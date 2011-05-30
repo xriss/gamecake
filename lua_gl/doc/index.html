@@ -1,0 +1,458 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+
+<head>
+<title>LuaGL: OpenGL binding for Lua 5.0 </title>
+<style type="text/css">
+ul { list-style-type: disc };
+</style>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<a name=top></a>
+<hr>
+<center>
+<table summary="LuaGL logo" border=0 cellspacing=0 cellpadding=0>
+<tr><td align=center>
+<a href="http://www.lua.org">
+<img border=0 alt="LuaGL" src="gl.gif">
+</a>
+<tr><td align=center valign=top>OpenGL binding for Lua 5.0
+</table>
+</center>
+
+<p align=center>
+<a href="#top">home</a> &middot;
+<a href="#whatis">whatis</a> &middot;
+<a href="#port">portability</a> &middot;
+<a href="#down">download</a> &middot;
+<a href="#howitworks">how it works</a> &middot;
+<a href="#ref">reference</a> &middot;
+<p>
+
+<hr>
+
+<h2><a name=whatis>What is it LuaGL? </a></h2><p>
+
+It’s a library that provides access to all of the OpenGL functionality from <a href="http://www.lua.org">Lua 5.0</a>. <p>
+
+<h2><a name=opengl>What is OpenGL? </a></h2><p>
+
+OpenGL is a portable software interface to graphics hardware. More information about OpenGL can be obtained from <a href="http://www.opengl.org">http://www.opengl.org</a>. You can find good tutorials about learning OpenGL at <a href="http://nehe.gamedev.net">http://nehe.gamedev.net</a>. <p>
+
+<h2><a name=port>Portability</a></h2><p>
+
+That library should run in all systems that support OpenGL, and has been tested under Windows platform. <p>
+
+<h2><a name=license>License</a></h2><p> 
+
+LuaGL is a free software and uses the MIT License. It  can be  used at no cost for both academic and commercial purposes. <p>
+
+<h2><a name=down>Download & Installation</a></h2><p>
+
+You can download LuaGL from the <a href="http://sourceforge.net">sourceforge</a> project home page <a href="http://sourceforge.net/projects/luagl">here</a>. <p>
+
+The package contains: <p>
+
+- The binding of all the OpenGL functions; <p>
+- The binding of some GLUT functions; <p>
+- Two lua programs created for testing the library; <p>
+- A simple example of an interpreter that uses the library and was used for the test programs. <p>
+- A copy of this web page; <p>
+
+LuaGL also needs that you have the OpenGL and the GLUT libraries installed. It can be obtained with the following links: <p>
+
+<a href="http://www.opengl.org/developers/documentation/implementations.html">http://www.opengl.org/developers/documentation/implementations.html</a> <br>
+<a href="http://www.opengl.org/developers/documentation/glut.html">http://www.opengl.org/developers/documentation/glut.html</a> <p>
+
+<h2><a name=howitworks>How it works ?</a></h2><p>
+
+This library works as a binding for all OpenGL commands, so you can have full access to the graphics hardware from Lua. <p>
+
+To have access to the library from a C host program, you must first call the 'luaopen_gl' function that will create a table named 'gl', and all the functions will be inside of it. <p>
+
+<h3><a name=constants>OpenGL constants</a></h3><p>
+
+In Lua, all OpenGL constants were converted to strings, for example: instead of writing GL_QUADS, you should write 'QUADS'. In functions that expected a bitwise operation between mask parameters, in Lua will receive a string that contains all the constants strings separated by comma (,). For example:  <p>
+
+gl.Begin ("TRIANGLES") <p>
+
+gl.Clear ('COLOR_BUFFER_BIT,DEPTH_BUFFER_BIT') <p>
+
+
+<h3><a name=argspecs>Argument specification</a></h3><p>
+
+The argument specification (e.g., '2d', '3f', '4sv') at the end of most OpenGL functions names have been removed. For example the new gl.Light function binds the OpenGL functions: glLightf, glLightfv, glLighti, glLightiv. <p>
+
+It’s always used the floating point version of the functions, with the highest possible precision. <p>
+
+<h3><a name=color>Color and Vector data</a></h3><p>
+
+The color and the vector data can be represented by a lua array. A vector can have 2, 3 or 4 values (x, y, z, w), and colors can have 3 or 4 values (red, green, blue, alpha). If there are more 4 value the extra parameters will be ignored. <p>
+
+For example: <p>
+<tt>
+v1 = { 0, 0 } <br>
+v2 = { 1, 1 } <br>
+Yellow = { 1, 1, 0 } <br><br>
+
+gl.Color(Yellow) <br>
+gl.Vertex(v1) <br>
+gl.Vertex(v2) <p>
+</tt>
+you can also call those: <p>
+<tt>
+gl.Color(1, 1, 0) <br>
+gl.Vertex(0, 0) <br>
+gl.Vertex(1, 1) <p>
+</tt>
+
+<h3><a name=argtypes>Argument types</a></h3><p>
+
+The OpenGL function parameters that specify the type of another argument, or the size of an array, won’t be used. Lua will always use the most precise type of data. The stride value of an array won’t be used too. For example: <p>
+
+<tt>gl.VertexPointer(vertex_array)</tt> binds:<p>
+
+<tt>void glVertexPointer (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer); </tt> <p>
+
+Where ‘vertex_array’ is an array of vectors. The size of the array returned by lua_getn function will be used as the size parameter. The type is the most precise possible, and the stride value is always set to zero. You can see an example of this function bellow: <p>
+
+<tt>
+v1 = { -1, -1 } <br>
+v2 = {  1, -1 } <br>
+v3 = {  1,  1 } <br>
+v4 = { -1,  1 } <br><br>
+
+vertices  = { v1, v2, v3, v4 } <br><br>
+
+gl.VertexPointer(vertices) </tt> <p>
+
+<h3><a name=reqinfo>Requesting OpenGL information</a></h3><p>
+
+The functions that request information from OpenGL, will now return the data by the function return value, instead of returning by a parameter. For example: <p>
+
+<tt>image = gl.GetTexImage (target, level, format) </tt><p>
+
+For more information about functions names and parameters, see the Function Reference bellow. <p>
+
+<h3><a name=bitpattern>Bit Pattern</a></h3><p>
+
+Functions that expects a number with a bit pattern, will accept a string with the mask numbers. All characters that are different to ‘0’ and ‘1’ will be ignored. For example: <p>
+
+<tt>
+gl.LineStipple (1, "1111000011110000") <br>
+gl.LineStipple (1, "1010.0101.1000.1111" ) <br>
+gl.LineStipple (1, "0000 0000 1111 1111" ) </tt> <p>
+
+<h2><a name=ref>Function Reference</a></h2><p>
+
+Accum (op, value) -> none <br><br>
+
+AlphaFunc (func, ref) -> none <br><br>
+
+AreTexturesResident (texturesArray) -> residences <br><br>
+
+ArrayElement (i) -> none <br><br>
+
+Begin (mode) -> none <br><br>
+
+BindTexture (target, texture) -> none <br><br>
+
+Bitmap (xorig, yorig, ymove, bitmap) -> none <br><br>
+
+BlendFunc (sfactor, dfactor) -> none <br><br>
+
+CallList (list) -> none <br><br>
+
+CallLists (listArray) -> none <br><br>
+
+Clear (mask) -> none <br><br>
+
+ClearAccum (red, green, blue, alpha) -> none <br><br>
+
+ClearColor (red, green, blue, alpha) -> none <br><br>
+
+ClearDepth (depth) -> none <br><br>
+
+ClearIndex (c) -> none <br><br>
+
+ClearStencil (s) -> none <br><br>
+
+ClipPlane (plane, equationArray) -> none <br><br>
+
+Color (red, green, blue [, alpha]) -> none <br>
+Color (color) -> none <br><br>
+
+ColorMask (red, green, blue, alpha) -> none <br><br>
+
+ColorMaterial (face, mode) -> none <br><br>
+
+ColorPointer (colorArray) -> none <br><br>
+
+CopyPixels (x, y, width, height, type) -> none <br><br>
+
+CopyTexImage (level, internalFormat, border, x, y, width[, height]) -> none <br><br>
+
+CopyTexSubImage (level, x, y, xoffset, width[, yoffset, height]) -> none <br><br>
+
+CullFace (mode) -> none <br><br>
+
+DeleteLists (list, range) -> none <br><br>
+
+DeleteTextures (texturesArray) -> none <br><br>
+
+DepthFunc (func) -> none <br><br>
+
+DepthMask (flag) -> none <br><br>
+
+DepthRange (zNear, zFar) -> none <br><br>
+
+Disable (cap) -> none <br><br>
+
+DisableClientState (array) -> none <br><br>
+
+DrawArrays (mode, first, count) -> none <br><br>
+
+DrawBuffer (mode) -> none <br><br>
+
+DrawElements (mode, indicesArray) -> none <br><br>
+
+DrawPixels (width, height, format, pixels) -> none <br><br>
+
+EdgeFlag (flag) -> none <br><br>
+
+EdgeFlagPointer (flagsArray) -> none <br><br>
+
+Enable (cap) -> none <br><br>
+
+EnableClientState (array) -> none <br><br>
+
+End () -> none  <br><br>
+
+EndList () -> none <br><br>
+
+EvalCoord (u[, v]) -> none <br>
+EvalCoord (coordArray) -> none <br><br>
+
+EvalMesh (mode, i1, i2[,j1, j2]) -> none <br><br>
+
+EvalPoint (i[, j]) -> none <br><br>
+
+FeedbackBuffer (size, type) -> dataArray <br><br>
+
+Finish () -> none <br><br>
+
+Flush () -> none <br><br>
+
+Fog (pname, param) -> none <br>
+Fog (pname, paramsArray) -> none <br><br>
+
+FrontFace (mode) -> none <br><br>
+
+Frustum (left, right, bottom, top, zNear, zFar) -> none <br><br>
+
+GenLists (range) -> num <br><br>
+
+GenTextures (n) -> texturesArray <br><br>
+
+Get (pname) -> params <br><br>
+
+GetArray (pname) -> paramsArray <br><br>
+
+GetConst (pname) -> constant string <br><br>
+
+GetClipPlane (plane) -> equationArray <br><br>
+
+GetError () -> error flag <br><br>
+
+GetLight (light, pname) -> paramsArray <br><br>
+
+GetMap (target, query) -> vArray <br><br>
+
+GetMaterial (face, pname) -> paramsArray <br><br>
+
+GetPixelMap (map) -> valuesArray <br><br>
+
+GetPointer (pname, n) -> valuesArray <br><br>
+
+GetPolygonStipple () -> maskArray <br><br>
+
+GetString (name) -> string <br><br>
+
+GetTexEnv (pname) -> paramsArray <br><br>
+
+GetTexGen (coord, pname) -> paramsArray <br><br>
+
+GetTexImage (target, level, format) -> pixelsArray <br><br>
+
+GetTexLevelParameter (target, level, pname) -> param <br><br>
+
+GetTexParameter (target, pname) -> paramsArray <br><br>
+
+Hint (target, mode) -> none <br><br>
+
+Index (c) -> none <br><br>
+
+IndexMask (mask) -> none <br><br>
+
+IndexPointer (indexArray) -> none <br><br>
+
+InitNames () -> none <br><br>
+
+InterleavedArrays (format, dataArray) -> none <br><br>
+
+IsEnabled (cap) -> true/false <br><br>
+
+IsList (list) -> true/false <br><br>
+
+IsTexture (texture) -> true/false <br><br>
+
+Light (light, pname, param) -> none <br>
+Light (light, pname, paramsArray) -> none <br><br>
+
+LightModel (pname, param) -> none <br>
+LightModel (pname, paramsArray) -> none <br><br>
+
+LineStipple (factor, pattern) -> none <br><br>
+
+LineWidth (width) -> none <br><br>
+
+ListBase (base) -> none <br><br>
+
+LoadIdentity () -> none <br><br>
+
+LoadMatrix (mArray) -> none <br><br>
+
+LoadName (name) -> none <br><br>
+
+LogicOp (opcode) -> none <br><br>
+
+Map (target, u1, u2, ustride, pointsArray) -> none <br>
+Map (target, u1, u2, ustride, v1, v2, vstride, pointsArray) -> none <br><br>
+
+MapGrid (un, u1, u2[, vn, v1, v2]) -> none <br><br>
+
+Material (face, pname, param) -> none <br><br>
+
+MatrixMode (mode) -> none <br><br>
+
+MultMatrix (mArray) -> none <br><br>
+
+NewList (list, mode) -> none <br><br>
+
+Normal (nx, ny, nz) -> none <br>
+Normal (nArray) -> none <br><br>
+
+NormalPointer (normalArray) -> none <br><br>
+
+Ortho (left, right, bottom, top, zNear, zFar) -> none <br><br>
+
+PassThrough (token) -> none <br><br>
+
+PixelMap (map, valuesArray) -> none <br><br>
+
+PixelStore (pname, param) -> none <br><br>
+
+PixelTransfer (pname, param) -> none <br><br>
+
+PixelZoom (xfactor, yfactor) -> none <br><br>
+
+PointSize (size) -> none <br><br>
+
+PolygonMode (face, mode) -> none <br><br>
+
+PolygonOffset (factor, units) -> none <br><br>
+
+PolygonStipple (maskArray) -> none <br><br>
+
+PopAttrib () -> none <br><br>
+
+PopClientAttrib () -> none <br><br>
+
+PopMatrix () -> none <br><br>
+
+PopName () -> none <br><br>
+
+PrioritizeTextures (texturesArray, prioritiesArray) -> none <br><br>
+
+PushAttrib (mask) -> none <br><br>
+
+PushClientAttrib (mask) -> none <br><br>
+
+PushMatrix () -> none <br><br>
+
+PushName (GLuint name) -> none <br><br>
+
+RasterPos (x, y[, z, w]) -> none <br>
+RasterPos (vArray) -> none <br><br>
+
+ReadBuffer (mode) -> none <br><br>
+
+ReadPixels (x, y, width, height, format, pixelsArray) -> none <br><br>
+
+Rect (x1, y1, x2, y2) -> none <br>
+Rect (v1, v2) -> none <br><br>
+
+RenderMode (mode) -> none <br><br>
+
+Rotate (angle, x, y, z) -> none <br><br>
+
+Scale (x, y, z) -> none <br><br>
+
+Scissor (x, y, width, height) -> none <br><br>
+
+SelectBuffer (size) -> SelectArray <br><br>
+
+ShadeModel (mode) -> none <br><br>
+
+StencilFunc (func, ref, mask) -> none <br><br>
+
+StencilMask (mask) -> none <br><br>
+
+StencilOp (fail, zfail, zpass) -> none <br><br>
+
+TexCoord (s[, t, r, q]) -> none <br>
+TexCoord (vArray) -> none <br><br>
+
+TexCoordPointer(vArray) -> none <br><br>
+
+TexEnv (pname, param) -> none <br>
+TexEnv (pname, paramsArray) -> none <br><br>
+
+TexGen (coord, pname, param) -> none <br>
+TexGen (coord, pname, paramsArray) -> none <br><br>
+
+TexImage(level, internalformat, format, pixels) -> none <br><br>
+
+TexParameter (target, pname, param) -> none <br>
+TexParameter (target, pname, paramsArray) -> none <br><br>
+
+TexSubImage (level, format, pixels, xoffset) -> none <br>
+TexSubImage (level, format, pixels, xoffset, yoffset) -> none <br><br>
+
+Translate (x, y, z) -> none <br><br>
+
+Vertex (x, y, [z, w]) -> none <br>
+Vertex (vArray) -> none <br><br>
+
+VertexPointer (vertexArray) -> none <br><br>
+
+Viewport (x, y, width, height) -> none <br><br>
+
+<hr>
+<p align=center>
+<a href="#top">home</a> &middot;
+<a href="#whatis">whatis</a> &middot;
+<a href="#port">portability</a> &middot;
+<a href="#down">download</a> &middot;
+<a href="#howitworks">how it works</a> &middot;
+<a href="#ref">reference</a> &middot;
+<p>
+
+<small>
+Last modified on 13/07/2003
+</small>
+
+</body>
+</html>
