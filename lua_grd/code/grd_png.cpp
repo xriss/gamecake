@@ -20,7 +20,7 @@
 void grd_png_load_file(struct grd * g, const char* file_name)
 {
 	
-	const char *err;
+	const char *err=0;
 	int x, y;
 
 	int width, height;
@@ -166,7 +166,7 @@ bogus:
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_png_save_file(struct grd *g , const char* file_name )
 {
-	const char *err;
+	const char *err=0;
 
 	int x, y;
 

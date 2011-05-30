@@ -110,7 +110,9 @@ s32 lua_grd_tofmt(lua_State *l,int idx)
 
 void lua_grd_pushfmt(lua_State *l,s32 fmt)
 {
-	lua_pushstring(l,strenum_find_string(GRD_FMT_STRENUM,fmt));
+	const char *s=strenum_find_string(GRD_FMT_STRENUM,fmt);
+	if(!s){ s=GRD_FMT_STRENUM[0].str; }
+	lua_pushstring(l,s);
 }
 
 
