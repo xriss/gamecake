@@ -28,11 +28,9 @@ Wettest can be started up in a number of states, for instance to start the avata
 
 ./wettest.sh avatar
 
-TL;DR
+to build under ubuntu the following script should work asuming you have a reasonable buld environement setup
 
-build/premake4 gmake
-cd build-gmake
-make config=release
+./gmake.sh
 
 -- 
 
