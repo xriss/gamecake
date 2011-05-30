@@ -67,9 +67,11 @@ function SET_TARGET(dir,name,force)
 	if not force then
 		kind("StaticLib")
 		configuration {"Debug"}
+		flags {"Symbols"} -- blue debug needs symbols badly
 		targetdir(DBG_OBJ_DIR)
 
 		configuration {"Release"}
+		flags {"Optimize"}
 		targetdir(EXE_OBJ_DIR)
 		return
 	end
@@ -82,10 +84,13 @@ dir=dir or ""
 	end
 
 	configuration {"Debug"}
+	flags {"Symbols"} -- blue debug needs symbols badly
 	targetdir(DBG_OUT_DIR..dir)
 
 	configuration {"Release"}
+	flags {"Optimize"}
 	targetdir(EXE_OUT_DIR..dir)
+	
 end
 
 if NACL then
