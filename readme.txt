@@ -28,9 +28,12 @@ Wettest can be started up in a number of states, for instance to start the avata
 
 ./wettest.sh avatar
 
+TL;DR
+
+build/premake4 gmake
+cd build-gmake
+make config=release
 
 -- 
 
 Kriss@WetGenes.com
-
-
