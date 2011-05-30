@@ -1,2 +1,2 @@
-cd dbg
+cd exe
 ./lua ../lua/apps.lua wettest $*
