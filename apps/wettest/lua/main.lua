@@ -27,7 +27,7 @@ print( arg[4] or "" ) -- hwnd
 
 
 
-lanes=require("lanes")
+--lanes=require("lanes")
 
 local f=function()
 
@@ -41,6 +41,7 @@ wet_setup_hwnd=nil--arg[4]
 	
 end
 
+--[[
 
 thread={}
 	thread.linda=lanes.linda()
@@ -58,6 +59,8 @@ thread={}
 	
 
 -- no lanes?
---f()
+--]]
+
+f()
 
 

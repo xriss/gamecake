@@ -1,3 +1,4 @@
+cd `dirname $0`
 
 #simple forced nacl build, just to see if we can get somewhere with this
 

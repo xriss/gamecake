@@ -62,7 +62,7 @@ end
 -- get url content
 --
 -----------------------------------------------------------------------------
-function lanes_url_worker(linda,msg)
+function lanes_url_worker(msg)
 
 local body, headers, code = http.request(msg.url)
 
@@ -72,8 +72,7 @@ local ret={}
 	ret.headers=headers
 	ret.code=code
 	
-	return lanes_return(linda,msg,ret)
---	linda:send(nil,0,{ cmd="ret" , id=msg.id , ret=ret })
+	return ret
 
 end
 
@@ -97,7 +96,8 @@ local loop=true
 					
 			elseif msg.cmd=="url" then
 			
-				lanes_url_worker(linda,msg)
+				local ret=lanes_url_worker(msg)
+				lanes_return(linda,msg,ret)
 			
 			end
 			
