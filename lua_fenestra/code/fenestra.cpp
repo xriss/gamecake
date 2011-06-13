@@ -16,7 +16,7 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
  void fenestra::prepare()
 {
-    memset( this , 0, sizeof(this) );
+    memset( this , 0, sizeof(*this) ); //doh, must get size right
 
 	argv=(char**)&("");
 	argc=0;
