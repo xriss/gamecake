@@ -1,7 +1,33 @@
 
 -- moved the worker thread to own file so we cant pick up any out of thread upvalues by mistake
 
+local require=require -- darnation, upvalues are a problem, currently lanes is disabled but this will break it later
+
 module(...)
+
+
+-----------------------------------------------------------------------------
+--
+-- get url content
+--
+-----------------------------------------------------------------------------
+function lanes_url_worker(msg)
+
+local http=require("socket.http")
+
+local body, headers, code = http.request(msg.url)
+
+local ret={}
+
+	ret.body=body
+	ret.headers=headers
+	ret.code=code
+	
+	return ret
+
+end
+
+
 
 -----------------------------------------------------------------------------
 --
@@ -18,9 +44,6 @@ function lanes_worker(linda,idx)
 
 package.cpath=wetlua.cpath -- and set paths so we can find things
 package.path=wetlua.path
-
-
-local http=require("socket.http")
 
 -----------------------------------------------------------------------------
 --
@@ -57,26 +80,6 @@ local kay=math.floor(collectgarbage("count"))
 
 end
 
------------------------------------------------------------------------------
---
--- get url content
---
------------------------------------------------------------------------------
-function lanes_url_worker(msg)
-
-local body, headers, code = http.request(msg.url)
-
-local ret={}
-
-	ret.body=body
-	ret.headers=headers
-	ret.code=code
-	
-	return ret
-
-end
-
-
 
 local loop=true
 
@@ -107,5 +110,5 @@ local loop=true
 			
 		end
 	end
-	
+
 end

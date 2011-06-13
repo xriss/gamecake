@@ -21,7 +21,6 @@ local wetlua=wetlua
 
 module(...)
 
-
 -----------------------------------------------------------------------------
 --
 -- create data.lanes table and threads if it isnt already setup
@@ -237,7 +236,6 @@ local ret
 	msg.cmd="url"
 	msg.url=url
 	if work_lanes_disable then
-	
 		return worker.lanes_url_worker(msg)
 	
 	else	
