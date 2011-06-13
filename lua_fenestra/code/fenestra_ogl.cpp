@@ -48,13 +48,70 @@ bool fenestra_ogl::setup(struct fenestra * _fenestra)
 #elif defined(X11)
 
 	int attrcount;
-	int AttributeList[] = { GLX_RED_SIZE, 4, GLX_GREEN_SIZE, 4, GLX_BLUE_SIZE, 4,
-			GLX_DEPTH_SIZE,1,
+	int AttributeList[] = {
+			GLX_RED_SIZE, 1,
+			GLX_GREEN_SIZE, 1,
+			GLX_BLUE_SIZE, 1,
+			GLX_ALPHA_SIZE, 0,
+			GLX_DEPTH_SIZE, 1,
+			GLX_STENCIL_SIZE, 0,
+			GLX_X_RENDERABLE,1,
+//			GLX_RENDER_TYPE, GLX_RGBA_BIT, 
+			GLX_DOUBLEBUFFER,1,
+//			GLX_TRANSPARENT_TYPE,GLX_NONE,
+//			GLX_X_VISUAL_TYPE,GLX_TRUE_COLOR,
 			None};
 	GLXFBConfig *conf=glXChooseFBConfig(fenestra->dsp,fenestra->screen,AttributeList,&attrcount);
 	
-	Xcontext=glXCreateNewContext( fenestra->dsp , *conf , GLX_RGBA_TYPE , NULL , true );
+
+//	for( int i=0 ; conf[i] ; i++ )
+	int i=0;
+	{
+		int v;
+
+#define confdump(dd) glXGetFBConfigAttrib(fenestra->dsp, conf[i], dd, &v); printf( #dd ":0x%X , ",v);
+		
+		printf( "\nfound glx config %d = { ",i);
+		confdump( GLX_FBCONFIG_ID )
+		confdump( GLX_VISUAL_ID )
+		confdump( GLX_BUFFER_SIZE )
+		confdump( GLX_LEVEL )
+		confdump( GLX_DOUBLEBUFFER )
+		confdump( GLX_STEREO )
+		confdump( GLX_AUX_BUFFERS )
+		confdump( GLX_RED_SIZE )
+		confdump( GLX_GREEN_SIZE )
+		confdump( GLX_BLUE_SIZE )
+		confdump( GLX_ALPHA_SIZE )
+		confdump( GLX_DEPTH_SIZE )
+		confdump( GLX_STENCIL_SIZE )
+		confdump( GLX_ACCUM_RED_SIZE )
+		confdump( GLX_ACCUM_GREEN_SIZE )
+		confdump( GLX_ACCUM_BLUE_SIZE )
+		confdump( GLX_ACCUM_ALPHA_SIZE )
+		confdump( GLX_RENDER_TYPE )
+		confdump( GLX_DRAWABLE_TYPE )
+		confdump( GLX_X_RENDERABLE )
+		confdump( GLX_X_VISUAL_TYPE )
+		confdump( GLX_CONFIG_CAVEAT )
+		confdump( GLX_TRANSPARENT_TYPE )
+		confdump( GLX_TRANSPARENT_INDEX_VALUE )
+		confdump( GLX_TRANSPARENT_RED_VALUE )
+		confdump( GLX_TRANSPARENT_GREEN_VALUE )
+		confdump( GLX_TRANSPARENT_BLUE_VALUE )
+		confdump( GLX_TRANSPARENT_ALPHA_VALUE )
+		confdump( GLX_MAX_PBUFFER_WIDTH )
+		confdump( GLX_MAX_PBUFFER_HEIGHT )
+		confdump( GLX_MAX_PBUFFER_PIXELS )
+		printf( "}\n");
+
+	}
+        
+        
+	Xcontext=glXCreateNewContext( fenestra->dsp , conf[0] , GLX_RGBA_TYPE , NULL , true );
+glError();
 	glXMakeContextCurrent( fenestra->dsp , fenestra->win , fenestra->win,Xcontext );
+glError();
 
 #endif
 
@@ -248,7 +305,7 @@ void fenestra_ogl::project23d(float aspect, float fov, float depth)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void fenestra_ogl::begin(s32 _width,s32 _height)
-{	
+{
 	if( (_width>0) && (_height>0) )
 	{
 		width=_width;
@@ -280,6 +337,7 @@ void fenestra_ogl::begin(s32 _width,s32 _height)
 
 	/* clear window */
 
+glError();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	glEnable( GL_TEXTURE_2D );

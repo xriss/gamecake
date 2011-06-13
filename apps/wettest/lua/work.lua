@@ -1,6 +1,6 @@
 
 local work_lanes_version=16 -- bump this version number to live update running threads
-local work_lanes_disable=false -- do not use lanes if set, block the main thread for easier debuging
+local work_lanes_disable=true -- do not use lanes if set, block the main thread for easier debuging
 
 
 
@@ -12,7 +12,8 @@ local print=print
 local coroutine=coroutine
 local require=require
 
-local lanes=require("lanes")
+local lanes
+if not work_lanes_disable then lanes=require("lanes") end
 
 local worker=require("worker")
 
@@ -235,9 +236,9 @@ local ret
 
 	msg.cmd="url"
 	msg.url=url
-	if spew_lanes_disable then
+	if work_lanes_disable then
 	
-		return lanes_url_worker(nil,msg)
+		return worker.lanes_url_worker(msg)
 	
 	else	
 	
