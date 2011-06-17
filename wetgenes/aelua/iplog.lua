@@ -5,7 +5,7 @@
 -- will be added when I work out what these extras might be
 
 local cache=require("wetgenes.aelua.cache")
-local json=require("json")
+local json=require("wetgenes.json")
 
 local log=require("wetgenes.aelua.log").log -- grab the func from the package
 

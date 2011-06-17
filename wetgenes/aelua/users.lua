@@ -1,5 +1,5 @@
 
-local json=require("json")
+local json=require("wetgenes.json")
 
 local dat=require("wetgenes.aelua.data")
 local cache=require("wetgenes.aelua.cache")
