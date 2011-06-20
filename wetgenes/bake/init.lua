@@ -22,7 +22,7 @@
 --
 -- This is exceptionally true of windows where process creation has a huge overhead
 --
--- Hopefully things are kept shrinkwrapped enough here to enable an easy unixy port when I need it
+-- Hopefully things are kept shrinkwrapped enough here to enable an easy unixy port when I need it (theywoz)
 --
 
 local lfs=require("lfs")
@@ -33,6 +33,7 @@ local io=io
 local print=print
 
 local ipairs=ipairs
+
 
 module("wetgenes.bake")
 
