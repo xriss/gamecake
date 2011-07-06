@@ -5,7 +5,6 @@
 
 local _G=_G
 
-local win=win
 
 local table=table
 local ipairs=ipairs
@@ -15,14 +14,13 @@ local os=os
 
 local setfenv=setfenv
 local unpack=unpack
-
-local gl=gl
-
-
-local function print(...) _G.print(...) end
+local require=require
 
 
-module("state.rouge.map")
+
+module(...)
+
+
 
 local a_space=string.byte(" ",1)
 local a_under=string.byte("_",1)
@@ -32,21 +30,31 @@ local a_dash=string.byte("-",1)
 local a_dot=string.byte(".",1)
 
 
-function create(level)
+function create(opts)
 
-	local d=build_map(level)
+	local d=build_map(opts)
 	
 	return d
 end
 
 
-function build_map(level)
+function build_map(opts)
 	
 local d={}
+
+	d.opts=opts
 
 local asc={}
 local asc_xh=0
 local asc_yh=0	
+
+
+if opts.mode=="town" then
+
+	opts.bigroom=true
+
+end
+
 
 
 function d.rand_weight_change()
@@ -166,14 +174,34 @@ function d.room_rand()
 	d.xh=d.xh+d.rand(2,5)
 	d.yh=d.yh+d.rand(2,5)
 --	if d.xh==2 and d.yh==2 then d.xh=3 end -- do not allow 2x2 rooms
+
+	if #d.rooms < #opts.rooms then
+		local r=opts.rooms[ #d.rooms+1 ]
+		d.xh=r.xh
+		d.yh=r.yh
+		d.r=r
+	else
+		if opts.only_these_rooms then
+			return
+		end
+	end
 	
 	if d.room_check() then d.room_dig() end
 end
 function d.room_check()
-	for y=d.y-1,d.y+d.yh do
-		for x=d.x-1,d.x+d.xh do
-			local a=d.get_asc(x,y)
-			if (not a) or (a==a_dot) then return false end
+	if opts.bigroom then -- bigroom rooms need more space
+		for y=d.y-1-2,d.y+d.yh+2 do
+			for x=d.x-1-2,d.x+d.xh+2 do
+				local a=d.get_asc(x,y)
+				if (not a) or (a==a_dot) then return false end
+			end
+		end
+	else
+		for y=d.y-1,d.y+d.yh do
+			for x=d.x-1,d.x+d.xh do
+				local a=d.get_asc(x,y)
+				if (not a) or (a==a_dot) then return false end
+			end
 		end
 	end
 	return true
@@ -193,17 +221,76 @@ function d.room_dig()
 	r.doors={}
 	table.insert(d.rooms,r)
 	table.insert(d.rooms_groups,{r})
+	if d.r then r.opts=d.r d.r=nil end -- map room opts 
 	return r
 end
+
+function d.bigroom_dig()
+	local r={}
+	r.x=1
+	r.y=1
+	r.xh=asc_xh-2
+	r.yh=asc_yh-2
+	r.doors={}
+	table.insert(d.rooms_groups,{r})
+	if d.r then r.opts=d.r d.r=nil end -- map room opts 
+	return r
+end
+
+function d.room_remove(r)
+
+	for y=r.y,r.y+r.yh-1 do
+		for x=r.x,r.x+r.xh-1 do
+			d.set_asc(x,y,a_dash)
+		end
+	end
+	
+	d.rand_weight_change()
+	
+	for i,v in ipairs(d.rooms) do
+		if v==r then
+			table.remove(d.rooms,i)
+		end
+	end
+	
+	for i,rg in ipairs(d.rooms_groups) do
+		for i,v in ipairs(rg) do
+			if v==r then
+				table.remove(rg,i)
+			end
+		end
+	end
+end
+
 
 -- try and connect all the rooms
 
 function d.room_find(x,y)
+
 	for i,v in ipairs(d.rooms) do
-	
 		if v.x<=x and v.x+v.xh>x and v.y<=y and v.y+v.yh>y then -- hit
 			return v
 		end
+	end
+	
+	if opts.bigroom then -- hit a wall, or we hit the bigroom
+	
+		if x==0 or x==asc_xh-1 or y==0 or y==asc_yh-1 then -- map border
+			return nil
+		end
+
+		for i,v in ipairs(d.rooms) do
+			if v.xh>1 or v.yh>1 then -- ignore alleys
+				if v.x-1<=x and v.x+v.xh+1>x and v.y-1<=y and v.y+v.yh+1>y then -- hit room border
+					return nil
+				end
+			end
+		end
+		
+-- finally we hit the bigroom by default
+
+		return d.bigroom
+		
 	end
 	
 	return nil
@@ -238,14 +325,15 @@ end
 
 function d.alleys_rand()
 
-	for i=1,1000 do
+	for i=1000,1,-1 do -- check quite a lot
 	
 --print(i..":"..#d.rooms_groups)
 	
-		if #d.rooms_groups<=1 then break end -- all connected
-	
+		if #d.rooms_groups<=1 then break end -- all connected, we will probably drop out here 
+			
 	local r2=nil
-	local r=d.rooms[ d.rand(1,#d.rooms) ]
+	local g=d.rooms_groups[ 1+(i % #d.rooms_groups) ] -- simple group weighting
+	local r=g[ d.rand(1,#g) ]
 	local door=d.rand_xy_door(r)
 	local door_hit=0
 	
@@ -342,9 +430,38 @@ function d.alleys_rand()
 	
 end
 
+-- remove all rooms that are not in the biggest connection group
+function d.rooms_prune()
+
+	if #d.rooms_groups<=1 then return end
+	
+	local mx=d.rooms_groups[1]
+	
+	for i,v in ipairs(d.rooms_groups) do
+	
+		if #v > #mx then mx=v end -- biggest
+		
+	end
+
+	for i,v in ipairs(d.rooms_groups) do
+	
+		if v==mx then
+			-- main group
+		else
+			for i,v in ipairs(v) do
+				d.room_remove(v)
+			end
+		end
+	end
+	
+	d.rooms_groups={mx} -- only one group remains
+	
+end
+
+
 -- fill level with solid
-	asc_xh=level.xh
-	asc_yh=level.yh
+	asc_xh=opts.xh
+	asc_yh=opts.yh
 	
 	for y=0,asc_yh-1 do
 		for x=0,asc_xh-1 do
@@ -360,12 +477,43 @@ end
 	d.rooms={}
 	d.rooms_groups={} -- every room starts in its own group, then we try and join them all into one
 
+	if opts.bigroom then
+		d.bigroom=d.bigroom_dig()
+	end
+	
 	d.rand_weight_change()
 	for i=1,100 do
 		d.room_rand()
 	end
 	
+	if opts.bigroom then
+		for y=0,asc_yh do
+			for x=0,asc_xh do
+				if d.room_find(x,y)==d.bigroom then -- add the main big room
+					d.set_asc(x,y,a_dot)
+				end
+			end
+		end
+	end
+	
 	d.alleys_rand()
+	
+	d.rooms_prune()
+	
+	
+-- check we got all the special rooms
+	local gotroom={}
+	for i,v in ipairs(d.rooms) do
+		if v.opts then
+			gotroom[v.opts]=true
+		end
+	end
+	for i,v in ipairs(opts.rooms) do
+		if not gotroom[v] then
+			return build_map(opts) -- try again
+		end
+	end
+	
 	
 	return d
 	

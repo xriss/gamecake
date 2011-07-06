@@ -16,6 +16,7 @@ local unpack=unpack
 
 local tostring=tostring
 
+local require=require
 
 local gl=gl
 
@@ -24,54 +25,15 @@ local gl=gl
 local function print(...) _G.print(...) end
 
 
-local rouge_level=require("state.rouge.level")
-local rouge_menu=require("state.rouge.menu")
 
 local _M=module("state.rouge")
 
-local a_space=string.byte(" ",1)
-local a_under=string.byte("_",1)
-local a_star=string.byte("*",1)
-local a_hash=string.byte("#",1)
-local a_dash=string.byte("-",1)
-local a_dot=string.byte(".",1)
 
-asc={}
-asc_xh=0
-asc_yh=0	
-
-level={}
+yarn=require("yarn")
 
 function setup()
 
-
-local i
-
-	asc_xh=40
-	asc_yh=30
-	for y=0,asc_yh-1 do
-		for x=0,asc_xh-1 do
-		
-			i=1+x+y*asc_xh
-			
-			asc[i]=a_space
-		end
-	end
-	
-	level=rouge_level.create({xh=40,yh=28},_M)
-	menu=rouge_menu.create({},_M)
-	
-	for y=0,asc_yh-1 do
-		for x=0,asc_xh-1 do
-			i=1+x+y*asc_xh
-			local a=level.get_asc(x,y)
-			if a then asc[i]=a end
-		end
-	end
-	
---	level.draw_map(_M)
-	
-	level.set_msg("Welcome to the jungle.")
+	yarn.setup()
 	
 	print("setup")
 
@@ -79,10 +41,10 @@ end
 
 function keypress(ascii,key,act)
 
-	if menu.keypress(ascii,key,act) then -- give the menu first chance to eat this keypress
-		level.key_clear() -- stop level repeats
+	if yarn.menu.keypress(ascii,key,act) then -- give the menu first chance to eat this keypress
+		yarn.level.key_clear() -- stop level repeats
 	else
-		level.keypress(ascii,key,act)
+		yarn.level.keypress(ascii,key,act)
 	end
 end
 
@@ -98,13 +60,14 @@ end
 
 	
 function clean()
+	yarn.clean()
 end
 
 
 
 function update()
 
-	level.update()
+	yarn.update()
 	
 end
 
@@ -187,6 +150,8 @@ end
 
 function draw()
 
+	yarn.draw()
+
 	gl.ClearColor(0,0,0.25,0)
 	win.begin()
 	
@@ -196,12 +161,12 @@ function draw()
 					
 local i=0
 local t={}
-
+--[[
 	
 	for y=0,asc_yh-1 do
 		for x=0,asc_xh-1 do
 			i=1+x+y*asc_xh
-			local a=level.get_asc(x,y)
+			local a=yarn.level.get_asc(x,y)
 			if a then asc[i]=a end
 		end
 	end
@@ -219,10 +184,10 @@ local t={}
 
 	local s=""
 	
-	s=s.." hp="..level.player.attr.hp .."/".. level.player.attr.hpmax 
-	s=s.." s="..level.player.attr.score
-	s=s.." t="..level.time_passed
---[[
+	s=s.." hp="..yarn.level.player.attr.hp .."/".. yarn.level.player.attr.hpmax 
+	s=s.." s="..yarn.level.player.attr.score
+	s=s.." t="..yarn.level.time_passed
+--[ [
 	prt(1,"score")
 	prt(2,level.player.attr.score)
 	
@@ -231,12 +196,12 @@ local t={}
 	
 	prt(7,"health")
 	prt(8, level.player.attr.hp .."/".. level.player.attr.hpmax )
-]]	
+] ]	
 --	prt_wide(0,s)
 	
-	local wrap=word_wrap(level.get_msg(),40)
+	local wrap=word_wrap(yarn.level.get_msg(),40)
 	
-	menu.draw()
+	yarn.menu.draw()
 	
 	if #wrap<1 then
 		prt_wide(29,"")
@@ -247,17 +212,17 @@ local t={}
 		prt_wide(i,wrap[i-(29-#wrap)])
 	end
 	
-	
+]]	
 	gl.Translate(-320,240, -240)
 		
-	for y=0,asc_yh-1 do
+	for y=0,yarn.asc_yh-1 do
 	
 		win.font_debug.set(0,y*-16,0xffffffff,16)
 		
-		for x=0,asc_xh-1 do
+		for x=0,yarn.asc_xh-1 do
 		
-			i=1+x+y*asc_xh
-			t[x+1]=asc[i]%256
+			i=1+x+y*yarn.asc_xh
+			t[x+1]=yarn.asc[i]%256
 			
 		end
 		

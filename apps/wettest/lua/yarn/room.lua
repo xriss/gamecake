@@ -1,9 +1,7 @@
 
--- a collection of cells
+-- a local area of cells
 
 local _G=_G
-
-local win=win
 
 local table=table
 local ipairs=ipairs
@@ -13,22 +11,22 @@ local os=os
 
 local setfenv=setfenv
 local unpack=unpack
-
-local gl=gl
-
-
-local rouge_attr=require("state.rouge.attr")
-
-local function print(...) _G.print(...) end
+local require=require
+local setmetatable=setmetatable
 
 
-module("state.rouge.room")
+module(...)
+local yarn_attr=require("yarn.attr")
 
 
 function create(t)
 
 local d={}
 setfenv(1,d)
+
+	attr=yarn_attr.create(t)
+	metatable={__index=attr}
+	setmetatable(d,metatable)
 
 	level=t.level
 	xp=t.xp or 0
@@ -37,7 +35,8 @@ setfenv(1,d)
 	yh=t.yh or 0
 	doors={} -- a cell->room table of links to bordering rooms
 	
-	attr=rouge_attr.create(t)
+--	cellfind={} -- find cells in his room only?
+--	celllist={}
 	
 -- point to this room from the cells we cover, only one room pointer per cell
 
@@ -84,47 +83,24 @@ setfenv(1,d)
 
 	
 	function post_create()
---		set_walls()
+		for _,cell in level.cpairs(xp,yp,xh,yh) do
+			cell.set.name("floor")
+		end
 	end
 
--- work out the wall edges for the cells of this room
-	function set_walls()
-	
-		for _,cell in level.cpairs(xp,yp-1,xh,1) do
-			if cell.wall=="|" or cell.wall=="-" then
-				cell.wall="-"
-			else
-				cell.wall="-"
-			end
-		end
-		for _,cell in level.cpairs(xp,yp+yh,xh,1) do
-			if cell.wall=="|" or cell.wall=="-" then
-				cell.wall="-"
-			else
-				cell.wall="-"
-			end
-		end
+-- create a save state for this data
+	function save()
+		local sd={}
 		
-		for _,cell in level.cpairs(xp-1,yp,1,yh) do
-			if cell.wall=="-" or cell.wall=="+" then
-				cell.wall="-"
-			else
-				cell.wall="|"
-			end
-		end
-		for _,cell in level.cpairs(xp+xh,yp,1,yh) do
-			if cell.wall=="-" or cell.wall=="+" then
-				cell.wall="-"
-			else
-				cell.wall="|"
-			end
-		end
+		sd.attr=yarn_attr.save(attr)
+		
+		return sd
+	end
 
-		level.get_cell(xp-1 ,yp-1 ).wall="-"
-		level.get_cell(xp+xh,yp-1 ).wall="-"
-		level.get_cell(xp-1 ,yp+yh).wall="-"
-		level.get_cell(xp+xh,yp+yh).wall="-"
-
+-- reload a saved data (create and then load)
+	function load(sd)
+		d.attr=yarn_attr.load(sd.attr)
+		d.metatable.__index=attr
 	end
 	
 	return d
