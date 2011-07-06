@@ -15,13 +15,9 @@ local os=os
 local pairs=pairs
 local setfenv=setfenv
 local unpack=unpack
+local require=require
 
-local gl=gl
 
-
-local rouge_attr=require("state.rouge.attr")
-
-local function print(...) _G.print(...) end
 
 --[[
 
@@ -69,7 +65,8 @@ kinda ish
 ]]
 
 
-module("state.rouge.char_fight")
+
+module(...)
 
 --
 -- get the amount of damage, done by this char with their currently welded weapon
