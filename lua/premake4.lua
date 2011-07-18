@@ -80,8 +80,10 @@ if #lua_lib_names>0 then
 		links {  "lua_grd_libpng" , "lua_grd_zlib" }
 	
 		links { "GL" , "GLU" }
-		links { "crypt" , "ssl" }
-		links { "mysqlclient" }
+		links { "crypt" }
+		
+--		links { "ssl" }
+--		links { "mysqlclient" }
 
 		local fp=assert(io.popen("pkg-config --libs gtkmm-2.4"))
 		local s=assert(fp:read("*l"))

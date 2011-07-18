@@ -165,6 +165,43 @@ room("dump_stairs",[[
 	["@1"]="sensei.dump",
 })
 
+room("test_stairs",[[
+# # # # # #
+# . . . . #
+# . < @1. #
+# . . . . #
+# # # # # #
+]],{   
+	["< "]="stairs.test",
+	["@1"]="sensei.test",
+})
+
+room("test_stairs_1",[[
+# # # # # # # # # # # #
+# . . . . . . . . . . #
+# . . . . . . . . . . #
+# . . < @1. . . ! . . #
+# . . . . . . . . . . #
+# . . . . . . . . . . #
+# # # # # # # # # # # #
+]],{   
+	["< "]="stairs.test",
+	["@1"]="sensei.test",
+	["! "]="pointy_stick",
+})
+
+room("test_lair_1",[[
+# # # # # # # # # # # #
+# . . . . . . . . . . #
+# . . . . . . . . . . #
+# . . r r r r r r . . #
+# . . . . . . . . . . #
+# . . . . . . . . . . #
+# # # # # # # # # # # #
+]],{   
+	["a "]="ant",
+})
+
 room("stairs",[[
 # # # # #
 # . . . #
@@ -270,6 +307,7 @@ function map_opts(name,pow)
 	
 		r=add_room(get_room("home_stairs"))
 		r=add_room(get_room("dump_stairs"))
+		r=add_room(get_room("test_stairs"))
 		r=add_room(get_room("pub"))
 		r=add_room(get_room("bank"))
 		r=add_room(get_room("shop"))
@@ -287,6 +325,19 @@ function map_opts(name,pow)
 	elseif name=="level.dump" then
 
 		r=add_room(get_room("dump_stairs"))
+	
+	elseif name=="level.test" then
+
+		if pow==1 then
+		
+			r=add_room(get_room("test_stairs_1"))
+			r=add_room(get_room("test_lair_1"))
+			
+		else
+		
+			r=add_room(get_room("test_stairs"))
+			
+		end
 	
 	else
 

@@ -56,7 +56,8 @@ local i
 		end
 	end
 	
-	level=yarn_level.create(attrdata.get("level.home",1,{xh=40,yh=28}),yarn)
+--	level=yarn_level.create(attrdata.get("level.home",1,{xh=40,yh=28}),yarn)
+	level=yarn_level.create(attrdata.get("level.test",1,{xh=40,yh=28}),yarn)
 	menu=yarn_menu.create({},yarn)
 	
 	for y=0,asc_yh-1 do
