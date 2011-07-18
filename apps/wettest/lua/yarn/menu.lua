@@ -189,9 +189,16 @@ setfenv(1,d)
 				end
 			}
 			
+	-- add equiped item option
+			tab[#tab+1]={
+				txt=[[your tools]],
+				call=function(it)
+					show_tool_menu(player)
+				end
+			}
 	-- add backpack option
 			tab[#tab+1]={
-				txt=[[your loot and tools]],
+				txt=[[your loots]],
 				call=function(it)
 					show_loot_menu(player)
 				end
@@ -223,10 +230,33 @@ setfenv(1,d)
 	end
 
 
+	function show_tool_menu(player)
+		local top={}
+		
+		top.title="your tools"
+		
+		top.call=function(tab)
+		
+			local tab={}
+			
+-- add cancel option
+			tab[#tab+1]={
+				txt=[[..]],
+				call=function(it)
+					back()
+				end
+			}
+			
+			top.display=build_request(tab)
+		end
+		
+		show(top)
+	end
+
 	function show_loot_menu(player)
 		local top={}
 		
-		top.title="your loot and tools"
+		top.title="your loots"
 		
 		top.call=function(tab)
 		

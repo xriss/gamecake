@@ -84,6 +84,9 @@ dd={
 {
 	name="level.dump",
 },
+{
+	name="level.test",
+},
 
 {
 	name="room",
@@ -140,6 +143,12 @@ dd={
 },
 
 {
+	name="sensei.test",
+	sensei="test",
+	desc="a sensei named chester",
+},
+
+{
 	name="stairs",
 	form="char",
 	class="stairs",
@@ -176,6 +185,14 @@ dd={
 	desc="a doorstone inscribed, garbage dump",
 	stairs_min=1,
 	stairs_max=5,
+},
+
+{
+	name="stairs.test",
+	stairs="test",
+	desc="a doorstone inscribed, testing 123",
+	stairs_min=1,
+	stairs_max=1,
 },
 
 {
@@ -433,6 +450,35 @@ Eventually.
 	asc=ascii("%"),
 	weight=1,
 	desc="a corpse of a rat",
+},
+
+{
+	name="rat_tail",
+	form="item",
+	class="meat",
+	flavour="rat",
+	asc=ascii(","),
+	weight=0.1,
+	desc="a rats tail",
+},
+{
+	name="rat_tooth",
+	form="item",
+	class="meat",
+	flavour="rat",
+	asc=ascii(","),
+	weight=0.1,
+	desc="a rats tooth",
+},
+
+{
+	name="pointy_stick",
+	form="item",
+	class="weapon",
+	flavour="stick",
+	asc=ascii("!"),
+	weight=1,
+	desc="a pointy stick",
 },
 
 }
