@@ -1,6 +1,12 @@
 cd `dirname $0`
 build/premake4 gmake
 cd build-gmake
-make $*
+
+if [ "$1" == "release" ] ; then
+	make config=release
+else
+	make $*
+fi
+
 cd ..
 

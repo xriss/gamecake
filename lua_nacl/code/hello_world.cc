@@ -1,284 +1,140 @@
-// Copyright 2008 The Native Client Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can
-// be found in the LICENSE file.
+// Copyright (c) 2011 The Native Client Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+/// @file
+/// This example demonstrates loading, running and scripting a very simple NaCl
+/// module.  To load the NaCl module, the browser first looks for the
+/// CreateModule() factory method (at the end of this file).  It calls
+/// CreateModule() once to load the module code from your .nexe.  After the
+/// .nexe code is loaded, CreateModule() is not called again.
+///
+/// Once the .nexe code is loaded, the browser then calls the
+/// HelloWorldModule::CreateInstance()
+/// method on the object returned by CreateModule().  It calls CreateInstance()
+/// each time it encounters an <embed> tag that references your NaCl module.
+///
+/// When the browser encounters JavaScript that references your NaCl module, it
+/// calls the GetInstanceObject() method on the object returned from
+/// CreateInstance().  In this example, the returned object is a subclass of
+/// ScriptableObject, which handles the scripting support.
 
-#include <nacl/nacl_npapi.h>
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include "code/helper_functions.h"
+#include "ppapi/cpp/instance.h"
+#include "ppapi/cpp/module.h"
+#include "ppapi/cpp/var.h"
 
-#include "lua.hpp"
+namespace hello_world {
+/// Method name for ReverseText, as seen by JavaScript code.
+const char* const kReverseTextMethodId = "reverseText";
 
-struct NPO_DATA {
-  NPClass *_class;
-  uint32_t referenceCount;
-  /*
-   * Additional space may be allocated here by types of NPObjects
-   */
-	lua_State *L;
+/// Method name for FortyTwo, as seen by Javascript code. @see FortyTwo()
+const char* const kFortyTwoMethodId = "fortyTwo";
+
+/// Separator character for the reverseText method.
+static const char kMessageArgumentSeparator = ':';
+
+/// This is the module's function that invokes FortyTwo and converts the return
+/// value from an int32_t to a pp::Var for return.
+pp::Var MarshallFortyTwo() {
+  return pp::Var(FortyTwo());
+}
+
+/// This function is passed the arg list from the JavaScript call to
+/// @a reverseText.
+/// It makes sure that there is one argument and that it is a string, returning
+/// an error message if it is not.
+/// On good input, it calls ReverseText and returns the result.  The
+/// ScriptableObject that called this function returns this string back to the
+/// browser as a JavaScript value.
+pp::Var MarshallReverseText(const std::string& text) {
+  return pp::Var(ReverseText(text));
+}
+
+/// The Instance class.  One of these exists for each instance of your NaCl
+/// module on the web page.  The browser will ask the Module object to create
+/// a new Instance for each occurrence of the <embed> tag that has these
+/// attributes:
+/// <pre>
+///     type="application/x-nacl"
+///     nacl="hello_world.nmf"
+/// </pre>
+/// The Instance can return a ScriptableObject representing itself.  When the
+/// browser encounters JavaScript that wants to access the Instance, it calls
+/// the GetInstanceObject() method.  All the scripting work is done through
+/// the returned ScriptableObject.
+class HelloWorldInstance : public pp::Instance {
+ public:
+  explicit HelloWorldInstance(PP_Instance instance) : pp::Instance(instance) {}
+  virtual ~HelloWorldInstance() {}
+
+  /// Called by the browser to handle the postMessage() call in Javascript.
+  /// Detects which method is being called from the message contents, and
+  /// calls the appropriate function.  Posts the result back to the browser
+  /// asynchronously.
+  /// @param[in] var_message The message posted by the browser.  The possible
+  ///     messages are 'fortyTwo' and 'reverseText:Hello World'.  Note that
+  ///     the 'reverseText' form contains the string to reverse following a ':'
+  ///     separator.
+  virtual void HandleMessage(const pp::Var& var_message);
 };
 
-
-// handle all the basic lua gubbins
-
-static void lstop (lua_State *L, lua_Debug *ar) {
-  (void)ar;  /* unused arg. */
-  lua_sethook(L, NULL, 0, 0);
-  luaL_error(L, "interrupted!");
-}
-
-
-static void laction (int i) {
-//  signal(i, SIG_DFL); /* if another SIGINT happens before lstop,
-//                              terminate process (default action) */
-//  lua_sethook(globalL, lstop, LUA_MASKCALL | LUA_MASKRET | LUA_MASKCOUNT, 1);
-}
-
-
-
-static void l_message (const char *pname, const char *msg) {
-//  if (pname) fprintf(stderr, "%s: ", pname);
- // fprintf(stderr, "%s\n", msg);
- // fflush(stderr);
-}
-
-
-static int report (lua_State *L, int status) {
-  if (status && !lua_isnil(L, -1)) {
-    const char *msg = lua_tostring(L, -1);
-    if (msg == NULL) msg = "(error object is not a string)";
-    l_message("progname", msg);
-    lua_pop(L, 1);
+void HelloWorldInstance::HandleMessage(const pp::Var& var_message) {
+  if (!var_message.is_string()) {
+    return;
   }
-  return status;
-}
-
-
-static int traceback (lua_State *L) {
-  if (!lua_isstring(L, 1))  /* 'message' not a string? */
-    return 1;  /* keep it intact */
-  lua_getfield(L, LUA_GLOBALSINDEX, "debug");
-  if (!lua_istable(L, -1)) {
-    lua_pop(L, 1);
-    return 1;
+  std::string message = var_message.AsString();
+  pp::Var return_var;
+  if (message == kFortyTwoMethodId) {
+    // Note that no arguments are passed in to FortyTwo.
+    return_var = MarshallFortyTwo();
+  } else if (message.find(kReverseTextMethodId) == 0) {
+    // The argument to reverseText is everything after the first ':'.
+    size_t sep_pos = message.find_first_of(kMessageArgumentSeparator);
+    if (sep_pos != std::string::npos) {
+      std::string string_arg = message.substr(sep_pos + 1);
+      return_var = MarshallReverseText(string_arg);
+    }
   }
-  lua_getfield(L, -1, "traceback");
-  if (!lua_isfunction(L, -1)) {
-    lua_pop(L, 2);
-    return 1;
+  // Post the return result back to the browser.  Note that HandleMessage() is
+  // always called on the main thread, so it's OK to post the return message
+  // directly from here.  The return post is asynhronous: PostMessage returns
+  // immediately.
+  PostMessage(return_var);
+}
+
+/// The Module class.  The browser calls the CreateInstance() method to create
+/// an instance of you NaCl module on the web page.  The browser creates a new
+/// instance for each <embed> tag with
+/// <code>type="application/x-ppapi-nacl-srpc"</code>.
+class HelloWorldModule : public pp::Module {
+ public:
+  HelloWorldModule() : pp::Module() {}
+  virtual ~HelloWorldModule() {}
+
+  /// Create and return a HelloWorldInstance object.
+  /// @param[in] instance a handle to a plug-in instance.
+  /// @return a newly created HelloWorldInstance.
+  /// @note The browser is responsible for calling @a delete when done.
+  virtual pp::Instance* CreateInstance(PP_Instance instance) {
+    return new HelloWorldInstance(instance);
   }
-  lua_pushvalue(L, 1);  /* pass error message */
-  lua_pushinteger(L, 2);  /* skip this function and traceback */
-  lua_call(L, 2, 1);  /* call debug.traceback */
-  return 1;
-}
-
-
-static int docall (lua_State *L, int narg, int clear) {
-  int status;
-  int base = lua_gettop(L) - narg;  /* function index */
-  lua_pushcfunction(L, traceback);  /* push traceback function */
-  lua_insert(L, base);  /* put it under chunk and args */
-//  signal(SIGINT, laction);
-  status = lua_pcall(L, narg, (clear ? 0 : LUA_MULTRET), base);
-//  signal(SIGINT, SIG_DFL);
-  lua_remove(L, base);  /* remove traceback function */
-  /* force a complete garbage collection in case of errors */
-  if (status != 0) lua_gc(L, LUA_GCCOLLECT, 0);
-  return status;
-}
-
-
-
-/*
- * static int dofile (lua_State *L, const char *name) {
-  int status = luaL_loadfile(L, name) || docall(L, 0, 1);
-  return report(L, status);
-}
-*/
-
-
-static int dostring (lua_State *L, const char *s, const char *name) {
-  int status = luaL_loadbuffer(L, s, strlen(s), name) || docall(L, 0, 1);
-  return report(L, status);
-}
-
-
-static int dolibrary (lua_State *L, const char *name) {
-  lua_getglobal(L, "require");
-  lua_pushstring(L, name);
-  return report(L, docall(L, 1, 1));
-}
-
-
-
-
-
-
-
-
-// These are the method names as JavaScript sees them.
-static const char* kHelloWorldMethodId = "helloworld";
-static const char* kFortyTwoMethodId = "fortytwo";
-
-// This is the module's function that does the work to set the value of the
-// result variable to '42'.  The Invoke() function that called this function
-// then returns the result back to the browser as a JavaScript value.
-static bool FortyTwo(lua_State *L  , NPVariant *result) {
-  if (result) {
-
-//  lua_State *L = lua_open();  /* create state */
-/*
-    if (L == NULL) {
-    l_message(argv[0], "cannot create state: not enough memory");
-    return EXIT_FAILURE;
-  }
-*/
-//  s.argc = argc;
- // s.argv = argv;
-//  status = lua_cpcall(L, &pmain, &s);
-//  report(L, status);
-
-//const char *s=" aa=(aa or "")..'+' ; return 'this is a lie'..aa ";
-const char *s="aa=(aa or '')..'++';return 'this is a lie'..aa";
-
-  int status = luaL_loadbuffer(L, s, strlen(s), "test") ;
-  lua_call(L, 0, 1);
-
-//    INT32_TO_NPVARIANT(status, *result);
-
-    const char *msg = "hello, world.";
-    
-    msg=lua_tostring(L,1);
-    lua_pop(L,1);
-    
-    const int msg_length = strlen(msg) + 1;
-    // Note: |msg_copy| will be freed later on by the browser, so it needs to
-    // be allocated here with NPN_MemAlloc().
-    char *msg_copy = reinterpret_cast<char*>(NPN_MemAlloc(msg_length));
-    strncpy(msg_copy, msg, msg_length);
-    STRINGN_TO_NPVARIANT(msg_copy, msg_length - 1, *result);
-
-  }
-  return true;
-}
-
-// This function creates a string in the browser's memory pool and then returns
-// a variable containing a pointer to that string.  The variable is later
-// returned back to the browser by the Invoke() function that called this.
-static bool HelloWorld(NPVariant *result) {
-  if (result) {
-    const char *msg = "hello, world.";
-    const int msg_length = strlen(msg) + 1;
-    // Note: |msg_copy| will be freed later on by the browser, so it needs to
-    // be allocated here with NPN_MemAlloc().
-    char *msg_copy = reinterpret_cast<char*>(NPN_MemAlloc(msg_length));
-    strncpy(msg_copy, msg, msg_length);
-    STRINGN_TO_NPVARIANT(msg_copy, msg_length - 1, *result);
-  }
-  return true;
-}
-
-// Creates the plugin-side instance of NPObject.
-// Called by NPN_CreateObject, declared in npruntime.h
-// Documentation URL: https://developer.mozilla.org/en/NPClass
-static NPObject* Allocate(NPP npp, NPClass* npclass) {
-	struct NPO_DATA *NPD=new struct NPO_DATA;
-	NPD->_class=npclass;
-	NPD->L=lua_open();
-  return (NPObject*)NPD;
-}
-
-// Cleans up the plugin-side instance of an NPObject.
-// Called by NPN_ReleaseObject, declared in npruntime.h
-// Documentation URL: https://developer.mozilla.org/en/NPClass
-static void Deallocate(NPObject* object) {
-	struct NPO_DATA *NPD=(struct NPO_DATA *)object;
-	  lua_close(NPD->L);
-
-  delete NPD;
-}
-
-// Returns |true| if |method_name| is a recognized method.
-// Called by NPN_HasMethod, declared in npruntime.h
-// Documentation URL: https://developer.mozilla.org/en/NPClass
-static bool HasMethod(NPObject* obj, NPIdentifier method_name) {
-  char *name = NPN_UTF8FromIdentifier(method_name);
-  bool is_method = false;
-  if (!strcmp((const char *)name, kHelloWorldMethodId)) {
-    is_method = true;
-  } else if (!strcmp((const char*)name, kFortyTwoMethodId)) {
-    is_method = true;
-  }
-  NPN_MemFree(name);
-  return is_method;
-}
-
-// Called by the browser to invoke the default method on an NPObject.
-// Returns null.
-// Apparently the plugin won't load properly if we simply
-// tell the browser we don't have this method.
-// Called by NPN_InvokeDefault, declared in npruntime.h
-// Documentation URL: https://developer.mozilla.org/en/NPClass
-static bool InvokeDefault(NPObject *obj, const NPVariant *args,
-                          uint32_t argCount, NPVariant *result) {
-  if (result) {
-    NULL_TO_NPVARIANT(*result);
-  }
-  return true;
-}
-
-// Called by the browser to invoke a function object whose name
-// is |method_name|.
-// Called by NPN_Invoke, declared in npruntime.h
-// Documentation URL: https://developer.mozilla.org/en/NPClass
-static bool Invoke(NPObject* obj,
-                   NPIdentifier method_name,
-                   const NPVariant *args,
-                   uint32_t arg_count,
-                   NPVariant *result) {
-  NULL_TO_NPVARIANT(*result);
-  char *name = NPN_UTF8FromIdentifier(method_name);
-  if (name == NULL)
-    return false;
-  bool rval = false;
-
-	struct NPO_DATA *NPD=(struct NPO_DATA *)obj;
-
-  // Map the method name to a function call.  |result| is filled in by the
-  // called function, then gets returned to the browser when Invoke() returns.
-  if (!strcmp((const char *)name, kHelloWorldMethodId)) {
-    rval = HelloWorld(result);
-  } else if (!strcmp((const char*)name, kFortyTwoMethodId)) {
-    rval = FortyTwo(NPD->L,result);
-  }
-  // Since name was allocated above by NPN_UTF8FromIdentifier,
-  // it needs to be freed here.
-  NPN_MemFree(name);
-  return rval;
-}
-
-// Represents a class's interface, so that the browser knows what functions it
-// can call on this plugin object.  The browser can use the methods in this
-// class to discover the rest of the plugin's interface.
-// Documentation URL: https://developer.mozilla.org/en/NPClass
-static NPClass kHelloWorldClass = {
-  NP_CLASS_STRUCT_VERSION,
-  Allocate,
-  Deallocate,
-  NULL,  // Invalidate is not implemented
-  HasMethod,
-  Invoke,
-  InvokeDefault,
-  NULL,  // HasProperty is not implemented
-  NULL,  // GetProperty is not implemented
-  NULL,  // SetProperty is not implemented
 };
+}  // namespace hello_world
 
-// Called by NPP_GetScriptableInstance to get the scripting interface for
-// this plugin.
-NPClass *GetNPSimpleClass() {
-  return &kHelloWorldClass;
+
+namespace pp {
+/// Factory function called by the browser when the module is first loaded.
+/// The browser keeps a singleton of this module.  It calls the
+/// CreateInstance() method on the object you return to make instances.  There
+/// is one instance per <embed> tag on the page.  This is the main binding
+/// point for your NaCl module with the browser.
+/// @return new HelloWorldModule.
+/// @note The browser is responsible for deleting returned @a Module.
+Module* CreateModule() {
+  return new hello_world::HelloWorldModule();
 }
+}  // namespace pp
