@@ -29,6 +29,10 @@ if NACL then
 
 	defines "NACL"
 	
+	local naclsdk=os.getenv("naclsdk") or "./naclsdk"
+	
+	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
+	
 elseif os.get() == "windows" then
 
 	defines "WIN32"

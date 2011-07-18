@@ -7,10 +7,11 @@ project "lua_nacl"
 language "C++"
 files { "code/**.cpp" , "code/**.c" , "code/**.cc" , "code/**.h" , "all.h" }
 
-links { "google_nacl_imc" ,  "google_nacl_npruntime" , "pthread" , "srpc" }
+links { "ppapi" ,  "ppapi_cpp" , "pthread" , "srpc" }
 
+includedirs { "." }
 
-links { "lua_main" , "lua" }
+--links { "lua_main" , "lua" }
 
 defines { "LUA_LIB" }
 
