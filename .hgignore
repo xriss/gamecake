@@ -1,5 +1,4 @@
 .orig
 build-gmake
 .dbg
-naclsdk
-
+sdks
