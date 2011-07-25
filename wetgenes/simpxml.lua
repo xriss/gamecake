@@ -8,6 +8,8 @@ local pairs=pairs
 local type=type
 
 local print=log or print
+local assert=assert
+
 module(...)
 
 
@@ -64,6 +66,12 @@ local ret_stack=2
 	ret_stack=1
 	ni,j,c,label,args, empty = string.find(s, "<(%/?)([%w_]+)(.-)(%/?)>")
   end
+  
+  local warnings
+  local warn=function(s)
+	if not warnings then warnings={} end
+	warnings[#warnings+1]=s
+  end
 
   
   while ni do
@@ -78,15 +86,21 @@ local ret_stack=2
       top = parse_args(args,label)
       table.insert(stack, top)   -- new level
     else  -- end tag
-      local toclose = table.remove(stack)  -- remove top
-      top = stack[#stack]
-      if #stack < 1 then
-        assert(false,"Tag <"..label.."> not matched ")
-      end
-      if toclose[0] ~= label then
-	    assert(false,"Tag <"..(toclose[0] or "?").."> doesnt match <"..(label or "?")..">.")
-      end
-      table.insert(top, toclose)
+		local autoclose=true -- autoclose
+		while autoclose do
+		  local toclose = table.remove(stack)  -- remove top
+		  top = stack[#stack]
+		  if #stack < 1 then
+			warn("Tag <"..label.."> not matched ")
+		  else
+			  if toclose[0] ~= label then
+				warn("Tag <"..(toclose[0] or "?").."> doesnt match <"..(label or "?")..">.")
+				else
+				autoclose=false
+			  end
+		  end
+		  table.insert(top, toclose)
+		  end
     end 
     i = j+1
     ni,j,c,label,args, empty = string.find(s, "<(%/?)([%w_]+)(.-)(%/?)>", j)
@@ -95,8 +109,9 @@ local ret_stack=2
   if not string.find(text, "^%s*$") then
     table.insert(stack[#stack], text)
   end
-  return stack[ret_stack]
+  return stack[ret_stack],warnings
 end
+
 
 
 -----------------------------------------------------------------------------
@@ -162,6 +177,11 @@ function attr(parent,name,set)
 
 	name=string.lower(name)
 
+	if set then parent[name]=set end
+
+	return parent[name]
+--[[
+
 	for n,v in pairs(parent) do
 		if type(n)=="string" and string.lower(n)==name then
 			if set then parent[n]=set end
@@ -170,7 +190,7 @@ function attr(parent,name,set)
 	end
 	
 	return nil
-
+]]
 end
 
 
@@ -257,4 +277,63 @@ function descendents(parent,name,opts)
 	return opts.out -- maybe an empty output
 end
 
+
+
+-----------------------------------------------------------------------------
+--
+-- find the first descendent tag of the given class, this does recurse
+--
+-----------------------------------------------------------------------------
+function class(parent,name)
+
+	name=string.lower(name)
+
+	for i,v in ipairs(parent) do
+		if type(v)=="table" then
+			if attr(v,"class") then
+--print( attr(v,"class") .."\n" )
+				if string.lower(attr(v,"class"))==name then return v end
+			end
+		end
+	end
+	
+	for i,v in ipairs(parent) do -- recurse
+		local ret
+		if type(v)=="table" then ret=class(v,name) end
+		if ret then return ret end
+	end
+	
+	return nil
+
+end
+
+-----------------------------------------------------------------------------
+--
+-- find **all** the descendent tags of the given class, this does recurse
+--
+-----------------------------------------------------------------------------
+function classes(parent,name,opts)
+	opts=opts or {}
+	opts.out=opts.out or {}
+	
+	local out=function(s) opts.out[#opts.out+1]=s end
+	
+	name=string.lower(name)
+
+	for i,v in ipairs(parent) do -- this level
+		if type(v)=="table" then
+			if attr(v,"class") then
+				if string.lower(attr(v,"class"))==name then out(v) end
+			end
+		end
+		if type(v)=="table" and attr(v,"class") and string.lower(attr(v,"class"))==name then out(v) end
+	end
+	
+	for i,v in ipairs(parent) do -- recurse
+		if type(v)=="table" then classes(v,name,opts) end
+	end
+	
+	return opts.out -- maybe an empty output
+
+end
 
