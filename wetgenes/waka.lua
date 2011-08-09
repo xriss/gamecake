@@ -454,6 +454,17 @@ function refine_chunks(srv,chunks,opts)
 					s=note.chunk_import(srv,e)
 				end
 				
+			elseif e.import=="comic" then
+			
+				e.hook   = e.hook   or opts.hook
+				e.limit=e.limit or 5
+				e.sort=e.sort or "pubdate"
+				
+				if not opts.nocomic then -- prevent recursions
+					local comic=require("comic")
+					s=comic.chunk_import(srv,e)
+				end
+				
 			elseif e.import=="gsheet" then -- we need to grab some json from google
 			
 				local gsheet=require("waka.gsheet")
