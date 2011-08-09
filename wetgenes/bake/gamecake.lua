@@ -19,7 +19,7 @@ function build(tab)
 	bake.files_min_js[ #bake.files_min_js + 1 ]="gamecake"
 
 	local files_gamecake={}
-	local r=bake.findfiles{basedir="../gamecake/src",dir="",filter="%.js$"}
+	local r=bake.findfiles{basedir="../../js/gamecake/src",dir="",filter="%.js$"}
 	for i,v in ipairs(r.ret) do
 		files_gamecake[#files_gamecake+1]=v
 		bake.create_dir_for_file(bake.cd_out.."/js/gamecake/"..v)

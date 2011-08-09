@@ -202,6 +202,22 @@ end
 		bake.copyfile(v,bake.cd_out.."/"..v)
 	end
 
+	local r=bake.findfiles{basedir=".",dir="art",filter="%.mp3$"}
+	for i,v in ipairs(r.ret) do
+		bake.create_dir_for_file(bake.cd_out.."/"..v)
+		bake.copyfile(v,bake.cd_out.."/"..v)
+	end
+	local r=bake.findfiles{basedir=".",dir="art",filter="%.ogg$"}
+	for i,v in ipairs(r.ret) do
+		bake.create_dir_for_file(bake.cd_out.."/"..v)
+		bake.copyfile(v,bake.cd_out.."/"..v)
+	end
+	local r=bake.findfiles{basedir=".",dir="art",filter="%.wav$"}
+	for i,v in ipairs(r.ret) do
+		bake.create_dir_for_file(bake.cd_out.."/"..v)
+		bake.copyfile(v,bake.cd_out.."/"..v)
+	end
+
 	local r=bake.findfiles{basedir=".",dir="jslib",filter="%.js$"}
 	for i,v in ipairs(r.ret) do
 		bake.create_dir_for_file(bake.cd_out.."/"..v)
