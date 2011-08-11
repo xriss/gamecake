@@ -1,0 +1,2057 @@
+defLib = 'GooCanvas'
+defName = 'goocanvas'
+
+defClass('GooCanvas',
+	{
+		parent = 'GtkContainer',
+		implements = {'AtkImplementorIface', 'GtkBuildable'}
+	}
+)
+
+defClass('GooCanvasEllipse',
+	{
+		parent = 'GooCanvasItemSimple',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasEllipseModel',
+	{
+		parent = 'GooCanvasItemModelSimple',
+		implements = {'GooCanvasItemModel'}
+	}
+)
+
+defClass('GooCanvasGrid',
+	{
+		parent = 'GooCanvasItemSimple',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasGridModel',
+	{
+		parent = 'GooCanvasItemModelSimple',
+		implements = {'GooCanvasItemModel'}
+	}
+)
+
+defClass('GooCanvasGroup',
+	{
+		parent = 'GooCanvasItemSimple',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasGroupModel',
+	{
+		parent = 'GooCanvasItemModelSimple',
+		implements = {'GooCanvasItemModel'}
+	}
+)
+
+defClass('GooCanvasImage',
+	{
+		parent = 'GooCanvasItemSimple',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasImageModel',
+	{
+		parent = 'GooCanvasItemModelSimple',
+		implements = {'GooCanvasItemModel'}
+	}
+)
+
+defClass('GooCanvasItem',
+	{
+		abstract = true
+	}
+)
+
+defClass('GooCanvasItemModel',
+	{
+		abstract = true
+	}
+)
+
+defClass('GooCanvasItemModelSimple',
+	{
+		parent = 'GObject',
+		implements = {'GooCanvasItemModel'}
+	}
+)
+
+defClass('GooCanvasItemSimple',
+	{
+		parent = 'GObject',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasPath',
+	{
+		parent = 'GooCanvasItemSimple',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasPathModel',
+	{
+		parent = 'GooCanvasItemModelSimple',
+		implements = {'GooCanvasItemModel'}
+	}
+)
+
+defClass('GooCanvasPolyline',
+	{
+		parent = 'GooCanvasItemSimple',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasPolylineModel',
+	{
+		parent = 'GooCanvasItemModelSimple',
+		implements = {'GooCanvasItemModel'}
+	}
+)
+
+defClass('GooCanvasRect',
+	{
+		parent = 'GooCanvasItemSimple',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasRectModel',
+	{
+		parent = 'GooCanvasItemModelSimple',
+		implements = {'GooCanvasItemModel'}
+	}
+)
+
+defClass('GooCanvasStyle',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GooCanvasTable',
+	{
+		parent = 'GooCanvasGroup',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasTableModel',
+	{
+		parent = 'GooCanvasGroupModel',
+		implements = {'GooCanvasItemModel'}
+	}
+)
+
+defClass('GooCanvasText',
+	{
+		parent = 'GooCanvasItemSimple',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasTextModel',
+	{
+		parent = 'GooCanvasItemModelSimple',
+		implements = {'GooCanvasItemModel'}
+	}
+)
+
+defClass('GooCanvasWidget',
+	{
+		parent = 'GooCanvasItemSimple',
+		implements = {'GooCanvasItem'}
+	}
+)
+
+defClass('GooCanvasBounds',
+	{
+		
+	}
+)
+
+defClass('GooCanvasEllipseData',
+	{
+		
+	}
+)
+
+defClass('GooCanvasGridData',
+	{
+		
+	}
+)
+
+defClass('GooCanvasImageData',
+	{
+		
+	}
+)
+
+defClass('GooCanvasItemIface',
+	{
+		
+	}
+)
+
+defClass('GooCanvasItemModelIface',
+	{
+		
+	}
+)
+
+defClass('GooCanvasItemSimpleData',
+	{
+		
+	}
+)
+
+defClass('GooCanvasLineDash',
+	{
+		
+	}
+)
+
+defClass('GooCanvasPathCommand',
+	{
+		
+	}
+)
+
+defClass('simple',
+	{
+		
+	}
+)
+
+defClass('curve',
+	{
+		
+	}
+)
+
+defClass('arc',
+	{
+		
+	}
+)
+
+defClass('GooCanvasPathData',
+	{
+		
+	}
+)
+
+defClass('GooCanvasPoints',
+	{
+		
+	}
+)
+
+defClass('GooCanvasPolylineArrowData',
+	{
+		
+	}
+)
+
+defClass('GooCanvasPolylineData',
+	{
+		
+	}
+)
+
+defClass('GooCanvasRectData',
+	{
+		
+	}
+)
+
+defClass('GooCanvasStyleProperty',
+	{
+		
+	}
+)
+
+defClass('GooCanvasTableData',
+	{
+		
+	}
+)
+
+defClass('GooCanvasTableDimension',
+	{
+		
+	}
+)
+
+defClass('GooCanvasTableLayoutData',
+	{
+		
+	}
+)
+
+defClass('GooCanvasTextData',
+	{
+		
+	}
+)
+
+defFunction('goo_canvas_get_type',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_new',
+	{
+		class = 'GooCanvas',
+		constructor = true,
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_item_class_install_child_property',
+	{
+		since = '0.1',
+		args = {'struct* none', 'unsigned int none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_class_find_child_property',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_item_class_list_child_properties',
+	{
+		since = '0.1',
+		args = {'struct* none', 'unsigned int* full'},
+		ret = 'struct** full'
+	}
+)
+
+defFunction('goo_canvas_item_model_class_install_child_property',
+	{
+		since = '0.1',
+		args = {'struct* none', 'unsigned int none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_class_find_child_property',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_item_model_class_list_child_properties',
+	{
+		since = '0.1',
+		args = {'struct* none', 'unsigned int* full'},
+		ret = 'struct** full'
+	}
+)
+
+defFunction('goo_canvas_parse_path_data',
+	{
+		since = '0.1',
+		args = {'char* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_create_path',
+	{
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_get_root_item',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_set_root_item',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_get_root_item_model',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_set_root_item_model',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_get_static_root_item',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_set_static_root_item',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_get_static_root_item_model',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_set_static_root_item_model',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_get_item',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_get_item_at',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'boolean none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_get_items_at',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'boolean none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_get_items_in_area',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'boolean none', 'boolean none', 'boolean none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_get_scale',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		accessorSince = '0.10',
+		args = {'GObject* none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('goo_canvas_set_scale',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		accessorSince = '0.10',
+		args = {'GObject* none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_get_bounds',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'double* full', 'double* full', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('goo_canvas_set_bounds',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_scroll_to',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_grab_focus',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_render',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_convert_to_pixels',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('goo_canvas_convert_from_pixels',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('goo_canvas_convert_to_item_space',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('goo_canvas_convert_from_item_space',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('goo_canvas_convert_bounds_to_item_space',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_pointer_grab',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'struct* none', 'unsigned long none'},
+		ret = 'int full'
+	}
+)
+
+defFunction('goo_canvas_pointer_ungrab',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'unsigned long none'}
+	}
+)
+
+defFunction('goo_canvas_keyboard_grab',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'boolean none', 'unsigned long none'},
+		ret = 'int full'
+	}
+)
+
+defFunction('goo_canvas_keyboard_ungrab',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'unsigned long none'}
+	}
+)
+
+defFunction('goo_canvas_create_cairo_context',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_create_item',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_unregister_item',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_update',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_request_update',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_request_redraw',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_request_item_redraw',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'boolean none'}
+	}
+)
+
+defFunction('goo_canvas_get_default_line_width',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('goo_canvas_register_widget_item',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_unregister_widget_item',
+	{
+		class = 'GooCanvas',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_ellipse_get_type',
+	{
+		class = 'GooCanvasEllipse',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_ellipse_new',
+	{
+		class = 'GooCanvasEllipse',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_ellipse_model_get_type',
+	{
+		class = 'GooCanvasEllipseModel',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_ellipse_model_new',
+	{
+		class = 'GooCanvasEllipseModel',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_grid_get_type',
+	{
+		class = 'GooCanvasGrid',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_grid_new',
+	{
+		class = 'GooCanvasGrid',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none', 'double none', 'double none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_grid_model_get_type',
+	{
+		class = 'GooCanvasGridModel',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_grid_model_new',
+	{
+		class = 'GooCanvasGridModel',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none', 'double none', 'double none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_group_get_type',
+	{
+		class = 'GooCanvasGroup',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_group_new',
+	{
+		class = 'GooCanvasGroup',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_group_model_get_type',
+	{
+		class = 'GooCanvasGroupModel',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_group_model_new',
+	{
+		class = 'GooCanvasGroupModel',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_image_get_type',
+	{
+		class = 'GooCanvasImage',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_image_new',
+	{
+		class = 'GooCanvasImage',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_image_model_get_type',
+	{
+		class = 'GooCanvasImageModel',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_image_model_new',
+	{
+		class = 'GooCanvasImageModel',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_item_get_n_children',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('goo_canvas_item_get_child',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'int none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_item_find_child',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('goo_canvas_item_add_child',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none'}
+	}
+)
+
+defFunction('goo_canvas_item_move_child',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('goo_canvas_item_remove_child',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_child_property',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'char* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_set_child_property',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'char* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_child_properties',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'void* none'}
+	}
+)
+
+defFunction('goo_canvas_item_set_child_properties',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'void* none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_transform_for_child',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_get_canvas',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_item_set_canvas',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_parent',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_item_set_parent',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_remove',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_is_container',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_raise',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_lower',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_transform',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_set_transform',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_simple_transform',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'double* full', 'double* full', 'double* full', 'double* full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_set_simple_transform',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_translate',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_scale',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_rotate',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_skew_x',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_skew_y',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_style',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_item_set_style',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_animate',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none', 'boolean none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('goo_canvas_item_stop_animation',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_bounds',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_items_at',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'struct* none', 'boolean none', 'boolean none', 'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_item_is_visible',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_get_model',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_item_set_model',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_request_update',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_ensure_updated',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_update',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_paint',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_requested_area',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_get_requested_height',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'double none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('goo_canvas_item_allocate_area',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none', 'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_get_is_static',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_set_is_static',
+	{
+		class = 'GooCanvasItem',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_get_n_children',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('goo_canvas_item_model_get_child',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'int none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_item_model_add_child',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_move_child',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_remove_child',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_find_child',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('goo_canvas_item_model_get_child_property',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'char* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_set_child_property',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'char* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_get_child_properties',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'void* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_set_child_properties',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'void* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_get_parent',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_item_model_set_parent',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_remove',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_is_container',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_model_raise',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_lower',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_get_transform',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_model_set_transform',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_get_simple_transform',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'double* full', 'double* full', 'double* full', 'double* full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_model_set_simple_transform',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_translate',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_scale',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_rotate',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_skew_x',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_skew_y',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_get_style',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_item_model_set_style',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_animate',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none', 'boolean none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_stop_animation',
+	{
+		class = 'GooCanvasItemModel',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_model_simple_get_type',
+	{
+		class = 'GooCanvasItemModelSimple',
+		since = '9999.9999',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_item_simple_get_type',
+	{
+		class = 'GooCanvasItemSimple',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_item_simple_get_path_bounds',
+	{
+		class = 'GooCanvasItemSimple',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_simple_user_bounds_to_device',
+	{
+		class = 'GooCanvasItemSimple',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_simple_user_bounds_to_parent',
+	{
+		class = 'GooCanvasItemSimple',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_simple_check_in_path',
+	{
+		class = 'GooCanvasItemSimple',
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'struct* none', 'int none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_item_simple_paint_path',
+	{
+		class = 'GooCanvasItemSimple',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_item_simple_changed',
+	{
+		class = 'GooCanvasItemSimple',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('goo_canvas_item_simple_check_style',
+	{
+		class = 'GooCanvasItemSimple',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_item_simple_get_line_width',
+	{
+		class = 'GooCanvasItemSimple',
+		since = '0.1',
+		accessorSince = '0.10',
+		args = {'GObject* none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('goo_canvas_item_simple_set_model',
+	{
+		class = 'GooCanvasItemSimple',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_line_dash_new',
+	{
+		class = 'GooCanvasLineDash',
+		constructor = true,
+		since = '0.1',
+		args = {'int none', 'void* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_line_dash_newv',
+	{
+		class = 'GooCanvasLineDash',
+		constructor = true,
+		since = '0.1',
+		args = {'int none', 'double* full'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_line_dash_ref',
+	{
+		class = 'GooCanvasLineDash',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_line_dash_unref',
+	{
+		class = 'GooCanvasLineDash',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_path_get_type',
+	{
+		class = 'GooCanvasPath',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_path_new',
+	{
+		class = 'GooCanvasPath',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_path_model_get_type',
+	{
+		class = 'GooCanvasPathModel',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_path_model_new',
+	{
+		class = 'GooCanvasPathModel',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_points_new',
+	{
+		class = 'GooCanvasPoints',
+		constructor = true,
+		since = '0.1',
+		args = {'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_points_ref',
+	{
+		class = 'GooCanvasPoints',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_points_unref',
+	{
+		class = 'GooCanvasPoints',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_polyline_get_type',
+	{
+		class = 'GooCanvasPolyline',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_polyline_new',
+	{
+		class = 'GooCanvasPolyline',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'int none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_polyline_new_line',
+	{
+		class = 'GooCanvasPolyline',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_polyline_model_get_type',
+	{
+		class = 'GooCanvasPolylineModel',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_polyline_model_new',
+	{
+		class = 'GooCanvasPolylineModel',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'int none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_polyline_model_new_line',
+	{
+		class = 'GooCanvasPolylineModel',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_rect_get_type',
+	{
+		class = 'GooCanvasRect',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_rect_new',
+	{
+		class = 'GooCanvasRect',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_rect_model_get_type',
+	{
+		class = 'GooCanvasRectModel',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_rect_model_new',
+	{
+		class = 'GooCanvasRectModel',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'double none', 'double none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_style_get_type',
+	{
+		class = 'GooCanvasStyle',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_style_new',
+	{
+		class = 'GooCanvasStyle',
+		constructor = true,
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_style_copy',
+	{
+		class = 'GooCanvasStyle',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_style_get_parent',
+	{
+		class = 'GooCanvasStyle',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_style_set_parent',
+	{
+		class = 'GooCanvasStyle',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('goo_canvas_style_get_property',
+	{
+		class = 'GooCanvasStyle',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_canvas_style_set_property',
+	{
+		class = 'GooCanvasStyle',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_style_set_stroke_options',
+	{
+		class = 'GooCanvasStyle',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_style_set_fill_options',
+	{
+		class = 'GooCanvasStyle',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('goo_canvas_table_get_type',
+	{
+		class = 'GooCanvasTable',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_table_new',
+	{
+		class = 'GooCanvasTable',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_table_model_get_type',
+	{
+		class = 'GooCanvasTableModel',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_table_model_new',
+	{
+		class = 'GooCanvasTableModel',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_text_get_type',
+	{
+		class = 'GooCanvasText',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_text_new',
+	{
+		class = 'GooCanvasText',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'double none', 'double none', 'double none', 'int none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_text_get_natural_extents',
+	{
+		class = 'GooCanvasText',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('goo_canvas_text_model_get_type',
+	{
+		class = 'GooCanvasTextModel',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_text_model_new',
+	{
+		class = 'GooCanvasTextModel',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'double none', 'double none', 'double none', 'int none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_canvas_widget_get_type',
+	{
+		class = 'GooCanvasWidget',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('goo_canvas_widget_new',
+	{
+		class = 'GooCanvasWidget',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'double none', 'double none', 'double none', 'double none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('goo_cairo_matrix_copy',
+	{
+		since = '0.10',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('goo_cairo_matrix_free',
+	{
+		since = '0.10',
+		args = {'struct* none'}
+	}
+)
+
+defEnum('GooCairoAntialias',
+	{
+		['CAIRO_ANTIALIAS_SUBPIXEL'] = 3,
+		['CAIRO_ANTIALIAS_DEFAULT'] = 0,
+		['CAIRO_ANTIALIAS_GRAY'] = 2,
+		['CAIRO_ANTIALIAS_NONE'] = 1
+	}
+)
+
+defEnum('GooCairoFillRule',
+	{
+		['CAIRO_FILL_RULE_EVEN_ODD'] = 1,
+		['CAIRO_FILL_RULE_WINDING'] = 0
+	}
+)
+
+defEnum('GooCairoHintMetrics',
+	{
+		['CAIRO_HINT_METRICS_DEFAULT'] = 0,
+		['CAIRO_HINT_METRICS_OFF'] = 1,
+		['CAIRO_HINT_METRICS_ON'] = 2
+	}
+)
+
+defEnum('GooCairoLineCap',
+	{
+		['CAIRO_LINE_CAP_ROUND'] = 1,
+		['CAIRO_LINE_CAP_SQUARE'] = 2,
+		['CAIRO_LINE_CAP_BUTT'] = 0
+	}
+)
+
+defEnum('GooCairoLineJoin',
+	{
+		['CAIRO_LINE_JOIN_MITER'] = 0,
+		['CAIRO_LINE_JOIN_ROUND'] = 1,
+		['CAIRO_LINE_JOIN_BEVEL'] = 2
+	}
+)
+
+defEnum('GooCairoOperator',
+	{
+		['CAIRO_OPERATOR_SATURATE'] = 13,
+		['CAIRO_OPERATOR_OUT'] = 4,
+		['CAIRO_OPERATOR_ADD'] = 12,
+		['CAIRO_OPERATOR_XOR'] = 11,
+		['CAIRO_OPERATOR_DEST_OUT'] = 9,
+		['CAIRO_OPERATOR_SOURCE'] = 1,
+		['CAIRO_OPERATOR_DEST_ATOP'] = 10,
+		['CAIRO_OPERATOR_ATOP'] = 5,
+		['CAIRO_OPERATOR_OVER'] = 2,
+		['CAIRO_OPERATOR_IN'] = 3,
+		['CAIRO_OPERATOR_CLEAR'] = 0,
+		['CAIRO_OPERATOR_DEST_IN'] = 8,
+		['CAIRO_OPERATOR_DEST_OVER'] = 7,
+		['CAIRO_OPERATOR_DEST'] = 6
+	}
+)
+
+defEnum('GooCanvasAnimateType',
+	{
+		['GOO_CANVAS_ANIMATE_BOUNCE'] = 3,
+		['GOO_CANVAS_ANIMATE_RESTART'] = 2,
+		['GOO_CANVAS_ANIMATE_FREEZE'] = 0,
+		['GOO_CANVAS_ANIMATE_RESET'] = 1
+	}
+)
+
+defEnum('GooCanvasItemVisibility',
+	{
+		['GOO_CANVAS_ITEM_INVISIBLE'] = 1,
+		['GOO_CANVAS_ITEM_VISIBLE_ABOVE_THRESHOLD'] = 3,
+		['GOO_CANVAS_ITEM_HIDDEN'] = 0,
+		['GOO_CANVAS_ITEM_VISIBLE'] = 2
+	}
+)
+
+defEnum('GooCanvasPathCommandType',
+	{
+		['GOO_CANVAS_PATH_LINE_TO'] = 2,
+		['GOO_CANVAS_PATH_QUADRATIC_CURVE_TO'] = 7,
+		['GOO_CANVAS_PATH_CLOSE_PATH'] = 1,
+		['GOO_CANVAS_PATH_HORIZONTAL_LINE_TO'] = 3,
+		['GOO_CANVAS_PATH_SMOOTH_CURVE_TO'] = 6,
+		['GOO_CANVAS_PATH_VERTICAL_LINE_TO'] = 4,
+		['GOO_CANVAS_PATH_SMOOTH_QUADRATIC_CURVE_TO'] = 8,
+		['GOO_CANVAS_PATH_MOVE_TO'] = 0,
+		['GOO_CANVAS_PATH_ELLIPTICAL_ARC'] = 9,
+		['GOO_CANVAS_PATH_CURVE_TO'] = 5
+	}
+)
+
+defEnum('GooCanvasPointerEvents',
+	{
+		['GOO_CANVAS_EVENTS_PAINTED'] = 14,
+		['GOO_CANVAS_EVENTS_FILL_MASK'] = 4,
+		['GOO_CANVAS_EVENTS_ALL'] = 12,
+		['GOO_CANVAS_EVENTS_NONE'] = 0,
+		['GOO_CANVAS_EVENTS_PAINTED_MASK'] = 2,
+		['GOO_CANVAS_EVENTS_VISIBLE_MASK'] = 1,
+		['GOO_CANVAS_EVENTS_VISIBLE'] = 13,
+		['GOO_CANVAS_EVENTS_VISIBLE_FILL'] = 5,
+		['GOO_CANVAS_EVENTS_STROKE_MASK'] = 8,
+		['GOO_CANVAS_EVENTS_STROKE'] = 8,
+		['GOO_CANVAS_EVENTS_VISIBLE_STROKE'] = 9,
+		['GOO_CANVAS_EVENTS_FILL'] = 4,
+		['GOO_CANVAS_EVENTS_VISIBLE_PAINTED'] = 15
+	}
+)
+

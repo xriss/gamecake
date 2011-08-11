@@ -1,0 +1,15 @@
+include('poppler.def')
+
+undef{
+	'poppler_document_new_from_data',
+	'poppler_date_parse',
+}
+
+defFunction('poppler_page_get_text',
+	{
+		class = 'PopplerPage',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)

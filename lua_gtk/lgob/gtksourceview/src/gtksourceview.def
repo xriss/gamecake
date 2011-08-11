@@ -1,0 +1,2101 @@
+defLib = 'Gtk'
+defName = 'gtksourceview'
+
+defClass('GtkSourceBuffer',
+	{
+		parent = 'GtkTextBuffer'
+	}
+)
+
+defClass('GtkSourceCompletion',
+	{
+		parent = 'GtkObject'
+	}
+)
+
+defClass('GtkSourceCompletionContext',
+	{
+		parent = 'GInitiallyUnowned'
+	}
+)
+
+defClass('GtkSourceCompletionInfo',
+	{
+		parent = 'GtkWindow',
+		implements = {'AtkImplementorIface', 'GtkBuildable'}
+	}
+)
+
+defClass('GtkSourceCompletionItem',
+	{
+		parent = 'GObject',
+		implements = {'GtkSourceSourceCompletionProposal'}
+	}
+)
+
+defClass('GtkSourceCompletionProposal',
+	{
+		abstract = true
+	}
+)
+
+defClass('GtkSourceCompletionProvider',
+	{
+		abstract = true
+	}
+)
+
+defClass('GtkSourceGutter',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GtkSourceLanguage',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GtkSourceLanguageManager',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GtkSourceMark',
+	{
+		parent = 'GtkTextMark'
+	}
+)
+
+defClass('GtkSourcePrintCompositor',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GtkSourceStyle',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GtkSourceStyleScheme',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GtkSourceStyleSchemeManager',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GtkSourceUndoManager',
+	{
+		abstract = true
+	}
+)
+
+defClass('GtkSourceView',
+	{
+		parent = 'GtkTextView',
+		implements = {'AtkImplementorIface', 'GtkBuildable'}
+	}
+)
+
+defClass('GtkSourceCompletionProposalIface',
+	{
+		
+	}
+)
+
+defClass('GtkSourceCompletionProviderIface',
+	{
+		
+	}
+)
+
+defClass('GtkSourceUndoManagerIface',
+	{
+		
+	}
+)
+
+defFunction('gtk_source_buffer_get_type',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_buffer_new',
+	{
+		class = 'GtkSourceBuffer',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_buffer_new_with_language',
+	{
+		class = 'GtkSourceBuffer',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_buffer_get_highlight_syntax',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_buffer_set_highlight_syntax',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_buffer_get_highlight_matching_brackets',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_buffer_set_highlight_matching_brackets',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_buffer_get_max_undo_levels',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gtk_source_buffer_set_max_undo_levels',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_buffer_get_language',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_buffer_set_language',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_buffer_can_undo',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_buffer_can_redo',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_buffer_get_style_scheme',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_buffer_set_style_scheme',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_buffer_ensure_highlight',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gtk_source_buffer_undo',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_buffer_redo',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_buffer_begin_not_undoable_action',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_buffer_end_not_undoable_action',
+	{
+		class = 'GtkSourceBuffer',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_buffer_create_source_mark',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		args = {'GObject* none', 'char* none', 'char* none', 'struct* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_buffer_forward_iter_to_source_mark',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none', 'char* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_buffer_backward_iter_to_source_mark',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none', 'char* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_buffer_get_source_marks_at_iter',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none', 'char* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gtk_source_buffer_get_source_marks_at_line',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		args = {'GObject* none', 'int none', 'char* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gtk_source_buffer_remove_source_marks',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none', 'struct* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_buffer_iter_has_context_class',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none', 'char* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_buffer_get_context_classes_at_iter',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gtk_source_buffer_iter_forward_to_context_class_toggle',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none', 'char* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_buffer_iter_backward_to_context_class_toggle',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none', 'char* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_buffer_get_undo_manager',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_buffer_set_undo_manager',
+	{
+		class = 'GtkSourceBuffer',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_completion_get_type',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_completion_add_provider',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_completion_remove_provider',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_completion_get_providers',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gtk_source_completion_show',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_completion_hide',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_completion_get_info_window',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_completion_get_view',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'any* none'
+	}
+)
+
+defFunction('gtk_source_completion_create_context',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_completion_move_window',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gtk_source_completion_block_interactive',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_completion_unblock_interactive',
+	{
+		class = 'GtkSourceCompletion',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_completion_context_get_type',
+	{
+		class = 'GtkSourceCompletionContext',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_completion_context_add_proposals',
+	{
+		class = 'GtkSourceCompletionContext',
+		since = '0.1',
+		args = {'GObject* none', 'any* none', 'struct* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_completion_context_get_iter',
+	{
+		class = 'GtkSourceCompletionContext',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gtk_source_completion_context_get_activation',
+	{
+		class = 'GtkSourceCompletionContext',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'int full'
+	}
+)
+
+defFunction('gtk_source_completion_info_get_type',
+	{
+		class = 'GtkSourceCompletionInfo',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_completion_info_new',
+	{
+		class = 'GtkSourceCompletionInfo',
+		constructor = true,
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_completion_info_move_to_iter',
+	{
+		class = 'GtkSourceCompletionInfo',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gtk_source_completion_info_set_sizing',
+	{
+		class = 'GtkSourceCompletionInfo',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'boolean none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_completion_info_set_widget',
+	{
+		class = 'GtkSourceCompletionInfo',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_completion_info_get_widget',
+	{
+		class = 'GtkSourceCompletionInfo',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_completion_info_process_resize',
+	{
+		class = 'GtkSourceCompletionInfo',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_completion_item_get_type',
+	{
+		class = 'GtkSourceCompletionItem',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_completion_item_new',
+	{
+		class = 'GtkSourceCompletionItem',
+		constructor = true,
+		since = '0.1',
+		args = {'char* none', 'char* none', 'GObject* none', 'char* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_completion_item_new_with_markup',
+	{
+		class = 'GtkSourceCompletionItem',
+		constructor = true,
+		since = '0.1',
+		args = {'char* none', 'char* none', 'GObject* none', 'char* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_completion_item_new_from_stock',
+	{
+		class = 'GtkSourceCompletionItem',
+		constructor = true,
+		since = '0.1',
+		args = {'char* none', 'char* none', 'char* none', 'char* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_completion_proposal_get_label',
+	{
+		class = 'GtkSourceCompletionProposal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gtk_source_completion_proposal_get_markup',
+	{
+		class = 'GtkSourceCompletionProposal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gtk_source_completion_proposal_get_text',
+	{
+		class = 'GtkSourceCompletionProposal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gtk_source_completion_proposal_get_icon',
+	{
+		class = 'GtkSourceCompletionProposal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_completion_proposal_get_info',
+	{
+		class = 'GtkSourceCompletionProposal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gtk_source_completion_proposal_changed',
+	{
+		class = 'GtkSourceCompletionProposal',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_completion_proposal_hash',
+	{
+		class = 'GtkSourceCompletionProposal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gtk_source_completion_proposal_equal',
+	{
+		class = 'GtkSourceCompletionProposal',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_completion_provider_get_name',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gtk_source_completion_provider_get_icon',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_completion_provider_populate',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_completion_provider_get_activation',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int full'
+	}
+)
+
+defFunction('gtk_source_completion_provider_match',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_completion_provider_get_info_widget',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_completion_provider_update_info',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_completion_provider_get_start_iter',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GObject* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_completion_provider_activate_proposal',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_completion_provider_get_interactive_delay',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gtk_source_completion_provider_get_priority',
+	{
+		class = 'GtkSourceCompletionProvider',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gtk_source_gutter_get_type',
+	{
+		class = 'GtkSourceGutter',
+		since = '2.8',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_gutter_get_window',
+	{
+		class = 'GtkSourceGutter',
+		since = '2.8',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_gutter_insert',
+	{
+		class = 'GtkSourceGutter',
+		since = '2.8',
+		args = {'GObject* none', 'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_gutter_reorder',
+	{
+		class = 'GtkSourceGutter',
+		since = '2.8',
+		args = {'GObject* none', 'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_gutter_remove',
+	{
+		class = 'GtkSourceGutter',
+		since = '2.8',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_gutter_set_cell_data_func',
+	{
+		class = 'GtkSourceGutter',
+		since = '2.8',
+		args = {'GObject* none', 'GObject* none', 'callback none', 'void* none', 'callback none'}
+	}
+)
+
+defFunction('gtk_source_gutter_set_cell_size_func',
+	{
+		class = 'GtkSourceGutter',
+		since = '2.8',
+		args = {'GObject* none', 'GObject* none', 'callback none', 'void* none', 'callback none'}
+	}
+)
+
+defFunction('gtk_source_gutter_queue_draw',
+	{
+		class = 'GtkSourceGutter',
+		since = '2.8',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_language_get_type',
+	{
+		class = 'GtkSourceLanguage',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_language_get_id',
+	{
+		class = 'GtkSourceLanguage',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gtk_source_language_get_name',
+	{
+		class = 'GtkSourceLanguage',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gtk_source_language_get_section',
+	{
+		class = 'GtkSourceLanguage',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gtk_source_language_get_hidden',
+	{
+		class = 'GtkSourceLanguage',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_language_get_metadata',
+	{
+		class = 'GtkSourceLanguage',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gtk_source_language_get_mime_types',
+	{
+		class = 'GtkSourceLanguage',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_language_get_globs',
+	{
+		class = 'GtkSourceLanguage',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_language_get_style_ids',
+	{
+		class = 'GtkSourceLanguage',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_language_get_style_name',
+	{
+		class = 'GtkSourceLanguage',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gtk_source_language_manager_get_type',
+	{
+		class = 'GtkSourceLanguageManager',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_language_manager_new',
+	{
+		class = 'GtkSourceLanguageManager',
+		constructor = true,
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_language_manager_get_default',
+	{
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_language_manager_get_search_path',
+	{
+		class = 'GtkSourceLanguageManager',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_language_manager_set_search_path',
+	{
+		class = 'GtkSourceLanguageManager',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'void* none'}
+	}
+)
+
+defFunction('gtk_source_language_manager_get_language_ids',
+	{
+		class = 'GtkSourceLanguageManager',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_language_manager_get_language',
+	{
+		class = 'GtkSourceLanguageManager',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_language_manager_guess_language',
+	{
+		class = 'GtkSourceLanguageManager',
+		since = '2.4',
+		args = {'GObject* none', 'char* none', 'char* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_mark_get_type',
+	{
+		class = 'GtkSourceMark',
+		since = '2.2',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_mark_new',
+	{
+		class = 'GtkSourceMark',
+		constructor = true,
+		since = '2.2',
+		args = {'char* none', 'char* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_mark_get_category',
+	{
+		class = 'GtkSourceMark',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gtk_source_mark_next',
+	{
+		class = 'GtkSourceMark',
+		since = '2.2',
+		args = {'GObject* none', 'char* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_mark_prev',
+	{
+		class = 'GtkSourceMark',
+		since = '2.2',
+		args = {'GObject* none', 'char* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_type',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_new',
+	{
+		class = 'GtkSourcePrintCompositor',
+		constructor = true,
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_print_compositor_new_from_view',
+	{
+		class = 'GtkSourcePrintCompositor',
+		constructor = true,
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_buffer',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_tab_width',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'unsigned int none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_tab_width',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_wrap_mode',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_wrap_mode',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'int full'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_highlight_syntax',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_highlight_syntax',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_print_line_numbers',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'unsigned int none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_print_line_numbers',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_body_font_name',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_body_font_name',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_line_numbers_font_name',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_line_numbers_font_name',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_header_font_name',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_header_font_name',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_footer_font_name',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_footer_font_name',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_top_margin',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'int none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_top_margin',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'double none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_bottom_margin',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'int none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_bottom_margin',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'double none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_left_margin',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'int none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_left_margin',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'double none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_right_margin',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'int none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_right_margin',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'double none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_print_header',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_print_header',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_print_footer',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_print_footer',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_header_format',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'boolean none', 'char* none', 'char* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_set_footer_format',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'boolean none', 'char* none', 'char* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_n_pages',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_paginate',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none', 'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_get_pagination_progress',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('gtk_source_print_compositor_draw_page',
+	{
+		class = 'GtkSourcePrintCompositor',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_style_get_type',
+	{
+		class = 'GtkSourceStyle',
+		since = '2.0',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_style_copy',
+	{
+		class = 'GtkSourceStyle',
+		since = '2.0',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_style_scheme_get_type',
+	{
+		class = 'GtkSourceStyleScheme',
+		since = '2.0',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_style_scheme_get_id',
+	{
+		class = 'GtkSourceStyleScheme',
+		since = '2.0',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gtk_source_style_scheme_get_name',
+	{
+		class = 'GtkSourceStyleScheme',
+		since = '2.0',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gtk_source_style_scheme_get_description',
+	{
+		class = 'GtkSourceStyleScheme',
+		since = '2.0',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gtk_source_style_scheme_get_authors',
+	{
+		class = 'GtkSourceStyleScheme',
+		since = '2.0',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_style_scheme_get_filename',
+	{
+		class = 'GtkSourceStyleScheme',
+		since = '2.0',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gtk_source_style_scheme_get_style',
+	{
+		class = 'GtkSourceStyleScheme',
+		since = '2.0',
+		args = {'GObject* none', 'char* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_style_scheme_manager_get_type',
+	{
+		class = 'GtkSourceStyleSchemeManager',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_style_scheme_manager_new',
+	{
+		class = 'GtkSourceStyleSchemeManager',
+		constructor = true,
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_style_scheme_manager_get_default',
+	{
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_style_scheme_manager_set_search_path',
+	{
+		class = 'GtkSourceStyleSchemeManager',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'void* none'}
+	}
+)
+
+defFunction('gtk_source_style_scheme_manager_append_search_path',
+	{
+		class = 'GtkSourceStyleSchemeManager',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_style_scheme_manager_prepend_search_path',
+	{
+		class = 'GtkSourceStyleSchemeManager',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_style_scheme_manager_get_search_path',
+	{
+		class = 'GtkSourceStyleSchemeManager',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_style_scheme_manager_force_rescan',
+	{
+		class = 'GtkSourceStyleSchemeManager',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_style_scheme_manager_get_scheme_ids',
+	{
+		class = 'GtkSourceStyleSchemeManager',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_style_scheme_manager_get_scheme',
+	{
+		class = 'GtkSourceStyleSchemeManager',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_undo_manager_can_undo',
+	{
+		class = 'GtkSourceUndoManager',
+		since = '2.10',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_undo_manager_can_redo',
+	{
+		class = 'GtkSourceUndoManager',
+		since = '2.10',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_undo_manager_undo',
+	{
+		class = 'GtkSourceUndoManager',
+		since = '2.10',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_undo_manager_redo',
+	{
+		class = 'GtkSourceUndoManager',
+		since = '2.10',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_undo_manager_begin_not_undoable_action',
+	{
+		class = 'GtkSourceUndoManager',
+		since = '2.10',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_undo_manager_end_not_undoable_action',
+	{
+		class = 'GtkSourceUndoManager',
+		since = '2.10',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_undo_manager_can_undo_changed',
+	{
+		class = 'GtkSourceUndoManager',
+		since = '2.10',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_undo_manager_can_redo_changed',
+	{
+		class = 'GtkSourceUndoManager',
+		since = '2.10',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_view_get_type',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gtk_source_view_new',
+	{
+		class = 'GtkSourceView',
+		constructor = true,
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_view_new_with_buffer',
+	{
+		class = 'GtkSourceView',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_view_set_show_line_numbers',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_view_get_show_line_numbers',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_view_set_tab_width',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'unsigned int none'}
+	}
+)
+
+defFunction('gtk_source_view_get_tab_width',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gtk_source_view_set_indent_width',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_view_get_indent_width',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gtk_source_view_set_auto_indent',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_view_get_auto_indent',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_view_set_insert_spaces_instead_of_tabs',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_view_get_insert_spaces_instead_of_tabs',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_view_set_indent_on_tab',
+	{
+		class = 'GtkSourceView',
+		since = '1.8',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_view_get_indent_on_tab',
+	{
+		class = 'GtkSourceView',
+		since = '1.8',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_view_set_highlight_current_line',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_view_get_highlight_current_line',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_view_set_show_right_margin',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_view_get_show_right_margin',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_view_set_right_margin_position',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'unsigned int none'}
+	}
+)
+
+defFunction('gtk_source_view_get_right_margin_position',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gtk_source_view_set_show_line_marks',
+	{
+		class = 'GtkSourceView',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gtk_source_view_get_show_line_marks',
+	{
+		class = 'GtkSourceView',
+		since = '2.2',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_view_set_mark_category_pixbuf',
+	{
+		class = 'GtkSourceView',
+		since = '2.2',
+		args = {'GObject* none', 'char* none', 'GObject* none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gtk_source_view_set_mark_category_icon_from_pixbuf',
+	{
+		class = 'GtkSourceView',
+		since = '2.8',
+		args = {'GObject* none', 'char* none', 'GObject* none'}
+	}
+)
+
+defFunction('gtk_source_view_set_mark_category_icon_from_stock',
+	{
+		class = 'GtkSourceView',
+		since = '2.8',
+		args = {'GObject* none', 'char* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_view_set_mark_category_icon_from_icon_name',
+	{
+		class = 'GtkSourceView',
+		since = '2.8',
+		args = {'GObject* none', 'char* none', 'char* none'}
+	}
+)
+
+defFunction('gtk_source_view_get_mark_category_pixbuf',
+	{
+		class = 'GtkSourceView',
+		since = '2.2',
+		args = {'GObject* none', 'char* none'},
+		ret = 'GObject* full',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gtk_source_view_set_mark_category_background',
+	{
+		class = 'GtkSourceView',
+		since = '2.4',
+		args = {'GObject* none', 'char* none', 'struct* none'}
+	}
+)
+
+defFunction('gtk_source_view_get_mark_category_background',
+	{
+		class = 'GtkSourceView',
+		since = '2.4',
+		args = {'GObject* none', 'char* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_view_set_mark_category_tooltip_func',
+	{
+		class = 'GtkSourceView',
+		since = '2.8',
+		args = {'GObject* none', 'char* none', 'callback none', 'void* none', 'callback none'}
+	}
+)
+
+defFunction('gtk_source_view_set_mark_category_tooltip_markup_func',
+	{
+		class = 'GtkSourceView',
+		since = '2.8',
+		args = {'GObject* none', 'char* none', 'callback none', 'void* none', 'callback none'}
+	}
+)
+
+defFunction('gtk_source_view_set_mark_category_priority',
+	{
+		class = 'GtkSourceView',
+		since = '2.2',
+		args = {'GObject* none', 'char* none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_view_get_mark_category_priority',
+	{
+		class = 'GtkSourceView',
+		since = '2.2',
+		args = {'GObject* none', 'char* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gtk_source_view_set_smart_home_end',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_view_get_smart_home_end',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'int full'
+	}
+)
+
+defFunction('gtk_source_view_set_draw_spaces',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gtk_source_view_get_draw_spaces',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'int full'
+	}
+)
+
+defFunction('gtk_source_view_get_completion',
+	{
+		class = 'GtkSourceView',
+		since = '0.1',
+		accessorSince = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_view_get_gutter',
+	{
+		class = 'GtkSourceView',
+		since = '2.8',
+		args = {'GObject* none', 'int none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_source_iter_backward_search',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int none', 'struct* none', 'struct* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtk_source_iter_forward_search',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int none', 'struct* none', 'struct* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defEnum('GtkSourceCompletionActivation',
+	{
+		['GTK_SOURCE_COMPLETION_ACTIVATION_USER_REQUESTED'] = 2,
+		['GTK_SOURCE_COMPLETION_ACTIVATION_INTERACTIVE'] = 1,
+		['GTK_SOURCE_COMPLETION_ACTIVATION_NONE'] = 0
+	}
+)
+
+defEnum('GtkSourceCompletionError',
+	{
+		['GTK_SOURCE_COMPLETION_ERROR_ALREADY_BOUND'] = 0,
+		['GTK_SOURCE_COMPLETION_ERROR_NOT_BOUND'] = 1
+	}
+)
+
+defEnum('GtkSourceDrawSpacesFlags',
+	{
+		['GTK_SOURCE_DRAW_SPACES_ALL'] = 127,
+		['GTK_SOURCE_DRAW_SPACES_NEWLINE'] = 4,
+		['GTK_SOURCE_DRAW_SPACES_NBSP'] = 8,
+		['GTK_SOURCE_DRAW_SPACES_TRAILING'] = 64,
+		['GTK_SOURCE_DRAW_SPACES_TEXT'] = 32,
+		['GTK_SOURCE_DRAW_SPACES_TAB'] = 2,
+		['GTK_SOURCE_DRAW_SPACES_SPACE'] = 1,
+		['GTK_SOURCE_DRAW_SPACES_LEADING'] = 16
+	}
+)
+
+defEnum('GtkSourceSearchFlags',
+	{
+		['GTK_SOURCE_SEARCH_CASE_INSENSITIVE'] = 4,
+		['GTK_SOURCE_SEARCH_VISIBLE_ONLY'] = 1,
+		['GTK_SOURCE_SEARCH_TEXT_ONLY'] = 2
+	}
+)
+
+defEnum('GtkSourceSmartHomeEndType',
+	{
+		['GTK_SOURCE_SMART_HOME_END_BEFORE'] = 1,
+		['GTK_SOURCE_SMART_HOME_END_ALWAYS'] = 3,
+		['GTK_SOURCE_SMART_HOME_END_DISABLED'] = 0,
+		['GTK_SOURCE_SMART_HOME_END_AFTER'] = 2
+	}
+)
+
+defEnum('GtkSourceViewGutterPosition',
+	{
+		['GTK_SOURCE_VIEW_GUTTER_POSITION_LINES'] = -30,
+		['GTK_SOURCE_VIEW_GUTTER_POSITION_MARKS'] = -20
+	}
+)
+

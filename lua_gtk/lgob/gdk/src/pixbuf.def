@@ -1,0 +1,964 @@
+
+defClass('GdkPixbuf',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkPixbufAnimation',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkPixbufAnimationIter',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkPixbufLoader',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkPixbufNonAnim',
+	{
+		parent = 'GdkPixbufAnimation'
+	}
+)
+
+defClass('GdkPixbufSimpleAnim',
+	{
+		parent = 'GdkPixbufAnimation'
+	}
+)
+
+defClass('GdkPixbufSimpleAnimIter',
+	{
+		parent = 'GdkPixbufAnimationIter'
+	}
+)
+
+defClass('GdkPixbufFormat',
+	{
+		
+	}
+)
+
+defClass('GdkPixbufModule',
+	{
+		
+	}
+)
+
+defClass('GdkPixbufModulePattern',
+	{
+		
+	}
+)
+
+defClass('GdkPixdata',
+	{
+		
+	}
+)
+
+defFunction('gdk_pixbuf_get_type',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_pixbuf_new',
+	{
+		class = 'GdkPixbuf',
+		constructor = true,
+		since = '0.1',
+		args = {'int none', 'boolean none', 'int none', 'int none', 'int none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_new_subpixbuf',
+	{
+		class = 'GdkPixbuf',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_new_from_file',
+	{
+		class = 'GdkPixbuf',
+		constructor = true,
+		since = '0.1',
+		args = {'char* none', 'GError** full'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_new_from_file_at_size',
+	{
+		class = 'GdkPixbuf',
+		constructor = true,
+		since = '2.4',
+		args = {'char* none', 'int none', 'int none', 'GError** full'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_new_from_file_at_scale',
+	{
+		class = 'GdkPixbuf',
+		constructor = true,
+		since = '2.6',
+		args = {'char* none', 'int none', 'int none', 'boolean none', 'GError** full'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_new_from_data',
+	{
+		class = 'GdkPixbuf',
+		constructor = true,
+		since = '0.1',
+		args = {'unsigned char* none', 'int none', 'boolean none', 'int none', 'int none', 'int none', 'int none', 'callback none', 'void* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_new_from_xpm_data',
+	{
+		class = 'GdkPixbuf',
+		constructor = true,
+		since = '0.1',
+		args = {'unhandled none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_new_from_inline',
+	{
+		class = 'GdkPixbuf',
+		constructor = true,
+		since = '0.1',
+		args = {'int none', 'unhandled none', 'boolean none', 'GError** full'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_new_from_stream',
+	{
+		class = 'GdkPixbuf',
+		constructor = true,
+		since = '2.14',
+		args = {'GObject* none', 'GObject* none', 'GError** full'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_new_from_stream_at_scale',
+	{
+		class = 'GdkPixbuf',
+		constructor = true,
+		since = '2.14',
+		args = {'GObject* none', 'int none', 'int none', 'boolean none', 'GObject* none', 'GError** full'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_get_formats',
+	{
+		since = '2.2',
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_pixbuf_get_file_info',
+	{
+		since = '2.4',
+		args = {'char* none', 'int* full', 'int* full'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_pixbuf_from_pixdata',
+	{
+		since = '0.1',
+		args = {'struct* none', 'boolean none', 'GError** full'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_ref',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full',
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_pixbuf_unref',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none'},
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_pixbuf_get_colorspace',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'int full'
+	}
+)
+
+defFunction('gdk_pixbuf_get_n_channels',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_pixbuf_get_has_alpha',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_get_bits_per_sample',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_pixbuf_get_pixels',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'unsigned char* full'
+	}
+)
+
+defFunction('gdk_pixbuf_get_width',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_pixbuf_get_height',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_pixbuf_get_rowstride',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_pixbuf_copy',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_fill',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_pixbuf_save',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'char* none', 'struct** none', 'unhandled none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_savev',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'char* none', 'unhandled none', 'unhandled none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_save_to_callback',
+	{
+		class = 'GdkPixbuf',
+		since = '2.4',
+		args = {'GObject* none', 'callback none', 'void* none', 'char* none', 'struct** none', 'unhandled none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_save_to_callbackv',
+	{
+		class = 'GdkPixbuf',
+		since = '2.4',
+		args = {'GObject* none', 'callback none', 'void* none', 'char* none', 'unhandled none', 'unhandled none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_save_to_buffer',
+	{
+		class = 'GdkPixbuf',
+		since = '2.4',
+		args = {'GObject* none', 'unhandled none', 'gsize* full', 'char* none', 'struct** none', 'unhandled none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_save_to_bufferv',
+	{
+		class = 'GdkPixbuf',
+		since = '2.4',
+		args = {'GObject* none', 'unhandled none', 'gsize* full', 'char* none', 'unhandled none', 'unhandled none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_save_to_stream',
+	{
+		class = 'GdkPixbuf',
+		since = '2.14',
+		args = {'GObject* none', 'GObject* none', 'char* none', 'GObject* none', 'struct** none', 'unhandled none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_add_alpha',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'unsigned char none', 'unsigned char none', 'unsigned char none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_copy_area',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none', 'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_pixbuf_saturate_and_pixelate',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'float none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_pixbuf_apply_embedded_orientation',
+	{
+		class = 'GdkPixbuf',
+		since = '2.12',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_get_option',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gdk_pixbuf_scale',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'double none', 'double none', 'double none', 'double none', 'int none'}
+	}
+)
+
+defFunction('gdk_pixbuf_composite',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'double none', 'double none', 'double none', 'double none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_pixbuf_composite_color',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'double none', 'double none', 'double none', 'double none', 'int none', 'int none', 'int none', 'int none', 'int none', 'unsigned long none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_pixbuf_scale_simple',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_composite_color_simple',
+	{
+		class = 'GdkPixbuf',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'unsigned long none', 'unsigned long none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_rotate_simple',
+	{
+		class = 'GdkPixbuf',
+		since = '2.6',
+		args = {'GObject* none', 'int none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_flip',
+	{
+		class = 'GdkPixbuf',
+		since = '2.6',
+		args = {'GObject* none', 'boolean none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_set_option',
+	{
+		class = 'GdkPixbuf',
+		since = '2.2',
+		args = {'GObject* none', 'char* none', 'char* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_get_type',
+	{
+		class = 'GdkPixbufAnimation',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_new_from_file',
+	{
+		class = 'GdkPixbufAnimation',
+		constructor = true,
+		since = '0.1',
+		args = {'char* none', 'GError** full'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_ref',
+	{
+		class = 'GdkPixbufAnimation',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full',
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_unref',
+	{
+		class = 'GdkPixbufAnimation',
+		since = '0.1',
+		args = {'GObject* none'},
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_get_width',
+	{
+		class = 'GdkPixbufAnimation',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_get_height',
+	{
+		class = 'GdkPixbufAnimation',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_is_static_image',
+	{
+		class = 'GdkPixbufAnimation',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_get_static_image',
+	{
+		class = 'GdkPixbufAnimation',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_get_iter',
+	{
+		class = 'GdkPixbufAnimation',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_iter_get_type',
+	{
+		class = 'GdkPixbufAnimationIter',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_iter_get_delay_time',
+	{
+		class = 'GdkPixbufAnimationIter',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_iter_get_pixbuf',
+	{
+		class = 'GdkPixbufAnimationIter',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_iter_on_currently_loading_frame',
+	{
+		class = 'GdkPixbufAnimationIter',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_animation_iter_advance',
+	{
+		class = 'GdkPixbufAnimationIter',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_format_get_name',
+	{
+		class = 'GdkPixbufFormat',
+		since = '2.2',
+		args = {'struct* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_pixbuf_format_get_description',
+	{
+		class = 'GdkPixbufFormat',
+		since = '2.2',
+		args = {'struct* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_pixbuf_format_get_mime_types',
+	{
+		class = 'GdkPixbufFormat',
+		since = '2.2',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_pixbuf_format_get_extensions',
+	{
+		class = 'GdkPixbufFormat',
+		since = '2.2',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_pixbuf_format_is_writable',
+	{
+		class = 'GdkPixbufFormat',
+		since = '2.2',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_format_is_scalable',
+	{
+		class = 'GdkPixbufFormat',
+		since = '2.6',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_format_is_disabled',
+	{
+		class = 'GdkPixbufFormat',
+		since = '2.6',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_format_set_disabled',
+	{
+		class = 'GdkPixbufFormat',
+		since = '2.6',
+		args = {'struct* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_pixbuf_format_get_license',
+	{
+		class = 'GdkPixbufFormat',
+		since = '2.6',
+		args = {'struct* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_pixbuf_loader_get_type',
+	{
+		class = 'GdkPixbufLoader',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_pixbuf_loader_new',
+	{
+		class = 'GdkPixbufLoader',
+		constructor = true,
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_loader_new_with_type',
+	{
+		class = 'GdkPixbufLoader',
+		constructor = true,
+		since = '0.1',
+		args = {'char* none', 'GError** full'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_loader_new_with_mime_type',
+	{
+		class = 'GdkPixbufLoader',
+		constructor = true,
+		since = '2.4',
+		args = {'char* none', 'GError** full'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_loader_set_size',
+	{
+		class = 'GdkPixbufLoader',
+		since = '2.2',
+		args = {'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_pixbuf_loader_write',
+	{
+		class = 'GdkPixbufLoader',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned char* none', 'gsize none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_loader_get_pixbuf',
+	{
+		class = 'GdkPixbufLoader',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_loader_get_animation',
+	{
+		class = 'GdkPixbufLoader',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_loader_close',
+	{
+		class = 'GdkPixbufLoader',
+		since = '0.1',
+		args = {'GObject* none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_loader_get_format',
+	{
+		class = 'GdkPixbufLoader',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_pixbuf_non_anim_get_type',
+	{
+		class = 'GdkPixbufNonAnim',
+		since = '9999.9999',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_pixbuf_non_anim_new',
+	{
+		class = 'GdkPixbufNonAnim',
+		constructor = true,
+		since = '2.0',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_simple_anim_get_type',
+	{
+		class = 'GdkPixbufSimpleAnim',
+		since = '2.8',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_pixbuf_simple_anim_new',
+	{
+		class = 'GdkPixbufSimpleAnim',
+		constructor = true,
+		since = '2.8',
+		args = {'int none', 'int none', 'float none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixbuf_simple_anim_add_frame',
+	{
+		class = 'GdkPixbufSimpleAnim',
+		since = '2.8',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_pixbuf_simple_anim_set_loop',
+	{
+		class = 'GdkPixbufSimpleAnim',
+		since = '2.18',
+		accessorSince = '2.18',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_pixbuf_simple_anim_get_loop',
+	{
+		class = 'GdkPixbufSimpleAnim',
+		since = '2.18',
+		accessorSince = '2.18',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixbuf_simple_anim_iter_get_type',
+	{
+		class = 'GdkPixbufSimpleAnimIter',
+		since = '9999.9999',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_pixdata_serialize',
+	{
+		class = 'GdkPixdata',
+		since = '0.1',
+		args = {'struct* none', 'unsigned int* full'}
+	}
+)
+
+defFunction('gdk_pixdata_deserialize',
+	{
+		class = 'GdkPixdata',
+		since = '0.1',
+		args = {'struct* none', 'unsigned int none', 'unhandled none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pixdata_from_pixbuf',
+	{
+		class = 'GdkPixdata',
+		since = '0.1',
+		args = {'struct* none', 'GObject* none', 'boolean none'},
+		ret = 'void* none'
+	}
+)
+
+defFunction('gdk_pixdata_to_csource',
+	{
+		class = 'GdkPixdata',
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defEnum('GdkColorspace',
+	{
+		['GDK_COLORSPACE_RGB'] = 0
+	}
+)
+
+defEnum('GdkInterpType',
+	{
+		['GDK_INTERP_TILES'] = 1,
+		['GDK_INTERP_HYPER'] = 3,
+		['GDK_INTERP_NEAREST'] = 0,
+		['GDK_INTERP_BILINEAR'] = 2
+	}
+)
+
+defEnum('GdkPixbufAlphaMode',
+	{
+		['GDK_PIXBUF_ALPHA_BILEVEL'] = 0,
+		['GDK_PIXBUF_ALPHA_FULL'] = 1
+	}
+)
+
+defEnum('GdkPixbufError',
+	{
+		['GDK_PIXBUF_ERROR_UNSUPPORTED_OPERATION'] = 4,
+		['GDK_PIXBUF_ERROR_BAD_OPTION'] = 2,
+		['GDK_PIXBUF_ERROR_FAILED'] = 5,
+		['GDK_PIXBUF_ERROR_CORRUPT_IMAGE'] = 0,
+		['GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY'] = 1,
+		['GDK_PIXBUF_ERROR_UNKNOWN_TYPE'] = 3
+	}
+)
+
+defEnum('GdkPixbufFormatFlags',
+	{
+		['GDK_PIXBUF_FORMAT_WRITABLE'] = 1,
+		['GDK_PIXBUF_FORMAT_THREADSAFE'] = 4,
+		['GDK_PIXBUF_FORMAT_SCALABLE'] = 2
+	}
+)
+
+defEnum('GdkPixbufRotation',
+	{
+		['GDK_PIXBUF_ROTATE_NONE'] = 0,
+		['GDK_PIXBUF_ROTATE_CLOCKWISE'] = 270,
+		['GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE'] = 90,
+		['GDK_PIXBUF_ROTATE_UPSIDEDOWN'] = 180
+	}
+)
+
+defEnum('GdkPixdataDumpType',
+	{
+		['GDK_PIXDATA_DUMP_PIXDATA_STRUCT'] = 1,
+		['GDK_PIXDATA_DUMP_MACROS'] = 2,
+		['GDK_PIXDATA_DUMP_PIXDATA_STREAM'] = 0,
+		['GDK_PIXDATA_DUMP_STATIC'] = 512,
+		['GDK_PIXDATA_DUMP_GTYPES'] = 0,
+		['GDK_PIXDATA_DUMP_CONST'] = 1024,
+		['GDK_PIXDATA_DUMP_RLE_DECODER'] = 65536,
+		['GDK_PIXDATA_DUMP_CTYPES'] = 256
+	}
+)
+
+defEnum('GdkPixdataType',
+	{
+		['GDK_PIXDATA_SAMPLE_WIDTH_MASK'] = 983040,
+		['GDK_PIXDATA_COLOR_TYPE_RGBA'] = 2,
+		['GDK_PIXDATA_ENCODING_RAW'] = 16777216,
+		['GDK_PIXDATA_COLOR_TYPE_MASK'] = 255,
+		['GDK_PIXDATA_COLOR_TYPE_RGB'] = 1,
+		['GDK_PIXDATA_ENCODING_RLE'] = 33554432,
+		['GDK_PIXDATA_SAMPLE_WIDTH_8'] = 65536,
+		['GDK_PIXDATA_ENCODING_MASK'] = 251658240
+	}
+)

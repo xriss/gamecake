@@ -1,0 +1,6410 @@
+defLib = 'Gdk'
+defName = 'gdk'
+
+defClass('GdkAppLaunchContext',
+	{
+		parent = 'GAppLaunchContext'
+	}
+)
+
+defClass('GdkColormap',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkDevice',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkDisplay',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkDisplayManager',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkDragContext',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkDrawable',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkGC',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkImage',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkKeymap',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkPangoRenderer',
+	{
+		parent = 'PangoRenderer'
+	}
+)
+
+defClass('GdkPixmap',
+	{
+		parent = 'GdkDrawable'
+	}
+)
+
+defClass('GdkScreen',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkVisual',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('GdkWindow',
+	{
+		parent = 'GdkDrawable'
+	}
+)
+
+defClass('GdkAtom',
+	{
+		
+	}
+)
+
+defClass('GdkBitmap',
+	{
+		
+	}
+)
+
+defClass('GdkColor',
+	{
+		
+	}
+)
+
+defClass('GdkCursor',
+	{
+		
+	}
+)
+
+defClass('GdkDeviceAxis',
+	{
+		
+	}
+)
+
+defClass('GdkDeviceKey',
+	{
+		
+	}
+)
+
+defClass('GdkDisplayPointerHooks',
+	{
+		
+	}
+)
+
+defClass('GdkEvent',
+	{
+		
+	}
+)
+
+defClass('GdkEventAny',
+	{
+		
+	}
+)
+
+defClass('GdkEventButton',
+	{
+		
+	}
+)
+
+defClass('GdkEventClient',
+	{
+		
+	}
+)
+
+defClass('data',
+	{
+		
+	}
+)
+
+defClass('GdkEventConfigure',
+	{
+		
+	}
+)
+
+defClass('GdkEventCrossing',
+	{
+		
+	}
+)
+
+defClass('GdkEventDND',
+	{
+		
+	}
+)
+
+defClass('GdkEventExpose',
+	{
+		
+	}
+)
+
+defClass('GdkEventFocus',
+	{
+		
+	}
+)
+
+defClass('GdkEventGrabBroken',
+	{
+		
+	}
+)
+
+defClass('GdkEventKey',
+	{
+		
+	}
+)
+
+defClass('GdkEventMotion',
+	{
+		
+	}
+)
+
+defClass('GdkEventNoExpose',
+	{
+		
+	}
+)
+
+defClass('GdkEventOwnerChange',
+	{
+		
+	}
+)
+
+defClass('GdkEventProperty',
+	{
+		
+	}
+)
+
+defClass('GdkEventProximity',
+	{
+		
+	}
+)
+
+defClass('GdkEventScroll',
+	{
+		
+	}
+)
+
+defClass('GdkEventSelection',
+	{
+		
+	}
+)
+
+defClass('GdkEventSetting',
+	{
+		
+	}
+)
+
+defClass('GdkEventVisibility',
+	{
+		
+	}
+)
+
+defClass('GdkEventWindowState',
+	{
+		
+	}
+)
+
+defClass('GdkFont',
+	{
+		
+	}
+)
+
+defClass('GdkGCValues',
+	{
+		
+	}
+)
+
+defClass('GdkGeometry',
+	{
+		
+	}
+)
+
+defClass('GdkKeyboardGrabInfo',
+	{
+		
+	}
+)
+
+defClass('GdkKeymapKey',
+	{
+		
+	}
+)
+
+defClass('GdkPangoAttrEmbossColor',
+	{
+		
+	}
+)
+
+defClass('GdkPangoAttrEmbossed',
+	{
+		
+	}
+)
+
+defClass('GdkPangoAttrStipple',
+	{
+		
+	}
+)
+
+defClass('GdkPixmapObject',
+	{
+		
+	}
+)
+
+defClass('GdkPoint',
+	{
+		
+	}
+)
+
+defClass('GdkPointerHooks',
+	{
+		
+	}
+)
+
+defClass('GdkPointerWindowInfo',
+	{
+		
+	}
+)
+
+defClass('GdkRectangle',
+	{
+		
+	}
+)
+
+defClass('GdkRegion',
+	{
+		
+	}
+)
+
+defClass('GdkRgbCmap',
+	{
+		
+	}
+)
+
+defClass('GdkSegment',
+	{
+		
+	}
+)
+
+defClass('GdkSpan',
+	{
+		
+	}
+)
+
+defClass('GdkTimeCoord',
+	{
+		
+	}
+)
+
+defClass('GdkTrapezoid',
+	{
+		
+	}
+)
+
+defClass('GdkWindowAttr',
+	{
+		
+	}
+)
+
+defClass('GdkWindowObject',
+	{
+		
+	}
+)
+
+defClass('GdkWindowRedirect',
+	{
+		
+	}
+)
+
+defFunction('gdk_app_launch_context_get_type',
+	{
+		class = 'GdkAppLaunchContext',
+		since = '2.14',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_app_launch_context_new',
+	{
+		class = 'GdkAppLaunchContext',
+		constructor = true,
+		since = '2.14',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_app_launch_context_set_desktop',
+	{
+		class = 'GdkAppLaunchContext',
+		since = '2.14',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gdk_app_launch_context_set_display',
+	{
+		class = 'GdkAppLaunchContext',
+		since = '2.14',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_app_launch_context_set_icon',
+	{
+		class = 'GdkAppLaunchContext',
+		since = '2.14',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_app_launch_context_set_icon_name',
+	{
+		class = 'GdkAppLaunchContext',
+		since = '2.14',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gdk_app_launch_context_set_screen',
+	{
+		class = 'GdkAppLaunchContext',
+		since = '2.14',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_app_launch_context_set_timestamp',
+	{
+		class = 'GdkAppLaunchContext',
+		since = '2.14',
+		args = {'GObject* none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_color_copy',
+	{
+		class = 'GdkColor',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_color_equal',
+	{
+		class = 'GdkColor',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_color_free',
+	{
+		class = 'GdkColor',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_color_hash',
+	{
+		class = 'GdkColor',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_color_to_string',
+	{
+		class = 'GdkColor',
+		since = '2.12',
+		args = {'struct* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_colormap_get_type',
+	{
+		class = 'GdkColormap',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_colormap_new',
+	{
+		class = 'GdkColormap',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_colormap_get_system',
+	{
+		since = '0.1',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_colormap_get_system_size',
+	{
+		since = '0.1',
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_colormap_alloc_color',
+	{
+		class = 'GdkColormap',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'boolean none', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_colormap_alloc_colors',
+	{
+		class = 'GdkColormap',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'int none', 'boolean none', 'boolean none', 'boolean* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_colormap_change',
+	{
+		class = 'GdkColormap',
+		since = '0.1',
+		args = {'GObject* none', 'int none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_colormap_free_colors',
+	{
+		class = 'GdkColormap',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'int none'}
+	}
+)
+
+defFunction('gdk_colormap_get_screen',
+	{
+		class = 'GdkColormap',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_colormap_get_visual',
+	{
+		class = 'GdkColormap',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_colormap_query_color',
+	{
+		class = 'GdkColormap',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_colormap_ref',
+	{
+		class = 'GdkColormap',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none',
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_colormap_unref',
+	{
+		class = 'GdkColormap',
+		since = '0.1',
+		args = {'GObject* none'},
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_cursor_new',
+	{
+		class = 'GdkCursor',
+		constructor = true,
+		since = '0.1',
+		args = {'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_cursor_new_for_display',
+	{
+		class = 'GdkCursor',
+		constructor = true,
+		since = '2.2',
+		args = {'GObject* none', 'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_cursor_new_from_name',
+	{
+		class = 'GdkCursor',
+		constructor = true,
+		since = '2.8',
+		args = {'GObject* none', 'char* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_cursor_new_from_pixbuf',
+	{
+		class = 'GdkCursor',
+		constructor = true,
+		since = '2.4',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_cursor_new_from_pixmap',
+	{
+		class = 'GdkCursor',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct* none', 'struct* none', 'int none', 'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_cursor_get_cursor_type',
+	{
+		class = 'GdkCursor',
+		since = '2.22',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_cursor_get_display',
+	{
+		class = 'GdkCursor',
+		since = '2.2',
+		args = {'struct* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_cursor_get_image',
+	{
+		class = 'GdkCursor',
+		since = '2.8',
+		args = {'struct* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_cursor_ref',
+	{
+		class = 'GdkCursor',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_cursor_unref',
+	{
+		class = 'GdkCursor',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_device_get_type',
+	{
+		class = 'GdkDevice',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_device_free_history',
+	{
+		since = '0.1',
+		args = {'struct** none', 'int none'}
+	}
+)
+
+defFunction('gdk_device_get_core_pointer',
+	{
+		since = '0.1',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_device_get_axis',
+	{
+		class = 'GdkDevice',
+		since = '0.1',
+		args = {'GObject* none', 'double* none', 'int none', 'double* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_device_get_axis_use',
+	{
+		class = 'GdkDevice',
+		since = '2.22',
+		args = {'GObject* none', 'unsigned int none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_device_get_has_cursor',
+	{
+		class = 'GdkDevice',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_device_get_history',
+	{
+		class = 'GdkDevice',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'unsigned long none', 'unsigned long none', 'unhandled none', 'int* full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_device_get_key',
+	{
+		class = 'GdkDevice',
+		since = '2.22',
+		args = {'GObject* none', 'unsigned int none', 'unsigned int* none', 'int* none'}
+	}
+)
+
+defFunction('gdk_device_get_mode',
+	{
+		class = 'GdkDevice',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_device_get_n_axes',
+	{
+		class = 'GdkDevice',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_device_get_name',
+	{
+		class = 'GdkDevice',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gdk_device_get_source',
+	{
+		class = 'GdkDevice',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_device_get_state',
+	{
+		class = 'GdkDevice',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'double* none', 'int* none'}
+	}
+)
+
+defFunction('gdk_device_set_axis_use',
+	{
+		class = 'GdkDevice',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned int none', 'int none'}
+	}
+)
+
+defFunction('gdk_device_set_key',
+	{
+		class = 'GdkDevice',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned int none', 'unsigned int none', 'int none'}
+	}
+)
+
+defFunction('gdk_device_set_mode',
+	{
+		class = 'GdkDevice',
+		since = '0.1',
+		args = {'GObject* none', 'int none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_device_set_source',
+	{
+		class = 'GdkDevice',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gdk_display_get_type',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_display_get_default',
+	{
+		since = '2.2',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_display_open',
+	{
+		since = '2.2',
+		args = {'char* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_display_open_default_libgtk_only',
+	{
+		since = '2.0',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_display_add_client_message_filter',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none', 'ptraslong none', 'callback none', 'void* none'}
+	}
+)
+
+defFunction('gdk_display_beep',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_display_close',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_display_flush',
+	{
+		class = 'GdkDisplay',
+		since = '2.4',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_display_get_core_pointer',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_display_get_default_cursor_size',
+	{
+		class = 'GdkDisplay',
+		since = '2.4',
+		args = {'GObject* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_display_get_default_group',
+	{
+		class = 'GdkDisplay',
+		since = '2.4',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_display_get_default_screen',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_display_get_event',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_display_get_maximal_cursor_size',
+	{
+		class = 'GdkDisplay',
+		since = '2.4',
+		args = {'GObject* none', 'unsigned int* full', 'unsigned int* full'}
+	}
+)
+
+defFunction('gdk_display_get_n_screens',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_display_get_name',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('gdk_display_get_pointer',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none', 'GObject** none', 'int* full', 'int* full', 'int* none'}
+	}
+)
+
+defFunction('gdk_display_get_screen',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none', 'int none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_display_get_window_at_pointer',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none', 'int* full', 'int* full'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_display_is_closed',
+	{
+		class = 'GdkDisplay',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_display_keyboard_ungrab',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_display_list_devices',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_display_peek_event',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_display_pointer_is_grabbed',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_display_pointer_ungrab',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_display_put_event',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_display_request_selection_notification',
+	{
+		class = 'GdkDisplay',
+		since = '2.6',
+		args = {'GObject* none', 'ptraslong none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_display_set_double_click_distance',
+	{
+		class = 'GdkDisplay',
+		since = '2.4',
+		args = {'GObject* none', 'unsigned int none'}
+	}
+)
+
+defFunction('gdk_display_set_double_click_time',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none', 'unsigned int none'}
+	}
+)
+
+defFunction('gdk_display_set_pointer_hooks',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_display_store_clipboard',
+	{
+		class = 'GdkDisplay',
+		since = '2.6',
+		args = {'GObject* none', 'GObject* none', 'unsigned long none', 'ptraslong* none', 'int none'}
+	}
+)
+
+defFunction('gdk_display_supports_clipboard_persistence',
+	{
+		class = 'GdkDisplay',
+		since = '2.6',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_display_supports_composite',
+	{
+		class = 'GdkDisplay',
+		since = '2.12',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_display_supports_cursor_alpha',
+	{
+		class = 'GdkDisplay',
+		since = '2.4',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_display_supports_cursor_color',
+	{
+		class = 'GdkDisplay',
+		since = '2.4',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_display_supports_input_shapes',
+	{
+		class = 'GdkDisplay',
+		since = '2.10',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_display_supports_selection_notification',
+	{
+		class = 'GdkDisplay',
+		since = '2.6',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_display_supports_shapes',
+	{
+		class = 'GdkDisplay',
+		since = '2.10',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_display_sync',
+	{
+		class = 'GdkDisplay',
+		since = '2.2',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_display_warp_pointer',
+	{
+		class = 'GdkDisplay',
+		since = '2.8',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_display_manager_get_type',
+	{
+		class = 'GdkDisplayManager',
+		since = '2.2',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_display_manager_get',
+	{
+		since = '2.2',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_display_manager_get_default_display',
+	{
+		class = 'GdkDisplayManager',
+		since = '2.2',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_display_manager_list_displays',
+	{
+		class = 'GdkDisplayManager',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'struct* container'
+	}
+)
+
+defFunction('gdk_display_manager_set_default_display',
+	{
+		class = 'GdkDisplayManager',
+		since = '2.2',
+		accessorSince = '2.0',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_drag_context_get_type',
+	{
+		class = 'GdkDragContext',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_drag_context_new',
+	{
+		class = 'GdkDragContext',
+		constructor = true,
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_drag_context_get_actions',
+	{
+		class = 'GdkDragContext',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_drag_context_get_selected_action',
+	{
+		class = 'GdkDragContext',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_drag_context_get_source_window',
+	{
+		class = 'GdkDragContext',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_drag_context_get_suggested_action',
+	{
+		class = 'GdkDragContext',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_drag_context_list_targets',
+	{
+		class = 'GdkDragContext',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_drag_context_ref',
+	{
+		class = 'GdkDragContext',
+		since = '0.1',
+		args = {'GObject* none'},
+		deprecated = '2.2'
+	}
+)
+
+defFunction('gdk_drag_context_unref',
+	{
+		class = 'GdkDragContext',
+		since = '0.1',
+		args = {'GObject* none'},
+		deprecated = '2.2'
+	}
+)
+
+defFunction('gdk_drawable_get_type',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_drawable_copy_to_image',
+	{
+		class = 'GdkDrawable',
+		since = '2.4',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_drawable_get_clip_region',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_drawable_get_colormap',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_drawable_get_data',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'},
+		ret = 'void* none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_drawable_get_depth',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_drawable_get_display',
+	{
+		class = 'GdkDrawable',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_drawable_get_image',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_drawable_get_screen',
+	{
+		class = 'GdkDrawable',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_drawable_get_size',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none', 'int* full', 'int* full'}
+	}
+)
+
+defFunction('gdk_drawable_get_visible_region',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_drawable_get_visual',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_drawable_ref',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none',
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_drawable_set_colormap',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_drawable_set_data',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'void* none', 'callback none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_drawable_unref',
+	{
+		class = 'GdkDrawable',
+		since = '0.1',
+		args = {'GObject* none'},
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_event_new',
+	{
+		class = 'GdkEvent',
+		constructor = true,
+		since = '2.2',
+		args = {'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_event_copy',
+	{
+		class = 'GdkEvent',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_event_free',
+	{
+		class = 'GdkEvent',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_event_get_axis',
+	{
+		class = 'GdkEvent',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'double* full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_event_get_coords',
+	{
+		class = 'GdkEvent',
+		since = '0.1',
+		args = {'struct* none', 'double* full', 'double* full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_event_get_root_coords',
+	{
+		class = 'GdkEvent',
+		since = '0.1',
+		args = {'struct* none', 'double* full', 'double* full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_event_get_screen',
+	{
+		class = 'GdkEvent',
+		since = '2.2',
+		args = {'struct* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_event_get_state',
+	{
+		class = 'GdkEvent',
+		since = '0.1',
+		args = {'struct* none', 'int* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_event_get_time',
+	{
+		class = 'GdkEvent',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_event_put',
+	{
+		class = 'GdkEvent',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_event_send_client_message',
+	{
+		class = 'GdkEvent',
+		since = '0.1',
+		args = {'struct* none', 'unsigned long none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_event_send_clientmessage_toall',
+	{
+		class = 'GdkEvent',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_event_set_screen',
+	{
+		class = 'GdkEvent',
+		since = '2.2',
+		args = {'struct* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_font_equal',
+	{
+		class = 'GdkFont',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'},
+		ret = 'boolean none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_font_get_display',
+	{
+		class = 'GdkFont',
+		since = '2.2',
+		args = {'struct* none'},
+		ret = 'GObject* none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_font_id',
+	{
+		class = 'GdkFont',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_font_ref',
+	{
+		class = 'GdkFont',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_font_unref',
+	{
+		class = 'GdkFont',
+		since = '0.1',
+		args = {'struct* none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_gc_get_type',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_gc_new',
+	{
+		class = 'GdkGC',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_new_with_values',
+	{
+		class = 'GdkGC',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'int none'},
+		ret = 'GObject* full',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_copy',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_get_colormap',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_get_screen',
+	{
+		class = 'GdkGC',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_gc_get_values',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_offset',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_ref',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none',
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_gc_set_background',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_clip_mask',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_clip_origin',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_clip_rectangle',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_clip_region',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_colormap',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_dashes',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'gint8 none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_exposures',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_fill',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_font',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_gc_set_foreground',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_function',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_line_attributes',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_rgb_bg_color',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_rgb_fg_color',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_stipple',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_subwindow',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_tile',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_ts_origin',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_set_values',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_gc_unref',
+	{
+		class = 'GdkGC',
+		since = '0.1',
+		args = {'GObject* none'},
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_image_get_type',
+	{
+		class = 'GdkImage',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_image_new',
+	{
+		class = 'GdkImage',
+		constructor = true,
+		since = '0.1',
+		args = {'int none', 'GObject* none', 'int none', 'int none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_image_get',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none'},
+		ret = 'GObject* none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_image_get_bits_per_pixel',
+	{
+		class = 'GdkImage',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'unsigned int none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_get_byte_order',
+	{
+		class = 'GdkImage',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_get_bytes_per_line',
+	{
+		class = 'GdkImage',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'unsigned int none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_get_bytes_per_pixel',
+	{
+		class = 'GdkImage',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'unsigned int none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_get_colormap',
+	{
+		class = 'GdkImage',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_get_depth',
+	{
+		class = 'GdkImage',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'unsigned int none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_get_height',
+	{
+		class = 'GdkImage',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_get_image_type',
+	{
+		class = 'GdkImage',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_get_pixel',
+	{
+		class = 'GdkImage',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none'},
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_image_get_pixels',
+	{
+		class = 'GdkImage',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'void* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_get_visual',
+	{
+		class = 'GdkImage',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_get_width',
+	{
+		class = 'GdkImage',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_put_pixel',
+	{
+		class = 'GdkImage',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_image_ref',
+	{
+		class = 'GdkImage',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none',
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_image_set_colormap',
+	{
+		class = 'GdkImage',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_image_unref',
+	{
+		class = 'GdkImage',
+		since = '0.1',
+		args = {'GObject* none'},
+		deprecated = '2.0'
+	}
+)
+
+defFunction('gdk_keymap_get_type',
+	{
+		class = 'GdkKeymap',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_keymap_get_default',
+	{
+		since = '0.1',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_keymap_get_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_keymap_add_virtual_modifiers',
+	{
+		class = 'GdkKeymap',
+		since = '2.20',
+		args = {'GObject* none', 'int* none'}
+	}
+)
+
+defFunction('gdk_keymap_get_caps_lock_state',
+	{
+		class = 'GdkKeymap',
+		since = '2.16',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_keymap_get_direction',
+	{
+		class = 'GdkKeymap',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_keymap_get_entries_for_keycode',
+	{
+		class = 'GdkKeymap',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned int none', 'struct** full', 'unsigned int** full', 'int* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_keymap_get_entries_for_keyval',
+	{
+		class = 'GdkKeymap',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned int none', 'struct** full', 'int* full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_keymap_have_bidi_layouts',
+	{
+		class = 'GdkKeymap',
+		since = '2.12',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_keymap_lookup_key',
+	{
+		class = 'GdkKeymap',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_keymap_map_virtual_modifiers',
+	{
+		class = 'GdkKeymap',
+		since = '2.20',
+		args = {'GObject* none', 'int* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_keymap_translate_keyboard_state',
+	{
+		class = 'GdkKeymap',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned int none', 'int none', 'int none', 'unsigned int* full', 'int* full', 'int* full', 'int* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pango_renderer_get_type',
+	{
+		class = 'GdkPangoRenderer',
+		since = '2.6',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_pango_renderer_new',
+	{
+		class = 'GdkPangoRenderer',
+		constructor = true,
+		since = '2.6',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pango_renderer_get_default',
+	{
+		since = '2.6',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_pango_renderer_set_drawable',
+	{
+		class = 'GdkPangoRenderer',
+		since = '2.6',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_pango_renderer_set_gc',
+	{
+		class = 'GdkPangoRenderer',
+		since = '2.6',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_pango_renderer_set_override_color',
+	{
+		class = 'GdkPangoRenderer',
+		since = '2.6',
+		args = {'GObject* none', 'int none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_pango_renderer_set_stipple',
+	{
+		class = 'GdkPangoRenderer',
+		since = '2.6',
+		args = {'GObject* none', 'int none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_pixmap_get_type',
+	{
+		class = 'GdkPixmap',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_pixmap_foreign_new',
+	{
+		class = 'GdkPixmap',
+		constructor = true,
+		since = '0.1',
+		args = {'unsigned long none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixmap_foreign_new_for_display',
+	{
+		class = 'GdkPixmap',
+		constructor = true,
+		since = '2.2',
+		args = {'GObject* none', 'unsigned long none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixmap_foreign_new_for_screen',
+	{
+		class = 'GdkPixmap',
+		constructor = true,
+		since = '2.10',
+		args = {'GObject* none', 'unsigned long none', 'int none', 'int none', 'int none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixmap_new',
+	{
+		class = 'GdkPixmap',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gdk_pixmap_colormap_create_from_xpm',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct** none', 'struct* none', 'char* none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_pixmap_colormap_create_from_xpm_d',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct** none', 'struct* none', 'char** none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_pixmap_create_from_data',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'int none', 'int none', 'int none', 'struct* none', 'struct* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_pixmap_create_from_xpm',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct** none', 'struct* none', 'char* none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_pixmap_create_from_xpm_d',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct** full', 'struct* none', 'char** none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_pixmap_lookup',
+	{
+		since = '0.1',
+		args = {'unsigned long none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_pixmap_lookup_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'unsigned long none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_rectangle_intersect',
+	{
+		class = 'GdkRectangle',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_rectangle_union',
+	{
+		class = 'GdkRectangle',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_region_copy',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_region_destroy',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_region_empty',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_region_equal',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_region_get_clipbox',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_region_get_rectangles',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'unhandled container', 'int* none'}
+	}
+)
+
+defFunction('gdk_region_intersect',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_region_offset',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_region_point_in',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_region_rect_equal',
+	{
+		class = 'GdkRegion',
+		since = '2.18',
+		args = {'struct* none', 'struct* none'},
+		ret = 'boolean none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_region_rect_in',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_region_shrink',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_region_spans_intersect_foreach',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'int none', 'boolean none', 'callback none', 'void* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_region_subtract',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_region_union',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_region_union_with_rect',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_region_xor',
+	{
+		class = 'GdkRegion',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_rgb_cmap_free',
+	{
+		class = 'GdkRgbCmap',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_screen_get_type',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_screen_get_default',
+	{
+		since = '2.2',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_screen_height',
+	{
+		since = '0.1',
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_height_mm',
+	{
+		since = '0.1',
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_width',
+	{
+		since = '0.1',
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_width_mm',
+	{
+		since = '0.1',
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_broadcast_client_message',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_screen_get_active_window',
+	{
+		class = 'GdkScreen',
+		since = '2.10',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_screen_get_default_colormap',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_screen_get_display',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_screen_get_font_options',
+	{
+		class = 'GdkScreen',
+		since = '2.10',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_screen_get_height',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_height_mm',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_monitor_at_point',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none', 'int none', 'int none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_monitor_at_window',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none', 'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_monitor_geometry',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none', 'int none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_screen_get_monitor_height_mm',
+	{
+		class = 'GdkScreen',
+		since = '2.14',
+		args = {'GObject* none', 'int none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_monitor_plug_name',
+	{
+		class = 'GdkScreen',
+		since = '2.14',
+		args = {'GObject* none', 'int none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_screen_get_monitor_width_mm',
+	{
+		class = 'GdkScreen',
+		since = '2.14',
+		args = {'GObject* none', 'int none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_n_monitors',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_number',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_primary_monitor',
+	{
+		class = 'GdkScreen',
+		since = '2.20',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_resolution',
+	{
+		class = 'GdkScreen',
+		since = '2.10',
+		accessorSince = '2.0',
+		args = {'GObject* none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('gdk_screen_get_rgb_colormap',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_screen_get_rgb_visual',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_screen_get_rgba_colormap',
+	{
+		class = 'GdkScreen',
+		since = '2.8',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_screen_get_rgba_visual',
+	{
+		class = 'GdkScreen',
+		since = '2.8',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_screen_get_root_window',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_screen_get_setting',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none', 'char* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_screen_get_system_colormap',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_screen_get_system_visual',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_screen_get_toplevel_windows',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'struct* container'
+	}
+)
+
+defFunction('gdk_screen_get_width',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_width_mm',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_screen_get_window_stack',
+	{
+		class = 'GdkScreen',
+		since = '2.10',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_screen_is_composited',
+	{
+		class = 'GdkScreen',
+		since = '2.10',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_screen_list_visuals',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'struct* container'
+	}
+)
+
+defFunction('gdk_screen_make_display_name',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_screen_set_default_colormap',
+	{
+		class = 'GdkScreen',
+		since = '2.2',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_screen_set_font_options',
+	{
+		class = 'GdkScreen',
+		since = '2.10',
+		accessorSince = '2.0',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_screen_set_resolution',
+	{
+		class = 'GdkScreen',
+		since = '2.10',
+		accessorSince = '2.0',
+		args = {'GObject* none', 'double none'}
+	}
+)
+
+defFunction('gdk_visual_get_type',
+	{
+		class = 'GdkVisual',
+		since = '2.2',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_visual_get_best',
+	{
+		since = '0.1',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_visual_get_best_depth',
+	{
+		since = '0.1',
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_visual_get_best_type',
+	{
+		since = '0.1',
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_visual_get_best_with_both',
+	{
+		since = '0.1',
+		args = {'int none', 'int none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_visual_get_best_with_depth',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_visual_get_best_with_type',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_visual_get_system',
+	{
+		since = '0.1',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_visual_get_bits_per_rgb',
+	{
+		class = 'GdkVisual',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_visual_get_blue_pixel_details',
+	{
+		class = 'GdkVisual',
+		since = '2.22',
+		args = {'GObject* none', 'unsigned long* full', 'int* full', 'int* full'}
+	}
+)
+
+defFunction('gdk_visual_get_byte_order',
+	{
+		class = 'GdkVisual',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_visual_get_colormap_size',
+	{
+		class = 'GdkVisual',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_visual_get_depth',
+	{
+		class = 'GdkVisual',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_visual_get_green_pixel_details',
+	{
+		class = 'GdkVisual',
+		since = '2.22',
+		args = {'GObject* none', 'unsigned long* full', 'int* full', 'int* full'}
+	}
+)
+
+defFunction('gdk_visual_get_red_pixel_details',
+	{
+		class = 'GdkVisual',
+		since = '2.22',
+		args = {'GObject* none', 'unsigned long* full', 'int* full', 'int* full'}
+	}
+)
+
+defFunction('gdk_visual_get_screen',
+	{
+		class = 'GdkVisual',
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_visual_get_visual_type',
+	{
+		class = 'GdkVisual',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_window_object_get_type',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_window_add_filter',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'callback none', 'void* none'}
+	}
+)
+
+defFunction('gdk_window_beep',
+	{
+		class = 'GdkWindow',
+		since = '2.12',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_begin_move_drag',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_window_begin_paint_rect',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_window_begin_paint_region',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_window_begin_resize_drag',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_window_clear',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_clear_area',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_clear_area_e',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_configure_finished',
+	{
+		class = 'GdkWindow',
+		since = '2.6',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_coords_from_parent',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none', 'double none', 'double none', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('gdk_window_coords_to_parent',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none', 'double none', 'double none', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('gdk_window_create_similar_surface',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none', 'int none', 'int none', 'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_window_deiconify',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_destroy',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_destroy_notify',
+	{
+		class = 'GdkWindow',
+		since = '2.0',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_enable_synchronized_configure',
+	{
+		class = 'GdkWindow',
+		since = '2.6',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_end_paint',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_ensure_native',
+	{
+		class = 'GdkWindow',
+		since = '2.18',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_flush',
+	{
+		class = 'GdkWindow',
+		since = '2.18',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_focus',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_window_freeze_toplevel_updates_libgtk_only',
+	{
+		class = 'GdkWindow',
+		since = '2.0',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_freeze_updates',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_fullscreen',
+	{
+		class = 'GdkWindow',
+		since = '2.2',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_geometry_changed',
+	{
+		class = 'GdkWindow',
+		since = '2.18',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_get_accept_focus',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_get_background_pattern',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_window_get_children',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* container'
+	}
+)
+
+defFunction('gdk_window_get_composited',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_get_cursor',
+	{
+		class = 'GdkWindow',
+		since = '2.18',
+		accessorSince = '2.18',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_window_get_decorations',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_get_deskrelative_origin',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int* none', 'int* none'},
+		ret = 'boolean none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_window_get_effective_parent',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_get_effective_toplevel',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_get_events',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_window_get_focus_on_map',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_get_frame_extents',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_window_get_geometry',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int* none', 'int* none', 'int* none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('gdk_window_get_group',
+	{
+		class = 'GdkWindow',
+		since = '2.4',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_get_internal_paint_info',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'GObject** full', 'int* full', 'int* full'}
+	}
+)
+
+defFunction('gdk_window_get_modal_hint',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_get_origin',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int* none', 'int* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_window_get_parent',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_get_pointer',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int* full', 'int* full', 'int* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_get_position',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('gdk_window_get_root_coords',
+	{
+		class = 'GdkWindow',
+		since = '2.18',
+		args = {'GObject* none', 'int none', 'int none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('gdk_window_get_root_origin',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('gdk_window_get_state',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_window_get_toplevel',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_get_type_hint',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_window_get_update_area',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_window_get_user_data',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'void** none'}
+	}
+)
+
+defFunction('gdk_window_get_window_type',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_window_has_native',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_hide',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_iconify',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_input_shape_combine_mask',
+	{
+		class = 'GdkWindow',
+		since = '2.10',
+		args = {'GObject* none', 'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_input_shape_combine_region',
+	{
+		class = 'GdkWindow',
+		since = '2.10',
+		args = {'GObject* none', 'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_invalidate_maybe_recurse',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'void** none', 'void* none'}
+	}
+)
+
+defFunction('gdk_window_invalidate_rect',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_invalidate_region',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_is_destroyed',
+	{
+		class = 'GdkWindow',
+		since = '2.18',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_is_input_only',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_is_shaped',
+	{
+		class = 'GdkWindow',
+		since = '2.22',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_is_viewable',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_is_visible',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_lower',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_maximize',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_merge_child_input_shapes',
+	{
+		class = 'GdkWindow',
+		since = '2.10',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_merge_child_shapes',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_move',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_move_region',
+	{
+		class = 'GdkWindow',
+		since = '2.8',
+		args = {'GObject* none', 'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_move_resize',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_new',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'int none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_peek_children',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_window_process_updates',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_raise',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_redirect_to_drawable',
+	{
+		class = 'GdkWindow',
+		since = '2.14',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_register_dnd',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_remove_filter',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'callback none', 'void* none'}
+	}
+)
+
+defFunction('gdk_window_remove_redirection',
+	{
+		class = 'GdkWindow',
+		since = '2.14',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_reparent',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_resize',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_restack',
+	{
+		class = 'GdkWindow',
+		since = '2.18',
+		args = {'GObject* none', 'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_scroll',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_set_accept_focus',
+	{
+		class = 'GdkWindow',
+		since = '2.4',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_back_pixmap',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_background',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_window_set_child_input_shapes',
+	{
+		class = 'GdkWindow',
+		since = '2.10',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_set_child_shapes',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_set_composited',
+	{
+		class = 'GdkWindow',
+		since = '2.12',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_cursor',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		accessorSince = '2.18',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_window_set_decorations',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_set_events',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_set_focus_on_map',
+	{
+		class = 'GdkWindow',
+		since = '2.6',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_functions',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_set_geometry_hints',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_set_group',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_set_hints',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_window_set_icon',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_window_set_icon_list',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_window_set_icon_name',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gdk_window_set_keep_above',
+	{
+		class = 'GdkWindow',
+		since = '2.4',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_keep_below',
+	{
+		class = 'GdkWindow',
+		since = '2.4',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_modal_hint',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_opacity',
+	{
+		class = 'GdkWindow',
+		since = '2.12',
+		args = {'GObject* none', 'double none'}
+	}
+)
+
+defFunction('gdk_window_set_override_redirect',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_role',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gdk_window_set_skip_pager_hint',
+	{
+		class = 'GdkWindow',
+		since = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_skip_taskbar_hint',
+	{
+		class = 'GdkWindow',
+		since = '2.2',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_startup_id',
+	{
+		class = 'GdkWindow',
+		since = '2.12',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gdk_window_set_static_gravities',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_window_set_title',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('gdk_window_set_transient_for',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_set_type_hint',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_set_urgency_hint',
+	{
+		class = 'GdkWindow',
+		since = '2.8',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('gdk_window_set_user_data',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'void* none'}
+	}
+)
+
+defFunction('gdk_window_shape_combine_mask',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_shape_combine_region',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_window_show',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_show_unraised',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_stick',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_thaw_toplevel_updates_libgtk_only',
+	{
+		class = 'GdkWindow',
+		since = '2.0',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_thaw_updates',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_unfullscreen',
+	{
+		class = 'GdkWindow',
+		since = '2.2',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_unmaximize',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_unstick',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_window_withdraw',
+	{
+		class = 'GdkWindow',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_add_client_message_filter',
+	{
+		since = '0.1',
+		args = {'ptraslong none', 'callback none', 'void* none'}
+	}
+)
+
+defFunction('gdk_add_option_entries_libgtk_only',
+	{
+		since = '2.0',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_atom_intern',
+	{
+		since = '0.1',
+		args = {'char* none', 'boolean none'},
+		ret = 'ptraslong none'
+	}
+)
+
+defFunction('gdk_atom_intern_static_string',
+	{
+		since = '2.10',
+		args = {'char* none'},
+		ret = 'ptraslong none'
+	}
+)
+
+defFunction('gdk_atom_name',
+	{
+		since = '0.1',
+		args = {'ptraslong none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_beep',
+	{
+		since = '0.1'
+	}
+)
+
+defFunction('gdk_bitmap_create_from_data',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'int none', 'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_cairo_create',
+	{
+		since = '2.8',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_cairo_rectangle',
+	{
+		since = '2.8',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_cairo_region',
+	{
+		since = '2.8',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_cairo_reset_clip',
+	{
+		since = '2.18',
+		args = {'struct* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_cairo_set_source_color',
+	{
+		since = '2.8',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_cairo_set_source_pixbuf',
+	{
+		since = '2.8',
+		args = {'struct* none', 'GObject* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('gdk_cairo_set_source_pixmap',
+	{
+		since = '2.10',
+		args = {'struct* none', 'GObject* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('gdk_char_height',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char none'},
+		ret = 'int none',
+		deprecated = '2.2'
+	}
+)
+
+defFunction('gdk_char_measure',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_char_width',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char none'},
+		ret = 'int none',
+		deprecated = '2.2'
+	}
+)
+
+defFunction('gdk_char_width_wc',
+	{
+		since = '0.1',
+		args = {'struct* none', 'unsigned long none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_color_alloc',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'int none',
+		deprecated = '2.2'
+	}
+)
+
+defFunction('gdk_color_black',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_color_change',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_color_parse',
+	{
+		since = '0.1',
+		args = {'char* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_color_white',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_colors_alloc',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'unsigned long* none', 'int none', 'unsigned long* none', 'int none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_colors_free',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long* none', 'int none', 'unsigned long none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_colors_store',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'int none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_devices_list',
+	{
+		since = '0.1',
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_drag_abort',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_drag_begin',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_drag_drop',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_drag_drop_succeeded',
+	{
+		since = '2.6',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_drag_find_window',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'GObject** full', 'int* none'}
+	}
+)
+
+defFunction('gdk_drag_find_window_for_screen',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'GObject* none', 'GObject* none', 'int none', 'int none', 'GObject** full', 'int* none'}
+	}
+)
+
+defFunction('gdk_drag_get_protocol',
+	{
+		since = '0.1',
+		args = {'unsigned long none', 'int* none'},
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_drag_get_protocol_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'unsigned long none', 'int* none'},
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_drag_get_selection',
+	{
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'ptraslong none'
+	}
+)
+
+defFunction('gdk_drag_motion',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'unsigned long none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_drag_status',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_draw_arc',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'boolean none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_drawable',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_glyphs',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GObject* none', 'int none', 'int none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_glyphs_transformed',
+	{
+		since = '2.6',
+		args = {'GObject* none', 'GObject* none', 'struct* none', 'GObject* none', 'int none', 'int none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_gray_image',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'unsigned char* none', 'int none'}
+	}
+)
+
+defFunction('gdk_draw_image',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_indexed_image',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'unsigned char* none', 'int none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_draw_layout',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_draw_layout_line',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_draw_layout_line_with_colors',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'struct* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_draw_layout_with_colors',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'GObject* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('gdk_draw_line',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_lines',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct* none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_pixbuf',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_point',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_points',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct* none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_polygon',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'boolean none', 'struct* none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_rectangle',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'boolean none', 'int none', 'int none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_rgb_32_image',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'unsigned char* none', 'int none'}
+	}
+)
+
+defFunction('gdk_draw_rgb_32_image_dithalign',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'unsigned char* none', 'int none', 'int none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_rgb_image',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'unsigned char* none', 'int none'}
+	}
+)
+
+defFunction('gdk_draw_rgb_image_dithalign',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'unsigned char* none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_draw_segments',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct* none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_draw_string',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'GObject* none', 'int none', 'int none', 'char* none'},
+		deprecated = '2.4'
+	}
+)
+
+defFunction('gdk_draw_text',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'GObject* none', 'int none', 'int none', 'char* none', 'int none'},
+		deprecated = '2.4'
+	}
+)
+
+defFunction('gdk_draw_text_wc',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'GObject* none', 'int none', 'int none', 'unsigned long* none', 'int none'},
+		deprecated = '2.4'
+	}
+)
+
+defFunction('gdk_draw_trapezoids',
+	{
+		since = '2.6',
+		args = {'GObject* none', 'GObject* none', 'struct* none', 'int none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_drop_finish',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_drop_reply',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_error_trap_pop',
+	{
+		since = '0.1',
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_error_trap_push',
+	{
+		since = '0.1'
+	}
+)
+
+defFunction('gdk_event_get',
+	{
+		since = '0.1',
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_event_get_graphics_expose',
+	{
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full',
+		deprecated = '2.18'
+	}
+)
+
+defFunction('gdk_event_handler_set',
+	{
+		since = '0.1',
+		args = {'callback none', 'void* none', 'callback none'}
+	}
+)
+
+defFunction('gdk_event_peek',
+	{
+		since = '0.1',
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gdk_event_request_motions',
+	{
+		since = '2.12',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('gdk_event_send_client_message_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'struct* none', 'unsigned long none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_events_pending',
+	{
+		since = '0.1',
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_exit',
+	{
+		since = '0.1',
+		args = {'int none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_flush',
+	{
+		since = '0.1'
+	}
+)
+
+defFunction('gdk_font_from_description',
+	{
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_font_from_description_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'struct* full',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_font_load',
+	{
+		since = '0.1',
+		args = {'char* none'},
+		ret = 'struct* full',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_font_load_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'char* none'},
+		ret = 'struct* full',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_fontset_load',
+	{
+		since = '0.1',
+		args = {'char* none'},
+		ret = 'struct* full',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_fontset_load_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'char* none'},
+		ret = 'struct* full',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_free_compound_text',
+	{
+		since = '0.1',
+		args = {'unsigned char* none'}
+	}
+)
+
+defFunction('gdk_free_text_list',
+	{
+		since = '0.1',
+		args = {'char** none'}
+	}
+)
+
+defFunction('gdk_get_default_root_window',
+	{
+		since = '0.1',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_get_display',
+	{
+		since = '0.1',
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_get_display_arg_name',
+	{
+		since = '2.2',
+		ret = 'char* none'
+	}
+)
+
+defFunction('gdk_get_program_class',
+	{
+		since = '0.1',
+		ret = 'char* none'
+	}
+)
+
+defFunction('gdk_get_show_events',
+	{
+		since = '0.1',
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_get_use_xshm',
+	{
+		since = '0.1',
+		ret = 'boolean none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_init',
+	{
+		since = '0.1',
+		args = {'int* full', 'unhandled full'}
+	}
+)
+
+defFunction('gdk_init_check',
+	{
+		since = '0.1',
+		args = {'int* full', 'unhandled full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_input_add',
+	{
+		since = '0.1',
+		args = {'int none', 'int none', 'callback none', 'void* none'},
+		ret = 'int none',
+		deprecated = '2.14'
+	}
+)
+
+defFunction('gdk_input_add_full',
+	{
+		since = '0.1',
+		args = {'int none', 'int none', 'callback none', 'void* none', 'callback none'},
+		ret = 'int none',
+		deprecated = '2.14'
+	}
+)
+
+defFunction('gdk_input_remove',
+	{
+		since = '0.1',
+		args = {'int none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_input_set_extension_events',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_keyboard_grab',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'unsigned long none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_keyboard_grab_info_libgtk_only',
+	{
+		since = '2.0',
+		args = {'GObject* none', 'GObject** none', 'boolean* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_keyboard_ungrab',
+	{
+		since = '0.1',
+		args = {'unsigned long none'}
+	}
+)
+
+defFunction('gdk_keyval_convert_case',
+	{
+		since = '0.1',
+		args = {'unsigned int none', 'unsigned int* full', 'unsigned int* full'}
+	}
+)
+
+defFunction('gdk_keyval_from_name',
+	{
+		since = '0.1',
+		args = {'char* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_keyval_is_lower',
+	{
+		since = '0.1',
+		args = {'unsigned int none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_keyval_is_upper',
+	{
+		since = '0.1',
+		args = {'unsigned int none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_keyval_name',
+	{
+		since = '0.1',
+		args = {'unsigned int none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_keyval_to_lower',
+	{
+		since = '0.1',
+		args = {'unsigned int none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_keyval_to_unicode',
+	{
+		since = '0.1',
+		args = {'unsigned int none'},
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('gdk_keyval_to_upper',
+	{
+		since = '0.1',
+		args = {'unsigned int none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_list_visuals',
+	{
+		since = '0.1',
+		ret = 'struct* container'
+	}
+)
+
+defFunction('gdk_mbstowcs',
+	{
+		since = '0.1',
+		args = {'unsigned long* none', 'char* none', 'int none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_notify_startup_complete',
+	{
+		since = '2.2'
+	}
+)
+
+defFunction('gdk_notify_startup_complete_with_id',
+	{
+		since = '2.12',
+		args = {'char* none'}
+	}
+)
+
+defFunction('gdk_offscreen_window_get_embedder',
+	{
+		since = '2.18',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_offscreen_window_get_pixmap',
+	{
+		since = '2.18',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_offscreen_window_set_embedder',
+	{
+		since = '2.18',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('gdk_pango_attr_emboss_color_new',
+	{
+		since = '2.12',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_pango_attr_embossed_new',
+	{
+		since = '0.1',
+		args = {'boolean none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_pango_attr_stipple_new',
+	{
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_pango_context_get',
+	{
+		since = '0.1',
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_pango_context_get_for_screen',
+	{
+		since = '2.2',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_pango_context_set_colormap',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_pango_layout_get_clip_region',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int* none', 'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_pango_layout_line_get_clip_region',
+	{
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none', 'int* none', 'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_parse_args',
+	{
+		since = '2.2',
+		args = {'int* none', 'gchar*** none'}
+	}
+)
+
+defFunction('gdk_pixbuf_get_from_drawable',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_pixbuf_get_from_image',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_pixbuf_render_pixmap_and_mask',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject** none', 'struct** none', 'int none'}
+	}
+)
+
+defFunction('gdk_pixbuf_render_pixmap_and_mask_for_colormap',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GObject** none', 'struct** none', 'int none'}
+	}
+)
+
+defFunction('gdk_pixbuf_render_threshold_alpha',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_pixbuf_render_to_drawable',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'},
+		deprecated = '2.4'
+	}
+)
+
+defFunction('gdk_pixbuf_render_to_drawable_alpha',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none', 'int none'},
+		deprecated = '2.4'
+	}
+)
+
+defFunction('gdk_pointer_grab',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'int none', 'GObject* none', 'struct* none', 'unsigned long none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_pointer_grab_info_libgtk_only',
+	{
+		since = '2.0',
+		args = {'GObject* none', 'GObject** none', 'boolean* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pointer_is_grabbed',
+	{
+		since = '0.1',
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_pointer_ungrab',
+	{
+		since = '0.1',
+		args = {'unsigned long none'}
+	}
+)
+
+defFunction('gdk_pre_parse_libgtk_only',
+	{
+		since = '2.0'
+	}
+)
+
+defFunction('gdk_property_change',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'ptraslong none', 'ptraslong none', 'int none', 'int none', 'unsigned char* none', 'int none'}
+	}
+)
+
+defFunction('gdk_property_delete',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'ptraslong none'}
+	}
+)
+
+defFunction('gdk_property_get',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'ptraslong none', 'ptraslong none', 'unsigned long none', 'unsigned long none', 'int none', 'ptraslong* none', 'int* none', 'int* none', 'unsigned char** none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_query_depths',
+	{
+		since = '0.1',
+		args = {'unhandled full', 'int* full'}
+	}
+)
+
+defFunction('gdk_query_visual_types',
+	{
+		since = '0.1',
+		args = {'GdkVisualType** none', 'int* none'}
+	}
+)
+
+defFunction('gdk_region_new',
+	{
+		since = '0.1',
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_region_polygon',
+	{
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none'},
+		ret = 'struct* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_region_rectangle',
+	{
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_rgb_cmap_new',
+	{
+		since = '0.1',
+		args = {'unsigned long* none', 'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_rgb_colormap_ditherable',
+	{
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_rgb_ditherable',
+	{
+		since = '0.1',
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_rgb_find_color',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_rgb_gc_set_background',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_rgb_gc_set_foreground',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_rgb_get_colormap',
+	{
+		since = '0.1',
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_rgb_get_visual',
+	{
+		since = '0.1',
+		ret = 'GObject* none',
+		deprecated = '2.22'
+	}
+)
+
+defFunction('gdk_rgb_init',
+	{
+		since = '0.1',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_rgb_set_install',
+	{
+		since = '0.1',
+		args = {'boolean none'}
+	}
+)
+
+defFunction('gdk_rgb_set_min_colors',
+	{
+		since = '0.1',
+		args = {'int none'}
+	}
+)
+
+defFunction('gdk_rgb_set_verbose',
+	{
+		since = '0.1',
+		args = {'boolean none'}
+	}
+)
+
+defFunction('gdk_rgb_xpixel_from_rgb',
+	{
+		since = '0.1',
+		args = {'unsigned long none'},
+		ret = 'unsigned long none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_selection_convert',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'ptraslong none', 'ptraslong none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_selection_owner_get',
+	{
+		since = '0.1',
+		args = {'ptraslong none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_selection_owner_get_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'ptraslong none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_selection_owner_set',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'ptraslong none', 'unsigned long none', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_selection_owner_set_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'GObject* none', 'ptraslong none', 'unsigned long none', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_selection_property_get',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'unsigned char** none', 'ptraslong* none', 'int* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_selection_send_notify',
+	{
+		since = '0.1',
+		args = {'unsigned long none', 'ptraslong none', 'ptraslong none', 'ptraslong none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_selection_send_notify_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'unsigned long none', 'ptraslong none', 'ptraslong none', 'ptraslong none', 'unsigned long none'}
+	}
+)
+
+defFunction('gdk_set_double_click_time',
+	{
+		since = '0.1',
+		args = {'unsigned int none'}
+	}
+)
+
+defFunction('gdk_set_locale',
+	{
+		since = '0.1',
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_set_pointer_hooks',
+	{
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gdk_set_program_class',
+	{
+		since = '0.1',
+		args = {'char* none'}
+	}
+)
+
+defFunction('gdk_set_show_events',
+	{
+		since = '0.1',
+		args = {'boolean none'}
+	}
+)
+
+defFunction('gdk_set_sm_client_id',
+	{
+		since = '0.1',
+		args = {'char* none'}
+	}
+)
+
+defFunction('gdk_set_use_xshm',
+	{
+		since = '0.1',
+		args = {'boolean none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_setting_get',
+	{
+		since = '0.1',
+		args = {'char* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_spawn_command_line_on_screen',
+	{
+		since = '2.4',
+		args = {'GObject* none', 'char* none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_spawn_on_screen',
+	{
+		since = '2.4',
+		args = {'GObject* none', 'char* none', 'char** none', 'char** none', 'int none', 'callback none', 'void* none', 'int* none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_spawn_on_screen_with_pipes',
+	{
+		since = '2.4',
+		args = {'GObject* none', 'char* none', 'char** none', 'char** none', 'int none', 'callback none', 'void* none', 'int* none', 'int* none', 'int* none', 'int* none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_string_extents',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int* none', 'int* none', 'int* none', 'int* none', 'int* none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_string_height',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_string_measure',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_string_to_compound_text',
+	{
+		since = '0.1',
+		args = {'char* none', 'ptraslong* none', 'int* none', 'unsigned char** none', 'int* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_string_to_compound_text_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'char* none', 'ptraslong* none', 'int* none', 'unsigned char** none', 'int* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_string_width',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_synthesize_window_state',
+	{
+		since = '2.0',
+		args = {'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('gdk_test_render_sync',
+	{
+		since = '2.14',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('gdk_test_simulate_button',
+	{
+		since = '2.14',
+		args = {'GObject* none', 'int none', 'int none', 'unsigned int none', 'int none', 'int none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_test_simulate_key',
+	{
+		since = '2.14',
+		args = {'GObject* none', 'int none', 'int none', 'unsigned int none', 'int none', 'int none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_text_extents',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int none', 'int* none', 'int* none', 'int* none', 'int* none', 'int* none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_text_extents_wc',
+	{
+		since = '0.1',
+		args = {'struct* none', 'unsigned long* none', 'int none', 'int* none', 'int* none', 'int* none', 'int* none', 'int* none'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_text_height',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_text_measure',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_text_property_to_text_list',
+	{
+		since = '0.1',
+		args = {'ptraslong none', 'int none', 'unsigned char* none', 'int none', 'gchar*** none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_text_property_to_text_list_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'ptraslong none', 'int none', 'unsigned char* none', 'int none', 'gchar*** none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_text_property_to_utf8_list',
+	{
+		since = '0.1',
+		args = {'ptraslong none', 'int none', 'unsigned char* none', 'int none', 'gchar*** none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_text_property_to_utf8_list_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'ptraslong none', 'int none', 'unsigned char* none', 'int none', 'gchar*** none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('gdk_text_width',
+	{
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_text_width_wc',
+	{
+		since = '0.1',
+		args = {'struct* none', 'unsigned long* none', 'int none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_threads_add_idle',
+	{
+		since = '2.12',
+		args = {'callback none', 'void* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_threads_add_idle_full',
+	{
+		since = '2.12',
+		args = {'int none', 'callback none', 'void* none', 'callback none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_threads_add_timeout',
+	{
+		since = '2.12',
+		args = {'unsigned int none', 'callback none', 'void* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_threads_add_timeout_full',
+	{
+		since = '2.12',
+		args = {'int none', 'unsigned int none', 'callback none', 'void* none', 'callback none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_threads_add_timeout_seconds',
+	{
+		since = '2.14',
+		args = {'unsigned int none', 'callback none', 'void* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_threads_add_timeout_seconds_full',
+	{
+		since = '2.14',
+		args = {'int none', 'unsigned int none', 'callback none', 'void* none', 'callback none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_threads_enter',
+	{
+		since = '0.1'
+	}
+)
+
+defFunction('gdk_threads_init',
+	{
+		since = '0.1'
+	}
+)
+
+defFunction('gdk_threads_leave',
+	{
+		since = '0.1'
+	}
+)
+
+defFunction('gdk_threads_set_lock_functions',
+	{
+		since = '2.4',
+		args = {'callback none', 'callback none'}
+	}
+)
+
+defFunction('gdk_unicode_to_keyval',
+	{
+		since = '0.1',
+		args = {'unsigned long none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('gdk_utf8_to_compound_text',
+	{
+		since = '0.1',
+		args = {'char* none', 'ptraslong* none', 'int* none', 'unsigned char** none', 'int* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_utf8_to_compound_text_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'char* none', 'ptraslong* none', 'int* none', 'unsigned char** none', 'int* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gdk_utf8_to_string_target',
+	{
+		since = '0.1',
+		args = {'char* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gdk_wcstombs',
+	{
+		since = '0.1',
+		args = {'unsigned long* none'},
+		ret = 'char* full',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('gdk_window_at_pointer',
+	{
+		since = '0.1',
+		args = {'int* full', 'int* full'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_constrain_size',
+	{
+		since = '0.1',
+		args = {'struct* none', 'unsigned int none', 'int none', 'int none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('gdk_window_foreign_new',
+	{
+		since = '0.1',
+		args = {'unsigned long none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_foreign_new_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'unsigned long none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_get_toplevels',
+	{
+		since = '0.1',
+		ret = 'struct* none',
+		deprecated = '2.16'
+	}
+)
+
+defFunction('gdk_window_lookup',
+	{
+		since = '0.1',
+		args = {'unsigned long none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_lookup_for_display',
+	{
+		since = '2.2',
+		args = {'GObject* none', 'unsigned long none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('gdk_window_process_all_updates',
+	{
+		since = '0.1'
+	}
+)
+
+defFunction('gdk_window_set_debug_updates',
+	{
+		since = '0.1',
+		args = {'boolean none'}
+	}
+)
+
+defEnum('GdkAxisUse',
+	{
+		['GDK_AXIS_Y'] = 2,
+		['GDK_AXIS_WHEEL'] = 6,
+		['GDK_AXIS_IGNORE'] = 0,
+		['GDK_AXIS_XTILT'] = 4,
+		['GDK_AXIS_PRESSURE'] = 3,
+		['GDK_AXIS_X'] = 1,
+		['GDK_AXIS_LAST'] = 7,
+		['GDK_AXIS_YTILT'] = 5
+	}
+)
+
+defEnum('GdkByteOrder',
+	{
+		['GDK_LSB_FIRST'] = 0,
+		['GDK_MSB_FIRST'] = 1
+	}
+)
+
+defEnum('GdkCapStyle',
+	{
+		['GDK_CAP_ROUND'] = 2,
+		['GDK_CAP_BUTT'] = 1,
+		['GDK_CAP_NOT_LAST'] = 0,
+		['GDK_CAP_PROJECTING'] = 3
+	}
+)
+
+defEnum('GdkCrossingMode',
+	{
+		['GDK_CROSSING_GTK_GRAB'] = 3,
+		['GDK_CROSSING_STATE_CHANGED'] = 5,
+		['GDK_CROSSING_UNGRAB'] = 2,
+		['GDK_CROSSING_NORMAL'] = 0,
+		['GDK_CROSSING_GRAB'] = 1,
+		['GDK_CROSSING_GTK_UNGRAB'] = 4
+	}
+)
+
+defEnum('GdkCursorType',
+	{
+		['GDK_TREK'] = 142,
+		['GDK_DRAPED_BOX'] = 48,
+		['GDK_DRAFT_SMALL'] = 46,
+		['GDK_CENTER_PTR'] = 22,
+		['GDK_FLEUR'] = 52,
+		['GDK_UL_ANGLE'] = 144,
+		['GDK_DRAFT_LARGE'] = 44,
+		['GDK_UR_ANGLE'] = 148,
+		['GDK_RIGHT_TEE'] = 98,
+		['GDK_BASED_ARROW_DOWN'] = 4,
+		['GDK_COFFEE_MUG'] = 28,
+		['GDK_TOP_LEFT_CORNER'] = 134,
+		['GDK_SB_V_DOUBLE_ARROW'] = 116,
+		['GDK_SB_DOWN_ARROW'] = 106,
+		['GDK_MOUSE'] = 84,
+		['GDK_BOAT'] = 8,
+		['GDK_GOBBLER'] = 54,
+		['GDK_DOT'] = 38,
+		['GDK_BOGOSITY'] = 10,
+		['GDK_BOTTOM_SIDE'] = 16,
+		['GDK_TOP_TEE'] = 140,
+		['GDK_RIGHT_SIDE'] = 96,
+		['GDK_PIRATE'] = 88,
+		['GDK_CROSSHAIR'] = 34,
+		['GDK_PLUS'] = 90,
+		['GDK_ARROW'] = 2,
+		['GDK_BOX_SPIRAL'] = 20,
+		['GDK_CURSOR_IS_PIXMAP'] = -1,
+		['GDK_CROSS_REVERSE'] = 32,
+		['GDK_TOP_LEFT_ARROW'] = 132,
+		['GDK_SHUTTLE'] = 118,
+		['GDK_PENCIL'] = 86,
+		['GDK_SB_UP_ARROW'] = 114,
+		['GDK_BOTTOM_LEFT_CORNER'] = 12,
+		['GDK_WATCH'] = 150,
+		['GDK_GUMBY'] = 56,
+		['GDK_HAND2'] = 60,
+		['GDK_BASED_ARROW_UP'] = 6,
+		['GDK_EXCHANGE'] = 50,
+		['GDK_MAN'] = 80,
+		['GDK_SAILBOAT'] = 104,
+		['GDK_UMBRELLA'] = 146,
+		['GDK_X_CURSOR'] = 0,
+		['GDK_BLANK_CURSOR'] = -2,
+		['GDK_LAST_CURSOR'] = 153,
+		['GDK_XTERM'] = 152,
+		['GDK_TOP_SIDE'] = 138,
+		['GDK_TOP_RIGHT_CORNER'] = 136,
+		['GDK_DOTBOX'] = 40,
+		['GDK_LEFT_TEE'] = 72,
+		['GDK_TARGET'] = 128,
+		['GDK_STAR'] = 126,
+		['GDK_CIRCLE'] = 24,
+		['GDK_SPIDER'] = 122,
+		['GDK_CROSS'] = 30,
+		['GDK_HEART'] = 62,
+		['GDK_TCROSS'] = 130,
+		['GDK_ICON'] = 64,
+		['GDK_SB_LEFT_ARROW'] = 110,
+		['GDK_BOTTOM_RIGHT_CORNER'] = 14,
+		['GDK_QUESTION_ARROW'] = 92,
+		['GDK_RTL_LOGO'] = 102,
+		['GDK_RIGHTBUTTON'] = 100,
+		['GDK_RIGHT_PTR'] = 94,
+		['GDK_DIAMOND_CROSS'] = 36,
+		['GDK_LEFT_PTR'] = 68,
+		['GDK_LEFT_SIDE'] = 70,
+		['GDK_LR_ANGLE'] = 78,
+		['GDK_DOUBLE_ARROW'] = 42,
+		['GDK_LL_ANGLE'] = 76,
+		['GDK_LEFTBUTTON'] = 74,
+		['GDK_MIDDLEBUTTON'] = 82,
+		['GDK_SPRAYCAN'] = 124,
+		['GDK_SIZING'] = 120,
+		['GDK_CLOCK'] = 26,
+		['GDK_HAND1'] = 58,
+		['GDK_SB_RIGHT_ARROW'] = 112,
+		['GDK_IRON_CROSS'] = 66,
+		['GDK_BOTTOM_TEE'] = 18,
+		['GDK_SB_H_DOUBLE_ARROW'] = 108
+	}
+)
+
+defEnum('GdkDragAction',
+	{
+		['GDK_ACTION_DEFAULT'] = 1,
+		['GDK_ACTION_COPY'] = 2,
+		['GDK_ACTION_ASK'] = 32,
+		['GDK_ACTION_MOVE'] = 4,
+		['GDK_ACTION_PRIVATE'] = 16,
+		['GDK_ACTION_LINK'] = 8
+	}
+)
+
+defEnum('GdkDragProtocol',
+	{
+		['GDK_DRAG_PROTO_LOCAL'] = 6,
+		['GDK_DRAG_PROTO_WIN32_DROPFILES'] = 4,
+		['GDK_DRAG_PROTO_ROOTWIN'] = 2,
+		['GDK_DRAG_PROTO_NONE'] = 3,
+		['GDK_DRAG_PROTO_OLE2'] = 5,
+		['GDK_DRAG_PROTO_XDND'] = 1,
+		['GDK_DRAG_PROTO_MOTIF'] = 0
+	}
+)
+
+defEnum('GdkEventMask',
+	{
+		['GDK_BUTTON2_MOTION_MASK'] = 64,
+		['GDK_ENTER_NOTIFY_MASK'] = 4096,
+		['GDK_PROPERTY_CHANGE_MASK'] = 65536,
+		['GDK_BUTTON_MOTION_MASK'] = 16,
+		['GDK_ALL_EVENTS_MASK'] = 4194302,
+		['GDK_STRUCTURE_MASK'] = 32768,
+		['GDK_PROXIMITY_IN_MASK'] = 262144,
+		['GDK_EXPOSURE_MASK'] = 2,
+		['GDK_KEY_RELEASE_MASK'] = 2048,
+		['GDK_KEY_PRESS_MASK'] = 1024,
+		['GDK_SCROLL_MASK'] = 2097152,
+		['GDK_SUBSTRUCTURE_MASK'] = 1048576,
+		['GDK_VISIBILITY_NOTIFY_MASK'] = 131072,
+		['GDK_BUTTON_RELEASE_MASK'] = 512,
+		['GDK_POINTER_MOTION_MASK'] = 4,
+		['GDK_FOCUS_CHANGE_MASK'] = 16384,
+		['GDK_POINTER_MOTION_HINT_MASK'] = 8,
+		['GDK_BUTTON1_MOTION_MASK'] = 32,
+		['GDK_LEAVE_NOTIFY_MASK'] = 8192,
+		['GDK_BUTTON_PRESS_MASK'] = 256,
+		['GDK_PROXIMITY_OUT_MASK'] = 524288,
+		['GDK_BUTTON3_MOTION_MASK'] = 128
+	}
+)
+
+defEnum('GdkEventType',
+	{
+		['GDK_DELETE'] = 0,
+		['GDK_NOTHING'] = -1,
+		['GDK_DRAG_STATUS'] = 25,
+		['GDK_KEY_RELEASE'] = 9,
+		['GDK_BUTTON_RELEASE'] = 7,
+		['GDK_SELECTION_CLEAR'] = 17,
+		['GDK_OWNER_CHANGE'] = 34,
+		['GDK_PROXIMITY_OUT'] = 21,
+		['GDK_BUTTON_PRESS'] = 4,
+		['GDK_UNMAP'] = 15,
+		['GDK_EVENT_LAST'] = 37,
+		['GDK_SETTING'] = 33,
+		['GDK_FOCUS_CHANGE'] = 12,
+		['GDK_EXPOSE'] = 2,
+		['GDK_MOTION_NOTIFY'] = 3,
+		['GDK_SELECTION_NOTIFY'] = 19,
+		['GDK_DRAG_ENTER'] = 22,
+		['GDK_PROPERTY_NOTIFY'] = 16,
+		['GDK_LEAVE_NOTIFY'] = 11,
+		['GDK_KEY_PRESS'] = 8,
+		['GDK_DESTROY'] = 1,
+		['GDK_ENTER_NOTIFY'] = 10,
+		['GDK_DAMAGE'] = 36,
+		['GDK_3BUTTON_PRESS'] = 6,
+		['GDK_GRAB_BROKEN'] = 35,
+		['GDK_MAP'] = 14,
+		['GDK_VISIBILITY_NOTIFY'] = 29,
+		['GDK_DROP_FINISHED'] = 27,
+		['GDK_WINDOW_STATE'] = 32,
+		['GDK_DRAG_LEAVE'] = 23,
+		['GDK_SCROLL'] = 31,
+		['GDK_SELECTION_REQUEST'] = 18,
+		['GDK_PROXIMITY_IN'] = 20,
+		['GDK_CLIENT_EVENT'] = 28,
+		['GDK_DROP_START'] = 26,
+		['GDK_DRAG_MOTION'] = 24,
+		['GDK_NO_EXPOSE'] = 30,
+		['GDK_CONFIGURE'] = 13,
+		['GDK_2BUTTON_PRESS'] = 5
+	}
+)
+
+defEnum('GdkExtensionMode',
+	{
+		['GDK_EXTENSION_EVENTS_NONE'] = 0,
+		['GDK_EXTENSION_EVENTS_ALL'] = 1,
+		['GDK_EXTENSION_EVENTS_CURSOR'] = 2
+	}
+)
+
+defEnum('GdkFill',
+	{
+		['GDK_SOLID'] = 0,
+		['GDK_TILED'] = 1,
+		['GDK_STIPPLED'] = 2,
+		['GDK_OPAQUE_STIPPLED'] = 3
+	}
+)
+
+defEnum('GdkFillRule',
+	{
+		['GDK_EVEN_ODD_RULE'] = 0,
+		['GDK_WINDING_RULE'] = 1
+	}
+)
+
+defEnum('GdkFilterReturn',
+	{
+		['GDK_FILTER_TRANSLATE'] = 1,
+		['GDK_FILTER_REMOVE'] = 2,
+		['GDK_FILTER_CONTINUE'] = 0
+	}
+)
+
+defEnum('GdkFontType',
+	{
+		['GDK_FONT_FONTSET'] = 1,
+		['GDK_FONT_FONT'] = 0
+	}
+)
+
+defEnum('GdkFunction',
+	{
+		['GDK_XOR'] = 2,
+		['GDK_OR'] = 8,
+		['GDK_AND_REVERSE'] = 5,
+		['GDK_COPY'] = 0,
+		['GDK_SET'] = 15,
+		['GDK_NOOP'] = 7,
+		['GDK_NOR'] = 14,
+		['GDK_CLEAR'] = 3,
+		['GDK_AND_INVERT'] = 6,
+		['GDK_INVERT'] = 1,
+		['GDK_OR_INVERT'] = 12,
+		['GDK_OR_REVERSE'] = 10,
+		['GDK_EQUIV'] = 9,
+		['GDK_COPY_INVERT'] = 11,
+		['GDK_AND'] = 4,
+		['GDK_NAND'] = 13
+	}
+)
+
+defEnum('GdkGCValuesMask',
+	{
+		['GDK_GC_FUNCTION'] = 8,
+		['GDK_GC_TILE'] = 32,
+		['GDK_GC_SUBWINDOW'] = 256,
+		['GDK_GC_BACKGROUND'] = 2,
+		['GDK_GC_LINE_WIDTH'] = 16384,
+		['GDK_GC_CAP_STYLE'] = 65536,
+		['GDK_GC_CLIP_Y_ORIGIN'] = 4096,
+		['GDK_GC_TS_X_ORIGIN'] = 512,
+		['GDK_GC_CLIP_X_ORIGIN'] = 2048,
+		['GDK_GC_FOREGROUND'] = 1,
+		['GDK_GC_FONT'] = 4,
+		['GDK_GC_TS_Y_ORIGIN'] = 1024,
+		['GDK_GC_CLIP_MASK'] = 128,
+		['GDK_GC_JOIN_STYLE'] = 131072,
+		['GDK_GC_LINE_STYLE'] = 32768,
+		['GDK_GC_EXPOSURES'] = 8192,
+		['GDK_GC_FILL'] = 16,
+		['GDK_GC_STIPPLE'] = 64
+	}
+)
+
+defEnum('GdkGrabStatus',
+	{
+		['GDK_GRAB_INVALID_TIME'] = 2,
+		['GDK_GRAB_NOT_VIEWABLE'] = 3,
+		['GDK_GRAB_ALREADY_GRABBED'] = 1,
+		['GDK_GRAB_FROZEN'] = 4,
+		['GDK_GRAB_SUCCESS'] = 0
+	}
+)
+
+defEnum('GdkGravity',
+	{
+		['GDK_GRAVITY_EAST'] = 6,
+		['GDK_GRAVITY_NORTH'] = 2,
+		['GDK_GRAVITY_SOUTH'] = 8,
+		['GDK_GRAVITY_WEST'] = 4,
+		['GDK_GRAVITY_NORTH_WEST'] = 1,
+		['GDK_GRAVITY_NORTH_EAST'] = 3,
+		['GDK_GRAVITY_SOUTH_WEST'] = 7,
+		['GDK_GRAVITY_STATIC'] = 10,
+		['GDK_GRAVITY_SOUTH_EAST'] = 9,
+		['GDK_GRAVITY_CENTER'] = 5
+	}
+)
+
+defEnum('GdkImageType',
+	{
+		['GDK_IMAGE_FASTEST'] = 2,
+		['GDK_IMAGE_NORMAL'] = 0,
+		['GDK_IMAGE_SHARED'] = 1
+	}
+)
+
+defEnum('GdkInputCondition',
+	{
+		['GDK_INPUT_WRITE'] = 2,
+		['GDK_INPUT_EXCEPTION'] = 4,
+		['GDK_INPUT_READ'] = 1
+	}
+)
+
+defEnum('GdkInputMode',
+	{
+		['GDK_MODE_WINDOW'] = 2,
+		['GDK_MODE_DISABLED'] = 0,
+		['GDK_MODE_SCREEN'] = 1
+	}
+)
+
+defEnum('GdkInputSource',
+	{
+		['GDK_SOURCE_CURSOR'] = 3,
+		['GDK_SOURCE_MOUSE'] = 0,
+		['GDK_SOURCE_ERASER'] = 2,
+		['GDK_SOURCE_PEN'] = 1
+	}
+)
+
+defEnum('GdkJoinStyle',
+	{
+		['GDK_JOIN_MITER'] = 0,
+		['GDK_JOIN_ROUND'] = 1,
+		['GDK_JOIN_BEVEL'] = 2
+	}
+)
+
+defEnum('GdkLineStyle',
+	{
+		['GDK_LINE_SOLID'] = 0,
+		['GDK_LINE_DOUBLE_DASH'] = 2,
+		['GDK_LINE_ON_OFF_DASH'] = 1
+	}
+)
+
+defEnum('GdkModifierType',
+	{
+		['GDK_SUPER_MASK'] = 67108864,
+		['GDK_MOD1_MASK'] = 8,
+		['GDK_BUTTON2_MASK'] = 512,
+		['GDK_MOD4_MASK'] = 64,
+		['GDK_MODIFIER_MASK'] = 1543512063,
+		['GDK_BUTTON3_MASK'] = 1024,
+		['GDK_CONTROL_MASK'] = 4,
+		['GDK_META_MASK'] = 268435456,
+		['GDK_HYPER_MASK'] = 134217728,
+		['GDK_BUTTON1_MASK'] = 256,
+		['GDK_MOD5_MASK'] = 128,
+		['GDK_RELEASE_MASK'] = 1073741824,
+		['GDK_BUTTON5_MASK'] = 4096,
+		['GDK_SHIFT_MASK'] = 1,
+		['GDK_BUTTON4_MASK'] = 2048,
+		['GDK_MOD2_MASK'] = 16,
+		['GDK_LOCK_MASK'] = 2,
+		['GDK_MOD3_MASK'] = 32
+	}
+)
+
+defEnum('GdkNotifyType',
+	{
+		['GDK_NOTIFY_VIRTUAL'] = 1,
+		['GDK_NOTIFY_UNKNOWN'] = 5,
+		['GDK_NOTIFY_ANCESTOR'] = 0,
+		['GDK_NOTIFY_NONLINEAR'] = 3,
+		['GDK_NOTIFY_INFERIOR'] = 2,
+		['GDK_NOTIFY_NONLINEAR_VIRTUAL'] = 4
+	}
+)
+
+defEnum('GdkOverlapType',
+	{
+		['GDK_OVERLAP_RECTANGLE_PART'] = 2,
+		['GDK_OVERLAP_RECTANGLE_OUT'] = 1,
+		['GDK_OVERLAP_RECTANGLE_IN'] = 0
+	}
+)
+
+defEnum('GdkOwnerChange',
+	{
+		['GDK_OWNER_CHANGE_NEW_OWNER'] = 0,
+		['GDK_OWNER_CHANGE_CLOSE'] = 2,
+		['GDK_OWNER_CHANGE_DESTROY'] = 1
+	}
+)
+
+defEnum('GdkPropMode',
+	{
+		['GDK_PROP_MODE_APPEND'] = 2,
+		['GDK_PROP_MODE_PREPEND'] = 1,
+		['GDK_PROP_MODE_REPLACE'] = 0
+	}
+)
+
+defEnum('GdkPropertyState',
+	{
+		['GDK_PROPERTY_DELETE'] = 1,
+		['GDK_PROPERTY_NEW_VALUE'] = 0
+	}
+)
+
+defEnum('GdkRgbDither',
+	{
+		['GDK_RGB_DITHER_MAX'] = 2,
+		['GDK_RGB_DITHER_NONE'] = 0,
+		['GDK_RGB_DITHER_NORMAL'] = 1
+	}
+)
+
+defEnum('GdkScrollDirection',
+	{
+		['GDK_SCROLL_UP'] = 0,
+		['GDK_SCROLL_LEFT'] = 2,
+		['GDK_SCROLL_RIGHT'] = 3,
+		['GDK_SCROLL_DOWN'] = 1
+	}
+)
+
+defEnum('GdkSettingAction',
+	{
+		['GDK_SETTING_ACTION_NEW'] = 0,
+		['GDK_SETTING_ACTION_DELETED'] = 2,
+		['GDK_SETTING_ACTION_CHANGED'] = 1
+	}
+)
+
+defEnum('GdkStatus',
+	{
+		['GDK_ERROR_FILE'] = -3,
+		['GDK_ERROR_PARAM'] = -2,
+		['GDK_ERROR_MEM'] = -4,
+		['GDK_ERROR'] = -1,
+		['GDK_OK'] = 0
+	}
+)
+
+defEnum('GdkSubwindowMode',
+	{
+		['GDK_CLIP_BY_CHILDREN'] = 0,
+		['GDK_INCLUDE_INFERIORS'] = 1
+	}
+)
+
+defEnum('GdkVisibilityState',
+	{
+		['GDK_VISIBILITY_PARTIAL'] = 1,
+		['GDK_VISIBILITY_UNOBSCURED'] = 0,
+		['GDK_VISIBILITY_FULLY_OBSCURED'] = 2
+	}
+)
+
+defEnum('GdkVisualType',
+	{
+		['GDK_VISUAL_TRUE_COLOR'] = 4,
+		['GDK_VISUAL_DIRECT_COLOR'] = 5,
+		['GDK_VISUAL_STATIC_GRAY'] = 0,
+		['GDK_VISUAL_PSEUDO_COLOR'] = 3,
+		['GDK_VISUAL_GRAYSCALE'] = 1,
+		['GDK_VISUAL_STATIC_COLOR'] = 2
+	}
+)
+
+defEnum('GdkWMDecoration',
+	{
+		['GDK_DECOR_TITLE'] = 8,
+		['GDK_DECOR_MAXIMIZE'] = 64,
+		['GDK_DECOR_MINIMIZE'] = 32,
+		['GDK_DECOR_BORDER'] = 2,
+		['GDK_DECOR_RESIZEH'] = 4,
+		['GDK_DECOR_ALL'] = 1,
+		['GDK_DECOR_MENU'] = 16
+	}
+)
+
+defEnum('GdkWMFunction',
+	{
+		['GDK_FUNC_MOVE'] = 4,
+		['GDK_FUNC_RESIZE'] = 2,
+		['GDK_FUNC_CLOSE'] = 32,
+		['GDK_FUNC_MINIMIZE'] = 8,
+		['GDK_FUNC_MAXIMIZE'] = 16,
+		['GDK_FUNC_ALL'] = 1
+	}
+)
+
+defEnum('GdkWindowAttributesType',
+	{
+		['GDK_WA_X'] = 4,
+		['GDK_WA_TITLE'] = 2,
+		['GDK_WA_NOREDIR'] = 256,
+		['GDK_WA_CURSOR'] = 16,
+		['GDK_WA_COLORMAP'] = 32,
+		['GDK_WA_WMCLASS'] = 128,
+		['GDK_WA_TYPE_HINT'] = 512,
+		['GDK_WA_VISUAL'] = 64,
+		['GDK_WA_Y'] = 8
+	}
+)
+
+defEnum('GdkWindowClass',
+	{
+		['GDK_INPUT_OUTPUT'] = 0,
+		['GDK_INPUT_ONLY'] = 1
+	}
+)
+
+defEnum('GdkWindowEdge',
+	{
+		['GDK_WINDOW_EDGE_NORTH'] = 1,
+		['GDK_WINDOW_EDGE_NORTH_EAST'] = 2,
+		['GDK_WINDOW_EDGE_NORTH_WEST'] = 0,
+		['GDK_WINDOW_EDGE_EAST'] = 4,
+		['GDK_WINDOW_EDGE_SOUTH'] = 6,
+		['GDK_WINDOW_EDGE_WEST'] = 3,
+		['GDK_WINDOW_EDGE_SOUTH_EAST'] = 7,
+		['GDK_WINDOW_EDGE_SOUTH_WEST'] = 5
+	}
+)
+
+defEnum('GdkWindowHints',
+	{
+		['GDK_HINT_MAX_SIZE'] = 4,
+		['GDK_HINT_BASE_SIZE'] = 8,
+		['GDK_HINT_RESIZE_INC'] = 32,
+		['GDK_HINT_USER_POS'] = 128,
+		['GDK_HINT_MIN_SIZE'] = 2,
+		['GDK_HINT_POS'] = 1,
+		['GDK_HINT_USER_SIZE'] = 256,
+		['GDK_HINT_ASPECT'] = 16,
+		['GDK_HINT_WIN_GRAVITY'] = 64
+	}
+)
+
+defEnum('GdkWindowState',
+	{
+		['GDK_WINDOW_STATE_ICONIFIED'] = 2,
+		['GDK_WINDOW_STATE_MAXIMIZED'] = 4,
+		['GDK_WINDOW_STATE_ABOVE'] = 32,
+		['GDK_WINDOW_STATE_WITHDRAWN'] = 1,
+		['GDK_WINDOW_STATE_STICKY'] = 8,
+		['GDK_WINDOW_STATE_BELOW'] = 64,
+		['GDK_WINDOW_STATE_FULLSCREEN'] = 16
+	}
+)
+
+defEnum('GdkWindowType',
+	{
+		['GDK_WINDOW_OFFSCREEN'] = 6,
+		['GDK_WINDOW_TOPLEVEL'] = 1,
+		['GDK_WINDOW_CHILD'] = 2,
+		['GDK_WINDOW_TEMP'] = 4,
+		['GDK_WINDOW_ROOT'] = 0,
+		['GDK_WINDOW_FOREIGN'] = 5,
+		['GDK_WINDOW_DIALOG'] = 3
+	}
+)
+
+defEnum('GdkWindowTypeHint',
+	{
+		['GDK_WINDOW_TYPE_HINT_NORMAL'] = 0,
+		['GDK_WINDOW_TYPE_HINT_COMBO'] = 12,
+		['GDK_WINDOW_TYPE_HINT_UTILITY'] = 5,
+		['GDK_WINDOW_TYPE_HINT_DND'] = 13,
+		['GDK_WINDOW_TYPE_HINT_TOOLBAR'] = 3,
+		['GDK_WINDOW_TYPE_HINT_NOTIFICATION'] = 11,
+		['GDK_WINDOW_TYPE_HINT_POPUP_MENU'] = 9,
+		['GDK_WINDOW_TYPE_HINT_DESKTOP'] = 7,
+		['GDK_WINDOW_TYPE_HINT_TOOLTIP'] = 10,
+		['GDK_WINDOW_TYPE_HINT_SPLASHSCREEN'] = 4,
+		['GDK_WINDOW_TYPE_HINT_MENU'] = 2,
+		['GDK_WINDOW_TYPE_HINT_DOCK'] = 6,
+		['GDK_WINDOW_TYPE_HINT_DROPDOWN_MENU'] = 8,
+		['GDK_WINDOW_TYPE_HINT_DIALOG'] = 1
+	}
+)
+

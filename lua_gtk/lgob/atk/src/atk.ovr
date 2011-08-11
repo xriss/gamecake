@@ -1,0 +1,18 @@
+include('atk.def')
+
+fixVersion('atk_get_version', '1.20')
+fixVersion('atk_misc_get_instance', '1.14')
+fixVersion('atk_misc_get_type', '1.14')
+fixVersion('atk_misc_threads_enter', '1.14')
+fixVersion('atk_misc_threads_leave', '1.14')
+fixVersion('atk_relation_remove_target', '1.26')
+
+undef{
+    'atk_state_set_add_states',
+    'atk_misc_get_instance',
+    'atk_state_set_contains_states',
+    'atk_socket_embed',
+    'AtkPlug',
+    'AtkSocket',
+    '_AtkRegistry',
+}

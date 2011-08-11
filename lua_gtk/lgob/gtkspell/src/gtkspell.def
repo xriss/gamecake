@@ -1,0 +1,45 @@
+defLib = 'GtkSpell'
+defName = 'gtkspell'
+
+defType('GtkSpell',
+	{
+		gc = 'gtkspell_detach'
+	}
+)
+
+defFunction('gtkspell_new_attach',
+	{
+		class = 'GtkSpell',
+		args = {'GObject* none', 'char* none', 'GError** full'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('gtkspell_set_language',
+	{
+		class = 'GtkSpell',
+		args = {'struct* none', 'char* none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('gtkspell_recheck_all',
+	{
+		class = 'GtkSpell',
+		args = {'struct* none'},
+	}
+)
+
+defFunction('gtkspell_get_from_text_view',
+	{
+		class = 'GtkSpell',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('gtkspell_detach',
+	{
+		class = 'GtkSpell',
+	}
+)

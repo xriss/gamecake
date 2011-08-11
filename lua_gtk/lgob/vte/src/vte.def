@@ -1,0 +1,933 @@
+defLib = 'Vte'
+defName = 'vte'
+
+defClass('VteReaper',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('VteTerminal',
+	{
+		parent = 'GtkWidget',
+		implements = {'AtkImplementorIface', 'GtkBuildable'}
+	}
+)
+
+defClass('VteTerminalAccessible',
+	{
+		parent = 'GtkAccessible',
+		implements = {'AtkAction', 'AtkComponent', 'AtkText'}
+	}
+)
+
+defClass('VteTerminalAccessibleFactory',
+	{
+		parent = 'AtkObjectFactory'
+	}
+)
+
+defClass('_VteCharAttributes',
+	{
+		
+	}
+)
+
+defClass('vte_char_attributes',
+	{
+		
+	}
+)
+
+defFunction('vte_reaper_get_type',
+	{
+		class = 'VteReaper',
+		since = '9999.9999',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('vte_reaper_get',
+	{
+		since = '0.1',
+		ret = 'GObject* full',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('vte_reaper_add_child',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('vte_terminal_get_type',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('vte_terminal_new',
+	{
+		class = 'VteTerminal',
+		constructor = true,
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('vte_terminal_fork_command',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'void* none', 'void* none', 'char* none', 'boolean none', 'boolean none', 'boolean none'},
+		ret = 'pid_t none'
+	}
+)
+
+defFunction('vte_terminal_forkpty',
+	{
+		class = 'VteTerminal',
+		since = '0.11.11',
+		args = {'GObject* none', 'void* none', 'char* none', 'boolean none', 'boolean none', 'boolean none'},
+		ret = 'pid_t none'
+	}
+)
+
+defFunction('vte_terminal_feed',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'long none'}
+	}
+)
+
+defFunction('vte_terminal_feed_child',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'long none'}
+	}
+)
+
+defFunction('vte_terminal_feed_child_binary',
+	{
+		class = 'VteTerminal',
+		since = '0.12.1',
+		args = {'GObject* none', 'char* none', 'long none'}
+	}
+)
+
+defFunction('vte_terminal_copy_clipboard',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('vte_terminal_paste_clipboard',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('vte_terminal_copy_primary',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('vte_terminal_paste_primary',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('vte_terminal_select_all',
+	{
+		class = 'VteTerminal',
+		since = '0.16',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('vte_terminal_select_none',
+	{
+		class = 'VteTerminal',
+		since = '0.16',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('vte_terminal_set_size',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'long none', 'long none'}
+	}
+)
+
+defFunction('vte_terminal_set_audible_bell',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('vte_terminal_get_audible_bell',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('vte_terminal_set_visible_bell',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('vte_terminal_get_visible_bell',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('vte_terminal_set_scroll_background',
+	{
+		class = 'VteTerminal',
+		since = '0.11',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('vte_terminal_set_scroll_on_output',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('vte_terminal_set_scroll_on_keystroke',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('vte_terminal_set_color_dim',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('vte_terminal_set_color_bold',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('vte_terminal_set_color_foreground',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('vte_terminal_set_color_background',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('vte_terminal_set_color_cursor',
+	{
+		class = 'VteTerminal',
+		since = '0.11.11',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('vte_terminal_set_color_highlight',
+	{
+		class = 'VteTerminal',
+		since = '0.11.11',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('vte_terminal_set_colors',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none', 'struct* none', 'long none'}
+	}
+)
+
+defFunction('vte_terminal_set_default_colors',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('vte_terminal_set_background_image',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('vte_terminal_set_background_image_file',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('vte_terminal_set_background_tint_color',
+	{
+		class = 'VteTerminal',
+		since = '0.11',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('vte_terminal_set_background_saturation',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'double none'}
+	}
+)
+
+defFunction('vte_terminal_set_background_transparent',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('vte_terminal_set_opacity',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned int none'}
+	}
+)
+
+defFunction('vte_terminal_set_cursor_blink_mode',
+	{
+		class = 'VteTerminal',
+		since = '0.17.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('vte_terminal_get_cursor_blink_mode',
+	{
+		class = 'VteTerminal',
+		since = '0.17.1',
+		accessorSince = '1.0',
+		args = {'GObject* none'},
+		ret = 'int full'
+	}
+)
+
+defFunction('vte_terminal_set_cursor_shape',
+	{
+		class = 'VteTerminal',
+		since = '0.20',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('vte_terminal_get_cursor_shape',
+	{
+		class = 'VteTerminal',
+		since = '0.17.6',
+		accessorSince = '1.0',
+		args = {'GObject* none'},
+		ret = 'int full'
+	}
+)
+
+defFunction('vte_terminal_set_scrollback_lines',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'long none'}
+	}
+)
+
+defFunction('vte_terminal_im_append_menuitems',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('vte_terminal_set_font',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('vte_terminal_set_font_from_string',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('vte_terminal_get_font',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('vte_terminal_set_allow_bold',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('vte_terminal_get_allow_bold',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('vte_terminal_get_has_selection',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('vte_terminal_set_word_chars',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('vte_terminal_is_word_char',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'gunichar none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('vte_terminal_set_backspace_binding',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('vte_terminal_set_delete_binding',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('vte_terminal_set_mouse_autohide',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('vte_terminal_get_mouse_autohide',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('vte_terminal_reset',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'boolean none'}
+	}
+)
+
+defFunction('vte_terminal_get_text',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'callback none', 'void* none', 'struct* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('vte_terminal_get_text_include_trailing_spaces',
+	{
+		class = 'VteTerminal',
+		since = '0.11.11',
+		args = {'GObject* none', 'callback none', 'void* none', 'struct* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('vte_terminal_get_text_range',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'long none', 'long none', 'long none', 'long none', 'callback none', 'void* none', 'struct* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('vte_terminal_get_cursor_position',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'long* full', 'long* full'}
+	}
+)
+
+defFunction('vte_terminal_match_clear_all',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('vte_terminal_match_add_gregex',
+	{
+		class = 'VteTerminal',
+		since = '0.17.1',
+		args = {'GObject* none', 'struct* none', 'int none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('vte_terminal_match_set_cursor',
+	{
+		class = 'VteTerminal',
+		since = '0.11',
+		args = {'GObject* none', 'int none', 'struct* none'}
+	}
+)
+
+defFunction('vte_terminal_match_set_cursor_type',
+	{
+		class = 'VteTerminal',
+		since = '0.11.9',
+		args = {'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('vte_terminal_match_set_cursor_name',
+	{
+		class = 'VteTerminal',
+		since = '0.17.1',
+		args = {'GObject* none', 'int none', 'char* none'}
+	}
+)
+
+defFunction('vte_terminal_match_remove',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('vte_terminal_match_check',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'long none', 'long none', 'int* full'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('vte_terminal_set_emulation',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('vte_terminal_get_emulation',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('vte_terminal_get_default_emulation',
+	{
+		class = 'VteTerminal',
+		since = '0.11.11',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('vte_terminal_set_encoding',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'char* none'}
+	}
+)
+
+defFunction('vte_terminal_get_encoding',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('vte_terminal_get_status_line',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('vte_terminal_get_padding',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'int* full', 'int* full'},
+		deprecated = '0.1'
+	}
+)
+
+defFunction('vte_terminal_set_pty',
+	{
+		class = 'VteTerminal',
+		since = '0.12.1',
+		accessorSince = '1.0',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('vte_terminal_get_pty',
+	{
+		class = 'VteTerminal',
+		since = '0.20',
+		accessorSince = '1.0',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('vte_terminal_get_adjustment',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('vte_terminal_get_char_width',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'long none'
+	}
+)
+
+defFunction('vte_terminal_get_char_height',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'long none'
+	}
+)
+
+defFunction('vte_terminal_get_row_count',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'long none'
+	}
+)
+
+defFunction('vte_terminal_get_column_count',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'long none'
+	}
+)
+
+defFunction('vte_terminal_get_window_title',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('vte_terminal_get_icon_title',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		accessorSince = '1.0',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('vte_terminal_get_child_exit_status',
+	{
+		class = 'VteTerminal',
+		since = '0.20',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('vte_terminal_write_contents',
+	{
+		class = 'VteTerminal',
+		since = '0.24',
+		args = {'GObject* none', 'GObject* none', 'int none', 'GObject* none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('vte_terminal_set_cursor_blinks',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'},
+		deprecated = '0.17'
+	}
+)
+
+defFunction('vte_terminal_get_using_xft',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none',
+		deprecated = '0.20'
+	}
+)
+
+defFunction('vte_terminal_match_add',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none', 'char* none'},
+		ret = 'int none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('vte_terminal_get_char_descent',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'long none',
+		deprecated = '0.20'
+	}
+)
+
+defFunction('vte_terminal_get_char_ascent',
+	{
+		class = 'VteTerminal',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'long none',
+		deprecated = '0.20'
+	}
+)
+
+defFunction('vte_terminal_set_font_full',
+	{
+		class = 'VteTerminal',
+		since = '0.11.11',
+		args = {'GObject* none', 'struct* none', 'int none'},
+		deprecated = '0.20'
+	}
+)
+
+defFunction('vte_terminal_set_font_from_string_full',
+	{
+		class = 'VteTerminal',
+		since = '0.11.11',
+		args = {'GObject* none', 'char* none', 'int none'},
+		deprecated = '0.20'
+	}
+)
+
+defFunction('vte_terminal_accessible_get_type',
+	{
+		class = 'VteTerminalAccessible',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('vte_terminal_accessible_new',
+	{
+		class = 'VteTerminalAccessible',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('vte_terminal_accessible_factory_get_type',
+	{
+		class = 'VteTerminalAccessibleFactory',
+		since = '9999.9999',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('vte_terminal_accessible_factory_new',
+	{
+		class = 'VteTerminalAccessibleFactory',
+		constructor = true,
+		since = '1.0',
+		ret = 'GObject* full'
+	}
+)
+
+defEnum('VteTerminalAntiAlias',
+	{
+		['VTE_ANTI_ALIAS_FORCE_DISABLE'] = 2,
+		['VTE_ANTI_ALIAS_USE_DEFAULT'] = 0,
+		['VTE_ANTI_ALIAS_FORCE_ENABLE'] = 1
+	}
+)
+
+defEnum('VteTerminalCursorBlinkMode',
+	{
+		['VTE_CURSOR_BLINK_ON'] = 1,
+		['VTE_CURSOR_BLINK_SYSTEM'] = 0,
+		['VTE_CURSOR_BLINK_OFF'] = 2
+	}
+)
+
+defEnum('VteTerminalCursorShape',
+	{
+		['VTE_CURSOR_SHAPE_IBEAM'] = 1,
+		['VTE_CURSOR_SHAPE_BLOCK'] = 0,
+		['VTE_CURSOR_SHAPE_UNDERLINE'] = 2
+	}
+)
+
+defEnum('VteTerminalEraseBinding',
+	{
+		['VTE_ERASE_AUTO'] = 0,
+		['VTE_ERASE_TTY'] = 4,
+		['VTE_ERASE_ASCII_BACKSPACE'] = 1,
+		['VTE_ERASE_DELETE_SEQUENCE'] = 3,
+		['VTE_ERASE_ASCII_DELETE'] = 2
+	}
+)
+
+defEnum('VteTerminalWriteFlags',
+	{
+		['VTE_TERMINAL_WRITE_DEFAULT'] = 0
+	}
+)
+

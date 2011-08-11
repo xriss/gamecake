@@ -1,0 +1,67 @@
+defType('PsSurface',
+	{
+		gc = 'cairo_surface_destroy',
+		parent = 'Surface' 
+	}
+)
+
+defFunction('cairo_ps_surface_create',
+	{
+		class = 'PsSurface'
+	}
+)
+
+defFunction('cairo_ps_surface_set_size',
+	{
+		class = 'PsSurface',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_ps_surface_set_eps',
+	{
+		class = 'PsSurface',
+		since = '1.6',
+		args = {'struct* none', 'boolean none'}
+	}
+)
+
+defFunction('cairo_ps_surface_get_eps',
+	{
+		class = 'PsSurface',
+		args = {'struct* none'},
+		since = '1.6',
+		ret = 'boolean none'
+	}
+)
+
+defFunction('cairo_ps_surface_dsc_begin_setup',
+	{
+		class = 'PsSurface',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_ps_surface_dsc_begin_page_setup',
+	{
+		class = 'PsSurface',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_ps_surface_dsc_comment',
+	{
+		class = 'PsSurface',
+		args = {'struct* none', 'gchar* none'}
+	}
+)
+
+defOverride('cairo_ps_surface_create', [[
+	luaL_checktype(L, 1, LUA_TSTRING);
+	cairo_surface_t* ptr = cairo_ps_surface_create(lua_tostring(L, 1),
+		lua_tonumber(L, 2), lua_tonumber(L, 3));
+		
+	priv_struct_new(L, ptr, TRUE, "cairoPsSurfaceMT");
+	
+	return 1;
+]])

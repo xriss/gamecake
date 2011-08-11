@@ -1,0 +1,29 @@
+defType('PdfSurface',
+	{
+		gc = 'cairo_surface_destroy',
+		parent = 'Surface' 
+	}
+)
+
+defFunction('cairo_pdf_surface_create',
+	{
+		class = 'PdfSurface'
+	}
+)
+
+defFunction('cairo_pdf_surface_set_size',
+	{
+		class = 'PdfSurface',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defOverride('cairo_pdf_surface_create', [[
+	luaL_checktype(L, 1, LUA_TSTRING);
+	cairo_surface_t* ptr = cairo_pdf_surface_create(lua_tostring(L, 1),
+		lua_tonumber(L, 2), lua_tonumber(L, 3));
+		
+	priv_struct_new(L, ptr, TRUE, "cairoPdfSurfaceMT");
+	
+	return 1;
+]])

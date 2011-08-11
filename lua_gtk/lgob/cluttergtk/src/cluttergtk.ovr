@@ -1,0 +1,32 @@
+include('cluttergtk.def')
+
+defFunction('gtk_clutter_init_once',
+	{
+	}
+)
+
+defOverride('gtk_clutter_init_once', [[
+	static gboolean initialized = FALSE;
+	if(initialized) return 0;
+	
+	int argc = 1;
+	char** argv = g_malloc(argc * sizeof(char*));
+
+	lua_pushliteral(L, "arg");
+	lua_rawget(L, LUA_GLOBALSINDEX);
+
+	if(!lua_istable(L, -1))
+		argv[0] = "lgob";
+	else
+	{
+		lua_pushnumber(L, 0);
+		lua_rawget(L, -2);
+		argv[0] = (char*)luaL_optstring(L, -1, "lgob");
+	}
+
+	lua_pushinteger(L, gtk_clutter_init(&argc, &argv));
+	g_free(argv);
+	
+	initialized = TRUE;
+	return 1;
+]])

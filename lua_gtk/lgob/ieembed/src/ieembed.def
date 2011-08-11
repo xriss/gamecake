@@ -1,0 +1,205 @@
+defLib = 'gtk_ie_embed'
+defName = 'ieembed'
+
+defClass('gtk_ie_embedWebView', 
+	{
+		parent = 'GtkWidget'
+	}
+)
+
+defFunction('gtk_ie_embed_new',
+	{
+		class = 'gtk_ie_embedWebView',
+		constructor = true,
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('gtk_ie_embed_cut_clipboard',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'}
+	}
+)
+
+defFunction('gtk_ie_embed_copy_clipboard',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'}
+	}
+)
+
+defFunction('gtk_ie_embed_paste_clipboard',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'}
+	}
+)
+
+defFunction('gtk_ie_embed_select_all',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'}
+	}
+)
+
+defFunction('gtk_ie_embed_find_string',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full', 'char* none', 'bool none', 'bool none'}
+	}
+)
+
+defFunction('gtk_ie_embed_go_forward',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'}
+	}
+)
+
+defFunction('gtk_ie_embed_go_back',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'}
+	}
+)
+
+defFunction('gtk_ie_embed_stop',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'}
+	}
+)
+
+defFunction('gtk_ie_embed_reload',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full', 'int none'}
+	}
+)
+
+defFunction('gtk_ie_embed_set_font_size',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full', 'int none'}
+	}
+)
+
+defFunction('gtk_ie_embed_print',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'}
+	}
+)
+
+defFunction('gtk_ie_embed_print_preview',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'}
+	}
+)
+
+defFunction('gtk_ie_embed_page_setup',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'}
+	}
+)
+
+defFunction('gtk_ie_embed_save_as',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full', 'char* none'}
+	}
+)
+
+defFunction('gtk_ie_embed_set_use_context_menu',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full', 'bool none'}
+	}
+)
+
+defFunction('gtk_ie_embed_load_url',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full', 'char* none'}
+	}
+)
+
+defFunction('gtk_ie_embed_can_go_back',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'},
+		ret = 'bool none'
+	}
+)
+
+defFunction('gtk_ie_embed_can_go_forward',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'},
+		ret = 'bool none'
+	}
+)
+
+defFunction('gtk_ie_embed_get_use_context_menu',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'},
+		ret = 'bool none'
+	}
+)
+
+defFunction('gtk_ie_embed_can_cut_clipboard',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'},
+		ret = 'bool none'
+	}
+)
+
+defFunction('gtk_ie_embed_can_copy_clipboard',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'},
+		ret = 'bool none'
+	}
+)
+
+defFunction('gtk_ie_embed_can_paste_clipboard',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'},
+		ret = 'bool none'
+	}
+)
+
+defFunction('gtk_ie_embed_get_location',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('gtk_ie_embed_load_html_from_string',
+	{
+		class = 'gtk_ie_embedWebView',
+		args = {'GObject* full', 'char* none'},
+	}
+)
+
+defEnum('GtkIEEmbedReloadFlag', {
+	['RELOAD_NORMAL'] = 0,
+	['RELOAD_IFEXPIRED'] = 1,
+	['RELOAD_COMPLETELY'] = 3,
+})
+
+defEnum('GtkIEEmbedFontSize', {
+	['FONT_SMALLEST'] = 0,
+	['FONT_SMALL'] = 1,
+	['FONT_MEDIUM'] = 2,
+	['FONT_LARGE'] = 3,
+	['FONT_LARGEST'] = 4,
+})

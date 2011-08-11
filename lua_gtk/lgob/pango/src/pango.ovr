@@ -1,0 +1,526 @@
+include('pango.def')
+
+undef{
+	'PangoFreeGCFunc',
+	'PangoGetGCFunc',
+	'PangoXFontCache',
+	'PangoXSubfont',
+	'pango_cairo_font_map_create_context',
+	'pango_fc_font_get_unknown_glyph',
+	'pango_fc_font_map_create_context',
+	'pango_ft2_font_get_coverage',
+	'pango_ft2_font_get_face',
+	'pango_ft2_font_get_kerning',
+	'pango_ft2_font_map_create_context',
+	'pango_ft2_font_map_for_display',
+	'pango_ft2_get_context',
+	'pango_ft2_get_unknown_glyph',
+	'pango_ft2_shutdown_display',
+	'pango_get_mirror_char',
+	'pango_win32_get_context',
+	'pango_win32_get_unknown_glyph',
+	'pango_xft_font_get_glyph',
+	'pango_xft_font_get_unknown_glyph',
+	'pango_xft_font_has_char',
+	'pango_xft_font_lock_face',
+	'pango_xft_font_unlock_face',
+	'pango_xft_get_context',
+	'pango_x_apply_ligatures',
+	'pango_x_context_set_funcs',
+	'pango_x_fallback_shape',
+	'pango_x_find_first_subfont',
+	'pango_x_font_cache_free',
+	'pango_x_font_cache_load',
+	'pango_x_font_cache_new',
+	'pango_x_font_cache_unload',
+	'pango_x_font_get_unknown_glyph',
+	'pango_x_font_map_for_display',
+	'pango_x_font_map_get_font_cache',
+	'pango_x_font_subfont_xlfd',
+	'pango_x_get_context',
+	'pango_x_get_unknown_glyph',
+	'pango_x_has_glyph',
+	'pango_x_list_subfonts',
+	'pango_x_load_font',
+	'pango_x_render',
+	'pango_x_render_layout',
+	'pango_x_render_layout_line',
+	'pango_x_shutdown_display',
+	'pango_glyph_string_x_to_index',
+	'pango_glyph_string_index_to_x',
+	'pango_log2vis_get_embedding_levels',
+    'pango_layout_set_markup_with_accel',
+}
+
+undef{
+    'PangoAttrColor',
+    'PangoAttrFloat',
+    'PangoAttrInt',
+    'PangoAttrFontDesc',
+    'PangoAttrLanguage',
+    'PangoAttrShape',
+    'PangoAttrSize',
+    'PangoAttrString',
+}
+
+fixVersion('pango_context_new', '1.24')
+fixVersion('pango_context_set_font_map', '1.24')
+fixVersion('pango_is_zero_width', '1.24')
+fixVersion('pango_language_get_sample_string', '1.24')
+fixVersion('pango_parse_stretch', '1.24')
+fixVersion('pango_parse_style', '1.24')
+fixVersion('pango_parse_variant', '1.24')
+fixVersion('pango_parse_weight', '1.24')
+fixVersion('pango_trim_string', '1.24')
+fixVersion('pango_quantize_line_geometry', '1.24')
+fixVersion('pango_split_file_list', '1.26')
+
+defType('PangoFontDescription',
+	{
+		gc = 'pango_font_description_free',
+		tostring = 'pango_font_description_to_string',
+	}
+)
+
+defType('PangoAttrList',
+    {
+        gc = 'pango_attr_list_unref'
+    }
+)
+
+defType('PangoAttribute',
+    {
+        gc = 'pango_attribute_destroy'
+    }
+)
+
+defType('PangoLayoutIter',
+	{
+		gc = 'pango_layout_iter_free',
+	}
+)
+
+defType('PangoLayoutLine',
+	{
+	}
+)
+
+defClass('PangoRectangle',
+    {
+    }
+)
+
+defFunction('pango_font_description_from_string',
+	{
+		class = 'PangoFontDescription',
+		args = {'gchar* none'},
+		ret = 'struct* full',
+	}
+)
+
+defOverride('pango_layout_get_iter', [[
+	luaL_checktype(L, 1, LUA_TUSERDATA);
+	Object* obj = lua_touserdata(L, 1);
+	
+	PangoLayoutIter* ptr = pango_layout_get_iter(obj->pointer);
+	special_type_new(L, "pangoLayoutIterMT", ptr);
+	
+	return 1;
+]])
+
+defOverride('pango_font_description_from_string', [[
+	PangoFontDescription* ptr = pango_font_description_from_string(lua_tostring(L, 1));
+	special_type_new(L, "pangoFontDescriptionMT", ptr);
+	
+	return 1;
+]])
+
+defOverride('pango_layout_iter_get_line', [[
+	luaL_checktype(L, 1, LUA_TUSERDATA);
+	Object* obj = lua_touserdata(L, 1);
+	
+	PangoLayoutLine* ptr = pango_layout_iter_get_line(obj->pointer);
+	special_type_new(L, "pangoLayoutLineMT", ptr);
+	
+	return 1;
+]])
+
+defOverride('pango_layout_iter_get_line_readonly', [[
+	luaL_checktype(L, 1, LUA_TUSERDATA);
+	Object* obj = lua_touserdata(L, 1);
+	
+	PangoLayoutLine* ptr = pango_layout_iter_get_line_readonly(obj->pointer);
+	special_type_new(L, "pangoLayoutLineMT", ptr);
+	
+	return 1;
+]])
+
+defEnum('PangoScales',
+	{
+		['PANGO_SCALE'] = 1024,
+	}
+)
+
+defFunction('pango_parse_stretch',
+	{
+		since = '1.24',
+		args = {'char* none', 'unsigned int* full', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_parse_style',
+	{
+		since = '1.24',
+		args = {'char* none', 'unsigned int* full', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_parse_variant',
+	{
+		since = '1.24',
+		args = {'char* none', 'unsigned int* full', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_parse_weight',
+	{
+		since = '1.24',
+		args = {'char* none', 'unsgined int* full', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_tab_array_get_tab',
+	{
+		class = 'PangoTabArray',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'unsigned int* full', 'int* full'}
+	}
+)
+
+defOverride('pango_attr_list_new', [[
+    PangoAttrList* ptr = pango_attr_list_new();
+    special_type_new(L, "pangoAttrListMT", ptr);
+
+    return 1;
+]])
+
+defFunction('pango_attr_font_desc_new', {})
+defOverride('pango_attr_font_desc_new', [[
+    luaL_checktype(L, 1, LUA_TUSERDATA);
+    Object* obj = lua_touserdata(L, 1);
+
+    PangoAttribute* ptr = pango_attr_font_desc_new(obj->pointer);
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defFunction('pango_attribute_set_index',
+    {
+        class = 'PangoAttribute'
+    }
+)
+
+defOverride('pango_attribute_set_index', [[
+    luaL_checktype(L, 1, LUA_TUSERDATA);
+    luaL_checktype(L, 2, LUA_TNUMBER);
+    luaL_checktype(L, 3, LUA_TNUMBER);
+    Object* obj = lua_touserdata(L, 1);
+    
+    PangoAttribute* attr = obj->pointer;
+    attr->start_index = lua_tointeger(L, 2);
+    attr->end_index = lua_tointeger(L, 3);
+    
+    return 0;
+]])
+
+defFunction('pango_attribute_get_index',
+    {
+        class = 'PangoAttribute'
+    }
+)
+
+defOverride('pango_attribute_get_index', [[
+    luaL_checktype(L, 1, LUA_TUSERDATA);
+    Object* obj = lua_touserdata(L, 1);
+    
+    PangoAttribute* attr = obj->pointer;
+    lua_pushinteger(L, attr->start_index);
+    lua_pushinteger(L, attr->end_index);
+    
+    return 2;
+]])
+
+defFunction('pango_attr_foreground_new', {})
+defOverride('pango_attr_foreground_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+    luaL_checktype(L, 2, LUA_TNUMBER);
+    luaL_checktype(L, 3, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_foreground_new(
+        lua_tointeger(L, 1), lua_tointeger(L, 2), lua_tointeger(L, 3) );
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defFunction('pango_attr_background_new', {})
+defOverride('pango_attr_background_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+    luaL_checktype(L, 2, LUA_TNUMBER);
+    luaL_checktype(L, 3, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_background_new(
+        lua_tointeger(L, 1), lua_tointeger(L, 2), lua_tointeger(L, 3) );
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_gravity_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_gravity_new(lua_tointeger(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_gravity_hint_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_gravity_hint_new(lua_tointeger(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_family_new', [[
+    luaL_checktype(L, 1, LUA_TSTRING);
+
+    PangoAttribute* ptr = pango_attr_family_new(lua_tostring(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_style_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_style_new(lua_tointeger(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_variant_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_variant_new(lua_tointeger(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_stretch_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_stretch_new(lua_tointeger(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_weight_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_weight_new(lua_tointeger(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_size_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_size_new(lua_tointeger(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_size_new_absolute', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_size_new_absolute(lua_tointeger(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_strikethrough_new', [[
+    luaL_checktype(L, 1, LUA_TBOOLEAN);
+
+    PangoAttribute* ptr = pango_attr_strikethrough_new(lua_toboolean(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_strikethrough_color_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+    luaL_checktype(L, 2, LUA_TNUMBER);
+    luaL_checktype(L, 3, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_strikethrough_color_new(
+        lua_tointeger(L, 1), lua_tointeger(L, 2), lua_tointeger(L, 3) );
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_underline_new', [[
+    luaL_checktype(L, 1, LUA_TBOOLEAN);
+
+    PangoAttribute* ptr = pango_attr_underline_new(lua_toboolean(L, 1));
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_attr_underline_color_new', [[
+    luaL_checktype(L, 1, LUA_TNUMBER);
+    luaL_checktype(L, 2, LUA_TNUMBER);
+    luaL_checktype(L, 3, LUA_TNUMBER);
+
+    PangoAttribute* ptr = pango_attr_underline_color_new(
+        lua_tointeger(L, 1), lua_tointeger(L, 2), lua_tointeger(L, 3) );
+    special_type_new(L, "pangoAttributeMT", ptr);
+
+    return 1;
+]])
+
+defOverride('pango_context_get_matrix', [[
+    luaL_checktype(L, 1, LUA_TUSERDATA);
+    Object* obj = lua_touserdata(L, 1);
+    
+    void* ptr = (void*)pango_context_get_matrix(obj->pointer);
+    lua_getfield(L, LUA_REGISTRYINDEX, "cairoMatrixPush");
+    lua_pushlightuserdata(L, ptr);
+    lua_pushboolean(L, FALSE);
+    lua_call(L, 2, 1);
+    
+    return 1;
+]])
+
+defFunction('pango_rectangle_new',
+	{
+		class = 'PangoRectangle'
+	}
+)
+
+defOverride('pango_rectangle_new', [[
+	PangoRectangle* ptr = g_malloc(sizeof(PangoRectangle));
+	struct_new(L, ptr, TRUE);
+
+	return 1;
+]])
+
+defFunction('pango_rectangle_set',
+	{
+		class = 'PangoRectangle'
+	}
+)
+
+defOverride('pango_rectangle_set', [[
+    luaL_checktype(L, 1, LUA_TUSERDATA);
+    luaL_checktype(L, 2, LUA_TNUMBER);
+    luaL_checktype(L, 3, LUA_TNUMBER);
+    luaL_checktype(L, 4, LUA_TNUMBER);
+    luaL_checktype(L, 5, LUA_TNUMBER);
+    
+    Object* obj = lua_touserdata(L, 1);
+    PangoRectangle* rect = obj->pointer;
+    
+    rect->x = lua_tointeger(L, 2);
+    rect->y = lua_tointeger(L, 3);
+    rect->width = lua_tointeger(L, 4);
+    rect->height = lua_tointeger(L, 5);
+	
+    return 0;
+]])
+
+defFunction('pango_rectangle_get',
+	{
+		class = 'PangoRectangle'
+	}
+)
+
+defOverride('pango_rectangle_get', [[
+    luaL_checktype(L, 1, LUA_TUSERDATA);
+    
+    Object* obj = lua_touserdata(L, 1);
+    PangoRectangle* rect = obj->pointer;
+    
+    lua_pushinteger(L, rect->x);
+    lua_pushinteger(L, rect->y);
+    lua_pushinteger(L, rect->width);
+    lua_pushinteger(L, rect->height);
+	
+    return 4;
+]])
+
+defOverride('pango_attribute_destroy', [[
+    Object* obj = lua_touserdata(L, 1);
+    
+    if(obj->need_unref)
+    {
+        pango_attribute_destroy(obj->pointer);
+        obj->need_unref = FALSE;
+    }
+    
+    return 0;
+]])
+
+defOverride('pango_attr_list_change', [[
+    luaL_checktype(L, 1, LUA_TUSERDATA);
+    luaL_checktype(L, 2, LUA_TUSERDATA);
+    
+    Object* obj1 = lua_touserdata(L, 1);
+    Object* obj2 = lua_touserdata(L, 2);
+
+	pango_attr_list_change(obj1->pointer, obj2->pointer);
+	obj2->need_unref = FALSE;
+    
+	return 0;
+]])
+
+defOverride('pango_attr_list_insert', [[
+    luaL_checktype(L, 1, LUA_TUSERDATA);
+    luaL_checktype(L, 2, LUA_TUSERDATA);
+    
+    Object* obj1 = lua_touserdata(L, 1);
+    Object* obj2 = lua_touserdata(L, 2); 
+
+	pango_attr_list_insert(obj1->pointer, obj2->pointer);
+    obj2->need_unref = FALSE;
+	
+	return 0;
+]])
+
+defOverride('pango_attr_list_insert_before', [[
+     luaL_checktype(L, 1, LUA_TUSERDATA);
+    luaL_checktype(L, 2, LUA_TUSERDATA);
+    
+    Object* obj1 = lua_touserdata(L, 1);
+    Object* obj2 = lua_touserdata(L, 2); 
+
+	pango_attr_list_insert_before(obj1->pointer, obj2->pointer);
+    obj2->need_unref = FALSE;
+	
+	return 0;
+]])
