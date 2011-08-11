@@ -1,0 +1,298 @@
+include('glib.def')
+
+defType('GBase64', 
+	{
+	}
+)
+
+defType('GMainContext',
+	{
+	}
+)
+
+defType('GMainLoop',
+	{
+		gc = 'g_main_loop_unref'
+	}
+)
+
+defOverride('g_main_loop_new', [[
+	Object* obj = lua_touserdata(L, 1);
+	gpointer arg = obj ? obj->pointer : NULL;
+	
+	gpointer ptr = g_main_loop_new(arg, lua_toboolean(L, 2));
+	priv_struct_new(L, ptr, TRUE, "glibMainLoopMT");
+	
+	return 1;
+]])
+
+defOverride('g_main_loop_get_context', [[
+	Object* obj = lua_touserdata(L, 1);
+	gpointer arg = obj ? obj->pointer : NULL;
+	
+	gpointer ptr = g_main_loop_get_context(arg);
+	priv_struct_new(L, ptr, FALSE, "glibMainContextMT");
+	
+	return 1;
+]])
+
+defType('GDate', 
+	{
+		gc = 'g_date_free'
+	}
+)
+
+defType('GTimer',
+	{
+		gc = 'g_timer_destroy'
+	}
+)
+
+defOverride('g_date_new', [[
+	gpointer ptr = g_date_new();
+	priv_struct_new(L, ptr, TRUE, "glibDateMT");
+	
+	return 1;
+]])
+
+defOverride('g_date_new_dmy', [[
+	gint arg1 = lua_tointeger(L, 1);
+	gint arg2 = lua_tointeger(L, 2);
+	gint arg3 = lua_tointeger(L, 3);
+	
+	gpointer ptr = g_date_new_dmy(arg1, arg2, arg3);
+	priv_struct_new(L, ptr, TRUE, "glibDateMT");
+	
+	return 1;
+]])
+
+defOverride('g_date_new_julian', [[
+	guint arg1 = lua_tointeger(L, 1);
+	
+	gpointer ptr = g_date_new_julian(arg1);
+	priv_struct_new(L, ptr, TRUE, "glibDateMT");
+	
+	return 1;
+]])
+
+defOverride('g_build_filename', [[
+	int top = lua_gettop(L);
+	gchar** args = g_malloc(sizeof(gchar*) * (top + 1) );
+	
+	int i;
+	for(i = 1; i <= top; ++i)
+		args[i - 1] = (gchar*)luaL_checkstring(L, i);
+		
+	args[top] = NULL;
+	
+	char* str = g_build_filenamev(args);
+	lua_pushstring(L, str);
+	
+	g_free(str);
+	g_free(args);
+	
+	return 1;
+]])
+
+defOverride('g_build_path', [[
+	const gchar* separator = luaL_checkstring(L, 1);
+	int top = lua_gettop(L); // separator + N strings
+
+	gchar** arr = g_malloc( sizeof(gchar*) * top );
+	
+	int i;
+	for(i = 2; i <= top; ++i)
+		arr[i - 2] = (gchar*)luaL_checkstring(L, i);
+		
+	arr[top - 1] = NULL;
+
+	gchar* path = g_build_pathv(separator, arr);
+	lua_pushstring(L, path);
+	
+	g_free(path);
+	g_free(arr);
+	
+	return 1;
+]])
+
+defOverride('g_strchomp', [[
+	char* copy = g_strdup( lua_tostring(L, 1) );
+	const char* ret = g_strchomp( copy );
+	lua_pushstring(L, ret);
+	
+	g_free(copy);
+	return 1;
+]])
+
+defOverride('g_strchug', [[
+	char* copy = g_strdup( lua_tostring(L, 1) );
+	const char* ret = g_strchug( copy );
+	lua_pushstring(L, ret);
+	
+	g_free(copy);
+	return 1;
+]])
+
+defOverride('g_strreverse', [[
+	char* copy = g_strdup( lua_tostring(L, 1) );
+	char* ret = g_strreverse(copy);
+	lua_pushstring(L, ret);
+	
+	g_free(copy);
+	return 1;
+]])
+
+defOverride('g_strstrip', [[
+	char* copy = g_strdup( lua_tostring(L, 1) );
+	const char* ret = g_strstrip( copy );
+	lua_pushstring(L, ret);
+	
+	g_free(copy);
+	return 1;
+]])
+
+defOverride('g_strdelimit', [[
+	gchar* copy = g_strdup( lua_tostring(L, 1) );
+	const char* arg3 = lua_tostring(L, 3);
+	const char* ret = g_strdelimit(copy, lua_tostring(L, 2), arg3 ? arg3[0] : '\0');
+	lua_pushstring(L, ret);
+	
+	g_free(copy);
+	return 1;
+]])
+
+defOverride('g_strcanon', [[
+	gchar* copy = g_strdup( lua_tostring(L, 1) );
+	const char* arg3 = lua_tostring(L, 3);
+	const char* ret = g_strcanon(copy, lua_tostring(L, 2), arg3 ? arg3[0] : '\0');
+	lua_pushstring(L, ret);
+	
+	g_free(copy);
+	return 1;
+]])
+
+defOverride('g_utf8_validate', [[
+	gboolean res = g_utf8_validate( lua_tostring(L, 1), lua_tointeger(L, 2),
+		NULL);
+		
+	lua_pushboolean(L, res);
+	return 1;
+]])
+
+defOverride('g_timer_new', [[
+	gpointer ptr = g_timer_new();
+	priv_struct_new(L, ptr, TRUE, "glibTimerMT");
+	
+	return 1;
+]])
+
+defOverride('g_thread_init', [[
+	g_thread_init(NULL);
+	
+	return 0;
+]])
+
+defOverride('g_handle_log', [[
+	priv_handle_log(L, luaL_checkstring(L, 1));
+	return 0;
+]])
+
+defOverride('g_timeout_add', [[
+	luaL_checktype(L, 1, LUA_TNUMBER);
+	luaL_checktype(L, 2, LUA_TNUMBER);
+	luaL_checktype(L, 3, LUA_TFUNCTION);
+
+	#ifdef IDEBUG
+	g_debug("Adding a timeout!");
+	#endif
+
+	/* Ref the function and the user data */
+	int ud_ref = -1;
+
+	if(lua_gettop(L) >= 4)
+	{
+		lua_settop(L, 4);
+		ud_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+		lua_pushvalue(L, 3);
+	}
+
+	int function_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	/* Create the callback data */
+	Data* data = g_malloc(sizeof(Data));
+	data->L = L;
+	data->function_ref = function_ref;
+	data->ud_ref = ud_ref;
+	data->signal_info.param_types = NULL;
+	data->signal_info.n_params = 0;
+	data->signal_info.return_type = G_TYPE_BOOLEAN;
+
+	/* Connect and send the id to Lua */
+	guint res = priv_timeout_add(lua_tointeger(L, 1), lua_tointeger(L, 2), data);
+	lua_pushnumber(L, res);
+
+	return 1;
+]])
+
+defOverride('g_timeout_remove', [[
+	luaL_checktype(L, 1, LUA_TNUMBER);
+
+	#ifdef IDEBUG
+	g_debug("Removing a timeout!");
+	#endif
+
+	guint id = (guint)lua_tointeger(L, 1);
+	g_source_remove(id);
+
+	return 0;
+]])
+
+defOverride('g_idle_add', [[
+	luaL_checktype(L, 1, LUA_TNUMBER);
+	luaL_checktype(L, 2, LUA_TFUNCTION);
+
+	#ifdef IDEBUG
+	g_debug("Adding a idle timeout!");
+	#endif
+
+	/* Ref the function and the user data */
+	int ud_ref = -1;
+
+	if(lua_gettop(L) >= 3)
+	{
+		lua_settop(L, 3);
+		ud_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+		lua_pushvalue(L, 2);
+	}
+
+	int function_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	/* Create the callback data */
+	Data* data = g_malloc(sizeof(Data));
+	data->L = L;
+	data->function_ref = function_ref;
+	data->ud_ref = ud_ref;
+	data->signal_info.param_types = NULL;
+	data->signal_info.n_params = 0;
+	data->signal_info.return_type = G_TYPE_BOOLEAN;
+
+	/* Connect and send the id to Lua */
+	guint res = priv_idle_add(lua_tointeger(L, 1), data);
+	lua_pushnumber(L, res);
+
+	return 1;
+]])
+
+defOverride('g_base64_decode', [[
+    luaL_checktype(L, 1, LUA_TSTRING);
+    
+    gsize size;
+    char* ret = (char*)g_base64_decode(lua_tostring(L, 1), &size);
+    
+    lua_pushlstring(L, ret, size);
+    lua_pushinteger(L, size);
+    
+    g_free(ret);
+    
+    return 2;
+]])

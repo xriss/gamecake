@@ -1,0 +1,29 @@
+include('gtkextra.def')
+
+function skipLib(name, defLib)
+	local _, _, newn = name:find('Gtk(.+)')
+	return newn or skipFirst(name)
+end
+
+function skipClass(name, class, lib)
+    lib = 'Gtk'
+    if class == 'GtkPlot3D' then
+        class = 'GtkPlot3d'
+    elseif class == 'GtkIconFileSel' then
+        class = 'GtkIconFileSelection'
+    end 
+    
+    if class then
+		local class = skipLib(class, lib)
+		name = skipLib(name, camelToC(lib))
+		local name, skip = name:gsub(camelToC(class), "", 1)
+		return name:sub(skip + 1)
+	else
+		return skipFirst(name)
+	end
+end
+
+undef{
+    'gtk_plot_data_dimension_set_scale',
+    'gtk_plot_data_dimension_get_scale'
+}

@@ -1,0 +1,1337 @@
+defLib = 'cairo'
+defName = 'cairo'
+
+defFunction('cairo_create',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('cairo_new_path',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_new_sub_path',
+	{
+		class = 'Context',
+		since = '1.2',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_destroy',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_fill',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_status',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_save',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_restore',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_get_current_point',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('cairo_get_target',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('cairo_push_group',
+	{
+		class = 'Context',
+		since = '1.2',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_push_group_with_content',
+	{
+		class = 'Context',
+		since = '1.2',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('cairo_pop_group',
+	{
+		class = 'Context',
+		since = '1.2',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_set_source_rgb',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_set_source_rgba',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_pop_group_to_source',
+	{
+		class = 'Context',
+		since = '1.2',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_get_group_target',
+	{
+		class = 'Context',
+		since = '1.2',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('cairo_set_source',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('cairo_set_source_surface',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_get_source',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('cairo_set_antialias',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('cairo_get_antialias',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_set_dash',
+	{
+		class = 'Context',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_get_dash_count',
+	{
+		class = 'Context',
+		since = '1.4',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_set_fill_rule',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('cairo_get_fill_rule',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_set_line_cap',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('cairo_get_line_join',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_set_line_join',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('cairo_get_line_cap',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_set_line_width',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none'}
+	}
+)
+
+defFunction('cairo_get_line_width',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('cairo_set_miter_limit',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none'}
+	}
+)
+
+defFunction('cairo_get_miter_limit',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('cairo_set_operator',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('cairo_get_operator',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_set_tolerance',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none'}
+	}
+)
+
+defFunction('cairo_get_tolerance',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('cairo_clip',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_clip_preserve',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_clip_extents',
+	{
+		class = 'Context',
+		since = '1.4',
+		args = {'struct* none', 'double* full', 'double* full', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('cairo_reset_clip',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_fill',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_fill_preserve',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_fill_extents',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double* full', 'double* full', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('cairo_in_fill',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('cairo_mask',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('cairo_mask_surface',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_paint',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_paint_with_alpha',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none'}
+	}
+)
+
+defFunction('cairo_stroke',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_stroke_preserve',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_stroke_extents',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double* full', 'double* full', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('cairo_in_stroke',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('cairo_copy_page',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_show_page',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_close_path',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_arc',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_arc_negative',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_curve_to',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_line_to',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_move_to',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_rectangle',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_text_path',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'char* none'}
+	}
+)
+
+defFunction('cairo_rel_curve_to',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_rel_line_to',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_rel_move_to',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_path_extents',
+	{
+		class = 'Context',
+		since = '1.6',
+		args = {'struct* none', 'double* full', 'double* full', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('cairo_translate',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_scale',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_rotate',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'double none'}
+	}
+)
+
+defFunction('cairo_transform',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('cairo_show_text',
+	{
+		class = 'Context',
+		args = {'struct* none', 'char* none'},
+	}
+)
+
+defFunction('cairo_select_font_face',
+	{
+		class = 'Context',
+		args = {'struct* none', 'char* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('cairo_set_font_size',
+	{
+		class = 'Context',
+		args = {'struct* none', 'double none'}
+	}
+)
+
+defFunction('cairo_set_matrix',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('cairo_get_matrix',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('cairo_identity_matrix',
+	{
+		class = 'Context',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_user_to_device',
+	{
+		class = 'Context',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_user_to_device_distance',
+	{
+		class = 'Context',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_device_to_user',
+	{
+		class = 'Context',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_device_to_user_distance',
+	{
+		class = 'Context',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_text_extents',
+	{
+		class ='Context',
+		args = {'struct* none', 'char* none', 'struct* none'}
+	} 
+)
+
+defFunction('cairo_font_extents_create',
+	{
+		class = 'FontExtents',
+	}
+)
+
+defFunction('cairo_font_extents_get',
+	{
+		class = 'FontExtents',
+	}
+)
+
+defFunction('cairo_font_extents_destroy',
+	{
+		class = 'FontExtents',
+	}
+)
+
+defFunction('cairo_text_extents_create',
+	{
+		class = 'TextExtents',
+	}
+)
+
+defFunction('cairo_text_extents_get',
+	{
+		class = 'TextExtents',
+	}
+)
+
+defFunction('cairo_text_extents_destroy',
+	{
+		class = 'TextExtents',
+	}
+)
+
+defFunction('cairo_matrix_create',
+	{
+		class = 'Matrix'
+	}
+)
+
+defFunction('cairo_matrix_destroy',
+	{
+		class = 'Matrix',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_matrix_init',
+	{
+		class = 'Matrix',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_matrix_init_identity',
+	{
+		class = 'Matrix',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_matrix_init_translate',
+	{
+		class = 'Matrix',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_matrix_init_scale',
+	{
+		class = 'Matrix',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_matrix_init_rotate',
+	{
+		class = 'Matrix',
+		since = '0.1',
+		args = {'struct* none', 'double none'}
+	}
+)
+
+defFunction('cairo_matrix_translate',
+	{
+		class = 'Matrix',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_matrix_scale',
+	{
+		class = 'Matrix',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_matrix_rotate',
+	{
+		class = 'Matrix',
+		since = '0.1',
+		args = {'struct* none', 'double none'}
+	}
+)
+
+defFunction('cairo_matrix_invert',
+	{
+		class = 'Matrix',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_matrix_multiply',
+	{
+		class = 'Matrix',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('cairo_matrix_transform_distance',
+	{
+		class = 'Matrix',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_matrix_transform_point',
+	{
+		class = 'Matrix',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_pattern_add_color_stop_rgb',
+	{
+		class = 'Pattern',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_pattern_add_color_stop_rgba',
+	{
+		class = 'Pattern',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_pattern_get_color_stop_count',
+	{
+		class = 'Pattern',
+		since = '1.4',
+		args = {'struct* none', 'int* full'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_pattern_get_color_stop_rgba',
+	{
+		class = 'Pattern',
+		since = '1.4',
+		args = {'struct* none', 'int none', 'double* full', 'double* full', 'double* full', 'double* full', 'double* full'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_pattern_get_rgba',
+	{
+		class = 'Pattern',
+		since = '1.4',
+		args = {'struct* none', 'double* full', 'double* full', 'double* full', 'double* full'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_pattern_create_rgb',
+	{
+		class = 'Pattern',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_pattern_create_rgba',
+	{
+		class = 'Pattern',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_pattern_destroy',
+	{
+		class = 'Pattern',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_pattern_create_for_surface',
+	{
+		class = 'Pattern',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_pattern_create_linear',
+	{
+		class = 'Pattern',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_pattern_get_linear_points',
+	{
+		class = 'Pattern',
+		since = '1.4',
+		args = {'struct* none', 'double* full', 'double* full', 'double* full', 'double* full'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_pattern_create_radial',
+	{
+		class = 'Pattern',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_pattern_get_radial_circles',
+	{
+		class = 'Pattern',
+		since = '1.4',
+		args = {'struct* none', 'double* full', 'double* full', 'double* full', 'double* full', 'double* full', 'double* full'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_pattern_status',
+	{
+		class = 'Pattern',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_pattern_set_extend',
+	{
+		class = 'Pattern',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('cairo_pattern_get_extend',
+	{
+		class = 'Pattern',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_pattern_set_filter',
+	{
+		class = 'Pattern',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('cairo_pattern_get_filter',
+	{
+		class = 'Pattern',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_pattern_get_type',
+	{
+		class = 'Pattern',
+		since = '1.2',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_pattern_set_matrix',
+	{
+		class = 'Pattern',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('cairo_pattern_get_matrix',
+	{
+		class = 'Pattern',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('cairo_status_to_string',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('cairo_surface_destroy',
+	{
+		class = 'Surface',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_surface_create_similar',
+	{
+		class = 'Surface',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_surface_status',
+	{
+		class = 'Surface',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_surface_finish',
+	{
+		class = 'Surface',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_surface_flush',
+	{
+		class = 'Surface',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_surface_get_content',
+	{
+		class = 'Surface',
+		since = '1.2',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_surface_mark_dirty',
+	{
+		class = 'Surface',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_surface_mark_dirty_rectangle',
+	{
+		class = 'Surface',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('cairo_surface_set_device_offset',
+	{
+		class = 'Surface',
+		since = '0.1',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_surface_get_device_offset',
+	{
+		class = 'Surface',
+		since = '1.2',
+		args = {'struct* none', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('cairo_surface_set_fallback_resolution',
+	{
+		class = 'Surface',
+		since = '1.2',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('cairo_surface_get_fallback_resolution',
+	{
+		class = 'Surface',
+		since = '1.8',
+		args = {'struct* none', 'double* full', 'double* full'}
+	}
+)
+
+defFunction('cairo_surface_get_type',
+	{
+		class = 'Surface',
+		since = '1.2',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_surface_copy_page',
+	{
+		class = 'Surface',
+		since = '1.6',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_surface_show_page',
+	{
+		class = 'Surface',
+		since = '1.6',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('cairo_surface_has_show_text_glyphs',
+	{
+		class = 'Surface',
+		since = '1.8',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('cairo_image_surface_create',
+	{
+		class = 'ImageSurface',
+		since = '0.1'
+	}
+)
+
+defFunction('cairo_image_surface_get_format',
+	{
+		class = 'ImageSurface',
+		since = '1.2',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_image_surface_get_width',
+	{
+		class = 'ImageSurface',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_image_surface_get_height',
+	{
+		class = 'ImageSurface',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('cairo_image_surface_get_stride',
+	{
+		class = 'ImageSurface',
+		since = '1.2',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defEnum('cairo_antialias_t',
+	{
+		['CAIRO_ANTIALIAS_DEFAULT'] = 0,
+		['CAIRO_ANTIALIAS_GRAY'] = 2,
+		['CAIRO_ANTIALIAS_NONE'] = 1,
+		['CAIRO_ANTIALIAS_SUBPIXEL'] = 3
+	}
+)
+
+defEnum('cairo_fill_rule_t',
+	{
+		['CAIRO_FILL_RULE_WINDING'] = 0,
+		['CAIRO_FILL_RULE_EVEN_ODD'] = 1
+	}
+)
+
+defEnum('cairo_line_cap_t',
+	{
+		['CAIRO_LINE_CAP_SQUARE'] = 2,
+		['CAIRO_LINE_CAP_BUTT'] = 0,
+		['CAIRO_LINE_CAP_ROUND'] = 1
+	}
+)
+
+defEnum('cairo_line_join_t',
+	{
+		['CAIRO_LINE_JOIN_ROUND'] = 1,
+		['CAIRO_LINE_JOIN_MITER'] = 0,
+		['CAIRO_LINE_JOIN_BEVEL'] = 2
+	}
+)
+
+defEnum('cairo_operator_t',
+	{
+		['CAIRO_OPERATOR_SATURATE'] = 13,
+		['CAIRO_OPERATOR_OVER'] = 2,
+		['CAIRO_OPERATOR_ADD'] = 12,
+		['CAIRO_OPERATOR_CLEAR'] = 0,
+		['CAIRO_OPERATOR_DEST_OUT'] = 9,
+		['CAIRO_OPERATOR_IN'] = 3,
+		['CAIRO_OPERATOR_DEST_IN'] = 8,
+		['CAIRO_OPERATOR_OUT'] = 4,
+		['CAIRO_OPERATOR_SOURCE'] = 1,
+		['CAIRO_OPERATOR_DEST_ATOP'] = 10,
+		['CAIRO_OPERATOR_DEST_OVER'] = 7,
+		['CAIRO_OPERATOR_ATOP'] = 5,
+		['CAIRO_OPERATOR_DEST'] = 6,
+		['CAIRO_OPERATOR_XOR'] = 11
+	}
+)
+
+defEnum('cairo_status_t',
+	{
+		['CAIRO_STATUS_INVALID_SLANT'] = 30,
+		['CAIRO_STATUS_INVALID_RESTORE'] = 2,
+		['CAIRO_STATUS_SURFACE_FINISHED'] = 12,
+		['CAIRO_STATUS_SURFACE_TYPE_MISMATCH'] = 13,
+		['CAIRO_STATUS_INVALID_POP_GROUP'] = 3,
+		['CAIRO_STATUS_INVALID_STRING'] = 8,
+		['CAIRO_STATUS_INVALID_WEIGHT'] = 31,
+		['CAIRO_STATUS_INVALID_MATRIX'] = 5,
+		['CAIRO_STATUS_NO_MEMORY'] = 1,
+		['CAIRO_STATUS_INVALID_DSC_COMMENT'] = 20,
+		['CAIRO_STATUS_NULL_POINTER'] = 7,
+		['CAIRO_STATUS_INVALID_CLUSTERS'] = 29,
+		['CAIRO_STATUS_NEGATIVE_COUNT'] = 28,
+		['CAIRO_STATUS_FONT_TYPE_MISMATCH'] = 25,
+		['CAIRO_STATUS_USER_FONT_IMMUTABLE'] = 26,
+		['CAIRO_STATUS_INVALID_DASH'] = 19,
+		['CAIRO_STATUS_USER_FONT_ERROR'] = 27,
+		['CAIRO_STATUS_INVALID_CONTENT'] = 15,
+		['CAIRO_STATUS_FILE_NOT_FOUND'] = 18,
+		['CAIRO_STATUS_SUCCESS'] = 0,
+		['CAIRO_STATUS_NO_CURRENT_POINT'] = 4,
+		['CAIRO_STATUS_PATTERN_TYPE_MISMATCH'] = 14,
+		['CAIRO_STATUS_CLIP_NOT_REPRESENTABLE'] = 22,
+		['CAIRO_STATUS_INVALID_INDEX'] = 21,
+		['CAIRO_STATUS_WRITE_ERROR'] = 11,
+		['CAIRO_STATUS_TEMP_FILE_ERROR'] = 23,
+		['CAIRO_STATUS_INVALID_FORMAT'] = 16,
+		['CAIRO_STATUS_INVALID_VISUAL'] = 17,
+		['CAIRO_STATUS_INVALID_PATH_DATA'] = 9,
+		['CAIRO_STATUS_READ_ERROR'] = 10,
+		['CAIRO_STATUS_INVALID_STATUS'] = 6,
+		['CAIRO_STATUS_INVALID_STRIDE'] = 24
+	}
+)
+
+defEnum('cairo_extend_t',
+	{
+		['CAIRO_EXTEND_REFLECT'] = 2,
+		['CAIRO_EXTEND_NONE'] = 0,
+		['CAIRO_EXTEND_PAD'] = 3,
+		['CAIRO_EXTEND_REPEAT'] = 1
+	}
+)
+
+defEnum('cairo_filter_t',
+	{
+		['CAIRO_FILTER_GOOD'] = 1,
+		['CAIRO_FILTER_BEST'] = 2,
+		['CAIRO_FILTER_NEAREST'] = 3,
+		['CAIRO_FILTER_FAST'] = 0,
+		['CAIRO_FILTER_GAUSSIAN'] = 5,
+		['CAIRO_FILTER_BILINEAR'] = 4
+	}
+)
+
+defEnum('cairo_pattern_type_t',
+	{
+		['CAIRO_PATTERN_TYPE_RADIAL'] = 3,
+		['CAIRO_PATTERN_TYPE_LINEAR'] = 2,
+		['CAIRO_PATTERN_TYPE_SURFACE'] = 1,
+		['CAIRO_PATTERN_TYPE_SOLID'] = 0
+	}
+)
+
+defEnum('cairo_content_t',
+	{
+		['CAIRO_CONTENT_COLOR'] = 4096,
+		['CAIRO_CONTENT_ALPHA'] = 8192,
+		['CAIRO_CONTENT_COLOR_ALPHA'] = 12288
+	}
+)
+
+defEnum('cairo_surface_type_t',
+	{
+		['CAIRO_SURFACE_TYPE_DIRECTFB'] = 9,
+		['CAIRO_SURFACE_TYPE_IMAGE'] = 0,
+		['CAIRO_SURFACE_TYPE_WIN32'] = 7,
+		['CAIRO_SURFACE_TYPE_WIN32_PRINTING'] = 12,
+		['CAIRO_SURFACE_TYPE_QUARTZ'] = 6,
+		['CAIRO_SURFACE_TYPE_PS'] = 2,
+		['CAIRO_SURFACE_TYPE_XCB'] = 4,
+		['CAIRO_SURFACE_TYPE_PDF'] = 1,
+		['CAIRO_SURFACE_TYPE_QUARTZ_IMAGE'] = 13,
+		['CAIRO_SURFACE_TYPE_GLITZ'] = 5,
+		['CAIRO_SURFACE_TYPE_BEOS'] = 8,
+		['CAIRO_SURFACE_TYPE_XLIB'] = 3,
+		['CAIRO_SURFACE_TYPE_SVG'] = 10,
+		['CAIRO_SURFACE_TYPE_OS2'] = 11
+	}
+)
+
+defEnum('cairo_format_t',
+	{
+		['CAIRO_FORMAT_ARGB32'] = 0,
+		['CAIRO_FORMAT_RGB24'] = 1,
+		['CAIRO_FORMAT_A8'] = 2,
+		['CAIRO_FORMAT_A1'] = 3
+	}
+)
+
+defEnum('cairo_font_slant_t',
+	{
+		['CAIRO_FONT_SLANT_NORMAL'] = 0,
+		['CAIRO_FONT_SLANT_ITALIC'] = 1,
+		['CAIRO_FONT_SLANT_OBLIQUE'] = 2,
+	}
+)
+
+defEnum('cairo_font_weight_t',
+	{
+		['CAIRO_FONT_WEIGHT_NORMAL'] = 0,
+    	['CAIRO_FONT_WEIGHT_BOLD'] = 1,
+	}
+)
+

@@ -1,0 +1,3434 @@
+defLib = 'Pango'
+defName = 'pango'
+
+defClass('PangoContext',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('PangoFont',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('PangoFontFace',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('PangoFontFamily',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('PangoFontMap',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('PangoFontset',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('PangoLayout',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('PangoRenderer',
+	{
+		parent = 'GObject'
+	}
+)
+
+defClass('PangoAnalysis',
+	{
+		
+	}
+)
+
+defClass('PangoAttrColor',
+	{
+		
+	}
+)
+
+defClass('PangoAttrFloat',
+	{
+		
+	}
+)
+
+defClass('PangoAttrFontDesc',
+	{
+		
+	}
+)
+
+defClass('PangoAttrInt',
+	{
+		
+	}
+)
+
+defClass('PangoAttrIterator',
+	{
+		
+	}
+)
+
+defClass('PangoAttrLanguage',
+	{
+		
+	}
+)
+
+defClass('PangoAttrList',
+	{
+		
+	}
+)
+
+defClass('PangoAttrShape',
+	{
+		
+	}
+)
+
+defClass('PangoAttrSize',
+	{
+		
+	}
+)
+
+defClass('PangoAttrString',
+	{
+		
+	}
+)
+
+defClass('PangoAttribute',
+	{
+		
+	}
+)
+
+defClass('PangoColor',
+	{
+		
+	}
+)
+
+defClass('PangoCoverage',
+	{
+		
+	}
+)
+
+defClass('PangoEngineLang',
+	{
+		
+	}
+)
+
+defClass('PangoEngineShape',
+	{
+		
+	}
+)
+
+defClass('PangoFontDescription',
+	{
+		
+	}
+)
+
+defClass('PangoFontMetrics',
+	{
+		
+	}
+)
+
+defClass('PangoGlyphGeometry',
+	{
+		
+	}
+)
+
+defClass('PangoGlyphInfo',
+	{
+		
+	}
+)
+
+defClass('PangoGlyphItem',
+	{
+		
+	}
+)
+
+defClass('PangoGlyphItemIter',
+	{
+		
+	}
+)
+
+defClass('PangoGlyphString',
+	{
+		
+	}
+)
+
+defClass('PangoGlyphVisAttr',
+	{
+		
+	}
+)
+
+defClass('PangoItem',
+	{
+		
+	}
+)
+
+defClass('PangoLanguage',
+	{
+		
+	}
+)
+
+defClass('PangoLayoutIter',
+	{
+		
+	}
+)
+
+defClass('PangoLayoutLine',
+	{
+		
+	}
+)
+
+defClass('PangoLogAttr',
+	{
+		
+	}
+)
+
+defClass('PangoMatrix',
+	{
+		
+	}
+)
+
+defClass('PangoRectangle',
+	{
+		
+	}
+)
+
+defClass('PangoScriptIter',
+	{
+		
+	}
+)
+
+defClass('PangoTabArray',
+	{
+		
+	}
+)
+
+defClass('_PangoScriptForLang',
+	{
+		
+	}
+)
+
+defFunction('pango_attr_iterator_copy',
+	{
+		class = 'PangoAttrIterator',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_iterator_destroy',
+	{
+		class = 'PangoAttrIterator',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_attr_iterator_get',
+	{
+		class = 'PangoAttrIterator',
+		since = '0.1',
+		args = {'struct* none', 'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_iterator_get_attrs',
+	{
+		class = 'PangoAttrIterator',
+		since = '1.2',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_iterator_get_font',
+	{
+		class = 'PangoAttrIterator',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct** none', 'struct** none'}
+	}
+)
+
+defFunction('pango_attr_iterator_next',
+	{
+		class = 'PangoAttrIterator',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_attr_iterator_range',
+	{
+		class = 'PangoAttrIterator',
+		since = '0.1',
+		args = {'struct* none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('pango_attr_list_new',
+	{
+		class = 'PangoAttrList',
+		constructor = true,
+		since = '0.1',
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_attr_list_change',
+	{
+		class = 'PangoAttrList',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_attr_list_copy',
+	{
+		class = 'PangoAttrList',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_attr_list_filter',
+	{
+		class = 'PangoAttrList',
+		since = '1.2',
+		args = {'struct* none', 'callback none', 'void* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_attr_list_get_iterator',
+	{
+		class = 'PangoAttrList',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_list_insert',
+	{
+		class = 'PangoAttrList',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_attr_list_insert_before',
+	{
+		class = 'PangoAttrList',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_attr_list_ref',
+	{
+		class = 'PangoAttrList',
+		since = '1.10',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_attr_list_splice',
+	{
+		class = 'PangoAttrList',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('pango_attr_list_unref',
+	{
+		class = 'PangoAttrList',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_attribute_copy',
+	{
+		class = 'PangoAttribute',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attribute_destroy',
+	{
+		class = 'PangoAttribute',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_attribute_equal',
+	{
+		class = 'PangoAttribute',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_attribute_init',
+	{
+		class = 'PangoAttribute',
+		since = '1.20',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_color_copy',
+	{
+		class = 'PangoColor',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_color_free',
+	{
+		class = 'PangoColor',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_color_parse',
+	{
+		class = 'PangoColor',
+		since = '0.1',
+		args = {'struct* none', 'char* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_color_to_string',
+	{
+		class = 'PangoColor',
+		since = '1.16',
+		args = {'struct* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('pango_context_get_type',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('pango_context_new',
+	{
+		class = 'PangoContext',
+		constructor = true,
+		since = '0.1',
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('pango_context_get_base_dir',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_context_get_base_gravity',
+	{
+		class = 'PangoContext',
+		since = '1.16',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_context_get_font_description',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_context_get_font_map',
+	{
+		class = 'PangoContext',
+		since = '1.6',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_context_get_gravity',
+	{
+		class = 'PangoContext',
+		since = '1.16',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_context_get_gravity_hint',
+	{
+		class = 'PangoContext',
+		since = '1.16',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_context_get_language',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_context_get_matrix',
+	{
+		class = 'PangoContext',
+		since = '1.6',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_context_get_metrics',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_context_list_families',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none', 'PangoFontFamily*** none', 'int* none'}
+	}
+)
+
+defFunction('pango_context_load_font',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_context_load_fontset',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_context_set_base_dir',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_context_set_base_gravity',
+	{
+		class = 'PangoContext',
+		since = '1.16',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_context_set_font_description',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_context_set_font_map',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none'}
+	}
+)
+
+defFunction('pango_context_set_gravity_hint',
+	{
+		class = 'PangoContext',
+		since = '1.16',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_context_set_language',
+	{
+		class = 'PangoContext',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_context_set_matrix',
+	{
+		class = 'PangoContext',
+		since = '1.6',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_coverage_copy',
+	{
+		class = 'PangoCoverage',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_coverage_get',
+	{
+		class = 'PangoCoverage',
+		since = '0.1',
+		args = {'struct* none', 'int none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_coverage_max',
+	{
+		class = 'PangoCoverage',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_coverage_ref',
+	{
+		class = 'PangoCoverage',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_coverage_set',
+	{
+		class = 'PangoCoverage',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('pango_coverage_to_bytes',
+	{
+		class = 'PangoCoverage',
+		since = '0.1',
+		args = {'struct* none', 'unsigned char** none', 'int* none'}
+	}
+)
+
+defFunction('pango_coverage_unref',
+	{
+		class = 'PangoCoverage',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_font_get_type',
+	{
+		class = 'PangoFont',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('pango_font_descriptions_free',
+	{
+		since = '0.1',
+		args = {'struct** none', 'int none'}
+	}
+)
+
+defFunction('pango_font_describe',
+	{
+		class = 'PangoFont',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_font_describe_with_absolute_size',
+	{
+		class = 'PangoFont',
+		since = '1.14',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_font_find_shaper',
+	{
+		class = 'PangoFont',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'unsigned long none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_font_get_coverage',
+	{
+		class = 'PangoFont',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_font_get_font_map',
+	{
+		class = 'PangoFont',
+		since = '1.10',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_font_get_glyph_extents',
+	{
+		class = 'PangoFont',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned long none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_font_get_metrics',
+	{
+		class = 'PangoFont',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_font_description_new',
+	{
+		class = 'PangoFontDescription',
+		constructor = true,
+		since = '0.1',
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_font_description_better_match',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_font_description_copy',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_font_description_copy_static',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_font_description_equal',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_font_description_free',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_font_description_get_family',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('pango_font_description_get_gravity',
+	{
+		class = 'PangoFontDescription',
+		since = '1.16',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_description_get_set_fields',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_description_get_size',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_description_get_size_is_absolute',
+	{
+		class = 'PangoFontDescription',
+		since = '1.8',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_font_description_get_stretch',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_description_get_style',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_description_get_variant',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_description_get_weight',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_description_hash',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'unsigned int none'
+	}
+)
+
+defFunction('pango_font_description_merge',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'boolean none'}
+	}
+)
+
+defFunction('pango_font_description_merge_static',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'boolean none'}
+	}
+)
+
+defFunction('pango_font_description_set_absolute_size',
+	{
+		class = 'PangoFontDescription',
+		since = '1.8',
+		args = {'struct* none', 'double none'}
+	}
+)
+
+defFunction('pango_font_description_set_family',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'char* none'}
+	}
+)
+
+defFunction('pango_font_description_set_family_static',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'char* none'}
+	}
+)
+
+defFunction('pango_font_description_set_gravity',
+	{
+		class = 'PangoFontDescription',
+		since = '1.16',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_font_description_set_size',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_font_description_set_stretch',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_font_description_set_style',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_font_description_set_variant',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_font_description_set_weight',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_font_description_to_filename',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('pango_font_description_to_string',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('pango_font_description_unset_fields',
+	{
+		class = 'PangoFontDescription',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_font_face_get_type',
+	{
+		class = 'PangoFontFace',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('pango_font_face_describe',
+	{
+		class = 'PangoFontFace',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_font_face_get_face_name',
+	{
+		class = 'PangoFontFace',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('pango_font_face_is_synthesized',
+	{
+		class = 'PangoFontFace',
+		since = '1.18',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_font_face_list_sizes',
+	{
+		class = 'PangoFontFace',
+		since = '1.4',
+		args = {'GObject* none', 'int** none', 'int* none'}
+	}
+)
+
+defFunction('pango_font_family_get_type',
+	{
+		class = 'PangoFontFamily',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('pango_font_family_get_name',
+	{
+		class = 'PangoFontFamily',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('pango_font_family_is_monospace',
+	{
+		class = 'PangoFontFamily',
+		since = '1.4',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_font_family_list_faces',
+	{
+		class = 'PangoFontFamily',
+		since = '0.1',
+		args = {'GObject* none', 'PangoFontFace*** none', 'int* none'}
+	}
+)
+
+defFunction('pango_font_map_get_type',
+	{
+		class = 'PangoFontMap',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('pango_font_map_create_context',
+	{
+		class = 'PangoFontMap',
+		since = '1.22',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_font_map_list_families',
+	{
+		class = 'PangoFontMap',
+		since = '0.1',
+		args = {'GObject* none', 'PangoFontFamily*** none', 'int* none'}
+	}
+)
+
+defFunction('pango_font_map_load_font',
+	{
+		class = 'PangoFontMap',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_font_map_load_fontset',
+	{
+		class = 'PangoFontMap',
+		since = '0.1',
+		args = {'GObject* none', 'GObject* none', 'struct* none', 'struct* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_font_metrics_get_approximate_char_width',
+	{
+		class = 'PangoFontMetrics',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_metrics_get_approximate_digit_width',
+	{
+		class = 'PangoFontMetrics',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_metrics_get_ascent',
+	{
+		class = 'PangoFontMetrics',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_metrics_get_descent',
+	{
+		class = 'PangoFontMetrics',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_metrics_get_strikethrough_position',
+	{
+		class = 'PangoFontMetrics',
+		since = '1.6',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_metrics_get_strikethrough_thickness',
+	{
+		class = 'PangoFontMetrics',
+		since = '1.6',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_metrics_get_underline_position',
+	{
+		class = 'PangoFontMetrics',
+		since = '1.6',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_metrics_get_underline_thickness',
+	{
+		class = 'PangoFontMetrics',
+		since = '1.6',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_font_metrics_ref',
+	{
+		class = 'PangoFontMetrics',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_font_metrics_unref',
+	{
+		class = 'PangoFontMetrics',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_fontset_get_type',
+	{
+		class = 'PangoFontset',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('pango_fontset_foreach',
+	{
+		class = 'PangoFontset',
+		since = '1.4',
+		args = {'GObject* none', 'callback none', 'void* none'}
+	}
+)
+
+defFunction('pango_fontset_get_font',
+	{
+		class = 'PangoFontset',
+		since = '0.1',
+		args = {'GObject* none', 'unsigned int none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_fontset_get_metrics',
+	{
+		class = 'PangoFontset',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_glyph_item_apply_attrs',
+	{
+		class = 'PangoGlyphItem',
+		since = '1.2',
+		args = {'struct* none', 'char* none', 'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_glyph_item_copy',
+	{
+		class = 'PangoGlyphItem',
+		since = '1.20',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_glyph_item_free',
+	{
+		class = 'PangoGlyphItem',
+		since = '1.6',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_glyph_item_get_logical_widths',
+	{
+		class = 'PangoGlyphItem',
+		since = '1.26',
+		args = {'struct* none', 'char* none', 'int* none'}
+	}
+)
+
+defFunction('pango_glyph_item_letter_space',
+	{
+		class = 'PangoGlyphItem',
+		since = '1.6',
+		args = {'struct* none', 'char* none', 'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_glyph_item_split',
+	{
+		class = 'PangoGlyphItem',
+		since = '1.2',
+		args = {'struct* none', 'char* none', 'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_glyph_item_iter_copy',
+	{
+		class = 'PangoGlyphItemIter',
+		since = '1.22',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_glyph_item_iter_free',
+	{
+		class = 'PangoGlyphItemIter',
+		since = '1.22',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_glyph_item_iter_init_end',
+	{
+		class = 'PangoGlyphItemIter',
+		since = '1.22',
+		args = {'struct* none', 'struct* none', 'char* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_glyph_item_iter_init_start',
+	{
+		class = 'PangoGlyphItemIter',
+		since = '1.22',
+		args = {'struct* none', 'struct* none', 'char* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_glyph_item_iter_next_cluster',
+	{
+		class = 'PangoGlyphItemIter',
+		since = '1.22',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_glyph_item_iter_prev_cluster',
+	{
+		class = 'PangoGlyphItemIter',
+		since = '1.22',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_glyph_string_new',
+	{
+		class = 'PangoGlyphString',
+		constructor = true,
+		since = '0.1',
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_glyph_string_copy',
+	{
+		class = 'PangoGlyphString',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_glyph_string_extents',
+	{
+		class = 'PangoGlyphString',
+		since = '0.1',
+		args = {'struct* none', 'GObject* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_glyph_string_extents_range',
+	{
+		class = 'PangoGlyphString',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none', 'GObject* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_glyph_string_free',
+	{
+		class = 'PangoGlyphString',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_glyph_string_get_logical_widths',
+	{
+		class = 'PangoGlyphString',
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int none', 'int none', 'int* none'}
+	}
+)
+
+defFunction('pango_glyph_string_get_width',
+	{
+		class = 'PangoGlyphString',
+		since = '1.14',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_glyph_string_index_to_x',
+	{
+		class = 'PangoGlyphString',
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int none', 'struct* none', 'int none', 'boolean none', 'int* none'}
+	}
+)
+
+defFunction('pango_glyph_string_set_size',
+	{
+		class = 'PangoGlyphString',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_glyph_string_x_to_index',
+	{
+		class = 'PangoGlyphString',
+		since = '0.1',
+		args = {'struct* none', 'char* none', 'int none', 'struct* none', 'int none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('pango_item_new',
+	{
+		class = 'PangoItem',
+		constructor = true,
+		since = '0.1',
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_item_copy',
+	{
+		class = 'PangoItem',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_item_free',
+	{
+		class = 'PangoItem',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_item_split',
+	{
+		class = 'PangoItem',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_language_get_sample_string',
+	{
+		class = 'PangoLanguage',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('pango_language_get_scripts',
+	{
+		class = 'PangoLanguage',
+		since = '1.22',
+		args = {'struct* none', 'int* none'},
+		ret = 'int* none'
+	}
+)
+
+defFunction('pango_language_includes_script',
+	{
+		class = 'PangoLanguage',
+		since = '1.4',
+		args = {'struct* none', 'int none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_language_matches',
+	{
+		class = 'PangoLanguage',
+		since = '0.1',
+		args = {'struct* none', 'char* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_language_to_string',
+	{
+		class = 'PangoLanguage',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('pango_layout_get_type',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('pango_layout_new',
+	{
+		class = 'PangoLayout',
+		constructor = true,
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* full'
+	}
+)
+
+defFunction('pango_layout_context_changed',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('pango_layout_copy',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_layout_get_alignment',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_get_attributes',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_layout_get_auto_dir',
+	{
+		class = 'PangoLayout',
+		since = '1.4',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_get_baseline',
+	{
+		class = 'PangoLayout',
+		since = '1.22',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_get_context',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_layout_get_cursor_pos',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_get_ellipsize',
+	{
+		class = 'PangoLayout',
+		since = '1.6',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_get_extents',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_get_font_description',
+	{
+		class = 'PangoLayout',
+		since = '1.8',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_layout_get_height',
+	{
+		class = 'PangoLayout',
+		since = '1.20',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_get_indent',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_get_iter',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_layout_get_justify',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_get_line',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_layout_get_line_count',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_get_line_readonly',
+	{
+		class = 'PangoLayout',
+		since = '1.16',
+		args = {'GObject* none', 'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_layout_get_lines',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_layout_get_lines_readonly',
+	{
+		class = 'PangoLayout',
+		since = '1.16',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_layout_get_log_attrs',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'struct** none', 'int* none'}
+	}
+)
+
+defFunction('pango_layout_get_pixel_extents',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_get_pixel_size',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('pango_layout_get_single_paragraph_mode',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_get_size',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('pango_layout_get_spacing',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_get_tabs',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_layout_get_text',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('pango_layout_get_unknown_glyphs_count',
+	{
+		class = 'PangoLayout',
+		since = '1.16',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_get_width',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_get_wrap',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_index_to_line_x',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'boolean none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('pango_layout_index_to_pos',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_is_ellipsized',
+	{
+		class = 'PangoLayout',
+		since = '1.16',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_is_wrapped',
+	{
+		class = 'PangoLayout',
+		since = '1.16',
+		args = {'GObject* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_move_cursor_visually',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none', 'int none', 'int none', 'int none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('pango_layout_set_alignment',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_layout_set_attributes',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_set_auto_dir',
+	{
+		class = 'PangoLayout',
+		since = '1.4',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('pango_layout_set_ellipsize',
+	{
+		class = 'PangoLayout',
+		since = '1.6',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_layout_set_font_description',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_set_height',
+	{
+		class = 'PangoLayout',
+		since = '1.20',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_layout_set_indent',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_layout_set_justify',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('pango_layout_set_markup',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'int none'}
+	}
+)
+
+defFunction('pango_layout_set_markup_with_accel',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'int none', 'gunichar none', 'gunichar* none'}
+	}
+)
+
+defFunction('pango_layout_set_single_paragraph_mode',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'boolean none'}
+	}
+)
+
+defFunction('pango_layout_set_spacing',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_layout_set_tabs',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_set_text',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'int none'}
+	}
+)
+
+defFunction('pango_layout_set_width',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_layout_set_wrap',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_layout_xy_to_index',
+	{
+		class = 'PangoLayout',
+		since = '0.1',
+		args = {'GObject* none', 'int none', 'int none', 'int* none', 'int* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_iter_at_last_line',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_iter_copy',
+	{
+		class = 'PangoLayoutIter',
+		since = '1.20',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_layout_iter_free',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_layout_iter_get_baseline',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_iter_get_char_extents',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_iter_get_cluster_extents',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_iter_get_index',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_layout_iter_get_layout',
+	{
+		class = 'PangoLayoutIter',
+		since = '1.20',
+		args = {'struct* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_layout_iter_get_layout_extents',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_iter_get_line',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_layout_iter_get_line_extents',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_iter_get_line_readonly',
+	{
+		class = 'PangoLayoutIter',
+		since = '1.16',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_layout_iter_get_line_yrange',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('pango_layout_iter_get_run',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'GlyphItem* none'
+	}
+)
+
+defFunction('pango_layout_iter_get_run_extents',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_iter_get_run_readonly',
+	{
+		class = 'PangoLayoutIter',
+		since = '1.16',
+		args = {'struct* none'},
+		ret = 'GlyphItem* none'
+	}
+)
+
+defFunction('pango_layout_iter_next_char',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_iter_next_cluster',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_iter_next_line',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_iter_next_run',
+	{
+		class = 'PangoLayoutIter',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_layout_line_get_extents',
+	{
+		class = 'PangoLayoutLine',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_line_get_pixel_extents',
+	{
+		class = 'PangoLayoutLine',
+		since = '0.1',
+		args = {'struct* none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_layout_line_get_x_ranges',
+	{
+		class = 'PangoLayoutLine',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none', 'int** full', 'int* none'}
+	}
+)
+
+defFunction('pango_layout_line_index_to_x',
+	{
+		class = 'PangoLayoutLine',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'boolean none', 'int* none'}
+	}
+)
+
+defFunction('pango_layout_line_ref',
+	{
+		class = 'PangoLayoutLine',
+		since = '1.10',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_layout_line_unref',
+	{
+		class = 'PangoLayoutLine',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_layout_line_x_to_index',
+	{
+		class = 'PangoLayoutLine',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int* none', 'int* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_matrix_concat',
+	{
+		class = 'PangoMatrix',
+		since = '1.6',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_matrix_copy',
+	{
+		class = 'PangoMatrix',
+		since = '1.6',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_matrix_free',
+	{
+		class = 'PangoMatrix',
+		since = '1.6',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_matrix_get_font_scale_factor',
+	{
+		class = 'PangoMatrix',
+		since = '1.12',
+		args = {'struct* none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('pango_matrix_rotate',
+	{
+		class = 'PangoMatrix',
+		since = '1.6',
+		args = {'struct* none', 'double none'}
+	}
+)
+
+defFunction('pango_matrix_scale',
+	{
+		class = 'PangoMatrix',
+		since = '1.6',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('pango_matrix_transform_distance',
+	{
+		class = 'PangoMatrix',
+		since = '1.16',
+		args = {'struct* none', 'double* none', 'double* none'}
+	}
+)
+
+defFunction('pango_matrix_transform_pixel_rectangle',
+	{
+		class = 'PangoMatrix',
+		since = '1.16',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_matrix_transform_point',
+	{
+		class = 'PangoMatrix',
+		since = '1.16',
+		args = {'struct* none', 'double* none', 'double* none'}
+	}
+)
+
+defFunction('pango_matrix_transform_rectangle',
+	{
+		class = 'PangoMatrix',
+		since = '1.16',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_matrix_translate',
+	{
+		class = 'PangoMatrix',
+		since = '1.6',
+		args = {'struct* none', 'double none', 'double none'}
+	}
+)
+
+defFunction('pango_renderer_get_type',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		ret = 'unsigned long none'
+	}
+)
+
+defFunction('pango_renderer_activate',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('pango_renderer_deactivate',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none'}
+	}
+)
+
+defFunction('pango_renderer_draw_error_underline',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('pango_renderer_draw_glyph',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'GObject* none', 'unsigned long none', 'double none', 'double none'}
+	}
+)
+
+defFunction('pango_renderer_draw_glyph_item',
+	{
+		class = 'PangoRenderer',
+		since = '1.22',
+		args = {'GObject* none', 'char* none', 'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('pango_renderer_draw_glyphs',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'GObject* none', 'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('pango_renderer_draw_layout',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'GObject* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('pango_renderer_draw_layout_line',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'struct* none', 'int none', 'int none'}
+	}
+)
+
+defFunction('pango_renderer_draw_rectangle',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'int none', 'int none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('pango_renderer_draw_trapezoid',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'int none', 'double none', 'double none', 'double none', 'double none', 'double none', 'double none'}
+	}
+)
+
+defFunction('pango_renderer_get_color',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_renderer_get_layout',
+	{
+		class = 'PangoRenderer',
+		since = '1.20',
+		args = {'GObject* none'},
+		ret = 'GObject* none'
+	}
+)
+
+defFunction('pango_renderer_get_layout_line',
+	{
+		class = 'PangoRenderer',
+		since = '1.20',
+		args = {'GObject* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_renderer_get_matrix',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_renderer_part_changed',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'int none'}
+	}
+)
+
+defFunction('pango_renderer_set_color',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'int none', 'struct* none'}
+	}
+)
+
+defFunction('pango_renderer_set_matrix',
+	{
+		class = 'PangoRenderer',
+		since = '1.8',
+		args = {'GObject* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_script_iter_free',
+	{
+		class = 'PangoScriptIter',
+		since = '1.4',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_script_iter_get_range',
+	{
+		class = 'PangoScriptIter',
+		since = '1.4',
+		args = {'struct* none', 'char** none', 'char** none', 'int* none'}
+	}
+)
+
+defFunction('pango_script_iter_next',
+	{
+		class = 'PangoScriptIter',
+		since = '1.4',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_tab_array_new',
+	{
+		class = 'PangoTabArray',
+		constructor = true,
+		since = '0.1',
+		args = {'int none', 'boolean none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_tab_array_new_with_positions',
+	{
+		class = 'PangoTabArray',
+		constructor = true,
+		since = '0.1',
+		args = {'int none', 'boolean none', 'int none', 'int none', 'unhandled none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_tab_array_copy',
+	{
+		class = 'PangoTabArray',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_tab_array_free',
+	{
+		class = 'PangoTabArray',
+		since = '0.1',
+		args = {'struct* none'}
+	}
+)
+
+defFunction('pango_tab_array_get_positions_in_pixels',
+	{
+		class = 'PangoTabArray',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_tab_array_get_size',
+	{
+		class = 'PangoTabArray',
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_tab_array_get_tab',
+	{
+		class = 'PangoTabArray',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('pango_tab_array_get_tabs',
+	{
+		class = 'PangoTabArray',
+		since = '0.1',
+		args = {'struct* none', 'PangoTabAlign** none', 'int** none'}
+	}
+)
+
+defFunction('pango_tab_array_resize',
+	{
+		class = 'PangoTabArray',
+		since = '0.1',
+		args = {'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_tab_array_set_tab',
+	{
+		class = 'PangoTabArray',
+		since = '0.1',
+		args = {'struct* none', 'int none', 'int none', 'int none'}
+	}
+)
+
+defFunction('pango_attr_background_new',
+	{
+		since = '0.1',
+		args = {'unsigned int none', 'unsigned int none', 'unsigned int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_fallback_new',
+	{
+		since = '1.4',
+		args = {'boolean none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_family_new',
+	{
+		since = '0.1',
+		args = {'char* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_font_desc_new',
+	{
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_foreground_new',
+	{
+		since = '0.1',
+		args = {'unsigned int none', 'unsigned int none', 'unsigned int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_gravity_hint_new',
+	{
+		since = '1.16',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_gravity_new',
+	{
+		since = '1.16',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_language_new',
+	{
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_letter_spacing_new',
+	{
+		since = '1.6',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_rise_new',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_scale_new',
+	{
+		since = '0.1',
+		args = {'double none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_shape_new',
+	{
+		since = '0.1',
+		args = {'struct* none', 'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_shape_new_with_data',
+	{
+		since = '1.8',
+		args = {'struct* none', 'struct* none', 'void* none', 'callback none', 'callback none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_size_new',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_size_new_absolute',
+	{
+		since = '1.8',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_stretch_new',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_strikethrough_color_new',
+	{
+		since = '1.8',
+		args = {'unsigned int none', 'unsigned int none', 'unsigned int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_strikethrough_new',
+	{
+		since = '0.1',
+		args = {'boolean none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_style_new',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_type_get_name',
+	{
+		since = '1.22',
+		args = {'int none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('pango_attr_type_register',
+	{
+		since = '0.1',
+		args = {'char* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_attr_underline_color_new',
+	{
+		since = '1.8',
+		args = {'unsigned int none', 'unsigned int none', 'unsigned int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_underline_new',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_variant_new',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_attr_weight_new',
+	{
+		since = '0.1',
+		args = {'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_bidi_type_for_unichar',
+	{
+		since = '1.22',
+		args = {'gunichar none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_break',
+	{
+		since = '0.1',
+		args = {'char* none', 'int none', 'struct* none', 'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_coverage_from_bytes',
+	{
+		since = '0.1',
+		args = {'unsigned char* none', 'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_coverage_new',
+	{
+		since = '0.1',
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_extents_to_pixels',
+	{
+		since = '1.16',
+		args = {'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_find_base_dir',
+	{
+		since = '1.4',
+		args = {'char* none', 'int none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_find_paragraph_boundary',
+	{
+		since = '0.1',
+		args = {'char* none', 'int none', 'int* none', 'int* none'}
+	}
+)
+
+defFunction('pango_font_description_from_string',
+	{
+		since = '0.1',
+		args = {'char* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_get_log_attrs',
+	{
+		since = '0.1',
+		args = {'char* none', 'int none', 'int none', 'struct* none', 'struct* none', 'int none'}
+	}
+)
+
+defFunction('pango_get_mirror_char',
+	{
+		since = '0.1',
+		args = {'gunichar none', 'gunichar* none'},
+		ret = 'boolean none',
+		deprecated = '0.1'
+	}
+)
+
+defFunction('pango_gravity_get_for_matrix',
+	{
+		since = '1.16',
+		args = {'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_gravity_get_for_script',
+	{
+		since = '1.16',
+		args = {'int none', 'int none', 'int none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_gravity_get_for_script_and_width',
+	{
+		since = '1.26',
+		args = {'int none', 'boolean none', 'int none', 'int none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_gravity_to_rotation',
+	{
+		since = '1.16',
+		args = {'int none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('pango_is_zero_width',
+	{
+		since = '1.10',
+		args = {'gunichar none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_itemize',
+	{
+		since = '0.1',
+		args = {'GObject* none', 'char* none', 'int none', 'int none', 'struct* none', 'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_itemize_with_base_dir',
+	{
+		since = '1.4',
+		args = {'GObject* none', 'int none', 'char* none', 'int none', 'int none', 'struct* none', 'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_language_from_string',
+	{
+		since = '0.1',
+		args = {'char* none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_language_get_default',
+	{
+		since = '1.16',
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_log2vis_get_embedding_levels',
+	{
+		since = '1.4',
+		args = {'char* none', 'int none', 'int* none'},
+		ret = 'guint8* none'
+	}
+)
+
+defFunction('pango_parse_enum',
+	{
+		since = '1.16',
+		args = {'unsigned long none', 'char* none', 'int* none', 'boolean none', 'char** none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_parse_markup',
+	{
+		since = '0.1',
+		args = {'char* none', 'int none', 'gunichar none', 'struct** none', 'char** none', 'gunichar* none', 'GError** full'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_parse_stretch',
+	{
+		since = '0.1',
+		args = {'char* none', 'int* none', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_parse_style',
+	{
+		since = '0.1',
+		args = {'char* none', 'int* none', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_parse_variant',
+	{
+		since = '0.1',
+		args = {'char* none', 'int* none', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_parse_weight',
+	{
+		since = '0.1',
+		args = {'char* none', 'int* none', 'boolean none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_quantize_line_geometry',
+	{
+		since = '1.12',
+		args = {'int* none', 'int* none'}
+	}
+)
+
+defFunction('pango_read_line',
+	{
+		since = '0.1',
+		args = {'FILE* none', 'struct* none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_reorder_items',
+	{
+		since = '0.1',
+		args = {'struct* none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_scan_int',
+	{
+		since = '0.1',
+		args = {'char** none', 'int* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_scan_string',
+	{
+		since = '0.1',
+		args = {'char** none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_scan_word',
+	{
+		since = '0.1',
+		args = {'char** none', 'struct* none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_script_for_unichar',
+	{
+		since = '1.4',
+		args = {'gunichar none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_script_get_sample_language',
+	{
+		since = '1.4',
+		args = {'int none'},
+		ret = 'struct* full'
+	}
+)
+
+defFunction('pango_script_iter_new',
+	{
+		since = '1.4',
+		args = {'char* none', 'int none'},
+		ret = 'struct* none'
+	}
+)
+
+defFunction('pango_shape',
+	{
+		since = '0.1',
+		args = {'char* none', 'int none', 'struct* none', 'struct* none'}
+	}
+)
+
+defFunction('pango_skip_space',
+	{
+		since = '0.1',
+		args = {'char** none'},
+		ret = 'boolean none'
+	}
+)
+
+defFunction('pango_split_file_list',
+	{
+		since = '0.1',
+		args = {'char* none'}
+	}
+)
+
+defFunction('pango_trim_string',
+	{
+		since = '0.1',
+		args = {'char* none'},
+		ret = 'char* full'
+	}
+)
+
+defFunction('pango_unichar_direction',
+	{
+		since = '0.1',
+		args = {'gunichar none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_units_from_double',
+	{
+		since = '1.16',
+		args = {'double none'},
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_units_to_double',
+	{
+		since = '1.16',
+		args = {'int none'},
+		ret = 'double none'
+	}
+)
+
+defFunction('pango_version',
+	{
+		since = '1.16',
+		ret = 'int none'
+	}
+)
+
+defFunction('pango_version_check',
+	{
+		since = '1.16',
+		args = {'int none', 'int none', 'int none'},
+		ret = 'char* none'
+	}
+)
+
+defFunction('pango_version_string',
+	{
+		since = '1.16',
+		ret = 'char* none'
+	}
+)
+
+defEnum('PangoAlignment',
+	{
+		['PANGO_ALIGN_LEFT'] = 0,
+		['PANGO_ALIGN_RIGHT'] = 2,
+		['PANGO_ALIGN_CENTER'] = 1
+	}
+)
+
+defEnum('PangoAttrType',
+	{
+		['PANGO_ATTR_RISE'] = 13,
+		['PANGO_ATTR_GRAVITY_HINT'] = 22,
+		['PANGO_ATTR_STRIKETHROUGH'] = 12,
+		['PANGO_ATTR_STRETCH'] = 6,
+		['PANGO_ATTR_BACKGROUND'] = 10,
+		['PANGO_ATTR_SCALE'] = 15,
+		['PANGO_ATTR_FOREGROUND'] = 9,
+		['PANGO_ATTR_GRAVITY'] = 21,
+		['PANGO_ATTR_SIZE'] = 7,
+		['PANGO_ATTR_FONT_DESC'] = 8,
+		['PANGO_ATTR_STRIKETHROUGH_COLOR'] = 19,
+		['PANGO_ATTR_ABSOLUTE_SIZE'] = 20,
+		['PANGO_ATTR_STYLE'] = 3,
+		['PANGO_ATTR_FAMILY'] = 2,
+		['PANGO_ATTR_SHAPE'] = 14,
+		['PANGO_ATTR_LETTER_SPACING'] = 17,
+		['PANGO_ATTR_LANGUAGE'] = 1,
+		['PANGO_ATTR_WEIGHT'] = 4,
+		['PANGO_ATTR_UNDERLINE'] = 11,
+		['PANGO_ATTR_FALLBACK'] = 16,
+		['PANGO_ATTR_UNDERLINE_COLOR'] = 18,
+		['PANGO_ATTR_INVALID'] = 0,
+		['PANGO_ATTR_VARIANT'] = 5
+	}
+)
+
+defEnum('PangoBidiType',
+	{
+		['PANGO_BIDI_TYPE_PDF'] = 7,
+		['PANGO_BIDI_TYPE_LRE'] = 1,
+		['PANGO_BIDI_TYPE_AN'] = 11,
+		['PANGO_BIDI_TYPE_AL'] = 4,
+		['PANGO_BIDI_TYPE_RLE'] = 5,
+		['PANGO_BIDI_TYPE_EN'] = 8,
+		['PANGO_BIDI_TYPE_LRO'] = 2,
+		['PANGO_BIDI_TYPE_ON'] = 18,
+		['PANGO_BIDI_TYPE_WS'] = 17,
+		['PANGO_BIDI_TYPE_ES'] = 9,
+		['PANGO_BIDI_TYPE_B'] = 15,
+		['PANGO_BIDI_TYPE_RLO'] = 6,
+		['PANGO_BIDI_TYPE_NSM'] = 13,
+		['PANGO_BIDI_TYPE_R'] = 3,
+		['PANGO_BIDI_TYPE_S'] = 16,
+		['PANGO_BIDI_TYPE_ET'] = 10,
+		['PANGO_BIDI_TYPE_L'] = 0,
+		['PANGO_BIDI_TYPE_CS'] = 12,
+		['PANGO_BIDI_TYPE_BN'] = 14
+	}
+)
+
+defEnum('PangoCoverageLevel',
+	{
+		['PANGO_COVERAGE_APPROXIMATE'] = 2,
+		['PANGO_COVERAGE_NONE'] = 0,
+		['PANGO_COVERAGE_EXACT'] = 3,
+		['PANGO_COVERAGE_FALLBACK'] = 1
+	}
+)
+
+defEnum('PangoDirection',
+	{
+		['PANGO_DIRECTION_RTL'] = 1,
+		['PANGO_DIRECTION_WEAK_RTL'] = 5,
+		['PANGO_DIRECTION_WEAK_LTR'] = 4,
+		['PANGO_DIRECTION_NEUTRAL'] = 6,
+		['PANGO_DIRECTION_TTB_RTL'] = 3,
+		['PANGO_DIRECTION_LTR'] = 0,
+		['PANGO_DIRECTION_TTB_LTR'] = 2
+	}
+)
+
+defEnum('PangoEllipsizeMode',
+	{
+		['PANGO_ELLIPSIZE_NONE'] = 0,
+		['PANGO_ELLIPSIZE_START'] = 1,
+		['PANGO_ELLIPSIZE_MIDDLE'] = 2,
+		['PANGO_ELLIPSIZE_END'] = 3
+	}
+)
+
+defEnum('PangoFontMask',
+	{
+		['PANGO_FONT_MASK_GRAVITY'] = 64,
+		['PANGO_FONT_MASK_STYLE'] = 2,
+		['PANGO_FONT_MASK_VARIANT'] = 4,
+		['PANGO_FONT_MASK_SIZE'] = 32,
+		['PANGO_FONT_MASK_STRETCH'] = 16,
+		['PANGO_FONT_MASK_WEIGHT'] = 8,
+		['PANGO_FONT_MASK_FAMILY'] = 1
+	}
+)
+
+defEnum('PangoGravity',
+	{
+		['PANGO_GRAVITY_SOUTH'] = 0,
+		['PANGO_GRAVITY_EAST'] = 1,
+		['PANGO_GRAVITY_AUTO'] = 4,
+		['PANGO_GRAVITY_WEST'] = 3,
+		['PANGO_GRAVITY_NORTH'] = 2
+	}
+)
+
+defEnum('PangoGravityHint',
+	{
+		['PANGO_GRAVITY_HINT_STRONG'] = 1,
+		['PANGO_GRAVITY_HINT_LINE'] = 2,
+		['PANGO_GRAVITY_HINT_NATURAL'] = 0
+	}
+)
+
+defEnum('PangoRenderPart',
+	{
+		['PANGO_RENDER_PART_STRIKETHROUGH'] = 3,
+		['PANGO_RENDER_PART_BACKGROUND'] = 1,
+		['PANGO_RENDER_PART_FOREGROUND'] = 0,
+		['PANGO_RENDER_PART_UNDERLINE'] = 2
+	}
+)
+
+defEnum('PangoScript',
+	{
+		['PANGO_SCRIPT_ARABIC'] = 2,
+		['PANGO_SCRIPT_HEBREW'] = 19,
+		['PANGO_SCRIPT_ETHIOPIC'] = 11,
+		['PANGO_SCRIPT_KHMER'] = 23,
+		['PANGO_SCRIPT_CARIAN'] = 75,
+		['PANGO_SCRIPT_OLD_ITALIC'] = 30,
+		['PANGO_SCRIPT_TAGALOG'] = 42,
+		['PANGO_SCRIPT_ORIYA'] = 31,
+		['PANGO_SCRIPT_NEW_TAI_LUE'] = 54,
+		['PANGO_SCRIPT_UNKNOWN'] = 61,
+		['PANGO_SCRIPT_OL_CHIKI'] = 73,
+		['PANGO_SCRIPT_TAMIL'] = 35,
+		['PANGO_SCRIPT_KANNADA'] = 21,
+		['PANGO_SCRIPT_UGARITIC'] = 53,
+		['PANGO_SCRIPT_MYANMAR'] = 28,
+		['PANGO_SCRIPT_KHAROSHTHI'] = 60,
+		['PANGO_SCRIPT_YI'] = 41,
+		['PANGO_SCRIPT_INVALID_CODE'] = -1,
+		['PANGO_SCRIPT_BOPOMOFO'] = 5,
+		['PANGO_SCRIPT_CHEROKEE'] = 6,
+		['PANGO_SCRIPT_PHOENICIAN'] = 64,
+		['PANGO_SCRIPT_BRAILLE'] = 46,
+		['PANGO_SCRIPT_TIBETAN'] = 39,
+		['PANGO_SCRIPT_LATIN'] = 25,
+		['PANGO_SCRIPT_BENGALI'] = 4,
+		['PANGO_SCRIPT_COPTIC'] = 7,
+		['PANGO_SCRIPT_LEPCHA'] = 68,
+		['PANGO_SCRIPT_HAN'] = 17,
+		['PANGO_SCRIPT_TAI_LE'] = 52,
+		['PANGO_SCRIPT_GURMUKHI'] = 16,
+		['PANGO_SCRIPT_MONGOLIAN'] = 27,
+		['PANGO_SCRIPT_THAANA'] = 37,
+		['PANGO_SCRIPT_REJANG'] = 69,
+		['PANGO_SCRIPT_GREEK'] = 14,
+		['PANGO_SCRIPT_INHERITED'] = 1,
+		['PANGO_SCRIPT_GOTHIC'] = 13,
+		['PANGO_SCRIPT_TAGBANWA'] = 45,
+		['PANGO_SCRIPT_GUJARATI'] = 15,
+		['PANGO_SCRIPT_HIRAGANA'] = 20,
+		['PANGO_SCRIPT_LINEAR_B'] = 51,
+		['PANGO_SCRIPT_GLAGOLITIC'] = 56,
+		['PANGO_SCRIPT_SYLOTI_NAGRI'] = 58,
+		['PANGO_SCRIPT_MALAYALAM'] = 26,
+		['PANGO_SCRIPT_CYPRIOT'] = 47,
+		['PANGO_SCRIPT_TIFINAGH'] = 57,
+		['PANGO_SCRIPT_COMMON'] = 0,
+		['PANGO_SCRIPT_LAO'] = 24,
+		['PANGO_SCRIPT_SHAVIAN'] = 50,
+		['PANGO_SCRIPT_CANADIAN_ABORIGINAL'] = 40,
+		['PANGO_SCRIPT_HANGUL'] = 18,
+		['PANGO_SCRIPT_LYDIAN'] = 77,
+		['PANGO_SCRIPT_SINHALA'] = 33,
+		['PANGO_SCRIPT_LYCIAN'] = 76,
+		['PANGO_SCRIPT_CYRILLIC'] = 8,
+		['PANGO_SCRIPT_VAI'] = 74,
+		['PANGO_SCRIPT_CHAM'] = 72,
+		['PANGO_SCRIPT_SAURASHTRA'] = 71,
+		['PANGO_SCRIPT_SUNDANESE'] = 70,
+		['PANGO_SCRIPT_SYRIAC'] = 34,
+		['PANGO_SCRIPT_KAYAH_LI'] = 67,
+		['PANGO_SCRIPT_HANUNOO'] = 43,
+		['PANGO_SCRIPT_PHAGS_PA'] = 65,
+		['PANGO_SCRIPT_OSMANYA'] = 49,
+		['PANGO_SCRIPT_CUNEIFORM'] = 63,
+		['PANGO_SCRIPT_BALINESE'] = 62,
+		['PANGO_SCRIPT_LIMBU'] = 48,
+		['PANGO_SCRIPT_DESERET'] = 9,
+		['PANGO_SCRIPT_BUGINESE'] = 55,
+		['PANGO_SCRIPT_ARMENIAN'] = 3,
+		['PANGO_SCRIPT_DEVANAGARI'] = 10,
+		['PANGO_SCRIPT_OLD_PERSIAN'] = 59,
+		['PANGO_SCRIPT_BUHID'] = 44,
+		['PANGO_SCRIPT_NKO'] = 66,
+		['PANGO_SCRIPT_THAI'] = 38,
+		['PANGO_SCRIPT_TELUGU'] = 36,
+		['PANGO_SCRIPT_RUNIC'] = 32,
+		['PANGO_SCRIPT_OGHAM'] = 29,
+		['PANGO_SCRIPT_KATAKANA'] = 22,
+		['PANGO_SCRIPT_GEORGIAN'] = 12
+	}
+)
+
+defEnum('PangoStretch',
+	{
+		['PANGO_STRETCH_EXTRA_CONDENSED'] = 1,
+		['PANGO_STRETCH_ULTRA_EXPANDED'] = 8,
+		['PANGO_STRETCH_SEMI_CONDENSED'] = 3,
+		['PANGO_STRETCH_CONDENSED'] = 2,
+		['PANGO_STRETCH_EXTRA_EXPANDED'] = 7,
+		['PANGO_STRETCH_EXPANDED'] = 6,
+		['PANGO_STRETCH_NORMAL'] = 4,
+		['PANGO_STRETCH_ULTRA_CONDENSED'] = 0,
+		['PANGO_STRETCH_SEMI_EXPANDED'] = 5
+	}
+)
+
+defEnum('PangoStyle',
+	{
+		['PANGO_STYLE_NORMAL'] = 0,
+		['PANGO_STYLE_ITALIC'] = 2,
+		['PANGO_STYLE_OBLIQUE'] = 1
+	}
+)
+
+defEnum('PangoTabAlign',
+	{
+		['PANGO_TAB_LEFT'] = 0
+	}
+)
+
+defEnum('PangoUnderline',
+	{
+		['PANGO_UNDERLINE_ERROR'] = 4,
+		['PANGO_UNDERLINE_LOW'] = 3,
+		['PANGO_UNDERLINE_NONE'] = 0,
+		['PANGO_UNDERLINE_DOUBLE'] = 2,
+		['PANGO_UNDERLINE_SINGLE'] = 1
+	}
+)
+
+defEnum('PangoVariant',
+	{
+		['PANGO_VARIANT_SMALL_CAPS'] = 1,
+		['PANGO_VARIANT_NORMAL'] = 0
+	}
+)
+
+defEnum('PangoWeight',
+	{
+		['PANGO_WEIGHT_NORMAL'] = 400,
+		['PANGO_WEIGHT_THIN'] = 100,
+		['PANGO_WEIGHT_ULTRALIGHT'] = 200,
+		['PANGO_WEIGHT_LIGHT'] = 300,
+		['PANGO_WEIGHT_BOOK'] = 380,
+		['PANGO_WEIGHT_MEDIUM'] = 500,
+		['PANGO_WEIGHT_ULTRABOLD'] = 800,
+		['PANGO_WEIGHT_HEAVY'] = 900,
+		['PANGO_WEIGHT_BOLD'] = 700,
+		['PANGO_WEIGHT_ULTRAHEAVY'] = 1000,
+		['PANGO_WEIGHT_SEMIBOLD'] = 600
+	}
+)
+
+defEnum('PangoWrapMode',
+	{
+		['PANGO_WRAP_WORD'] = 0,
+		['PANGO_WRAP_WORD_CHAR'] = 2,
+		['PANGO_WRAP_CHAR'] = 1
+	}
+)
+

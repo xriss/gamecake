@@ -1,0 +1,22 @@
+defType('SvgSurface',
+	{
+		gc = 'cairo_surface_destroy',
+		parent = 'Surface' 
+	}
+)
+
+defFunction('cairo_svg_surface_create',
+	{
+		class = 'SvgSurface'
+	}
+)
+
+defOverride('cairo_svg_surface_create', [[
+	luaL_checktype(L, 1, LUA_TSTRING);
+	cairo_surface_t* ptr = cairo_svg_surface_create(lua_tostring(L, 1),
+		lua_tonumber(L, 2), lua_tonumber(L, 3));
+		
+	priv_struct_new(L, ptr, TRUE, "cairoSvgSurfaceMT");
+	
+	return 1;
+]])
