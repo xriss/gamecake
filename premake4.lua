@@ -106,6 +106,7 @@ if NACL then
 	
 else
 
+	include("lua_iup")
 	include("lua_bit")
 	include("lua_box2d")
 	include("lua_gl")
