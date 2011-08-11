@@ -2,7 +2,7 @@
 
 
 
-project "lua_iup"
+project "lua_gtk"
 language "C"
 
 includedirs { "cd/include" , "im/include" , "iup/include" , "iup/src" }
@@ -39,6 +39,6 @@ end
 files { "iup/srclua5/*.h" , "iup/srclua5/*.c" }
 
 
-SET_KIND("lua","lua_iup","iup")
-SET_TARGET("","lua_iup")
+SET_KIND("lua","lua_gtk","gtk")
+SET_TARGET("","lua_gtk")
 
