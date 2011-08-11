@@ -1,28 +1,47 @@
 
 
+project "lua_wx"
+language "C++"
+
+includedirs { "wx"  }
 
 
-project "lua_gtk"
-language "C"
+for i,v in ipairs{
+"jpeg",
+"png", 
+"tiff", 
+"zlib", 
+"regex", 
+"expat",
+--"base", 
+--"net", 
+--"odbc", 
+--"core", 
+--"gl", 
+"html", 
+"xml", 
+--"media", 
+--"qa", 
+--"adv", 
+--"dbgrid", 
+"xrc", 
+"aui",
+"richtext",
+} do
 
-includedirs { "cd/include" , "im/include" , "iup/include" , "iup/src" }
+files { "wx/"..v.."/*.h" , "wx/"..v.."/*.c" , "wx/"..v.."/*.cpp" }
 
+end
 
-files { "iup/srcim/*.h" , "iup/srcim/*.c" }
-
-files { "iup/srccd/*.h" , "iup/srccd/*.c" }
-
-files { "iup/src/*.h" , "iup/src/*.c" }
-
-links { "lua51" }
+--links { "lua51" }
 
 if os.get() == "windows" then
 
-	files { "iup/src/win/*.h" , "iup/src/win/*.c" }
+--	files { "iup/src/win/*.h" , "iup/src/win/*.c" }
 
 else -- nix
 
-	files { "iup/src/gtk/iupgtk*.h" , "iup/src/gtk/iupgtk*.c" }
+--	files { "iup/src/gtk/iupgtk*.h" , "iup/src/gtk/iupgtk*.c" }
 
 	local fp=assert(io.popen("pkg-config --cflags gtkmm-2.4"))
 	local s=assert(fp:read("*l"))
@@ -36,7 +55,7 @@ else -- nix
 end
 
 
-files { "iup/srclua5/*.h" , "iup/srclua5/*.c" }
+-- files { "iup/srclua5/*.h" , "iup/srclua5/*.c" }
 
 
 SET_KIND("lua","lua_gtk","gtk")
