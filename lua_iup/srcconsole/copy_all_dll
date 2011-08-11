@@ -1,0 +1,18 @@
+#!/bin/tcsh
+cp -f ../lib/dll8/*.dll ../bin/Win32
+cp -f ../../cd/lib/dll8/*.dll ../bin/Win32
+cp -f ../../im/lib/dll8/*.dll ../bin/Win32
+cp -f ../../lua5.1/lib/dll8/*.dll ../bin/Win32
+cp -f ../../luagl/lib/dll8/*.dll ../bin/Win32
+cp -f ../../lfs/lib/dll8/*.dll ../bin/Win32
+cp -fr ../../lua5.1/bin/Win32/Microsoft.VC80.CRT ../bin/Win32
+rm -f ../bin/Win32/*3.dll
+
+cp -f ../lib/dll8_64/*.dll ../bin/Win64
+cp -f ../../cd/lib/dll8_64/*.dll ../bin/Win64
+cp -f ../../im/lib/dll8_64/*.dll ../bin/Win64
+cp -f ../../lua5.1/lib/dll8_64/*.dll ../bin/Win64
+cp -f ../../luagl/lib/dll8_64/*.dll ../bin/Win64
+cp -f ../../lfs/lib/dll8_64/*.dll ../bin/Win64
+cp -fr ../../lua5.1/bin/Win64/Microsoft.VC80.CRT ../bin/Win64
+rm -f ../bin/Win64/*3.dll

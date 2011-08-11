@@ -1,0 +1,27 @@
+EXPORTS
+  IupPPlotOpen
+  IupPPlot
+  IupPPlotBegin
+  IupPPlotAdd
+  IupPPlotAddStr
+  IupPPlotEnd
+  IupPPlotInsertStr
+  IupPPlotInsert
+  IupPPlotTransform
+  IupPPlotPaintTo
+  IupPPlotInsertStrPoints
+  IupPPlotInsertPoints
+  IupPPlotAddPoints
+  IupPPlotAddStrPoints
+  IupPlotBegin
+  IupPlotAdd
+  IupPlotAddStr
+  IupPlotEnd
+  IupPlotInsertStr
+  IupPlotInsert
+  IupPlotTransform
+  IupPlotPaintTo
+  IupPlotInsertStrPoints
+  IupPlotInsertPoints
+  IupPlotAddPoints
+  IupPlotAddStrPoints

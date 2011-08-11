@@ -1,0 +1,13 @@
+#!/bin/tcsh
+
+# AIX43 IRIX65 Linux26_ia64 SunOS57 SunOS510x86 
+
+foreach plat ( Linux24 Linux24g3 Linux24g3_64 Linux26 Linux26_64 Linux26g4 Linux26g4_64 SunOS510 IRIX6465 )
+  echo $plat
+  cp -f ../lib/$plat/*.so ../bin/$plat
+  cp -f ../../cd/lib/$plat/*.so ../bin/$plat
+  cp -f ../../im/lib/$plat/*.so ../bin/$plat
+  cp -f ../../luagl/lib/$plat/*.so ../bin/$plat
+  cp -f ../../lfs/lib/$plat/*.so ../bin/$plat
+  rm -f ../bin/$plat/*3.so
+end
