@@ -5,24 +5,24 @@
 project "lua_iup"
 language "C"
 
-includedirs { "include" , "src" , "srccd" , "srcim" , "srclua5" }
+includedirs { "cd/include" , "im/include" , "iup/include" }
 
 
-files { "srcim/*.h" , "srcim/*.c" }
+files { "iup/srcim/*.h" , "iup/srcim/*.c" }
 
-files { "srccd/*.h" , "srccd/*.c" }
+files { "iup/srccd/*.h" , "iup/srccd/*.c" }
 
-files { "src/*.h" , "src/*.c" }
+files { "iup/src/*.h" , "iup/src/*.c" }
 
 links { "lua51" }
 
 if os.get() == "windows" then
 
-	files { "src/win/*.h" , "src/win/*.c" }
+	files { "iup/src/win/*.h" , "iup/src/win/*.c" }
 
 else -- nix
 
-	files { "src/gtk/iupgtk*.h" , "src/gtk/iupgtk*.c" }
+	files { "iup/src/gtk/iupgtk*.h" , "iup/src/gtk/iupgtk*.c" }
 
 	local fp=assert(io.popen("pkg-config --cflags gtkmm-2.4"))
 	local s=assert(fp:read("*l"))
@@ -36,9 +36,7 @@ else -- nix
 end
 
 
-
-
-files { "srclua5/*.h" , "srclua5/*.c" }
+files { "iup/srclua5/*.h" , "iup/srclua5/*.c" }
 
 
 SET_KIND("lua","lua_iup","iup")

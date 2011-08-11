@@ -1,0 +1,13 @@
+# This builds all the libraries of the folder for 1 uname
+
+tecmake $1 $2 $3 $4 $5 $6 $7 $8
+tecmake $1 MF=im_process $2 $3 $4 $5 $6 $7 $8
+tecmake $1 MF=im_jp2 $2 $3 $4 $5 $6 $7 $8
+tecmake $1 MF=im_fftw $2 $3 $4 $5 $6 $7 $8
+
+#tecmake $1 MF=imlua3 $2 $3 $4 $5 $6 $7 $8
+
+tecmake $1 MF=imlua5 $2 $3 $4 $5 $6 $7 $8
+tecmake $1 MF=imlua_process5 $2 $3 $4 $5 $6 $7 $8
+tecmake $1 MF=imlua_jp2 $2 $3 $4 $5 $6 $7 $8
+tecmake $1 MF=imlua_fftw5 $2 $3 $4 $5 $6 $7 $8

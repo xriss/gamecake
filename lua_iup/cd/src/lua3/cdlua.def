@@ -1,0 +1,7 @@
+EXPORTS
+  cdlua_open
+  cdlua_close
+  cdlua_getcanvas
+  cdlua_addcontext
+  cdlua_checkcanvas
+  cdlua_pushcanvas

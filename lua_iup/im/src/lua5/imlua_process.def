@@ -1,0 +1,3 @@
+EXPORTS
+  imlua_open_process
+  luaopen_imlua_process

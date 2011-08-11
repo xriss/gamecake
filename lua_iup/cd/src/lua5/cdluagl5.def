@@ -1,0 +1,3 @@
+EXPORTS
+  cdluagl_open
+  luaopen_cdluagl

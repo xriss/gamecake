@@ -1,0 +1,29 @@
+EXPORTS
+  imVideoCaptureDeviceCount
+  imVideoCaptureDeviceDesc
+  imVideoCaptureReloadDevices
+  imVideoCaptureCreate
+  imVideoCaptureDestroy
+  imVideoCaptureConnect
+  imVideoCaptureDisconnect
+  imVideoCaptureShowDialog
+  imVideoCaptureDialogCount
+  imVideoCaptureDialogDesc
+  imVideoCaptureGetImageSize
+  imVideoCaptureSetImageSize
+  imVideoCaptureFrame
+  imVideoCaptureOneFrame
+  imVideoCaptureLive
+  imVideoCaptureResetAttribute
+  imVideoCaptureGetAttribute
+  imVideoCaptureSetAttribute
+  imVideoCaptureGetAttributeList
+  imVideoCaptureFormatCount
+  imVideoCaptureGetFormat
+  imVideoCaptureSetFormat
+  imVideoCaptureSetInOut 
+  imVideoCaptureDeviceExDesc
+  imVideoCaptureDevicePath
+  imVideoCaptureDeviceVendorInfo
+  imVideoCaptureReleaseDevices
+  

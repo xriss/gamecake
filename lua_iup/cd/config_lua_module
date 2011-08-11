@@ -1,0 +1,38 @@
+#!/bin/bash
+
+echo ' '
+echo '  This script will configure the Tecgraf libraries in the system'
+echo '  to be used from Lua. It was tested only in Ubuntu and in Fedora.'
+echo ' '
+echo '  The Run Time libraries must be already installed on the system (see the install script).'
+echo '  It assumes that Lua binaries are installed using system packages.'
+echo ' '
+echo '  Must be run with "sudo", or install will fail,'
+echo '  for example:'
+echo '     sudo ./config_lua_module'
+echo ' '
+echo -n Press Enter to continue or Ctrl+C to abort...
+read contscr
+echo ' '
+
+if [ -d /usr/lib64 ]; then
+  SYSTEM_LIB=/usr/lib64
+else
+  SYSTEM_LIB=/usr/lib
+fi
+LUA_LIB=$SYSTEM_LIB/lua/5.1
+
+Make_Lua_Link()
+{
+  ln -fsv $SYSTEM_LIB/lib$1'51'.so $1.so
+}
+
+mkdir -p $LUA_LIB
+cd $LUA_LIB
+
+Make_Lua_Link cdlua
+Make_Lua_Link cdluacontextplus
+Make_Lua_Link cdluacairo
+Make_Lua_Link cdluagl
+Make_Lua_Link cdluaim
+Make_Lua_Link cdluapdf

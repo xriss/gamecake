@@ -1,0 +1,1510 @@
+#===========================================================================#
+# CDTEST.LED - 05/12/95                                                     #
+#===========================================================================#
+
+#---------------------------------------------------------------------------#
+# Icones da Barra de Primitivas.                                            #
+#---------------------------------------------------------------------------#
+imgLine = IMAGE
+[ 
+ 0 = "BGCOLOR",
+ 1 = "0 0 0" 
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 
+)
+
+imgClip = IMAGE
+[ 
+ 0 = "BGCOLOR",
+ 1 = "0 0 0" 
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,
+ 0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0,
+ 0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,
+ 0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,0,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,
+ 0,0,0,1,1,0,0,0,0,1,0,1,1,0,0,0,0,0,
+ 0,0,0,1,1,0,0,0,1,0,0,1,1,0,0,0,0,0,
+ 0,0,0,1,1,0,0,1,0,0,0,1,1,0,0,0,0,0,
+ 0,0,0,1,1,0,1,0,0,0,0,1,1,0,0,0,0,0,
+ 0,0,0,1,1,1,0,0,0,0,0,1,1,0,0,0,0,0,
+ 0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,
+ 0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 
+)
+
+imgImage = IMAGE
+[ 
+ 0 = "BGCOLOR",
+ 1 = "0 0 0", 
+ 2 = "255 255 255",
+ 3 = "153 153 153"
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,
+ 0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,
+ 0,0,0,0,1,1,2,2,2,2,2,1,1,0,0,0,0,0,
+ 0,0,0,0,1,1,2,2,2,2,2,1,1,0,0,0,0,0,
+ 0,0,0,1,1,2,1,1,2,1,1,2,1,1,0,0,0,0,
+ 0,0,0,1,2,2,1,2,2,2,1,2,2,1,0,0,0,0,
+ 0,0,0,1,2,2,2,2,1,2,2,2,2,1,0,0,0,0,
+ 0,0,0,1,1,2,2,2,1,3,2,2,1,1,0,0,0,0,
+ 0,0,0,0,1,2,2,2,2,1,2,2,1,3,0,0,0,0,
+ 0,0,0,0,1,2,2,2,1,1,2,2,1,3,0,0,0,0,
+ 0,0,0,0,1,2,2,2,2,2,2,2,1,3,0,0,0,0,
+ 0,0,0,0,0,1,2,1,3,1,2,1,3,0,0,0,0,0,
+ 0,0,0,0,0,1,2,2,1,3,2,1,3,0,0,0,0,0,
+ 0,0,0,0,0,0,1,2,2,2,1,3,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,1,1,1,3,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,1,2,1,3,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,1,2,1,3,0,0,0,0,0,0,0 
+)
+
+imgImageRGB = IMAGE
+[ 
+ 0 = "BGCOLOR",
+ 1 = "255 0 0", 
+ 2 = "0 255 0",
+ 3 = "0 0 255"
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,
+ 0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,
+ 0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,
+ 0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,
+ 0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,
+ 0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,
+ 0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,
+ 0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,
+ 0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,
+ 0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 
+)
+
+imgBox = IMAGE
+[ 
+ 0 = "BGCOLOR",
+ 1 = "0 0 0", 
+ 2 = "255 255 255"
+]
+(
+ 18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,0,0,
+ 0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,0,0,
+ 0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,0,0,
+ 0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,0,0,
+ 0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,0,0,
+ 0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,
+ 0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,
+ 0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+)
+
+imgRect = IMAGE
+[ 
+ 0 = "BGCOLOR",
+ 1 = "0 0 0", 
+ 2 = "255 255 255"
+]
+(
+ 18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+ 0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+ 0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+ 0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+ 0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+ 0,0,1,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,
+ 0,0,1,0,0,0,0,0,2,0,0,0,1,0,0,2,0,0,
+ 0,0,1,0,0,0,0,0,2,0,0,0,1,0,0,2,0,0,
+ 0,0,1,0,0,0,0,0,2,0,0,0,1,0,0,2,0,0,
+ 0,0,1,1,1,1,1,1,2,1,1,1,1,0,0,2,0,0,
+ 0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,2,0,0,
+ 0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,2,0,0,
+ 0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+)
+
+imgSector = IMAGE
+[
+ 0 = "BGCOLOR",
+ 1 = "0 0 0" ,
+ 2 = "255 255 255"
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,
+ 0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,0,1,1,1,1,1,1,1,1,1,1,2,0,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,2,2,2,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,2,2,2,2,0,0,0,
+ 0,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,0,0,
+ 0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,0,0,
+ 0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,0,0,
+ 0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,
+ 0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,
+ 0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,
+ 0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 
+)
+
+imgChord = IMAGE
+[
+ 0 = "BGCOLOR",
+ 1 = "0 0 0" ,
+ 2 = "255 255 255"
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,1,1,2,2,2,0,0,0,0,0,0,0,
+ 0,0,0,0,1,1,1,1,1,2,2,2,2,0,0,0,0,0,
+ 0,0,0,1,1,1,1,1,1,1,2,2,2,2,0,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,2,2,2,2,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,2,2,2,0,0,0,
+ 0,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,0,0,
+ 0,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,0,0,
+ 0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,0,0,
+ 0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,
+ 0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,
+ 0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,
+ 0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,
+ 0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 
+)
+
+imgArc = IMAGE
+[
+ 0 = "BGCOLOR",
+ 1 = "0 0 0",
+ 2 = "255 255 255"
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,
+ 0,0,2,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,
+ 0,0,2,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,
+ 0,0,2,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,
+ 0,0,0,2,0,0,0,2,0,0,1,2,2,0,0,0,0,0,
+ 0,0,0,0,2,2,2,0,1,1,0,0,0,2,2,0,0,0,
+ 0,0,0,0,0,0,0,0,1,0,0,0,0,0,2,0,0,0,
+ 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,2,0,0,
+ 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,2,0,0,
+ 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,2,0,0,
+ 0,0,0,0,0,0,0,0,1,0,0,0,0,0,2,0,0,0,
+ 0,0,0,0,0,0,0,0,1,1,0,0,0,2,2,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,1,1,2,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+)
+
+imgText = IMAGE
+[
+ 0 = "BGCOLOR",
+ 1 = "255 255 255",
+ 2 = "0 0 0"
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,2,2,0,0,2,2,0,0,1,1,0,0,0,0,0,
+ 0,0,2,2,0,0,0,0,2,2,0,0,1,0,0,0,0,0,
+ 0,0,2,2,0,0,0,0,2,2,0,0,1,0,0,0,0,0,
+ 0,0,2,2,0,0,0,0,2,2,0,0,1,1,1,1,0,0,
+ 0,0,2,2,2,2,2,2,2,2,0,0,1,0,0,0,1,0,
+ 0,0,2,2,0,0,0,0,2,2,0,0,1,0,0,0,1,0,
+ 0,0,2,2,0,0,0,0,2,2,0,0,1,0,0,0,1,0,
+ 0,0,2,2,0,0,0,0,2,2,0,0,1,0,0,0,1,0,
+ 0,0,2,2,0,0,0,0,2,2,0,1,1,1,1,1,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+)
+
+imgPoly = IMAGE
+[
+ 0 = "BGCOLOR",
+ 1 = "0 0 0"
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,
+ 0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,
+ 0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,
+ 0,0,1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,
+ 0,0,0,1,1,1,0,0,0,0,1,1,0,0,0,0,0,0,
+ 0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,
+ 0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
+ 0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,
+ 0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,
+ 0,0,0,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,
+ 0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,
+ 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+)
+
+imgMark = IMAGE
+[
+ 0 = "BGCOLOR",
+ 1 = "0 0 0"
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,
+ 0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,
+ 0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,
+ 0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,
+ 0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,
+ 0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,
+ 0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,
+ 0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,
+ 0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+)
+
+imgPixel = IMAGE
+[
+ 0 = "BGCOLOR",
+ 1 = "0 0 0",
+ 2 = "255 255 255"
+]
+(18, 18, 
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,2,2,0,0,0,0,0,0,0,2,2,0,0,0,0,
+ 0,0,0,2,2,0,0,0,0,0,0,0,2,2,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,2,2,0,0,0,1,1,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+)
+
+#---------------------------------------------------------------------------#
+# Descricao dos Menus.                                                      #
+#---------------------------------------------------------------------------#
+mnOpen = MENU
+(
+ ITEM("MF...",  cmdPlayMF),
+ itPlayCGM = ITEM[ACTIVE=NO]("CGM...", cmdPlayCGM),
+ itPlayEMF = ITEM[ACTIVE=NO]("EMF...", cmdPlayEMF),
+ itPlayWMF = ITEM[ACTIVE=NO]("WMF...", cmdPlayWMF)
+)
+
+mnSave = MENU
+(
+ ITEM("MF...",  cmdMF),
+ ITEM("DEBUG...",  cmdDebug),
+ itPDF = ITEM[ACTIVE=NO]("PDF...",  cmdPDF),
+ itPS = ITEM[ACTIVE=NO]("PS...",  cmdPS),
+ itEPS = ITEM[ACTIVE=NO]("EPS...",  cmdEPS),
+ itSVG = ITEM[ACTIVE=NO]("SVG...",  cmdSVG),
+ itCGMt = ITEM[ACTIVE=NO]("CGMt...", cmdCGMt),
+ itCGMb = ITEM[ACTIVE=NO]("CGMb...", cmdCGMb),
+ itDGN = ITEM[ACTIVE=NO]("DGN...", cmdDGN),
+ itDXF = ITEM[ACTIVE=NO]("DXF...", cmdDXF),
+ itEMF = ITEM[ACTIVE=NO]("EMF...", cmdEMF),
+ itWMF = ITEM[ACTIVE=NO]("WMF...", cmdWMF)
+)
+
+mnFile = MENU
+(
+ SUBMENU[KEY=K_O]("Open", mnOpen),
+ SEPARATOR(),
+ SUBMENU[KEY=K_S]("Save", mnSave),
+ SEPARATOR(),
+ itPrint = ITEM[KEY=K_P]("Print...", cmdPrint),
+ SEPARATOR(),
+ ITEM[KEY=K_x]("Exit", cmdFileExit)
+)
+
+mnEdit = MENU
+(
+ itEditUndo = ITEM("Undo", cmdEditUndo),
+ SEPARATOR(),
+ itClipBoard = ITEM[ACTIVE=NO]("Copy as EMF/WMF", cmdClipBoard),
+ itClipBoardBitmap = ITEM[ACTIVE=NO]("Copy as Bitmap", cmdClipBoardBitmap),
+ itClipBoardMetafile = ITEM[ACTIVE=NO]("Copy as CD Metafile", cmdClipBoardMetafile),
+ itClipBoardPaste = ITEM[ACTIVE=NO]("Paste", cmdClipBoardPaste),
+ SEPARATOR(),
+ ITEM("Clear", cmdEditClear),
+ SEPARATOR(),
+ ITEM("Options...", cmdOptions)
+)
+
+mnPrimitives = MENU
+(
+ ITEM("Pixel...", cmdPixel),
+ ITEM("Mark...", cmdMark),
+ ITEM("Line...", cmdLine),
+ ITEM("Polygon...", cmdPoly),
+ ITEM("Rect...", cmdRect),
+ ITEM("Box...", cmdBox),
+ ITEM("Arc...", cmdArc),
+ ITEM("Sector...", cmdSector),
+ ITEM("Chord...", cmdChord),
+ ITEM("Text...", cmdText),
+ SEPARATOR(),
+ ITEM("Server Image...", cmdImage),
+ ITEM("RGB Image...", cmdImageRGB)
+)    
+
+mnDraw = MENU[ISMENU=YES]
+(
+ SUBMENU[KEY=K_P]("Primitives", mnPrimitives),
+ SEPARATOR(),
+ ITEM("Clipping...", cmdClip),
+ ITEM("Attributes...", cmdAttributes),
+ SEPARATOR(),
+ itWDCanvas = ITEM("Show WD Canvas", cmdWDCanvas),
+ itPICCanvas = ITEM("Show Picture Canvas", cmdPICCanvas)
+)    
+
+mnHelp = MENU
+(
+ ITEM("About...", cmdHelpAbout)
+)
+
+mnMain = MENU
+(
+ SUBMENU[KEY=K_mF]("File", mnFile),
+ SUBMENU[KEY=K_mE]("Edit", mnEdit),
+ SUBMENU[KEY=K_mD]("Draw", mnDraw),
+ SUBMENU[KEY=K_mH]("Help", mnHelp)
+)
+
+#===========================================================================#
+# Barras de Ferramentas.                                                    #
+#===========================================================================#
+
+#---------------------------------------------------------------------------#
+# Barra de status.                                                          #
+#---------------------------------------------------------------------------#
+lbStatusLine = LABEL[EXPAND=HORIZONTAL]("Esta eh a barra de status do CDTest.")
+
+#---------------------------------------------------------------------------#
+# Barra de Primitivas.                                                      #
+#---------------------------------------------------------------------------#
+
+btLine       = BUTTON[IMAGE=imgLine, TIP="Line"]("",cmdLine)
+btBox        = BUTTON[IMAGE=imgBox, TIP="Box"]("",cmdBox)
+btRect       = BUTTON[IMAGE=imgRect, TIP="Rect"]("",cmdRect)
+btArc        = BUTTON[IMAGE=imgArc, TIP="Arc"]("", cmdArc)
+btSector     = BUTTON[IMAGE=imgSector, TIP="Sector"]("", cmdSector)
+btChord      = BUTTON[IMAGE=imgChord, TIP="Chord"]("", cmdChord)
+btPixel      = BUTTON[IMAGE=imgPixel, TIP="Pixel"]("", cmdPixel)
+btMark       = BUTTON[IMAGE=imgMark, TIP="Mark"]("", cmdMark)
+btText       = BUTTON[IMAGE=imgText, TIP="Text"]("", cmdText)
+btPoly       = BUTTON[IMAGE=imgPoly, TIP="Polygon"]("", cmdPoly)
+
+btImageRGB   = BUTTON[IMAGE=imgImageRGB, TIP="RGB Image"]("", cmdImageRGB)
+btImage      = BUTTON[IMAGE=imgImage, TIP="Server Image"]("", cmdImage)
+btClip       = BUTTON[IMAGE=imgClip, TIP="Clipping Area"]("", cmdClip)
+
+btCurPrim    = BUTTON[IMAGE=imgLine, TIP="Show primitive dialog"]("", cmdShowDialog)
+
+lbMousePos = LABEL[SIZE=90]("(    ,    )")
+
+PrimBar = VBOX[GAP=2]
+(
+ btCurPrim,
+ FILL[SIZE=20](),
+ btPixel,
+ btMark,
+ btLine,
+ btPoly,
+ btRect,
+ btBox,
+ btArc,
+ btSector,
+ btChord,
+ btText,
+ FILL[SIZE=5](),
+ btImage,
+ btImageRGB,
+ FILL[SIZE=5](),
+ btClip,
+ FILL[SIZE=30]()
+)
+
+#---------------------------------------------------------------------------#
+# Barra de Cores.                                                           #
+#---------------------------------------------------------------------------#
+cnvColorBar = CANVAS
+[
+ BUTTON_CB = cmdColorBarButtonCB,
+ RESIZE_CB = cmdColorBarResizeCB,
+ SIZE = 220x12,
+ BORDER = NO,
+ EXPAND = NO
+]
+(cmdColorBarRepaint)
+
+#===========================================================================#
+# Dialogo Principal                                                         #
+#===========================================================================#
+
+#---------------------------------------------------------------------------#
+# Canvas para visualizacao das primitivas.                                  #
+#---------------------------------------------------------------------------#
+cnvMain = CANVAS
+[
+ MOTION_CB=cmdMotionCB,
+ BUTTON_CB=cmdButtonCB,
+ RESIZE_CB=cmdResizeCB
+]
+(cmdRepaint)
+
+#---------------------------------------------------------------------------#
+# Area de trabalho.                                                         #
+#---------------------------------------------------------------------------#
+DeskTop = VBOX
+(
+ FILL[SIZE=5](),
+ HBOX
+ (
+  FILL[SIZE=5](),
+  PrimBar,
+  FILL[SIZE=2](),
+  VBOX
+  (
+   FILL[SIZE=2](),
+   lbMousePos,
+   FILL[SIZE=5](),
+   cnvMain,
+   FILL[SIZE=2](),
+   cnvColorBar,
+   FILL[SIZE=5](),
+   lbStatusLine
+  ),
+  FILL[SIZE=5]()
+ ),
+ FILL[SIZE=5]()
+)
+
+#---------------------------------------------------------------------------#
+# Dialogo principal.                                                        #
+#---------------------------------------------------------------------------#
+dlgMain = DIALOG
+[
+ TITLE = "CD Test 5.3",
+ MENU = mnMain,
+ ICON = "CdTestIcon",
+ K_cZ = cmdEditUndo,
+ GETFOCUS_CB = cmdGetFocusCB,
+ KILLFOCUS_CB = cmdKillFocusCB,
+ CLOSE_CB = cmdFileExit
+]
+(DeskTop)
+
+#===========================================================================#
+# Especificacao dos dialogos auxiliares.                                    #
+#===========================================================================#
+
+#---------------------------------------------------------------------------#
+# Dialogo com o canvas para exibiccao de primitivas WD.                     #
+#---------------------------------------------------------------------------#
+cnvWDCanvas = CANVAS[BORDER=NO](cmdWDRepaint)
+dlgWDCanvas = DIALOG
+[
+ TITLE = "WD Canvas",
+ CLISE_CB =	cmdCloseWD,
+ SIZE = 200x200,
+ PARENTDIALOG="dlgMain",
+ GAP=5x5
+]
+(cnvWDCanvas)
+
+cnvPICCanvas = CANVAS[BORDER=NO](cmdPICRepaint)
+dlgPICCanvas = DIALOG
+[
+ TITLE = "PIC Canvas",
+ CLISE_CB =	cmdClosePIC,
+ SIZE = 200x200,
+ PARENTDIALOG="dlgMain",
+ GAP=5x5
+]
+(cnvPICCanvas)
+
+#---------------------------------------------------------------------------#
+# Dialogo Options                                                           #
+#---------------------------------------------------------------------------#
+btOptionsHide = BUTTON[SIZE=30]("Hide", cmdOptionsHide)
+
+tgSimulate = TOGGLE[VALUE=OFF, SIZE=55]("Simulate", cmdSimulate)
+tgStretchPlay = TOGGLE[VALUE=OFF, SIZE=70]("Stretch Play", cmdStretchPlay)
+
+tgNoBuffering = TOGGLE[VALUE=ON]("No buffering", cmdNoBuffering)
+tgImageBuffer = TOGGLE("CD_DBUFFER", cmdImageBuffer)
+tgRGBBuffer   = TOGGLE("CD_DBUFFERRGB", cmdRGBBuffer)
+
+rdBuffering = RADIO
+(
+ VBOX
+ (
+  tgNoBuffering,
+  tgImageBuffer,
+  tgRGBBuffer
+ )
+)
+
+OptionsDesktop = VBOX
+(
+  VBOX[GAP=2]
+  (
+   FRAME[TITLE="Buffering:", MARGIN=5x5, SIZE=80]
+   (
+    rdBuffering
+   ),
+   FILL[SIZE=10](),
+   tgSimulate,
+   tgStretchPlay,
+   FILL[SIZE=10](),
+   btOptionsHide,
+   FILL[SIZE=2]()
+  )
+)
+
+dlgOptions = DIALOG
+[
+ TITLE="Options",
+ PARENTDIALOG="dlgMain",
+ MAXBOX=NO,
+ MINBOX=NO,
+ RESIZE=NO,
+ MARGIN=5x2
+]
+(OptionsDesktop)
+
+#---------------------------------------------------------------------------#
+# Dialogo Attributes                                                        #
+#---------------------------------------------------------------------------#
+lstTextAlignment = LIST
+[
+ 1="CD_NORTH",
+ 2="CD_SOUTH",
+ 3="CD_EAST",
+ 4="CD_WEST",
+ 5="CD_NORTH_EAST",
+ 6="CD_NORTH_WEST",
+ 7="CD_SOUTH_EAST",
+ 8="CD_SOUTH_WEST",
+ 9="CD_CENTER",
+ 10="CD_BASE_LEFT",
+ 11="CD_BASE_CENTER",
+ 12="CD_BASE_RIGHT",
+ DROPDOWN=YES,
+ VALUE=10,
+ SIZE=89
+]
+(cmdTextAlignment)
+
+txtMarkSize = TEXT[NC=4, SIZE=20x12, VALUE="10"](cmdInteger)
+
+lstMarkType = LIST
+[
+ 1="CD_PLUS",
+ 2="CD_STAR",
+ 3="CD_CIRCLE",
+ 4="CD_X",
+ 5="CD_BOX",
+ 6="CD_DIAMOND",
+ 7="CD_HOLLOW_CIRCLE",
+ 8="CD_HOLLOW_BOX",
+ 9="CD_HOLLOW_DIAMOND",
+ DROPDOWN=YES,
+ VALUE=2,
+ SIZE=80
+](cmdMarkType)
+
+lstWriteMode = LIST
+[
+ 1="CD_REPLACE",
+ 2="CD_XOR",
+ 3="CD_NOT_XOR",
+ VALUE=1,
+ DROPDOWN=YES,
+ SIZE=80
+]
+(cmdWriteMode)
+
+lstFontTypeFace = LIST
+[
+ 1="CD_SYSTEM",
+ 2="CD_COURIER",
+ 3="CD_TIMES_ROMAN",
+ 4="CD_HELVETICA",
+ VALUE=1,
+ DROPDOWN=YES,
+ SIZE=80
+]
+(cmdFontTypeFace)
+
+lstLineCap = LIST
+[
+ 1="CD_CAPFLAT",
+ 2="CD_CAPSQUARE",
+ 3="CD_CAPROUND",
+ VALUE=1,
+ DROPDOWN=YES,
+ SIZE=80
+]
+(cmdLineCap)
+
+lstLineJoin = LIST
+[
+ 1="CD_BEVEL",
+ 2="CD_MITER",
+ 3="CD_ROUND",
+ VALUE=1,
+ DROPDOWN=YES,
+ SIZE=80
+]
+(cmdLineJoin)
+
+lstFillMode = LIST
+[
+ 1="CD_EVENODD",
+ 2="CD_WINDING",
+ VALUE=1,
+ DROPDOWN=YES,
+ SIZE=80
+]
+(cmdFillMode)
+
+lstFontStyle = LIST
+[
+ 1="CD_PLAIN",
+ 2="CD_BOLD",
+ 3="CD_ITALIC",
+ 4="CD_BOLD_ITALIC",
+ VALUE=1,
+ DROPDOWN=YES,
+ SIZE=80
+]
+(cmdFontStyle)
+
+txtLineWidth = TEXT[SIZE=30, NC=3, VALUE="1"](cmdInteger)
+txtFontSize  = TEXT[SIZE=30, NC=3, VALUE="12"](cmdInteger)
+txtTextOrientation  = TEXT[SIZE=30, NC=3, VALUE="0"](cmdInteger)
+
+lstLineStyle = LIST
+[
+ 1="CD_CONTINUOUS",
+ 2="CD_DASHED",
+ 3="CD_DOTTED",
+ 4="CD_DASH_DOT",
+ 5="CD_DASH_DOT_DOT",
+ 6="CD_CUSTOM",
+ VALUE=1,
+ DROPDOWN=YES,
+ SIZE=80
+]
+(cmdLineStyle)
+
+tgSolid   = TOGGLE[VALUE=ON] ("CD_SOLID",   cmdSolid)
+tgHatch   = TOGGLE("CD_HATCH",   cmdHatch)
+tgStipple = TOGGLE("CD_STIPPLE", cmdStipple)
+tgPattern = TOGGLE("CD_PATTERN", cmdPattern)
+
+lstOpacity = LIST
+[
+ 1="CD_OPAQUE",
+ 2="CD_TRANSPARENT",
+ VALUE=2,
+ DROPDOWN=YES,
+ SIZE=80,
+ ACTIVE=YES
+]
+(cmdOpacity)
+
+lstHatchStyle = LIST
+[
+ 1="CD_HORIZONTAL",
+ 2="CD_VERTICAL",
+ 3="CD_FDIAGONAL",
+ 4="CD_BDIAGONAL",
+ 5="CD_CROSS",
+ 6="CD_DIAGCROSS",
+ VALUE=1,
+ DROPDOWN=YES,
+ SIZE=80,
+ ACTIVE=YES
+]
+(cmdHatchStyle)
+
+btAttributesHide = BUTTON[SIZE=30]("Hide", cmdAttributesHide)
+
+rdInteriorStyle = RADIO
+(
+ VBOX
+ (
+  tgSolid,
+  tgHatch,
+  tgStipple,
+  tgPattern
+ )
+)
+
+AttributesDesktop = VBOX
+(
+  HBOX
+  (
+    VBOX[GAP=2]
+    (
+      LABEL("Write Mode:"),
+      lstWriteMode,
+      FILL[SIZE=4](),
+      FRAME[TITLE="Fill Attributes", MARGIN=5x5]
+      (
+        VBOX
+        (
+          LABEL("Back Opacity:"),
+          lstOpacity,
+          FILL[SIZE=2](),
+          LABEL("Fill Mode:"),
+          lstFillMode,
+          FILL[SIZE=2](),
+          FRAME[TITLE="Interior Style:", MARGIN=5x5, SIZE=80]
+          (
+            rdInteriorStyle
+          ),
+          FILL[SIZE=2](),
+          LABEL("Hatch Style:"),
+          lstHatchStyle
+        )
+      ),
+      FILL[SIZE=10](),
+      FRAME[TITLE="Mark Attributes", MARGIN=5x5]
+      (
+        VBOX
+        (
+          LABEL("Mark Type:"),
+          lstMarkType,
+          FILL[SIZE=2](),
+          LABEL("Mark Size:"),
+          txtMarkSize
+        )
+      ),
+      FILL[SIZE=10](),
+      btAttributesHide
+    ),
+    VBOX[GAP=2]
+    (
+      FRAME[TITLE="Text Attributes", MARGIN=5x5]
+      (
+        VBOX
+        (
+          LABEL("Font Typeface:"),
+          lstFontTypeFace,
+          FILL[SIZE=2](),
+          LABEL("Font Style:"),
+          lstFontStyle,
+          FILL[SIZE=2](),
+          LABEL("Font Size:"),
+          txtFontSize,
+          FILL[SIZE=2](),
+          LABEL[SIZE=x9]("Text Alignment:"),
+          lstTextAlignment,
+          FILL[SIZE=2](),
+          LABEL[SIZE=x9]("Text Orientation:"),
+          txtTextOrientation
+        )
+      ),
+      FILL[SIZE=10](),
+      FRAME[TITLE="Line Attributes", MARGIN=5x5]
+      (
+        VBOX
+        (
+          LABEL("Line Style:"),
+          lstLineStyle,
+          FILL[SIZE=2](),
+          LABEL("Line Width:"),
+          txtLineWidth,
+          FILL[SIZE=2](),
+          LABEL("Line Cap:"),
+          lstLineCap,
+          FILL[SIZE=2](),
+          LABEL("Line Join:"),
+          lstLineJoin
+        )
+      )
+    )
+  )
+)
+
+dlgAttributes = DIALOG
+[
+ TITLE="Attributes",
+ PARENTDIALOG="dlgMain",
+ MAXBOX=NO,
+ MINBOX=NO,
+ RESIZE=NO,
+ CLOSE_CB=cmdAttributesHide,
+ MARGIN=5x2
+]
+(AttributesDesktop)
+
+#---------------------------------------------------------------------------#
+# Dialogo Line ou Box ou Rect.                                              #
+#---------------------------------------------------------------------------#
+txtLBX1 = TEXT[NC=8, SIZE=30x12, VALUE="0"](cmdInteger)
+txtLBX2 = TEXT[NC=8, SIZE=30x12, VALUE="0"](cmdInteger)
+txtLBY1 = TEXT[NC=8, SIZE=30x12, VALUE="0"](cmdInteger)
+txtLBY2 = TEXT[NC=8, SIZE=30x12, VALUE="0"](cmdInteger)
+
+btLBDraw = BUTTON[SIZE=30]("Draw", cmdDraw)
+btLBHide = BUTTON[SIZE=30]("Hide", cmdMsgHide)
+
+LBData = VBOX
+(
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=15x9]("X1:"),
+  txtLBX1,
+  FILL[SIZE=5](),
+  LABEL[SIZE=15x9]("Y1:"),
+  txtLBY1
+ ),
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=15x9]("X2:"),
+  txtLBX2,
+  FILL[SIZE=5](),
+  LABEL[SIZE=15x9]("Y2:"),
+  txtLBY2
+ )
+)
+
+LBDeskTop = VBOX
+(
+ HBOX
+ (
+  FILL(),
+  LBData,
+  FILL()
+ ),
+ HBOX
+ (
+  FILL(),
+  btLBDraw,
+  FILL[SIZE=5](),
+  btLBHide,
+  FILL()
+ )
+)
+
+dlgLB = DIALOG
+[
+ TITLE="Line Parameters",
+ PARENTDIALOG="dlgMain",
+ MAXBOX=NO,
+ MINBOX=NO,
+ RESIZE=NO,
+ CLOSE_CB=cmdMsgHide,
+ MARGIN=5x5
+]
+(LBDeskTop)
+
+#---------------------------------------------------------------------------#
+# Dialogo Arc ou Sector.                                                    #
+#---------------------------------------------------------------------------#
+txtASXC     = TEXT[NC=4, SIZE=30x12, VALUE="0"](cmdInteger)
+txtASYC     = TEXT[NC=4, SIZE=30x12, VALUE="0"](cmdInteger)
+txtASW      = TEXT[NC=4, SIZE=30x12, VALUE="0"](cmdInteger)
+txtASH      = TEXT[NC=4, SIZE=30x12, VALUE="0"](cmdInteger)
+txtASAngle1 = TEXT[NC=10, SIZE=30x12, VALUE="0"](cmdReal)
+txtASAngle2 = TEXT[NC=10, SIZE=30x12, VALUE="360"](cmdReal)
+
+btASDraw = BUTTON[SIZE=30]("Draw", cmdDraw)
+btASHide = BUTTON[SIZE=30]("Hide", cmdMsgHide)
+
+ASData = VBOX
+(
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=30x9]("Xc:"),
+  txtASXC,
+  FILL[SIZE=5](),
+  LABEL[SIZE=30x9]("Yc:"),
+  txtASYC
+ ),
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=30x9]("W:"),
+  txtASW,
+  FILL[SIZE=5](),
+  LABEL[SIZE=30x9]("H:"),
+  txtASH
+ ),
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=30x9]("Angle1:"),
+  txtASAngle1,
+  FILL[SIZE=5](),
+  LABEL[SIZE=30x9]("Angle2:"),
+  txtASAngle2
+ )
+)
+
+ASDeskTop = VBOX
+(
+ HBOX
+ (
+  FILL(),
+  ASData,
+  FILL()
+ ),
+ HBOX
+ (
+  FILL(),
+  btASDraw,
+  FILL[SIZE=5](),
+  btASHide,
+  FILL()
+ )
+)
+
+dlgAS = DIALOG
+[
+ PARENTDIALOG="dlgMain",
+ TITLE="Arc Parameters",
+ MAXBOX=NO,
+ MINBOX=NO,
+ RESIZE=NO,
+ CLOSE_CB=cmdMsgHide,
+ MARGIN=5x5
+]
+(ASDeskTop)
+
+#---------------------------------------------------------------------------#
+# Dialogo Pixel.                                                            #
+#---------------------------------------------------------------------------#
+txtPixelX = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtPixelY = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+
+btPixelDraw   = BUTTON[SIZE=30]("Draw", cmdDraw)
+btPixelHide = BUTTON[SIZE=30]("Hide", cmdMsgHide)
+
+PixelData = VBOX
+(
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=10x9]("X:"),
+  txtPixelX,
+  FILL[SIZE=5](),
+  LABEL[SIZE=10x9]("Y:"),
+  txtPixelY
+ )
+)
+
+PixelDeskTop = VBOX
+(
+ HBOX
+ (
+  FILL(),
+  PixelData,
+  FILL()
+ ),
+ HBOX
+ (
+  FILL(),
+  btPixelDraw,
+  FILL[SIZE=5](),
+  btPixelHide,
+  FILL()
+ )
+)
+
+dlgPixel = DIALOG
+[
+ PARENTDIALOG="dlgMain",
+ TITLE="Pixel Parameters",
+ MAXBOX=NO,
+ MINBOX=NO,
+ RESIZE=NO,
+ CLOSE_CB=cmdMsgHide,
+ MARGIN=5x5
+]
+(PixelDeskTop)
+
+#---------------------------------------------------------------------------#
+# Dialogo Mark.                                                             #
+#---------------------------------------------------------------------------#
+txtMarkX    = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtMarkY    = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+
+btMarkDraw = BUTTON[SIZE=30]("Draw", cmdDraw)
+btMarkHide = BUTTON[SIZE=30]("Hide", cmdMsgHide)
+
+MarkData = VBOX
+(
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  FILL(),
+  LABEL[SIZE=10x9]("X:"),
+  txtMarkX,
+  FILL[SIZE=5](),
+  LABEL[SIZE=10x9]("Y:"),
+  txtMarkY,
+  FILL()
+ )
+)
+
+MarkDeskTop = VBOX
+(
+ HBOX
+ (
+  FILL(),
+  MarkData,
+  FILL()
+ ),
+ HBOX
+ (
+  FILL(),
+  btMarkDraw,
+  FILL[SIZE=5](),
+  btMarkHide,
+  FILL()
+ )
+)
+
+dlgMark = DIALOG
+[
+ PARENTDIALOG="dlgMain",
+ TITLE="Mark Parameters",
+ MAXBOX=NO,
+ MINBOX=NO,
+ RESIZE=NO,
+ CLOSE_CB=cmdMsgHide,
+ MARGIN=5x5
+]
+(MarkDeskTop)
+
+#---------------------------------------------------------------------------#
+# Dialogo Text.                                                             #
+#---------------------------------------------------------------------------#
+txtTextX = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtTextY = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtTextS = TEXT[NC=100, SIZE=89x12, VALUE="Text"](cmdString)
+                                
+btTextDraw = BUTTON[SIZE=30]("Draw", cmdDraw)
+btTextHide = BUTTON[SIZE=30]("Hide", cmdMsgHide)
+
+TextData = VBOX
+(
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=10x9]("X:"),
+  txtTextX,
+  FILL[SIZE=5](),
+  LABEL[SIZE=10x9]("Y:"),
+  txtTextY
+ ),
+ HBOX
+ (
+  VBOX
+  (
+   LABEL[SIZE=25x9]("Text:"),
+   txtTextS
+  )
+ )
+)
+
+TextDeskTop = VBOX
+(
+ HBOX
+ (
+  FILL(),
+  TextData,
+  FILL()
+ ),
+ HBOX
+ (
+  FILL(),
+  btTextDraw,
+  FILL[SIZE=5](),
+  btTextHide,
+  FILL()
+ )
+)
+
+dlgText = DIALOG
+[
+ PARENTDIALOG="dlgMain",
+ TITLE="Text Parameters", 
+ MAXBOX=NO,
+ MINBOX=NO,
+ CLOSE_CB=cmdMsgHide,
+ RESIZE=NO,
+ MARGIN=5x5
+]
+(TextDeskTop)
+
+#---------------------------------------------------------------------------#
+# Dialogo Poly.                                                             #
+#---------------------------------------------------------------------------#
+tgOpenLines   = TOGGLE[VALUE=ON]("CD_OPEN_LINES", cmdOpenLines)
+tgClosedLines = TOGGLE("CD_CLOSED_LINES", cmdClosedLines)
+tgFilled      = TOGGLE("CD_FILL", cmdFill)
+tgClip        = TOGGLE("CD_CLIP", cmdPolyClip)
+tgBezier      = TOGGLE("CD_BEZIER", cmdPolyBezier)
+
+btPolyHide = BUTTON[SIZE=30]("Hide", cmdMsgHide)
+
+rdMode = RADIO
+(
+ VBOX
+ (
+  tgOpenLines,
+  tgClosedLines,
+  tgFilled,
+  tgClip,
+  tgBezier
+ )
+)
+
+PolyDesktop = VBOX
+(
+ FILL[SIZE=5](),
+ HBOX
+ (
+  FILL(),
+  FRAME[TITLE="Polygon Mode:"]
+  (
+   HBOX
+   (
+    FILL[SIZE=5](),
+    rdMode
+   )
+  ),
+  FILL()
+ ),
+ FILL[SIZE=10](),
+ HBOX
+ (
+  FILL(),
+  btPolyHide,
+  FILL()
+ ),
+ FILL[SIZE=5]()
+)
+
+dlgPoly = DIALOG
+[
+ PARENTDIALOG="dlgMain",
+ TITLE="Polygon Parameters",
+ MAXBOX=NO,
+ MINBOX=NO,
+ RESIZE=NO,
+ CLOSE_CB=cmdMsgHide
+]
+(PolyDesktop)
+
+#---------------------------------------------------------------------------#
+# Dialogo Clip.                                                             #
+#---------------------------------------------------------------------------#
+txtClipXmin = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtClipXmax = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtClipYmin = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtClipYmax = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+
+btClipOff    = BUTTON[SIZE=30]("Off", cmdClipOff)
+btClipArea   = BUTTON[SIZE=30]("Area", cmdClipArea)
+btClipPoly   = BUTTON[SIZE=50]("Polygon", cmdClipPoly)
+btClipHide   = BUTTON[SIZE=30]("Hide", cmdMsgHide)
+
+ClipData = VBOX
+(
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=25x9]("Xmin:"),
+  txtClipXmin,
+  FILL[SIZE=5](),
+  LABEL[SIZE=25x9]("Ymin:"),
+  txtClipYmin
+ ),
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=25x9]("Xmax:"),
+  txtClipXmax,
+  FILL[SIZE=5](),
+  LABEL[SIZE=25x9]("Ymax:"),
+  txtClipYmax
+ )
+)
+
+ClipDeskTop = VBOX
+(
+ HBOX
+ (
+  FILL(),
+  ClipData,
+  FILL()
+ ),
+ HBOX
+ (
+  FILL(),
+  btClipOff,
+  FILL[SIZE=5](),
+  btClipArea,
+  FILL[SIZE=5](),
+  btClipPoly,
+  FILL[SIZE=5](),
+  btClipHide,
+  FILL()
+ )
+)
+
+dlgClip = DIALOG
+[
+ PARENTDIALOG="dlgMain",
+ TITLE="Clipping",
+ MAXBOX=NO,
+ CLOSE_CB=cmdMsgHide,
+ MINBOX=NO,
+ RESIZE=NO,
+ MARGIN=5x5
+]
+(ClipDeskTop)
+
+#---------------------------------------------------------------------------#
+# Dialogo Image.                                                            #
+#---------------------------------------------------------------------------#
+txtImageX   = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtImageY   = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtImageW   = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtImageH   = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+
+btImagePut  = BUTTON[SIZE=30]("Put", cmdImagePut)
+btImageGet  = BUTTON[SIZE=30]("Get", cmdImageGet)
+btImageHide = BUTTON[SIZE=30]("Hide", cmdMsgHide)
+
+ImageData = VBOX
+(
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=30x9]("X:"),
+  txtImageX,
+  FILL[SIZE=5](),
+  LABEL[SIZE=30x9]("Y:"),
+  txtImageY
+ ),
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=30x9]("Width:"),
+  txtImageW,
+  FILL[SIZE=5](),
+  LABEL[SIZE=30x9]("Height:"),
+  txtImageH
+ )
+)
+
+ImageDeskTop = VBOX
+(
+ HBOX
+ (
+  FILL(),
+  ImageData,
+  FILL()
+ ),
+ HBOX
+ (
+  FILL(),
+  btImageGet,
+  FILL[SIZE=5](),
+  btImagePut,
+  FILL[SIZE=5](),
+  btImageHide,
+  FILL()
+ )
+)
+
+dlgImage = DIALOG
+[
+ PARENTDIALOG="dlgMain",
+ TITLE="Server Image",
+ MAXBOX=NO,
+ MINBOX=NO,
+ CLOSE_CB=cmdMsgHide,
+ RESIZE=NO,
+ MARGIN=5x5
+]
+(ImageDeskTop)
+
+#---------------------------------------------------------------------------#
+# Dialogo ImageRGB.                                                            #
+#---------------------------------------------------------------------------#
+txtImageRGBX   = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtImageRGBY   = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtImageRGBW   = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+txtImageRGBH   = TEXT[NC=5, SIZE=30x12, VALUE="0"](cmdInteger)
+
+btImageRGBPut  = BUTTON[SIZE=30]("Put", cmdImageRGBPut)
+btImageRGBGet  = BUTTON[SIZE=30]("Get", cmdImageRGBGet)
+btImageRGBHide = BUTTON[SIZE=30]("Hide", cmdMsgHide)
+
+ImageRGBData = VBOX
+(
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=30x9]("X:"),
+  txtImageRGBX,
+  FILL[SIZE=5](),
+  LABEL[SIZE=30x9]("Y:"),
+  txtImageRGBY
+ ),
+ HBOX[ALIGNMENT=ACENTER]
+ (
+  LABEL[SIZE=30x9]("Width:"),
+  txtImageRGBW,
+  FILL[SIZE=5](),
+  LABEL[SIZE=30x9]("Height:"),
+  txtImageRGBH
+ )
+)
+
+ImageRGBDeskTop = VBOX
+(
+ HBOX
+ (
+  FILL(),
+  ImageRGBData,
+  FILL()
+ ),
+ HBOX
+ (
+  FILL(),
+  btImageRGBGet,
+  FILL[SIZE=5](),
+  btImageRGBPut,
+  FILL[SIZE=5](),
+  btImageRGBHide,
+  FILL()
+ )
+)
+
+dlgImageRGB = DIALOG
+[
+ PARENTDIALOG="dlgMain",
+ TITLE="RGB Image",
+ MAXBOX=NO,
+ MINBOX=NO,
+ CLOSE_CB=cmdMsgHide,
+ RESIZE=NO,
+ MARGIN=5x5
+]
+(ImageRGBDeskTop)
+
+#---------------------------------------------------------------------------#
+# Dialogo About.                                                            #
+#---------------------------------------------------------------------------#
+
+btCDTest = BUTTON("Close", cmdCloseAbout)
+
+AboutDeskTop = HBOX[MARGIN=5x5, GAP=2]
+(
+ FILL(),
+ VBOX[ALIGNMENT=ACENTER](
+  LABEL("CD Test 5.3"),
+  FILL[SIZE=5](),
+  LABEL("Antonio Scuri"),
+  LABEL("Diego Nehab"),
+  FILL[SIZE=5](),
+  LABEL("Tecgraf/PUC-Rio"),
+  FILL[SIZE=5](),
+  LABEL("CD Library Version"),
+  lblVersion = LABEL(""),
+  btCDTest
+ ),
+ FILL()
+)
+
+dlgHelpAbout = DIALOG
+[
+ PARENTDIALOG="dlgMain",
+ TITLE="About",
+ MAXBOX=NO,
+ MINBOX=NO,
+ RESIZE=NO
+]
+(AboutDeskTop)
+
+
+          

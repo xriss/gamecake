@@ -1,0 +1,95 @@
+mnOpen = MENU
+(
+ ITEM("CGM - Binary", SimplePlayCGMBin),
+ ITEM("CGM - Text", SimplePlayCGMText),
+ ITEM("METAFILE", SimplePlayMetafile),
+ ITEM("WMF", SimplePlayWMF),
+ ITEM("EMF", SimplePlayEMF)
+)
+
+mnSaveAs = MENU
+(
+ ITEM("DEBUG", SimpleDrawDebug),
+ ITEM("CGM - Binary", SimpleDrawCGMBin),
+ ITEM("CGM - Text", SimpleDrawCGMText),
+ ITEM("DGN", SimpleDrawDGN),
+ ITEM("DXF", SimpleDrawDXF),
+ ITEM("EMF", SimpleDrawEMF),
+ ITEM("METAFILE", SimpleDrawMetafile),
+ ITEM("PDF", SimpleDrawPDF),
+ ITEM("PS", SimpleDrawPS),
+ ITEM("EPS", SimpleDrawEPS),
+ ITEM("SVG", SimpleDrawSVG),
+ ITEM("WMF", SimpleDrawWMF)
+)
+
+mnFile = MENU
+(
+ SUBMENU("Open", mnOpen),
+ SUBMENU("Save As", mnSaveAs),
+ SEPARATOR(),
+ ITEM("Print", SimpleDrawPrint),
+ ITEM("Print Dialog...", SimpleDrawPrintDialog),
+ SEPARATOR(),
+ ITEM("Exit", cmdExit)
+)
+
+mnEdit = MENU
+(
+ ITEM("Copy as Metafile", SimpleDrawClipboardMetafile),
+ ITEM("Copy as EMF", SimpleDrawClipboardEMF),
+ ITEM("Copy as Bitmap", SimpleDrawClipboardBitmap),
+ ITEM("Paste", SimplePlayClipboard)
+)
+
+mnClipping = MENU
+(
+ ITEM("Off", SimpleClippingOff),
+ ITEM("Area", SimpleClippingArea),
+ ITEM("Polygon", SimpleClippingPolygon),
+ ITEM("Region", SimpleClippingRegion)
+)
+
+mnWriteMode = MENU
+(
+ ITEM("Replace", SimpleReplace),
+ ITEM("Xor", SimpleXor),
+ ITEM("Not Xor", SimpleNotXor)
+)
+
+mnOptions = MENU
+(
+ SUBMENU("Clipping", mnClipping),
+ SUBMENU("Write Mode", mnWriteMode),
+ ITEM("Simulate", SimpleDrawSimulate),
+ ITEM("Transform", SimpleTransform),
+ ITEM("Context Plus", SimpleContextPlus)
+)    
+
+mnSurface = MENU
+(
+ ITEM("Window", SimpleDrawWindow),
+ ITEM("Server Image", SimpleDrawImage),
+ ITEM("Image RGB", SimpleDrawImageRGB),
+ ITEM("OpenGL", SimpleDrawGL)
+)    
+
+mnPrimitives = MENU
+(
+ ITEM("All", SimpleAll),
+ ITEM("Text Align", SimpleTextAlign),
+ ITEM("Text Fonts", SimpleTextFonts),
+ ITEM("Test", SimpleTest)
+)    
+
+mnSimpleMenu = MENU
+(
+ SUBMENU("File", mnFile),
+ SUBMENU("Edit", mnEdit),
+ SUBMENU("Options", mnOptions),
+ SUBMENU("Surface", mnSurface),
+ SUBMENU("Primitives", mnPrimitives)
+)
+
+SimpleCanvas = CANVAS[BORDER=0](SimpleRepaint)
+SimpleDialog = DIALOG [TITLE="Simple Draw", MENU=mnSimpleMenu](SimpleCanvas)
