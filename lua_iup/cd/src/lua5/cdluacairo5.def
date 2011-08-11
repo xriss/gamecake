@@ -1,0 +1,4 @@
+EXPORTS
+  luaopen_cdluacairo
+  
+ 

@@ -1,0 +1,9 @@
+EXPORTS
+  cdInitContextPlus
+  cdInitGdiPlus
+  cdwpCreateCanvas
+  cdwpGdiPlusStartup
+  cdwpGdiPlusShutdown
+  cdwpInitTable
+  cdwpUpdateCanvas
+  cdwpKillCanvas

@@ -1,0 +1,9 @@
+EXPORTS
+  cdContextCairoImage
+  cdContextCairoImageRGB
+  cdContextCairoPS
+  cdContextCairoNativeWindow
+  cdContextCairoDBuffer
+  cdContextCairoSVG
+  cdContextCairoPDF
+  cdInitContextPlus
