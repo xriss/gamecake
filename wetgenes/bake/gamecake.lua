@@ -30,6 +30,18 @@ function build(tab)
 		bake.files_pp[ #bake.files_pp +1]={ "../../js/gamecake/src"..v , bake.cd_out..'/js/gamecake'..v }
 	end
 
+	local r=bake.findfiles{basedir="../../js/gamecake/jslib",dir="",filter="%.js$"}
+	for i,v in ipairs(r.ret) do
+		bake.create_dir_for_file(bake.cd_out.."/jslib"..v)
+		bake.copyfile("../../js/gamecake/jslib"..v,bake.cd_out.."/jslib"..v)
+	end
+
+	local r=bake.findfiles{basedir="../../js/gamecake/art",dir="",filter="%.swf$"}
+	for i,v in ipairs(r.ret) do
+		bake.create_dir_for_file(bake.cd_out.."/art"..v)
+		bake.copyfile("../../js/gamecake/art"..v,bake.cd_out.."/art"..v)
+	end
+
 -- the main action happens here
 	bakejs.build(tab)
 
