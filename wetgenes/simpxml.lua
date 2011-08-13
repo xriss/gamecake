@@ -58,30 +58,41 @@ function parse(s)
   local top = {}
   table.insert(stack, top)
   local i = 1
-  local ni,j,c,label,args, empty = string.find(s, "<%?(%/?)([%w_]+)(.-)(%/?)%?>")
 
-local ret_stack=2
-  
-  if not ni then -- ignore missing <? tag
-	ret_stack=1
-	ni,j,c,label,args, empty = string.find(s, "<(%/?)([%w_]+)(.-)(%/?)>")
-  end
-  
+local ret_stack=2 -- we start by assuming we will be skipping a header
+
   local warnings
   local warn=function(s)
 	if not warnings then warnings={} end
 	warnings[#warnings+1]=s
   end
 
+
+
+	local j2
+-- find header
+  local ni,j,c,label,args, empty = string.find(s, "<%?(%/?)([%w_]+)(.-)(%/?)%?>")
+  
+  if not ni then -- ignore missing <? tag header at start
+	ret_stack=1
+	ni,j,c,label,args, empty = string.find(s, "<(%/?)([%w_]+)(.-)(%/?)>")
+  end
+  
   
   while ni do
 --print(ni,j,c,label,args,empty)
     local text = string.sub(s, i, ni-1)
-    if not string.find(text, "^%s*$") then
+
+--print(text)
+    
+    if not string.find(text, "^%s*$") then -- if not just white space
       table.insert(top, text)
     end
     if empty == "/" then  -- empty element tag
       table.insert(top, parse_args(args,label) )
+    elseif c == "xml" then   -- top tag
+      top = parse_args(args,label)
+      table.insert(stack, top)   -- new level
     elseif c == "" then   -- start tag
       top = parse_args(args,label)
       table.insert(stack, top)   -- new level
@@ -100,10 +111,21 @@ local ret_stack=2
 			  end
 		  end
 		  table.insert(top, toclose)
-		  end
+		end
     end 
     i = j+1
-    ni,j,c,label,args, empty = string.find(s, "<(%/?)([%w_]+)(.-)(%/?)>", j)
+
+-- catch cdata in tag
+    ni,j2,text = string.find(s, "^%<%!%[CDATA%[(.-)%]%]%>", i)
+    if ni then
+--print(text)
+		table.insert(top, text) -- just insert the content
+		j=j2
+		i = j+1
+	end
+    
+    
+    ni,j,c,label,args, empty = string.find(s, "<(%/?)([%w_]+)(.-)(%/?)>", i)
   end
   local text = string.sub(s, i)
   if not string.find(text, "^%s*$") then
