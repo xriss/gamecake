@@ -235,9 +235,9 @@ end
 			v1=v
 			v2=v
 		end
-print('caching '..v1.." as "..v2)
+print('caching out/'..v1.." as "..v2)
 		bake.create_dir_for_file(bake.cd_out.."/cache/"..v2)
-		bake.copyfile(v1,bake.cd_out.."/cache/"..v2)
+		bake.copyfile("out/"..v1,bake.cd_out.."/cache/"..v2)
 	end
 
 	local r=bake.findfiles{basedir=bake.cd_out.."/cache",dir=".",filter=""}
