@@ -48,7 +48,6 @@
 
 #endif
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -64,3 +63,4 @@ extern "C" {
 #endif
 
 
+#include "../lua_freetype/code/lua_freetype.h"
