@@ -1,4 +1,0 @@
-EXPORTS
-  imlua_open_capture
-  luaopen_imlua_capture
-  

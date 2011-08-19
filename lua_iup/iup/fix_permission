@@ -1,1 +1,0 @@
-find . -name make_\* -type f -exec chmod ug+x {} \;

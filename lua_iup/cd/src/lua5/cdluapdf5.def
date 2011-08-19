@@ -1,3 +1,0 @@
-EXPORTS
-  cdluapdf_open
-  luaopen_cdluapdf
