@@ -1,6 +1,0 @@
-cp -f ../lib/${TEC_UNAME}/*.dylib ../bin/$TEC_UNAME
-cp -f ../../cd/lib/${TEC_UNAME}/*.dylib ../bin/$TEC_UNAME
-cp -f ../../im/lib/${TEC_UNAME}/*.dylib ../bin/$TEC_UNAME
-cp -f ../../luagl/lib/${TEC_UNAME}/*.dylib ../bin/${TEC_UNAME}
-cp -f ../../lfs/lib/${TEC_UNAME}/*.dylib ../bin/${TEC_UNAME}
-rm -f ../bin/${TEC_UNAME}/*3.dylib
