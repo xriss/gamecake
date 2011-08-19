@@ -3,6 +3,7 @@
 project "lua_freetype"
 language "C++"
 
+defines { "FT2_BUILD_LIBRARY" }
 
 
 files {
@@ -85,7 +86,7 @@ else -- nix
 end
 
 
-includedirs { "freetype/src/include" }
+includedirs { "freetype/include" , "." }
 
 
 SET_KIND("lua","freetype","freetype")

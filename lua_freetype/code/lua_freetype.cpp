@@ -66,9 +66,9 @@ int luaopen_freetype (lua_State *l)
 {
 
 
-	luaL_newmetatable(l, lua_freetype_ptr_name);
-	lua_grd_ptr_openlib(l,0);
-	lua_pop(l,1);
+//	luaL_newmetatable(l, lua_freetype_ptr_name);
+//	lua_freetype_ptr_openlib(l,0);
+//	lua_pop(l,1);
 
 	lua_newtable(l);
 	lua_pushstring(l, LUA_freetype_LIB_NAME );
