@@ -34,7 +34,20 @@ typedef struct freetype * part_ptr ;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_freetype_test (lua_State *l)
 {
-	lua_pushstring(l, "test");
+int error=0;
+	FT_Library  library;   /* handle to library     */
+	FT_Face     face;      /* handle to face object */
+
+	error = FT_Init_FreeType( &library );
+	if( !error )
+	{
+		error = FT_New_Face( library,
+			"/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf",
+			0,
+			&face );
+	}
+
+	lua_pushnumber(l, error);
 	return 1;
 }
 

@@ -63,4 +63,7 @@ extern "C" {
 #endif
 
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+  
 #include "../lua_freetype/code/lua_freetype.h"

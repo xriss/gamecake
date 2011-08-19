@@ -9,6 +9,8 @@ includedirs { "src" }
 
 SET_KIND("luamain")
 
+defines("LUA_USE_MKSTEMP") -- remove warning
+
 if #lua_lib_names>0 then
 	defines("LUA_PRELOADLIBS=lua_preloadlibs")
 end
