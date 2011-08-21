@@ -1,4 +1,4 @@
 bin = http://hg.4lfa.com/bin
-sdks = http://hg.4lfa.com/sdks
+sdks = ../sdks
 
 
