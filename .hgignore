@@ -1,7 +1,6 @@
 .orig
 build-gmake
 .dbg
-sdks
 android/bin
 android/gen
 
