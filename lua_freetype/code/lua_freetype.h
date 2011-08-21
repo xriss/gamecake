@@ -17,6 +17,19 @@ LUALIB_API int luaopen_freetype (lua_State *l);
 #endif
 
 
+//
+// We own the data stored here
+//
+struct lua_freetype_font
+{
+	int error;
+	FT_Library  library;   /* handle to library     */
+	FT_Face     face;      /* handle to face object */
+	
+};
+
+
+
 
 #define LUA_freetype_LIB_NAME "freetype"
 
