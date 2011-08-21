@@ -13,9 +13,9 @@ local freetype=require("freetype")
 print(debug.getinfo(1))
 
 
-local n=freetype.test(wetlua.dir.."dat/DejaVuSans.ttf")
+local n=freetype.create(wetlua.dir.."dat/DejaVuSans.ttf")
 
-print("freetype result "..n)
+print("freetype result "..tostring(n))
 
 
 
