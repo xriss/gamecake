@@ -3,7 +3,7 @@ wetlua={}
 wetlua.exe="exe"
 wetlua.app=arg[1]
 wetlua.dll="so"
-wetlua.dir="../../apps/"..wetlua.app.."/"
+wetlua.dir="../../"..wetlua.app.."/"
 
 print(wetlua.exe)
 print(wetlua.app)
