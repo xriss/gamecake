@@ -25,7 +25,6 @@ struct lua_freetype_font
 	int error;
 	FT_Library  library;   /* handle to library     */
 	FT_Face     face;      /* handle to face object */
-	
 };
 
 
