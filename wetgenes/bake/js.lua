@@ -180,7 +180,7 @@ else
 for i,v in ipairs(bake.files_min_js) do
 print('compressing '..v)
 	bake.execute( bake.cd_base , bake.cmd.java ,
-"-jar ../class/compiler.jar --js_output_file "..bake.cd_out.."/"..v..".min.js --js "..bake.cd_out.."/"..v..".js")
+"-jar ../../js/class/compiler.jar --js_output_file "..bake.cd_out.."/"..v..".min.js --js "..bake.cd_out.."/"..v..".js")
 
 end
 
