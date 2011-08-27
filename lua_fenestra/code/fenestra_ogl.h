@@ -182,14 +182,15 @@ struct fenestra_ogl
 	bool fbo_bind(struct fogl_fbo *fbo);
 	bool fbo_texture(struct fogl_fbo *fbo);
 
+	bool flat_setup();
 	void flat_begin();
 	void flat_end();
 
 	bool font_setup();
 	void font_position(f32 x, f32 y, f32 size , u32 color);
 	void font_draw(char c);
-	void font_draw_string_base(const char *string);
 	void font_draw_string(const char *string);
+	f32 font_width_string(const char *string);
 
 
 #if defined(WIN32)

@@ -507,6 +507,51 @@ const char *s;
 // lua
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+static int core_flat_measure(lua_State *l)
+{
+	struct fenestra_ogl *core = (struct fenestra_ogl *)lua_touserdata(l, 1 );
+	
+const char *s;
+
+	s=0;
+
+	if(lua_istable(l,2))
+	{
+		lua_getfield(l,2,"size");
+		if(lua_isnumber(l,-1))
+		{
+			core->font_size=(f32)lua_tonumber(l,-1);
+		}
+		lua_pop(l,1);
+		
+		lua_getfield(l,2,"s");
+		if(lua_isstring(l,-1))
+		{
+			s=lua_tostring(l,-1);
+		}
+		lua_pop(l,1);
+	}
+	else
+	if(lua_isstring(l,2))
+	{
+		s=lua_tostring(l,2);
+	}
+	
+	if(s)
+	{
+		lua_pushnumber(l, core->font_width_string(s) );
+		return 1;
+	}
+	
+	
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// lua
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 static int core_debug_rect(lua_State *l)
 {
 	struct fenestra_ogl *core = (struct fenestra_ogl *)lua_touserdata(l, 1 );
@@ -1043,6 +1088,7 @@ static const struct luaL_reg core_lib[] = {
 	{"flat_begin",				core_flat_begin},
 	{"flat_end",				core_flat_end},
 	{"flat_print",				core_flat_print},
+	{"flat_measure",			core_flat_measure},
 	
 	{"xox_setup",				core_xox_setup},
 	{"xox_clean",				core_xox_clean},

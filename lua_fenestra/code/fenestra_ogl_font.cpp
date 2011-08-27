@@ -115,7 +115,7 @@ fogl_glyph *pfg;
 		bpy=face->glyph->bitmap.rows+2;
 		
 		gpl=(face->glyph->bitmap_left)-1; // adjust by our 1pixel outline
-		gpt=(-32+face->glyph->bitmap_top)-1; // move to base line (including our 1pixel outline)
+		gpt=(-32+face->glyph->bitmap_top)+3; // move to base line (including our 1pixel outline)
 		gpa=(face->glyph->advance.x/64.0f);
 		
 		if(bpx>64){ bpx=64; } // buffer over run sanity, should not happen
@@ -173,44 +173,9 @@ fogl_glyph *pfg;
 		
 	}
 
-//	FT_Done_FreeType(library); // free everything
+	FT_Done_FreeType(library); // free everything
 
 	return true;
-}
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// Setup junk
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-void fenestra_ogl::flat_begin()
-{
-	glMatrixMode (GL_PROJECTION);
-	glLoadIdentity ();
-	glOrtho(0,width, height,0, -1.0,1.0);
-
-	glEnable( GL_TEXTURE_2D );
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	
-	glDisable(GL_LIGHTING);
-	glDisable(GL_DEPTH_TEST);
-	
-	glEnable( GL_TEXTURE_2D );
-	
-	glDisable( GL_CULL_FACE );
-	
-}
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// Setup junk
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-void fenestra_ogl::flat_end()
-{
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -228,19 +193,19 @@ void fenestra_ogl::font_position(f32 x, f32 y, f32 size, u32 color)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// Setup junk
+// Draw a single char
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void fenestra_ogl::font_draw(char c)
 {
 	fogl_glyph *pfg;
 
-	GLfloat x,y,s;
+	GLfloat x,y,siz;
 	GLfloat cx,cy;
 
 	x=(GLfloat)font_x;
 	y=(GLfloat)font_y;
-	s=(GLfloat)font_size;
+	siz=(GLfloat)font_size;
 
 	c=c-32;
 	if(c<0)   { c=95; } 
@@ -252,31 +217,18 @@ void fenestra_ogl::font_draw(char c)
 	glColor4ub( (font_color>>16)&0xff , (font_color>>8)&0xff , (font_color)&0xff , (font_color>>24)&0xff );
 	
 	glBegin(GL_QUADS);
-	 	glTexCoord2d(0,1); glVertex2f(x,   y+s);
-	 	glTexCoord2d(0,0); glVertex2f(x,   y  );
-	 	glTexCoord2d(1,0); glVertex2f(x+s, y  );
-	 	glTexCoord2d(1,1); glVertex2f(x+s, y+s);
+			glTexCoord2d(0,1); glVertex2f(x+((pfg->left)*siz),            y-((-pfg->top+pfg->height)*siz) );
+			glTexCoord2d(0,0); glVertex2f(x+((pfg->left)*siz),            y-((-pfg->top)*siz)             );
+			glTexCoord2d(1,0); glVertex2f(x+((pfg->left+pfg->width)*siz), y-((-pfg->top)*siz)             );
+			glTexCoord2d(1,1); glVertex2f(x+((pfg->left+pfg->width)*siz), y-((-pfg->top+pfg->height)*siz) );
 	glEnd();
 
 	font_x+=font_size;
 }
 
-void fenestra_ogl::font_draw_string_base(const char *string)
-{
-const char *s;
-
-	for(s=string;*s;s++)
-	{
-		font_draw(*s);
-		
-		if(font_x>width) break;
-	}
-}
-
-
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// alternative drawstring for "normal" use
+// draw a string
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void fenestra_ogl::font_draw_string(const char *string)
@@ -321,5 +273,30 @@ glColor4ub( (font_color>>16)&0xff , (font_color>>8)&0xff , (font_color)&0xff , (
 glDisable( GL_TEXTURE_2D );
 glEnable(GL_LIGHTING);
 
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// how wide is this string?
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+f32 fenestra_ogl::font_width_string(const char *string)
+{
+const char *s;
+f32 w=0;
+GLfloat siz=(GLfloat)font_size;
+		
+	for(s=string;*s;s++)
+	{
+		char c=*s;
+		
+		c=c-32;
+		if(c<0)   { c=95; } 
+		if(c>95)  { c=95; }
+		
+		w+=(font_infos[c].advance*siz);
+	}
+	
+	return w;
 }
 
