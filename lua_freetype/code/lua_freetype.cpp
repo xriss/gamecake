@@ -341,8 +341,17 @@ unsigned char* b;
 
 	return 1;
 }
-                
-            
+
+/*
+FT_Vector  delta;
+
+
+      FT_Get_Kerning( face, previous, glyph_index,
+                      FT_KERNING_DEFAULT, &delta );
+
+      pen_x += delta.x >> 6;
+*/
+      
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // call open lib with our ptr functions

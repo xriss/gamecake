@@ -71,6 +71,9 @@ extern "C" {
 #endif
 
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 
 //#include "../../drylib/drylib_all.h"
 
