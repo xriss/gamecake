@@ -123,6 +123,7 @@ glError();
 //	setup_viewport(640,480);
 
 	debug_setup();
+	font_setup();
 
 	return true;
 }

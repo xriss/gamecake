@@ -174,6 +174,16 @@ struct fenestra_ogl
 	bool fbo_bind(struct fogl_fbo *fbo);
 	bool fbo_texture(struct fogl_fbo *fbo);
 
+	void flat_begin();
+	void flat_end();
+
+	bool font_setup();
+	void font_position(f32 x, f32 y, f32 size , u32 color);
+	void font_draw(char c);
+	void font_draw_string_base(const char *string);
+	void font_draw_string(const char *string);
+
+
 #if defined(WIN32)
 	HDC hDC;
 	HGLRC hRC;
@@ -187,9 +197,6 @@ struct fenestra_ogl
 	u32 force_diffuse; // replace diffuse from material if !0 (for blooming effect)
 	u32 force_spec;    // same with spec
 	f32 force_gloss;   // and gloss
-
-//	GLuint debug_font;
-	GLuint debug_font_chars[96];
 
 	struct fogl_fbo target[1];
 
@@ -206,10 +213,19 @@ struct fenestra_ogl
 	f32 clip_xh;
 	f32 clip_yh;
 
+//debug font
+	GLuint debug_font_chars[96];
 	f32 debug_font_x;
 	f32 debug_font_y;
 	f32 debug_font_size;
 	u32 debug_font_color;
+
+//current basic font
+	GLuint font_chars[96];
+	f32 font_x;
+	f32 font_y;
+	f32 font_size;
+	u32 font_color;
 };
 
 
