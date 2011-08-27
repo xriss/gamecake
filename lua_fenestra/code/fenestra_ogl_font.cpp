@@ -96,6 +96,10 @@ int i=0;
 unsigned char* bp;
 int bpx;
 int bpy;
+int gpl;
+int gpt;
+float gpa;
+fogl_glyph *pfg;
 
     // allocate texture names
     glGenTextures( 96, font_chars );
@@ -110,9 +114,21 @@ int bpy;
 		bpx=face->glyph->bitmap.width+2;
 		bpy=face->glyph->bitmap.rows+2;
 		
-		if(bpx>64){ bpx=64; } // sanity
-		if(bpy>64){ bpy=64; }
+		gpl=(face->glyph->bitmap_left)-1; // adjust by our 1pixel outline
+		gpt=(-32+face->glyph->bitmap_top)-1; // move to base line (including our 1pixel outline)
+		gpa=(face->glyph->advance.x/64.0f);
+		
+		if(bpx>64){ bpx=64; } // buffer over run sanity, should not happen
+		if(bpy>64){ bpy=64; } // dont bother making this nice, it is just a hack
 
+		pfg=font_infos+i; // cache some info in thsi for later drawing
+
+// we are rendering at 32x32 so scale down by that	
+		pfg->top=gpt/32.0f;
+		pfg->left=gpl/32.0f;
+		pfg->advance=gpa/32.0f;
+		pfg->width=bpx/32.0f;
+		pfg->height=bpy/32.0f;
 
 			
 // build a single char			
@@ -217,6 +233,8 @@ void fenestra_ogl::font_position(f32 x, f32 y, f32 size, u32 color)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void fenestra_ogl::font_draw(char c)
 {
+	fogl_glyph *pfg;
+
 	GLfloat x,y,s;
 	GLfloat cx,cy;
 
@@ -226,7 +244,9 @@ void fenestra_ogl::font_draw(char c)
 
 	c=c-32;
 	if(c<0)   { c=95; } 
-	if(c>95)  { c=95; } 
+	if(c>95)  { c=95; }
+	pfg=font_infos+c;
+
     glBindTexture( GL_TEXTURE_2D, font_chars[c] );
     
 	glColor4ub( (font_color>>16)&0xff , (font_color>>8)&0xff , (font_color)&0xff , (font_color>>24)&0xff );
@@ -271,6 +291,7 @@ glColor4ub( (font_color>>16)&0xff , (font_color>>8)&0xff , (font_color)&0xff , (
 	for(s=string;*s;s++)
 	{
 		char c=*s;
+		fogl_glyph *pfg;
 		
 		GLfloat x,y,siz;
 
@@ -280,17 +301,18 @@ glColor4ub( (font_color>>16)&0xff , (font_color>>8)&0xff , (font_color)&0xff , (
 		
 		c=c-32;
 		if(c<0)   { c=95; } 
-		if(c>95)  { c=95; } 
+		if(c>95)  { c=95; }
+		pfg=font_infos+c;
 		glBindTexture( GL_TEXTURE_2D, font_chars[c] );
 		
 		glBegin(GL_QUADS);
-			glTexCoord2d(0,1); glVertex2f(x,     y-siz);
-			glTexCoord2d(0,0); glVertex2f(x,     y    );
-			glTexCoord2d(1,0); glVertex2f(x+siz, y    );
-			glTexCoord2d(1,1); glVertex2f(x+siz, y-siz);
+			glTexCoord2d(0,1); glVertex2f(x+((pfg->left)*siz),            y-((-pfg->top+pfg->height)*siz) );
+			glTexCoord2d(0,0); glVertex2f(x+((pfg->left)*siz),            y-((-pfg->top)*siz)             );
+			glTexCoord2d(1,0); glVertex2f(x+((pfg->left+pfg->width)*siz), y-((-pfg->top)*siz)             );
+			glTexCoord2d(1,1); glVertex2f(x+((pfg->left+pfg->width)*siz), y-((-pfg->top+pfg->height)*siz) );
 		glEnd();
 
-		font_x+=font_size;
+		font_x+=(pfg->advance*siz);
 		
 		if(font_x>width) break;
 	}

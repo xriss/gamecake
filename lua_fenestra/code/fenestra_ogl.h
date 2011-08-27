@@ -122,6 +122,14 @@ struct fogl_fbo
 	
 };
 
+struct fogl_glyph
+{
+	f32 top;
+	f32 left;
+	f32 width;
+	f32 height;
+	f32 advance;
+};
 
 // a main window class to hangs everything off of
 
@@ -221,6 +229,7 @@ struct fenestra_ogl
 	u32 debug_font_color;
 
 //current basic font
+	fogl_glyph font_infos[96];
 	GLuint font_chars[96];
 	f32 font_x;
 	f32 font_y;
