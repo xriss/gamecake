@@ -144,6 +144,16 @@ function win.debug_polygon_begin(...)	return core.ogl.debug_polygon_begin(	win.c
 function win.debug_polygon_vertex(...)	return core.ogl.debug_polygon_vertex(	win.core_ogl,	...) end
 function win.debug_polygon_end(...)		return core.ogl.debug_polygon_end(		win.core_ogl,	...) end
 
+
+function win.flat_begin(...)				return core.ogl.flat_begin(				win.core_ogl,	...) end
+function win.flat_end(...)				return core.ogl.flat_end(				win.core_ogl,	...) end
+function win.flat_print(...)				return core.ogl.flat_print(				win.core_ogl,	...) end
+function win.flat_rect(...)				return core.ogl.debug_rect(				win.core_ogl,	...) end
+function win.flat_polygon_begin(...)			return core.ogl.debug_polygon_begin(			win.core_ogl,	...) end
+function win.flat_polygon_vertex(...)			return core.ogl.debug_polygon_vertex(			win.core_ogl,	...) end
+function win.flat_polygon_end(...)			return core.ogl.debug_polygon_end(			win.core_ogl,	...) end
+
+
 function win.draw_cube(...)				return core.ogl.draw_cube(				win.core_ogl,	...) end
 
 function win.xox_setup(...)				return core.ogl.xox_setup(				win.core_ogl,	...) end
@@ -161,7 +171,7 @@ function win.xsx_set(...)				return core.ogl.xsx_set(				win.core_ogl,	...) end
 function win.fbo_setup(...)				return core.ogl.fbo_setup(				win.core_ogl,	...) end
 function win.fbo_clean(...)				return core.ogl.fbo_clean(				win.core_ogl,	...) end
 function win.fbo_bind(...)				return core.ogl.fbo_bind(				win.core_ogl,	...) end
-function win.fbo_texture(...)			return core.ogl.fbo_texture(			win.core_ogl,	...) end
+function win.fbo_texture(...)				return core.ogl.fbo_texture(			win.core_ogl,	...) end
 
 function win.load(...)					return core.data.load(					win.core_data,	...) end
 	

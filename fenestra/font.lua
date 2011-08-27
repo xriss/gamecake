@@ -73,7 +73,7 @@ function setup(win,name)
 -- draw this string, optionally apply a different color to each char using the colors array
 --
 	function font.draw(text,colors)
-		win.debug_print_alt({x=font.px,y=font.py,size=font.sx,color=font.color,s=text,c=colors})
+		win.flat_print({x=font.px,y=font.py,size=font.sx,color=font.color,s=text,c=colors})
 	end
 
 	return font
