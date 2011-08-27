@@ -72,6 +72,17 @@ static unsigned char const font_bits[16*48]={
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 bool fenestra_ogl::font_setup()
 {
+FT_Library  library;   /* handle to library     */
+FT_Face     face;      /* handle to face object */
+
+int error;
+
+	error = FT_Init_FreeType( &library );
+	error = FT_New_Face( library,"../../lua/apps/wettest/data/fonts/DejaVuSans.ttf",0, &face );
+	error = FT_Set_Pixel_Sizes( face, 32, 32 );
+	
+int glyph_index;
+
 int x,y,xx,yy;
 u8 b;
 u8 m;
@@ -79,71 +90,74 @@ cu8 *f=font_bits;
 u32 *t;
 u32 c;
 bool last;
-u32 bmap[8*8];
+u32 bmap[64*64];
 int i=0;
+
+unsigned char* bp;
+int bpx;
+int bpy;
 
     // allocate texture names
     glGenTextures( 96, font_chars );
 
-	for(yy=0;yy<48;yy+=8) // bitmap data is 6 chars high
+	for( i=0; i<96 ; i++ )
 	{
-		last=false;
-		for(xx=0;xx<128;xx+=8) // bitmap data is 16 chars wide
-		{
+		glyph_index = FT_Get_Char_Index( face, 32+i);
+		error = FT_Load_Glyph( face, glyph_index , 0 );
+		error = FT_Render_Glyph( face->glyph , FT_RENDER_MODE_NORMAL ); 
+
+		bp=face->glyph->bitmap.buffer;
+		bpx=face->glyph->bitmap.width+2;
+		bpy=face->glyph->bitmap.rows+2;
+		
+		if(bpx>64){ bpx=64; } // sanity
+		if(bpy>64){ bpy=64; }
+
+
 			
 // build a single char			
-			for(y=0;y<8;y++)
+		for(y=0;y<bpy;y++)
+		{
+			for(x=0;x<bpx;x++)
 			{
-				f=font_bits+((yy+y)*16)+(xx/8);
-				b=*f++;
-				m=0x80;
-				last=false;
-				for(x=0;x<8;x++)
+				if((x==0)||(y==0)||(x==bpx-1)||(y==bpy-1))
 				{
-					if(b&m)
-					{
-						c=0xffffffff; // solid
-						last=true;
-					}
-					else
-					{
-						if(last)
-						{
-							c=0xff000000; // abgr shadow
-						}
-						else
-						{
-							c=0x00000000; // transparent
-						}
-						last=false;
-					}
-					m=m>>1;
-					bmap[x+(y*8)]=c;
+					c=0x00ffffff;
 				}
+				else
+				{
+					c=0x00ffffff | (bp[x-1]<<24);
+				}
+				
+				bmap[x+(y*bpx)]=c;
 			}
-			
-			// select our current texture
-			glBindTexture( GL_TEXTURE_2D, font_chars[i] );
-
-			// select modulate to mix texture with color for shading
-			glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-
-			// when texture area is small, bilinear filter the closest mipmap
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-
-			// when texture area is large, bilinear filter the first mipmap
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-
-			// build our texture mipmaps
-		    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGBA , 8, 8, GL_RGBA, GL_UNSIGNED_BYTE, bmap );
-//			glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,8,8,0,GL_RGBA, GL_UNSIGNED_BYTE,bmap);
-			
-			i++;
+			if(y!=0)
+			{
+				bp+=face->glyph->bitmap.pitch;
+			}
 		}
+		
+		// select our current texture
+		glBindTexture( GL_TEXTURE_2D, font_chars[i] );
+
+		// select modulate to mix texture with color for shading
+		glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+
+		// when texture area is small, bilinear filter the closest mipmap
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+
+		// when texture area is large, bilinear filter the first mipmap
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+
+		// build our texture mipmaps
+		gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGBA , bpx, bpy, GL_RGBA, GL_UNSIGNED_BYTE, bmap );
+		
 	}
+
+//	FT_Done_FreeType(library); // free everything
 
 	return true;
 }
