@@ -60,14 +60,8 @@ function setup(win,name)
 -- how big an area does this string require, return width,height
 --
 	function font.size(text,s)
-	
-		if s then
-		
-			return #text*s , s
-		else
-	
-			return #text*font.sx , font.sy
-		end
+		if s then font.sx=s font.sy=s end
+		if text then return win.flat_measure({size=font.sx,s=text}) , font.sy end
 	end
 --
 -- draw this string, optionally apply a different color to each char using the colors array
