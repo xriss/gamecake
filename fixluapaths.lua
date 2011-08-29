@@ -1,6 +1,7 @@
 
 -- create a global function that can be called to fix lua paths so we can find things
--- dofile("thisfile")
+-- unfortunatly you still have to know where this file is first and run a 
+-- dofile("thisfile") need to come up with a better plan
 --
 -- this needs to get more searchy so it can find where the lua stuff is without any explicit values
 

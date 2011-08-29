@@ -59,8 +59,8 @@ function setup(win,name)
 --
 -- how big an area does this string require, return width,height
 --
-	function font.size(text,s)
-		if s then font.sx=s font.sy=s end
+	function font.size(text,size)
+		if size then font.sx=size font.sy=size end
 		if text then return win.flat_measure({size=font.sx,s=text}) , font.sy end
 	end
 --
@@ -69,8 +69,14 @@ function setup(win,name)
 	function font.draw(text,colors)
 		win.flat_print({x=font.px,y=font.py,size=font.sx,color=font.color,s=text,c=colors})
 	end
+--
+-- number of characters that fit in this width
+--
+	function font.fits(width,text,size)
+		if size then font.sx=size font.sy=size end
+		if text then return win.flat_fits({size=font.sx,s=text,width=width}) end
+	end
 
 	return font
-
 end
 
