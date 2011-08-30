@@ -3,7 +3,7 @@
 extern int luaopen_freetype(lua_State *L);
 extern int luaopen_bit(lua_State *L);
 extern int luaopen_box2d_core(lua_State *L);
-extern int luaopen_gl(lua_State *L);
+extern int luaopen_luagl(lua_State *L);
 extern int luaopen_grd(lua_State *L);
 extern int luaopen_lanes(lua_State *L);
 extern int luaopen_lash(lua_State *L);
@@ -27,7 +27,7 @@ extern void lua_preloadlibs(lua_State *L)
     lua_pushcfunction(L, luaopen_box2d_core);
     lua_settable(L, -3);
     lua_pushliteral(L, "gl");
-    lua_pushcfunction(L, luaopen_gl);
+    lua_pushcfunction(L, luaopen_luagl);
     lua_settable(L, -3);
     lua_pushliteral(L, "grd");
     lua_pushcfunction(L, luaopen_grd);
