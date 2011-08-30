@@ -36,7 +36,7 @@ local f=function()
 wet_setup_comandline=nil--arg[3]
 wet_setup_hwnd=nil--arg[4]
 
-	local f=loadfile(wetlua.dir.."lua/state/main.lua")
+	local f=loadfile(apps.dir.."lua/state/main.lua")
 	f()
 	
 end
@@ -49,7 +49,7 @@ thread={}
 		arg=arg,
 		oldmain=main,
 		main_next=main_next,
-		wetlua=wetlua
+		apps=apps
 	}},f)(thread.linda,1)
 
 -- wait for thread? not if this is running under moz...

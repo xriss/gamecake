@@ -1,5 +1,5 @@
-package.cpath=wetlua.cpath -- and set paths so we can find things
-package.path=wetlua.path
+package.cpath=apps.cpath -- and set paths so we can find things
+package.path=apps.path
 
 local wetquire=require("wetquire")
 wetquire.overload() -- replace require and module

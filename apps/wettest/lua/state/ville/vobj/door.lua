@@ -16,7 +16,7 @@ local print=print
 
 local gl=require("gl")
 
-local wldir=wetlua.dir or ""
+local wldir=apps.dir or ""
 
 
 module(...)

@@ -23,8 +23,8 @@ local io=io
 local math=math
 
 
-local wetlua=wetlua
-local wldir=wetlua.dir or ""
+local apps=apps
+local wldir=apps.dir or ""
 
 
 local fbo_w=640/1

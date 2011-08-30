@@ -42,8 +42,8 @@ end
 -----------------------------------------------------------------------------
 function lanes_worker(linda,idx)
 
-package.cpath=wetlua.cpath -- and set paths so we can find things
-package.path=wetlua.path
+package.cpath=apps.cpath -- and set paths so we can find things
+package.path=apps.path
 
 -----------------------------------------------------------------------------
 --
