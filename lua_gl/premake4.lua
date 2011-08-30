@@ -1,7 +1,7 @@
 
 project "lua_gl"
 language "C++"
-files { "src/**.cpp" , "src/**.c" , "src/**.h" , "include/**.h" ,
+files { "luagl/src/**.cpp" , "luagl/src/**.c" , "luagl/src/**.h" , "luagl/include/**.h" ,
 	 "freeglut/src/**.cpp" , "freeglut/src/**.c" , "freeglut/src/**.h"  , "freeglut/include/**.h" }
 excludes{ "src/Interpreter.c" , }
 
@@ -25,8 +25,8 @@ else -- nix
 end
 
 
-includedirs { "src" , "include" , "freeglut/src" , "freeglut/include" , "freeglut/include/GL" }
+includedirs { "luagl/src" , "luagl/include" , "freeglut/src" , "freeglut/include" , "freeglut/include/GL" }
 
-SET_KIND("lua","gl","gl")
+SET_KIND("lua","gl","luagl")
 SET_TARGET("","gl")
 

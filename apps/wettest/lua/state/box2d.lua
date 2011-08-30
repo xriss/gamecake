@@ -95,8 +95,9 @@ end
 
 function draw()
 
-	gl.ClearColor(0,0,0.25,0)
 	win.begin()
+	gl.ClearColor(0,0,0.25,0)
+	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 	
 	win.project23d(480/640,1,1024)
 	gl.MatrixMode("MODELVIEW")

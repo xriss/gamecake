@@ -259,8 +259,9 @@ local fov=4
 	elseif filter=="test" then
 	
 		win.fbo_bind(fbo1)
-		gl.ClearColor(0,0,0,0)
 		win.begin(fbo_w,fbo_h)
+		gl.ClearColor(0,0,0,0)
+		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 		
 		draw_parts()
 		
@@ -268,8 +269,9 @@ local fov=4
 	-- drawing to the screen
 		win.fbo_bind()
 
-		gl.ClearColor(0,0,0.25,0)
 		win.begin()
+		gl.ClearColor(0,0,0.25,0)
+		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 		win.clip2d(0,0,0,0)
 		win.project23d(640/480,fov,1024)
 
@@ -310,8 +312,9 @@ local fov=4
 	elseif filter=="blur" then
 	
 		win.fbo_bind(fbo1)
-		gl.ClearColor(0,0,0,0)
 		win.begin(fbo_w,fbo_h)
+		gl.ClearColor(0,0,0,0)
+		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 
 --		win.set("force_diffuse",0xff000000)
 --		win.set("force_gloss",64)
@@ -321,8 +324,9 @@ local fov=4
 		
 	
 		win.fbo_bind(fbo2)
-		gl.ClearColor(0,0,0,0)
 		win.begin(fbo_w,fbo_h)
+		gl.ClearColor(0,0,0,0)
+		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 
 	--	win.set("clear_diffuse",true)
 		draw_parts()
@@ -333,8 +337,9 @@ local fov=4
 	-- drawing to the screen
 		win.fbo_bind()
 
-		gl.ClearColor(0,0,0.25,0)
 		win.begin()
+		gl.ClearColor(0,0,0.25,0)
+		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 		win.clip2d(0,0,0,0)
 		win.project23d(640/480,fov,1024)
 

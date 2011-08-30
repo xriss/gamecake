@@ -209,8 +209,9 @@ end
 
 function draw()
 
-	gl.ClearColor(0,0,0.25,0)
 	win.begin()
+	gl.ClearColor(0,0,0.25,0)
+	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 	
 	
 	
@@ -285,7 +286,7 @@ function draw()
 		win.clip2d(2/3,0,1/3,win.height)
 		win.project23d(480/320,1,32768)
 		gl.ClearColor(0,0,0,0)
-		gl.Clear('COLOR_BUFFER_BIT,DEPTH_BUFFER_BIT')
+		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 		gl.MatrixMode("MODELVIEW")
 		gl.LoadIdentity()
 		gl.Translate(0,0,-240)
@@ -299,7 +300,7 @@ function draw()
 
 	win.clip2d(0,7/8,1/8,1/8)
 	win.project23d(1/1,8,32768)
-	gl.Clear('COLOR_BUFFER_BIT,DEPTH_BUFFER_BIT')
+	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 	gl.MatrixMode("MODELVIEW")
 	gl.LoadIdentity()
 
