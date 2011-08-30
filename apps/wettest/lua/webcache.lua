@@ -14,7 +14,7 @@ local setfenv=setfenv
 local work=require("work")
 local wetstr=require("wetgenes.string")
 
-local wetlua=wetlua
+local apps=apps
 
 module(...)
 
@@ -45,7 +45,7 @@ function get_url(url)
 	if not ret then -- then try for disk cache
 	
 		local erl=esc_url(url)
-		local fname=wetlua.dir.."local/cache/"..erl..".lua"
+		local fname=apps.dir.."local/cache/"..erl..".lua"
 		local fp=io.open(fname,"rb")
 		
 		if fp then -- got some cache

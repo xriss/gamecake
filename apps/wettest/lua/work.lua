@@ -44,7 +44,7 @@ local function create_new_thread(i)
 	threads[i]={}
 	threads[i].linda=lanes.linda()
 	threads[i].version=work_lanes_version
-	local worker=lanes.gen("*",{["globals"]={wetlua=wetlua}}, worker.lanes_worker )
+	local worker=lanes.gen("*",{["globals"]={apps=apps}}, worker.lanes_worker )
 	threads[i].worker=worker(threads[i].linda,i)
 
 end
