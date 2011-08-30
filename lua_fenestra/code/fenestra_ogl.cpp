@@ -119,8 +119,6 @@ glError();
 	
 	ret=GLeeInit();
 	ret=GLeeForceLink( "GL_VERSION_1_4" );
-	
-//	setup_viewport(640,480);
 
 	debug_setup();
 	font_setup();
@@ -128,16 +126,27 @@ glError();
 	return true;
 }
 
-/*
+
 bool fenestra_ogl::setup_viewport(int _width,int _height)
 {
-	if(!viewport_lock)
+	if((_width>0)&&(_height>0))
 	{
 		width=(f32)_width;
 		height=(f32)_height;
 	}
+	else // use the master sizes
+	{
+		width=master_width;
+		height=master_height;
+	}
+	
+	/* This is the default view clipping */
+
+	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
+	clip2d(0,0,width,height);
+
 	return true;
-}*/
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -214,11 +223,12 @@ void fenestra_ogl::clip2d(float xp, float yp, float xh, float yh)
 // simpler for 2d positioning.
 //
 // it adjusts itself based upon the width and height of the display window
+// setting an FBO will change these values, so call this afterwards
 //
 // aspect is x/y of what you want to see, setting a z=1 and y=1 would get you the top of the screen
 // as would a z=128 and y=128. This means we can treat the z as a simple divider with no adjustment
 //
-// so setting aspect to 640/480 would mean at a z depth of 240 (which is y/2) then your view area would be
+// so setting aspect to 640,480 would mean at a z depth of 240 (which is y/2) then your view area would be
 // -320 to +320 in the x any -240 to +240 in the y.
 //
 // fov is just a viewscale, (the tan of ( 90deg - half the viewscale ) )
@@ -226,7 +236,7 @@ void fenestra_ogl::clip2d(float xp, float yp, float xh, float yh)
 // need to scale your x or y calculations or 3d sizes by when doing 2d positioning
 // this angle is a vertical view angle
 //
-// so again in the above 640/480 example, a fov of 4 (a more natural looking fov) the extents at z=240
+// so again in the above 640,480 example, a fov of 4 (a more natural looking fov) the extents at z=240
 // -80 to +80 in the x and -60 to +60 in the y. Which is the original numbers * 0.25
 // this fov of 4 gives a viewing angle of about 28 degrees
 // 
@@ -239,11 +249,16 @@ void fenestra_ogl::clip2d(float xp, float yp, float xh, float yh)
 //
 // The following would be a reasonable default for a 640x480 screen.
 //
-// view(640/480,4,1024)
+// view(320/240,4,1024)
+//
+// then at z=(240/4)=60 , the view area would be -320 +320 , -240 +240 , -60 +(1024-60)
+//
+// and this is about as simple as it is going to get for 2d things
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void fenestra_ogl::project23d(float aspect, float fov, float depth)
 {
+
 // diveide by zero sanity
 	clip_xh=clip_xh ? clip_xh : 1;
 	clip_yh=clip_yh ? clip_yh : 1;
@@ -309,41 +324,34 @@ void fenestra_ogl::begin(s32 _width,s32 _height)
 {
 	if( (_width>0) && (_height>0) )
 	{
-		width=_width;
-		height=_height;
+		master_width=_width;
+		master_height=_height;
 	}
 	else
 	{
-		width=fenestra->width;
-		height=fenestra->height;
+		master_width=fenestra->width;
+		master_height=fenestra->height;
 	}
+	width=master_width;
+	height=master_height;
 	
-	/* set clear color to black */
-
-//	glClearColor (0.0, 0.0, 0.0, 0.0);
-
-	/* set fill  color to white */
+// set fill  color to white
 
 	glColor3f(1.0, 1.0, 1.0);
-
-
-	/* This is the default view clipping */
-	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
+	
+	setup_viewport(width,height);
 	
 // reset model matrix before setting up lights
 	glMatrixMode (GL_MODELVIEW);
-	glLoadIdentity ();	
-	
-//	glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+	glLoadIdentity ();
 
 	/* clear window */
 
 glError();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	glEnable( GL_TEXTURE_2D );
 
-//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
@@ -360,7 +368,6 @@ glError();
 // the scene is nice and over bright
 	
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,light5);
-//	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SINGLE_COLOR);
 	
 	glLightfv(GL_LIGHT0, GL_AMBIENT, light0);
@@ -374,10 +381,7 @@ glError();
 	
 	glDisable( GL_TEXTURE_2D );
 	
-//	glDisable( GL_RESCALE_NORMAL );
-//	glDisable( GL_NORMALIZE );
-//	glEnable(GL_RESCALE_NORMAL);
-	glEnable(GL_NORMALIZE);
+	glEnable(GL_NORMALIZE); // anoying need to rescale normals for sensible lighting...
 
 // force vsync?
 #if defined(WIN32)
@@ -391,6 +395,8 @@ glError();
 
 	glAlphaFunc(GL_GREATER,0.0f);
 	glEnable(GL_ALPHA_TEST);
+
+
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -434,10 +440,7 @@ int fenestra_ogl::set_target(int w,int h)
 		fbo_bind(target);
 
 // the new width/height
-		target_old_width=width;
 		width=w;
-		
-		target_old_height=height;
 		height=h;
 		
   		return target->status;
@@ -449,8 +452,8 @@ int fenestra_ogl::set_target(int w,int h)
 		fbo_clean(target);
 
 // the old width/height		
-		width=target_old_width;
-		height=target_old_height;
+		width=master_width;
+		height=master_height;
 
 		return 0;
   	}

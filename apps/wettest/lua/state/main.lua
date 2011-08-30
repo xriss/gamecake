@@ -200,8 +200,9 @@ end_now=false
 			
 			if menu_active then
 			
-				gl.ClearColor(0,0,0.25,0)
 				win.begin()
+				gl.ClearColor(0,0,0.25,0)
+				gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 				
 				win.clip2d(0,0,0,0)
 				win.project23d(640/480,1,1024)
@@ -218,8 +219,9 @@ end_now=false
 				if _G.main and _G.main.draw then
 					skipwidge=_G.main:draw()
 				else
-					gl.ClearColor(0,0,0.25,0)
 					win.begin()
+					gl.ClearColor(0,0,0.25,0)
+					gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 					
 					win.clip2d(0,0,0,0)
 					win.project23d(640/480,1,1024)

@@ -300,3 +300,34 @@ GLfloat siz=(GLfloat)font_size;
 	return w;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// how characters from this string can we fit in this space without overflowing
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+s32 fenestra_ogl::font_fit_string(const char *string,f32 width)
+{
+int count=0;
+const char *s;
+f32 w=0;
+GLfloat siz=(GLfloat)font_size;
+		
+	for(s=string;*s;s++)
+	{
+		char c=*s;
+		
+		c=c-32;
+		if(c<0)   { c=95; } 
+		if(c>95)  { c=95; }
+		
+		w+=(font_infos[c].advance*siz);
+		
+		if(w>width)
+		{
+			break;
+		}
+		count++;
+	}
+	
+	return count;
+}
