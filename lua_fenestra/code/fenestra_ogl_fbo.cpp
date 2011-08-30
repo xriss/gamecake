@@ -88,11 +88,14 @@ bool fenestra_ogl::fbo_bind(struct fogl_fbo *fbo)
 
 // should check for errors here
 		fbo->status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+		
+		setup_viewport(fbo->width,fbo->height);
 	}
 	else
 	{
 //Bind 0, which means render to back buffer, as a result, fb is unbound
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		setup_viewport(0,0);
 	}
 	
 	return true;

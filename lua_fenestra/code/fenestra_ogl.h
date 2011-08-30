@@ -138,6 +138,7 @@ struct fenestra_ogl
 	struct fenestra *fenestra; // up pointer
 
 	bool setup(struct fenestra * _fenestra);
+	bool setup_viewport(int _width,int _height);
 	void clean(void);
 
 	void clip2d(float xp, float yp, float xh, float yh);
@@ -191,7 +192,7 @@ struct fenestra_ogl
 	void font_draw(char c);
 	void font_draw_string(const char *string);
 	f32 font_width_string(const char *string);
-
+	s32 font_fit_string( const char *string, f32 width );
 
 #if defined(WIN32)
 	HDC hDC;
@@ -209,9 +210,11 @@ struct fenestra_ogl
 
 	struct fogl_fbo target[1];
 
-	f32 target_old_width;
-	f32 target_old_height;
-	
+// the master window size
+
+	f32 master_width;
+	f32 master_height;
+
 // the full window size
 	f32 width;
 	f32 height;
