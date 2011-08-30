@@ -112,7 +112,7 @@ local win={}
 
 	end
 	
--- return window x,y transformed into the viewspace of project23d if you provided h/w
+-- return window x,y pos transformed into the viewspace of project23d if you provided h/w to that function
 	function win.mouse23d(w,h,x,y)
 	
 		local hx=win.width/2
@@ -120,7 +120,7 @@ local win={}
 
 		local tx,ty
 		
-		if win.height/(win.width or 1) > (h/w) then -- deal with new smart viewport sizeing
+		if win.height/(win.width or 1) > (h/w) then -- deal with new "smart" viewport sizeing
 		
 			tx=(w/ 2)*(x-hx)/hx
 			ty=(w/-2)*(hy-y)/hx

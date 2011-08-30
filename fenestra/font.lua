@@ -77,6 +77,50 @@ function setup(win,name)
 		if text then return win.flat_fits({size=font.sx,s=text,width=width}) end
 	end
 
+--
+-- break this string into an array of strings with proper word wrapping to the given width
+-- whitespace will be removed from the begining of the strings
+--
+	function font.wrap(width,text,size)
+		if size then font.sx=size font.sy=size end
+		if text then
+		
+			local s=text
+			local s1=0
+			local ss={}
+			while #s>0 do
+				s1=font.fits(width,s)
+				if s1>=0 then
+					local bp=s1
+					local wa,wb=s:sub(bp+1):find("^%s+") -- white space at end?
+					
+					if #s == bp then -- the end of string
+					
+					elseif wa then -- perfect split, followed by space
+					
+						bp=bp+wb -- include the space at the end
+						
+					else -- find the space before
+					
+						local a,b = s:find("%s+")
+						
+						while a do
+							if a<s1 then bp=b else break end
+							a,b = s:find("%s+",b+1)
+						end
+						
+					end
+					ss[#ss+1]=s:sub(1,bp)
+					s=s:sub(bp+1)
+				else
+					break
+				end
+			end
+
+			return ss
+		end
+	end
+
 	return font
 end
 
