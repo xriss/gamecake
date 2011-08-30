@@ -30,8 +30,8 @@ local unpack=unpack
 
 local _G = _G
 
-local wetlua=wetlua
-local wldir=wetlua.dir or ""
+local apps=apps
+local wldir=apps.dir or ""
 
 module("fenestra.data")
 
