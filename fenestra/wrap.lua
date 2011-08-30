@@ -111,6 +111,29 @@ local win={}
 		return xsx
 
 	end
+	
+-- return window x,y transformed into the viewspace of project23d if you provided h/w
+	function win.mouse23d(w,h,x,y)
+	
+		local hx=win.width/2
+		local hy=win.height/2
+
+		local tx,ty
+		
+		if win.height/(win.width or 1) > (h/w) then -- deal with new smart viewport sizeing
+		
+			tx=(w/ 2)*(x-hx)/hx
+			ty=(w/-2)*(hy-y)/hx
+			
+		else
+		
+			tx=(h/ 2)*(x-hx)/hy
+			ty=(h/-2)*(hy-y)/hy
+
+		end
+
+		return tx,ty
+	end
 
 function win.choose_file(...)			return core.choose_file(				win.core,		...) end
 
