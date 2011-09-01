@@ -9,6 +9,8 @@ local avatar = require("fenestra.avatar")
 local font = require("fenestra.font")
 local widget = require("fenestra.widget")
 
+local gl=require("gl")
+
 module("fenestra.wrap")
 
 --
@@ -111,6 +113,50 @@ local win={}
 		return xsx
 
 	end
+
+
+	function win.fbo(width,height,depth)
+	
+		depth=depth or 0
+		
+		local core=win.fbo_setup(width,height,depth)
+		local fbo={}
+		fbo.core=core
+		fbo.width=width
+		fbo.height=height
+		fbo.depth=depth
+		
+		function fbo.clean(fbo)
+			return win.fbo_clean(core)
+		end
+		
+		function fbo.bind(fbo)
+			return win.fbo_bind(core)
+		end
+
+		function fbo.texture(fbo)
+			return win.fbo_texture(core)
+		end
+
+		function fbo.draw(fbo)
+			win.fbo_texture(core)
+			gl.Disable('CULL_FACE')
+			gl.Enable('TEXTURE_2D')
+			gl.TexParameter('TEXTURE_2D','TEXTURE_MAG_FILTER','LINEAR')
+			gl.BlendFunc('SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA')
+			gl.Begin('QUADS')
+				gl.Color({1,1,1,1})
+				gl.TexCoord(0, 0) gl.Vertex(width*-0.5, height*-0.5)
+				gl.TexCoord(1, 0) gl.Vertex(width* 0.5, height*-0.5)
+				gl.TexCoord(1, 1) gl.Vertex(width* 0.5, height* 0.5)
+				gl.TexCoord(0, 1) gl.Vertex(width*-0.5, height* 0.5)
+			gl.End()
+		end
+
+		return fbo
+
+	end
+
 	
 -- return window x,y pos transformed into the viewspace of project23d if you provided h/w to that function
 	function win.mouse23d(w,h,x,y)
@@ -196,7 +242,7 @@ function win.xsx_set(...)				return core.ogl.xsx_set(				win.core_ogl,	...) end
 function win.fbo_setup(...)				return core.ogl.fbo_setup(				win.core_ogl,	...) end
 function win.fbo_clean(...)				return core.ogl.fbo_clean(				win.core_ogl,	...) end
 function win.fbo_bind(...)				return core.ogl.fbo_bind(				win.core_ogl,	...) end
-function win.fbo_texture(...)				return core.ogl.fbo_texture(			win.core_ogl,	...) end
+function win.fbo_texture(...)			return core.ogl.fbo_texture(			win.core_ogl,	...) end
 
 function win.load(...)					return core.data.load(					win.core_data,	...) end
 	
