@@ -23,12 +23,14 @@ bool fenestra_ogl::fbo_setup(struct fogl_fbo *fbo)
 	if(fbo)
 	{
 		glGenFramebuffersEXT(1, &fbo->frame_buffer);
-		glGenRenderbuffersEXT(1, &fbo->depth_buffer);
 		
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, fbo->depth_buffer);		
-		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, fbo->width, fbo->height );
-
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, fbo->depth_buffer);
+		if(fbo->depth)
+		{
+			glGenRenderbuffersEXT(1, &fbo->depth_buffer);
+			glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, fbo->depth_buffer);		
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, fbo->depth_buffer);
+			glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, fbo->width, fbo->height );
+		}
 		
 		glGenTextures(1, &fbo->texture_buffer);
 		glBindTexture(GL_TEXTURE_2D, fbo->texture_buffer);
@@ -45,7 +47,10 @@ bool fenestra_ogl::fbo_setup(struct fogl_fbo *fbo)
 // attach to frame buffer
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo->frame_buffer);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, fbo->texture_buffer, 0);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, fbo->depth_buffer);
+		if(fbo->depth)
+		{
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, fbo->depth_buffer);
+		}
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 
