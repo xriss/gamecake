@@ -111,6 +111,7 @@ struct fogl_fbo
 {
 	s32 width;
 	s32 height;
+	s32 depth; // if non 0 then we want a depth buffer
 	
 	s32 flags;
 
