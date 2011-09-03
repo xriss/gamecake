@@ -123,6 +123,19 @@ struct fogl_fbo
 	
 };
 
+struct fogl_tex
+{
+	s32 width;
+	s32 height;
+	s32 depth; // if non 0 then we want a depth buffer
+	
+	s32 flags;
+
+	GLenum status;
+	
+	GLuint texture_buffer;
+};
+
 struct fogl_glyph
 {
 	f32 top;
@@ -183,6 +196,10 @@ struct fenestra_ogl
 	void fbo_clean(struct fogl_fbo *fbo);
 	bool fbo_bind(struct fogl_fbo *fbo);
 	bool fbo_texture(struct fogl_fbo *fbo);
+
+	bool tex_setup(struct fogl_tex *tex);
+	void tex_clean(struct fogl_tex *tex);
+	bool tex_bind(struct fogl_tex *tex);
 
 	bool flat_setup();
 	void flat_begin();

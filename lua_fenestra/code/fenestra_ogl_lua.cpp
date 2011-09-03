@@ -471,9 +471,13 @@ static const struct luaL_reg core_lib[] = {
 	{"clip2d",					core_clip2d},
 	{"project23d",				core_project23d},
 	{"swap",					core_swap},
-	{"target",					core_target},
+
 	{"get",						core_getset},
 	{"set",						core_getset},
+
+// test and debug functions
+
+	{"target",					core_target},
 	{"readpixels",				core_readpixels},
 		
 	{NULL, NULL},
@@ -489,6 +493,7 @@ LUALIB_API int luaopen_fenestra_core_ogl_xox (lua_State *l);
 LUALIB_API int luaopen_fenestra_core_ogl_xsx (lua_State *l);
 LUALIB_API int luaopen_fenestra_core_ogl_flat (lua_State *l);
 LUALIB_API int luaopen_fenestra_core_ogl_fbo (lua_State *l);
+LUALIB_API int luaopen_fenestra_core_ogl_tex (lua_State *l);
 
 LUALIB_API int luaopen_fenestra_core_ogl (lua_State *l) {
 
@@ -507,6 +512,9 @@ LUALIB_API int luaopen_fenestra_core_ogl (lua_State *l) {
 	lua_pop(l,1);
 
 	luaopen_fenestra_core_ogl_fbo(l);
+	lua_pop(l,1);
+
+	luaopen_fenestra_core_ogl_tex(l);
 	lua_pop(l,1);
 
 	return 1;
