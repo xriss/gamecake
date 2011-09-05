@@ -16,12 +16,11 @@ static int core_tex_setup(lua_State *l)
 		
 	struct fogl_tex *tex = (struct fogl_tex *)lua_newuserdata(l, sizeof(fogl_tex) );
 	
-	tex->width=(s32)lua_tonumber(l,2);
-	tex->height=(s32)lua_tonumber(l,3);
+	struct grd *g=lua_grd_check(l, 2);
 	
 	if(tex)
 	{
-		core->tex_setup(tex);
+		core->tex_setup(tex,g);
 	}
 			
 	return 1;

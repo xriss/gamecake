@@ -197,7 +197,7 @@ struct fenestra_ogl
 	bool fbo_bind(struct fogl_fbo *fbo);
 	bool fbo_texture(struct fogl_fbo *fbo);
 
-	bool tex_setup(struct fogl_tex *tex);
+	bool tex_setup(struct fogl_tex *tex, struct grd *g);
 	void tex_clean(struct fogl_tex *tex);
 	bool tex_bind(struct fogl_tex *tex);
 

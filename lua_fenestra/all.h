@@ -89,6 +89,9 @@ extern "C" {
 #include "../wet/file/file_xtx.h"
 
 
+#include "../lua_grd/code/grd.h"
+#include "../lua_grd/code/lua_grd.h"
+
 #include "code/fenestra_data.h"
 #include "code/fenestra_ogl.h"
 #include "code/fenestra.h"
