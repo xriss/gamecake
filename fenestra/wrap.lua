@@ -140,11 +140,11 @@ local win={}
 
 		function fbo.draw(fbo)
 			win.fbo_texture(core)
-			gl.Disable('CULL_FACE')
-			gl.Enable('TEXTURE_2D')
-			gl.TexParameter('TEXTURE_2D','TEXTURE_MAG_FILTER','LINEAR')
-			gl.BlendFunc('SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA')
-			gl.Begin('QUADS')
+			gl.Disable(gl.CULL_FACE)
+			gl.Enable(gl.TEXTURE_2D)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+			gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+			gl.Begin(gl.QUADS)
 				gl.Color({1,1,1,1})
 				gl.TexCoord(0, 0) gl.Vertex(fbo.width*-0.5, fbo.height*-0.5)
 				gl.TexCoord(1, 0) gl.Vertex(fbo.width* 0.5, fbo.height*-0.5)
@@ -166,6 +166,8 @@ local win={}
 		tex.height=grd.height
 		tex.depth=grd.depth
 		
+		grd=nil -- do not keep any references
+		
 		function tex.clean(tex)
 			return win.tex_clean(core)
 		end
@@ -176,11 +178,11 @@ local win={}
 
 		function tex.draw(tex)
 			win.tex_bind(core)
-			gl.Disable('CULL_FACE')
-			gl.Enable('TEXTURE_2D')
-			gl.TexParameter('TEXTURE_2D','TEXTURE_MAG_FILTER','LINEAR')
-			gl.BlendFunc('SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA')
-			gl.Begin('QUADS')
+			gl.Disable(gl.CULL_FACE)
+			gl.Enable(gl.TEXTURE_2D)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+			gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+			gl.Begin(gl.QUADS)
 				gl.Color({1,1,1,1})
 				gl.TexCoord(0, 0) gl.Vertex(tex.width*-0.5, tex.height* 0.5)
 				gl.TexCoord(1, 0) gl.Vertex(tex.width* 0.5, tex.height* 0.5)
