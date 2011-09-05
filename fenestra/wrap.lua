@@ -146,14 +146,50 @@ local win={}
 			gl.BlendFunc('SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA')
 			gl.Begin('QUADS')
 				gl.Color({1,1,1,1})
-				gl.TexCoord(0, 0) gl.Vertex(width*-0.5, height*-0.5)
-				gl.TexCoord(1, 0) gl.Vertex(width* 0.5, height*-0.5)
-				gl.TexCoord(1, 1) gl.Vertex(width* 0.5, height* 0.5)
-				gl.TexCoord(0, 1) gl.Vertex(width*-0.5, height* 0.5)
+				gl.TexCoord(0, 0) gl.Vertex(fbo.width*-0.5, fbo.height*-0.5)
+				gl.TexCoord(1, 0) gl.Vertex(fbo.width* 0.5, fbo.height*-0.5)
+				gl.TexCoord(1, 1) gl.Vertex(fbo.width* 0.5, fbo.height* 0.5)
+				gl.TexCoord(0, 1) gl.Vertex(fbo.width*-0.5, fbo.height* 0.5)
 			gl.End()
 		end
 
 		return fbo
+
+	end
+
+	function win.tex(grd) -- this takes a copy of the given grd
+	
+		local core=win.tex_setup(grd)
+		local tex={}
+		tex.core=core
+		tex.width=grd.width
+		tex.height=grd.height
+		tex.depth=grd.depth
+		
+		function tex.clean(tex)
+			return win.tex_clean(core)
+		end
+		
+		function tex.bind(tex)
+			return win.tex_bind(core)
+		end
+
+		function tex.draw(tex)
+			win.tex_bind(core)
+			gl.Disable('CULL_FACE')
+			gl.Enable('TEXTURE_2D')
+			gl.TexParameter('TEXTURE_2D','TEXTURE_MAG_FILTER','LINEAR')
+			gl.BlendFunc('SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA')
+			gl.Begin('QUADS')
+				gl.Color({1,1,1,1})
+				gl.TexCoord(0, 0) gl.Vertex(tex.width*-0.5, tex.height* 0.5)
+				gl.TexCoord(1, 0) gl.Vertex(tex.width* 0.5, tex.height* 0.5)
+				gl.TexCoord(1, 1) gl.Vertex(tex.width* 0.5, tex.height*-0.5)
+				gl.TexCoord(0, 1) gl.Vertex(tex.width*-0.5, tex.height*-0.5)
+			gl.End()
+		end
+
+		return tex
 
 	end
 
@@ -243,6 +279,10 @@ function win.fbo_setup(...)				return core.ogl.fbo_setup(				win.core_ogl,	...) 
 function win.fbo_clean(...)				return core.ogl.fbo_clean(				win.core_ogl,	...) end
 function win.fbo_bind(...)				return core.ogl.fbo_bind(				win.core_ogl,	...) end
 function win.fbo_texture(...)			return core.ogl.fbo_texture(			win.core_ogl,	...) end
+
+function win.tex_setup(...)				return core.ogl.tex_setup(				win.core_ogl,	...) end
+function win.tex_clean(...)				return core.ogl.tex_clean(				win.core_ogl,	...) end
+function win.tex_bind(...)				return core.ogl.tex_bind(				win.core_ogl,	...) end
 
 function win.load(...)					return core.data.load(					win.core_data,	...) end
 	
