@@ -13,21 +13,24 @@
 // clear it to 0 and set tex->width and height before calling this function
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool fenestra_ogl::tex_setup(struct fogl_tex *tex)
+bool fenestra_ogl::tex_setup(struct fogl_tex *tex, struct grd *g)
 {
 
-	if(tex)
+	if((tex)&&(g))
 	{
+		tex->width=g->bmap->w;
+		tex->height=g->bmap->h;
+		
 		glGenTextures(1, &tex->texture_buffer);
 		glBindTexture(GL_TEXTURE_2D, tex->texture_buffer);
 
-//NULL means reserve texture memory, but texels are undefined
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex->width, tex->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+		// build our texture mipmaps
+		gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA , g->bmap->w, g->bmap->h, GL_RGBA, GL_UNSIGNED_BYTE, g->bmap->data );
+		
  		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glGenerateMipmapEXT(GL_TEXTURE_2D); // this seems to be very important...
 
 	}
 	
