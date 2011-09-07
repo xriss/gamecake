@@ -120,7 +120,7 @@ function draw()
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 	
 	win.project23d(480/640,2,1024)
-	gl.MatrixMode("MODELVIEW")
+	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
 
 	for i,v in ipairs(items) do
@@ -156,11 +156,15 @@ function draw()
 		local vww={mw,vw-2*mw,mw}
 		local vhh={mh,vh-2*mh,mh}
 		
-		gl.Disable('CULL_FACE')
-		gl.Enable('TEXTURE_2D')
-		gl.TexParameter('TEXTURE_2D','TEXTURE_MAG_FILTER','LINEAR')
-		gl.BlendFunc('SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA')
-		gl.Begin('QUADS')
+		gl.Disable(gl.CULL_FACE)
+		gl.Enable(gl.TEXTURE_2D)
+
+
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+
+		gl.Begin(gl.QUADS)
 			gl.Color({1,1,1,1})
 			
 			local function drawbox( tx,ty, vx,vy , txp,typ, vxp,vyp )
