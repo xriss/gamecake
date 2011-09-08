@@ -1,6 +1,8 @@
 
 
 
+local gl=require('gl')
+
 
 local math=math
 local table=table
@@ -13,7 +15,7 @@ local function print(...) _G.print(...) end
 
 
 
-module("fenestra.widget.skin")
+module("fenestra.widget.master")
 
 --
 -- add meta functions
