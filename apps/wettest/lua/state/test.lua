@@ -42,7 +42,7 @@ function setup()
 	table.insert(items, new_item(0,10,0) )
 	
 
-local fname=apps.dir.."data/feme/testbutt.png"
+local fname=apps.dir.."data/skins/test/button_high.png"
 
 
 
@@ -53,6 +53,16 @@ local t=win.tex(g)
 print(t)
 
 	texs[1]=t
+
+local fname=apps.dir.."data/skins/test/button_high_in.png"
+
+print(fname)
+local g=grd.create("GRD_FMT_U8_BGRA",fname)
+print(g)
+local t=win.tex(g)
+print(t)
+
+	texs[2]=t
 	
 	print("setup")
 
@@ -83,16 +93,22 @@ end
 	
 	
 
-
+mdown=false
 
 function mouse(act,x,y,key)
 
 	x,y=win.mouse23d(640,480,x,y)
 
 	if act=="down" then
+	
+		mdown=true
 
 		table.insert(items, new_item((x)/10,(y)/10,0) )
 	
+	elseif act=="up" then
+	
+		mdown=false
+		
 	end
 
 end
@@ -116,7 +132,7 @@ end
 function draw()
 
 	win.begin()
-	gl.ClearColor(0,0,0.25,0)
+	gl.ClearColor(.8,.8,.8,0)
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 	
 	win.project23d(480/640,2,1024)
@@ -145,10 +161,12 @@ function draw()
 		
 		local tex=texs[1]
 				
+		if mdown then tex=texs[2] end
+		
 		tex:bind()
 		
 		local tw,th=tex.width,tex.height
-		local vw,vh=512,64
+		local vw,vh=512,52
 		local mw,mh=24,24
 		
 		local tww={mw/tw,(tw-2*mw)/tw,mw/tw}
@@ -156,6 +174,7 @@ function draw()
 		local vww={mw,vw-2*mw,mw}
 		local vhh={mh,vh-2*mh,mh}
 		
+		gl.Disable(gl.LIGHTING)
 		gl.Disable(gl.CULL_FACE)
 		gl.Enable(gl.TEXTURE_2D)
 

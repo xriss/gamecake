@@ -15,21 +15,12 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.1 r9760"
-   sodipodi:docname="button.svg">
+   sodipodi:docname="button_high.svg"
+   inkscape:export-filename="/home/kriss/hg/lua/apps/wettest/data/skins/test/button_high.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4">
-    <linearGradient
-       inkscape:collect="always"
-       id="linearGradient4333">
-      <stop
-         style="stop-color:#ffffff;stop-opacity:1;"
-         offset="0"
-         id="stop4335" />
-      <stop
-         style="stop-color:#ffffff;stop-opacity:0;"
-         offset="1"
-         id="stop4337" />
-    </linearGradient>
     <linearGradient
        id="linearGradient3771">
       <stop
@@ -74,48 +65,41 @@
            in="SourceGraphic" />
       </feMerge>
     </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3884">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.88"
+         id="feGaussianBlur3886" />
+    </filter>
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3771"
-       id="linearGradient3904"
+       id="linearGradient3921"
+       x1="108.71147"
+       y1="1032.9287"
+       x2="19.288525"
+       y2="943.79559"
        gradientUnits="userSpaceOnUse"
-       x1="71.868385"
-       y1="965.6676"
-       x2="71.868385"
-       y2="1025.5857"
-       gradientTransform="matrix(0.92708339,0,0,0.92708339,4.7031252,72.031541)" />
-    <filter
-       inkscape:collect="always"
-       id="filter3934">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.445"
-         id="feGaussianBlur3936" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       id="filter4078">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="3.84"
-         id="feGaussianBlur4080" />
-    </filter>
+       gradientTransform="matrix(0.99479166,0,0,0.99479166,0.33333316,5.1472886)" />
     <linearGradient
        inkscape:collect="always"
-       xlink:href="#linearGradient4333"
-       id="linearGradient4339"
-       x1="17.895676"
-       y1="941.65509"
-       x2="111.34129"
-       y2="1033.5953"
-       gradientUnits="userSpaceOnUse" />
+       xlink:href="#linearGradient3771"
+       id="linearGradient3925"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.89583334,0,0,0.89583334,6.6666666,102.95434)"
+       x1="65.135941"
+       y1="942.86603"
+       x2="65.135941"
+       y2="1032.8314" />
     <filter
        inkscape:collect="always"
-       id="filter4583">
+       id="filter4055">
       <feGaussianBlur
          inkscape:collect="always"
-         stdDeviation="0.89"
-         id="feGaussianBlur4585" />
+         stdDeviation="0.43"
+         id="feGaussianBlur4057" />
     </filter>
   </defs>
   <sodipodi:namedview
@@ -125,11 +109,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.9840839"
-     inkscape:cx="57.658866"
-     inkscape:cy="51.220089"
+     inkscape:zoom="4.106169"
+     inkscape:cx="29.0238"
+     inkscape:cy="77.597072"
      inkscape:document-units="px"
-     inkscape:current-layer="layer2"
+     inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1328"
      inkscape:window-height="738"
@@ -156,42 +140,70 @@
      style="display:inline">
     <rect
        ry="5.6508183"
-       y="941.36218"
-       x="18"
+       y="940.36218"
+       x="16"
        height="96"
        width="96"
        id="rect3094"
-       style="fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter4078)" />
+       style="fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter3884);opacity:1" />
     <rect
-       style="fill:url(#linearGradient4339);fill-opacity:1;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       id="rect2985"
+       inkscape:label="#rect3016"
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
+       id="rect3790"
        width="96"
        height="96"
-       x="16.5"
-       y="939.86218"
+       x="16"
+       y="940.36218"
        ry="5.6508183" />
     <rect
-       ry="5.23878"
-       y="943.36218"
-       x="20"
-       height="89"
-       width="89"
-       id="rect3902"
-       style="fill:url(#linearGradient3904);fill-opacity:1;stroke:none;filter:url(#filter3934)" />
+       ry="5.621387"
+       y="940.61218"
+       x="16.25"
+       height="95.5"
+       width="95.5"
+       id="rect3888"
+       style="fill:url(#linearGradient3921);fill-opacity:1;stroke:none"
+       inkscape:label="#rect3016" />
+    <rect
+       ry="5.6508183"
+       y="940.36218"
+       x="16"
+       height="96"
+       width="96"
+       id="border1"
+       style="fill:none;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       inkscape:label="#rect3016" />
+    <rect
+       inkscape:label="#rect3016"
+       style="fill:none;stroke:#000000;stroke-width:1.95918368999999992;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;opacity:0"
+       id="border2"
+       width="94.040817"
+       height="94.040817"
+       x="16.979591"
+       y="941.3418"
+       ry="5.5354958" />
+    <rect
+       inkscape:label="#rect3016"
+       style="fill:url(#linearGradient3925);fill-opacity:1;stroke:none"
+       id="rect3923"
+       width="86"
+       height="86"
+       x="21"
+       y="945.36218"
+       ry="5.0621915" />
+    <rect
+       ry="5.0621915"
+       y="945.36218"
+       x="21"
+       height="86"
+       width="86"
+       id="rect3927"
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1;opacity:1;filter:url(#filter4055);stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:label="#rect3016" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="high"
-     style="display:inline">
-    <rect
-       transform="translate(0,-924.36218)"
-       style="fill:none;stroke:#ffffff;stroke-opacity:1;display:inline;filter:url(#filter4583)"
-       id="rect4341"
-       width="89"
-       height="89"
-       x="20"
-       y="943.36218"
-       ry="5.23878" />
-  </g>
+     style="display:inline" />
 </svg>
