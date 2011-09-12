@@ -37,6 +37,7 @@ local function implode_color(r,g,b,a)
 end
 
 
+local print=print
 
 module("fenestra.widget.skin")
 
@@ -45,7 +46,6 @@ local texs={}
 
 local margin=0 -- whitespace
 local border=0 -- solidspace
-
 --
 -- unload a skin, go back to the "builtin" default
 --
@@ -68,6 +68,8 @@ function load(win,name)
 	
 		if name=="test" then
 			mode=name
+print(apps.dir.."data/skins/test/button_high.png")
+print(apps.dir.."data/skins/test/button_high_in.png")
 			texs.buttof=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/button_high.png") )
 			texs.button=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/button_high.png") )
 			texs.buttin=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/button_high_in.png") )
@@ -142,7 +144,7 @@ end
 --
 function setup(def)
 
-	load(def.win,"test")
+--	load(def.win,"test")
 
 
 	local master=def.master
