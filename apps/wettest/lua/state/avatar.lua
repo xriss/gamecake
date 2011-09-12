@@ -92,8 +92,8 @@ filter="test"
 
 
 print("setup")
-fbo1=win.fbo_setup(fbo_w,fbo_h)
-fbo2=win.fbo_setup(fbo_w,fbo_h)
+fbo1=win.fbo_setup(fbo_w,fbo_h,24)
+fbo2=win.fbo_setup(fbo_w,fbo_h,24)
 
 
 soul_filename=nil
@@ -270,7 +270,7 @@ local fov=4
 		win.fbo_bind()
 
 		win.begin()
-		gl.ClearColor(0,0,0.25,0)
+		gl.ClearColor(1,1,1,0)
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 		win.clip2d(0,0,0,0)
 		win.project23d(640/480,fov,1024)
