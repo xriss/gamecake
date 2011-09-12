@@ -119,7 +119,7 @@ end
 
 -- only call this once
 -- probably on the commandline
-function start(_name)
+function start(_name,...)
 
 	path_orig=package.path
 	cpath_orig=package.cpath
@@ -137,8 +137,9 @@ function start(_name)
 	print("apps.name",name)
 	print("apps.dll",dll)
 	print("apps.dir",dir)
+	print(...)
 
-	return require(name).start()
+	return require(name).start(...)
 end
 
 
