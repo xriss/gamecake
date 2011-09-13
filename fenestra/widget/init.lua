@@ -6,13 +6,14 @@
 
 local widget_meta=require("fenestra.widget.meta")
 local widget_skin=require("fenestra.widget.skin")
-local widget_master=require("fenestra.widget.master")
 
 
 local setmetatable=setmetatable
 
+local require=require
 
 module("fenestra.widget")
+
 
 --
 -- create a master widget
@@ -31,11 +32,18 @@ function setup(win,def)
 
 	widget_meta.setup(def)
 	widget_skin.setup(def)
-	widget_master.setup(def)
-
-	master:setup({hx=640,hy=480,px=0,py=480,class="master"}) -- default GUI size
 	
-	return master
+-- default GUI size if no other is specified
+	def.hx=def.hx or 640
+	def.hy=def.hy or 480
+	def.px=def.px or 0
+	def.py=def.py or def.hy
+
+	def.class=def.class or "master"
+	
+	master:setup(def)
+	
+	return master -- our new widget is ready
 
 end
 

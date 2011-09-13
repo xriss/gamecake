@@ -1,20 +1,20 @@
+-- widget class string
+-- a one line string buffer that can be edited
 
 
 
 local require=require
 
--- a 1 line buffer edit, how you display it is up to you
--- has a simple history, just pass in key presses
--- this is intended for commandline style editing
 
-module("fenestra.buffedit")
+module("fenestra.widget.textedit")
 
 local string=require("string")
 local table=require("table")
 
 
 
-function keypress(it,ascii,key,act)
+function keypress(widget,ascii,key,act)
+	local it=widget.textedit
 	
 	if act=="down" or act=="repeat" then
 	
@@ -47,7 +47,7 @@ function keypress(it,ascii,key,act)
 				it.line=it.line:sub(1,-2)
 				it.line_idx=#it.line
 			
-			elseif it.line_idx == 0 then -- at start
+			elseif it.line_idx < 1 then -- at start
 			
 			elseif it.line_idx == 1 then -- near start
 			
@@ -67,8 +67,7 @@ function keypress(it,ascii,key,act)
 	
 			if it.line_idx >= #it.line then -- at end
 			
-
-			elseif it.line_idx == 0 then -- at start
+			elseif it.line_idx < 1 then -- at start
 			
 				it.line=it.line:sub(2)
 				it.line_idx=0
@@ -86,42 +85,17 @@ function keypress(it,ascii,key,act)
 		
 			if act=="down" then -- ignore repeats on enter key
 			
-				local f=it.line
---				fenestra._g.print(">"..f)
+				if it.line and it.enter then -- callback?
 				
-				table.insert(it.history,it.line)
-				
-				while #it.history > it.history_max do
-					table.remove(it.history,1)
-				end
-		
-				it.history_idx=#it.history+1
-			
-				it.line=""
-				it.line_idx=0
-				
-				if f and it.enter then -- callback?
-				
-					it:enter(f)
+					it:enter(it.line)
 					
 				end
 				
 			end
 			
-		elseif key=="up" then
+--		elseif key=="up" then
+--		elseif key=="down" then
 		
-			it.history_idx=it.history_idx-1
-			if it.history_idx<0 then it.history_idx=#it.history end
-			it.line=it.history[it.history_idx] or ""
-			it.line_idx=#it.line
-		
-		elseif key=="down" then
-		
-			it.history_idx=it.history_idx+1
-			if it.history_idx>#it.history then it.history_idx=0 end
-			it.line=it.history[it.history_idx] or ""
-			it.line_idx=#it.line
-			
 		elseif ascii~="" then -- not a blank string
 			local c=string.byte(ascii)
 			
@@ -132,10 +106,10 @@ function keypress(it,ascii,key,act)
 					it.line=it.line..ascii
 					it.line_idx=#it.line
 					
-				elseif it.line_idx == 0 then -- put at start
+				elseif it.line_idx < 1 then -- put at start
 				
 					it.line=ascii..it.line
-					it.line_idx=it.line_idx+1
+					it.line_idx=1
 					
 				else -- need to insert into line
 				
@@ -155,28 +129,30 @@ function keypress(it,ascii,key,act)
 end
 
 
-function update(it)
-
+function update(widget)
+	local it=widget.textedit
+	
 	it.throb=it.throb-4
 	if it.throb<0 then it.throb=255 end
 
 end
 
 
-function create()
 
-local it={}
 
-	it.history={}
-	it.history_idx=0
-	it.history_max=64
-	it.line=""
+function setup(widget,def)
+	local it={}
+	widget.textedit=it
+	widget.class="textedit"
+	
+	it.lines=""
 	it.line_idx=0
-
+	it.lines_idx=0
 	it.throb=255
 	
 	it.keypress=keypress
 	it.update=update
 
-	return it
+
+	return widget
 end

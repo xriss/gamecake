@@ -1,4 +1,4 @@
-
+-- generic default widget functions
 
 
 local math=math
@@ -11,8 +11,17 @@ local type=type
 local function print(...) _G.print(...) end
 
 
+local require=require
+
 
 module("fenestra.widget.meta")
+
+-- available widget classes
+classes={
+	["master"]=require("fenestra.widget.master"),
+	["string"]=require("fenestra.widget.string"),
+	["textedit"]=require("fenestra.widget.textedit"),
+}
 
 --
 -- add meta functions
@@ -48,7 +57,9 @@ function setup(def)
 	function meta.setup(widget,def)
 	
 		widget.state="none"
-	
+		
+		widget.meta=meta
+		
 		widget.class=def.class
 		widget.highlight=def.highlight
 		
@@ -56,32 +67,51 @@ function setup(def)
 		widget.user=def.user
 		widget.hooks=def.hooks
 		
-		widget.fx=def.fx		-- optional local size
-		widget.fy=def.fy
-		widget.ax=def.ax or 0	-- local position
-		widget.ay=def.ay or 0
 		
-		widget.sx=def.sx or 1 -- size for layout
+		widget.sx=def.sx or 1 -- (ratio)size for layout code
 		widget.sy=def.sy or 1
 		
-		widget.mx=def.mx or 0 -- max size for layout
+		widget.mx=def.mx or 0 -- max (ratio)size for layout code
 		widget.my=def.my or 0
 		
-		widget.hx=def.hx or 0 -- absolute pixel size (may be generated)
+
+		
+		-- if set these will generate rx,ry
+		widget.ax=def.ax      -- local position, for sliders etc, goes from 0-1 
+		widget.ay=def.ay      -- fractional position within container
+
+		widget.rx=def.rx or 0 -- relative pixel position (may auto generate)
+		widget.ry=def.ry or 0
+		
+		widget.px=def.px or 0 -- pixel position (probably auto generated)
+		widget.py=def.py or 0
+		widget.pa=def.pa or 0 -- display rotation angle, possibly
+
+		
+		-- if set these will generate hx,hy
+		widget.fx=def.fx	  -- optional relative local size of container, possibly best not to use
+		widget.fy=def.fy	  -- it does not have a default so may not be set
+		
+		widget.hx=def.hx or 0 -- absolute pixel size (may auto generate)
 		widget.hy=def.hy or 0
 		
-		widget.px=def.px or 0 -- pixel position (may be generated)
-		widget.py=def.py or 0
-		widget.pa=0
+		widget.hx_max=def.hx_max -- clip maximum layout size
+		widget.hy_max=def.hy_max
+		
+		
 		
 		widget.color=def.color
-		widget.text_color=def.text_color or master.text_color or 0xffffffff
-		widget.text_size=def.text_size or master.text_size or 16
+		widget.text_color=def.text_color or master.text_color or 0xff000000 -- black text
+		widget.text_size=def.text_size or master.text_size or 16 -- quite chunky text by default
 		
-		widget.text=def.text
+		widget.text=def.text -- display this text on the button
 		
 		if widget.color or widget.text then widget.solid=true end
 		widget.solid=widget.solid or def.solid
+		
+		if widget.class and classes[widget.class] then -- got a class, call its setup, its setup can override other functions
+			classes[widget.class].setup(widget,def)
+		end
 		
 		return widget
 	end
@@ -113,11 +143,11 @@ function setup(def)
 			for i,v in ipairs(widget) do
 			
 				if type(t[1])=="table" then
-					v.ax=t[1][1] or v.ax
-					v.ay=t[1][2] or v.ay
+					v.ax=t[1][1] or v.ax or 0
+					v.ay=t[1][2] or v.ay or 0
 				else
-					v.ax=t[1] or v.ax
-					v.ay=t[2] or v.ay
+					v.ax=t[1] or v.ax or 0
+					v.ay=t[2] or v.ay or 0
 				end
 				
 				v.px=widget.px+(widget.hx-v.hx)*v.ax -- local position relative to parents size
@@ -137,9 +167,9 @@ function setup(def)
 		elseif widget.class=="slide" or widget.class=="pad" then
 			meta.layout_padding(widget)
 		elseif widget.class=="master" or widget.class=="abs" then
-			meta.layout_absolute(widget)
+			meta.layout_base(widget)
 		else
-			meta.layout_relative(widget)
+			meta.layout_base(widget)
 		end
 	end
 	
@@ -164,36 +194,27 @@ function setup(def)
 		end
 	end
 	
-	function meta.layout_absolute(widget)
+
+	function meta.layout_base(widget)
 		for i,v in ipairs(widget) do
 		
 			if v.fx then v.hx=widget.hx*v.fx end -- generate size as a fraction of parent
 			if v.fy then v.hy=widget.hy*v.fy end
 			
-			v.px=widget.px+v.ax -- local absolute position
-			v.py=widget.py-v.ay
+			if v.ax then v.rx=(widget.hx)*v.ax end -- local position relative to parents size
+			if v.ay then v.ry=(widget.hy)*v.ay end
+
+			v.px=widget.px+v.rx -- local absolute position
+			v.py=widget.py-v.ry
 			
 		end
 		for i,v in ipairs(widget) do
 			v:layout()
 		end
 	end
-	
-	function meta.layout_relative(widget)
-		for i,v in ipairs(widget) do
-		
-			if v.fx then v.hx=widget.hx*v.fx end -- generate size as a fraction of parent
-			if v.fy then v.hy=widget.hy*v.fy end
-			
-			v.px=widget.px+(widget.hx)*v.ax -- local position relative to parents size
-			v.py=widget.py-(widget.hy)*v.ay
-			
-		end
-		for i,v in ipairs(widget) do
-			v:layout()
-		end
-	end
-	
+
+-- this is the magical layout that works kind of like text
+-- use sx,sy and ax,ay to control what ends up where
 	function meta.layout_hx(widget)
 		local sx,sy=0,0
 		local my=0
@@ -203,6 +224,7 @@ function setup(def)
 			local y=0
 			for i,v in ipairs(widget) do
 				v.hy=v.sy*widget.hy/sy
+				if v.hy_max and v.hy > v.hy_max then v.hy = v.hy_max end
 				v.py=widget.py-y
 				if v.endofline then y=y+v.hy end
 --print(v.px..","..v.py.." - "..v.hx..","..v.hy)
@@ -215,6 +237,7 @@ function setup(def)
 				local v=widget[i]
 				v.sy=my
 				v.hx=v.sx*widget.hx/sx
+				if v.hx_max and v.hx > v.hx_max then v.hx = v.hx_max end
 				v.px=widget.px+x
 				x=x+v.hx
 			end
@@ -230,11 +253,11 @@ function setup(def)
 			
 				v.endofline=false
 				if sx+v.sx>widget.mx then
-					if sx==0 then
+					if sx==0 then -- only one on line
 						if v.sy>my then my=v.sy end
 						sx=sx+v.sx				
 						endofline(i)
-					else
+					else -- skip this one, push onto nextline
 						endofline(i-1)
 						if v.sy>my then my=v.sy end
 						sx=sx+v.sx				

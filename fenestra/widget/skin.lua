@@ -68,8 +68,7 @@ function load(win,name)
 	
 		if name=="test" then
 			mode=name
-print(apps.dir.."data/skins/test/button_high.png")
-print(apps.dir.."data/skins/test/button_high_in.png")
+
 			texs.buttof=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/button_high.png") )
 			texs.button=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/button_high.png") )
 			texs.buttin=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/button_high_in.png") )
@@ -197,7 +196,7 @@ function setup(def)
 					gl.Color( explode_color(widget.color))
 				else
 					local c={explode_color(widget.color)}
-					c[4]=c[4]/2
+					c[4]=c[4]*0.85
 					gl.Color( c )
 				end
 				

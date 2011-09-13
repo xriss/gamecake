@@ -1,3 +1,5 @@
+-- widget class master
+-- the master widget
 
 
 
@@ -20,11 +22,11 @@ module("fenestra.widget.master")
 --
 -- add meta functions
 --
-function setup(def)
+function setup(widget,def)
 
-	local master=def.master
-	local meta=def.meta
-	local win=def.win
+	local master=widget
+	local meta=widget.meta
+--	local win=def.win
 
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget)
@@ -33,9 +35,9 @@ function setup(def)
 	
 	function master.draw(widget)
 	
-		gl.Disable("CULL_FACE")
-		gl.Disable("LIGHTING")
-		gl.Disable("DEPTH_TEST")
+		gl.Disable(gl.CULL_FACE)
+		gl.Disable(gl.LIGHTING)
+		gl.Disable(gl.DEPTH_TEST)
 		gl.PushMatrix()
 		meta.draw(widget)
 		gl.PopMatrix()
