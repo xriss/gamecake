@@ -1237,18 +1237,18 @@ function page_thunk(hash)
 		if w.avatar then
 			w.avatar:remove_all()
 		else
-			w.avatar=win.widget:add{class="rel",hx=hx,hy=hy,ax=x,ay=y}
+			w.avatar=win.widget:add{class="rel",hx=hx,hy=hy,pxr=x,pyr=y}
 		end
 
-		w.avatar_goto=w.avatar:add{class="hx",fx=1,fy=1/12,ax=0,ay=0,mx=3}
+		w.avatar_goto=w.avatar:add{class="hx",hxf=1,hyf=1/12,pxf=0,pyf=0,mx=3}
 		w.avatar_colors=w.avatar_goto:add{text="colors",id="goto_colors",hooks=hooks,color=0x44ffffff}
 		w.avatar_parts=w.avatar_goto:add{text="parts",id="goto_parts",hooks=hooks,color=0x44ffffff}
 		w.avatar_soul=w.avatar_goto:add{text="soul",id="goto_soul",hooks=hooks,color=0x44ffffff}
 		w.avatar_anim=w.avatar_goto:add{text="anims",id="goto_anims",hooks=hooks,color=0x44ffffff}
 		w.avatar_x5=w.avatar_goto:add{}
 		w.avatar_x6=w.avatar_goto:add{}
-		w.avatar_rot=w.avatar:add{class="slide",color=0x22ffffff,fx=1,fy=1/24,ax=0,ay=23/24}
-		w.avatar_rot:add{id="rotate",color=0x88ffffff,hooks=hooks,ax=1/2,ay=0,fx=3/10,fy=1}
+		w.avatar_rot=w.avatar:add{class="slide",color=0x22ffffff,hxf=1,hyf=1/24,pxf=0,pyf=23/24}
+		w.avatar_rot:add{id="rotate",color=0x88ffffff,hooks=hooks,pxf=1/2,pyf=0,hxf=3/10,hyf=1}
 		
 	end
 
@@ -1258,35 +1258,35 @@ function page_thunk(hash)
 		if w.colors then
 			w.colors:remove_all()
 		else
-			w.colors=win.widget:add{class="rel",hx=hx,hy=hy,ax=x,ay=y}
+			w.colors=win.widget:add{class="rel",hx=hx,hy=hy,pxr=x,pyr=y}
 		end
 		
 		
-		local colors=w.colors:add({hx=hx,hy=hy/2,mx=8,class="hx",ax=0,ay=0})
+		local colors=w.colors:add({hx=hx,hy=hy/2,mx=8,class="hx",pxf=0,pyf=0})
 		for i,v in ipairs(pick_colors) do
 			colors:add{color=v,id="color",hooks=hooks,highlight="shrink"}
 		end
 		
-		local slides=w.colors:add({hx=hx,hy=hy/2,mx=2,class="hx",ax=0,ay=1/2})
+		local slides=w.colors:add({hx=hx,hy=hy/2,mx=2,class="hx",pxf=0,pyf=1/2})
 
 --[[		
 		w.color_alpha=slides:add{class="slide",sx=2}
-		w.color_alpha:add{text="Alpha",color=0x88ffffff,text_color=0xffffffff,id="alpha",hooks=hooks,ax=0,ay=0,fx=4/10,fy=1}
+		w.color_alpha:add{text="Alpha",color=0x88ffffff,text_color=0xffffffff,id="alpha",hooks=hooks,pxf=0,pyf=0,hxf=4/10,hyf=1}
 ]]		
 		w.color_red=slides:add{class="slide",sx=2}
-		w.color_red:add{text="Red",color=0x88ffffff,text_color=0xffffffff,id="red",hooks=hooks,ax=0,ay=0,fx=4/10,fy=1}
+		w.color_red:add{text="Red",color=0x88ffffff,text_color=0xffffffff,id="red",hooks=hooks,pxf=0,pyf=0,hxf=4/10,hyf=1}
 		
 		w.color_green=slides:add{class="slide",sx=2}
-		w.color_green:add{text="Green",color=0x88ffffff,text_color=0xffffffff,id="green",hooks=hooks,ax=0,ay=0,fx=4/10,fy=1}
+		w.color_green:add{text="Green",color=0x88ffffff,text_color=0xffffffff,id="green",hooks=hooks,pxf=0,pyf=0,hxf=4/10,hyf=1}
 
 		w.color_blue=slides:add{class="slide",sx=2}
-		w.color_blue:add{text="Blue",color=0x88ffffff,text_color=0xffffffff,id="blue",hooks=hooks,ax=0,ay=0,fx=4/10,fy=1}
+		w.color_blue:add{text="Blue",color=0x88ffffff,text_color=0xffffffff,id="blue",hooks=hooks,pxf=0,pyf=0,hxf=4/10,hyf=1}
 
 		w.color=slides:add{text="ff00ff00",highlight="text",color=0xff00ff00,id="set_color",hooks=hooks}
 		w.spec=slides:add{text="ff00ff00",highlight="text",color=0xff00ff00,id="set_spec",hooks=hooks}
 		
 		w.color_gloss=slides:add{class="slide",sx=2}
-		w.color_gloss:add{text="Gloss",color=0x88ffffff,text_color=0xffffffff,id="gloss",hooks=hooks,ax=0,ay=0,fx=4/10,fy=1}
+		w.color_gloss:add{text="Gloss",color=0x88ffffff,text_color=0xffffffff,id="gloss",hooks=hooks,pxf=0,pyf=0,hxf=4/10,hyf=1}
 		
 		set_color(0xff888888)
 		
@@ -1298,13 +1298,13 @@ function page_thunk(hash)
 		if w.surf then
 			w.surf:remove_all()
 		else
-			w.surf=win.widget:add{class="rel",hx=hx,hy=hy,ax=x,ay=y}
+			w.surf=win.widget:add{class="rel",hx=hx,hy=hy,pxr=x,pyr=y}
 		end
 		
 		w.surfs={}
 		w.specs={}
 
-		local surf=w.surf:add({hx=hx,hy=hy*3/4,mx=10,class="hx",ax=0,ay=1/4})
+		local surf=w.surf:add({hx=hx,hy=hy*3/4,mx=10,class="hx",pxf=0,pyf=1/4})
 		for i,v in ipairs(pick_surfs) do
 			w.surfs[v]=surf:add{color=0xff888888,sx=4,text=v,id="surf",user=v,hooks=hooks,highlight="text"}
 			w.specs[v]=surf:add{color=0xff888888,sx=1,id="spec",user=v,hooks=hooks,highlight="text"}
@@ -1324,10 +1324,10 @@ function page_thunk(hash)
 		if w.loadsave then
 			w.loadsave:remove_all()
 		else
-			w.loadsave=win.widget:add{class="rel",hx=hx,hy=hy,ax=x,ay=y}
+			w.loadsave=win.widget:add{class="rel",hx=hx,hy=hy,pxr=x,pyr=y}
 		end
 
-		local ls=w.loadsave:add({hx=hx,hy=hy*3/4,mx=1,class="hx",ax=0,ay=1/4})
+		local ls=w.loadsave:add({hx=hx,hy=hy*3/4,mx=1,class="hx",pxf=0,pyf=1/4})
 
 		w.load_soul=ls:add{color=0xff888888,sx=4,text="Load soul",id="load_soul",hooks=hooks}
 		w.save_soul=ls:add{color=0xff888888,sx=4,text="Save soul",id="save_soul",hooks=hooks}
@@ -1342,10 +1342,10 @@ function page_thunk(hash)
 		if w.parts_base then
 			w.parts_base:remove_all()
 		else
-			w.parts_base=win.widget:add{class="rel",hx=hx,hy=hy,ax=x,ay=y}
+			w.parts_base=win.widget:add{class="rel",hx=hx,hy=hy,pxr=x,pyr=y}
 		end
 		
-		local ls=w.parts_base:add({hx=hx,hy=hy*1/12,mx=5,class="hx",ax=0,ay=0})
+		local ls=w.parts_base:add({hx=hx,hy=hy*1/12,mx=5,class="hx",pxf=0,pyf=0})
 		for i,v in ipairs{"Layer 1","2","3","4"} do
 			local sx=1
 			if i==1 then sx=2 end
@@ -1356,7 +1356,7 @@ function page_thunk(hash)
 			w.groups[i]=ls:add{color=color,sx=sx,sy=1,id="part_layer",text=v,user=i,hooks=hooks}
 		end	
 		
-		local ls=w.parts_base:add({hx=hx,hy=hy*11/12,mx=4,class="hx",ax=0,ay=1/12})
+		local ls=w.parts_base:add({hx=hx,hy=hy*11/12,mx=4,class="hx",pxf=0,pyf=1/12})
 		w.parts={}
 		for i=1,16 do
 			w.parts[i]=ls:add{color=0x44ffffff,sx=1,sy=1,id="part",user=i+((part_page-1)*16),hooks=hooks}
@@ -1371,10 +1371,10 @@ function page_thunk(hash)
 		if w.groups_base then
 			w.groups_base:remove_all()
 		else
-			w.groups_base=win.widget:add{class="rel",hx=hx,hy=hy,ax=x,ay=y}
+			w.groups_base=win.widget:add{class="rel",hx=hx,hy=hy,pxr=x,pyr=y}
 		end
 
-		local ls=w.groups_base:add({hx=hx,hy=hy,mx=2,class="hx",ax=0,ay=0})
+		local ls=w.groups_base:add({hx=hx,hy=hy,mx=2,class="hx",pxf=0,pyf=0})
 
 		w.groups={}
 		for i,v in ipairs{
@@ -1394,10 +1394,10 @@ function page_thunk(hash)
 		if w.pmod_base then
 			w.pmod_base:remove_all()
 		else
-			w.pmod_base=win.widget:add{class="rel",hx=hx,hy=hy,ax=x,ay=y}
+			w.pmod_base=win.widget:add{class="rel",hx=hx,hy=hy,pxr=x,pyr=y}
 		end
 		
-		local ls=w.pmod_base:add({hx=hx,hy=hy*1/7,mx=5,class="hx",ax=0,ay=0})
+		local ls=w.pmod_base:add({hx=hx,hy=hy*1/7,mx=5,class="hx",pxf=0,pyf=0})
 
 		w.pages={}
 		for i,v in ipairs{" Page 1","2","3","4"} do
@@ -1410,7 +1410,7 @@ function page_thunk(hash)
 			w.pages[i]=ls:add{color=color,sx=sx,sy=1,id="part_page",text=v,user=i,hooks=hooks}
 		end	
 		
-		local ls=w.pmod_base:add({hx=hx,hy=hy*1/7,mx=3,class="hx",ax=0,ay=1/7})
+		local ls=w.pmod_base:add({hx=hx,hy=hy*1/7,mx=3,class="hx",pxf=0,pyf=1/7})
 		
 		w.sides={}
 		for i,v in ipairs{"Left","Right","Both"} do
@@ -1421,17 +1421,17 @@ function page_thunk(hash)
 			w.sides[i]=ls:add{color=color,sx=1,sy=1,id="part_side",text=v,user=v:lower(),hooks=hooks}
 		end
 		
-		w.part_pos=w.pmod_base:add{class="slide",hx=hx*1/4,hy=hy*3/7,ax=0,ay=2/7,id="pos_reset",color=0x22ffffff,hooks=hooks}
-		w.part_pos:add{text="X",color=0x88ffffff,text_color=0xffffffff,id="pos",hooks=hooks,ax=0,ay=0,fx=1/3,fy=1/3}
+		w.part_pos=w.pmod_base:add{class="slide",hx=hx*1/4,hy=hy*3/7,pxf=0,pyf=2/7,id="pos_reset",color=0x22ffffff,hooks=hooks}
+		w.part_pos:add{text="X",color=0x88ffffff,text_color=0xffffffff,id="pos",hooks=hooks,pxf=0,pyf=0,hxf=1/3,hyf=1/3}
 		
-		w.part_size=w.pmod_base:add{class="slide",hx=hx*3/4,hy=hy*1/7,ax=1/4,ay=2/7,id="size_reset",color=0x22ffffff,hooks=hooks}
-		w.part_size:add{text="Size",color=0x88ffffff,text_color=0xffffffff,id="size",hooks=hooks,ax=0,ay=0,fx=4/10,fy=1}
+		w.part_size=w.pmod_base:add{class="slide",hx=hx*3/4,hy=hy*1/7,pxf=1/4,pyf=2/7,id="size_reset",color=0x22ffffff,hooks=hooks}
+		w.part_size:add{text="Size",color=0x88ffffff,text_color=0xffffffff,id="size",hooks=hooks,pxf=0,pyf=0,hxf=4/10,hyf=1}
 		
-		w.part_aspect=w.pmod_base:add{class="slide",hx=hx*3/4,hy=hy*1/7,ax=1/4,ay=3/7,id="aspect_reset",color=0x22ffffff,hooks=hooks}
-		w.part_aspect:add{text="Aspect",color=0x88ffffff,text_color=0xffffffff,id="aspect",hooks=hooks,ax=0,ay=0,fx=4/10,fy=1}
+		w.part_aspect=w.pmod_base:add{class="slide",hx=hx*3/4,hy=hy*1/7,pxf=1/4,pyf=3/7,id="aspect_reset",color=0x22ffffff,hooks=hooks}
+		w.part_aspect:add{text="Aspect",color=0x88ffffff,text_color=0xffffffff,id="aspect",hooks=hooks,pxf=0,pyf=0,hxf=4/10,hyf=1}
 
-		w.part_morph=w.pmod_base:add{class="slide",hx=hx*3/4,hy=hy*1/7,ax=1/4,ay=4/7,id="morph_reset",color=0x22ffffff,hooks=hooks}
-		w.part_morph:add{text="Morph",color=0x88ffffff,text_color=0xffffffff,id="morph",hooks=hooks,ax=0,ay=0,fx=4/10,fy=1}
+		w.part_morph=w.pmod_base:add{class="slide",hx=hx*3/4,hy=hy*1/7,pxf=1/4,pyf=4/7,id="morph_reset",color=0x22ffffff,hooks=hooks}
+		w.part_morph:add{text="Morph",color=0x88ffffff,text_color=0xffffffff,id="morph",hooks=hooks,pxf=0,pyf=0,hxf=4/10,hyf=1}
 
 	end
 	
@@ -1441,10 +1441,10 @@ function page_thunk(hash)
 		if w.anims_base then
 			w.anims_base:remove_all()
 		else
-			w.anims_base=win.widget:add{class="rel",hx=hx,hy=hy,ax=x,ay=y}
+			w.anims_base=win.widget:add{class="rel",hx=hx,hy=hy,pxr=x,pyr=y}
 		end
 
-		local ls=w.anims_base:add({hx=hx,hy=hy,mx=20,class="hx",ax=0,ay=0})
+		local ls=w.anims_base:add({hx=hx,hy=hy,mx=20,class="hx",pxr=0,pyr=0})
 
 		w.anims={}
 		for i,v in ipairs(anim_names) do
@@ -1468,8 +1468,8 @@ function page_thunk(hash)
 	
 	elseif tonumber(hash)==1 then
 	
-		local top=win.widget:add({hx=640,hy=480,mx=5,class="hx",ax=0,ay=0})
-		local colors=win.widget:add({hx=320,hy=240,mx=8,class="hx",ax=0,ay=0.5})
+		local top=win.widget:add({hx=640,hy=480,mx=5,class="hx",pxf=0,pyf=0})
+		local colors=win.widget:add({hx=320,hy=240,mx=8,class="hx",pxf=0,pyf=0.5})
 		for i,v in ipairs(pick_colors) do
 			colors:add{color=v,id="color",hooks=hooks,highlight="shrink"}
 		end
@@ -1481,7 +1481,7 @@ function page_thunk(hash)
 		top:add({text="save",color=0x88ff0000,id="save",hooks=hooks})
 		top:add({sy=22,sx=5})
 		local drag=top:add({sy=1,sx=5,class="slide",color=0x22ffffff})
-		drag:add{text="rotate",color=0x88ffffff,id="rotate",hooks=hooks,ax=0,ay=0,fx=2/10,fy=1}
+		drag:add{text="rotate",color=0x88ffffff,id="rotate",hooks=hooks,pxf=0,pyf=0,hxf=2/10,hyf=1}
 
 		win.widget:layout()
 		
