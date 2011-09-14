@@ -190,13 +190,15 @@ function setup(def)
 			
 				gl.Color( explode_color(widget.color))
 				
-			else -- alpha default
+			else -- default is to darken everything slightly
 			
 				if master.over==widget then
 					gl.Color( explode_color(widget.color))
 				else
 					local c={explode_color(widget.color)}
-					c[4]=c[4]*0.85
+					c[3]=c[3]*14/15
+					c[2]=c[2]*14/15
+					c[1]=c[1]*14/15
 					gl.Color( c )
 				end
 				

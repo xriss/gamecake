@@ -77,20 +77,21 @@ function setup(def)
 
 		
 		-- if set these will generate rx,ry
-		widget.ax=def.ax      -- local position, for sliders etc, goes from 0-1 
-		widget.ay=def.ay      -- fractional position within container
+		widget.pxf=def.pxf      -- local position, for sliders etc, goes from 0-1 
+		widget.pyf=def.pyf      -- fractional position within container
 
-		widget.rx=def.rx or 0 -- relative pixel position (may auto generate)
-		widget.ry=def.ry or 0
+		widget.pxr=def.pxr or 0 -- relative pixel position (may auto generate)
+		widget.pyr=def.pyr or 0
 		
 		widget.px=def.px or 0 -- pixel position (probably auto generated)
 		widget.py=def.py or 0
+		
 		widget.pa=def.pa or 0 -- display rotation angle, possibly
 
 		
 		-- if set these will generate hx,hy
-		widget.fx=def.fx	  -- optional relative local size of container, possibly best not to use
-		widget.fy=def.fy	  -- it does not have a default so may not be set
+		widget.hxf=def.hxf	  -- optional relative local size of container, possibly best not to use
+		widget.hyf=def.hyf	  -- it does not have a default so may not be set
 		
 		widget.hx=def.hx or 0 -- absolute pixel size (may auto generate)
 		widget.hy=def.hy or 0
@@ -143,15 +144,15 @@ function setup(def)
 			for i,v in ipairs(widget) do
 			
 				if type(t[1])=="table" then
-					v.ax=t[1][1] or v.ax or 0
-					v.ay=t[1][2] or v.ay or 0
+					v.pxf=t[1][1] or v.pxf or 0
+					v.pyf=t[1][2] or v.pyf or 0
 				else
-					v.ax=t[1] or v.ax or 0
-					v.ay=t[2] or v.ay or 0
+					v.pxf=t[1] or v.pxf or 0
+					v.pyf=t[2] or v.pyf or 0
 				end
 				
-				v.px=widget.px+(widget.hx-v.hx)*v.ax -- local position relative to parents size
-				v.py=widget.py-(widget.hy-v.hy)*v.ay
+				v.px=widget.px+(widget.hx-v.hx)*v.pxf -- local position relative to parents size
+				v.py=widget.py-(widget.hy-v.hy)*v.pyf
 				
 			end
 		end
@@ -182,11 +183,11 @@ function setup(def)
 	function meta.layout_padding(widget)
 		for i,v in ipairs(widget) do
 		
-			if v.fx then v.hx=widget.hx*v.fx end -- generate size as a fraction of parent
-			if v.fy then v.hy=widget.hy*v.fy end
+			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
+			if v.hyf then v.hy=widget.hy*v.hyf end
 			
-			v.px=widget.px+(widget.hx-v.hx)*v.ax -- local position relative to parents size
-			v.py=widget.py-(widget.hy-v.hy)*v.ay
+			v.px=widget.px+(widget.hx-v.hx)*v.pxf -- local position relative to parents size
+			v.py=widget.py-(widget.hy-v.hy)*v.pyf
 			
 		end
 		for i,v in ipairs(widget) do
@@ -198,14 +199,14 @@ function setup(def)
 	function meta.layout_base(widget)
 		for i,v in ipairs(widget) do
 		
-			if v.fx then v.hx=widget.hx*v.fx end -- generate size as a fraction of parent
-			if v.fy then v.hy=widget.hy*v.fy end
+			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
+			if v.hyf then v.hy=widget.hy*v.hyf end
 			
-			if v.ax then v.rx=(widget.hx)*v.ax end -- local position relative to parents size
-			if v.ay then v.ry=(widget.hy)*v.ay end
+			if v.pxf then v.pxr=(widget.hx)*v.pxf end -- local position relative to parents size
+			if v.pyf then v.pyr=(widget.hy)*v.pyf end
 
-			v.px=widget.px+v.rx -- local absolute position
-			v.py=widget.py-v.ry
+			v.px=widget.px+v.pxr -- local absolute position
+			v.py=widget.py-v.pyr
 			
 		end
 		for i,v in ipairs(widget) do
