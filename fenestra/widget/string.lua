@@ -4,17 +4,25 @@
 
 
 local require=require
-
+local print=print
 
 module("fenestra.widget.string")
 
 local string=require("string")
 local table=require("table")
 
+function mouse(widget,act,x,y,key)
+	widget.master.focus=widget
+	return widget.meta.mouse(widget,act,x,y,key)
+end
 
 
-function keypress(widget,ascii,key,act)
+function key(widget,ascii,key,act)
 	local it=widget.string
+	
+	local changed=false
+
+--print("gotkey",ascii)
 	
 	if act=="down" or act=="repeat" then
 	
@@ -46,6 +54,8 @@ function keypress(widget,ascii,key,act)
 			
 				it.line=it.line:sub(1,-2)
 				it.line_idx=#it.line
+				
+				changed=true
 			
 			elseif it.line_idx < 1 then -- at start
 			
@@ -54,11 +64,15 @@ function keypress(widget,ascii,key,act)
 				it.line=it.line:sub(2)
 				it.line_idx=it.line_idx-1
 			
+				changed=true
+
 			else -- somewhere in the line
 			
 				it.line=it.line:sub(1,it.line_idx-1) .. it.line:sub(it.line_idx+1)
 				it.line_idx=it.line_idx-1
 				
+				changed=true
+
 			end
 			
 			it.throb=255
@@ -72,11 +86,15 @@ function keypress(widget,ascii,key,act)
 				it.line=it.line:sub(2)
 				it.line_idx=0
 			
+				changed=true
+
 			else -- somewhere in the line
 			
 				it.line=it.line:sub(1,it.line_idx) .. it.line:sub(it.line_idx+2)
 				it.line_idx=it.line_idx
 				
+				changed=true
+
 			end
 			
 			it.throb=255
@@ -85,9 +103,9 @@ function keypress(widget,ascii,key,act)
 		
 			if act=="down" then -- ignore repeats on enter key
 			
-				if it.line and it.enter then -- callback?
+				if it.line and it.onenter then -- callback?
 				
-					it:enter(it.line)
+					widget:call_hook("click")
 					
 				end
 				
@@ -120,8 +138,16 @@ function keypress(widget,ascii,key,act)
 				
 				it.throb=255
 				
+				changed=true
+
 			end
 		end
+	end
+	
+	if changed then
+		widget.text=it.line
+		
+		widget:call_hook("update")
 	end
 	
 	return true
@@ -149,9 +175,11 @@ function setup(widget,def)
 	it.line_idx=0
 	it.throb=255
 	
-	it.keypress=keypress
+--	it.key=key
 	it.update=update
 
+	widget.key=key
+	widget.mouse=mouse
 
 	return widget
 end

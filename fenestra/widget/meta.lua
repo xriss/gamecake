@@ -45,6 +45,7 @@ function setup(def)
 		setmetatable(widget,meta)
 		table.insert(parent,widget)
 		widget.parent=parent
+		widget.master=parent.master
 		widget:setup(def)
 		widget.meta=meta
 		
@@ -215,7 +216,7 @@ function setup(def)
 	end
 
 -- this is the magical layout that works kind of like text
--- use sx,sy and ax,ay to control what ends up where
+-- use sx,sy and mx,my to control what ends up where
 	function meta.layout_hx(widget)
 		local sx,sy=0,0
 		local my=0
@@ -279,7 +280,13 @@ function setup(def)
 	end
 	
 --
--- initial layout of widgets, to put them into reasonable positions
+-- handle key input
+--
+	function meta.key(widget,ascii,key,act)
+	end
+	
+--
+-- handle mouse input
 --
 	function meta.mouse(widget,act,x,y,key)
 	

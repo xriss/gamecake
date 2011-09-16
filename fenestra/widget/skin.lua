@@ -69,9 +69,11 @@ function load(win,name)
 		if name=="test" then
 			mode=name
 
-			texs.buttof=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/button_high.png") )
-			texs.button=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/button_high.png") )
-			texs.buttin=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/button_high_in.png") )
+			texs.border=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/border.png") )
+			
+			texs.buttof=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/buttof.png") )
+			texs.button=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/button.png") )
+			texs.buttin=win.tex( grd.create("GRD_FMT_U8_BGRA",apps.dir.."data/skins/test/buttin.png") )
 		
 			margin=15
 			border=0
@@ -190,7 +192,7 @@ function setup(def)
 			
 				gl.Color( explode_color(widget.color))
 				
-			else -- default is to darken everything slightly
+			else -- default is to darken everything slightly when it is not the active widget
 			
 				if master.over==widget then
 					gl.Color( explode_color(widget.color))
@@ -218,17 +220,21 @@ function setup(def)
 			
 			if mode then
 			
-			if ( master.active==widget and master.over==widget ) or widget.state=="selected" then
-				texs.buttin:bind()
-				txp=0
-				typ=-1
-			else
-				texs.button:bind()
-				txp=0
-				typ=-2
-			end
+				if ( master.active==widget and master.over==widget ) or widget.state=="selected" then
+					texs.buttin:bind()
+					txp=0
+					typ=-1
+				else
+					texs.button:bind()
+					txp=0
+					typ=-2
+				end
+				
+				if widget.class=="string" then -- hack
+					texs.border:bind()
+				end
 			
-			draw33(128,128, 24,24, 0-margin,0+margin, hx+(margin*2),hy+(margin*2))
+				draw33(128,128, 24,24, 0-margin,0+margin, hx+(margin*2),hy+(margin*2))
 			
 			else -- builtin
 			

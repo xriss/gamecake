@@ -24,7 +24,8 @@ function setup(win,def)
 	meta.__index=meta
 	local master={} -- the master widget, all numerical keys of a widget are the widgets children
 	setmetatable(master,meta)
-	master.parent=master
+	master.parent=master -- we are our own parent, probably safer than setting as null
+	master.master=master -- and our own master
 	
 	def.master=master
 	def.meta=meta

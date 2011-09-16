@@ -45,6 +45,21 @@ function setup(widget,def)
 --		gl.Enable("LIGHTING")
 	end
 	
+--
+-- handle key input
+--
+	function master.key(widget,ascii,key,act)
+
+		if master.focus then -- key focus
+		
+			master.focus:key(ascii,key,act)
+		end
+
+	end
+
+--
+-- handle mouse input
+--
 	function master.mouse(widget,act,x,y,key)
 	
 --		if widget.state=="ready" then
