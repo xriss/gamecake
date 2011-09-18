@@ -19,14 +19,19 @@ module("fenestra.wrap")
 --
 -- local win=require("fenestra.wrap").win()
 --
-function win(into_hwnd)
+function win(opts)
+opts=opts or {}
 
 local win={}
 
 	function win.setup(g)
 	
 		win._g=g -- the global table
-		win.into_hwnd=into_hwnd
+		win.into_hwnd=opts.into_hwnd
+
+-- open window of this height		
+		win.width=opts.width
+		win.height=opts.height
 
 		win.core = core.setup(win)
 		

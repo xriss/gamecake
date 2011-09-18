@@ -286,10 +286,10 @@ function setup(fenestra)
 		local w=fenestra.get("width")
 		local h=it.y
 		fenestra.debug_polygon_begin()
-		fenestra.debug_polygon_vertex(0,0,hex"8800ff00")
-		fenestra.debug_polygon_vertex(w,0,hex"8800ff00")
-		fenestra.debug_polygon_vertex(w,h,hex"88008800")
-		fenestra.debug_polygon_vertex(0,h,hex"88008800")
+		fenestra.debug_polygon_vertex(0,0,hex"ee00cc00")
+		fenestra.debug_polygon_vertex(w,0,hex"ee00cc00")
+		fenestra.debug_polygon_vertex(w,h,hex"ee004400")
+		fenestra.debug_polygon_vertex(0,h,hex"ee004400")
 		fenestra.debug_polygon_end()
 		
 --		fenestra.debug_rect(0,0,fenestra.get("width"),it.y,hex"8800ff00")
@@ -307,7 +307,7 @@ function setup(fenestra)
 		if it.show_hud then
 			for i,v in ipairs(it.lines_display) do
 			
-				fenestra.debug_print({x=0,y=it.y+i*8-8,size=8,color=hex"ff00ff00",s=v})
+				fenestra.debug_print({x=0,y=it.y+i*8-8,size=8,color=hex"ffffffff",s=v})
 			
 			end
 		end

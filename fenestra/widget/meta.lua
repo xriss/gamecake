@@ -33,7 +33,11 @@ function setup(def)
 	local win=def.win
 
 	function meta.call_hook(widget,hook)
-		if widget.hooks and widget.hooks[hook] then widget.hooks[hook](widget) end
+		if widget.hooks and widget.hooks[hook] then -- either local hooks
+			widget.hooks[hook](widget)
+		elseif widget.master.hooks and widget.master.hooks[hook] then -- or a master hook
+			widget.master.hooks[hook](widget)
+		end
 	end
 
 --

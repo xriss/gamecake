@@ -92,6 +92,10 @@ function setup(win,name)
 				s1=font.fits(width,s)
 				if s1>=0 then
 					local bp=s1
+					
+					local sa,sb=s:find("\n")		-- new lines force breaks
+					if sa and sa<bp then bp=sa end
+					
 					local wa,wb=s:sub(bp+1):find("^%s+") -- white space at end?
 					
 					if #s == bp then -- the end of string
