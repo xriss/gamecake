@@ -46,6 +46,23 @@ HWND into_hwnd=0;
 	lua_pushlightuserdata(l,core);
 	lua_pushvalue(l,1);
 	lua_settable(l, LUA_REGISTRYINDEX); // save main tab associated with main struct
+
+	lua_pushstring(l,"width");
+	lua_rawget(l,1);
+	if( lua_isnumber(l,-1) )
+	{
+		core->width=(s32)lua_tonumber(l,-1);
+	}
+	lua_pop(l,1);
+
+	lua_pushstring(l,"height");
+	lua_rawget(l,1);
+	if( lua_isnumber(l,-1) )
+	{
+		core->height=(s32)lua_tonumber(l,-1);
+	}
+	lua_pop(l,1);
+
 	
 #if defined(WIN32)
 

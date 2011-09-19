@@ -266,7 +266,7 @@ glColor4ub( (font_color>>16)&0xff , (font_color>>8)&0xff , (font_color)&0xff , (
 
 		font_x+=(pfg->advance*siz);
 		
-		if(font_x>width) break;
+//		if(font_x>width) break;
 	}
 //	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
@@ -302,7 +302,7 @@ GLfloat siz=(GLfloat)font_size;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// how characters from this string can we fit in this space without overflowing
+// how many characters from this string can we fit in this space without overflowing
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 s32 fenestra_ogl::font_fit_string(const char *string,f32 width)
@@ -330,4 +330,34 @@ GLfloat siz=(GLfloat)font_size;
 	}
 	
 	return count;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// which char is under a given x position, returns a string index (0 is first,etc)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+s32 fenestra_ogl::font_which_char(const char *string,f32 x)
+{
+const char *s;
+s32 i;
+f32 w=0;
+GLfloat siz=(GLfloat)font_size;
+
+	if(x<0) { return -1; } // out of bounds
+
+	for(s=string,i=0;*s;s++,i++)
+	{
+		char c=*s;
+		
+		c=c-32;
+		if(c<0)   { c=95; } 
+		if(c>95)  { c=95; }
+		
+		w+=(font_infos[c].advance*siz);
+		
+		if(w>=x) { return i; } // found it
+	}
+	
+	return -1; // not in range
 }

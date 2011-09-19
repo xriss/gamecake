@@ -74,6 +74,7 @@ static unsigned char const font_bits[16*48]={
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 bool fenestra_ogl::debug_setup()
 {
+int xi,yi;
 int x,y,xx,yy;
 u8 b;
 u8 m;
@@ -96,30 +97,39 @@ int i=0;
 // build a single char			
 			for(y=0;y<8;y++)
 			{
-				f=font_bits+((yy+y)*16)+(xx/8);
-				b=*f++;
-				m=0x80;
-				last=false;
+				f=font_bits+((yy)*16)+(xx/8);
 				for(x=0;x<8;x++)
 				{
+					b=*(f+(y*16));
+					m=0x80>>x;
 					if(b&m)
 					{
 						c=0xffffffff; // solid
-						last=true;
 					}
 					else
 					{
-						if(last)
+							c=0x44000000; // transparent
+/*
+						for(yi=-1;yi<=1;yi++)
 						{
-							c=0xff000000; // abgr shadow
+							for(xi=-1;xi<=1;xi++)
+							{
+								if(	((x+xi)>=0) &&
+									((x+xi)<=7) &&
+									((y+yi)>=0) &&
+									((y+yi)<=7) )
+								{
+									b=*(f+(y+yi)*16);
+									m=0x80>>(x+xi);
+									if(b&m)
+									{
+										c=0xff000000; // shadow
+									}
+								}
+							}
 						}
-						else
-						{
-							c=0x00000000; // transparent
-						}
-						last=false;
+*/
 					}
-					m=m>>1;
 					bmap[x+(y*8)]=c;
 				}
 			}
