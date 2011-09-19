@@ -331,7 +331,6 @@ function setup(def)
 	function meta.update(widget)
 	
 		for i,v in ipairs(widget) do
-
 			v:update()
 		end
 	end

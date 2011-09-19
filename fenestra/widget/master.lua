@@ -28,8 +28,14 @@ function setup(widget,def)
 	local meta=widget.meta
 --	local win=def.win
 
+	master.throb=0
+
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget)
+
+		master.throb=master.throb-4
+		if master.throb<0 then master.throb=255 end
+
 		meta.update(widget)
 	end
 	

@@ -76,6 +76,14 @@ function setup(win,name)
 		if size then font.sx=size font.sy=size end
 		if text then return win.flat_fits({size=font.sx,s=text,width=width}) end
 	end
+	
+--
+-- which char is under this xpos, ( 0 is first and -1 is unknown )
+--
+	function font.which(x,text,size)
+		if size then font.sx=size font.sy=size end
+		if text then return win.flat_which({size=font.sx,s=text,x=x}) end
+	end
 
 --
 -- break this string into an array of strings with proper word wrapping to the given width

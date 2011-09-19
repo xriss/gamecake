@@ -298,6 +298,15 @@ function setup(def)
 			font.set(tx,-ty,c,widget.text_size)
 			font.draw(widget.text)
 		
+
+				if widget.class=="string" then -- hack
+					local sw=font.size(widget.text:sub(1,widget.string.line_idx))
+					win.flat_rect(
+						tx+sw+0,-ty,
+						tx+sw+2,-ty-widget.text_size,
+						widget.master.throb*256*256*256)
+				end
+
 		end
 		
 		for i,v in ipairs(widget) do v:draw() end

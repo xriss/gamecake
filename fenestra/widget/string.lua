@@ -19,6 +19,7 @@ end
 
 function key(widget,ascii,key,act)
 	local it=widget.string
+	local master=widget.master
 	
 	local changed=false
 
@@ -31,14 +32,14 @@ function key(widget,ascii,key,act)
 			it.line_idx=it.line_idx-1
 			if it.line_idx<0 then it.line_idx=0 end
 			
-			it.throb=255
+			master.throb=255
 						
 		elseif key=="right" then
 	
 			it.line_idx=it.line_idx+1
 			if it.line_idx>#it.line then it.line_idx=#it.line end
 			
-			it.throb=255
+			master.throb=255
 			
 		elseif key=="home" then
 		
@@ -75,7 +76,7 @@ function key(widget,ascii,key,act)
 
 			end
 			
-			it.throb=255
+			master.throb=255
 			
 		elseif key=="delete" then
 	
@@ -97,7 +98,7 @@ function key(widget,ascii,key,act)
 
 			end
 			
-			it.throb=255
+			master.throb=255
 			
 		elseif key=="enter" or key=="return" then
 		
@@ -136,7 +137,7 @@ function key(widget,ascii,key,act)
 					
 				end
 				
-				it.throb=255
+				master.throb=255
 				
 				changed=true
 
@@ -156,14 +157,7 @@ end
 
 
 function update(widget)
-	local it=widget.string
-	
-	it.throb=it.throb-4
-	if it.throb<0 then it.throb=255 end
-
 end
-
-
 
 
 function setup(widget,def)
@@ -173,7 +167,6 @@ function setup(widget,def)
 	
 	it.line=""
 	it.line_idx=0
-	it.throb=255
 	
 --	it.key=key
 	it.update=update
