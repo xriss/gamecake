@@ -196,6 +196,61 @@ f32 wide=0;
 	return 0;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// lua
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int core_flat_which(lua_State *l)
+{
+	struct fenestra_ogl *core = (struct fenestra_ogl *)lua_touserdata(l, 1 );
+	
+const char *s;
+f32 x=0;
+
+	s=0;
+
+	if(lua_istable(l,2))
+	{
+		lua_getfield(l,2,"x");
+		if(lua_isnumber(l,-1))
+		{
+			x=(f32)lua_tonumber(l,-1);
+		}
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"size");
+		if(lua_isnumber(l,-1))
+		{
+			core->font_size=(f32)lua_tonumber(l,-1);
+		}
+		lua_pop(l,1);
+		
+		lua_getfield(l,2,"s");
+		if(lua_isstring(l,-1))
+		{
+			s=lua_tostring(l,-1);
+		}
+		lua_pop(l,1);
+	}
+	else
+	if(lua_isstring(l,2))
+	{
+		s=lua_tostring(l,2);
+		x=(f32)lua_tonumber(l,3);
+	}
+	
+	if(s)
+	{
+		lua_pushnumber(l, core->font_which_char(s,x) );
+		return 1;
+	}
+	
+	
+	return 0;
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // lua
@@ -205,9 +260,14 @@ static const struct luaL_reg core_lib[] = {
 	
 	{"flat_begin",				core_flat_begin},
 	{"flat_end",				core_flat_end},
+
+// font functions
+
 	{"flat_print",				core_flat_print},
 	{"flat_measure",			core_flat_measure},
 	{"flat_fits",				core_flat_fits},
+	{"flat_which",				core_flat_which},
+
 	
 	{NULL, NULL},
 };

@@ -429,8 +429,9 @@ bool fenestra::event_handler( XEvent *e )
 
 bool fenestra::setup(HWND _into_hwnd)
 {
-	width=960;
-	height=480;
+//auto height
+	if(width==0)  { width=640; }
+	if(height==0) { height=480; }
 
 	call_update=true;
 		
@@ -533,8 +534,9 @@ bogus:
 
 bool fenestra::setup()
 {
-	width=960;
-	height=480;
+//auto height
+	if(width==0)  { width=640; }
+	if(height==0) { height=480; }
 
 	bool ret=false;
 	

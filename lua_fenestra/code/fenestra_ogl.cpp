@@ -258,6 +258,7 @@ void fenestra_ogl::clip2d(float xp, float yp, float xh, float yh)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void fenestra_ogl::project23d(float aspect, float fov, float depth)
 {
+	float ooaspect=1.0f/aspect;
 
 // diveide by zero sanity
 	clip_xh=clip_xh ? clip_xh : 1;
@@ -279,10 +280,10 @@ void fenestra_ogl::project23d(float aspect, float fov, float depth)
 		m[0] = clip_yh/clip_xh;
 		m[5] = 1.0f;
 		
-		if(m[0] > (aspect) ) // we need to fit width instead to keep everything onscreen
+		if(m[0] > (ooaspect) ) // we need to fit width instead to keep everything onscreen
 		{
-			m[0] = aspect*1.0f;
-			m[5] = aspect*clip_xh/clip_yh;
+			m[0] = (ooaspect)*1.0f;
+			m[5] = (ooaspect)*clip_xh/clip_yh;
 		}
 		
 		m[1] = 0.0f;

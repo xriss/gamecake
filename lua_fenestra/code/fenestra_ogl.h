@@ -211,6 +211,7 @@ struct fenestra_ogl
 	void font_draw_string(const char *string);
 	f32 font_width_string(const char *string);
 	s32 font_fit_string( const char *string, f32 width );
+	s32 font_which_char( const char *string,f32 x );
 
 #if defined(WIN32)
 	HDC hDC;
