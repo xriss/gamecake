@@ -292,9 +292,13 @@ function setup(def)
 			tx=(widget.hx-tx)/2
 			ty=(widget.hy-ty)/2
 			
+			
 			tx=tx+txp
 			ty=ty+typ
 			
+			widget.text_x=tx
+			widget.text_y=ty
+
 			font.set(tx,-ty,c,widget.text_size)
 			font.draw(widget.text)
 		

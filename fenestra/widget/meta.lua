@@ -168,8 +168,10 @@ function setup(def)
 --
 	function meta.layout(widget)
 --print(widget.class)
-		if widget.class=="hx" then
-			meta.layout_hx(widget)
+		if widget.class=="flow" or widget.class=="hx" then -- hx will be removed
+			meta.layout_flow(widget)
+		elseif widget.class=="fill" then
+			meta.layout_fill(widget)
 		elseif widget.class=="slide" or widget.class=="pad" then
 			meta.layout_padding(widget)
 		elseif widget.class=="master" or widget.class=="abs" then
@@ -219,9 +221,70 @@ function setup(def)
 		end
 	end
 
+-- this is a fixed layout that works kind of like text
+-- we do not adjust the hx,hy size of sub widgets
+-- we just place them left to right top to bottom
+-- finally we resize this widget to fit its content
+	function meta.layout_fill(widget)
+	
+	
+		local hx,hy=0,0
+		local my=0
+		local mhx,mhy=0,0
+		
+		function addone(w)
+			w.px=hx
+			w.py=hy -- top align by default
+			hx=hx+w.hx
+			if hx > mhx then mhx=hx end -- max x total size
+			if w.hy > my then my=w.hy end -- max y size for this line
+		end
+		
+		function endoflines()
+			widget.hx=mhx
+			widget.hy=mhy
+		end
+		
+		function endofline()
+			hx=0
+			hy=hy+my
+			my=0
+		end
+		
+		if #widget>0 then
+		
+			widget.hx=widget.sx -- use sx,sy as the base fill size
+			widget.hy=widget.sy
+		
+			for i,w in ipairs(widget) do
+			
+				if hx+w.hx>widget.hx then
+					if hx==0 then -- need one item per line
+						addone(w)
+						endofline()
+					else -- skip this one, push onto nextline
+						endofline()
+						addone(w)
+					end
+				else
+					addone(w)
+				end
+			end
+
+			endofline()
+			endoflines()
+		end
+		
+	
+		for i,v in ipairs(widget) do
+			v:layout()
+		end
+	end
+	
 -- this is the magical layout that works kind of like text
+-- except things expand to fit the area
 -- use sx,sy and mx,my to control what ends up where
-	function meta.layout_hx(widget)
+	function meta.layout_flow(widget)
 		local sx,sy=0,0
 		local my=0
 		local line=1
