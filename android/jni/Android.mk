@@ -14,4 +14,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_LDLIBS := -lGLESv1_CM -ldl -llog
 
+LOCAL_SHARED_LIBRARIES := luandroid
+
+
 include $(BUILD_SHARED_LIBRARY)
