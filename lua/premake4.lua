@@ -1,5 +1,5 @@
 
-if not NACL then -- we just link with prebuilt
+if not NACL then -- we just link with prebuilt?
 
 project "lua51"
 language "C++"
@@ -34,9 +34,20 @@ includedirs { "src" }
 
 if NACL then -- we just link with prebuilt
 
+--	files { "src/*.h", "src/lua.c" }
+
 	links { "lua", "m" , "pthread" }
 
 	kind("StaticLib")
+
+elseif ANDROID then 
+
+	files { "src/*.h", "src/lua.c" }
+
+	links { "m" , "pthread" }
+
+	kind("SharedLib")
+
 else
 
 	kind "ConsoleApp"
@@ -60,6 +71,10 @@ if #lua_lib_names>0 then
 
 
 	if NACL then
+
+	elseif ANDROID then
+
+		links { "lua51" }
 
 	elseif os.get() == "windows" then
 
@@ -148,8 +163,19 @@ extern void lua_preloadlibs(lua_State *L)
 end
 
 
-SET_TARGET("","lua",true)
+	if NACL then
 
+		SET_TARGET("","lua")
+
+	elseif ANDROID then
+
+		SET_TARGET("","luandroid",true)
+
+	else
+
+		SET_TARGET("","lua",true)
+		
+	end
 
 --linking lua with pthread makes gdb much happier when we use it later...
 

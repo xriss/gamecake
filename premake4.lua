@@ -7,9 +7,17 @@ if _ARGS[1]=="nacl" then
 NACL=true
 end
 
+-- build using ANDROID?
+ANDROID=false
+if _ARGS[1]=="android" then
+ANDROID=true
+end
 
 BUILD_DIR="build-"..(_ACTION or "")
+
 if NACL then BUILD_DIR=BUILD_DIR.."-nacl" end
+if ANDROID then BUILD_DIR=BUILD_DIR.."-android" end
+
 location( BUILD_DIR )
 
 configurations { "Debug", "Release" }
@@ -24,14 +32,23 @@ ALL_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj")
 EXE_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Release")
 DBG_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Debug")
 
+AND_OUT_DIR=path.getabsolute("android/libs/armeabi")
 
 if NACL then
 
 	defines "NACL"
 	
-	local naclsdk=os.getenv("naclsdk") or "./naclsdk"
+	local naclsdk=os.getenv("naclsdk") or "../sdks/naclsdk"
 	
 	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
+	
+elseif ANDROID then
+
+	defines "ANDROID"
+	
+	local androidsdk=os.getenv("androidsdk") or "../sdks/android-sdk"
+	
+--	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
 	
 elseif os.get() == "windows" then
 
@@ -87,6 +104,14 @@ dir=dir or ""
 		targetname (name)
 	end
 
+	if ANDROID then
+	
+		configuration {"Debug"}
+		flags {"Symbols"} -- blue debug needs symbols badly
+		targetdir(AND_OUT_DIR..dir)
+
+	else
+
 	configuration {"Debug"}
 	flags {"Symbols"} -- blue debug needs symbols badly
 	targetdir(DBG_OUT_DIR..dir)
@@ -94,12 +119,22 @@ dir=dir or ""
 	configuration {"Release"}
 	flags {"Optimize"}
 	targetdir(EXE_OUT_DIR..dir)
-	
+
+	end
 end
 
 if NACL then
 
 	include("lua_nacl")
+
+-- we might static link with all the above libs
+	include("lua")
+	
+elseif ANDROID then
+
+	include("lua_android")
+
+	include("lua_bit")
 
 -- we might static link with all the above libs
 	include("lua")
