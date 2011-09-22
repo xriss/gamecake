@@ -27,6 +27,8 @@ function setup(win,def)
 	master.parent=master -- we are our own parent, probably safer than setting as null
 	master.master=master -- and our own master
 	
+	master.font=def.font
+	
 	def.master=master
 	def.meta=meta
 	def.win=win

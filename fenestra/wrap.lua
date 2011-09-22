@@ -261,6 +261,7 @@ function win.flat_begin(...)			return core.ogl.flat_begin(				win.core_ogl,	...)
 function win.flat_end(...)				return core.ogl.flat_end(				win.core_ogl,	...) end
 function win.flat_print(...)			return core.ogl.flat_print(				win.core_ogl,	...) end
 function win.flat_measure(...)			return core.ogl.flat_measure(			win.core_ogl,	...) end
+function win.flat_which(...)			return core.ogl.flat_which(				win.core_ogl,	...) end
 function win.flat_fits(...)				return core.ogl.flat_fits(				win.core_ogl,	...) end
 function win.flat_rect(...)				return core.ogl.debug_rect(				win.core_ogl,	...) end
 function win.flat_polygon_begin(...)	return core.ogl.debug_polygon_begin(	win.core_ogl,	...) end

@@ -12,8 +12,29 @@ local string=require("string")
 local table=require("table")
 
 function mouse(widget,act,x,y,key)
-	widget.master.focus=widget
-	return widget.meta.mouse(widget,act,x,y,key)
+
+	local it=widget.string
+
+-- call here so we can use any state changes immediatly	
+	local ret=widget.meta.mouse(widget,act,x,y,key)
+	
+	if widget.master.active==widget then
+	
+		widget.master.focus=widget
+		
+		if act=="down" then
+			local dx=x-(widget.px+widget.text_x)
+--print(dx)
+			if dx<0 then -- catch lessthan
+				it.line_idx=0
+			else
+				it.line_idx=widget.master.font.which(dx,it.line)
+				if it.line_idx<0 then it.line_idx=#it.line end -- catch morethan
+			end
+		end
+	end
+	
+	return ret
 end
 
 

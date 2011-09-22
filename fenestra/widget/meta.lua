@@ -225,16 +225,16 @@ function setup(def)
 -- we do not adjust the hx,hy size of sub widgets
 -- we just place them left to right top to bottom
 -- finally we resize this widget to fit its content
+-- the widgets sx,sy is used as default hx,hy for layout
 	function meta.layout_fill(widget)
-	
-	
+		
 		local hx,hy=0,0
 		local my=0
 		local mhx,mhy=0,0
 		
 		function addone(w)
-			w.px=hx
-			w.py=hy -- top align by default
+			w.px=widget.px+hx
+			w.py=widget.py-hy -- top align by default
 			hx=hx+w.hx
 			if hx > mhx then mhx=hx end -- max x total size
 			if w.hy > my then my=w.hy end -- max y size for this line
@@ -259,23 +259,25 @@ function setup(def)
 			for i,w in ipairs(widget) do
 			
 				if hx+w.hx>widget.hx then
-					if hx==0 then -- need one item per line
+					if hx==0 then -- need one item per line so add it anyway
 						addone(w)
 						endofline()
-					else -- skip this one, push onto nextline
+					else -- skip this one, push it onto nextline
 						endofline()
 						addone(w)
 					end
-				else
+				else -- it fits so just add
 					addone(w)
 				end
 			end
 
-			endofline()
+			if hx>0 then endofline() end -- final end of line
+			
 			endoflines()
+			
 		end
 		
-	
+-- layout sub sub widgets	
 		for i,v in ipairs(widget) do
 			v:layout()
 		end
