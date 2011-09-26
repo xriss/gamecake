@@ -57,6 +57,36 @@ function setup(def)
 	end
 	
 --
+-- remove from parent
+--
+	function meta.remove(widget)
+	
+		if widget.parent then
+			for i,v in ipairs(widget.parent) do
+				if v==widget then
+					table.remove(widget.parent,i)
+				end
+			end
+			widget.parent=nil
+		end
+		
+	end	
+--
+-- add a previosuly created widget as a child to this widget
+-- the widget will be forcibly removed...
+--
+	function meta.insert(parent,widget)
+	
+		meta.remove(widget) -- make sure we dont end up in two parents
+		
+		table.insert(parent,widget)
+		widget.parent=parent
+		widget.master=parent.master
+		
+		return widget
+	end
+
+--
 -- initial setup
 --def
 	function meta.setup(widget,def)
@@ -72,9 +102,8 @@ function setup(def)
 		widget.user=def.user
 		widget.hooks=def.hooks
 		
-		
-		widget.sx=def.sx or 1 -- (ratio)size for layout code
-		widget.sy=def.sy or 1
+		widget.sx=def.sx or def.hx or 1 -- (ratio)size for layout code
+		widget.sy=def.sy or def.hy or 1 -- use hxy if its provided
 		
 		widget.mx=def.mx or 0 -- max (ratio)size for layout code
 		widget.my=def.my or 0
@@ -109,6 +138,9 @@ function setup(def)
 		widget.color=def.color
 		widget.text_color=def.text_color or master.text_color or 0xff000000 -- black text
 		widget.text_size=def.text_size or master.text_size or 16 -- quite chunky text by default
+		
+		widget.text_color_over=def.text_color_over -- if set, switch text color on hover
+		widget.text_align=def.text_align -- default is center
 		
 		widget.text=def.text -- display this text on the button
 		
@@ -170,7 +202,7 @@ function setup(def)
 --print(widget.class)
 		if widget.class=="flow" or widget.class=="hx" then -- hx will be removed
 			meta.layout_flow(widget)
-		elseif widget.class=="fill" then
+		elseif widget.class=="fill" or widget.class=="fbo" then
 			meta.layout_fill(widget)
 		elseif widget.class=="slide" or widget.class=="pad" then
 			meta.layout_padding(widget)

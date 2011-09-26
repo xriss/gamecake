@@ -38,6 +38,7 @@ end
 
 
 local print=print
+local tostring=tostring
 
 module("fenestra.widget.skin")
 
@@ -278,20 +279,22 @@ function setup(def)
 			
 			local c=widget.text_color
 			
-			if widget.highlight=="text" then
-				local t={explode_color(c)}
+			if widget.text_color_over then
 				if master.over==widget then
-				elseif ( master.active==widget and master.over==widget ) or widget.state=="selected" then
-					t[4]=t[4]*3/4
-				else
-					t[4]=t[4]*3/4
+					c=widget.text_color_over
 				end
-				c=implode_color(t)
 			end
 			
-			tx=(widget.hx-tx)/2
-			ty=(widget.hy-ty)/2
-			
+			if widget.text_align=="left" then
+				tx=0
+				ty=0			
+			elseif widget.text_align=="right" then
+				tx=(widget.hx-tx)
+				ty=(widget.hy-ty)			
+			else
+				tx=(widget.hx-tx)/2
+				ty=(widget.hy-ty)/2
+			end
 			
 			tx=tx+txp
 			ty=ty+typ
@@ -305,8 +308,8 @@ function setup(def)
 
 				if widget.class=="string" then -- hack
 					if widget.master.focus==widget then --only draw curser in active widget
-					
 						local sw=font.size(widget.text:sub(1,widget.string.line_idx))
+						gl.Enable(gl.COLOR_MATERIAL)
 						win.flat_rect(
 							tx+sw+0,-ty,
 							tx+sw+2,-ty-widget.text_size,

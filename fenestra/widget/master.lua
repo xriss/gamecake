@@ -12,6 +12,7 @@ local table=table
 local ipairs=ipairs
 local setmetatable=setmetatable
 local type=type
+local tostring=tostring
 
 local function print(...) _G.print(...) end
 
@@ -32,13 +33,17 @@ function setup(widget,def)
 
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget)
-
-		master.throb=master.throb-4
-		if master.throb<0 then master.throb=255 end
+		widget.throb=widget.throb-4
+		if widget.throb<0 then widget.throb=255 end
 
 		meta.update(widget)
 	end
 	
+	function master.layout(widget)
+		meta.layout(widget)
+		master.remouse(widget)
+	end
+
 	function master.draw(widget)
 	
 		gl.Disable(gl.CULL_FACE)
@@ -64,9 +69,19 @@ function setup(widget,def)
 	end
 
 --
--- handle mouse input
+-- set the mouse position to its last position
+-- call this after adding/removing widgets to make sure they highlight properly
+--	
+	function master.remouse(widget)
+		local p=widget.last_mouse_position or {0,0}
+		widget.mouse(widget,nil,p[1],p[2],nil)
+	end
 --
+-- handle mouse input
+--	
 	function master.mouse(widget,act,x,y,key)
+	
+		master.last_mouse_position={x,y}
 	
 --		if widget.state=="ready" then
 		

@@ -6,7 +6,7 @@
 local require=require
 local print=print
 
-module("fenestra.widget.string")
+module("fenestra.widget.scroll")
 
 local string=require("string")
 local table=require("table")
