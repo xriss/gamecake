@@ -2,6 +2,6 @@
 
 stty cbreak
 
-lua yarnterm.lua || true
+lua yarnterm.lua $* || true
 
 stty sane

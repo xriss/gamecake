@@ -2,20 +2,11 @@
 
 -- a single location
 
-local _G=_G
+-- functions into locals
+local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local table=table
-local ipairs=ipairs
-local string=string
-local math=math
-local os=os
-
-local setfenv=setfenv
-local unpack=unpack
-local pairs=pairs
-local require=require
-local setmetatable=setmetatable
-local print=print
+-- libs into locals
+local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
 module(...)
 local yarn_attr=require("yarn.attr")
@@ -64,8 +55,8 @@ setfenv(1,d)
 	end
 	
 	function neighboursplus()
-		local n_x_look={  0 , -1 , 1 , 0 , 0 }
-		local n_y_look={ -1 ,  0 , 0 , 1 , 0 }
+		local n_x_look={ 0,  0 , -1 , 1 , 0 }
+		local n_y_look={ 0, -1 ,  0 , 0 , 1 }
 		return function(d,i)
 			if i>5 then return nil,nil end -- no more edges
 			return i+1 , level.get_cell( xp+n_x_look[i] , yp+n_y_look[i] )
@@ -82,8 +73,8 @@ setfenv(1,d)
 	end
 	
 	function bordersplus()
-		local n_x_look={ -1 ,  0 ,  1 , -1 , 1 , -1 , 0 , 1 , 0 }
-		local n_y_look={ -1 , -1 , -1 ,  0 , 0 ,  1 , 1 , 1 , 0 }
+		local n_x_look={ 0, -1 ,  0 ,  1 , -1 , 1 , -1 , 0 , 1 }
+		local n_y_look={ 0, -1 , -1 , -1 ,  0 , 0 ,  1 , 1 , 1 }
 		return function(d,i)
 			if i>9 then return nil,nil end -- no more edges
 			return i+1 , level.get_cell( xp+n_x_look[i] , yp+n_y_look[i] )
@@ -100,6 +91,11 @@ setfenv(1,d)
 		for v,b in pairs(items) do
 			if v.form=="char" then return v end
 		end
+	end
+	
+	function is_empty()
+		if name=="floor" and not get_char() then return true end
+		return false
 	end
 	
 	function asc()

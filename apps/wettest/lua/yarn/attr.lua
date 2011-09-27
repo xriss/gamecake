@@ -2,20 +2,11 @@
 -- shared attributes, across cells, items and chars
 -- we metamap .attr in these tables so cell.get gets attributes
 
-local _G=_G
+-- functions into locals
+local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local table=table
-local pairs=pairs
-local ipairs=ipairs
-local string=string
-local math=math
-local os=os
-
-local setfenv=setfenv
-local unpack=unpack
-local require=require
-local type=type
-local print=print
+-- libs into locals
+local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
 module(...)
 local attrdata=require("yarn.attrdata")

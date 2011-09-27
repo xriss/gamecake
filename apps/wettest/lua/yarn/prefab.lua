@@ -1,18 +1,11 @@
 
 -- pre fabricated rooms, dungeon building for the use of
 
-local _G=_G
+-- functions into locals
+local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-
-local table=table
-local ipairs=ipairs
-local string=string
-local math=math
-local os=os
-
-local setfenv=setfenv
-local unpack=unpack
-local require=require
+-- libs into locals
+local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
 local dbg=dbg or function()end
 
@@ -21,6 +14,22 @@ module(...)
 local yarn_strings=require("yarn.strings")
 local yarn_attrdata=require("yarn.attrdata")
 
+-- names that have a .in them are sub classes
+-- we need to be able to find them using their subclass
+-- so turn a name with . into a list of possible names
+function keys_name_and_subnames(s)
+	local splits={}
+	local i=1
+	repeat
+		i=s:find(".",i,true)
+		if i then
+			splits[ #splits+1 ] = s:sub(1,i-1)
+			i=i+1
+		end
+	until not i
+	splits[ #splits+1 ]=s -- add all last
+	return splits
+end
 
 strings={}
 keys={}
@@ -199,7 +208,7 @@ room("test_lair_1",[[
 # . . . . . . . . . . #
 # # # # # # # # # # # #
 ]],{   
-	["a "]="ant",
+	["r "]="rat",
 })
 
 room("stairs",[[
@@ -275,11 +284,15 @@ function map_opts(name,pow)
 	local function callback(d) -- default callback when building maps
 		if d.call=="cell" then
 		
-			d.level.cellfind[d.name]=d.cell -- last generated cell of this type
+			for _,n in ipairs(keys_name_and_subnames(d.name)) do
 			
-			local l=d.level.celllist[d.name] or {} -- all generated cells of this type
-			l[#l+1]=d.cell
-			d.level.celllist[d.name]=l
+				d.level.cellfind[n]=d.cell -- last generated cell of this type
+				
+				local l=d.level.celllist[n] or {} -- all generated cells of this type
+				l[#l+1]=d.cell
+				d.level.celllist[n]=l
+				
+			end
 			
 			local at
 			if d.name=="wall" then
@@ -301,6 +314,63 @@ function map_opts(name,pow)
 		r.callback=callback
 		return r
 	end
+
+
+	local function generate_player(level)
+		level.player=level.new_item( "player" )
+		level.player.attr.soul=level.main.soul -- we got soul
+		level.player.set_cell( level.cellfind["player_spawn"] or level.rand_room_cell({}) )
+	end
+	
+	local function generate_player_bystairs(level)
+		level.player=level.new_item( "player" )
+		level.player.attr.soul=level.main.soul -- we got soul
+		
+		local stairs
+		if level.soul.last_stairs then -- aim to stick to the same stairs
+			stairs=level.cellfind[level.soul.last_stairs]
+dbg("fond real stairs : "..tostring(stairs))
+		end
+		if not stairs then stairs=level.cellfind["stairs"] end
+		
+		if stairs then
+			for i,v in stairs.neighbours() do
+				if v.is_empty() then --empty so place palyer here
+					level.player.set_cell( v )
+					break
+				end
+			end
+		else -- if we got here then just pick a random place
+			level.player.set_cell( level.rand_room_cell({}) )
+		end
+	end
+
+	local function generate_ants(level)
+		for i=1,10 do
+			local c=level.rand_room_cell({})
+			if not c.char then
+				local p=level.new_item( "ant" )
+				p.set_cell( c )
+			end
+		end
+	end
+
+	local function generate_blobs(level)
+		for i=1,5 do
+			local c=level.rand_room_cell({})
+			if not c.char then
+				local p=level.new_item( "blob" )
+				p.set_cell( c )
+			end
+		end
+	end
+
+--default generation	
+	opts.generate=function(level)
+		generate_player(level)
+		generate_ants(level)
+		generate_blobs(level)
+	end
 	
 	local r
 	if pow==0 then -- level 0 is always town no matter what the name
@@ -315,6 +385,10 @@ function map_opts(name,pow)
 		
 		opts.mode="town"
 		opts.only_these_rooms=true
+
+		opts.generate=function(level)
+			generate_player_bystairs(level)
+		end
 	
 	elseif name=="level.home" then
 	
@@ -322,9 +396,30 @@ function map_opts(name,pow)
 		r=add_room(get_room("home_bedroom"))
 		r=add_room(get_room("home_mainroom"))
 		
+		opts.generate=function(level)
+		
+			if level.soul.capsule_done then
+				generate_player_bystairs(level)
+			else
+				generate_player(level)
+			end
+			
+			level.soul.capsule_done=true
+			
+		end
+		
+		
 	elseif name=="level.dump" then
 
 		r=add_room(get_room("dump_stairs"))
+
+			opts.generate=function(level)
+			
+				generate_player(level)
+				generate_ants(level)
+				generate_blobs(level)
+				
+			end
 	
 	elseif name=="level.test" then
 
@@ -333,6 +428,10 @@ function map_opts(name,pow)
 			r=add_room(get_room("test_stairs_1"))
 			r=add_room(get_room("test_lair_1"))
 			
+			opts.generate=function(level)
+				generate_player_bystairs(level)
+			end
+
 		else
 		
 			r=add_room(get_room("test_stairs"))
@@ -344,6 +443,7 @@ function map_opts(name,pow)
 		r=add_room(get_room("stairs"))
 	
 	end
+	
 	
 	return opts
 

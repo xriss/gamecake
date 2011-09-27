@@ -1,12 +1,18 @@
 {
   ["soul"] = {
+  ["last_stairs"] = "stairs.home",
   ["visited"] = {
   ["level.town"] = {
   [0] = true,
 }
 ,
+  ["level.home"] = {
+  [1] = true,
 }
 ,
+}
+,
+  ["capsule_done"] = true,
 }
 ,
   ["levels"] = {
@@ -24,8 +30,9 @@
   ["xh"] = 5,
   ["yh"] = 5,
   ["name"] = "room",
+  ["visible"] = true,
   ["xp"] = 31,
-  ["yp"] = 17,
+  ["yp"] = 6,
 }
 ,
 }
@@ -35,29 +42,30 @@
   ["xh"] = 4,
   ["yh"] = 3,
   ["name"] = "room",
-  ["xp"] = 20,
-  ["yp"] = 19,
+  ["xp"] = 9,
+  ["yp"] = 9,
 }
 ,
 }
 ,
   [3] = {
   ["attr"] = {
-  ["xh"] = 6,
-  ["yh"] = 4,
+  ["xh"] = 4,
+  ["yh"] = 3,
   ["name"] = "room",
-  ["xp"] = 8,
-  ["yp"] = 6,
+  ["visible"] = true,
+  ["xp"] = 25,
+  ["yp"] = 14,
 }
 ,
 }
 ,
   [4] = {
   ["attr"] = {
-  ["xh"] = 4,
+  ["xh"] = 6,
   ["yh"] = 4,
   ["name"] = "room",
-  ["xp"] = 7,
+  ["xp"] = 27,
   ["yp"] = 20,
 }
 ,
@@ -66,10 +74,9 @@
   [5] = {
   ["attr"] = {
   ["xh"] = 4,
-  ["yh"] = 6,
+  ["yh"] = 4,
   ["name"] = "room",
-  ["visible"] = true,
-  ["xp"] = 18,
+  ["xp"] = 20,
   ["yp"] = 6,
 }
 ,
@@ -77,22 +84,22 @@
 ,
   [6] = {
   ["attr"] = {
-  ["xh"] = 5,
-  ["yh"] = 5,
+  ["xh"] = 4,
+  ["yh"] = 6,
   ["name"] = "room",
-  ["xp"] = 26,
-  ["yp"] = 8,
+  ["xp"] = 13,
+  ["yp"] = 19,
 }
 ,
 }
 ,
   [7] = {
   ["attr"] = {
-  ["xh"] = 1,
-  ["yh"] = 1,
+  ["xh"] = 5,
+  ["yh"] = 5,
   ["name"] = "room",
-  ["xp"] = 28,
-  ["yp"] = 13,
+  ["xp"] = 3,
+  ["yp"] = 20,
 }
 ,
 }
@@ -102,8 +109,8 @@
   ["xh"] = 1,
   ["yh"] = 1,
   ["name"] = "room",
-  ["xp"] = 8,
-  ["yp"] = 24,
+  ["xp"] = 22,
+  ["yp"] = 10,
 }
 ,
 }
@@ -113,8 +120,9 @@
   ["xh"] = 1,
   ["yh"] = 1,
   ["name"] = "room",
-  ["xp"] = 22,
-  ["yp"] = 22,
+  ["visible"] = true,
+  ["xp"] = 29,
+  ["yp"] = 15,
 }
 ,
 }
@@ -124,8 +132,8 @@
   ["xh"] = 1,
   ["yh"] = 1,
   ["name"] = "room",
-  ["xp"] = 22,
-  ["yp"] = 8,
+  ["xp"] = 5,
+  ["yp"] = 25,
 }
 ,
 }
@@ -135,8 +143,8 @@
   ["xh"] = 1,
   ["yh"] = 1,
   ["name"] = "room",
-  ["xp"] = 14,
-  ["yp"] = 7,
+  ["xp"] = 15,
+  ["yp"] = 25,
 }
 ,
 }
@@ -146,8 +154,31 @@
   ["xh"] = 1,
   ["yh"] = 1,
   ["name"] = "room",
-  ["xp"] = 32,
-  ["yp"] = 22,
+  ["visible"] = true,
+  ["xp"] = 34,
+  ["yp"] = 11,
+}
+,
+}
+,
+  [13] = {
+  ["attr"] = {
+  ["xh"] = 1,
+  ["yh"] = 1,
+  ["name"] = "room",
+  ["xp"] = 13,
+  ["yp"] = 10,
+}
+,
+}
+,
+  [14] = {
+  ["attr"] = {
+  ["xh"] = 1,
+  ["yh"] = 1,
+  ["name"] = "room",
+  ["xp"] = 28,
+  ["yp"] = 24,
 }
 ,
 }
@@ -1806,7 +1837,7 @@
   [207] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -1814,7 +1845,7 @@
   [208] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -1822,7 +1853,7 @@
   [209] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -1830,7 +1861,7 @@
   [210] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -1838,7 +1869,7 @@
   [211] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -1846,7 +1877,7 @@
   [212] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -1854,7 +1885,7 @@
   [213] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -1862,7 +1893,7 @@
   [214] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -1886,7 +1917,7 @@
   [217] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -1894,7 +1925,7 @@
   [218] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -1934,7 +1965,7 @@
   [223] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -1942,7 +1973,7 @@
   [224] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -1990,7 +2021,7 @@
   [230] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -1998,7 +2029,7 @@
   [231] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2006,7 +2037,7 @@
   [232] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2014,7 +2045,7 @@
   [233] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2022,7 +2053,7 @@
   [234] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2030,7 +2061,7 @@
   [235] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2038,7 +2069,7 @@
   [236] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2126,13 +2157,14 @@
   [247] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [248] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2140,6 +2172,7 @@
 ,
   [249] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2147,6 +2180,7 @@
 ,
   [250] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2154,6 +2188,7 @@
 ,
   [251] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2161,6 +2196,7 @@
 ,
   [252] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2168,6 +2204,7 @@
 ,
   [253] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2176,7 +2213,7 @@
   [254] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2200,7 +2237,7 @@
   [257] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2216,14 +2253,13 @@
   [259] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [260] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2231,7 +2267,6 @@
 ,
   [261] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2239,15 +2274,13 @@
 ,
   [262] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [263] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2256,7 +2289,7 @@
   [264] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2304,7 +2337,7 @@
   [270] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2352,7 +2385,7 @@
   [276] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2440,13 +2473,14 @@
   [287] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [288] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2454,6 +2488,7 @@
 ,
   [289] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2461,6 +2496,7 @@
 ,
   [290] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2468,6 +2504,7 @@
 ,
   [291] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2475,6 +2512,7 @@
 ,
   [292] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2482,6 +2520,7 @@
 ,
   [293] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2514,7 +2553,7 @@
   [297] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2530,14 +2569,13 @@
   [299] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [300] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2545,7 +2583,6 @@
 ,
   [301] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2553,15 +2590,13 @@
 ,
   [302] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [303] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2570,7 +2605,7 @@
   [304] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2578,7 +2613,7 @@
   [305] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2586,7 +2621,7 @@
   [306] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2594,7 +2629,7 @@
   [307] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2602,7 +2637,7 @@
   [308] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2610,7 +2645,7 @@
   [309] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2626,7 +2661,7 @@
   [311] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2634,7 +2669,7 @@
   [312] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2642,7 +2677,7 @@
   [313] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2650,7 +2685,7 @@
   [314] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2666,7 +2701,7 @@
   [316] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2754,60 +2789,55 @@
   [327] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [328] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [329] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [330] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [331] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [332] = {
   ["attr"] = {
-  ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "ant",
-  ["hpmax"] = 2,
-}
-,
-}
-,
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [333] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
@@ -2815,7 +2845,7 @@
   [334] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2839,7 +2869,7 @@
   [337] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2855,14 +2885,13 @@
   [339] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [340] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2870,7 +2899,6 @@
 ,
   [341] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2878,7 +2906,6 @@
 ,
   [342] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2886,7 +2913,6 @@
 ,
   [343] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2895,7 +2921,7 @@
   [344] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2903,13 +2929,14 @@
   [345] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [346] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2917,6 +2944,7 @@
 ,
   [347] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2924,6 +2952,7 @@
 ,
   [348] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2931,6 +2960,7 @@
 ,
   [349] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2938,7 +2968,8 @@
 ,
   [350] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
@@ -2946,7 +2977,7 @@
   [351] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -2965,12 +2996,22 @@
   ["name"] = "floor",
 }
 ,
+  ["items"] = {
+  [1] = {
+  ["attr"] = {
+  ["name"] = "stairs.home",
+}
+,
+}
+,
+}
+,
 }
 ,
   [354] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -2986,7 +3027,7 @@
   [356] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3074,14 +3115,15 @@
   [367] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [368] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
@@ -3098,33 +3140,11 @@
   ["name"] = "floor",
 }
 ,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "ant",
-  ["hpmax"] = 2,
-}
-,
-}
-,
-}
-,
 }
 ,
   [371] = {
   ["attr"] = {
   ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "blob",
-  ["hpmax"] = 10,
-}
-,
-}
-,
 }
 ,
 }
@@ -3138,7 +3158,8 @@
 ,
   [373] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
@@ -3146,7 +3167,7 @@
   [374] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3170,7 +3191,7 @@
   [377] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3186,14 +3207,13 @@
   [379] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [380] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3201,7 +3221,6 @@
 ,
   [381] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3209,15 +3228,13 @@
 ,
   [382] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [383] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3226,7 +3243,7 @@
   [384] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3234,13 +3251,14 @@
   [385] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [386] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3248,6 +3266,7 @@
 ,
   [387] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3255,6 +3274,7 @@
 ,
   [388] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3262,6 +3282,7 @@
 ,
   [389] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3269,7 +3290,8 @@
 ,
   [390] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
@@ -3277,7 +3299,7 @@
   [391] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3285,7 +3307,7 @@
   [392] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3293,7 +3315,7 @@
   [393] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3301,7 +3323,7 @@
   [394] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3317,7 +3339,7 @@
   [396] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3405,7 +3427,7 @@
   [407] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3420,32 +3442,48 @@
 ,
   [409] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [410] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
+}
+,
+  ["items"] = {
+  [1] = {
+  ["attr"] = {
+  ["name"] = "stairs.dump",
+}
+,
+}
+,
 }
 ,
 }
 ,
   [411] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
+}
+,
+  ["items"] = {
+  [1] = {
+  ["attr"] = {
+  ["name"] = "sensei.dump",
+}
+,
+}
+,
 }
 ,
 }
 ,
   [412] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3453,7 +3491,7 @@
   [413] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3461,7 +3499,7 @@
   [414] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3485,7 +3523,7 @@
   [417] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3501,7 +3539,7 @@
   [419] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3509,7 +3547,7 @@
   [420] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3517,18 +3555,7 @@
   [421] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "player",
-  ["hpmax"] = 10,
-}
-,
-}
-,
+  ["name"] = "wall",
 }
 ,
 }
@@ -3536,7 +3563,7 @@
   [422] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3544,7 +3571,7 @@
   [423] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3552,7 +3579,7 @@
   [424] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3560,13 +3587,14 @@
   [425] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [426] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3574,6 +3602,7 @@
 ,
   [427] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3581,6 +3610,7 @@
 ,
   [428] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3588,6 +3618,7 @@
 ,
   [429] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3595,7 +3626,8 @@
 ,
   [430] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
@@ -3603,7 +3635,7 @@
   [431] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3643,7 +3675,7 @@
   [436] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3739,14 +3771,13 @@
   [448] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [449] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3754,7 +3785,6 @@
 ,
   [450] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3762,7 +3792,6 @@
 ,
   [451] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3770,7 +3799,6 @@
 ,
   [452] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3779,7 +3807,7 @@
   [453] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3811,7 +3839,7 @@
   [457] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3851,7 +3879,7 @@
   [462] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3875,13 +3903,14 @@
   [465] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [466] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3889,6 +3918,7 @@
 ,
   [467] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3896,6 +3926,7 @@
 ,
   [468] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3903,6 +3934,7 @@
 ,
   [469] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3910,7 +3942,8 @@
 ,
   [470] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
@@ -3926,7 +3959,7 @@
   [472] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3934,7 +3967,7 @@
   [473] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3950,7 +3983,7 @@
   [475] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -3958,7 +3991,7 @@
   [476] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -4054,7 +4087,7 @@
   [488] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -4062,7 +4095,7 @@
   [489] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -4070,7 +4103,7 @@
   [490] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -4078,7 +4111,7 @@
   [491] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -4086,7 +4119,7 @@
   [492] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -4094,7 +4127,7 @@
   [493] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -4126,7 +4159,7 @@
   [497] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -4134,7 +4167,7 @@
   [498] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -4142,7 +4175,7 @@
   [499] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -4150,7 +4183,7 @@
   [500] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -4158,7 +4191,7 @@
   [501] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -4166,7 +4199,7 @@
   [502] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -4190,13 +4223,14 @@
   [505] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [506] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -4204,6 +4238,7 @@
 ,
   [507] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -4211,6 +4246,7 @@
 ,
   [508] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -4218,6 +4254,7 @@
 ,
   [509] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -4225,6 +4262,7 @@
 ,
   [510] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -4233,7 +4271,7 @@
   [511] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -4497,7 +4535,7 @@
   [544] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -4529,7 +4567,7 @@
   [548] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -4545,7 +4583,7 @@
   [550] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -4553,7 +4591,7 @@
   [551] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -4817,7 +4855,7 @@
   [584] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -4857,7 +4895,7 @@
   [589] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -5137,7 +5175,7 @@
   [624] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -5156,12 +5194,32 @@
   ["name"] = "floor",
 }
 ,
+  ["items"] = {
+  [1] = {
+  ["attr"] = {
+  ["name"] = "stairs.test",
+}
+,
+}
+,
+}
+,
 }
 ,
   [627] = {
   ["attr"] = {
   ["visible"] = true,
   ["name"] = "floor",
+}
+,
+  ["items"] = {
+  [1] = {
+  ["attr"] = {
+  ["name"] = "sensei.test",
+}
+,
+}
+,
 }
 ,
 }
@@ -5194,6 +5252,17 @@
   ["attr"] = {
   ["visible"] = true,
   ["name"] = "floor",
+}
+,
+  ["items"] = {
+  [1] = {
+  ["attr"] = {
+  ["name"] = "player",
+  ["hpmax"] = 10,
+}
+,
+}
+,
 }
 ,
 }
@@ -5457,7 +5526,7 @@
   [664] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -5497,7 +5566,7 @@
   [669] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -5505,7 +5574,7 @@
   [670] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -5513,7 +5582,7 @@
   [671] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -5521,7 +5590,7 @@
   [672] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -5529,7 +5598,7 @@
   [673] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -5537,7 +5606,7 @@
   [674] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -5545,7 +5614,7 @@
   [675] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -5553,7 +5622,7 @@
   [676] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -5777,7 +5846,7 @@
   [704] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -5785,7 +5854,7 @@
   [705] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -5793,7 +5862,7 @@
   [706] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -5801,7 +5870,7 @@
   [707] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -5809,7 +5878,7 @@
   [708] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -5817,7 +5886,7 @@
   [709] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -5825,31 +5894,22 @@
   [710] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [711] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "ant",
-  ["hpmax"] = 2,
-}
-,
-}
-,
 }
 ,
 }
 ,
   [712] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -5857,6 +5917,7 @@
 ,
   [713] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -5864,6 +5925,7 @@
 ,
   [714] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -5871,6 +5933,7 @@
 ,
   [715] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -5879,7 +5942,7 @@
   [716] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6007,7 +6070,7 @@
   [732] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6015,7 +6078,7 @@
   [733] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6023,7 +6086,7 @@
   [734] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6031,7 +6094,7 @@
   [735] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6039,7 +6102,7 @@
   [736] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6047,7 +6110,7 @@
   [737] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6063,7 +6126,7 @@
   [739] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6071,7 +6134,7 @@
   [740] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6079,7 +6142,7 @@
   [741] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6087,7 +6150,7 @@
   [742] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6095,7 +6158,7 @@
   [743] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6103,7 +6166,7 @@
   [744] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6151,13 +6214,38 @@
   [750] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [751] = {
   ["attr"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [752] = {
+  ["attr"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [753] = {
+  ["attr"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [754] = {
+  ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6165,6 +6253,7 @@
 ,
   [755] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6173,7 +6262,7 @@
   [756] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6221,7 +6310,7 @@
   [762] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6229,7 +6318,7 @@
   [763] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6237,7 +6326,7 @@
   [764] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6245,7 +6334,7 @@
   [765] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6277,7 +6366,7 @@
   [769] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6285,7 +6374,7 @@
   [770] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6293,7 +6382,7 @@
   [771] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6301,14 +6390,13 @@
   [772] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [773] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6316,7 +6404,6 @@
 ,
   [774] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6324,7 +6411,6 @@
 ,
   [775] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6332,7 +6418,6 @@
 ,
   [776] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6341,7 +6426,7 @@
   [777] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6357,13 +6442,14 @@
   [779] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [780] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6371,6 +6457,7 @@
 ,
   [781] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6378,24 +6465,15 @@
 ,
   [782] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "blob",
-  ["hpmax"] = 10,
-}
-,
-}
-,
 }
 ,
 }
 ,
   [783] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6404,7 +6482,7 @@
   [784] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6420,7 +6498,7 @@
   [786] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6428,7 +6506,7 @@
   [787] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6436,7 +6514,7 @@
   [788] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6444,7 +6522,7 @@
   [789] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6459,60 +6537,40 @@
 ,
   [791] = {
   ["attr"] = {
-  ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "blob",
-  ["hpmax"] = 10,
-}
-,
-}
-,
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [792] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [793] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
-  ["items"] = {
-  [1] = {
+}
+,
+  [794] = {
   ["attr"] = {
-  ["name"] = "stairs.home",
-}
-,
-}
-,
+  ["visible"] = true,
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [795] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "ant",
-  ["hpmax"] = 2,
-}
-,
-}
-,
 }
 ,
 }
@@ -6520,7 +6578,7 @@
   [796] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6568,14 +6626,13 @@
   [802] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [803] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6583,7 +6640,6 @@
 ,
   [804] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6591,7 +6647,6 @@
 ,
   [805] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6599,8 +6654,7 @@
 ,
   [806] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6610,44 +6664,19 @@
   ["name"] = "floor",
 }
 ,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "ant",
-  ["hpmax"] = 2,
-}
-,
-}
-,
-  [2] = {
-  ["attr"] = {
-  ["name"] = "ant",
-  ["hpmax"] = 2,
-}
-,
-}
-,
-  [3] = {
-  ["attr"] = {
-  ["name"] = "blob",
-  ["hpmax"] = 10,
-}
-,
-}
-,
-}
-,
 }
 ,
   [808] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [809] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6655,6 +6684,7 @@
 ,
   [810] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6663,7 +6693,7 @@
   [811] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6671,14 +6701,13 @@
   [812] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [813] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6686,7 +6715,6 @@
 ,
   [814] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6694,7 +6722,6 @@
 ,
   [815] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6702,7 +6729,6 @@
 ,
   [816] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6711,7 +6737,7 @@
   [817] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -6727,13 +6753,14 @@
   [819] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [820] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6741,56 +6768,23 @@
 ,
   [821] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "stairs.dump",
-}
-,
-}
-,
-  [2] = {
-  ["attr"] = {
-  ["name"] = "ant",
-  ["hpmax"] = 2,
-}
-,
-}
-,
 }
 ,
 }
 ,
   [822] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "sensei.dump",
-}
-,
-}
-,
-  [2] = {
-  ["attr"] = {
-  ["name"] = "ant",
-  ["hpmax"] = 2,
-}
-,
-}
-,
 }
 ,
 }
 ,
   [823] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6799,7 +6793,7 @@
   [824] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6815,14 +6809,13 @@
   [826] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [827] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6830,7 +6823,6 @@
 ,
   [828] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6838,7 +6830,6 @@
 ,
   [829] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6846,8 +6837,7 @@
 ,
   [830] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6859,8 +6849,32 @@
 ,
 }
 ,
+  [832] = {
+  ["attr"] = {
+  ["name"] = "floor",
+}
+,
+}
+,
+  [833] = {
+  ["attr"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [834] = {
+  ["attr"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
   [835] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6869,7 +6883,7 @@
   [836] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6917,14 +6931,13 @@
   [842] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [843] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6932,7 +6945,6 @@
 ,
   [844] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6940,7 +6952,6 @@
 ,
   [845] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6948,8 +6959,7 @@
 ,
   [846] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -6963,31 +6973,23 @@
 ,
   [848] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [849] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "ant",
-  ["hpmax"] = 2,
-}
-,
-}
-,
 }
 ,
 }
 ,
   [850] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -6996,7 +6998,7 @@
   [851] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7004,14 +7006,13 @@
   [852] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [853] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7019,7 +7020,6 @@
 ,
   [854] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7027,7 +7027,6 @@
 ,
   [855] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7035,7 +7034,6 @@
 ,
   [856] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7044,7 +7042,7 @@
   [857] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -7060,13 +7058,14 @@
   [859] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [860] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7074,24 +7073,15 @@
 ,
   [861] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "blob",
-  ["hpmax"] = 10,
-}
-,
-}
-,
 }
 ,
 }
 ,
   [862] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7099,6 +7089,7 @@
 ,
   [863] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7107,7 +7098,7 @@
   [864] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7123,14 +7114,13 @@
   [866] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [867] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7138,7 +7128,6 @@
 ,
   [868] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7146,7 +7135,6 @@
 ,
   [869] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7154,8 +7142,7 @@
 ,
   [870] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7176,13 +7163,15 @@
 ,
   [873] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [874] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7190,6 +7179,7 @@
 ,
   [875] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7198,7 +7188,7 @@
   [876] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7246,14 +7236,13 @@
   [882] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [883] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7261,7 +7250,6 @@
 ,
   [884] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7269,7 +7257,6 @@
 ,
   [885] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7277,8 +7264,7 @@
 ,
   [886] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7292,13 +7278,15 @@
 ,
   [888] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [889] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7306,6 +7294,7 @@
 ,
   [890] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7314,7 +7303,7 @@
   [891] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7322,14 +7311,13 @@
   [892] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [893] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7337,7 +7325,6 @@
 ,
   [894] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7345,7 +7332,6 @@
 ,
   [895] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7353,7 +7339,6 @@
 ,
   [896] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7362,7 +7347,7 @@
   [897] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -7378,7 +7363,7 @@
   [899] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7386,7 +7371,7 @@
   [900] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7394,7 +7379,7 @@
   [901] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7410,7 +7395,7 @@
   [903] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7418,7 +7403,7 @@
   [904] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7434,14 +7419,13 @@
   [906] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [907] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7449,7 +7433,6 @@
 ,
   [908] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7457,7 +7440,6 @@
 ,
   [909] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7465,23 +7447,20 @@
 ,
   [910] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [911] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [912] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7498,7 +7477,7 @@
   [914] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7506,7 +7485,7 @@
   [915] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7514,7 +7493,7 @@
   [916] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7562,14 +7541,13 @@
   [922] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [923] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7577,7 +7555,6 @@
 ,
   [924] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7585,7 +7562,6 @@
 ,
   [925] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7593,8 +7569,7 @@
 ,
   [926] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7604,28 +7579,19 @@
   ["name"] = "floor",
 }
 ,
-  ["items"] = {
-  [1] = {
-  ["attr"] = {
-  ["name"] = "ant",
-  ["hpmax"] = 2,
-}
-,
-}
-,
-}
-,
 }
 ,
   [928] = {
   ["attr"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [929] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7633,6 +7599,7 @@
 ,
   [930] = {
   ["attr"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7641,7 +7608,7 @@
   [931] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7649,14 +7616,13 @@
   [932] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [933] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7664,7 +7630,6 @@
 ,
   [934] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7672,7 +7637,6 @@
 ,
   [935] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7680,7 +7644,6 @@
 ,
   [936] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7689,7 +7652,7 @@
   [937] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -7761,14 +7724,13 @@
   [946] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [947] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7776,7 +7738,6 @@
 ,
   [948] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7784,7 +7745,6 @@
 ,
   [949] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7792,7 +7752,6 @@
 ,
   [950] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7800,7 +7759,6 @@
 ,
   [951] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7808,7 +7766,6 @@
 ,
   [952] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7817,7 +7774,7 @@
   [953] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -7889,14 +7846,13 @@
   [962] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [963] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7904,7 +7860,6 @@
 ,
   [964] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7912,7 +7867,6 @@
 ,
   [965] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7920,16 +7874,14 @@
 ,
   [966] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
 ,
   [967] = {
   ["attr"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7937,7 +7889,7 @@
   [968] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -7945,7 +7897,7 @@
   [969] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7953,7 +7905,7 @@
   [970] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7961,7 +7913,7 @@
   [971] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -7969,14 +7921,13 @@
   [972] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
 ,
   [973] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7984,7 +7935,6 @@
 ,
   [974] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -7992,7 +7942,6 @@
 ,
   [975] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -8000,7 +7949,6 @@
 ,
   [976] = {
   ["attr"] = {
-  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -8009,7 +7957,7 @@
   [977] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8081,7 +8029,7 @@
   [986] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8089,7 +8037,7 @@
   [987] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8105,7 +8053,7 @@
   [989] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8113,7 +8061,7 @@
   [990] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8121,7 +8069,7 @@
   [991] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8129,7 +8077,7 @@
   [992] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8137,7 +8085,7 @@
   [993] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8209,7 +8157,7 @@
   [1002] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8217,7 +8165,7 @@
   [1003] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8225,7 +8173,7 @@
   [1004] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8241,7 +8189,7 @@
   [1006] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8249,7 +8197,7 @@
   [1007] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8257,7 +8205,7 @@
   [1008] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8289,7 +8237,7 @@
   [1012] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8297,7 +8245,7 @@
   [1013] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8305,7 +8253,7 @@
   [1014] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8321,7 +8269,7 @@
   [1016] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
@@ -8329,7 +8277,7 @@
   [1017] = {
   ["attr"] = {
   ["visible"] = true,
-  ["name"] = "floor",
+  ["name"] = "wall",
 }
 ,
 }
