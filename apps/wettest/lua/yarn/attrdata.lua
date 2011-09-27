@@ -1,25 +1,14 @@
 
 -- data to fill up attr with, this is the main game item/monster/logic content
 
-local _G=_G
+-- functions into locals
+local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-
-local table=table
-local ipairs=ipairs
-local string=string
-local math=math
-local os=os
-local package=package
-
-local pairs=pairs
-local setfenv=setfenv
-local unpack=unpack
-local require=require
-local print=print
-local tostring=tostring
-local exit=exit
+-- libs into locals
+local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
 module(...)
+local yarn_fight=require("yarn.fight")
 local yarn_level=require("yarn.level")
 local strings=require("yarn.strings")
 
@@ -59,6 +48,37 @@ function get(name,pow,xtra)
 	
 	return it
 end
+
+local call_fight={
+	acts=function(it,by)
+		if it.can.fight and by.can.fight then return {"hit","look"} end
+		return {"look"}
+	end,
+	hit=function(it,by)
+		if it.can.fight and by.can.fight then yarn_fight.hit(by,it) end
+		it.level.menu.hide()
+		it.level.step(1)
+--		it.level.update()
+	end,
+	look=function(it,by)
+		it.level.menu.show_text(it.desc,it.longdesc or it.desc)
+	end,
+}
+
+local call_talk={
+	acts=function(it,by)
+		if by.can.operate then return {"talk","look"} end
+		return {"look"}
+	end,
+	talk=function(it,by)
+		if by.can.operate then
+			it.level.menu.show_talk_menu(it,by)
+		end
+	end,
+	look=function(it,by)
+		it.level.menu.show_text(it.desc,it.longdesc or it.desc)
+	end,
+}
 
 dd={
 
@@ -125,27 +145,118 @@ dd={
 	
 	can=
 	{
-		use="menu",
+		use="talk",
 	},
 	
-	call=
-	{
-		menu=function(it,by)
-			it.level.main.menu.show_sensei_menu(it,by)
-		end,
-	}
+	call=call_talk,
+
+	chat={
+		["welcome"]={
+			text=[[Anybody there?]],
+			says={"hello"},
+		},
+		["hello"]={
+			text=[[Why hello there.]],
+			says={"TTFN"},
+		},
+	},
 },
 
 {
 	name="sensei.dump",
 	sensei="dump",
 	desc="a sensei named eeyore",
+	longdesc="Although it must be assumed that this is a person it looks more like a walking talking ball of fluff wearing leather Y-fronts.",
+	chat={
+		["welcome"]=function(it,by)
+			if it.level.name=="level.dump" then
+				if it.level.pow==1 then
+					return it.chat["welcome.0"]
+				end
+			end
+			return it.chat["welcome.0"]
+		end,
+		["welcome.0"]={
+			text=[[Anybody there?]],
+			says={"hello"},
+		},
+		["hello"]={
+			text=[[Why hello there.]],
+			says={"TTFN"},
+		},
+	},
 },
 
 {
 	name="sensei.test",
 	sensei="test",
 	desc="a sensei named chester",
+	longdesc="Cauliflour ears are the least of his worries, worries that include brocoley nose and turnip tongue. One can only assume that the  best years of his boxing career are far far behind him.",
+	chat={
+		["welcome"]=function(it,by)
+			if it.level.name=="level.test" then
+				if it.level.pow==1 then
+					return it.chat["welcome.1"]
+				end
+			end
+			return it.chat["welcome.0"]
+		end,
+		["welcome.0"]={
+			text=[[Anybody there?]],
+			says={"hello",{say="nobody",text="Theres nobody here but us chickens."}},
+		},
+		["question"]={
+			sticky=true,
+			text=[[
+			Ya wanna me ta learn ya somink?
+			Well do ya punk?
+			Do ya?]],
+			says={{say="teach",text="Teach me oh great one."},{say="no",text="Nope."}},
+		},
+		["hello"]={
+			text=[[
+			!!!
+			Gorden Freeman Bennett, don't be suprisin' on me like that.
+			]],
+			says={{say="question",text="..."}},
+		},
+		["nobody"]={
+			text=[[
+			Good to hear it.
+			I can't be 'avin with ninjas sneaking up on me all sneaky like.
+			The smoke bombs play 'avok with me poor sinuses.
+			]],
+			says={{say="question",text="..."}},
+		},
+		["teach"]={
+			text=[[
+			Well young padawan, you could work it all out yourself but if you really want a bit of the old toot then nip over to that doorstone next to me and pick a level.
+			
+			I'll follow you down and let you know what you 'ave to be doing.
+			
+			Down there is my domain and you may not take anything with you nor bring anything back.
+			
+			Still it's all fun and games init?
+			]],
+			says={"..."},
+		},
+		["welcome.1"]={
+			text=[[
+			Here you must learn the importance of items and equipment.
+			
+			Without tools we are but shaved monkeys.
+			
+			With tools we are shaved monkeys in suits.
+			
+			Now go forth and equip yourself with the weapon that lays yonder and find the mass damon hordes.
+			
+			Destroy them all then return to me victorious.
+			
+			Or just nip back upstairs, your call blud.
+			]],
+			says={"..."},
+		},
+	},
 },
 
 {
@@ -165,8 +276,14 @@ dd={
 	
 	call=
 	{
+		acts=function(it,by)
+			if by.can.operate then return {"menu"} end
+		end,
+		look=function(it,by)
+			it.level.menu.show_text(it.desc,it.longdesc or it.desc)
+		end,
 		menu=function(it,by)
-			it.level.main.menu.show_stairs_menu(it,by)
+			it.level.menu.show_stairs_menu(it,by)
 		end,
 	}
 },
@@ -222,26 +339,26 @@ dd={
 		end,
 		
 		look=function(it,by)
-			it.level.main.menu.show_text(it.desc,
+			it.level.menu.show_text(it.desc,
 			"Your SwordStone vault capsule is ".. (it.open and "open" or "closed").."." )
 		end,
 		open=function(it,by)
 			if not it.open then
-				it.level.main.menu.show_text(it.desc,
+				it.level.menu.show_text(it.desc,
 				"Your SwordStone vault capsule is held shut by something inside.")
 			end
 		end,
 		close=function(it,by)
 			if it.open then
 				it.attr.open=false
-				it.level.main.menu.show_text(it.desc,
+				it.level.menu.show_text(it.desc,
 				"Your SwordStone vault capsule closes very very very slowly.")
 				it.attr.asc=ascii("=")
 			end
 		end,
 		
 		["read welcome"]=function(it,by)
-			it.level.main.menu.show_text("Welcome to YARN, where an @ is you",
+			it.level.menu.show_text("Welcome to YARN, where an @ is you",
 [[
 Press the CURSOR keys to move up/down/left/right.
 
@@ -254,7 +371,7 @@ Press SPACE to continue.
 		end,
 		
 		["read license"]=function(it,by)
-			it.level.main.menu.show_text(it.desc,
+			it.level.menu.show_text(it.desc,
 [[
 SwordStone technologies: Where your future, is our business.
 
@@ -300,12 +417,12 @@ Eventually.
 		end,
 		
 		look=function(it,by)
-			it.level.main.menu.show_text(it.desc,"your SwordStone vault door is ".. (it.open and "open" or "closed") )
+			it.level.menu.show_text(it.desc,"your SwordStone vault door is ".. (it.open and "open" or "closed") )
 		end,
 		open=function(it,by)
 			local capsule=it.level.find_item("cryo_bed")
 			if not capsule or capsule.open==true then
-				it.level.main.menu.show_text(it.desc,"please ensure that your SwordStone vault capsule is closed before exiting your SwordStone vault")
+				it.level.menu.show_text(it.desc,"please ensure that your SwordStone vault capsule is closed before exiting your SwordStone vault")
 			else
 				it.attr.open=true
 				it.attr.form="item"
@@ -344,6 +461,8 @@ Eventually.
 		roam="random",
 	},
 	
+	call=call_fight,
+	
 	powup={
 		score=2,
 		hp=2,
@@ -375,6 +494,8 @@ Eventually.
 		fight=true,
 		roam="random",
 	},
+	
+	call=call_fight,
 	
 	powup={
 		score=10,
@@ -429,6 +550,8 @@ Eventually.
 		fight=true,
 		roam="random",
 	},
+
+	call=call_fight,
 	
 	powup={
 		score=10,

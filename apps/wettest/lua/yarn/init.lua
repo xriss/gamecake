@@ -1,21 +1,10 @@
 
 
-local _G=_G
+-- functions into locals
+local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local table=table
-local ipairs=ipairs
-local string=string
-local math=math
-local os=os
-
--- a rogue like
-
-local unpack=unpack
-
-local tostring=tostring
-local require=require
-
-local print=print
+-- libs into locals
+local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
 module(...)
 local yarn=require("yarn")
@@ -40,7 +29,7 @@ menu={}
 
 soul={}
 
-function setup(sd)
+function setup(sd,arg)
 
 
 local i
@@ -56,9 +45,18 @@ local i
 		end
 	end
 	
---	level=yarn_level.create(attrdata.get("level.home",1,{xh=40,yh=28}),yarn)
-	level=yarn_level.create(attrdata.get("level.test",1,{xh=40,yh=28}),yarn)
 	menu=yarn_menu.create({},yarn)
+	
+	if arg[1] then -- debug this level
+		local pow=tonumber(arg[2] or 1) or 1
+		level=yarn_level.create(attrdata.get("level."..arg[1],pow,{xh=40,yh=28}),yarn)
+		
+	else
+	
+		level=yarn_level.create(attrdata.get("level.home",1,{xh=40,yh=28}),yarn)
+	
+	end
+
 	
 	for y=0,asc_yh-1 do
 		for x=0,asc_xh-1 do

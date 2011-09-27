@@ -1,20 +1,10 @@
 
--- a single item
+-- functions into locals
+local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local _G=_G
+-- libs into locals
+local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
-local table=table
-local ipairs=ipairs
-local string=string
-local math=math
-local os=os
-
-local setfenv=setfenv
-local unpack=unpack
-local require=require
-local pairs=pairs
-
-local tostring=tostring
 
 local dbg=dbg or function()end
 
@@ -83,9 +73,14 @@ setfenv(1,d)
 		
 		dirty=1
 		
-		local tab=display[ cursor ]
+		local getmenuitem=function()
+			local tab=display[ cursor ]		
+			if tab and tab.tab then tab=tab.tab end -- use this data
+			return tab
+		end
+
+		local tab=getmenuitem()
 		
-		if tab.tab then tab=tab.tab end -- use this data
 		
 		if act=="down" then
 		
@@ -107,13 +102,28 @@ setfenv(1,d)
 			
 			elseif key=="up" then
 			
-				cursor=cursor-1
-				if cursor<1 then cursor=#display end
+				local cacheid=getmenuitem()
+				repeat
+					cursor=cursor-1
+				until cursor<1 or getmenuitem()~=cacheid
+				
+				if cursor<1 then cursor=#display end --wrap
+
+				local cacheid=getmenuitem() -- move to top of item
+				while cursor>0 and cacheid==getmenuitem() do
+					cursor=cursor-1
+				end
+				cursor=cursor+1
+
 			
 			elseif key=="down" then
 				
-				cursor=cursor+1
-				if cursor>#display then cursor=1 end
+				local cacheid=getmenuitem()
+				repeat
+					cursor=cursor+1
+				until cursor>#display or getmenuitem()~=cacheid
+				
+				if cursor>#display then cursor=1 end --wrap
 			
 			end
 		
@@ -159,12 +169,13 @@ setfenv(1,d)
 	-- build a requester
 	function build_request(t)
 	
--- t[1++].txt is the main body of text, t[1++].use is a call back function if this is
+-- t[1++].text is the main body of text, t[1++].use is a call back function if this is
 -- selectable, if there is no callback then selecting that option just hides the menu
 
 		local lines={}
+		local pos=1
 		for id=1,#t do
-			local ls=strings.smart_wrap(t[id].txt,32)
+			local ls=strings.smart_wrap(t[id].text,32)
 			for i=1,#ls do lines[#lines+1]={s=ls[i],id=id,tab=t[id]} end
 		end
 		
@@ -183,7 +194,7 @@ setfenv(1,d)
 			
 	-- add cancel option
 			tab[#tab+1]={
-				txt=[[..]],
+				text=[[..]],
 				call=function(it)
 					back()
 				end
@@ -191,21 +202,21 @@ setfenv(1,d)
 			
 	-- add equiped item option
 			tab[#tab+1]={
-				txt=[[your tools]],
+				text=[[your tools]],
 				call=function(it)
 					show_tool_menu(player)
 				end
 			}
 	-- add backpack option
 			tab[#tab+1]={
-				txt=[[your loots]],
+				text=[[your loots]],
 				call=function(it)
 					show_loot_menu(player)
 				end
 			}
 			
 			local items={}
-			for i,v in player.cell.bordersplus() do
+			for i,v in player.cell.neighboursplus() do
 				for item,b in pairs(v.items) do
 					items[#items+1]=item
 				end				
@@ -214,7 +225,7 @@ setfenv(1,d)
 			for i,v in ipairs(items) do
 				if v.call.acts then				
 					tab[#tab+1]={
-						txt=v.desc,
+						text=v.desc,
 						call=function(it)
 							show_item_menu(v)
 						end
@@ -241,7 +252,7 @@ setfenv(1,d)
 			
 -- add cancel option
 			tab[#tab+1]={
-				txt=[[..]],
+				text=[[..]],
 				call=function(it)
 					back()
 				end
@@ -264,7 +275,7 @@ setfenv(1,d)
 			
 -- add cancel option
 			tab[#tab+1]={
-				txt=[[..]],
+				text=[[..]],
 				call=function(it)
 					back()
 				end
@@ -287,7 +298,7 @@ setfenv(1,d)
 			local player=item.level.player
 	-- add cancel option
 			tab[#tab+1]={
-				txt=[[..]],
+				text=[[..]],
 				call=function(it)
 					back()
 				end
@@ -299,7 +310,7 @@ setfenv(1,d)
 			
 			for i,v in ipairs(acts) do
 				tab[#tab+1]={
-					txt=v,
+					text=v,
 					call=function(it)
 						if item.call[v] then
 							item.call[v](item,player)
@@ -319,6 +330,10 @@ setfenv(1,d)
 		local top={}
 
 		local goto_level=function(name,pow)
+		
+			main.soul.last_stairs=it.name
+dbg("saving stairs name : "..it.name)
+
 			main.level=main.level.destroy()
 			main.level=yarn_level.create(attrdata.get(name,pow,{xh=40,yh=28}),main)
 			main.menu.hide()
@@ -327,6 +342,7 @@ setfenv(1,d)
 			main.soul.visited=main.soul.visited or {}
 			main.soul.visited[name]=main.soul.visited[name] or {}
 			main.soul.visited[name][pow]=true
+			
 
 		end
 		
@@ -338,14 +354,14 @@ setfenv(1,d)
 			local player=it.level.player
 	-- add cancel option
 			tab[#tab+1]={
-				txt=[[..]],
+				text=[[..]],
 				call=function(it)
 					back()
 				end
 			}
 
 			tab[#tab+1]={
-				txt="town (0)",
+				text="town (0)",
 				call=function()
 					goto_level("level.town",0)
 				end
@@ -380,7 +396,7 @@ dbg(main.level.pow)
 				
 				if show then
 					tab[#tab+1]={
-						txt=it.stairs.." ("..i..")",
+						text=it.stairs.." ("..i..")",
 						call=function()
 							goto_level("level."..it.stairs,i)
 						end
@@ -394,31 +410,53 @@ dbg(main.level.pow)
 		show(top)
 	end
 	
-	function show_sensei_menu(it,by)
+	function show_talk_menu(it,by,chatname)
+		chatname=chatname or "welcome"
 		local top={}
+		local chat=it.chat[chatname]
+		if not chat then return hide() end
+		if type(chat)=="function" then chat=chat(it,by,chatname) end
 		
-		top.title=it.desc
+		top.title=chat.title or it.desc
 		
 		top.call=function(tab)
 		
 			local tab={}
 			local player=it.level.player
-	-- add cancel option
+	-- add cancel option?
+
 			tab[#tab+1]={
-				txt=[[..]],
-				call=function(it)
-					back()
+				text=strings.trim(chat.text).."\n\n", -- keep one blank line at end
+				call=function()
+					hide()
 				end
 			}
 
-			tab[#tab+1]={
-				txt="hello",
-				call=function()
-					back()
+			local cursor=#tab+1
+			
+			for i,v in ipairs(chat.says) do
+				local t=type(v)
+				local text,cal
+				if t=="string" then
+					text=v
+					cal=function() show_talk_menu(it,by,v) end
+				elseif t=="table" then
+					text=v.text
+					cal=function() show_talk_menu(it,by,v.say) end
 				end
-			}
+				tab[#tab+1]={
+					text=text,
+					call=cal
+				}
+			end
 			
 			top.display=build_request(tab)
+			for i,v in ipairs(top.display) do
+				if v.id==cursor then
+					top.cursor=i
+					break
+				end
+			end
 		end
 		
 		show(top)
@@ -430,14 +468,14 @@ dbg(main.level.pow)
 		local tab={}
 -- add cancel option
 		tab[#tab+1]={
-			txt=[[..]],
+			text=[[..]],
 			call=function(it)
 				back()
 			end
 		}
 			
 		tab[#tab+1]={
-			txt=display,
+			text=display,
 			call=function(it)
 				hide()
 			end

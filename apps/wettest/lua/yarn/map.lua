@@ -3,18 +3,11 @@
 --
 -- a little bit hacky but hey, i didnt knw how i was going to do it when i started :)
 
-local _G=_G
+-- functions into locals
+local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-
-local table=table
-local ipairs=ipairs
-local string=string
-local math=math
-local os=os
-
-local setfenv=setfenv
-local unpack=unpack
-local require=require
+-- libs into locals
+local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
 
 

@@ -2,21 +2,11 @@
 -- a collection of everything
 
 
-local _G=_G
+-- functions into locals
+local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local debug=debug
-local table=table
-local ipairs=ipairs
-local pairs=pairs
-local string=string
-local math=math
-local os=os
-
-local setfenv=setfenv
-local unpack=unpack
-local require=require
-local type=type
-local setmetatable=setmetatable
+-- libs into locals
+local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
 module(...)
 local yarn_map=require("yarn.map")
@@ -38,8 +28,10 @@ setfenv(1,d)
 	metatable={__index=attr}
 	setmetatable(d,metatable)
 
-	level=d -- we are the level
+	level=d -- we are the level, so level.level==level
 	main=up
+	menu=up.menu
+	soul=up.soul
 
 	time_passed=0
 	time_update=0
@@ -151,13 +143,12 @@ setfenv(1,d)
 	function rand_room_cell(t)
 		return rand_cell(rand_room(t))
 	end
-	
-	do
-		local opts=yarn_prefab.map_opts(d.name,d.pow)
-		opts.xh=d.xh
-		opts.yh=d.yh
-		map=yarn_map.create(opts) -- create an empty map, this is only a room layout
-	end
+
+-- set opts using prefab,this is where most of the brainwork happens	
+	opts=yarn_prefab.map_opts(d.name,d.pow)
+	opts.xh=d.xh
+	opts.yh=d.yh
+	map=yarn_map.create(opts) -- create an empty map, this is only a room layout
 	
 -- now turn that generated map into real rooms we can put stuff in
 	for i,v in ipairs(map.rooms) do
@@ -200,7 +191,7 @@ setfenv(1,d)
 	end
 	
 	
-	if map.opts.bigroom then
+	if opts.bigroom then
 
 --		rooms[#rooms+1]=yarn_room.create(attrdata.get("room",0,
 --			{ level=d, xp=1, yp=1, xh=xh-2, yh=yh-2, }) )
@@ -232,25 +223,7 @@ setfenv(1,d)
 		end
 	end
 	
-	player=new_item( "player" )
-	player.set_cell( cellfind["player_spawn"] or rand_room_cell({}) )
-	player.attr.soul=main.soul -- we got soul
-	
-	for i=1,10 do
-		c=rand_room_cell({})
-		if not c.char then
-			local p=new_item( "ant" )
-			p.set_cell( c )
-		end
-	end
-
-	for i=1,5 do
-		c=rand_room_cell({})
-		if not c.char then
-			local p=new_item( "blob" )
-			p.set_cell( c )
-		end
-	end
+	if opts.generate then opts.generate(level) end
 	
 	key_repeat=nil
 	key_repeat_count=0
@@ -297,6 +270,11 @@ setfenv(1,d)
 			time_update=time_update+player.move(vx,vy)
 			return true
 		end
+	end
+	
+	function step(t,it)
+		if it then t=t end -- advance level time relative to actor..
+		time_update=time_update+t
 	end
 	
 	function keypress(ascii,key,act)

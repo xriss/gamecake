@@ -1,5 +1,6 @@
 package.path=package.path..";./?/init.lua"
 
+
 dbg=function(s)
 	local fp=io.open("yarn.dbg","a")
 	if fp then
@@ -37,7 +38,7 @@ if fp then
 	fp:close()
 end
 
-yarn.setup(sd)
+yarn.setup(sd,arg)
 yarn.update()
 print( aesc.."2J"..aesc.."0;0H"..yarn.draw(2) )
 
