@@ -9,9 +9,9 @@ local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstrin
 local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
 module(...)
-local attrdata=require("yarn.attrdata")
+local attrs=require("yarn.attrdata")
 
--- pass in a table created by attrdata.get
+-- pass in a table created by attrs.get
 function create(ad)
 	
 local d=ad
@@ -43,11 +43,11 @@ end
 
 -- create a save state for this attr which contains enough information
 -- to recreate this attr when combined with the attrdata tables
--- so this is a diff from an attrdata.get
+-- so this is a diff from an attrs.get
 -- the result should be good to save as json
 function save(it)
 
-	local ad=attrdata.get(it.name,it.pow) -- get base data to compare
+	local ad=attrs.get(it.name,it.pow) -- get base data to compare
 	local sd={}
 	for i,v in pairs(it) do
 		if ( type(ad[i])==type(v) ) and ad[i]==v then -- no change from base
@@ -69,6 +69,6 @@ end
 
 -- reload a saved data (use instead of create)
 function load(sd)
-	return create( attrdata.get(sd.name,sd.pow,sd) ) -- unpack and create
+	return create( attrs.get(sd.name,sd.pow,sd) ) -- unpack and create
 end
 

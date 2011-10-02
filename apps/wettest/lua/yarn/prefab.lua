@@ -12,7 +12,7 @@ local dbg=dbg or function()end
 module(...)
 
 local yarn_strings=require("yarn.strings")
-local yarn_attrdata=require("yarn.attrdata")
+local yarn_attrs=require("yarn.attrs")
 
 -- names that have a .in them are sub classes
 -- we need to be able to find them using their subclass
@@ -298,7 +298,7 @@ function map_opts(name,pow)
 			if d.name=="wall" then
 				d.cell.set.name("wall")
 			else
-				at=yarn_attrdata.get(d.name)
+				at=yarn_attrs.get(d.name)
 			end
 			if at then
 				local it=d.level.new_item( at )

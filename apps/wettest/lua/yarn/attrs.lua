@@ -12,7 +12,7 @@ local yarn_fight=require("yarn.fight")
 local yarn_level=require("yarn.level")
 local strings=require("yarn.strings")
 
-local attrdata=require(...)
+local attrs=require(...)
 
 function ascii(a) return string.byte(a,1) end
 
@@ -42,7 +42,7 @@ function get(name,pow,xtra)
 		return get(parent,pow,it) -- recurse
 	end
 	
-	it.can=d.can or {} -- make sure we have a can table
+--	it.can=d.can or {} -- make sure we have a can table
 	
 	return it
 end
