@@ -18,7 +18,7 @@ local d=ad
 setfenv(1,d)
 
 -- any state data you expect to persist must be stored in the base table
--- never change any of the sub tables, such as .can or .call these are
+-- never change any of the sub tables, such as .is or .can these are
 -- shared tables so any change will effect all other objects of the same class
 
 

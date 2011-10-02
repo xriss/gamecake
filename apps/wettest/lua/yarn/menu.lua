@@ -223,7 +223,7 @@ setfenv(1,d)
 			end
 			
 			for i,v in ipairs(items) do
-				if v.call.acts or v.form=="item"then				
+				if v.can.acts or v.form=="item"then				
 					tab[#tab+1]={
 						text=v.desc,
 						call=function(it)
@@ -311,8 +311,8 @@ setfenv(1,d)
 					tab[#tab+1]={
 						text=v,
 						call=function(it)
-							if item.call[v] then
-								item.call[v](item,player)
+							if type(item.can[v])=="function" then
+								item.can[v](item,player)
 							end
 						end
 					}

@@ -43,13 +43,15 @@ function get(name,pow,xtra)
 	end
 	
 -- make sure these exist
-	it.call=it.call or {}
+	it.is=it.is or {}
 	it.can=it.can or {}
 	
 	return it
 end
 
-local call_fight={
+local can_fight={
+	fight=true,
+	roam="random",
 	acts=function(it,by)
 		if it.can.fight and by.can.fight then return {"hit","look"} end
 		return {"look"}
@@ -65,7 +67,8 @@ local call_fight={
 	end,
 }
 
-local call_talk={
+local can_talk={
+	use="talk",
 	acts=function(it,by)
 		if by.can.operate then return {"talk","look"} end
 		return {"look"}
@@ -80,7 +83,7 @@ local call_talk={
 	end,
 }
 
-local call_item={
+local can_item={
 	acts=function(it,by)
 		if by.can.operate then return {"get","look"} end
 		return {"look"}
@@ -157,13 +160,8 @@ dd={
 	class="sensei",
 	asc=ascii("&"),
 	desc="a sensei",
-	
-	can=
-	{
-		use="talk",
-	},
-	
-	call=call_talk,
+		
+	can=can_talk,
 
 	chat={
 		["welcome"]={
@@ -287,10 +285,6 @@ dd={
 	can=
 	{
 		use="menu",
-	},
-	
-	call=
-	{
 		acts=function(it,by)
 			if by.can.operate then return {"menu"} end
 		end,
@@ -339,10 +333,6 @@ dd={
 	can=
 	{
 		use="menu",
-	},
-	
-	call=
-	{
 		acts=function(it,by)
 			local t={"read welcome","read license","look"}
 			if it.open then
@@ -417,10 +407,6 @@ Eventually.
 	can=
 	{
 		use="menu",
-	},
-	
-	call=
-	{
 		acts=function(it,by)
 			local t={"look"}
 			if it.open then
@@ -472,13 +458,7 @@ Eventually.
 	def_add=0,
 	def_mul=1,
 	
-	can=
-	{
-		fight=true,
-		roam="random",
-	},
-	
-	call=call_fight,
+	can=can_fight,
 	
 	powup={
 		score=2,
@@ -508,13 +488,7 @@ Eventually.
 	def_add=0,
 	def_mul=0.75,
 	
-	can=
-	{
-		fight=true,
-		roam="random",
-	},
-	
-	call=call_fight,
+	can=can_fight,
 	
 	powup={
 		score=10,
@@ -537,7 +511,7 @@ Eventually.
 		corpse=true,
 		ant=true,
 	},
-	call=call_item,
+	can=can_item,
 	weight=1,
 },
 
@@ -551,7 +525,7 @@ Eventually.
 		corpse=true,
 		blob=true,
 	},
-	call=call_item,
+	can=can_item,
 	weight=1,
 },
 
@@ -572,13 +546,7 @@ Eventually.
 	def_add=0,
 	def_mul=0.75,
 	
-	can=
-	{
-		fight=true,
-		roam="random",
-	},
-
-	call=call_fight,
+	can=can_fight,
 	
 	powup={
 		score=10,
@@ -601,7 +569,7 @@ Eventually.
 		corpse=true,
 		rat=true,
 	},
-	call=call_item,
+	can=can_item,
 	weight=1,
 },
 
@@ -614,7 +582,7 @@ Eventually.
 		meat=true,
 		rat=true,
 	},
-	call=call_item,
+	can=can_item,
 	weight=0.1,
 },
 {
@@ -626,7 +594,7 @@ Eventually.
 		meat=true,
 		rat=true,
 	},
-	call=call_item,
+	can=can_item,
 	weight=0.1,
 },
 
@@ -640,7 +608,7 @@ Eventually.
 		stick=true,
 		wood=true,
 	},
-	call=call_item,
+	can=can_item,
 	weight=1,
 },
 

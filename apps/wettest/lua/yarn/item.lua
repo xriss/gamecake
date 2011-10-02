@@ -75,11 +75,11 @@ setfenv(1,d)
 				
 					local usename=char.can.use
 					
-					if char.call[usename] then
-						char.call[usename](char , d )
+					if char.can[usename] then
+						char.can[usename](char , d )
 					elseif usename=="menu" then
-						if char.call.menu then
-							char.call.menu(char,d)
+						if char.can.menu then
+							char.can.menu(char,d)
 						else
 							level.main.menu.show_item_menu(char)
 						end
