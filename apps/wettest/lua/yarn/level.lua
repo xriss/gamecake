@@ -16,7 +16,7 @@ local yarn_item=require("yarn.item")
 local yarn_attr=require("yarn.attr")
 
 local yarn_rooms=require("yarn.rooms")
-local attrs=require("yarn.attrs")
+local yarn_attrs=require("yarn.attrs")
 
 
 function create(t,up)
@@ -53,7 +53,7 @@ setfenv(1,d)
 	for y=0,yh-1 do
 		for x=0,xh-1 do
 			local i=x+y*xh
-			cells[i]=yarn_cell.create(attrs.get("cell",0,{ level=d, xp=x, yp=y, id=i }))
+			cells[i]=yarn_cell.create(yarn_attrs.get("cell",0,{ level=d, xp=x, yp=y, id=i }))
 		end
 	end
 
@@ -93,7 +93,7 @@ setfenv(1,d)
 	function new_item(n,l)
 		local at
 		if type(n)=="string" then
-			at=attrs.get(n,l)
+			at=yarn_attrs.get(n,l)
 		else
 			at=n
 			n=at.name
@@ -152,7 +152,7 @@ setfenv(1,d)
 	
 -- now turn that generated map into real rooms we can put stuff in
 	for i,v in ipairs(map.rooms) do
-		rooms[i]=yarn_room.create(attrs.get("room",0,
+		rooms[i]=yarn_room.create(yarn_attrs.get("room",0,
 			{ level=d, xp=v.x, yp=v.y, xh=v.xh, yh=v.yh, }) )
 		rooms[i].opts=v.opts
 	end
@@ -193,7 +193,7 @@ setfenv(1,d)
 	
 	if opts.bigroom then
 
---		rooms[#rooms+1]=yarn_room.create(attrs.get("room",0,
+--		rooms[#rooms+1]=yarn_room.create(yarn_attrs.get("room",0,
 --			{ level=d, xp=1, yp=1, xh=xh-2, yh=yh-2, }) )
 
 		for y=0,yh-1 do

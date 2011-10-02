@@ -12,7 +12,7 @@ local yarn_fight=require("yarn.fight")
 local yarn_level=require("yarn.level")
 local strings=require("yarn.strings")
 
-local attrs=require(...)
+--local attrs=require(...)
 
 function ascii(a) return string.byte(a,1) end
 

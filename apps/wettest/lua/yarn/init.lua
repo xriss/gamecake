@@ -10,8 +10,9 @@ module(...)
 local yarn=require("yarn")
 local yarn_level=require("yarn.level")
 local yarn_menu=require("yarn.menu")
+local yarn_attrs=require("yarn.attrs")
+
 local strings=require("yarn.strings")
-local attrs=require("yarn.attrs")
 
 local a_space=string.byte(" ",1)
 local a_under=string.byte("_",1)
@@ -49,11 +50,11 @@ local i
 	
 	if arg[1] then -- debug this level
 		local pow=tonumber(arg[2] or 1) or 1
-		level=yarn_level.create(attrs.get("level."..arg[1],pow,{xh=40,yh=28}),yarn)
+		level=yarn_level.create(yarn_attrs.get("level."..arg[1],pow,{xh=40,yh=28}),yarn)
 		
 	else
 	
-		level=yarn_level.create(attrs.get("level.home",1,{xh=40,yh=28}),yarn)
+		level=yarn_level.create(yarn_attrs.get("level.home",1,{xh=40,yh=28}),yarn)
 	
 	end
 
