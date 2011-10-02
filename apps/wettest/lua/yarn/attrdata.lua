@@ -165,7 +165,7 @@ dd={
 {
 	name="sensei.dump",
 	sensei="dump",
-	desc="a sensei named eeyore",
+	desc="a sensei named hobob",
 	longdesc="Although it must be assumed that this is a person it looks more like a walking talking ball of fluff wearing leather Y-fronts.",
 	chat={
 		["welcome"]=function(it,by)
@@ -177,12 +177,58 @@ dd={
 			return it.chat["welcome.0"]
 		end,
 		["welcome.0"]={
-			text=[[Anybody there?]],
-			says={"hello"},
+			text=[[That you, Maud?]],
+			says={{say="hello",text="Were you expecting the queen?"},{say="maud",text="Maud?"}},
 		},
 		["hello"]={
-			text=[[Why hello there.]],
+			text=[[You sure took your time. You know I can't stand being by myself.]],
 			says={"TTFN"},
+		},
+		["maud"]={
+			text=[[Oh, nevermind. It must be the fumes. They get things all confused with each other.]],
+			says={"TTFN"},
+		},
+	},
+},
+
+{
+	name="sensei.twin1",
+	sensei="dump",
+	desc="a young girl",
+	longdesc="A normal looking young girl with long braids on each side of her head, fashioned from her dark brown hair.",
+	chat={
+		["welcome"]={
+			text=[[Would you like to play with us?]],
+			says={{say="yes",text="Sure, why not."},{say="no",text="I think i'll pass."}},
+		},
+		["yes"]={
+			text=[[Oh, good! I've been waiting for someone to try this new game I'll think of in a while.]],
+			says={"If you say so."},
+		},
+		["no"]={
+			text=[[You should really speak to my sister.]],
+			says={"If you say so"},
+		},
+	},
+},
+
+{
+	name="sensei.twin2",
+	sensei="dump",
+	desc="a young girl",
+	longdesc="Although it looks as if this young girl looks eerily similar to the other one, she actually does.",
+	chat={
+		["welcome"]={
+			text=[[Would you like to play with us?]],
+			says={{say="yes",text="What if i said yes?"},{say="no",text="No, thanks."}},
+		},
+		["yes"]={
+			text=[[Then you should speak to my sister.]],
+			says={"Ok, I'll do that now."},
+		},
+		["no"]={
+			text=[[Well, I really think you should speak to my sister.]],
+			says={"Fine."},
 		},
 	},
 },
@@ -191,7 +237,7 @@ dd={
 	name="sensei.test",
 	sensei="test",
 	desc="a sensei named chester",
-	longdesc="Cauliflour ears are the least of his worries, worries that include brocoley nose and turnip tongue. One can only assume that the  best years of his boxing career are far far behind him.",
+	longdesc="Cauliflower ears are the least of his worries, worries that include broccoli nose and turnip tongue. One can only assume that the best years of his boxing career are far, far behind him.",
 	chat={
 		["welcome"]=function(it,by)
 			if it.level.name=="level.test" then
@@ -203,7 +249,7 @@ dd={
 		end,
 		["welcome.0"]={
 			text=[[Anybody there?]],
-			says={"hello",{say="nobody",text="Theres nobody here but us chickens."}},
+			says={"hello",{say="nobody",text="There's nobody here but us chickens."}},
 		},
 		["question"]={
 			sticky=true,
@@ -211,7 +257,7 @@ dd={
 			Ya wanna me ta learn ya somink?
 			Well do ya punk?
 			Do ya?]],
-			says={{say="teach",text="Teach me oh great one."},{say="no",text="Nope."}},
+			says={{say="teach",text="Teach me, oh great one."},{say="no",text="Nope."}},
 		},
 		["hello"]={
 			text=[[
@@ -236,7 +282,7 @@ dd={
 			
 			Down there is my domain and you may not take anything with you nor bring anything back.
 			
-			Still it's all fun and games init?
+			Still it's all fun and games, init?
 			]],
 			says={"..."},
 		},
