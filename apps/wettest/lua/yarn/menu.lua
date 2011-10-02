@@ -11,7 +11,7 @@ local dbg=dbg or function()end
 module(...)
 local strings=require("yarn.strings")
 local yarn_level=require("yarn.level")
-local attrdata=require("yarn.attrdata")
+local attrs=require("yarn.attrs")
 
 
 function create(t,up)
@@ -335,7 +335,7 @@ setfenv(1,d)
 dbg("saving stairs name : "..it.name)
 
 			main.level=main.level.destroy()
-			main.level=yarn_level.create(attrdata.get(name,pow,{xh=40,yh=28}),main)
+			main.level=yarn_level.create(attrs.get(name,pow,{xh=40,yh=28}),main)
 			main.menu.hide()
 
 -- mark this new area as visited
