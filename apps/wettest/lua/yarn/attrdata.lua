@@ -80,6 +80,19 @@ local call_talk={
 	end,
 }
 
+local call_item={
+	acts=function(it,by)
+		if by.can.operate then return {"get","look"} end
+		return {"look"}
+	end,
+	get=function(it,by)
+		it.level.menu.show_text(it.desc,it.longdesc or it.desc)
+	end,
+	look=function(it,by)
+		it.level.menu.show_text(it.desc,it.longdesc or it.desc)
+	end,
+}
+
 dd={
 
 {
@@ -114,10 +127,12 @@ dd={
 
 {
 	name="player",
-	form="char",
-	class="player",
-	asc=ascii("@"),
 	desc="a human",
+	asc=ascii("@"),
+	form="char",
+	is={
+		player=true,
+	},
 	hp=10,
 	score=0,
 	
@@ -442,10 +457,12 @@ Eventually.
 
 {
 	name="ant",
-	form="char",
-	class="ant",
-	asc=ascii("a"),
 	desc="an ant",
+	asc=ascii("a"),
+	form="char",
+	is={
+		ant=true,
+	},
 	score=2,
 	hp=2,
 	
@@ -476,10 +493,12 @@ Eventually.
 
 {
 	name="blob",
-	form="char",
-	class="blob",
-	asc=ascii("b"),
 	desc="a blob",
+	asc=ascii("b"),
+	form="char",
+	is={
+		blob=true,
+	},
 	score=10,
 	hp=10,
 	
@@ -511,31 +530,39 @@ Eventually.
 
 {
 	name="ant_corpse",
-	form="item",
-	class="corpse",
-	flavour="ant",
-	asc=ascii("%"),
-	weight=1,
 	desc="a corpse of an ant",
+	asc=ascii("%"),
+	form="item",
+	is={
+		corpse=true,
+		ant=true,
+	},
+	call=call_item,
+	weight=1,
 },
 
 
 {
 	name="blob_corpse",
-	form="item",
-	class="corpse",
-	flavour="blob",
-	asc=ascii("%"),
-	weight=1,
 	desc="a corpse of a blob",
+	asc=ascii("%"),
+	form="item",
+	is={
+		corpse=true,
+		blob=true,
+	},
+	call=call_item,
+	weight=1,
 },
 
 {
 	name="rat",
-	form="char",
-	class="rat",
-	asc=ascii("r"),
 	desc="a rat",
+	asc=ascii("r"),
+	form="char",
+	is={
+		rat=true,
+	},
 	score=10,
 	hp=10,
 	
@@ -567,41 +594,54 @@ Eventually.
 
 {
 	name="rat_corpse",
-	form="item",
-	class="corpse",
-	flavour="rat",
-	asc=ascii("%"),
-	weight=1,
 	desc="a corpse of a rat",
+	asc=ascii("%"),
+	form="item",
+	is={
+		corpse=true,
+		rat=true,
+	},
+	call=call_item,
+	weight=1,
 },
 
 {
 	name="rat_tail",
-	form="item",
-	class="meat",
-	flavour="rat",
-	asc=ascii(","),
-	weight=0.1,
 	desc="a rats tail",
+	asc=ascii(","),
+	form="item",
+	is={
+		meat=true,
+		rat=true,
+	},
+	call=call_item,
+	weight=0.1,
 },
 {
 	name="rat_tooth",
-	form="item",
-	class="meat",
-	flavour="rat",
-	asc=ascii(","),
-	weight=0.1,
 	desc="a rats tooth",
+	asc=ascii(","),
+	form="item",
+	is={
+		meat=true,
+		rat=true,
+	},
+	call=call_item,
+	weight=0.1,
 },
 
 {
 	name="pointy_stick",
-	form="item",
-	class="weapon",
-	flavour="stick",
-	asc=ascii("!"),
-	weight=1,
 	desc="a pointy stick",
+	asc=ascii("!"),
+	form="item",
+	is={
+		weapon=true,
+		stick=true,
+		wood=true,
+	},
+	call=call_item,
+	weight=1,
 },
 
 }
@@ -611,6 +651,9 @@ for i,v in ipairs(dd) do
 
 	dd[ v.name ] = v -- look up by name
 	v.id=i -- every data gets a unique id
+	
+	v.is=v.is or {}
+	v.can=v.can or {}
 
 end
 

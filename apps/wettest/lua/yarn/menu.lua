@@ -223,7 +223,7 @@ setfenv(1,d)
 			end
 			
 			for i,v in ipairs(items) do
-				if v.call.acts then				
+				if v.call.acts or v.form=="item"then				
 					tab[#tab+1]={
 						text=v.desc,
 						call=function(it)
@@ -305,18 +305,18 @@ setfenv(1,d)
 			}
 			
 
-			
-			local acts=item.call.acts(item,player)
-			
-			for i,v in ipairs(acts) do
-				tab[#tab+1]={
-					text=v,
-					call=function(it)
-						if item.call[v] then
-							item.call[v](item,player)
+			if item.call.acts then
+				local acts=item.call.acts(item,player)
+				for i,v in ipairs(acts) do
+					tab[#tab+1]={
+						text=v,
+						call=function(it)
+							if item.call[v] then
+								item.call[v](item,player)
+							end
 						end
-					end
-				}
+					}
+				end
 			end
 
 			top.display=build_request(tab)

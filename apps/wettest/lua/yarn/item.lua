@@ -101,7 +101,7 @@ setfenv(1,d)
 	end
 
 	function die()
-		local p=level.new_item( class.."_corpse" )
+		local p=level.new_item( name.."_corpse" )
 		p.set_cell( cell )
 
 		level.del_item(d)

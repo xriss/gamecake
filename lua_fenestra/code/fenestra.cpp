@@ -312,7 +312,7 @@ static char * strlwr ( char *string )
 
 const char * mbutname(int i)
 {
-static const char* mk[]={"0","left","right","middle","x1","x2"};
+static const char* mk[]={"0","left","middle","right","x1","x2"};
 	if( (i<=5) && (i>=0) )
 	{
 		return mk[i];

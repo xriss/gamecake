@@ -114,14 +114,14 @@ function hit(c1,c2)
 		
 		c2.attr.hp=0
 	
-		if c1.class=="player" then
+		if c1.is.player then
 		
 			c1.level.add_msg("You hit for "..damage.." damage!")
 			c1.level.add_msg("You killed "..(c2.attr.desc).." and won "..c2.attr.score.." points!")
 			c1.attr.score=c1.attr.score+c2.attr.score
 			c2.die()
 			
-		elseif c2.class=="player" then
+		elseif c2.is.player then
 
 			c1.level.add_msg("You took "..damage.." damage from "..(c1.attr.desc).." and died!")
 			
@@ -131,11 +131,11 @@ function hit(c1,c2)
 	
 		c2.attr.hp=hp
 		
-		if c1.class=="player" then
+		if c1.is.player then
 		
 			c1.level.add_msg("You hit for "..damage.." damage!")
 			
-		elseif c2.class=="player" then
+		elseif c2.is.player then
 
 			c1.level.add_msg("You took "..damage.." damage from "..(c1.attr.desc).." and now have "..c2.attr.hp.." health!")
 			
