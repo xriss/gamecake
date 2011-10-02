@@ -9,7 +9,7 @@ local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstrin
 local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
 module(...)
-local attrs=require("yarn.attrdata")
+local attrs=require("yarn.attrs")
 
 -- pass in a table created by attrs.get
 function create(ad)
