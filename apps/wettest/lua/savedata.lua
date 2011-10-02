@@ -19,8 +19,8 @@
   ["yh"] = 5,
   ["name"] = "room",
   ["visible"] = true,
-  ["xp"] = 19,
-  ["yp"] = 16,
+  ["xp"] = 10,
+  ["yp"] = 14,
 }
 ,
 }
@@ -30,52 +30,57 @@
   ["xh"] = 10,
   ["yh"] = 5,
   ["name"] = "room",
-  ["xp"] = 7,
-  ["yp"] = 22,
+  ["visible"] = true,
+  ["xp"] = 11,
+  ["yp"] = 7,
 }
 ,
 }
 ,
   [3] = {
   ["is"] = {
-  ["xh"] = 7,
-  ["yh"] = 8,
+  ["xh"] = 4,
+  ["yh"] = 9,
   ["name"] = "room",
-  ["xp"] = 31,
-  ["yp"] = 14,
+  ["visible"] = true,
+  ["xp"] = 29,
+  ["yp"] = 11,
 }
 ,
 }
 ,
   [4] = {
   ["is"] = {
-  ["xh"] = 7,
-  ["yh"] = 7,
+  ["xh"] = 5,
+  ["yh"] = 5,
   ["name"] = "room",
-  ["xp"] = 1,
-  ["yp"] = 2,
+  ["visible"] = true,
+  ["xp"] = 34,
+  ["yp"] = 11,
 }
 ,
 }
 ,
   [5] = {
   ["is"] = {
-  ["xh"] = 5,
-  ["yh"] = 7,
+  ["xh"] = 7,
+  ["yh"] = 3,
   ["name"] = "room",
-  ["xp"] = 23,
-  ["yp"] = 6,
+  ["visible"] = true,
+  ["xp"] = 25,
+  ["yp"] = 22,
 }
 ,
 }
 ,
   [6] = {
   ["is"] = {
-  ["xh"] = 7,
-  ["yh"] = 7,
+  ["xh"] = 3,
+  ["yh"] = 3,
   ["name"] = "room",
-  ["xp"] = 11,
-  ["yp"] = 8,
+  ["visible"] = true,
+  ["xp"] = 3,
+  ["yp"] = 2,
 }
 ,
 }
@@ -83,21 +88,23 @@
   [7] = {
   ["is"] = {
   ["xh"] = 4,
-  ["yh"] = 6,
+  ["yh"] = 5,
   ["name"] = "room",
-  ["xp"] = 35,
-  ["yp"] = 2,
+  ["visible"] = true,
+  ["xp"] = 1,
+  ["yp"] = 16,
 }
 ,
 }
 ,
   [8] = {
   ["is"] = {
-  ["xh"] = 5,
+  ["xh"] = 4,
   ["yh"] = 6,
   ["name"] = "room",
-  ["xp"] = 1,
-  ["yp"] = 11,
+  ["visible"] = true,
+  ["xp"] = 6,
+  ["yp"] = 21,
 }
 ,
 }
@@ -105,65 +112,71 @@
   [9] = {
   ["is"] = {
   ["xh"] = 6,
-  ["yh"] = 5,
+  ["yh"] = 7,
   ["name"] = "room",
-  ["xp"] = 15,
-  ["yp"] = 1,
+  ["visible"] = true,
+  ["xp"] = 14,
+  ["yp"] = 20,
 }
 ,
 }
 ,
   [10] = {
   ["is"] = {
-  ["xh"] = 5,
-  ["yh"] = 1,
+  ["xh"] = 7,
+  ["yh"] = 5,
   ["name"] = "room",
-  ["xp"] = 18,
-  ["yp"] = 9,
+  ["visible"] = true,
+  ["xp"] = 9,
+  ["yp"] = 1,
 }
 ,
 }
 ,
   [11] = {
   ["is"] = {
-  ["xh"] = 1,
-  ["yh"] = 2,
+  ["xh"] = 6,
+  ["yh"] = 8,
   ["name"] = "room",
-  ["xp"] = 2,
-  ["yp"] = 9,
+  ["visible"] = true,
+  ["xp"] = 30,
+  ["yp"] = 1,
 }
 ,
 }
 ,
   [12] = {
   ["is"] = {
-  ["xh"] = 1,
-  ["yh"] = 3,
+  ["xh"] = 5,
+  ["yh"] = 6,
   ["name"] = "room",
-  ["xp"] = 19,
-  ["yp"] = 6,
+  ["visible"] = true,
+  ["xp"] = 23,
+  ["yp"] = 14,
 }
 ,
 }
 ,
   [13] = {
   ["is"] = {
-  ["xh"] = 1,
-  ["yh"] = 6,
+  ["xh"] = 5,
+  ["yh"] = 5,
   ["name"] = "room",
-  ["xp"] = 20,
-  ["yp"] = 10,
+  ["visible"] = true,
+  ["xp"] = 23,
+  ["yp"] = 2,
 }
 ,
 }
 ,
   [14] = {
   ["is"] = {
-  ["xh"] = 1,
-  ["yh"] = 6,
+  ["xh"] = 2,
+  ["yh"] = 1,
   ["name"] = "room",
-  ["xp"] = 36,
-  ["yp"] = 8,
+  ["visible"] = true,
+  ["xp"] = 28,
+  ["yp"] = 5,
 }
 ,
 }
@@ -171,10 +184,11 @@
   [15] = {
   ["is"] = {
   ["xh"] = 1,
-  ["yh"] = 7,
+  ["yh"] = 1,
   ["name"] = "room",
-  ["xp"] = 12,
-  ["yp"] = 15,
+  ["visible"] = true,
+  ["xp"] = 33,
+  ["yp"] = 12,
 }
 ,
 }
@@ -184,19 +198,117 @@
   ["xh"] = 5,
   ["yh"] = 1,
   ["name"] = "room",
-  ["xp"] = 6,
-  ["yp"] = 13,
+  ["visible"] = true,
+  ["xp"] = 5,
+  ["yp"] = 17,
 }
 ,
 }
 ,
   [17] = {
   ["is"] = {
-  ["xh"] = 2,
+  ["xh"] = 1,
   ["yh"] = 1,
   ["name"] = "room",
-  ["xp"] = 29,
-  ["yp"] = 19,
+  ["visible"] = true,
+  ["xp"] = 14,
+  ["yp"] = 6,
+}
+,
+}
+,
+  [18] = {
+  ["is"] = {
+  ["xh"] = 1,
+  ["yh"] = 1,
+  ["name"] = "room",
+  ["visible"] = true,
+  ["xp"] = 28,
+  ["yp"] = 15,
+}
+,
+}
+,
+  [19] = {
+  ["is"] = {
+  ["xh"] = 3,
+  ["yh"] = 1,
+  ["name"] = "room",
+  ["visible"] = true,
+  ["xp"] = 20,
+  ["yp"] = 16,
+}
+,
+}
+,
+  [20] = {
+  ["is"] = {
+  ["xh"] = 7,
+  ["yh"] = 1,
+  ["name"] = "room",
+  ["visible"] = true,
+  ["xp"] = 16,
+  ["yp"] = 3,
+}
+,
+}
+,
+  [21] = {
+  ["is"] = {
+  ["xh"] = 1,
+  ["yh"] = 2,
+  ["name"] = "room",
+  ["visible"] = true,
+  ["xp"] = 30,
+  ["yp"] = 20,
+}
+,
+}
+,
+  [22] = {
+  ["is"] = {
+  ["xh"] = 5,
+  ["yh"] = 1,
+  ["name"] = "room",
+  ["visible"] = true,
+  ["xp"] = 20,
+  ["yp"] = 23,
+}
+,
+}
+,
+  [23] = {
+  ["is"] = {
+  ["xh"] = 4,
+  ["yh"] = 1,
+  ["name"] = "room",
+  ["visible"] = true,
+  ["xp"] = 10,
+  ["yp"] = 23,
+}
+,
+}
+,
+  [24] = {
+  ["is"] = {
+  ["xh"] = 1,
+  ["yh"] = 7,
+  ["name"] = "room",
+  ["visible"] = true,
+  ["xp"] = 25,
+  ["yp"] = 7,
+}
+,
+}
+,
+  [25] = {
+  ["is"] = {
+  ["xh"] = 3,
+  ["yh"] = 1,
+  ["name"] = "room",
+  ["visible"] = true,
+  ["xp"] = 6,
+  ["yp"] = 3,
 }
 ,
 }
@@ -204,336 +316,7 @@
 }
 ,
   ["cells"] = {
-  [1013] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [158] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1014] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [631] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [380] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [887] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1015] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [632] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [888] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1016] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [633] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [381] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [889] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [634] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [890] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [635] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [382] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [891] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [636] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [892] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [637] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [96] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [893] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [894] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [384] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [895] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [896] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [641] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [385] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [642] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [643] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [386] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [516] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [644] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [772] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [259] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [323] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [387] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [451] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [162] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [324] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [452] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [521] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [325] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [453] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [522] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [163] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [778] = {
+  [8] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "wall",
@@ -541,192 +324,7 @@
 ,
 }
 ,
-  [523] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [326] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [779] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [454] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [524] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [652] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1047] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [57] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [263] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [327] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [781] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [455] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1050] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["is"] = {
-  ["name"] = "rat",
-  ["hpmax"] = 10,
-}
-,
-}
-,
-}
-,
-}
-,
-  [164] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [782] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [264] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [783] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [456] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [528] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [784] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [265] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [785] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [457] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [530] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [658] = {
+  [9] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "wall",
@@ -734,7 +332,175 @@
 ,
 }
 ,
-  [786] = {
+  [10] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [11] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [12] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [13] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [14] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [15] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [16] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [29] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [30] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [31] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [32] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [33] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [34] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [35] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [36] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [42] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [43] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [44] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [45] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [46] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [48] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [49] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -742,14 +508,7 @@
 ,
 }
 ,
-  [266] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [659] = {
+  [50] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -757,7 +516,7 @@
 ,
 }
 ,
-  [787] = {
+  [51] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -765,14 +524,7 @@
 ,
 }
 ,
-  [532] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [660] = {
+  [52] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -780,7 +532,7 @@
 ,
 }
 ,
-  [788] = {
+  [53] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -788,42 +540,7 @@
 ,
 }
 ,
-  [267] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [83] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [99] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [115] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [534] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [662] = {
+  [54] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -831,363 +548,9 @@
 ,
 }
 ,
-  [198] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [535] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [663] = {
+  [55] = {
   ["is"] = {
   ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [791] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [460] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [536] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [664] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [792] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [537] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [333] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [793] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [135] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [666] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [794] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [667] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [795] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [540] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [668] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [796] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [58] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [335] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [797] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [463] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [136] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [336] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [464] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [672] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [928] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [337] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [465] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [137] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [674] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [201] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [930] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [675] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [402] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [466] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [322] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [676] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [161] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [932] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [275] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [677] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [321] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [467] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [138] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1052] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [202] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [934] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [276] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [935] = {
-  ["is"] = {
   ["name"] = "floor",
 }
 ,
@@ -1195,125 +558,159 @@
 ,
   [56] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [62] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [63] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [64] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [65] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [66] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [67] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [68] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [69] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [70] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [1049] = {
+  [71] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [936] = {
+  [72] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [277] = {
+  [73] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [127] = {
+  [74] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [316] = {
+  [75] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [139] = {
+  [76] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [82] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [83] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [444] = {
+  [84] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [203] = {
+  [85] = {
   ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [235] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [278] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [317] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [445] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1048] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [556] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [318] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [812] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [59] = {
-  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -1321,13 +718,391 @@
 ,
   [86] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [87] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [88] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [89] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [118] = {
+  [90] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [91] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [92] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [93] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [94] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [95] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [96] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [97] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [98] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [99] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [100] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [101] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [102] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [103] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [104] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [105] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [106] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [107] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [108] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [109] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [110] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [111] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [112] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [113] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [114] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [115] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [116] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [122] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [123] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [124] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [125] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [126] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [127] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [128] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [129] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [130] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [131] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [132] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [133] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [134] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [135] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [136] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [137] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [138] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [139] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -1335,103 +1110,69 @@
 ,
   [140] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [383] = {
+  [141] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [204] = {
+  [142] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [236] = {
+  [143] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [344] = {
+  [144] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [1053] = {
+  [145] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [1054] = {
+  [146] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [1055] = {
+  [147] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [561] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [345] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [645] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [97] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [562] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1056] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [818] = {
+  [148] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "wall",
@@ -1439,28 +1180,15 @@
 ,
 }
 ,
-  [237] = {
+  [149] = {
   ["is"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
-  [282] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [346] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [819] = {
+  [150] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -1468,28 +1196,7 @@
 ,
 }
 ,
-  [195] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [564] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [692] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [820] = {
+  [151] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -1497,7 +1204,7 @@
 ,
 }
 ,
-  [780] = {
+  [152] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -1505,21 +1212,7 @@
 ,
 }
 ,
-  [565] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [87] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [821] = {
+  [153] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -1527,56 +1220,7 @@
 ,
 }
 ,
-  [525] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [82] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [98] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [206] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [238] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [284] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [526] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [823] = {
+  [154] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -1584,28 +1228,7 @@
 ,
 }
 ,
-  [476] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [196] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [527] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [824] = {
+  [155] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -1613,169 +1236,39 @@
 ,
 }
 ,
-  [529] = {
+  [156] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [162] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [163] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [285] = {
+  [164] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
   [165] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [825] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [197] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [531] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [698] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [207] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [533] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [286] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [699] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [827] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [331] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [572] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [700] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [828] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [60] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [287] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [701] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [415] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [789] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [574] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [702] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -1785,26 +1278,1361 @@
 ,
   [166] = {
   ["is"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
-  [790] = {
+  [167] = {
   ["is"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
-  [575] = {
+  [168] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [169] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [703] = {
+  [170] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [171] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [172] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [173] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [174] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+  ["items"] = {
+  [1] = {
+  ["is"] = {
+  ["name"] = "rat_corpse",
+}
+,
+}
+,
+}
+,
+}
+,
+  [175] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [176] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [177] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [178] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [179] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [180] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [181] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [182] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [183] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [184] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [185] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [186] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [187] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [188] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [189] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [190] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [191] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [192] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [193] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [194] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [195] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [196] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [202] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [203] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [204] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [205] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [206] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [208] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [209] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [210] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [211] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [212] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [213] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [214] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [215] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [216] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [222] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [223] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [224] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [225] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [226] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [227] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [228] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [229] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [230] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [231] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [232] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [233] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [234] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [235] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [236] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [248] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [249] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [250] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [251] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [252] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [253] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [254] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [255] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [256] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [257] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [258] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [259] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [260] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [261] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [262] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [263] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [264] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [265] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [266] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [267] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [268] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [269] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [270] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [271] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [272] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [273] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [274] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [275] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [276] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [290] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [291] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [292] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [293] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [294] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [295] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+  ["items"] = {
+  [1] = {
+  ["is"] = {
+  ["name"] = "rat_corpse",
+}
+,
+}
+,
+}
+,
+}
+,
+  [296] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [297] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [298] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [299] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [300] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [301] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [302] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [303] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [304] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [305] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [306] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [307] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [308] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [309] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [310] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [311] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [312] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [313] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [314] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [315] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [316] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [330] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [331] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [332] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [333] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [334] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [335] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [336] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [337] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [338] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [339] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [340] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [341] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [344] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [345] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [346] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [349] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [350] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [351] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [352] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [353] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [354] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [355] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [356] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [370] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [371] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [372] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [373] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [374] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [375] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [376] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [377] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [378] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [379] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [380] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [381] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [384] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [385] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [386] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [389] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [390] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [391] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [392] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [393] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [394] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [395] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [396] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [410] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [411] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [412] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [413] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [414] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [415] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -1814,229 +2642,51 @@
 ,
   [416] = {
   ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [332] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [576] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [704] = {
-  ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [832] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [396] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [577] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [705] = {
+  [417] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
 }
 ,
-}
-,
-  [833] = {
+  ["items"] = {
+  [1] = {
   ["is"] = {
-  ["name"] = "floor",
+  ["name"] = "rat_corpse",
 }
 ,
 }
 ,
-  [481] = {
-  ["is"] = {
-  ["name"] = "floor",
 }
 ,
 }
 ,
-  [665] = {
+  [418] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
 }
 ,
-}
-,
-  [177] = {
+  ["items"] = {
+  [1] = {
   ["is"] = {
-  ["name"] = "floor",
+  ["name"] = "rat_corpse",
 }
 ,
 }
 ,
-  [834] = {
-  ["is"] = {
-  ["name"] = "floor",
 }
 ,
 }
 ,
-  [241] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [167] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [707] = {
+  [419] = {
   ["is"] = {
   ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [835] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [482] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [580] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [708] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [836] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [334] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [84] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [709] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [837] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [483] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [100] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [178] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [116] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [242] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [671] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [711] = {
-  ["is"] = {
   ["name"] = "floor",
 }
 ,
@@ -2044,76 +2694,514 @@
 ,
   [420] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [967] = {
+  [421] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [424] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [425] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [927] = {
+  [426] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [428] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [429] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [430] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [431] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [432] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [433] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [434] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [435] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [436] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [437] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [438] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [439] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [450] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [451] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [712] = {
+  [452] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [673] = {
+  [453] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [968] = {
+  [454] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [929] = {
+  [455] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [713] = {
+  [456] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [931] = {
+  [457] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [969] = {
+  [458] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [459] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [460] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
   ["items"] = {
   [1] = {
   ["is"] = {
-  ["name"] = "rat",
+  ["name"] = "rat_corpse",
+}
+,
+}
+,
+}
+,
+}
+,
+  [461] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [464] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [465] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [466] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [468] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [469] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [470] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [471] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [472] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [473] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [474] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [475] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [476] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [477] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [478] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [479] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [490] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [491] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [492] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [493] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [494] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [495] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [496] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [497] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [498] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [499] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [500] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [501] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [504] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [505] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [506] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [508] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [509] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [510] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+  ["items"] = {
+  [1] = {
+  ["is"] = {
+  ["score"] = 60,
+  ["name"] = "player",
+  ["hp"] = 2,
   ["hpmax"] = 10,
 }
 ,
@@ -2123,150 +3211,761 @@
 ,
 }
 ,
-  [339] = {
+  [511] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [179] = {
+  [512] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [933] = {
+  [513] = {
   ["is"] = {
-  ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["is"] = {
-  ["name"] = "rat",
-  ["hpmax"] = 10,
-}
-,
-}
-,
-}
-,
-}
-,
-  [970] = {
-  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [1051] = {
+  [514] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [715] = {
+  [515] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [343] = {
+  [516] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [971] = {
+  [517] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [507] = {
+  [518] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [716] = {
+  [519] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [529] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [530] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [531] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [532] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [533] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [534] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [535] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [536] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [537] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [538] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [539] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [540] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [542] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [543] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [544] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [545] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [1011] = {
+  [546] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [547] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [548] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [549] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [972] = {
+  [550] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [126] = {
+  [551] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [717] = {
+  [552] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [423] = {
+  [553] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [554] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [973] = {
+  [555] = {
   ["is"] = {
-  ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["is"] = {
-  ["name"] = "rat",
-  ["hpmax"] = 10,
-  ["hp"] = 7,
-}
-,
-}
-,
-}
-,
-}
-,
-  [281] = {
-  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [180] = {
+  [556] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [557] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [558] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [559] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [569] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [570] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [571] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [572] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [573] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [574] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [575] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [576] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [577] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [578] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [579] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [580] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [582] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [583] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [584] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [585] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [586] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [587] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [588] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [589] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [590] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [591] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [592] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [593] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [594] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [595] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [596] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [597] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [598] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [599] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [600] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [601] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [602] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [603] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [604] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [605] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [609] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [610] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [611] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [612] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [613] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [614] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [615] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [616] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [617] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [618] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [619] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [620] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [621] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [622] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [623] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [624] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [625] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [626] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [627] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [628] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -2275,94 +3974,188 @@
   [629] = {
   ["is"] = {
   ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [630] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [631] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [632] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [633] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "wall",
 }
 ,
 }
 ,
-  [974] = {
+  [634] = {
   ["is"] = {
-  ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["is"] = {
-  ["name"] = "rat",
-  ["hpmax"] = 10,
-  ["hp"] = 7,
-}
-,
-}
-,
-}
-,
-}
-,
-  [591] = {
-  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [1009] = {
+  [635] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [424] = {
+  [636] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [975] = {
+  [637] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [592] = {
+  [638] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [205] = {
+  [639] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [640] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [641] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [563] = {
+  [642] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [976] = {
+  [643] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [593] = {
+  [644] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [741] = {
+  [645] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [646] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [647] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [648] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [649] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [650] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [651] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [652] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -2380,632 +4173,7 @@
 ,
 }
 ,
-  [425] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [283] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [594] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [347] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [411] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [245] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [595] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [362] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [426] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1007] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [596] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [379] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [852] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["is"] = {
-  ["name"] = "rat",
-  ["hpmax"] = 10,
-  ["hp"] = 8,
-}
-,
-}
-,
-}
-,
-}
-,
-  [822] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [299] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [412] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [427] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [491] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [123] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [753] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [755] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [246] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [356] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [413] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [176] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [492] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [175] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [826] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [571] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [414] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [601] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [573] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [829] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [493] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [602] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [831] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [858] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [247] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [603] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [417] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [859] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [494] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [604] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [732] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [860] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [706] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["is"] = {
-  ["name"] = "player",
-  ["hpmax"] = 10,
-}
-,
-}
-,
-}
-,
-}
-,
-  [303] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [81] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [861] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [124] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [117] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [121] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [862] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [484] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [304] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [485] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [863] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [496] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [714] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [243] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [864] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [122] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [305] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [661] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [865] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [497] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [244] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [738] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [866] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [669] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [306] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [739] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [867] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [597] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [612] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [740] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [868] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [85] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [307] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [371] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [869] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [125] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [605] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [742] = {
+  [653] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
@@ -3023,50 +4191,665 @@
 ,
 }
 ,
-  [218] = {
+  [654] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [157] = {
+  [655] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [215] = {
+  [656] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [372] = {
+  [657] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [436] = {
+  [658] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [500] = {
+  [659] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [495] = {
+  [660] = {
   ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [661] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [662] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [663] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [664] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [665] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [666] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [667] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [668] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [669] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [670] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [671] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [672] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [673] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [674] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [675] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [676] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [677] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [678] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [679] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [680] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [681] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [682] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [683] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [684] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [685] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [686] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [687] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [688] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [689] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [690] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [691] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [692] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [693] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [694] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [695] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [696] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [697] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [698] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [699] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [700] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [701] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [702] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [703] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [704] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [705] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [706] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [707] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [708] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [709] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [710] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [711] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [712] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [713] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [720] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [721] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [722] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [723] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [724] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [725] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [726] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [727] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [728] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [729] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [730] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [731] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [732] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [733] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [734] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [735] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [736] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [737] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [738] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [739] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [740] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [742] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [743] = {
+  ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
@@ -3080,52 +4863,10 @@
 ,
 }
 ,
-  [872] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [216] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [876] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [373] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [873] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [217] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [618] = {
+  [745] = {
   ["is"] = {
   ["visible"] = true,
-  ["name"] = "wall",
+  ["name"] = "floor",
 }
 ,
 }
@@ -3134,38 +4875,6 @@
   ["is"] = {
   ["visible"] = true,
   ["name"] = "floor",
-}
-,
-  ["items"] = {
-  [1] = {
-  ["is"] = {
-  ["name"] = "pointy_stick",
-}
-,
-}
-,
-}
-,
-}
-,
-  [219] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [874] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [619] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
 }
 ,
 }
@@ -3178,52 +4887,7 @@
 ,
 }
 ,
-  [875] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [871] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [620] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
   [748] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [55] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [743] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [621] = {
   ["is"] = {
   ["visible"] = true,
   ["name"] = "wall",
@@ -3234,210 +4898,14 @@
   [749] = {
   ["is"] = {
   ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [877] = {
-  ["is"] = {
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [503] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [622] = {
+  [750] = {
   ["is"] = {
   ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [745] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "floor",
-}
-,
-}
-,
-  [220] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [155] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [623] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [376] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [374] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [504] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [624] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [752] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [375] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1008] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [625] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [377] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [441] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [505] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [626] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [754] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [156] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [1010] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [627] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [378] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [442] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [506] = {
-  ["is"] = {
-  ["name"] = "floor",
-}
-,
-}
-,
-  [628] = {
-  ["is"] = {
-  ["visible"] = true,
-  ["name"] = "wall",
-}
-,
-}
-,
-  [756] = {
-  ["is"] = {
   ["name"] = "floor",
 }
 ,
@@ -3445,42 +4913,1816 @@
 ,
   [751] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [1012] = {
+  [752] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [315] = {
+  [753] = {
   ["is"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
-  [95] = {
+  [760] = {
   ["is"] = {
-  ["name"] = "floor",
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }
 ,
-  [443] = {
+  [761] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
 }
 ,
 }
 ,
-  [757] = {
+  [762] = {
   ["is"] = {
+  ["visible"] = true,
   ["name"] = "floor",
+}
+,
+}
+,
+  [763] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [764] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [765] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [769] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [770] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [771] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [772] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [773] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [774] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [775] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [776] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [777] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [778] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [779] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [780] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [782] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [783] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [784] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [785] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [786] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [787] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [788] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [789] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [790] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [791] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [792] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [793] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [800] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [801] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [802] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [803] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [804] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [805] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [806] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [807] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [808] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [809] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [810] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [813] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [814] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [815] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [816] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [817] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [818] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [819] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [820] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [822] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [823] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [824] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [825] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [826] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [827] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [828] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [829] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [830] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [831] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [832] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [833] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [840] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [841] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [842] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [843] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [844] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [845] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [846] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [847] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [848] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [849] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [850] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [853] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [854] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [855] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [856] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [857] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [858] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [859] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [860] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [864] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [865] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [866] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [867] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [868] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [869] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [870] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [871] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [872] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [885] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [886] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [887] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [888] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [889] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [890] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [891] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [892] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [893] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [894] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [895] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [896] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [897] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [898] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [899] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [900] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [901] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [902] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [903] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [904] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [905] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [906] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [907] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [908] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [909] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [910] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [911] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [912] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [925] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [926] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [927] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [928] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [929] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [930] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [931] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [932] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [933] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [934] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [935] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [936] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [937] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [938] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [939] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [940] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [941] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [942] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [943] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [944] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [945] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [946] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [947] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [948] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [949] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [950] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [951] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [952] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [965] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [966] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [967] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [968] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [969] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [970] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [971] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [972] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [973] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [974] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [975] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [976] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [977] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [978] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [979] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [980] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [981] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [982] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [983] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [984] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [985] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [986] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [987] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [988] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [989] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [990] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [991] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [992] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1005] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1006] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1007] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1008] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1009] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1010] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1013] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1014] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1015] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1016] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1017] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1018] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1019] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1020] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1024] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1085] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1089] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1030] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1097] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1046] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1050] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1054] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1058] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1086] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1090] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1031] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1098] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1047] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1055] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1059] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1087] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1028] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1095] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1099] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1048] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1056] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1060] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1094] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1093] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1032] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1025] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1088] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1029] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1096] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1100] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1045] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1049] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1053] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1057] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "floor",
+}
+,
+}
+,
+  [1026] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
+}
+,
+}
+,
+  [1027] = {
+  ["is"] = {
+  ["visible"] = true,
+  ["name"] = "wall",
 }
 ,
 }

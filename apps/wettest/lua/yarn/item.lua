@@ -23,7 +23,7 @@ local d={}
 setfenv(1,d)
 
 	is=yarn_attr.create(t) -- allow attr access via item.is.wood syntax
-	metatable={__index=is}
+	metatable={__index=is} -- or without the is if we do not fear nameclash
 	setmetatable(d,metatable)
 
 	level=_level or t.level
@@ -44,12 +44,15 @@ setfenv(1,d)
 		end
 		
 		cell=c
+		if not cell.items then cell.items={} end -- make space in non cells
 		cell.items[d]=true
 		
 		if can.make_room_visible then -- this item makes the room visible (ie its the player)
-			for i,v in cell.neighboursplus() do -- apply to neighbours and self
-				if v.room and ( not v.room.get.visible() ) then -- if room is not visible
-					v.room.set_visible(true)
+			if cell.room then
+				for i,v in cell.neighboursplus() do -- apply to neighbours and self
+					if v.room and ( not v.room.get.visible() ) then -- if room is not visible
+						v.room.set_visible(true)
+					end
 				end
 			end
 		end
@@ -74,16 +77,9 @@ setfenv(1,d)
 			local char=c.get_char()
 
 			if char then -- interact with another char?
-dbg("char "..tostring(char))				
-dbg("char.can.use "..tostring(char.can.use))				
-for i,v in pairs(char.can) do
-	dbg(tostring(i).." = "..tostring(v))
-end
-dbg("can.operate "..tostring(can.operate))				
 				if char.can.use and can.operate then
 
 					local usename=char.can.use
-dbg("use "..tostring(usename))				
 					
 					if char.can[usename] then
 						char.can[usename](char , d )
@@ -96,7 +92,6 @@ dbg("use "..tostring(usename))
 					end
 					
 				elseif char.can.fight and can.fight then
-dbg("char.can.fight "..tostring(char.can.fight))				
 				
 					yarn_fight.hit(d,char)
 					return 1

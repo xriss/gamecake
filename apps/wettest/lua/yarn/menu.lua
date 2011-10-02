@@ -258,6 +258,22 @@ setfenv(1,d)
 				end
 			}
 			
+			local items={}
+			for v,b in pairs(player.items or {}) do
+				items[#items+1]=v
+			end
+			
+			for i,v in ipairs(items) do
+				if v.can.acts or v.form=="item"then				
+					tab[#tab+1]={
+						text=v.desc,
+						call=function(it)
+							show_item_menu(v)
+						end
+					}
+				end
+			end
+						
 			top.display=build_request(tab)
 		end
 		
@@ -281,6 +297,22 @@ setfenv(1,d)
 				end
 			}
 			
+			local items={}
+			for v,b in pairs(player.items or {}) do
+				items[#items+1]=v
+			end
+			
+			for i,v in ipairs(items) do
+				if v.can.acts or v.form=="item"then				
+					tab[#tab+1]={
+						text=v.desc,
+						call=function(it)
+							show_item_menu(v)
+						end
+					}
+				end
+			end
+
 			top.display=build_request(tab)
 		end
 		
