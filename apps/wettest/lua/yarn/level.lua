@@ -15,7 +15,7 @@ local yarn_cell=require("yarn.cell")
 local yarn_item=require("yarn.item")
 local yarn_attr=require("yarn.attr")
 
-local yarn_prefab=require("yarn.prefab")
+local yarn_rooms=require("yarn.rooms")
 local attrs=require("yarn.attrs")
 
 
@@ -144,8 +144,8 @@ setfenv(1,d)
 		return rand_cell(rand_room(t))
 	end
 
--- set opts using prefab,this is where most of the brainwork happens	
-	opts=yarn_prefab.map_opts(d.name,d.pow)
+-- set opts using rooms,this is where most of the brainwork happens	
+	opts=yarn_rooms.map_opts(d.name,d.pow)
 	opts.xh=d.xh
 	opts.yh=d.yh
 	map=yarn_map.create(opts) -- create an empty map, this is only a room layout
