@@ -18,8 +18,9 @@ local d=ad
 setfenv(1,d)
 
 -- any state data you expect to persist must be stored in the base table
--- never change any of the sub tables, such as .is or .can these are
+-- never change any of the sub tables, eg .can as these are
 -- shared tables so any change will effect all other objects of the same class
+-- all datagoes into this main table
 
 
 	hpmax=hp -- remember initial hp

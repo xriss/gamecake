@@ -7,6 +7,8 @@ local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstrin
 -- libs into locals
 local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
+local dbg=dbg or function()end
+
 
 
 module(...)
@@ -20,8 +22,8 @@ function create(t,_level)
 local d={}
 setfenv(1,d)
 
-	attr=yarn_attr.create(t)
-	metatable={__index=attr}
+	is=yarn_attr.create(t) -- allow attr access via item.is.wood syntax
+	metatable={__index=is}
 	setmetatable(d,metatable)
 
 	level=_level or t.level
@@ -55,11 +57,11 @@ setfenv(1,d)
 	end
 	
 	function asc()
-		return attr.asc
+		return is.asc
 	end
 	
 	function view_text()
-		return "You see "..(attr.desc or "something").."."
+		return "You see "..(is.desc or "something").."."
 	end
 
 	function move(vx,vy)
@@ -70,10 +72,18 @@ setfenv(1,d)
 		if c and c.name=="floor" then -- its a cell we can move into
 		
 			local char=c.get_char()
+
 			if char then -- interact with another char?
+dbg("char "..tostring(char))				
+dbg("char.can.use "..tostring(char.can.use))				
+for i,v in pairs(char.can) do
+	dbg(tostring(i).." = "..tostring(v))
+end
+dbg("can.operate "..tostring(can.operate))				
 				if char.can.use and can.operate then
-				
+
 					local usename=char.can.use
+dbg("use "..tostring(usename))				
 					
 					if char.can[usename] then
 						char.can[usename](char , d )
@@ -86,6 +96,7 @@ setfenv(1,d)
 					end
 					
 				elseif char.can.fight and can.fight then
+dbg("char.can.fight "..tostring(char.can.fight))				
 				
 					yarn_fight.hit(d,char)
 					return 1
@@ -130,15 +141,15 @@ setfenv(1,d)
 	function save()
 		local sd={}
 		
-		sd.attr=yarn_attr.save(attr)
+		sd.is=yarn_attr.save(is)
 		
 		return sd
 	end
 
 -- reload a saved data (create and then load)
 	function load(sd)
-		d.attr=yarn_attr.load(sd.attr)
-		d.metatable.__index=attr
+		d.is=yarn_attr.load(sd.is)
+		d.metatable.__index=is
 	end
 
 	return d

@@ -318,13 +318,13 @@ function map_opts(name,pow)
 
 	local function generate_player(level)
 		level.player=level.new_item( "player" )
-		level.player.attr.soul=level.main.soul -- we got soul
+		level.player.is.soul=level.main.soul -- we got soul
 		level.player.set_cell( level.cellfind["player_spawn"] or level.rand_room_cell({}) )
 	end
 	
 	local function generate_player_bystairs(level)
 		level.player=level.new_item( "player" )
-		level.player.attr.soul=level.main.soul -- we got soul
+		level.player.is.soul=level.main.soul -- we got soul
 		
 		local stairs
 		if level.soul.last_stairs then -- aim to stick to the same stairs

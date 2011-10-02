@@ -17,8 +17,8 @@ function create(t)
 local d={}
 setfenv(1,d)
 
-	attr=yarn_attr.create(t)
-	metatable={__index=attr}
+	is=yarn_attr.create(t)
+	metatable={__index=is}
 	setmetatable(d,metatable)
 
 	level=t.level
@@ -69,9 +69,9 @@ setfenv(1,d)
 
 	function set_visible(v)
 		for _,cell in level.cpairs(xp-1,yp-1,xh+2,yh+2) do
-			cell.attr.set.visible(v)
+			cell.is.set.visible(v)
 		end
-		attr.set.visible(v)
+		is.set.visible(v)
 	end
 
 	
@@ -85,15 +85,15 @@ setfenv(1,d)
 	function save()
 		local sd={}
 		
-		sd.attr=yarn_attr.save(attr)
+		sd.is=yarn_attr.save(is)
 		
 		return sd
 	end
 
 -- reload a saved data (create and then load)
 	function load(sd)
-		d.attr=yarn_attr.load(sd.attr)
-		d.metatable.__index=attr
+		d.is=yarn_attr.load(sd.is)
+		d.metatable.__index=is
 	end
 	
 	return d

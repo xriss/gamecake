@@ -305,8 +305,8 @@ setfenv(1,d)
 			}
 			
 
-			if item.call.acts then
-				local acts=item.call.acts(item,player)
+			if type(item.can.acts)=="function" then
+				local acts=item.can.acts(item,player)
 				for i,v in ipairs(acts) do
 					tab[#tab+1]={
 						text=v,
