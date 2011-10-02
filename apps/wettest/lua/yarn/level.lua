@@ -46,7 +46,7 @@ setfenv(1,d)
 	cellfind={}
 	celllist={}
 	
-	call=call or {}
+	can=can or {}
 
 -- create blank cells
 
@@ -101,10 +101,10 @@ setfenv(1,d)
 		local it=yarn_item.create( at ,d)
 		items[it]=true -- everything lives in items list
 		
-		for i,v in pairs(it.call) do -- every item puts its call functions in the levels call table
-			d.call[i]=v
+		for i,v in pairs(it.can) do -- every item puts its can functions in the levels can table
+			d.can[i]=v
 		end
-		-- this means we can easily add uniquely named call functions to a level using any item
+		-- this means we can easily add uniquely named can functions to a level using any item
 
 		return it
 	end

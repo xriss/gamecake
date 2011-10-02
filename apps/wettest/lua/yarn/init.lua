@@ -70,7 +70,7 @@ local i
 	
 	level.set_msg("Welcome to the jungle.")
 	
-	local f=level.call["read welcome"]
+	local f=level.can["read welcome"]
 	if f then f(level) end
 
 end
