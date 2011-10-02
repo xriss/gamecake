@@ -42,9 +42,7 @@ function get(name,pow,xtra)
 		return get(parent,pow,it) -- recurse
 	end
 	
--- make sure these exist
-	it.is=it.is or {}
-	it.can=it.can or {}
+	it.can=d.can or {} -- make sure we have a can table
 	
 	return it
 end
@@ -133,9 +131,7 @@ dd={
 	desc="a human",
 	asc=ascii("@"),
 	form="char",
-	is={
 		player=true,
-	},
 	hp=10,
 	score=0,
 	
@@ -335,7 +331,7 @@ dd={
 		use="menu",
 		acts=function(it,by)
 			local t={"read welcome","read license","look"}
-			if it.open then
+			if it.is.open then
 				t[#t+1]="close"
 			else
 				t[#t+1]="open"
@@ -345,7 +341,7 @@ dd={
 		
 		look=function(it,by)
 			it.level.menu.show_text(it.desc,
-			"Your SwordStone vault capsule is ".. (it.open and "open" or "closed").."." )
+			"Your SwordStone vault capsule is ".. (it.is.open and "open" or "closed").."." )
 		end,
 		open=function(it,by)
 			if not it.open then
@@ -355,10 +351,10 @@ dd={
 		end,
 		close=function(it,by)
 			if it.open then
-				it.attr.open=false
+				it.is.open=false
 				it.level.menu.show_text(it.desc,
 				"Your SwordStone vault capsule closes very very very slowly.")
-				it.attr.asc=ascii("=")
+				it.is.asc=ascii("=")
 			end
 		end,
 		
@@ -418,23 +414,23 @@ Eventually.
 		end,
 		
 		look=function(it,by)
-			it.level.menu.show_text(it.desc,"your SwordStone vault door is ".. (it.open and "open" or "closed") )
+			it.level.menu.show_text(it.desc,"your SwordStone vault door is ".. (it.is.open and "open" or "closed") )
 		end,
 		open=function(it,by)
 			local capsule=it.level.find_item("cryo_bed")
-			if not capsule or capsule.open==true then
+			if not capsule or capsule.is.open==true then
 				it.level.menu.show_text(it.desc,"please ensure that your SwordStone vault capsule is closed before exiting your SwordStone vault")
 			else
-				it.attr.open=true
-				it.attr.form="item"
-				it.attr.asc=ascii("/"),
+				it.is.open=true
+				it.is.form="item"
+				it.is.asc=ascii("/"),
 				it.call.look(it,by)
 			end
 		end,
 		close=function(it,by)
-			it.attr.open=false
-			it.attr.form="char"
-			it.attr.asc=ascii("|"),
+			it.is.open=false
+			it.is.form="char"
+			it.is.asc=ascii("|"),
 			it.call.look(it,by)
 		end,
 	},
@@ -446,9 +442,7 @@ Eventually.
 	desc="an ant",
 	asc=ascii("a"),
 	form="char",
-	is={
-		ant=true,
-	},
+	ant=true,
 	score=2,
 	hp=2,
 	
@@ -476,9 +470,7 @@ Eventually.
 	desc="a blob",
 	asc=ascii("b"),
 	form="char",
-	is={
-		blob=true,
-	},
+	blob=true,
 	score=10,
 	hp=10,
 	
@@ -507,10 +499,8 @@ Eventually.
 	desc="a corpse of an ant",
 	asc=ascii("%"),
 	form="item",
-	is={
-		corpse=true,
-		ant=true,
-	},
+	corpse=true,
+	ant=true,
 	can=can_item,
 	weight=1,
 },
@@ -521,10 +511,8 @@ Eventually.
 	desc="a corpse of a blob",
 	asc=ascii("%"),
 	form="item",
-	is={
-		corpse=true,
-		blob=true,
-	},
+	corpse=true,
+	blob=true,
 	can=can_item,
 	weight=1,
 },
@@ -534,9 +522,7 @@ Eventually.
 	desc="a rat",
 	asc=ascii("r"),
 	form="char",
-	is={
-		rat=true,
-	},
+	rat=true,
 	score=10,
 	hp=10,
 	
@@ -565,10 +551,8 @@ Eventually.
 	desc="a corpse of a rat",
 	asc=ascii("%"),
 	form="item",
-	is={
-		corpse=true,
-		rat=true,
-	},
+	corpse=true,
+	rat=true,
 	can=can_item,
 	weight=1,
 },
@@ -578,10 +562,8 @@ Eventually.
 	desc="a rats tail",
 	asc=ascii(","),
 	form="item",
-	is={
-		meat=true,
-		rat=true,
-	},
+	meat=true,
+	rat=true,
 	can=can_item,
 	weight=0.1,
 },
@@ -590,10 +572,8 @@ Eventually.
 	desc="a rats tooth",
 	asc=ascii(","),
 	form="item",
-	is={
-		meat=true,
-		rat=true,
-	},
+	meat=true,
+	rat=true,
 	can=can_item,
 	weight=0.1,
 },
@@ -603,11 +583,9 @@ Eventually.
 	desc="a pointy stick",
 	asc=ascii("!"),
 	form="item",
-	is={
-		weapon=true,
-		stick=true,
-		wood=true,
-	},
+	weapon=true,
+	stick=true,
+	wood=true,
 	can=can_item,
 	weight=1,
 },
@@ -620,9 +598,6 @@ for i,v in ipairs(dd) do
 	dd[ v.name ] = v -- look up by name
 	v.id=i -- every data gets a unique id
 	
-	v.is=v.is or {}
-	v.can=v.can or {}
-
 end
 
 

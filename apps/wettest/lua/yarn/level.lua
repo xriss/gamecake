@@ -24,8 +24,8 @@ function create(t,up)
 local d={}
 setfenv(1,d)
 
-	attr=yarn_attr.create(t)
-	metatable={__index=attr}
+	is=yarn_attr.create(t)
+	metatable={__index=is}
 	setmetatable(d,metatable)
 
 	level=d -- we are the level, so level.level==level
@@ -202,10 +202,10 @@ setfenv(1,d)
 				local cell=cells[i]
 				if map.room_find(x,y)==map.bigroom then
 					cell.set.name("floor")
-					cell.attr.set.visible(true)
+					cell.is.set.visible(true)
 				end
 				if y==0 or y==yh-1 or x==0 or x==xh-1 then
-					cell.attr.set.visible(true)
+					cell.is.set.visible(true)
 				end
 			end
 		end
@@ -215,7 +215,7 @@ setfenv(1,d)
 					for y=r.yp-1,r.yp+r.yh do
 						if x==r.xp-1 or x==r.xp+r.xh or y==r.yp-1 or y==r.yp+r.yh then
 							local cell=get_cell(x,y)
-							cell.attr.set.visible(true)
+							cell.is.set.visible(true)
 						end
 					end
 				end
@@ -315,10 +315,10 @@ setfenv(1,d)
 			
 			if item then -- standing on an item
 				set_msg(item.view_text())
-			elseif player.attr.hp~=player.attr.hpmax then
-				set_msg("Your health is ".. player.attr.hp .."/".. player.attr.hpmax )
+			elseif player.is.hp~=player.is.hpmax then
+				set_msg("Your health is ".. player.is.hp .."/".. player.is.hpmax )
 			else
-				set_msg("You have scored "..player.attr.score .." points.")
+				set_msg("You have scored "..player.is.score .." points.")
 			end
 		end
 
@@ -351,15 +351,15 @@ setfenv(1,d)
 	function save()
 		local sd={}
 		
-		sd.attr=yarn_attr.save(attr)
+		sd.is=yarn_attr.save(is)
 		
 		sd.rooms={}
 		sd.cells={}
 		
 		for i,v in ipairs(cells) do -- cells contain all items so they get saved here
 			sd.cells[i]=v.save()
-			if sd.cells[i].attr.name=="wall" then
-				if not sd.cells[i].attr.visible then
+			if sd.cells[i].is.name=="wall" then
+				if not sd.cells[i].is.visible then
 					if not sd.cells[i].items then
 						sd.cells[i]=nil				-- do not need to save
 					end
@@ -376,8 +376,8 @@ setfenv(1,d)
 
 -- reload a saved data (create and then load)
 	function load(sd)
-		d.attr=yarn_attr.load(sd.attr)
-		d.metatable.__index=attr
+		d.is=yarn_attr.load(sd.is)
+		d.metatable.__index=is
 	end
 	
 	return d

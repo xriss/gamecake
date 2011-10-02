@@ -28,8 +28,8 @@ function create(t,_level)
 local d={}
 setfenv(1,d)
 
-	attr=yarn_attr.create(t)
-	metatable={__index=attr}
+	is=yarn_attr.create(t)
+	metatable={__index=is}
 	setmetatable(d,metatable)
 
 	level=t.level or _level
@@ -99,7 +99,7 @@ setfenv(1,d)
 	end
 	
 	function asc()
-		if not attr.get.visible() then return a_space end
+		if not is.get.visible() then return a_space end
 		
 		local char=get_char()
 		local item=get_item()
@@ -122,11 +122,11 @@ setfenv(1,d)
 -- create a save state for this data
 	function save()
 		local sd={}
-		sd.attr=yarn_attr.save(attr)
+		sd.is=yarn_attr.save(is)
 		
-		sd.attr.xp=nil
-		sd.attr.yp=nil
-		sd.attr.id=nil
+		sd.is.xp=nil
+		sd.is.yp=nil
+		sd.is.id=nil
 		
 		for v,b in pairs(items) do
 			sd.items=sd.items or {}
@@ -138,8 +138,8 @@ setfenv(1,d)
 
 -- reload a saved data (create and then load)
 	function load(sd)
-		d.attr=yarn_attr.load(sd.attr)
-		d.metatable.__index=attr
+		d.is=yarn_attr.load(sd.is)
+		d.metatable.__index=is
 	end
 	
 	return d

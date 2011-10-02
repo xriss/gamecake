@@ -66,8 +66,8 @@ module(...)
 --
 function get_damage_char(c)
 
-	local mn=c.attr.dam_min
-	local mx=c.attr.dam_max
+	local mn=c.is.dam_min
+	local mx=c.is.dam_max
 	
 	local num=0
 	
@@ -85,8 +85,8 @@ end
 --
 function adjust_defense_char(c,damage)
 
-	local ma=c.attr.def_add
-	local mm=c.attr.def_mul
+	local ma=c.is.def_add
+	local mm=c.is.def_mul
 	
 	damage=(damage+ma)*mm
 	
@@ -106,30 +106,30 @@ function hit(c1,c2)
 	
 	damage=adjust_defense_char(c2,damage)
 	
-	local hp=c2.attr.hp
+	local hp=c2.is.hp
 	
 	hp=hp-damage
 	
 	if hp<=0 then -- dead
 		
-		c2.attr.hp=0
+		c2.is.hp=0
 	
 		if c1.is.player then
 		
 			c1.level.add_msg("You hit for "..damage.." damage!")
-			c1.level.add_msg("You killed "..(c2.attr.desc).." and won "..c2.attr.score.." points!")
-			c1.attr.score=c1.attr.score+c2.attr.score
+			c1.level.add_msg("You killed "..(c2.is.desc).." and won "..c2.is.score.." points!")
+			c1.is.score=c1.is.score+c2.is.score
 			c2.die()
 			
 		elseif c2.is.player then
 
-			c1.level.add_msg("You took "..damage.." damage from "..(c1.attr.desc).." and died!")
+			c1.level.add_msg("You took "..damage.." damage from "..(c1.is.desc).." and died!")
 			
 		end
 	
 	else -- just hit
 	
-		c2.attr.hp=hp
+		c2.is.hp=hp
 		
 		if c1.is.player then
 		
@@ -137,7 +137,7 @@ function hit(c1,c2)
 			
 		elseif c2.is.player then
 
-			c1.level.add_msg("You took "..damage.." damage from "..(c1.attr.desc).." and now have "..c2.attr.hp.." health!")
+			c1.level.add_msg("You took "..damage.." damage from "..(c1.is.desc).." and now have "..c2.is.hp.." health!")
 			
 		end
 		
