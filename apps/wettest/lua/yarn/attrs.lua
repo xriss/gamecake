@@ -83,11 +83,24 @@ local can_talk={
 
 local can_item={
 	acts=function(it,by)
-		if by.can.operate then return {"get","look"} end
+		if by.can.operate then
+			if by.items and by.items[it] then
+				return {"drop","look"}
+			else
+				return {"get","look"}
+			end
+		end
 		return {"look"}
 	end,
 	get=function(it,by)
-		it.level.menu.show_text(it.desc,it.longdesc or it.desc)
+		it.set_cell(by)
+		it.level.menu.hide()
+		it.level.step(1)
+	end,
+	drop=function(it,by)
+		it.set_cell(by.cell)
+		it.level.menu.hide()
+		it.level.step(1)
 	end,
 	look=function(it,by)
 		it.level.menu.show_text(it.desc,it.longdesc or it.desc)
@@ -131,7 +144,7 @@ dd={
 	desc="a human",
 	asc=ascii("@"),
 	form="char",
-		player=true,
+	player=true,
 	hp=10,
 	score=0,
 	
@@ -144,6 +157,7 @@ dd={
 	can=
 	{
 		fight=true,
+		loot=true,
 		make_room_visible=true,
 		operate=true,
 	},
