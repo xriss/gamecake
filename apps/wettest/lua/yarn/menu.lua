@@ -260,7 +260,9 @@ setfenv(1,d)
 			
 			local items={}
 			for v,b in pairs(player.items or {}) do
-				items[#items+1]=v
+				if v.is.equiped then
+					items[#items+1]=v
+				end
 			end
 			
 			for i,v in ipairs(items) do
@@ -299,7 +301,9 @@ setfenv(1,d)
 			
 			local items={}
 			for v,b in pairs(player.items or {}) do
-				items[#items+1]=v
+				if not v.is.equiped then
+					items[#items+1]=v
+				end
 			end
 			
 			for i,v in ipairs(items) do
