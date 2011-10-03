@@ -85,7 +85,15 @@ local can_item={
 	acts=function(it,by)
 		if by.can.operate then
 			if by.items and by.items[it] then
-				return {"drop","look"}
+				if it.can.equip then
+					if it.is.equiped then
+						return {"unequip","drop","look"}
+					else
+						return {"equip","drop","look"}
+					end
+				else
+					return {"drop","look"}
+				end
 			else
 				return {"get","look"}
 			end
@@ -98,7 +106,18 @@ local can_item={
 		it.level.step(1)
 	end,
 	drop=function(it,by)
+		it.is.equiped=false
 		it.set_cell(by.cell)
+		it.level.menu.hide()
+		it.level.step(1)
+	end,
+	equip=function(it,by)
+		it.is.equiped=true
+		it.level.menu.hide()
+		it.level.step(1)
+	end,
+	unequip=function(it,by)
+		it.is.equiped=false
 		it.level.menu.hide()
 		it.level.step(1)
 	end,
@@ -400,26 +419,20 @@ dd={
 		end,
 		
 		look=function(it,by)
-			it.level.menu.hide()
-			it.level.add_msg("Your SwordStone vault capsule is ".. (it.is.open and "open" or "closed").."." ))
---			it.level.menu.show_text(it.desc,
---			"Your SwordStone vault capsule is ".. (it.is.open and "open" or "closed").."." )
+			it.level.menu.show_text(it.desc,
+			"Your SwordStone vault capsule is ".. (it.is.open and "open" or "closed").."." )
 		end,
 		open=function(it,by)
 			if not it.open then
-			it.level.menu.hide()
-			it.level.add_msg("Your SwordStone vault capsule is held shut by something inside.")
---				it.level.menu.show_text(it.desc,
---				"Your SwordStone vault capsule is held shut by something inside.")
+				it.level.menu.show_text(it.desc,
+				"Your SwordStone vault capsule is held shut by something inside.")
 			end
 		end,
 		close=function(it,by)
 			if it.open then
 				it.is.open=false
-				it.level.menu.hide()
-				it.level.add_msg("Your SwordStone vault capsule closes very very very slowly.")
---				it.level.menu.show_text(it.desc,
---				"Your SwordStone vault capsule closes very very very slowly.")
+				it.level.menu.show_text(it.desc,
+				"Your SwordStone vault capsule closes very very very slowly.")
 				it.is.asc=ascii("=")
 			end
 		end,
@@ -480,9 +493,7 @@ Eventually.
 		end,
 		
 		look=function(it,by)
-			it.level.menu.hide()
-			it.level.add_msg("your SwordStone vault door is ".. (it.is.open and "open" or "closed"))
---			it.level.menu.show_text(it.desc,"your SwordStone vault door is ".. (it.is.open and "open" or "closed") )
+			it.level.menu.show_text(it.desc,"your SwordStone vault door is ".. (it.is.open and "open" or "closed") )
 		end,
 		open=function(it,by)
 			local capsule=it.level.find_item("cryo_bed")
