@@ -221,6 +221,17 @@ room("stairs",[[
 	["< "]="stairs",
 })
 
+room("redroom",[[
+# # # # # #
+# . . . . #
+# . @1@2. #
+# . . . . #
+# # # # # #
+]],{
+	["@1"]="sensei.twin1",
+	["@2"]="sensei.twin2",
+})
+
 function string_to_room(s,key)
 
 	if not key then key=keys.base end
@@ -382,6 +393,7 @@ dbg("fond real stairs : "..tostring(stairs))
 		r=add_room(get_room("bank"))
 		r=add_room(get_room("shop"))
 		r=add_room(get_room("hotel"))
+		r=add_room(get_room("redroom"))
 		
 		opts.mode="town"
 		opts.only_these_rooms=true
