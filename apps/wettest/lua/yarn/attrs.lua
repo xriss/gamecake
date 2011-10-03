@@ -354,20 +354,26 @@ dd={
 		end,
 		
 		look=function(it,by)
-			it.level.menu.show_text(it.desc,
-			"Your SwordStone vault capsule is ".. (it.is.open and "open" or "closed").."." )
+			it.level.menu.hide()
+			it.level.add_msg("Your SwordStone vault capsule is ".. (it.is.open and "open" or "closed").."." ))
+--			it.level.menu.show_text(it.desc,
+--			"Your SwordStone vault capsule is ".. (it.is.open and "open" or "closed").."." )
 		end,
 		open=function(it,by)
 			if not it.open then
-				it.level.menu.show_text(it.desc,
-				"Your SwordStone vault capsule is held shut by something inside.")
+			it.level.menu.hide()
+			it.level.add_msg("Your SwordStone vault capsule is held shut by something inside.")
+--				it.level.menu.show_text(it.desc,
+--				"Your SwordStone vault capsule is held shut by something inside.")
 			end
 		end,
 		close=function(it,by)
 			if it.open then
 				it.is.open=false
-				it.level.menu.show_text(it.desc,
-				"Your SwordStone vault capsule closes very very very slowly.")
+				it.level.menu.hide()
+				it.level.add_msg("Your SwordStone vault capsule closes very very very slowly.")
+--				it.level.menu.show_text(it.desc,
+--				"Your SwordStone vault capsule closes very very very slowly.")
 				it.is.asc=ascii("=")
 			end
 		end,
@@ -428,7 +434,9 @@ Eventually.
 		end,
 		
 		look=function(it,by)
-			it.level.menu.show_text(it.desc,"your SwordStone vault door is ".. (it.is.open and "open" or "closed") )
+			it.level.menu.hide()
+			it.level.add_msg("your SwordStone vault door is ".. (it.is.open and "open" or "closed"))
+--			it.level.menu.show_text(it.desc,"your SwordStone vault door is ".. (it.is.open and "open" or "closed") )
 		end,
 		open=function(it,by)
 			local capsule=it.level.find_item("cryo_bed")
@@ -438,14 +446,14 @@ Eventually.
 				it.is.open=true
 				it.is.form="item"
 				it.is.asc=ascii("/"),
-				it.call.look(it,by)
+				it.can.look(it,by)
 			end
 		end,
 		close=function(it,by)
 			it.is.open=false
 			it.is.form="char"
 			it.is.asc=ascii("|"),
-			it.call.look(it,by)
+			it.can.look(it,by)
 		end,
 	},
 },
