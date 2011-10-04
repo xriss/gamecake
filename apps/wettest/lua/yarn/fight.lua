@@ -140,7 +140,7 @@ dbg(c2.name.." hp : "..c2.hp)
 		
 			c1.level.add_msg("You hit for "..damage.." damage!")
 			c1.level.add_msg("You killed "..(c2.is.desc)..".")--" and won "..c2.is.score.." points!")
-			c1.is.score=c1.is.score+c2.is.score
+--			c1.is.score=c1.is.score+c2.is.score
 			
 		elseif c2.is.player then
 

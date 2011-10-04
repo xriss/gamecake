@@ -23,8 +23,6 @@ setfenv(1,d)
 -- all datagoes into this main table
 
 
-	hpmax=hp -- remember initial hp
-
 	set={}
 	get={}
 
