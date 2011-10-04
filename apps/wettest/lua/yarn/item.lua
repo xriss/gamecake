@@ -13,7 +13,9 @@ local dbg=dbg or function()end
 
 module(...)
 local yarn_attr=require("yarn.attr")
+local yarn_attrs=require("yarn.attrs")
 local yarn_fight=require("yarn.fight")
+local yarn_level=require("yarn.level")
 
 
 function create(t,_level)
@@ -93,8 +95,10 @@ setfenv(1,d)
 					
 				elseif char.can.fight and can.fight then
 				
-					yarn_fight.hit(d,char)
-					return 1
+					if char.is.player or is.player then -- do not fight amongst selfs				
+						yarn_fight.hit(d,char)
+						return 1
+					end
 					
 				end
 			else -- just move
@@ -107,10 +111,22 @@ setfenv(1,d)
 	end
 
 	function die()
-		local p=level.new_item( name.."_corpse" )
-		p.set_cell( cell )
+		if is.player then -- we deaded
+			local main=level.main
+			main.soul.last_stairs=nil
+			main.level=main.level.destroy()
+			main.level=yarn_level.create(yarn_attrs.get("level.home",1,{xh=40,yh=28}),main)
+			main.menu.hide()
+			
+			main.level.add_msg("You feel dead...")
 
-		level.del_item(d)
+		else
+		
+			local p=level.new_item( name.."_corpse" )
+			p.set_cell( cell )
+
+			level.del_item(d)
+		end
 	end
 
 	function update()

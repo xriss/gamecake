@@ -168,8 +168,8 @@ dd={
 	score=0,
 	
 	wheel=0,
-	dam_min=20,
-	dam_max=20,
+	dam_min=1,
+	dam_max=2,
 	def_add=0,
 	def_mul=1,
 	
@@ -603,13 +603,13 @@ Eventually.
 	form="char",
 	rat=true,
 	score=10,
-	hp=10,
+	hp=5,
 	
 	wheel=0,
-	dam_min=2,
-	dam_max=4,
+	dam_min=1,
+	dam_max=2,
 	def_add=0,
-	def_mul=0.75,
+	def_mul=1,
 	
 	can=can_fight,
 	
@@ -667,6 +667,13 @@ Eventually.
 	wood=true,
 	can=can_item,
 	weight=1,
+
+	wheel=0,
+	dam_min=2,
+	dam_max=8,
+	def_add=0,
+	def_mul=1,
+
 },
 
 }
