@@ -14,7 +14,7 @@ local io=io
 
 module("apps")
 
-local function setpaths(dll,dirs)
+function setpaths(dll,dirs)
 
 	local cpath={}
 	for i,v in ipairs(dirs) do
