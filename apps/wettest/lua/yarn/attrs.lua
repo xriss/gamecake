@@ -165,7 +165,6 @@ dd={
 	form="char",
 	player=true,
 	hp=10,
-	score=0,
 	
 	wheel=0,
 	dam_min=1,
@@ -522,7 +521,6 @@ Eventually.
 	asc=ascii("a"),
 	form="char",
 	ant=true,
-	score=2,
 	hp=2,
 	
 	wheel=0,
@@ -534,7 +532,6 @@ Eventually.
 	can=can_fight,
 	
 	powup={
-		score=2,
 		hp=2,
 		dam_min=0,
 		dam_max=1,
@@ -550,7 +547,6 @@ Eventually.
 	asc=ascii("b"),
 	form="char",
 	blob=true,
-	score=10,
 	hp=10,
 	
 	wheel=0,
@@ -562,7 +558,6 @@ Eventually.
 	can=can_fight,
 	
 	powup={
-		score=10,
 		hp=10,
 		dam_min=2,
 		dam_max=2,
@@ -602,7 +597,6 @@ Eventually.
 	asc=ascii("r"),
 	form="char",
 	rat=true,
-	score=10,
 	hp=5,
 	
 	wheel=0,
@@ -614,7 +608,6 @@ Eventually.
 	can=can_fight,
 	
 	powup={
-		score=10,
 		hp=10,
 		dam_min=2,
 		dam_max=2,
@@ -674,6 +667,12 @@ Eventually.
 	def_add=0,
 	def_mul=1,
 
+	powup={
+		dam_min=1,
+		dam_max=1,
+		def_add=0,
+		def_mul=1,
+	},
 },
 
 }

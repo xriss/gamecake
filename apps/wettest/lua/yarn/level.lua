@@ -315,10 +315,8 @@ setfenv(1,d)
 			
 			if item then -- standing on an item
 				set_msg(item.view_text())
-			elseif player.is.hp~=player.is.hpmax then
-				set_msg("Your health is ".. player.is.hp .."/".. player.is.hpmax )
 			else
-				set_msg("You have scored "..player.is.score .." points.")
+				set_msg("Your health is ".. player.hp .."/".. player.is.hp )
 			end
 		end
 
