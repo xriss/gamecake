@@ -258,12 +258,22 @@ setfenv(1,d)
 				end
 			}
 			
+-- add status option
+			tab[#tab+1]={
+				text="your status ( "..player.hp.."/"..player.is.hp.." hp )",
+				call=function(it)
+					show_status_menu(player)
+				end
+			}
+			
 			local items={}
 			for v,b in pairs(player.items or {}) do
 				if v.is.equiped then
 					items[#items+1]=v
 				end
 			end
+			
+			table.sort(items,function(a,b) return a.name<b.name end)
 			
 			for i,v in ipairs(items) do
 				if v.can.acts or v.form=="item"then				
@@ -306,6 +316,8 @@ setfenv(1,d)
 				end
 			end
 			
+			table.sort(items,function(a,b) return a.name<b.name end)
+			
 			for i,v in ipairs(items) do
 				if v.can.acts or v.form=="item"then				
 					tab[#tab+1]={
@@ -323,6 +335,36 @@ setfenv(1,d)
 		show(top)
 	end
 
+	function show_status_menu(item)
+		local top={}
+
+		top.title=item.desc
+		
+		top.call=function(tab)
+		
+			local tab={}
+			local player=item.level.player
+	-- add cancel option
+			tab[#tab+1]={
+				text=[[..]],
+				call=function(it)
+					back()
+				end
+			}
+-- add status option
+			tab[#tab+1]={
+				text=player.hp.."/"..player.is.hp.." hp",
+				call=function(it)
+					back()
+				end
+			}
+			
+			top.display=build_request(tab)
+		end
+		
+		show(top)
+	end
+	
 	function show_item_menu(item)
 		local top={}
 
@@ -360,7 +402,7 @@ setfenv(1,d)
 		
 		show(top)
 	end
-	
+
 	function show_stairs_menu(it,by)
 		local main=it.level.main
 		local top={}
