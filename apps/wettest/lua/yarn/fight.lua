@@ -8,6 +8,7 @@ local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstrin
 -- libs into locals
 local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
 
+local dbg=dbg or function()end
 
 
 --[[
@@ -69,6 +70,15 @@ function get_damage_char(c)
 	local mn=c.is.dam_min
 	local mx=c.is.dam_max
 	
+	if c.items then -- equipment
+		for v,b in pairs(c.items) do
+			if v.equiped then
+				mn=mn+v.is.dam_min
+				mx=mx+v.is.dam_max
+			end
+		end
+	end
+	
 	local num=0
 	
 	if mx<=mn then
@@ -88,6 +98,17 @@ function adjust_defense_char(c,damage)
 	local ma=c.is.def_add
 	local mm=c.is.def_mul
 	
+	if c.items then -- equipment
+		for v,b in pairs(c.items) do
+			if v.equiped then
+				ma=ma+v.is.def_add
+				mm=mm*v.is.def_mul
+			end
+		end
+	end
+	
+
+
 	damage=(damage+ma)*mm
 	
 	return math.floor(damage)
@@ -106,30 +127,33 @@ function hit(c1,c2)
 	
 	damage=adjust_defense_char(c2,damage)
 	
-	local hp=c2.is.hp
+	local hp=c2.hp
+
+dbg(c2.name.." hp : "..c2.hp)
 	
 	hp=hp-damage
 	
 	if hp<=0 then -- dead
 		
-		c2.is.hp=0
 	
 		if c1.is.player then
 		
 			c1.level.add_msg("You hit for "..damage.." damage!")
 			c1.level.add_msg("You killed "..(c2.is.desc)..".")--" and won "..c2.is.score.." points!")
 			c1.is.score=c1.is.score+c2.is.score
-			c2.die()
 			
 		elseif c2.is.player then
 
 			c1.level.add_msg("You took "..damage.." damage from "..(c1.is.desc).." and died!")
 			
 		end
+		
+		c2.hp=0
+		c2.die()
 	
 	else -- just hit
 	
-		c2.is.hp=hp
+		c2.hp=hp
 		
 		if c1.is.player then
 		
@@ -137,7 +161,7 @@ function hit(c1,c2)
 			
 		elseif c2.is.player then
 
-			c1.level.add_msg("You took "..damage.." damage from "..(c1.is.desc).." and now have "..c2.is.hp.." health!")
+			c1.level.add_msg("You took "..damage.." damage from "..(c1.is.desc).." and now have "..c2.hp.." health!")
 			
 		end
 		
