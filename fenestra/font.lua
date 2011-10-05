@@ -13,13 +13,16 @@ module("fenestra.font")
 --
 -- Return a font object we can use to draw text with
 --
--- "debug" is the built in 8x8 font
+-- "base" is the built in 8x8 font
 -- "sans" is the default proportional font
 --
 function setup(win,name)
 
 
 	local font={}
+	
+	font.name=nil -- base by default
+	if name=="sans" then font.name="sans" end
 	
 	font.sx=8 -- base size of each char in this font
 	font.sy=8
@@ -47,9 +50,20 @@ function setup(win,name)
 	end
 	
 --
+-- make this font active
+--
+	function font.active(force)
+		if force or win.font ~= font then
+			win.font=font
+			win.flat_font(font.name)
+		end
+	end
+
+--
 -- set the position and color and size, any input may be nil for no change
 --
 	function font.set(px,py,color,sx,sy)
+		font.active()
 		font.px=px or font.px
 		font.py=py or font.py
 		font.color=color or font.color		
@@ -61,6 +75,7 @@ function setup(win,name)
 -- how big an area does this string require, return width,height
 --
 	function font.size(text,size)
+		font.active()
 		if size then font.sx=size font.sy=size end
 		if text then return win.flat_measure({size=font.sx,s=text}) , font.sy end
 	end
@@ -68,12 +83,14 @@ function setup(win,name)
 -- draw this string, optionally apply a different color to each char using the colors array
 --
 	function font.draw(text,colors)
+		font.active()
 		win.flat_print({x=font.px,y=font.py,size=font.sx,color=font.color,s=text,c=colors})
 	end
 --
 -- number of characters that fit in this width
 --
 	function font.fits(width,text,size)
+		font.active()
 		if size then font.sx=size font.sy=size end
 		if text then return win.flat_fits({size=font.sx,s=text,width=width}) end
 	end
@@ -82,6 +99,7 @@ function setup(win,name)
 -- which char is under this xpos, ( 0 is first and -1 is unknown )
 --
 	function font.which(x,text,size)
+		font.active()
 		if size then font.sx=size font.sy=size end
 		if text then return win.flat_which({size=font.sx,s=text,x=x}) end
 	end
@@ -91,6 +109,7 @@ function setup(win,name)
 -- whitespace will be removed from the begining of the strings
 --
 	function font.wrap(width,text,size)
+		font.active()
 		if size then font.sx=size font.sy=size end
 		if text then
 		

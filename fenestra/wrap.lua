@@ -46,10 +46,10 @@ local win={}
 		
 		win.avatar = avatar.setup(win)
 		
-		win.font_debug=font.setup(win,"debug")
+		win.font_base=font.setup(win,"base")
 		win.font_sans=font.setup(win,"sans")
 		
-		win.widget=widget.setup(win,{font=win.font_debug})
+		win.widget=widget.setup(win,{font=win.font_sans})
 		
 		return win
 	end
@@ -261,6 +261,7 @@ function win.debug_polygon_end(...)		return core.ogl.debug_polygon_end(		win.cor
 
 function win.flat_begin(...)			return core.ogl.flat_begin(				win.core_ogl,	...) end
 function win.flat_end(...)				return core.ogl.flat_end(				win.core_ogl,	...) end
+function win.flat_font(...)				return core.ogl.flat_font(				win.core_ogl,	...) end
 function win.flat_print(...)			return core.ogl.flat_print(				win.core_ogl,	...) end
 function win.flat_measure(...)			return core.ogl.flat_measure(			win.core_ogl,	...) end
 function win.flat_which(...)			return core.ogl.flat_which(				win.core_ogl,	...) end
