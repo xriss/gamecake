@@ -38,6 +38,35 @@ static int core_flat_end(lua_State *l)
 // lua
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+static int core_flat_font(lua_State *l)
+{
+	struct fenestra_ogl *core = (struct fenestra_ogl *)lua_touserdata(l, 1 );
+	
+const char *s;
+
+	s=0;
+	if(lua_isstring(l,2))
+	{
+		s=lua_tostring(l,2);
+	}
+	
+	if(s)
+	{
+		core->font=core->font_sans;
+	}
+	else
+	{
+		core->font=core->font_base;
+	}
+	
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// lua
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 static int core_flat_print(lua_State *l)
 {
 	struct fenestra_ogl *core = (struct fenestra_ogl *)lua_touserdata(l, 1 );
@@ -263,6 +292,7 @@ static const struct luaL_reg core_lib[] = {
 
 // font functions
 
+	{"flat_font",				core_flat_font},
 	{"flat_print",				core_flat_print},
 	{"flat_measure",			core_flat_measure},
 	{"flat_fits",				core_flat_fits},
