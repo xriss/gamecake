@@ -121,8 +121,8 @@ glError();
 	ret=GLeeForceLink( "GL_VERSION_1_4" );
 
 	debug_setup();
-	font_setup(font_base);
-	font_setup(font_sans);
+	font_setup(font_base,0);
+	font_setup(font_sans,"../../lua/apps/wettest/data/fonts/DejaVuSans.ttf");
 	font=font_base;
 	
 	return true;

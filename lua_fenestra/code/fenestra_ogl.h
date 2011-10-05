@@ -216,7 +216,7 @@ struct fenestra_ogl
 	void flat_begin();
 	void flat_end();
 
-	bool font_setup(fogl_font *font);
+	bool font_setup(fogl_font *font,const char *fontfilename);
 	void font_position(fogl_font *font, f32 x, f32 y, f32 size , u32 color);
 	void font_draw(fogl_font *font, char c);
 	void font_draw_string(fogl_font *font, const char *string);
