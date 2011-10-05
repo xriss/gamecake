@@ -145,6 +145,17 @@ struct fogl_glyph
 	f32 advance;
 };
 
+//everything you need to know about a font
+struct fogl_font
+{
+	fogl_glyph infos[96];
+	GLuint chars[96];
+	f32 x;
+	f32 y;
+	f32 size;
+	u32 color;
+};
+
 // a main window class to hangs everything off of
 
 struct fenestra_ogl
@@ -205,13 +216,13 @@ struct fenestra_ogl
 	void flat_begin();
 	void flat_end();
 
-	bool font_setup();
-	void font_position(f32 x, f32 y, f32 size , u32 color);
-	void font_draw(char c);
-	void font_draw_string(const char *string);
-	f32 font_width_string(const char *string);
-	s32 font_fit_string( const char *string, f32 width );
-	s32 font_which_char( const char *string,f32 x );
+	bool font_setup(fogl_font *font);
+	void font_position(fogl_font *font, f32 x, f32 y, f32 size , u32 color);
+	void font_draw(fogl_font *font, char c);
+	void font_draw_string(fogl_font *font, const char *string);
+	f32 font_width_string(fogl_font *font, const char *string);
+	s32 font_fit_string(fogl_font *font, const char *string, f32 width );
+	s32 font_which_char(fogl_font *font, const char *string,f32 x );
 
 #if defined(WIN32)
 	HDC hDC;
@@ -250,14 +261,20 @@ struct fenestra_ogl
 	f32 debug_font_y;
 	f32 debug_font_size;
 	u32 debug_font_color;
+//	fogl_font font_debug[1];	
 
-//current basic font
+//current basic fonts
+	fogl_font *font; // currently selected font
+	fogl_font font_base[1];
+	fogl_font font_sans[1];
+/*	
 	fogl_glyph font_infos[96];
 	GLuint font_chars[96];
 	f32 font_x;
 	f32 font_y;
 	f32 font_size;
 	u32 font_color;
+*/
 };
 
 
