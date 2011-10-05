@@ -14,6 +14,7 @@ module("fenestra.font")
 -- Return a font object we can use to draw text with
 --
 -- "debug" is the built in 8x8 font
+-- "sans" is the default proportional font
 --
 function setup(win,name)
 

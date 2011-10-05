@@ -105,15 +105,17 @@ print("BIN PATH",bin_dir,dll)
 		dir.."/../../lua/apps/"..name,
 	}
 	local app_dir=dir.."/"
+	local app_name=name
 	for i=1,#tdirs do local v=tdirs[i]
 		if file_exists(v.."/lua/"..name..".lua") then app_dir=v.."/" break end -- found a base dir?
+		if file_exists(v.."/lua/app.lua") then app_dir=v.."/" app_name="app" break end -- found a base dir?
 	end
 
 print("APP PATH",app_dir,dll)
 
 	setpaths(dll,{app_dir,bin_dir})
 
-	return app_dir
+	return app_dir,app_name
 end
 
 
@@ -128,7 +130,7 @@ function start(_name,...)
 	name=_name
 	dll="so"
 
-	dir=find(name)
+	dir,appname=find(name)
 
 	path=package.path
 	cpath=package.cpath
@@ -139,7 +141,7 @@ function start(_name,...)
 	print("apps.dir",dir)
 	print(...)
 
-	return require(name).start(...)
+	return require(appname).start(...)
 end
 
 
