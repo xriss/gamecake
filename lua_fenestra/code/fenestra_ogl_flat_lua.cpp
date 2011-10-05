@@ -51,28 +51,28 @@ const char *s;
 		lua_getfield(l,2,"x");
 		if(lua_isnumber(l,-1))
 		{
-			core->font_x=(f32)lua_tonumber(l,-1);
+			core->font->x=(f32)lua_tonumber(l,-1);
 		}
 		lua_pop(l,1);
 		
 		lua_getfield(l,2,"y");
 		if(lua_isnumber(l,-1))
 		{
-			core->font_y=(f32)lua_tonumber(l,-1);
+			core->font->y=(f32)lua_tonumber(l,-1);
 		}
 		lua_pop(l,1);
 		
 		lua_getfield(l,2,"size");
 		if(lua_isnumber(l,-1))
 		{
-			core->font_size=(f32)lua_tonumber(l,-1);
+			core->font->size=(f32)lua_tonumber(l,-1);
 		}
 		lua_pop(l,1);
 		
 		lua_getfield(l,2,"color");
 		if(lua_isnumber(l,-1))
 		{
-			core->font_color=(u32)lua_tonumber(l,-1);
+			core->font->color=(u32)lua_tonumber(l,-1);
 		}
 		lua_pop(l,1);
 		
@@ -91,7 +91,7 @@ const char *s;
 	
 	if(s)
 	{
-		core->font_draw_string(s);
+		core->font_draw_string(core->font,s);
 	}
 	
 	
@@ -116,7 +116,7 @@ const char *s;
 		lua_getfield(l,2,"size");
 		if(lua_isnumber(l,-1))
 		{
-			core->font_size=(f32)lua_tonumber(l,-1);
+			core->font->size=(f32)lua_tonumber(l,-1);
 		}
 		lua_pop(l,1);
 		
@@ -135,7 +135,7 @@ const char *s;
 	
 	if(s)
 	{
-		lua_pushnumber(l, core->font_width_string(s) );
+		lua_pushnumber(l, core->font_width_string(core->font,s) );
 		return 1;
 	}
 	
@@ -169,7 +169,7 @@ f32 wide=0;
 		lua_getfield(l,2,"size");
 		if(lua_isnumber(l,-1))
 		{
-			core->font_size=(f32)lua_tonumber(l,-1);
+			core->font->size=(f32)lua_tonumber(l,-1);
 		}
 		lua_pop(l,1);
 		
@@ -188,7 +188,7 @@ f32 wide=0;
 	
 	if(s)
 	{
-		lua_pushnumber(l, core->font_fit_string(s,wide) );
+		lua_pushnumber(l, core->font_fit_string(core->font,s,wide) );
 		return 1;
 	}
 	
@@ -223,7 +223,7 @@ f32 x=0;
 		lua_getfield(l,2,"size");
 		if(lua_isnumber(l,-1))
 		{
-			core->font_size=(f32)lua_tonumber(l,-1);
+			core->font->size=(f32)lua_tonumber(l,-1);
 		}
 		lua_pop(l,1);
 		
@@ -243,7 +243,7 @@ f32 x=0;
 	
 	if(s)
 	{
-		lua_pushnumber(l, core->font_which_char(s,x) );
+		lua_pushnumber(l, core->font_which_char(core->font,s,x) );
 		return 1;
 	}
 	

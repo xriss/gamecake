@@ -121,8 +121,10 @@ glError();
 	ret=GLeeForceLink( "GL_VERSION_1_4" );
 
 	debug_setup();
-	font_setup();
-
+	font_setup(font_base);
+	font_setup(font_sans);
+	font=font_base;
+	
 	return true;
 }
 
