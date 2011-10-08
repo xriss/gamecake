@@ -34,6 +34,7 @@ DBG_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Debug")
 
 AND_OUT_DIR=path.getabsolute("android/libs/armeabi")
 
+
 if NACL then
 
 	defines "NACL"
@@ -51,13 +52,15 @@ elseif ANDROID then
 --	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
 	
 elseif os.get() == "windows" then
-
+	WINDOWS=true
+	
 	defines "WIN32"
 	defines "_CRT_SECURE_NO_WARNINGS"
 --	defines	"LUA_BUILD_AS_DLL"
 
 else -- nix
-
+	NIX=true
+	
 	defines "X11"
 	defines	"LUA_USE_DLOPEN"
 	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
