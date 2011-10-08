@@ -11,7 +11,6 @@ extern int luaopen_lfs(lua_State *L);
 extern int luaopen_socket_core(lua_State *L);
 extern int luaopen_mime_core(lua_State *L);
 extern int luaopen_fenestra_core(lua_State *L);
-extern int luaopen_posix(lua_State *L);
 
 extern void lua_preloadlibs(lua_State *L)
 {
@@ -49,9 +48,6 @@ extern void lua_preloadlibs(lua_State *L)
     lua_settable(L, -3);
     lua_pushliteral(L, "fenestra.core");
     lua_pushcfunction(L, luaopen_fenestra_core);
-    lua_settable(L, -3);
-    lua_pushliteral(L, "posix");
-    lua_pushcfunction(L, luaopen_posix);
     lua_settable(L, -3);
     lua_pop(L, 2);
 }

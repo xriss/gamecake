@@ -5,6 +5,7 @@ language "C++"
 
 defines { "FT2_BUILD_LIBRARY" }
 
+includedirs { "../lua_freetype/freetype/include/" }
 
 files {
 
