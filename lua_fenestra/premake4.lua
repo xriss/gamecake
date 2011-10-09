@@ -3,6 +3,8 @@ project "lua_fenestra"
 language "C++"
 files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 
+includedirs { "../lua_freetype/freetype/include/" }
+
 links { "lua51" }
 
 defines { "LUA_LIB" }
