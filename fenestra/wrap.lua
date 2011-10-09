@@ -48,6 +48,7 @@ local win={}
 		
 		win.font_base=font.setup(win,"base")
 		win.font_sans=font.setup(win,"sans")
+		win.font_debug=win.font_base -- old name, do not use...
 		
 		win.widget=widget.setup(win,{font=win.font_sans})
 		
@@ -59,7 +60,7 @@ local win={}
 		win.widget.clean()
 		
 		win.font_sans.clean()
-		win.font_debug.clean()
+		win.font_base.clean()
 
 		win.avatar.clean()
 		
