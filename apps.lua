@@ -92,17 +92,25 @@ print("BIN PATH",bin_dir,dll)
 
 
 	local tdirs={ -- look in these dirs
+	
 		dir,
+		dir.."/"..name,
+		dir.."/apps/"..name,
+		dir.."/lua/"..name,
+		dir.."/lua/apps/"..name,
+		
 		dir.."/..",
 		dir.."/../"..name,
-		dir.."/apps/"..name,
+		dir.."/../apps/"..name,
 		dir.."/../lua/"..name,
 		dir.."/../lua/apps/"..name,
+		
 		dir.."/../..",
 		dir.."/../../"..name,
-		dir.."/../apps/"..name,
+		dir.."/../../apps/"..name,
 		dir.."/../../lua/"..name,
 		dir.."/../../lua/apps/"..name,
+		
 	}
 	local app_dir=dir.."/"
 	local app_name=name
