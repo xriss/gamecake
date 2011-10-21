@@ -7,7 +7,8 @@
 // this is a huge amount of junk so only include in this file
 #if defined(X11)
 
-#include <gtkmm.h>
+//#include <gtk/gtk.h>
+extern "C" char *freq_GetFile(const char *_path);
 
 #endif
 
@@ -246,11 +247,30 @@ static int core_choose_file(lua_State *l)
 	struct fenestra *core = (struct fenestra *)lua_touserdata(l, 1 );
 
 #if defined(WIN32)
-	return 0;	
+//	return 0;	
 #endif
 
 #if defined(X11)
 
+const char *s1=0;
+char *s2=0;
+
+
+	if( lua_isstring(l,2) )
+	{
+		s1=lua_tostring(l,2);
+	}
+
+	s2=freq_GetFile(0);
+	
+	if(!s2) { return 0; }
+
+	lua_pushstring(l,s2);
+	free(s2);
+	return 1;
+
+//disable gtkmm...
+#if 0
 	GtkWindow *gtkWindow;
 	const char *title="Choose File to Load";
 	GtkFileChooserAction mode=GTK_FILE_CHOOSER_ACTION_OPEN;
@@ -303,7 +323,10 @@ static int core_choose_file(lua_State *l)
 	}
 
 	return 1;
-	
+#endif
+
+//	return 0;
+
 #endif
 
 }

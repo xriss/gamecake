@@ -62,7 +62,7 @@ else -- nix
 	NIX=true
 	
 	defines "X11"
-	defines	"LUA_USE_DLOPEN"
+--	defines	"LUA_USE_DLOPEN"
 	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
 	
 end
@@ -149,7 +149,7 @@ else
 	include("lua_box2d")
 	include("lua_gl")
 	include("lua_grd")
-	include("lua_lanes")
+--	include("lua_lanes")
 	include("lua_lash")
 	include("lua_lfs")
 	include("lua_socket")

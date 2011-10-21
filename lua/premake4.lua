@@ -102,13 +102,17 @@ if #lua_lib_names>0 then
 		links { "GL" , "GLU" }
 		links { "crypt" }
 		
+		links { "pthread" }
+		links { "sx" }
 --		links { "ssl" }
 --		links { "mysqlclient" }
 
-		local fp=assert(io.popen("pkg-config --libs gtkmm-2.4"))
+--[[
+		local fp=assert(io.popen("pkg-config --libs libsx"))
 		local s=assert(fp:read("*l"))
 		linkoptions { s }
 		fp:close()
+]]		
 	end
 
 	files { "preloadlibs.c" }

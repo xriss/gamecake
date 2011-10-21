@@ -12,17 +12,18 @@ defines { "LUA_LIB" }
 if os.get() == "windows" then
 	links { "opengl32" , "glu32" }
 else -- nix
-	links { "GL" , "GLU" }
-
-	local fp=assert(io.popen("pkg-config --cflags gtkmm-2.4"))
+	links { "GL" , "GLU" , "sx" }
+--[[
+	local fp=assert(io.popen("pkg-config --cflags libsx"))
 	local s=assert(fp:read("*l"))
 	buildoptions { s }
 	fp:close()
 
-	local fp=assert(io.popen("pkg-config --libs gtkmm-2.4"))
+	local fp=assert(io.popen("pkg-config --libs libsx"))
 	local s=assert(fp:read("*l"))
 	linkoptions { s }
 	fp:close()
+]]
 
 end
 
