@@ -56,7 +56,7 @@ char *strdup(const char *str)
  * in the butt.  Why on earth isn't strdup() in the POSIX standard
  * but something completely useless like mbstowcs() is?
  */
-char *strdup(const char *str);
+//extern char *strdup(const char *str);???
 
 
 /*
@@ -103,9 +103,10 @@ char *freq_GetFile(const char *_path)
   Widget w[8];
   int num_dir;
   char path[MAXPATHLEN];
+char *err;
 
   if(!_path || strcmp(_path, ".") == 0 || strcmp(_path, "./") == 0)
-    getcwd(path, MAXPATHLEN);
+    err=getcwd(path, MAXPATHLEN);
   else
     strcpy(path, _path);
   
