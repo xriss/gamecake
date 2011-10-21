@@ -87,6 +87,8 @@ static int mystrcmp(const void *a, const void *b);
 char **get_dir_list(char *pname, int *num);
 void free_dirlist(char **table);
 
+// unfortunatley this hangs next time it is called...
+// maybe grab sxsource and fix sx?
 /*
  * GetFile() - This is the entry point to the file requestor.  A single
  *             argument is passed - the path name for the initial list.
