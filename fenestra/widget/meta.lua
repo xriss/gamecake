@@ -7,6 +7,7 @@ local table=table
 local ipairs=ipairs
 local setmetatable=setmetatable
 local type=type
+local tostring=tostring
 
 local function print(...) _G.print(...) end
 
@@ -28,7 +29,7 @@ classes={
 --
 function setup(def)
 
-	local master=def.master
+--	local master=def.master
 	local meta=def.meta
 	local win=def.win
 
@@ -136,8 +137,8 @@ function setup(def)
 		
 		
 		widget.color=def.color
-		widget.text_color=def.text_color or master.text_color or 0xff000000 -- black text
-		widget.text_size=def.text_size or master.text_size or 16 -- quite chunky text by default
+		widget.text_color=def.text_color or widget.master.text_color or 0xff000000 -- black text
+		widget.text_size=def.text_size or widget.master.text_size or 16 -- quite chunky text by default
 		
 		widget.text_color_over=def.text_color_over -- if set, switch text color on hover
 		widget.text_align=def.text_align -- default is center
@@ -151,12 +152,15 @@ function setup(def)
 			classes[widget.class].setup(widget,def)
 		end
 		
+		if widget.master.ids and widget.id then widget.master.ids[widget.id]=widget end -- lookup by id
+		
 		return widget
 	end
 --
 -- and final cleanup
 --
 	function meta.clean(widget)
+		if widget.master.ids and widget.id then widget.master.ids[widget.id]=nil end -- remove id lookup
 		return widget
 	end
 --
@@ -397,24 +401,24 @@ function setup(def)
 		
 			if act=="down" then
 -- only set if null or our parent...
-				if not master.active or master.active==widget.parent then
-					master.active=widget
-					master.active_x=x-widget.px
-					master.active_y=y-widget.py
+				if not widget.master.active or widget.master.active==widget.parent then
+					widget.master.active=widget
+					widget.master.active_x=x-widget.px
+					widget.master.active_y=y-widget.py
 				end
 			end
 			if act=="up" then
-				if master.active and master.active==widget then -- widget clicked
+				if widget.master.active and widget.master.active==widget then -- widget clicked
 					widget:call_hook("click")
 				end
 			end
 
-			if not master.active or master.active==widget then -- over widget
-				master.over=widget
+			if not widget.master.active or widget.master.active==widget then -- over widget
+				widget.master.over=widget
 			end
 		else
 		
-			if master.over==widget then master.over=nil end
+			if widget.master.over==widget then widget.master.over=nil end
 		end
 	
 		for i,v in ipairs(widget) do
