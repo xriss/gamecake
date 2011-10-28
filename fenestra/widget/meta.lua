@@ -267,13 +267,13 @@ function setup(def)
 		local hx,hy=0,0
 		local my=0
 		local mhx,mhy=0,0
-		
 		function addone(w)
 			w.px=widget.px+hx
 			w.py=widget.py-hy -- top align by default
 			hx=hx+w.hx
 			if hx > mhx then mhx=hx end -- max x total size
 			if w.hy > my then my=w.hy end -- max y size for this line
+--print(w.id or "?",w.px,w.py,w.hx,w.hy)
 		end
 		
 		function endoflines()
@@ -285,6 +285,7 @@ function setup(def)
 			hx=0
 			hy=hy+my
 			my=0
+			mhy=hy
 		end
 		
 		if #widget>0 then
