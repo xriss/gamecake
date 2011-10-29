@@ -50,6 +50,19 @@ local dat_set=function(dat,def)
 end
 
 
+-- set number (may trigger hook)
+local dat_value=function(dat,num)
+	if num and num~=dat.num then -- change value
+		if num then dat.num=num end
+		if dat.num<dat.min then dat.num=dat.min end
+		if dat.num>dat.max then dat.num=dat.max end
+		dat.widget:call_hook("value",dat) -- call value hook, which may choose to mod the num some more...
+	end
+	return dat.num
+end
+
+
+
 -- a string to put in the handle
 local dat_get_string=function(dat)
 	return dat.num.."/"..dat.max
@@ -71,34 +84,28 @@ end
 local dat_snap=function(dat,psiz,bsiz,bpos)
 	if dat.snap==0 then -- no snap
 	
-		if dat.max==dat.min then dat.num=dat.min return 0 end -- do not move
+		if dat.max==dat.min then dat:value(dat.min) return 0 end -- do not move
 		
 		local f=bpos/(psiz-bsiz)
-		dat.num=dat.min+((dat.max-dat.min)*f)
-
-		if dat.num<dat.min then dat.num=dat.min end
-		if dat.num>dat.max then dat.num=dat.max end
+		dat:value(dat.min+((dat.max-dat.min)*f))
 		
 		return bpos -- do not snap
 		
 	else
 	
-		if dat.max==dat.min then dat.num=dat.min return 0 end -- do not move
+		if dat.max==dat.min then dat:value(dat.min) return 0 end -- do not move
 		
 		local f=bpos/(psiz-bsiz)
 		local n=math.floor(0.5+(((dat.max-dat.min)*f)/dat.step))
 
-		dat.num=dat.min+(n*dat.step)
-		
-		if dat.num<dat.min then dat.num=dat.min end
-		if dat.num>dat.max then dat.num=dat.max end
+		dat:value(dat.min+(n*dat.step))
 		
 		return math.floor((psiz-bsiz)*((dat.num-dat.min)/(dat.max-dat.min)))
 	end
 end
 
 
-function new_dat(id)
+function new_dat(widget,id)
 
 	local dat={}
 	dat.widget=widget
@@ -112,6 +119,7 @@ function new_dat(id)
 	dat.get_string=dat_get_string
 	dat.get_size=dat_get_size
 	dat.set=dat_set
+	dat.value=dat_value
 	dat.snap=dat_snap
 	
 	return dat
@@ -126,7 +134,7 @@ function slide_snap(it)
 end
 	
 function setup(widget,def)
-	local it={}
+	local it={} -- our main data so as not to clobber widget values
 	it.widget=widget
 	it.snap=slide_snap
 	widget.slide=it
@@ -137,8 +145,8 @@ function setup(widget,def)
 	widget.update=update
 	
 --setup constraints in x and y 
-	it.datx=new_dat("x"):set(def.datx)
-	it.daty=new_dat("y"):set(def.daty)
+	it.datx=new_dat(widget,"x"):set(def.datx)
+	it.daty=new_dat(widget,"y"):set(def.daty)
 
 -- auto add the draging button as a child
 	it.drag=widget:add({class="drag",color=0xffffffff,hy=it.daty:get_size(widget.hy),hx=it.datx:get_size(widget.hx),pxf=0,pyf=0})
