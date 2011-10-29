@@ -5,6 +5,7 @@
 
 local require=require
 local print=print
+local math=math
 
 module("fenestra.widget.slide")
 
@@ -25,8 +26,16 @@ end
 function update(widget)
 	local it=widget.slide
 
-	it.drag.text=it.daty:get_string()
-	
+
+	it:snap()
+--	local t=it.datx:snap( it.widget.hx , it.drag.hx , it.drag.px )
+--print( it.datx.num , it.widget.hx , it.drag.hx , it.drag.px )
+--it.drag.px=t
+
+
+
+--	it.drag.text=it.datx:get_string()
+
 	
 	return widget.meta.update(widget)
 end
@@ -41,7 +50,7 @@ local dat_set=function(dat,def)
 	if def.max then dat.max=def.max end
 	if def.num then dat.num=def.num end
 	if def.size then dat.size=def.size end
-	if def.step then dat.size=def.step end
+	if def.step then dat.step=def.step end
 	
 	return dat
 end
@@ -58,7 +67,7 @@ local dat_get_size=function(dat,w)
 		if dat.min==dat.max then return w end -- fullsize		
 		return w/4 -- else some room to scroll
 	else
-		return w*( dat.max-dat.min / dat_size )
+		return w*( dat.size / dat.max-dat.min )
 	end
 end
 
@@ -71,7 +80,7 @@ local dat_snap=function(dat,psiz,bsiz,bpos)
 		if dat.max==dat.min then dat.num=dat.min return 0 end -- do not move
 		
 		local f=bpos/(psiz-bsiz)
-		dat.num=dat.min+(dat.max-dat.min)*f)
+		dat.num=dat.min+((dat.max-dat.min)*f)
 
 		if dat.num<dat.min then dat.num=dat.min end
 		if dat.num>dat.max then dat.num=dat.max end
@@ -83,7 +92,7 @@ local dat_snap=function(dat,psiz,bsiz,bpos)
 		if dat.max==dat.min then dat.num=dat.min return 0 end -- do not move
 		
 		local f=bpos/(psiz-bsiz)
-		local n=math.round((dat.max-dat.min)*f)/dat.step)
+		local n=math.floor(0.5+(((dat.max-dat.min)*f)/dat.step))
 
 		dat.num=dat.min+(n*dat.step)
 		
@@ -114,9 +123,18 @@ function new_dat(id)
 	return dat
 	
 end
+
+function slide_snap(it)
+-- auto snap positions when draged?
+	it.drag.px=it.datx:snap( it.widget.hx , it.drag.hx , it.drag.px )
+-- upside down y so need to twiddle it
+	it.drag.py=it.widget.py - it.daty:snap( it.widget.hy , it.drag.hy , it.widget.py - it.drag.py )
+end
 	
 function setup(widget,def)
 	local it={}
+	it.widget=widget
+	it.snap=slide_snap
 	widget.slide=it
 	widget.class="slide"
 	
@@ -124,7 +142,7 @@ function setup(widget,def)
 	widget.mouse=mouse
 	widget.update=update
 	
-	-- guess horiz or vertical slider?
+-- auto guess horiz or vertical slider? nah keep it simple
 --	local maxx=1,maxy=0 -- horiz scroll?
 --	if widget.hx>widget.hy then maxy=1 maxx=0 end -- ver scroll
 	
