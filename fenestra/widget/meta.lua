@@ -22,6 +22,8 @@ classes={
 	["master"]=require("fenestra.widget.master"),
 	["string"]=require("fenestra.widget.string"),
 	["textedit"]=require("fenestra.widget.textedit"),
+--	["scroll"]=require("fenestra.widget.scroll"),
+	["slide"]=require("fenestra.widget.slide"),
 }
 
 --
@@ -134,6 +136,8 @@ function setup(def)
 		widget.hx_max=def.hx_max -- clip maximum layout size
 		widget.hy_max=def.hy_max
 		
+		widget.ox=def.wx or 0 -- window fractional position within a scrolling container ( top left )
+		widget.oy=def.wy or 0 -- so 0,0 is normal and 1,1 is bottom right this depends on size of content
 		
 		
 		widget.color=def.color

@@ -29,7 +29,7 @@ end
 
 function setup(widget,def)
 	local it={}
-	widget.string=it
+	widget.scroll=it
 	widget.class="scroll"
 	
 	widget.key=key
