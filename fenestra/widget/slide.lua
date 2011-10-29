@@ -28,14 +28,8 @@ function update(widget)
 
 
 	it:snap()
---	local t=it.datx:snap( it.widget.hx , it.drag.hx , it.drag.px )
---print( it.datx.num , it.widget.hx , it.drag.hx , it.drag.px )
---it.drag.px=t
-
-
 
 --	it.drag.text=it.datx:get_string()
-
 	
 	return widget.meta.update(widget)
 end
@@ -72,8 +66,8 @@ local dat_get_size=function(dat,w)
 end
 
 
--- given the parents size and our relative position within it
--- update dat.num and return a new position (snapping)
+-- given the parents size and our relative position/size within it
+-- update dat.num and return a new position (for snapping)
 local dat_snap=function(dat,psiz,bsiz,bpos)
 	if dat.snap==0 then -- no snap
 	
@@ -112,7 +106,7 @@ function new_dat(id)
 	dat.min=0
 	dat.num=0
 	dat.max=1
-	dat.size=0 -- if 0 then it is auto sized
+	dat.size=0 -- if 0 then button is auto sized to some value
 	dat.step=0 -- if 0 then there is no quantization
 	
 	dat.get_string=dat_get_string
@@ -125,7 +119,7 @@ function new_dat(id)
 end
 
 function slide_snap(it)
--- auto snap positions when draged?
+-- auto snap positions when draged
 	it.drag.px=it.datx:snap( it.widget.hx , it.drag.hx , it.drag.px )
 -- upside down y so need to twiddle it
 	it.drag.py=it.widget.py - it.daty:snap( it.widget.hy , it.drag.hy , it.widget.py - it.drag.py )
@@ -142,14 +136,11 @@ function setup(widget,def)
 	widget.mouse=mouse
 	widget.update=update
 	
--- auto guess horiz or vertical slider? nah keep it simple
---	local maxx=1,maxy=0 -- horiz scroll?
---	if widget.hx>widget.hy then maxy=1 maxx=0 end -- ver scroll
-	
+--setup constraints in x and y 
 	it.datx=new_dat("x"):set(def.datx)
 	it.daty=new_dat("y"):set(def.daty)
 
--- addthe draging part
+-- auto add the draging button as a child
 	it.drag=widget:add({class="drag",color=0xffffffff,hy=it.daty:get_size(widget.hy),hx=it.datx:get_size(widget.hx),pxf=0,pyf=0})
 
 	return widget
