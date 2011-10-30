@@ -96,9 +96,13 @@ if #lua_lib_names>0 then
 
 	else -- nix
 
+-- we need to include libs again here for linking, cant prelink with statics?
+-- it should probably auto handle stuff
+-- anyway it gets complicated, so this is all hax
+
 		links { "lua51" }
-		links {  "lua_grd_libpng" , "lua_grd_zlib" }
-	
+		links { "lua_grd_libpng" , "lua_grd_zlib" }
+		links { "lua_zip_zziplib"}
 		links { "GL" , "GLU" }
 		links { "crypt" }
 		
