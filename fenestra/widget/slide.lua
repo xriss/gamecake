@@ -105,10 +105,11 @@ local dat_snap=function(dat,psiz,bsiz,bpos)
 end
 
 
-function new_dat(widget,id)
+function new_dat(it,id)
 
 	local dat={}
-	dat.widget=widget
+	dat.widget=it.widget
+	dat.it=it
 	dat.id=id
 	dat.min=0
 	dat.num=0
@@ -145,8 +146,8 @@ function setup(widget,def)
 	widget.update=update
 	
 --setup constraints in x and y 
-	it.datx=new_dat(widget,"x"):set(def.datx)
-	it.daty=new_dat(widget,"y"):set(def.daty)
+	it.datx=new_dat(it,"x"):set(def.datx)
+	it.daty=new_dat(it,"y"):set(def.daty)
 
 -- auto add the draging button as a child
 	it.drag=widget:add({class="drag",color=0xffffffff,hy=it.daty:get_size(widget.hy),hx=it.datx:get_size(widget.hx),pxf=0,pyf=0})
