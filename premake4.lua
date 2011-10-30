@@ -144,6 +144,8 @@ elseif ANDROID then
 	
 else
 
+	include("lib_z")
+	
 	include("lua_zip")
 	include("lua_zlib")
 	include("lua_freetype")

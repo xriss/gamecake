@@ -1,5 +1,5 @@
 
-project "lua_zlib_zlib"
+project "lib_z"
 kind "StaticLib"
 language "C++"
 files { "./**.cpp" , "./**.c" , "./**.h" }

@@ -101,7 +101,8 @@ if #lua_lib_names>0 then
 -- anyway it gets complicated, so this is all hax
 
 		links { "lua51" }
-		links { "lua_grd_libpng" , "lua_grd_zlib" }
+		links { "lib_z" }
+		links { "lua_grd_libpng" }
 		links { "lua_zip_zziplib"}
 		links { "GL" , "GLU" }
 		links { "crypt" }
