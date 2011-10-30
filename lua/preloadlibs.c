@@ -1,5 +1,6 @@
 
 #include "lua.h"
+extern int luaopen_zlib(lua_State *L);
 extern int luaopen_freetype(lua_State *L);
 extern int luaopen_bit(lua_State *L);
 extern int luaopen_box2d_core(lua_State *L);
@@ -16,6 +17,9 @@ extern void lua_preloadlibs(lua_State *L)
 {
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
+    lua_pushliteral(L, "zlib");
+    lua_pushcfunction(L, luaopen_zlib);
+    lua_settable(L, -3);
     lua_pushliteral(L, "freetype");
     lua_pushcfunction(L, luaopen_freetype);
     lua_settable(L, -3);

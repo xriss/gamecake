@@ -186,7 +186,7 @@ dd={
 	name="sensei",
 	form="char",
 	class="sensei",
-	asc=ascii("&"),
+	asc=ascii("1"),
 	desc="a sensei",
 		
 	can=can_talk,
@@ -206,6 +206,7 @@ dd={
 {
 	name="sensei.dump",
 	sensei="dump",
+	asc=ascii("2"),
 	desc="a sensei named hobob",
 	longdesc="Although it must be assumed that this is a person it looks more like a walking talking ball of fluff wearing leather Y-fronts.",
 	chat={
@@ -235,6 +236,7 @@ dd={
 {
 	name="sensei.twin1",
 	sensei="dump",
+	asc=ascii("2"),
 	desc="a young girl",
 	longdesc="A normal looking young girl with long braids on each side of her head, fashioned from her dark brown hair.",
 	chat={
@@ -256,6 +258,7 @@ dd={
 {
 	name="sensei.twin2",
 	sensei="dump",
+	asc=ascii("2"),
 	desc="a young girl",
 	longdesc="Although it looks as if this young girl looks eerily similar to the other one, she actually does.",
 	chat={
@@ -277,6 +280,7 @@ dd={
 {
 	name="sensei.test",
 	sensei="test",
+	asc=ascii("1"),
 	desc="a sensei named chester",
 	longdesc="Cauliflower ears are the least of his worries, worries that include broccoli nose and turnip tongue. One can only assume that the best years of his boxing career are far, far behind him.",
 	chat={
@@ -624,6 +628,16 @@ Eventually.
 	asc=ascii("%"),
 	form="item",
 	corpse=true,
+	rat=true,
+	can=can_item,
+	weight=1,
+},
+{
+	name="rat_gibs",
+	desc="the gibs of a rat",
+	asc=ascii(","),
+	form="item",
+	gibs=true,
 	rat=true,
 	can=can_item,
 	weight=1,
