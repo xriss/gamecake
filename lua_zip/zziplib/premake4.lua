@@ -1,8 +1,8 @@
 
 project "lua_zip_zziplib"
 kind "StaticLib"
-language "C++"
-files { "zzip/**.cpp" , "zzip/**.c" , "zzip/**.h" }
+language "C"
+files { "zzip/**.c" , "zzip/**.h" }
 
 if os.get() == "windows" then
 

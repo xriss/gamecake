@@ -3,8 +3,8 @@ include("zziplib")
 
 
 project "lua_zip"
-language "C++"
-files { "src/**.cpp" , "src/**.c" , "src/**.h" }
+language "C"
+files { "src/**.c" , "src/**.h" }
 
 links { "lua51" , "lua_zip_zziplib" }
 
