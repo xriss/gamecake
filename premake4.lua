@@ -153,13 +153,33 @@ else
 	include("lua_box2d")
 	include("lua_gl")
 	include("lua_grd")
---	include("lua_lanes")
 	include("lua_lash")
 	include("lua_lfs")
 	include("lua_socket")
-	--include("lua_sql")
-	--include("lua_sec")
 	include("lua_fenestra")
+
+
+-- lanes has trouble with multipple CPUs for some reason?
+-- or my code is not really thread safe?
+-- tis bugs that need to be fixed
+-- just disabled for now as a quick hack fix
+
+--	include("lua_lanes")
+
+
+-- security is always a clusterfuck, need openssl workingcross platform
+-- and its not building right now, so disable for now
+
+--	include("lua_sec")
+
+
+-- not using these so avoid the dependencies
+-- should probably setup sql as a dll since its useless on consoles etc
+-- as there is no full source to build, well there is source...
+-- but fuck me if I can build the shits
+
+--	include("lua_sql")
+
 
 	if os.get() == "windows" then
 
