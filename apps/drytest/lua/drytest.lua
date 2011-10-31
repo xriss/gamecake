@@ -9,8 +9,7 @@ module(...)
 
 function start()
 
-	lunatest.suite("poop")
-	lunatest.suite("test")
+	lunatest.suite("wetgenes_string")
 
 	lunatest.run()
 	
