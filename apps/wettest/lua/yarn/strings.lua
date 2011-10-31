@@ -211,17 +211,17 @@ function serialize(o,fout)
 		
 	elseif type(o) == "table" then
 	
-		fout("{\n")
+		fout("{")
 		
 		for k,v in pairs(o) do
-			fout("  [")
+			fout("[")
 			serialize(k,fout)
-			fout("] = ")
+			fout("]=")
 			serialize(v,fout)
-			fout(",\n")
+			fout(",")
 		end
 		
-		return fout("}\n")
+		return fout("}")
 	else
 		error("cannot serialize a " .. type(o))
 	end
