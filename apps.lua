@@ -143,6 +143,7 @@ function start(_name,...)
 	path=package.path
 	cpath=package.cpath
 
+	print("appname",appname)
 	print("apps.exe",exe)
 	print("apps.name",name)
 	print("apps.dll",dll)
