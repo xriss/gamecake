@@ -10,21 +10,33 @@ local wetstr=require("wetgenes.string")
 
 function test_serialize(dat)
 
-	if type(dat)=="table" then
-		
-		local dat1=dat or
-		{
-			poop={1,2,3}
-		}
+	local dat1=dat or
+	{
+		poop={1,2,3,ok="yes",num=78,{ok="yes",21,22,23}}
+	}
 
-		local str=wetstr.serialize(dat1)
+	if type(dat1)=="table" then
 		
+
+-- test normal
+		local str=wetstr.serialize(dat1)		
 		local f=assert(loadstring("return( "..str.." )"))
-		
 		local dat2=assert(f())
-				
 		assert_tables_equal(dat1,dat2)
-		
+
+-- test pretty		
+		local str=wetstr.serialize(dat1,{pretty=true})
+		local f=assert(loadstring("return( "..str.." )"))
+		local dat2=assert(f())
+		assert_tables_equal(dat1,dat2)
+
+-- test compact
+		local str=wetstr.serialize(dat1,{compact=true})
+		local f=assert(loadstring("return( "..str.." )"))
+		local dat2=assert(f())
+		assert_tables_equal(dat1,dat2)
+
+
 	end
 	
 end
