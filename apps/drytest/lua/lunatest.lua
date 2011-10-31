@@ -448,7 +448,7 @@ function assert_random(opt, f, ...)
 end
 
 
-
+--HAXTBH
 -- a table comparison checks all values of table a against table b should find any irregularities
 -- some mild anti recursion check...
 -- other wise it works like assert_equal
