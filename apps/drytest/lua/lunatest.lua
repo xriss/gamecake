@@ -448,6 +448,54 @@ function assert_random(opt, f, ...)
 end
 
 
+
+-- a table comparison checks all values of table a against table b should find any irregularities
+-- some mild anti recursion check...
+-- other wise it works like assert_equal
+function assert_tables_equal(exp, got, msg)
+
+   wraptest(type(exp) == "table", msg,
+            { reason=fmt("Expected type table but exp is %s",
+                         type(exp)) })
+                         
+   wraptest(type(got) == "table", msg,
+            { reason=fmt("Expected type table but got is %s",
+                         type(got)) })
+
+	msg=msg or "" -- need a string so we can keep track of how deep we go
+	
+	if #msg>4096 then -- probably over recursed, dont call with too large a msg or you may trigger this
+		fail("table test got too deep : "..msg)
+	end
+
+	idxs={}
+	for i,v in pairs(exp) do
+		idxs[i]=true
+	end
+	for i,v in pairs(got) do
+		idxs[i]=true
+	end
+	
+	for i,v in pairs(idxs) do
+	
+		if type(exp[i])=="table" or type(got[i])=="table" then -- recurse
+		
+			assert_tables_equal(exp[i],got[i], msg.."."..tostring(i))
+			
+		else
+		
+			assert_equal(exp[i],got[i],msg.."."..tostring(i))
+			
+		end
+		
+	end
+	
+end
+
+
+
+
+
 -- ####################
 -- # Module beginning #
 -- ####################
@@ -1093,3 +1141,4 @@ end
 
 -- Put it in the same namespace as the other assert_ functions.
 _importing_env.assert_random = assert_random
+
