@@ -11,7 +11,7 @@ classes={
 	["master"]=require("fenestra.widget.master"),
 	["string"]=require("fenestra.widget.string"),
 	["textedit"]=require("fenestra.widget.textedit"),
---	["scroll"]=require("fenestra.widget.scroll"),
+	["scroll"]=require("fenestra.widget.scroll"),
 	["pan"]=require("fenestra.widget.pan"),
 	["slide"]=require("fenestra.widget.slide"),
 }
@@ -96,7 +96,7 @@ function setup(def)
 		widget.hooks=def.hooks
 		
 		widget.sx=def.sx or def.hx or 1 -- (ratio)size for layout code
-		widget.sy=def.sy or def.hy or 1 -- use hxy if its provided
+		widget.sy=def.sy or def.hy or 1 -- use hx and hy if its provided
 		
 		widget.mx=def.mx or 0 -- max (ratio)size for layout code
 		widget.my=def.my or 0
