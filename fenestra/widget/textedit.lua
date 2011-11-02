@@ -1,15 +1,13 @@
+-- copy all globals into locals
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
 -- widget class string
 -- a one line string buffer that can be edited
 
 
 
-local require=require
-
 
 module("fenestra.widget.textedit")
-
-local string=require("string")
-local table=require("table")
 
 
 

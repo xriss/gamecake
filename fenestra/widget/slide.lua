@@ -1,16 +1,11 @@
--- widget class string
--- a one line string buffer that can be edited
+-- copy all globals into locals
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
+-- two basic widgets merged together to give a simple slide or scrollbar 
 
-local require=require
-local print=print
-local math=math
 
 module("fenestra.widget.slide")
-
-local string=require("string")
-local table=require("table")
 
 function mouse(widget,act,x,y,key)
 --	widget.master.focus=widget

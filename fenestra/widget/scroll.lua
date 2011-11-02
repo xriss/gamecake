@@ -1,15 +1,13 @@
--- widget class string
--- a one line string buffer that can be edited
+-- copy all globals into locals
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
+-- a scrolling area, the widget is biffer than display area but scroll bars allow you to see it all
 
-local require=require
-local print=print
+
 
 module("fenestra.widget.scroll")
 
-local string=require("string")
-local table=require("table")
 
 function mouse(widget,act,x,y,key)
 --	widget.master.focus=widget

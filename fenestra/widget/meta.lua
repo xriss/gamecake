@@ -1,18 +1,7 @@
+-- copy all globals into locals
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
 -- generic default widget functions
-
-
-local math=math
-local table=table
-
-local ipairs=ipairs
-local setmetatable=setmetatable
-local type=type
-local tostring=tostring
-
-local function print(...) _G.print(...) end
-
-
-local require=require
 
 
 module("fenestra.widget.meta")

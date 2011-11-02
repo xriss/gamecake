@@ -1,3 +1,5 @@
+-- copy all globals into locals
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 --
 -- handle widgets
@@ -8,9 +10,6 @@ local widget_meta=require("fenestra.widget.meta")
 local widget_skin=require("fenestra.widget.skin")
 
 
-local setmetatable=setmetatable
-
-local require=require
 
 module("fenestra.widget")
 
