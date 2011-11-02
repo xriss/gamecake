@@ -40,9 +40,9 @@ function setup(widget,def)
 	if widget.hy<ss*2 then ss=widget.hy/2 end
 	
 	it.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss,	})
-	it.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	pxr=widget.hx-ss,	pyr=0,
+	it.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
 		datx={max=0},daty={max=1},color=0xffffffff})
-	it.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	pxr=0,           	pyr=widget.hy-ss,
+	it.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	px=0,           	py=widget.hy-ss,
 		datx={max=1},daty={max=0},color=0xffffffff})
 
 	return widget

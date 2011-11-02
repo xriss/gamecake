@@ -165,7 +165,7 @@ function setup(def)
 
 		gl.PopMatrix() -- expect the base to be pushed
 		gl.PushMatrix()
-		gl.Translate(widget.px,widget.py,0)
+		gl.Translate(widget.pxd,widget.pyd,0)
 		gl.Rotate(widget.pa,0,0,1)
 		
 		gl.Disable(gl.LIGHTING)

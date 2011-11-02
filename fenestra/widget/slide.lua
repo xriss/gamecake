@@ -124,12 +124,12 @@ end
 function slide_snap(it)
 
 -- auto snap positions when draged
-	it.drag.pxr=it.datx:snap( it.widget.hx , it.drag.hx , it.drag.pxr )
-	it.drag.px=it.widget.px+it.drag.pxr
+	it.drag.px=it.datx:snap( it.widget.hx , it.drag.hx , it.drag.px )
+	it.drag.pxd=it.widget.pxd+it.drag.px
 	
 -- upside down y so need to twiddle it, pyr is "the right way up"
-	it.drag.pyr=it.daty:snap( it.widget.hy , it.drag.hy , it.drag.pyr )
-	it.drag.py=it.widget.py-it.drag.pyr
+	it.drag.py=it.daty:snap( it.widget.hy , it.drag.hy , it.drag.py )
+	it.drag.pyd=it.widget.pyd-it.drag.py
 	
 end
 	

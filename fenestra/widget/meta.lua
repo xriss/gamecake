@@ -107,11 +107,11 @@ function setup(def)
 		widget.pxf=def.pxf      -- local position, for sliders etc, goes from 0-1 
 		widget.pyf=def.pyf      -- fractional position within container
 
-		widget.pxr=def.pxr or 0 -- relative pixel position (may auto generate)
-		widget.pyr=def.pyr or 0
-		
-		widget.px=def.px or 0 -- absolute pixel position (very probably auto generated)
+		widget.px=def.px or 0 -- relative pixel position (may auto generate)
 		widget.py=def.py or 0
+		
+		widget.pxd=def.pxd or 0 -- absolute pixel position (very probably auto generated)
+		widget.pyd=def.pyd or 0
 		
 		widget.pa=def.pa or 0 -- display rotation angle, possibly
 
@@ -164,8 +164,8 @@ function setup(def)
 	
 		if val=="slide" then
 		
-			local x=(widget.px-widget.parent.px) / (widget.parent.hx-widget.hx)
-			local y=(widget.py-widget.parent.py) / (widget.parent.hy-widget.hy)
+			local x=(widget.pxd-widget.parent.pxd) / (widget.parent.hx-widget.hx)
+			local y=(widget.pyd-widget.parent.pyd) / (widget.parent.hy-widget.hy)
 			
 			
 			return x,y
@@ -187,11 +187,11 @@ function setup(def)
 					v.pyf=t[2] or v.pyf or 0
 				end
 print("SET",v.pxf,v.pyf)
-				v.pxr=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
-				v.pyr=(widget.hy-v.hy)*v.pyf
+				v.px=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
+				v.py=(widget.hy-v.hy)*v.pyf
 				
-				v.px=widget.px+v.pxr -- absolute
-				v.py=widget.py-v.pyr
+				v.pxd=widget.pxd+v.px -- absolute
+				v.pyd=widget.pyd-v.py
 				
 			end
 		end
@@ -227,11 +227,11 @@ print("SET",v.pxf,v.pyf)
 			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
 			if v.hyf then v.hy=widget.hy*v.hyf end
 			
-			v.pxr=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
-			v.pyr=(widget.hy-v.hy)*v.pyf
+			v.px=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
+			v.py=(widget.hy-v.hy)*v.pyf
 
-			v.px=widget.px+v.pxr -- local absolute position
-			v.py=widget.py-v.pyr
+			v.pxd=widget.pxd+v.px -- local absolute position
+			v.pyd=widget.pyd-v.py
 
 		end
 		for i,v in ipairs(widget) do
@@ -246,11 +246,11 @@ print("SET",v.pxf,v.pyf)
 			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
 			if v.hyf then v.hy=widget.hy*v.hyf end
 			
-			if v.pxf then v.pxr=(widget.hx)*v.pxf end -- local position relative to parents size
-			if v.pyf then v.pyr=(widget.hy)*v.pyf end
+			if v.pxf then v.px=(widget.hx)*v.pxf end -- local position relative to parents size
+			if v.pyf then v.py=(widget.hy)*v.pyf end
 
-			v.px=widget.px+v.pxr -- local absolute position
-			v.py=widget.py-v.pyr
+			v.pxd=widget.pxd+v.px -- absolute position
+			v.pyd=widget.pyd-v.py
 			
 		end
 		for i,v in ipairs(widget) do
@@ -269,8 +269,8 @@ print("SET",v.pxf,v.pyf)
 		local my=0
 		local mhx,mhy=0,0
 		function addone(w)
-			w.px=widget.px+hx
-			w.py=widget.py-hy -- top align by default
+			w.px=hx
+			w.py=hy
 			hx=hx+w.hx
 			if hx > mhx then mhx=hx end -- max x total size
 			if w.hy > my then my=w.hy end -- max y size for this line
@@ -315,6 +315,11 @@ print("SET",v.pxf,v.pyf)
 			
 		end
 		
+		for i,v in ipairs(widget) do
+			v.pxd=widget.pxd+v.px
+			v.pyd=widget.pyd-v.py
+		end
+
 -- layout sub sub widgets	
 		for i,v in ipairs(widget) do
 			v:layout()
@@ -334,7 +339,7 @@ print("SET",v.pxf,v.pyf)
 			for i,v in ipairs(widget) do
 				v.hy=v.sy*widget.hy/sy
 				if v.hy_max and v.hy > v.hy_max then v.hy = v.hy_max end
-				v.py=widget.py-y
+				v.py=y
 				if v.endofline then y=y+v.hy end
 --print(v.px..","..v.py.." - "..v.hx..","..v.hy)
 			end
@@ -347,7 +352,7 @@ print("SET",v.pxf,v.pyf)
 				v.sy=my
 				v.hx=v.sx*widget.hx/sx
 				if v.hx_max and v.hx > v.hx_max then v.hx = v.hx_max end
-				v.px=widget.px+x
+				v.px=x
 				x=x+v.hx
 			end
 			widget[i].endofline=true
@@ -382,6 +387,11 @@ print("SET",v.pxf,v.pyf)
 		end
 		
 		for i,v in ipairs(widget) do
+			v.pxd=widget.pxd+v.px
+			v.pyd=widget.pyd-v.py
+		end
+
+		for i,v in ipairs(widget) do
 			v:layout()
 		end
 	end
@@ -399,14 +409,14 @@ print("SET",v.pxf,v.pyf)
 	
 --print(x..","..y.." : "..widget.px..","..widget.py)
 
-		if widget.solid and x>=widget.px and x<widget.px+widget.hx and y<=widget.py and y>widget.py-widget.hy then
+		if widget.solid and x>=widget.pxd and x<widget.pxd+widget.hx and y<=widget.pyd and y>widget.pyd-widget.hy then
 		
 			if act=="down" then
 -- only set if null or our parent...
 				if not widget.master.active or widget.master.active==widget.parent then
 					widget.master.active=widget
-					widget.master.active_x=x-widget.px
-					widget.master.active_y=y-widget.py
+					widget.master.active_x=x-widget.pxd
+					widget.master.active_y=y-widget.pyd
 				end
 			end
 			if act=="up" then

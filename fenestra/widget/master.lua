@@ -81,21 +81,21 @@ function setup(widget,def)
 				local w=master.active
 				local p=master.active.parent
 				
-				local minx=p.px
-				local miny=p.py-p.hy+w.hy
-				local maxx=p.px+p.hx-w.hx
-				local maxy=p.py
+				local minx=p.pxd
+				local miny=p.pyd-p.hy+w.hy
+				local maxx=p.pxd+p.hx-w.hx
+				local maxy=p.pyd
 				
-				w.px=x-master.active_x
-				w.py=y-master.active_y
+				w.pxd=x-master.active_x
+				w.pyd=y-master.active_y
 				
-				if w.px<minx then w.px=minx end
-				if w.px>maxx then w.px=maxx end
-				if w.py<miny then w.py=miny end
-				if w.py>maxy then w.py=maxy end
+				if w.pxd<minx then w.pxd=minx end
+				if w.pxd>maxx then w.pxd=maxx end
+				if w.pyd<miny then w.pyd=miny end
+				if w.pyd>maxy then w.pyd=maxy end
 				
-				w.pxr=w.px-p.px
-				w.pyr=p.py-w.py
+				w.px=w.pxd-p.pxd
+				w.py=p.pyd-w.pyd
 			
 				w:call_hook("slide")
 

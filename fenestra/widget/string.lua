@@ -21,7 +21,7 @@ function mouse(widget,act,x,y,key)
 		widget.master.focus=widget
 		
 		if act=="down" then
-			local dx=x-((widget.px or 0)+(widget.text_x or 0))
+			local dx=x-((widget.pxd or 0)+(widget.text_x or 0))
 --print(dx)
 			if dx<0 then -- catch lessthan
 				it.line_idx=0

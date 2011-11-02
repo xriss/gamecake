@@ -39,8 +39,10 @@ function setup(win,def)
 	def.hx=def.hx or 640
 	def.hy=def.hy or 480
 	def.px=def.px or 0
-	def.py=def.py or def.hy
-
+	def.py=def.py or 0
+	def.pxd=def.pxd or 0
+	def.pyd=def.pyd or def.hy
+print("poop?",def.pyd)
 	def.class=def.class or "master"
 	
 	master:setup(def)
