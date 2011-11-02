@@ -93,6 +93,9 @@ function setup(widget,def)
 				if w.px>maxx then w.px=maxx end
 				if w.py<miny then w.py=miny end
 				if w.py>maxy then w.py=maxy end
+				
+				w.pxr=w.px-p.px
+				w.pyr=p.py-w.py
 			
 				w:call_hook("slide")
 

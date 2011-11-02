@@ -156,6 +156,10 @@ function setup(def)
 --
 	function meta.draw(widget)
 		
+		if debug_hook then debug_hook("draw",widget) end
+		
+		
+
 		-- draw rectangle
 
 

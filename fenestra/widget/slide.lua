@@ -77,14 +77,13 @@ end
 -- given the parents size and our relative position/size within it
 -- update dat.num and return a new position (for snapping)
 local dat_snap=function(dat,psiz,bsiz,bpos)
-	if dat.snap==0 then -- no snap
-	
+	if dat.step==0 then -- no snap
 		if dat.max==dat.min then dat:value(dat.min) return 0 end -- do not move
 		
 		local f=bpos/(psiz-bsiz)
 		dat:value(dat.min+((dat.max-dat.min)*f))
 		
-		return bpos -- do not snap
+		return bpos
 		
 	else
 	
@@ -123,10 +122,15 @@ function new_dat(it,id)
 end
 
 function slide_snap(it)
+
 -- auto snap positions when draged
-	it.drag.px=it.datx:snap( it.widget.hx , it.drag.hx , it.drag.px )
+	it.drag.pxr=it.datx:snap( it.widget.hx , it.drag.hx , it.drag.pxr )
+	it.drag.px=it.widget.px+it.drag.pxr
+	
 -- upside down y so need to twiddle it
-	it.drag.py=it.widget.py - it.daty:snap( it.widget.hy , it.drag.hy , it.widget.py - it.drag.py )
+	it.drag.pyr=it.daty:snap( it.widget.hy , it.drag.hy , it.drag.pyr )
+	it.drag.py=it.widget.py-it.drag.pyr
+	
 end
 	
 function setup(widget,def)

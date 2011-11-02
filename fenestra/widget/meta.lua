@@ -12,6 +12,7 @@ classes={
 	["string"]=require("fenestra.widget.string"),
 	["textedit"]=require("fenestra.widget.textedit"),
 --	["scroll"]=require("fenestra.widget.scroll"),
+	["pan"]=require("fenestra.widget.pan"),
 	["slide"]=require("fenestra.widget.slide"),
 }
 
@@ -109,7 +110,7 @@ function setup(def)
 		widget.pxr=def.pxr or 0 -- relative pixel position (may auto generate)
 		widget.pyr=def.pyr or 0
 		
-		widget.px=def.px or 0 -- pixel position (probably auto generated)
+		widget.px=def.px or 0 -- absolute pixel position (very probably auto generated)
 		widget.py=def.py or 0
 		
 		widget.pa=def.pa or 0 -- display rotation angle, possibly
@@ -166,6 +167,7 @@ function setup(def)
 			local x=(widget.px-widget.parent.px) / (widget.parent.hx-widget.hx)
 			local y=(widget.py-widget.parent.py) / (widget.parent.hy-widget.hy)
 			
+			
 			return x,y
 		end
 		
@@ -184,9 +186,12 @@ function setup(def)
 					v.pxf=t[1] or v.pxf or 0
 					v.pyf=t[2] or v.pyf or 0
 				end
+print("SET",v.pxf,v.pyf)
+				v.pxr=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
+				v.pyr=(widget.hy-v.hy)*v.pyf
 				
-				v.px=widget.px+(widget.hx-v.hx)*v.pxf -- local position relative to parents size
-				v.py=widget.py-(widget.hy-v.hy)*v.pyf
+				v.px=widget.px+v.pxr -- absolute
+				v.py=widget.py-v.pyr
 				
 			end
 		end
@@ -199,7 +204,7 @@ function setup(def)
 --print(widget.class)
 		if widget.class=="flow" or widget.class=="hx" then -- hx will be removed
 			meta.layout_flow(widget)
-		elseif widget.class=="fill" or widget.class=="fbo" then
+		elseif widget.class=="fill" or widget.class=="pan" then
 			meta.layout_fill(widget)
 		elseif widget.class=="slide" or widget.class=="pad" then
 			meta.layout_padding(widget)
@@ -218,13 +223,16 @@ function setup(def)
 	
 	function meta.layout_padding(widget)
 		for i,v in ipairs(widget) do
-		
+
 			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
 			if v.hyf then v.hy=widget.hy*v.hyf end
 			
-			v.px=widget.px+(widget.hx-v.hx)*v.pxf -- local position relative to parents size
-			v.py=widget.py-(widget.hy-v.hy)*v.pyf
-			
+			v.pxr=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
+			v.pyr=(widget.hy-v.hy)*v.pyf
+
+			v.px=widget.px+v.pxr -- local absolute position
+			v.py=widget.py-v.pyr
+
 		end
 		for i,v in ipairs(widget) do
 			v:layout()
