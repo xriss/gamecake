@@ -321,8 +321,9 @@ function setup(def)
 
 		end
 		
-		for i,v in ipairs(widget) do v:draw() end
-		
+		if not widget.do_not_recurse then
+			for i,v in ipairs(widget) do v:draw() end
+		end
 		
 		return widget
 	end

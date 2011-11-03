@@ -26,7 +26,27 @@ function update(widget)
 end
 
 function draw(widget)
-	return widget.meta.draw(widget)
+
+	local it=widget.pan
+
+	widget.do_not_recurse=true
+	local ret=widget.meta.draw(widget)
+	widget.do_not_recurse=nil
+
+	for i,v in ipairs(widget) do
+		local pxd,pyd=v.pxd,v.pyd
+		
+		v.pxd=pxd+it.px
+		v.pyd=pyd+it.py
+		
+		v:draw()
+
+		v.pxd=pxd
+		v.pyd=pyd
+
+	end
+	
+	return ret
 end
 
 
@@ -34,6 +54,9 @@ function setup(widget,def)
 	local it={}
 	widget.pan=it
 	widget.class="pan"
+	
+	it.px=0
+	it.py=0
 	
 	widget.key=key
 	widget.mouse=mouse

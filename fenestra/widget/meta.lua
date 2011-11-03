@@ -124,12 +124,8 @@ function setup(def)
 		widget.hy=def.hy or 0
 		
 		widget.hx_max=def.hx_max -- clip maximum layout size
-		widget.hy_max=def.hy_max
-		
-		widget.ox=def.wx or 0 -- window fractional position within a scrolling container ( top left )
-		widget.oy=def.wy or 0 -- so 0,0 is normal and 1,1 is bottom right this depends on size of content
-		
-		
+		widget.hy_max=def.hy_max		
+				
 		widget.color=def.color
 		widget.text_color=def.text_color or widget.master.text_color or 0xff000000 -- black text
 		widget.text_size=def.text_size or widget.master.text_size or 16 -- quite chunky text by default

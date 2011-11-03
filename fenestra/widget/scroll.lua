@@ -24,6 +24,17 @@ function update(widget)
 	return widget.meta.update(widget)
 end
 
+function draw(widget)
+
+	local it=widget.scroll
+	
+	local pan=it.pan.pan
+	
+	pan.px=it.slidex.slide.datx.num*1000
+	pan.py=it.slidey.slide.daty.num*1000
+	
+	return widget.meta.draw(widget)
+end
 
 function setup(widget,def)
 	local it={}
@@ -33,6 +44,7 @@ function setup(widget,def)
 	widget.key=key
 	widget.mouse=mouse
 	widget.update=update
+	widget.draw=draw
 
 -- auto add the draging button as a child
 	local ss=24
