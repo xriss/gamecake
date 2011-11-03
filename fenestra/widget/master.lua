@@ -76,7 +76,7 @@ function setup(widget,def)
 	
 --		if widget.state=="ready" then
 		
-			if master.active and master.active.parent.class=="slide" then -- slide :)
+			if master.active and (master.active.parent.class=="slide" or master.active.parent.class=="oldslide") then -- slide :)
 			
 				local w=master.active
 				local p=master.active.parent

@@ -186,7 +186,9 @@ function setup(def)
 					v.pxf=t[1] or v.pxf or 0
 					v.pyf=t[2] or v.pyf or 0
 				end
-print("SET",v.pxf,v.pyf)
+				
+--print("SET",v.pxf,v.pyf)
+
 				v.px=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
 				v.py=(widget.hy-v.hy)*v.pyf
 				
