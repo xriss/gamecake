@@ -11,7 +11,7 @@ else -- nix
 end
 
 
-includedirs { "." }
+includedirs { "." , "../../lib_z" }
 
 
 configuration {"Debug"}
