@@ -47,7 +47,7 @@ function setup(widget,def)
 	widget.draw=draw
 
 -- auto add the draging button as a child
-	local ss=24
+	local ss=16
 	if widget.hx<ss*2 then ss=widget.hx/2 end
 	if widget.hy<ss*2 then ss=widget.hy/2 end
 	
