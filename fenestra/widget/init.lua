@@ -42,7 +42,7 @@ function setup(win,def)
 	def.py=def.py or 0
 	def.pxd=def.pxd or 0
 	def.pyd=def.pyd or def.hy
-print("poop?",def.pyd)
+
 	def.class=def.class or "master"
 	
 	master:setup(def)
