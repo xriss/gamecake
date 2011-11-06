@@ -232,7 +232,7 @@ end
 	
 -- build an application cache
 
-	for i,v in ipairs(tab.cache_files) do
+	for i,v in ipairs(tab.cache_files or {}) do
 		local v1,v2
 		if type(v)=="table" then
 			v1=v[1]
