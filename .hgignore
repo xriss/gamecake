@@ -1,0 +1,6 @@
+.orig
+build-
+.dbg
+android/bin
+android/gen
+
