@@ -8,7 +8,7 @@
 #if defined(X11)
 
 //#include <gtk/gtk.h>
-extern "C" char *freq_GetFile(const char *_path);
+//extern "C" char *freq_GetFile(const char *_path);
 
 #endif
 
@@ -246,12 +246,17 @@ static int core_choose_file(lua_State *l)
 {
 	struct fenestra *core = (struct fenestra *)lua_touserdata(l, 1 );
 
+// function disabled till i make a damn file requester...
+	return 0;
+
 #if defined(WIN32)
 //	return 0;	
 #endif
 
 #if defined(X11)
 
+/*
+ * 
 const char *s1=0;
 char *s2=0;
 
@@ -268,6 +273,7 @@ char *s2=0;
 	lua_pushstring(l,s2);
 	free(s2);
 	return 1;
+*/
 
 //disable gtkmm...
 #if 0
