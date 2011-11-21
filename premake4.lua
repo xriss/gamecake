@@ -186,6 +186,7 @@ else
 	else -- nix
 
 		include("lua_posix")
+--		include("lib_sx")
 		
 	end
 	

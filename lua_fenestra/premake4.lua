@@ -4,6 +4,7 @@ language "C++"
 files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 
 includedirs { "../lua_freetype/freetype/include/" }
+includedirs { "../lib_sx/src/" }
 
 links { "lua51" }
 
@@ -12,7 +13,7 @@ defines { "LUA_LIB" }
 if os.get() == "windows" then
 	links { "opengl32" , "glu32" }
 else -- nix
-	links { "GL" , "GLU" , "sx" }
+	links { "GL" , "GLU"  }
 --[[
 	local fp=assert(io.popen("pkg-config --cflags libsx"))
 	local s=assert(fp:read("*l"))

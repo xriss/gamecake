@@ -102,13 +102,14 @@ if #lua_lib_names>0 then
 
 		links { "lua51" }
 		links { "lib_z" }
+--		links { "lib_sx" }
 		links { "lua_grd_libpng" }
 		links { "lua_zip_zziplib"}
 		links { "GL" , "GLU" }
 		links { "crypt" }
 		
 		links { "pthread" }
-		links { "sx" }
+--		links { "sx" }
 --		links { "ssl" }
 --		links { "mysqlclient" }
 
