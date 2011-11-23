@@ -72,7 +72,7 @@ function update()
 
 end
 
-function draw()
+function draw(wx,wy)
 
 -- save current mtx for reverse mouse pointer projections
 	mtx_proj:set(gl.Get("PROJECTION_MATRIX"))
@@ -81,17 +81,20 @@ function draw()
 	mtx_3d_to_2d:inverse(mtx_2d_to_3d)         	-- inverse
 	
 	gl.PushMatrix()
-	gl.Translate(-160,-240, 0)
-	widget:draw()
+	gl.Translate(-wx/2,-wy/2, 0)
+--	widget:draw()
 	gl.PopMatrix()	
+--TODO: fix widget scroll thing
 
 --if true then return end
 
 	gl.PushMatrix()
-	gl.Translate(-160,-240,0)
-	
+	gl.Translate(-wx/2,-wy/2,0)
+
+local wrap_x=math.floor(wx/(fontsize))
+
 	local dx,dy=sideslide_knob:get("slide")
-	local skiplines=total_lines-((480/(fontsize+2))-2)
+	local skiplines=total_lines-((wy/(fontsize+2))-2)
 --print(dx,dy,total_lines,skiplines)
 	skiplines=math.floor(skiplines*(1+dy))
 	if skiplines<0 then skiplines=0 end
@@ -100,16 +103,22 @@ function draw()
 		for i=#lines+1,1,-1 do local v=lines[i]
 		local noskip=false
 		
-			if y>480 then break end -- drawing off of the top of the screen
+			if y>wy then break end -- drawing off of the top of the screen
 			
 			if not v then -- draw edit buffer
 			
 				v={}
 				v.buff=buff
-				v.lines=word_wrap(buff.line,40-1)
+				v.lines=word_wrap(buff.line,wrap_x)
 				if not v.lines[1] then v.lines[1]="" end
 				noskip=true
 				v.rgb=0x00ff00
+	
+			else
+				if v.wrap_x~=wrap_x then
+					v.lines=word_wrap(v.txt,wrap_x)
+					v.wrap_x=wrap_x
+				end
 			end
 			
 			if #v.lines>0 then

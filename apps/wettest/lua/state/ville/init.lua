@@ -283,16 +283,16 @@ function draw()
 	gl.Disable('DEPTH_TEST')
 	gl.Disable('CULL_FACE')
 	
-		win.clip2d(2/3,0,1/3,win.height)
-		win.project23d(480/320,1,32768)
+		win.clip2d(win.width*2/3,0,win.width*1/3,win.height)
+		win.project23d( (win.width*1/3)/win.height ,1,32768)
 		gl.ClearColor(0,0,0,0)
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 		gl.MatrixMode("MODELVIEW")
 		gl.LoadIdentity()
-		gl.Translate(0,0,-240)
+		gl.Translate(0,0,-win.height/2)
 		
 		gl.PushMatrix()
-		chat.draw()
+		chat.draw( (win.width*1/3) , win.height )
 		gl.PopMatrix()
 	end
 
