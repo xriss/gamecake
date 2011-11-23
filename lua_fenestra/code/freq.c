@@ -1,3 +1,5 @@
+#if defined(X11)
+
 /* This file contains all routines for creating and managing a file
  * requestor.  The programmer's only interface to the file requestor
  * is the function GetFile().  See the description for that function
@@ -393,3 +395,4 @@ static int mystrcmp(const void *a, const void *b)
   return strcmp(*(char **)a, *(char **)b);
 }
 
+#endif
