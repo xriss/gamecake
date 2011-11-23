@@ -250,7 +250,7 @@ static int core_choose_file(lua_State *l)
 	return 0;
 
 #if defined(WIN32)
-//	return 0;	
+	return 0;	
 #endif
 
 #if defined(X11)
