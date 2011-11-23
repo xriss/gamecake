@@ -34,7 +34,7 @@ bool fenestra_ogl::setup(struct fenestra * _fenestra)
     pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.cColorBits = 24;
-    pfd.cDepthBits = 16;
+    pfd.cDepthBits = 24; // 16 is too small?
     pfd.iLayerType = PFD_MAIN_PLANE;
     iFormat = ChoosePixelFormat( hDC, &pfd );
 
