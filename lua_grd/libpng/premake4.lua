@@ -4,7 +4,7 @@ kind "StaticLib"
 language "C++"
 files { "./**.cpp" , "./**.c" , "./**.h" }
 
-links { "lua_grd_zlib" }
+links { "lib_z" }
 
 defines { "PNG_STATIC" }
 
@@ -15,7 +15,7 @@ else -- nix
 end
 
 
-includedirs { "." , "../zlib" }
+includedirs { "." , "../../lib_z" }
 
 
 configuration {"Debug"}

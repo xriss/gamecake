@@ -247,7 +247,7 @@ static int core_choose_file(lua_State *l)
 	struct fenestra *core = (struct fenestra *)lua_touserdata(l, 1 );
 
 #if defined(WIN32)
-//	return 0;	
+	return 0;	
 #endif
 
 #if defined(X11)
