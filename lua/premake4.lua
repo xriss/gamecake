@@ -12,6 +12,7 @@ SET_KIND("luamain")
 if NIX then
 printf("MKSTEMP")
 	defines("LUA_USE_MKSTEMP") -- remove warning
+	defines("LUA_USE_POPEN") -- we want to enable popen
 end
 
 if #lua_lib_names>0 then
