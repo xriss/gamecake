@@ -566,6 +566,8 @@ bool fenestra::setup()
 
 		XMapWindow( dsp, win );
 
+		XStoreName(dsp, win, "http://www.WetGenes.com/ - fenestra");
+
 		XSelectInput( dsp, win, KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask );
 		XFlush(dsp);
 		  
