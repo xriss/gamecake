@@ -127,6 +127,13 @@ end
 local goto_page=goto_page
 
 
+
+-- persistant gui data
+local datas={}
+
+datas.num1={class="number",val=0,max=10,min=0,step=1,size=1}
+datas.num2={class="number",val=0,max=10,min=0,step=0,size=1}
+
 -----------------------------------------------------------------------------
 --
 -- setup a table of panels functions using the provided widgets table, insert our functions into ws.panels
@@ -136,6 +143,7 @@ local goto_page=goto_page
 function panels_setup(ws)
 local env={}
 ws.panels=env
+ws.datas=datas
 setfenv(1,env)
 
 -----------------------------------------------------------------------------
@@ -215,6 +223,7 @@ end
 -----------------------------------------------------------------------------
 test_buttons={}
 
+
 -----------------------------------------------------------------------------
 function test_buttons.add(hash)
 -----------------------------------------------------------------------------
@@ -232,6 +241,8 @@ print(widget.id)
 	misc.add("topbar")
 	
 	ws.top:add({class="fill",hx=640,hy=24,text="test buttons",color=0xffffffff,id="test_buttons",hooks=hooks})
+	ws.top:add({class="slide",color=0xffffffff,id="test_slide1",hy=24,hx=640,datx=datas.num1,daty={max=0},data=datas.num1,hooks=hooks})
+	ws.top:add({class="slide",color=0xffffffff,id="test_slide2",hy=24,hx=640,datx=datas.num2,daty={max=0},data=datas.num2,hooks=hooks})
 	
 	ws.master:layout()
 	
