@@ -43,7 +43,7 @@ end
 
 -- a string to put in the handle
 local data_get_string=function(dat)
-	return dat.num.."/"..dat.max
+	return math.floor(dat.num).."/"..math.floor(dat.max)
 end
 
 -- how wide or tall should the handle be given the size of the parent?
@@ -56,6 +56,15 @@ local data_get_size=function(dat,w)
 	end
 end
 
+
+-- get display pos, given the size of the parent and our size?
+local data_get_pos=function(dat,psiz,bsiz)
+	if dat.step==0 then -- no snap
+		return ((dat.num-dat.min)/(dat.max-dat.min))
+	else
+		return ((dat.num-dat.min)/(dat.max-dat.min))
+	end
+end
 
 -- given the parents size and our relative position/size within it
 -- update dat.num and return a new position (for snapping)
@@ -84,7 +93,7 @@ end
 
 function new_data(dat)
 
-	local dat=dat or {}
+	local dat=dat or {} -- probably use what is passed in only fill in more values
 --	dat.widget=it.widget
 --	dat.it=it
 --	dat.id=id
@@ -96,9 +105,12 @@ function new_data(dat)
 	
 	dat.get_string=data_get_string
 	dat.get_size=data_get_size
+	dat.get_pos=data_get_pos
 	dat.set=data_set
 	dat.value=data_value
 	dat.snap=data_snap
+
+	data_value(dat,dat.num)
 	
 	return dat
 	

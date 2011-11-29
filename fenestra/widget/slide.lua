@@ -61,7 +61,7 @@ function setup(widget,def)
 	it.daty=widget_data.new_data(def.daty)
 
 -- auto add the draging button as a child
-	it.drag=widget:add({class="drag",color=0xffffffff,hy=it.daty:get_size(widget.hy),hx=it.datx:get_size(widget.hx),pxf=0,pyf=0,data=widget.data})
-
+	it.drag=widget:add({class="drag",color=0xffffffff,hy=it.daty:get_size(widget.hy),hx=it.datx:get_size(widget.hx),pxf=it.datx:get_pos(),pyf=it.daty:get_pos(),data=widget.data})
+	
 	return widget
 end
