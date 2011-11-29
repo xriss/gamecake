@@ -14,6 +14,7 @@ classes={
 	["scroll"]=require("fenestra.widget.scroll"),
 	["pan"]=require("fenestra.widget.pan"),
 	["slide"]=require("fenestra.widget.slide"),
+	["drag"]=require("fenestra.widget.drag"),
 }
 
 --
@@ -87,6 +88,8 @@ function setup(def)
 		widget.state="none"
 		
 		widget.meta=meta
+		
+		widget.data=def.data -- this widget is synced with this data
 		
 		widget.class=def.class
 		widget.highlight=def.highlight
