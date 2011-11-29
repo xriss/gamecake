@@ -20,7 +20,7 @@ module(...)
 	
 function setup()
 
-	page()
+	goto_page()
 	
 	print("setup")
 
@@ -76,7 +76,7 @@ end
 
 
 local this_page=nil
-function page(f)
+function goto_page(f)
 
 	if f then this_page=f else f=this_page end -- call with no args to reload current page
 	
@@ -124,7 +124,7 @@ function page(f)
 ]]
 
 end
-
+local goto_page=goto_page
 
 
 -----------------------------------------------------------------------------
@@ -137,6 +137,46 @@ function panels_setup(ws)
 local env={}
 ws.panels=env
 setfenv(1,env)
+
+-----------------------------------------------------------------------------
+--
+-- misc
+--
+-----------------------------------------------------------------------------
+misc={}
+misc.hooks={}
+
+-----------------------------------------------------------------------------
+function misc.hooks.click(widget)
+-----------------------------------------------------------------------------
+print(widget.id)
+
+--[[
+	local f=hooks_click[widget.id]
+	if f then
+		f(widget)
+	end
+]]
+
+	if widget.id=="topbar_menu" then
+		goto_page("menu")
+	end
+
+end
+	
+
+-----------------------------------------------------------------------------
+function misc.add(hash)
+-----------------------------------------------------------------------------
+
+	if hash=="topbar" then
+	
+		ws.top:add({hx=640,hy=24,class="fill",id="topbar"})
+		ws.topbar:add({class="button",text="menu",color=0xffffffff,id="topbar_menu",hy=24,hx=120,hooks=misc.hooks})
+		ws.topbar:add({text="title",id="topbar_title",hy=24,hx=640-120})
+	
+	end
+end
 
 -----------------------------------------------------------------------------
 --
@@ -153,23 +193,82 @@ local hooks={}
 	function hooks.click(widget)
 print(widget.id)
 		if widget.id and env[widget.id] then
---			_G.stock_gotopage(widget.id)
+			goto_page(widget.id)
 		end
 	end
 
---	ws.top=ws.master:add({sx=640,sy=480,mx=1,class="fill",rx=0,ry=0})
 	ws.master:add({hx=640,hy=480,mx=1,class="flow",ax=0,ay=0,id="top"})
 	
 	ws.top:add({class="flow",sy=5,sx=1})
-	ws.top:add({class="flow",text="view buys",color=0xffeeeeee,id="buy_list",hooks=hooks})
-	ws.top:add({class="flow",text="sold stock",color=0xffeeeeee,id="search",hooks=hooks})
-	ws.top:add({class="flow",text="edit items",color=0xffeeeeee,id="item",hooks=hooks})
+	ws.top:add({class="flow",text="buttons",color=0xffffffff,id="test_buttons",hooks=hooks})
+	ws.top:add({class="flow",text="scrolls",color=0xffffffff,id="test_scrolls",hooks=hooks})
 	ws.top:add({class="flow",sy=5,sx=1})
 	
 	ws.master:layout()
 	
 end
 
-return panels
+-----------------------------------------------------------------------------
+--
+-- test_buttons
+--
+-----------------------------------------------------------------------------
+test_buttons={}
+
+-----------------------------------------------------------------------------
+function test_buttons.add(hash)
+-----------------------------------------------------------------------------
+
+local hooks={}
+	function hooks.click(widget)
+print(widget.id)
+		if widget.id and env[widget.id] then
+			goto_page(widget.id)
+		end
+	end
+
+	ws.master:add({hx=640,hy=480,mx=1,class="fill",ax=0,ay=0,id="top"})
+	
+	misc.add("topbar")
+	
+	ws.top:add({class="fill",hx=640,hy=24,text="test buttons",color=0xffffffff,id="test_buttons",hooks=hooks})
+	
+	ws.master:layout()
+	
 end
 
+-----------------------------------------------------------------------------
+--
+-- test_scrolls
+--
+-----------------------------------------------------------------------------
+test_scrolls={}
+
+-----------------------------------------------------------------------------
+function test_scrolls.add(hash)
+-----------------------------------------------------------------------------
+
+local hooks={}
+	function hooks.click(widget)
+print(widget.id)
+		if widget.id and env[widget.id] then
+			goto_page(widget.id)
+		end
+	end
+
+	ws.master:add({hx=640,hy=480,mx=1,class="fill",ax=0,ay=0,id="top"})
+	
+	misc.add("topbar")
+	
+	ws.top:add({class="fill",hx=640,hy=24,text="test buttons",color=0xffffffff,id="test_buttons",hooks=hooks})
+	
+	ws.master:layout()
+	
+end
+
+
+
+
+-----------------------------------------------------------------------------
+return panels
+end
