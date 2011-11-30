@@ -26,7 +26,8 @@ function update(widget)
 end
 
 function draw(widget)
-
+	return widget.meta.draw(widget)
+--[[
 	local it=widget.pan
 
 	widget.do_not_recurse=true
@@ -47,6 +48,7 @@ function draw(widget)
 	end
 	
 	return ret
+]]
 end
 
 

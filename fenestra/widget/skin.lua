@@ -165,6 +165,11 @@ function setup(def)
 
 		gl.PopMatrix() -- expect the base to be pushed
 		gl.PushMatrix()
+		if widget.pan_px and widget.pan_py then -- fidle everything
+			gl.Translate(widget.pan_px,widget.pan_py,0)
+			gl.PushMatrix()
+		end
+		
 		gl.Translate(widget.pxd,widget.pyd,0)
 		gl.Rotate(widget.pa,0,0,1)
 		
@@ -325,6 +330,10 @@ function setup(def)
 			for i,v in ipairs(widget) do v:draw() end
 		end
 		
+		if widget.pan_px and widget.pan_py then
+			gl.PopMatrix()
+		end
+
 		return widget
 	end
 

@@ -30,8 +30,8 @@ function draw(widget)
 	
 	local pan=widget.pan
 	
-	pan.px=widget.slidex.datx.num*1000
-	pan.py=widget.slidey.daty.num*1000
+	pan.pan_px=widget.slidex.datx.num*1000
+	pan.pan_py=widget.slidey.daty.num*1000
 	
 	return widget.meta.draw(widget)
 end
