@@ -15,9 +15,7 @@ classes={
 	["button"]=require("fenestra.widget.button"),
 	["drag"]=require("fenestra.widget.drag"),
 	["text"]=require("fenestra.widget.text"),
-	["string"]=require("fenestra.widget.string"),
-	
-	["textedit"]=require("fenestra.widget.textedit"), -- borked
+	["textedit"]=require("fenestra.widget.textedit"),
 
 --classes built out of the base classes
 

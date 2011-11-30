@@ -7,7 +7,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("fenestra.widget.string")
+module("fenestra.widget.textedit")
 
 local widget_data=require("fenestra.widget.data")
 
@@ -185,7 +185,7 @@ end
 function setup(widget,def)
 --	local it={}
 --	widget.string=it
-	widget.class="string"
+	widget.class="textedit"
 	
 	widget.data=widget.data or widget_data.new_data({})
 	
