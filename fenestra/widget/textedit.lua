@@ -7,85 +7,128 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("fenestra.widget.textedit")
+module("fenestra.widget.string")
+
+local widget_data=require("fenestra.widget.data")
 
 
+function mouse(widget,act,x,y,key)
 
-function keypress(widget,ascii,key,act)
---	local it=widget.textedit
+--	local it=widget.string
+
+-- call here so we can use any state changes immediatly	
+	local ret=widget.meta.mouse(widget,act,x,y,key)
+	
+	if widget.master.active==widget then
+	
+		widget.master.focus=widget
+		
+		if act=="down" then
+			local dx=x-((widget.pxd or 0)+(widget.text_x or 0))
+--print(dx)
+			if dx<0 then -- catch lessthan
+				widget.data.str_idx=0
+			else
+				widget.data.str_idx=widget.master.font.which(dx,widget.data.str)
+				if widget.data.str_idx<0 then widget.data.str_idx=#widget.data.str end -- catch morethan
+			end
+		end
+	end
+	
+	return ret
+end
+
+
+function key(widget,ascii,key,act)
+--	local it=widget.string
+	local master=widget.master
+	
+	local changed=false
+
+--print("gotkey",ascii)
 	
 	if act=="down" or act=="repeat" then
 	
 		if key=="left" then
 
-			widget.line_idx=widget.line_idx-1
-			if widget.line_idx<0 then widget.line_idx=0 end
+			widget.data.str_idx=widget.data.str_idx-1
+			if widget.data.str_idx<0 then widget.data.str_idx=0 end
 			
-			widget.throb=255
+			master.throb=255
 						
 		elseif key=="right" then
 	
-			widget.line_idx=widget.line_idx+1
-			if widget.line_idx>#widget.line then widget.line_idx=#widget.line end
+			widget.data.str_idx=widget.data.str_idx+1
+			if widget.data.str_idx>#widget.data.str then widget.data.str_idx=#widget.data.str end
 			
-			widget.throb=255
+			master.throb=255
 			
 		elseif key=="home" then
 		
-			widget.line_idx=0
+			widget.data.str_idx=0
 		
 		elseif key=="end" then
 		
-			widget.line_idx=#widget.line
+			widget.data.str_idx=#widget.data.str
 		
 		elseif key=="backspace" then
 	
-			if widget.line_idx >= #widget.line then -- at end
+			if widget.data.str_idx >= #widget.data.str then -- at end
 			
-				widget.line=widget.line:sub(1,-2)
-				widget.line_idx=#widget.line
+				widget.data.str=widget.data.str:sub(1,-2)
+				widget.data.str_idx=#widget.data.str
+				
+				changed=true
 			
-			elseif widget.line_idx < 1 then -- at start
+			elseif widget.data.str_idx < 1 then -- at start
 			
-			elseif widget.line_idx == 1 then -- near start
+			elseif widget.data.str_idx == 1 then -- near start
 			
-				widget.line=widget.line:sub(2)
-				widget.line_idx=widget.line_idx-1
+				widget.data.str=widget.data.str:sub(2)
+				widget.data.str_idx=widget.data.str_idx-1
 			
+				changed=true
+
 			else -- somewhere in the line
 			
-				widget.line=widget.line:sub(1,widget.line_idx-1) .. widget.line:sub(widget.line_idx+1)
-				widget.line_idx=widget.line_idx-1
+				widget.data.str=widget.data.str:sub(1,widget.data.str_idx-1) .. widget.data.str:sub(widget.data.str_idx+1)
+				widget.data.str_idx=widget.data.str_idx-1
 				
+				changed=true
+
 			end
 			
-			widget.throb=255
+			master.throb=255
 			
 		elseif key=="delete" then
 	
-			if widget.line_idx >= #widget.line then -- at end
+			if widget.data.str_idx >= #widget.data.str then -- at end
 			
-			elseif widget.line_idx < 1 then -- at start
+			elseif widget.data.str_idx < 1 then -- at start
 			
-				widget.line=widget.line:sub(2)
-				widget.line_idx=0
+				widget.data.str=widget.data.str:sub(2)
+				widget.data.str_idx=0
 			
+				changed=true
+
 			else -- somewhere in the line
 			
-				widget.line=widget.line:sub(1,widget.line_idx) .. widget.line:sub(widget.line_idx+2)
-				widget.line_idx=widget.line_idx
+				widget.data.str=widget.data.str:sub(1,widget.data.str_idx) .. widget.data.str:sub(widget.data.str_idx+2)
+				widget.data.str_idx=widget.data.str_idx
 				
+				changed=true
+
 			end
 			
-			widget.throb=255
+			master.throb=255
 			
 		elseif key=="enter" or key=="return" then
 		
 			if act=="down" then -- ignore repeats on enter key
 			
-				if widget.line and widget.enter then -- callback?
+				if widget.data.str and widget.onenter then -- callback?
 				
-					widget:enter(widget.line)
+					widget:call_hook("click")
 					
 				end
 				
@@ -99,27 +142,35 @@ function keypress(widget,ascii,key,act)
 			
 			if c>=32 and c<128 then
 			
-				if widget.line_idx >= #widget.line then -- put at end
+				if widget.data.str_idx >= #widget.data.str then -- put at end
 				
-					widget.line=widget.line..ascii
-					widget.line_idx=#widget.line
+					widget.data.str=widget.data.str..ascii
+					widget.data.str_idx=#widget.data.str
 					
-				elseif widget.line_idx < 1 then -- put at start
+				elseif widget.data.str_idx < 1 then -- put at start
 				
-					widget.line=ascii..widget.line
-					widget.line_idx=1
+					widget.data.str=ascii..widget.data.str
+					widget.data.str_idx=1
 					
 				else -- need to insert into line
 				
-					widget.line=widget.line:sub(1,widget.line_idx) .. ascii .. widget.line:sub(widget.line_idx+1)
-					widget.line_idx=widget.line_idx+1
+					widget.data.str=widget.data.str:sub(1,widget.data.str_idx) .. ascii .. widget.data.str:sub(widget.data.str_idx+1)
+					widget.data.str_idx=widget.data.str_idx+1
 					
 				end
 				
-				widget.throb=255
+				master.throb=255
 				
+				changed=true
+
 			end
 		end
+	end
+	
+	if changed then
+		widget.text=widget.data.str
+		
+		widget:call_hook("update")
 	end
 	
 	return true
@@ -128,29 +179,24 @@ end
 
 
 function update(widget)
-	local widget=widget.textedwidget
-	
-	widget.throb=widget.throb-4
-	if widget.throb<0 then widget.throb=255 end
-
 end
-
-
 
 
 function setup(widget,def)
 --	local it={}
---	widget.textedit=it
-	widget.class="textedit"
+--	widget.string=it
+	widget.class="string"
 	
-	it.lines=""
-	it.line_idx=0
-	it.lines_idx=0
-	it.throb=255
+	widget.data=widget.data or widget_data.new_data({})
 	
-	it.keypress=keypress
-	it.update=update
+--	widget.data.str=""
+--	widget.data.str_idx=0
+	
+--	widget.key=key
+	widget.update=update
 
+	widget.key=key
+	widget.mouse=mouse
 
 	return widget
 end

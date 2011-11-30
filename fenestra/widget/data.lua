@@ -78,8 +78,19 @@ function new_data(dat)
 --	dat.widget=it.widget
 --	dat.it=it
 --	dat.id=id
-	dat.min=dat.min or 0
+
+	dat.class=dat.class or "number"
+
+-- make a default values and ranges for every possible class
+-- this is heavy data...
+
+	dat.lst=dat.lst or {}
+
+	dat.str=dat.str or ""
+	dat.str_idx=dat.str_idx or 0
+
 	dat.num=dat.num or 0
+	dat.min=dat.min or 0
 	dat.max=dat.max or 1
 	dat.size=dat.size or 0 -- if 0 then button is auto sized to some value
 	dat.step=dat.step or 0 -- if 0 then there is no quantization
@@ -87,7 +98,7 @@ function new_data(dat)
 	
 -- setup callback functions
 
-	dat.get_string=data_get_string
+	dat.get_string=data_get_string -- should be moved into value() ?
 	dat.get_size=data_get_size
 	dat.get_pos=data_get_pos
 	

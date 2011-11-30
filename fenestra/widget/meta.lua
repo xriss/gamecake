@@ -8,13 +8,24 @@ module("fenestra.widget.meta")
 
 -- available widget classes
 classes={
+
+-- base classes
+
 	["master"]=require("fenestra.widget.master"),
+	["button"]=require("fenestra.widget.button"),
+	["drag"]=require("fenestra.widget.drag"),
+	["text"]=require("fenestra.widget.text"),
 	["string"]=require("fenestra.widget.string"),
-	["textedit"]=require("fenestra.widget.textedit"),
-	["scroll"]=require("fenestra.widget.scroll"),
+	
+	["textedit"]=require("fenestra.widget.textedit"), -- borked
+
+--classes built out of the base classes
+
 	["pan"]=require("fenestra.widget.pan"),
 	["slide"]=require("fenestra.widget.slide"),
-	["drag"]=require("fenestra.widget.drag"),
+
+	["scroll"]=require("fenestra.widget.scroll"),
+
 }
 
 --
