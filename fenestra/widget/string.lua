@@ -11,7 +11,7 @@ module("fenestra.widget.string")
 
 function mouse(widget,act,x,y,key)
 
-	local it=widget.string
+--	local it=widget.string
 
 -- call here so we can use any state changes immediatly	
 	local ret=widget.meta.mouse(widget,act,x,y,key)
@@ -24,10 +24,10 @@ function mouse(widget,act,x,y,key)
 			local dx=x-((widget.pxd or 0)+(widget.text_x or 0))
 --print(dx)
 			if dx<0 then -- catch lessthan
-				it.line_idx=0
+				widget.line_idx=0
 			else
-				it.line_idx=widget.master.font.which(dx,it.line)
-				if it.line_idx<0 then it.line_idx=#it.line end -- catch morethan
+				widget.line_idx=widget.master.font.which(dx,widget.line)
+				if widget.line_idx<0 then widget.line_idx=#widget.line end -- catch morethan
 			end
 		end
 	end
@@ -37,7 +37,7 @@ end
 
 
 function key(widget,ascii,key,act)
-	local it=widget.string
+--	local it=widget.string
 	local master=widget.master
 	
 	local changed=false
@@ -48,48 +48,48 @@ function key(widget,ascii,key,act)
 	
 		if key=="left" then
 
-			it.line_idx=it.line_idx-1
-			if it.line_idx<0 then it.line_idx=0 end
+			widget.line_idx=widget.line_idx-1
+			if widget.line_idx<0 then widget.line_idx=0 end
 			
 			master.throb=255
 						
 		elseif key=="right" then
 	
-			it.line_idx=it.line_idx+1
-			if it.line_idx>#it.line then it.line_idx=#it.line end
+			widget.line_idx=widget.line_idx+1
+			if widget.line_idx>#widget.line then widget.line_idx=#widget.line end
 			
 			master.throb=255
 			
 		elseif key=="home" then
 		
-			it.line_idx=0
+			widget.line_idx=0
 		
 		elseif key=="end" then
 		
-			it.line_idx=#it.line
+			widget.line_idx=#widget.line
 		
 		elseif key=="backspace" then
 	
-			if it.line_idx >= #it.line then -- at end
+			if widget.line_idx >= #widget.line then -- at end
 			
-				it.line=it.line:sub(1,-2)
-				it.line_idx=#it.line
+				widget.line=widget.line:sub(1,-2)
+				widget.line_idx=#widget.line
 				
 				changed=true
 			
-			elseif it.line_idx < 1 then -- at start
+			elseif widget.line_idx < 1 then -- at start
 			
-			elseif it.line_idx == 1 then -- near start
+			elseif widget.line_idx == 1 then -- near start
 			
-				it.line=it.line:sub(2)
-				it.line_idx=it.line_idx-1
+				widget.line=widget.line:sub(2)
+				widget.line_idx=widget.line_idx-1
 			
 				changed=true
 
 			else -- somewhere in the line
 			
-				it.line=it.line:sub(1,it.line_idx-1) .. it.line:sub(it.line_idx+1)
-				it.line_idx=it.line_idx-1
+				widget.line=widget.line:sub(1,widget.line_idx-1) .. widget.line:sub(widget.line_idx+1)
+				widget.line_idx=widget.line_idx-1
 				
 				changed=true
 
@@ -99,19 +99,19 @@ function key(widget,ascii,key,act)
 			
 		elseif key=="delete" then
 	
-			if it.line_idx >= #it.line then -- at end
+			if widget.line_idx >= #widget.line then -- at end
 			
-			elseif it.line_idx < 1 then -- at start
+			elseif widget.line_idx < 1 then -- at start
 			
-				it.line=it.line:sub(2)
-				it.line_idx=0
+				widget.line=widget.line:sub(2)
+				widget.line_idx=0
 			
 				changed=true
 
 			else -- somewhere in the line
 			
-				it.line=it.line:sub(1,it.line_idx) .. it.line:sub(it.line_idx+2)
-				it.line_idx=it.line_idx
+				widget.line=widget.line:sub(1,widget.line_idx) .. widget.line:sub(widget.line_idx+2)
+				widget.line_idx=widget.line_idx
 				
 				changed=true
 
@@ -123,7 +123,7 @@ function key(widget,ascii,key,act)
 		
 			if act=="down" then -- ignore repeats on enter key
 			
-				if it.line and it.onenter then -- callback?
+				if widget.line and widget.onenter then -- callback?
 				
 					widget:call_hook("click")
 					
@@ -139,20 +139,20 @@ function key(widget,ascii,key,act)
 			
 			if c>=32 and c<128 then
 			
-				if it.line_idx >= #it.line then -- put at end
+				if widget.line_idx >= #widget.line then -- put at end
 				
-					it.line=it.line..ascii
-					it.line_idx=#it.line
+					widget.line=widget.line..ascii
+					widget.line_idx=#widget.line
 					
-				elseif it.line_idx < 1 then -- put at start
+				elseif widget.line_idx < 1 then -- put at start
 				
-					it.line=ascii..it.line
-					it.line_idx=1
+					widget.line=ascii..widget.line
+					widget.line_idx=1
 					
 				else -- need to insert into line
 				
-					it.line=it.line:sub(1,it.line_idx) .. ascii .. it.line:sub(it.line_idx+1)
-					it.line_idx=it.line_idx+1
+					widget.line=widget.line:sub(1,widget.line_idx) .. ascii .. widget.line:sub(widget.line_idx+1)
+					widget.line_idx=widget.line_idx+1
 					
 				end
 				
@@ -165,7 +165,7 @@ function key(widget,ascii,key,act)
 	end
 	
 	if changed then
-		widget.text=it.line
+		widget.text=widget.line
 		
 		widget:call_hook("update")
 	end
@@ -180,15 +180,15 @@ end
 
 
 function setup(widget,def)
-	local it={}
-	widget.string=it
+--	local it={}
+--	widget.string=it
 	widget.class="string"
 	
-	it.line=""
-	it.line_idx=0
+	widget.line=""
+	widget.line_idx=0
 	
---	it.key=key
-	it.update=update
+--	widget.key=key
+	widget.update=update
 
 	widget.key=key
 	widget.mouse=mouse

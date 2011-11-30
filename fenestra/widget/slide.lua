@@ -22,10 +22,10 @@ end
 
 
 function update(widget)
-	local it=widget.slide
+--	local it=widget.slide
 
 
-	it:snap()
+	widget:snap()
 
 --	it.drag.text=it.datx:get_string()
 	
@@ -36,32 +36,33 @@ end
 function slide_snap(it)
 
 -- auto snap positions when draged
-	it.drag.px=it.datx:snap( it.widget.hx , it.drag.hx , it.drag.px )
-	it.drag.pxd=it.widget.pxd+it.drag.px
+	it.drag.px=it.datx:snap( it.hx , it.drag.hx , it.drag.px )
+	it.drag.pxd=it.pxd+it.drag.px
 	
 -- upside down y so need to twiddle it, pyr is "the right way up"
-	it.drag.py=it.daty:snap( it.widget.hy , it.drag.hy , it.drag.py )
-	it.drag.pyd=it.widget.pyd-it.drag.py
+	it.drag.py=it.daty:snap( it.hy , it.drag.hy , it.drag.py )
+	it.drag.pyd=it.pyd-it.drag.py
 	
 end
 	
 function setup(widget,def)
-	local it={} -- our main data so as not to clobber widget values
-	it.widget=widget
-	it.snap=slide_snap
-	widget.slide=it
+--	local it={} -- our main data so as not to clobber widget values
+--	it.widget=widget
+--	widget.slide=it
 	widget.class="slide"
+	
+	widget.snap=slide_snap
 	
 	widget.key=key
 	widget.mouse=mouse
 	widget.update=update
 	
 --setup constraints in x and y 
-	it.datx=widget_data.new_data(def.datx)
-	it.daty=widget_data.new_data(def.daty)
+	widget.datx=widget_data.new_data(def.datx)
+	widget.daty=widget_data.new_data(def.daty)
 
 -- auto add the draging button as a child
-	it.drag=widget:add({class="drag",color=0xffffffff,hy=it.daty:get_size(widget.hy),hx=it.datx:get_size(widget.hx),pxf=it.datx:get_pos(),pyf=it.daty:get_pos(),data=widget.data})
+	widget.drag=widget:add({class="drag",color=0xffffffff,hy=widget.daty:get_size(widget.hy),hx=widget.datx:get_size(widget.hx),pxf=widget.datx:get_pos(),pyf=widget.daty:get_pos(),data=widget.data})
 	
 	return widget
 end

@@ -36,8 +36,8 @@ function draw(widget)
 	for i,v in ipairs(widget) do
 		local pxd,pyd=v.pxd,v.pyd
 		
-		v.pxd=pxd+it.px
-		v.pyd=pyd+it.py
+		v.pxd=pxd+widget.pan_px
+		v.pyd=pyd+widget.pan_py
 		
 		v:draw()
 
@@ -51,12 +51,12 @@ end
 
 
 function setup(widget,def)
-	local it={}
-	widget.pan=it
+--	local it={}
+--	widget.pan=it
 	widget.class="pan"
 	
-	it.px=0
-	it.py=0
+	widget.pan_px=0
+	widget.pan_py=0
 	
 	widget.key=key
 	widget.mouse=mouse

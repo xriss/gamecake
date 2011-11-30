@@ -12,80 +12,80 @@ module("fenestra.widget.textedit")
 
 
 function keypress(widget,ascii,key,act)
-	local it=widget.textedit
+--	local it=widget.textedit
 	
 	if act=="down" or act=="repeat" then
 	
 		if key=="left" then
 
-			it.line_idx=it.line_idx-1
-			if it.line_idx<0 then it.line_idx=0 end
+			widget.line_idx=widget.line_idx-1
+			if widget.line_idx<0 then widget.line_idx=0 end
 			
-			it.throb=255
+			widget.throb=255
 						
 		elseif key=="right" then
 	
-			it.line_idx=it.line_idx+1
-			if it.line_idx>#it.line then it.line_idx=#it.line end
+			widget.line_idx=widget.line_idx+1
+			if widget.line_idx>#widget.line then widget.line_idx=#widget.line end
 			
-			it.throb=255
+			widget.throb=255
 			
 		elseif key=="home" then
 		
-			it.line_idx=0
+			widget.line_idx=0
 		
 		elseif key=="end" then
 		
-			it.line_idx=#it.line
+			widget.line_idx=#widget.line
 		
 		elseif key=="backspace" then
 	
-			if it.line_idx >= #it.line then -- at end
+			if widget.line_idx >= #widget.line then -- at end
 			
-				it.line=it.line:sub(1,-2)
-				it.line_idx=#it.line
+				widget.line=widget.line:sub(1,-2)
+				widget.line_idx=#widget.line
 			
-			elseif it.line_idx < 1 then -- at start
+			elseif widget.line_idx < 1 then -- at start
 			
-			elseif it.line_idx == 1 then -- near start
+			elseif widget.line_idx == 1 then -- near start
 			
-				it.line=it.line:sub(2)
-				it.line_idx=it.line_idx-1
+				widget.line=widget.line:sub(2)
+				widget.line_idx=widget.line_idx-1
 			
 			else -- somewhere in the line
 			
-				it.line=it.line:sub(1,it.line_idx-1) .. it.line:sub(it.line_idx+1)
-				it.line_idx=it.line_idx-1
+				widget.line=widget.line:sub(1,widget.line_idx-1) .. widget.line:sub(widget.line_idx+1)
+				widget.line_idx=widget.line_idx-1
 				
 			end
 			
-			it.throb=255
+			widget.throb=255
 			
 		elseif key=="delete" then
 	
-			if it.line_idx >= #it.line then -- at end
+			if widget.line_idx >= #widget.line then -- at end
 			
-			elseif it.line_idx < 1 then -- at start
+			elseif widget.line_idx < 1 then -- at start
 			
-				it.line=it.line:sub(2)
-				it.line_idx=0
+				widget.line=widget.line:sub(2)
+				widget.line_idx=0
 			
 			else -- somewhere in the line
 			
-				it.line=it.line:sub(1,it.line_idx) .. it.line:sub(it.line_idx+2)
-				it.line_idx=it.line_idx
+				widget.line=widget.line:sub(1,widget.line_idx) .. widget.line:sub(widget.line_idx+2)
+				widget.line_idx=widget.line_idx
 				
 			end
 			
-			it.throb=255
+			widget.throb=255
 			
 		elseif key=="enter" or key=="return" then
 		
 			if act=="down" then -- ignore repeats on enter key
 			
-				if it.line and it.enter then -- callback?
+				if widget.line and widget.enter then -- callback?
 				
-					it:enter(it.line)
+					widget:enter(widget.line)
 					
 				end
 				
@@ -99,24 +99,24 @@ function keypress(widget,ascii,key,act)
 			
 			if c>=32 and c<128 then
 			
-				if it.line_idx >= #it.line then -- put at end
+				if widget.line_idx >= #widget.line then -- put at end
 				
-					it.line=it.line..ascii
-					it.line_idx=#it.line
+					widget.line=widget.line..ascii
+					widget.line_idx=#widget.line
 					
-				elseif it.line_idx < 1 then -- put at start
+				elseif widget.line_idx < 1 then -- put at start
 				
-					it.line=ascii..it.line
-					it.line_idx=1
+					widget.line=ascii..widget.line
+					widget.line_idx=1
 					
 				else -- need to insert into line
 				
-					it.line=it.line:sub(1,it.line_idx) .. ascii .. it.line:sub(it.line_idx+1)
-					it.line_idx=it.line_idx+1
+					widget.line=widget.line:sub(1,widget.line_idx) .. ascii .. widget.line:sub(widget.line_idx+1)
+					widget.line_idx=widget.line_idx+1
 					
 				end
 				
-				it.throb=255
+				widget.throb=255
 				
 			end
 		end
@@ -128,10 +128,10 @@ end
 
 
 function update(widget)
-	local it=widget.textedit
+	local widget=widget.textedwidget
 	
-	it.throb=it.throb-4
-	if it.throb<0 then it.throb=255 end
+	widget.throb=widget.throb-4
+	if widget.throb<0 then widget.throb=255 end
 
 end
 
@@ -139,8 +139,8 @@ end
 
 
 function setup(widget,def)
-	local it={}
-	widget.textedit=it
+--	local it={}
+--	widget.textedit=it
 	widget.class="textedit"
 	
 	it.lines=""

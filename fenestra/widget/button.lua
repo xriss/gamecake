@@ -31,8 +31,8 @@ end
 
 
 function setup(widget,def)
-	local it={}
-	widget.button=it
+--	local it={}
+--	widget.button=it
 	widget.class="button"
 	
 	widget.key=key

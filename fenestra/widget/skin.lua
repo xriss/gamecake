@@ -309,7 +309,7 @@ function setup(def)
 
 				if widget.class=="string" then -- hack
 					if widget.master.focus==widget then --only draw curser in active widget
-						local sw=font.size(widget.text:sub(1,widget.string.line_idx))
+						local sw=font.size(widget.text:sub(1,widget.line_idx))
 						gl.Enable(gl.COLOR_MATERIAL)
 						win.flat_rect(
 							tx+sw+0,-ty,

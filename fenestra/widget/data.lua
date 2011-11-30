@@ -9,25 +9,6 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 module("fenestra.widget.data")
 
 
-
-
-
-
--- set dat from def table
-local data_set=function(dat,def)
-
-	if not def then return dat end -- short circuit
-	
-	if def.min then dat.min=def.min end
-	if def.max then dat.max=def.max end
-	if def.num then dat.num=def.num end
-	if def.size then dat.size=def.size end
-	if def.step then dat.step=def.step end
-	
-	return dat
-end
-
-
 -- set number (may trigger hook)
 local data_value=function(dat,num)
 	if num and num~=dat.num then -- change value
@@ -103,14 +84,20 @@ function new_data(dat)
 	dat.size=dat.size or 0 -- if 0 then button is auto sized to some value
 	dat.step=dat.step or 0 -- if 0 then there is no quantization
 	
+	
+-- setup callback functions
+
 	dat.get_string=data_get_string
 	dat.get_size=data_get_size
 	dat.get_pos=data_get_pos
-	dat.set=data_set
+	
+-- get or set the value
 	dat.value=data_value
+
+-- work out snapping for scroll bars	
 	dat.snap=data_snap
 
-	data_value(dat,dat.num)
+	data_value(dat,dat.num) -- triger value changed/set callbacks
 	
 	return dat
 	

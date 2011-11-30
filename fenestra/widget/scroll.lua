@@ -26,19 +26,19 @@ end
 
 function draw(widget)
 
-	local it=widget.scroll
+--	local it=widget.scroll
 	
-	local pan=it.pan.pan
+	local pan=widget.pan
 	
-	pan.px=it.slidex.slide.datx.num*1000
-	pan.py=it.slidey.slide.daty.num*1000
+	pan.px=widget.slidex.datx.num*1000
+	pan.py=widget.slidey.daty.num*1000
 	
 	return widget.meta.draw(widget)
 end
 
 function setup(widget,def)
-	local it={}
-	widget.scroll=it
+--	local it={}
+--	widget.scroll=it
 	widget.class="scroll"
 	
 	widget.key=key
@@ -51,10 +51,10 @@ function setup(widget,def)
 	if widget.hx<ss*2 then ss=widget.hx/2 end
 	if widget.hy<ss*2 then ss=widget.hy/2 end
 	
-	it.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss,	})
-	it.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
+	widget.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss,	})
+	widget.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
 		datx={max=0},daty={max=1},color=0xffffffff})
-	it.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	px=0,           	py=widget.hy-ss,
+	widget.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	px=0,           	py=widget.hy-ss,
 		datx={max=1},daty={max=0},color=0xffffffff})
 
 	return widget
