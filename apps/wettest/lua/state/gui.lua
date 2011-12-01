@@ -131,8 +131,8 @@ local goto_page=goto_page
 -- persistant gui data
 local datas={}
 
-datas.num1={class="number",val=0,max=10,min=0,step=1,size=1}
-datas.num2={class="number",val=0,max=10,min=0,step=0,size=1}
+datas.num1={class="number",num=0,max=10,min=0,step=1,size=1}
+datas.num2={class="number",num=0,max=10,min=0,step=0,size=1}
 
 -----------------------------------------------------------------------------
 --
