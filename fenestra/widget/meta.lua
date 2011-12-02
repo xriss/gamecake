@@ -336,7 +336,7 @@ function setup(def)
 		end
 	end
 	
--- this is the magical layout that works kind of like text
+-- this is the magical layout that works like text
 -- except things expand to fit the area
 -- use sx,sy and mx,my to control what ends up where
 	function meta.layout_flow(widget)
@@ -418,6 +418,9 @@ function setup(def)
 	function meta.mouse(widget,act,x,y,key)
 	
 --print(x..","..y.." : "..widget.px..","..widget.py)
+
+		if widget.pan_px then x=x-widget.pan_px end
+		if widget.pan_py then y=y-widget.pan_py end
 
 		if widget.solid and x>=widget.pxd and x<widget.pxd+widget.hx and y<=widget.pyd and y>widget.pyd-widget.hy then
 		

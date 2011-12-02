@@ -166,13 +166,47 @@ function setup(def)
 		gl.PopMatrix() -- expect the base to be pushed
 		gl.PushMatrix()
 		if widget.pan_px and widget.pan_py then -- fidle everything
-			gl.Translate(widget.pan_px,widget.pan_py,0)
-			gl.PushMatrix()
+--			gl.Translate(widget.pan_px,widget.pan_py,0)
+--			gl.PushMatrix()
 		end
 		
 		gl.Translate(widget.pxd,widget.pyd,0)
 		gl.Rotate(widget.pa,0,0,1)
 		
+		if widget.fbo then
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PushMatrix()
+			gl.MatrixMode(gl.MODELVIEW)
+			gl.PushMatrix()
+
+			if widget.fbo.width==widget.sx and widget.fbo.height==widget.sy then
+			else
+				widget.fbo:clean()
+				widget.fbo=nil
+			end
+			if not widget.fbo then
+				widget.fbo=_G.win.fbo(widget.sx,widget.sy,24)
+			end
+			widget.fbo:bind()
+			
+			win.project23d(widget.sx/widget.sy,1,1024)
+						
+			gl.ClearColor(0,0,0,0)
+			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
+
+			gl.MatrixMode(gl.MODELVIEW)
+			gl.LoadIdentity()
+			gl.Translate(-widget.sx/2,widget.sy/2,-widget.sy/2)
+			gl.Translate(-widget.pxd,-widget.pyd,0)
+
+			if widget.pan_px and widget.pan_py then -- fidle everything
+				gl.Translate(widget.pan_px,widget.pan_py,0)
+			end
+			
+			gl.PushMatrix() -- put new master on stack
+				
+		end
+
 		gl.Disable(gl.LIGHTING)
 		gl.Disable(gl.DEPTH_TEST)
 		gl.Disable(gl.CULL_FACE)
@@ -312,7 +346,7 @@ function setup(def)
 			font.draw(widget.text)
 		
 
-				if widget.class=="string" then -- hack
+				if widget.class=="textedit" then -- hack
 					if widget.master.focus==widget then --only draw curser in active widget
 						local sw=font.size(widget.text:sub(1,widget.line_idx))
 						gl.Enable(gl.COLOR_MATERIAL)
@@ -330,8 +364,21 @@ function setup(def)
 			for i,v in ipairs(widget) do v:draw() end
 		end
 		
-		if widget.pan_px and widget.pan_py then
+		if widget.fbo then -- we have drawn into the fbo
 			gl.PopMatrix()
+			
+			win.fbo_bind()
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PopMatrix()
+			gl.MatrixMode(gl.MODELVIEW)
+			gl.PopMatrix()
+--			widget.fbo:texture()
+			gl.Translate(widget.sx/2,-widget.sy/2,0)
+			widget.fbo:draw()
+		end
+		
+		if widget.pan_px and widget.pan_py then
+--			gl.PopMatrix()
 		end
 
 		return widget

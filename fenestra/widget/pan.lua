@@ -64,6 +64,8 @@ function setup(widget,def)
 	widget.mouse=mouse
 	widget.update=update
 	widget.draw=draw
+	
+	widget.fbo=_G.win.fbo(128,128,24)
 
 	return widget
 end
