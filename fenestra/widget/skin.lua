@@ -185,7 +185,7 @@ function setup(def)
 				widget.fbo=nil
 			end
 			if not widget.fbo then
-				widget.fbo=_G.win.fbo(widget.sx,widget.sy,24)
+				widget.fbo=_G.win.fbo(widget.sx,widget.sy,0)
 			end
 			widget.fbo:bind()
 			
@@ -372,8 +372,8 @@ function setup(def)
 			gl.PopMatrix()
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.PopMatrix()
---			widget.fbo:texture()
 			gl.Translate(widget.sx/2,-widget.sy/2,0)
+			gl.Color(1,1,1,1)
 			widget.fbo:draw()
 		end
 		
