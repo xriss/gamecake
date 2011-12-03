@@ -165,35 +165,37 @@ function setup(def)
 
 		gl.PopMatrix() -- expect the base to be pushed
 		gl.PushMatrix()
-		if widget.pan_px and widget.pan_py then -- fidle everything
---			gl.Translate(widget.pan_px,widget.pan_py,0)
---			gl.PushMatrix()
-		end
 		
 		gl.Translate(widget.pxd,widget.pyd,0)
-		gl.Rotate(widget.pa,0,0,1)
 		
 		if widget.fbo then
-			gl.MatrixMode(gl.PROJECTION)
-			gl.PushMatrix()
-			gl.MatrixMode(gl.MODELVIEW)
-			gl.PushMatrix()
-
-			if widget.fbo.width==widget.sx and widget.fbo.height==widget.sy then
-			else
+			if widget.fbo.width~=widget.sx or widget.fbo.height~=widget.sy then -- resize so we need a new fbo
 				widget.fbo:clean()
 				widget.fbo=nil
 			end
-			if not widget.fbo then
+			if not widget.fbo then -- allocate a new fbo
+print("new fbo")
 				widget.fbo=_G.win.fbo(widget.sx,widget.sy,0)
+				widget.dirty=true -- flag redraw
 			end
+				
+		end
+
+if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
+
+		if widget.fbo then
+--print("into fbo")
+			
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PushMatrix()
+
 			widget.fbo:bind()
 			
+			gl.ClearColor(0,0,0,0/15)
+			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
+
 			win.project23d(widget.sx/widget.sy,1,1024)
 						
-			gl.ClearColor(0,0,0,0)
-			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
-
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.LoadIdentity()
 			gl.Translate(-widget.sx/2,widget.sy/2,-widget.sy/2)
@@ -202,11 +204,12 @@ function setup(def)
 			if widget.pan_px and widget.pan_py then -- fidle everything
 				gl.Translate(widget.pan_px,widget.pan_py,0)
 			end
-			
-			gl.PushMatrix() -- put new master on stack
-				
+						
+			gl.PushMatrix() -- put new base matrix onto stack
 		end
-
+		
+		widget.dirty=nil
+				
 		gl.Disable(gl.LIGHTING)
 		gl.Disable(gl.DEPTH_TEST)
 		gl.Disable(gl.CULL_FACE)
@@ -354,33 +357,42 @@ function setup(def)
 							tx+sw+0,-ty,
 							tx+sw+2,-ty-widget.text_size,
 							widget.master.throb*256*256*256)
+--						gl.Disable(gl.COLOR_MATERIAL)
 							
 					end
 				end
 
 		end
 		
-		if not widget.do_not_recurse then
-			for i,v in ipairs(widget) do v:draw() end
+		for i,v in ipairs(widget) do
+			if not v.fbo or not v.dirty then -- terminate recursion at dirty fbo
+				v:draw()
+			end
 		end
-		
+
 		if widget.fbo then -- we have drawn into the fbo
+			
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PopMatrix()
+			
+			gl.MatrixMode(gl.MODELVIEW)
 			gl.PopMatrix()
 			
 			win.fbo_bind()
-			gl.MatrixMode(gl.PROJECTION)
-			gl.PopMatrix()
-			gl.MatrixMode(gl.MODELVIEW)
-			gl.PopMatrix()
+		end
+		
+else -- we can only draw once
+
+		if widget.fbo then -- we need to draw our cached fbo
 			gl.Translate(widget.sx/2,-widget.sy/2,0)
 			gl.Color(1,1,1,1)
 			widget.fbo:draw()
+--print("draw fbo")
 		end
 		
-		if widget.pan_px and widget.pan_py then
---			gl.PopMatrix()
-		end
-
+end
+	
+		
 		return widget
 	end
 

@@ -21,17 +21,26 @@ end
 
 
 function update(widget)
+
+	local pan=widget.pan
+	
+	local pan_px=widget.slidex.datx.num*1000
+	local pan_py=widget.slidey.daty.num*1000
+	
+	if pan_px~=pan.pan_px or pan_py~=pan.pan_py then
+	
+		pan.pan_px=pan_px
+		pan.pan_py=pan_py
+		
+		pan:set_dirty()
+	end
+
 	return widget.meta.update(widget)
 end
 
 function draw(widget)
 
 --	local it=widget.scroll
-	
-	local pan=widget.pan
-	
-	pan.pan_px=widget.slidex.datx.num*1000
-	pan.pan_py=widget.slidey.daty.num*1000
 	
 	return widget.meta.draw(widget)
 end

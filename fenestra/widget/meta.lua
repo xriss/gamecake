@@ -35,6 +35,17 @@ function setup(def)
 	local meta=def.meta
 	local win=def.win
 
+-- set a dirty flag on this and all parents, this has a smart break, as if a child is dirty
+-- then its parent must also be
+-- the dirty flag is cleared on draw
+	function meta.set_dirty(widget)
+		widget.dirty=true
+		while (widget.parent ~= widget) and not widget.parent.dirty do
+			widget=widget.parent
+			widget.dirty=true
+		end
+	end
+
 	function meta.call_hook(widget,hook,dat)
 		if widget.hooks and widget.hooks[hook] then -- either local hooks
 			widget.hooks[hook](widget,dat)
@@ -54,8 +65,7 @@ function setup(def)
 		widget.parent=parent
 		widget.master=parent.master
 		widget:setup(def)
-		widget.meta=meta
-		
+		widget.meta=meta		
 		return widget
 	end
 	
@@ -156,12 +166,15 @@ function setup(def)
 		
 		if widget.master.ids and widget.id then widget.master.ids[widget.id]=widget end -- lookup by id
 		
+		widget:set_dirty()
+		
 		return widget
 	end
 --
 -- and final cleanup
 --
 	function meta.clean(widget)
+		widget:set_dirty()
 		if widget.master.ids and widget.id then widget.master.ids[widget.id]=nil end -- remove id lookup
 		return widget
 	end
@@ -443,7 +456,9 @@ function setup(def)
 			end
 		else
 		
-			if widget.master.over==widget then widget.master.over=nil end
+			if widget.master.over==widget then
+				widget.master.over=nil
+			end
 		end
 	
 		for i,v in ipairs(widget) do

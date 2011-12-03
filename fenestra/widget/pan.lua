@@ -27,28 +27,6 @@ end
 
 function draw(widget)
 	return widget.meta.draw(widget)
---[[
-	local it=widget.pan
-
-	widget.do_not_recurse=true
-	local ret=widget.meta.draw(widget)
-	widget.do_not_recurse=nil
-
-	for i,v in ipairs(widget) do
-		local pxd,pyd=v.pxd,v.pyd
-		
-		v.pxd=pxd+widget.pan_px
-		v.pyd=pyd+widget.pan_py
-		
-		v:draw()
-
-		v.pxd=pxd
-		v.pyd=pyd
-
-	end
-	
-	return ret
-]]
 end
 
 
@@ -65,7 +43,7 @@ function setup(widget,def)
 	widget.update=update
 	widget.draw=draw
 	
-	widget.fbo=_G.win.fbo(128,128,24)
+	widget.fbo=_G.win.fbo(0,0,0)
 
 	return widget
 end

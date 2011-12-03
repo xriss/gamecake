@@ -21,6 +21,7 @@ function setup(widget,def)
 --	local win=def.win
 
 	master.throb=0
+	master.fbo=_G.win.fbo(0,0,0) -- use an fbo
 
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget)
@@ -35,13 +36,34 @@ function setup(widget,def)
 		master.remouse(widget)
 	end
 
+	local dirty_fbos={}
+	local find_dirty_fbos
+	find_dirty_fbos=function(widget)
+		if widget.fbo and widget.dirty then
+			dirty_fbos[ #dirty_fbos+1 ]=widget
+		end
+		for i,v in ipairs(widget) do
+			find_dirty_fbos(v)
+		end
+	end
+	
 	function master.draw(widget)
+		dirty_fbos={}
+		find_dirty_fbos(widget)
 	
 		gl.Disable(gl.CULL_FACE)
 		gl.Disable(gl.LIGHTING)
 		gl.Disable(gl.DEPTH_TEST)
 		gl.PushMatrix()
+		
+		if #dirty_fbos>0 then
+			for i=#dirty_fbos,1,-1 do -- call in reverse so sub fbos can work
+				meta.draw(dirty_fbos[i]) -- dirty, so this only builds the fbo
+			end
+		end
+		
 		meta.draw(widget)
+		
 		gl.PopMatrix()
 --		gl.Enable("DEPTH_TEST")
 --		gl.Enable("LIGHTING")
@@ -98,15 +120,29 @@ function setup(widget,def)
 				w.py=p.pyd-w.pyd
 			
 				w:call_hook("slide")
+				
+				w:set_dirty()
 
 			end
-		
+			
+			local old_active=master.active
+			local old_over=master.over
 			for i,v in ipairs(widget) do
 				meta.mouse(v,act,x,y,key)
 			end
 			
 			if act=="up" then
 				master.active=nil
+			end
+			
+--mark as dirty
+			if master.active~=old_active then
+				if master.active then master.active:set_dirty() end
+				if old_active then old_active:set_dirty() end
+			end
+			if master.over~=old_over then
+				if master.over then master.over:set_dirty() end
+				if old_over then old_over:set_dirty() end
 			end
 			
 --		end
