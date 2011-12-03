@@ -1,9 +1,12 @@
+
+rm build-gmake-android -Rf
+
 cd `dirname $0`
 
 #simple forced nacl build, just to see if we can get somewhere with this
 
-ansdk=../sdks/android-8-arm
-export PATH=$ansdk/arm-linux-androideabi/bin:$PATH
+and=../../sdks/android-8-arm
+export PATH=$and/bin:$PATH
 
 #so premake knows that it is a nacl build
 build/premake4 gmake android
@@ -19,3 +22,6 @@ fi
 
 cd ..
 
+cd android
+
+ant debug install

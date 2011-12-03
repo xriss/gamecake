@@ -1,3 +1,56 @@
+function newplatform(plf)
+    local name = plf.name
+    local description = plf.description
+ 
+    -- Register new platform
+    premake.platforms[name] = {
+        cfgsuffix = "_"..name,
+        iscrosscompiler = true
+    }
+ 
+    -- Allow use of new platform in --platfroms
+    table.insert(premake.option.list["platform"].allowed, { name, description })
+    table.insert(premake.fields.platforms.allowed, name)
+ 
+    -- Add compiler support
+    -- gcc
+    premake.gcc.platforms[name] = plf.gcc
+    --other compilers (?)
+end
+ 
+function newgcctoolchain(toolchain)
+    newplatform {
+        name = toolchain.name,
+        description = toolchain.description,
+        gcc = {
+            cc = toolchain.prefix .. "gcc",
+            cxx = toolchain.prefix .. "g++",
+            ar = toolchain.prefix .. "ar",
+            cppflags = "-MMD " .. toolchain.cppflags
+        }
+    }
+end
+
+
+newplatform {
+    name = "android",
+    description = "android",
+    gcc = {
+        cc = "gcc",
+        cxx = "g++",
+        cppflags = ""
+    }
+}
+ 
+newgcctoolchain {
+    name = "android",
+    description = "android",
+    prefix = "arm-linux-androideabi-",
+    cppflags = ""
+}
+
+
+
 
 solution("wetlua")
 
@@ -11,6 +64,10 @@ end
 ANDROID=false
 if _ARGS[1]=="android" then
 ANDROID=true
+
+--hax
+platforms { "android" }
+
 end
 
 BUILD_DIR="build-"..(_ACTION or "")
@@ -46,6 +103,9 @@ if NACL then
 elseif ANDROID then
 
 	defines "ANDROID"
+
+	defines("LUA_USE_POSIX")
+
 	
 	local androidsdk=os.getenv("androidsdk") or "../sdks/android-sdk"
 	
@@ -135,9 +195,9 @@ if NACL then
 	
 elseif ANDROID then
 
-	include("lua_android")
+--	include("lua_android")
 
-	include("lua_bit")
+--	include("lua_bit")
 
 -- we might static link with all the above libs
 	include("lua")

@@ -39,7 +39,7 @@
  * Fixing the program to send less polygons to the GPU is left
  * as an exercise to the reader. As always, patches welcomed :-)
  */
-package com.example.SanAngeles;
+package com.wetgenes;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -50,7 +50,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.MotionEvent;
 
-public class DemoActivity extends Activity {
+public class Lua extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,20 +98,20 @@ class DemoGLSurfaceView extends GLSurfaceView {
 
 class DemoRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        nativeInit();
+//        nativeInit();
     }
 
     public void onSurfaceChanged(GL10 gl, int w, int h) {
         //gl.glViewport(0, 0, w, h);
-        nativeResize(w, h);
+//        nativeResize(w, h);
     }
 
     public void onDrawFrame(GL10 gl) {
-        nativeRender();
+//        nativeRender();
     }
 
-    private static native void nativeInit();
-    private static native void nativeResize(int w, int h);
-    private static native void nativeRender();
-    private static native void nativeDone();
+//    private static native void nativeInit();
+//    private static native void nativeResize(int w, int h);
+//    private static native void nativeRender();
+//    private static native void nativeDone();
 }
