@@ -176,6 +176,7 @@ function setup(def)
 	function meta.clean(widget)
 		widget:set_dirty()
 		if widget.master.ids and widget.id then widget.master.ids[widget.id]=nil end -- remove id lookup
+		if widget.fbo then widget.fbo:clean() end
 		return widget
 	end
 --
@@ -483,6 +484,22 @@ function setup(def)
 	
 		local len=#widget
 		for i=1,len do
+			widget[i]=nil
+		end
+	end
+
+--
+-- clean and remove all children of this widget
+--
+	function meta.clean_all(widget)
+	
+		for i,v in ipairs(widget) do
+			v:clean_all()
+		end
+		
+		local len=#widget
+		for i=1,len do
+			widget[i]:clean()
 			widget[i]=nil
 		end
 	end

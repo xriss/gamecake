@@ -174,7 +174,7 @@ function setup(def)
 				widget.fbo=nil
 			end
 			if not widget.fbo then -- allocate a new fbo
-print("new fbo")
+print("new fbo",widget.sx,widget.sy)
 				widget.fbo=_G.win.fbo(widget.sx,widget.sy,0)
 				widget.dirty=true -- flag redraw
 			end
