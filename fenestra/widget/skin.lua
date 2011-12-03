@@ -191,7 +191,8 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 
 			widget.fbo:bind()
 			
-			gl.ClearColor(0,0,0,0/15)
+--			gl.ClearColor(14/15,14/15,14/15,1)
+			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 			win.project23d(widget.sx/widget.sy,1,1024)

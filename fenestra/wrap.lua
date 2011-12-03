@@ -151,7 +151,7 @@ local win={}
 			gl.Disable(gl.CULL_FACE)
 			gl.Enable(gl.TEXTURE_2D)
 			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
-			gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+			gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA) --fbo has premultipliedalpha
 			gl.Begin(gl.QUADS)
 				gl.Color({1,1,1,1})
 				gl.TexCoord(0, 0) gl.Vertex(fbo.width*-0.5, fbo.height*-0.5)
