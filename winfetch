@@ -1,0 +1,8 @@
+echo "fetching changes from the windows build"
+
+cd bin
+hg fetch /media/System/hg/lua/bin
+
+cd ..
+hg fetch /media/System/hg/lua
+
