@@ -46,9 +46,21 @@ if NACL then -- we just link with prebuilt
 
 elseif ANDROID then 
 
-	files { "src/*.h", "src/lua.c" }
+--	buildoptions()
 
-	links { "m" , "pthread" }
+--	buildoptions{ "-fno-stack-protector -fno-stack-protector-all" }
+
+--	linkoptions { " -static -nodefaultlibs " }
+
+	linkoptions { " -static " }
+
+--print( "OK",os.getenv("GCCLIB"))	
+
+	files { "src/*.h", "src/lua.c"  }
+
+--	links { "../"..os.getenv("GCCLIB") } -- , "pthread"
+	
+--	flags { "StaticRuntime" }
 
 	kind("SharedLib")
 
@@ -183,7 +195,7 @@ end
 
 	elseif ANDROID then
 
-		SET_TARGET("","luandroid",true)
+		SET_TARGET("","liblua",true)
 
 	else
 
