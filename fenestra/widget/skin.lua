@@ -358,7 +358,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 							tx+sw+0,-ty,
 							tx+sw+2,-ty-widget.text_size,
 							widget.master.throb*256*256*256)
---						gl.Disable(gl.COLOR_MATERIAL)
+						gl.Disable(gl.COLOR_MATERIAL)
 							
 					end
 				end
@@ -385,6 +385,12 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 else -- we can only draw once
 
 		if widget.fbo then -- we need to draw our cached fbo
+		
+			gl.Disable(gl.LIGHTING)
+			gl.Disable(gl.DEPTH_TEST)
+			gl.Disable(gl.CULL_FACE)
+			gl.Disable(gl.TEXTURE_2D)
+		
 			gl.Translate(widget.sx/2,-widget.sy/2,0)
 			gl.Color(1,1,1,1)
 			widget.fbo:draw()
