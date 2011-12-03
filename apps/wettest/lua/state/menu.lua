@@ -34,7 +34,7 @@ print(widget.id)
 	
 function setup()
 
-	win.widget:remove_all()
+	win.widget:clean_all()
 	local top=win.widget:add({hx=640,hy=480,mx=1,class="hx",ax=0,ay=0})
 	
 	top:add({sy=5,sx=1})
@@ -54,7 +54,7 @@ end
 
 	
 function clean()
-	win.widget:remove_all()
+	win.widget:clean_all()
 end
 
 

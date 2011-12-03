@@ -82,7 +82,7 @@ function goto_page(f)
 	
 	widgets_main={} -- a place to keep widgets namespace
 	widgets_main.master=win.widget
-	widgets_main.master:remove_all() -- start afresh, remove all widgets
+	widgets_main.master:clean_all() -- start afresh, remove all widgets
 	widgets_main.master.ids=widgets_main --  lookup widgets by ids here
 	widgets_main.master.font=win.font_sans
 	

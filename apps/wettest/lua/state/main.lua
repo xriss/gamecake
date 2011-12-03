@@ -388,7 +388,7 @@ end
 
 function clean()
 
-	menu:remove_all()
+	menu:clean_all()
 	
 	-- cleanup any state
 	state_change(true)

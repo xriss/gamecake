@@ -89,7 +89,10 @@ bool fenestra_ogl::fbo_bind(struct fogl_fbo *fbo)
 	{
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo->frame_buffer);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, fbo->texture_buffer, 0);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, fbo->depth_buffer);
+		if(fbo->depth)
+		{
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, fbo->depth_buffer);
+		}
 
 // should check for errors here
 		fbo->status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);

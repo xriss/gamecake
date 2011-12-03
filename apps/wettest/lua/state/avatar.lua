@@ -166,7 +166,7 @@ end
 -----------------------------------------------------------------------------
 function clean()
 print("clean")
-	win.widget:remove_all()
+	win.widget:clean_all()
 	
 	win.fbo_clean(fbo2)
 	fbo2=nil
@@ -1224,7 +1224,7 @@ end
 -----------------------------------------------------------------------------
 function page(hash)
 
-	win.widget:remove_all()
+	win.widget:clean_all()
 	w={}
 	page_thunk(hash)
 	
@@ -1236,7 +1236,7 @@ function page_thunk(hash)
 	local function w_avatar(x,y,hx,hy)
 	
 		if w.avatar then
-			w.avatar:remove_all()
+			w.avatar:clean_all()
 		else
 			w.avatar=win.widget:add{class="rel",hx=hx,hy=hy,px=x,py=y}
 		end
@@ -1257,7 +1257,7 @@ function page_thunk(hash)
 	local function w_colors(x,y,hx,hy)
 	
 		if w.colors then
-			w.colors:remove_all()
+			w.colors:clean_all()
 		else
 			w.colors=win.widget:add{class="rel",hx=hx,hy=hy,px=x,py=y}
 		end
@@ -1297,7 +1297,7 @@ function page_thunk(hash)
 	local function w_surf(x,y,hx,hy)
 	
 		if w.surf then
-			w.surf:remove_all()
+			w.surf:clean_all()
 		else
 			w.surf=win.widget:add{class="rel",hx=hx,hy=hy,px=x,py=y}
 		end
@@ -1323,7 +1323,7 @@ function page_thunk(hash)
 	local function w_loadsave(x,y,hx,hy)
 	
 		if w.loadsave then
-			w.loadsave:remove_all()
+			w.loadsave:clean_all()
 		else
 			w.loadsave=win.widget:add{class="rel",hx=hx,hy=hy,px=x,py=y}
 		end
@@ -1341,7 +1341,7 @@ function page_thunk(hash)
 	local function w_parts(x,y,hx,hy)
 	
 		if w.parts_base then
-			w.parts_base:remove_all()
+			w.parts_base:clean_all()
 		else
 			w.parts_base=win.widget:add{class="rel",hx=hx,hy=hy,px=x,py=y}
 		end
@@ -1370,7 +1370,7 @@ function page_thunk(hash)
 	local function w_groups(x,y,hx,hy)
 	
 		if w.groups_base then
-			w.groups_base:remove_all()
+			w.groups_base:clean_all()
 		else
 			w.groups_base=win.widget:add{class="rel",hx=hx,hy=hy,px=x,py=y}
 		end
@@ -1393,7 +1393,7 @@ function page_thunk(hash)
 	local function w_pmod(x,y,hx,hy)
 	
 		if w.pmod_base then
-			w.pmod_base:remove_all()
+			w.pmod_base:clean_all()
 		else
 			w.pmod_base=win.widget:add{class="rel",hx=hx,hy=hy,px=x,py=y}
 		end
@@ -1440,7 +1440,7 @@ function page_thunk(hash)
 	local function w_anims(x,y,hx,hy)
 	
 		if w.anims_base then
-			w.anims_base:remove_all()
+			w.anims_base:clean_all()
 		else
 			w.anims_base=win.widget:add{class="rel",hx=hx,hy=hy,px=x,py=y}
 		end
