@@ -15,9 +15,9 @@ printf("MKSTEMP")
 	defines("LUA_USE_POPEN") -- we want to enable popen
 end
 
-if #lua_lib_names>0 then
+--if #lua_lib_names>0 then
 	defines("LUA_PRELOADLIBS=lua_preloadlibs")
-end
+--end
 
 
 configuration {"Debug"}
