@@ -79,7 +79,7 @@ location( BUILD_DIR )
 
 configurations { "Debug", "Release" }
 
-includedirs { "lua/src" }
+includedirs { "lib_lua/src" }
 
 
 EXE_OUT_DIR=path.getabsolute("bin/exe")
@@ -191,7 +191,7 @@ if NACL then
 	include("lua_nacl")
 
 -- we might static link with all the above libs
-	include("lua")
+	include("lib_lua")
 	
 elseif ANDROID then
 
@@ -200,10 +200,11 @@ elseif ANDROID then
 --	include("lua_bit")
 
 -- we might static link with all the above libs
-	include("lua")
+	include("lib_lua")
 	
 else
 
+	include("lib_lua")
 	include("lib_z")
 	
 	include("lua_zip")
@@ -250,8 +251,8 @@ else
 		
 	end
 	
--- we might static link with all the above libs
-	include("lua")
+-- we might static link with all the above libs here, producing a final exe
+	include("lua_main")
 
 end
 

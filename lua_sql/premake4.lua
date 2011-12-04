@@ -4,7 +4,7 @@ project "lua_mysql"
 language "C++"
 files { "src/luasql.*" , "src/ls_mysql.c" }
 
-links { "lua51" }
+links { "lib_lua" }
 
 if os.get() == "windows" then
 

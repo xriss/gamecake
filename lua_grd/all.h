@@ -55,9 +55,9 @@
 extern "C" {
 #endif
 
-#include "../lua/src/lua.h"
-#include "../lua/src/lauxlib.h"
-#include "../lua/src/lualib.h"
+#include "../lib_lua/src/lua.h"
+#include "../lib_lua/src/lauxlib.h"
+#include "../lib_lua/src/lualib.h"
 
 //#include "../_src/liblwo/code/lwo2.h"
 

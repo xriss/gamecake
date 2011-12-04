@@ -1,6 +1,6 @@
 
 
-if false and ANDROID then
+if ANDROID then
 
 
 project "lua_android"
@@ -15,8 +15,8 @@ includedirs { "." }
 defines { "LUA_LIB" }
 
 
-SET_KIND("ConsoleApp","nacl","nacl")
-SET_TARGET("","lua.nexe",true)
+--SET_KIND("ConsoleApp","nacl","nacl")
+--SET_TARGET("","lua.nexe",true)
 
 
 end

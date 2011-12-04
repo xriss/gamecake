@@ -6,7 +6,7 @@ files { "src/**.c" , "src/**.cpp" , "src/**.h" }
 excludes("src/mime.*")
 excludes("src/unix.*")
 
-links { "lua51" }
+links { "lib_lua" }
 
 if os.get() == "windows" then
 
@@ -35,7 +35,7 @@ project "lua_mime"
 language "C++"
 files { "src/mime.c" ,"src/mime.h" }
 
-links { "lua51" }
+links { "lib_lua" }
 
 if os.get() == "windows" then
 

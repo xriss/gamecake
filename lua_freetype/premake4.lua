@@ -77,7 +77,7 @@ files {
 
 files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 
-links { "lua51" }
+links { "lib_lua" }
 
 
 if os.get() == "windows" then
