@@ -8,7 +8,7 @@ project "lua_grd"
 language "C++"
 files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 
-links { "lua51" , "lua_grd_libpng" , "lib_z" }
+links { "lib_lua" , "lua_grd_libpng" , "lib_z" }
 
 if os.get() == "windows" then
 

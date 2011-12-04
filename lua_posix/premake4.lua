@@ -4,7 +4,7 @@ project "lua_posix"
 language "C++"
 files { "lposix.c" }
 
-links { "lua51" , "crypt" }
+links { "lib_lua" , "crypt" }
 
 
 SET_KIND("lua","posix","posix")

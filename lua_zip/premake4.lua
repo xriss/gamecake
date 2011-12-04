@@ -6,7 +6,7 @@ project "lua_zip"
 language "C"
 files { "src/**.c" , "src/**.h" }
 
-links { "lua51" , "lua_zip_zziplib" }
+links { "lib_lua" , "lua_zip_zziplib" }
 
 if os.get() == "windows" then
 

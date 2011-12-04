@@ -5,7 +5,7 @@ language "C++"
 files { "src/**.c" , "src/**.cpp" ,  "src/**.h" }
 
 
-links { "lua51" }
+links { "lib_lua" }
 
 
 SET_KIND("lua","lfs","lfs")

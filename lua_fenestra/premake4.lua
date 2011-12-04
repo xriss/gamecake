@@ -6,7 +6,7 @@ files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 includedirs { "../lua_freetype/freetype/include/" }
 includedirs { "../lib_sx/src/" }
 
-links { "lua51" }
+links { "lib_lua" }
 
 defines { "LUA_LIB" }
 

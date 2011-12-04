@@ -3,7 +3,7 @@ project "lua_lanes"
 language "C++"
 files { "src/**.cpp" , "src/**.c" , "src/**.h" }
 
-links { "lua51" }
+links { "lib_lua" }
 
 if os.get() == "windows" then
 

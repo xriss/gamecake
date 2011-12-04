@@ -5,7 +5,7 @@ files { "luagl/src/**.cpp" , "luagl/src/**.c" , "luagl/src/**.h" , "luagl/includ
 	 "freeglut/src/**.cpp" , "freeglut/src/**.c" , "freeglut/src/**.h"  , "freeglut/include/**.h" }
 excludes{ "src/Interpreter.c" , }
 
-links { "lua51" }
+links { "lib_lua" }
 
 defines "FREEGLUT_STATIC"
 

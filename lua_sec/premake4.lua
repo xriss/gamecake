@@ -4,7 +4,7 @@ project "lua_sec"
 language "C++"
 files { "src/**.c" , "src/**.cpp" , "src/**.h" }
 
-links { "lua51" }
+links { "lib_lua" }
 
 if os.get() == "windows" then
 
