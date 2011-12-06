@@ -2,7 +2,7 @@ cd `dirname $0`
 
 #simple forced nacl build, just to see if we can get somewhere with this
 
-naclsdk=../sdks/native_client_sdk
+naclsdk=../../sdks/nacl-sdk/pepper_15
 export PATH=$naclsdk/toolchain/linux_x86/nacl/bin:$PATH
 
 #so premake knows that it is a nacl build
