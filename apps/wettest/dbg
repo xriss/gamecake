@@ -1,4 +1,4 @@
 cd `dirname $0`
 cd ../../bin/dbg
-./lua -e'dofile("../lua/apps.lua").start("wettest");' $*
+./lua -e'require("apps").start("wettest");' $*
 

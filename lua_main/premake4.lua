@@ -110,12 +110,18 @@ final_links={}
 	end
 
 	files { "preloadlibs.c" }
+	
+	files { "cache.c" , "cache_funcs.c" }
 
 	local fp=io.open("preloadlibs.c","w")
 	local t={}
 	local function put(s)
 		t[#t+1]=s
 	end
+	
+	put([[
+extern void wetgenes_cache_preloader(lua_State *L);
+]])
 
 	for i,v in ipairs(lua_lib_loads) do
 	local n=v[1]
@@ -154,6 +160,7 @@ fp:write([[
 extern void lua_preloadlibs(lua_State *L)
 {
 ]]..s2..[[
+	wetgenes_cache_preloader(L); // include embeded strings loader
 }
 
 ]])
@@ -181,3 +188,5 @@ extern void lua_preloadlibs(lua_State *L)
 --linking lua with pthread makes gdb much happier when we use it later...
 
 links(final_links) -- linker is dumb dumb dumb
+
+dofile("cache.lua")
