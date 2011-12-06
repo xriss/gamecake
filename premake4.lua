@@ -1,3 +1,8 @@
+
+------------------------------------------------------------------------
+-- hacky premake functions
+------------------------------------------------------------------------
+
 function newplatform(plf)
     local name = plf.name
     local description = plf.description
@@ -26,7 +31,8 @@ function newgcctoolchain(toolchain)
             cc = toolchain.prefix .. "gcc",
             cxx = toolchain.prefix .. "g++",
             ar = toolchain.prefix .. "ar",
-            cppflags = "-MMD " .. toolchain.cppflags
+            cppflags = "-MMD " .. toolchain.cppflags,
+            cflags = "-MMD " .. toolchain.cppflags,
         }
     }
 end
@@ -38,7 +44,8 @@ newplatform {
     gcc = {
         cc = "gcc",
         cxx = "g++",
-        cppflags = ""
+        cppflags = "",
+        cflags = "",
     }
 }
  
@@ -46,29 +53,84 @@ newgcctoolchain {
     name = "android",
     description = "android",
     prefix = "arm-linux-androideabi-",
-    cppflags = ""
+    cppflags = "",
+    cflags = "",
 }
 
-
-
+------------------------------------------------------------------------
+-- work out what we should be building for
+------------------------------------------------------------------------
 
 solution("wetlua")
 
--- build using NACL?
+-- flag build using NACL?
 NACL=false
 if _ARGS[1]=="nacl" then
 NACL=true
 end
 
--- build using ANDROID?
+-- flag build using ANDROID?
 ANDROID=false
 if _ARGS[1]=="android" then
 ANDROID=true
-
---hax
-platforms { "android" }
-
 end
+
+if NACL then
+
+	defines "NACL"
+	
+	local naclsdk=os.getenv("naclsdk") or "../sdks/naclsdk"
+	
+	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
+	
+elseif ANDROID then
+
+	platforms { "android" } --hax
+
+	defines "ANDROID"
+
+	defines("LUA_USE_POSIX")
+
+	local androidsdk=os.getenv("androidsdk") or "../../sdks/android-sdk"
+	
+--	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
+	
+	buildoptions{ "-mthumb" }
+	
+--	buildoptions{  "-nostdlib" ,"-fno-exceptions"}
+--	buildoptions{ "-fno-rtti", "-Wa", "--noexecstack" }
+--	linkoptions{ "-Wl","--no-undefined","-z","--error-unresolved-symbols", "--no-allow-shlib-undefined", "-Bsymbolic","-Bstatic"}
+--	linkoptions{ "noexecstack" }
+
+
+--	flags{"StaticRuntime"}
+
+--[[
+ 0x00000001 (NEEDED)                     Shared library: [libGLESv1_CM.so]
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so]
+ 0x00000001 (NEEDED)                     Shared library: [liblog.so]
+ 0x00000001 (NEEDED)                     Shared library: [libstdc++.so]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so]
+]]
+
+
+elseif os.get() == "windows" then
+	WINDOWS=true
+	
+	defines "WIN32"
+	defines "_CRT_SECURE_NO_WARNINGS"
+--	defines	"LUA_BUILD_AS_DLL"
+
+else -- nix
+	NIX=true
+	
+	defines "X11"
+--	defines	"LUA_USE_DLOPEN"
+	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
+	
+end
+
 
 BUILD_DIR="build-"..(_ACTION or "")
 
@@ -91,41 +153,6 @@ DBG_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Debug")
 
 AND_OUT_DIR=path.getabsolute("android/libs/armeabi")
 
-
-if NACL then
-
-	defines "NACL"
-	
-	local naclsdk=os.getenv("naclsdk") or "../sdks/naclsdk"
-	
-	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
-	
-elseif ANDROID then
-
-	defines "ANDROID"
-
-	defines("LUA_USE_POSIX")
-
-	
-	local androidsdk=os.getenv("androidsdk") or "../sdks/android-sdk"
-	
---	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
-	
-elseif os.get() == "windows" then
-	WINDOWS=true
-	
-	defines "WIN32"
-	defines "_CRT_SECURE_NO_WARNINGS"
---	defines	"LUA_BUILD_AS_DLL"
-
-else -- nix
-	NIX=true
-	
-	defines "X11"
---	defines	"LUA_USE_DLOPEN"
-	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
-	
-end
 
 lua_lib_names={}
 lua_lib_loads={}
@@ -175,32 +202,42 @@ dir=dir or ""
 
 	else
 
-	configuration {"Debug"}
-	flags {"Symbols"} -- blue debug needs symbols badly
-	targetdir(DBG_OUT_DIR..dir)
+		configuration {"Debug"}
+		flags {"Symbols"} -- blue debug needs symbols badly
+		targetdir(DBG_OUT_DIR..dir)
 
-	configuration {"Release"}
-	flags {"Optimize"}
-	targetdir(EXE_OUT_DIR..dir)
+		configuration {"Release"}
+		flags {"Optimize"}
+		targetdir(EXE_OUT_DIR..dir)
 
 	end
 end
 
+
+------------------------------------------------------------------------
+-- include sub projects depending on build
+------------------------------------------------------------------------
+
 if NACL then
 
-	include("lua_nacl")
+	include("lib_lua")
+
+--	include("lua_nacl")
 
 -- we might static link with all the above libs
-	include("lib_lua")
+	include("lua_main")
 	
 elseif ANDROID then
+
+	include("lib_lua")
 
 --	include("lua_android")
 
 --	include("lua_bit")
 
+	
 -- we might static link with all the above libs
-	include("lib_lua")
+	include("lua_main")
 	
 else
 
