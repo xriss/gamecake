@@ -21,7 +21,7 @@ elseif ANDROID then
 --	links { "../"..os.getenv("GCCLIB") } -- , "pthread"
 --	flags { "StaticRuntime" }
 
-	links { "m" }
+--	links { "m" }
 
 	linkoptions { " -static " }
 	files { "../lib_lua/src/*.h", --[["src/lua.c"]]  }
@@ -44,16 +44,27 @@ else
 end
 
 
-if #lua_lib_names>0 then
+--if #lua_lib_names>0 then
 
 	links(lua_lib_names)
 
+final_links={}
 
 	if NACL then
 
 	elseif ANDROID then
+		
+--"m", "GLESv1_CM", "dl","log"
+--		linkoptions { "-lGLESv1_CM", "-llog", "-lstdc++", "-ldl", "-lm", "-lc" } --, "m", "log" }
+		linkoptions { "-v" }
+		links { "lib_lua" } --, "m", "log" }
+		final_links={"gcc", "c", "m"}
 
-		links { "lib_lua" }
+		linkoptions { "-L../../sdks/android-ndk/platforms/android-8/arch-arm/usr/lib" }
+		
+--	linkoptions{ "-Bsymbolic"}
+--	linkoptions{ "-Bsymbolic-functions"}
+--	linkoptions{ "-Bdynamic"}
 
 	elseif os.get() == "windows" then
 
@@ -149,7 +160,7 @@ extern void lua_preloadlibs(lua_State *L)
 
 
 
-end
+--end
 
 
 	if NACL then
@@ -168,3 +179,4 @@ end
 
 --linking lua with pthread makes gdb much happier when we use it later...
 
+links(final_links) -- linker is dumb dumb dumb
