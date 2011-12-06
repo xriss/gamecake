@@ -22,6 +22,6 @@ fi
 
 cd ..
 
-cd android
+cd lib_android
 
 ant debug install

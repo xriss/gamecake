@@ -151,7 +151,7 @@ ALL_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj")
 EXE_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Release")
 DBG_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Debug")
 
-AND_OUT_DIR=path.getabsolute("android/libs/armeabi")
+AND_OUT_DIR=path.getabsolute("lib_android/libs/armeabi")
 
 
 lua_lib_names={}

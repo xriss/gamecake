@@ -49,6 +49,7 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.widget.TextView;
 
 public class Lua extends Activity {
     @Override
@@ -56,7 +57,10 @@ public class Lua extends Activity {
         super.onCreate(savedInstanceState);
         mGLView = new DemoGLSurfaceView(this);
         setContentView(mGLView);
-    }
+       TextView tv = new TextView(this);
+       tv.setText("Hello, Android");
+       setContentView(tv);
+      }
 
     @Override
     protected void onPause() {
@@ -86,7 +90,7 @@ class DemoGLSurfaceView extends GLSurfaceView {
 
     public boolean onTouchEvent(final MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            nativePause();
+//            nativePause();
         }
         return true;
     }

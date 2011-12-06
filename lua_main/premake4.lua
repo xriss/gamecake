@@ -58,11 +58,12 @@ final_links={}
 --		linkoptions { "-lGLESv1_CM", "-llog", "-lstdc++", "-ldl", "-lm", "-lc" } --, "m", "log" }
 		linkoptions { "-v" }
 		links { "lib_lua" } --, "m", "log" }
-		final_links={"gcc", "c", "m"}
+		final_links={"c", "m","gcc"} 
 
-		linkoptions { "-L../../sdks/android-ndk/platforms/android-8/arch-arm/usr/lib" }
+--		linkoptions { "-L../../sdks/android-ndk/platforms/android-8/arch-arm/usr/lib" }
 		
---	linkoptions{ "-Bsymbolic"}
+	linkoptions{ "-Bsymbolic"}
+
 --	linkoptions{ "-Bsymbolic-functions"}
 --	linkoptions{ "-Bdynamic"}
 
