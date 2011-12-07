@@ -11,7 +11,7 @@ links { "ppapi" ,  "ppapi_cpp" , "pthread" , "srpc" }
 
 includedirs { "." }
 
---links { "lua_main" , "lua" }
+--links { "lib_lua" , "lua" }
 
 defines { "LUA_LIB" }
 

@@ -1,5 +1,5 @@
 
-project "lua_main"
+project "lua"
 language "C"
 
 includedirs { "../lib_lua/src" }
@@ -22,8 +22,8 @@ if NACL then -- we just link with prebuilt
 	files { "../lib_lua/src/*.h", --[["src/lua.c"]]  }
 
 
---	kind "ConsoleApp"
-	SET_TARGET("","lua")
+	kind "WindowedApp"
+	SET_TARGET("","lua",true)
 
 elseif ANDROID then 
 
