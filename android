@@ -1,11 +1,11 @@
 
-rm build-gmake-android -Rf
+#rm build-gmake-android -Rf
 
 cd `dirname $0`
 
 #simple forced nacl build, just to see if we can get somewhere with this
 
-and=../../sdks/android-8-arm
+and=`readlink -f ../sdks/android-8-arm`
 export PATH=$and/bin:$PATH
 
 #so premake knows that it is a nacl build

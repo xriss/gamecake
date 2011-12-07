@@ -1,5 +1,5 @@
 
-if not NACL then -- we just link with prebuilt?
+--if not NACL then -- we just link with prebuilt?
 
 project "lib_lua"
 language "C"
@@ -26,4 +26,4 @@ targetdir(DBG_OBJ_DIR)
 configuration {"Release"}
 targetdir(EXE_OBJ_DIR)
 
-end
+--end

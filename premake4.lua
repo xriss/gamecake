@@ -32,7 +32,6 @@ function newgcctoolchain(toolchain)
             cxx = toolchain.prefix .. "g++",
             ar = toolchain.prefix .. "ar",
             cppflags = "-MMD " .. toolchain.cppflags,
-            cflags = "-MMD " .. toolchain.cppflags,
         }
     }
 end
@@ -45,7 +44,6 @@ newplatform {
         cc = "gcc",
         cxx = "g++",
         cppflags = "",
-        cflags = "",
     }
 }
  
@@ -54,7 +52,23 @@ newgcctoolchain {
     description = "android",
     prefix = "arm-linux-androideabi-",
     cppflags = "",
-    cflags = "",
+}
+
+newplatform {
+    name = "nacl",
+    description = "nacl",
+    gcc = {
+        cc = "gcc",
+        cxx = "g++",
+        cppflags = "",
+    }
+}
+ 
+newgcctoolchain {
+    name = "nacl",
+    description = "nacl",
+    prefix = "i686-nacl-",
+    cppflags = "",
 }
 
 ------------------------------------------------------------------------
@@ -63,25 +77,39 @@ newgcctoolchain {
 
 solution("wetlua")
 
--- flag build using NACL?
+-- work out build type and set flag
 NACL=false
+ANDROID=false
+WINDOWS=false
+NIX=false
+
 if _ARGS[1]=="nacl" then
-NACL=true
+	TARGET="NACL"
+	NACL=true
+elseif _ARGS[1]=="android" then
+	TARGET="ANDROID"
+	ANDROID=true
+elseif os.get() == "windows" then
+	TARGET="WINDOWS"
+	WINDOWS=true
+else
+	TARGET="NIX"
+	NIX=true
 end
 
--- flag build using ANDROID?
-ANDROID=false
-if _ARGS[1]=="android" then
-ANDROID=true
-end
+
 
 if NACL then
 
+	platforms { "nacl" } --hax
+	
 	defines "NACL"
 	
-	local naclsdk=os.getenv("naclsdk") or "../sdks/naclsdk"
+	local naclsdk=path.getabsolute("../sdks/naclsdk/pepper_15")
 	
-	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
+--	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
+
+	buildoptions{"-m32"}
 	
 elseif ANDROID then
 
@@ -91,7 +119,7 @@ elseif ANDROID then
 
 	defines("LUA_USE_POSIX")
 
-	local androidsdk=os.getenv("androidsdk") or "../../sdks/android-sdk"
+	local androidsdk=path.getabsolute("../sdks/android-sdk")
 	
 --	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
 	
@@ -115,15 +143,13 @@ elseif ANDROID then
 ]]
 
 
-elseif os.get() == "windows" then
-	WINDOWS=true
+elseif WINDOWS then
 	
 	defines "WIN32"
 	defines "_CRT_SECURE_NO_WARNINGS"
 --	defines	"LUA_BUILD_AS_DLL"
 
-else -- nix
-	NIX=true
+elseif NIX then
 	
 	defines "X11"
 --	defines	"LUA_USE_DLOPEN"
@@ -199,6 +225,12 @@ dir=dir or ""
 		configuration {"Debug"}
 		flags {"Symbols"} -- blue debug needs symbols badly
 		targetdir(AND_OUT_DIR..dir)
+
+	elseif NACL then
+	
+		configuration {"Debug"}
+		flags {"Symbols"} -- blue debug needs symbols badly
+		targetdir(DBG_OUT_DIR..dir)
 
 	else
 
@@ -279,9 +311,7 @@ else
 --	include("lua_sql")
 
 
-	if os.get() == "windows" then
-
-	else -- nix
+	if NIX then
 
 		include("lua_posix")
 --		include("lib_sx")

@@ -31,19 +31,7 @@ extern int wetgenes_cache_loader(lua_State *L)
 			name, "internal", lua_tostring(L, -1));
 	}
 
-//	lua_call(L,0);
-//	lua_pop(L,1);
-//	name = (const char *)luaL_checkstring(L, -1);
-
 	return 1;
-/*
-	if (luaL_loadbuffer(L, data, (int)strlen(data), name) != 0)
-	{
-		lua_pop(L,1); // ignore error
-		return 0;
-	}
-	return 1;
-*/
 }
 
 extern void wetgenes_cache_preloader(lua_State *L)
