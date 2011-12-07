@@ -1,3 +1,5 @@
+	files { "cache.c" , "cache_funcs.c" }
+
 
 -- this is a premake file
 -- it sticks all of the current lua sources into a .c file for internal packing
