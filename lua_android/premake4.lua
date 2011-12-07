@@ -10,7 +10,7 @@ files { "code/**.cpp" , "code/**.c" , "code/**.cc" , "code/**.h" , "all.h" }
 
 includedirs { "." }
 
---links { "lua_main" , "lua" }
+--links { "lua" , "lib_lua" }
 
 defines { "LUA_LIB" }
 

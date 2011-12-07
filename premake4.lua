@@ -257,7 +257,7 @@ if NACL then
 --	include("lua_nacl")
 
 -- we might static link with all the above libs
-	include("lua_main")
+	include("lua")
 	
 elseif ANDROID then
 
@@ -269,7 +269,7 @@ elseif ANDROID then
 
 	
 -- we might static link with all the above libs
-	include("lua_main")
+	include("lua")
 	
 else
 
@@ -319,7 +319,7 @@ else
 	end
 	
 -- we might static link with all the above libs here, producing a final exe
-	include("lua_main")
+	include("lua")
 
 end
 
