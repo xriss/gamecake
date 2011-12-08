@@ -954,9 +954,7 @@ static int luagl_clear_color(lua_State *L)
 /*ClearDepth (depth) -> none*/
 static int luagl_clear_depth(lua_State *L)
 {
-#if defined(ENABLE_NON_GL_ES)
-  glClearDepth((GLclampf)luaL_checknumber(L, 1));
-#endif
+  glClearDepthf((GLclampf)luaL_checknumber(L, 1));
   return 0;
 }
 
@@ -1302,9 +1300,7 @@ static int luagl_enable(lua_State *L)
 /*EnableClientState (parray) -> none*/
 static int luagl_enable_client_state(lua_State *L)
 {
-#if defined(ENABLE_NON_GL_ES)
   glEnableClientState(luagl_get_gl_enum(L, 1));
-#endif
   return 0;
 }
 
@@ -2573,9 +2569,9 @@ static int luagl_normal_pointer(lua_State *L)
 static int luagl_ortho(lua_State *L)
 {
 #if defined(ENABLE_NON_GL_ES)
-  glOrtho(luaL_checknumber(L, 1), luaL_checknumber(L, 2),
-          luaL_checknumber(L, 3), luaL_checknumber(L, 4),
-          luaL_checknumber(L, 5), luaL_checknumber(L, 6));
+  glOrthof((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2),
+           (GLfloat)luaL_checknumber(L, 3), (GLfloat)luaL_checknumber(L, 4),
+           (GLfloat)luaL_checknumber(L, 5), (GLfloat)luaL_checknumber(L, 6));
 #endif
   return 0;
 }
