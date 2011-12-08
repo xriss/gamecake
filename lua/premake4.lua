@@ -13,19 +13,13 @@ links(lua_lib_names)
 
 if NACL then -- we just link with prebuilt
 
-	linkoptions { "-v"  }
+--	linkoptions { "-v" }
 
-	links { "ppapi" }--, "ppapi_cpp" } -- , "nosys"
+	links { "ppapi" }
 	
---	links { "lib_lua" }
+	links { "lib_lua" }
 	links { "lib_nacl" }
 
---	links {  "crt_platform", "ppruntime", "nosys", "nacl" , "platform", "m" , "pthread" }
-		
---	links {  "crt_common" , "crt_platform" }
-
-
---	links { "stdc++" }
 	links { "m" }
 	
 	SET_KIND("WindowedApp")
