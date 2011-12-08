@@ -1,4 +1,4 @@
-rm -Rf build-gmake-nacl
+#rm -Rf build-gmake-nacl
 
 cd `dirname $0`
 
