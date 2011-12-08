@@ -43,6 +43,7 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
     printf("failed to create graphics3d context\n");
     return PP_FALSE;
   }
+    printf("created graphics3d context\n");
 
   glSetCurrentContextPPAPI(context);
 
