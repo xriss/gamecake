@@ -51,7 +51,7 @@ else
 		links { "lib_lua" }
 
 		SET_KIND("ConsoleApp")
-		SET_TARGET("","lua.exe",true)
+		SET_TARGET("","lua",true)
 
 	else -- nix
 
