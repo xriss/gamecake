@@ -5,7 +5,6 @@ extern int luaopen_zlib(lua_State *L);
 extern int luaopen_freetype(lua_State *L);
 extern int luaopen_bit(lua_State *L);
 extern int luaopen_luagl(lua_State *L);
-extern int luaopen_lfs(lua_State *L);
 
 extern void lua_preloadlibs(lua_State *L)
 {
@@ -22,9 +21,6 @@ extern void lua_preloadlibs(lua_State *L)
     lua_settable(L, -3);
     lua_pushliteral(L, "gl");
     lua_pushcfunction(L, luaopen_luagl);
-    lua_settable(L, -3);
-    lua_pushliteral(L, "lfs");
-    lua_pushcfunction(L, luaopen_lfs);
     lua_settable(L, -3);
     lua_pop(L, 2);
 	wetgenes_cache_preloader(L); // include embeded strings loader
