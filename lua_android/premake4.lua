@@ -8,7 +8,7 @@ language "C++"
 files { "code/**.cpp" , "code/**.c" , "code/**.cc" , "code/**.h" , "all.h" }
 
 
-includedirs { "." }
+includedirs { "code" }
 
 --links { "lua" , "lib_lua" }
 
