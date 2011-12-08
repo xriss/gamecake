@@ -13,9 +13,9 @@ links(lua_lib_names)
 
 if NACL then -- we just link with prebuilt
 
---	linkoptions { "-v" }
+	linkoptions { "-v" }
 
-	links { "ppapi" }
+	links { "ppapi" , "ppapi_gles2" }
 	
 	links { "lib_lua" }
 	links { "lib_z" }
@@ -23,6 +23,7 @@ if NACL then -- we just link with prebuilt
 	links { "lib_nacl" }
 
 	links { "m" , "stdc++" }
+	links { "ppapi" , "ppapi_gles2" }
 	
 	SET_KIND("WindowedApp")
 	SET_TARGET("","lua.32.nexe",true)

@@ -948,11 +948,11 @@ static int luagl_clear_stencil(lua_State *L)
 /*ClipPlane (plane, equationArray) -> none*/
 static int luagl_clip_plane(lua_State *L)
 {
-  GLdouble *equation;
+  GLfloat *equation;
 
-  luagl_get_arrayd(L, 2, &equation);
+  luagl_get_arrayf(L, 2, &equation);
 
-  glClipPlane(luagl_get_gl_enum(L, 1), equation);
+//  glClipPlanefv(luagl_get_gl_enum(L, 1), equation);
 
   LUAGL_DELETE_ARRAY(equation);
   return 0;
@@ -964,10 +964,10 @@ static int luagl_color(lua_State *L)
 {
   if (lua_istable(L, 1))
   {
-    GLdouble *parray = NULL;
+    GLfloat *parray = NULL;
     int n;
 
-    n = luagl_get_arrayd(L, 1, &parray);
+    n = luagl_get_arrayf(L, 1, &parray);
     if (n < 3)
     {
       LUAGL_DELETE_ARRAY(parray);
@@ -976,8 +976,8 @@ static int luagl_color(lua_State *L)
 
     switch(n)
     {
-    case 3:  glColor3dv(parray); break;
-    case 4:  glColor4dv(parray); break;
+    case 3:  glColor3fv(parray); break;
+    case 4:  glColor4fv(parray); break;
     }
 
     LUAGL_DELETE_ARRAY(parray);
@@ -986,9 +986,9 @@ static int luagl_color(lua_State *L)
   {
     switch(lua_gettop(L))
     {
-    case 3:  glColor3d(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+    case 3:  glColor3f((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2), (GLfloat)luaL_checknumber(L, 3));
       break;
-    case 4:  glColor4d(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4));
+    case 4:  glColor4f((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2), (GLfloat)luaL_checknumber(L, 3), (GLfloat)luaL_checknumber(L, 4));
       break;
     }
   }
@@ -1015,7 +1015,7 @@ static int luagl_color_material(lua_State *L)
 static int luagl_color_pointer(lua_State *L)
 {
   GLint size;
-  static GLdouble *parray = NULL;
+  static GLfloat *parray = NULL;
 
   LUAGL_DELETE_ARRAY(parray);
 
@@ -1025,16 +1025,16 @@ static int luagl_color_pointer(lua_State *L)
   if (lua_isnumber(L, 2))
   {
     size = luaL_checkinteger(L, 2);
-    luagl_get_arrayd(L, 1, &parray);
+    luagl_get_arrayf(L, 1, &parray);
   }
   else 
   {
-    int h = luagl_get_array2d(L, 1, &parray, &size);
+    int h = luagl_get_array2f(L, 1, &parray, &size);
     if (h==-1)
       luaL_argerror(L, 1, "must be a table of tables");
   }
 
-  glColorPointer(size, GL_DOUBLE, 0, parray);
+  glColorPointer(size, GL_FLOAT, 0, parray);
   return 0;
 }
 
@@ -1058,12 +1058,14 @@ static int luagl_copy_tex_image(lua_State *L)
       luaL_checkinteger(L, 6), luaL_checkinteger(L, 7),
       luaL_checkinteger(L, 3));
   }
+/*
   else
   {
     glCopyTexImage1D(GL_TEXTURE_1D, luaL_checkinteger(L, 1), luagl_get_gl_enum(L, 2),
       luaL_checkinteger(L, 4), luaL_checkinteger(L, 5),
       luaL_checkinteger(L, 6), luaL_checkinteger(L, 3));
   }
+*/
   return 0;
 }
 
@@ -1079,14 +1081,14 @@ static int luagl_copy_tex_sub_image(lua_State *L)
       luaL_checkinteger(L, 3), luaL_checkinteger(L, 5),
       luaL_checkinteger(L, 7));
   }
-  else
+/*  else
   {
     glCopyTexSubImage1D(GL_TEXTURE_1D,
       luaL_checkinteger(L, 1), luaL_checkinteger(L, 4),
       luaL_checkinteger(L, 2), luaL_checkinteger(L, 3),
       luaL_checkinteger(L, 5));
   }
-  return 0;
+*/  return 0;
 }
 
 /*CullFace (mode) -> none*/
@@ -1135,7 +1137,7 @@ static int luagl_depth_mask(lua_State *L)
 /*DepthRange (zNear, zFar) -> none*/
 static int luagl_depth_range(lua_State *L)
 {
-  glDepthRange((GLclampd)luaL_checknumber(L, 1), (GLclampd)luaL_checknumber(L, 2));
+  glDepthRange((GLclampf)luaL_checknumber(L, 1), (GLclampf)luaL_checknumber(L, 2));
   return 0;
 }
 
@@ -1272,11 +1274,11 @@ static int luagl_eval_coord(lua_State *L)
 {
   if (lua_istable(L, 1))
   {
-    GLdouble *parray;
-    if(luagl_get_arrayd(L, 1, &parray) == 1)
-      glEvalCoord1dv(parray);
+    GLfloat *parray;
+    if(luagl_get_arrayf(L, 1, &parray) == 1)
+      glEvalCoord1fv(parray);
     else
-      glEvalCoord2dv(parray);
+      glEvalCoord2fv(parray);
 
     LUAGL_DELETE_ARRAY(parray);
 
@@ -1287,9 +1289,9 @@ static int luagl_eval_coord(lua_State *L)
     int num_args = lua_gettop(L);
     switch(num_args)
     {
-    case 1:  glEvalCoord1d(luaL_checknumber(L, 1));
+    case 1:  glEvalCoord1f((GLfloat)luaL_checknumber(L, 1));
       break;
-    case 2:  glEvalCoord2d(luaL_checknumber(L, 1), luaL_checknumber(L, 2));
+    case 2:  glEvalCoord2f((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2));
       break;
     }
   }
@@ -1421,7 +1423,7 @@ static int luagl_get(lua_State *L)
 {
   int i, size=1;
   GLenum e;
-  GLdouble *params;
+  GLfloat *params;
   int mask;
 
   e = luagl_get_gl_enum(L, 1);
@@ -1429,58 +1431,58 @@ static int luagl_get(lua_State *L)
   switch(e)
   {
   case GL_STENCIL_VALUE_MASK:
-  case GL_LINE_STIPPLE_PATTERN:
+//  case GL_LINE_STIPPLE_PATTERN:
   case GL_STENCIL_WRITEMASK:
-  case GL_INDEX_WRITEMASK:
+//  case GL_INDEX_WRITEMASK:
     mask = 0;
     glGetIntegerv(e, &mask);
     lua_pushstring(L, luagl_mask2str(mask));
     return 1;
 
   case GL_DEPTH_RANGE:
-  case GL_MAP1_GRID_DOMAIN:
-  case GL_MAP2_GRID_SEGMENTS:
+//  case GL_MAP1_GRID_DOMAIN:
+//  case GL_MAP2_GRID_SEGMENTS:
   case GL_MAX_VIEWPORT_DIMS:
-  case GL_POINT_SIZE_RANGE:
-  case GL_POLYGON_MODE:
+//  case GL_POINT_SIZE_RANGE:
+//  case GL_POLYGON_MODE:
     size = 2;
     break;
 
-  case GL_CURRENT_NORMAL:
-    size = 3;
-    break;
+//  case GL_CURRENT_NORMAL:
+//    size = 3;
+//    break;
 
-  case GL_ACCUM_CLEAR_VALUE:
+//  case GL_ACCUM_CLEAR_VALUE:
   case GL_COLOR_CLEAR_VALUE:
   case GL_COLOR_WRITEMASK:
-  case GL_CURRENT_COLOR:
-  case GL_CURRENT_RASTER_COLOR:
-  case GL_CURRENT_RASTER_POSITION:
-  case GL_CURRENT_RASTER_TEXTURE_COORDS:
-  case GL_CURRENT_TEXTURE_COORDS:
-  case GL_FOG_COLOR:
-  case GL_LIGHT_MODEL_AMBIENT:
-  case GL_MAP2_GRID_DOMAIN:
+//  case GL_CURRENT_COLOR:
+//  case GL_CURRENT_RASTER_COLOR:
+//  case GL_CURRENT_RASTER_POSITION:
+//  case GL_CURRENT_RASTER_TEXTURE_COORDS:
+//  case GL_CURRENT_TEXTURE_COORDS:
+//  case GL_FOG_COLOR:
+//  case GL_LIGHT_MODEL_AMBIENT:
+//  case GL_MAP2_GRID_DOMAIN:
   case GL_SCISSOR_BOX:
-  case GL_TEXTURE_ENV_COLOR:
+//  case GL_TEXTURE_ENV_COLOR:
   case GL_VIEWPORT:
     size = 4;
     break;
 
-  case GL_MODELVIEW_MATRIX:
-  case GL_PROJECTION_MATRIX:
-  case GL_TEXTURE_MATRIX:
-    size = 16;
-    break;
+//  case GL_MODELVIEW_MATRIX:
+//  case GL_PROJECTION_MATRIX:
+//  case GL_TEXTURE_MATRIX:
+//    size = 16;
+//    break;
 
   default:
     luaL_argerror(L, 1, "unknown enumeration.");
     break;
   }
 
-  params = LUAGL_NEW_ARRAY(GLdouble, size);
+  params = LUAGL_NEW_ARRAY(GLfloat, size);
 
-  glGetDoublev(e, params);
+  glGetFloatv(e, params);
 
   for(i = 0; i < size; i++)
     lua_pushnumber(L, params[i]);
@@ -1502,40 +1504,40 @@ static int luagl_get_const(lua_State *L)
   switch(e)
   {
   case GL_DEPTH_RANGE:
-  case GL_MAP1_GRID_DOMAIN:
-  case GL_MAP2_GRID_SEGMENTS:
+//  case GL_MAP1_GRID_DOMAIN:
+//  case GL_MAP2_GRID_SEGMENTS:
   case GL_MAX_VIEWPORT_DIMS:
-  case GL_POINT_SIZE_RANGE:
-  case GL_POLYGON_MODE:
+//  case GL_POINT_SIZE_RANGE:
+//  case GL_POLYGON_MODE:
     size = 2;
     break;
 
-  case GL_CURRENT_NORMAL:
-    size = 3;
-    break;
+//  case GL_CURRENT_NORMAL:
+//    size = 3;
+//    break;
 
-  case GL_ACCUM_CLEAR_VALUE:
+//  case GL_ACCUM_CLEAR_VALUE:
   case GL_COLOR_CLEAR_VALUE:
   case GL_COLOR_WRITEMASK:
-  case GL_CURRENT_COLOR:
-  case GL_CURRENT_RASTER_COLOR:
-  case GL_CURRENT_RASTER_POSITION:
-  case GL_CURRENT_RASTER_TEXTURE_COORDS:
-  case GL_CURRENT_TEXTURE_COORDS:
-  case GL_FOG_COLOR:
-  case GL_LIGHT_MODEL_AMBIENT:
-  case GL_MAP2_GRID_DOMAIN:
+//  case GL_CURRENT_COLOR:
+//  case GL_CURRENT_RASTER_COLOR:
+//  case GL_CURRENT_RASTER_POSITION:
+//  case GL_CURRENT_RASTER_TEXTURE_COORDS:
+//  case GL_CURRENT_TEXTURE_COORDS:
+//  case GL_FOG_COLOR:
+//  case GL_LIGHT_MODEL_AMBIENT:
+//  case GL_MAP2_GRID_DOMAIN:
   case GL_SCISSOR_BOX:
-  case GL_TEXTURE_ENV_COLOR:
+//  case GL_TEXTURE_ENV_COLOR:
   case GL_VIEWPORT:
     size = 4;
     break;
 
-  case GL_MODELVIEW_MATRIX:
-  case GL_PROJECTION_MATRIX:
-  case GL_TEXTURE_MATRIX:
-    size = 16;
-    break;
+//  case GL_MODELVIEW_MATRIX:
+//  case GL_PROJECTION_MATRIX:
+//  case GL_TEXTURE_MATRIX:
+//    size = 16;
+//    break;
   }
 
   params = LUAGL_NEW_ARRAY(GLenum, size);
@@ -1555,54 +1557,54 @@ static int luagl_get_array(lua_State *L)
 {
   int size = 1;
   GLenum e;
-  GLdouble *params;
+  GLfloat *params;
 
   e = luagl_get_gl_enum(L, 1);
 
   switch(e)
   {
   case GL_DEPTH_RANGE:
-  case GL_MAP1_GRID_DOMAIN:
-  case GL_MAP2_GRID_SEGMENTS:
+//  case GL_MAP1_GRID_DOMAIN:
+//  case GL_MAP2_GRID_SEGMENTS:
   case GL_MAX_VIEWPORT_DIMS:
-  case GL_POINT_SIZE_RANGE:
-  case GL_POLYGON_MODE:
+//  case GL_POINT_SIZE_RANGE:
+//  case GL_POLYGON_MODE:
     size = 2;
     break;
 
-  case GL_CURRENT_NORMAL:
-    size = 3;
-    break;
+//  case GL_CURRENT_NORMAL:
+//    size = 3;
+//    break;
 
-  case GL_ACCUM_CLEAR_VALUE:
+//  case GL_ACCUM_CLEAR_VALUE:
   case GL_COLOR_CLEAR_VALUE:
   case GL_COLOR_WRITEMASK:
-  case GL_CURRENT_COLOR:
-  case GL_CURRENT_RASTER_COLOR:
-  case GL_CURRENT_RASTER_POSITION:
-  case GL_CURRENT_RASTER_TEXTURE_COORDS:
-  case GL_CURRENT_TEXTURE_COORDS:
-  case GL_FOG_COLOR:
-  case GL_LIGHT_MODEL_AMBIENT:
-  case GL_MAP2_GRID_DOMAIN:
+//  case GL_CURRENT_COLOR:
+//  case GL_CURRENT_RASTER_COLOR:
+//  case GL_CURRENT_RASTER_POSITION:
+//  case GL_CURRENT_RASTER_TEXTURE_COORDS:
+//  case GL_CURRENT_TEXTURE_COORDS:
+//  case GL_FOG_COLOR:
+//  case GL_LIGHT_MODEL_AMBIENT:
+//  case GL_MAP2_GRID_DOMAIN:
   case GL_SCISSOR_BOX:
-  case GL_TEXTURE_ENV_COLOR:
+//  case GL_TEXTURE_ENV_COLOR:
   case GL_VIEWPORT:
     size = 4;
     break;
 
-  case GL_MODELVIEW_MATRIX:
-  case GL_PROJECTION_MATRIX:
-  case GL_TEXTURE_MATRIX:
-    size = 16;
-    break;
+ // case GL_MODELVIEW_MATRIX:
+ // case GL_PROJECTION_MATRIX:
+ // case GL_TEXTURE_MATRIX:
+ //   size = 16;
+ //   break;
   }
 
-  params = LUAGL_NEW_ARRAY(GLdouble, size);
+  params = LUAGL_NEW_ARRAY(GLfloat, size);
 
-  glGetDoublev(e, params);
+  glGetFloatv(e, params);
 
-  luagl_push_arrayd(L, params, size);
+  luagl_push_arrayf(L, params, size);
 
   LUAGL_DELETE_ARRAY(params);
 
@@ -1612,13 +1614,13 @@ static int luagl_get_array(lua_State *L)
 /*GetClipPlane (plane) -> equationArray*/
 static int luagl_get_clip_plane(lua_State *L)
 {
-  GLdouble *equation;
+  GLfloat *equation;
 
-  equation = LUAGL_NEW_ARRAY(GLdouble, 4);
+  equation = LUAGL_NEW_ARRAY(GLfloat, 4);
 
-  glGetClipPlane(luagl_get_gl_enum(L, 1), equation);
+//  glGetClipPlanefv(luagl_get_gl_enum(L, 1), equation);
 
-  luagl_push_arrayd(L, equation, 4);
+  luagl_push_arrayf(L, equation, 4);
 
   LUAGL_DELETE_ARRAY(equation);
 
@@ -1639,6 +1641,8 @@ static int luagl_get_error(lua_State *L)
 /*GetLight (light, pname) -> paramsArray*/
 static int luagl_get_light(lua_State *L)
 {
+	return 0;
+/*	
   int size = 1;
   GLenum e1, e2;
   GLfloat *params;
@@ -1646,25 +1650,25 @@ static int luagl_get_light(lua_State *L)
   e1 = luagl_get_gl_enum(L, 1);
   e2 = luagl_get_gl_enum(L, 2);
 
-  switch(e2)
-  {
-  case GL_AMBIENT:
-  case GL_DIFFUSE:
-  case GL_SPECULAR:
-  case GL_POSITION:
-    size = 4;
-    break;
-  case GL_SPOT_DIRECTION :
-    size = 3;
-    break;
-  case GL_SPOT_EXPONENT:
-  case GL_SPOT_CUTOFF:
-  case GL_CONSTANT_ATTENUATION:
-  case GL_LINEAR_ATTENUATION:
-  case GL_QUADRATIC_ATTENUATION:
-    size = 1;
-    break;
-  }
+//  switch(e2)
+//  {
+//  case GL_AMBIENT:
+//  case GL_DIFFUSE:
+//  case GL_SPECULAR:
+//  case GL_POSITION:
+//    size = 4;
+//    break;
+//  case GL_SPOT_DIRECTION :
+//    size = 3;
+//    break;
+//  case GL_SPOT_EXPONENT:
+//  case GL_SPOT_CUTOFF:
+//  case GL_CONSTANT_ATTENUATION:
+//  case GL_LINEAR_ATTENUATION:
+//  case GL_QUADRATIC_ATTENUATION:
+//    size = 1;
+//    break;
+//  }
 
   params = LUAGL_NEW_ARRAY(GLfloat, size);
 
@@ -1675,14 +1679,16 @@ static int luagl_get_light(lua_State *L)
   LUAGL_DELETE_ARRAY(params);
 
   return 1;
+*/
 }
 
 /*GetMap (target, query) -> vArray*/
 static int luagl_get_map(lua_State *L)
 {
-  int size = 1;
+	return 0;
+/*  int size = 1;
   GLenum e1, e2;
-  GLdouble *params;
+  GLfloat *params;
   GLint *order;
 
   order = LUAGL_NEW_ARRAY(GLint, 2);
@@ -1691,60 +1697,63 @@ static int luagl_get_map(lua_State *L)
   e1 = luagl_get_gl_enum(L, 1);
   e2 = luagl_get_gl_enum(L, 2);
 
-  switch(e1)
-  {
-  case GL_MAP1_INDEX:
-  case GL_MAP2_INDEX:
-  case GL_MAP1_TEXTURE_COORD_1:
-  case GL_MAP2_TEXTURE_COORD_1:
-    size = 1;
-    break;
-  case GL_MAP1_TEXTURE_COORD_2:
-  case GL_MAP2_TEXTURE_COORD_2:
-    size = 2;
-    break;
-  case GL_MAP1_VERTEX_3:
-  case GL_MAP2_VERTEX_3:
-  case GL_MAP1_NORMAL:
-  case GL_MAP2_NORMAL:
-  case GL_MAP1_TEXTURE_COORD_3:
-  case GL_MAP2_TEXTURE_COORD_3:
-    size = 3;
-    break;
-  case GL_MAP1_VERTEX_4:
-  case GL_MAP2_VERTEX_4:
-  case GL_MAP1_COLOR_4:
-  case GL_MAP2_COLOR_4:
-  case GL_MAP1_TEXTURE_COORD_4:
-  case GL_MAP2_TEXTURE_COORD_4:
-    size = 4;
-    break;
-  }
+//  switch(e1)
+//  {
+//  case GL_MAP1_INDEX:
+//  case GL_MAP2_INDEX:
+//  case GL_MAP1_TEXTURE_COORD_1:
+//  case GL_MAP2_TEXTURE_COORD_1:
+//    size = 1;
+//    break;
+//  case GL_MAP1_TEXTURE_COORD_2:
+//  case GL_MAP2_TEXTURE_COORD_2:
+//    size = 2;
+//    break;
+//  case GL_MAP1_VERTEX_3:
+//  case GL_MAP2_VERTEX_3:
+//  case GL_MAP1_NORMAL:
+//  case GL_MAP2_NORMAL:
+//  case GL_MAP1_TEXTURE_COORD_3:
+//  case GL_MAP2_TEXTURE_COORD_3:
+//    size = 3;
+//    break;
+//  case GL_MAP1_VERTEX_4:
+//  case GL_MAP2_VERTEX_4:
+//  case GL_MAP1_COLOR_4:
+//  case GL_MAP2_COLOR_4:
+//  case GL_MAP1_TEXTURE_COORD_4:
+//  case GL_MAP2_TEXTURE_COORD_4:
+//    size = 4;
+//    break;
+//  }
 
   glGetMapiv(e1, GL_ORDER, order);
 
   size *= order[0] * order[1];
 
-  params = LUAGL_NEW_ARRAY(GLdouble, size);
+  params = LUAGL_NEW_ARRAY(GLfloat, size);
 
-  glGetMapdv(e1, e2, params);
+  glGetMapfv(e1, e2, params);
 
-  luagl_push_arrayd(L, params, size);
+  luagl_push_arrayf(L, params, size);
 
   LUAGL_DELETE_ARRAY(params);
   LUAGL_DELETE_ARRAY(order);
 
   return 1;
+*/
 }
 
 /*GetMaterial (face, pname) -> paramsArray*/
 static int luagl_get_material(lua_State *L)
 {
+	return 0;
+/*	
   int size = 1;
   GLenum e1, e2;
   GLfloat *params;
 
-  /* get string parameters */
+  // get string parameters
   e1 = luagl_get_gl_enum(L, 1);
   e2 = luagl_get_gl_enum(L, 2);
 
@@ -1773,11 +1782,14 @@ static int luagl_get_material(lua_State *L)
   LUAGL_DELETE_ARRAY(params);
 
   return 1;
+*/
 }
 
 /*GetPixelMap (map) -> valuesArray*/
 static int luagl_get_pixel_map(lua_State *L)
 {
+	return 0;
+/*
   int size;
   int s = GL_PIXEL_MAP_R_TO_R_SIZE;
   GLenum e;
@@ -1810,6 +1822,7 @@ static int luagl_get_pixel_map(lua_State *L)
   LUAGL_DELETE_ARRAY(values);
 
   return 1;
+*/
 }
 
 /*GetPointer (pname, n) -> valuesArray*/
@@ -1821,7 +1834,8 @@ static int luagl_get_pointer(lua_State *L)
   e = luagl_get_gl_enum(L, 1);
   n = luaL_checkinteger(L, 2);
 
-  if(e == GL_EDGE_FLAG_ARRAY_POINTER)
+/*
+ *   if(e == GL_EDGE_FLAG_ARRAY_POINTER)
   {
     GLboolean *flags;
     glGetPointerv(e, (void *)&flags);
@@ -1831,13 +1845,14 @@ static int luagl_get_pointer(lua_State *L)
     luagl_push_arrayb(L, flags, n);
   }
   else
+*/
   {
-    GLdouble *params;
+    GLfloat *params;
     glGetPointerv(e, (void *)&params);
     if(params == 0)
       return 0;
 
-    luagl_push_arrayd(L, params, n);
+    luagl_push_arrayf(L, params, n);
   }
 
   return 1;
@@ -1867,7 +1882,8 @@ static int luagl_get_string(lua_State *L)
 /*GetTexEnv (pname) -> paramsArray*/
 static int luagl_get_tex_env(lua_State *L)
 {
-  GLenum e1;
+	return 0;
+/*  GLenum e1;
 
   e1 = luagl_get_gl_enum(L, 1);
 
@@ -1891,6 +1907,7 @@ static int luagl_get_tex_env(lua_State *L)
   }
 
   return 1;
+*/
 }
 
 /*GetTexGen (coord, pname) -> paramsArray*/
@@ -1900,19 +1917,19 @@ static int luagl_get_tex_gen(lua_State *L)
 
   e2 = luagl_get_gl_enum(L, 2);
 
-  if (e2 != GL_TEXTURE_GEN_MODE)
+/*  if (e2 != GL_TEXTURE_GEN_MODE)
   {
-    GLdouble *params;
+    GLfloat *params;
 
-    params = LUAGL_NEW_ARRAY(GLdouble, 4);
+    params = LUAGL_NEW_ARRAY(GLfloat, 4);
 
-    glGetTexGendv(luagl_get_gl_enum(L, 1), e2, params);
+    glGetTexGenfv(luagl_get_gl_enum(L, 1), e2, params);
 
-    luagl_push_arrayd(L, params, 4);
+    luagl_push_arrayf(L, params, 4);
 
     LUAGL_DELETE_ARRAY(params);
   }
-  else
+  else*/
   {
     GLint e3;
     glGetTexGeniv(luagl_get_gl_enum(L, 1), e2, &e3);
@@ -1928,10 +1945,10 @@ static int luagl_get_depth(GLenum format)
   {
   case GL_DEPTH_COMPONENT:
   case GL_STENCIL_INDEX:
-  case GL_COLOR_INDEX:
-  case GL_RED:
-  case GL_GREEN:
-  case GL_BLUE:
+//  case GL_COLOR_INDEX:
+//  case GL_RED:
+//  case GL_GREEN:
+//  case GL_BLUE:
   case GL_ALPHA:
   case GL_LUMINANCE:
     depth = 1;
@@ -1962,7 +1979,8 @@ static int luagl_get_depth(GLenum format)
 /*GetTexImage (target, level, format) -> pixelsArray*/
 static int luagl_get_tex_image(lua_State *L)
 {
-  int depth, size;
+	return 0;
+/*  int depth, size;
   int width, height, level;
   GLenum target, format;
   GLfloat *pixels;
@@ -1971,7 +1989,7 @@ static int luagl_get_tex_image(lua_State *L)
   level = luaL_checkinteger(L, 2);
   format = luagl_get_gl_enum(L, 3);
 
-  /* get width and height of image */
+  // get width and height of image 
   glGetTexLevelParameteriv(target, level, GL_TEXTURE_WIDTH, &width);
   glGetTexLevelParameteriv(target, level, GL_TEXTURE_HEIGHT, &height);
 
@@ -1989,6 +2007,7 @@ static int luagl_get_tex_image(lua_State *L)
   LUAGL_DELETE_ARRAY(pixels);
 
   return 1;
+*/
 }
 
 /*GetTexImageRaw (target, level, format, type, pixels) -> none*/
@@ -2016,7 +2035,7 @@ static int luagl_get_tex_parameter(lua_State *L)
   target = luagl_get_gl_enum(L, 1);
   pname = luagl_get_gl_enum(L, 2);
 
-  if(pname == GL_TEXTURE_BORDER_COLOR)
+/*  if(pname == GL_TEXTURE_BORDER_COLOR)
   {
     GLfloat *params;
 
@@ -2034,7 +2053,7 @@ static int luagl_get_tex_parameter(lua_State *L)
     glGetTexParameterfv(target, pname, &param);
     lua_pushnumber(L, param);
   }
-  else
+  else*/
   {
     GLint e;
     glGetTexParameteriv(target, pname, &e);
@@ -2055,16 +2074,16 @@ static int luagl_index(lua_State *L)
 {
   if (lua_istable(L, 1))
   {
-    GLdouble *c;
+    GLfloat *c;
 
-    luagl_get_arrayd(L, 1, &c);
+    luagl_get_arrayf(L, 1, &c);
 
-    glIndexdv((GLdouble *)c);
+    glIndexfv((GLfloat *)c);
 
     LUAGL_DELETE_ARRAY(c);
   }
   else 
-    glIndexd(luaL_checknumber(L, 1));
+    glIndexf((GLfloat)luaL_checknumber(L, 1));
 
   return 0;
 }
@@ -2082,7 +2101,7 @@ static int luagl_index_mask(lua_State *L)
 /*IndexPointer (indexArray) -> none*/
 static int luagl_index_pointer(lua_State *L)
 {
-  static GLdouble *parray = NULL;
+  static GLfloat *parray = NULL;
 
   LUAGL_DELETE_ARRAY(parray);
 
@@ -2090,9 +2109,9 @@ static int luagl_index_pointer(lua_State *L)
   if(lua_isnil(L,1))
     return 0;
 
-  luagl_get_arrayd(L, 1, &parray);
+  luagl_get_arrayf(L, 1, &parray);
 
-  glIndexPointer(GL_DOUBLE, 0, parray);
+  glIndexPointer(GL_FLOAT, 0, parray);
 
   return 0;
 }
@@ -2195,17 +2214,17 @@ static int luagl_load_identity(lua_State *L)
 /*LoadMatrix (mArray) -> none*/
 static int luagl_load_matrix(lua_State *L)
 {
-  GLdouble *m;
+  GLfloat *m;
   int n;
 
-  n = luagl_get_arrayd(L, 1, &m);
+  n = luagl_get_arrayf(L, 1, &m);
   if (n < 16)
   {
     LUAGL_DELETE_ARRAY(m);
     luaL_argerror(L, 1, "invalid number of elements in the matrix table (n<16).");
   }
 
-  glLoadMatrixd(m);
+  glLoadMatrixf(m);
 
   LUAGL_DELETE_ARRAY(m);
 
@@ -2232,12 +2251,13 @@ static int luagl_map(lua_State *L)
 {
   int size=1;
   GLenum target;
-  GLdouble *points;
+  GLfloat *points;
   GLint uorder, vorder;
 
   target = luagl_get_gl_enum(L, 1);
 
-  switch(target)
+/*
+ *   switch(target)
   {
   case GL_MAP1_INDEX:
   case GL_MAP2_INDEX:
@@ -2266,12 +2286,12 @@ static int luagl_map(lua_State *L)
     size = 4;
     break;
   }
-
+*/
   if (lua_gettop(L) < 6)
   {
-    uorder = luagl_get_arrayd(L, 4, &points) / size;
+    uorder = luagl_get_arrayf(L, 4, &points) / size;
 
-    glMap1d(target, luaL_checknumber(L, 2),
+    glMap1f(target, (GLfloat)luaL_checknumber(L, 2),
       luaL_checknumber(L, 3),
       size, uorder, points);
 
@@ -2279,14 +2299,14 @@ static int luagl_map(lua_State *L)
   }
   else
   {
-    vorder = luagl_get_array2d(L, 6, &points, &uorder);
+    vorder = luagl_get_array2f(L, 6, &points, &uorder);
     uorder /= size;
 
     if (vorder==-1)
       luaL_argerror(L, 6, "must be a table of tables");
 
-    glMap2d(target, luaL_checknumber(L, 2), luaL_checknumber(L, 3),
-            size, uorder, luaL_checknumber(L, 4), luaL_checknumber(L, 5),
+    glMap2f(target, (GLfloat)luaL_checknumber(L, 2), (GLfloat)luaL_checknumber(L, 3),
+            size, uorder, (GLfloat)luaL_checknumber(L, 4), (GLfloat)luaL_checknumber(L, 5),
             size * uorder, vorder, points);
 
     LUAGL_DELETE_ARRAY(points);
@@ -2298,16 +2318,16 @@ static int luagl_map(lua_State *L)
 static int luagl_map_grid(lua_State *L)
 {
   if (lua_gettop(L) < 6)
-    glMapGrid1d(luaL_checkinteger(L, 1),
-                luaL_checknumber(L, 2),
-                luaL_checknumber(L, 3));
+    glMapGrid1f(luaL_checkinteger(L, 1),
+                (GLfloat)luaL_checknumber(L, 2),
+                (GLfloat)luaL_checknumber(L, 3));
   else
-    glMapGrid2d(luaL_checkinteger(L, 1),
-                luaL_checknumber(L, 2),
-                luaL_checknumber(L, 3),
+    glMapGrid2f(luaL_checkinteger(L, 1),
+                (GLfloat)luaL_checknumber(L, 2),
+                (GLfloat)luaL_checknumber(L, 3),
                 luaL_checkinteger(L, 4),
-                luaL_checknumber(L, 5),
-                luaL_checknumber(L, 6));
+                (GLfloat)luaL_checknumber(L, 5),
+                (GLfloat)luaL_checknumber(L, 6));
   return 0;
 }
 
@@ -2343,17 +2363,17 @@ static int luagl_matrix_mode(lua_State *L)
 /*MultMatrix (mArray) -> none*/
 static int luagl_mult_matrix(lua_State *L)
 {
-  GLdouble *m;
+  GLfloat *m;
   int n;
 
-  n = luagl_get_arrayd(L, 1, &m);
+  n = luagl_get_arrayf(L, 1, &m);
   if (n < 16)
   {
     LUAGL_DELETE_ARRAY(m);
     luaL_argerror(L, 1, "invalid number of elements in the matrix table (n<16).");
   }
 
-  glMultMatrixd(m);
+  glMultMatrixf(m);
 
   LUAGL_DELETE_ARRAY(m);
 
@@ -2373,19 +2393,19 @@ static int luagl_normal(lua_State *L)
 {
   if(lua_istable(L, 1))
   {
-    GLdouble *parray;
+    GLfloat *parray;
     int n;
 
-    n = luagl_get_arrayd(L, 1, &parray);
+    n = luagl_get_arrayf(L, 1, &parray);
     if (n < 3)
       luaL_argerror(L, 1, "invalid number of elements in the table (n<3)");
 
-    glNormal3dv(parray);
+    glNormal3fv(parray);
 
     LUAGL_DELETE_ARRAY(parray);
   }
   else
-    glNormal3d(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+    glNormal3f((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2), (GLfloat)luaL_checknumber(L, 3));
 
   return 0;
 }
@@ -2394,7 +2414,7 @@ static int luagl_normal(lua_State *L)
 static int luagl_normal_pointer(lua_State *L)
 {
   GLint size;
-  static GLdouble *parray = NULL;
+  static GLfloat *parray = NULL;
 
   LUAGL_DELETE_ARRAY(parray);
 
@@ -2404,16 +2424,16 @@ static int luagl_normal_pointer(lua_State *L)
   if (lua_isnumber(L, 2))
   {
     size = luaL_checkinteger(L, 2);
-    luagl_get_arrayd(L, 1, &parray);
+    luagl_get_arrayf(L, 1, &parray);
   }
   else 
   {
-    int h = luagl_get_array2d(L, 1, &parray, &size);
+    int h = luagl_get_array2f(L, 1, &parray, &size);
     if (h==-1)
       luaL_argerror(L, 1, "must be a table of tables");
   }
 
-  glNormalPointer(GL_DOUBLE, 0, parray);
+  glNormalPointer(GL_FLOAT, 0, parray);
 
   return 0;
 }
@@ -2601,8 +2621,8 @@ static int luagl_raster_pos(lua_State *L)
 {
   if(lua_istable(L, 1))
   {
-    GLdouble *parray;
-    int n = luagl_get_arrayd(L, 1, &parray);
+    GLfloat *parray;
+    int n = luagl_get_arrayf(L, 1, &parray);
     if (n < 2)
     {
       LUAGL_DELETE_ARRAY(parray);
@@ -2611,9 +2631,9 @@ static int luagl_raster_pos(lua_State *L)
 
     switch(n)
     {
-    case 2:  glRasterPos2dv(parray); break;
-    case 3:  glRasterPos3dv(parray); break;
-    case 4:  glRasterPos4dv(parray); break;
+    case 2:  glRasterPos2fv(parray); break;
+    case 3:  glRasterPos3fv(parray); break;
+    case 4:  glRasterPos4fv(parray); break;
     }
 
     LUAGL_DELETE_ARRAY(parray);
@@ -2624,13 +2644,13 @@ static int luagl_raster_pos(lua_State *L)
     switch(num_args)
     {
     case 2:  
-      glRasterPos2d(luaL_checknumber(L, 1), luaL_checknumber(L, 2));
+      glRasterPos2f((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2));
       break;
     case 3:  
-      glRasterPos3d(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+      glRasterPos3f((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2), (GLfloat)luaL_checknumber(L, 3));
       break;
     case 4:  
-      glRasterPos4d(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4));
+      glRasterPos4f((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2), (GLfloat)luaL_checknumber(L, 3), (GLfloat)luaL_checknumber(L, 4));
       break;
     }
   }
@@ -2685,20 +2705,20 @@ static int luagl_read_pixels_raw(lua_State *L)
   Rect (v1, v2) -> none*/
 static int luagl_rect(lua_State *L)
 {
-  GLdouble *v1, *v2;
+  GLfloat *v1, *v2;
 
   if (lua_istable(L, 1) && lua_istable(L, 2))
   {
-    luagl_get_arrayd(L, 1, &v1);
-    luagl_get_arrayd(L, 2, &v2);
+    luagl_get_arrayf(L, 1, &v1);
+    luagl_get_arrayf(L, 2, &v2);
 
-    glRectdv(v1, v2);
+    glRectfv(v1, v2);
 
     LUAGL_DELETE_ARRAY(v1);
     LUAGL_DELETE_ARRAY(v2);
   }
   else 
-    glRectd(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4));
+    glRectf((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2), (GLfloat)luaL_checknumber(L, 3), (GLfloat)luaL_checknumber(L, 4));
   return 0;
 }
 
@@ -2712,14 +2732,14 @@ static int luagl_render_mode(lua_State *L)
 /*Rotate (angle, x, y, z) -> none*/
 static int luagl_rotate(lua_State *L)
 {
-  glRotated(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4));
+  glRotatef((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2), (GLfloat)luaL_checknumber(L, 3), (GLfloat)luaL_checknumber(L, 4));
   return 0;
 }
 
 /*Scale (x, y, z) -> none*/
 static int luagl_scale(lua_State *L)
 {
-  glScaled(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+  glScalef((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2), (GLfloat)luaL_checknumber(L, 3));
   return 0;
 }
 
@@ -2826,13 +2846,13 @@ static int luagl_tex_coord(lua_State *L)
   int index;
   int num_args = lua_gettop(L);
 
-  GLdouble *v = 0;
+  GLfloat *v = 0;
 
   if (lua_istable(L, 1))
-    num_args = luagl_get_arrayd(L, 1, &v);
+    num_args = luagl_get_arrayf(L, 1, &v);
   else
   {
-    v = LUAGL_NEW_ARRAY(GLdouble, num_args);
+    v = LUAGL_NEW_ARRAY(GLfloat, num_args);
 
     for(index = 0; index < num_args; index++)
     {
@@ -2842,10 +2862,10 @@ static int luagl_tex_coord(lua_State *L)
 
   switch(num_args)
   {
-  case 1:  glTexCoord1dv((GLdouble *)v);  break;
-  case 2:  glTexCoord2dv((GLdouble *)v);  break;
-  case 3:  glTexCoord3dv((GLdouble *)v);  break;
-  case 4:  glTexCoord4dv((GLdouble *)v);  break;
+  case 1:  glTexCoord1fv((GLfloat *)v);  break;
+  case 2:  glTexCoord2fv((GLfloat *)v);  break;
+  case 3:  glTexCoord3fv((GLfloat *)v);  break;
+  case 4:  glTexCoord4fv((GLfloat *)v);  break;
   }
 
   LUAGL_DELETE_ARRAY(v);
@@ -2857,7 +2877,7 @@ static int luagl_tex_coord(lua_State *L)
 static int luagl_tex_coord_pointer(lua_State *L)
 {
   GLint size;
-  static GLdouble *parray = NULL;
+  static GLfloat *parray = NULL;
 
   LUAGL_DELETE_ARRAY(parray);
 
@@ -2867,16 +2887,16 @@ static int luagl_tex_coord_pointer(lua_State *L)
   if (lua_isnumber(L, 2))
   {
     size = luaL_checkinteger(L, 2);
-    luagl_get_arrayd(L, 1, &parray);
+    luagl_get_arrayf(L, 1, &parray);
   }
   else
   {
-    int h = luagl_get_array2d(L, 1, &parray, &size);
+    int h = luagl_get_array2f(L, 1, &parray, &size);
     if (h==-1)
       luaL_argerror(L, 1, "must be a table of tables");
   }
 
-  glTexCoordPointer(size, GL_DOUBLE, 0, parray);
+  glTexCoordPointer(size, GL_FLOAT, 0, parray);
 
   return 0;
 }
@@ -2885,7 +2905,8 @@ static int luagl_tex_coord_pointer(lua_State *L)
   TexEnv (pname, paramsArray) -> none*/
 static int luagl_tex_env(lua_State *L)
 {
-  if(lua_istable(L, 2))
+	return 0;
+/*  if(lua_istable(L, 2))
   {
     GLfloat *param;
     luagl_get_arrayf(L, 2, &param);
@@ -2898,7 +2919,7 @@ static int luagl_tex_env(lua_State *L)
     glTexEnvf(GL_TEXTURE_ENV, luagl_get_gl_enum(L, 1), (GLfloat)luaL_checknumber(L, 2));
   else 
     glTexEnvi(GL_TEXTURE_ENV, luagl_get_gl_enum(L, 1), luagl_get_gl_enum(L, 2));
-
+*/
   return 0;
 }
 
@@ -2913,10 +2934,10 @@ static int luagl_tex_gen(lua_State *L)
 
   if (lua_istable(L, 3))
   {
-    GLdouble *param;
-    luagl_get_arrayd(L, 3, &param);
+    GLfloat *param;
+    luagl_get_arrayf(L, 3, &param);
 
-    glTexGendv(e1, e2, (GLdouble *)param);
+    glTexGenfv(e1, e2, (GLfloat *)param);
 
     LUAGL_DELETE_ARRAY(param);
   }
@@ -2962,12 +2983,12 @@ static int luagl_tex_image(lua_State *L)
     glTexImage2D(GL_TEXTURE_2D, luaL_checkinteger(L, 1),
                  iformat, width/iformat, height, 0, e, GL_UNSIGNED_BYTE, pixels);
   }
-  else  /* if not 2D, get 1D */
+/*  else  //if not 2D, get 1D 
   {
     width = luagl_get_arrayuc(L, index, &pixels);
     glTexImage1D(GL_TEXTURE_1D, luaL_checkinteger(L, 1),
                  iformat, width/iformat, 0, e, GL_UNSIGNED_BYTE, pixels);
-  }
+  }*/
   LUAGL_DELETE_ARRAY(pixels);
   return 0;
 }
@@ -2985,11 +3006,11 @@ static int luagl_tex_image_2d(lua_State *L)
 /* TexImage1D(level, depth, width, border, format, type, pixels) -> none*/
 static int luagl_tex_image_1d(lua_State *L)
 {
-  glTexImage1D(GL_TEXTURE_1D, luaL_checkinteger(L, 1),
+/*  glTexImage1D(GL_TEXTURE_1D, luaL_checkinteger(L, 1),
                luaL_checkinteger(L, 2), (GLsizei)luaL_checkinteger(L, 3), 
                luaL_checkinteger(L, 4), luagl_get_gl_enum(L, 5), 
                luagl_get_gl_enum(L, 6), luagl_checkuserdata(L, 7));
-  return 0;
+*/  return 0;
 }
 
 /*TexSubImage (level, format, pixels, xoffset) -> none
@@ -3012,12 +3033,12 @@ static int luagl_tex_sub_image(lua_State *L)
     glTexSubImage2D(GL_TEXTURE_2D, luaL_checkinteger(L, 1), luaL_checkinteger(L, 4),
                     luaL_checkinteger(L, 5), width/depth, height, format, GL_FLOAT, pixels);
   }
-  else  /* if not 2D, get 1D */
+/*  else  // if not 2D, get 1D 
   {
     width = luagl_get_arrayf(L, 3, &pixels);
     glTexSubImage1D(GL_TEXTURE_1D, luaL_checkinteger(L, 1), luaL_checkinteger(L, 4),
                     width/depth, format, GL_FLOAT, pixels);
-  }
+  }*/
 
   LUAGL_DELETE_ARRAY(pixels);
   return 0;
@@ -3035,10 +3056,10 @@ static int luagl_tex_sub_image_2d(lua_State *L)
 /* TexSubImage1D (level, xoffset, width, format, type, pixels) -> none*/
 static int luagl_tex_sub_image_1d(lua_State *L)
 {
-  glTexSubImage1D(GL_TEXTURE_1D, luaL_checkinteger(L, 1), luaL_checkinteger(L, 2), 
+/*  glTexSubImage1D(GL_TEXTURE_1D, luaL_checkinteger(L, 1), luaL_checkinteger(L, 2), 
                   luaL_checkinteger(L, 3), luagl_get_gl_enum(L, 4), 
                   luagl_get_gl_enum(L, 5), luagl_checkuserdata(L, 6));
-  return 0;
+*/  return 0;
 }
 
 /*TexParameter (target, pname, param) -> none
@@ -3070,7 +3091,7 @@ static int luagl_tex_parameter(lua_State *L)
 /*Translate (x, y, z) -> none*/
 static int luagl_translate(lua_State *L)
 {
-  glTranslated(luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+  glTranslatef((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2), (GLfloat)luaL_checknumber(L, 3));
   return 0;
 }
 
@@ -3081,13 +3102,13 @@ static int luagl_vertex(lua_State *L)
   int index;
   int num_args = lua_gettop(L);
 
-  GLdouble *v;
+  GLfloat *v;
 
   if(lua_istable(L, 1))
-    num_args = luagl_get_arrayd(L, 1, &v);
+    num_args = luagl_get_arrayf(L, 1, &v);
   else
   {
-    v = LUAGL_NEW_ARRAY(GLdouble, num_args);
+    v = LUAGL_NEW_ARRAY(GLfloat, num_args);
 
     for(index = 0; index < num_args; index++)
     {
@@ -3100,9 +3121,9 @@ static int luagl_vertex(lua_State *L)
 
   switch(num_args)
   {
-  case 2:  glVertex2dv((GLdouble *)v);  break;
-  case 3:  glVertex3dv((GLdouble *)v);  break;
-  case 4:  glVertex4dv((GLdouble *)v);  break;
+  case 2:  glVertex2fv((GLfloat *)v);  break;
+  case 3:  glVertex3fv((GLfloat *)v);  break;
+  case 4:  glVertex4fv((GLfloat *)v);  break;
   }
 
   LUAGL_DELETE_ARRAY(v);
@@ -3114,7 +3135,7 @@ static int luagl_vertex(lua_State *L)
 static int luagl_vertex_pointer(lua_State *L)
 {
   GLint size;
-  static GLdouble *parray = NULL;
+  static GLfloat *parray = NULL;
 
   LUAGL_DELETE_ARRAY(parray);
 
@@ -3124,16 +3145,16 @@ static int luagl_vertex_pointer(lua_State *L)
   if (lua_isnumber(L, 2))
   {
     size = luaL_checkinteger(L, 2);
-    luagl_get_arrayd(L, 1, &parray);
+    luagl_get_arrayf(L, 1, &parray);
   }
   else 
   {
-    int h = luagl_get_array2d(L, 1, &parray, &size);
+    int h = luagl_get_array2f(L, 1, &parray, &size);
     if (h==-1)
       luaL_argerror(L, 1, "must be a table of tables");
   }
 
-  glVertexPointer(size, GL_DOUBLE, 0, parray);
+  glVertexPointer(size, GL_FLOAT, 0, parray);
 
   return 0;
 }
