@@ -954,7 +954,11 @@ static int luagl_clear_color(lua_State *L)
 /*ClearDepth (depth) -> none*/
 static int luagl_clear_depth(lua_State *L)
 {
+#ifdef WIN32
+  glClearDepth((GLclampf)luaL_checknumber(L, 1));
+#else
   glClearDepthf((GLclampf)luaL_checknumber(L, 1));
+#endif
   return 0;
 }
 
@@ -2569,9 +2573,15 @@ static int luagl_normal_pointer(lua_State *L)
 static int luagl_ortho(lua_State *L)
 {
 #if defined(ENABLE_NON_GL_ES)
-  glOrthof((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2),
+#ifdef WIN32
+	glOrtho((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2),
            (GLfloat)luaL_checknumber(L, 3), (GLfloat)luaL_checknumber(L, 4),
            (GLfloat)luaL_checknumber(L, 5), (GLfloat)luaL_checknumber(L, 6));
+#else
+	glOrthof((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2),
+           (GLfloat)luaL_checknumber(L, 3), (GLfloat)luaL_checknumber(L, 4),
+           (GLfloat)luaL_checknumber(L, 5), (GLfloat)luaL_checknumber(L, 6));
+#endif
 #endif
   return 0;
 }

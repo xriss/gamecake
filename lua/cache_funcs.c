@@ -36,6 +36,8 @@ extern int wetgenes_cache_loader(lua_State *L)
 
 extern void wetgenes_cache_preloader(lua_State *L)
 {
+	int numLoaders = 0;
+
 	lua_getfield(L, LUA_GLOBALSINDEX, "package");	// push "package"
 	lua_getfield(L, -1, "loaders");					// push "package.loaders"
 	lua_remove(L, -2);								// remove "package"
@@ -43,7 +45,6 @@ extern void wetgenes_cache_preloader(lua_State *L)
 	// Count the number of entries in package.loaders.
 	// Table is now at index -2, since 'nil' is right on top of it.
 	// lua_next pushes a key and a value onto the stack.
-	int numLoaders = 0;
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) 
 	{
