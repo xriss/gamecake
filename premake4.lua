@@ -36,7 +36,6 @@ function newgcctoolchain(toolchain)
     }
 end
 
-
 newplatform {
     name = "android",
     description = "android",
@@ -101,47 +100,25 @@ end
 
 if NACL then
 
+	local naclsdk=path.getabsolute("../sdks/naclsdk/pepper_15")
+
 	platforms { "nacl" } --hax
 	
 	defines "NACL"
-	
-	local naclsdk=path.getabsolute("../sdks/naclsdk/pepper_15")
-	
---	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
-
+		
 	buildoptions{"-m32"}
 	
 elseif ANDROID then
+
+	local androidsdk=path.getabsolute("../sdks/android-sdk")
 
 	platforms { "android" } --hax
 
 	defines "ANDROID"
 
 	defines("LUA_USE_POSIX")
-
-	local androidsdk=path.getabsolute("../sdks/android-sdk")
-	
---	includedirs { naclsdk.."/toolchain/linux_x86/nacl/include" }
 	
 	buildoptions{ "-mthumb" }
-	
---	buildoptions{  "-nostdlib" ,"-fno-exceptions"}
---	buildoptions{ "-fno-rtti", "-Wa", "--noexecstack" }
---	linkoptions{ "-Wl","--no-undefined","-z","--error-unresolved-symbols", "--no-allow-shlib-undefined", "-Bsymbolic","-Bstatic"}
---	linkoptions{ "noexecstack" }
-
-
---	flags{"StaticRuntime"}
-
---[[
- 0x00000001 (NEEDED)                     Shared library: [libGLESv1_CM.so]
- 0x00000001 (NEEDED)                     Shared library: [libdl.so]
- 0x00000001 (NEEDED)                     Shared library: [liblog.so]
- 0x00000001 (NEEDED)                     Shared library: [libstdc++.so]
- 0x00000001 (NEEDED)                     Shared library: [libm.so]
- 0x00000001 (NEEDED)                     Shared library: [libc.so]
-]]
-
 
 elseif WINDOWS then
 	
@@ -151,6 +128,9 @@ elseif WINDOWS then
 
 elseif NIX then
 	
+	defines("LUA_USE_MKSTEMP") -- remove warning
+	defines("LUA_USE_POPEN") -- we want to enable popen
+
 	defines "X11"
 --	defines	"LUA_USE_DLOPEN"
 	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
@@ -254,7 +234,7 @@ if NACL then
 
 	include("lib_lua")
 
---	include("lua_nacl")
+	include("lib_nacl")
 
 -- we might static link with all the above libs
 	include("lua")

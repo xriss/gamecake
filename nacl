@@ -1,9 +1,11 @@
+rm -Rf build-gmake-nacl
+
 cd `dirname $0`
 
 #simple forced nacl build, just to see if we can get somewhere with this
 
 naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_15`
-export PATH=$naclsdk/toolchain/linux_x86/bin:$PATH
+export PATH=$naclsdk/toolchain/linux_x86_newlib/bin:$PATH
 
 #so premake knows that it is a nacl build
 build/premake4 gmake nacl

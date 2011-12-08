@@ -9,15 +9,7 @@ includedirs { "src" }
 
 SET_KIND("luamain")
 
-if NIX then
-printf("MKSTEMP")
-	defines("LUA_USE_MKSTEMP") -- remove warning
-	defines("LUA_USE_POPEN") -- we want to enable popen
-end
-
---if #lua_lib_names>0 then
-	defines("LUA_PRELOADLIBS=lua_preloadlibs")
---end
+defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
 
 configuration {"Debug"}
