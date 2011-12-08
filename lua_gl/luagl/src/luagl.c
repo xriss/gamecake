@@ -1304,7 +1304,9 @@ static int luagl_enable(lua_State *L)
 /*EnableClientState (parray) -> none*/
 static int luagl_enable_client_state(lua_State *L)
 {
+#if defined(ENABLE_NON_GL_ES)
   glEnableClientState(luagl_get_gl_enum(L, 1));
+#endif
   return 0;
 }
 
@@ -2573,15 +2575,9 @@ static int luagl_normal_pointer(lua_State *L)
 static int luagl_ortho(lua_State *L)
 {
 #if defined(ENABLE_NON_GL_ES)
-#ifdef WIN32
 	glOrtho((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2),
            (GLfloat)luaL_checknumber(L, 3), (GLfloat)luaL_checknumber(L, 4),
            (GLfloat)luaL_checknumber(L, 5), (GLfloat)luaL_checknumber(L, 6));
-#else
-	glOrthof((GLfloat)luaL_checknumber(L, 1), (GLfloat)luaL_checknumber(L, 2),
-           (GLfloat)luaL_checknumber(L, 3), (GLfloat)luaL_checknumber(L, 4),
-           (GLfloat)luaL_checknumber(L, 5), (GLfloat)luaL_checknumber(L, 6));
-#endif
 #endif
   return 0;
 }
