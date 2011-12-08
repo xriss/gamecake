@@ -232,7 +232,21 @@ end
 
 if NACL then
 
+	
+--	include("lua_zip")
+	include("lua_zlib")
+	include("lua_freetype")
+	include("lua_bit")
+--	include("lua_box2d")
+	include("lua_gl")
+--	include("lua_grd")
+--	include("lua_lash")
+--	include("lua_lfs")
+--	include("lua_socket")
+--	include("lua_fenestra")
+
 	include("lib_lua")
+	include("lib_z")
 
 	include("lib_nacl")
 
@@ -241,20 +255,31 @@ if NACL then
 	
 elseif ANDROID then
 
-	include("lib_lua")
+	
+--	include("lua_zip")
+	include("lua_zlib")
+	include("lua_freetype")
+	include("lua_bit")
+--	include("lua_box2d")
+	include("lua_gl")
+--	include("lua_grd")
+--	include("lua_lash")
+	include("lua_lfs")
+--	include("lua_socket")
+--	include("lua_fenestra")
 
 --	include("lua_android")
 
 --	include("lua_bit")
 
+	include("lib_lua")
+	include("lib_z")
 	
 -- we might static link with all the above libs
 	include("lua")
 	
 else
 
-	include("lib_lua")
-	include("lib_z")
 	
 	include("lua_zip")
 	include("lua_zlib")
@@ -298,6 +323,9 @@ else
 		
 	end
 	
+	include("lib_lua")
+	include("lib_z")
+
 -- we might static link with all the above libs here, producing a final exe
 	include("lua")
 

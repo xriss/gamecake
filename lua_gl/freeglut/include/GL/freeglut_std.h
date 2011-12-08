@@ -117,8 +117,7 @@
 /*
  * Always include OpenGL and GLU headers
  */
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include "INCGL.h"
 
 /*
  * GLUT API macro definitions -- the special key codes:
