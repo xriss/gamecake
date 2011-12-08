@@ -1,3 +1,4 @@
+#if 0
 /*************************************************
 *  LuaGL - an OpenGL binding for Lua
 *  2007(c) Fabio Guerra
@@ -1305,3 +1306,5 @@ int luaopen_luaglu(lua_State *L)
 
   return 1;
 }
+
+#endif
