@@ -11,6 +11,9 @@
 *  See Copyright Notice in LuaGL.h
 *************************************************/
 
+// hacking this all down to build with GLES2...
+// sorry
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,7 +24,7 @@
 #if defined (__APPLE__) || defined (OSX)
 #include <OpenGL/gl.h>
 #else
-#include <GL/gl.h>
+#include "INCGL.h"
 #endif
 
 #include <lua.h>
@@ -31,10 +34,11 @@
 #include "luagl_util.h"
 
 
-#define LUAGL_VERSION "1.6"
+#define LUAGL_VERSION "1.666"
 
 
 static const luaglConst luagl_const[] = {
+#ifdef GL_VERSION_1_1
   { "VERSION_1_1"                     , GL_VERSION_1_1                    },
 #ifdef GL_VERSION_1_2
   { "VERSION_1_2"                     , GL_VERSION_1_2                    },
@@ -47,6 +51,7 @@ static const luaglConst luagl_const[] = {
   { "RETURN"                          , GL_RETURN                         },
   { "MULT"                            , GL_MULT                           },
   { "ADD"                             , GL_ADD                            },
+#endif
   { "NEVER"                           , GL_NEVER                          },
   { "LESS"                            , GL_LESS                           },
   { "EQUAL"                           , GL_EQUAL                          },
@@ -62,9 +67,11 @@ static const luaglConst luagl_const[] = {
   { "TRIANGLES"                       , GL_TRIANGLES                      },
   { "TRIANGLE_STRIP"                  , GL_TRIANGLE_STRIP                 },
   { "TRIANGLE_FAN"                    , GL_TRIANGLE_FAN                   },
+#ifdef GL_VERSION_1_1
   { "QUADS"                           , GL_QUADS                          },
   { "QUAD_STRIP"                      , GL_QUAD_STRIP                     },
   { "POLYGON"                         , GL_POLYGON                        },
+#endif
   { "ZERO"                            , GL_ZERO                           },
   { "ONE"                             , GL_ONE                            },
   { "SRC_COLOR"                       , GL_SRC_COLOR                      },
@@ -78,12 +85,14 @@ static const luaglConst luagl_const[] = {
   { "SRC_ALPHA_SATURATE"              , GL_SRC_ALPHA_SATURATE             },
   { "TRUE"                            , GL_TRUE                           },
   { "FALSE"                           , GL_FALSE                          },
+#ifdef GL_VERSION_1_1
   { "CLIP_PLANE0"                     , GL_CLIP_PLANE0                    },
   { "CLIP_PLANE1"                     , GL_CLIP_PLANE1                    },
   { "CLIP_PLANE2"                     , GL_CLIP_PLANE2                    },
   { "CLIP_PLANE3"                     , GL_CLIP_PLANE3                    },
   { "CLIP_PLANE4"                     , GL_CLIP_PLANE4                    },
   { "CLIP_PLANE5"                     , GL_CLIP_PLANE5                    },
+#endif
   { "BYTE"                            , GL_BYTE                           },
   { "UNSIGNED_BYTE"                   , GL_UNSIGNED_BYTE                  },
   { "SHORT"                           , GL_SHORT                          },
@@ -91,31 +100,42 @@ static const luaglConst luagl_const[] = {
   { "INT"                             , GL_INT                            },
   { "UNSIGNED_INT"                    , GL_UNSIGNED_INT                   },
   { "FLOAT"                           , GL_FLOAT                          },
+#ifdef GL_VERSION_1_1
   { "2_BYTES"                         , GL_2_BYTES                        },
   { "3_BYTES"                         , GL_3_BYTES                        },
   { "4_BYTES"                         , GL_4_BYTES                        },
   { "DOUBLE"                          , GL_DOUBLE                         },
+#endif
   { "NONE"                            , GL_NONE                           },
+#ifdef GL_VERSION_1_1
   { "FRONT_LEFT"                      , GL_FRONT_LEFT                     },
   { "FRONT_RIGHT"                     , GL_FRONT_RIGHT                    },
   { "BACK_LEFT"                       , GL_BACK_LEFT                      },
   { "BACK_RIGHT"                      , GL_BACK_RIGHT                     },
+#endif
   { "FRONT"                           , GL_FRONT                          },
   { "BACK"                            , GL_BACK                           },
+#ifdef GL_VERSION_1_1
   { "LEFT"                            , GL_LEFT                           },
   { "RIGHT"                           , GL_RIGHT                          },
+#endif
   { "FRONT_AND_BACK"                  , GL_FRONT_AND_BACK                 },
+#ifdef GL_VERSION_1_1
   { "AUX0"                            , GL_AUX0                           },
   { "AUX1"                            , GL_AUX1                           },
   { "AUX2"                            , GL_AUX2                           },
   { "AUX3"                            , GL_AUX3                           },
+#endif
   { "NO_ERROR"                        , GL_NO_ERROR                       },
   { "INVALID_ENUM"                    , GL_INVALID_ENUM                   },
   { "INVALID_VALUE"                   , GL_INVALID_VALUE                  },
   { "INVALID_OPERATION"               , GL_INVALID_OPERATION              },
+#ifdef GL_VERSION_1_1
   { "STACK_OVERFLOW"                  , GL_STACK_OVERFLOW                 },
   { "STACK_UNDERFLOW"                 , GL_STACK_UNDERFLOW                },
+#endif
   { "OUT_OF_MEMORY"                   , GL_OUT_OF_MEMORY                  },
+#ifdef GL_VERSION_1_1
   { "2D"                              , GL_2D                             },
   { "3D"                              , GL_3D                             },
   { "3D_COLOR"                        , GL_3D_COLOR                       },
@@ -131,8 +151,10 @@ static const luaglConst luagl_const[] = {
   { "LINE_RESET_TOKEN"                , GL_LINE_RESET_TOKEN               },
   { "EXP"                             , GL_EXP                            },
   { "EXP2"                            , GL_EXP2                           },
+#endif
   { "CW"                              , GL_CW                             },
   { "CCW"                             , GL_CCW                            },
+#ifdef GL_VERSION_1_1
   { "COEFF"                           , GL_COEFF                          },
   { "ORDER"                           , GL_ORDER                          },
   { "DOMAIN"                          , GL_DOMAIN                         },
@@ -151,7 +173,9 @@ static const luaglConst luagl_const[] = {
   { "POINT_SIZE_RANGE"                , GL_POINT_SIZE_RANGE               },
   { "POINT_SIZE_GRANULARITY"          , GL_POINT_SIZE_GRANULARITY         },
   { "LINE_SMOOTH"                     , GL_LINE_SMOOTH                    },
+#endif
   { "LINE_WIDTH"                      , GL_LINE_WIDTH                     },
+#ifdef GL_VERSION_1_1
   { "LINE_WIDTH_RANGE"                , GL_LINE_WIDTH_RANGE               },
   { "LINE_WIDTH_GRANULARITY"          , GL_LINE_WIDTH_GRANULARITY         },
   { "LINE_STIPPLE"                    , GL_LINE_STIPPLE                   },
@@ -183,12 +207,15 @@ static const luaglConst luagl_const[] = {
   { "FOG_END"                         , GL_FOG_END                        },
   { "FOG_MODE"                        , GL_FOG_MODE                       },
   { "FOG_COLOR"                       , GL_FOG_COLOR                      },
+#endif
   { "DEPTH_RANGE"                     , GL_DEPTH_RANGE                    },
   { "DEPTH_TEST"                      , GL_DEPTH_TEST                     },
   { "DEPTH_WRITEMASK"                 , GL_DEPTH_WRITEMASK                },
   { "DEPTH_CLEAR_VALUE"               , GL_DEPTH_CLEAR_VALUE              },
   { "DEPTH_FUNC"                      , GL_DEPTH_FUNC                     },
+#ifdef GL_VERSION_1_1
   { "ACCUM_CLEAR_VALUE"               , GL_ACCUM_CLEAR_VALUE              },
+#endif
   { "STENCIL_TEST"                    , GL_STENCIL_TEST                   },
   { "STENCIL_CLEAR_VALUE"             , GL_STENCIL_CLEAR_VALUE            },
   { "STENCIL_FUNC"                    , GL_STENCIL_FUNC                   },
@@ -198,9 +225,12 @@ static const luaglConst luagl_const[] = {
   { "STENCIL_PASS_DEPTH_PASS"         , GL_STENCIL_PASS_DEPTH_PASS        },
   { "STENCIL_REF"                     , GL_STENCIL_REF                    },
   { "STENCIL_WRITEMASK"               , GL_STENCIL_WRITEMASK              },
+#ifdef GL_VERSION_1_1
   { "MATRIX_MODE"                     , GL_MATRIX_MODE                    },
   { "NORMALIZE"                       , GL_NORMALIZE                      },
+#endif
   { "VIEWPORT"                        , GL_VIEWPORT                       },
+#ifdef GL_VERSION_1_1
   { "MODELVIEW_STACK_DEPTH"           , GL_MODELVIEW_STACK_DEPTH          },
   { "PROJECTION_STACK_DEPTH"          , GL_PROJECTION_STACK_DEPTH         },
   { "TEXTURE_STACK_DEPTH"             , GL_TEXTURE_STACK_DEPTH            },
@@ -212,10 +242,14 @@ static const luaglConst luagl_const[] = {
   { "ALPHA_TEST"                      , GL_ALPHA_TEST                     },
   { "ALPHA_TEST_FUNC"                 , GL_ALPHA_TEST_FUNC                },
   { "ALPHA_TEST_REF"                  , GL_ALPHA_TEST_REF                 },
+#endif
   { "DITHER"                          , GL_DITHER                         },
+#ifdef GL_VERSION_1_1
   { "BLEND_DST"                       , GL_BLEND_DST                      },
   { "BLEND_SRC"                       , GL_BLEND_SRC                      },
+#endif
   { "BLEND"                           , GL_BLEND                          },
+#ifdef GL_VERSION_1_1
   { "LOGIC_OP_MODE"                   , GL_LOGIC_OP_MODE                  },
   { "LOGIC_OP"                        , GL_LOGIC_OP                       },
   { "INDEX_LOGIC_OP"                  , GL_INDEX_LOGIC_OP                 },
@@ -223,12 +257,16 @@ static const luaglConst luagl_const[] = {
   { "AUX_BUFFERS"                     , GL_AUX_BUFFERS                    },
   { "DRAW_BUFFER"                     , GL_DRAW_BUFFER                    },
   { "READ_BUFFER"                     , GL_READ_BUFFER                    },
+#endif
   { "SCISSOR_BOX"                     , GL_SCISSOR_BOX                    },
   { "SCISSOR_TEST"                    , GL_SCISSOR_TEST                   },
+#ifdef GL_VERSION_1_1
   { "INDEX_CLEAR_VALUE"               , GL_INDEX_CLEAR_VALUE              },
   { "INDEX_WRITEMASK"                 , GL_INDEX_WRITEMASK                },
+#endif
   { "COLOR_CLEAR_VALUE"               , GL_COLOR_CLEAR_VALUE              },
   { "COLOR_WRITEMASK"                 , GL_COLOR_WRITEMASK                },
+#ifdef GL_VERSION_1_1
   { "INDEX_MODE"                      , GL_INDEX_MODE                     },
   { "RGBA_MODE"                       , GL_RGBA_MODE                      },
   { "DOUBLEBUFFER"                    , GL_DOUBLEBUFFER                   },
@@ -268,13 +306,17 @@ static const luaglConst luagl_const[] = {
   { "UNPACK_ROW_LENGTH"               , GL_UNPACK_ROW_LENGTH              },
   { "UNPACK_SKIP_ROWS"                , GL_UNPACK_SKIP_ROWS               },
   { "UNPACK_SKIP_PIXELS"              , GL_UNPACK_SKIP_PIXELS             },
+#endif
   { "UNPACK_ALIGNMENT"                , GL_UNPACK_ALIGNMENT               },
+#ifdef GL_VERSION_1_1
   { "PACK_SWAP_BYTES"                 , GL_PACK_SWAP_BYTES                },
   { "PACK_LSB_FIRST"                  , GL_PACK_LSB_FIRST                 },
   { "PACK_ROW_LENGTH"                 , GL_PACK_ROW_LENGTH                },
   { "PACK_SKIP_ROWS"                  , GL_PACK_SKIP_ROWS                 },
   { "PACK_SKIP_PIXELS"                , GL_PACK_SKIP_PIXELS               },
+#endif
   { "PACK_ALIGNMENT"                  , GL_PACK_ALIGNMENT                 },
+#ifdef GL_VERSION_1_1
   { "MAP_COLOR"                       , GL_MAP_COLOR                      },
   { "MAP_STENCIL"                     , GL_MAP_STENCIL                    },
   { "INDEX_SHIFT"                     , GL_INDEX_SHIFT                    },
@@ -294,23 +336,31 @@ static const luaglConst luagl_const[] = {
   { "MAX_EVAL_ORDER"                  , GL_MAX_EVAL_ORDER                 },
   { "MAX_LIGHTS"                      , GL_MAX_LIGHTS                     },
   { "MAX_CLIP_PLANES"                 , GL_MAX_CLIP_PLANES                },
+#endif
   { "MAX_TEXTURE_SIZE"                , GL_MAX_TEXTURE_SIZE               },
+#ifdef GL_VERSION_1_1
   { "MAX_PIXEL_MAP_TABLE"             , GL_MAX_PIXEL_MAP_TABLE            },
   { "MAX_ATTRIB_STACK_DEPTH"          , GL_MAX_ATTRIB_STACK_DEPTH         },
   { "MAX_MODELVIEW_STACK_DEPTH"       , GL_MAX_MODELVIEW_STACK_DEPTH      },
   { "MAX_NAME_STACK_DEPTH"            , GL_MAX_NAME_STACK_DEPTH           },
   { "MAX_PROJECTION_STACK_DEPTH"      , GL_MAX_PROJECTION_STACK_DEPTH     },
   { "MAX_TEXTURE_STACK_DEPTH"         , GL_MAX_TEXTURE_STACK_DEPTH        },
+#endif
   { "MAX_VIEWPORT_DIMS"               , GL_MAX_VIEWPORT_DIMS              },
+#ifdef GL_VERSION_1_1
   { "MAX_CLIENT_ATTRIB_STACK_DEPTH"   , GL_MAX_CLIENT_ATTRIB_STACK_DEPTH  },
+#endif
   { "SUBPIXEL_BITS"                   , GL_SUBPIXEL_BITS                  },
+#ifdef GL_VERSION_1_1
   { "INDEX_BITS"                      , GL_INDEX_BITS                     },
+#endif
   { "RED_BITS"                        , GL_RED_BITS                       },
   { "GREEN_BITS"                      , GL_GREEN_BITS                     },
   { "BLUE_BITS"                       , GL_BLUE_BITS                      },
   { "ALPHA_BITS"                      , GL_ALPHA_BITS                     },
   { "DEPTH_BITS"                      , GL_DEPTH_BITS                     },
   { "STENCIL_BITS"                    , GL_STENCIL_BITS                   },
+#ifdef GL_VERSION_1_1
   { "ACCUM_RED_BITS"                  , GL_ACCUM_RED_BITS                 },
   { "ACCUM_GREEN_BITS"                , GL_ACCUM_GREEN_BITS               },
   { "ACCUM_BLUE_BITS"                 , GL_ACCUM_BLUE_BITS                },
@@ -340,7 +390,9 @@ static const luaglConst luagl_const[] = {
   { "MAP2_GRID_DOMAIN"                , GL_MAP2_GRID_DOMAIN               },
   { "MAP2_GRID_SEGMENTS"              , GL_MAP2_GRID_SEGMENTS             },
   { "TEXTURE_1D"                      , GL_TEXTURE_1D                     },
+#endif
   { "TEXTURE_2D"                      , GL_TEXTURE_2D                     },
+#ifdef GL_VERSION_1_1
   { "FEEDBACK_BUFFER_POINTER"         , GL_FEEDBACK_BUFFER_POINTER        },
   { "FEEDBACK_BUFFER_SIZE"            , GL_FEEDBACK_BUFFER_SIZE           },
   { "FEEDBACK_BUFFER_TYPE"            , GL_FEEDBACK_BUFFER_TYPE           },
@@ -352,9 +404,11 @@ static const luaglConst luagl_const[] = {
   { "TEXTURE_INTERNAL_FORMAT"         , GL_TEXTURE_INTERNAL_FORMAT        },
   { "TEXTURE_BORDER_COLOR"            , GL_TEXTURE_BORDER_COLOR           },
   { "TEXTURE_BORDER"                  , GL_TEXTURE_BORDER                 },
+#endif
   { "DONT_CARE"                       , GL_DONT_CARE                      },
   { "FASTEST"                         , GL_FASTEST                        },
   { "NICEST"                          , GL_NICEST                         },
+#ifdef GL_VERSION_1_1
   { "LIGHT0"                          , GL_LIGHT0                         },
   { "LIGHT1"                          , GL_LIGHT1                         },
   { "LIGHT2"                          , GL_LIGHT2                         },
@@ -385,7 +439,9 @@ static const luaglConst luagl_const[] = {
   { "OR"                              , GL_OR                             },
   { "NOR"                             , GL_NOR                            },
   { "EQUIV"                           , GL_EQUIV                          },
+#endif
   { "INVERT"                          , GL_INVERT                         },
+#ifdef GL_VERSION_1_1
   { "OR_REVERSE"                      , GL_OR_REVERSE                     },
   { "COPY_INVERTED"                   , GL_COPY_INVERTED                  },
   { "OR_INVERTED"                     , GL_OR_INVERTED                    },
@@ -397,21 +453,27 @@ static const luaglConst luagl_const[] = {
   { "COLOR_INDEXES"                   , GL_COLOR_INDEXES                  },
   { "MODELVIEW"                       , GL_MODELVIEW                      },
   { "PROJECTION"                      , GL_PROJECTION                     },
+#endif
   { "TEXTURE"                         , GL_TEXTURE                        },
+#ifdef GL_VERSION_1_1
   { "COLOR"                           , GL_COLOR                          },
   { "DEPTH"                           , GL_DEPTH                          },
   { "STENCIL"                         , GL_STENCIL                        },
   { "COLOR_INDEX"                     , GL_COLOR_INDEX                    },
+#endif
   { "STENCIL_INDEX"                   , GL_STENCIL_INDEX                  },
   { "DEPTH_COMPONENT"                 , GL_DEPTH_COMPONENT                },
+#ifdef GL_VERSION_1_1
   { "RED"                             , GL_RED                            },
   { "GREEN"                           , GL_GREEN                          },
   { "BLUE"                            , GL_BLUE                           },
+#endif
   { "ALPHA"                           , GL_ALPHA                          },
   { "RGB"                             , GL_RGB                            },
   { "RGBA"                            , GL_RGBA                           },
   { "LUMINANCE"                       , GL_LUMINANCE                      },
   { "LUMINANCE_ALPHA"                 , GL_LUMINANCE_ALPHA                },
+#ifdef GL_VERSION_1_1
   { "BITMAP"                          , GL_BITMAP                         },
   { "POINT"                           , GL_POINT                          },
   { "LINE"                            , GL_LINE                           },
@@ -421,6 +483,7 @@ static const luaglConst luagl_const[] = {
   { "SELECT"                          , GL_SELECT                         },
   { "FLAT"                            , GL_FLAT                           },
   { "SMOOTH"                          , GL_SMOOTH                         },
+#endif
   { "KEEP"                            , GL_KEEP                           },
   { "REPLACE"                         , GL_REPLACE                        },
   { "INCR"                            , GL_INCR                           },
@@ -429,6 +492,7 @@ static const luaglConst luagl_const[] = {
   { "RENDERER"                        , GL_RENDERER                       },
   { "VERSION"                         , GL_VERSION                        },
   { "EXTENSIONS"                      , GL_EXTENSIONS                     },
+#ifdef GL_VERSION_1_1
   { "S"                               , GL_S                              },
   { "T"                               , GL_T                              },
   { "R"                               , GL_R                              },
@@ -444,6 +508,7 @@ static const luaglConst luagl_const[] = {
   { "TEXTURE_GEN_MODE"                , GL_TEXTURE_GEN_MODE               },
   { "OBJECT_PLANE"                    , GL_OBJECT_PLANE                   },
   { "EYE_PLANE"                       , GL_EYE_PLANE                      },
+#endif
   { "NEAREST"                         , GL_NEAREST                        },
   { "LINEAR"                          , GL_LINEAR                         },
   { "NEAREST_MIPMAP_NEAREST"          , GL_NEAREST_MIPMAP_NEAREST         },
@@ -454,7 +519,9 @@ static const luaglConst luagl_const[] = {
   { "TEXTURE_MIN_FILTER"              , GL_TEXTURE_MIN_FILTER             },
   { "TEXTURE_WRAP_S"                  , GL_TEXTURE_WRAP_S                 },
   { "TEXTURE_WRAP_T"                  , GL_TEXTURE_WRAP_T                 },
+#ifdef GL_VERSION_1_1
   { "CLAMP"                           , GL_CLAMP                          },
+#endif
   { "REPEAT"                          , GL_REPEAT                         },
 #ifdef GL_MIRRORED_REPEAT
   { "MIRRORED_REPEAT"                 , GL_MIRRORED_REPEAT                },
@@ -464,9 +531,12 @@ static const luaglConst luagl_const[] = {
 #endif
   { "POLYGON_OFFSET_FACTOR"           , GL_POLYGON_OFFSET_FACTOR          },
   { "POLYGON_OFFSET_UNITS"            , GL_POLYGON_OFFSET_UNITS           },
+#ifdef GL_VERSION_1_1
   { "POLYGON_OFFSET_POINT"            , GL_POLYGON_OFFSET_POINT           },
   { "POLYGON_OFFSET_LINE"             , GL_POLYGON_OFFSET_LINE            },
+#endif
   { "POLYGON_OFFSET_FILL"             , GL_POLYGON_OFFSET_FILL            },
+#ifdef GL_VERSION_1_1
   { "ALPHA4"                          , GL_ALPHA4                         },
   { "ALPHA8"                          , GL_ALPHA8                         },
   { "ALPHA12"                         , GL_ALPHA12                        },
@@ -494,8 +564,10 @@ static const luaglConst luagl_const[] = {
   { "RGB12"                           , GL_RGB12                          },
   { "RGB16"                           , GL_RGB16                          },
   { "RGBA2"                           , GL_RGBA2                          },
+#endif
   { "RGBA4"                           , GL_RGBA4                          },
   { "RGB5_A1"                         , GL_RGB5_A1                        },
+#ifdef GL_VERSION_1_1
   { "RGBA8"                           , GL_RGBA8                          },
   { "RGB10_A2"                        , GL_RGB10_A2                       },
   { "RGBA12"                          , GL_RGBA12                         },
@@ -511,7 +583,9 @@ static const luaglConst luagl_const[] = {
   { "TEXTURE_PRIORITY"                , GL_TEXTURE_PRIORITY               },
   { "TEXTURE_RESIDENT"                , GL_TEXTURE_RESIDENT               },
   { "TEXTURE_BINDING_1D"              , GL_TEXTURE_BINDING_1D             },
+#endif
   { "TEXTURE_BINDING_2D"              , GL_TEXTURE_BINDING_2D             },
+#ifdef GL_VERSION_1_1
   { "VERTEX_ARRAY"                    , GL_VERTEX_ARRAY                   },
   { "NORMAL_ARRAY"                    , GL_NORMAL_ARRAY                   },
   { "COLOR_ARRAY"                     , GL_COLOR_ARRAY                    },
@@ -552,6 +626,7 @@ static const luaglConst luagl_const[] = {
   { "T2F_N3F_V3F"                     , GL_T2F_N3F_V3F                    },
   { "T2F_C4F_N3F_V3F"                 , GL_T2F_C4F_N3F_V3F                },
   { "T4F_C4F_N3F_V4F"                 , GL_T4F_C4F_N3F_V4F                },
+#endif
 #ifdef GL_EXT_vertex_array
   { "EXT_vertex_array"                , GL_EXT_vertex_array               },
 #endif
@@ -632,6 +707,7 @@ static const luaglConst luagl_const[] = {
 #ifdef GL_FOG_SPECULAR_TEXTURE_WIN
   { "FOG_SPECULAR_TEXTURE_WIN"        , GL_FOG_SPECULAR_TEXTURE_WIN       },
 #endif
+#ifdef GL_VERSION_1_1
   { "CURRENT_BIT"                     , GL_CURRENT_BIT                    },
   { "POINT_BIT"                       , GL_POINT_BIT                      },
   { "LINE_BIT"                        , GL_LINE_BIT                       },
@@ -640,13 +716,19 @@ static const luaglConst luagl_const[] = {
   { "PIXEL_MODE_BIT"                  , GL_PIXEL_MODE_BIT                 },
   { "LIGHTING_BIT"                    , GL_LIGHTING_BIT                   },
   { "FOG_BIT"                         , GL_FOG_BIT                        },
+#endif
   { "DEPTH_BUFFER_BIT"                , GL_DEPTH_BUFFER_BIT               },
+#ifdef GL_VERSION_1_1
   { "ACCUM_BUFFER_BIT"                , GL_ACCUM_BUFFER_BIT               },
+#endif
   { "STENCIL_BUFFER_BIT"              , GL_STENCIL_BUFFER_BIT             },
+#ifdef GL_VERSION_1_1
   { "VIEWPORT_BIT"                    , GL_VIEWPORT_BIT                   },
   { "TRANSFORM_BIT"                   , GL_TRANSFORM_BIT                  },
   { "ENABLE_BIT"                      , GL_ENABLE_BIT                     },
+#endif
   { "COLOR_BUFFER_BIT"                , GL_COLOR_BUFFER_BIT               },
+#ifdef GL_VERSION_1_1
   { "HINT_BIT"                        , GL_HINT_BIT                       },
   { "EVAL_BIT"                        , GL_EVAL_BIT                       },
   { "LIST_BIT"                        , GL_LIST_BIT                       },
@@ -655,6 +737,7 @@ static const luaglConst luagl_const[] = {
   { "ALL_ATTRIB_BITS"                 , GL_ALL_ATTRIB_BITS                },
   { "CLIENT_PIXEL_STORE_BIT"          , GL_CLIENT_PIXEL_STORE_BIT         },
   { "CLIENT_VERTEX_ARRAY_BIT"         , GL_CLIENT_VERTEX_ARRAY_BIT        },
+#endif
 #ifdef GL_CLIENT_ALL_ATTRIB_BITS
   { "CLIENT_ALL_ATTRIB_BITS"          , GL_CLIENT_ALL_ATTRIB_BITS         },
 #endif
@@ -844,7 +927,7 @@ static int luagl_clear_color(lua_State *L)
 /*ClearDepth (depth) -> none*/
 static int luagl_clear_depth(lua_State *L)
 {
-  glClearDepth((GLclampd)luaL_checknumber(L, 1));
+  glClearDepth((GLclampf)luaL_checknumber(L, 1));
   return 0;
 }
 

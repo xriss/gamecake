@@ -1,7 +1,7 @@
 
 project "lib_z"
 kind "StaticLib"
-language "C++"
+language "C"
 files { "./**.cpp" , "./**.c" , "./**.h" }
 
 if os.get() == "windows" then

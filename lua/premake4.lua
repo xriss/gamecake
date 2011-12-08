@@ -6,8 +6,8 @@ includedirs { "../lib_lua/src" }
 
 
 
---dofile("cache.lua")
---dofile("preloadlibs.lua")
+dofile("cache.lua")
+dofile("preloadlibs.lua")
 
 links(lua_lib_names)
 
@@ -18,17 +18,23 @@ if NACL then -- we just link with prebuilt
 	links { "ppapi" }
 	
 	links { "lib_lua" }
+	links { "lib_z" }
+	
 	links { "lib_nacl" }
 
-	links { "m" }
+	links { "m" , "stdc++" }
 	
 	SET_KIND("WindowedApp")
 	SET_TARGET("","lua.32.nexe",true)
 
 elseif ANDROID then 
 
-	linkoptions { "-v" }
-	links { "lib_lua" , "dl", "log", "GLESv1_CM", "c", "m", "gcc" }
+--	linkoptions { "-v" }
+	links { "lib_lua" }
+	links { "lib_z" }
+	
+	links { "dl", "log", "GLESv1_CM", "c", "m", "gcc" }
+	
 	linkoptions{ "-Bsymbolic"}
 
 	files { "../lib_lua/src/*.h", --[["src/lua.c"]]  }
