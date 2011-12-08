@@ -37,11 +37,12 @@ const char* wetgenes_cache_lua_mods[]={
 	for i,v in pairs(mod_files) do
 	
 	local d=readfile(v)
-
+	d=string.format("%q",d):gsub("\n","n")
+	d=d:gsub("\\n","\\n\"\n\"")
 	put(string.format([[
 %q,%s,
 
-]],i,string.format("%q",d):gsub("\n","n")))
+]],i,d))
 
 	end
 
