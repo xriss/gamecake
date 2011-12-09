@@ -76,7 +76,7 @@ newgcctoolchain {
 
 solution("wetlua")
 
--- work out build type and set flag
+-- work out build type and set flags
 NACL=false
 ANDROID=false
 WINDOWS=false
@@ -152,30 +152,27 @@ includedirs { "lib_lua/src" }
 
 EXE_OUT_DIR=path.getabsolute("bin/exe")
 DBG_OUT_DIR=path.getabsolute("bin/dbg")
+AND_OUT_DIR=path.getabsolute("lib_android/libs/armeabi")
 
 ALL_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj")
 EXE_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Release")
 DBG_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Debug")
 
-AND_OUT_DIR=path.getabsolute("lib_android/libs/armeabi")
 
 
 lua_lib_names={}
 lua_lib_loads={}
 
-function SET_KIND(name,luaname,luafname)
-	if name=="luamain" then
-
-		kind("StaticLib")
-
-	elseif name=="lua" then
+-- need to clean this up and merge SET_KIND and SET_TARGET into one function...
+function SET_KIND(kindof,luaname,luafname)
+	if kindof=="lua" then -- special laulib kind that keeps a list of libs
 
 		kind("StaticLib")
 		lua_lib_names[#lua_lib_names+1]=project().name
 		lua_lib_loads[#lua_lib_loads+1]={luaname,luafname}
 
 	else
-		kind(name)
+		kind(kindof)
 	end
 end
 
@@ -206,6 +203,10 @@ dir=dir or ""
 		flags {"Symbols"} -- blue debug needs symbols badly
 		targetdir(AND_OUT_DIR..dir)
 
+		configuration {"Release"}
+		flags {"Optimize"}
+		targetdir(AND_OUT_DIR..dir)
+		
 	elseif NACL then
 	
 		configuration {"Debug"}
@@ -250,7 +251,7 @@ if NACL then
 
 	include("lib_nacl")
 
--- we might static link with all the above libs
+-- we probably static link with all the above libs so this should go last
 	include("lua")
 	
 elseif ANDROID then
@@ -274,8 +275,9 @@ elseif ANDROID then
 
 	include("lib_lua")
 	include("lib_z")
+	include("lib_android")
 	
--- we might static link with all the above libs
+-- we probably static link with all the above libs so this should go last
 	include("lua")
 	
 else
@@ -302,13 +304,13 @@ else
 --	include("lua_lanes")
 
 
--- security is always a clusterfuck, need openssl workingcross platform
+-- security is always a clusterfuck, need openssl working cross platform
 -- and its not building right now, so disable for now
 
 --	include("lua_sec")
 
 
--- not using these so avoid the dependencies
+-- not using these to avoid the dependencies
 -- should probably setup sql as a dll since its useless on consoles etc
 -- as there is no full source to build, well there is source...
 -- but fuck me if I can build the shits
@@ -326,7 +328,7 @@ else
 	include("lib_lua")
 	include("lib_z")
 
--- we might static link with all the above libs here, producing a final exe
+-- we probably static link with all the above libs so this should go last
 	include("lua")
 
 end

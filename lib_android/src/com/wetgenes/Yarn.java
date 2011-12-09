@@ -55,7 +55,13 @@ import android.content.pm.ActivityInfo;
 import android.view.Window;
 import android.util.DisplayMetrics;
 
-public class Lua extends Activity {
+public class Yarn extends Activity {
+
+    private static native void setup();
+    private static native void clean();
+    private static native void update();
+    private static native String getstring();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +79,9 @@ getWindowManager().getDefaultDisplay().getMetrics(metrics);
         
        tv.setText("# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . #\n# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #");
        setContentView(tv);
+       
+       setup();
+       tv.setText(getstring());
       }
 
     @Override
@@ -131,4 +140,5 @@ class DemoRenderer implements GLSurfaceView.Renderer {
 //    private static native void nativeResize(int w, int h);
 //    private static native void nativeRender();
 //    private static native void nativeDone();
+
 }

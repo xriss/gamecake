@@ -11,7 +11,7 @@ dofile("preloadlibs.lua")
 
 links(lua_lib_names)
 
-if NACL then -- we just link with prebuilt
+if NACL then
 
 	linkoptions { "-v" }
 
@@ -30,9 +30,13 @@ if NACL then -- we just link with prebuilt
 
 elseif ANDROID then 
 
---	linkoptions { "-v" }
+	linkoptions { "-v" }
+	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions
+
 	links { "lib_lua" }
 	links { "lib_z" }
+	
+	links { "lib_android" }
 	
 	links { "dl", "log", "GLESv1_CM", "c", "m", "gcc" }
 	
@@ -42,35 +46,32 @@ elseif ANDROID then
 	SET_KIND("SharedLib")
 	SET_TARGET("","liblua",true)
 
-else
+elseif WINDOWS then
 
 	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
 
-	if os.get() == "windows" then
+	links { "lib_lua" }
 
-		links { "lib_lua" }
+	SET_KIND("ConsoleApp")
+	SET_TARGET("","lua",true)
 
-		SET_KIND("ConsoleApp")
-		SET_TARGET("","lua",true)
-
-	else -- nix
+elseif NIX then
 
 -- we need to include libs again here for linking, cant prelink with statics?
 -- it should probably auto handle stuff
 -- anyway it gets complicated, so this is all hax
 
-		links { "lib_lua" }
-		links { "lib_z" }
-		links { "lua_grd_libpng" }
-		links { "lua_zip_zziplib"}
-		links { "GL" , "GLU" }
-		links { "crypt" }
-		links { "pthread" }
-		
-		links { "dl" , "m" , "pthread" }
-		
-		SET_KIND("ConsoleApp")
-		SET_TARGET("","lua",true)
-	end
+	links { "lib_lua" }
+	links { "lib_z" }
+	links { "lua_grd_libpng" }
+	links { "lua_zip_zziplib"}
+	links { "GL" , "GLU" }
+	links { "crypt" }
+	links { "pthread" }
+	
+	links { "dl" , "m" , "pthread" }
+	
+	SET_KIND("ConsoleApp")
+	SET_TARGET("","lua",true)
 
 end
