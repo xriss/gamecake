@@ -33,11 +33,27 @@ JNIEXPORT void JNICALL Java_com_wetgenes_Yarn_update
 
 /*
  * Class:     com_wetgenes_Yarn
+ * Method:    draw
+ * Signature: ([I)V
+ */
+JNIEXPORT void JNICALL Java_com_wetgenes_Yarn_draw
+  (JNIEnv *, jclass, jintArray);
+
+/*
+ * Class:     com_wetgenes_Yarn
  * Method:    getstring
  * Signature: ()Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_com_wetgenes_Yarn_getstring
   (JNIEnv *, jclass);
+
+/*
+ * Class:     com_wetgenes_Yarn
+ * Method:    keypress
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_com_wetgenes_Yarn_keypress
+  (JNIEnv *, jclass, jstring, jstring, jstring);
 
 #ifdef __cplusplus
 }
