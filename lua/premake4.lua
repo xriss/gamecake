@@ -31,12 +31,13 @@ if NACL then
 elseif ANDROID then 
 
 	linkoptions { "-v" }
-	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions
+	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
+
+	links { "lib_android" }
 
 	links { "lib_lua" }
 	links { "lib_z" }
 	
-	links { "lib_android" }
 	
 	links { "dl", "log", "GLESv1_CM", "c", "m", "gcc" }
 	

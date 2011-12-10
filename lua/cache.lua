@@ -4,15 +4,22 @@
 -- this is a premake file
 -- it sticks all of the current lua sources into a .c file for internal packing
 
-lua_files = os.matchfiles("../bin/lua/**.lua")
-
 mod_files={}
-for i,v in ipairs(lua_files) do
-	local m=v:sub(12,-1):sub(1,-5):gsub("/",".") -- remove head and tail and replace / with .
+
+function dofilename(i,v)
+	local m=v:sub(v:find("/lua/")+5,-1) -- strip upto this starting part of the path (mostly works)
+	m=m:sub(1,-5):gsub("/",".") -- remove tail and replace / with .
 	if m:sub(-5,-1)==".init" then m=m:sub(1,-6) end -- special init.lua case
 	mod_files[m]=v
 --	print(m,v)
 end
+
+
+for i,v in ipairs( os.matchfiles("../bin/lua/**.lua") or {} ) do dofilename(i,v) end
+
+-- include yarn codes for now?
+for i,v in ipairs( os.matchfiles("../../yarn/lua/**.lua") or {} ) do dofilename(i,v) end
+
 
 local readfile=function(name)
 	local fp=assert(io.open(name,"r"))
