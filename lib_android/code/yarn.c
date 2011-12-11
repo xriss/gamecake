@@ -24,7 +24,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "com_wetgenes_Yarn.h"
+#include "com_wetgenes_yarn.h"
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -100,7 +100,7 @@ static void llog (const char *msg) {
 //  if (pname) fprintf(stderr, "%s: ", pname);
 //  fprintf(stderr, "%s\n", msg);
 //  fflush(stderr);
-  __android_log_print(ANDROID_LOG_INFO, "Yarn", msg);
+  __android_log_print(ANDROID_LOG_INFO, "yarn", msg);
 }
 
 
@@ -176,7 +176,7 @@ static int dolibrary (lua_State *L, const char *name) {
 
 
 JNIEXPORT void JNICALL
-	Java_com_wetgenes_Yarn_setup(
+	Java_com_wetgenes_yarn_setup(
 		JNIEnv*  env,
 		jclass class
 	)
@@ -193,7 +193,7 @@ JNIEXPORT void JNICALL
 }
 
 JNIEXPORT void JNICALL
-	Java_com_wetgenes_Yarn_clean(
+	Java_com_wetgenes_yarn_clean(
 		JNIEnv*  env,
 		jclass class
 	)
@@ -202,7 +202,7 @@ JNIEXPORT void JNICALL
 }
 
 JNIEXPORT void JNICALL
-	Java_com_wetgenes_Yarn_update(
+	Java_com_wetgenes_yarn_update(
 		JNIEnv*  env,
 		jclass class
 	)
@@ -213,7 +213,7 @@ JNIEXPORT void JNICALL
 }
 
 JNIEXPORT void JNICALL
-	Java_com_wetgenes_Yarn_keypress(
+	Java_com_wetgenes_yarn_keypress(
 		JNIEnv *env,
 		jclass class,
 		jstring ascii_wank,
@@ -246,7 +246,7 @@ JNIEXPORT void JNICALL
 
 
 JNIEXPORT jstring JNICALL
-	Java_com_wetgenes_Yarn_getstring(
+	Java_com_wetgenes_yarn_getstring(
 		JNIEnv*  env,
 		jclass class
 	)
@@ -263,7 +263,7 @@ JNIEXPORT jstring JNICALL
 }
 
 JNIEXPORT void JNICALL
-	Java_com_wetgenes_Yarn_draw(
+	Java_com_wetgenes_yarn_draw(
 		JNIEnv*  env,
 		jclass class,
 		jintArray a_wank
@@ -323,7 +323,7 @@ JNIEXPORT void JNICALL
 		a[i]=0xff000000 | (a[i]+i);
 	}*/
 	
-	llog("drawn stuff");
+//	llog("drawn stuff");
 	
 	(*env)->ReleasePrimitiveArrayCritical(env,a_wank,a,0);
 }
@@ -345,7 +345,7 @@ JNIEXPORT jint JNICALL
 	0
 };*/
 
-    llog("Booting Yarn...");
+    llog("Booting yarn...");
     print_version();
     
 	return JNI_VERSION_1_6;

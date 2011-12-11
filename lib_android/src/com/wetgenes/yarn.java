@@ -33,7 +33,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 
 
-public class Yarn extends Activity {
+public class yarn extends Activity {
 
     private static native void setup();
     private static native void clean();
@@ -155,16 +155,16 @@ public class Yarn extends Activity {
 class DrawView extends View implements OnTouchListener {
     private static final String TAG = "DrawView";
 
-	Yarn yarn;
+	yarn up;
 
 	DisplayMetrics metrics;
 	
     public DrawView(Context context) {
         super(context);
-		yarn=(Yarn)context;
+		up=(yarn)context;
 
 		metrics = new DisplayMetrics();
-		yarn.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		up.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
         setFocusable(true);
         setFocusableInTouchMode(true);
@@ -177,7 +177,7 @@ class DrawView extends View implements OnTouchListener {
     public void onDraw(Canvas canvas) {
 
 		canvas.scale(metrics.widthPixels/320, metrics.heightPixels/240);
-		canvas.drawBitmap(yarn.bmap, 0, 0, null);
+		canvas.drawBitmap(up.bmap, 0, 0, null);
 
     }
 
