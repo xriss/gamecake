@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.wetgenes"
-      android:versionCode="11942"
-      android:versionName="11.942">
-    <application android:label="yarn" android:icon="@drawable/icon">
-        <activity android:name="yarn"
-                  android:label="yarn">
+      android:versionCode="{version_int}"
+      android:versionName="{version}">
+    <application android:label="{name}" android:icon="@drawable/icon">
+        <activity android:name="{name}"
+                  android:label="{name}">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

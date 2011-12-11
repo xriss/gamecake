@@ -13,8 +13,8 @@ build/premake4 gmake nacl
 #perform a build
 cd build-gmake-nacl
 
-if [ "$1" == "release" ] ; then
-	make config=release
+if [ "$1" = "release" ] ; then
+	make config=release_nacl
 else
 	make $*
 fi

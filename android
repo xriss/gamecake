@@ -1,27 +1,27 @@
-
 #rm build-gmake-android -Rf
 
 cd `dirname $0`
 
-#simple forced nacl build, just to see if we can get somewhere with this
-
 andsdk=`readlink -f ../sdks/android-8-arm`
 export PATH=$andsdk/bin:$PATH
 
-#so premake knows that it is a nacl build
+#so premake knows that it is an android build
 build/premake4 gmake android
 
 #perform a build
 cd build-gmake-android
 
-if [ "$1" == "release" ] ; then
-	make config=release
+if [ "$1" = "release" ] ; then
+	make config=release_android
 else
 	make $*
 fi
 
 cd ..
-
 cd lib_android
 
-ant debug install
+if [ "$1" = "release" ] ; then
+	ant release install
+else
+	ant debug install
+fi
