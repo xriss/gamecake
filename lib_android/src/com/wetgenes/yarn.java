@@ -35,12 +35,12 @@ import android.view.View.OnTouchListener;
 
 public class yarn extends Activity {
 
-    private static native void setup();
-    private static native void clean();
-    private static native void update();
-    private static native void draw(int[] bmap);
-    private static native String getstring();
-    private static native void keypress(String ascii,String key,String act);
+    static native void setup();
+    static native void clean();
+    static native void update();
+    static native void draw(int[] bmap);
+    static native String getstring();
+    static native void keypress(String ascii,String key,String act);
 
 	int bdat[]=new int[320*240];;
 	Bitmap bmap;
@@ -182,6 +182,69 @@ class DrawView extends View implements OnTouchListener {
     }
 
     public boolean onTouch(View view, MotionEvent event) {
+
+	if(event.getAction()==MotionEvent.ACTION_DOWN) // is it a press
+	{
+		int x = (int)event.getX();
+		int y = (int)event.getY();
+		String key=null;
+
+// work out where it was pressed and send appropriate msgs
+
+		if(x<metrics.widthPixels*1/3)
+		{
+			if(y<metrics.heightPixels*1/3)
+			{
+			}
+			else
+			if(y<metrics.heightPixels*2/3)
+			{
+				key="left";
+			}
+			else
+			{
+			}
+		}
+		else
+		if(x<metrics.widthPixels*2/3)
+		{
+			if(y<metrics.heightPixels*1/3)
+			{
+				key="up";
+			}
+			else
+			if(y<metrics.heightPixels*2/3)
+			{
+				key="space";
+			}
+			else
+			{
+				key="down";
+			}
+		}
+		else
+		{
+			if(y<metrics.heightPixels*1/3)
+			{
+			}
+			else
+			if(y<metrics.heightPixels*2/3)
+			{
+				key="right";
+			}
+			else
+			{
+			}
+		}
+		if(key!=null)
+		{
+			up.keypress(" ",key,"down");
+			up.updraw();
+			up.keypress(" ",key,"up");
+			up.update();
+		}
+	}
+
         return true;
     }
 }
