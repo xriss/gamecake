@@ -352,14 +352,15 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 
 				if widget.class=="textedit" then -- hack
 					if widget.master.focus==widget then --only draw curser in active widget
-						local sw=font.size(widget.text:sub(1,widget.line_idx))
-						gl.Enable(gl.COLOR_MATERIAL)
-						win.flat_rect(
-							tx+sw+0,-ty,
-							tx+sw+2,-ty-widget.text_size,
-							widget.master.throb*256*256*256)
-						gl.Disable(gl.COLOR_MATERIAL)
-							
+						if widget.master.throb>=128 then
+							local sw=font.size(widget.text:sub(1,widget.data.str_idx))
+							gl.Enable(gl.COLOR_MATERIAL)
+							win.flat_rect(
+								tx+sw+0,-ty,
+								tx+sw+2,-ty-widget.text_size,
+								255*256*256*256)
+							gl.Disable(gl.COLOR_MATERIAL)
+						end
 					end
 				end
 

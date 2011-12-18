@@ -55,6 +55,7 @@ function key(widget,ascii,key,act)
 			if widget.data.str_idx<0 then widget.data.str_idx=0 end
 			
 			master.throb=255
+			changed=true
 						
 		elseif key=="right" then
 	
@@ -62,14 +63,17 @@ function key(widget,ascii,key,act)
 			if widget.data.str_idx>#widget.data.str then widget.data.str_idx=#widget.data.str end
 			
 			master.throb=255
+			changed=true
 			
 		elseif key=="home" then
 		
 			widget.data.str_idx=0
+			changed=true
 		
 		elseif key=="end" then
 		
 			widget.data.str_idx=#widget.data.str
+			changed=true
 		
 		elseif key=="backspace" then
 	
@@ -132,6 +136,7 @@ function key(widget,ascii,key,act)
 					
 				end
 				
+				changed=true
 			end
 			
 --		elseif key=="up" then
@@ -171,6 +176,7 @@ function key(widget,ascii,key,act)
 		widget.text=widget.data.str
 		
 		widget:call_hook("update")
+		widget:set_dirty()
 	end
 	
 	return true

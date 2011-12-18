@@ -25,8 +25,19 @@ function setup(widget,def)
 
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget)
+	
+		local throb=(widget.throb<128)
+		
 		widget.throb=widget.throb-4
 		if widget.throb<0 then widget.throb=255 end
+		
+		if throb ~= (widget.throb<128) then -- dirty throb...
+			if widget.focus then
+				if widget.focus.class=="textedit" then
+					widget.focus:set_dirty()
+				end
+			end
+		end
 
 		meta.update(widget)
 	end
