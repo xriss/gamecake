@@ -32,6 +32,10 @@ function mouse(widget,act,x,y,key)
 				widget.data.str_idx=widget.master.font.which(dx,widget.data.str)
 				if widget.data.str_idx<0 then widget.data.str_idx=#widget.data.str end -- catch morethan
 			end
+
+			widget.master.throb=255
+			widget:set_dirty()
+
 		end
 	end
 	
