@@ -58,6 +58,8 @@ elseif WINDOWS then
 
 elseif NIX then
 
+	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
+
 -- we need to include libs again here for linking, cant prelink with statics?
 -- it should probably auto handle stuff
 -- anyway it gets complicated, so this is all hax

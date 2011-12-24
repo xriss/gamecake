@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.wetgenes"
-      android:versionCode="11942"
-      android:versionName="11.942">
+      android:versionCode="11951"
+      android:versionName="11.951">
     <application android:label="yarn" android:icon="@drawable/icon">
         <activity android:name="yarn"
                   android:label="yarn">
