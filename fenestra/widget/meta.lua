@@ -47,10 +47,12 @@ function setup(def)
 	end
 
 	function meta.call_hook(widget,hook,dat)
-		if widget.hooks and widget.hooks[hook] then -- either local hooks
-			widget.hooks[hook](widget,dat)
-		elseif widget.master.hooks and widget.master.hooks[hook] then -- or a master hook
-			widget.master.hooks[hook](widget,dat)
+		local hooks=widget.hooks or widget.master.hooks
+		local type_hooks=type(hooks)
+		if type_hooks=="function" then -- master function
+			hooks(hook,widget,dat)
+		elseif type_hooks=="table" and hooks[hook] then -- or table of functions
+			hooks[hook](widget,dat)
 		end
 	end
 
@@ -129,10 +131,10 @@ function setup(def)
 		widget.pxf=def.pxf      -- local position, for sliders etc, goes from 0-1 
 		widget.pyf=def.pyf      -- fractional position within container
 
-		widget.px=def.px or 0 -- relative pixel position (may auto generate)
+		widget.px=def.px or 0 -- relative pixel position (may generate)
 		widget.py=def.py or 0
 		
-		widget.pxd=def.pxd or 0 -- absolute pixel position (very probably auto generated)
+		widget.pxd=def.pxd or 0 -- absolute pixel position (very probably generated)
 		widget.pyd=def.pyd or 0
 		
 		widget.pa=def.pa or 0 -- display rotation angle, possibly
@@ -142,12 +144,15 @@ function setup(def)
 		widget.hxf=def.hxf	  -- optional relative local size of container, possibly best not to use
 		widget.hyf=def.hyf	  -- it does not have a default so may not be set
 		
-		widget.hx=def.hx or 0 -- absolute pixel size (may auto generate)
+		widget.hx=def.hx or 0 -- absolute pixel size (may generate)
 		widget.hy=def.hy or 0
 		
 		widget.hx_max=def.hx_max -- clip maximum layout size
 		widget.hy_max=def.hy_max		
 				
+		widget.hx_fill=def.hx_fill -- if we wish to stretch this layout then this widget can fill up
+		widget.hy_fill=def.hy_fill -- this much extra space where 1 is all of the avilable extra space
+
 		widget.color=def.color
 		widget.text_color=def.text_color or widget.master.text_color or 0xff000000 -- black text
 		widget.text_size=def.text_size or widget.master.text_size or 16 -- quite chunky text by default
