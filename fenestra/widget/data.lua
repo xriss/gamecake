@@ -29,12 +29,17 @@ end
 
 -- how wide or tall should the handle be given the size of the parent?
 local data_get_size=function(dat,w)
-	if dat.size==0 then
-		if dat.min==dat.max then return w end -- fullsize		
-		return w/4 -- else some room to scroll
+	local ret=16
+	if dat.min==dat.max then
+		ret=w					-- fullsize
+	elseif dat.size==0 then
+		ret=w/4					-- some random room to scroll
 	else
-		return w*( dat.size / dat.max-dat.min )
+		ret=w*dat.size			-- use the given size
 	end
+	if ret<16 then ret=16 end
+	if ret>w then ret=w end
+	return ret
 end
 
 

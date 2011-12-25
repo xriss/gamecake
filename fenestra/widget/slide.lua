@@ -32,6 +32,14 @@ function update(widget)
 	return widget.meta.update(widget)
 end
 
+function layout(widget)
+
+	widget.drag.hx=widget.datx:get_size(widget.hx)
+	widget.drag.hy=widget.daty:get_size(widget.hy)
+
+	widget.meta.layout(widget)	
+	
+end
 
 function slide_snap(it)
 
@@ -56,6 +64,7 @@ function setup(widget,def)
 	widget.key=key
 	widget.mouse=mouse
 	widget.update=update
+	widget.layout=layout
 	
 --setup constraints in x and y 
 	widget.datx=widget_data.new_data(def.datx)
