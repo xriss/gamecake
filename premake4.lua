@@ -333,9 +333,13 @@ else -- windows or linux
 	include("lib_lua")
 	include("lib_z")
 	include("lib_sqlite")
+	include("lib_pcre")
 
 -- we probably static link with all the above libs so this should go last
 	include("lua")
+
+-- build webserver
+	include("nginx")
 
 end
 
