@@ -1,0 +1,2 @@
+bin/dbg/nginx -pnginxd $*
+

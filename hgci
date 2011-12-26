@@ -1,4 +1,4 @@
-cd ../bin
+cd bin
 hg ci
-cd ../been
+cd ..
 hg ci
