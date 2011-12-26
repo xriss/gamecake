@@ -1,5 +1,5 @@
 
-project "lua_grd_libpng"
+project "lib_png"
 kind "StaticLib"
 language "C++"
 files { "./**.cpp" , "./**.c" , "./**.h" }

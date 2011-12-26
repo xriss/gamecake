@@ -69,8 +69,8 @@ elseif NIX then
 	links { "lib_lua" }
 	links { "lib_z" }
 	links { "lib_sqlite" }
-	links { "lua_grd_libpng" }
-	links { "lua_zip_zziplib"}
+	links { "lib_png" }
+	links { "lib_zzip"}
 	links { "GL" , "GLU" }
 	links { "crypt" }
 	links { "pthread" }

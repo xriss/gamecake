@@ -248,6 +248,8 @@ if NACL then
 --	include("lua_fenestra")
 
 	include("lib_lua")
+	include("lib_zzip")
+--	include("lib_png")
 	include("lib_z")
 --	include("lib_sqlite")
 
@@ -277,6 +279,8 @@ elseif ANDROID then
 --	include("lua_bit")
 
 	include("lib_lua")
+	include("lib_zzip")
+	include("lib_png")
 	include("lib_z")
 	include("lib_sqlite")
 	include("lib_android")
@@ -331,6 +335,8 @@ else -- windows or linux
 	end
 	
 	include("lib_lua")
+	include("lib_zzip")
+	include("lib_png")
 	include("lib_z")
 	include("lib_sqlite")
 	include("lib_pcre")
