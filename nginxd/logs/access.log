@@ -8,3 +8,5 @@
 127.0.0.1 - - [26/Dec/2011:21:46:51 +0000] "GET /favicon.ico HTTP/1.1" 404 571 "-" "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"
 127.0.0.1 - - [26/Dec/2011:21:46:56 +0000] "GET /test.png HTTP/1.1" 404 571 "-" "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"
 127.0.0.1 - - [26/Dec/2011:21:46:56 +0000] "GET /favicon.ico HTTP/1.1" 404 571 "-" "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"
+127.0.0.1 - - [26/Dec/2011:23:08:24 +0000] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"
+127.0.0.1 - - [26/Dec/2011:23:08:25 +0000] "GET /favicon.ico HTTP/1.1" 404 571 "-" "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"
