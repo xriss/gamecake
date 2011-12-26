@@ -243,11 +243,13 @@ if NACL then
 --	include("lua_grd")
 --	include("lua_lash")
 --	include("lua_lfs")
+--	include("lua_sqlite")
 --	include("lua_socket")
 --	include("lua_fenestra")
 
 	include("lib_lua")
 	include("lib_z")
+--	include("lib_sqlite")
 
 	include("lib_nacl")
 
@@ -266,6 +268,7 @@ elseif ANDROID then
 --	include("lua_grd")
 --	include("lua_lash")
 	include("lua_lfs")
+--	include("lua_sqlite")
 --	include("lua_socket")
 --	include("lua_fenestra")
 
@@ -275,12 +278,13 @@ elseif ANDROID then
 
 	include("lib_lua")
 	include("lib_z")
+	include("lib_sqlite")
 	include("lib_android")
 	
 -- we probably static link with all the above libs so this should go last
 	include("lua")
 	
-else
+else -- windows or linux
 
 	
 	include("lua_zip")
@@ -294,6 +298,7 @@ else
 	include("lua_lfs")
 	include("lua_socket")
 	include("lua_fenestra")
+	include("lua_sqlite")
 
 
 -- lanes has trouble with multipple CPUs for some reason?
@@ -327,6 +332,7 @@ else
 	
 	include("lib_lua")
 	include("lib_z")
+	include("lib_sqlite")
 
 -- we probably static link with all the above libs so this should go last
 	include("lua")
