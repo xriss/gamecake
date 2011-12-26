@@ -22,3 +22,24 @@
 2011/12/26 21:46:51 [error] 8353#-1217648432: *2 open() "nginxd/www/favicon.ico" failed (2: No such file or directory), client: 127.0.0.1, server: host.local, request: "GET /favicon.ico HTTP/1.1", host: "127.0.0.1:8888"
 2011/12/26 21:46:56 [error] 8353#-1217648432: *2 open() "nginxd/www/test.png" failed (2: No such file or directory), client: 127.0.0.1, server: host.local, request: "GET /test.png HTTP/1.1", host: "127.0.0.1:8888"
 2011/12/26 21:46:56 [error] 8353#-1217648432: *2 open() "nginxd/www/favicon.ico" failed (2: No such file or directory), client: 127.0.0.1, server: host.local, request: "GET /favicon.ico HTTP/1.1", host: "127.0.0.1:8888"
+2011/12/26 23:08:07 [emerg] 22163#-1222105376: bind() to 127.0.0.1:8888 failed (98: Address already in use)
+2011/12/26 23:08:07 [emerg] 22163#-1222105376: bind() to 127.0.0.1:8888 failed (98: Address already in use)
+2011/12/26 23:08:07 [emerg] 22163#-1222105376: bind() to 127.0.0.1:8888 failed (98: Address already in use)
+2011/12/26 23:08:07 [emerg] 22163#-1222105376: bind() to 127.0.0.1:8888 failed (98: Address already in use)
+2011/12/26 23:08:13 [notice] 22171#-1222347040: signal process started
+2011/12/26 23:08:25 [error] 22177#-1222371616: *1 open() "nginxd/www/favicon.ico" failed (2: No such file or directory), client: 127.0.0.1, server: host.local, request: "GET /favicon.ico HTTP/1.1", host: "127.0.0.1:8888"
+2011/12/26 23:13:49 [emerg] 24579#-1222674720: bind() to 127.0.0.1:8888 failed (98: Address already in use)
+2011/12/26 23:13:49 [emerg] 24579#-1222674720: bind() to 127.0.0.1:8888 failed (98: Address already in use)
+2011/12/26 23:13:49 [emerg] 24579#-1222674720: bind() to 127.0.0.1:8888 failed (98: Address already in use)
+2011/12/26 23:13:53 [notice] 24585#-1222523168: signal process started
+2011/12/26 23:14:31 [notice] 24630#-1222584608: signal process started
+2011/12/26 23:14:31 [error] 24630#-1222584608: open() "nginxd/logs/nginx.pid" failed (2: No such file or directory)
+2011/12/26 23:14:33 [notice] 24637#-1222531360: signal process started
+2011/12/26 23:14:35 [notice] 24644#-1221884192: signal process started
+2011/12/26 23:14:39 [notice] 24653#-1220983072: signal process started
+2011/12/26 23:14:39 [notice] 24654#-1222539552: signal process started
+2011/12/26 23:14:39 [error] 24654#-1222539552: open() "nginxd/logs/nginx.pid" failed (2: No such file or directory)
+2011/12/26 23:14:41 [notice] 24658#-1220933920: signal process started
+2011/12/26 23:14:41 [error] 24658#-1220933920: open() "nginxd/logs/nginx.pid" failed (2: No such file or directory)
+2011/12/26 23:14:41 [notice] 24659#-1221871904: signal process started
+2011/12/26 23:14:41 [error] 24659#-1221871904: open() "nginxd/logs/nginx.pid" failed (2: No such file or directory)
