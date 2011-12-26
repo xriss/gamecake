@@ -160,9 +160,25 @@ elseif NIX then
 		"./src/os/unix/ngx_writev_chain.c",
 	}
 
+	files { "./lua/src/**.h" , "./lua/src/**.c" }
+
+	files { "../lua/*.c" }
+	
+
+	links(lua_lib_names)
+
+	links { "lib_lua" }
 	links { "lib_z" }
+	links { "lib_sqlite" }
+	links { "lua_grd_libpng" }
+	links { "lua_zip_zziplib"}
+	links { "GL" , "GLU" }
+	links { "crypt" }
+	links { "pthread" }
+	
 	links { "lib_pcre" }
-	links { "dl" , "m" , "pthread" , "crypt" }
+
+	links { "dl" , "m" }
 	
 	SET_KIND("ConsoleApp")
 	SET_TARGET("","nginx",true)
