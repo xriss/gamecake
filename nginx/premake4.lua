@@ -8,12 +8,13 @@ includedirs {	"." ,
 		"src/core" ,
 		"src/os" ,
 		"src/os/unix" ,
-		"../lib_pcre" ,
 		"src/event" ,
 		"src/mail" ,
 		"src/http" ,
 		"src/misc" ,
 		"src/http/modules" ,
+		"../lib_z" ,
+		"../lib_pcre" ,
 }
 
 if NACL then
@@ -89,7 +90,7 @@ elseif NIX then
 		"./src/http/modules/ngx_http_flv_module.c",
 --		"./src/http/modules/ngx_http_geoip_module.c",
 		"./src/http/modules/ngx_http_geo_module.c",
---		"./src/http/modules/ngx_http_gzip_filter_module.c",
+		"./src/http/modules/ngx_http_gzip_filter_module.c",
 		"./src/http/modules/ngx_http_gzip_static_module.c",
 		"./src/http/modules/ngx_http_headers_filter_module.c",
 --		"./src/http/modules/ngx_http_image_filter_module.c",
@@ -159,6 +160,7 @@ elseif NIX then
 		"./src/os/unix/ngx_writev_chain.c",
 	}
 
+	links { "lib_z" }
 	links { "lib_pcre" }
 	links { "dl" , "m" , "pthread" , "crypt" }
 	

@@ -40,7 +40,7 @@ extern ngx_module_t  ngx_http_write_filter_module;
 extern ngx_module_t  ngx_http_header_filter_module;
 extern ngx_module_t  ngx_http_chunked_filter_module;
 extern ngx_module_t  ngx_http_range_header_filter_module;
-//extern ngx_module_t  ngx_http_gzip_filter_module;
+extern ngx_module_t  ngx_http_gzip_filter_module;
 extern ngx_module_t  ngx_http_postpone_filter_module;
 extern ngx_module_t  ngx_http_ssi_filter_module;
 extern ngx_module_t  ngx_http_charset_filter_module;
