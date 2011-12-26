@@ -1,0 +1,4 @@
+cd ../bin
+hg ci
+cd ../been
+hg ci
