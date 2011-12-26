@@ -19,6 +19,7 @@ if NACL then
 	
 	links { "lib_lua" }
 	links { "lib_z" }
+--	links { "lib_sqlite" }
 	
 	links { "lib_nacl" }
 
@@ -37,6 +38,7 @@ elseif ANDROID then
 
 	links { "lib_lua" }
 	links { "lib_z" }
+--	links { "lib_sqlite" }
 	
 	
 	links { "dl", "log", "GLESv1_CM", "c", "m", "gcc" }
@@ -66,6 +68,7 @@ elseif NIX then
 
 	links { "lib_lua" }
 	links { "lib_z" }
+	links { "lib_sqlite" }
 	links { "lua_grd_libpng" }
 	links { "lua_zip_zziplib"}
 	links { "GL" , "GLU" }
