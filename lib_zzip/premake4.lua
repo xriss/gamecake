@@ -1,5 +1,5 @@
 
-project "lua_zip_zziplib"
+project "lib_zzip"
 kind "StaticLib"
 language "C"
 files { "zzip/**.c" , "zzip/**.h" }
@@ -11,7 +11,7 @@ else -- nix
 end
 
 
-includedirs { "." , "../../lib_z" }
+includedirs { "." , "../lib_z" }
 
 
 configuration {"Debug"}

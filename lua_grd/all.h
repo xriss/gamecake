@@ -65,8 +65,8 @@ extern "C" {
 };
 #endif
 
-#include "libpng/png.h"
-#include "libjpeg/jpeglib.h"
+#include "png.h"
+#include "jpeglib.h"
 
 #include "code/grd.h"
 #include "code/grd_png.h"
