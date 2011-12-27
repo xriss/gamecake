@@ -13,7 +13,7 @@ local log=require("wetgenes.www.any.log").log
 local tostring=tostring
 
 module(...)
-local cache=require(...)
+local cache=require("wetgenes.www.any.cache")
 local dat=_M
 
 
@@ -418,6 +418,7 @@ end
 --------------------------------------------------------------------------------
 function def_cache_fix(env,srv,mc)
 	for n,b in pairs(mc) do
+log(n,b)
 		cache.del(srv,n)
 	end
 end
