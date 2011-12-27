@@ -8,7 +8,7 @@ local type=type
 local os=os
 
 local core=require("wetgenes.aelua.data.core")
-local log=require("wetgenes.aelua.log").log
+local log=require("wetgenes.www.any.log").log
 
 local tostring=tostring
 

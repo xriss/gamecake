@@ -1,13 +1,13 @@
 
 local json=require("wetgenes.json")
 
-local dat=require("wetgenes.aelua.data")
-local cache=require("wetgenes.aelua.cache")
+local dat=require("wetgenes.www.any.data")
+local cache=require("wetgenes.www.any.cache")
 
-local log=require("wetgenes.aelua.log").log -- grab the func from the package
+local log=require("wetgenes.www.any.log").log -- grab the func from the package
 
-local fetch=require("wetgenes.aelua.fetch")
-local sys=require("wetgenes.aelua.sys")
+local fetch=require("wetgenes.www.any.fetch")
+local sys=require("wetgenes.www.any.sys")
 
 
 local core=require("wetgenes.aelua.users.core")

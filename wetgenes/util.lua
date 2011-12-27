@@ -1,6 +1,3 @@
-
---local log=require("wetgenes.aelua.log").log
-
 local string=string
 local table=table
 local math=math
