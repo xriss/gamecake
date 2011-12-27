@@ -13,6 +13,8 @@ includedirs {	"." ,
 		"src/http" ,
 		"src/misc" ,
 		"src/http/modules" ,
+		"ndk/objs" ,
+		"ndk/src" ,
 		"../lib_z" ,
 		"../lib_pcre" ,
 }
@@ -25,6 +27,7 @@ elseif NIX then
 --	defines "NGX_HAVE_AIO"
 	defines "NGX_LINUX"
 	defines "NGX_THREADS"
+	defines "NDK"
 
 	files { "./**.h" }
 	files { "./objs/**.c" }
@@ -161,6 +164,20 @@ elseif NIX then
 	}
 
 	files { "./lua/src/**.h" , "./lua/src/**.c" }
+
+	files { "./ndk/src/**.h" }
+	files { "./ndk/src/ndk.c" }
+--[[
+	files { "./ndk/src/**.h" , "./ndk/src/**.c" }
+	excludes { "./ndk/src/ndk_upstream_list.*" }
+	excludes { "./ndk/src/ndk_process.*" }
+	excludes { "./ndk/src/ndk_uri.*" }
+	excludes { "./ndk/src/ndk_complex_path.*" }
+	excludes { "./ndk/src/ndk_set_var.*" }
+	excludes { "./ndk/src/ndk_encoding.*" }
+	excludes { "./ndk/src/ndk_regex.*" }
+	excludes { "./ndk/src/ndk_http.*" }
+]]
 
 	files { "../lua/*.c" }
 	
