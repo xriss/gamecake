@@ -43,3 +43,12 @@
 2011/12/26 23:14:41 [error] 24658#-1220933920: open() "nginxd/logs/nginx.pid" failed (2: No such file or directory)
 2011/12/26 23:14:41 [notice] 24659#-1221871904: signal process started
 2011/12/26 23:14:41 [error] 24659#-1221871904: open() "nginxd/logs/nginx.pid" failed (2: No such file or directory)
+2011/12/27 01:41:04 [emerg] 4911#-1222801696: unknown directive "lua_package_path" in nginxd/conf/nginx.conf:2
+2011/12/27 01:41:04 [emerg] 4912#-1221294368: unknown directive "lua_package_path" in nginxd/conf/nginx.conf:2
+2011/12/27 01:42:22 [notice] 5014#-1222494496: signal process started
+2011/12/27 01:42:22 [error] 5014#-1222494496: open() "nginxd/logs/nginx.pid" failed (2: No such file or directory)
+2011/12/27 01:42:26 [notice] 5023#-1222691104: signal process started
+2011/12/27 01:42:28 [notice] 5030#-1221867808: signal process started
+2011/12/27 01:46:21 [emerg] 5304#-1222609184: unknown directive "tryfiles" in nginxd/conf/nginx.conf:24
+2011/12/27 01:46:21 [emerg] 5305#-1222441248: unknown directive "tryfiles" in nginxd/conf/nginx.conf:24
+2011/12/27 01:46:34 [notice] 5321#-1222560032: signal process started
