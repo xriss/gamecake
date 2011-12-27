@@ -1,0 +1,1 @@
+if ngx then	return require("wetgenes.www.any").wrap_module("wetgenes.www.ngx.fetch",...)else	return require("wetgenes.www.any").wrap_module("wetgenes.www.gae.fetch",...)end

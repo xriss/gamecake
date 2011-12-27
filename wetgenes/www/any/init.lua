@@ -1,0 +1,1 @@
+local function _wrap_module(old_name,new_name)	package.loaded[new_name]=require(old_name)	return package.loaded[new_name]endmodule("wetgenes.www.any")wrap_module=_wrap_module
