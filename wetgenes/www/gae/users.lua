@@ -25,7 +25,7 @@ local wet_string=require("wetgenes.string")
 local str_split=wet_string.str_split
 local serialize=wet_string.serialize
 
-module("wetgenes.aelua.users")
+module(...)
 
 function login_url(a)
 

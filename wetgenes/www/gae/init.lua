@@ -1,1 +1,1 @@
-module("wetgenes.aelua")
+module(...)

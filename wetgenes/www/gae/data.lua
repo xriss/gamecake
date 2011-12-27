@@ -12,8 +12,8 @@ local log=require("wetgenes.aelua.log").log
 
 local tostring=tostring
 
-module("wetgenes.aelua.data")
-local cache=require("wetgenes.aelua.cache")
+module(...)
+local cache=require(...)
 local dat=_M
 
 

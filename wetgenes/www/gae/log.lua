@@ -4,7 +4,7 @@ local core=require("wetgenes.aelua.log.core")
 
 
 
-module("wetgenes.aelua.log")
+module(...)
 
 
 function log(a,b)

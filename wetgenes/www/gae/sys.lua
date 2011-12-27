@@ -4,7 +4,7 @@ local core=require("wetgenes.aelua.sys.core")
 
 local io=io
 
-module("wetgenes.aelua.sys")
+module(...)
 
 
 function sleep(...)

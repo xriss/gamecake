@@ -7,7 +7,7 @@ local os=os
 local type=type
 local tostring=tostring
 
-module("wetgenes.aelua.cache")
+module(...)
 
 
 function countzero()

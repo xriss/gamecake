@@ -2,7 +2,7 @@
 
 local core=require("wetgenes.aelua.img.core")
 
-module("wetgenes.aelua.img")
+module(...)
 
 
 function get(...)

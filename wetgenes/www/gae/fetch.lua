@@ -4,7 +4,7 @@ local core=require("wetgenes.aelua.fetch.core")
 
 local os=os
 
-module("wetgenes.aelua.fetch")
+module(...)
 
 function countzero()
 	count=0

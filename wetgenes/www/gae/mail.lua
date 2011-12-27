@@ -4,7 +4,7 @@ local core=require("wetgenes.aelua.mail.core")
 
 local os=os
 
-module("wetgenes.aelua.mail")
+module(...)
 
 
 function send(...)
