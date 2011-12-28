@@ -27,7 +27,7 @@ elseif NIX then
 --	defines "NGX_HAVE_AIO"
 	defines "NGX_LINUX"
 	defines "NGX_THREADS"
-	defines "NDK"
+--	defines "NDK"
 
 	files { "./**.h" }
 	files { "./objs/**.c" }
@@ -164,9 +164,11 @@ elseif NIX then
 	}
 
 	files { "./lua/src/**.h" , "./lua/src/**.c" }
+--	excludes { "./lua/src/ngx_http_lua_ndk.c" }
+--	excludes { "./lua/src/ngx_http_lua_directive.c" }
 
-	files { "./ndk/src/**.h" }
-	files { "./ndk/src/ndk.c" }
+--	files { "./ndk/src/**.h" }
+--	files { "./ndk/src/ndk.c" }
 --[[
 	files { "./ndk/src/**.h" , "./ndk/src/**.c" }
 	excludes { "./ndk/src/ndk_upstream_list.*" }

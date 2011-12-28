@@ -25,7 +25,7 @@ extern int wetgenes_cache_loader(lua_State *L)
 	
 //		lua_pushfstring(L,"\nFound internal lua string %s of %s",name,(data));
 
- 	if( luaL_loadstring(L, data) != 0 )
+ 	if( luaL_loadbuffer(L, data,strlen(data),name) != 0 )
 	{
 		luaL_error(L, "error loading module %q from file %q:\n\t%s",
 			name, "internal", lua_tostring(L, -1));
