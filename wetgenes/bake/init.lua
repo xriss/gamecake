@@ -174,22 +174,24 @@ opts.ret=opts.ret or {}
 
 	local subdirs={}
 	local d=opts.basedir.."/"..opts.dir
-	for v in lfs.dir(d) do
-		local a=lfs.attributes(d.."/"..v)
---print("test",v,a.mode)
-		if a.mode=="file" then
-			if string.find(v,opts.filter) then
---print("found",v)
-				opts.ret[#opts.ret+1]=opts.dir.."/"..v
+	if lfs.attributes(d) then -- only if dir exists
+		for v in lfs.dir(d) do
+			local a=lfs.attributes(d.."/"..v)
+	--print("test",v,a.mode)
+			if a.mode=="file" then
+				if string.find(v,opts.filter) then
+	--print("found",v)
+					opts.ret[#opts.ret+1]=opts.dir.."/"..v
+				end
 			end
-		end
-		if a.mode=="directory" then
-			if v:sub(1,1)~="." then
-				subdirs[#subdirs+1]=v
+			if a.mode=="directory" then
+				if v:sub(1,1)~="." then
+					subdirs[#subdirs+1]=v
+				end
 			end
 		end
 	end
-
+	
 -- recurse
 	local dir=opts.dir
 	for i,v in ipairs(subdirs) do

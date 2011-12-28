@@ -14,14 +14,39 @@ local io=io
 
 module("apps")
 
+--
+-- get/set current dir
+--
+local get_cd=function()
+	local lfs=require("lfs")
+
+	return string.gsub(lfs.currentdir(),'\\','/')
+
+end
+local set_cd=function(str)
+	local lfs=require("lfs")
+
+	lfs.chdir(str)
+
+end
+local file_exists=function(str)
+	local fp=io.open(str,"r")
+	if fp then fp:close() return true end
+	return false
+end
+
+	
 function setpaths(dll,dirs)
 
-	local cpath={}
-	for i,v in ipairs(dirs) do
-		cpath[#cpath+1]=v .. "?." .. dll
-		cpath[#cpath+1]=v .. "?/init." .. dll
+	if dll then
+		local cpath={}
+		for i,v in ipairs(dirs) do
+			cpath[#cpath+1]=v .. "?." .. dll
+			cpath[#cpath+1]=v .. "?/init." .. dll
+		end
+		cpath[#cpath+1]=package.cpath
+		package.cpath=table.concat(cpath,";")
 	end
-	cpath[#cpath+1]=package.cpath
 	
 	local path={}
 	for i,v in ipairs(dirs) do
@@ -29,11 +54,35 @@ function setpaths(dll,dirs)
 		path[#path+1]=v .. "lua/?/init.lua"
 	end
 	path[#path+1]=package.path
-
-
-	package.cpath=table.concat(cpath,";")
 	package.path=table.concat(path,";")
 
+end
+
+--
+-- find where our exe lives
+--
+function find_bin()
+
+	local dir=get_cd()
+
+	local tdirs={ -- look in these dirs
+		dir,
+		dir.."/bin",
+		dir.."/..",
+		dir.."/../bin",
+		dir.."/../lua",
+		dir.."/../lua/bin",
+		dir.."/../..",
+		dir.."/../../bin",
+		dir.."/../../..",
+		dir.."/../../../bin",
+	}
+	local bin_dir=dir.."/"
+	for i=1,#tdirs do local v=tdirs[i]
+		if file_exists(v.."/lua/apps.lua") then bin_dir=v.."/" break end -- found a bin dir?
+	end
+
+	return bin_dir
 end
 
 --
@@ -43,24 +92,6 @@ function find(name)
 
 	local lfs=require("lfs")
 
---
--- get/set current dir
---
-	local get_cd=function()
-
-		return string.gsub(lfs.currentdir(),'\\','/')
-
-	end
-	local set_cd=function(str)
-
-		lfs.chdir(str)
-
-	end
-	local file_exists=function(str)
-		local fp=io.open(str,"r")
-		if fp then fp:close() return true end
-		return false
-	end
 
 -- we are looking for a dir/lua/name.lua and dir will be our base dir so look in various places
 
@@ -73,24 +104,12 @@ function find(name)
 	local dll="dll"
 	if osflavour=="nix" then dll="so" end
 
-	local dir=get_cd()
-
-	local tdirs={ -- look in these dirs
-		dir,
-		dir.."/bin",
-		dir.."/..",
-		dir.."/../bin",
-		dir.."/../lua",
-		dir.."/../lua/bin",
-	}
-	local bin_dir=dir.."/"
-	for i=1,#tdirs do local v=tdirs[i]
-		if file_exists(v.."/lua/apps.lua") then bin_dir=v.."/" break end -- found a bin dir?
-	end
-
+	bin_dir=find_bin()
+	
 print("BIN PATH",bin_dir,dll)
 
 
+	local dir=get_cd()
 	local tdirs={ -- look in these dirs
 	
 		dir,
