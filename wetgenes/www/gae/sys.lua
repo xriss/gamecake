@@ -1,6 +1,6 @@
 
 
-local core=require("wetgenes.aelua.sys.core")
+local core=require("wetgenes.www.gae.sys.core")
 
 local io=io
 

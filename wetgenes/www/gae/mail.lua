@@ -1,6 +1,6 @@
 
 
-local core=require("wetgenes.aelua.mail.core")
+local core=require("wetgenes.www.gae.mail.core")
 
 local os=os
 

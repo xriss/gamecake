@@ -1,6 +1,6 @@
 
 
-local core=require("wetgenes.aelua.img.core")
+local core=require("wetgenes.www.gae.img.core")
 
 module(...)
 

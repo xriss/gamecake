@@ -1,6 +1,6 @@
 
 
-local core=require("wetgenes.aelua.fetch.core")
+local core=require("wetgenes.www.gae.fetch.core")
 
 local os=os
 

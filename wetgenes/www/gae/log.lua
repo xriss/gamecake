@@ -1,6 +1,6 @@
 
 
-local core=require("wetgenes.aelua.log.core")
+local core=require("wetgenes.www.gae.log.core")
 
 
 

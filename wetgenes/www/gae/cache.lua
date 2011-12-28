@@ -1,6 +1,6 @@
 
 
-local core=require("wetgenes.aelua.cache.core")
+local core=require("wetgenes.www.gae.cache.core")
 local log=require("wetgenes.www.any.log").log
 
 local os=os
