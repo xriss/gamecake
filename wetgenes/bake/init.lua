@@ -33,7 +33,7 @@ local io=io
 local print=print
 
 local ipairs=ipairs
-
+local assert=assert
 
 module("wetgenes.bake")
 
@@ -132,19 +132,6 @@ execute=function(cwd,cmd,arg)
 
 end
 
---
--- Copy a file from one location to another
---
-copyfile=function(f,t)
-
-local fpr=io.open(f,"rb")
-local d=fpr:read("*a")
-local fpw=io.open(t,"wb")
-
-	fpw:write(d)
-	fpr:close()
-	fpw:close()
-end
 
 
 --
@@ -204,6 +191,28 @@ end
 
 
 
+readfile=function(name)
+	local fp=assert(io.open(name,"r"))
+	local d=fp:read("*all")
+	fp:close()
+	return d
+end
 
+file_exists=function(name)
+	local fp=(io.open(name,"r"))
+--print(fp)
+	if fp then fp:close() return true end
+	return false
+end
 
+writefile=function(name,data)
+	local fp=assert(io.open(name,"w"))
+	fp:write(data)
+	fp:close()
+end
+
+copyfile=function(frm,too)
+	local text=readfile(frm)
+	writefile(too,text)
+end
 

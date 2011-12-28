@@ -22,7 +22,7 @@ function build(tab)
 
 -- combine all possible lua files into one lua dir in the .ngx output dir
 
-	local opts={basedir=bake.cd_root.."/bin",dir="lua",filter="%.lua$"}
+	local opts={basedir=bake.cd_root.."/bin",dir="lua",filter=""}
 	local r=bake.findfiles(opts)
 	for i,v in ipairs(r.ret) do
 		local fname=bake.cd_out.."/"..v
@@ -30,7 +30,7 @@ function build(tab)
 		bake.copyfile(opts.basedir.."/"..v,fname)
 	end
 
-	local opts={basedir=bake.cd_base.."/html",dir="lua",filter="%.lua$"}
+	local opts={basedir=bake.cd_base.."/html",dir="lua",filter=""}
 	local r=bake.findfiles(opts)
 	for i,v in ipairs(r.ret) do
 		local fname=bake.cd_out.."/"..v
@@ -38,12 +38,106 @@ function build(tab)
 		bake.copyfile(opts.basedir.."/"..v,fname)
 	end
 
-	local opts={basedir=bake.cd_base,dir="lua",filter="%.lua$"}
+	local opts={basedir=bake.cd_base,dir="lua",filter=""}
 	local r=bake.findfiles(opts)
 	for i,v in ipairs(r.ret) do
 		local fname=bake.cd_out.."/"..v
 		bake.create_dir_for_file(fname)
 		bake.copyfile(opts.basedir.."/"..v,fname)
 	end
+
+
+-- now do the same with the modules datas
+
+	local modnames={
+		"admin",
+		"base",
+		"blog",
+		"chan",
+		"comic",
+		"console",
+		"data",
+		"dice",
+		"dimeload",
+		"dumid",
+		"forum",
+		"mirror",
+		"note",
+		"port",
+		"profile",
+		"score",
+		"shoop",
+		"thumbcache",
+		"todo",
+		"waka",
+	}
+	for i,n in ipairs(modnames) do
+		for i,s in ipairs{"art","css","js"} do
+			local opts={basedir=bake.cd_root.."/mods/"..n.."/"..s,dir="",filter=""}
+			local r=bake.findfiles(opts)
+			for i,v in ipairs(r.ret) do
+				local fname=bake.cd_out.."/html/"..s.."/"..n.."/"..v
+				bake.create_dir_for_file(fname)
+				bake.copyfile(opts.basedir.."/"..v,fname)
+			end
+		end
+		
+		local opts={basedir=bake.cd_root.."/mods/"..n.."/lua",dir="",filter=""}
+		local r=bake.findfiles(opts)
+		for i,v in ipairs(r.ret) do
+			local fname=bake.cd_out.."/lua/"..n.."/"..v
+			bake.create_dir_for_file(fname)
+			bake.copyfile(opts.basedir.."/"..v,fname)
+		end
+	end
+
+	local opts={basedir=bake.cd_base,dir="html",filter=""}
+	local r=bake.findfiles(opts)
+	for i,v in ipairs(r.ret) do
+		local fname=bake.cd_out.."/"..v
+		bake.create_dir_for_file(fname)
+		bake.copyfile(opts.basedir.."/"..v,fname)
+	end
+
+local ngx_config=[[
+#worker_processes  4;
+
+events {
+    worker_connections  64;
+}
+
+http {
+
+lua_package_path  './lua/?.lua;./lua/?/init.lua;;';
+lua_package_cpath ';;';
+
+  server {
+#      access_log  access.log;
+#      error_log   error.log;
+      listen      127.0.0.1:8888;
+      root        www;
+      server_name host.local;
+
+#try existing files
+	location  / {
+		try_files $uri @serv;
+	}
+	
+#call into lua to handle anything else	
+	location  @serv {
+		content_by_lua_file lua/serv.lua;
+	}
+	
+  }
+}
+]]
+	local fname=bake.cd_out.."/conf/nginx.conf"
+	bake.create_dir_for_file(fname)
+	bake.writefile(fname,ngx_config)
+	
+	local fname=bake.cd_out.."/logs/test" --nginx wont make its logs dir...
+	bake.create_dir_for_file(fname)
+
+
 
 end
