@@ -125,7 +125,7 @@ lua_package_cpath ';;';
 	
 #call into lua to handle anything else	
 	location  @serv {
-		content_by_lua_file lua/serv.lua;
+		content_by_lua_file lua/ngx_serv.lua;
 	}
 	
   }
@@ -139,5 +139,13 @@ lua_package_cpath ';;';
 	bake.create_dir_for_file(fname)
 
 
-
+	if (tab.arg[1] or "")=="serv" then
+	
+		print("Starting anlua on nginx")
+		
+		bake.execute(bake.cd_out,"../../../bin/exe/nginx","-p. -sstop")
+		bake.execute(bake.cd_out,"../../../bin/exe/nginx","-p.")
+		bake.execute(bake.cd_out,"tail","-f logs/error.log")
+	end
+	
 end
