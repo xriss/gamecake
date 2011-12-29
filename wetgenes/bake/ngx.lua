@@ -125,7 +125,7 @@ lua_package_cpath ';;';
 	
 #call into lua to handle anything else	
 	location  @serv {
-		content_by_lua_file lua/ngx_serv.lua;
+		content_by_lua "require(\"wetgenes.www.ngx.serv\").serv()";
 	}
 	
   }
