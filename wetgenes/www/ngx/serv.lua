@@ -17,24 +17,36 @@ function serv()
 end
 
 function serv2()
---ngx.log(ngx.ERR,"test321")
---ngx.log(ngx.ERR,tostring(error))
 
-	_G.print("starting srv")
-	--log( debug.traceback("test") )
-	--error("test",1)
+local sql=require("sqlite")
+local db=assert(sql.open("sqlite/test.sqlite"))
+log("sqltest")
 
-	_G.print("require basic codes")
+--[=[
+assert(sql.OK==db:exec([[
+	CREATE TABLE t(x INTEGER PRIMARY KEY ASC, y, z);
+	INSERT INTO t VALUES(1,2,3);
+	INSERT INTO t VALUES(4,5,6);
+]]) and db:errmsg())
+]=]
+
+assert(sql.OK==db:exec([[
+	SELECT * FROM t;
+]],
+	function(udata,cols,values,names)
+		local t={}
+		for i=1,cols do t[#t+1]=' ' t[#t+1]=names[i] t[#t+1]=' = ' t[#t+1]=values[i] end
+		log(table.concat(t))
+		return 0
+	end,0) and db:errmsg())
+
 	local basic=require("base.basic")
-	_G.print("required basic codes AOK")
 
 	-- shove this basic functions into the global name space
 	-- they will work with the opts to serv this app as needed
 
 	_G.serv_fail=basic.serv_fail
-
 	_G.serv=basic.serv
-
 
 	_G.serv(require("wetgenes.www.ngx.srv").new())
 

@@ -18,6 +18,10 @@ function build(tab)
 
 -- we need this one
 	lfs.mkdir(bake.cd_out)
+-- and these
+	lfs.mkdir(bake.cd_out.."/conf")
+	lfs.mkdir(bake.cd_out.."/logs")
+	lfs.mkdir(bake.cd_out.."/sqlite")
 
 
 -- combine all possible lua files into one lua dir in the .ngx output dir
@@ -111,9 +115,12 @@ http {
 lua_package_path  './lua/?.lua;./lua/?/init.lua;;';
 lua_package_cpath ';;';
 
+log_format err ‘$msec $status‘;
+
   server {
-#      access_log  access.log;
-#      error_log   error.log;
+
+      access_log  logs/access.log;
+      error_log   logs/error.log debug;
       listen      127.0.0.1:8888;
       root        www;
       server_name host.local;
@@ -132,20 +139,27 @@ lua_package_cpath ';;';
 }
 ]]
 	local fname=bake.cd_out.."/conf/nginx.conf"
-	bake.create_dir_for_file(fname)
 	bake.writefile(fname,ngx_config)
-	
-	local fname=bake.cd_out.."/logs/test" --nginx wont make its logs dir...
-	bake.create_dir_for_file(fname)
-
 
 	if (tab.arg[1] or "")=="serv" then
 	
-		print("Starting anlua on nginx")
+		print("Starting anlua on nginx\n\n")
 		
 		bake.execute(bake.cd_out,"../../../bin/exe/nginx","-p. -sstop")
 		bake.execute(bake.cd_out,"../../../bin/exe/nginx","-p.")
-		bake.execute(bake.cd_out,"tail","-f logs/error.log")
+--		bake.execute(bake.cd_out,"tail","-n0 -f logs/error.log")
+		
+		local fp=io.popen("tail -n0 -f logs/error.log","r") -- should probably just open the file myself...
+		local finished
+		while true do
+			local l=fp:read("*l")
+			if l then
+				local s=l
+				s=s:gsub(", client: .*$"," .")
+				s=s:gsub("^.*: %*%d ",". ")
+				print(s)
+			else break end
+		end
 	end
 	
 end

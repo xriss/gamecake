@@ -11,7 +11,7 @@ function log(...)
 -- only error seems to work?
 
 	if (...) then
-		return ngx.log(ngx.ERR,...)
+		return ngx.log(ngx.NOTICE,...)
 	end
 --	return core.log(a,b)
 
