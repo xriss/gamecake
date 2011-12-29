@@ -4,8 +4,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local log=require("wetgenes.www.any.log").log
 
 module(...)
+local dat=require(...) -- us
 local cache=require("wetgenes.www.any.cache")
-local dat=require(...)
 
 
 function countzero()
@@ -155,8 +155,7 @@ end
 --
 -----------------------------------------------------------------------------
 function build_cache(e)
-	log("data.build_cache:")
---[[
+
 	if e.props.json then -- expand the json data
 	
 		e.cache=json.decode(e.props.json)
@@ -180,7 +179,7 @@ function build_cache(e)
 	end
 	
 	return e
-]]
+
 end
 -----------------------------------------------------------------------------
 --
@@ -190,8 +189,7 @@ end
 --
 -----------------------------------------------------------------------------
 function build_props(e)
-	log("data.build_props:")
---[[
+
 	local t={}
 	local ignore={kind=true,id=true,parent=true,json=true,} -- special names to ignore
 	
@@ -206,7 +204,7 @@ function build_props(e)
 	e.props.json=json.encode(t)
 	
 	return e
-]]
+	
 end
 
 
