@@ -1,3 +1,4 @@
+syntax: glob
 .orig
 build-
 .dbg
