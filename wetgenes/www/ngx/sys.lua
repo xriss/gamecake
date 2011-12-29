@@ -7,6 +7,7 @@ module(...)
 
 
 function sleep(...)
+	log("sys.sleep:")
 
 --	return core.sleep(...)
 
@@ -24,6 +25,7 @@ function file_read(filename)
 end
 
 function bytes_split(bytes,size)
+	log("sys.bytes_split:")
 --	return core.bytes_split(bytes,size)
 end
 function bytes_join(tab)
@@ -37,23 +39,29 @@ function bytes_to_string(bytes)
 end
 
 function bin_encode(t,b)
+	log("sys.bin_encode:")
 --	return core.bin_encode(t,b)
 end
 
 function md5(s,f)
+	log("sys.md5:")
 --	return core.md5(s,f)
 end
 function sha1(s,f)
+	log("sys.sha1:")
 --	return core.sha1(s,f)
 end
 function hmac_sha1(k,s,f)
+	log("sys.hmac_sha1:")
 --	return core.hmac_sha1(k,s,f)
 end
 
 function zip_list(z)
+	log("sys.zip_list:")
 --	return core.zip_list(z)
 end
 function zip_read(z,n)
+	log("sys.sleep:")
 --	return core.zip_read(z,n)
 end
 

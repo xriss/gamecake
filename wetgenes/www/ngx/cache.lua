@@ -1,6 +1,8 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log=require("wetgenes.www.any.log").log
+
 module(...)
 
 
@@ -23,6 +25,7 @@ end
 
 
 function clear(srv)
+	log("cache.clear:")
 	apis()
 --	return apie(core.clear())
 
@@ -30,6 +33,7 @@ end
 
 
 function del(srv,id)
+	log("cache.del:")
 	if srv then srv.cache[id]=nil end
 	apis()
 --	return apie(core.del(id))
@@ -37,6 +41,7 @@ function del(srv,id)
 end
 
 function put(srv,id,tab,ttl)
+	log("cache.put:")
 	if srv then srv.cache[id]=tab end -- this local cache only lasts as long as a request
 	apis()
 --if( type(tab)~="string" ) then log(type(tab).." "..tostring(tab)) end -- it seems to be only safe to cache strings
@@ -45,6 +50,7 @@ function put(srv,id,tab,ttl)
 end
 
 function get(srv,id)
+	log("cache.get:")
 	if srv and type(srv.cache[id])~="nil" then return srv.cache[id] end -- very fast retry for multiple gets
 	
 	apis()
@@ -58,6 +64,7 @@ function get(srv,id)
 end
 
 function inc(srv,id,num,start)
+	log("cache.inc:")
 	apis()
 --	local r=apie(core.inc(id,num,start))
 	

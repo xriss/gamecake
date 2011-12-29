@@ -3,6 +3,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local ngx=require("ngx")
 
+local log=require("wetgenes.www.any.log").log
+
 module(...)
 
 --------------------------------------------------------------------------------
@@ -18,23 +20,23 @@ function new()
 	end
 	
 	srv.set_header=function(...)
-		ngx.print(...)
+		log("srv.set_header:",...)
 	end
 	
 	srv.set_mimetype=function(...)
-		ngx.print(...)
+		log("srv.set_mimetype:",...)
 	end
 	
 	srv.set_cookie=function(...)
-		ngx.print(...)
+		log("srv.set_cookie:",...)
 	end
 
 	srv.redirect=function(...)
-		ngx.print(...)
+		log("srv.redirect:",...)
 	end
 
 	srv.reloadcache=function(...)
-		ngx.print(...)
+		log("srv.reloadcache:",...)
 	end
 
 	srv.cache={} -- a very local cache

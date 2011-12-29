@@ -1,8 +1,10 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log=require("wetgenes.www.any.log").log
+
 module(...)
---local cache=require("wetgenes.www.any.cache")
+local cache=require("wetgenes.www.any.cache")
 local dat=require(...)
 
 
@@ -26,11 +28,13 @@ end
 
 
 function keyinfo(keystr)
+	log("data.keyinfo:")
 	
 --	return core.keyinfo(keystr)
 end
 
 function keystr(kind,id,parent)
+	log("data.keystr:")
 
 --	return core.keystr(kind,id,parent)
 
@@ -39,6 +43,7 @@ end
 
 
 function del(ent)
+	log("data.del:")
 	apis()
 	
 	count=count+0.5
@@ -47,6 +52,7 @@ function del(ent)
 end
 
 function put(ent)
+	log("data.put:")
 	apis()
 	count=count+0.5
 	
@@ -54,12 +60,14 @@ function put(ent)
 end
 
 function get(ent)
+	log("data.get:")
 	apis()
 	count=count+0.5
 --	return apie(core.get(nil,ent))
 end
 
 function query(q)
+	log("data.query:")
 	apis()
 	count=count+1
 --log(tostring(q))	
@@ -91,6 +99,7 @@ end
 --
 -----------------------------------------------------------------------------
 function begin()
+	log("data.begin:")
 --[[
 	local t={}
 	t.core=core.begin()
@@ -146,6 +155,7 @@ end
 --
 -----------------------------------------------------------------------------
 function build_cache(e)
+	log("data.build_cache:")
 --[[
 	if e.props.json then -- expand the json data
 	
@@ -180,6 +190,7 @@ end
 --
 -----------------------------------------------------------------------------
 function build_props(e)
+	log("data.build_props:")
 --[[
 	local t={}
 	local ignore={kind=true,id=true,parent=true,json=true,} -- special names to ignore
@@ -208,6 +219,7 @@ end
 --
 --------------------------------------------------------------------------------
 function def_create(env,srv)
+	log("data.def_create:")
 --[[
 	local ent={}
 	
@@ -244,6 +256,7 @@ end
 --
 --------------------------------------------------------------------------------
 function def_put(env,srv,ent,tt)
+	log("data.def_put:")
 --[[
 	t=tt or dat -- use transaction?
 
@@ -272,6 +285,7 @@ end
 --
 --------------------------------------------------------------------------------
 function def_get(env,srv,id,tt)
+	log("data.def_get:")
 --[[
 	local ent=id
 	
@@ -310,6 +324,7 @@ end
 --
 --------------------------------------------------------------------------------
 function def_update(env,srv,id,f)
+	log("data.def_update:")
 --[[
 	if type(id)=="table" then id=id.key.id end -- can turn an entity into an id
 		
@@ -348,6 +363,7 @@ end
 --
 --------------------------------------------------------------------------------
 function def_manifest(env,srv,id,f)
+	log("data.def_manifest:")
 --[[
 	if type(id)=="table" then id=id.key.id end -- can turn an entity into an id
 		
@@ -413,8 +429,7 @@ end
 --------------------------------------------------------------------------------
 function def_cache_fix(env,srv,mc)
 	for n,b in pairs(mc) do
---log(n,b)
---		cache.del(srv,n)
+		cache.del(srv,n)
 	end
 end
 
