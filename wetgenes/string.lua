@@ -49,7 +49,8 @@ function str_split(div,str,flag)
 
 	return arr
 end
-
+--  yeah the above is bad and should be turned into this
+function split(str,div,flag) return str_split(div,str,flag) end
 
 
 

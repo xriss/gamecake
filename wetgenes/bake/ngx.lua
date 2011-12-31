@@ -115,8 +115,6 @@ http {
 lua_package_path  './lua/?.lua;./lua/?/init.lua;;';
 lua_package_cpath ';;';
 
-log_format err ‘$msec $status‘;
-
   server {
 
       access_log  logs/access.log;
