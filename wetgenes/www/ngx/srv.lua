@@ -45,7 +45,22 @@ function new()
 	
 	srv.ip=ngx.var.remote_addr -- users IP
 	
-	srv.url=ngx.var.uri -- the url requested (not including any query string)
+
+
+	local scheme=ngx.var.scheme			-- http or https
+	local domain=ngx.var.server_name
+	local port=ngx.var.server_port
+	local uri=ngx.var.uri				-- begins with /
+	
+	if port and port~="80" then
+	
+		srv.url=scheme.."://"..domain..":"..port..uri -- the url requested (not including any query string)
+
+	else
+
+		srv.url=scheme.."://"..domain..uri -- the url requested (not including any query string)
+
+	end
 	
 	srv.query=ngx.var.args -- the query string
 	

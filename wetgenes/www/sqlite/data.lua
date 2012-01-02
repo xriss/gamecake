@@ -65,8 +65,8 @@ end
 
 
 function del(ent,t)
+--	log(wstr.serialize(ent))
 	log("data.del:",ent.key.kind)
-	log(wstr.serialize(ent))
 	apis()
 	
 	count=count+0.5
@@ -77,8 +77,8 @@ function del(ent,t)
 end
 
 function put(ent,t)
+--	log(wstr.serialize(ent))
 	log("data.put:",ent.key.kind)
-	log(wstr.serialize(ent))
 	apis()
 	count=count+0.5
 
@@ -88,7 +88,7 @@ function put(ent,t)
 end
 
 function get(ent,t)
-	log(wstr.serialize(ent))
+--	log(wstr.serialize(ent))
 	log("data.get:",ent.key.kind)
 	apis()
 	count=count+0.5
@@ -507,12 +507,13 @@ function setup_db(env,srv)
 
 
 	local db=getdb(kind)
-	
+
+-- all data has these fields	
 	local info={
 		{name="id",INTEGER=true,PRIMARY=true},
-		{name="json",TEXT=true},
 		{name="created",INTEGER=true},
 		{name="updated",INTEGER=true},
+		{name="json",TEXT=true},
 	}
 	
 --check if is already added

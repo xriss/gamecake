@@ -202,7 +202,9 @@ function set_info(db,name,info)
 		end
 	end
 	
-	print(table.concat(t))
-	exec(db,table.concat(t))
+	if t[1] then -- something to do
+--		print(table.concat(t))
+		exec(db,table.concat(t))
+	end
 	
 end
