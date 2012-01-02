@@ -19,20 +19,23 @@ function new()
 		ngx.print(...)
 	end
 	
-	srv.set_header=function(...)
-		log("srv.set_header:",...)
+	srv.set_header=function(n,v)
+--		log("srv.set_header:",n,"=",v)
+		ngx.header[n] = v;
 	end
 	
-	srv.set_mimetype=function(...)
-		log("srv.set_mimetype:",...)
+	srv.set_mimetype=function(v)	
+		srv.set_header("content_type",v)
+--		log("srv.set_mimetype:",v)
 	end
 	
 	srv.set_cookie=function(...)
 		log("srv.set_cookie:",...)
 	end
 
-	srv.redirect=function(...)
-		log("srv.redirect:",...)
+	srv.redirect=function(url)
+		log("srv.redirect:",url)
+		return ngx.redirect(url)
 	end
 
 	srv.reloadcache=function(...)
