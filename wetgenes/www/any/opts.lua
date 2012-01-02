@@ -1,19 +1,8 @@
+-- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local dat=require("wetgenes.www.any.data")
 local cache=require("wetgenes.www.any.cache")
-
-local math=math
-local string=string
-local table=table
-local os=os
-
-local ipairs=ipairs
-local pairs=pairs
-local tostring=tostring
-local tonumber=tonumber
-local type=type
-local pcall=pcall
-local loadstring=loadstring
 
 
 -- a place to keep options such as passwords that
@@ -23,17 +12,26 @@ local loadstring=loadstring
 -- data is kept in the datastore and also cached in the memcache (todo)
 
 module("wetgenes.www.any.opts")
+local _M=require(...)
 
---------------------------------------------------------------------------------
---
--- serving flavour can be used to create a subgame of a different flavour
--- make sure we incorporate flavour into the name of our stored data types
---
---------------------------------------------------------------------------------
+default_props=
+{
+	flavour="",
+	email  ="", -- this is a duplicate of the userid or a real email
+	name   ="",
+	parent ="", -- set to a parent userid for linked accounts
+	ip="", -- last known ip or blank if unknown
+}
+
+default_cache=
+{
+}
+
 function kind()
 	return "opts"
 end
 
+--[[
 --------------------------------------------------------------------------------
 --
 -- Create a new local entity filled with initial data
@@ -60,6 +58,7 @@ function create()
 
 	return check(ent)
 end
+]]
 
 --------------------------------------------------------------------------------
 --
@@ -67,7 +66,7 @@ end
 -- the second return value is false if this is not a valid entity
 --
 --------------------------------------------------------------------------------
-function check(ent)
+function check(srv,ent)
 
 	local ok=true
 
@@ -76,6 +75,7 @@ function check(ent)
 	return ent,ok
 end
 
+--[[
 --------------------------------------------------------------------------------
 --
 -- Save to database
@@ -100,8 +100,9 @@ function put(ent,t)
 
 	return ks -- return the keystring which is an absolute name
 end
+]]
 
-
+--[[
 --------------------------------------------------------------------------------
 --
 -- Load from database, pass in id or entity
@@ -124,7 +125,7 @@ function get(id,t)
 	
 	return check(ent)
 end
-
+]]
 
 --------------------------------------------------------------------------------
 --
@@ -132,7 +133,7 @@ end
 --
 --------------------------------------------------------------------------------
 function get_dat(id)
-	local e=get(id,t)
+	local e=get(nil,id,t)
 	if e then return e.cache.dat end
 	return nil
 end
@@ -142,10 +143,15 @@ end
 --
 --------------------------------------------------------------------------------
 function put_dat(id,dat)
-	local e=create()
+	local e=create(nil)
 	e.key.id=id
 	e.cache.dat=dat
-	local r=put(e)
+	local r=put(nil,e)
 	
 	return r
 end
+
+
+
+dat.set_defs(_M) -- create basic data handling funcs
+dat.setup_db(_M) -- make sure DB exists and is ready

@@ -3,8 +3,14 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local log=require("wetgenes.www.any.log").log
 
+
+local sql=require("sqlite")
+local wstr=require("wetgenes.string")
+local wsql=require("wetgenes.www.sqlite")
+
+
 module(...)
-local dat=require(...) -- us
+local wdata=require(...) -- this is us
 local cache=require("wetgenes.www.any.cache")
 
 
@@ -25,16 +31,32 @@ local function apie(...)
 	return ...
 end
 
+local prefix="sqlite/"
+local postfix=".sqlite"
 
+function getdb(kind)
+
+-- at this point we can choose to return a single database no matter what the kind
+-- or open a seperate one for each kind which might make more sense
+
+	db=wsql.open(wsql.dbs,prefix,kind,postfix)
+	return db
+end
 
 function keyinfo(keystr)
-	log("data.keyinfo:")
+--	log("data.keyinfo:")
+	
+	local t=wstr.split(keystr,"/")
+	
+	return {kind=t[1],id=t[2]}
 	
 --	return core.keyinfo(keystr)
 end
 
 function keystr(kind,id,parent)
-	log("data.keystr:")
+--	log("data.keystr:")
+	
+	return kind.."/"..id
 
 --	return core.keystr(kind,id,parent)
 
@@ -42,37 +64,54 @@ end
 
 
 
-function del(ent)
-	log("data.del:")
+function del(ent,t)
+	log("data.del:",ent.key.kind)
+	log(wstr.serialize(ent))
 	apis()
 	
 	count=count+0.5
+	
+	local db=getdb(ent.key.kind)
 	
 --	return apie(core.del(nil,ent))
 end
 
-function put(ent)
-	log("data.put:")
+function put(ent,t)
+	log("data.put:",ent.key.kind)
+	log(wstr.serialize(ent))
 	apis()
 	count=count+0.5
+
+	local db=getdb(ent.key.kind)
 	
 --	return apie(core.put(nil,ent))
 end
 
-function get(ent)
-	log("data.get:")
+function get(ent,t)
+	log(wstr.serialize(ent))
+	log("data.get:",ent.key.kind)
 	apis()
 	count=count+0.5
+
+	local db=getdb(ent.key.kind)
+
 --	return apie(core.get(nil,ent))
 end
 
-function query(q)
+function query(q,t)
 	log("data.query:")
 	apis()
 	count=count+1
 --log(tostring(q))	
 
+	local db=getdb(ent.key.kind)
+
 --	return apie(core.query(nil,q))
+end
+
+function rollback(t)
+end
+function commit(t)
 end
 
 -----------------------------------------------------------------------------
@@ -100,41 +139,39 @@ end
 -----------------------------------------------------------------------------
 function begin()
 	log("data.begin:")
---[[
+
 	local t={}
-	t.core=core.begin()
+--	t.core=core.begin()
 	
 	t.fail=false -- this will be set to true when a transaction action fails and you should rollback and retry
 	t.done=false -- set to true on commit or rollback to disable all methods
 	
  -- these methods are the same as the global ones but operate on this transaction
- 	t.del=function(ent)	if t.fail or t.done then return nil end apis() return apie(core.del(t,ent)) end
-	t.put=function(ent)	if t.fail or t.done then return nil end apis() return apie(core.put(t,ent)) end
-	t.get=function(ent)	if t.fail or t.done then return nil end apis() return apie(core.get(t,ent)) end
-	t.query=function(q)	if t.fail or t.done then return nil end apis() return apie(core.query(t,q)) end
+ 	t.del=function(ent)	if t.fail or t.done then return nil end return del(ent,t) end
+	t.put=function(ent)	if t.fail or t.done then return nil end return put(ent,t) end
+	t.get=function(ent)	if t.fail or t.done then return nil end return get(ent,t) end
+	t.query=function(q)	if t.fail or t.done then return nil end return query(q,t) end
 	
 	t.rollback=function() -- returns false to imply that nothing was commited
 		if t.done then return false end -- safe to rollback repeatedly
 		t.done=true
-		apis()
-		t.fail=not apie(core.rollback(t.core)) -- we always set fail and return false
+		t.fail=not rollback(t) -- we always set fail and return false
 		return not t.fail
 	end	
 	
 	t.commit=function() -- returns true if commited, false if not
 		if t.done then return false end -- safe to rollback repeatedly
 		if t.fail then -- rollback rather than commit
-			apis()
-			return apie(t.rollback())
+			return rollback(t)
 		end
 		t.done=true
 		apis()
-		t.fail=not apie(core.commit(t.core))
+		t.fail=not commit(t)
 		return not t.fail
 	end
 
 	return t
-]]
+
 end
 
 
@@ -217,8 +254,7 @@ end
 --
 --------------------------------------------------------------------------------
 function def_create(env,srv)
-	log("data.def_create:")
---[[
+
 	local ent={}
 	
 	ent.key={kind=env.kind(srv)} -- we will not know the key id until after we save
@@ -226,14 +262,14 @@ function def_create(env,srv)
 	
 	local p=ent.props
 	
-	p.created=srv.time
-	p.updated=srv.time
+	p.created=srv and srv.time or os.time() -- allow srv to be nil
+	p.updated=srv and srv.time or p.created
 	
 	for i,v in pairs(env.default_props or {}) do
 		p[i]=v
 	end
 
-	dat.build_cache(ent) -- this just copies the props across
+	wdata.build_cache(ent) -- this just copies the props across
 	
 -- these are json only vars
 	local c=ent.cache
@@ -243,7 +279,7 @@ function def_create(env,srv)
 	end
 
 	return env.check(srv,ent)
-]]
+
 end
 
 --------------------------------------------------------------------------------
@@ -255,24 +291,23 @@ end
 --------------------------------------------------------------------------------
 function def_put(env,srv,ent,tt)
 	log("data.def_put:")
---[[
-	t=tt or dat -- use transaction?
+	
+	t=tt or wdata -- use transaction?
 
 	local _,ok=env.check(srv,ent) -- check that this is valid to put
 	if not ok then return nil end
 
-	dat.build_props(ent)
+	wdata.build_props(ent)
 	local ks=t.put(ent)
 	
 	if ks then
-		ent.key=dat.keyinfo( ks ) -- update key with new id
-		dat.build_cache(ent)
+		ent.key=wdata.keyinfo( ks ) -- update key with new id
+		wdata.build_cache(ent)
 		
 		if not tt then env.cache_fix(srv,env.cache_what(srv,ent)) end -- destroy any cache if not in transaction
 	end
 
 	return ks -- return the keystring which is an absolute name
-]]
 end
 
 
@@ -284,7 +319,9 @@ end
 --------------------------------------------------------------------------------
 function def_get(env,srv,id,tt)
 	log("data.def_get:")
---[[
+	
+	if not id then return nil end
+
 	local ent=id
 	
 	if type(ent)~="table" then -- get by id
@@ -298,17 +335,17 @@ function def_get(env,srv,id,tt)
 		if ent then return env.check(srv,json.decode(ent)) end -- Yay, we got a cached value
 	end
 	
-	local t=tt or dat -- use transaction?
+	local t=tt or wdata -- use transaction?
 	
 	if not t.get(ent) then return nil end	
-	dat.build_cache(ent)
+	wdata.build_cache(ent)
 	
 	if not tt then -- auto cache ent for one hour
 		cache.put(srv,ck,json.encode(ent),60*60)
 	end
 	
 	return env.check(srv,ent)
-]]
+
 end
 
 
@@ -323,12 +360,12 @@ end
 --------------------------------------------------------------------------------
 function def_update(env,srv,id,f)
 	log("data.def_update:")
---[[
+
 	if type(id)=="table" then id=id.key.id end -- can turn an entity into an id
 		
 	for retry=1,10 do
 		local mc={}
-		local t=dat.begin()
+		local t=wdata.begin()
 		local e=env.get(srv,id,t) -- must exist
 		if e then
 			env.cache_what(srv,e,mc) -- the original values
@@ -348,7 +385,7 @@ function def_update(env,srv,id,f)
 		end
 		t.rollback() -- undo everything ready to try again
 	end
-]]
+	
 end
 
 --------------------------------------------------------------------------------
@@ -362,12 +399,12 @@ end
 --------------------------------------------------------------------------------
 function def_manifest(env,srv,id,f)
 	log("data.def_manifest:")
---[[
+
 	if type(id)=="table" then id=id.key.id end -- can turn an entity into an id
 		
 	for retry=1,10 do
 		local mc={}
-		local t=dat.begin()
+		local t=wdata.begin()
 		local e=env.get(srv,id,t) -- may or may not exist
 		if e then
 			env.cache_what(srv,e,mc) -- the original values
@@ -390,7 +427,7 @@ function def_manifest(env,srv,id,f)
 		end
 		t.rollback() -- undo everything ready to try again
 	end
-]]
+
 end
 
 --------------------------------------------------------------------------------
@@ -460,4 +497,46 @@ function set_defs(env)
 	return env
 end
 
+function setup_db(env,srv)
 
+-- make sure database exists and is setup
+
+	local kind=env.kind()
+
+	log("data.setup_db:",kind)
+
+
+	local db=getdb(kind)
+	
+	local info={
+		{name="id",INTEGER=true,PRIMARY=true},
+		{name="json",TEXT=true},
+		{name="created",INTEGER=true},
+		{name="updated",INTEGER=true},
+	}
+	
+--check if is already added
+	local function in_table(tab,name)
+		for i,v in ipairs(tab) do
+			if v.name==name then return true end
+		end
+	end
+	
+		
+	for n,v in pairs(env.default_props) do
+		if not in_table(info,n) then -- add to table, simple check for dupes just in case.
+			local t={name=n}
+			if tp=="number" then -- only have numbers or strings and numbers are real
+				t.REAL=true
+			else
+				t.TEXT=true
+			end
+			info[#info+1]=t
+		end
+	end
+	
+
+-- check or update database
+	wsql.set_info(db,kind,info)
+	
+end

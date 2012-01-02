@@ -2,11 +2,41 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local log=print
---local log=require("wetgenes.www.any.log").log
+
+if ngx then
+	log=require("wetgenes.www.any.log").log
+end
 
 local sql=require("sqlite")
 local wstr=require("wetgenes.string")
+
 module(...)
+
+dbs={} -- tooglobal?pass in this or your own to the funcs anyhow
+
+function open(dbs,prefix,name,postfix) -- multiple opens are ok and get you the same db
+
+	local db=dbs[name]
+	
+	if db then return db end -- already open
+	
+	db=assert(sql.open(prefix..name..postfix))
+
+	set_pragmas(db) -- always run this
+
+	return db
+	
+end
+
+function close(dbs,name)
+
+	local db=dbs[name]
+	
+	if db then
+		sb:close()
+		dbs[name]=nil
+	end
+end
 
 -- setup pragmas, should run this after opening a db
 function set_pragmas(db)
@@ -46,7 +76,10 @@ function rows(db,s)
 	return d
 end
 
-
+-- get first row the sql requests
+function row(db,s)
+	return rows(db,s)[1]
+end
 
 -- get info about a table, this can only work if WE created the table
 function get_info(db,name)
@@ -62,6 +95,7 @@ function get_info(db,name)
 	
 -- grab the bit in brackets
 	local _,_,s=string.find(d[1].sql,"%((.*)%)")
+--print(s)
 -- and split it by commas
 	local a=wstr.split(s,",")
 	
@@ -75,6 +109,7 @@ function get_info(db,name)
 		local c=wstr.split_words(v)
 --		print(wstr.serialize(c))
 		local d={}
+		for i,v in ipairs(c) do d[v]=flags[v] and c[i+flags[v]] end -- set flags only if we recognise them
 		local cmd=false
 		for i,v in ipairs(flags) do if c[1]:sub(1,#v)==v then cmd=v end end
 		if cmd then
@@ -83,12 +118,10 @@ function get_info(db,name)
 			d.name=c[1] -- set the name
 		end
 
-		for i,v in ipairs(c) do d[v]=flags[v] and c[i+flags[v]] end -- set flags only if we recognise them
-
 		tab[i]=d
 	end
 	
-	print(wstr.serialize(tab))
+--	print(wstr.serialize(tab))
 	return tab
 end
 
@@ -102,7 +135,7 @@ end
 function set_info(db,name,info)
 
 
-	print(wstr.serialize(info))
+--	print(wstr.serialize(info))
 
 	old=get_info(db,name)
 
@@ -118,10 +151,10 @@ function set_info(db,name,info)
 				p(" INTEGER")
 			elseif t.REAL then
 				p(" REAL")
-			elseif t.REAL then
+			elseif t.TEXT then
 				p(" TEXT")
-			elseif t.REAL then
-				p(" BLOG")
+			elseif t.BLOB then
+				p(" BLOB")
 			end
 			if t.PRIMARY then
 				p(" PRIMARY KEY")
@@ -129,7 +162,7 @@ function set_info(db,name,info)
 				p(" UNIQUE")
 			end
 			if t.DEFAULT then
-				p(" DEFAULT ",t.DEFAULT)
+				p(" DEFAULT ",t.DEFAULT) --- Only numbers? ...dont want defaults anyhow...
 			end
 		end
 	end
