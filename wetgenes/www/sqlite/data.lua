@@ -8,6 +8,7 @@ local sql=require("sqlite")
 local wstr=require("wetgenes.string")
 local wsql=require("wetgenes.www.sqlite")
 
+local json=require("wetgenes.json")
 
 local fixvalue=wsql.fixvalue
 
@@ -48,22 +49,12 @@ function getdb(kind)
 end
 
 function keyinfo(keystr)
---	log("data.keyinfo:")
-	
-	local t=wstr.split(keystr,"/")
-	
+	local t=wstr.split(keystr,"/")	
 	return {kind=t[1],id=tonumber(t[2])}
-	
---	return core.keyinfo(keystr)
 end
 
 function keystr(kind,id,parent)
---	log("data.keystr:")
-	
 	return kind.."/"..id
-
---	return core.keystr(kind,id,parent)
-
 end
 
 
@@ -80,12 +71,16 @@ function del(ent,t)
 	
 	local db=getdb(kind)
 
-	local s="DELETE FROM "..kind.." WHERE id="..fixvalue(id)..";\n"
-	
+	local s
+	if type(id)=="number" then
+		s="DELETE FROM "..kind.." WHERE ROWID="..fixvalue(id)..";\n"
+	else
+		s="DELETE FROM "..kind.." WHERE id="..fixvalue(id)..";\n"
+	end
 log(s)
 	ret=wsql.exec(db,s)
 	apie()
-	return ret
+	return true
 end
 
 function put(ent,t)
@@ -99,12 +94,16 @@ function put(ent,t)
 
 	local db=getdb(kind)
 	
-	local s=make_replace(kind,ent.props)
+	local s=wsql.make_replace(kind,ent.props)
 	
 log(s)
 	ret=wsql.exec(db,s)
+	id=id or db:last_insert_rowid() -- get the new id, unless we forced it
+	
+	ent.key.id=id -- fix id
+	
 	apie()
-	return ret
+	return keystr(kind,id)
 end
 
 function get(ent,t)
@@ -118,17 +117,26 @@ function get(ent,t)
 
 	local db=getdb(kind)
 
-	local s="SELECT * FROM "..kind.." WHERE id="..fixvalue(id)..";\n"
+	local s
+	if type(id)=="number" then
+		s="SELECT * FROM "..kind.." WHERE ROWID="..fixvalue(id)..";\n"
+	else
+		s="SELECT * FROM "..kind.." WHERE id="..fixvalue(id)..";\n"
+	end
 
 log(s)
-	ret=wsql.row(db,s)
+	ent.props=wsql.row(db,s)
 	
-	apie()
-	return ret
+if ent.props then
+	log(wstr.serialize(ent.props))
 end
 
-function query(q,t)
-	local kind=fixkind(ent and ent.key and ent.key.kind)
+	apie()
+	return ent.props and ent
+end
+
+function query(q)
+	local kind=fixkind(q and q.kind)
 	local ret
 	log("data.query:")
 	apis()
@@ -138,12 +146,13 @@ function query(q,t)
 	local db=getdb(kind)
 
 	apie()
-	return ret
+	return {list={}}
 end
 
 function rollback(t)
 end
 function commit(t)
+	return true
 end
 
 -----------------------------------------------------------------------------
@@ -244,7 +253,7 @@ function build_cache(e)
 	if e.key then -- copy the key data
 		e.cache.parent=e.key.parent
 		e.cache.kind=e.key.kind
-		e.cache.id=e.key.id
+		e.cache.id=e.props.id or e.key.id -- use string or ROWID?
 	end
 	
 	return e
@@ -271,6 +280,14 @@ function build_props(e)
 		end
 	end
 	e.props.json=json.encode(t)
+
+	if e.key.id then
+		if type(e.key.id)=="number" then
+			e.props.ROWID=e.key.id -- use number id from key
+		else
+			e.props.id=e.key.id -- use string id from key
+		end
+	end
 	
 	return e
 	
@@ -431,6 +448,8 @@ end
 --------------------------------------------------------------------------------
 function def_manifest(env,srv,id,f)
 	log("data.def_manifest:")
+	
+	f=f or env.default_manifest
 
 	if type(id)=="table" then id=id.key.id end -- can turn an entity into an id
 		
@@ -482,7 +501,9 @@ end
 function def_cache_what(env,srv,ent,mc)
 	local mc=mc or {} -- can supply your own result table for merges	
 	
-	mc[ env.cache_key(srv,ent.key.id) ] = true
+	if ent.key.id then
+		mc[ env.cache_key(srv,ent.key.id) ] = true
+	end
 	
 	return mc
 end
@@ -542,9 +563,9 @@ function setup_db(env,srv)
 
 -- all data has these fields	
 	local info={
-		{name="id",INTEGER=true,PRIMARY=true},
-		{name="created",INTEGER=true},
-		{name="updated",INTEGER=true},
+		{name="id",TEXT=true,UNIQUE=true},
+		{name="created",REAL=true},
+		{name="updated",REAL=true},
 		{name="json",TEXT=true},
 	}
 	

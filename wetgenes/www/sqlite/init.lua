@@ -28,6 +28,8 @@ function open(dbs,prefix,kind,postfix) -- multiple opens are ok and get you the 
 
 	set_pragmas(db) -- always run this
 
+
+	dbs[kind]=db -- remember
 	return db
 	
 end
@@ -59,7 +61,7 @@ end
 
 -- wrap db:exec with an error checker
 function exec(db,s,f,d)
-
+--log(s)
 	if 	db:exec(s,f,d)~=sql.OK then error(db:errmsg()) end
 
 end
@@ -68,16 +70,18 @@ end
 function rows(db,s)
 
 	local d={}
-	local f=function(d,count,v,n)
-		for i=1,count do
-			dd={}
-			dd[ n[i] ]=v[i]
-			d[#d+1]=dd
-		end
-		return 0
+--	local f=function(d,count,v,n)
+--		local dd={}
+--		d[#d+1]=dd
+--		for i=1,count do dd[ n[i] ]=v[i] end
+--		return 0
+--	end
+	
+	for r in db:nrows(s) do
+		d[#d+1]=r
 	end
 
-	if 	db:exec(s,f,d)~=sql.OK then error(db:errmsg()) end
+--	if 	db:exec(s,f,d)~=sql.OK then error(db:errmsg()) end
 
 	return d
 end
@@ -124,6 +128,7 @@ function get_info(db,kind)
 			d.cmd=c[1] -- set the command
 		else -- a named column
 			d.name=c[1] -- set the name
+			if d.name:sub(1,1)=="'" then d.name=d.name:sub(2,-2) end -- strip quotes
 		end
 
 		tab[i]=d
@@ -155,7 +160,7 @@ function set_info(db,kind,info)
 -- add a column
 	local function pdef(t)
 		if t.name then
-			p(t.name)
+			p("'"..t.name.."'")
 			if t.INTEGER then
 				p(" INTEGER")
 			elseif t.REAL then
@@ -241,7 +246,7 @@ function make_values(tab)
 	local ds={}
 	for n,d in pairs(tab) do
 		if type(d)=="string" then d=escape(d) end
-		ns[#ns+1]=n
+		ns[#ns+1]="'"..n.."'"
 		ds[#ds+1]=d
 	end
 
@@ -258,7 +263,7 @@ function make_valueset(tab)
 	local ss={}
 	for n,d in pairs(tab) do
 		if type(d)=="string" then d=escape(d) end
-		ss[#ss+1]=n.."="..d
+		ss[#ss+1]="'"..n.."'="..d
 	end
 
 	return table.concat(ss,",")
