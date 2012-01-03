@@ -9,6 +9,8 @@ local wstr=require("wetgenes.string")
 local wsql=require("wetgenes.www.sqlite")
 
 
+local fixvalue=wsql.fixvalue
+
 module(...)
 local wdata=require(...) -- this is us
 local cache=require("wetgenes.www.any.cache")
@@ -34,12 +36,14 @@ end
 local prefix="sqlite/"
 local postfix=".sqlite"
 
+local function fixkind(kind) return kind:gsub("%p","_") end
+
 function getdb(kind)
 
 -- at this point we can choose to return a single database no matter what the kind
 -- or open a seperate one for each kind which might make more sense
 
-	db=wsql.open(wsql.dbs,prefix,kind,postfix)
+	db=wsql.open(wsql.dbs,prefix,fixkind(kind),postfix)
 	return db
 end
 
@@ -48,7 +52,7 @@ function keyinfo(keystr)
 	
 	local t=wstr.split(keystr,"/")
 	
-	return {kind=t[1],id=t[2]}
+	return {kind=t[1],id=tonumber(t[2])}
 	
 --	return core.keyinfo(keystr)
 end
@@ -65,48 +69,76 @@ end
 
 
 function del(ent,t)
+	local kind=fixkind(ent and ent.key and ent.key.kind)
+	local id=ent and ent.key and ent.key.id
+	local ret
 --	log(wstr.serialize(ent))
-	log("data.del:",ent.key.kind)
+	log("data.del:",kind)
 	apis()
 	
 	count=count+0.5
 	
-	local db=getdb(ent.key.kind)
+	local db=getdb(kind)
+
+	local s="DELETE FROM "..kind.." WHERE id="..fixvalue(id)..";\n"
 	
---	return apie(core.del(nil,ent))
+log(s)
+	ret=wsql.exec(db,s)
+	apie()
+	return ret
 end
 
 function put(ent,t)
+	local kind=fixkind(ent and ent.key and ent.key.kind)
+	local id=ent and ent.key and ent.key.id
+	local ret
 --	log(wstr.serialize(ent))
-	log("data.put:",ent.key.kind)
+	log("data.put:",kind)
 	apis()
 	count=count+0.5
 
-	local db=getdb(ent.key.kind)
+	local db=getdb(kind)
 	
---	return apie(core.put(nil,ent))
+	local s=make_replace(kind,ent.props)
+	
+log(s)
+	ret=wsql.exec(db,s)
+	apie()
+	return ret
 end
 
 function get(ent,t)
+	local kind=fixkind(ent and ent.key and ent.key.kind)
+	local id=ent and ent.key and ent.key.id
+	local ret
 --	log(wstr.serialize(ent))
-	log("data.get:",ent.key.kind)
+	log("data.get:",kind)
 	apis()
 	count=count+0.5
 
-	local db=getdb(ent.key.kind)
+	local db=getdb(kind)
 
---	return apie(core.get(nil,ent))
+	local s="SELECT * FROM "..kind.." WHERE id="..fixvalue(id)..";\n"
+
+log(s)
+	ret=wsql.row(db,s)
+	
+	apie()
+	return ret
 end
 
 function query(q,t)
+	local kind=fixkind(ent and ent.key and ent.key.kind)
+	local ret
 	log("data.query:")
 	apis()
 	count=count+1
 --log(tostring(q))	
 
-	local db=getdb(ent.key.kind)
+	local db=getdb(kind)
 
---	return apie(core.query(nil,q))
+	apie()
+	return ret
 end
 
 function rollback(t)

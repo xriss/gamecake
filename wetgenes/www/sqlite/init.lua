@@ -10,17 +10,21 @@ end
 local sql=require("sqlite")
 local wstr=require("wetgenes.string")
 
+local function fixkind(kind) return kind:gsub("%p","_") end
+
 module(...)
 
 dbs={} -- tooglobal?pass in this or your own to the funcs anyhow
 
-function open(dbs,prefix,name,postfix) -- multiple opens are ok and get you the same db
+function open(dbs,prefix,kind,postfix) -- multiple opens are ok and get you the same db
 
-	local db=dbs[name]
+	kind=fixkind(kind)
+
+	local db=dbs[kind]
 	
 	if db then return db end -- already open
 	
-	db=assert(sql.open(prefix..name..postfix))
+	db=assert(sql.open(prefix..kind..postfix))
 
 	set_pragmas(db) -- always run this
 
@@ -28,13 +32,15 @@ function open(dbs,prefix,name,postfix) -- multiple opens are ok and get you the 
 	
 end
 
-function close(dbs,name)
+function close(dbs,kind)
 
-	local db=dbs[name]
+	kind=fixkind(kind)
+
+	local db=dbs[kind]
 	
 	if db then
 		sb:close()
-		dbs[name]=nil
+		dbs[kind]=nil
 	end
 end
 
@@ -82,16 +88,18 @@ function row(db,s)
 end
 
 -- get info about a table, this can only work if WE created the table
-function get_info(db,name)
+function get_info(db,kind)
+
+	kind=fixkind(kind)
 
 --[[
 	local d=rows(db,"PRAGMA table_info('"..name.."')");
 	print(wstr.serialize(d))
 ]]
 
-	local d=rows(db,"select sql from sqlite_master where name = '"..name.."';")
+	local d=rows(db,"select sql from sqlite_master where name = '"..kind.."';")
 	
-	if not d[1] then return end -- no table of the given name exists
+	if not d[1] then return end -- no table of the given kind exists
 	
 -- grab the bit in brackets
 	local _,_,s=string.find(d[1].sql,"%((.*)%)")
@@ -132,12 +140,13 @@ end
 --
 -- in general it should be safe to add columns to the end of the info and call this again
 -- so we can modify existing tabs
-function set_info(db,name,info)
+function set_info(db,kind,info)
 
+	kind=fixkind(kind)
 
 --	print(wstr.serialize(info))
 
-	old=get_info(db,name)
+	old=get_info(db,kind)
 
 -- build the sql string we need to run	
 	local t={}
@@ -176,7 +185,7 @@ function set_info(db,name,info)
 	
 	if not old then -- create new
 	
-		p("CREATE TABLE "..name.."( ")
+		p("CREATE TABLE "..kind.."( ")
 		for i,v in ipairs(info) do
 			if i>1 then p(" , ") end
 			pdef(v)
@@ -195,7 +204,7 @@ function set_info(db,name,info)
 
 		if ch then
 			for i,v in ipairs(ch) do
-				p("ALTER TABLE "..name.." ADD COLUMN ")
+				p("ALTER TABLE "..kind.." ADD COLUMN ")
 				pdef(v)
 				p(" ;\n")
 			end
@@ -208,3 +217,109 @@ function set_info(db,name,info)
 	end
 	
 end
+
+
+
+-----------------------------------------------------------------------------
+--
+-- escape a string for sqlite use
+--
+-----------------------------------------------------------------------------
+function escape(s)
+	return "'"..s:gsub("'","''").."'"
+end
+
+
+-----------------------------------------------------------------------------
+--
+-- turn a table into a string of values
+--
+-----------------------------------------------------------------------------
+function make_values(tab)
+
+	local ns={}
+	local ds={}
+	for n,d in pairs(tab) do
+		if type(d)=="string" then d=escape(d) end
+		ns[#ns+1]=n
+		ds[#ds+1]=d
+	end
+
+	return "("..table.concat(ns,",")..")".." VALUES ("..table.concat(ds,",")..")"
+end
+
+-----------------------------------------------------------------------------
+--
+-- turn a table into a string of sets
+--
+-----------------------------------------------------------------------------
+function make_valueset(tab)
+
+	local ss={}
+	for n,d in pairs(tab) do
+		if type(d)=="string" then d=escape(d) end
+		ss[#ss+1]=n.."="..d
+	end
+
+	return table.concat(ss,",")
+end
+
+function fixvalue(v)
+	if type(v)=="string" then
+		return escape(v)
+	else
+		return tonumber(v)
+	end
+end
+
+-----------------------------------------------------------------------------
+--
+-- insert or update data on clash, similar format to the lanes returned info
+-- this function doesnt do anything it just builds a queery string that will
+--
+-- name == table name
+-- tab == data to insert
+--
+-- this is a single insert or update, so there is only one row
+--
+-- any previous values not in the tab be lost, use update to only change some values
+--
+-----------------------------------------------------------------------------
+function make_replace(name,tab)
+	return "REPLACE INTO "..name.." "..make_values(tab)..";\n"
+end
+
+-----------------------------------------------------------------------------
+--
+-- insert only, similar format to the lanes returned info
+-- this function doesnt do anything it just builds a queery string that will
+--
+-- name == table name
+-- tab == data to insert
+--
+-- this is a single insert or update, so there is only one row
+--
+-----------------------------------------------------------------------------
+function make_insert(name,tab)
+	return "INSERT INTO "..name.." "..make_values(tab)..";\n"
+end
+
+-----------------------------------------------------------------------------
+--
+-- update only, similar format to the lanes returned info
+-- this function doesnt do anything it just builds a queery string that will
+--
+-- name == table name
+-- tab == data to insert
+-- where == where to update (sql string)
+--
+-- this is a single insert or update, so there is only one row
+--
+-----------------------------------------------------------------------------
+function make_update(name,tab,where)
+
+	return "UPDATE "..name.." SET "..make_valueset(tab).." WHERE "..where..";\n"
+end
+
+
+

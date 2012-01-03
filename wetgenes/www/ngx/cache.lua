@@ -5,6 +5,8 @@ local log=require("wetgenes.www.any.log").log
 
 module(...)
 
+hax={}
+
 
 function countzero()
 	count=0
@@ -27,49 +29,51 @@ end
 function clear(srv)
 	log("cache.clear:")
 	apis()
---	return apie(core.clear())
 
+	hax={}
+
+	apie()
 end
 
 
 function del(srv,id)
 	log("cache.del:")
-	if srv then srv.cache[id]=nil end
 	apis()
---	return apie(core.del(id))
 
+	hax[id]=nil
+
+	apie()
 end
 
 function put(srv,id,tab,ttl)
-	log("cache.put:")
-	if srv then srv.cache[id]=tab end -- this local cache only lasts as long as a request
+	log("cache.put:",id)
 	apis()
---if( type(tab)~="string" ) then log(type(tab).." "..tostring(tab)) end -- it seems to be only safe to cache strings
---	return apie(core.put(id,tab,ttl))
-
+	
+	hax[id]=tab
+	
+	apie()
 end
 
 function get(srv,id)
-	log("cache.get:")
-	if srv and type(srv.cache[id])~="nil" then return srv.cache[id] end -- very fast retry for multiple gets
-	
+	log("cache.get:",id)	
 	apis()
 	count=count+1
 
---	local r=apie(core.get(id))
-
-	if type(r)~="nil" then count_got=count_got+1 end -- a false is still a good result
-
+	r=hax[id]
+log(r)
+	apie()
 	return r
 end
 
 function inc(srv,id,num,start)
-	log("cache.inc:")
+	log("cache.inc:",id)
 	apis()
---	local r=apie(core.inc(id,num,start))
-	
-	if srv then srv.cache[id]=r end -- so we can fast get it later in this request
 
+	local r=(hax[id] or start)+num
+	hax[id]=r
+	
+log(r)
+	apie()
 	return r
 end
 

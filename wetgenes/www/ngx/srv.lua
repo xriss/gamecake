@@ -34,7 +34,7 @@ function new()
 	end
 
 	srv.redirect=function(url)
-		log("srv.redirect:",url)
+--		log("srv.redirect:",url)
 		return ngx.redirect(url)
 	end
 

@@ -26,34 +26,52 @@ end
 
 function bytes_split(bytes,size)
 	log("sys.bytes_split:")
---	return core.bytes_split(bytes,size)
+	
+	local t={}
+	for i=1,#bytes,size do
+		t[#t+1]=bytes:sub(i,i+size-1)
+	end
+	return t
 end
+
 function bytes_join(tab)
 	return table.concat(tab)
---	return core.bytes_join(tab)
 end
 
 function bytes_to_string(bytes)
 	return bytes
---	return core.bytes_to_string(bytes)
 end
 
-function bin_encode(t,b)
+function bin_encode(enc,s)
 	log("sys.bin_encode:")
+
+	if enc=="hex" then
+		r=str_to_hex(s)
+	elseif enc=="base64" then
+		r=b64_enc(s)
+	else
+		r=s
+	end
+	
+	return r 
 --	return core.bin_encode(t,b)
 end
 
-function md5(s,f)
+function md5(s,t)
 	log("sys.md5:")
---	return core.md5(s,f)
+	if f=="bin" then return ngx.md5_bin(s) end
+	return ngx.md5(s)
 end
 function sha1(s,f)
 	log("sys.sha1:")
+--	if f=="bin" then return ngx.sha1_bin(s) end
+--	return ngx.sha1(s)
 --	return core.sha1(s,f)
 end
 function hmac_sha1(k,s,f)
 	log("sys.hmac_sha1:")
---	return core.hmac_sha1(k,s,f)
+	if f=="bin" then return ngx.hmac_sha1(k,s) end
+	return ngx.hmac_sha1(k,s)
 end
 
 function zip_list(z)
@@ -64,6 +82,20 @@ function zip_read(z,n)
 	log("sys.sleep:")
 --	return core.zip_read(z,n)
 end
+
+
+-----------------------------------------------------------------------------
+--
+-- convert a string into a hex string
+--
+-----------------------------------------------------------------------------
+function str_to_hex(s)
+	return string.gsub(s, ".", function (c)
+		return string.format("%02x", string.byte(c))
+	end)
+end
+
+
 
 -----------------------------------------------------------------------------
 --
@@ -109,3 +141,37 @@ function redirect(srv,url)
 
 end
 
+
+
+-- character table string
+local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+-- encoding
+function b64_enc(data)
+    return ((data:gsub('.', function(x) 
+        local r,b='',x:byte()
+        for i=8,1,-1 do r=r..(b%2^i-b%2^(i-1)>0 and '1' or '0') end
+        return r;
+    end)..'0000'):gsub('%d%d%d?%d?%d?%d?', function(x)
+        if (#x < 6) then return '' end
+        local c=0
+        for i=1,6 do c=c+(x:sub(i,i)=='1' and 2^(6-i) or 0) end
+        return b:sub(c+1,c+1)
+    end)..({ '', '==', '=' })[#data%3+1])
+end
+
+-- decoding
+function b64_dec(data)
+    data = string.gsub(data, '[^'..b..'=]', '')
+    return (data:gsub('.', function(x)
+        if (x == '=') then return '' end
+        local r,f='',(b:find(x)-1)
+        for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end
+        return r;
+    end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
+        if (#x ~= 8) then return '' end
+        local c=0
+        for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
+        return string.char(c)
+    end))
+end
