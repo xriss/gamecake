@@ -3,6 +3,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local log=require("wetgenes.www.any.log").log
 
+local wstr=require("wetgenes.string")
+
 module(...)
 
 hax={}
@@ -60,7 +62,7 @@ function get(srv,id)
 	count=count+1
 
 	r=hax[id]
-log(r)
+log(wstr.serialize(r))
 	apie()
 	return r
 end

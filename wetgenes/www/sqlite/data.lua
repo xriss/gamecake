@@ -73,9 +73,9 @@ function del(ent,t)
 
 	local s
 	if type(id)=="number" then
-		s="DELETE FROM "..kind.." WHERE ROWID="..fixvalue(id)..";\n"
+		s="DELETE FROM "..kind.." WHERE ROWID="..fixvalue(id)..";"
 	else
-		s="DELETE FROM "..kind.." WHERE id="..fixvalue(id)..";\n"
+		s="DELETE FROM "..kind.." WHERE id="..fixvalue(id)..";"
 	end
 log(s)
 	ret=wsql.exec(db,s)
@@ -119,9 +119,9 @@ function get(ent,t)
 
 	local s
 	if type(id)=="number" then
-		s="SELECT * FROM "..kind.." WHERE ROWID="..fixvalue(id)..";\n"
+		s="SELECT * FROM "..kind.." WHERE ROWID="..fixvalue(id)..";"
 	else
-		s="SELECT * FROM "..kind.." WHERE id="..fixvalue(id)..";\n"
+		s="SELECT * FROM "..kind.." WHERE id="..fixvalue(id)..";"
 	end
 
 log(s)
@@ -419,7 +419,7 @@ function def_update(env,srv,id,f)
 		if e then
 			env.cache_what(srv,e,mc) -- the original values
 			if e.props.created~=srv.time then -- not a newly created entity
-				if e.cache.updated>=srv.time then t.rollback() return false end -- stop any updates that time travel
+				if e.cache.updated>srv.time then t.rollback() return false end -- stop any updates that time travel
 			end
 			e.cache.updated=srv.time -- the next function can change this change if it wishes
 			if not f(srv,e) then t.rollback() return false end -- hard fail
@@ -439,9 +439,10 @@ end
 
 --------------------------------------------------------------------------------
 --
--- get or create then fill and put, similar to update but will create new data
+-- get or create then fill/update and put, similar to update but will also create new data
 --
 -- f must be a function that fills the entity and returns true on success
+-- env.default_manifest will be used if this is nil
 --
 -- id can be an id or an entity from which we will get the id
 --
@@ -459,7 +460,7 @@ function def_manifest(env,srv,id,f)
 		local e=env.get(srv,id,t) -- may or may not exist
 		if e then
 			env.cache_what(srv,e,mc) -- the original values
-			if e.cache.updated>=srv.time then t.rollback() return false end -- stop any updates that time travel
+			if e.cache.updated>srv.time then t.rollback() return false end -- stop any updates that time travel
 			e.cache.updated=srv.time -- the next function can change this change if it wishes
 			if not f(srv,e) then t.rollback() return e end -- just return orig
 		else

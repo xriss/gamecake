@@ -211,7 +211,7 @@ function set_info(db,kind,info)
 			for i,v in ipairs(ch) do
 				p("ALTER TABLE "..kind.." ADD COLUMN ")
 				pdef(v)
-				p(" ;\n")
+				p(" ;")
 			end
 		end
 	end
@@ -291,7 +291,7 @@ end
 --
 -----------------------------------------------------------------------------
 function make_replace(name,tab)
-	return "REPLACE INTO "..name.." "..make_values(tab)..";\n"
+	return "REPLACE INTO "..name.." "..make_values(tab)..";"
 end
 
 -----------------------------------------------------------------------------
@@ -306,7 +306,7 @@ end
 --
 -----------------------------------------------------------------------------
 function make_insert(name,tab)
-	return "INSERT INTO "..name.." "..make_values(tab)..";\n"
+	return "INSERT INTO "..name.." "..make_values(tab)..";"
 end
 
 -----------------------------------------------------------------------------
@@ -323,7 +323,7 @@ end
 -----------------------------------------------------------------------------
 function make_update(name,tab,where)
 
-	return "UPDATE "..name.." SET "..make_valueset(tab).." WHERE "..where..";\n"
+	return "UPDATE "..name.." SET "..make_valueset(tab).." WHERE "..where..";"
 end
 
 

@@ -132,6 +132,8 @@ local fout=opts.fout
 			fout(opts.indent,"}",opts.newline)
 			return
 		end
+	elseif type(o) == "nil" then	
+		return fout("nil")
 	else
 		error("cannot serialize a " .. type(o))
 	end

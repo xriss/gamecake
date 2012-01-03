@@ -452,4 +452,8 @@ function set_defs(env)
 	return env
 end
 
+--no need for this, so just a stub
+function setup_db(env,srv)
+end
+
 

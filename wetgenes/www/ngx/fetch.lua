@@ -2,6 +2,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local log=require("wetgenes.www.any.log").log
+local ngx=require("ngx")
 
 module(...)
 
@@ -25,18 +26,33 @@ end
 
 
 
-function get(...)
+function get(url)
 	log("fetch.get:")
 	apis()
 	count=count+1
---	return apie(core.get(...))
+	
+	local res = ngx.location.capture("/@fetch/"..url)
+	ret={}
+	ret.code=res.status
+	ret.headers=res.header
+	ret.body=red.body
+	
+	apie()
+	return ret
 end
 
 
 
-function post(...)
+function post(url)
 	log("fetch.post:")
 	apis()
 	count=count+1
---	return apie(core.post(...))
+	local res = ngx.location.capture("/@fetch/"..url)
+	ret={}
+	ret.code=res.status
+	ret.headers=res.header
+	ret.body=red.body
+	
+	apie()
+	return ret
 end

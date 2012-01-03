@@ -104,11 +104,17 @@ function build(tab)
 	end
 
 local ngx_config=[[
-#worker_processes  4;
+
+#This forces us to have only one lua state, which can make some nginx speed hacks possible
+#Since we can leave values lying around for future use.
+#I figure we can just use lanes to offload big cpu tasks onto other threads...
+
+worker_processes  1;
+
 
 
 events {
-    worker_connections  64;
+    worker_connections  512;
 }
 
 http {
@@ -235,7 +241,7 @@ lua_package_cpath ';;';
 			if l then
 				local s=l
 				s=s:gsub(", client: .*$"," .")
-				s=s:gsub("^.*: %*%d ",". ")
+				s=s:gsub("^.*: %*%d* ",". ")
 				print(s)
 			else break end
 		end
