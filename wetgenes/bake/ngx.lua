@@ -119,6 +119,9 @@ events {
 
 http {
 
+# do not merge slashes fool
+merge_slashes off ;
+
 types {
     text/html                             html htm shtml;
     text/css                              css;
@@ -209,6 +212,16 @@ lua_package_cpath ';;';
       listen      127.0.0.1:8888;
       root        html;
       server_name host.local;
+
+#do the fetch work?
+	location ~ /@fetch/(.*)$ {
+		internal;
+		set $a $1;
+		resolver 8.8.8.8;
+		rewrite (.*) $a break;
+		proxy_pass $a;
+	}
+
 
 #try existing files
 	location  / {
