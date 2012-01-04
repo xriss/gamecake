@@ -17,7 +17,7 @@ if NACL then
 
 	links { "ppapi" , "ppapi_gles2" }
 	
-	links { "lib_lua" }
+	links { LIB_LUA }
 	links { "lib_z" }
 --	links { "lib_sqlite" }
 	
@@ -36,7 +36,7 @@ elseif ANDROID then
 
 	links { "lib_android" }
 
-	links { "lib_lua" }
+	links { LIB_LUA }
 	links { "lib_z" }
 --	links { "lib_sqlite" }
 	
@@ -53,7 +53,7 @@ elseif WINDOWS then
 
 	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
 
-	links { "lib_lua" }
+	links { LIB_LUA }
 
 	SET_KIND("ConsoleApp")
 	SET_TARGET("","lua",true)
@@ -66,7 +66,7 @@ elseif NIX then
 -- it should probably auto handle stuff
 -- anyway it gets complicated, so this is all hax
 
-	links { "lib_lua" }
+	links { LIB_LUA }
 	links { "lib_z" }
 	links { "lib_sqlite" }
 	links { "lib_png" }

@@ -1,7 +1,6 @@
 syntax: glob
-.orig
-build-
-.dbg
-android/bin
-android/gen
-
+*.orig
+build-*
+*.dbg
+lib_android/bin*
+lib_android/gen*

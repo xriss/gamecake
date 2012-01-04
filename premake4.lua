@@ -233,6 +233,7 @@ end
 
 if NACL then
 
+LIB_LUA="lib_lua"
 	
 --	include("lua_zip")
 	include("lua_zlib")
@@ -247,7 +248,7 @@ if NACL then
 --	include("lua_socket")
 --	include("lua_fenestra")
 
-	include("lib_lua")
+	include(LIB_LUA)
 	include("lib_zzip")
 --	include("lib_png")
 	include("lib_z")
@@ -260,6 +261,7 @@ if NACL then
 	
 elseif ANDROID then
 
+LIB_LUA="lib_lua"
 	
 --	include("lua_zip")
 	include("lua_zlib")
@@ -278,7 +280,7 @@ elseif ANDROID then
 
 --	include("lua_bit")
 
-	include("lib_lua")
+	include(LIB_LUA)
 	include("lib_zzip")
 	include("lib_png")
 	include("lib_z")
@@ -290,6 +292,8 @@ elseif ANDROID then
 	
 else -- windows or linux
 
+-- a define to choose vanilla lua or luajit...
+LIB_LUA="lib_luajit"
 	
 	include("lua_zip")
 	include("lua_zlib")
@@ -334,7 +338,7 @@ else -- windows or linux
 		
 	end
 	
-	include("lib_lua")
+	include(LIB_LUA)
 	include("lib_zzip")
 	include("lib_png")
 	include("lib_z")
