@@ -219,7 +219,8 @@ lua_package_cpath ';;';
 		set $a $1;
 		resolver 8.8.8.8;
 		rewrite (.*) $a break;
-		proxy_pass $a;
+		proxy_pass_request_headers off;
+		proxy_pass '$a?$args';
 	}
 
 

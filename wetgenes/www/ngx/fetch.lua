@@ -4,6 +4,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local log=require("wetgenes.www.any.log").log
 local ngx=require("ngx")
 
+local wstr=require("wetgenes.string")
+
 module(...)
 
 function countzero()
@@ -32,10 +34,13 @@ function get(url)
 	count=count+1
 	
 	local res = ngx.location.capture("/@fetch/"..url)
+
 	ret={}
 	ret.code=res.status
 	ret.headers=res.header
-	ret.body=red.body
+	ret.body=res.body
+
+log(wstr.serialize(ret))
 	
 	apie()
 	return ret
@@ -51,7 +56,7 @@ function post(url)
 	ret={}
 	ret.code=res.status
 	ret.headers=res.header
-	ret.body=red.body
+	ret.body=res.body
 	
 	apie()
 	return ret

@@ -29,7 +29,7 @@ end
 
 
 function clear(srv)
-	log("cache.clear:")
+--	log("cache.clear:")
 	apis()
 
 	hax={}
@@ -39,7 +39,7 @@ end
 
 
 function del(srv,id)
-	log("cache.del:")
+--	log("cache.del:")
 	apis()
 
 	hax[id]=nil
@@ -48,7 +48,7 @@ function del(srv,id)
 end
 
 function put(srv,id,tab,ttl)
-	log("cache.put:",id)
+--	log("cache.put:",id)
 	apis()
 	
 	hax[id]=tab
@@ -57,24 +57,24 @@ function put(srv,id,tab,ttl)
 end
 
 function get(srv,id)
-	log("cache.get:",id)	
+--	log("cache.get:",id)	
 	apis()
 	count=count+1
 
 	r=hax[id]
-log(wstr.serialize(r))
+--log(wstr.serialize(r))
 	apie()
 	return r
 end
 
 function inc(srv,id,num,start)
-	log("cache.inc:",id)
+--	log("cache.inc:",id)
 	apis()
 
 	local r=(hax[id] or start)+num
 	hax[id]=r
 	
-log(r)
+--log(r)
 	apie()
 	return r
 end

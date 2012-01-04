@@ -44,13 +44,15 @@ function getdb(kind)
 -- at this point we can choose to return a single database no matter what the kind
 -- or open a seperate one for each kind which might make more sense
 
-	db=wsql.open(wsql.dbs,prefix,fixkind(kind),postfix)
+--	db=wsql.open(wsql.dbs,prefix,fixkind(kind),postfix)
+
+	db=wsql.open(wsql.dbs,prefix,"data",postfix)
 	return db
 end
 
 function keyinfo(keystr)
 	local t=wstr.split(keystr,"/")	
-	return {kind=t[1],id=tonumber(t[2])}
+	return {kind=t[1],id=tonumber(t[2]) or t[2] }
 end
 
 function keystr(kind,id,parent)
@@ -128,7 +130,7 @@ log(s)
 	ent.props=wsql.row(db,s)
 	
 if ent.props then
-	log(wstr.serialize(ent.props))
+--	log(wstr.serialize(ent.props))
 end
 
 	apie()

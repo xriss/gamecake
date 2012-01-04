@@ -22,7 +22,7 @@ function new()
 	end
 	
 	srv.exit=function(n)
---		ngx.exit(n)
+		ngx.exit(n)
 		return n
 	end
 	
@@ -36,14 +36,9 @@ function new()
 --		log("srv.set_mimetype:",v)
 	end
 	
-	srv.set_cookie=function(n,v,tt)
-		log("srv.set_cookie:",n,v)
-		local t=os.time()+ (tt or (60*60))
-		
---		ngx.header["Set-Cookie"]=ngx.header["Set-Cookie"] or {}
---		ngx.header["Set-Cookie"][ #(ngx.header["Set-Cookie"]) +1 ]=n.."="..v.."; Expires="..ngx.cookie_time(t)
-		
-		ngx.header["Set-Cookie"]=n.."="..v.."; Expires="..ngx.cookie_time(t)
+	srv.set_cookie=function(t)
+--		log("srv.set_cookie:",t.name,"=",t.value)		
+		ngx.header["Set-Cookie"]=t.name.."="..t.value.."; Domain="..t.domain.."; Path="..t.path..";  Expires="..ngx.cookie_time(t.live)
 	end
 
 	srv.redirect=function(url)
