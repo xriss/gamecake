@@ -224,8 +224,8 @@ function def_create(env,srv)
 	
 	local p=ent.props
 	
-	p.created=srv.time
-	p.updated=srv.time
+	p.created=srv and srv.time or os.time()
+	p.updated=srv and srv.time or p.created
 	
 	for i,v in pairs(env.default_props or {}) do
 		p[i]=v
@@ -353,6 +353,8 @@ end
 --
 --------------------------------------------------------------------------------
 function def_manifest(env,srv,id,f)
+
+	f=f or env.default_manifest
 
 	if type(id)=="table" then id=id.key.id end -- can turn an entity into an id
 		
