@@ -186,7 +186,7 @@ elseif NIX then
 
 	links(lua_lib_names)
 
-	links { "lib_lua" }
+	links { LIB_LUA }
 	links { "lib_z" }
 	links { "lib_sqlite" }
 	links { "lib_png" }
