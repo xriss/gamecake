@@ -288,17 +288,23 @@ function def_get(env,srv,id,tt)
 	end
 	
 	local ck=env.cache_key(srv,ent.key.id)
-	if not tt then -- can try for cached value outside of transactions
+	if not tt and ck then -- can try for cached value outside of transactions
 		local ent=cache.get(srv,ck)
 		if ent then return env.check(srv,json.decode(ent)) end -- Yay, we got a cached value
 	end
 	
 	local t=tt or dat -- use transaction?
 	
-	if not t.get(ent) then return nil end	
+	if not t.get(ent) then
+		if not tt and ck then -- kill auto cache
+			cache.del(srv,ck)
+		end
+		return nil
+	end
+	
 	dat.build_cache(ent)
 	
-	if not tt then -- auto cache ent for one hour
+	if not tt and ck then -- auto cache ent for one hour
 		cache.put(srv,ck,json.encode(ent),60*60)
 	end
 	
@@ -419,8 +425,10 @@ end
 function def_cache_what(env,srv,ent,mc)
 	local mc=mc or {} -- can supply your own result table for merges	
 	
-	mc[ env.cache_key(srv,ent.key.id) ] = true
-	
+	local ck=env.cache_key(srv,ent.key.id)
+	if ck then
+		mc[ ck ] = true
+	end
 	return mc
 end
 
