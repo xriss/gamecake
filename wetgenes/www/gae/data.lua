@@ -10,6 +10,8 @@ local os=os
 local core=require("wetgenes.www.gae.data.core")
 local log=require("wetgenes.www.any.log").log
 
+local wstr=require("wetgenes.string")
+
 local tostring=tostring
 
 module(...)
@@ -224,8 +226,8 @@ function def_create(env,srv)
 	
 	local p=ent.props
 	
-	p.created=srv and srv.time or os.time()
-	p.updated=srv and srv.time or p.created
+	p.created=(srv and srv.time) or os.time()
+	p.updated=(srv and srv.time) or p.created
 	
 	for i,v in pairs(env.default_props or {}) do
 		p[i]=v
@@ -251,7 +253,6 @@ end
 --
 --------------------------------------------------------------------------------
 function def_put(env,srv,ent,tt)
-
 	t=tt or dat -- use transaction?
 
 	local _,ok=env.check(srv,ent) -- check that this is valid to put
@@ -325,10 +326,18 @@ function def_update(env,srv,id,f)
 		if e then
 			env.cache_what(srv,e,mc) -- the original values
 			if e.props.created~=srv.time then -- not a newly created entity
-				if e.cache.updated>=srv.time then t.rollback() return false end -- stop any updates that time travel
+				if e.cache.updated>srv.time then -- stop any updates that time travel
+					t.rollback()
+					log("UPDATE FAILED TIMETRAVEL:"..wstr.serialize(e.key))
+					return false
+				end
 			end
 			e.cache.updated=srv.time -- the next function can change this change if it wishes
-			if not f(srv,e) then t.rollback() return false end -- hard fail
+			if not f(srv,e) then -- hard fail
+				t.rollback()
+				log("UPDATE FAILED FUNCTION:"..wstr.serialize(e.key))
+				return false
+			end
 			env.check(srv,e) -- keep consistant
 			if env.put(srv,e,t) then -- entity put ok
 				if t.commit() then -- success
@@ -340,12 +349,13 @@ function def_update(env,srv,id,f)
 		end
 		t.rollback() -- undo everything ready to try again
 	end
-	
+	log("UPDATE FAILED:"..wstr.serialize(e.key))
 end
 
 --------------------------------------------------------------------------------
 --
 -- get or create then fill and put, similar to update but will create new data
+-- and f only gets filled if new data is created otherwise this is just a get
 --
 -- f must be a function that fills the entity and returns true on success
 --
@@ -363,26 +373,29 @@ function def_manifest(env,srv,id,f)
 		local t=dat.begin()
 		local e=env.get(srv,id,t) -- may or may not exist
 		if e then
-			env.cache_what(srv,e,mc) -- the original values
-			if e.cache.updated>=srv.time then t.rollback() return false end -- stop any updates that time travel
-			e.cache.updated=srv.time -- the next function can change this change if it wishes
-			if not f(srv,e) then t.rollback() return e end -- just return orig
+			if t.commit() then -- success (should be always)
+				return e
+			end
 		else
 			e=env.create(srv)
 			e.key.id=id
 			e.cache.id=id
-			if not f(srv,e) then t.rollback() return false end -- hard fail
-		end
-		env.check(srv,e) -- keep consistant
-		if env.put(srv,e,t) then -- entity put ok
-			if t.commit() then -- success
-				env.cache_what(srv,e,mc) -- the new values
-				env.cache_fix(srv,mc) -- change any memcached values we just adjusted
-				return e -- return the adjusted entity
+			if not f(srv,e) then -- hard fail
+				t.rollback()
+				log("MANIFEST FAILED FUNCTION:"..wstr.serialize(e.key))
+				return false
+			end
+			if env.put(srv,e,t) then -- entity put ok
+				if t.commit() then -- success
+					env.cache_what(srv,e,mc) -- the new values
+					env.cache_fix(srv,mc) -- change any memcached values we just adjusted
+					return e -- return the adjusted entity
+				end
 			end
 		end
 		t.rollback() -- undo everything ready to try again
 	end
+	log("MANIFEST FAILED:"..wstr.serialize(e.key))
 	
 end
 
@@ -420,7 +433,6 @@ end
 --------------------------------------------------------------------------------
 function def_cache_fix(env,srv,mc)
 	for n,b in pairs(mc) do
-log(n,b)
 		cache.del(srv,n)
 	end
 end

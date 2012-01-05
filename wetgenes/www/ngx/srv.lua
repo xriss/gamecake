@@ -81,10 +81,14 @@ function new()
 	
 	srv.cookies={}
 	local cs
-	if type(srv.headers.Cookie=="string") then cs={srv.headers.Cookie} else cs=srv.headers.Cookie end
+	if type(srv.headers.Cookie=="string") then
+		cs=wstr.split(srv.headers.Cookie,";")
+	else
+		cs=srv.headers.Cookie
+	end
 	log(srv.headers.Cookie)
 	for i,s in ipairs(cs or {}) do
-		local n,v=wstr.split_equal(s)
+		local n,v=wstr.split_equal(wstr.trim(s))
 		srv.cookies[n]=v
 	end
 

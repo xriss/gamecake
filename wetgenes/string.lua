@@ -11,6 +11,8 @@ local setmetatable=setmetatable
 local error=error
 local tonumber=tonumber
 
+local log=print
+
 --
 -- Some ueful string functions.
 --
@@ -522,6 +524,5 @@ local opts=opts or {} --{dbg_html_comments=true} to include html dbg, this will 
 	end
 	opts.clean=true
 	ret=macro_replace_once(ret,{},opts) -- finally remove temporary chunks
-	
 	return ret
 end
