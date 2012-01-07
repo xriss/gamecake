@@ -430,6 +430,8 @@ function refine_chunks(srv,chunks,opts)
 			else
 				s=err
 			end
+
+-- this should be split off into a plugin system...
 			
 			if e.import=="blog" then
 			
@@ -486,6 +488,17 @@ function refine_chunks(srv,chunks,opts)
 				e.hook   = e.hook   or opts.hook -- callback function to fixup data
 				
 				s=wikipedia.getwaka(srv,e) -- get a string
+				
+			elseif e.import=="picassa" then -- we need to import some imagedata from picasssa
+			
+				local picassa=require("waka.picassa")
+				e.offset = e.offset or opts.offset -- can choose new pages
+				e.limit  = e.limit  or opts.limit -- can choose new pages
+				e.user  = e.user  or opts.user -- user name
+				e.album  = e.album  or opts.album -- album name
+				e.hook   = e.hook   or opts.hook -- callback function to fixup data
+				
+				s=picassa.getwaka(srv,e) -- get a string
 				
 			end
 		
