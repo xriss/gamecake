@@ -489,16 +489,18 @@ function refine_chunks(srv,chunks,opts)
 				
 				s=wikipedia.getwaka(srv,e) -- get a string
 				
-			elseif e.import=="picassa" then -- we need to import some imagedata from picasssa
+			elseif e.import=="picasa" then -- we need to import some imagedata from picasssa
 			
-				local picassa=require("waka.picassa")
+				local picassa=require("waka.picasa")
 				e.offset = e.offset or opts.offset -- can choose new pages
 				e.limit  = e.limit  or opts.limit -- can choose new pages
 				e.user  = e.user  or opts.user -- user name
 				e.album  = e.album  or opts.album -- album name
+				e.authkey  = e.authkey  or opts.authkey -- authkey if needed
 				e.hook   = e.hook   or opts.hook -- callback function to fixup data
+				e.plate   = e.plate   or opts.plate -- display plate
 				
-				s=picassa.getwaka(srv,e) -- get a string
+				s=picassa.getwaka(srv,e) -- get a string or tab
 				
 			end
 		
