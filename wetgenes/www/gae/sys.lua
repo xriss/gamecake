@@ -90,11 +90,11 @@ end
 -----------------------------------------------------------------------------
 function redirect(srv,url)
 
-	if not srv.redirect(url) then -- header write failed, spit out some java script instead?
+--	if not srv.redirect(url) then -- header write failed, spit out some java script instead?
 	
 		srv.put([[<script type="text/javascript" >window.location = "]]..url..[[";</script>]])
 		
-	end
+--	end
 
 end
 
