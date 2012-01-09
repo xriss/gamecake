@@ -54,8 +54,7 @@ end
 function def_put(env,srv,ent,tt)
 	t=tt or wdata -- use transaction?
 
-	local _,ok=env.check(srv,ent) -- check that this is valid to put
-	if not ok then return nil end
+	if not env.check(srv,ent) then return nil end -- check that this is valid to put
 
 	wdata.build_props(ent)
 	local ks=t.put(ent)
@@ -204,7 +203,7 @@ function def_set(env,srv,id,f)
 		t.rollback() -- undo everything ready to try again
 	end
 	log("DATA SET FAILED:"..env.kind(srv)..":"..id)
-	
+	return false
 end
 
 --------------------------------------------------------------------------------

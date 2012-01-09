@@ -8,6 +8,7 @@ local log=require("wetgenes.www.any.log").log
 
 module(...)
 local _M=require(...)
+local wdata=require("wetgenes.www.any.data")
 
 default_props=
 {
@@ -15,8 +16,8 @@ default_props=
 
 default_cache=
 {
-	base="",  -- require this module
-	func="",  -- call this func(srv,id) to rebuild this stash
+	base=nil,  --
+	func=nil,  -- require(base).func(srv,id) to rebuild this stash
 	data={},  -- the data we stashed
 }
 
@@ -44,8 +45,8 @@ end
 
 
 
-dat.set_defs(_M) -- create basic data handling funcs
+wdata.set_defs(_M) -- create basic data handling funcs
 
-dat.setup_db(_M) -- make sure DB exists and is ready
+wdata.setup_db(_M) -- make sure DB exists and is ready
 
 
