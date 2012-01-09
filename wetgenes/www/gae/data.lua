@@ -1,26 +1,18 @@
+-- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local json=require("wetgenes.json")
-
-local pairs=pairs
-local require=require
-local type=type
-local error=error
-
-local os=os
 
 local core=require("wetgenes.www.gae.data.core")
 local log=require("wetgenes.www.any.log").log
 
 local wstr=require("wetgenes.string")
 
-local tostring=tostring
-
 module(...)
 local wdata=require(...) -- this is us
+package.loaded["wetgenes.www.any.data"]=wdata
 local cache=require("wetgenes.www.any.cache")
 local wdatadef=require("wetgenes.www.any.datadef")
-wdatadef.wdata=wdata -- hack dependencies
-wdatadef.cache=cache -- hack dependencies
 
 
 function countzero()

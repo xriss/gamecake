@@ -1,1 +1,1 @@
-if ngx then	return require("wetgenes.www.any").wrap_module("wetgenes.www.ngx.img",...)else	return require("wetgenes.www.any").wrap_module("wetgenes.www.gae.img",...)end
+if ngx then	return require("wetgenes.www.ngx.img")else	return require("wetgenes.www.gae.img")end

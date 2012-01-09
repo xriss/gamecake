@@ -6,6 +6,8 @@ local log=require("wetgenes.www.any.log").log
 local wstr=require("wetgenes.string")
 
 module(...)
+local _M=require(...)
+package.loaded["wetgenes.www.any.cache"]=_M
 
 hax={}
 

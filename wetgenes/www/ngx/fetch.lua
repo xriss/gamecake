@@ -7,6 +7,8 @@ local ngx=require("ngx")
 local wstr=require("wetgenes.string")
 
 module(...)
+local _M=require(...)
+package.loaded["wetgenes.www.any.fetch"]=_M
 
 function countzero()
 	count=0

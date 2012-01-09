@@ -7,7 +7,8 @@ local json=require("wetgenes.json")
 
 module("wetgenes.www.any.datadef")
 
---local wdata=require("wetgenes.www.any.data")
+local wdata=require("wetgenes.www.any.data")
+local cache=require("wetgenes.www.any.cache")
 
 --------------------------------------------------------------------------------
 --

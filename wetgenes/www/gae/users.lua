@@ -1,31 +1,11 @@
-
-local json=require("wetgenes.json")
-
-local dat=require("wetgenes.www.any.data")
-local cache=require("wetgenes.www.any.cache")
-
-local log=require("wetgenes.www.any.log").log -- grab the func from the package
-
-local fetch=require("wetgenes.www.any.fetch")
-local sys=require("wetgenes.www.any.sys")
-
+-- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local core=require("wetgenes.www.gae.users.core")
 
-local os=os
-local string=string
-local math=math
-
-local tostring=tostring
-local type=type
-local ipairs=ipairs
-local require=require
-
-local wet_string=require("wetgenes.string")
-local str_split=wet_string.str_split
-local serialize=wet_string.serialize
-
 module(...)
+local _M=require(...)
+package.loaded["wetgenes.www.any.users"]=_M
 
 function login_url(a)
 

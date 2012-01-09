@@ -8,6 +8,8 @@ local debug=require("debug")
 local ngx=require("ngx")
 
 module(...)
+local _M=require(...)
+package.loaded["wetgenes.www.any.serv"]=_M
 
 function serv()
 	xpcall(serv2,function(msg,lev)

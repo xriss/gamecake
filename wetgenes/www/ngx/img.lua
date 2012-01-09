@@ -4,6 +4,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local log=require("wetgenes.www.any.log").log
 
 module(...)
+local _M=require(...)
+package.loaded["wetgenes.www.any.img"]=_M
 
 
 function get(...)

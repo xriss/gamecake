@@ -4,6 +4,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local ngx=require("ngx")
 
 module(...)
+local _M=require(...)
+package.loaded["wetgenes.www.any.log"]=_M
 
 
 function log(...)

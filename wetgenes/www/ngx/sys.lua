@@ -5,6 +5,8 @@ local log=require("wetgenes.www.any.log").log
 local ngx=require("ngx")
 
 module(...)
+local _M=require(...)
+package.loaded["wetgenes.www.any.sys"]=_M
 
 
 function sleep(...)

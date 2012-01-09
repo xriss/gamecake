@@ -14,10 +14,10 @@ local fixvalue=wsql.fixvalue
 
 module(...)
 local wdata=require(...) -- this is us
+package.loaded["wetgenes.www.any.data"]=wdata
+
 local cache=require("wetgenes.www.any.cache")
 local wdatadef=require("wetgenes.www.any.datadef")
-wdatadef.wdata=wdata -- hack dependencies
-wdatadef.cache=cache -- hack dependencies
 
 
 function countzero()
