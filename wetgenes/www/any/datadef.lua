@@ -286,11 +286,11 @@ end
 -----------------------------------------------------------------------------
 function set_defs(env)
 
-	env.create     = function(srv)        return def_create(env,srv,id)         end
-	env.manifest   = function(srv,id,f)   return def_manifest(env,srv,id)       end
+	env.create     = function(srv,id)     return def_create(env,srv,id)         end
+	env.manifest   = function(srv,id)     return def_manifest(env,srv,id)       end
 	env.put        = function(srv,ent,t)  return def_put(env,srv,ent,t)         end
 	env.get        = function(srv,id,t)   return def_get(env,srv,id,t)          end
-	env.set        = function(srv,id,t)   return def_set(env,srv,id,f)	 	    end
+	env.set        = function(srv,id,f)   return def_set(env,srv,id,f)	 	    end
 	env.update     = function(srv,id,f)   return def_update(env,srv,id,f)       end
 	env.cache_key  = function(srv,id)     return def_cache_key(env,srv,id)      end
 	env.cache_what = function(srv,ent,mc) return def_cache_what(env,srv,ent,mc) end
