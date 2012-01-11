@@ -37,12 +37,14 @@ local function apie(...)
 	return ...
 end
 
-local prefix="sqlite/"
-local postfix=".sqlite"
 
 local function fixkind(kind) return kind:gsub("%p","_") end
 
+-- can over ride this function to open dbs from other places
 function getdb(kind)
+
+local prefix="sqlite/"
+local postfix=".sqlite"
 
 -- at this point we can choose to return a single database no matter what the kind
 -- or open a seperate one for each kind which might make more sense

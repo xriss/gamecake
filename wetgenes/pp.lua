@@ -97,7 +97,7 @@ local lua_block_insert
 		table.insert(chunk,"	end\n")
 		table.insert(chunk,"end\n")
 		table.insert(chunk,"_lo=0\n")
-		table.insert(chunk,"local _out=function(...) for i,v in ipairs(arg) do _out_do(v) end end\n")
+		table.insert(chunk,"local _out=function(...) for i,v in ipairs({...}) do _out_do(v) end end\n")
 
 	end
 
