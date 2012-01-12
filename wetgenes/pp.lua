@@ -84,7 +84,7 @@ local lua_block_insert
 
 		table.insert(chunk,"-- A lua file that builds a preprocesed file as a table\n")
 		table.insert(chunk,"\n")
-		table.insert(chunk,"pp_output_table = {n=0}\n")
+		table.insert(chunk,"pp_output_table = {}\n")
 		table.insert(chunk,"local _out_ti=table.insert\n")
 		table.insert(chunk,"local _out_tt=pp_output_table\n")
 		table.insert(chunk,"local _out_do=function(s)\n")
