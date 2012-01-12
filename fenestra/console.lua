@@ -403,7 +403,7 @@ function setup(fenestra)
 		local print_new=function(...)
 		
 			local t={}
-			for i,v in ipairs(arg) do
+			for i,v in ipairs({...}) do
 				table.insert(t, it.dump_string(v) )
 			end
 			if not t[1] then t[1]="nil" end
