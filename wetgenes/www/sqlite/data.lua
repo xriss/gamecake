@@ -108,6 +108,7 @@ log(s)
 	id=id or db:last_insert_rowid() -- get the new id, unless we forced it
 	
 	ent.key.id=id -- fix id
+	ent.cache.id=id -- fix id
 	
 	apie()
 	return keystr(kind,id)
