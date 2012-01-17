@@ -136,11 +136,14 @@ local fout=opts.fout
 		end
 	elseif type(o) == "nil" then	
 		return fout("nil")
+	elseif type(o) == "function" then
+		return fout("function()end") -- error?
 	else
 		error("cannot serialize a " .. type(o))
 	end
 	
 end
+dump=serialize
 
 
 -----------------------------------------------------------------------------

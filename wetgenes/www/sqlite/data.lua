@@ -337,6 +337,7 @@ function setup_db(env,srv)
 	for n,v in pairs(env.default_props) do
 		if not in_table(info,n) then -- add to table, simple check for dupes just in case.
 			local t={name=n}
+			local tp=type(v)
 			if tp=="number" then -- only have numbers or strings and numbers are real
 				t.REAL=true
 			else

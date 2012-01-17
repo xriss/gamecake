@@ -63,7 +63,6 @@ end
 function exec(db,s,f,d)
 --log(s)
 	if 	db:exec(s,f,d)~=sql.OK then error(db:errmsg()) end
-
 end
 
 -- get all rows the sql requests
