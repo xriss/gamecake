@@ -189,6 +189,11 @@ end
 
 
 function update(widget)
+
+	if widget.text ~= widget.data.str then
+		widget.text = widget.data.str
+		widget:set_dirty()
+	end
 end
 
 

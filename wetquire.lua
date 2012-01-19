@@ -15,6 +15,12 @@ local os=os
 -- and live server situations where downtime is to be avoided. Small changes can be pushed
 -- to a live server seamlessly with a little care.
 
+--
+-- This monkey patches module and require when you call overload and is best applied to the master environment
+-- as early as possible.
+--
+
+-- define functions as local here so they can call each other
 local _overload
 local _rerequire
 local _remodule
@@ -48,11 +54,12 @@ function _remodule(name)
 	mod._MOD_FILENAME=debug.getinfo(2).short_src -- where to reload from
 	mod._MOD_LOADTIME=os.time() -- the time that we where loaded 
 
-	print("Loaded module : ".. mod._MOD_FILENAME)
+-- dbg
+--	print("Loaded module : ".. mod._MOD_FILENAME)
 
 	package.loaded[name] = mod
-	setfenv(2, mod)
-	
+	if setfenv then setfenv(2, mod) end -- setfenv may not exist in lua 5.2
+
 	return mod
 end
 
@@ -101,8 +108,11 @@ _module=oldmodule
 --
 function _overload(restore)
 
-	local oldstate=(require==oldrequire) -- true if functions are not replaced
-
+	
+	local oldstate
+	
+	oldstate=(require==oldrequire) -- true if functions are not replaced
+	
 	if restore then -- restore
 
 		require=oldrequire
@@ -119,6 +129,8 @@ function _overload(restore)
 end
 
 
+--use all the above locals to create this module
+
 _remodule("wetquire")
 
 _MOD_DISABLE_RELOAD=true -- disable reload of this module
@@ -133,5 +145,5 @@ overload=_overload
 --overload=function() return true end -- disable
 
 function set_reload_time(t)
-	reload_time=t or os.time() -- mark all modules loaded before now as requiring reload
+	reload_time=t or os.time() -- mark all modules loaded before now as requiring a reload
 end
