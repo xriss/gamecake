@@ -18,8 +18,8 @@ local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_en
 
 ]]--
 
-local _ENV=require("wetquire").remodule("wetgenes")
---module("wetgenes")
+--local _ENV=require("wetquire").remodule("wetgenes")
+module("wetgenes")
 
 -----------------------------------------------------------------------------
 --
