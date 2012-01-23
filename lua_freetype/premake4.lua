@@ -80,13 +80,6 @@ files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 links { "lib_lua" }
 
 
-if os.get() == "windows" then
-
-else -- nix
-
-end
-
-
 includedirs { "freetype/include" , "." }
 
 
