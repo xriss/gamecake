@@ -8,7 +8,7 @@ excludes("src/unix.*")
 
 links { "lib_lua" }
 
-if os.get() == "windows" then
+if WINDOWS then
 
 	excludes("src/usocket.*")
 
@@ -37,7 +37,7 @@ files { "src/mime.c" ,"src/mime.h" }
 
 links { "lib_lua" }
 
-if os.get() == "windows" then
+if WINDOWS then
 
 
 	defines "MIME_EXPORTS"

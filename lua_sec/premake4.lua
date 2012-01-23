@@ -6,7 +6,7 @@ files { "src/**.c" , "src/**.cpp" , "src/**.h" }
 
 links { "lib_lua" }
 
-if os.get() == "windows" then
+if WINDOWS then
 
 	excludes("src/usocket.*")
 	

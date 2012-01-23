@@ -5,12 +5,6 @@ language "C"
 files { "**.c" , "./**.h" }
 excludes { "dftables.c" }
 
-if os.get() == "windows" then
-
-else -- nix
-
-end
-
 --, "LINK_SIZE=2" ,
 defines { "HAVE_CONFIG_H", "PCRE_STATIC" , "POSIX_MALLOC_THRESHOLD=10" }
 

@@ -8,14 +8,10 @@ links { "lib_z" }
 
 defines { "PNG_STATIC" }
 
-if os.get() == "windows" then
-
-else -- nix
-
-end
 
 
-includedirs { "." , "../../lib_z" }
+
+includedirs { "." , "../lib_z" }
 
 
 configuration {"Debug"}

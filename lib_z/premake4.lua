@@ -4,11 +4,7 @@ kind "StaticLib"
 language "C"
 files { "./**.cpp" , "./**.c" , "./**.h" }
 
-if os.get() == "windows" then
 
-else -- nix
-
-end
 
 
 includedirs { "." }

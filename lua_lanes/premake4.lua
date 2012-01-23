@@ -5,11 +5,7 @@ files { "src/**.cpp" , "src/**.c" , "src/**.h" }
 
 links { "lib_lua" }
 
-if os.get() == "windows" then
 
-else -- nix
-
-end
 
 
 
