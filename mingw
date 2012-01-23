@@ -1,4 +1,6 @@
-rm -Rf build-gmake-mingw
+if [ "$1" = "clean" ] ; then
+	rm -Rf build-gmake-mingw
+fi
 
 cd `dirname $0`
 

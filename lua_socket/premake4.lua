@@ -1,5 +1,4 @@
 
-
 project "lua_socket"
 language "C++"
 files { "src/**.c" , "src/**.cpp" , "src/**.h" }
@@ -15,8 +14,13 @@ if WINDOWS then
 	links { "ws2_32" }
 
 	defines "LUASOCKET_EXPORTS"
-	defines "LUASOCKET_API=__declspec(dllexport)"
-		
+	
+	if MINGW then -- commandline escape problems?
+		defines "LUASOCKET_API=__declspec\\(dllexport\\)"
+	else
+		defines "LUASOCKET_API=__declspec(dllexport)"
+	end
+	
 else -- nix
 
 	excludes("src/wsocket.*")
@@ -39,12 +43,14 @@ links { "lib_lua" }
 
 if WINDOWS then
 
-
 	defines "MIME_EXPORTS"
-	defines "MIME_API=__declspec(dllexport)"
+	if MINGW then -- commandline escape problems?
+		defines "MIME_API=__declspec\\(dllexport\\)"
+	else
+		defines "MIME_API=__declspec(dllexport)"
+	end
 
 else -- nix
-
 
 end
 

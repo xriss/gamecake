@@ -145,7 +145,8 @@ elseif ANDROID then
 	buildoptions{ "-mthumb" }
 
 elseif WINDOWS then
-	
+
+	defines "_WIN32_WINNT=0x0500"
 	defines "WIN32"
 	defines "_CRT_SECURE_NO_WARNINGS"
 --	defines	"LUA_BUILD_AS_DLL"
@@ -329,7 +330,11 @@ LIB_LUA="lib_lua"
 else -- windows or linux
 
 -- a define to choose vanilla lua or luajit...
-LIB_LUA="lib_luajit"
+if WINDOWS then
+	LIB_LUA="lib_lua"
+else
+	LIB_LUA="lib_luajit"
+end
 	
 	include("lua_zip")
 	include("lua_zlib")
@@ -385,7 +390,9 @@ LIB_LUA="lib_luajit"
 	include("lua")
 
 -- build webserver
+if not WINDOWS then
 	include("nginx")
+end
 
 end
 

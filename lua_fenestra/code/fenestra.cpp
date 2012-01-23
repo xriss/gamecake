@@ -186,16 +186,16 @@ RECT srect[1];
 			lua='m';
 			act="double";
 			key="x";
-			if(GET_XBUTTON_WPARAM (wParam)==1 ) { key="x1"; }
-			if(GET_XBUTTON_WPARAM (wParam)==2 ) { key="x2"; }
+			if(HIWORD (wParam)==1 ) { key="x1"; }
+			if(HIWORD (wParam)==2 ) { key="x2"; }
 		break;
 		case WM_XBUTTONDOWN:
 //		case WM_NCXBUTTONDOWN:
 			lua='m';
 			act="down";
 			key="x";
-			if(GET_XBUTTON_WPARAM (wParam)==1 ) { key="x1"; }
-			if(GET_XBUTTON_WPARAM (wParam)==2 ) { key="x2"; }
+			if(HIWORD(wParam)==1 ) { key="x1"; }
+			if(HIWORD (wParam)==2 ) { key="x2"; }
 			SetCapture(hWnd);
 		break;
 		case WM_XBUTTONUP:
@@ -203,8 +203,8 @@ RECT srect[1];
 			lua='m';
 			act="up";
 			key="x";
-			if(GET_XBUTTON_WPARAM (wParam)==1 ) { key="x1"; }
-			if(GET_XBUTTON_WPARAM (wParam)==2 ) { key="x2"; }
+			if(HIWORD (wParam)==1 ) { key="x1"; }
+			if(HIWORD (wParam)==2 ) { key="x2"; }
 			ReleaseCapture();
 		break;
 		

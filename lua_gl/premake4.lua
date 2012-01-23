@@ -16,7 +16,7 @@ if WINDOWS then
 	links "gdi32"
 	links "winmm"
 --	defines "FREEGLUT_LIB_PRAGMAS=0"
-	defines ""
+--	defines ""
 	
 else -- nix
 

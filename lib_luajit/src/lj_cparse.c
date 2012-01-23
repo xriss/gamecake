@@ -56,7 +56,7 @@ static LJ_AINLINE int cp_iseol(CPChar c)
   return (c == '\n' || c == '\r');
 }
 
-static LJ_AINLINE CPChar cp_get(CPState *cp);
+//static LJ_AINLINE CPChar cp_get(CPState *cp);
 
 /* Peek next raw character. */
 static LJ_AINLINE CPChar cp_rawpeek(CPState *cp)
@@ -73,7 +73,11 @@ static LJ_NOINLINE CPChar cp_get_bs(CPState *cp)
   c2 = cp_rawpeek(cp);
   if (cp_iseol(c2) && c2 != c) cp->p++;
   cp->linenumber++;
-  return cp_get(cp);
+// hax inline dupe
+//  return cp_get(cp);
+  cp->c = (CPChar)(uint8_t)(*cp->p++);
+  if (LJ_LIKELY(cp->c != '\\')) return cp->c;
+  return cp_get_bs(cp);
 }
 
 /* Get next character. */
