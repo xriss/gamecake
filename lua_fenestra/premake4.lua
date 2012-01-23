@@ -10,7 +10,7 @@ links { "lib_lua" }
 
 defines { "LUA_LIB" }
 
-if os.get() == "windows" then
+if WINDOWS then
 	links { "opengl32" , "glu32" }
 else -- nix
 	links { "GL" , "GLU"  }

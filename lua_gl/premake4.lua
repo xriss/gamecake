@@ -10,7 +10,7 @@ links { "lib_lua" }
 
 --defines "FREEGLUT_STATIC"
 
-if os.get() == "windows" then
+if WINDOWS then
 
 	links { "opengl32" , "glu32" }
 	links "gdi32"

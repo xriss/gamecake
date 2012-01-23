@@ -6,7 +6,7 @@ files { "src/luasql.*" , "src/ls_mysql.c" }
 
 links { "lib_lua" }
 
-if os.get() == "windows" then
+if WINDOWS then
 
 	includedirs { "../windows/mysql51/include" }
 	libdirs { "../windows/mysql51/lib" }

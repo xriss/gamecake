@@ -8,11 +8,7 @@ excludes { "jmemdos.c" ,  "jmemmac.c" , "ansi2knr.c" , "example.c" }
 defines { "JPEGSTATIC" }
 
 
-if os.get() == "windows" then
 
-else -- nix
-
-end
 
 
 includedirs { "." }
