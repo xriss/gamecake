@@ -53,7 +53,21 @@ elseif WINDOWS then
 
 	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
 
+-- we need to include libs again here for linking, cant prelink with statics?
+-- it should probably auto handle stuff
+-- anyway it gets complicated, so this is all hax
+
 	links { LIB_LUA }
+	links { "lib_z" }
+	links { "lib_sqlite" }
+	links { "lib_png" }
+	links { "lib_zzip"}
+	links { "opengl32" , "glu32" }
+	links { "stdc++" , "ws2_32" , "gdi32"}
+
+--LLIBS = ['-lshell32', '-lshfolder', '-ldxguid', '-lgdi32', '-lmsvcrt', '-lwinmm', '-lmingw32', '-lm', '-lws2_32', '-lz', '-lstdc++'] 
+
+
 
 	SET_KIND("ConsoleApp")
 	SET_TARGET("","lua",true)
