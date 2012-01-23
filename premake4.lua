@@ -70,6 +70,25 @@ newgcctoolchain {
     cppflags = "",
 }
 
+
+newplatform {
+    name = "mingw",
+    description = "mingw",
+    gcc = {
+        cc = "gcc",
+        cxx = "g++",
+        cppflags = "",
+    }
+}
+ 
+newgcctoolchain {
+    name = "mingw",
+    description = "mingw",
+    prefix = "i586-mingw32msvc-",
+    cppflags = "",
+}
+
+
 ------------------------------------------------------------------------
 -- work out what we should be building for
 ------------------------------------------------------------------------
@@ -80,6 +99,7 @@ solution("wetlua")
 NACL=false
 ANDROID=false
 WINDOWS=false
+MINGW=false
 NIX=false
 
 if _ARGS[1]=="nacl" then
@@ -88,6 +108,10 @@ if _ARGS[1]=="nacl" then
 elseif _ARGS[1]=="android" then
 	TARGET="ANDROID"
 	ANDROID=true
+elseif _ARGS[1]=="mingw" then
+	TARGET="WINDOWS"
+	WINDOWS=true
+	MINGW=true
 elseif os.get() == "windows" then
 	TARGET="WINDOWS"
 	WINDOWS=true
@@ -126,6 +150,17 @@ elseif WINDOWS then
 	defines "_CRT_SECURE_NO_WARNINGS"
 --	defines	"LUA_BUILD_AS_DLL"
 
+	if MINGW then
+	
+		platforms { "mingw" } --hax
+
+		local w32api=path.getabsolute("../sdks/w32api")
+		
+		includedirs { w32api.."/include" }
+		libdirs { w32api.."/lib" }
+		
+	end
+
 elseif NIX then
 	
 	defines("LUA_USE_MKSTEMP") -- remove warning
@@ -142,6 +177,7 @@ BUILD_DIR="build-"..(_ACTION or "")
 
 if NACL then BUILD_DIR=BUILD_DIR.."-nacl" end
 if ANDROID then BUILD_DIR=BUILD_DIR.."-android" end
+if MINGW then BUILD_DIR=BUILD_DIR.."-mingw" end
 
 location( BUILD_DIR )
 

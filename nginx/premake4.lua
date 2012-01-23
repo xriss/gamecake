@@ -21,8 +21,7 @@ includedirs {	"." ,
 
 if NACL then
 elseif ANDROID then 
-elseif WINDOWS then
-elseif NIX then
+else
 
 --	defines "NGX_HAVE_AIO"
 	defines "NGX_LINUX"

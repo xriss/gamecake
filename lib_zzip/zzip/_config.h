@@ -12,9 +12,9 @@
 /* #undef HAVE_ALIGNED_ACCESS_REQUIRED */
 
 /* Define to 1 if you have the <byteswap.h> header file. */
-#ifndef ZZIP_HAVE_BYTESWAP_H 
-#define ZZIP_HAVE_BYTESWAP_H  1 
-#endif
+//#ifndef ZZIP_HAVE_BYTESWAP_H 
+//#define ZZIP_HAVE_BYTESWAP_H  1 
+//#endif
 
 /* Define to 1 if you have the <direct.h> header file. */
 /* #undef HAVE_DIRECT_H */
@@ -31,9 +31,9 @@
 #endif
 
 /* Define to 1 if you have the <fnmatch.h> header file. */
-#ifndef ZZIP_HAVE_FNMATCH_H 
-#define ZZIP_HAVE_FNMATCH_H  1 
-#endif
+//#ifndef ZZIP_HAVE_FNMATCH_H 
+//#define ZZIP_HAVE_FNMATCH_H  1 
+//#endif
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #ifndef ZZIP_HAVE_INTTYPES_H 
@@ -77,9 +77,9 @@
 #endif
 
 /* Define to 1 if you have the `strndup' function. */
-#ifndef ZZIP_HAVE_STRNDUP 
-#define ZZIP_HAVE_STRNDUP  1 
-#endif
+//#ifndef ZZIP_HAVE_STRNDUP 
+//#define ZZIP_HAVE_STRNDUP  1 
+//#endif
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */

@@ -4,10 +4,16 @@ kind "StaticLib"
 language "C"
 files { "zzip/**.c" , "zzip/**.h" }
 
-if os.get() == "windows" then
+if WINDOWS then
+
+	defines "ZZIP_HAVE_DIRECT_H"
 
 else -- nix
 
+	defines "ZZIP_HAVE_BYTESWAP_H"
+	defines "ZZIP_HAVE_FNMATCH_H"
+	defines "ZZIP_HAVE_STRNDUP"
+	
 end
 
 
