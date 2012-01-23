@@ -502,6 +502,16 @@ function refine_chunks(srv,chunks,opts)
 				
 				s=picassa.getwaka(srv,e) -- get a string or tab
 				
+			elseif e.import=="json" then -- we need to import some json from somewhere
+			
+				local waka_json=require("waka.json")
+				e.url  = e.url  or opts.url -- what to get
+				e.cachetime  = e.cachetime  or opts.cachetime -- how long to cache for
+				e.hook   = e.hook   or opts.hook -- callback function to fixup data
+				e.plate   = e.plate   or opts.plate -- display plate
+				
+				s=waka_json.getwaka(srv,e) -- get a string or tab
+				
 			end
 		
 		elseif format=="waka" then -- basic waka format, html allowed but links are upgraded and line ends are <br/>
