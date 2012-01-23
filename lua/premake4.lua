@@ -70,7 +70,7 @@ elseif WINDOWS then
 
 
 	SET_KIND("ConsoleApp")
-	SET_TARGET("","lua",true)
+	SET_TARGET("","lua.exe",true)
 
 elseif NIX then
 
