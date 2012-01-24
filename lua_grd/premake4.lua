@@ -11,7 +11,7 @@ files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 links { "lib_lua" , "lib_png" , "lib_z" }
 
 
-
+defines { "JPEGSTATIC" }
 
 includedirs { "." , "../lib_z" , "../lib_png" , "../lib_jpeg" }
 
