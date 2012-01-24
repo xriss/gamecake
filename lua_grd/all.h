@@ -61,15 +61,17 @@ extern "C" {
 
 //#include "../_src/liblwo/code/lwo2.h"
 
+#include "jpeglib.h"
+
 #ifdef __cplusplus
 };
 #endif
 
 #include "png.h"
-#include "jpeglib.h"
 
 #include "code/grd.h"
 #include "code/grd_png.h"
+#include "code/grd_jpg.h"
 #include "code/lua_grd.h"
 #include "code/neuquant32.h"
 

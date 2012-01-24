@@ -189,6 +189,7 @@ else
 	links { "lib_z" }
 	links { "lib_sqlite" }
 	links { "lib_png" }
+	links { "lib_jpeg" }
 	links { "lib_zzip"}
 	links { "GL" , "GLU" }
 	links { "crypt" }

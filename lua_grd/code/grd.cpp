@@ -145,7 +145,21 @@ struct grd *g=0;
 
 	if(g)
 	{
-		grd_png_load_file(g,filename);
+		if(opts)
+		{
+			if(strcmp(opts,"jpg")==0)
+			{
+				grd_jpg_load_file(g,filename);
+			}
+			else
+			{
+				grd_png_load_file(g,filename);
+			}
+		}
+		else
+		{
+			grd_png_load_file(g,filename);
+		}
 	}
 
 	return g;
@@ -154,7 +168,7 @@ struct grd *g=0;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // save an image
-// opst is optional to force a type of output
+// opts is optional to force a type of output
 // otherwise the filename extension is just used to guess
 // returns 0 on error
 //
@@ -162,7 +176,21 @@ struct grd *g=0;
 
 bool grd_save( struct grd *g , const char *filename , const char *opts )
 {
-	grd_png_save_file(g,filename);
+		if(opts)
+		{
+			if(strcmp(opts,"jpg")==0)
+			{
+				grd_jpg_save_file(g,filename);
+			}
+			else
+			{
+				grd_png_save_file(g,filename);
+			}
+		}
+		else
+		{
+			grd_png_save_file(g,filename);
+		}
 
 	return g->err?false:true ;
 }

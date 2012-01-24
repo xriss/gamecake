@@ -61,6 +61,7 @@ elseif WINDOWS then
 	links { "lib_z" }
 	links { "lib_sqlite" }
 	links { "lib_png" }
+	links { "lib_jpeg" }
 	links { "lib_zzip"}
 	links { "opengl32" , "glu32" }
 	links { "stdc++" , "ws2_32" , "gdi32"}
@@ -84,6 +85,7 @@ elseif NIX then
 	links { "lib_z" }
 	links { "lib_sqlite" }
 	links { "lib_png" }
+	links { "lib_jpeg" }
 	links { "lib_zzip"}
 	links { "GL" , "GLU" }
 	links { "crypt" }

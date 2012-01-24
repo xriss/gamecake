@@ -382,6 +382,7 @@ end
 	include(LIB_LUA)
 	include("lib_zzip")
 	include("lib_png")
+	include("lib_jpeg")
 	include("lib_z")
 	include("lib_sqlite")
 	include("lib_pcre")
