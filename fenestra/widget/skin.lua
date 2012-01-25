@@ -4,7 +4,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local bit=require('bit')
 local gl=require('gl')
-local grd=require('grd')
+local grd=require('wetgenes.grd')
 
 
 local apps=apps
