@@ -1146,7 +1146,7 @@ const luaL_reg lib[] =
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 
 
-int luaopen_grd (lua_State *l)
+int luaopen_wetgenes_grd_core (lua_State *l)
 {
 
 
@@ -1174,7 +1174,7 @@ int luaopen_grd (lua_State *l)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 
-int luaclose_grd (lua_State *l)
+int luaclose_wetgenes_grd_core (lua_State *l)
 {
 	lua_pushstring(l, LUA_grd_LIB_NAME);
 	lua_pushnil(l);

@@ -6,7 +6,7 @@
 
 module(...,package.seeall)
 
-local grd=require("grd")
+local grd=require("wetgenes.grd")
 
 
 

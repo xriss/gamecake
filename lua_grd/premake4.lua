@@ -16,6 +16,6 @@ defines { "JPEGSTATIC" }
 includedirs { "." , "../lib_z" , "../lib_png" , "../lib_jpeg" }
 
 
-SET_KIND("lua","grd","grd")
-SET_TARGET("","grd")
+SET_KIND("lua","wetgenes.grd.core","wetgenes_grd_core")
+SET_TARGET("/wetgenes/grd","core")
 
