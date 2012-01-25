@@ -69,12 +69,28 @@ void grd_info_free(struct grd_info *gi)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 struct grd * grd_realloc( struct grd *g, s32 fmt , s32 w, s32 h, s32 d )
 {
+u8 *bp;
+int i;
 	if(g)
 	{
 		if(!grd_info_alloc(g->bmap, fmt , w, h, d )) { goto bogus; }
 		if(fmt==GRD_FMT_U8_INDEXED) // do we need a palette?
 		{
 			if(!grd_info_alloc(g->pall, GRD_FMT_U8_BGRA , 256, 1, 1 )) { goto bogus; }
+		}
+		else
+		if(fmt==GRD_FMT_U8_LUMINANCE) // do we need a palette?
+		{
+			if(!grd_info_alloc(g->pall, GRD_FMT_U8_BGRA , 256, 1, 1 )) { goto bogus; }
+			bp=g->pall->get_data(0,0,0);
+			for(i=0;i<256;i++)
+			{
+				bp[0]=255;
+				bp[1]=i;
+				bp[2]=i;
+				bp[3]=i;
+				bp+=4;
+			}
 		}
 		else
 		{
@@ -147,7 +163,7 @@ struct grd *g=0;
 	{
 		if(opts)
 		{
-			if(strcmp(opts,"jpg")==0)
+			if(strncmp(opts,"jpg",3)==0)
 			{
 				grd_jpg_load_file(g,filename);
 			}
@@ -159,6 +175,13 @@ struct grd *g=0;
 		else
 		{
 			grd_png_load_file(g,filename);
+		}
+		if(!g->err)
+		{
+			if(!grd_convert(g,fmt))
+			{
+				g->err="failed to convert to requested format";
+			}
 		}
 	}
 
@@ -178,7 +201,7 @@ bool grd_save( struct grd *g , const char *filename , const char *opts )
 {
 		if(opts)
 		{
-			if(strcmp(opts,"jpg")==0)
+			if(strncmp(opts,"jpg",3)==0)
 			{
 				grd_jpg_save_file(g,filename);
 			}
@@ -231,6 +254,8 @@ struct grd * g2=grd_create( g->bmap->fmt , g->bmap->w, g->bmap->h, g->bmap->d );
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 struct grd * grd_insert( struct grd *ga ,  struct grd *gb )
 {
+	ga->err=gb->err;
+	
 	grd_info_free(ga->pall);
 	grd_info_free(ga->bmap);
 	
@@ -251,7 +276,157 @@ struct grd * grd_insert( struct grd *ga ,  struct grd *gb )
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 bool grd_convert( struct grd *g , s32 fmt )
 {
-//TODO:
+struct grd *gb;
+int x,y,z;
+u8 *pa;
+u8 *pb;
+u8 *pc;
+
+	if(g->bmap->fmt==fmt) // nothing to do
+	{
+		return true;
+	}
+
+	if(g->bmap->fmt==GRD_FMT_U8_BGRA) // convert from BGRA
+	{
+		switch(fmt)
+		{
+			case GRD_FMT_HINT_ALPHA:
+			case GRD_FMT_U8_BGRA:
+				return true; // no change needed
+			break;
+			
+			case GRD_FMT_U8_INDEXED:
+				return grd_quant(g,256);
+			break;
+			
+			case GRD_FMT_HINT_ALPHA_1BIT:
+			case GRD_FMT_U16_ARGB_1555:
+				gb=grd_create(GRD_FMT_U16_ARGB_1555,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return false; }
+				
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=g->bmap->get_data(0,y,z);
+						pb=gb->bmap->get_data(0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							u16 d;
+							
+							d=( (pa[3]>=128) ? 0x8000 : 0x0000 ) |
+								(pa[0]>>3) | 
+								((pa[1]>>3)<<5) |
+								((pa[2]>>3)<<10) ;
+								
+							*((u16 *)(pb))=d;
+							
+							pa+=4;
+							pb+=2;							
+						}
+					}
+				}
+				
+				grd_insert(g,gb);
+			break;
+						
+			case GRD_FMT_HINT_ONLY_ALPHA:
+			case GRD_FMT_U8_LUMINANCE:
+			
+			case GRD_FMT_F32_ARGB:
+			
+			case GRD_FMT_F64_ARGB:
+			
+			case GRD_FMT_HINT_NO_ALPHA:
+			case GRD_FMT_U8_RGB:
+			
+			default:
+				return false;
+			break;	
+		}
+	}
+	else
+	if(fmt==GRD_FMT_U8_BGRA) // convert to BGRA
+	{
+		switch(g->bmap->fmt)
+		{
+			case GRD_FMT_U8_BGRA:
+				return true; // no change needed
+			break;
+			
+			case GRD_FMT_U8_LUMINANCE:
+			case GRD_FMT_U8_INDEXED:
+				gb=grd_create(GRD_FMT_U8_BGRA,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return false; }
+				
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=g->bmap->get_data(0,y,z);
+						pb=gb->bmap->get_data(0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							pc=g->pall->get_data(*pa,0,0);
+							pb[0]=pc[0];
+							pb[1]=pc[1];
+							pb[2]=pc[2];
+							pb[3]=pc[3];
+							pa+=1;
+							pb+=4;
+						}
+					}
+				}
+				
+				grd_insert(g,gb);
+			break;
+						
+			case GRD_FMT_U16_ARGB_1555:
+				gb=grd_create(GRD_FMT_U8_BGRA,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return false; }
+				
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=g->bmap->get_data(0,y,z);
+						pb=gb->bmap->get_data(0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							u16 d;
+							d=*((u16*)(pa));
+							pb[3]=(d>=0x8000)?255:0;
+							pb[2]=(((d>>10)&0x1f)<<3) | (((d>>10)&0x1f)>>2);
+							pb[1]=(((d>> 5)&0x1f)<<3) | (((d>> 5)&0x1f)>>2);
+							pb[0]=(((d    )&0x1f)<<3) | (((d>>  )&0x1f)>>2);
+							
+							pa+=2;
+							pb+=4;
+						}
+					}
+				}
+				
+				grd_insert(g,gb);
+			break;
+			
+			case GRD_FMT_F32_ARGB:
+			
+			case GRD_FMT_F64_ARGB:
+			
+			case GRD_FMT_U8_RGB:
+			
+			default:
+				return false;
+			break;	
+		}
+	}
+	else // convert source to BGRA first then try again
+	{
+		if(! grd_convert(g ,GRD_FMT_U8_BGRA) ) { return false; }
+		return grd_convert(g ,fmt);
+	}
+	
 	return true;
 }
 
@@ -304,7 +479,7 @@ bool grd_conscale( struct grd *g , f32 base, f32 scale)
 {
 
 
-	return true;
+	return false;
 
 }
 
@@ -429,7 +604,7 @@ u32 *ptr;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// flip top to bottom
+// flip top to bottom, ogl is often upside down so this is a useful function?
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_flipy( struct grd *g )
@@ -445,7 +620,7 @@ u8 b;
 		{
 			p1=(u8*)gi->get_data(0,y,z);
 			p2=(u8*)gi->get_data(0,(gi->h-1)-y,z);
-			for(x=0;x<gi->yscan;x++) // yscan is a full line (use abs?)
+			for(x=0;x<gi->yscan;x++) // yscan is a full line (use abs?) this may break, fixit
 			{
 				b=*p1;
 				*p1++=*p2;

@@ -158,7 +158,7 @@ bogus:
 	{
 		fclose(fp);
 	}
-	if(err) {g->err=err;}
+	if(err) {g->err=err;} else {g->err=0; }
 }
 
 
@@ -235,8 +235,13 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 		}
 	}
 	else
+	if(g->bmap->fmt==GRD_FMT_U8_BGRA)	
 	{
 		png_set_bgr(png_ptr);
+	}
+	else
+	{
+		abort_("unsupported png save format");
 	}
 
 
@@ -296,6 +301,6 @@ bogus:
 	{
 		fclose(fp);
 	}
-	if(err) {g->err=err;}
+	if(err) {g->err=err;} else {g->err=0; }
 }
 

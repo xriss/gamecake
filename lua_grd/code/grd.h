@@ -48,7 +48,11 @@ enum GRD_FMT
 #define GRD_FMT_SIZEOFPIXEL(x) (	(x==GRD_FMT_U8_BGRA)?4:\
 									(x==GRD_FMT_U8_INDEXED)?1:\
 									(x==GRD_FMT_U8_LUMINANCE)?1:\
+									(x==GRD_FMT_U16_ARGB_1555)?2:\
+									(x==GRD_FMT_U8_RGB)?3:\
 									0)
+//									(x==GRD_FMT_F32_ARGB)?16:\
+//									(x==GRD_FMT_F64_ARGB)?32:\
 
 // information about a bitmap held in memory (or even a palette)
 // by using scan values we can describe a section of a larger bitmap in this structure

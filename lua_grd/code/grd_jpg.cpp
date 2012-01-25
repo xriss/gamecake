@@ -88,7 +88,7 @@ bogus:
 	{
 		fclose(fp);
 	}
-	if(err) {g->err=err;}
+	if(err) {g->err=err;} else {g->err=0; }
 
 }
 
@@ -100,6 +100,6 @@ bogus:
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_jpg_save_file(struct grd *g , const char* file_name )
 {
-
+	g->err="jpg save disabled";
 }
 
