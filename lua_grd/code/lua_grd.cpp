@@ -209,6 +209,7 @@ int lua_grd_create (lua_State *l)
 {
 part_ptr *p;
 const char *s;
+const char *opts=0;
 
 int idx_ptr;
 int idx_tab;
@@ -270,8 +271,22 @@ int idx_tab;
 
 		fmt=lua_grd_tofmt(l,1);
 		s=lua_tostring(l,2);
+		if(lua_isstring(l,3))	// choose format?
+		{
+			opts=lua_tostring(l,3);
+		}
+		
+		(*p)=grd_load(s,fmt,opts);
+		
+		if( (*p)->err ) // return nil,err
+		{
+			lua_pushnil(l);
+			lua_pushstring(l,(*p)->err);
+			
+			lua_remove(l, idx_ptr );
 
-		(*p)=grd_load(s,fmt,0);
+			return 2;
+		}
 	}
 	else // just make a default one
 	{
@@ -365,7 +380,8 @@ part_ptr new_p;
 	}
 	lua_grd_getinfo(l,*p,lua_upvalueindex(UPVALUE_TAB));
 
-	return 0;
+	lua_pushboolean(l,1);
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -375,6 +391,8 @@ part_ptr new_p;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_load (lua_State *l)
 {
+const char *opts=0;
+
 part_ptr *p;
 part_ptr new_p;
 	
@@ -388,7 +406,12 @@ s32 fmt;
 	fmt=lua_grd_tofmt(l,2);
 	s=lua_tostring(l,3);
 
-	new_p=grd_load(s,fmt,0);
+	if(lua_isstring(l,4))	// force format?
+	{
+		opts=lua_tostring(l,4);
+	}
+
+	new_p=grd_load(s,fmt,opts);
 
 
 	if(new_p!=0)
@@ -403,7 +426,8 @@ s32 fmt;
 	lua_grd_getinfo(l,*p,lua_upvalueindex(UPVALUE_TAB));
 
 
-	return 0;
+	lua_pushboolean(l,1);
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -424,10 +448,25 @@ const char *s;
 	{
 		luaL_error(l, "no file name specified" );
 	}
+	
+	if( p->bmap->w<1 )
+	{
+		luaL_error(l, "image has 0 width" );
+	}
+	if( p->bmap->h<1 )
+	{
+		luaL_error(l, "image has 0 height" );
+	}
+	if( p->bmap->d<1 )
+	{
+		luaL_error(l, "image has 0 depth" );
+	}
+	
 	grd_save(p,s,0);
 
 
-	return 0;
+	lua_pushboolean(l,1);
+	return 1;
 }
 
 
@@ -451,7 +490,8 @@ s32 num;
 
 	lua_grd_getinfo(l,p,1);
 
-	return 0;
+	lua_pushboolean(l,1);
+	return 1;
 }
 
 
@@ -472,7 +512,8 @@ s32 fmt;
 
 	lua_grd_getinfo(l,p,1);
 
-	return 0;
+	lua_pushboolean(l,1);
+	return 1;
 }
 
 
@@ -493,7 +534,8 @@ f32 scale;
 
 	grd_conscale(p,base,scale);
 
-	return 0;
+	lua_pushboolean(l,1);
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -515,7 +557,8 @@ s32 w,h,d;
 
 	lua_grd_getinfo(l,p,1);
 
-	return 0;
+	lua_pushboolean(l,1);
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -532,7 +575,8 @@ part_ptr p;
 
 	lua_grd_getinfo(l,p,1);
 
-	return 0;
+	lua_pushboolean(l,1);
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
