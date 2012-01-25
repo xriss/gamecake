@@ -10,6 +10,7 @@ module(...)
 function start()
 
 	lunatest.suite("wetgenes_string")
+	lunatest.suite("wetgenes_grd")
 
 	lunatest.run()
 	

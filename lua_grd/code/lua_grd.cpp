@@ -271,7 +271,7 @@ int idx_tab;
 
 		fmt=lua_grd_tofmt(l,1);
 		s=lua_tostring(l,2);
-		if(lua_isstring(l,3))	// choose format?
+		if(lua_isstring(l,3))	// choose loader?
 		{
 			opts=lua_tostring(l,3);
 		}
@@ -285,6 +285,7 @@ int idx_tab;
 			
 			lua_remove(l, idx_ptr );
 
+			grd_free((*p));
 			return 2;
 		}
 	}
@@ -412,6 +413,14 @@ s32 fmt;
 	}
 
 	new_p=grd_load(s,fmt,opts);
+	
+	if(new_p->err)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,new_p->err);
+		grd_free(new_p);
+		return 2;
+	}
 
 
 	if(new_p!=0)
@@ -462,7 +471,12 @@ const char *s;
 		luaL_error(l, "image has 0 depth" );
 	}
 	
-	grd_save(p,s,0);
+	if(! grd_save(p,s,0) )
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"failed to convert");
+		return 2;
+	}
 
 
 	lua_pushboolean(l,1);
@@ -508,7 +522,12 @@ s32 fmt;
 
 	fmt=lua_grd_tofmt(l,2);
 
-	grd_convert(p,fmt);
+	if(! grd_convert(p,fmt) )
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"failed to convert");
+		return 2;
+	}
 
 	lua_grd_getinfo(l,p,1);
 
