@@ -27,8 +27,8 @@ void grd_png_load_file(struct grd * g, const char* file_name)
 	png_byte color_type;
 	png_byte bit_depth;
 
-	png_structp png_ptr;
-	png_infop info_ptr;
+	png_structp png_ptr=0;
+	png_infop info_ptr=0;
 	int number_of_passes;
 	png_bytep * row_pointers=0;
 	int num_palette;
@@ -146,7 +146,10 @@ void grd_png_load_file(struct grd * g, const char* file_name)
     
 bogus:
 
-	png_destroy_read_struct(&png_ptr,&info_ptr,0);
+	if( png_ptr )
+	{
+		png_destroy_read_struct(&png_ptr,&info_ptr,0);
+	}
 	if(row_pointers)
 	{
 		free(row_pointers); // temporary
@@ -174,8 +177,8 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 	png_byte color_type;
 	png_byte bit_depth;
 
-	png_structp png_ptr;
-	png_infop info_ptr;
+	png_structp png_ptr=0;
+	png_infop info_ptr=0;
 	int number_of_passes;
 	png_bytep * row_pointers;
 
@@ -281,7 +284,10 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 
 bogus:
 
-	png_destroy_write_struct(&png_ptr,&info_ptr);
+	if( png_ptr )
+	{
+		png_destroy_write_struct(&png_ptr,&info_ptr);
+	}
 	if(row_pointers)
 	{
 		free(row_pointers); // temporary

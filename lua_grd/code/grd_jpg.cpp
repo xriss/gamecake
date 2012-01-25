@@ -24,6 +24,8 @@ void grd_jpg_load_file(struct grd * g, const char* file_name)
 	int grdfmt;
 	int width, height;
 	int y;
+
+	unsigned char *bb,*bi,*bo; // buffer ptrs
 	
 	JSAMPARRAY buffer;		/* Output row buffer */
 	int row_stride;		/* physical row width in output buffer */
@@ -63,10 +65,19 @@ void grd_jpg_load_file(struct grd * g, const char* file_name)
 	while (cinfo.output_scanline < cinfo.output_height)
 	{
 		jpeg_read_scanlines(&cinfo, buffer, 1);
-		memcpy( g->bmap->get_data(0,y,0) , buffer[0] , width*4 ); // save each in our wossname
+		
+		bo=g->bmap->get_data(0,y,0);
+		bb=buffer[0];
+		for( bi=bb ; bi<bb+(width*3) ; bi+=3 , bo+=4 )
+		{
+			bo[0]=bi[2];
+			bo[1]=bi[1];
+			bo[2]=bi[0];
+			bo[3]=255;
+		}
+		
 		y++;
 	}
- 
  
 	jpeg_finish_decompress(&cinfo);
 
