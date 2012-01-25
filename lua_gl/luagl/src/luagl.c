@@ -1544,11 +1544,13 @@ static int luagl_get(lua_State *L)
     size = 4;
     break;
 
-//  case GL_MODELVIEW_MATRIX:
-//  case GL_PROJECTION_MATRIX:
-//  case GL_TEXTURE_MATRIX:
-//    size = 16;
-//    break;
+#if defined(ENABLE_NON_GL_ES)
+  case GL_MODELVIEW_MATRIX:
+  case GL_PROJECTION_MATRIX:
+  case GL_TEXTURE_MATRIX:
+    size = 16;
+    break;
+#endif
 
   default:
     luaL_argerror(L, 1, "unknown enumeration.");
@@ -1608,11 +1610,13 @@ static int luagl_get_const(lua_State *L)
     size = 4;
     break;
 
-//  case GL_MODELVIEW_MATRIX:
-//  case GL_PROJECTION_MATRIX:
-//  case GL_TEXTURE_MATRIX:
-//    size = 16;
-//    break;
+#if defined(ENABLE_NON_GL_ES)
+  case GL_MODELVIEW_MATRIX:
+  case GL_PROJECTION_MATRIX:
+  case GL_TEXTURE_MATRIX:
+    size = 16;
+    break;
+#endif
   }
 
   params = LUAGL_NEW_ARRAY(GLenum, size);
@@ -1668,11 +1672,13 @@ static int luagl_get_array(lua_State *L)
     size = 4;
     break;
 
- // case GL_MODELVIEW_MATRIX:
- // case GL_PROJECTION_MATRIX:
- // case GL_TEXTURE_MATRIX:
- //   size = 16;
- //   break;
+#if defined(ENABLE_NON_GL_ES)
+  case GL_MODELVIEW_MATRIX:
+  case GL_PROJECTION_MATRIX:
+  case GL_TEXTURE_MATRIX:
+    size = 16;
+    break;
+#endif
   }
 
   params = LUAGL_NEW_ARRAY(GLfloat, size);
