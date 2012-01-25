@@ -3,7 +3,7 @@ local fenestra_avatar=require('fenestra.avatar')
 
 local bit=require('bit')
 local gl=require('gl')
-local grd=require('grd')
+local grd=require('wetgenes.grd')
 
 
 local _G=_G

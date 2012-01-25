@@ -7,7 +7,7 @@ const char* wetgenes_cache_lua_mods[]={
 "\n"
 "local bit=require('bit')\n"
 "local gl=require('gl')\n"
-"local grd=require('grd')\n"
+"local grd=require('wetgenes.grd')\n"
 "\n"
 "\n"
 "local apps=apps\n"

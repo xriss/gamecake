@@ -6,7 +6,7 @@ local win=win
 local apps=apps
 
 local gl=require("gl")
-local grd=require("grd")
+local grd=require("wetgenes.grd")
 
 
 local function print(...) _G.print(...) end

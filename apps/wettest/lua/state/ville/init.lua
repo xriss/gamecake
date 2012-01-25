@@ -222,7 +222,7 @@ function draw()
 	end
 	win.project23d(480/640,8,32768)
 	
-	gl.MatrixMode("MODELVIEW")
+	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
 
 -- dumb camera position	
@@ -230,8 +230,8 @@ function draw()
 	gl.Rotate(vrot,1,0,0)
 
 -- save current mtx for reverse mouse pointer projections
-	mtx_proj:set(gl.Get("PROJECTION_MATRIX"))
-	mtx_view:set(gl.Get("MODELVIEW_MATRIX"))
+	mtx_proj:set(gl.Get(gl.PROJECTION_MATRIX))
+	mtx_view:set(gl.Get(gl.MODELVIEW_MATRIX))
 	mtx_view:product(mtx_proj,mtx_3d_to_2d) 	-- combine
 	mtx_3d_to_2d:inverse(mtx_2d_to_3d)         	-- inverse
 
@@ -287,7 +287,7 @@ function draw()
 		win.project23d( (win.width*1/3)/win.height ,1,32768)
 		gl.ClearColor(0,0,0,0)
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
-		gl.MatrixMode("MODELVIEW")
+		gl.MatrixMode(gl.MODELVIEW)
 		gl.LoadIdentity()
 		gl.Translate(0,0,-win.height/2)
 		
