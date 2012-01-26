@@ -461,7 +461,7 @@ int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 	for( i=0 ; i<siz ; i++ )
 	{
 		c=*ptr++;
-		*optr++=neuquant32_inxsearch( (c>>24)&0xff , (c>>16)&0xff , (c>>8)&0xff , (c)&0xff  );
+		*optr++=neuquant32_inxsearch( (c)&0xff , (c>>8)&0xff , (c>>16)&0xff , (c>>24)&0xff );
 	}
 	
 	grd_insert(g,gb);

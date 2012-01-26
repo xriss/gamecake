@@ -186,10 +186,10 @@ void neuquant32_getcolormap(unsigned char *map)
 	unsigned int j;
 	for(j=0; j<netsize; j++)
     {
-        *map++ = unbiasvalue(network[j].b);
-        *map++ = unbiasvalue(network[j].g);
-        *map++ = unbiasvalue(network[j].r);
         *map++ = round_biased(network[j].al);
+        *map++ = unbiasvalue(network[j].r);
+        *map++ = unbiasvalue(network[j].g);
+        *map++ = unbiasvalue(network[j].b);
 	}
 }
 
@@ -257,7 +257,7 @@ inline static double colorimportance(double al)
 /* Search for ABGR values 0..255 (after net is unbiased) and return colour index
    ---------------------------------------------------------------------------- */
 
-unsigned int neuquant32_inxsearch( int al, int b, int g, int r)
+unsigned int neuquant32_inxsearch( int al, int r, int g, int b)
 {
     unsigned int i,best=0;
     double a,bestd=1<<30,dist;
@@ -429,12 +429,12 @@ void neuquant32_learn(unsigned int samplefac)//, unsigned int verbose) /* Stu: N
 	i = 0;
 	while (i < samplepixels) 
     {
-        if (p[3])
-        {            
-            al =p[3];
-            r = biasvalue(p[2]);
-            g = biasvalue(p[1]);
-            b = biasvalue(p[0]);
+        if (p[0])
+        {
+            al =p[0];
+            r = biasvalue(p[1]);
+            g = biasvalue(p[2]);
+            b = biasvalue(p[3]);
         }
         else
         {
