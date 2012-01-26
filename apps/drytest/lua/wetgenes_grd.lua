@@ -40,6 +40,16 @@ end
 function test_png_8888_t3()
 	do_png_8888("t3")
 end
+function test_png_1555_t3()
+	do_png_1555("t3")
+end
+function test_png_8_t3()
+	do_png_8("t3")
+end
+function test_png_8x_t3()
+	do_png_8x("t3")
+end
+
 
 function do_file_read(f)
 	local fp=assert(io.open(f,"rb"))
@@ -83,6 +93,16 @@ function do_jpg_1555(name)
 	assert_true( do_file_compare("dat/grd/"..name..".1555.out.png","dat/grd/"..name..".1555.chk.png") )
 end
 
+function do_png_1555(name)
+
+	local g=assert(grd.create("GRD_FMT_U8_BGRA","dat/grd/"..name..".bse.png","png"))
+	assert( g:convert("GRD_FMT_U16_ARGB_1555") )
+	assert( g:convert("GRD_FMT_U8_BGRA") )
+	assert( g:save("dat/grd/"..name..".1555.out.png","png") )
+
+	assert_true( do_file_compare("dat/grd/"..name..".1555.out.png","dat/grd/"..name..".1555.chk.png") )
+end
+
 function do_jpg_8(name)
 
 	local g=assert(grd.create("GRD_FMT_U8_BGRA","dat/grd/"..name..".bse.jpg","jpg"))
@@ -92,9 +112,29 @@ function do_jpg_8(name)
 	assert_true( do_file_compare("dat/grd/"..name..".8.out.png","dat/grd/"..name..".8.chk.png") )
 end
 	
+function do_png_8(name)
+
+	local g=assert(grd.create("GRD_FMT_U8_BGRA","dat/grd/"..name..".bse.png","png"))
+	assert( g:convert("GRD_FMT_U8_INDEXED") )
+	assert( g:save("dat/grd/"..name..".8.out.png","png") )
+
+	assert_true( do_file_compare("dat/grd/"..name..".8.out.png","dat/grd/"..name..".8.chk.png") )
+end
+	
 function do_jpg_8x(name)
 
 	local g=assert(grd.create("GRD_FMT_U8_BGRA","dat/grd/"..name..".bse.jpg","jpg"))
+	assert( g:convert("GRD_FMT_U8_INDEXED") )
+	assert( g:convert("GRD_FMT_U8_BGRA") )
+	assert( g:save("dat/grd/"..name..".8x.out.png","png") )
+
+	assert_true( do_file_compare("dat/grd/"..name..".8x.out.png","dat/grd/"..name..".8x.chk.png") )
+	
+end
+
+function do_png_8x(name)
+
+	local g=assert(grd.create("GRD_FMT_U8_BGRA","dat/grd/"..name..".bse.png","png"))
 	assert( g:convert("GRD_FMT_U8_INDEXED") )
 	assert( g:convert("GRD_FMT_U8_BGRA") )
 	assert( g:save("dat/grd/"..name..".8x.out.png","png") )
