@@ -70,10 +70,10 @@ void grd_jpg_load_file(struct grd * g, const char* file_name)
 		bb=buffer[0];
 		for( bi=bb ; bi<bb+(width*3) ; bi+=3 , bo+=4 )
 		{
-			bo[0]=bi[2];
-			bo[1]=bi[1];
-			bo[2]=bi[0];
-			bo[3]=255;
+			bo[0]=255;
+			bo[1]=bi[0];
+			bo[2]=bi[1];
+			bo[3]=bi[2];
 		}
 		
 		y++;
