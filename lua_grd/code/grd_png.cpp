@@ -97,7 +97,8 @@ void grd_png_load_file(struct grd * g, const char* file_name)
 	}
 	if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA)
 	{
-		png_set_bgr(png_ptr);
+		png_set_swap_alpha(png_ptr);
+//		png_set_bgr(png_ptr);
 	}
 	if (color_type == PNG_COLOR_TYPE_RGB)
 	{
@@ -220,9 +221,9 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 		{
 		u32 c=((u32*)g->pall->data)[x];
 		
-			palptr[x].red  =(c    )&0xff;
+			palptr[x].blue =(c    )&0xff;
 			palptr[x].green=(c>> 8)&0xff;
-			palptr[x].blue =(c>>16)&0xff;
+			palptr[x].red  =(c>>16)&0xff;
 			  tptr[x]      =(c>>24)&0xff;
 			  
 			if(tptr[x]!=255) { max_trans=x; } // skip some trans values?
@@ -237,7 +238,8 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 	else
 	if(g->bmap->fmt==GRD_FMT_U8_BGRA)	
 	{
-		png_set_bgr(png_ptr);
+		png_set_swap_alpha(png_ptr);
+//		png_set_bgr(png_ptr);
 	}
 	else
 	{

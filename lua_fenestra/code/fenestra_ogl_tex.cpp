@@ -25,7 +25,7 @@ bool fenestra_ogl::tex_setup(struct fogl_tex *tex, struct grd *g)
 		glBindTexture(GL_TEXTURE_2D, tex->texture_buffer);
 
 		// build our texture mipmaps
-		gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA , g->bmap->w, g->bmap->h, GL_RGBA, GL_UNSIGNED_BYTE, g->bmap->data );
+		gluBuild2DMipmaps(GL_TEXTURE_2D, GL_BGRA , g->bmap->w, g->bmap->h, GL_BGRA, GL_UNSIGNED_BYTE, g->bmap->data );
 		
  		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
