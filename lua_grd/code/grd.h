@@ -8,12 +8,14 @@
 //
 // Only have popular/usefull formats as basic types that can be used internaly
 //
+// data is always in ARGB order in memory but these are little endian, hence the BGRA (u32) default 
+//
 enum GRD_FMT
 {
 	GRD_FMT_NONE=0,
 
 // basic formats, most manipulations will only work on GRD_FMT_ARGB_U8
-// data can be convereted too or from other formats but only during load/save its never going to be worked on like that
+// data can be convereted too or from other formats
 
 	GRD_FMT_U8_BGRA,				// u8[4]  per pixel, forced U8 BGRA (thinking little endian makes this the default) 
 	GRD_FMT_U8_INDEXED,				// u8[1]  per pixel, forced U8 Indexed input

@@ -663,47 +663,47 @@ bool read_tab;
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[3]=(u8)t;
+						datu8[0]=(u8)t;
 						lua_pop(l,1);
 
 						lua_pushnumber(l,idx+1);
-						lua_rawget(l,tab_idx);
-						t=(float)lua_tonumber(l,-1);
-						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[2]=(u8)t;
-						lua_pop(l,1);
-
-						lua_pushnumber(l,idx+2);
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
 						datu8[1]=(u8)t;
 						lua_pop(l,1);
 
+						lua_pushnumber(l,idx+2);
+						lua_rawget(l,tab_idx);
+						t=(float)lua_tonumber(l,-1);
+						if(t>255) { t=255; }	if(t<0)   { t=0; }
+						datu8[2]=(u8)t;
+						lua_pop(l,1);
+
 						lua_pushnumber(l,idx+3);
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[0]=(u8)t;
+						datu8[3]=(u8)t;
 						lua_pop(l,1);
 
 					}
 					else
 					{
 						lua_pushnumber(l,idx+0);
-						lua_pushnumber(l,datu8[3]);
+						lua_pushnumber(l,datu8[0]);
 						lua_rawset(l,tab_idx);
 
 						lua_pushnumber(l,idx+1);
-						lua_pushnumber(l,datu8[2]);
-						lua_rawset(l,tab_idx);
-
-						lua_pushnumber(l,idx+2);
 						lua_pushnumber(l,datu8[1]);
 						lua_rawset(l,tab_idx);
 
+						lua_pushnumber(l,idx+2);
+						lua_pushnumber(l,datu8[2]);
+						lua_rawset(l,tab_idx);
+
 						lua_pushnumber(l,idx+3);
-						lua_pushnumber(l,datu8[0]);
+						lua_pushnumber(l,datu8[3]);
 						lua_rawset(l,tab_idx);
 					}
 

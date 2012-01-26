@@ -1,13 +1,8 @@
 
 
-
-
-
-
 module(...,package.seeall)
 
 local grd=require("wetgenes.grd")
-
 
 
 
