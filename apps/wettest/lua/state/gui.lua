@@ -67,7 +67,7 @@ function draw()
 	gl.ClearColor(14/15,14/15,14/15,0)
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT);
 	
-	win.project23d(480/640,2,1024)
+	win.project23d(640/480,2,1024)
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
 
