@@ -221,10 +221,10 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 		{
 		u32 c=((u32*)g->pall->data)[x];
 		
-			palptr[x].blue =(c    )&0xff;
-			palptr[x].green=(c>> 8)&0xff;
-			palptr[x].red  =(c>>16)&0xff;
-			  tptr[x]      =(c>>24)&0xff;
+			palptr[x].blue =(c>>24)&0xff;
+			palptr[x].green=(c>>16)&0xff;
+			palptr[x].red  =(c>> 8)&0xff;
+			  tptr[x]      =(c    )&0xff;
 			  
 			if(tptr[x]!=255) { max_trans=x; } // skip some trans values?
 		}

@@ -5,9 +5,15 @@
 
 local lunatest=require("lunatest")
 
+local apps=apps
+
+local lfs=require("lfs")
+
 module(...)
 
 function start()
+
+	lfs.chdir(apps.dir)
 
 	lunatest.suite("wetgenes_string")
 	lunatest.suite("wetgenes_grd")
