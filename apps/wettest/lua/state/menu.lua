@@ -25,6 +25,8 @@ print(widget.id)
 				_G.goto("rouge")
 			elseif widget.id=="gui" then
 				_G.goto("gui")
+			elseif widget.id=="gamecake" then
+				_G.goto("gamecake")
 --			elseif widget.id=="cruft" then
 --				_G.goto("cruft")
 			end
@@ -42,6 +44,7 @@ function setup()
 	top:add({text="avatar editor",color=0x88ff0000,id="avatar",hooks=hooks})
 	top:add({text="test box2d",color=0x88ff0000,id="box2d",hooks=hooks})
 	top:add({text="test gui",color=0x88ff0000,id="gui",hooks=hooks})
+	top:add({text="test gamecake",color=0x88ff0000,id="gamecake",hooks=hooks})
 --	top:add({text="roguyver",color=0x88ff0000,id="rouge",hooks=hooks})
 --	top:add({text="old avatar editor",color=0x88ff0000,id="cruft",hooks=hooks})
 	top:add({sy=5,sx=1})
