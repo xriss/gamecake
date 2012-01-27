@@ -312,6 +312,7 @@ u8 *pc;
 							pa[2]=(u8)((pa[2]*a)>>8);
 							pa[3]=(u8)((pa[3]*a)>>8);
 							pa[0]=255-a;
+							pa+=4;
 						}
 					}
 				}
@@ -654,11 +655,57 @@ u8 b;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // copy gb into ga, but only copy the pointers
+//
+// then adjust the size and address so it points to a single layer of the image
+// as described by z
+//
+// this new structure should not be freed as it is mearly a copy of pointers
+// also you should not free the original while using this new one
+// ie it is designed as tempory use for effects that should only effect a portion of another grd
+//
+// if gb==ga then it is not copied just adjusted
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+bool grd_layer( struct grd *ga , struct grd *gb , s32 z)
+{
+	gb->err=0;
+	
+	if(z<0)             { gb->err="layer out of bounds"; }
+	if((z)>gb->bmap->d) { gb->err="layer out of bounds"; }
+
+	ga->err=gb->err; // put error in both
+	if(ga->err) { return false; }
+
+	if(ga!=gb)
+	{
+		ga->cmap->set(gb->cmap);
+		ga->bmap->set(gb->bmap);
+	}
+	
+	ga->bmap->d=1;
+	ga->bmap->data+=(ga->bmap->zscan*z);
+
+	return true;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// copy gb into ga, but only copy the pointers
+//
 // then adjust the size and address so it points to a smaller portion of the image
 // as described by x,y : w,h
 //
+// we also always select layer 0
+//
+// this new structure should not be freed as it is mearly a copy of pointers
+// also you should not free the original while using this new one
+//
+// ie it is designed as tempory use for effects that should only effect a portion of another grd
+//
+// if gb==ga then it is not copied just adjusted
+//
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grd_clip( struct grd *ga , struct grd *gb , int x, int y, int w, int h)
+bool grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 w, s32 h)
 {
 	gb->err=0;
 	
@@ -670,11 +717,15 @@ bool grd_clip( struct grd *ga , struct grd *gb , int x, int y, int w, int h)
 	ga->err=gb->err; // put error in both
 	if(ga->err) { return false; }
 	
-	ga->cmap->set(gb->cmap);
-	ga->bmap->set(gb->bmap);
+	if(ga!=gb)
+	{
+		ga->cmap->set(gb->cmap);
+		ga->bmap->set(gb->bmap);
+	}
 	
 	ga->bmap->w=w;
 	ga->bmap->h=h;
+	ga->bmap->d=1;
 	ga->bmap->data+=(ga->bmap->xscan*x)+(ga->bmap->yscan*y);
 
 	return true;
@@ -684,10 +735,10 @@ bool grd_clip( struct grd *ga , struct grd *gb , int x, int y, int w, int h)
 //
 // blit gb onto ga at x,y (topleft is 0,0)
 //
-// you can use a fake gb to choose a portion of a larger image built using grd_clip
+// you can use a fake gb to choose a portion of a larger image built using grd_clip and grd_layer
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grd_blit( struct grd *ga , struct grd *gb , int x, int y)
+bool grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y)
 {
 struct grd_info *ba=ga->bmap;
 struct grd_info *bb=gb->bmap;
@@ -695,9 +746,9 @@ struct grd_info *bb=gb->bmap;
 u32 *pa,*pb;
 u32 a,b;
 
-int i;
-int w=bb->w;
-int h=bb->h;
+s32 i,j;
+s32 w=bb->w;
+s32 h=bb->h;
 
 	ga->err=0;
 
@@ -716,7 +767,7 @@ int h=bb->h;
 		{
 			pa=(u32*)ba->get_data(x,y+i,0);
 			pb=(u32*)bb->get_data(0,i,0);
-			for(x=0;x<w;x++)
+			for(j=0;j<w;j++)
 			{
 				a=*(pa);
 				b=*(pb++);

@@ -70,6 +70,8 @@ function do_premult(name)
 	
 	local c=assert(grd.create("GRD_FMT_U8_BGRA",320,240,1))
 	
+	assert( c:blit(g,0,0) )
+	
 	assert( c:save("dat/grd/"..name..".premult.out.png","png") )
 	
 	assert_true( do_file_compare("dat/grd/"..name..".premult.out.png","dat/grd/"..name..".premult.chk.png") )
