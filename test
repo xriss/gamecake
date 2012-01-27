@@ -1,2 +1,2 @@
-cd apps/wettest
-./dbg
+cd apps/drytest
+./dbg $*

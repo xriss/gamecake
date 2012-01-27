@@ -46,6 +46,11 @@ function test_png_8x_t3()
 end
 
 
+function test_premult_t3()
+	do_premult("t3")
+end
+
+
 function do_file_read(f)
 	local fp=assert(io.open(f,"rb"))
 	local d=assert(fp:read("*a"))
@@ -59,6 +64,17 @@ function do_file_compare(f1,f2)
 	return d1==d2
 end
 
+function do_premult(name)
+
+	local g=assert(grd.create("GRD_FMT_U8_BGRA_PREMULT","dat/grd/"..name..".bse.png","png"))
+	
+	local c=assert(grd.create("GRD_FMT_U8_BGRA",320,240,1))
+	
+	assert( c:save("dat/grd/"..name..".premult.out.png","png") )
+	
+	assert_true( do_file_compare("dat/grd/"..name..".premult.out.png","dat/grd/"..name..".premult.chk.png") )
+
+end
 
 function do_jpg_8888(name)
 

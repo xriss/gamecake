@@ -62,10 +62,14 @@ local now = socket and socket.gettime
 -- Get env immediately wrapping module, to put assert_ tests there.
 local _importing_env = getenv()
 
--- Check command line arguments:
--- -v / --verbose, default to verbose_hooks.
--- -s or --suite, only run the named suite(s).
--- -t or --test, only run tests matching the pattern.
+local helpstr=[[
+Check command line arguments:
+-h / --help, this msg
+-v / --verbose, default to verbose_hooks.
+-s or --suite, only run the named suite(s).
+-t or --test, only run tests matching the pattern.
+]]
+
 local lt_arg = arg
 
 -- #####################
@@ -694,7 +698,10 @@ local function cmd_line_switches(arg)
    local opts = {}
    for i=1,#arg do
       local v = arg[i]
-      if v == "-v" or v == "--verbose" then opts.verbose=true
+      if v=="?" or v=="-?" or v=="-h" or v=="--help" then
+		print(helpstr)
+		exit(0)
+      elseif v == "-v" or v == "--verbose" then opts.verbose=true
       elseif v == "-s" or v == "--suite" then
          opts.suite_pat = arg[i+1]
       elseif v == "-t" or v == "--test" then

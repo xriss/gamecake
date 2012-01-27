@@ -31,7 +31,7 @@
 // added neuquant32_ prefix so as to reduce name clash
 // moved junk from header to this file for the same reason
 // marked all globals as static except the ones prefixed with neuquant32_
-// switched to expect bgra colors, which is a little endian u32 argb
+// switched to expect BGRA colors, which is a little endian U32 of a U8[4] ARGB
 // made the alpha super important when doing an inxsearch
 // removed the faster version of inxsearch since it seems broken
 //

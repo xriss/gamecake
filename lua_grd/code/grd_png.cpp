@@ -138,11 +138,11 @@ void grd_png_load_file(struct grd * g, const char* file_name)
 		    ((palptr[x].red  &0xff)    )|
 		    ((palptr[x].green&0xff)<< 8)|
 		    ((palptr[x].blue &0xff)<<16);
-		((u32*)g->pall->data)[x]=c;
+		((u32*)g->cmap->data)[x]=c;
 	}
     for(x=0;x<num_trans;x++)
     {
-		((u8*)g->pall->data)[(4*x)+3]=trans[x];
+		((u8*)g->cmap->data)[(4*x)+3]=trans[x];
 	}
     
 bogus:
@@ -219,7 +219,7 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 
 		for(x=0;x<256;x++)
 		{
-		u32 c=((u32*)g->pall->data)[x];
+		u32 c=((u32*)g->cmap->data)[x];
 		
 			palptr[x].blue =(c>>24)&0xff;
 			palptr[x].green=(c>>16)&0xff;
