@@ -36,14 +36,16 @@ enum GRD_FMT
 // these are hints for textures rather than specific formats and don't guarantee any number of bits
 // in fact the texture may even use a simple lossy compressed format if enabled
 // basically it is none of your concern, if you intend to do anything with the dat convert it to one of the
-// above basic formats
+// basic formats
 
 	GRD_FMT_HINT_NO_ALPHA,			// just RGB , probably u32 or u16(565)
 	GRD_FMT_HINT_ALPHA_1BIT,		// and RGB  , probably u32 or u16(1555)
 	GRD_FMT_HINT_ALPHA,				// and RGB  , probably u32 or u16(4444)
 	GRD_FMT_HINT_ONLY_ALPHA,		// no RGB   , probably u8
 
-
+// same as GRD_FMT_U8_BGRA but the inverted A and premultiplied RGB makes CPU blending a bit simpler
+	GRD_FMT_U8_BGRA_PREMULT,		// RGB=RGB*A , A=A-1 so to blend it is simply background*A + RGB
+									
 	GRD_FMT_MAX
 };
 #define GRD_FMT_GOTALPHA(x) (x!=GRD_FMT_NO_ALPHA)
@@ -52,6 +54,7 @@ enum GRD_FMT
 									(x==GRD_FMT_U8_LUMINANCE)?1:\
 									(x==GRD_FMT_U16_ARGB_1555)?2:\
 									(x==GRD_FMT_U8_RGB)?3:\
+									(x==GRD_FMT_U8_BGRA_PREMULT)?4:\
 									0)
 //									(x==GRD_FMT_F32_ARGB)?16:\
 //									(x==GRD_FMT_F64_ARGB)?32:\
@@ -120,7 +123,7 @@ struct grd_info
 struct grd
 {
 	
-	struct grd_info pall[1]; // a palette, if we are a paletted file (pall.data!=0)
+	struct grd_info cmap[1]; // a palette, if we are a paletted file (cmap.data!=0)
 	
 	struct grd_info bmap[1]; // the bitmap data
 
@@ -157,7 +160,7 @@ bool grd_convert( struct grd *g , s32 fmt );
 
 bool grd_quant(struct grd *g , s32 num_colors );
 
-bool grd_conscale( struct grd *g , f32 base, f32 scale);
+//bool grd_conscale( struct grd *g , f32 base, f32 scale);
 
 bool grd_scale( struct grd *g , s32 w, s32 h, s32 d);
 

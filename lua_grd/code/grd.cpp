@@ -76,13 +76,13 @@ int i;
 		if(!grd_info_alloc(g->bmap, fmt , w, h, d )) { goto bogus; }
 		if(fmt==GRD_FMT_U8_INDEXED) // do we need a palette?
 		{
-			if(!grd_info_alloc(g->pall, GRD_FMT_U8_BGRA , 256, 1, 1 )) { goto bogus; }
+			if(!grd_info_alloc(g->cmap, GRD_FMT_U8_BGRA , 256, 1, 1 )) { goto bogus; }
 		}
 		else
 		if(fmt==GRD_FMT_U8_LUMINANCE) // do we need a palette?
 		{
-			if(!grd_info_alloc(g->pall, GRD_FMT_U8_BGRA , 256, 1, 1 )) { goto bogus; }
-			bp=g->pall->get_data(0,0,0);
+			if(!grd_info_alloc(g->cmap, GRD_FMT_U8_BGRA , 256, 1, 1 )) { goto bogus; }
+			bp=g->cmap->get_data(0,0,0);
 			for(i=0;i<256;i++)
 			{
 				bp[0]=255;
@@ -94,7 +94,7 @@ int i;
 		}
 		else
 		{
-			grd_info_free(g->pall);
+			grd_info_free(g->cmap);
 		}
 	}
 
@@ -136,7 +136,7 @@ void grd_free( struct grd *g )
 {
 	if(g)
 	{
-		grd_info_free(g->pall);
+		grd_info_free(g->cmap);
 		grd_info_free(g->bmap);
 		if(g->data)
 		{
@@ -236,10 +236,10 @@ struct grd * g2=grd_create( g->bmap->fmt , g->bmap->w, g->bmap->h, g->bmap->d );
 
 			memcpy(g2->bmap->data,g->bmap->data, ps * g->bmap->w * g->bmap->h * g->bmap->d );
 		}
-		if(g->pall->data && g2->pall->data)
+		if(g->cmap->data && g2->cmap->data)
 		{
 
-			memcpy(g2->pall->data,g->pall->data, 4 * 256 );
+			memcpy(g2->cmap->data,g->cmap->data, 4 * 256 );
 		}
 	}
 
@@ -256,13 +256,13 @@ struct grd * grd_insert( struct grd *ga ,  struct grd *gb )
 {
 	ga->err=gb->err;
 	
-	grd_info_free(ga->pall);
+	grd_info_free(ga->cmap);
 	grd_info_free(ga->bmap);
 	
-	ga->pall->set(gb->pall);
+	ga->cmap->set(gb->cmap);
 	ga->bmap->set(gb->bmap);
 
-	gb->pall->reset();
+	gb->cmap->reset();
 	gb->bmap->reset();
 	grd_free(gb);
 	
@@ -282,6 +282,8 @@ u8 *pa;
 u8 *pb;
 u8 *pc;
 
+	g->err=0;
+
 	if(g->bmap->fmt==fmt) // nothing to do
 	{
 		return true;
@@ -296,6 +298,25 @@ u8 *pc;
 				return true; // no change needed
 			break;
 			
+			case GRD_FMT_U8_BGRA_PREMULT:
+				g->bmap->fmt=GRD_FMT_U8_BGRA_PREMULT; // this is the same data, just bit twiddled
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=g->bmap->get_data(0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							u32 a=pa[0];
+							pa[1]=(u8)((pa[1]*a)>>8);
+							pa[2]=(u8)((pa[2]*a)>>8);
+							pa[3]=(u8)((pa[3]*a)>>8);
+							pa[0]=255-a;
+						}
+					}
+				}
+			break;
+
 			case GRD_FMT_U8_INDEXED:
 				return grd_quant(g,256);
 			break;
@@ -368,7 +389,7 @@ u8 *pc;
 						pb=gb->bmap->get_data(0,y,z);
 						for(x=0;x<g->bmap->w;x++)
 						{
-							pc=g->pall->get_data(*pa,0,0);
+							pc=g->cmap->get_data(*pa,0,0);
 							pb[0]=pc[0];
 							pb[1]=pc[1];
 							pb[2]=pc[2];
@@ -453,7 +474,7 @@ int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 	neuquant32_initnet( g->bmap->data , siz*4 , num_colors , 1.0/*1.0/2.2*/ );
 	neuquant32_learn( 1 ); // 1 is the best quality, 30 is worst
 	neuquant32_inxbuild();
-	neuquant32_getcolormap(gb->pall->data);
+	neuquant32_getcolormap(gb->cmap->data);
 	
 	
 	optr=(u8*)gb->bmap->data;
@@ -472,16 +493,16 @@ int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// apply a contrast adjust adjust to +-128 then scale then clip, so 0.5 halves the range 2.0 doubles it
+// apply a contrast adjust : adjust to +-128 then scale then clip, so 0.5 halves the range 2.0 doubles it
+// and base chooses the center of the scale, 0 or 128 or 255 are probably good choices
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+/*
 bool grd_conscale( struct grd *g , f32 base, f32 scale)
 {
-
-
 	return false;
-
 }
+*/
 
 
 
@@ -628,6 +649,95 @@ u8 b;
 			}
 		}
 	}
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// copy gb into ga, but only copy the pointers
+// then adjust the size and address so it points to a smaller portion of the image
+// as described by x,y : w,h
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+bool grd_clip( struct grd *ga , struct grd *gb , int x, int y, int w, int h)
+{
+	gb->err=0;
+	
+	if(x<0)               { gb->err="clip x out of bounds"; }
+	if((x+w)>gb->bmap->w) { gb->err="clip x out of bounds"; }
+	if(y<0)               { gb->err="clip y out of bounds"; }
+	if((y+h)>gb->bmap->h) { gb->err="clip y out of bounds"; }
+	
+	ga->err=gb->err; // put error in both
+	if(ga->err) { return false; }
+	
+	ga->cmap->set(gb->cmap);
+	ga->bmap->set(gb->bmap);
+	
+	ga->bmap->w=w;
+	ga->bmap->h=h;
+	ga->bmap->data+=(ga->bmap->xscan*x)+(ga->bmap->yscan*y);
+
+	return true;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// blit gb onto ga at x,y (topleft is 0,0)
+//
+// you can use a fake gb to choose a portion of a larger image built using grd_clip
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+bool grd_blit( struct grd *ga , struct grd *gb , int x, int y)
+{
+struct grd_info *ba=ga->bmap;
+struct grd_info *bb=gb->bmap;
+
+u32 *pa,*pb;
+u32 a,b;
+
+int i;
+int w=bb->w;
+int h=bb->h;
+
+	ga->err=0;
+
+	if(x<0)               { ga->err="blit x out of bounds"; }
+	if((x+w)>ga->bmap->w) { ga->err="blit x out of bounds"; }
+	if(y<0)               { ga->err="blit y out of bounds"; }
+	if((y+h)>ga->bmap->h) { ga->err="blit y out of bounds"; }
+
+	gb->err=ga->err; // put error in both
+	if(ga->err) { return false; }
+
+	if( (ba->fmt==GRD_FMT_U8_BGRA) && (bb->fmt==GRD_FMT_U8_BGRA_PREMULT) )
+	{
+		
+		for(i=0;i<h;i++)
+		{
+			pa=(u32*)ba->get_data(x,y+i,0);
+			pb=(u32*)bb->get_data(0,i,0);
+			for(x=0;x<w;x++)
+			{
+				a=*(pa);
+				b=*(pb++);
+				
+				*(pa++)=
+				 ( ( ( ((a>>8)&0x00ff0000) * (b&0xff) ) + (b&0xff000000) ) & 0xff000000 ) |
+				 ( ( ( ((a>>8)&0x0000ff00) * (b&0xff) ) + (b&0x00ff0000) ) & 0x00ff0000 ) |
+				 ( ( ( ((a>>8)&0x000000ff) * (b&0xff) ) + (b&0x0000ff00) ) & 0x0000ff00 ) |
+				 (0xff); // full alpha
+			}
+		}
+
+	}
+	else
+	{
+		ga->err="bad blit format"; // complain rather than auto convert
+		gb->err=ga->err;
+		return false;
+	}
+	
+	return true;
 }
 
 

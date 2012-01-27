@@ -86,6 +86,8 @@ STRENUM(GRD_FMT_HINT_ALPHA_1BIT)
 STRENUM(GRD_FMT_HINT_ALPHA)
 STRENUM(GRD_FMT_HINT_ONLY_ALPHA)
 
+STRENUM(GRD_FMT_U8_BGRA_PREMULT)
+
 STRENUM(GRD_FMT_MAX)
 
 {0,0}
@@ -474,7 +476,7 @@ const char *s;
 	if(! grd_save(p,s,0) )
 	{
 		lua_pushnil(l);
-		lua_pushstring(l,"failed to convert");
+		lua_pushstring(l,"failed to save");
 		return 2;
 	}
 
@@ -540,6 +542,7 @@ s32 fmt;
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+/*
 int lua_grd_conscale (lua_State *l)
 {
 part_ptr p;
@@ -556,6 +559,7 @@ f32 scale;
 	lua_pushboolean(l,1);
 	return 1;
 }
+*/
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -945,7 +949,7 @@ s32 x;
 s32 w;
 
 	p=lua_grd_get_ptr(l);
-	grd=p->pall;
+	grd=p->cmap;
 //	grd_getpalinfo(p,grd);
 
 	x=(s32)lua_tonumber(l,2);
@@ -1125,7 +1129,7 @@ const luaL_reg lib[] =
 		{"pixels",			lua_grd_pixels},
 		{"palette",			lua_grd_palette},
 
-		{"conscale",		lua_grd_conscale},
+//		{"conscale",		lua_grd_conscale},
 
 		{"scale",			lua_grd_scale},
 			
