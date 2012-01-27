@@ -137,11 +137,14 @@ typedef struct grd * part_ptr ;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 part_ptr lua_grd_check (lua_State *l, int idx)
 {
-part_ptr p;
+part_ptr p=0;
 
-	lua_rawgeti(l,idx,0);
-	p = (part_ptr *)luaL_checkudata(l, -1 , lua_grd_ptr_name);
-	lua_pop(l,1);
+	if(lua_istable(l,idx))
+	{
+		lua_rawgeti(l,idx,0);
+		p = *((part_ptr *)luaL_checkudata(l, -1 , lua_grd_ptr_name));
+		lua_pop(l,1);
+	}
 
 	return p;
 }
@@ -154,7 +157,7 @@ part_ptr p;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 part_ptr lua_grd_get_ptr (lua_State *l, int idx)
 {
-part_ptr p=lua_grd_check (lua_State *l, int idx)
+part_ptr p=lua_grd_check(l,idx);
 
 	if (p == 0)
 	{
@@ -320,7 +323,7 @@ part_ptr *p;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_destroy (lua_State *l)
 {
-	lua_grd_destroy_idx (lua_State *l, 1);
+	lua_grd_destroy_idx(l, 1);
 	return 0;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -330,6 +333,8 @@ int lua_grd_destroy (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_destroy_ptr (lua_State *l)
 {	
+part_ptr *p;
+
 	p = (part_ptr *)luaL_checkudata(l, 1 , lua_grd_ptr_name);
 	
 	if(*p)
@@ -537,6 +542,63 @@ s32 fmt;
 	}
 
 	lua_grd_getinfo(l,p,1);
+
+	lua_pushboolean(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_blit (lua_State *l)
+{
+part_ptr pa;
+part_ptr pb;
+grd g[1];
+
+s32 x;
+s32 y;
+
+s32 cx;
+s32 cy;
+s32 cw;
+s32 ch;
+
+	pa=lua_grd_get_ptr(l,1);
+	pb=lua_grd_get_ptr(l,2);
+	x=(s32)lua_tonumber(l,3);
+	y=(s32)lua_tonumber(l,4);
+
+	if( lua_isnumber(l,5) ) // clip the from grd
+	{
+		cx=(s32)lua_tonumber(l,5);
+		cy=(s32)lua_tonumber(l,6);
+		cw=(s32)lua_tonumber(l,7);
+		ch=(s32)lua_tonumber(l,8);
+		if(!grd_clip(g,pb,cx,cy,cw,ch))
+		{
+			lua_pushboolean(l,0);
+			lua_pushstring(l,g->err);
+			return 1;
+		}
+		
+		if(!grd_blit(pa,g,x,y))
+		{
+			lua_pushboolean(l,0);
+			lua_pushstring(l,g->err);
+			return 1;
+		}
+	}
+	else
+	{
+		if(!grd_blit(pa,pb,x,y))
+		{
+			lua_pushboolean(l,0);
+			lua_pushstring(l,g->err);
+			return 1;
+		}
+	}
 
 	lua_pushboolean(l,1);
 	return 1;
@@ -1106,6 +1168,7 @@ void lua_grd_openlib (lua_State *l, int upvalues)
 		{"scale",			lua_grd_scale},
 			
 		{"flipy",			lua_grd_flipy},
+		{"blit",			lua_grd_blit},
 		
 		{0,0}
 	};
@@ -1159,6 +1222,8 @@ const luaL_reg lib[] =
 		{"scale",			lua_grd_scale},
 			
 		{"flipy",			lua_grd_flipy},
+
+		{"blit",			lua_grd_blit},
 		
 //		{	"unref"					,	lua_grd_unref},
 

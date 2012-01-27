@@ -154,6 +154,9 @@ bool grd_save( struct grd *g , const char *filename , const char *opts );
 
 struct grd * grd_duplicate( struct grd *g );
 
+
+
+
 void grd_flipy( struct grd *g );
 
 bool grd_convert( struct grd *g , s32 fmt );
@@ -163,4 +166,11 @@ bool grd_quant(struct grd *g , s32 num_colors );
 //bool grd_conscale( struct grd *g , f32 base, f32 scale);
 
 bool grd_scale( struct grd *g , s32 w, s32 h, s32 d);
+
+
+bool grd_layer( struct grd *ga , struct grd *gb , s32 z);
+
+bool grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 w, s32 h);
+
+bool grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y);
 
