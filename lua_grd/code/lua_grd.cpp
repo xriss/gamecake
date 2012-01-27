@@ -231,7 +231,7 @@ int idx_tab;
 // remember the userdata in the table as well as the upvalue
 
 	lua_pushvalue(l, idx_ptr ); // get our userdata,
-	lua_rawseti(l,-2,0);
+	lua_rawseti(l,-2,0); // our userdata lives in [0]
 
 
 	(*p)=0;
@@ -1086,7 +1086,27 @@ void lua_grd_openlib (lua_State *l, int upvalues)
 	const luaL_reg lib[] =
 	{
 		{	"create"		,	lua_grd_create	},
+		
+		{"destroy",			lua_grd_destroy},
 
+
+		{"reset",			lua_grd_reset},
+		{"load",			lua_grd_load},
+		{"save",			lua_grd_save},
+
+		{"convert",			lua_grd_convert},
+		
+		{"quant",			lua_grd_quant},
+
+		{"pixels",			lua_grd_pixels},
+		{"palette",			lua_grd_palette},
+
+//		{"conscale",		lua_grd_conscale},
+
+		{"scale",			lua_grd_scale},
+			
+		{"flipy",			lua_grd_flipy},
+		
 		{0,0}
 	};
 	luaL_openlib(l, NULL, lib, upvalues);
