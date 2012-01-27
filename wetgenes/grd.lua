@@ -7,9 +7,59 @@ module("wetgenes.grd")
 
 local core=require("wetgenes.grd.core")
 
+base={}
+meta={}
+meta.__index=base
 
-create=function(...)
+function create(...)
 
-	return core.create(...)
-	
+	local grd=core.create(...)
+	setmetatable(grd,meta)
+
+	return grd
+end
+
+base.destroy=function(...)
+	return core.destroy(...)
+end
+
+
+base.reset=function(...)
+	return core.reset(...)
+end
+
+base.load=function(...)
+	return core.load(...)
+end
+
+base.save=function(...)
+	return core.save(...)
+end
+
+base.convert=function(...)
+	return core.convert(...)
+end
+
+base.quant=function(...)
+	return core.quant(...)
+end
+
+base.pixels=function(...)
+	return core.pixels(...)
+end
+
+base.palette=function(...)
+	return core.palette(...)
+end
+
+base.scale=function(...)
+	return core.scale(...)
+end
+
+base.flipy=function(...)
+	return core.flipy(...)
+end
+
+base.blit=function(...)
+	return core.blit(...)
 end
