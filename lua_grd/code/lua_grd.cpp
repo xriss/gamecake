@@ -9,7 +9,7 @@
 
 #define UPVALUE_LIB 1
 
-void lua_grd_tab_openlib (lua_State *l, int upvalues);
+//void lua_grd_tab_openlib (lua_State *l, int upvalues);
 
 
 
@@ -225,11 +225,11 @@ int idx_tab;
 
 // main lib and userdata are stored as upvalues in the function calls for easy/fast access
 
-	lua_pushvalue(l, lua_upvalueindex(UPVALUE_LIB) ); // get our base table
+//	lua_pushvalue(l, lua_upvalueindex(UPVALUE_LIB) ); // get our base table
 //	lua_pushvalue(l, idx_ptr ); // get our userdata,
 //	lua_pushvalue(l, idx_tab ); // get our userdata,
 
-	lua_grd_tab_openlib(l,1);
+//	lua_grd_tab_openlib(l,1);
 
 // remember the userdata in the table as well as the upvalue
 
@@ -1199,7 +1199,8 @@ const luaL_reg lib[] =
 // all functions expect the self table to be passed in as arg1
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void lua_grd_tab_openlib (lua_State *l, int upvalues)
+/*
+ * void lua_grd_tab_openlib (lua_State *l, int upvalues)
 {
 const luaL_reg lib[] =
 	{
@@ -1231,7 +1232,7 @@ const luaL_reg lib[] =
 	};
 	luaL_openlib(l, NULL, lib, upvalues);
 }
-
+*/
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
