@@ -20368,10 +20368,6 @@ const char* wetgenes_cache_lua_mods[]={
 "\n"
 "	return require(appname).start(...)\n"
 "end\n"
-"\n"
-"\n"
-"-- make sure we return the module so we can use it in a dofile(\"apps.lua\")\n"
-"--return package.loaded.apps\n"
 "",
 
 "fenestra.widget.data","-- copy all globals into locals\r\n"

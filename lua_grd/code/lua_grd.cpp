@@ -8,8 +8,6 @@
 
 
 #define UPVALUE_LIB 1
-#define UPVALUE_PTR 2
-#define UPVALUE_TAB 3
 
 void lua_grd_tab_openlib (lua_State *l, int upvalues);
 
@@ -141,11 +139,8 @@ part_ptr lua_grd_check (lua_State *l, int idx)
 {
 part_ptr p;
 
-	lua_pushstring(l, lua_grd_ptr_name );
-	lua_gettable(l,idx);
-
-	p=(part_ptr )(*(void **)luaL_checkudata(l,lua_gettop(l),lua_grd_ptr_name));
-
+	lua_rawgeti(l,idx,0);
+	p = (part_ptr *)luaL_checkudata(l, -1 , lua_grd_ptr_name);
 	lua_pop(l,1);
 
 	return p;
@@ -154,20 +149,16 @@ part_ptr p;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// get userdata from upvalue, no need to test for type
-// just error on null
+// lua_grd_check with auto error on bad ptr
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-part_ptr lua_grd_get_ptr (lua_State *l)
+part_ptr lua_grd_get_ptr (lua_State *l, int idx)
 {
-part_ptr p;
-
-	p=(part_ptr )(*(void **)lua_touserdata(l,lua_upvalueindex(UPVALUE_PTR)));
-
+part_ptr p=lua_grd_check (lua_State *l, int idx)
 
 	if (p == 0)
 	{
-		luaL_error(l, "null pointer in grd usedata" );
+		luaL_error(l, "bad grd usedata" );
 	}
 
 	return p;
@@ -232,16 +223,15 @@ int idx_tab;
 // main lib and userdata are stored as upvalues in the function calls for easy/fast access
 
 	lua_pushvalue(l, lua_upvalueindex(UPVALUE_LIB) ); // get our base table
-	lua_pushvalue(l, idx_ptr ); // get our userdata,
-	lua_pushvalue(l, idx_tab ); // get our userdata,
+//	lua_pushvalue(l, idx_ptr ); // get our userdata,
+//	lua_pushvalue(l, idx_tab ); // get our userdata,
 
-	lua_grd_tab_openlib(l,3);
+	lua_grd_tab_openlib(l,1);
 
 // remember the userdata in the table as well as the upvalue
 
-	lua_pushstring(l, lua_grd_ptr_name );
 	lua_pushvalue(l, idx_ptr ); // get our userdata,
-	lua_rawset(l,-3);
+	lua_rawseti(l,-2,0);
 
 
 	(*p)=0;
@@ -252,7 +242,7 @@ int idx_tab;
 
 	if(lua_istable(l,1))	// duplicate another image
 	{
-		(*p)=grd_duplicate( lua_grd_check(l,1) );
+		(*p)=grd_duplicate( lua_grd_get_ptr(l,1) );
 	}
 	else
 	if(lua_isnumber(l,2))	// create an image of a given size
@@ -296,7 +286,7 @@ int idx_tab;
 		(*p)=grd_create(GRD_FMT_U8_BGRA,0,0,0);
 	}
 	
-	lua_grd_getinfo(l,*p,lua_gettop(l));
+	lua_grd_getinfo(l,*p,idx_tab);
 
 	lua_remove(l, idx_ptr );
 	return 1;
@@ -304,14 +294,16 @@ int idx_tab;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// destroy pointer
+// destroy pointer in table at given index
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_destroy_idx (lua_State *l, int idx)
 {
 part_ptr *p;
 	
-	p = (part_ptr *)luaL_checkudata(l, idx, lua_grd_ptr_name);
+	lua_rawgeti(l,idx,0);
+	p = (part_ptr *)luaL_checkudata(l, -1 , lua_grd_ptr_name);
+	lua_pop(l,1);
 
 	if(*p)
 	{
@@ -321,24 +313,32 @@ part_ptr *p;
 
 	return 0;
 }
-
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// destroy pointer in table
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_destroy (lua_State *l)
+{
+	lua_grd_destroy_idx (lua_State *l, 1);
+	return 0;
+}
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // __GC for ptr
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_destroy_ptr (lua_State *l)
-{
-	return lua_grd_destroy_idx(l,1);
-}
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// delete the pointer data and set pointer to 0
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_grd_destroy (lua_State *l)
-{
-	return lua_grd_destroy_idx(l,lua_upvalueindex(UPVALUE_PTR));
+{	
+	p = (part_ptr *)luaL_checkudata(l, 1 , lua_grd_ptr_name);
+	
+	if(*p)
+	{
+		grd_free(*p);
+	}
+	(*p)=0;
+	
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -352,8 +352,11 @@ part_ptr *p;
 part_ptr new_p;
 	
 	new_p=0;
+	
+	lua_rawgeti(l,1,0);
+	p = (part_ptr *)luaL_checkudata(l, -1 , lua_grd_ptr_name);
+	lua_pop(l,1);
 
-	p = (part_ptr *)luaL_checkudata(l, lua_upvalueindex(UPVALUE_PTR) , lua_grd_ptr_name);
 
 
 	if(lua_isnil(l,1)) // just clear what we have
@@ -376,12 +379,12 @@ part_ptr new_p;
 	{
 		if(*p!=0) // free old
 		{
-			lua_grd_destroy(l);
+			lua_grd_destroy_idx(l,1);
 		}
 
 		(*p)=new_p;
 	}
-	lua_grd_getinfo(l,*p,lua_upvalueindex(UPVALUE_TAB));
+	lua_grd_getinfo(l,*p,1);
 
 	lua_pushboolean(l,1);
 	return 1;
@@ -401,7 +404,9 @@ part_ptr new_p;
 	
 	new_p=0;
 
-	p = (part_ptr *)luaL_checkudata(l, lua_upvalueindex(UPVALUE_PTR) , lua_grd_ptr_name);
+	lua_rawgeti(l,1,0);
+	p = (part_ptr *)luaL_checkudata(l, -1 , lua_grd_ptr_name);
+	lua_pop(l,1);
 
 const char *s;
 s32 fmt;
@@ -429,12 +434,12 @@ s32 fmt;
 	{
 		if(*p!=0) // free old
 		{
-			lua_grd_destroy(l);
+			lua_grd_destroy_idx(l,1);
 		}
 
 		(*p)=new_p;
 	}
-	lua_grd_getinfo(l,*p,lua_upvalueindex(UPVALUE_TAB));
+	lua_grd_getinfo(l,*p,1);
 
 
 	lua_pushboolean(l,1);
@@ -451,7 +456,7 @@ int lua_grd_save (lua_State *l)
 part_ptr p;
 const char *s;
 
-	p=lua_grd_get_ptr(l);
+	p=lua_grd_get_ptr(l,1);
 
 	s=lua_tostring(l,2);
 
@@ -495,7 +500,7 @@ int lua_grd_quant (lua_State *l)
 part_ptr p;
 s32 num;
 
-	p=lua_grd_get_ptr(l);
+	p=lua_grd_get_ptr(l,1);
 
 	num=(s32)lua_tonumber(l,2);
 	
@@ -520,7 +525,7 @@ int lua_grd_convert (lua_State *l)
 part_ptr p;
 s32 fmt;
 
-	p=lua_grd_get_ptr(l);
+	p=lua_grd_get_ptr(l,1);
 
 	fmt=lua_grd_tofmt(l,2);
 
@@ -549,7 +554,7 @@ part_ptr p;
 f32 base;
 f32 scale;
 
-	p=lua_grd_get_ptr(l);
+	p=lua_grd_get_ptr(l,1);
 
 	base=(f32)lua_tonumber(l,2);
 	scale=(f32)lua_tonumber(l,3);
@@ -570,7 +575,7 @@ int lua_grd_scale (lua_State *l)
 part_ptr p;
 s32 w,h,d;
 
-	p=lua_grd_get_ptr(l);
+	p=lua_grd_get_ptr(l,1);
 
 	w=(s32)lua_tonumber(l,2);
 	h=(s32)lua_tonumber(l,3);
@@ -592,7 +597,7 @@ int lua_grd_flipy (lua_State *l)
 {
 part_ptr p;
 
-	p=lua_grd_get_ptr(l);
+	p=lua_grd_get_ptr(l,1);
 
 	grd_flipy(p);
 
@@ -948,7 +953,7 @@ grd_info *grd;
 s32 x;
 s32 w;
 
-	p=lua_grd_get_ptr(l);
+	p=lua_grd_get_ptr(l,1);
 	grd=p->cmap;
 //	grd_getpalinfo(p,grd);
 
@@ -1000,7 +1005,7 @@ s32 x,y,z;
 s32 w,h,d;
 s32 tab_idx;
 
-	p=lua_grd_get_ptr(l);
+	p=lua_grd_get_ptr(l,1);
 	grd=p->bmap;
 //	grd_getinfo(p,grd);
 
