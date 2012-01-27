@@ -173,7 +173,3 @@ function start(_name,...)
 
 	return require(appname).start(...)
 end
-
-
--- make sure we return the module so we can use it in a dofile("apps.lua")
---return package.loaded.apps
