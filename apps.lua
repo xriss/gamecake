@@ -161,13 +161,15 @@ function start(_name,...)
 
 	path=package.path
 	cpath=package.cpath
-
+	
+	args=(...)
+	
 	print("appname ",appname)
 	print("apps.exe",exe)
 	print("apps.name",name)
 	print("apps.dll",dll)
 	print("apps.dir",dir)
-	print(...)
+	print("apps.args",args)
 
 	return require(appname).start(...)
 end
