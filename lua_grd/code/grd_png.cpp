@@ -134,15 +134,15 @@ void grd_png_load_file(struct grd * g, const char* file_name)
     for(x=0;x<num_palette;x++)
     {
 	u32 c;
-		c=0xff000000|
-		    ((palptr[x].red  &0xff)    )|
-		    ((palptr[x].green&0xff)<< 8)|
-		    ((palptr[x].blue &0xff)<<16);
+		c=0x000000ff|
+		    ((palptr[x].red  &0xff)<< 8)|
+		    ((palptr[x].green&0xff)<<16)|
+		    ((palptr[x].blue &0xff)<<24);
 		((u32*)g->cmap->data)[x]=c;
 	}
     for(x=0;x<num_trans;x++)
     {
-		((u8*)g->cmap->data)[(4*x)+3]=trans[x];
+		((u8*)g->cmap->data)[(4*x)+0]=trans[x];
 	}
     
 bogus:
