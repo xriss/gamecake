@@ -32,6 +32,10 @@ function test_jpg_8x_t2()
 	do_jpg_8x("t2")	
 end
 
+function test_png_8888_t4()
+	do_png_8888("t4")
+end
+
 function test_png_8888_t3()
 	do_png_8888("t3")
 end
