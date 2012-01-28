@@ -281,6 +281,7 @@ int idx_tab;
 			lua_remove(l, idx_ptr );
 
 			grd_free((*p));
+			(*p)=0;
 			return 2;
 		}
 	}
