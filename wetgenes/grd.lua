@@ -14,8 +14,11 @@ meta.__index=base
 function create(...)
 
 	local grd=core.create(...)
-	setmetatable(grd,meta)
-
+	
+	if grd then
+		setmetatable(grd,meta)
+	end
+	
 	return grd
 end
 
@@ -60,6 +63,26 @@ base.flipy=function(...)
 	return core.flipy(...)
 end
 
-base.blit=function(...)
-	return core.blit(...)
+base.blit=function(ga,gb,x,y,cx,cy,cw,ch)
+
+	if cx then -- autoclip
+		if cx<0 then cw=cw+cx cx=0 end
+		if cy<0 then ch=ch+cy cy=0 end
+		if (cx+cw)>gb.width  then cw=gb.width -cx end
+		if (cy+ch)>gb.height then ch=gb.height-cy end
+	else -- auto build
+		cx=0
+		cy=0
+		cw=gb.width
+		ch=gb.height
+	end
+	
+	if x<0 then cx=cx-x cw=cw+x x=0 end
+	if y<0 then cy=cy-y ch=ch+y y=0 end	
+	if (x+cw)>ga.width  then cw=ga.width -x end
+	if (y+ch)>ga.height then ch=ga.height-y end
+
+	if cw<=0 or ch<=0 then return true end -- nothing to draw
+
+	return core.blit(ga,gb,x,y,cx,cy,cw,ch)
 end

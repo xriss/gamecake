@@ -40,7 +40,7 @@ end
 -- draw using win and opengl functions
 -- do not call if you do not have fenestra and a global win setup.
 base.draw = function(cake)
-	local t=win.tex( cake.canvas.grd )
+	local t=assert(win.tex( cake.canvas.grd ))
 	t:draw()
 	t:clean()
 end
