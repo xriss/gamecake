@@ -11,6 +11,7 @@ local win=win
 module("wetgenes.gamecake")
 
 local wcanvas=require("wetgenes.gamecake.canvas")
+local wimages=require("wetgenes.gamecake.images")
 
 
 base={}
@@ -23,11 +24,14 @@ function create(opts)
 	setmetatable(cake,meta)
 	
 	opts.cake=cake -- insert cake into opts
+	cake.opts=opts -- and opts into cake
 	
 	cake.grd_fmt="GRD_FMT_U8_BGRA"
 	
 	
-	cake.canvas=wcanvas.create(opts) -- we will need a canvas to draw too, use same opts
+	cake.canvas=wcanvas.create(opts) -- we will need a canvas to draw too
+	
+	cake.images=wimages.create(opts) -- we will need to load some images
 
 	return cake
 end
