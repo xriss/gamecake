@@ -244,9 +244,8 @@ function make_values(tab)
 	local ns={}
 	local ds={}
 	for n,d in pairs(tab) do
-		if type(d)=="string" then d=escape(d) end
-		ns[#ns+1]="'"..n.."'"
-		ds[#ds+1]=d
+		ns[#ns+1]=fixname(n)
+		ds[#ds+1]=fixvalue(d)
 	end
 
 	return "("..table.concat(ns,",")..")".." VALUES ("..table.concat(ds,",")..")"
@@ -261,8 +260,7 @@ function make_valueset(tab)
 
 	local ss={}
 	for n,d in pairs(tab) do
-		if type(d)=="string" then d=escape(d) end
-		ss[#ss+1]="'"..n.."'="..d
+		ss[#ss+1]=fixname(n)"="..fixvalue(d)
 	end
 
 	return table.concat(ss,",")
@@ -274,6 +272,10 @@ function fixvalue(v)
 	else
 		return tonumber(v)
 	end
+end
+
+function fixname(v)
+	return escape(tostring(v))
 end
 
 -----------------------------------------------------------------------------
@@ -325,5 +327,84 @@ function make_update(name,tab,where)
 	return "UPDATE "..name.." SET "..make_valueset(tab).." WHERE "..where..";"
 end
 
+-----------------------------------------------------------------------------
+--
+-- convert a table containing data about a query into an sqlite query string
+--
+-- this table was originally based around the restrictions of googles big table
+-- so yes, it is a very limited subset
+--
+-----------------------------------------------------------------------------
+function make_query(tab)
+
+	local operators={ -- require the use of C style ops
+		["=="]="=",
+		["<"]="<",
+		[">"]=">",
+		["<="]="<=",
+		[">="]=">=",
+		["!="]="<>",
+		}
+
+	local t={}
+	local p=function(...)
+		for i,v in ipairs{...} do t[#t+1]=tostring(v) end
+	end
+	
+	p("SELECT *,ROWID FROM ",tab.kind," ")
+	
+	local wa="WHERE"
+	for i,v in ipairs(tab) do
+		
+		if v[1]=="filter" then
+		
+			local o=operators[ v[3] ] 
+			if o then
+				p(wa," ",(v[2]),o,fixvalue(v[4])," ")
+			elseif v[3]=="IN" then
+				p(wa," ",(v[2]),"IN(")
+				for i,v in ipairs(v[4]) do
+					if i~=1 then p(",") end -- separator
+					p(fixvalue(v))
+				end
+				p(") ")
+			else
+				error("UNSUPORTED SQLITE OPERATOR "..tostring(v[3]))
+			end
+		
+			wa="AND" -- switch from WHERE to AND
+		end
+	end
+
+	local ss={}
+	for i,v in ipairs(tab) do
+		if v[1]=="sort" then
+			if v[3]=="DESC" then
+				ss[#ss+1]=fixname(v[2]).." DESC"
+			
+			else
+				ss[#ss+1]=fixname(v[2]).." ASC"
+			end		
+		end
+	end
+	if ss[1] then
+		p("ORDER BY ")
+		p(table.concat(ss," , "))
+		p(" ")
+	end
+	
+	if tab.limit then
+		p("LIMIT ",tab.limit," ")
+	end
+
+	if tab.offset then
+		p("OFFSET ",tab.offset," ")
+	end
+	
+	p(";")
+
+	local s=table.concat(t)
+	return s
+end
 
 

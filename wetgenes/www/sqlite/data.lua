@@ -66,9 +66,10 @@ end
 
 
 
-function del(ent,t)
-	local kind=fixkind(ent and ent.key and ent.key.kind)
-	local id=ent and ent.key and ent.key.id
+function del(key,t)
+	key=key and ( key.key or key ) -- turn an ent into a key
+	local kind=fixkind(key and key.kind)
+	local id=key and key.id
 	local ret
 --	log(wstr.serialize(ent))
 	log("data.del:",kind)
@@ -127,13 +128,14 @@ function get(ent,t)
 
 	local s
 	if type(id)=="number" then
-		s="SELECT * FROM "..kind.." WHERE ROWID="..fixvalue(id)..";"
+		s="SELECT *,ROWID FROM "..kind.." WHERE ROWID="..fixvalue(id)..";"
 	else
-		s="SELECT * FROM "..kind.." WHERE id="..fixvalue(id)..";"
+		s="SELECT *,ROWID FROM "..kind.." WHERE id="..fixvalue(id)..";"
 	end
 
 log(s)
 	ent.props=wsql.row(db,s)
+	
 	
 if ent.props then
 --	log(wstr.serialize(ent.props))
@@ -144,17 +146,36 @@ end
 end
 
 function query(q)
+	local original_kind=q.kind
 	local kind=fixkind(q and q.kind)
-	local ret
+	
+	local ret={list={}}
 	log("data.query:")
 	apis()
 	count=count+1
---log(tostring(q))	
-
+	
 	local db=getdb(kind)
 
+	q.kind=kind -- patchup kind
+	ret.code=wsql.make_query(q)
+	q.kind=original_kind -- and restore it
+	
+	local el=wsql.rows(db,ret.code)
+	
+	for i,v in ipairs(el) do
+	
+		local e={}
+		ret.list[i]=e
+		
+		e.props=v
+		e.key={kind=original_kind,id=v.id or v.rowid}
+
+	end
+	
+log( wstr.dump(ret) )
+	
 	apie()
-	return {list={}}
+	return ret
 end
 
 function rollback(t)
