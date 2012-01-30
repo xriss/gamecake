@@ -19,7 +19,6 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_png_load_file(struct grd * g, const char* file_name)
 {
-	
 	const char *err=0;
 	int x, y;
 
@@ -102,7 +101,7 @@ void grd_png_load_file(struct grd * g, const char* file_name)
 	}
 	if (color_type == PNG_COLOR_TYPE_RGB)
 	{
-		png_set_filler(png_ptr, 0xff, PNG_FILLER_AFTER);
+		png_set_filler(png_ptr, 0xff, PNG_FILLER_BEFORE);
 	}
 
 
