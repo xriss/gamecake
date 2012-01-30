@@ -7,12 +7,12 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.canvas")
 
-local wgrd=require("wetgenes.grd")
-
-
-base={}
+base=require(...)
 meta={}
 meta.__index=base
+
+local wgrd=require("wetgenes.grd")
+
 
 function create(opts)
 

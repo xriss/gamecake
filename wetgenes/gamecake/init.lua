@@ -13,8 +13,7 @@ module("wetgenes.gamecake")
 local wcanvas=require("wetgenes.gamecake.canvas")
 local wimages=require("wetgenes.gamecake.images")
 
-
-base={}
+base=require(...)
 meta={}
 meta.__index=base
 
@@ -39,7 +38,7 @@ end
 
 -- draw using win and opengl functions
 -- do not call if you do not have fenestra and a global win setup.
-base.draw = function(cake)
+draw = function(cake)
 	local t=assert(win.tex( cake.canvas.grd ))
 	t:draw()
 	t:clean()
