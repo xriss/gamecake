@@ -6,7 +6,7 @@
 
 
 #define LUA_MMAPLIBNAME	"mmap"
-int luaopen_mmap (lua_State *L);
+int luaopen_wetgenes_grdmap_core (lua_State *L);
 
 
 #define MMAPHANDLE "mmap"

@@ -343,6 +343,7 @@ end
 	include("lua_box2d")
 	include("lua_gl")
 	include("lua_grd")
+	include("lua_grdmap")
 	include("lua_lash")
 	include("lua_lfs")
 	include("lua_socket")

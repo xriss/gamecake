@@ -591,7 +591,7 @@ static void lua_mmapt_meta_create (lua_State *l)
 //
 /*----------------------------------------------------------------------------------------------------------------------------*/
 
-int luaopen_mmap (lua_State *l)
+int luaopen_wetgenes_grdmap_core (lua_State *l)
 {
 	lua_mmap_meta_create(l);
 	lua_mmapt_meta_create(l);
