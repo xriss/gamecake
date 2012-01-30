@@ -1,9 +1,4 @@
 
---include("zlib")
---include("libpng")
---include("libjpeg")
-
-
 project "lua_grd"
 language "C++"
 files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
