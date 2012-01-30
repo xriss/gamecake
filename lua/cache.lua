@@ -28,12 +28,43 @@ local readfile=function(name)
 	return d
 end
 
+function version_from_time(t,vplus)
+
+	vplus=vplus or 0 -- slight tweak if we need it
+
+	t=t or os.time()
+
+	local d=os.date("*t",t)
+
+-- how far through the year are we
+	local total=os.time{year=d.year+1,day=1,month=1} - os.time{year=d.year,day=1,month=1}
+	local part=t - os.time{year=d.year,day=1,month=1}
+
+-- build major and minor version numbers
+	local maj=math.floor(d.year-2000)
+	local min=math.floor((part/total)*1000)+vplus
+
+	if min>=1000 then min=min-1000 maj=maj+1 end -- paranoia fix
+
+	return string.format("%02d.%03d",maj,min)
+end
+	local version=version_from_time()
+
 
 	local fp=io.open("cache.c","w")
 	local t={}
 	local function put(s)
 		t[#t+1]=s
 	end
+	
+	put([[
+
+	const char *wetgenes_wetmods_version()
+	{
+		return "Featuring WetMods V]]..version..[[ https://bitbucket.org/xixs/lua";
+	}
+
+]])
 
 	put([[
 
