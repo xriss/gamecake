@@ -17,6 +17,7 @@
 //
 metamap *lua_mmap_to_mmap (lua_State *L, int index)
 {
+#if 0
 metamap *p;
 	
 	p = (metamap *)luaL_checkudata(L, index, MMAPHANDLE);
@@ -27,10 +28,14 @@ metamap *p;
 	}
 
 	return p;
+#endif
+	return 0;
 }
 
 metamap *lua_mmap_to_mmap_from_table (lua_State *l, int index)
 {
+#if 0
+
 metamap *p;
 devilhandle *ip;
 
@@ -69,11 +74,14 @@ devilhandle *ip;
 	}
 
 	return p;
+#endif
+	return 0;
 }
 
 
 static int lua_mmap_alloc (lua_State *l)
 {
+#if 0
 metamap *p;
 
 
@@ -95,20 +103,26 @@ metamap *p;
 	lua_settable(l, -3);
 
 	return 1;
+#endif
+	return true;
 }
 
 static int lua_mmap_free_mmap (lua_State *l)
 {
+#if 0
 metamap *p;
 	p=lua_mmap_to_mmap(l,1);
 
 	mmap_clean(p);
 
 	return 0;
+#endif
+	return 0;
 }
 
 static int lua_mmap_free (lua_State *l)
 {
+#if 0
 metamap *p;
 
 	lua_pushliteral(l,MMAPHANDLE); // get our data within the table
@@ -118,6 +132,8 @@ metamap *p;
 
 	mmap_clean(p);
 
+	return 0;
+#endif
 	return 0;
 }
 
@@ -132,6 +148,7 @@ metamap *p;
 //
 static int lua_mmap_cutup (lua_State *l)
 {
+#if 0
 metamap *p;
 
 s32 h,w;
@@ -144,6 +161,8 @@ s32 h,w;
 	mmap_cutup(p,w,h);
 
 	return 0;
+#endif
+	return 0;
 }
 
 
@@ -154,12 +173,15 @@ s32 h,w;
 /*----------------------------------------------------------------------------------------------------------------------------*/
 static int lua_mmap_merge (lua_State *l)
 {
+#if 0
 metamap *p;
 
 	p=lua_mmap_to_mmap_from_table(l,1);
 
 	mmap_merge(p);
 
+	return 0;
+#endif
 	return 0;
 }
 
@@ -170,12 +192,15 @@ metamap *p;
 /*----------------------------------------------------------------------------------------------------------------------------*/
 static int lua_mmap_shrink (lua_State *l)
 {
+#if 0
 metamap *p;
 
 	p=lua_mmap_to_mmap_from_table(l,1);
 
 	mmap_shrink(p);
 
+	return 0;
+#endif
 	return 0;
 }
 
@@ -186,6 +211,7 @@ metamap *p;
 /*----------------------------------------------------------------------------------------------------------------------------*/
 static int lua_mmap_keymap (lua_State *l)
 {
+#if 0
 metamap *pa;
 metamap *pb;
 
@@ -194,6 +220,8 @@ metamap *pb;
 
 	mmap_keymap(pa,pb);
 
+	return 0;
+#endif
 	return 0;
 }
 
@@ -204,6 +232,7 @@ metamap *pb;
 /*----------------------------------------------------------------------------------------------------------------------------*/
 static int lua_mmap_layout (lua_State *l)
 {
+#if 0
 metamap *pa;
 metamap *pb;
 s32 border;
@@ -217,6 +246,8 @@ s32 border;
 	lua_devil_error_check(l);
 
 	return 0;
+#endif
+	return 0;
 }
 
 
@@ -227,6 +258,7 @@ s32 border;
 /*----------------------------------------------------------------------------------------------------------------------------*/
 static int lua_mmap_get_tile (lua_State *l)
 {
+#if 0
 mmap_tile *m;
 mmap_tile *t;
 metamap *p;
@@ -294,10 +326,14 @@ s32 x,y,idx;
 	lua_settable(l,2);
 
 	return 0;
+#endif
+	return 0;
 }
 
 static int lua_mmap_get_master_tile (lua_State *l)
 {
+#if 0
+
 mmap_tile *t;
 mmap_tile *m;
 metamap *p;
@@ -365,10 +401,13 @@ s32 x,y,idx;
 	lua_settable(l,2);
 
 	return 0;
+#endif
+	return 0;
 }
 
 static int lua_mmap_set_tile (lua_State *l)
 {
+#if 0
 mmap_tile *t;
 metamap *p;
 s32 x,y,idx;
@@ -428,10 +467,13 @@ s32 x,y,idx;
 	
 
 	return 0;
+#endif
+	return 0;
 }
 
 static int lua_mmap_get_numof_tiles (lua_State *l)
 {
+#if 0
 metamap *p;
 
 	lua_pushliteral(l,MMAPHANDLE); // get our data within the table
@@ -442,6 +484,8 @@ metamap *p;
 	lua_pushnumber(l,p->numof_tiles);
 	
 	return 1;
+#endif
+	return 0;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------*/
@@ -451,6 +495,7 @@ metamap *p;
 /*----------------------------------------------------------------------------------------------------------------------------*/
 static int lua_mmap_saveXTX (lua_State *l)
 {
+#if 0
 metamap *pa;
 metamap *pb;
 const char *str;
@@ -461,6 +506,8 @@ const char *str;
 
 	mmap_save_XTX(pa,pb,str);
 
+	return 0;
+#endif
 	return 0;
 }
 

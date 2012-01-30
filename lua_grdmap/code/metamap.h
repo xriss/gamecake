@@ -35,6 +35,7 @@ struct metamap
 	s32		tw,th;						// width,height in tiles, or 0,0 if not a cut up tile map used for 2d indexing
 
 
+/*
 	ILuint image;			// cached DevIL image ID and other cached Devil info follows
 
 	s32		w,h;			// width,height in pixels
@@ -43,6 +44,7 @@ struct metamap
 	s32		format,type;	// image type info
 	s32		span;			// amount to add to data to move down a line
 	u8		*data;			// image data pointer
+*/
 
 };
 

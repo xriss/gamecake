@@ -17,6 +17,7 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void metamap_char_shrink(mmap_tile *a )
 {
+#if 0
 
 s32 sa,sp; // spans for tile a and a pixel
 
@@ -126,6 +127,8 @@ s32 delta;
 	a->w-=delta;
 	a->x+=delta;
 	a->hx+=delta;
+
+#endif
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -137,6 +140,7 @@ s32 delta;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 bool metamap_char_compare(mmap_tile *a , mmap_tile *b)
 {
+#if 0
 
 s32 w,h; //in bytes for both tiles (if tiles are diferent size then they aint equil)
 s32 sa,sb,sp; // spans for tiles a and b and a pixel
@@ -174,6 +178,6 @@ s32 x,y;	// x,y pointers
 			if(*pa++!=*pb++) return false;
 		}
 	}
-
+#endif
 	return true; // if we got here then tiles are the same
 }
