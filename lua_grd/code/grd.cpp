@@ -311,7 +311,6 @@ u8 *pc;
 							pa[1]=(u8)((pa[1]*a)>>8);
 							pa[2]=(u8)((pa[2]*a)>>8);
 							pa[3]=(u8)((pa[3]*a)>>8);
-							pa[0]=255-a;
 							pa+=4;
 						}
 					}
@@ -763,20 +762,33 @@ s32 h=bb->h;
 	if( (ba->fmt==GRD_FMT_U8_BGRA) && (bb->fmt==GRD_FMT_U8_BGRA_PREMULT) )
 	{
 		
+		
+		u32 alpha;
 		for(i=0;i<h;i++)
 		{
 			pa=(u32*)ba->get_data(x,y+i,0);
 			pb=(u32*)bb->get_data(0,i,0);
 			for(j=0;j<w;j++)
 			{
-				a=*(pa);
 				b=*(pb++);
-				
-				*(pa++)=
-				 ( ( ( ((a>>8)&0x00ff0000) * (b&0xff) ) + (b&0xff000000) ) & 0xff000000 ) |
-				 ( ( ( ((a>>8)&0x0000ff00) * (b&0xff) ) + (b&0x00ff0000) ) & 0x00ff0000 ) |
-				 ( ( ( ((a>>8)&0x000000ff) * (b&0xff) ) + (b&0x0000ff00) ) & 0x0000ff00 ) |
-				 (0xff); // full alpha
+				switch(b&0xff)
+				{
+					case 0xff:
+						*(pa++)=b|0xff;
+					break;
+					case 0x00:
+						pa++;
+					break;
+					default:
+						alpha=(0x100 - (b&0xff) );
+						a=*(pa);
+						*(pa++)=
+						 ( ( ( ((a>>8)&0x00ff0000) * alpha ) + (b&0xff000000) ) & 0xff000000 ) |
+						 ( ( ( ((a>>8)&0x0000ff00) * alpha ) + (b&0x00ff0000) ) & 0x00ff0000 ) |
+						 ( ( ( ((a>>8)&0x000000ff) * alpha ) + (b&0x0000ff00) ) & 0x0000ff00 ) |
+						 (0xff); // full alpha
+					break;
+				}
 			}
 		}
 

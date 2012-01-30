@@ -8,21 +8,19 @@
 //
 // Only have popular/usefull formats as basic types that can be used internaly
 //
-// data is always in ARGB order in memory but these are little endian, hence the BGRA (u32) default 
-//
 enum GRD_FMT
 {
 	GRD_FMT_NONE=0,
 
 // basic formats, most manipulations will only work on GRD_FMT_ARGB_U8
-// data can be convereted too or from other formats
+// data can be convereted too or from other formats but only during load/save its never going to be worked on like that
+
+	GRD_FMT_F32_ARGB,				// f32[4] per pixel, forced F32 ARGB
 
 	GRD_FMT_U8_BGRA,				// u8[4]  per pixel, forced U8 BGRA (thinking little endian makes this the default) 
 	GRD_FMT_U8_INDEXED,				// u8[1]  per pixel, forced U8 Indexed input
-	GRD_FMT_U8_LUMINANCE,			// u8[1]  per pixel, forced U8 gray scale (treat as indexed)
+	GRD_FMT_U8_LUMINANCE,			// u8[1]  per pixel, forced U8 gray scale
 
-	GRD_FMT_F32_ARGB,				// f32[4] per pixel, forced F32 ARGB (future proofed)
-	GRD_FMT_F64_ARGB,				// f64[4] per pixel, forced F64 ARGB (very future proofed)
 
 // these are slightly less basic, intended to be converted to, on read/write but not manipulated
 // some of them fit multiple pixels into 1 byte for instance.
@@ -36,28 +34,23 @@ enum GRD_FMT
 // these are hints for textures rather than specific formats and don't guarantee any number of bits
 // in fact the texture may even use a simple lossy compressed format if enabled
 // basically it is none of your concern, if you intend to do anything with the dat convert it to one of the
-// basic formats
+// above basic formats
 
 	GRD_FMT_HINT_NO_ALPHA,			// just RGB , probably u32 or u16(565)
 	GRD_FMT_HINT_ALPHA_1BIT,		// and RGB  , probably u32 or u16(1555)
 	GRD_FMT_HINT_ALPHA,				// and RGB  , probably u32 or u16(4444)
 	GRD_FMT_HINT_ONLY_ALPHA,		// no RGB   , probably u8
 
-// same as GRD_FMT_U8_BGRA but the premultiplied RGB makes more sense...
-	GRD_FMT_U8_BGRA_PREMULT,		// A is the same as in BGRA but ( RGB=RGB*A )
-									
+
 	GRD_FMT_MAX
 };
 #define GRD_FMT_GOTALPHA(x) (x!=GRD_FMT_NO_ALPHA)
-#define GRD_FMT_SIZEOFPIXEL(x) (	(x==GRD_FMT_U8_BGRA)?4:\
-									(x==GRD_FMT_U8_INDEXED)?1:\
-									(x==GRD_FMT_U8_LUMINANCE)?1:\
-									(x==GRD_FMT_U16_ARGB_1555)?2:\
-									(x==GRD_FMT_U8_RGB)?3:\
-									(x==GRD_FMT_U8_BGRA_PREMULT)?4:\
-									0)
-//									(x==GRD_FMT_F32_ARGB)?16:\
-//									(x==GRD_FMT_F64_ARGB)?32:\
+#define GRD_FMT_SIZEOFPIXEL(x) ((x==GRD_FMT_U8_INDEXED)?1:4)
+
+
+
+
+
 
 // information about a bitmap held in memory (or even a palette)
 // by using scan values we can describe a section of a larger bitmap in this structure
@@ -90,21 +83,6 @@ struct grd_info
 		data=0;
 	}
 
-	inline void set( struct grd_info *ga )
-	{
-		fmt=ga->fmt;
-
-		w=ga->w;
-		h=ga->h;
-		d=ga->d;
-
-		xscan=ga->xscan;
-		yscan=ga->yscan;
-		zscan=ga->zscan;
-
-		data=ga->data;
-	}
-	
 	inline u8 * get_data(s32 x, s32 y, s32 z)
 	{
 		return data+(z*zscan)+(y*yscan)+(x*xscan);
@@ -117,60 +95,7 @@ struct grd_info
 
 };
 
-//
-// We own the data stored here
-//
-struct grd
-{
-	
-	struct grd_info cmap[1]; // a palette, if we are a paletted file (cmap.data!=0)
-	
-	struct grd_info bmap[1]; // the bitmap data
-
-// this can be set to an error string if we hit any problems
-
-	const char *err;
-
-// extra allocated memory associated with this grd,
-	
-	void *data;
-	s32   data_sizeof;
-	
-};
 
 
-void * grd_info_alloc(struct grd_info *gi,  s32 fmt , s32 w, s32 h, s32 d );
-void grd_info_free(struct grd_info *gi);
-
-
-struct grd * grd_realloc( struct grd *g, s32 fmt , s32 w, s32 h, s32 d );
-
-struct grd * grd_create( s32 fmt , s32 w, s32 h, s32 d );
-
-void grd_free( struct grd *g );
-
-struct grd * grd_load( const char *filename , s32 fmt , const char *opts );
-bool grd_save( struct grd *g , const char *filename , const char *opts );
-
-struct grd * grd_duplicate( struct grd *g );
-
-
-
-
-void grd_flipy( struct grd *g );
-
-bool grd_convert( struct grd *g , s32 fmt );
-
-bool grd_quant(struct grd *g , s32 num_colors );
-
-//bool grd_conscale( struct grd *g , f32 base, f32 scale);
-
-bool grd_scale( struct grd *g , s32 w, s32 h, s32 d);
-
-
-bool grd_layer( struct grd *ga , struct grd *gb , s32 z);
-
-bool grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 w, s32 h);
-
-bool grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y);
+s32 grd_load_smart( const char *filename , s32 fmt , grd_info *grd );
 

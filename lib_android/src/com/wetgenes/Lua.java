@@ -58,6 +58,20 @@ import android.util.DisplayMetrics;
 public class Lua extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+		
+/*
+String apkFilePath = null;
+ApplicationInfo appInfo = null;
+PackageManager packMgmr = this.getPackageManager();
+try {
+        appInfo = packMgmr.getApplicationInfo("com.yourpackage", 0);
+    } catch (NameNotFoundException e) {
+ e.printStackTrace();
+throw new RuntimeException("Unable to locate assets, aborting...");
+    }
+apkFilePath = appInfo.sourceDir;
+*/
+		
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
