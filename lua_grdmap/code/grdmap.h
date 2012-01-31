@@ -5,6 +5,36 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 
 
+struct grdmap_tile
+{
+	struct grdmap_tile *master;	// pointer to master tile or 0 if we are a master tile
+
+
+	s32		x;					// location oftile in base image
+	s32		y;
+	s32		w;					// width and height of tile
+	s32		h;
+
+	s32		hx;					// x,y handle, local coords so relative to x,y 
+	s32		hy;
+
+	struct grdmap		*base;				// where this tile comes from
+};
+
+struct grdmap
+{
+
+	s32					numof_tiles;	// number of tiles allocated
+	struct grdmap_tile		*tiles;		// pointer to memory chunk that contains numof_tiles
+	s32		tw,th;						// width,height in tiles, or 0,0 if not a cut up tile map used for 2d indexing
+
+	struct grd *g;	// pointer to bitmap data or 0 if none
+};
+
+
+
+
+
 
 
 
@@ -25,8 +55,6 @@ struct mmap_tile
 
 };
 
-
-
 struct metamap
 {
 
@@ -34,6 +62,7 @@ struct metamap
 	struct mmap_tile		*tiles;		// pointer to memory chunk that contains numof_tiles
 	s32		tw,th;						// width,height in tiles, or 0,0 if not a cut up tile map used for 2d indexing
 
+	struct grd *g;	// bitmap data or 0 if none
 
 /*
 	ILuint image;			// cached DevIL image ID and other cached Devil info follows

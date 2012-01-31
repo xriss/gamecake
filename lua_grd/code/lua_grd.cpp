@@ -69,22 +69,26 @@ const strenum GRD_FMT_STRENUM[]=
 {
 STRENUM(GRD_FMT_NONE)
 
-STRENUM(GRD_FMT_U8_BGRA)
-STRENUM(GRD_FMT_U8_INDEXED)
-STRENUM(GRD_FMT_U8_LUMINANCE)
-
-STRENUM(GRD_FMT_F32_ARGB)
-STRENUM(GRD_FMT_F64_ARGB)
+STRENUM(GRD_FMT_U8_ARGB)
+STRENUM(GRD_FMT_U8_ARGB_PREMULT)
 
 STRENUM(GRD_FMT_U16_ARGB_1555)
+STRENUM(GRD_FMT_U16_ARGB_1555_PREMULT)
+
 STRENUM(GRD_FMT_U8_RGB)
+
+STRENUM(GRD_FMT_F16_ARGB_PREMULT)
+STRENUM(GRD_FMT_F32_ARGB_PREMULT)
+STRENUM(GRD_FMT_F64_ARGB_PREMULT)
+
+STRENUM(GRD_FMT_U8_INDEXED)
+STRENUM(GRD_FMT_U8_LUMINANCE)
 
 STRENUM(GRD_FMT_HINT_NO_ALPHA)
 STRENUM(GRD_FMT_HINT_ALPHA_1BIT)
 STRENUM(GRD_FMT_HINT_ALPHA)
 STRENUM(GRD_FMT_HINT_ONLY_ALPHA)
 
-STRENUM(GRD_FMT_U8_BGRA_PREMULT)
 
 STRENUM(GRD_FMT_MAX)
 
@@ -287,7 +291,7 @@ int idx_tab;
 	}
 	else // just make a default one
 	{
-		(*p)=grd_create(GRD_FMT_U8_BGRA,0,0,0);
+		(*p)=grd_create(GRD_FMT_U8_ARGB,0,0,0);
 	}
 	
 	lua_grd_getinfo(l,*p,idx_tab);
@@ -716,7 +720,7 @@ bool read_tab;
 	}
 
 
-	if( (grd->fmt==GRD_FMT_U8_BGRA) )
+	if( (grd->fmt==GRD_FMT_U8_ARGB) )
 	{
 		for( zi=z ; zi<z+d ; zi++ )
 		{
@@ -1240,8 +1244,6 @@ const luaL_reg lib[] =
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-
-
 int luaopen_wetgenes_grd_core (lua_State *l)
 {
 
@@ -1263,19 +1265,3 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 	return 1;
 }
 
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// close library.
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-
-int luaclose_wetgenes_grd_core (lua_State *l)
-{
-	lua_pushstring(l, LUA_grd_LIB_NAME);
-	lua_pushnil(l);
-	lua_rawset(l, LUA_GLOBALSINDEX);
-
-
-	return 0;
-}

@@ -73,7 +73,7 @@ void grd_png_load_file(struct grd * g, const char* file_name)
 	bit_depth = info_ptr->bit_depth;
 
 // choose grdfmt
-	grdfmt=GRD_FMT_U8_BGRA;
+	grdfmt=GRD_FMT_U8_ARGB;
 	if (color_type == PNG_COLOR_TYPE_PALETTE)
 	{
 		grdfmt=GRD_FMT_U8_INDEXED;
@@ -235,7 +235,7 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 		}
 	}
 	else
-	if(g->bmap->fmt==GRD_FMT_U8_BGRA)	
+	if(g->bmap->fmt==GRD_FMT_U8_ARGB)	
 	{
 		png_set_swap_alpha(png_ptr);
 //		png_set_bgr(png_ptr);

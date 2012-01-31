@@ -47,7 +47,7 @@ local fname=apps.dir.."data/skins/test/button_high.png"
 
 
 print(fname)
-local g=grd.create("GRD_FMT_U8_BGRA",fname)
+local g=grd.create("GRD_FMT_U8_ARGB",fname)
 print(g)
 local t=win.tex(g)
 print(t)
@@ -57,7 +57,7 @@ print(t)
 local fname=apps.dir.."data/skins/test/button_high_in.png"
 
 print(fname)
-local g=grd.create("GRD_FMT_U8_BGRA",fname)
+local g=grd.create("GRD_FMT_U8_ARGB",fname)
 print(g)
 local t=win.tex(g)
 print(t)
