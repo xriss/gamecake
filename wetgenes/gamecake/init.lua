@@ -25,7 +25,7 @@ function create(opts)
 	opts.cake=cake -- insert cake into opts
 	cake.opts=opts -- and opts into cake
 	
-	cake.grd_fmt="GRD_FMT_U8_BGRA"
+	cake.grd_fmt="GRD_FMT_U8_ARGB"
 	
 	
 	cake.canvas=wcanvas.create(opts) -- we will need a canvas to draw too
