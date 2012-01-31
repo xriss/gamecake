@@ -1617,7 +1617,7 @@ function sheet(soulname)
 	local max_x=800
 	local max_y=600
 	
-	local gd=grd.create("GRD_FMT_U8_BGRA",max_x,max_y,1)
+	local gd=grd.create("GRD_FMT_U8_ARGB",max_x,max_y,1)
 		
 	for i=1,#que do local v=que[i]
 	
@@ -1642,7 +1642,7 @@ print( v[1].." "..v[2].." "..v[3] )
 		-- grab display
 		local w,h,s=win.readpixels()
 		win.target(0,0) -- unbind	
-		local ga=grd.create("GRD_FMT_U8_BGRA",w,h,1)
+		local ga=grd.create("GRD_FMT_U8_ARGB",w,h,1)
 		ga:pixels(0,0,w,h,s)
 		ga:flipy() -- silly upside down ogl
 		
@@ -1716,7 +1716,7 @@ _G.sheet=sheet
 
 		print(w,h)
 		
-		local ga=grd.create("GRD_FMT_U8_BGRA",w,h,1)
+		local ga=grd.create("GRD_FMT_U8_ARGB",w,h,1)
 		ga:pixels(0,0,w,h,s)
 		ga:flipy() -- silly upside down ogl
 		

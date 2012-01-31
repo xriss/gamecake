@@ -76,12 +76,12 @@ int i;
 		if(!grd_info_alloc(g->bmap, fmt , w, h, d )) { goto bogus; }
 		if(fmt==GRD_FMT_U8_INDEXED) // do we need a palette?
 		{
-			if(!grd_info_alloc(g->cmap, GRD_FMT_U8_BGRA , 256, 1, 1 )) { goto bogus; }
+			if(!grd_info_alloc(g->cmap, GRD_FMT_U8_ARGB , 256, 1, 1 )) { goto bogus; }
 		}
 		else
 		if(fmt==GRD_FMT_U8_LUMINANCE) // do we need a palette?
 		{
-			if(!grd_info_alloc(g->cmap, GRD_FMT_U8_BGRA , 256, 1, 1 )) { goto bogus; }
+			if(!grd_info_alloc(g->cmap, GRD_FMT_U8_ARGB , 256, 1, 1 )) { goto bogus; }
 			bp=g->cmap->get_data(0,0,0);
 			for(i=0;i<256;i++)
 			{
@@ -289,17 +289,17 @@ u8 *pc;
 		return true;
 	}
 
-	if(g->bmap->fmt==GRD_FMT_U8_BGRA) // convert from BGRA
+	if(g->bmap->fmt==GRD_FMT_U8_ARGB) // convert from ARGB
 	{
 		switch(fmt)
 		{
 			case GRD_FMT_HINT_ALPHA:
-			case GRD_FMT_U8_BGRA:
+			case GRD_FMT_U8_ARGB:
 				return true; // no change needed
 			break;
 			
-			case GRD_FMT_U8_BGRA_PREMULT:
-				g->bmap->fmt=GRD_FMT_U8_BGRA_PREMULT; // this is the same data, just bit twiddled
+			case GRD_FMT_U8_ARGB_PREMULT:
+				g->bmap->fmt=GRD_FMT_U8_ARGB_PREMULT; // this is the same data, just bit twiddled
 				for(z=0;z<g->bmap->d;z++)
 				{
 					for(y=0;y<g->bmap->h;y++)
@@ -352,14 +352,6 @@ u8 *pc;
 				grd_insert(g,gb);
 			break;
 						
-			case GRD_FMT_HINT_ONLY_ALPHA:
-			case GRD_FMT_U8_LUMINANCE:
-			
-			case GRD_FMT_F32_ARGB:
-			
-			case GRD_FMT_F64_ARGB:
-			
-			case GRD_FMT_HINT_NO_ALPHA:
 			case GRD_FMT_U8_RGB:
 			
 			default:
@@ -368,17 +360,17 @@ u8 *pc;
 		}
 	}
 	else
-	if(fmt==GRD_FMT_U8_BGRA) // convert to BGRA
+	if(fmt==GRD_FMT_U8_ARGB) // convert to BGRA
 	{
 		switch(g->bmap->fmt)
 		{
-			case GRD_FMT_U8_BGRA:
+			case GRD_FMT_U8_ARGB:
 				return true; // no change needed
 			break;
 			
 			case GRD_FMT_U8_LUMINANCE:
 			case GRD_FMT_U8_INDEXED:
-				gb=grd_create(GRD_FMT_U8_BGRA,g->bmap->w,g->bmap->h,g->bmap->d);
+				gb=grd_create(GRD_FMT_U8_ARGB,g->bmap->w,g->bmap->h,g->bmap->d);
 				if(!gb) { return false; }
 				
 				for(z=0;z<g->bmap->d;z++)
@@ -404,7 +396,7 @@ u8 *pc;
 			break;
 						
 			case GRD_FMT_U16_ARGB_1555:
-				gb=grd_create(GRD_FMT_U8_BGRA,g->bmap->w,g->bmap->h,g->bmap->d);
+				gb=grd_create(GRD_FMT_U8_ARGB,g->bmap->w,g->bmap->h,g->bmap->d);
 				if(!gb) { return false; }
 				
 				for(z=0;z<g->bmap->d;z++)
@@ -431,10 +423,6 @@ u8 *pc;
 				grd_insert(g,gb);
 			break;
 			
-			case GRD_FMT_F32_ARGB:
-			
-			case GRD_FMT_F64_ARGB:
-			
 			case GRD_FMT_U8_RGB:
 			
 			default:
@@ -444,7 +432,7 @@ u8 *pc;
 	}
 	else // convert source to BGRA first then try again
 	{
-		if(! grd_convert(g ,GRD_FMT_U8_BGRA) ) { return false; }
+		if(! grd_convert(g ,GRD_FMT_U8_ARGB) ) { return false; }
 		return grd_convert(g ,fmt);
 	}
 	
@@ -759,7 +747,7 @@ s32 h=bb->h;
 	gb->err=ga->err; // put error in both
 	if(ga->err) { return false; }
 
-	if( (ba->fmt==GRD_FMT_U8_BGRA) && (bb->fmt==GRD_FMT_U8_BGRA_PREMULT) )
+	if( (ba->fmt==GRD_FMT_U8_ARGB) && (bb->fmt==GRD_FMT_U8_ARGB_PREMULT) )
 	{
 		
 		

@@ -8,7 +8,116 @@
 
 #define UPVALUE_LIB 1
 
+//
+// we can use either this string as a string identifier
+// or its address as a light userdata identifier, both unique
+//
+const char *lua_grdmap_ptr_name="grdmap*ptr";
 
+
+// the data pointer we are using
+
+typedef struct grdmap * part_ptr;
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// alloc an item, returns table that you can modify and associate extra data with
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_create (lua_State *l)
+{
+part_ptr *p;
+const char *s;
+const char *opts=0;
+
+int idx_ptr;
+int idx_tab;
+
+	p = (part_ptr *)lua_newuserdata(l, sizeof(part_ptr));
+	idx_ptr=lua_gettop(l);
+	(*p)=0;
+
+	luaL_getmetatable(l, lua_grdmap_ptr_name);
+	lua_setmetatable(l, idx_ptr);
+
+	lua_newtable(l);
+	idx_tab=lua_gettop(l);
+
+	lua_pushvalue(l, idx_ptr ); // get our userdata,
+	lua_rawseti(l,idx_tab,0); // our userdata lives in tab[0]
+
+
+//	(*p)=grd_create(GRD_FMT_U8_BGRA,0,0,0);
+
+//	lua_grdmap_getinfo(l,*p,idx_tab);
+
+	lua_remove(l, idx_ptr ); // dont need pointer anymore, so just return the table
+	return 1;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// __GC for ptr
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_destroy_ptr (lua_State *l)
+{	
+part_ptr *p;
+
+	p = (part_ptr *)luaL_checkudata(l, 1 , lua_grdmap_ptr_name);
+	
+	if(*p)
+	{
+//		grdmap_free(*p);
+	}
+	(*p)=0;
+	
+	return 0;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// open library.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+
+
+int luaopen_wetgenes_grdmap_core (lua_State *l)
+{
+	
+	const luaL_reg lib[] =
+	{
+		{	"create",		lua_grdmap_create			},
+		
+		{0,0}
+	};
+
+	const luaL_reg meta[] =
+	{
+		{	"__gc",			lua_grdmap_destroy_ptr		},
+
+		{0,0}
+	};
+
+
+	luaL_newmetatable(l, lua_grdmap_ptr_name);
+	luaL_openlib(l,0,meta,0);
+	lua_pop(l,1);
+	
+	lua_newtable(l);
+	luaL_openlib(l,0,lib,0);
+
+	return 1;
+}
+
+
+
+
+
+#if 0
 
 /*----------------------------------------------------------------------------------------------------------------------------*/
 //
@@ -609,4 +718,5 @@ int luaopen_wetgenes_grdmap_core (lua_State *l)
 	return 1;
 }
 
+#endif
 

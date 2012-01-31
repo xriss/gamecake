@@ -14,23 +14,29 @@ enum GRD_FMT
 {
 	GRD_FMT_NONE=0,
 
-// basic formats, most manipulations will only work on GRD_FMT_ARGB_U8
-// data can be convereted too or from other formats
+// basic formats, most internal manipulations will only work on GRD_FMT_ARGB_U8
+// also you may need to convert to ARGB or RGB or INDEXED before saving and from after loading
+// I'm trying to avoid diferent byte order to keep it simple, so ARGB **memory** order only
 
-	GRD_FMT_U8_BGRA,				// u8[4]  per pixel, forced U8 BGRA (thinking little endian makes this the default) 
-	GRD_FMT_U8_INDEXED,				// u8[1]  per pixel, forced U8 Indexed input
-	GRD_FMT_U8_LUMINANCE,			// u8[1]  per pixel, forced U8 gray scale (treat as indexed)
-
-	GRD_FMT_F32_ARGB,				// f32[4] per pixel, forced F32 ARGB (future proofed)
-	GRD_FMT_F64_ARGB,				// f64[4] per pixel, forced F64 ARGB (very future proofed)
-
-// these are slightly less basic, intended to be converted to, on read/write but not manipulated
-// some of them fit multiple pixels into 1 byte for instance.
-// generally duplicate the image, convert to one of these then dump or save it
+	GRD_FMT_U8_ARGB,				// u8[4] ARGB per pixel, so thats a U32-BGRA (thinking little endian)
+	
+	GRD_FMT_U8_ARGB_PREMULT,		// A is the same as in ARGB but ( RGB=RGB*A )
 
 	GRD_FMT_U16_ARGB_1555,			// u16[1] per pixel, 1 bit alpha , 5 bits red , 5 bits green , 5 bits blue
+	
+	GRD_FMT_U16_ARGB_1555_PREMULT,	// again premult makes more sense
 
-	GRD_FMT_U8_RGB,					// u8[3]  per pixel, probably normal palette information
+// I think it makes sense to keep all floating point values as premultiplied alpha?
+// a 1.0 in here is the same as a 255 in U8 format
+	GRD_FMT_F16_ARGB_PREMULT,		// f16[4] per pixel
+	GRD_FMT_F32_ARGB_PREMULT,		// f32[4] per pixel
+	GRD_FMT_F64_ARGB_PREMULT,		// f64[4] per pixel
+
+	GRD_FMT_U8_RGB,					// u8[3]  per pixel, probably just normal palette information
+
+	GRD_FMT_U8_INDEXED,		// u8[1]  per pixel, forced U8 Indexed input
+	GRD_FMT_U8_LUMINANCE,			// u8[1]  per pixel, forced U8 gray scale (treat as indexed)
+
 
 // more formats, not to be used when mucking about with data
 // these are hints for textures rather than specific formats and don't guarantee any number of bits
@@ -38,23 +44,21 @@ enum GRD_FMT
 // basically it is none of your concern, if you intend to do anything with the dat convert it to one of the
 // basic formats
 
-	GRD_FMT_HINT_NO_ALPHA,			// just RGB , probably u32 or u16(565)
-	GRD_FMT_HINT_ALPHA_1BIT,		// and RGB  , probably u32 or u16(1555)
-	GRD_FMT_HINT_ALPHA,				// and RGB  , probably u32 or u16(4444)
-	GRD_FMT_HINT_ONLY_ALPHA,		// no RGB   , probably u8
+	GRD_FMT_HINT_NO_ALPHA=0x80,	// just RGB , probably u32 or u16(565)
+	GRD_FMT_HINT_ALPHA_1BIT,	// and RGB  , probably u32 or u16(1555)
+	GRD_FMT_HINT_ALPHA,			// and RGB  , probably u32 or u16(4444)
+	GRD_FMT_HINT_ONLY_ALPHA,	// no RGB   , probably u8
 
-// same as GRD_FMT_U8_BGRA but the premultiplied RGB makes more sense...
-	GRD_FMT_U8_BGRA_PREMULT,		// A is the same as in BGRA but ( RGB=RGB*A )
 									
 	GRD_FMT_MAX
 };
 #define GRD_FMT_GOTALPHA(x) (x!=GRD_FMT_NO_ALPHA)
-#define GRD_FMT_SIZEOFPIXEL(x) (	(x==GRD_FMT_U8_BGRA)?4:\
+#define GRD_FMT_SIZEOFPIXEL(x) (	(x==GRD_FMT_U8_ARGB)?4:\
 									(x==GRD_FMT_U8_INDEXED)?1:\
 									(x==GRD_FMT_U8_LUMINANCE)?1:\
 									(x==GRD_FMT_U16_ARGB_1555)?2:\
 									(x==GRD_FMT_U8_RGB)?3:\
-									(x==GRD_FMT_U8_BGRA_PREMULT)?4:\
+									(x==GRD_FMT_U8_ARGB_PREMULT)?4:\
 									0)
 //									(x==GRD_FMT_F32_ARGB)?16:\
 //									(x==GRD_FMT_F64_ARGB)?32:\

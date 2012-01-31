@@ -50,7 +50,7 @@ void grd_jpg_load_file(struct grd * g, const char* file_name)
 // choose grdfmt
 	width=cinfo.image_width;
 	height=cinfo.image_height;
-	grdfmt=GRD_FMT_U8_BGRA;
+	grdfmt=GRD_FMT_U8_ARGB;
 	
 	if(!grd_realloc(g,grdfmt,width,height,1))
 		abort_("grd realloc fail");

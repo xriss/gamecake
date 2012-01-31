@@ -86,7 +86,7 @@ if false then
 
 	local fname=wetlua.dir.."atest.32.png"
 	print(fname)
-	local ga=grd.create("GRD_FMT_U8_BGRA",fname)
+	local ga=grd.create("GRD_FMT_U8_ARGB",fname)
 
 	for i,v in pairs(ga) do
 		print(i," = ",v)
