@@ -50,10 +50,6 @@
 
 #include "../wet/util/f32_math.h"
 
-
-#include "code/grd.h"
-#include "code/grdmap.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -62,7 +58,6 @@ extern "C" {
 #include "../lib_lua/src/lauxlib.h"
 #include "../lib_lua/src/lualib.h"
 
-#include "code/lua_grdmap.h"
 
 #ifdef __cplusplus
 };
@@ -70,3 +65,7 @@ extern "C" {
 
 
 
+#include "code/grd.h"
+#include "code/grdmap.h"
+#include "code/lua_grd.h"
+#include "code/lua_grdmap.h"

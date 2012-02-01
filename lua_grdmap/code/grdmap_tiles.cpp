@@ -15,9 +15,8 @@
 // shrink the given tile, adjust the posiion and size such that only the non transparent potion is within the area
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void metamap_char_shrink(mmap_tile *a )
+void grdmap_tile_shrink(grdmap_tile *a )
 {
-#if 0
 
 s32 sa,sp; // spans for tile a and a pixel
 
@@ -30,15 +29,15 @@ bool clear;
 
 s32 delta;
 
-	sa=a->base->span;
-	sp=a->base->sizeof_pix;
+	sa=a->base->g->bmap->yscan;
+	sp=a->base->g->bmap->xscan;
 
 
 // push up from bottom
 	delta=0;
 	for(y=a->h-1;y>=0;y--)
 	{
-		pa = a->base->data + (a->x*sp) + ((a->y+y)*sa) ;
+		pa = a->base->g->bmap->get_data(a->x,a->y+y,0);
 
 		clear=true;
 		for(x=0;x<a->w;x++)
@@ -58,7 +57,7 @@ s32 delta;
 	delta=0;
 	for(y=0;y<a->h;y++)
 	{
-		pa = a->base->data + (a->x*sp) + ((a->y+y)*sa) ;
+		pa = a->base->g->bmap->get_data(a->x,a->y+y,0);
 
 		clear=true;
 		for(x=0;x<a->w;x++)
@@ -88,7 +87,7 @@ s32 delta;
 	delta=0;
 	for(x=a->w-1;x>=0;x--)
 	{
-		pa = a->base->data + ((a->x+x)*sp) + (a->y*sa) ;
+		pa = a->base->g->bmap->get_data(a->x+x,a->y,0);
 
 		clear=true;
 		for(y=0;y<a->h;y++)
@@ -109,7 +108,7 @@ s32 delta;
 	delta=0;
 	for(x=0;x<a->w;x++)
 	{
-		pa = a->base->data + ((a->x+x)*sp) + (a->y*sa) ;
+		pa = a->base->g->bmap->get_data(a->x+x,a->y,0);
 
 		clear=true;
 		for(y=0;y<a->h;y++)
@@ -127,8 +126,6 @@ s32 delta;
 	a->w-=delta;
 	a->x+=delta;
 	a->hx+=delta;
-
-#endif
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -138,12 +135,11 @@ s32 delta;
 // return true if they are exactly the same
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool metamap_char_compare(mmap_tile *a , mmap_tile *b)
+bool grdmap_tile_compare(grdmap_tile *a , grdmap_tile *b)
 {
-#if 0
 
-s32 w,h; //in bytes for both tiles (if tiles are diferent size then they aint equil)
-s32 sa,sb,sp; // spans for tiles a and b and a pixel
+s32 w,h; //in bytes for both tiles (if tiles are diferent size then they aint equal)
+s32 sp; // spans for tiles a and b and a pixel
 
 u8 *pa,*pb; // data pointers
 s32 x,y;	// x,y pointers
@@ -156,28 +152,24 @@ s32 x,y;	// x,y pointers
 
 	if(a->base!=b->base) // only need to check if not pointing to same image
 	{
-		if(a->base->format!=b->base->format) return false;
-		if(a->base->type!=b->base->type) return false;
-		if(a->base->sizeof_pix!=b->base->sizeof_pix) return false;
+		if(a->base->g->bmap->fmt!=b->base->g->bmap->fmt) return false;
 	}
 
-	sa=a->base->span;
-	sb=b->base->span;
-	sp=a->base->sizeof_pix;
+	sp=a->base->g->bmap->xscan;
 
 	w=a->w*sp;
 	h=a->h;
 
 	for(y=0;y<h;y++)
 	{
-		pa = a->base->data + (a->x*sp) + ((a->y+y)*sa) ;
-		pb = b->base->data + (b->x*sp) + ((b->y+y)*sb) ;
+		pa = a->base->g->bmap->get_data(a->x,a->y+y,0);
+		pb = b->base->g->bmap->get_data(b->x,b->y+y,0);
 
 		for(x=0;x<w;x++)
 		{
 			if(*pa++!=*pb++) return false;
 		}
 	}
-#endif
+
 	return true; // if we got here then tiles are the same
 }

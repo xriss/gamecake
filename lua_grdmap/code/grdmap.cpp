@@ -8,139 +8,121 @@
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// setup the basic structures so they are ready to be filled in
+// allocate a gridmap structure
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool mmap_setup( metamap *mmap )
+struct grdmap * grdmap_alloc()
 {
-#if 0
-bool ret;
-
-	ret=true;
-
-	memset(mmap,0,sizeof(metamap));	// clear data
-
-	return ret;
-#endif
-	return true;
+	return 	(struct grdmap *)calloc(sizeof(struct grdmap),1);
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// clean/free anything that may have been allocated
+// free any data in a grdmap and then free the structure
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool mmap_clean( metamap *mmap )
+void grdmap_free(struct grdmap *gm)
 {
-#if 0
-bool ret;
-
-	ret=true;
-
-	if(mmap->tiles)
+	if(gm)
 	{
-		free(mmap->tiles);
-		mmap->tiles=0;
-		mmap->numof_tiles=0;
+		grdmap_clean(gm);
+		free(gm);
+	}
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// Allocate chars 
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+bool grdmap_setup(struct grdmap *gm,struct grd *g)
+{
+s32 x;
+s32 y;
+
+	if(!gm) { goto bogus; } // need these parts
+	
+	grdmap_clean(gm); // remove old stuff first
+
+	gm->g=g;
+
+	return true;
+bogus:
+	if(gm) { grdmap_clean(gm); }
+	return false;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// free any allocated data but not the structure
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+bool grdmap_clean(struct grdmap *gm)
+{
+	if(gm)
+	{
+		if(gm->tiles)
+		{
+			free(gm->tiles);
+		}
+		memset(gm,0,sizeof(struct grdmap));	// clear data
 	}
 
-	return ret;
-#endif
 	return true;
+bogus:
+	return false;
 }
 
 
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// update the image info cache
+// break an image into chars of the given size, this may fail
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void mmap_update_cache( metamap *mmap )
+bool grdmap_cutup(struct grdmap *gm,s32 pw,s32 ph)
 {
-#if 0
-	ilBindImage(mmap->image);
+s32 x;
+s32 y;
+s32 id;
+const char *err;
 
-	mmap->w=ilGetInteger(IL_IMAGE_WIDTH);
-	mmap->h=ilGetInteger(IL_IMAGE_HEIGHT);
-
-	mmap->format=ilGetInteger(IL_IMAGE_FORMAT);
-	mmap->type=ilGetInteger(IL_IMAGE_TYPE);
-
-	mmap->sizeof_pix=ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
-
-	mmap->span=mmap->sizeof_pix*mmap->w;
-
-	mmap->data=ilGetData();
-#endif
-}
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// check we have tiles and image data
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-bool mmap_check( metamap *mmap )
-{
-#if 0
-	if(!mmap->tiles) return false;
-	if(!mmap->data) return false;
-
-	return true;
-#endif
-	return true;
-}
-
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// allocate and fill in a tilemap using tiles of the given size
-// doesnt reduce in anyway so all it does is produce an array which can later be collapsed
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-bool mmap_cutup( metamap *mmap , s32 w, s32 h)
-{
-#if 0
-bool ret;
-s32 x,y;
-mmap_tile *tp;
-
-	ret=false;
-
-	mmap_update_cache(mmap);
-
-	mmap->tw=mmap->w/w;
-	mmap->th=mmap->h/h;
-
-
-// alloc tiles
-	mmap->tiles=(mmap_tile*)calloc(mmap->tw*mmap->th,sizeof(mmap_tile));
-	if(!mmap->tiles) goto bogus;
-
-
-	mmap->numof_tiles=mmap->tw*mmap->th;
-
-
-// fill in tiles
-	tp=mmap->tiles;
-	for(y=0;y<mmap->th;y++)
+	if(!gm) { goto bogus; } // need these parts
+	if(!gm->g) { err="missing grd"; goto bogus; } // need these parts
+	
+	gm->pw=pw;
+	gm->ph=ph;
+	
+	gm->tw=(gm->g->bmap->w+pw-1)/pw; // round up
+	gm->th=(gm->g->bmap->h+ph-1)/ph;
+	
+	gm->tiles=(struct grdmap_tile*)calloc(gm->tw*gm->th,sizeof(struct grdmap_tile));
+	if(!gm->tiles) { goto bogus; } // error
+	gm->numof_tiles=gm->tw*gm->th;
+	
+	id=0;
+	for(y=0;y<gm->th;y++)
 	{
-		for(x=0;x<mmap->tw;x++,tp++)
+		for(x=0;x<gm->tw;x++)
 		{
-			tp->w=w;
-			tp->h=h;
-			tp->x=x*tp->w;
-			tp->y=y*tp->h;
-			tp->base=mmap;
+				struct grdmap_tile *t=gm->tiles + (x+y*gm->tw);
+				t->id=id;
+				t->x=x*gm->pw;
+				t->y=y*gm->ph;
+				t->w=gm->pw;
+				t->h=gm->ph;
+				if( (t->x+t->w) > gm->g->bmap->w ) { t->w=gm->g->bmap->w-t->x; } // clip size of end tiles
+				if( (t->y+t->h) > gm->g->bmap->h ) { t->h=gm->g->bmap->h-t->y; }
+				t->base=gm;
+				
+				id++;
 		}
 	}
 
-
-	ret=true;
-
-bogus:
-	return ret;
-#endif
 	return true;
+bogus:
+	if(gm) { grdmap_clean(gm); gm->err=err; }
+	return false;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -148,18 +130,13 @@ bogus:
 // reduce master to master chains down to a single pointer to the final data.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool mmap_unchain( metamap *mmap )
+bool grdmap_unchain( struct grdmap *gm )
 {
-#if 0
-bool ret;
-mmap_tile *tp;
+grdmap_tile *tp;
 
-	ret=false;
+	if( ! gm->tiles ) { goto bogus; }
 
-	mmap_update_cache(mmap);
-	if(!mmap_check(mmap)) goto bogus;
-
-	for( tp=mmap->tiles ; tp<mmap->tiles+mmap->numof_tiles ; tp++ )
+	for( tp=gm->tiles ; tp<gm->tiles+gm->numof_tiles ; tp++ )
 	{
 		if(tp->master)
 		{
@@ -170,11 +147,9 @@ mmap_tile *tp;
 		}
 	}
 
-	ret=true;
-bogus:
-	return ret;
-#endif
 	return true;
+bogus:
+	return false;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -182,34 +157,27 @@ bogus:
 // compare all tiles with all other tiles, and mark duplicates as such.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool mmap_merge( metamap *mmap )
+bool grdmap_merge( grdmap *gm )
 {
-#if 0
-bool ret;
-mmap_tile *pa;
-mmap_tile *pb;
+grdmap_tile *pa;
+grdmap_tile *pb;
 
-	ret=false;
+	if( ! gm->tiles ) { goto bogus; }
 
-	mmap_update_cache(mmap);
-	if(!mmap_check(mmap)) goto bogus;
-
-	for( pa=mmap->tiles ; pa<mmap->tiles+mmap->numof_tiles ; pa++ )
+	for( pa=gm->tiles ; pa<gm->tiles+gm->numof_tiles ; pa++ )
 	{
 		if(pa->master) continue;
 
-		for( pb=mmap->tiles ; pb<pa ; pb++ )
+		for( pb=gm->tiles ; pb<pa ; pb++ )
 		{
 			if(pb->master) continue;
-			if(metamap_char_compare(pa,pb)) { pa->master=pb; break; }
+			if(grdmap_tile_compare(pa,pb)) { pa->master=pb; break; }
 		}
 	}
 
-	ret=true;
-bogus:
-	return ret;
-#endif
 	return true;
+bogus:
+	return false;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -217,80 +185,64 @@ bogus:
 // Shrink each tile, remove alpha from around the outside.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool mmap_shrink( metamap *mmap )
+bool grdmap_shrink( grdmap *gm )
 {
-#if 0
-bool ret;
-mmap_tile *pa;
+grdmap_tile *pa;
 
-	ret=false;
+	if( ! gm->tiles ) { goto bogus; }
 
-	mmap_update_cache(mmap);
-	if(!mmap_check(mmap)) goto bogus;
-
-	for( pa=mmap->tiles ; pa<mmap->tiles+mmap->numof_tiles ; pa++ )
+	for( pa=gm->tiles ; pa<gm->tiles+gm->numof_tiles ; pa++ )
 	{
 		if(pa->master) continue;
 
-		metamap_char_shrink(pa);
+		grdmap_tile_shrink(pa);
 	}
 
-	ret=true;
-bogus:
-	return ret;
-#endif
 	return true;
+bogus:
+	return false;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// compare all tiles on one metamap with all tiles on another metamap
+// compare all tiles on one grdmap with all tiles on another grdmap
 // and map them acordingly
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool mmap_keymap( metamap *a , metamap *b )
+bool grdmap_keymap( grdmap *a , grdmap *b )
 {
-#if 0
-bool ret;
-mmap_tile *pa;
-mmap_tile *pb;
+grdmap_tile *pa;
+grdmap_tile *pb;
 
-	ret=false;
-
-	mmap_update_cache(a);
-	mmap_update_cache(b);
-	if(!mmap_check(a)) goto bogus;
-	if(!mmap_check(b)) goto bogus;
-
+	if( ! a->tiles ) { goto bogus; }
+	if( ! b->tiles ) { goto bogus; }
 
 	for( pa=a->tiles ; pa<a->tiles+a->numof_tiles ; pa++ )
 	{
 		for( pb=b->tiles ; pb<b->tiles+b->numof_tiles ; pb++ )
 		{
 			if(pb->master) continue;
-			if(metamap_char_compare(pa,pb)) { pa->master=pb; break; }
+			if(grdmap_tile_compare(pa,pb)) { pa->master=pb; break; }
 		}
 	}
 
-	ret=true;
-bogus:
-	return ret;
-#endif
 	return true;
+bogus:
+	return false;
 }
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// layout the contents of one metamap onto another, skip tiles that have a zero size
+// layout the contents of one grdmap onto another, skip tiles that have a zero size
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool mmap_layout( metamap *a , metamap *b , s32 border)
+bool grdmap_layout( grdmap *a , grdmap *b , s32 border)
 {
 #if 0
 bool ret;
-mmap_tile *pa;
-mmap_tile *pb;
+grdmap_tile *pa;
+grdmap_tile *pb;
 
 s32 count;
 
@@ -306,10 +258,10 @@ s32 height_loop;
 
 	ret=false;
 
-	mmap_update_cache(a);
-	mmap_update_cache(b);
-	if(!mmap_check(a)) goto bogus;
-//	if(!mmap_check(b)) goto bogus; //no need to check b, we will be creating it
+	grdmap_update_cache(a);
+	grdmap_update_cache(b);
+	if(!grdmap_check(a)) goto bogus;
+//	if(!grdmap_check(b)) goto bogus; //no need to check b, we will be creating it
 
 
 //	base_tile_width=a->w/a->tw;
@@ -333,9 +285,9 @@ s32 height_loop;
 
 // free? then allocate tiles in b
 
-	mmap_clean(b);
+	grdmap_clean(b);
 
-	b->tiles=(mmap_tile*)calloc(count,sizeof(mmap_tile));
+	b->tiles=(grdmap_tile*)calloc(count,sizeof(grdmap_tile));
 	if(!b->tiles) goto bogus;
 	b->numof_tiles=count;
 	b->tw=0;
@@ -413,13 +365,13 @@ bogus:
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// save the metamap info as an XTX data file
+// save the grdmap info as an XTX data file
 //
-// pass in the layedout page in mmap_layout and the original page in mmap_master in order to generate a mapping table
+// pass in the layedout page in grdmap_layout and the original page in grdmap_master in order to generate a mapping table
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 
-bool mmap_save_XTX( metamap *mmap_layout , metamap *mmap_master ,const char *filename)
+bool grdmap_save_XTX( grdmap *grdmap_layout , grdmap *grdmap_master ,const char *filename)
 {
 #if 0
 
@@ -431,8 +383,8 @@ FILE *fp=0;
 
 bool ret;
 
-mmap_tile *tile;
-mmap_tile *tile2;
+grdmap_tile *tile;
+grdmap_tile *tile2;
 
 
 s32 chunk_info			;
@@ -451,8 +403,8 @@ u16 id;
 		goto bogus;
 	}
 
-	xtxinfo->numof_areas=mmap_layout->numof_tiles;
-	xtxinfo->numof_maps=mmap_master->numof_tiles;
+	xtxinfo->numof_areas=grdmap_layout->numof_tiles;
+	xtxinfo->numof_maps=grdmap_master->numof_tiles;
 	xtxinfo->numof_kerns=0;
 
 
@@ -496,13 +448,13 @@ u16 id;
 //
 // dump out area infos
 //
-	for( tile=mmap_layout->tiles ; tile<mmap_layout->tiles+mmap_layout->numof_tiles ; tile++ )
+	for( tile=grdmap_layout->tiles ; tile<grdmap_layout->tiles+grdmap_layout->numof_tiles ; tile++ )
 	{
-		xtxarea->x=((s16)(tile->x));///((f32)(mmap_layout->w));
-		xtxarea->y=((s16)(tile->y));///((f32)(mmap_layout->h));
+		xtxarea->x=((s16)(tile->x));///((f32)(grdmap_layout->w));
+		xtxarea->y=((s16)(tile->y));///((f32)(grdmap_layout->h));
 
-		xtxarea->w=((s16)(tile->w));///((f32)(mmap_layout->w));
-		xtxarea->h=((s16)(tile->h));///((f32)(mmap_layout->h));
+		xtxarea->w=((s16)(tile->w));///((f32)(grdmap_layout->w));
+		xtxarea->h=((s16)(tile->h));///((f32)(grdmap_layout->h));
 
 		xtxarea->hx=((s16)(tile->hx));
 		xtxarea->hy=((s16)(tile->hy));
@@ -516,15 +468,15 @@ u16 id;
 		xtxarea->twiddle();
 	}
 
-	for( tile=mmap_master->tiles ; tile<mmap_master->tiles+mmap_master->numof_tiles ; tile++ )
+	for( tile=grdmap_master->tiles ; tile<grdmap_master->tiles+grdmap_master->numof_tiles ; tile++ )
 	{
 		id=0; // not a tile
 
-		for( tile2=mmap_layout->tiles ; tile2<mmap_layout->tiles+mmap_layout->numof_tiles ; tile2++ )
+		for( tile2=grdmap_layout->tiles ; tile2<grdmap_layout->tiles+grdmap_layout->numof_tiles ; tile2++ )
 		{
 			if(tile2->master==tile)
 			{
-				id=1+tile2-mmap_layout->tiles;
+				id=1+tile2-grdmap_layout->tiles;
 				break;
 			}
 		}

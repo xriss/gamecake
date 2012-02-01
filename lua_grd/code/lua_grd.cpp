@@ -165,7 +165,7 @@ part_ptr p=lua_grd_check(l,idx);
 
 	if (p == 0)
 	{
-		luaL_error(l, "bad grd usedata" );
+		luaL_error(l, "bad grd userdata" );
 	}
 
 	return p;
