@@ -11,7 +11,7 @@ local grdmap=require("wetgenes.grdmap")
 
 function test_grdmap()
 
-	print(wstr.dump(grdmap))
+--	print(wstr.dump(grdmap))
 	
 	local gm=grdmap.create()
 	local gk=grdmap.create()
@@ -24,13 +24,12 @@ function test_grdmap()
 	
 	gm:keymap(gk)
 	
-	print("GM\n",wstr.dump(gm))
-	print("GK\n",wstr.dump(gk))
+--	print("GM\n",wstr.dump(gm))
+--	print("GK\n",wstr.dump(gk))
 	
+	local s=""
 	for y=0,gm.th-1 do
-	
-		local s=""
-	
+		
 		for x=0,gm.tw-1 do
 
 			local t=gm:tile(x,y)
@@ -42,12 +41,51 @@ function test_grdmap()
 			end
 
 		end
+		s=s.."\n"
+	end
+--	print(s)
+
+
+	local s=""
+	local xp=1
+	for y=gm.th-2,0,-2 do
+			
+		if xp==1 then xp=0 else xp=1 end -- flip offset each line
+	
+		for x=xp,gm.tw-2,2 do
+
+			local t=gm:tile(x,y)
+
+			if t.master then
+				s=s..string.format("%01X ",math.floor(t.master/2))
+			else
+				s=s.."0 "
+			end
+
+		end
 		
-		print(s)
+		s=s.."\n"
 	end
 
+expected=[[
+1 1 1 3 1 1 
+1 3 3 3 3 1 
+3 1 3 3 1 1 
+3 1 3 3 3 1 
+1 1 3 3 1 1 
+6 6 7 6 6 6 
+7 7 7 7 7 7 
+7 7 7 7 7 7 
+0 0 0 0 0 0 
+0 0 0 0 0 0 
+0 0 0 0 0 0 
+0 0 0 0 0 0 
+0 0 0 0 0 0 
+0 0 0 0 0 0 
+]]
 
-
+--	print("\n"..s)
+	assert( s==expected ,"\n"..expected.."\n\n==\n\n"..s.."\n")
 
 --[[
 	local g=assert(grd.create("GRD_FMT_U8_ARGB","dat/grd/"..name..".bse.png","png"))
