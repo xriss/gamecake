@@ -19,6 +19,70 @@ const char *lua_grdmap_ptr_name="grdmap*ptr";
 
 typedef struct grdmap * part_ptr;
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// fill a table in with the current settings
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_getinfo (lua_State *l, part_ptr p, int tab)
+{
+	if(p)
+	{
+		lua_pushliteral(l,"tw");		lua_pushnumber(l,p->tw);		lua_rawset(l,tab);
+		lua_pushliteral(l,"th");		lua_pushnumber(l,p->th);		lua_rawset(l,tab);
+		
+		lua_pushliteral(l,"pw");		lua_pushnumber(l,p->pw);		lua_rawset(l,tab);
+		lua_pushliteral(l,"ph");		lua_pushnumber(l,p->ph);		lua_rawset(l,tab);
+
+		lua_pushliteral(l,"err");
+		if(p->err) 	{ lua_pushstring(l,p->err); }
+		else		{ lua_pushnil(l); }
+		lua_rawset(l,tab);
+	}
+	else
+	{
+		lua_pushliteral(l,"err"); lua_pushstring(l,"unbound grdmap"); lua_rawset(l,tab);
+	}
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// fill a table in with the current settings
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_tile_getinfo (lua_State *l, struct grdmap_tile *p, int tab)
+{
+	if(p)
+	{
+		lua_pushliteral(l,"id");	lua_pushnumber(l,p->id);	lua_rawset(l,tab);
+		
+		lua_pushliteral(l,"x");		lua_pushnumber(l,p->x);		lua_rawset(l,tab);
+		lua_pushliteral(l,"y");		lua_pushnumber(l,p->y);		lua_rawset(l,tab);
+		lua_pushliteral(l,"w");		lua_pushnumber(l,p->w);		lua_rawset(l,tab);
+		lua_pushliteral(l,"h");		lua_pushnumber(l,p->h);		lua_rawset(l,tab);
+		
+		lua_pushliteral(l,"hx");	lua_pushnumber(l,p->hx);	lua_rawset(l,tab);
+		lua_pushliteral(l,"hy");	lua_pushnumber(l,p->hy);	lua_rawset(l,tab);
+		
+		if(p->master)
+		{
+			lua_pushliteral(l,"master");		lua_pushnumber(l,p->master->id);		lua_rawset(l,tab);
+		}
+		else
+		{
+			lua_pushliteral(l,"master");		lua_pushnil(l);		lua_rawset(l,tab);
+		}
+	}
+	else
+	{
+		lua_pushliteral(l,"err"); lua_pushstring(l,"unbound grdmap tile"); lua_rawset(l,tab);
+	}
+
+	return 0;
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -48,9 +112,15 @@ int idx_tab;
 	lua_rawseti(l,idx_tab,0); // our userdata lives in tab[0]
 
 
-//	(*p)=grd_create(GRD_FMT_U8_BGRA,0,0,0);
+	(*p)=grdmap_alloc();
+	if(!(*p))
+	{
+		lua_pop(l,2);
+		lua_pushnil(l);
+		lua_pushstring(l,"failed to alloc grdmap");
+	}
 
-//	lua_grdmap_getinfo(l,*p,idx_tab);
+	lua_grdmap_getinfo(l,*p,idx_tab);
 
 	lua_remove(l, idx_ptr ); // dont need pointer anymore, so just return the table
 	return 1;
@@ -70,13 +140,191 @@ part_ptr *p;
 	
 	if(*p)
 	{
-//		grdmap_free(*p);
+		grdmap_free(*p);
 	}
 	(*p)=0;
 	
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// check that a table at the given index contains a grd object
+// return the part_ptr if it does, otherwise return 0
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+part_ptr lua_grdmap_check (lua_State *l, int idx)
+{
+part_ptr p=0;
+
+	if(lua_istable(l,idx))
+	{
+		lua_rawgeti(l,idx,0);
+		p = *((part_ptr *)luaL_checkudata(l, -1 , lua_grdmap_ptr_name));
+		lua_pop(l,1);
+	}
+
+	return p;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// lua_grdmap_check with auto error on bad ptr
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+part_ptr lua_grdmap_get (lua_State *l, int idx)
+{
+part_ptr p=lua_grdmap_check(l,idx);
+
+	if (p == 0)
+	{
+		luaL_error(l, "bad grdmap userdata" );
+	}
+
+	return p;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// assign a grd into this grdmap, pass in null to remove
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_setup (lua_State *l)
+{
+part_ptr p=lua_grdmap_get(l,1);
+
+struct grd *g=lua_grd_check(l,2);
+
+	if(g)
+	{
+		p->g=g;
+		lua_pushstring(l,"g"); // we store this here, and you should not remove it
+		lua_pushvalue(l,2);
+		lua_rawset(l,1);
+	}
+	else
+	{
+		p->g=0;
+		lua_pushstring(l,"g"); // except by calling this function again, otherewise you may get GC problems
+		lua_pushnil(l);
+		lua_rawset(l,1);
+	}
+
+	lua_pushboolean(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// cutup the grd into chars of w,h in size
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_cutup (lua_State *l)
+{
+part_ptr p=lua_grdmap_get(l,1);
+
+	if(!p->g)
+	{
+		luaL_error(l, "missing grd in grdmap" );
+	}
+	
+s32 px;
+s32 py;
+	
+	px=(s32)lua_tonumber(l,2);
+	py=(s32)lua_tonumber(l,3);
+
+	grdmap_cutup(p,px,py);
+	
+	if(p->err)
+	{
+		luaL_error(l, p->err );
+	}
+	
+	lua_grdmap_getinfo(l,p,1);
+	
+	lua_pushboolean(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get information about the given tile
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_tile (lua_State *l)
+{
+part_ptr p=lua_grdmap_get(l,1);
+
+s32 id;
+s32 x;
+s32 y;
+	
+	if( lua_isnumber(l,3) ) // x,y ?
+	{
+		x=(s32)lua_tonumber(l,2);
+		y=(s32)lua_tonumber(l,3);
+		
+		id=x+y*p->tw;
+	}
+	else
+	{
+		id=(s32)lua_tonumber(l,2); // or just id
+	}
+	
+	if( (id<0) || (id>=p->numof_tiles) ) { luaL_error(l, "tile out of range" ); }
+	
+	struct grdmap_tile *t=p->tiles+id;
+	
+	lua_newtable(l);
+	lua_grdmap_tile_getinfo(l, t, lua_gettop(l) );
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// merge similar tiles
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_merge (lua_State *l)
+{
+part_ptr p=lua_grdmap_get(l,1);
+
+	grdmap_merge(p);
+
+	lua_pushboolean(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// remove whitespace from around tiles
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_shrink (lua_State *l)
+{
+part_ptr p=lua_grdmap_get(l,1);
+
+	grdmap_shrink(p);
+
+	lua_pushboolean(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// keymap from one grdmap to another
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_keymap (lua_State *l)
+{
+part_ptr a=lua_grdmap_get(l,1);
+part_ptr b=lua_grdmap_get(l,2);
+
+	grdmap_keymap(a,b);
+
+	lua_pushboolean(l,1);
+	return 1;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -91,6 +339,12 @@ int luaopen_wetgenes_grdmap_core (lua_State *l)
 	const luaL_reg lib[] =
 	{
 		{	"create",		lua_grdmap_create			},
+		{	"setup",		lua_grdmap_setup			},
+		{	"cutup",		lua_grdmap_cutup			},
+		{	"tile",			lua_grdmap_tile				},
+		{	"merge",		lua_grdmap_merge			},
+		{	"shrink",		lua_grdmap_shrink			},
+		{	"keymap",		lua_grdmap_keymap			},
 		
 		{0,0}
 	};

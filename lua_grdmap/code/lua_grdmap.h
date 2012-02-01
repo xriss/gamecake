@@ -5,16 +5,18 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 
 
-#define LUA_MMAPLIBNAME	"mmap"
-int luaopen_wetgenes_grdmap_core (lua_State *L);
-
-
-#define MMAPHANDLE "mmap"
-#define MMAPTHANDLE "mmapt"
-
 #define LUA_grdmap_LIB_NAME "wetgenes.grdmap.core"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+LUALIB_API int luaopen_wetgenes_grdmap_core (lua_State *l);
+
+#ifdef __cplusplus
+};
+#endif
 
 
-metamap *lua_mmap_to_mmap (lua_State *L, int index);
-metamap *lua_mmap_to_mmap_from_table (lua_State *L, int index);
+struct grdmap *lua_grdmap_check(lua_State *L, int index);
+
