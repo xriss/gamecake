@@ -107,10 +107,13 @@ bool fenestra_ogl::setup(struct fenestra * _fenestra)
 
 	}
         
-        
 	Xcontext=glXCreateNewContext( fenestra->dsp , conf[0] , GLX_RGBA_TYPE , NULL , true );
 glError();
 	glXMakeContextCurrent( fenestra->dsp , fenestra->win , fenestra->win,Xcontext );
+
+// this does not work?	
+//	glXSwapIntervalEXT(fenestra->dsp , fenestra->win , fenestra->ogl->swap_interval);
+
 glError();
 
 #endif
@@ -124,7 +127,8 @@ glError();
 	font_setup(font_base,0);
 	font_setup(font_sans,"../../mods/data/fonts/DejaVuSans.ttf");
 	font=font_base;
-	
+
+
 	return true;
 }
 

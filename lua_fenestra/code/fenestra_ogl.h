@@ -237,6 +237,7 @@ struct fenestra_ogl
 	u32 force_diffuse; // replace diffuse from material if !0 (for blooming effect)
 	u32 force_spec;    // same with spec
 	f32 force_gloss;   // and gloss
+	s32 swap_interval; // wait for frame flag
 
 	struct fogl_fbo target[1];
 

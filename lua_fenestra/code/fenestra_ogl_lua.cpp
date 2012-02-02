@@ -91,6 +91,19 @@ bool b;
 		lua_pushnumber(l,core->force_gloss);
 		return 1;
 	}
+	else
+	if( strcmp(s,"swap_interval")==0 )
+	{
+		if(lua_isnumber(l,3))
+		{
+			core->swap_interval=(s32)lua_tonumber(l,3);
+			glXSwapIntervalSGI(core->swap_interval);
+		}
+		lua_pushnumber(l,core->swap_interval);
+		return 1;
+	}
+	
+
 /*
 	else
 	if( strcmp(s,"blend_sub")==0 )
