@@ -16,8 +16,8 @@ function test_grdmap()
 	local gm=grdmap.create()
 	local gk=grdmap.create()
 
-	gm:setup( assert(grd.create("GRD_FMT_U8_ARGB","dat/grdmap/t1.map.png","png")) )	
-	gk:setup( assert(grd.create("GRD_FMT_U8_ARGB","dat/grdmap/t1.key.png","png")) )	
+	gm:setup( assert(grd.create("dat/grdmap/t1.map.png","png")) )	
+	gk:setup( assert(grd.create("dat/grdmap/t1.key.png","png")) )	
 	
 	gm:cutup(8,8)
 	gk:cutup(8,8)

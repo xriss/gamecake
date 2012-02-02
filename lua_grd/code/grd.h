@@ -153,7 +153,7 @@ struct grd * grd_create( s32 fmt , s32 w, s32 h, s32 d );
 
 void grd_free( struct grd *g );
 
-struct grd * grd_load( const char *filename , s32 fmt , const char *opts );
+struct grd * grd_load( const char *filename , const char *opts );
 bool grd_save( struct grd *g , const char *filename , const char *opts );
 
 struct grd * grd_duplicate( struct grd *g );
