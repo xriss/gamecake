@@ -227,32 +227,19 @@ int idx_tab;
 
 	idx_tab=lua_gettop(l);
 
-// main lib and userdata are stored as upvalues in the function calls for easy/fast access
-
-//	lua_pushvalue(l, lua_upvalueindex(UPVALUE_LIB) ); // get our base table
-//	lua_pushvalue(l, idx_ptr ); // get our userdata,
-//	lua_pushvalue(l, idx_tab ); // get our userdata,
-
-//	lua_grd_tab_openlib(l,1);
-
 // remember the userdata in the table as well as the upvalue
 
 	lua_pushvalue(l, idx_ptr ); // get our userdata,
 	lua_rawseti(l,-2,0); // our userdata lives in [0]
-
-
+	
 	(*p)=0;
-
-
-
-
 
 	if(lua_istable(l,1))	// duplicate another image
 	{
 		(*p)=grd_duplicate( lua_grd_get_ptr(l,1) );
 	}
 	else
-	if(lua_isnumber(l,2))	// create an image of a given size
+	if(lua_isnumber(l,2))	// create an image of a given format and size
 	{
 	s32 fmt,w,h,d;
 
@@ -264,18 +251,17 @@ int idx_tab;
 		(*p)=grd_create(fmt,w,h,d);
 	}
 	else
-	if(lua_isstring(l,2))	// load an image if a filename is given
+	if(lua_isstring(l,1))	// load an image if a filename is given
 	{
 	s32 fmt;
 
-		fmt=lua_grd_tofmt(l,1);
-		s=lua_tostring(l,2);
-		if(lua_isstring(l,3))	// choose loader?
+		s=lua_tostring(l,1);
+		if(lua_isstring(l,2))	// choose loader?
 		{
-			opts=lua_tostring(l,3);
+			opts=lua_tostring(l,2);
 		}
 		
-		(*p)=grd_load(s,fmt,opts);
+		(*p)=grd_load(s,opts);
 		
 		if( (*p)->err ) // return nil,err
 		{
@@ -421,15 +407,14 @@ part_ptr new_p;
 const char *s;
 s32 fmt;
 
-	fmt=lua_grd_tofmt(l,2);
-	s=lua_tostring(l,3);
+	s=lua_tostring(l,2);
 
-	if(lua_isstring(l,4))	// force format?
+	if(lua_isstring(l,3))	// force format?
 	{
-		opts=lua_tostring(l,4);
+		opts=lua_tostring(l,3);
 	}
 
-	new_p=grd_load(s,fmt,opts);
+	new_p=grd_load(s,opts);
 	
 	if(new_p->err)
 	{
@@ -438,7 +423,6 @@ s32 fmt;
 		grd_free(new_p);
 		return 2;
 	}
-
 
 	if(new_p!=0)
 	{
@@ -1199,48 +1183,6 @@ const luaL_reg lib[] =
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// call open lib with our tab functions
-//
-// all functions expect the self table to be passed in as arg1
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-/*
- * void lua_grd_tab_openlib (lua_State *l, int upvalues)
-{
-const luaL_reg lib[] =
-	{
-		{"destroy",			lua_grd_destroy},
-
-
-		{"reset",			lua_grd_reset},
-		{"load",			lua_grd_load},
-		{"save",			lua_grd_save},
-
-		{"convert",			lua_grd_convert},
-		
-		{"quant",			lua_grd_quant},
-
-		{"pixels",			lua_grd_pixels},
-		{"palette",			lua_grd_palette},
-
-//		{"conscale",		lua_grd_conscale},
-
-		{"scale",			lua_grd_scale},
-			
-		{"flipy",			lua_grd_flipy},
-
-		{"blit",			lua_grd_blit},
-		
-//		{	"unref"					,	lua_grd_unref},
-
-		{0,0}
-	};
-	luaL_openlib(l, NULL, lib, upvalues);
-}
-*/
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1258,9 +1200,6 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 	lua_pushvalue(l, -1); // and we need to save one to return
 	lua_grd_openlib(l,1);
 	lua_rawset(l, LUA_GLOBALSINDEX);
-
-//	lua_pushstring(l, LUA_grd_LIB_NAME ); // and we need to return it
-//	lua_rawget(l, LUA_GLOBALSINDEX);
 
 	return 1;
 }

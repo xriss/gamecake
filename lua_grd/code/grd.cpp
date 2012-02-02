@@ -153,7 +153,7 @@ void grd_free( struct grd *g )
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct grd * grd_load( const char *filename , s32 fmt , const char *opts )
+struct grd * grd_load( const char *filename , const char *opts )
 {
 struct grd *g=0;
 
@@ -175,13 +175,6 @@ struct grd *g=0;
 		else
 		{
 			grd_png_load_file(g,filename);
-		}
-		if(!g->err)
-		{
-			if(!grd_convert(g,fmt))
-			{
-				g->err="failed to convert to requested format";
-			}
 		}
 	}
 
