@@ -87,12 +87,4 @@ expected=[[
 --	print("\n"..s)
 	assert( s==expected ,"\n"..expected.."\n\n==\n\n"..s.."\n")
 
---[[
-	local g=assert(grd.create("GRD_FMT_U8_ARGB","dat/grd/"..name..".bse.png","png"))
-	assert( g:convert("GRD_FMT_U8_INDEXED") )
-	assert( g:convert("GRD_FMT_U8_ARGB") )
-	assert( g:save("dat/grd/"..name..".8x.out.png","png") )
-
-	assert_true( do_file_compare("dat/grd/"..name..".8x.out.png","dat/grd/"..name..".8x.chk.png") )
-]]
 end

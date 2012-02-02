@@ -209,7 +209,7 @@ struct grd *g=lua_grd_check(l,2);
 		lua_rawset(l,1);
 	}
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -242,7 +242,7 @@ s32 py;
 	
 	lua_grdmap_getinfo(l,p,1);
 	
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -291,7 +291,7 @@ part_ptr p=lua_grdmap_get(l,1);
 
 	grdmap_merge(p);
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -306,7 +306,7 @@ part_ptr p=lua_grdmap_get(l,1);
 
 	grdmap_shrink(p);
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -322,7 +322,7 @@ part_ptr b=lua_grdmap_get(l,2);
 
 	grdmap_keymap(a,b);
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 

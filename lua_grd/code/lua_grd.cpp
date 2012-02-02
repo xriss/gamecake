@@ -123,7 +123,7 @@ void lua_grd_pushfmt(lua_State *l,s32 fmt)
 {
 	const char *s=strenum_find_string(GRD_FMT_STRENUM,fmt);
 	if(!s){ s=GRD_FMT_STRENUM[0].str; }
-	lua_pushstring(l,s);
+	lua_pushstring(l,s+8); // skip the prefix
 }
 
 
@@ -389,7 +389,7 @@ part_ptr new_p;
 	}
 	lua_grd_getinfo(l,*p,1);
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -443,7 +443,7 @@ s32 fmt;
 	lua_grd_getinfo(l,*p,1);
 
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -487,7 +487,7 @@ const char *s;
 	}
 
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -512,7 +512,7 @@ s32 num;
 
 	lua_grd_getinfo(l,p,1);
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -539,7 +539,7 @@ s32 fmt;
 
 	lua_grd_getinfo(l,p,1);
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -596,7 +596,7 @@ s32 ch;
 		}
 	}
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -643,7 +643,7 @@ s32 w,h,d;
 
 	lua_grd_getinfo(l,p,1);
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -661,7 +661,7 @@ part_ptr p;
 
 	lua_grd_getinfo(l,p,1);
 
-	lua_pushboolean(l,1);
+	lua_pushvalue(l,1);
 	return 1;
 }
 
