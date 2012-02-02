@@ -53,6 +53,13 @@ s32 strenum_find_num(const strenum *se, const char *str)
 		{
 			return se->num;
 		}
+		if(strlen(se->str)>8) // also try without the prefix "GRD_FMT_"
+		{
+			if(strcmp(se->str+8,str)==0)
+			{
+				return se->num;
+			}
+		}
 
 		se++;
 	}
