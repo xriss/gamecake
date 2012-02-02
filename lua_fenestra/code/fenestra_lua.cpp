@@ -64,6 +64,13 @@ HWND into_hwnd=0;
 	}
 	lua_pop(l,1);
 
+	lua_pushstring(l,"swap_interval");
+	lua_rawget(l,1);
+	if( lua_isnumber(l,-1) )
+	{
+		core->ogl->swap_interval=(s32)lua_tonumber(l,-1);
+	}
+	lua_pop(l,1);
 	
 #if defined(WIN32)
 
