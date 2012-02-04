@@ -65,6 +65,10 @@ elseif WINDOWS then
 	links { "lib_zzip"}
 	links { "opengl32" , "glu32" }
 	links { "stdc++" , "ws2_32" , "gdi32"}
+	
+	links { "comdlg32" } -- we can dump this when we impliment our own freq
+	
+	
 
 --LLIBS = ['-lshell32', '-lshfolder', '-ldxguid', '-lgdi32', '-lmsvcrt', '-lwinmm', '-lmingw32', '-lm', '-lws2_32', '-lz', '-lstdc++'] 
 
