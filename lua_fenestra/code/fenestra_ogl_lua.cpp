@@ -91,7 +91,8 @@ bool b;
 		lua_pushnumber(l,core->force_gloss);
 		return 1;
 	}
-	else
+/*
+ * 	else
 	if( strcmp(s,"swap_interval")==0 )
 	{
 		if(lua_isnumber(l,3))
@@ -103,6 +104,7 @@ bool b;
 		return 1;
 	}
 	
+*/
 
 /*
 	else

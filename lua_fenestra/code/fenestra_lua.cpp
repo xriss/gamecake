@@ -30,13 +30,15 @@ static int core_setup(lua_State *l)
 
 HWND into_hwnd=0;
 
-	lua_pushstring(l,"into_hwnd");
+/*
+ * 	lua_pushstring(l,"into_hwnd");
 	lua_rawget(l,1);
 	if( lua_isuserdata(l,-1) )
 	{
 		into_hwnd=(HWND)lua_touserdata(l,-1);
 	}
 	lua_pop(l,1);
+*/
 
 #endif
 

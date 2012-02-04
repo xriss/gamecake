@@ -1,2 +1,2 @@
 cd ..\..\bin\exe
-.\lua.exe -e"dofile(\"../lua/apps.lua\");apps.start(\"wettest\");" %1 %2 %3 %4 %5
+.\lua.exe -e"require('apps').start('wettest','%1');"
