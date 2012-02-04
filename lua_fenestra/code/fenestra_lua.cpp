@@ -256,10 +256,80 @@ static int core_choose_file(lua_State *l)
 	struct fenestra *core = (struct fenestra *)lua_touserdata(l, 1 );
 
 // function disabled till i make a damn file requester...
-	return 0;
+//	return 0;
+
+const char *s1=0;
+char *s2=0;
+
+
+	if( lua_isstring(l,2) )
+	{
+		s1=lua_tostring(l,2);
+	}
+
+
 
 #if defined(WIN32)
-	return 0;	
+
+const char *dotsufix="*";
+const char *title=s1;
+const char *dirname=s1;
+
+//char * win_filereq_load(char *title, char *dirname,char *dotsufix)
+//{
+OPENFILENAME ofn;       // common dialog box structure
+
+static char name[_MAX_PATH];
+
+char origpath[_MAX_PATH];
+s32 origdrive;
+
+char sufixs[_MAX_PATH];
+
+s32 ret;
+
+char *cp;
+
+	_getcwd( origpath, _MAX_PATH );
+	origdrive=_getdrive();
+
+	sprintf(sufixs,"All%c*.*%c%s%c%s%c",0,0,dotsufix,0,dotsufix,0);
+
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+//	ofn.hwndOwner = WIN_MAIN->hwnd;
+	ofn.lpstrFile = name;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = sizeof(name);
+	ofn.lpstrFilter = sufixs;
+	ofn.nFilterIndex = 2;
+	ofn.lpstrFileTitle = (CHAR*)title;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = 0;
+	ofn.Flags = OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST ;
+
+	if(dirname){sprintf(name,"%s",dirname);}
+
+	for(cp=name;*cp;cp++) // fix directory seperators
+	{
+		if(*cp=='/') *cp='\\';
+	}
+
+	ret=GetOpenFileName(&ofn);
+
+	_chdrive(origdrive);
+	_chdir(origpath);
+
+	if(ret)
+	{
+		lua_pushstring(l,name);
+		return 1;
+	}
+
+	return 0;
+
+
 #endif
 
 #if defined(X11)
