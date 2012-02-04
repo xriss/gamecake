@@ -258,8 +258,8 @@ static int core_choose_file(lua_State *l)
 // function disabled till i make a damn file requester...
 //	return 0;
 
-const char *s1=0;
-char *s2=0;
+const char *s1="";
+char *s2="";
 
 
 	if( lua_isstring(l,2) )
@@ -410,7 +410,7 @@ char *s2=0;
 	return 1;
 #endif
 
-//	return 0;
+	return 0;
 
 #endif
 
