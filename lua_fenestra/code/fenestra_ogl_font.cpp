@@ -72,6 +72,7 @@ static unsigned char const font_bits[16*48]={
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 bool fenestra_ogl::font_setup(fogl_font *font,const char *fontfilename)
 {
+if(font->chars[0]){return true;} // already loaded
 if(fontfilename)
 {
 		
@@ -82,6 +83,10 @@ if(fontfilename)
 
 		error = FT_Init_FreeType( &library );
 		error = FT_New_Face( library,fontfilename,0, &face );
+		if(error){ // check file exists
+			FT_Done_FreeType(library); // free everything
+			return false;
+		}
 		error = FT_Set_Pixel_Sizes( face, 32, 32 );
 		
 	int glyph_index;
