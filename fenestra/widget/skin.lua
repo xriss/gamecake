@@ -67,11 +67,11 @@ function load(win,name)
 		if name=="test" then
 			mode=name
 
-			texs.border=win.tex( grd.create("GRD_FMT_U8_ARGB",apps.dir.."data/skins/test/border.png") )
+			texs.border=win.tex( grd.create(apps.dir.."data/skins/test/border.png"):convert("GRD_FMT_U8_ARGB") )
 			
-			texs.buttof=win.tex( grd.create("GRD_FMT_U8_ARGB",apps.dir.."data/skins/test/buttof.png") )
-			texs.button=win.tex( grd.create("GRD_FMT_U8_ARGB",apps.dir.."data/skins/test/button.png") )
-			texs.buttin=win.tex( grd.create("GRD_FMT_U8_ARGB",apps.dir.."data/skins/test/buttin.png") )
+			texs.buttof=win.tex( grd.create(apps.dir.."data/skins/test/buttof.png"):convert("GRD_FMT_U8_ARGB") )
+			texs.button=win.tex( grd.create(apps.dir.."data/skins/test/button.png"):convert("GRD_FMT_U8_ARGB") )
+			texs.buttin=win.tex( grd.create(apps.dir.."data/skins/test/buttin.png"):convert("GRD_FMT_U8_ARGB") )
 		
 			margin=15
 			border=0
