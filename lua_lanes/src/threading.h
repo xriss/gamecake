@@ -1,8 +1,8 @@
 /*
 * THREADING.H
 */
-#ifndef THREADING_H
-#define THREADING_H
+#ifndef __threading_h__
+#define __threading_h__ 1
 
 /* Platform detection
 */
@@ -18,8 +18,8 @@
   #define PLATFORM_BSD
 #elif (defined __QNX__)
   #define PLATFORM_QNX
-#elif 0
-  //..more platforms here..
+#elif (defined __CYGWIN__)
+  #define PLATFORM_CYGWIN
 #else
   #error "Unknown platform!"
 #endif
@@ -32,34 +32,57 @@ typedef int bool_t;
 
 typedef unsigned int uint_t;
 
+#if defined(PLATFORM_WIN32) && defined(__GNUC__)
+/* MinGW with MSVCR80.DLL */
+/* Do this BEFORE including time.h so that it is declaring _mktime32()
+ * as it would have declared mktime().
+ */
+# define mktime _mktime32
+#endif
+#include <time.h>
 
-/*---=== Generic ===---
+/* Note: ERROR is a defined entity on Win32
 */
-typedef double time_d;  // ms since Epoch
-time_d now_secs(void);
+enum e_status { PENDING, RUNNING, WAITING, DONE, ERROR_ST, CANCELLED };
 
+#define THREADAPI_WINDOWS 1
+#define THREADAPI_PTHREAD 2
+
+#if (defined PLATFORM_WIN32) || (defined PLATFORM_POCKETPC)
+#define THREADAPI THREADAPI_WINDOWS
+#else // (defined PLATFORM_WIN32) || (defined PLATFORM_POCKETPC)
+#define THREADAPI THREADAPI_PTHREAD
+#endif // (defined PLATFORM_WIN32) || (defined PLATFORM_POCKETPC)
 
 /*---=== Locks & Signals ===---
 */
 
-#if (defined PLATFORM_WIN32) || (defined PLATFORM_WINCE)
+#if THREADAPI == THREADAPI_WINDOWS
   #define WIN32_LEAN_AND_MEAN
+  // 'SignalObjectAndWait' needs this (targets Windows 2000 and above)
+  #define _WIN32_WINNT 0x0400
   #include <windows.h>
   #include <process.h>
 
   // MSDN: http://msdn2.microsoft.com/en-us/library/ms684254.aspx
   //
-  #define LOCK_T            CRITICAL_SECTION
-  #define LOCK_INIT(ref)    InitializeCriticalSection(ref)
-  #define LOCK_RECURSIVE_INIT(ref)  LOCK_INIT(ref)  /* always recursive in Win32 */
-  #define LOCK_FREE(ref)    /* nothing */
-  #define LOCK_START(ref)   EnterCriticalSection(ref)
-  #define LOCK_END(ref)     LeaveCriticalSection(ref)
+  // CRITICAL_SECTION can be used for simple code protection. Mutexes are
+  // needed for use with the SIGNAL system.
+  //
+  #define MUTEX_T HANDLE
+  void MUTEX_INIT( MUTEX_T *ref );
+  #define MUTEX_RECURSIVE_INIT(ref)  MUTEX_INIT(ref)  /* always recursive in Win32 */
+  void MUTEX_FREE( MUTEX_T *ref );
+  void MUTEX_LOCK( MUTEX_T *ref );
+  void MUTEX_UNLOCK( MUTEX_T *ref );
 
-  typedef unsigned THREAD_RETURN_T;
+  typedef unsigned int THREAD_RETURN_T;
 
   #define SIGNAL_T HANDLE
-#else
+  
+  #define YIELD() Sleep(0)
+	#define THREAD_CALLCONV __stdcall
+#else // THREADAPI == THREADAPI_PTHREAD
   // PThread (Linux, OS X, ...)
   //
   #include <pthread.h>
@@ -67,64 +90,95 @@ time_d now_secs(void);
   #ifdef PLATFORM_LINUX
   # define _MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE_NP
   #else
-    /* OS X */
+    /* OS X, ... */
   # define _MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE
   #endif
 
-  #define LOCK_T            pthread_mutex_t
-  #define LOCK_INIT(ref)    pthread_mutex_init(ref,NULL)
-  #define LOCK_RECURSIVE_INIT(ref) \
+  #define MUTEX_T            pthread_mutex_t
+  #define MUTEX_INIT(ref)    pthread_mutex_init(ref,NULL)
+  #define MUTEX_RECURSIVE_INIT(ref) \
       { pthread_mutexattr_t a; pthread_mutexattr_init( &a ); \
         pthread_mutexattr_settype( &a, _MUTEX_RECURSIVE ); \
         pthread_mutex_init(ref,&a); pthread_mutexattr_destroy( &a ); \
       }
-  #define LOCK_FREE(ref)    pthread_mutex_destroy(ref)
-  #define LOCK_START(ref)   pthread_mutex_lock(ref)
-  #define LOCK_END(ref)     pthread_mutex_unlock(ref)
+  #define MUTEX_FREE(ref)    pthread_mutex_destroy(ref)
+  #define MUTEX_LOCK(ref)    pthread_mutex_lock(ref)
+  #define MUTEX_UNLOCK(ref)  pthread_mutex_unlock(ref)
 
   typedef void * THREAD_RETURN_T;
 
   typedef pthread_cond_t SIGNAL_T;
-#endif
+
+  void SIGNAL_ONE( SIGNAL_T *ref );
+  
+  // Yield is non-portable:
+  //
+  //    OS X 10.4.8/9 has pthread_yield_np()
+  //    Linux 2.4   has pthread_yield() if _GNU_SOURCE is #defined
+  //    FreeBSD 6.2 has pthread_yield()
+  //    ...
+  //
+  #ifdef PLATFORM_OSX
+    #define YIELD() pthread_yield_np()
+  #else
+    #define YIELD() pthread_yield()
+  #endif
+	#define THREAD_CALLCONV
+#endif //THREADAPI == THREADAPI_PTHREAD
 
 void SIGNAL_INIT( SIGNAL_T *ref );
 void SIGNAL_FREE( SIGNAL_T *ref );
-void SIGNAL_SET( SIGNAL_T *ref );
-bool_t SIGNAL_WAIT( SIGNAL_T *ref, LOCK_T *mu, double secs );
+void SIGNAL_ALL( SIGNAL_T *ref );
+
+/*
+* 'time_d': <0.0 for no timeout
+*           0.0 for instant check
+*           >0.0 absolute timeout in secs + ms
+*/
+typedef double time_d;
+time_d now_secs(void);
+
+time_d SIGNAL_TIMEOUT_PREPARE( double rel_secs );
+
+bool_t SIGNAL_WAIT( SIGNAL_T *ref, MUTEX_T *mu, time_d timeout );
 
 
 /*---=== Threading ===---
 */
 
-#if (defined PLATFORM_WIN32) || (defined PLATFORM_WINCE)
+#if THREADAPI == THREADAPI_WINDOWS
 
   typedef HANDLE THREAD_T;
+# define THREAD_ISNULL( _h) (_h == 0)
   //
-  void
-  THREAD_CREATE( THREAD_T *ref,
-                 THREAD_RETURN_T (__stdcall *func)( void * ),
-                 void *data, int prio /* -3..+3 */ );
+  void THREAD_CREATE( THREAD_T *ref,
+                      THREAD_RETURN_T (__stdcall *func)( void * ),
+                      void *data, int prio /* -3..+3 */ );
                  
 # define THREAD_PRIO_MIN (-3)
 # define THREAD_PRIO_MAX (+3)
 
-#else
-  // We cannot use 'pthread_t' directly, due to making a manual 'join'
-  //
-  typedef struct {
-        pthread_t pt;
-        pthread_mutex_t mu;     // mainly to keep pthread happy (keep locked)
-        pthread_cond_t cv;      // signalled when thread has finished
-        volatile bool_t done;   // we need some 'value' to change (to guard
-                                // against false wakeups); could use 's->state'
-                                // but we don't have 's_lane' here.
-        } THREAD_T;
+#else // THREADAPI == THREADAPI_PTHREAD
+    /* Platforms that have a timed 'pthread_join()' can get away with a simpler
+    * implementation. Others will use a condition variable.
+    */
+# ifdef USE_PTHREAD_TIMEDJOIN
+#  ifdef PLATFORM_OSX
+#   error "No 'pthread_timedjoin()' on this system"
+#  else
+    /* Linux, ... */
+#   define PTHREAD_TIMEDJOIN pthread_timedjoin_np
+#  endif
+# endif
+
+  typedef pthread_t THREAD_T;
+# define THREAD_ISNULL( _h) 0 // pthread_t may be a structure: never 'null' by itself
 
   void THREAD_CREATE( THREAD_T *ref, 
                       THREAD_RETURN_T (*func)( void * ),
                       void *data, int prio /* -2..+2 */ );
                       
-# ifdef PLATFORM_LINUX
+# if defined(PLATFORM_LINUX)
   volatile bool_t sudo;
 #  ifdef LINUX_SCHED_RR
 #   define THREAD_PRIO_MIN (sudo ? -2 : 0)
@@ -136,12 +190,30 @@ bool_t SIGNAL_WAIT( SIGNAL_T *ref, LOCK_T *mu, double secs );
 #  define THREAD_PRIO_MIN (-2)
 #  define THREAD_PRIO_MAX (+2)
 # endif
-#endif
+#endif // THREADAPI == THREADAPI_WINDOWS
 
-void THREAD_FREE( THREAD_T *ref );
-bool_t THREAD_WAIT( THREAD_T *ref, long ms );
-void THREAD_EXIT( THREAD_T *ref );
+/* 
+* Win32 and PTHREAD_TIMEDJOIN allow waiting for a thread with a timeout.
+* Posix without PTHREAD_TIMEDJOIN needs to use a condition variable approach.
+*/
+#define THREADWAIT_TIMEOUT 1
+#define THREADWAIT_CONDVAR 2
+
+#if THREADAPI == THREADAPI_WINDOWS || (defined PTHREAD_TIMEDJOIN)
+#define THREADWAIT_METHOD THREADWAIT_TIMEOUT
+#else // THREADAPI == THREADAPI_WINDOWS || (defined PTHREAD_TIMEDJOIN)
+#define THREADWAIT_METHOD THREADWAIT_CONDVAR
+#endif // THREADAPI == THREADAPI_WINDOWS || (defined PTHREAD_TIMEDJOIN)
+
+
+#if THREADWAIT_METHOD == THREADWAIT_TIMEOUT
+bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs);
+#define THREAD_WAIT( a, b, c, d, e) THREAD_WAIT_IMPL( a, b)
+#else // THREADWAIT_METHOD == THREADWAIT_CONDVAR
+bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs, SIGNAL_T *signal_ref, MUTEX_T *mu_ref, volatile enum e_status *st_ref);
+#define THREAD_WAIT THREAD_WAIT_IMPL
+#endif // // THREADWAIT_METHOD == THREADWAIT_CONDVAR
+
 void THREAD_KILL( THREAD_T *ref );
 
-#endif
-    // THREADING_H
+#endif // __threading_h__

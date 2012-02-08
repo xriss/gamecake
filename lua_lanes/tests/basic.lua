@@ -1,17 +1,30 @@
 --
--- TESTS.LUA           Copyright (c) 2007-08, Asko Kauppi <akauppi@gmail.com>
+-- BASIC.LUA           Copyright (c) 2007-08, Asko Kauppi <akauppi@gmail.com>
 --
 -- Selftests for Lua Lanes
--- 
+--
 -- To do:
 --      - ...
 --
 
-require "lanes"
+local lanes = require "lanes"
+lanes.configure( 1)
 require "assert"    -- assert.fails()
 
 local lanes_gen=    assert( lanes.gen )
 local lanes_linda=  assert( lanes.linda )
+
+local tostring=     assert( tostring )
+
+local function PRINT(...)
+    local str=""
+    for i=1,select('#',...) do
+        str= str..tostring(select(i,...)).."\t"
+    end
+    if io then
+        io.stderr:write(str.."\n")
+    end
+end
 
 
 ---=== Local helpers ===---
@@ -43,9 +56,9 @@ tables_match= function( a, b )
 end
 
 
----=== Tasking (basic) ===---
+PRINT( "---=== Tasking (basic) ===---")
 
-local function task_f( a, b, c )
+local function task( a, b, c )
     --error "111"     -- testing error messages
     assert(hey)
     local v=0
@@ -55,67 +68,76 @@ local function task_f( a, b, c )
     return v, hey
 end
 
-local task= lanes_gen( "", { cancelstep=100, globals={hey=true} }, task_f )
+local task_launch= lanes_gen( "", { globals={hey=true} }, task )
 	-- base stdlibs, normal priority
 
--- 'task' is a factory of multithreaded tasks, we can launch several:
+-- 'task_launch' is a factory of multithreaded tasks, we can launch several:
 
-local lane1= task(100,200,3)
-local lane2= task(200,300,4)
+local lane1= task_launch( 100,200,3 )
+local lane2= task_launch( 200,300,4 )
 
 -- At this stage, states may be "pending", "running" or "done"
 
 local st1,st2= lane1.status, lane2.status
-print(st1,st2)
+PRINT(st1,st2)
 assert( st1=="pending" or st1=="running" or st1=="done" )
 assert( st2=="pending" or st2=="running" or st2=="done" )
 
 -- Accessing results ([1..N]) pends until they are available
 --
+PRINT("waiting...")
 local v1, v1_hey= lane1[1], lane1[2]
 local v2, v2_hey= lane2[1], lane2[2]
 
-print( v1, v1_hey )
+PRINT( v1, v1_hey )
 assert( v1_hey == true )
 
-print( v2, v2_hey )
+PRINT( v2, v2_hey )
 assert( v2_hey == true )
 
 assert( lane1.status == "done" )
 assert( lane1.status == "done" )
 
 
----=== Tasking (cancelling) ===---
+PRINT( "---=== Tasking (cancelling) ===---")
 
-local lane9= task(1,2000000,1)   -- huuuuuuge...
+local task_launch2= lanes_gen( "", { cancelstep=100, globals={hey=true} }, task )
+
+local N=999999999
+local lane9= task_launch2(1,N,1)   -- huuuuuuge...
 
 -- Wait until state changes "pending"->"running"
 --
 local st
-for i=1,999999 do
+local t0= os.time()
+while os.time()-t0 < 5 do
     st= lane9.status
-    io.write( (i==1) and st.." " or '.' )
+    io.stderr:write( (i==1) and st.." " or '.' )
     if st~="pending" then break end
 end
-print(" "..st)
+PRINT(" "..st)
 
 if st=="error" then
-    lane9:join()  -- propagate the error here
+    local _= lane9[0]  -- propagate the error here
 end
-assert( st == "running" )
+if st=="done" then
+    error( "Looping to "..N.." was not long enough (cannot test cancellation)" )
+end
+assert( st=="running" )
 
 lane9:cancel()
 
-for i=1,999999 do
+local t0= os.time()
+while os.time()-t0 < 5 do
     st= lane9.status
-    io.write( (i==1) and st.." " or '.' )
+    io.stderr:write( (i==1) and st.." " or '.' )
     if st~="running" then break end
 end
-print(" "..st)
+PRINT(" "..st)
 assert( st == "cancelled" )
 
 
----=== Communications ===---
+PRINT( "---=== Communications ===---")
 
 local function WR(...) io.stderr:write(...) end
 
@@ -136,16 +158,15 @@ local chunk= function( linda )
     send { 'a', 'b', 'c', d=10 }; WR( "{'a','b','c',d=10} sent\n" )
 
     v=receive(); WR( v.." received\n" ); assert( v==4 )
-        
+
     WR( "Lane ends!\n" )
 end
 
 local linda= lanes_linda()
+assert( type(linda) == "userdata" )
     --
     -- ["->"] master -> slave
-    -- ["<-"] slave <- master (queued)
-
-assert( type(linda) == "userdata" )
+    -- ["<-"] slave <- master
 
 local function PEEK() return linda:get("<-") end
 local function SEND(...) linda:send( "->", ... ) end
@@ -175,7 +196,7 @@ assert( PEEK() == nil )
 SEND(4)
 
 
----=== Stdlib naming ===---
+PRINT( "---=== Stdlib naming ===---")
 
 local function io_os_f()
     assert(io)
@@ -195,7 +216,7 @@ assert( f2()[1] )
 assert( f3()[1] )
 
 
----=== Comms criss cross ===---
+PRINT( "---=== Comms criss cross ===---")
 
 -- We make two identical lanes, which are using the same Linda channel.
 --
@@ -203,14 +224,14 @@ local tc= lanes_gen( "io",
   function( linda, ch_in, ch_out )
 
     local function STAGE(str)
-        io.stderr:write( c..": "..str.."\n" )
+        io.stderr:write( ch_in..": "..str.."\n" )
         linda:send( nil, ch_out, str )
         local v= linda:receive( nil, ch_in )
         assert(v==str)
     end
     STAGE("Hello")
     STAGE("I was here first!")
-    STAGE("So waht?")
+    STAGE("So what?")
   end
 )
 
@@ -221,41 +242,28 @@ local a,b= tc(linda, "A","B"), tc(linda, "B","A")   -- launching two lanes, twis
 local _= a[1],b[1]  -- waits until they are both ready
 
 
----=== Receive & send of code ===---
+PRINT( "---=== Receive & send of code ===---")
 
 local upvalue="123"
 
 local function chunk2( linda )
     assert( upvalue=="123" )    -- even when running as separate thread
-
     -- function name & line number should be there even as separate thread
     --
     local info= debug.getinfo(1)    -- 1 = us
-        --
-        for k,v in pairs(info) do print(k,v) end
+    --
+    for k,v in pairs(info) do PRINT(k,v) end
 
-        assert( info.nups == 1 )    -- one upvalue
-        assert( info.what == "Lua" )
-        
-        --assert( info.name == "chunk2" )   -- name does not seem to come through
-        assert( string.match( info.source, "^@tests[/\\]basic.lua$" ) )
-        assert( string.match( info.short_src, "^tests[/\\]basic.lua$" ) )
-        
-        -- These vary so let's not be picky (they're there..)
-        --
-        assert( info.linedefined > 200 )   -- start of 'chunk2'
-        assert( info.currentline > info.linedefined )   -- line of 'debug.getinfo'
-        assert( info.lastlinedefined > info.currentline )   -- end of 'chunk2'
-
--- TBD: Currently, we don't support receiving multiple values at once (we could,
---      but the parameter construction gets complicated.
---
---[[
-    local func, str= linda:receive( "down" )
-
-    assert( type(func)=="function" )
-    assert( str=="ok" )
-]]
+    assert( info.nups == 2 )    -- one upvalue + PRINT
+    assert( info.what == "Lua" )
+    --assert( info.name == "chunk2" )   -- name does not seem to come through
+    assert( string.match( info.source, "^@.*basic.lua$" ) )
+    assert( string.match( info.short_src, "^.*basic.lua$" ) )
+    -- These vary so let's not be picky (they're there..)
+    --
+    assert( info.linedefined > 200 )   -- start of 'chunk2'
+    assert( info.currentline > info.linedefined )   -- line of 'debug.getinfo'
+    assert( info.lastlinedefined > info.currentline )   -- end of 'chunk2'
     local func,k= linda:receive( "down" )
     assert( type(func)=="function" )
     assert( k=="down" )
@@ -264,21 +272,18 @@ local function chunk2( linda )
 
     local str= linda:receive( "down" )
     assert( str=="ok" )
-    
+
     linda:send( "up", function() return ":)" end, "ok2" )
 end
 
 local linda= lanes.linda()
-
-local t2= lanes_gen( "debug,string", chunk2 )(linda)     -- prepare & launch
-
+local t2= lanes_gen( "debug,string,io", chunk2 )(linda)     -- prepare & launch
 linda:send( "down", function(linda) linda:send( "up", "ready!" ) end,
                     "ok" )
-
 -- wait to see if the tiny function gets executed
 --
 local s= linda:receive( "up" )
-print(s)
+PRINT(s)
 assert( s=="ready!" )
 
 -- returns of the 'chunk2' itself
@@ -287,14 +292,13 @@ local f= linda:receive( "up" )
 assert( type(f)=="function" )
 
 local s2= f()
-print(s2)
 assert( s2==":)" )
 
 local ok2= linda:receive( "up" )
 assert( ok2 == "ok2" )
 
 
----=== :join test ===---
+PRINT( "---=== :join test ===---")
 
 -- NOTE: 'unpack()' cannot be used on the lane handle; it will always return nil
 --       (unless [1..n] has been read earlier, in which case it would seemingly

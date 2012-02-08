@@ -20,7 +20,15 @@
 --      (none?)
 --
 
-require "lanes"
+-- On MSYS, stderr is buffered. In this test it matters.
+-- Seems, even with this MSYS wants to buffer linewise, needing '\n'
+-- before actual output.
+--
+local MSYS= os.getenv("OSTYPE")=="msys"
+
+
+local lanes = require "lanes"
+lanes.configure( 1)
 
 local m= require "argtable"
 local argtable= assert( m.argtable )
@@ -78,6 +86,11 @@ PRIO_EVEN= PRIO_EVEN or 0
 --     Lanes 2008 can take the used functions as upvalues.
 --
 local function sieve_lane(N,id)
+
+ if MSYS then
+   io.stderr:setvbuf "no"
+ end
+
  -- generate all the numbers from 2 to n
  local function gen (n)
   return coroutine.wrap(function ()
@@ -108,7 +121,7 @@ local function sieve_lane(N,id)
   x = filter(n, x)	-- now remove its multiples
  end
  
- io.stderr:write(id.."\t")   -- mark we're ready
+ io.stderr:write(id..(MSYS and "\n" or "\t"))   -- mark we're ready
 
  return ret     
 end
