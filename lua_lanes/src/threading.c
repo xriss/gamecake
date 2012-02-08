@@ -1,18 +1,16 @@
 /*
- * THREADING.C   	                    Copyright (c) 2007-08, Asko Kauppi
+ * THREADING.C   	                    Copyright (c) 2007-10, Asko Kauppi
  *
  * Lua Lanes OS threading specific code.
  *
- * Defines:
- *  TBB_SCALABLE_ALLOC  Use TBB (Intel Threading Building Blocks) scalable
- *                      allocator (EXPERIMENTAL!!!)
- *  ...
+ * References:
+ *      <http://www.cse.wustl.edu/~schmidt/win32-cv-1.html>
 */
 
 /*
 ===============================================================================
 
-Copyright (C) 2007-08 Asko Kauppi <akauppi@gmail.com>
+Copyright (C) 2007-10 Asko Kauppi <akauppi@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,16 +35,25 @@ THE SOFTWARE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
+#include <math.h>
 
 #include "threading.h"
 #include "lua.h"
 
+#if THREADAPI == THREADAPI_PTHREAD
+# include <sys/time.h>
+#endif // THREADAPI == THREADAPI_PTHREAD
+
+
+#if defined(PLATFORM_LINUX) || defined(PLATFORM_CYGWIN)
+# include <sys/types.h>
+# include <unistd.h>
+#endif
 
 /* Linux needs to check, whether it's been run as root
 */
 #ifdef PLATFORM_LINUX
-# include <sys/types.h>
-# include <unistd.h>
   volatile bool_t sudo;
 #endif
 
@@ -59,6 +66,128 @@ THE SOFTWARE.
 
 //#define THREAD_CREATE_RETRIES_MAX 20
     // loops (maybe retry forever?)
+
+/* 
+* FAIL is for unexpected API return values - essentially programming 
+* error in _this_ code. 
+*/
+#if THREADAPI == THREADAPI_WINDOWS
+static void FAIL( const char *funcname, int rc ) {
+    fprintf( stderr, "%s() failed! (%d)\n", funcname, rc );
+#ifdef _MSC_VER
+    __debugbreak(); // give a chance to the debugger!
+#endif // _MSC_VER
+    abort();
+}
+#endif // THREADAPI == THREADAPI_WINDOWS
+
+
+/*
+* Returns millisecond timing (in seconds) for the current time.
+*
+* Note: This function should be called once in single-threaded mode in Win32,
+*       to get it initialized.
+*/
+time_d now_secs(void) {
+
+#if THREADAPI == THREADAPI_WINDOWS
+    /*
+    * Windows FILETIME values are "100-nanosecond intervals since 
+    * January 1, 1601 (UTC)" (MSDN). Well, we'd want Unix Epoch as
+    * the offset and it seems, so would they:
+    *
+    * <http://msdn.microsoft.com/en-us/library/ms724928(VS.85).aspx>
+    */
+    SYSTEMTIME st;
+    FILETIME ft;
+    ULARGE_INTEGER uli;
+    static ULARGE_INTEGER uli_epoch;   // Jan 1st 1970 0:0:0
+
+    if (uli_epoch.HighPart==0) {
+        st.wYear= 1970;
+        st.wMonth= 1;   // Jan
+        st.wDay= 1;
+        st.wHour= st.wMinute= st.wSecond= st.wMilliseconds= 0;
+
+        if (!SystemTimeToFileTime( &st, &ft ))
+            FAIL( "SystemTimeToFileTime", GetLastError() );
+
+        uli_epoch.LowPart= ft.dwLowDateTime;
+        uli_epoch.HighPart= ft.dwHighDateTime;
+    }
+
+    GetSystemTime( &st );	// current system date/time in UTC
+    if (!SystemTimeToFileTime( &st, &ft ))
+        FAIL( "SystemTimeToFileTime", GetLastError() );
+
+    uli.LowPart= ft.dwLowDateTime;
+    uli.HighPart= ft.dwHighDateTime;
+
+    /* 'double' has less accuracy than 64-bit int, but if it were to degrade,
+     * it would do so gracefully. In practise, the integer accuracy is not
+     * of the 100ns class but just 1ms (Windows XP).
+     */
+# if 1
+    // >= 2.0.3 code
+    return (double) ((uli.QuadPart - uli_epoch.QuadPart)/10000) / 1000.0;
+# elif 0
+    // fix from Kriss Daniels, see: 
+    // <http://luaforge.net/forum/forum.php?thread_id=22704&forum_id=1781>
+    //
+    // "seem to be getting negative numbers from the old version, probably number
+    // conversion clipping, this fixes it and maintains ms resolution"
+    //
+    // This was a bad fix, and caused timer test 5 sec timers to disappear.
+    // --AKa 25-Jan-2009
+    //
+    return ((double)((signed)((uli.QuadPart/10000) - (uli_epoch.QuadPart/10000)))) / 1000.0;
+# else
+    // <= 2.0.2 code
+    return (double)(uli.QuadPart - uli_epoch.QuadPart) / 10000000.0;
+# endif
+#else // THREADAPI == THREADAPI_PTHREAD
+    struct timeval tv;
+        // {
+        //   time_t       tv_sec;   /* seconds since Jan. 1, 1970 */
+        //   suseconds_t  tv_usec;  /* and microseconds */
+        // };
+
+    int rc= gettimeofday( &tv, NULL /*time zone not used any more (in Linux)*/ );
+    assert( rc==0 );
+
+    return ((double)tv.tv_sec) + ((tv.tv_usec)/1000) / 1000.0;
+#endif // THREADAPI THREADAPI_PTHREAD
+}
+
+
+/*
+*/
+time_d SIGNAL_TIMEOUT_PREPARE( double secs ) {
+    if (secs<=0.0) return secs;
+    else return now_secs() + secs;
+}
+
+
+#if THREADAPI == THREADAPI_PTHREAD
+/*
+* Prepare 'abs_secs' kind of timeout to 'timespec' format
+*/
+static void prepare_timeout( struct timespec *ts, time_d abs_secs ) {
+    assert(ts);
+    assert( abs_secs >= 0.0 );
+
+    if (abs_secs==0.0)
+        abs_secs= now_secs();
+
+    ts->tv_sec= floor( abs_secs );
+    ts->tv_nsec= ((long)((abs_secs - ts->tv_sec) * 1000.0 +0.5)) * 1000000UL;   // 1ms = 1000000ns
+    if (ts->tv_nsec == 1000000000UL)
+    {
+        ts->tv_nsec = 0;
+        ts->tv_sec = ts->tv_sec + 1;
+    }
+}
+#endif // THREADAPI == THREADAPI_PTHREAD
 
 
 /*---=== Threading ===---*/
@@ -85,9 +214,9 @@ THE SOFTWARE.
 //                      valid values N * 4KB
 //
 #ifndef _THREAD_STACK_SIZE
-# if (defined PLATFORM_WIN32) || (defined PLATFORM_WINCE)
+# if (defined PLATFORM_WIN32) || (defined PLATFORM_POCKETPC) || (defined PLATFORM_CYGWIN)
 #  define _THREAD_STACK_SIZE 0
-      // TBD: does it work with less?
+      // Win32: does it work with less?
 # elif (defined PLATFORM_OSX)
 #  define _THREAD_STACK_SIZE (524288/2)   // 262144
       // OS X: "make test" works on 65536 and even below
@@ -101,15 +230,24 @@ THE SOFTWARE.
 # endif
 #endif
 
-#if (defined PLATFORM_WIN32) || (defined PLATFORM_WINCE)
-  /* FAIL is for unexpected API return values - essentially programming 
-   * error in _this_ code. 
-   */
-  static void FAIL( const char *funcname, int rc ) {
-    fprintf( stderr, "%s() failed! (%d)\n", funcname, rc );
-    abort();
-  }
+#if THREADAPI == THREADAPI_WINDOWS
   //
+  void MUTEX_INIT( MUTEX_T *ref ) {
+     *ref= CreateMutex( NULL /*security attr*/, FALSE /*not locked*/, NULL );
+     if (!ref) FAIL( "CreateMutex", GetLastError() );
+  }
+  void MUTEX_FREE( MUTEX_T *ref ) {
+     if (!CloseHandle(*ref)) FAIL( "CloseHandle (mutex)", GetLastError() );
+     *ref= NULL;
+  }
+  void MUTEX_LOCK( MUTEX_T *ref ) {
+    DWORD rc= WaitForSingleObject(*ref,INFINITE);
+    if (rc!=0) FAIL( "WaitForSingleObject", rc==WAIT_FAILED ? GetLastError() : rc );
+  }
+  void MUTEX_UNLOCK( MUTEX_T *ref ) {
+    if (!ReleaseMutex(*ref))
+        FAIL( "ReleaseMutex", GetLastError() );
+  }
     /* MSDN: "If you would like to use the CRT in ThreadProc, use the
               _beginthreadex function instead (of CreateThread)."
        MSDN: "you can create at most 2028 threads"
@@ -144,31 +282,34 @@ THE SOFTWARE.
     *ref= h;
   }
   //
-  void THREAD_FREE( THREAD_T *ref ) { *(ref)= NULL; }
-  //
-  bool_t THREAD_WAIT( THREAD_T *ref, long ms ) {
-    DWORD rc= WaitForSingleObject( *ref, ms<0 ? INFINITE:ms /*timeout*/ );
+bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
+{
+    DWORD ms = (secs<0.0) ? INFINITE : (DWORD)((secs*1000.0)+0.5);
+
+    DWORD rc= WaitForSingleObject( *ref, ms /*timeout*/ );
         //
         // (WAIT_ABANDONED)
         // WAIT_OBJECT_0    success (0)
         // WAIT_TIMEOUT
         // WAIT_FAILED      more info via GetLastError()
-    
+
     if (rc == WAIT_TIMEOUT) return FALSE;
     if (rc != 0) FAIL( "WaitForSingleObject", rc );
+    *ref= NULL;     // thread no longer usable
     return TRUE;
   }
   //
-  void THREAD_EXIT( THREAD_T *ignore ) { (void)ignore; ExitThread(0); }
-  //
   void THREAD_KILL( THREAD_T *ref ) {
     if (!TerminateThread( *ref, 0 )) FAIL("TerminateThread", GetLastError());
+    *ref= NULL;
   }
   //
   void SIGNAL_INIT( SIGNAL_T *ref ) {
+    // 'manual reset' event type selected, to be able to wake up all the
+    // waiting threads.
+    //
     HANDLE h= CreateEvent( NULL,    // security attributes
-                           FALSE,   // TRUE: requires manual reset (ResetEvent())
-                                    // FALSE: autoreset (after single waiting thread has been released)
+                           TRUE,    // TRUE: manual event
                            FALSE,   // Initial state
                            NULL );  // name
 
@@ -179,38 +320,61 @@ THE SOFTWARE.
     if (!CloseHandle(*ref)) FAIL( "CloseHandle (event)", GetLastError() );
     *ref= NULL;
   }
-  bool_t SIGNAL_WAIT( SIGNAL_T *ref, LOCK_T *lock_ref, double secs ) {
+  //
+  bool_t SIGNAL_WAIT( SIGNAL_T *ref, MUTEX_T *mu_ref, time_d abs_secs ) {
     DWORD rc;
-    long ms= secs<0.0 ? INFINITE : (long)((secs*1000.0) +0.5);    // smoothen floating point inaccuracy issues
-
-    // Wait for the event to become "signalled", with lock opened.
-    //
-    LOCK_END(lock_ref);
-    {
-        // Multiple threads can end here, but since we're using autoreset mode, 
-        // only one is let to pass, and event is placed back to "non-signalled".
-        //
-        rc= WaitForSingleObject( *ref, ms );
+    long ms;
+    
+    if (abs_secs<0.0)
+        ms= INFINITE;
+    else if (abs_secs==0.0)
+        ms= 0;
+    else {
+        ms= (long) ((abs_secs - now_secs())*1000.0 + 0.5);
         
-        // Unlike in PThreads, the wakeup & lock acquiry is not atomic.
-        // What can happen is a new "signal" while we're stuck here, letting
-        // a second thread come and compete for the lock with us. What this
-        // causes in practise is "false wakeups" where a thread is woken, but
-        // it won't find any data coming to it.
+        // If the time already passed, still try once (ms==0). A short timeout
+        // may have turned negative or 0 because of the two time samples done.
+        //
+        if (ms<0) ms= 0;
     }
-    LOCK_START(lock_ref);
+
+    // Unlock and start a wait, atomically (like condition variables do)
+    //
+    rc= SignalObjectAndWait( *mu_ref,   // "object to signal" (unlock)
+                             *ref,      // "object to wait on"
+                             ms,
+                             FALSE );   // not alertable
+
+    // All waiting locks are woken here; each competes for the lock in turn.
+    //
+    // Note: We must get the lock even if we've timed out; it makes upper
+    //       level code equivalent to how PThread does it.
+    //
+    MUTEX_LOCK(mu_ref);
 
     if (rc==WAIT_TIMEOUT) return FALSE;
-    if (rc!=0) FAIL( "WaitForSingleObject", rc );
+    if (rc!=0) FAIL( "SignalObjectAndWait", rc );
     return TRUE;
   }
-  void SIGNAL_SET( SIGNAL_T *ref ) {
-    // Sets the event to "signalled", releasing a single thread that is waiting
-    // for it (or remaining signalled until a thread comes to ask).
+  void SIGNAL_ALL( SIGNAL_T *ref ) {
+/* 
+ * MSDN tries to scare that 'PulseEvent' is bad, unreliable and should not be
+ * used. Use condition variables instead (wow, they have that!?!); which will
+ * ONLY WORK on Vista and 2008 Server, it seems... so MS, isn't it.
+ * 
+ * I refuse to believe that; using 'PulseEvent' is probably just as good as
+ * using Windows (XP) in the first place. Just don't use APC's (asynchronous
+ * process calls) in your C side coding.
+ */
+    // PulseEvent on manual event:
     //
-    if (!SetEvent( *ref )) FAIL( "SetEvent", GetLastError() );
+    // Release ALL threads waiting for it (and go instantly back to unsignalled
+    // status = future threads to start a wait will wait)
+    //
+    if (!PulseEvent( *ref ))
+        FAIL( "PulseEvent", GetLastError() );
   }
-#else
+#else // THREADAPI == THREADAPI_PTHREAD
   // PThread (Linux, OS X, ...)
   //
   // On OS X, user processes seem to be able to change priorities.
@@ -224,6 +388,7 @@ THE SOFTWARE.
                      (rc==EBUSY) ? "EBUSY" : 
                      (rc==EPERM) ? "EPERM" :
                      (rc==ENOMEM) ? "ENOMEM" :
+                     (rc==ESRCH) ? "ESRCH" :
                      //...
                      "";
     fprintf( stderr, "%s %d: %s failed, %d %s\n", file, line, name, rc, why );
@@ -231,54 +396,42 @@ THE SOFTWARE.
   }
   #define PT_CALL( call ) { int rc= call; if (rc!=0) _PT_FAIL( rc, #call, __FILE__, __LINE__ ); }
   //
-  static void set_abstime( struct timespec *ts, unsigned long ms ) {
-    //
-    // Linux has 'clock_gettime()' that works directly with 'struct timespec'.
-    // OS X does not.
-    //
-    struct timeval tv;
-        // long    tv_sec;  // seconds since Jan. 1, 1970
-        // long    tv_usec; // microseconds
-    PT_CALL( gettimeofday( &tv, NULL ) );   // timezone not used any more, says 'man'
-
-    // 'tv_nsec' is long, having a range at least 2147483648 (2.1 secs) so
-    // we can overflow temporarily
-    //
-    ts->tv_sec = tv.tv_sec + (ms/1000);
-    ts->tv_nsec = tv.tv_usec * 1000L + (ms%1000) * 1000000L;    // ms == 1000us == 1000000ns
-    if (ts->tv_nsec >= 1000000000L) {
-        ts->tv_nsec -= 1000000000L; ts->tv_sec++;
-    }
-  }
-  //
   void SIGNAL_INIT( SIGNAL_T *ref ) {
     PT_CALL( pthread_cond_init(ref,NULL /*attr*/) );
     }
   void SIGNAL_FREE( SIGNAL_T *ref ) {
     PT_CALL( pthread_cond_destroy(ref) );
   }
-  bool_t SIGNAL_WAIT( SIGNAL_T *ref, pthread_mutex_t *mu, double secs ) {
-    if (secs<0.0) {
+  //
+  /*
+  * Timeout is given as absolute since we may have fake wakeups during
+  * a timed out sleep. A Linda with some other key read, or just because
+  * PThread cond vars can wake up unwantedly.
+  */
+  bool_t SIGNAL_WAIT( SIGNAL_T *ref, pthread_mutex_t *mu, time_d abs_secs ) {
+    if (abs_secs<0.0) {
         PT_CALL( pthread_cond_wait( ref, mu ) );  // infinite
     } else {
         int rc;
         struct timespec ts;
-        long ms= (long)((secs*1000.0) +0.5);    // smoothen floating point inaccuracy issues
 
-        set_abstime( &ts, ms );
+        assert( abs_secs != 0.0 );
+        prepare_timeout( &ts, abs_secs );
 
         rc= pthread_cond_timedwait( ref, mu, &ts );
-            // 0: success (condition reached)
-            // EINVAL: some parameter is invalid
-            // ETIMEDOUT: timeout
 
         if (rc==ETIMEDOUT) return FALSE;
         if (rc) { _PT_FAIL( rc, "pthread_cond_timedwait()", __FILE__, __LINE__ ); }
     }
     return TRUE;
   }
-  void SIGNAL_SET( SIGNAL_T *ref ) {
-    PT_CALL( pthread_cond_signal(ref) );
+  //
+  void SIGNAL_ONE( SIGNAL_T *ref ) {
+    PT_CALL( pthread_cond_signal(ref) );     // wake up ONE (or no) waiting thread
+  }
+  //
+  void SIGNAL_ALL( SIGNAL_T *ref ) {
+    PT_CALL( pthread_cond_broadcast(ref) );     // wake up ALL waiting threads
   }
   //
   void THREAD_CREATE( THREAD_T* ref, 
@@ -290,11 +443,13 @@ THE SOFTWARE.
 
     PT_CALL( pthread_attr_init(a) );
 
+#ifndef PTHREAD_TIMEDJOIN
     // We create a NON-JOINABLE thread. This is mainly due to the lack of
     // 'pthread_timedjoin()', but does offer other benefits (s.a. earlier 
     // freeing of the thread's resources).
     //
     PT_CALL( pthread_attr_setdetachstate(a,PTHREAD_CREATE_DETACHED) );
+#endif
 
     // Use this to find a system's default stack size (DEBUG)
 #if 0
@@ -414,6 +569,11 @@ THE SOFTWARE.
         #define _PRIO_HI 31
         #define _PRIO_0  15
         #define _PRIO_LO 1
+
+#elif defined(PLATFORM_CYGWIN)
+	//
+	// TBD: Find right values for Cygwin
+	//
 #else
         #error "Unknown OS: not implemented!"
 #endif
@@ -437,14 +597,7 @@ THE SOFTWARE.
         PT_CALL( pthread_attr_setschedparam( a, &sp ) );
     }
 
-    ref->done= FALSE;
-    PT_CALL( pthread_mutex_init( &ref->mu, NULL ) );
-    PT_CALL( pthread_mutex_lock( &ref->mu ) );
-    PT_CALL( pthread_cond_init( &ref->cv, NULL ) );
-
     //---
-    // Thread creation might fail, if ~1000 threads are already in use.
-    //
     // Seems on OS X, _POSIX_THREAD_THREADS_MAX is some kind of system
     // thread limit (not userland thread). Actual limit for us is way higher.
     // PTHREAD_THREADS_MAX is not defined (even though man page refers to it!)
@@ -452,16 +605,19 @@ THE SOFTWARE.
 # ifndef THREAD_CREATE_RETRIES_MAX
     // Don't bother with retries; a failure is a failure
     //
-    { int rc= pthread_create( &ref->pt, a, func, data );
-      if (rc) _PT_FAIL( rc, "pthread_create()", __FILE__, __LINE__ );
+    { 
+      int rc= pthread_create( ref, a, func, data );
+      if (rc) _PT_FAIL( rc, "pthread_create()", __FILE__, __LINE__-1 );
     }
 # else
+# error "This code deprecated"
+/*
     // Wait slightly if thread creation has exchausted the system
     //
     { uint_t retries;
     for( retries=0; retries<THREAD_CREATE_RETRIES_MAX; retries++ ) {
 
-        int rc= pthread_create( &ref->pt, a, func, data );
+        int rc= pthread_create( ref, a, func, data );
             //
             // OS X / Linux:
             //    EAGAIN: ".. lacked the necessary resources to create
@@ -481,26 +637,15 @@ THE SOFTWARE.
         if (rc==EAGAIN) {
 //fprintf( stderr, "Looping (retries=%d) ", retries );    // DEBUG
 
-            // Try again, later.  We can simply busy loop on the 'pthread_create'
-            // but better to use yielding the thread, if the OS allows.
+            // Try again, later.
 
-            // Yield is non-portable:
-            //
-            //    OS X 10.4.8/9 has pthread_yield_np()
-            //    Linux 2.4   has pthread_yield() if _GNU_SOURCE is #defined
-            //    FreeBSD 6.2 has pthread_yield()
-            //    ...
-            //
-#  ifdef PLATFORM_OSX
-            pthread_yield_np();
-#  else
-            pthread_yield();
-#  endif
+            Yield();
         } else {
             _PT_FAIL( rc, "pthread_create()", __FILE__, __LINE__ );
         }
     }
     }
+*/
 # endif
 
     if (a) {
@@ -508,132 +653,76 @@ THE SOFTWARE.
     }
   }
   //
-  void THREAD_FREE( THREAD_T *ref ) {
-    PT_CALL( pthread_mutex_unlock( &ref->mu ) );
-    PT_CALL( pthread_mutex_destroy( &ref->mu ) );
-    PT_CALL( pthread_cond_destroy( &ref->cv ) );
-  }
-  //
-  void THREAD_EXIT( THREAD_T *ref ) {
-    ref->done= TRUE;
-    PT_CALL( pthread_cond_signal( &ref->cv ) );    // wake up 'THREAD_WAIT'
-    pthread_exit( 0 /*ignored*/ );  // no return
-  }
-  //
-  // Returns TRUE for succesful wait, FALSE for timed out
-  //
-  bool_t THREAD_WAIT( THREAD_T *ref, long ms ) {
+ /*
+  * Wait for a thread to finish.
+  *
+  * 'mu_ref' is a lock we should use for the waiting; initially unlocked.
+  * Same lock as passed to THREAD_EXIT.
+  *
+  * Returns TRUE for succesful wait, FALSE for timed out
+  */
+bool_t THREAD_WAIT( THREAD_T *ref, double secs , SIGNAL_T *signal_ref, MUTEX_T *mu_ref, volatile enum e_status *st_ref)
+{
+    struct timespec ts_store;
+    const struct timespec *timeout= NULL;
+    bool_t done;
 
-    if (ms!=0) {
-        // Important that we set the absolute timeout here, so even if there's
-        // multiple loops the caller gets what (s)he wants.
+    // Do timeout counting before the locks
+    //
+#if THREADWAIT_METHOD == THREADWAIT_TIMEOUT
+    if (secs>=0.0)
+#else // THREADWAIT_METHOD == THREADWAIT_CONDVAR
+    if (secs>0.0)
+#endif // THREADWAIT_METHOD == THREADWAIT_CONDVAR
+    {
+        prepare_timeout( &ts_store, now_secs()+secs );
+        timeout= &ts_store;
+    }
+
+#if THREADWAIT_METHOD == THREADWAIT_TIMEOUT
+    /* Thread is joinable
+    */
+    if (!timeout) {
+        PT_CALL( pthread_join( *ref, NULL /*ignore exit value*/ ));
+        done= TRUE;
+    } else {
+        int rc= PTHREAD_TIMEDJOIN( *ref, NULL, timeout );
+        if ((rc!=0) && (rc!=ETIMEDOUT)) {
+            _PT_FAIL( rc, "PTHREAD_TIMEDJOIN", __FILE__, __LINE__-2 );
+        }
+        done= rc==0;
+    }
+#else // THREADWAIT_METHOD == THREADWAIT_CONDVAR
+    /* Since we've set the thread up as PTHREAD_CREATE_DETACHED, we cannot
+     * join with it. Use the cond.var.
+    */
+    (void) ref; // unused
+    MUTEX_LOCK( mu_ref );
+    
+        // 'secs'==0.0 does not need to wait, just take the current status
+        // within the 'mu_ref' locks
         //
-        struct timespec ts;
-        if (ms>0) set_abstime( &ts, ms );
-
-        while( !ref->done ) {
-            if (ms<0) {
-                PT_CALL( pthread_cond_wait( &ref->cv, &ref->mu ) );
-            } else {
-                int rc= pthread_cond_timedwait( &ref->cv, &ref->mu, &ts );
-                if (rc==ETIMEDOUT) break;
-                if (rc!=0) _PT_FAIL( rc, "pthread_cond_timedwait", __FILE__, __LINE__ );
+        if (secs != 0.0) {
+            while( *st_ref < DONE ) {
+                if (!timeout) {
+                    PT_CALL( pthread_cond_wait( signal_ref, mu_ref ));
+                } else {
+                    int rc= pthread_cond_timedwait( signal_ref, mu_ref, timeout );
+                    if (rc==ETIMEDOUT) break;
+                    if (rc!=0) _PT_FAIL( rc, "pthread_cond_timedwait", __FILE__, __LINE__-2 );
+                }
             }
         }
-    }
-    return ref->done;
-  }    
+        done= *st_ref >= DONE;  // DONE|ERROR_ST|CANCELLED
+
+    MUTEX_UNLOCK( mu_ref );
+#endif // THREADWAIT_METHOD == THREADWAIT_CONDVAR
+    return done;
+  }
   //
   void THREAD_KILL( THREAD_T *ref ) {
-    pthread_cancel( (ref)->pt );
+    pthread_cancel( *ref );
   }
-#endif
+#endif // THREADAPI == THREADAPI_PTHREAD
 
-/*
- * Memory allocator used for states created via '_glua_new()'
- *
- * Ref: <http://devworld.apple.com/documentation/Performance/Conceptual/ManagingMemory/Articles/MemoryAlloc.html>
- *
- * Note: OS X 'malloc_zone_realloc()' was tried, but did not give speed benefits
- *       (on 10.5.2).
- */
-    // TBD: measurements, measurements!!! Do we get any speed benefits?
-    //
-#ifdef TBB_SCALABLE_ALLOC
-    // Threading Building Blocks - scalable allocator
-    //
-#include "tbb/scalable_allocator.h"
- static void *alloc_f (void *ignore, void *ptr, size_t osize, size_t nsize) {
-  (void)ignore;
-  (void)osize;
-  if (nsize == 0) {
-    scalable_free(ptr);
-    return NULL;
-  }
-  return scalable_realloc(ptr, nsize);
- }
-#else
- static const lua_Alloc alloc_f= 0;
-#endif
-
-
-/*
-* Returns millisecond timing (in seconds) for the current time.
-*/
-double now_secs(void) {
-
-#if (defined PLATFORM_WIN32) || (defined PLATFORM_WINCE)
-    /*
-    * Windows FILETIME values are "100-nanosecond intervals since 
-    * January 1, 1601 (UTC)" (MSDN). Well, we'd want Unix Epoch as
-    * the offset and it seems, so would they:
-    *
-    * <http://msdn.microsoft.com/en-us/library/ms724928(VS.85).aspx>
-    */
-    SYSTEMTIME st;
-    FILETIME ft;
-    ULARGE_INTEGER uli;
-
-#if 1
-    // TBD: Move this calculation to be done just once, at initialization.
-    //
-    ULARGE_INTEGER uli_epoch;   // Jan 1st 1970 0:0:0
-
-    st.wYear= 1970;
-    st.wMonth= 1;   // Jan
-    st.wDay= 1;
-    st.wHour= st.wMinute= st.wSecond= st.wMilliseconds= 0;
-    //
-    st.wDayOfWeek= 0;  // ignored
-
-    if (!SystemTimeToFileTime( &st, &ft ))
-        FAIL( "SystemTimeToFileTime", GetLastError() );
-
-    uli_epoch.LowPart= ft.dwLowDateTime;
-    uli_epoch.HighPart= ft.dwHighDateTime;
-#endif
-
-    GetSystemTime( &st );	// current system date/time in UTC
-    if (!SystemTimeToFileTime( &st, &ft ))
-        FAIL( "SystemTimeToFileTime", GetLastError() );
-
-    uli.LowPart= ft.dwLowDateTime;
-    uli.HighPart= ft.dwHighDateTime;
-
-// seem to be getting negative numbers from the old version, probably number conversion clipping, this fixes it and maintains MS resolution
-    return ( (double) (LONGLONG) ( ( uli.QuadPart/( (LONGLONG) 10000) ) - ( uli_epoch.QuadPart/( (LONGLONG) 10000) ) ) ) / 1000.0;
-
-#else
-    struct timeval tv;
-        // {
-        //   time_t       tv_sec;   /* seconds since Jan. 1, 1970 */
-        //   suseconds_t  tv_usec;  /* and microseconds */
-        // };
-
-    int rc= gettimeofday( &tv, NULL /*time zone not used any more (in Linux)*/ );
-    assert( rc==0 );
-
-    return ((double)tv.tv_sec) + ((tv.tv_usec)/1000) / 1000.0;
-#endif
-}
-
+static const lua_Alloc alloc_f= 0;

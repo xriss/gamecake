@@ -1,15 +1,64 @@
-@set LUA_PATH_OLD=%LUA_PATH%
+@REM
+@REM make-vc.cmd to build Lanes on Visual C++ 2005/08
+@REM
+@REM Requires:  Windows XP or later (cmd.exe)
+@REM            Visual C++ 2005/2008 (Express)
+@REM            LuaBinaries 5.1.3 or Lua for Windows 5.1.3
+@REM
+
+@setlocal
 @set LUA_PATH=src\?.lua;tests\?.lua
 
-@if not "%LUA51%"=="" goto LUADIR_OK
-@REM LuaBinaries:
-@if exist "C:\Program Files\Lua5.1\lua5.1.exe" set LUA51=C:\Progra~1\Lua5.1
+@if not "%LUA51%"=="" (
+  @goto LUA_OK
+)
 
-@REM Lua for Windows:
-@if exist "C:\Program Files\Lua\5.1\lua.exe" set LUA51=C:\Progra~1\Lua\5.1
+@REM *** Lua for Windows >=5.1.3.14 (%LUA_DEV%) ***
+@REM
+@if exist "%LUA_DEV%\lua.exe" (
+  @set LUA51=%LUA_DEV%
+  @goto LUA_OK
+)
 
-@if "%LUA51%"=="" goto ERR_NOLUA
-:LUADIR_OK
+@REM *** Lua for Windows (default path) ***
+@REM
+@if exist "%ProgramFiles%\Lua\5.1\lua.exe" (
+  @set LUA51=%ProgramFiles:~0,2%\Progra~1\Lua\5.1
+  @goto LUA_OK
+)
+
+@REM *** LuaBinaries (default path) ***
+@REM
+@if exist "%ProgramFiles%\Lua5.1\lua5.1.exe" (
+  @set LUA51=%ProgramFiles:~0,2%\Progra~1\Lua5.1
+  @goto LUA_OK
+)
+
+goto ERR_NOLUA
+:LUA_OK
+
+@REM ---
+@REM %LUA_EXE% = %LUA51%\lua[5.1].exe
+@REM %LUAC_EXE% = %LUA51%\luac[5.1].exe
+@REM %LUA_LIB% = %LUA51%[\lib]
+@REM ---
+
+@set LUA_EXE=%LUA51%\lua5.1.exe
+@if exist "%LUA_EXE%" goto LUA_EXE_OK
+@set LUA_EXE=%LUA51%\lua.exe
+@if exist "%LUA_EXE%" goto LUA_EXE_OK
+@echo "Cannot find %LUA51%\lua[5.1].exe
+@goto EXIT
+:LUA_EXE_OK
+
+@set LUAC_EXE=%LUA51%\luac5.1.exe
+@if exist "%LUAC_EXE%" goto LUAC_EXE_OK
+@set LUAC_EXE=%LUA51%\luac.exe
+@if exist "%LUAC_EXE%" goto LUAC_EXE_OK
+@echo "Cannot find %LUA51%\luac[5.1].exe
+@goto EXIT
+:LUAC_EXE_OK
+
 
 @if "%1"=="" goto BUILD
 @if "%1"=="clean" goto CLEAN
@@ -26,31 +75,53 @@
 @if "%1"=="timer" goto TIMER
 @if "%1"=="recursive" goto RECURSIVE
 @if "%1"=="fibonacci" goto FIBONACCI
+@if "%1"=="hangtest" goto HANGTEST
+@if "%1"=="require" goto REQUIRE
 
 @echo Unknown target: %1
 @echo.
 @goto EXIT
 
 :BUILD
+@REM LuaBinaries: 
+@REM 	The current build system does not show 'lua51-lanes.dll' to
+@REM 	be dependent on more than 'KERNEL32.DLL'. Good.
 @REM
-@REM Precompile src/.lua -> .lch
+@REM Lua for Windows:
+@REM    Depends on KERNEL32.DLL and LUA5.1.DLL. Good?
+
+@set LUA_LIB=%LUA51%
+@if exist "%LUA_LIB%\lua5.1.lib" (
+  @echo.
+  @echo ***
+  @echo *** Using Lua from: %LUA51%
+  @echo ***
+  @echo.
+  @goto LUA_LIB_OK
+)
+
+@set LUA_LIB=%LUA51%\lib
+@if exist "%LUA_LIB%\lua5.1.lib" (
+  @echo.
+  @echo ***
+  @echo *** Using Lua from: %LUA51%
+  @echo ***
+  @echo.
+  @goto LUA_LIB_OK
+)
+@echo Cannot find %LUA51%\[lib\]lua5.1.lib
+@goto EXIT
+:LUA_LIB_OK
+
+@REM
+@REM Embed src/keeper.lua -> .lch
 @REM 
 @REM Note: we cannot use piping in Windows since we need binary output.
 @REM 
-"%LUA51%\luac5.1" -o delme src/keeper.lua
-"%LUA51%\lua5.1" tools/bin2c.lua -o src/keeper.lch delme
-@del delme
+"%LUA_EXE%" tools/bin2c.lua -o src/keeper.lch src/keeper.lua
 
-@if not "%VCINSTALLDIR%"=="" goto VC
+@if "%VCINSTALLDIR%"=="" goto ERR_NOVC
 
-@goto ERR_NOVC
-;@REM
-;@REM Win32 (MinGW) build commands
-;@REM
-;gcc -Wall -O2 -I "%LUA51%\include" -L "%LUA51%" -llua5.1 -shared -o lua51-lanes.dll src\*.c
-;@goto EXIT
-
-:VC
 @REM
 @REM Win32 (Visual C++ 2005/08 Express) build commands
 @REM
@@ -61,15 +132,16 @@
 @REM
 @set WARN=/Wall /wd4054 /wd4127 /wd4255 /wd4668 /wd4711 /wd4820 /wd4826
 
-@REM /LDd "creates a debug DLL"
+@REM /LDd: debug DLL
+@REM /O2 /LD: release DLL
 @REM
-@set NODEF=/link /NODEFAULTLIB:libcmt
-cl %WARN% /O2 /I "%LUA51%\include" /LDd /Felua51-lanes.dll src\*.c "%LUA51%\lua5.1.lib" %NODEF%
+@set FLAGS=/O2 /LD
+
+cl %WARN% %FLAGS% /I "%LUA51%\include" /Felua51-lanes.dll src\*.c "%LUA_LIB%\lua5.1.lib"
+@REM cl %WARN% %FLAGS% /I "%LUA51%\include" /Felua51-lanes.dll src\*.c "%LUA_LIB%\lua5.1.lib" /link /NODEFAULTLIB:libcmt
 
 @del lua51-lanes.lib
 @del lua51-lanes.exp
-@set NODEF=
-@set WARN=
 @goto EXIT
 
 :CLEAN
@@ -80,87 +152,97 @@ if exist delme del delme
 :TEST
 @REM "make test" does not automatically build/update the dll. We're NOT a makefile. :!
 @REM
-"%LUA51%\lua5.1" tests\basic.lua
+"%LUA_EXE%" tests\basic.lua
 @IF errorlevel 1 goto EXIT
 
-"%LUA51%\lua5.1" tests\fifo.lua
+"%LUA_EXE%" tests\fifo.lua
 @IF errorlevel 1 goto EXIT
 
-"%LUA51%\lua5.1" tests\keeper.lua
+"%LUA_EXE%" tests\keeper.lua
 @IF errorlevel 1 goto EXIT
 
-"%LUA51%\lua5.1" tests\fibonacci.lua
+"%LUA_EXE%" tests\fibonacci.lua
 @IF errorlevel 1 goto EXIT
 
-"%LUA51%\lua5.1" tests\timer.lua
+"%LUA_EXE%" tests\timer.lua
 @IF errorlevel 1 goto EXIT
 
-"%LUA51%\lua5.1" tests\atomic.lua
+"%LUA_EXE%" tests\atomic.lua
 @IF errorlevel 1 goto EXIT
 
-"%LUA51%\lua5.1" tests\cyclic.lua
+"%LUA_EXE%" tests\cyclic.lua
 @IF errorlevel 1 goto EXIT
 
-"%LUA51%\lua5.1" tests\recursive.lua
+"%LUA_EXE%" tests\recursive.lua
 @IF errorlevel 1 goto EXIT
 
 @goto EXIT
 
 :BASIC
-"%LUA51%\lua5.1" tests\basic.lua
+"%LUA_EXE%" tests\basic.lua
 @goto EXIT
 
 :FIFO
-"%LUA51%\lua5.1" tests\fifo.lua
+"%LUA_EXE%" tests\fifo.lua
 @goto EXIT
 
 :KEEPER
-"%LUA51%\lua5.1" tests\keeper.lua
+"%LUA_EXE%" tests\keeper.lua
 @goto EXIT
 
 :ATOMIC
-"%LUA51%\lua5.1" tests\atomic.lua
+"%LUA_EXE%" tests\atomic.lua
 @goto EXIT
 
 :CYCLIC
-"%LUA51%\lua5.1" tests\cyclic.lua
+"%LUA_EXE%" tests\cyclic.lua
 @goto EXIT
 
 :TIMER
-"%LUA51%\lua5.1" tests\timer.lua
+"%LUA_EXE%" tests\timer.lua
 @goto EXIT
 
 :RECURSIVE
-"%LUA51%\lua5.1" tests\recursive.lua
+"%LUA_EXE%" tests\recursive.lua
 @goto EXIT
 
 :FIBONACCI
-"%LUA51%\lua5.1" tests\fibonacci.lua
+"%LUA_EXE%" tests\fibonacci.lua
 @goto EXIT
 
-REM 'timeit' does not handle executables in space-containing path. So WHY
-REM does MS need to make all their default paths HAVE spaces? :) :) :)
-REM (even if using quotes - I tried...)
+:HANGTEST
+"%LUA_EXE%" tests\hangtest.lua
+@goto EXIT
+
+:REQUIRE
+"%LUA_EXE%" -e "require'lanes'"
+@goto EXIT
+
+REM ---
+REM NOTE: 'timeit' is a funny thing; it does _not_ work with quoted
+REM long paths, but it _does_ work without the quotes. I have no idea,
+REM how it knows the spaces in paths apart from spaces in between
+REM parameters.
 
 :LAUNCHTEST
-timeit %LUA51%\lua5.1 tests\launchtest.lua %2 %3 %4
+timeit %LUA_EXE% tests\launchtest.lua %2 %3 %4
 @goto EXIT
 
 :PERFTEST
-timeit %LUA51%\lua5.1 tests\perftest.lua %2 %3 %4
+timeit %LUA_EXE% tests\perftest.lua %2 %3 %4
 @goto EXIT
 
 :PERFTEST-PLAIN
-timeit %LUA51%\lua5.1 tests\perftest.lua --plain %2 %3 %4
+timeit %LUA_EXE% tests\perftest.lua --plain %2 %3 %4
 @goto EXIT
 
 :STRESS
-"%LUA51%\lua5.1" tests\test.lua
-"%LUA51%\lua5.1" tests\perftest.lua 100
-"%LUA51%\lua5.1" tests\perftest.lua 50 -prio=-1,0
-"%LUA51%\lua5.1" tests\perftest.lua 50 -prio=0,-1
-"%LUA51%\lua5.1" tests\perftest.lua 50 -prio=0,2
-"%LUA51%\lua5.1" tests\perftest.lua 50 -prio=2,0
+"%LUA_EXE%" tests\test.lua
+"%LUA_EXE%" tests\perftest.lua 100
+"%LUA_EXE%" tests\perftest.lua 50 -prio=-1,0
+"%LUA_EXE%" tests\perftest.lua 50 -prio=0,-1
+"%LUA_EXE%" tests\perftest.lua 50 -prio=0,2
+"%LUA_EXE%" tests\perftest.lua 50 -prio=2,0
 
 @echo All seems okay!
 @goto EXIT
@@ -168,15 +250,12 @@ timeit %LUA51%\lua5.1 tests\perftest.lua --plain %2 %3 %4
 REM ---
 :ERR_NOLUA
 @echo ***
-@echo *** Please set LUA51 to point to LuaBinaries directory:
+@echo *** Please set LUA51 to point to either LuaBinaries or
+@echo *** Lua for Windows directory.
 @echo ***
 @echo *** http://luabinaries.luaforge.net/download.html
 @echo ***	lua5_1_2_Win32_dll8_lib
 @echo ***	lua5_1_2_Win32_bin
-@echo ***
-@echo *** Extracting to C:\Program Files\Lua5.1 will be autodetected.
-@echo ***
-@echo *** Also Lua for Windows is supported:
 @echo ***
 @echo *** http://luaforge.net/frs/?group_id=377&release_id=1138
 @echo ***
@@ -191,5 +270,3 @@ REM ---
 @goto EXIT
 
 :EXIT
-@set LUA_PATH=%LUA_PATH_OLD%
-@set LUA_PATH_OLD=

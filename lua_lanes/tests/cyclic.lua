@@ -4,7 +4,8 @@
 -- Test program for Lua Lanes
 --
 
-require "lanes"
+local lanes = require "lanes"
+lanes.configure( 1)
 
 local table_concat= assert(table.concat)
 
@@ -15,16 +16,18 @@ local function WR(str,...)
     io.stderr:write( str..'\n' )
 end
 
+local function same(k,l)
+    return k==l and "same" or ("NOT SAME: "..k.." "..l)
+end
+
 local a= {}
 local b= {a}
 a[1]= b
 
-WR( "Originally: ", a,b, a[1],b[1] )
-
 -- Getting the tables as upvalues should still have the <-> linkage
 --
 local function lane1()
-    WR( "Via upvalue: ", a,b, a[1],b[1] )
+    WR( "Via upvalue: ", same(a,b[1]), same(a[1],b) )
     assert( a[1]==b )
     assert( b[1]==a )
 end
@@ -34,7 +37,7 @@ local L1= lanes.gen( "io", lane1 )()
 -- Getting the tables as parameters should also keep the linkage
 --
 local function lane2( aa, bb )
-    WR( "Via parameters:", aa,bb, aa[1],bb[1] )
+    WR( "Via parameters:", same(aa,bb[1]), same(aa[1],bb) )
     assert( aa[1]==bb )
     assert( bb[1]==aa )
 end
@@ -47,7 +50,7 @@ c= {}
 c.a= c
 
 local function lane3( cc )
-    WR( "Directly recursive: ", cc, cc.a )
+    WR( "Directly recursive: ", same(cc, cc.a) )
     assert( cc and cc.a==cc )
 end
 local L3= lanes.gen("io", lane3)(c)
