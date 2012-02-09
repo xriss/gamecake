@@ -123,12 +123,14 @@ static bool_t openlib( lua_State *L, const char *name, size_t len ) {
 				lua_pushcfunction( L, libs[i].func);
 				// pushes the module table on the stack
 				lua_call( L, 0, 1);
-	if( (strcmp(libs[i].name, "package") ==0) )
-	{
+				
 #ifdef LUA_PRELOADLIBS
-	LUA_PRELOADLIBS(L);
+				if( (strcmp(libs[i].name, "package") ==0) ) // need to preload into package
+				{
+					LUA_PRELOADLIBS(L);
+				}
 #endif
-	}
+
 				populate_func_lookup_table( L, -1, libs[i].name);
 				// remove the module when we are done
 				lua_pop( L, 1);
