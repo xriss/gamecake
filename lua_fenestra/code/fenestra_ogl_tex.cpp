@@ -37,8 +37,10 @@ bool fenestra_ogl::tex_setup(struct fogl_tex *tex, struct grd *g)
 			*(p)= (0xff000000&(t<<24)) | (0x000000ff&(t>>8)) | (0x0000ff00&(t>>8)) | (0x00ff0000&(t>>8)) ;
 		}
 		
-		gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA , g->bmap->w, g->bmap->h, GL_RGBA, GL_UNSIGNED_BYTE, g->bmap->data );
+//		gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA , g->bmap->w, g->bmap->h, GL_RGBA, GL_UNSIGNED_BYTE, g->bmap->data );
 
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA , g->bmap->w, g->bmap->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, g->bmap->data );
+ 	
 		for(p=(u32*)(g->bmap->data); p<((u32*)(g->bmap->data))+d; p++ ) // swap grd data back
 		{
 			u32 t=*p;
