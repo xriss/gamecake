@@ -1,0 +1,4 @@
+cd `dirname $0`
+cd ../../bin/dbg
+strace -f ./lua -e"require('apps').start('drytest','$*');"
+

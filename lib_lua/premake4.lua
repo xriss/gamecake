@@ -11,7 +11,6 @@ SET_KIND("StaticLib")
 
 defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
-
 configuration {"Debug"}
 targetdir(DBG_OBJ_DIR)
 
