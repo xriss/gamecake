@@ -238,7 +238,7 @@ local function gen( ... )
     -- Lane generator
     --
     return function(...)
-              return thread_new( func, libs, cs, prio, g_tbl, package_tbl, required, ...)     -- args
+		return thread_new( func, libs, cs, prio, g_tbl, package, required, ...)     -- args
            end
 end
 
