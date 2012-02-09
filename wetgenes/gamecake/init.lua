@@ -41,7 +41,7 @@ end
 draw = function(cake)
 	local gl=require("gl")
 	local t=assert(win.tex( cake.canvas.grd ))
-	t:draw({max=gl.NEAREST,min=gl.NEAREST})
+	t:draw()--{max=gl.NEAREST,min=gl.NEAREST})
 	t:clean()
 end
 

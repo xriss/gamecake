@@ -278,6 +278,8 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 				if widget.class=="string" then -- hack
 					texs.border:bind()
 				end
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)
 			
 				draw33(128,128, 24,24, 0-margin,0+margin, hx+(margin*2),hy+(margin*2))
 			
