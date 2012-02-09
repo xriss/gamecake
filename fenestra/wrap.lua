@@ -184,18 +184,20 @@ local win={}
 			return win.tex_bind(core)
 		end
 
-		function tex.draw(tex)
+		function tex.draw(tex,opts)
+			opts=opts or {}
 			win.tex_bind(core)
 			gl.Disable(gl.CULL_FACE)
 			gl.Enable(gl.TEXTURE_2D)
-			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,opts.max or gl.LINEAR)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,opts.min or gl.LINEAR)
 			gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 			gl.Begin(gl.QUADS)
 				gl.Color({1,1,1,1})
-				gl.TexCoord(0, 0) gl.Vertex(tex.width*-0.5, tex.height* 0.5)
-				gl.TexCoord(1, 0) gl.Vertex(tex.width* 0.5, tex.height* 0.5)
-				gl.TexCoord(1, 1) gl.Vertex(tex.width* 0.5, tex.height*-0.5)
-				gl.TexCoord(0, 1) gl.Vertex(tex.width*-0.5, tex.height*-0.5)
+				gl.TexCoord(0, 0) gl.Vertex(0.5+tex.width*-0.5, 0.5+tex.height* 0.5)
+				gl.TexCoord(1, 0) gl.Vertex(0.5+tex.width* 0.5, 0.5+tex.height* 0.5)
+				gl.TexCoord(1, 1) gl.Vertex(0.5+tex.width* 0.5, 0.5+tex.height*-0.5)
+				gl.TexCoord(0, 1) gl.Vertex(0.5+tex.width*-0.5, 0.5+tex.height*-0.5)
 			gl.End()
 		end
 

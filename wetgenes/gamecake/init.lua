@@ -39,8 +39,9 @@ end
 -- draw using win and opengl functions
 -- do not call if you do not have fenestra and a global win setup.
 draw = function(cake)
+	local gl=require("gl")
 	local t=assert(win.tex( cake.canvas.grd ))
-	t:draw()
+	t:draw({max=gl.NEAREST,min=gl.NEAREST})
 	t:clean()
 end
 
