@@ -37,7 +37,7 @@ typedef unsigned int uint_t;
 /* Do this BEFORE including time.h so that it is declaring _mktime32()
  * as it would have declared mktime().
  */
-# define mktime _mktime32
+//# define mktime _mktime32
 #endif
 #include <time.h>
 
