@@ -6,6 +6,7 @@ files { "src/**.cpp" , "src/**.c" , "src/**.h" }
 links { "lib_lua" }
 
 
+defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
 
 

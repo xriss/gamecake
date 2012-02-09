@@ -1625,8 +1625,6 @@ LUAG_FUNC( thread_new )
 	STACK_END(L2,0)
 	STACK_END(L,0)
 
-	// modules to require in the target lane *before* the function is transfered!
-
 	//start by requiring lua51-lanes, since it is a bit special
 	// it not fatal if 'require' isn't loaded, just ignore (may cause function transfer errors later on if the lane pulls the lanes module itself)
 	STACK_CHECK(L)
