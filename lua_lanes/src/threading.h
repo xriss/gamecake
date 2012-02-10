@@ -60,6 +60,7 @@ enum e_status { PENDING, RUNNING, WAITING, DONE, ERROR_ST, CANCELLED };
 #if THREADAPI == THREADAPI_WINDOWS
   #define WIN32_LEAN_AND_MEAN
   // 'SignalObjectAndWait' needs this (targets Windows 2000 and above)
+  #undef _WIN32_WINNT
   #define _WIN32_WINNT 0x0400
   #include <windows.h>
   #include <process.h>
