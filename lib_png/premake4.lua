@@ -14,11 +14,4 @@ defines { "PNG_STATIC" }
 includedirs { "." , "../lib_z" }
 
 
-configuration {"Debug"}
-targetdir(DBG_OBJ_DIR)
-
-
-configuration {"Release"}
-targetdir(EXE_OBJ_DIR)
-
-
+KIND{}

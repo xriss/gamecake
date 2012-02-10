@@ -200,7 +200,79 @@ DBG_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Debug")
 lua_lib_names={}
 lua_lib_loads={}
 
+
+function KIND(opts)
+
+	opts=opts or {}
+
+	if opts.kind=="lua" then
+	
+		opts.kind="StaticLib" -- lua turns to static
+		
+		lua_lib_names[#lua_lib_names+1]=project().name
+		lua_lib_loads[#lua_lib_loads+1]={opts.luaname or opts.name,opts.luaopen or opts.luaname or opts.name}
+
+	end
+	
+	opts.kind=opts.kind or "StaticLib" -- default kind
+	
+	kind(opts.kind)
+	
+-- setup configurations
+
+	configuration {"Debug"}
+	flags {"Symbols"} -- blue debug needs symbols badly
+
+	configuration {"Release"}
+	flags {"Optimize"}
+	
+
+	if opts.name and opts.kind~="StaticLib" then -- force an output target name
+	
+		targetprefix ("")
+		targetname (opts.name)
+		
+	end
+
+-- set output dirs
+
+	if opts.kind~="StaticLib" then -- force output dir
+	
+		local d=""
+		if opts.dir and opts.dir~="" then d="/"..opts.dir end
+		
+		if ANDROID then
+		
+			configuration {"Debug"}
+			targetdir(AND_OUT_DIR..d)
+
+			configuration {"Release"}
+			targetdir(AND_OUT_DIR..d)
+			
+		else
+
+			configuration {"Debug"}
+			targetdir(DBG_OUT_DIR..d)
+
+			configuration {"Release"}
+			targetdir(EXE_OUT_DIR..d)
+
+		end
+		
+	else
+	
+		configuration {"Debug"}
+		targetdir(DBG_OBJ_DIR)
+
+		configuration {"Release"}
+		targetdir(EXE_OBJ_DIR)
+	end
+	
+end
+
+
 -- need to clean this up and merge SET_KIND and SET_TARGET into one function...
+--[[
 function SET_KIND(kindof,luaname,luafname)
 	if kindof=="lua" then -- special laulib kind that keeps a list of libs
 
@@ -262,7 +334,7 @@ dir=dir or ""
 
 	end
 end
-
+]]
 
 ------------------------------------------------------------------------
 -- include sub projects depending on build

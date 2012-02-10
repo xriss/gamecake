@@ -7,6 +7,5 @@ links { "lib_lua" , "lib_z" }
 includedirs { "." , "../lib_z" }
 
 
-SET_KIND("lua","zlib","zlib")
-SET_TARGET("","zlib")
+KIND{kind="lua",name="zlib"}
 

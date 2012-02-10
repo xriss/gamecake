@@ -31,6 +31,5 @@ end
 
 includedirs { "." }
 
-SET_KIND("lua","fenestra.core","fenestra_core")
-SET_TARGET("/fenestra","core")
+KIND{kind="lua",dir="fenestra",name="core",luaname="fenestra.core",luaopen="fenestra_core"}
 

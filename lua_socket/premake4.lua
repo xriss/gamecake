@@ -30,9 +30,7 @@ else -- nix
 end
 
 
-SET_KIND("lua","socket.core","socket_core")
-SET_TARGET("/socket","core")
-
+KIND{kind="lua",dir="socket",name="core",luaname="socket.core",luaopen="socket_core"}
 
 
 project "lua_mime"
@@ -54,6 +52,5 @@ else -- nix
 
 end
 
-SET_KIND("lua","mime.core","mime_core")
-SET_TARGET("/mime","core")
+KIND{kind="lua",dir="mime",name="core",luaname="mime.core",luaopen="mime_core"}
 

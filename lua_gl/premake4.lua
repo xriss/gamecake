@@ -28,6 +28,6 @@ end
 
 includedirs { ".", "luagl/src" , "luagl/include" }--, "freeglut/src" , "freeglut/include" , "freeglut/include/GL" }
 
-SET_KIND("lua","gl","luagl")
-SET_TARGET("","gl")
+KIND{kind="lua",name="gl",luaopen="luagl"}
+
 

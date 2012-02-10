@@ -7,6 +7,6 @@ links { "lib_sqlite" }
 includedirs { "." , "../lib_sqlite" }
 
 
-SET_KIND("lua","sqlite","lsqlite3")
-SET_TARGET("","sqlite")
+KIND{kind="lua",name="sqlite",luaname="sqlite",luaopen="lsqlite3"}
+
 
