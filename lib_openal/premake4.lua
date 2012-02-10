@@ -38,11 +38,13 @@ files {
 }
 
 
-includedirs { ".","./soft/include","./soft/OpenAL32/include" }
+includedirs { ".","soft/include","soft/OpenAL32/Include" }
 
+defines{ "AL_ALEXT_PROTOTYPES" }
 
 configuration {"Debug"}
 targetdir(DBG_OBJ_DIR)
+--buildoptions {"--verbose"}
 
 configuration {"Release"}
 targetdir(EXE_OBJ_DIR)
