@@ -9,6 +9,5 @@ links { "lib_lua" , "lib_grd" }
 includedirs { "." , "../lua_grd" }
 
 
-SET_KIND("lua","wetgenes.grdmap.core","wetgenes_grdmap_core")
-SET_TARGET("/wetgenes/grdmap","core")
+KIND{kind="lua",dir="wetgenes/grdmap",name="core",luaname="wetgenes.grdmap.core",luaopen="wetgenes_grdmap_core"}
 

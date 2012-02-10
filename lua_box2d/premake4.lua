@@ -7,6 +7,5 @@ includedirs { "Box2D/Source" , "Box2D/Include" }
 
 links { "lib_lua" }
 
-SET_KIND("lua","box2d.core","box2d_core")
-SET_TARGET("/box2d","core")
+KIND{kind="lua",dir="box2d",name="core",luaname="box2d.core",luaopen="box2d_core"}
 

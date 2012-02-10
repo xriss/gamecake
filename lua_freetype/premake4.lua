@@ -83,6 +83,5 @@ links { "lib_lua" }
 includedirs { "freetype/include" , "." }
 
 
-SET_KIND("lua","freetype","freetype")
-SET_TARGET("","freetype")
+KIND{kind="lua",name="freetype"}
 

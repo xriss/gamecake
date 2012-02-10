@@ -199,7 +199,6 @@ else
 
 	links { "dl" , "m" }
 	
-	SET_KIND("ConsoleApp")
-	SET_TARGET("","nginx",true)
+	KIND{kind="ConsoleApp",name="nginx"}
 
 end

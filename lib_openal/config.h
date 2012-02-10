@@ -6,10 +6,10 @@
 #define ALSOFT_VERSION "1.13"
 
 /* Define if we have the ALSA backend */
-#define HAVE_ALSO
+//#define HAVE_ALSA
 
 /* Define if we have the OSS backend */
-/* #undef HAVE_OSS */
+#define HAVE_OSS
 
 /* Define if we have the Solaris backend */
 /* #undef HAVE_SOLARIS */

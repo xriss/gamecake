@@ -35,6 +35,7 @@ files {
 
 		"soft/Alc/backends/loopback.c",
 		"soft/Alc/backends/null.c",
+		"soft/Alc/backends/oss.c",
 }
 
 
@@ -42,10 +43,6 @@ includedirs { ".","soft/include","soft/OpenAL32/Include" }
 
 defines{ "AL_ALEXT_PROTOTYPES" }
 
-configuration {"Debug"}
-targetdir(DBG_OBJ_DIR)
+KIND{}
 --buildoptions {"--verbose"}
-
-configuration {"Release"}
-targetdir(EXE_OBJ_DIR)
 

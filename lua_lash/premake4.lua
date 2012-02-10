@@ -7,6 +7,5 @@ excludes { "src/rijndael.*" }
 
 links { "lib_lua" }
 
-SET_KIND("lua","lash","lash")
-SET_TARGET("","lash")
+KIND{kind="lua",name="lash"}
 

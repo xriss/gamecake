@@ -26,8 +26,7 @@ if NACL then
 	links { "m" , "stdc++" }
 	links { "ppapi" , "ppapi_gles2" }
 	
-	SET_KIND("WindowedApp")
-	SET_TARGET("","lua.32.nexe",true)
+	KIND{kind="WindowedApp",name="lua.32.nexe"}
 
 elseif ANDROID then 
 
@@ -46,8 +45,7 @@ elseif ANDROID then
 	linkoptions{ "-Bsymbolic"}
 
 	files { "../lib_lua/src/*.h", --[["src/lua.c"]]  }
-	SET_KIND("SharedLib")
-	SET_TARGET("","liblua",true)
+	KIND{kind="SharedLib",name="liblua"}
 
 elseif WINDOWS then
 
@@ -74,8 +72,7 @@ elseif WINDOWS then
 
 
 
-	SET_KIND("ConsoleApp")
-	SET_TARGET("","lua.exe",true)
+	KIND{kind="ConsoleApp",name="lua.exe"}
 
 elseif NIX then
 
@@ -97,7 +94,6 @@ elseif NIX then
 	
 	links { "dl" , "m" , "pthread" }
 	
-	SET_KIND("ConsoleApp")
-	SET_TARGET("","lua",true)
+	KIND{kind="ConsoleApp",name="lua"}
 
 end

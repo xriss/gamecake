@@ -10,10 +10,5 @@ defines { "HAVE_CONFIG_H", "PCRE_STATIC" , "POSIX_MALLOC_THRESHOLD=10" }
 
 includedirs { "." }
 
-
-configuration {"Debug"}
-targetdir(DBG_OBJ_DIR)
-
-configuration {"Release"}
-targetdir(EXE_OBJ_DIR)
+KIND{}
 

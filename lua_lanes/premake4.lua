@@ -10,8 +10,7 @@ defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
 
 
-SET_KIND("lua","lua51-lanes","lanes")
-SET_TARGET("","lua51-lanes")
+KIND{kind="lua",name="lua51-lanes",luaname="lua51-lanes",luaopen="lanes"}
 
 
 local function ldump(fni,fno)
