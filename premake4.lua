@@ -349,23 +349,15 @@ end
 	include("lua_socket")
 	include("lua_fenestra")
 	include("lua_sqlite")
-
-
--- lanes has trouble with multipple CPUs for some reason?
--- or my code is not really thread safe?
--- tis bugs that need to be fixed
--- just disabled for now as a quick hack fix
-
 	include("lua_lanes")
 
-
 -- security is always a clusterfuck, need openssl working cross platform
--- and its not building right now, so disable for now
+-- and its not building right now, so disabled
 
 --	include("lua_sec")
 
 
--- not using these to avoid the dependencies
+-- not using this to avoid the dependencies
 -- should probably setup sql as a dll since its useless on consoles etc
 -- as there is no full source to build, well there is source...
 -- but fuck me if I can build the shits
@@ -387,6 +379,8 @@ end
 	include("lib_z")
 	include("lib_sqlite")
 	include("lib_pcre")
+	
+	include("lib_openal")
 
 -- we probably static link with all the above libs so this should go last
 	include("lua")
