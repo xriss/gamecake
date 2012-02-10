@@ -1,4 +1,6 @@
 
+if not WINDOWS then
+
 project "lib_openal"
 kind "StaticLib"
 language "C"
@@ -46,3 +48,4 @@ defines{ "AL_ALEXT_PROTOTYPES" }
 KIND{}
 --buildoptions {"--verbose"}
 
+end

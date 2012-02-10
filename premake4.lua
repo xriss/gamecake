@@ -202,6 +202,8 @@ lua_lib_loads={}
 
 
 function KIND(opts)
+-- apply to all configs
+	configuration{}
 
 	opts=opts or {}
 
@@ -218,6 +220,13 @@ function KIND(opts)
 	
 	kind(opts.kind)
 	
+	if opts.name and opts.kind~="StaticLib" then -- force an output target name
+	
+		targetprefix ("")
+		targetname (opts.name)
+		
+	end
+
 -- setup configurations
 
 	configuration {"Debug"}
@@ -226,14 +235,6 @@ function KIND(opts)
 	configuration {"Release"}
 	flags {"Optimize"}
 	
-
-	if opts.name and opts.kind~="StaticLib" then -- force an output target name
-	
-		targetprefix ("")
-		targetname (opts.name)
-		
-	end
-
 -- set output dirs
 
 	if opts.kind~="StaticLib" then -- force output dir
@@ -253,9 +254,11 @@ function KIND(opts)
 
 			configuration {"Debug"}
 			targetdir(DBG_OUT_DIR..d)
+print("Debug","=", DBG_OUT_DIR..d)
 
 			configuration {"Release"}
 			targetdir(EXE_OUT_DIR..d)
+print("Release","=", EXE_OUT_DIR..d)
 
 		end
 		

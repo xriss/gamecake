@@ -7,8 +7,6 @@ files { "src/*.h", "src/*.cpp", "src/*.c" }
 excludes { "src/lua.c" }
 includedirs { "src" }
 
-SET_KIND("StaticLib")
-
 defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
 KIND{}
