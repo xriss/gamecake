@@ -1,13 +1,13 @@
 
-project "lua_al"
+project "lua_alc"
 language "C"
 
-files { "code/*.c" }
+files { "code/lua_alc.c" }
 
 links { "lib_lua" }
 
 includedirs { "../lib_openal/soft/include"}
 
 
-KIND{lua="al.core"}
+KIND{lua="alc.core"}
 
