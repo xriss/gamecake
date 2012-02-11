@@ -186,6 +186,7 @@ else
 	links(lua_lib_names)
 
 	links { LIB_LUA }
+	links { "lib_openal" }
 	links { "lib_z" }
 	links { "lib_sqlite" }
 	links { "lib_png" }

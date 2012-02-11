@@ -56,6 +56,7 @@ elseif WINDOWS then
 -- anyway it gets complicated, so this is all hax
 
 	links { LIB_LUA }
+	links { "lib_openal" }
 	links { "lib_z" }
 	links { "lib_sqlite" }
 	links { "lib_png" }
@@ -83,6 +84,7 @@ elseif NIX then
 -- anyway it gets complicated, so this is all hax
 
 	links { LIB_LUA }
+	links { "lib_openal" }
 	links { "lib_z" }
 	links { "lib_sqlite" }
 	links { "lib_png" }

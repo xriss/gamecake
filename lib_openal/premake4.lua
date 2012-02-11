@@ -36,8 +36,9 @@ files {
 		"soft/Alc/panning.c",
 
 		"soft/Alc/backends/loopback.c",
+		"soft/Alc/backends/wave.c",
 		"soft/Alc/backends/null.c",
-		"soft/Alc/backends/oss.c",
+		"soft/Alc/backends/alsa.c",
 }
 
 

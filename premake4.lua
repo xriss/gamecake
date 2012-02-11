@@ -416,6 +416,7 @@ end
 	include("lua_freetype")
 	include("lua_bit")
 	include("lua_box2d")
+	include("lua_al")
 	include("lua_gl")
 	include("lua_grd")
 	include("lua_grdmap")
