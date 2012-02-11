@@ -201,11 +201,44 @@ lua_lib_names={}
 lua_lib_loads={}
 
 
+-- deadsimple single char string spliter, c must be a single char possibly escaped with %
+-- this is a simple path or modulename spliting function
+local function csplit(str,c)
+	local ret={}
+	local n=1
+	for w in str:gmatch("([^"..c.."]*)") do
+			ret[n]=ret[n] or w -- only set once (so the blank after a string is ignored)
+			if w=="" then n=n+1 end -- step forwards on a blank but not a string
+	end
+	return ret
+end
+
 function KIND(opts)
+
 -- apply to all configs
 	configuration{}
 
 	opts=opts or {}
+	
+	if opts.lua then -- shorthand lua options, fill in other opts with it
+	
+		opts.kind="lua" 
+
+		opts.luaname=opts.lua -- the full lua module name
+		
+		local aa=csplit(opts.lua,"%.") -- break it on every .
+		
+		opts.luaopen=table.concat(aa,"_") -- replace . with _ and that is the call function
+		
+		opts.name=aa[#aa] -- last part is the name
+		
+		aa[#aa]=nil -- remove name and what everything else is the dir
+		
+		opts.dir=table.concat(aa,"/")
+		
+print(opts)
+for i,v in pairs(opts) do print(i,v) end
+	end
 
 	if opts.kind=="lua" then
 	
@@ -417,6 +450,7 @@ end
 	include("lua_bit")
 	include("lua_box2d")
 	include("lua_al")
+	include("lua_alc")
 	include("lua_gl")
 	include("lua_grd")
 	include("lua_grdmap")
