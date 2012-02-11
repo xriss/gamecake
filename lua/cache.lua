@@ -58,11 +58,27 @@ end
 		t[#t+1]=s
 	end
 	
+	local libnames={}
+	
+	for i,v in ipairs(lua_lib_loads) do
+		libnames[#libnames+1]=v[1]
+	end
+	
+	libnames=table.concat(libnames," ")
+
+	local srcnames={}
+
+	for i,v in pairs(mod_files) do
+		srcnames[#srcnames+1]=i
+	end
+	
+	srcnames=table.concat(srcnames," ")
+	
 	put([[
 
 	const char *wetgenes_wetmods_version()
 	{
-		return "Featuring WetMods V]]..version..[[ https://bitbucket.org/xixs/lua";
+		return "Featuring WetMods V]]..version..[[ https://bitbucket.org/xixs/lua\n]]..libnames.."\\n"..srcnames..[[";
 	}
 
 ]])

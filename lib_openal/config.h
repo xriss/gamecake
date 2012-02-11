@@ -1,15 +1,17 @@
 /* API declaration export attribute */
-#define AL_API  __attribute__((visibility("protected")))
-#define ALC_API __attribute__((visibility("protected")))
+//#define AL_API  __attribute__((visibility("protected")))
+//#define ALC_API __attribute__((visibility("protected")))
+#define AL_API  
+#define ALC_API 
 
 /* Define to the library version */
 #define ALSOFT_VERSION "1.13"
 
 /* Define if we have the ALSA backend */
-//#define HAVE_ALSA
+#define HAVE_ALSA
 
 /* Define if we have the OSS backend */
-#define HAVE_OSS
+//#define HAVE_OSS
 
 /* Define if we have the Solaris backend */
 /* #undef HAVE_SOLARIS */
