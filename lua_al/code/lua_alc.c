@@ -107,37 +107,63 @@ alDeleteBuffers(1, &buffer);
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_alc_OpenDevice(lua_State *l)
 {
-	ALCdevice **ppdevice;
+	ALCdevice **device;
 
 // create a device userdata pointer pointer
-	ppdevice = (ALCdevice**)lua_newuserdata(l, sizeof(ALCdevice**));	
+	device = (ALCdevice**)lua_newuserdata(l, sizeof(ALCdevice**));	
 	luaL_getmetatable(l, lua_alc_device_meta_name);
 	lua_setmetatable(l, -2);
 	
 //start pointer at 0
-	(*ppdevice)=0;
+	(*device)=0;
 
 //open the actual device
-	(*ppdevice)=alcOpenDevice(NULL);
+	(*device)=alcOpenDevice(NULL);
 
 //return the userdata	
 	return 1;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// __GC for device ptr
+// get **device and error if it is not the right udata
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+ALCdevice ** lua_alc_get_device_ptr (lua_State *l,int idx)
+{
+ALCdevice **device;
+	device = (ALCdevice**)luaL_checkudata(l, idx , lua_alc_device_meta_name);
+	return device;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get *device and error if it is 0
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+ALCdevice * lua_alc_check_device (lua_State *l,int idx)
+{	
+ALCdevice **device;
+	device = lua_alc_get_device_ptr (l, idx);
+	if(!*device)
+	{
+		luaL_error(l,"alc device is null");
+	}
+	return *device;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// __GC for device ptr (may be null)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_alc_CloseDevice (lua_State *l)
 {	
-ALCdevice **ppdevice;
+ALCdevice **device;
 
-	ppdevice = (ALCdevice**)luaL_checkudata(l, 1 , lua_alc_device_meta_name);
+	device = lua_alc_get_device_ptr(l, 1 );
 	
-	if(*ppdevice)
+	if(*device)
 	{
-		alcCloseDevice(*ppdevice);
-		(*ppdevice)=0;
+		alcCloseDevice(*device);
+		(*device)=0;
 	}
 	
 	return 0;
@@ -150,57 +176,83 @@ ALCdevice **ppdevice;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_alc_CreateContext(lua_State *l)
 {
-	ALCdevice **ppdevice;
-	ALCcontext **ppcontext;
+	ALCdevice *device;
+	ALCcontext **context;
 
 // must pass in a device
-	ppdevice = (ALCdevice**)luaL_checkudata(l, 1 , lua_alc_device_meta_name);
+	device = lua_alc_check_device(l, 1);
 
 // create a context userdata pointer pointer
-	ppcontext = (ALCcontext**)lua_newuserdata(l, sizeof(ALCcontext**));	
+	context = (ALCcontext**)lua_newuserdata(l, sizeof(ALCcontext**));	
 	luaL_getmetatable(l, lua_alc_context_meta_name);
 	lua_setmetatable(l, -2);
 	
 //start pointer at 0
-	(*ppcontext)=0;
+	(*context)=0;
 
 //open the actual context
-	(*ppcontext)=alcCreateContext((*ppdevice),NULL);
+	(*context)=alcCreateContext(device,NULL);
 
 //return the userdata	
 	return 1;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// __GC for context ptr
+// get **context and error if it is not the right udata
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+ALCcontext ** lua_alc_get_context_ptr (lua_State *l,int idx)
+{
+ALCcontext **context;
+	context = (ALCcontext**)luaL_checkudata(l, idx , lua_alc_context_meta_name);
+	return context;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get *context and error if it is 0
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+ALCcontext * lua_alc_check_context (lua_State *l,int idx)
+{	
+ALCcontext **context;
+	context = lua_alc_get_context_ptr (l,idx);
+	if(!*context)
+	{
+		luaL_error(l,"alc device is null");
+	}
+	return *context;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// __GC for context ptr (may be null)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_alc_DestroyContext (lua_State *l)
 {	
-ALCcontext **ppcontext;
+ALCcontext **context;
 
-	ppcontext = (ALCcontext**)luaL_checkudata(l, 1 , lua_alc_context_meta_name);
+	context = lua_alc_get_context_ptr(l, 1 );
 	
-	if(*ppcontext)
+	if(*context)
 	{
-		alcDestroyContext(*ppcontext);
-		(*ppcontext)=0;
+		alcDestroyContext(*context);
+		(*context)=0;
 	}
 	
 	return 0;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// __GC for context ptr
+// Select the current context
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_alc_MakeContextCurrent (lua_State *l)
 {	
-ALCcontext **ppcontext;
+ALCcontext *context;
 
-	ppcontext = (ALCcontext**)luaL_checkudata(l, 1 , lua_alc_context_meta_name);
+	context = lua_alc_check_context(l, 1);
 	
-	alcMakeContextCurrent(*ppcontext);
+	alcMakeContextCurrent(context);
 	
 	return 0;
 }
@@ -222,6 +274,7 @@ LUALIB_API int luaopen_alc_core(lua_State *l)
 		
 		{"MakeContextCurrent",	lua_alc_MakeContextCurrent},
 
+		{"test",				lua_alc_test},
 		{0,0}
 	};
 	const luaL_reg meta_device[] =
