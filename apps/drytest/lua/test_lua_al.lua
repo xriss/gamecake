@@ -14,7 +14,7 @@ local alc=require("alc")
 	
 --	alc.test()-- test junk
 
-	local data="00000000ZZZZZZZZ" -- fake test sample data should be squarewave ishhh
+	local data="00000000zzzzzzzz" -- fake test sample data should be squarewave ishhh
 
 	al.Listener(al.POSITION, 0, 0, 0)
 	al.Listener(al.VELOCITY, 0, 0, 0)
@@ -30,7 +30,7 @@ local alc=require("alc")
 
 	local buffer=al.GenBuffer()
 
-	al.BufferData(buffer,al.FORMAT_MONO16,data,1024)
+	al.BufferData(buffer,al.FORMAT_MONO16,data,261.626*8) -- C4 hopefully?
 
 	al.Source(source, al.BUFFER, buffer)
 	al.Source(source, al.LOOPING,al.TRUE)
