@@ -81,68 +81,439 @@ alSpeedOfSound
 alDistanceModel
 */
 
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// simple test...
+// generate one buffer
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_al_test(lua_State *l)
+static int lua_al_GenBuffer (lua_State *l)
+{	
+int buff;
+	alGenBuffers(1,&buff);
+	lua_pushnumber(l,buff);
+	return 1;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// delete one buffer
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_DeleteBuffer (lua_State *l)
+{	
+int buff;
+	buff=luaL_checknumber(l,1);
+	alDeleteBuffers(1,&buff);
+	return 0;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// Load some data into a buffer
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_BufferData (lua_State *l)
 {
-int format=AL_FORMAT_MONO16;
-short data[512];
-int size=512*2;
-int freq=1024*10;
+int buff,fmt,size,freq;
+void *data;
+
+	buff=luaL_checknumber(l,1);
+	fmt=luaL_checknumber(l,2);
+	data=(void*)luaL_checklstring(l,3,&size);
+	freq=luaL_checknumber(l,4);
+
+	alBufferData(buff,fmt,data,size,freq);
+	
+	return 0;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// generate one source
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_GenSource (lua_State *l)
+{	
+int src;
+	alGenSources(1,&src);
+	lua_pushnumber(l,src);
+	return 1;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// delete one source
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_DeleteSource (lua_State *l)
+{	
+int src;
+	src=luaL_checknumber(l,1);
+	alDeleteSources(1,&src);
+	return 0;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// Play pause rewind or stop a source
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_SourcePlay (lua_State *l)
+{
+int src=luaL_checknumber(l,1);
+	alSourcePlay(src);
+	return 0;
+}
+static int lua_al_SourcePause (lua_State *l)
+{
+int src=luaL_checknumber(l,1);
+	alSourcePause(src);
+	return 0;
+}
+static int lua_al_SourceRewind (lua_State *l)
+{
+int src=luaL_checknumber(l,1);
+	alSourceRewind(src);
+	return 0;
+}
+static int lua_al_SourceStop (lua_State *l)
+{
+int src=luaL_checknumber(l,1);
+	alSourceStop(src);
+	return 0;
+}
+
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// turn a def into a property type and size
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void lua_al_get_prop_info (int def, char *v, int *num)
+{
+	switch(def)
+	{
+// int[1]
+		case AL_SOURCE_RELATIVE:
+		case AL_SOURCE_TYPE:
+		case AL_LOOPING:
+		case AL_BUFFER:
+		case AL_SOURCE_STATE:
+		case AL_BUFFERS_QUEUED:
+		case AL_BUFFERS_PROCESSED:
+		case AL_SAMPLE_OFFSET:
+		case AL_BYTE_OFFSET:
+		case AL_FREQUENCY:
+		case AL_BITS:
+		case AL_CHANNELS:
+		case AL_SIZE:
+		case AL_DISTANCE_MODEL:
+			*num=1; *v='i';
+		break;
+// float[1]
+		case AL_GAIN:
+		case AL_PITCH:
+		case AL_MAX_DISTANCE:
+		case AL_ROLLOFF_FACTOR:
+		case AL_REFERENCE_DISTANCE:
+		case AL_MIN_GAIN:
+		case AL_MAX_GAIN:
+		case AL_CONE_OUTER_GAIN:
+		case AL_CONE_INNER_ANGLE:
+		case AL_CONE_OUTER_ANGLE:
+		case AL_SEC_OFFSET:
+		case AL_DOPPLER_FACTOR:
+		case AL_SPEED_OF_SOUND:
+			*num=1; *v='f';
+		break;
+// float[3]
+		case AL_POSITION:
+		case AL_VELOCITY:
+		case AL_DIRECTION:
+			*num=3; *v='f';
+		break;
+// float[6]
+		case AL_ORIENTATION:
+			*num=6; *v='f';
+		break;
+	}
+}
+
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get or set listener properties
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_Listener (lua_State *l,int get)
+{	
+int def;
+
+// default of a single integer
+char v='i';
+int num=1;
+
+int iv[16];
+float fv[16];
+
 int i;
 
-for(i=0;i<512;i++)
+	def=luaL_checknumber(l,1);
+	
+	lua_al_get_prop_info(def, &v, &num);
+	
+	switch(v)
+	{
+		case 'i':
+			if(get)
+			{
+				alGetListeneriv(def,iv);
+				for(i=0;i<num;i++)
+				{
+					lua_pushnumber(l,iv[i]);
+				}
+			}
+			else
+			{
+				for(i=0;i<num;i++)
+				{
+					iv[i]=(int)luaL_checknumber(l,2+i);
+				}
+				alListeneriv(def,iv);
+			}
+		break;
+		case 'f':
+			if(get)
+			{
+				alGetListenerfv(def,fv);
+				for(i=0;i<num;i++)
+				{
+					lua_pushnumber(l,fv[i]);
+				}
+			}
+			else
+			{
+				for(i=0;i<num;i++)
+				{
+					fv[i]=(float)luaL_checknumber(l,2+i);
+				}
+				alListenerfv(def,fv);
+			}
+		break;
+	}
+	
+	if(get)	{ return num; }
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get or set Source properties
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_Source (lua_State *l,int get)
 {
-	data[i]=(short)random();
+int src;
+int def;
+
+// default of a single integer
+char v='i';
+int num=1;
+
+int iv[16];
+float fv[16];
+
+int i;
+
+	src=luaL_checknumber(l,1);
+	def=luaL_checknumber(l,2);
+	
+	lua_al_get_prop_info(def, &v, &num);
+	
+	switch(v)
+	{
+		case 'i':
+			if(get)
+			{
+				alGetSourceiv(src,def,iv);
+				for(i=0;i<num;i++)
+				{
+					lua_pushnumber(l,iv[i]);
+				}
+			}
+			else
+			{
+				for(i=0;i<num;i++)
+				{
+					iv[i]=(int)luaL_checknumber(l,3+i);
+				}
+				alSourceiv(src,def,iv);
+			}
+		break;
+		case 'f':
+			if(get)
+			{
+				alGetSourcefv(src,def,fv);
+				for(i=0;i<num;i++)
+				{
+					lua_pushnumber(l,fv[i]);
+				}
+			}
+			else
+			{
+				for(i=0;i<num;i++)
+				{
+					fv[i]=(float)luaL_checknumber(l,3+i);
+				}
+				alSourcefv(src,def,fv);
+			}
+		break;
+	}
+	
+	if(get)	{ return num; }
+	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get or set Buffer properties
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_Buffer (lua_State *l,int get)
+{	
+int buff;
+int def;
+
+// default of a single integer
+char v='i';
+int num=1;
+
+int iv[16];
+float fv[16];
+
+int i;
+
+	buff=luaL_checknumber(l,1);
+	def=luaL_checknumber(l,2);
 	
+	lua_al_get_prop_info(def, &v, &num);
 	
-int buffer;
+	switch(v)
+	{
+		case 'i':
+			if(get)
+			{
+				alGetBufferiv(buff,def,iv);
+				for(i=0;i<num;i++)
+				{
+					lua_pushnumber(l,iv[i]);
+				}
+			}
+			else
+			{
+				for(i=0;i<num;i++)
+				{
+					iv[i]=(int)luaL_checknumber(l,2+i);
+				}
+				alBufferiv(buff,def,iv);
+			}
+		break;
+		case 'f':
+			if(get)
+			{
+				alGetBufferfv(buff,def,fv);
+				for(i=0;i<num;i++)
+				{
+					lua_pushnumber(l,fv[i]);
+				}
+			}
+			else
+			{
+				for(i=0;i<num;i++)
+				{
+					fv[i]=(float)luaL_checknumber(l,2+i);
+				}
+				alBufferfv(buff,def,fv);
+			}
+		break;
+	}
 	
-ALCdevice* device = alcOpenDevice(NULL);
-ALCcontext* context = alcCreateContext(device, NULL);
-alcMakeContextCurrent(context);
-
-alListener3f(AL_POSITION, 0, 0, 0);
-alListener3f(AL_VELOCITY, 0, 0, 0);
-alListener3f(AL_ORIENTATION, 0, 0, -1);
-
-ALuint source;
-alGenSources(1, &source);
-
-alSourcef(source, AL_PITCH, 1);
-alSourcef(source, AL_GAIN, 1);
-alSource3f(source, AL_POSITION, 0, 0, 0);
-alSource3f(source, AL_VELOCITY, 0, 0, 0);
-alSourcei(source, AL_LOOPING, AL_FALSE);
-
-alGenBuffers(1, &buffer);
-
-alBufferData(buffer,format,data,size,freq);
-
-
-alSourcei(source, AL_BUFFER, buffer);
-alSourcei(source, AL_LOOPING,AL_TRUE);
-
-alSourcePlay(source);
-fgetc(stdin);
-
-
-alDeleteSources(1, &source);
-alDeleteBuffers(1, &buffer);
-alcDestroyContext(context);
-alcCloseDevice(device);
-
-
-
-	
-  return 0;
+	if(get)	{ return num; }
+	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get base properties
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_Get (lua_State *l)
+{	
+int def;
+
+// default of a single integer
+char v='i';
+int num=1;
+
+int iv[16];
+float fv[16];
+
+int i;
+
+	def=luaL_checknumber(l,1);
+	
+	lua_al_get_prop_info(def, &v, &num);
+	
+	switch(v)
+	{
+		case 'i':
+			alGetIntegerv(def,iv);
+			for(i=0;i<num;i++)
+			{
+				lua_pushnumber(l,iv[i]);
+			}
+		break;
+		case 'f':
+			alGetFloatv(def,fv);
+			for(i=0;i<num;i++)
+			{
+				lua_pushnumber(l,fv[i]);
+			}
+		break;
+	}
+	
+	return num;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// Property stubs
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_GetListener (lua_State *l)
+{	
+	return lua_al_Listener(l,1);
+}
+static int lua_al_SetListener (lua_State *l)
+{	
+	return lua_al_Listener(l,0);
+}
+static int lua_al_GetSource (lua_State *l)
+{	
+	return lua_al_Source(l,1);
+}
+static int lua_al_SetSource (lua_State *l)
+{	
+	return lua_al_Source(l,0);
+}
+static int lua_al_GetBuffer (lua_State *l)
+{	
+	return lua_al_Buffer(l,1);
+}
+static int lua_al_SetBuffer (lua_State *l)
+{	
+	return lua_al_Buffer(l,0);
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -153,8 +524,25 @@ LUALIB_API int luaopen_al_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
-		{"test",			lua_al_test},
+		{"Get",					lua_al_Get},
+		
+		{"Listener",			lua_al_SetListener},
+		{"GetListener",			lua_al_GetListener},
 
+		{"GenSource",			lua_al_GenSource},
+		{"DeleteSource",		lua_al_DeleteSource},
+		{"Source",				lua_al_SetSource},
+		{"GetSource",			lua_al_GetSource},
+		{"SourcePlay",			lua_al_SourcePlay},
+		{"SourcePause",			lua_al_SourcePause},
+		{"SourceRewind",		lua_al_SourceRewind},
+		{"SourceStop",			lua_al_SourceStop},
+
+		{"GenBuffer",			lua_al_GenBuffer},
+		{"DeleteBuffer",		lua_al_DeleteBuffer},
+		{"Buffer",				lua_al_SetBuffer},
+		{"GetBuffer",			lua_al_GetBuffer},
+		{"BufferData",			lua_al_BufferData},
 		{0,0}
 	};
 

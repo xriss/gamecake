@@ -63,7 +63,7 @@ int buffer;
 //ALCdevice* device = alcOpenDevice(NULL);
 //ALCcontext* context = alcCreateContext(device, NULL);
 //alcMakeContextCurrent(context);
-
+/*
 alListener3f(AL_POSITION, 0, 0, 0);
 alListener3f(AL_VELOCITY, 0, 0, 0);
 alListener3f(AL_ORIENTATION, 0, 0, -1);
@@ -86,11 +86,13 @@ alSourcei(source, AL_BUFFER, buffer);
 alSourcei(source, AL_LOOPING,AL_TRUE);
 
 alSourcePlay(source);
+*/
 fgetc(stdin);
-
+/*
 
 alDeleteSources(1, &source);
 alDeleteBuffers(1, &buffer);
+*/
 //alcDestroyContext(context);
 //alcCloseDevice(device);
 
@@ -111,11 +113,9 @@ static int lua_alc_OpenDevice(lua_State *l)
 
 // create a device userdata pointer pointer
 	device = (ALCdevice**)lua_newuserdata(l, sizeof(ALCdevice**));	
+	(*device)=0;
 	luaL_getmetatable(l, lua_alc_device_meta_name);
 	lua_setmetatable(l, -2);
-	
-//start pointer at 0
-	(*device)=0;
 
 //open the actual device
 	(*device)=alcOpenDevice(NULL);
@@ -184,11 +184,9 @@ static int lua_alc_CreateContext(lua_State *l)
 
 // create a context userdata pointer pointer
 	context = (ALCcontext**)lua_newuserdata(l, sizeof(ALCcontext**));	
+	(*context)=0;
 	luaL_getmetatable(l, lua_alc_context_meta_name);
 	lua_setmetatable(l, -2);
-	
-//start pointer at 0
-	(*context)=0;
 
 //open the actual context
 	(*context)=alcCreateContext(device,NULL);
@@ -248,9 +246,12 @@ ALCcontext **context;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_alc_MakeContextCurrent (lua_State *l)
 {	
-ALCcontext *context;
+ALCcontext *context=0;
 
-	context = lua_alc_check_context(l, 1);
+	if( lua_isuserdata(l,1) ) // allow passing in of null to clear current context
+	{
+		context = lua_alc_check_context(l, 1);
+	}
 	
 	alcMakeContextCurrent(context);
 	
