@@ -6,7 +6,28 @@
 #include <AL/alc.h>
 
 
-
+/*
+alcCreateContext
+alcMakeContextCurrent
+alcProcessContext
+alcSuspendContext
+alcDestroyContext
+alcGetCurrentContext
+alcGetContextsDevice
+alcOpenDevice
+alcCloseDevice
+alcGetError
+alcIsExtensionPresent
+alcGetProcAddress
+alcGetEnumValue
+alcGetString
+alcGetIntegerv
+alcCaptureOpenDevice
+alcCaptureCloseDevice
+alcCaptureStart
+alcCaptureStop
+alcCaptureSamples
+*/
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
