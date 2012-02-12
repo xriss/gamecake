@@ -308,7 +308,7 @@ for l in import:gmatch("([^\n]*)") do
 				if define:sub(1,3)=="AL_" then -- sanity check
 					define=define:sub(4)
 					
-					if value:sub(1,3)=="AL_" then -- lookback
+					if value:sub(1,3)=="AL_" then -- allow lookback
 						value=al.defs[value:sub(4)]
 					end
 					
@@ -328,11 +328,56 @@ for i,v in pairs(al.defs) do -- copy vals into base for shorthand al.FALSE use
 end
 
 
-function al.test(...)
-
-	return core.test(...)
+function al.Get(...)
+	return core.Get(...)
 end
 
+function al.Listener(...)
+	return core.Listener(...)
+end
+function al.GetListener(...)
+	return core.GetListener(...)
+end
 
+function al.GenSource(...)
+	return core.GenSource(...)
+end
+function al.DeleteSource(...)
+	return core.DeleteSource(...)
+end
+function al.Source(...)
+	return core.Source(...)
+end
+function al.GetSource(...)
+	return core.GetSource(...)
+end
+function al.SourcePlay(...)
+	return core.SourcePlay(...)
+end
+function al.SourcePause(...)
+	return core.SourcePause(...)
+end
+function al.SourceRewind(...)
+	return core.SourceRewind(...)
+end
+function al.SourceStop(...)
+	return core.SourceStop(...)
+end
+
+function al.GenBuffer(...)
+	return core.GenBuffer(...)
+end
+function al.DeleteBuffer(...)
+	return core.DeleteBuffer(...)
+end
+function al.Buffer(...)
+	return core.Buffer(...)
+end
+function al.GetBuffer(...)
+	return core.GetBuffer(...)
+end
+function al.BufferData(...)
+	return core.BufferData(...)
+end
 
 return al

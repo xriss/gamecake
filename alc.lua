@@ -134,7 +134,7 @@ for l in import:gmatch("([^\n]*)") do
 				if define:sub(1,4)=="ALC_" then -- sanity check
 					define=define:sub(5)
 					
-					if value:sub(1,4)=="ALC_" then -- lookback
+					if value:sub(1,4)=="ALC_" then -- allow lookback
 						value=alc.defs[value:sub(5)]
 					end
 					
@@ -155,10 +155,47 @@ end
 
 
 function alc.test(...)
-
 	return core.test(...)
 end
 
+function alc.OpenDevice(...)
+	return core.OpenDevice(...)
+end
+function alc.CloseDevice(...)
+	return core.CloseDevice(...)
+end
 
+function alc.CreateContext(...)
+	return core.CreateContext(...)
+end
+function alc.DestroyContext(...)
+	return core.DestroyContext(...)
+end
+
+function alc.MakeContextCurrent(...)
+	print("current:",...)
+	return core.MakeContextCurrent(...)
+end
+
+--TODO: include device and context options
+function alc.setup(opts)
+	opts=opts or {}
+	local dc={}
+	dc.alc=alc
+	dc.opts=opts
+	dc.device=alc.OpenDevice()
+	dc.context=alc.CreateContext(dc.device)
+	dc.clean=alc.clean
+	alc.MakeContextCurrent(dc.context)
+	return dc
+end
+
+function alc.clean(dc)
+-- cleanup must happen in this order
+	alc.MakeContextCurrent()
+	dc.context=alc.DestroyContext(dc.context)
+	dc.device=alc.CloseDevice(dc.device)
+	return dc
+end
 
 return alc
