@@ -36,15 +36,17 @@ local alc=require("alc")
 	al.Source(source, al.LOOPING,al.TRUE)
 
 	al.SourcePlay(source)
-	alc.test()-- test junk
+	require("socket").sleep(2)
+	
+	al.CheckError()
 
 	al.DeleteSource(source)
 	al.DeleteBuffer(buffer)
 	
 	dc:clean() -- should really clean up when finished
 
-	print("AL",wstr.dump(al))
-	print("ALC",wstr.dump(alc))
+--	print("AL",wstr.dump(al))
+--	print("ALC",wstr.dump(alc))
 	
 --	print(al.NO_ERROR,"==",al[al.NO_ERROR])
 

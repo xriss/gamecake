@@ -154,8 +154,8 @@ for i,v in pairs(alc.defs) do -- copy vals into base for shorthand al.FALSE use
 end
 
 
-function alc.test(...)
-	return core.test(...)
+function alc.GetError(...)
+	return core.GetError(...)
 end
 
 function alc.OpenDevice(...)
@@ -173,7 +173,6 @@ function alc.DestroyContext(...)
 end
 
 function alc.MakeContextCurrent(...)
-	print("current:",...)
 	return core.MakeContextCurrent(...)
 end
 
