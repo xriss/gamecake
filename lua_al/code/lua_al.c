@@ -235,6 +235,12 @@ void lua_al_get_prop_info (int def, char *v, int *num)
 		case AL_ORIENTATION:
 			*num=6; *v='f';
 		break;
+// const char *
+		case AL_VENDOR:
+		case AL_RENDERER:
+		case AL_EXTENSIONS:
+			*num=1; *v='s';
+		break;
 	}
 }
 
@@ -444,6 +450,17 @@ int i;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// get error number
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_GetError (lua_State *l)
+{
+	lua_pushnumber(l,alGetError());
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // get base properties
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -478,6 +495,12 @@ int i;
 			for(i=0;i<num;i++)
 			{
 				lua_pushnumber(l,fv[i]);
+			}
+		break;
+		case 's':
+			for(i=0;i<num;i++) // this should only ever be 1
+			{
+				lua_pushstring(l, alGetString(def) );
 			}
 		break;
 	}
@@ -525,6 +548,7 @@ LUALIB_API int luaopen_al_core(lua_State *l)
 	const luaL_reg lib[] =
 	{
 		{"Get",					lua_al_Get},
+		{"GetError",			lua_al_GetError},
 		
 		{"Listener",			lua_al_SetListener},
 		{"GetListener",			lua_al_GetListener},

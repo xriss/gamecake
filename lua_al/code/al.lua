@@ -327,9 +327,20 @@ for i,v in pairs(al.defs) do -- copy vals into base for shorthand al.FALSE use
 	base[v]=i
 end
 
+function al.numtostring(num)
+	return al.defs[num]
+end
 
 function al.Get(...)
 	return core.Get(...)
+end
+function al.GetError(...)
+	return core.GetError(...)
+end
+function al.CheckError(...)
+	local err=al.GetError()
+	local str=al.numtostring(err)
+	assert(err==0,str)
 end
 
 function al.Listener(...)

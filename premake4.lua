@@ -449,6 +449,7 @@ end
 	include("lua_gl")
 	include("lua_grd")
 	include("lua_grdmap")
+	include("lua_sod")
 	include("lua_lash")
 	include("lua_lfs")
 	include("lua_socket")

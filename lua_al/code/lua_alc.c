@@ -13,8 +13,6 @@ const char *lua_alc_device_meta_name="alc*device*ptr";
 const char *lua_alc_context_meta_name="alc*context*ptr";
 
 
-
-
 /*
 alcCreateContext
 alcMakeContextCurrent
@@ -37,70 +35,6 @@ alcCaptureStart
 alcCaptureStop
 alcCaptureSamples
 */
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// simple test...
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_alc_test(lua_State *l)
-{
-int format=AL_FORMAT_MONO16;
-short data[512];
-int size=512*2;
-int freq=1024*10;
-int i;
-
-for(i=0;i<512;i++)
-{
-	data[i]=(short)random();
-}
-
-	
-	
-int buffer;
-	
-//ALCdevice* device = alcOpenDevice(NULL);
-//ALCcontext* context = alcCreateContext(device, NULL);
-//alcMakeContextCurrent(context);
-/*
-alListener3f(AL_POSITION, 0, 0, 0);
-alListener3f(AL_VELOCITY, 0, 0, 0);
-alListener3f(AL_ORIENTATION, 0, 0, -1);
-
-ALuint source;
-alGenSources(1, &source);
-
-alSourcef(source, AL_PITCH, 1);
-alSourcef(source, AL_GAIN, 1);
-alSource3f(source, AL_POSITION, 0, 0, 0);
-alSource3f(source, AL_VELOCITY, 0, 0, 0);
-alSourcei(source, AL_LOOPING, AL_FALSE);
-
-alGenBuffers(1, &buffer);
-
-alBufferData(buffer,format,data,size,freq);
-
-
-alSourcei(source, AL_BUFFER, buffer);
-alSourcei(source, AL_LOOPING,AL_TRUE);
-
-alSourcePlay(source);
-*/
-fgetc(stdin);
-/*
-
-alDeleteSources(1, &source);
-alDeleteBuffers(1, &buffer);
-*/
-//alcDestroyContext(context);
-//alcCloseDevice(device);
-
-
-
-	
-  return 0;
-}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -167,6 +101,17 @@ ALCdevice **device;
 	}
 	
 	return 0;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get error number
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_alc_GetError (lua_State *l)
+{
+	ALCdevice *device = lua_alc_check_device(l, 1 );
+	lua_pushnumber(l,alcGetError(device));
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -267,6 +212,8 @@ LUALIB_API int luaopen_alc_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
+		{"GetError",			lua_alc_GetError},
+		
 		{"OpenDevice",			lua_alc_OpenDevice},
 		{"CloseDevice",			lua_alc_CloseDevice},
 
@@ -275,7 +222,6 @@ LUALIB_API int luaopen_alc_core(lua_State *l)
 		
 		{"MakeContextCurrent",	lua_alc_MakeContextCurrent},
 
-		{"test",				lua_alc_test},
 		{0,0}
 	};
 	const luaL_reg meta_device[] =
