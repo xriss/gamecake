@@ -18,13 +18,14 @@ struct sod
 {
 	s32	fmt;			// format of data
 	
-	s32	sample_size;	// size of each sample in bytes, probably 2
+	s32	sample_size;	// size of each sample in bytes, probably 2 (16bits)
 	s32	samples;		// size of data in samples
+	s32 chanels;		// number of chanels, probably 1 or maybe 2
 	
 	u8 *data;			// pointer to sample data
-	s32 data_sizeof;	// size of data in bytes probably ( sample_size * samples )
+	s32 data_sizeof;	// size of data in bytes probably ( sample_size * samples * chanels )
 	
-	s32 freq;			// default frequency this sample should be played at
+	s32 freq;			// sugested default frequency this sample should be played back at
 		
 	const char *err;	// can be used to pass error strings back to other code
 };
