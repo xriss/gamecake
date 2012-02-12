@@ -236,8 +236,6 @@ function KIND(opts)
 		
 		opts.dir=table.concat(aa,"/")
 		
-print(opts)
-for i,v in pairs(opts) do print(i,v) end
 	end
 
 	if opts.kind=="lua" then
@@ -287,11 +285,9 @@ for i,v in pairs(opts) do print(i,v) end
 
 			configuration {"Debug"}
 			targetdir(DBG_OUT_DIR..d)
-print("Debug","=", DBG_OUT_DIR..d)
 
 			configuration {"Release"}
 			targetdir(EXE_OUT_DIR..d)
-print("Release","=", EXE_OUT_DIR..d)
 
 		end
 		
@@ -450,7 +446,6 @@ end
 	include("lua_bit")
 	include("lua_box2d")
 	include("lua_al")
-	include("lua_alc")
 	include("lua_gl")
 	include("lua_grd")
 	include("lua_grdmap")
