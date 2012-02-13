@@ -53,6 +53,8 @@ static int lua_alc_OpenDevice(lua_State *l)
 
 //open the actual device
 	(*device)=alcOpenDevice(NULL);
+	if(!(*device)) { return 0; }
+	
 
 //return the userdata	
 	return 1;
@@ -135,6 +137,7 @@ static int lua_alc_CreateContext(lua_State *l)
 
 //open the actual context
 	(*context)=alcCreateContext(device,NULL);
+	if(!(*context)) { return 0; }
 
 //return the userdata	
 	return 1;

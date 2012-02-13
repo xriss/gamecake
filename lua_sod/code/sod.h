@@ -1,8 +1,9 @@
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// (C) Kriss Daniels 2003 http://www.XIXs.com
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
+/*
+-- Copyright (C) 2012 Kriss Blank < Kriss@XIXs.com >
+-- This file is distributed under the terms of the MIT license.
+-- http://en.wikipedia.org/wiki/MIT_License
+-- Please ping me if you use it for anything cool...
+*/
 
 
 //
@@ -14,7 +15,7 @@
 #define SOD_FMT_STEREO8								0x1102
 #define SOD_FMT_STEREO16							0x1103
 
-struct sod
+typedef struct
 {
 	s32	fmt;			// format of data
 	
@@ -29,37 +30,18 @@ struct sod
 		
 	const char *err;	// can be used to pass error strings back to other code
 
-	inline void set_fmt( s32 _fmt )
-	{
-		fmt=_fmt;
-		
-		switch(fmt)
-		{
-			case SOD_FMT_STEREO8:
-			case SOD_FMT_STEREO16:
-				chanels=2;
-			default:
-				chanels=1;
-			break;
-		}
-
-		switch(fmt)
-		{
-			case SOD_FMT_MONO8:
-			case SOD_FMT_STEREO8:
-				sample_size=1;
-			default:
-				sample_size=2;
-			break;
-		}
-	}
-};
+} sod;
 
 
-struct sod * sod_alloc();
-struct sod * sod_alloc_data(struct sod *sd,s32 fmt,s32 samples);
+sod * sod_alloc();
+sod * sod_alloc_data(sod *sd,s32 fmt,s32 samples);
 
-void sod_free(struct sod *sd);
-void sod_free_data(struct sod *sd);
+void sod_free(sod *sd);
+void sod_free_data(sod *sd);;
+
+void sod_set_fmt( sod * sd, s32 fmt );
+
+sod * sod_load( sod * sd, const char *filename , const char *opts );
+
 
 

@@ -6,16 +6,6 @@
 */
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+sod * sod_wav_load_file(sod *sd, const char* file_name);
 
-LUALIB_API int luaopen_wetgenes_sod_core (lua_State *l);
-
-sod ** lua_sod_ptr   (lua_State *l,int idx);
-sod *  lua_sod_check (lua_State *l,int idx);
-
-#ifdef __cplusplus
-};
-#endif
-
+sod * sod_wav_save_file(sod *sd , const char* file_name);

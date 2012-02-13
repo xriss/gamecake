@@ -29,6 +29,9 @@ function start(args)
 	lunatest.suite("test_lua_al")
 	
 	lunatest.suite("wetgenes_string")
+
+	lunatest.suite("wetgenes_sod")
+
 	lunatest.suite("wetgenes_grd")
 	lunatest.suite("wetgenes_grdmap")
 

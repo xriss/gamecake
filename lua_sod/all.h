@@ -65,6 +65,7 @@ extern "C" {
 #endif
 
 #include "code/sod.h"
+#include "code/sod_wav.h"
 #include "code/lua_sod.h"
 
 
