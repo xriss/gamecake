@@ -30,7 +30,7 @@ local alc=require("alc")
 
 	local buffer=al.GenBuffer()
 
-	al.BufferData(buffer,al.FORMAT_MONO16,data,261.626*8) -- C4 hopefully?
+	al.BufferData(buffer,al.FORMAT_MONO16,data,#data,261.626*8) -- C4 hopefully?
 
 	al.Source(source, al.BUFFER, buffer)
 	al.Source(source, al.LOOPING,al.TRUE)
