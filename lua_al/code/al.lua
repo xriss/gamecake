@@ -387,8 +387,15 @@ end
 function al.GetBuffer(...)
 	return core.GetBuffer(...)
 end
-function al.BufferData(...)
-	return core.BufferData(...)
+function al.BufferData(buff,fmt,data,freq)
+
+	if type(fmt)=="table" then	
+print("tabdata")
+		return core.BufferData(buff,fmt.fmt,fmt.data,fmt.freq)
+	else
+print("data",type(fmt),type(data))
+		return core.BufferData(buff,fmt,data,freq)
+	end
 end
 
 return al

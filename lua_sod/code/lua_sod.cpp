@@ -101,13 +101,13 @@ const char *s;
 		lua_newtable(l);
 	}
 	
-	lua_pushstring(l,"fmt"); lua_pushnumber(l,sd->fmt); lua_settable(l,-3);	
-	lua_pushstring(l,"sample_size"); lua_pushnumber(l,sd->sample_size); lua_settable(l,-3);
-	lua_pushstring(l,"samples"); lua_pushnumber(l,sd->samples); lua_settable(l,-3);
-	lua_pushstring(l,"chanels"); lua_pushnumber(l,sd->chanels); lua_settable(l,-3);
-	lua_pushstring(l,"data"); lua_pushlightuserdata(l,sd->data); lua_settable(l,-3);
-	lua_pushstring(l,"data_sizeof"); lua_pushnumber(l,sd->data_sizeof); lua_settable(l,-3);
-	lua_pushstring(l,"freq"); lua_pushnumber(l,sd->freq); lua_settable(l,-3);
+	lua_pushstring(l,"fmt");			lua_pushnumber(l,sd->fmt);			lua_settable(l,-3);	
+	lua_pushstring(l,"sample_size");	lua_pushnumber(l,sd->sample_size);	lua_settable(l,-3);
+	lua_pushstring(l,"samples");		lua_pushnumber(l,sd->samples);		lua_settable(l,-3);
+	lua_pushstring(l,"chanels");		lua_pushnumber(l,sd->chanels);		lua_settable(l,-3);
+	lua_pushstring(l,"data");			lua_pushlightuserdata(l,sd->data);	lua_settable(l,-3);
+	lua_pushstring(l,"data_sizeof");	lua_pushnumber(l,sd->data_sizeof);	lua_settable(l,-3);
+	lua_pushstring(l,"freq");			lua_pushnumber(l,sd->freq);			lua_settable(l,-3);
 
 	if(sd->err)
 	{
