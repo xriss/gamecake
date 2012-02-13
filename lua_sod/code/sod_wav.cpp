@@ -132,8 +132,9 @@ sod * sod_wav_load_file(sod * sd, const char* file_name)
 				{
 					error("failed to allocate wav data");
 				}
-				fread(sd->data,1,sd->data_sizeof,fp);
-				
+				sd->freq=freq;
+				fread(sd->data,FmtHdr.BlockAlign,sd->data_sizeof/FmtHdr.BlockAlign,fp);
+
 //						size=ChunkHdr.Size;
 //						data=calloc(ChunkHdr.Size);
 //						if (data)

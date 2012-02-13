@@ -9,15 +9,15 @@ local sod=require("wetgenes.sod")
 
 function test_sod()
 
-print(wstr.dump(sod))
+--print(wstr.dump(sod))
 
 local sd=assert(sod.create())
 
-print(wstr.dump(sd))
+--print(wstr.dump(sd))
 
 	assert(sd:load("dat/sod/t1.wav"))
 
-print(wstr.dump(sd))
+--print(wstr.dump(sd))
 
 end
 
@@ -31,10 +31,10 @@ local alc=require("alc")
 	
 --	alc.test()-- test junk
 
---	local data="00000000zzzzzzzz" -- fake test sample data should be squarewave ishhh
-	local sd=sod.create():load("dat/sod/t1.wav")
+	local data="00000000zzzzzzzz" -- fake test sample data should be squarewave ishhh
+	local sd=sod.create():load("dat/sod/t2.wav")
 
-print(sd)
+--print(sd)
 
 	al.Listener(al.POSITION, 0, 0, 0)
 	al.Listener(al.VELOCITY, 0, 0, 0)
@@ -50,7 +50,7 @@ print(sd)
 
 	local buffer=al.GenBuffer()
 
---	al.BufferData(buffer,al.FORMAT_MONO16,data,261.626*8) -- C4 hopefully?
+--	al.BufferData(buffer,al.FORMAT_MONO16,data,#data,261.626*8) -- C4 hopefully?
 	al.BufferData(buffer,sd) -- all loaded
 
 	al.Source(source, al.BUFFER, buffer)

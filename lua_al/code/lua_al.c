@@ -126,8 +126,19 @@ void *data;
 	if(lua_islightuserdata(l,3))
 	{
 		data=(void*)lua_touserdata(l,3);
+//printf("add %08x\n",(unsigned int)data);
+//printf("this was data %d\n",*((unsigned int*)(((char*)data)+4)));
 	}
-	freq=luaL_checknumber(l,4);
+	size=luaL_checknumber(l,4);
+	freq=luaL_checknumber(l,5);
+
+/*
+		int i;
+		for(i=0;i<size;i++)
+		{
+			*(((unsigned char *)data)+i)=i;
+		}
+*/
 
 	alBufferData(buff,fmt,data,size,freq);
 	

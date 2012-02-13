@@ -387,14 +387,12 @@ end
 function al.GetBuffer(...)
 	return core.GetBuffer(...)
 end
-function al.BufferData(buff,fmt,data,freq)
+function al.BufferData(buff,fmt,data,size,freq)
 
 	if type(fmt)=="table" then	
-print("tabdata")
-		return core.BufferData(buff,fmt.fmt,fmt.data,fmt.freq)
+		return core.BufferData(buff,fmt.fmt,fmt.data,fmt.data_sizeof,fmt.freq)
 	else
-print("data",type(fmt),type(data))
-		return core.BufferData(buff,fmt,data,freq)
+		return core.BufferData(buff,fmt,data,size,freq)
 	end
 end
 
