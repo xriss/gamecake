@@ -34,6 +34,8 @@ local alc=require("alc")
 --	local data="00000000zzzzzzzz" -- fake test sample data should be squarewave ishhh
 	local sd=sod.create():load("dat/sod/t1.wav")
 
+print(sd)
+
 	al.Listener(al.POSITION, 0, 0, 0)
 	al.Listener(al.VELOCITY, 0, 0, 0)
 	al.Listener(al.ORIENTATION, 0, 0, -1, 0,1,0 )
