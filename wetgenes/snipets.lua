@@ -1,5 +1,14 @@
+--
+-- Copyright (C) 2012 Kriss Blank < Kriss@XIXs.com >
+-- This file is distributed under the terms of the MIT license.
+-- http://en.wikipedia.org/wiki/MIT_License
+-- Please ping me if you use it for anything cool...
+--
+
+error([[
 -- just snippets of code for copypasta do not run as it should do nothing
--- this files is intended as a central place to keep upto date incase things need to be changed
+-- this files is intended as a central notepad
+]])
 
 -- copy functions into locals
 local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require

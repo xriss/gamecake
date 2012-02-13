@@ -1,23 +1,31 @@
-
 --
--- time and relative dimensions in space
+-- Copyright (C) 2012 Kriss Blank < Kriss@XIXs.com >
+-- This file is distributed under the terms of the MIT license.
+-- http://en.wikipedia.org/wiki/MIT_License
+-- Please ping me if you use it for anything cool...
+--
+-- Time And Relative Dimensions In Space
 --
 -- a lua library for manipulating time and space
 -- pure lua by default and opengl in flavour
 --
 -- recoil in terror as we use two glyph names to describe structures
--- whilst typing in random strings of numbers that may or may not contain tyops
+-- whilst typing in random strings of numbers that may or may not
+-- contain tyops
 --
 -- v# vector [#]
 -- m# matrix [#][#]
 -- q4 quaternion (yeah its just a repackaged v4)
 --
--- each class is a table of # values [1] to [#] , just access them directly
--- they are number streams formated the same way as opengl (row-major)
--- metatables are used to provide advanced functionality
+-- each class is a table of # values [1] to [#] , just access them
+-- directly they are number streams formated the same way as opengl
+-- (row-major) metatables are used to provide advanced functionality
 --
--- currently this is not terribly optimised and may be broken in many places due to lack of testing
--- which means it is really not advisable to use this if you are not prepared to fix it :)
+-- This code may contain bugs,
+-- do not use if you are not prepared to fix them.
+--
+-- https://bitbucket.org/xixs/bin/src/tip/lua/wetgenes/tardis.lua
+--
 
 local math=require("math")
 local table=require("table")
