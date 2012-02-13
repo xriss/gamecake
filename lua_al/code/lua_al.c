@@ -118,14 +118,21 @@ void *data;
 
 	buff=luaL_checknumber(l,1);
 	fmt=luaL_checknumber(l,2);
-	data=(void*)luaL_checklstring(l,3,&size);
+	if(lua_isstring(l,3))
+	{
+		data=(void*)luaL_checklstring(l,3,&size);
+	}
+	else
+	if(lua_islightuserdata(l,3))
+	{
+		data=(void*)lua_touserdata(l,3);
+	}
 	freq=luaL_checknumber(l,4);
 
 	alBufferData(buff,fmt,data,size,freq);
 	
 	return 0;
 }
-
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //

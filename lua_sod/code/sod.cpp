@@ -1,8 +1,10 @@
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// (C) Kriss Daniels 2003 http://www.XIXs.com
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
+/*
+-- Copyright (C) 2012 Kriss Blank < Kriss@XIXs.com >
+-- This file is distributed under the terms of the MIT license.
+-- http://en.wikipedia.org/wiki/MIT_License
+-- Please ping me if you use it for anything cool...
+*/
+
 #include "all.h"
 
 //
@@ -17,15 +19,15 @@
 // diferent data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct sod * sod_alloc()
+sod * sod_alloc()
 {
-	return (struct sod *) calloc( sizeof(struct sod) , 1 );
+	return (sod *) calloc( sizeof(sod) , 1 );
 }
-struct sod * sod_alloc_data(struct sod *sd,s32 fmt,s32 samples)
+sod * sod_alloc_data(sod *sd,s32 fmt,s32 samples)
 {
 	sod_free_data(sd); // free old data if we have any
 	
-	sd->set_fmt(fmt); // this fills in fmt, sample_size and chanels
+	sod_set_fmt(sd,fmt); // this fills in fmt, sample_size and chanels
 	sd->samples=samples;
 	sd->data_sizeof=( sd->sample_size * sd->samples * sd->chanels );
 	sd->data=(u8*)calloc(sd->data_sizeof,1);
@@ -37,7 +39,7 @@ struct sod * sod_alloc_data(struct sod *sd,s32 fmt,s32 samples)
 // free the structure and or the data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void sod_free(struct sod *sd)
+void sod_free(sod *sd)
 {
 	if(sd)
 	{
@@ -45,7 +47,7 @@ void sod_free(struct sod *sd)
 		free(sd);
 	}
 }
-void sod_free_data(struct sod *sd)
+void sod_free_data(sod *sd)
 {
 	if(sd->data)
 	{
@@ -53,6 +55,52 @@ void sod_free_data(struct sod *sd)
 		sd->data=0;
 	}
 }
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// set fmt and chanels and sample_size
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void sod_set_fmt( sod * sd, s32 fmt )
+{
+	sd->fmt=fmt;
+	
+	switch(fmt)
+	{
+		case SOD_FMT_STEREO8:
+		case SOD_FMT_STEREO16:
+			sd->chanels=2;
+		default:
+			sd->chanels=1;
+		break;
+	}
+
+	switch(fmt)
+	{
+		case SOD_FMT_MONO8:
+		case SOD_FMT_STEREO8:
+			sd->sample_size=1;
+		default:
+			sd->sample_size=2;
+		break;
+	}
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// load an image into a sod
+// returns 0 on error
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+sod * sod_load( sod * sd, const char *filename , const char *opts )
+{
+	sod_wav_load_file(sd,filename);
+
+	if(sd->err) { return 0; }
+	return sd;
+}
+
 
 
 #if 0
