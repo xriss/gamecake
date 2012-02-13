@@ -21,6 +21,7 @@ sod.create=function()
 	
 	sd[0]=assert( core.create() )
 	
+	core.info(sd[0],sd)
 	return sd
 end
 
@@ -31,7 +32,8 @@ end
 
 sod.load=function(sd,name)
 	assert(core.load(sd[0],name))
-	return 0
+	core.info(sd[0],sd)
+	return sd
 end
 
 
