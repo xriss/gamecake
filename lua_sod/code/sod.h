@@ -28,4 +28,38 @@ struct sod
 	s32 freq;			// sugested default frequency this sample should be played back at
 		
 	const char *err;	// can be used to pass error strings back to other code
+
+	inline void set_fmt( s32 _fmt )
+	{
+		fmt=_fmt;
+		
+		switch(fmt)
+		{
+			case SOD_FMT_STEREO8:
+			case SOD_FMT_STEREO16:
+				chanels=2;
+			default:
+				chanels=1;
+			break;
+		}
+
+		switch(fmt)
+		{
+			case SOD_FMT_MONO8:
+			case SOD_FMT_STEREO8:
+				sample_size=1;
+			default:
+				sample_size=2;
+			break;
+		}
+	}
 };
+
+
+struct sod * sod_alloc();
+struct sod * sod_alloc_data(struct sod *sd,s32 fmt,s32 samples);
+
+void sod_free(struct sod *sd);
+void sod_free_data(struct sod *sd);
+
+
