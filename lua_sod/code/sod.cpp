@@ -9,6 +9,52 @@
 // SOD sound object data handling layer, load/save/manipulate
 //
 
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// allocate the structure, and then the data, seperated because we expect to reuse the struct with
+// diferent data
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+struct sod * sod_alloc()
+{
+	return (struct sod *) calloc( sizeof(struct sod) , 1 );
+}
+struct sod * sod_alloc_data(struct sod *sd,s32 fmt,s32 samples)
+{
+	sod_free_data(sd); // free old data if we have any
+	
+	sd->set_fmt(fmt); // this fills in fmt, sample_size and chanels
+	sd->samples=samples;
+	sd->data_sizeof=( sd->sample_size * sd->samples * sd->chanels );
+	sd->data=(u8*)calloc(sd->data_sizeof,1);
+	if(!sd->data) { return 0; } //fail
+	return sd; //success
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// free the structure and or the data
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void sod_free(struct sod *sd)
+{
+	if(sd)
+	{
+		sod_free_data(sd);
+		free(sd);
+	}
+}
+void sod_free_data(struct sod *sd)
+{
+	if(sd->data)
+	{
+		free(sd->data);
+		sd->data=0;
+	}
+}
+
+
 #if 0
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
