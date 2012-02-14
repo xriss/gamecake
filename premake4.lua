@@ -450,6 +450,7 @@ end
 	include("lua_grd")
 	include("lua_grdmap")
 	include("lua_sod")
+	include("lua_speak") -- maybe a bad idea?
 	include("lua_lash")
 	include("lua_lfs")
 	include("lua_socket")
