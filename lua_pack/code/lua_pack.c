@@ -207,7 +207,7 @@ static double lua_pack_get_field (u32 def,cu8*p,int inyourendo)
 		case 's32' : return (double) lua_pack_read_s32 ( p, inyourendo );
 		case 'u32' : return (double) lua_pack_read_u32 ( p, inyourendo );
 	}
-	
+		
 	return 0.0;
 }
 
@@ -248,6 +248,7 @@ int n;
 int inyourendo=1;
 
 u32 def;
+int def_len;
 
 int data_len=0;
 int count;
@@ -284,7 +285,7 @@ int count;
 	lua_pop(l,1);
 
 	
-	if(!lua_isnumber(l,3)) // optional start point
+	if(lua_isnumber(l,3)) // optional start point
 	{
 		off=(u32)lua_tonumber(l,3);
 	}
@@ -299,10 +300,20 @@ int count;
 			lua_pop(l,1);
 			break;
 		}
-		def=string_to_id( (u8*) lua_tostring(l,-1) );
+		
+		if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
+		{
+			def_len=(int)lua_tonumber(l,-1);
+			def=0;
+		}
+		else
+		{
+			def=string_to_id( (u8*) lua_tostring(l,-1) );
+			def_len=lua_pack_field_size(def);
+		}
 		lua_pop(l,1);
 		
-		data_len+=lua_pack_field_size(def);
+		data_len+=def_len;			
 		count++;
 	}
 	
@@ -318,18 +329,36 @@ int count;
 			lua_pop(l,1);
 			break;
 		}
-		def=string_to_id( (u8*) lua_tostring(l,-1) );
-		lua_pop(l,1);
 		
-		d=lua_pack_get_field(def,ptr+off,inyourendo);
-		lua_pushnumber(l,d);
-		lua_rawseti(l,-2,n); // save in table
+		if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
+		{
+			def_len=(int)lua_tonumber(l,-1);
+			def=0;
+		}
+		else
+		{
+			def=string_to_id( (u8*) lua_tostring(l,-1) );
+			def_len=lua_pack_field_size(def);
+		}
+		lua_pop(l,1);			
 		
-		off+=lua_pack_field_size(def); // advance ptr
+		if(def==0)
+		{
+			lua_pushlstring(l,ptr+off,def_len);
+			lua_rawseti(l,-2,n); // save in table
+		}
+		else
+		{
+			d=lua_pack_get_field(def,ptr+off,inyourendo);
+			lua_pushnumber(l,d);
+			lua_rawseti(l,-2,n); // save in table
+		}
+		
+		off+=def_len; // advance ptr
 	}
 	
-	
-	return 1;
+	lua_pushnumber(l,data_len);
+	return 2;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -346,10 +375,14 @@ int n;
 int inyourendo=1;
 
 u32 def;
+int def_len;
 
 int data_len=0;
 u8 *data=0;
 int count;
+
+const char *s;
+int sl;
 
 	if(!lua_istable(l,1))
 	{
@@ -369,7 +402,7 @@ int count;
 	lua_pop(l,1);
 
 	
-	if(!lua_isnumber(l,3)) // optional start point
+	if(lua_isnumber(l,3)) // optional start point
 	{
 		off=(u32)lua_tonumber(l,3);
 	}
@@ -384,10 +417,20 @@ int count;
 			lua_pop(l,1);
 			break;
 		}
-		def=string_to_id( (u8*) lua_tostring(l,-1) );
+
+		if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
+		{
+			def_len=(int)lua_tonumber(l,-1);
+			def=0;
+		}
+		else
+		{
+			def=string_to_id( (u8*) lua_tostring(l,-1) );
+			def_len=lua_pack_field_size(def);
+		}
 		lua_pop(l,1);
-		
-		data_len+=lua_pack_field_size(def);
+			
+		data_len+=def_len;
 		count++;
 	}
 	
@@ -408,22 +451,44 @@ int count;
 			lua_pop(l,1);
 			break;
 		}
-		def=string_to_id( (u8*) lua_tostring(l,-1) );
+		if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
+		{
+			def_len=(int)lua_tonumber(l,-1);
+			def=0;
+		}
+		else
+		{
+			def=string_to_id( (u8*) lua_tostring(l,-1) );
+			def_len=lua_pack_field_size(def);
+		}
 		lua_pop(l,1);
+			
 		
-		lua_rawgeti(l,1,n); // read data
-		d=lua_tonumber(l,-1);
-		lua_pop(l,1);
-		
-		lua_pack_set_field(d,def,data+off,inyourendo);
+		if(def==0) // raw string to insert
+		{
+			lua_rawgeti(l,1,n); // write data
+			s=lua_tolstring(l,-1,&sl);
+			lua_pop(l,1);
+			if(sl<def_len) { memcpy(data+off,s,sl); }
+			else { memcpy(data+off,s,def_len); }
+		}
+		else
+		{
+			lua_rawgeti(l,1,n); // write data
+			d=lua_tonumber(l,-1);
+			lua_pop(l,1);
+			
+			lua_pack_set_field(d,def,data+off,inyourendo);
+		}
 				
-		off+=lua_pack_field_size(def); // advance ptr
+		off+=def_len; // advance ptr
 	}	
 
 	lua_pushlstring(l,(char *)data,data_len);
 	free(data);
 	
-	return 1;
+	lua_pushnumber(l,data_len);
+	return 2;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
