@@ -11,7 +11,7 @@ function test_pack()
 
 
 	local s1="12341234"
-	local d={"u8","u8","u16","u32",bigend=false}
+	local d={"u8","bit8a","u8","bit8b","u16","worda","u32","longa",bigend=false}
 	
 --	print(wstr.dump(pack))
 
