@@ -13,7 +13,7 @@ function test_speak()
 
 	local t=require("wetgenes.speak.core")
 
-	local dat,len=t.test("I can speak better than you.")
+	local dat,len=t.test("Welcome! To the world of toomorrow...")
 	
 print("SPEAK",dat,len)
 
@@ -48,7 +48,7 @@ print("SPEAK",dat,len)
 	al.Source(source, al.LOOPING,al.TRUE)
 
 	al.SourcePlay(source)
-	require("socket").sleep(4)
+	require("socket").sleep(8)
 	
 	al.CheckError()
 

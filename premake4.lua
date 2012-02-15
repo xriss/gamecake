@@ -440,6 +440,7 @@ else
 	LIB_LUA="lib_luajit"
 end
 	
+	include("lua_pack")
 	include("lua_zip")
 	include("lua_zlib")
 	include("lua_freetype")
@@ -450,7 +451,7 @@ end
 	include("lua_grd")
 	include("lua_grdmap")
 	include("lua_sod")
-	include("lua_speak") -- maybe a bad idea?
+	include("lua_speak")
 	include("lua_lash")
 	include("lua_lfs")
 	include("lua_socket")

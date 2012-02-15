@@ -32,6 +32,8 @@ function start(args)
 
 	lunatest.suite("wetgenes_sod")
 	
+	lunatest.suite("wetgenes_pack")
+	
 	lunatest.suite("wetgenes_speak")
 
 	lunatest.suite("wetgenes_grd")
