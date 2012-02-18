@@ -446,6 +446,7 @@ end
 	include("lua_freetype")
 	include("lua_bit")
 	include("lua_box2d")
+	include("lua_ogg")
 	include("lua_al")
 	include("lua_gl")
 	include("lua_grd")
@@ -487,6 +488,9 @@ end
 	include("lib_z")
 	include("lib_sqlite")
 	include("lib_pcre")
+	
+	include("lib_ogg")
+	include("lib_vorbis")
 	
 	include("lib_openal")
 
