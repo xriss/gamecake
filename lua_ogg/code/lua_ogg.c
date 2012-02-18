@@ -5,16 +5,7 @@
 -- Please ping me if you use it for anything cool...
 */
 
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-
-#include "../wet/util/wet_types.h"
-#include "../lib_lua/src/lua.h"
-#include "../lib_lua/src/lauxlib.h"
-#include "../lib_lua/src/lualib.h"
-
-#include "code/lua_pack.h"
+#include "all.h"
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -24,7 +15,7 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_ogg_test (lua_State *l)
 {
-	print("test ogg");
+	printf("test ogg");
 
 	return 0;
 }

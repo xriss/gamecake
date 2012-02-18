@@ -8,7 +8,6 @@
 #include <string.h>
 
 
-
 #if defined(_MSC_VER)
 
 #include <crtdbg.h>
@@ -31,18 +30,14 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "../wet/util/win_types.h"
-
 #elif defined(X11)
 
 #include <strings.h>
 #include <sys/time.h>
 
-#include "../wet/util/nix_types.h"
-
 #endif
 
-#include "../wet/util/f32_math.h"
+#include "../wet/util/wet_types.h"
 
 
 #ifdef __cplusplus
