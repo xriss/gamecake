@@ -1,0 +1,227 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/!svn/ver/18154/branches/lowmem-branch/Tremor
+END
+config_types.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/!svn/ver/9258/branches/lowmem-branch/Tremor/config_types.h
+END
+misc.h
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/!svn/ver/9258/branches/lowmem-branch/Tremor/misc.h
+END
+floor0.c
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/!svn/ver/9258/branches/lowmem-branch/Tremor/floor0.c
+END
+floor1.c
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/!svn/ver/18154/branches/lowmem-branch/Tremor/floor1.c
+END
+CHANGELOG
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/!svn/ver/9258/branches/lowmem-branch/Tremor/CHANGELOG
+END
+floor_lookup.c
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/!svn/ver/9258/branches/lowmem-branch/Tremor/floor_lookup.c
+END
+os_types.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/!svn/ver/9258/branches/lowmem-branch/Tremor/os_types.h
+END
+mapping0.c
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/!svn/ver/9260/branches/lowmem-branch/Tremor/mapping0.c
+END
+codec_internal.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/9258/branches/lowmem-branch/Tremor/codec_internal.h
+END
+vorbisidec.pc.in
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/!svn/ver/17154/branches/lowmem-branch/Tremor/vorbisidec.pc.in
+END
+ivorbisfile.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/!svn/ver/9258/branches/lowmem-branch/Tremor/ivorbisfile.h
+END
+framing.c
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/!svn/ver/13165/branches/lowmem-branch/Tremor/framing.c
+END
+codebook.c
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/!svn/ver/13184/branches/lowmem-branch/Tremor/codebook.c
+END
+os.h
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/!svn/ver/9258/branches/lowmem-branch/Tremor/os.h
+END
+COPYING
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/!svn/ver/9258/branches/lowmem-branch/Tremor/COPYING
+END
+ivorbisfile_example.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/!svn/ver/9258/branches/lowmem-branch/Tremor/ivorbisfile_example.c
+END
+autogen.sh
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/!svn/ver/12650/branches/lowmem-branch/Tremor/autogen.sh
+END
+codebook.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/!svn/ver/9258/branches/lowmem-branch/Tremor/codebook.h
+END
+info.c
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/!svn/ver/9258/branches/lowmem-branch/Tremor/info.c
+END
+lsp_lookup.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/!svn/ver/9258/branches/lowmem-branch/Tremor/lsp_lookup.h
+END
+vorbisfile.c
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/!svn/ver/10708/branches/lowmem-branch/Tremor/vorbisfile.c
+END
+configure.in
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/!svn/ver/18154/branches/lowmem-branch/Tremor/configure.in
+END
+window_lookup.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/!svn/ver/9258/branches/lowmem-branch/Tremor/window_lookup.h
+END
+bitwise.c
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/!svn/ver/9258/branches/lowmem-branch/Tremor/bitwise.c
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/!svn/ver/9258/branches/lowmem-branch/Tremor/README
+END
+res012.c
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/!svn/ver/13181/branches/lowmem-branch/Tremor/res012.c
+END
+ivorbiscodec.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/!svn/ver/9258/branches/lowmem-branch/Tremor/ivorbiscodec.h
+END
+ogg.h
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/!svn/ver/9258/branches/lowmem-branch/Tremor/ogg.h
+END
+TODO
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/!svn/ver/9258/branches/lowmem-branch/Tremor/TODO
+END
+asm_arm.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/!svn/ver/9258/branches/lowmem-branch/Tremor/asm_arm.h
+END
+mdct_lookup.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/!svn/ver/9258/branches/lowmem-branch/Tremor/mdct_lookup.h
+END
+dsp.c
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/!svn/ver/9258/branches/lowmem-branch/Tremor/dsp.c
+END
+mdct.c
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/!svn/ver/9258/branches/lowmem-branch/Tremor/mdct.c
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/!svn/ver/17154/branches/lowmem-branch/Tremor/Makefile.am
+END
+misc.c
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/!svn/ver/13184/branches/lowmem-branch/Tremor/misc.c
+END
+mdct.h
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/!svn/ver/9258/branches/lowmem-branch/Tremor/mdct.h
+END
+Version_script.in
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/!svn/ver/17158/branches/lowmem-branch/Tremor/Version_script.in
+END

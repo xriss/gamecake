@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/!svn/ver/9259/branches/lowmem-branch/Tremor/debian
+END
+control
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/!svn/ver/9259/branches/lowmem-branch/Tremor/debian/control
+END
+libvorbisidec-dev.install
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/!svn/ver/9259/branches/lowmem-branch/Tremor/debian/libvorbisidec-dev.install
+END
+libvorbisidec1.install
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/!svn/ver/9259/branches/lowmem-branch/Tremor/debian/libvorbisidec1.install
+END
+changelog
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/9259/branches/lowmem-branch/Tremor/debian/changelog
+END
+copyright
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/9259/branches/lowmem-branch/Tremor/debian/copyright
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/!svn/ver/9259/branches/lowmem-branch/Tremor/debian/Makefile.am
+END
+rules
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/!svn/ver/9259/branches/lowmem-branch/Tremor/debian/rules
+END
