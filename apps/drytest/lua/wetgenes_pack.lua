@@ -8,10 +8,10 @@ local pack=require("wetgenes.pack")
 
 function test_alloc()
 
-	local t=pack.alloc(64)
-	
-	print()
-	print(tostring(t),pack.sizeof(t))
+	local d=pack.alloc(64)
+	local siz=pack.sizeof(d)
+
+	assert(siz==64)
 
 end
 
