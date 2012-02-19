@@ -71,6 +71,9 @@ end
 function do_premult(name)
 
 	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
+
+print("sizeof",type(g[0],#g[0]))
+
 	g:convert("U8_ARGB_PREMULT")
 	
 	local c=assert(grd.create("U8_ARGB",320,240,1))

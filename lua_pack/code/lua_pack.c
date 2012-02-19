@@ -14,7 +14,51 @@
 #include "../lib_lua/src/lauxlib.h"
 #include "../lib_lua/src/lualib.h"
 
+
 #include "code/lua_pack.h"
+
+
+
+
+// hax to be honest, all this to create a lua_toluserdata function
+// if lua or luajit change then this will break
+// it is however still better than not having any bounds checking
+
+#if defined(LIB_LUAJIT)
+#include "../lib_luajit/src/lj_obj.h"
+#else
+#include "../lib_lua/src/lobject.h"
+#endif
+
+static u8 * lua_toluserdata (lua_State *L, int idx, size_t *len) {
+
+#if defined(LIB_LUAJIT)
+	GCudata *g;
+#else
+	Udata *g;
+#endif
+
+	u8 *p=lua_touserdata(L,idx);
+	
+	if(!p) { return 0; }
+	
+#if defined(LIB_LUAJIT)
+	g=(GCudata*)(p-sizeof(GCudata));
+#else
+	g=(Udata*)(p-sizeof(Udata));
+#endif
+	
+	if(len)
+	{
+#if defined(LIB_LUAJIT)
+		*len=g->len;
+#else
+		*len=g->uv.len;
+#endif
+	}
+	
+	return p;
+}
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -255,17 +299,18 @@ int count;
 
 	if(lua_isstring(l,1))
 	{
-		ptr=(const u8*)lua_tostring(l,1);
+		ptr=(const u8*)lua_tolstring(l,1,&len);
 	}
 	else
 	if(lua_isuserdata(l,1))
 	{
-		ptr=lua_touserdata(l,1);
+		ptr=lua_toluserdata(l,1,&len);
 	}
 	else
 	if(lua_islightuserdata(l,1))
 	{
 		ptr=lua_touserdata(l,1);
+		len=0x7fffffff; // fake length as we have no idea
 	}
 	else
 	{
@@ -318,6 +363,13 @@ int count;
 	}
 	
 	if(data_len==0) { return 0; } // no data to pack
+	
+	if(data_len+off>len) // data overflow
+	{
+		lua_pushstring(l,"data pack overflow");
+		lua_error(l);
+		return 0;
+	}
 
 	
 	lua_createtable(l,count,0); // we know size of array so ask for it
@@ -379,6 +431,7 @@ int def_len;
 
 int data_len=0;
 u8 *data=0;
+u8 *ptr=0;
 int count;
 
 const char *s;
@@ -405,6 +458,11 @@ int sl;
 	if(lua_isnumber(l,3)) // optional start point
 	{
 		off=(u32)lua_tonumber(l,3);
+	}
+
+	if(lua_isuserdata(l,4)) // optional buffer to write too
+	{
+		ptr=lua_toluserdata(l,4,&len);
 	}
 	
 	data_len=0;
@@ -435,12 +493,25 @@ int sl;
 	}
 	
 	if(data_len==0) { return 0; } // no data to pack
-
-	data=calloc(data_len,1);
-	if(!data)
+	
+	if(ptr) // got a buffer to write intoo
 	{
-		lua_pushstring(l,"failed to allocate pack data buffer");
-		lua_error(l);
+		if(data_len+off>len) // error buffer is too small
+		{
+			lua_pushstring(l,"data pack overflow");
+			lua_error(l);
+			return 0;
+		}
+		data=ptr;
+	}
+	else // need to allocate one
+	{
+		data=calloc(data_len,1);
+		if(!data)
+		{
+			lua_pushstring(l,"failed to allocate pack data buffer");
+			lua_error(l);
+		}
 	}
 	
 	for(n=1;1;n++)
@@ -484,13 +555,61 @@ int sl;
 		off+=def_len; // advance ptr
 	}	
 
-	lua_pushlstring(l,(char *)data,data_len);
-	free(data);
+	if(ptr) // we are writing into a buffer that was passed in
+	{
+		lua_pushvalue(l,4);
+	}
+	else
+	{
+		lua_pushlstring(l,(char *)data,data_len);
+		free(data);
+	}
 	
 	lua_pushnumber(l,data_len);
 	return 2;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// just allocate a userdata of the given size and return it
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_pack_alloc (lua_State *l)
+{
+s32 size=(s32)lua_tonumber(l,1);
+
+	if(size<=0) { lua_pushstring(l,"alloc size must be > 0"); lua_error(l); }
+	
+	lua_newuserdata(l,size);
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// find the size of a userdata
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_pack_sizeof (lua_State *l)
+{
+int len=0;
+u8 *ptr=0;
+	
+	if(!lua_isuserdata(l,1))
+	{
+		lua_pushstring(l,"not a userdata");
+		lua_error(l);
+		return 0;
+	}
+	
+	ptr=lua_toluserdata(l,1,&len);
+	
+	lua_pushlightuserdata(l,(void*)ptr);
+	
+//	lua_pushnumber(l,*((int*)(&l->base)));
+	lua_pushnumber(l,len);
+	return 2;
+}
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -502,6 +621,9 @@ LUALIB_API int luaopen_wetgenes_pack_core (lua_State *l)
 	{
 		{"load",			lua_pack_load},
 		{"save",			lua_pack_save},
+
+		{"alloc",			lua_pack_alloc},
+		{"sizeof",			lua_pack_sizeof},
 
 		{0,0}
 	};

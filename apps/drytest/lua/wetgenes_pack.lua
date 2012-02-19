@@ -6,6 +6,15 @@ local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 
 
+function test_alloc()
+
+	local t=pack.alloc(64)
+	
+	print()
+	print(tostring(t),pack.sizeof(t))
+
+end
+
 
 function test_pack()
 

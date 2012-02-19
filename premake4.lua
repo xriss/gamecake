@@ -438,6 +438,7 @@ if WINDOWS then
 	LIB_LUA="lib_lua"
 else
 	LIB_LUA="lib_luajit"
+	defines( "LIB_LUAJIT" )
 end
 	
 	include("lua_pack")
