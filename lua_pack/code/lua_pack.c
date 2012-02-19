@@ -603,12 +603,10 @@ u8 *ptr=0;
 	}
 	
 	ptr=lua_toluserdata(l,1,&len);
-	
-	lua_pushlightuserdata(l,(void*)ptr);
-	
-//	lua_pushnumber(l,*((int*)(&l->base)));
+	if(!ptr) { return 0; }
+
 	lua_pushnumber(l,len);
-	return 2;
+	return 1;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //

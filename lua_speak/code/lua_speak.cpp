@@ -20,8 +20,8 @@ const char *text="hello mr speak and spell";
 
 	text=luaL_checkstring(l,1);
 
-	printf("%s\n",text);
-	printf("\n");
+//	printf("%s\n",text);
+//	printf("\n");
 
 	flite_init();
 	voice=register_cmu_us_slt();
