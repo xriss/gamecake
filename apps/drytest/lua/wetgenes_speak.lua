@@ -15,7 +15,7 @@ function test_speak()
 
 	local dat,len=t.test("Welcome! To the world of toomorrow...")
 	
-print("SPEAK",dat,len)
+--print("SPEAK",dat,len)
 
 
 	local dc=alc.setup()
