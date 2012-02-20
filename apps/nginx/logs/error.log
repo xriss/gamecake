@@ -67,3 +67,7 @@
 2011/12/28 14:18:32 [error] 14252#-1222105376: open() "nginxd/logs/nginx.pid" failed (2: No such file or directory)
 2011/12/28 14:18:32 [notice] 14253#-1222482208: signal process started
 2011/12/28 14:18:32 [error] 14253#-1222482208: open() "nginxd/logs/nginx.pid" failed (2: No such file or directory)
+2012/02/20 23:14:38 [notice] 14039#-1221470496: signal process started
+2012/02/20 23:14:38 [error] 14039#-1221470496: open() "nginx/logs/nginx.pid" failed (2: No such file or directory)
+2012/02/20 23:14:42 [notice] 14044#-1221617952: signal process started
+2012/02/20 23:15:18 [notice] 14053#-1220962592: signal process started
