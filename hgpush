@@ -1,8 +1,0 @@
-echo "need to push the bin dir first"
-
-cd bin
-hg push
-
-cd ..
-hg push
-
