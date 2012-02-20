@@ -1,4 +1,0 @@
-cd bin
-hg ci
-cd ..
-hg ci

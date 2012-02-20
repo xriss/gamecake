@@ -4,12 +4,8 @@ fi
 
 cd `dirname $0`
 
-#simple forced mingw build, just to see if we can get somewhere with this
-
-#so premake knows that it is a nacl build
 build/premake4 gmake mingw
 
-#perform a build
 cd build-gmake-mingw
 
 if [ "$1" = "release" ] ; then
