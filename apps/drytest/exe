@@ -1,4 +1,0 @@
-cd `dirname $0`
-cd ../../bin/exe
-./lua -e"require('apps').start('drytest','$*');"
-
