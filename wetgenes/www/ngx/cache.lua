@@ -49,11 +49,22 @@ function del(srv,id)
 	apie()
 end
 
-function put(srv,id,tab,ttl)
+function put(srv,id,tab,ttl,opts)
 --	log("cache.put:",id)
 	apis()
 	
-	hax[id]=tab
+	local t={tab=tab,ttl=os.time()+ttl}
+
+	if opts=="ADD_ONLY_IF_NOT_PRESENT" then
+		local r=hax[id]
+		if r and r.ttl<os.time() then -- stale data must die
+			hax[id]=nil
+			r=nil
+		end
+		if not r then hax[id]=t end
+	else
+		hax[id]=t
+	end
 	
 	apie()
 end
@@ -64,9 +75,15 @@ function get(srv,id)
 	count=count+1
 
 	r=hax[id]
+	
+	if r and r.ttl<os.time() then -- stale data must die
+		hax[id]=nil
+		r=nil
+	end
+	
 --log(wstr.serialize(r))
 	apie()
-	return r
+	return r and r.tab
 end
 
 function inc(srv,id,num,start)
