@@ -404,16 +404,23 @@ elseif ANDROID then
 
 LIB_LUA="lib_lua"
 	
+	include("lua_pack")
 --	include("lua_zip")
 	include("lua_zlib")
 	include("lua_freetype")
 	include("lua_bit")
 --	include("lua_box2d")
+	include("lua_ogg")
+--	include("lua_al")
 	include("lua_gl")
---	include("lua_grd")
+	include("lua_grd")
+	include("lua_grdmap")
+	include("lua_sod")
+	include("lua_speak")
 --	include("lua_lash")
 	include("lua_lfs")
---	include("lua_sqlite")
+--	include("lua_lanes")
+	include("lua_sqlite")
 --	include("lua_socket")
 --	include("lua_fenestra")
 
@@ -424,8 +431,11 @@ LIB_LUA="lib_lua"
 	include(LIB_LUA)
 	include("lib_zzip")
 	include("lib_png")
+	include("lib_jpeg")
 	include("lib_z")
 	include("lib_sqlite")
+--	include("lib_ogg")
+--	include("lib_vorbis")
 	include("lib_android")
 	
 -- we probably static link with all the above libs so this should go last

@@ -5,10 +5,8 @@ cd `dirname $0`
 andsdk=`readlink -f ../sdks/android-8-arm`
 export PATH=$andsdk/bin:$PATH
 
-#so premake knows that it is an android build
 build/premake4 gmake android
 
-#perform a build
 cd build-gmake-android
 
 if [ "$1" = "release" ] ; then

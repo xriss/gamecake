@@ -46,6 +46,10 @@
 
 #include "../wet/util/nix_types.h"
 
+#else
+
+#include "../wet/util/nix_types.h"
+
 #endif
 
 #include "../wet/util/f32_math.h"
