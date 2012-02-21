@@ -46,6 +46,10 @@
 
 #include "../wet/util/nix_types.h"
 
+#else
+
+#include "../wet/util/nix_types.h"
+
 #endif
 
 #include "../wet/util/f32_math.h"
@@ -62,6 +66,7 @@ extern "C" {
 //#include "../_src/liblwo/code/lwo2.h"
 
 #include "jpeglib.h"
+#include "jerror.h"
 
 #ifdef __cplusplus
 };
