@@ -5,6 +5,9 @@ module(...,package.seeall)
 local grd=require("wetgenes.grd")
 
 
+function test_jpg_mem_t1()
+	do_jpg_mem("t1")
+end
 
 function test_jpg_8888_t1()
 	do_jpg_8888("t1")
@@ -81,6 +84,17 @@ function do_premult(name)
 	assert( c:save("dat/grd/"..name..".premult.out.png","png") )
 	
 	assert_true( do_file_compare("dat/grd/"..name..".premult.out.png","dat/grd/"..name..".premult.chk.png") )
+
+end
+
+function do_jpg_mem(name)
+
+	local g=assert(grd.create())
+	local dat=do_file_read("dat/grd/"..name..".bse.jpg")
+	g:load_data(dat,"jpg")
+	assert( g:save("dat/grd/"..name..".mem.out.png","png") )
+	
+	assert_true( do_file_compare("dat/grd/"..name..".mem.out.png","dat/grd/"..name..".mem.chk.png") )
 
 end
 
