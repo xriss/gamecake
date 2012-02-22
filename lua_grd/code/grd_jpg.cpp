@@ -161,7 +161,7 @@ void grd_jpg_load_file(struct grd * g, const char* file_name)
 // read a jpg into a grd from data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_jpg_load_data(struct grd * g, u8* data, int data_len)
+void grd_jpg_load_data(struct grd * g, unsigned char* data, int data_len)
 {
 	jpg_loader_info inf[1];
 	
