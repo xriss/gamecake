@@ -10,32 +10,45 @@
 //
 // data is always in ARGB order in memory but these are little endian, hence the BGRA (u32) default 
 //
-enum GRD_FMT
-{
-	GRD_FMT_NONE=0,
+// these are all signed values 
+//
 
-// basic formats, most internal manipulations will only work on GRD_FMT_ARGB_U8
+#define	GRD_FMT_NONE								0x0000
+
+// basic formats, most internal manipulations will only work on GRD_FMT_U8_ARGB
 // also you may need to convert to ARGB or RGB or INDEXED before saving and from after loading
 // I'm trying to avoid diferent byte order to keep it simple, so ARGB **memory** order only
 
-	GRD_FMT_U8_ARGB,				// u8[4] ARGB per pixel, so thats a U32-BGRA (thinking little endian)
+// u8[4] ARGB per pixel, so thats a U32-BGRA (thinking little endian)
+#define	GRD_FMT_U8_ARGB								0x0001
 	
-	GRD_FMT_U8_ARGB_PREMULT,		// A is the same as in ARGB but ( RGB=RGB*A )
+// A is the same as in ARGB but ( RGB=RGB*A )
+#define	GRD_FMT_U8_ARGB_PREMULT						0x0002
 
-	GRD_FMT_U16_ARGB_1555,			// u16[1] per pixel, 1 bit alpha , 5 bits red , 5 bits green , 5 bits blue
+// u16[1] per pixel, 1 bit alpha , 5 bits red , 5 bits green , 5 bits blue
+#define	GRD_FMT_U16_ARGB_1555						0x0011
 	
-	GRD_FMT_U16_ARGB_1555_PREMULT,	// again premult makes more sense
+// again premult makes more sense
+#define	GRD_FMT_U16_ARGB_1555_PREMULT				0x0012
 
 // I think it makes sense to keep all floating point values as premultiplied alpha?
 // a 1.0 in here is the same as a 255 in U8 format
-	GRD_FMT_F16_ARGB_PREMULT,		// f16[4] per pixel
-	GRD_FMT_F32_ARGB_PREMULT,		// f32[4] per pixel
-	GRD_FMT_F64_ARGB_PREMULT,		// f64[4] per pixel
 
-	GRD_FMT_U8_RGB,					// u8[3]  per pixel, probably just normal palette information
+// f16[4] per pixel
+#define	GRD_FMT_F16_ARGB_PREMULT					0x0021
+// f32[4] per pixel
+#define	GRD_FMT_F32_ARGB_PREMULT					0x0022
+// f64[4] per pixel
+#define	GRD_FMT_F64_ARGB_PREMULT					0x0023
 
-	GRD_FMT_U8_INDEXED,		// u8[1]  per pixel, forced U8 Indexed input
-	GRD_FMT_U8_LUMINANCE,			// u8[1]  per pixel, forced U8 gray scale (treat as indexed)
+// u8[3]  per pixel, probably just normal palette information
+#define	GRD_FMT_U8_RGB								0x0031
+
+// u8[1]  per pixel, forced U8 Indexed input
+#define	GRD_FMT_U8_INDEXED							0x0041
+
+// u8[1]  per pixel, forced U8 gray scale (treat as indexed)
+#define	GRD_FMT_U8_LUMINANCE						0x0051
 
 
 // more formats, not to be used when mucking about with data
@@ -44,14 +57,27 @@ enum GRD_FMT
 // basically it is none of your concern, if you intend to do anything with the dat convert it to one of the
 // basic formats
 
-	GRD_FMT_HINT_NO_ALPHA=0x80,	// just RGB , probably u32 or u16(565)
-	GRD_FMT_HINT_ALPHA_1BIT,	// and RGB  , probably u32 or u16(1555)
-	GRD_FMT_HINT_ALPHA,			// and RGB  , probably u32 or u16(4444)
-	GRD_FMT_HINT_ONLY_ALPHA,	// no RGB   , probably u8
+// just RGB , probably u32 or u16(565)
+#define	GRD_FMT_HINT_NO_ALPHA						0x0101
 
-									
-	GRD_FMT_MAX
-};
+// and RGB  , probably u32 or u16(1555)
+#define	GRD_FMT_HINT_ALPHA_1BIT						0x0102
+
+// and RGB  , probably u32 or u16(4444)
+#define	GRD_FMT_HINT_ALPHA							0x0103
+
+// no RGB   , probably u8
+#define	GRD_FMT_HINT_ONLY_ALPHA						0x0104
+
+// we want to save or load as a png									
+#define	GRD_FMT_HINT_PNG							0x0105
+
+// we want to save or load as a jpg									
+#define	GRD_FMT_HINT_JPG							0x0106
+	
+// maximum GRD_FMT value		
+#define	GRD_FMT_MAX									0x0107
+	
 #define GRD_FMT_GOTALPHA(x) (x!=GRD_FMT_NO_ALPHA)
 #define GRD_FMT_SIZEOFPIXEL(x) (	(x==GRD_FMT_U8_ARGB)?4:\
 									(x==GRD_FMT_U8_INDEXED)?1:\
@@ -69,8 +95,8 @@ enum GRD_FMT
 
 struct grd_info
 {
-	s32	fmt;	// format of data
-
+	s32	fmt;			// format of data
+	
 	s32	w,h,d;			// width and height and depth of image
 
 	s32	xscan;			// add this to data to move across the image probably (sizeof(pixel))
@@ -142,6 +168,14 @@ struct grd
 	
 };
 
+// everything you need to know to load an image from file or memory
+struct grd_loader_info
+{
+	const char * file_name;
+	u8 * data;
+	int data_len;
+	int fmt;
+};
 
 void * grd_info_alloc(struct grd_info *gi,  s32 fmt , s32 w, s32 h, s32 d );
 void grd_info_free(struct grd_info *gi);

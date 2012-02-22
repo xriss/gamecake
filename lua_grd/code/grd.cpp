@@ -106,7 +106,7 @@ bogus:
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// creat an image and return
+// creat an image and return, pass in w==0 for just a structure allocation
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -116,7 +116,7 @@ struct grd *g=0;
 
 	g=(struct grd *)calloc(sizeof(struct grd),1);
 	
-	if(g)
+	if(g && w)
 	{
 		if(!grd_realloc(g,fmt , w, h, d)){ goto bogus; }
 	}
@@ -158,28 +158,26 @@ struct grd * grd_load( const char *filename , const char *opts )
 struct grd *g=0;
 
 	g=(struct grd *)calloc(sizeof(struct grd),1);
+	
+int fmt='p';
 
 	if(g)
 	{
 		if(opts)
 		{
-			if(strncmp(opts,"jpg",3)==0)
-			{
-				grd_jpg_load_file(g,filename);
-			}
-			else
-			{
-				grd_png_load_file(g,filename);
-			}
+			if(strncmp(opts,"jpg",3)==0) { fmt='j'; }
 		}
-		else
+		switch(fmt)
 		{
-			grd_png_load_file(g,filename);
+			default:
+			case 'p': grd_png_load_file(g,filename); break;
+			case 'j': grd_jpg_load_file(g,filename); break;
 		}
 	}
 
 	return g;
 }
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -189,25 +187,24 @@ struct grd *g=0;
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-
 bool grd_save( struct grd *g , const char *filename , const char *opts )
 {
+int fmt='p';
+
+	if(g)
+	{
 		if(opts)
 		{
-			if(strncmp(opts,"jpg",3)==0)
-			{
-				grd_jpg_save_file(g,filename);
-			}
-			else
-			{
-				grd_png_save_file(g,filename);
-			}
+			if(strncmp(opts,"jpg",3)==0) { fmt='j'; }
 		}
-		else
+		switch(fmt)
 		{
-			grd_png_save_file(g,filename);
+			default:
+			case 'p': grd_png_save_file(g,filename); break;
+			case 'j': grd_jpg_save_file(g,filename); break;
 		}
-
+	}
+	
 	return g->err?false:true ;
 }
 
@@ -242,7 +239,8 @@ struct grd * g2=grd_create( g->bmap->fmt , g->bmap->w, g->bmap->h, g->bmap->d );
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // swap bitmap data from a new grd (gb) with old grd (ga)
-// then free all the data that is now only in gb
+//
+// after this you should free the old gb structure and all its associated infos
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 struct grd * grd_insert( struct grd *ga ,  struct grd *gb )
@@ -257,7 +255,6 @@ struct grd * grd_insert( struct grd *ga ,  struct grd *gb )
 
 	gb->cmap->reset();
 	gb->bmap->reset();
-	grd_free(gb);
 	
 	return ga;
 }
@@ -343,6 +340,7 @@ u8 *pc;
 				}
 				
 				grd_insert(g,gb);
+				grd_free(gb);
 			break;
 						
 			case GRD_FMT_U8_RGB:
@@ -386,6 +384,7 @@ u8 *pc;
 				}
 				
 				grd_insert(g,gb);
+				grd_free(gb);
 			break;
 						
 			case GRD_FMT_U16_ARGB_1555:
@@ -414,6 +413,7 @@ u8 *pc;
 				}
 				
 				grd_insert(g,gb);
+				grd_free(gb);
 			break;
 			
 			case GRD_FMT_U8_RGB:
@@ -467,6 +467,7 @@ int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 	}
 	
 	grd_insert(g,gb);
+	grd_free(gb);
 	return true;
 }
 
@@ -474,8 +475,9 @@ int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// apply a contrast adjust : adjust to +-128 then scale then clip, so 0.5 halves the range 2.0 doubles it
-// and base chooses the center of the scale, 0 or 128 or 255 are probably good choices
+// apply a contrast adjust : subtract base then apply scale and clip value.
+// so 0.5 halves the range 2.0 doubles it
+// and base chooses the center of the scale probably 128
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 /*
@@ -598,6 +600,7 @@ u32 *ptr;
 	}
 	
 	grd_insert(g,gb);
+	grd_free(gb);
 
 	return true;
 }

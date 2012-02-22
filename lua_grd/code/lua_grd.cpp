@@ -5,129 +5,6 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 #include "all.h"
 
-
-
-#define UPVALUE_LIB 1
-
-//void lua_grd_tab_openlib (lua_State *l, int upvalues);
-
-
-
-/*----------------------------------------------------------------------------------------------------------------------------*/
-//
-// str def lookups
-//
-/*----------------------------------------------------------------------------------------------------------------------------*/
-
-
-
-
-struct strenum
-{
-	const char *str;
-	s32 num;
-};
-
-
-const char *strenum_find_string(const strenum *se, s32 num)
-{
-	while( se->str )
-	{
-		if(se->num==num)
-		{
-			return se->str;
-		}
-
-		se++;
-	}
-
-	return 0;
-}
-
-
-s32 strenum_find_num(const strenum *se, const char *str)
-{
-	while( se->str )
-	{
-		if(strcmp(se->str,str)==0)
-		{
-			return se->num;
-		}
-		if(strlen(se->str)>8) // also try without the prefix "GRD_FMT_"
-		{
-			if(strcmp(se->str+8,str)==0)
-			{
-				return se->num;
-			}
-		}
-
-		se++;
-	}
-
-	return 0;
-}
-
-
-
-
-#define STRENUM(s) {#s,s},
-
-const strenum GRD_FMT_STRENUM[]=
-{
-STRENUM(GRD_FMT_NONE)
-
-STRENUM(GRD_FMT_U8_ARGB)
-STRENUM(GRD_FMT_U8_ARGB_PREMULT)
-
-STRENUM(GRD_FMT_U16_ARGB_1555)
-STRENUM(GRD_FMT_U16_ARGB_1555_PREMULT)
-
-STRENUM(GRD_FMT_U8_RGB)
-
-STRENUM(GRD_FMT_F16_ARGB_PREMULT)
-STRENUM(GRD_FMT_F32_ARGB_PREMULT)
-STRENUM(GRD_FMT_F64_ARGB_PREMULT)
-
-STRENUM(GRD_FMT_U8_INDEXED)
-STRENUM(GRD_FMT_U8_LUMINANCE)
-
-STRENUM(GRD_FMT_HINT_NO_ALPHA)
-STRENUM(GRD_FMT_HINT_ALPHA_1BIT)
-STRENUM(GRD_FMT_HINT_ALPHA)
-STRENUM(GRD_FMT_HINT_ONLY_ALPHA)
-
-
-STRENUM(GRD_FMT_MAX)
-
-{0,0}
-};
-
-#undef STRENUM
-
-
-
-s32 lua_grd_tofmt(lua_State *l,int idx)
-{
-	if(lua_isstring(l,idx))
-	{
-		return strenum_find_num( GRD_FMT_STRENUM , lua_tostring(l,idx) );
-	}
-	else
-	{
-		return (s32)lua_tonumber(l,idx);
-	}
-	return 0;
-}
-
-void lua_grd_pushfmt(lua_State *l,s32 fmt)
-{
-	const char *s=strenum_find_string(GRD_FMT_STRENUM,fmt);
-	if(!s){ s=GRD_FMT_STRENUM[0].str; }
-	lua_pushstring(l,s+8); // skip the prefix
-}
-
-
-
 //
 // we can use either this string as a string identifier
 // or its address as a light userdata identifier, both unique
@@ -187,7 +64,7 @@ int lua_grd_getinfo (lua_State *l, part_ptr p, int tab)
 {
 	if(p)
 	{
-		lua_pushliteral(l,"format");	lua_grd_pushfmt(l,p->bmap->fmt);		lua_rawset(l,tab);
+		lua_pushliteral(l,"format");	lua_pushnumber(l,p->bmap->fmt);		lua_rawset(l,tab);
 
 		lua_pushliteral(l,"width");		lua_pushnumber(l,p->bmap->w);		lua_rawset(l,tab);
 		lua_pushliteral(l,"height");	lua_pushnumber(l,p->bmap->h);		lua_rawset(l,tab);
@@ -212,7 +89,7 @@ int lua_grd_getinfo (lua_State *l, part_ptr p, int tab)
 // alloc an item, returns table that you can modify and associate extra data with
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_grd_create (lua_State *l)
+int lua_grd_create(lua_State *l)
 {
 part_ptr *p;
 const char *s;
@@ -250,7 +127,7 @@ int idx_tab;
 	{
 	s32 fmt,w,h,d;
 
-		fmt=lua_grd_tofmt(l,1);
+		fmt=(s32)lua_tonumber(l,1);
 		w=(s32)lua_tonumber(l,2);
 		h=(s32)lua_tonumber(l,3);
 		d=(s32)lua_tonumber(l,4);
@@ -370,7 +247,7 @@ part_ptr new_p;
 	{
 	s32 fmt,w,h,d;
 
-		fmt=lua_grd_tofmt(l,2);
+		fmt=(s32)lua_tonumber(l,2);
 		w=(s32)lua_tonumber(l,3);
 		h=(s32)lua_tonumber(l,4);
 		d=(s32)lua_tonumber(l,5);
@@ -528,7 +405,7 @@ s32 fmt;
 
 	p=lua_grd_get_ptr(l,1);
 
-	fmt=lua_grd_tofmt(l,2);
+	fmt=(s32)lua_tonumber(l,2);
 
 	if(! grd_convert(p,fmt) )
 	{
@@ -1143,7 +1020,7 @@ void lua_grd_openlib (lua_State *l, int upvalues)
 {
 	const luaL_reg lib[] =
 	{
-		{	"create"		,	lua_grd_create	},
+		{"create"		,	lua_grd_create	},
 		
 		{"destroy",			lua_grd_destroy},
 
