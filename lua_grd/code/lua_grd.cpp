@@ -5,6 +5,7 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 #include "all.h"
 
+
 //
 // we can use either this string as a string identifier
 // or its address as a light userdata identifier, both unique
@@ -15,6 +16,9 @@ const char *lua_grd_ptr_name="grd*ptr";
 // the data pointer we are using
 
 typedef struct grd * part_ptr ;
+
+// pull in a hack
+extern "C" u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -95,11 +99,6 @@ const char *opts=0;
 	luaL_getmetatable(l, lua_grd_ptr_name);
 	lua_setmetatable(l, -2);
 
-	if(lua_isuserdata(l,1))	// duplicate another image
-	{
-		(*p)=grd_duplicate( lua_grd_check_ptr(l,1) );
-	}
-	else
 	if(lua_isnumber(l,2))	// create an image of a given format and size
 	{
 	s32 fmt,w,h,d;
@@ -110,31 +109,6 @@ const char *opts=0;
 		d=(s32)lua_tonumber(l,4);
 
 		(*p)=grd_create(fmt,w,h,d);
-	}
-	else
-	if(lua_isstring(l,1))	// load an image if a filename is given
-	{
-	s32 fmt;
-
-		s=lua_tostring(l,1);
-		if(lua_isstring(l,2))	// choose loader?
-		{
-			opts=lua_tostring(l,2);
-		}
-		
-		(*p)=grd_load(s,opts);
-		
-		if( (*p)->err ) // return nil,err
-		{
-			lua_remove(l, -1 ); // remove userdata
-			
-			lua_pushnil(l);
-			lua_pushstring(l,(*p)->err);
-
-			grd_free((*p));
-			(*p)=0;
-			return 2;
-		}
 	}
 	else // just make a default one
 	{
@@ -184,17 +158,13 @@ part_ptr new_p;
 	
 	new_p=0;
 	
-	lua_rawgeti(l,1,0);
-	p = (part_ptr *)luaL_checkudata(l, -1 , lua_grd_ptr_name);
-	lua_pop(l,1);
-
-
+	p=lua_grd_get_ptr(l,1);
 
 	if(lua_isnil(l,1)) // just clear what we have
 	{
-
+		new_p=grd_create(GRD_FMT_U8_ARGB,0,0,0);
 	}
-	else	// perform a resize
+	else	// change dimensions
 	{
 	s32 fmt,w,h,d;
 
@@ -235,32 +205,67 @@ part_ptr new_p;
 	
 	new_p=0;
 
-	lua_rawgeti(l,1,0);
-	p = (part_ptr *)luaL_checkudata(l, -1 , lua_grd_ptr_name);
+	p=lua_grd_get_ptr(l,1);
+
+const char *filename=0;
+const u8 *data=0;
+s32 data_len=0;
+s32 fmt=0;
+
+	if(! lua_istable(l,2) )
+	{
+		lua_pushstring(l,"grd load needs options table");
+		lua_error(l);
+	}
+	
+	lua_pushstring(l,"fmt");
+	lua_gettable(l,2);
+	if(lua_isnumber(l,-1))
+	{
+		fmt=lua_tonumber(l,-1);
+	}
+	lua_pop(l,1);
+	
+	lua_pushstring(l,"filename");
+	lua_gettable(l,2);
+	if(lua_isstring(l,-1))
+	{
+		filename=lua_tostring(l,-1);
+	}
 	lua_pop(l,1);
 
-const char *s;
-s32 fmt;
-
-	s=lua_tostring(l,2);
-
-	if(lua_isstring(l,3))	// force format?
+	lua_pushstring(l,"data");
+	lua_gettable(l,2);
+	if(lua_isstring(l,-1))
 	{
-		opts=lua_tostring(l,3);
+		data=(cu8*)lua_tolstring(l,-1,(size_t*)&data_len);
 	}
-
-	new_p=grd_load(s,opts);
-	
-	if(new_p->err)
+	if(lua_isuserdata(l,-1))
 	{
-		lua_pushnil(l);
-		lua_pushstring(l,new_p->err);
-		grd_free(new_p);
-		return 2;
+		data=lua_toluserdata(l,-1,(size_t*)&data_len);
 	}
+	lua_pop(l,1);
 
-	if(new_p!=0)
+	if(filename)
 	{
+		new_p=grd_load_file(filename,fmt);
+	}
+	else
+	if(data)
+	{
+		new_p=grd_load_data(data,data_len,fmt);
+	}
+		
+	if(new_p!=0) // loaded something
+	{
+		if(new_p->err)
+		{
+			lua_pushnil(l);
+			lua_pushstring(l,new_p->err);
+			grd_free(new_p);
+			return 2;
+		}
+
 		if(*p!=0) // free old
 		{
 			lua_grd_destroy_idx(l,1);
@@ -268,8 +273,6 @@ s32 fmt;
 
 		(*p)=new_p;
 	}
-//	lua_grd_getinfo(l,*p,1);
-
 
 	lua_pushvalue(l,1);
 	return 1;
@@ -307,7 +310,7 @@ const char *s;
 		luaL_error(l, "image has 0 depth" );
 	}
 	
-	if(! grd_save(p,s,0) )
+	if(! grd_save_file(p,s,0) )
 	{
 		lua_pushnil(l);
 		lua_pushstring(l,"failed to save");

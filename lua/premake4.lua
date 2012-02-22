@@ -4,6 +4,7 @@ language "C"
 
 includedirs { "../lib_lua/src" }
 
+files { "hacks.c" }
 
 
 dofile("cache.lua")
