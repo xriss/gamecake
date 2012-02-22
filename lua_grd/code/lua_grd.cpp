@@ -171,25 +171,6 @@ int lua_grd_destroy (lua_State *l)
 	lua_grd_destroy_idx(l, 1);
 	return 0;
 }
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// __GC for ptr
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_grd_destroy_ptr (lua_State *l)
-{	
-part_ptr *p;
-
-	p = (part_ptr *)luaL_checkudata(l, 1 , lua_grd_ptr_name);
-	
-	if(*p)
-	{
-		grd_free(*p);
-	}
-	(*p)=0;
-	
-	return 0;
-}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1033,7 +1014,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 
 	const luaL_reg meta[] =
 	{
-		{"__gc",			lua_grd_destroy_ptr},
+		{"__gc",			lua_grd_destroy},
 
 		{0,0}
 	};
