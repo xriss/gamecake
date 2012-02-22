@@ -95,34 +95,33 @@ part_ptr *p;
 const char *s;
 const char *opts=0;
 
-int idx_ptr;
-int idx_tab;
+//int idx_ptr;
+//int idx_tab;
 
 	p = (part_ptr *)lua_newuserdata(l, sizeof(part_ptr));
-	idx_ptr=lua_gettop(l);
+//	idx_ptr=lua_gettop(l);
 	(*p)=0;
-
 	luaL_getmetatable(l, lua_grdmap_ptr_name);
-	lua_setmetatable(l, idx_ptr);
+	lua_setmetatable(l, -2);
 
-	lua_newtable(l);
-	idx_tab=lua_gettop(l);
+//	lua_newtable(l);
+//	idx_tab=lua_gettop(l);
 
-	lua_pushvalue(l, idx_ptr ); // get our userdata,
-	lua_rawseti(l,idx_tab,0); // our userdata lives in tab[0]
+//	lua_pushvalue(l, idx_ptr ); // get our userdata,
+//	lua_rawseti(l,idx_tab,0); // our userdata lives in tab[0]
 
 
 	(*p)=grdmap_alloc();
 	if(!(*p))
 	{
-		lua_pop(l,2);
+		lua_pop(l,1); // remove userdata
 		lua_pushnil(l);
 		lua_pushstring(l,"failed to alloc grdmap");
 	}
 
-	lua_grdmap_getinfo(l,*p,idx_tab);
+//	lua_grdmap_getinfo(l,*p,idx_tab);
 
-	lua_remove(l, idx_ptr ); // dont need pointer anymore, so just return the table
+//	lua_remove(l, idx_ptr ); // dont need pointer anymore, so just return the table
 	return 1;
 }
 
@@ -157,12 +156,12 @@ part_ptr lua_grdmap_check (lua_State *l, int idx)
 {
 part_ptr p=0;
 
-	if(lua_istable(l,idx))
-	{
-		lua_rawgeti(l,idx,0);
-		p = *((part_ptr *)luaL_checkudata(l, -1 , lua_grdmap_ptr_name));
-		lua_pop(l,1);
-	}
+//	if(lua_istable(l,idx))
+//	{
+//		lua_rawgeti(l,idx,0);
+		p = *((part_ptr *)luaL_checkudata(l, idx , lua_grdmap_ptr_name));
+//		lua_pop(l,1);
+//	}
 
 	return p;
 }
@@ -197,16 +196,16 @@ struct grd *g=lua_grd_check_ptr(l,2);
 	if(g)
 	{
 		p->g=g;
-		lua_pushstring(l,"g"); // we store this here, and you should not remove it
-		lua_pushvalue(l,2);
-		lua_rawset(l,1);
+//		lua_pushstring(l,"g"); // we store this here, and you should not remove it
+//		lua_pushvalue(l,2);
+//		lua_rawset(l,1);
 	}
 	else
 	{
 		p->g=0;
-		lua_pushstring(l,"g"); // except by calling this function again, otherewise you may get GC problems
-		lua_pushnil(l);
-		lua_rawset(l,1);
+//		lua_pushstring(l,"g"); // except by calling this function again, otherewise you may get GC problems
+//		lua_pushnil(l);
+//		lua_rawset(l,1);
 	}
 
 	lua_pushvalue(l,1);
@@ -240,7 +239,7 @@ s32 py;
 		luaL_error(l, p->err );
 	}
 	
-	lua_grdmap_getinfo(l,p,1);
+//	lua_grdmap_getinfo(l,p,1);
 	
 	lua_pushvalue(l,1);
 	return 1;
@@ -328,6 +327,19 @@ part_ptr b=lua_grdmap_get(l,2);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// set info into table
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grdmap_info (lua_State *l)
+{
+part_ptr p=lua_grdmap_get(l,1);
+
+	lua_grdmap_getinfo(l,p,2);
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -340,6 +352,7 @@ int luaopen_wetgenes_grdmap_core (lua_State *l)
 	{
 		{	"create",		lua_grdmap_create			},
 		{	"setup",		lua_grdmap_setup			},
+		{	"info",			lua_grdmap_info				},
 		{	"cutup",		lua_grdmap_cutup			},
 		{	"tile",			lua_grdmap_tile				},
 		{	"merge",		lua_grdmap_merge			},
