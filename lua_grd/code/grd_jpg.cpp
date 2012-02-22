@@ -51,7 +51,7 @@ static void jpeg_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
 struct jpg_loader_info
 {
 	const char * file_name;
-	u8 * data;
+	cu8 * data;
 	int data_len;
 };
 
@@ -91,7 +91,7 @@ void grd_jpg_load(struct grd * g, struct jpg_loader_info * inf )
 	}
 	else // reading from memory
 	{
-		jpeg_mem_src(&cinfo, inf->data ,inf->data_len );
+		jpeg_mem_src(&cinfo, (void*)inf->data ,inf->data_len );
 	}
 		
 	jpeg_read_header(&cinfo, TRUE);
@@ -161,7 +161,7 @@ void grd_jpg_load_file(struct grd * g, const char* file_name)
 // read a jpg into a grd from data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_jpg_load_data(struct grd * g, unsigned char* data, int data_len)
+void grd_jpg_load_data(struct grd * g, const unsigned char* data, int data_len)
 {
 	jpg_loader_info inf[1];
 	

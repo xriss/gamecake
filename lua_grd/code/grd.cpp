@@ -153,25 +153,37 @@ void grd_free( struct grd *g )
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct grd * grd_load( const char *filename , const char *opts )
+struct grd * grd_load_file( const char *filename , int fmt )
 {
 struct grd *g=0;
 
 	g=(struct grd *)calloc(sizeof(struct grd),1);
-	
-int fmt='p';
 
 	if(g)
 	{
-		if(opts)
-		{
-			if(strncmp(opts,"jpg",3)==0) { fmt='j'; }
-		}
 		switch(fmt)
 		{
 			default:
-			case 'p': grd_png_load_file(g,filename); break;
-			case 'j': grd_jpg_load_file(g,filename); break;
+			case GRD_FMT_HINT_PNG: grd_png_load_file(g,filename); break;
+			case GRD_FMT_HINT_JPG: grd_jpg_load_file(g,filename); break;
+		}
+	}
+
+	return g;
+}
+struct grd * grd_load_data( const unsigned char *data , int len,  int fmt )
+{
+struct grd *g=0;
+
+	g=(struct grd *)calloc(sizeof(struct grd),1);
+
+	if(g)
+	{
+		switch(fmt)
+		{
+			default:
+//			case GRD_FMT_HINT_PNG: grd_png_load_data(g,data,len); break;
+			case GRD_FMT_HINT_JPG: grd_jpg_load_data(g,data,len); break;
 		}
 	}
 
@@ -187,25 +199,19 @@ int fmt='p';
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grd_save( struct grd *g , const char *filename , const char *opts )
+struct grd * grd_save_file( struct grd *g , const char *filename , int fmt )
 {
-int fmt='p';
-
 	if(g)
 	{
-		if(opts)
-		{
-			if(strncmp(opts,"jpg",3)==0) { fmt='j'; }
-		}
 		switch(fmt)
 		{
 			default:
-			case 'p': grd_png_save_file(g,filename); break;
-			case 'j': grd_jpg_save_file(g,filename); break;
+			case GRD_FMT_HINT_PNG: grd_png_save_file(g,filename); break;
+			case GRD_FMT_HINT_JPG: grd_jpg_save_file(g,filename); break;
 		}
 	}
 	
-	return g->err?false:true ;
+	return g->err ? 0 : g ;
 }
 
 
