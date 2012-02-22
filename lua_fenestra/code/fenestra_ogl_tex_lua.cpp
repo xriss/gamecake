@@ -16,7 +16,7 @@ static int core_tex_setup(lua_State *l)
 		
 	struct fogl_tex *tex = (struct fogl_tex *)lua_newuserdata(l, sizeof(fogl_tex) );
 	
-	struct grd *g=lua_grd_check(l, 2);
+	struct grd *g=lua_grd_check_ptr(l, 2);
 	
 	if(tex)
 	{
