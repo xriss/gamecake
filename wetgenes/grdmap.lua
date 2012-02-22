@@ -28,8 +28,8 @@ function create(...)
 	return gm
 end
 
-base.setup=function(...)
-	return core.setup(...)
+base.setup=function(gm,g)
+	return core.setup(gm,g[0])
 end
 
 base.cutup=function(...)

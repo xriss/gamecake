@@ -151,12 +151,12 @@ end
 -- grd.create() -- a blank image of 0 dimensions
 grd.create=function(...)
 	local args={...}
-	local g
+	local g={}
 	
 	if type(args[1]) == "table" then -- duplicate
 	
 		local g2=args[1]
-		g=core.create(g2)
+		g[0]=core.create(g2[0])
 	
 	elseif type(args[2]) == "number" then -- a new blank image of given dimensions
 	
@@ -165,69 +165,86 @@ grd.create=function(...)
 		if type(fmt) == "string" then
 			fmt=grd.stringtonum(args[1])
 		end
-		g=core.create(fmt,w,h,d)
+		g[0]=core.create(fmt,w,h,d)
 
 	elseif type(args[1]) == "string" then -- load image
 	
 		local filename=args[1]
 		local opts=args[2]
-		g=core.create(filename,opts)
+		g[0]=core.create(filename,opts)
 	
 	else -- a blank image of 0 dimensions
 
-		g=core.create()
+		g[0]=core.create()
 	
 	end
-
-	if g then
-		setmetatable(g,meta)
-	end
 	
+	setmetatable(g,meta)
+	
+	core.info(g[0],g)
 	return g
 end
 
 base.destroy=function(g)
-	return core.destroy(g)
+	return core.destroy(g[0])
 end
 
 
 base.reset=function(g)
-	return core.reset(g)
+	local r=core.reset(g[0])
+	core.info(g[0],g)
+	return r
 end
 
 base.load=function(g,filename,opts)
-	return core.load(g,filename,opts)
+	local r=core.load(g[0],filename,opts)
+	core.info(g[0],g)
+	return r
 end
 
 base.save=function(g,filename,opts)
-	return core.save(g,filename,opts)
+	local r=core.save(g[0],filename,opts)
+	core.info(g[0],g)
+	return r
 end
 
 base.convert=function(g,fmt)
 	if type(fmt) == "string" then
 		fmt=grd.stringtonum(fmt)
 	end
-	return core.convert(g,fmt)
+	local r=core.convert(g[0],fmt)
+	core.info(g[0],g)
+	return r
 end
 
 base.quant=function(g,num)
-	return core.quant(g,num)
+	local r=core.quant(g[0],num)
+	core.info(g[0],g)
+	return r
 end
 
 base.pixels=function(...)
-	return core.pixels(...)
+	local r=core.pixels(...)
+	core.info(g[0],g)
+	return r
 end
 
 base.palette=function(...)
-	return core.palette(...)
+	local r=core.palette(...)
+	core.info(g[0],g)
+	return r
 end
 
 base.scale=function(...)
-	return core.scale(...)
+	local r=core.scale(...)
+	core.info(g[0],g)
+	return r
 end
 
 base.flipy=function(...)
-	return core.flipy(...)
+	local r=core.flipy(...)
+	core.info(g[0],g)
+	return r
 end
 
 base.blit=function(ga,gb,x,y,cx,cy,cw,ch)
@@ -251,7 +268,9 @@ base.blit=function(ga,gb,x,y,cx,cy,cw,ch)
 
 	if cw<=0 or ch<=0 then return true end -- nothing to draw
 
-	return core.blit(ga,gb,x,y,cx,cy,cw,ch)
+	local r=core.blit(ga[0],gb[0],x,y,cx,cy,cw,ch)
+	
+	return r
 end
 
 return grd
