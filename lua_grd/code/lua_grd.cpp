@@ -19,20 +19,15 @@ typedef struct grd * part_ptr ;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// check that a table at the given index contains a grd object
+// check that a userdata at the given index is a grd object
 // return the part_ptr if it does, otherwise return 0
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-part_ptr lua_grd_check (lua_State *l, int idx)
+part_ptr *lua_grd_get_ptr (lua_State *l, int idx)
 {
-part_ptr p=0;
+part_ptr *p=0;
 
-	if(lua_istable(l,idx))
-	{
-		lua_rawgeti(l,idx,0);
-		p = *((part_ptr *)luaL_checkudata(l, -1 , lua_grd_ptr_name));
-		lua_pop(l,1);
-	}
+	p = ((part_ptr *)luaL_checkudata(l, idx , lua_grd_ptr_name));
 
 	return p;
 }
@@ -40,19 +35,19 @@ part_ptr p=0;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// lua_grd_check with auto error on bad ptr
+// lua_grd_check but with auto error on 0 ptr
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-part_ptr lua_grd_get_ptr (lua_State *l, int idx)
+part_ptr lua_grd_check_ptr (lua_State *l, int idx)
 {
-part_ptr p=lua_grd_check(l,idx);
+part_ptr *p=lua_grd_get_ptr(l,idx);
 
-	if (p == 0)
+	if (*p == 0)
 	{
 		luaL_error(l, "bad grd userdata" );
 	}
 
-	return p;
+	return *p;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -86,7 +81,7 @@ int lua_grd_getinfo (lua_State *l, part_ptr p, int tab)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// alloc an item, returns table that you can modify and associate extra data with
+// alloc an item, returns userdata
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_create(lua_State *l)
@@ -95,32 +90,14 @@ part_ptr *p;
 const char *s;
 const char *opts=0;
 
-int idx_ptr;
-int idx_tab;
-
 	p = (part_ptr *)lua_newuserdata(l, sizeof(part_ptr));
-	
-	idx_ptr=lua_gettop(l);
-
 	(*p)=0;
-
 	luaL_getmetatable(l, lua_grd_ptr_name);
 	lua_setmetatable(l, -2);
 
-	lua_newtable(l);
-
-	idx_tab=lua_gettop(l);
-
-// remember the userdata in the table as well as the upvalue
-
-	lua_pushvalue(l, idx_ptr ); // get our userdata,
-	lua_rawseti(l,-2,0); // our userdata lives in [0]
-	
-	(*p)=0;
-
-	if(lua_istable(l,1))	// duplicate another image
+	if(lua_isuserdata(l,1))	// duplicate another image
 	{
-		(*p)=grd_duplicate( lua_grd_get_ptr(l,1) );
+		(*p)=grd_duplicate( lua_grd_check_ptr(l,1) );
 	}
 	else
 	if(lua_isnumber(l,2))	// create an image of a given format and size
@@ -149,10 +126,10 @@ int idx_tab;
 		
 		if( (*p)->err ) // return nil,err
 		{
+			lua_remove(l, -1 ); // remove userdata
+			
 			lua_pushnil(l);
 			lua_pushstring(l,(*p)->err);
-			
-			lua_remove(l, idx_ptr );
 
 			grd_free((*p));
 			(*p)=0;
@@ -163,10 +140,7 @@ int idx_tab;
 	{
 		(*p)=grd_create(GRD_FMT_U8_ARGB,0,0,0);
 	}
-	
-	lua_grd_getinfo(l,*p,idx_tab);
 
-	lua_remove(l, idx_ptr );
 	return 1;
 }
 
@@ -177,11 +151,7 @@ int idx_tab;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_destroy_idx (lua_State *l, int idx)
 {
-part_ptr *p;
-	
-	lua_rawgeti(l,idx,0);
-	p = (part_ptr *)luaL_checkudata(l, -1 , lua_grd_ptr_name);
-	lua_pop(l,1);
+part_ptr *p=lua_grd_get_ptr(l,idx);
 
 	if(*p)
 	{
@@ -264,7 +234,7 @@ part_ptr new_p;
 
 		(*p)=new_p;
 	}
-	lua_grd_getinfo(l,*p,1);
+//	lua_grd_getinfo(l,*p,1);
 
 	lua_pushvalue(l,1);
 	return 1;
@@ -317,7 +287,7 @@ s32 fmt;
 
 		(*p)=new_p;
 	}
-	lua_grd_getinfo(l,*p,1);
+//	lua_grd_getinfo(l,*p,1);
 
 
 	lua_pushvalue(l,1);
@@ -334,7 +304,7 @@ int lua_grd_save (lua_State *l)
 part_ptr p;
 const char *s;
 
-	p=lua_grd_get_ptr(l,1);
+	p=lua_grd_check_ptr(l,1);
 
 	s=lua_tostring(l,2);
 
@@ -378,7 +348,7 @@ int lua_grd_quant (lua_State *l)
 part_ptr p;
 s32 num;
 
-	p=lua_grd_get_ptr(l,1);
+	p=lua_grd_check_ptr(l,1);
 
 	num=(s32)lua_tonumber(l,2);
 	
@@ -387,7 +357,7 @@ s32 num;
 	
 	grd_quant(p,num);
 
-	lua_grd_getinfo(l,p,1);
+//	lua_grd_getinfo(l,p,1);
 
 	lua_pushvalue(l,1);
 	return 1;
@@ -403,7 +373,7 @@ int lua_grd_convert (lua_State *l)
 part_ptr p;
 s32 fmt;
 
-	p=lua_grd_get_ptr(l,1);
+	p=lua_grd_check_ptr(l,1);
 
 	fmt=(s32)lua_tonumber(l,2);
 
@@ -414,7 +384,7 @@ s32 fmt;
 		return 2;
 	}
 
-	lua_grd_getinfo(l,p,1);
+//	lua_grd_getinfo(l,p,1);
 
 	lua_pushvalue(l,1);
 	return 1;
@@ -438,8 +408,8 @@ s32 cy;
 s32 cw;
 s32 ch;
 
-	pa=lua_grd_get_ptr(l,1);
-	pb=lua_grd_get_ptr(l,2);
+	pa=lua_grd_check_ptr(l,1);
+	pb=lua_grd_check_ptr(l,2);
 	x=(s32)lua_tonumber(l,3);
 	y=(s32)lua_tonumber(l,4);
 
@@ -489,7 +459,7 @@ part_ptr p;
 f32 base;
 f32 scale;
 
-	p=lua_grd_get_ptr(l,1);
+	p=lua_grd_check_ptr(l,1);
 
 	base=(f32)lua_tonumber(l,2);
 	scale=(f32)lua_tonumber(l,3);
@@ -510,7 +480,7 @@ int lua_grd_scale (lua_State *l)
 part_ptr p;
 s32 w,h,d;
 
-	p=lua_grd_get_ptr(l,1);
+	p=lua_grd_check_ptr(l,1);
 
 	w=(s32)lua_tonumber(l,2);
 	h=(s32)lua_tonumber(l,3);
@@ -518,7 +488,7 @@ s32 w,h,d;
 
 	grd_scale(p,w,h,d);
 
-	lua_grd_getinfo(l,p,1);
+//	lua_grd_getinfo(l,p,1);
 
 	lua_pushvalue(l,1);
 	return 1;
@@ -532,11 +502,11 @@ int lua_grd_flipy (lua_State *l)
 {
 part_ptr p;
 
-	p=lua_grd_get_ptr(l,1);
+	p=lua_grd_check_ptr(l,1);
 
 	grd_flipy(p);
 
-	lua_grd_getinfo(l,p,1);
+//	lua_grd_getinfo(l,p,1);
 
 	lua_pushvalue(l,1);
 	return 1;
@@ -888,7 +858,7 @@ grd_info *grd;
 s32 x;
 s32 w;
 
-	p=lua_grd_get_ptr(l,1);
+	p=lua_grd_check_ptr(l,1);
 	grd=p->cmap;
 //	grd_getpalinfo(p,grd);
 
@@ -940,7 +910,7 @@ s32 x,y,z;
 s32 w,h,d;
 s32 tab_idx;
 
-	p=lua_grd_get_ptr(l,1);
+	p=lua_grd_check_ptr(l,1);
 	grd=p->bmap;
 //	grd_getinfo(p,grd);
 
@@ -1010,13 +980,27 @@ s32 tab_idx;
 	else		{ return 1; }
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// set info into the provided table
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_info (lua_State *l)
+{
+part_ptr p;
+
+	p=lua_grd_check_ptr(l,1);
+	lua_grd_getinfo(l,p,2);
+	
+	return 0;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// call open lib with our functions
+// open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void lua_grd_openlib (lua_State *l, int upvalues)
+int luaopen_wetgenes_grd_core (lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
@@ -1024,6 +1008,7 @@ void lua_grd_openlib (lua_State *l, int upvalues)
 		
 		{"destroy",			lua_grd_destroy},
 
+		{"info",			lua_grd_info},
 
 		{"reset",			lua_grd_reset},
 		{"load",			lua_grd_load},
@@ -1045,46 +1030,20 @@ void lua_grd_openlib (lua_State *l, int upvalues)
 		
 		{0,0}
 	};
-	luaL_openlib(l, NULL, lib, upvalues);
-};
 
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// call open lib with our ptr functions
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-void lua_grd_ptr_openlib (lua_State *l, int upvalues)
-{
-const luaL_reg lib[] =
+	const luaL_reg meta[] =
 	{
 		{"__gc",			lua_grd_destroy_ptr},
 
 		{0,0}
 	};
-	luaL_openlib(l, NULL, lib, upvalues);
-}
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// open library.
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-int luaopen_wetgenes_grd_core (lua_State *l)
-{
-
 
 	luaL_newmetatable(l, lua_grd_ptr_name);
-	lua_grd_ptr_openlib(l,0);
+	luaL_openlib(l, NULL, meta, 0);
 	lua_pop(l,1);
 
 	lua_newtable(l);
-	lua_pushstring(l, LUA_grd_LIB_NAME );
-	lua_pushvalue(l, -2); // have this table as the first up value?
-	lua_pushvalue(l, -1); // and we need to save one to return
-	lua_grd_openlib(l,1);
-	lua_rawset(l, LUA_GLOBALSINDEX);
-
+	luaL_openlib(l, NULL, lib, 0);
 	return 1;
 }
 

@@ -192,7 +192,7 @@ int lua_grdmap_setup (lua_State *l)
 {
 part_ptr p=lua_grdmap_get(l,1);
 
-struct grd *g=lua_grd_check(l,2);
+struct grd *g=lua_grd_check_ptr(l,2);
 
 	if(g)
 	{
