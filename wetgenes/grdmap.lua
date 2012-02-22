@@ -7,47 +7,59 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
--- the core module previously lived in "grd" now it is in "wetgenes.grd.core" with this wrapper code
-
-module("wetgenes.grdmap")
+local grdmap={}
 
 local core=require("wetgenes.grdmap.core")
 
-base={}
-meta={}
+local base={}
+local meta={}
 meta.__index=base
 
-function create(...)
+function grdmap.create()
 
-	local gm=core.create(...)
+	local gm={}
 	
-	if gm then
-		setmetatable(gm,meta)
-	end
+	gm[0]=core.create()	
+	setmetatable(gm,meta)
+	
+	core.info(gm[0],gm)
 	
 	return gm
 end
 
 base.setup=function(gm,g)
-	return core.setup(gm,g[0])
+	local r=core.setup(gm[0],g[0])
+	core.info(gm[0],gm)
+	return r
 end
 
-base.cutup=function(...)
-	return core.cutup(...)
+base.cutup=function(gm,...)
+	local r=core.cutup(gm[0],...)
+	core.info(gm[0],gm)
+	return r
 end
 
-base.tile=function(...)
-	return core.tile(...)
+base.tile=function(gm,...)
+	local r=core.tile(gm[0],...)
+	return r
 end
 
-base.merge=function(...)
-	return core.merge(...)
+base.merge=function(gm,...)
+	local r=core.merge(gm[0],...)
+	core.info(gm[0],gm)
+	return r
 end
 
-base.shrink=function(...)
-	return core.shrink(...)
+base.shrink=function(gm,...)
+	local r=core.shrink(gm[0],...)
+	core.info(gm[0],gm)
+	return r
 end
 
-base.keymap=function(...)
-	return core.keymap(...)
+base.keymap=function(gma,gmb)
+	local r=core.keymap(gma[0],gmb[0])
+	core.info(gma[0],gma)
+	return r
 end
+
+return grdmap
