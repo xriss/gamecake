@@ -124,6 +124,11 @@ for l in import:gmatch("([^\n]*)") do
 					end
 					
 					grd.defs[define]=tonumber(value)
+
+					if define:sub(1,4)=="FMT_" then -- allow even shorter names
+						grd.defs[define:sub(5)]=tonumber(value)
+					end
+					
 				end
 			break
 		else
@@ -133,15 +138,18 @@ for l in import:gmatch("([^\n]*)") do
 end
 import=nil -- free it just because
 
-for i,v in pairs(grd.defs) do -- copy vals into base for shorthand grd.FALSE use
+grd.nums={}
+
+for i,v in pairs(grd.defs) do -- copy vals into base for shorthand grd.FALSE style use
 	base[i]=v
+	grd.nums[v]=i -- and reverse lookup
 end
 
 function grd.numtostring(num)
-	return grd.defs[num]
+	return grd.nums[num]
 end
 function grd.stringtonum(str)
-	return grd.defs[str] or grd.defs["FMT_"..str]
+	return grd.defs[str] 
 end
 
 -- many options
@@ -152,11 +160,12 @@ end
 grd.create=function(...)
 	local args={...}
 	local g={}
+	setmetatable(g,meta)
 	
 	if type(args[1]) == "table" then -- duplicate
 	
-		local g2=args[1]
-		g[0]=core.create(g2[0])
+--		local g2=args[1]
+--		g[0]=core.create(g2[0])
 	
 	elseif type(args[2]) == "number" then -- a new blank image of given dimensions
 	
@@ -170,8 +179,9 @@ grd.create=function(...)
 	elseif type(args[1]) == "string" then -- load image
 	
 		local filename=args[1]
-		local opts=args[2]
-		g[0]=core.create(filename,opts)
+		local fmt=args[2]
+		g[0]=core.create()
+		g:load_file(filename,fmt)
 	
 	else -- a blank image of 0 dimensions
 
@@ -179,7 +189,6 @@ grd.create=function(...)
 	
 	end
 	
-	setmetatable(g,meta)
 	
 	core.info(g[0],g)
 	return g
@@ -196,8 +205,22 @@ base.reset=function(g)
 	return r
 end
 
-base.load=function(g,filename,opts)
-	local r=core.load(g[0],filename,opts)
+base.load_file=function(g,filename,fmt)
+	return base.load(g,{filename=filename,fmt=fmt})
+end
+
+base.load_data=function(g,data,fmt)
+	return base.load(g,{data=data,fmt=fmt})
+end
+
+base.load=function(g,opts)
+	if opts.fmt=="jpg" then
+		opts.fmt=grd.FMT_HINT_JPG
+	end
+	if opts.fmt=="png" then
+		opts.fmt=grd.FMT_HINT_PNG
+	end
+	local r=core.load(g[0],opts)
 	core.info(g[0],g)
 	return r
 end
