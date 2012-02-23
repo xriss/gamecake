@@ -35,6 +35,10 @@ function test_jpg_8x_t2()
 	do_jpg_8x("t2")	
 end
 
+function test_png_mem_t4()
+	do_png_mem("t4")
+end
+
 function test_png_8888_t4()
 	do_png_8888("t4")
 end
@@ -87,6 +91,17 @@ function do_premult(name)
 
 end
 
+function do_png_mem(name)
+
+	local g=assert(grd.create())
+	local dat=do_file_read("dat/grd/"..name..".bse.png")
+	g:load_data(dat,"png")
+	assert( g:save("dat/grd/"..name..".mem.out.png","png") )
+	
+	assert_true( do_file_compare("dat/grd/"..name..".mem.out.png","dat/grd/"..name..".mem.chk.png") )
+
+end
+
 function do_jpg_mem(name)
 
 	local g=assert(grd.create())
@@ -97,6 +112,7 @@ function do_jpg_mem(name)
 	assert_true( do_file_compare("dat/grd/"..name..".mem.out.png","dat/grd/"..name..".mem.chk.png") )
 
 end
+
 
 function do_jpg_8888(name)
 
