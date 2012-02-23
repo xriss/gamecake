@@ -182,7 +182,7 @@ struct grd *g=0;
 		switch(fmt)
 		{
 			default:
-//			case GRD_FMT_HINT_PNG: grd_png_load_data(g,data,len); break;
+			case GRD_FMT_HINT_PNG: grd_png_load_data(g,data,len); break;
 			case GRD_FMT_HINT_JPG: grd_jpg_load_data(g,data,len); break;
 		}
 	}

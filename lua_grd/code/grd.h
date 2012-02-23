@@ -174,6 +174,7 @@ struct grd_loader_info
 	const char * file_name;
 	u8 * data;
 	int data_len;
+	int pos;
 	int fmt;
 };
 

@@ -48,19 +48,12 @@ static void jpeg_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
     src->next_input_byte = (JOCTET*)buffer;
 }
 
-struct jpg_loader_info
-{
-	const char * file_name;
-	cu8 * data;
-	int data_len;
-};
-
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // allocate a grd and read a png file into it
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_jpg_load(struct grd * g, struct jpg_loader_info * inf )
+static void grd_jpg_load(struct grd * g, struct grd_loader_info * inf )
 {
 	const char *err=0;
 
@@ -147,10 +140,11 @@ bogus:
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_jpg_load_file(struct grd * g, const char* file_name)
 {
-	jpg_loader_info inf[1];
+	grd_loader_info inf[1];
 	
 	inf->file_name=file_name;
 	inf->data=0;
+	inf->pos=0;
 	inf->data_len=0;
 	
 	grd_jpg_load(g,inf);	
@@ -163,10 +157,11 @@ void grd_jpg_load_file(struct grd * g, const char* file_name)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_jpg_load_data(struct grd * g, const unsigned char* data, int data_len)
 {
-	jpg_loader_info inf[1];
+	grd_loader_info inf[1];
 	
 	inf->file_name=0;
-	inf->data=data;
+	inf->data=(u8*)data;
+	inf->pos=0;
 	inf->data_len=data_len;
 	
 	grd_jpg_load(g,inf);	

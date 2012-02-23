@@ -10,6 +10,24 @@
 #define abort_(x) { err=x; goto bogus; }
 
 
+void read_func(png_structp ptr, png_bytep buff, png_size_t count)
+{
+grd_loader_info *inf=(grd_loader_info *)ptr->io_ptr;
+
+	if(inf == NULL)
+	{
+		return;   // error
+	}
+
+	if( ( inf->pos + count ) > inf->data_len )
+	{
+		return;   // error
+	}
+
+	memcpy(buff,inf->data+inf->pos,count);
+	
+	inf->pos+=count;
+} 
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -17,7 +35,7 @@
 // allocate a grd and read a png file into it
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_png_load_file(struct grd * g, const char* file_name)
+static void grd_png_load(struct grd * g, struct grd_loader_info * inf )
 {
 	const char *err=0;
 	int x, y;
@@ -38,16 +56,11 @@ void grd_png_load_file(struct grd * g, const char* file_name)
 	
 	int grdfmt;
 
-	char header[8];	// 8 is the maximum size that can be checked
+//	char header[8];	// 8 is the maximum size that can be checked
 
 	/* open file and test for it being a png */
-	FILE *fp = fopen(file_name, "rb");
-	if (!fp)
-		abort_("png open fail");
-	fread(header, 1, 8, fp);
-	if (png_sig_cmp((png_byte *)header, 0, 8))
-		abort_("png unrecognised header");
-
+	FILE *fp=0;
+	
 
 	/* initialize stuff */
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -62,8 +75,17 @@ void grd_png_load_file(struct grd * g, const char* file_name)
 	if (setjmp(png_jmpbuf(png_ptr)))
 		abort_("png init io fail");
 
-	png_init_io(png_ptr, fp);
-	png_set_sig_bytes(png_ptr, 8);
+	if(inf->file_name) // reading from a file
+	{
+		fp = fopen(inf->file_name, "rb");
+		if (!fp) { abort_("png open fail"); }
+		png_init_io(png_ptr, fp);
+	}
+	else
+	{
+		png_set_read_fn(png_ptr, inf, read_func);
+	}
+	
 
 	png_read_info(png_ptr, info_ptr);
 
@@ -161,6 +183,41 @@ bogus:
 	if(err) {g->err=err;} else {g->err=0; }
 }
 
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// read a jpg into a grd from a file
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void grd_png_load_file(struct grd * g, const char* file_name)
+{
+	grd_loader_info inf[1];
+	
+	inf->file_name=file_name;
+	inf->data=0;
+	inf->pos=0;
+	inf->data_len=0;
+	
+	grd_png_load(g,inf);	
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// read a jpg into a grd from data
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void grd_png_load_data(struct grd *g, const unsigned char* data, int data_len)
+{
+	grd_loader_info inf[1];
+	
+	inf->file_name=0;
+	inf->data=(u8*)data;
+	inf->pos=0;
+	inf->data_len=data_len;
+	
+	grd_png_load(g,inf);
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
