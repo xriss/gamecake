@@ -38,6 +38,9 @@ end
 function test_png_mem_t4()
 	do_png_mem("t4")
 end
+function test_png_mem_t5()
+	do_png_mem("t5")
+end
 
 function test_png_8888_t4()
 	do_png_8888("t4")

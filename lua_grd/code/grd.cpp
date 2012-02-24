@@ -578,6 +578,8 @@ f32 fx,fy,fz;
 s32 x,y,z;
 u32 *ptr;
 
+	if( g->bmap->fmt!=GRD_FMT_U8_ARGB ) { return false; } // must be this format
+
 	if( gi->w<1 || gi->h<1 || gi->d<1 ) { return false; }
 	if( w<1 || h<1 || d<1 ) { return false; }
 	

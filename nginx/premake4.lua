@@ -13,6 +13,7 @@ includedirs {	"." ,
 		"src/http" ,
 		"src/misc" ,
 		"src/http/modules" ,
+		"src/http/modules/echo" ,
 		"ndk/objs" ,
 		"ndk/src" ,
 		"../lib_z" ,
@@ -124,6 +125,9 @@ else
 --		"./src/http/modules/ngx_http_xslt_filter_module.c",
 
 }
+
+	files { "./src/http/modules/echo/**.c" }
+
 
 	files {
 --		"./src/os/unix/ngx_aio_read.c",
