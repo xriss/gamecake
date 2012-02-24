@@ -22,42 +22,47 @@ function get(data,fmt)
 	local g=grd.create()
 	g:load_data(data,gfmt)
 
---	return core.get(...)
-
 	return g
 end
 
 function resize(g,x,y)
 	log("img.resize:")
 
---	return core.resize(...)
+	if g.width==0 or g.height==0 then return nil end
 
-	g:scale(x,y,1)
+	g:convert(grd.FMT_U8_ARGB) -- need this format
+
+	if ( x * g.height/g.width ) <= y then -- aspect fits at maximum width
+
+		g:scale( x , x * g.height/g.width , 1 )
+	
+	else
+
+		g:scale( y * g.width/g.height , y , 1 )
+	
+	end
 
 	return g
 end
 
-function composite(tab)
+function composite(t)
 	log("img.composite:")
 
---	return core.composite(...)
---[[
-					image=img.composite({
-						format="DEFAULT",
-						width=ix,
-						height=iy,
-						color=tonumber("ffffff",16), -- white, does not work?
-						{image,px,py,1,"TOP_LEFT"},
-					}) -- and force it to a JPEG with a white? background
-]]
-
-		return tab[0][0]
+	local go=grd.create(grd.FMT_U8_ARGB,t.width,t.height,1)
+	
+	for i,v in ipairs(t) do
+		v[1]:convert(grd.FMT_U8_ARGB)
+		go:blit(v[1],v[2],v[3])
+	end
+	
+	return go
 end
 
 
 function memsave(g,fmt)
 
 	local gfmt=grd.HINT_PNG
+	if fmt then fmt=fmt:lower() end
 	if fmt=="jpeg" then gfmt=grd.HINT_JPG end
 
 	local function file_read(filename)
@@ -67,14 +72,14 @@ function memsave(g,fmt)
 		return d
 	end
 	
-	local fn=os.tmpname()
+	local filename=os.tmpname()
 	
-	g:save_file(fn,gfmt)
+	g:save(filename,gfmt)
 	
 	g.body=file_read(filename)
 	g.format=fmt
 	
-	os.remove(fn)
+	os.remove(filename)
 	
 	return g
 end

@@ -246,26 +246,26 @@ base.quant=function(g,num)
 	return r
 end
 
-base.pixels=function(...)
-	local r=core.pixels(...)
+base.pixels=function(g,...)
+	local r=core.pixels(g[0],...)
 	core.info(g[0],g)
 	return r
 end
 
-base.palette=function(...)
-	local r=core.palette(...)
+base.palette=function(g,...)
+	local r=core.palette(g[0],...)
 	core.info(g[0],g)
 	return r
 end
 
-base.scale=function(...)
-	local r=core.scale(...)
+base.scale=function(g,...)
+	local r=core.scale(g[0],...)
 	core.info(g[0],g)
 	return r
 end
 
-base.flipy=function(...)
-	local r=core.flipy(...)
+base.flipy=function(g,...)
+	local r=core.flipy(g[0],...)
 	core.info(g[0],g)
 	return r
 end
