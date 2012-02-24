@@ -9,8 +9,10 @@ local _M=require(...)
 package.loaded["wetgenes.www.any.sys"]=_M
 
 
-function sleep(...)
+function sleep(t)
 	log("sys.sleep:")
+
+	local res = ngx.location.capture("/@sleep/"..t)
 
 --	return core.sleep(...)
 

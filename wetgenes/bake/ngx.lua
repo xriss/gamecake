@@ -213,7 +213,7 @@ lua_package_cpath ';;';
       root        html;
       server_name host.local;
 
-#do the fetch work?
+#do the fetching here...
 	location ~ /@fetch/(.*)$ {
 		internal;
 		set $a $1;
@@ -223,6 +223,11 @@ lua_package_cpath ';;';
 		proxy_pass '$a?$args';
 	}
 
+#is this the best way to sleep?
+	location ~ /@sleep/(.*)$ {
+		internal;
+		echo_sleep $1;
+	}
 
 #try existing files
 	location  / {
