@@ -187,21 +187,11 @@ else
 	files { "../lua/*.c" }
 	
 
-	links(lua_lib_names)
+	links(static_lib_names)
 
-	links { LIB_LUA }
-	links { "lib_openal" }
-	links { "lib_z" }
-	links { "lib_sqlite" }
-	links { "lib_png" }
-	links { "lib_jpeg" }
-	links { "lib_zzip"}
 	links { "GL" , "GLU" }
 	links { "crypt" }
 	links { "pthread" }
-	
-	links { "lib_pcre" }
-
 	links { "dl" , "m" }
 	
 	KIND{kind="ConsoleApp",name="nginx"}
