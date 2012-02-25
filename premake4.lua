@@ -174,13 +174,19 @@ elseif NIX then
 end
 
 
-BUILD_DIR="build-"..(_ACTION or "")
+if not BUILD_DIR then
 
-if NACL then BUILD_DIR=BUILD_DIR.."-nacl" end
-if ANDROID then BUILD_DIR=BUILD_DIR.."-android" end
-if MINGW then BUILD_DIR=BUILD_DIR.."-mingw" end
+	BUILD_DIR="build-"..(_ACTION or "")
+
+	if NACL then BUILD_DIR=BUILD_DIR.."-nacl" end
+	if ANDROID then BUILD_DIR=BUILD_DIR.."-android" end
+	if MINGW then BUILD_DIR=BUILD_DIR.."-mingw" end
+
+end
 
 location( BUILD_DIR )
+
+	
 
 configurations { "Debug", "Release" }
 
@@ -189,7 +195,8 @@ includedirs { "lib_lua/src" }
 
 EXE_OUT_DIR=path.getabsolute("bin/exe")
 DBG_OUT_DIR=path.getabsolute("bin/dbg")
-AND_OUT_DIR=path.getabsolute("lib_android/libs/armeabi")
+AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("lib_android")
+AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("lib_android/libs/armeabi")
 
 ALL_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj")
 EXE_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Release")
@@ -439,7 +446,7 @@ LIB_LUA="lib_lua"
 	include("lib_sqlite")
 --	include("lib_ogg")
 --	include("lib_vorbis")
-	include("lib_android")
+	include(AND_LIB_DIR)
 	
 -- we probably static link with all the above libs so this should go last
 	include("lua")
