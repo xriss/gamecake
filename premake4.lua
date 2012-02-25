@@ -186,6 +186,7 @@ end
 
 location( BUILD_DIR )
 
+
 	
 
 configurations { "Debug", "Release" }
@@ -203,6 +204,7 @@ EXE_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Release")
 DBG_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Debug")
 
 
+static_lib_names={}
 
 lua_lib_names={}
 lua_lib_loads={}
@@ -254,9 +256,12 @@ function KIND(opts)
 
 	end
 	
+	
 	opts.kind=opts.kind or "StaticLib" -- default kind
 	
 	kind(opts.kind)
+
+
 	
 	if opts.name and opts.kind~="StaticLib" then -- force an output target name
 	
@@ -300,6 +305,8 @@ function KIND(opts)
 		
 	else
 	
+		static_lib_names[#static_lib_names+1]=project().name
+	
 		configuration {"Debug"}
 		targetdir(DBG_OBJ_DIR)
 
@@ -310,220 +317,68 @@ function KIND(opts)
 end
 
 
--- need to clean this up and merge SET_KIND and SET_TARGET into one function...
---[[
-function SET_KIND(kindof,luaname,luafname)
-	if kindof=="lua" then -- special laulib kind that keeps a list of libs
-
-		kind("StaticLib")
-		lua_lib_names[#lua_lib_names+1]=project().name
-		lua_lib_loads[#lua_lib_loads+1]={luaname,luafname}
-
-	else
-		kind(kindof)
-	end
-end
-
-function SET_TARGET(dir,name,force)
-
-	if not force then
-		kind("StaticLib")
-		configuration {"Debug"}
-		flags {"Symbols"} -- blue debug needs symbols badly
-		targetdir(DBG_OBJ_DIR)
-
-		configuration {"Release"}
-		flags {"Optimize"}
-		targetdir(EXE_OBJ_DIR)
-		return
-	end
-
-dir=dir or ""
-
-	if name then
-		targetprefix ("")
-		targetname (name)
-	end
-
-	if ANDROID then
-	
-		configuration {"Debug"}
-		flags {"Symbols"} -- blue debug needs symbols badly
-		targetdir(AND_OUT_DIR..dir)
-
-		configuration {"Release"}
-		flags {"Optimize"}
-		targetdir(AND_OUT_DIR..dir)
-		
-	elseif NACL then
-	
-		configuration {"Debug"}
-		flags {"Symbols"} -- blue debug needs symbols badly
-		targetdir(DBG_OUT_DIR..dir)
-
-	else
-
-		configuration {"Debug"}
-		flags {"Symbols"} -- blue debug needs symbols badly
-		targetdir(DBG_OUT_DIR..dir)
-
-		configuration {"Release"}
-		flags {"Optimize"}
-		targetdir(EXE_OUT_DIR..dir)
-
-	end
-end
-]]
 
 ------------------------------------------------------------------------
--- include sub projects depending on build
+-- which lua version should we usr
 ------------------------------------------------------------------------
 
-if NACL then
+LIB_LUA="lib_lua" -- default 
 
-LIB_LUA="lib_lua"
-	
---	include("lua_zip")
-	include("lua_zlib")
-	include("lua_freetype")
-	include("lua_bit")
---	include("lua_box2d")
-	include("lua_gl")
---	include("lua_grd")
---	include("lua_lash")
---	include("lua_lfs")
---	include("lua_sqlite")
---	include("lua_socket")
---	include("lua_fenestra")
+if NIX then -- luajit is working for these builds
 
-	include(LIB_LUA)
-	include("lib_zzip")
---	include("lib_png")
---	include("lib_jpeg")
---	include("lib_gif")
-	include("lib_z")
---	include("lib_sqlite")
-
-	include("lib_nacl")
-
--- we probably static link with all the above libs so this should go last
-	include("lua")
-	
-elseif ANDROID then
-
-LIB_LUA="lib_lua"
-	
-	include("lua_pack")
---	include("lua_zip")
-	include("lua_zlib")
-	include("lua_freetype")
-	include("lua_bit")
---	include("lua_box2d")
-	include("lua_ogg")
---	include("lua_al")
-	include("lua_gl")
-	include("lua_grd")
-	include("lua_grdmap")
-	include("lua_sod")
-	include("lua_speak")
---	include("lua_lash")
-	include("lua_lfs")
---	include("lua_lanes")
-	include("lua_sqlite")
---	include("lua_socket")
---	include("lua_fenestra")
-
---	include("lua_android")
-
---	include("lua_bit")
-
-	include(LIB_LUA)
-	include("lib_zzip")
-	include("lib_png")
-	include("lib_jpeg")
---	include("lib_gif")
-	include("lib_z")
-	include("lib_sqlite")
---	include("lib_ogg")
---	include("lib_vorbis")
-	include(AND_LIB_DIR)
-	
--- we probably static link with all the above libs so this should go last
-	include("lua")
-	
-else -- windows or linux
-
--- a define to choose vanilla lua or luajit...
-if WINDOWS then
-	LIB_LUA="lib_lua"
-else
 	LIB_LUA="lib_luajit"
 	defines( "LIB_LUAJIT" )
-end
 	
-	include("lua_pack")
-	include("lua_zip")
-	include("lua_zlib")
-	include("lua_freetype")
-	include("lua_bit")
-	include("lua_box2d")
-	include("lua_ogg")
-	include("lua_al")
-	include("lua_gl")
-	include("lua_grd")
-	include("lua_grdmap")
-	include("lua_sod")
-	include("lua_speak")
-	include("lua_lash")
-	include("lua_lfs")
-	include("lua_socket")
-	include("lua_fenestra")
-	include("lua_sqlite")
-	include("lua_lanes")
+end
 
--- security is always a clusterfuck, need openssl working cross platform
--- and its not building right now, so disabled
+or
+all_includes=all_includes or {
+	{"lua_pack",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
+	{"lua_zip",			WINDOWS		or		NIX		or		nil		or		ANDROID		},
+	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		},
+	{"lua_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		},
+	{"lua_bit",			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
+	{"lua_box2d",		WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lua_ogg",			WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lua_al",			WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lua_gl",			WINDOWS		or		NIX		or		NACL	or		nil			},
+	{"lua_grd",			WINDOWS		or		NIX		or		nil		or		ANDROID		},
+	{"lua_grdmap",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
+	{"lua_sod",			WINDOWS		or		NIX		or		nil		or		ANDROID		},
+	{"lua_speak",		WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lua_lash",		WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lua_socket",		WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lua_fenestra",	WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
+	{"lua_lanes",		WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lua_posix",		nil			or		NIX		or		nil		or		nil			},
+	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
+	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		},
+	{"lib_png",			WINDOWS		or		NIX		or		nil		or		ANDROID		},
+	{"lib_jpeg",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
+	{"lib_gif",			WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lib_z",			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
+	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
+	{"lib_pcre",		WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lib_ogg",			WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lib_vorbis",		WINDOWS		or		NIX		or		nil		or		nil			},
+	{"lib_openal",		WINDOWS		or		NIX		or		nil		or		nil			},
+	{AND_LIB_DIR,		nil			or		nil		or		nil		or		ANDROID		},
+	{"lib_nacl",		nil			or		nil		or		NACL	or		nil			},
+	{"lua",				WINDOWS		or		NIX		or		NACL	or		ANDROID		},
+	{"nginx",			nil			or		NIX		or		nil		or		nil			},
+}
 
---	include("lua_sec")
+------------------------------------------------------------------------
+-- include sub projects depending on above build tests or you could choose
+-- to set all_includes before including this file to choose your own config
+------------------------------------------------------------------------
 
-
--- not using this to avoid the dependencies
--- should probably setup sql as a dll since its useless on consoles etc
--- as there is no full source to build, well there is source...
--- but fuck me if I can build the shits
-
---	include("lua_sql")
-
-
-	if NIX then
-
-		include("lua_posix")
---		include("lib_sx")
-		
+for i,v in ipairs(all_includes) do
+	if v[2] then
+		include(v[1])
 	end
-	
-	include(LIB_LUA)
-	include("lib_zzip")
-	include("lib_png")
-	include("lib_jpeg")
-	include("lib_gif")
-	include("lib_z")
-	include("lib_sqlite")
-	include("lib_pcre")
-	
-	include("lib_ogg")
-	include("lib_vorbis")
-	
-	include("lib_openal")
-
--- we probably static link with all the above libs so this should go last
-	include("lua")
-
--- build webserver
-if not WINDOWS then
-	include("nginx")
-end
-
 end
 
 
