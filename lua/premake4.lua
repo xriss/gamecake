@@ -13,6 +13,7 @@ dofile("preloadlibs.lua")
 --links(lua_lib_names)
 
 links(static_lib_names)
+links(static_lib_names) -- so good we linked it twice...
 
 if NACL then
 
