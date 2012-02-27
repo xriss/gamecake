@@ -17,8 +17,10 @@ end
 
 for i,v in ipairs( os.matchfiles("../bin/lua/**.lua") or {} ) do dofilename(i,v) end
 
--- include yarn codes for now?
-for i,v in ipairs( os.matchfiles("../../yarn/lua/**.lua") or {} ) do dofilename(i,v) end
+
+for i,v in ipairs( LUA_CACHE_FILES or {} ) do
+	for i,v in ipairs( os.matchfiles(v) or {} ) do dofilename(i,v) end
+end
 
 
 local readfile=function(name)
