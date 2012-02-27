@@ -20,23 +20,23 @@ if NACL then
 	linkoptions { "-v" }
 
 	links { "ppapi" , "ppapi_gles2" }
-
 	links { "m" , "stdc++" }
-	links { "ppapi" , "ppapi_gles2" }
 	
 	KIND{kind="WindowedApp",name="lua.32.nexe"}
 
 elseif ANDROID then 
 
-	linkoptions { "-v" }
+--	linkoptions { "-v" }
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	
-	links { "dl", "log", "GLESv1_CM", "c", "m", "gcc" }
+	links { "GLESv1_CM" }
+	links { "dl", "log", "c", "m", "gcc" }	
 	
-	linkoptions{ "-Bsymbolic"}
+--	linkoptions{ "-Bsymbolic"}
 
 	files { "../lib_lua/src/*.h", --[["src/lua.c"]]  }
 	KIND{kind="SharedLib",name="liblua"}
+
 
 elseif WINDOWS then
 

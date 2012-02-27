@@ -477,7 +477,9 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
         // "The specified scheduling parameters are only used if the scheduling
         //  parameter inheritance attribute is PTHREAD_EXPLICIT_SCHED."
         //
-        PT_CALL( pthread_attr_setinheritsched( a, PTHREAD_EXPLICIT_SCHED ) );
+
+//TODO???? ANDROID
+//        PT_CALL( pthread_attr_setinheritsched( a, PTHREAD_EXPLICIT_SCHED ) );
 
         //---
         // "Select the scheduling policy for the thread: one of SCHED_OTHER 
@@ -721,7 +723,11 @@ bool_t THREAD_WAIT( THREAD_T *ref, double secs , SIGNAL_T *signal_ref, MUTEX_T *
   }
   //
   void THREAD_KILL( THREAD_T *ref ) {
+// missing....
+#if !defined(pthread_cancel)
     pthread_cancel( *ref );
+#endif
+
   }
 #endif // THREADAPI == THREADAPI_PTHREAD
 

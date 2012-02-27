@@ -102,7 +102,9 @@ static const luaglConst luagl_const[] = {
   { "UNSIGNED_BYTE"                   , GL_UNSIGNED_BYTE                  },
   { "SHORT"                           , GL_SHORT                          },
   { "UNSIGNED_SHORT"                  , GL_UNSIGNED_SHORT                 },
+#ifdef GL_VERSION_1_1
   { "INT"                             , GL_INT                            },
+#endif
   { "UNSIGNED_INT"                    , GL_UNSIGNED_INT                   },
   { "FLOAT"                           , GL_FLOAT                          },
 #ifdef GL_VERSION_1_1
@@ -110,8 +112,8 @@ static const luaglConst luagl_const[] = {
   { "3_BYTES"                         , GL_3_BYTES                        },
   { "4_BYTES"                         , GL_4_BYTES                        },
   { "DOUBLE"                          , GL_DOUBLE                         },
-#endif
   { "NONE"                            , GL_NONE                           },
+#endif
 #ifdef GL_VERSION_1_1
   { "FRONT_LEFT"                      , GL_FRONT_LEFT                     },
   { "FRONT_RIGHT"                     , GL_FRONT_RIGHT                    },
@@ -465,9 +467,9 @@ static const luaglConst luagl_const[] = {
   { "DEPTH"                           , GL_DEPTH                          },
   { "STENCIL"                         , GL_STENCIL                        },
   { "COLOR_INDEX"                     , GL_COLOR_INDEX                    },
-#endif
   { "STENCIL_INDEX"                   , GL_STENCIL_INDEX                  },
   { "DEPTH_COMPONENT"                 , GL_DEPTH_COMPONENT                },
+#endif
 #ifdef GL_VERSION_1_1
   { "RED"                             , GL_RED                            },
   { "GREEN"                           , GL_GREEN                          },
@@ -569,9 +571,9 @@ static const luaglConst luagl_const[] = {
   { "RGB12"                           , GL_RGB12                          },
   { "RGB16"                           , GL_RGB16                          },
   { "RGBA2"                           , GL_RGBA2                          },
-#endif
   { "RGBA4"                           , GL_RGBA4                          },
   { "RGB5_A1"                         , GL_RGB5_A1                        },
+#endif
 #ifdef GL_VERSION_1_1
   { "RGBA8"                           , GL_RGBA8                          },
   { "RGB10_A2"                        , GL_RGB10_A2                       },
@@ -2036,8 +2038,8 @@ static int luagl_get_depth(GLenum format)
   int depth = 0;
   switch(format)
   {
-  case GL_DEPTH_COMPONENT:
-  case GL_STENCIL_INDEX:
+//  case GL_DEPTH_COMPONENT:
+//  case GL_STENCIL_INDEX:
 //  case GL_COLOR_INDEX:
 //  case GL_RED:
 //  case GL_GREEN:
