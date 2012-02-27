@@ -8,6 +8,8 @@ links { "lib_lua" }
 
 defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
+defines("pthread_yield=sched_yield")
+defines("pthread_cancel=0")
 
 
 KIND{kind="lua",name="lua51-lanes",luaname="lua51-lanes",luaopen="lanes"}

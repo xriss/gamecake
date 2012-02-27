@@ -1,6 +1,11 @@
 
 
-#if defined(ANDROID) || defined(NACL)
+#if defined(ANDROID) 
+
+#include "GLES/gl.h"
+#include "GLES/glext.h"
+
+#elif  defined(NACL)
 
 #include "GLES2/gl2.h"
 #include "GLES2/gl2ext.h"
