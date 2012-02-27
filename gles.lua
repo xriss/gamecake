@@ -603,13 +603,14 @@ for l in import:gmatch("([^\n]*)") do
 end
 import=nil -- free it just because
 
-for i,v in pairs(gles.defs) do -- copy vals into base for shorthand al.FALSE use
+gles.nums={}
+for i,v in pairs(gles.defs) do -- copy vals into base for shorthand gl.FALSE use
 	base[i]=v
-	base[v]=i
+	gles.nums[v]=i
 end
 
 function gles.numtostring(num)
-	return gles.defs[num]
+	return gles.nums[num]
 end
 
 function gles.GetError(...)
@@ -623,6 +624,47 @@ end
 
 function gles.Get(...)
 	return core.Get(...)
+end
+
+
+function gles.ClearColor(...)
+	return core.ClearColor(...)
+end
+
+function gles.Clear(...)
+	return core.Clear(...)
+end
+
+function gles.MatrixMode(...)
+	return core.MatrixMode(...)
+end
+
+function gles.LoadMatrix(...)
+	return core.LoadMatrix(...)
+end
+
+function gles.LoadIdentity(...)
+	return core.LoadIdentity(...)
+end
+
+function gles.Translate(...)
+	return core.Translate(...)
+end
+
+function gles.Rotate(...)
+	return core.Rotate(...)
+end
+
+function gles.Scale(...)
+	return core.Scale(...)
+end
+
+function gles.PushMatrix(...)
+	return core.PushMatrix(...)
+end
+
+function gles.PopMatrix(...)
+	return core.PopMatrix(...)
 end
 
 
