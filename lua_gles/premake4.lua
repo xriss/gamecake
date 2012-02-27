@@ -2,12 +2,11 @@
 project "lua_gles"
 language "C"
 
-files { "code/*.c" }
+files { "code/**.c" , "code/**.h" }
+
+includedirs { "code" }
 
 links { "lib_lua" }
-
-includedirs { "." , "code" }
-
 
 KIND{lua="gles.core"}
 
