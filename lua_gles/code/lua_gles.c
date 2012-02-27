@@ -5,6 +5,7 @@
 #include <GLES/gl.h>
 
 
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // turn a def into a property type and size
@@ -27,7 +28,13 @@ void lua_gles_get_prop_info (int def, char *v, int *num)
 // float[6]
 			*num=6; *v='f';
 		break;
+
 // const char *
+		case GL_VENDOR:
+		case GL_RENDERER:
+		case GL_VERSION:
+		case GL_EXTENSIONS:
+
 			*num=1; *v='s';
 		break;
 	}
@@ -93,13 +100,115 @@ int i;
 	return num;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// enabler
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gles_Enable (lua_State *l)
+{
+	glEnable(		(int)lua_tonumber(l,1)	);
+	return 0;
+}
+static int lua_gles_Disable (lua_State *l)
+{
+	glDisable(		(int)lua_tonumber(l,1)	);
+	return 0;
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // Clear
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gles_ClearColor (lua_State *l)
+{
+	glClearColor(	(float)lua_tonumber(l,1)	,
+					(float)lua_tonumber(l,2)	,
+					(float)lua_tonumber(l,3)	,
+					(float)lua_tonumber(l,4)	);
+	return 0;
+}
+
+static int lua_gles_ClearDepth (lua_State *l)
+{
+	glClearDepthf(	(float)lua_tonumber(l,1)	);
+	return 0;
+}
+
 static int lua_gles_Clear (lua_State *l)
 {
+	glClear(		(int)lua_tonumber(l,1)	);
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// Matrix
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gles_MatrixMode (lua_State *l)
+{
+	glMatrixMode(	(int)lua_tonumber(l,1)	);
+	return 0;
+}
+
+static int lua_gles_LoadMatrix (lua_State *l)
+{
+int i;
+float ff[16];
+	for(i=0;i<16;i++)
+	{
+		lua_pushnumber(l,i+1);
+		lua_gettable(l,1);
+		ff[i]=(float)lua_tonumber(l,-1);
+		lua_pop(l,1);
+	}
+
+	glLoadMatrixf(ff);
+	return 0;
+}
+
+static int lua_gles_LoadIdentity (lua_State *l)
+{
+	glLoadIdentity();
+	return 0;
+}
+
+static int lua_gles_Translate (lua_State *l)
+{
+	glTranslatef(	(float)lua_tonumber(l,1)	,
+					(float)lua_tonumber(l,2)	,
+					(float)lua_tonumber(l,3)	);
+	return 0;
+}
+static int lua_gles_Rotate (lua_State *l)
+{
+	glRotatef(		(float)lua_tonumber(l,1)	,
+					(float)lua_tonumber(l,2)	,
+					(float)lua_tonumber(l,3)	,
+					(float)lua_tonumber(l,4)	);
+	return 0;
+}
+static int lua_gles_Scale (lua_State *l)
+{
+	glScalef(		(float)lua_tonumber(l,1)	,
+					(float)lua_tonumber(l,2)	,
+					(float)lua_tonumber(l,3)	);
+	return 0;
+}
+
+
+static int lua_gles_PushMatrix (lua_State *l)
+{
+	glPushMatrix();
+	return 0;
+}
+
+static int lua_gles_PopMatrix (lua_State *l)
+{
+	glPopMatrix();
 	return 0;
 }
 
@@ -116,7 +225,21 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"Get",					lua_gles_Get},
 		{"GetError",			lua_gles_GetError},
 
+		{"Enable",				lua_gles_Enable},
+		{"Disable",				lua_gles_Disable},
+
+		{"ClearColor",			lua_gles_ClearColor},
+		{"ClearDepth",			lua_gles_ClearDepth},
 		{"Clear",				lua_gles_Clear},
+
+		{"MatrixMode",			lua_gles_MatrixMode},
+		{"LoadMatrix",			lua_gles_LoadMatrix},
+		{"LoadIdentity",		lua_gles_LoadIdentity},
+		{"Translate",			lua_gles_Translate},
+		{"Rotate",				lua_gles_Rotate},
+		{"Scale",				lua_gles_Scale},
+		{"PushMatrix",			lua_gles_PushMatrix},
+		{"PopMatrix",			lua_gles_PopMatrix},
 		
 		{0,0}
 	};
