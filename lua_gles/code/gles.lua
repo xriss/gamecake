@@ -626,6 +626,13 @@ function gles.Get(...)
 	return core.Get(...)
 end
 
+function gles.Enable(...)
+	return core.Enable(...)
+end
+
+function gles.Disable(...)
+	return core.Disable(...)
+end
 
 function gles.ClearColor(...)
 	return core.ClearColor(...)
@@ -641,6 +648,14 @@ end
 
 function gles.LoadMatrix(...)
 	return core.LoadMatrix(...)
+end
+
+function gles.MultMatrix(...)
+	return core.MultMatrix(...)
+end
+
+function gles.Frustum(...)
+	return core.Frustum(...)
 end
 
 function gles.LoadIdentity(...)
@@ -667,5 +682,72 @@ function gles.PopMatrix(...)
 	return core.PopMatrix(...)
 end
 
+function gles.GenTexture(...)
+	return core.GenTexture(...)
+end
+
+function gles.BindTexture(...)
+	return core.BindTexture(...)
+end
+
+function gles.DeleteTexture(...)
+	return core.DeleteTexture(...)
+end
+
+function gles.TexImage2D(...)
+	return core.TexImage2D(...)
+end
+
+function gles.TexParameter(...)
+	return core.TexParameter(...)
+end
+
+function gles.Viewport(...)
+	return core.Viewport(...)
+end
+
+function gles.BlendFunc(...)
+	return core.BlendFunc(...)
+end
+
+function gles.ShadeModel(...)
+	return core.ShadeModel(...)
+end
+
+function gles.Color(...)
+	return core.Color(...)
+end
+
+function gles.EnableClientState(...)
+	return core.EnableClientState(...)
+end
+
+function gles.DisableClientState(...)
+	return core.DisableClientState(...)
+end
+
+function gles.DrawArrays(...)
+	return core.DrawArrays(...)
+end
+
+function gles.DrawElements(...)
+	return core.DrawElements(...)
+end
+
+function gles.ColorPointer(...)
+	return core.ColorPointer(...)
+end
+
+function gles.TexCoordPointer(...)
+	return core.TexCoordPointer(...)
+end
+
+function gles.NormalPointer(...)
+	return core.NormalPointer(...)
+end
+
+function gles.VertexPointer(...)
+	return core.VertexPointer(...)
+end
 
 return gles
