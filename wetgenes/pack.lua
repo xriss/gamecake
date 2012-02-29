@@ -17,16 +17,16 @@ local wstr=require("wetgenes.string")
 --
 -- Read a single member and return it
 --
-pack.read=function(dats,fmt,off,bigend)
-	local datt,len=core.load(dats,{fmt,bigend=bigend},off)
+pack.read=function(dats,fmt,off)
+	local datt,len=core.load(dats,{fmt},off)
 	return datt and datt[1]
 end
 
 --
 -- Read an array of the same type
 --
-pack.load_array=function(dats,fmt,off,count,bigend)
-	local fmts={bigend=bigend}
+pack.load_array=function(dats,fmt,off,count)
+	local fmts={}
 	for i=1,count do fmts[i]=fmt end
 	return core.load(dats,fmts,off)
 end
@@ -34,10 +34,10 @@ end
 --
 -- write an array of the same type
 --
-pack.save_array=function(dats,fmt,off,count,bigend)
-	local fmts={bigend=bigend}
+pack.save_array=function(dats,fmt,off,count,buff)
+	local fmts={}
 	for i=1,count do fmts[i]=fmt end
-	return core.save(dats,fmts,off)
+	return core.save(dats,fmts,off,buff)
 end
 
 --
@@ -66,7 +66,6 @@ pack.load=function(dats,fmts,off)
 		fmtn[len]=vn
 		
 	end
-	
 
 -- parse the data	
 	local datt,len=core.load(dats,fmtt,off)
@@ -117,6 +116,9 @@ pack.alloc=function(size)
 end
 pack.sizeof=function(ud)
 	return core.sizeof(ud)
+end
+pack.tostring=function(ud)
+	return core.tostring(ud)
 end
 
 return pack
