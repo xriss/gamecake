@@ -17,7 +17,9 @@
 
 #include "code/lua_pack.h"
 
-
+// inyourendo is a flag set to 1 for little endian (the default) or 0 for bigendian
+// dataformats can be preceeded by - to force little endian although they are little endian by default
+// or with + to force big endian
 
 
 // hax to be honest, all this to create a lua_toluserdata function
@@ -64,7 +66,7 @@ static u8 * lua_toluserdata (lua_State *L, int idx, size_t *len) {
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // Turn a short string to a number, 4 chars max.
-// This number can then be compared agains multichar numbers.
+// This number can then be compared against multichar numbers.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static u32 string_to_id(const char *s)
@@ -147,7 +149,7 @@ static void lua_pack_write_s32 (s32 d,u8 *p, int inyourendo )
 }
 static void lua_pack_write_f32 (f32 d,u8 *p, int inyourendo )
 {
-	lua_pack_write_f32 ( *((f32*)(&d)) ,p,inyourendo );
+	lua_pack_write_u32 ( *((u32*)(&d)) ,p,inyourendo );
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -216,16 +218,30 @@ static int lua_pack_field_size (u32 def)
 	switch(def)
 	{
 		case 's8' :
+		case '-s8' :
+		case '+s8' :
 		case 'u8' :
+		case '-u8' :
+		case '+u8' :
 			return 1;
 			
 		case 's16' :
+		case '-s16' :
+		case '+s16' :
 		case 'u16' :
+		case '-u16' :
+		case '+u16' :
 			return 2;
 			
 		case 'f32' :
+		case '-f32' :
+		case '+f32' :
 		case 's32' :
+		case '-s32' :
+		case '+s32' :
 		case 'u32' :
+		case '-u32' :
+		case '+u32' :
 			return 4;
 	}
 	
@@ -237,19 +253,37 @@ static int lua_pack_field_size (u32 def)
 // read this field into a double (s32 and u32 will fit with no bitloss)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static double lua_pack_get_field (u32 def,cu8*p,int inyourendo)
+static double lua_pack_get_field (u32 def,cu8*p)
 {
 	switch(def)
 	{
-		case 's8' : return (double) lua_pack_read_s8 ( p, inyourendo );
-		case 'u8' : return (double) lua_pack_read_u8 ( p, inyourendo );
-			
-		case 's16' : return (double) lua_pack_read_s16 ( p, inyourendo );
-		case 'u16' : return (double) lua_pack_read_u16 ( p, inyourendo );
-			
-		case 'f32' : return (double) lua_pack_read_f32 ( p, inyourendo );
-		case 's32' : return (double) lua_pack_read_s32 ( p, inyourendo );
-		case 'u32' : return (double) lua_pack_read_u32 ( p, inyourendo );
+		case 's8' :
+		case '-s8' : return (double) lua_pack_read_s8 ( p, 1 );
+		case '+s8' : return (double) lua_pack_read_s8 ( p, 0 );
+		
+		case 'u8' :
+		case '-u8' : return (double) lua_pack_read_u8 ( p, 1 );
+		case '+u8' : return (double) lua_pack_read_u8 ( p, 0 );
+
+		case 's16' :
+		case '-s16' : return (double) lua_pack_read_s16 ( p, 1 );
+		case '+s16' : return (double) lua_pack_read_s16 ( p, 0 );
+
+		case 'u16' :
+		case '-u16' : return (double) lua_pack_read_u16 ( p, 1 );
+		case '+u16' : return (double) lua_pack_read_u16 ( p, 0 );
+
+		case 'f32' :
+		case '-f32' : return (double) lua_pack_read_f32 ( p, 1 );
+		case '+f32' : return (double) lua_pack_read_f32 ( p, 0 );
+
+		case 's32' :
+		case '-s32' : return (double) lua_pack_read_s32 ( p, 1 );
+		case '+s32' : return (double) lua_pack_read_s32 ( p, 0 );
+
+		case 'u32' :
+		case '-u32' : return (double) lua_pack_read_u32 ( p, 1 );
+		case '+u32' : return (double) lua_pack_read_u32 ( p, 0 );
 	}
 		
 	return 0.0;
@@ -260,19 +294,37 @@ static double lua_pack_get_field (u32 def,cu8*p,int inyourendo)
 // write this field into some data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static void lua_pack_set_field (double d,u32 def,u8*p,int inyourendo)
+static void lua_pack_set_field (double d,u32 def,u8*p)
 {
 	switch(def)
 	{
-		case 's8' : lua_pack_write_s8 ( (s8)d,p, inyourendo ); break;
-		case 'u8' : lua_pack_write_u8 ( (u8)d,p, inyourendo ); break;
+		case 's8' :
+		case '-s8' : lua_pack_write_s8 ( (s8)d,p, 1 ); break;
+		case '+s8' : lua_pack_write_s8 ( (s8)d,p, 0 ); break;
+
+		case 'u8' :
+		case '-u8' : lua_pack_write_u8 ( (u8)d,p, 1 ); break;
+		case '+u8' : lua_pack_write_u8 ( (u8)d,p, 0 ); break;
 			
-		case 's16' : lua_pack_write_s16 ( (s16)d,p, inyourendo ); break;
-		case 'u16' : lua_pack_write_u16 ( (u16)d,p, inyourendo ); break;
+		case 's16' :
+		case '-s16' : lua_pack_write_s16 ( (s16)d,p, 1 ); break;
+		case '+s16' : lua_pack_write_s16 ( (s16)d,p, 0 ); break;
+
+		case 'u16' :
+		case '-u16' : lua_pack_write_u16 ( (u16)d,p, 1 ); break;
+		case '+u16' : lua_pack_write_u16 ( (u16)d,p, 0 ); break;
 			
-		case 'f32' : lua_pack_write_f32 ( (f32)d,p, inyourendo ); break;
-		case 's32' : lua_pack_write_s32 ( (s32)d,p, inyourendo ); break;
-		case 'u32' : lua_pack_write_u32 ( (u32)d,p, inyourendo ); break;
+		case 'f32' :
+		case '-f32' : lua_pack_write_f32 ( (f32)d,p, 1 ); break;
+		case '+f32' : lua_pack_write_f32 ( (f32)d,p, 0 ); break;
+
+		case 's32' :
+		case '-s32' : lua_pack_write_s32 ( (s32)d,p, 1 ); break;
+		case '+s32' : lua_pack_write_s32 ( (s32)d,p, 0 ); break;
+
+		case 'u32' :
+		case '-u32' : lua_pack_write_u32 ( (u32)d,p, 1 ); break;
+		case '+u32' : lua_pack_write_u32 ( (u32)d,p, 0 ); break;
 	}
 	
 }
@@ -289,7 +341,6 @@ const u8 *ptr=0;
 int len;
 int off=0;
 int n;
-int inyourendo=1;
 
 u32 def;
 int def_len;
@@ -323,12 +374,6 @@ int count;
 		lua_pushstring(l,"need a table to describe packed data");
 		lua_error(l);
 	}
-	
-	lua_pushstring(l,"bigend"); // check big endian flag
-	lua_rawget(l,2);
-	if(lua_toboolean(l,-1)) { inyourendo=0; } // big endian
-	lua_pop(l,1);
-
 	
 	if(lua_isnumber(l,3)) // optional start point
 	{
@@ -401,7 +446,7 @@ int count;
 		}
 		else
 		{
-			d=lua_pack_get_field(def,ptr+off,inyourendo);
+			d=lua_pack_get_field(def,ptr+off);
 			lua_pushnumber(l,d);
 			lua_rawseti(l,-2,n); // save in table
 		}
@@ -424,7 +469,6 @@ double d;
 int len;
 int off=0;
 int n;
-int inyourendo=1;
 
 u32 def;
 int def_len;
@@ -448,12 +492,6 @@ int sl;
 		lua_pushstring(l,"need a table to describe packed data");
 		lua_error(l);
 	}
-	
-	lua_pushstring(l,"bigend"); // check big endian flag
-	lua_rawget(l,2);
-	if(lua_toboolean(l,-1)) { inyourendo=0; } // big endian
-	lua_pop(l,1);
-
 	
 	if(lua_isnumber(l,3)) // optional start point
 	{
@@ -549,7 +587,7 @@ int sl;
 			d=lua_tonumber(l,-1);
 			lua_pop(l,1);
 			
-			lua_pack_set_field(d,def,data+off,inyourendo);
+			lua_pack_set_field(d,def,data+off);
 		}
 				
 		off+=def_len; // advance ptr
@@ -608,6 +646,31 @@ u8 *ptr=0;
 	lua_pushnumber(l,len);
 	return 1;
 }
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// convert a userdata to a string
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_pack_tostring (lua_State *l)
+{
+int len=0;
+u8 *ptr=0;
+	
+	if(!lua_isuserdata(l,1))
+	{
+		lua_pushstring(l,"not a userdata");
+		lua_error(l);
+		return 0;
+	}
+	
+	ptr=lua_toluserdata(l,1,&len);
+	if(!ptr) { return 0; }
+
+	lua_pushlstring(l,ptr,len);
+	return 1;
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -622,6 +685,7 @@ LUALIB_API int luaopen_wetgenes_pack_core (lua_State *l)
 
 		{"alloc",			lua_pack_alloc},
 		{"sizeof",			lua_pack_sizeof},
+		{"tostring",		lua_pack_tostring},
 
 		{0,0}
 	};

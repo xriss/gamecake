@@ -145,7 +145,7 @@ static int lua_gles_Clear (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// Matrix
+// Matrix (gles1)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_gles_MatrixMode (lua_State *l)
@@ -167,6 +167,33 @@ float ff[16];
 	}
 
 	glLoadMatrixf(ff);
+	return 0;
+}
+
+static int lua_gles_MultMatrix (lua_State *l)
+{
+int i;
+float ff[16];
+	for(i=0;i<16;i++)
+	{
+		lua_pushnumber(l,i+1);
+		lua_gettable(l,1);
+		ff[i]=(float)lua_tonumber(l,-1);
+		lua_pop(l,1);
+	}
+
+	glMultMatrixf(ff);
+	return 0;
+}
+
+static int lua_gles_Frustum (lua_State *l)
+{
+	glFrustumf(		(float)lua_tonumber(l,1)	,
+					(float)lua_tonumber(l,2)	,
+					(float)lua_tonumber(l,3)	,
+					(float)lua_tonumber(l,4)	,
+					(float)lua_tonumber(l,5)	,
+					(float)lua_tonumber(l,6)	);
 	return 0;
 }
 
@@ -212,6 +239,166 @@ static int lua_gles_PopMatrix (lua_State *l)
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// textures
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gles_GenTexture (lua_State *l)
+{
+int id;
+	glGenTextures(1,&id);
+	lua_pushnumber(l,id);
+	return 1;
+}
+
+static int lua_gles_BindTexture (lua_State *l)
+{
+	glBindTexture((int)lua_tonumber(l,1),(int)lua_tonumber(l,2));
+	return 0;
+}
+
+static int lua_gles_DeleteTexture (lua_State *l)
+{
+int id=(int)lua_tonumber(l,1);
+	glDeleteTextures(1,&id);
+	return 0;
+}
+
+static int lua_gles_TexImage2D (lua_State *l)
+{
+	glTexImage2D(	(int)lua_tonumber(l,1)		,
+					(int)lua_tonumber(l,2)		,
+					(int)lua_tonumber(l,3)		,
+					(int)lua_tonumber(l,4)		,
+					(int)lua_tonumber(l,5)		,
+					(int)lua_tonumber(l,6)		,
+					(int)lua_tonumber(l,7)		,
+					(int)lua_tonumber(l,8)		,
+					(void*)lua_touserdata(l,9)	);
+	return 0;
+}
+
+static int lua_gles_TexParameter (lua_State *l)
+{
+int v[1];
+	v[1]=(int)lua_tonumber(l,3);
+	
+	glTexParameteriv(	(int)lua_tonumber(l,1)		,
+						(int)lua_tonumber(l,1)		,
+						v							);
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// how to draw
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gles_BlendFunc (lua_State *l)
+{
+	glBlendFunc(	(int)lua_tonumber(l,1)		,
+					(int)lua_tonumber(l,2)		);
+	return 0;
+}
+static int lua_gles_ShadeModel (lua_State *l)
+{
+	glShadeModel(	(int)lua_tonumber(l,1)		);
+	return 0;
+}
+
+static int lua_gles_Color (lua_State *l)
+{
+	glColor4f(		(float)lua_tonumber(l,1)	,
+					(float)lua_tonumber(l,2)	,
+					(float)lua_tonumber(l,3)	,
+					(float)lua_tonumber(l,4)	);
+	return 0;
+}
+
+static int lua_gles_EnableClientState (lua_State *l)
+{
+	glEnableClientState(	(int)lua_tonumber(l,1)	);
+	return 0;
+}
+
+static int lua_gles_DisableClientState (lua_State *l)
+{
+	glDisableClientState(	(int)lua_tonumber(l,1)	);
+	return 0;
+}
+
+static int lua_gles_Viewport (lua_State *l)
+{
+	glViewport(			(int)lua_tonumber(l,1)	,
+						(int)lua_tonumber(l,2)	,
+						(int)lua_tonumber(l,3)	,
+						(int)lua_tonumber(l,4)	);
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// what to draw (gles1)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+
+static int lua_gles_ColorPointer (lua_State *l)
+{
+	glColorPointer(		(int)lua_tonumber(l,1)		,
+						(int)lua_tonumber(l,2)		,
+						(int)lua_tonumber(l,3)		,
+						(void*)lua_touserdata(l,4)	);
+	return 0;
+}
+
+static int lua_gles_TexCoordPointer (lua_State *l)
+{
+	glTexCoordPointer(	(int)lua_tonumber(l,1)		,
+						(int)lua_tonumber(l,2)		,
+						(int)lua_tonumber(l,3)		,
+						(void*)lua_touserdata(l,4)	);
+	return 0;
+}
+
+static int lua_gles_NormalPointer (lua_State *l)
+{
+	glNormalPointer(	(int)lua_tonumber(l,1)		,
+						(int)lua_tonumber(l,2)		,
+						(void*)lua_touserdata(l,3)	);
+	return 0;
+}
+
+static int lua_gles_VertexPointer (lua_State *l)
+{
+	glVertexPointer(	(int)lua_tonumber(l,1)		,
+						(int)lua_tonumber(l,2)		,
+						(int)lua_tonumber(l,3)		,
+						(void*)lua_touserdata(l,4)	);
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// when to draw
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gles_DrawArrays (lua_State *l)
+{
+	glDrawArrays(		(int)lua_tonumber(l,1)		,
+						(int)lua_tonumber(l,2)		,
+						(int)lua_tonumber(l,3)		);
+	return 0;
+}
+
+static int lua_gles_DrawElements (lua_State *l)
+{
+	glDrawElements(		(int)lua_tonumber(l,1)		,
+						(int)lua_tonumber(l,2)		,
+						(int)lua_tonumber(l,3)		,
+						(void*)lua_touserdata(l,4)	);
+	return 0;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -232,14 +419,40 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"ClearDepth",			lua_gles_ClearDepth},
 		{"Clear",				lua_gles_Clear},
 
+		{"GenTexture",			lua_gles_GenTexture},
+		{"BindTexture",			lua_gles_BindTexture},
+		{"DeleteTexture",		lua_gles_DeleteTexture},
+		{"TexImage2D",			lua_gles_TexImage2D},
+		{"TexParameter",		lua_gles_TexParameter},
+
+		{"ShadeModel",			lua_gles_ShadeModel},		
+		{"BlendFunc",			lua_gles_BlendFunc},		
+		{"Color",				lua_gles_Color},
+		{"Viewport",			lua_gles_Viewport},
+
+		{"EnableClientState",	lua_gles_EnableClientState},
+		{"DisableClientState",	lua_gles_DisableClientState},
+		
+		{"DrawArrays",			lua_gles_DrawArrays},
+		{"DrawElements",		lua_gles_DrawElements},
+
+//GLES1 only...
+
 		{"MatrixMode",			lua_gles_MatrixMode},
 		{"LoadMatrix",			lua_gles_LoadMatrix},
+		{"MultMatrix",			lua_gles_MultMatrix},
 		{"LoadIdentity",		lua_gles_LoadIdentity},
 		{"Translate",			lua_gles_Translate},
 		{"Rotate",				lua_gles_Rotate},
 		{"Scale",				lua_gles_Scale},
 		{"PushMatrix",			lua_gles_PushMatrix},
 		{"PopMatrix",			lua_gles_PopMatrix},
+		{"Frustum",				lua_gles_Frustum},
+		
+		{"ColorPointer",		lua_gles_ColorPointer},
+		{"TexCoordPointer",		lua_gles_TexCoordPointer},
+		{"NormalPointer",		lua_gles_NormalPointer},
+		{"VertexPointer",		lua_gles_VertexPointer},
 		
 		{0,0}
 	};

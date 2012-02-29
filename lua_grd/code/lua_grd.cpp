@@ -63,6 +63,8 @@ int lua_grd_getinfo (lua_State *l, part_ptr p, int tab)
 {
 	if(p)
 	{
+		lua_pushliteral(l,"data");		lua_pushlightuserdata(l,p->bmap->data);		lua_rawset(l,tab);
+
 		lua_pushliteral(l,"format");	lua_pushnumber(l,p->bmap->fmt);		lua_rawset(l,tab);
 
 		lua_pushliteral(l,"width");		lua_pushnumber(l,p->bmap->w);		lua_rawset(l,tab);

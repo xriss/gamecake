@@ -35,3 +35,18 @@ function test_pack()
 	assert(s1==s2)
 
 end
+
+
+function test_buffpack()
+
+	local buff=pack.alloc(16*4)
+	
+	pack.save_array( {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},"f32",0,16 )
+
+	local s=pack.tostring(buff)
+	
+--	print(s)
+
+	
+
+end
