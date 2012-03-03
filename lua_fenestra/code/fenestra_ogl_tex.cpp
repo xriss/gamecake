@@ -39,8 +39,14 @@ bool fenestra_ogl::tex_setup(struct fogl_tex *tex, struct grd *g)
 
 // no auto mipmaps, add them in later?
 
-		glTexImage2D(GL_TEXTURE_2D, 0, 4 , g->bmap->w, g->bmap->h, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, g->bmap->data );
- 	
+		if(g->bmap->fmt=GRD_FMT_U16_RGB_565)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, 3 , g->bmap->w, g->bmap->h, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, g->bmap->data );
+		}
+		else
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, 4 , g->bmap->w, g->bmap->h, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, g->bmap->data );
+		}
 
 	}
 	

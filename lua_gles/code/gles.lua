@@ -609,19 +609,6 @@ for i,v in pairs(gles.defs) do -- copy vals into base for shorthand gl.FALSE use
 	gles.nums[v]=i
 end
 
-function gles.numtostring(num)
-	return gles.nums[num]
-end
-
-function gles.GetError(...)
-	return core.GetError(...)
-end
-function gles.CheckError(...)
-	local err=gles.GetError()
-	local str=gles.numtostring(err)
-	assert(err==0,str)
-end
-
 function gles.Get(...)
 	return core.Get(...)
 end
@@ -748,6 +735,41 @@ end
 
 function gles.VertexPointer(...)
 	return core.VertexPointer(...)
+end
+
+-- add optional debuggery to every function defined above
+--[[
+for i,v in pairs(gles) do
+	if type(v)=="function" and not ( i=="CheckError" or i=="GetError" or i=="numtostring" ) then	
+		local f=v
+		gles[i]=function(...) local r=f(...) gles.CheckError() return r end
+	end
+end
+]]
+
+function gles.numtostring(num)
+	return gles.nums[num]
+end
+
+function gles.GetError(...)
+	return core.GetError(...)
+end
+function gles.CheckError(...)
+	local err=gles.GetError()
+	local str=gles.numtostring(err)
+	assert(err==0,str)
+end
+
+-- add all extensions as flags to our main table (same as all the enums)
+function gles.GetExtensions()
+	gles.flags={}
+	local s=gles.Get(gles.EXTENSIONS)
+	for w in s:gmatch("([^%s]+)") do
+_G.print(w)
+		if w:sub(1,3)=="GL_" then
+			gles.flags[w:sub(4)]=true -- skip the "GL_" at the start
+		end
+	end
 end
 
 return gles
