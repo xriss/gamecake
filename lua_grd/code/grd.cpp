@@ -9,6 +9,10 @@
 // GRD Image handling layer, load/save/manipulate
 //
 
+//
+// this code makes an assumption of little endian, needs some if defs and slightly different conversion code
+// to run on bigendian hardware, we will leave that for later...
+//
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -272,6 +276,20 @@ struct grd * grd_insert( struct grd *ga ,  struct grd *gb )
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 bool grd_convert( struct grd *g , s32 fmt )
 {
+	struct grd *gb=grd_duplicate_convert( g , fmt );
+	if( gb == 0 )
+	{
+		return false; // error
+	}
+	if( gb != g ) // if these pointers are the same then there was no need to convert
+	{
+		grd_insert(g,gb); // we swap thw datas around
+		grd_free(gb);
+	}
+	return true;
+}
+struct grd * grd_duplicate_convert( struct grd *g , s32 fmt )
+{
 struct grd *gb;
 int x,y,z;
 u8 *pa;
@@ -280,9 +298,9 @@ u8 *pc;
 
 	g->err=0;
 
-	if(g->bmap->fmt==fmt) // nothing to do
+	if(g->bmap->fmt==fmt) // nothing to change
 	{
-		return true;
+		return g;
 	}
 
 	if(g->bmap->fmt==GRD_FMT_U8_ARGB) // convert from ARGB
@@ -291,30 +309,35 @@ u8 *pc;
 		{
 			case GRD_FMT_HINT_ALPHA:
 			case GRD_FMT_U8_ARGB:
-				return true; // no change needed
+				return g; // no change needed
 			break;
 			
 			case GRD_FMT_U8_ARGB_PREMULT:
-				g->bmap->fmt=GRD_FMT_U8_ARGB_PREMULT; // this is the same data, just bit twiddled
+				gb=grd_create(GRD_FMT_U8_ARGB_PREMULT,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return 0; }
 				for(z=0;z<g->bmap->d;z++)
 				{
 					for(y=0;y<g->bmap->h;y++)
 					{
 						pa=g->bmap->get_data(0,y,z);
+						pb=gb->bmap->get_data(0,y,z);
 						for(x=0;x<g->bmap->w;x++)
 						{
 							u32 a=pa[0];
-							pa[1]=(u8)((pa[1]*a)>>8);
-							pa[2]=(u8)((pa[2]*a)>>8);
-							pa[3]=(u8)((pa[3]*a)>>8);
+							pb[0]=a;
+							pb[1]=(u8)((pa[1]*a)>>8);
+							pb[2]=(u8)((pa[2]*a)>>8);
+							pb[3]=(u8)((pa[3]*a)>>8);
 							pa+=4;
+							pb+=4;
 						}
 					}
 				}
+				return gb;
 			break;
 
 			case GRD_FMT_U8_INDEXED:
-				return grd_quant(g,256);
+				return grd_duplicate_quant(g,256);
 			break;
 			
 			case GRD_FMT_HINT_ALPHA_1BIT:
@@ -345,14 +368,104 @@ u8 *pc;
 					}
 				}
 				
-				grd_insert(g,gb);
-				grd_free(gb);
+				return gb ;
 			break;
+
+			case GRD_FMT_U16_RGBA_4444:
+				gb=grd_create(GRD_FMT_U16_RGBA_4444,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return false; }
+				
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=g->bmap->get_data(0,y,z);
+						pb=gb->bmap->get_data(0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							u32 d;
+							
+							d=	((((u32)pa[1])<<8)&0xf000) |
+								((((u32)pa[2])<<4)&0x0f00) |
+								((((u32)pa[3])   )&0x00f0) |
+								((((u32)pa[0])>>4)&0x000f) ;
+								
+							*((u16 *)(pb))=(u16)d;
+							
+							pa+=4;
+							pb+=2;							
+						}
+					}
+				}
+				
+				return gb ;
+			break;
+
+			case GRD_FMT_U16_RGBA_4444_PREMULT:
+				gb=grd_create(GRD_FMT_U16_RGBA_4444_PREMULT,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return false; }
+				
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=g->bmap->get_data(0,y,z);
+						pb=gb->bmap->get_data(0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							u32 d;
+							u32 a=pa[0];
+							
+							d=	(((((u32)pa[1])*a)   )&0xf000) |
+								(((((u32)pa[2])*a)>>4)&0x0f00) |
+								(((((u32)pa[3])*a)>>8)&0x00f0) |
+								((((u32)pa[0])>>4)    &0x000f) ;
+								
+							*((u16 *)(pb))=(u16)d;
+							
+							pa+=4;
+							pb+=2;							
+						}
+					}
+				}
+				
+				return gb ;			break;
+			break;
+			
+			case GRD_FMT_U16_RGB_565:
+				gb=grd_create(GRD_FMT_U16_RGB_565,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return false; }
+				
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=g->bmap->get_data(0,y,z);
+						pb=gb->bmap->get_data(0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							u16 d;
+							
+							d=	((pa[1]>>3)<<11) |
+								((pa[2]>>2)<<5) |
+								 (pa[3]>>3) ;
+								
+							*((u16 *)(pb))=d;
+							
+							pa+=4;
+							pb+=2;							
+						}
+					}
+				}
+				
+				return gb ;
+			break;
+
 						
 			case GRD_FMT_U8_RGB:
 			
 			default:
-				return false;
+				return 0;
 			break;	
 		}
 	}
@@ -362,7 +475,7 @@ u8 *pc;
 		switch(g->bmap->fmt)
 		{
 			case GRD_FMT_U8_ARGB:
-				return true; // no change needed
+				return g; // no change needed
 			break;
 			
 			case GRD_FMT_U8_LUMINANCE:
@@ -389,8 +502,7 @@ u8 *pc;
 					}
 				}
 				
-				grd_insert(g,gb);
-				grd_free(gb);
+				return gb ;
 			break;
 						
 			case GRD_FMT_U16_ARGB_1555:
@@ -418,24 +530,26 @@ u8 *pc;
 					}
 				}
 				
-				grd_insert(g,gb);
-				grd_free(gb);
+				return gb ;
 			break;
 			
 			case GRD_FMT_U8_RGB:
 			
 			default:
-				return false;
+				return 0;
 			break;	
 		}
 	}
-	else // convert source to BGRA first then try again
+	else // convert source then try again
 	{
-		if(! grd_convert(g ,GRD_FMT_U8_ARGB) ) { return false; }
-		return grd_convert(g ,fmt);
+		gb=grd_duplicate_convert(g ,GRD_FMT_U8_ARGB); // this one always makes a new bitmap
+		if(gb==0) { return 0; }
+		if( ! grd_convert(gb ,GRD_FMT_U8_ARGB) ) { grd_free(gb); return 0; }
+		if( ! grd_convert(gb ,fmt) ) { grd_free(gb); return 0; }
+		return gb;
 	}
 	
-	return true;
+	return 0; // default fail
 }
 
 
@@ -447,6 +561,18 @@ u8 *pc;
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 bool grd_quant(struct grd *g , s32 num_colors )
+{
+	struct grd *gb=grd_duplicate_quant(g , num_colors );
+	
+	if( gb == 0 ) { return false; }
+	if( gb != g )
+	{
+		grd_insert(g,gb);
+		grd_free(gb);
+	}
+	return true;
+}
+struct grd * grd_duplicate_quant(struct grd *g , s32 num_colors )
 {
 struct grd *gb;
 int i;
@@ -472,9 +598,7 @@ int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 		*optr++=neuquant32_inxsearch( (c)&0xff , (c>>8)&0xff , (c>>16)&0xff , (c>>24)&0xff );
 	}
 	
-	grd_insert(g,gb);
-	grd_free(gb);
-	return true;
+	return gb;
 }
 
 
@@ -735,6 +859,7 @@ struct grd_info *ba=ga->bmap;
 struct grd_info *bb=gb->bmap;
 
 u32 *pa,*pb;
+u16 *p16a,*p16b;
 u32 a,b;
 
 s32 i,j;
@@ -753,9 +878,7 @@ s32 h=bb->h;
 
 	if( (ba->fmt==GRD_FMT_U8_ARGB) && (bb->fmt==GRD_FMT_U8_ARGB_PREMULT) )
 	{
-		
-		
-		u32 alpha;
+		u32 ialpha;
 		for(i=0;i<h;i++)
 		{
 			pa=(u32*)ba->get_data(x,y+i,0);
@@ -772,18 +895,49 @@ s32 h=bb->h;
 						pa++;
 					break;
 					default:
-						alpha=(0x100 - (b&0xff) );
+						ialpha=(0x100 - (b&0xff) );
 						a=*(pa);
 						*(pa++)=
-						 ( ( ( ((a>>8)&0x00ff0000) * alpha ) + (b&0xff000000) ) & 0xff000000 ) |
-						 ( ( ( ((a>>8)&0x0000ff00) * alpha ) + (b&0x00ff0000) ) & 0x00ff0000 ) |
-						 ( ( ( ((a>>8)&0x000000ff) * alpha ) + (b&0x0000ff00) ) & 0x0000ff00 ) |
+						 ( ( ( ((a>>8)&0x00ff0000) * ialpha ) + (b&0xff000000) ) & 0xff000000 ) |
+						 ( ( ( ((a>>8)&0x0000ff00) * ialpha ) + (b&0x00ff0000) ) & 0x00ff0000 ) |
+						 ( ( ( ((a>>8)&0x000000ff) * ialpha ) + (b&0x0000ff00) ) & 0x0000ff00 ) |
 						 (0xff); // full alpha
 					break;
 				}
 			}
 		}
 
+	}
+	else
+	if( (ba->fmt==GRD_FMT_U16_RGB_565) && (bb->fmt==GRD_FMT_U16_RGBA_4444_PREMULT) )
+	{
+		u32 ialpha;
+		for(i=0;i<h;i++)
+		{
+			p16a=(u16*)ba->get_data(x,y+i,0);
+			p16b=(u16*)bb->get_data(0,i,0);
+			for(j=0;j<w;j++)
+			{
+				b=*(p16b++);
+				switch(b&0x000f)
+				{
+					case 0x000f:
+						*(p16a++)=(b&0xf000) | ((b&0x0f00)>>1) | ((b&0x00f0)>>3) ;
+					break;
+					case 0x0000:
+						p16a++;
+					break;
+					default:
+						ialpha=(0x0010 - (b&0x000f) );
+						a=*(p16a);
+						*(p16a++)=
+						 ( ( ( ( (a&0xf800) * ialpha ) >> 4 ) +  (b&0xf000)     ) &0xf800 ) |
+						 ( ( ( ( (a&0x07e0) * ialpha ) >> 4 ) + ((b&0x0f00)>>1) ) &0x07e0 ) |
+						 ( ( ( ( (a&0x001f) * ialpha ) >> 4 ) + ((b&0x00f0)>>3) ) &0x001f ) ;
+					break;
+				}
+			}
+		}
 	}
 	else
 	{

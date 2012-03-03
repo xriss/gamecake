@@ -10,45 +10,58 @@
 //
 // data is always in ARGB order in memory but these are little endian, hence the BGRA (u32) default 
 //
-// these are all signed values 
+// these are all signed values and fit in 16bits
 //
 
 #define	GRD_FMT_NONE								0x0000
 
 // basic formats, most internal manipulations will only work on GRD_FMT_U8_ARGB
+// in fact many will convert to this as an intermediate step.
 // also you may need to convert to ARGB or RGB or INDEXED before saving and from after loading
-// I'm trying to avoid diferent byte order to keep it simple, so ARGB **memory** order only
+// I'm trying to avoid diferent byte order to keep it simple, so ARGB **memory** order default
 
-// u8[4] ARGB per pixel, so thats a U32-BGRA (thinking little endian)
+// u32[1] or u8[4] ARGB per pixel, so thats a U32-BGRA (in little endian)
 #define	GRD_FMT_U8_ARGB								0x0001
 	
 // A is the same as in ARGB but ( RGB=RGB*A )
 #define	GRD_FMT_U8_ARGB_PREMULT						0x0002
 
+// bit swizzzzzzzzled for gles prefered (and only) order
+#define	GRD_FMT_U8_RGBA								0x0004
+
 // u16[1] per pixel, 1 bit alpha , 5 bits red , 5 bits green , 5 bits blue
-#define	GRD_FMT_U16_ARGB_1555						0x0011
-	
+#define	GRD_FMT_U16_ARGB_1555						0x0021	
 // again premult makes more sense
-#define	GRD_FMT_U16_ARGB_1555_PREMULT				0x0012
+#define	GRD_FMT_U16_ARGB_1555_PREMULT				0x0022
+
+// again, this is bit swizzzzzzzzled for the gles prefered order
+// u16[1] per pixel, 4 bits red , 4 bits green , 4 bits blue , 4 bit alpha
+#define	GRD_FMT_U16_RGBA_4444						0x0023
+// again premult makes more sense
+#define	GRD_FMT_U16_RGBA_4444_PREMULT				0x0024
+
+// u16[1] an output display 16bit format for gles
+#define	GRD_FMT_U16_RGB_565							0x0025
+
 
 // I think it makes sense to keep all floating point values as premultiplied alpha?
 // a 1.0 in here is the same as a 255 in U8 format
 
 // f16[4] per pixel
-#define	GRD_FMT_F16_ARGB_PREMULT					0x0021
+#define	GRD_FMT_F16_ARGB_PREMULT					0x0041
 // f32[4] per pixel
-#define	GRD_FMT_F32_ARGB_PREMULT					0x0022
+#define	GRD_FMT_F32_ARGB_PREMULT					0x0062
 // f64[4] per pixel
-#define	GRD_FMT_F64_ARGB_PREMULT					0x0023
+#define	GRD_FMT_F64_ARGB_PREMULT					0x0083
 
 // u8[3]  per pixel, probably just normal palette information
-#define	GRD_FMT_U8_RGB								0x0031
+#define	GRD_FMT_U8_RGB								0x00a1
 
 // u8[1]  per pixel, forced U8 Indexed input
-#define	GRD_FMT_U8_INDEXED							0x0041
+#define	GRD_FMT_U8_INDEXED							0x00c1
 
 // u8[1]  per pixel, forced U8 gray scale (treat as indexed)
-#define	GRD_FMT_U8_LUMINANCE						0x0051
+#define	GRD_FMT_U8_LUMINANCE						0x00e1
 
 
 // more formats, not to be used when mucking about with data
@@ -83,6 +96,9 @@
 									(x==GRD_FMT_U8_INDEXED)?1:\
 									(x==GRD_FMT_U8_LUMINANCE)?1:\
 									(x==GRD_FMT_U16_ARGB_1555)?2:\
+									(x==GRD_FMT_U16_RGB_565)?2:\
+									(x==GRD_FMT_U16_RGBA_4444_PREMULT)?2:\
+									(x==GRD_FMT_U16_RGBA_4444)?2:\
 									(x==GRD_FMT_U8_RGB)?3:\
 									(x==GRD_FMT_U8_ARGB_PREMULT)?4:\
 									0)
@@ -195,15 +211,13 @@ struct grd * grd_save_file( struct grd *g, const char *filename , int fmt );
 
 
 struct grd * grd_duplicate( struct grd *g );
-
-
-
-
-void grd_flipy( struct grd *g );
+struct grd * grd_duplicate_convert( struct grd *g , s32 fmt );
+struct grd * grd_duplicate_quant(struct grd *g , s32 num_colors );
 
 bool grd_convert( struct grd *g , s32 fmt );
-
 bool grd_quant(struct grd *g , s32 num_colors );
+
+void grd_flipy( struct grd *g );
 
 //bool grd_conscale( struct grd *g , f32 base, f32 scale);
 

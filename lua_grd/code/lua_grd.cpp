@@ -90,16 +90,23 @@ int lua_grd_getinfo (lua_State *l, part_ptr p, int tab)
 // alloc an item, returns userdata
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+part_ptr * lua_grd_create_ptr(lua_State *l)
+{
+part_ptr *p;
+	p = (part_ptr *)lua_newuserdata(l, sizeof(part_ptr));
+	(*p)=0;
+	luaL_getmetatable(l, lua_grd_ptr_name);
+	lua_setmetatable(l, -2);
+	return p;
+}
+
 int lua_grd_create(lua_State *l)
 {
 part_ptr *p;
 const char *s;
 const char *opts=0;
 
-	p = (part_ptr *)lua_newuserdata(l, sizeof(part_ptr));
-	(*p)=0;
-	luaL_getmetatable(l, lua_grd_ptr_name);
-	lua_setmetatable(l, -2);
+	p=lua_grd_create_ptr(l);
 
 	if(lua_isnumber(l,2))	// create an image of a given format and size
 	{
@@ -373,6 +380,32 @@ s32 fmt;
 //	lua_grd_getinfo(l,p,1);
 
 	lua_pushvalue(l,1);
+	return 1;
+}
+
+int lua_grd_duplicate_convert (lua_State *l)
+{
+part_ptr p;
+part_ptr *pp;
+part_ptr p2;
+s32 fmt;
+
+	p=lua_grd_check_ptr(l,1);
+
+	fmt=(s32)lua_tonumber(l,2);
+
+	p2=grd_duplicate_convert(p,fmt);
+
+	if(! p2 )
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"failed to convert");
+		return 2;
+	}
+
+	pp=lua_grd_create_ptr(l);
+	*pp=p2;
+	
 	return 1;
 }
 
