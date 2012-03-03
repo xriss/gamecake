@@ -167,7 +167,7 @@ local win={}
 
 	function win.tex(grd) -- this takes a texture copy of the given grd
 	
-		local core=win.tex_setup(grd)
+		local core=win.tex_setup(grd[0])
 		local tex={}
 		tex.core=core
 		tex.width=grd.width

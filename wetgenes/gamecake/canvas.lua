@@ -21,10 +21,10 @@ function create(opts)
 	
 	canvas.cake=opts.cake
 	
-	canvas.grd=wgrd.create(canvas.cake.grd_fmt,
+	canvas.grd=assert(wgrd.create(canvas.cake.grd_fmt,
 		opts.width or 320,
 		opts.height or 240,
-		1)
+		1))
 
 	return canvas
 end

@@ -59,6 +59,7 @@ local _single= assert(mm._single)
 local _version= assert(mm._version)
 
 local now_secs= assert( mm.now_secs )
+lanes.now_secs=now_secs
 local wakeup_conv= assert( mm.wakeup_conv )
 
 local max_prio= assert( mm.max_prio )

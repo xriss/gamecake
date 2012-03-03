@@ -28,45 +28,56 @@ local import=[[
 //
 // data is always in ARGB order in memory but these are little endian, hence the BGRA (u32) default 
 //
-// these are all signed values 
+// these are all signed values and fit in 16bits
 //
 
 #define	GRD_FMT_NONE								0x0000
 
 // basic formats, most internal manipulations will only work on GRD_FMT_U8_ARGB
 // also you may need to convert to ARGB or RGB or INDEXED before saving and from after loading
-// I'm trying to avoid diferent byte order to keep it simple, so ARGB **memory** order only
+// I'm trying to avoid diferent byte order to keep it simple, so ARGB **memory** order default
 
-// u8[4] ARGB per pixel, so thats a U32-BGRA (thinking little endian)
+// u32[1] or u8[4] ARGB per pixel, so thats a U32-BGRA (in little endian)
 #define	GRD_FMT_U8_ARGB								0x0001
 	
 // A is the same as in ARGB but ( RGB=RGB*A )
 #define	GRD_FMT_U8_ARGB_PREMULT						0x0002
 
+// bit swizzzzzzzzled for gles prefered order
+#define	GRD_FMT_U8_RGBA								0x0004
+
 // u16[1] per pixel, 1 bit alpha , 5 bits red , 5 bits green , 5 bits blue
-#define	GRD_FMT_U16_ARGB_1555						0x0011
-	
+#define	GRD_FMT_U16_ARGB_1555						0x0021	
 // again premult makes more sense
-#define	GRD_FMT_U16_ARGB_1555_PREMULT				0x0012
+#define	GRD_FMT_U16_ARGB_1555_PREMULT				0x0022
+
+// u16[1] per pixel, 4 bit alpha , 4 bits red , 4 bits green , 4 bits blue
+#define	GRD_FMT_U16_RGBA_4444						0x0023
+// again premult makes more sense
+#define	GRD_FMT_U16_RGBA_4444_PREMULT				0x0024
+
+// u16[1] an output display 16bit format for gles
+#define	GRD_FMT_U16_RGB_565							0x0025
+
 
 // I think it makes sense to keep all floating point values as premultiplied alpha?
 // a 1.0 in here is the same as a 255 in U8 format
 
 // f16[4] per pixel
-#define	GRD_FMT_F16_ARGB_PREMULT					0x0021
+#define	GRD_FMT_F16_ARGB_PREMULT					0x0041
 // f32[4] per pixel
-#define	GRD_FMT_F32_ARGB_PREMULT					0x0022
+#define	GRD_FMT_F32_ARGB_PREMULT					0x0062
 // f64[4] per pixel
-#define	GRD_FMT_F64_ARGB_PREMULT					0x0023
+#define	GRD_FMT_F64_ARGB_PREMULT					0x0083
 
 // u8[3]  per pixel, probably just normal palette information
-#define	GRD_FMT_U8_RGB								0x0031
+#define	GRD_FMT_U8_RGB								0x00a1
 
 // u8[1]  per pixel, forced U8 Indexed input
-#define	GRD_FMT_U8_INDEXED							0x0041
+#define	GRD_FMT_U8_INDEXED							0x00c1
 
 // u8[1]  per pixel, forced U8 gray scale (treat as indexed)
-#define	GRD_FMT_U8_LUMINANCE						0x0051
+#define	GRD_FMT_U8_LUMINANCE						0x00e1
 
 
 // more formats, not to be used when mucking about with data
@@ -183,6 +194,10 @@ grd.create=function(...)
 		g[0]=core.create()
 		g:load_file(filename,fmt)
 	
+	elseif type(args[1]) == "userdata" then -- just wrap the table
+
+		g[0]=args[1]
+
 	else -- a blank image of 0 dimensions
 
 		g[0]=core.create()
@@ -229,6 +244,20 @@ base.save=function(g,filename,opts)
 	local r=core.save(g[0],filename,opts)
 	core.info(g[0],g)
 	return r
+end
+
+base.duplicate=function(g)
+	local r=core.duplicate(g[0])
+	return grd.create(r)
+end
+
+base.duplicate_convert=function(g,fmt)
+	if type(fmt) == "string" then
+		fmt=grd.stringtonum(fmt)
+	end
+	local r=core.duplicate_convert(g[0],fmt)
+	if r==g[0] then r=core.duplicate(g[0]) end -- force duplication
+	return grd.create(r)
 end
 
 base.convert=function(g,fmt)

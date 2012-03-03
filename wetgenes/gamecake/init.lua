@@ -13,6 +13,8 @@ module("wetgenes.gamecake")
 local wcanvas=require("wetgenes.gamecake.canvas")
 local wimages=require("wetgenes.gamecake.images")
 
+local grd=require("wetgenes.grd")
+
 base=require(...)
 meta={}
 meta.__index=base
@@ -25,7 +27,7 @@ function create(opts)
 	opts.cake=cake -- insert cake into opts
 	cake.opts=opts -- and opts into cake
 	
-	cake.grd_fmt="GRD_FMT_U8_ARGB"
+	cake.grd_fmt=opts.grd_fmt or grd.FMT_U16_RGB_565
 	
 	
 	cake.canvas=wcanvas.create(opts) -- we will need a canvas to draw too
@@ -39,10 +41,12 @@ end
 -- draw using win and opengl functions
 -- do not call if you do not have fenestra and a global win setup.
 draw = function(cake)
-	local gl=require("gl")
-	local t=assert(win.tex( cake.canvas.grd ))
-	t:draw()--{max=gl.NEAREST,min=gl.NEAREST})
-	t:clean()
+	if win then
+		local gl=require("gl")
+		local t=assert(win.tex( cake.canvas.grd ))
+		t:draw()--{max=gl.NEAREST,min=gl.NEAREST})
+		t:clean()
+	end
 end
 
 
