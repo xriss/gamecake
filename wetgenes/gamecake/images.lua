@@ -18,9 +18,15 @@ function create(opts)
 	setmetatable(images,meta)
 	
 	images.cake=opts.cake
+	images.gl=opts.gl
 	
-	images.grds={}
+	if images.gl then --gl mode
+		images.texs={}
+	else
+		images.grds={}
+	end
 	
+	images.fmt=opts.cake.images_fmt
 	images.zip=opts.zip
 	images.prefix=opts.prefix or "art/out"
 	images.postfix=opts.postfix or ".png"
@@ -34,6 +40,8 @@ end
 -- load a single image, and make it easy to lookup by the given id
 --
 load=function(images,name,id)
+
+	local gl=images.gl
 
 	local fname=images.prefix..name..images.postfix
 	
@@ -50,9 +58,44 @@ load=function(images,name,id)
 		assert(g:load_file(fname,"png"))
 	end
 	
-	assert(g:convert(grd.FMT_U16_RGBA_4444_PREMULT))
+	if gl then --gl mode
+	
+		t={}
+		t.id=assert(gl.GenTexture())
+		t.w=g.width
+		t.h=g.height
+		t.tw=g.width
+		t.th=g.height
+
+		gl.BindTexture( gl.TEXTURE_2D , t.id )
 		
-	images.grds[id]=g
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)
+	
+		assert(g:convert(grd.FMT_U8_RGBA))
+--		assert(g:convert(grd.FMT_U16_RGBA_4444))
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			0,
+			gl.RGBA,
+			g.width,
+			g.height,
+			0,
+			gl.RGBA,
+--			gl.GL_UNSIGNED_SHORT_4_4_4_4,
+			gl.UNSIGNED_BYTE,
+			g.data)
+
+		images.texs[id]=t
+	else
+	
+		assert(g:convert(images.fmt))
+		
+		images.grds[id]=g
+	end
+	
 
 end
 

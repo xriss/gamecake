@@ -1,7 +1,7 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
--- gamecake lua is a simple CPU only 2D game framework that renders to a bitmap.
+-- gamecake lua is a simple 2D game framework that uses GLES or CPU renders to a bitmap.
 -- It bears a passing resemblence to gamecake js.
 
 
@@ -26,12 +26,13 @@ function create(opts)
 	
 	opts.cake=cake -- insert cake into opts
 	cake.opts=opts -- and opts into cake
+	cake.gl=opts.gl
 	
-	cake.grd_fmt=opts.grd_fmt or grd.FMT_U16_RGB_565
+	cake.canvas_fmt=opts.canvas_fmt or grd.FMT_U16_RGB_565
+	cake.images_fmt=opts.images_fmt or grd.FMT_U16_RGBA_4444_PREMULT
 	
 	
 	cake.canvas=wcanvas.create(opts) -- we will need a canvas to draw too
-	
 	cake.images=wimages.create(opts) -- we will need to load some images
 
 	return cake
@@ -48,6 +49,3 @@ draw = function(cake)
 		t:clean()
 	end
 end
-
-
-

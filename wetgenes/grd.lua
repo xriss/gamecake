@@ -44,7 +44,8 @@ local import=[[
 #define	GRD_FMT_U8_ARGB_PREMULT						0x0002
 
 // bit swizzzzzzzzled for gles prefered order
-#define	GRD_FMT_U8_RGBA								0x0004
+#define	GRD_FMT_U8_RGBA								0x0003
+#define	GRD_FMT_U8_RGBA_PREMULT						0x0004
 
 // u16[1] per pixel, 1 bit alpha , 5 bits red , 5 bits green , 5 bits blue
 #define	GRD_FMT_U16_ARGB_1555						0x0021	
