@@ -26,8 +26,9 @@
 // A is the same as in ARGB but ( RGB=RGB*A )
 #define	GRD_FMT_U8_ARGB_PREMULT						0x0002
 
-// bit swizzzzzzzzled for gles prefered (and only) order
-#define	GRD_FMT_U8_RGBA								0x0004
+// bit swizzzzzzzzled for gles prefered (and only suported) order
+#define	GRD_FMT_U8_RGBA								0x0003
+#define	GRD_FMT_U8_RGBA_PREMULT						0x0004
 
 // u16[1] per pixel, 1 bit alpha , 5 bits red , 5 bits green , 5 bits blue
 #define	GRD_FMT_U16_ARGB_1555						0x0021	
@@ -101,6 +102,8 @@
 									(x==GRD_FMT_U16_RGBA_4444)?2:\
 									(x==GRD_FMT_U8_RGB)?3:\
 									(x==GRD_FMT_U8_ARGB_PREMULT)?4:\
+									(x==GRD_FMT_U8_RGBA)?4:\
+									(x==GRD_FMT_U8_RGBA_PREMULT)?4:\
 									0)
 //									(x==GRD_FMT_F32_ARGB)?16:\
 //									(x==GRD_FMT_F64_ARGB)?32:\

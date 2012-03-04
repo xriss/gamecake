@@ -281,12 +281,9 @@ static int lua_gles_TexImage2D (lua_State *l)
 
 static int lua_gles_TexParameter (lua_State *l)
 {
-int v[1];
-	v[1]=(int)lua_tonumber(l,3);
-	
-	glTexParameteriv(	(int)lua_tonumber(l,1)		,
-						(int)lua_tonumber(l,1)		,
-						v							);
+	glTexParameteri(	(int)lua_tonumber(l,1)		,
+						(int)lua_tonumber(l,2)		,
+						(int)lua_tonumber(l,3)		);
 	return 0;
 }
 
@@ -348,7 +345,7 @@ static int lua_gles_ColorPointer (lua_State *l)
 	glColorPointer(		(int)lua_tonumber(l,1)		,
 						(int)lua_tonumber(l,2)		,
 						(int)lua_tonumber(l,3)		,
-						(void*)lua_touserdata(l,4)	);
+						((char*)lua_touserdata(l,4))+((int)lua_tonumber(l,5))	);
 	return 0;
 }
 
@@ -357,7 +354,7 @@ static int lua_gles_TexCoordPointer (lua_State *l)
 	glTexCoordPointer(	(int)lua_tonumber(l,1)		,
 						(int)lua_tonumber(l,2)		,
 						(int)lua_tonumber(l,3)		,
-						(void*)lua_touserdata(l,4)	);
+						((char*)lua_touserdata(l,4))+((int)lua_tonumber(l,5))	);
 	return 0;
 }
 
@@ -365,7 +362,7 @@ static int lua_gles_NormalPointer (lua_State *l)
 {
 	glNormalPointer(	(int)lua_tonumber(l,1)		,
 						(int)lua_tonumber(l,2)		,
-						(void*)lua_touserdata(l,3)	);
+						((char*)lua_touserdata(l,3))+((int)lua_tonumber(l,4))	);
 	return 0;
 }
 
@@ -374,7 +371,7 @@ static int lua_gles_VertexPointer (lua_State *l)
 	glVertexPointer(	(int)lua_tonumber(l,1)		,
 						(int)lua_tonumber(l,2)		,
 						(int)lua_tonumber(l,3)		,
-						(void*)lua_touserdata(l,4)	);
+						((char*)lua_touserdata(l,4))+((int)lua_tonumber(l,5))	);
 	return 0;
 }
 
