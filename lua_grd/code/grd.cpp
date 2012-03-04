@@ -336,6 +336,29 @@ u8 *pc;
 				return gb;
 			break;
 
+			case GRD_FMT_U8_RGBA:
+				gb=grd_create(GRD_FMT_U8_RGBA,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return 0; }
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=g->bmap->get_data(0,y,z);
+						pb=gb->bmap->get_data(0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							pb[0]=pa[1];
+							pb[1]=pa[2];
+							pb[2]=pa[3];
+							pb[3]=pa[0];
+							pa+=4;
+							pb+=4;
+						}
+					}
+				}
+				return gb;
+			break;
+
 			case GRD_FMT_U8_INDEXED:
 				return grd_duplicate_quant(g,256);
 			break;
