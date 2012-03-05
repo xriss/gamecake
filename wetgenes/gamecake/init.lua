@@ -39,9 +39,9 @@ function create(opts)
 end
 
 
--- draw using win and opengl functions
+-- draw a prebuilt texture using win and opengl functions
 -- do not call if you do not have fenestra and a global win setup.
-draw = function(cake)
+windraw = function(cake)
 	if win then
 		local gl=require("gl")
 		local t=assert(win.tex( cake.canvas.grd ))
@@ -49,3 +49,58 @@ draw = function(cake)
 		t:clean()
 	end
 end
+
+
+
+--
+-- build a simple field of view projection matrix designed to work in 2d or 3d and keep the numbers
+-- easy for 2d positioning.
+--
+-- setting aspect to 640,480 and fov of 1 would mean at a z depth of 240 (which is y/2) then your view area would be
+-- -320 to +320 in the x and -240 to +240 in the y.
+--
+-- fov is a tan like value (a view size inverse scalar) so 1 would be 90deg, 0.5 would be 45deg and so on
+--
+-- the depth parameter is only used to limit the range of the zbuffer so it covers 0 to depth
+--
+-- The following would be a reasonable default for a 640x480 screen.
+--
+-- build_project23d(640,480,0.5,1024)
+--
+-- then at z=((480/2)/0.5)=480 we would have one to one pixel scale...
+-- the total view area volume from there would be -320 +320 , -240 +240 , -480 +(1024-480)
+--
+-- screen needs to contain width and height of the display which we use to work
+-- out where to place our view such that it is always visible.
+--
+function build_project23d(screen,width,height,fov,depth)
+
+	local aspect=height/width
+	
+	local m={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- defaults
+	local f=depth
+	local n=1
+
+	local screen_aspect=(screen.height/screen.width)
+		
+	if (screen_aspect > (aspect) ) 	then 	-- fit width to screen
+	
+		m[1] = ((aspect)*1)/fov
+		m[6] = -((aspect)/screen_aspect)/fov
+		
+	else									-- fit height to screen
+	
+		m[1] = screen_aspect/fov
+		m[6] = -1/fov
+		
+	end
+	
+	m[11] = -(f+n)/(f-n)
+	m[12] = -1
+
+	m[15] = -2*f*n/(f-n)
+	
+	return m
+end
+
+

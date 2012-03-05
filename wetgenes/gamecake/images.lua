@@ -84,7 +84,7 @@ load=function(images,name,id)
 			g.height,
 			0,
 			gl.RGBA,
---			gl.GL_UNSIGNED_SHORT_4_4_4_4,
+--			gl.UNSIGNED_SHORT_4_4_4_4,
 			gl.UNSIGNED_BYTE,
 			g.data)
 
