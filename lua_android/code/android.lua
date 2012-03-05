@@ -23,7 +23,10 @@ android.print=function(...)
 	for i,v in ipairs{...} do
 		t[#t+1]=tostring(v)
 	end
-	core.print(table.concat(t),"\t")
+	core.print(table.concat(t,"\t"))
 end
+
+android.time=core.time
+
 
 return android
