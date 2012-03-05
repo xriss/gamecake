@@ -4,6 +4,11 @@
 
 #include <android/log.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/time.h>
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -19,6 +24,20 @@ static int lua_android_print (lua_State *l)
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// Print
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_android_time (lua_State *l)
+{
+	struct timeval tv ;
+	gettimeofday ( & tv, NULL ) ;
+	lua_pushnumber(l, (double) tv.tv_sec + (double) tv.tv_usec / 1000000.0 );
+	return 1;
+}
+
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -31,6 +50,7 @@ LUALIB_API int luaopen_wetgenes_android_core(lua_State *l)
 	{
 
 		{"print",				lua_android_print},
+		{"time",				lua_android_time},
 		
 		{0,0}
 	};
