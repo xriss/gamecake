@@ -12,7 +12,7 @@ local grd=require("wetgenes.grd")
 
 
 
-function create(opts)
+function bake(opts)
 
 	local images={}
 	setmetatable(images,meta)
@@ -20,30 +20,66 @@ function create(opts)
 	images.cake=opts.cake
 	images.gl=opts.gl
 	
-	if images.gl then --gl mode
-		images.texs={}
-	else
-		images.grds={}
-	end
+	images.data={}
 	
 	images.fmt=opts.cake.images_fmt
 	images.zip=opts.zip
 	images.prefix=opts.prefix or "art/out"
 	images.postfix=opts.postfix or ".png"
 	
-
 	return images
+end
+
+get=function(images,id,name)
+	name=name or "base"
+	return images.data[name] and images.data[name][id]
+end
+
+set=function(images,d,id,name)
+	name=name or "base"
+	local tab
+	
+	if images.data[name] then
+		tab=images.data[name]		
+	else
+		tab={}
+		images.data[name]=tab
+	end
+	
+	tab[id]=d	
 end
 
 
 --
+-- unload a previously loaded image
+--
+unload=function(images,id,name)
+	local gl=images.gl
+	name=name or "base"
+	
+	local t=images:get(id,name)
+
+	if t then
+		if gl then --gl mode
+				gl.DeleteTexture( t.id )			
+		end
+		images:set(nil,id,name)
+	end
+end
+
+--
 -- load a single image, and make it easy to lookup by the given id
 --
-load=function(images,name,id)
-
+load=function(images,filename,id,name)
 	local gl=images.gl
+	name=name or "base"
 
-	local fname=images.prefix..name..images.postfix
+	local t=images:get(id,name)
+	
+	if t then return t end --first check it is not already loaded
+
+
+	local fname=images.prefix..filename..images.postfix
 	
 	local g=assert(grd.create())
 	
@@ -62,10 +98,10 @@ load=function(images,name,id)
 	
 		t={}
 		t.id=assert(gl.GenTexture())
-		t.w=g.width
-		t.h=g.height
-		t.tw=g.width
-		t.th=g.height
+		t.width=g.width
+		t.height=g.height
+		t.twidth=g.width
+		t.theight=g.height
 
 		gl.BindTexture( gl.TEXTURE_2D , t.id )
 		
@@ -88,15 +124,18 @@ load=function(images,name,id)
 			gl.UNSIGNED_BYTE,
 			g.data)
 
-		images.texs[id]=t
+		images:set(t,id,name)
+		
+		return t
 	else
 	
 		assert(g:convert(images.fmt))
 		
-		images.grds[id]=g
+		images:set(g,id,name)
+
+		return g
 	end
 	
-
 end
 
 --
@@ -106,7 +145,19 @@ loads=function(images,tab)
 
 	for i,v in pairs(tab) do
 	
-		if type(i)=="number" then -- use name twice
+		if type(v)=="table" then -- use a subtable and its name
+		
+			for ii,vv in pairs(v) do
+			
+				if type(ii)=="number" then -- just use filename twice
+					images:load(vv,vv,i)
+				else
+					images:load(vv,ii,i)
+				end
+				
+			end
+			
+		elseif type(i)=="number" then -- just use filename twice
 			images:load(v,v)
 		else
 			images:load(v,i)
@@ -117,5 +168,21 @@ loads=function(images,tab)
 end
 
 
+start = function(images)
+end
+
+stop = function(images)
+
+	for n,tab in pairs(images.data) do
+
+		for i,t in pairs(tab) do
+		
+			images:unload(i,n)
+			
+		end
+
+	end
+
+end
 
 

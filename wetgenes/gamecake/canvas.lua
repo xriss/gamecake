@@ -15,7 +15,7 @@ local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 
 
-function create(opts)
+function bake(opts)
 
 	local canvas={}
 	setmetatable(canvas,meta)
@@ -28,39 +28,30 @@ function create(opts)
 	
 	canvas.fmt=opts.cake.canvas_fmt
 
-	if canvas.gl then -- open
-		canvas.vdat=pack.alloc(4*5*4) -- tempory vertex draw buffer		
-		blit=gl_blit
-	else
-		canvas.grd=assert(wgrd.create(canvas.fmt,
-		canvas.width, canvas.height, 1))
-		blit=grd_blit
-	end
-
+	canvas:start()
+	
 	return canvas
 end
 
-grd_blit = function(canvas,img,cx,cy,ix,iy,w,h)
+grd_blit = function(canvas,t,cx,cy,ix,iy,w,h)
 	assert(
-			canvas.grd:blit(	canvas.cake.images.grds[img],
+			canvas.grd:blit(	t,
 								cx,cy,
 								ix,iy,
 								w,h)
 	)
 end
 
-gl_blit = function(canvas,img,cx,cy,ix,iy,w,h)
+gl_blit = function(canvas,t,cx,cy,ix,iy,w,h)
 
 	local gl=canvas.gl
 
-	local t=canvas.cake.images.texs[img]
-
 	ix=ix or 0
 	iy=iy or 0
-	w=w or t.w
-	h=h or t.h
-	local tw=t.tw
-	local th=t.th
+	w=w or t.width
+	h=h or t.height
+	local tw=t.twidth
+	local th=t.theight
 	
 	local cxw=cx+w
 	local cyh=cy+h
@@ -85,5 +76,29 @@ gl_blit = function(canvas,img,cx,cy,ix,iy,w,h)
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP,0,4)
 
+end
+
+
+
+
+start = function(canvas)
+	if canvas.gl then -- open
+		canvas.vdat=pack.alloc(4*5*4) -- tempory vertex draw buffer		
+		blit=gl_blit
+	else
+		canvas.grd=assert(wgrd.create(canvas.fmt,
+		canvas.width, canvas.height, 1))
+		blit=grd_blit
+	end
+end
+
+stop = function(canvas)
+	if canvas.gl then -- open
+		canvas.vdat=nil
+		blit=nil
+	else
+		canvas.grd=nil
+		blit=nil
+	end
 end
 

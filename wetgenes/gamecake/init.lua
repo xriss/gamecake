@@ -19,7 +19,7 @@ base=require(...)
 meta={}
 meta.__index=base
 
-function create(opts)
+function bake(opts)
 
 	local cake={}
 	setmetatable(cake,meta)
@@ -32,16 +32,31 @@ function create(opts)
 	cake.images_fmt=opts.images_fmt or grd.FMT_U16_RGBA_4444_PREMULT
 	
 	
-	cake.canvas=wcanvas.create(opts) -- we will need a canvas to draw too
-	cake.images=wimages.create(opts) -- we will need to load some images
+	cake.canvas=wcanvas.bake(opts) -- we will need a canvas to draw too
+	cake.images=wimages.bake(opts) -- we will need to load some images
 
 	return cake
 end
 
 
+start = function(cake)
+	cake.canvas:start()
+	cake.images:start()
+end
+
+stop = function(cake)
+	cake.canvas:stop()
+	cake.images:stop()
+end
+
+blit = function(cake,id,name,cx,cy,ix,iy,w,h)
+	cake.canvas:blit(cake.images:get(id,name),cx,cy,ix,iy,w,h)
+end
+
+
 -- draw a prebuilt texture using win and opengl functions
 -- do not call if you do not have fenestra and a global win setup.
-windraw = function(cake)
+gldraw = function(cake)
 	if win then
 		local gl=require("gl")
 		local t=assert(win.tex( cake.canvas.grd ))
@@ -102,5 +117,7 @@ function build_project23d(screen,width,height,fov,depth)
 	
 	return m
 end
+
+
 
 
