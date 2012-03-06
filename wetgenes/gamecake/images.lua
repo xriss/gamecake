@@ -126,6 +126,7 @@ load=function(images,filename,id,name)
 
 		images:set(t,id,name)
 		
+		t.filename=filename
 		return t
 	else
 	
@@ -133,6 +134,7 @@ load=function(images,filename,id,name)
 		
 		images:set(g,id,name)
 
+		g.filename=filename
 		return g
 	end
 	
@@ -169,13 +171,22 @@ end
 
 
 start = function(images)
+
+	for v,n in pairs(images.remember or {}) do
+		images:load(v.filename,n[1],n[2])
+	end
+	images.remember=nil
 end
 
 stop = function(images)
 
+	images.remember={}
+	
 	for n,tab in pairs(images.data) do
 
 		for i,t in pairs(tab) do
+		
+			images.remember[t]={i,n}
 		
 			images:unload(i,n)
 			
