@@ -2,8 +2,10 @@ syntax: glob
 *.orig
 build-*
 *.dbg
-lib_android/bin/*
-lib_android/libs/*
-lib_android/gen/*
+android/bin/*
+android/libs/*
+android/gen/*
 lua/preloadlibs.c
 lua/cache.c
+*/log.txt
+
