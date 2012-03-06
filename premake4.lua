@@ -196,7 +196,7 @@ includedirs { "lib_lua/src" }
 
 EXE_OUT_DIR=path.getabsolute("bin/exe")
 DBG_OUT_DIR=path.getabsolute("bin/dbg")
-AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
+AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("lib_android")
 AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi")
 
 ALL_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj")
