@@ -738,14 +738,12 @@ function gles.VertexPointer(...)
 end
 
 -- add optional debuggery to every function defined above
---[[
 for i,v in pairs(gles) do
 	if type(v)=="function" and not ( i=="CheckError" or i=="GetError" or i=="numtostring" ) then	
 		local f=v
 		gles[i]=function(...) local r=f(...) gles.CheckError() return r end
 	end
 end
-]]
 
 function gles.numtostring(num)
 	return gles.nums[num]
