@@ -285,15 +285,15 @@ end
 -----------------------------------------------------------------------------
 function set_defs(env)
 
-	env.create     = function(srv,id)     return def_create(env,srv,id)         end
-	env.manifest   = function(srv,id)     return def_manifest(env,srv,id)       end
-	env.put        = function(srv,ent,t)  return def_put(env,srv,ent,t)         end
-	env.get        = function(srv,id,t)   return def_get(env,srv,id,t)          end
-	env.set        = function(srv,id,f)   return def_set(env,srv,id,f)	 	    end
-	env.update     = function(srv,id,f)   return def_update(env,srv,id,f)       end
-	env.cache_key  = function(srv,id)     return def_cache_key(env,srv,id)      end
-	env.cache_what = function(srv,ent,mc) return def_cache_what(env,srv,ent,mc) end
-	env.cache_fix  = function(srv,mc)     return def_cache_fix(env,srv,mc)      end
+	env.create     = env.create or		function(srv,id)     return def_create(env,srv,id)         end
+	env.manifest   = env.manifest or	function(srv,id)     return def_manifest(env,srv,id)       end
+	env.put        = env.put or			function(srv,ent,t)  return def_put(env,srv,ent,t)         end
+	env.get        = env.get or			function(srv,id,t)   return def_get(env,srv,id,t)          end
+	env.set        = env.set or			function(srv,id,f)   return def_set(env,srv,id,f)	 	   end
+	env.update     = env.update or		function(srv,id,f)   return def_update(env,srv,id,f)       end
+	env.cache_key  = env.cache_key or	function(srv,id)     return def_cache_key(env,srv,id)      end
+	env.cache_what = env.cache_what or	function(srv,ent,mc) return def_cache_what(env,srv,ent,mc) end
+	env.cache_fix  = env.cache_fix or	function(srv,mc)     return def_cache_fix(env,srv,mc)      end
 
 	return env
 end
