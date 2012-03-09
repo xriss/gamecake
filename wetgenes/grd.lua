@@ -218,7 +218,7 @@ end
 base.reset=function(g)
 	local r=core.reset(g[0])
 	core.info(g[0],g)
-	return r
+	return r and g
 end
 
 base.load_file=function(g,filename,fmt)
@@ -238,13 +238,13 @@ base.load=function(g,opts)
 	end
 	local r=core.load(g[0],opts)
 	core.info(g[0],g)
-	return r
+	return r and g
 end
 
 base.save=function(g,filename,opts)
 	local r=core.save(g[0],filename,opts)
 	core.info(g[0],g)
-	return r
+	return r and g
 end
 
 base.duplicate=function(g)
@@ -267,13 +267,13 @@ base.convert=function(g,fmt)
 	end
 	local r=core.convert(g[0],fmt)
 	core.info(g[0],g)
-	return r
+	return r and g
 end
 
 base.quant=function(g,num)
 	local r=core.quant(g[0],num)
 	core.info(g[0],g)
-	return r
+	return r and g
 end
 
 base.pixels=function(g,...)
@@ -291,13 +291,19 @@ end
 base.scale=function(g,...)
 	local r=core.scale(g[0],...)
 	core.info(g[0],g)
-	return r
+	return r and g
 end
 
 base.flipy=function(g,...)
 	local r=core.flipy(g[0],...)
 	core.info(g[0],g)
-	return r
+	return r and g
+end
+
+base.shrink=function(g,...)
+	local r=core.shrink(g[0],...)
+	core.info(g[0],g)
+	return r and g
 end
 
 base.blit=function(ga,gb,x,y,cx,cy,cw,ch)
