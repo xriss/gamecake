@@ -442,14 +442,14 @@ s32 ch;
 		{
 			lua_pushboolean(l,0);
 			lua_pushstring(l,g->err);
-			return 1;
+			return 2;
 		}
 		
 		if(!grd_blit(pa,g,x,y))
 		{
 			lua_pushboolean(l,0);
 			lua_pushstring(l,g->err);
-			return 1;
+			return 2;
 		}
 	}
 	else
@@ -458,7 +458,7 @@ s32 ch;
 		{
 			lua_pushboolean(l,0);
 			lua_pushstring(l,g->err);
-			return 1;
+			return 2;
 		}
 	}
 
@@ -512,6 +512,44 @@ s32 w,h,d;
 	lua_pushvalue(l,1);
 	return 1;
 }
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_shrink (lua_State *l)
+{
+part_ptr p;
+struct grd_area gc[1];
+
+	p=lua_grd_check_ptr(l,1);
+
+	lua_getfield(l,2,"x");	gc->x=(s32)lua_tonumber(l,-1);	lua_pop(l,1);
+	lua_getfield(l,2,"y");	gc->y=(s32)lua_tonumber(l,-1);	lua_pop(l,1);	
+	lua_getfield(l,2,"z");	gc->z=(s32)lua_tonumber(l,-1);	lua_pop(l,1);
+	lua_getfield(l,2,"w");	gc->w=(s32)lua_tonumber(l,-1);	lua_pop(l,1);
+	lua_getfield(l,2,"h");	gc->h=(s32)lua_tonumber(l,-1);	lua_pop(l,1);	
+	lua_getfield(l,2,"d");	gc->d=(s32)lua_tonumber(l,-1);	lua_pop(l,1);
+	
+	if( !grd_shrink(p,gc) )
+	{
+		lua_pushboolean(l,0);
+		lua_pushstring(l,p->err);
+		return 2;
+	}
+
+	lua_pushnumber(l,gc->x);	lua_setfield(l,2,"x");
+	lua_pushnumber(l,gc->y);	lua_setfield(l,2,"y");
+	lua_pushnumber(l,gc->z);	lua_setfield(l,2,"z");
+	lua_pushnumber(l,gc->w);	lua_setfield(l,2,"w");
+	lua_pushnumber(l,gc->h);	lua_setfield(l,2,"h");
+	lua_pushnumber(l,gc->d);	lua_setfield(l,2,"d");
+
+	lua_pushvalue(l,1);
+	return 1;
+}
+
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1046,6 +1084,8 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 			
 		{"flipy",			lua_grd_flipy},
 		{"blit",			lua_grd_blit},
+		
+		{"shrink",			lua_grd_shrink},
 		
 		{0,0}
 	};

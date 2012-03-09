@@ -973,3 +973,119 @@ s32 h=bb->h;
 }
 
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// shrink the given image clip,
+// just adjust the posiion and size such that only the non transparent potion are within the area
+// return true if done, we may have shrunk to nothing
+//
+// this function is not intending to be overly fast
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+bool grd_shrink(struct grd *g,struct grd_area *gc )
+{
+struct grd_info *gi=g->bmap;
+
+	if( ! ( (gi->fmt==GRD_FMT_U8_ARGB) || (gi->fmt==GRD_FMT_U8_ARGB_PREMULT) ) )
+	{
+		g->err="bad shrink format"; // complain
+		return false;
+	}
+	
+	if( gc->d != 1 ) // the code does not shrink depth
+	{
+		g->err="bad shrink depth"; // complain
+		return false;
+	}
+
+
+s32 x,y;
+s32 w,h;
+u8 *p;
+u32 a;
+
+// push down
+	for( y=gc->y ; y<gc->y+gc->h ; y++ )
+	{
+		for( x=gc->x ; x<gc->x+gc->w ; x++ )
+		{
+			p=gi->get_data( x , y , gc->z );
+			a=(*p)&0xff;
+			if(a!=0) { break; }
+		}
+		if(a==0) // empty line
+		{
+			gc->y++;
+			gc->h--;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if(gc->h<=0) { gc->x=0; gc->y=0; gc->z=0; gc->w=0; gc->h=0; gc->d=0; return true; }
+
+// push up
+	for( y=gc->y+gc->h-1 ; y>=gc->y ; y-- )
+	{
+		for( x=gc->x ; x<gc->x+gc->w ; x++ )
+		{
+			p=gi->get_data( x , y , gc->z );
+			a=(*p)&0xff;
+			if(a!=0) { break; }
+		}
+		if(a==0) // empty line
+		{
+			gc->h--;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if(gc->h<=0) { gc->x=0; gc->y=0; gc->z=0; gc->w=0; gc->h=0; gc->d=0; return true; }
+
+// push right
+	for( x=gc->x ; x<gc->x+gc->w ; x++ )
+	{
+		for( y=gc->y ; y<gc->y+gc->h ; y++ )
+		{
+			p=gi->get_data( x , y , gc->z );
+			a=(*p)&0xff;
+			if(a!=0) { break; }
+		}
+		if(a==0) // empty line
+		{
+			gc->x++;
+			gc->w--;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if(gc->w<=0) { gc->x=0; gc->y=0; gc->z=0; gc->w=0; gc->h=0; gc->d=0; return true; }
+
+// push left
+	for( x=gc->x+gc->w-1 ; x>=gc->x ; x-- )
+	{
+		for( y=gc->y ; y<gc->y+gc->h ; y++ )
+		{
+			p=gi->get_data( x , y , gc->z );
+			a=(*p)&0xff;
+			if(a!=0) { break; }
+		}
+		if(a==0) // empty line
+		{
+			gc->w--;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if(gc->w<=0) { gc->x=0; gc->y=0; gc->z=0; gc->w=0; gc->h=0; gc->d=0; return true; }
+
+
+	return true;
+}
