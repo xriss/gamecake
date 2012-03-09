@@ -197,6 +197,15 @@ struct grd_loader_info
 	int fmt;
 };
 
+
+// just a simple  area
+struct grd_area
+{
+	s32	x,y,z;			// the top left corner and its
+	s32	w,h,d;			// width and height and depth
+};
+
+
 void * grd_info_alloc(struct grd_info *gi,  s32 fmt , s32 w, s32 h, s32 d );
 void grd_info_free(struct grd_info *gi);
 
@@ -232,4 +241,6 @@ bool grd_layer( struct grd *ga , struct grd *gb , s32 z);
 bool grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 w, s32 h);
 
 bool grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y);
+
+bool grd_shrink(struct grd *ga,struct grd_area *gc );
 
