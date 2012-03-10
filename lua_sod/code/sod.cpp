@@ -93,7 +93,7 @@ void sod_set_fmt( sod * sd, s32 fmt )
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-sod * sod_load( sod * sd, const char *filename , const char *opts )
+sod * sod_load_file( sod * sd, const char *filename , const char *opts )
 {
 	sod_wav_load_file(sd,filename);
 
@@ -101,6 +101,19 @@ sod * sod_load( sod * sd, const char *filename , const char *opts )
 	return sd;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// load an image into a sod
+// returns 0 on error
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+sod * sod_load_data( sod * sd, const unsigned char *data , int len, const char *opts )
+{
+	sod_wav_load_data(sd,data,len);
+
+	if(sd->err) { return 0; }
+	return sd;
+}
 
 
 #if 0

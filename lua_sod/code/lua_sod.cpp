@@ -126,7 +126,7 @@ const char *s;
 // load some sounds
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_sod_load (lua_State *l)
+static int lua_sod_load_file (lua_State *l)
 {	
 sod *sd;
 const char *s;
@@ -134,12 +134,31 @@ const char *s;
 	sd = lua_sod_check(l, 1 );
 	s = luaL_checkstring(l, 2 );
 
-	sod_load(sd,s,0);
+	sod_load_file(sd,s,0);
 
 	if(sd->err)	{ lua_pushnil(l); lua_pushstring(l,sd->err); return 2; } // nil,err on failure
 	lua_pushvalue(l,1); return 1; // return the sod on success
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// load some sounds
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_sod_load_data (lua_State *l)
+{	
+sod *sd;
+const unsigned char *s;
+size_t len;
+
+	sd = lua_sod_check(l, 1 );
+	s =(const unsigned char *) luaL_checklstring(l, 2 ,&len);
+
+	sod_load_data(sd,s,(int)len,0);
+
+	if(sd->err)	{ lua_pushnil(l); lua_pushstring(l,sd->err); return 2; } // nil,err on failure
+	lua_pushvalue(l,1); return 1; // return the sod on success
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -155,7 +174,8 @@ LUALIB_API int luaopen_wetgenes_sod_core (lua_State *l)
 
 		{"info",			lua_sod_info},
 		
-		{"load",			lua_sod_load},
+		{"load_data",		lua_sod_load_data},
+		{"load_file",		lua_sod_load_file},
 //		{"save",			lua_sod_save},
 		
 		{0,0}

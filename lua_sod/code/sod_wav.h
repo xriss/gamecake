@@ -7,5 +7,6 @@
 
 
 sod * sod_wav_load_file(sod *sd, const char* file_name);
+sod * sod_wav_load_data(sod *sd, const unsigned char* data,int len);
 
 sod * sod_wav_save_file(sod *sd , const char* file_name);
