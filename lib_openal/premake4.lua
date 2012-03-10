@@ -6,43 +6,65 @@ kind "StaticLib"
 language "C"
 
 
+local prefix="soft"
+
+if ANDROID then
+
+	prefix="android"
+	
+	files { 
+			prefix.."/Alc/backends/android.c",
+	}
+	defines("HAVE_ANDROID")
+	
+else
+
+	files { 
+			prefix.."/Alc/backends/alsa.c",
+	}
+	defines("HAVE_ALSA")
+end
+
+
+
+
 files { 
-		"soft/OpenAL32/alAuxEffectSlot.c",
-		"soft/OpenAL32/alBuffer.c",
-		"soft/OpenAL32/alEffect.c",
-		"soft/OpenAL32/alError.c",
-		"soft/OpenAL32/alExtension.c",
-		"soft/OpenAL32/alFilter.c",
-		"soft/OpenAL32/alListener.c",
-		"soft/OpenAL32/alSource.c",
-		"soft/OpenAL32/alState.c",
-		"soft/OpenAL32/alThunk.c",
+		prefix.."/OpenAL32/alAuxEffectSlot.c",
+		prefix.."/OpenAL32/alBuffer.c",
+		prefix.."/OpenAL32/alEffect.c",
+		prefix.."/OpenAL32/alError.c",
+		prefix.."/OpenAL32/alExtension.c",
+		prefix.."/OpenAL32/alFilter.c",
+		prefix.."/OpenAL32/alListener.c",
+		prefix.."/OpenAL32/alSource.c",
+		prefix.."/OpenAL32/alState.c",
+		prefix.."/OpenAL32/alThunk.c",
 }
 
 files { 
-		"soft/Alc/ALc.c",
-		"soft/Alc/ALu.c",
-		"soft/Alc/alcConfig.c",
-		"soft/Alc/alcDedicated.c",
-		"soft/Alc/alcEcho.c",
-		"soft/Alc/alcModulator.c",
-		"soft/Alc/alcReverb.c",
-		"soft/Alc/alcRing.c",
-		"soft/Alc/alcThread.c",
-		"soft/Alc/bs2b.c",
-		"soft/Alc/helpers.c",
-		"soft/Alc/hrtf.c",
-		"soft/Alc/mixer.c",
-		"soft/Alc/panning.c",
+		prefix.."/Alc/ALc.c",
+		prefix.."/Alc/ALu.c",
+		prefix.."/Alc/alcConfig.c",
+		prefix.."/Alc/alcDedicated.c",
+		prefix.."/Alc/alcEcho.c",
+		prefix.."/Alc/alcModulator.c",
+		prefix.."/Alc/alcReverb.c",
+		prefix.."/Alc/alcRing.c",
+		prefix.."/Alc/alcThread.c",
+		prefix.."/Alc/bs2b.c",
+		prefix.."/Alc/helpers.c",
+		prefix.."/Alc/hrtf.c",
+		prefix.."/Alc/mixer.c",
+		prefix.."/Alc/panning.c",
 
-		"soft/Alc/backends/loopback.c",
-		"soft/Alc/backends/wave.c",
-		"soft/Alc/backends/null.c",
-		"soft/Alc/backends/alsa.c",
+		prefix.."/Alc/backends/loopback.c",
+		prefix.."/Alc/backends/wave.c",
+		prefix.."/Alc/backends/null.c",
+
 }
 
 
-includedirs { ".","soft/include","soft/OpenAL32/Include" }
+includedirs { ".",prefix.."/include",prefix.."/OpenAL32/Include" }
 
 defines{ "AL_ALEXT_PROTOTYPES" }
 
