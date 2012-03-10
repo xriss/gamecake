@@ -41,7 +41,8 @@ void sod_free_data(sod *sd);;
 
 void sod_set_fmt( sod * sd, s32 fmt );
 
-sod * sod_load( sod * sd, const char *filename , const char *opts );
+sod * sod_load_file( sod * sd, const char *filename , const char *opts );
 
+sod * sod_load_data( sod * sd, const unsigned char *data , int len, const char *opts );
 
 
