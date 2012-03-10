@@ -31,10 +31,21 @@ end
 
 
 sod.load=function(sd,name)
-	assert(core.load(sd[0],name))
+	assert(core.load_file(sd[0],name))
 	core.info(sd[0],sd)
 	return sd
 end
 
+sod.load_file=function(sd,name)
+	assert(core.load_file(sd[0],name))
+	core.info(sd[0],sd)
+	return sd
+end
+
+sod.load_data=function(sd,data)
+	assert(core.load_data(sd[0],data))
+	core.info(sd[0],sd)
+	return sd
+end
 
 return sod
