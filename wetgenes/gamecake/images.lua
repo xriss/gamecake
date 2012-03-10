@@ -152,9 +152,9 @@ loads=function(images,tab)
 			for ii,vv in pairs(v) do
 			
 				if type(ii)=="number" then -- just use filename twice
-					images:load(vv,vv,i)
+					images:load(i.."_"..vv,vv,i)
 				else
-					images:load(vv,ii,i)
+					images:load(i.."_"..vv,ii,i)
 				end
 				
 			end

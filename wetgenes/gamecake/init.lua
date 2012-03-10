@@ -12,6 +12,7 @@ module("wetgenes.gamecake")
 
 local wcanvas=require("wetgenes.gamecake.canvas")
 local wimages=require("wetgenes.gamecake.images")
+local wsounds=require("wetgenes.gamecake.sounds")
 
 local grd=require("wetgenes.grd")
 
@@ -34,25 +35,38 @@ function bake(opts)
 	
 	cake.canvas=wcanvas.bake(opts) -- we will need a canvas to draw too
 	cake.images=wimages.bake(opts) -- we will need to load some images
+	cake.sounds=wsounds.bake(opts) -- we will need to load some sounds
 
 	return cake
 end
 
+setup = function(cake)
+	cake.sounds:setup()
+end
+
+clean = function(cake)
+	cake.sounds:clean()
+end
 
 start = function(cake)
 	cake.canvas:start()
 	cake.images:start()
+	cake.sounds:start()
 end
 
 stop = function(cake)
 	cake.canvas:stop()
 	cake.images:stop()
+	cake.sounds:stop()
 end
 
 blit = function(cake,id,name,cx,cy,ix,iy,w,h)
 	cake.canvas:blit(cake.images:get(id,name),cx,cy,ix,iy,w,h)
 end
 
+beep = function(cake,id,name)
+	cake.sounds:beep(cake.sounds:get(id,name))
+end
 
 -- draw a prebuilt texture using win and opengl functions
 -- do not call if you do not have fenestra and a global win setup.
@@ -86,7 +100,7 @@ end
 -- the total view area volume from there would be -320 +320 , -240 +240 , -480 +(1024-480)
 --
 -- screen needs to contain width and height of the display which we use to work
--- out where to place our view such that it is always visible.
+-- out where to place our view such that it is always visible and keeps its aspect.
 --
 function build_project23d(screen,width,height,fov,depth)
 
