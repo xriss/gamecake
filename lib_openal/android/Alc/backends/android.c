@@ -203,7 +203,7 @@ static ALCboolean android_reset_playback(ALCdevice *device)
     AndroidData* data = (AndroidData*)device->ExtraData;
 
     device->Frequency = 22050;
-    device->NumUpdates = 2;
+    device->NumUpdates = 1;
     device->FmtChans = ChannelsFromDevFmt(device->FmtChans) > 1 ? ALC_STEREO_SOFT : ALC_MONO_SOFT;
     device->FmtType = BytesFromDevFmt(device->FmtType) > 1 ? ALC_SHORT_SOFT : ALC_UNSIGNED_BYTE_SOFT;
 

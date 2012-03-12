@@ -21,6 +21,14 @@ local sd=assert(sod.create())
 
 end
 
+function do_file_read(f)
+	local fp=assert(io.open(f,"rb"))
+	local d=assert(fp:read("*a"))
+	fp:close()
+	return d
+end
+
+
 function test_al()
 
 local al=require("al")
@@ -32,7 +40,7 @@ local alc=require("alc")
 --	alc.test()-- test junk
 
 	local data="00000000zzzzzzzz" -- fake test sample data should be squarewave ishhh
-	local sd=sod.create():load("dat/sod/t2.wav")
+	local sd=sod.create():load_data(do_file_read("dat/sod/t2.wav"))
 
 --print(sd)
 
