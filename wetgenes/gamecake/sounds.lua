@@ -9,6 +9,7 @@ meta={}
 meta.__index=base
 
 local grd=require("wetgenes.grd")
+local sod=require("wetgenes.sod")
 
 
 --[[
@@ -71,8 +72,8 @@ function bake(opts)
 	sounds.data={}
 	
 	sounds.zip=opts.zip
-	sounds.prefix=opts.prefix or "data"
-	sounds.postfix=opts.postfix or ".wav"
+	sounds.prefix=opts.sodprefix or "data/sfx_"
+	sounds.postfix=opts.sodpostfix or ".wav"
 	
 	return sounds
 end
@@ -90,22 +91,28 @@ setup=function(sounds)
 	al.Listener(al.ORIENTATION, 0, 0, -1, 0,1,0 )
 	
 	sounds.sources={}
-	sounds.sources[1]=al.GenSource()
-
-	al.Source(sounds.sources[1], al.PITCH, 1)
-	al.Source(sounds.sources[1], al.GAIN, 1)
-	al.Source(sounds.sources[1], al.POSITION, 0, 0, 0)
-	al.Source(sounds.sources[1], al.VELOCITY, 0, 0, 0)
-	al.Source(sounds.sources[1], al.LOOPING, al.FALSE)
+	for i=1,4 do
+		sounds.sources[i]=al.GenSource()
+		local s=sounds.sources[i]
+		al.Source(s, al.PITCH, 1)
+		al.Source(s, al.GAIN, 1)
+		al.Source(s, al.POSITION, 0, 0, 0)
+		al.Source(s, al.VELOCITY, 0, 0, 0)
+		al.Source(s, al.LOOPING, al.FALSE)
+	end
 	
-	sounds.buffers={}
-	sounds.buffers[1]=al.GenBuffer()
+--	sounds.buffers={}
+
+--[[
+	sounds.buffers[4]=al.GenBuffer()
 
 	local d="00000000zzzzzzzz" -- fake test sample data should be squarewave ishhh
 	al.BufferData(sounds.buffers[1],al.FORMAT_MONO16,d,#d,261.626*8) -- C4 hopefully?
+	al.BufferData(sounds.buffers[1],sd) -- all loaded
 
 	al.Source(sounds.sources[1], al.BUFFER, sounds.buffers[1])
 	al.Source(sounds.sources[1], al.LOOPING,al.TRUE)
+]]
 
 end
 
@@ -113,8 +120,15 @@ clean=function(sounds)
 	sounds.al=sounds.al
 	sounds.alc=sounds.alc
 
-	al.DeleteSource(sounds.sources[1])
-	al.DeleteBuffer(sounds.buffers[1])
+	for i,v in pairs(sounds.sources) do
+		al.DeleteSource(v)
+	end
+	sounds.sources={}
+	
+	for i,v in pairs(sounds.buffers) do
+		al.DeleteBuffer(v)
+	end
+	sounds.buffers={}
 
 	context:clean()
 end
@@ -139,8 +153,11 @@ set=function(sounds,d,id,name)
 	tab[id]=d	
 end
 
-beep=function(sounds,id,name)
+beep=function(sounds,d)
 	local al=sounds.al
+	
+	al.Source(sounds.sources[1], al.BUFFER, d.buff)
+	al.Source(sounds.sources[1], al.LOOPING, d.loop)
 
 	al.SourcePlay(sounds.sources[1])
 
@@ -178,27 +195,33 @@ load=function(sounds,filename,id,name)
 
 	local fname=sounds.prefix..filename..sounds.postfix
 	
---	local g=assert(grd.create())
+	local x=assert(sod.create())
 	
 	if sounds.zip then -- load from a zip file
 		
---		local f=assert(sounds.zip:open(fname))
---		local d=assert(f:read("*a"))
---		f:close()
+		local f=assert(sounds.zip:open(fname))
+		local d=assert(f:read("*a"))
+		f:close()
 
---		assert(g:load_data(d,"png"))
+		assert(x:load_data(d,"wav"))
 	else
---		assert(g:load_file(fname,"png"))
+		assert(x:load_file(fname,"wav"))
 	end
+	
+	t={}
+	t.filename=filename
+	t.loop=al.FALSE
 	
 	if al then --al mode
 	
-		sounds:set(t,id,name)
-
--- do the loading
+		t.buff=al.GenBuffer()
+		al.BufferData(t.buff,x) -- all loaded
 		
-		t.filename=filename
+		sounds:set(t,id,name) -- remember
+
+print("loaded",id,name,filename)		
 		return t
+		
 	else
 	
 		return nil
@@ -239,7 +262,7 @@ end
 start = function(sounds)
 
 	for v,n in pairs(sounds.remember or {}) do
-		sounds:load(v.filename,n[1],n[2])
+		sounds:load(v,n[1],n[2])
 	end
 	sounds.remember=nil
 end
@@ -252,7 +275,7 @@ stop = function(sounds)
 
 		for i,t in pairs(tab) do
 		
-			sounds.remember[t]={i,n}
+			sounds.remember[t.filename]={i,n}
 		
 			sounds:unload(i,n)
 			

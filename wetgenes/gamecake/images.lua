@@ -24,8 +24,8 @@ function bake(opts)
 	
 	images.fmt=opts.cake.images_fmt
 	images.zip=opts.zip
-	images.prefix=opts.prefix or "art/out"
-	images.postfix=opts.postfix or ".png"
+	images.prefix=opts.grdprefix or "data/"
+	images.postfix=opts.grdpostfix or ".png"
 	
 	return images
 end
@@ -173,7 +173,7 @@ end
 start = function(images)
 
 	for v,n in pairs(images.remember or {}) do
-		images:load(v.filename,n[1],n[2])
+		images:load(v,n[1],n[2])
 	end
 	images.remember=nil
 end
@@ -186,7 +186,7 @@ stop = function(images)
 
 		for i,t in pairs(tab) do
 		
-			images.remember[t]={i,n}
+			images.remember[t.filename]={i,n}
 		
 			images:unload(i,n)
 			
