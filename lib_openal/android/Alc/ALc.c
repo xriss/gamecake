@@ -2494,24 +2494,27 @@ ALC_API ALCdevice* ALC_APIENTRY alcOpenDevice(const ALCchar *deviceName)
     InitUIntMap(&device->FilterMap, ~0);
 
     //Set output format
-    device->NumUpdates = 4;
-    device->UpdateSize = 1024;
+    device->NumUpdates = 1;
+    device->UpdateSize = 128;
 
-    device->Frequency = DEFAULT_OUTPUT_RATE;
-    if(ConfigValueUInt(NULL, "frequency", &device->Frequency))
-        device->Flags |= DEVICE_FREQUENCY_REQUEST;
-    device->Frequency = maxu(device->Frequency, 8000);
+    device->Frequency = (22050);// DEFAULT_OUTPUT_RATE;
+//    if(ConfigValueUInt(NULL, "frequency", &device->Frequency))
+//        device->Flags |= DEVICE_FREQUENCY_REQUEST;
+//    device->Frequency = maxu(device->Frequency, 8000);
 
     fmt = "AL_FORMAT_STEREO32";
-    if(ConfigValueStr(NULL, "format", &fmt))
-        device->Flags |= DEVICE_CHANNELS_REQUEST;
-    GetFormatFromString(fmt, &device->FmtChans, &device->FmtType);
+//    if(ConfigValueStr(NULL, "format", &fmt))
+//       device->Flags |= DEVICE_CHANNELS_REQUEST;
+//    GetFormatFromString(fmt, &device->FmtChans, &device->FmtType);
+    
+    device->FmtChans=1;
+    device->FmtType=1;
 
-    ConfigValueUInt(NULL, "periods", &device->NumUpdates);
-    if(device->NumUpdates < 2) device->NumUpdates = 4;
+//    ConfigValueUInt(NULL, "periods", &device->NumUpdates);
+//    if(device->NumUpdates < 2) device->NumUpdates = 4;
 
-    ConfigValueUInt(NULL, "period_size", &device->UpdateSize);
-    if(device->UpdateSize == 0) device->UpdateSize = 1024;
+//    ConfigValueUInt(NULL, "period_size", &device->UpdateSize);
+//    if(device->UpdateSize == 0) device->UpdateSize = 1024;
 
     ConfigValueUInt(NULL, "sources", &device->MaxNoOfSources);
     if(device->MaxNoOfSources == 0) device->MaxNoOfSources = 256;
