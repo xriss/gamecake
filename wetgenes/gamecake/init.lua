@@ -117,12 +117,17 @@ function build_project23d(screen,width,height,fov,depth)
 		m[1] = ((aspect)*1)/fov
 		m[6] = -((aspect)/screen_aspect)/fov
 		
+		screen.xs=1
+		screen.ys=-screen_aspect/aspect
 	else									-- fit height to screen
 	
 		m[1] = screen_aspect/fov
 		m[6] = -1/fov
 		
+		screen.xs=aspect/screen_aspect
+		screen.ys=-1
 	end
+	
 	
 	m[11] = -(f+n)/(f-n)
 	m[12] = -1

@@ -12,54 +12,6 @@ local grd=require("wetgenes.grd")
 local sod=require("wetgenes.sod")
 
 
---[[
-local al=require("al")
-local alc=require("alc")
-
-	
-	local dc=alc.setup()
-	
---	alc.test()-- test junk
-
-	local data="00000000zzzzzzzz" -- fake test sample data should be squarewave ishhh
-	local sd=sod.create():load("dat/sod/t2.wav")
-
---print(sd)
-
-	al.Listener(al.POSITION, 0, 0, 0)
-	al.Listener(al.VELOCITY, 0, 0, 0)
-	al.Listener(al.ORIENTATION, 0, 0, -1, 0,1,0 )
-
-	local source=al.GenSource()
-
-	al.Source(source, al.PITCH, 1)
-	al.Source(source, al.GAIN, 1)
-	al.Source(source, al.POSITION, 0, 0, 0)
-	al.Source(source, al.VELOCITY, 0, 0, 0)
-	al.Source(source, al.LOOPING, al.FALSE)
-
-	local buffer=al.GenBuffer()
-
---	al.BufferData(buffer,al.FORMAT_MONO16,data,#data,261.626*8) -- C4 hopefully?
-	al.BufferData(buffer,sd) -- all loaded
-
-	al.Source(source, al.BUFFER, buffer)
-	al.Source(source, al.LOOPING,al.TRUE)
-
-	al.SourcePlay(source)
-	require("socket").sleep(2)
-	
-	al.CheckError()
-
-	al.DeleteSource(source)
-	al.DeleteBuffer(buffer)
-	
-	dc:clean() -- should really clean up when finished
-
-
-]]
-
-
 function bake(opts)
 
 	local sounds={}
@@ -81,56 +33,13 @@ end
 setup=function(sounds)
 	sounds.al=sounds.al or require("al")
 	sounds.alc=sounds.alc or require("alc")
-	local al=sounds.al
-	local alc=sounds.alc
-	
-	sounds.context=alc.setup()
-	
-	al.Listener(al.POSITION, 0, 0, 0)
-	al.Listener(al.VELOCITY, 0, 0, 0)
-	al.Listener(al.ORIENTATION, 0, 0, -1, 0,1,0 )
-	
-	sounds.sources={}
-	for i=1,4 do
-		sounds.sources[i]=al.GenSource()
-		local s=sounds.sources[i]
-		al.Source(s, al.PITCH, 1)
-		al.Source(s, al.GAIN, 1)
-		al.Source(s, al.POSITION, 0, 0, 0)
-		al.Source(s, al.VELOCITY, 0, 0, 0)
-		al.Source(s, al.LOOPING, al.FALSE)
-	end
-	
---	sounds.buffers={}
 
---[[
-	sounds.buffers[4]=al.GenBuffer()
-
-	local d="00000000zzzzzzzz" -- fake test sample data should be squarewave ishhh
-	al.BufferData(sounds.buffers[1],al.FORMAT_MONO16,d,#d,261.626*8) -- C4 hopefully?
-	al.BufferData(sounds.buffers[1],sd) -- all loaded
-
-	al.Source(sounds.sources[1], al.BUFFER, sounds.buffers[1])
-	al.Source(sounds.sources[1], al.LOOPING,al.TRUE)
-]]
+	sounds:start()
 
 end
 
 clean=function(sounds)
-	sounds.al=sounds.al
-	sounds.alc=sounds.alc
-
-	for i,v in pairs(sounds.sources) do
-		al.DeleteSource(v)
-	end
-	sounds.sources={}
-	
-	for i,v in pairs(sounds.buffers) do
-		al.DeleteBuffer(v)
-	end
-	sounds.buffers={}
-
-	context:clean()
+	sounds:stop()
 end
 	
 	
@@ -260,6 +169,26 @@ end
 
 
 start = function(sounds)
+	local al=sounds.al
+	local alc=sounds.alc
+
+	sounds.context=alc.setup()
+	
+	al.Listener(al.POSITION, 0, 0, 0)
+	al.Listener(al.VELOCITY, 0, 0, 0)
+	al.Listener(al.ORIENTATION, 0, 0, -1, 0,1,0 )
+	
+	sounds.sources={}
+	for i=1,4 do
+		sounds.sources[i]=al.GenSource()
+		local s=sounds.sources[i]
+		al.Source(s, al.PITCH, 1)
+		al.Source(s, al.GAIN, 1)
+		al.Source(s, al.POSITION, 0, 0, 0)
+		al.Source(s, al.VELOCITY, 0, 0, 0)
+		al.Source(s, al.LOOPING, al.FALSE)
+	end
+
 
 	for v,n in pairs(sounds.remember or {}) do
 		sounds:load(v,n[1],n[2])
@@ -268,6 +197,8 @@ start = function(sounds)
 end
 
 stop = function(sounds)
+	local al=sounds.al
+	local alc=sounds.alc
 
 	sounds.remember={}
 	
@@ -282,6 +213,19 @@ stop = function(sounds)
 		end
 
 	end
+
+	for i,v in pairs(sounds.sources) do
+		al.DeleteSource(v)
+	end
+	sounds.sources={}
+	
+	for i,v in pairs(sounds.buffers) do
+		al.DeleteBuffer(v)
+	end
+	sounds.buffers={}
+
+	context:clean()
+
 
 end
 
