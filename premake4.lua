@@ -343,7 +343,7 @@ all_includes=all_includes or {
 	{"lua_ogg",			WINDOWS		or		NIX		or		nil		or		nil			},
 	{"lua_al",			WINDOWS		or		NIX		or		nil		or		ANDROID		},
 	{"lua_gl",			WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lua_gles",		nil			or		nil		or		nil		or		ANDROID		},
+	{"lua_gles",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
 	{"lua_grd",			WINDOWS		or		NIX		or		nil		or		ANDROID		},
 	{"lua_grdmap",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
 	{"lua_sod",			WINDOWS		or		NIX		or		nil		or		ANDROID		},

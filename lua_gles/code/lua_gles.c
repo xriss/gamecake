@@ -2,8 +2,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 
-#include <GLES/gl.h>
-
+#include INCLUDE_GLES_GL
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -188,12 +187,26 @@ float ff[16];
 
 static int lua_gles_Frustum (lua_State *l)
 {
+#if defined(LUA_GLES_GL)
+
+	glFrustum(		lua_tonumber(l,1)	,
+					lua_tonumber(l,2)	,
+					lua_tonumber(l,3)	,
+					lua_tonumber(l,4)	,
+					lua_tonumber(l,5)	,
+					lua_tonumber(l,6)	);
+
+#else
+
 	glFrustumf(		(float)lua_tonumber(l,1)	,
 					(float)lua_tonumber(l,2)	,
 					(float)lua_tonumber(l,3)	,
 					(float)lua_tonumber(l,4)	,
 					(float)lua_tonumber(l,5)	,
 					(float)lua_tonumber(l,6)	);
+					
+#endif
+
 	return 0;
 }
 
