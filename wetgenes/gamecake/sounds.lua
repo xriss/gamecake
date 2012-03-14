@@ -218,14 +218,8 @@ stop = function(sounds)
 		al.DeleteSource(v)
 	end
 	sounds.sources={}
-	
-	for i,v in pairs(sounds.buffers) do
-		al.DeleteBuffer(v)
-	end
-	sounds.buffers={}
 
-	context:clean()
-
+	sounds.context:clean()
 
 end
 
