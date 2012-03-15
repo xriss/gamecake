@@ -1,5 +1,4 @@
 
-
 project "lua_freetype"
 language "C++"
 

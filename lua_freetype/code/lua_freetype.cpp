@@ -246,7 +246,7 @@ int lua_freetype_destroy (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// test function
+// set font size
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_freetype_size (lua_State *l)
@@ -342,6 +342,56 @@ unsigned char* b;
 	return 1;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get the bitmapdata of the current glyph as a grd.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_freetype_grd (lua_State *l)
+{
+part_ptr p=lua_freetype_get_ptr(l);
+
+int x,y,i;
+unsigned char* b;
+unsigned char* c;
+
+struct grd *g;
+
+	if(p->face->glyph)
+	{
+		b=p->face->glyph->bitmap.buffer;
+
+		g=lua_grd_check_ptr(l,2); // need a grd to write too
+		
+		g=grd_realloc(g,GRD_FMT_U8_LUMINANCE,p->face->glyph->bitmap.width,p->face->glyph->bitmap.rows,1); // new size
+		
+		if(!g)
+		{
+			lua_pushnil(l);
+			lua_pushstring(l,"failed to realloc grd");
+			return 2;
+		}
+
+		for( y=0 ; y<p->face->glyph->bitmap.rows ; y++ )
+		{
+			c=g->bmap->get_data(0,y,0);
+			for( x=0 ; x<p->face->glyph->bitmap.width ; x++ )
+			{
+				c[x]=b[x]; // save into grd
+			}
+			b+=p->face->glyph->bitmap.pitch;
+		}
+		
+	}
+	else
+	{
+		lua_pushnil(l);
+	}
+
+	return 1;
+}
+
 /*
 FT_Vector  delta;
 
@@ -384,6 +434,7 @@ const luaL_reg lib[] =
 		{"glyph",			lua_freetype_glyph},
 		{"render",			lua_freetype_render},
 		{"bitmap",			lua_freetype_bitmap},
+		{"grd",				lua_freetype_grd},
 
 		{0,0}
 	};

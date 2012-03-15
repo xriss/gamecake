@@ -67,3 +67,7 @@ extern "C" {
 #include FT_FREETYPE_H
   
 #include "../lua_freetype/code/lua_freetype.h"
+
+#include "../lua_grd/code/grd.h"
+#include "../lua_grd/code/lua_grd.h"
+
