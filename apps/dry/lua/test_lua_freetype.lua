@@ -14,7 +14,8 @@ local d=fp:read("*a")
 fp:close()
 
 --local f=ft.create("../../../mods/data/fonts/Vera.ttf")
-local f=ft.create(d)
+local f=ft.create()
+f:load_data(d)
 
 local g=grd.create()
 

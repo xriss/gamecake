@@ -145,29 +145,57 @@ int slen;
 	lua_setmetatable(l, -2);
 
 	(*pp)=(part_ptr)calloc(sizeof(part_struct),1);
-	
-	(*pp)->error = FT_Init_FreeType( &(*pp)->library );
-	if( !(*pp)->error )
-	{
-		s=lua_tolstring(l,1,(size_t*)&slen); // the file name of the font to open
-		if(slen>=1024) //big strings are data
-		{
-			(*pp)->error = FT_New_Memory_Face( (*pp)->library,
-                              (const FT_Byte*)s,
-                              slen,
-                              0,
-                              &(*pp)->face );
-		}
-		else
-		{
-			(*pp)->error = FT_New_Face( (*pp)->library,
-				s,
-				0,
-				&(*pp)->face );			
-		}
-	}
 
 	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// load font from file
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_freetype_load_file (lua_State *l)
+{
+part_ptr p=lua_freetype_check_ptr(l,1);
+const char *s;
+int slen;
+	
+	p->error = FT_Init_FreeType( &p->library );
+	if( !p->error )
+	{
+		s=lua_tolstring(l,2,(size_t*)&slen); // the file name of the font to open
+		p->error = FT_New_Face( p->library,
+			s,
+			0,
+			&p->face );			
+	}
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// load font from memory
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_freetype_load_data (lua_State *l)
+{
+part_ptr p=lua_freetype_check_ptr(l,1);
+const char *s;
+int slen;
+	
+	p->error = FT_Init_FreeType( &p->library );
+	if( !p->error )
+	{
+		s=lua_tolstring(l,2,(size_t*)&slen); // the file name of the font to open
+		p->error = FT_New_Memory_Face( p->library,
+						  (const FT_Byte*)s,
+						  slen,
+						  0,
+						  &p->face );
+	}
+
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -268,7 +296,7 @@ int glyph_index=FT_Get_Char_Index( p->face, ucode);
 // good for debugering
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_freetype_bitmap (lua_State *l)
+int lua_freetype_tab (lua_State *l)
 {
 part_ptr p=lua_freetype_check_ptr(l,1);
 
@@ -374,11 +402,15 @@ int luaopen_wetgenes_freetype_core (lua_State *l)
 	{
 		{"create",			lua_freetype_create	},
 
+		{"load_file",		lua_freetype_load_file	},
+		{"load_data",		lua_freetype_load_data	},
+
 		{"destroy",			lua_freetype_destroy},
+		
 		{"size",			lua_freetype_size},
 		{"glyph",			lua_freetype_glyph},
 		{"render",			lua_freetype_render},
-		{"bitmap",			lua_freetype_bitmap},
+		{"tab",				lua_freetype_tab},
 		{"grd",				lua_freetype_grd},
 		{"info",			lua_freetype_info},
 
