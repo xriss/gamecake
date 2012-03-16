@@ -3,7 +3,7 @@ project "lua_fenestra"
 language "C++"
 files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 
-includedirs { "../lua_freetype/freetype/include/" }
+includedirs { "../lib_freetype/freetype/include/" }
 includedirs { "../lib_sx/src/" }
 
 links { "lib_lua" }
