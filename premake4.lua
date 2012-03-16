@@ -363,6 +363,7 @@ all_includes=all_includes or {
 	{"lib_jpeg",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
 	{"lib_gif",			WINDOWS		or		NIX		or		nil		or		nil			},
 	{"lib_z",			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
+	{"lib_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
 	{"lib_pcre",		WINDOWS		or		NIX		or		nil		or		nil			},
 --	{"lib_ogg",			WINDOWS		or		NIX		or		nil		or		nil			},
