@@ -82,5 +82,5 @@ links { "lib_lua" }
 includedirs { "freetype/include" , "." }
 
 
-KIND{kind="lua",name="freetype"}
+KIND{kind="lua",dir="wetgenes/freetype",name="core",luaname="wetgenes.freetype.core",luaopen="wetgenes_freetype_core"}
 

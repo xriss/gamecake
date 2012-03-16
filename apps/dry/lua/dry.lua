@@ -27,6 +27,7 @@ function start(args)
 	lunatest.suite("test_lanes")
 
 	lunatest.suite("test_lua_al")
+	lunatest.suite("test_lua_freetype")
 	
 	lunatest.suite("wetgenes_string")
 
