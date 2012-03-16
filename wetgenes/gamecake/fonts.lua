@@ -8,7 +8,7 @@ base=require(...)
 meta={}
 meta.__index=base
 
-local ft=require("freetype")
+local ft=require("wetgenes.freetype")
 local grd=require("wetgenes.grd")
 
 --[[
@@ -83,7 +83,9 @@ unload=function(fonts,id,name)
 
 	if t then
 		if gl then --gl mode
---				gl.DeleteTexture( t.id )			
+			for i,v in pairs(t.chars or {}) do -- delete all thje chars
+				gl.DeleteTexture( v.id )
+			end
 		end
 		fonts:set(nil,id,name)
 	end
@@ -101,17 +103,18 @@ load=function(fonts,filename,id,name)
 	if t then return t end --first check it is not already loaded
 
 
-	local fname=fonts.prefix..filename..images.postfix
+	local fname=fonts.prefix..filename..fonts.postfix
 	
 --	local g=assert(grd.create())
 	
+	local d
 	if fonts.zip then -- load from a zip file
 		local f=assert(fonts.zip:open(fname))
-		local d=assert(f:read("*a"))
+		d=assert(f:read("*a"))
 		f:close()
 	else
 		local f=assert(io.open(fname,"rb"))
-		local d=assert(f:read("*a"))
+		d=assert(f:read("*a"))
 		f:close()
 	end
 	
@@ -120,6 +123,28 @@ load=function(fonts,filename,id,name)
 		t={}
 		t.filename=filename
 		fonts:set(t,id,name)
+		
+		t.font=ft.create()
+		t.data=d -- keep the data alive (the loader expects it to continue to exist)
+		t.font:load_data(t.data)
+		
+		
+		t.font:size(32,32) -- render at 32x32 pixel size
+		
+		t.chars={}
+		
+		local g=grd.create() -- tempory buffer
+		for i=32,127 do -- setup base texturers
+
+print("loading glyph "..i)
+
+			t.font:render(i) -- render
+			t.font:grd(g) -- copy to grd			
+			g:convert(grd.FMT_U8_ARGB)
+			
+			t.chars[i]=fonts.cake.images:upload_grd(nil,g) -- send to opengl
+			
+		end
 
 		return t
 	else

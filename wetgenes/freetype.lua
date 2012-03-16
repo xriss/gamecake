@@ -65,8 +65,8 @@ base.render=function(ft,id)
 	return ft
 end
 
-base.bitmap=function(ft)
-	local r,err=core.bitmap(ft[0])
+base.tab=function(ft)
+	local r,err=core.tab(ft[0])
 	core.info(ft[0],ft)
 	return ft
 end

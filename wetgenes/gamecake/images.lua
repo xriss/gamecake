@@ -97,34 +97,7 @@ load=function(images,filename,id,name)
 	if gl then --gl mode
 	
 		t={}
-		t.id=assert(gl.GenTexture())
-		t.width=g.width
-		t.height=g.height
-		t.twidth=g.width
-		t.theight=g.height
-
-		gl.BindTexture( gl.TEXTURE_2D , t.id )
-		
---		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
---		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)
-	
-		assert(g:convert(grd.FMT_U8_RGBA))
---		assert(g:convert(grd.FMT_U16_RGBA_4444))
-		gl.TexImage2D(
-			gl.TEXTURE_2D,
-			0,
-			gl.RGBA,
-			g.width,
-			g.height,
-			0,
-			gl.RGBA,
---			gl.UNSIGNED_SHORT_4_4_4_4,
-			gl.UNSIGNED_BYTE,
-			g.data)
+		images:upload_grd(t,g)
 
 		images:set(t,id,name)
 		
@@ -140,6 +113,46 @@ load=function(images,filename,id,name)
 		return g
 	end
 	
+end
+
+function upload_grd(images,t,g)
+	local gl=images.gl
+
+	if not t then
+		t={}
+	end
+	
+	if not t.id then
+		t.id=assert(gl.GenTexture())
+	end
+	
+	t.width=g.width
+	t.height=g.height
+	t.twidth=g.width
+	t.theight=g.height
+	
+	gl.BindTexture( gl.TEXTURE_2D , t.id )
+	
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)
+
+	if g.width==0 or g.height==0 then return t end -- no data to upload
+	
+	assert(g:convert(grd.FMT_U8_RGBA))
+	gl.TexImage2D(
+		gl.TEXTURE_2D,
+		0,
+		gl.RGBA,
+		g.width,
+		g.height,
+		0,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		g.data)
+		
+	return t
 end
 
 --
