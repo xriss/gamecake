@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-LUALIB_API int luaopen_freetype (lua_State *l);
+LUALIB_API int luaopen_wetgenes_freetype_core (lua_State *l);
 
 #ifdef __cplusplus
 };
