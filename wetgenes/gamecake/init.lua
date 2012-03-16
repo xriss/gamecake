@@ -14,6 +14,7 @@ local wcanvas=require("wetgenes.gamecake.canvas")
 local wimages=require("wetgenes.gamecake.images")
 local wsounds=require("wetgenes.gamecake.sounds")
 local wscreen=require("wetgenes.gamecake.screen")
+local wfonts =require("wetgenes.gamecake.fonts")
 
 local grd=require("wetgenes.grd")
 
@@ -36,6 +37,7 @@ function bake(opts)
 	
 	cake.canvas=wcanvas.bake(opts) -- we will need a canvas to draw too
 	cake.images=wimages.bake(opts) -- we will need to load some images
+	cake.fonts = wfonts.bake(opts) -- we will need to load some fonts
 	cake.sounds=wsounds.bake(opts) -- we will need to load some sounds
 	cake.screen=wscreen.bake(opts) -- how to display a canvas
 
@@ -53,12 +55,14 @@ end
 start = function(cake)
 	cake.canvas:start()
 	cake.images:start()
+	cake.fonts:start()
 	cake.sounds:start()
 end
 
 stop = function(cake)
 	cake.canvas:stop()
 	cake.images:stop()
+	cake.fonts:stop()
 	cake.sounds:stop()
 end
 

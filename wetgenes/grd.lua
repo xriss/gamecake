@@ -306,6 +306,11 @@ base.shrink=function(g,...)
 	return r and g
 end
 
+base.info=function(g,...)
+	core.info(g[0],g)
+	return g
+end
+
 base.blit=function(ga,gb,x,y,cx,cy,cw,ch)
 
 	if cx then -- autoclip
