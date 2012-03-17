@@ -113,24 +113,38 @@ end
 
 
 
-
-set_font = function(canvas,font)
+font_set = function(canvas,font)
 	canvas.font=font or canvas.font
-	canvas:set_font_size(16,0)
-	canvas:set_font_xy(0,0)
+	canvas:font_set_size(16,0)
+	canvas:font_set_xy(0,0)
 end
 
-set_font_size = function(canvas,size,add)
+font_set_size = function(canvas,size,add)
 	canvas.font_size=size
 	canvas.font_add=add or 0 -- clear the x space tweak
 end
-set_font_xy = function(canvas,x,y)
+font_set_xy = function(canvas,x,y)
 	canvas.font_x=x or canvas.font_x
 	canvas.font_y=y or canvas.font_y
 end
 
+font_width=function(canvas,text)
 
-draw_font=function(canvas,text)
+	local font=canvas.font
+	local s=canvas.font_size/font.size
+	local x=0
+	for i=1,#text do
+	
+		local cid=text:byte(i)
+		local c=font.chars[cid] or canvas.font.chars[32]
+		
+		x=x+(c.add*s)+canvas.font_add
+	end
+
+	return x
+end
+
+font_draw=function(canvas,text)
 
 	local x=canvas.font_x
 	local y=canvas.font_y
@@ -144,14 +158,10 @@ draw_font=function(canvas,text)
 		local c=font.chars[cid] or canvas.font.chars[32]
 		
 		canvas:blit(c,x+(c.x*s),y+(c.y*s),nil,nil,c.width,c.height,c.width*s,c.height*s)
-		
---print(x,y,c.x,c.y)
+
 		x=x+(c.add*s)+canvas.font_add
 	end
 	
---exit(0)
-
 	canvas.font_x=x
-
 end
 
