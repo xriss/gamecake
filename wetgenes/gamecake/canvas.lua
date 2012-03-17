@@ -42,19 +42,27 @@ grd_blit = function(canvas,t,cx,cy,ix,iy,w,h)
 	)
 end
 
-gl_blit = function(canvas,t,cx,cy,ix,iy,w,h)
+gl_blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
 
 	local gl=canvas.gl
+	
+--	cx=(cx or 0)+t.x -- handle adjustment of the x,y position
+--	cy=(cy or 0)+t.y
 
 	ix=ix or 0
 	iy=iy or 0
 	w=w or t.width
 	h=h or t.height
-	local tw=t.twidth
-	local th=t.theight
+	cw=cw or w
+	ch=ch or h
 	
-	local cxw=cx+w
-	local cyh=cy+h
+	if cw==0 or ch==0 then return end -- nothing to draw
+	
+	local tw=t.texture_width -- hacks for cards that do not suport non power of two texture sizes
+	local th=t.texture_height -- we just use a part of this bigger texture
+	
+	local cxw=cx+cw
+	local cyh=cy+ch
 	
 	local ixw=(ix+w)/tw
 	local iyh=(iy+h)/th
@@ -83,7 +91,7 @@ end
 
 start = function(canvas)
 	if canvas.gl then -- open
-		canvas.vdat=pack.alloc(4*5*4) -- tempory vertex draw buffer		
+		canvas.vdat=pack.alloc(4*5*4) -- temp vertex quad draw buffer		
 		blit=gl_blit
 	else
 		canvas.grd=assert(wgrd.create(canvas.fmt,
@@ -100,5 +108,50 @@ stop = function(canvas)
 		canvas.grd=nil
 		blit=nil
 	end
+end
+
+
+
+
+
+set_font = function(canvas,font)
+	canvas.font=font or canvas.font
+	canvas:set_font_size(16,0)
+	canvas:set_font_xy(0,0)
+end
+
+set_font_size = function(canvas,size,add)
+	canvas.font_size=size
+	canvas.font_add=add or 0 -- clear the x space tweak
+end
+set_font_xy = function(canvas,x,y)
+	canvas.font_x=x or canvas.font_x
+	canvas.font_y=y or canvas.font_y
+end
+
+
+draw_font=function(canvas,text)
+
+	local x=canvas.font_x
+	local y=canvas.font_y
+	local font=canvas.font
+	
+	local s=canvas.font_size/font.size
+	
+	for i=1,#text do
+	
+		local cid=text:byte(i)
+		local c=font.chars[cid] or canvas.font.chars[32]
+		
+		canvas:blit(c,x+(c.x*s),y+(c.y*s),nil,nil,c.width,c.height,c.width*s,c.height*s)
+		
+--print(x,y,c.x,c.y)
+		x=x+(c.add*s)+canvas.font_add
+	end
+	
+--exit(0)
+
+	canvas.font_x=x
+
 end
 

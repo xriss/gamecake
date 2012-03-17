@@ -79,6 +79,7 @@ local import=[[
 
 // u8[1]  per pixel, forced U8 gray scale (treat as indexed)
 #define	GRD_FMT_U8_LUMINANCE						0x00e1
+#define	GRD_FMT_U8_ALPHA							0x00e2
 
 
 // more formats, not to be used when mucking about with data

@@ -11,29 +11,6 @@ meta.__index=base
 local ft=require("wetgenes.freetype")
 local grd=require("wetgenes.grd")
 
---[[
-
-local ft=require("freetype")
-local grd=require("wetgenes.grd")
-
-local fp=io.open("../../../mods/data/fonts/Vera.ttf","rb")
-local d=fp:read("*a")
-fp:close()
-
---local f=ft.create("../../../mods/data/fonts/Vera.ttf")
-local f=ft.create(d)
-
-local g=grd.create()
-
-f:size(64,64)
-f:render(65)
-f:grd(g[0])
-g:convert(grd.FMT_U8_ARGB)
-print(wstr.dump(f))
-print(wstr.dump(g:info()))
-
-]]
-
 
 function bake(opts)
 
@@ -83,7 +60,7 @@ unload=function(fonts,id,name)
 
 	if t then
 		if gl then --gl mode
-			for i,v in pairs(t.chars or {}) do -- delete all thje chars
+			for i,v in pairs(t.chars or {}) do -- delete all the chars
 				gl.DeleteTexture( v.id )
 			end
 		end
@@ -129,22 +106,28 @@ load=function(fonts,filename,id,name)
 		t.font:load_data(t.data)
 		
 		
-		t.font:size(32,32) -- render at 32x32 pixel size
+		t.size=32
+		t.font:size(t.size,t.size) -- render at 32x32 pixel size, all future numbers are relative to this size
 		
 		t.chars={}
 		
 		local g=grd.create() -- tempory buffer
-		for i=32,127 do -- setup base texturers
-
-print("loading glyph "..i)
+		for i=32,127 do -- setup base textures for 7bit ascii
 
 			t.font:render(i) -- render
 			t.font:grd(g) -- copy to grd			
 			g:convert(grd.FMT_U8_ARGB)
 			
-			t.chars[i]=fonts.cake.images:upload_grd(nil,g) -- send to opengl
+			local c=fonts.cake.images:upload_grd(nil,g) -- send to opengl
+			t.chars[i]=c
 			
+			c.x=t.font.bitmap_left -- offsets to draw the bitmap at, whole pixels
+			c.y=t.size-t.font.bitmap_top
+			c.add=t.font.advance -- character draw width which may be fractional
+
 		end
+
+-- we keep the ttf font in memory around so we can reload chars or load new chars as we need them
 
 		return t
 	else

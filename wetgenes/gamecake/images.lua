@@ -126,10 +126,12 @@ function upload_grd(images,t,g)
 		t.id=assert(gl.GenTexture())
 	end
 	
+	t.x=0
+	t.y=0
 	t.width=g.width
 	t.height=g.height
-	t.twidth=g.width
-	t.theight=g.height
+	t.texture_width=g.width
+	t.texture_height=g.height
 	
 	gl.BindTexture( gl.TEXTURE_2D , t.id )
 	
