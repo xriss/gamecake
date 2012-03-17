@@ -349,7 +349,7 @@ struct grd *g;
 
 		g=lua_grd_check_ptr(l,2); // need a grd to write too
 		
-		g=grd_realloc(g,GRD_FMT_U8_LUMINANCE,p->face->glyph->bitmap.width,p->face->glyph->bitmap.rows,1); // new size
+		g=grd_realloc(g,GRD_FMT_U8_ALPHA,p->face->glyph->bitmap.width,p->face->glyph->bitmap.rows,1); // new size
 		
 		if(!g)
 		{

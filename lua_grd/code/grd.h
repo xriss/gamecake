@@ -63,6 +63,7 @@
 
 // u8[1]  per pixel, forced U8 gray scale (treat as indexed)
 #define	GRD_FMT_U8_LUMINANCE						0x00e1
+#define	GRD_FMT_U8_ALPHA							0x00e2
 
 
 // more formats, not to be used when mucking about with data
@@ -91,22 +92,6 @@
 	
 // maximum GRD_FMT value		
 #define	GRD_FMT_MAX									0x0107
-	
-#define GRD_FMT_GOTALPHA(x) (x!=GRD_FMT_NO_ALPHA)
-#define GRD_FMT_SIZEOFPIXEL(x) (	(x==GRD_FMT_U8_ARGB)?4:\
-									(x==GRD_FMT_U8_INDEXED)?1:\
-									(x==GRD_FMT_U8_LUMINANCE)?1:\
-									(x==GRD_FMT_U16_ARGB_1555)?2:\
-									(x==GRD_FMT_U16_RGB_565)?2:\
-									(x==GRD_FMT_U16_RGBA_4444_PREMULT)?2:\
-									(x==GRD_FMT_U16_RGBA_4444)?2:\
-									(x==GRD_FMT_U8_RGB)?3:\
-									(x==GRD_FMT_U8_ARGB_PREMULT)?4:\
-									(x==GRD_FMT_U8_RGBA)?4:\
-									(x==GRD_FMT_U8_RGBA_PREMULT)?4:\
-									0)
-//									(x==GRD_FMT_F32_ARGB)?16:\
-//									(x==GRD_FMT_F64_ARGB)?32:\
 
 // information about a bitmap held in memory (or even a palette)
 // by using scan values we can describe a section of a larger bitmap in this structure
