@@ -16,12 +16,41 @@
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// how big is each pixel for the given format, returns 0 if not known
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int grd_sizeof_pixel(int id)
+{
+	switch(id)
+	{
+		case GRD_FMT_U8_ARGB:
+		case GRD_FMT_U8_ARGB_PREMULT:
+		case GRD_FMT_U8_RGBA:
+		case GRD_FMT_U8_RGBA_PREMULT:
+			return 4;
+		case GRD_FMT_U8_RGB:
+			return 3;
+		case GRD_FMT_U16_ARGB_1555:
+		case GRD_FMT_U16_RGB_565:
+		case GRD_FMT_U16_RGBA_4444:
+		case GRD_FMT_U16_RGBA_4444_PREMULT:
+			return 2;
+		case GRD_FMT_U8_INDEXED:
+		case GRD_FMT_U8_LUMINANCE:
+		case GRD_FMT_U8_ALPHA:
+			return 1;
+	}
+	return 0;
+}	
+									
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // allocate some data in a grd_info
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void * grd_info_alloc(struct grd_info *gi,  s32 fmt , s32 w, s32 h, s32 d )
 {
-int ps=GRD_FMT_SIZEOFPIXEL(fmt);
+int ps=grd_sizeof_pixel(fmt);
 
 	grd_info_free(gi); // this resets everything and frees any data it finds
 	
@@ -232,7 +261,7 @@ struct grd * g2=grd_create( g->bmap->fmt , g->bmap->w, g->bmap->h, g->bmap->d );
 	{
 		if(g->bmap->data && g2->bmap->data)
 		{
-			int ps=GRD_FMT_SIZEOFPIXEL(g->bmap->fmt);
+			int ps=grd_sizeof_pixel(g->bmap->fmt);
 
 			memcpy(g2->bmap->data,g->bmap->data, ps * g->bmap->w * g->bmap->h * g->bmap->d );
 		}
@@ -499,6 +528,31 @@ u8 *pc;
 		{
 			case GRD_FMT_U8_ARGB:
 				return g; // no change needed
+			break;
+			
+			case GRD_FMT_U8_ALPHA:
+				gb=grd_create(GRD_FMT_U8_ARGB,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return false; }
+				
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=g->bmap->get_data(0,y,z);
+						pb=gb->bmap->get_data(0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							pb[0]=*pa;
+							pb[1]=255;
+							pb[2]=255;
+							pb[3]=255;
+							pa+=1;
+							pb+=4;
+						}
+					}
+				}
+				
+				return gb ;
 			break;
 			
 			case GRD_FMT_U8_LUMINANCE:
