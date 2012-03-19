@@ -1,6 +1,6 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// (C) Kriss 2011 http://xixs.com
+// (C) Kriss Daniels 2003 http://www.XIXs.com
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 
@@ -12,7 +12,6 @@
 #include <math.h>
 #include <signal.h>
 #include <string.h>
-
 
 
 #if defined(_MSC_VER)
@@ -31,13 +30,11 @@
 
 #if defined(WIN32)
 
-//#include <io.h>
-//#include <direct.h>
+#include <io.h>
+#include <direct.h>
 
 #include <windows.h>
 #include <windowsx.h>
-
-#include "../wet/util/win_types.h"
 
 #elif defined(X11)
 
@@ -45,8 +42,6 @@
 #include <sys/time.h>
 
 #endif
-
-#include "../wet/util/wet_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,18 +51,13 @@ extern "C" {
 #include "../lib_lua/src/lauxlib.h"
 #include "../lib_lua/src/lualib.h"
 
-//#include "../_src/liblwo/code/lwo2.h"
-
 #ifdef __cplusplus
 };
 #endif
 
+#include "../wet/util/wet_types.h"
+#include "../wet/util/f32_math.h"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
-#include "../lua_freetype/code/lua_freetype.h"
-
-#include "../lua_grd/code/grd.h"
-#include "../lua_grd/code/lua_grd.h"
-
+#include "code/win_windows.h"
+#include "code/win_linux.h"
+#include "code/win_lua.h"
