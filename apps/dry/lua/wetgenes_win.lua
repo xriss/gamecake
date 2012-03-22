@@ -4,6 +4,7 @@ module(...,package.seeall)
 
 local wstr=require("wetgenes.string")
 local wwin=require("wetgenes.win")
+local gl=require("gles")
 
 
 
@@ -28,7 +29,10 @@ for i=1,10*50 do
 		end
 	until t==nil
 	
-
+	gl.ClearColor((i%15)/15,(i%15)/15,(i%15)/15,(i%15)/15)
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+	
+	win:swap()
 	win:sleep(1/50)
 end
 

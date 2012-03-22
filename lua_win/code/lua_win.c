@@ -194,6 +194,21 @@ wetwin_lua *p=lua_wetwin_check_ptr(l,1);
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// swap a gl surface 
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_swap (lua_State *l)
+{
+wetwin_lua *p=lua_wetwin_check_ptr(l,1);
+
+	glXSwapBuffers( p->dsp, p->win );
+
+	return 0;
+}
+
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -395,6 +410,7 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 		{"info",			lua_wetwin_info},
 
 		{"context",			lua_wetwin_context},
+		{"swap",			lua_wetwin_swap},
 
 		{"peek",			lua_wetwin_peek},
 		{"wait",			lua_wetwin_wait},
