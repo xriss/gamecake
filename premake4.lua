@@ -355,6 +355,7 @@ all_includes=all_includes or {
 	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
 	{"lua_lanes",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
 	{"lua_posix",		nil			or		NIX		or		nil		or		nil			},
+	{"lua_win",			WINDOWS		or		NIX		or		nil		or		nil			},
 	{"lua_android",		nil			or		nil		or		nil		or		ANDROID		},
 	{AND_LIB_DIR,		nil			or		nil		or		nil		or		ANDROID		},
 	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
