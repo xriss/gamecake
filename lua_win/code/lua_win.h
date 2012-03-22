@@ -11,6 +11,11 @@ typedef struct swetwin_lua {
 	Display		*dsp;
 	int			screen;
 	Window		win;
+	
+	GLXContext context;
+
+	int width;
+	int height;
 
 } wetwin_lua ;
 

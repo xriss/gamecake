@@ -13,10 +13,12 @@ function test_win()
 
 local win=assert(wwin.create())
 
+	win:context()
+	
 --print(wstr.dump(win))
 
 
---[[
+
 for i=1,10*50 do
 
 	repeat
@@ -29,7 +31,7 @@ for i=1,10*50 do
 
 	win:sleep(1/50)
 end
-]]
+
 	win:sleep(2)
 	
 

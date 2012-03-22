@@ -51,20 +51,8 @@ int lua_wetwin_getinfo (lua_State *l, wetwin_lua *p, int tab)
 {
 	if(p)
 	{
-/*
-		lua_pushliteral(l,"data");		lua_pushlightuserdata(l,p->bmap->data);		lua_rawset(l,tab);
-
-		lua_pushliteral(l,"format");	lua_pushnumber(l,p->bmap->fmt);		lua_rawset(l,tab);
-
-		lua_pushliteral(l,"width");		lua_pushnumber(l,p->bmap->w);		lua_rawset(l,tab);
-		lua_pushliteral(l,"height");	lua_pushnumber(l,p->bmap->h);		lua_rawset(l,tab);
-		lua_pushliteral(l,"depth");		lua_pushnumber(l,p->bmap->d);		lua_rawset(l,tab);
-
-		lua_pushliteral(l,"err");
-		if(p->err) 	{ lua_pushstring(l,p->err); }
-		else		{ lua_pushnil(l); }
-		lua_rawset(l,tab);
-*/
+		lua_pushnumber(l,p->width);		lua_setfield(l,tab,"width");
+		lua_pushnumber(l,p->height);	lua_setfield(l,tab,"height");
 	}
 	else
 	{
@@ -161,12 +149,47 @@ wetwin_lua **pp=lua_wetwin_ptr_ptr(l,1);
 		{
 			if((*pp)->win)
 			{
+				if((*pp)->context)
+				{
+					glXMakeCurrent((*pp)->dsp,None,NULL);
+					glXDestroyContext((*pp)->dsp,(*pp)->context);
+				}
 				XDestroyWindow( (*pp)->dsp, (*pp)->win );
 			}
 			XCloseDisplay( (*pp)->dsp );
 		}
 	}
 	(*pp)=0;
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// prepare a gl surface in the window
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_context (lua_State *l)
+{
+wetwin_lua *p=lua_wetwin_check_ptr(l,1);
+
+	int attrcount;
+	int AttributeList[] = {
+			GLX_RED_SIZE, 1,
+			GLX_GREEN_SIZE, 1,
+			GLX_BLUE_SIZE, 1,
+			GLX_ALPHA_SIZE, 0,
+			GLX_DEPTH_SIZE, 1,
+			GLX_STENCIL_SIZE, 0,
+			GLX_X_RENDERABLE,1,
+			GLX_DOUBLEBUFFER,1,
+			None};
+			
+	GLXFBConfig *conf=glXChooseFBConfig(p->dsp,p->screen,AttributeList,&attrcount);
+
+	p->context=glXCreateNewContext( p->dsp , *conf , GLX_RGBA_TYPE , NULL , 1 );
+
+	glXMakeContextCurrent( p->dsp , p->win , p->win, p->context );
 
 	return 0;
 }
@@ -224,6 +247,7 @@ int key=0;
 int x=0;
 int y=0;
 char asc[255];
+KeySym k;
 
 	XEvent e[1];
 	if( XPending( p->dsp ) > 0 )
@@ -265,6 +289,8 @@ char asc[255];
 				lua='s';
 				x=e->xconfigure.width;
 				y=e->xconfigure.height;
+				p->width=x;
+				p->height=y;
 			break;
 		}
 	}
@@ -281,14 +307,14 @@ char asc[255];
     else
     if(lua=='k')
     {
-		int ts=XLookupString(&e->xkey,asc,32,&key,0);
+		int ts=XLookupString(&e->xkey,asc,32,&k,0);
 		asc[ts]=0; // null term the ascii
 
 		lua_pushstring(l,"key");
-		lua_pushnumber(l,e->xkey);
-		lua_pushnumber(l,act);
 		lua_pushstring(l,asc);
-		lua_pushstring(l,XKeysymToString(e->xkey));
+		lua_pushnumber(l,act);
+		lua_pushnumber(l,k);
+		lua_pushstring(l,XKeysymToString(k));
 		return 5;
 	}
     else
@@ -302,88 +328,6 @@ char asc[255];
 	
 	return 0; // no more msgs
 }
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// prepare a gl surface in the window
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_wetwin_gl (lua_State *l)
-{
-/*
-	int attrcount;
-	int AttributeList[] = {
-			GLX_RED_SIZE, 1,
-			GLX_GREEN_SIZE, 1,
-			GLX_BLUE_SIZE, 1,
-			GLX_ALPHA_SIZE, 0,
-			GLX_DEPTH_SIZE, 1,
-			GLX_STENCIL_SIZE, 0,
-			GLX_X_RENDERABLE,1,
-//			GLX_RENDER_TYPE, GLX_RGBA_BIT, 
-			GLX_DOUBLEBUFFER,1,
-//			GLX_TRANSPARENT_TYPE,GLX_NONE,
-//			GLX_X_VISUAL_TYPE,GLX_TRUE_COLOR,
-			None};
-	GLXFBConfig *conf=glXChooseFBConfig(fenestra->dsp,fenestra->screen,AttributeList,&attrcount);
-	
-
-//	for( int i=0 ; conf[i] ; i++ )
-	int i=0;
-	{
-		int v;
-
-#define confdump(dd) glXGetFBConfigAttrib(fenestra->dsp, conf[i], dd, &v); printf( #dd ":0x%X , ",v);
-		
-		printf( "\nfound glx config %d = { ",i);
-		confdump( GLX_FBCONFIG_ID )
-		confdump( GLX_VISUAL_ID )
-		confdump( GLX_BUFFER_SIZE )
-		confdump( GLX_LEVEL )
-		confdump( GLX_DOUBLEBUFFER )
-		confdump( GLX_STEREO )
-		confdump( GLX_AUX_BUFFERS )
-		confdump( GLX_RED_SIZE )
-		confdump( GLX_GREEN_SIZE )
-		confdump( GLX_BLUE_SIZE )
-		confdump( GLX_ALPHA_SIZE )
-		confdump( GLX_DEPTH_SIZE )
-		confdump( GLX_STENCIL_SIZE )
-		confdump( GLX_ACCUM_RED_SIZE )
-		confdump( GLX_ACCUM_GREEN_SIZE )
-		confdump( GLX_ACCUM_BLUE_SIZE )
-		confdump( GLX_ACCUM_ALPHA_SIZE )
-		confdump( GLX_RENDER_TYPE )
-		confdump( GLX_DRAWABLE_TYPE )
-		confdump( GLX_X_RENDERABLE )
-		confdump( GLX_X_VISUAL_TYPE )
-		confdump( GLX_CONFIG_CAVEAT )
-		confdump( GLX_TRANSPARENT_TYPE )
-		confdump( GLX_TRANSPARENT_INDEX_VALUE )
-		confdump( GLX_TRANSPARENT_RED_VALUE )
-		confdump( GLX_TRANSPARENT_GREEN_VALUE )
-		confdump( GLX_TRANSPARENT_BLUE_VALUE )
-		confdump( GLX_TRANSPARENT_ALPHA_VALUE )
-		confdump( GLX_MAX_PBUFFER_WIDTH )
-		confdump( GLX_MAX_PBUFFER_HEIGHT )
-		confdump( GLX_MAX_PBUFFER_PIXELS )
-		printf( "}\n");
-
-	}
-        
-	Xcontext=glXCreateNewContext( fenestra->dsp , conf[0] , GLX_RGBA_TYPE , NULL , true );
-glError();
-	glXMakeContextCurrent( fenestra->dsp , fenestra->win , fenestra->win,Xcontext );
-
-// this does not work?	
-//	glXSwapIntervalEXT(fenestra->dsp , fenestra->win , fenestra->ogl->swap_interval);
-
-glError();
-*/
-
-	return 0;
-}
-
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -409,6 +353,33 @@ int lua_wetwin_sleep (lua_State *l)
     return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// what time is it, with sub second resolution
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_time (lua_State *l)
+{
+
+#if defined(WIN32)
+
+s64 rez;
+s64 tim;
+
+	QueryPerformanceFrequency( (LARGE_INTEGER *) (&rez) );
+	QueryPerformanceCounter( (LARGE_INTEGER *) (&(tim)) );
+	lua_pushnumber(l, ((double)tim)/((double)rez) );
+	return 1;
+	
+#else
+
+	struct timeval tv;
+	gettimeofday ( &tv, NULL );
+	lua_pushnumber(l, ((double)tv.tv_sec) + ( ((double)tv.tv_usec) / 1000000.0 ) );
+	return 1;
+	
+#endif
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -423,13 +394,14 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 		{"destroy",			lua_wetwin_destroy},
 		{"info",			lua_wetwin_info},
 
-		{"gl",				lua_wetwin_gl},
+		{"context",			lua_wetwin_context},
 
 		{"peek",			lua_wetwin_peek},
 		{"wait",			lua_wetwin_wait},
 		{"msg",				lua_wetwin_msg},
 
 		{"sleep",			lua_wetwin_sleep},
+		{"time",			lua_wetwin_time},
 		
 		{0,0}
 	};
