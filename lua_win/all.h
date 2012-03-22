@@ -38,6 +38,8 @@
 
 #elif defined(X11)
 
+#include <X11/Xlib.h> 
+
 #include <strings.h>
 #include <sys/time.h>
 
@@ -56,8 +58,6 @@ extern "C" {
 #endif
 
 #include "../wet/util/wet_types.h"
-#include "../wet/util/f32_math.h"
 
-#include "code/win_windows.h"
-#include "code/win_linux.h"
-#include "code/win_lua.h"
+
+#include "code/lua_win.h"

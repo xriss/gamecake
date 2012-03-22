@@ -41,6 +41,8 @@ function start(args)
 	lunatest.suite("wetgenes_grd")
 	lunatest.suite("wetgenes_grdmap")
 
+	lunatest.suite("wetgenes_win")
+
 	lunatest.run()
 	
 end

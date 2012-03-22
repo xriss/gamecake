@@ -41,6 +41,8 @@
 
 #elif defined(X11)
 
+#include <X11/Xlib.h> 
+
 #include <strings.h>
 #include <sys/time.h>
 
