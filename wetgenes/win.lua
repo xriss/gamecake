@@ -30,8 +30,8 @@ function base.info(w)
 	core.info(w[0],w)
 end
 
-function base.gl(w,opts)
-	core.gl(w[0],opts)
+function base.context(w,opts)
+	core.context(w[0],opts)
 end
 
 function base.peek(w)
