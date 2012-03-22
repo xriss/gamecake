@@ -34,6 +34,10 @@ function base.context(w,opts)
 	core.context(w[0],opts)
 end
 
+function base.swap(w)
+	core.swap(w[0])
+end
+
 function base.peek(w)
 	return core.peek(w[0])
 end
