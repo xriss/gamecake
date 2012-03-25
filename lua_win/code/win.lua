@@ -11,6 +11,16 @@ meta.__index=base
 
 setmetatable(win,meta)
 
+-- key names are given in raw OS flavour,
+-- this maps these raw names to more generic names
+win.generic_keymap={
+
+}
+
+function win.keymap(key)
+	return win.generic_keymap[key] or key
+end
+
 function win.create(opts)
 
 	local w={}

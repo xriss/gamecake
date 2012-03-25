@@ -87,7 +87,7 @@ wetwin_lua *p;
 int x=20;
 int y=20;
 
-int width=640;
+int width=320;
 int height=480;
 
 const char *title="http://www.WetGenes.com/ - fenestra";
