@@ -115,8 +115,9 @@ load=function(fonts,filename,id,name)
 		for i=32,127 do -- setup base textures for 7bit ascii
 
 			t.font:render(i) -- render
-			t.font:grd(g) -- copy to grd			
-			g:convert(grd.FMT_U8_ARGB)
+			t.font:grd(g) -- copy to grd
+--			g:convert(grd.FMT_U8_ARGB_PREMULT)
+			g:convert(grd.FMT_U8_RGBA_PREMULT)
 			
 			local c=fonts.cake.images:upload_grd(nil,g) -- send to opengl
 			t.chars[i]=c

@@ -142,7 +142,13 @@ function upload_grd(images,t,g)
 
 	if g.width==0 or g.height==0 then return t end -- no data to upload
 	
-	assert(g:convert(grd.FMT_U8_RGBA))
+--print(require("wetgenes.string").dump(g))
+--	if g.format==grd.FMT_U8_RGBA or g.format==grd.FMT_U8_RGBA_PREMULT then
+		-- ok to upload as is
+--	else
+		assert(g:convert(grd.FMT_U8_RGBA_PREMULT))
+--	end
+	
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
 		0,
