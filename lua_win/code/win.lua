@@ -69,5 +69,9 @@ function base.sleep(...)
 end
 win.sleep=base.sleep
 
+function base.time()
+	return core.time()
+end
+win.time=base.time
 
 return win
