@@ -354,9 +354,9 @@ u8 *pc;
 						{
 							u32 a=pa[0];
 							pb[0]=a;
-							pb[1]=(u8)((pa[1]*a)>>8);
-							pb[2]=(u8)((pa[2]*a)>>8);
-							pb[3]=(u8)((pa[3]*a)>>8);
+							pb[1]=(u8)((pa[1]*a)/255);
+							pb[2]=(u8)((pa[2]*a)/255);
+							pb[3]=(u8)((pa[3]*a)/255);
 							pa+=4;
 							pb+=4;
 						}
@@ -379,6 +379,30 @@ u8 *pc;
 							pb[0]=pa[1];
 							pb[1]=pa[2];
 							pb[2]=pa[3];
+							pb[3]=pa[0];
+							pa+=4;
+							pb+=4;
+						}
+					}
+				}
+				return gb;
+			break;
+
+			case GRD_FMT_U8_RGBA_PREMULT:
+				gb=grd_create(GRD_FMT_U8_RGBA_PREMULT,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return 0; }
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=g->bmap->get_data(0,y,z);
+						pb=gb->bmap->get_data(0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							u32 a=pa[0];
+							pb[0]=(u8)((pa[1]*a)/255);
+							pb[1]=(u8)((pa[2]*a)/255);
+							pb[2]=(u8)((pa[3]*a)/255);
 							pb[3]=pa[0];
 							pa+=4;
 							pb+=4;
@@ -779,7 +803,7 @@ f32 fx,fy,fz;
 s32 x,y,z;
 u32 *ptr;
 
-	if( g->bmap->fmt!=GRD_FMT_U8_ARGB ) { return false; } // must be this format
+	if( ( g->bmap->fmt!=GRD_FMT_U8_ARGB ) && ( g->bmap->fmt!=GRD_FMT_U8_ARGB_PREMULT ) ) { return false; } // must be this format
 
 	if( gi->w<1 || gi->h<1 || gi->d<1 ) { return false; }
 	if( w<1 || h<1 || d<1 ) { return false; }

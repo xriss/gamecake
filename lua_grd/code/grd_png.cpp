@@ -237,7 +237,7 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 	png_structp png_ptr=0;
 	png_infop info_ptr=0;
 	int number_of_passes;
-	png_bytep * row_pointers;
+	png_bytep * row_pointers=0;
 
 
 	/* create file */
@@ -292,7 +292,7 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 		}
 	}
 	else
-	if(g->bmap->fmt==GRD_FMT_U8_ARGB)	
+	if( (g->bmap->fmt==GRD_FMT_U8_ARGB) || (g->bmap->fmt==GRD_FMT_U8_ARGB_PREMULT) )
 	{
 		png_set_swap_alpha(png_ptr);
 //		png_set_bgr(png_ptr);
