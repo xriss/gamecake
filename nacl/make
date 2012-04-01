@@ -2,6 +2,8 @@
 
 cd `dirname $0`
 
+cd ..
+
 naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_15`
 export PATH=$naclsdk/toolchain/linux_x86_newlib/bin:$PATH
 
