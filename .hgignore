@@ -8,4 +8,6 @@ android/gen/*
 lua/preloadlibs.c
 lua/cache.c
 */log.txt
+nacl/nginx/logs/*
+
 
