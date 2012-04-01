@@ -758,14 +758,13 @@ function gles.CheckError(...)
 	assert(err==0,str)
 end
 
--- add all extensions as flags to our main table (same as all the enums)
+-- add all extensions as flags to gles.extensions
 function gles.GetExtensions()
-	gles.flags={}
+	gles.extensions={}
 	local s=gles.Get(gles.EXTENSIONS)
 	for w in s:gmatch("([^%s]+)") do
-_G.print(w)
 		if w:sub(1,3)=="GL_" then
-			gles.flags[w:sub(4)]=true -- skip the "GL_" at the start
+			gles.extensions[w:sub(4)]=true -- skip the "GL_" at the start
 		end
 	end
 end
