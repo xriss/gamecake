@@ -10,7 +10,7 @@ const char *lua_wetwin_ptr_name="wetwin*ptr";
 	
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// check that a userdata at the given index is a grd object
+// check that a userdata at the given index is a wetwin object
 // return the userdata if it does, otherwise return 0
 // this userdata will be a pointer to the real data
 //
@@ -74,6 +74,27 @@ wetwin_lua *p=lua_wetwin_check_ptr(l,1);
 	return 0;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get info about the screen size
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_screen (lua_State *l)
+{
+	Display		*dsp = XOpenDisplay( NULL );
+
+
+	lua_pushnumber(l,DisplayWidth(dsp,0));
+	lua_pushnumber(l,DisplayHeight(dsp,0));
+	
+	
+	XCloseDisplay( dsp );
+	
+	return 2;
+}
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // create and return the data
@@ -87,10 +108,15 @@ wetwin_lua *p;
 int x=20;
 int y=20;
 
-int width=320;
+int width=640;
 int height=480;
 
 const char *title="http://www.WetGenes.com/ - fenestra";
+
+	lua_getfield(l,1,"width");	if( lua_isnumber(l,-1) ) { width=lua_tonumber(l,-1);	} lua_pop(l,1);
+	lua_getfield(l,1,"height");	if( lua_isnumber(l,-1) ) { height=lua_tonumber(l,-1);	} lua_pop(l,1);
+	lua_getfield(l,1,"x");		if( lua_isnumber(l,-1) ) { x=lua_tonumber(l,-1); 		} lua_pop(l,1);
+	lua_getfield(l,1,"y");		if( lua_isnumber(l,-1) ) { y=lua_tonumber(l,-1);		} lua_pop(l,1);
 
 	wp = (wetwin_lua_wrap *)lua_newuserdata(l, sizeof(wetwin_lua_wrap)); // we need a pointer, this makes lua GC a bit easier
 	memset(wp,0,sizeof(wetwin_lua_wrap)); // make sure it is 0
@@ -126,6 +152,8 @@ const char *title="http://www.WetGenes.com/ - fenestra";
 				KeyPressMask | KeyReleaseMask |
 				ButtonPressMask | ButtonReleaseMask |
 				PointerMotionMask | StructureNotifyMask );
+
+			XMoveWindow( p->dsp , p->win , x,y);
 
 			XFlush(p->dsp);
 		}
@@ -405,6 +433,8 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
+		{"screen",			lua_wetwin_screen},
+		
 		{"create",			lua_wetwin_create},
 		{"destroy",			lua_wetwin_destroy},
 		{"info",			lua_wetwin_info},
