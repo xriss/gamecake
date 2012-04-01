@@ -24,6 +24,8 @@ function start(args)
 
 	lfs.chdir(apps.dir)
 
+	lunatest.suite("test_zip")
+
 	lunatest.suite("test_lanes")
 
 	lunatest.suite("test_lua_al")

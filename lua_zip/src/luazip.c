@@ -99,6 +99,160 @@ static int zip_open (lua_State *L) {
   }
   return 1;
 }
+/*
+ * need to be able to read zip files from memory, this treats a lua string as a zip memorychunk
+ */
+ struct zzip_plugin_mem_io { /* use "zzip_plugin_io_handlers" in applications !! */
+    int          (*open)(zzip_char_t* name, int flags, ...);
+    int          (*close)(int fd);
+    zzip_ssize_t (*read)(int fd, void* buf, zzip_size_t len);
+    zzip_off_t   (*seeks)(int fd, zzip_off_t offset, int whence);
+    zzip_off_t   (*filesize)(int fd);
+    long         sys;
+    long         type;
+    zzip_ssize_t (*write)(int fd, _zzip_const void* buf, zzip_size_t len);
+};
+
+struct zzip_plugin_mem_io_file {
+	char magic[8];
+	unsigned char *data;
+	int size;
+	int curr;
+};
+
+static int zzip_plugin_mem_io_check_magic(struct zzip_plugin_mem_io_file *f)
+{
+	char *cp=f->magic;
+	
+	if(cp[0]!='Z') return 0;
+	if(cp[1]!='I') return 0;
+	if(cp[2]!='P') return 0;
+	if(cp[3]!= 0 ) return 0;
+	if(cp[4]!='D') return 0;
+	if(cp[5]!='A') return 0;
+	if(cp[6]!='T') return 0;
+	if(cp[7]!= 0 ) return 0;
+	
+	return 1;
+}
+static int zzip_plugin_mem_io_open(zzip_char_t* name, int flags, ...)
+{
+struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)name; /* reuse the name as the data struct*/
+	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
+	
+	return (int)f;
+}
+static int zzip_plugin_mem_io_close(int fd)
+{
+struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
+	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
+
+	free((void*)f);
+	return 0;
+}
+static zzip_ssize_t zzip_plugin_mem_io_read(int fd, void* buf, zzip_size_t len)
+{
+struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
+	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
+
+	if(f->curr+len > f->size)
+	{
+		return -1;
+	}
+	memcpy(buf,f->data+f->curr,len);
+	f->curr+=len;
+
+	return len;
+}
+static zzip_off_t   zzip_plugin_mem_io_seaks(int fd, zzip_off_t offset, int whence)
+{
+struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
+	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
+	
+	if(whence==0)
+	{
+		f->curr=offset;
+	}
+	else
+	if(whence==1)
+	{
+		f->curr+=offset;
+	}
+	else
+	if(whence==2)
+	{
+		f->curr=f->size+offset;
+	}
+	if(f->curr<0)       { f->curr=0;       }
+	if(f->curr>f->size) { f->curr=f->size; }
+
+	return 0;
+}
+static zzip_off_t   zzip_plugin_mem_io_filesize(int fd)
+{
+struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
+	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
+
+	return f->size;
+}
+static zzip_ssize_t zzip_plugin_mem_io_write(int fd, _zzip_const void* buf, zzip_size_t len)
+{
+struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
+	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
+
+	return 0;
+}
+
+static struct zzip_plugin_mem_io xio_mem={
+	zzip_plugin_mem_io_open,
+	zzip_plugin_mem_io_close,
+	zzip_plugin_mem_io_read,
+	zzip_plugin_mem_io_seaks,
+	zzip_plugin_mem_io_filesize,
+	0,
+	0,
+	zzip_plugin_mem_io_write
+};
+
+static int zip_open_mem (lua_State *L) {
+  ZZIP_FILE** inf;
+
+	struct zzip_plugin_mem_io_file *f;
+	f=calloc(sizeof(struct zzip_plugin_mem_io_file),1);
+	if(!f) { return 0; } // alloc fail
+	
+	char *cp=f->magic;
+	cp[0]='Z';cp[1]='I';cp[2]='P';cp[3]=0;
+	cp[4]='D';cp[5]='A';cp[6]='T';cp[7]=0;
+	
+	if(lua_isstring(L,1))
+	{
+		f->data = (unsigned char *)luaL_checklstring(L, 1,&f->size);
+	}
+	else
+	if(lua_isuserdata(L,1))
+	{
+		f->data = lua_touserdata(L, 1);
+		f->size = luaL_checknumber(L, 2);
+	}
+	else
+	{
+	  lua_pushnil(L);
+	  lua_pushfstring(L, "no zip data");
+	  return 2;
+	}
+	
+  ZZIP_DIR** pf = newfile(L);
+  *pf = zzip_dir_open_ext_io(cp, 0,0, (zzip_plugin_io_t)&xio_mem);
+  if (*pf == NULL)
+  {
+    lua_pushnil(L);
+    lua_pushfstring(L, "could not open zip mem file");
+    return 2;
+  }
+  return 1;
+
+}
 
 static int zip_close (lua_State *L) {
   ZZIP_DIR* f = tofile(L, 1);
@@ -195,6 +349,7 @@ static int zip_openfile (lua_State *L) {
   lua_pushfstring(L, "could not open file `%s'", filename);
   return 2;
 }
+
 
 static int zip_type (lua_State *L) {
   ZZIP_DIR** f = (ZZIP_DIR**)luaL_checkudata(L, 1, ZIPFILEHANDLE);
@@ -470,6 +625,7 @@ static int ff_seek (lua_State *L) {
 }
 
 static const luaL_reg ziplib[] = {
+  {"open_mem", zip_open_mem}, // open a file from memory
   {"open", zip_open},
   {"close", zip_close},
   {"type", zip_type},
@@ -511,7 +667,7 @@ static void set_info (lua_State *L) {
 	lua_pushliteral (L, "Reading files inside zip files");
 	lua_settable (L, -3);
 	lua_pushliteral (L, "_VERSION");
-	lua_pushliteral (L, "LuaZip 1.2.3");
+	lua_pushliteral (L, "LuaZip 1.2.3.mem");
 	lua_settable (L, -3);
 }
 

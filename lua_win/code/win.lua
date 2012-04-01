@@ -11,6 +11,13 @@ meta.__index=base
 
 setmetatable(win,meta)
 
+
+function win.screen()
+	it={}
+	it.width,it.height= core.screen()
+	return it
+end
+
 -- key names are given in raw OS flavour,
 -- this maps these raw names to more generic names
 win.generic_keymap={
