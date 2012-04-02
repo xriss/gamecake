@@ -4,19 +4,13 @@ language "C"
 
 includedirs { "../lib_lua/src" }
 
-if not NACL then -- disable lua stuff for small test
-
 files { "hacks.c" }
 
 dofile("cache.lua")
 dofile("preloadlibs.lua")
 
---links(lua_lib_names)
-
-end
-
 links(static_lib_names)
-links(static_lib_names) -- so good we linked it twice...
+links(static_lib_names) -- so good, so good, we linked it twice...
 
 
 --print("LIBS TO LINK ",table.concat(static_lib_names,","))
@@ -24,7 +18,7 @@ links(static_lib_names) -- so good we linked it twice...
 
 if NACL then
 
-	files { "../nacl/code/gltest.c" }
+	files { "../nacl/code/nacl_lua.c" }
 
 	linkoptions { "-v -O0" }
 
@@ -44,7 +38,7 @@ elseif ANDROID then
 	
 --	linkoptions{ "-Bsymbolic"}
 
-	files { "../lib_lua/src/*.h", --[["src/lua.c"]]  }
+	files { "../lib_lua/src/*.h"  }
 	KIND{kind="SharedLib",name="liblua"}
 
 
@@ -55,7 +49,7 @@ elseif WINDOWS then
 	links { "opengl32" , "glu32" }
 	links { "stdc++" , "ws2_32" , "gdi32"}
 	
-	links { "comdlg32" } -- we can dump this when we impliment our own freq
+	links { "comdlg32" } -- we need to remove this when we impliment our own file-requester
 
 	KIND{kind="ConsoleApp",name="lua.exe"}
 
