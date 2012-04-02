@@ -11,6 +11,11 @@ if ANDROID then
 	defines{ "LUA_GLES_GLES" }
 	defines{ "INCLUDE_GLES_GL=\\\"GLES/gl.h\\\"" }
 	
+elseif NACL then
+
+	defines{ "LUA_GLES_GLES2" }
+	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
+	
 else -- use GL 
 	defines{ "LUA_GLES_GL" }
 	defines{ "INCLUDE_GLES_GL=\\\"GL/gl.h\\\"" }
