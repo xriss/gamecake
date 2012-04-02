@@ -4,22 +4,32 @@ language "C"
 
 includedirs { "../lib_lua/src" }
 
-files { "hacks.c" }
+if not NACL then -- disable lua stuff for small test
 
+files { "hacks.c" }
 
 dofile("cache.lua")
 dofile("preloadlibs.lua")
 
 --links(lua_lib_names)
 
+end
+
 links(static_lib_names)
 links(static_lib_names) -- so good we linked it twice...
 
+
+--print("LIBS TO LINK ",table.concat(static_lib_names,","))
+
+
 if NACL then
 
-	linkoptions { "-v" }
+	files { "../nacl/code/gltest.c" }
 
-	links { "ppapi" , "ppapi_gles2" }
+	linkoptions { "-v -O0" }
+
+	links { "ppapi"  }
+	links { "ppapi_gles2" }
 	links { "m" , "stdc++" }
 	
 	KIND{kind="WindowedApp",name="lua.32.nexe"}
