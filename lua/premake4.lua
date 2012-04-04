@@ -18,7 +18,7 @@ links(static_lib_names) -- so good, so good, we linked it twice...
 
 if NACL then
 
-	files { "../nacl/code/nacl_lua.c" }
+	files { "../nacl/code/lua_force_import.c" }
 
 	linkoptions { "-v -O0" }
 	

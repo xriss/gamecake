@@ -1,26 +1,9 @@
 
-
-if NACL then
-
-
 project "lua_nacl"
-language "C++"
-files { "code/**.cpp" , "code/**.c" , "code/**.cc" , "code/**.h" , "all.h" }
+language "C"
 
-links { "ppapi" ,  "ppapi_cpp" , "pthread" , "srpc" }
-
+files {  "code/**.c" , "code/**.h" , "all.h" }
 includedirs { "." }
 
---links { "lib_lua" , "lua" }
-
-defines { "LUA_LIB" }
-
-
-SET_KIND("ConsoleApp","nacl","nacl")
-SET_TARGET("","lua.nexe",true)
-
-
-end
-
-
+KIND{lua="wetgenes.nacl.core"}
 
