@@ -272,7 +272,52 @@ function m4.inverse(it,r)
 	local ood=1/m4.determinant(it)	
 	return m4.scale(m4.cofactor(m4.transpose(it,m4.new())),ood,r)
 end
+function m4.identity(it)
+	return it:set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1)
+end
+function m4.translate(it,v3a,r)
+	r=r or it
+	local r1=it[12+1]+v3a[1]
+	local r2=it[12+2]+v3a[2]
+	local r3=it[12+3]+v3a[3]
+	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,it[16] )
+end
 
+function m4.scale_v3(it,degrees,v3a,r)
+	local m4a=m4.new(
+		v3a.x	,	0		,	0		,	0	,
+		0		,	v3a.y	,	0		,	0	,
+		0		,	0		,	v3a.z	,	0	,
+		0		,	0		,	0		,	1	)
+	return m4_product_m4(it,m4a,r)
+end
+
+function m4.rotate(it,degrees,v3a,r)
+
+	local c=math.cos(math.pi*degrees/180)
+	local s=math.sin(math.pi*degrees/180)
+	
+	local x=v3a.x
+	local y=v3a.y
+	local z=v3a.z
+	
+	local delta=0.001 -- a smallish number
+	local dd=( (x*x) + (y*y) + (z*z) )
+	if ( dd < (1-delta) ) or ( dd > (1+delta) ) then -- not even close to a unit vector
+		local d=math.sqrt(d)
+		x=x/dd
+		y=y/dd
+		z=z/dd
+	end
+
+	local m4a=m4.new(
+		x*2*(1-c)+c		,	x*y*(1-c)-z*s	,	x*z*(1-c)+y*s	, 	0	,
+		x*y*(1-c)+z*s	,	y*2*(1-c)+c		,	y*z*(1-c)-x*s	,	0	,
+        x*z*(1-c)-y*s	,	y*z*(1-c)+x*s	,	z*2*(1-c)+c		,	0	,
+        0				,	0				,	0				,	1	)
+               
+	return m4_product_m4(it,m4a,r)
+end
 
 
 class("v2",array)
