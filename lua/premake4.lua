@@ -21,10 +21,11 @@ if NACL then
 	files { "../nacl/code/nacl_lua.c" }
 
 	linkoptions { "-v -O0" }
-
+	
 	links { "ppapi"  }
 	links { "ppapi_gles2" }
 	links { "m" , "stdc++" }
+	links { "nosys" } -- remove newlib link errors
 	
 	KIND{kind="WindowedApp",name="lua.32.nexe"}
 

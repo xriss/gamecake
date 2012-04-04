@@ -18,11 +18,16 @@
 #include "ppapi/gles2/gl2ext_ppapi.h"
 #include "GLES2/gl2.h"
 
+#include "lua.h"
+
 static PP_Module module_id = 0;
 static PPB_Messaging* messaging_interface = NULL;
 static PPB_Var* var_interface = NULL;
 static PPB_Graphics3D* graphics3d_interface = NULL;
 static PPB_Instance* instance_interface = NULL;
+
+static lua_State *L=0;
+
 
 struct MessageInfo {
   PP_Instance instance;
@@ -110,6 +115,13 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
                                   uint32_t argc,
                                   const char* argn[],
                                   const char* argv[]) {
+									  
+	L = lua_open();  /* create state */
+	luaL_openlibs(L);  /* open libraries */
+									  
+									  
+									  
+									  
   PP_Resource context;
   int32_t attribs[] = {PP_GRAPHICS3DATTRIB_WIDTH, 640,
                        PP_GRAPHICS3DATTRIB_HEIGHT, 480,
@@ -141,6 +153,10 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
 }
 
 static void Instance_DidDestroy(PP_Instance instance) {
+	
+	lua_close(L);
+	L=0;
+	
 }
 
 static void Instance_DidChangeView(PP_Instance instance,
@@ -157,6 +173,62 @@ static PP_Bool Instance_HandleDocumentLoad(PP_Instance instance,
   return PP_FALSE;
 }
 
+static void l_message (const char *pname, const char *msg) {
+  if (pname) fprintf(stderr, "%s: ", pname);
+  fprintf(stderr, "%s\n", msg);
+  fflush(stderr);
+}
+
+
+static int report (lua_State *L, int status) {
+  if (status && !lua_isnil(L, -1)) {
+    const char *msg = lua_tostring(L, -1);
+    if (msg == NULL) msg = "(error object is not a string)";
+    l_message("", msg);
+    lua_pop(L, 1);
+  }
+  return status;
+}
+
+static int traceback (lua_State *L) {
+  if (!lua_isstring(L, 1))  /* 'message' not a string? */
+    return 1;  /* keep it intact */
+  lua_getfield(L, LUA_GLOBALSINDEX, "debug");
+  if (!lua_istable(L, -1)) {
+    lua_pop(L, 1);
+    return 1;
+  }
+  lua_getfield(L, -1, "traceback");
+  if (!lua_isfunction(L, -1)) {
+    lua_pop(L, 2);
+    return 1;
+  }
+  lua_pushvalue(L, 1);  /* pass error message */
+  lua_pushinteger(L, 2);  /* skip this function and traceback */
+  lua_call(L, 2, 1);  /* call debug.traceback */
+  return 1;
+}
+
+static int docall (lua_State *L, int narg, int clear) {
+  int status;
+  int base = lua_gettop(L) - narg;  /* function index */
+  lua_pushcfunction(L, traceback);  /* push traceback function */
+  lua_insert(L, base);  /* put it under chunk and args */
+//  signal(SIGINT, laction);
+  status = lua_pcall(L, narg, (clear ? 0 : LUA_MULTRET), base);
+//  signal(SIGINT, SIG_DFL);
+  lua_remove(L, base);  /* remove traceback function */
+  /* force a complete garbage collection in case of errors */
+  if (status != 0) lua_gc(L, LUA_GCCOLLECT, 0);
+  return status;
+}
+
+static int dostringr (lua_State *L, const char *s, const char *name) {
+  int status = luaL_loadbuffer(L, s, strlen(s), name) || docall(L, 0, 0);
+  return report(L, status);
+}
+
+
 void Messaging_HandleMessage(PP_Instance instance, struct PP_Var var_message) {
   if (var_message.type != PP_VARTYPE_STRING) {
     /* Only handle string messages */
@@ -166,6 +238,24 @@ void Messaging_HandleMessage(PP_Instance instance, struct PP_Var var_message) {
   if (message == NULL)
     return;
   struct PP_Var var_result = PP_MakeUndefined();
+  if (strncmp(message, "lua\n", strlen("lua\n")) == 0)
+  {
+		int top=lua_gettop(L);
+		
+		dostringr(L,message+4,message+4);
+		if(lua_isnumber(L,-1))
+		{
+			var_result = PP_MakeDouble( lua_tonumber(L,-1) );
+		}
+		else
+		if(lua_isstring(L,-1))
+		{
+			var_result = CStrToVar( lua_tostring(L,-1) );
+		}
+		
+		lua_settop(L,top);
+  }
+  else
   if (strncmp(message, kFortyTwoMethodId, strlen(kFortyTwoMethodId)) == 0) {
     var_result = FortyTwo();
   } else if (strncmp(message,
