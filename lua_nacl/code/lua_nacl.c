@@ -1,4 +1,7 @@
 
+// this file handles the basic nacl interface setup
+// the creation of the master lua state under nacl
+// as well as the lua interface into nacl (wetgenes.nacl.core)
 
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +22,10 @@
 #include "GLES2/gl2.h"
 
 #include "lua.h"
+#include "lauxlib.h"
+
+static PP_Instance nacl_instance=0;
+static PP_Resource nacl_context;
 
 static PP_Module module_id = 0;
 static PPB_Messaging* messaging_interface = NULL;
@@ -27,7 +34,6 @@ static PPB_Graphics3D* graphics3d_interface = NULL;
 static PPB_Instance* instance_interface = NULL;
 
 static lua_State *L=0;
-
 
 
 /**
@@ -80,13 +86,15 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
                                   uint32_t argc,
                                   const char* argn[],
                                   const char* argv[]) {
+
+nacl_instance=instance;
 									  
 	L = lua_open();  /* create state */
 	luaL_openlibs(L);  /* open libraries */
 									  
 									  
 									  
-									  
+/*									  
   PP_Resource context;
   int32_t attribs[] = {PP_GRAPHICS3DATTRIB_WIDTH, 640,
                        PP_GRAPHICS3DATTRIB_HEIGHT, 480,
@@ -113,6 +121,7 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
     printf("SwapBuffers failed with code %d\n", ret);
     return PP_FALSE;
   }
+*/
 
   return PP_TRUE;
 }
@@ -195,6 +204,9 @@ static int dostringr (lua_State *L, const char *s, const char *name) {
 
 
 void Messaging_HandleMessage(PP_Instance instance, struct PP_Var var_message) {
+
+nacl_instance=instance;
+
   if (var_message.type != PP_VARTYPE_STRING) {
     /* Only handle string messages */
     return;
@@ -277,3 +289,108 @@ PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
 
 PP_EXPORT void PPP_ShutdownModule() {
 }
+
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// prepare a gl surface in the window
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_nacl_context (lua_State *l)
+{
+									  
+  int32_t attribs[] = {PP_GRAPHICS3DATTRIB_WIDTH, 640,
+                       PP_GRAPHICS3DATTRIB_HEIGHT, 480,
+                       PP_GRAPHICS3DATTRIB_NONE};
+  nacl_context = graphics3d_interface->Create(nacl_instance, 0, attribs);
+  if (nacl_context == 0)
+  {
+    lua_pushstring(l,"failed to create graphics3d context");
+    lua_error(l);
+  }
+
+  glSetCurrentContextPPAPI(nacl_context);
+
+  if (!instance_interface->BindGraphics(nacl_instance, nacl_context))
+  {
+    lua_pushstring(l,"failed to bind graphics3d context");
+    lua_error(l);
+  }
+
+
+/*
+ * wetwin_lua *p=lua_wetwin_check_ptr(l,1);
+
+	int attrcount;
+	int AttributeList[] = {
+			GLX_RED_SIZE, 1,
+			GLX_GREEN_SIZE, 1,
+			GLX_BLUE_SIZE, 1,
+			GLX_ALPHA_SIZE, 0,
+			GLX_DEPTH_SIZE, 1,
+			GLX_STENCIL_SIZE, 0,
+			GLX_X_RENDERABLE,1,
+			GLX_DOUBLEBUFFER,1,
+			None};
+			
+	GLXFBConfig *conf=glXChooseFBConfig(p->dsp,p->screen,AttributeList,&attrcount);
+
+	p->context=glXCreateNewContext( p->dsp , *conf , GLX_RGBA_TYPE , NULL , 1 );
+
+	glXMakeContextCurrent( p->dsp , p->win , p->win, p->context );
+*/
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// swap a gl surface 
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_nacl_swap (lua_State *l)
+{
+//  glClearColor(1.0f, 0.9f, 0.4f, 0.9f);
+//  glClear(GL_COLOR_BUFFER_BIT);
+
+   struct PP_CompletionCallback callback = { swap_callback, NULL, PP_COMPLETIONCALLBACK_FLAG_NONE };
+  int32_t ret = graphics3d_interface->SwapBuffers(nacl_context, callback);
+  if (ret != PP_OK && ret != PP_OK_COMPLETIONPENDING) {
+    lua_pushfstring(l,"SwapBuffers failed with code %d\n", ret);
+    lua_error(l);
+  }
+
+
+/*
+ * wetwin_lua *p=lua_wetwin_check_ptr(l,1);
+
+	glXSwapBuffers( p->dsp, p->win );
+*/
+	return 0;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// open library.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+LUALIB_API int luaopen_wetgenes_nacl_core(lua_State *l)
+{
+	const luaL_reg lib[] =
+	{
+//		{"create",			lua_nacl_create},
+		
+		{"context",			lua_nacl_context},
+		{"swap",			lua_nacl_swap},
+		
+		{0,0}
+	};
+
+	lua_newtable(l);
+	luaL_openlib(l, NULL, lib, 0);
+	
+	return 1;
+}
+
+

@@ -42,21 +42,13 @@
       }
     }
 
-    function fortyTwo() {
-      helloWorldModule.postMessage('fortyTwo');
+
+    function luasetup() {
+      helloWorldModule.postMessage('lua\n local b=require("bulb_nacl") b:setup() return "SETUP"');
     }
 
-    function luatest() {
-      helloWorldModule.postMessage('lua\n return ("plops");');
-    }
-
-    function reverseText() {
-      // Grab the text from the text box, pass it into reverseText()
-      var inputBox = document.forms.helloForm.inputBox;
-      helloWorldModule.postMessage('reverseText:' + inputBox.value);
-      // Note: a |false| return tells the <form> tag to cancel the GET action
-      // when submitting the form.
-      return false;
+    function luaframe() {
+      helloWorldModule.postMessage('lua\n local b=require("bulb_nacl") b:updatedraw() return "FRAME"');
     }
 
     // Set the global status message.  If the element with id 'statusField'
@@ -83,9 +75,8 @@
         method="get"
         onsubmit="return reverseText()">
     <input type="text" id="inputBox" name="inputBox" value="Hello world" /><p>
-    <input type="button" value="Call luatest()" onclick="luatest()" />
-    <input type="button" value="Call fortyTwo()" onclick="fortyTwo()" />
-    <input type="submit" value="Call reverseText()" />
+    <input type="button" value="Call luasetup()" onclick="luasetup()" />
+    <input type="button" value="Call luaframe()" onclick="luaframe()" />
   </form>
   <!-- Load the published .nexe.  This includes the 'src' attribute which
   shows how to load multi-architecture modules.  Each entry in the "nexes"
