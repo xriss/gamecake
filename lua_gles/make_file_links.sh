@@ -4,3 +4,4 @@ echo "linking .lua fles from the main lua dir so we dont accidently edit multipl
 #rm code/gles.lua
 
 ln ../../bin/lua/gles.lua code
+ln ../../bin/lua/glesfix.lua code

@@ -79,7 +79,7 @@ static struct PP_Var CStrToVar(const char* str) {
 
 void swap_callback(void* user_data, int32_t result)
 {
-  printf("swap result: %d\n", result);
+//  printf("swap result: %d\n", result);
 }
 
 static PP_Bool Instance_DidCreate(PP_Instance instance,
