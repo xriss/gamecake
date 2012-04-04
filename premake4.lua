@@ -174,13 +174,16 @@ elseif NIX then
 end
 
 
+if not BUILD_DIR_BASE then
+
+	BUILD_DIR_BASE="build-"..(_ACTION or "")
+end
+
 if not BUILD_DIR then
 
-	BUILD_DIR="build-"..(_ACTION or "")
-
-	if NACL then BUILD_DIR=BUILD_DIR.."-nacl" end
-	if ANDROID then BUILD_DIR=BUILD_DIR.."-android" end
-	if MINGW then BUILD_DIR=BUILD_DIR.."-mingw" end
+	if NACL then BUILD_DIR=BUILD_DIR_BASE.."-nacl" end
+	if ANDROID then BUILD_DIR=BUILD_DIR_BASE.."-android" end
+	if MINGW then BUILD_DIR=BUILD_DIR_BASE.."-mingw" end
 
 end
 
