@@ -370,7 +370,7 @@ static int lua_gles_ColorPointer (lua_State *l)
 	glColorPointer(		(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
 						(int)luaL_checknumber(l,3)		,
-						((char*)lua_touserdata(l,4))+((int)luaL_checknumber(l,5))	);
+						((char*)lua_touserdata(l,5))+((int)luaL_checknumber(l,4))	);
 	return 0;
 }
 
@@ -379,7 +379,7 @@ static int lua_gles_TexCoordPointer (lua_State *l)
 	glTexCoordPointer(	(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
 						(int)luaL_checknumber(l,3)		,
-						((char*)lua_touserdata(l,4))+((int)luaL_checknumber(l,5))	);
+						((char*)lua_touserdata(l,5))+((int)luaL_checknumber(l,4))	);
 	return 0;
 }
 
@@ -387,7 +387,7 @@ static int lua_gles_NormalPointer (lua_State *l)
 {
 	glNormalPointer(	(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
-						((char*)lua_touserdata(l,3))+((int)luaL_checknumber(l,4))	);
+						((char*)lua_touserdata(l,4))+((int)luaL_checknumber(l,3))	);
 	return 0;
 }
 
@@ -396,7 +396,7 @@ static int lua_gles_VertexPointer (lua_State *l)
 	glVertexPointer(	(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
 						(int)luaL_checknumber(l,3)		,
-						((char*)lua_touserdata(l,4))+((int)luaL_checknumber(l,5))	);
+						((char*)lua_touserdata(l,5))+((int)luaL_checknumber(l,4))	);
 	return 0;
 }
 #endif
@@ -425,10 +425,9 @@ static int lua_gles_DrawElements (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// Stubs
+// Buffer functions
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-#if defined(LUA_GLES_GLES2) || defined(LUA_GLES_GL)
 
 static int lua_gles_GenBuffer (lua_State *l)
 {
@@ -445,24 +444,22 @@ int id=luaL_checknumber(l,1);
 }
 static int lua_gles_BindBuffer (lua_State *l)
 {
-	glBindBuffer(luaL_checknumber(l,1),luaL_checknumber(l,2));
+	glBindBuffer((int)luaL_checknumber(l,1),(int)luaL_checknumber(l,2));
 	return 0;
 }
 static int lua_gles_BufferData (lua_State *l)
 {
-	glBufferData(luaL_checknumber(l,1),luaL_checknumber(l,2),
-						((char*)lua_touserdata(l,3))+((int)luaL_checknumber(l,4)),
-						luaL_checknumber(l,5));
+	glBufferData((int)luaL_checknumber(l,1),(int)luaL_checknumber(l,2),
+						((char*)lua_touserdata(l,3)),
+						(int)luaL_checknumber(l,4));
 	return 0;
 }
 static int lua_gles_BufferSubData (lua_State *l)
 {
-	glBufferSubData(luaL_checknumber(l,1),luaL_checknumber(l,2),luaL_checknumber(l,3),
+	glBufferSubData((int)luaL_checknumber(l,1),(int)luaL_checknumber(l,2),(int)luaL_checknumber(l,3),
 						((char*)lua_touserdata(l,4))+((int)luaL_checknumber(l,5)) );
 	return 0;
 }
-
-#endif
 
 
 
@@ -671,7 +668,7 @@ int i;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// setup data for programs
+// data for programs
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_gles_VertexAttribPointer (lua_State *l)
@@ -699,64 +696,64 @@ unsigned int pointer;
 
 static int lua_gles_VertexAttrib1f (lua_State *l)
 {
-	glVertexAttrib1f(luaL_checknumber(l,1), luaL_checknumber(l,2) );
+	glVertexAttrib1f((int)luaL_checknumber(l,1), luaL_checknumber(l,2) );
 	return 0;
 }
 static int lua_gles_VertexAttrib2f (lua_State *l)
 {
-	glVertexAttrib2f(luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3) );
+	glVertexAttrib2f((int)luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3) );
 	return 0;
 }
 static int lua_gles_VertexAttrib3f (lua_State *l)
 {
-	glVertexAttrib3f(luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3), luaL_checknumber(l,4) );
+	glVertexAttrib3f((int)luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3), luaL_checknumber(l,4) );
 	return 0;
 }
 static int lua_gles_VertexAttrib4f (lua_State *l)
 {
-	glVertexAttrib4f(luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3), luaL_checknumber(l,4), luaL_checknumber(l,5) );
+	glVertexAttrib4f((int)luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3), luaL_checknumber(l,4), luaL_checknumber(l,5) );
 	return 0;
 }
 
 static int lua_gles_Uniform1f (lua_State *l)
 {
-	glUniform1f(luaL_checknumber(l,1), luaL_checknumber(l,2) );
+	glUniform1f((int)luaL_checknumber(l,1), (float)luaL_checknumber(l,2) );
 	return 0;
 }
 static int lua_gles_Uniform2f (lua_State *l)
 {
-	glUniform2f(luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3) );
+	glUniform2f((int)luaL_checknumber(l,1), (float)luaL_checknumber(l,2), (float)luaL_checknumber(l,3) );
 	return 0;
 }
 static int lua_gles_Uniform3f (lua_State *l)
 {
-	glUniform3f(luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3), luaL_checknumber(l,4) );
+	glUniform3f((int)luaL_checknumber(l,1), (float)luaL_checknumber(l,2), (float)luaL_checknumber(l,3), (float)luaL_checknumber(l,4) );
 	return 0;
 }
 static int lua_gles_Uniform4f (lua_State *l)
 {
-	glUniform4f(luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3), luaL_checknumber(l,4), luaL_checknumber(l,5) );
+	glUniform4f((int)luaL_checknumber(l,1), (float)luaL_checknumber(l,2), (float)luaL_checknumber(l,3), (float)luaL_checknumber(l,4), (float)luaL_checknumber(l,5) );
 	return 0;
 }
 
 static int lua_gles_Uniform1i (lua_State *l)
 {
-	glUniform1i(luaL_checknumber(l,1), luaL_checknumber(l,2) );
+	glUniform1i((int)luaL_checknumber(l,1), (int)luaL_checknumber(l,2) );
 	return 0;
 }
 static int lua_gles_Uniform2i (lua_State *l)
 {
-	glUniform2i(luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3) );
+	glUniform2i((int)luaL_checknumber(l,1), (int)luaL_checknumber(l,2), (int)luaL_checknumber(l,3) );
 	return 0;
 }
 static int lua_gles_Uniform3i (lua_State *l)
 {
-	glUniform3i(luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3), luaL_checknumber(l,4) );
+	glUniform3i((int)luaL_checknumber(l,1), (int)luaL_checknumber(l,2), (int)luaL_checknumber(l,3), (int)luaL_checknumber(l,4) );
 	return 0;
 }
 static int lua_gles_Uniform4i (lua_State *l)
 {
-	glUniform4i(luaL_checknumber(l,1), luaL_checknumber(l,2), luaL_checknumber(l,3), luaL_checknumber(l,4), luaL_checknumber(l,5) );
+	glUniform4i((int)luaL_checknumber(l,1), (int)luaL_checknumber(l,2), (int)luaL_checknumber(l,3), (int)luaL_checknumber(l,4), (int)luaL_checknumber(l,5) );
 	return 0;
 }
 
@@ -771,7 +768,7 @@ float ff[4];
 		ff[i]=(float)luaL_checknumber(l,-1);
 		lua_pop(l,1);
 	}	
-	glUniformMatrix2fv(luaL_checknumber(l,1), 1, ff );
+	glUniformMatrix2fv((int)luaL_checknumber(l,1), 1, ff );
 	return 0;
 }
 static int lua_gles_UniformMatrix3f (lua_State *l)
@@ -785,7 +782,7 @@ float ff[9];
 		ff[i]=(float)luaL_checknumber(l,-1);
 		lua_pop(l,1);
 	}	
-	glUniformMatrix3fv(luaL_checknumber(l,1), 1, ff );
+	glUniformMatrix3fv((int)luaL_checknumber(l,1), 1, ff );
 	return 0;
 }
 static int lua_gles_UniformMatrix4f (lua_State *l)
@@ -799,7 +796,7 @@ float ff[16];
 		ff[i]=(float)luaL_checknumber(l,-1);
 		lua_pop(l,1);
 	}	
-	glUniformMatrix4fv(luaL_checknumber(l,1), 1, ff );
+	glUniformMatrix4fv((int)luaL_checknumber(l,1), 1, ff );
 	return 0;
 }
 
@@ -901,21 +898,26 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"TexImage2D",			lua_gles_TexImage2D},
 		{"TexParameter",		lua_gles_TexParameter},
 
-#if defined(LUA_GLES_GLES) || defined(LUA_GLES_GL)
-		{"Color",				lua_gles_Color},
-		{"EnableClientState",	lua_gles_EnableClientState},
-		{"DisableClientState",	lua_gles_DisableClientState},
-		{"ShadeModel",			lua_gles_ShadeModel},		
-#endif
-
 		{"BlendFunc",			lua_gles_BlendFunc},		
 		{"Viewport",			lua_gles_Viewport},
-
 		
 		{"DrawArrays",			lua_gles_DrawArrays},
 		{"DrawElements",		lua_gles_DrawElements},
 
+		{"GenBuffer",				lua_gles_GenBuffer},
+		{"BindBuffer",				lua_gles_BindBuffer},
+		{"DeleteBuffer",			lua_gles_DeleteBuffer},
+		{"BufferData",				lua_gles_BufferData},
+		{"BufferSubData",			lua_gles_BufferSubData},
+
+// fixed pipeline
 #if defined(LUA_GLES_GLES) || defined(LUA_GLES_GL)
+
+		{"Color",				lua_gles_Color},
+		{"EnableClientState",	lua_gles_EnableClientState},
+		{"DisableClientState",	lua_gles_DisableClientState},
+		{"ShadeModel",			lua_gles_ShadeModel},		
+
 		{"MatrixMode",			lua_gles_MatrixMode},
 		{"LoadMatrix",			lua_gles_LoadMatrix},
 		{"MultMatrix",			lua_gles_MultMatrix},
@@ -931,15 +933,11 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"TexCoordPointer",		lua_gles_TexCoordPointer},
 		{"NormalPointer",		lua_gles_NormalPointer},
 		{"VertexPointer",		lua_gles_VertexPointer},
+		
 #endif
 
+// programable pipeline
 #if defined(LUA_GLES_GLES2) || defined(LUA_GLES_GL)
-
-		{"GenBuffer",				lua_gles_GenBuffer},
-		{"BindBuffer",				lua_gles_BindBuffer},
-		{"DeleteBuffer",			lua_gles_DeleteBuffer},
-		{"BufferData",				lua_gles_BufferData},
-		{"BufferSubData",			lua_gles_BufferSubData},
 
 		{"CreateShader",			lua_gles_CreateShader},
 		{"DeleteShader",			lua_gles_DeleteShader},
