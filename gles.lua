@@ -1073,6 +1073,207 @@ for i,v in pairs(gles.defs) do -- copy vals into base for shorthand gl.FALSE use
 	gles.nums[v]=i
 end
 
+if false then --core.fixed_pipeline_available then -- the old way
+
+	function gles.MatrixMode(...)
+		return core.MatrixMode(...)
+	end
+
+	function gles.LoadMatrix(...)
+		return core.LoadMatrix(...)
+	end
+
+	function gles.MultMatrix(...)
+		return core.MultMatrix(...)
+	end
+
+	function gles.Frustum(...)
+		return core.Frustum(...)
+	end
+
+	function gles.LoadIdentity(...)
+		return core.LoadIdentity(...)
+	end
+
+	function gles.Translate(...)
+		return core.Translate(...)
+	end
+
+	function gles.Rotate(...)
+		return core.Rotate(...)
+	end
+
+	function gles.Scale(...)
+		return core.Scale(...)
+	end
+
+	function gles.PushMatrix(...)
+		return core.PushMatrix(...)
+	end
+
+	function gles.PopMatrix(...)
+		return core.PopMatrix(...)
+	end
+
+	function gles.Color(...)
+		return core.Color(...)
+	end
+
+	function gles.EnableClientState(...)
+		return core.EnableClientState(...)
+	end
+
+	function gles.DisableClientState(...)
+		return core.DisableClientState(...)
+	end
+
+	function gles.ColorPointer(...)
+		return core.ColorPointer(...)
+	end
+
+	function gles.TexCoordPointer(...)
+		return core.TexCoordPointer(...)
+	end
+
+	function gles.NormalPointer(...)
+		return core.NormalPointer(...)
+	end
+
+	function gles.VertexPointer(...)
+		return core.VertexPointer(...)
+	end
+end
+
+if core.programmable_pipeline_available then -- the new way
+
+	function gles.CreateShader(...)
+		return core.CreateShader(...)
+	end
+
+	function gles.DeleteShader(...)
+		return core.DeleteShader(...)
+	end
+
+	function gles.ShaderSource(...)
+		return core.ShaderSource(...)
+	end
+
+	function gles.CompileShader(...)
+		return core.CompileShader(...)
+	end
+
+	function gles.GetShader(...)
+		return core.GetShader(...)
+	end
+
+	function gles.GetShaderInfoLog(...)
+		return core.GetShaderInfoLog(...)
+	end
+
+	function gles.AttachShader(...)
+		return core.AttachShader(...)
+	end
+
+	function gles.CreateProgram(...)
+		return core.CreateProgram(...)
+	end
+
+	function gles.DeleteProgram(...)
+		return core.DeleteProgram(...)
+	end
+
+	function gles.LinkProgram(...)
+		return core.LinkProgram(...)
+	end
+
+	function gles.GetProgram(...)
+		return core.GetProgram(...)
+	end
+
+	function gles.UseProgram(...)
+		return core.UseProgram(...)
+	end
+
+	function gles.ValidateProgram(...)
+		return core.ValidateProgram(...)
+	end
+
+	function gles.GetProgramInfoLog(...)
+		return core.GetProgramInfoLog(...)
+	end
+
+	function gles.GetAttribLocation(...)
+		return core.GetAttribLocation(...)
+	end
+
+	function gles.GetUniformLocation(...)
+		return core.GetUniformLocation(...)
+	end
+
+	function gles.EnableVertexAttribArray(...)
+		return core.EnableVertexAttribArray(...)
+	end
+
+	function gles.DisableVertexAttribArray(...)
+		return core.DisableVertexAttribArray(...)
+	end
+
+	function gles.VertexAttribPointer(...)
+		return core.VertexAttribPointer(...)
+	end
+
+	function gles.VertexAttrib1f(...)
+		return core.VertexAttrib1f(...)
+	end
+	function gles.VertexAttrib2f(...)
+		return core.VertexAttrib2f(...)
+	end
+	function gles.VertexAttrib3f(...)
+		return core.VertexAttrib3f(...)
+	end
+	function gles.VertexAttrib4f(...)
+		return core.VertexAttrib4f(...)
+	end
+		
+	function gles.Uniform1f(...)
+		return core.Uniform1f(...)
+	end
+	function gles.Uniform2f(...)
+		return core.Uniform2f(...)
+	end
+	function gles.Uniform3f(...)
+		return core.Uniform3f(...)
+	end
+	function gles.Uniform4f(...)
+		return core.Uniform4f(...)
+	end
+
+	function gles.Uniform1i(...)
+		return core.Uniform1i(...)
+	end
+	function gles.Uniform2i(...)
+		return core.Uniform2i(...)
+	end
+	function gles.Uniform3i(...)
+		return core.Uniform3i(...)
+	end
+	function gles.Uniform4i(...)
+		return core.Uniform4i(...)
+	end
+
+	function gles.UniformMatrix2f(...)
+		return core.UniformMatrix2f(...)
+	end
+	function gles.UniformMatrix3f(...)
+		return core.UniformMatrix3f(...)
+	end
+	function gles.UniformMatrix4f(...)
+		return core.UniformMatrix4f(...)
+	end
+
+end
+
+
 function gles.Get(...)
 	return core.Get(...)
 end
@@ -1093,44 +1294,12 @@ function gles.Clear(...)
 	return core.Clear(...)
 end
 
-function gles.MatrixMode(...)
-	return core.MatrixMode(...)
+function gles.DrawArrays(...)
+	return core.DrawArrays(...)
 end
 
-function gles.LoadMatrix(...)
-	return core.LoadMatrix(...)
-end
-
-function gles.MultMatrix(...)
-	return core.MultMatrix(...)
-end
-
-function gles.Frustum(...)
-	return core.Frustum(...)
-end
-
-function gles.LoadIdentity(...)
-	return core.LoadIdentity(...)
-end
-
-function gles.Translate(...)
-	return core.Translate(...)
-end
-
-function gles.Rotate(...)
-	return core.Rotate(...)
-end
-
-function gles.Scale(...)
-	return core.Scale(...)
-end
-
-function gles.PushMatrix(...)
-	return core.PushMatrix(...)
-end
-
-function gles.PopMatrix(...)
-	return core.PopMatrix(...)
+function gles.DrawElements(...)
+	return core.DrawElements(...)
 end
 
 function gles.GenBuffer(...)
@@ -1184,41 +1353,6 @@ function gles.ShadeModel(...)
 	return core.ShadeModel(...)
 end
 
-function gles.Color(...)
-	return core.Color(...)
-end
-
-function gles.EnableClientState(...)
-	return core.EnableClientState(...)
-end
-
-function gles.DisableClientState(...)
-	return core.DisableClientState(...)
-end
-
-function gles.DrawArrays(...)
-	return core.DrawArrays(...)
-end
-
-function gles.DrawElements(...)
-	return core.DrawElements(...)
-end
-
-function gles.ColorPointer(...)
-	return core.ColorPointer(...)
-end
-
-function gles.TexCoordPointer(...)
-	return core.TexCoordPointer(...)
-end
-
-function gles.NormalPointer(...)
-	return core.NormalPointer(...)
-end
-
-function gles.VertexPointer(...)
-	return core.VertexPointer(...)
-end
 
 -- add optional debuggery to every function defined above
 for i,v in pairs(gles) do
@@ -1252,8 +1386,9 @@ function gles.GetExtensions()
 	end
 end
 
+if core.programmable_pipeline_available then -- build our own fixed pipeline functions...
 
-if not core.VertexPointer then -- need to build our own fixed pipeline functions...
+print("USE FIXED PIPELINE PATCH")
 
 	require("glesfix").apply_compat(gles)
 
