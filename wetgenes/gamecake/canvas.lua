@@ -77,8 +77,15 @@ gl_blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
 		cxw,	cyh,	0,		ixw,	iyh,
 	},"f32",0,5*4,canvas.vdat)	
 
-	gl.VertexPointer(3,gl.FLOAT,5*4,canvas.vdat,0*0)
-	gl.TexCoordPointer(2,gl.FLOAT,5*4,canvas.vdat,3*4)
+
+--	gl.EnableClientState(gl.VERTEX_ARRAY)
+--	gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
+	
+	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf)
+	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
+
+	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
+	gl.TexCoordPointer(2,gl.FLOAT,5*4,3*4)
 
 	gl.BindTexture(gl.TEXTURE_2D,t.id)
 
@@ -91,6 +98,7 @@ end
 
 start = function(canvas)
 	if canvas.gl then -- open
+		canvas.vbuf=canvas.gl.GenBuffer()
 		canvas.vdat=pack.alloc(4*5*4) -- temp vertex quad draw buffer		
 		blit=gl_blit
 	else
@@ -101,7 +109,8 @@ start = function(canvas)
 end
 
 stop = function(canvas)
-	if canvas.gl then -- open
+	if canvas.gl then -- free
+		if canvas.vbuf then canvas.gl.DeleteBuffer(canvas.vbuf) canvas.vbuf=nil end
 		canvas.vdat=nil
 		blit=nil
 	else
