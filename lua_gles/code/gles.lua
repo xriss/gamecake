@@ -1133,6 +1133,25 @@ function gles.PopMatrix(...)
 	return core.PopMatrix(...)
 end
 
+function gles.GenBuffer(...)
+	return core.GenBuffer(...)
+end
+
+function gles.BindBuffer(...)
+	return core.BindBuffer(...)
+end
+
+function gles.DeleteBuffer(...)
+	return core.DeleteBuffer(...)
+end
+
+function gles.BufferData(...)
+	return core.BufferData(...)
+end
+function gles.BufferSubData(...)
+	return core.BufferSubData(...)
+end
+
 function gles.GenTexture(...)
 	return core.GenTexture(...)
 end
