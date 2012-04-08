@@ -317,6 +317,14 @@ static int lua_gles_BlendFunc (lua_State *l)
 	return 0;
 }
 
+static int lua_gles_Viewport (lua_State *l)
+{
+	glViewport(			(int)luaL_checknumber(l,1)	,
+						(int)luaL_checknumber(l,2)	,
+						(int)luaL_checknumber(l,3)	,
+						(int)luaL_checknumber(l,4)	);
+	return 0;
+}
 
 #if defined(LUA_GLES_GLES) || defined(LUA_GLES_GL)
 
@@ -349,18 +357,10 @@ static int lua_gles_DisableClientState (lua_State *l)
 
 #endif
 
-static int lua_gles_Viewport (lua_State *l)
-{
-	glViewport(			(int)luaL_checknumber(l,1)	,
-						(int)luaL_checknumber(l,2)	,
-						(int)luaL_checknumber(l,3)	,
-						(int)luaL_checknumber(l,4)	);
-	return 0;
-}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// what to draw (gles1)
+// what to draw (gles1) no userdata means touserdata returns 0 , which is correct for vbo use
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 #if defined(LUA_GLES_GLES) || defined(LUA_GLES_GL)
@@ -1002,6 +1002,16 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 
 	lua_newtable(l);
 	luaL_openlib(l, NULL, lib, 0);
+
+#if defined(LUA_GLES_GLES2) || defined(LUA_GLES_GL)
+	lua_pushboolean(l,1);
+	lua_setfield(l,-2,"programmable_pipeline_available");
+#endif
+
+#if defined(LUA_GLES_GLES) || defined(LUA_GLES_GL)
+	lua_pushboolean(l,1);
+	lua_setfield(l,-2,"fixed_pipeline_available");
+#endif
 	
 	return 1;
 }
