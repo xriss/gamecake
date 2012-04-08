@@ -181,6 +181,8 @@ end
 
 if not BUILD_DIR then
 
+	BUILD_DIR=BUILD_DIR_BASE
+	
 	if NACL then BUILD_DIR=BUILD_DIR_BASE.."-nacl" end
 	if ANDROID then BUILD_DIR=BUILD_DIR_BASE.."-android" end
 	if MINGW then BUILD_DIR=BUILD_DIR_BASE.."-mingw" end
