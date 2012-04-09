@@ -251,7 +251,7 @@ print("Linking program "..pname)
 		gles.UniformMatrix4f(p:uniform("modelview"), getmatrix(gles.MODELVIEW) )
 		gles.UniformMatrix4f(p:uniform("projection"), getmatrix(gles.PROJECTION) )
 
-		gles.Uniform4f(p:uniform("color"), 1,1,1,1 )
+		gles.Uniform4f(p:uniform("color"), gles.fix.color[1],gles.fix.color[2],gles.fix.color[3],gles.fix.color[4] )
 
 		gles.core.DrawArrays(...)
 	end
