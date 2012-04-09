@@ -148,7 +148,7 @@ static int lua_gles_Clear (lua_State *l)
 // Matrix (gles1)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-#if defined(LUA_GLES_GLES) || defined(LUA_GLES_GL)
+#if defined(LUA_GLES_GLES1) || defined(LUA_GLES_GL)
 
 static int lua_gles_MatrixMode (lua_State *l)
 {
@@ -325,7 +325,7 @@ static int lua_gles_Viewport (lua_State *l)
 	return 0;
 }
 
-#if defined(LUA_GLES_GLES) || defined(LUA_GLES_GL)
+#if defined(LUA_GLES_GLES1) || defined(LUA_GLES_GL)
 
 static int lua_gles_Color (lua_State *l)
 {
@@ -362,7 +362,7 @@ static int lua_gles_DisableClientState (lua_State *l)
 // what to draw (gles1) no userdata means touserdata returns 0 , which is correct for vbo use
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-#if defined(LUA_GLES_GLES) || defined(LUA_GLES_GL)
+#if defined(LUA_GLES_GLES1) || defined(LUA_GLES_GL)
 
 static int lua_gles_ColorPointer (lua_State *l)
 {
@@ -775,7 +775,7 @@ float ff[4];
 	ff[1]=(float)luaL_checknumber(l,3);
 	ff[2]=(float)luaL_checknumber(l,4);
 	ff[3]=(float)luaL_checknumber(l,5);
-//	glUniform4f(i,ff[0],ff[1],ff[2],ff[3]); // this function seems toyally fucked??? Gonna asume its adriver bug...
+//	glUniform4f(i,ff[0],ff[1],ff[2],ff[3]); // this function seems totally fucked??? Gonna asume its a driver bug...
 	glUniform4fv(i,1,ff); // so we use this one
 	return 0;
 }
@@ -977,7 +977,7 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"BufferSubData",			lua_gles_BufferSubData},
 
 // fixed pipeline
-#if defined(LUA_GLES_GLES) || defined(LUA_GLES_GL)
+#if defined(LUA_GLES_GLES1) || defined(LUA_GLES_GL)
 
 		{"Color",				lua_gles_Color},
 		{"EnableClientState",	lua_gles_EnableClientState},
@@ -1074,7 +1074,7 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 	lua_setfield(l,-2,"programmable_pipeline_available");
 #endif
 
-#if defined(LUA_GLES_GLES) || defined(LUA_GLES_GL)
+#if defined(LUA_GLES_GLES1) || defined(LUA_GLES_GL)
 	lua_pushboolean(l,1);
 	lua_setfield(l,-2,"fixed_pipeline_available");
 #endif

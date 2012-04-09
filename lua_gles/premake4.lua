@@ -8,7 +8,7 @@ includedirs { "code" }
 
 if ANDROID then
 
-	defines{ "LUA_GLES_GLES" }
+	defines{ "LUA_GLES_GLES1" }
 	defines{ "INCLUDE_GLES_GL=\\\"GLES/gl.h\\\"" }
 	
 elseif NACL then
