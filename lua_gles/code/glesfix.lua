@@ -27,31 +27,51 @@ function glesfix.apply_compat(gles)
 	gles.stack=gles.stacks[gles.stack_mode]
 	gles.stack_matrix=gles.stack[#gles.stack]
 	
+	function getmatrix(i)
+		local v=gles.stacks[i]
+		return v[#v]
+	end
+	
 	gles.shaders={}
 	gles.programs={}
 	
 	gles.shaders.v_pos_tex={
 	source=[[
-	
-uniform mat4 modelview_projection;
+#version 120
+
 uniform mat4 modelview;
 uniform mat4 projection;
- 
+
 attribute vec3 vertex;
+attribute vec2 texcoord;
+uniform vec4 color;
+
+varying vec2  v_texcoord;
+varying vec4  v_color;
  
 void main()
 {
     gl_Position = projection * modelview * vec4(vertex, 1.0);
+	v_texcoord=texcoord;
+	v_color=color;
 }
 
 	]]
 }
 	gles.shaders.f_pos_tex={
 	source=[[
- 
+#version 120
+
+uniform sampler2D tex;
+
+varying vec2  v_texcoord;
+varying vec4  v_color;
+
+//uniform vec4 color;
+
 void main(void)
 {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+	gl_FragColor=texture2D(tex, v_texcoord) * v_color ;
 }
 
 	]]
@@ -68,7 +88,7 @@ void main(void)
 		
 		if s[0] then return s[0] end
 
-print("building shader "..sname)
+print("Compiling shader "..sname)
 		s[0]=gles.CreateShader(stype)
 		gles.ShaderSource(s[0],s.source)
 		gles.CompileShader(s[0])
@@ -83,33 +103,54 @@ print("building shader "..sname)
 		return s[0]
 	end
 	
-	function program(pname)
+	local pbase={}
+	local pmeta={__index=pbase}
 	
-		local p=gles.programs[pname]
-		
-		if p[0] then return p[0] end
-		
-print("building program "..pname)
-		p[0]=gles.CreateProgram()
-		
-		for i,v in ipairs(p.vshaders) do
-			gles.AttachShader( p[0] , shader(gles.VERTEX_SHADER,v) )
-		end
-		for i,v in ipairs(p.fshaders) do
-			gles.AttachShader( p[0] , shader(gles.FRAGMENT_SHADER,v) )
-		end
-		
-		gles.LinkProgram(p[0])
-	
-		if gles.GetProgram(p[0], gles.LINK_STATUS) == gles.FALSE then -- error
+	function prog(pname)
+		local p=assert(gles.programs[pname])
+		if not p[0] then
+			setmetatable(p,pmeta)
 
-			print( gles.GetProgramInfoLog(p[0]) , "\n" )
+			p.vars={}
+			p[0]=gles.CreateProgram()
+			
+			for i,v in ipairs(p.vshaders) do
+				gles.AttachShader( p[0] , shader(gles.VERTEX_SHADER,v) )
+			end
+			for i,v in ipairs(p.fshaders) do
+				gles.AttachShader( p[0] , shader(gles.FRAGMENT_SHADER,v) )
+			end
+			
+print("Linking program "..pname)
+			gles.LinkProgram(p[0])
+		
+			if gles.GetProgram(p[0], gles.LINK_STATUS) == gles.FALSE then -- error
 
-			error( "failed to build program "..pname )
+				print( gles.GetProgramInfoLog(p[0]) , "\n" )
+
+				error( "failed to build program "..pname )
+			end
+			
 		end
-
-		return p[0]
+		return p
 	end
+	
+	function pbase.attrib(p,vname)
+		local r=p.vars[vname]
+		if r then return r end
+		r=gles.GetAttribLocation(p[0],vname)
+		p.vars[vname]=r
+		return r
+	end
+
+	function pbase.uniform(p,vname)
+		local r=p.vars[vname]
+		if r then return r end
+		r=gles.GetUniformLocation(p[0],vname)
+		p.vars[vname]=r
+		return r
+	end
+	
 
 --debug test function, push into old gl
 	function uploadmatrix()
@@ -190,8 +231,28 @@ print("building program "..pname)
 
 	function gles.DrawArrays(...) -- make sure state is set before doing
 	
-		gles.UseProgram( program("pos_tex") )
-	
+		local p=prog("pos_tex")
+		gles.UseProgram( p[0] )
+
+		
+		gles.EnableVertexAttribArray(p:attrib("vertex"))
+		gles.EnableVertexAttribArray(p:attrib("texcoord"))
+
+		local v=gles.fix.pointer.vertex
+		gles.VertexAttribPointer(p:attrib("vertex"),v[1],v[2],gles.FALSE,v[3],v[4])
+		
+		local v=gles.fix.pointer.texcoord
+		gles.VertexAttribPointer(p:attrib("texcoord"),v[1],v[2],gles.FALSE,v[3],v[4])
+
+--		gles.VertexAttrib4f(p:attrib("color"), 1,1,1,1 )
+
+--		gles.Uniform1i(p:uniform("tex"), 0 )
+
+		gles.UniformMatrix4f(p:uniform("modelview"), getmatrix(gles.MODELVIEW) )
+		gles.UniformMatrix4f(p:uniform("projection"), getmatrix(gles.PROJECTION) )
+
+		gles.Uniform4f(p:uniform("color"), 1,1,1,1 )
+
 		gles.core.DrawArrays(...)
 	end
 
