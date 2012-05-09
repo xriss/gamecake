@@ -1336,6 +1336,9 @@ end
 function gles.TexImage2D(...)
 	return core.TexImage2D(...)
 end
+function gles.TexSubImage2D(...)
+	return core.TexSubImage2D(...)
+end
 
 function gles.TexParameter(...)
 	return core.TexParameter(...)

@@ -78,6 +78,7 @@ load=function(images,filename,id,name)
 	
 	if t then return t end --first check it is not already loaded
 
+print("loading",id,name)
 
 	local fname=images.prefix..filename..images.postfix
 	
@@ -115,6 +116,23 @@ load=function(images,filename,id,name)
 	
 end
 
+function uptwopow(n)
+
+	if n<1 then return 0
+	elseif n<=16   then return 16
+	elseif n<=32   then return 32
+	elseif n<=64   then return 64
+	elseif n<=128  then return 128
+	elseif n<=256  then return 256
+	elseif n<=512  then return 512
+	elseif n<=1024 then return 1024
+	elseif n<=2048 then return 2048
+	elseif n<=4096 then return 4096
+	end
+
+	return 0
+end
+
 function upload_grd(images,t,g)
 	local gl=images.gl
 
@@ -130,8 +148,8 @@ function upload_grd(images,t,g)
 	t.y=0
 	t.width=g.width
 	t.height=g.height
-	t.texture_width=g.width
-	t.texture_height=g.height
+	t.texture_width=uptwopow(g.width)
+	t.texture_height=uptwopow(g.height)
 	
 	gl.BindTexture( gl.TEXTURE_2D , t.id )
 	
@@ -153,13 +171,24 @@ function upload_grd(images,t,g)
 		gl.TEXTURE_2D,
 		0,
 		gl.RGBA,
-		g.width,
-		g.height,
+		t.texture_width,
+		t.texture_height,
 		0,
 		gl.RGBA,
 		gl.UNSIGNED_BYTE,
-		g.data)
+		nil)
 		
+	gl.TexSubImage2D(
+		gl.TEXTURE_2D,
+		0,
+		0,
+		0,
+		g.width,
+		g.height,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		g.data)
+
 	return t
 end
 
