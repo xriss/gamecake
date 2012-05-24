@@ -1073,7 +1073,7 @@ for i,v in pairs(gles.defs) do -- copy vals into base for shorthand gl.FALSE use
 	gles.nums[v]=i
 end
 
-if false then --core.fixed_pipeline_available then -- the old way
+if core.fixed_pipeline_available then -- the old way
 
 	function gles.MatrixMode(...)
 		return core.MatrixMode(...)
@@ -1335,6 +1335,9 @@ end
 
 function gles.TexImage2D(...)
 	return core.TexImage2D(...)
+end
+function gles.TexSubImage2D(...)
+	return core.TexSubImage2D(...)
 end
 
 function gles.TexParameter(...)

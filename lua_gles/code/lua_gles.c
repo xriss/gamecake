@@ -296,6 +296,20 @@ static int lua_gles_TexImage2D (lua_State *l)
 	return 0;
 }
 
+static int lua_gles_TexSubImage2D (lua_State *l)
+{
+	glTexSubImage2D((int)luaL_checknumber(l,1)		,
+					(int)luaL_checknumber(l,2)		,
+					(int)luaL_checknumber(l,3)		,
+					(int)luaL_checknumber(l,4)		,
+					(int)luaL_checknumber(l,5)		,
+					(int)luaL_checknumber(l,6)		,
+					(int)luaL_checknumber(l,7)		,
+					(int)luaL_checknumber(l,8)		,
+					(void*)lua_touserdata(l,9)	);
+	return 0;
+}
+
 static int lua_gles_TexParameter (lua_State *l)
 {
 	glTexParameteri(	(int)luaL_checknumber(l,1)		,
@@ -783,7 +797,7 @@ float ff[4];
 static int lua_gles_Uniform1i (lua_State *l)
 {
 int i;
-float ii[1];
+int ii[1];
 	i=(int)luaL_checknumber(l,1);
 	ii[0]=(int)luaL_checknumber(l,2);
 	glUniform1iv(i,1,ii);
@@ -792,7 +806,7 @@ float ii[1];
 static int lua_gles_Uniform2i (lua_State *l)
 {
 int i;
-float ii[2];
+int ii[2];
 	i=(int)luaL_checknumber(l,1);
 	ii[0]=(int)luaL_checknumber(l,2);
 	ii[1]=(int)luaL_checknumber(l,3);
@@ -813,7 +827,7 @@ float ii[3];
 static int lua_gles_Uniform4i (lua_State *l)
 {
 int i;
-float ii[4];
+int ii[4];
 	i=(int)luaL_checknumber(l,1);
 	ii[0]=(int)luaL_checknumber(l,2);
 	ii[1]=(int)luaL_checknumber(l,3);
@@ -962,6 +976,7 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"BindTexture",			lua_gles_BindTexture},
 		{"DeleteTexture",		lua_gles_DeleteTexture},
 		{"TexImage2D",			lua_gles_TexImage2D},
+		{"TexSubImage2D",		lua_gles_TexSubImage2D},
 		{"TexParameter",		lua_gles_TexParameter},
 
 		{"BlendFunc",			lua_gles_BlendFunc},		
