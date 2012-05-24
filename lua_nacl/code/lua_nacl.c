@@ -10,6 +10,9 @@
 #include "ppapi/c/pp_module.h"
 #include "ppapi/c/pp_var.h"
 #include "ppapi/c/ppb.h"
+#include "ppapi/c/ppb_url_loader.h"
+#include "ppapi/c/ppb_url_request_info.h"
+#include "ppapi/c/ppb_url_response_info.h"
 #include "ppapi/c/ppb_instance.h"
 #include "ppapi/c/ppb_messaging.h"
 #include "ppapi/c/ppb_var.h"
@@ -33,7 +36,92 @@ static PPB_Var* var_interface = NULL;
 static PPB_Graphics3D* graphics3d_interface = NULL;
 static PPB_Instance* instance_interface = NULL;
 
+static PPB_URLLoader* url_loader_interface = NULL;
+static PPB_URLRequestInfo* url_request_info_interface = NULL;
+static PPB_URLResponseInfo* url_response_info_interface = NULL;
+
 static lua_State *L=0;
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// nacl callback util functions
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+struct lua_nacl_callback
+{
+	struct PP_CompletionCallback pp[1];
+	lua_State *l;
+};
+
+void lua_nacl_callback_func(void* user_data, int32_t result)
+{
+struct lua_nacl_callback *cb=(struct lua_nacl_callback *)user_data;
+lua_State *l=cb->l; // use this lua state
+
+		lua_pushlightuserdata(l,cb);
+		lua_gettable(l,LUA_REGISTRYINDEX); // get the lua table associated with this callback
+		
+		lua_getfield(l,-1,"func");
+		if( lua_isfunction(l,-1) )
+		{
+			lua_pushvalue(l,-2); // pass our callback table into function?
+			lua_pushnumber(l,result); // and the result code
+			lua_call(l,2,0);
+		}
+		else // just remove whatever it was
+		{
+			lua_pop(l,1);
+		}
+			
+		lua_pop(l,1); // remove our struct
+		
+		lua_nacl_callback_free(l,cb); // and free it
+}
+
+struct lua_nacl_callback * lua_nacl_callback_alloc (lua_State *l,int func)
+{
+	struct lua_nacl_callback *cb=0;
+	
+	cb = calloc(1,sizeof(struct lua_nacl_callback));
+	
+	if(cb)
+	{
+		cb->l=l;
+		
+		cb->pp->flags=PP_COMPLETIONCALLBACK_FLAG_NONE;
+		cb->pp->func=lua_nacl_callback_func;
+		cb->pp->user_data=cb;
+		
+		lua_pushlightuserdata(l,cb);
+		lua_newtable(l);
+		
+		lua_pushlightuserdata(l,cb);
+		lua_setfield(l,-2,"userdata"); // store struct
+
+		if(func)
+		{
+			lua_pushvalue(l,func);
+			lua_setfield(l,-2,"func"); // store callback function
+		}
+
+		lua_settable(l,LUA_REGISTRYINDEX); // store in registy so we can access from callback
+	}
+
+	return cb;
+}
+
+void lua_nacl_callback_free (lua_State *l, struct lua_nacl_callback * cb)
+{
+	if(cb)
+	{
+		lua_pushlightuserdata(l,cb);
+		lua_pushnil(l);
+		lua_settable(l,LUA_REGISTRYINDEX); // remove from registry
+		
+		free(cb); // free our memory
+	}
+}
+
 
 
 /**
@@ -253,12 +341,14 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
                                        PPB_GetInterface get_browser_interface) {
   module_id = a_module_id;
   var_interface = ( PPB_Var*)(get_browser_interface(PPB_VAR_INTERFACE));
-  messaging_interface =
-      ( PPB_Messaging*)(get_browser_interface(PPB_MESSAGING_INTERFACE));
-  graphics3d_interface =
-      ( PPB_Graphics3D*)(get_browser_interface(PPB_GRAPHICS_3D_INTERFACE));
-  instance_interface =
-      ( PPB_Instance*)(get_browser_interface(PPB_INSTANCE_INTERFACE));
+
+  url_loader_interface = ( PPB_URLLoader*)(get_browser_interface(PPB_URLLOADER_INTERFACE));
+  url_request_info_interface = ( PPB_URLRequestInfo*)(get_browser_interface(PPB_URLREQUESTINFO_INTERFACE));
+  url_response_info_interface = ( PPB_URLResponseInfo*)(get_browser_interface(PPB_URLRESPONSEINFO_INTERFACE));
+
+  messaging_interface = ( PPB_Messaging*)(get_browser_interface(PPB_MESSAGING_INTERFACE));
+  graphics3d_interface = ( PPB_Graphics3D*)(get_browser_interface(PPB_GRAPHICS_3D_INTERFACE));
+  instance_interface = ( PPB_Instance*)(get_browser_interface(PPB_INSTANCE_INTERFACE));
 
   if (!glInitializePPAPI(get_browser_interface)) {
     printf("glInitializePPAPI failed\n");

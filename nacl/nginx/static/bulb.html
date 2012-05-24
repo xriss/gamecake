@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Bulbaceous Balls</title>
+
+  <script type="text/javascript">
+    naclmod = null;  // Global application object.
+    statusText = 'NO-STATUS';
+
+    // Indicate success when the NaCl module has loaded.
+    function moduleDidLoad() {
+      naclmod = document.getElementById('naclmod');
+      updateStatus('SUCCESS');
+      luasetup();
+    }
+
+    // Handle a message coming from the NaCl module.
+    function handleMessage(message_event) {
+		if( typeof(message_event.data)=='string' )
+		{
+			console.log(message_event.data);
+		}
+    }
+
+    // If the page loads before the Native Client module loads, then set the
+    // status message indicating that the module is still loading.  Otherwise,
+    // do not change the status message.
+    function pageDidLoad() {
+      if (naclmod == null) {
+        updateStatus('LOADING...');
+      } else { updateStatus(); }
+    }
+
+
+    function luasetup() {
+      naclmod.postMessage('lua\n local b=require("bulb_nacl") b:setup() return "SETUP"');
+
+		var requestAnimationFrame = (function(){
+	// it may be nice to use these, but they seem to degrade performance...
+//		  return  window.requestAnimationFrame       || 
+//				  window.webkitRequestAnimationFrame || 
+//				  window.mozRequestAnimationFrame    || 
+//				  window.oRequestAnimationFrame      || 
+//				  window.msRequestAnimationFrame     ||
+return				  function(callback,element){
+					  window.setTimeout(callback, 1000 / 60);
+				  };
+		})();
+
+		var update;      
+			update=function() {
+	   			requestAnimationFrame(update); // we need to always ask to be called again
+
+      naclmod.postMessage('lua\n local b=require("bulb_nacl") b:updatedraw()');
+
+			};
+			update(); // start the updates
+    }
+
+    function updateStatus(opt_message) {
+      if (opt_message)
+        statusText = opt_message;
+      var statusField = document.getElementById('statusField');
+      if (statusField) {
+        statusField.innerHTML = statusText;
+      }
+    }
+
+
+  </script>
+</head>
+<body onload="pageDidLoad()">
+
+<p>  
+  <div id="listener">
+    <script type="text/javascript">
+      var listener = document.getElementById('listener')
+      listener.addEventListener('load', moduleDidLoad, true);
+      listener.addEventListener('message', handleMessage, true);
+    </script>
+
+    <embed name="nacl_module"
+           id="naclmod"
+           width=640 height=480
+           src="bin/dbg/lua.nmf"
+           type="application/x-nacl" />
+  </div>
+
+</p>
+<div id="statusField">NO-STATUS</div>
+</body>
+</html>

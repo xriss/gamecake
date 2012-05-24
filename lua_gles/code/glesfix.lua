@@ -151,28 +151,19 @@ print("Linking program "..pname)
 		return r
 	end
 	
-
---debug test function, push into old gl
-	function uploadmatrix()
-		gles.core.MatrixMode(gles.stack_mode)
-		gles.core.LoadMatrix(gles.stack_matrix)
-	end
 	
 	function gles.MatrixMode(mode)
 		gles.stack_mode=mode
 		gles.stack=assert(gles.stacks[gles.stack_mode])
 		gles.stack_matrix=assert(gles.stack[#gles.stack])
-		uploadmatrix()
 	end
 
 	function gles.LoadMatrix(...)
 		gles.stack_matrix:set(...)
-		uploadmatrix()
 	end
 
 	function gles.MultMatrix(a)
 		tardis.m4_product_m4(gles.stack_matrix,a,gles.stack_matrix)
-		uploadmatrix()
 	end
 
 	function gles.Frustum(...)
@@ -181,34 +172,28 @@ print("Linking program "..pname)
 
 	function gles.LoadIdentity()
 		gles.stack_matrix:identity()
-		uploadmatrix()
 	end
 
 	function gles.Translate(vx,vy,vz)
 		gles.stack_matrix:translate({vx,vy,vz})
-		uploadmatrix()
 	end
 
 	function gles.Rotate(d,vx,vy,vz)
 		gles.stack_matrix:rotate(d,{vx,vy,vz})
-		uploadmatrix()
 	end
 
 	function gles.Scale(vx,vy,vz)
 		gles.stack_matrix:scale_v3({vx,vy,vz})
-		uploadmatrix()
 	end
 
 	function gles.PushMatrix()		
 		gles.stack[#gles.stack+1]=tardis.m4.new(gles.stack_matrix) -- duplicate to new top
 		gles.stack_matrix=assert(gles.stack[#gles.stack])
-		uploadmatrix()
 	end
 
 	function gles.PopMatrix()
 		gles.stack[#gles.stack]=nil -- remove topmost
 		gles.stack_matrix=assert(gles.stack[#gles.stack]) -- this will assert on too many pops
-		uploadmatrix()
 	end
 
 	function gles.Color(...)

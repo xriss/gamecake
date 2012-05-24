@@ -7,4 +7,6 @@ cd nginx
 ../../bin/dbg/nginx -p. -s stop
 ../../bin/dbg/nginx -p.
 
+echo http://host.local:8888
+
 tail -f logs/error.log
