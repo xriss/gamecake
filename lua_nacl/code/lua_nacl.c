@@ -44,7 +44,7 @@ static lua_State *L=0;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// nacl callback util functions
+// nacl callback util functions, keep your state lua side
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 struct lua_nacl_callback
@@ -52,6 +52,18 @@ struct lua_nacl_callback
 	struct PP_CompletionCallback pp[1];
 	lua_State *l;
 };
+
+void lua_nacl_callback_free (lua_State *l, struct lua_nacl_callback * cb)
+{
+	if(cb)
+	{
+		lua_pushlightuserdata(l,cb);
+		lua_pushnil(l);
+		lua_settable(l,LUA_REGISTRYINDEX); // remove from registry
+		
+		free(cb); // free our memory
+	}
+}
 
 void lua_nacl_callback_func(void* user_data, int32_t result)
 {
@@ -61,19 +73,15 @@ lua_State *l=cb->l; // use this lua state
 		lua_pushlightuserdata(l,cb);
 		lua_gettable(l,LUA_REGISTRYINDEX); // get the lua table associated with this callback
 		
-		lua_getfield(l,-1,"func");
-		if( lua_isfunction(l,-1) )
+		if( lua_isfunction(l,-1) ) // sanity
 		{
-			lua_pushvalue(l,-2); // pass our callback table into function?
-			lua_pushnumber(l,result); // and the result code
-			lua_call(l,2,0);
+			lua_pushnumber(l,result); // give the result code ( use upvalues for state )
+			lua_call(l,1,0);
 		}
-		else // just remove whatever it was
+		else // hmmm, insane, just remove whatever it was
 		{
 			lua_pop(l,1);
 		}
-			
-		lua_pop(l,1); // remove our struct
 		
 		lua_nacl_callback_free(l,cb); // and free it
 }
@@ -93,16 +101,7 @@ struct lua_nacl_callback * lua_nacl_callback_alloc (lua_State *l,int func)
 		cb->pp->user_data=cb;
 		
 		lua_pushlightuserdata(l,cb);
-		lua_newtable(l);
-		
-		lua_pushlightuserdata(l,cb);
-		lua_setfield(l,-2,"userdata"); // store struct
-
-		if(func)
-		{
-			lua_pushvalue(l,func);
-			lua_setfield(l,-2,"func"); // store callback function
-		}
+		lua_pushvalue(l,func);
 
 		lua_settable(l,LUA_REGISTRYINDEX); // store in registy so we can access from callback
 	}
@@ -110,17 +109,6 @@ struct lua_nacl_callback * lua_nacl_callback_alloc (lua_State *l,int func)
 	return cb;
 }
 
-void lua_nacl_callback_free (lua_State *l, struct lua_nacl_callback * cb)
-{
-	if(cb)
-	{
-		lua_pushlightuserdata(l,cb);
-		lua_pushnil(l);
-		lua_settable(l,LUA_REGISTRYINDEX); // remove from registry
-		
-		free(cb); // free our memory
-	}
-}
 
 
 
@@ -443,12 +431,29 @@ int lua_nacl_swap (lua_State *l)
 //  glClearColor(1.0f, 0.9f, 0.4f, 0.9f);
 //  glClear(GL_COLOR_BUFFER_BIT);
 
+/*
    struct PP_CompletionCallback callback = { swap_callback, NULL, PP_COMPLETIONCALLBACK_FLAG_NONE };
   int32_t ret = graphics3d_interface->SwapBuffers(nacl_context, callback);
   if (ret != PP_OK && ret != PP_OK_COMPLETIONPENDING) {
     lua_pushfstring(l,"SwapBuffers failed with code %d\n", ret);
     lua_error(l);
   }
+ */
+ 
+	struct lua_nacl_callback * cb=lua_nacl_callback_alloc(l,1); // arg is a callback function
+
+	int32_t ret = graphics3d_interface->SwapBuffers(nacl_context, *cb->pp);
+
+	lua_pushnumber(l,ret);
+	return 1;
+/*
+ * 
+	if (ret != PP_OK && ret != PP_OK_COMPLETIONPENDING)
+	{
+		lua_pushfstring(l,"SwapBuffers failed with code %d\n", ret);
+		lua_error(l);
+	}
+  */
 
 
 /*
@@ -456,6 +461,27 @@ int lua_nacl_swap (lua_State *l)
 
 	glXSwapBuffers( p->dsp, p->win );
 */
+//	return 0;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// print sends a msg to the javascript side "cmd=print\n" and the rest of the string is what to print
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_nacl_print(lua_State *l)
+{
+struct PP_Var var_result;
+
+	lua_pushfstring(l,"cmd=print\n%s",lua_tostring(L,1));
+	var_result = CStrToVar( lua_tostring(L,-1) );
+
+	messaging_interface->PostMessage(nacl_instance, var_result);
+
+	var_interface->Release(var_result);
+	
+	lua_pop(l,1);
 	return 0;
 }
 
@@ -473,6 +499,7 @@ LUALIB_API int luaopen_wetgenes_nacl_core(lua_State *l)
 		
 		{"context",			lua_nacl_context},
 		{"swap",			lua_nacl_swap},
+		{"print",			lua_nacl_print},
 		
 		{0,0}
 	};
