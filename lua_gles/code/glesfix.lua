@@ -8,8 +8,9 @@ local tardis=require("wetgenes.tardis")
 local glesfix={}
 
 
+local shaderprefix="#version 120\n"
 
-
+shaderprefix="#version 100\nprecision mediump float;\n"
 
 -- apply our compatibility fixes into the base gles function table
 function glesfix.apply_compat(gles)
@@ -36,8 +37,7 @@ function glesfix.apply_compat(gles)
 	gles.programs={}
 	
 	gles.shaders.v_pos_tex={
-	source=[[
-#version 120
+	source=shaderprefix..[[
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -59,8 +59,7 @@ void main()
 	]]
 }
 	gles.shaders.f_pos_tex={
-	source=[[
-#version 120
+	source=shaderprefix..[[
 
 uniform sampler2D tex;
 
