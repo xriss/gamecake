@@ -94,6 +94,11 @@ end
 -- load a single image, and make it easy to lookup by the given id
 --
 load=function(sounds,filename,id,name)
+	if sounds.cake.opts.disable_sounds then
+		return
+	end
+
+
 	local al=sounds.al
 	name=name or "base"
 

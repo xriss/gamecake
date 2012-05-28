@@ -45,25 +45,33 @@ function bake(opts)
 end
 
 setup = function(cake)
-	cake.sounds:setup()
+	if not cake.opts.disable_sounds then
+		cake.sounds:setup()
+	end
 end
 
 clean = function(cake)
-	cake.sounds:clean()
+	if not cake.opts.disable_sounds then
+		cake.sounds:clean()
+	end
 end
 
 start = function(cake)
 	cake.canvas:start()
 	cake.images:start()
 	cake.fonts:start()
-	cake.sounds:start()
+	if not cake.opts.disable_sounds then
+		cake.sounds:start()
+	end
 end
 
 stop = function(cake)
 	cake.canvas:stop()
 	cake.images:stop()
 	cake.fonts:stop()
-	cake.sounds:stop()
+	if not cake.opts.disable_sounds then
+		cake.sounds:stop()
+	end
 end
 
 blit = function(cake,id,name,cx,cy,ix,iy,w,h)
@@ -71,7 +79,9 @@ blit = function(cake,id,name,cx,cy,ix,iy,w,h)
 end
 
 beep = function(cake,id,name)
-	cake.sounds:beep(cake.sounds:get(id,name))
+	if not cake.opts.disable_sounds then
+		cake.sounds:beep(cake.sounds:get(id,name))
+	end
 end
 
 -- draw a prebuilt texture using win and opengl functions
