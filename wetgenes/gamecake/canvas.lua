@@ -14,6 +14,7 @@ meta.__index=base
 local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 
+--local nacl=require("wetgenes.nacl.core")
 
 function bake(opts)
 
@@ -43,6 +44,8 @@ grd_blit = function(canvas,t,cx,cy,ix,iy,w,h)
 end
 
 gl_blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
+
+--print("gl_blit + ",nacl.time()," ",t.filename )
 
 	local gl=canvas.gl
 	
@@ -77,12 +80,13 @@ gl_blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
 		cxw,	cyh,	0,		ixw,	iyh,
 	},"f32",0,5*4,canvas.vdat)	
 
-
 --	gl.EnableClientState(gl.VERTEX_ARRAY)
 --	gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
 	
+--print("gl_blit . ",nacl.time() )
+
 	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf)
-	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.STREAM_DRAW)
 
 	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
 	gl.TexCoordPointer(2,gl.FLOAT,5*4,3*4)
@@ -90,6 +94,8 @@ gl_blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
 	gl.BindTexture(gl.TEXTURE_2D,t.id)
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP,0,4)
+
+--print("gl_blit - ",nacl.time() )
 
 end
 
