@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+#include <sys/time.h>
+
 #include "ppapi/c/pp_errors.h"
 #include "ppapi/c/pp_module.h"
 #include "ppapi/c/pp_var.h"
@@ -44,6 +47,43 @@ static lua_State *L=0;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// manage some lua memory (userdata) which keeps itself alive with registry references
+//
+// alloc and deref create and then release the memory
+//
+// push pushes the userdata onto the lua stack (identified by pointer)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void *lua_nacl_mem_alloc(lua_State *l,int size)
+{
+	void *mem=lua_newuserdata(l,size);
+	
+	if(mem)
+	{
+		lua_pushlightuserdata(l,mem);
+		lua_pushvalue(l,-2);
+		lua_settable(l,LUA_REGISTRYINDEX);
+		
+		lua_pop(l,1);
+	}
+	
+	return mem;
+}
+void lua_nacl_mem_deref(lua_State *l,void *mem)
+{
+	lua_pushlightuserdata(l,mem);
+	lua_pushnil(l);
+	lua_settable(l,LUA_REGISTRYINDEX);
+}
+
+void lua_nacl_mem_push(lua_State *l,void *mem)
+{
+	lua_pushlightuserdata(l,mem);
+	lua_gettable(l,LUA_REGISTRYINDEX);
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // nacl callback util functions, keep your state lua side
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -51,6 +91,13 @@ struct lua_nacl_callback
 {
 	struct PP_CompletionCallback pp[1];
 	lua_State *l;
+	PP_Resource r;
+	
+	void *ret; // return this memory if not 0
+	int ret_size;
+	int ret_prog;
+	
+	char state;
 };
 
 void lua_nacl_callback_free (lua_State *l, struct lua_nacl_callback * cb)
@@ -76,7 +123,16 @@ lua_State *l=cb->l; // use this lua state
 		if( lua_isfunction(l,-1) ) // sanity
 		{
 			lua_pushnumber(l,result); // give the result code ( use upvalues for state )
-			lua_call(l,1,0);
+			if(cb->ret)
+			{
+				lua_nacl_mem_push(l,cb->ret); // add result userdata if we have any
+				lua_call(l,2,0);
+				lua_nacl_mem_deref(l,cb->ret); // let it be gc when finished with
+			}
+			else
+			{
+				lua_call(l,1,0);
+			}
 		}
 		else // hmmm, insane, just remove whatever it was
 		{
@@ -210,8 +266,10 @@ static void Instance_DidDestroy(PP_Instance instance) {
 }
 
 static void Instance_DidChangeView(PP_Instance instance,
-                                   const struct PP_Rect* position,
-                                   const struct PP_Rect* clip) {
+									PP_Resource view_resource)
+//                                   const struct PP_Rect* position,
+//                                   const struct PP_Rect* clip)
+{
 }
 
 static void Instance_DidChangeFocus(PP_Instance instance,
@@ -444,8 +502,14 @@ int lua_nacl_swap (lua_State *l)
 
 	int32_t ret = graphics3d_interface->SwapBuffers(nacl_context, *cb->pp);
 
+	if( ret != PP_OK_COMPLETIONPENDING )
+	{
+		lua_nacl_callback_free(l,cb); // it will never be called so free it
+	}
+
 	lua_pushnumber(l,ret);
 	return 1;
+
 /*
  * 
 	if (ret != PP_OK && ret != PP_OK_COMPLETIONPENDING)
@@ -474,8 +538,8 @@ int lua_nacl_print(lua_State *l)
 {
 struct PP_Var var_result;
 
-	lua_pushfstring(l,"cmd=print\n%s",lua_tostring(L,1));
-	var_result = CStrToVar( lua_tostring(L,-1) );
+	lua_pushfstring(l,"cmd=print\n%s",lua_tostring(l,1));
+	var_result = CStrToVar( lua_tostring(l,-1) );
 
 	messaging_interface->PostMessage(nacl_instance, var_result);
 
@@ -483,6 +547,117 @@ struct PP_Var var_result;
 	
 	lua_pop(l,1);
 	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get data from a URL, needs a callback
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+
+
+
+void lua_nacl_getURL_callback(void* user_data, int32_t result)
+{
+struct lua_nacl_callback *cb=(struct lua_nacl_callback *)user_data;
+lua_State *l=cb->l; // use this lua state
+
+PP_Resource resp=0;
+
+int64_t prog = 0;
+int64_t size = 0;
+
+int finished=0;
+	
+	url_loader_interface->GetDownloadProgress(cb->r,&prog,&size);
+	
+	if(cb->state=='h')
+	{
+		if( size>0 )
+		{
+			cb->state='l';
+			
+			cb->ret=lua_nacl_mem_alloc(l,size);
+			cb->ret_size=size;
+			cb->ret_prog=0;
+
+			url_loader_interface->ReadResponseBody(cb->r,cb->ret,cb->ret_size,*cb->pp);
+			return;
+		}
+	}
+	else
+	if(cb->state=='l')
+	{
+		if(result>0)
+		{
+			cb->ret_prog+=result; 
+			
+			if( cb->ret_prog >= cb->ret_size)
+			{
+				lua_nacl_callback_func(user_data,cb->ret_size);
+				return;
+			}
+			else // keep loading
+			{
+				url_loader_interface->ReadResponseBody(cb->r,((char*)(cb->ret))+cb->ret_prog,cb->ret_size-cb->ret_prog,*cb->pp);
+				return;
+			}
+		}
+	}
+	
+	lua_nacl_callback_func(user_data,result);
+	return;
+}
+
+
+int lua_nacl_getURL(lua_State *l)
+{
+struct lua_nacl_callback * cb;
+struct PP_Var v;
+const char * s=0;
+int ret=0;
+
+struct PP_CompletionCallback callback = { lua_nacl_getURL_callback, NULL, PP_COMPLETIONCALLBACK_FLAG_NONE };
+
+	PP_Resource load=0;
+	PP_Resource req=0;
+
+	load=url_loader_interface->Create(nacl_instance);
+	req=url_request_info_interface->Create(nacl_instance);
+	
+	if((load==0)||(req==0))
+	{
+		lua_pushfstring(l,"getURL creation failed\n");
+		lua_error(l);
+	}
+	
+	s=lua_tostring(l,1); // what to get
+	v=CStrToVar( s );
+	url_request_info_interface->SetProperty(req,PP_URLREQUESTPROPERTY_URL,v);
+	url_request_info_interface->SetProperty(req,PP_URLREQUESTPROPERTY_RECORDDOWNLOADPROGRESS,PP_MakeBool(1));
+	
+	cb=lua_nacl_callback_alloc(l,2); // arg 2 is a callback function
+	cb->r=load;
+	cb->pp->func=lua_nacl_getURL_callback;
+	cb->state='h';
+	
+	ret=url_loader_interface->Open(load,req,*cb->pp);
+	
+	lua_pushnumber(l,ret);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// What time is it?
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_nacl_time (lua_State *l)
+{
+	struct timeval tv ;
+	gettimeofday ( & tv, NULL ) ;
+	lua_pushnumber(l, (double) tv.tv_sec + (double) tv.tv_usec / 1000000.0 );
+	return 1;
 }
 
 
@@ -497,10 +672,17 @@ LUALIB_API int luaopen_wetgenes_nacl_core(lua_State *l)
 	{
 //		{"create",			lua_nacl_create},
 		
-		{"context",			lua_nacl_context},
-		{"swap",			lua_nacl_swap},
-		{"print",			lua_nacl_print},
-		
+		{	"context",						lua_nacl_context					},
+		{	"swap",							lua_nacl_swap						},
+		{	"print",						lua_nacl_print						},
+		{	"time",							lua_nacl_time						},
+
+		{	"getURL",						lua_nacl_getURL						},
+
+//		{	"PPB_URLLoader_create",			lua_nacl_PPB_URLLoader_create		},
+//		{	"PPB_URLRequestInfo_create",	lua_nacl_PPB_URLRequestInfo_create	},
+
+
 		{0,0}
 	};
 
