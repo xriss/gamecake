@@ -13,6 +13,7 @@
 #include "ppapi/c/pp_module.h"
 #include "ppapi/c/pp_var.h"
 #include "ppapi/c/ppb.h"
+#include "ppapi/c/ppb_input_event.h"
 #include "ppapi/c/ppb_url_loader.h"
 #include "ppapi/c/ppb_url_request_info.h"
 #include "ppapi/c/ppb_url_response_info.h"
@@ -30,6 +31,13 @@
 #include "lua.h"
 #include "lauxlib.h"
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// Global master static state, not expecting more than one of these per page so lets keep it simple.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+
 static PP_Instance nacl_instance=0;
 static PP_Resource nacl_context;
 
@@ -43,17 +51,18 @@ static PPB_URLLoader* url_loader_interface = NULL;
 static PPB_URLRequestInfo* url_request_info_interface = NULL;
 static PPB_URLResponseInfo* url_response_info_interface = NULL;
 
+static PPB_InputEvent* input_event_interface = NULL;
+
 static lua_State *L=0;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // manage some lua memory (userdata) which keeps itself alive with registry references
 //
-// alloc and deref create and then release the memory
-//
-// push pushes the userdata onto the lua stack (identified by pointer)
-//
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// alloc some memory
+//
 void *lua_nacl_mem_alloc(lua_State *l,int size)
 {
 	void *mem=lua_newuserdata(l,size);
@@ -69,13 +78,18 @@ void *lua_nacl_mem_alloc(lua_State *l,int size)
 	
 	return mem;
 }
+//
+// stop keeping this memory referenced, it will GC later on
+//
 void lua_nacl_mem_deref(lua_State *l,void *mem)
 {
 	lua_pushlightuserdata(l,mem);
 	lua_pushnil(l);
 	lua_settable(l,LUA_REGISTRYINDEX);
 }
-
+//
+// push the userdata onto the stack
+//
 void lua_nacl_mem_push(lua_State *l,void *mem)
 {
 	lua_pushlightuserdata(l,mem);
@@ -87,6 +101,9 @@ void lua_nacl_mem_push(lua_State *l,void *mem)
 // nacl callback util functions, keep your state lua side
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// Generic callback state
+//
 struct lua_nacl_callback
 {
 	struct PP_CompletionCallback pp[1];
@@ -99,7 +116,9 @@ struct lua_nacl_callback
 	
 	char state;
 };
-
+//
+// Free the callback
+//
 void lua_nacl_callback_free (lua_State *l, struct lua_nacl_callback * cb)
 {
 	if(cb)
@@ -111,7 +130,9 @@ void lua_nacl_callback_free (lua_State *l, struct lua_nacl_callback * cb)
 		free(cb); // free our memory
 	}
 }
-
+//
+// The actual nacl callback function, which then calls into the main lua thread
+//
 void lua_nacl_callback_func(void* user_data, int32_t result)
 {
 struct lua_nacl_callback *cb=(struct lua_nacl_callback *)user_data;
@@ -141,7 +162,9 @@ lua_State *l=cb->l; // use this lua state
 		
 		lua_nacl_callback_free(l,cb); // and free it
 }
-
+//
+// Create a callback structure
+//
 struct lua_nacl_callback * lua_nacl_callback_alloc (lua_State *l,int func)
 {
 	struct lua_nacl_callback *cb=0;
@@ -267,8 +290,6 @@ static void Instance_DidDestroy(PP_Instance instance) {
 
 static void Instance_DidChangeView(PP_Instance instance,
 									PP_Resource view_resource)
-//                                   const struct PP_Rect* position,
-//                                   const struct PP_Rect* clip)
 {
 }
 
@@ -395,6 +416,8 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
   messaging_interface = ( PPB_Messaging*)(get_browser_interface(PPB_MESSAGING_INTERFACE));
   graphics3d_interface = ( PPB_Graphics3D*)(get_browser_interface(PPB_GRAPHICS_3D_INTERFACE));
   instance_interface = ( PPB_Instance*)(get_browser_interface(PPB_INSTANCE_INTERFACE));
+
+  input_event_interface = ( PPB_InputEvent*)(get_browser_interface(PPB_INPUT_EVENT_INTERFACE));
 
   if (!glInitializePPAPI(get_browser_interface)) {
     printf("glInitializePPAPI failed\n");
@@ -551,7 +574,7 @@ struct PP_Var var_result;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// get data from a URL, needs a callback
+// very basic but simple, get of data from a URL, needs a callback as it is async
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 
