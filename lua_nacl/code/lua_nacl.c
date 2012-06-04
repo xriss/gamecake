@@ -3,33 +3,7 @@
 // the creation of the master lua state under nacl
 // as well as the lua interface into nacl (wetgenes.nacl.core)
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
-#include <sys/time.h>
-
-#include "ppapi/c/pp_errors.h"
-#include "ppapi/c/pp_module.h"
-#include "ppapi/c/pp_var.h"
-#include "ppapi/c/ppb.h"
-#include "ppapi/c/ppb_input_event.h"
-#include "ppapi/c/ppb_url_loader.h"
-#include "ppapi/c/ppb_url_request_info.h"
-#include "ppapi/c/ppb_url_response_info.h"
-#include "ppapi/c/ppb_instance.h"
-#include "ppapi/c/ppb_messaging.h"
-#include "ppapi/c/ppb_var.h"
-#include "ppapi/c/ppp.h"
-#include "ppapi/c/ppp_instance.h"
-#include "ppapi/c/ppp_messaging.h"
-#include "ppapi/c/pp_completion_callback.h"
-#include "ppapi/c/ppb_graphics_3d.h"
-#include "ppapi/gles2/gl2ext_ppapi.h"
-#include "GLES2/gl2.h"
-
-#include "lua.h"
-#include "lauxlib.h"
+#include "lua_nacl.h"
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -40,6 +14,8 @@
 
 static PP_Instance nacl_instance=0;
 static PP_Resource nacl_context;
+
+static PPB_Core* core_interface = NULL;
 
 static PP_Module module_id = 0;
 static PPB_Messaging* messaging_interface = NULL;
@@ -52,143 +28,38 @@ static PPB_URLRequestInfo* url_request_info_interface = NULL;
 static PPB_URLResponseInfo* url_response_info_interface = NULL;
 
 static PPB_InputEvent* input_event_interface = NULL;
+static PPB_KeyboardInputEvent* keyboard_input_event_interface = NULL;
+static PPB_MouseInputEvent* mouse_input_event_interface = NULL;
 
 static lua_State *L=0;
 
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// manage some lua memory (userdata) which keeps itself alive with registry references
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// alloc some memory
-//
-void *lua_nacl_mem_alloc(lua_State *l,int size)
-{
-	void *mem=lua_newuserdata(l,size);
-	
-	if(mem)
-	{
-		lua_pushlightuserdata(l,mem);
-		lua_pushvalue(l,-2);
-		lua_settable(l,LUA_REGISTRYINDEX);
-		
-		lua_pop(l,1);
-	}
-	
-	return mem;
-}
-//
-// stop keeping this memory referenced, it will GC later on
-//
-void lua_nacl_mem_deref(lua_State *l,void *mem)
-{
-	lua_pushlightuserdata(l,mem);
-	lua_pushnil(l);
-	lua_settable(l,LUA_REGISTRYINDEX);
-}
-//
-// push the userdata onto the stack
-//
-void lua_nacl_mem_push(lua_State *l,void *mem)
-{
-	lua_pushlightuserdata(l,mem);
-	lua_gettable(l,LUA_REGISTRYINDEX);
-}
+PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
+                                       PPB_GetInterface get_browser_interface) {
+  module_id = a_module_id;
+  core_interface = ( PPB_Core*)(get_browser_interface(PPB_CORE_INTERFACE));
+  var_interface = ( PPB_Var*)(get_browser_interface(PPB_VAR_INTERFACE));
 
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// nacl callback util functions, keep your state lua side
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// Generic callback state
-//
-struct lua_nacl_callback
-{
-	struct PP_CompletionCallback pp[1];
-	lua_State *l;
-	PP_Resource r;
-	
-	void *ret; // return this memory if not 0
-	int ret_size;
-	int ret_prog;
-	
-	char state;
-};
-//
-// Free the callback
-//
-void lua_nacl_callback_free (lua_State *l, struct lua_nacl_callback * cb)
-{
-	if(cb)
-	{
-		lua_pushlightuserdata(l,cb);
-		lua_pushnil(l);
-		lua_settable(l,LUA_REGISTRYINDEX); // remove from registry
-		
-		free(cb); // free our memory
-	}
+  url_loader_interface = ( PPB_URLLoader*)(get_browser_interface(PPB_URLLOADER_INTERFACE));
+  url_request_info_interface = ( PPB_URLRequestInfo*)(get_browser_interface(PPB_URLREQUESTINFO_INTERFACE));
+  url_response_info_interface = ( PPB_URLResponseInfo*)(get_browser_interface(PPB_URLRESPONSEINFO_INTERFACE));
+
+  messaging_interface = ( PPB_Messaging*)(get_browser_interface(PPB_MESSAGING_INTERFACE));
+  graphics3d_interface = ( PPB_Graphics3D*)(get_browser_interface(PPB_GRAPHICS_3D_INTERFACE));
+  instance_interface = ( PPB_Instance*)(get_browser_interface(PPB_INSTANCE_INTERFACE));
+
+  input_event_interface = ( PPB_InputEvent*)(get_browser_interface(PPB_INPUT_EVENT_INTERFACE));
+  
+  keyboard_input_event_interface = ( PPB_KeyboardInputEvent*)(get_browser_interface(PPB_KEYBOARD_INPUT_EVENT_INTERFACE));
+  mouse_input_event_interface = ( PPB_MouseInputEvent*)(get_browser_interface(PPB_MOUSE_INPUT_EVENT_INTERFACE));
+  
+
+  if (!glInitializePPAPI(get_browser_interface)) {
+    printf("glInitializePPAPI failed\n");
+    return PP_ERROR_FAILED;
+  }
+
+  return PP_OK;
 }
-//
-// The actual nacl callback function, which then calls into the main lua thread
-//
-void lua_nacl_callback_func(void* user_data, int32_t result)
-{
-struct lua_nacl_callback *cb=(struct lua_nacl_callback *)user_data;
-lua_State *l=cb->l; // use this lua state
-
-		lua_pushlightuserdata(l,cb);
-		lua_gettable(l,LUA_REGISTRYINDEX); // get the lua table associated with this callback
-		
-		if( lua_isfunction(l,-1) ) // sanity
-		{
-			lua_pushnumber(l,result); // give the result code ( use upvalues for state )
-			if(cb->ret)
-			{
-				lua_nacl_mem_push(l,cb->ret); // add result userdata if we have any
-				lua_call(l,2,0);
-				lua_nacl_mem_deref(l,cb->ret); // let it be gc when finished with
-			}
-			else
-			{
-				lua_call(l,1,0);
-			}
-		}
-		else // hmmm, insane, just remove whatever it was
-		{
-			lua_pop(l,1);
-		}
-		
-		lua_nacl_callback_free(l,cb); // and free it
-}
-//
-// Create a callback structure
-//
-struct lua_nacl_callback * lua_nacl_callback_alloc (lua_State *l,int func)
-{
-	struct lua_nacl_callback *cb=0;
-	
-	cb = calloc(1,sizeof(struct lua_nacl_callback));
-	
-	if(cb)
-	{
-		cb->l=l;
-		
-		cb->pp->flags=PP_COMPLETIONCALLBACK_FLAG_NONE;
-		cb->pp->func=lua_nacl_callback_func;
-		cb->pp->user_data=cb;
-		
-		lua_pushlightuserdata(l,cb);
-		lua_pushvalue(l,func);
-
-		lua_settable(l,LUA_REGISTRYINDEX); // store in registy so we can access from callback
-	}
-
-	return cb;
-}
-
-
 
 
 /**
@@ -231,12 +102,6 @@ static struct PP_Var CStrToVar(const char* str) {
 
 
 
-
-void swap_callback(void* user_data, int32_t result)
-{
-//  printf("swap result: %d\n", result);
-}
-
 static PP_Bool Instance_DidCreate(PP_Instance instance,
                                   uint32_t argc,
                                   const char* argn[],
@@ -246,37 +111,8 @@ nacl_instance=instance;
 									  
 	L = lua_open();  /* create state */
 	luaL_openlibs(L);  /* open libraries */
-									  
-									  
-									  
-/*									  
-  PP_Resource context;
-  int32_t attribs[] = {PP_GRAPHICS3DATTRIB_WIDTH, 640,
-                       PP_GRAPHICS3DATTRIB_HEIGHT, 480,
-                       PP_GRAPHICS3DATTRIB_NONE};
-  context = graphics3d_interface->Create(instance, 0, attribs);
-  if (context == 0) {
-    printf("failed to create graphics3d context\n");
-    return PP_FALSE;
-  }
 
-  glSetCurrentContextPPAPI(context);
-
-  if (!instance_interface->BindGraphics(instance, context)) {
-    printf("failed to bind graphics3d context\n");
-    return PP_FALSE;
-  }
-
-  glClearColor(1.0f, 0.9f, 0.4f, 0.9f);
-  glClear(GL_COLOR_BUFFER_BIT);
-
-   struct PP_CompletionCallback callback = { swap_callback, NULL, PP_COMPLETIONCALLBACK_FLAG_NONE };
-  int32_t ret = graphics3d_interface->SwapBuffers(context, callback);
-  if (ret != PP_OK && ret != PP_OK_COMPLETIONPENDING) {
-    printf("SwapBuffers failed with code %d\n", ret);
-    return PP_FALSE;
-  }
-*/
+	input_event_interface->RequestInputEvents(nacl_instance , PP_INPUTEVENT_CLASS_MOUSE | PP_INPUTEVENT_CLASS_KEYBOARD );
 
   return PP_TRUE;
 }
@@ -357,6 +193,49 @@ static int dostringr (lua_State *L, const char *s, const char *name) {
   return report(L, status);
 }
 
+PP_Bool Input_HandleInputEvent( PP_Instance instance , PP_Resource input_event )
+{
+
+	lua_getfield(L,LUA_GLOBALSINDEX,"nacl_input_event");
+	if(lua_isfunction(L,-1))
+	{
+		if (mouse_input_event_interface->IsMouseInputEvent(input_event))
+		{
+			PP_InputEvent_Type 			t = input_event_interface->GetType(input_event);
+			PP_InputEvent_MouseButton 	b = mouse_input_event_interface->GetButton(input_event);
+			struct PP_Point			p = mouse_input_event_interface->GetPosition(input_event);
+			int							c = mouse_input_event_interface->GetClickCount(input_event);
+			
+			lua_pushstring(L,"mouse");
+			lua_pushnumber(L,t);
+			lua_pushnumber(L,b);
+			lua_pushnumber(L,p.x);
+			lua_pushnumber(L,p.y);
+			lua_pushnumber(L,c);
+			lua_call(L,6,0);
+		}
+		else
+		if( keyboard_input_event_interface->IsKeyboardInputEvent(input_event) )
+		{
+				PP_InputEvent_Type 			t = input_event_interface->GetType(input_event);
+
+				int 				k = keyboard_input_event_interface->GetKeyCode(input_event);
+				struct PP_Var				v = keyboard_input_event_interface->GetCharacterText(input_event);
+				int 			sl=0;
+				const char* 	s = var_interface->VarToUtf8(v, &sl);
+
+				lua_pushstring(L,"key");
+				lua_pushnumber(L,t);
+				lua_pushnumber(L,k);
+				lua_pushlstring(L,s,sl);
+				lua_call(L,4,0);
+		}
+	}
+	else
+	{
+		lua_pop(L,1);
+	}
+}
 
 void Messaging_HandleMessage(PP_Instance instance, struct PP_Var var_message) {
 
@@ -404,28 +283,7 @@ nacl_instance=instance;
 }
 
 
-PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
-                                       PPB_GetInterface get_browser_interface) {
-  module_id = a_module_id;
-  var_interface = ( PPB_Var*)(get_browser_interface(PPB_VAR_INTERFACE));
 
-  url_loader_interface = ( PPB_URLLoader*)(get_browser_interface(PPB_URLLOADER_INTERFACE));
-  url_request_info_interface = ( PPB_URLRequestInfo*)(get_browser_interface(PPB_URLREQUESTINFO_INTERFACE));
-  url_response_info_interface = ( PPB_URLResponseInfo*)(get_browser_interface(PPB_URLRESPONSEINFO_INTERFACE));
-
-  messaging_interface = ( PPB_Messaging*)(get_browser_interface(PPB_MESSAGING_INTERFACE));
-  graphics3d_interface = ( PPB_Graphics3D*)(get_browser_interface(PPB_GRAPHICS_3D_INTERFACE));
-  instance_interface = ( PPB_Instance*)(get_browser_interface(PPB_INSTANCE_INTERFACE));
-
-  input_event_interface = ( PPB_InputEvent*)(get_browser_interface(PPB_INPUT_EVENT_INTERFACE));
-
-  if (!glInitializePPAPI(get_browser_interface)) {
-    printf("glInitializePPAPI failed\n");
-    return PP_ERROR_FAILED;
-  }
-
-  return PP_OK;
-}
 
 PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
   if (strcmp(interface_name, PPP_INSTANCE_INTERFACE) == 0) {
@@ -442,6 +300,11 @@ PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
       &Messaging_HandleMessage
     };
     return &messaging_interface;
+  } else if (strcmp(interface_name, PPP_INPUT_EVENT_INTERFACE) == 0) {
+    static  PPP_InputEvent input_interface = {
+      &Input_HandleInputEvent
+    };
+    return &input_interface;
   }
   return NULL;
 }
@@ -512,14 +375,6 @@ int lua_nacl_swap (lua_State *l)
 //  glClearColor(1.0f, 0.9f, 0.4f, 0.9f);
 //  glClear(GL_COLOR_BUFFER_BIT);
 
-/*
-   struct PP_CompletionCallback callback = { swap_callback, NULL, PP_COMPLETIONCALLBACK_FLAG_NONE };
-  int32_t ret = graphics3d_interface->SwapBuffers(nacl_context, callback);
-  if (ret != PP_OK && ret != PP_OK_COMPLETIONPENDING) {
-    lua_pushfstring(l,"SwapBuffers failed with code %d\n", ret);
-    lua_error(l);
-  }
- */
  
 	struct lua_nacl_callback * cb=lua_nacl_callback_alloc(l,1); // arg is a callback function
 
@@ -533,22 +388,6 @@ int lua_nacl_swap (lua_State *l)
 	lua_pushnumber(l,ret);
 	return 1;
 
-/*
- * 
-	if (ret != PP_OK && ret != PP_OK_COMPLETIONPENDING)
-	{
-		lua_pushfstring(l,"SwapBuffers failed with code %d\n", ret);
-		lua_error(l);
-	}
-  */
-
-
-/*
- * wetwin_lua *p=lua_wetwin_check_ptr(l,1);
-
-	glXSwapBuffers( p->dsp, p->win );
-*/
-//	return 0;
 }
 
 
@@ -577,8 +416,6 @@ struct PP_Var var_result;
 // very basic but simple, get of data from a URL, needs a callback as it is async
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-
-
 
 void lua_nacl_getURL_callback(void* user_data, int32_t result)
 {
@@ -683,6 +520,26 @@ static int lua_nacl_time (lua_State *l)
 	return 1;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// schedual a callback
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_nacl_call (lua_State *l)
+{
+struct lua_nacl_callback * cb;
+int ret=0;
+int ms=0;
+int val=0;
+
+	ms=lua_tointeger(l,1);
+	cb=lua_nacl_callback_alloc(l,2); // arg 2 is a callback function	
+	val=lua_tointeger(l,3);
+
+	core_interface->CallOnMainThread(ms,*cb->pp,val);
+
+	return 0;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -699,7 +556,8 @@ LUALIB_API int luaopen_wetgenes_nacl_core(lua_State *l)
 		{	"swap",							lua_nacl_swap						},
 		{	"print",						lua_nacl_print						},
 		{	"time",							lua_nacl_time						},
-
+		
+		{	"call",							lua_nacl_call						},
 		{	"getURL",						lua_nacl_getURL						},
 
 //		{	"PPB_URLLoader_create",			lua_nacl_PPB_URLLoader_create		},
