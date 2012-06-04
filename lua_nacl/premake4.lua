@@ -3,7 +3,7 @@ project "lua_nacl"
 language "C"
 
 files {  "code/**.c" , "code/**.h" , "all.h" }
-includedirs { "." }
+includedirs { "." , "code" }
 
 KIND{lua="wetgenes.nacl.core"}
 
