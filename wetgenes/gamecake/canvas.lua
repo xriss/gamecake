@@ -86,7 +86,7 @@ gl_blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
 --print("gl_blit . ",nacl.time() )
 
 	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf)
-	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.STREAM_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
 
 	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
 	gl.TexCoordPointer(2,gl.FLOAT,5*4,3*4)
