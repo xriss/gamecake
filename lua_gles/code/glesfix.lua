@@ -10,6 +10,7 @@ local glesfix={}
 
 local shaderprefix="#version 120\n"
 
+-- assume gles2 junk, by default?
 shaderprefix="#version 100\nprecision mediump float;\n"
 
 -- apply our compatibility fixes into the base gles function table
@@ -81,6 +82,16 @@ void main(void)
 		fshaders={"f_pos_tex"},
 	}
 	
+-- forget cached info when we lose context
+	function gles.forget_programs()
+		for i,v in pairs(gles.shaders) do
+			v[0]=nil
+		end
+		for i,v in pairs(gles.programs) do
+			v[0]=nil
+		end
+	end
+	
 	function shader(stype,sname)
 
 		local s=gles.shaders[sname]
@@ -94,9 +105,7 @@ print("Compiling shader "..sname)
 		
 		if gles.GetShader(s[0], gles.COMPILE_STATUS) == gles.FALSE then -- error
 
-			print( gles.GetShaderInfoLog(s[0])  , "\n" )
-
-			error( "failed to build shader "..sname )
+			error( "failed to build shader " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. (gles.GetShaderInfoLog(s[0]) or "stoopid droid") .. "\n\n" )
 		end
 	
 		return s[0]

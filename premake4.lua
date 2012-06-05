@@ -37,6 +37,22 @@ function newgcctoolchain(toolchain)
 end
 
 newplatform {
+    name = "raspi",
+    description = "raspi",
+    gcc = {
+        cc = "gcc",
+        cxx = "g++",
+        cppflags = "",
+    }
+}
+newgcctoolchain {
+    name = "raspi",
+    description = "raspi",
+    prefix = "arm-bcm2708-linux-gnueabi-",
+    cppflags = "",
+}
+
+newplatform {
     name = "android",
     description = "android",
     gcc = {
@@ -45,7 +61,6 @@ newplatform {
         cppflags = "",
     }
 }
- 
 newgcctoolchain {
     name = "android",
     description = "android",
@@ -62,7 +77,6 @@ newplatform {
         cppflags = "",
     }
 }
- 
 newgcctoolchain {
     name = "nacl",
     description = "nacl",
@@ -80,7 +94,6 @@ newplatform {
         cppflags = "",
     }
 }
- 
 newgcctoolchain {
     name = "mingw",
     description = "mingw",
@@ -102,7 +115,10 @@ WINDOWS=false
 MINGW=false
 NIX=false
 
-if _ARGS[1]=="nacl" then
+if _ARGS[1]=="raspi" then
+	TARGET="RASPI"
+	RASPI=true
+elseif _ARGS[1]=="nacl" then
 	TARGET="NACL"
 	NACL=true
 elseif _ARGS[1]=="android" then
@@ -132,6 +148,20 @@ if NACL then
 		
 	buildoptions{"-m32"}
 	
+elseif RASPI then
+
+	local raspisdk=path.getabsolute("../sdks/raspi/firmware/opt/vc")
+	includedirs { raspisdk.."/include" }
+	libdirs { raspisdk.."/lib" }
+
+	platforms { "raspi" } --hax
+
+	defines "RASPI"
+
+	defines("LUA_USE_POSIX")
+	
+--	buildoptions{ "-mthumb" }
+
 elseif ANDROID then
 
 	local androidsdk=path.getabsolute("../sdks/android-sdk")
@@ -186,6 +216,7 @@ if not BUILD_DIR then
 	if NACL then BUILD_DIR=BUILD_DIR_BASE.."-nacl" end
 	if ANDROID then BUILD_DIR=BUILD_DIR_BASE.."-android" end
 	if MINGW then BUILD_DIR=BUILD_DIR_BASE.."-mingw" end
+	if RASPI then BUILD_DIR=BUILD_DIR_BASE.."-raspi" end
 
 end
 
@@ -339,45 +370,46 @@ if NIX then -- luajit is working for these builds
 end
 
 all_includes=all_includes or {
-	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lua_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lua_bit",			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lua_box2d",		WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lua_ogg",			WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lua_al",			WINDOWS		or		NIX		or		nil		or		ANDROID		},
-	{"lua_gl",			WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lua_grd",			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lua_grdmap",		WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lua_sod",			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lua_speak",		WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lua_lash",		WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lua_socket",		WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lua_fenestra",	WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
-	{"lua_lanes",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
-	{"lua_posix",		nil			or		NIX		or		nil		or		nil			},
-	{"lua_win",			WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lua_nacl",		nil			or		nil		or		NACL	or		nil			},
-	{"lua_android",		nil			or		nil		or		nil		or		ANDROID		},
-	{AND_LIB_DIR,		nil			or		nil		or		nil		or		ANDROID		},
-	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lib_png",			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lib_jpeg",		WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lib_gif",			WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lib_z",			WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lib_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
-	{"lib_pcre",		WINDOWS		or		NIX		or		nil		or		nil			},
---	{"lib_ogg",			WINDOWS		or		NIX		or		nil		or		nil			},
---	{"lib_vorbis",		WINDOWS		or		NIX		or		nil		or		nil			},
-	{"lib_openal",		WINDOWS		or		NIX		or		nil		or		ANDROID		},
-	{"lua",				WINDOWS		or		NIX		or		NACL	or		ANDROID		},
-	{"nginx",			nil			or		NIX		or		nil		or		nil			},
+	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_bit",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_box2d",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lua_ogg",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lua_al",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		nil			},
+	{"lua_gl",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_grd",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_grdmap",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_sod",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_speak",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lua_lash",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lua_socket",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lua_fenestra",	WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		},
+	{"lua_lanes",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		},
+	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		},
+	{"lua_win",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lua_nacl",		nil			or		nil		or		NACL	or		nil			or		nil			},
+	{"lua_android",		nil			or		nil		or		nil		or		ANDROID		or		nil			},
+--	{"lua_raspi",		nil			or		nil		or		nil		or		nil			or		RASPI		},
+	{AND_LIB_DIR,		nil			or		nil		or		nil		or		ANDROID		or		nil			},
+	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lib_png",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lib_jpeg",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lib_gif",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lib_z",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lib_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		},
+	{"lib_pcre",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+--	{"lib_ogg",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+--	{"lib_vorbis",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lib_openal",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		nil			},
+	{"lua",				WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"nginx",			nil			or		NIX		or		nil		or		nil			or		nil			},
 }
 
 ------------------------------------------------------------------------
