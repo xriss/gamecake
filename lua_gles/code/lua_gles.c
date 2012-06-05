@@ -540,15 +540,16 @@ static int lua_gles_GetShaderInfoLog (lua_State *l)
 {
 int i;
 int size=0;
+int newsize=0;
 char *p=0;
 	i=luaL_checknumber(l,1);
 
 	glGetShaderiv(i, GL_INFO_LOG_LENGTH, &size);
-	if(size==0) { return 0; }
+	if(size==0) { size=16384; } // pick a fuckoff buffer size when driver is retarted
 	p=malloc(size);
 	if(p==0) { lua_pushfstring(l,"malloc failed (%d)",size); lua_error(l); return 0; }
 	
-	glGetShaderInfoLog(i,size,0,p);
+	glGetShaderInfoLog(i,size,&newsize,p);
 	lua_pushstring(l,p);
 	free(p);
 	
@@ -816,7 +817,7 @@ int ii[2];
 static int lua_gles_Uniform3i (lua_State *l)
 {
 int i;
-float ii[3];
+int ii[3];
 	i=(int)luaL_checknumber(l,1);
 	ii[0]=(int)luaL_checknumber(l,2);
 	ii[1]=(int)luaL_checknumber(l,3);

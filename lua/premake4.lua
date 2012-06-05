@@ -16,7 +16,19 @@ links(static_lib_names) -- so good, so good, we linked it twice...
 --print("LIBS TO LINK ",table.concat(static_lib_names,","))
 
 
-if NACL then
+if RASPI then
+
+	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
+	
+	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
+	links { "crypt" }
+	links { "pthread" }
+	
+	links { "dl" , "m" , "pthread" }
+	
+	KIND{kind="ConsoleApp",name="lua.raspi"}
+
+elseif NACL then
 
 	files { "../nacl/code/lua_force_import.c" }
 
@@ -34,7 +46,8 @@ elseif ANDROID then
 --	linkoptions { "-v" }
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	
-	links { "GLESv1_CM" }
+--	links { "GLESv1_CM" }
+	links { "GLESv2" }
 	links { "dl", "log", "c", "m", "gcc" }	
 	
 --	linkoptions{ "-Bsymbolic"}
