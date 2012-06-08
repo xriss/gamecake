@@ -1030,6 +1030,9 @@ local import=[[
 #define GL_INVALID_FRAMEBUFFER_OPERATION  0x0506
 
 
+
+
+
 ]]
 -- parse the above string for constants, makes updates as easy as a cutnpaste from original source code
 
@@ -1100,6 +1103,7 @@ if core.fixed_pipeline_available then -- the old way
 	end
 
 	function gles.Rotate(...)
+--print("Rotate",...)	
 		return core.Rotate(...)
 	end
 

@@ -285,11 +285,11 @@ end
 
 function m4.scale_v3(it,degrees,v3a,r)
 	local m4a=m4.new(
-		v3a.x	,	0		,	0		,	0	,
-		0		,	v3a.y	,	0		,	0	,
-		0		,	0		,	v3a.z	,	0	,
+		v3a[1]	,	0		,	0		,	0	,
+		0		,	v3a[2]	,	0		,	0	,
+		0		,	0		,	v3a[3]	,	0	,
 		0		,	0		,	0		,	1	)
-	return m4_product_m4(it,m4a,r)
+	return m4_product_m4(m4a,it,r)
 end
 
 function m4.rotate(it,degrees,v3a,r)
@@ -297,17 +297,17 @@ function m4.rotate(it,degrees,v3a,r)
 	local c=math.cos(math.pi*degrees/180)
 	local s=math.sin(math.pi*degrees/180)
 	
-	local x=v3a.x
-	local y=v3a.y
-	local z=v3a.z
+	local x=v3a[1]
+	local y=v3a[2]
+	local z=v3a[3]
 	
 	local delta=0.001 -- a smallish number
 	local dd=( (x*x) + (y*y) + (z*z) )
 	if ( dd < (1-delta) ) or ( dd > (1+delta) ) then -- not even close to a unit vector
-		local d=math.sqrt(d)
-		x=x/dd
-		y=y/dd
-		z=z/dd
+		local d=math.sqrt(dd)
+		x=x/d
+		y=y/d
+		z=z/d
 	end
 
 	local m4a=m4.new(
@@ -316,7 +316,15 @@ function m4.rotate(it,degrees,v3a,r)
         x*z*(1-c)-y*s	,	y*z*(1-c)+x*s	,	z*2*(1-c)+c		,	0	,
         0				,	0				,	0				,	1	)
                
-	return m4_product_m4(it,m4a,r)
+--[[
+	local m4a=m4.new(
+		c			,	s			,	0			, 	0	,
+		-s			,	c			,	0			,	0	,
+        0			,	0			,	1			,	0	,
+        0			,	0			,	0			,	1	)
+]]
+
+	return m4_product_m4(m4a,it,r)
 end
 
 

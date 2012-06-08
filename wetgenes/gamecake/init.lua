@@ -12,6 +12,7 @@ module("wetgenes.gamecake")
 
 local wcanvas=require("wetgenes.gamecake.canvas")
 local wimages=require("wetgenes.gamecake.images")
+local wsheets=require("wetgenes.gamecake.sheets")
 local wsounds=require("wetgenes.gamecake.sounds")
 local wscreen=require("wetgenes.gamecake.screen")
 local wfonts =require("wetgenes.gamecake.fonts")
@@ -35,11 +36,12 @@ function bake(opts)
 	cake.images_fmt=opts.images_fmt or grd.FMT_U16_RGBA_4444_PREMULT
 	
 	
-	cake.canvas=wcanvas.bake(opts) -- we will need a canvas to draw too
-	cake.images=wimages.bake(opts) -- we will need to load some images
-	cake.fonts = wfonts.bake(opts) -- we will need to load some fonts
-	cake.sounds=wsounds.bake(opts) -- we will need to load some sounds
-	cake.screen=wscreen.bake(opts) -- how to display a canvas
+	cake.canvas = wcanvas.bake(opts) -- we will need a canvas to draw too
+	cake.images = wimages.bake(opts) -- we will need to load some images
+	cake.sheets = wsheets.bake(opts) -- we will need to manage some sprite sheets
+	cake.fonts  =  wfonts.bake(opts) -- we will need to load some fonts
+	cake.sounds = wsounds.bake(opts) -- we will need to load some sounds
+	cake.screen = wscreen.bake(opts) -- how to display a canvas
 
 	return cake
 end
@@ -59,6 +61,7 @@ end
 start = function(cake)
 	cake.canvas:start()
 	cake.images:start()
+	cake.sheets:start()
 	cake.fonts:start()
 	if not cake.opts.disable_sounds then
 		cake.sounds:start()
@@ -67,6 +70,7 @@ end
 
 stop = function(cake)
 	cake.canvas:stop()
+	cake.sheets:stop()
 	cake.images:stop()
 	cake.fonts:stop()
 	if not cake.opts.disable_sounds then
