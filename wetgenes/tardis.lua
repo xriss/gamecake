@@ -283,13 +283,15 @@ function m4.translate(it,v3a,r)
 	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,it[16] )
 end
 
-function m4.scale_v3(it,degrees,v3a,r)
-	local m4a=m4.new(
-		v3a[1]	,	0		,	0		,	0	,
-		0		,	v3a[2]	,	0		,	0	,
-		0		,	0		,	v3a[3]	,	0	,
-		0		,	0		,	0		,	1	)
-	return m4_product_m4(m4a,it,r)
+function m4.scale_v3(it,v3a,r)
+	r=r or it
+	local s1=v3a[1]
+	local s2=v3a[2]
+	local s3=v3a[3]
+	return r:set(	s1*it[1],	s1*it[2],	s1*it[3],	s1*it[4],
+					s2*it[5],	s2*it[6],	s2*it[7],	s2*it[8],
+					s3*it[9],	s3*it[10],	s3*it[11],	s3*it[12],
+					it[13],		it[14],		it[15],		it[16] )
 end
 
 function m4.rotate(it,degrees,v3a,r)
@@ -315,14 +317,6 @@ function m4.rotate(it,degrees,v3a,r)
 		x*y*(1-c)+z*s	,	y*2*(1-c)+c		,	y*z*(1-c)-x*s	,	0	,
         x*z*(1-c)-y*s	,	y*z*(1-c)+x*s	,	z*2*(1-c)+c		,	0	,
         0				,	0				,	0				,	1	)
-               
---[[
-	local m4a=m4.new(
-		c			,	s			,	0			, 	0	,
-		-s			,	c			,	0			,	0	,
-        0			,	0			,	1			,	0	,
-        0			,	0			,	0			,	1	)
-]]
 
 	return m4_product_m4(m4a,it,r)
 end

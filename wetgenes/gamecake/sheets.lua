@@ -184,7 +184,6 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 		gl.PushMatrix()
 		gl.Translate(px,py,0)
 		if rz then
-print(rz)
 			gl.Rotate(rz,0,0,1)
 		end
 		if sx then
