@@ -22,7 +22,7 @@ struct ngx_slab_page_s {
 
 
 typedef struct {
-    ngx_shmtx_sh_t    lock;
+    ngx_atomic_t      lock;
 
     size_t            min_size;
     size_t            min_shift;

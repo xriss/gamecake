@@ -153,7 +153,7 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
 {
     u_char        *prev;
     size_t         size;
-    ssize_t        total, n;
+    ssize_t        n;
     ngx_array_t    vec;
     struct iovec  *iov, iovs[NGX_IOVS];
 
@@ -164,8 +164,6 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
                               (size_t) (cl->buf->last - cl->buf->pos),
                               offset);
     }
-
-    total = 0;
 
     vec.elts = iovs;
     vec.size = sizeof(struct iovec);
@@ -204,15 +202,8 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
 
         if (vec.nelts == 1) {
             iov = vec.elts;
-
-            n = ngx_write_file(file, (u_char *) iov[0].iov_base,
-                               iov[0].iov_len, offset);
-
-            if (n == NGX_ERROR) {
-                return n;
-            }
-
-            return total + n;
+            return ngx_write_file(file, (u_char *) iov[0].iov_base,
+                                  iov[0].iov_len, offset);
         }
 
         if (file->sys_offset != offset) {
@@ -242,11 +233,10 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
 
         file->sys_offset += n;
         file->offset += n;
-        total += n;
 
     } while (cl);
 
-    return total;
+    return n;
 }
 
 
@@ -464,7 +454,7 @@ ngx_unlock_fd(ngx_fd_t fd)
 }
 
 
-#if (NGX_HAVE_POSIX_FADVISE) && !(NGX_HAVE_F_READAHEAD)
+#if (NGX_HAVE_POSIX_FADVISE)
 
 ngx_int_t
 ngx_read_ahead(ngx_fd_t fd, size_t n)

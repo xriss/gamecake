@@ -17,7 +17,7 @@ links(static_lib_names) -- so good, so good, we linked it twice...
 
 
 if RASPI then
-
+	
 	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
 	
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
@@ -25,7 +25,11 @@ if RASPI then
 	links { "pthread" }
 	
 	links { "dl" , "m" , "pthread" }
-	
+
+	linkoptions { "-v" }
+--	linkoptions { "-v -nostdlib" }
+--	links {  "gcc" , "c" , "c++" }
+
 	KIND{kind="ConsoleApp",name="lua.raspi"}
 
 elseif NACL then
@@ -80,3 +84,6 @@ elseif NIX then
 	KIND{kind="ConsoleApp",name="lua"}
 
 end
+
+
+

@@ -38,7 +38,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
 
     r->main->count++;
 
-    if (r->request_body || r->discard_body) {
+    if (r->request_body || r->discard_body || r->content_length_n == 0) {
         post_handler(r);
         return NGX_OK;
     }
@@ -440,7 +440,7 @@ ngx_http_discard_request_body(ngx_http_request_t *r)
     ssize_t       size;
     ngx_event_t  *rev;
 
-    if (r != r->main || r->discard_body) {
+    if (r != r->main || r->discard_body || r->content_length_n == 0) {
         return NGX_OK;
     }
 
@@ -456,20 +456,22 @@ ngx_http_discard_request_body(ngx_http_request_t *r)
         ngx_del_timer(rev);
     }
 
-    if (r->headers_in.content_length_n <= 0 || r->request_body) {
+    r->content_length_n = r->headers_in.content_length_n;
+
+    if (r->content_length_n <= 0 || r->request_body) {
         return NGX_OK;
     }
 
     size = r->header_in->last - r->header_in->pos;
 
     if (size) {
-        if (r->headers_in.content_length_n > size) {
+        if (r->content_length_n > size) {
             r->header_in->pos += size;
-            r->headers_in.content_length_n -= size;
+            r->content_length_n -= size;
 
         } else {
-            r->header_in->pos += (size_t) r->headers_in.content_length_n;
-            r->headers_in.content_length_n = 0;
+            r->header_in->pos += (size_t) r->content_length_n;
+            r->content_length_n = 0;
             return NGX_OK;
         }
     }
@@ -568,7 +570,7 @@ ngx_http_read_discarded_request_body(ngx_http_request_t *r)
                    "http read discarded body");
 
     for ( ;; ) {
-        if (r->headers_in.content_length_n == 0) {
+        if (r->content_length_n == 0) {
             r->read_event_handler = ngx_http_block_reading;
             return NGX_OK;
         }
@@ -577,9 +579,9 @@ ngx_http_read_discarded_request_body(ngx_http_request_t *r)
             return NGX_AGAIN;
         }
 
-        size = (r->headers_in.content_length_n > NGX_HTTP_DISCARD_BUFFER_SIZE) ?
+        size = (r->content_length_n > NGX_HTTP_DISCARD_BUFFER_SIZE) ?
                    NGX_HTTP_DISCARD_BUFFER_SIZE:
-                   (size_t) r->headers_in.content_length_n;
+                   (size_t) r->content_length_n;
 
         n = r->connection->recv(r->connection, buffer, size);
 
@@ -596,7 +598,7 @@ ngx_http_read_discarded_request_body(ngx_http_request_t *r)
             return NGX_OK;
         }
 
-        r->headers_in.content_length_n -= n;
+        r->content_length_n -= n;
     }
 }
 

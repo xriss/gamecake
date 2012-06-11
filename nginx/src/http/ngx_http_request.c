@@ -286,6 +286,8 @@ ngx_http_init_request(ngx_event_t *rev)
 
         r->pipeline = hc->pipeline;
 
+        r->content_length_n = -1;
+
         if (hc->nbusy) {
             r->header_in = hc->busy[0];
         }
@@ -296,6 +298,8 @@ ngx_http_init_request(ngx_event_t *rev)
             ngx_http_close_connection(c);
             return;
         }
+
+        r->content_length_n = -1;
 
         hc->request = r;
     }
@@ -671,27 +675,25 @@ ngx_http_ssl_servername(ngx_ssl_conn_t *ssl_conn, int *ad, void *arg)
 
     sscf = ngx_http_get_module_srv_conf(r, ngx_http_ssl_module);
 
-    if (sscf->ssl.ctx) {
-        SSL_set_SSL_CTX(ssl_conn, sscf->ssl.ctx);
+    SSL_set_SSL_CTX(ssl_conn, sscf->ssl.ctx);
 
-        /*
-         * SSL_set_SSL_CTX() only changes certs as of 1.0.0d
-         * adjust other things we care about
-         */
+    /*
+     * SSL_set_SSL_CTX() only changes certs as of 1.0.0d
+     * adjust other things we care about
+     */
 
-        SSL_set_verify(ssl_conn, SSL_CTX_get_verify_mode(sscf->ssl.ctx),
-                       SSL_CTX_get_verify_callback(sscf->ssl.ctx));
+    SSL_set_verify(ssl_conn, SSL_CTX_get_verify_mode(sscf->ssl.ctx),
+                   SSL_CTX_get_verify_callback(sscf->ssl.ctx));
 
-        SSL_set_verify_depth(ssl_conn, SSL_CTX_get_verify_depth(sscf->ssl.ctx));
+    SSL_set_verify_depth(ssl_conn, SSL_CTX_get_verify_depth(sscf->ssl.ctx));
 
 #ifdef SSL_CTRL_CLEAR_OPTIONS
-        /* only in 0.9.8m+ */
-        SSL_clear_options(ssl_conn, SSL_get_options(ssl_conn) &
-                                    ~SSL_CTX_get_options(sscf->ssl.ctx));
+    /* only in 0.9.8m+ */
+    SSL_clear_options(ssl_conn, SSL_get_options(ssl_conn) &
+                                ~SSL_CTX_get_options(sscf->ssl.ctx));
 #endif
 
-        SSL_set_options(ssl_conn, SSL_CTX_get_options(sscf->ssl.ctx));
-    }
+    SSL_set_options(ssl_conn, SSL_CTX_get_options(sscf->ssl.ctx));
 
     return SSL_TLSEXT_ERR_OK;
 }
@@ -1674,85 +1676,56 @@ static ssize_t
 ngx_http_validate_host(ngx_http_request_t *r, u_char **host, size_t len,
     ngx_uint_t alloc)
 {
-    u_char  *h, ch;
-    size_t   i, dot_pos, host_len;
+    u_char      *h, ch;
+    size_t       i, last;
+    ngx_uint_t   dot;
 
-    enum {
-        sw_usual = 0,
-        sw_literal,
-        sw_rest
-    } state;
-
-    dot_pos = len;
-    host_len = len;
-
+    last = len;
     h = *host;
-
-    state = sw_usual;
+    dot = 0;
 
     for (i = 0; i < len; i++) {
         ch = h[i];
 
-        switch (ch) {
-
-        case '.':
-            if (dot_pos == i - 1) {
+        if (ch == '.') {
+            if (dot) {
                 return 0;
             }
-            dot_pos = i;
-            break;
 
-        case ':':
-            if (state == sw_usual) {
-                host_len = i;
-                state = sw_rest;
-            }
-            break;
+            dot = 1;
+            continue;
+        }
 
-        case '[':
-            if (i == 0) {
-                state = sw_literal;
-            }
-            break;
+        dot = 0;
 
-        case ']':
-            if (state == sw_literal) {
-                host_len = i + 1;
-                state = sw_rest;
-            }
-            break;
+        if (ch == ':') {
+            last = i;
+            continue;
+        }
 
-        case '\0':
+        if (ngx_path_separator(ch) || ch == '\0') {
             return 0;
+        }
 
-        default:
-
-            if (ngx_path_separator(ch)) {
-                return 0;
-            }
-
-            if (ch >= 'A' && ch <= 'Z') {
-                alloc = 1;
-            }
-
-            break;
+        if (ch >= 'A' || ch < 'Z') {
+            alloc = 1;
         }
     }
 
-    if (dot_pos == host_len - 1) {
-        host_len--;
+    if (dot) {
+        last--;
     }
 
     if (alloc) {
-        *host = ngx_pnalloc(r->pool, host_len);
+        *host = ngx_pnalloc(r->pool, last) ;
         if (*host == NULL) {
             return -1;
         }
 
-        ngx_strlow(*host, h, host_len);
+        ngx_strlow(*host, h, last);
     }
 
-    return host_len;
+    return last;
 }
 
 
@@ -2009,6 +1982,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
         if (r == c->data) {
 
             r->main->count--;
+            r->main->subrequests++;
 
             if (!r->logged) {
 

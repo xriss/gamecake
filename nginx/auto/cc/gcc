@@ -169,7 +169,7 @@ esac
 
 
 # stop on warning
-CFLAGS="$CFLAGS -Werror"
+#CFLAGS="$CFLAGS -Werror"
 
 # debug
 CFLAGS="$CFLAGS -g"

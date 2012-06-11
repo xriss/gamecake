@@ -8,10 +8,10 @@ local tardis=require("wetgenes.tardis")
 local glesfix={}
 
 
-local shaderprefix="#version 120\n"
+local shaderprefix="#version 100\nprecision mediump float;\n"
 
--- assume gles2 junk, by default?
-shaderprefix="#version 100\nprecision mediump float;\n"
+
+--shaderprefix=="#version 120\n"
 
 -- apply our compatibility fixes into the base gles function table
 function glesfix.apply_compat(gles)

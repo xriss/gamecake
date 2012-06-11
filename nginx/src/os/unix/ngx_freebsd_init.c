@@ -22,8 +22,7 @@ int     ngx_freebsd_machdep_hlt_logical_cpus;
 
 ngx_uint_t  ngx_freebsd_sendfile_nbytes_bug;
 ngx_uint_t  ngx_freebsd_use_tcp_nopush;
-
-ngx_uint_t  ngx_debug_malloc;
+ngx_uint_t  ngx_freebsd_debug_malloc;
 
 
 static ngx_os_io_t ngx_freebsd_io = {
@@ -81,7 +80,7 @@ ngx_debug_init()
     malloc_options = "J";
 #endif
 
-    ngx_debug_malloc = 1;
+    ngx_freebsd_debug_malloc = 1;
 
 #else
     char  *mo;
@@ -89,7 +88,7 @@ ngx_debug_init()
     mo = getenv("MALLOC_OPTIONS");
 
     if (mo && ngx_strchr(mo, 'J')) {
-        ngx_debug_malloc = 1;
+        ngx_freebsd_debug_malloc = 1;
     }
 #endif
 }
@@ -98,7 +97,7 @@ ngx_debug_init()
 ngx_int_t
 ngx_os_specific_init(ngx_log_t *log)
 {
-    int         version;
+    int         version, somaxconn;
     size_t      size;
     ngx_err_t   err;
     ngx_uint_t  i;
@@ -210,9 +209,12 @@ ngx_os_specific_init(ngx_log_t *log)
         ngx_ncpu = ngx_freebsd_hw_ncpu;
     }
 
-    if (version < 600008 && ngx_freebsd_kern_ipc_somaxconn > 32767) {
+    somaxconn = version < 600008 ? 32676 : 65535;
+
+    if (ngx_freebsd_kern_ipc_somaxconn > somaxconn) {
         ngx_log_error(NGX_LOG_ALERT, log, 0,
-                      "sysctl kern.ipc.somaxconn must be less than 32768");
+                      "sysctl kern.ipc.somaxconn must be no more than %d",
+                      somaxconn);
         return NGX_ERROR;
     }
 

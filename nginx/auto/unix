@@ -328,20 +328,6 @@ ngx_feature_test="setsockopt(0, IPPROTO_TCP, TCP_DEFER_ACCEPT, NULL, 0)"
 . auto/feature
 
 
-ngx_feature="TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_KEEPCNT"
-ngx_feature_name="NGX_HAVE_KEEPALIVE_TUNABLE"
-ngx_feature_run=no
-ngx_feature_incs="#include <sys/socket.h>
-                  #include <netinet/in.h>
-                  #include <netinet/tcp.h>"
-ngx_feature_path=
-ngx_feature_libs=
-ngx_feature_test="setsockopt(0, IPPROTO_TCP, TCP_KEEPIDLE, NULL, 0);
-                  setsockopt(0, IPPROTO_TCP, TCP_KEEPINTVL, NULL, 0);
-                  setsockopt(0, IPPROTO_TCP, TCP_KEEPCNT, NULL, 0)"
-. auto/feature
-
-
 ngx_feature="accept4()"
 ngx_feature_name="NGX_HAVE_ACCEPT4"
 ngx_feature_run=no
@@ -510,8 +496,7 @@ ngx_feature_test="char buf[1]; ssize_t n; n = pwrite(1, buf, 1, 0)"
 ngx_feature="sys_nerr"
 ngx_feature_name="NGX_SYS_NERR"
 ngx_feature_run=value
-ngx_feature_incs='#include <errno.h>
-                  #include <stdio.h>'
+ngx_feature_incs='#include <stdio.h>'
 ngx_feature_path=
 ngx_feature_libs=
 ngx_feature_test='printf("%d", sys_nerr);'
@@ -553,10 +538,10 @@ if [ $ngx_found = no ]; then
                               || p == NULL
                               || strncmp(p, "Unknown error", 13) == 0)
                           {
-                              break;
+                              printf("%d", n);
+                              return 0;
                           }
-                      }
-                      printf("%d", n);'
+                     }'
     . auto/feature
 fi
 

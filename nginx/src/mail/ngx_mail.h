@@ -40,12 +40,6 @@ typedef struct {
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
     unsigned                ipv6only:2;
 #endif
-    unsigned                so_keepalive:2;
-#if (NGX_HAVE_KEEPALIVE_TUNABLE)
-    int                     tcp_keepidle;
-    int                     tcp_keepintvl;
-    int                     tcp_keepcnt;
-#endif
 } ngx_mail_listen_t;
 
 
@@ -100,12 +94,6 @@ typedef struct {
 #endif
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
     unsigned                ipv6only:2;
-#endif
-    unsigned                so_keepalive:2;
-#if (NGX_HAVE_KEEPALIVE_TUNABLE)
-    int                     tcp_keepidle;
-    int                     tcp_keepintvl;
-    int                     tcp_keepcnt;
 #endif
 } ngx_mail_conf_addr_t;
 
