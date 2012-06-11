@@ -249,8 +249,8 @@ lua_package_cpath ';;';
 	
 		print("Starting anlua on nginx\n\n")
 		
-		bake.execute(bake.cd_out,"../../../bin/exe/nginx","-p. -sstop")
-		bake.execute(bake.cd_out,"../../../bin/exe/nginx","-p.")
+		bake.execute(bake.cd_out,"../../../bin/dbg/nginx","-p. -sstop")
+		bake.execute(bake.cd_out,"../../../bin/dbg/nginx","-p.")
 --		bake.execute(bake.cd_out,"tail","-n0 -f logs/error.log")
 		
 		local fp=io.popen("tail -n0 -f logs/error.log","r") -- should probably just open the file myself...

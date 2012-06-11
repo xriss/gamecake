@@ -81,9 +81,11 @@ function new()
 	
 	srv.headers=ngx.req.get_headers()
 	
+print("HEADERS",wstr.dump(srv.headers))
+
 	srv.cookies={}
 	local cs
-	if type(srv.headers.Cookie=="string") then
+	if type(srv.headers.Cookie)=="string" then
 		cs=wstr.split(srv.headers.Cookie,";")
 	else
 		cs=srv.headers.Cookie
@@ -95,11 +97,15 @@ function new()
 	end
 
 	ngx.req.read_body()
-	srv.posts=ngx.req.get_post_args()
+	srv.posts={ngx.req.get_body_data()} -- we will have to parse this ourselves to suport all post types...
+
+print("POSTS",wstr.dump(srv.posts))
 
 	srv.uploads={}
 
 	srv.gets=ngx.req.get_uri_args()
+
+print("GETS",wstr.dump(srv.gets))
 
 	srv.vars={}
 	for key, val in pairs( srv.posts ) do

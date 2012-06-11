@@ -1361,11 +1361,11 @@ function gles.ShadeModel(...)
 end
 
 
--- add optional debuggery to every function defined above
+-- add optional debuggery to every function defined *above*
 for i,v in pairs(gles) do
 	if type(v)=="function" and not ( i=="CheckError" or i=="GetError" or i=="numtostring" ) then	
 		local f=v
-		gles[i]=function(...) local r=f(...) gles.CheckError() return r end
+--		gles[i]=function(...) local r=f(...) gles.CheckError() return r end
 	end
 end
 

@@ -75,6 +75,9 @@ function create(sheets,id,name)
 	return sheet
 end
 
+function createimg(sheets,id,name)
+	return create(sheets,id,name):setimg(id,name)
+end
 
 function base_sheet.setimg(sheet,img_id,img_name)
 
@@ -84,6 +87,7 @@ function base_sheet.setimg(sheet,img_id,img_name)
 
 	return sheet
 end
+
 
 function base_sheet.chop(sheet,hx,hy,ox,oy)
 
