@@ -139,7 +139,7 @@ case "$NGX_ICC_VER" in
 esac
 
 # stop on warning
-CFLAGS="$CFLAGS -Werror"
+#CFLAGS="$CFLAGS -Werror"
 
 # debug
 CFLAGS="$CFLAGS -g"

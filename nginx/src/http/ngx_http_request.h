@@ -366,6 +366,9 @@ struct ngx_http_request_s {
     ngx_pool_t                       *pool;
     ngx_buf_t                        *header_in;
 
+    off_t                             content_length_n;
+                                          /* for discarding request body */
+
     ngx_http_headers_in_t             headers_in;
     ngx_http_headers_out_t            headers_out;
 
@@ -480,7 +483,7 @@ struct ngx_http_request_s {
      * ngx_http_limit_zone_module and ngx_http_limit_req_module
      * we use the single bits in the request structure
      */
-    unsigned                          limit_conn_set:1;
+    unsigned                          limit_zone_set:1;
     unsigned                          limit_req_set:1;
 
 #if 0

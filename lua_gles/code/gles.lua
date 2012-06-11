@@ -1030,6 +1030,9 @@ local import=[[
 #define GL_INVALID_FRAMEBUFFER_OPERATION  0x0506
 
 
+
+
+
 ]]
 -- parse the above string for constants, makes updates as easy as a cutnpaste from original source code
 
@@ -1100,6 +1103,7 @@ if core.fixed_pipeline_available then -- the old way
 	end
 
 	function gles.Rotate(...)
+--print("Rotate",...)	
 		return core.Rotate(...)
 	end
 
@@ -1357,11 +1361,11 @@ function gles.ShadeModel(...)
 end
 
 
--- add optional debuggery to every function defined above
+-- add optional debuggery to every function defined *above*
 for i,v in pairs(gles) do
 	if type(v)=="function" and not ( i=="CheckError" or i=="GetError" or i=="numtostring" ) then	
 		local f=v
-		gles[i]=function(...) local r=f(...) gles.CheckError() return r end
+--		gles[i]=function(...) local r=f(...) gles.CheckError() return r end
 	end
 end
 

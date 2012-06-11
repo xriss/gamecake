@@ -682,7 +682,6 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
         wev = c->write;
 
         if ((revents & EPOLLOUT) && wev->active) {
-
             if (c->fd == -1 || wev->instance != instance) {
 
                 /*

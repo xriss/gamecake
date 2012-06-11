@@ -246,14 +246,9 @@ ngx_freebsd_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
                 }
             }
 
-            /*
-             * sendfile() does unneeded work if sf_hdtr's count is 0,
-             * but corresponding pointer is not NULL
-             */
-
-            hdtr.headers = header.nelts ? (struct iovec *) header.elts: NULL;
+            hdtr.headers = (struct iovec *) header.elts;
             hdtr.hdr_cnt = header.nelts;
-            hdtr.trailers = trailer.nelts ? (struct iovec *) trailer.elts: NULL;
+            hdtr.trailers = (struct iovec *) trailer.elts;
             hdtr.trl_cnt = trailer.nelts;
 
             /*

@@ -180,7 +180,7 @@ ngx_chain_get_free_buf(ngx_pool_t *p, ngx_chain_t **free)
 
 
 void
-ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free, ngx_chain_t **busy,
+ngx_chain_update_chains(ngx_chain_t **free, ngx_chain_t **busy,
     ngx_chain_t **out, ngx_buf_tag_t tag)
 {
     ngx_chain_t  *cl;
@@ -197,21 +197,19 @@ ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free, ngx_chain_t **busy,
     *out = NULL;
 
     while (*busy) {
-        cl = *busy;
-
-        if (ngx_buf_size(cl->buf) != 0) {
+        if (ngx_buf_size((*busy)->buf) != 0) {
             break;
         }
 
-        if (cl->buf->tag != tag) {
-            *busy = cl->next;
-            ngx_free_chain(p, cl);
+        if ((*busy)->buf->tag != tag) {
+            *busy = (*busy)->next;
             continue;
         }
 
-        cl->buf->pos = cl->buf->start;
-        cl->buf->last = cl->buf->start;
+        (*busy)->buf->pos = (*busy)->buf->start;
+        (*busy)->buf->last = (*busy)->buf->start;
 
+        cl = *busy;
         *busy = cl->next;
         cl->next = *free;
         *free = cl;

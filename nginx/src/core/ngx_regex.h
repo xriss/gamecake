@@ -18,11 +18,7 @@
 
 #define NGX_REGEX_CASELESS    PCRE_CASELESS
 
-
-typedef struct {
-    pcre        *pcre;
-    pcre_extra  *extra;
-} ngx_regex_t;
+typedef pcre  ngx_regex_t;
 
 
 typedef struct {
@@ -49,7 +45,7 @@ void ngx_regex_init(void);
 ngx_int_t ngx_regex_compile(ngx_regex_compile_t *rc);
 
 #define ngx_regex_exec(re, s, captures, size)                                \
-    pcre_exec(re->pcre, re->extra, (const char *) (s)->data, (s)->len, 0, 0, \
+    pcre_exec(re, NULL, (const char *) (s)->data, (s)->len, 0, 0,            \
               captures, size)
 #define ngx_regex_exec_n      "pcre_exec()"
 

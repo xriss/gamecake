@@ -50,8 +50,6 @@ static void ngx_http_uwsgi_finalize_request(ngx_http_request_t *r,
 static void *ngx_http_uwsgi_create_loc_conf(ngx_conf_t *cf);
 static char *ngx_http_uwsgi_merge_loc_conf(ngx_conf_t *cf, void *parent,
     void *child);
-static ngx_int_t ngx_http_uwsgi_merge_params(ngx_conf_t *cf,
-    ngx_http_uwsgi_loc_conf_t *conf, ngx_http_uwsgi_loc_conf_t *prev);
 
 static char *ngx_http_uwsgi_pass(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
@@ -274,20 +272,6 @@ static ngx_command_t ngx_http_uwsgi_commands[] = {
       offsetof(ngx_http_uwsgi_loc_conf_t, upstream.cache_methods),
       &ngx_http_upstream_cache_method_mask },
 
-    { ngx_string("uwsgi_cache_lock"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_uwsgi_loc_conf_t, upstream.cache_lock),
-      NULL },
-
-    { ngx_string("uwsgi_cache_lock_timeout"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_msec_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_uwsgi_loc_conf_t, upstream.cache_lock_timeout),
-      NULL },
-
 #endif
 
     { ngx_string("uwsgi_temp_path"),
@@ -319,8 +303,8 @@ static ngx_command_t ngx_http_uwsgi_commands[] = {
       &ngx_http_uwsgi_next_upstream_masks },
 
     { ngx_string("uwsgi_param"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE23,
-      ngx_http_upstream_param_set_slot,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE2,
+      ngx_conf_set_keyval_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_uwsgi_loc_conf_t, params_source),
       NULL },
@@ -567,7 +551,7 @@ ngx_http_uwsgi_create_request(ngx_http_request_t *r)
 {
     u_char                        ch, *lowcase_key;
     size_t                        key_len, val_len, len, allocated;
-    ngx_uint_t                    i, n, hash, skip_empty, header_params;
+    ngx_uint_t                    i, n, hash, header_params;
     ngx_buf_t                    *b;
     ngx_chain_t                  *cl, *body;
     ngx_list_part_t              *part;
@@ -597,17 +581,10 @@ ngx_http_uwsgi_create_request(ngx_http_request_t *r)
             lcode = *(ngx_http_script_len_code_pt *) le.ip;
             key_len = lcode(&le);
 
-            lcode = *(ngx_http_script_len_code_pt *) le.ip;
-            skip_empty = lcode(&le);
-
             for (val_len = 0; *(uintptr_t *) le.ip; val_len += lcode (&le)) {
                 lcode = *(ngx_http_script_len_code_pt *) le.ip;
             }
             le.ip += sizeof(uintptr_t);
-
-            if (skip_empty && val_len == 0) {
-                continue;
-            }
 
             len += 2 + key_len + 2 + val_len;
         }
@@ -727,27 +704,10 @@ ngx_http_uwsgi_create_request(ngx_http_request_t *r)
             lcode = *(ngx_http_script_len_code_pt *) le.ip;
             key_len = (u_char) lcode (&le);
 
-            lcode = *(ngx_http_script_len_code_pt *) le.ip;
-            skip_empty = lcode(&le);
-
             for (val_len = 0; *(uintptr_t *) le.ip; val_len += lcode(&le)) {
                 lcode = *(ngx_http_script_len_code_pt *) le.ip;
             }
             le.ip += sizeof(uintptr_t);
-
-            if (skip_empty && val_len == 0) {
-                e.skip = 1;
-
-                while (*(uintptr_t *) e.ip) {
-                    code = *(ngx_http_script_code_pt *) e.ip;
-                    code((ngx_http_script_engine_t *) &e);
-                }
-                e.ip += sizeof(uintptr_t);
-
-                e.skip = 0;
-
-                continue;
-            }
 
             *e.pos++ = (u_char) (key_len & 0xff);
             *e.pos++ = (u_char) ((key_len >> 8) & 0xff);
@@ -1128,8 +1088,6 @@ ngx_http_uwsgi_create_loc_conf(ngx_conf_t *cf)
     conf->upstream.cache_bypass = NGX_CONF_UNSET_PTR;
     conf->upstream.no_cache = NGX_CONF_UNSET_PTR;
     conf->upstream.cache_valid = NGX_CONF_UNSET_PTR;
-    conf->upstream.cache_lock = NGX_CONF_UNSET;
-    conf->upstream.cache_lock_timeout = NGX_CONF_UNSET_MSEC;
 #endif
 
     conf->upstream.hide_headers = NGX_CONF_UNSET_PTR;
@@ -1154,9 +1112,17 @@ ngx_http_uwsgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_http_uwsgi_loc_conf_t *prev = parent;
     ngx_http_uwsgi_loc_conf_t *conf = child;
 
+    u_char                       *p;
     size_t                        size;
+    uintptr_t                    *code;
+    ngx_uint_t                    i;
+    ngx_array_t                   headers_names;
+    ngx_keyval_t                 *src;
+    ngx_hash_key_t               *hk;
     ngx_hash_init_t               hash;
     ngx_http_core_loc_conf_t     *clcf;
+    ngx_http_script_compile_t     sc;
+    ngx_http_script_copy_code_t  *copy;
 
     if (conf->upstream.store != 0) {
         ngx_conf_merge_value(conf->upstream.store, prev->upstream.store, 0);
@@ -1357,12 +1323,6 @@ ngx_http_uwsgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
         conf->cache_key = prev->cache_key;
     }
 
-    ngx_conf_merge_value(conf->upstream.cache_lock,
-                              prev->upstream.cache_lock, 0);
-
-    ngx_conf_merge_msec_value(conf->upstream.cache_lock_timeout,
-                              prev->upstream.cache_lock_timeout, 5000);
-
 #endif
 
     ngx_conf_merge_value(conf->upstream.pass_request_headers,
@@ -1405,150 +1365,95 @@ ngx_http_uwsgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_uint_value(conf->modifier1, prev->modifier1, 0);
     ngx_conf_merge_uint_value(conf->modifier2, prev->modifier2, 0);
 
-    if (ngx_http_uwsgi_merge_params(cf, conf, prev) != NGX_OK) {
-        return NGX_CONF_ERROR;
-    }
-
-    return NGX_CONF_OK;
-}
-
-
-static ngx_int_t
-ngx_http_uwsgi_merge_params(ngx_conf_t *cf, ngx_http_uwsgi_loc_conf_t *conf,
-    ngx_http_uwsgi_loc_conf_t *prev)
-{
-    u_char                       *p;
-    size_t                        size;
-    uintptr_t                    *code;
-    ngx_uint_t                    i, nsrc;
-    ngx_array_t                   headers_names;
-#if (NGX_HTTP_CACHE)
-    ngx_array_t                   params_merged;
-#endif
-    ngx_hash_key_t               *hk;
-    ngx_hash_init_t               hash;
-    ngx_http_upstream_param_t    *src;
-    ngx_http_script_compile_t     sc;
-    ngx_http_script_copy_code_t  *copy;
-
     if (conf->params_source == NULL) {
+        conf->flushes = prev->flushes;
+        conf->params_len = prev->params_len;
+        conf->params = prev->params;
         conf->params_source = prev->params_source;
+        conf->headers_hash = prev->headers_hash;
 
-        if (prev->headers_hash.buckets
 #if (NGX_HTTP_CACHE)
-            && ((conf->upstream.cache == NULL) == (prev->upstream.cache == NULL))
-#endif
-           )
-        {
-            conf->flushes = prev->flushes;
-            conf->params_len = prev->params_len;
-            conf->params = prev->params;
-            conf->headers_hash = prev->headers_hash;
-            conf->header_params = prev->header_params;
 
-            return NGX_OK;
+        if (conf->params_source == NULL) {
+
+            if ((conf->upstream.cache == NULL)
+                == (prev->upstream.cache == NULL))
+            {
+                return NGX_CONF_OK;
+            }
+
+            /* 6 is a number of ngx_http_uwsgi_cache_headers entries */
+            conf->params_source = ngx_array_create(cf->pool, 6,
+                                                   sizeof(ngx_keyval_t));
+            if (conf->params_source == NULL) {
+                return NGX_CONF_ERROR;
+            }
         }
-    }
+#else
 
-    if (conf->params_source == NULL
-#if (NGX_HTTP_CACHE)
-        && (conf->upstream.cache == NULL)
+        if (conf->params_source == NULL) {
+            return NGX_CONF_OK;
+        }
+
 #endif
-       )
-    {
-        conf->headers_hash.buckets = (void *) 1;
-        return NGX_OK;
     }
 
     conf->params_len = ngx_array_create(cf->pool, 64, 1);
     if (conf->params_len == NULL) {
-        return NGX_ERROR;
+        return NGX_CONF_ERROR;
     }
 
     conf->params = ngx_array_create(cf->pool, 512, 1);
     if (conf->params == NULL) {
-        return NGX_ERROR;
+        return NGX_CONF_ERROR;
     }
 
     if (ngx_array_init(&headers_names, cf->temp_pool, 4, sizeof(ngx_hash_key_t))
         != NGX_OK)
     {
-        return NGX_ERROR;
+        return NGX_CONF_ERROR;
     }
 
-    if (conf->params_source) {
-        src = conf->params_source->elts;
-        nsrc = conf->params_source->nelts;
-
-    } else {
-        src = NULL;
-        nsrc = 0;
-    }
+    src = conf->params_source->elts;
 
 #if (NGX_HTTP_CACHE)
 
     if (conf->upstream.cache) {
-        ngx_keyval_t               *h;
-        ngx_http_upstream_param_t  *s;
+        ngx_keyval_t  *h, *s;
 
-        if (ngx_array_init(&params_merged, cf->temp_pool, 4,
-                           sizeof(ngx_http_upstream_param_t))
-            != NGX_OK)
-        {
-            return NGX_ERROR;
-        }
+        for (h = ngx_http_uwsgi_cache_headers; h->key.len; h++) {
 
-        for (i = 0; i < nsrc; i++) {
-
-            s = ngx_array_push(&params_merged);
-            if (s == NULL) {
-                return NGX_ERROR;
-            }
-
-            *s = src[i];
-        }
-
-        h = ngx_http_uwsgi_cache_headers;
-
-        while (h->key.len) {
-
-            src = params_merged.elts;
-            nsrc = params_merged.nelts;
-
-            for (i = 0; i < nsrc; i++) {
+            for (i = 0; i < conf->params_source->nelts; i++) {
                 if (ngx_strcasecmp(h->key.data, src[i].key.data) == 0) {
                     goto next;
                 }
             }
 
-            s = ngx_array_push(&params_merged);
+            s = ngx_array_push(conf->params_source);
             if (s == NULL) {
-                return NGX_ERROR;
+                return NGX_CONF_ERROR;
             }
 
-            s->key = h->key;
-            s->value = h->value;
-            s->skip_empty = 0;
+            *s = *h;
+
+            src = conf->params_source->elts;
 
         next:
 
             h++;
         }
-
-        src = params_merged.elts;
-        nsrc = params_merged.nelts;
     }
 
 #endif
 
-    for (i = 0; i < nsrc; i++) {
+    for (i = 0; i < conf->params_source->nelts; i++) {
 
         if (src[i].key.len > sizeof("HTTP_") - 1
             && ngx_strncmp(src[i].key.data, "HTTP_", sizeof("HTTP_") - 1) == 0)
         {
             hk = ngx_array_push(&headers_names);
             if (hk == NULL) {
-                return NGX_ERROR;
+                return NGX_CONF_ERROR;
             }
 
             hk->key.len = src[i].key.len - 5;
@@ -1564,20 +1469,11 @@ ngx_http_uwsgi_merge_params(ngx_conf_t *cf, ngx_http_uwsgi_loc_conf_t *conf,
         copy = ngx_array_push_n(conf->params_len,
                                 sizeof(ngx_http_script_copy_code_t));
         if (copy == NULL) {
-            return NGX_ERROR;
+            return NGX_CONF_ERROR;
         }
 
         copy->code = (ngx_http_script_code_pt) ngx_http_script_copy_len_code;
         copy->len = src[i].key.len;
-
-        copy = ngx_array_push_n(conf->params_len,
-                                sizeof(ngx_http_script_copy_code_t));
-        if (copy == NULL) {
-            return NGX_ERROR;
-        }
-
-        copy->code = (ngx_http_script_code_pt) ngx_http_script_copy_len_code;
-        copy->len = src[i].skip_empty;
 
 
         size = (sizeof(ngx_http_script_copy_code_t)
@@ -1586,7 +1482,7 @@ ngx_http_uwsgi_merge_params(ngx_conf_t *cf, ngx_http_uwsgi_loc_conf_t *conf,
 
         copy = ngx_array_push_n(conf->params, size);
         if (copy == NULL) {
-            return NGX_ERROR;
+            return NGX_CONF_ERROR;
         }
 
         copy->code = ngx_http_script_copy_code;
@@ -1605,12 +1501,12 @@ ngx_http_uwsgi_merge_params(ngx_conf_t *cf, ngx_http_uwsgi_loc_conf_t *conf,
         sc.values = &conf->params;
 
         if (ngx_http_script_compile(&sc) != NGX_OK) {
-            return NGX_ERROR;
+            return NGX_CONF_ERROR;
         }
 
         code = ngx_array_push_n(conf->params_len, sizeof(uintptr_t));
         if (code == NULL) {
-            return NGX_ERROR;
+            return NGX_CONF_ERROR;
         }
 
         *code = (uintptr_t) NULL;
@@ -1618,7 +1514,7 @@ ngx_http_uwsgi_merge_params(ngx_conf_t *cf, ngx_http_uwsgi_loc_conf_t *conf,
 
         code = ngx_array_push_n(conf->params, sizeof(uintptr_t));
         if (code == NULL) {
-            return NGX_ERROR;
+            return NGX_CONF_ERROR;
         }
 
         *code = (uintptr_t) NULL;
@@ -1626,7 +1522,7 @@ ngx_http_uwsgi_merge_params(ngx_conf_t *cf, ngx_http_uwsgi_loc_conf_t *conf,
 
     code = ngx_array_push_n(conf->params_len, sizeof(uintptr_t));
     if (code == NULL) {
-        return NGX_ERROR;
+        return NGX_CONF_ERROR;
     }
 
     *code = (uintptr_t) NULL;
@@ -1641,7 +1537,12 @@ ngx_http_uwsgi_merge_params(ngx_conf_t *cf, ngx_http_uwsgi_loc_conf_t *conf,
     hash.pool = cf->pool;
     hash.temp_pool = NULL;
 
-    return ngx_hash_init(&hash, headers_names.elts, headers_names.nelts);
+    if (ngx_hash_init(&hash, headers_names.elts, headers_names.nelts) != NGX_OK)
+    {
+        return NGX_CONF_ERROR;
+    }
+
+    return NGX_CONF_OK;
 }
 
 

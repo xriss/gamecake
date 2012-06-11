@@ -203,8 +203,6 @@ main(int argc, char *const *argv)
     ngx_cycle_t      *cycle, init_cycle;
     ngx_core_conf_t  *ccf;
 
-    ngx_debug_init();
-
     if (ngx_strerror_init() != NGX_OK) {
         return 1;
     }
@@ -214,55 +212,57 @@ main(int argc, char *const *argv)
     }
 
     if (ngx_show_version) {
-        ngx_write_stderr("nginx version: " NGINX_VER NGX_LINEFEED);
+        ngx_log_stderr(0, "nginx version: " NGINX_VER);
 
         if (ngx_show_help) {
-            ngx_write_stderr(
+            ngx_log_stderr(0,
                 "Usage: nginx [-?hvVtq] [-s signal] [-c filename] "
-                             "[-p prefix] [-g directives]" NGX_LINEFEED
-                             NGX_LINEFEED
-                "Options:" NGX_LINEFEED
-                "  -?,-h         : this help" NGX_LINEFEED
-                "  -v            : show version and exit" NGX_LINEFEED
+                             "[-p prefix] [-g directives]" CRLF CRLF
+                "Options:" CRLF
+                "  -?,-h         : this help" CRLF
+                "  -v            : show version and exit" CRLF
                 "  -V            : show version and configure options then exit"
-                                   NGX_LINEFEED
-                "  -t            : test configuration and exit" NGX_LINEFEED
+                                   CRLF
+                "  -t            : test configuration and exit" CRLF
                 "  -q            : suppress non-error messages "
-                                   "during configuration testing" NGX_LINEFEED
+                                   "during configuration testing" CRLF
                 "  -s signal     : send signal to a master process: "
-                                   "stop, quit, reopen, reload" NGX_LINEFEED
+                                   "stop, quit, reopen, reload" CRLF
 #ifdef NGX_PREFIX
                 "  -p prefix     : set prefix path (default: "
-                                   NGX_PREFIX ")" NGX_LINEFEED
+                                   NGX_PREFIX ")" CRLF
 #else
-                "  -p prefix     : set prefix path (default: NONE)" NGX_LINEFEED
+                "  -p prefix     : set prefix path (default: NONE)" CRLF
 #endif
                 "  -c filename   : set configuration file (default: "
-                                   NGX_CONF_PATH ")" NGX_LINEFEED
+                                   NGX_CONF_PATH ")" CRLF
                 "  -g directives : set global directives out of configuration "
-                                   "file" NGX_LINEFEED NGX_LINEFEED
+                                   "file" CRLF
                 );
         }
 
         if (ngx_show_configure) {
-            ngx_write_stderr(
 #ifdef NGX_COMPILER
-                "built by " NGX_COMPILER NGX_LINEFEED
+            ngx_log_stderr(0, "built by " NGX_COMPILER);
 #endif
 #if (NGX_SSL)
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-                "TLS SNI support enabled" NGX_LINEFEED
+            ngx_log_stderr(0, "TLS SNI support enabled");
 #else
-                "TLS SNI support disabled" NGX_LINEFEED
+            ngx_log_stderr(0, "TLS SNI support disabled");
 #endif
 #endif
-                "configure arguments:" NGX_CONFIGURE NGX_LINEFEED);
+            ngx_log_stderr(0, "configure arguments:" NGX_CONFIGURE);
         }
 
         if (!ngx_test_config) {
             return 0;
         }
     }
+
+#if (NGX_FREEBSD)
+    ngx_debug_init();
+#endif
 
     /* TODO */ ngx_max_sockets = -1;
 
@@ -371,10 +371,6 @@ main(int argc, char *const *argv)
             return 1;
         }
 
-        ngx_daemonized = 1;
-    }
-
-    if (ngx_inherited) {
         ngx_daemonized = 1;
     }
 

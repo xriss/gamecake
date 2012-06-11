@@ -21,8 +21,7 @@ types {
     image/x-icon                          ico;
     image/x-jng                           jng;
     image/x-ms-bmp                        bmp;
-    image/svg+xml                         svg svgz;
-    image/webp                            webp;
+    image/svg+xml                         svg;
 
     application/java-archive              jar war ear;
     application/mac-binhex40              hqx;
@@ -70,7 +69,6 @@ types {
     video/mp4                             mp4;
     video/mpeg                            mpeg mpg;
     video/quicktime                       mov;
-    video/webm                            webm;
     video/x-flv                           flv;
     video/x-m4v                           m4v;
     video/x-mng                           mng;
