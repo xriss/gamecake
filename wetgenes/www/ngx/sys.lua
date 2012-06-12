@@ -34,13 +34,18 @@ function bytes_split(bytes,size)
 	
 	local t={}
 	for i=1,#bytes,size do
-		t[#t+1]=bytes:sub(i,i+size-1)
+		local d=bytes:sub(i,i+size-1)
+		t[#t+1]={data=d,size=#d}
 	end
 	return t
 end
 
 function bytes_join(tab)
-	return table.concat(tab)
+	local t={}
+	for i,v in ipairs(tab) do
+		t[i]=v.data
+	end
+	return table.concat(t)
 end
 
 function bytes_to_string(bytes)

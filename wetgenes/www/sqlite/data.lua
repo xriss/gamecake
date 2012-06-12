@@ -155,7 +155,6 @@ function query(q)
 	count=count+1
 	
 	local db=getdb(kind)
-
 	q.kind=kind -- patchup kind
 	ret.code=wsql.make_query(q)
 	q.kind=original_kind -- and restore it
@@ -171,8 +170,6 @@ function query(q)
 		e.key={kind=original_kind,id=v.id or v.rowid}
 
 	end
-	
-log( wstr.dump(ret) )
 	
 	apie()
 	return ret

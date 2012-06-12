@@ -81,7 +81,7 @@ function new()
 	
 	srv.headers=ngx.req.get_headers()
 	
-print("HEADERS",wstr.dump(srv.headers))
+--print("HEADERS",wstr.dump(srv.headers))
 
 	srv.cookies={}
 	local cs
@@ -96,16 +96,81 @@ print("HEADERS",wstr.dump(srv.headers))
 		srv.cookies[n]=v
 	end
 
+	local body	-- pulling the body in is slightly complex
 	ngx.req.read_body()
-	srv.posts={ngx.req.get_body_data()} -- we will have to parse this ourselves to suport all post types...
-
-print("POSTS",wstr.dump(srv.posts))
-
+	local fn=ngx.req.get_body_file()
+	if fn then
+		local fp=io.open(fn,"r")
+		body=fp:read("*a")
+		fp:close()
+	else
+		body=ngx.req.get_body_data()
+	end
+	
+	srv.posts={}
 	srv.uploads={}
+	
+	local content_type=srv.headers["Content-Type"]
+	
+	if not content_type then --nothing?
+
+	elseif string.find(content_type, "x-www-form-urlencoded", 1, true) then
+	
+		srv.posts=ngx.req.get_post_args()
+	
+	elseif string.find(content_type, "multipart/form-data", 1, true) then
+
+		local _,_,boundary = string.find (content_type, "boundary%=(.-)$")
+	  
+		boundary="--"..boundary
+
+		local parts=wstr.split(body,boundary)
+	  
+		for i,v in ipairs(parts) do
+		
+			local _,header_end=string.find(v, "\r\n\r\n") -- this terminates the header
+			
+			if header_end then -- and we can ignore this chunk if it has no header
+			
+				local header_str=v:sub(1,header_end)
+				local data
+				if v:sub(-2)=="\r\n" then -- check and
+					data=v:sub(header_end+1,-3) -- kill crlf data tail
+				else
+					data=v:sub(header_end+1)
+				end
+				local headers={}
+				for i,v in ipairs( wstr.split(header_str,"\r\n") ) do
+					local aa=wstr.split(v,":")
+					if aa[1] and aa[2] then
+						headers[ wstr.trim(aa[1]) ] = aa[2]
+					end
+				end
+				
+				local attrs={}
+				if headers["Content-Disposition"] then
+					string.gsub(headers["Content-Disposition"], ';%s*([^%s=]+)="(.-)"',
+						function(attr, val)
+							attrs[attr] = val
+						end)
+				end
+				
+				if attrs.name then
+					if attrs.filename then -- this be an uploaded file.
+						srv.uploads[attrs.name]={data=data,size=#data,name=attrs.filename,type=headers["Content-Type"]}
+					else
+						srv.posts[attrs.name]=data
+					end
+				end
+			end
+		end
+	end
 
 	srv.gets=ngx.req.get_uri_args()
 
-print("GETS",wstr.dump(srv.gets))
+--print("UPLOADS",wstr.dump(srv.uploads))
+--print("POSTS",wstr.dump(srv.posts))
+--print("GETS",wstr.dump(srv.gets))
 
 	srv.vars={}
 	for key, val in pairs( srv.posts ) do

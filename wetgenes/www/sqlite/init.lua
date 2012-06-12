@@ -230,7 +230,10 @@ end
 --
 -----------------------------------------------------------------------------
 function escape(s)
-	return "'"..s:gsub("'","''").."'"
+	return "X'"..string.gsub(s, ".", function (c)
+		return string.format("%02x", string.byte(c))
+	end).."'"
+--	return "'"..s:gsub("'","''").."'"
 end
 
 
@@ -275,7 +278,7 @@ function fixvalue(v)
 end
 
 function fixname(v)
-	return escape(tostring(v))
+	return '"'..(tostring(v))..'"' -- name must not include " or '
 end
 
 -----------------------------------------------------------------------------
@@ -360,9 +363,9 @@ function make_query(tab)
 		
 			local o=operators[ v[3] ] 
 			if o then
-				p(wa," ",(v[2]),o,fixvalue(v[4])," ")
+				p(wa," ",fixname(v[2]),o,fixvalue(v[4])," ")
 			elseif v[3]=="IN" then
-				p(wa," ",(v[2]),"IN(")
+				p(wa," ",fixname(v[2]),"IN(")
 				for i,v in ipairs(v[4]) do
 					if i~=1 then p(",") end -- separator
 					p(fixvalue(v))
