@@ -4,6 +4,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local log=require("wetgenes.www.any.log").log
 local ngx=require("ngx")
 
+local zip=require("zip")
+local wstr=require("wetgenes.string")
+
 module(...)
 local _M=require(...)
 package.loaded["wetgenes.www.any.sys"]=_M
@@ -41,11 +44,13 @@ function bytes_split(bytes,size)
 end
 
 function bytes_join(tab)
+--[[
 	local t={}
 	for i,v in ipairs(tab) do
 		t[i]=v.data
 	end
-	return table.concat(t)
+]]
+	return table.concat(tab)
 end
 
 function bytes_to_string(bytes)
@@ -86,11 +91,35 @@ end
 
 function zip_list(z)
 	log("sys.zip_list:")
---	return core.zip_list(z)
+	local r={}
+	local zf=zip.open_mem(z,#z)
+	if zf then
+		for file in zf:files() do
+			r[#r+1]={ name=file.filename , size=file.uncompressed_size}
+		end
+		zf:close()
+	end
+	return r
 end
+
 function zip_read(z,n)
-	log("sys.sleep:")
---	return core.zip_read(z,n)
+	log("zip.read:")
+	
+	local r
+	local zf=zip.open_mem(z,#z)	
+print(n,#z,wstr.dump(zf))
+	if zf then
+	
+		local f=zf:open(n)
+		
+		if f then
+			r=f:read("*a")
+			f:close()
+		end
+		
+		zf:close()
+	end
+	return r
 end
 
 
