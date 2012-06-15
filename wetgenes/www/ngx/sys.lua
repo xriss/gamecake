@@ -6,6 +6,7 @@ local ngx=require("ngx")
 
 local zip=require("zip")
 local wstr=require("wetgenes.string")
+local wpack=require("wetgenes.pack")
 
 module(...)
 local _M=require(...)
@@ -54,6 +55,9 @@ function bytes_join(tab)
 end
 
 function bytes_to_string(bytes)
+	if type(bytes)~="string" then
+		return wpack.tostring(bytes)
+	end
 	return bytes
 end
 

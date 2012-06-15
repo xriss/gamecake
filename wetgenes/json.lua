@@ -77,7 +77,10 @@ local function unesc(s)
     end)
 
 	s=string.gsub(s, "\\u(%x%x%x%x)", function(c)
-		return string.char( tonumber(c,16) or 32 ) or ""
+		local n=tonumber(c,16) or 32
+		if n>255 then return " " else -- need utf8?
+			return string.char( n ) or ""
+		end
     end)
     
   return s
