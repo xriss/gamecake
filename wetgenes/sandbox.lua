@@ -5,14 +5,8 @@
 -- Please ping me if you use it for anything cool...
 --
 
-local string=string
-local table=table
-
-local type=type
-local pairs=pairs
-local ipairs=ipairs
-local tostring=tostring
-local setmetatable=setmetatable
+-- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 --
 -- Simple sandboxing of lua functions
@@ -135,3 +129,33 @@ local env=local_make_env_safe()
 	return env
 end
 
+--
+-- turns a string containing lua code into a table containing the globals it sets
+-- IE read an ini file, run it through this
+--
+function ini(s)
+
+	local env=make_env()
+	local tab={}
+	local meta={__index=env}
+	setmetatable(tab, meta)
+
+	local f=assert(loadstring(s))
+	setfenv(f,tab)
+	assert(pcall(f))
+
+	return tab
+end
+
+function lson(s)
+
+	local env=make_env()
+	local tab={}
+	local meta={__index=env}
+	setmetatable(tab, meta)
+
+	local f=assert(loadstring("return "..s))
+	setfenv(f,tab)
+	local _,ret=assert(pcall(f))
+	return ret
+end
