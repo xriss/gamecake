@@ -173,7 +173,7 @@ function new()
 	srv.gets=ngx.req.get_uri_args()
 
 --print("UPLOADS",wstr.dump(srv.uploads))
-print("POSTS",wstr.dump(srv.posts))
+--print("POSTS",wstr.dump(srv.posts))
 --print("GETS",wstr.dump(srv.gets))
 
 	srv.vars={}
