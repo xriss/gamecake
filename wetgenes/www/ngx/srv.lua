@@ -79,18 +79,21 @@ function new()
 --log(srv.query)
 	
 	
-	srv.headers=ngx.req.get_headers()
+	srv.headers={}
+	for n,v in pairs( ngx.req.get_headers() ) do
+		srv.headers[string.lower(n)]=v -- force all lowercase
+	end
 	
---print("HEADERS",wstr.dump(srv.headers))
+--print("HEADERS",wstr.dump(ngx.req.get_headers()))
 
 	srv.cookies={}
 	local cs
-	if type(srv.headers.Cookie)=="string" then
-		cs=wstr.split(srv.headers.Cookie,";")
+	if type(srv.headers.cookie)=="string" then
+		cs=wstr.split(srv.headers.cookie,";")
 	else
-		cs=srv.headers.Cookie
+		cs=srv.headers.cookie
 	end
-	log(srv.headers.Cookie)
+	log(srv.headers.cookie)
 	for i,s in ipairs(cs or {}) do
 		local n,v=wstr.split_equal(wstr.trim(s))
 		srv.cookies[n]=v
@@ -110,7 +113,8 @@ function new()
 	srv.posts={}
 	srv.uploads={}
 	
-	local content_type=srv.headers["Content-Type"]
+	local content_type=srv.headers["content-type"]
+--log(wstr.serialize(srv.headers))
 	
 	if not content_type then --nothing?
 
@@ -119,7 +123,7 @@ function new()
 		srv.posts=ngx.req.get_post_args()
 	
 	elseif string.find(content_type, "multipart/form-data", 1, true) then
-
+	
 		local _,_,boundary = string.find (content_type, "boundary%=(.-)$")
 	  
 		boundary="--"..boundary
@@ -169,7 +173,7 @@ function new()
 	srv.gets=ngx.req.get_uri_args()
 
 --print("UPLOADS",wstr.dump(srv.uploads))
---print("POSTS",wstr.dump(srv.posts))
+print("POSTS",wstr.dump(srv.posts))
 --print("GETS",wstr.dump(srv.gets))
 
 	srv.vars={}
