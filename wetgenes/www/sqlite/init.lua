@@ -364,7 +364,7 @@ function make_query(tab)
 			local o=operators[ v[3] ] 
 			if o then
 				p(wa," ",fixname(v[2]),o,fixvalue(v[4])," ")
-			elseif v[3]=="IN" then
+			elseif string.upper(v[3])=="IN" then
 				p(wa," ",fixname(v[2]),"IN(")
 				for i,v in ipairs(v[4]) do
 					if i~=1 then p(",") end -- separator
