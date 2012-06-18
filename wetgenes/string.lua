@@ -303,6 +303,17 @@ function url_encode(str)
     end)
 end
 
+-----------------------------------------------------------------------------
+--
+-- a one way action that replaces anything that is not a-z or 0-9 with _
+-- and converts the entire string to lowercase
+--
+-----------------------------------------------------------------------------
+function alpha_munge(str)
+    return string.gsub(string.lower(str), "([^a-z0-9])", function(c)
+        return "_"
+    end)
+end
 
 -----------------------------------------------------------------------------
 --
