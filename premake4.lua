@@ -48,7 +48,7 @@ newplatform {
 newgcctoolchain {
     name = "raspi",
     description = "raspi",
-    prefix = "arm-linux-gnueabihf-",
+    prefix = "arm-bcm2708-linux-gnueabi-",
     cppflags = "",
 }
 
@@ -155,12 +155,6 @@ elseif RASPI then
 	local raspisdk=path.getabsolute("../sdks/raspi")
 	includedirs { raspisdk.."/firmware/opt/vc/include" }
 	libdirs { raspisdk.."/firmware/opt/vc/lib" }
---	libdirs { raspisdk.."/tools/arm-bcm2708/x86-linux64-cross-arm-linux-hardfp/lib/gcc/arm-bcm2708hardfp-linux-gnueabi/4.5.1" }
---	libdirs { raspisdk.."/tools/arm-bcm2708/x86-linux64-cross-arm-linux-hardfp/lib" }
---	libdirs { raspisdk.."/tools/arm-bcm2708/x86-linux64-cross-arm-linux-hardfp/arm-bcm2708hardfp-linux-gnueabi/sys-root/lib" }
---	libdirs { raspisdk.."/tools/arm-bcm2708/x86-linux64-cross-arm-linux-hardfp/arm-bcm2708hardfp-linux-gnueabi/sys-root/usr/lib" }
-	
-	CRTLIB=raspisdk.."/tools/arm-bcm2708/x86-linux64-cross-arm-linux-hardfp/arm-bcm2708hardfp-linux-gnueabi/sys-root"
 
 	platforms { "raspi" } --hax
 
@@ -168,10 +162,7 @@ elseif RASPI then
 
 	defines("LUA_USE_POSIX")
 	
-	buildoptions { "--sysroot="..CRTLIB }
-	linkoptions { "--sysroot="..CRTLIB }
---	buildoptions{ "-march=armv6 -mfpu=vfp -mfloat-abi=hard -marm" }
-	buildoptions{"-march=armv6zk -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s" }
+--	buildoptions{"-march=armv6zk -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s" }
 
 
 
@@ -407,7 +398,7 @@ all_includes=all_includes or {
 	{"lua_win",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
 	{"lua_nacl",		nil			or		nil		or		NACL	or		nil			or		nil			},
 	{"lua_android",		nil			or		nil		or		nil		or		ANDROID		or		nil			},
---	{"lua_raspi",		nil			or		nil		or		nil		or		nil			or		RASPI		},
+	{"lua_raspi",		nil			or		nil		or		nil		or		nil			or		RASPI		},
 	{AND_LIB_DIR,		nil			or		nil		or		nil		or		ANDROID		or		nil			},
 	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
