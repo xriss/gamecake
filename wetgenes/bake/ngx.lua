@@ -109,7 +109,7 @@ local ngx_config=[[
 #Since we can leave values lying around for future use.
 #I figure we can just use lanes to offload big cpu tasks onto other threads...
 
-worker_processes  1;
+worker_processes  16;
 
 
 
