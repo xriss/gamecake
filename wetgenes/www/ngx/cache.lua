@@ -29,12 +29,24 @@ local function apie(...)
 	return ...
 end
 
+local function getvhost(srv)
+	local vhost="data"
+	if ngx and ngx.ctx and ngx.ctx.vhost then
+		vhost=ngx.ctx.vhost
+	end
+	return vhost
+end
+local function gethax(srv)
+	local vhost=getvhost(srv)
+	if not hax[vhost] then hax[vhost]={} end
+	return hax[vhost]
+end
 
 function clear(srv)
 --	log("cache.clear:")
 	apis()
 
-	hax={}
+	hax[getvhost(srv)]={}
 
 	apie()
 end
@@ -44,6 +56,8 @@ function del(srv,id)
 --	log("cache.del:")
 	apis()
 
+	local hax=gethax(srv)
+	
 	hax[id]=nil
 
 	apie()
@@ -53,6 +67,8 @@ function put(srv,id,tab,ttl,opts)
 --	log("cache.put:",id)
 	apis()
 	
+	local hax=gethax(srv)
+
 	local t={tab=tab,ttl=os.time()+ttl}
 
 	if opts=="ADD_ONLY_IF_NOT_PRESENT" then
@@ -74,6 +90,8 @@ function get(srv,id)
 	apis()
 	count=count+1
 
+	local hax=gethax(srv)
+	
 	r=hax[id]
 	
 	if r and r.ttl<os.time() then -- stale data must die
@@ -90,6 +108,8 @@ function inc(srv,id,num,start)
 --	log("cache.inc:",id)
 	apis()
 
+	local hax=gethax(srv)
+	
 	local r=(hax[id] or start)+num
 	hax[id]=r
 	

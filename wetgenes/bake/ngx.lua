@@ -211,7 +211,7 @@ lua_package_cpath ';;';
       error_log   logs/error.log debug;
       listen      127.0.0.1:8888;
       root        html;
-      server_name host.local;
+      server_name $host;
 
 #do the fetching here...
 	location ~ /@fetch/(.*)$ {

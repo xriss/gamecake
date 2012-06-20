@@ -61,7 +61,7 @@ function new()
 
 
 	local scheme=ngx.var.scheme			-- http or https
-	local domain=ngx.var.server_name
+	local domain=ngx.var.host
 	local port=ngx.var.server_port
 	local uri=ngx.var.uri				-- begins with /
 	

@@ -4,6 +4,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local log=require("wetgenes.www.ngx.log").log
 local debug=require("debug")
 
+local opts=require("opts")
 
 local ngx=require("ngx")
 
@@ -25,6 +26,22 @@ function serv2()
 	-- shove this basic functions into the global name space
 	-- they will work with the opts to serv this app as needed
 
-	basic.serv(require("wetgenes.www.ngx.srv").new())
+	local srv=require("wetgenes.www.ngx.srv").new()
+	ngx.ctx=srv -- this is out ctx
+	
+	if opts.vhosts_map then
+		srv.vhost=opts.vhosts_map[1][2]
+		for i,v in ipairs(opts.vhosts_map) do
+			if ngx.var.host:find(v[1]) then
+				srv.vhost=v[2]
+				break
+			end
+		end
+	end
+	
+	
+if srv.vhost then log("VHOST = "..srv.vhost) end
+	
+	basic.serv(srv)
 
 end

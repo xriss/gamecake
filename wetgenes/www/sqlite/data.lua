@@ -10,11 +10,15 @@ local wsql=require("wetgenes.www.sqlite")
 
 local json=require("wetgenes.json")
 
+local ngx=ngx -- only on ngx?
+
 local fixvalue=wsql.fixvalue
 
 module(...)
 local wdata=require(...) -- this is us
 package.loaded["wetgenes.www.any.data"]=wdata
+
+local opts=require("opts")
 
 local cache=require("wetgenes.www.any.cache")
 local wdatadef=require("wetgenes.www.any.datadef")
@@ -51,7 +55,11 @@ local postfix=".sqlite"
 
 --	db=wsql.open(wsql.dbs,prefix,fixkind(kind),postfix)
 
-	db=wsql.open(wsql.dbs,prefix,"data",postfix)
+	local vhost=vhost or "data"
+	if ngx and ngx.ctx and ngx.ctx.vhost then
+		vhost=ngx.ctx.vhost
+	end
+	db=wsql.open(wsql.dbs,prefix,vhost,postfix)
 	return db
 end
 
@@ -326,6 +334,18 @@ end
 
 
 function setup_db(env,srv)
+	if opts and opts.vhosts then
+		for n,b in pairs(opts.vhosts) do
+			ngx.ctx.vhost=n
+			log("data.setup_vhost:",ngx.ctx.vhost)
+			setup_dbv(env,srv)
+		end
+	else
+		setup_dbv(env,srv)
+	end
+end
+
+function setup_dbv(env,srv)
 
 -- make sure database exists and is setup
 
