@@ -14,8 +14,60 @@ local core=require("wetgenes.raspi.core")
 
 local wstr=require("wetgenes.string")
 
+local base={}
+local meta={}
+meta.__index=base
 
-raspi.time=raspi.time
+setmetatable(raspi,meta)
 
+
+function raspi.screen()
+	it={}
+	it.width,it.height= core.screen()
+	return it
+end
+
+function raspi.create(opts)
+
+	local w={}
+	setmetatable(w,meta)
+	
+	w[0]=assert( core.create(opts) )
+	
+	core.info(w[0],w)
+	return w
+end
+
+function base.destroy(w)
+	core.destroy(w[0],w)
+end
+
+function base.info(w)
+	core.info(w[0],w)
+end
+
+function base.context(w,opts)
+	core.context(w[0],opts)
+end
+
+function base.swap(w)
+	core.swap(w[0])
+end
+
+function base.time()
+	return core.time()
+end
+
+--
+-- export all core functions not wrapped above
+--
+for n,v in pairs(core) do -- check the core
+	if type(v)=="function" then -- only functions
+		if not raspi[n] then -- only if not prewrapped
+			raspi[n]=v
+		end
+	end
+
+end
 
 return raspi
