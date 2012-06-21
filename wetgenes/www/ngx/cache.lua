@@ -5,6 +5,8 @@ local log=require("wetgenes.www.any.log").log
 
 local wstr=require("wetgenes.string")
 
+local ngx=ngx
+
 module(...)
 local _M=require(...)
 package.loaded["wetgenes.www.any.cache"]=_M

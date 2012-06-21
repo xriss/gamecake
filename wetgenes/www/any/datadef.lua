@@ -58,6 +58,7 @@ function def_put(env,srv,ent,tt)
 
 	wdata.build_props(ent)
 	local ks=t.put(ent)
+	ent.key.notsaved=nil
 	
 	if ks then
 		ent.key=wdata.keyinfo( ks ) -- update key with new id

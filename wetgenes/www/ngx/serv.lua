@@ -21,10 +21,7 @@ end
 
 function serv2()
 
-	local basic=require("base.basic")
 
-	-- shove this basic functions into the global name space
-	-- they will work with the opts to serv this app as needed
 
 	local srv=require("wetgenes.www.ngx.srv").new()
 	ngx.ctx=srv -- this is out ctx
@@ -40,8 +37,11 @@ function serv2()
 	end
 	
 	
-if srv.vhost then log("VHOST = "..srv.vhost) end
+	if srv.vhost then log("VHOST = "..srv.vhost) end
 	
+	-- shove this basic functions into the global name space
+	-- they will work with the opts to serv this app as needed
+	local basic=require("base.basic")
 	basic.serv(srv)
 
 end

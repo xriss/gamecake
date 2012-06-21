@@ -146,6 +146,9 @@ log(s)
 	
 	
 if ent.props then
+	if ent.key then
+		ent.key.notsaved=nil
+	end
 --	log(wstr.serialize(ent.props))
 end
 
