@@ -133,7 +133,7 @@ static int lua_gles_ClearColor (lua_State *l)
 
 static int lua_gles_ClearDepth (lua_State *l)
 {
-	glClearDepthf(	(float)luaL_checknumber(l,1)	);
+//TODO	glClearDepthf(	(float)luaL_checknumber(l,1)	);
 	return 0;
 }
 
@@ -912,7 +912,7 @@ static int lua_gles_GetBufferParameter (lua_State *l)
 
 static int lua_gles_GetShaderPrecisionFormat (lua_State *l)
 {
-	glGetShaderPrecisionFormat(0,0,0,0);
+//TODO	glGetShaderPrecisionFormat(0,0,0,0);
 	return 0;
 }
 
@@ -946,7 +946,7 @@ static int lua_gles_GetVertexAttribPointer (lua_State *l)
 
 static int lua_gles_ReleaseShaderCompiler (lua_State *l)
 {
-	glReleaseShaderCompiler();
+//TODO	glReleaseShaderCompiler();
 	return 0;
 }
 
