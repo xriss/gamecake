@@ -109,7 +109,7 @@ void InitializeCriticalSection(CRITICAL_SECTION *cs)
     ret = pthread_mutexattr_init(&attrib);
     assert(ret == 0);
 
-    ret = pthread_mutexattr_settype(&attrib, PTHREAD_MUTEX_RECURSIVE);
+    ret = pthread_mutexattr_settype(&attrib, PTHREAD_MUTEX_RECURSIVE_NP);
 #ifdef HAVE_PTHREAD_NP_H
     if(ret != 0)
         ret = pthread_mutexattr_setkind_np(&attrib, PTHREAD_MUTEX_RECURSIVE);
