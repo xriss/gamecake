@@ -2,7 +2,6 @@ local pack=require("wetgenes.pack")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")
 local gl=require("gles").gles1
-local screen=require("wetgenes.win").screen()
 local win=require("wetgenes.win").create({})
 
 
@@ -68,7 +67,7 @@ while true do
 	while frame_time>win:time() do win:sleep(0.001) end -- simple frame limit
 	frame_time=frame_time+frame_rate -- step frame forward
 
-	repeat -- handle msg queue (so we keep the window size current)
+	repeat -- handle msg queue (so we know the window size)
 		local m={win:msg()}
 	until not m[1]
 	
