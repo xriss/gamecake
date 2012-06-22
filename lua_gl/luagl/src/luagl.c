@@ -959,7 +959,7 @@ static int luagl_clear_depth(lua_State *L)
 #ifdef WIN32
   glClearDepth((GLclampf)luaL_checknumber(L, 1));
 #else
-  glClearDepthf((GLclampf)luaL_checknumber(L, 1));
+//TODO  glClearDepthf((GLclampf)luaL_checknumber(L, 1));
 #endif
   return 0;
 }
