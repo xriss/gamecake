@@ -3,7 +3,13 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local win={}
 
-local core=require("wetgenes.win.core")
+local core -- we may use different cores depending on the system we compiled for so check for the right one
+
+core=require("wetgenes.win.core")
+--core=require("wetgenes.nix.core")
+--core=require("wetgenes.nacl.core")
+--core=require("wetgenes.raspi.core")
+
 
 local base={}
 local meta={}
