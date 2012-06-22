@@ -321,7 +321,6 @@ function m4.rotate(it,degrees,v3a,r)
 	return m4_product_m4(m4a,it,r)
 end
 
-
 class("v2",array)
 function v2.new(...) return setmetatable({0,0},v2):set(...) end
 function v2.lenlen(it)
@@ -454,5 +453,59 @@ function m4_product_m4(m4a,m4b,r)
 	local r15= (m4a[12+1]*m4b[   3]) + (m4a[12+2]*m4b[ 4+3]) + (m4a[12+3]*m4b[ 8+3]) + (m4a[12+4]*m4b[12+3])
 	local r16= (m4a[12+1]*m4b[   4]) + (m4a[12+2]*m4b[ 4+4]) + (m4a[12+3]*m4b[ 8+4]) + (m4a[12+4]*m4b[12+4])
 	return r:set(r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16)
+end
+
+
+--
+-- build a simple field of view GL projection matrix designed to work in 2d or 3d and keep the numbers
+-- easy for 2d positioning.
+--
+-- setting aspect to 640,480 and fov of 1 would mean at a z depth of 240 (which is y/2) then your view area would be
+-- -320 to +320 in the x and -240 to +240 in the y.
+--
+-- fov is a tan like value (a view size inverse scalar) so 1 would be 90deg, 0.5 would be 45deg and so on
+--
+-- the depth parameter is only used to limit the range of the zbuffer so it covers 0 to depth
+--
+-- The following would be a reasonable default for an assumed 640x480 display.
+--
+-- m4_project23d(w,h,640,480,0.5,1024)
+--
+-- then at z=480 we would have one to one pixel scale...
+-- the total view area volume from there would be -320 +320 , -240 +240 , -480 +(1024-480)
+--
+-- win_width and win_height must be the current width and height of the display in pixels
+-- we use this to wout out where to place our view such that it is always visible and keeps its aspect.
+--
+m4_project23d = function(win_width,win_height,width,height,fov,depth)
+
+	local aspect=height/width
+
+	local m=m4.new()
+	
+	local f=depth
+	local n=1
+
+	local win_aspect=(win_height/win_width)
+		
+	if (win_aspect > (aspect) ) 	then 	-- fit width to screen
+	
+		m[1] = ((aspect)*1)/fov
+		m[6] = -((aspect)/win_aspect)/fov
+		
+	else									-- fit height to screen
+	
+		m[1] = win_aspect/fov
+		m[6] = -1/fov
+		
+	end
+	
+	
+	m[11] = -(f+n)/(f-n)
+	m[12] = -1
+
+	m[15] = -2*f*n/(f-n)
+	
+	return m
 end
 

@@ -1393,11 +1393,27 @@ function gles.GetExtensions()
 	end
 end
 
-if core.programmable_pipeline_available then -- build our own fixed pipeline functions...
+gles.gles=gles -- so we can always use gles1.gles or gles2.gles
+gles.gles1=gles
+gles.gles2=gles
 
-print("USE FIXED PIPELINE PATCH")
+if not core.fixed_pipeline_available then
 
-	require("glesfix").apply_compat(gles)
+	
+end
+
+if not core.programmable_pipeline_available then
+
+	gles.gles2=false -- sorry but this is not gles2 compatable in any way
+
+else
+
+--force test glesfix
+
+print("FORCING GLESFIX")
+	gles.gles1={}
+	setmetatable(gles.gles1,{__index=gles}) -- so we can keep the base pure
+	require("glesfix").apply_compat(gles.gles1)
 
 end
 
