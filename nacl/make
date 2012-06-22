@@ -1,0 +1,30 @@
+#rm -Rf build-gmake-nacl
+
+cd `dirname $0`
+
+cd ..
+
+naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_18`
+export PATH=$naclsdk/toolchain/linux_x86_newlib/bin:$PATH
+
+build/premake4 gmake nacl
+
+cd build-gmake-nacl
+
+if [ "$1" = "release" ] ; then
+
+	make config=release_nacl
+
+elif [ "$1" == "clean" ] ; then
+
+        cd ..
+        rm -rf build-gmake-nacl
+
+else
+
+	make $*
+
+fi
+
+cd ..
+
