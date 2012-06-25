@@ -2,6 +2,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local lfs=require("lfs")
+local wstr=require("wetgenes.string")
 
 module(...)
 
@@ -10,9 +11,9 @@ function build(tab)
 	local bake=require("wetgenes.bake")
 	
 	-- where we are building from
-	bake.cd_base	=	bake.cd_base or bake.get_cd()
+	bake.cd_base	=	tab.cd_base or bake.get_cd()
 	-- where we are building to
-	bake.cd_out		=	bake.cd_out or '.ngx'
+	bake.cd_out		=	tab.cd_out or '.ngx'
 	-- where we are building from
 	bake.cd_root	=	bake.cd_base .. "/../.."
 
@@ -103,15 +104,17 @@ function build(tab)
 		bake.copyfile(opts.basedir.."/"..v,fname)
 	end
 
-local ngx_config=[[
+tab.ngx_listen	=tab.ngx_listen or "127.0.0.1:8888"
+tab.ngx_user	=tab.ngx_user	or "kriss"
+tab.ngx_debug	=tab.ngx_debug	or "debug"
 
-#This forces us to have only one lua state, which can make some nginx speed hacks possible
-#Since we can leave values lying around for future use.
-#I figure we can just use lanes to offload big cpu tasks onto other threads...
+local ngx_config=wstr.replace([[
 
-worker_processes  16;
+# this gets slightly complicateed when higher than 1
+# so goign to keep it at 1 for now...
+worker_processes  1;
 
-
+user {ngx_user};
 
 events {
     worker_connections  512;
@@ -208,8 +211,8 @@ lua_package_cpath ';;';
   server {
 
       access_log  logs/access.log;
-      error_log   logs/error.log debug;
-      listen      127.0.0.1:8888;
+      error_log   logs/error.log {ngx_debug};
+      listen      {ngx_listen};
       root        html;
       server_name $host;
 
@@ -241,7 +244,8 @@ lua_package_cpath ';;';
 	
   }
 }
-]]
+]],tab)
+
 	local fname=bake.cd_out.."/conf/nginx.conf"
 	bake.writefile(fname,ngx_config)
 

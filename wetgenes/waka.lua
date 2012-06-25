@@ -452,7 +452,6 @@ function refine_chunks(srv,chunks,opts)
 				end
 				
 			elseif e.import=="note" then
-			
 				e.hook   = e.hook   or opts.hook
 				e.limit=e.limit or 5
 				e.sort=e.sort or "pubdate"

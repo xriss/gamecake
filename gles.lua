@@ -1410,7 +1410,7 @@ else
 
 --force test glesfix
 
-print("FORCING GLESFIX")
+print("FORCING GLES1FIX")
 	gles.gles1={}
 	setmetatable(gles.gles1,{__index=gles}) -- so we can keep the base pure
 	require("glesfix").apply_compat(gles.gles1)

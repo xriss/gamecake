@@ -4,7 +4,6 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local log=require("wetgenes.www.ngx.log").log
 local debug=require("debug")
 
-local opts=require("opts")
 
 local ngx=require("ngx")
 
@@ -21,6 +20,7 @@ end
 
 function serv2()
 
+	local opts=require("opts")
 
 
 	local srv=require("wetgenes.www.ngx.srv").new()
