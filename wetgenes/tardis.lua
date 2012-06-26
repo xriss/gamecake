@@ -297,6 +297,7 @@ end
 function m4.rotate(it,degrees,v3a,r)
 
 	local c=math.cos(math.pi*degrees/180)
+	local cc=1-c
 	local s=math.sin(math.pi*degrees/180)
 	
 	local x=v3a[1]
@@ -313,10 +314,10 @@ function m4.rotate(it,degrees,v3a,r)
 	end
 
 	local m4a=m4.new(
-		x*2*(1-c)+c		,	x*y*(1-c)-z*s	,	x*z*(1-c)+y*s	, 	0	,
-		x*y*(1-c)+z*s	,	y*2*(1-c)+c		,	y*z*(1-c)-x*s	,	0	,
-        x*z*(1-c)-y*s	,	y*z*(1-c)+x*s	,	z*2*(1-c)+c		,	0	,
-        0				,	0				,	0				,	1	)
+		x*x*cc+c	,	x*y*cc-z*s	,	x*z*cc+y*s	, 	0	,
+		x*y*cc+z*s	,	y*y*cc+c	,	y*z*cc-x*s	,	0	,
+        x*z*cc-y*s	,	y*z*cc+x*s	,	z*z*cc+c	,	0	,
+        0			,	0			,	0			,	1	)
 
 	return m4_product_m4(m4a,it,r)
 end
