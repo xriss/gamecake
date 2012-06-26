@@ -9,23 +9,23 @@ local tardis=require("wetgenes.tardis")
 local glescode={}
 
 
-
 -- please pass in the gles base you wish to use, eg gles.gles2
 -- returns a state table with compiler functions and places to
 -- keep your source.
 function glescode.create(gl)
 
 	local code={}
+	setmetatable(code,{__index=gl}) -- so we can reference extra gl bits easily
 
 -- matrix functions
 
-	function reset_stacks()
+	function code.reset_stacks()
 		code.stacks={}		
 		code.stack_mode=nil
 		code.stack=nil
 		code.stack_matrix=nil
 	end
-	reset_stacks() -- setup
+	code.reset_stacks() -- setup
 
 	function code.matrix(mode)
 		local v=assert(code.stacks[mode])
@@ -132,7 +132,7 @@ print("Compiling shader "..sname)
 	function code.program(pname)
 		local p
 		
-		if type(sname)=="string" then
+		if type(pname)=="string" then
 			p=assert(code.programs[pname])
 		else
 			p=pname

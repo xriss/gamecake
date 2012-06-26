@@ -86,6 +86,29 @@ function find_bin()
 end
 
 --
+-- find our bin dir and set search for all lua files under there, makes debuging a bit easier
+-- than using the builtin strings. Also lets us pick up any dlls in there.
+--
+function default_paths()
+
+-- we are looking for a dir/lua/name.lua and dir will be our base dir so look in various places
+
+	local osflavour="win"
+	local os_shell=os.getenv("SHELL")
+	if os_shell and string.sub(os_shell,1,5)== "/bin/" then -- if your shell is not here then we assume windows...
+		osflavour="nix"
+	end
+
+	local dll="dll"
+	if osflavour=="nix" then dll="so" end
+
+	local bin_dir=find_bin()
+	
+	setpaths(dll,{bin_dir,bin_dir})
+	
+end
+
+--
 -- this needs to get more searchy so it can find where the lua app is without any explicit values
 --
 function find(name)

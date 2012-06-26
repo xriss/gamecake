@@ -1398,8 +1398,11 @@ gles.gles1=gles
 gles.gles2=gles
 
 if not core.fixed_pipeline_available then
-
-	
+	if core.programmable_pipeline_available then
+		gles.gles1=require("glesfix").create(gles)
+	else
+		gles.gles1=false
+	end
 end
 
 if not core.programmable_pipeline_available then
@@ -1408,12 +1411,9 @@ if not core.programmable_pipeline_available then
 
 else
 
---force test glesfix
-
-print("FORCING GLES1FIX")
-	gles.gles1={}
-	setmetatable(gles.gles1,{__index=gles}) -- so we can keep the base pure
-	require("glesfix").apply_compat(gles.gles1)
+--force a test of our glesfix
+--print("FORCING TEST OF GLES1FIX")
+--	gles.gles1=require("glesfix").create(gles)
 
 end
 
