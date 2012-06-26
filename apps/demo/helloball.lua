@@ -1,8 +1,58 @@
+
+-- setup some default search paths
+require("apps").default_paths()
+
+-- grab some libs
 local pack=require("wetgenes.pack")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")
-local gl=require("gles").gles1
 local win=require("wetgenes.win").create({})
+
+-- wrap some extra shader compiler functions around a basic gles2 library
+local gl=require("glescode").create( assert(require("gles").gles2) )
+
+
+local shaderprefix="#version 100\nprecision mediump float;\n"
+
+local prog_color=
+{
+	name="prog_color",
+	vshaders=
+	{{
+		name="vtx_color",
+		source=shaderprefix..[[
+
+uniform mat4 modelview;
+uniform mat4 projection;
+
+attribute vec3 vertex;
+uniform vec4 color;
+
+varying vec4  v_color;
+ 
+void main()
+{
+    gl_Position = projection * modelview * vec4(vertex, 1.0);
+	v_color=color;
+}
+
+]]
+	}},
+	fshaders=
+	{{
+		name="frg_color",
+		source=shaderprefix..[[
+
+varying vec4  v_color;
+
+void main(void)
+{
+	gl_FragColor=v_color ;
+}
+
+	]]
+	}},
+}
 
 
 
@@ -11,19 +61,21 @@ function ball_create()
 
 	local t={} -- tempory table to build into
 	function tp(...) for i,v in ipairs{...} do t[#t+1]=v end end -- and data push function
+	for check=0,1 do
 	for y=0,7 do
 		for x=0,15 do
-			if ((x+y)%2)==0 then
-				tp(	(x+0)/16	,	(y+0)/8		,	0	,	0	,	0	)
-				tp(	(x+1)/16	,	(y+0)/8		,	0	,	0	,	0	)
-				tp(	(x+0)/16	,	(y+1)/8		,	0	,	0	,	0	)
+			if ((x+y)%2)==check then
+				tp(	(x+0)/16	,	(y+0)/8		,	0	)
+				tp(	(x+1)/16	,	(y+0)/8		,	0	)
+				tp(	(x+0)/16	,	(y+1)/8		,	0	)
 				
-				tp(	(x+1)/16	,	(y+0)/8		,	0	,	0	,	0	)
-				tp(	(x+0)/16	,	(y+1)/8		,	0	,	0	,	0	)
-				tp(	(x+1)/16	,	(y+1)/8		,	0	,	0	,	0	)
+				tp(	(x+1)/16	,	(y+0)/8		,	0	)
+				tp(	(x+0)/16	,	(y+1)/8		,	0	)
+				tp(	(x+1)/16	,	(y+1)/8		,	0	)
 			end
 			
 		end
+	end
 	end
 
 	ball.vdat=pack.alloc( #t*4 )
@@ -35,17 +87,32 @@ function ball_create()
 	gl.BufferData(gl.ARRAY_BUFFER,#t*4,ball.vdat,gl.STATIC_DRAW)
 
 --	print(wstr.dump(t))
-	function ball.draw(siz)
+	function ball.draw(siz,color,part)
+	
+		local p=gl.program(prog_color)
+		gl.UseProgram( p[0] )
+
 		gl.PushMatrix()
 		gl.Scale(siz,siz,siz)
 
 		gl.BindBuffer(gl.ARRAY_BUFFER,ball.vbuf)
 
-		gl.VertexPointer(   3, gl.FLOAT, 5*4, 0*4 )
-		gl.TexCoordPointer( 2, gl.FLOAT, 5*4, 3*4 )
+		gl.VertexAttribPointer(p:attrib("vertex"), 3 , gl.FLOAT , gl.FALSE , 3*4 , 0*4)
+		gl.EnableVertexAttribArray(p:attrib("vertex"))
 
-		gl.DrawArrays(gl.TRIANGLES,0,#t/5)
+		gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+		gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
 
+		gl.Uniform4f(p:uniform("color"), color[1],color[2],color[3],color[4] )
+
+		if part==0 then
+			gl.DrawArrays(gl.TRIANGLES,0,(#t/3)/2)
+		elseif part==1 then
+			gl.DrawArrays(gl.TRIANGLES,(#t/3)/2,(#t/3)/2)
+		elseif part==2 then
+			gl.DrawArrays(gl.TRIANGLES,0,(#t/3))
+		end
+		
 		gl.PopMatrix()
 	end
 
@@ -92,21 +159,24 @@ while true do
 --	gl.Translate(-1920/2,-1080/2,-1080*1)
 	gl.Translate(0,0,-1080)
 	
+--[[
 	gl.Disable(gl.LIGHTING)
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Disable(gl.CULL_FACE)
 	gl.Disable(gl.TEXTURE_2D)    
     
-	gl.Color(1,1,1,1)	
+	gl.Color(1,1,1,1)
    	gl.EnableClientState(gl.VERTEX_ARRAY)
    	gl.DisableClientState(gl.TEXTURE_COORD_ARRAY)
    	gl.DisableClientState(gl.COLOR_ARRAY)
    	gl.DisableClientState(gl.NORMAL_ARRAY)
+]]
 
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	gl.Enable(gl.BLEND)
 
-	ball.draw(256)
+	ball.draw(256,{1,1,1,1},0)
+	ball.draw(256,{0,0,0,1},1)
 
 --print(gl.GetError())
 
