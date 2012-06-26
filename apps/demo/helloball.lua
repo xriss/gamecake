@@ -6,14 +6,17 @@ require("apps").default_paths()
 local pack=require("wetgenes.pack")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")
+
+-- a window/screen handler
 local win=require("wetgenes.win").create({})
 
 -- wrap some extra shader compiler functions around a basic gles2 library
 local gl=require("glescode").create( assert(require("gles").gles2) )
 
-
+-- gles needs this header
 local shaderprefix="#version 100\nprecision mediump float;\n"
 
+-- source code for a simple a shader, the name= are just for debuging
 local prog_color=
 {
 	name="prog_color",
@@ -55,27 +58,39 @@ void main(void)
 }
 
 
+-- an amiga ball
 
 function ball_create()
 	local ball={}
 
-	local t={} -- tempory table to build into
-	function tp(...) for i,v in ipairs{...} do t[#t+1]=v end end -- and data push function
-	for check=0,1 do
-	for y=0,7 do
-		for x=0,15 do
-			if ((x+y)%2)==check then
-				tp(	(x+0)/16	,	(y+0)/8		,	0	)
-				tp(	(x+1)/16	,	(y+0)/8		,	0	)
-				tp(	(x+0)/16	,	(y+1)/8		,	0	)
-				
-				tp(	(x+1)/16	,	(y+0)/8		,	0	)
-				tp(	(x+0)/16	,	(y+1)/8		,	0	)
-				tp(	(x+1)/16	,	(y+1)/8		,	0	)
-			end
-			
+	local p={} -- tempory table to build points into
+	function pp(...) for i,v in ipairs{...} do p[#p+1]=v end end -- and data push function
+	function xy(x,y) return p[((x+(y*17))*3)+1],p[((x+(y*17))*3)+2],p[((x+(y*17))*3)+3] end
+	for y=0,8 do
+		for x=0,16 do
+			local s=math.cos(math.pi*(y-4)/8)
+			pp(	math.sin(2*math.pi*x/16)*s	,	math.sin(math.pi*(y-4)/8)	,	math.cos(2*math.pi*x/16)*s	)
 		end
 	end
+	
+
+	local t={} -- tempory table to build tris into
+	function tp(...) for i,v in ipairs{...} do t[#t+1]=v end end -- and data push function
+	for check=0,1 do -- make chequered pattern order
+		for y=0,7 do
+			for x=0,15 do
+				if ((x+y)%2)==check then
+					tp(	xy(x+0,y+0) )
+					tp(	xy(x+1,y+0) )
+					tp(	xy(x+0,y+1) )
+					
+					tp(	xy(x+1,y+0) )
+					tp(	xy(x+1,y+1) )
+					tp(	xy(x+0,y+1) )
+				end
+				
+			end
+		end
 	end
 
 	ball.vdat=pack.alloc( #t*4 )
@@ -125,11 +140,19 @@ win:context({})
 local frame_rate=1/60
 local frame_time=0
 
-
-local i=0
 local ball=ball_create()
+
+-- lets bounce
+local siz=256
+local pos={0,0,0}
+local vec={4,4,0}
+local rot={0,0,0}
+local vrt={1,1,1/2}
+
 while true do
 	
+-- frame limit
+
 	if frame_time<win:time() then frame_time=win:time() end -- prevent race condition
 	while frame_time>win:time() do win:sleep(0.001) end -- simple frame limit
 	frame_time=frame_time+frame_rate -- step frame forward
@@ -137,46 +160,54 @@ while true do
 	repeat -- handle msg queue (so we know the window size)
 		local m={win:msg()}
 	until not m[1]
-	
-	i=(i+1)%256
 
+-- update bouncyness
+
+	rot[1]=rot[1]+vrt[1]
+	rot[2]=rot[2]+vrt[2]
+	rot[3]=rot[3]+vrt[3]
+	
+	pos[1]=pos[1]+vec[1]
+	pos[2]=pos[2]+vec[2]
+	
+	vec[2]=vec[2] + (1/8)
+	
+	if pos[1] > -siz+1920/2 then pos[1]=-siz+1920/2 vec[1]=vec[1]*-1 vrt[1]=vrt[1]*-1 end
+	if pos[1] <  siz-1920/2 then pos[1]= siz-1920/2 vec[1]=vec[1]*-1 vrt[1]=vrt[1]*-1 end
+	
+	if pos[2] > -siz+1080/2 then pos[2]=-siz+1080/2 vec[2]=vec[2]*-1 vrt[2]=vrt[2]*-1 end
+	if pos[2] <  siz-1080/2 then pos[2]= siz-1080/2 vec[2]=0         vrt[2]=vrt[2]*-1 end
+
+-- prepare to draw a frame
+
+	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+	gl.Enable(gl.BLEND)
+	gl.Enable(gl.DEPTH_TEST)
 
 	win:info()
---	print(win.width,win.height)
 	gl.Viewport(0,0,win.width,win.height)
 
-	gl.ClearColor(i/255,i/255,i/255,i/255)
---	gl.ClearColor(0,0,0,0)
+	gl.ClearColor(0,0,1/4,1/4)
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 	gl.MatrixMode(gl.PROJECTION)
-	gl.LoadMatrix( tardis.m4_project23d(win.width,win.height,1920,1080,0.25,2160) )
+	gl.LoadMatrix( tardis.m4_project23d(win.width,win.height,1920,1080,0.25,1080*4) )
 
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
 
 	gl.PushMatrix()
---	gl.Translate(-1920/2,-1080/2,-1080*1)
-	gl.Translate(0,0,-1080)
+
+-- draw the ball
+
+	gl.Translate(0,0,-1080*2)
+	gl.Translate(pos[1],pos[2],pos[3])
 	
---[[
-	gl.Disable(gl.LIGHTING)
-	gl.Disable(gl.DEPTH_TEST)
-	gl.Disable(gl.CULL_FACE)
-	gl.Disable(gl.TEXTURE_2D)    
-    
-	gl.Color(1,1,1,1)
-   	gl.EnableClientState(gl.VERTEX_ARRAY)
-   	gl.DisableClientState(gl.TEXTURE_COORD_ARRAY)
-   	gl.DisableClientState(gl.COLOR_ARRAY)
-   	gl.DisableClientState(gl.NORMAL_ARRAY)
-]]
-
-	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-	gl.Enable(gl.BLEND)
-
-	ball.draw(256,{1,1,1,1},0)
-	ball.draw(256,{0,0,0,1},1)
+	gl.Rotate(rot[2],1,0,0)
+	gl.Rotate(rot[1],0,0,1)
+	
+	ball.draw(siz,{1,1,1,1},0) -- draw white parts
+	ball.draw(siz,{1,0,0,1},1) -- draw red parts
 
 --print(gl.GetError())
 
