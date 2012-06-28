@@ -3,6 +3,7 @@ if [ "$1" = "clean" ] ; then
 fi
 
 cd `dirname $0`
+cd ..
 
 build/premake4 gmake mingw
 

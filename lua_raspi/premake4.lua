@@ -8,7 +8,7 @@ includedirs { "code" }
 
 links { "lib_lua" }
 
-KIND{lua="wetgenes.raspi.core"}
+KIND{lua="wetgenes.win.raspi"}
 
 
 
