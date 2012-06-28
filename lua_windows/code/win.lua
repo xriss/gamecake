@@ -1,33 +1,40 @@
---
--- Copyright (C) 2012 Kriss Blank < Kriss@XIXs.com >
--- This file is distributed under the terms of the MIT license.
--- http://en.wikipedia.org/wiki/MIT_License
--- Please ping me if you use it for anything cool...
---
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local win={}
 
-local raspi={}
+local core -- we may use different cores depending on the system we compiled for so check for the right one
 
-local core=require("wetgenes.raspi.core")
+core=require("wetgenes.win.core")
+--core=require("wetgenes.nix.core")
+--core=require("wetgenes.nacl.core")
+--core=require("wetgenes.raspi.core")
 
-local wstr=require("wetgenes.string")
 
 local base={}
 local meta={}
 meta.__index=base
 
-setmetatable(raspi,meta)
+setmetatable(win,meta)
 
 
-function raspi.screen()
+function win.screen()
 	it={}
 	it.width,it.height= core.screen()
 	return it
 end
 
-function raspi.create(opts)
+-- key names are given in raw OS flavour,
+-- this maps these raw names to more generic names
+win.generic_keymap={
+
+}
+
+function win.keymap(key)
+	return win.generic_keymap[key] or key
+end
+
+function win.create(opts)
 
 	local w={}
 	setmetatable(w,meta)
@@ -54,20 +61,30 @@ function base.swap(w)
 	core.swap(w[0])
 end
 
+function base.peek(w)
+	return core.peek(w[0])
+end
+
+function base.wait(w,t)
+	core.wait(w[0],t)
+end
+
+function base.msg(w)
+	return core.msg(w[0])
+end
+
+function base.sleep(...)
+	for i,v in ipairs({...}) do
+		if type(v)=="number" then
+			core.sleep(v)
+		end
+	end
+end
+win.sleep=base.sleep
+
 function base.time()
 	return core.time()
 end
+win.time=base.time
 
---
--- export all core functions not wrapped above
---
-for n,v in pairs(core) do -- check the core
-	if type(v)=="function" then -- only functions
-		if not raspi[n] then -- only if not prewrapped
-			raspi[n]=v
-		end
-	end
-
-end
-
-return raspi
+return win

@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 
-LUALIB_API	int luaopen_wetgenes_win_core (lua_State *l);
+LUALIB_API	int luaopen_wetgenes_win_linux (lua_State *l);
 
 
 #ifdef __cplusplus

@@ -139,11 +139,8 @@ int lua_raspi_create (lua_State *l)
 raspi_lua_wrap *wp;
 raspi_lua *p;
 
-int x=20;
-int y=20;
-
-int width=640;
-int height=480;
+int x=0;
+int y=0;
 
 const char *title="http://www.WetGenes.com/ - GameCake";
 
@@ -158,23 +155,31 @@ VC_RECT_T src_rect;
 
 EGLConfig config;
 EGLint num_config;
-static const EGLint attribute_list[] =
+EGLint attribute_list[] =
 {
-	EGL_RED_SIZE, 8,
-	EGL_GREEN_SIZE, 8,
-	EGL_BLUE_SIZE, 8,
-	EGL_ALPHA_SIZE, 8,
+	
+// hard hax, please not to be reordering
+	EGL_RED_SIZE, 1,	//	[1]	r
+	EGL_GREEN_SIZE, 1,	//	[3]	g
+	EGL_BLUE_SIZE, 1,	//	[5]	b
+	EGL_ALPHA_SIZE, 1,	//	[7]	a
+	EGL_DEPTH_SIZE, 1,	//	[9]	depth
+
 	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 	EGL_NONE
 };
-static const EGLint context_attributes[] =
+EGLint context_attributes[] =
 {
 	EGL_CONTEXT_CLIENT_VERSION, 2,
 	EGL_NONE
 };
  
-	lua_getfield(l,1,"width");	if( lua_isnumber(l,-1) ) { width=lua_tonumber(l,-1);	} lua_pop(l,1);
-	lua_getfield(l,1,"height");	if( lua_isnumber(l,-1) ) { height=lua_tonumber(l,-1);	} lua_pop(l,1);
+	lua_getfield(l,1,"r");		if( lua_isnumber(l,-1) ) { attribute_list[1]=(int)lua_tonumber(l,-1);	} lua_pop(l,1);
+	lua_getfield(l,1,"g");		if( lua_isnumber(l,-1) ) { attribute_list[3]=(int)lua_tonumber(l,-1);	} lua_pop(l,1);
+	lua_getfield(l,1,"b");		if( lua_isnumber(l,-1) ) { attribute_list[5]=(int)lua_tonumber(l,-1);	} lua_pop(l,1);
+	lua_getfield(l,1,"a");		if( lua_isnumber(l,-1) ) { attribute_list[7]=(int)lua_tonumber(l,-1);	} lua_pop(l,1);
+	lua_getfield(l,1,"depth");	if( lua_isnumber(l,-1) ) { attribute_list[9]=(int)lua_tonumber(l,-1);	} lua_pop(l,1);
+
 	lua_getfield(l,1,"x");		if( lua_isnumber(l,-1) ) { x=lua_tonumber(l,-1); 		} lua_pop(l,1);
 	lua_getfield(l,1,"y");		if( lua_isnumber(l,-1) ) { y=lua_tonumber(l,-1);		} lua_pop(l,1);
 
@@ -198,18 +203,21 @@ static const EGLint context_attributes[] =
 	success = graphics_get_display_size(0 /* LCD */, &p->screen_width, &p->screen_height);
 	assert( success >= 0 );
 
-	p->width=p->screen_width; // full width/height always
+	p->width=p->screen_width;	 // full width/height by default
 	p->height=p->screen_height;
 
-	dst_rect.x = 0;
-	dst_rect.y = 0;
-	dst_rect.width = p->screen_width;
-	dst_rect.height = p->screen_height;
+	lua_getfield(l,1,"width");	if( lua_isnumber(l,-1) ) { p->width=lua_tonumber(l,-1);	} lua_pop(l,1); // overide width/height
+	lua_getfield(l,1,"height");	if( lua_isnumber(l,-1) ) { p->height=lua_tonumber(l,-1);} lua_pop(l,1); // if given
+
+	dst_rect.x = x;
+	dst_rect.y = y;
+	dst_rect.width = p->width;
+	dst_rect.height = p->height;
 	  
 	src_rect.x = 0;
 	src_rect.y = 0;
-	src_rect.width = p->screen_width << 16;
-	src_rect.height = p->screen_height << 16;        
+	src_rect.width = p->width << 16;
+	src_rect.height = p->height << 16;        
 
 	dispman_display = vc_dispmanx_display_open( 0 /* LCD */);
 	dispman_update = vc_dispmanx_update_start( 0 );
@@ -219,8 +227,8 @@ static const EGLint context_attributes[] =
 	  &src_rect, DISPMANX_PROTECTION_NONE, 0 /*alpha*/, 0/*clamp*/, 0/*transform*/);
 	  
 	p->nativewindow.element = dispman_element;
-	p->nativewindow.width = p->screen_width;
-	p->nativewindow.height = p->screen_height;
+	p->nativewindow.width = p->width;
+	p->nativewindow.height = p->height;
 	vc_dispmanx_update_submit_sync( dispman_update );
 
    // get an appropriate EGL frame buffer configuration
@@ -356,7 +364,7 @@ char c;
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_wetgenes_raspi_core(lua_State *l)
+LUALIB_API int luaopen_wetgenes_win_raspi(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
