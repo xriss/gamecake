@@ -6,6 +6,7 @@
 
 typedef struct swetwin_lua {
 
+/*
 	int			fp_dsp;			// display as file
 	fd_set		set_dsp;		// display as set
 	Display		*dsp;
@@ -13,7 +14,7 @@ typedef struct swetwin_lua {
 	Window		win;
 	
 	GLXContext context;
-
+*/
 	int width;
 	int height;
 

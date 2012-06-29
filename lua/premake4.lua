@@ -67,6 +67,8 @@ elseif WINDOWS then
 	links { "opengl32" , "glu32" }
 	links { "stdc++" , "ws2_32" , "gdi32"}
 	
+	links { "winmm" }
+
 	links { "comdlg32" } -- we need to remove this when we impliment our own file-requester
 
 	KIND{kind="ConsoleApp",name="lua.exe"}

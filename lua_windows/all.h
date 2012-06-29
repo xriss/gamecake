@@ -13,22 +13,14 @@
 #include <signal.h>
 #include <string.h>
 
-
-#if defined(_MSC_VER)
-
-#include <crtdbg.h>
-
-#else
-
-#endif
-
+//#include <crtdbg.h>
 
 #if !defined(__TIMESTAMP__)
 #define __TIMESTAMP__ 0
 #endif
 
+#include <GL3/gl3w.h>
 
-#if defined(WIN32)
 
 #include <io.h>
 #include <direct.h>
@@ -36,17 +28,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#elif defined(X11)
 
-#include <X11/Xlib.h> 
-
-#include <GL/gl.h>
-#include <GL/glx.h>
-
-#include <strings.h>
-#include <sys/time.h>
-
-#endif
 
 #ifdef __cplusplus
 extern "C" {

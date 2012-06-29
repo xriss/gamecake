@@ -12,17 +12,17 @@ if type(args[2]=="table" ) then -- you can force a core by using a second arg to
 end
 
 if not core then
-	local suc,dat=pcall(function return require("wetgenes.win.windows") end )
+	local suc,dat=pcall(function() return require("wetgenes.win.windows") end )
 	if suc then core=dat end
 end
 
 if not core then
-	local suc,dat=pcall(function return require("wetgenes.win.linux") end )
+	local suc,dat=pcall(function() return require("wetgenes.win.linux") end )
 	if suc then core=dat end
 end
 
 if not core then
-	local suc,dat=pcall(function return require("wetgenes.win.raspi") end )
+	local suc,dat=pcall(function() return require("wetgenes.win.raspi") end )
 	if suc then core=dat end
 end
 
