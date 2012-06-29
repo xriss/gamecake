@@ -381,7 +381,7 @@ all_includes=all_includes or {
 	{"lua_bit",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_box2d",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
 	{"lua_ogg",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
-	{"lua_al",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		nil			},
+	{"lua_al",			nil			or		NIX		or		nil		or		ANDROID		or		nil			},
 	{"lua_gl",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
 	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_grd",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},

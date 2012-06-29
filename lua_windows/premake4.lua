@@ -3,7 +3,7 @@ project "lua_windows"
 language "C"
 
 files {  "code/**.c" , "code/**.h" , "all.h" }
-includedirs { "." }
+includedirs { "." , "code" }
 
 KIND{lua="wetgenes.win.windows"}
 

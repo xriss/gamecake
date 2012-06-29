@@ -3,12 +3,29 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local win={}
 
-local core -- we may use different cores depending on the system we compiled for so check for the right one
+local core -- we may use different cores depending on the system we compiled for and are running on
 
-core=require("wetgenes.win.core")
---core=require("wetgenes.nix.core")
---core=require("wetgenes.nacl.core")
---core=require("wetgenes.raspi.core")
+local args={...}
+
+if type(args[2]=="table" ) then -- you can force a core by using a second arg to require
+	core=args[2]
+end
+
+if not core then
+	local suc,dat=pcall(function() return require("wetgenes.win.windows") end )
+	if suc then core=dat end
+end
+
+if not core then
+	local suc,dat=pcall(function() return require("wetgenes.win.linux") end )
+	if suc then core=dat end
+end
+
+if not core then
+	local suc,dat=pcall(function() return require("wetgenes.win.raspi") end )
+	if suc then core=dat end
+end
+
 
 
 local base={}
@@ -20,7 +37,11 @@ setmetatable(win,meta)
 
 function win.screen()
 	it={}
-	it.width,it.height= core.screen()
+	if core.screen then
+		it.width,it.height=core.screen()
+	else
+		it.width,it.height=0,0
+	end
 	return it
 end
 
@@ -39,51 +60,73 @@ function win.create(opts)
 	local w={}
 	setmetatable(w,meta)
 	
-	w[0]=assert( core.create(opts) )
+	if core.create then
+		w[0]=assert( core.create(opts) )
+	end
 	
-	core.info(w[0],w)
+	base.info(w)
 	return w
 end
 
 function base.destroy(w)
-	core.destroy(w[0],w)
+	if core.destroy then
+		core.destroy(w[0],w)
+	end
 end
 
 function base.info(w)
-	core.info(w[0],w)
+	if core.info then
+		core.info(w[0],w)
+	end
 end
 
 function base.context(w,opts)
-	core.context(w[0],opts)
+	if core.context then
+		core.context(w[0],opts)
+	end
 end
 
 function base.swap(w)
-	core.swap(w[0])
+	if core.swap then
+		core.swap(w[0])
+	end
 end
 
 function base.peek(w)
-	return core.peek(w[0])
+	if core.peek then
+		return core.peek(w[0])
+	end
 end
 
 function base.wait(w,t)
-	core.wait(w[0],t)
+	if core.wait then
+		core.wait(w[0],t)
+	end
 end
 
 function base.msg(w)
-	return core.msg(w[0])
+	if core.msg then
+		return core.msg(w[0])
+	end
 end
 
 function base.sleep(...)
-	for i,v in ipairs({...}) do
-		if type(v)=="number" then
-			core.sleep(v)
+	if core.sleep then
+		for i,v in ipairs({...}) do
+			if type(v)=="number" then
+				core.sleep(v)
+			end
 		end
 	end
 end
 win.sleep=base.sleep
 
 function base.time()
-	return core.time()
+	if core.time then
+		return core.time()
+	else
+		return os.time()
+	end
 end
 win.time=base.time
 

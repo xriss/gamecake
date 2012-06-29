@@ -538,6 +538,9 @@ static int lua_gles_GetShader (lua_State *l)
 }
 static int lua_gles_GetShaderInfoLog (lua_State *l)
 {
+#if !defined(GL_INFO_LOG_LENGTH)
+	return 0;
+#else
 int i;
 int size=0;
 int newsize=0;
@@ -554,6 +557,7 @@ char *p=0;
 	free(p);
 	
 	return 1;
+#endif
 }
 
 
@@ -596,6 +600,9 @@ int i=0;
 
 static int lua_gles_GetProgramInfoLog (lua_State *l)
 {
+#if !defined(GL_INFO_LOG_LENGTH)
+	return 0;
+#else
 int i;
 int size=0;
 char *p=0;
@@ -611,6 +618,7 @@ char *p=0;
 	free(p);
 	
 	return 1;
+#endif
 }
 
 static int lua_gles_GetProgram (lua_State *l)
