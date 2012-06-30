@@ -70,6 +70,8 @@ elseif WINDOWS then
 	links { "winmm" }
 
 	links { "comdlg32" } -- we need to remove this when we impliment our own file-requester
+	
+--	linkoptions{ "--enable-stdcall-fixup" }
 
 	KIND{kind="ConsoleApp",name="lua.exe"}
 

@@ -1,13 +1,13 @@
 
--- setup some default search paths
+-- setup some default search paths,
 require("apps").default_paths()
 
 -- grab some libs
-local pack=require("wetgenes.pack")
-local wstr=require("wetgenes.string")
-local tardis=require("wetgenes.tardis")
+local pack=require("wetgenes.pack")		-- raw memory packing
+local wstr=require("wetgenes.string")	-- string helpers
+local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
--- a window/screen handler
+-- a window/screen handler this works in windows/linux/nacl/android/raspi
 local win=require("wetgenes.win").create({})
 
 -- wrap some extra shader compiler functions around a basic gles2 library
@@ -94,14 +94,13 @@ function ball_create()
 	end
 
 	ball.vdat=pack.alloc( #t*4 )
-	pack.save_array(t,"f32",0,#t,ball.vdat)
+	pack.save_array(t,"f32",0,#t,ball.vdat) -- pack data as 32bit floats
 	
 
 	ball.vbuf=gl.GenBuffer()
 	gl.BindBuffer(gl.ARRAY_BUFFER,ball.vbuf)
 	gl.BufferData(gl.ARRAY_BUFFER,#t*4,ball.vdat,gl.STATIC_DRAW)
 
---	print(wstr.dump(t))
 	function ball.draw(siz,color,part)
 	
 		local p=gl.program(prog_color)
@@ -120,6 +119,7 @@ function ball_create()
 
 		gl.Uniform4f(p:uniform("color"), color[1],color[2],color[3],color[4] )
 
+-- draw odd squares or even squares or both. so we can choose what color ball to draw very simply
 		if part==0 then
 			gl.DrawArrays(gl.TRIANGLES,0,(#t/3)/2)
 		elseif part==1 then
@@ -135,6 +135,7 @@ function ball_create()
 end
 
 
+-- select a standard gles context
 win:context({})
 
 local frame_rate=1/60
@@ -157,30 +158,32 @@ while true do
 	while frame_time>win:time() do win:sleep(0.001) end -- simple frame limit
 	frame_time=frame_time+frame_rate -- step frame forward
 
-	repeat -- handle msg queue (so we know the window size)
+	repeat -- handle msg queue (so we know the window size on windows)
 		local m={win:msg()}
 	until not m[1]
 
--- update bouncyness
-
+-- velocity
 	rot[1]=rot[1]+vrt[1]
 	rot[2]=rot[2]+vrt[2]
 	rot[3]=rot[3]+vrt[3]
 	
 	pos[1]=pos[1]+vec[1]
 	pos[2]=pos[2]+vec[2]
-	
+
+-- gravity	
 	vec[2]=vec[2] + (1/8)
-	
+
+-- simple collision against sides ofscreen
 	if pos[1] > -siz+1920/2 then pos[1]=-siz+1920/2 vec[1]=vec[1]*-1 vrt[1]=vrt[1]*-1 end
 	if pos[1] <  siz-1920/2 then pos[1]= siz-1920/2 vec[1]=vec[1]*-1 vrt[1]=vrt[1]*-1 end
 	
 	if pos[2] > -siz+1080/2 then pos[2]=-siz+1080/2 vec[2]=vec[2]*-1 vrt[2]=vrt[2]*-1 end
 	if pos[2] <  siz-1080/2 then pos[2]= siz-1080/2 vec[2]=0         vrt[2]=vrt[2]*-1 end
+	-- fake friction at top, prevents runaway fizix
 
 -- prepare to draw a frame
 
-	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA) -- default of premultiplied alpha blending mode
 	gl.Enable(gl.BLEND)
 	gl.Enable(gl.DEPTH_TEST)
 
@@ -209,6 +212,7 @@ while true do
 	ball.draw(siz,{1,1,1,1},0) -- draw white parts
 	ball.draw(siz,{1,0,0,1},1) -- draw red parts
 
+--calling this can stall the pipeline but is good for catching errors
 --print(gl.GetError())
 
 	gl.PopMatrix()
