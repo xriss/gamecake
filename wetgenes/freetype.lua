@@ -42,11 +42,6 @@ base.destroy=function(ft)
 	core.info(ft[0],ft)
 end
 
-base.destroy=function(ft)
-	local r,err=core.destroy(ft[0])
-	core.info(ft[0],ft)
-end
-
 base.size=function(ft,x,y)
 	local r,err=core.size(ft[0],x,y)
 	core.info(ft[0],ft)
