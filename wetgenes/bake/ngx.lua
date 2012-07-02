@@ -110,9 +110,7 @@ tab.ngx_debug	=tab.ngx_debug	or "debug"
 
 local ngx_config=wstr.replace([[
 
-# this gets slightly complicateed when higher than 1
-# so goign to keep it at 1 for now...
-worker_processes  1;
+worker_processes  4;
 
 user {ngx_user};
 
