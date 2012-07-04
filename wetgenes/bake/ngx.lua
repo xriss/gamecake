@@ -211,7 +211,7 @@ lua_package_cpath ';;';
       access_log  logs/access.log;
       error_log   logs/error.log {ngx_debug};
       listen      {ngx_listen};
-      root        html;
+      root        .;
       server_name $host;
 
 #do the fetching here...
@@ -231,8 +231,11 @@ lua_package_cpath ';;';
 	}
 
 #try existing files
+#first under html
+#then under static/$host for example static/4lfa.com/
+#so we can throw special data files into special sites
 	location  / {
-		try_files $uri @serv;
+		try_files /html$uri /static/$host/$uri @serv;
 	}
 	
 #call into lua to handle anything else	

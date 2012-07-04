@@ -101,6 +101,8 @@ function get(srv,id)
 		r=nil
 	end
 	
+	if r then count_got=count_got+1 end
+	
 --log(wstr.serialize(r))
 	apie()
 	return r and r.tab
