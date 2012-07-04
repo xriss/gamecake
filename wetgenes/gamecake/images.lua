@@ -148,8 +148,18 @@ function upload_grd(images,t,g)
 	t.y=0
 	t.width=g.width
 	t.height=g.height
-	t.texture_width=uptwopow(g.width)
-	t.texture_height=uptwopow(g.height)
+	
+	if gl.extensions.ARB_texture_non_power_of_two then
+
+		t.texture_width=g.width
+		t.texture_height=g.height
+		
+	else -- need to place the image in a bigger texture and probably disable mipmaps.
+	
+		t.texture_width=uptwopow(g.width)
+		t.texture_height=uptwopow(g.height)
+		
+	end
 	
 	gl.BindTexture( gl.TEXTURE_2D , t.id )
 	
@@ -167,6 +177,8 @@ function upload_grd(images,t,g)
 		assert(g:convert(grd.FMT_U8_RGBA_PREMULT))
 --	end
 	
+
+-- create a possibly bigger texture
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
 		0,
@@ -177,7 +189,8 @@ function upload_grd(images,t,g)
 		gl.RGBA,
 		gl.UNSIGNED_BYTE,
 		nil)
-		
+
+-- and then copy the image data into it 		
 	gl.TexSubImage2D(
 		gl.TEXTURE_2D,
 		0,

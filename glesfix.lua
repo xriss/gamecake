@@ -159,7 +159,7 @@ void main(void)
 		gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
 		gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
 
-		gl.Uniform4f(p:uniform("color"), gl.fix.color[1]*0,gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
+		gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
 
 		gl.core.DrawArrays(...)
 	end

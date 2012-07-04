@@ -59,6 +59,7 @@ clean = function(cake)
 end
 
 start = function(cake)
+print("cakestart")
 	cake.canvas:start()
 	cake.images:start()
 	cake.sheets:start()
@@ -69,12 +70,16 @@ start = function(cake)
 end
 
 stop = function(cake)
+print("cakestop")
 	cake.canvas:stop()
 	cake.sheets:stop()
 	cake.images:stop()
 	cake.fonts:stop()
 	if not cake.opts.disable_sounds then
 		cake.sounds:stop()
+	end
+	if cake.gl.forget then -- any programs need to be recompiled
+		cake.gl.forget()
 	end
 end
 

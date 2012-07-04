@@ -52,16 +52,23 @@ end
 
 function start(sheets)
 
-	for i,v in pairs(sheets.data) do -- refresh image data after a stop
-		if v.img_id or v.img_name then
-			v.img=sheets.cake.images:get(v.img_id,v.img_name)
+	for i,t in pairs(sheets.data) do -- refresh image data after a stop
+		for i,v in pairs(t) do
+			if v.img_id or v.img_name then
+				v.img=sheets.cake.images:get(v.img_id,v.img_name)
+				v:build_vbuf()
+			end
 		end
 	end
-
+	
 end
 
 function stop(sheets)
-	v.img=nil
+	for i,t in pairs(sheets.data) do -- forget everything
+		for i,v in pairs(t) do
+			v.img=nil
+		end
+	end
 end
 
 function create(sheets,id,name)

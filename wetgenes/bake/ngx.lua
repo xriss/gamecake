@@ -234,6 +234,7 @@ lua_package_cpath ';;';
 #first under html
 #then under static/$host for example static/4lfa.com/
 #so we can throw special data files into special sites
+
 	location  / {
 		try_files /html$uri /static/$host/$uri @serv;
 	}
