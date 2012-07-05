@@ -35,7 +35,7 @@ function build(tab)
 		bake.copyfile(opts.basedir.."/"..v,fname)
 	end
 
-	local opts={basedir=bake.cd_base.."/html",dir="lua",filter=""}
+	local opts={basedir=bake.cd_base.."/public",dir="lua",filter=""}
 	local r=bake.findfiles(opts)
 	for i,v in ipairs(r.ret) do
 		local fname=bake.cd_out.."/"..v
@@ -81,7 +81,7 @@ function build(tab)
 			local opts={basedir=bake.cd_root.."/mods/"..n.."/"..s,dir="",filter=""}
 			local r=bake.findfiles(opts)
 			for i,v in ipairs(r.ret) do
-				local fname=bake.cd_out.."/html/"..s.."/"..n.."/"..v
+				local fname=bake.cd_out.."/public/"..s.."/"..n.."/"..v
 				bake.create_dir_for_file(fname)
 				bake.copyfile(opts.basedir.."/"..v,fname)
 			end
@@ -96,7 +96,7 @@ function build(tab)
 		end
 	end
 
-	local opts={basedir=bake.cd_base,dir="html",filter=""}
+	local opts={basedir=bake.cd_base,dir="public",filter=""}
 	local r=bake.findfiles(opts)
 	for i,v in ipairs(r.ret) do
 		local fname=bake.cd_out.."/"..v
@@ -108,145 +108,9 @@ tab.ngx_listen	=tab.ngx_listen or "127.0.0.1:8888"
 tab.ngx_user	=tab.ngx_user	or "kriss"
 tab.ngx_debug	=tab.ngx_debug	or "debug"
 
-local ngx_config=wstr.replace([[
 
-worker_processes  4;
-
-user {ngx_user};
-
-events {
-    worker_connections  512;
-}
-
-http {
-
-# do not merge slashes fool
-merge_slashes off ;
-
-types {
-    text/html                             html htm shtml;
-    text/css                              css;
-    text/xml                              xml;
-    image/gif                             gif;
-    image/jpeg                            jpeg jpg;
-    application/x-javascript              js;
-    application/atom+xml                  atom;
-    application/rss+xml                   rss;
-
-    text/mathml                           mml;
-    text/plain                            txt;
-    text/vnd.sun.j2me.app-descriptor      jad;
-    text/vnd.wap.wml                      wml;
-    text/x-component                      htc;
-
-    image/png                             png;
-    image/tiff                            tif tiff;
-    image/vnd.wap.wbmp                    wbmp;
-    image/x-icon                          ico;
-    image/x-jng                           jng;
-    image/x-ms-bmp                        bmp;
-    image/svg+xml                         svg svgz;
-    image/webp                            webp;
-
-    application/java-archive              jar war ear;
-    application/mac-binhex40              hqx;
-    application/msword                    doc;
-    application/pdf                       pdf;
-    application/postscript                ps eps ai;
-    application/rtf                       rtf;
-    application/vnd.ms-excel              xls;
-    application/vnd.ms-powerpoint         ppt;
-    application/vnd.wap.wmlc              wmlc;
-    application/vnd.google-earth.kml+xml  kml;
-    application/vnd.google-earth.kmz      kmz;
-    application/x-7z-compressed           7z;
-    application/x-cocoa                   cco;
-    application/x-java-archive-diff       jardiff;
-    application/x-java-jnlp-file          jnlp;
-    application/x-makeself                run;
-    application/x-perl                    pl pm;
-    application/x-pilot                   prc pdb;
-    application/x-rar-compressed          rar;
-    application/x-redhat-package-manager  rpm;
-    application/x-sea                     sea;
-    application/x-shockwave-flash         swf;
-    application/x-stuffit                 sit;
-    application/x-tcl                     tcl tk;
-    application/x-x509-ca-cert            der pem crt;
-    application/x-xpinstall               xpi;
-    application/xhtml+xml                 xhtml;
-    application/zip                       zip;
-
-    application/octet-stream              bin exe dll;
-    application/octet-stream              deb;
-    application/octet-stream              dmg;
-    application/octet-stream              eot;
-    application/octet-stream              iso img;
-    application/octet-stream              msi msp msm;
-
-    audio/midi                            mid midi kar;
-    audio/mpeg                            mp3;
-    audio/ogg                             ogg;
-    audio/x-m4a                           m4a;
-    audio/x-realaudio                     ra;
-
-    video/3gpp                            3gpp 3gp;
-    video/mp4                             mp4;
-    video/mpeg                            mpeg mpg;
-    video/quicktime                       mov;
-    video/webm                            webm;
-    video/x-flv                           flv;
-    video/x-m4v                           m4v;
-    video/x-mng                           mng;
-    video/x-ms-asf                        asx asf;
-    video/x-ms-wmv                        wmv;
-    video/x-msvideo                       avi;
-}
-
-lua_package_path  './lua/?.lua;./lua/?/init.lua;;';
-lua_package_cpath ';;';
-
-  server {
-
-      access_log  logs/access.log;
-      error_log   logs/error.log {ngx_debug};
-      listen      {ngx_listen};
-      root        .;
-      server_name $host;
-
-#do the fetching here...
-	location ~ /@fetch/(.*)$ {
-		internal;
-		set $a $1;
-		resolver 8.8.8.8;
-		rewrite (.*) $a break;
-		proxy_pass_request_headers off;
-		proxy_pass '$a?$args';
-	}
-
-#is this the best way to sleep?
-	location ~ /@sleep/(.*)$ {
-		internal;
-		echo_sleep $1;
-	}
-
-#try existing files
-#first under html
-#then under static/$host for example static/4lfa.com/
-#so we can throw special data files into special sites
-
-	location  / {
-		try_files /html$uri /static/$host/$uri @serv;
-	}
-	
-#call into lua to handle anything else	
-	location  @serv {
-		content_by_lua "require(\"wetgenes.www.ngx.serv\").serv()";
-	}
-	
-  }
-}
-]],tab)
+	local ngx_config=bake.readfile(bake.cd_base.."/nginx.conf")
+	ngx_config=wstr.replace(ngx_config,tab)
 
 	local fname=bake.cd_out.."/conf/nginx.conf"
 	bake.writefile(fname,ngx_config)
