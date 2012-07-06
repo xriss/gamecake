@@ -26,16 +26,10 @@ function serv2()
 	local srv=require("wetgenes.www.ngx.srv").new()
 	ngx.ctx=srv -- this is out ctx
 	
-	if opts.vhosts_map then
-		srv.vhost=opts.vhosts_map[1][2]
-		for i,v in ipairs(opts.vhosts_map) do
-			if ngx.var.host:find(v[1]) then
-				srv.vhost=v[2]
-				break
-			end
-		end
-	end
-	
+	for i,v in ipairs(opts.vhosts_map or {} ) do
+		srv.vhost=v[2]
+		if ngx.var.host:find(v[1]) then break end
+	end	
 	
 	if srv.vhost then log("VHOST = "..srv.vhost) end
 	

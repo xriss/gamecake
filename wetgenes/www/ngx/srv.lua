@@ -35,7 +35,11 @@ function new()
 	
 	srv.set_mimetype=function(v)	
 		srv.set_header("content_type",v)
---		log("srv.set_mimetype:",v)
+		srv.redirect=function(url) -- must hack redirects from now on
+				ngx.print("<script type=\"text/javascript\"> window.location = \""..url.."\"; </script>")
+		end
+			
+		log("srv.set_mimetype:",v)
 	end
 	
 	srv.set_cookie=function(t)
