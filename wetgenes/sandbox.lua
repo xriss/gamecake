@@ -147,6 +147,7 @@ function ini(s)
 	return tab
 end
 
+-- this performs the opposite of a string.serialize
 function lson(s)
 
 	local env=make_env()

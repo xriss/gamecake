@@ -4,6 +4,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local log=require("wetgenes.www.any.log").log
 
 local wstr=require("wetgenes.string")
+local wbox=require("wetgenes.sandbox")
 
 local ngx=ngx
 
@@ -11,7 +12,7 @@ module(...)
 local _M=require(...)
 package.loaded["wetgenes.www.any.cache"]=_M
 
-hax={}
+--hax={}
 
 
 function countzero()
@@ -38,86 +39,81 @@ local function getvhost(srv)
 	end
 	return vhost
 end
-local function gethax(srv)
-	local vhost=getvhost(srv)
-	if not hax[vhost] then hax[vhost]={} end
-	return hax[vhost]
-end
 
 function clear(srv)
---	log("cache.clear:")
 	apis()
-
-	hax[getvhost(srv)]={}
+	
+	ngx.shared.cache:flush_all()
 
 	apie()
 end
 
 
 function del(srv,id)
---	log("cache.del:")
 	apis()
 
-	local hax=gethax(srv)
+	local k=getvhost(srv).."&"..id
 	
-	hax[id]=nil
+	ngx.shared.cache:delete(k)
 
 	apie()
 end
 
-function put(srv,id,tab,ttl,opts)
+function put(srv,id,v,ttl,opts)
 --	log("cache.put:",id)
 	apis()
 	
-	local hax=gethax(srv)
-
-	local t={tab=tab,ttl=os.time()+ttl}
+	local k=getvhost(srv).."&"..id
+	
+	if type(v)=="number" then
+		--as is
+	else 
+		v=wstr.serialize(v)
+	end
 
 	if opts=="ADD_ONLY_IF_NOT_PRESENT" then
-		local r=hax[id]
-		if r and r.ttl<os.time() then -- stale data must die
-			hax[id]=nil
-			r=nil
-		end
-		if not r then hax[id]=t end
-	else
-		hax[id]=t
+	
+		ngx.shared.cache:add(k,v,ttl)
+		
+	else -- normal set
+	
+		ngx.shared.cache:set(k,v,ttl)
+		
 	end
+
 	
 	apie()
 end
 
 function get(srv,id)
---	log("cache.get:",id)	
 	apis()
 	count=count+1
 
-	local hax=gethax(srv)
-	
-	r=hax[id]
-	
-	if r and r.ttl<os.time() then -- stale data must die
-		hax[id]=nil
-		r=nil
-	end
+	local k = getvhost(srv).."&"..id
+	local r = ngx.shared.cache:get(k)
 	
 	if r then count_got=count_got+1 end
 	
---log(wstr.serialize(r))
+	if type(r)=="string" then -- need to unserialise the data
+		r=wbox.lson(r)
+	end
+
 	apie()
 	return r and r.tab
 end
 
 function inc(srv,id,num,start)
---	log("cache.inc:",id)
 	apis()
 
-	local hax=gethax(srv)
-	
-	local r=(hax[id] or start)+num
-	hax[id]=r
-	
---log(r)
+	local k=getvhost(srv).."&"..id
+
+
+	r=ngx.shared.cache:incr(k,num)
+	if not r then
+		r=start
+		ngx.shared.cache:set(k,num)
+	end
+
 	apie()
 	return r
 end
