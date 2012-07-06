@@ -62,7 +62,7 @@ function serv2()
 				log("require "..n)
 				local m,err=pcall(require,n)
 				if not m then
-					log("require "..i.." failed on mod "..n.."\n"..(err or ""))
+					log("require failed on mod "..n.."\n"..(err or ""))
 				end
 			end
 		end
