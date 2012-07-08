@@ -113,7 +113,7 @@ function glescode.create(gl)
 		
 		if s[0] then return s[0] end
 
-print("Compiling shader "..sname)
+--print("Compiling shader "..sname)
 		s[0]=gl.CreateShader(stype)
 		gl.ShaderSource(s[0],s.source)
 		gl.CompileShader(s[0])
@@ -157,7 +157,7 @@ print("Compiling shader "..sname)
 				gl.AttachShader( p[0] , code.shader(gl.FRAGMENT_SHADER,v) )
 			end
 			
-print("Linking program "..pname)
+--print("Linking program "..pname)
 			gl.LinkProgram(p[0])
 		
 			if gl.GetProgram(p[0], gl.LINK_STATUS) == gl.FALSE then -- error

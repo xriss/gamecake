@@ -67,13 +67,17 @@ function stop(sheets)
 	for i,t in pairs(sheets.data) do -- forget everything
 		for i,v in pairs(t) do
 			v.img=nil
+			v:free_vbuf()
 		end
 	end
 end
 
 function create(sheets,id,name)
 
-	local sheet={}
+	local sheet=sheets:get(id,name)
+	if sheet then return sheet end
+	
+	sheet={}
 	sheet.sheets=sheets
 	setmetatable(sheet,meta_sheet)
 
