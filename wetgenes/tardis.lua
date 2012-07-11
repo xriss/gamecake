@@ -296,9 +296,9 @@ end
 
 function m4.rotate(it,degrees,v3a,r)
 
-	local c=math.cos(math.pi*degrees/180)
+	local c=math.cos(-math.pi*degrees/180)
 	local cc=1-c
-	local s=math.sin(math.pi*degrees/180)
+	local s=math.sin(-math.pi*degrees/180)
 	
 	local x=v3a[1]
 	local y=v3a[2]

@@ -1412,8 +1412,8 @@ if not core.programmable_pipeline_available then
 else
 
 --force a test of our glesfix
-print("FORCING TEST OF GLES1FIX")
-	gles.gles1=require("glesfix").create(gles)
+--print("FORCING TEST OF GLES1FIX")
+--	gles.gles1=require("glesfix").create(gles)
 
 end
 

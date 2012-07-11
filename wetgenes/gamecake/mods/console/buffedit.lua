@@ -1,18 +1,13 @@
+-- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-
-
-local require=require
 
 -- a 1 line buffer edit, how you display it is up to you
 -- has a simple history, just pass in key presses
 -- this is intended for commandline style editing
 
-module("fenestra.buffedit")
 
-local string=require("string")
-local table=require("table")
-
-
+module("wetgenes.gamecake.mods.console.buffedit")
 
 function keypress(it,ascii,key,act)
 	

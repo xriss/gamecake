@@ -106,6 +106,8 @@ function default_paths()
 	
 	setpaths(dll,{bin_dir,bin_dir})
 	
+	dir=bin_dir -- and remember
+	
 end
 
 --
