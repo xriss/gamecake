@@ -546,7 +546,7 @@ int val=0;
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_wetgenes_nacl_core(lua_State *l)
+LUALIB_API int luaopen_wetgenes_win_nacl(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{

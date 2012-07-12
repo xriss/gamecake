@@ -44,7 +44,7 @@ static int lua_android_time (lua_State *l)
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_wetgenes_android_core(lua_State *l)
+LUALIB_API int luaopen_wetgenes_win_android(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{

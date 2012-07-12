@@ -1,5 +1,5 @@
 
-project "lua_linux"
+project "lua_win_linux"
 language "C"
 
 files {  "code/**.c" , "code/**.h" , "all.h" }
