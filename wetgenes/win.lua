@@ -3,27 +3,29 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local win={}
 
-local core -- we may use different cores depending on the system we compiled for and are running on
+local softcore=require("wetgenes.win.core") -- we keep some generic C functions here
+
+local hardcore -- but use different cores depending on the system we compiled for and are running on
 
 local args={...}
 
 if type(args[2]=="table" ) then -- you can force a core by using a second arg to require
-	core=args[2]
+	hardcore=args[2]
 end
 
-if not core then
+if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.windows") end )
-	if suc then core=dat end
+	if suc then hardcore=dat end
 end
 
-if not core then
+if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.linux") end )
-	if suc then core=dat end
+	if suc then hardcore=dat end
 end
 
-if not core then
+if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.raspi") end )
-	if suc then core=dat end
+	if suc then hardcore=dat end
 end
 
 
@@ -37,8 +39,8 @@ setmetatable(win,meta)
 
 function win.screen()
 	it={}
-	if core.screen then
-		it.width,it.height=core.screen()
+	if hardcore.screen then
+		it.width,it.height=hardcore.screen()
 	else
 		it.width,it.height=0,0
 	end
@@ -60,8 +62,8 @@ function win.create(opts)
 	local w={}
 	setmetatable(w,meta)
 	
-	if core.create then
-		w[0]=assert( core.create(opts) )
+	if hardcore.create then
+		w[0]=assert( hardcore.create(opts) )
 	end
 	
 	base.info(w)
@@ -69,52 +71,52 @@ function win.create(opts)
 end
 
 function base.destroy(w)
-	if core.destroy then
-		core.destroy(w[0],w)
+	if hardcore.destroy then
+		hardcore.destroy(w[0],w)
 	end
 end
 
 function base.info(w)
-	if core.info then
-		core.info(w[0],w)
+	if hardcore.info then
+		hardcore.info(w[0],w)
 	end
 end
 
 function base.context(w,opts)
-	if core.context then
-		core.context(w[0],opts)
+	if hardcore.context then
+		hardcore.context(w[0],opts)
 	end
 end
 
 function base.swap(w)
-	if core.swap then
-		core.swap(w[0])
+	if hardcore.swap then
+		hardcore.swap(w[0])
 	end
 end
 
 function base.peek(w)
-	if core.peek then
-		return core.peek(w[0])
+	if hardcore.peek then
+		return hardcore.peek(w[0])
 	end
 end
 
 function base.wait(w,t)
-	if core.wait then
-		core.wait(w[0],t)
+	if hardcore.wait then
+		hardcore.wait(w[0],t)
 	end
 end
 
 function base.msg(w)
-	if core.msg then
-		return core.msg(w[0])
+	if hardcore.msg then
+		return hardcore.msg(w[0])
 	end
 end
 
 function base.sleep(...)
-	if core.sleep then
+	if hardcore.sleep then
 		for i,v in ipairs({...}) do
 			if type(v)=="number" then
-				core.sleep(v)
+				hardcore.sleep(v)
 			end
 		end
 	end
@@ -122,12 +124,18 @@ end
 win.sleep=base.sleep
 
 function base.time()
-	if core.time then
-		return core.time()
+	if hardcore.time then
+		return hardcore.time()
 	else
 		return os.time()
 	end
 end
 win.time=base.time
+
+
+function base.glyph_8x8(n)
+	return softcore.glyph_8x8(n)
+end
+win.glyph_8x8=base.glyph_8x8
 
 return win
