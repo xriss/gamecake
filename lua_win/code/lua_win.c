@@ -81,13 +81,21 @@ unsigned long c;
 
 unsigned long bmap[8*8];
 
-	xx=8;
-	yy=8;
+int id=0;
+
+	id=(int)(lua_tonumber(l,1));
+	if( id<32 )  { id=32; }
+	if( id>255 ) { id=255; }
+	
+	id=id-32;
+
+	xx=(id%16);
+	yy=(id/16);
 
 // build a single char
 	for(y=0;y<8;y++)
 	{
-		f=font_bits+((yy)*16)+(xx/8);
+		f=font_bits+((yy)*16*8)+(xx);
 		for(x=0;x<8;x++)
 		{
 			b=*(f+(y*16));
