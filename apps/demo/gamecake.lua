@@ -43,7 +43,7 @@ function start()
 	
 	table.insert(state.mods,require("wetgenes.gamecake.mods.console").bake(opts))
 
-	state.next=runthis
+	state.next=demo
 
 	local finished=state.change()
 	repeat
@@ -59,7 +59,30 @@ function start()
 	until finished
 end
 
-runthis={}
+demo={}
+
+demo.setup=function(state)
+
+	print("glyph BEG")
+	print( state.win.glyph_8x8(32) )
+	print("glyph END")
+	
+	
+end
+
+demo.clean=function(state)
+
+end
+
+demo.update=function(state)
+
+end
+
+demo.draw=function(state)
+
+end
+
+
 
 
 start()
