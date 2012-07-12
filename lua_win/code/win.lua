@@ -28,6 +28,15 @@ if not hardcore then
 	if suc then hardcore=dat end
 end
 
+if not hardcore then
+	local suc,dat=pcall(function() return require("wetgenes.win.android") end )
+	if suc then hardcore=dat end
+end
+
+if not hardcore then
+	local suc,dat=pcall(function() return require("wetgenes.win.nacl") end )
+	if suc then hardcore=dat end
+end
 
 
 local base={}

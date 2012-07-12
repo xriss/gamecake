@@ -1,9 +1,9 @@
 
-project "lua_nacl"
+project "lua_win_windows"
 language "C"
 
 files {  "code/**.c" , "code/**.h" , "all.h" }
 includedirs { "." , "code" }
 
-KIND{lua="wetgenes.nacl.core"}
+KIND{lua="wetgenes.win.windows"}
 
