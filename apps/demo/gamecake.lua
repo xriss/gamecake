@@ -109,30 +109,15 @@ demo.draw=function(state)
 
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
-	gl.Translate(0,0,-480*2)
+	gl.Translate(-320,-240,-480*2) -- a good starting point
 
-
-	gl.Disable(gl.LIGHTING)
-	gl.Disable(gl.DEPTH_TEST)
-	gl.Disable(gl.CULL_FACE)
-	gl.Enable(gl.TEXTURE_2D)    
-    
-	gl.Color(1,1,1,1)	
-   	gl.EnableClientState(gl.VERTEX_ARRAY)
-   	gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
-   	gl.DisableClientState(gl.COLOR_ARRAY)
-   	gl.DisableClientState(gl.NORMAL_ARRAY)
-
---	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-	gl.Enable(gl.BLEND)
-
+	canvas:gl_default()
 
 	gl.PushMatrix()
 	
 	canvas:font_set(cake.fonts:get(1))
 	canvas:font_set_size(32,0)
-	canvas:font_set_xy(-120,-60)
+	canvas:font_set_xy((640-(12*32))/2,240-16)
 	canvas:font_draw("Hello World!")
 	
 	gl.PopMatrix()
