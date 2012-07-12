@@ -182,3 +182,32 @@ font_draw=function(canvas,text)
 	canvas.font_x=x
 end
 
+
+gl_default=function(canvas)
+
+	local gl=canvas.gl
+
+-- the default gl state, when we deviate from this we should restore it...
+
+	if gl then
+	
+		gl.Disable(gl.LIGHTING)
+		gl.Disable(gl.DEPTH_TEST)
+		gl.Disable(gl.CULL_FACE)
+		gl.Enable(gl.TEXTURE_2D)    
+		
+		gl.Color(1,1,1,1)	
+		gl.EnableClientState(gl.VERTEX_ARRAY)
+		gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
+		gl.DisableClientState(gl.COLOR_ARRAY)
+		gl.DisableClientState(gl.NORMAL_ARRAY)
+
+	--	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+		gl.Enable(gl.BLEND)
+		
+	end
+
+end
+
+
