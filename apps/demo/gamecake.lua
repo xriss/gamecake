@@ -64,7 +64,7 @@ demo={}
 demo.setup=function(state)
 
 	print("glyph BEG")
-	print( state.win.glyph_8x8(32) )
+	print( state.win.glyph_8x8(34) )
 	print("glyph END")
 	
 	
