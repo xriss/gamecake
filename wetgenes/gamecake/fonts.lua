@@ -79,59 +79,93 @@ load=function(fonts,filename,id,name)
 	
 	if t then return t end --first check it is not already loaded
 
+	if type(filename)=="number" then -- builtin font id, so far we only have this one
 
-	local fname=fonts.prefix..filename..fonts.postfix
-	
---	local g=assert(grd.create())
-	
-	local d
-	if fonts.zip then -- load from a zip file
-		local f=assert(fonts.zip:open(fname))
-		d=assert(f:read("*a"))
-		f:close()
-	else
-		local f=assert(io.open(fname,"rb"))
-		d=assert(f:read("*a"))
-		f:close()
-	end
-	
-	if gl then --gl mode
-	
-		t={}
-		t.filename=filename
-		fonts:set(t,id,name)
-		
-		t.font=ft.create()
-		t.data=d -- keep the data alive (the loader expects it to continue to exist)
-		t.font:load_data(t.data)
-		
-		
-		t.size=32
-		t.font:size(t.size,t.size) -- render at 32x32 pixel size, all future numbers are relative to this size
-		
-		t.chars={}
-		
-		local g=grd.create() -- tempory buffer
-		for i=32,127 do -- setup base textures for 7bit ascii
+		if gl then --gl mode
+			t={}
+			t.filename=filename
+			fonts:set(t,id,name)
+			t.size=8
 
-			t.font:render(i) -- render
-			t.font:grd(g) -- copy to grd
---			g:convert(grd.FMT_U8_ARGB_PREMULT)
-			g:convert(grd.FMT_U8_RGBA_PREMULT)
-			
-			local c=fonts.cake.images:upload_grd(nil,g) -- send to opengl
-			t.chars[i]=c
-			
-			c.x=t.font.bitmap_left -- offsets to draw the bitmap at, whole pixels
-			c.y=t.size-t.font.bitmap_top
-			c.add=t.font.advance -- character draw width which may be fractional
+			for i=32,127 do -- setup base textures for 7bit ascii
 
+				
+				local g=grd.create(grd.FMT_U8_ARGB,8,8,1) -- tempory buffer
+				
+				local dat="1234567890123456789012345678901234567890123456789012345678901234"
+				dat=dat..dat..dat..dat -- tmp test garbage
+				g:pixels(0,0,8,8,dat)
+				
+				g:convert(grd.FMT_U8_RGBA_PREMULT)
+
+				local c=fonts.cake.images:upload_grd(nil,g) -- send to opengl
+				t.chars[i]=c
+				
+				c.x=0 -- offsets to draw the bitmap at, whole pixels
+				c.y=0
+				c.add=8 -- character draw width which may be fractional
+
+			end
+
+			return t
 		end
-
--- we keep the ttf font in memory around so we can reload chars or load new chars as we need them
-
-		return t
+		
 	else
+
+		local fname=fonts.prefix..filename..fonts.postfix
+		
+	--	local g=assert(grd.create())
+		
+		local d
+		if fonts.zip then -- load from a zip file
+			local f=assert(fonts.zip:open(fname))
+			d=assert(f:read("*a"))
+			f:close()
+		else
+			local f=assert(io.open(fname,"rb"))
+			d=assert(f:read("*a"))
+			f:close()
+		end
+		
+		if gl then --gl mode
+		
+			t={}
+			t.filename=filename
+			fonts:set(t,id,name)
+			
+			t.font=ft.create()
+			t.data=d -- keep the data alive (the loader expects it to continue to exist)
+			t.font:load_data(t.data)
+			
+			
+			t.size=32
+			t.font:size(t.size,t.size) -- render at 32x32 pixel size, all future numbers are relative to this size
+			
+			t.chars={}
+			
+			local g=grd.create() -- tempory buffer
+			for i=32,127 do -- setup base textures for 7bit ascii
+
+				t.font:render(i) -- render
+				t.font:grd(g) -- copy to grd
+	--			g:convert(grd.FMT_U8_ARGB_PREMULT)
+				g:convert(grd.FMT_U8_RGBA_PREMULT)
+				
+				local c=fonts.cake.images:upload_grd(nil,g) -- send to opengl
+				t.chars[i]=c
+				
+				c.x=t.font.bitmap_left -- offsets to draw the bitmap at, whole pixels
+				c.y=t.size-t.font.bitmap_top
+				c.add=t.font.advance -- character draw width which may be fractional
+
+			end
+
+	-- we keep the ttf font in memory around so we can reload chars or load new chars as we need them
+
+			return t
+			
+		end
+		
 	end
 	
 end
