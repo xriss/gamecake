@@ -5,9 +5,6 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- It bears a passing resemblence to gamecake js.
 
 
-
-local win=win
-
 module("wetgenes.gamecake")
 
 local wcanvas=require("wetgenes.gamecake.canvas")
@@ -31,6 +28,9 @@ function bake(opts)
 	opts.cake=cake -- insert cake into opts
 	cake.opts=opts -- and opts into cake
 	cake.gl=opts.gl
+	cake.win=opts.win
+	
+	if cake.gl then cake.gl.GetExtensions() end
 	
 	cake.canvas_fmt=opts.canvas_fmt or grd.FMT_U16_RGB_565
 	cake.images_fmt=opts.images_fmt or grd.FMT_U16_RGBA_4444_PREMULT
@@ -93,15 +93,4 @@ beep = function(cake,id,name)
 	end
 end
 
--- draw a prebuilt texture using win and opengl functions
--- do not call if you do not have fenestra and a global win setup?
--- probably need to remove this
-gldraw = function(cake)
-	if win then
-		local gl=require("gl")
-		local t=assert(win.tex( cake.canvas.grd ))
-		t:draw()--{max=gl.NEAREST,min=gl.NEAREST})
-		t:clean()
-	end
-end
 

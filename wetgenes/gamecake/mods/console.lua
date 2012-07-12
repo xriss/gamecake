@@ -238,8 +238,8 @@ print("console setup")
 		local w,h=state.win.width,state.win.height
 		gl.Viewport(0,0,w,h)
 
-		gl.ClearColor(0,0,0,0)
-		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
+--		gl.ClearColor(0,0,0,0)
+--		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 		gl.MatrixMode(gl.PROJECTION)
 		gl.LoadMatrix( tardis.m4_project23d(w,h,w,h,1,h*2) )

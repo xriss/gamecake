@@ -167,11 +167,13 @@ font_draw=function(canvas,text)
 	
 	local s=canvas.font_size/font.size
 	
+	local gl=canvas.gl
+
 	for i=1,#text do
 	
 		local cid=text:byte(i)
 		local c=font.chars[cid] or canvas.font.chars[32]
-		
+
 		canvas:blit(c,x+(c.x*s),y+(c.y*s),nil,nil,c.width,c.height,c.width*s,c.height*s)
 
 		x=x+(c.add*s)+canvas.font_add

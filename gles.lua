@@ -1383,6 +1383,7 @@ function gles.CheckError(...)
 end
 
 -- add all extensions as flags to gles.extensions
+-- this may need to be called after setting up a context to be valid...
 function gles.GetExtensions()
 	gles.extensions={}
 	local s=gles.Get(gles.EXTENSIONS)

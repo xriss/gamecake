@@ -10,6 +10,7 @@ meta.__index=base
 
 local ft=require("wetgenes.freetype")
 local grd=require("wetgenes.grd")
+local wwin=require("wetgenes.win")
 
 
 function bake(opts)
@@ -87,22 +88,23 @@ load=function(fonts,filename,id,name)
 			fonts:set(t,id,name)
 			t.size=8
 
-			for i=32,127 do -- setup base textures for 7bit ascii
+			t.chars={}
 
+			for i=32,127 do -- setup base textures for 7bit ascii
 				
-				local g=grd.create(grd.FMT_U8_ARGB,8,8,1) -- tempory buffer
+				local g=grd.create(grd.FMT_U8_ARGB,10,10,1) -- tempory buffer
 				
-				local dat="1234567890123456789012345678901234567890123456789012345678901234"
-				dat=dat..dat..dat..dat -- tmp test garbage
-				g:pixels(0,0,8,8,dat)
+				local dat=wwin.glyph_8x8(i)
+				g:pixels(1,1,8,8,dat)
 				
 				g:convert(grd.FMT_U8_RGBA_PREMULT)
 
 				local c=fonts.cake.images:upload_grd(nil,g) -- send to opengl
+
 				t.chars[i]=c
 				
-				c.x=0 -- offsets to draw the bitmap at, whole pixels
-				c.y=0
+				c.x=-1 -- offsets to draw the bitmap at, whole pixels
+				c.y=-1
 				c.add=8 -- character draw width which may be fractional
 
 			end
