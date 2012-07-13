@@ -44,7 +44,7 @@ function start()
 		})
 	end
 	
---	table.insert(state.mods,require("wetgenes.gamecake.mods.console").bake(opts))
+	table.insert(state.mods,require("wetgenes.gamecake.mods.console").bake(opts))
 
 	state.next=demo
 
@@ -52,7 +52,10 @@ function start()
 	repeat
 
 		repeat -- handle msg queue (so we know the window size on windows)
-			local m={state.win:msg()}
+			local m=state.win:msg()
+			if m[1] then
+				state.mods[1].msg(m)
+			end
 		until not m[1]
 
 		state.update()
