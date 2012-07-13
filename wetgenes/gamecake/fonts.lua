@@ -92,7 +92,7 @@ load=function(fonts,filename,id,name)
 
 			for i=32,127 do -- setup base textures for 7bit ascii
 				
-				local g=grd.create(grd.FMT_U8_ARGB,10,10,1) -- tempory buffer
+				local g=grd.create(grd.FMT_U8_ARGB,10,10,1) -- tempory buffer, 1 pixel border makes it less horrible when scaled
 				
 				local dat=wwin.glyph_8x8(i)
 				g:pixels(1,1,8,8,dat)

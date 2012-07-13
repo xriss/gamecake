@@ -5,7 +5,6 @@ local hex=function(str) return tonumber(str,16) end
 
 local wetstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
-local gl=require("gles").gles1
 
 
 module("wetgenes.gamecake.mods.console")
@@ -25,6 +24,10 @@ function bake(opts)
 
 	function console.setup(state)
 	
+		console.replace_print(_G)
+	
+		state.cake.fonts:loads({1}) -- load builtin font number 1 a basic 8x8 font
+
 		console.buff=buffedit.create() -- create buff edit
 		console.buff.enter=function(_,line) console.dump_eval(line) end
 		
@@ -36,9 +39,12 @@ function bake(opts)
 		console.y_show=8*8
 		
 		console.show=false
+
+--		console.show=true
+--		console.show_hud=true
 		
 		console.setup_done=true
-print("console setup")
+--print("console setup")
 	end
 
 	function console.clean(state)
@@ -147,10 +153,10 @@ print("console setup")
 			
 				table.remove(args,1) -- remove the function name
 			
-				setfenv(chunk,fenestra._g) -- call with master environment?
+				setfenv(chunk,_G) -- call with master environment?
 			else
 			
-				chunk=lookup(fenestra._g,args[1]) -- check for functions in master environment
+				chunk=lookup(_G,args[1]) -- check for functions in master environment
 				
 				if chunk and type(chunk)=="function" then -- must be a function
 				
@@ -178,7 +184,7 @@ print("console setup")
 			end
 			
 			if chunk then
-				setfenv(chunk,fenestra._g) -- compile in master environment will have an overloaded print
+				setfenv(chunk,_G) -- compile in master environment will have an overloaded print
 			end
 		end
 
@@ -198,17 +204,18 @@ print("console setup")
 		
 		-- if there was any error, print it out
 		if err then
-			fenestra._g.print(err)
+			_G.print(err)
 		else
-			for i,v in ipairs(ret) do
-				fenestra._g.print(v)
+--print("test")
+			if ret[1] then
+				_G.print(unpack(ret))
 			end
 		end
 	end
 
 	function console.update(state)
 	
-		if not console.setup_done then console.setup(state) end -- modules do not have their setup called...
+		if not console.setup_done then console.setup(state) end -- modules do not have their setup called yet...
 	
 		console.buff:update()
 		
@@ -234,6 +241,12 @@ print("console setup")
 	
 	function console.draw(state)
 	
+		local win=state.win
+		local cake=state.cake
+		local canvas=cake.canvas
+		local gl=cake.gl
+
+
 		state.win:info()
 		local w,h=state.win.width,state.win.height
 		gl.Viewport(0,0,w,h)
@@ -242,35 +255,22 @@ print("console setup")
 --		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( tardis.m4_project23d(w,h,w,h,1,h*2) )
+		gl.LoadMatrix( tardis.m4_project23d(w,h,w,h,0.5,0) )
 
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.LoadIdentity()
-
+		gl.Translate(-w/2,-h/2,-h) -- top/left 1unit==1pixel
 		gl.PushMatrix()
 
+		canvas:font_set(cake.fonts:get(1))
+		canvas:font_set_size(8,0)
 
-		gl.PopMatrix()
-
---[[
-		fenestra.debug_begin()
-		
-		local w=fenestra.get("width")
-		local h=console.y
-		fenestra.debug_polygon_begin()
-		fenestra.debug_polygon_vertex(0,0,hex"ee00cc00")
-		fenestra.debug_polygon_vertex(w,0,hex"ee00cc00")
-		fenestra.debug_polygon_vertex(w,h,hex"ee004400")
-		fenestra.debug_polygon_vertex(0,h,hex"ee004400")
-		fenestra.debug_polygon_end()
-		
---		fenestra.debug_rect(0,0,fenestra.get("width"),console.y,hex"8800ff00")
-		
 		local i=#console.lines
 		local y=console.y-16
 		while y>-8 and i>0 do
 		
-			fenestra.debug_print({x=0,y=y,size=8,color=hex"ff00ff00",s=console.lines[i]})
+			canvas:font_set_xy(0,y)
+			canvas:font_draw(console.lines[i])
 			
 			y=y-8
 			i=i-1
@@ -279,19 +279,24 @@ print("console setup")
 		if console.show_hud then
 			for i,v in ipairs(console.lines_display) do
 			
-				fenestra.debug_print({x=0,y=console.y+i*8-8,size=8,color=hex"ffffffff",s=v})
+				canvas:font_set_xy(0,console.y+i*8-8)
+				canvas:font_draw(v)
 			
 			end
 		end
 		
-		fenestra.debug_print({x=0,y=console.y-8,size=8,color=hex"ff00ff00",s=">"..console.buff.line})
+		canvas:font_set_xy(0,console.y-8)
+		canvas:font_draw(">"..console.buff.line)
 
-		fenestra.debug_rect((console.buff.line_idx+1)*8,console.y-8,(console.buff.line_idx+2)*8,console.y,hex"00ff00"+console.buff.throb*256*256*256)
-
-		fenestra.debug_end()
+		if console.buff.throb > 128 then
+			canvas:font_set_xy((console.buff.line_idx+1)*8,console.y-8)
+			canvas:font_draw("_")
+		end
 
 		console.lines_display={}
-]]
+
+
+		gl.PopMatrix()
 
 	end
 	
@@ -321,13 +326,18 @@ print("console setup")
 --		print(act.." "..x..","..y.." "..key)
 	end
 	
-	function console.keypress(ascii,key,act)
+	function console.msg(m)
+		if m[1]=="key" then
+			console.keypress(m[2],string.lower(m[5]),m[3])
+		end
+	end
 
-		if act=="down" then
---			fenestra._g.print(ascii.." "..(key or ""))
+	function console.keypress(ascii,key,act)
+		if act==1 then
+--			_G.print(ascii.." "..(key or ""))
 		end
 
-		if act=="down" and ascii=="`" then
+		if act==1 and ascii=="`" then
 		
 			if console.show then
 			
@@ -347,7 +357,7 @@ print("console setup")
 			
 		if console.show then
 		
-			if act=="down" or act=="repeat" then
+			if act==1 or act==0 then
 					
 				if key=="page up" or key=="prior" then
 				
@@ -379,9 +389,9 @@ print("console setup")
 			for i,v in ipairs({...}) do
 				table.insert(t, console.dump_string(v) )
 			end
-			if not t[1] then t[1]="nil" end
+--			if not t[1] then t[1]="nil" end
 			
-			console.print( unpack(t) )
+			console.print( table.concat(t,"\t") )
 			if print_old then
 				print_old( unpack(t) )
 			end

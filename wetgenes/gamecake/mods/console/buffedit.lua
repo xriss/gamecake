@@ -11,7 +11,7 @@ module("wetgenes.gamecake.mods.console.buffedit")
 
 function keypress(it,ascii,key,act)
 	
-	if act=="down" or act=="repeat" then
+	if act==1 or act==0 then
 	
 		if key=="left" then
 
@@ -79,7 +79,7 @@ function keypress(it,ascii,key,act)
 			
 		elseif key=="enter" or key=="return" then
 		
-			if act=="down" then -- ignore repeats on enter key
+			if act==1 then -- ignore repeats on enter key
 			
 				local f=it.line
 --				fenestra._g.print(">"..f)

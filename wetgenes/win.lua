@@ -117,7 +117,11 @@ end
 
 function base.msg(w)
 	if hardcore.msg then
-		return hardcore.msg(w[0])
+		local m={hardcore.msg(w[0])}
+		if m[1]=="key" then
+			if m[5] then m[5]=m[5]:lower() end -- patch key name to lowercase
+		end
+		return m
 	end
 end
 
