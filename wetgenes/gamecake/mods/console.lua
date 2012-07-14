@@ -177,7 +177,7 @@ function bake(opts)
 			args={} -- no arguments
 			
 			-- is it an expression?
-			err,chunk = compile('print('..line..')')
+			err,chunk = compile('return '..line..' ')
 			if err then
 				-- otherwise, a statement?
 				err,chunk = compile(line)
@@ -206,7 +206,6 @@ function bake(opts)
 		if err then
 			_G.print(err)
 		else
---print("test")
 			if ret[1] then
 				_G.print(unpack(ret))
 			end
