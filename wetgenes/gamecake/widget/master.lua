@@ -7,9 +7,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-local gl=require('gl')
+local gl=require('gles').gles1
 
-module("fenestra.widget.master")
+module("wetgenes.gamecake.widget.master")
 
 --
 -- add meta functions
@@ -21,7 +21,7 @@ function setup(widget,def)
 --	local win=def.win
 
 	master.throb=0
-	master.fbo=_G.win.fbo(0,0,0) -- use an fbo
+--	master.fbo=_G.win.fbo(0,0,0) -- use an fbo
 
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget)
@@ -47,6 +47,7 @@ function setup(widget,def)
 		master.remouse(widget)
 	end
 
+--[[
 	local dirty_fbos={}
 	local find_dirty_fbos
 	find_dirty_fbos=function(widget)
@@ -57,22 +58,25 @@ function setup(widget,def)
 			find_dirty_fbos(v)
 		end
 	end
-	
+]]	
 	function master.draw(widget)
+--[[
 		dirty_fbos={}
 		find_dirty_fbos(widget)
+]]
 	
 		gl.Disable(gl.CULL_FACE)
 		gl.Disable(gl.LIGHTING)
 		gl.Disable(gl.DEPTH_TEST)
 		gl.PushMatrix()
 		
+--[[
 		if #dirty_fbos>0 then
 			for i=#dirty_fbos,1,-1 do -- call in reverse so sub fbos can work
 				meta.draw(dirty_fbos[i]) -- dirty, so this only builds the fbo
 			end
 		end
-		
+]]		
 		meta.draw(widget)
 		
 		gl.PopMatrix()

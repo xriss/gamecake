@@ -7,7 +7,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("fenestra.widget.pan")
+module("wetgenes.gamecake.widget.pan")
 
 
 function mouse(widget,act,x,y,key)

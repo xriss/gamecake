@@ -4,25 +4,25 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- generic default widget functions
 
 
-module("fenestra.widget.meta")
+module("wetgenes.gamecake.widget.meta")
 
 -- available widget classes
 classes={
 
 -- base classes
 
-	["master"]=require("fenestra.widget.master"),
-	["button"]=require("fenestra.widget.button"),
-	["drag"]=require("fenestra.widget.drag"),
-	["text"]=require("fenestra.widget.text"),
-	["textedit"]=require("fenestra.widget.textedit"),
+	["master"]=require("wetgenes.gamecake.widget.master"),
+	["button"]=require("wetgenes.gamecake.widget.button"),
+	["drag"]=require("wetgenes.gamecake.widget.drag"),
+	["text"]=require("wetgenes.gamecake.widget.text"),
+	["textedit"]=require("wetgenes.gamecake.widget.textedit"),
 
 --classes built out of the base classes
 
-	["pan"]=require("fenestra.widget.pan"),
-	["slide"]=require("fenestra.widget.slide"),
+	["pan"]=require("wetgenes.gamecake.widget.pan"),
+	["slide"]=require("wetgenes.gamecake.widget.slide"),
 
-	["scroll"]=require("fenestra.widget.scroll"),
+	["scroll"]=require("wetgenes.gamecake.widget.scroll"),
 
 }
 

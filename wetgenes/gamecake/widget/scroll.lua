@@ -6,7 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("fenestra.widget.scroll")
+module("wetgenes.gamecake.widget.scroll")
 
 
 function mouse(widget,act,x,y,key)

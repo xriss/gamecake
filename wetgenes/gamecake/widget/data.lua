@@ -6,7 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --
 
 
-module("fenestra.widget.data")
+module("wetgenes.gamecake.widget.data")
 
 local call_hook=function(dat,hook)
 	local hooks=dat.hooks

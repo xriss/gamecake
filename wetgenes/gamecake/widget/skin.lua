@@ -3,7 +3,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 local bit=require('bit')
-local gl=require('gl')
+local gl=require('gles').gles1
 local grd=require('wetgenes.grd')
 
 
@@ -37,7 +37,7 @@ end
 
 
 
-module("fenestra.widget.skin")
+module("wetgenes.gamecake.widget.skin")
 
 local mode=nil
 local texs={}
@@ -149,7 +149,10 @@ function setup(def)
 	local master=def.master
 	local meta=def.meta
 	local win=def.win
-	local font=def.font
+--	local font=--[[def.font]]def.state.cake.fonts:get(1)
+
+	local cake=def.state.cake
+	local canvas=cake.canvas
 	
 --
 -- display this widget and its sub widgets
@@ -246,7 +249,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 					c[3]=c[3]*14/15
 					c[2]=c[2]*14/15
 					c[1]=c[1]*14/15
-					gl.Color( c )
+					gl.Color( c[1],c[2],c[3],c[4] )
 				end
 				
 			end
@@ -285,6 +288,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			
 			else -- builtin
 			
+--[[
 				gl.Begin(gl.QUADS)
 					gl.Vertex(  0,   0)
 					gl.Vertex( hx,   0)
@@ -315,13 +319,19 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 					gl.Vertex(  hx-bb, -hy+bb)
 					gl.Vertex(  hx-bb, -bb )
 				gl.End()
+]]
 			end
 			
 		end
 		
 		if widget.text then
 		
-			local tx,ty=font.size(widget.text,widget.text_size)
+			canvas:font_set(cake.fonts:get(1))
+			canvas:font_set_size(widget.text_size,0)
+			local ty=widget.text_size
+			local tx=canvas:font_width(widget.text)
+
+--			local tx,ty=font.size(widget.text,widget.text_size)
 			
 			local c=widget.text_color
 			
@@ -348,20 +358,28 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			widget.text_x=tx
 			widget.text_y=ty
 
-			font.set(tx,-ty,c,widget.text_size)
-			font.draw(widget.text)
+			canvas:font_set_xy(tx,-ty)
+			canvas:font_draw(widget.text)
+
+--			font.set(tx,-ty,c,widget.text_size)
+--			font.draw(widget.text)
 		
 
 				if widget.class=="textedit" then -- hack
 					if widget.master.focus==widget then --only draw curser in active widget
 						if widget.master.throb>=128 then
-							local sw=font.size(widget.text:sub(1,widget.data.str_idx))
+							local sw=canvas:font_width(widget.text:sub(1,widget.data.str_idx))
+
+			canvas:font_set_xy(tx+sw,-ty)
+			canvas:font_draw("_")
+--[[
 							gl.Enable(gl.COLOR_MATERIAL)
 							win.flat_rect(
 								tx+sw+0,-ty,
 								tx+sw+2,-ty-widget.text_size,
 								255*256*256*256)
 							gl.Disable(gl.COLOR_MATERIAL)
+]]
 						end
 					end
 				end

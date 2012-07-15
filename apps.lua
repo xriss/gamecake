@@ -2,6 +2,9 @@
 -- create a global function that can be called to fix lua paths so we can find things
 -- unfortunatly you still have to know where this file is first and run a 
 -- dofile("thisfile") need to come up with a better plan, possibly preload a module?
+--
+-- yup this module is assumed to be preloaded, afterwhich all other modules can be found
+-- and loaded.
 
 local package=package
 local require=require
@@ -106,7 +109,7 @@ function default_paths()
 	
 	setpaths(dll,{bin_dir,bin_dir})
 	
-	dir=bin_dir -- and remember
+	dir=get_cd() -- use cd as base dir
 	
 end
 

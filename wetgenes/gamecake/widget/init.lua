@@ -6,12 +6,12 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --
 
 
-local widget_meta=require("fenestra.widget.meta")
-local widget_skin=require("fenestra.widget.skin")
+local widget_meta=require("wetgenes.gamecake.widget.meta")
+local widget_skin=require("wetgenes.gamecake.widget.skin")
 
 
 
-module("fenestra.widget")
+module("wetgenes.gamecake.widget")
 
 
 --

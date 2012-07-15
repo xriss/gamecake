@@ -1,5 +1,6 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local gcinfo=gcinfo
 
 local hex=function(str) return tonumber(str,16) end
 
@@ -9,6 +10,8 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 module("wetgenes.gamecake.mods.console")
 local buffedit=require("wetgenes.gamecake.mods.console.buffedit")
+
+name="console" -- by this name shall ye know me
 
 function bake(opts)
 
@@ -214,8 +217,6 @@ function bake(opts)
 
 	function console.update(state)
 	
-		if not console.setup_done then console.setup(state) end -- modules do not have their setup called yet...
-	
 		console.buff:update()
 		
 		if console.show then
@@ -244,6 +245,32 @@ function bake(opts)
 		local cake=state.cake
 		local canvas=cake.canvas
 		local gl=cake.gl
+
+		if state.times and state.win then -- simple benchmarking
+		
+			local t=state.win.time()
+
+		-- count frames	
+			if (not console.fps) or t-console.fps_last >= 1 then -- update with average value once a sec
+			
+				console.fps=console.fps_count or 0
+				console.fps_count=0
+				console.fps_last=t
+			
+				state.times.update.done()
+				state.times.draw.done()
+			end
+
+			local gci=gcinfo()
+			console.display(string.format("fps=%02.0f t=%03.0f u=%03.0f d=%03.0f gc=%0.0fk",
+				console.fps,
+				math.floor(0.5+(10000/console.fps)),
+				math.floor(0.5+state.times.update.time*10000),
+				math.floor(0.5+state.times.draw.time*10000/state.times.draw.hash),
+				math.floor(gci) ))
+				
+			console.fps_count=console.fps_count+1
+		end
 
 
 		state.win:info()

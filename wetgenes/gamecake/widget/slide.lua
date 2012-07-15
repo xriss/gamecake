@@ -5,9 +5,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- two basic widgets merged together to give a simple slide or scrollbar 
 
 
-module("fenestra.widget.slide")
+module("wetgenes.gamecake.widget.slide")
 
-local widget_data=require("fenestra.widget.data")
+local widget_data=require("wetgenes.gamecake.widget.data")
 
 
 function mouse(widget,act,x,y,key)

@@ -7,9 +7,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("fenestra.widget.textedit")
+module("wetgenes.gamecake.widget.textedit")
 
-local widget_data=require("fenestra.widget.data")
+local widget_data=require("wetgenes.gamecake.widget.data")
 
 
 function mouse(widget,act,x,y,key)
