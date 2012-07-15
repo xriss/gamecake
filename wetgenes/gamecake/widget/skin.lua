@@ -152,7 +152,7 @@ function setup(def)
 --	local font=--[[def.font]]def.state.cake.fonts:get(1)
 
 	local cake=def.state.cake
-	local canvas=cake.canvas
+	local canvas=def.state.canvas
 	local font=canvas.font
 	
 --

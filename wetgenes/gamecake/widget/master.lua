@@ -21,7 +21,7 @@ function setup(widget,def)
 --	local win=def.win
 
 	local cake=def.state.cake
-	local canvas=cake.canvas
+	local canvas=def.state.canvas
 
 	master.throb=0
 --	master.fbo=_G.win.fbo(0,0,0) -- use an fbo

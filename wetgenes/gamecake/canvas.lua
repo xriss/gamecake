@@ -7,21 +7,16 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.canvas")
 
-
 local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 
-function bake(opts)
 
-	local canvas={}
-	local font={}
-	canvas.font=font
-	font.canvas=canvas
-	
-	canvas.cake=opts.cake
-	canvas.win=opts.cake.win
-	canvas.gl=opts.gl
-		
+local base={}
+local canvas={}
+local font={}
+
+base.font=font
+base.canvas=canvas
 
 
 --
@@ -158,6 +153,41 @@ canvas.stop = function(canvas)
 	canvas.vdat=nil
 end
 
+canvas.viewport=function(canvas)
+	local win=canvas.win
+	local gl=canvas.gl
+	
+	win:info()
+	gl.Viewport(0,0,win.width,win.height)
+end
+
+canvas.gl_default=function(canvas)
+
+	local gl=canvas.gl
+
+-- the default gl state, when we deviate from this we should restore it...
+
+	if gl then
+	
+		gl.Disable(gl.LIGHTING)
+		gl.Disable(gl.DEPTH_TEST)
+		gl.Disable(gl.CULL_FACE)
+		gl.Enable(gl.TEXTURE_2D)    
+		
+		gl.Color(1,1,1,1)	
+		gl.EnableClientState(gl.VERTEX_ARRAY)
+		gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
+		gl.DisableClientState(gl.COLOR_ARRAY)
+		gl.DisableClientState(gl.NORMAL_ARRAY)
+
+	--	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+		gl.Enable(gl.BLEND)
+		
+	end
+
+end
+
 
 
 
@@ -213,37 +243,30 @@ font.draw=function(font,text)
 	font.x=x
 end
 
+function bake(opts)
 
-canvas.gl_default=function(canvas)
+	local canvas={}
+	local font={}
 
-	local gl=canvas.gl
+-- fill with functions	
+	for n,v in pairs(base.canvas) do canvas[n]=v end
+	for n,v in pairs(base.font) do font[n]=v end
 
--- the default gl state, when we deviate from this we should restore it...
+-- link together, all canvas data
+	canvas.font=font
+	font.canvas=canvas
 
-	if gl then
-	
-		gl.Disable(gl.LIGHTING)
-		gl.Disable(gl.DEPTH_TEST)
-		gl.Disable(gl.CULL_FACE)
-		gl.Enable(gl.TEXTURE_2D)    
-		
-		gl.Color(1,1,1,1)	
-		gl.EnableClientState(gl.VERTEX_ARRAY)
-		gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
-		gl.DisableClientState(gl.COLOR_ARRAY)
-		gl.DisableClientState(gl.NORMAL_ARRAY)
+-- fill in options	
+	canvas.cake=opts.cake
+	canvas.win=opts.cake.win
+	canvas.gl=opts.gl
 
-	--	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-		gl.Enable(gl.BLEND)
-		
-	end
-
-end
-
+-- basic setup of canvas
 
 	canvas:project23d(canvas.win.width,canvas.win.height,0.5,1024) -- some dumb defaults
-	canvas:start()
+	canvas:start()	
+	
+	font:set( canvas.cake.fonts:get(1) ) -- load default, builtin, 8x8 font
 	
 	return canvas
 end

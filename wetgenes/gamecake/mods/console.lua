@@ -243,7 +243,7 @@ function bake(opts)
 	
 		local win=state.win
 		local cake=state.cake
-		local canvas=cake.canvas
+		local canvas=state.canvas
 		local font=canvas.font
 		local gl=cake.gl
 

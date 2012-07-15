@@ -34,8 +34,12 @@ function bake(opts)
 	cake.canvas_fmt=opts.canvas_fmt or grd.FMT_U16_RGB_565
 	cake.images_fmt=opts.images_fmt or grd.FMT_U16_RGBA_4444_PREMULT
 	
+-- canvas should be user allocated and you may have multiple canvas
+-- its now considered a drawstate holder
+--	cake.canvas = wcanvas.bake(opts) -- we will need a canvas to draw too
+
+	cake.bake_canvas=function() return wcanvas.bake(opts)	end -- canvas generator
 	
-	cake.canvas = wcanvas.bake(opts) -- we will need a canvas to draw too
 	cake.images = wimages.bake(opts) -- we will need to load some images
 	cake.sheets = wsheets.bake(opts) -- we will need to manage some sprite sheets
 	cake.fonts  =  wfonts.bake(opts) -- we will need to load some fonts
@@ -61,7 +65,7 @@ end
 
 start = function(cake)
 print("cakestart")
-	cake.canvas:start()
+--	cake.canvas:start()
 	cake.images:start()
 	cake.sheets:start()
 	cake.fonts:start()
@@ -72,7 +76,7 @@ end
 
 stop = function(cake)
 print("cakestop")
-	cake.canvas:stop()
+--	cake.canvas:stop()
 	cake.sheets:stop()
 	cake.images:stop()
 	cake.fonts:stop()
@@ -84,6 +88,7 @@ print("cakestop")
 	end
 end
 
+--[[
 blit = function(cake,id,name,cx,cy,ix,iy,w,h)
 	cake.canvas:blit(cake.images:get(id,name),cx,cy,ix,iy,w,h)
 end
@@ -93,5 +98,5 @@ beep = function(cake,id,name)
 		cake.sounds:beep(cake.sounds:get(id,name))
 	end
 end
-
+]]
 
