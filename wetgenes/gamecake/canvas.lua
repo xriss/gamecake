@@ -65,7 +65,7 @@ canvas.project23d = function(canvas,width,height,fov,depth)
 	if (canvas_aspect > (aspect) ) 	then 	-- fit width to screen
 	
 		m[1] = ((aspect)*1)/fov
-		m[6] = -((aspect)/screen_aspect)/fov
+		m[6] = -((aspect)/canvas_aspect)/fov
 		
 		canvas.xs=1
 		canvas.ys=canvas_aspect/aspect
