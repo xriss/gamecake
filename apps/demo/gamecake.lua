@@ -44,6 +44,8 @@ function start()
 			win=state.win,
 			disable_sounds=true,
 		})
+		
+		state.canvas=state.cake.bake_canvas() -- get a default canvas to draw with
 	end
 	
 --	table.insert(state.mods,require("wetgenes.gamecake.mods.console").bake(opts))
@@ -78,7 +80,7 @@ demo.setup=function(state)
 	state.require_mod("wetgenes.gamecake.mods.console")
 
 
-	state.escmenu=require("wetgenes.gamecake.widget").setup(state.win,{state=state--[[font=win.font_sans]]})
+	state.escmenu=require("wetgenes.gamecake.widget").setup(state.win,{state=state})
 
 
 	local hooks={}
@@ -111,29 +113,30 @@ demo.draw=function(state)
 --print("draw")
 	local win=state.win
 	local cake=state.cake
-	local canvas=cake.canvas
+	local canvas=state.canvas
 	local font=canvas.font
 	local gl=cake.gl
 	
 --print(wstr.dump(win))
 
-	win:info() -- did our window change?
-	gl.Viewport(0,0,win.width,win.height)
+	canvas:viewport() -- did our window change?
+	canvas:project23d(640,480,0.25,480*4)
 		
 	gl.ClearColor(0,0,0,0)
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 	gl.MatrixMode(gl.PROJECTION)
-	gl.LoadMatrix( canvas:project23d(640,480,0.25,480*4) )
+	gl.LoadMatrix( canvas.pmtx )
 
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
 	gl.Translate(-320,-240,-480*2) -- a good starting point
 
-	canvas:gl_default()
+	canvas:gl_default() -- reset gl state
 
 	gl.PushMatrix()
 	
+-- default font is auto loaded
 	font:set(cake.fonts:get(1))
 	font:set_size(32,0)
 	font:set_xy((640-(12*32))/2,240-16)
