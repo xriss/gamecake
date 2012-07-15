@@ -11,7 +11,9 @@ local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
-local opts={}
+local opts={
+	times=true, -- request simple time keeping samples
+}
 
 
 function start()
@@ -44,20 +46,14 @@ function start()
 		})
 	end
 	
-	table.insert(state.mods,require("wetgenes.gamecake.mods.console").bake(opts))
+--	table.insert(state.mods,require("wetgenes.gamecake.mods.console").bake(opts))
 
 	state.next=demo
 
 	local finished=state.change()
 	repeat
 
-		repeat -- handle msg queue (so we know the window size on windows)
-			local m=state.win:msg()
-			if m[1] then
-				state.mods[1].msg(m)
-			end
-		until not m[1]
-
+		state.msgs()
 		state.update()
 		state.draw()
 		
@@ -76,7 +72,29 @@ end
 demo.setup=function(state)
 
 	demo.loads(state)
+
+-- we want the following mods to load and be setup
+-- console gives us a ` style quake console
+	state.require_mod("wetgenes.gamecake.mods.console")
+
+
+	state.escmenu=require("wetgenes.gamecake.widget").setup(state.win,{state=state--[[font=win.font_sans]]})
+
+
+	local hooks={}
+	function hooks.click(widget)
+print(widget.id)
+	end
+	local top=state.escmenu:add({hx=640,hy=480,mx=1,class="hx",ax=0,ay=0})
+	top:add({sy=4,sx=1})
+	top:add({text="Continue",color=0xff00ff00,id="continue",hooks=hooks})
+	top:add({text="Main Menu",color=0xffffff00,id="menu",hooks=hooks})
+	top:add({text="Reload",color=0xffff8800,id="reload",hooks=hooks})
+	top:add({text="Quit",color=0xffff0000,id="quit",hooks=hooks})
+	top:add({sy=4,sx=1})
 	
+	state.escmenu:layout()
+
 	
 end
 
@@ -90,6 +108,7 @@ demo.update=function(state)
 	state.cake.screen.height=state.win.height
 	state.cake.screen:project23d(320,480,0.5,1024)
 
+	state.escmenu:update()
 end
 
 demo.draw=function(state)
@@ -126,8 +145,8 @@ demo.draw=function(state)
 	gl.PopMatrix()
 
 
---	win:swap()
-
+	state.escmenu:draw()
+	
 end
 
 
