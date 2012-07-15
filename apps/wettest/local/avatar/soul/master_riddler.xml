@@ -1,0 +1,115 @@
+<?xml version="1.0" standalone="no" ?>
+<!-- http://www.wetgenes.com/xml/soul -->
+<!-- A wavy soul for all your modern avatar needs -->
+<soul version="1.0">
+    <flavour name="vanilla">
+        <part name="body" Morph0="1.000000">
+            <object group="body" name="bodess" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="head" Xsize="1.006479" Ysize="0.993522" Zsize="1.000000" Morph1="0.465047">
+            <object group="head" name="default" />
+            <object />
+            <object group="hair_xtra" name="long" />
+            <object group="hair_xtra" name="bang" />
+        </part>
+        <part name="mouth" Xsize="0.855939" Ysize="0.855939" Zsize="0.855939">
+            <object group="mouth" name="bow_fat" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="nose" Xsize="0.937390" Ysize="1.000000" Zsize="0.937390">
+            <object group="nose" name="small" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="tail">
+            <object />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="left_hand">
+            <object group="hand" name="default" />
+            <object />
+            <object />
+            <object group="inhand" name="pipe" />
+        </part>
+        <part name="left_foot">
+            <object group="foot" name="heel" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="left_eye" Xsize="1.112634" Ysize="1.112634" Zsize="1.112634">
+            <object group="eye" name="default" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="left_eyeball">
+            <object group="eyeball" name="default" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="left_ear">
+            <object group="ear" name="default" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="right_hand">
+            <object group="hand" name="default" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="right_foot">
+            <object group="foot" name="heel" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="right_eye" Xsize="1.119268" Ysize="1.119268" Zsize="1.119268">
+            <object group="eye" name="default" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="right_eyeball">
+            <object group="eyeball" name="default" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="right_ear">
+            <object group="ear" name="default" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <surface name="skin" argb="0xffffc0aa" spec="0xff000000" gloss="0.000000" />
+        <surface name="lips" argb="0xff990000" spec="0xff000000" gloss="0.005760" />
+        <surface name="nipples" argb="0xffdd9977" spec="0xff000000" gloss="0.000000" />
+        <surface name="hair" argb="0xffffffff" spec="0xffff8800" gloss="0.000000" />
+        <surface name="hairhi" argb="0xffffffff" spec="0xffff8800" gloss="0.000000" />
+        <surface name="hairlo" argb="0xffffffff" spec="0xffff8800" gloss="0.000000" />
+        <surface name="eyebrows" argb="0xffffffff" spec="0xffff8800" gloss="0.000000" />
+        <surface name="beard" argb="0xffffffff" spec="0xffff8800" gloss="0.000000" />
+        <surface name="specs" argb="0xff000000" spec="0xff000000" gloss="0.000000" />
+        <surface name="eye" argb="0xffcccccc" spec="0xffffffff" gloss="0.085927" />
+        <surface name="iris" argb="0xff000040" spec="0xffffffff" gloss="0.195082" />
+        <surface name="body" argb="0xff88b7da" spec="0xff000000" gloss="0.000000" />
+        <surface name="bodyhi" argb="0xff88b7da" spec="0xff000000" gloss="0.000000" />
+        <surface name="bodylo" argb="0xff88b7da" spec="0xff000000" gloss="0.000000" />
+        <surface name="foot" argb="0xffddc6b8" spec="0xff000000" gloss="0.188147" />
+        <surface name="toecaps" argb="0xff000000" spec="0xff000000" gloss="0.191599" />
+        <surface name="sole" argb="0xff000000" spec="0xff000000" gloss="0.000000" />
+        <surface name="socks" argb="0xffffaaaa" spec="0xff000000" gloss="0.000000" />
+    </flavour>
+</soul>

@@ -1,0 +1,27 @@
+#rm build-gmake-android -Rf
+
+cd `dirname $0`
+
+cd ..
+
+andsdk=`readlink -f ../sdks/android-8-arm`
+export PATH=$andsdk/bin:$PATH
+
+build/premake4 gmake android
+
+cd build-gmake-android
+
+if [ "$1" = "release" ] ; then
+	make config=release_android
+else
+	make $*
+fi
+
+cd ..
+cd android
+
+if [ "$1" = "release" ] ; then
+	ant release install
+else
+	ant debug install
+fi

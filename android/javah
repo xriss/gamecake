@@ -1,0 +1,1 @@
+javah -classpath bin/classes -d code com.wetgenes.yarn

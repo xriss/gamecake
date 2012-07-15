@@ -1,0 +1,19 @@
+if [ "$1" = "clean" ] ; then
+	rm -Rf build-gmake-mingw
+fi
+
+cd `dirname $0`
+cd ..
+
+build/premake4 gmake mingw
+
+cd build-gmake-mingw
+
+if [ "$1" = "release" ] ; then
+	make config=release_mingw
+else
+	make $*
+fi
+
+cd ..
+

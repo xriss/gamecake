@@ -1,0 +1,269 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc
+END
+decoding.html
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/decoding.html
+END
+ov_raw_tell.html
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_raw_tell.html
+END
+datastructures.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/datastructures.html
+END
+ov_read.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_read.html
+END
+callbacks.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/callbacks.html
+END
+vorbis_info.html
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/vorbis_info.html
+END
+ov_test_callbacks.html
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_test_callbacks.html
+END
+ov_callbacks.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_callbacks.html
+END
+style.css
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/style.css
+END
+ov_pcm_seek_page.html
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_pcm_seek_page.html
+END
+vorbis_comment.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/vorbis_comment.html
+END
+ov_pcm_seek.html
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_pcm_seek.html
+END
+ov_clear.html
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_clear.html
+END
+example.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/example.html
+END
+reference.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/reference.html
+END
+ov_info.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_info.html
+END
+OggVorbis_File.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/OggVorbis_File.html
+END
+ov_test_open.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_test_open.html
+END
+ov_raw_seek.html
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_raw_seek.html
+END
+ov_open_callbacks.html
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_open_callbacks.html
+END
+ov_time_seek_page.html
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_time_seek_page.html
+END
+ov_comment.html
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_comment.html
+END
+ov_seekable.html
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_seekable.html
+END
+return.html
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/return.html
+END
+ov_streams.html
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_streams.html
+END
+ov_time_tell.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_time_tell.html
+END
+ov_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_test.html
+END
+seeking.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/seeking.html
+END
+ov_pcm_total.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_pcm_total.html
+END
+initialization.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/initialization.html
+END
+threads.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/threads.html
+END
+fileinfo.html
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/fileinfo.html
+END
+ov_serialnumber.html
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_serialnumber.html
+END
+ov_bitrate.html
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_bitrate.html
+END
+ov_bitrate_instant.html
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_bitrate_instant.html
+END
+build.html
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/build.html
+END
+ov_raw_total.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_raw_total.html
+END
+ov_pcm_tell.html
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_pcm_tell.html
+END
+ov_open.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_open.html
+END
+ov_time_total.html
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_time_total.html
+END
+overview.html
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/overview.html
+END
+index.html
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/index.html
+END
+diff.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/diff.html
+END
+ov_time_seek.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/!svn/ver/9259/branches/lowmem-branch/Tremor/doc/ov_time_seek.html
+END
