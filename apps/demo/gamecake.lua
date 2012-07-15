@@ -104,10 +104,6 @@ end
 
 demo.update=function(state)
 
-	state.cake.screen.width=state.win.width
-	state.cake.screen.height=state.win.height
-	state.cake.screen:project23d(320,480,0.5,1024)
-
 	state.escmenu:update()
 end
 
@@ -116,18 +112,19 @@ demo.draw=function(state)
 	local win=state.win
 	local cake=state.cake
 	local canvas=cake.canvas
+	local font=canvas.font
 	local gl=cake.gl
 	
 --print(wstr.dump(win))
 
-	win:info()
+	win:info() -- did our window change?
 	gl.Viewport(0,0,win.width,win.height)
-
+		
 	gl.ClearColor(0,0,0,0)
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 	gl.MatrixMode(gl.PROJECTION)
-	gl.LoadMatrix( tardis.m4_project23d(win.width,win.height,640,480,0.25,480*4) )
+	gl.LoadMatrix( canvas:project23d(640,480,0.25,480*4) )
 
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
@@ -137,10 +134,10 @@ demo.draw=function(state)
 
 	gl.PushMatrix()
 	
-	canvas:font_set(cake.fonts:get(1))
-	canvas:font_set_size(32,0)
-	canvas:font_set_xy((640-(12*32))/2,240-16)
-	canvas:font_draw("Hello World!")
+	font:set(cake.fonts:get(1))
+	font:set_size(32,0)
+	font:set_xy((640-(12*32))/2,240-16)
+	font:draw("Hello World!")
 	
 	gl.PopMatrix()
 
