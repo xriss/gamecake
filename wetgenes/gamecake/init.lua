@@ -11,7 +11,6 @@ local wcanvas=require("wetgenes.gamecake.canvas")
 local wimages=require("wetgenes.gamecake.images")
 local wsheets=require("wetgenes.gamecake.sheets")
 local wsounds=require("wetgenes.gamecake.sounds")
-local wscreen=require("wetgenes.gamecake.screen")
 local wfonts =require("wetgenes.gamecake.fonts")
 
 local grd=require("wetgenes.grd")
@@ -41,7 +40,9 @@ function bake(opts)
 	cake.sheets = wsheets.bake(opts) -- we will need to manage some sprite sheets
 	cake.fonts  =  wfonts.bake(opts) -- we will need to load some fonts
 	cake.sounds = wsounds.bake(opts) -- we will need to load some sounds
-	cake.screen = wscreen.bake(opts) -- how to display a canvas
+	
+-- screen has been merged with canvas
+--	cake.screen = wscreen.bake(opts) -- how to display the canvas, 
 
 	return cake
 end

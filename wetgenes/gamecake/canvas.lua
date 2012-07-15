@@ -7,43 +7,89 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.canvas")
 
-base=require(...)
-meta={}
-meta.__index=base
 
 local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 
---local nacl=require("wetgenes.nacl.core")
-
 function bake(opts)
 
 	local canvas={}
-	setmetatable(canvas,meta)
+	local font={}
+	canvas.font=font
+	font.canvas=canvas
 	
 	canvas.cake=opts.cake
+	canvas.win=opts.cake.win
 	canvas.gl=opts.gl
-	
-	canvas.width=opts.width or 320
-	canvas.height=opts.height or 240
-	
-	canvas.fmt=opts.cake.canvas_fmt
+		
 
-	canvas:start()
+
+--
+-- build a simple field of view projection matrix designed to work in 2d or 3d and keep the numbers
+-- easy for 2d positioning.
+--
+-- setting aspect to 640,480 and fov of 1 would mean at a z depth of 240 (which is y/2) then your view area would be
+-- -320 to +320 in the x and -240 to +240 in the y.
+--
+-- fov is a tan like value (a view size inverse scalar) so 1 would be 90deg, 0.5 would be 45deg and so on
+--
+-- the depth parameter is only used to limit the range of the zbuffer so it covers 0 to depth
+--
+-- The following would be a reasonable default for a 640x480 canvas.
+--
+-- build_project23d(640,480,0.5,1024)
+--
+-- then at z=((480/2)/0.5)=480 we would have one to one pixel scale...
+-- the total view area volume from there would be -320 +320 , -240 +240 , -480 +(1024-480)
+--
+-- canvas needs to contain width and height of the display which we use to work
+-- out where to place our view such that it is always visible and keeps its aspect.
+--
+canvas.project23d = function(canvas,width,height,fov,depth)
+
+	local aspect=height/width
 	
-	return canvas
+	canvas.view_width=width
+	canvas.view_height=height
+	canvas.view_fov=fov
+	canvas.view_depth=depth
+
+	local m={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- defaults
+	canvas.pmtx=m
+	
+	local f=depth
+	local n=1
+
+	local canvas_aspect=(canvas.win.height/canvas.win.width)
+		
+	if (canvas_aspect > (aspect) ) 	then 	-- fit width to screen
+	
+		m[1] = ((aspect)*1)/fov
+		m[6] = -((aspect)/screen_aspect)/fov
+		
+		canvas.xs=1
+		canvas.ys=canvas_aspect/aspect
+	else									-- fit height to screen
+	
+		m[1] = canvas_aspect/fov
+		m[6] = -1/fov
+		
+		canvas.xs=aspect/canvas_aspect
+		canvas.ys=1
+	end
+	
+	
+	m[11] = -(f+n)/(f-n)
+	m[12] = -1
+
+	m[15] = -2*f*n/(f-n)
+	
+	return m -- return the matrix but we also updated the canvas size/scale for later use
 end
 
-grd_blit = function(canvas,t,cx,cy,ix,iy,w,h)
-	assert(
-			canvas.grd:blit(	t,
-								cx,cy,
-								ix,iy,
-								w,h)
-	)
-end
 
-gl_blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
+
+canvas.blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
 
 --print("gl_blit + ",nacl.time()," ",t.filename )
 
@@ -102,88 +148,73 @@ end
 
 
 
-start = function(canvas)
-	if canvas.gl then -- open
-		canvas.vbuf=canvas.gl.GenBuffer()
-		canvas.vdat=pack.alloc(4*5*4) -- temp vertex quad draw buffer		
-		blit=gl_blit
-	else
-		canvas.grd=assert(wgrd.create(canvas.fmt,
-		canvas.width, canvas.height, 1))
-		blit=grd_blit
-	end
+canvas.start = function(canvas)
+	canvas.vbuf=canvas.gl.GenBuffer()
+	canvas.vdat=pack.alloc(4*5*4) -- temp vertex quad draw buffer		
 end
 
-stop = function(canvas)
-	if canvas.gl then -- free
-		if canvas.vbuf then canvas.gl.DeleteBuffer(canvas.vbuf) canvas.vbuf=nil end
-		canvas.vdat=nil
-		blit=nil
-	else
-		canvas.grd=nil
-		blit=nil
-	end
+canvas.stop = function(canvas)
+	if canvas.vbuf then canvas.gl.DeleteBuffer(canvas.vbuf) canvas.vbuf=nil end
+	canvas.vdat=nil
 end
 
 
 
 
-font_set = function(canvas,font)
-	canvas.font=font or canvas.font
-	canvas:font_set_size(16,0)
-	canvas:font_set_xy(0,0)
+font.set = function(font,dat)
+	font.dat=dat or font.dat
+	font:set_size(16,0)
+	font:set_xy(0,0)
 end
 
-font_set_size = function(canvas,size,add)
-	canvas.font_size=size
-	canvas.font_add=add or 0 -- clear the x space tweak
+font.set_size = function(font,size,add)
+	font.size=size
+	font.add=add or 0 -- clear the x space tweak
 end
-font_set_xy = function(canvas,x,y)
-	canvas.font_x=x or canvas.font_x
-	canvas.font_y=y or canvas.font_y
+font.set_xy = function(font,x,y)
+	font.x=x or font.x
+	font.y=y or font.y
 end
 
-font_width=function(canvas,text)
+font.width=function(font,text)
 
-	local font=canvas.font
-	local s=canvas.font_size/font.size
+	local font_dat=font.dat
+	local s=font.size/font_dat.size
 	local x=0
 	for i=1,#text do
 	
 		local cid=text:byte(i)
-		local c=font.chars[cid] or canvas.font.chars[32]
+		local c=font_dat.chars[cid] or font_dat.chars[32]
 		
-		x=x+(c.add*s)+canvas.font_add
+		x=x+(c.add*s)+font.add
 	end
 
 	return x
 end
 
-font_draw=function(canvas,text)
+font.draw=function(font,text)
 
-	local x=canvas.font_x
-	local y=canvas.font_y
-	local font=canvas.font
+	local x=font.x
+	local y=font.y
+	local font_dat=font.dat
 	
-	local s=canvas.font_size/font.size
+	local s=font.size/font_dat.size
 	
-	local gl=canvas.gl
-
 	for i=1,#text do
 	
 		local cid=text:byte(i)
-		local c=font.chars[cid] or canvas.font.chars[32]
+		local c=font_dat.chars[cid] or font_dat.chars[32]
 
-		canvas:blit(c,x+(c.x*s),y+(c.y*s),nil,nil,c.width,c.height,c.width*s,c.height*s)
+		font.canvas:blit(c,x+(c.x*s),y+(c.y*s),nil,nil,c.width,c.height,c.width*s,c.height*s)
 
-		x=x+(c.add*s)+canvas.font_add
+		x=x+(c.add*s)+font.add
 	end
 	
-	canvas.font_x=x
+	font.x=x
 end
 
 
-gl_default=function(canvas)
+canvas.gl_default=function(canvas)
 
 	local gl=canvas.gl
 
@@ -211,3 +242,8 @@ gl_default=function(canvas)
 end
 
 
+	canvas:project23d(canvas.win.width,canvas.win.height,0.5,1024) -- some dumb defaults
+	canvas:start()
+	
+	return canvas
+end

@@ -244,6 +244,7 @@ function bake(opts)
 		local win=state.win
 		local cake=state.cake
 		local canvas=cake.canvas
+		local font=canvas.font
 		local gl=cake.gl
 
 		if state.times and state.win then -- simple benchmarking
@@ -288,15 +289,15 @@ function bake(opts)
 		gl.Translate(-w/2,-h/2,-h) -- top/left 1unit==1pixel
 		gl.PushMatrix()
 
-		canvas:font_set(cake.fonts:get(1))
-		canvas:font_set_size(8,0)
+		font:set(cake.fonts:get(1))
+		font:set_size(8,0)
 
 		local i=#console.lines
 		local y=console.y-16
 		while y>-8 and i>0 do
 		
-			canvas:font_set_xy(0,y)
-			canvas:font_draw(console.lines[i])
+			font:set_xy(0,y)
+			font:draw(console.lines[i])
 			
 			y=y-8
 			i=i-1
@@ -305,18 +306,18 @@ function bake(opts)
 		if console.show_hud then
 			for i,v in ipairs(console.lines_display) do
 			
-				canvas:font_set_xy(0,console.y+i*8-8)
-				canvas:font_draw(v)
+				font:set_xy(0,console.y+i*8-8)
+				font:draw(v)
 			
 			end
 		end
 		
-		canvas:font_set_xy(0,console.y-8)
-		canvas:font_draw(">"..console.buff.line)
+		font:set_xy(0,console.y-8)
+		font:draw(">"..console.buff.line)
 
 		if console.buff.throb > 128 then
-			canvas:font_set_xy((console.buff.line_idx+1)*8,console.y-8)
-			canvas:font_draw("_")
+			font:set_xy((console.buff.line_idx+1)*8,console.y-8)
+			font:draw("_")
 		end
 
 		console.lines_display={}

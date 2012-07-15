@@ -20,6 +20,9 @@ function setup(widget,def)
 	local meta=widget.meta
 --	local win=def.win
 
+	local cake=def.state.cake
+	local canvas=cake.canvas
+
 	master.throb=0
 --	master.fbo=_G.win.fbo(0,0,0) -- use an fbo
 
@@ -65,6 +68,8 @@ function setup(widget,def)
 		find_dirty_fbos(widget)
 ]]
 	
+
+
 		gl.Disable(gl.CULL_FACE)
 		gl.Disable(gl.LIGHTING)
 		gl.Disable(gl.DEPTH_TEST)

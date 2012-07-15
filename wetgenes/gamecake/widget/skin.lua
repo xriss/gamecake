@@ -153,6 +153,7 @@ function setup(def)
 
 	local cake=def.state.cake
 	local canvas=cake.canvas
+	local font=canvas.font
 	
 --
 -- display this widget and its sub widgets
@@ -214,10 +215,10 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		
 		widget.dirty=nil
 				
-		gl.Disable(gl.LIGHTING)
-		gl.Disable(gl.DEPTH_TEST)
-		gl.Disable(gl.CULL_FACE)
-		gl.Disable(gl.TEXTURE_2D)
+--		gl.Disable(gl.LIGHTING)
+--		gl.Disable(gl.DEPTH_TEST)
+--		gl.Disable(gl.CULL_FACE)
+--		gl.Disable(gl.TEXTURE_2D)
 		
 		local txp,typ=0,0
 		
@@ -281,6 +282,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 				if widget.class=="string" then -- hack
 					texs.border:bind()
 				end
+				
 			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
 			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)
 			
@@ -326,10 +328,10 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		
 		if widget.text then
 		
-			canvas:font_set(cake.fonts:get(1))
-			canvas:font_set_size(widget.text_size,0)
+			font:set(cake.fonts:get(1))
+			font:set_size(widget.text_size,0)
 			local ty=widget.text_size
-			local tx=canvas:font_width(widget.text)
+			local tx=font:width(widget.text)
 
 --			local tx,ty=font.size(widget.text,widget.text_size)
 			
@@ -358,8 +360,8 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			widget.text_x=tx
 			widget.text_y=ty
 
-			canvas:font_set_xy(tx,-ty)
-			canvas:font_draw(widget.text)
+			font:set_xy(tx,-ty)
+			font:draw(widget.text)
 
 --			font.set(tx,-ty,c,widget.text_size)
 --			font.draw(widget.text)
@@ -368,10 +370,10 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 				if widget.class=="textedit" then -- hack
 					if widget.master.focus==widget then --only draw curser in active widget
 						if widget.master.throb>=128 then
-							local sw=canvas:font_width(widget.text:sub(1,widget.data.str_idx))
+							local sw=font:width(widget.text:sub(1,widget.data.str_idx))
 
-			canvas:font_set_xy(tx+sw,-ty)
-			canvas:font_draw("_")
+			font:set_xy(tx+sw,-ty)
+			font:draw("_")
 --[[
 							gl.Enable(gl.COLOR_MATERIAL)
 							win.flat_rect(
