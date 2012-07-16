@@ -192,7 +192,7 @@ else
 	links { "GL" , "GLU" }
 	links { "crypt" }
 	links { "pthread" }
-	links { "dl" , "m" }
+	links { "dl" , "m" , "rt" }
 	
 	KIND{kind="ConsoleApp",name="nginx"}
 
