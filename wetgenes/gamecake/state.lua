@@ -107,13 +107,13 @@ function bake(opts)
 		end
 
 		function state.update()
-			
+
 			if state.frame_rate and state.frame_time then --  framerate limiter enabled
 				if state.frame_time<state.win:time() then state.frame_time=state.win:time() end -- prevent race condition
 				while (state.frame_time-0.001)>state.win:time() do state.win:sleep(0.001) end -- simple frame limit
 				state.frame_time=state.frame_time+state.frame_rate -- step frame forward
 			end
-			
+
 			if state.times then state.times.update.start() end
 			
 			if state.now and state.now.update then
@@ -130,22 +130,25 @@ function bake(opts)
 
 		function state.draw()
 			
+			if state.times then state.times.draw.stop() end -- draw is squify just use it as total frame
 			if state.times then state.times.draw.start() end
 			
 			if state.now and state.now.draw then
 				state.now.draw(state)
 			end
+
+			
 			for i,v in ipairs(state.mods) do
 				if v.draw then
 					v.draw(state)
 				end
 			end
 			
+			
 			if state.win then
 				state.win:swap()
 			end
 			
-			if state.times then state.times.draw.stop() end
 		end
 
 		function state.msgs() -- read and process any msgs we have from win:msg

@@ -261,16 +261,16 @@ function bake(opts)
 				console.fps_count=0
 				console.fps_last=t
 			
-				state.times.update.done()
-				state.times.draw.done()
 			end
+			
+			state.times.update.done()
+			state.times.draw.done()
 
 			local gci=gcinfo()
-			console.display(string.format("fps=%02.0f t=%03.0f u=%03.0f d=%03.0f gc=%0.0fk",
+			console.display(string.format("fps=%02.0f u=%02.2f d=%02.2f gc=%0.0fk",
 				console.fps,
-				math.floor(0.5+(10000/console.fps)),
-				math.floor(0.5+state.times.update.time*10000),
-				math.floor(0.5+state.times.draw.time*10000/state.times.draw.hash),
+				(0.0+state.times.update.time*1000),
+				(0.0+state.times.draw.time*1000),
 				math.floor(gci) ))
 				
 			console.fps_count=console.fps_count+1
@@ -321,7 +321,13 @@ function bake(opts)
 		end
 
 		if console.show_hud then
-			gl.Color(pack.pm_argb4_f4(0xffff))
+			if console.flick then
+--				console.flick=false
+				gl.Color(pack.pm_argb4_f4(0xffff))
+			else
+				console.flick=true
+				gl.Color(pack.pm_argb4_f4(0xf000))
+			end
 			for i,v in ipairs(console.lines_display) do
 			
 				font:set_xy(0,console.y+i*8-8)
