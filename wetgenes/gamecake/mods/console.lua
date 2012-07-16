@@ -274,7 +274,7 @@ function bake(opts)
 		end
 
 
-		state.win:info()
+--		state.win:info()
 		local w,h=state.win.width,state.win.height
 		gl.Viewport(0,0,w,h)
 
@@ -282,12 +282,14 @@ function bake(opts)
 --		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( tardis.m4_project23d(w,h,w,h,0.5,0) )
+		gl.LoadMatrix( tardis.m4_project23d(w,h,w,h,0.5,h*2) )
 
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.LoadIdentity()
 		gl.Translate(-w/2,-h/2,-h) -- top/left 1unit==1pixel
 		gl.PushMatrix()
+
+		gl.Color(1,1,1,1)	
 
 		font:set(cake.fonts:get(1))
 		font:set_size(8,0)

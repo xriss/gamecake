@@ -7,11 +7,12 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake")
 
-local wcanvas=require("wetgenes.gamecake.canvas")
-local wimages=require("wetgenes.gamecake.images")
-local wsheets=require("wetgenes.gamecake.sheets")
-local wsounds=require("wetgenes.gamecake.sounds")
-local wfonts =require("wetgenes.gamecake.fonts")
+local wcanvas =require("wetgenes.gamecake.canvas")
+local wbuffers=require("wetgenes.gamecake.buffers")
+local wimages =require("wetgenes.gamecake.images")
+local wsheets =require("wetgenes.gamecake.sheets")
+local wsounds =require("wetgenes.gamecake.sounds")
+local wfonts  =require("wetgenes.gamecake.fonts")
 
 local grd=require("wetgenes.grd")
 
@@ -31,23 +32,17 @@ function bake(opts)
 	
 	if cake.gl then cake.gl.GetExtensions() end
 	
-	cake.canvas_fmt=opts.canvas_fmt or grd.FMT_U16_RGB_565
-	cake.images_fmt=opts.images_fmt or grd.FMT_U16_RGBA_4444_PREMULT
+--	cake.bake_canvas=function() return wcanvas.bake(opts)	end -- a canvas generator
 	
--- canvas should be user allocated and you may have multiple canvas
--- its now considered a drawstate holder
---	cake.canvas = wcanvas.bake(opts) -- we will need a canvas to draw too
+	
+	cake.buffers = wbuffers.bake(opts) -- generic buffer memory is now complex thanks to retardroid
+	cake.images  =  wimages.bake(opts) -- we will need to load some images
+	cake.sheets  =  wsheets.bake(opts) -- we will need to manage some sprite sheets
+	cake.fonts   =   wfonts.bake(opts) -- we will need to load some fonts
+	cake.sounds  =  wsounds.bake(opts) -- we will need to load some sounds
 
-	cake.bake_canvas=function() return wcanvas.bake(opts)	end -- canvas generator
+	cake.canvas  =  wcanvas.bake(opts) -- a canvas contains current drawing state and functions
 	
-	cake.images = wimages.bake(opts) -- we will need to load some images
-	cake.sheets = wsheets.bake(opts) -- we will need to manage some sprite sheets
-	cake.fonts  =  wfonts.bake(opts) -- we will need to load some fonts
-	cake.sounds = wsounds.bake(opts) -- we will need to load some sounds
-	
--- screen has been merged with canvas
---	cake.screen = wscreen.bake(opts) -- how to display the canvas, 
-
 	return cake
 end
 
@@ -65,7 +60,7 @@ end
 
 start = function(cake)
 print("cakestart")
---	cake.canvas:start()
+	cake.buffers:start()
 	cake.images:start()
 	cake.sheets:start()
 	cake.fonts:start()
@@ -76,27 +71,15 @@ end
 
 stop = function(cake)
 print("cakestop")
---	cake.canvas:stop()
+	cake.fonts:stop()
 	cake.sheets:stop()
 	cake.images:stop()
-	cake.fonts:stop()
+	cake.buffers:stop()
 	if not cake.opts.disable_sounds then
 		cake.sounds:stop()
 	end
-	if cake.gl.forget then -- any programs need to be recompiled
+	if cake.gl.forget then -- any programs will need to be recompiled
 		cake.gl.forget()
 	end
 end
-
---[[
-blit = function(cake,id,name,cx,cy,ix,iy,w,h)
-	cake.canvas:blit(cake.images:get(id,name),cx,cy,ix,iy,w,h)
-end
-
-beep = function(cake,id,name)
-	if not cake.opts.disable_sounds then
-		cake.sounds:beep(cake.sounds:get(id,name))
-	end
-end
-]]
 

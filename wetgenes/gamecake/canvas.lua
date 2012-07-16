@@ -126,7 +126,7 @@ canvas.blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
 	
 --print("gl_blit . ",nacl.time() )
 
-	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf)
+	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf[0])
 	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
 
 	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
@@ -143,15 +143,7 @@ end
 
 
 
-canvas.start = function(canvas)
-	canvas.vbuf=canvas.gl.GenBuffer()
-	canvas.vdat=pack.alloc(4*5*4) -- temp vertex quad draw buffer		
-end
 
-canvas.stop = function(canvas)
-	if canvas.vbuf then canvas.gl.DeleteBuffer(canvas.vbuf) canvas.vbuf=nil end
-	canvas.vdat=nil
-end
 
 canvas.viewport=function(canvas)
 	local win=canvas.win
@@ -263,8 +255,11 @@ function bake(opts)
 
 -- basic setup of canvas
 
+	canvas.vbuf=canvas.cake.buffers:create()
+	canvas.vdat=pack.alloc(4*5*4) -- temp vertex quad draw buffer		
+	
 	canvas:project23d(canvas.win.width,canvas.win.height,0.5,1024) -- some dumb defaults
-	canvas:start()	
+
 	
 	font:set( canvas.cake.fonts:get(1) ) -- load default, builtin, 8x8 font
 	
