@@ -4,6 +4,8 @@ local gcinfo=gcinfo
 
 local hex=function(str) return tonumber(str,16) end
 
+local pack=require("wetgenes.pack")
+
 local wetstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
@@ -245,6 +247,7 @@ function bake(opts)
 		local cake=state.cake
 		local canvas=state.canvas
 		local font=canvas.font
+		local flat=canvas.flat
 		local gl=cake.gl
 
 		if state.times and state.win then -- simple benchmarking
@@ -289,8 +292,12 @@ function bake(opts)
 		gl.Translate(-w/2,-h/2,-h) -- top/left 1unit==1pixel
 		gl.PushMatrix()
 
-		gl.Color(1,1,1,1)	
+		gl.Color(pack.pm_argb4_f4(0x40f0))
 
+		
+		flat:quad(0,0,w,console.y)
+
+		gl.Color(pack.pm_argb4_f4(0x80f0))
 		font:set(cake.fonts:get(1))
 		font:set_size(8,0)
 
@@ -304,22 +311,23 @@ function bake(opts)
 			y=y-8
 			i=i-1
 		end
-		
-		if console.show_hud then
-			for i,v in ipairs(console.lines_display) do
-			
-				font:set_xy(0,console.y+i*8-8)
-				font:draw(v)
-			
-			end
-		end
-		
+				
 		font:set_xy(0,console.y-8)
 		font:draw(">"..console.buff.line)
 
 		if console.buff.throb > 128 then
 			font:set_xy((console.buff.line_idx+1)*8,console.y-8)
 			font:draw("_")
+		end
+
+		if console.show_hud then
+			gl.Color(pack.pm_argb4_f4(0xffff))
+			for i,v in ipairs(console.lines_display) do
+			
+				font:set_xy(0,console.y+i*8-8)
+				font:draw(v)
+			
+			end
 		end
 
 		console.lines_display={}

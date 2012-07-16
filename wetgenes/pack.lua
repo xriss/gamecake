@@ -14,6 +14,8 @@ local core=require("wetgenes.pack.core")
 
 local wstr=require("wetgenes.string")
 
+local bit=require("bit")
+
 --
 -- Read a single member and return it
 --
@@ -119,6 +121,45 @@ pack.sizeof=function(ud)
 end
 pack.tostring=function(ud)
 	return core.tostring(ud)
+end
+
+
+-- convert a 16bit color to 4 floats, with premultiplied alpha
+-- ie so it can be used in a gl.Color() call
+pack.pm_argb4_f4=function(c)
+	local r,g,b,a
+	
+	a=bit.band(bit.rshift(c,12),0xf)
+	r=bit.band(bit.rshift(c, 8),0xf)
+	g=bit.band(bit.rshift(c, 4),0xf)
+	b=bit.band(c,0xf)
+
+	a=a/0xf
+	return a*r/0xf,a*g/0xf,a*b/0xf,a
+end
+
+-- same again but 32bit
+pack.pm_argb4_f8=function(c)
+	local r,g,b,a
+	
+	a=bit.band(bit.rshift(c,24),0xff)
+	r=bit.band(bit.rshift(c,16),0xff)
+	g=bit.band(bit.rshift(c, 8),0xff)
+	b=bit.band(c,0xff)
+
+	a=a/0xff
+	return a*r/0xff,a*g/0xff,a*b/0xff,a
+end
+
+-- pack 4 gl floats into 1 32bit color
+pack.f4_argb=function(r,g,b,a)
+	
+	a=bit.band(a*0xff,0xff)
+	r=bit.band(r*0xff,0xff)
+	g=bit.band(g*0xff,0xff)
+	b=bit.band(b*0xff,0xff)
+	
+	return  (a*0x01000000 + r*0x00010000 + g*0x00000100 + b*0x00000001)
 end
 
 return pack

@@ -12,11 +12,9 @@ local pack=require("wetgenes.pack")
 
 
 local base={}
-local canvas={}
-local font={}
-
-base.font=font
-base.canvas=canvas
+base.canvas={}
+base.font={}
+base.flat={}
 
 
 --
@@ -40,7 +38,7 @@ base.canvas=canvas
 -- canvas needs to contain width and height of the display which we use to work
 -- out where to place our view such that it is always visible and keeps its aspect.
 --
-canvas.project23d = function(canvas,width,height,fov,depth)
+base.canvas.project23d = function(canvas,width,height,fov,depth)
 
 	local aspect=height/width
 	
@@ -84,7 +82,7 @@ end
 
 
 
-canvas.blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
+base.canvas.blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
 
 --print("gl_blit + ",nacl.time()," ",t.filename )
 
@@ -145,7 +143,7 @@ end
 
 
 
-canvas.viewport=function(canvas)
+base.canvas.viewport=function(canvas)
 	local win=canvas.win
 	local gl=canvas.gl
 	
@@ -153,7 +151,7 @@ canvas.viewport=function(canvas)
 	gl.Viewport(0,0,win.width,win.height)
 end
 
-canvas.gl_default=function(canvas)
+base.canvas.gl_default=function(canvas)
 
 	local gl=canvas.gl
 
@@ -183,22 +181,22 @@ end
 
 
 
-font.set = function(font,dat)
+base.font.set = function(font,dat)
 	font.dat=dat or font.dat
 	font:set_size(16,0)
 	font:set_xy(0,0)
 end
 
-font.set_size = function(font,size,add)
+base.font.set_size = function(font,size,add)
 	font.size=size
 	font.add=add or 0 -- clear the x space tweak
 end
-font.set_xy = function(font,x,y)
+base.font.set_xy = function(font,x,y)
 	font.x=x or font.x
 	font.y=y or font.y
 end
 
-font.width=function(font,text)
+base.font.width=function(font,text)
 
 	local font_dat=font.dat
 	local s=font.size/font_dat.size
@@ -214,7 +212,7 @@ font.width=function(font,text)
 	return x
 end
 
-font.draw=function(font,text)
+base.font.draw=function(font,text)
 
 	local x=font.x
 	local y=font.y
@@ -235,18 +233,46 @@ font.draw=function(font,text)
 	font.x=x
 end
 
+
+base.flat.quad = function(flat,x1,y1,x2,y2)
+
+	local canvas=flat.canvas
+	local gl=canvas.gl
+	
+	pack.save_array({
+		x1,		y1,		0,		0,		0,
+		x2,		y1,		0,		1,		0,
+		x1,		y2,		0,		0,		1,
+		x2,		y2,		0,		1,		1,
+	},"f32",0,5*4,canvas.vdat)	
+
+	gl.BindBuffer(gl.ARRAY_BUFFER,flat.canvas.vbuf[0])
+	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
+
+	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
+	gl.TexCoordPointer(2,gl.FLOAT,5*4,3*4)
+
+	gl.Disable(gl.TEXTURE_2D)    
+	gl.DrawArrays(gl.TRIANGLE_STRIP,0,4)
+	gl.Enable(gl.TEXTURE_2D)    
+
+end
+
+
 function bake(opts)
 
 	local canvas={}
 	local font={}
+	local flat={}
 
 -- fill with functions	
 	for n,v in pairs(base.canvas) do canvas[n]=v end
 	for n,v in pairs(base.font) do font[n]=v end
+	for n,v in pairs(base.flat) do flat[n]=v end
 
--- link together, all canvas data
-	canvas.font=font
-	font.canvas=canvas
+-- link together
+	canvas.font,font.canvas=font,canvas
+	canvas.flat,flat.canvas=flat,canvas
 
 -- fill in options	
 	canvas.cake=opts.cake
@@ -260,7 +286,6 @@ function bake(opts)
 	
 	canvas:project23d(canvas.win.width,canvas.win.height,0.5,1024) -- some dumb defaults
 
-	
 	font:set( canvas.cake.fonts:get(1) ) -- load default, builtin, 8x8 font
 	
 	return canvas
