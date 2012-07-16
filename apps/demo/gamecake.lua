@@ -45,7 +45,7 @@ function start()
 			disable_sounds=true,
 		})
 		
-		state.canvas=state.cake.bake_canvas() -- get a default canvas to draw with
+		state.canvas=state.cake.canvas -- the default canvas to draw on
 	end
 	
 --	table.insert(state.mods,require("wetgenes.gamecake.mods.console").bake(opts))
@@ -121,6 +121,7 @@ demo.draw=function(state)
 
 	canvas:viewport() -- did our window change?
 	canvas:project23d(640,480,0.25,480*4)
+	canvas:gl_default() -- reset gl state
 		
 	gl.ClearColor(0,0,0,0)
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
@@ -132,7 +133,6 @@ demo.draw=function(state)
 	gl.LoadIdentity()
 	gl.Translate(-320,-240,-480*2) -- a good starting point
 
-	canvas:gl_default() -- reset gl state
 
 	gl.PushMatrix()
 	
