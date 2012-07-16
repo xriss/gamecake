@@ -1298,6 +1298,14 @@ function gles.Clear(...)
 	return core.Clear(...)
 end
 
+function gles.Finish(...)
+	return core.Finish(...)
+end
+
+function gles.Flush(...)
+	return core.Flush(...)
+end
+
 function gles.DrawArrays(...)
 	return core.DrawArrays(...)
 end
