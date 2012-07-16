@@ -84,7 +84,7 @@ elseif NIX then
 	links { "crypt" }
 	links { "pthread" }
 	
-	links { "dl" , "m" , "pthread" }
+	links { "dl" , "m" , "pthread" , "rt" }
 	
 	KIND{kind="ConsoleApp",name="lua"}
 
