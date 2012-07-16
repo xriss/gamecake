@@ -133,7 +133,7 @@ demo.draw=function(state)
 	gl.LoadIdentity()
 	gl.Translate(-320,-240,-480*2) -- a good starting point
 
-
+--[[
 	gl.PushMatrix()
 	
 -- default font is auto loaded
@@ -144,8 +144,9 @@ demo.draw=function(state)
 	
 	gl.PopMatrix()
 
+]]
 
-	state.escmenu:draw()
+--	state.escmenu:draw()
 	
 end
 

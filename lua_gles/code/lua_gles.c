@@ -143,6 +143,17 @@ static int lua_gles_Clear (lua_State *l)
 	return 0;
 }
 
+static int lua_gles_Finish (lua_State *l)
+{
+	glFinish();
+	return 0;
+}
+static int lua_gles_Flush (lua_State *l)
+{
+	glFlush();
+	return 0;
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // Matrix (gles1)
@@ -980,6 +991,8 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"ClearColor",			lua_gles_ClearColor},
 		{"ClearDepth",			lua_gles_ClearDepth},
 		{"Clear",				lua_gles_Clear},
+		{"Finish",				lua_gles_Finish},
+		{"Flush",				lua_gles_Flush},
 
 		{"GenTexture",			lua_gles_GenTexture},
 		{"BindTexture",			lua_gles_BindTexture},
