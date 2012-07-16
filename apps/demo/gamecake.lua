@@ -28,7 +28,7 @@ function start()
 		state.gl=require("gles").gles1
 		state.win:context({})
 
-		state.frame_rate=1/60 -- how fast we want to run
+		state.frame_rate=1/61 -- how fast we want to run
 		state.frame_time=0
 
 		state.cake=require("wetgenes.gamecake").bake({
@@ -133,7 +133,6 @@ demo.draw=function(state)
 	gl.LoadIdentity()
 	gl.Translate(-320,-240,-480*2) -- a good starting point
 
---[[
 	gl.PushMatrix()
 	
 -- default font is auto loaded
@@ -144,9 +143,8 @@ demo.draw=function(state)
 	
 	gl.PopMatrix()
 
-]]
 
---	state.escmenu:draw()
+	state.escmenu:draw()
 	
 end
 
