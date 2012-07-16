@@ -234,17 +234,26 @@ base.font.draw=function(font,text)
 end
 
 
-base.flat.quad = function(flat,x1,y1,x2,y2)
+base.flat.quad = function(flat,x1,y1,x2,y2,x3,y3,x4,y4)
 
 	local canvas=flat.canvas
 	local gl=canvas.gl
 	
-	pack.save_array({
-		x1,		y1,		0,		0,		0,
-		x2,		y1,		0,		1,		0,
-		x1,		y2,		0,		0,		1,
-		x2,		y2,		0,		1,		1,
-	},"f32",0,5*4,canvas.vdat)	
+	if y4 then
+		pack.save_array({
+			x1,		y1,		0,		0,		0,
+			x2,		y2,		0,		1,		0,
+			x4,		y4,		0,		0,		1,
+			x3,		y3,		0,		1,		1,
+		},"f32",0,5*4,canvas.vdat)	
+	else
+		pack.save_array({
+			x1,		y1,		0,		0,		0,
+			x2,		y1,		0,		1,		0,
+			x1,		y2,		0,		0,		1,
+			x2,		y2,		0,		1,		1,
+		},"f32",0,5*4,canvas.vdat)	
+	end
 
 	gl.BindBuffer(gl.ARRAY_BUFFER,flat.canvas.vbuf[0])
 	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)

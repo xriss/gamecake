@@ -130,21 +130,19 @@ function bake(opts)
 
 		function state.draw()
 			
-			if state.times then state.times.draw.stop() end -- draw is squify just use it as total frame
+			if state.times then state.times.draw.stop() end -- draw is squify so just use it as total frame time
 			if state.times then state.times.draw.start() end
 			
 			if state.now and state.now.draw then
 				state.now.draw(state)
 			end
-
 			
 			for i,v in ipairs(state.mods) do
 				if v.draw then
 					v.draw(state)
 				end
 			end
-			
-			
+						
 			if state.win then
 				state.win:swap()
 			end

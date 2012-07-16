@@ -267,10 +267,10 @@ function bake(opts)
 			state.times.draw.done()
 
 			local gci=gcinfo()
-			console.display(string.format("fps=%02.0f u=%02.2f d=%02.2f gc=%0.0fk",
+			console.display(string.format("fps=%02.0f %02.2f/%02.2f mem=%0.0fk",
 				console.fps,
-				(0.0+state.times.update.time*1000),
-				(0.0+state.times.draw.time*1000),
+				(state.times.update.time*1000),
+				(state.times.draw.time*1000),
 				math.floor(gci) ))
 				
 			console.fps_count=console.fps_count+1
@@ -292,32 +292,36 @@ function bake(opts)
 		gl.Translate(-w/2,-h/2,-h) -- top/left 1unit==1pixel
 		gl.PushMatrix()
 
-		gl.Color(pack.pm_argb4_f4(0x40f0))
-
-		
-		flat:quad(0,0,w,console.y)
-
-		gl.Color(pack.pm_argb4_f4(0x80f0))
 		font:set(cake.fonts:get(1))
 		font:set_size(8,0)
 
-		local i=#console.lines
-		local y=console.y-16
-		while y>-8 and i>0 do
+		if console.y > 0 then
 		
-			font:set_xy(0,y)
-			font:draw(console.lines[i])
+			gl.Color(pack.pm_argb4_f4(0x40f0))
 			
-			y=y-8
-			i=i-1
-		end
-				
-		font:set_xy(0,console.y-8)
-		font:draw(">"..console.buff.line)
+			flat:quad(0,0,w,console.y)
 
-		if console.buff.throb > 128 then
-			font:set_xy((console.buff.line_idx+1)*8,console.y-8)
-			font:draw("_")
+			gl.Color(pack.pm_argb4_f4(0x80f0))
+
+			local i=#console.lines
+			local y=console.y-16
+			while y>-8 and i>0 do
+			
+				font:set_xy(0,y)
+				font:draw(console.lines[i])
+				
+				y=y-8
+				i=i-1
+			end
+					
+			font:set_xy(0,console.y-8)
+			font:draw(">"..console.buff.line)
+
+			if console.buff.throb > 128 then
+				font:set_xy((console.buff.line_idx+1)*8,console.y-8)
+				font:draw("_")
+			end
+			
 		end
 
 		if console.show_hud then

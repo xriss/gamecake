@@ -5,6 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local bit=require('bit')
 local gl=require('gles').gles1
 local grd=require('wetgenes.grd')
+local pack=require('wetgenes.pack')
 
 
 local apps=apps
@@ -154,6 +155,7 @@ function setup(def)
 	local cake=def.state.cake
 	local canvas=def.state.canvas
 	local font=canvas.font
+	local flat=canvas.flat
 	
 --
 -- display this widget and its sub widgets
@@ -260,6 +262,12 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			local bb=2
 			local tl={1,1,1,0.25}
 			local br={0,0,0,0.25}
+			tl[1]=tl[1]*tl[4]
+			tl[2]=tl[2]*tl[4]
+			tl[3]=tl[3]*tl[4]
+			br[1]=br[1]*br[4]
+			br[2]=br[2]*br[4]
+			br[3]=br[3]*br[4]
 			
 			if ( master.active==widget and master.over==widget ) or widget.state=="selected" then
 				tl,br=br,tl
@@ -290,6 +298,30 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			
 			else -- builtin
 			
+			
+			flat:quad(	0,		0,
+						hx,		0,
+						hx,		-hy,
+						0,		-hy)
+			gl.Color( tl[1],tl[2],tl[3],tl[4] )
+			flat:quad(	0,		0,
+						hx,		0,
+						hx-bb,	-bb,
+						0+bb, 	-bb)
+			flat:quad(	0,		0,
+						0+bb,	-bb,
+						0+bb, 	-hy+bb,
+						0,    	-hy)
+			gl.Color( br[1],br[2],br[3],br[4] )
+			flat:quad( hx,  	-hy,
+						0,  	-hy,
+						0+bb,	-hy+bb,
+						hx-bb,	-hy+bb)
+			flat:quad(  hx,    0,
+						hx,    -hy,
+						hx-bb, -hy+bb,
+						hx-bb, -bb)
+
 --[[
 				gl.Begin(gl.QUADS)
 					gl.Vertex(  0,   0)
@@ -354,12 +386,15 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 				ty=(widget.hy-ty)/2
 			end
 			
+			ty=ty+widget.text_size
+			
 			tx=tx+txp
 			ty=ty+typ
 			
 			widget.text_x=tx
 			widget.text_y=ty
 
+			gl.Color( pack.pm_argb4_f8(c) )
 			font:set_xy(tx,-ty)
 			font:draw(widget.text)
 
