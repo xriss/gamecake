@@ -120,7 +120,7 @@ function setup(widget,def)
 -- handle mouse input
 --	
 	function master.mouse(widget,act,x,y,key)
-print(act,x,y,key)	
+--print(act,x,y,key)	
 		master.last_mouse_position={x,y}
 	
 --		if widget.state=="ready" then

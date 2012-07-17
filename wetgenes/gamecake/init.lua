@@ -27,6 +27,13 @@ function bake(opts)
 	
 	opts.cake=cake -- insert cake into opts
 	cake.opts=opts -- and opts into cake
+
+--	get gl and win from state if we need them
+	opts.gl=opts.gl or (opts.state and opts.state.gl)
+	opts.win=opts.win or (opts.state and opts.state.win)
+
+-- cache stuffs	
+	cake.state=opts.state
 	cake.gl=opts.gl
 	cake.win=opts.win
 	
@@ -42,6 +49,11 @@ function bake(opts)
 	cake.sounds  =  wsounds.bake(opts) -- we will need to load some sounds
 
 	cake.canvas  =  wcanvas.bake(opts) -- a canvas contains current drawing state and functions
+	
+	if cake.state then -- squirt some shortcuts into the state such as
+		cake.state.cake=cake -- the cake upon which we rest
+		cake.state.canvas=cake.canvas -- the default canvas to draw upon
+	end
 	
 	return cake
 end
