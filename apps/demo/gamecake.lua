@@ -28,31 +28,23 @@ function start()
 		state.gl=require("gles").gles1
 		state.win:context({})
 
-		state.frame_rate=1/61 -- how fast we want to run
+		state.frame_rate=1/60 -- how fast we want to run
 		state.frame_time=0
 
-		state.cake=require("wetgenes.gamecake").bake({
-			width=640,
-			height=480,
-			grdprefix=apps.dir.."data/",
-			grdpostfix=".png",
-			sodprefix=apps.dir.."data/sfx_",
-			sodpostfix=".wav",
-			fontprefix=apps.dir.."data/font_",
-			fontpostfix=".ttf",
-			gl=state.gl,
-			win=state.win,
-			disable_sounds=true,
+		require("wetgenes.gamecake").bake({
+			state=state,
+			width=inf.width,
+			height=inf.height,
 		})
 		
-		state.canvas=state.cake.canvas -- the default canvas to draw on
 	end
 	
---	table.insert(state.mods,require("wetgenes.gamecake.mods.console").bake(opts))
+	state.require_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style esc menu
+	state.require_mod("wetgenes.gamecake.mods.console") -- console gives us a quake style tilda console
 
-	state.next=demo
+	state.next=demo -- we want to run a demo state
 
-	local finished=state.change()
+	local finished
 	repeat
 
 		state.msgs()
@@ -60,6 +52,7 @@ function start()
 		state.draw()
 		
 		finished=state.change()
+		
 	until finished
 end
 
@@ -74,28 +67,6 @@ end
 demo.setup=function(state)
 
 	demo.loads(state)
-
--- we want the following mods to load and be setup
--- console gives us a ` style quake console
-	state.require_mod("wetgenes.gamecake.mods.console")
-
-
-	state.escmenu=require("wetgenes.gamecake.widget").setup(state.win,{state=state})
-
-	local hooks={}
-	function hooks.click(widget)
-print(widget.id)
-	end
-	local top=state.escmenu:add({hx=640,hy=480,mx=1,class="hx",ax=0,ay=0})
-	top:add({sy=4,sx=1})
-	top:add({text="Continue",color=0xff00ff00,id="continue",hooks=hooks})
-	top:add({text="Main Menu",color=0xffffff00,id="menu",hooks=hooks})
-	top:add({text="Reload",color=0xffff8800,id="reload",hooks=hooks})
-	top:add({text="Quit",color=0xffff0000,id="quit",hooks=hooks})
-	top:add({sy=4,sx=1})
-	
-	state.escmenu:layout()
-
 	
 end
 
@@ -104,14 +75,9 @@ demo.clean=function(state)
 end
 
 demo.msg=function(state,m)
-	if state.escmenu then
-		state.escmenu:msg(m)
-	end
 end
 
 demo.update=function(state)
-
-	state.escmenu:update()
 end
 
 demo.draw=function(state)
@@ -122,8 +88,6 @@ demo.draw=function(state)
 	local font=canvas.font
 	local gl=cake.gl
 	
---print(wstr.dump(win))
-
 	canvas:viewport() -- did our window change?
 	canvas:project23d(640,480,0.25,480*4)
 	canvas:gl_default() -- reset gl state
@@ -140,16 +104,12 @@ demo.draw=function(state)
 
 	gl.PushMatrix()
 	
--- default font is auto loaded
 	font:set(cake.fonts:get(1))
 	font:set_size(32,0)
 	font:set_xy((640-(12*32))/2,240-16)
 	font:draw("Hello World!")
 	
 	gl.PopMatrix()
-
-
-	state.escmenu:draw()
 	
 end
 
