@@ -220,7 +220,7 @@ function setup(def)
 				v.py=(widget.hy-v.hy)*v.pyf
 				
 				v.pxd=widget.pxd+v.px -- absolute
-				v.pyd=widget.pyd-v.py
+				v.pyd=widget.pyd+v.py
 				
 			end
 		end
@@ -260,7 +260,7 @@ function setup(def)
 			v.py=(widget.hy-v.hy)*v.pyf
 
 			v.pxd=widget.pxd+v.px -- local absolute position
-			v.pyd=widget.pyd-v.py
+			v.pyd=widget.pyd+v.py
 
 		end
 		for i,v in ipairs(widget) do
@@ -279,7 +279,7 @@ function setup(def)
 			if v.pyf then v.py=(widget.hy)*v.pyf end
 
 			v.pxd=widget.pxd+v.px -- absolute position
-			v.pyd=widget.pyd-v.py
+			v.pyd=widget.pyd+v.py
 			
 		end
 		for i,v in ipairs(widget) do
@@ -346,7 +346,7 @@ function setup(def)
 		
 		for i,v in ipairs(widget) do
 			v.pxd=widget.pxd+v.px
-			v.pyd=widget.pyd-v.py
+			v.pyd=widget.pyd+v.py
 		end
 
 -- layout sub sub widgets	
@@ -417,7 +417,7 @@ function setup(def)
 		
 		for i,v in ipairs(widget) do
 			v.pxd=widget.pxd+v.px
-			v.pyd=widget.pyd-v.py
+			v.pyd=widget.pyd+v.py
 		end
 
 		for i,v in ipairs(widget) do
@@ -441,7 +441,7 @@ function setup(def)
 		if widget.pan_px then x=x-widget.pan_px end
 		if widget.pan_py then y=y-widget.pan_py end
 
-		if widget.solid and x>=widget.pxd and x<widget.pxd+widget.hx and y<=widget.pyd and y>widget.pyd-widget.hy then
+		if widget.solid and x>=widget.pxd and x<widget.pxd+widget.hx and y>=widget.pyd and y<widget.pyd+widget.hy then
 		
 			if act==1 then
 -- only set if null or our parent...

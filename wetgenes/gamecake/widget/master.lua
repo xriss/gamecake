@@ -131,7 +131,7 @@ print(act,x,y,key)
 				local p=master.active.parent
 				
 				local minx=p.pxd
-				local miny=p.pyd-p.hy+w.hy
+				local miny=p.pyd+p.hy-w.hy
 				local maxx=p.pxd+p.hx-w.hx
 				local maxy=p.pyd
 				
@@ -144,7 +144,7 @@ print(act,x,y,key)
 				if w.pyd>maxy then w.pyd=maxy end
 				
 				w.px=w.pxd-p.pxd
-				w.py=p.pyd-w.pyd
+				w.py=w.pyd-p.pyd
 			
 				w:call_hook("slide")
 				

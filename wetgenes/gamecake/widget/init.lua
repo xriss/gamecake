@@ -41,7 +41,7 @@ function setup(win,def)
 	def.px=def.px or 0
 	def.py=def.py or 0
 	def.pxd=def.pxd or 0
-	def.pyd=def.pyd or def.hy
+	def.pyd=def.pyd or 0
 
 	def.class=def.class or "master"
 	

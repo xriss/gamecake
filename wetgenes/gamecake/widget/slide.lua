@@ -47,9 +47,9 @@ function slide_snap(it)
 	it.drag.px=it.datx:snap( it.hx , it.drag.hx , it.drag.px )
 	it.drag.pxd=it.pxd+it.drag.px
 	
--- upside down y so need to twiddle it, pyr is "the right way up"
+-- y is now the right way up
 	it.drag.py=it.daty:snap( it.hy , it.drag.hy , it.drag.py )
-	it.drag.pyd=it.pyd-it.drag.py
+	it.drag.pyd=it.pyd+it.drag.py
 	
 end
 	

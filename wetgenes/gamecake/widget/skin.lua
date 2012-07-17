@@ -231,7 +231,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 				gl.Color( explode_color(widget.color))
 					
 				if master.over==widget then
-					gl.Translate(widget.hx/16,-widget.hy/16,0)
+					gl.Translate(widget.hx/16,widget.hy/16,0)
 					gl.Scale(7/8,7/8,1)
 				end
 			
@@ -301,26 +301,26 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			
 			flat:quad(	0,		0,
 						hx,		0,
-						hx,		-hy,
-						0,		-hy)
+						hx,		hy,
+						0,		hy)
 			gl.Color( tl[1],tl[2],tl[3],tl[4] )
 			flat:quad(	0,		0,
 						hx,		0,
-						hx-bb,	-bb,
-						0+bb, 	-bb)
+						hx-bb,	bb,
+						0+bb, 	bb)
 			flat:quad(	0,		0,
-						0+bb,	-bb,
-						0+bb, 	-hy+bb,
-						0,    	-hy)
+						0+bb,	bb,
+						0+bb, 	hy-bb,
+						0,    	hy)
 			gl.Color( br[1],br[2],br[3],br[4] )
-			flat:quad( hx,  	-hy,
-						0,  	-hy,
-						0+bb,	-hy+bb,
-						hx-bb,	-hy+bb)
+			flat:quad( hx,  	hy,
+						0,  	hy,
+						0+bb,	hy-bb,
+						hx-bb,	hy-bb)
 			flat:quad(  hx,    0,
-						hx,    -hy,
-						hx-bb, -hy+bb,
-						hx-bb, -bb)
+						hx,    hy,
+						hx-bb, hy-bb,
+						hx-bb, bb)
 
 --[[
 				gl.Begin(gl.QUADS)
@@ -386,8 +386,6 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 				ty=(widget.hy-ty)/2
 			end
 			
-			ty=ty+widget.text_size
-			
 			tx=tx+txp
 			ty=ty+typ
 			
@@ -395,7 +393,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			widget.text_y=ty
 
 			gl.Color( pack.pm_argb4_f8(c) )
-			font:set_xy(tx,-ty)
+			font:set_xy(tx,ty)
 			font:draw(widget.text)
 
 --			font.set(tx,-ty,c,widget.text_size)
@@ -407,7 +405,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 						if widget.master.throb>=128 then
 							local sw=font:width(widget.text:sub(1,widget.data.str_idx))
 
-			font:set_xy(tx+sw,-ty)
+			font:set_xy(tx+sw,ty)
 			font:draw("_")
 --[[
 							gl.Enable(gl.COLOR_MATERIAL)
