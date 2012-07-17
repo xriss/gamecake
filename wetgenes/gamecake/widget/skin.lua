@@ -392,7 +392,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			widget.text_x=tx
 			widget.text_y=ty
 
-			gl.Color( pack.pm_argb4_f8(c) )
+			gl.Color( pack.argb8_pmf4(c) )
 			font:set_xy(tx,ty)
 			font:draw(widget.text)
 

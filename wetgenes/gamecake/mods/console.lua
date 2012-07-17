@@ -297,11 +297,11 @@ function bake(opts)
 
 		if console.y > 0 then
 		
-			gl.Color(pack.pm_argb4_f4(0x40f0))
+			gl.Color(pack.argb4_pmf4(0x40f0))
 			
 			flat:quad(0,0,w,console.y)
 
-			gl.Color(pack.pm_argb4_f4(0x80f0))
+			gl.Color(pack.argb4_pmf4(0x80f0))
 
 			local i=#console.lines
 			local y=console.y-16
@@ -327,10 +327,10 @@ function bake(opts)
 		if console.show_hud then
 			if console.flick then
 --				console.flick=false
-				gl.Color(pack.pm_argb4_f4(0xffff))
+				gl.Color(pack.argb4_pmf4(0xffff))
 			else
 				console.flick=true
-				gl.Color(pack.pm_argb4_f4(0xf000))
+				gl.Color(pack.argb4_pmf4(0xf000))
 			end
 			for i,v in ipairs(console.lines_display) do
 			

@@ -126,7 +126,7 @@ end
 
 -- convert a 16bit color to 4 floats, with premultiplied alpha
 -- ie so it can be used in a gl.Color() call
-pack.pm_argb4_f4=function(c)
+pack.argb4_pmf4=function(c)
 	local r,g,b,a
 	
 	a=bit.band(bit.rshift(c,12),0xf)
@@ -139,7 +139,7 @@ pack.pm_argb4_f4=function(c)
 end
 
 -- same again but 32bit
-pack.pm_argb4_f8=function(c)
+pack.argb8_pmf4=function(c)
 	local r,g,b,a
 	
 	a=bit.band(bit.rshift(c,24),0xff)
