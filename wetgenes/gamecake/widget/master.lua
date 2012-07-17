@@ -89,6 +89,13 @@ function setup(widget,def)
 --		gl.Enable("LIGHTING")
 	end
 	
+	function master.msg(widget,m)
+		if m[1]=="key" then
+			widget:key(m[2],m[3],m[4])
+		elseif m[1]=="mouse" then
+			widget:mouse(m[3],m[4],m[5],m[2])
+		end
+	end
 --
 -- handle key input
 --
@@ -113,7 +120,7 @@ function setup(widget,def)
 -- handle mouse input
 --	
 	function master.mouse(widget,act,x,y,key)
-	
+print(act,x,y,key)	
 		master.last_mouse_position={x,y}
 	
 --		if widget.state=="ready" then
@@ -151,7 +158,7 @@ function setup(widget,def)
 				meta.mouse(v,act,x,y,key)
 			end
 			
-			if act=="up" then
+			if act==-1 then
 				master.active=nil
 			end
 			

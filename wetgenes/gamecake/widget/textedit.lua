@@ -23,7 +23,7 @@ function mouse(widget,act,x,y,key)
 	
 		widget.master.focus=widget
 		
-		if act=="down" then
+		if act==1 then
 			local dx=x-((widget.pxd or 0)+(widget.text_x or 0))
 --print(dx)
 			if dx<0 then -- catch lessthan
@@ -51,7 +51,7 @@ function key(widget,ascii,key,act)
 
 --print("gotkey",ascii)
 	
-	if act=="down" or act=="repeat" then
+	if act==1 or act==0 then
 	
 		if key=="left" then
 
@@ -132,7 +132,7 @@ function key(widget,ascii,key,act)
 			
 		elseif key=="enter" or key=="return" then
 		
-			if act=="down" then -- ignore repeats on enter key
+			if act==1 then -- ignore repeats on enter key
 			
 				if widget.data.str and widget.onenter then -- callback?
 				

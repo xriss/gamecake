@@ -443,7 +443,7 @@ function setup(def)
 
 		if widget.solid and x>=widget.pxd and x<widget.pxd+widget.hx and y<=widget.pyd and y>widget.pyd-widget.hy then
 		
-			if act=="down" then
+			if act==1 then
 -- only set if null or our parent...
 				if not widget.master.active or widget.master.active==widget.parent then
 					widget.master.active=widget
@@ -451,7 +451,7 @@ function setup(def)
 					widget.master.active_y=y-widget.pyd
 				end
 			end
-			if act=="up" then
+			if act==-1 then
 				if widget.master.active and widget.master.active==widget then -- widget clicked
 					widget:call_hook("click")
 				end

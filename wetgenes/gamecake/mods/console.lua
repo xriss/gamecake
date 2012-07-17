@@ -373,7 +373,7 @@ function bake(opts)
 --		print(act.." "..x..","..y.." "..key)
 	end
 	
-	function console.msg(m)
+	function console.msg(state,m)
 		if m[1]=="key" then
 			console.keypress(m[2],string.lower(m[5]),m[3])
 		end

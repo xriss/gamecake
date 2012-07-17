@@ -15,7 +15,9 @@ function bake(opts)
 		
 		function state.require_mod(mname)
 		
-			local m=require(mname)
+			local m=mname -- can pass in mod table or require name of mod
+			if type(m)=="string" then m=require(m) end
+			 
 			
 			if state.mods[m.name] then return state.mods[m.name] end -- already setup
 			
@@ -154,11 +156,11 @@ function bake(opts)
 				local m=state.win:msg() -- read first
 				while m[1] do
 					if state.now and state.now.msg then
-						state.now.msg(m)
+						state.now.msg(state,m)
 					end
 					for i,v in ipairs(state.mods) do
 						if v.msg then
-							v.msg(m)
+							v.msg(state,m)
 						end
 					end
 					m=state.win:msg() -- read next
