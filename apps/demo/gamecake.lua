@@ -82,7 +82,6 @@ demo.setup=function(state)
 
 	state.escmenu=require("wetgenes.gamecake.widget").setup(state.win,{state=state})
 
-
 	local hooks={}
 	function hooks.click(widget)
 print(widget.id)
@@ -102,6 +101,12 @@ end
 
 demo.clean=function(state)
 
+end
+
+demo.msg=function(state,m)
+	if state.escmenu then
+		state.escmenu:msg(m)
+	end
 end
 
 demo.update=function(state)
