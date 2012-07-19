@@ -159,10 +159,10 @@ EGLint attribute_list[] =
 {
 	
 // hard hax, please not to be reordering
-	EGL_RED_SIZE, 1,	//	[1]	r
-	EGL_GREEN_SIZE, 1,	//	[3]	g
-	EGL_BLUE_SIZE, 1,	//	[5]	b
-	EGL_ALPHA_SIZE, 1,	//	[7]	a
+	EGL_RED_SIZE, 4,	//	[1]	r
+	EGL_GREEN_SIZE, 4,	//	[3]	g
+	EGL_BLUE_SIZE, 4,	//	[5]	b
+	EGL_ALPHA_SIZE, 0,	//	[7]	a
 	EGL_DEPTH_SIZE, 1,	//	[9]	depth
 
 	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
