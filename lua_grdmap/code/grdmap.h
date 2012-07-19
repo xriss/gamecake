@@ -40,20 +40,21 @@ struct grdmap
 struct grdmap * grdmap_alloc();
 void            grdmap_free(struct grdmap *gm);
 
-bool grdmap_setup(struct grdmap *gm,struct grd *g,s32 pw,s32 ph);
-bool grdmap_clean(struct grdmap *gm);
+//int grdmap_setup(struct grdmap *gm,struct grd *g,s32 pw,s32 ph);
+int grdmap_setup(struct grdmap *gm,struct grd *g);
+int grdmap_clean(struct grdmap *gm);
 
-bool grdmap_cutup(struct grdmap *gm,s32 pw,s32 ph);
+int grdmap_cutup(struct grdmap *gm,s32 pw,s32 ph);
 
 
-bool grdmap_merge( grdmap *g );
+int grdmap_merge( struct grdmap *g );
 
-bool grdmap_keymap( grdmap *a , grdmap *b );
+int grdmap_keymap( struct grdmap *a , struct grdmap *b );
 
-bool grdmap_shrink( grdmap *grdmap );
+int grdmap_shrink( struct grdmap *grdmap );
 
-void grdmap_tile_shrink(grdmap_tile *a );
+void grdmap_tile_shrink(struct grdmap_tile *a );
 
-bool grdmap_tile_compare(grdmap_tile *a , grdmap_tile *b);
+int grdmap_tile_compare(struct grdmap_tile *a , struct grdmap_tile *b);
 
 

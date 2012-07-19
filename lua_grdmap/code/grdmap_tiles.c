@@ -15,7 +15,7 @@
 // shrink the given tile, adjust the posiion and size such that only the non transparent potion is within the area
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grdmap_tile_shrink(grdmap_tile *a )
+void grdmap_tile_shrink(struct grdmap_tile *a )
 {
 
 s32 sa,sp; // spans for tile a and a pixel
@@ -25,7 +25,7 @@ s32 x,y,p;	// x,y pointers
 
 u32 pix;
 
-bool clear;
+int clear;
 
 s32 delta;
 
@@ -37,9 +37,9 @@ s32 delta;
 	delta=0;
 	for(y=a->h-1;y>=0;y--)
 	{
-		pa = a->base->g->bmap->get_data(a->x,a->y+y,0);
+		pa = grdinfo_get_data(a->base->g->bmap,a->x,a->y+y,0);
 
-		clear=true;
+		clear=1;
 		for(x=0;x<a->w;x++)
 		{
 			pix=0;
@@ -47,7 +47,7 @@ s32 delta;
 			{
 				pix=(pix<<8)+*pa++;
 			}
-			if(pix!=0) { clear=false; break; }
+			if(pix!=0) { clear=0; break; }
 		}
 		if(clear) delta++; else break;
 	}
@@ -57,9 +57,9 @@ s32 delta;
 	delta=0;
 	for(y=0;y<a->h;y++)
 	{
-		pa = a->base->g->bmap->get_data(a->x,a->y+y,0);
+		pa = grdinfo_get_data(a->base->g->bmap,a->x,a->y+y,0);
 
-		clear=true;
+		clear=1;
 		for(x=0;x<a->w;x++)
 		{
 			pix=0;
@@ -67,7 +67,7 @@ s32 delta;
 			{
 				pix=(pix<<8)+*pa++;
 			}
-			if(pix!=0) { clear=false; break; }
+			if(pix!=0) { clear=0; break; }
 		}
 		if(clear) delta++; else break;
 	}
@@ -87,9 +87,9 @@ s32 delta;
 	delta=0;
 	for(x=a->w-1;x>=0;x--)
 	{
-		pa = a->base->g->bmap->get_data(a->x+x,a->y,0);
+		pa = grdinfo_get_data(a->base->g->bmap,a->x+x,a->y,0);
 
-		clear=true;
+		clear=1;
 		for(y=0;y<a->h;y++)
 		{
 			pix=0;
@@ -97,7 +97,7 @@ s32 delta;
 			{
 				pix=(pix<<8)+*pa++;
 			}
-			if(pix!=0) { clear=false; break; }
+			if(pix!=0) { clear=0; break; }
 			pa+=sa-sp;
 		}
 		if(clear) delta++; else break;
@@ -108,9 +108,9 @@ s32 delta;
 	delta=0;
 	for(x=0;x<a->w;x++)
 	{
-		pa = a->base->g->bmap->get_data(a->x+x,a->y,0);
+		pa = grdinfo_get_data(a->base->g->bmap,a->x+x,a->y,0);
 
-		clear=true;
+		clear=1;
 		for(y=0;y<a->h;y++)
 		{
 			pix=0;
@@ -118,7 +118,7 @@ s32 delta;
 			{
 				pix=(pix<<8)+*pa++;
 			}
-			if(pix!=0) { clear=false; break; }
+			if(pix!=0) { clear=0; break; }
 			pa+=sa-sp;
 		}
 		if(clear) delta++; else break;
@@ -135,7 +135,7 @@ s32 delta;
 // return true if they are exactly the same
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grdmap_tile_compare(grdmap_tile *a , grdmap_tile *b)
+int grdmap_tile_compare(struct grdmap_tile *a , struct grdmap_tile *b)
 {
 
 s32 w,h; //in bytes for both tiles (if tiles are diferent size then they aint equal)
@@ -145,14 +145,14 @@ u8 *pa,*pb; // data pointers
 s32 x,y;	// x,y pointers
 
 
-	if(a==b) return true; // pass in the same pointer twice?
+	if(a==b) return 1; // pass in the same pointer twice?
 
-	if(a->w!=b->w) return false;
-	if(a->h!=b->h) return false;
+	if(a->w!=b->w) return 0;
+	if(a->h!=b->h) return 0;
 
 	if(a->base!=b->base) // only need to check if not pointing to same image
 	{
-		if(a->base->g->bmap->fmt!=b->base->g->bmap->fmt) return false;
+		if(a->base->g->bmap->fmt!=b->base->g->bmap->fmt) return 0;
 	}
 
 	sp=a->base->g->bmap->xscan;
@@ -162,14 +162,14 @@ s32 x,y;	// x,y pointers
 
 	for(y=0;y<h;y++)
 	{
-		pa = a->base->g->bmap->get_data(a->x,a->y+y,0);
-		pb = b->base->g->bmap->get_data(b->x,b->y+y,0);
+		pa = grdinfo_get_data(a->base->g->bmap,a->x,a->y+y,0);
+		pb = grdinfo_get_data(b->base->g->bmap,b->x,b->y+y,0);
 
 		for(x=0;x<w;x++)
 		{
-			if(*pa++!=*pb++) return false;
+			if(*pa++!=*pb++) return 0;
 		}
 	}
 
-	return true; // if we got here then tiles are the same
+	return 1; // if we got here then tiles are the same
 }

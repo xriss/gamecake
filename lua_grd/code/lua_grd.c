@@ -18,7 +18,8 @@ const char *lua_grd_ptr_name="grd*ptr";
 typedef struct grd * part_ptr ;
 
 // pull in a hack
-extern "C" u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
+//extern "C" 
+u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -417,7 +418,7 @@ int lua_grd_blit (lua_State *l)
 {
 part_ptr pa;
 part_ptr pb;
-grd g[1];
+struct grd g[1];
 
 s32 x;
 s32 y;
@@ -576,7 +577,7 @@ part_ptr p;
 // works with palettes of bitmaps
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void lua_grd_pix(lua_State *l , s32 tab_idx , grd_info *grd , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
+void lua_grd_pix(lua_State *l , s32 tab_idx , struct grd_info *grd , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
 {
 s32 xi,yi,zi;
 
@@ -584,7 +585,7 @@ u8* datu8;
 
 s32 idx;
 
-bool read_tab;
+int read_tab;
 
 	idx=1;
 
@@ -607,11 +608,11 @@ bool read_tab;
 	{
 		lua_newtable(l);
 		tab_idx=lua_gettop(l);
-		read_tab=false;
+		read_tab=0;
 	}
 	else
 	{
-		read_tab=true;
+		read_tab=1;
 	}
 
 
@@ -621,7 +622,7 @@ bool read_tab;
 		{
 			for( yi=y ; yi<y+h ; yi++ )
 			{
-				datu8=grd->get_data(x,yi,zi);
+				datu8=grdinfo_get_data(grd,x,yi,zi);
 
 				for( xi=x ; xi<x+w ; xi++ )
 				{
@@ -691,7 +692,7 @@ bool read_tab;
 		{
 			for( yi=y ; yi<y+h ; yi++ )
 			{
-				datu8=grd->get_data(x,yi,zi);
+				datu8=grdinfo_get_data(grd,x,yi,zi);
 
 				for( xi=x ; xi<x+w ; xi++ )
 				{
@@ -753,7 +754,7 @@ bool read_tab;
 		{
 			for( yi=y ; yi<y+h ; yi++ )
 			{
-				datu8=grd->get_data(x,yi,zi);
+				datu8=grdinfo_get_data(grd,x,yi,zi);
 
 				for( xi=x ; xi<x+w ; xi++ )
 				{
@@ -792,7 +793,7 @@ bool read_tab;
 // a string version of lua_grd_pix for when you dont want to bit fiddle
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_grd_pix_str(lua_State *l , s32 str_idx , grd_info *grd , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
+int lua_grd_pix_str(lua_State *l , s32 str_idx , struct grd_info *grd , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
 {
 int i;
 
@@ -803,7 +804,7 @@ u8* bufu8;
 
 s32 idx;
 
-bool read_tab;
+int read_tab;
 
 	idx=1;
 
@@ -822,24 +823,24 @@ bool read_tab;
 
 size_t sl=0;
 const char * s=0;
-grd_info gb[1];
-	gb->reset();
+struct grd_info gb[1];
+	grdinfo_reset(gb);
 
 	if(str_idx==0) // just fill in, dont read
 	{
-		read_tab=false;
+		read_tab=0;
 	}
 	else
 	{
 		s=lua_tolstring(l,str_idx,&sl);
 		if(sl==0) // passed in a ""
 		{
-			read_tab=false;
+			read_tab=0;
 			s=0;
 		}
 		else
 		{
-			read_tab=true;
+			read_tab=1;
 		}
 	}
 	
@@ -866,7 +867,7 @@ grd_info gb[1];
 	{
 		for( yi=y ; yi<y+h ; yi++ )
 		{
-			datu8=grd->get_data(x,yi,zi);
+			datu8=grdinfo_get_data(grd,x,yi,zi);
 			if(read_tab) // read
 			{
 				for( i=0 ; i<w*grd->xscan ; i++ )
@@ -910,7 +911,7 @@ int lua_grd_palette (lua_State *l)
 {
 part_ptr p;
 
-grd_info *grd;
+struct grd_info *grd;
 
 s32 x;
 s32 w;
@@ -960,7 +961,7 @@ int lua_grd_pixels (lua_State *l)
 {
 part_ptr p;
 
-grd_info *grd;
+struct grd_info *grd;
 
 
 s32 x,y,z;

@@ -12,7 +12,7 @@
 
 void read_func(png_structp ptr, png_bytep buff, png_size_t count)
 {
-grd_loader_info *inf=(grd_loader_info *)ptr->io_ptr;
+struct grd_loader_info *inf=(struct grd_loader_info *)ptr->io_ptr;
 
 	if(inf == NULL)
 	{
@@ -144,7 +144,7 @@ static void grd_png_load(struct grd * g, struct grd_loader_info * inf )
 		abort_("png alloc rows fail");
 
 	for (y=0; y<height; y++)
-		row_pointers[y] = g->bmap->get_data(0,y,0); //(png_byte*) malloc(info_ptr->rowbytes);
+		row_pointers[y] = grdinfo_get_data(g->bmap,0,y,0); //(png_byte*) malloc(info_ptr->rowbytes);
 
 	png_read_image(png_ptr, row_pointers);
 	
@@ -192,7 +192,7 @@ bogus:
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_png_load_file(struct grd * g, const char* file_name)
 {
-	grd_loader_info inf[1];
+	struct grd_loader_info inf[1];
 	
 	inf->file_name=file_name;
 	inf->data=0;
@@ -209,7 +209,7 @@ void grd_png_load_file(struct grd * g, const char* file_name)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_png_load_data(struct grd *g, const unsigned char* data, int data_len)
 {
-	grd_loader_info inf[1];
+	struct grd_loader_info inf[1];
 	
 	inf->file_name=0;
 	inf->data=(u8*)data;
@@ -327,7 +327,7 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 		abort_("png alloc rows fail");
 
 	for (y=0; y<height; y++)
-		row_pointers[y] = g->bmap->get_data(0,y,0); //(png_byte*) malloc(info_ptr->rowbytes);
+		row_pointers[y] = grdinfo_get_data(g->bmap,0,y,0); //(png_byte*) malloc(info_ptr->rowbytes);
 
 
 
