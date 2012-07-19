@@ -6,8 +6,9 @@ if [ "$1" = "clean" ] ; then
 fi
 
 
-raspisdk=`readlink -f ../sdks/raspi`
-export PATH=$raspisdk/tools/arm-bcm2708/linux-x86/bin:$PATH
+sdks=`readlink -f ../sdks`
+#export PATH=$sdks/raspi/tools/arm-bcm2708/linux-x86/bin:$PATH
+export PATH=$sdks/gcc/prefix/bin:$PATH
 
 build/premake4 gmake raspi
 

@@ -360,7 +360,7 @@ struct grd *g;
 
 		for( y=0 ; y<p->face->glyph->bitmap.rows ; y++ )
 		{
-			c=g->bmap->get_data(0,y,0);
+			c=grdinfo_get_data(g->bmap,0,y,0);
 			for( x=0 ; x<p->face->glyph->bitmap.width ; x++ )
 			{
 				c[x]=b[x]; // save into grd

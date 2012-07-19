@@ -35,7 +35,7 @@ void grdmap_free(struct grdmap *gm)
 // Allocate chars 
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grdmap_setup(struct grdmap *gm,struct grd *g)
+int grdmap_setup(struct grdmap *gm,struct grd *g)
 {
 s32 x;
 s32 y;
@@ -46,10 +46,10 @@ s32 y;
 
 	gm->g=g;
 
-	return true;
+	return 1;
 bogus:
 	if(gm) { grdmap_clean(gm); }
-	return false;
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -57,7 +57,7 @@ bogus:
 // free any allocated data but not the structure
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grdmap_clean(struct grdmap *gm)
+int grdmap_clean(struct grdmap *gm)
 {
 	if(gm)
 	{
@@ -68,9 +68,9 @@ bool grdmap_clean(struct grdmap *gm)
 		memset(gm,0,sizeof(struct grdmap));	// clear data
 	}
 
-	return true;
+	return 1;
 bogus:
-	return false;
+	return 0;
 }
 
 
@@ -80,7 +80,7 @@ bogus:
 // break an image into chars of the given size, this may fail
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grdmap_cutup(struct grdmap *gm,s32 pw,s32 ph)
+int grdmap_cutup(struct grdmap *gm,s32 pw,s32 ph)
 {
 s32 x;
 s32 y;
@@ -119,10 +119,10 @@ const char *err;
 		}
 	}
 
-	return true;
+	return 1;
 bogus:
 	if(gm) { grdmap_clean(gm); gm->err=err; }
-	return false;
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -130,9 +130,9 @@ bogus:
 // reduce master to master chains down to a single pointer to the final data.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grdmap_unchain( struct grdmap *gm )
+int grdmap_unchain( struct grdmap *gm )
 {
-grdmap_tile *tp;
+struct grdmap_tile *tp;
 
 	if( ! gm->tiles ) { goto bogus; }
 
@@ -147,9 +147,9 @@ grdmap_tile *tp;
 		}
 	}
 
-	return true;
+	return 1;
 bogus:
-	return false;
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -157,10 +157,10 @@ bogus:
 // compare all tiles with all other tiles, and mark duplicates as such.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grdmap_merge( grdmap *gm )
+int grdmap_merge( struct grdmap *gm )
 {
-grdmap_tile *pa;
-grdmap_tile *pb;
+struct grdmap_tile *pa;
+struct grdmap_tile *pb;
 
 	if( ! gm->tiles ) { goto bogus; }
 
@@ -175,9 +175,9 @@ grdmap_tile *pb;
 		}
 	}
 
-	return true;
+	return 1;
 bogus:
-	return false;
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -185,9 +185,9 @@ bogus:
 // Shrink each tile, remove alpha from around the outside.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grdmap_shrink( grdmap *gm )
+int grdmap_shrink( struct grdmap *gm )
 {
-grdmap_tile *pa;
+struct grdmap_tile *pa;
 
 	if( ! gm->tiles ) { goto bogus; }
 
@@ -198,9 +198,9 @@ grdmap_tile *pa;
 		grdmap_tile_shrink(pa);
 	}
 
-	return true;
+	return 1;
 bogus:
-	return false;
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -209,10 +209,10 @@ bogus:
 // and map them acordingly
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grdmap_keymap( grdmap *a , grdmap *b )
+int grdmap_keymap( struct grdmap *a , struct grdmap *b )
 {
-grdmap_tile *pa;
-grdmap_tile *pb;
+struct grdmap_tile *pa;
+struct grdmap_tile *pb;
 
 	if( ! a->tiles ) { goto bogus; }
 	if( ! b->tiles ) { goto bogus; }
@@ -226,9 +226,9 @@ grdmap_tile *pb;
 		}
 	}
 
-	return true;
+	return 1;
 bogus:
-	return false;
+	return 0;
 }
 
 
@@ -237,12 +237,12 @@ bogus:
 // layout the contents of one grdmap onto another, skip tiles that have a zero size
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool grdmap_layout( grdmap *a , grdmap *b , s32 border)
+int grdmap_layout( struct grdmap *a , struct grdmap *b , s32 border)
 {
 #if 0
 bool ret;
-grdmap_tile *pa;
-grdmap_tile *pb;
+struct grdmap_tile *pa;
+struct grdmap_tile *pb;
 
 s32 count;
 
@@ -287,7 +287,7 @@ s32 height_loop;
 
 	grdmap_clean(b);
 
-	b->tiles=(grdmap_tile*)calloc(count,sizeof(grdmap_tile));
+	b->tiles=(grdmap_tile*)calloc(count,sizeof(struct grdmap_tile));
 	if(!b->tiles) goto bogus;
 	b->numof_tiles=count;
 	b->tw=0;
@@ -353,11 +353,11 @@ s32 height_loop;
 	}
 
 
-	ret=true;
+	ret=1;
 bogus:
 	return ret;
 #endif
-	return true;
+	return 0;
 }
 
 
@@ -371,7 +371,7 @@ bogus:
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 
-bool grdmap_save_XTX( grdmap *grdmap_layout , grdmap *grdmap_master ,const char *filename)
+int grdmap_save_XTX( struct grdmap *grdmap_layout , struct grdmap *grdmap_master ,const char *filename)
 {
 #if 0
 
@@ -381,10 +381,10 @@ XTX0_area		xtxarea[1];
 
 FILE *fp=0;
 
-bool ret;
+int ret;
 
-grdmap_tile *tile;
-grdmap_tile *tile2;
+struct grdmap_tile *tile;
+struct grdmap_tile *tile2;
 
 
 s32 chunk_info			;
@@ -489,11 +489,11 @@ u16 id;
 	}
 
 
-	ret=true;
+	ret=1;
 bogus:
 	if(fp) { fclose(fp); }
 	return ret;
 
 #endif
-	return true;
+	return 1;
 }

@@ -108,7 +108,7 @@ static void grd_jpg_load(struct grd * g, struct grd_loader_info * inf )
 	{
 		jpeg_read_scanlines(&cinfo, buffer, 1);
 		
-		bo=g->bmap->get_data(0,y,0);
+		bo=grdinfo_get_data(g->bmap,0,y,0);
 		bb=buffer[0];
 		for( bi=bb ; bi<bb+(width*3) ; bi+=3 , bo+=4 )
 		{
@@ -140,7 +140,7 @@ bogus:
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_jpg_load_file(struct grd * g, const char* file_name)
 {
-	grd_loader_info inf[1];
+	struct grd_loader_info inf[1];
 	
 	inf->file_name=file_name;
 	inf->data=0;
@@ -157,7 +157,7 @@ void grd_jpg_load_file(struct grd * g, const char* file_name)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_jpg_load_data(struct grd * g, const unsigned char* data, int data_len)
 {
-	grd_loader_info inf[1];
+	struct grd_loader_info inf[1];
 	
 	inf->file_name=0;
 	inf->data=(u8*)data;

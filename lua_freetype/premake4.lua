@@ -1,6 +1,6 @@
 
 project "lua_freetype"
-language "C++"
+language "C"
 
 includedirs { "../lib_freetype/freetype/include/" , "." }
 

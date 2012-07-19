@@ -109,47 +109,12 @@ struct grd_info
 
 	u8 *data;			// pointer to image data
 
-	inline void reset(void)
-	{
-		fmt=GRD_FMT_NONE;
-
-		w=0;
-		h=0;
-		d=0;
-
-		xscan=0;
-		yscan=0;
-		zscan=0;
-
-		data=0;
-	}
-
-	inline void set( struct grd_info *ga )
-	{
-		fmt=ga->fmt;
-
-		w=ga->w;
-		h=ga->h;
-		d=ga->d;
-
-		xscan=ga->xscan;
-		yscan=ga->yscan;
-		zscan=ga->zscan;
-
-		data=ga->data;
-	}
-	
-	inline u8 * get_data(s32 x, s32 y, s32 z)
-	{
-		return data+(z*zscan)+(y*yscan)+(x*xscan);
-	}
-
-	inline u8 * get_data(f32 x, f32 y, f32 z)
-	{
-		return data+(((s32)(z))*zscan)+(((s32)(y))*yscan)+(((s32)(x))*xscan);
-	}
-
 };
+
+void grdinfo_reset(struct grd_info *gi);
+void grdinfo_set(  struct grd_info *gi , struct grd_info *ga );
+u8 * grdinfo_get_data( struct grd_info *gi , s32 x, s32 y, s32 z);
+
 
 //
 // We own the data stored here
@@ -211,21 +176,21 @@ struct grd * grd_duplicate( struct grd *g );
 struct grd * grd_duplicate_convert( struct grd *g , s32 fmt );
 struct grd * grd_duplicate_quant(struct grd *g , s32 num_colors );
 
-bool grd_convert( struct grd *g , s32 fmt );
-bool grd_quant(struct grd *g , s32 num_colors );
+int grd_convert( struct grd *g , s32 fmt );
+int grd_quant(struct grd *g , s32 num_colors );
 
 void grd_flipy( struct grd *g );
 
-//bool grd_conscale( struct grd *g , f32 base, f32 scale);
+//int grd_conscale( struct grd *g , f32 base, f32 scale);
 
-bool grd_scale( struct grd *g , s32 w, s32 h, s32 d);
+int grd_scale( struct grd *g , s32 w, s32 h, s32 d);
 
 
-bool grd_layer( struct grd *ga , struct grd *gb , s32 z);
+int grd_layer( struct grd *ga , struct grd *gb , s32 z);
 
-bool grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 w, s32 h);
+int grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 w, s32 h);
 
-bool grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y);
+int grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y);
 
-bool grd_shrink(struct grd *ga,struct grd_area *gc );
+int grd_shrink(struct grd *ga,struct grd_area *gc );
 
