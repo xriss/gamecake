@@ -161,7 +161,7 @@ while true do
 
 	repeat -- handle msg queue (so we know the window size on windows)
 		local m=win:msg()
-	until not m[1]
+	until not (m and m[1])
 
 -- velocity
 	rot[1]=rot[1]+vrt[1]

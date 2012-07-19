@@ -154,8 +154,8 @@ if NACL then
 elseif RASPI then
 
 	local raspisdk=path.getabsolute("../sdks/raspi")
-	includedirs { raspisdk.."/firmware/opt/vc/include" }
-	libdirs { raspisdk.."/firmware/opt/vc/lib" }
+	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include" }
+	libdirs { raspisdk.."/firmware/hardfp/opt/vc/lib" }
 
 	platforms { "raspi" } --hax
 
