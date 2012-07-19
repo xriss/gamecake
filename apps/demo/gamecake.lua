@@ -15,7 +15,6 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local opts={
 	times=true, -- request simple time keeping samples
 	
-	
 	width=640,	-- display basics
 	height=480,
 	title="testing",
@@ -67,7 +66,7 @@ demo={}
 
 demo.loads=function(state)
 
-	state.cake.fonts:loads({1}) -- load builtin font number 1 a basic 8x8 font
+	state.cake.fonts:loads({1}) -- load 1st builtin font, a basic 8x8 font
 
 end
 		
@@ -107,18 +106,28 @@ demo.draw=function(state)
 
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
-	gl.Translate(-opts.width/2,-opts.height/2,-opts.height*2) -- a good starting point
+	gl.Translate(-opts.width/2,-opts.height/2,-opts.height*2) -- top left corner is origin
 
 	gl.PushMatrix()
 	
-	gl.Color(pack.argb8_pmf4(0xff0000ff))
-	flat:quad(0,(opts.height/2)-32,opts.width,(opts.height/2)+32)
 
-	gl.Color(pack.argb8_pmf4(0xffffffff))
-	font:set(cake.fonts:get(1))
-	font:set_size(32,0)
-	font:set_xy((opts.width-(12*32))/2,(opts.height-32)/2)
-	font:draw("Hello World!")
+	gl.Color(pack.argb4_pmf4(0x800f))
+	flat:quad(0,(opts.height/2)-32,opts.width,(opts.height/2)+32) -- draw a blue box as a background
+
+	font:set(cake.fonts:get(1)) -- default font
+	font:set_size(32,0) -- 32 pixels high
+	
+	local s="Hello World!"
+	local sw=font:width(s) -- how wide the string is
+	local x,y=(opts.width-(sw))/2,(opts.height-32)/2 -- center the text in  middle of display
+
+	gl.Color(pack.argb4_pmf4(0xf000)) -- draw drop shadow
+	font:set_xy(x+4,y+4)
+	font:draw(s)
+	
+	gl.Color(pack.argb4_pmf4(0xffff)) -- draw white text
+	font:set_xy(x,y)
+	font:draw(s)
 
 	
 	gl.PopMatrix()

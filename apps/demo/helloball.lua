@@ -1,4 +1,4 @@
-#!../../bin/exe/lua
+#!../../bin/dbg/lua
 
 -- setup some default search paths,
 require("apps").default_paths()
@@ -160,7 +160,7 @@ while true do
 	frame_time=frame_time+frame_rate -- step frame forward
 
 	repeat -- handle msg queue (so we know the window size on windows)
-		local m={win:msg()}
+		local m=win:msg()
 	until not m[1]
 
 -- velocity
