@@ -249,9 +249,9 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 					gl.Color( explode_color(widget.color))
 				else
 					local c={explode_color(widget.color)}
-					c[3]=c[3]*14/15
-					c[2]=c[2]*14/15
-					c[1]=c[1]*14/15
+					c[3]=c[3]*12/16
+					c[2]=c[2]*12/16
+					c[1]=c[1]*12/16
 					gl.Color( c[1],c[2],c[3],c[4] )
 				end
 				
