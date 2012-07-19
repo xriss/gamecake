@@ -154,7 +154,7 @@ function bake(opts)
 		function state.msgs() -- read and process any msgs we have from win:msg
 			if state.win then
 				local m=state.win:msg() -- read first
-				while m[1] do
+				while m and m[1] do
 					if state.now and state.now.msg then
 						state.now.msg(state,m)
 					end
