@@ -10,7 +10,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local android={}
 
-local core=require("wetgenes.android.core")
+local core=require("wetgenes.win.android.core")
 
 local wstr=require("wetgenes.string")
 
