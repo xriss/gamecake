@@ -293,7 +293,7 @@ function bake(opts)
 	canvas.vbuf=canvas.cake.buffers:create()
 	canvas.vdat=pack.alloc(4*5*4) -- temp vertex quad draw buffer		
 	
-	canvas:project23d(canvas.win.width,canvas.win.height,0.5,1024) -- some dumb defaults
+--	canvas:project23d(canvas.win.width,canvas.win.height,0.5,1024) -- some dumb defaults
 
 	font:set( canvas.cake.fonts:get(1) ) -- load default, builtin, 8x8 font
 	

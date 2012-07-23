@@ -80,7 +80,7 @@ function bake(opts)
 				return "<self>"
 			end
 		end
-		push(console.dump_stack,tbl)
+--		push(console.dump_stack,tbl)
 		
 		for key,v in pairs(tbl) do
 			if type(key) == 'number' then
@@ -96,8 +96,8 @@ function bake(opts)
 			end
 		end
 		
-		pop(console.dump_stack)
-		return sub(res,2)
+--		pop(console.dump_stack)
+		return string.sub(res,2)
 	end
 
 
@@ -440,7 +440,7 @@ function bake(opts)
 			
 			console.print( table.concat(t,"\t") )
 			if print_old then
-				print_old( unpack(t) )
+				print_old( ... )
 			end
 		end
 		g.print=print_new

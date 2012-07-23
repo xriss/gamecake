@@ -95,3 +95,7 @@ print("cakestop")
 	end
 end
 
+-- wrapper for bliting by id/name
+blit = function(cake,id,name,cx,cy,ix,iy,w,h)
+	cake.canvas:blit(cake.images:get(id,name),cx,cy,ix,iy,w,h)
+end

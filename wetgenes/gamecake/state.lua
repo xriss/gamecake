@@ -1,6 +1,7 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local wwin=require("wetgenes.win")
 
 -- handle a simple state for win programs,
 -- all it does is call other states/mods functions.
@@ -102,6 +103,18 @@ function bake(opts)
 			end
 		end
 
+		function state.start()	
+			if state.now and state.now.start then
+				state.now.start(state)
+			end
+		end
+
+		function state.stop()
+			if state.now and state.now.stop then
+				state.now.stop(state)
+			end
+		end
+
 		function state.clean()
 			if state.now and state.now.clean then
 				state.now.clean(state)
@@ -166,6 +179,69 @@ function bake(opts)
 					m=state.win:msg() -- read next
 				end
 			end
+		end
+
+-- a busy blocking loop, or not, if we are running on the wrong sort
+-- of system it just returns and expects the other functions
+-- to be called when necesary.
+		function state.serv(state)
+		
+			if state.win.noblock then
+				return state
+			end
+			
+			local finished
+			repeat
+
+				state.msgs()
+				state.update()
+				state.draw()
+				
+				finished=state.change()
+				
+			until finished
+		end
+		
+-- android control functions so we can do things slightly diferently
+		function state.android_setup(apk)
+print("mainstate setup")
+			state.apk=apk
+			state.setup()
+		end
+		function state.android_start()
+print("mainstate start")
+			state.start()
+		end
+		function state.android_stop()
+print("mainstate stop")
+			state.stop()
+		end
+		function state.android_clean()
+print("mainstate clean")
+			state.clean()
+		end
+		function state.android_updatedraw()
+			state.msgs()
+			state.update()
+			state.draw()
+			
+			local finished=state.change()
+		end
+		function state.android_draw()
+			state.draw()
+		end
+		function state.android_resize(w,h)
+print("mainstate resize",w,h)
+			state.win.width=w
+			state.win.height=h
+		end
+		function state.android_press(asc,code,updn)
+print("mainstate press",asc,code,updn)
+			table.insert(state.win.msgs,{"key",string.char(asc),updn,code,string.format("android_%02x",code)})
+		end
+		function state.android_touch(...)
+print("mainstate touch",...)
+			table.insert(state.win.msgs,{})
 		end
 
 	return state
