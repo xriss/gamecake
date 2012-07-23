@@ -21,8 +21,9 @@ local opts={
 	fps=60,
 }
 
+local demo={} -- a demo state
 
-function start()
+local bake=function()
 	local state=require("wetgenes.gamecake.state").bake(opts)
 
 	do
@@ -45,24 +46,14 @@ function start()
 		
 	end
 	
-	state.require_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style esc menu
+	state.require_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style escape menu
 	state.require_mod("wetgenes.gamecake.mods.console") -- console gives us a quake style tilda console
 
 	state.next=demo -- we want to run a demo state
 
-	local finished
-	repeat
-
-		state.msgs()
-		state.update()
-		state.draw()
-		
-		finished=state.change()
-		
-	until finished
+	return state
 end
 
-demo={}
 
 demo.loads=function(state)
 
@@ -136,5 +127,7 @@ end
 
 
 
+-- this will busy loop or hand back control depending on system we are running on
+return bake():serv()
 
-start()
+
