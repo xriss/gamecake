@@ -84,11 +84,18 @@ function win.keymap(key)
 	return win.generic_keymap[key] or key
 end
 
-function win.android_setup()
+function win.android_setup(apk)
 
 	if win.flavour=="android" and hardcore.print then
+	
+		win.apk=apk
+		
 		_G.print=hardcore.print
 		print=_G.print
+
+
+print("ANDROID_SETUP with ",apk,4)
+		
 	end
 	
 end

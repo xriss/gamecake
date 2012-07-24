@@ -47,10 +47,10 @@ elseif NACL then
 
 elseif ANDROID then 
 
---	linkoptions { "-v" }
+	linkoptions { "-v" }
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	
-	links { "GLESv1_CM" }
+	links { "GLESv1_CM" , "EGL" , "android" , "jnigraphics" , "OpenSLES" }
 --	links { "GLESv2" }
 	
 	links { "dl", "log", "c", "m", "gcc" }	

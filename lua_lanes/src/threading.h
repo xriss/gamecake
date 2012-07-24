@@ -30,7 +30,10 @@ typedef int bool_t;
 # define TRUE 1
 #endif
 
+// this confuses android so needs to be skipped
+#ifndef ANDROID
 typedef unsigned int uint_t;
+#endif
 
 #if defined(PLATFORM_WIN32) && defined(__GNUC__)
 /* MinGW with MSVCR80.DLL */
