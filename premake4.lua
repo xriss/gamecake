@@ -170,6 +170,10 @@ elseif RASPI then
 elseif ANDROID then
 
 	local androidsdk=path.getabsolute("../sdks/android-sdk")
+	local androidsys=path.getabsolute("../sdks/android-9-arm/sysroot/usr")
+
+	includedirs { androidsys.."/include" }
+	libdirs { androidsys.."/lib" }
 
 	platforms { "android" } --hax
 

@@ -9,6 +9,15 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+extern void android_main(struct android_app* state);
+
+extern int android_fakeimportfunction()
+{
+	android_main(0);
+	return 0;
+}
+
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
