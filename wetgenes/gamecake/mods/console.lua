@@ -6,7 +6,7 @@ local hex=function(str) return tonumber(str,16) end
 
 local pack=require("wetgenes.pack")
 
-local wetstr=require("wetgenes.string")
+local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 
@@ -46,7 +46,7 @@ function bake(opts)
 		console.show=false
 
 --		console.show=true
---		console.show_hud=true
+		console.show_hud=true
 		
 		console.setup_done=true
 --print("console setup")
@@ -67,60 +67,7 @@ function bake(opts)
 		return table.concat(t," ")
 	end
 	
-	function console.dump_table(tbl,delim)
-		local n = #tbl
-		local res = ''
-		local k = 0
-		-- very important to avoid disgracing ourselves with circular referencs...
-		if #console.dump_stack > console.dump_depth then
-			return "..."
-		end
-		for i,t in ipairs(console.dump_stack) do
-			if tbl == t then
-				return "<self>"
-			end
-		end
---		push(console.dump_stack,tbl)
-		
-		for key,v in pairs(tbl) do
-			if type(key) == 'number' then
-				key = '['..tostring(key)..']'
-			else
-				key = tostring(key)
-			end
-			res = res..delim..key..'='..console.dump_string(v)
-			k = k + 1
-			if k > console.dump_limit then
-				res = res.." ... "
-				break
-			end
-		end
-		
---		pop(console.dump_stack)
-		return string.sub(res,2)
-	end
 
-
-
-	function console.dump_string(val)
-		local tp = type(val)
-		if tp == 'function' then
-			return tostring(val)
-		elseif tp == 'table' then
-			if val.__tostring  then
-				return tostring(val)
-			else
-				return '{'..console.dump_table(val,',\n')..'}'
-			end
-		elseif tp == 'string' then
-			return val--"'"..val.."'"
-		elseif tp == 'number' then
-			return tostring(val)
-		else
-			return tostring(val)
-		end
-	end
-	
 -- based on ilua.lua
 	function console.dump_eval(line)
 	
@@ -135,12 +82,12 @@ function bake(opts)
 		local args={}
 		
 		
-		if line~="" then args=wetstr.split("%s",line) end -- split input on whitespace
+		if line~="" then args=wstr.split("%s",line) end -- split input on whitespace
 		
 		if args[1] then
 		
 			function lookup(tab,name)
-				local names=wetstr.split("%.",name)
+				local names=wstr.split("%.",name)
 				for i,v in ipairs(names) do
 --				print(i.." "..v)
 					if type(tab)=="table" then
@@ -349,7 +296,7 @@ function bake(opts)
 	
 	function console.print(s)
 	
-		s=console.dump_string(s)
+		if type(s)~="string" then s=wstr.dump(s) end
 	
 		table.insert(console.lines,s)
 		
@@ -363,7 +310,7 @@ function bake(opts)
 	
 	function console.display(s)
 	
-		s=console.dump_string(s)
+		if type(s)~="string" then s=wstr.dump(s) end
 		
 		table.insert(console.lines_display,s)
 	
@@ -434,7 +381,8 @@ function bake(opts)
 		
 			local t={}
 			for i,v in ipairs({...}) do
-				table.insert(t, console.dump_string(v) )
+				if type(v)~="string" then v=wstr.dump(s) end
+				table.insert(t,v)
 			end
 --			if not t[1] then t[1]="nil" end
 			

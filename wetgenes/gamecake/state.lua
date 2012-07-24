@@ -124,9 +124,10 @@ function bake(opts)
 		function state.update()
 
 			if state.frame_rate and state.frame_time then --  framerate limiter enabled
-				if state.frame_time<state.win:time() then state.frame_time=state.win:time() end -- prevent race condition
-				while (state.frame_time-0.001)>state.win:time() do state.win:sleep(0.001) end -- simple frame limit
-				state.frame_time=state.frame_time+state.frame_rate -- step frame forward
+--				if state.frame_time<state.win:time() then state.frame_time=state.win:time() end -- prevent race condition
+--				while (state.frame_time-0.001)>state.win:time() do state.win:sleep(0.001) end -- simple frame limit
+--				while (state.frame_time-0.001)>state.win:time() do end -- simple frame limit
+--				state.frame_time=state.frame_time+state.frame_rate -- step frame forward one tick
 			end
 
 			if state.times then state.times.update.start() end
@@ -203,9 +204,8 @@ function bake(opts)
 		end
 		
 -- android control functions so we can do things slightly diferently
-		function state.android_setup(apk)
+		function state.android_setup()
 print("mainstate setup")
-			state.apk=apk
 			state.setup()
 		end
 		function state.android_start()

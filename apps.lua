@@ -53,6 +53,8 @@ function setpaths(dll,dirs)
 	
 	local path={}
 	for i,v in ipairs(dirs) do
+		path[#path+1]=v .. "?.lua"
+		path[#path+1]=v .. "?/init.lua"
 		path[#path+1]=v .. "lua/?.lua"
 		path[#path+1]=v .. "lua/?/init.lua"
 	end
@@ -107,7 +109,7 @@ function default_paths()
 
 	local bin_dir=find_bin()
 	
-	setpaths(dll,{bin_dir,bin_dir})
+	setpaths(dll,{bin_dir,"./"})
 	
 	dir=get_cd() -- use cd as base dir
 	
