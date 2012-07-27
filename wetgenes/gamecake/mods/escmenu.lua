@@ -73,8 +73,8 @@ function bake(opts)
 		if escmenu.show then
 			escmenu.master:msg(m)
 		end
-		if m[1]=="key" then
-			if m[5]=="escape" and m[3]==1 then -- escape key toggles
+		if m.class=="key" then
+			if m.action==1 and m.keyname=="escape" then
 				escmenu.show=not escmenu.show
 			end
 		end

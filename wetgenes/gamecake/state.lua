@@ -2,6 +2,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local wwin=require("wetgenes.win")
+local wstr=require("wetgenes.string")
 
 -- handle a simple state for win programs,
 -- all it does is call other states/mods functions.
@@ -123,25 +124,30 @@ function bake(opts)
 
 		function state.update()
 
-			if state.frame_rate and state.frame_time then --  framerate limiter enabled
---				if state.frame_time<state.win:time() then state.frame_time=state.win:time() end -- prevent race condition
---				while (state.frame_time-0.001)>state.win:time() do state.win:sleep(0.001) end -- simple frame limit
---				while (state.frame_time-0.001)>state.win:time() do end -- simple frame limit
---				state.frame_time=state.frame_time+state.frame_rate -- step frame forward one tick
-			end
+				if state.frame_rate and state.frame_time then --  framerate limiter enabled
+					if state.frame_time<(state.win:time()-0.5) then state.frame_time=state.win:time() end -- prevent race condition
+					while (state.frame_time-0.001)>state.win:time() do state.win:sleep(0.001) end -- simple frame limit
+					state.frame_time=state.frame_time+state.frame_rate -- step frame forward one tick
+				end
 
-			if state.times then state.times.update.start() end
-			
-			if state.now and state.now.update then
-				state.now.update(state)
-			end
-			for i,v in ipairs(state.mods) do
-				if v.update then
-					v.update(state)
+				if state.times then state.times.update.start() end
+				
+				if state.now and state.now.update then
+					state.now.update(state)
+				end
+				for i,v in ipairs(state.mods) do
+					if v.update then
+						v.update(state)
+					end
+				end
+
+				if state.times then state.times.update.stop() end
+				
+			if state.frame_rate and state.frame_time then --  framerate limiter enabled
+				if (state.frame_time-0.001)<=state.win:time() then -- repeat until we are ahead of real time
+					return state.update() -- tailcall
 				end
 			end
-
-			if state.times then state.times.update.stop() end
 		end
 
 		function state.draw()
@@ -167,8 +173,7 @@ function bake(opts)
 
 		function state.msgs() -- read and process any msgs we have from win:msg
 			if state.win then
-				local m=state.win:msg() -- read first
-				while m and m[1] do
+				for m in state.win:msgs() do
 					if state.now and state.now.msg then
 						state.now.msg(state,m)
 					end
@@ -177,19 +182,20 @@ function bake(opts)
 							v.msg(state,m)
 						end
 					end
-					m=state.win:msg() -- read next
 				end
 			end
 		end
 
 -- a busy blocking loop, or not, if we are running on the wrong sort
 -- of system it just returns and expects the other functions
--- to be called when necesary.
+-- eg android_* to be called when necesary.
 		function state.serv(state)
+print("normal serv")
 		
 			if state.win.noblock then
 				return state
 			end
+print("normal serv loop")
 			
 			local finished
 			repeat
@@ -220,12 +226,13 @@ print("mainstate stop")
 print("mainstate clean")
 			state.clean()
 		end
-		function state.android_updatedraw()
+		function state.android_serv()
 			state.msgs()
 			state.update()
 			state.draw()
 			
 			local finished=state.change()
+			return finished
 		end
 		function state.android_draw()
 			state.draw()
@@ -235,14 +242,49 @@ print("mainstate resize",w,h)
 			state.win.width=w
 			state.win.height=h
 		end
+		function state.android_msg(m)
+--	print(wstr.dump(m))
+			if m.type==1 then
+				table.insert(state.win.msgstack,{
+					time=m.eventtime,
+					class="key",
+					ascii="",
+					action=( (m.action==0) and 1 or -1),
+					keycode=m.keycode,
+					keyname=string.format("android_%02x",m.keycode)
+				})
+			elseif m.type==2 then
+				local act=0
+				if m.action==0 then act= 1 end
+				if m.action==1 then act=-1 end
+				if m.action==2 then act= 0 end
+				table.insert(state.win.msgstack,{
+					time=m.eventtime,
+					action=act,
+					class="mouse",
+					keycode=m.pointers[1].id,
+					x=m.pointers[1].x,
+					y=m.pointers[1].y,
+				})
+			end
+		end
+--[[
 		function state.android_press(asc,code,updn)
 print("mainstate press",asc,code,updn)
-			table.insert(state.win.msgs,{"key",string.char(asc),updn,code,string.format("android_%02x",code)})
+			table.insert(state.win.msgstack,{
+				time=win.time(),
+				class="key",
+				ascii=string.char(asc),
+				action=updn,
+				keycode=code,
+				keyname=string.format("android_%02x",code)
+			})
 		end
 		function state.android_touch(...)
 print("mainstate touch",...)
-			table.insert(state.win.msgs,{})
+			table.insert(state.win.msgstack,{})
 		end
+]]
 
 	return state
 

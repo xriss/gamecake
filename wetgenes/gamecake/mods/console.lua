@@ -44,9 +44,10 @@ function bake(opts)
 		console.y_show=8*8
 		
 		console.show=false
+		console.show_hud=true
 
 --		console.show=true
-		console.show_hud=true
+--		console.show_hud=true
 		
 		console.setup_done=true
 --print("console setup")
@@ -244,11 +245,11 @@ function bake(opts)
 
 		if console.y > 0 then
 		
-			gl.Color(pack.argb4_pmf4(0x40f0))
+			gl.Color(pack.argb4_pmf4(0xc040))
 			
 			flat:quad(0,0,w,console.y)
 
-			gl.Color(pack.argb4_pmf4(0x80f0))
+			gl.Color(pack.argb4_pmf4(0xf4f4))
 
 			local i=#console.lines
 			local y=console.y-16
@@ -321,8 +322,10 @@ function bake(opts)
 	end
 	
 	function console.msg(state,m)
-		if m[1]=="key" then
-			console.keypress(m[2],string.lower(m[5]),m[3])
+		if m.class=="key" then
+			console.keypress(m.ascii,m.keyname,m.action)
+		elseif m.class=="mouse" then
+			console.keypress(m.action,m.x,m.y,m.keycode)
 		end
 	end
 

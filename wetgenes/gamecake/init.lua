@@ -60,13 +60,13 @@ end
 
 setup = function(cake)
 	if not cake.opts.disable_sounds then
-		cake.sounds:setup()
+--		cake.sounds:setup()
 	end
 end
 
 clean = function(cake)
 	if not cake.opts.disable_sounds then
-		cake.sounds:clean()
+--		cake.sounds:clean()
 	end
 end
 
@@ -77,7 +77,7 @@ print("cakestart")
 	cake.sheets:start()
 	cake.fonts:start()
 	if not cake.opts.disable_sounds then
-		cake.sounds:start()
+--		cake.sounds:start()
 	end
 end
 
@@ -88,7 +88,7 @@ print("cakestop")
 	cake.images:stop()
 	cake.buffers:stop()
 	if not cake.opts.disable_sounds then
-		cake.sounds:stop()
+--		cake.sounds:stop()
 	end
 	if cake.gl.forget then -- any programs will need to be recompiled
 		cake.gl.forget()

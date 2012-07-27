@@ -124,10 +124,11 @@ load=function(sounds,filename,id,name)
 	
 	t={}
 	t.filename=filename
-	t.loop=al.FALSE
 	
 	if al then --al mode
 	
+		t.loop=al.FALSE
+		
 		t.buff=al.GenBuffer()
 		al.BufferData(t.buff,x) -- all loaded
 		

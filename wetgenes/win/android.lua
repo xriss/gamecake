@@ -28,5 +28,11 @@ end
 
 android.time=core.time
 
+android.create=core.create
+android.destroy=core.destroy
+android.info=core.info
+
+android.context=core.context
+android.swap=core.swap
 
 return android

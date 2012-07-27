@@ -90,10 +90,10 @@ function setup(widget,def)
 	end
 	
 	function master.msg(widget,m)
-		if m[1]=="key" then
-			widget:key(m[2],m[3],m[4])
-		elseif m[1]=="mouse" then
-			widget:mouse(m[3],m[4],m[5],m[2])
+		if m.class=="key" then
+			widget:key(m.ascii,m.keyname,m.actions)
+		elseif m.class=="mouse" then
+			widget:mouse(m.action,m.x,m.y,m.keycode)
 		end
 	end
 --
