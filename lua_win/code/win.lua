@@ -8,7 +8,7 @@ local base={}
 
 local softcore=require("wetgenes.win.core") -- we keep some generic C functions here
 
-local hardcore -- but use different cores depending on the system we compiled for and are running on
+local hardcore -- but use different hardcores depending on the system we compiled for and are running on
 
 local args={...}
 
@@ -94,7 +94,7 @@ function win.android_setup(apk)
 		print=_G.print
 
 
-print("ANDROID_SETUP with ",apk,4)
+--print("ANDROID_SETUP with ",apk,4)
 		
 	end
 	
@@ -108,7 +108,7 @@ function win.create(opts)
 	if hardcore.create then
 		w[0]=assert( hardcore.create(opts) )
 	end
-	w.msgs={} -- can feed msgs into here (fifo stack) with table.push
+	w.msgstack={} -- can feed "fake" msgs into here (fifo stack) with table.push
 	w.width=0
 	w.height=0
 	
@@ -152,27 +152,37 @@ function base.wait(w,t)
 	end
 end
 
+-- a msg iterator
+function base.msgs(w)
+	return function() return w:msg() end
+end
+
+-- get the next msg or return nil if there are no more
 function base.msg(w)
-	if w.msgs[1] then
-		local m=table.remove(w.msgs,1)
-		if m[1]=="key" then
-			if m[5] then m[5]=win.keymap(m[5]) end -- patch key name to lowercase and rename if we have to
-		end
---		_G.print(m)
-		return m
+
+	local m
+	
+	if w.msgstack[1] then
+		m=table.remove(w.msgstack,1)
 	end
 	if hardcore.msg then
-		local m={hardcore.msg(w[0])}
-		if m[1]=="key" then
-			if m[5] then m[5]=win.keymap(m[5]) end -- patch key name to lowercase and rename if we have to
-		end
-		return m
+		m=hardcore.msg(w[0])
 	end
+
+	if m then -- proccess the msg some more
+	
+		if m.keyname then -- run it through our keymap probably just force it to lowercase.
+			m.keyname=win.keymap(m.keyname)
+		end
+		
+	end
+	
+	return m
 end
 
 function base.sleep(...)
 	if hardcore.sleep then
-		for i,v in ipairs({...}) do
+		for i,v in ipairs({...}) do	-- ignore first arg if it is a table so we can call with :
 			if type(v)=="number" then
 				hardcore.sleep(v)
 			end

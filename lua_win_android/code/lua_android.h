@@ -6,21 +6,11 @@
 
 typedef struct sandroid_lua {
 
-/*
- * 	int			fp_dsp;			// display as file
-	fd_set		set_dsp;		// display as set
-	Display		*dsp;
-	int			screen;
-	Window		win;
-	
-	GLXContext context;
-*/
-
 	EGLDisplay display;
 	EGLSurface surface;
 	EGLContext context;
 
-//	EGL_DISPMANX_WINDOW_T nativewindow;
+	ANativeWindow* window;
 	
 	int screen_width;
 	int screen_height;
@@ -38,6 +28,8 @@ typedef struct sandroid_lua_wrap { // this can be treated as wetwin_lua **
 } android_lua_wrap ;
 
 extern const char *lua_android_ptr_name;
+
+extern struct android_app* master_android_app;
 
 
 #ifdef __cplusplus
