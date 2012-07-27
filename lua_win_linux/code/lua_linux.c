@@ -291,6 +291,7 @@ int x=0;
 int y=0;
 char asc[255];
 KeySym k;
+double time;
 
 	XEvent e[1];
 	if( XPending( p->dsp ) > 0 )
@@ -300,15 +301,18 @@ KeySym k;
 		switch(e->type)
 		{
 			case KeyPress:
+				time=(e->xkey.time/1000.0);
 				lua='k';
 				act=1;
 			break;
 			case KeyRelease:
+				time=(e->xkey.time/1000.0);
 				lua='k';
 				act=-1;
 			break;
 			
 			case ButtonPress:
+				time=(e->xbutton.time/1000.0);
 				lua='m';
 				act=1;
 				key=(e->xbutton.button);
@@ -316,6 +320,7 @@ KeySym k;
 				y=e->xbutton.y;
 			break;
 			case ButtonRelease:
+				time=(e->xbutton.time/1000.0);
 				lua='m';
 				act=-1;
 				key=(e->xbutton.button);
@@ -323,29 +328,36 @@ KeySym k;
 				y=e->xbutton.y;
 			break;
 			case MotionNotify:
+				time=(e->xmotion.time/1000.0);
 				lua='m';
 				x=e->xmotion.x;
 				y=e->xmotion.y;
 			break;
 			
 			case ConfigureNotify:
+//				time=(e->xconfigure.time/1000.0);
 				lua='s';
 				x=e->xconfigure.width;
 				y=e->xconfigure.height;
+				
+				// remember this value
 				p->width=x;
 				p->height=y;
+				
 			break;
 		}
 	}
 	
     if(lua=='m')
     {
-		lua_pushstring(l,"mouse");
-		lua_pushnumber(l,key);
-		lua_pushnumber(l,act);
-		lua_pushnumber(l,x);
-		lua_pushnumber(l,y);
-		return 5;
+		lua_newtable(l);
+		lua_pushnumber(l,time);					lua_setfield(l,-2,"time");
+		lua_pushstring(l,"mouse");				lua_setfield(l,-2,"class");
+		lua_pushnumber(l,key);					lua_setfield(l,-2,"keycode");
+		lua_pushnumber(l,act);					lua_setfield(l,-2,"action");
+		lua_pushnumber(l,x);					lua_setfield(l,-2,"x");
+		lua_pushnumber(l,y);					lua_setfield(l,-2,"y");
+		return 1;
 	}
     else
     if(lua=='k')
@@ -353,20 +365,24 @@ KeySym k;
 		int ts=XLookupString(&e->xkey,asc,32,&k,0);
 		asc[ts]=0; // null term the ascii
 
-		lua_pushstring(l,"key");
-		lua_pushstring(l,asc);
-		lua_pushnumber(l,act);
-		lua_pushnumber(l,k);
-		lua_pushstring(l,XKeysymToString(k));
-		return 5;
+		lua_newtable(l);
+		lua_pushnumber(l,time);					lua_setfield(l,-2,"time");
+		lua_pushstring(l,"key");				lua_setfield(l,-2,"class");
+		lua_pushstring(l,asc);					lua_setfield(l,-2,"ascii");
+		lua_pushnumber(l,act);					lua_setfield(l,-2,"action");
+		lua_pushnumber(l,k);					lua_setfield(l,-2,"keycode");
+		lua_pushstring(l,XKeysymToString(k));	lua_setfield(l,-2,"keyname");
+		return 1;
 	}
     else
     if(lua=='s')
 	{	
-		lua_pushstring(l,"size");
-		lua_pushnumber(l,x);
-		lua_pushnumber(l,y);
-		return 3;
+		lua_newtable(l);
+//		lua_pushnumber(l,time);					lua_setfield(l,-2,"time");
+		lua_pushstring(l,"size");				lua_setfield(l,-2,"class");
+		lua_pushnumber(l,x);					lua_setfield(l,-2,"x");
+		lua_pushnumber(l,y);					lua_setfield(l,-2,"y");
+		return 1;
 	}
 	
 	return 0; // no more msgs
@@ -404,24 +420,10 @@ int lua_wetwin_sleep (lua_State *l)
 int lua_wetwin_time (lua_State *l)
 {
 
-#if defined(WIN32)
-
-s64 rez;
-s64 tim;
-
-	QueryPerformanceFrequency( (LARGE_INTEGER *) (&rez) );
-	QueryPerformanceCounter( (LARGE_INTEGER *) (&(tim)) );
-	lua_pushnumber(l, ((double)tim)/((double)rez) );
-	return 1;
-	
-#else
-
 	struct timeval tv;
 	gettimeofday ( &tv, NULL );
 	lua_pushnumber(l, ((double)tv.tv_sec) + ( ((double)tv.tv_usec) / 1000000.0 ) );
 	return 1;
-	
-#endif
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/

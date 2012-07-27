@@ -406,7 +406,7 @@ all_includes=all_includes or {
 	{"lua_win_nacl",	nil			or		nil		or		NACL	or		nil			or		nil			},
 	{"lua_win_android",	nil			or		nil		or		nil		or		ANDROID		or		nil			},
 	{"lua_win_raspi",	nil			or		nil		or		nil		or		nil			or		RASPI		},
-	{AND_LIB_DIR,		nil			or		nil		or		nil		or		ANDROID		or		nil			},
+--	{AND_LIB_DIR,		nil			or		nil		or		nil		or		ANDROID		or		nil			},
 	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_png",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},

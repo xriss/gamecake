@@ -63,4 +63,4 @@ extern "C" {
 #include "../wet/util/wet_types.h"
 
 
-#include "code/lua_win.h"
+#include "code/lua_linux.h"
