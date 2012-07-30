@@ -14639,16 +14639,12 @@ if test "${with_lua_suffix+set}" = set; then :
   withval=$with_lua_suffix;
 fi
 
-  lua_min_version=501
-  lua_max_version=503
+  lua_min_version=500
+  lua_max_version=550
   if test "x$lua_min_version" = x; then
     lua_min_version=0
   fi
-  if test "x$lua_max_version" = x; then
-    lua_max_version=$(($lua_min_version + 1))
-  fi
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking lua.h version is in range $lua_min_version <= v < $lua_max_version" >&5
-$as_echo_n "checking lua.h version is in range $lua_min_version <= v < $lua_max_version... " >&6; }
+
   LUA_OLD_LIBS="$LIBS"
   LIBS="$LIBS $LUA_LIB"
   LUA_OLD_CPPFLAGS="$CPPFLAGS"
@@ -14674,17 +14670,7 @@ int main()
 }
 
 _ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "lua.h version not in desired range
-See \`config.log' for more details" "$LINENO" 5; }
-fi
+
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
