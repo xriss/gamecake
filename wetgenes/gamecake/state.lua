@@ -13,6 +13,7 @@ function bake(opts)
 
 	local state={}
 
+		state.opts=opts
 		state.mods={}
 		
 		function state.require_mod(mname)
