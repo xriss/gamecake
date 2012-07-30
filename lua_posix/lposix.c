@@ -17,7 +17,9 @@
 #include <fcntl.h>
 #include <fnmatch.h>
 #include <getopt.h>
+#ifndef ANDROID
 #include <glob.h>
+#endif
 #include <grp.h>
 #include <libgen.h>
 #include <limits.h>
@@ -475,6 +477,7 @@ static int Pfnmatch(lua_State *L)     /** fnmatch(pattern, string [,flags]) */
 	return 1;
 }
 
+#ifndef ANDROID
 static int Pglob(lua_State *L)                  /** glob(pattern) */
 {
 	const char *pattern = luaL_optstring(L, 1, "*");
@@ -495,6 +498,7 @@ static int Pglob(lua_State *L)                  /** glob(pattern) */
 		return 1;
 	}
 }
+#endif
 
 static int aux_files(lua_State *L)
 {
@@ -1260,7 +1264,8 @@ static int Pttyname(lua_State *L)		/** ttyname([fd]) */
 static int Pctermid(lua_State *L)		/** ctermid() */
 {
 	char b[L_ctermid];
-	lua_pushstring(L, ctermid(b));
+	ctermid(b); //android fix
+	lua_pushstring(L,b);
 	return 1;
 }
 
@@ -2303,7 +2308,9 @@ static const luaL_Reg R[] =
 	MENTRY( Pgetpid		),
 	MENTRY( Pgetrlimit	),
 	MENTRY( Pgettimeofday	),
+#ifndef ANDROID
 	MENTRY( Pglob		),
+#endif
 	MENTRY( Pgmtime		),
 	MENTRY( Phostid		),
 	MENTRY( Pisgraph	),
@@ -2392,7 +2399,9 @@ LUALIB_API int luaopen_posix_c (lua_State *L)
 	MENTRY( RDWR     );
 	MENTRY( APPEND   );
 	MENTRY( CREAT    );
+#ifndef ANDROID
 	MENTRY( DSYNC    );
+#endif
 	MENTRY( EXCL     );
 	MENTRY( NOCTTY   );
 	MENTRY( NONBLOCK );
