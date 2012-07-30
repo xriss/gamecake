@@ -27,6 +27,8 @@ typedef struct sraspi_lua {
 
 	int width;
 	int height;
+	
+	int joy_fd[4];
 
 } raspi_lua ;
 

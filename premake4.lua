@@ -399,7 +399,7 @@ all_includes=all_includes or {
 --	{"lua_fenestra",	WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
 	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		},
 	{"lua_lanes",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		},
-	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		},
+	{"lua_posix",		nil			or		NIX		or		nil		or		ANDROID		or		RASPI		},
 	{"lua_win",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_win_windows",	WINDOWS		or		nil		or		nil		or		nil			or		nil			},
 	{"lua_win_linux",	nil			or		NIX		or		nil		or		nil			or		nil			},

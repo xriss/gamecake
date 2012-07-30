@@ -17,7 +17,9 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#ifndef ANDROID
 #include <glob.h>
+#endif
 #include <grp.h>
 #include <libgen.h>
 #include <limits.h>
@@ -224,6 +226,7 @@ static int Pdir(lua_State *L)			/** dir([path]) */
 	}
 }
 
+#ifndef ANDROID
 static int Pglob(lua_State *L)                  /** glob(pattern) */
 {
  const char *pattern = luaL_optstring(L, 1, "*");
@@ -243,6 +246,7 @@ static int Pglob(lua_State *L)                  /** glob(pattern) */
      return 1;
    }
 }
+#endif
 
 static int aux_files(lua_State *L)
 {
@@ -722,7 +726,8 @@ static int Pttyname(lua_State *L)		/** ttyname([fd]) */
 static int Pctermid(lua_State *L)		/** ctermid() */
 {
 	char b[L_ctermid];
-	lua_pushstring(L, ctermid(b));
+	ctermid(b);
+	lua_pushstring(L, b);
 	return 1;
 }
 
@@ -745,8 +750,10 @@ static void Fgetpasswd(lua_State *L, int i, const void *data)
 		case 3: lua_pushstring(L, p->pw_dir); break;
 		case 4: lua_pushstring(L, p->pw_shell); break;
 /* not strictly POSIX */
+#ifndef ANDROID
 		case 5: lua_pushstring(L, p->pw_gecos); break;
 		case 6: lua_pushstring(L, p->pw_passwd); break;
+#endif
 	}
 }
 
@@ -1055,7 +1062,9 @@ static const luaL_reg R[] =
 	{"getlogin",		Pgetlogin},
 	{"getpasswd",		Pgetpasswd},
 	{"getpid",		Pgetpid},
+#ifndef ANDROID
 	{"glob",		Pglob},
+#endif
 	{"hostid",		Phostid},
 	{"kill",		Pkill},
 	{"link",		Plink},

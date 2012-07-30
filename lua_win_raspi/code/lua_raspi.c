@@ -19,6 +19,10 @@
 
 #include "lua_raspi.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 //
 // we can use either this string as a string identifier
@@ -361,6 +365,41 @@ char c;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// what time is it, with sub second resolution
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_raspi_jread (lua_State *l)
+{
+raspi_lua *p=lua_raspi_check_ptr(l,1);
+int n = (int)luaL_checknumber(l, 2);
+
+unsigned char b[16];
+char s[256];
+
+	strcpy(s,"/dev/input/js0");
+
+	if(n<0) { n=0; }
+	if(n>3) { n=3; }
+	if(! p->joy_fd[n])
+	{
+		s[13]='0'+n;
+		p->joy_fd[n] = open(s,O_RDONLY|O_NONBLOCK);
+	}
+
+	if(p->joy_fd[n])
+	{
+		if( read(p->joy_fd[n], b, 8) == 8 )
+		{
+			lua_pushlstring(l,b,8);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -386,6 +425,8 @@ LUALIB_API int luaopen_wetgenes_win_raspi(lua_State *l)
 		
 		{"getc",			lua_raspi_getc},
 		
+		{"jread",			lua_raspi_jread},
+
 		{0,0}
 	};
 

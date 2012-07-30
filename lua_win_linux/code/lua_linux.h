@@ -16,6 +16,8 @@ typedef struct swetwin_lua {
 
 	int width;
 	int height;
+	
+	int joy_fd[4];
 
 } wetwin_lua ;
 
