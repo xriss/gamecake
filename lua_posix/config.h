@@ -1,17 +1,21 @@
 /* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+#ifndef ANDROID
+
 /* Define this if your system has a crypt() function */
 #define HAVE_CRYPT /**/
 
 /* Define to 1 if you have the <crypt.h> header file. */
 #define HAVE_CRYPT_H 1
 
+
 /* Define to 1 if a SysV or X/Open compatible Curses library is present */
 #define HAVE_CURSES 1
 
 /* Define to 1 if library supports color (enhanced functions) */
 #define HAVE_CURSES_COLOR 1
+
 
 /* Define to 1 if library supports X/Open Enhanced functions */
 /* #undef HAVE_CURSES_ENHANCED */
@@ -21,6 +25,11 @@
 
 /* Define to 1 if library supports certain obsolete features */
 #define HAVE_CURSES_OBSOLETE 1
+
+/* Define to 1 if the Ncurses library is present */
+#define HAVE_NCURSES 1
+
+#endif
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
@@ -37,8 +46,6 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
 
-/* Define to 1 if the Ncurses library is present */
-#define HAVE_NCURSES 1
 
 /* Define to 1 if the NcursesW library is present */
 /* #undef HAVE_NCURSESW */
@@ -52,11 +59,16 @@
 /* Define to 1 if <ncurses/curses.h> is present */
 /* #undef HAVE_NCURSES_CURSES_H */
 
+#ifndef ANDROID
+
 /* Define to 1 if <ncurses.h> is present */
 #define HAVE_NCURSES_H 1
 
+/* Define to 1 if you have the <sys/statvfs.h> header file. */
+#define HAVE_SYS_STATVFS_H 1
 /* Define to 1 if you have the `statvfs' function. */
 #define HAVE_STATVFS 1
+#endif
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -73,8 +85,6 @@
 /* Define to 1 if you have the `strlcpy' function. */
 /* #undef HAVE_STRLCPY */
 
-/* Define to 1 if you have the <sys/statvfs.h> header file. */
-#define HAVE_SYS_STATVFS_H 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
