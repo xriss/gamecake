@@ -2,6 +2,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local wstr=require("wetgenes.string")
+local pack=require("wetgenes.pack")
 
 local win={}
 local base={}
@@ -180,6 +181,20 @@ function base.msg(w)
 	return m
 end
 
+function base.jread(w,n)
+	if hardcore.jread then
+--print("jread")	
+		local pkt=hardcore.jread(w[0],n)
+		local tab
+		if pkt then
+			tab=pack.load(pkt,{"u32","time","s16","value","u8","type","u8","number"})
+			tab.class="joy"
+		end
+		return tab
+	end
+end
+
+
 function base.sleep(...)
 	if hardcore.sleep then
 		for i,v in ipairs({...}) do	-- ignore first arg if it is a table so we can call with :
@@ -205,5 +220,6 @@ function base.glyph_8x8(n)
 	return softcore.glyph_8x8(n)
 end
 win.glyph_8x8=base.glyph_8x8
+
 
 return win
