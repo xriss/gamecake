@@ -48,6 +48,9 @@ if not hardcore then
 	if suc then hardcore=dat base.flavour="linux" end
 end
 
+win.hardcore=hardcore
+win.softcore=softcore
+
 local meta={}
 meta.__index=base
 
