@@ -464,6 +464,47 @@ char s[256];
 	return 0;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// this is fucking dangerous
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_ioctl (lua_State *l)
+{
+int i1 = (int)luaL_checknumber(l, 1);
+int i2 = (int)luaL_checknumber(l, 2);
+int i3 = (int)luaL_checknumber(l, 3);
+int r;
+	r=ioctl(i1,i2,i3);
+	lua_pushnumber(l,(double)r);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// non blocking getc, returns nil if there is nothing there, otherwise a char code
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_wetwin_getc (lua_State *l)
+{
+char c;
+    struct timeval tv;
+    fd_set fds;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    FD_ZERO(&fds);
+    FD_SET(0, &fds); //STDIN_FILENO is 0
+    select(0+1, &fds, NULL, NULL, &tv);
+    if( FD_ISSET(0, &fds) )
+    {
+		c=fgetc(stdin);
+		lua_pushnumber(l,c);
+		return 1;
+	}
+	
+	return 0;
+}
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -490,6 +531,9 @@ LUALIB_API int luaopen_wetgenes_win_linux(lua_State *l)
 		{"time",			lua_wetwin_time},
 		
 		{"jread",			lua_wetwin_jread},
+		
+		{"ioctl",			lua_wetwin_ioctl},
+		{"getc",			lua_wetwin_getc},
 		
 		{0,0}
 	};
