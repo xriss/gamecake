@@ -24,7 +24,7 @@ if RASPI then
 	links { "crypt" }
 	links { "pthread" }
 	
-	links { "dl" , "m" , "pthread" }
+	links { "dl" , "m" , "pthread" ,"rt"}
 
 	linkoptions { "-v" }
 --	linkoptions { "-v -nostdlib" }
