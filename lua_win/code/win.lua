@@ -3,6 +3,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
+local bit=require("bit")
 
 local win={}
 local base={}
@@ -11,12 +12,13 @@ local softcore=require("wetgenes.win.core") -- we keep some generic C functions 
 
 local hardcore -- but use different hardcores depending on the system we compiled for and are running on
 
+local posix -- set if we are a posix system
+
 local args={...}
 
 
 base.noblock=false
 base.flavour="raw"
-
 
 if type(args[2]=="table" ) then -- you can force a core by using a second arg to require
 	hardcore=args[2]
@@ -35,7 +37,9 @@ end
 
 if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.raspi") end )
-	if suc then hardcore=dat base.flavour="raspi" end
+	if suc then hardcore=dat base.flavour="raspi"
+		posix=require("posix")
+	end
 end
 
 if not hardcore then
@@ -45,11 +49,14 @@ end
 
 if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.linux") end )
-	if suc then hardcore=dat base.flavour="linux" end
+	if suc then hardcore=dat base.flavour="linux"
+		posix=require("posix")
+	end
 end
 
 win.hardcore=hardcore
 win.softcore=softcore
+win.posix=posix
 
 local meta={}
 meta.__index=base
@@ -166,11 +173,14 @@ function base.msg(w)
 
 	local m
 	
-	if w.msgstack[1] then
+	if not m and w.msgstack[1] then
 		m=table.remove(w.msgstack,1)
 	end
-	if hardcore.msg then
+	if not m and hardcore.msg then
 		m=hardcore.msg(w[0])
+	end
+	if not m and posix then
+		m=base.posix_msg(w)
 	end
 
 	if m then -- proccess the msg some more
@@ -223,6 +233,115 @@ function base.glyph_8x8(n)
 	return softcore.glyph_8x8(n)
 end
 win.glyph_8x8=base.glyph_8x8
+
+
+function base.posix_open_events(w)
+	if not posix then return end
+
+	base.posix_events={}
+	local events=base.posix_events
+	local fp=io.open("/proc/bus/input/devices","r")
+	local tab={}
+	for l in fp:lines() do
+		local t=l:sub(1,3)
+		local v=l:sub(4)
+		if t=="I: " then
+			tab={} -- start new device
+			tab.bus		=string.match(v,"Bus=([^%s]+)")
+			tab.vendor	=string.match(v,"Vendor=([^%s]+)")
+			tab.product	=string.match(v,"Product=([^%s]+)")
+			tab.version	=string.match(v,"Version=([^%s]+)")
+		end
+		if t=="N: " then
+			tab.name=string.match(v,"Name=\"([^\"]+)")
+		end
+		if t=="H: " then
+			local t=string.match(v,"Handlers=(.+)")
+			tab.event=tonumber(string.match(t,"event(%d+)"))
+			tab.js=tonumber(string.match(t,"js(%d+)"))
+			tab.mouse=tonumber(string.match(t,"mouse(%d+)"))
+			events[tab.event]=tab
+			tab.handlers={}
+			for n in string.gmatch(t,"[^%s]+") do
+				tab.handlers[n]=true
+				if n:sub(1,5)~="event" then -- we already have events
+					events[n]=tab
+				end
+			end
+		end
+	end
+	fp:close()
+	
+--	print(wstr.dump(events))
+
+	local kbdcount=0
+	for i=0,#events do local v=events[i]
+		if v.handlers.kbd then -- open as keyboard, there may be many of these and it is all a hacky
+			v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
+			if v.fd then
+				print("opened keyboard "..kbdcount.." on event"..v.event.." "..v.name)
+				v.fd_device=kbdcount
+				v.fd_type="keyboard"
+				kbdcount=kbdcount+1
+			else
+				print("failed to open keyboard "..kbdcount.." on event"..v.event.." "..v.name)
+			end
+		elseif v.js then -- open as joystick	
+			v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
+			if v.fd then
+				print("opened joystick "..v.js.." on event"..v.event.." "..v.name)
+				v.fd_device=v.js
+				v.fd_type="joystick"
+			else
+				print("failed to open joystick "..v.js.." on event"..v.event.." "..v.name)
+			end
+		elseif v.mouse then -- open as mouse
+			v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
+			if v.fd then
+				print("opened mouse "..v.mouse.." on event"..v.event.." "..v.name)
+				v.fd_device=v.mouse
+				v.fd_type="mouse"
+			else
+				print("failed to open mouse "..v.mouse.." on event"..v.event.." "..v.name)
+			end
+		end
+	end
+
+--	print(wstr.dump(events))
+
+	
+end
+function base.posix_read_events(w) -- call this until it returns nil to get all events
+	if not posix then return end
+	
+	local events=base.posix_events
+	for i=0,#events do local v=events[i]
+		if v.fd then
+			local pkt=posix.read(v.fd,16)
+			if pkt then
+				local tab=pack.load(pkt,{"u32","secs","u32","micros","u16","type","u16","code","u32","value"})
+				tab.time=tab.secs+(tab.micros/1000000)
+				tab.secs=nil
+				tab.micros=nil
+				tab.class="posix_"..v.fd_type
+				tab.posix_device=v -- please do not edit this
+				return tab
+			end
+		end
+	end
+	
+end
+function base.posix_close_events(w)
+	if not posix then return end
+	base.posix_events=nil
+end
+
+function base.posix_msg(w)
+	if not base.posix_events then -- need to initialize
+		base.posix_open_events(w)
+	end
+	return base.posix_read_events(w)
+end
 
 
 return win
