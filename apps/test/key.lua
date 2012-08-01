@@ -69,7 +69,7 @@ print(keydev)
 
 --find device in /proc/bus/input/devices  ?
 
-local fd=assert(posix.open("/dev/input/by-path/platform-i8042-serio-0-event-kbd", bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) ))
+local fd=assert(posix.open(keydev, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) ))
 --local fd=assert(posix.open("/dev/input/event3", bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) ))
 --local fd=assert(posix.open("/dev/stdin", bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) ))
 
