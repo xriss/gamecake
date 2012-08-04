@@ -1,4 +1,4 @@
-ngx_feature="lua library"
+ngx_feature="Lua library"
 ngx_feature_libs="-llua -lm"
 ngx_feature_name=
 ngx_feature_run=no
@@ -7,7 +7,7 @@ ngx_feature_path=
 ngx_feature_test="(void) luaL_newstate();"
 
 if [ -n "$LUAJIT_INC" -o -n "$LUAJIT_LIB" ]; then
-    # explicit set lua lib path
+    # explicitly set Lua lib path
     ngx_feature="LuaJIT library in $LUAJIT_LIB and $LUAJIT_INC (specified by the LUAJIT_LIB and LUAJIT_INC env)"
     ngx_feature_path="$LUAJIT_INC"
     if [ $NGX_RPATH = YES ]; then
@@ -20,7 +20,7 @@ if [ -n "$LUAJIT_INC" -o -n "$LUAJIT_LIB" ]; then
 
     if [ $ngx_found = no ]; then
         cat << END
-        $0: error: the ngx_lua addon requires the lua or luajit library and LUAJIT_LIB is defined as $LUAJIT_LIB and LUAJIT_INC $LUAJIT_INC, but we cannot find LuaJIT there.
+        $0: error: ngx_http_lua_module requires the Lua or LuaJIT library and LUAJIT_LIB is defined as $LUAJIT_LIB and LUAJIT_INC $LUAJIT_INC, but we cannot find LuaJIT there.
 END
         exit 1
     fi
@@ -43,8 +43,8 @@ END
     esac
 else
     if [ -n "$LUA_INC" -o -n "$LUA_LIB" ]; then
-        # explicit set lua lib path
-        ngx_feature="lua library in $LUA_LIB and $LUA_INC (specified by the LUA_LIB and LUA_INC env)"
+        # explicitly set Lua lib path
+        ngx_feature="Lua library in $LUA_LIB and $LUA_INC (specified by the LUA_LIB and LUA_INC env)"
         ngx_feature_path="$LUA_INC"
         if [ $NGX_RPATH = YES ]; then
             ngx_feature_libs="-R$LUA_LIB -L$LUA_LIB -llua -lm"
@@ -56,19 +56,19 @@ else
 
         if [ $ngx_found = no ]; then
             cat << END
-            $0: error: the ngx_lua addon requires the lua or luajit library and LUA_LIB is defined as $LUA_LIB and LUA_INC is $LUA_INC, but we cannot find standard Lua there.
+            $0: error: ngx_http_lua_module requires the Lua or LuaJIT library and LUA_LIB is defined as $LUA_LIB and LUA_INC is $LUA_INC, but we cannot find standard Lua there.
 END
             exit 1
         fi
     else
         # auto-discovery
-        ngx_feature="lua library"
+        ngx_feature="Lua library"
         ngx_feature_libs="-llua -lm"
         . auto/feature
 
         if [ $ngx_found = no ]; then
             # OpenBSD
-            ngx_feature="lua library in /usr/local/"
+            ngx_feature="Lua library in /usr/local/"
             ngx_feature_path="/usr/local/include"
             if [ $NGX_RPATH = YES ]; then
                 ngx_feature_libs="-R/usr/local/lib -L/usr/local/lib -llua -lm"
@@ -80,7 +80,7 @@ END
 
         if [ $ngx_found = no ]; then
             # NetBSD
-            ngx_feature="lua library in /usr/pkg/"
+            ngx_feature="Lua library in /usr/pkg/"
             ngx_feature_path="/usr/pkg/include/"
             if [ $NGX_RPATH = YES ]; then
                 ngx_feature_libs="-R/usr/pkg/lib -L/usr/pkg/lib -lm -llua"
@@ -92,7 +92,7 @@ END
 
         if [ $ngx_found = no ]; then
             # MacPorts
-            ngx_feature="lua library in /opt/local/"
+            ngx_feature="Lua library in /opt/local/"
             ngx_feature_path="/opt/local/include"
             if [ $NGX_RPATH = YES ]; then
                 ngx_feature_libs="-R/opt/local/lib -L/opt/local/lib -lm -llua"
@@ -104,7 +104,7 @@ END
 
         if [ $ngx_found = no ]; then
             # FreeBSD
-            ngx_feature="lua library in /usr/local/../lua51/"
+            ngx_feature="Lua library in /usr/local/../lua51/"
             ngx_feature_path="/usr/local/include/lua51"
             if [ $NGX_RPATH = YES ]; then
                 ngx_feature_libs="-R/usr/local/lib/lua51 -L/usr/local/lib/lua51 -llua -lm"
@@ -116,7 +116,7 @@ END
 
         if [ $ngx_found = no ]; then
             # Debian
-            ngx_feature="lua library in /usr/"
+            ngx_feature="Lua library in /usr/"
             ngx_feature_path="/usr/include/lua5.1"
             if [ $NGX_RPATH = YES ]; then
                 ngx_feature_libs="-R/usr/lib -L/usr/lib -lm -llua5.1"
@@ -133,15 +133,106 @@ if [ $ngx_found = yes ]; then
     CORE_LIBS="$CORE_LIBS $ngx_feature_libs"
 else
  cat << END
- $0: error: the ngx_lua addon requires the lua library.
+ $0: error: ngx_http_lua_module requires the Lua library.
 END
  exit 1
 fi
 
 ngx_addon_name=ngx_http_lua_module
 HTTP_AUX_FILTER_MODULES="$HTTP_AUX_FILTER_MODULES ngx_http_lua_module"
-NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/src/ngx_http_lua_script.c $ngx_addon_dir/src/ngx_http_lua_log.c $ngx_addon_dir/src/ngx_http_lua_subrequest.c $ngx_addon_dir/src/ngx_http_lua_ndk.c $ngx_addon_dir/src/ngx_http_lua_control.c $ngx_addon_dir/src/ngx_http_lua_time.c $ngx_addon_dir/src/ngx_http_lua_misc.c $ngx_addon_dir/src/ngx_http_lua_variable.c $ngx_addon_dir/src/ngx_http_lua_string.c $ngx_addon_dir/src/ngx_http_lua_output.c $ngx_addon_dir/src/ngx_http_lua_headers.c $ngx_addon_dir/src/ngx_http_lua_req_body.c $ngx_addon_dir/src/ngx_http_lua_uri.c $ngx_addon_dir/src/ngx_http_lua_args.c $ngx_addon_dir/src/ngx_http_lua_ctx.c $ngx_addon_dir/src/ngx_http_lua_regex.c $ngx_addon_dir/src/ngx_http_lua_module.c $ngx_addon_dir/src/ngx_http_lua_headers_out.c $ngx_addon_dir/src/ngx_http_lua_headers_in.c $ngx_addon_dir/src/ngx_http_lua_directive.c $ngx_addon_dir/src/ngx_http_lua_consts.c $ngx_addon_dir/src/ngx_http_lua_exception.c $ngx_addon_dir/src/ngx_http_lua_util.c $ngx_addon_dir/src/ngx_http_lua_cache.c $ngx_addon_dir/src/ngx_http_lua_conf.c $ngx_addon_dir/src/ngx_http_lua_contentby.c $ngx_addon_dir/src/ngx_http_lua_rewriteby.c $ngx_addon_dir/src/ngx_http_lua_accessby.c $ngx_addon_dir/src/ngx_http_lua_setby.c $ngx_addon_dir/src/ngx_http_lua_capturefilter.c $ngx_addon_dir/src/ngx_http_lua_clfactory.c $ngx_addon_dir/src/ngx_http_lua_pcrefix.c $ngx_addon_dir/src/ngx_http_lua_headerfilterby.c $ngx_addon_dir/src/ngx_http_lua_shdict.c"
-NGX_ADDON_DEPS="$NGX_ADDON_DEPS $ngx_addon_dir/src/ddebug.h $ngx_addon_dir/src/ngx_http_lua_script.h $ngx_addon_dir/src/ngx_http_lua_log.h $ngx_addon_dir/src/ngx_http_lua_subrequest.h $ngx_addon_dir/src/ngx_http_lua_ndk.h $ngx_addon_dir/src/ngx_http_lua_control.h $ngx_addon_dir/src/ngx_http_lua_time.h $ngx_addon_dir/src/ngx_http_lua_string.h $ngx_addon_dir/src/ngx_http_lua_misc.h $ngx_addon_dir/src/ngx_http_lua_variable.h $ngx_addon_dir/src/ngx_http_lua_output.h $ngx_addon_dir/src/ngx_http_lua_headers.h $ngx_addon_dir/src/ngx_http_lua_uri.h $ngx_addon_dir/src/ngx_http_lua_req_body.h $ngx_addon_dir/src/ngx_http_lua_args.h $ngx_addon_dir/src/ngx_http_lua_ctx.h $ngx_addon_dir/src/ngx_http_lua_regex.h $ngx_addon_dir/src/ngx_http_lua_common.h $ngx_addon_dir/src/ngx_http_lua_directive.h $ngx_addon_dir/src/ngx_http_lua_headers_out.h $ngx_addon_dir/src/ngx_http_lua_headers_in.h $ngx_addon_dir/src/ngx_http_lua_consts.h $ngx_addon_dir/src/ngx_http_lua_exception.h $ngx_addon_dir/src/ngx_http_lua_util.h $ngx_addon_dir/src/ngx_http_lua_cache.h $ngx_addon_dir/src/ngx_http_lua_conf.h $ngx_addon_dir/src/ngx_http_lua_contentby.h $ngx_addon_dir/src/ngx_http_lua_rewriteby.h $ngx_addon_dir/src/ngx_http_lua_accessby.h $ngx_addon_dir/src/ngx_http_lua_setby.h $ngx_addon_dir/src/ngx_http_lua_capturefilter.h $ngx_addon_dir/src/ngx_http_lua_clfactory.h $ngx_addon_dir/src/ngx_http_lua_pcrefix.h $ngx_addon_dir/src/ngx_http_lua_headerfilterby.h $ngx_addon_dir/src/ngx_http_lua_shdict.h"
+NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
+                $ngx_addon_dir/src/ngx_http_lua_script.c \
+                $ngx_addon_dir/src/ngx_http_lua_log.c \
+                $ngx_addon_dir/src/ngx_http_lua_subrequest.c \
+                $ngx_addon_dir/src/ngx_http_lua_ndk.c \
+                $ngx_addon_dir/src/ngx_http_lua_control.c \
+                $ngx_addon_dir/src/ngx_http_lua_time.c \
+                $ngx_addon_dir/src/ngx_http_lua_misc.c \
+                $ngx_addon_dir/src/ngx_http_lua_variable.c \
+                $ngx_addon_dir/src/ngx_http_lua_string.c \
+                $ngx_addon_dir/src/ngx_http_lua_output.c \
+                $ngx_addon_dir/src/ngx_http_lua_headers.c \
+                $ngx_addon_dir/src/ngx_http_lua_req_body.c \
+                $ngx_addon_dir/src/ngx_http_lua_uri.c \
+                $ngx_addon_dir/src/ngx_http_lua_args.c \
+                $ngx_addon_dir/src/ngx_http_lua_ctx.c \
+                $ngx_addon_dir/src/ngx_http_lua_regex.c \
+                $ngx_addon_dir/src/ngx_http_lua_module.c \
+                $ngx_addon_dir/src/ngx_http_lua_headers_out.c \
+                $ngx_addon_dir/src/ngx_http_lua_headers_in.c \
+                $ngx_addon_dir/src/ngx_http_lua_directive.c \
+                $ngx_addon_dir/src/ngx_http_lua_consts.c \
+                $ngx_addon_dir/src/ngx_http_lua_exception.c \
+                $ngx_addon_dir/src/ngx_http_lua_util.c \
+                $ngx_addon_dir/src/ngx_http_lua_cache.c \
+                $ngx_addon_dir/src/ngx_http_lua_conf.c \
+                $ngx_addon_dir/src/ngx_http_lua_contentby.c \
+                $ngx_addon_dir/src/ngx_http_lua_rewriteby.c \
+                $ngx_addon_dir/src/ngx_http_lua_accessby.c \
+                $ngx_addon_dir/src/ngx_http_lua_setby.c \
+                $ngx_addon_dir/src/ngx_http_lua_capturefilter.c \
+                $ngx_addon_dir/src/ngx_http_lua_clfactory.c \
+                $ngx_addon_dir/src/ngx_http_lua_pcrefix.c \
+                $ngx_addon_dir/src/ngx_http_lua_headerfilterby.c \
+                $ngx_addon_dir/src/ngx_http_lua_shdict.c \
+                $ngx_addon_dir/src/ngx_http_lua_socket_tcp.c \
+                $ngx_addon_dir/src/ngx_http_lua_api.c \
+                $ngx_addon_dir/src/ngx_http_lua_logby.c \
+                $ngx_addon_dir/src/ngx_http_lua_sleep.c \
+                $ngx_addon_dir/src/ngx_http_lua_bodyfilterby.c \
+                $ngx_addon_dir/src/ngx_http_lua_initby.c \
+                $ngx_addon_dir/src/ngx_http_lua_socket_udp.c \
+                $ngx_addon_dir/src/ngx_http_lua_req_method.c \
+                $ngx_addon_dir/src/ngx_http_lua_phase.c \
+                "
+
+NGX_ADDON_DEPS="$NGX_ADDON_DEPS \
+                $ngx_addon_dir/src/ddebug.h \
+                $ngx_addon_dir/src/ngx_http_lua_script.h \
+                $ngx_addon_dir/src/ngx_http_lua_log.h \
+                $ngx_addon_dir/src/ngx_http_lua_subrequest.h \
+                $ngx_addon_dir/src/ngx_http_lua_ndk.h \
+                $ngx_addon_dir/src/ngx_http_lua_control.h \
+                $ngx_addon_dir/src/ngx_http_lua_time.h \
+                $ngx_addon_dir/src/ngx_http_lua_string.h \
+                $ngx_addon_dir/src/ngx_http_lua_misc.h \
+                $ngx_addon_dir/src/ngx_http_lua_variable.h \
+                $ngx_addon_dir/src/ngx_http_lua_output.h \
+                $ngx_addon_dir/src/ngx_http_lua_headers.h \
+                $ngx_addon_dir/src/ngx_http_lua_uri.h \
+                $ngx_addon_dir/src/ngx_http_lua_req_body.h \
+                $ngx_addon_dir/src/ngx_http_lua_args.h \
+                $ngx_addon_dir/src/ngx_http_lua_ctx.h \
+                $ngx_addon_dir/src/ngx_http_lua_regex.h \
+                $ngx_addon_dir/src/ngx_http_lua_common.h \
+                $ngx_addon_dir/src/ngx_http_lua_directive.h \
+                $ngx_addon_dir/src/ngx_http_lua_headers_out.h \
+                $ngx_addon_dir/src/ngx_http_lua_headers_in.h \
+                $ngx_addon_dir/src/ngx_http_lua_consts.h \
+                $ngx_addon_dir/src/ngx_http_lua_exception.h \
+                $ngx_addon_dir/src/ngx_http_lua_util.h \
+                $ngx_addon_dir/src/ngx_http_lua_cache.h \
+                $ngx_addon_dir/src/ngx_http_lua_conf.h \
+                $ngx_addon_dir/src/ngx_http_lua_contentby.h \
+                $ngx_addon_dir/src/ngx_http_lua_rewriteby.h \
+                $ngx_addon_dir/src/ngx_http_lua_accessby.h \
+                $ngx_addon_dir/src/ngx_http_lua_setby.h \
+                $ngx_addon_dir/src/ngx_http_lua_capturefilter.h \
+                $ngx_addon_dir/src/ngx_http_lua_clfactory.h \
+                $ngx_addon_dir/src/ngx_http_lua_pcrefix.h \
+                $ngx_addon_dir/src/ngx_http_lua_headerfilterby.h \
+                $ngx_addon_dir/src/ngx_http_lua_shdict.h \
+                $ngx_addon_dir/src/ngx_http_lua_socket_tcp.h \
+                $ngx_addon_dir/src/api/ngx_http_lua_api.h \
+                $ngx_addon_dir/src/ngx_http_lua_logby.h \
+                $ngx_addon_dir/src/ngx_http_lua_sleep.h \
+                $ngx_addon_dir/src/ngx_http_lua_bodyfilterby.h \
+                $ngx_addon_dir/src/ngx_http_lua_initby.h \
+                $ngx_addon_dir/src/ngx_http_lua_socket_udp.h \
+                $ngx_addon_dir/src/ngx_http_lua_req_method.h \
+                $ngx_addon_dir/src/ngx_http_lua_phase.h \
+                "
+
 CFLAGS="$CFLAGS -DNDK_SET_VAR"
 
 ngx_feature="export symbols by default"
@@ -158,7 +249,13 @@ if [ $ngx_found = yes ]; then
     CORE_LIBS="-Wl,-E $CORE_LIBS"
 fi
 
+NGX_DTRACE_PROVIDERS="$NGX_DTRACE_PROVIDERS $ngx_addon_dir/dtrace/ngx_lua_provider.d"
+NGX_TAPSET_SRCS="$NGX_TAPSET_SRCS $ngx_addon_dir/tapset/ngx_lua.stp"
+
 USE_MD5=YES
+USE_SHA1=YES
+
+CORE_INCS="$CORE_INCS $ngx_addon_dir/src/api"
 
 #CFLAGS=$"$CFLAGS -DLUA_DEFAULT_PATH='\"/usr/local/openresty/lualib/?.lua\"'"
 #CFLAGS=$"$CFLAGS -DLUA_DEFAULT_CPATH='\"/usr/local/openresty/lualib/?.so\"'"

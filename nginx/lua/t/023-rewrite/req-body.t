@@ -50,10 +50,10 @@ hello, world
 Host: localhost\r
 Content-Length: 100\r
 Connection: close\r
-
+\r
 hello, world"
 --- response_body:
---- error_code:
+--- error_code_like: ^(?:500)?$
 
 
 

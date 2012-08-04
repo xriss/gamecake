@@ -32,11 +32,12 @@ static ngx_int_t
 ngx_http_lua_cache_load_code(lua_State *L, const char *key)
 {
     /*  get code cache table */
-    lua_getfield(L, LUA_REGISTRYINDEX, LUA_CODE_CACHE_KEY);    /*  sp++ */
+    lua_pushlightuserdata(L, &ngx_http_lua_code_cache_key);
+    lua_rawget(L, LUA_REGISTRYINDEX);    /*  sp++ */
 
     dd("Code cache table to load: %p", lua_topointer(L, -1));
 
-    if (! lua_istable(L, -1)) {
+    if (!lua_istable(L, -1)) {
         dd("Error: code cache table to load did not exist!!");
         return NGX_ERROR;
     }
@@ -85,11 +86,12 @@ ngx_http_lua_cache_store_code(lua_State *L, const char *key)
     int rc;
 
     /*  get code cache table */
-    lua_getfield(L, LUA_REGISTRYINDEX, LUA_CODE_CACHE_KEY); /* closure cache */
+    lua_pushlightuserdata(L, &ngx_http_lua_code_cache_key);
+    lua_rawget(L, LUA_REGISTRYINDEX);
 
     dd("Code cache table to store: %p", lua_topointer(L, -1));
 
-    if (! lua_istable(L, -1)) {
+    if (!lua_istable(L, -1)) {
         dd("Error: code cache table to load did not exist!!");
         return NGX_ERROR;
     }
@@ -120,7 +122,7 @@ ngx_http_lua_cache_loadbuffer(lua_State *L, const u_char *src, size_t src_len,
 
     dd("XXX cache key: [%s]", cache_key);
 
-    if (! enabled) {
+    if (!enabled) {
         ngx_http_lua_clear_package_loaded(L);
     }
 
@@ -160,7 +162,7 @@ ngx_http_lua_cache_loadbuffer(lua_State *L, const u_char *src, size_t src_len,
     rc = ngx_http_lua_cache_store_code(L, (char *) cache_key);
 
     if (rc != NGX_OK) {
-        *err = "fail to genearte new closutre from the closutre factory";
+        *err = "fail to generate new closure from the closure factory";
         return NGX_ERROR;
     }
 
@@ -232,7 +234,7 @@ ngx_http_lua_cache_loadfile(lua_State *L, const u_char *script,
         rc = ngx_http_lua_cache_store_code(L, (char *) cache_key);
 
         if (rc != NGX_OK) {
-            *err = "fail to genearte new closutre from the closutre factory";
+            *err = "fail to generate new closure from the closure factory";
             return NGX_ERROR;
         }
 
@@ -281,17 +283,19 @@ ngx_http_lua_clear_package_loaded(lua_State *L)
 
         switch (len) {
         case 2:
-            if (ngx_strncmp(p, "os", sizeof("os") - 1) == 0) {
+            if (p[0] == 'o' && p[1] == 's') {
                 goto done;
             }
 
-            if (ngx_strncmp(p, "io", sizeof("io") - 1) == 0) {
+            if (p[0] == 'i' && p[1] == 'o') {
                 goto done;
             }
 
+#if 0
             if (ngx_strncmp(p, "_G", sizeof("_G") - 1) == 0) {
                 goto done;
             }
+#endif
 
             break;
 
@@ -379,5 +383,8 @@ done:
 
     /* package loaded */
     lua_pop(L, 2);
+
+    lua_newtable(L);
+    lua_setglobal(L, "_G");
 }
 

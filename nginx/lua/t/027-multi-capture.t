@@ -3,15 +3,16 @@
 use lib 'lib';
 use Test::Nginx::Socket;
 
-repeat_each(3);
+repeat_each(10);
 #repeat_each(1);
 
-plan tests => blocks() * repeat_each() * 2;
+plan tests => repeat_each() * (blocks() * 2 + 2);
 
 #$ENV{LUA_PATH} = $ENV{HOME} . '/work/JSON4Lua-0.9.30/json/?.lua';
 $ENV{TEST_NGINX_MYSQL_PORT} ||= 3306;
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 
+#log_level 'warn';
 no_long_string();
 
 run_tests();
@@ -532,7 +533,9 @@ res3.body = e
 res4.status = 200
 res4.body = f
 " x 4
---- timeout: 4
+--- no_error_log eval
+["[error]", "[alert]"]
+--- timeout: 10
 
 
 

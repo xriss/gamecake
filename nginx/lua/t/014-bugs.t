@@ -7,15 +7,12 @@ use Test::Nginx::Socket;
 #master_on();
 log_level('debug');
 
-#repeat_each(120);
 repeat_each(3);
 
-plan tests => repeat_each() * (blocks() * 2 + 2);
+plan tests => repeat_each() * (blocks() * 2 + 20);
 
 our $HtmlDir = html_dir;
 #warn $html_dir;
-
-$ENV{LUA_CPATH} = "/home/lz/luax/?.so;;";
 
 #no_diff();
 #no_long_string();
@@ -521,4 +518,175 @@ hello
 ngx.location.capture("/echo")
 --- response_body
 --- SKIP
+
+
+
+=== TEST 25: set 20+ headers
+--- config
+    location /test {
+        rewrite_by_lua '
+            ngx.req.clear_header("Authorization")
+        ';
+        echo $http_a1;
+        echo $http_authorization;
+        echo $http_a2;
+        echo $http_a3;
+        echo $http_a23;
+        echo $http_a24;
+        echo $http_a25;
+    }
+--- request
+    GET /test
+--- more_headers eval
+my $i = 1;
+my $s;
+while ($i <= 25) {
+    $s .= "A$i: $i\n";
+    if ($i == 22) {
+        $s .= "Authorization: blah\n";
+    }
+    $i++;
+}
+#warn $s;
+$s
+--- response_body
+1
+
+2
+3
+23
+24
+25
+
+
+
+=== TEST 26: unexpected globals sharing by using _G
+--- config
+    location /test {
+        content_by_lua '
+            if _G.t then
+                _G.t = _G.t + 1
+            else
+                _G.t = 0
+            end
+            ngx.print(t)
+        ';
+    }
+--- pipelined_requests eval
+["GET /test", "GET /test", "GET /test"]
+--- response_body eval
+["0", "0", "0"]
+
+
+
+=== TEST 27: unexpected globals sharing by using _G (set_by_lua*)
+--- config
+    location /test {
+        set_by_lua $a '
+            if _G.t then
+                _G.t = _G.t + 1
+            else
+                _G.t = 0
+            end
+            return t
+        ';
+        echo -n $a;
+    }
+--- pipelined_requests eval
+["GET /test", "GET /test", "GET /test"]
+--- response_body eval
+["0", "0", "0"]
+
+
+
+=== TEST 28: unexpected globals sharing by using _G (log_by_lua*)
+--- http_config
+    lua_shared_dict log_dict 100k;
+--- config
+    location /test {
+        content_by_lua '
+            local log_dict = ngx.shared.log_dict
+            ngx.print(log_dict:get("cnt") or 0)
+        ';
+
+        log_by_lua '
+            local log_dict = ngx.shared.log_dict
+            if _G.t then
+                _G.t = _G.t + 1
+            else
+                _G.t = 0
+            end
+            log_dict:set("cnt", t)
+        ';
+    }
+--- pipelined_requests eval
+["GET /test", "GET /test", "GET /test"]
+--- response_body eval
+["0", "0", "0"]
+
+
+
+=== TEST 29: unexpected globals sharing by using _G (header_filter_by_lua*)
+--- config
+    location /test {
+        header_filter_by_lua '
+            if _G.t then
+                _G.t = _G.t + 1
+            else
+                _G.t = 0
+            end
+            ngx.ctx.cnt = tostring(t)
+        ';
+        content_by_lua '
+            ngx.send_headers()
+            ngx.print(ngx.ctx.cnt or 0)
+        ';
+    }
+--- pipelined_requests eval
+["GET /test", "GET /test", "GET /test"]
+--- response_body eval
+["0", "0", "0"]
+
+
+
+=== TEST 30: unexpected globals sharing by using _G (body_filter_by_lua*)
+--- config
+    location /test {
+        body_filter_by_lua '
+            if _G.t then
+                _G.t = _G.t + 1
+            else
+                _G.t = 0
+            end
+            ngx.ctx.cnt = _G.t
+        ';
+        content_by_lua '
+            ngx.print("a")
+            ngx.say(ngx.ctx.cnt or 0)
+        ';
+    }
+--- request
+GET /test
+--- response_body
+a0
+--- no_error_log
+[error]
+
+
+
+=== TEST 31: set content-type header with charset and default_type
+--- http_config
+--- config
+    location /lua {
+        default_type application/json;
+        charset utf-8;
+        charset_types application/json;
+        content_by_lua 'ngx.say("hi")';
+    }
+--- request
+    GET /lua
+--- response_body
+hi
+--- response_headers
+Content-Type: application/json; charset=utf-8
 

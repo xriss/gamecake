@@ -15,8 +15,6 @@ static int ngx_http_lua_ngx_flush(lua_State *L);
 static int ngx_http_lua_ngx_eof(lua_State *L);
 static int ngx_http_lua_ngx_send_headers(lua_State *L);
 static int ngx_http_lua_ngx_echo(lua_State *L, unsigned newline);
-static size_t ngx_http_lua_calc_strlen_in_table(lua_State *L, int arg_i);
-static u_char * ngx_http_lua_copy_str_in_table(lua_State *L, u_char *dst);
 
 
 static int
@@ -50,8 +48,10 @@ ngx_http_lua_ngx_echo(lua_State *L, unsigned newline)
     int                          nargs;
     int                          type;
     const char                  *msg;
+    ngx_buf_tag_t                tag;
 
-    lua_getglobal(L, GLOBALS_SYMBOL_REQUEST);
+    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
+    lua_rawget(L, LUA_GLOBALSINDEX);
     r = lua_touserdata(L, -1);
     lua_pop(L, 1);
 
@@ -65,7 +65,11 @@ ngx_http_lua_ngx_echo(lua_State *L, unsigned newline)
         return luaL_error(L, "no request ctx found");
     }
 
-    if ((r->method & NGX_HTTP_HEAD) || r->header_only) {
+    ngx_http_lua_check_context(L, ctx, NGX_HTTP_LUA_CONTEXT_REWRITE
+                               | NGX_HTTP_LUA_CONTEXT_ACCESS
+                               | NGX_HTTP_LUA_CONTEXT_CONTENT);
+
+    if (r->header_only) {
         return 0;
     }
 
@@ -77,19 +81,24 @@ ngx_http_lua_ngx_echo(lua_State *L, unsigned newline)
     size = 0;
 
     for (i = 1; i <= nargs; i++) {
+
         type = lua_type(L, i);
+
         switch (type) {
             case LUA_TNUMBER:
             case LUA_TSTRING:
+
                 lua_tolstring(L, i, &len);
                 size += len;
                 break;
 
             case LUA_TNIL:
+
                 size += sizeof("nil") - 1;
                 break;
 
             case LUA_TBOOLEAN:
+
                 if (lua_toboolean(L, i)) {
                     size += sizeof("true") - 1;
 
@@ -100,13 +109,27 @@ ngx_http_lua_ngx_echo(lua_State *L, unsigned newline)
                 break;
 
             case LUA_TTABLE:
-                size += ngx_http_lua_calc_strlen_in_table(L, i);
+
+                size += ngx_http_lua_calc_strlen_in_table(L, i, i,
+                                                          0 /* strict */);
                 break;
 
+            case LUA_TLIGHTUSERDATA:
+
+                dd("userdata: %p", lua_touserdata(L, i));
+
+                if (lua_touserdata(L, i) == NULL) {
+                    size += sizeof("null") - 1;
+                    break;
+                }
+
+                continue;
+
             default:
+
                 msg = lua_pushfstring(L, "string, number, boolean, nil, "
-                        "or array table expected, got %s",
-                        lua_typename(L, type));
+                                      "ngx.null, or array table expected, "
+                                      "but got %s", lua_typename(L, type));
 
                 return luaL_argerror(L, i, msg);
         }
@@ -121,10 +144,16 @@ ngx_http_lua_ngx_echo(lua_State *L, unsigned newline)
         return 0;
     }
 
-    b = ngx_create_temp_buf(r->pool, size);
-    if (b == NULL) {
+    tag = (ngx_buf_tag_t) &ngx_http_lua_module;
+
+    cl = ngx_http_lua_chains_get_free_buf(r->connection->log, r->pool,
+                                          &ctx->free_bufs, size, tag);
+
+    if (cl == NULL) {
         return luaL_error(L, "out of memory");
     }
+
+    b = cl->buf;
 
     for (i = 1; i <= nargs; i++) {
         type = lua_type(L, i);
@@ -159,7 +188,14 @@ ngx_http_lua_ngx_echo(lua_State *L, unsigned newline)
                 break;
 
             case LUA_TTABLE:
-                b->last = ngx_http_lua_copy_str_in_table(L, b->last);
+                b->last = ngx_http_lua_copy_str_in_table(L, i, b->last);
+                break;
+
+            case LUA_TLIGHTUSERDATA:
+                *b->last++ = 'n';
+                *b->last++ = 'u';
+                *b->last++ = 'l';
+                *b->last++ = 'l';
                 break;
 
             default:
@@ -171,17 +207,11 @@ ngx_http_lua_ngx_echo(lua_State *L, unsigned newline)
         *b->last++ = '\n';
     }
 
+#if 0
     if (b->last != b->end) {
         return luaL_error(L, "buffer error: %p != %p", b->last, b->end);
     }
-
-    cl = ngx_alloc_chain_link(r->pool);
-    if (cl == NULL) {
-        return luaL_error(L, "out of memory");
-    }
-
-    cl->next = NULL;
-    cl->buf = b;
+#endif
 
     ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    newline ? "lua say response" : "lua print response");
@@ -192,12 +222,29 @@ ngx_http_lua_ngx_echo(lua_State *L, unsigned newline)
         return luaL_error(L, "failed to send data through the output filters");
     }
 
+    dd("downstream write: %d, buf len: %d", (int) rc,
+            (int) (b->last - b->pos));
+
+    if (!ctx->out) {
+#if nginx_version >= 1001004
+        ngx_chain_update_chains(r->pool,
+#else
+        ngx_chain_update_chains(
+#endif
+                                &ctx->free_bufs, &ctx->busy_bufs, &cl, tag);
+
+        dd("out lua buf tag: %p, buffered: %x, busy bufs: %p",
+            &ngx_http_lua_module, (int) r->connection->buffered,
+            ctx->busy_bufs);
+    }
+
     return 0;
 }
 
 
-static size_t
-ngx_http_lua_calc_strlen_in_table(lua_State *L, int arg_i)
+size_t
+ngx_http_lua_calc_strlen_in_table(lua_State *L, int index, int arg_i,
+    unsigned strict)
 {
     double              key;
     int                 max;
@@ -207,11 +254,24 @@ ngx_http_lua_calc_strlen_in_table(lua_State *L, int arg_i)
     size_t              len;
     const char         *msg;
 
+    if (index < 0) {
+        index = lua_gettop(L) + index + 1;
+    }
+
+    dd("table index: %d", index);
+
     max = 0;
 
     lua_pushnil(L); /* stack: table key */
-    while (lua_next(L, -2) != 0) { /* stack: table key value */
-        if (lua_type(L, -2) == LUA_TNUMBER && (key = lua_tonumber(L, -2))) {
+    while (lua_next(L, index) != 0) { /* stack: table key value */
+        dd("key type: %s", luaL_typename(L, -2));
+
+        if (lua_type(L, -2) == LUA_TNUMBER) {
+
+            key = lua_tonumber(L, -2);
+
+            dd("key value: %d", (int) key);
+
             if (floor(key) == key && key >= 1) {
                 if (key > max) {
                     max = key;
@@ -225,7 +285,7 @@ ngx_http_lua_calc_strlen_in_table(lua_State *L, int arg_i)
         /* not an array (non positive integer key) */
         lua_pop(L, 2); /* stack: table */
 
-        msg = lua_pushfstring(L, "on-array table found");
+        msg = lua_pushfstring(L, "non-array table found");
         luaL_argerror(L, arg_i, msg);
         return 0;
     }
@@ -233,20 +293,32 @@ ngx_http_lua_calc_strlen_in_table(lua_State *L, int arg_i)
     size = 0;
 
     for (i = 1; i <= max; i++) {
-        lua_rawgeti(L, -1, i); /* stack: table value */
+        lua_rawgeti(L, index, i); /* stack: table value */
         type = lua_type(L, -1);
+
         switch (type) {
             case LUA_TNUMBER:
             case LUA_TSTRING:
+
                 lua_tolstring(L, -1, &len);
                 size += len;
                 break;
 
             case LUA_TNIL:
+
+                if (strict) {
+                    goto bad_type;
+                }
+
                 size += sizeof("nil") - 1;
                 break;
 
             case LUA_TBOOLEAN:
+
+                if (strict) {
+                    goto bad_type;
+                }
+
                 if (lua_toboolean(L, -1)) {
                     size += sizeof("true") - 1;
 
@@ -257,14 +329,29 @@ ngx_http_lua_calc_strlen_in_table(lua_State *L, int arg_i)
                 break;
 
             case LUA_TTABLE:
-                size += ngx_http_lua_calc_strlen_in_table(L, arg_i);
+
+                size += ngx_http_lua_calc_strlen_in_table(L, -1, arg_i, strict);
                 break;
 
+            case LUA_TLIGHTUSERDATA:
+
+                if (strict) {
+                    goto bad_type;
+                }
+
+                if (lua_touserdata(L, -1) == NULL) {
+                    size += sizeof("null") - 1;
+                    break;
+                }
+
+                continue;
+
             default:
+
+bad_type:
                 msg = lua_pushfstring(L, "bad data type %s found",
                         lua_typename(L, type));
-                luaL_argerror(L, arg_i, msg);
-                return 0;
+                return luaL_argerror(L, arg_i, msg);
         }
 
         lua_pop(L, 1); /* stack: table */
@@ -274,8 +361,8 @@ ngx_http_lua_calc_strlen_in_table(lua_State *L, int arg_i)
 }
 
 
-static u_char *
-ngx_http_lua_copy_str_in_table(lua_State *L, u_char *dst)
+u_char *
+ngx_http_lua_copy_str_in_table(lua_State *L, int index, u_char *dst)
 {
     double               key;
     int                  max;
@@ -284,10 +371,14 @@ ngx_http_lua_copy_str_in_table(lua_State *L, u_char *dst)
     size_t               len;
     u_char              *p;
 
+    if (index < 0) {
+        index = lua_gettop(L) + index + 1;
+    }
+
     max = 0;
 
     lua_pushnil(L); /* stack: table key */
-    while (lua_next(L, -2) != 0) { /* stack: table key value */
+    while (lua_next(L, index) != 0) { /* stack: table key value */
         key = lua_tonumber(L, -2);
         if (key > max) {
             max = key;
@@ -297,7 +388,7 @@ ngx_http_lua_copy_str_in_table(lua_State *L, u_char *dst)
     }
 
     for (i = 1; i <= max; i++) {
-        lua_rawgeti(L, -1, i); /* stack: table value */
+        lua_rawgeti(L, index, i); /* stack: table value */
         type = lua_type(L, -1);
         switch (type) {
             case LUA_TNUMBER:
@@ -330,7 +421,15 @@ ngx_http_lua_copy_str_in_table(lua_State *L, u_char *dst)
                 break;
 
             case LUA_TTABLE:
-                dst = ngx_http_lua_copy_str_in_table(L, dst);
+                dst = ngx_http_lua_copy_str_in_table(L, -1, dst);
+                break;
+
+            case LUA_TLIGHTUSERDATA:
+
+                *dst++ = 'n';
+                *dst++ = 'u';
+                *dst++ = 'l';
+                *dst++ = 'l';
                 break;
 
             default:
@@ -367,7 +466,8 @@ ngx_http_lua_ngx_flush(lua_State *L)
                 "or 1", n);
     }
 
-    lua_getglobal(L, GLOBALS_SYMBOL_REQUEST);
+    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
+    lua_rawget(L, LUA_GLOBALSINDEX);
     r = lua_touserdata(L, -1);
     lua_pop(L, 1);
 
@@ -381,7 +481,11 @@ ngx_http_lua_ngx_flush(lua_State *L)
         return luaL_error(L, "no request ctx found");
     }
 
-    if ((r->method & NGX_HTTP_HEAD) || r->header_only) {
+    ngx_http_lua_check_context(L, ctx, NGX_HTTP_LUA_CONTEXT_REWRITE
+                               | NGX_HTTP_LUA_CONTEXT_ACCESS
+                               | NGX_HTTP_LUA_CONTEXT_CONTENT);
+
+    if (r->header_only) {
         return 0;
     }
 
@@ -389,20 +493,36 @@ ngx_http_lua_ngx_flush(lua_State *L)
         return luaL_error(L, "already seen eof");
     }
 
-    buf = ngx_calloc_buf(r->pool);
-    if (buf == NULL) {
-        return luaL_error(L, "memory allocation error");
+    if (ctx->buffering) {
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                       "lua http 1.0 buffering makes ngx.flush() a no-op");
+
+        return 0;
     }
 
-    buf->flush = 1;
+    if (ctx->flush_buf) {
+        cl = ctx->flush_buf;
 
-    cl = ngx_alloc_chain_link(r->pool);
-    if (cl == NULL) {
-        return luaL_error(L, "out of memory");
+    } else {
+        dd("allocating new flush buf");
+        buf = ngx_calloc_buf(r->pool);
+        if (buf == NULL) {
+            return luaL_error(L, "memory allocation error");
+        }
+
+        buf->flush = 1;
+
+        dd("allocating new flush chain");
+        cl = ngx_alloc_chain_link(r->pool);
+        if (cl == NULL) {
+            return luaL_error(L, "out of memory");
+        }
+
+        cl->next = NULL;
+        cl->buf = buf;
+
+        ctx->flush_buf = cl;
     }
-
-    cl->next = NULL;
-    cl->buf = buf;
 
     rc = ngx_http_lua_send_chain_link(r, ctx, cl);
 
@@ -460,7 +580,8 @@ ngx_http_lua_ngx_eof(lua_State *L)
     ngx_http_lua_ctx_t      *ctx;
     ngx_int_t                rc;
 
-    lua_getglobal(L, GLOBALS_SYMBOL_REQUEST);
+    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
+    lua_rawget(L, LUA_GLOBALSINDEX);
     r = lua_touserdata(L, -1);
     lua_pop(L, 1);
 
@@ -473,6 +594,13 @@ ngx_http_lua_ngx_eof(lua_State *L)
     }
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_lua_module);
+    if (ctx == NULL) {
+        return luaL_error(L, "no ctx found");
+    }
+
+    ngx_http_lua_check_context(L, ctx, NGX_HTTP_LUA_CONTEXT_REWRITE
+                               | NGX_HTTP_LUA_CONTEXT_ACCESS
+                               | NGX_HTTP_LUA_CONTEXT_CONTENT);
 
     ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    "lua send eof");
@@ -516,24 +644,30 @@ ngx_http_lua_ngx_send_headers(lua_State *L)
     ngx_http_request_t      *r;
     ngx_http_lua_ctx_t      *ctx;
 
-    lua_getglobal(L, GLOBALS_SYMBOL_REQUEST);
+    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
+    lua_rawget(L, LUA_GLOBALSINDEX);
     r = lua_touserdata(L, -1);
     lua_pop(L, 1);
 
-    if (r) {
-        ctx = ngx_http_get_module_ctx(r, ngx_http_lua_module);
-
-        if (ctx && ctx->headers_sent == 0) {
-            ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                           "lua send headers");
-
-            ngx_http_lua_send_header_if_needed(r, ctx);
-        }
-
-        return 0;
+    if (r == NULL) {
+        return luaL_error(L, "no request found");
     }
 
-    dd("(lua-ngx-send-headers) can't find nginx request object!");
+    ctx = ngx_http_get_module_ctx(r, ngx_http_lua_module);
+    if (ctx == NULL) {
+        return luaL_error(L, "no ctx found");
+    }
+
+    ngx_http_lua_check_context(L, ctx, NGX_HTTP_LUA_CONTEXT_REWRITE
+                               | NGX_HTTP_LUA_CONTEXT_ACCESS
+                               | NGX_HTTP_LUA_CONTEXT_CONTENT);
+
+    if (!ctx->headers_sent) {
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                       "lua send headers");
+
+        ngx_http_lua_send_header_if_needed(r, ctx);
+    }
 
     return 0;
 }
