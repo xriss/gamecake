@@ -4,20 +4,21 @@ use lib 'lib';
 use Test::Nginx::Socket;
 
 #repeat_each(20000);
-#repeat_each(1);
 repeat_each(2);
+
 #master_on();
 #workers(1);
 #log_level('debug');
 #log_level('warn');
 #worker_connections(1024);
 
-plan tests => blocks() * repeat_each() * 2;
+plan tests => repeat_each() * (blocks() * 2);
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 $ENV{TEST_NGINX_MYSQL_PORT} ||= 3306;
 
-$ENV{LUA_CPATH} ||= '/usr/local/openresty/lualib/?.so;;';
+our $LuaCpath = $ENV{LUA_CPATH} ||
+    '/usr/local/openresty-debug/lualib/?.so;/usr/local/openresty/lualib/?.so;;';
 
 no_long_string();
 
@@ -59,8 +60,11 @@ GET /lua
     }
 --- request
 GET /lua
---- error_code:
---- response_body:
+--- ignore_response
+--- no_error_log
+[alert]
+--- error_log
+attempt to set status 404 via ngx.exit after sending out the response status 200
 
 
 
@@ -110,13 +114,15 @@ GET /api?user=agentz
 
 
 === TEST 6: working with ngx_auth_request (simplest form, w/o ngx_memc)
---- http_config
+--- http_config eval
+"
+    lua_package_cpath '$::LuaCpath';
     upstream backend {
-        drizzle_server 127.0.0.1:$TEST_NGINX_MYSQL_PORT protocol=mysql
+        drizzle_server 127.0.0.1:\$TEST_NGINX_MYSQL_PORT protocol=mysql
                        dbname=ngx_test user=ngx_test password=ngx_test;
         drizzle_keepalive max=300 mode=single overflow=ignore;
     }
-
+"
 --- config
     location /memc {
         internal;
@@ -175,13 +181,15 @@ Logged in 56
 
 
 === TEST 7: working with ngx_auth_request (simplest form)
---- http_config
+--- http_config eval
+"
+    lua_package_cpath '$::LuaCpath';
     upstream backend {
-        drizzle_server 127.0.0.1:$TEST_NGINX_MYSQL_PORT protocol=mysql
+        drizzle_server 127.0.0.1:\$TEST_NGINX_MYSQL_PORT protocol=mysql
                        dbname=ngx_test user=ngx_test password=ngx_test;
         drizzle_keepalive max=300 mode=single overflow=ignore;
     }
-
+"
 --- config
     location /memc {
         internal;
@@ -239,23 +247,25 @@ Logged in 56
 
 
 === TEST 8: working with ngx_auth_request
---- http_config
+--- http_config eval
+"
+    lua_package_cpath '$::LuaCpath';
     upstream backend {
-        drizzle_server 127.0.0.1:$TEST_NGINX_MYSQL_PORT protocol=mysql
+        drizzle_server 127.0.0.1:\$TEST_NGINX_MYSQL_PORT protocol=mysql
                        dbname=ngx_test user=ngx_test password=ngx_test;
         drizzle_keepalive max=300 mode=single overflow=ignore;
     }
 
     upstream memc_a {
-        server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        server 127.0.0.1:\$TEST_NGINX_MEMCACHED_PORT;
     }
 
     upstream memc_b {
-        server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        server 127.0.0.1:\$TEST_NGINX_MEMCACHED_PORT;
     }
 
     upstream_list memc_cluster memc_a memc_b;
-
+"
 --- config
     location /memc {
         internal;
@@ -507,4 +517,32 @@ morning
 --- response_body
 This is our own content
 --- error_code: 410
+
+
+
+=== TEST 17: exit(404) after I/O
+--- config
+    error_page 400 /400.html;
+    error_page 404 /404.html;
+    location /foo {
+        access_by_lua '
+            ngx.location.capture("/sleep")
+            ngx.exit(ngx.HTTP_NOT_FOUND)
+        ';
+        echo Hello;
+    }
+
+    location /sleep {
+        echo_sleep 0.002;
+    }
+--- user_files
+>>> 400.html
+Bad request, dear...
+>>> 404.html
+Not found, dear...
+--- request
+    GET /bah
+--- response_body
+Not found, dear...
+--- error_code: 404
 

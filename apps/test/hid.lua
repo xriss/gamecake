@@ -5,24 +5,24 @@ require("apps").default_paths()
 
 local pack=require("wetgenes.pack")
 local wstr=require("wetgenes.string")
+local wwin=require("wetgenes.win")
 
 local posix=require("posix")
 
 --find device in /proc/bus/input/devices  ?
 
-local fp=assert(posix.open("/dev/input/event3", posix.O_NONBLOCK + posix.O_RDONLY ))
+local fp=assert(posix.open("/dev/input/event12", posix.O_NONBLOCK + posix.O_RDONLY ))
 
 while true do
+	wwin.sleep(0.0001)
 
-	local pkt=posix.read(fp,8)
+	local pkt=posix.read(fp,16)
 	
 	if pkt then
 	
-		local tab=pack.load(pkt,{"u32","time","s16","value","u8","type","u8","number"})
+		 local tab=pack.load(pkt,{"u32","secs","u32","micros","u16","type","u16","code","u32","value"})
 		
-if tab.number<8 then
-		print(wstr.dump(tab))
-end
+		print(tab.type,tab.code,tab.value)
 	
 	end
 	

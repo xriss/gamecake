@@ -10,9 +10,10 @@ typedef struct {
     u_char                       dummy;
     u_short                      key_len;
     ngx_queue_t                  queue;
-    ngx_msec_t                   expires;
+    uint64_t                     expires;
     uint8_t                      value_type;
     uint32_t                     value_len;
+    uint32_t                     user_flags;
     u_char                       data[1];
 } ngx_http_lua_shdict_node_t;
 
@@ -28,6 +29,8 @@ typedef struct {
     ngx_http_lua_shdict_shctx_t  *sh;
     ngx_slab_pool_t              *shpool;
     ngx_str_t                     name;
+    ngx_http_lua_main_conf_t     *main_conf;
+    ngx_log_t                    *log;
 } ngx_http_lua_shdict_ctx_t;
 
 

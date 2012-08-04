@@ -84,6 +84,8 @@ ngx_http_lua_compile_complex_value(ngx_http_lua_compile_complex_value_t *ccv)
     sc.complete_values = 1;
 
     if (ngx_http_lua_script_compile(&sc) != NGX_OK) {
+        ngx_array_destroy(&lengths);
+        ngx_array_destroy(&values);
         return NGX_ERROR;
     }
 
@@ -257,7 +259,7 @@ ngx_http_lua_script_compile(ngx_http_lua_script_compile_t *sc)
                 goto invalid_variable;
             }
 
-            if (! num_var) {
+            if (!num_var) {
                 ngx_log_error(NGX_LOG_ERR, sc->log, 0,
                        "attempt to use named capturing variable "
                        "\"%V\" (named captures not supported yet)", &name);

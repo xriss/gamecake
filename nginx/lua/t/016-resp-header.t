@@ -9,7 +9,7 @@ use Test::Nginx::Socket;
 
 repeat_each(2);
 
-plan tests => blocks() * repeat_each() * 3;
+plan tests => repeat_each() * (blocks() * 3 - 1);
 
 #no_diff();
 no_long_string();
@@ -274,10 +274,11 @@ Fooy: cony1, cony2
     }
 --- request
     GET /lua
---- response_headers
-Content-Type:
---- error_code:
---- response_body:
+--- ignore_response
+--- error_log
+attempt to set ngx.header.HEADER after sending out response headers
+--- no_error_log eval
+["alert", "warn"]
 
 
 
@@ -721,4 +722,104 @@ Foo: nil
 Cache-Control: blah
 --- response_body
 Cache-Control: blah
+
+
+
+=== TEST 37: set last-modified and return 304
+--- config
+  location /lua {
+        content_by_lua '
+            ngx.header["Last-Modified"] = ngx.http_time(1290079655)
+            ngx.say(ngx.header["Last-Modified"])
+        ';
+    }
+--- request
+    GET /lua
+--- more_headers
+If-Modified-Since: Thu, 18 Nov 2010 11:27:35 GMT
+--- response_headers
+Last-Modified: Thu, 18 Nov 2010 11:27:35 GMT
+--- error_code: 304
+
+
+
+=== TEST 38: set last-modified and return 200
+--- config
+  location /lua {
+        content_by_lua '
+            ngx.header["Last-Modified"] = ngx.http_time(1290079655)
+            ngx.say(ngx.header["Last-Modified"])
+        ';
+    }
+--- request
+    GET /lua
+--- more_headers
+If-Modified-Since: Thu, 18 Nov 2010 11:27:34 GMTT
+--- response_headers
+Last-Modified: Thu, 18 Nov 2010 11:27:35 GMT
+--- response_body
+Thu, 18 Nov 2010 11:27:35 GMT
+
+
+
+=== TEST 39: set response content-encoding header should bypass ngx_http_gzip_filter_module
+--- config
+    default_type text/plain;
+    gzip             on;
+    gzip_min_length  1;
+    gzip_types       text/plain;
+    location /read {
+        content_by_lua '
+            ngx.header.content_encoding = "gzip";
+            ngx.say("Hello, world, my dear friend!");
+        ';
+    }
+--- request
+GET /read
+--- more_headers
+Accept-Encoding: gzip
+--- response_headers
+Content-Type: text/plain
+--- response_body
+Hello, world, my dear friend!
+
+
+
+=== TEST 40: no transform underscores (write)
+--- config
+    lua_transform_underscores_in_response_headers off;
+    location = /t {
+        content_by_lua '
+            ngx.header.foo_bar = "Hello"
+            ngx.say(ngx.header.foo_bar)
+            ngx.say(ngx.header["foo-bar"])
+        ';
+    }
+--- request
+    GET /t
+--- raw_response_headers_like eval
+"\r\nfoo_bar: Hello\r\n"
+--- response_body
+Hello
+nil
+
+
+
+=== TEST 41: with transform underscores (write)
+--- config
+    lua_transform_underscores_in_response_headers on;
+    location = /t {
+        content_by_lua '
+            ngx.header.foo_bar = "Hello"
+            ngx.say(ngx.header.foo_bar)
+            ngx.say(ngx.header["foo-bar"])
+        ';
+    }
+--- request
+    GET /t
+--- raw_response_headers_like eval
+"\r\nfoo-bar: Hello\r\n"
+--- response_body
+Hello
+Hello
 
