@@ -7,6 +7,7 @@ local ngx=require("ngx")
 local wstr=require("wetgenes.string")
 local socket=require("socket")
 local http=require("socket.http")
+local ltn12=require("ltn12")
 
 module(...)
 local _M=require(...)
@@ -31,7 +32,7 @@ end
 
 
 
-
+--[[
 function get(url)
 	log("fetch.get:")
 	apis()
@@ -49,7 +50,7 @@ log(wstr.serialize(ret))
 	apie()
 	return ret
 end
-
+]]
 
 
 function post(url,headers,body)
@@ -60,7 +61,8 @@ function post(url,headers,body)
 	local res_body={}
 
 
-	local suc, code , headers = assert(socket.http.request{
+	local suc, code , rheaders = assert(socket.http.request{
+		create=ngx.socket.create,
 		url=url,
 		method="POST",
 		headers=headers,
@@ -68,9 +70,51 @@ function post(url,headers,body)
 		sink = ltn12.sink.table(res_body),
 	})
 	
-	log("Received "..suc.." "..code.."\n") -- wstr.serialize(headers)
+--	log("Received "..suc.." "..code.."\n") -- wstr.serialize(headers)
 --	table.foreach(res_body,print)
-	local ret=table.concat(res_body)
+	local ret={}
+	ret.body=table.concat(res_body)
+	ret.code=code
+	ret.headers=rheaders
+
+	apie()
+	return ret
+end
+
+
+
+function get(url,headers,body)
+	log("fetch.get:"..url)
+--	log(wstr.dump(headers))
+--	log(wstr.dump(body))
+	apis()
+	count=count+1
+
+	local res_body={}
+
+	body=body or ""
+	headers=headers or {
+		["User-Agent"]="Mozilla/5.0 (Windows NT 5.1; rv:8.0) Gecko/20100101 Firefox/8.0",
+		["Content-Length"] = #body,
+		["Referer"]=url,
+	}
+
+	local suc, code , rheaders = assert(socket.http.request{
+		create=ngx.socket.create,
+		url=url,
+		method="GET",
+		headers=headers,
+--		source = ltn12.source.string(body),
+		sink = ltn12.sink.table(res_body),
+	})
+	
+--	log("Received "..tostring(suc).." "..tostring(code).."\n") -- wstr.serialize(headers)
+--	table.foreach(res_body,print)
+	local ret={}
+	ret.body=table.concat(res_body)
+	ret.code=code
+	ret.headers=rheaders
+--	log("Received "..tostring(ret.body).."\n")
 
 	apie()
 	return ret

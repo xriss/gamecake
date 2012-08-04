@@ -65,6 +65,8 @@ function put(srv,id,v,ttl,opts)
 	
 	local k=getvhost(srv).."&"..id
 	
+	ttl=ttl or 60*5
+	
 	if type(v)=="number" then
 		--as is
 	else 
@@ -97,9 +99,8 @@ function get(srv,id)
 	if type(r)=="string" then -- need to unserialise the data
 		r=wbox.lson(r)
 	end
-
 	apie()
-	return r and r.tab
+	return r
 end
 
 function inc(srv,id,num,start)

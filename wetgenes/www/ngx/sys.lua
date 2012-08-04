@@ -4,6 +4,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local log=require("wetgenes.www.any.log").log
 local ngx=require("ngx")
 
+local lash=require("lash")
+local bit=require("bit")
 local zip=require("zip")
 local wstr=require("wetgenes.string")
 local wpack=require("wetgenes.pack")
@@ -11,6 +13,35 @@ local wpack=require("wetgenes.pack")
 module(...)
 local _M=require(...)
 package.loaded["wetgenes.www.any.sys"]=_M
+
+
+-- build HMAX using lash?
+
+local xor_with_0x5c = {}
+local xor_with_0x36 = {}
+for i=0,0xff do
+	xor_with_0x5c[string.char(i)] = string.char(bit.bxor(i,0x5c))
+	xor_with_0x36[string.char(i)] = string.char(bit.bxor(i,0x36))
+end
+
+local blocksize = 64 -- 512 bits
+
+local sha1hex=function(s) local h,b = lash.SHA1.string2hex(s) ; return h end
+local sha1bin=function(s) local h,b = lash.SHA1.string2hex(s) ; return b end
+
+function do_hmac_sha1(key, text)
+
+	if #key > blocksize then
+		key = sha1bin(key)
+	end
+
+	local key_xord_with_0x36 = key:gsub('.', xor_with_0x36) .. string.rep(string.char(0x36), blocksize - #key)
+	local key_xord_with_0x5c = key:gsub('.', xor_with_0x5c) .. string.rep(string.char(0x5c), blocksize - #key)
+
+	return sha1bin(key_xord_with_0x5c .. sha1bin(key_xord_with_0x36 .. text))
+end
+
+
 
 
 function sleep(t)
@@ -89,8 +120,8 @@ function sha1(s,f)
 end
 function hmac_sha1(k,s,f)
 	log("sys.hmac_sha1:")
-	if f=="bin" then return ngx.hmac_sha1(k,s) end
-	return ngx.hmac_sha1(k,s)
+	if f=="bin" then return do_hmac_sha1(k,s) end
+	return str_to_hex(do_hmac_sha1(k,s))
 end
 
 function zip_list(z)
@@ -133,9 +164,9 @@ end
 --
 -----------------------------------------------------------------------------
 function str_to_hex(s)
-	return string.gsub(s, ".", function (c)
+	return (string.gsub(s, ".", function (c)
 		return string.format("%02x", string.byte(c))
-	end)
+	end))
 end
 
 
@@ -218,3 +249,10 @@ function b64_dec(data)
         return string.char(c)
     end))
 end
+
+--[[
+log('HMAC_SHA1("", "") = 0xfbdb1d1b18aa6c08324b7d64b71fb76370690e1d')
+log('HMAC_SHA1("key", "The quick brown fox jumps over the lazy dog") = 0xde7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9')
+log(str_to_hex(do_hmac_sha1("","")))
+log(str_to_hex(do_hmac_sha1("key", "The quick brown fox jumps over the lazy dog")).."POOP")
+]]

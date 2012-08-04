@@ -8,11 +8,12 @@ local debug=require("debug")
 local ngx=require("ngx")
 
 -- does this overloading let us just use the socket module?
+--[[
 local socket=assert(require("socket"))
 socket.tcp=ngx.socket.tcp
 socket.udp=ngx.socket.udp
 socket.connect=ngx.socket.connect
-
+]]
 
 module(...)
 local _M=require(...)
