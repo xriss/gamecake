@@ -5,6 +5,8 @@ local log=require("wetgenes.www.any.log").log
 local ngx=require("ngx")
 
 local wstr=require("wetgenes.string")
+local socket=require("socket")
+local http=require("socket.http")
 
 module(...)
 local _M=require(...)
@@ -50,16 +52,26 @@ end
 
 
 
-function post(url)
-	log("fetch.post:")
+function post(url,headers,body)
+	log("fetch.post:"..url)
 	apis()
 	count=count+1
-	local res = ngx.location.capture("/@fetch/"..url)
-	ret={}
-	ret.code=res.status
-	ret.headers=res.header
-	ret.body=res.body
+
+	local res_body={}
+
+
+	local suc, code , headers = assert(socket.http.request{
+		url=url,
+		method="POST",
+		headers=headers,
+		source = ltn12.source.string(body),
+		sink = ltn12.sink.table(res_body),
+	})
 	
+	log("Received "..suc.." "..code.."\n") -- wstr.serialize(headers)
+--	table.foreach(res_body,print)
+	local ret=table.concat(res_body)
+
 	apie()
 	return ret
 end
