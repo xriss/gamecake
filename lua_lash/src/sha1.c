@@ -389,11 +389,12 @@ static void SHA1PadMessage(SHA1Context *context) {
  * hexstr = lash.SHA1.str2hex(str)
  *
  *  calculates the SHA1 hash of str and
- *  returns it as a lowercase hexstring
+ *  returns it as a lowercase hexstring , binary string
  */
 int SHA1String(lua_State *L) {
     SHA1Context sha;
     char hashstring[41];
+    unsigned char binstring[20];
     size_t length;
     unsigned char *data = (unsigned char *)luaL_checklstring(L, 1, &length);
     char *h;
@@ -407,13 +408,19 @@ int SHA1String(lua_State *L) {
     } else {
 	for (h = hashstring, i = 0; i < 5; i++, h += 8) {
 	    sprintf(h, "%08x", sha.Message_Digest[i]);
+	    
+	    binstring[ (i*4) + 0 ] = 0xff&(sha.Message_Digest[i] >> 24);
+	    binstring[ (i*4) + 1 ] = 0xff&(sha.Message_Digest[i] >> 16);
+	    binstring[ (i*4) + 2 ] = 0xff&(sha.Message_Digest[i] >>  8);
+	    binstring[ (i*4) + 3 ] = 0xff&(sha.Message_Digest[i] >>  0);
 	}
 
 	hashstring[40] = '\0';
 	lua_pushstring(L, hashstring);
+	lua_pushlstring(L, binstring,20);
     }
 
-    return 1;
+    return 2;
 }
 
 /*
