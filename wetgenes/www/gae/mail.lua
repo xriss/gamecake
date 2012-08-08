@@ -11,5 +11,5 @@ package.loaded["wetgenes.www.any.mail"]=_M
 
 
 function send(...)
-	return core.send(...)
+--	return core.send(...)
 end
