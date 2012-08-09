@@ -52,7 +52,7 @@ function build(tab)
 	end
 
 
--- now do the same with the modules datas
+-- now do the same with the modules datas, should auto find these
 
 	local modnames={
 		"admin",
@@ -75,6 +75,7 @@ function build(tab)
 		"thumbcache",
 		"todo",
 		"waka",
+		"hoe",
 	}
 	for i,n in ipairs(modnames) do
 		for i,s in ipairs{"art","css","js"} do
