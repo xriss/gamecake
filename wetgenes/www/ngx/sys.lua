@@ -55,7 +55,7 @@ end
 
 function file_read(filename)
 	local d
-	local fp=io.open("html/"..filename,"r")
+	local fp=io.open(filename,"r")
 	if fp then
 		d=fp:read("*a")
 		fp:close()
@@ -178,7 +178,7 @@ end
 -----------------------------------------------------------------------------
 function file_exists(filename)
 
-	local f=io.open("html/"..filename,"r")
+	local f=io.open(filename,"r")
 	if f then
 		f:close()
 		return true
@@ -196,7 +196,7 @@ end
 -----------------------------------------------------------------------------
 function file_find_lua(name)
 
-	return "../lua/"..name..".lua"
+	return "lua/"..name..".lua"
 
 end
 
