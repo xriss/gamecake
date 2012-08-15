@@ -1,8 +1,10 @@
-project "android"
+project "android_native"
 
 language "C"
 
-files { "code/*.h" , "code/*.c" }
+	includedirs { "code" }
+
+files { "code/*.h" , "code/native.c" }
 
 links { "lib_lua" }
 

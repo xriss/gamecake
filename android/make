@@ -1,15 +1,14 @@
-#rm build-gmake-android -Rf
-
 cd `dirname $0`
 
-cd ..
-
-andsdk=`readlink -f ../sdks/android-8-arm`
+andsdk=`readlink -f ../../sdks/android-9-arm`
 export PATH=$andsdk/bin:$PATH
+
+cd ..
 
 build/premake4 gmake android
 
 cd build-gmake-android
+
 
 if [ "$1" = "release" ] ; then
 	make config=release_android
@@ -20,8 +19,25 @@ fi
 cd ..
 cd android
 
-if [ "$1" = "release" ] ; then
+
+if [ "$1" = "clean" ] ; then
+
+	rm build-gmake-android -Rf
+
+elif [ "$1" = "release" ] ; then
+
+#release is always a full build?
+
+	rm bin/*.apk
+	ant uninstall
+#	ant clean
 	ant release install
 else
+
+#deleting the apks seems the onlyway to force a reload of any modified so files...
+
+	rm bin/*.apk
+	ant uninstall
 	ant debug install
+
 fi
