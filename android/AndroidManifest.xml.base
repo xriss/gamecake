@@ -1,16 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.wetgenes"
+        package="com.wetgenes.{name}"
       android:versionCode="{version_int}"
-      android:versionName="{version}">
-    <application android:label="{name}" android:icon="@drawable/icon">
-        <activity android:name="{name}"
-                  android:label="{name}">
+      android:versionName="{version}"
+>
+    <!-- This is the platform API where NativeActivity was introduced. -->
+    <uses-sdk android:minSdkVersion="9" />
+
+    <!-- This .apk has no Java code itself, so set hasCode to false. -->
+    <application android:label="Bulb" android:hasCode="false" android:icon="@drawable/icon"
+		android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+    >
+
+        <!-- Our activity is the built-in NativeActivity framework class.
+             This will take care of integrating with our NDK code. -->
+        <activity android:name="android.app.NativeActivity"
+                android:label="{name}"
+                android:configChanges="orientation|keyboardHidden">
+            <!-- Tell NativeActivity the name of our .so -->
+            <meta-data android:name="android.app.lib_name"
+                    android:value="lua" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-<uses-sdk android:minSdkVersion="7" />
+
 </manifest> 
