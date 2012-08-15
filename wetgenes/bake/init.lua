@@ -12,6 +12,8 @@
 --
 --+-----------------------------------------------------------------------------------------------------------------+--
 
+-- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 --
 -- A thrown together build toool, well some useful lua functions for making a build.
@@ -26,14 +28,7 @@
 --
 
 local lfs=require("lfs")
-local table=table
-local string=string
-local os=os
-local io=io
-local print=print
-
-local ipairs=ipairs
-local assert=assert
+local wstr=require("wetgenes.string")
 
 module("wetgenes.bake")
 
@@ -214,5 +209,41 @@ end
 copyfile=function(frm,too)
 	local text=readfile(frm)
 	writefile(too,text)
+end
+
+-- copy but with macro replacements
+replacefile=function(frm,too,opts)
+	local text=readfile(frm)
+	text=wstr.replace(text,opts)
+	writefile(too,text)
+end
+
+-----------------------------------------------------------------------------
+--
+-- convert time stamp into a 2.3 version string like so vv.mmm
+--
+-- this gives us space for about 3 unique releases a day based on time
+-- lets try not to releasemore than that, mkay :)
+--
+-----------------------------------------------------------------------------
+function version_from_time(t,vplus)
+
+	vplus=vplus or 0 -- slight tweak if we need it
+
+	t=t or os.time()
+
+	local d=os.date("*t",t)
+
+-- how far through the year are we
+	local total=os.time{year=d.year+1,day=1,month=1} - os.time{year=d.year,day=1,month=1}
+	local part=t - os.time{year=d.year,day=1,month=1}
+
+-- build major and minor version numbers
+	local maj=math.floor(d.year-2000)
+	local min=math.floor((part/total)*1000)+vplus
+
+	if min>=1000 then min=min-1000 maj=maj+1 end -- paranoia fix
+
+	return string.format("%02d.%03d",maj,min)
 end
 
