@@ -4,10 +4,9 @@ extern const char* wetgenes_cache_lua_mods[];
 #include "lauxlib.h"
 #include <string.h>
 
-extern int wetgenes_cache_loader(lua_State *L)
+static const char *wetgenes_cache_find(const char *name)
 {
 	const char *data=(const char *)0;
-	const char *name = (const char *)luaL_checkstring(L, 1);
 	int i;
 	for(i=0;wetgenes_cache_lua_mods[i];i+=2)
 	{
@@ -17,9 +16,16 @@ extern int wetgenes_cache_loader(lua_State *L)
 			break;
 		}
 	}
+	return data;
+}
+
+extern int wetgenes_cache_loader(lua_State *L)
+{
+	const char *name = (const char *)luaL_checkstring(L, 1);
+	const char *data=wetgenes_cache_find(name);
 	if (!data) 
 	{
-		lua_pushfstring(L,"\nFailed to find internal lua string %s",name);
+		lua_pushfstring(L,"\n\tno str '%s'",name);
 		return 1;  /* library not found in this path */
 	}
 	
@@ -27,7 +33,7 @@ extern int wetgenes_cache_loader(lua_State *L)
 
  	if( luaL_loadbuffer(L, data,strlen(data),name) != 0 )
 	{
-		luaL_error(L, "error loading module %q from file %q:\n\t%s",
+		luaL_error(L, "error loading module %s from file %s:\n\t%s",
 			name, "internal", lua_tostring(L, -1));
 	}
 
@@ -52,6 +58,25 @@ extern void wetgenes_cache_preloader(lua_State *L)
 		numLoaders++;
 	}
 
+// setup the ziploader (which is written in lua)
+	const char *name="wetgenes.zipsloader";
+	const char *data=wetgenes_cache_find(name);
+
+	if(data)
+	{
+		lua_pushinteger(L, numLoaders + 1);
+
+		if( luaL_loadbuffer(L, data,strlen(data),name) != 0 )
+		{
+			luaL_error(L, "error loading module %s from file %s:\n\t%s",
+				name, "internal", lua_tostring(L, -1));
+		}
+
+		lua_rawset(L, -3);
+		numLoaders++;
+	}
+
+// setup the string loader
 	lua_pushinteger(L, numLoaders + 1);
 	lua_pushcfunction(L, wetgenes_cache_loader);
 	lua_rawset(L, -3);
