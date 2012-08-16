@@ -149,10 +149,10 @@ end
 --
 findfiles=function(opts)
 if not opts then return end
-if not opts.basedir then return end
 if not opts.dir then return end
-if not opts.filter then return end
-opts.ret=opts.ret or {}
+opts.basedir=opts.basedir or "." -- "." for current
+opts.filter=opts.filter or "." -- include all files by default
+opts.ret=opts.ret or {} -- return value is in opts.ret
 
 	local subdirs={}
 	local d=opts.basedir.."/"..opts.dir
