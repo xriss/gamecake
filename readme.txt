@@ -10,7 +10,7 @@ The bin dir is a testbed containing pre-built binaries and lua scripts and data.
 
 The following commands should build everything under ubuntu/debian assuming you have a build environment setup, you will need to install some dev packages such as opengl. ./get-apts may install them for you if you are lucky.
 
-./make release
+gcc/make release
 
 for windows I've swiched to a mingwin cross compile. This assumes you have my sdks repo checked out next to the lua one, ie get the sdks repos and place it next to the lua repo. Possibly there are some update scripts in the sdks repo that should be run to grab all sorts of horrible sdk and build files.
 
