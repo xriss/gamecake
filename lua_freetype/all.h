@@ -37,8 +37,6 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "../wet/util/win_types.h"
-
 #elif defined(X11)
 
 #include <strings.h>

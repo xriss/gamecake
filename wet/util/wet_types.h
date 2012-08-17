@@ -3,6 +3,8 @@
 // (C) Kriss Daniels 2003 http://www.XIXs.com
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+#ifndef wet_types_h
+#define wet_types_h
 
 
 #define U32_ID4(a,b,c,d) ((u32)(((a)<<24)|((b)<<16)|((c)<<8)|(d)))
@@ -60,3 +62,4 @@ typedef volatile unsigned long long	vu64;
 
 
 
+#endif

@@ -26,7 +26,7 @@ elseif NACL then
 
 elseif WINDOWS then -- need windows GL hacks
 
-	includedirs { "../lua_windows/code" }
+	includedirs { "../lua_win_windows/code" }
 	defines{ "LUA_GLES_GL" }
 	defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
 	
