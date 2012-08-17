@@ -1,4 +1,5 @@
 cd `dirname $0`
+cd ..
 build/premake4 gmake
 cd build-gmake
 
