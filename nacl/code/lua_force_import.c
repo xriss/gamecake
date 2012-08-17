@@ -1,10 +1,10 @@
 #include "lua.h"
 
-extern int luaopen_wetgenes_nacl_core(lua_State *l);
+extern int luaopen_wetgenes_win_nacl(lua_State *l);
 
 extern int fakeimportfunction()
 {
-	luaopen_wetgenes_nacl_core(0);
+	luaopen_wetgenes_win_nacl(0);
 	return 0;
 }
 

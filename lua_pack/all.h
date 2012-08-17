@@ -37,17 +37,14 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "../wet/util/win_types.h"
-
 #elif defined(X11)
 
 #include <strings.h>
 #include <sys/time.h>
 
-#include "../wet/util/nix_types.h"
-
 #endif
 
+#include "../wet/util/wet_types.h"
 #include "../wet/util/f32_math.h"
 
 
