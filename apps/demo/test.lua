@@ -1,0 +1,23 @@
+-- setup some default search paths,
+require("apps").default_paths()
+
+-- grab some libs
+--local pack=require("wetgenes.pack")             -- raw memory packing
+local wstr=require("wetgenes.string")   -- string helpers
+--local tardis=require("wetgenes.tardis") -- matrix/vector math
+
+-- a window/screen handler this works in windows/linux/nacl/android/raspi
+
+local wwin=require("wetgenes.win")
+
+print( wstr.dump(wwin.screen()) )
+
+local win=wwin.create({})
+
+print(wstr.dump(win))
+
+for i=1,1000 do
+	win:sleep(0.001)
+	win:msg()
+end
+
