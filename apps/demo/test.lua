@@ -17,7 +17,11 @@ local win=wwin.create({})
 print(wstr.dump(win))
 
 for i=1,1000 do
-	win:sleep(0.001)
-	win:msg()
+--print(i)
+	win:sleep(0.02)
+	local m=win:msg()
+	if m then
+		print(wstr.dump(m))
+	end
 end
 

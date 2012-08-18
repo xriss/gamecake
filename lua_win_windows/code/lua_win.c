@@ -566,12 +566,180 @@ int lua_wetwin_msg (lua_State *l)
 {
 wetwin_lua *p=lua_wetwin_check_ptr(l,1);
 
-int ret;
+int ret=0;
 MSG msg;
+/*
+typedef struct tagMSG {
+  HWND   hwnd;
+  UINT   message;
+  WPARAM wParam;
+  LPARAM lParam;
+  DWORD  time;
+  POINT  pt;
+} MSG, *PMSG, *LPMSG;
+*/
 
-	if( !GetMessage( &msg, NULL, 0, 0 ) ) { ret=0; } // Simon says shutdown
-	TranslateMessage(&msg); 
-	DispatchMessage(&msg);
+	char char_buff256[256];
+	char char_buff16[16];
+
+	BYTE keystate[256];
+
+	int scancode;
+	int act=0;
+	char *key="";
+
+	char lua=' ';
+
+	char_buff256[0]=0;
+	char_buff16[0]=0;
+	
+	double time=0.0;
+
+	if( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
+	{
+		time=(msg.time/1000.0);
+		
+		if( !GetMessage( &msg, NULL, 0, 0 ) )
+		{ // Simon says shutdown?
+			lua='r';
+		}
+		
+		switch( msg.message )
+		{
+			case WM_LBUTTONDBLCLK:
+				lua='m';
+				act=2;
+				key="left";
+			break;
+			case WM_LBUTTONDOWN:
+				lua='m';
+				act=1;
+				key="left";
+			break;
+			case WM_LBUTTONUP:
+				lua='m';
+				act=-1;
+				key="left";
+			break;
+			
+			case WM_RBUTTONDBLCLK:
+				lua='m';
+				act=2;
+				key="right";
+			break;
+			case WM_RBUTTONDOWN:
+				lua='m';
+				act=1;
+				key="right";
+			break;
+			case WM_RBUTTONUP:
+				lua='m';
+				act=-1;
+				key="right";
+			break;
+			
+			case WM_MBUTTONDBLCLK:
+				lua='m';
+				act=2;
+				key="middle";
+			break;
+			case WM_MBUTTONDOWN:
+				lua='m';
+				act=1;
+				key="middle";
+			break;
+			case WM_MBUTTONUP:
+				lua='m';
+				act=-1;
+				key="middle";
+			break;
+			
+			case WM_XBUTTONDBLCLK:
+				lua='m';
+				act=2;
+				key="x";
+				if(HIWORD (msg.wParam)==1 ) { key="x1"; }
+				if(HIWORD (msg.wParam)==2 ) { key="x2"; }
+			break;
+			case WM_XBUTTONDOWN:
+				lua='m';
+				act=1;
+				key="x";
+				if(HIWORD(msg.wParam)==1 ) { key="x1"; }
+				if(HIWORD(msg.wParam)==2 ) { key="x2"; }
+			break;
+			case WM_XBUTTONUP:
+				lua='m';
+				act=-1;
+				key="x";
+				if(HIWORD (msg.wParam)==1 ) { key="x1"; }
+				if(HIWORD (msg.wParam)==2 ) { key="x2"; }
+			break;
+			
+			case WM_MOUSEMOVE:
+				lua='m';
+				act=0;
+				key="none";
+			break;
+			
+			case WM_KEYDOWN:
+				lua='k';
+				if(msg.lParam&0x40000000)
+				{
+					act=0;
+				}
+				else
+				{
+					act=1;
+				}
+			break;
+			
+			case WM_KEYUP:
+			
+				lua='k';
+				act=-1;
+				
+			break;
+		}
+		
+
+		ret=0;
+		if(lua=='m')
+		{
+			lua_newtable(l);
+			lua_pushnumber(l,time);						lua_setfield(l,-2,"time");
+			lua_pushstring(l,"mouse");					lua_setfield(l,-2,"class");
+			lua_pushstring(l,key);						lua_setfield(l,-2,"keyname");
+			lua_pushnumber(l,act);						lua_setfield(l,-2,"action");
+			lua_pushnumber(l,GET_X_LPARAM(msg.lParam));	lua_setfield(l,-2,"x");
+			lua_pushnumber(l,GET_Y_LPARAM(msg.lParam));	lua_setfield(l,-2,"y");
+			ret=1;
+		}
+		else
+		if(lua=='k')
+		{
+			scancode=(msg.lParam>>16)&0xff;
+			
+			GetKeyboardState(keystate);
+			
+			ToAscii(msg.wParam,scancode,keystate,(LPWORD)char_buff16,0);
+			char_buff16[1]=0;
+
+			GetKeyNameText(msg.lParam,char_buff256,256);
+		
+			lua_newtable(l);
+			lua_pushnumber(l,time);					lua_setfield(l,-2,"time");
+			lua_pushstring(l,"key");				lua_setfield(l,-2,"class");
+			lua_pushstring(l,char_buff16);			lua_setfield(l,-2,"ascii");
+			lua_pushnumber(l,act);					lua_setfield(l,-2,"action");
+			lua_pushnumber(l,scancode);				lua_setfield(l,-2,"keycode");
+			lua_pushstring(l,char_buff256);			lua_setfield(l,-2,"keyname");
+			ret=1;
+		}	
+		TranslateMessage(&msg); 
+		DispatchMessage(&msg);
+		return ret;
+	}
 
 	return 0; // no more msgs
 }
