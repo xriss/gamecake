@@ -120,20 +120,6 @@ char lua=' ';
 	char_buff256[0]=0;
 	char_buff16[0]=0;
 	
-/*
-HWND front=GetForegroundWindow();
-HWND parent=GetAncestor(hWnd,GA_ROOT);
-
-	if( (front==parent) && IsWindowVisible(hWnd) )
-	{
-		active_window=true;
-	}
-	else
-	{
-		active_window=false;
-	}
-*/
-	
 	switch( msg )
     {
 		case WM_CREATE: // remember who we are
@@ -143,36 +129,6 @@ HWND parent=GetAncestor(hWnd,GA_ROOT);
 			
 		break;
 		
-/*
-        case WM_TIMER:
-
-RECT srect[1];
-			GetClientRect(hWnd,srect);
-//			fenestra->ogl->setup_viewport(srect->right,srect->bottom);
-			fenestra->width=srect->right;
-			fenestra->height=srect->bottom;
-
-			if(fenestra->call_update)
-			{
-				l=fenestra->l;
-				lua_pushlightuserdata(l,fenestra);
-				lua_gettable(l, LUA_REGISTRYINDEX);
-				lua_getfield(l,-1,"update");
-				if( lua_isfunction(l,-1) )
-				{
-					lua_call(l,0,0);
-				}
-				else
-				{
-					lua_pop(l,1);
-				}
-				lua_pop(l,1);
-			}
-
-			SetTimer(hWnd,0,1,0); // hit the msg loop repeatedly
-
-		break;
-*/
 
 		case WM_DESTROY:
 			PostQuitMessage( 0 );
@@ -184,186 +140,36 @@ RECT srect[1];
 			return(0);
 		break;
 
-		case WM_LBUTTONDBLCLK:
-//		case WM_NCLBUTTONDBLCLK:
-			lua='m';
-			act="double";
-			key="left";
-		break;
 		case WM_LBUTTONDOWN:
-		SetFocus(hWnd);
-//		case WM_NCLBUTTONDOWN:
-			lua='m';
-			act="down";
-			key="left";
+			SetFocus(hWnd);
 			SetCapture(hWnd);
 		break;
 		case WM_LBUTTONUP:
-//		case WM_NCLBUTTONUP:
-			lua='m';
-			act="up";
-			key="left";
 			ReleaseCapture();
 		break;
 		
-		case WM_RBUTTONDBLCLK:
-//		case WM_NCRBUTTONDBLCLK:
-			lua='m';
-			act="double";
-			key="right";
-		break;
 		case WM_RBUTTONDOWN:
-//		case WM_NCRBUTTONDOWN:
-			lua='m';
-			act="down";
-			key="right";
 			SetCapture(hWnd);
 		break;
 		case WM_RBUTTONUP:
-//		case WM_NCRBUTTONUP:
-			lua='m';
-			act="up";
-			key="right";
 			ReleaseCapture();
 		break;
 		
-		case WM_MBUTTONDBLCLK:
-//		case WM_NCMBUTTONDBLCLK:
-			lua='m';
-			act="double";
-			key="middle";
-		break;
 		case WM_MBUTTONDOWN:
-//		case WM_NCMBUTTONDOWN:
-			lua='m';
-			act="down";
-			key="middle";
 			SetCapture(hWnd);
 		break;
 		case WM_MBUTTONUP:
-//		case WM_NCMBUTTONUP:
-			lua='m';
-			act="up";
-			key="middle";
 			ReleaseCapture();
 		break;
 		
-		case WM_XBUTTONDBLCLK:
-//		case WM_NCXBUTTONDBLCLK:
-			lua='m';
-			act="double";
-			key="x";
-			if(HIWORD (wParam)==1 ) { key="x1"; }
-			if(HIWORD (wParam)==2 ) { key="x2"; }
-		break;
 		case WM_XBUTTONDOWN:
-//		case WM_NCXBUTTONDOWN:
-			lua='m';
-			act="down";
-			key="x";
-			if(HIWORD(wParam)==1 ) { key="x1"; }
-			if(HIWORD (wParam)==2 ) { key="x2"; }
 			SetCapture(hWnd);
 		break;
 		case WM_XBUTTONUP:
-//		case WM_NCXBUTTONUP:
-			lua='m';
-			act="up";
-			key="x";
-			if(HIWORD (wParam)==1 ) { key="x1"; }
-			if(HIWORD (wParam)==2 ) { key="x2"; }
 			ReleaseCapture();
 		break;
-		
-		case WM_MOUSEMOVE:
-//		case WM_NCMOUSEMOVE:
-			lua='m';
-			act="move";
-			key="none";
-		break;
-		
-		case WM_KEYDOWN:
-			lua='k';
-			if(lParam&0x40000000)
-			{
-				act="repeat";
-			}
-			else
-			{
-				act="down";
-			}
-		break;
-		
-		case WM_KEYUP:
-		
-			lua='k';
-			act="up";
-			
-		break;
-		
-		case WM_SIZE:
-		
-
-	
-		break;
-		
-		case WM_EXITSIZEMOVE:
-		break;
-
     }
     
-
-/*
-    if(lua=='m')
-    {
-		l=fenestra->l;
-		lua_pushlightuserdata(l,fenestra);
-		lua_gettable(l, LUA_REGISTRYINDEX);
-		lua_getfield(l,-1,"mouse");
-		if( lua_isfunction(l,-1) )
-		{
-			lua_pushstring(l,act);
-			lua_pushnumber(l,GET_X_LPARAM(lParam));
-			lua_pushnumber(l,GET_Y_LPARAM(lParam));
-			lua_pushstring(l,key);
-			lua_call(l,4,0);
-		}
-		else
-		{
-			lua_pop(l,1);
-		}
-		lua_pop(l,1);
-    }
-    else
-    if(lua=='k')
-    {
-		scancode=(lParam>>16)&0xff;
-		
-		GetKeyboardState(keystate);
-		
-		ToAscii(wParam,scancode,keystate,(LPWORD)char_buff16,0);
-		char_buff16[1]=0;
-
-		GetKeyNameText(lParam,char_buff256,256);
-	
-		l=fenestra->l;
-		lua_pushlightuserdata(l,fenestra);
-		lua_gettable(l, LUA_REGISTRYINDEX);
-		lua_getfield(l,-1,"keypress");
-		if( lua_isfunction(l,-1) )
-		{
-			lua_pushstring(l,char_buff16);
-			lua_pushstring(l,char_buff256);
-			lua_pushstring(l,act);
-			lua_call(l,3,0);
-		}
-		else
-		{
-			lua_pop(l,1);
-		}
-		lua_pop(l,1);
-    }
-*/
     return DefWindowProc( hWnd, msg, wParam, lParam );
 }
 
@@ -435,7 +241,30 @@ wetwin_lua *p;
 	
     UpdateWindow( p->hwnd );
     
-	return 1;
+    PIXELFORMATDESCRIPTOR pfd;
+    int iFormat;
+
+    // get the device context (DC)
+    p->hDC = GetDC( p->hwnd );
+
+    // set the pixel format for the DC
+    ZeroMemory( &pfd, sizeof( pfd ) );
+    pfd.nSize = sizeof( pfd );
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 24;
+    pfd.cDepthBits = 16; // 16 is too small?
+    pfd.iLayerType = PFD_MAIN_PLANE;
+    iFormat = ChoosePixelFormat( p->hDC, &pfd );
+
+    SetPixelFormat( p->hDC, iFormat, &pfd );
+
+    // create and enable the render context (RC)
+    p->hRC = wglCreateContext( p->hDC );
+	assert(p->hRC);
+    
+    return 1;
 	
 bogus:
 	return 0;
@@ -476,28 +305,6 @@ wetwin_lua **pp=lua_wetwin_ptr_ptr(l,1);
 int lua_wetwin_context (lua_State *l)
 {
 wetwin_lua *p=lua_wetwin_check_ptr(l,1);
-
-    PIXELFORMATDESCRIPTOR pfd;
-    int iFormat;
-
-    // get the device context (DC)
-    p->hDC = GetDC( p->hwnd );
-
-    // set the pixel format for the DC
-    ZeroMemory( &pfd, sizeof( pfd ) );
-    pfd.nSize = sizeof( pfd );
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 24;
-    pfd.cDepthBits = 24; // 16 is too small?
-    pfd.iLayerType = PFD_MAIN_PLANE;
-    iFormat = ChoosePixelFormat( p->hDC, &pfd );
-
-    SetPixelFormat( p->hDC, iFormat, &pfd );
-
-    // create and enable the render context (RC)
-    p->hRC = wglCreateContext( p->hDC );
 
     wglMakeCurrent( p->hDC, p->hRC );
     
@@ -808,6 +615,8 @@ LUALIB_API int luaopen_wetgenes_win_windows(lua_State *l)
 		{"__gc",			lua_wetwin_destroy},
 		{0,0}
 	};
+	
+	gl3wInit(); // initialise GL, so we need to require wetgenes.win before using any GL functions
 	
 	luaL_newmetatable(l, lua_wetwin_ptr_name);
 	luaL_openlib(l, NULL, meta, 0);
