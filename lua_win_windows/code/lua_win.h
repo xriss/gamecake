@@ -6,15 +6,36 @@
 
 typedef struct swetwin_lua {
 
-/*
-	int			fp_dsp;			// display as file
-	fd_set		set_dsp;		// display as set
-	Display		*dsp;
-	int			screen;
-	Window		win;
+// startup junk, filled passed in from WinMain if we have one...
+
+    LPSTR lpCmdLine;
+    int nCmdShow;
+
+    HINSTANCE hInstance;
+    HINSTANCE hPrevInstance;
+    
+// or if running as a plugin we must use this window
+	HWND into_hwnd; // a window to hijack?
+	WNDPROC into_hwnd_OldProc; // and its old proc
+
+	char ModuleFileName[260];
+
+// our process handle
+
+	HANDLE proc;
+
+	WNDCLASSEX wc[1]; //window class init info
 	
-	GLXContext context;
-*/
+// our window
+
+	HWND hwnd;
+	HWND console; // if we are a console app
+
+	HINSTANCE instance;
+	
+	HDC hDC;
+	HGLRC hRC;
+
 	int width;
 	int height;
 
