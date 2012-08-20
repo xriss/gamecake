@@ -264,6 +264,8 @@ wetwin_lua *p;
     p->hRC = wglCreateContext( p->hDC );
 	assert(p->hRC);
     
+	gl3wInit(); // initialise GL function pointers
+
     return 1;
 	
 bogus:
@@ -616,7 +618,6 @@ LUALIB_API int luaopen_wetgenes_win_windows(lua_State *l)
 		{0,0}
 	};
 	
-	gl3wInit(); // initialise GL, so we need to require wetgenes.win before using any GL functions
 	
 	luaL_newmetatable(l, lua_wetwin_ptr_name);
 	luaL_openlib(l, NULL, meta, 0);
