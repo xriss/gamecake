@@ -12,11 +12,10 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 module("wetgenes.gamecake.mods.escmenu")
 
-name="escmenu" -- by this name shall ye know me
-
-function bake(opts)
+function bake(state)
 
 	local escmenu={}
+	escmenu.name="escmenu" -- by this name shall ye know me
 	
 
 	function escmenu.setup(state)

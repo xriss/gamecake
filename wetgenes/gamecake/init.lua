@@ -103,19 +103,3 @@ blit = function(cake,id,name,cx,cy,ix,iy,w,h)
 end
 
 
--- require and bake cake.game[modules] in such a way that it can have simple circular dependencies
-rebake = function(cake,name)
-
-	local ret=cake.mods[name]
-	
-	if not ret then
-	
-		ret={modname=name}
-		cake.mods[name]=ret
-		ret=require(name).bake(cake,ret)
-		
-	end
-
-	return ret
-end
-

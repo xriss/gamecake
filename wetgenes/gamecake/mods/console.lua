@@ -13,12 +13,12 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 module("wetgenes.gamecake.mods.console")
 local buffedit=require("wetgenes.gamecake.mods.console.buffedit")
 
-name="console" -- by this name shall ye know me
 
-function bake(opts)
+function bake(state)
 
 	local console={}
-	
+	console.name="console" -- by this name shall ye know me
+
 	-- print out lua data in a somewhat sensible way, returns a string
 	console.dump_limit = 20
 	console.dump_depth = 7
