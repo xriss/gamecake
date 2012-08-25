@@ -37,6 +37,8 @@ function bake(opts)
 	cake.gl=opts.gl
 	cake.win=opts.win
 	
+	cake.mods={} -- for use in our baked require
+	
 	if cake.gl then cake.gl.GetExtensions() end
 	
 --	cake.bake_canvas=function() return wcanvas.bake(opts)	end -- a canvas generator
@@ -99,3 +101,21 @@ end
 blit = function(cake,id,name,cx,cy,ix,iy,w,h)
 	cake.canvas:blit(cake.images:get(id,name),cx,cy,ix,iy,w,h)
 end
+
+
+-- require and bake cake.game[modules] in such a way that it can have simple circular dependencies
+rebake = function(cake,name)
+
+	local ret=cake.mods[name]
+	
+	if not ret then
+	
+		ret={modname=name}
+		cake.mods[name]=ret
+		ret=require(name).bake(cake,ret)
+		
+	end
+
+	return ret
+end
+

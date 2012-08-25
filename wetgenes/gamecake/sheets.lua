@@ -90,6 +90,20 @@ function createimg(sheets,id,name)
 	return create(sheets,id,name):setimg(id,name)
 end
 
+--
+-- Load images and chop them up
+--
+function loads_and_chops(sheets,tab)
+
+	for i,v in ipairs(tab) do
+		sheets.cake.images:load(v[1],v[1])
+		local img=sheets:createimg(v[1])
+		img:chop(v[2],v[3],v[4],v[5])
+	end
+
+end
+
+
 function base_sheet.setimg(sheet,img_id,img_name)
 
 	sheet.img_id=img_id
