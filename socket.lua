@@ -29,9 +29,10 @@ module("socket")
 -- loading our hack
 function socket.protect(f)
   return function(...)
+	local arg={...}
     local co = coroutine.create(f)
     while true do
-      local results = {coroutine.resume(co, ...)}
+      local results = {coroutine.resume(co, base.unpack(arg))}
       local status = table.remove(results, 1)
       if not status then
         if type(results[1]) == 'table' then
