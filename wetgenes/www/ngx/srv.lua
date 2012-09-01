@@ -97,7 +97,7 @@ function new()
 	else
 		cs=srv.headers.cookie
 	end
-	log(srv.headers.cookie)
+--	log(srv.headers.cookie)
 	for i,s in ipairs(cs or {}) do
 		local n,v=wstr.split_equal(wstr.trim(s))
 		srv.cookies[n]=v

@@ -14,6 +14,16 @@ package.loaded["wetgenes.www.any.cache"]=_M
 
 --hax={}
 
+function check_mc()
+	if ngx.ctx.mc then return ngx.ctx.mc end
+	
+	ngx.ctx.mc=require("wetgenes.www.ngx.memcache").Connect() -- every request needs a new connection...
+
+	ngx.ctx.mc:set_encode(function(s) local r=wstr.serialize(s) return r end) -- so we may store tables
+	ngx.ctx.mc:set_decode(function(s) return wbox.lson(s) end)
+	
+	return ngx.ctx.mc
+end
 
 function countzero()
 	count=0
@@ -42,8 +52,10 @@ end
 
 function clear(srv)
 	apis()
+	local mc=check_mc()
 	
-	ngx.shared.cache:flush_all()
+	mc:flush_all()
+--	ngx.shared.cache:flush_all()
 
 	apie()
 end
@@ -51,10 +63,12 @@ end
 
 function del(srv,id)
 	apis()
+	local mc=check_mc()
 
 	local k=getvhost(srv).."&"..id
 	
-	ngx.shared.cache:delete(k)
+	mc:delete(k)
+--	ngx.shared.cache:delete(k)
 
 	apie()
 end
@@ -62,24 +76,29 @@ end
 function put(srv,id,v,ttl,opts)
 --	log("cache.put:",id)
 	apis()
+	local mc=check_mc()
 	
 	local k=getvhost(srv).."&"..id
 	
 	ttl=ttl or 60*5
 	
+--[[
 	if type(v)=="number" then
 		--as is
 	else 
 		v=wstr.serialize(v)
 	end
+]]
 
 	if opts=="ADD_ONLY_IF_NOT_PRESENT" then
 	
-		ngx.shared.cache:add(k,v,ttl)
+		mc:add(k,v,ttl)
+--		ngx.shared.cache:add(k,v,ttl)
 		
 	else -- normal set
 	
-		ngx.shared.cache:set(k,v,ttl)
+		mc:set(k,v,ttl)
+--		ngx.shared.cache:set(k,v,ttl)
 		
 	end
 
@@ -89,30 +108,37 @@ end
 
 function get(srv,id)
 	apis()
+	local mc=check_mc()
 	count=count+1
 
 	local k = getvhost(srv).."&"..id
-	local r = ngx.shared.cache:get(k)
+	local r = mc:get(k)
+--	local r = ngx.shared.cache:get(k)
 	
 	if r then count_got=count_got+1 end
 	
+--[[
 	if type(r)=="string" then -- need to unserialise the data
 		r=wbox.lson(r)
 	end
+]]
 	apie()
 	return r
 end
 
 function inc(srv,id,num,start)
 	apis()
+	local mc=check_mc()
 
 	local k=getvhost(srv).."&"..id
 
 
-	r=ngx.shared.cache:incr(k,num)
+	r=mc:incr(k,num)
+--	r=ngx.shared.cache:incr(k,num)
 	if not r then
 		r=start
-		ngx.shared.cache:set(k,num)
+		mc:set(k,num)
+--		ngx.shared.cache:set(k,num)
 	end
 
 	apie()

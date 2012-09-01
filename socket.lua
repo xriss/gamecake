@@ -4,6 +4,14 @@
 -- RCS ID: $Id: socket.lua,v 1.22 2005/11/22 08:33:29 diego Exp $
 -----------------------------------------------------------------------------
 
+
+-----------------------------------------------------------------------------
+-- Mega hack. Don't try to do this at home.
+-----------------------------------------------------------------------------
+local coroutine = require("coroutine")
+local table = require("table")
+local type=type
+
 -----------------------------------------------------------------------------
 -- Declare module and import dependencies
 -----------------------------------------------------------------------------
@@ -12,6 +20,32 @@ local string = require("string")
 local math = require("math")
 local socket = require("socket.core")
 module("socket")
+
+-----------------------------------------------------------------------------
+-- Mega hack. Don't try to do this at home.
+-----------------------------------------------------------------------------
+-- we can't yield across calls to protect, so we rewrite it with coxpcall
+-- make sure you don't require any module that uses socket.protect before
+-- loading our hack
+function socket.protect(f)
+  return function(...)
+    local co = coroutine.create(f)
+    while true do
+      local results = {coroutine.resume(co, ...)}
+      local status = table.remove(results, 1)
+      if not status then
+        if type(results[1]) == 'table' then
+          return nil, results[1][1]
+        else base.error(results[1]) end
+      end
+      if coroutine.status(co) == "suspended" then
+        arg = {coroutine.yield(base.unpack(results))}
+      else
+        return base.unpack(results)
+      end
+    end
+  end
+end
 
 -----------------------------------------------------------------------------
 -- Exported auxiliar functions

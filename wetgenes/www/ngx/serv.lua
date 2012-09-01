@@ -5,6 +5,10 @@ local log=require("wetgenes.www.ngx.log").log
 local debug=require("debug")
 
 
+local cache=require("wetgenes.www.ngx.cache")
+
+
+
 local ngx=require("ngx")
 
 -- does this overloading let us just use the socket module?
@@ -28,7 +32,9 @@ end
 
 function serv2()
 
+
 	local opts=require("opts")
+	opts.setup() -- may need to in itialize stuff
 
 
 	local srv=require("wetgenes.www.ngx.srv").new()
@@ -70,6 +76,7 @@ function serv2()
 		end
 		
 	end
+
 	
 	basic.serv(srv)
 

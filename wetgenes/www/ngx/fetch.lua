@@ -13,6 +13,109 @@ module(...)
 local _M=require(...)
 package.loaded["wetgenes.www.any.fetch"]=_M
 
+local function create()
+
+log("CREATE")
+	local p={}
+	local tcp=ngx.socket.tcp()
+
+	p.accept=function(_,...)
+log("accept")
+log(...)
+		return tcp:accept(...)
+	end
+
+	p.bind=function(_,...)
+log("bind")
+log(...)
+		return tcp:bind(...)
+	end
+
+	p.close=function(_,...)
+log("close")
+log(...)
+		return tcp:close(...)
+	end
+	
+	p.connect=function(_,...)
+log("connect")
+log(...)
+		tcp:connect(...)
+		return true
+	end
+
+	p.getpeername=function(_,...)
+log("getpeername")
+log(...)
+		return tcp:getpeername(...)
+	end
+
+	p.getsockname=function(_,...)
+log("getsockname")
+log(...)
+		return tcp:getsockname(...)
+	end
+
+	p.getstats=function(_,...)
+log("getstats")
+log(...)
+		return tcp:getstats(...)
+	end
+
+	p.listen=function(_,...)
+log("listen")
+log(...)
+		return tcp:listen(...)
+	end
+
+	p.receive=function(_,...)
+log("receive")
+log(...)
+		local r=tcp:receive(...)
+		if type(r)=="table" then -- WTF BBQ?
+		log(wstr.dump(r))
+			r="HTTP/1.1 200 OK"
+		end
+		log(wstr.dump(r))
+		return r
+	end
+
+	p.send=function(_,...)
+log("send")
+log(...)
+		return tcp:send(...)
+	end
+
+	p.setoption=function(_,...)
+log("setoption")
+log(...)
+		return tcp:setoption(...)
+	end
+
+	p.setstats=function(_,...)
+log("setstats")
+log(...)
+		return tcp:setstats(...)
+	end
+
+	p.settimeout=function(_,n)
+log("settimeout")
+log(n)
+		tcp:settimeout(n*1000)
+		return true
+	end
+
+	p.shutdown=function(_,...)
+log("shutdown")
+log(...)
+		return tcp:shutdown(...)
+	end
+
+log(wstr.dump(p))
+
+	return p
+end
+
 function countzero()
 	count=0
 	api_time=0
@@ -29,8 +132,6 @@ local function apie(...)
 	api_time=api_time+os.time()-start_time
 	return ...
 end
-
-
 
 --[[
 function get(url)
@@ -62,7 +163,7 @@ function post(url,headers,body)
 
 
 	local suc, code , rheaders = assert(socket.http.request{
-		create=ngx.socket.create,
+		create=create,
 		url=url,
 		method="POST",
 		headers=headers,
@@ -100,7 +201,7 @@ function get(url,headers,body)
 	}
 
 	local suc, code , rheaders = assert(socket.http.request{
-		create=ngx.socket.create,
+		create=create,
 		url=url,
 		method="GET",
 		headers=headers,
