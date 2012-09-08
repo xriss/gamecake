@@ -15,7 +15,7 @@ function dofilename(i,v)
 end
 
 
-for i,v in ipairs( os.matchfiles("../bin/lua/**.lua") or {} ) do dofilename(i,v) end
+for i,v in ipairs( os.matchfiles("../../bin/lua/**.lua") or {} ) do dofilename(i,v) end
 
 
 for i,v in ipairs( LUA_CACHE_FILES or {} ) do
