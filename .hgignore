@@ -5,6 +5,7 @@ build-*
 android/bin/*
 android/libs/*
 android/gen/*
+android/res/raw/*
 lua/preloadlibs.c
 lua/cache.c
 */log.txt
