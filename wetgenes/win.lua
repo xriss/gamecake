@@ -32,7 +32,9 @@ end
 
 if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.android") end )
-	if suc then hardcore=dat base.flavour="android" base.noblock=true end
+	if suc then hardcore=dat base.flavour="android"
+--		posix=require("posix")
+	end
 end
 
 if not hardcore then
@@ -95,21 +97,39 @@ function win.keymap(key)
 	return win.generic_keymap[key] or key
 end
 
-function win.android_setup(apk)
+--
+-- Special android entry points, we pass in the location of the apk
+-- this does things that must only happen once
+--
+function win.android_start(apk)
 
-	if win.flavour=="android" and hardcore.print then
+-- replace print
+	_G.print=hardcore.print
+	print=_G.print
+
+	win.apk=apk
+
+	local zips=require("wetgenes.zips")
 	
-		win.apk=apk
-		
-		_G.print=hardcore.print
-		print=_G.print
+	zips.add_apk_file(win.apk)
+
+--print("ANDROID_SETUP with ",apk)
 
 
---print("ANDROID_SETUP with ",apk,4)
-		
-	end
+-- Now load and run lua/init.lua which initalizes the window and runs the app
+
+	local s=zips.readfile("lua/init.lua")
+	
+	assert(s) -- sanity, may want a seperate path for any missing init.lua ?
+	
+	local f=assert(loadstring(s))
+	
+	f()
+
 	
 end
+
+
 
 function win.create(opts)
 
@@ -117,6 +137,7 @@ function win.create(opts)
 	setmetatable(w,meta)
 	
 	if hardcore.create then
+print("pre create")
 		w[0]=assert( hardcore.create(opts) )
 	end
 	w.msgstack={} -- can feed "fake" msgs into here (fifo stack) with table.push

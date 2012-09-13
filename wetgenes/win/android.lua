@@ -25,14 +25,40 @@ android.print=function(...)
 	end
 	core.print(table.concat(t,"\t"))
 end
+local print=android.print
 
 android.time=core.time
 
-android.create=core.create
+android.create=function(opts)
+print("and win prep")
+	repeat
+		local done=false
+		repeat
+			local m
+			m=core.msg()
+			print("andmsg",wstr.dump(m))
+			if m and m.cmd=="init_window" then done=true break end
+		until not m
+		android.sleep(1)
+	until done
+	
+	return core.create(opts)
+end
 android.destroy=core.destroy
 android.info=core.info
 
 android.context=core.context
 android.swap=core.swap
+
+android.sleep=core.sleep
+
+android.msg=function()
+
+	local m=core.msg()
+	
+	print("andmsg",wstr.dump(m))
+	
+end
+
 
 return android
