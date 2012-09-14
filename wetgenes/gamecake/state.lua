@@ -192,6 +192,11 @@ function bake(opts)
 		function state.msgs() -- read and process any msgs we have from win:msg
 			if state.win then
 				for m in state.win:msgs() do
+
+					if m.class=="mouse" and m.x and m.y then	-- need to fix x,y numbers
+						m.xraw,m.yraw=m.x,m.y					-- remember original
+					end
+
 					if state.now and state.now.msg then
 						state.now.msg(state,m)
 					end

@@ -39,7 +39,8 @@ base.flat={}
 -- out where to place our view such that it is always visible and keeps its aspect.
 --
 base.canvas.project23d = function(canvas,width,height,fov,depth)
-
+	local win=canvas.win
+	
 	local aspect=height/width
 	
 	canvas.view_width=width
@@ -53,23 +54,28 @@ base.canvas.project23d = function(canvas,width,height,fov,depth)
 	local f=depth
 	local n=1
 
-	local canvas_aspect=(canvas.win.height/canvas.win.width)
+	local canvas_aspect=(win.height/win.width)
 		
 	if (canvas_aspect > (aspect) ) 	then 	-- fit width to screen
 	
 		m[1] = ((aspect)*1)/fov
 		m[6] = -((aspect)/canvas_aspect)/fov
 		
-		canvas.xs=1
-		canvas.ys=canvas_aspect/aspect
+		canvas.x_scale=1
+		canvas.y_scale=canvas_aspect/aspect
 	else									-- fit height to screen
 	
 		m[1] = canvas_aspect/fov
 		m[6] = -1/fov
 		
-		canvas.xs=aspect/canvas_aspect
-		canvas.ys=1
+		canvas.x_scale=aspect/canvas_aspect
+		canvas.y_scale=1
 	end
+
+	canvas.x_origin=win.width/2
+	canvas.y_origin=win.height/2
+	canvas.x_size=win.width
+	canvas.y_size=win.height
 	
 	
 	m[11] = -(f+n)/(f-n)
@@ -139,7 +145,16 @@ base.canvas.blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
 end
 
 
+-- convert raw xy coords (IE mouse win width and height) into local coords (view width and height) centered on origin
+-- basically do whatever transform we came up with in project23d
+base.canvas.xyscale=function(canvas,x,y)
 
+	-- centered and scaled
+	x=canvas.view_width  * ( (x-canvas.x_origin) * canvas.x_scale ) / canvas.x_size
+	y=canvas.view_height * ( (y-canvas.y_origin) * canvas.y_scale ) / canvas.y_size
+	
+	return x,y
+end
 
 
 
