@@ -8,6 +8,8 @@ base=require(...)
 meta={}
 meta.__index=base
 
+local zips=require("wetgenes.zips")
+
 local grd=require("wetgenes.grd")
 local sod=require("wetgenes.sod")
 
@@ -111,6 +113,9 @@ load=function(sounds,filename,id,name)
 	
 	local x=assert(sod.create())
 	
+	local d=assert(zips.readfile(fname))
+	assert(x:load_data(d,"wav"))
+--[[
 	if sounds.zip then -- load from a zip file
 		
 		local f=assert(sounds.zip:open(fname))
@@ -121,7 +126,7 @@ load=function(sounds,filename,id,name)
 	else
 		assert(x:load_file(fname,"wav"))
 	end
-	
+]]	
 	t={}
 	t.filename=filename
 	

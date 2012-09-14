@@ -9,6 +9,7 @@ meta={}
 meta.__index=base
 
 local grd=require("wetgenes.grd")
+local zips=require("wetgenes.zips")
 
 
 
@@ -84,6 +85,11 @@ print("loading",id,name)
 	
 	local g=assert(grd.create())
 	
+
+	local d=assert(zips.readfile(fname))
+	assert(g:load_data(d,"png"))
+	
+--[[
 	if images.zip then -- load from a zip file
 		
 		local f=assert(images.zip:open(fname))
@@ -94,7 +100,7 @@ print("loading",id,name)
 	else
 		assert(g:load_file(fname,"png"))
 	end
-	
+]]	
 	if gl then --gl mode
 	
 		t={}

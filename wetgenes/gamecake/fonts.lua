@@ -8,6 +8,8 @@ base=require(...)
 meta={}
 meta.__index=base
 
+local zips=require("wetgenes.zips")
+
 local ft=require("wetgenes.freetype")
 local grd=require("wetgenes.grd")
 local wwin=require("wetgenes.win")
@@ -118,6 +120,8 @@ load=function(fonts,filename,id,name)
 		
 	--	local g=assert(grd.create())
 		
+		local d=assert(zips.readfile(fname))
+--[[
 		local d
 		if fonts.zip then -- load from a zip file
 			local f=assert(fonts.zip:open(fname))
@@ -128,7 +132,7 @@ load=function(fonts,filename,id,name)
 			d=assert(f:read("*a"))
 			f:close()
 		end
-		
+]]		
 		if gl then --gl mode
 		
 			t={}
