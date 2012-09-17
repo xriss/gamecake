@@ -14,6 +14,7 @@ local ipairs=ipairs
 local print=print
 local os=os
 local io=io
+local pcall=pcall
 
 module("apps")
 
@@ -97,6 +98,8 @@ end
 function default_paths()
 
 -- we are looking for a dir/lua/name.lua and dir will be our base dir so look in various places
+
+	if not pcall( function() return require("lfs") end ) then return end -- not possible without lfs
 
 	local osflavour="win"
 	local os_shell=os.getenv("SHELL")

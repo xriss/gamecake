@@ -193,7 +193,13 @@ base.canvas.gl_default=function(canvas)
 
 end
 
-
+-- create and return a child canvas (just has its own transform cache)
+base.canvas.child = function(canvas)
+	local tab={}
+	local meta={__index=canvas}
+	setmetatable(tab,meta)
+	return tab
+end
 
 
 base.font.set = function(font,dat)

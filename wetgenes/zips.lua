@@ -48,6 +48,20 @@ function add_apk_file(fname,t)
 	t.munge=apk_munge_filename
 	return add_zip_file(fname,t)
 end
+--
+-- add a zipfile (already read into memory) to the end of places to search and return it
+-- so we can add more options if we need to
+--
+function add_zip_data(mem,t)
+	t=t or {}
+	
+	t.fname="**data**"
+	t.mem=mem -- do not garbagecollect this value...
+	t.z=zip.open_mem(mem) -- the file exists in memory only
+		
+	files[#files+1]=t
+	return t
+end
 
 --
 -- this is inserted into the package loaders to load modules from zip

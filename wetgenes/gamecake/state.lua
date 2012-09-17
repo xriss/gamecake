@@ -222,92 +222,18 @@ print("normal serv loop")
 			
 			local finished
 			repeat
-
+				finished=state.serv_pulse(state)
+			until finished
+		end
+		function state.serv_pulse(state)
 				state.msgs()
 				state.update()
 				state.draw()
 				
 				finished=state.change()
-				
-			until finished
+				return finished
 		end
 		
--- android control functions so we can do things slightly diferently
-		function state.android_setup()
-print("mainstate setup")
-			state.setup()
-		end
-		function state.android_start()
-print("mainstate start")
-			state.start()
-		end
-		function state.android_stop()
-print("mainstate stop")
-			state.stop()
-		end
-		function state.android_clean()
-print("mainstate clean")
-			state.clean()
-		end
-		function state.android_serv()
-			state.msgs()
-			state.update()
-			state.draw()
-			
-			local finished=state.change()
-			return finished
-		end
-		function state.android_draw()
-			state.draw()
-		end
-		function state.android_resize(w,h)
-print("mainstate resize",w,h)
-			state.win.width=w
-			state.win.height=h
-		end
-		function state.android_msg(m)
---	print(wstr.dump(m))
-			if m.type==1 then
-				table.insert(state.win.msgstack,{
-					time=m.eventtime,
-					class="key",
-					ascii="",
-					action=( (m.action==0) and 1 or -1),
-					keycode=m.keycode,
-					keyname=string.format("android_%02x",m.keycode)
-				})
-			elseif m.type==2 then
-				local act=0
-				if m.action==0 then act= 1 end
-				if m.action==1 then act=-1 end
-				if m.action==2 then act= 0 end
-				table.insert(state.win.msgstack,{
-					time=m.eventtime,
-					action=act,
-					class="mouse",
-					keycode=m.pointers[1].id,
-					x=m.pointers[1].x,
-					y=m.pointers[1].y,
-				})
-			end
-		end
---[[
-		function state.android_press(asc,code,updn)
-print("mainstate press",asc,code,updn)
-			table.insert(state.win.msgstack,{
-				time=win.time(),
-				class="key",
-				ascii=string.char(asc),
-				action=updn,
-				keycode=code,
-				keyname=string.format("android_%02x",code)
-			})
-		end
-		function state.android_touch(...)
-print("mainstate touch",...)
-			table.insert(state.win.msgstack,{})
-		end
-]]
 
 	return state
 
