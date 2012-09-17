@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.wetgenes.WetDike"
-      android:versionCode="12691"
-      android:versionName="12.691"
+      android:versionCode="12706"
+      android:versionName="12.706"
 >
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="9" />

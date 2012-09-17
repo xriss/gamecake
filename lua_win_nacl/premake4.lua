@@ -5,5 +5,5 @@ language "C"
 files {  "code/**.c" , "code/**.h" , "all.h" }
 includedirs { "." , "code" }
 
-KIND{lua="wetgenes.win.nacl"}
+KIND{lua="wetgenes.win.nacl.core"}
 

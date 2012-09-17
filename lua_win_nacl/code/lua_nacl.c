@@ -142,6 +142,18 @@ static void l_message (const char *pname, const char *msg) {
   if (pname) fprintf(stderr, "%s: ", pname);
   fprintf(stderr, "%s\n", msg);
   fflush(stderr);
+  if(L)
+  {
+	struct PP_Var var_result;
+
+	lua_pushfstring(L,"cmd=print\n%s",msg);
+	var_result = CStrToVar( lua_tostring(L,-1) );
+	lua_pop(L,1);
+
+	messaging_interface->PostMessage(nacl_instance, var_result);
+
+	var_interface->Release(var_result);
+  }
 }
 
 
@@ -546,7 +558,7 @@ int val=0;
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_wetgenes_win_nacl(lua_State *l)
+LUALIB_API int luaopen_wetgenes_win_nacl_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
