@@ -32,7 +32,9 @@ end
 
 if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.android") end )
-	if suc then hardcore=dat base.flavour="android" base.noblock=true end
+	if suc then hardcore=dat base.flavour="android"
+--		posix=require("posix")
+	end
 end
 
 if not hardcore then
@@ -95,21 +97,78 @@ function win.keymap(key)
 	return win.generic_keymap[key] or key
 end
 
-function win.android_setup(apk)
+function win.load_run_init()
 
-	if win.flavour=="android" and hardcore.print then
+	local zips=require("wetgenes.zips")
+
+-- Now load and run lua/init.lua which initalizes the window and runs the app
+
+	local s=zips.readfile("lua/init.lua")
 	
-		win.apk=apk
-		
-		_G.print=hardcore.print
-		print=_G.print
-
-
---print("ANDROID_SETUP with ",apk,4)
-		
-	end
+	assert(s) -- sanity, may want a seperate path for any missing init.lua ?
 	
+	local f=assert(loadstring(s))
+	
+	return f()
+
 end
+
+--
+-- Special android entry points, we pass in the location of the apk
+-- this does things that must only happen once
+--
+function win.android_start(apk)
+
+-- replace print
+	_G.print=hardcore.print
+	print=_G.print
+
+	win.apk=apk
+
+	local zips=require("wetgenes.zips")
+	
+	zips.add_apk_file(win.apk)
+
+--print("ANDROID_SETUP with ",apk)
+	
+	return win.load_run_init()
+end
+
+
+--
+-- Special nacl entry points, we pass in the url of the main zip we wish to load
+-- this does things that must only happen once
+--
+local main -- gonna have to cache the main state here
+function win.nacl_start(url)
+	_G.print=hardcore.print
+	print=_G.print
+	
+	print("nacl start ",url)
+
+	local zips=require("wetgenes.zips")
+	
+	hardcore.getURL(url,function(size,mem)	
+		print("nacl callback",size,mem)
+		
+		zips.add_zip_data(mem)
+		print("nacl pulse mem2")
+		main=win.load_run_init()
+		print("nacl pulse mem3")
+
+	end)
+
+	print("nacl start done")
+
+end
+
+function win.nacl_pulse() -- called 60ish times a second depending upon how retarted the browser is
+
+	if main then
+		main:serv_pulse()
+	end
+end
+
 
 function win.create(opts)
 
@@ -117,6 +176,7 @@ function win.create(opts)
 	setmetatable(w,meta)
 	
 	if hardcore.create then
+print("pre create")
 		w[0]=assert( hardcore.create(opts) )
 	end
 	w.msgstack={} -- can feed "fake" msgs into here (fifo stack) with table.push

@@ -1,0 +1,4 @@
+cd `dirname $0`
+rm log.txt
+../../sdks/android-sdk/tools/emulator -avd gpuarm -logcat *:v $* | tee log.txt
+#../../../sdks/android-sdk/tools/emulator -avd gpuarm -logcat *:v $* | tee log.txt

@@ -157,19 +157,20 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 		action=AKeyEvent_getAction(event);
 		flags=AKeyEvent_getFlags(event);
 		
-		lua_getglobal(L,"mainstate");
-		if(lua_istable(L,-1)) // check we are setup
-		{
-			lua_getfield(L,-1,"android_msg");
-			lua_newtable(L);
+//		lua_getglobal(L,"mainstate");
+//		if(lua_istable(L,-1)) // check we are setup
+//		{
+//			lua_getfield(L,-1,"android_msg");
+//			lua_newtable(L);
+			lua_pushstring(L,"key"); lua_setfield(L,-2,"event");
 			lua_pushnumber(L,type); lua_setfield(L,-2,"type");
 			lua_pushnumber(L,eventtime/1000000000.0); lua_setfield(L,-2,"eventtime");
 			lua_pushnumber(L,keycode); lua_setfield(L,-2,"keycode");
 			lua_pushnumber(L,action); lua_setfield(L,-2,"action");
 			lua_pushnumber(L,flags); lua_setfield(L,-2,"flags");
-			report(L, docall(L, 1, 0) );
-		}
-		lua_settop(L,0);
+//			report(L, docall(L, 1, 0) );
+//		}
+//		lua_settop(L,0);
 		return 1;
 	}
 	else
@@ -180,11 +181,12 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 		action=AMotionEvent_getAction(event);
 		flags=AMotionEvent_getFlags(event);
 		
-		lua_getglobal(L,"mainstate");
-		if(lua_istable(L,-1)) // check we are setup
-		{
-			lua_getfield(L,-1,"android_msg");
-			lua_newtable(L);
+//		lua_getglobal(L,"mainstate");
+//		if(lua_istable(L,-1)) // check we are setup
+//		{
+//			lua_getfield(L,-1,"android_msg");
+//			lua_newtable(L);
+			lua_pushstring(L,"motion"); lua_setfield(L,-2,"event");
 			lua_pushnumber(L,type); lua_setfield(L,-2,"type");
 			lua_pushnumber(L,eventtime/1000000000.0); lua_setfield(L,-2,"eventtime");
 			lua_pushnumber(L,action); lua_setfield(L,-2,"action");
@@ -206,9 +208,9 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 			}
 			lua_setfield(L,-2,"pointers");
 			
-			report(L, docall(L, 1, 0) );
-		}
-		lua_settop(L,0);
+//			report(L, docall(L, 1, 0) );
+//		}
+//		lua_settop(L,0);
 		return 1;
     }
     return 0;
@@ -219,48 +221,93 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 	lua_State *L=engine->L;
 
     switch (cmd) {
-        case APP_CMD_SAVE_STATE:
+		case APP_CMD_INPUT_CHANGED:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"input_changed"); lua_setfield(L,-2,"cmd");
+		break;
 
-            break;
-        case APP_CMD_INIT_WINDOW:
-            if (engine->app->window != NULL) {
+		case APP_CMD_INIT_WINDOW:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"init_window"); lua_setfield(L,-2,"cmd");
+//			if (engine->app->window != NULL) {
+//			}
+		break;
 
-	lua_getglobal(L,"require");
-	lua_pushstring(L,"mainstate");	
-	report(L, docall(L, 1, 0) );
-	lua_setglobal(L,"mainstate"); // for faster access
-	
-	lua_getglobal(L,"mainstate");
-	lua_getfield(L,-1,"android_setup");
-	report(L, docall(L, 0, 0) );
+		case APP_CMD_TERM_WINDOW:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"term_window"); lua_setfield(L,-2,"cmd");
+		break;
 
-	lua_settop(L,0); // remove all the junk we just built up
+		case APP_CMD_WINDOW_RESIZED:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"window_resized"); lua_setfield(L,-2,"cmd");
+		break;
 
-           }
-            break;
-        case APP_CMD_TERM_WINDOW:
+		case APP_CMD_WINDOW_REDRAW_NEEDED:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"redraw_needed"); lua_setfield(L,-2,"cmd");
+		break;
+		
+		case APP_CMD_CONTENT_RECT_CHANGED:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"rect_changed"); lua_setfield(L,-2,"cmd");
+		break;
 
-            break;
-        case APP_CMD_START:
-            break;
-        case APP_CMD_GAINED_FOCUS:
-        
-	lua_getglobal(L,"mainstate");
-	lua_getfield(L,-1,"android_start");
-	report(L, docall(L, 0, 0) );
-	lua_settop(L,0);
+		case APP_CMD_GAINED_FOCUS:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"gained_focus"); lua_setfield(L,-2,"cmd");
+		break;
 
-            break;
-        case APP_CMD_STOP:
-            break;
-        case APP_CMD_LOST_FOCUS:
+		case APP_CMD_LOST_FOCUS:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"lost_focus"); lua_setfield(L,-2,"cmd");
+		break;
 
-	lua_getglobal(L,"mainstate");
-	lua_getfield(L,-1,"android_stop");
-	report(L, docall(L, 0, 0) );
-	lua_settop(L,0);
+		case APP_CMD_CONFIG_CHANGED:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"config_changed"); lua_setfield(L,-2,"cmd");
+		break;
 
-            break;
+		case APP_CMD_LOW_MEMORY:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"low_memory"); lua_setfield(L,-2,"cmd");
+		break;
+
+		case APP_CMD_START:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"start"); lua_setfield(L,-2,"cmd");
+		break;
+
+		case APP_CMD_RESUME:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"resume"); lua_setfield(L,-2,"cmd");
+		break;
+
+		case APP_CMD_SAVE_STATE:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"save_state"); lua_setfield(L,-2,"cmd");
+		break;
+
+		case APP_CMD_PAUSE:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"pause"); lua_setfield(L,-2,"cmd");
+		break;
+
+		case APP_CMD_STOP:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"stop"); lua_setfield(L,-2,"cmd");
+		break;
+
+		case APP_CMD_DESTROY:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"destroy"); lua_setfield(L,-2,"cmd");
+		break;
+
+		default:
+			lua_pushstring(L,"app"); lua_setfield(L,-2,"event");
+			lua_pushstring(L,"unknown"); lua_setfield(L,-2,"cmd");
+			lua_pushnumber(L,cmd); lua_setfield(L,-2,"cmid");
+		break;
     }
 }
 
@@ -313,16 +360,20 @@ void android_main(struct android_app* state) {
 	lua_pushstring(L,"wetgenes.win");	
 	report(L, docall(L, 1, 0) );
 	
-	lua_getfield(L,-1,"android_setup");
+	lua_getfield(L,-1,"android_start");
 	lua_pushstring(L,apk);
-	report(L, docall(L, 1, 0) );		// this lets us load files from the apk from now on
 
 	(*env)->ReleaseStringUTFChars(env, (jstring)apk_result, apk);
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 
+	report(L, docall(L, 1, 0) );		// setup and load and run lua/init.lua from the apks res/raw
+
+/*
 
 	lua_settop(L,0); // remove all the junk we just built up
 
+	lua_getfield(L,-1,"android_start");
+	report(L, docall(L, 0, 0) );		// begin the main loop ( load and call lua/init.lua )
 
     while (1)
     {
@@ -349,6 +400,8 @@ void android_main(struct android_app* state) {
 		lua_settop(L,0);
 
 	}
+*/
+
 }
 
 
@@ -638,6 +691,31 @@ int lua_android_sleep (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// read a msg if one is there
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_msg (lua_State *l)
+{
+	int ident;
+	int events;
+	struct android_poll_source* source;
+	if ((ident=ALooper_pollAll(0, NULL, &events,
+		(void**)&source)) >= 0)
+	{
+		if (source != NULL) {
+			
+			lua_newtable(l);
+			source->process(master_android_app, source); // this fills in the table we just pushed with android specific msg info
+			return 1;
+		}
+	}
+		
+	return 0;
+}
+		
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -656,7 +734,7 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 
 //		{"peek",			lua_android_peek},
 //		{"wait",			lua_android_wait},
-//		{"msg",				lua_android_msg},
+		{"msg",				lua_android_msg},
 
 		{"sleep",			lua_android_sleep},
 

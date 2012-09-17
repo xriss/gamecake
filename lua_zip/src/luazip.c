@@ -214,6 +214,9 @@ static struct zzip_plugin_mem_io xio_mem={
 	zzip_plugin_mem_io_write
 };
 
+// need hacks to get length of userdata
+extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
+
 static int zip_open_mem (lua_State *L) {
   ZZIP_FILE** inf;
 
@@ -232,8 +235,9 @@ static int zip_open_mem (lua_State *L) {
 	else
 	if(lua_isuserdata(L,1))
 	{
-		f->data = lua_touserdata(L, 1);
-		f->size = luaL_checknumber(L, 2);
+		f->data = lua_toluserdata(L,1, &f->size);
+//		f->data = lua_touserdata(L, 1);
+//		f->size = luaL_checknumber(L, 2);
 	}
 	else
 	{
