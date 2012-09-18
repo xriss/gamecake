@@ -14,7 +14,7 @@ setmetatable(gles,meta)
 
 
 -- copypasta from GLES header, this is a merge of v1 and v2 so we can work with both
-local import=[[
+local import=--[[
 /*************************************************************/
 
 /* OpenGL ES core versions */
@@ -566,6 +566,17 @@ local import=[[
 #define GL_POINT_SPRITE_OES                                     0x8861
 #define GL_COORD_REPLACE_OES                                    0x8862
 #endif
+]]
+
+[[
+#define GL_MODELVIEW                      0x1700
+#define GL_PROJECTION                     0x1701
+#define GL_TEXTURE                        0x1702
+
+#define GL_VERTEX_ARRAY                   0x8074
+#define GL_NORMAL_ARRAY                   0x8075
+#define GL_COLOR_ARRAY                    0x8076
+#define GL_TEXTURE_COORD_ARRAY            0x8078
 
 /*************************************************************/
 /*************************************************************/
@@ -1057,7 +1068,7 @@ for l in import:gmatch("([^\n]*)") do
 					define=define:sub(4)
 					
 					if value:sub(1,3)=="GL_" then -- allow lookback
-						value=al.defs[value:sub(4)]
+						value=gles.defs[value:sub(4)]
 					end
 					
 					gles.defs[define]=tonumber(value)
@@ -1421,8 +1432,8 @@ if not core.programmable_pipeline_available then
 else
 
 --force a test of our glesfix
---print("FORCING TEST OF GLES1FIX")
---	gles.gles1=require("glesfix").create(gles)
+print("FORCING TEST OF GLES1FIX")
+	gles.gles1=require("glesfix").create(gles)
 
 end
 

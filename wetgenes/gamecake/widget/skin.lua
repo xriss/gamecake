@@ -407,14 +407,6 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 
 			font:set_xy(tx+sw,ty)
 			font:draw("_")
---[[
-							gl.Enable(gl.COLOR_MATERIAL)
-							win.flat_rect(
-								tx+sw+0,-ty,
-								tx+sw+2,-ty-widget.text_size,
-								255*256*256*256)
-							gl.Disable(gl.COLOR_MATERIAL)
-]]
 						end
 					end
 				end

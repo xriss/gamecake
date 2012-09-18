@@ -28,7 +28,6 @@ function bake(state)
 
 
 	function console.setup(state)
-	
 		console.replace_print(_G)
 	
 		state.cake.fonts:loads({1}) -- load builtin font number 1 a basic 8x8 font
@@ -228,6 +227,7 @@ function bake(state)
 --		state.win:info()
 		local w,h=state.win.width,state.win.height
 		gl.Viewport(0,0,w,h)
+		canvas:gl_default() -- reset gl state
 
 --		gl.ClearColor(0,0,0,0)
 --		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)

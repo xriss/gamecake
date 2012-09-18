@@ -85,8 +85,6 @@ function setup(widget,def)
 		meta.draw(widget)
 		
 		gl.PopMatrix()
---		gl.Enable("DEPTH_TEST")
---		gl.Enable("LIGHTING")
 	end
 	
 	function master.msg(widget,m)
