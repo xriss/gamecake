@@ -110,6 +110,25 @@ void main(void)
 		gl.fix.color={...}
 	end
 
+	local function EnableDisable(n,v)
+-- need to catch stuff that we suport in our fake fixed pipeline and gles2 does not understand
+		if 			n==gl.LIGHTING 			then
+		elseif 	n==gl.TEXTURE_2D 		then
+		else
+			if v then gles.Enable(n) else gles.Disable(n) end -- pass on
+		end
+	end
+	function gl.Enable(n)
+		EnableDisable(n,true)
+	end
+	function gl.Disable(n)
+		EnableDisable(n,false)
+	end
+
+
+
+
+
 	function gl.EnableClientState(n)
 		gl.fix.client[n]=true
 	end

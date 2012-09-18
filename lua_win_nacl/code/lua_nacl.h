@@ -13,6 +13,7 @@
 
 #include "ppapi/c/ppb.h"
 #include "ppapi/c/ppb_core.h"
+#include "ppapi/c/ppb_view.h"
 #include "ppapi/c/ppb_input_event.h"
 #include "ppapi/c/ppb_url_loader.h"
 #include "ppapi/c/ppb_url_request_info.h"

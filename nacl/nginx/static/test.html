@@ -82,10 +82,10 @@ return				  function(callback,element){
 
   </script>
 </head>
-<body onload="pageDidLoad()">
+<body onload="pageDidLoad()" style=" margin:0; padding:0; border:0; overflow:hidden;">
 
-<p>  
-  <div id="listener">
+  <div id="listener" style=" width:100%; height:100%; position:absolute; ">
+	  
     <script type="text/javascript">
       var listener = document.getElementById('listener')
       listener.addEventListener('load', moduleDidLoad, true);
@@ -94,12 +94,11 @@ return				  function(callback,element){
 
     <embed name="nacl_module"
            id="naclmod"
-           width=640 height=480
            src="bin/dbg/lua.nmf"
-           type="application/x-nacl" />
+           type="application/x-nacl"
+           style=" width:100%; height:100%; position:relative; "/>
+
   </div>
 
-</p>
-<div id="statusField">NO-STATUS</div>
 </body>
 </html>

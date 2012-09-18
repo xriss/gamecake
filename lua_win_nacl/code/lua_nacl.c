@@ -23,6 +23,11 @@ static PPB_Var* var_interface = NULL;
 static PPB_Graphics3D* graphics3d_interface = NULL;
 static PPB_Instance* instance_interface = NULL;
 
+static PPB_View* view_interface = NULL;
+static	int view_width=640;
+static	int view_height=480;
+	
+
 static PPB_URLLoader* url_loader_interface = NULL;
 static PPB_URLRequestInfo* url_request_info_interface = NULL;
 static PPB_URLResponseInfo* url_response_info_interface = NULL;
@@ -38,6 +43,8 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
   module_id = a_module_id;
   core_interface = ( PPB_Core*)(get_browser_interface(PPB_CORE_INTERFACE));
   var_interface = ( PPB_Var*)(get_browser_interface(PPB_VAR_INTERFACE));
+
+  view_interface = ( PPB_View*)(get_browser_interface(PPB_VIEW_INTERFACE));
 
   url_loader_interface = ( PPB_URLLoader*)(get_browser_interface(PPB_URLLOADER_INTERFACE));
   url_request_info_interface = ( PPB_URLRequestInfo*)(get_browser_interface(PPB_URLREQUESTINFO_INTERFACE));
@@ -127,6 +134,17 @@ static void Instance_DidDestroy(PP_Instance instance) {
 static void Instance_DidChangeView(PP_Instance instance,
 									PP_Resource view_resource)
 {
+struct PP_Rect clip;
+
+	view_interface->GetRect(view_resource,&clip);
+
+	view_width=clip.size.width;
+	view_height=clip.size.height;
+
+	if(nacl_context)
+	{
+		graphics3d_interface->ResizeBuffers(nacl_context, view_width, view_height);
+	}
 }
 
 static void Instance_DidChangeFocus(PP_Instance instance,
@@ -334,8 +352,8 @@ PP_EXPORT void PPP_ShutdownModule() {
 int lua_nacl_context (lua_State *l)
 {
 									  
-  int32_t attribs[] = {PP_GRAPHICS3DATTRIB_WIDTH, 640,
-                       PP_GRAPHICS3DATTRIB_HEIGHT, 480,
+  int32_t attribs[] = {PP_GRAPHICS3DATTRIB_WIDTH, view_width,
+                       PP_GRAPHICS3DATTRIB_HEIGHT, view_height,
                        PP_GRAPHICS3DATTRIB_NONE};
   nacl_context = graphics3d_interface->Create(nacl_instance, 0, attribs);
   if (nacl_context == 0)
@@ -555,6 +573,20 @@ int val=0;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// What time is it?
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_nacl_info (lua_State *l)
+{
+
+	lua_pushnumber(l,view_width);	lua_setfield(l,2,"width");
+	lua_pushnumber(l,view_height);	lua_setfield(l,2,"height");
+	
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -568,6 +600,8 @@ LUALIB_API int luaopen_wetgenes_win_nacl_core(lua_State *l)
 		{	"swap",							lua_nacl_swap						},
 		{	"print",						lua_nacl_print						},
 		{	"time",							lua_nacl_time						},
+
+		{	"info",							lua_nacl_info						},
 		
 		{	"call",							lua_nacl_call						},
 		{	"getURL",						lua_nacl_getURL						},

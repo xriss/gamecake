@@ -148,13 +148,15 @@ function win.nacl_start(url)
 
 	local zips=require("wetgenes.zips")
 	
+-- we want nacl msgs to go here.
+	_G.nacl_input_event=function(...) return hardcore.input_event(...) end
+
 	hardcore.getURL(url,function(size,mem)	
 		print("nacl callback",size,mem)
 		
+		
 		zips.add_zip_data(mem)
-		print("nacl pulse mem2")
 		main=win.load_run_init()
-		print("nacl pulse mem3")
 
 	end)
 
@@ -196,6 +198,7 @@ end
 function base.info(w)
 	if hardcore.info then
 		hardcore.info(w[0],w)
+--		print("WH",w.width,w.height)
 	end
 end
 
