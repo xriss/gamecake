@@ -217,7 +217,7 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 		end
 		if sx then
 			sy=sy or sx
-			gl.Scale(sx,sy,1)
+			gl.Scale(sx/sheet[i].hx,sy/sheet[i].hy,1) -- fixed, ignore base size of image?
 		end
 	end
 	
