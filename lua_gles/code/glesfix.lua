@@ -112,11 +112,17 @@ void main(void)
 
 	local function EnableDisable(n,v)
 -- need to catch stuff that we suport in our fake fixed pipeline and gles2 does not understand
-		if 			n==gl.LIGHTING 			then
-		elseif 	n==gl.TEXTURE_2D 		then
-		else
-			if v then gles.Enable(n) else gles.Disable(n) end -- pass on
+
+		if n then
+			gl.fix.client[n]=v and true or false -- remember state
+		
+			if 			n==gl.LIGHTING 			then
+			elseif 	n==gl.TEXTURE_2D 		then
+			else
+				if v then gles.Enable(n) else gles.Disable(n) end -- pass on
+			end
 		end
+		
 	end
 	function gl.Enable(n)
 		EnableDisable(n,true)
@@ -147,8 +153,7 @@ void main(void)
 	
 		local p
 		
-		if gl.fix.client[gl.TEXTURE_COORD_ARRAY] then
-		
+		if gl.fix.client[gl.TEXTURE_2D] then
 			p=gl.program("pos_tex")
 			
 		else
@@ -163,7 +168,7 @@ void main(void)
 		gl.VertexAttribPointer(p:attrib("vertex"),v[1],v[2],gl.FALSE,v[3],v[4])
 		gl.EnableVertexAttribArray(p:attrib("vertex"))
 		
-		if gl.TEXTURE_COORD_ARRAY then
+		if gl.fix.client[gl.TEXTURE_COORD_ARRAY] then
 		
 			local v=gl.fix.pointer.texcoord
 			gl.VertexAttribPointer(p:attrib("texcoord"),v[1],v[2],gl.FALSE,v[3],v[4])

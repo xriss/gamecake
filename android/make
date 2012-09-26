@@ -1,43 +1,55 @@
 cd `dirname $0`
 
-andsdk=`readlink -f ../../sdks/android-9-arm`
-export PATH=$andsdk/bin:$PATH
+OPATH=$PATH
 
-cd ..
+andsdkarm=`readlink -f ../../sdks/android-9-arm`
+andsdkx86=`readlink -f ../../sdks/android-9-x86`
 
-build/premake4 gmake android
-
-cd build-gmake-android
+export PATH=$andsdkarm/bin:$andsdkx86/bin:$OPATH
 
 
+build="debug"
+makeopts=""
 if [ "$1" = "release" ] ; then
-	make config=release_android
-else
-	make $*
+makeopts="config=release_android"
+build="release"
 fi
 
 cd ..
-cd android
+
+build/premake4 gmake android-arm
+build/premake4 gmake android-armv7
+build/premake4 gmake android-32
 
 
-if [ "$1" = "clean" ] ; then
+if [ "$1" == "clean" ] ; then
 
-	rm build-gmake-android -Rf
-
-elif [ "$1" = "release" ] ; then
-
-#release is always a full build?
-
-	rm bin/*.apk
-	ant uninstall
-#	ant clean
-	ant release install
-else
-
-#deleting the apks seems the onlyway to force a reload of any modified so files...
-
-	rm bin/*.apk
-	ant uninstall
-	ant debug install
+        rm -rf build-gmake-android-arm
+        rm -rf build-gmake-android-armv7
+        rm -rf build-gmake-android-32
+        cd android
+		rm bin/*.apk
+		ant uninstall
+        exit
 
 fi
+
+
+cd build-gmake-android-arm
+make $makeopts $2 $3 $4
+cd ..
+
+cd build-gmake-android-armv7
+make $makeopts $2 $3 $4
+cd ..
+
+
+cd build-gmake-android-32
+make $makeopts $2 $3 $4
+cd ..
+
+cd android
+rm bin/*.apk
+ant uninstall
+ant $build install
+

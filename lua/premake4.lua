@@ -43,7 +43,7 @@ elseif NACL then
 	links { "m" , "stdc++" }
 	links { "nosys" } -- remove newlib link errors
 	
-	KIND{kind="WindowedApp",name="lua.32.nexe"}
+	KIND{kind="WindowedApp",name="lua."..CPU..".nexe"}
 
 elseif ANDROID then 
 
