@@ -70,6 +70,22 @@ newgcctoolchain {
 }
 
 newplatform {
+    name = "android-x86",
+    description = "android-x86",
+    gcc = {
+        cc = "gcc",
+        cxx = "g++",
+        cppflags = "",
+    }
+}
+newgcctoolchain {
+    name = "android-x86",
+    description = "android-x86",
+    prefix = "i686-android-linux-",
+    cppflags = "",
+}
+
+newplatform {
     name = "nacl",
     description = "nacl",
     gcc = {
@@ -115,20 +131,31 @@ ANDROID=false
 WINDOWS=false
 MINGW=false
 NIX=false
+CPU="32"
+TARGET="NIX"
 
-if _ARGS[1]=="raspi" then
+local t= _ARGS[1] or ""
+if t:sub(1,5)=="raspi" then
 	TARGET="RASPI"
+	CPU=t:sub(6)
 	RASPI=true
-elseif _ARGS[1]=="nacl" then
+elseif t:sub(1,4)=="nacl" then
 	TARGET="NACL"
+	CPU=t:sub(5)
 	NACL=true
-elseif _ARGS[1]=="android" then
+elseif t:sub(1,7)=="android" then
 	TARGET="ANDROID"
+	CPU=t:sub(8)
 	ANDROID=true
-elseif _ARGS[1]=="mingw" then
+elseif t:sub(1,5)=="mingw" then
 	TARGET="WINDOWS"
+	CPU=t:sub(6)
 	WINDOWS=true
 	MINGW=true
+elseif t:sub(1,5)=="nix" then
+	TARGET="NIX"
+	CPU=t:sub(6)
+	NIX=true
 elseif os.get() == "windows" then
 	TARGET="WINDOWS"
 	WINDOWS=true
@@ -137,9 +164,22 @@ else
 	NIX=true
 end
 
-if _ARGS[1] then
-print(_ARGS[1].." == "..TARGET)
+if CPU=="32" then -- done
+else
+	if CPU=="-64" then
+		CPU="64"
+	elseif CPU=="-32" then
+		CPU="32"
+	elseif CPU=="-arm" then
+		CPU="arm"
+	elseif CPU=="-armv7" then
+		CPU="armv7"
+	else
+		CPU="native"
+	end
 end
+
+print("TARGET == "..TARGET.." " ..CPU )
 
 if NACL then
 
@@ -148,8 +188,18 @@ if NACL then
 	platforms { "nacl" } --hax
 	
 	defines "NACL"
+	
+	if CPU=="32" then
+	
+		buildoptions{"-m32"}
+		linkoptions{"-m32"}
 		
-	buildoptions{"-m32"}
+	elseif CPU=="64" then
+	
+		buildoptions{"-m64"}
+		linkoptions{"-m64"}
+		
+	end
 	
 elseif RASPI then
 
@@ -172,16 +222,46 @@ elseif ANDROID then
 	local androidsdk=path.getabsolute("../sdks/android-sdk")
 	local androidsys=path.getabsolute("../sdks/android-9-arm/sysroot/usr")
 
-	includedirs { androidsys.."/include" }
-	libdirs { androidsys.."/lib" }
 
-	platforms { "android" } --hax
 
 	defines "ANDROID"
 
 	defines("LUA_USE_POSIX")
 	
-	buildoptions{ "-mthumb" }
+-- these are application specific and need proper paths so will get overidden
+AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
+
+	if CPU=="32" then
+
+		platforms { "android-x86" } --hax
+	
+		androidsys=path.getabsolute("../sdks/android-9-x86/sysroot/usr")
+		
+		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/x86")
+
+--		buildoptions{ "-m32" }
+--		linkoptions{ "-m32" }
+		
+	elseif CPU=="arm" then
+	
+		platforms { "android" } --hax
+		
+		buildoptions{ "-mthumb" }
+		
+		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi")
+		
+	elseif CPU=="armv7" then
+	
+		platforms { "android" } --hax
+
+		buildoptions{ "-march=armv7-a" , "-mfloat-abi=softfp" , "-mfpu=vfpv3" }
+		linkoptions{ "--fix-cortex-a8" }
+
+		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi-v7a")
+	end
+
+	includedirs { androidsys.."/include" }
+	libdirs { androidsys.."/lib" }
 
 elseif WINDOWS then
 
@@ -215,17 +295,12 @@ end
 
 if not BUILD_DIR_BASE then
 
-	BUILD_DIR_BASE="build-"..(_ACTION or "")
+	BUILD_DIR_BASE=("build-"..(_ACTION or "gmake").."-"..TARGET.."-"..CPU):lower()
 end
 
 if not BUILD_DIR then
 
 	BUILD_DIR=BUILD_DIR_BASE
-	
-	if NACL then BUILD_DIR=BUILD_DIR_BASE.."-nacl" end
-	if ANDROID then BUILD_DIR=BUILD_DIR_BASE.."-android" end
-	if MINGW then BUILD_DIR=BUILD_DIR_BASE.."-mingw" end
-	if RASPI then BUILD_DIR=BUILD_DIR_BASE.."-raspi" end
 
 end
 
@@ -242,9 +317,7 @@ includedirs { "lib_lua/src" }
 EXE_OUT_DIR=path.getabsolute("../bin/exe")
 DBG_OUT_DIR=path.getabsolute("../bin/dbg")
 
--- these are application specific and need proper paths so will get overidden
-AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
-AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi")
+
 
 ALL_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj")
 EXE_OBJ_DIR=path.getabsolute(BUILD_DIR.."/obj/Release")
