@@ -89,18 +89,6 @@ print("loading",id,name)
 	local d=assert(zips.readfile(fname))
 	assert(g:load_data(d,"png"))
 	
---[[
-	if images.zip then -- load from a zip file
-		
-		local f=assert(images.zip:open(fname))
-		local d=assert(f:read("*a"))
-		f:close()
-
-		assert(g:load_data(d,"png"))
-	else
-		assert(g:load_file(fname,"png"))
-	end
-]]	
 	if gl then --gl mode
 	
 		t={}
@@ -216,24 +204,20 @@ end
 --
 loads=function(images,tab)
 
+	local function iorv(i,v) if type(i)=="number" then return v end return i end -- choose i or v
+
 	for i,v in pairs(tab) do
 	
 		if type(v)=="table" then -- use a subtable and its name
 		
 			for ii,vv in pairs(v) do
 			
-				if type(ii)=="number" then -- just use filename twice
-					images:load(i.."_"..vv,vv,i)
-				else
-					images:load(i.."_"..vv,ii,i)
-				end
+				images:load(i.."/"..vv,iorv(ii,vv),i) -- i must be the base dir in this case as v is a table
 				
 			end
 			
-		elseif type(i)=="number" then -- just use filename twice
-			images:load(v,v)
 		else
-			images:load(v,i)
+			images:load(v,iorv(i,v))
 		end
 		
 	end

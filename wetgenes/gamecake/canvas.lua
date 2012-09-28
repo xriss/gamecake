@@ -288,6 +288,78 @@ base.flat.quad = function(flat,x1,y1,x2,y2,x3,y3,x4,y4)
 
 end
 
+-- tristrip is the most useful, 3 points gives us a tri
+-- 4 gives us a quad, and of course you can keep going to create a strip
+base.flat.tristrip = function(flat,fmt,data)
+
+	local canvas=flat.canvas
+	local gl=canvas.gl
+
+-- some basic vertexformats
+
+	local pstride
+	local ptex
+	local pcolor
+	
+	if fmt=="xyz" then -- xyz only
+	
+		pstride=12
+	
+	elseif fmt=="xyzuv" then -- xyz and texture
+
+		pstride=20
+		ptex=12
+	
+	elseif fmt=="xyzargb" then -- xyz and color
+
+		pstride=28
+		pcolor=12
+	
+	elseif fmt=="xyzuvargb" then -- xyz and texture and color
+	
+		pstride=36
+		ptex=12
+		pcolor=20
+
+	end
+	
+	local datalen=#data
+	local datasize=datalen*4 -- we need this much vdat memory
+	
+	assert(datasize>1024) -- not too many at once please
+	
+	pack.save_array(data,"f32",0,datalen,canvas.vdat)	
+
+	gl.BindBuffer(gl.ARRAY_BUFFER,flat.canvas.vbuf[0])
+	gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.DYNAMIC_DRAW)
+
+	gl.VertexPointer(3,gl.FLOAT,pstride,0)
+	
+	if ptex then
+		gl.TexCoordPointer(2,gl.FLOAT,pstride,ptex)
+	else
+		gl.DisableClientState(gl.TEXTURE_COORD_ARRAY)
+		gl.Disable(gl.TEXTURE_2D)    
+	end
+
+	if pcolor then
+		gl.ColorPointer(4,gl.FLOAT,pstride,pcolor)
+		gl.EnableClientState(gl.COLOR_ARRAY)
+	end
+
+	gl.DrawArrays(gl.TRIANGLE_STRIP,0,datasize/pstride)
+		
+	if not ptex then -- revert
+		gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
+		gl.Enable(gl.TEXTURE_2D)    
+	end
+	
+	if pcolor then -- revert
+		gl.DisableClientState(gl.COLOR_ARRAY)
+	end
+	
+end
+
 
 function bake(opts)
 
@@ -311,7 +383,7 @@ function bake(opts)
 
 -- basic setup of canvas
 	canvas.vbuf=canvas.cake.buffers:create()
-	canvas.vdat=pack.alloc(4*5*4) -- temp vertex quad draw buffer		
+	canvas.vdat=pack.alloc(1024) -- temp vertex quad draw buffer		
 	
 --	canvas:project23d(canvas.win.width,canvas.win.height,0.5,1024) -- some dumb defaults
 

@@ -148,18 +148,31 @@ void main(void)
 	function gl.TexCoordPointer(...)
 		gl.fix.pointer.texcoord={...}
 	end
+	function gl.ColorPointer(...)
+		gl.fix.pointer.color={...}
+	end
 
 	function gl.DrawArrays(...) -- make sure state is set before doing
 	
 		local p
 		
-		if gl.fix.client[gl.TEXTURE_2D] then
-			p=gl.program("pos_tex")
-			
+		local got_color=gl.fix.client[gl.COLOR_ARRAY]
+		local got_tex=gl.fix.client[gl.TEXTURE_COORD_ARRAY]
+		
+		if got_tex then
+		
+			if got_color then
+				p=gl.program("pos_tex_color")			
+			else
+				p=gl.program("pos_tex")
+			end
 		else
 		
-			p=gl.program("pos")
-			
+			if got_color then
+				p=gl.program("pos_color")
+			else
+				p=gl.program("pos")
+			end
 		end
 		gl.UseProgram( p[0] )
 
@@ -168,12 +181,16 @@ void main(void)
 		gl.VertexAttribPointer(p:attrib("vertex"),v[1],v[2],gl.FALSE,v[3],v[4])
 		gl.EnableVertexAttribArray(p:attrib("vertex"))
 		
-		if gl.fix.client[gl.TEXTURE_COORD_ARRAY] then
-		
+		if got_tex then
 			local v=gl.fix.pointer.texcoord
 			gl.VertexAttribPointer(p:attrib("texcoord"),v[1],v[2],gl.FALSE,v[3],v[4])
 			gl.EnableVertexAttribArray(p:attrib("texcoord"))
-			
+		end
+
+		if got_color then
+			local v=gl.fix.pointer.color
+			gl.VertexAttribPointer(p:attrib("color"),v[1],v[2],gl.FALSE,v[3],v[4])
+			gl.EnableVertexAttribArray(p:attrib("color"))
 		end
 
 --		gl.VertexAttrib4f(p:attrib("color"), 1,1,1,1 )
@@ -186,6 +203,8 @@ void main(void)
 		gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
 
 		gl.core.DrawArrays(...)
+		
+		gl.fix.pointer={} -- start again, old pointers are lost
 	end
 
 	return gl

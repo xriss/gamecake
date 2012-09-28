@@ -7,6 +7,8 @@ local gl=require('gles').gles1
 local grd=require('wetgenes.grd')
 local pack=require('wetgenes.pack')
 
+local wzips=require("wetgenes.zips")
+
 
 local apps=apps
 
@@ -61,6 +63,14 @@ end
 --
 function load(win,name)
 
+	local function load_tex(filename)
+		local d=assert( wzips.readfile(filename) )
+		local g=assert( grd.create() )
+		assert( g:load_data(d,"png") )
+		assert( g:convert("GRD_FMT_U8_ARGB") )
+		local t=assert( win.tex( g ) )
+	end
+	
 	unload(win)
 
 	if name then -- load a named skin
@@ -68,12 +78,17 @@ function load(win,name)
 		if name=="test" then
 			mode=name
 
-			texs.border=win.tex( grd.create(apps.dir.."data/skins/test/border.png"):convert("GRD_FMT_U8_ARGB") )
+			texs.border=load_tex( "data/skins/test/border.png")
+			texs.bottof=load_tex( "data/skins/test/bottof.png")
+			texs.botton=load_tex( "data/skins/test/botton.png")
+			texs.bottin=load_tex( "data/skins/test/bottin.png")
 			
+--[[
+			texs.border=win.tex( grd.create(apps.dir.."data/skins/test/border.png"):convert("GRD_FMT_U8_ARGB") )
 			texs.buttof=win.tex( grd.create(apps.dir.."data/skins/test/buttof.png"):convert("GRD_FMT_U8_ARGB") )
 			texs.button=win.tex( grd.create(apps.dir.."data/skins/test/button.png"):convert("GRD_FMT_U8_ARGB") )
 			texs.buttin=win.tex( grd.create(apps.dir.."data/skins/test/buttin.png"):convert("GRD_FMT_U8_ARGB") )
-		
+]]		
 			margin=15
 			border=0
 		end
@@ -360,7 +375,9 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		
 		if widget.text then
 		
-			font:set(cake.fonts:get(1))
+print("using font "..(widget.font or widget.master.font or 1))
+
+			font:set(cake.fonts:get(widget.font or widget.master.font or 1))
 			font:set_size(widget.text_size,0)
 			local ty=widget.text_size
 			local tx=font:width(widget.text)

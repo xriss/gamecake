@@ -129,4 +129,15 @@ function readfile(fname)
 	end
 end
 
+--
+-- returns true if a file exists
+--
+function exists(fname)
+	local f=open(fname)
+	if f then
+		f:close()
+		return true
+	end
+	return false
+end
 

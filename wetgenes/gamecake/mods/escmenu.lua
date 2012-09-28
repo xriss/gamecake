@@ -5,6 +5,7 @@ local gcinfo=gcinfo
 local hex=function(str) return tonumber(str,16) end
 
 local pack=require("wetgenes.pack")
+local wzips=require("wetgenes.zips")
 
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
@@ -26,7 +27,14 @@ function bake(state)
 
 	function escmenu.setup(state)
 	
-		state.cake.fonts:loads({1}) -- load builtin font number 1 a basic 8x8 font
+		state.cake.fonts:loads({1}) -- always load builtin font number 1 a basic 8x8 font		
+		opts.font=1
+		
+		if wzips.exists("data/fonts/Vera.ttf") then -- we got us better font to use :)
+			state.cake.fonts:loads({"Vera"})
+			opts.font="Vera"
+		end
+
 
 		escmenu.show=false
 
@@ -36,7 +44,7 @@ function bake(state)
 		function hooks.click(widget)
 	print(widget.id)
 		end
-		local top=escmenu.master:add({hx=480,hy=480,mx=1,class="hx",ax=0,ay=0})
+		local top=escmenu.master:add({hx=480,hy=480,mx=1,class="hx",ax=0,ay=0,font=opts.font})
 		top:add({sy=1,sx=1})
 		top:add({text="Continue",color=0xff00ff00,id="continue",hooks=hooks,text_size=32})
 		top:add({text="Main Menu",color=0xffffff00,id="menu",hooks=hooks,text_size=32})

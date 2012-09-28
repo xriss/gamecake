@@ -154,8 +154,10 @@ function setup(def)
 		widget.hy_fill=def.hy_fill -- this much extra space where 1 is all of the avilable extra space
 
 		widget.color=def.color
-		widget.text_color=def.text_color or widget.master.text_color or 0xff000000 -- black text
-		widget.text_size=def.text_size or widget.master.text_size or 16 -- quite chunky text by default
+		widget.text_color=def.text_color or widget.parent.text_color or 0xff000000 -- black text
+		widget.text_size=def.text_size or widget.parent.text_size or 16 -- quite chunky text by default
+		
+		widget.font=def.font or widget.parent.font --  use this font if set or inherit value from parent
 		
 		widget.text_color_over=def.text_color_over -- if set, switch text color on hover
 		widget.text_align=def.text_align -- default is center

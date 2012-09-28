@@ -26,7 +26,7 @@ function bake(opts)
 	fonts.data={}
 	
 	fonts.zip=opts.zip
-	fonts.prefix=opts.fontprefix or "data/font_"
+	fonts.prefix=opts.fontprefix or "data/fonts/"
 	fonts.postfix=opts.fontpostfix or ".ttf"
 	
 	return fonts
