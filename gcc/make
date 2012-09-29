@@ -1,16 +1,22 @@
 cd `dirname $0`
 cd ..
-build/premake4 gmake
-cd build-gmake
 
-if [ "$1" == "release" ] ; then
-	make config=release
-elif [ "$1" == "clean" ] ; then
-	cd ..
-	rm -Rf build-gmake
-else
-	make $*
+
+makeopts=""
+if [ "$1" = "release" ] ; then
+makeopts="config=release"
 fi
 
+build/premake4 gmake nix-32
+
+if [ "$1" == "clean" ] ; then
+
+        rm -rf build-gmake-nix-32
+        exit
+fi
+
+
+cd build-gmake-nix-32
+make $makeopts $2 $3 $4
 cd ..
 

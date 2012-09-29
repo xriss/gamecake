@@ -8,15 +8,11 @@ require("apps").default_paths()
 local wstr=require("wetgenes.string")   -- string helpers
 --local tardis=require("wetgenes.tardis") -- matrix/vector math
 
--- wrap some extra shader compiler functions around a basic gles2 library
-local gl=require("glescode").create( assert(require("gles").gles2) )
+
+local gl=assert(require("gles").gles1) -- something that works like gles1 please
 
 -- a window/screen handler this works in windows/linux/nacl/android/raspi
-
 local wwin=require("wetgenes.win")
-
-print( wstr.dump(wwin.screen()) )
-
 local win=wwin.create({})
 
 -- select a standard gles context

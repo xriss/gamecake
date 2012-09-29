@@ -57,7 +57,7 @@ end
 
 demo.loads=function(state)
 
-	state.cake.fonts.loads({1}) -- load 1st builtin font, a basic 8x8 font
+	state.cake.fonts:loads({1}) -- load 1st builtin font, a basic 8x8 font
 
 end
 		
@@ -85,9 +85,9 @@ demo.draw=function(state)
 	local flat=canvas.flat
 	local gl=cake.gl
 	
-	canvas.viewport() -- did our window change?
-	canvas.project23d(opts.width,opts.height,0.25,opts.height*4)
-	canvas.gl_default() -- reset gl state
+	canvas:viewport() -- did our window change?
+	canvas:project23d(opts.width,opts.height,0.25,opts.height*4)
+	canvas:gl_default() -- reset gl state
 		
 	gl.ClearColor(0,0,0,0)
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
@@ -103,23 +103,27 @@ demo.draw=function(state)
 	
 
 	gl.Color(pack.argb4_pmf4(0x800f))
-	flat.quad(0,(opts.height/2)-32,opts.width,(opts.height/2)+32) -- draw a blue box as a background
+	flat:quad(0,(opts.height/2)-32,opts.width,(opts.height/2)+32) -- draw a blue box as a background
 
-	font.set(cake.fonts:get(1)) -- default font
-	font.set_size(32,0) -- 32 pixels high
+	font:set(cake.fonts:get(1)) -- default font
+	font:set_size(32,0) -- 32 pixels high
 	
 	local s="Hello World!"
-	local sw=font.width(s) -- how wide the string is
+	local sw=font:width(s) -- how wide the string is
 	local x,y=(opts.width-(sw))/2,(opts.height-32)/2 -- center the text in  middle of display
 
 	gl.Color(pack.argb4_pmf4(0xf000)) -- draw drop shadow
-	font.set_xy(x+4,y+4)
-	font.draw(s)
+	font:set_xy(x+4,y+4)
+	font:draw(s)
 	
 	gl.Color(pack.argb4_pmf4(0xffff)) -- draw white text
-	font.set_xy(x,y)
-	font.draw(s)
+	font:set_xy(x,y)
+	font:draw(s)
 
+
+	gl.Color(pack.argb4_pmf4(0xffff)) -- draw white text
+--	canvas.flat.tristrip()
+	
 	gl.PopMatrix()
 	
 end
