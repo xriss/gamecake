@@ -4,10 +4,6 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.sheets")
 
-base=require(...)
-meta={}
-meta.__index=base
-
 base_sheet={}
 meta_sheet={}
 meta_sheet.__index=base_sheet
@@ -20,23 +16,21 @@ local pack=require("wetgenes.pack")
 function bake(opts)
 
 	local sheets={}
-	setmetatable(sheets,meta)
 	
 	sheets.cake=opts.cake
 	sheets.gl=opts.gl
 	
 	sheets.data={}
 	
+	local gl=sheets.gl
+	local cake=sheets.cake
 	
-	return sheets
-end
-
-function get(sheets,id,name)
+sheets.get=function(id,name)
 	name=name or "base"
 	return sheets.data[name] and sheets.data[name][id]
 end
 
-function set(sheets,d,id,name)
+sheets.set=function(d,id,name)
 	name=name or "base"
 	local tab
 	
@@ -50,12 +44,12 @@ function set(sheets,d,id,name)
 	tab[id]=d	
 end
 
-function start(sheets)
+sheets.start=function()
 
 	for i,t in pairs(sheets.data) do -- refresh image data after a stop
 		for i,v in pairs(t) do
 			if v.img_id or v.img_name then
-				v.img=sheets.cake.images:get(v.img_id,v.img_name)
+				v.img=images.get(v.img_id,v.img_name)
 				v:build_vbuf()
 			end
 		end
@@ -63,7 +57,7 @@ function start(sheets)
 	
 end
 
-function stop(sheets)
+sheets.stop=function()
 	for i,t in pairs(sheets.data) do -- forget everything
 		for i,v in pairs(t) do
 			v.img=nil
@@ -72,32 +66,32 @@ function stop(sheets)
 	end
 end
 
-function create(sheets,id,name)
+sheets.create=function(id,name)
 
-	local sheet=sheets:get(id,name)
+	local sheet=sheets.get(id,name)
 	if sheet then return sheet end
 	
 	sheet={}
 	sheet.sheets=sheets
 	setmetatable(sheet,meta_sheet)
 
-	sheets:set(sheet,id,name)
+	sheets.set(sheet,id,name)
 
 	return sheet
 end
 
-function createimg(sheets,id,name)
-	return create(sheets,id,name):setimg(id,name)
+sheets.createimg=function(id,name)
+	return sheets.create(id,name):setimg(id,name)
 end
 
 --
 -- Load images and chop them up
 --
-function loads_and_chops(sheets,tab)
+sheets.loads_and_chops=function(tab)
 
 	for i,v in ipairs(tab) do
-		sheets.cake.images:load(v[1],v[1])
-		local img=sheets:createimg(v[1])
+		sheets.cake.images.load(v[1],v[1])
+		local img=sheets.createimg(v[1])
 		img:chop(v[2],v[3],v[4],v[5])
 	end
 
@@ -235,5 +229,10 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 	end
 	
 	return sheet
+end
+
+
+	
+	return sheets
 end
 

@@ -11,11 +11,24 @@ local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 
 
-local base={}
-base.canvas={}
-base.font={}
-base.flat={}
+function bake(opts)
 
+	local canvas={}
+	local font={}
+	local flat={}
+	
+-- link together
+	canvas.font,font.canvas=font,canvas
+	canvas.flat,flat.canvas=flat,canvas
+-- fill in options	
+	canvas.cake=opts.cake
+	canvas.win=opts.cake.win
+	canvas.gl=opts.gl
+
+-- local cache
+	local cake=canvas.cake
+	local win=canvas.win
+	local gl=canvas.gl
 
 --
 -- build a simple field of view projection matrix designed to work in 2d or 3d and keep the numbers
@@ -38,8 +51,7 @@ base.flat={}
 -- canvas needs to contain width and height of the display which we use to work
 -- out where to place our view such that it is always visible and keeps its aspect.
 --
-base.canvas.project23d = function(canvas,width,height,fov,depth)
-	local win=canvas.win
+canvas.project23d = function(width,height,fov,depth)
 	
 	local aspect=height/width
 	
@@ -88,11 +100,9 @@ end
 
 
 
-base.canvas.blit = function(canvas,t,cx,cy,ix,iy,w,h,cw,ch)
+canvas.blit = function(t,cx,cy,ix,iy,w,h,cw,ch)
 
 --print("gl_blit + ",nacl.time()," ",t.filename )
-
-	local gl=canvas.gl
 	
 --	cx=(cx or 0)+t.x -- handle adjustment of the x,y position
 --	cy=(cy or 0)+t.y
@@ -147,7 +157,7 @@ end
 
 -- convert raw xy coords (IE mouse win width and height) into local coords (view width and height) centered on origin
 -- basically do whatever transform we came up with in project23d
-base.canvas.xyscale=function(canvas,x,y)
+canvas.xyscale=function(x,y)
 
 	-- centered and scaled
 	x=canvas.view_width  * ( (x-canvas.x_origin) * canvas.x_scale ) / canvas.x_size
@@ -158,17 +168,12 @@ end
 
 
 
-base.canvas.viewport=function(canvas)
-	local win=canvas.win
-	local gl=canvas.gl
-	
+canvas.viewport=function()
 	win:info()
 	gl.Viewport(0,0,win.width,win.height)
 end
 
-base.canvas.gl_default=function(canvas)
-
-	local gl=canvas.gl
+canvas.gl_default=function()
 
 -- the default gl state, when we deviate from this we should restore it...
 
@@ -194,7 +199,7 @@ base.canvas.gl_default=function(canvas)
 end
 
 -- create and return a child canvas (just has its own transform cache)
-base.canvas.child = function(canvas)
+canvas.child = function()
 	local tab={}
 	local meta={__index=canvas}
 	setmetatable(tab,meta)
@@ -202,22 +207,22 @@ base.canvas.child = function(canvas)
 end
 
 
-base.font.set = function(font,dat)
+font.set = function(dat)
 	font.dat=dat or font.dat
-	font:set_size(16,0)
-	font:set_xy(0,0)
+	font.set_size(16,0)
+	font.set_xy(0,0)
 end
 
-base.font.set_size = function(font,size,add)
+font.set_size = function(size,add)
 	font.size=size
 	font.add=add or 0 -- clear the x space tweak
 end
-base.font.set_xy = function(font,x,y)
+font.set_xy = function(x,y)
 	font.x=x or font.x
 	font.y=y or font.y
 end
 
-base.font.width=function(font,text)
+font.width=function(text)
 
 	local font_dat=font.dat
 	local s=font.size/font_dat.size
@@ -233,7 +238,7 @@ base.font.width=function(font,text)
 	return x
 end
 
-base.font.draw=function(font,text)
+font.draw=function(text)
 
 	local x=font.x
 	local y=font.y
@@ -246,7 +251,7 @@ base.font.draw=function(font,text)
 		local cid=text:byte(i)
 		local c=font_dat.chars[cid] or font_dat.chars[32]
 
-		font.canvas:blit(c,x+(c.x*s),y+(c.y*s),nil,nil,c.width,c.height,c.width*s,c.height*s)
+		canvas.blit(c,x+(c.x*s),y+(c.y*s),nil,nil,c.width,c.height,c.width*s,c.height*s)
 
 		x=x+(c.add*s)+font.add
 	end
@@ -255,11 +260,8 @@ base.font.draw=function(font,text)
 end
 
 
-base.flat.quad = function(flat,x1,y1,x2,y2,x3,y3,x4,y4)
+flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
 
-	local canvas=flat.canvas
-	local gl=canvas.gl
-	
 	if y4 then
 		pack.save_array({
 			x1,		y1,		0,		0,		0,
@@ -282,21 +284,19 @@ base.flat.quad = function(flat,x1,y1,x2,y2,x3,y3,x4,y4)
 	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
 	gl.TexCoordPointer(2,gl.FLOAT,5*4,3*4)
 
+	gl.DisableClientState(gl.TEXTURE_COORD_ARRAY)
 	gl.Disable(gl.TEXTURE_2D)    
 	gl.DrawArrays(gl.TRIANGLE_STRIP,0,4)
 	gl.Enable(gl.TEXTURE_2D)    
+	gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
 
 end
 
 -- tristrip is the most useful, 3 points gives us a tri
 -- 4 gives us a quad, and of course you can keep going to create a strip
-base.flat.tristrip = function(flat,fmt,data)
-
-	local canvas=flat.canvas
-	local gl=canvas.gl
+flat.tristrip = function(fmt,data)
 
 -- some basic vertexformats
-
 	local pstride
 	local ptex
 	local pcolor
@@ -310,12 +310,12 @@ base.flat.tristrip = function(flat,fmt,data)
 		pstride=20
 		ptex=12
 	
-	elseif fmt=="xyzargb" then -- xyz and color
+	elseif fmt=="xyzrgba" then -- xyz and color
 
 		pstride=28
 		pcolor=12
 	
-	elseif fmt=="xyzuvargb" then -- xyz and texture and color
+	elseif fmt=="xyzuvrgba" then -- xyz and texture and color
 	
 		pstride=36
 		ptex=12
@@ -325,8 +325,7 @@ base.flat.tristrip = function(flat,fmt,data)
 	
 	local datalen=#data
 	local datasize=datalen*4 -- we need this much vdat memory
-	
-	assert(datasize>1024) -- not too many at once please
+	canvas.vdat_check(datasize) -- make sure we have space in the buffer
 	
 	pack.save_array(data,"f32",0,datalen,canvas.vdat)	
 
@@ -361,33 +360,18 @@ base.flat.tristrip = function(flat,fmt,data)
 end
 
 
-function bake(opts)
-
-	local canvas={}
-	local font={}
-	local flat={}
-
--- fill with functions	
-	for n,v in pairs(base.canvas) do canvas[n]=v end
-	for n,v in pairs(base.font) do font[n]=v end
-	for n,v in pairs(base.flat) do flat[n]=v end
-
--- link together
-	canvas.font,font.canvas=font,canvas
-	canvas.flat,flat.canvas=flat,canvas
-
--- fill in options	
-	canvas.cake=opts.cake
-	canvas.win=opts.cake.win
-	canvas.gl=opts.gl
-
 -- basic setup of canvas
-	canvas.vbuf=canvas.cake.buffers:create()
-	canvas.vdat=pack.alloc(1024) -- temp vertex quad draw buffer		
+	canvas.vbuf=canvas.cake.buffers.create()
+	canvas.vdat_size=0
+	canvas.vdat_check=function(size) -- check we have enough buffer
+		if canvas.vdat_size<size then
+			canvas.vdat_size=size
+			canvas.vdat=pack.alloc(canvas.vdat_size) -- temp draw buffer		
+		end
+	end
+	canvas.vdat_check(1024) -- initial buffer size it may grow but thisis probably more than enough
 	
---	canvas:project23d(canvas.win.width,canvas.win.height,0.5,1024) -- some dumb defaults
-
-	font:set( canvas.cake.fonts:get(1) ) -- load default, builtin, 8x8 font
+	font.set( canvas.cake.fonts:get(1) ) -- load default, builtin, 8x8 font
 	
 	return canvas
 end

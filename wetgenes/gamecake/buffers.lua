@@ -7,25 +7,20 @@ base=require(...)
 
 local grd=require("wetgenes.grd")
 
-
-
 function bake(opts)
 
 	local buffers={}
-	setmetatable(buffers,{__index=base})
 	
 	buffers.cake=opts.cake
 	buffers.gl=opts.gl
 	
+	local gl=buffers.gl
+	local cake=buffers.cake
+	
 	buffers.data={}
 
-	return buffers
-end
+buffers.create = function(start,stop)
 
-
-create = function(buffers,start,stop)
-	local gl=buffers.gl
-	
 	local v={}
 	
 	v[0]=gl.GenBuffer()
@@ -41,9 +36,7 @@ create = function(buffers,start,stop)
 end
 
 
-start = function(buffers)
-	local gl=buffers.gl
-
+buffers.start = function()
 	for v,n in pairs(buffers.data) do
 		v[0]=gl.GenBuffer()
 		if v.start then
@@ -52,9 +45,7 @@ start = function(buffers)
 	end
 end
 
-stop = function(buffers)
-	local gl=buffers.gl
-
+buffers.stop = function()
 	for v,n in pairs(buffers.data) do
 		gl.DeleteBuffer(v[0])
 		v[0]=nil
@@ -64,5 +55,11 @@ stop = function(buffers)
 	end
 
 end
+
+
+	return buffers
+end
+
+
 
 

@@ -165,7 +165,7 @@ function setup(def)
 	local master=def.master
 	local meta=def.meta
 	local win=def.win
---	local font=--[[def.font]]def.state.cake.fonts:get(1)
+--	local font=--[[def.font]]def.state.cake.fonts.get(1)
 
 	local cake=def.state.cake
 	local canvas=def.state.canvas
@@ -314,25 +314,25 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			else -- builtin
 			
 			
-			flat:quad(	0,		0,
+			flat.quad(	0,		0,
 						hx,		0,
 						hx,		hy,
 						0,		hy)
 			gl.Color( tl[1],tl[2],tl[3],tl[4] )
-			flat:quad(	0,		0,
+			flat.quad(	0,		0,
 						hx,		0,
 						hx-bb,	bb,
 						0+bb, 	bb)
-			flat:quad(	0,		0,
+			flat.quad(	0,		0,
 						0+bb,	bb,
 						0+bb, 	hy-bb,
 						0,    	hy)
 			gl.Color( br[1],br[2],br[3],br[4] )
-			flat:quad( hx,  	hy,
+			flat.quad( hx,  	hy,
 						0,  	hy,
 						0+bb,	hy-bb,
 						hx-bb,	hy-bb)
-			flat:quad(  hx,    0,
+			flat.quad(  hx,    0,
 						hx,    hy,
 						hx-bb, hy-bb,
 						hx-bb, bb)
@@ -375,12 +375,12 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		
 		if widget.text then
 		
-print("using font "..(widget.font or widget.master.font or 1))
+--print("using font "..(widget.font or widget.master.font or 1))
 
-			font:set(cake.fonts:get(widget.font or widget.master.font or 1))
-			font:set_size(widget.text_size,0)
+			font.set(cake.fonts.get(widget.font or widget.master.font or 1))
+			font.set_size(widget.text_size,0)
 			local ty=widget.text_size
-			local tx=font:width(widget.text)
+			local tx=font.width(widget.text)
 
 --			local tx,ty=font.size(widget.text,widget.text_size)
 			
@@ -410,8 +410,8 @@ print("using font "..(widget.font or widget.master.font or 1))
 			widget.text_y=ty
 
 			gl.Color( pack.argb8_pmf4(c) )
-			font:set_xy(tx,ty)
-			font:draw(widget.text)
+			font.set_xy(tx,ty)
+			font.draw(widget.text)
 
 --			font.set(tx,-ty,c,widget.text_size)
 --			font.draw(widget.text)
@@ -420,10 +420,10 @@ print("using font "..(widget.font or widget.master.font or 1))
 				if widget.class=="textedit" then -- hack
 					if widget.master.focus==widget then --only draw curser in active widget
 						if widget.master.throb>=128 then
-							local sw=font:width(widget.text:sub(1,widget.data.str_idx))
+							local sw=font.width(widget.text:sub(1,widget.data.str_idx))
 
-			font:set_xy(tx+sw,ty)
-			font:draw("_")
+			font.set_xy(tx+sw,ty)
+			font.draw("_")
 						end
 					end
 				end

@@ -16,14 +16,10 @@ local wfonts  =require("wetgenes.gamecake.fonts")
 
 local grd=require("wetgenes.grd")
 
-base=require(...)
-meta={}
-meta.__index=base
 
 function bake(opts)
 
 	local cake={}
-	setmetatable(cake,meta)
 	
 	opts.cake=cake -- insert cake into opts
 	cake.opts=opts -- and opts into cake
@@ -43,6 +39,48 @@ function bake(opts)
 	
 --	cake.bake_canvas=function() return wcanvas.bake(opts)	end -- a canvas generator
 	
+cake.setup = function()
+	if not cake.opts.disable_sounds then
+--		cake.sounds.setup()
+	end
+end
+
+cake.clean = function()
+	if not cake.opts.disable_sounds then
+--		cake.sounds.clean()
+	end
+end
+
+cake.start = function()
+print("cakestart")
+	cake.buffers.start()
+	cake.images.start()
+	cake.sheets.start()
+	cake.fonts.start()
+	if not cake.opts.disable_sounds then
+--		cake.sounds.start()
+	end
+end
+
+cake.stop = function()
+print("cakestop")
+	cake.fonts.stop()
+	cake.sheets.stop()
+	cake.images.stop()
+	cake.buffers.stop()
+	if not cake.opts.disable_sounds then
+--		cake.sounds.stop()
+	end
+	if cake.gl.forget then -- any programs will need to be recompiled
+		cake.gl.forget()
+	end
+end
+
+-- wrapper for bliting by id/name
+cake.blit = function(id,name,cx,cy,ix,iy,w,h)
+	cake.canvas.blit(cake.images.get(id,name),cx,cy,ix,iy,w,h)
+end
+
 	
 	cake.buffers = wbuffers.bake(opts) -- generic buffer memory is now complex thanks to retardroid
 	cake.images  =  wimages.bake(opts) -- we will need to load some images
@@ -59,47 +97,4 @@ function bake(opts)
 	
 	return cake
 end
-
-setup = function(cake)
-	if not cake.opts.disable_sounds then
---		cake.sounds:setup()
-	end
-end
-
-clean = function(cake)
-	if not cake.opts.disable_sounds then
---		cake.sounds:clean()
-	end
-end
-
-start = function(cake)
-print("cakestart")
-	cake.buffers:start()
-	cake.images:start()
-	cake.sheets:start()
-	cake.fonts:start()
-	if not cake.opts.disable_sounds then
---		cake.sounds:start()
-	end
-end
-
-stop = function(cake)
-print("cakestop")
-	cake.fonts:stop()
-	cake.sheets:stop()
-	cake.images:stop()
-	cake.buffers:stop()
-	if not cake.opts.disable_sounds then
---		cake.sounds:stop()
-	end
-	if cake.gl.forget then -- any programs will need to be recompiled
-		cake.gl.forget()
-	end
-end
-
--- wrapper for bliting by id/name
-blit = function(cake,id,name,cx,cy,ix,iy,w,h)
-	cake.canvas:blit(cake.images:get(id,name),cx,cy,ix,iy,w,h)
-end
-
 

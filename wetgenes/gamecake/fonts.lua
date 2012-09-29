@@ -4,10 +4,6 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.fonts")
 
-base=require(...)
-meta={}
-meta.__index=base
-
 local zips=require("wetgenes.zips")
 
 local ft=require("wetgenes.freetype")
@@ -18,7 +14,6 @@ local wwin=require("wetgenes.win")
 function bake(opts)
 
 	local fonts={}
-	setmetatable(fonts,meta)
 	
 	fonts.cake=opts.cake
 	fonts.gl=opts.gl
@@ -28,16 +23,18 @@ function bake(opts)
 	fonts.zip=opts.zip
 	fonts.prefix=opts.fontprefix or "data/fonts/"
 	fonts.postfix=opts.fontpostfix or ".ttf"
-	
-	return fonts
-end
 
-get=function(fonts,id,name)
+
+	local cake=fonts.cake
+	local gl=fonts.gl
+
+
+fonts.get=function(id,name)
 	name=name or "base"
 	return fonts.data[name] and fonts.data[name][id]
 end
 
-set=function(fonts,d,id,name)
+fonts.set=function(d,id,name)
 	name=name or "base"
 	local tab
 	
@@ -55,11 +52,11 @@ end
 --
 -- unload a previously loaded image
 --
-unload=function(fonts,id,name)
-	local gl=fonts.gl
+fonts.unload=function(id,name)
+
 	name=name or "base"
 	
-	local t=fonts:get(id,name)
+	local t=fonts.get(id,name)
 
 	if t then
 		if gl then --gl mode
@@ -67,18 +64,18 @@ unload=function(fonts,id,name)
 				gl.DeleteTexture( v.id )
 			end
 		end
-		fonts:set(nil,id,name)
+		fonts.set(nil,id,name)
 	end
 end
 
 --
 -- load a single image, and make it easy to lookup by the given id
 --
-load=function(fonts,filename,id,name)
-	local gl=fonts.gl
+fonts.load=function(filename,id,name)
+
 	name=name or "base"
 
-	local t=fonts:get(id,name)
+	local t=fonts.get(id,name)
 	
 	if t then return t end --first check it is not already loaded
 
@@ -87,7 +84,7 @@ load=function(fonts,filename,id,name)
 		if gl then --gl mode
 			t={}
 			t.filename=filename
-			fonts:set(t,id,name)
+			fonts.set(t,id,name)
 			t.size=8
 
 			t.chars={}
@@ -101,7 +98,7 @@ load=function(fonts,filename,id,name)
 				
 				g:convert(grd.FMT_U8_RGBA_PREMULT)
 
-				local c=fonts.cake.images:upload_grd(nil,g) -- send to opengl
+				local c=fonts.cake.images.upload_grd(nil,g) -- send to opengl
 
 				t.chars[i]=c
 				
@@ -118,26 +115,14 @@ load=function(fonts,filename,id,name)
 
 		local fname=fonts.prefix..filename..fonts.postfix
 		
-	--	local g=assert(grd.create())
 		
 		local d=assert(zips.readfile(fname))
---[[
-		local d
-		if fonts.zip then -- load from a zip file
-			local f=assert(fonts.zip:open(fname))
-			d=assert(f:read("*a"))
-			f:close()
-		else
-			local f=assert(io.open(fname,"rb"))
-			d=assert(f:read("*a"))
-			f:close()
-		end
-]]		
+
 		if gl then --gl mode
 		
 			t={}
 			t.filename=filename
-			fonts:set(t,id,name)
+			fonts.set(t,id,name)
 			
 			t.font=ft.create()
 			t.data=d -- keep the data alive (the loader expects it to continue to exist)
@@ -154,10 +139,9 @@ load=function(fonts,filename,id,name)
 
 				t.font:render(i) -- render
 				t.font:grd(g) -- copy to grd
-	--			g:convert(grd.FMT_U8_ARGB_PREMULT)
 				g:convert(grd.FMT_U8_RGBA_PREMULT)
 				
-				local c=fonts.cake.images:upload_grd(nil,g) -- send to opengl
+				local c=fonts.cake.images.upload_grd(nil,g) -- send to opengl
 				t.chars[i]=c
 				
 				c.x=t.font.bitmap_left -- offsets to draw the bitmap at, whole pixels
@@ -179,7 +163,7 @@ end
 --
 -- load many images from id=filename table
 --
-loads=function(fonts,tab)
+fonts.loads=function(tab)
 
 	for i,v in pairs(tab) do
 	
@@ -188,17 +172,17 @@ loads=function(fonts,tab)
 			for ii,vv in pairs(v) do
 			
 				if type(ii)=="number" then -- just use filename twice
-					fonts:load(i.."_"..vv,vv,i)
+					fonts.load(i.."_"..vv,vv,i)
 				else
-					fonts:load(i.."_"..vv,ii,i)
+					fonts.load(i.."_"..vv,ii,i)
 				end
 				
 			end
 			
 		elseif type(i)=="number" then -- just use filename twice
-			fonts:load(v,v)
+			fonts.load(v,v)
 		else
-			fonts:load(v,i)
+			fonts.load(v,i)
 		end
 		
 	end
@@ -206,15 +190,15 @@ loads=function(fonts,tab)
 end
 
 
-start = function(fonts)
+fonts.start = function()
 
 	for v,n in pairs(fonts.remember or {}) do
-		fonts:load(v,n[1],n[2])
+		fonts.load(v,n[1],n[2])
 	end
 	fonts.remember=nil
 end
 
-stop = function(fonts)
+fonts.stop = function()
 
 	fonts.remember={}
 	
@@ -224,12 +208,17 @@ stop = function(fonts)
 		
 			fonts.remember[t.filename]={i,n}
 		
-			fonts:unload(i,n)
+			fonts.unload(i,n)
 			
 		end
 
 	end
 
 end
+
+
+	return fonts
+end
+
 
 

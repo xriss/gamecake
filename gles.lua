@@ -13,7 +13,7 @@ meta.__index=base
 setmetatable(gles,meta)
 
 
--- copypasta from GLES header, this is a merge of v1 and v2 so we can work with both
+-- copypasta from GLES header, this is a merge of v1 and v2 so we can work with both?
 local import=--[[
 /*************************************************************/
 
@@ -569,6 +569,19 @@ local import=--[[
 ]]
 
 [[
+
+-- for simplicities sake, I have disabled the above GLES1 defines instead
+-- these are the parts of GLES1 we understand in our hacked and partially implimented fixed pipeline
+-- if it gets defined here then it is safeish to use...
+-- only the most general things are going to get done on an as needed bases, if you care about
+-- opengl standards then use gles2 only, the gles1 fakefixed is just a cheap hack on top of that
+-- oldstyle is just easier to understand and write examples for,
+-- the new way is a directX style fuckup in terms of interface design,
+-- you need to wrap it to something sensible
+-- only we already *have* a sensible interface it just got taken away
+-- so now we must reinvent the wheel
+-- which is a fucking retarted waste of time
+
 #define GL_MODELVIEW                      0x1700
 #define GL_PROJECTION                     0x1701
 #define GL_TEXTURE                        0x1702

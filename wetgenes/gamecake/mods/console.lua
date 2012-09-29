@@ -30,7 +30,7 @@ function bake(state)
 	function console.setup(state)
 		console.replace_print(_G)
 	
-		state.cake.fonts:loads({1}) -- load builtin font number 1 a basic 8x8 font
+		state.cake.fonts.loads({1}) -- load builtin font number 1 a basic 8x8 font
 
 		console.buff=buffedit.create() -- create buff edit
 		console.buff.enter=function(_,line) console.dump_eval(line) end
@@ -227,7 +227,7 @@ function bake(state)
 --		state.win:info()
 		local w,h=state.win.width,state.win.height
 		gl.Viewport(0,0,w,h)
-		canvas:gl_default() -- reset gl state
+		canvas.gl_default() -- reset gl state
 
 --		gl.ClearColor(0,0,0,0)
 --		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
@@ -240,14 +240,14 @@ function bake(state)
 		gl.Translate(-w/2,-h/2,-h) -- top/left 1unit==1pixel
 		gl.PushMatrix()
 
-		font:set(cake.fonts:get(1))
-		font:set_size(8,0)
+		font.set(cake.fonts.get(1))
+		font.set_size(8,0)
 
 		if console.y > 0 then
 		
 			gl.Color(pack.argb4_pmf4(0xc040))
 			
-			flat:quad(0,0,w,console.y)
+			flat.quad(0,0,w,console.y)
 
 			gl.Color(pack.argb4_pmf4(0xf4f4))
 
@@ -255,19 +255,19 @@ function bake(state)
 			local y=console.y-16
 			while y>-8 and i>0 do
 			
-				font:set_xy(0,y)
-				font:draw(console.lines[i])
+				font.set_xy(0,y)
+				font.draw(console.lines[i])
 				
 				y=y-8
 				i=i-1
 			end
 					
-			font:set_xy(0,console.y-8)
-			font:draw(">"..console.buff.line)
+			font.set_xy(0,console.y-8)
+			font.draw(">"..console.buff.line)
 
 			if console.buff.throb > 128 then
-				font:set_xy((console.buff.line_idx+1)*8,console.y-8)
-				font:draw("_")
+				font.set_xy((console.buff.line_idx+1)*8,console.y-8)
+				font.draw("_")
 			end
 			
 		end
@@ -282,8 +282,8 @@ function bake(state)
 			end
 			for i,v in ipairs(console.lines_display) do
 			
-				font:set_xy(0,console.y+i*8-8)
-				font:draw(v)
+				font.set_xy(0,console.y+i*8-8)
+				font.draw(v)
 			
 			end
 		end

@@ -23,15 +23,15 @@ function bake(state)
 		height=480,
 	}
 
-	local canvas=state.canvas:child()
+	local canvas=state.canvas.child()
 
 	function escmenu.setup(state)
 	
-		state.cake.fonts:loads({1}) -- always load builtin font number 1 a basic 8x8 font		
+		state.cake.fonts.loads({1}) -- always load builtin font number 1 a basic 8x8 font		
 		opts.font=1
 		
 		if wzips.exists("data/fonts/Vera.ttf") then -- we got us better font to use :)
-			state.cake.fonts:loads({"Vera"})
+			state.cake.fonts.loads({"Vera"})
 			opts.font="Vera"
 		end
 
@@ -82,9 +82,9 @@ function bake(state)
 
 		if escmenu.show then
 
-		canvas:viewport() -- did our window change?
-		canvas:project23d(opts.width,opts.height,1/4,opts.height*4)
-		canvas:gl_default() -- reset gl state
+		canvas.viewport() -- did our window change?
+		canvas.project23d(opts.width,opts.height,1/4,opts.height*4)
+		canvas.gl_default() -- reset gl state
 
 --		local w,h=state.win.width,state.win.height
 --		gl.Viewport(0,0,w,h)
@@ -117,7 +117,7 @@ function bake(state)
 	function escmenu.msg(state,m)
 		if escmenu.show then
 			if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
-				m.x,m.y=canvas:xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
+				m.x,m.y=canvas.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
 				m.x=m.x+(opts.width/2)
 				m.y=m.y+(opts.height/2)
 			end

@@ -4,10 +4,6 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.images")
 
-base=require(...)
-meta={}
-meta.__index=base
-
 local grd=require("wetgenes.grd")
 local zips=require("wetgenes.zips")
 
@@ -16,27 +12,27 @@ local zips=require("wetgenes.zips")
 function bake(opts)
 
 	local images={}
-	setmetatable(images,meta)
 	
 	images.cake=opts.cake
 	images.gl=opts.gl
 	
+	local cake=images.cake
+	local gl=images.gl
+		
 	images.data={}
 	
 	images.fmt=opts.cake.images_fmt
 	images.zip=opts.zip
 	images.prefix=opts.grdprefix or "data/"
 	images.postfix=opts.grdpostfix or ".png"
-	
-	return images
-end
 
-get=function(images,id,name)
+
+images.get=function(id,name)
 	name=name or "base"
 	return images.data[name] and images.data[name][id]
 end
 
-set=function(images,d,id,name)
+images.set=function(d,id,name)
 	name=name or "base"
 	local tab
 	
@@ -54,28 +50,28 @@ end
 --
 -- unload a previously loaded image
 --
-unload=function(images,id,name)
+images.unload=function(id,name)
 	local gl=images.gl
 	name=name or "base"
 	
-	local t=images:get(id,name)
+	local t=images.get(id,name)
 
 	if t then
 		if gl then --gl mode
 				gl.DeleteTexture( t.id )			
 		end
-		images:set(nil,id,name)
+		images.set(nil,id,name)
 	end
 end
 
 --
 -- load a single image, and make it easy to lookup by the given id
 --
-load=function(images,filename,id,name)
+images.load=function(filename,id,name)
 	local gl=images.gl
 	name=name or "base"
 
-	local t=images:get(id,name)
+	local t=images.get(id,name)
 	
 	if t then return t end --first check it is not already loaded
 
@@ -92,9 +88,9 @@ print("loading",id,name)
 	if gl then --gl mode
 	
 		t={}
-		images:upload_grd(t,g)
+		images.upload_grd(t,g)
 
-		images:set(t,id,name)
+		images.set(t,id,name)
 		
 		t.filename=filename
 		return t
@@ -102,7 +98,7 @@ print("loading",id,name)
 	
 		assert(g:convert(images.fmt))
 		
-		images:set(g,id,name)
+		images.set(g,id,name)
 
 		g.filename=filename
 		return g
@@ -110,7 +106,7 @@ print("loading",id,name)
 	
 end
 
-function uptwopow(n)
+local function uptwopow(n)
 
 	if n<1 then return 0
 	elseif n<=16   then return 16
@@ -127,8 +123,7 @@ function uptwopow(n)
 	return 0
 end
 
-function upload_grd(images,t,g)
-	local gl=images.gl
+images.upload_grd= function(t,g)
 
 	if not t then
 		t={}
@@ -202,7 +197,7 @@ end
 --
 -- load many images from id=filename table
 --
-loads=function(images,tab)
+images.loads=function(tab)
 
 	local function iorv(i,v) if type(i)=="number" then return v end return i end -- choose i or v
 
@@ -212,12 +207,12 @@ loads=function(images,tab)
 		
 			for ii,vv in pairs(v) do
 			
-				images:load(i.."/"..vv,iorv(ii,vv),i) -- i must be the base dir in this case as v is a table
+				images.load(i.."/"..vv,iorv(ii,vv),i) -- i must be the base dir in this case as v is a table
 				
 			end
 			
 		else
-			images:load(v,iorv(i,v))
+			images.load(v,iorv(i,v))
 		end
 		
 	end
@@ -225,15 +220,15 @@ loads=function(images,tab)
 end
 
 
-start = function(images)
+images.start = function()
 
 	for v,n in pairs(images.remember or {}) do
-		images:load(v,n[1],n[2])
+		images.load(v,n[1],n[2])
 	end
 	images.remember=nil
 end
 
-stop = function(images)
+images.stop = function()
 
 	images.remember={}
 	
@@ -243,12 +238,17 @@ stop = function(images)
 		
 			images.remember[t.filename]={i,n}
 		
-			images:unload(i,n)
+			images.unload(i,n)
 			
 		end
 
 	end
 
+end
+
+
+	
+	return images
 end
 
 
