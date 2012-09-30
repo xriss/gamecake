@@ -50,7 +50,7 @@ local border=0 -- solidspace
 --
 -- unload a skin, go back to the "builtin" default
 --
-function unload(win)
+function unload(state)
 
 	mode=nil
 	texs={}
@@ -61,43 +61,33 @@ end
 --
 -- load a skin
 --
-function load(win,name)
-
-	local function load_tex(filename)
-		local d=assert( wzips.readfile(filename) )
-		local g=assert( grd.create() )
-		assert( g:load_data(d,"png") )
-		assert( g:convert("GRD_FMT_U8_ARGB") )
-		local t=assert( win.tex( g ) )
-	end
+function load(state,name)
 	
-	unload(win)
+	unload(state)
+	
+	local images=state.cake.images
 
 	if name then -- load a named skin
 	
-		if name=="test" then
+		if name=="soapbar" then
 			mode=name
-
-			texs.border=load_tex( "data/skins/test/border.png")
-			texs.bottof=load_tex( "data/skins/test/bottof.png")
-			texs.botton=load_tex( "data/skins/test/botton.png")
-			texs.bottin=load_tex( "data/skins/test/bottin.png")
 			
---[[
-			texs.border=win.tex( grd.create(apps.dir.."data/skins/test/border.png"):convert("GRD_FMT_U8_ARGB") )
-			texs.buttof=win.tex( grd.create(apps.dir.."data/skins/test/buttof.png"):convert("GRD_FMT_U8_ARGB") )
-			texs.button=win.tex( grd.create(apps.dir.."data/skins/test/button.png"):convert("GRD_FMT_U8_ARGB") )
-			texs.buttin=win.tex( grd.create(apps.dir.."data/skins/test/buttin.png"):convert("GRD_FMT_U8_ARGB") )
-]]		
+			images.loads{
+				"skins/"..mode.."/border",
+				"skins/"..mode.."/buttof",
+				"skins/"..mode.."/button",
+				"skins/"..mode.."/buttin",
+			}
 			margin=15
 			border=0
+			
 		end
 			
 	end
 
 end
 
-
+--[[
 function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 		
 --		local vw,vh=512,52
@@ -153,6 +143,7 @@ function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 
 
 end
+]]
 
 --
 -- add meta functions
@@ -168,9 +159,82 @@ function setup(def)
 --	local font=--[[def.font]]def.state.cake.fonts.get(1)
 
 	local cake=def.state.cake
+	local images=cake.images
 	local canvas=def.state.canvas
 	local font=canvas.font
 	local flat=canvas.flat
+	
+local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
+		
+--		local vw,vh=512,52
+--		local mw,mh=24,24
+
+		if mw*2 > vw then mw=vw/2 end
+		if mh*2 > vh then mh=vh/2 end
+
+		
+		local tww={mw/tw,(tw-2*mw)/tw,mw/tw}
+		local thh={mh/th,(th-2*mh)/th,mh/th}
+		local vww={mw,vw-2*mw,mw}
+		local vhh={mh,vh-2*mh,mh}
+		
+--[[
+		gl.Disable(gl.DEPTH_TEST)
+		gl.Disable(gl.LIGHTING)
+		gl.Disable(gl.CULL_FACE)
+		gl.Enable(gl.TEXTURE_2D)
+
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+]]
+
+
+--		gl.Begin(gl.QUADS)
+--			gl.Color(1,1,1,1)
+			
+			local function drawbox( tx,ty, vx,vy , txp,typ, vxp,vyp )
+			
+				flat.tristrip("xyzuv",{
+					vx,		vy,		0,	tx,		ty,
+					vx+vxp,	vy,		0,	tx+txp,	ty,
+					vx,		vy+vyp,	0,	tx,		ty+typ,
+					vx+vxp,	vy+vyp,	0,	tx+txp,	ty+typ,
+				})
+--[[
+					tx,		ty,		0,	--vx,		vy,
+					tx+txp,	ty,		0,	--vx+vxp,	vy,
+					tx,		ty+typ,	0,	--vx,		vy+vyp,
+					tx+txp,	ty+typ,	0,	--vx+vxp,	vy+vyp,
+
+
+				gl.TexCoord(tx    ,ty)     gl.Vertex(vx,    vy)
+				gl.TexCoord(tx+txp,ty)     gl.Vertex(vx+vxp,vy)
+				gl.TexCoord(tx+txp,ty+typ) gl.Vertex(vx+vxp,vy+vyp)
+				gl.TexCoord(tx    ,ty+typ) gl.Vertex(vx,    vy+vyp)
+]]
+			end
+			
+		local tx,ty=0,0
+		local vx,vy=vxs,vys-- -vw/2,vh/2
+
+			for iy=1,3 do
+				tx=0
+				vx=vxs-- -vw/2
+				for ix=1,3 do
+
+					drawbox( tx,ty, vx,vy , tww[ix],thh[iy], vww[ix],vhh[iy] )
+
+					tx=tx+tww[ix]
+					vx=vx+vww[ix]
+				end
+				ty=ty+thh[iy]
+				vy=vy+vhh[iy]
+			end
+			
+--		gl.End()
+
+
+end
 	
 --
 -- display this widget and its sub widgets
@@ -291,25 +355,29 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			end
 			
 			if mode then
-			
+
+		
 				if ( master.active==widget and master.over==widget ) or widget.state=="selected" then
-					texs.buttin:bind()
+					images.bind(images.get("skins/"..mode.."/buttin"))
+--					texs.buttin:bind()
 					txp=0
 					typ=-1
 				else
-					texs.button:bind()
+					images.bind(images.get("skins/"..mode.."/button"))
+--					texs.button:bind()
 					txp=0
 					typ=-2
 				end
 				
 				if widget.class=="string" then -- hack
-					texs.border:bind()
+					images.bind(images.get("skins/"..mode.."/border"))
+--					texs.border:bind()
 				end
 				
-			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
-			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)
+--			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+--			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)
 			
-				draw33(128,128, 24,24, 0-margin,0+margin, hx+(margin*2),hy+(margin*2))
+				draw33(128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
 			
 			else -- builtin
 			

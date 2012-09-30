@@ -6,6 +6,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --
 
 
+-- this all needs to be baked into thecake, just hax for now
+
 local widget_meta=require("wetgenes.gamecake.widget.meta")
 local widget_skin=require("wetgenes.gamecake.widget.skin")
 
@@ -26,6 +28,11 @@ function setup(win,def)
 	master.parent=master -- we are our own parent, probably safer than setting as null
 	master.master=master -- and our own master
 	
+
+	master.widget_meta=require("wetgenes.gamecake.widget.meta")
+	master.widget_skin=require("wetgenes.gamecake.widget.skin")
+
+
 	master.font=def.font
 	
 	def.master=master

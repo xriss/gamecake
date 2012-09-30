@@ -39,6 +39,10 @@ function bake(state)
 		escmenu.show=false
 
 		escmenu.master=require("wetgenes.gamecake.widget").setup(state.win,{state=state})
+		
+		if wzips.exists("data/skins/soapbar/button.png") then -- we got us better font to use :)
+			escmenu.master.widget_skin.load(state,"soapbar")
+		end
 
 		local hooks={}
 		function hooks.click(widget)

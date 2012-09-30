@@ -102,7 +102,7 @@ function base_sheet.setimg(sheet,img_id,img_name)
 
 	sheet.img_id=img_id
 	sheet.img_name=img_name
-	sheet.img=sheet.sheets.cake.images:get(sheet.img_id,sheet.img_name)
+	sheet.img=sheet.sheets.cake.images.get(sheet.img_id,sheet.img_name)
 
 	return sheet
 end

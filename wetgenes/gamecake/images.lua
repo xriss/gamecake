@@ -246,7 +246,10 @@ images.stop = function()
 
 end
 
-
+-- do a gl bind of this texture
+images.bind = function(t)
+	gl.BindTexture( gl.TEXTURE_2D , t.id )
+end
 	
 	return images
 end
