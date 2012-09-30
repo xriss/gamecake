@@ -42,6 +42,10 @@ end
 
 module("wetgenes.gamecake.widget.skin")
 
+function bake(state,wskin)
+wskin=wskin or {}
+
+
 local mode=nil
 local texs={}
 
@@ -50,7 +54,7 @@ local border=0 -- solidspace
 --
 -- unload a skin, go back to the "builtin" default
 --
-function unload(state)
+function wskin.unload(state)
 
 	mode=nil
 	texs={}
@@ -61,7 +65,7 @@ end
 --
 -- load a skin
 --
-function load(state,name)
+function wskin.load(state,name)
 	
 	unload(state)
 	
@@ -87,68 +91,11 @@ function load(state,name)
 
 end
 
---[[
-function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
-		
---		local vw,vh=512,52
---		local mw,mh=24,24
-
-		if mw*2 > vw then mw=vw/2 end
-		if mh*2 > vh then mh=vh/2 end
-
-		
-		local tww={mw/tw,(tw-2*mw)/tw,mw/tw}
-		local thh={mh/th,(th-2*mh)/th,mh/th}
-		local vww={mw,vw-2*mw,mw}
-		local vhh={mh,vh-2*mh,mh}
-		
-		gl.Disable(gl.DEPTH_TEST)
-		gl.Disable(gl.LIGHTING)
-		gl.Disable(gl.CULL_FACE)
-		gl.Enable(gl.TEXTURE_2D)
-
-
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
-		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-
-		gl.Begin(gl.QUADS)
---			gl.Color({1,1,1,1})
-			
-			local function drawbox( tx,ty, vx,vy , txp,typ, vxp,vyp )
-				gl.TexCoord(tx    ,ty)     gl.Vertex(vx,    vy)
-				gl.TexCoord(tx+txp,ty)     gl.Vertex(vx+vxp,vy)
-				gl.TexCoord(tx+txp,ty+typ) gl.Vertex(vx+vxp,vy+vyp)
-				gl.TexCoord(tx    ,ty+typ) gl.Vertex(vx,    vy+vyp)
-			end
-			
-		local tx,ty=0,0
-		local vx,vy=vxs,vys-- -vw/2,vh/2
-
-			for iy=1,3 do
-				tx=0
-				vx=vxs-- -vw/2
-				for ix=1,3 do
-
-					drawbox( tx,ty, vx,vy , tww[ix],thh[iy], vww[ix],-vhh[iy] )
-
-					tx=tx+tww[ix]
-					vx=vx+vww[ix]
-				end
-				ty=ty+thh[iy]
-				vy=vy-vhh[iy]
-			end
-			
-		gl.End()
-
-
-end
-]]
 
 --
 -- add meta functions
 --
-function setup(def)
+function wskin.setup(def)
 
 --	load(def.win,"test")
 
@@ -538,4 +485,7 @@ end
 
 
 
+end
+
+return wskin
 end

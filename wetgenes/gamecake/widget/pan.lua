@@ -9,28 +9,30 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widget.pan")
 
+function bake(state,wpan)
+wpan=wpan or {}
 
-function mouse(widget,act,x,y,key)
+function wpan.mouse(widget,act,x,y,key)
 --	widget.master.focus=widget
 	return widget.meta.mouse(widget,act,x,y,key)
 end
 
 
-function key(widget,ascii,key,act)
+function wpan.key(widget,ascii,key,act)
 	return widget.meta.key(widget,ascii,key,act)
 end
 
 
-function update(widget)
+function wpan.update(widget)
 	return widget.meta.update(widget)
 end
 
-function draw(widget)
+function wpan.draw(widget)
 	return widget.meta.draw(widget)
 end
 
 
-function setup(widget,def)
+function wpan.setup(widget,def)
 --	local it={}
 --	widget.pan=it
 	widget.class="pan"
@@ -46,4 +48,7 @@ function setup(widget,def)
 	widget.fbo=_G.win.fbo(0,0,0)
 
 	return widget
+end
+
+return wpan
 end

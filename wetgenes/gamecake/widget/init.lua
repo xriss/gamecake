@@ -15,11 +15,13 @@ local widget_skin=require("wetgenes.gamecake.widget.skin")
 
 module("wetgenes.gamecake.widget")
 
+function bake(state,widgets)
+widgets=widgets or {}
 
 --
 -- create a master widget
 --
-function setup(win,def)
+function widgets.setup(win,def)
 
 	local meta={}
 	meta.__index=meta
@@ -28,10 +30,8 @@ function setup(win,def)
 	master.parent=master -- we are our own parent, probably safer than setting as null
 	master.master=master -- and our own master
 	
-
 	master.widget_meta=require("wetgenes.gamecake.widget.meta")
 	master.widget_skin=require("wetgenes.gamecake.widget.skin")
-
 
 	master.font=def.font
 	
@@ -58,3 +58,5 @@ function setup(win,def)
 
 end
 
+return widgets
+end

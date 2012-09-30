@@ -8,26 +8,28 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widget.file")
 
+function bake(state,wfile)
+wfile=wfile or {}
 
-function mouse(widget,act,x,y,key)
+function wfile.mouse(widget,act,x,y,key)
 	return widget.meta.mouse(widget,act,x,y,key)
 end
 
 
-function key(widget,ascii,key,act)
+function wfile.key(widget,ascii,key,act)
 	return widget.meta.key(widget,ascii,key,act)
 end
 
 
-function update(widget)
+function wfile.update(widget)
 	return widget.meta.update(widget)
 end
 
-function draw(widget)
+function wfile.draw(widget)
 	return widget.meta.draw(widget)
 end
 
-function setup(widget,def)
+function wfile.setup(widget,def)
 	widget.class="file"
 	
 	widget.key=key
@@ -48,4 +50,7 @@ function setup(widget,def)
 		datx={max=1},daty={max=0},color=0xffffffff})
 ]]
 	return widget
+end
+
+return wfile
 end

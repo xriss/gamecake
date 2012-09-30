@@ -8,19 +8,22 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widget.scroll")
 
+function bake(state,wscroll)
+wscroll=wscroll or {}
 
-function mouse(widget,act,x,y,key)
+
+function wscroll.mouse(widget,act,x,y,key)
 --	widget.master.focus=widget
 	return widget.meta.mouse(widget,act,x,y,key)
 end
 
 
-function key(widget,ascii,key,act)
+function wscroll.key(widget,ascii,key,act)
 	return widget.meta.key(widget,ascii,key,act)
 end
 
 
-function update(widget)
+function wscroll.update(widget)
 
 	local pan=widget.pan
 	
@@ -38,14 +41,14 @@ function update(widget)
 	return widget.meta.update(widget)
 end
 
-function draw(widget)
+function wscroll.draw(widget)
 
 --	local it=widget.scroll
 	
 	return widget.meta.draw(widget)
 end
 
-function layout(widget)
+function wscroll.layout(widget)
 
 --	local it=widget.scroll
 	
@@ -62,7 +65,7 @@ function layout(widget)
 	widget.meta.layout(widget)
 end
 
-function setup(widget,def)
+function wscroll.setup(widget,def)
 --	local it={}
 --	widget.scroll=it
 	widget.class="scroll"
@@ -88,4 +91,7 @@ function setup(widget,def)
 		datx=widget.datx,daty={max=0},color=0xffffffff})
 
 	return widget
+end
+
+return wscroll
 end

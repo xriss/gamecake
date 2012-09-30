@@ -7,21 +7,24 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widget.slide")
 
+function bake(state,wslide)
+wslide=wslide or {}
+
 local widget_data=require("wetgenes.gamecake.widget.data")
 
 
-function mouse(widget,act,x,y,key)
+function wslide.mouse(widget,act,x,y,key)
 --	widget.master.focus=widget
 	return widget.meta.mouse(widget,act,x,y,key)
 end
 
 
-function key(widget,ascii,key,act)
+function wslide.key(widget,ascii,key,act)
 	return widget.meta.key(widget,ascii,key,act)
 end
 
 
-function update(widget)
+function wslide.update(widget)
 --	local it=widget.slide
 
 
@@ -32,7 +35,7 @@ function update(widget)
 	return widget.meta.update(widget)
 end
 
-function layout(widget)
+function wslide.layout(widget)
 
 	widget.drag.hx=widget.datx:get_size(widget.hx)
 	widget.drag.hy=widget.daty:get_size(widget.hy)
@@ -41,7 +44,7 @@ function layout(widget)
 	
 end
 
-function slide_snap(it)
+function wslide.slide_snap(it)
 
 -- auto snap positions when draged
 	it.drag.px=it.datx:snap( it.hx , it.drag.hx , it.drag.px )
@@ -53,7 +56,7 @@ function slide_snap(it)
 	
 end
 	
-function setup(widget,def)
+function wslide.setup(widget,def)
 --	local it={} -- our main data so as not to clobber widget values
 --	it.widget=widget
 --	widget.slide=it
@@ -74,4 +77,7 @@ function setup(widget,def)
 	widget.drag=widget:add({class="drag",color=0xffffffff,hy=widget.daty:get_size(widget.hy),hx=widget.datx:get_size(widget.hx),pxf=widget.datx:get_pos(),pyf=widget.daty:get_pos(),data=widget.data})
 	
 	return widget
+end
+
+return wslide
 end

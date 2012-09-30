@@ -9,10 +9,13 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widget.textedit")
 
+function bake(state,wtextedit)
+wtextedit=wtextedit or {}
+
 local widget_data=require("wetgenes.gamecake.widget.data")
 
 
-function mouse(widget,act,x,y,key)
+function wtextedit.mouse(widget,act,x,y,key)
 
 --	local it=widget.string
 
@@ -43,7 +46,7 @@ function mouse(widget,act,x,y,key)
 end
 
 
-function key(widget,ascii,key,act)
+function wtextedit.key(widget,ascii,key,act)
 --	local it=widget.string
 	local master=widget.master
 	
@@ -188,7 +191,7 @@ function key(widget,ascii,key,act)
 end
 
 
-function update(widget)
+function wtextedit.update(widget)
 
 	if widget.text ~= widget.data.str then
 		widget.text = widget.data.str
@@ -197,7 +200,7 @@ function update(widget)
 end
 
 
-function setup(widget,def)
+function wtextedit.setup(widget,def)
 --	local it={}
 --	widget.string=it
 	widget.class="textedit"
@@ -214,4 +217,7 @@ function setup(widget,def)
 	widget.mouse=mouse
 
 	return widget
+end
+
+rwturn wtextedit
 end

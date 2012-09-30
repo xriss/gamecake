@@ -4,19 +4,21 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widget.drag")
 
+function bake(state,wdrag)
+wdrag=wdrag or {}
 
-function mouse(widget,act,x,y,key)
+function wdrag.mouse(widget,act,x,y,key)
 --	widget.master.focus=widget
 	return widget.meta.mouse(widget,act,x,y,key)
 end
 
 
-function key(widget,ascii,key,act)
+function wdrag.key(widget,ascii,key,act)
 	return widget.meta.key(widget,ascii,key,act)
 end
 
 
-function update(widget)
+function wdrag.update(widget)
 
 	if widget.data then
 		widget.text=widget.data:get_string()
@@ -25,12 +27,12 @@ function update(widget)
 	return widget.meta.update(widget)
 end
 
-function draw(widget)
+function wdrag.draw(widget)
 	return widget.meta.draw(widget)
 end
 
 
-function setup(widget,def)
+function wdrag.setup(widget,def)
 --	local it={}
 --	widget.drag=it
 	widget.class="drag"
@@ -41,4 +43,7 @@ function setup(widget,def)
 	widget.draw=draw
 
 	return widget
+end
+
+return wdrag
 end

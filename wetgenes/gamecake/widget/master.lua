@@ -11,10 +11,13 @@ local gl=require('gles').gles1
 
 module("wetgenes.gamecake.widget.master")
 
+function bake(state,wmaster)
+wmaster=wmaster or {}
+
 --
 -- add meta functions
 --
-function setup(widget,def)
+function wmaster.setup(widget,def)
 
 	local master=widget
 	local meta=widget.meta
@@ -173,4 +176,7 @@ function setup(widget,def)
 --		end
 	end
 --
+end
+
+return wmaster
 end

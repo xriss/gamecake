@@ -6,8 +6,11 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widget.meta")
 
+function bake(state,wmeta)
+wmeta=wmeta or {}
+
 -- available widget classes
-classes={
+wmeta.classes={
 
 -- base classes
 
@@ -29,7 +32,7 @@ classes={
 --
 -- add meta functions
 --
-function setup(def)
+function wmeta.setup(def)
 
 --	local master=def.master
 	local meta=def.meta
@@ -511,4 +514,8 @@ function setup(def)
 		end
 	end
 
+end
+
+
+return wmeta
 end
