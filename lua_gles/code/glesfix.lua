@@ -30,19 +30,43 @@ function glesfix.create(gles)
 
 uniform mat4 modelview;
 uniform mat4 projection;
-
-attribute vec3 vertex;
-attribute vec2 texcoord;
 uniform vec4 color;
+
+attribute vec3 a_vertex;
+attribute vec2 a_texcoord;
 
 varying vec2  v_texcoord;
 varying vec4  v_color;
  
 void main()
 {
-    gl_Position = projection * modelview * vec4(vertex, 1.0);
-	v_texcoord=texcoord;
+    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+	v_texcoord=a_texcoord;
 	v_color=color;
+}
+
+	]]
+}
+
+	gl.shaders.v_pos_tex_color={
+	source=shaderprefix..[[
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+attribute vec3 a_vertex;
+attribute vec2 a_texcoord;
+attribute vec4 a_color;
+
+varying vec2  v_texcoord;
+varying vec4  v_color;
+ 
+void main()
+{
+    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+	v_texcoord=a_texcoord;
+	v_color=a_color*color;
 }
 
 	]]
@@ -53,22 +77,43 @@ void main()
 
 uniform mat4 modelview;
 uniform mat4 projection;
-
-attribute vec3 vertex;
 uniform vec4 color;
+
+attribute vec3 a_vertex;
 
 varying vec4  v_color;
  
 void main()
 {
-    gl_Position = projection * modelview * vec4(vertex, 1.0);
+    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
 	v_color=color;
 }
 
 	]]
 }
 
-	gl.shaders.f_pos_tex={
+	gl.shaders.v_pos_color={
+	source=shaderprefix..[[
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+attribute vec3 a_vertex;
+attribute vec4 a_color;
+
+varying vec4  v_color;
+ 
+void main()
+{
+    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+	v_color=a_color*color;
+}
+
+	]]
+}
+
+	gl.shaders.f_tex={
 	source=shaderprefix..[[
 
 uniform sampler2D tex;
@@ -84,7 +129,7 @@ void main(void)
 	]]
 }
 
-	gl.shaders.f_pos={
+	gl.shaders.f_color={
 	source=shaderprefix..[[
 
 varying vec4  v_color;
@@ -97,13 +142,21 @@ void main(void)
 	]]
 }
 
+	gl.programs.pos_color={
+		vshaders={"v_pos_color"},
+		fshaders={"f_color"},
+	}
 	gl.programs.pos_tex={
 		vshaders={"v_pos_tex"},
-		fshaders={"f_pos_tex"},
+		fshaders={"f_tex"},
+	}
+	gl.programs.pos_tex_color={
+		vshaders={"v_pos_tex_color"},
+		fshaders={"f_tex"},
 	}
 	gl.programs.pos={
 		vshaders={"v_pos"},
-		fshaders={"f_pos"},
+		fshaders={"f_color"},
 	}
 
 	function gl.Color(...)
@@ -178,19 +231,19 @@ void main(void)
 
 		
 		local v=gl.fix.pointer.vertex
-		gl.VertexAttribPointer(p:attrib("vertex"),v[1],v[2],gl.FALSE,v[3],v[4])
-		gl.EnableVertexAttribArray(p:attrib("vertex"))
+		gl.VertexAttribPointer(p:attrib("a_vertex"),v[1],v[2],gl.FALSE,v[3],v[4])
+		gl.EnableVertexAttribArray(p:attrib("a_vertex"))
 		
 		if got_tex then
 			local v=gl.fix.pointer.texcoord
-			gl.VertexAttribPointer(p:attrib("texcoord"),v[1],v[2],gl.FALSE,v[3],v[4])
-			gl.EnableVertexAttribArray(p:attrib("texcoord"))
+			gl.VertexAttribPointer(p:attrib("a_texcoord"),v[1],v[2],gl.FALSE,v[3],v[4])
+			gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
 		end
 
 		if got_color then
 			local v=gl.fix.pointer.color
-			gl.VertexAttribPointer(p:attrib("color"),v[1],v[2],gl.FALSE,v[3],v[4])
-			gl.EnableVertexAttribArray(p:attrib("color"))
+			gl.VertexAttribPointer(p:attrib("a_color"),v[1],v[2],gl.FALSE,v[3],v[4])
+			gl.EnableVertexAttribArray(p:attrib("a_color"))
 		end
 
 --		gl.VertexAttrib4f(p:attrib("color"), 1,1,1,1 )
