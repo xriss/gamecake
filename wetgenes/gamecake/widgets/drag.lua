@@ -2,7 +2,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
-module("wetgenes.gamecake.widget.drag")
+module("wetgenes.gamecake.widgets.drag")
 
 function bake(state,wdrag)
 wdrag=wdrag or {}
@@ -37,10 +37,10 @@ function wdrag.setup(widget,def)
 --	widget.drag=it
 	widget.class="drag"
 	
-	widget.key=key
-	widget.mouse=mouse
-	widget.update=update
-	widget.draw=draw
+	widget.key=wdrag.key
+	widget.mouse=wdrag.mouse
+	widget.update=wdrag.update
+	widget.draw=wdrag.draw
 
 	return widget
 end

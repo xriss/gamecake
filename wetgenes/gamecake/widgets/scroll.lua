@@ -6,7 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("wetgenes.gamecake.widget.scroll")
+module("wetgenes.gamecake.widgets.scroll")
 
 function bake(state,wscroll)
 wscroll=wscroll or {}
@@ -70,11 +70,11 @@ function wscroll.setup(widget,def)
 --	widget.scroll=it
 	widget.class="scroll"
 	
-	widget.key=key
-	widget.mouse=mouse
-	widget.update=update
-	widget.layout=layout
-	widget.draw=draw
+	widget.key=wscroll.key
+	widget.mouse=wscroll.mouse
+	widget.update=wscroll.update
+	widget.layout=wscroll.layout
+	widget.draw=wscroll.draw
 
 -- auto add the draging button as a child
 	local ss=16

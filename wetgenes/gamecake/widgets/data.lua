@@ -6,13 +6,13 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --
 
 
-module("wetgenes.gamecake.widget.data")
+module("wetgenes.gamecake.widgets.data")
 
 function bake(state,wdata)
 wdata=wdata or {}
 
 
-local wdata.call_hook=function(dat,hook)
+wdata.call_hook=function(dat,hook)
 	local hooks=dat.hooks
 	local type_hooks=type(hooks)
 	if type_hooks=="function" then -- master function
@@ -23,7 +23,7 @@ local wdata.call_hook=function(dat,hook)
 end
 
 -- set number (may trigger hook)
-local wdata.data_value=function(dat,val)
+wdata.data_value=function(dat,val)
 	if dat.class=="number" then
 		if val then val=tonumber(val) end -- auto convert from string
 		if val and val~=dat.num then -- change value
@@ -45,13 +45,13 @@ end
 
 
 -- a string to put in the handle
-local wdata.data_get_string=function(dat)
+wdata.data_get_string=function(dat)
 	if dat.class=="number" then return tostring(dat.num) end
 	return dat.str
 end
 
 -- how wide or tall should the handle be given the size of the parent?
-local wdata.data_get_size=function(dat,w)
+wdata.data_get_size=function(dat,w)
 	local ret=16
 	if dat.min==dat.max then
 		ret=w					-- fullsize
@@ -67,7 +67,7 @@ end
 
 
 -- get display pos, given the size of the parent and our size?
-local wdata.data_get_pos=function(dat,psiz,bsiz)
+wdata.data_get_pos=function(dat,psiz,bsiz)
 	if dat.step==0 then -- no snap
 		return ((dat.num-dat.min)/(dat.max-dat.min))
 	else
@@ -77,7 +77,7 @@ end
 
 -- given the parents size and our relative position/size within it
 -- update dat.num and return a new position (for snapping)
-local wdata.data_snap=function(dat,psiz,bsiz,bpos)
+wdata.data_snap=function(dat,psiz,bsiz,bpos)
 	if dat.step==0 then -- no snap
 		if dat.max==dat.min then dat:value(dat.min) return 0 end -- do not move
 		
@@ -126,14 +126,14 @@ function wdata.new_data(dat)
 	
 -- setup callback functions
 
-	dat.call_hook=call_hook
+	dat.call_hook=wdata.call_hook
 
-	dat.get_string=data_get_string -- should be moved into value() ?
-	dat.get_size=data_get_size
-	dat.get_pos=data_get_pos
+	dat.get_string=wdata.data_get_string -- should be moved into value() ?
+	dat.get_size=wdata.data_get_size
+	dat.get_pos=wdata.data_get_pos
 	
 -- get or set the value
-	dat.value=data_value
+	dat.value=wdata.data_value
 
 -- work out snapping for scroll bars	
 	dat.snap=data_snap

@@ -6,7 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("wetgenes.gamecake.widget.file")
+module("wetgenes.gamecake.widgets.file")
 
 function bake(state,wfile)
 wfile=wfile or {}
@@ -32,10 +32,10 @@ end
 function wfile.setup(widget,def)
 	widget.class="file"
 	
-	widget.key=key
-	widget.mouse=mouse
-	widget.update=update
-	widget.draw=draw
+	widget.key=wfile.key
+	widget.mouse=wfile.mouse
+	widget.update=wfile.update
+	widget.draw=wfile.draw
 
 -- auto add the draging button as a child
 --[[

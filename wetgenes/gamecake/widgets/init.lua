@@ -8,20 +8,21 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 -- this all needs to be baked into thecake, just hax for now
 
-local widget_meta=require("wetgenes.gamecake.widget.meta")
-local widget_skin=require("wetgenes.gamecake.widget.skin")
 
 
 
-module("wetgenes.gamecake.widget")
+module("wetgenes.gamecake.widgets")
 
 function bake(state,widgets)
 widgets=widgets or {}
 
+local wmeta=state:rebake("wetgenes.gamecake.widgets.meta")
+local wskin=state:rebake("wetgenes.gamecake.widgets.skin")
+
 --
 -- create a master widget
 --
-function widgets.setup(win,def)
+function widgets.setup(def)
 
 	local meta={}
 	meta.__index=meta
@@ -30,17 +31,13 @@ function widgets.setup(win,def)
 	master.parent=master -- we are our own parent, probably safer than setting as null
 	master.master=master -- and our own master
 	
-	master.widget_meta=require("wetgenes.gamecake.widget.meta")
-	master.widget_skin=require("wetgenes.gamecake.widget.skin")
-
 	master.font=def.font
 	
 	def.master=master
 	def.meta=meta
-	def.win=win
 
-	widget_meta.setup(def)
-	widget_skin.setup(def)
+	wmeta.setup(def)
+	wskin.setup(def)
 	
 -- default GUI size if no other is specified
 	def.hx=def.hx or 640

@@ -27,7 +27,7 @@ function bake(opts)
 			
 				ret={modname=name}
 				state.baked[name]=ret
-				ret=require(name).bake(state,ret)
+				ret=assert(require(name)).bake(state,ret)
 				
 			end
 

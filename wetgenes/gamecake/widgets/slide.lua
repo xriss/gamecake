@@ -5,12 +5,12 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- two basic widgets merged together to give a simple slide or scrollbar 
 
 
-module("wetgenes.gamecake.widget.slide")
+module("wetgenes.gamecake.widgets.slide")
 
 function bake(state,wslide)
 wslide=wslide or {}
 
-local widget_data=require("wetgenes.gamecake.widget.data")
+local widget_data=state:rebake("wetgenes.gamecake.widgets.data")
 
 
 function wslide.mouse(widget,act,x,y,key)
@@ -62,12 +62,12 @@ function wslide.setup(widget,def)
 --	widget.slide=it
 	widget.class="slide"
 	
-	widget.snap=slide_snap
+	widget.snap=wslide.slide_snap
 	
-	widget.key=key
-	widget.mouse=mouse
-	widget.update=update
-	widget.layout=layout
+	widget.key=wslide.key
+	widget.mouse=wslide.mouse
+	widget.update=wslide.update
+	widget.layout=wslide.layout
 	
 --setup constraints in x and y 
 	widget.datx=widget_data.new_data(def.datx)

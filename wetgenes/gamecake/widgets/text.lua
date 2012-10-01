@@ -2,7 +2,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
-module("wetgenes.gamecake.widget.text")
+module("wetgenes.gamecake.widgets.text")
 
 function bake(state,wtext)
 wtext=wtext or {}
@@ -37,10 +37,10 @@ function wtext.setup(widget,def)
 --	widget.button=it
 	widget.class="text"
 	
-	widget.key=key
-	widget.mouse=mouse
-	widget.update=update
-	widget.draw=draw
+	widget.key=wtext.key
+	widget.mouse=wtext.mouse
+	widget.update=wtext.update
+	widget.draw=wtext.draw
 
 	return widget
 end

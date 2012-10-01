@@ -40,10 +40,17 @@ end
 
 
 
-module("wetgenes.gamecake.widget.skin")
+module("wetgenes.gamecake.widgets.skin")
 
 function bake(state,wskin)
 wskin=wskin or {}
+
+
+local cake=state.cake
+local images=cake.images
+local canvas=state.canvas
+local font=canvas.font
+local flat=canvas.flat
 
 
 local mode=nil
@@ -67,7 +74,7 @@ end
 --
 function wskin.load(state,name)
 	
-	unload(state)
+	wskin.unload(state)
 	
 	local images=state.cake.images
 
@@ -105,11 +112,6 @@ function wskin.setup(def)
 	local win=def.win
 --	local font=--[[def.font]]def.state.cake.fonts.get(1)
 
-	local cake=def.state.cake
-	local images=cake.images
-	local canvas=def.state.canvas
-	local font=canvas.font
-	local flat=canvas.flat
 	
 local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 		

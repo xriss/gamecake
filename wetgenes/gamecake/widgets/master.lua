@@ -9,10 +9,13 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local gl=require('gles').gles1
 
-module("wetgenes.gamecake.widget.master")
+module("wetgenes.gamecake.widgets.master")
 
 function bake(state,wmaster)
 wmaster=wmaster or {}
+
+local cake=state.cake
+local canvas=state.canvas
 
 --
 -- add meta functions
@@ -23,8 +26,6 @@ function wmaster.setup(widget,def)
 	local meta=widget.meta
 --	local win=def.win
 
-	local cake=def.state.cake
-	local canvas=def.state.canvas
 
 	master.throb=0
 --	master.fbo=_G.win.fbo(0,0,0) -- use an fbo

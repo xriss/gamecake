@@ -7,7 +7,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("wetgenes.gamecake.widget.pan")
+module("wetgenes.gamecake.widgets.pan")
 
 function bake(state,wpan)
 wpan=wpan or {}
@@ -40,12 +40,12 @@ function wpan.setup(widget,def)
 	widget.pan_px=0
 	widget.pan_py=0
 	
-	widget.key=key
-	widget.mouse=mouse
-	widget.update=update
-	widget.draw=draw
+	widget.key=wpan.key
+	widget.mouse=wpan.mouse
+	widget.update=wpan.update
+	widget.draw=wpan.draw
 	
-	widget.fbo=_G.win.fbo(0,0,0)
+--	widget.fbo=_G.win.fbo(0,0,0)
 
 	return widget
 end

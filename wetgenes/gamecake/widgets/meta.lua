@@ -4,7 +4,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- generic default widget functions
 
 
-module("wetgenes.gamecake.widget.meta")
+module("wetgenes.gamecake.widgets.meta")
 
 function bake(state,wmeta)
 wmeta=wmeta or {}
@@ -14,18 +14,18 @@ wmeta.classes={
 
 -- base classes
 
-	["master"]=require("wetgenes.gamecake.widget.master"),
-	["button"]=require("wetgenes.gamecake.widget.button"),
-	["drag"]=require("wetgenes.gamecake.widget.drag"),
-	["text"]=require("wetgenes.gamecake.widget.text"),
-	["textedit"]=require("wetgenes.gamecake.widget.textedit"),
+	["master"]=state:rebake("wetgenes.gamecake.widgets.master"),
+	["button"]=state:rebake("wetgenes.gamecake.widgets.button"),
+	["drag"]=state:rebake("wetgenes.gamecake.widgets.drag"),
+	["text"]=state:rebake("wetgenes.gamecake.widgets.text"),
+	["textedit"]=state:rebake("wetgenes.gamecake.widgets.textedit"),
 
 --classes built out of the base classes
 
-	["pan"]=require("wetgenes.gamecake.widget.pan"),
-	["slide"]=require("wetgenes.gamecake.widget.slide"),
+	["pan"]=state:rebake("wetgenes.gamecake.widgets.pan"),
+	["slide"]=state:rebake("wetgenes.gamecake.widgets.slide"),
 
-	["scroll"]=require("wetgenes.gamecake.widget.scroll"),
+	["scroll"]=state:rebake("wetgenes.gamecake.widgets.scroll"),
 
 }
 
@@ -170,8 +170,8 @@ function wmeta.setup(def)
 		if widget.color or widget.text then widget.solid=true end
 		widget.solid=widget.solid or def.solid
 		
-		if widget.class and classes[widget.class] then -- got a class, call its setup, its setup can override other functions
-			classes[widget.class].setup(widget,def)
+		if widget.class and wmeta.classes[widget.class] then -- got a class, call its setup, its setup can override other functions
+			wmeta.classes[widget.class].setup(widget,def)
 		end
 		
 		if widget.master.ids and widget.id then widget.master.ids[widget.id]=widget end -- lookup by id

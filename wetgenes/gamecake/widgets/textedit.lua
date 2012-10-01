@@ -7,12 +7,12 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("wetgenes.gamecake.widget.textedit")
+module("wetgenes.gamecake.widgets.textedit")
 
 function bake(state,wtextedit)
 wtextedit=wtextedit or {}
 
-local widget_data=require("wetgenes.gamecake.widget.data")
+local widget_data=state:rebake("wetgenes.gamecake.widgets.data")
 
 
 function wtextedit.mouse(widget,act,x,y,key)
@@ -211,13 +211,13 @@ function wtextedit.setup(widget,def)
 --	widget.data.str_idx=0
 	
 --	widget.key=key
-	widget.update=update
+	widget.update=wtextedit.update
 
-	widget.key=key
-	widget.mouse=mouse
+	widget.key=wtextedit.key
+	widget.mouse=wtextedit.mouse
 
 	return widget
 end
 
-rwturn wtextedit
+return wtextedit
 end
