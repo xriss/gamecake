@@ -34,7 +34,7 @@ module(...)
 -----------------------------------------------------------------------------
 function parse_args(s,label)
   local arg = {}
-  arg[0]=label or "?"
+  arg[0]=label
   string.gsub(s, "([%w_]+)%s*=%s*([\"'])(.-)%2", function (w, _, a)
     arg[string.lower(w)] = a
   end)
@@ -83,7 +83,7 @@ local ret_stack=2 -- we start by assuming we will be skipping a header
 	ret_stack=1
 	ni,j,c,label,args, empty = string.find(s, "<(%/?)([%w_]+)(.-)(%/?)>")
   end
-  
+  label=(label or "?"):lower()
   
   while ni do
 --print(ni,j,c,label,args,empty)
@@ -132,6 +132,7 @@ local ret_stack=2 -- we start by assuming we will be skipping a header
     
     
     ni,j,c,label,args, empty = string.find(s, "<(%/?)([%w_]+)(.-)(%/?)>", i)
+    label=(label or "?"):lower()
   end
   local text = string.sub(s, i)
   if not string.find(text, "^%s*$") then
