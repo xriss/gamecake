@@ -1,4 +1,4 @@
-#!../../bin/exe/lua
+#!../../../bin/dbg/lua
 
 -- setup some default search paths,
 require("apps").default_paths()
