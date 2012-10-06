@@ -154,6 +154,25 @@ static int lua_gles_Flush (lua_State *l)
 	return 0;
 }
 
+static int lua_gles_DepthFunc (lua_State *l)
+{
+	glDepthFunc( (int)luaL_checknumber(l,1) );
+	return 0;
+}
+
+static int lua_gles_DepthMask (lua_State *l)
+{
+
+	glDepthMask( (int)luaL_checknumber(l,1) );
+	return 0;
+}
+static int lua_gles_DepthRange (lua_State *l)
+{
+
+	glDepthRangef( (float)luaL_checknumber(l,1) , (float)luaL_checknumber(l,2)  );
+	return 0;
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // Matrix (gles1)
@@ -1012,6 +1031,10 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"DeleteBuffer",			lua_gles_DeleteBuffer},
 		{"BufferData",				lua_gles_BufferData},
 		{"BufferSubData",			lua_gles_BufferSubData},
+
+		{"DepthMask",			lua_gles_DepthMask},
+		{"DepthRange",			lua_gles_DepthRange},
+		{"DepthFunc",			lua_gles_DepthFunc},
 
 // fixed pipeline
 #if defined(LUA_GLES_GLES1) || defined(LUA_GLES_GL)
