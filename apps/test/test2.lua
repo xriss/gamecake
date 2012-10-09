@@ -9,6 +9,7 @@ apps.default_paths()
 
 local pack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
+local wxox=require("wetgenes.xox")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
@@ -64,181 +65,12 @@ end
 demo.setup=function(state)
 
 	demo.loads(state)
+
+
+	demo.xox=wxox.create_xox({}):load_dae("cog.dae")
 	
-	
-local dprint=function(...) print(wstr.dump(...)) end
-local wxml=require("wetgenes.simpxml")
-local wzips=require("wetgenes.zips")
-
---local s=wzips.readfile("multimtl.dae")
---local s=wzips.readfile("hand.dae")
---local s=wzips.readfile("test2.dae")
---local s=wzips.readfile("dice.dae")
-local s=wzips.readfile("cog.dae")
-
-print("loaded ",#s,"bytes")
-
-local x=wxml.parse(s)
-
---print("loaded ",wxml.unparse(x))
-
-local ids={}
-local function do_ids(t)
-	for i=1,#t do local v=t[i]
-		if type(v)=="table" then
-			if v.id then ids[v.id]=v end
-			do_ids(v)
-		end
-	end
-end
-do_ids(x)
-
-for id,v in pairs(ids) do
-print("\""..id.."\"")
 end
 
-local function get_dat(id)
-	if id:sub(1,1) == "#" then
-		id=id:sub(2)
-	end
-	local d=ids[id]
-	if d[0]=="source" or d[0]=="float_array" then
-		return d 
-	else
-		local t=wxml.descendent(d,"input")
-		return get_dat(t.source)
-	end
-end
-
-local function scan_nums(s)
-	local a={}
-	for w in string.gfind(s, "([^%s]+)") do
-		local n=tonumber(w)
-		a[#a+1]=n
-	end	
-	return a
-end
-
-local sources={}
-local function get_source(id)
-	if sources[id] then return sources[id] end
-	
-	local d=get_dat(id)
-	
-	local a=wxml.descendent(d,"accessor")
-	local it={}
-	
-	it.stride=tonumber(a.stride)
-	it.names={}
-
-	for i,v in ipairs( wxml.descendents(a,"param") ) do
-		it.names[#it.names+1]=v.name
-	end
-	
-	it.data=scan_nums( get_dat(a.source)[1] )
-	
-	sources[id]=it
-	return it
-end
-
-
-local geo
-
-local t=wxml.descendent(x,"library_geometries")
-for i=1,#t do local v=t[i]
-	if v[0]=="geometry" then
-		geo={}
-		geo.name=v.name
-		geo.mesh=wxml.descendent(v,"mesh")
-		break
-	end
-end
-
-
-
-print("loading object named \""..geo.name.."\"")
-
-local polys={}
-for i,v in ipairs( wxml.descendents(geo.mesh,"polylist")) do -- handle each polylist chunk
-
-	local p={}
-	polys[#polys+1]=p
-	
-	p.inputs={}
-	
-	p.stride=0
-	for i,l in ipairs( wxml.descendents(v,"input") ) do
-		local m={}
-		p.inputs[#p.inputs+1]=m
-		
-		m.semantic=l.semantic
-		m.offset=tonumber(l.offset)
-		m.source=get_source(l.source)
-		if m.offset > p.stride then p.stride=m.offset end
-	end
-	p.stride=p.stride+1 -- this is how we guess this number?
-	p.vcount=scan_nums( wxml.descendent(v,"vcount")[1] )
-	p.p=scan_nums( wxml.descendent(v,"p")[1] )
-	
---	dprint( p )
-
-end
-
-print("found poly list count \""..#polys.."\"")
-
-demo.draw_test=function(state)
-
-local canvas=state.canvas
-local cake=state.cake
-local gl=cake.gl
-
-	for ips,ps in ipairs(polys) do
-	
-
-		local off=1
-		for ipc,pc in ipairs(ps.vcount) do
-		
-			local db={}
-			local function push(n)
-				db[#db+1]=n
-			end
-
-			local pxx
-			if pc==3 then
-				pxx={1,2,3}
-			elseif pc==4 then
-				pxx={1,2,4,3}
-			end
-			
-			for _,i in ipairs(pxx) do
-				
-				for j=1,ps.stride do
-					local v=ps.p[ off+(ps.stride*(i-1))+j-1 ]
-					
-					if ps.inputs[j].semantic == "VERTEX" then
-						local s=ps.inputs[j].source
-						for n=1,3 do
-							push( s.data[ (v*s.stride) +n ] )
-						end
-					end
-					
-				end
-				
-			end
-			off=off+ps.stride*pc
-		
-			gl.Color(0.5,ipc/#ps.vcount,0.5,1) -- draw drop shadow
-			canvas.flat.tristrip("xyz",db)
-			
-		end
-	
-
-	end
-
-
-end
-
-end
 
 demo.clean=function(state)
 
@@ -314,7 +146,8 @@ demo.draw=function(state)
 	gl.Enable(gl.DEPTH_TEST)
 --	gl.Enable(gl.CULL_FACE)
 
-	demo.draw_test(state)
+--	demo.draw_test(state)
+	demo.xox:draw_canvas(canvas)
 
 	gl.Disable(gl.DEPTH_TEST)
 --	gl.Disable(gl.CULL_FACE)
