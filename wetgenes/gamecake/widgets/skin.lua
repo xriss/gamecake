@@ -61,7 +61,7 @@ local border=0 -- solidspace
 --
 -- unload a skin, go back to the "builtin" default
 --
-function wskin.unload(state)
+function wskin.unload()
 
 	mode=nil
 	texs={}
@@ -72,9 +72,9 @@ end
 --
 -- load a skin
 --
-function wskin.load(state,name)
+function wskin.load(name)
 	
-	wskin.unload(state)
+	wskin.unload()
 	
 	local images=state.cake.images
 
@@ -394,9 +394,18 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		
 --print("using font "..(widget.font or widget.master.font or 1))
 
-			font.set(cake.fonts.get(widget.font or widget.master.font or 1))
-			font.set_size(widget.text_size,0)
 			local ty=widget.text_size
+
+			local f=widget.font or widget.master.font or 1
+			if f then
+				if type(f)=="number" then
+				else
+					typ=typ-ty/8 -- reposition font slightly as fonts other than the builtin probably have decenders
+				end
+			end
+			
+			font.set(cake.fonts.get(f))
+			font.set_size(widget.text_size,0)
 			local tx=font.width(widget.text)
 
 --			local tx,ty=font.size(widget.text,widget.text_size)
@@ -426,9 +435,16 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			widget.text_x=tx
 			widget.text_y=ty
 
+			if widget.text_color_shadow then
+				gl.Color( pack.argb8_pmf4(widget.text_color_shadow) )
+				font.set_xy(tx+1,ty+1)
+				font.draw(widget.text)
+			end
+			
 			gl.Color( pack.argb8_pmf4(c) )
 			font.set_xy(tx,ty)
 			font.draw(widget.text)
+
 
 --			font.set(tx,-ty,c,widget.text_size)
 --			font.draw(widget.text)

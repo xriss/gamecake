@@ -38,10 +38,10 @@ function bake(state)
 
 		escmenu.show=false
 
-		escmenu.master=state:rebake("wetgenes.gamecake.widgets").setup(state.win,{state=state})
+		escmenu.master=state:rebake("wetgenes.gamecake.widgets").setup({})
 		
-		if wzips.exists("data/skins/soapbar/button.png") then -- we got us better font to use :)
-			state:rebake("wetgenes.gamecake.widgets.skin").load(state,"soapbar")
+		if wzips.exists("data/skins/soapbar/button.png") then -- we got us better skin to use :)
+			state:rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
 		end
 
 		local hooks={}

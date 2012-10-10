@@ -160,6 +160,8 @@ function wmeta.setup(def)
 		widget.text_color=def.text_color or widget.parent.text_color or 0xff000000 -- black text
 		widget.text_size=def.text_size or widget.parent.text_size or 16 -- quite chunky text by default
 		
+		widget.text_color_shadow=def.text_color_shadow  -- may need a shadow
+		
 		widget.font=def.font or widget.parent.font --  use this font if set or inherit value from parent
 		
 		widget.text_color_over=def.text_color_over -- if set, switch text color on hover
