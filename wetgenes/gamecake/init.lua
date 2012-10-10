@@ -37,17 +37,17 @@ function bake(opts)
 	
 	if cake.gl then cake.gl.GetExtensions() end
 	
---	cake.bake_canvas=function() return wcanvas.bake(opts)	end -- a canvas generator
-	
+		
 cake.setup = function()
+print("CAKE SETUP")
 	if not cake.opts.disable_sounds then
---		cake.sounds.setup()
+		cake.sounds.setup()
 	end
 end
 
 cake.clean = function()
 	if not cake.opts.disable_sounds then
---		cake.sounds.clean()
+		cake.sounds.clean()
 	end
 end
 
@@ -58,7 +58,7 @@ print("cakestart")
 	cake.sheets.start()
 	cake.fonts.start()
 	if not cake.opts.disable_sounds then
---		cake.sounds.start()
+		cake.sounds.start()
 	end
 end
 
@@ -76,11 +76,6 @@ print("cakestop")
 	end
 end
 
--- wrapper for bliting by id/name
-cake.blit = function(id,name,cx,cy,ix,iy,w,h)
-	cake.canvas.blit(cake.images.get(id,name),cx,cy,ix,iy,w,h)
-end
-
 	
 	cake.buffers = wbuffers.bake(opts) -- generic buffer memory is now complex thanks to retardroid
 	cake.images  =  wimages.bake(opts) -- we will need to load some images
@@ -94,6 +89,25 @@ end
 		cake.state.cake=cake -- the cake upon which we rest
 		cake.state.canvas=cake.canvas -- the default canvas to draw upon
 	end
+	
+
+-- and add in some extra simple sugar
+
+	local images=cake.images
+	local canvas=cake.canvas
+	local sounds=cake.sounds
+
+-- simple wrapper for bliting by id/name
+cake.blit = function(id,name,cx,cy,ix,iy,w,h)
+	canvas.blit(images.get(id,name),cx,cy,ix,iy,w,h)
+end
+
+-- simple wrapper for beeping by id/name
+cake.beep = function(id,name)
+	sounds.beep(sounds.get(id,name))
+end
+
+	cake.setup()
 	
 	return cake
 end

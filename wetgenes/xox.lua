@@ -8,7 +8,8 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 -- we handle the lua side loading and manipulation of 3d vertex/polygon buffers
--- this can be used for file/data processing but needs opengl drawing code to be wrapped on top
+-- this can be used for file/data processing but needs you to pass in contexts
+-- for basic opengl drawing funcs
 
 local dprint=function(...) print(wstr.dump(...)) end
 local wxml=require("wetgenes.simpxml")

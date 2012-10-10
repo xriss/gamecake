@@ -88,6 +88,9 @@ function loader(...)
 				if file then
 					local str=file:read("*a")
 					file:close()
+					if str:sub(1,2)=="#!" then
+						str="--"..str -- ignore hashbang on first line
+					end
 					local func,err=assert(loadstring(str))
 					return func or err
 				end

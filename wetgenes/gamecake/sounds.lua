@@ -15,6 +15,7 @@ function bake(opts)
 	local sounds={}
 	
 	sounds.cake=opts.cake
+	
 	sounds.al=opts.al
 	sounds.alc=opts.alc
 	
@@ -25,13 +26,18 @@ function bake(opts)
 	sounds.data={}
 	
 	sounds.zip=opts.zip
-	sounds.prefix=opts.sodprefix or "data/sfx_"
+	sounds.prefix=opts.sodprefix or "data/sfx/"
 	sounds.postfix=opts.sodpostfix or ".wav"
 	
 
 sounds.setup=function()
+
 	sounds.al=sounds.al or require("al")
 	sounds.alc=sounds.alc or require("alc")
+
+-- copy into locals
+	al=sounds.al
+	alc=sounds.alc
 
 	sounds.start()
 
@@ -79,9 +85,6 @@ sounds.unload=function(id,name)
 	local t=sounds.get(id,name)
 
 	if t then
-		if al then --gl mode
---				gl.DeleteTexture( t.id )			
-		end
 		sounds.set(nil,id,name)
 	end
 end
