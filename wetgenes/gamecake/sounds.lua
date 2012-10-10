@@ -93,9 +93,6 @@ end
 -- load a single image, and make it easy to lookup by the given id
 --
 sounds.load=function(filename,id,name)
-	if sounds.cake.opts.disable_sounds then
-		return
-	end
 
 	name=name or "base"
 
@@ -212,6 +209,13 @@ sounds.stop = function()
 
 end
 
+	if sounds.cake.opts.disable_sounds then -- disable all function in this file
+		for n,v in pairs(sounds) do
+			if type(v)=="function" then
+				sounds[n]=function() end
+			end
+		end
+	end
 
 	return sounds
 end

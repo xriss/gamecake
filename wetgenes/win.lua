@@ -106,6 +106,10 @@ function win.load_run_init()
 	local s=zips.readfile("lua/init.lua")
 	
 	assert(s) -- sanity, may want a seperate path for any missing init.lua ?
+
+	if s:sub(1,2)=="#!" then
+		s="--"..s -- ignore hashbang on first line
+	end
 	
 	local f=assert(loadstring(s))
 	

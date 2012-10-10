@@ -24,9 +24,22 @@ function bake(opts)
 	opts.cake=cake -- insert cake into opts
 	cake.opts=opts -- and opts into cake
 
+
 --	get gl and win from state if we need them
 	opts.gl=opts.gl or (opts.state and opts.state.gl)
 	opts.win=opts.win or (opts.state and opts.state.win)
+
+	if opts.win.flavour=="nacl" then -- nacl hacks
+		cake.opts.disable_sounds=true
+	end
+
+	if opts.win.flavour=="windows" then -- windows hacks
+		cake.opts.disable_sounds=true
+	end
+
+	if opts.win.flavour=="raspi" then -- raspi hacks
+		cake.opts.disable_sounds=true
+	end
 
 -- cache stuffs	
 	cake.state=opts.state
@@ -35,20 +48,17 @@ function bake(opts)
 	
 	cake.mods={} -- for use in our baked require
 	
+	
 	if cake.gl then cake.gl.GetExtensions() end
 	
 		
 cake.setup = function()
 print("CAKE SETUP")
-	if not cake.opts.disable_sounds then
-		cake.sounds.setup()
-	end
+	cake.sounds.setup()
 end
 
 cake.clean = function()
-	if not cake.opts.disable_sounds then
-		cake.sounds.clean()
-	end
+	cake.sounds.clean()
 end
 
 cake.start = function()
@@ -57,9 +67,7 @@ print("cakestart")
 	cake.images.start()
 	cake.sheets.start()
 	cake.fonts.start()
-	if not cake.opts.disable_sounds then
-		cake.sounds.start()
-	end
+	cake.sounds.start()
 end
 
 cake.stop = function()
@@ -68,9 +76,7 @@ print("cakestop")
 	cake.sheets.stop()
 	cake.images.stop()
 	cake.buffers.stop()
-	if not cake.opts.disable_sounds then
---		cake.sounds.stop()
-	end
+	cake.sounds.stop()
 	if cake.gl.forget then -- any programs will need to be recompiled
 		cake.gl.forget()
 	end
