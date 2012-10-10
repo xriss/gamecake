@@ -16,13 +16,23 @@ if ANDROID then
 			prefix.."/Alc/backends/android.c",
 	}
 	defines("HAVE_ANDROID")
-	
+
+
+elseif NACL then
+
+	files { 
+			prefix.."/Alc/backends/ppapi.c",
+	}
+	defines("HAVE_PPAPI")
+
+
 else
 
 	files { 
 			prefix.."/Alc/backends/alsa.c",
 	}
 	defines("HAVE_ALSA")
+	
 end
 
 
