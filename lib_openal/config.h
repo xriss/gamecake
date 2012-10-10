@@ -44,7 +44,7 @@
 #define HAVE_WAVE
 
 /* Define if we have dlfcn.h */
-#define HAVE_DLFCN_H
+//#define HAVE_DLFCN_H
 
 /* Define if we have the stat function */
 #define HAVE_STAT
@@ -110,10 +110,10 @@
 #define HAVE_FLOAT_H
 
 /* Define if we have fenv.h */
-#define HAVE_FENV_H
+//#define HAVE_FENV_H
 
 /* Define if we have fesetround() */
-#define HAVE_FESETROUND
+//#define HAVE_FESETROUND
 
 /* Define if we have _controlfp() */
 /* #undef HAVE__CONTROLFP */

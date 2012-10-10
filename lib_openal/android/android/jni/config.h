@@ -125,7 +125,7 @@
 /* #cmakedefine HAVE_FPU_CONTROL_H */
 
 /* Define if we have fenv.h */
-#define HAVE_FENV_H 1
+//#define HAVE_FENV_H 1
 
 /* Define if we have fesetround() */
 /* #cmakedefine HAVE_FESETROUND */
