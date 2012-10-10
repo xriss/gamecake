@@ -48,9 +48,9 @@ typedef struct {
     ALvoid *buffer;
     ALuint size;
 
-    struct PPB_AudioConfig* audio_config;
-    struct PPB_Audio* audio;
-    struct PPB_Core* core;
+    PPB_AudioConfig* audio_config;
+    PPB_Audio* audio;
+    PPB_Core* core;
 
     PP_Resource audio_config_resource;
     PP_Resource audio_resource;
@@ -169,16 +169,22 @@ static void ppapi_open_playback_main_thread(void* user_data, int32_t result)
     ppapi_data *data = (ppapi_data*)user_data;
     (void)result;
 
-    data->sample_frame_count =
-        data->audio_config->RecommendSampleFrameCount(PP_AUDIOSAMPLERATE_44100,
+    data->
+    sample_frame_count =
+        data->
+        audio_config->
+        RecommendSampleFrameCount(PP_AUDIOSAMPLERATE_44100,
                                                       kRequestedFrameCount);
 
     PP_AudioSampleRate rate = PP_AUDIOSAMPLERATE_44100;
     if (data->device->Frequency == 48000)
         rate = PP_AUDIOSAMPLERATE_48000;
 
-    data->audio_config_resource =
-        data->audio_config->CreateStereo16Bit(gInstance,
+    data->
+    audio_config_resource =
+        data->
+        audio_config->
+        CreateStereo16Bit(gInstance,
                                               rate,
                                               data->sample_frame_count);
 
@@ -227,21 +233,21 @@ static ALCboolean ppapi_open_playback(ALCdevice *device,
     data->device = device;
 
     data->audio_config =
-        (struct PPB_AudioConfig*)gGetInterface(PPB_AUDIO_CONFIG_INTERFACE);
+        (PPB_AudioConfig*)gGetInterface(PPB_AUDIO_CONFIG_INTERFACE);
     if (!data->audio_config)
     {
         free(data);
         return ALC_FALSE;
     }
 
-    data->audio = (struct PPB_Audio*)gGetInterface(PPB_AUDIO_INTERFACE);
+    data->audio = (PPB_Audio*)gGetInterface(PPB_AUDIO_INTERFACE);
     if (!data->audio)
     {
         free(data);
         return ALC_FALSE;
     }
 
-    data->core = (struct PPB_Core*)gGetInterface(PPB_CORE_INTERFACE);
+    data->core = (PPB_Core*)gGetInterface(PPB_CORE_INTERFACE);
     if (!data->core)
     {
         free(data);

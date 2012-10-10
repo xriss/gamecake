@@ -1,5 +1,5 @@
 if [ "$1" = "clean" ] ; then
-	rm -Rf build-gmake-mingw
+	rm -Rf build-gmake-windows-native
 fi
 
 cd `dirname $0`
@@ -7,7 +7,7 @@ cd ..
 
 build/premake4 gmake mingw
 
-cd build-gmake-mingw
+cd build-gmake-windows-native
 
 if [ "$1" = "release" ] ; then
 	make config=release_mingw

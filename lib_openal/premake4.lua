@@ -16,6 +16,7 @@ if ANDROID then
 			prefix.."/Alc/backends/android.c",
 	}
 	defines("HAVE_ANDROID")
+	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H"}
 
 
 elseif NACL then
@@ -32,6 +33,7 @@ else
 			prefix.."/Alc/backends/alsa.c",
 	}
 	defines("HAVE_ALSA")
+	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H"}
 	
 end
 
