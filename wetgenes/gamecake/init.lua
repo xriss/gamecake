@@ -30,7 +30,7 @@ function bake(opts)
 	opts.win=opts.win or (opts.state and opts.state.win)
 
 	if opts.win.flavour=="nacl" then -- nacl hacks
-		cake.opts.disable_sounds=true
+--		cake.opts.disable_sounds=true
 	end
 
 	if opts.win.flavour=="windows" then -- windows hacks
