@@ -70,10 +70,12 @@ typedef struct {
 static PP_Instance gInstance;
 static PPB_GetInterface gGetInterface;
 
+extern void alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface);
 void alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface)
 {
     gInstance = instance;
     gGetInterface = get_interface;
+    
 }
 
 /* This is the callback from PPAPI to fill in the audio buffer. */
@@ -118,6 +120,9 @@ void PPAPI_Audio_Callback(void *sample_buffer,
 
 static const ALCchar ppapiDevice[] = "PPAPI Output";
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 static ALuint PpapiProc(ALvoid *ptr)
 {
     ALCdevice *Device = (ALCdevice*)ptr;
@@ -129,7 +134,7 @@ static ALuint PpapiProc(ALvoid *ptr)
      * small for low latency but large enough so we don't starve Pepper.
      */
     const ALuint MinBufferSizeInBytes =
-        min(max(SampleFrameInBytes*4, UpdateSizeInBytes), data->size/2);
+        MIN(MAX(SampleFrameInBytes*4, UpdateSizeInBytes), data->size/2);
 
     while(!data->killNow && Device->Connected)
     {
@@ -197,7 +202,7 @@ static void ppapi_open_playback_main_thread(void* user_data, int32_t result)
     data->initialized = 1;
 }
 
-static ALCboolean ppapi_open_playback(ALCdevice *device,
+static ALCenum ppapi_open_playback(ALCdevice *device,
                                       const ALCchar *deviceName)
 {
     ppapi_data *data;
@@ -205,7 +210,7 @@ static ALCboolean ppapi_open_playback(ALCdevice *device,
     if(!deviceName)
         deviceName = ppapiDevice;
     else if(strcmp(deviceName, ppapiDevice) != 0)
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
 
     int channels = ChannelsFromDevFmt(device->FmtChans);
     int bytes = BytesFromDevFmt(device->FmtType);
@@ -213,17 +218,17 @@ static ALCboolean ppapi_open_playback(ALCdevice *device,
     if (channels != 2)
     {
         AL_PRINT("PPAPI only supports 2 channel output\n");
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
     if (bytes != 2)
     {
         AL_PRINT("PPAPI only supports 16-bit output\n");
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
     if (device->Frequency != 44100 && device->Frequency != 44800)
     {
         AL_PRINT("PPAPI only supports 44100 and 44800 sample frequencies\n");
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
 
     data = (ppapi_data*)calloc(1, sizeof(*data));
@@ -237,27 +242,31 @@ static ALCboolean ppapi_open_playback(ALCdevice *device,
     if (!data->audio_config)
     {
         free(data);
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
 
     data->audio = (PPB_Audio*)gGetInterface(PPB_AUDIO_INTERFACE);
     if (!data->audio)
     {
         free(data);
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
 
     data->core = (PPB_Core*)gGetInterface(PPB_CORE_INTERFACE);
     if (!data->core)
     {
         free(data);
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
+/*
     struct PP_CompletionCallback cb =
         PP_MakeCompletionCallback(ppapi_open_playback_main_thread, data);
     data->core->CallOnMainThread(0, cb, 0);
+*/
+// assume we are on themain thread otherwise we lock because sleep does not sleep?
+ppapi_open_playback_main_thread(data,0);
 
-    return ALC_TRUE;
+    return ALC_NO_ERROR;
 }
 
 
@@ -290,11 +299,13 @@ static void ppapi_close_playback(ALCdevice *device)
 
 static ALCboolean ppapi_reset_playback(ALCdevice *device)
 {
+
     ppapi_data *data = (ppapi_data*)device->ExtraData;
     /* Initialization via 'open_playback' happens asychronously, so we
      * need to wait until this happens in order for data to be ready
      */
     while (!data->initialized) Sleep(100);
+    
 
     /* 4 is 2-channels, 2-bytes per sample. */
     ALuint UpdateSizeInBytes = device->UpdateSize * 4;
@@ -343,12 +354,12 @@ static void ppapi_stop_playback(ALCdevice *device)
 }
 
 
-static ALCboolean ppapi_open_capture(ALCdevice *device,
+static ALCenum ppapi_open_capture(ALCdevice *device,
                                      const ALCchar *deviceName)
 {
     (void)device;
     (void)deviceName;
-    return ALC_FALSE;
+    return ALC_INVALID_VALUE;
 }
 
 
@@ -369,7 +380,7 @@ ALCboolean alc_ppapi_init(BackendFuncs *func_list)
 {
     *func_list = ppapi_funcs;
     
-    return 1;
+    return ALC_TRUE;
 }
 
 void alc_ppapi_deinit(void)

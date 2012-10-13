@@ -459,7 +459,7 @@ all_includes=all_includes or {
 	{"lua_bit",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 --	{"lua_box2d",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
 	{"lua_ogg",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
-	{"lua_al",			nil			or		NIX		or		nil		or		ANDROID		or		nil			},
+	{"lua_al",			nil			or		NIX		or		NACL	or		ANDROID		or		nil			},
 --	{"lua_gl",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
 	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_grd",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
@@ -491,7 +491,7 @@ all_includes=all_includes or {
 	{"lib_pcre",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
 --	{"lib_ogg",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
 --	{"lib_vorbis",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
-	{"lib_openal",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		nil			},
+	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		nil			},
 	{"lua",				WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"nginx",			nil			or		NIX		or		nil		or		nil			or		nil			},
 }

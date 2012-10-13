@@ -119,7 +119,7 @@
 /* #undef HAVE__CONTROLFP */
 
 /* Define if we have pthread_setschedparam() */
-#define HAVE_PTHREAD_SETSCHEDPARAM
+//#define HAVE_PTHREAD_SETSCHEDPARAM
 
 /* Define if we have the restrict keyword */
 /* #undef HAVE_RESTRICT */

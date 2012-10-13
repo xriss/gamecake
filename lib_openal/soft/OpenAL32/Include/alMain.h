@@ -691,7 +691,9 @@ void GetLerpedHrtfCoeffs(ALfloat elevation, ALfloat azimuth, ALfloat gain, ALflo
 ALuint GetMovingHrtfCoeffs(ALfloat elevation, ALfloat azimuth, ALfloat gain, ALfloat delta, ALint counter, ALfloat (*coeffs)[2], ALuint *delays, ALfloat (*coeffStep)[2], ALint *delayStep);
 
 void al_print(const char *func, const char *fmt, ...) PRINTF_STYLE(2,3);
-#define AL_PRINT(...) al_print(__FUNCTION__, __VA_ARGS__)
+//#define AL_PRINT(...) al_print(__FUNCTION__, __VA_ARGS__)
+//#define AL_PRINT(...) printf( __VA_ARGS__)
+#define AL_PRINT(...)
 
 extern FILE *LogFile;
 enum LogLevel {
@@ -703,17 +705,14 @@ enum LogLevel {
 extern enum LogLevel LogLevel;
 
 #define TRACE(...) do {                                                       \
-    if(LogLevel >= LogTrace)                                                  \
         AL_PRINT(__VA_ARGS__);                                                \
 } while(0)
 
 #define WARN(...) do {                                                        \
-    if(LogLevel >= LogWarning)                                                \
         AL_PRINT(__VA_ARGS__);                                                \
 } while(0)
 
 #define ERR(...) do {                                                         \
-    if(LogLevel >= LogError)                                                  \
         AL_PRINT(__VA_ARGS__);                                                \
 } while(0)
 
