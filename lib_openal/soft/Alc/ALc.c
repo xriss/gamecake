@@ -42,6 +42,11 @@
 
 #define EmptyFuncs { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 static struct BackendInfo BackendList[] = {
+
+#ifdef HAVE_PPAPI
+    { "ppapi", alc_ppapi_init, alc_ppapi_deinit, alc_ppapi_probe, EmptyFuncs },
+#endif
+
 #ifdef HAVE_PULSEAUDIO
     { "pulse", alc_pulse_init, alc_pulse_deinit, alc_pulse_probe, EmptyFuncs },
 #endif
@@ -74,9 +79,6 @@ static struct BackendInfo BackendList[] = {
 #endif
 #ifdef HAVE_OPENSL
     { "opensl", alc_opensl_init, alc_opensl_deinit, alc_opensl_probe, EmptyFuncs },
-#endif
-#ifdef HAVE_PPAPI
-    { "ppapi", alc_ppapi_init, alc_ppapi_deinit, alc_ppapi_probe, EmptyFuncs },
 #endif
 
     { "null", alc_null_init, alc_null_deinit, alc_null_probe, EmptyFuncs },
@@ -2243,6 +2245,7 @@ ALC_API ALCcontext* ALC_APIENTRY alcCreateContext(ALCdevice *device, const ALCin
 {
     ALCcontext *ALContext;
 
+
     LockLists();
     if(!(device=VerifyDevice(device)) || device->IsCaptureDevice || !device->Connected)
     {
@@ -2251,6 +2254,7 @@ ALC_API ALCcontext* ALC_APIENTRY alcCreateContext(ALCdevice *device, const ALCin
         if(device) ALCdevice_DecRef(device);
         return NULL;
     }
+
 
     /* Reset Context Last Error code */
     device->LastError = ALC_NO_ERROR;
@@ -2263,6 +2267,7 @@ ALC_API ALCcontext* ALC_APIENTRY alcCreateContext(ALCdevice *device, const ALCin
         ALCdevice_DecRef(device);
         return NULL;
     }
+
 
     ALContext = calloc(1, sizeof(ALCcontext));
     if(ALContext)
@@ -2290,6 +2295,7 @@ ALC_API ALCcontext* ALC_APIENTRY alcCreateContext(ALCdevice *device, const ALCin
         return NULL;
     }
 
+
     ALContext->Device = device;
     InitContext(ALContext);
 
@@ -2298,6 +2304,8 @@ ALC_API ALCcontext* ALC_APIENTRY alcCreateContext(ALCdevice *device, const ALCin
     UnlockLists();
 
     ALCdevice_DecRef(device);
+
+
     return ALContext;
 }
 
@@ -2385,6 +2393,7 @@ ALC_API ALCdevice* ALC_APIENTRY alcGetContextsDevice(ALCcontext *pContext)
 */
 ALC_API ALCboolean ALC_APIENTRY alcMakeContextCurrent(ALCcontext *context)
 {
+
     ALboolean bReturn = AL_TRUE;
 
     LockLists();
@@ -2411,6 +2420,7 @@ ALC_API ALCboolean ALC_APIENTRY alcMakeContextCurrent(ALCcontext *context)
     }
 
     UnlockLists();
+
 
     return bReturn;
 }
@@ -2578,6 +2588,7 @@ ALC_API ALCdevice* ALC_APIENTRY alcOpenDevice(const ALCchar *deviceName)
 
     device->Bs2bLevel = GetConfigValueInt(NULL, "cf_level", 0);
 
+
     // Find a playback device to open
     LockLists();
     if((err=ALCdevice_OpenPlayback(device, deviceName)) == ALC_NO_ERROR)
@@ -2595,6 +2606,7 @@ ALC_API ALCdevice* ALC_APIENTRY alcOpenDevice(const ALCchar *deviceName)
         alcSetError(NULL, err);
     }
     UnlockLists();
+
 
     return device;
 }

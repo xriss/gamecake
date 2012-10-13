@@ -35,11 +35,15 @@ static PPB_URLResponseInfo* url_response_info_interface = NULL;
 static PPB_InputEvent* input_event_interface = NULL;
 static PPB_KeyboardInputEvent* keyboard_input_event_interface = NULL;
 static PPB_MouseInputEvent* mouse_input_event_interface = NULL;
+static PPB_GetInterface get_browser_interface = NULL;
 
 static lua_State *L=0;
 
 PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
-                                       PPB_GetInterface get_browser_interface) {
+                                       PPB_GetInterface _get_browser_interface) {
+										   
+  get_browser_interface=_get_browser_interface;
+
   module_id = a_module_id;
   core_interface = ( PPB_Core*)(get_browser_interface(PPB_CORE_INTERFACE));
   var_interface = ( PPB_Var*)(get_browser_interface(PPB_VAR_INTERFACE));
@@ -59,7 +63,6 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
   keyboard_input_event_interface = ( PPB_KeyboardInputEvent*)(get_browser_interface(PPB_KEYBOARD_INPUT_EVENT_INTERFACE));
   mouse_input_event_interface = ( PPB_MouseInputEvent*)(get_browser_interface(PPB_MOUSE_INPUT_EVENT_INTERFACE));
   
-
   if (!glInitializePPAPI(get_browser_interface)) {
     printf("glInitializePPAPI failed\n");
     return PP_ERROR_FAILED;
@@ -108,13 +111,17 @@ static struct PP_Var CStrToVar(const char* str) {
 }
 
 
+extern void alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface);
 
 static PP_Bool Instance_DidCreate(PP_Instance instance,
                                   uint32_t argc,
                                   const char* argn[],
                                   const char* argv[]) {
 
-nacl_instance=instance;
+	nacl_instance=instance;
+
+
+	alSetPpapiInfo( nacl_instance , get_browser_interface );
 									  
 	L = lua_open();  /* create state */
 	luaL_openlibs(L);  /* open libraries */
