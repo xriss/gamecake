@@ -29,34 +29,21 @@ function bake(opts)
 	local gl=fonts.gl
 
 
-fonts.get=function(id,name)
-	name=name or "base"
-	return fonts.data[name] and fonts.data[name][id]
+fonts.get=function(id)
+	return fonts.data[id]
 end
 
-fonts.set=function(d,id,name)
-	name=name or "base"
-	local tab
-	
-	if fonts.data[name] then
-		tab=fonts.data[name]		
-	else
-		tab={}
-		fonts.data[name]=tab
-	end
-	
-	tab[id]=d	
+fonts.set=function(d,id)
+	fonts.data[id]=d
 end
 
 
 --
 -- unload a previously loaded image
 --
-fonts.unload=function(id,name)
-
-	name=name or "base"
+fonts.unload=function(id)
 	
-	local t=fonts.get(id,name)
+	local t=fonts.get(id)
 
 	if t then
 		if gl then --gl mode
@@ -64,18 +51,16 @@ fonts.unload=function(id,name)
 				gl.DeleteTexture( v.id )
 			end
 		end
-		fonts.set(nil,id,name)
+		fonts.set(nil,id)
 	end
 end
 
 --
 -- load a single image, and make it easy to lookup by the given id
 --
-fonts.load=function(filename,id,name)
+fonts.load=function(filename,id)
 
-	name=name or "base"
-
-	local t=fonts.get(id,name)
+	local t=fonts.get(id)
 	
 	if t then return t end --first check it is not already loaded
 
@@ -84,7 +69,7 @@ fonts.load=function(filename,id,name)
 		if gl then --gl mode
 			t={}
 			t.filename=filename
-			fonts.set(t,id,name)
+			fonts.set(t,id)
 			t.size=8
 
 			t.chars={}
@@ -122,7 +107,7 @@ fonts.load=function(filename,id,name)
 		
 			t={}
 			t.filename=filename
-			fonts.set(t,id,name)
+			fonts.set(t,id)
 			
 			t.font=ft.create()
 			t.data=d -- keep the data alive (the loader expects it to continue to exist)
@@ -167,19 +152,7 @@ fonts.loads=function(tab)
 
 	for i,v in pairs(tab) do
 	
-		if type(v)=="table" then -- use a subtable and its name
-		
-			for ii,vv in pairs(v) do
-			
-				if type(ii)=="number" then -- just use filename twice
-					fonts.load(i.."_"..vv,vv,i)
-				else
-					fonts.load(i.."_"..vv,ii,i)
-				end
-				
-			end
-			
-		elseif type(i)=="number" then -- just use filename twice
+		if type(i)=="number" then -- just use filename twice
 			fonts.load(v,v)
 		else
 			fonts.load(v,i)
@@ -193,7 +166,7 @@ end
 fonts.start = function()
 
 	for v,n in pairs(fonts.remember or {}) do
-		fonts.load(v,n[1],n[2])
+		fonts.load(v,n)
 	end
 	fonts.remember=nil
 end
@@ -202,15 +175,10 @@ fonts.stop = function()
 
 	fonts.remember={}
 	
-	for n,tab in pairs(fonts.data) do
+	for n,t in pairs(fonts.data) do
 
-		for i,t in pairs(tab) do
-		
-			fonts.remember[t.filename]={i,n}
-		
-			fonts.unload(i,n)
-			
-		end
+		fonts.remember[t.filename]=n		
+		fonts.unload(n)
 
 	end
 

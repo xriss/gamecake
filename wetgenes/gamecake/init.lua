@@ -104,13 +104,13 @@ end
 	local sounds=cake.sounds
 
 -- simple wrapper for bliting by id/name
-cake.blit = function(id,name,cx,cy,ix,iy,w,h)
-	canvas.blit(images.get(id,name),cx,cy,ix,iy,w,h)
+cake.blit = function(id,cx,cy,ix,iy,w,h)
+	canvas.blit(images.get(id),cx,cy,ix,iy,w,h)
 end
 
 -- simple wrapper for beeping by id/name
-cake.beep = function(id,name)
-	sounds.beep(sounds.get(id,name))
+cake.beep = function(id)
+	sounds.beep(sounds.get(id))
 end
 
 	cake.setup()

@@ -27,61 +27,43 @@ function bake(opts)
 	images.postfix=opts.grdpostfix or ".png"
 
 
-images.get=function(id,name)
-	name=name or "base"
-	return images.data[name] and images.data[name][id]
+images.get=function(id)
+	return images.data[id]
 end
 
-images.set=function(d,id,name)
-	name=name or "base"
-	local tab
-	
-	if images.data[name] then
-		tab=images.data[name]		
-	else
-		tab={}
-		images.data[name]=tab
-	end
-	
-	tab[id]=d	
+images.set=function(d,id)
+	images.data[id]=d
 end
 
 
 --
 -- unload a previously loaded image
 --
-images.unload=function(id,name)
+images.unload=function(id)
 	local gl=images.gl
-	name=name or "base"
-	
-	local t=images.get(id,name)
+	local t=images.get(id)
 
 	if t then
 		if gl then --gl mode
 				gl.DeleteTexture( t.id )			
 		end
-		images.set(nil,id,name)
+		images.set(nil,id)
 	end
 end
 
 --
 -- load a single image, and make it easy to lookup by the given id
 --
-images.load=function(filename,id,name)
+images.load=function(filename,id)
 	local gl=images.gl
-	name=name or "base"
-
-	local t=images.get(id,name)
+	local t=images.get(id)
 	
 	if t then return t end --first check it is not already loaded
 
-print("loading",id,name)
+print("loading",id)
 
 	local fname=images.prefix..filename..images.postfix
-	
 	local g=assert(grd.create())
-	
-
 	local d=assert(zips.readfile(fname))
 	assert(g:load_data(d,"png"))
 	
@@ -90,7 +72,7 @@ print("loading",id,name)
 		t={}
 		images.upload_grd(t,g)
 
-		images.set(t,id,name)
+		images.set(t,id)
 		
 		t.filename=filename
 		return t
@@ -98,7 +80,7 @@ print("loading",id,name)
 	
 		assert(g:convert(images.fmt))
 		
-		images.set(g,id,name)
+		images.set(g,id)
 
 		g.filename=filename
 		return g
@@ -202,19 +184,7 @@ images.loads=function(tab)
 	local function iorv(i,v) if type(i)=="number" then return v end return i end -- choose i or v
 
 	for i,v in pairs(tab) do
-	
-		if type(v)=="table" then -- use a subtable and its name
-		
-			for ii,vv in pairs(v) do
-			
-				images.load(i.."/"..vv,iorv(ii,vv),i) -- i must be the base dir in this case as v is a table
-				
-			end
-			
-		else
-			images.load(v,iorv(i,v))
-		end
-		
+		images.load(v,iorv(i,v))		
 	end
 
 end
@@ -223,7 +193,7 @@ end
 images.start = function()
 
 	for v,n in pairs(images.remember or {}) do
-		images.load(v,n[1],n[2])
+		images.load(v,n)
 	end
 	images.remember=nil
 end
@@ -232,16 +202,9 @@ images.stop = function()
 
 	images.remember={}
 	
-	for n,tab in pairs(images.data) do
-
-		for i,t in pairs(tab) do
-		
-			images.remember[t.filename]={i,n}
-		
-			images.unload(i,n)
-			
-		end
-
+	for n,t in pairs(images.data) do
+		images.remember[t.filename]=n	
+		images.unload(n)
 	end
 
 end

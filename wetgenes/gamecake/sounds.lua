@@ -47,56 +47,71 @@ sounds.clean=function()
 	sounds.stop()
 end
 
-sounds.get=function(id,name)
-	name=name or "base"
-	return sounds.data[name] and sounds.data[name][id]
+sounds.get=function(id)
+	return sounds.data[id]
 end
 
-sounds.set=function(d,id,name)
-	name=name or "base"
-	local tab
-	
-	if sounds.data[name] then
-		tab=sounds.data[name]		
-	else
-		tab={}
-		sounds.data[name]=tab
-	end
-	
-	tab[id]=d	
+sounds.set=function(d,id)
+	sounds.data[id]=d
 end
 
+sounds.beep_idx=1
 sounds.beep=function(d)
 	
-	al.Source(sounds.sources[1], al.BUFFER, d.buff)
-	al.Source(sounds.sources[1], al.LOOPING, d.loop)
+	al.SourceStop(sounds.sources[sounds.beep_idx])
 
-	al.SourcePlay(sounds.sources[1])
+	al.Source(sounds.sources[sounds.beep_idx], al.BUFFER, d.buff)
+	al.Source(sounds.sources[sounds.beep_idx], al.LOOPING, d.loop)
 
+	al.SourcePlay(sounds.sources[sounds.beep_idx])
+
+	sounds.beep_idx=sounds.beep_idx+1
+	if sounds.beep_idx > #sounds.sources then sounds.beep_idx=1 end
 end
 
 --
 -- unload a previously loaded image
 --
-sounds.unload=function(id,name)
-
-	name=name or "base"
+sounds.unload=function(id)
 	
-	local t=sounds.get(id,name)
+	local t=sounds.get(id)
 
 	if t then
-		sounds.set(nil,id,name)
+		sounds.set(nil,id)
 	end
 end
 
+
 --
--- load a single image, and make it easy to lookup by the given id
+-- pre bake some speech, and make it easy to lookup by the given ids
 --
-sounds.load=function(filename,id,name)
+sounds.load_speak=function(tab,id)
+	if type(tab)=="string" then tab={text=tab} end -- default options
 
 	name=name or "base"
+	local t=sounds.get(id)
+	if t then return t end --first check it is not already loaded
+	
+	t={}
+	t.filename=tab
+	
+	t.loop=al.FALSE
+	
+	t.buff=al.GenBuffer()
 
-	local t=sounds.get(id,name)
+	local dat,len=require("wetgenes.speak.core").test(tab.text)
+	al.BufferData(t.buff,al.FORMAT_MONO16,dat,len,261.626*8*8) -- C4 hopefully?
+	
+	sounds.set(t,id) -- remember
+
+end
+
+--
+-- load a single sound, and make it easy to lookup by the given id
+--
+sounds.load=function(filename,id)
+
+	local t=sounds.get(id)
 	
 	if t then return t end --first check it is not already loaded
 
@@ -116,9 +131,9 @@ sounds.load=function(filename,id,name)
 		t.buff=al.GenBuffer()
 		al.BufferData(t.buff,x) -- all loaded
 		
-		sounds.set(t,id,name) -- remember
+		sounds.set(t,id) -- remember
 
-print("loaded",id,name,filename)		
+print("loaded",id,filename)		
 		return t
 		
 	else
@@ -135,19 +150,7 @@ sounds.loads=function(tab)
 
 	for i,v in pairs(tab) do
 	
-		if type(v)=="table" then -- use a subtable and its name
-		
-			for ii,vv in pairs(v) do
-			
-				if type(ii)=="number" then -- just use filename twice
-					sounds.load(i.."_"..vv,vv,i)
-				else
-					sounds.load(i.."_"..vv,ii,i)
-				end
-				
-			end
-			
-		elseif type(i)=="number" then -- just use filename twice
+		if type(i)=="number" then -- just use filename twice
 			sounds.load(v,v)
 		else
 			sounds.load(v,i)
@@ -179,7 +182,11 @@ sounds.start = function()
 
 
 	for v,n in pairs(sounds.remember or {}) do
-		sounds.load(v,n[1],n[2])
+		if type(v)=="table" then
+			sounds.load_speak(v,n)
+		else
+			sounds.load(v,n)
+		end
 	end
 	sounds.remember=nil
 end
@@ -188,15 +195,10 @@ sounds.stop = function()
 
 	sounds.remember={}
 	
-	for n,tab in pairs(sounds.data) do
-
-		for i,t in pairs(tab) do
+	for n,t in pairs(sounds.data) do
 		
-			sounds.remember[t.filename]={i,n}
-		
-			sounds.unload(i,n)
-			
-		end
+		sounds.remember[t.filename]=n		
+		sounds.unload(n)
 
 	end
 

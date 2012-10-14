@@ -25,23 +25,12 @@ function bake(opts)
 	local gl=sheets.gl
 	local cake=sheets.cake
 	
-sheets.get=function(id,name)
-	name=name or "base"
-	return sheets.data[name] and sheets.data[name][id]
+sheets.get=function(id)
+	return sheets.data[id]
 end
 
-sheets.set=function(d,id,name)
-	name=name or "base"
-	local tab
-	
-	if sheets.data[name] then
-		tab=sheets.data[name]		
-	else
-		tab={}
-		sheets.data[name]=tab
-	end
-	
-	tab[id]=d	
+sheets.set=function(d,id)
+	sheets.data[id]=d
 end
 
 sheets.start=function()
@@ -66,22 +55,22 @@ sheets.stop=function()
 	end
 end
 
-sheets.create=function(id,name)
+sheets.create=function(id)
 
-	local sheet=sheets.get(id,name)
+	local sheet=sheets.get(id)
 	if sheet then return sheet end
 	
 	sheet={}
 	sheet.sheets=sheets
 	setmetatable(sheet,meta_sheet)
 
-	sheets.set(sheet,id,name)
+	sheets.set(sheet,id)
 
 	return sheet
 end
 
-sheets.createimg=function(id,name)
-	return sheets.create(id,name):setimg(id,name)
+sheets.createimg=function(id)
+	return sheets.create(id):setimg(id)
 end
 
 --
