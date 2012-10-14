@@ -8,7 +8,7 @@
 
 #include "flite.h"
 
-extern "C" cst_voice *register_cmu_us_slt();
+extern cst_voice *register_cmu_us_slt();
 
 static int lua_speak_test (lua_State *l)
 {
@@ -16,7 +16,7 @@ cst_wave *sound;
 cst_voice *voice;
 u16 *data;
 
-const char *text="hello mr speak and spell";
+const char *text;//="hello mr speak and spell";
 
 	text=luaL_checkstring(l,1);
 
