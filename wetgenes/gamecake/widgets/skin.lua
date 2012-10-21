@@ -84,10 +84,10 @@ function wskin.load(name)
 			mode=name
 			
 			images.loads{
-				"skins/"..mode.."/border",
-				"skins/"..mode.."/buttof",
-				"skins/"..mode.."/button",
-				"skins/"..mode.."/buttin",
+				"wskins/"..mode.."/border",
+				"wskins/"..mode.."/buttof",
+				"wskins/"..mode.."/button",
+				"wskins/"..mode.."/buttin",
 			}
 			margin=15
 			border=0
@@ -307,19 +307,19 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 
 		
 				if ( master.active==widget and master.over==widget ) or widget.state=="selected" then
-					images.bind(images.get("skins/"..mode.."/buttin"))
+					images.bind(images.get("wskins/"..mode.."/buttin"))
 --					texs.buttin:bind()
 					txp=0
 					typ=-1
 				else
-					images.bind(images.get("skins/"..mode.."/button"))
+					images.bind(images.get("wskins/"..mode.."/button"))
 --					texs.button:bind()
 					txp=0
 					typ=-2
 				end
 				
 				if widget.class=="string" then -- hack
-					images.bind(images.get("skins/"..mode.."/border"))
+					images.bind(images.get("wskins/"..mode.."/border"))
 --					texs.border:bind()
 				end
 				

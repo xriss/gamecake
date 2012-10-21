@@ -40,7 +40,7 @@ function bake(state)
 
 		escmenu.master=state:rebake("wetgenes.gamecake.widgets").setup({})
 		
-		if wzips.exists("data/skins/soapbar/button.png") then -- we got us better skin to use :)
+		if wzips.exists("data/wskins/soapbar/button.png") then -- we got us better skin to use :)
 			state:rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
 		end
 

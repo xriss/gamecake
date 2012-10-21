@@ -170,8 +170,8 @@ function bake(opts)
 
 		function state.draw()
 			
-			if state.times then state.times.draw.stop() end -- draw is squify so just use it as total frame time
-			if state.times then state.times.draw.start() end
+			if state.times then state.times.draw.stop() end -- draw is squify so just use it as the total time
+			if state.times then state.times.draw.start() end -- between calls to draw
 			
 			if state.now and state.now.draw then
 				state.now.draw(state)
@@ -213,12 +213,10 @@ function bake(opts)
 -- of system it just returns and expects the other functions
 -- eg android_* to be called when necesary.
 		function state.serv(state)
-print("normal serv")
 		
 			if state.win.noblock then
 				return state
 			end
-print("normal serv loop")
 			
 			local finished
 			repeat

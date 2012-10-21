@@ -26,7 +26,7 @@ function bake(opts)
 	sounds.data={}
 	
 	sounds.zip=opts.zip
-	sounds.prefix=opts.sodprefix or "data/sfx/"
+	sounds.prefix=opts.sodprefix or "data/"
 	sounds.postfix=opts.sodpostfix or ".wav"
 	
 

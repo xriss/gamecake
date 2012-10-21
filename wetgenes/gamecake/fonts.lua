@@ -131,7 +131,7 @@ fonts.load=function(filename,id)
 				
 				c.x=t.font.bitmap_left -- offsets to draw the bitmap at, whole pixels
 				c.y=t.size-t.font.bitmap_top
-				c.add=t.font.advance -- character draw width which may be fractional
+				c.add=math.floor(t.font.advance) -- character draw width which may be fractional
 
 			end
 
