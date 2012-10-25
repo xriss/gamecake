@@ -314,6 +314,12 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 
 struct android_app* master_android_app=0;
 
+extern jint JNICALL
+JNI_OnLoad_openal(
+	JavaVM *vm,
+	void *reserved
+);
+
 /**
  * This is the main entry point of a native application that is using
  * android_native_app_glue.  It runs in its own thread, with its own
@@ -323,6 +329,8 @@ void android_main(struct android_app* state) {
     struct engine engine;
 	lua_State *L;
 	
+    JNI_OnLoad_openal(activity->vm,0);
+
 	master_android_app=state;
 
 	ANativeActivity* activity = state->activity;

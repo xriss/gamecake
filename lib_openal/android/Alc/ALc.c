@@ -42,6 +42,9 @@
 
 #define EmptyFuncs { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 static struct BackendInfo BackendList[] = {
+#ifdef HAVE_ANDROID
+    { "android", alc_android_init, alc_android_deinit, alc_android_probe, EmptyFuncs },
+#endif
 #ifdef HAVE_PULSEAUDIO
     { "pulse", alc_pulse_init, alc_pulse_deinit, alc_pulse_probe, EmptyFuncs },
 #endif
@@ -74,9 +77,6 @@ static struct BackendInfo BackendList[] = {
 #endif
 #ifdef HAVE_OPENSL
     { "opensl", alc_opensl_init, alc_opensl_deinit, alc_opensl_probe, EmptyFuncs },
-#endif
-#ifdef HAVE_ANDROID
-    { "android", alc_android_init, alc_android_deinit, alc_android_probe, EmptyFuncs },
 #endif
 
     { "null", alc_null_init, alc_null_deinit, alc_null_probe, EmptyFuncs },
