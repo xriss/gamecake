@@ -35,23 +35,19 @@ end
 
 sheets.start=function()
 
-	for i,t in pairs(sheets.data) do -- refresh image data after a stop
-		for i,v in pairs(t) do
-			if v.img_id or v.img_name then
-				v.img=images.get(v.img_id,v.img_name)
-				v:build_vbuf()
-			end
+	for i,v in pairs(sheets.data) do -- refresh image data after a stop
+		if v.img_id or v.img_name then
+			v.img=sheets.cake.images.get(v.img_id,v.img_name)
+			v:build_vbuf()
 		end
 	end
 	
 end
 
 sheets.stop=function()
-	for i,t in pairs(sheets.data) do -- forget everything
-		for i,v in pairs(t) do
-			v.img=nil
-			v:free_vbuf()
-		end
+	for i,v in pairs(sheets.data) do -- forget everything
+		v.img=nil
+		v:free_vbuf()
 	end
 end
 

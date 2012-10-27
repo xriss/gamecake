@@ -459,14 +459,14 @@ function wmeta.setup(def)
 				end
 			end
 			if act==-1 then
-				if widget.master.active and widget.master.active==widget then -- widget clicked
+--				if widget.master.active and widget.master.active==widget then -- widget clicked
 					widget:call_hook("click")
-				end
+--				end
 			end
 
-			if not widget.master.active or widget.master.active==widget then -- over widget
+--			if not widget.master.active or widget.master.active==widget then -- over widget
 				widget.master.over=widget
-			end
+--			end
 		else
 		
 			if widget.master.over==widget then

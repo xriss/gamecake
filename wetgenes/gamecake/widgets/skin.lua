@@ -297,7 +297,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			br[2]=br[2]*br[4]
 			br[3]=br[3]*br[4]
 			
-			if ( master.active==widget and master.over==widget ) or widget.state=="selected" then
+			if ( master.press and master.over==widget ) or widget.state=="selected" then
 				tl,br=br,tl
 				txp=1
 				typ=1
@@ -306,7 +306,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			if mode then
 
 		
-				if ( master.active==widget and master.over==widget ) or widget.state=="selected" then
+				if ( master.press and master.over==widget ) or widget.state=="selected" then
 					images.bind(images.get("wskins/"..mode.."/buttin"))
 --					texs.buttin:bind()
 					txp=0

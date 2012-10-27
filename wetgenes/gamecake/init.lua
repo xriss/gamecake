@@ -1,9 +1,7 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
--- gamecake lua is a simple 2D game framework that uses GLES or CPU renders to a bitmap.
--- It bears a passing resemblence to gamecake js.
-
+-- gamecake lua is a simple 2D/3D game framework that targets GLESv2 on android/nacl/linux/windows/raspberrypi systems
 
 module("wetgenes.gamecake")
 
@@ -30,6 +28,10 @@ function bake(opts)
 	opts.win=opts.win or (opts.state and opts.state.win)
 
 	if opts.win.flavour=="nacl" then -- nacl hacks
+--		cake.opts.disable_sounds=true
+	end
+
+	if opts.win.flavour=="android" then -- android hacks
 --		cake.opts.disable_sounds=true
 	end
 

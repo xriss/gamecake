@@ -7,6 +7,8 @@ local wstr=require("wetgenes.string")
 -- handle a simple state for win programs,
 -- all it does is call other states/mods functions.
 
+local function print(...) return _G.print(...) end
+
 module(...)
 
 function bake(opts)
@@ -98,10 +100,13 @@ function bake(opts)
 				end
 				
 				if type(state.next)=="string" then	 -- change by required name
-					if type(state.next)=="boolean" then -- special exit state
-						return true
-					end
+				
 					state.next=state:rebake(state.next)
+					
+				elseif type(state.next)=="boolean" then -- special exit state
+				
+					return true
+					
 				end
 
 				state.last=state.now
@@ -123,15 +128,19 @@ function bake(opts)
 		end
 
 		function state.start()	
+			state.cake.start()
 			if state.now and state.now.start then
 				state.now.start(state)
 			end
+			state.stopped=false
 		end
 
 		function state.stop()
+			state.cake.stop()
 			if state.now and state.now.stop then
 				state.now.stop(state)
 			end
+			state.stopped=true
 		end
 
 		function state.clean()
@@ -196,6 +205,15 @@ function bake(opts)
 					if m.class=="mouse" and m.x and m.y then	-- need to fix x,y numbers
 						m.xraw,m.yraw=m.x,m.y					-- remember original
 					end
+					
+					if m.class=="app" then -- androidy
+print("caught : ",m.class,m.cmd)
+						if		m.cmd=="start" then
+							state.start()
+						elseif	m.cmd=="stop"  then
+							state.stop()
+						end
+					end
 
 					if state.now and state.now.msg then
 						state.now.msg(state,m)
@@ -225,8 +243,11 @@ function bake(opts)
 		end
 		function state.serv_pulse(state)
 				state.msgs()
-				state.update()
-				state.draw()
+				
+				if not state.stopped then
+					state.update()
+					state.draw()
+				end
 				
 				finished=state.change()
 				return finished

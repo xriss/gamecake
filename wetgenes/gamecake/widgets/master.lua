@@ -160,7 +160,11 @@ function wmaster.setup(widget,def)
 				meta.mouse(v,act,x,y,key)
 			end
 			
+			if act== 1 then
+				master.press=true
+			end
 			if act==-1 then
+				master.press=false
 				master.active=nil
 			end
 			

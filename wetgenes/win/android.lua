@@ -62,9 +62,14 @@ android.queue_all_msgs=function()
 			
 print("andmsg",wstr.dump(ma))
 
-				if ma.cmd=="config_changed" then
-				
-				end
+				m={
+					time=ma.eventtime,
+					class="app",
+					cmd=ma.cmd,
+				}
+
+--				if ma.cmd=="config_changed" then
+--				end
 			
 			elseif ma.event == "motion" then
 			

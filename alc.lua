@@ -198,8 +198,8 @@ end
 function alc.clean(dc)
 -- cleanup must happen in this order
 	alc.MakeContextCurrent()
-	dc.context=alc.DestroyContext(dc.context)
-	dc.device=alc.CloseDevice(dc.device)
+	if dc.context then dc.context=alc.DestroyContext(dc.context) end
+	if dc.device then dc.device=alc.CloseDevice(dc.device) end
 	return dc
 end
 
