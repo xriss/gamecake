@@ -329,12 +329,13 @@ void android_main(struct android_app* state) {
     struct engine engine;
 	lua_State *L;
 	
-    JNI_OnLoad_openal(activity->vm,0);
 
 	master_android_app=state;
 
 	ANativeActivity* activity = state->activity;
 	JNIEnv* env=0;
+
+    JNI_OnLoad_openal(activity->vm,0);
 
 	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);
 
