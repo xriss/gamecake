@@ -255,6 +255,15 @@ struct grd * grd_load_data( const unsigned char *data , int len,  int fmt )
 struct grd *g=0;
 
 	g=(struct grd *)calloc(sizeof(struct grd),1);
+	
+	if( data[1]=='P' && data[1]=='N' && data[1]=='G' )
+	{
+		fmt=GRD_FMT_HINT_PNG;
+	}
+	else
+	{
+		fmt=GRD_FMT_HINT_JPG;
+	}
 
 	if(g)
 	{
