@@ -169,7 +169,12 @@ static int lua_gles_DepthMask (lua_State *l)
 static int lua_gles_DepthRange (lua_State *l)
 {
 
+#if defined(LUA_GLES_GL)
+	glDepthRange( luaL_checknumber(l,1) , luaL_checknumber(l,2)  );
+#else
 	glDepthRangef( (float)luaL_checknumber(l,1) , (float)luaL_checknumber(l,2)  );
+#endif
+
 	return 0;
 }
 
