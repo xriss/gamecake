@@ -12,6 +12,7 @@ build="debug"
 makeopts=""
 if [ "$1" = "release" ] ; then
 makeopts="config=release_android"
+makeopts32="config=release_android-x86"
 build="release"
 fi
 
@@ -45,7 +46,7 @@ cd ..
 
 
 cd build-gmake-android-32
-make $makeopts $2 $3 $4
+make $makeopts32 $2 $3 $4
 cd ..
 
 cd android
