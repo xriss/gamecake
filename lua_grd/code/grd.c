@@ -256,7 +256,7 @@ struct grd *g=0;
 
 	g=(struct grd *)calloc(sizeof(struct grd),1);
 	
-	if( data[1]=='P' && data[1]=='N' && data[1]=='G' )
+	if( data[1]=='P' && data[2]=='N' && data[3]=='G' )
 	{
 		fmt=GRD_FMT_HINT_PNG;
 	}
