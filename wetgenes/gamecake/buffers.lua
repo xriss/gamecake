@@ -32,15 +32,19 @@ buffers.create = function(start,stop)
 		v:start(buffers) -- and call start now
 	end
 	
+	buffers.data[v]=v
+	
 	return v
 end
 
 
 buffers.start = function()
 	for v,n in pairs(buffers.data) do
-		v[0]=gl.GenBuffer()
-		if v.start then
-			v:start(buffers)
+		if not v[0] then
+			v[0]=gl.GenBuffer()
+			if v.start then
+				v:start(buffers)
+			end
 		end
 	end
 end

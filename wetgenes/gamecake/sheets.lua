@@ -4,9 +4,6 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.sheets")
 
-base_sheet={}
-meta_sheet={}
-meta_sheet.__index=base_sheet
 
 local grd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
@@ -14,6 +11,9 @@ local pack=require("wetgenes.pack")
 
 
 function bake(opts)
+
+local base_sheet={}
+local meta_sheet={__index=base_sheet}
 
 	local sheets={}
 	
@@ -24,6 +24,7 @@ function bake(opts)
 	
 	local gl=sheets.gl
 	local cake=sheets.cake
+	local images=cake.images
 	
 sheets.get=function(id)
 	return sheets.data[id]
@@ -34,10 +35,9 @@ sheets.set=function(d,id)
 end
 
 sheets.start=function()
-
 	for i,v in pairs(sheets.data) do -- refresh image data after a stop
-		if v.img_id or v.img_name then
-			v.img=sheets.cake.images.get(v.img_id,v.img_name)
+		if v.img_id and not v.img then
+			v.img=images.get(v.img_id)
 			v:build_vbuf()
 		end
 	end
@@ -75,7 +75,7 @@ end
 sheets.loads_and_chops=function(tab)
 
 	for i,v in ipairs(tab) do
-		sheets.cake.images.load(v[1],v[1])
+		images.load(v[1],v[1])
 		local img=sheets.createimg(v[1])
 		img:chop(v[2],v[3],v[4],v[5])
 	end
@@ -83,11 +83,10 @@ sheets.loads_and_chops=function(tab)
 end
 
 
-function base_sheet.setimg(sheet,img_id,img_name)
+function base_sheet.setimg(sheet,img_id)
 
 	sheet.img_id=img_id
-	sheet.img_name=img_name
-	sheet.img=sheet.sheets.cake.images.get(sheet.img_id,sheet.img_name)
+	sheet.img=images.get(sheet.img_id)
 
 	return sheet
 end
@@ -133,7 +132,6 @@ end
 
 -- free the sheets vertex buffer
 function base_sheet.free_vbuf(sheet)
-	local gl=sheet.sheets.gl
 
 	if sheet.vbuf then -- free any previously allocated buffer
 		gl.DeleteBuffer(sheet.vbuf)
@@ -147,7 +145,6 @@ end
 
 -- buildvertex buffer containing all sprites in the sheet
 function base_sheet.build_vbuf(sheet)
-	local gl=sheet.sheets.gl
 
 	sheet:free_vbuf()
 	
@@ -185,8 +182,7 @@ end
 
 -- draw one sprite, normal lua indexs, so first sprite is 1 not 0
 function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
-	local gl=sheet.sheets.gl
-	
+		
 	if px then
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.PushMatrix()

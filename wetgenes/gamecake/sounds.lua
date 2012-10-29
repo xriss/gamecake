@@ -133,7 +133,7 @@ sounds.load=function(filename,id)
 		
 		sounds.set(t,id) -- remember
 
-print("loaded",id,filename)		
+print("loaded",filename)		
 		return t
 		
 	else
@@ -163,32 +163,35 @@ end
 
 sounds.start = function()
 
-	sounds.context=alc.setup()
+	if not sounds.context then
 	
-	al.Listener(al.POSITION, 0, 0, 0)
-	al.Listener(al.VELOCITY, 0, 0, 0)
-	al.Listener(al.ORIENTATION, 0, 0, -1, 0,1,0 )
-	
-	sounds.sources={}
-	for i=1,4 do
-		sounds.sources[i]=al.GenSource()
-		local s=sounds.sources[i]
-		al.Source(s, al.PITCH, 1)
-		al.Source(s, al.GAIN, 1)
-		al.Source(s, al.POSITION, 0, 0, 0)
-		al.Source(s, al.VELOCITY, 0, 0, 0)
-		al.Source(s, al.LOOPING, al.FALSE)
-	end
-
-
-	for v,n in pairs(sounds.remember or {}) do
-		if type(v)=="table" then
-			sounds.load_speak(v,n)
-		else
-			sounds.load(v,n)
+		sounds.context=alc.setup()
+		
+		al.Listener(al.POSITION, 0, 0, 0)
+		al.Listener(al.VELOCITY, 0, 0, 0)
+		al.Listener(al.ORIENTATION, 0, 0, -1, 0,1,0 )
+		
+		sounds.sources={}
+		for i=1,4 do
+			sounds.sources[i]=al.GenSource()
+			local s=sounds.sources[i]
+			al.Source(s, al.PITCH, 1)
+			al.Source(s, al.GAIN, 1)
+			al.Source(s, al.POSITION, 0, 0, 0)
+			al.Source(s, al.VELOCITY, 0, 0, 0)
+			al.Source(s, al.LOOPING, al.FALSE)
 		end
+
+
+		for v,n in pairs(sounds.remember or {}) do
+			if type(v)=="table" then
+				sounds.load_speak(v,n)
+			else
+				sounds.load(v,n)
+			end
+		end
+		sounds.remember=nil
 	end
-	sounds.remember=nil
 end
 
 sounds.stop = function()
@@ -209,6 +212,7 @@ sounds.stop = function()
 
 	sounds.context:clean()
 
+	sounds.context=nil
 end
 
 	if sounds.cake.opts.disable_sounds then -- disable all function in this file

@@ -40,12 +40,12 @@ end
 -- unload a previously loaded image
 --
 images.unload=function(id)
-	local gl=images.gl
 	local t=images.get(id)
 
 	if t then
 		if gl then --gl mode
-				gl.DeleteTexture( t.id )			
+				gl.DeleteTexture( t.id )
+				t.id=nil	
 		end
 		images.set(nil,id)
 	end
@@ -55,12 +55,11 @@ end
 -- load a single image, and make it easy to lookup by the given id
 --
 images.load=function(filename,id)
-	local gl=images.gl
 	local t=images.get(id)
 	
 	if t then return t end --first check it is not already loaded
 
-print("loading",id)
+print("loading",filename,id)
 
 	local fname=images.prefix..filename..images.postfix
 	local g=assert(grd.create())

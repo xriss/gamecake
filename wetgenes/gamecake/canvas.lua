@@ -278,7 +278,7 @@ flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
 		},"f32",0,5*4,canvas.vdat)	
 	end
 
-	gl.BindBuffer(gl.ARRAY_BUFFER,flat.canvas.vbuf[0])
+	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf[0])
 	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
 
 	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
@@ -329,7 +329,7 @@ flat.tristrip = function(fmt,data)
 	
 	pack.save_array(data,"f32",0,datalen,canvas.vdat)	
 
-	gl.BindBuffer(gl.ARRAY_BUFFER,flat.canvas.vbuf[0])
+	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf[0])
 	gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.DYNAMIC_DRAW)
 
 	gl.VertexPointer(3,gl.FLOAT,pstride,0)

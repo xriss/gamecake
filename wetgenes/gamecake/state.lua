@@ -128,19 +128,19 @@ function bake(opts)
 		end
 
 		function state.start()	
+			state.win:start()
 			state.cake.start()
 			if state.now and state.now.start then
 				state.now.start(state)
 			end
-			state.stopped=false
 		end
 
 		function state.stop()
+			state.win:stop()
 			state.cake.stop()
 			if state.now and state.now.stop then
 				state.now.stop(state)
 			end
-			state.stopped=true
 		end
 
 		function state.clean()
@@ -207,10 +207,14 @@ function bake(opts)
 					end
 					
 					if m.class=="app" then -- androidy
-print("caught : ",m.class,m.cmd)
-						if		m.cmd=="start" then
+--print("caught : ",m.class,m.cmd)
+						if		m.cmd=="init_window" then
 							state.start()
-						elseif	m.cmd=="stop"  then
+							state.paused=false
+						elseif	m.cmd=="pause"  then
+							state.paused=true
+						elseif	m.cmd=="term_window"  then
+							state.paused=true
 							state.stop()
 						end
 					end
@@ -229,7 +233,7 @@ print("caught : ",m.class,m.cmd)
 
 -- a busy blocking loop, or not, if we are running on the wrong sort
 -- of system it just returns and expects the other functions
--- eg android_* to be called when necesary.
+-- eg state.serv_pulse to be called when necesary.
 		function state.serv(state)
 		
 			if state.win.noblock then
@@ -244,9 +248,11 @@ print("caught : ",m.class,m.cmd)
 		function state.serv_pulse(state)
 				state.msgs()
 				
-				if not state.stopped then
+				if not state.paused then
 					state.update()
 					state.draw()
+				else
+					state.win:sleep(1/10)
 				end
 				
 				finished=state.change()

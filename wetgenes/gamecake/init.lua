@@ -55,7 +55,6 @@ function bake(opts)
 	
 		
 cake.setup = function()
-print("CAKE SETUP")
 	cake.sounds.setup()
 end
 
@@ -64,7 +63,6 @@ cake.clean = function()
 end
 
 cake.start = function()
-print("cakestart")
 	cake.buffers.start()
 	cake.images.start()
 	cake.sheets.start()
@@ -73,7 +71,6 @@ print("cakestart")
 end
 
 cake.stop = function()
-print("cakestop")
 	cake.fonts.stop()
 	cake.sheets.stop()
 	cake.images.stop()

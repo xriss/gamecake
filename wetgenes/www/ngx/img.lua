@@ -16,12 +16,6 @@ package.loaded["wetgenes.www.any.img"]=_M
 function get(data,fmt)
 	log("img.get:")
 	
-	if type(data)=="string"then
-		local h=string.sub(data,7,10)
-		if h=="Exif" or h=="JFIF" then -- probably a jpeg
-			fmt="jpeg"
-		end
-	end
 
 	local gfmt=grd.HINT_PNG
 	if fmt=="jpeg" then gfmt=grd.HINT_JPG end
