@@ -18,9 +18,9 @@ fi
 
 cd ..
 
-build/premake4 gmake android-arm
+#build/premake4 gmake android-arm
 build/premake4 gmake android-armv7
-build/premake4 gmake android-32
+#build/premake4 gmake android-32
 
 
 if [ "$1" == "clean" ] ; then
@@ -36,18 +36,18 @@ if [ "$1" == "clean" ] ; then
 fi
 
 
-cd build-gmake-android-arm
-make $makeopts $2 $3 $4
-cd ..
+#cd build-gmake-android-arm
+#make $makeopts $2 $3 $4
+#cd ..
 
 cd build-gmake-android-armv7
 make $makeopts $2 $3 $4
 cd ..
 
 
-cd build-gmake-android-32
-make $makeopts32 $2 $3 $4
-cd ..
+#cd build-gmake-android-32
+#make $makeopts32 $2 $3 $4
+#cd ..
 
 cd android
 rm bin/*.apk

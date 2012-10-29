@@ -32,12 +32,12 @@ local print=android.print
 android.win_ready=false
 
 android.create=function(opts)
-print("and win prep")
+
 	repeat
 		android.queue_all_msgs()
 		android.sleep(1)
 	until android.win_ready
-	
+
 	return core.create(opts)
 end
 
@@ -119,6 +119,14 @@ android.msg=function()
 		return table.remove(android.queue,1)
 	end
 	
+end
+
+android.stop=function(...)
+	core.stop(...)
+end
+
+android.start=function(...)
+	core.start(...)
 end
 
 
