@@ -546,7 +546,7 @@ int32_t success = 0;
 
 EGLint format;
 
-EGLConfig config;
+//EGLConfig config;
 EGLint num_config;
 EGLint attribute_list[] =
 {
@@ -575,6 +575,9 @@ EGLint attribute_list[] =
 	luaL_getmetatable(l, lua_android_ptr_name);
 	lua_setmetatable(l, -2);
 	
+	lua_android_start_p(p);
+
+/*
 	p->window=master_android_app->window;
 
 	// get an EGL display connection
@@ -586,7 +589,7 @@ EGLint attribute_list[] =
 	assert(EGL_FALSE != result);
  
   // get an appropriate EGL frame buffer configuration
-   result = eglChooseConfig(p->display, attribute_list, &config, 1, &num_config);
+   result = eglChooseConfig(p->display, attribute_list, &p->config, 1, &num_config);
    assert(EGL_FALSE != result);
 
 //    eglGetConfigAttrib(p->display, config, EGL_NATIVE_VISUAL_ID, &format);
@@ -594,16 +597,115 @@ EGLint attribute_list[] =
     
 
 // create an EGL rendering context
-   p->context = eglCreateContext(p->display, config, EGL_NO_CONTEXT, NULL);
+   p->context = eglCreateContext(p->display, p->config, EGL_NO_CONTEXT, NULL);
    assert(p->context!=EGL_NO_CONTEXT);
 
 // create surface
-	p->surface = eglCreateWindowSurface( p->display, config, p->window, NULL );
+	p->surface = eglCreateWindowSurface( p->display, p->config, p->window, NULL );
 	assert(p->surface != EGL_NO_SURFACE);
-
+*/
 	return 1;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// start
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_start_p (android_lua *p)
+{
+EGLBoolean result;
+
+EGLint num_config;
+EGLint attribute_list[] =
+{
+	
+// hard hax, please not to be reordering
+	EGL_RED_SIZE, 1,	//	[1]	r
+	EGL_GREEN_SIZE, 1,	//	[3]	g
+	EGL_BLUE_SIZE, 1,	//	[5]	b
+	EGL_ALPHA_SIZE, 0,	//	[7]	a
+	EGL_DEPTH_SIZE, 1,	//	[9]	depth
+
+	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+	EGL_NONE
+};
+
+	if(!p->display)
+	{
+		p->window=master_android_app->window;
+
+llog("START DISPLAY");
+		// get an EGL display connection
+		p->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+		assert(p->display!=EGL_NO_DISPLAY);
+
+		// initialize the EGL display connection
+		result = eglInitialize(p->display, NULL, NULL);
+		assert(EGL_FALSE != result);
+	 
+	  // get an appropriate EGL frame buffer configuration
+	   result = eglChooseConfig(p->display, attribute_list, &p->config, 1, &num_config);
+	   assert(EGL_FALSE != result);
+	}
+
+// create an EGL rendering context
+	if(!p->context)
+	{
+llog("START CONTEXT");
+		p->context = eglCreateContext(p->display, p->config, EGL_NO_CONTEXT, NULL);
+		assert(p->context!=EGL_NO_CONTEXT);
+	}
+// create surface
+	if(!p->surface)
+	{
+llog("START SURFACE");
+		p->surface = eglCreateWindowSurface( p->display, p->config, p->window, NULL );
+		assert(p->surface != EGL_NO_SURFACE);
+	}
+
+// connect the context to the surface
+   result = eglMakeCurrent(p->display, p->surface, p->surface, p->context);
+   assert(EGL_FALSE != result);
+
+}
+
+int lua_android_start (lua_State *l)
+{
+android_lua *p=lua_android_check_ptr(l,1);
+	lua_android_start_p(p);
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// stop
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_stop (lua_State *l)
+{
+android_lua *p=lua_android_check_ptr(l,1);
+
+		if(p->display)
+		{
+			// Release OpenGL resources
+			eglMakeCurrent( p->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
+			if(p->surface)
+			{
+				eglDestroySurface( p->display, p->surface );
+				p->surface=0;
+			}
+			if(p->context)
+			{
+				eglDestroyContext( p->display, p->context );
+				p->context=0;
+			}
+			eglTerminate( p->display );
+			p->display=0;
+		}
+	
+	return 0;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -652,6 +754,8 @@ int lua_android_context (lua_State *l)
 android_lua *p=lua_android_check_ptr(l,1);
 
 EGLBoolean result;
+
+	if(!p->display || !p->surface || !p->context) { return 0; }
 	
 // connect the context to the surface
    result = eglMakeCurrent(p->display, p->surface, p->surface, p->context);
@@ -669,6 +773,8 @@ EGLBoolean result;
 int lua_android_swap (lua_State *l)
 {
 android_lua *p=lua_android_check_ptr(l,1);
+
+	if(!p->display || !p->surface || !p->context) { return 0; }
 
 	eglSwapBuffers(p->display, p->surface);
    
@@ -734,7 +840,10 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 	{
 //		{"screen",			lua_android_screen},
 		
+
 		{"create",			lua_android_create},
+		{"start",			lua_android_start},
+		{"stop",			lua_android_stop},
 		{"destroy",			lua_android_destroy},
 		{"info",			lua_android_info},
 

@@ -212,6 +212,18 @@ function base.context(w,opts)
 	end
 end
 
+function base.start(w)
+	if hardcore.start then
+		hardcore.start(w[0])
+	end
+end
+
+function base.stop(w)
+	if hardcore.stop then
+		hardcore.stop(w[0])
+	end
+end
+
 function base.swap(w)
 	if hardcore.swap then
 		hardcore.swap(w[0])

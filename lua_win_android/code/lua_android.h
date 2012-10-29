@@ -18,6 +18,8 @@ typedef struct sandroid_lua {
 	int width;
 	int height;
 
+EGLConfig config;
+
 } android_lua ;
 
 typedef struct sandroid_lua_wrap { // this can be treated as wetwin_lua **
