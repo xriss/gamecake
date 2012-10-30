@@ -194,6 +194,28 @@ int src=luaL_checknumber(l,1);
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// for streaming, normally we just feed in one buffer at a time anyway so might as well force
+// multiple calls for multiple buffers, we can fake the buffers array in lua and this is not
+// going to be a performance issue, probably :)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_al_SourceQueueBuffer (lua_State *l)
+{
+int src=luaL_checknumber(l,1);
+int buf=luaL_checknumber(l,2);
+	alSourceQueueBuffers(src,1,&buf);
+	return 0;
+}
+static int lua_al_SourceUnqueueBuffer (lua_State *l)
+{
+int src=luaL_checknumber(l,1);
+int buf=-1;
+	alSourceUnqueueBuffers(src,1,&buf);
+	lua_pushnumber(l,buf);
+	return 1;
+}
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -574,6 +596,8 @@ LUALIB_API int luaopen_al_core(lua_State *l)
 		{"SourcePause",			lua_al_SourcePause},
 		{"SourceRewind",		lua_al_SourceRewind},
 		{"SourceStop",			lua_al_SourceStop},
+		{"SourceQueueBuffer",	lua_al_SourceQueueBuffer},
+		{"SourceUnqueueBuffer",	lua_al_SourceUnqueueBuffer},
 
 		{"GenBuffer",			lua_al_GenBuffer},
 		{"DeleteBuffer",		lua_al_DeleteBuffer},
