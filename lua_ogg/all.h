@@ -53,6 +53,8 @@ extern "C" {
 };
 #endif
 
+#include <vorbis/codec.h>
+
 #include "code/lua_ogg.h"
 
 
