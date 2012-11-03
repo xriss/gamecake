@@ -13,6 +13,15 @@ local sod=require("wetgenes.sod")
 function bake(opts)
 
 	local sounds={}
+
+	local str_func={}
+	local str_meta={__index=str_func}
+	
+	local sfx_func={}
+	local sfx_meta={__index=sfx_func}
+	
+	local sfxmax=opts.sfxmax or 4
+	local strmax=opts.strmax or 2
 	
 	sounds.cake=opts.cake
 	
@@ -57,16 +66,24 @@ end
 
 sounds.beep_idx=1
 sounds.beep=function(d)
+
+	local sfx=sounds.sfxs[sounds.beep_idx]
 	
-	al.SourceStop(sounds.sources[sounds.beep_idx])
+	al.SourceStop(sfx.source)
 
-	al.Source(sounds.sources[sounds.beep_idx], al.BUFFER, d.buff)
-	al.Source(sounds.sources[sounds.beep_idx], al.LOOPING, d.loop)
+	al.Source(sfx.source, al.BUFFER, d.buff)
+	al.Source(sfx.source, al.LOOPING, d.loop)
 
-	al.SourcePlay(sounds.sources[sounds.beep_idx])
+	al.SourcePlay(sfx.source)
 
 	sounds.beep_idx=sounds.beep_idx+1
-	if sounds.beep_idx > #sounds.sources then sounds.beep_idx=1 end
+	if sounds.beep_idx > sfxmax then sounds.beep_idx=1 end
+end
+
+sounds.queue_talk=function(d)
+
+	local str=sounds.strs[1]
+
 end
 
 --
@@ -88,7 +105,6 @@ end
 sounds.load_speak=function(tab,id)
 	if type(tab)=="string" then tab={text=tab} end -- default options
 
-	name=name or "base"
 	local t=sounds.get(id)
 	if t then return t end --first check it is not already loaded
 	
@@ -170,16 +186,43 @@ sounds.start = function()
 		al.Listener(al.POSITION, 0, 0, 0)
 		al.Listener(al.VELOCITY, 0, 0, 0)
 		al.Listener(al.ORIENTATION, 0, 0, -1, 0,1,0 )
-		
-		sounds.sources={}
-		for i=1,4 do
-			sounds.sources[i]=al.GenSource()
-			local s=sounds.sources[i]
+
+-- one off sound effect type things		
+		sounds.sfxs={}
+		for i=1,sfxmax+strmax do
+			local sfx={}
+			sounds.sfxs[i]=sfx
+			local s=al.GenSource()
+			sfx.source=s
 			al.Source(s, al.PITCH, 1)
 			al.Source(s, al.GAIN, 1)
 			al.Source(s, al.POSITION, 0, 0, 0)
 			al.Source(s, al.VELOCITY, 0, 0, 0)
 			al.Source(s, al.LOOPING, al.FALSE)
+			setmetatable(sfx,sfx_meta)
+		end
+		
+-- streaming music type things
+		sounds.strs={}
+		for i=1,strmax do
+			local str={}
+			sounds.strs[i]=str
+			local s=al.GenSource()
+			str.source=s
+			al.Source(s, al.PITCH, 1)
+			al.Source(s, al.GAIN, 1)
+			al.Source(s, al.POSITION, 0, 0, 0)
+			al.Source(s, al.VELOCITY, 0, 0, 0)
+			al.Source(s, al.LOOPING, al.FALSE)
+
+			str.buffers={al.GenBuffer(),al.GenBuffer()} -- double buffer sound renderer
+			str.full={} -- these buffers are full and queued
+			str.empty={} -- these buffers are empty and waiting to be queued
+			for i,v in ipairs(str.buffers) do str.empty[#str.empty+1]=v end
+			
+			str.state="none"
+			
+			setmetatable(str,str_meta)
 		end
 
 
@@ -205,15 +248,76 @@ sounds.stop = function()
 
 	end
 
-	for i,v in pairs(sounds.sources) do
-		al.DeleteSource(v)
+	for i,v in pairs(sounds.sfxs) do
+		al.DeleteSource(v.src)
 	end
-	sounds.sources={}
+	sounds.sfxs={}
+	for i,v in pairs(sounds.strs) do
+		al.DeleteSource(v.src)
+	end
+	sounds.strs={}
 
 	sounds.context:clean()
 
 	sounds.context=nil
 end
+
+
+sounds.update = function()
+
+	for i,v in ipairs(sounds.strs) do
+		v:update()
+	end
+
+end
+
+
+function str_func.fill(str,b)
+	if str.talks and str.talks[1] then
+		local t=table.remove(str.talks,1)
+		local dat,len=require("wetgenes.speak.core").test(t)
+		al.BufferData(b,al.FORMAT_MONO16,dat,len,261.626*8*8) -- C4 hopefully?
+		return true
+	end
+end
+
+-- default stream update func
+function str_func.update(str)
+
+-- remove finished buffers
+	local processed=al.GetSource(str.source,al.BUFFERS_PROCESSED)
+	for i=1,processed do
+		local b=al.SourceUnqueueBuffer(str.source)
+		local idx
+		for i,v in ipairs(str.full) do -- find and remove, it should be the first one.
+			if v==b then idx=i break end
+		end
+		assert(idx)
+		table.remove(str.full,idx)
+		table.insert(str.empty,b)
+--print("unqueue ",b,idx)
+	end
+
+	while str.empty[1] do -- fill the empty queue
+		local b=str.empty[1]
+		if str:fill(b) then
+			al.SourceQueueBuffer(str.source,b)			
+			table.remove(str.empty,1)
+			table.insert(str.full,b)
+--			print("queue ",b)
+		else
+			break
+		end
+	end
+	
+	if str.state=="play_queue" and str.full[1] then -- start to play wenever we have a buffer filled
+		str.state="play"
+		al.SourcePlay(str.source)
+	end
+
+end
+
+
 
 	if sounds.cake.opts.disable_sounds then -- disable all function in this file
 		for n,v in pairs(sounds) do

@@ -248,6 +248,7 @@ function bake(opts)
 		function state.serv_pulse(state)
 				state.msgs()
 				
+				state.cake.update()
 				if not state.paused then
 					state.update()
 					state.draw()

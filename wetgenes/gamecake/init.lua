@@ -81,7 +81,10 @@ cake.stop = function()
 	end
 end
 
-	
+cake.update = function()
+	cake.sounds.update()
+end
+
 	cake.buffers = wbuffers.bake(opts) -- generic buffer memory is now complex thanks to retardroid
 	cake.images  =  wimages.bake(opts) -- we will need to load some images
 	cake.sheets  =  wsheets.bake(opts) -- we will need to manage some sprite sheets
