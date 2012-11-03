@@ -8,7 +8,7 @@ files { "lib/**.c" , "include/**.h" }
 excludes { "lib/psytune.c" }
 
 
-includedirs { "." , "lib" , "include" }
+includedirs { "." , "lib" , "include" , "../lib_ogg/include" }
 
 
 KIND{}

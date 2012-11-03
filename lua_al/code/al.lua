@@ -374,6 +374,12 @@ end
 function al.SourceStop(...)
 	return core.SourceStop(...)
 end
+function al.SourceQueueBuffer(...)
+	return core.SourceQueueBuffer(...)
+end
+function al.SourceUnqueueBuffer(...)
+	return core.SourceUnqueueBuffer(...)
+end
 
 function al.GenBuffer(...)
 	return core.GenBuffer(...)
