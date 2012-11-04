@@ -215,7 +215,7 @@ sounds.start = function()
 			al.Source(s, al.VELOCITY, 0, 0, 0)
 			al.Source(s, al.LOOPING, al.FALSE)
 
-			str.buffers={al.GenBuffer(),al.GenBuffer()} -- double buffer sound renderer
+			str.buffers={al.GenBuffer(),al.GenBuffer(),al.GenBuffer()} -- triple buffer sound renderer
 			str.full={} -- these buffers are full and queued
 			str.empty={} -- these buffers are empty and waiting to be queued
 			for i,v in ipairs(str.buffers) do str.empty[#str.empty+1]=v end
@@ -274,10 +274,59 @@ end
 
 function str_func.fill(str,b)
 	if str.talks and str.talks[1] then
+	
 		local t=table.remove(str.talks,1)
 		local dat,len=require("wetgenes.speak.core").test(t)
 		al.BufferData(b,al.FORMAT_MONO16,dat,len,261.626*8*8) -- C4 hopefully?
 		return true
+		
+	elseif str.oggs then
+	
+		local od=str.ogg_data
+		if not od then
+			od={}
+			str.ogg_data=od
+		end
+		
+		if not od.og and str.oggs[1] then
+			local ogg=require("wetgenes.ogg")
+			od.fname=table.remove(str.oggs,1)
+			od.fp=zips.open("data/"..od.fname..".ogg")
+			od.og=ogg.create()
+			od.og:open()
+		end
+		
+		if od.og then
+			local rr
+			for i=1,16 do -- may take a few loops before we can return any data
+				local r=od.og:pull()
+				if not r then
+					if od.og.err=="push" then od.og:push(od.fp:read(4096))
+					elseif od.og.err then error( od.og.err ) end
+				else
+					if not rr then rr=r else rr=rr..r end
+					if #rr>=4096*8 or od.og.err=="end" then -- want a reasonable chunk of data
+						local fmt=al.FORMAT_MONO16
+						if od.og.channels==2 then fmt=al.FORMAT_STEREO16 end
+						local rate=od.og.rate
+						al.BufferData(b,fmt,rr,#rr,rate) -- C4 hopefully?
+						if od.og.err and od.og.err~="end" then error( od.og.err ) end
+						if od.og.err=="end" then
+							if str.ogg_loop then
+								str.oggs[#str.oggs+1]=od.fname -- insert ogg back into the end of the list
+							end
+							od.fp:close()
+							od.fp=nil
+							od.og:close()
+							od.og=nil -- flag end of file
+						end
+--	print("buffered some ogg ",#rr)
+						return true
+					end
+				end
+			end
+		end
+
 	end
 end
 
@@ -304,13 +353,14 @@ function str_func.update(str)
 			al.SourceQueueBuffer(str.source,b)			
 			table.remove(str.empty,1)
 			table.insert(str.full,b)
---			print("queue ",b)
+--print("queue ",b)
 		else
 			break
 		end
 	end
 	
 	if str.state=="play_queue" and str.full[1] then -- start to play wenever we have a buffer filled
+--print("play ")
 		str.state="play"
 		al.SourcePlay(str.source)
 	end
