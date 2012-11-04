@@ -24,7 +24,7 @@ typedef struct
 	vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
 	vorbis_block     vb; /* local working space for packet->PCM decode */
 
-
+// statemachine flags
 	int done_open;
 	int done_init;
 	int done_synthesis_init;
@@ -43,7 +43,7 @@ typedef struct
 
 	const char *err;	// can be used to pass error strings back to other code
 
-	ogg_int16_t convbuffer[4096]; /* take 8k out of the data segment, not the stack */
+	ogg_int16_t convbuffer[4096];
 
 } dogg;
 
