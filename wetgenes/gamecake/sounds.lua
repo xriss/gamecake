@@ -249,11 +249,11 @@ sounds.stop = function()
 	end
 
 	for i,v in pairs(sounds.sfxs) do
-		al.DeleteSource(v.src)
+		al.DeleteSource(v.source)
 	end
 	sounds.sfxs={}
 	for i,v in pairs(sounds.strs) do
-		al.DeleteSource(v.src)
+		al.DeleteSource(v.source)
 	end
 	sounds.strs={}
 
