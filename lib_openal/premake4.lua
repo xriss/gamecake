@@ -10,12 +10,15 @@ local prefix="soft"
 
 if ANDROID then
 
-	prefix="android"
+--	prefix="android"
+	prefix="asoft"
 	
 	files { 
-			prefix.."/Alc/backends/android.c",
+--			prefix.."/Alc/backends/android.c",
+			prefix.."/Alc/backends/opensl.c",
 	}
-	defines("HAVE_ANDROID")
+--	defines("HAVE_ANDROID")
+	defines("HAVE_OPENSL")
 	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
 
 
