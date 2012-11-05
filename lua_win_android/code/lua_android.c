@@ -314,11 +314,14 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 
 struct android_app* master_android_app=0;
 
+// switched to SLES so no longer need this
+/*
 extern jint JNICALL
 JNI_OnLoad_openal(
 	JavaVM *vm,
 	void *reserved
 );
+*/
 
 /**
  * This is the main entry point of a native application that is using
@@ -335,7 +338,7 @@ void android_main(struct android_app* state) {
 	ANativeActivity* activity = state->activity;
 	JNIEnv* env=0;
 
-    JNI_OnLoad_openal(activity->vm,0);
+//    JNI_OnLoad_openal(activity->vm,0);
 
 	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);
 
