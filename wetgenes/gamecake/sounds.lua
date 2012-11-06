@@ -1,6 +1,7 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local print=function(...) return _G.print(...) end
 
 module("wetgenes.gamecake.sounds")
 
@@ -290,18 +291,30 @@ function str_func.fill(str,b)
 		
 		if not od.og and str.oggs[1] then
 			local ogg=require("wetgenes.ogg")
-			od.fname=table.remove(str.oggs,1)
-			od.fp=zips.open("data/"..od.fname..".ogg")
+			local fnam=table.remove(str.oggs,1)
+			if od.fname~=fnam then -- need reload only if the off changes?
+-- streaming from within a zip seems to fuckup, possibly having multiple files of a zip open is the problem?
+-- reading it all in at once fixed this			
+				od.fname=fnam
+				od.fpdat=zips.readfile("data/"..od.fname..".ogg")
+			end
+			od.fpidx=1
+			od.fpsiz=#od.fpdat
 			od.og=ogg.create()
 			od.og:open()
 		end
 		
 		if od.og then
 			local rr
-			for i=1,16 do -- may take a few loops before we can return any data
+			for i=1,128 do -- may take a few loops before we can return any data
 				local r=od.og:pull()
 				if not r then
-					if od.og.err=="push" then od.og:push(od.fp:read(4096))
+					if od.og.err=="push" then
+--						od.og.fpdat=od.fp:read(4096) -- keep data live
+						local dat=string.sub(od.fpdat,od.fpidx,od.fpidx+4096-1)
+						od.fpidx=od.fpidx+4096
+--if dat then print("read some ogg ",#dat) end
+						od.og:push(dat)
 					elseif od.og.err then error( od.og.err ) end
 				else
 					if not rr then rr=r else rr=rr..r end
@@ -315,8 +328,8 @@ function str_func.fill(str,b)
 							if str.ogg_loop then
 								str.oggs[#str.oggs+1]=od.fname -- insert ogg back into the end of the list
 							end
-							od.fp:close()
-							od.fp=nil
+--							od.fp:close()
+--							od.fp=nil
 							od.og:close()
 							od.og=nil -- flag end of file
 						end
