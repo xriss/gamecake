@@ -41,6 +41,8 @@ elseif NACL then
 	links { "ppapi"  }
 	links { "ppapi_gles2" }
 	links { "m" , "stdc++" }
+	links { "pthread" }
+	links { "nosys" } -- remove newlib link errors
 	links { "nosys" } -- remove newlib link errors
 	
 	KIND{kind="WindowedApp",name="lua."..CPU..".nexe"}

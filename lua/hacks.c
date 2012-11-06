@@ -38,3 +38,20 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len)
 	
 	return p;
 }
+
+#if defined(NACL)
+
+// we should never really call kill but may accidently link to it with ome libs
+
+int kill(int pid, int sig)
+{
+//	if(pid == __MYPID)
+	{
+		while(1)
+		{
+		}
+	}
+	return 0;
+}
+
+#endif

@@ -12,18 +12,18 @@
 /* #undef HAVE_ALIGNED_ACCESS_REQUIRED */
 
 /* Define to 1 if you have the <byteswap.h> header file. */
-//#ifndef ZZIP_HAVE_BYTESWAP_H 
-//#define ZZIP_HAVE_BYTESWAP_H  1 
-//#endif
+#ifndef ZZIP_HAVE_BYTESWAP_H 
+#define ZZIP_HAVE_BYTESWAP_H  1 
+#endif
 
 /* Define to 1 if you have the <direct.h> header file. */
 /* #undef HAVE_DIRECT_H */
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
-//#ifndef ZZIP_HAVE_DIRENT_H 
-//#define ZZIP_HAVE_DIRENT_H  1 
-//#endif
+#ifndef ZZIP_HAVE_DIRENT_H 
+#define ZZIP_HAVE_DIRENT_H  1 
+#endif
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #ifndef ZZIP_HAVE_DLFCN_H 
@@ -31,9 +31,9 @@
 #endif
 
 /* Define to 1 if you have the <fnmatch.h> header file. */
-//#ifndef ZZIP_HAVE_FNMATCH_H 
-//#define ZZIP_HAVE_FNMATCH_H  1 
-//#endif
+#ifndef ZZIP_HAVE_FNMATCH_H 
+#define ZZIP_HAVE_FNMATCH_H  1 
+#endif
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #ifndef ZZIP_HAVE_INTTYPES_H 
@@ -77,9 +77,9 @@
 #endif
 
 /* Define to 1 if you have the `strndup' function. */
-//#ifndef ZZIP_HAVE_STRNDUP 
-//#define ZZIP_HAVE_STRNDUP  1 
-//#endif
+#ifndef ZZIP_HAVE_STRNDUP 
+#define ZZIP_HAVE_STRNDUP  1 
+#endif
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
@@ -198,7 +198,7 @@
 
 /* Version number of package */
 #ifndef ZZIP_VERSION 
-#define ZZIP_VERSION  "0.13.60" 
+#define ZZIP_VERSION  "0.13.62" 
 #endif
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
