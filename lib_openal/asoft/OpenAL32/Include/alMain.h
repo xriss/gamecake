@@ -431,6 +431,9 @@ struct BackendInfo {
     BackendFuncs Funcs;
 };
 
+ALCboolean alc_ppapi_init(BackendFuncs *func_list);
+void alc_ppapi_deinit(void);
+void alc_ppapi_probe(enum DevProbe type);
 ALCboolean alc_alsa_init(BackendFuncs *func_list);
 void alc_alsa_deinit(void);
 void alc_alsa_probe(enum DevProbe type);
@@ -488,7 +491,7 @@ enum DevFmtType {
     DevFmtUInt   = ALC_UNSIGNED_INT_SOFT,
     DevFmtFloat  = ALC_FLOAT_SOFT,
 
-    DevFmtTypeDefault = DevFmtFloat
+    DevFmtTypeDefault = DevFmtShort//DevFmtFloat
 };
 enum DevFmtChannels {
     DevFmtMono   = ALC_MONO_SOFT,

@@ -1,33 +1,36 @@
 
-if not WINDOWS then
-
 project "lib_openal"
 kind "StaticLib"
 language "C"
 
 
-local prefix="soft"
+local prefix="asoft"
+
 
 if ANDROID then
-
---	prefix="android"
-	prefix="asoft"
 	
 	files { 
---			prefix.."/Alc/backends/android.c",
 			prefix.."/Alc/backends/opensl.c",
 	}
---	defines("HAVE_ANDROID")
 	defines("HAVE_OPENSL")
 	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
 
 
 elseif NACL then
 
+	prefix="soft"
 	files { 
 			prefix.."/Alc/backends/ppapi.c",
 	}
 	defines("HAVE_PPAPI")
+
+
+elseif WINDOWS then
+
+	files { 
+			prefix.."/Alc/backends/dsound.c",
+	}
+	defines("HAVE_DSOUND")
 
 
 else
@@ -85,5 +88,3 @@ defines{ "AL_ALEXT_PROTOTYPES" }
 
 KIND{}
 --buildoptions {"--verbose"}
-
-end

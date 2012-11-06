@@ -145,8 +145,8 @@ end
 --
 local main -- gonna have to cache the main state here
 function win.nacl_start(url)
-	_G.print=hardcore.print
-	print=_G.print
+--	_G.print=hardcore.print
+--	print=_G.print
 	
 	print("nacl start ",url)
 

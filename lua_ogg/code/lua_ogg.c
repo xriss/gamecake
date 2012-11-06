@@ -186,6 +186,8 @@ int slen;
 	dd = lua_dogg_check(l, 1 );
 	s = lua_tolstring(l, 2 ,&slen);
 
+	ogg_stream_packetout(&dd->os,&dd->op);
+	
 	dd->buffer=ogg_sync_buffer(&dd->oy,slen);
 	dd->bytes=slen;
 	memcpy(dd->buffer,s,slen);
