@@ -205,6 +205,7 @@ elseif RASPI then
 
 	local raspisdk=path.getabsolute("../sdks/raspi")
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include" }
+	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vcos/pthreads"} -- bugfix?
 	libdirs { raspisdk.."/firmware/hardfp/opt/vc/lib" }
 
 	platforms { "raspi" } --hax
