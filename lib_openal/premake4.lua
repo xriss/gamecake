@@ -32,8 +32,17 @@ elseif WINDOWS then
 			prefix.."/Alc/backends/winmm.c",
 	}
 	defines("HAVE_WINMM")
-	defines("AL_LIBTYPE_STATIC")
 
+elseif RASPI then
+
+	prefix="asoft"
+	files { 
+			prefix.."/Alc/backends/alsa.c",
+	}
+	defines("HAVE_ALSA")
+
+	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
+	includedirs { "./raspi/include" }
 
 else
 
