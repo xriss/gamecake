@@ -22,56 +22,65 @@ function freetype.create()
 	ft[0]=core.create()	
 	setmetatable(ft,meta)
 	
-	core.info(ft[0],ft)
+--	ft:info()
 	
 	return ft
 end
 
 base.load_file=function(ft,s)
 	local r,err=core.load_file(ft[0],s)
-	core.info(ft[0],ft)
+	ft:info()
 end
 
 base.load_data=function(ft,s)
 	local r,err=core.load_data(ft[0],s)
-	core.info(ft[0],ft)
+	ft:info()
 end
 
 base.destroy=function(ft)
 	local r,err=core.destroy(ft[0])
-	core.info(ft[0],ft)
+	ft:info()
 end
 
 base.size=function(ft,x,y)
 	local r,err=core.size(ft[0],x,y)
-	core.info(ft[0],ft)
+	ft:info()
 	return ft
 end
 
 base.glyph=function(ft,id)
 	local r,err=core.glyph(ft[0],id)
-	core.info(ft[0],ft)
+	ft:info()
 	return ft
 end
 
 base.render=function(ft,id)
 	local r,err=core.render(ft[0],id)
-	core.info(ft[0],ft)
+	ft:info()
 	return ft
 end
 
 base.tab=function(ft)
 	local r,err=core.tab(ft[0])
-	core.info(ft[0],ft)
+	ft:info()
 	return ft
 end
 
 base.grd=function(ft,g)
 	local r,err=core.grd(ft[0],g[0])
-	core.info(ft[0],ft)
+	ft:info()
 	g:info()
 	return ft
 end
 
+base.info=function(ft)
+	core.info(ft[0],ft)
+--[[
+	if ft.error then
+		assert(not ft.error,ft.error)
+	end
+]]
+	return ft
+end
 
 return freetype

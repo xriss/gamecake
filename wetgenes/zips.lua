@@ -117,7 +117,7 @@ function open(fname)
 			end
 		end
 	end
-	return io.open(ioprefix..fname) -- also try the filesystem
+	return io.open(ioprefix..fname,"rb") -- also try the filesystem
 end
 
 --

@@ -36,11 +36,11 @@ function bake(opts)
 	end
 
 	if opts.win.flavour=="windows" then -- windows hacks
-		cake.opts.disable_sounds=true
+--		cake.opts.disable_sounds=true
 	end
 
 	if opts.win.flavour=="raspi" then -- raspi hacks
-		cake.opts.disable_sounds=true
+--		cake.opts.disable_sounds=true
 	end
 
 -- cache stuffs	

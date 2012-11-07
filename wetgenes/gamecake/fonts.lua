@@ -100,8 +100,8 @@ fonts.load=function(filename,id)
 
 		local fname=fonts.prefix..filename..fonts.postfix
 		
-		
 		local d=assert(zips.readfile(fname))
+print("Loading font ",fname,#d)		
 
 		if gl then --gl mode
 		
