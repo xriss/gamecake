@@ -27,10 +27,12 @@ elseif NACL then
 
 elseif WINDOWS then
 
+	prefix="asoft"
 	files { 
-			prefix.."/Alc/backends/dsound.c",
+			prefix.."/Alc/backends/winmm.c",
 	}
-	defines("HAVE_DSOUND")
+	defines("HAVE_WINMM")
+	defines("AL_LIBTYPE_STATIC")
 
 
 else
@@ -85,6 +87,7 @@ files {
 includedirs { ".",prefix.."/include",prefix.."/OpenAL32/Include" }
 
 defines{ "AL_ALEXT_PROTOTYPES" }
+defines( "AL_LIBTYPE_STATIC" )
 
 KIND{}
 --buildoptions {"--verbose"}

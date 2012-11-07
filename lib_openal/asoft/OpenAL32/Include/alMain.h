@@ -128,7 +128,7 @@ void *GetSymbol(void *handle, const char *name);
 
 typedef void *volatile XchgPtr;
 
-#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1))
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1))&&(!defined(_WIN32))
 typedef ALuint RefCount;
 static __inline RefCount IncrementRef(volatile RefCount *ptr)
 { return __sync_add_and_fetch(ptr, 1); }

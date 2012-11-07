@@ -1,6 +1,6 @@
 
 project "lib_freetype"
-language "C++"
+language "C"
 
 defines { "FT2_BUILD_LIBRARY" }
 

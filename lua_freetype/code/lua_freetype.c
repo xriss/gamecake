@@ -284,8 +284,14 @@ int glyph_index=FT_Get_Char_Index( p->face, ucode);
 
 	p->error=FT_Load_Glyph( p->face, glyph_index , 0 );
 
-	p->error = FT_Render_Glyph( p->face->glyph , FT_RENDER_MODE_NORMAL ); 
-      
+	if(!p->error)
+	{
+		p->error = FT_Render_Glyph( p->face->glyph , FT_RENDER_MODE_NORMAL ); 
+	}
+	else
+	{
+printf("ERROR %d\n",p->error);
+	}
 	return 0;
 }
 
@@ -343,7 +349,7 @@ unsigned char* c;
 
 struct grd *g;
 
-	if(p->face->glyph)
+	if(p->face && p->face->glyph)
 	{
 		b=p->face->glyph->bitmap.buffer;
 
