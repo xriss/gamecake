@@ -414,6 +414,24 @@ int r;
 	return 1;
 }
 
+int lua_raspi_sleep (lua_State *l)
+{
+    double n = luaL_checknumber(l, 1);
+//#ifdef _WIN32
+//    Sleep((int)(n*1000));
+//#else
+    struct timespec t, r;
+    t.tv_sec = (int) n;
+    n -= t.tv_sec;
+    t.tv_nsec = (int) (n * 1000000000);
+    if (t.tv_nsec >= 1000000000) t.tv_nsec = 999999999;
+    while (nanosleep(&t, &r) != 0) {
+        t.tv_sec = r.tv_sec;
+        t.tv_nsec = r.tv_nsec;
+    }
+//#endif
+    return 0;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -437,7 +455,7 @@ LUALIB_API int luaopen_wetgenes_win_raspi(lua_State *l)
 //		{"wait",			lua_raspi_wait},
 //		{"msg",				lua_raspi_msg},
 
-//		{"sleep",			lua_raspi_sleep},
+		{"sleep",			lua_raspi_sleep},
 		{"time",			lua_raspi_time},
 		
 		{"getc",			lua_raspi_getc},

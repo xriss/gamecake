@@ -148,7 +148,7 @@ function win.nacl_start(url)
 --	_G.print=hardcore.print
 --	print=_G.print
 	
-	print("nacl start ",url)
+--	print("nacl start ",url)
 
 	local zips=require("wetgenes.zips")
 	
@@ -156,15 +156,14 @@ function win.nacl_start(url)
 	_G.nacl_input_event=function(...) return hardcore.input_event(...) end
 
 	hardcore.getURL(url,function(size,mem)	
-		print("nacl callback",size,mem)
-		
+--		print("nacl callback",size,mem)
 		
 		zips.add_zip_data(mem)
 		main=win.load_run_init()
 
 	end)
 
-	print("nacl start done")
+--	print("nacl start done")
 
 end
 
@@ -182,7 +181,6 @@ function win.create(opts)
 	setmetatable(w,meta)
 	
 	if hardcore.create then
-print("pre create")
 		w[0]=assert( hardcore.create(opts) )
 	end
 	w.msgstack={} -- can feed "fake" msgs into here (fifo stack) with table.push
