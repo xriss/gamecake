@@ -153,9 +153,11 @@ function bake(opts)
 
 				if state.frame_rate and state.frame_time then --  framerate limiter enabled
 					if state.frame_time<(state.win:time()-0.5) then state.frame_time=state.win:time() end -- prevent race condition
-					while (state.frame_time-0.001)>state.win:time() do state.win:sleep(0.001) end -- simple frame limit
+					while (state.frame_time)>state.win:time() do state.win:sleep(0.001) end -- simple frame limit
 					state.frame_time=state.frame_time+state.frame_rate -- step frame forward one tick
 				end
+
+--print( "UPDATE",math.floor(10000000+(state.win:time()*1000)%1000000) )
 
 				if state.times then state.times.update.start() end
 				
@@ -179,7 +181,8 @@ function bake(opts)
 
 		function state.draw()
 			
-			if state.times then state.times.draw.stop() end -- draw is squify so just use it as the total time
+--print( "DRAW",math.floor(10000000+(state.win:time()*1000)%1000000) )
+
 			if state.times then state.times.draw.start() end -- between calls to draw
 			
 			if state.now and state.now.draw then
@@ -192,6 +195,8 @@ function bake(opts)
 				end
 			end
 						
+			if state.times then state.times.draw.stop() end -- draw is squify so just use it as the total time
+
 			if state.win then
 				state.win:swap()
 			end

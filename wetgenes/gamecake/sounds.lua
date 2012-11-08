@@ -274,6 +274,8 @@ end
 
 
 function str_func.fill(str,b)
+do return end
+
 	if str.talks and str.talks[1] then
 	
 		local t=table.remove(str.talks,1)

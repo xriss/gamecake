@@ -214,12 +214,18 @@ function bake(state)
 			state.times.draw.done()
 
 			local gci=gcinfo()
-			console.display(string.format("fps=%02.0f %02.2f/%02.2f mem=%0.0fk",
+			local s=string.format("fps=%02.0f %02.2f/%02.2f mem=%0.0fk",
 				console.fps,
 				(state.times.update.time*1000),
 				(state.times.draw.time*1000),
-				math.floor(gci) ))
-				
+				math.floor(gci) )
+			
+			if gl.patch_functions_method=="disable" then
+				print(s)
+			end
+							
+			console.display(s)
+
 			console.fps_count=console.fps_count+1
 		end
 
@@ -228,6 +234,7 @@ function bake(state)
 		local w,h=state.win.width,state.win.height
 		gl.Viewport(0,0,w,h)
 		canvas.gl_default() -- reset gl state
+
 
 --		gl.ClearColor(0,0,0,0)
 --		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
@@ -239,6 +246,7 @@ function bake(state)
 		gl.LoadIdentity()
 		gl.Translate(-w/2,-h/2,-h) -- top/left 1unit==1pixel
 		gl.PushMatrix()
+
 
 		font.set(cake.fonts.get(1))
 		font.set_size(8,0)
@@ -272,6 +280,7 @@ function bake(state)
 			
 		end
 
+
 		if console.show_hud then
 			if console.flick then
 --				console.flick=false
@@ -288,10 +297,12 @@ function bake(state)
 			end
 		end
 
+
 		console.lines_display={}
 
 
 		gl.PopMatrix()
+
 
 	end
 	

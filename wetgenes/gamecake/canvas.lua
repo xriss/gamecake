@@ -240,6 +240,8 @@ end
 
 font.draw=function(text)
 
+-- switch upto C func, with inline blit
+
 	local x=font.x
 	local y=font.y
 	local font_dat=font.dat
