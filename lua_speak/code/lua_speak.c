@@ -26,6 +26,8 @@ static int lua_speak_setup (lua_State *l)
 		
 		init=1;
 	}
+	
+	return 0;
 }
 
 
