@@ -8,32 +8,46 @@
 
 #include "flite.h"
 
-extern cst_voice *register_cmu_us_slt();
+//extern cst_voice *register_cmu_us_slt();
+extern cst_voice *register_cmu_us_kal();
 
-static int lua_speak_test (lua_State *l)
+static int init=0;
+static cst_voice *voice=0;
+
+// setup stuff if we must
+static int lua_speak_setup (lua_State *l)
+{
+	if(!init)
+	{
+		flite_init();
+	//	voice=register_cmu_us_slt();
+		voice=register_cmu_us_kal();
+		
+		
+		init=1;
+	}
+}
+
+
+// render some text using the current voice
+static int lua_speak_text (lua_State *l)
 {
 cst_wave *sound;
-cst_voice *voice;
 u16 *data;
+const char *text;
 
-const char *text;//="hello mr speak and spell";
+	lua_speak_setup(l);
 
 	text=luaL_checkstring(l,1);
-
-//	printf("%s\n",text);
-//	printf("\n");
-
-	flite_init();
-	voice=register_cmu_us_slt();
 	sound = flite_text_to_wave(text, voice);
-
+	
 	data = (u16*)lua_newuserdata(l,sound->num_samples*2);
 	memcpy(data,sound->samples,sound->num_samples*2);
 	lua_pushnumber(l,sound->num_samples*2);
 
 	delete_wave(sound);
 
-// return userdata and a size
+// return userdata,size
 	return 2;
 }
 
@@ -41,6 +55,17 @@ const char *text;//="hello mr speak and spell";
  //       feat_set_float(voice->features,"int_f0_target_stddev",variance);
   //      feat_set_float(voice->features,"duration_stretch",speed); 
   
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// set the current voice
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_speak_voice (lua_State *l)
+{
+	lua_speak_setup(l);
+
+	return 0;
+}
   
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -51,7 +76,10 @@ LUALIB_API int luaopen_wetgenes_speak_core (lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
-		{"test",			lua_speak_test},
+		{"test",			lua_speak_text},
+		
+		{"text",			lua_speak_text},
+		{"voice",			lua_speak_voice},
 		
 		{0,0}
 	};
