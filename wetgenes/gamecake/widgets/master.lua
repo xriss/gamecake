@@ -93,7 +93,7 @@ function wmaster.setup(widget,def)
 	
 	function master.msg(widget,m)
 		if m.class=="key" then
-			widget:key(m.ascii,m.keyname,m.actions)
+			widget:key(m.ascii,m.keyname,m.action)
 		elseif m.class=="mouse" then
 			widget:mouse(m.action,m.x,m.y,m.keycode)
 		end

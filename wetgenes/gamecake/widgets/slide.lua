@@ -70,11 +70,11 @@ function wslide.setup(widget,def)
 	widget.layout=wslide.layout
 	
 --setup constraints in x and y 
-	widget.datx=widget_data.new_data(def.datx)
-	widget.daty=widget_data.new_data(def.daty)
+	widget.datx=def.datx or widget_data.new_data({max=0})
+	widget.daty=def.daty or widget_data.new_data({max=0})
 
 -- auto add the draging button as a child
-	widget.drag=widget:add({class="drag",color=0xffffffff,hy=widget.daty:get_size(widget.hy),hx=widget.datx:get_size(widget.hx),pxf=widget.datx:get_pos(),pyf=widget.daty:get_pos(),data=widget.data})
+	widget.drag=widget:add({class="drag",color=widget.color,hy=widget.daty:get_size(widget.hy),hx=widget.datx:get_size(widget.hx),pxf=widget.datx:get_pos(),pyf=widget.daty:get_pos(),data=widget.data})
 	
 	return widget
 end

@@ -190,8 +190,8 @@ sounds.start = function()
 
 -- one off sound effect type things		
 		sounds.sfxs={}
-		for i=1,sfxmax+strmax do
-			local sfx={}
+		for i=1,sfxmax do
+			local sfx={idx=i}
 			sounds.sfxs[i]=sfx
 			local s=al.GenSource()
 			sfx.source=s
@@ -206,7 +206,7 @@ sounds.start = function()
 -- streaming music type things
 		sounds.strs={}
 		for i=1,strmax do
-			local str={}
+			local str={idx=i}
 			sounds.strs[i]=str
 			local s=al.GenSource()
 			str.source=s
@@ -221,11 +221,17 @@ sounds.start = function()
 			str.empty={} -- these buffers are empty and waiting to be queued
 			for i,v in ipairs(str.buffers) do str.empty[#str.empty+1]=v end
 			
-			str.state="none"
-			
 			setmetatable(str,str_meta)
 		end
 
+-- queues contain data that is kept valid between stop/starts
+-- this way we can kind of keep playing at more or less the same point in a stream
+		if not sounds.queues then
+			sounds.queues={}
+			for i=1,strmax do
+				sounds.queues[i]={}
+			end
+		end
 
 		for v,n in pairs(sounds.remember or {}) do
 			if type(v)=="table" then
@@ -274,66 +280,68 @@ end
 
 
 function str_func.fill(str,b)
-do return end
 
-	if str.talks and str.talks[1] then
+local qq=sounds.queues[str.idx]
+
+	if qq.talks and qq.talks[1] then
 	
-		local t=table.remove(str.talks,1)
-		local dat,len=require("wetgenes.speak.core").test(t)
-		al.BufferData(b,al.FORMAT_MONO16,dat,len,261.626*8*8) -- C4 hopefully?
+--	al.Source(str.source, al.GAIN, 1)
+	
+		local wspeak=require("wetgenes.speak")
+
+		local t=table.remove(qq.talks,1)
+		wspeak.voice(qq.voice)
+		local dat,len=wspeak.text(t)
+		al.BufferData(b,al.FORMAT_MONO16,dat,len,0x4000 )--this depends on the voice used
+		qq.pitch=qq.voice.pitch -- use the pitch from the voice
 		return true
 		
-	elseif str.oggs then
-	
-		local od=str.ogg_data
-		if not od then
-			od={}
-			str.ogg_data=od
-		end
+	elseif qq.oggs then
+--do return false end	
 		
-		if not od.og and str.oggs[1] then
+		if not qq.og and qq.oggs[1] then
 			local ogg=require("wetgenes.ogg")
-			local fnam=table.remove(str.oggs,1)
-			if od.fname~=fnam then -- need reload only if the off changes?
+			local fnam=table.remove(qq.oggs,1)
+			if qq.fname~=fnam then -- need reload only if the off changes?
 -- streaming from within a zip seems to fuckup, possibly having multiple files of a zip open is the problem?
 -- reading it all in at once fixed this			
-				od.fname=fnam
-				od.fpdat=zips.readfile("data/"..od.fname..".ogg")
+				qq.fname=fnam
+				qq.fpdat=zips.readfile("data/"..qq.fname..".ogg")
 			end
-			od.fpidx=1
-			od.fpsiz=#od.fpdat
-			od.og=ogg.create()
-			od.og:open()
+			qq.fpidx=1
+			qq.fpsiz=#qq.fpdat
+			qq.og=ogg.create()
+			qq.og:open()
 		end
 		
-		if od.og then
+		if qq.og then
 			local rr
 			for i=1,128 do -- may take a few loops before we can return any data
-				local r=od.og:pull()
+				local r=qq.og:pull()
 				if not r then
-					if od.og.err=="push" then
---						od.og.fpdat=od.fp:read(4096) -- keep data live
-						local dat=string.sub(od.fpdat,od.fpidx,od.fpidx+4096-1)
-						od.fpidx=od.fpidx+4096
+					if qq.og.err=="push" then
+--						qq.og.fpdat=qq.fp:read(4096) -- keep data live
+						local dat=string.sub(qq.fpdat,qq.fpidx,qq.fpidx+4096-1)
+						qq.fpidx=qq.fpidx+4096
 --if dat then print("read some ogg ",#dat) end
-						od.og:push(dat)
-					elseif od.og.err then error( od.og.err ) end
+						qq.og:push(dat)
+					elseif qq.og.err then error( qq.og.err ) end
 				else
 					if not rr then rr=r else rr=rr..r end
-					if #rr>=4096*8 or od.og.err=="end" then -- want a reasonable chunk of data
+					if #rr>=4096*8 or qq.og.err=="end" then -- want a reasonable chunk of data
 						local fmt=al.FORMAT_MONO16
-						if od.og.channels==2 then fmt=al.FORMAT_STEREO16 end
-						local rate=od.og.rate
+						if qq.og.channels==2 then fmt=al.FORMAT_STEREO16 end
+						local rate=qq.og.rate
 						al.BufferData(b,fmt,rr,#rr,rate) -- C4 hopefully?
-						if od.og.err and od.og.err~="end" then error( od.og.err ) end
-						if od.og.err=="end" then
-							if str.ogg_loop then
-								str.oggs[#str.oggs+1]=od.fname -- insert ogg back into the end of the list
+						if qq.og.err and qq.og.err~="end" then error( od.og.err ) end
+						if qq.og.err=="end" then
+							if qq.ogg_loop then
+								qq.oggs[#qq.oggs+1]=qq.fname -- insert ogg back into the end of the list
 							end
---							od.fp:close()
---							od.fp=nil
-							od.og:close()
-							od.og=nil -- flag end of file
+--							qq.fp:close()
+--							qq.fp=nil
+							qq.og:close()
+							qq.og=nil -- flag end of file
 						end
 --	print("buffered some ogg ",#rr)
 						return true
@@ -347,6 +355,7 @@ end
 
 -- default stream update func
 function str_func.update(str)
+local qq=sounds.queues[str.idx]
 
 -- remove finished buffers
 	local processed=al.GetSource(str.source,al.BUFFERS_PROCESSED)
@@ -365,20 +374,28 @@ function str_func.update(str)
 	while str.empty[1] do -- fill the empty queue
 		local b=str.empty[1]
 		if str:fill(b) then
-			al.SourceQueueBuffer(str.source,b)			
+			al.SourceQueueBuffer(str.source,b)	
+--print("queue ",b)
+--al.CheckError()
 			table.remove(str.empty,1)
 			table.insert(str.full,b)
---print("queue ",b)
 		else
 			break
 		end
 	end
 	
-	if str.state=="play_queue" and str.full[1] then -- start to play wenever we have a buffer filled
---print("play ")
-		str.state="play"
-		al.SourcePlay(str.source)
+	if qq.state=="play_queue" and str.full[1] then -- start to play whenever we have a buffer filled
+		local astate=al.GetSource(str.source, al.SOURCE_STATE)
+		if astate ~= al.PLAYING then
+--print("astate",astate)
+			al.SourceStop(str.source)
+			al.SourcePlay(str.source)
+		end
 	end
+
+--update every frame
+	al.Source(str.source, al.GAIN, qq.gain or 1)
+	al.Source(str.source, al.PITCH, qq.pitch or 1)
 
 end
 

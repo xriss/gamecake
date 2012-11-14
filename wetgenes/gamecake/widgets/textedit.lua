@@ -12,6 +12,8 @@ module("wetgenes.gamecake.widgets.textedit")
 function bake(state,wtextedit)
 wtextedit=wtextedit or {}
 
+local cake=state.cake
+
 local widget_data=state:rebake("wetgenes.gamecake.widgets.data")
 
 
@@ -32,7 +34,11 @@ function wtextedit.mouse(widget,act,x,y,key)
 			if dx<0 then -- catch lessthan
 				widget.data.str_idx=0
 			else
-				widget.data.str_idx=widget.master.font.which(dx,widget.data.str)
+				local f=widget.font or widget.master.font or 1
+				local font=cake.fonts.get(f)
+
+				widget.data.str_idx=0 -- font.which(dx,widget.data.str) // TODO: fix position under mouse
+				
 				if widget.data.str_idx<0 then widget.data.str_idx=#widget.data.str end -- catch morethan
 			end
 
@@ -52,7 +58,7 @@ function wtextedit.key(widget,ascii,key,act)
 	
 	local changed=false
 
---print("gotkey",ascii)
+--print("gotkey",ascii,act)
 	
 	if act==1 or act==0 then
 	

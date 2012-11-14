@@ -339,7 +339,7 @@ function al.GetError(...)
 end
 function al.CheckError(...)
 	local err=al.GetError()
-	local str=al.numtostring(err)
+	local str=al.numtostring(err) or ("0x%04x"):format(err)
 	assert(err==0,str)
 end
 

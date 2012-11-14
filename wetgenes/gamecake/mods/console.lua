@@ -43,7 +43,8 @@ function bake(state)
 		console.y_show=8*8
 		
 		console.show=false
-		console.show_hud=true
+--		console.show_hud=true
+		console.show_hud=false
 
 --		console.show=true
 --		console.show_hud=true

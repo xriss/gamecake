@@ -27,6 +27,7 @@ wdata.data_value=function(dat,val)
 	if dat.class=="number" then
 		if val then val=tonumber(val) end -- auto convert from string
 		if val and val~=dat.num then -- change value
+			dat.num=val
 			if dat.min and dat.num<dat.min then dat.num=dat.min end
 			if dat.max and dat.num>dat.max then dat.num=dat.max end
 			dat.str=dat:get_string() -- cache on change
@@ -80,7 +81,7 @@ end
 wdata.data_snap=function(dat,psiz,bsiz,bpos)
 	if dat.step==0 then -- no snap
 		if dat.max==dat.min then dat:value(dat.min) return 0 end -- do not move
-		
+
 		local f=bpos/(psiz-bsiz)
 		dat:value(dat.min+((dat.max-dat.min)*f))
 		
@@ -136,7 +137,7 @@ function wdata.new_data(dat)
 	dat.value=wdata.data_value
 
 -- work out snapping for scroll bars	
-	dat.snap=data_snap
+	dat.snap=wdata.data_snap
 
 	dat:value(dat,dat.num) -- triger value changed/set callbacks
 	
