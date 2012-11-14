@@ -113,7 +113,7 @@ int clips=0;
 	cbeg=p_start-data;
 	cend=pend-(p_stop+1);
 
-printf("blank space %d %d / %d\n",cbeg,cend,sound->num_samples);
+//printf("blank space %d %d / %d\n",cbeg,cend,sound->num_samples);
 
 	
 	len=(p_stop+1-p_start)*2;
@@ -145,11 +145,31 @@ printf("blank space %d %d / %d\n",cbeg,cend,sound->num_samples);
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_speak_voice (lua_State *l)
 {
-	lua_speak_setup(l);
+float mean=100; // 300
+float stddev=10; // 100
+float stretch=1; // 0.74
 
-    flite_feat_set_float(voice->features,"int_f0_target_mean",300);
-    flite_feat_set_float(voice->features,"int_f0_target_stddev",100);
-    flite_feat_set_float(voice->features,"duration_stretch",0.75);
+	lua_speak_setup(l);
+	
+	if( lua_istable(l,1) )
+	{
+
+		lua_getfield(l,1,"mean");
+		if(lua_isnumber(l,-1)) { mean=(float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,1,"stddev");
+		if(lua_isnumber(l,-1)) { stddev=(float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,1,"stretch");
+		if(lua_isnumber(l,-1)) { stretch=(float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+	}
+	
+    flite_feat_set_float(voice->features,"int_f0_target_mean",mean);
+    flite_feat_set_float(voice->features,"int_f0_target_stddev",stddev);
+    flite_feat_set_float(voice->features,"duration_stretch",stretch);
 
 	return 0;
 }
