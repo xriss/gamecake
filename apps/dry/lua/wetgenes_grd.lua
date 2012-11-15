@@ -59,6 +59,10 @@ function test_png_8x_t3()
 	do_png_8x("t3")
 end
 
+function test_png_grey_t3()
+	do_png_8888("grey")
+end
+
 
 function test_premult_t3()
 	do_premult("t3")
