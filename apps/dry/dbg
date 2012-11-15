@@ -1,4 +1,4 @@
 cd `dirname $0`
-cd ../../bin/dbg
+cd ../../../bin/dbg
 ./lua -e"require('apps').start('dry','$*');"
 
