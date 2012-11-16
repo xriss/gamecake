@@ -4,6 +4,7 @@ local zips=require("wetgenes.zips")
 local bake=require("wetgenes.bake")
 local sbox=require("wetgenes.sandbox")
 local wstr=require("wetgenes.string")
+local wgrd=require("wetgenes.grd")
 
 local args={...}
 
@@ -28,9 +29,9 @@ local opts={
 bake.replacefile("AndroidManifest.xml.base","AndroidManifest.xml",opts)
 bake.replacefile("build.xml.base","build.xml",opts)
 
--- remove all files in res/raw
+-- remove all files in res
 
-os.execute("rm -rf res/raw")
+os.execute("rm -rf res")
 
 -- copy all data and code from root into res/raw
 
@@ -47,5 +48,25 @@ for _,dir in ipairs{"lua","data"} do
 
 end
 
+local ficon=basedir.."/art/icons/android_icon.png"
+if bake.file_exists(ficon) then
+
+
+	for i,v in ipairs{
+		{s=96,o="xhdpi"},
+		{s=72,o="hdpi"},
+		{s=48,o="mdpi"},
+		{s=36,o="ldpi"},
+	} do
+		local gd=assert(wgrd.create(ficon))
+		assert(gd:convert(wgrd.FMT_U8_ARGB))
+		gd:scale(v.s,v.s,1)
+		local n="res/drawable-"..v.o.."/icon.png"
+		bake.create_dir_for_file(n)
+		gd:save(n)
+		print(n)
+	end
+
+end
 
 
