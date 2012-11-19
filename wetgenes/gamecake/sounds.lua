@@ -278,6 +278,7 @@ sounds.update = function()
 
 end
 
+local dbgfp
 
 function str_func.fill(str,b)
 
@@ -288,12 +289,13 @@ local qq=sounds.queues[str.idx]
 --	al.Source(str.source, al.GAIN, 1)
 	
 		local wspeak=require("wetgenes.speak")
+		local voice=qq.voice or {} -- make sure we have a voide
 
 		local t=table.remove(qq.talks,1)
-		wspeak.voice(qq.voice)
+		wspeak.voice(voice)
 		local dat,len=wspeak.text(t)
 		al.BufferData(b,al.FORMAT_MONO16,dat,len,0x4000 )--this depends on the voice used
-		qq.pitch=qq.voice.pitch -- use the pitch from the voice
+		qq.pitch=voice.pitch -- use the pitch from the voice
 		return true
 		
 	elseif qq.oggs then
