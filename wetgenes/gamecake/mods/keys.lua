@@ -30,7 +30,26 @@ function bake(state)
 	
 		local hooks={}
 		function hooks.click(widget)
-	print(widget.id)
+--	print(widget.id)
+			local k=widget.text
+			local mstack=state.win.msgstack
+			mstack[#mstack+1]={
+				time=os.time(),
+				class="key",
+				action=1,
+				ascii=k,
+				keycode=0,
+				keyname="",
+			}
+			mstack[#mstack+1]={
+				time=os.time(),
+				class="key",
+				action=-1,
+				ascii=k,
+				keycode=0,
+				keyname="",
+			}
+			
 		end
 
 --		keys.master=state:rebake("wetgenes.gamecake.widgets").setup({hx=320,hy=160})
