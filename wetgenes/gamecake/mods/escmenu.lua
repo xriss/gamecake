@@ -24,6 +24,7 @@ function bake(state)
 	}
 
 	local canvas=state.canvas.child()
+	canvas.layout=false
 
 	function escmenu.setup(state)
 	
@@ -47,9 +48,22 @@ function bake(state)
 		local hooks={}
 		function hooks.click(widget)
 	print(widget.id)
+			if widget.id=="layout" then
+				if state.mods.layout then
+					state.mods.layout.cycle_mode()
+					escmenu.layout_widget.text="Layout: "..state.mods.layout.mode
+				end
+			end
 		end
 		local top=escmenu.master:add({hx=480,hy=480,mx=1,class="hx",ax=0,ay=0,font=opts.font})
 		top:add({sy=1,sx=1})
+		
+		if state.mods.layout then
+		
+			escmenu.layout_widget=top:add({text="Layout: "..state.mods.layout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
+						
+		end
+		
 		top:add({text="Continue",color=0xff00ff00,id="continue",hooks=hooks,text_size=32})
 		top:add({text="Main Menu",color=0xffffff00,id="menu",hooks=hooks,text_size=32})
 		top:add({text="Reload",color=0xffff8800,id="reload",hooks=hooks,text_size=32})

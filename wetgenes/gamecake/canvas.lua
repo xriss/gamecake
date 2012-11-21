@@ -30,73 +30,6 @@ function bake(opts)
 	local win=canvas.win
 	local gl=canvas.gl
 
---
--- build a simple field of view projection matrix designed to work in 2d or 3d and keep the numbers
--- easy for 2d positioning.
---
--- setting aspect to 640,480 and fov of 1 would mean at a z depth of 240 (which is y/2) then your view area would be
--- -320 to +320 in the x and -240 to +240 in the y.
---
--- fov is a tan like value (a view size inverse scalar) so 1 would be 90deg, 0.5 would be 45deg and so on
---
--- the depth parameter is only used to limit the range of the zbuffer so it covers 0 to depth
---
--- The following would be a reasonable default for a 640x480 canvas.
---
--- build_project23d(640,480,0.5,1024)
---
--- then at z=((480/2)/0.5)=480 we would have one to one pixel scale...
--- the total view area volume from there would be -320 +320 , -240 +240 , -480 +(1024-480)
---
--- canvas needs to contain width and height of the display which we use to work
--- out where to place our view such that it is always visible and keeps its aspect.
---
-canvas.project23d = function(width,height,fov,depth)
-	
-	local aspect=height/width
-	
-	canvas.view_width=width
-	canvas.view_height=height
-	canvas.view_fov=fov
-	canvas.view_depth=depth
-
-	local m={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- defaults
-	canvas.pmtx=m
-	
-	local f=depth
-	local n=1
-
-	local canvas_aspect=(win.height/win.width)
-		
-	if (canvas_aspect > (aspect) ) 	then 	-- fit width to screen
-	
-		m[1] = ((aspect)*1)/fov
-		m[6] = -((aspect)/canvas_aspect)/fov
-		
-		canvas.x_scale=1
-		canvas.y_scale=canvas_aspect/aspect
-	else									-- fit height to screen
-	
-		m[1] = canvas_aspect/fov
-		m[6] = -1/fov
-		
-		canvas.x_scale=aspect/canvas_aspect
-		canvas.y_scale=1
-	end
-
-	canvas.x_origin=win.width/2
-	canvas.y_origin=win.height/2
-	canvas.x_size=win.width
-	canvas.y_size=win.height
-	
-	
-	m[11] = -(f+n)/(f-n)
-	m[12] = -1
-
-	m[15] = -2*f*n/(f-n)
-	
-	return m -- return the matrix but we also updated the canvas size/scale for later use
-end
 
 
 
@@ -155,23 +88,6 @@ canvas.blit = function(t,cx,cy,ix,iy,w,h,cw,ch)
 end
 
 
--- convert raw xy coords (IE mouse win width and height) into local coords (view width and height) centered on origin
--- basically do whatever transform we came up with in project23d
-canvas.xyscale=function(x,y)
-
-	-- centered and scaled
-	x=canvas.view_width  * ( (x-canvas.x_origin) * canvas.x_scale ) / canvas.x_size
-	y=canvas.view_height * ( (y-canvas.y_origin) * canvas.y_scale ) / canvas.y_size
-	
-	return x,y
-end
-
-
-
-canvas.viewport=function()
-	win:info()
-	gl.Viewport(0,0,win.width,win.height)
-end
 
 canvas.gl_default=function()
 
@@ -198,11 +114,116 @@ canvas.gl_default=function()
 
 end
 
--- create and return a child canvas (just has its own transform cache)
+
+-- generate functions locked to the canvas
+local factory=function(canvas)
+
+--
+-- build a simple field of view projection matrix designed to work in 2d or 3d and keep the numbers
+-- easy for 2d positioning.
+--
+-- setting aspect to 640,480 and fov of 1 would mean at a z depth of 240 (which is y/2) then your view area would be
+-- -320 to +320 in the x and -240 to +240 in the y.
+--
+-- fov is a tan like value (a view size inverse scalar) so 1 would be 90deg, 0.5 would be 45deg and so on
+--
+-- the depth parameter is only used to limit the range of the zbuffer so it covers 0 to depth
+--
+-- The following would be a reasonable default for a 640x480 canvas.
+--
+-- build_project23d(640,480,0.5,1024)
+--
+-- then at z=((480/2)/0.5)=480 we would have one to one pixel scale...
+-- the total view area volume from there would be -320 +320 , -240 +240 , -480 +(1024-480)
+--
+-- canvas needs to contain width and height of the display which we use to work
+-- out where to place our view such that it is always visible and keeps its aspect.
+--
+	canvas.project23d = function(width,height,fov,depth)
+		
+		local l=canvas.layout or {x=0,y=0,w=win.width,h=win.height}
+		
+		local aspect=height/width
+		
+		canvas.view_width=width
+		canvas.view_height=height
+		canvas.view_fov=fov
+		canvas.view_depth=depth
+
+		local m={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} -- defaults
+		canvas.pmtx=m
+		
+		local f=depth
+		local n=1
+
+		local canvas_aspect=(l.h/l.w)
+			
+		if (canvas_aspect > (aspect) ) 	then 	-- fit width to screen
+		
+			m[1] = ((aspect)*1)/fov
+			m[6] = -((aspect)/canvas_aspect)/fov
+			
+			canvas.x_scale=1
+			canvas.y_scale=canvas_aspect/aspect
+		else									-- fit height to screen
+		
+			m[1] = canvas_aspect/fov
+			m[6] = -1/fov
+			
+			canvas.x_scale=aspect/canvas_aspect
+			canvas.y_scale=1
+		end
+
+		canvas.x_origin=l.x+l.w/2
+		canvas.y_origin=l.y+l.h/2
+		canvas.x_size=l.w
+		canvas.y_size=l.h
+
+	-- we reposition with the viewport, so only need to fix the size in the matrix when using a layout.	
+		
+		m[11] = -(f+n)/(f-n)
+		m[12] = -1
+
+		m[15] = -2*f*n/(f-n)
+		
+		return m -- return the matrix but we also updated the canvas size/scale for later use
+	end
+
+-- convert raw xy coords (IE mouse win width and height) into local coords (view width and height) centered on origin
+-- basically do whatever transform we came up with in project23d
+	canvas.xyscale=function(x,y)
+
+		-- centered and scaled
+		x=canvas.view_width  * ( (x-canvas.x_origin) * canvas.x_scale ) / canvas.x_size
+		y=canvas.view_height * ( (y-canvas.y_origin) * canvas.y_scale ) / canvas.y_size
+		
+		return x,y
+	end
+
+	canvas.viewport=function()
+
+		win:info()
+
+		local l=canvas.layout or {x=0,y=0,w=win.width,h=win.height}
+
+		if l then -- layout mode
+			gl.Viewport(l.x,win.height - (l.y+l.h) ,l.w,l.h)
+		else
+			gl.Viewport(0,0,win.width,win.height)
+		end
+		
+	end
+
+
+end
+factory(canvas)
+
+-- create and return a child canvas (just has its own transform cache and some functions differ)
 canvas.child = function()
 	local tab={}
 	local meta={__index=canvas}
 	setmetatable(tab,meta)
+	factory(tab)
 	return tab
 end
 

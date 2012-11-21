@@ -26,6 +26,8 @@ function bake(state)
 
 	console.call = {} -- name -> function : functions that should be easily to call on the console command line
 
+	local canvas=state.canvas.child()
+	canvas.layout=false
 
 	function console.setup(state)
 		console.replace_print(_G)
