@@ -20,10 +20,8 @@ function bake(state)
 
 -- "main" , "main+chat" , "main+chat+keys" ,  "main+keys" 
 	layout.mode="main"
-	layout.mode="main+chat+keys"
+--	layout.mode="main+chat+keys"
 
---	local canvas=state.canvas.child() -- i want to be able to resize my view only?
-	
 -- info about some of the areas we offer
 
 	layout.main={}	-- where you should put your main view
@@ -33,9 +31,17 @@ function bake(state)
 
 	function layout.cycle_mode()
 		if layout.mode=="main" then
-			layout.mode="main+chat"
+			if state.mods.chat then
+				layout.mode="main+chat"
+			elseif state.mods.keys then
+				layout.mode="main+keys"
+			end
 		elseif layout.mode=="main+chat" then
-			layout.mode="main+chat+keys"
+			if state.mods.keys then
+				layout.mode="main+chat+keys"
+			else
+				layout.mode="main"
+			end
 		elseif layout.mode=="main+chat+keys" then
 			layout.mode="main+keys"
 		else
@@ -135,7 +141,7 @@ function bake(state)
 				layout.main.x=0
 				layout.main.y=0
 				layout.main.w=math.floor(w*2/3)
-				layout.main.h=math.floor(h/2)
+				layout.main.h=math.floor(h*2/3)
 				
 				layout.chat.active=true
 				layout.chat.x=layout.main.w
