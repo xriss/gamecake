@@ -59,8 +59,9 @@ if bake.file_exists(ficon) then
 		{s=36,o="ldpi"},
 	} do
 		local gd=assert(wgrd.create(ficon))
-		assert(gd:convert(wgrd.FMT_U8_ARGB))
+		assert(gd:convert(wgrd.FMT_U8_ARGB_PREMULT))
 		gd:scale(v.s,v.s,1)
+--		assert(gd:convert(wgrd.FMT_U8_ARGB))
 		local n="res/drawable-"..v.o.."/icon.png"
 		bake.create_dir_for_file(n)
 		gd:save(n)

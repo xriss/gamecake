@@ -1,20 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.wetgenes.bulb"
-      android:versionCode="12873"
-      android:versionName="12.873"
+        package="com.wetgenes.lemonhunter"
+      android:versionCode="12875"
+      android:versionName="12.875"
 >
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="9" />
 
     <!-- This .apk has no Java code itself, so set hasCode to false. -->
-    <application android:label="Bulb" android:hasCode="true" android:icon="@drawable/icon"
+    <application android:label="lemonhunter" android:hasCode="false" android:icon="@drawable/icon"
 		android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
     >
 
         <!-- Our activity is the built-in NativeActivity framework class.
              This will take care of integrating with our NDK code. -->
         <activity android:name="android.app.NativeActivity"
-                android:label="bulb"
+                android:label="lemonhunter"
                 android:configChanges="orientation|keyboardHidden">
             <!-- Tell NativeActivity the name of our .so -->
             <meta-data android:name="android.app.lib_name"
