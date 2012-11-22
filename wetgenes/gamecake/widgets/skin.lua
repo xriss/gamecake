@@ -394,7 +394,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		
 --print("using font "..(widget.font or widget.master.font or 1))
 
-			local ty=widget.text_size
+			local ty=widget.text_size or widget.master.text_size or 16
 
 			local f=widget.font or widget.master.font or 1
 			if f then
@@ -405,7 +405,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			end
 			
 			font.set(cake.fonts.get(f))
-			font.set_size(widget.text_size,0)
+			font.set_size(widget.text_size  or widget.master.text_size or 16 ,0)
 			local tx=font.width(widget.text)
 
 --			local tx,ty=font.size(widget.text,widget.text_size)

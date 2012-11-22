@@ -47,12 +47,27 @@ function bake(state)
 
 		local hooks={}
 		function hooks.click(widget)
-	print(widget.id)
-			if widget.id=="layout" then
+			local id=widget.id
+--	print(widget.id)
+			if id=="layout" then
 				if state.mods.layout then
 					state.mods.layout.cycle_mode()
 					escmenu.layout_widget.text="Layout: "..state.mods.layout.mode
 				end
+			elseif id=="continue" then
+			
+				escmenu.show=false
+				
+			elseif id=="restart" then
+			
+				state.next=state.now
+				escmenu.show=false
+				
+			elseif id=="quit" then
+			
+				state.next=true
+				escmenu.show=false
+				
 			end
 		end
 		local top=escmenu.master:add({hx=480,hy=480,mx=1,class="hx",ax=0,ay=0,font=opts.font})
@@ -64,10 +79,9 @@ function bake(state)
 						
 		end
 		
-		top:add({text="Continue",color=0xff00ff00,id="continue",hooks=hooks,text_size=32})
-		top:add({text="Main Menu",color=0xffffff00,id="menu",hooks=hooks,text_size=32})
-		top:add({text="Reload",color=0xffff8800,id="reload",hooks=hooks,text_size=32})
-		top:add({text="Quit",color=0xffff0000,id="quit",hooks=hooks,text_size=32})
+		top:add({text="Continue",color=0xff44ff44,id="continue",hooks=hooks,text_size=32})
+		top:add({text="Restart",color=0xffffff44,id="restart",hooks=hooks,text_size=32})
+		top:add({text="Quit",color=0xffff4444,id="quit",hooks=hooks,text_size=32})
 		top:add({sy=1,sx=1})
 		
 		escmenu.master:layout()
@@ -104,26 +118,16 @@ function bake(state)
 		canvas.project23d(opts.width,opts.height,1/4,opts.height*4)
 		canvas.gl_default() -- reset gl state
 
---		local w,h=state.win.width,state.win.height
---		gl.Viewport(0,0,w,h)
-
---		gl.ClearColor(0,0,0,0)
---		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 		gl.MatrixMode(gl.PROJECTION)
 		gl.LoadMatrix( canvas.pmtx )
---		gl.LoadMatrix( tardis.m4_project23d(w,h,480,480,0.5,480*2) )
 
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.LoadIdentity()
 		gl.Translate(-opts.width/2,-opts.height/2,-opts.height*2) -- top left corner is origin
---		gl.Translate(-480/2,-480/2,-480) -- top/left 1unit==1pixel
 		gl.PushMatrix()
 
---		font:set(cake.fonts:get(1))
---		font:set_size(8,0)
-
-			escmenu.master:draw()
+		escmenu.master:draw()
 			
 		gl.PopMatrix()
 

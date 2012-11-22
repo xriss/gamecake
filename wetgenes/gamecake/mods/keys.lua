@@ -25,29 +25,42 @@ function bake(state)
 	function keys.setup(state)
 	
 
-		keys.master=state:rebake("wetgenes.gamecake.widgets").setup({})
+		keys.master=state:rebake("wetgenes.gamecake.widgets").setup({font="Vera",text_size=24})
 		
 	
 		local hooks={}
 		function hooks.click(widget)
 --	print(widget.id)
-			local k=widget.text
+			local ascii=widget.text
+			local code=0
+			local name=""
+			
+			if ascii=="<" then
+				ascii=""
+				code=0
+				name="backspace"
+			elseif ascii==">" then
+				ascii=""
+				code=0
+				name="delete"
+			end
+			
 			local mstack=state.win.msgstack
 			mstack[#mstack+1]={
 				time=os.time(),
 				class="key",
 				action=1,
-				ascii=k,
-				keycode=0,
-				keyname="",
+				ascii=ascii,
+				keycode=code,
+				keyname=name,
 			}
 			mstack[#mstack+1]={
 				time=os.time(),
 				class="key",
 				action=-1,
-				ascii=k,
-				keycode=0,
-				keyname="",
+				ascii=ascii,
+				keycode=code,
+				keyname=name,
 			}
 			
 		end
@@ -57,21 +70,21 @@ function bake(state)
 		keys.master:clean_all()
 		keys.master.ids={}
 
-		keys.top=keys.master:add({py=0,hx=320,hy=160,mx=320,my=240,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+		keys.top=keys.master:add({py=0,hx=320,hy=160,mx=320,my=240,class="flow",ax=0,ay=0})
 
 		local function key_line(ks)
 			local t=keys.top:add({sx=320,sy=32,mx=320,my=32,class="flow"})
 			for i=1,#ks do
 				local k=ks:sub(i,i)
-				t:add({sx=320/11,sy=32,color=0xffcccccc,text=k,id="key",hooks=hooks,text_size=24})			
+				t:add({sx=320/11,sy=32,color=0xffcccccc,text=k,id="key",hooks=hooks})
 			end
 		end
 		
 		key_line("1234567890")
 		key_line("qwertyuiop")
 		key_line("asdfghjkl ")
-		key_line(" zxcvbnm  ")
-		key_line("<       .>")
+		key_line(" zxcvbnm:#")
+		key_line("<     ,./>")
 		
 			
 		keys.master:layout()
@@ -92,6 +105,8 @@ function bake(state)
 			if keys.top.hx~=canvas.layout.w or keys.top.hy~=canvas.layout.h then -- change rez
 				keys.top.hx=canvas.layout.w
 				keys.top.hy=canvas.layout.h
+				
+				keys.master.text_size=math.floor(canvas.layout.h/6)
 				keys.master:layout()
 			end
 

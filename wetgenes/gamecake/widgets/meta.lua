@@ -158,7 +158,7 @@ function wmeta.setup(def)
 
 		widget.color=def.color
 		widget.text_color=def.text_color or widget.parent.text_color or 0xff000000 -- black text
-		widget.text_size=def.text_size or widget.parent.text_size or 16 -- quite chunky text by default
+		widget.text_size=def.text_size -- quite chunky text by default
 		
 		widget.text_color_shadow=def.text_color_shadow  -- may need a shadow
 		
