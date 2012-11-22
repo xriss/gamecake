@@ -7,7 +7,7 @@
     <uses-sdk android:minSdkVersion="9" />
 
     <!-- This .apk has no Java code itself, so set hasCode to false. -->
-    <application android:label="Bulb" android:hasCode="true" android:icon="@drawable/icon"
+    <application android:label="{name}" android:hasCode="false" android:icon="@drawable/icon"
 		android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
     >
 
