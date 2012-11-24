@@ -380,6 +380,8 @@ void android_main(struct android_app* state) {
 
 	report(L, docall(L, 1, 0) );		// setup and load and run lua/init.lua from the apks res/raw
 
+	exit(0);
+	
 /*
 
 	lua_settop(L,0); // remove all the junk we just built up

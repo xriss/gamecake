@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.wetgenes.lemonhunter"
-      android:versionCode="12875"
-      android:versionName="12.875"
+      android:versionCode="12892"
+      android:versionName="12.892"
 >
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="9" />
