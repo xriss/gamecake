@@ -20,7 +20,8 @@ local opts=sbox.ini(fdat)
 
 local version=bake.version_from_time()
 local opts={
-        name=opts.title,
+        name=opts.name,
+        title=opts.title,
         namev=opts.title..".v"..version,
         version=version,
         version_int=math.floor(version*1000),
@@ -49,6 +50,10 @@ for _,dir in ipairs{"lua","data"} do
 end
 
 local ficon=basedir.."/art/icons/android_icon.png"
+if not bake.file_exists(ficon) then
+	ficon="art/icons/android_icon.png"
+end
+
 if bake.file_exists(ficon) then
 
 

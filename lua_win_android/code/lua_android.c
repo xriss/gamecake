@@ -379,8 +379,6 @@ void android_main(struct android_app* state) {
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 
 	report(L, docall(L, 1, 0) );		// setup and load and run lua/init.lua from the apks res/raw
-
-	exit(0);
 	
 /*
 
@@ -836,6 +834,34 @@ int lua_android_msg (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// moveTaskToBack,
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_back (lua_State *l)
+{
+	JNIEnv *env=0;
+	ANativeActivity *activity = master_android_app->activity;
+		
+	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);	
+	
+	jclass clazz = (*env)->GetObjectClass(env, activity->clazz);
+
+	jmethodID methodID = (*env)->GetMethodID(env, clazz, "moveTaskToBack", "(Z)Z");
+
+	jvalue val;	val.z=1;
+	
+	(*env)->CallBooleanMethod(env, activity->clazz, methodID,val);
+	
+	(*activity->vm)->DetachCurrentThread(activity->vm);
+	
+	
+	return 0;
+}
+
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -864,6 +890,8 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 		{"print",			lua_android_print},
 		{"time",			lua_android_time},
 		
+		{"back",			lua_android_back},
+		
 		{0,0}
 	};
 	
@@ -873,7 +901,7 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 		{"__gc",			lua_android_destroy},
 		{0,0}
 	};
-	
+
 	luaL_newmetatable(l, lua_android_ptr_name);
 	luaL_openlib(l, NULL, meta, 0);
 	lua_pop(l,1);

@@ -28,6 +28,7 @@ if [ "$1" == "clean" ] ; then
         rm -rf build-gmake-android-arm
         rm -rf build-gmake-android-armv7
         rm -rf build-gmake-android-32
+        rm -rf libs
         cd android
 		rm bin/*.apk
 		ant uninstall
@@ -43,7 +44,6 @@ fi
 cd build-gmake-android-armv7
 make $makeopts $2 $3 $4
 cd ..
-
 
 #cd build-gmake-android-32
 #make $makeopts32 $2 $3 $4
