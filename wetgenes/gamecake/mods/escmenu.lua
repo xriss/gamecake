@@ -10,6 +10,7 @@ local wzips=require("wetgenes.zips")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
+local win=require("wetgenes.win")
 
 module("wetgenes.gamecake.mods.escmenu")
 
@@ -65,7 +66,11 @@ function bake(state)
 				
 			elseif id=="quit" then
 			
-				state.next=true
+				if win.hardcore.back then -- on android there is no quit, only back
+					win.hardcore.back()
+				else
+					state.next=true
+				end
 				escmenu.show=false
 				
 			end
@@ -106,7 +111,6 @@ function bake(state)
 	
 	function escmenu.draw(state)
 	
-		local win=state.win
 		local cake=state.cake
 		local gl=cake.gl
 --		local canvas=state.canvas
