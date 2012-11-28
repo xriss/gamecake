@@ -137,4 +137,6 @@ android.context=core.context
 android.swap=core.swap
 android.sleep=core.sleep
 
+android.back=core.back
+
 return android
