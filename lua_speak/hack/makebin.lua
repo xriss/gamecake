@@ -40,21 +40,27 @@ print(#dat,"datas")
 local idx=0
 local idxs={}
 
-local fname="hack/slt_data.bin"
+local fname="hack/model_data.bin"
 local fp=io.open(fname,"wb")
 for i,v in ipairs(dat) do
 
 	idxs[#idxs+1]=idx -- build index
 	idx=idx+(#v*2)
 
-	fp:write(wpack.save_array(v,"u16",0,#v))
+local s=wpack.save_array(v,"u16",0,#v)
+
+	fp:write(s)
 
 end
 fp:close()
 
+print(idx,"size")
 
-local fname="hack/slt_data.idx"
+
+local fname="hack/model_data.idx"
 local fp=io.open(fname,"wb")
-fp:write(wpack.save_array(idxs,"u32",0,#idxs))
+local s=wpack.save_array(idxs,"u32",0,#idxs)
+fp:write(s)
 fp:close()
 
+--print(#s,idxs[#idxs],idxs[#idxs-1])
