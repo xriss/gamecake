@@ -7,18 +7,67 @@
 #include "all.h"
 
 #include "flite.h"
+#include "cst_cg.h"
 
 extern cst_voice *register_cmu_us_slt();
+extern cst_cg_db cmu_us_slt_cg_db;
+
 //extern cst_voice *register_cmu_us_kal();
 
 static int init=0;
 static cst_voice *voice=0;
 
+// allocated junk 
+static u16 **idxs;
+static int   idxs_size;
+
 // setup stuff if we must
 static int lua_speak_setup (lua_State *l)
 {
+u16  *data=0;
+int   data_size=0;
+
+u32  *offs=0;
+int   offs_size=0;
+
+	
 	if(!init)
 	{
+		
+// data passed in from lua should be kept live so as not to GC it, be careful		
+	if(lua_isstring(l,1))
+	{
+		data=(void*)luaL_checklstring(l,1,&data_size);
+	}
+	else
+	if(lua_isuserdata(l,1))
+	{
+		data=(void*)lua_toluserdata(l,1,&data_size);
+	}
+		
+	if(lua_isstring(l,2))
+	{
+		offs=(void*)luaL_checklstring(l,2,&offs_size);
+	}
+	else
+	if(lua_isuserdata(l,1))
+	{
+		offs=(void*)lua_toluserdata(l,2,&offs_size);
+	}
+
+// allocate	pointers (64 bit compat), one time init
+	idxs=calloc(offs_size,sizeof(u16 *));
+	idxs_size=offs_size;
+	
+int i;
+	for(i=0;i<idxs_size;i++)
+	{
+		idxs[i]=data + (offs[i]/2);
+	}
+
+// store in struct
+	cmu_us_slt_cg_db.model_vectors0=(const unsigned short * const * )idxs;
+		
 		flite_init();
 		voice=register_cmu_us_slt();
 //		voice=register_cmu_us_kal();
@@ -53,7 +102,7 @@ s16 *p_stop;
 int cbeg,cend;
 int clips=0;
 
-	lua_speak_setup(l);
+//	lua_speak_setup(l);
 
 	text=luaL_checkstring(l,1);
 	sound = flite_text_to_wave(text, voice);
@@ -149,7 +198,7 @@ float mean=100; // 300
 float stddev=10; // 100
 float stretch=1; // 0.74
 
-	lua_speak_setup(l);
+//	lua_speak_setup(l);
 	
 	if( lua_istable(l,1) )
 	{
@@ -183,6 +232,8 @@ LUALIB_API int luaopen_wetgenes_speak_core (lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
+		{"setup",			lua_speak_setup},
+		
 		{"test",			lua_speak_text},
 		
 		{"text",			lua_speak_text},

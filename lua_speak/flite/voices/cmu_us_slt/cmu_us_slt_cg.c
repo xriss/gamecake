@@ -401,18 +401,18 @@ const double * const cmu_us_slt_me_h[] = {
    cmu_us_slt_me_filter_4
 };
 
-const cst_cg_db cmu_us_slt_cg_db = {
+/*const*/ cst_cg_db cmu_us_slt_cg_db = {
   "cmu_us_slt",
   cmu_us_slt_types,
   cmu_us_slt_num_types,
   16000,
   172.000000,27.000000,
   cmu_us_slt_f0_carts,
-0,//  cmu_us_slt_single_mcep_carts,
+  cmu_us_slt_single_mcep_carts,
   NULL,NULL,
   cmu_us_slt_single_num_channels,
   cmu_us_slt_single_num_frames,
-NULL,//  cmu_us_slt_single_model_vectors,
+0,//  cmu_us_slt_single_model_vectors,
   0,0,NULL,
   0,0,NULL,
   cmu_us_slt_model_min,
