@@ -22,7 +22,7 @@ function apk_munge_filename(s)
 
 	local r=string.lower(s)
 
-	r=string.gsub(r,"([^a-z0-9%.%_]+)","_") -- replace most everything with an underscore
+	r=string.gsub(r,"([^a-z0-9%_]+)","_") -- replace most everything with an underscore
 
 	return "res/raw/"..r
 end
