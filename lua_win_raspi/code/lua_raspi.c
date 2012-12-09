@@ -218,6 +218,10 @@ EGLint context_attributes[] =
 	dst_rect.width = p->width;
 	dst_rect.height = p->height;
 	  
+ // overide upscale to screen if given
+ 	lua_getfield(l,1,"dest_width");		if( lua_isnumber(l,-1) ) { dst_rect.width=lua_tonumber(l,-1);	} lua_pop(l,1);
+ 	lua_getfield(l,1,"dest_height");	if( lua_isnumber(l,-1) ) { dst_rect.height=lua_tonumber(l,-1);	} lua_pop(l,1);
+
 	src_rect.x = 0;
 	src_rect.y = 0;
 	src_rect.width = p->width << 16;

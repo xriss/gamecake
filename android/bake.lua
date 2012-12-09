@@ -41,6 +41,7 @@ for _,dir in ipairs{"lua","data"} do
 	local files=bake.findfiles{basedir=basedir,dir=dir}.ret
 
 	for i,v in ipairs(files) do
+print(v)
 		local n=zips.apk_munge_filename(v) -- this includes the res/raw prefix
 		bake.create_dir_for_file(n)
 		bake.copyfile(basedir.."/"..v,n)
