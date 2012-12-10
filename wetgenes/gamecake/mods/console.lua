@@ -10,14 +10,15 @@ local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 
-module("wetgenes.gamecake.mods.console")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+
 local buffedit=require("wetgenes.gamecake.mods.console.buffedit")
 
 
-function bake(state)
+function M.bake(state,console)
 
-	local console={}
-	console.name="console" -- by this name shall ye know me
+	console=console or {}
 
 	-- print out lua data in a somewhat sensible way, returns a string
 	console.dump_limit = 20
@@ -29,7 +30,7 @@ function bake(state)
 	local canvas=state.canvas.child()
 	canvas.layout=false
 
-	function console.setup(state)
+	function console.setup()
 		console.replace_print(_G)
 	
 		state.cake.fonts.loads({1}) -- load builtin font number 1 a basic 8x8 font
@@ -55,7 +56,7 @@ function bake(state)
 --print("console setup")
 	end
 
-	function console.clean(state)
+	function console.clean()
 	
 		console.setup_done=false
 
@@ -167,7 +168,7 @@ function bake(state)
 		end
 	end
 
-	function console.update(state)
+	function console.update()
 	
 		console.buff:update()
 		
@@ -191,7 +192,7 @@ function bake(state)
 		
 	end
 	
-	function console.draw(state)
+	function console.draw()
 	
 		local win=state.win
 		local cake=state.cake
@@ -335,7 +336,7 @@ function bake(state)
 --		print(act.." "..x..","..y.." "..key)
 	end
 	
-	function console.msg(state,m)
+	function console.msg(m)
 		if m.class=="key" then
 			console.keypress(m.ascii,m.keyname,m.action)
 		elseif m.class=="mouse" then

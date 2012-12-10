@@ -2,27 +2,26 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 --module
-local M={ partname=(...) } ; package.loaded[M.partname]=M
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.bake=function(state,scores)
 
 	scores=scores or {} 
-	scores.partname=M.partname
 	
 
-	function scores.setup(state)
+	function scores.setup()
 	end
 
-	function scores.clean(state)
+	function scores.clean()
 	end
 
-	function scores.update(state)	
+	function scores.update()	
 	end
 	
-	function scores.draw(state)
+	function scores.draw()
 	end
 		
-	function scores.msg(state,m)
+	function scores.msg(m)
 	end
 
 	return scores

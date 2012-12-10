@@ -11,12 +11,12 @@ local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 
-module("wetgenes.gamecake.mods.layout")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(state)
+function M.bake(state,layout)
 
-	local layout={}
-	layout.name="layout" -- by this name shall ye know me
+	layout=layout or {}
 
 -- "main" , "main+chat" , "main+chat+keys" ,  "main+keys" 
 	layout.mode="main"
@@ -49,17 +49,17 @@ function bake(state)
 		end
 	end
 
-	function layout.setup(state)
+	function layout.setup()
 
 	end
 
-	function layout.clean(state)
+	function layout.clean()
 	
 	end
 	
 	
 
-	function layout.update(state)
+	function layout.update()
 
 		state.win:info()
 		
@@ -175,13 +175,13 @@ function bake(state)
 				
 	end
 	
-	function layout.draw(state) -- we dont need to draw but we will update again
+	function layout.draw() -- we dont need to draw but we will update again
 	
-		layout.update(state)
+		layout.update()
 		
 	end
 		
-	function layout.msg(state,m)
+	function layout.msg(m)
 
 	end
 

@@ -11,18 +11,18 @@ local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 
-module("wetgenes.gamecake.mods.keys")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(state)
+function M.bake(state,keys)
 
-	local keys={}
-	keys.name="keys" -- by this name shall ye know me
+	keys=keys or {}
 	
 
 	local canvas=state.canvas.child()
 	canvas.layout=state.mods.layout.keys
 
-	function keys.setup(state)
+	function keys.setup()
 	
 
 		keys.master=state:rebake("wetgenes.gamecake.widgets").setup({font="Vera",text_size=24})
@@ -91,13 +91,13 @@ function bake(state)
 
 	end
 
-	function keys.clean(state)
+	function keys.clean()
 	
 	end
 	
 	
 
-	function keys.update(state)
+	function keys.update()
 	
 		if canvas.layout.active then
 
@@ -116,7 +116,7 @@ function bake(state)
 		
 	end
 	
-	function keys.draw(state)
+	function keys.draw()
 	
 		local win=state.win
 		local cake=state.cake
@@ -147,7 +147,7 @@ function bake(state)
 		
 	end
 		
-	function keys.msg(state,m)
+	function keys.msg(m)
 		if canvas.layout.active then
 			if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
 				m.x,m.y=canvas.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen

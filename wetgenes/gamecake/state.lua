@@ -37,18 +37,20 @@ function bake(opts)
 		end
 
 
--- this should be replaced with the above rebake function
+-- this performs a rebake and adds the baked module into every update/draw function
+-- so we may insert extra functionality without having to modify the running app
+-- eg a console or an onscreen keyboard
 		function state.require_mod(mname)
 		
 			local m=mname -- can pass in mod table or require name of mod
 			if type(m)=="string" then m=state:rebake(m) end
 
-			if state.mods[m.name] then return state.mods[m.name] end -- already setup, nothing else to dore
+			if state.mods[m.modname] then return state.mods[m.modname] end -- already setup, nothing else to do
 
-			state.mods[m.name]=m			-- store baked version by its name
+			state.mods[m.modname]=m			-- store baked version by its name
 			table.insert(state.mods,m)		-- and put it at the end of the list for easy iteration
 			
-			m.setup(state) -- and auto setup
+			m.setup() -- and call setup since it will always be running from now on until it is removed
 		end
 
 		
@@ -96,7 +98,7 @@ function bake(opts)
 			if state.next then
 			
 				if state.now and state.now.clean then
-					state.now.clean(state)
+					state.now.clean()
 				end
 				
 				if type(state.next)=="string" then	 -- change by required name
@@ -114,7 +116,7 @@ function bake(opts)
 				state.next=nil
 				
 				if state.now and state.now.setup then
-					state.now.setup(state)
+					state.now.setup()
 				end
 				
 			end
@@ -123,7 +125,7 @@ function bake(opts)
 
 		function state.setup()	
 			if state.now and state.now.setup then
-				state.now.setup(state)
+				state.now.setup()
 			end
 		end
 
@@ -131,7 +133,7 @@ function bake(opts)
 			state.win:start()
 			state.cake.start()
 			if state.now and state.now.start then
-				state.now.start(state)
+				state.now.start()
 			end
 		end
 
@@ -139,13 +141,13 @@ function bake(opts)
 			state.win:stop()
 			state.cake.stop()
 			if state.now and state.now.stop then
-				state.now.stop(state)
+				state.now.stop()
 			end
 		end
 
 		function state.clean()
 			if state.now and state.now.clean then
-				state.now.clean(state)
+				state.now.clean()
 			end
 		end
 
@@ -162,11 +164,11 @@ function bake(opts)
 				if state.times then state.times.update.start() end
 				
 				if state.now and state.now.update then
-					state.now.update(state)
+					state.now.update()
 				end
 				for i,v in ipairs(state.mods) do
 					if v.update then
-						v.update(state)
+						v.update()
 					end
 				end
 
@@ -186,12 +188,12 @@ function bake(opts)
 			if state.times then state.times.draw.start() end -- between calls to draw
 			
 			if state.now and state.now.draw then
-				state.now.draw(state)
+				state.now.draw()
 			end
 			
 			for i,v in ipairs(state.mods) do
 				if v.draw then
-					v.draw(state)
+					v.draw()
 				end
 			end
 						
@@ -225,11 +227,11 @@ function bake(opts)
 					end
 
 					if state.now and state.now.msg then
-						state.now.msg(state,m)
+						state.now.msg(m)
 					end
 					for i,v in ipairs(state.mods) do
 						if v.msg then
-							v.msg(state,m)
+							v.msg(m)
 						end
 					end
 				end

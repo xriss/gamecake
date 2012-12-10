@@ -12,12 +12,12 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 local win=require("wetgenes.win")
 
-module("wetgenes.gamecake.mods.escmenu")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(state)
+function M.bake(state,escmenu)
 
-	local escmenu={}
-	escmenu.name="escmenu" -- by this name shall ye know me
+	escmenu=escmenu or {}
 	
 	local opts={
 		width=480,
@@ -27,7 +27,7 @@ function bake(state)
 	local canvas=state.canvas.child()
 	canvas.layout=false
 
-	function escmenu.setup(state)
+	function escmenu.setup()
 	
 		state.cake.fonts.loads({1}) -- always load builtin font number 1 a basic 8x8 font		
 		opts.font=1
@@ -93,13 +93,13 @@ function bake(state)
 
 	end
 
-	function escmenu.clean(state)
+	function escmenu.clean()
 	
 	end
 	
 	
 
-	function escmenu.update(state)
+	function escmenu.update()
 	
 		if escmenu.show then
 
@@ -109,7 +109,7 @@ function bake(state)
 		
 	end
 	
-	function escmenu.draw(state)
+	function escmenu.draw()
 	
 		local cake=state.cake
 		local gl=cake.gl
@@ -140,7 +140,7 @@ function bake(state)
 		
 	end
 		
-	function escmenu.msg(state,m)
+	function escmenu.msg(m)
 		if escmenu.show then
 			if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
 				m.x,m.y=canvas.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
