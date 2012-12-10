@@ -14,18 +14,18 @@ wmeta.classes={
 
 -- base classes
 
-	["master"]=state:rebake("wetgenes.gamecake.widgets.master"),
-	["button"]=state:rebake("wetgenes.gamecake.widgets.button"),
-	["drag"]=state:rebake("wetgenes.gamecake.widgets.drag"),
-	["text"]=state:rebake("wetgenes.gamecake.widgets.text"),
-	["textedit"]=state:rebake("wetgenes.gamecake.widgets.textedit"),
+	["master"]=state.rebake("wetgenes.gamecake.widgets.master"),
+	["button"]=state.rebake("wetgenes.gamecake.widgets.button"),
+	["drag"]=state.rebake("wetgenes.gamecake.widgets.drag"),
+	["text"]=state.rebake("wetgenes.gamecake.widgets.text"),
+	["textedit"]=state.rebake("wetgenes.gamecake.widgets.textedit"),
 
 --classes built out of the base classes
 
-	["pan"]=state:rebake("wetgenes.gamecake.widgets.pan"),
-	["slide"]=state:rebake("wetgenes.gamecake.widgets.slide"),
+	["pan"]=state.rebake("wetgenes.gamecake.widgets.pan"),
+	["slide"]=state.rebake("wetgenes.gamecake.widgets.slide"),
 
-	["scroll"]=state:rebake("wetgenes.gamecake.widgets.scroll"),
+	["scroll"]=state.rebake("wetgenes.gamecake.widgets.scroll"),
 
 }
 

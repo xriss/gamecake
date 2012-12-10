@@ -14,7 +14,7 @@ wtextedit=wtextedit or {}
 
 local cake=state.cake
 
-local widget_data=state:rebake("wetgenes.gamecake.widgets.data")
+local widget_data=state.rebake("wetgenes.gamecake.widgets.data")
 
 
 function wtextedit.mouse(widget,act,x,y,key)

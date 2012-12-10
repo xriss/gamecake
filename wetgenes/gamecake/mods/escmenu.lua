@@ -40,10 +40,10 @@ function M.bake(state,escmenu)
 
 		escmenu.show=false
 
-		escmenu.master=state:rebake("wetgenes.gamecake.widgets").setup({})
+		escmenu.master=state.rebake("wetgenes.gamecake.widgets").setup({})
 		
 		if wzips.exists("data/wskins/soapbar/button.png") then -- we got us better skin to use :)
-			state:rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
+			state.rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
 		end
 
 		local hooks={}
@@ -51,9 +51,10 @@ function M.bake(state,escmenu)
 			local id=widget.id
 --	print(widget.id)
 			if id=="layout" then
-				if state.mods.layout then
-					state.mods.layout.cycle_mode()
-					escmenu.layout_widget.text="Layout: "..state.mods.layout.mode
+				local layout=state.mods["wetgenes.gamecake.mods.layout"]
+				if layout then
+					layout.cycle_mode()
+					escmenu.layout_widget.text="Layout: "..layout.mode
 				end
 			elseif id=="continue" then
 			
@@ -78,9 +79,10 @@ function M.bake(state,escmenu)
 		local top=escmenu.master:add({hx=480,hy=480,mx=1,class="hx",ax=0,ay=0,font=opts.font})
 		top:add({sy=1,sx=1})
 		
-		if state.mods.layout then
+		local layout=state.mods["wetgenes.gamecake.mods.layout"]
+		if layout then
 		
-			escmenu.layout_widget=top:add({text="Layout: "..state.mods.layout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
+			escmenu.layout_widget=top:add({text="Layout: "..layout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
 						
 		end
 		

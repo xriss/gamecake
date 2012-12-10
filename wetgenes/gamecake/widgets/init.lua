@@ -16,8 +16,8 @@ module("wetgenes.gamecake.widgets")
 function bake(state,widgets)
 widgets=widgets or {}
 
-local wmeta=state:rebake("wetgenes.gamecake.widgets.meta")
-local wskin=state:rebake("wetgenes.gamecake.widgets.skin")
+local wmeta=state.rebake("wetgenes.gamecake.widgets.meta")
+local wskin=state.rebake("wetgenes.gamecake.widgets.skin")
 
 --
 -- create a master widget

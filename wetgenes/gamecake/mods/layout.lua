@@ -31,13 +31,13 @@ function M.bake(state,layout)
 
 	function layout.cycle_mode()
 		if layout.mode=="main" then
-			if state.mods.chat then
+			if state.mods["wetgenes.gamecake.mods.chat"] then
 				layout.mode="main+chat"
-			elseif state.mods.keys then
+			elseif state.mods["wetgenes.gamecake.mods.keys"] then
 				layout.mode="main+keys"
 			end
 		elseif layout.mode=="main+chat" then
-			if state.mods.keys then
+			if state.mods["wetgenes.gamecake.mods.keys"] then
 				layout.mode="main+chat+keys"
 			else
 				layout.mode="main"

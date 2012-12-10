@@ -10,7 +10,7 @@ module("wetgenes.gamecake.widgets.slide")
 function bake(state,wslide)
 wslide=wslide or {}
 
-local widget_data=state:rebake("wetgenes.gamecake.widgets.data")
+local widget_data=state.rebake("wetgenes.gamecake.widgets.data")
 
 
 function wslide.mouse(widget,act,x,y,key)

@@ -21,7 +21,7 @@ function bake(opts)
 		
 -- require and bake state.baked[modules] in such a way that it can have simple circular dependencies
 
-		function state.rebake(state,name)
+		function state.rebake(name)
 
 			local ret=state.baked[name]
 			
@@ -43,14 +43,16 @@ function bake(opts)
 		function state.require_mod(mname)
 		
 			local m=mname -- can pass in mod table or require name of mod
-			if type(m)=="string" then m=state:rebake(m) end
+			if type(m)=="table" then mname=m.modname end
+			if state.mods[mname] then return state.mods[mname] end -- already setup, nothing else to do
+			if type(m)=="string" then m=state.rebake(mname) end -- rebake mod into this state
 
-			if state.mods[m.modname] then return state.mods[m.modname] end -- already setup, nothing else to do
-
-			state.mods[m.modname]=m			-- store baked version by its name
+			state.mods[mname]=m			-- store baked version by its name
 			table.insert(state.mods,m)		-- and put it at the end of the list for easy iteration
 			
 			m.setup() -- and call setup since it will always be running from now on until it is removed
+			
+			return m
 		end
 
 		
@@ -103,7 +105,7 @@ function bake(opts)
 				
 				if type(state.next)=="string" then	 -- change by required name
 				
-					state.next=state:rebake(state.next)
+					state.next=state.rebake(state.next)
 					
 				elseif type(state.next)=="boolean" then -- special exit state
 				

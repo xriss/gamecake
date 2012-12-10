@@ -20,12 +20,12 @@ function M.bake(state,keys)
 	
 
 	local canvas=state.canvas.child()
-	canvas.layout=state.mods.layout.keys
+	canvas.layout=state.rebake("wetgenes.gamecake.mods.layout").keys
 
 	function keys.setup()
 	
 
-		keys.master=state:rebake("wetgenes.gamecake.widgets").setup({font="Vera",text_size=24})
+		keys.master=state.rebake("wetgenes.gamecake.widgets").setup({font="Vera",text_size=24})
 		
 	
 		local hooks={}
@@ -65,7 +65,7 @@ function M.bake(state,keys)
 			
 		end
 
---		keys.master=state:rebake("wetgenes.gamecake.widgets").setup({hx=320,hy=160})
+--		keys.master=state.rebake("wetgenes.gamecake.widgets").setup({hx=320,hy=160})
 
 		keys.master:clean_all()
 		keys.master.ids={}
