@@ -11,6 +11,7 @@ M.bake=function(state,recaps)
 	local cake=state.cake
 	local canvas=cake.canvas
 	
+--[[
 	function recaps.setup()
 	end
 
@@ -25,6 +26,7 @@ M.bake=function(state,recaps)
 		
 	function recaps.msg(m)
 	end
+]]
 
 -- the above are just stubs "incase", most of the meat happens in the recap table
 
@@ -34,8 +36,8 @@ M.bake=function(state,recaps)
 		local recap={}
 		
 
-		function recap.reset()
-			recap.flow="record" -- record by default
+		function recap.reset(flow)
+			recap.flow=flow or "none" -- record by default
 			recap.last={}
 			recap.now={}
 			recap.stream={} -- a stream of change "table"s or "number" frame skips
