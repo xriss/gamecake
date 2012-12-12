@@ -28,6 +28,7 @@ function M.bake(state,layout)
 	layout.keys={}	-- a place to type on devices without a keyboard
 	layout.chat={}  -- a place to view what other people type
 
+	state.canvas.layout=state.canvas.layout or layout.main -- set base canvas layout if not already set
 
 	function layout.cycle_mode()
 		if layout.mode=="main" then
