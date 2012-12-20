@@ -12,12 +12,13 @@ M.bake=function(state,scores)
 	local canvas=cake.canvas
 	
 	function scores.setup(max_up)
-		max_up=max_up or 0
+		max_up=max_up or 1
 		scores.up={}
 		for i=1,max_up do
 			scores.up[i]={score=0,high=0} -- 1up 2up etc
 		end
 		scores.high=0
+		return scores -- so setup is chainable with a bake
 	end
 
 	function scores.reset()

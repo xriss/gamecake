@@ -11,70 +11,76 @@ M.bake=function(state,recaps)
 	local cake=state.cake
 	local canvas=cake.canvas
 	
---[[
-	function recaps.setup()
+	local keys=state.rebake("wetgenes.gamecake.spew.keys")
+
+
+	function recaps.setup(max_up)
+		max_up=max_up or 1
+		recaps.up={}
+		for i=1,max_up do
+			recaps.up[i]=recaps.create() -- 1up 2up etc
+		end
+		return recaps -- so setup is chainable with a bake
 	end
 
-	function recaps.clean()
-	end
-
-	function recaps.update()	
+	function recaps.step()
+		for i,v in ipairs(recaps.up or {}) do
+			v.step()
+		end
 	end
 	
-	function recaps.draw()
+	function recaps.get(nam,idx)
+		local idx=idx or 1
+		local recap=recaps.up and recaps.up[idx]
+		if recap then return recap.get(nam) end
 	end
-		
-	function recaps.msg(m)
-	end
-]]
-
--- the above are just stubs "incase", most of the meat happens in the recap table
-
-
+	
 -- create a new recap table, then we can load or save this data to or from our server
-	function recaps.create()
+	function recaps.create(idx)
 		local recap={}
+		recap.idx=idx
 		
 
 		function recap.reset(flow)
-			recap.flow=flow or "none" -- record by default
+			recap.flow=flow or "none" -- do not play or record by default
 			recap.last={}
 			recap.now={}
+			recap.autoclear={}
 			recap.stream={} -- a stream of change "table"s or "number" frame skips
 			recap.frame=0
 			recap.read=0
 			recap.wait=0
 		end
 		
-		function recap.set(nam,dat)
+		function recap.set(nam,dat) -- set the volatile data,this gets copied into last before it should be used
 			recap.now[nam]=dat
 		end
-		function recap.now(nam) -- return now or last frame data whatever we have
+		function recap.pulse(nam,dat) -- set the volatile data but *only* for one frame
+			recap.now[nam]=dat
+			recap.autoclear[nam]=true
+		end
+		function recap.now(nam) -- return now or last frame data whatever "volatile" data we have
 			local v=recap.now[nam]
 			if type(v)=="nil" then v=recap.last[nam] end -- now probably only contains recent changes
 			return v
 		end
-		function recap.get(nam) -- return "last" frame data not this frame data
+		function recap.get(nam) -- return last "valid" frame data not current "volatile" frame data
 			return recap.last[nam]
 		end
 		
--- use this to set button flags, that may trigger a set/clr extra state
--- also call once a frame with no value to clear these extra states
+-- use this to set button flags, that may trigger a set/clr extra pulse state
 		function recap.but(nam,v)
-			if (type(v)=="nil") then -- call with no value to clear the set/clr change states
-				recap.set(nam.."_set",false)
-				recap.set(nam.."_clr",false)
-			end
-			local l=recap.now(nam)
+			local l=recap.now[nam]
+			if type(l)=="nil" then l=recap.last[nam] end -- now probably only contains recent changes
 			if v then -- set
 				if not l then -- change?
 					recap.set(nam,true)
-					recap.set(nam.."_set",true)
+					recap.pulse(nam.."_set",true)
 				end
 			else -- clr
 				if l then -- change?
 					recap.set(nam,false)
-					recap.set(nam.."_clr",true)
+					recap.pulse(nam.."_clr",true)
 				end
 			end
 		end
@@ -132,12 +138,17 @@ M.bake=function(state,recaps)
 			else -- default of do not record do not play just be
 			
 				for n,v in pairs(recap.now) do
-					if recap.last[n]~=v then
-						recap.last[n]=v
-						recap.now[n]=nil
-					end
+					recap.last[n]=v
+					recap.now[n]=nil
 				end
 				
+			end
+			
+			if recap.flow~="play" then
+				for n,b in pairs(recap.autoclear) do -- auto clear volatile button pulse states
+					recap.now[n]=false
+					recap.autoclear[n]=nil
+				end
 			end
 			
 			recap.frame=recap.frame+1 -- advance frame counter
