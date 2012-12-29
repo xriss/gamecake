@@ -319,6 +319,26 @@ int id=(int)luaL_checknumber(l,1);
 
 static int lua_gles_TexImage2D (lua_State *l)
 {
+const unsigned char *ptr=0;
+int len;
+
+	if(lua_isstring(l,9))
+	{
+		ptr=(const unsigned char*)lua_tolstring(l,9,&len);
+	}
+	else
+	if(lua_isuserdata(l,9))
+	{
+		ptr=(const unsigned char*)lua_toluserdata(l,9,&len);
+	}
+	else
+	if(lua_islightuserdata(l,9))
+	{
+		ptr=(const unsigned char*)lua_touserdata(l,9);
+		len=0x7fffffff; // fake length as we have no idea
+	}
+	
+		
 	glTexImage2D(	(int)luaL_checknumber(l,1)		,
 					(int)luaL_checknumber(l,2)		,
 					(int)luaL_checknumber(l,3)		,
@@ -327,13 +347,32 @@ static int lua_gles_TexImage2D (lua_State *l)
 					(int)luaL_checknumber(l,6)		,
 					(int)luaL_checknumber(l,7)		,
 					(int)luaL_checknumber(l,8)		,
-					(void*)lua_touserdata(l,9)	);
+					(void*)ptr	);
 	return 0;
 }
 
 static int lua_gles_TexSubImage2D (lua_State *l)
 {
-	glTexSubImage2D((int)luaL_checknumber(l,1)		,
+const unsigned char *ptr=0;
+int len;
+
+	if(lua_isstring(l,9))
+	{
+		ptr=(const unsigned char*)lua_tolstring(l,9,&len);
+	}
+	else
+	if(lua_isuserdata(l,9))
+	{
+		ptr=(const unsigned char*)lua_toluserdata(l,9,&len);
+	}
+	else
+	if(lua_islightuserdata(l,9))
+	{
+		ptr=(const unsigned char*)lua_touserdata(l,9);
+		len=0x7fffffff; // fake length as we have no idea
+	}
+	
+		glTexSubImage2D((int)luaL_checknumber(l,1)		,
 					(int)luaL_checknumber(l,2)		,
 					(int)luaL_checknumber(l,3)		,
 					(int)luaL_checknumber(l,4)		,
@@ -341,7 +380,7 @@ static int lua_gles_TexSubImage2D (lua_State *l)
 					(int)luaL_checknumber(l,6)		,
 					(int)luaL_checknumber(l,7)		,
 					(int)luaL_checknumber(l,8)		,
-					(void*)lua_touserdata(l,9)	);
+					(void*)ptr	);
 	return 0;
 }
 

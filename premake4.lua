@@ -204,12 +204,13 @@ if NACL then
 elseif RASPI then
 
 	local raspisdk=path.getabsolute("../sdks/raspi")
+
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include" }
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vcos/pthreads"} -- bugfix?
 	libdirs { raspisdk.."/firmware/hardfp/opt/vc/lib" }
 
-	includedirs { raspisdk.."/usr/include" } -- extra includes?
-	libdirs { raspisdk.."/usr/lib/arm-linux-gnueabihf/" } -- extra libs?
+--	includedirs { raspisdk.."/raspx/usr/include" } -- extra includes?
+--	libdirs { raspisdk.."/raspx/usr/lib" } -- extra libs?
 
 	platforms { "raspi" } --hax
 
