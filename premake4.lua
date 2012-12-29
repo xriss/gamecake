@@ -208,8 +208,12 @@ elseif RASPI then
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vcos/pthreads"} -- bugfix?
 	libdirs { raspisdk.."/firmware/hardfp/opt/vc/lib" }
 
+	includedirs { raspisdk.."/usr/include" } -- extra includes?
+	libdirs { raspisdk.."/usr/lib/arm-linux-gnueabihf/" } -- extra libs?
+
 	platforms { "raspi" } --hax
 
+	defines "X11"
 	defines "RASPI"
 
 	defines("LUA_USE_POSIX")
@@ -292,6 +296,10 @@ elseif NIX then
 	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
 	
 end
+
+
+
+
 
 
 if not BUILD_DIR_BASE then
