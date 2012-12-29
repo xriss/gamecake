@@ -48,6 +48,7 @@ wskin=wskin or {}
 
 local cake=state.cake
 local images=cake.images
+local sheets=cake.sheets
 local canvas=state.canvas
 local font=canvas.font
 local flat=canvas.flat
@@ -254,6 +255,12 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		
 		if widget.color then
 		
+			buttdown=false
+			if ( master.press and master.over==widget ) or widget.state=="selected" then
+				buttdown=true
+			end
+
+
 			if widget.highlight=="shrink" then
 			
 				gl.Color( explode_color(widget.color))
@@ -271,10 +278,18 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			
 				gl.Color( explode_color(widget.color))
 				
-			else -- default is to darken everything slightly when it is not the active widget
+			else -- widget.highlight=="dark" -- default is to darken everything slightly when it is not the active widget
 			
 				if master.over==widget then
-					gl.Color( explode_color(widget.color))
+					if buttdown then
+						local c={explode_color(widget.color)}
+						c[3]=c[3]*14/16
+						c[2]=c[2]*14/16
+						c[1]=c[1]*14/16
+						gl.Color( c[1],c[2],c[3],c[4] )
+					else
+						gl.Color( explode_color(widget.color))
+					end
 				else
 					local c={explode_color(widget.color)}
 					c[3]=c[3]*12/16
@@ -297,35 +312,34 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			br[2]=br[2]*br[4]
 			br[3]=br[3]*br[4]
 			
-			if ( master.press and master.over==widget ) or widget.state=="selected" then
+			if buttdown then -- flip highlight
 				tl,br=br,tl
 				txp=1
 				typ=1
 			end
 			
-			if mode then
+			if widget.sheet then -- custom graphics
+
+				sheets.get(widget.sheet):draw(1,0,0,0,hx,hy)
+
+			
+			elseif mode then
 
 		
 				if ( master.press and master.over==widget ) or widget.state=="selected" then
 					images.bind(images.get("wskins/"..mode.."/buttin"))
---					texs.buttin:bind()
 					txp=0
 					typ=-1
 				else
 					images.bind(images.get("wskins/"..mode.."/button"))
---					texs.button:bind()
 					txp=0
 					typ=-2
 				end
 				
 				if widget.class=="string" then -- hack
 					images.bind(images.get("wskins/"..mode.."/border"))
---					texs.border:bind()
 				end
 				
---			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
---			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)
-			
 				draw33(128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
 			
 			else -- builtin
@@ -353,39 +367,6 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 						hx,    hy,
 						hx-bb, hy-bb,
 						hx-bb, bb)
-
---[[
-				gl.Begin(gl.QUADS)
-					gl.Vertex(  0,   0)
-					gl.Vertex( hx,   0)
-					gl.Vertex( hx, -hy)
-					gl.Vertex(  0, -hy)
-				gl.End()
-				gl.Color( tl )
-				gl.Begin(gl.QUADS)
-					gl.Vertex(  0,   0  )
-					gl.Vertex( hx,   0  )
-					gl.Vertex( hx-bb, -bb)
-					gl.Vertex(  0+bb, -bb)
-					
-					gl.Vertex(  0,    0   )
-					gl.Vertex(  0+bb, -bb )
-					gl.Vertex(  0+bb, -hy+bb)
-					gl.Vertex(  0,    -hy  )
-				gl.End()
-				gl.Color( br )
-				gl.Begin(gl.QUADS)
-					gl.Vertex( hx,   -hy  )
-					gl.Vertex(  0,   -hy  )
-					gl.Vertex(  0+bb, -hy+bb)
-					gl.Vertex( hx-bb, -hy+bb)
-					
-					gl.Vertex(  hx,    0   )
-					gl.Vertex(  hx,    -hy  )
-					gl.Vertex(  hx-bb, -hy+bb)
-					gl.Vertex(  hx-bb, -bb )
-				gl.End()
-]]
 			end
 			
 		end

@@ -182,9 +182,9 @@ function M.bake(state,layout)
 		
 	end
 		
-	function layout.msg(m)
-
-	end
+--	function layout.msg(m)
+--		return m
+--	end
 
 	return layout
 end

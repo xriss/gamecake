@@ -338,30 +338,34 @@ function M.bake(state,console)
 	
 	function console.msg(m)
 		if m.class=="key" then
-			console.keypress(m.ascii,m.keyname,m.action)
-		elseif m.class=="mouse" then
-			console.keypress(m.action,m.x,m.y,m.keycode)
+			if console.keypress(m.ascii,m.keyname,m.action) then return nil end
+--		elseif m.class=="mouse" then
+--			console.keypress(m.action,m.x,m.y,m.keycode)
 		end
+		
+		return m
 	end
 
 	function console.keypress(ascii,key,act)
-		if act==1 then
+--		if act==1 then
 --			_G.print(ascii.." "..(key or ""))
-		end
+--		end
 
-		if act==1 and ascii=="`" then
+		if key=="oem_3" then -- terrible name for the ` key
 		
-			if console.show then
-			
-				console.show=false
-				console.show_hud=false
+			if act==-1 then
+				if console.show then
 				
-			elseif console.show_hud then
-			
-				console.show=true			
-				throb=255
-			else
-				console.show_hud=true
+					console.show=false
+					console.show_hud=false
+					
+				elseif console.show_hud then
+				
+					console.show=true			
+					throb=255
+				else
+					console.show_hud=true
+				end
 			end
 
 			return true

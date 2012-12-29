@@ -228,13 +228,14 @@ function bake(opts)
 						end
 					end
 
-					if state.now and state.now.msg then
-						state.now.msg(m)
-					end
-					for i,v in ipairs(state.mods) do
-						if v.msg then
-							v.msg(m)
+					for i=#state.mods,1,-1 do -- run it through the mods backwards, so the topmost layer gets first crack at the msgs
+						local v=state.mods[i]
+						if m and v and v.msg then
+							m=v.msg(m) -- mods can choose to eat the msgs, they must return it for it to bubble down
 						end
+					end
+					if m and state.now and state.now.msg then
+						state.now.msg(m)
 					end
 				end
 			end

@@ -20,3 +20,4 @@ local func=assert(loadstring(str,name))
 -- finally call with args
 func(...)
 
+os.exit(0) -- so that we do not end up at a console?

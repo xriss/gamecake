@@ -168,8 +168,9 @@ function wmeta.setup(def)
 		widget.text_align=def.text_align -- default is center
 		
 		widget.text=def.text -- display this text on the button
+		widget.sheet=def.sheet -- display this sheet (by name) on the button
 		
-		if widget.color or widget.text then widget.solid=true end
+		if widget.color or widget.text or widget.sheet then widget.solid=true end
 		widget.solid=widget.solid or def.solid
 		
 		if widget.class and wmeta.classes[widget.class] then -- got a class, call its setup, its setup can override other functions

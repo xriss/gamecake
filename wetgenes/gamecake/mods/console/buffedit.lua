@@ -10,7 +10,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 module("wetgenes.gamecake.mods.console.buffedit")
 
 function keypress(it,ascii,key,act)
-	
+
 	if act==1 or act==0 then
 	
 		if key=="left" then
@@ -35,7 +35,7 @@ function keypress(it,ascii,key,act)
 		
 			it.line_idx=#it.line
 		
-		elseif key=="backspace" then
+		elseif key=="back" then
 	
 			if it.line_idx >= #it.line then -- at end
 			

@@ -144,18 +144,29 @@ function M.bake(state,escmenu)
 		
 	function escmenu.msg(m)
 		if escmenu.show then
-			if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
-				m.x,m.y=canvas.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
-				m.x=m.x+(opts.width/2)
-				m.y=m.y+(opts.height/2)
+			if m.class=="key" or m.class=="mouse" then
+
+				if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
+					m.x,m.y=canvas.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
+					m.x=m.x+(opts.width/2)
+					m.y=m.y+(opts.height/2)
+				end
+				escmenu.master:msg(m)
+
+				if m.class=="key" and m.action==-1 and m.keyname=="escape" then
+					escmenu.show=not escmenu.show
+				end
+				
+				return nil
 			end
-			escmenu.master:msg(m)
 		end
-		if m.class=="key" then
-			if m.action==1 and m.keyname=="escape" then
+		if m.class=="key" and m.keyname=="escape" then
+			if m.action==-1 then
 				escmenu.show=not escmenu.show
 			end
+			return nil
 		end
+		return m
 	end
 
 	return escmenu
