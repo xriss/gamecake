@@ -4,3 +4,4 @@ echo "linking .lua fles from the main lua dir so we dont accidently edit multipl
 #rm code/wetgenes/win.lua
 
 ln ../../bin/lua/wetgenes/win.lua code
+ln ../../bin/lua/wetgenes/win/raspi.lua code

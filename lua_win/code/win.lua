@@ -245,6 +245,11 @@ function base.msgs(w)
 	return function() return w:msg() end
 end
 
+-- push a msg onto the msgstack, so it feeds back into the input loop
+function base.push_msg(w,m)
+	w.msgstack[#w.msgstack+1]=m
+end
+
 -- get the next msg or return nil if there are no more
 function base.msg(w)
 
@@ -402,6 +407,7 @@ function base.posix_read_events(w) -- call this until it returns nil to get all 
 				tab.micros=nil
 				tab.class="posix_"..v.fd_type
 				tab.posix_device=v -- please do not edit this
+--print(tab.class)
 				return tab
 			end
 		end

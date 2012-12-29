@@ -60,7 +60,7 @@ android.queue_all_msgs=function()
 			
 			if ma.event == "app" then
 			
-print("andmsg",wstr.dump(ma))
+--print("andmsg",wstr.dump(ma))
 
 				m={
 					time=ma.eventtime,

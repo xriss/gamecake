@@ -23,6 +23,8 @@ if RASPI then
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
 	links { "crypt" }
 	links { "pthread" }
+
+--	links { "X11"  }
 	
 	links { "dl" , "m" , "pthread" ,"rt"}
 
@@ -84,11 +86,14 @@ elseif WINDOWS then
 
 elseif NIX then
 
+--	linkoptions { "-v" }
+
 	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
 	
 	links { "GL" , "GLU" }
 	links { "crypt" }
 	links { "pthread" }
+--	links { "X11"  }
 	
 	links { "dl" , "m" , "pthread" , "rt" }
 	

@@ -132,6 +132,9 @@ const char *title="http://www.WetGenes.com/ - fenestra";
 	p->dsp = XOpenDisplay( NULL );
 	if(p->dsp)
 	{
+		Bool do_not_care=0;
+		XkbSetDetectableAutoRepeat (p->dsp, 1, &do_not_care); // turn off the fake release keyboard msgs
+
 		p->fp_dsp=ConnectionNumber(p->dsp);
 		
 		FD_ZERO(&p->set_dsp);
@@ -161,6 +164,7 @@ const char *title="http://www.WetGenes.com/ - fenestra";
 
 			XFlush(p->dsp);
 		}
+
 	}
 
 	return 1;
