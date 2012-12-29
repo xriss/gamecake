@@ -158,7 +158,7 @@ images.upload_grd= function(t,g)
 		0,
 		gl.RGBA,
 		gl.UNSIGNED_BYTE,
-		nil)
+		string.rep(string.char(0,0,0,0), t.texture_width * t.texture_height) ) -- need to zero the texture?
 
 -- and then copy the image data into it 		
 	gl.TexSubImage2D(
