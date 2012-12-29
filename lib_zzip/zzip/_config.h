@@ -104,7 +104,7 @@
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #ifndef ZZIP_HAVE_SYS_STAT_H 
-#define ZZIP_HAVE_SYS_STAT_H  1 
+//#define ZZIP_HAVE_SYS_STAT_H  1 
 #endif
 
 /* Define to 1 if you have the <sys/types.h> header file. */
