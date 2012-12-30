@@ -220,8 +220,10 @@ function bake(opts)
 						if		m.cmd=="init_window" then
 							state.start()
 							state.paused=false
-						elseif	m.cmd=="pause"  then
+						elseif	m.cmd=="lost_focus"  then
 							state.paused=true
+						elseif	m.cmd=="gained_focus"  then
+							state.paused=false
 						elseif	m.cmd=="term_window"  then
 							state.paused=true
 							state.stop()
