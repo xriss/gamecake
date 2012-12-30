@@ -8,66 +8,39 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
-local raspi={}
+local linux={}
 
-local core=require("wetgenes.raspi.core")
-
-local wstr=require("wetgenes.string")
-
-local base={}
-local meta={}
-meta.__index=base
-
-setmetatable(raspi,meta)
+local core=require("wetgenes.win.linux.core")
 
 
-function raspi.screen()
-	it={}
-	it.width,it.height= core.screen()
-	return it
+
+-- key names are given in raw OS flavour,
+-- this maps these raw names to more generic names
+-- well actually I've decided to standardise on the windows vkey codes since
+-- thats the most popular amongst all the platfroms suported (blame NaCl)
+linux.generic_keymap={
+	["grave"]="oem_3",
+}
+
+function linux.keymap(key)
+	key=key:lower()
+	return linux.generic_keymap[key] or key
 end
 
-function raspi.create(opts)
 
-	local w={}
-	setmetatable(w,meta)
-	
-	w[0]=assert( core.create(opts) )
-	
-	core.info(w[0],w)
-	return w
-end
 
-function base.destroy(w)
-	core.destroy(w[0],w)
-end
-
-function base.info(w)
-	core.info(w[0],w)
-end
-
-function base.context(w,opts)
-	core.context(w[0],opts)
-end
-
-function base.swap(w)
-	core.swap(w[0])
-end
-
-function base.time()
-	return core.time()
-end
 
 --
 -- export all core functions not wrapped above
 --
 for n,v in pairs(core) do -- check the core
 	if type(v)=="function" then -- only functions
-		if not raspi[n] then -- only if not prewrapped
-			raspi[n]=v
+		if not linux[n] then -- only if not prewrapped
+			linux[n]=v
 		end
 	end
-
 end
 
-return raspi
+
+
+return linux

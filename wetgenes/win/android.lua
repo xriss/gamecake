@@ -129,14 +129,15 @@ android.start=function(...)
 	core.start(...)
 end
 
-
-android.time=core.time
-android.destroy=core.destroy
-android.info=core.info
-android.context=core.context
-android.swap=core.swap
-android.sleep=core.sleep
-
-android.back=core.back
+--
+-- export all core functions not wrapped above
+--
+for n,v in pairs(core) do -- check the core
+	if type(v)=="function" then -- only functions
+		if not android[n] then -- only if not prewrapped
+			android[n]=v
+		end
+	end
+end
 
 return android

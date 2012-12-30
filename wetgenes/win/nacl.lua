@@ -342,4 +342,16 @@ nacl.msg=function()
 end
 
 
+--
+-- export all core functions not wrapped above
+--
+for n,v in pairs(core) do -- check the core
+	if type(v)=="function" then -- only functions
+		if not nacl[n] then -- only if not prewrapped
+			nacl[n]=v
+		end
+	end
+end
+
+
 return nacl
