@@ -514,7 +514,7 @@ char c;
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_wetgenes_win_linux(lua_State *l)
+LUALIB_API int luaopen_wetgenes_win_linux_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{

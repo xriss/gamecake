@@ -442,7 +442,7 @@ int lua_raspi_sleep (lua_State *l)
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_wetgenes_win_raspi(lua_State *l)
+LUALIB_API int luaopen_wetgenes_win_raspi_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
