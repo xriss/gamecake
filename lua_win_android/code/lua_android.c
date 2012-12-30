@@ -859,6 +859,32 @@ int lua_android_back (lua_State *l)
 }
 
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// send intent msg, EG post something to twitter, user gets to choose where it gets posted,
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_send_intent (lua_State *l)
+{
+	const char *s="";	
+	s=(const char *)lua_tostring(l,1);
+	
+	JNIEnv *env=0;
+	ANativeActivity *activity = master_android_app->activity;
+		
+	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);	
+	
+	jclass clazz = (*env)->GetObjectClass(env, activity->clazz);
+
+	jmethodID methodID = (*env)->GetMethodID(env, clazz, "SendIntent", "(Ljava/lang/String;)V");
+
+//	jvalue val;	val.z=1;
+	
+	(*env)->CallVoidMethod(env, activity->clazz, methodID, (*env)->NewStringUTF(env,s) );
+	(*activity->vm)->DetachCurrentThread(activity->vm);
+}
+
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -869,8 +895,7 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
-//		{"screen",			lua_android_screen},
-		
+		{"send_intent",			lua_android_send_intent},
 
 		{"create",			lua_android_create},
 		{"start",			lua_android_start},
