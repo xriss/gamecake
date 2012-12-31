@@ -20,6 +20,7 @@ local core=require("wetgenes.win.linux.core")
 -- thats the most popular amongst all the platfroms suported (blame NaCl)
 linux.generic_keymap={
 	["grave"]="oem_3",
+	["backspace"]="back",
 }
 
 function linux.keymap(key)
@@ -28,7 +29,15 @@ function linux.keymap(key)
 end
 
 
-
+linux.msg=function(w)
+	local m=core.msg(w)
+	if m then
+		if m.keyname then -- run it through our keymap probably just force it to lowercase.
+			m.keyname=linux.keymap(m.keyname)
+		end
+	end
+	return m
+end
 
 --
 -- export all core functions not wrapped above
