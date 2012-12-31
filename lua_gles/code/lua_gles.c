@@ -327,15 +327,15 @@ int len;
 		ptr=(const unsigned char*)lua_tolstring(l,9,&len);
 	}
 	else
-	if(lua_isuserdata(l,9))
-	{
-		ptr=(const unsigned char*)lua_toluserdata(l,9,&len);
-	}
-	else
 	if(lua_islightuserdata(l,9))
 	{
 		ptr=(const unsigned char*)lua_touserdata(l,9);
 		len=0x7fffffff; // fake length as we have no idea
+	}
+	else
+	if(lua_isuserdata(l,9)) // real user data only because we first checked for light
+	{
+		ptr=(const unsigned char*)lua_toluserdata(l,9,&len);
 	}
 	
 		
@@ -361,15 +361,15 @@ int len;
 		ptr=(const unsigned char*)lua_tolstring(l,9,&len);
 	}
 	else
-	if(lua_isuserdata(l,9))
-	{
-		ptr=(const unsigned char*)lua_toluserdata(l,9,&len);
-	}
-	else
 	if(lua_islightuserdata(l,9))
 	{
 		ptr=(const unsigned char*)lua_touserdata(l,9);
 		len=0x7fffffff; // fake length as we have no idea
+	}
+	else
+	if(lua_isuserdata(l,9)) // real user data only because we first checked for light
+	{
+		ptr=(const unsigned char*)lua_toluserdata(l,9,&len);
 	}
 	
 		glTexSubImage2D((int)luaL_checknumber(l,1)		,
