@@ -353,15 +353,15 @@ int count;
 		ptr=(const u8*)lua_tolstring(l,1,&len);
 	}
 	else
-	if(lua_isuserdata(l,1))
-	{
-		ptr=lua_toluserdata(l,1,&len);
-	}
-	else
 	if(lua_islightuserdata(l,1))
 	{
 		ptr=lua_touserdata(l,1);
 		len=0x7fffffff; // fake length as we have no idea
+	}
+	else
+	if(lua_isuserdata(l,1)) // must check for light first...
+	{
+		ptr=lua_toluserdata(l,1,&len);
 	}
 	else
 	{
