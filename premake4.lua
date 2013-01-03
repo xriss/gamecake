@@ -152,7 +152,7 @@ elseif t:sub(1,5)=="mingw" then
 	CPU=t:sub(6)
 	WINDOWS=true
 	MINGW=true
-elseif t:sub(1,5)=="nix" then
+elseif t:sub(1,3)=="nix" then
 	TARGET="NIX"
 	CPU=t:sub(6)
 	NIX=true
