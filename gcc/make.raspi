@@ -1,0 +1,22 @@
+cd `dirname $0`
+cd ..
+
+
+makeopts=""
+if [ "$1" = "release" ] ; then
+makeopts="config=release"
+fi
+
+build/premake4.raspi gmake nix-arm
+
+if [ "$1" == "clean" ] ; then
+
+        rm -rf build-gmake-nix-arm
+        exit
+fi
+
+
+cd build-gmake-nix-arm
+make $makeopts $2 $3 $4
+cd ..
+

@@ -1,0 +1,30 @@
+cd `dirname $0`
+cd ..
+
+naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_18`
+export PATH=$naclsdk/toolchain/linux_x86_newlib/bin:$PATH
+
+makeopts=""
+if [ "$1" = "release" ] ; then
+makeopts="config=release_nacl"
+fi
+
+build/premake4 gmake nacl-32
+build/premake4 gmake nacl-64
+
+if [ "$1" == "clean" ] ; then
+
+        rm -rf build-gmake-nacl-32
+        rm -rf build-gmake-nacl-64
+        exit
+fi
+
+
+cd build-gmake-nacl-32
+make $makeopts $2 $3 $4
+cd ..
+
+cd build-gmake-nacl-64
+make $makeopts $2 $3 $4
+cd ..
+
