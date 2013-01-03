@@ -830,14 +830,59 @@ int lua_android_msg (lua_State *l)
 		
 	return 0;
 }
-		
+
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// moveTaskToBack,
+// call a void function that returns a void
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_android_back (lua_State *l)
+int lua_android_func_call_void_return_void (lua_State *l,char *funcname)
+{
+	JNIEnv *env=0;
+	ANativeActivity *activity = master_android_app->activity;
+	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);	
+	jclass clazz = (*env)->GetObjectClass(env, activity->clazz);
+
+	jmethodID methodID = (*env)->GetMethodID(env, clazz, funcname, "()V");
+	
+	(*env)->CallVoidMethod(env, activity->clazz, methodID);
+
+	(*activity->vm)->DetachCurrentThread(activity->vm);
+	return 1;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// call a void function that returns a string (pushed on lua stack)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_func_call_void_return_string (lua_State *l,char *funcname)
+{
+	JNIEnv *env=0;
+	ANativeActivity *activity = master_android_app->activity;
+	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);	
+	jclass clazz = (*env)->GetObjectClass(env, activity->clazz);
+
+	jmethodID methodID = (*env)->GetMethodID(env, clazz, funcname, "()Ljava/lang/String;");
+	
+	jobject str_result = (*env)->CallObjectMethod(env, activity->clazz, methodID);
+	jboolean isCopy;
+	const char *str= (*env)->GetStringUTFChars(env, (jstring)str_result, &isCopy);
+
+	lua_pushstring(l,str);
+
+	(*env)->ReleaseStringUTFChars(env, (jstring)str_result, str);
+	(*activity->vm)->DetachCurrentThread(activity->vm);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// call a string function that returns a void
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_func_call_string_return_void (lua_State *l,char *funcname,const char *str)
 {
 	JNIEnv *env=0;
 	ANativeActivity *activity = master_android_app->activity;
@@ -846,18 +891,23 @@ int lua_android_back (lua_State *l)
 	
 	jclass clazz = (*env)->GetObjectClass(env, activity->clazz);
 
-	jmethodID methodID = (*env)->GetMethodID(env, clazz, "moveTaskToBack", "(Z)Z");
-
-	jvalue val;	val.z=1;
+	jmethodID methodID = (*env)->GetMethodID(env, clazz, funcname, "(Ljava/lang/String;)V");
 	
-	(*env)->CallBooleanMethod(env, activity->clazz, methodID,val);
-	
+	(*env)->CallVoidMethod(env, activity->clazz, methodID, (*env)->NewStringUTF(env,str) );
 	(*activity->vm)->DetachCurrentThread(activity->vm);
-	
 	
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// moveTaskToBack,
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_task_to_back (lua_State *l)
+{
+	return lua_android_func_call_void_return_void (l,"TaskToBack");
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -869,21 +919,28 @@ int lua_android_send_intent (lua_State *l)
 	const char *s="";	
 	s=(const char *)lua_tostring(l,1);
 	
-	JNIEnv *env=0;
-	ANativeActivity *activity = master_android_app->activity;
-		
-	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);	
-	
-	jclass clazz = (*env)->GetObjectClass(env, activity->clazz);
-
-	jmethodID methodID = (*env)->GetMethodID(env, clazz, "SendIntent", "(Ljava/lang/String;)V");
-
-//	jvalue val;	val.z=1;
-	
-	(*env)->CallVoidMethod(env, activity->clazz, methodID, (*env)->NewStringUTF(env,s) );
-	(*activity->vm)->DetachCurrentThread(activity->vm);
+	return lua_android_func_call_string_return_void(l,"SendIntent",s);
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get a full path of a place to store config/user files
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_get_files_prefix (lua_State *l)
+{
+	return lua_android_func_call_void_return_string (l,"GetFilesPrefix");
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get a full path of a place to store cache files
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_get_cache_prefix (lua_State *l)
+{
+	return lua_android_func_call_void_return_string (l,"GetCachePrefix");
+}
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -895,7 +952,6 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
-		{"send_intent",			lua_android_send_intent},
 
 		{"create",			lua_android_create},
 		{"start",			lua_android_start},
@@ -915,8 +971,17 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 		{"print",			lua_android_print},
 		{"time",			lua_android_time},
 		
-		{"back",			lua_android_back},
 		
+
+// special extra android abilities
+
+		{"task_to_back",				lua_android_task_to_back},
+
+		{"send_intent",					lua_android_send_intent},
+
+		{"get_files_prefix",			lua_android_get_files_prefix},
+		{"get_cache_prefix",			lua_android_get_cache_prefix},
+
 		{0,0}
 	};
 	

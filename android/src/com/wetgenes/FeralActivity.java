@@ -3,6 +3,8 @@ package com.wetgenes;
 import android.app.NativeActivity;
 import android.util.Log;
 import android.content.Intent;
+import android.content.Context;
+import java.io.File;
 
 public class FeralActivity extends NativeActivity
 {
@@ -15,7 +17,7 @@ public class FeralActivity extends NativeActivity
 
 	public void SendIntent(String txt)
 	{
-		Log(txt);
+//		Log(txt);
 
 		Intent i=new Intent(android.content.Intent.ACTION_SEND);
 
@@ -23,9 +25,26 @@ public class FeralActivity extends NativeActivity
 //		i.putExtra(Intent.EXTRA_SUBJECT, R.string.share_subject);
 		i.putExtra(Intent.EXTRA_TEXT, txt );
 
-//		moveTaskToBack(true);
 		startActivity(Intent.createChooser(i,"Where shall we post?"));
 
+	}
+	
+	public void TaskToBack()
+	{
+		moveTaskToBack(true);
+	}
+
+	public String GetFilesPrefix()
+	{
+		File f=getFilesDir();
+		String s=f.getAbsolutePath();
+		return s;
+	}
+	public String GetCachePrefix()
+	{
+		File f=getCacheDir();
+		String s=f.getAbsolutePath();
+		return s;
 	}
 
 }

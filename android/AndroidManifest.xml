@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.wetgenes.bulb"
-      android:versionCode="12998"
-      android:versionName="12.998"
+      android:versionCode="13001"
+      android:versionName="13.001"
 >
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="9" />

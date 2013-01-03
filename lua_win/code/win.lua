@@ -60,6 +60,12 @@ win.hardcore=hardcore
 win.softcore=softcore
 win.posix=posix
 
+-- a dir to store config or user generated files in
+win.files_prefix="./files/"
+-- a dir to store cache files in, may auto delete but also should be deleted by app
+win.cache_prefix="./cache/"
+
+
 local meta={}
 meta.__index=base
 
@@ -128,10 +134,14 @@ function win.android_start(apk)
 	print=_G.print
 
 	win.apk=apk
-
 	local zips=require("wetgenes.zips")
-	
 	zips.add_apk_file(win.apk)
+	
+	win.files_prefix=hardcore.get_files_prefix()
+	win.cache_prefix=hardcore.get_cache_prefix()
+
+print(win.files_prefix)
+print(win.cache_prefix)
 
 --print("ANDROID_SETUP with ",apk)
 	
