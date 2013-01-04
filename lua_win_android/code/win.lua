@@ -140,8 +140,8 @@ function win.android_start(apk)
 	win.files_prefix=hardcore.get_files_prefix()
 	win.cache_prefix=hardcore.get_cache_prefix()
 
-print(win.files_prefix)
-print(win.cache_prefix)
+--print(win.files_prefix)
+--print(win.cache_prefix)
 
 --print("ANDROID_SETUP with ",apk)
 	
