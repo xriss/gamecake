@@ -210,6 +210,10 @@ elseif RASPI then
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vcos/pthreads"} -- bugfix?
 	libdirs { raspisdk.."/firmware/hardfp/opt/vc/lib" }
 
+-- im not sure its even worth trying to run X11 gl code?
+-- best case is we use a large background window to catch clicks/keys but do
+-- everything  else the same and take over the screen.
+
 --	includedirs { raspisdk.."/raspx/usr/include" } -- extra includes?
 --	libdirs { raspisdk.."/raspx/usr/lib/arm-linux-gnueabihf/" } -- extra libs?
 
@@ -219,7 +223,7 @@ elseif RASPI then
 
 	platforms { "raspi" } --hax
 
-	defines "X11"
+--	defines "X11"
 	defines "RASPI"
 
 	defines("LUA_USE_POSIX")
