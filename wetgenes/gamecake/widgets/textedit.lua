@@ -88,7 +88,7 @@ function wtextedit.key(widget,ascii,key,act)
 			widget.data.str_idx=#widget.data.str
 			changed=true
 		
-		elseif key=="backspace" then
+		elseif key=="back" then
 	
 			if widget.data.str_idx >= #widget.data.str then -- at end
 			

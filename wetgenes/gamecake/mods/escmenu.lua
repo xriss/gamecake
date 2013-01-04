@@ -67,11 +67,7 @@ function M.bake(state,escmenu)
 				
 			elseif id=="quit" then
 			
-				if win.hardcore.back then -- on android there is no quit, only back
-					win.hardcore.back()
-				else
-					state.next=true
-				end
+				state.next=true
 				escmenu.show=false
 				
 			end

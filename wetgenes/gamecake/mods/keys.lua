@@ -448,12 +448,8 @@ function M.bake(state,keys)
 	keys.caps=false
 	keys.shift=false
 
-	function keys.setup()
-	
-
-		keys.master=state.rebake("wetgenes.gamecake.widgets").setup({font="Vera",text_size=24})
-		
-	
+-- push a keyboard widget into a master
+	function keys.setup_keyboard_widgets(master)
 		local hooks={}
 		function hooks.click(widget)
 --	print(widget.id)
@@ -464,7 +460,7 @@ function M.bake(state,keys)
 			if ascii=="<" then
 				ascii=""
 				code=0
-				name="backspace"
+				name="back"
 			elseif ascii==">" then
 				ascii=""
 				code=0
@@ -491,15 +487,13 @@ function M.bake(state,keys)
 			
 		end
 
---		keys.master=state.rebake("wetgenes.gamecake.widgets").setup({hx=320,hy=160})
+		master:clean_all()
+		master.ids={}
 
-		keys.master:clean_all()
-		keys.master.ids={}
-
-		keys.top=keys.master:add({py=0,hx=320,hy=160,mx=320,my=240,class="flow",ax=0,ay=0})
+		local top=master:add({py=0,hx=320,hy=160,mx=320,my=240,class="flow",ax=0,ay=0})
 
 		local function key_line(ks)
-			local t=keys.top:add({sx=320,sy=32,mx=320,my=32,class="flow"})
+			local t=top:add({sx=320,sy=32,mx=320,my=32,class="flow"})
 			for i=1,#ks do
 				local k=ks:sub(i,i)
 				t:add({sx=320/11,sy=32,color=0xffcccccc,text=k,id="key",hooks=hooks})
@@ -511,8 +505,16 @@ function M.bake(state,keys)
 		key_line("asdfghjkl ")
 		key_line(" zxcvbnm:#")
 		key_line("<     ,./>")
+					
+	end
+
+	function keys.setup()
+	
+
+		keys.master=state.rebake("wetgenes.gamecake.widgets").setup({font="Vera",text_size=24})
 		
-			
+		keys.setup_keyboard_widgets(keys.master)
+	
 		keys.master:layout()
 
 	end

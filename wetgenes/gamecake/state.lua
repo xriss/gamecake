@@ -109,16 +109,23 @@ function bake(opts)
 					
 				elseif type(state.next)=="boolean" then -- special exit state
 				
-					return true
+					if wwin.hardcore.task_to_back then -- on android there is no quit, only back
+						wwin.hardcore.task_to_back()
+						state.next=nil
+					else
+						return true
+					end
 					
 				end
 
-				state.last=state.now
-				state.now=state.next
-				state.next=nil
-				
-				if state.now and state.now.setup then
-					state.now.setup()
+				if state.next then
+					state.last=state.now
+					state.now=state.next
+					state.next=nil
+					
+					if state.now and state.now.setup then
+						state.now.setup()
+					end
 				end
 				
 			end

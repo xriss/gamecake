@@ -119,7 +119,7 @@ function wmeta.setup(def)
 		widget.highlight=def.highlight
 		
 		widget.id=def.id
-		widget.user=def.user
+		widget.user=def.user -- any user data you wish to associate with this widget (we will ignore it)
 		widget.hooks=def.hooks
 		
 		widget.sx=def.sx or def.hx or 1 -- (ratio)size for layout code
