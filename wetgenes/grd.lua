@@ -289,6 +289,11 @@ base.palette=function(g,...)
 	return r
 end
 
+base.resize=function(g,...)
+	local r=core.resize(g[0],...)
+	core.info(g[0],g)
+	return r and g
+end
 base.scale=function(g,...)
 	local r=core.scale(g[0],...)
 	core.info(g[0],g)

@@ -84,12 +84,14 @@ function wskin.load(name)
 		if name=="soapbar" then
 			mode=name
 			
+			images.TEXTURE_MIN_FILTER=gl.LINEAR -- disable mipmapping? it seems to feck draw33 up somehow?
 			images.loads{
 				"wskins/"..mode.."/border",
 				"wskins/"..mode.."/buttof",
 				"wskins/"..mode.."/button",
 				"wskins/"..mode.."/buttin",
 			}
+			images.TEXTURE_MIN_FILTER=nil
 			margin=15
 			border=0
 			
@@ -375,7 +377,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		
 --print("using font "..(widget.font or widget.master.font or 1))
 
-			local ty=widget.text_size or widget.master.text_size or 16
+			local ty=widget:bubble("text_size") or 16
 
 			local f=widget.font or widget.master.font or 1
 			if f then
@@ -386,7 +388,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			end
 			
 			font.set(cake.fonts.get(f))
-			font.set_size(widget.text_size  or widget.master.text_size or 16 ,0)
+			font.set_size(ty,0)
 			local tx=font.width(widget.text)
 
 --			local tx,ty=font.size(widget.text,widget.text_size)

@@ -119,17 +119,19 @@ images.upload_grd= function(t,g)
 	t.width=g.width
 	t.height=g.height
 	
-	if gl.extensions.ARB_texture_non_power_of_two then
-
-		t.texture_width=g.width
-		t.texture_height=g.height
-		
-	else -- need to place the image in a bigger texture and probably disable mipmaps.
+--	gl.extensions.ARB_texture_non_power_of_two=false
+--	if gl.extensions.ARB_texture_non_power_of_two then
+--		t.texture_width=g.width
+--		t.texture_height=g.height
+--	else -- need to place the image in a bigger texture and probably disable mipmaps.
 	
+-- always need powah of two so we may mipmap
+-- probably best to keep textures powah of two if at all possible as well?
+
 		t.texture_width=uptwopow(g.width)
 		t.texture_height=uptwopow(g.height)
-		
-	end
+
+--	end
 	
 	gl.BindTexture( gl.TEXTURE_2D , t.id )
 	
@@ -138,15 +140,25 @@ images.upload_grd= function(t,g)
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE)
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)
 
+--best mipmap?
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,t.TEXTURE_MIN_FILTER or images.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
+
+
 	if g.width==0 or g.height==0 then return t end -- no data to upload
 	
 --print(require("wetgenes.string").dump(g))
 --	if g.format==grd.FMT_U8_RGBA or g.format==grd.FMT_U8_RGBA_PREMULT then
 		-- ok to upload as is
 --	else
+
 		assert(g:convert(grd.FMT_U8_RGBA_PREMULT))
+
 --	end
+if t.texture_width~=g.width or t.texture_height~=g.height then 
+		g:resize(t.texture_width,t.texture_height,1) -- resize keeping the image in the topleft corner
+end
 	
+--local zero=string.rep(string.char(0,0,0,0), t.texture_width * t.texture_height)
 
 -- create a possibly bigger texture
 	gl.TexImage2D(
@@ -158,20 +170,36 @@ images.upload_grd= function(t,g)
 		0,
 		gl.RGBA,
 		gl.UNSIGNED_BYTE,
-		string.rep(string.char(0,0,0,0), t.texture_width * t.texture_height) ) -- need to zero the texture?
+		g.data ) -- need to zero the texture?
 
--- and then copy the image data into it 		
-	gl.TexSubImage2D(
-		gl.TEXTURE_2D,
-		0,
-		0,
-		0,
-		g.width,
-		g.height,
-		gl.RGBA,
-		gl.UNSIGNED_BYTE,
-		g.data)
+-- mipmaps
+	local w=g.width
+	local h=g.height
+	local idx=0
+	while w>=2 or h>=2 do
+		idx=idx+1
+		w=math.ceil(w/2)
+		h=math.ceil(h/2)
+		g:scale(w,h,1)
+--print("mipmap",w,h)
+		
 
+-- create a possibly bigger texture
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			idx,
+			gl.RGBA,
+			w,
+			h,
+			0,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			g.data ) -- need to zero the texture?
+
+gl.CheckError()
+
+	end
+	
 	return t
 end
 

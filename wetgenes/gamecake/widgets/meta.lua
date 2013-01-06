@@ -158,7 +158,7 @@ function wmeta.setup(def)
 
 		widget.color=def.color
 		widget.text_color=def.text_color or widget.parent.text_color or 0xff000000 -- black text
-		widget.text_size=def.text_size -- quite chunky text by default
+		widget.text_size=def.text_size
 		
 		widget.text_color_shadow=def.text_color_shadow  -- may need a shadow
 		
@@ -192,6 +192,17 @@ function wmeta.setup(def)
 		if widget.fbo then widget.fbo:clean() end
 		return widget
 	end
+
+
+-- get a member from this or parents... widget
+	function meta.bubble(widget,name)
+		local w=widget
+		repeat
+			if w[name] then return w[name] end
+			w=w.parent
+		until not w
+	end
+
 --
 -- live adjustment
 --

@@ -40,7 +40,7 @@ M.bake=function(state,profiles)
 	
 -- load all profile data
 	function profiles.load()
-	
+print("Loading "..profiles.filename)
 		local fp=io.open(profiles.filename,"r")
 		if fp then
 			local s=fp:read("*all")
@@ -56,6 +56,7 @@ M.bake=function(state,profiles)
 	
 -- save all profile data
 	function profiles.save()
+print("Saving "..profiles.filename)
 		local fp=io.open(profiles.filename,"w")
 		fp:write(wstr.serialize(ps))
 		fp:close()
@@ -68,8 +69,10 @@ M.bake=function(state,profiles)
 
 -- set a value in the current profile
 	function profiles.set(name,value)
-		p[name]=value
-		profiles.save()
+		if p[name]~=value then
+			p[name]=value
+			profiles.save()
+		end
 	end
 	
 -- get a value from the current profile
@@ -83,6 +86,11 @@ M.bake=function(state,profiles)
 		p[scores]=scores
 		scores[#scores+1]=score
 		profiles.save()
+	end
+
+-- simple iteration of all profiles, iterates the profile raw tab (ipairs)
+	function profiles.ipairs()
+		return ipairs(ps)
 	end
 	
 
