@@ -154,7 +154,7 @@ elseif t:sub(1,5)=="mingw" then
 	MINGW=true
 elseif t:sub(1,3)=="nix" then
 	TARGET="NIX"
-	CPU=t:sub(6)
+	CPU=t:sub(4)
 	NIX=true
 elseif os.get() == "windows" then
 	TARGET="WINDOWS"
@@ -471,6 +471,7 @@ if NIX then -- luajit is working for these builds
 end
 
 all_includes=all_includes or {
+	{"lua_profiler",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},

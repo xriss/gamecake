@@ -183,6 +183,7 @@ void grd_flipy( struct grd *g );
 
 //int grd_conscale( struct grd *g , f32 base, f32 scale);
 
+int grd_resize( struct grd *g , s32 w, s32 h, s32 d);
 int grd_scale( struct grd *g , s32 w, s32 h, s32 d);
 
 

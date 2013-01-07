@@ -22,6 +22,7 @@ function glesfix.create(gles)
 	local gl=glescode.create(gles)
 	gl.fix={}
 	gl.fix.client={}
+	gl.fix.cache={}
 	gl.fix.pointer={}
 
 
@@ -227,8 +228,26 @@ void main(void)
 				p=gl.program("pos")
 			end
 		end
-		gl.UseProgram( p[0] )
 
+--hotspot? dont call repeatedly if we can avoid it, these may not change much between invocations?		
+		if gl.fix.cache.UseProgram~=p[0] then
+			gl.fix.cache.color=nil
+			gl.fix.cache.UseProgram=p[0]
+			gl.UseProgram( p[0] )
+			gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+			gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+			gl.matrixclean(gl.MODELVIEW)
+			gl.matrixclean(gl.PROJECTION)
+		else
+			if gl.matrixdirty(gl.MODELVIEW) then
+				gl.matrixclean(gl.MODELVIEW)
+				gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+			end
+			if gl.matrixdirty(gl.PROJECTION) then
+				gl.matrixclean(gl.PROJECTION)
+				gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+			end		
+		end
 		
 		local v=gl.fix.pointer.vertex
 		gl.VertexAttribPointer(p:attrib("a_vertex"),v[1],v[2],gl.FALSE,v[3],v[4])
@@ -250,11 +269,11 @@ void main(void)
 
 --		gl.Uniform1i(p:uniform("tex"), 0 )
 
-		gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
-		gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
-
-		gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
-
+		if gl.fix.cache.color~=gl.fix.color then -- try  not to update the color?
+			gl.fix.cache.color=gl.fix.color
+			gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
+		end
+		
 		gl.core.DrawArrays(...)
 		
 		gl.fix.pointer={} -- start again, old pointers are lost
