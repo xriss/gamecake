@@ -495,6 +495,28 @@ f32 scale;
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_resize (lua_State *l)
+{
+part_ptr p;
+s32 w,h,d;
+
+	p=lua_grd_check_ptr(l,1);
+
+	w=(s32)lua_tonumber(l,2);
+	h=(s32)lua_tonumber(l,3);
+	d=(s32)lua_tonumber(l,4);
+
+	grd_resize(p,w,h,d);
+
+//	lua_grd_getinfo(l,p,1);
+
+	lua_pushvalue(l,1);
+	return 1;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_scale (lua_State *l)
 {
 part_ptr p;
@@ -513,7 +535,6 @@ s32 w,h,d;
 	lua_pushvalue(l,1);
 	return 1;
 }
-
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 //
@@ -1082,6 +1103,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 //		{"conscale",		lua_grd_conscale},
 
 		{"scale",			lua_grd_scale},
+		{"resize",			lua_grd_resize},
 			
 		{"flipy",			lua_grd_flipy},
 		{"blit",			lua_grd_blit},

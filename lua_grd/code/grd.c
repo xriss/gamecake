@@ -841,6 +841,68 @@ u32 bgra;
 // scale image
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+int grd_resize( struct grd *g , s32 w, s32 h, s32 d)
+{
+struct grd_info *gi=g->bmap;
+struct grd *gb;
+
+
+s32 ww,hh,dd;
+s32 x,y,z;
+u32 *ptr;
+u32 *pts;
+
+	if( // any U8 32bit format should be fine
+		( g->bmap->fmt!=GRD_FMT_U8_ARGB ) &&
+		( g->bmap->fmt!=GRD_FMT_U8_ARGB_PREMULT ) &&
+		( g->bmap->fmt!=GRD_FMT_U8_RGBA ) &&
+		( g->bmap->fmt!=GRD_FMT_U8_RGBA_PREMULT )
+
+	) { return 0; } // must be this format
+
+	if( gi->w<1 || gi->h<1 || gi->d<1 ) { return 0; }
+	if( w<1 || h<1 || d<1 ) { return 0; }
+	
+	gb=grd_create(g->bmap->fmt,w,h,d);
+	if(!gb) { return 0; }
+
+	ww=gi->w;
+	hh=gi->h;
+	dd=gi->d;
+	
+	for(z=0;z<d;z++)
+	{
+		for(y=0;y<h;y++)
+		{
+			ptr=(u32*)grdinfo_get_data(gb->bmap,0,y,z);
+			if(y<hh && z<dd)
+			{
+				pts=(u32*)grdinfo_get_data(gi,0,y,z);
+			}
+			else
+			{
+				pts=(u32*)0;
+			}
+			for(x=0;x<w;x++)
+			{
+				if(pts && x<ww) { *ptr++=*pts++; }
+				else { *ptr++=0; }
+			}
+		}
+	}
+	
+	grd_insert(g,gb);
+	grd_free(gb);
+
+	return 1;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// change the size of the image but keep the image data the same
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 int grd_scale( struct grd *g , s32 w, s32 h, s32 d)
 {
 struct grd_info *gi=g->bmap;
@@ -858,7 +920,13 @@ f32 fx,fy,fz;
 s32 x,y,z;
 u32 *ptr;
 
-	if( ( g->bmap->fmt!=GRD_FMT_U8_ARGB ) && ( g->bmap->fmt!=GRD_FMT_U8_ARGB_PREMULT ) ) { return 0; } // must be this format
+	if( // any U8 32bit format should be fine
+		( g->bmap->fmt!=GRD_FMT_U8_ARGB ) &&
+		( g->bmap->fmt!=GRD_FMT_U8_ARGB_PREMULT ) &&
+		( g->bmap->fmt!=GRD_FMT_U8_RGBA ) &&
+		( g->bmap->fmt!=GRD_FMT_U8_RGBA_PREMULT )
+
+	) { return 0; } // must be this format
 
 	if( gi->w<1 || gi->h<1 || gi->d<1 ) { return 0; }
 	if( w<1 || h<1 || d<1 ) { return 0; }
@@ -882,7 +950,7 @@ u32 *ptr;
 			ptr=(u32*)grdinfo_get_data(gb->bmap,0,y,z);
 			for(x=0,fx=0.0f;x<w;x++,fx+=fw)
 			{
-				*ptr++=grd_sample(g, (s32)fx,(s32)fy,(s32)fz, sw,sh,sd );
+				*ptr++=grd_sample(g, fx,fy,fz, sw,sh,sd );
 			}
 		}
 	}
@@ -892,8 +960,6 @@ u32 *ptr;
 
 	return 1;
 }
-
-
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
