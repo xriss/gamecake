@@ -143,15 +143,22 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 
 --		gl.Begin(gl.QUADS)
 --			gl.Color(1,1,1,1)
+			local t={}
+			local function drawbox() -- draw all 9 parts in one go
+				flat.tristrip("xyzuv",t)
+			end
+			local function tdrawbox( tx,ty, vx,vy , txp,typ, vxp,vyp )
 			
-			local function drawbox( tx,ty, vx,vy , txp,typ, vxp,vyp )
-			
-				flat.tristrip("xyzuv",{
+				local ht=#t
+				for i,v in ipairs{
 					vx,		vy,		0,	tx,		ty,
 					vx+vxp,	vy,		0,	tx+txp,	ty,
 					vx,		vy+vyp,	0,	tx,		ty+typ,
 					vx+vxp,	vy+vyp,	0,	tx+txp,	ty+typ,
-				})
+					vx+vxp,	vy+vyp,	0,	tx+txp,	ty+typ, -- doubletap hack so we can start at any location
+				} do
+					t[ht+i]=v
+				end
 --[[
 					tx,		ty,		0,	--vx,		vy,
 					tx+txp,	ty,		0,	--vx+vxp,	vy,
@@ -174,7 +181,7 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 				vx=vxs-- -vw/2
 				for ix=1,3 do
 
-					drawbox( tx,ty, vx,vy , tww[ix],thh[iy], vww[ix],vhh[iy] )
+					tdrawbox( tx,ty, vx,vy , tww[ix],thh[iy], vww[ix],vhh[iy] )
 
 					tx=tx+tww[ix]
 					vx=vx+vww[ix]
@@ -182,6 +189,8 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 				ty=ty+thh[iy]
 				vy=vy+vhh[iy]
 			end
+
+		drawbox()
 			
 --		gl.End()
 

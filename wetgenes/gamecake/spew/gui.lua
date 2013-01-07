@@ -40,6 +40,7 @@ M.bake=function(state,gui)
 	gui.data={}
 	function gui.initdata() -- call this later
 		gui.data.mode=1
+		gui.data.score=0
 		gui.data.name=wdata.new_data({class="string",hooks=gui.hooks})
 	end
 	
@@ -139,10 +140,26 @@ print("click",id)
 		
 	end
 
+	function gui.pages.score(master)
+		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+
+		local w=top:add({sx=320,sy=480,mx=320,my=480,class="flow"})
+
+		gui.add_part(w,"profile_bar")
+		w:add({sx=320,sy=40})
+		w:add({sx=320,sy=40,color=0xffcccccc,text="A new High!!"})
+		w:add({sx=320,sy=40,color=0xffcccccc,text=tostring(gui.data.score)})
+		w:add({sx=100,sy=40,color=0xffcccccc,text="Brag",id="profile_score_brag",hooks=gui.hooks})
+		w:add({sx=10,sy=40})
+		w:add({sx=100,sy=40,color=0xffcccccc,text="List",id="profile_score_list",hooks=gui.hooks})
+		w:add({sx=10,sy=40})
+		w:add({sx=100,sy=40,color=0xffcccccc,text="Submit",id="profile_score_submit",hooks=gui.hooks})
+		w:add({sx=320,sy=40})
+		
+	end
+
 
 	function gui.page(pname)
-	
-		gui.page_name=pname
 		
 		if not gui.master then
 			gui.master=state.rebake("wetgenes.gamecake.widgets").setup({hx=320,hy=480})
@@ -157,6 +174,8 @@ print("click",id)
 				f(gui.master) -- pass in the master so we could fill up other widgets
 			end
 		end
+
+		gui.page_name=pname
 
 		gui.set_all_values()
 

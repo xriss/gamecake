@@ -27,8 +27,15 @@ function glescode.create(gl)
 	end
 	code.reset_stacks() -- setup
 
+	function code.matrixdirty(mode)
+		return code.stacks[mode].dirty
+	end
+	function code.matrixclean(mode)
+		code.stacks[mode].dirty=false
+	end
+
 	function code.matrix(mode)
-		local v=assert(code.stacks[mode])
+		local v=code.stacks[mode]
 		return v[#v]
 	end
 	
@@ -36,7 +43,7 @@ function glescode.create(gl)
 		code.stack_mode=mode
 		code.stack=code.stacks[code.stack_mode]
 		if not code.stack then -- create on use
-			code.stack={ tardis.m4.new() }
+			code.stack={ tardis.m4.new() , dirty=true }
 			code.stacks[code.stack_mode]=code.stack
 		end
 		code.stack_matrix=assert(code.stack[#code.stack])
@@ -44,10 +51,12 @@ function glescode.create(gl)
 
 	function code.LoadMatrix(...)
 		code.stack_matrix:set(...)
+		code.stack.dirty=true
 	end
 
 	function code.MultMatrix(a)
 		tardis.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
+		code.stack.dirty=true
 	end
 
 	function code.Frustum(...)
@@ -56,28 +65,34 @@ function glescode.create(gl)
 
 	function code.LoadIdentity()
 		code.stack_matrix:identity()
+		code.stack.dirty=true
 	end
 
 	function code.Translate(vx,vy,vz)
 		code.stack_matrix:translate({vx,vy,vz})
+		code.stack.dirty=true
 	end
 
 	function code.Rotate(d,vx,vy,vz)
 		code.stack_matrix:rotate(d,{vx,vy,vz})
+		code.stack.dirty=true
 	end
 
 	function code.Scale(vx,vy,vz)
 		code.stack_matrix:scale_v3({vx,vy,vz})
+		code.stack.dirty=true
 	end
 
 	function code.PushMatrix()		
 		code.stack[#code.stack+1]=tardis.m4.new(code.stack_matrix) -- duplicate to new top
 		code.stack_matrix=assert(code.stack[#code.stack])
+		code.stack.dirty=true
 	end
 
 	function code.PopMatrix()
 		code.stack[#code.stack]=nil -- remove topmost
 		code.stack_matrix=assert(code.stack[#code.stack]) -- this will assert on too many pops
+		code.stack.dirty=true
 	end
 
 -- compiler functions

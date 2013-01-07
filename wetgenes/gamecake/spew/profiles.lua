@@ -5,6 +5,7 @@ local lfs=require("lfs")
 local wwin=require("wetgenes.win") -- system independent helpers
 local wstr=require("wetgenes.string")
 local wsbox=require("wetgenes.sandbox")
+local snames=require("wetgenes.gamecake.spew.names")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -32,7 +33,7 @@ M.bake=function(state,profiles)
 		ps={}
 		for i=1,5 do
 			p={}
-			p.name="Profile_Name"..i
+			p.name=snames.random()
 			ps[i]=p
 		end
 		profiles.select(1)

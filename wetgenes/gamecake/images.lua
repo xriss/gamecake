@@ -154,6 +154,8 @@ images.upload_grd= function(t,g)
 		assert(g:convert(grd.FMT_U8_RGBA_PREMULT))
 
 --	end
+
+-- force powah of 2 sizes
 if t.texture_width~=g.width or t.texture_height~=g.height then 
 		g:resize(t.texture_width,t.texture_height,1) -- resize keeping the image in the topleft corner
 end
@@ -172,7 +174,7 @@ end
 		gl.UNSIGNED_BYTE,
 		g.data ) -- need to zero the texture?
 
--- mipmaps
+-- create mipmaps
 	local w=g.width
 	local h=g.height
 	local idx=0
