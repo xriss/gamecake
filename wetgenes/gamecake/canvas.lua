@@ -29,6 +29,7 @@ function bake(opts)
 	local cake=canvas.cake
 	local win=canvas.win
 	local gl=canvas.gl
+	local images=cake.images
 
 
 
@@ -229,6 +230,10 @@ end
 
 
 font.set = function(dat)
+	if dat and dat~=font.dat then -- newfont, autokill the cache?
+		font.dat=dat
+--		font.drawcache_stop()
+	end
 	font.dat=dat or font.dat
 	font.set_size(16,0)
 	font.set_xy(0,0)
@@ -259,6 +264,18 @@ font.width=function(text)
 	return x
 end
 
+font.drawcache_start=function()
+	font.drawcache={}
+end
+
+font.drawcache_stop=function()
+	if font.drawcache then
+		images.bind(font.dat.images[1])
+		flat.tristrip("xyzuv",font.drawcache)
+		font.drawcache=nil
+	end
+end
+
 font.draw=function(text)
 
 -- This needs to switch upto C func, with inline blit
@@ -269,14 +286,39 @@ font.draw=function(text)
 	
 	local s=font.size/font_dat.size
 	
+	local t=font.drawcache or {}
+	
 	for i=1,#text do
 	
 		local cid=text:byte(i)
 		local c=font_dat.chars[cid] or font_dat.chars[32]
 
-		canvas.blit(c,x+(c.x*s),y+(c.y*s),nil,nil,c.width,c.height,c.width*s,c.height*s)
+--		canvas.blit(c,x+(c.x*s),y+(c.y*s),nil,nil,c.width,c.height,c.width*s,c.height*s)
+
+		local vx=x+(c.x*s)
+		local vxp=c.w*s
+		local vy=y+(c.y*s)
+		local vyp=c.h*s
+
+		local ht=#t
+		for i,v in ipairs{
+			vx,		vy,		0,	c.u1,	c.v1, -- doubletap hack so we can start at any location
+			vx,		vy,		0,	c.u1,	c.v1,
+			vx+vxp,	vy,		0,	c.u2,	c.v1,
+			vx,		vy+vyp,	0,	c.u1,	c.v2,
+			vx+vxp,	vy+vyp,	0,	c.u2,	c.v2,
+			vx+vxp,	vy+vyp,	0,	c.u2,	c.v2, -- doubletap hack so we can start at any location
+		} do
+			t[ht+i]=v
+		end
+
 
 		x=x+(c.add*s)+font.add
+	end
+
+	if not font.drawcache then -- we are not building multiple lines
+		images.bind(font_dat.images[1])
+		flat.tristrip("xyzuv",t)
 	end
 	
 	font.x=x
@@ -392,7 +434,7 @@ end
 			canvas.vdat=pack.alloc(canvas.vdat_size) -- temp draw buffer		
 		end
 	end
-	canvas.vdat_check(1024) -- initial buffer size it may grow but thisis probably more than enough
+	canvas.vdat_check(1024) -- initial buffer size it may grow but this is probably more than enough
 	
 	font.set( canvas.cake.fonts:get(1) ) -- load default, builtin, 8x8 font
 	

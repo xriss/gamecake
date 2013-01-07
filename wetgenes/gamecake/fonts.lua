@@ -47,11 +47,10 @@ fonts.unload=function(id)
 
 	if t then
 		if gl then --gl mode
-			for i,v in pairs(t.chars or {}) do -- delete all the chars
-				gl.DeleteTexture( v.id )
+			for i,v in pairs(t.images or {}) do -- delete all the chars
+				images.unload( v.id )
 			end
 		end
-		fonts.set(nil,id)
 	end
 end
 
@@ -67,31 +66,47 @@ fonts.load=function(filename,id)
 	if type(filename)=="number" then -- builtin font id, so far we only have this one
 
 		if gl then --gl mode
+		
 			t={}
 			t.filename=filename
 			fonts.set(t,id)
 			t.size=8
 
 			t.chars={}
+			t.images={}
+			
+			local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,16*16,1)
 
 			for i=32,127 do -- setup base textures for 7bit ascii
 				
-				local g=grd.create(grd.FMT_U8_ARGB,10,10,1) -- tempory buffer, 1 pixel border makes it less horrible when scaled
+				local idx=math.floor((i-32)%16) -- 0-31 are unprintable chars
+				local idy=math.floor((i-32)/16)
 				
-				local dat=wwin.glyph_8x8(i)
-				g:pixels(1,1,8,8,dat)
-				
-				g:convert(grd.FMT_U8_RGBA_PREMULT)
-
-				local c=fonts.cake.images.upload_grd(nil,g) -- send to opengl
-
+				local c={}
 				t.chars[i]=c
 				
-				c.x=-1 -- offsets to draw the bitmap at, whole pixels
-				c.y=-1
+				c.image=1
+				
 				c.add=8 -- character draw width which may be fractional
 
+				c.tx=(idx*16)+8
+				c.ty=(idy*16)+8
+
+				c.x=-1 -- offsets to draw the bitmap at, whole pixels
+				c.y=-1
+				c.w=10 --size to draw, a 1 pixel border is good to have
+				c.h=10
+				
+				c.u1=(c.tx-1)/(16*16)
+				c.u2=(c.tx+9)/(16*16)
+				c.v1=(c.ty-1)/(16*16)
+				c.v2=(c.ty+9)/(16*16)
+
+				g:pixels(c.tx,c.ty,8,8,wwin.glyph_8x8(i)) -- splat into grid
+
 			end
+
+			t.images[1]=fonts.cake.images.upload_grd(nil,g) -- send to opengl
 
 			return t
 		end
@@ -118,30 +133,69 @@ print("Loading font ",fname,#d)
 			t.font:size(t.size,t.size) -- render at 32x32 pixel size, all future numbers are relative to this size
 			
 			t.chars={}
+			t.images={}
 			
-			local g=grd.create() -- tempory buffer
+			local g=grd.create(grd.FMT_U8_RGBA_PREMULT,32*16,32*16,1)
+			
+			local gt=grd.create() -- tempory buffer
 			for i=32,127 do -- setup base textures for 7bit ascii
 
+				local idx=math.floor((i-32)%16) -- 0-31 are unprintable chars
+				local idy=math.floor((i-32)/16)
+
 				t.font:render(i) -- render
-				t.font:grd(g) -- copy to grd
-				g:convert(grd.FMT_U8_RGBA_PREMULT)
+				t.font:grd(gt) -- copy to grd
+				gt:convert(grd.FMT_U8_RGBA_PREMULT)
 				
-				local c=fonts.cake.images.upload_grd(nil,g) -- send to opengl
+--				local c=fonts.cake.images.upload_grd(nil,g) -- send to opengl
+				local c={}
 				t.chars[i]=c
+				
+				c.image=1
 				
 				c.x=t.font.bitmap_left -- offsets to draw the bitmap at, whole pixels
 				c.y=t.size-t.font.bitmap_top
-				c.add=math.floor(t.font.advance) -- character draw width which may be fractional
+				c.add=math.floor(t.font.advance) -- character draw width
+--				c.add=t.font.advance -- character draw width possibly fractional
+				
+				c.w=gt.width
+				c.h=gt.height
+				
+				c.tx=(idx*32)+1
+				c.ty=(idy*32)+1
+
+				c.u1=(c.tx-1)    /(32*16)
+				c.u2=(c.tx+c.w+1)/(32*16)
+				c.v1=(c.ty-1)    /(32*16)
+				c.v2=(c.ty+c.h+1)/(32*16)
+
+print(c.tx,c.ty,c.w,c.h)
+				
+				if c.w>=1 and c.h>=1 then -- must have size?
+				
+					local b=gt:pixels(0,0,c.w,c.h)
+					g:pixels(c.tx,c.ty,c.w,c.h, b ) -- splat into grid
+					
+					-- remember border
+					c.x=c.x-1
+					c.y=c.y-1
+					c.w=c.w+2
+					c.h=c.h+2
+					
+				end
 
 			end
 
 	-- we keep the ttf font in memory around so we can reload chars or load new chars as we need them
+
+			t.images[1]=fonts.cake.images.upload_grd(nil,g) -- send to opengl
 
 			return t
 			
 		end
 		
 	end
+
 	
 end
 

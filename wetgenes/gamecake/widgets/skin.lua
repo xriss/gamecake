@@ -151,6 +151,7 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 			
 				local ht=#t
 				for i,v in ipairs{
+					vx,		vy,		0,	tx,		ty, -- doubletap hack so we can start at any location
 					vx,		vy,		0,	tx,		ty,
 					vx+vxp,	vy,		0,	tx+txp,	ty,
 					vx,		vy+vyp,	0,	tx,		ty+typ,
