@@ -637,7 +637,7 @@ int read_tab;
 	}
 
 
-	if( (grd->fmt==GRD_FMT_U8_ARGB) )
+	if( (grd->fmt==GRD_FMT_U8_ARGB) || (grd->fmt==GRD_FMT_U8_RGBA) || (grd->fmt==GRD_FMT_U8_ARGB_PREMULT) || (grd->fmt==GRD_FMT_U8_RGBA_PREMULT) )
 	{
 		for( zi=z ; zi<z+d ; zi++ )
 		{
