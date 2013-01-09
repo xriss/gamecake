@@ -778,8 +778,7 @@ unsigned int pointer;
 	type=luaL_checknumber(l,3);
 	normalized=luaL_checknumber(l,4);
 	stride=luaL_checknumber(l,5);
-	pointer=(unsigned int)luaL_checknumber(l,6); // probably just an offset
-	pointer+=(unsigned int)lua_gles_topointer(l,7,0); // but possibly it might be a real pointer
+	pointer=(unsigned int)lua_gles_topointer(l,6,0);
 
 	glVertexAttribPointer(index,size,type,normalized,stride,(void *)pointer);
 	return 0;
