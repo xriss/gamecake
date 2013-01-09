@@ -1,6 +1,4 @@
 
-
-
 #include <stdlib.h>
 
 #include "lua.h"
