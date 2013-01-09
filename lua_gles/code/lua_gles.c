@@ -959,65 +959,181 @@ float ff[16];
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_gles_BindAttribLocation (lua_State *l)
 {
-	glBindAttribLocation(0,0,0);
+	glBindAttribLocation(	(int)luaL_checknumber(l,1)	,
+							(int)luaL_checknumber(l,2)	,
+							luaL_checkstring(l,3) 		);
 	return 0;
 }
 
 
 static int lua_gles_GetActiveAttrib (lua_State *l)
 {
-	glGetActiveAttrib(0,0,0,0,0,0,0);
-	return 0;
+char name[256];
+int size=0;
+int type=0;
+	name[0]=0; // safety
+	glGetActiveAttrib(	(int)luaL_checknumber(l,1)	,
+						(int)luaL_checknumber(l,2)	,
+						256,
+						0,
+						&size,
+						&type,
+						name);
+	lua_pushstring(l,name);
+	lua_pushnumber(l,(double)type);
+	lua_pushnumber(l,(double)size);
+	return 3;
 }
 static int lua_gles_GetActiveUniform (lua_State *l)
 {
-	glGetActiveUniform(0,0,0,0,0,0,0);
-	return 0;
+char name[256];
+int size=0;
+int type=0;
+	name[0]=0; // safety
+	glGetActiveUniform(	(int)luaL_checknumber(l,1)	,
+						(int)luaL_checknumber(l,2)	,
+						256,
+						0,
+						&size,
+						&type,
+						name);
+	lua_pushstring(l,name);
+	lua_pushnumber(l,(double)type);
+	lua_pushnumber(l,(double)size);
+	return 3;
 }
 
 static int lua_gles_GetBufferParameter (lua_State *l)
 {
-	glGetBufferParameteriv(0,0,0);
-	return 0;
+int ret=0;
+	glGetBufferParameteriv(		(int)luaL_checknumber(l,1)	,
+								(int)luaL_checknumber(l,2)	,
+								&ret						);
+	lua_pushnumber(l,(double)ret);
+	return 1;
 }
 
 static int lua_gles_GetShaderPrecisionFormat (lua_State *l)
 {
-//TODO	glGetShaderPrecisionFormat(0,0,0,0);
-	return 0;
+int ret[3]={0,0,0};
+	glGetShaderPrecisionFormat(		(int)luaL_checknumber(l,1)	,
+									(int)luaL_checknumber(l,2)	,
+									ret							,
+									ret+2						);
+	lua_pushnumber(l,(double)ret[0]);
+	lua_pushnumber(l,(double)ret[1]);
+	lua_pushnumber(l,(double)ret[2]);
+	return 3;
 }
 
 static int lua_gles_GetShaderSource (lua_State *l)
 {
-	glGetShaderSource(0,0,0,0);
-	return 0;
+int i;
+int size=0;
+int newsize=0;
+char *p=0;
+	i=luaL_checknumber(l,1);
+
+	glGetShaderiv(i, GL_SHADER_SOURCE_LENGTH, &size);
+	if(size==0) { size=16384; } // pick a fuckoff buffer size when driver is retarted
+	p=malloc(size);
+	if(p==0) { lua_pushfstring(l,"malloc failed (%d)",size); lua_error(l); return 0; }
+	
+	glGetShaderSource(i,size,&newsize,p);
+	lua_pushstring(l,p);
+	free(p);
+	
+	return 1;
 }
 
 
-static int lua_gles_GetUniform (lua_State *l)
+static int lua_gles_GetUniformf (lua_State *l)
 {
-	glGetUniformfv(0,0,0);
-	glGetUniformiv(0,0,0);
-	return 0;
+int i;
+float ret[16];
+int size=16;
+	if(lua_isnumber(l,3)) { size=luaL_checknumber(l,3); }
+	if(size>16) { size=16; }
+	glGetUniformfv(luaL_checknumber(l,1),luaL_checknumber(l,2),ret);
+	for(i=0;i<size;i++)
+	{
+		lua_pushnumber(l,(double)ret[i]);
+	}
+	return size;
 }
-
+static int lua_gles_GetUniformi (lua_State *l)
+{
+int i;
+int ret[16];
+int size=16;
+	if(lua_isnumber(l,3)) { size=luaL_checknumber(l,3); }
+	if(size>16) { size=16; }
+	glGetUniformiv(luaL_checknumber(l,1),luaL_checknumber(l,2),ret);
+	for(i=0;i<size;i++)
+	{
+		lua_pushnumber(l,(double)ret[i]);
+	}
+	return size;
+}
 
 static int lua_gles_GetVertexAttrib (lua_State *l)
 {
-	glGetVertexAttribfv(0,0,0);
-	glGetVertexAttribiv(0,0,0);
-	return 0;
+int idx;
+int def;
+
+// default of a single integer
+char v='i';
+int num=1;
+
+int iv[16];
+float fv[16];
+
+int i;
+
+	idx=luaL_checknumber(l,1);
+	def=luaL_checknumber(l,2);
+	
+	if(def==GL_CURRENT_VERTEX_ATTRIB) // everything else is just an int
+	{
+		num=4; v='f';
+	}
+
+	lua_gles_get_prop_info(def, &v, &num);
+	
+	switch(v)
+	{
+		case 'i':
+			glGetVertexAttribiv(idx,def,iv);
+			for(i=0;i<num;i++)
+			{
+				lua_pushnumber(l,(double)iv[i]);
+			}
+		break;
+		case 'f':
+			glGetVertexAttribfv(idx,def,fv);
+			for(i=0;i<num;i++)
+			{
+				lua_pushnumber(l,(double)fv[i]);
+			}
+		break;
+	}
+	
+	return num;
 }
 
 static int lua_gles_GetVertexAttribPointer (lua_State *l)
 {
-	glGetVertexAttribPointerv(0,0,0);
-	return 0;
+void *ret=0;
+	glGetVertexAttribPointerv(		(int)luaL_checknumber(l,1)	,
+									(int)luaL_checknumber(l,2)	,
+									&ret						);
+	lua_pushnumber(l,(double)((unsigned int)ret) );
+	return 1;
 }
 
 static int lua_gles_ReleaseShaderCompiler (lua_State *l)
 {
-//TODO	glReleaseShaderCompiler();
+	glReleaseShaderCompiler();
 	return 0;
 }
 
@@ -1360,12 +1476,16 @@ static int lua_gles_Scissor (lua_State *l)
 }
 static int lua_gles_ShaderBinary (lua_State *l)
 {
-	int len=0;
-	void *ptr=(void*)lua_gles_topointer(l,8,&len);
+// only one shader at a time?
+// can change to a table as first param if we need more?
 
-	glShaderBinary(		(int)luaL_checknumber(l,1)		,
+	int a=luaL_checknumber(l,1);
+	int len=0;
+	void *ptr=(void*)lua_gles_topointer(l,3,&len);
+	
+	glShaderBinary(		1								,
+						&a								,
 						(int)luaL_checknumber(l,2)		,
-						(int)luaL_checknumber(l,3)		,
 						(void*)ptr						,
 						(int)len						);
 	return 0;
@@ -1521,7 +1641,8 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"GetBufferParameter",		lua_gles_GetBufferParameter},
 		{"GetShaderPrecisionFormat",lua_gles_GetShaderPrecisionFormat},
 		{"GetShaderSource",			lua_gles_GetShaderSource},
-		{"GetUniform",				lua_gles_GetUniform},
+		{"GetUniformf",				lua_gles_GetUniformf},
+		{"GetUniformi",				lua_gles_GetUniformi},
 		{"GetVertexAttrib",			lua_gles_GetVertexAttrib},
 		{"GetVertexAttribPointer",	lua_gles_GetVertexAttribPointer},
 		{"ReleaseShaderCompiler",	lua_gles_ReleaseShaderCompiler},

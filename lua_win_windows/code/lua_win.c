@@ -589,7 +589,7 @@ s64 tim;
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_wetgenes_win_windows(lua_State *l)
+LUALIB_API int luaopen_wetgenes_win_windows_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
