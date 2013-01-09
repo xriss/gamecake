@@ -20,6 +20,11 @@ static const unsigned char* lua_gles_topointer (lua_State *l,int idx,int *plen)
 const unsigned char *ptr=0;
 int len=0x7fffffff; // fake max length if we have no idea what it is (light userdata)
 
+	if(lua_isnumber(l,idx))
+	{
+		ptr=(const unsigned char*)((unsigned int)lua_tonumber(l,idx));
+	}
+	else
 	if(lua_isstring(l,idx))
 	{
 		ptr=(const unsigned char*)lua_tolstring(l,idx,&len);
@@ -452,7 +457,7 @@ static int lua_gles_ColorPointer (lua_State *l)
 	glColorPointer(		(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
 						(int)luaL_checknumber(l,3)		,
-						((char*)lua_gles_topointer(l,5,0))+((int)luaL_checknumber(l,4))	);
+						lua_gles_topointer(l,4,0)		);
 	return 0;
 }
 
@@ -461,7 +466,7 @@ static int lua_gles_TexCoordPointer (lua_State *l)
 	glTexCoordPointer(	(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
 						(int)luaL_checknumber(l,3)		,
-						((char*)lua_gles_topointer(l,5,0))+((int)luaL_checknumber(l,4))	);
+						lua_gles_topointer(l,4,0)		);
 	return 0;
 }
 
@@ -469,7 +474,7 @@ static int lua_gles_NormalPointer (lua_State *l)
 {
 	glNormalPointer(	(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
-						((char*)lua_gles_topointer(l,4,0))+((int)luaL_checknumber(l,3))	);
+						lua_gles_topointer(l,3,0)		);
 	return 0;
 }
 
@@ -478,7 +483,7 @@ static int lua_gles_VertexPointer (lua_State *l)
 	glVertexPointer(	(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
 						(int)luaL_checknumber(l,3)		,
-						((char*)lua_gles_topointer(l,5,0))+((int)luaL_checknumber(l,4))	);
+						lua_gles_topointer(l,4,0)		);
 	return 0;
 }
 #endif
@@ -539,7 +544,7 @@ static int lua_gles_BufferData (lua_State *l)
 static int lua_gles_BufferSubData (lua_State *l)
 {
 	glBufferSubData((int)luaL_checknumber(l,1),(int)luaL_checknumber(l,2),(int)luaL_checknumber(l,3),
-						((char*)lua_gles_topointer(l,4,0))+((int)luaL_checknumber(l,5)) );
+						lua_gles_topointer(l,4,0) );
 	return 0;
 }
 
