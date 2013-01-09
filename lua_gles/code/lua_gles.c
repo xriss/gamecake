@@ -4,8 +4,39 @@
 #include "lua.h"
 #include "lauxlib.h"
 
+// we suport various GL versions
 #include INCLUDE_GLES_GL
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// turn a string or userdata at given idx into a ptr, returns 0 if not possible
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static const unsigned char* lua_gles_topointer (lua_State *l,int idx,int *plen)
+{
+const unsigned char *ptr=0;
+int len=0x7fffffff; // fake max length if we have no idea what it is (light userdata)
+
+	if(lua_isstring(l,idx))
+	{
+		ptr=(const unsigned char*)lua_tolstring(l,idx,&len);
+	}
+	else
+	if(lua_islightuserdata(l,idx))
+	{
+		ptr=(const unsigned char*)lua_touserdata(l,idx);
+	}
+	else
+	if(lua_isuserdata(l,idx)) // real user data only because we first checked for light
+	{
+		ptr=(const unsigned char*)lua_toluserdata(l,idx,&len);
+	}
+	
+	if(plen) { *plen=len; } //write out len if it was asked for
+
+	return ptr;
+}
+	
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // turn a def into a property type and size
@@ -133,7 +164,7 @@ static int lua_gles_ClearColor (lua_State *l)
 
 static int lua_gles_ClearDepth (lua_State *l)
 {
-//TODO	glClearDepthf(	(float)luaL_checknumber(l,1)	);
+//TODO glClearDepthf(	(float)luaL_checknumber(l,1)	);
 	return 0;
 }
 
@@ -318,27 +349,7 @@ int id=(int)luaL_checknumber(l,1);
 }
 
 static int lua_gles_TexImage2D (lua_State *l)
-{
-const unsigned char *ptr=0;
-int len;
-
-	if(lua_isstring(l,9))
-	{
-		ptr=(const unsigned char*)lua_tolstring(l,9,&len);
-	}
-	else
-	if(lua_islightuserdata(l,9))
-	{
-		ptr=(const unsigned char*)lua_touserdata(l,9);
-		len=0x7fffffff; // fake length as we have no idea
-	}
-	else
-	if(lua_isuserdata(l,9)) // real user data only because we first checked for light
-	{
-		ptr=(const unsigned char*)lua_toluserdata(l,9,&len);
-	}
-	
-		
+{		
 	glTexImage2D(	(int)luaL_checknumber(l,1)		,
 					(int)luaL_checknumber(l,2)		,
 					(int)luaL_checknumber(l,3)		,
@@ -347,32 +358,13 @@ int len;
 					(int)luaL_checknumber(l,6)		,
 					(int)luaL_checknumber(l,7)		,
 					(int)luaL_checknumber(l,8)		,
-					(void*)ptr	);
+					(void*)lua_gles_topointer(l,9,0));
 	return 0;
 }
 
 static int lua_gles_TexSubImage2D (lua_State *l)
-{
-const unsigned char *ptr=0;
-int len;
-
-	if(lua_isstring(l,9))
-	{
-		ptr=(const unsigned char*)lua_tolstring(l,9,&len);
-	}
-	else
-	if(lua_islightuserdata(l,9))
-	{
-		ptr=(const unsigned char*)lua_touserdata(l,9);
-		len=0x7fffffff; // fake length as we have no idea
-	}
-	else
-	if(lua_isuserdata(l,9)) // real user data only because we first checked for light
-	{
-		ptr=(const unsigned char*)lua_toluserdata(l,9,&len);
-	}
-	
-		glTexSubImage2D((int)luaL_checknumber(l,1)		,
+{	
+	glTexSubImage2D((int)luaL_checknumber(l,1)		,
 					(int)luaL_checknumber(l,2)		,
 					(int)luaL_checknumber(l,3)		,
 					(int)luaL_checknumber(l,4)		,
@@ -380,7 +372,7 @@ int len;
 					(int)luaL_checknumber(l,6)		,
 					(int)luaL_checknumber(l,7)		,
 					(int)luaL_checknumber(l,8)		,
-					(void*)ptr	);
+					(void*)lua_gles_topointer(l,9,0));
 	return 0;
 }
 
@@ -457,7 +449,7 @@ static int lua_gles_ColorPointer (lua_State *l)
 	glColorPointer(		(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
 						(int)luaL_checknumber(l,3)		,
-						((char*)lua_touserdata(l,5))+((int)luaL_checknumber(l,4))	);
+						((char*)lua_gles_topointer(l,5,0))+((int)luaL_checknumber(l,4))	);
 	return 0;
 }
 
@@ -466,7 +458,7 @@ static int lua_gles_TexCoordPointer (lua_State *l)
 	glTexCoordPointer(	(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
 						(int)luaL_checknumber(l,3)		,
-						((char*)lua_touserdata(l,5))+((int)luaL_checknumber(l,4))	);
+						((char*)lua_gles_topointer(l,5,0))+((int)luaL_checknumber(l,4))	);
 	return 0;
 }
 
@@ -474,7 +466,7 @@ static int lua_gles_NormalPointer (lua_State *l)
 {
 	glNormalPointer(	(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
-						((char*)lua_touserdata(l,4))+((int)luaL_checknumber(l,3))	);
+						((char*)lua_gles_topointer(l,4,0))+((int)luaL_checknumber(l,3))	);
 	return 0;
 }
 
@@ -483,7 +475,7 @@ static int lua_gles_VertexPointer (lua_State *l)
 	glVertexPointer(	(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
 						(int)luaL_checknumber(l,3)		,
-						((char*)lua_touserdata(l,5))+((int)luaL_checknumber(l,4))	);
+						((char*)lua_gles_topointer(l,5,0))+((int)luaL_checknumber(l,4))	);
 	return 0;
 }
 #endif
@@ -506,7 +498,7 @@ static int lua_gles_DrawElements (lua_State *l)
 	glDrawElements(		(int)luaL_checknumber(l,1)		,
 						(int)luaL_checknumber(l,2)		,
 						(int)luaL_checknumber(l,3)		,
-						(void*)lua_touserdata(l,4)	);
+						(void*)lua_gles_topointer(l,4,0)	);
 	return 0;
 }
 
@@ -537,14 +529,14 @@ static int lua_gles_BindBuffer (lua_State *l)
 static int lua_gles_BufferData (lua_State *l)
 {
 	glBufferData((int)luaL_checknumber(l,1),(int)luaL_checknumber(l,2),
-						((char*)lua_touserdata(l,3)),
+						((char*)lua_gles_topointer(l,3,0)),
 						(int)luaL_checknumber(l,4));
 	return 0;
 }
 static int lua_gles_BufferSubData (lua_State *l)
 {
 	glBufferSubData((int)luaL_checknumber(l,1),(int)luaL_checknumber(l,2),(int)luaL_checknumber(l,3),
-						((char*)lua_touserdata(l,4))+((int)luaL_checknumber(l,5)) );
+						((char*)lua_gles_topointer(l,4,0))+((int)luaL_checknumber(l,5)) );
 	return 0;
 }
 
@@ -781,10 +773,7 @@ unsigned int pointer;
 	normalized=luaL_checknumber(l,4);
 	stride=luaL_checknumber(l,5);
 	pointer=(unsigned int)luaL_checknumber(l,6); // probably just an offset
-	if(lua_isuserdata(l,7))
-	{
-		pointer+=(unsigned int)lua_touserdata(l,7); // but possibly it might be a real pointer
-	}
+	pointer+=(unsigned int)lua_gles_topointer(l,7,0); // but possibly it might be a real pointer
 
 	glVertexAttribPointer(index,size,type,normalized,stride,(void *)pointer);
 	return 0;
@@ -1036,6 +1025,205 @@ static int lua_gles_ReleaseShaderCompiler (lua_State *l)
 
 #endif
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// function stubs so we at least have them all typed into this file as a reminder to wire them up
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gles_ActiveTexture (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_BindFramebuffer (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_BindRenderbuffer (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_BlendColor (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_BlendEquation (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_BlendEquationSeparate (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_BlendFuncSeparate (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_CheckFramebufferStatus (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_ClearStencil (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_ColorMask (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_CompressedTexImage2D (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_CompressedTexSubImage2D (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_CopyTexImage2D (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_CopyTexSubImage2D (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_CullFace (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_DeleteFramebuffers (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_DeleteRenderbuffers (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_DetachShader (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_FramebufferRenderbuffer (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_FramebufferTexture2D (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_FrontFace (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_GenFramebuffers (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_GenRenderbuffers (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_GenerateMipmap (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_GetAttachedShaders (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_GetFramebufferAttachmentParameter (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_GetRenderbufferParameter (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_GetTexParameter (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_Hint (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_IsBuffer (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_IsEnabled (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_IsFramebuffer (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_IsProgram (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_IsRenderbuffer (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_IsShader (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_IsTexture (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_LineWidth (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_PixelStore (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_PolygonOffset (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_ReadPixels (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_RenderbufferStorage (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_SampleCoverage (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_Scissor (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_ShaderBinary (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_StencilFunc (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_StencilFuncSeparate (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_StencilOp (lua_State *l)
+{
+	return 0;
+}
+static int lua_gles_StencilOpSeparate (lua_State *l)
+{
+	return 0;
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -1070,11 +1258,11 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"DrawArrays",			lua_gles_DrawArrays},
 		{"DrawElements",		lua_gles_DrawElements},
 
-		{"GenBuffer",				lua_gles_GenBuffer},
-		{"BindBuffer",				lua_gles_BindBuffer},
-		{"DeleteBuffer",			lua_gles_DeleteBuffer},
-		{"BufferData",				lua_gles_BufferData},
-		{"BufferSubData",			lua_gles_BufferSubData},
+		{"GenBuffer",			lua_gles_GenBuffer},
+		{"BindBuffer",			lua_gles_BindBuffer},
+		{"DeleteBuffer",		lua_gles_DeleteBuffer},
+		{"BufferData",			lua_gles_BufferData},
+		{"BufferSubData",		lua_gles_BufferSubData},
 
 		{"DepthMask",			lua_gles_DepthMask},
 		{"DepthRange",			lua_gles_DepthRange},
@@ -1150,10 +1338,6 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"UniformMatrix3f",			lua_gles_UniformMatrix3f},
 		{"UniformMatrix4f",			lua_gles_UniformMatrix4f},
 
-//		{"UniformMatrix2fv",		lua_gles_UniformMatrix2fv},
-//		{"UniformMatrix3fv",		lua_gles_UniformMatrix3fv},
-//		{"UniformMatrix4fv",		lua_gles_UniformMatrix4fv},
-
 		{"BindAttribLocation",		lua_gles_BindAttribLocation},
 		{"GetActiveAttrib",			lua_gles_GetActiveAttrib},
 		{"GetActiveUniform",		lua_gles_GetActiveUniform},
@@ -1166,6 +1350,67 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"ReleaseShaderCompiler",	lua_gles_ReleaseShaderCompiler},
 
 #endif
+
+		{"ActiveTexture",						lua_gles_ActiveTexture},
+
+		{"BindFramebuffer",						lua_gles_BindFramebuffer},
+		{"BindRenderbuffer",					lua_gles_BindRenderbuffer},
+		{"BlendColor",							lua_gles_BlendColor},
+		{"BlendEquation",						lua_gles_BlendEquation},
+		{"BlendEquationSeparate",				lua_gles_BlendEquationSeparate},
+		{"BlendFuncSeparate",					lua_gles_BlendFuncSeparate},
+
+		{"CheckFramebufferStatus",				lua_gles_CheckFramebufferStatus},
+		{"ClearStencil",						lua_gles_ClearStencil},
+		{"ColorMask",							lua_gles_ColorMask},
+		{"CompressedTexImage2D",				lua_gles_CompressedTexImage2D},
+		{"CompressedTexSubImage2D",				lua_gles_CompressedTexSubImage2D},
+		{"CopyTexImage2D",						lua_gles_CopyTexImage2D},
+		{"CopyTexSubImage2D",					lua_gles_CopyTexSubImage2D},
+		{"CullFace",							lua_gles_CullFace},
+
+
+		{"DeleteFramebuffers",					lua_gles_DeleteFramebuffers},
+		{"DeleteRenderbuffers",					lua_gles_DeleteRenderbuffers},
+		{"DetachShader",						lua_gles_DetachShader},
+
+		{"FramebufferRenderbuffer",				lua_gles_FramebufferRenderbuffer},
+		{"FramebufferTexture2D",				lua_gles_FramebufferTexture2D},
+		{"FrontFace",							lua_gles_FrontFace},
+
+		{"GenFramebuffers",						lua_gles_GenFramebuffers},
+		{"GenRenderbuffers",					lua_gles_GenRenderbuffers},
+		{"GenerateMipmap",						lua_gles_GenerateMipmap},
+		{"GetAttachedShaders",					lua_gles_GetAttachedShaders},
+		{"GetFramebufferAttachmentParameter",	lua_gles_GetFramebufferAttachmentParameter},
+		{"GetRenderbufferParameter",			lua_gles_GetRenderbufferParameter},
+		{"GetTexParameter",						lua_gles_GetTexParameter},
+
+		{"Hint",								lua_gles_Hint},
+
+		{"IsBuffer",							lua_gles_IsBuffer},
+		{"IsEnabled",							lua_gles_IsEnabled},
+		{"IsFramebuffer",						lua_gles_IsFramebuffer},
+		{"IsProgram",							lua_gles_IsProgram},
+		{"IsRenderbuffer",						lua_gles_IsRenderbuffer},
+		{"IsShader",							lua_gles_IsShader},
+		{"IsTexture",							lua_gles_IsTexture},
+
+		{"LineWidth",							lua_gles_LineWidth},
+
+		{"PixelStore",							lua_gles_PixelStore},
+		{"PolygonOffset",						lua_gles_PolygonOffset},
+
+		{"ReadPixels",							lua_gles_ReadPixels},
+		{"RenderbufferStorage",					lua_gles_RenderbufferStorage},
+
+		{"SampleCoverage",						lua_gles_SampleCoverage},
+		{"Scissor",								lua_gles_Scissor},
+		{"ShaderBinary",						lua_gles_ShaderBinary},
+		{"StencilFunc",							lua_gles_StencilFunc},
+		{"StencilFuncSeparate",					lua_gles_StencilFuncSeparate},
+		{"StencilOp",							lua_gles_StencilOp},
+		{"StencilOpSeparate",					lua_gles_StencilOpSeparate},
 
 		{0,0}
 	};
