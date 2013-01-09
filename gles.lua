@@ -1104,294 +1104,17 @@ end
 
 if core.fixed_pipeline_available then -- the old way
 
-	function gles.MatrixMode(...)
-		return core.MatrixMode(...)
-	end
-
-	function gles.LoadMatrix(...)
-		return core.LoadMatrix(...)
-	end
-
-	function gles.MultMatrix(...)
-		return core.MultMatrix(...)
-	end
-
-	function gles.Frustum(...)
-		return core.Frustum(...)
-	end
-
-	function gles.LoadIdentity(...)
-		return core.LoadIdentity(...)
-	end
-
-	function gles.Translate(...)
-		return core.Translate(...)
-	end
-
-	function gles.Rotate(...)
---print("Rotate",...)	
-		return core.Rotate(...)
-	end
-
-	function gles.Scale(...)
-		return core.Scale(...)
-	end
-
-	function gles.PushMatrix(...)
-		return core.PushMatrix(...)
-	end
-
-	function gles.PopMatrix(...)
-		return core.PopMatrix(...)
-	end
-
-	function gles.Color(...)
-		return core.Color(...)
-	end
-
-	function gles.EnableClientState(...)
-		return core.EnableClientState(...)
-	end
-
-	function gles.DisableClientState(...)
-		return core.DisableClientState(...)
-	end
-
-	function gles.ColorPointer(...)
-		return core.ColorPointer(...)
-	end
-
-	function gles.TexCoordPointer(...)
-		return core.TexCoordPointer(...)
-	end
-
-	function gles.NormalPointer(...)
-		return core.NormalPointer(...)
-	end
-
-	function gles.VertexPointer(...)
-		return core.VertexPointer(...)
-	end
-end
-
-if core.programmable_pipeline_available then -- the new way
-
-	function gles.CreateShader(...)
-		return core.CreateShader(...)
-	end
-
-	function gles.DeleteShader(...)
-		return core.DeleteShader(...)
-	end
-
-	function gles.ShaderSource(...)
-		return core.ShaderSource(...)
-	end
-
-	function gles.CompileShader(...)
-		return core.CompileShader(...)
-	end
-
-	function gles.GetShader(...)
-		return core.GetShader(...)
-	end
-
-	function gles.GetShaderInfoLog(...)
-		return core.GetShaderInfoLog(...)
-	end
-
-	function gles.AttachShader(...)
-		return core.AttachShader(...)
-	end
-
-	function gles.CreateProgram(...)
-		return core.CreateProgram(...)
-	end
-
-	function gles.DeleteProgram(...)
-		return core.DeleteProgram(...)
-	end
-
-	function gles.LinkProgram(...)
-		return core.LinkProgram(...)
-	end
-
-	function gles.GetProgram(...)
-		return core.GetProgram(...)
-	end
-
-	function gles.UseProgram(...)
-		return core.UseProgram(...)
-	end
-
-	function gles.ValidateProgram(...)
-		return core.ValidateProgram(...)
-	end
-
-	function gles.GetProgramInfoLog(...)
-		return core.GetProgramInfoLog(...)
-	end
-
-	function gles.GetAttribLocation(...)
-		return core.GetAttribLocation(...)
-	end
-
-	function gles.GetUniformLocation(...)
-		return core.GetUniformLocation(...)
-	end
-
-	function gles.EnableVertexAttribArray(...)
-		return core.EnableVertexAttribArray(...)
-	end
-
-	function gles.DisableVertexAttribArray(...)
-		return core.DisableVertexAttribArray(...)
-	end
-
-	function gles.VertexAttribPointer(...)
-		return core.VertexAttribPointer(...)
-	end
-
-	function gles.VertexAttrib1f(...)
-		return core.VertexAttrib1f(...)
-	end
-	function gles.VertexAttrib2f(...)
-		return core.VertexAttrib2f(...)
-	end
-	function gles.VertexAttrib3f(...)
-		return core.VertexAttrib3f(...)
-	end
-	function gles.VertexAttrib4f(...)
-		return core.VertexAttrib4f(...)
-	end
-		
-	function gles.Uniform1f(...)
-		return core.Uniform1f(...)
-	end
-	function gles.Uniform2f(...)
-		return core.Uniform2f(...)
-	end
-	function gles.Uniform3f(...)
-		return core.Uniform3f(...)
-	end
-	function gles.Uniform4f(...)
-		return core.Uniform4f(...)
-	end
-
-	function gles.Uniform1i(...)
-		return core.Uniform1i(...)
-	end
-	function gles.Uniform2i(...)
-		return core.Uniform2i(...)
-	end
-	function gles.Uniform3i(...)
-		return core.Uniform3i(...)
-	end
-	function gles.Uniform4i(...)
-		return core.Uniform4i(...)
-	end
-
-	function gles.UniformMatrix2f(...)
-		return core.UniformMatrix2f(...)
-	end
-	function gles.UniformMatrix3f(...)
-		return core.UniformMatrix3f(...)
-	end
-	function gles.UniformMatrix4f(...)
-		return core.UniformMatrix4f(...)
-	end
+elseif core.programmable_pipeline_available then -- the new way
 
 end
 
-
-function gles.Get(...)
-	return core.Get(...)
-end
-
-function gles.Enable(...)
-	return core.Enable(...)
-end
-
-function gles.Disable(...)
-	return core.Disable(...)
-end
-
-function gles.ClearColor(...)
-	return core.ClearColor(...)
-end
-
-function gles.Clear(...)
-	return core.Clear(...)
-end
-
-function gles.Finish(...)
-	return core.Finish(...)
-end
-
-function gles.Flush(...)
-	return core.Flush(...)
-end
-
-function gles.DrawArrays(...)
-	return core.DrawArrays(...)
-end
-
-function gles.DrawElements(...)
-	return core.DrawElements(...)
-end
-
-function gles.GenBuffer(...)
-	return core.GenBuffer(...)
-end
-
-function gles.BindBuffer(...)
-	return core.BindBuffer(...)
-end
-
-function gles.DeleteBuffer(...)
-	return core.DeleteBuffer(...)
-end
-
-function gles.BufferData(...)
-	return core.BufferData(...)
-end
-function gles.BufferSubData(...)
-	return core.BufferSubData(...)
-end
-
-function gles.GenTexture(...)
-	return core.GenTexture(...)
-end
-
-function gles.BindTexture(...)
-	return core.BindTexture(...)
-end
-
-function gles.DeleteTexture(...)
-	return core.DeleteTexture(...)
-end
-
-function gles.TexImage2D(...)
-	return core.TexImage2D(...)
-end
-function gles.TexSubImage2D(...)
-	return core.TexSubImage2D(...)
-end
-
-function gles.TexParameter(...)
-	return core.TexParameter(...)
-end
-
-function gles.Viewport(...)
-	return core.Viewport(...)
-end
-
-function gles.BlendFunc(...)
-	return core.BlendFunc(...)
-end
-
-function gles.ShadeModel(...)
-	return core.ShadeModel(...)
+-- export all core functions that have not been explicitly defined *above*
+for n,v in pairs(core) do
+	if type(v)=="function" then
+		if not gles[n] then -- already used
+			gles[n]=v -- copy function
+		end
+	end
 end
 
 
@@ -1448,9 +1171,6 @@ function gles.numtostring(num)
 	return gles.nums[num]
 end
 
-function gles.GetError(...)
-	return core.GetError(...)
-end
 function gles.CheckError(...)
 	local err=gles.GetError()
 	local str=gles.numtostring(err)
@@ -1487,8 +1207,7 @@ if not core.programmable_pipeline_available then
 
 else
 
---force a test of our glesfix
---print("FORCING TEST OF GLES1FIX")
+--force a test of our glesfix, so we never willingly use the fixed pipeline
 	gles.gles1=require("glesfix").create(gles)
 
 end

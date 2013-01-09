@@ -192,7 +192,7 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 		end
 		if sx then
 			sy=sy or sx
-			gl.Scale(sx/sheet[i].hx,sy/sheet[i].hy,1) -- fixed, ignore base size of image?
+			gl.Scale(sx/sheet[i].hx,sy/sheet[i].hy,1) -- fixed, ignore the base size of image when we scale. So size is absolute
 		end
 	end
 	
