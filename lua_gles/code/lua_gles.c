@@ -954,7 +954,7 @@ float ff[16];
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// more stubs
+// stubs
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_gles_BindAttribLocation (lua_State *l)
@@ -1033,194 +1033,371 @@ static int lua_gles_ReleaseShaderCompiler (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_gles_ActiveTexture (lua_State *l)
 {
+	glActiveTexture(	(int)luaL_checknumber(l,1)	);
 	return 0;
 }
 static int lua_gles_BindFramebuffer (lua_State *l)
 {
+	glBindFramebuffer(	(int)luaL_checknumber(l,1)	,
+						(int)luaL_checknumber(l,2)	);
 	return 0;
 }
 static int lua_gles_BindRenderbuffer (lua_State *l)
 {
+	glBindRenderbuffer(	(int)luaL_checknumber(l,1)	,
+						(int)luaL_checknumber(l,2)	);
 	return 0;
 }
 static int lua_gles_BlendColor (lua_State *l)
 {
+	glBlendColor(		(float)luaL_checknumber(l,1)	,
+						(float)luaL_checknumber(l,2)	,
+						(float)luaL_checknumber(l,3)	,
+						(float)luaL_checknumber(l,4)	);
 	return 0;
 }
 static int lua_gles_BlendEquation (lua_State *l)
 {
+	glBlendEquation(	(int)luaL_checknumber(l,1)	);
 	return 0;
 }
 static int lua_gles_BlendEquationSeparate (lua_State *l)
 {
+	glBlendEquationSeparate(	(int)luaL_checknumber(l,1)	,
+								(int)luaL_checknumber(l,2)	);
 	return 0;
 }
 static int lua_gles_BlendFuncSeparate (lua_State *l)
 {
+	glBlendFuncSeparate(		(int)luaL_checknumber(l,1)	,
+								(int)luaL_checknumber(l,2)	,
+								(int)luaL_checknumber(l,3)	,
+								(int)luaL_checknumber(l,4)	);
 	return 0;
 }
 static int lua_gles_CheckFramebufferStatus (lua_State *l)
 {
-	return 0;
+	int i=glCheckFramebufferStatus(		(int)luaL_checknumber(l,1)	);
+	return i;
 }
 static int lua_gles_ClearStencil (lua_State *l)
 {
+	glClearStencil(		(int)luaL_checknumber(l,1)	);
 	return 0;
 }
 static int lua_gles_ColorMask (lua_State *l)
 {
+	glColorMask(		(int)luaL_checknumber(l,1)	,
+						(int)luaL_checknumber(l,2)	,
+						(int)luaL_checknumber(l,3)	,
+						(int)luaL_checknumber(l,4)	);
 	return 0;
 }
 static int lua_gles_CompressedTexImage2D (lua_State *l)
 {
+	int len=0;
+	void *ptr=(void*)lua_gles_topointer(l,7,&len);
+	
+	glCompressedTexImage2D(		(int)luaL_checknumber(l,1)		,
+								(int)luaL_checknumber(l,2)		,
+								(int)luaL_checknumber(l,3)		,
+								(int)luaL_checknumber(l,4)		,
+								(int)luaL_checknumber(l,5)		,
+								(int)luaL_checknumber(l,6)		,
+								(int)len						,
+								(void*)ptr);
 	return 0;
 }
 static int lua_gles_CompressedTexSubImage2D (lua_State *l)
 {
+	int len=0;
+	void *ptr=(void*)lua_gles_topointer(l,8,&len);
+
+	glCompressedTexSubImage2D(	(int)luaL_checknumber(l,1)		,
+								(int)luaL_checknumber(l,2)		,
+								(int)luaL_checknumber(l,3)		,
+								(int)luaL_checknumber(l,4)		,
+								(int)luaL_checknumber(l,5)		,
+								(int)luaL_checknumber(l,6)		,
+								(int)luaL_checknumber(l,7)		,
+								(int)len						,
+								(void*)ptr						);
 	return 0;
 }
 static int lua_gles_CopyTexImage2D (lua_State *l)
 {
+	glCopyTexImage2D(	(int)luaL_checknumber(l,1)		,
+						(int)luaL_checknumber(l,2)		,
+						(int)luaL_checknumber(l,3)		,
+						(int)luaL_checknumber(l,4)		,
+						(int)luaL_checknumber(l,5)		,
+						(int)luaL_checknumber(l,6)		,
+						(int)luaL_checknumber(l,7)		,
+						(int)luaL_checknumber(l,8)		);
 	return 0;
 }
 static int lua_gles_CopyTexSubImage2D (lua_State *l)
 {
+	glCopyTexSubImage2D(	(int)luaL_checknumber(l,1)		,
+							(int)luaL_checknumber(l,2)		,
+							(int)luaL_checknumber(l,3)		,
+							(int)luaL_checknumber(l,4)		,
+							(int)luaL_checknumber(l,5)		,
+							(int)luaL_checknumber(l,6)		,
+							(int)luaL_checknumber(l,7)		,
+							(int)luaL_checknumber(l,8)		);
 	return 0;
 }
 static int lua_gles_CullFace (lua_State *l)
 {
+	glCullFace(	(int)luaL_checknumber(l,1)		);
 	return 0;
 }
-static int lua_gles_DeleteFramebuffers (lua_State *l)
+static int lua_gles_DeleteFramebuffer (lua_State *l)
 {
+int id=luaL_checknumber(l,1);
+//TODO	glDeleteFrameBuffers(1,&id);
 	return 0;
 }
-static int lua_gles_DeleteRenderbuffers (lua_State *l)
+static int lua_gles_DeleteRenderbuffer (lua_State *l)
 {
+int id=luaL_checknumber(l,1);
+//TODO	glDeleteRenderBuffers(1,&id);
 	return 0;
 }
 static int lua_gles_DetachShader (lua_State *l)
 {
+	glDetachShader(		(int)luaL_checknumber(l,1)		,
+						(int)luaL_checknumber(l,2)		);
 	return 0;
 }
 static int lua_gles_FramebufferRenderbuffer (lua_State *l)
 {
+	glFramebufferRenderbuffer(	(int)luaL_checknumber(l,1)		,
+								(int)luaL_checknumber(l,2)		,
+								(int)luaL_checknumber(l,3)		,
+								(int)luaL_checknumber(l,4)		);
 	return 0;
 }
 static int lua_gles_FramebufferTexture2D (lua_State *l)
 {
+	glFramebufferTexture2D(		(int)luaL_checknumber(l,1)		,
+								(int)luaL_checknumber(l,2)		,
+								(int)luaL_checknumber(l,3)		,
+								(int)luaL_checknumber(l,4)		,
+								(int)luaL_checknumber(l,5)		);
 	return 0;
 }
 static int lua_gles_FrontFace (lua_State *l)
 {
+	glFrontFace(	(int)luaL_checknumber(l,1)		);
 	return 0;
 }
 static int lua_gles_GenFramebuffers (lua_State *l)
 {
-	return 0;
+int id=0;
+//TODO	glGenFrameBuffers(1,&id);
+	lua_pushnumber(l,(double)id);
+	return 1;
 }
 static int lua_gles_GenRenderbuffers (lua_State *l)
 {
-	return 0;
+int id=0;
+//TODO	glGenRenderBuffers(1,&id);
+	lua_pushnumber(l,(double)id);
+	return 1;
 }
 static int lua_gles_GenerateMipmap (lua_State *l)
 {
+	glGenerateMipmap(	(int)luaL_checknumber(l,1)		);
 	return 0;
 }
 static int lua_gles_GetAttachedShaders (lua_State *l)
 {
-	return 0;
+int i;
+int count=0;
+int ret[16];
+
+	glGetAttachedShaders( (int)luaL_checknumber(l,1)	, 16 , &count, ret);
+	for(i=0;i<count;i++)
+	{
+		lua_pushnumber(l,(double)ret[i]);
+	}
+	return count;
 }
 static int lua_gles_GetFramebufferAttachmentParameter (lua_State *l)
 {
-	return 0;
+int ret=0;
+	glGetFramebufferAttachmentParameteriv(	(int)luaL_checknumber(l,1)	,
+											(int)luaL_checknumber(l,2)	,
+											(int)luaL_checknumber(l,3)	,
+											&ret						);
+	lua_pushnumber(l,(double)ret);
+	return 1;
 }
 static int lua_gles_GetRenderbufferParameter (lua_State *l)
 {
-	return 0;
+int ret=0;
+	glGetRenderbufferParameteriv(	(int)luaL_checknumber(l,1)	,
+									(int)luaL_checknumber(l,2)	,
+									&ret						);
+	lua_pushnumber(l,(double)ret);
+	return 1;
 }
 static int lua_gles_GetTexParameter (lua_State *l)
 {
-	return 0;
+int ret=0;
+	glGetTexParameteriv(	(int)luaL_checknumber(l,1)	,
+							(int)luaL_checknumber(l,2)	,
+							&ret						);
+	lua_pushnumber(l,(double)ret);
+	return 1;
 }
 static int lua_gles_Hint (lua_State *l)
 {
+	glHint(	(int)luaL_checknumber(l,1)	,
+			(int)luaL_checknumber(l,2)	);
 	return 0;
 }
 static int lua_gles_IsBuffer (lua_State *l)
 {
-	return 0;
+	if( glIsBuffer( (int)luaL_checknumber(l,1) ) == GL_TRUE )
+	{ lua_pushboolean(l,1); } else
+	{ lua_pushboolean(l,0); }
+	return 1;
 }
 static int lua_gles_IsEnabled (lua_State *l)
 {
-	return 0;
+	if( glIsEnabled( (int)luaL_checknumber(l,1) ) == GL_TRUE )
+	{ lua_pushboolean(l,1); } else
+	{ lua_pushboolean(l,0); }
+	return 1;
 }
 static int lua_gles_IsFramebuffer (lua_State *l)
 {
-	return 0;
+	if( glIsFramebuffer( (int)luaL_checknumber(l,1) ) == GL_TRUE )
+	{ lua_pushboolean(l,1); } else
+	{ lua_pushboolean(l,0); }
+	return 1;
 }
 static int lua_gles_IsProgram (lua_State *l)
 {
-	return 0;
+	if( glIsProgram( (int)luaL_checknumber(l,1) ) == GL_TRUE )
+	{ lua_pushboolean(l,1); } else
+	{ lua_pushboolean(l,0); }
+	return 1;
 }
 static int lua_gles_IsRenderbuffer (lua_State *l)
 {
-	return 0;
+	if( glIsRenderbuffer( (int)luaL_checknumber(l,1) ) == GL_TRUE )
+	{ lua_pushboolean(l,1); } else
+	{ lua_pushboolean(l,0); }
+	return 1;
 }
 static int lua_gles_IsShader (lua_State *l)
 {
-	return 0;
+	if( glIsShader( (int)luaL_checknumber(l,1) ) == GL_TRUE )
+	{ lua_pushboolean(l,1); } else
+	{ lua_pushboolean(l,0); }
+	return 1;
 }
 static int lua_gles_IsTexture (lua_State *l)
 {
-	return 0;
+	if( glIsTexture( (int)luaL_checknumber(l,1) ) == GL_TRUE )
+	{ lua_pushboolean(l,1); } else
+	{ lua_pushboolean(l,0); }
+	return 1;
 }
 static int lua_gles_LineWidth (lua_State *l)
 {
+	glLineWidth(	(float)luaL_checknumber(l,1)	);
 	return 0;
 }
 static int lua_gles_PixelStore (lua_State *l)
 {
+	glPixelStorei(		(int)luaL_checknumber(l,1)	,
+						(int)luaL_checknumber(l,2)	);
 	return 0;
 }
 static int lua_gles_PolygonOffset (lua_State *l)
 {
+	glPolygonOffset(	(float)luaL_checknumber(l,1)	,
+						(float)luaL_checknumber(l,2)	);
 	return 0;
 }
 static int lua_gles_ReadPixels (lua_State *l)
 {
+	glReadPixels(		(int)luaL_checknumber(l,1)		,
+						(int)luaL_checknumber(l,2)		,
+						(int)luaL_checknumber(l,3)		,
+						(int)luaL_checknumber(l,4)		,
+						(int)luaL_checknumber(l,5)		,
+						(int)luaL_checknumber(l,6)		,
+						(void*)lua_touserdata(l,7)		); // must be userdata to be able to write to it
 	return 0;
 }
 static int lua_gles_RenderbufferStorage (lua_State *l)
 {
+	glRenderbufferStorage(		(int)luaL_checknumber(l,1)		,
+								(int)luaL_checknumber(l,2)		,
+								(int)luaL_checknumber(l,3)		,
+								(int)luaL_checknumber(l,4)		);
 	return 0;
 }
 static int lua_gles_SampleCoverage (lua_State *l)
 {
+	glSampleCoverage(		(float)luaL_checknumber(l,1)		,
+							(int)luaL_checknumber(l,2)			);
 	return 0;
 }
 static int lua_gles_Scissor (lua_State *l)
 {
+	glScissor(		(int)luaL_checknumber(l,1)		,
+					(int)luaL_checknumber(l,2)		,
+					(int)luaL_checknumber(l,3)		,
+					(int)luaL_checknumber(l,4)		);
 	return 0;
 }
 static int lua_gles_ShaderBinary (lua_State *l)
 {
+	int len=0;
+	void *ptr=(void*)lua_gles_topointer(l,8,&len);
+
+	glShaderBinary(		(int)luaL_checknumber(l,1)		,
+						(int)luaL_checknumber(l,2)		,
+						(int)luaL_checknumber(l,3)		,
+						(void*)ptr						,
+						(int)len						);
 	return 0;
 }
 static int lua_gles_StencilFunc (lua_State *l)
 {
+	glStencilFunc(		(int)luaL_checknumber(l,1)		,
+						(int)luaL_checknumber(l,2)		,
+						(int)luaL_checknumber(l,3)		);
 	return 0;
 }
 static int lua_gles_StencilFuncSeparate (lua_State *l)
 {
+	glStencilFuncSeparate(	(int)luaL_checknumber(l,1)		,
+							(int)luaL_checknumber(l,2)		,
+							(int)luaL_checknumber(l,4)		,
+							(int)luaL_checknumber(l,3)		);
 	return 0;
 }
 static int lua_gles_StencilOp (lua_State *l)
 {
+	glStencilOp(		(int)luaL_checknumber(l,1)		,
+						(int)luaL_checknumber(l,2)		,
+						(int)luaL_checknumber(l,3)		);
 	return 0;
 }
 static int lua_gles_StencilOpSeparate (lua_State *l)
 {
+	glStencilOpSeparate(	(int)luaL_checknumber(l,1)		,
+							(int)luaL_checknumber(l,2)		,
+							(int)luaL_checknumber(l,4)		,
+							(int)luaL_checknumber(l,3)		);
 	return 0;
 }
 
@@ -1370,8 +1547,8 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"CullFace",							lua_gles_CullFace},
 
 
-		{"DeleteFramebuffers",					lua_gles_DeleteFramebuffers},
-		{"DeleteRenderbuffers",					lua_gles_DeleteRenderbuffers},
+		{"DeleteFramebuffer",					lua_gles_DeleteFramebuffer},
+		{"DeleteRenderbuffer",					lua_gles_DeleteRenderbuffer},
 		{"DetachShader",						lua_gles_DetachShader},
 
 		{"FramebufferRenderbuffer",				lua_gles_FramebufferRenderbuffer},
