@@ -32,7 +32,6 @@ else -- use GL
 	defines{ "INCLUDE_GLES_GL=\\\"GL/gl.h\\\"" }
 end
 
-
 if WINDOWS then
 
 	links { "opengl32" , "glu32" }

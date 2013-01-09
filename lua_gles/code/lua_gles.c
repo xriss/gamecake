@@ -1,8 +1,11 @@
 
+
+
 #include <stdlib.h>
 
 #include "lua.h"
 #include "lauxlib.h"
+
 
 // we suport various GL versions
 #include INCLUDE_GLES_GL
@@ -1312,14 +1315,14 @@ static int lua_gles_FrontFace (lua_State *l)
 static int lua_gles_GenFramebuffers (lua_State *l)
 {
 int id=0;
-//TODO	glGenFrameBuffers(1,&id);
+	glGenFramebuffers(1,&id);
 	lua_pushnumber(l,(double)id);
 	return 1;
 }
 static int lua_gles_GenRenderbuffers (lua_State *l)
 {
 int id=0;
-//TODO	glGenRenderBuffers(1,&id);
+	glGenRenderbuffers(1,&id);
 	lua_pushnumber(l,(double)id);
 	return 1;
 }
@@ -1528,6 +1531,8 @@ static int lua_gles_StencilOpSeparate (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_gles_core(lua_State *l)
 {
+	glewInit();
+	
 	const luaL_reg lib[] =
 	{
 		{"Get",					lua_gles_Get},
