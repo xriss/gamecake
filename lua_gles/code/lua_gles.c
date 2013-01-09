@@ -167,7 +167,7 @@ static int lua_gles_ClearColor (lua_State *l)
 
 static int lua_gles_ClearDepth (lua_State *l)
 {
-//TODO glClearDepthf(	(float)luaL_checknumber(l,1)	);
+	glClearDepthf(	(float)luaL_checknumber(l,1)	);
 	return 0;
 }
 
@@ -1275,13 +1275,13 @@ static int lua_gles_CullFace (lua_State *l)
 static int lua_gles_DeleteFramebuffer (lua_State *l)
 {
 int id=luaL_checknumber(l,1);
-//TODO	glDeleteFrameBuffers(1,&id);
+	glDeleteFramebuffers(1,&id);
 	return 0;
 }
 static int lua_gles_DeleteRenderbuffer (lua_State *l)
 {
 int id=luaL_checknumber(l,1);
-//TODO	glDeleteRenderBuffers(1,&id);
+	glDeleteRenderbuffers(1,&id);
 	return 0;
 }
 static int lua_gles_DetachShader (lua_State *l)
@@ -1531,7 +1531,6 @@ static int lua_gles_StencilOpSeparate (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_gles_core(lua_State *l)
 {
-	glewInit();
 	
 	const luaL_reg lib[] =
 	{
