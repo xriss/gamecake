@@ -464,7 +464,7 @@ end
 
 LIB_LUA="lib_lua" -- default 
 
-if NIX then -- luajit is working for these builds
+if NIX or RASPI or ANDROID then -- luajit is working for these builds
 
 	LIB_LUA="lib_luajit"
 	defines( "LIB_LUAJIT" )
