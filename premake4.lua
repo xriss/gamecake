@@ -229,6 +229,7 @@ elseif RASPI then
 	defines("LUA_USE_POSIX")
 	
 --	buildoptions{"-march=armv6zk -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s" }
+	buildoptions{" -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s" }
 
 
 
