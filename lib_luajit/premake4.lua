@@ -129,8 +129,8 @@ includedirs { "src" }
 
 if RASPI then
 
-includedirs { "asm/arm" }
-files { "asm/arm/lj_vm.s" }
+includedirs { "asm/armhf" }
+files { "asm/armhf/lj_vm.s" }
 
 else
 --x86
