@@ -80,6 +80,19 @@ files {
 	}
 
 
+--X86
+--    -D JIT -D FFI -D FPU -D HFABI -D VER=
+
+
+--arm7
+--    
+
+
+--raspi
+--    
+
+
+
 includedirs { "src" }
 
 defines("LUA_PRELOADLIBS=lua_preloadlibs")

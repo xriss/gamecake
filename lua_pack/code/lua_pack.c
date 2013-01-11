@@ -342,6 +342,8 @@ int len;
 int off=0;
 int n;
 
+u32 arr=0;
+
 u32 def;
 int def_len;
 
@@ -369,6 +371,11 @@ int count;
 		lua_error(l);
 	}
 	
+	if(lua_isstring(l,2))
+	{
+		arr=string_to_id( (u8*) lua_tostring(l,2) ); // array flag and default
+	}
+	else
 	if(!lua_istable(l,2))
 	{
 		lua_pushstring(l,"need a table to describe packed data");
@@ -382,29 +389,40 @@ int count;
 	
 	data_len=0;
 	count=0;
-	for(n=1;1;n++)
+	if(arr) // read a full array
 	{
-		lua_rawgeti(l,2,n);
-		if(lua_isnil(l,-1))// the end
+		def=arr;
+		def_len=lua_pack_field_size(arr);
+		count=len/def_len;
+		data_len=len;
+		
+	}
+	else
+	{
+		for(n=1;1;n++)
 		{
+			lua_rawgeti(l,2,n);
+			if(lua_isnil(l,-1))// the end
+			{
+				lua_pop(l,1);
+				break;
+			}
+			
+			if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
+			{
+				def_len=(int)lua_tonumber(l,-1);
+				def=0;
+			}
+			else
+			{
+				def=string_to_id( (u8*) lua_tostring(l,-1) );
+				def_len=lua_pack_field_size(def);
+			}
 			lua_pop(l,1);
-			break;
+			
+			data_len+=def_len;			
+			count++;
 		}
-		
-		if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
-		{
-			def_len=(int)lua_tonumber(l,-1);
-			def=0;
-		}
-		else
-		{
-			def=string_to_id( (u8*) lua_tostring(l,-1) );
-			def_len=lua_pack_field_size(def);
-		}
-		lua_pop(l,1);
-		
-		data_len+=def_len;			
-		count++;
 	}
 	
 	if(data_len==0) { return 0; } // no data to pack
@@ -418,26 +436,29 @@ int count;
 
 	
 	lua_createtable(l,count,0); // we know size of array so ask for it
-	for(n=1;1;n++)
+	for(n=1;n<=count;n++)
 	{
-		lua_rawgeti(l,2,n);
-		if(lua_isnil(l,-1)) // the end
+		if(!arr) // all the same, def and def_len already set
 		{
+			lua_rawgeti(l,2,n);
+			if(lua_isnil(l,-1)) // the end
+			{
+				lua_pop(l,1);
+				break;
+			}
+			
+			if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
+			{
+				def_len=(int)lua_tonumber(l,-1);
+				def=0;
+			}
+			else
+			{
+				def=string_to_id( (u8*) lua_tostring(l,-1) );
+				def_len=lua_pack_field_size(def);
+			}
 			lua_pop(l,1);
-			break;
 		}
-		
-		if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
-		{
-			def_len=(int)lua_tonumber(l,-1);
-			def=0;
-		}
-		else
-		{
-			def=string_to_id( (u8*) lua_tostring(l,-1) );
-			def_len=lua_pack_field_size(def);
-		}
-		lua_pop(l,1);			
 		
 		if(def==0)
 		{
@@ -470,6 +491,8 @@ int len;
 int off=0;
 int n;
 
+u32 arr=0;
+
 u32 def;
 int def_len;
 
@@ -487,6 +510,11 @@ int sl;
 		lua_error(l);
 	}
 	
+	if(lua_isstring(l,2))
+	{
+		arr=string_to_id( (u8*) lua_tostring(l,2) ); // array flag and default
+	}
+	else
 	if(!lua_istable(l,2))
 	{
 		lua_pushstring(l,"need a table to describe packed data");
@@ -505,29 +533,39 @@ int sl;
 	
 	data_len=0;
 	count=0;
-	for(n=1;1;n++)
+	if(arr)
 	{
-		lua_rawgeti(l,2,n);
-		if(lua_isnil(l,-1))// the end
+		def=arr;
+		def_len=lua_pack_field_size(arr);
+		count=luaL_getn(l,1);
+		data_len=def_len*count;
+	}
+	else
+	{
+		for(n=1;1;n++)
 		{
-			lua_pop(l,1);
-			break;
-		}
+			lua_rawgeti(l,2,n);
+			if(lua_isnil(l,-1))// the end
+			{
+				lua_pop(l,1);
+				break;
+			}
 
-		if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
-		{
-			def_len=(int)lua_tonumber(l,-1);
-			def=0;
+			if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
+			{
+				def_len=(int)lua_tonumber(l,-1);
+				def=0;
+			}
+			else
+			{
+				def=string_to_id( (u8*) lua_tostring(l,-1) );
+				def_len=lua_pack_field_size(def);
+			}
+			lua_pop(l,1);
+				
+			data_len+=def_len;
+			count++;
 		}
-		else
-		{
-			def=string_to_id( (u8*) lua_tostring(l,-1) );
-			def_len=lua_pack_field_size(def);
-		}
-		lua_pop(l,1);
-			
-		data_len+=def_len;
-		count++;
 	}
 	
 	if(data_len==0) { return 0; } // no data to pack
@@ -552,26 +590,28 @@ int sl;
 		}
 	}
 	
-	for(n=1;1;n++)
+	for(n=1;n<=count;n++)
 	{
-		lua_rawgeti(l,2,n);
-		if(lua_isnil(l,-1)) // the end
+		if(!arr)
 		{
+			lua_rawgeti(l,2,n);
+			if(lua_isnil(l,-1)) // the end
+			{
+				lua_pop(l,1);
+				break;
+			}
+			if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
+			{
+				def_len=(int)lua_tonumber(l,-1);
+				def=0;
+			}
+			else
+			{
+				def=string_to_id( (u8*) lua_tostring(l,-1) );
+				def_len=lua_pack_field_size(def);
+			}
 			lua_pop(l,1);
-			break;
 		}
-		if(lua_isnumber(l,-1)) // the number is the size in bytes of the string we want
-		{
-			def_len=(int)lua_tonumber(l,-1);
-			def=0;
-		}
-		else
-		{
-			def=string_to_id( (u8*) lua_tostring(l,-1) );
-			def_len=lua_pack_field_size(def);
-		}
-		lua_pop(l,1);
-			
 		
 		if(def==0) // raw string to insert
 		{
