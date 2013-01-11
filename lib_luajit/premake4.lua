@@ -53,6 +53,10 @@ files {
 	"src/lj_api.c",
 	"src/lj_alloc.c",
 
+	"src/lj_load.c",
+	"src/lj_strscan.c",
+	"src/lj_opt_sink.c",
+
 --	"src/luajit.c",
 --	"src/ljamalg.c",
 
@@ -76,24 +80,58 @@ files {
 --	"src/buildvm_asm.c",
 --	"src/buildvm.c",
 	
-	"src/lj_vm.s",
+--	"src/lj_vm.s",
 	}
 
 
 --X86
 --    -D JIT -D FFI -D FPU -D HFABI -D VER=
 
+-- LJ_TARGET_X86ORX64
 
 --arm7
---    
+--    -D JIT -D FFI -D DUALNUM -D VER=50
 
 
 --raspi
---    
+--    -D JIT -D FFI -D DUALNUM -D FPU -D VER=60
+
+-- LJ_TARGET_ARM
+
+
+--[[
+
+#run in the src dir after a normal make (so minilua exists)
+
+host/minilua ../dynasm/dynasm.lua -D JIT -D FFI -D FPU -D HFABI -D VER= -o vm_x86.h vm_x86.dasc
+host/minilua ../dynasm/dynasm.lua -D JIT -D FFI -D DUALNUM -D FPU -D VER=60 -o vm_arm.h vm_arm.dasc
+
+hmmm ok need to do a makefile build then yank the following
+
+make CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi-
+
+lj_vm.s
+lj_ffdef.h
+lj_bcdef.h
+lj_folddef.h
+lj_recdef.h
+lj_libdef.h
+jit/vmdef.lua
+
+]]
+
 
 
 
 includedirs { "src" }
+
+
+
+--x86
+includedirs { "asm/x86" }
+files { "asm/x86/lj_vm.s" }
+
+
 
 defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
