@@ -109,6 +109,7 @@ host/minilua ../dynasm/dynasm.lua -D JIT -D FFI -D DUALNUM -D FPU -D VER=60 -o v
 hmmm ok need to do a makefile build then yank the following
 
 make CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi-
+make CROSS=/home/kriss/hg/sdks/gcc/prefix/bin/arm-raspi-linux-gnueabi-
 
 lj_vm.s
 lj_ffdef.h
@@ -126,11 +127,16 @@ jit/vmdef.lua
 includedirs { "src" }
 
 
+if RASPI then
 
+includedirs { "asm/arm" }
+files { "asm/arm/lj_vm.s" }
+
+else
 --x86
 includedirs { "asm/x86" }
 files { "asm/x86/lj_vm.s" }
-
+end
 
 
 defines("LUA_PRELOADLIBS=lua_preloadlibs")
