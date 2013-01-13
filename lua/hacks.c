@@ -17,21 +17,22 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len)
 	Udata *g;
 #endif
 
-	unsigned char *p=(unsigned char*)lua_touserdata(L,idx);
+	unsigned char *p=0;
+	
+	if(lua_isuserdata(L,idx))
+	{
+		p=(unsigned char*)lua_touserdata(L,idx);
+	}
 	
 	if(!p) { return 0; }
-	
-#if defined(LIB_LUAJIT)
-	g=(GCudata*)(p-sizeof(GCudata));
-#else
-	g=(Udata*)(p-sizeof(Udata));
-#endif
-	
+		
 	if(len)
 	{
 #if defined(LIB_LUAJIT)
+		g=(GCudata*)(p-sizeof(GCudata));
 		*len=g->len;
 #else
+		g=(Udata*)(p-sizeof(Udata));
 		*len=g->uv.len;
 #endif
 	}

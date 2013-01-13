@@ -22,6 +22,9 @@
 extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
 
+void lua_geti (lua_State *l, int idx, int i)
+{
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -42,7 +45,7 @@ int dlen=0;
 int i;
 int image=0;
 
-	lua_rawgeti(l,1,0); // get our userdata if it alreadyexists (also forces first param to be a table)
+	lua_rawgeti(l,1,0); // get our userdata if it already exists (also forces first param to be a table)
 	ud=(struct gamecake_fontdata *)lua_toluserdata(l,-1,&dlen);
 	lua_pop(l,1);
 	if(!ud) // need to allocate
@@ -52,7 +55,7 @@ int image=0;
 		lua_rawseti(l,1,0);
 	}
 	
-printf("fontdata %d\n",dlen);
+//printf("fontdata %d\n",dlen);
 	
 // only suport one gl image id for now...
 	lua_getfield(l,1,"images");
@@ -94,6 +97,61 @@ printf("fontdata %d\n",dlen);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// font sync function
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gamecake_canvas_font_sync (lua_State *l)
+{
+struct gamecake_canvas_font *ud;
+int dlen=0;
+int i;
+
+	lua_rawgeti(l,1,0); // get our userdata if it already exists (also forces first param to be a table)
+	ud=(struct gamecake_canvas_font *)lua_toluserdata(l,-1,&dlen);
+	lua_pop(l,1);
+	if(!ud) // need to allocate
+	{
+		dlen=sizeof(struct gamecake_canvas_font);
+		ud=(struct gamecake_canvas_font *)lua_newuserdata(l,dlen);
+		lua_rawseti(l,1,0);
+//printf("font %d\n",dlen);
+	}
+	
+	lua_getfield(l,1,"dat"); // fontdata
+	lua_rawgeti(l,-1,0);
+	ud->fontdata=(struct gamecake_fontdata *)lua_toluserdata(l,-1,0);
+	lua_pop(l,2);
+		
+	lua_getfield(l,1,"x"   ); ud->x   =(float)lua_tonumber(l,-1); lua_pop(l,1);
+	lua_getfield(l,1,"y"   ); ud->y   =(float)lua_tonumber(l,-1); lua_pop(l,1);
+	lua_getfield(l,1,"size"); ud->size=(float)lua_tonumber(l,-1); lua_pop(l,1);
+	lua_getfield(l,1,"add" ); ud->add =(float)lua_tonumber(l,-1); lua_pop(l,1);
+
+	
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// font sync function
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gamecake_canvas_font_draw (lua_State *l)
+{
+struct gamecake_canvas_font *ud;
+int i;
+
+	lua_rawgeti(l,1,0); // get our userdata if it already exists
+	ud=(struct gamecake_canvas_font *)lua_toluserdata(l,-1,0);
+	lua_pop(l,1);
+
+
+	
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -103,8 +161,8 @@ LUALIB_API int luaopen_wetgenes_gamecake_core (lua_State *l)
 	{
 		{"fontdata_sync",			lua_gamecake_fontdata_sync},
 
-//		{"canvas_font_sync",		lua_gamecake_canvas_font_sync},
-//		{"canvas_font_draw",		lua_gamecake_canvas_font_draw},
+		{"canvas_font_sync",		lua_gamecake_canvas_font_sync},
+		{"canvas_font_draw",		lua_gamecake_canvas_font_draw},
 
 
 		{0,0}
