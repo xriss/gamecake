@@ -1,2 +1,2 @@
 cd `dirname $0`
-../../../sdks/android-5-arm/bin/arm-linux-androideabi-readelf -Ws libs/armeabi/liblua.so  > libs/armeabi/liblua.map
+../../sdks/android-5-arm/bin/arm-linux-androideabi-readelf -Ws libs/armeabi-v7a/liblua.so  > libs/armeabi-v7a/liblua.map

@@ -1144,7 +1144,6 @@ static int lua_gles_ReleaseShaderCompiler (lua_State *l)
 
 
 
-#endif
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1526,6 +1525,11 @@ static int lua_gles_StencilOpSeparate (lua_State *l)
 	return 0;
 }
 
+
+#endif
+
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -1653,7 +1657,7 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"GetVertexAttribPointer",	lua_gles_GetVertexAttribPointer},
 		{"ReleaseShaderCompiler",	lua_gles_ReleaseShaderCompiler},
 
-#endif
+//functions below may or may not be in gles1
 
 		{"ActiveTexture",						lua_gles_ActiveTexture},
 
@@ -1715,6 +1719,7 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"StencilFuncSeparate",					lua_gles_StencilFuncSeparate},
 		{"StencilOp",							lua_gles_StencilOp},
 		{"StencilOpSeparate",					lua_gles_StencilOpSeparate},
+#endif
 
 		{0,0}
 	};
