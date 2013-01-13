@@ -10,6 +10,7 @@ module("wetgenes.gamecake.canvas")
 local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 
+local core=require("wetgenes.gamecake.core")
 
 function bake(opts)
 
@@ -232,20 +233,24 @@ end
 font.set = function(dat)
 	if dat and dat~=font.dat then -- newfont, autokill the cache?
 		font.dat=dat
---		font.drawcache_stop()
 	end
 	font.dat=dat or font.dat
-	font.set_size(16,0)
-	font.set_xy(0,0)
+	font.size=16
+	font.add=0
+	font.x=0
+	font.y=0
+	core.canvas_font_sync(font)
 end
 
 font.set_size = function(size,add)
 	font.size=size
 	font.add=add or 0 -- clear the x space tweak
+	core.canvas_font_sync(font)
 end
 font.set_xy = function(x,y)
 	font.x=x or font.x
 	font.y=y or font.y
+	core.canvas_font_sync(font)
 end
 
 font.width=function(text)
@@ -264,18 +269,6 @@ font.width=function(text)
 	return x
 end
 
-font.drawcache_start=function()
-	font.drawcache={}
-end
-
-font.drawcache_stop=function()
-	if font.drawcache then
-		images.bind(font.dat.images[1])
-		flat.tristrip("xyzuv",font.drawcache)
-		font.drawcache=nil
-	end
-end
-
 font.draw=function(text)
 
 -- This needs to switch upto C func, with inline blit
@@ -286,14 +279,12 @@ font.draw=function(text)
 	
 	local s=font.size/font_dat.size
 	
-	local t=font.drawcache or {}
+	local t={}
 	
 	for i=1,#text do
 	
 		local cid=text:byte(i)
 		local c=font_dat.chars[cid] or font_dat.chars[32]
-
---		canvas.blit(c,x+(c.x*s),y+(c.y*s),nil,nil,c.width,c.height,c.width*s,c.height*s)
 
 		local vx=x+(c.x*s)
 		local vxp=c.w*s
@@ -316,12 +307,32 @@ font.draw=function(text)
 		x=x+(c.add*s)+font.add
 	end
 
-	if not font.drawcache then -- we are not building multiple lines
-		images.bind(font_dat.images[1])
-		flat.tristrip("xyzuv",t)
-	end
+	images.bind(font_dat.images[1])
+	flat.tristrip("xyzuv",t)
 	
 	font.x=x
+end
+
+--
+-- I think it is time to drop suport for gles1 in gamecake gonna need gles2...
+--
+font.draw1 = function(text)
+
+	local p=gl.program("pos_tex")
+	gl.UseProgram( p[0] )
+	gl.UniformMatrix4f( p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+	gl.UniformMatrix4f( p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+	gl.Uniform4f( p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
+
+--[[
+	gl.VertexAttribPointer(p:attrib("a_vertex"),v[1],v[2],gl.FALSE,v[3],v[4])
+	gl.EnableVertexAttribArray(p:attrib("a_vertex"))		
+	gl.VertexAttribPointer(p:attrib("a_texcoord"),v[1],v[2],gl.FALSE,v[3],v[4])
+	gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
+]]
+
+	core.canvas_font_draw(font,text,p[0])
+
 end
 
 
@@ -436,7 +447,8 @@ end
 	end
 	canvas.vdat_check(1024) -- initial buffer size it may grow but this is probably more than enough
 	
-	font.set( canvas.cake.fonts:get(1) ) -- load default, builtin, 8x8 font
+	canvas.cake.fonts.load(1,1) -- make sure we have loaded the 8x8 font
+	font.set( canvas.cake.fonts.get(1) ) -- now use it
 	
 	return canvas
 end

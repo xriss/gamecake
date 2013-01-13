@@ -350,7 +350,7 @@ function M.bake(state,console)
 --		if act==1 then
 --			_G.print(ascii.." "..(key or ""))
 --		end
-print("key",key)
+--print("key",key)
 		if key=="oem_3" then -- terrible name for the ` key
 		
 			if act==-1 then

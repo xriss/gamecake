@@ -11,6 +11,8 @@ local grd=require("wetgenes.grd")
 local wwin=require("wetgenes.win")
 
 
+local core=require("wetgenes.gamecake.core")
+
 function bake(opts)
 
 	local fonts={}
@@ -58,12 +60,13 @@ end
 -- load a single image, and make it easy to lookup by the given id
 --
 fonts.load=function(filename,id)
-
 	local t=fonts.get(id)
 	
 	if t then return t end --first check it is not already loaded
 
 	if type(filename)=="number" then -- builtin font id, so far we only have this one
+
+print("Loading font 8x8")
 
 		if gl then --gl mode
 		
@@ -108,7 +111,6 @@ fonts.load=function(filename,id)
 
 			t.images[1]=fonts.cake.images.upload_grd(nil,g) -- send to opengl
 
-			return t
 		end
 		
 	else
@@ -168,8 +170,6 @@ print("Loading font ",fname,#d)
 				c.u2=(c.tx+c.w+1)/(32*16)
 				c.v1=(c.ty-1)    /(32*16)
 				c.v2=(c.ty+c.h+1)/(32*16)
-
-print(c.tx,c.ty,c.w,c.h)
 				
 				if c.w>=1 and c.h>=1 then -- must have size?
 				
@@ -190,12 +190,16 @@ print(c.tx,c.ty,c.w,c.h)
 
 			t.images[1]=fonts.cake.images.upload_grd(nil,g) -- send to opengl
 
-			return t
 			
 		end
 		
 	end
+	
+	if t then
+		core.fontdata_sync(t)
+	end
 
+	return t
 	
 end
 
