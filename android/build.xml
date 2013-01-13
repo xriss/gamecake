@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="bulb" default="help">
+<project name="hunted" default="help">
 
     <loadproperties srcFile="local.properties" />
     <loadproperties srcFile="/home/kriss/android.properties" />

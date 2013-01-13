@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.wetgenes.bulb"
-      android:versionCode="13014"
-      android:versionName="13.014"
+        package="com.wetgenes.hunted"
+      android:versionCode="13033"
+      android:versionName="13.033"
 >
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="9" />
@@ -14,7 +14,7 @@
 actually do not as this breaks random shit...
 -->
 
-    <application android:label="Bulbaceous Balls" android:icon="@drawable/icon"
+    <application android:label="hunted" android:icon="@drawable/icon"
 		android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
     >
 
@@ -23,7 +23,7 @@ actually do not as this breaks random shit...
         <!-- Our activity is the built-in NativeActivity framework class.
              This will take care of integrating with our NDK code. -->
         <activity android:name="com.wetgenes.FeralActivity"
-                android:label="Bulbaceous Balls"
+                android:label="hunted"
                 android:configChanges="orientation|keyboardHidden">
             <!-- Tell NativeActivity the name of our .so -->
             <meta-data android:name="android.app.lib_name"

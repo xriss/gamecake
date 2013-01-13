@@ -127,15 +127,22 @@ jit/vmdef.lua
 includedirs { "src" }
 
 
-if RASPI then
+if RASPI then -- hardfloat for raspbian
 
-includedirs { "asm/armhf" }
-files { "asm/armhf/lj_vm.s" }
+	includedirs { "asm/armhf" }
+	files { "asm/armhf/lj_vm.s" }
+
+elseif ANDROID then
+
+	includedirs { "asm/arm" }
+	files { "asm/arm/lj_vm.s" }
 
 else
+
 --x86
-includedirs { "asm/x86" }
-files { "asm/x86/lj_vm.s" }
+	includedirs { "asm/x86" }
+	files { "asm/x86/lj_vm.s" }
+
 end
 
 
