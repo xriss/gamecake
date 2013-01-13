@@ -30,6 +30,14 @@ struct gamecake_fontdata
 	struct gamecake_fontdata_char chars[256];
 };
 				
+struct gamecake_canvas_font
+{
+	struct gamecake_fontdata *fontdata;
+	float x;
+	float y;
+	float size;
+	float add;
+};
 				
 
 LUALIB_API int luaopen_wetgenes_gamecake_core (lua_State *l);
