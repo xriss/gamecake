@@ -14,6 +14,7 @@
 #include "../lib_lua/src/lauxlib.h"
 #include "../lib_lua/src/lualib.h"
 
+#include INCLUDE_GLES_GL
 
 #include "code/lua_gamecake.h"
 
@@ -21,10 +22,9 @@
 // link with lua/hacks.c plz
 extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
+#define SIZEOF_VB 16384
+static unsigned char vb[SIZEOF_VB]; // vertex buffer space
 
-void lua_geti (lua_State *l, int idx, int i)
-{
-}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -45,7 +45,7 @@ int dlen=0;
 int i;
 int image=0;
 
-	lua_rawgeti(l,1,0); // get our userdata if it already exists (also forces first param to be a table)
+	lua_rawgeti(l,1,0); // get our userdata if it already exists
 	ud=(struct gamecake_fontdata *)lua_toluserdata(l,-1,&dlen);
 	lua_pop(l,1);
 	if(!ud) // need to allocate
@@ -63,11 +63,13 @@ int image=0;
 	image=lua_tonumber(l,-1);
 	lua_pop(l,2);
 
+	lua_getfield(l,-1,"size"); ud->size=(float)lua_tonumber(l,-1); lua_pop(l,1);
+
 	lua_getfield(l,1,"chars");
 	
-	for(i=1;i<=256;i++)
+	for(i=0;i<=255;i++)
 	{
-		struct gamecake_fontdata_char *c=ud->chars+(i-1);
+		struct gamecake_fontdata_char *c=ud->chars+i;
 		lua_rawgeti(l,-1,i);
 
 		if(lua_isnil(l,-1))
@@ -106,7 +108,7 @@ struct gamecake_canvas_font *ud;
 int dlen=0;
 int i;
 
-	lua_rawgeti(l,1,0); // get our userdata if it already exists (also forces first param to be a table)
+	lua_rawgeti(l,1,0); // get our userdata if it already exists
 	ud=(struct gamecake_canvas_font *)lua_toluserdata(l,-1,&dlen);
 	lua_pop(l,1);
 	if(!ud) // need to allocate
@@ -133,19 +135,94 @@ int i;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// font sync function
+// font draw function
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_gamecake_canvas_font_draw (lua_State *l)
 {
 struct gamecake_canvas_font *ud;
 int i;
+unsigned char *buf=0;
+int len=0;
+
+unsigned char *s;
+unsigned char c;
+struct gamecake_fontdata_char *ch;
+
+float x;
+float y;
+float size;
+float add;
+
+float vx,vxp,vy,vyp;
+
+float *fp;
+int fp_len;
+
+int vid,tid;
+
+// hacks
+	vid=(int)luaL_checknumber(l,3);
+	tid=(int)luaL_checknumber(l,4);
 
 	lua_rawgeti(l,1,0); // get our userdata if it already exists
 	ud=(struct gamecake_canvas_font *)lua_toluserdata(l,-1,0);
 	lua_pop(l,1);
+	
+	s=(unsigned char *)luaL_checkstring(l,2);
+	
+	buf=vb;
+	len=SIZEOF_VB;
+	
+	fp=(float *)buf;
+	fp_len=0;
+	
+	size=ud->size/ud->fontdata->size;
+	add=ud->add;
+	x=ud->x;
+	y=ud->y;
 
+	while(c=*s++)
+	{
 
+		ch=ud->fontdata->chars+c;
+		
+		vx=x+(ch->x*size);
+		vxp=ch->w*size;
+		vy=y+(ch->y*size);
+		vyp=ch->h*size;
+		
+//printf("%d %1.1s (%f,%f) (%f,%f) \n",c,s-1,ch->x,ch->y,ch->u1,ch->v1);
+
+		fp[(0*5)+0]=vx;		fp[(0*5)+1]=vy;		fp[(0*5)+2]=0;		fp[(0*5)+3]=ch->u1;		fp[(0*5)+4]=ch->v1;
+		fp[(1*5)+0]=vx;		fp[(1*5)+1]=vy;		fp[(1*5)+2]=0;		fp[(1*5)+3]=ch->u1;		fp[(1*5)+4]=ch->v1;
+		fp[(2*5)+0]=vx+vxp;	fp[(2*5)+1]=vy;		fp[(2*5)+2]=0;		fp[(2*5)+3]=ch->u2;		fp[(2*5)+4]=ch->v1;
+		fp[(3*5)+0]=vx;		fp[(3*5)+1]=vy+vyp;	fp[(3*5)+2]=0;		fp[(3*5)+3]=ch->u1;		fp[(3*5)+4]=ch->v2;
+		fp[(4*5)+0]=vx+vxp;	fp[(4*5)+1]=vy+vyp;	fp[(4*5)+2]=0;		fp[(4*5)+3]=ch->u2;		fp[(4*5)+4]=ch->v2;
+		fp[(5*5)+0]=vx+vxp;	fp[(5*5)+1]=vy+vyp;	fp[(5*5)+2]=0;		fp[(5*5)+3]=ch->u2;		fp[(5*5)+4]=ch->v2;
+
+		fp+=6*5;
+		fp_len+=6*5;
+		
+		x=x+(ch->add*size)+add;
+
+		if( (fp_len+(6*5))*4 >= len)
+		{
+//			break;
+		}
+	}
+
+// assume stuff has been setup
+
+	glBufferData(GL_ARRAY_BUFFER,fp_len*4,(float *)buf,GL_DYNAMIC_DRAW);
+
+	glVertexAttribPointer(vid,3,GL_FLOAT,GL_FALSE,5*4,(void*)(0));
+	glEnableVertexAttribArray(vid);
+	
+	glVertexAttribPointer(tid,2,GL_FLOAT,GL_FALSE,5*4,(void*)(3*4));
+	glEnableVertexAttribArray(tid);
+
+	glDrawArrays(GL_TRIANGLE_STRIP,0,fp_len/5);
 	
 	return 0;
 }
