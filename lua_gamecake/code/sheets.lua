@@ -212,6 +212,51 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 	return sheet
 end
 
+if gl.fix then -- our faked fixed gles2 setup
+
+function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
+
+	if px then
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PushMatrix()
+		gl.Translate(px,py,0)
+		if rz then
+			gl.Rotate(rz,0,0,1)
+		end
+		if sx then
+			sy=sy or sx
+			gl.Scale(sx/sheet[i].hx,sy/sheet[i].hy,1) -- fixed, ignore the base size of image when we scale. So size is absolute
+		end
+	end
+	
+	gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)
+	gl.BindBuffer(gl.ARRAY_BUFFER,sheet.vbuf)
+	
+	local p=gl.program("pos_tex")
+	
+	gl.UseProgram( p[0] )
+	gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+	gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+
+	gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,5*4,0)
+	gl.EnableVertexAttribArray(p:attrib("a_vertex"))
+		
+	gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,5*4,3*4)
+	gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
+
+	gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
+
+	gl.core.DrawArrays(gl.TRIANGLE_STRIP,(i-1)*4,4)
+
+	if px then
+		gl.PopMatrix()
+	end
+	
+	return sheet
+
+end
+
+end
 
 	
 	return sheets

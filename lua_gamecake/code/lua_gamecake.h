@@ -27,6 +27,7 @@ struct gamecake_fontdata_char
 
 struct gamecake_fontdata
 {
+	float size;
 	struct gamecake_fontdata_char chars[256];
 };
 				

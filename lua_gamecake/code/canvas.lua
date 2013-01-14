@@ -316,22 +316,22 @@ end
 --
 -- I think it is time to drop suport for gles1 in gamecake gonna need gles2...
 --
-font.draw1 = function(text)
+if gl.fix then -- our faked fixed gles2 setup
 
+font.draw = function(text)
+	
 	local p=gl.program("pos_tex")
 	gl.UseProgram( p[0] )
 	gl.UniformMatrix4f( p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
-	gl.UniformMatrix4f( p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+	gl.UniformMatrix4f( p:uniform("projection"), gl.matrix(gl.PROJECTION) )	
 	gl.Uniform4f( p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
 
---[[
-	gl.VertexAttribPointer(p:attrib("a_vertex"),v[1],v[2],gl.FALSE,v[3],v[4])
-	gl.EnableVertexAttribArray(p:attrib("a_vertex"))		
-	gl.VertexAttribPointer(p:attrib("a_texcoord"),v[1],v[2],gl.FALSE,v[3],v[4])
-	gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
-]]
+	images.bind(font.dat.images[1])
+	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf[0])
 
-	core.canvas_font_draw(font,text,p[0])
+	core.canvas_font_draw(font,text,p:attrib("a_vertex"),p:attrib("a_texcoord"))
+
+end
 
 end
 

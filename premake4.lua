@@ -471,6 +471,37 @@ if NIX or RASPI or ANDROID then -- luajit is working for these builds
 	
 end
 
+-- many many versions of GL to suport, thes make this work -> #include INCLUDE_GLES_GL
+if RASPI then
+
+	defines{ "LUA_GLES_GLES2" }
+	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
+	
+elseif ANDROID then
+
+	defines{ "LUA_GLES_GLES1" }
+	defines{ "INCLUDE_GLES_GL=\\\"GLES/gl.h\\\"" }
+	
+elseif NACL then
+
+	defines{ "LUA_GLES_GLES2" }
+	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
+
+elseif WINDOWS then -- need windows GL hacks
+
+	includedirs { "lua_win_windows/code" }
+	defines{ "LUA_GLES_GLES2" }
+	defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
+	
+else -- use GL 
+
+	defines{ "LUA_GLES_GL" }
+	defines{ "INCLUDE_GLES_GL=\\\"GL/gl.h\\\"" }
+
+end
+
+
+
 all_includes=all_includes or {
 	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		},
 	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
