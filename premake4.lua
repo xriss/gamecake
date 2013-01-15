@@ -511,6 +511,7 @@ all_includes=all_includes or {
 	{"lua_bit",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_al",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_tardis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_grd",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_grdmap",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
