@@ -49,7 +49,7 @@ static unsigned char * lua_tardis_uda_alloc (lua_State *l, int size)
 }
 
 // get aligned pointer form a userdata at idx
-static unsigned char * lua_tardis_uda (lua_State *l, int idx)
+unsigned char * lua_tardis_uda (lua_State *l, int idx)
 {
 	return lua_tardis_uda_ptr_align(lua_touserdata(l,idx));
 }
@@ -93,7 +93,7 @@ static int lua_tardis_ptr (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_set (lua_State *l)
 {
-int len;
+int len,count;
 int i;
 float *fa=(float *)lua_tardis_uda(l,1);
 float *fb;
@@ -112,8 +112,12 @@ float *fb;
 	if(lua_isuserdata(l,2))
 	{
 		lua_toluserdata(l,2,&len);
+		count=((len+1-UDALIGN)/4);
+		if(lua_isnumber(l,3)) { count=(int)lua_tonumber(l,3); } // need to know how many floats to set?
+		if(count<=0) { count=1; } // sanity
+		if(count>16) { count=16; } // sanity
 		fb=(float *)lua_tardis_uda(l,2);
-		for(i=0;i<((len+1-UDALIGN)/4);i++)
+		for(i=0;i<count;i++)
 		{
 			fa[i]=fb[i];
 		}
@@ -147,7 +151,7 @@ int i=(int)lua_tonumber(l,2);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// create a new m4 and set its members
+// create a new m4
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_new_m4 (lua_State *l)
@@ -158,7 +162,7 @@ static int lua_tardis_new_m4 (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// create a new v4 and set its members
+// create a new v4
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_new_v4 (lua_State *l)
@@ -170,14 +174,13 @@ static int lua_tardis_new_v4 (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// create a new v4 and set its members
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static void raw_tardis_m4_product_m4(float *fa,float *fb,float *fc)
 {
 float r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16;
 
-	if(!fc)
+	if(!fc) // fb is output for default
 	{
 		fc=fb;
 	}
@@ -205,6 +208,10 @@ float r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16;
 	fc[12]=r13;	fc[13]=r14;	fc[14]=r15;	fc[15]=r16;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_m4_product_m4 (lua_State *l)
 {
 float *fa=(float *)lua_tardis_uda(l,1);
@@ -216,6 +223,26 @@ float *fc=(float *)lua_tardis_uda(l,3);
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_tardis_m4_identity (lua_State *l)
+{
+float *fa=(float *)lua_tardis_uda(l,1);
+
+	fa[ 0]=1.0f; fa[ 1]=0.0f; fa[ 2]=0.0f; fa[ 3]=0.0f;
+	fa[ 4]=0.0f; fa[ 5]=1.0f; fa[ 6]=0.0f; fa[ 7]=0.0f;
+	fa[ 8]=0.0f; fa[ 9]=0.0f; fa[10]=1.0f; fa[11]=0.0f;
+	fa[12]=0.0f; fa[13]=0.0f; fa[14]=0.0f; fa[15]=1.0f;
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_m4_rotate (lua_State *l)
 {
 const char *str;
@@ -229,11 +256,7 @@ float vv[3];
 float c,cc,s,x,y,z,d,dd;
 
 float degrees;
-
-
-	fa=(float *)lua_tardis_uda(l,1);
-	fc=(float *)lua_tardis_uda(l,4);
-	if(!fc) { fc=fa; }
+int fc_idx=4;
 	
 	if(lua_isuserdata(l,3))
 	{
@@ -241,6 +264,14 @@ float degrees;
 		x=v[0];
 		y=v[1];
 		z=v[2];
+	}
+	else
+	if(lua_isnumber(l,3))
+	{
+		x=(float)lua_tonumber(l,3);
+		y=(float)lua_tonumber(l,4);
+		z=(float)lua_tonumber(l,5);
+		fc_idx=6;
 	}
 	else
 	if(lua_isstring(l,3))
@@ -267,10 +298,16 @@ float degrees;
 		lua_rawgeti(l,3,2); y=(float)lua_tonumber(l,-1); lua_pop(l,1);
 		lua_rawgeti(l,3,3); z=(float)lua_tonumber(l,-1); lua_pop(l,1);
 	}
+	
+	fa=(float *)lua_tardis_uda(l,1);
+	degrees=(float)lua_tonumber(l,2);
+	fc=(float *)lua_tardis_uda(l,fc_idx);
+	if(!fc) { fc=fa; }
+//printf("(fa,fc)=(%08x,%08x)\n",fa,fc);
 
-	c=cosf(degrees*((float)(M_PI/180.0f)));
+	c=cosf(degrees*((float)(-M_PI/180.0f)));
 	cc=1-c;
-	s=sinf(degrees*((float)(M_PI/180.0f)));
+	s=sinf(degrees*((float)(-M_PI/180.0f)));
 		
 	// make sure we have a unit vector
 	dd=x*x + y*y + z*z;
@@ -287,11 +324,15 @@ float degrees;
 	fb[ 8]=x*z*cc-y*s;	fb[ 9]=y*z*cc+x*s;	fb[10]=z*z*cc+c;	fb[11]=0.0f;
 	fb[12]=0.0f;		fb[13]=0.0f;		fb[14]=0.0f;		fb[15]=1.0f;
 
-	raw_tardis_m4_product_m4(fa,fb,fc);
+	raw_tardis_m4_product_m4(fb,fa,fc);
 
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_m4_scale_v3 (lua_State *l)
 {
 float *fa;
@@ -305,6 +346,13 @@ float x,y,z;
 		x=fb[0];
 		y=fb[1];
 		z=fb[2];
+	}
+	else
+	if(lua_isnumber(l,2))
+	{
+		x=(float)lua_tonumber(l,2);
+		y=(float)lua_tonumber(l,3);
+		z=(float)lua_tonumber(l,4);
 	}
 	else
 	{
@@ -326,6 +374,10 @@ float x,y,z;
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_m4_translate (lua_State *l)
 {
 float *fa;
@@ -341,6 +393,13 @@ float x,y,z;
 		z=fb[2];
 	}
 	else
+	if(lua_isnumber(l,2))
+	{
+		x=(float)lua_tonumber(l,2);
+		y=(float)lua_tonumber(l,3);
+		z=(float)lua_tonumber(l,4);
+	}
+	else
 	{
 		luaL_checktype(l, 2, LUA_TTABLE);
 		lua_rawgeti(l,2,1); x=(float)lua_tonumber(l,-1); lua_pop(l,1);
@@ -352,7 +411,7 @@ float x,y,z;
 	fc=(float *)lua_tardis_uda(l,3);
 	if(!fc) { fc=fa; }
 
-	if(fa==fc)
+	if(fa==fc) // no need to copy
 	{
 		fc[12]+=x;
 		fc[13]+=y;
@@ -399,6 +458,8 @@ LUALIB_API int luaopen_wetgenes_tardis_core (lua_State *l)
 		{"new_v4",					lua_tardis_new_v4},
 
 		{"m4_product_m4",			lua_tardis_m4_product_m4},
+
+		{"m4_identity",				lua_tardis_m4_identity},
 		{"m4_rotate",				lua_tardis_m4_rotate},
 		{"m4_scale_v3",				lua_tardis_m4_scale_v3},
 		{"m4_translate",			lua_tardis_m4_translate},
