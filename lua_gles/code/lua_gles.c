@@ -4,6 +4,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 
+#include "../../lua_tardis/code/lua_tardis.h"
 
 // we suport various GL versions
 #include INCLUDE_GLES_GL
@@ -918,42 +919,69 @@ static int lua_gles_UniformMatrix2f (lua_State *l)
 {
 int i;
 float ff[4];
-	for(i=0;i<4;i++)
+float *m;
+	if(lua_isuserdata(l,2))
 	{
-		lua_pushnumber(l,(double)(i+1));
-		lua_gettable(l,2);
-		ff[i]=(float)lua_tonumber(l,-1);
-		lua_pop(l,1);
-	}	
-	glUniformMatrix2fv((int)luaL_checknumber(l,1), 1, 0, ff );
+		m=(float*)lua_tardis_uda(l,2);
+	}
+	else
+	{
+		for(i=0;i<4;i++)
+		{
+			lua_pushnumber(l,(double)(i+1));
+			lua_gettable(l,2);
+			ff[i]=(float)lua_tonumber(l,-1);
+			lua_pop(l,1);
+		}
+		m=ff;
+	}
+	glUniformMatrix2fv((int)luaL_checknumber(l,1), 1, 0, m );
 	return 0;
 }
 static int lua_gles_UniformMatrix3f (lua_State *l)
 {
 int i;
 float ff[9];
-	for(i=0;i<9;i++)
+float *m;
+	if(lua_isuserdata(l,2))
 	{
-		lua_pushnumber(l,(double)(i+1));
-		lua_gettable(l,2);
-		ff[i]=(float)lua_tonumber(l,-1);
-		lua_pop(l,1);
-	}	
-	glUniformMatrix3fv((int)luaL_checknumber(l,1), 1, 0, ff );
+		m=(float*)lua_tardis_uda(l,2);
+	}
+	else
+	{
+		for(i=0;i<9;i++)
+		{
+			lua_pushnumber(l,(double)(i+1));
+			lua_gettable(l,2);
+			ff[i]=(float)lua_tonumber(l,-1);
+			lua_pop(l,1);
+		}
+		m=ff;
+	}
+	glUniformMatrix3fv((int)luaL_checknumber(l,1), 1, 0, m );
 	return 0;
 }
 static int lua_gles_UniformMatrix4f (lua_State *l)
 {
 int i;
 float ff[16];
-	for(i=0;i<16;i++)
+float *m;
+	if(lua_isuserdata(l,2))
 	{
-		lua_pushnumber(l,(double)(i+1));
-		lua_gettable(l,2);
-		ff[i]=(float)lua_tonumber(l,-1);
-		lua_pop(l,1);
-	}	
-	glUniformMatrix4fv((int)luaL_checknumber(l,1), 1, 0, ff );
+		m=(float*)lua_tardis_uda(l,2);
+	}
+	else
+	{
+		luaL_checktype(l, 2, LUA_TTABLE);
+		for(i=0;i<16;i++)
+		{
+			lua_rawgeti(l,2,i+1);
+			ff[i]=(float)lua_tonumber(l,-1);
+			lua_pop(l,1);
+		}
+		m=ff;
+	}
+	glUniformMatrix4fv((int)luaL_checknumber(l,1), 1, 0, m );
 	return 0;
 }
 
