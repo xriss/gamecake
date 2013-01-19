@@ -39,6 +39,8 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 // force aligned pointer from a possibly non aligned one (safe to call again)
 static unsigned char * lua_tardis_uda_ptr_align (unsigned char *p)
 {
+//printf("uda %08x %08x\n",p,(unsigned char *)(((intptr_t)(p-1+UDALIGN))&(-UDALIGN)));
+//	return p;
 	return (unsigned char *)(((intptr_t)(p-1+UDALIGN))&(-UDALIGN)); // force alignment
 }
 
@@ -51,6 +53,7 @@ static unsigned char * lua_tardis_uda_alloc (lua_State *l, int size)
 // get aligned pointer form a userdata at idx
 unsigned char * lua_tardis_uda (lua_State *l, int idx)
 {
+	if(!lua_isuserdata(l,idx)) { return 0; }
 	return lua_tardis_uda_ptr_align(lua_touserdata(l,idx));
 }
 
@@ -98,15 +101,19 @@ int i;
 float *fa=(float *)lua_tardis_uda(l,1);
 float *fb;
 
+	if(!fa)	{ return luaL_error(l,"Bad tardis ptr"); }
+
+
 	if(lua_istable(l,2))
 	{
 		for(i=0;i<16;i++)
 		{
 			lua_rawgeti(l,2,i+1);
-			if(lua_isnil(l,-1)) { lua_pop(l,1); break; }
+			if(!lua_isnumber(l,-1)) { lua_pop(l,1); break; }
 			fa[i]=(float)lua_tonumber(l,-1);
 			lua_pop(l,1);
 		}
+//printf("set %08x tab %d\n"	,fa,i);
 	}
 	else
 	if(lua_isuserdata(l,2))
@@ -121,14 +128,16 @@ float *fb;
 		{
 			fa[i]=fb[i];
 		}
+//printf("set %08x uda %d\n"	,fa,i);
 	}
 	else
 	{
 		for(i=0;i<16;i++)
 		{
-			if(lua_isnil(l,2+i)) { break; } // stop on first nil
+			if(!lua_isnumber(l,2+i)) { break; } // stop on first nil
 			fa[i]=(float)lua_tonumber(l,2+i);
 		}
+//printf("set %08x var %d\n"	,fa,i);
 	}
 	return 0;
 }

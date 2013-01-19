@@ -788,87 +788,135 @@ unsigned int pointer;
 static int lua_gles_VertexAttrib1f (lua_State *l)
 {
 int i;
+float *fp;
 float ff[1];
 	i=(int)luaL_checknumber(l,1);
-	ff[0]=(float)luaL_checknumber(l,2);
-	glVertexAttrib1fv(i,ff);
+	fp=(float*)lua_tardis_uda(l,2);
+	if(!fp)
+	{
+		fp=ff;
+		ff[0]=(float)luaL_checknumber(l,2);
+	}
+	glVertexAttrib1fv(i,fp);
 	return 0;
 }
 static int lua_gles_VertexAttrib2f (lua_State *l)
 {
 int i;
+float *fp;
 float ff[2];
 	i=(int)luaL_checknumber(l,1);
-	ff[0]=(float)luaL_checknumber(l,2);
-	ff[1]=(float)luaL_checknumber(l,3);
-	glVertexAttrib2fv(i,ff);
+	fp=(float*)lua_tardis_uda(l,2);
+	if(!fp)
+	{
+		fp=ff;
+		ff[0]=(float)luaL_checknumber(l,2);
+		ff[1]=(float)luaL_checknumber(l,3);
+	}
+	glVertexAttrib2fv(i,fp);
 	return 0;
 }
 static int lua_gles_VertexAttrib3f (lua_State *l)
 {
 int i;
+float *fp;
 float ff[3];
 	i=(int)luaL_checknumber(l,1);
-	ff[0]=(float)luaL_checknumber(l,2);
-	ff[1]=(float)luaL_checknumber(l,3);
-	ff[2]=(float)luaL_checknumber(l,4);
-	glVertexAttrib3fv(i,ff);
+	fp=(float*)lua_tardis_uda(l,2);
+	if(!fp)
+	{
+		fp=ff;
+		ff[0]=(float)luaL_checknumber(l,2);
+		ff[1]=(float)luaL_checknumber(l,3);
+		ff[2]=(float)luaL_checknumber(l,4);
+	}
+	glVertexAttrib3fv(i,fp);
 	return 0;
 }
 static int lua_gles_VertexAttrib4f (lua_State *l)
 {
 int i;
+float *fp;
 float ff[4];
 	i=(int)luaL_checknumber(l,1);
-	ff[0]=(float)luaL_checknumber(l,2);
-	ff[1]=(float)luaL_checknumber(l,3);
-	ff[2]=(float)luaL_checknumber(l,4);
-	ff[3]=(float)luaL_checknumber(l,5);
-	glVertexAttrib4fv(i,ff);
+	fp=(float*)lua_tardis_uda(l,2);
+	if(!fp)
+	{
+		fp=ff;
+		ff[0]=(float)luaL_checknumber(l,2);
+		ff[1]=(float)luaL_checknumber(l,3);
+		ff[2]=(float)luaL_checknumber(l,4);
+		ff[3]=(float)luaL_checknumber(l,5);
+	}
+	glVertexAttrib4fv(i,fp);
 	return 0;
 }
 
 static int lua_gles_Uniform1f (lua_State *l)
 {
 int i;
+float *fp;
 float ff[1];
 	i=(int)luaL_checknumber(l,1);
-	ff[0]=(float)luaL_checknumber(l,2);
-	glUniform1fv(i,1,ff);
+	fp=(float*)lua_tardis_uda(l,2);
+	if(!fp)
+	{
+		fp=ff;
+		ff[0]=(float)luaL_checknumber(l,2);
+	}
+	glUniform1fv(i,1,fp);
 	return 0;
 }
 static int lua_gles_Uniform2f (lua_State *l)
 {
 int i;
+float *fp;
 float ff[2];
 	i=(int)luaL_checknumber(l,1);
-	ff[0]=(float)luaL_checknumber(l,2);
-	ff[1]=(float)luaL_checknumber(l,3);
-	glUniform2fv(i,1,ff);
+	fp=(float*)lua_tardis_uda(l,2);
+	if(!fp)
+	{
+		fp=ff;
+		ff[0]=(float)luaL_checknumber(l,2);
+		ff[1]=(float)luaL_checknumber(l,3);
+	}
+	glUniform2fv(i,1,fp);
 	return 0;
 }
 static int lua_gles_Uniform3f (lua_State *l)
 {
 int i;
+float *fp;
 float ff[3];
 	i=(int)luaL_checknumber(l,1);
-	ff[0]=(float)luaL_checknumber(l,2);
-	ff[1]=(float)luaL_checknumber(l,3);
-	ff[2]=(float)luaL_checknumber(l,4);
-	glUniform3fv(i,1,ff);
+	fp=(float*)lua_tardis_uda(l,2);
+	if(!fp)
+	{
+		fp=ff;
+		ff[0]=(float)luaL_checknumber(l,2);
+		ff[1]=(float)luaL_checknumber(l,3);
+		ff[2]=(float)luaL_checknumber(l,4);
+	}
+	glUniform3fv(i,1,fp);
 	return 0;
 }
 static int lua_gles_Uniform4f (lua_State *l)
 {
 int i;
+float *fp;
 float ff[4];
 	i=(int)luaL_checknumber(l,1);
-	ff[0]=(float)luaL_checknumber(l,2);
-	ff[1]=(float)luaL_checknumber(l,3);
-	ff[2]=(float)luaL_checknumber(l,4);
-	ff[3]=(float)luaL_checknumber(l,5);
-//	glUniform4f(i,ff[0],ff[1],ff[2],ff[3]); // this function seems totally fucked??? Gonna asume its a driver bug...
-	glUniform4fv(i,1,ff); // so we use this one
+	
+	fp=(float*)lua_tardis_uda(l,2);
+	if(!fp)
+	{
+		fp=ff;
+		ff[0]=(float)luaL_checknumber(l,2);
+		ff[1]=(float)luaL_checknumber(l,3);
+		ff[2]=(float)luaL_checknumber(l,4);
+		ff[3]=(float)luaL_checknumber(l,5);
+	}
+	glUniform4fv(i,1,fp);
 	return 0;
 }
 

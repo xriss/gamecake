@@ -29,8 +29,6 @@ function M.bake(opts)
 			state.frame_rate=1/opts.fps -- how fast we want to run
 			state.frame_time=0
 
-			state.gl=require("glescode").create( require("gles").gles2 )
-
 			local inf={width=opts.width,height=opts.height,title=opts.title}
 			local screen=wwin.screen()
 
@@ -314,6 +312,7 @@ function M.bake(opts)
 			until finished
 		end
 		function state.serv_pulse(state)
+				if state.change() then return true end
 				state.msgs()
 				
 				state.cake.update()
@@ -324,8 +323,7 @@ function M.bake(opts)
 					state.win:sleep(1/10)
 				end
 				
-				finished=state.change()
-				return finished
+--				return state.change()
 		end
 		
 
