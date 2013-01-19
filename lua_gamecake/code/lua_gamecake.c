@@ -194,12 +194,17 @@ int vid,tid;
 		
 //printf("%d %1.1s (%f,%f) (%f,%f) \n",c,s-1,ch->x,ch->y,ch->u1,ch->v1);
 
+//		fp[(0*5)+0]=vx;		fp[(0*5)+1]=vy;		fp[(0*5)+2]=0;		fp[(0*5)+3]=ch->u1;		fp[(0*5)+4]=ch->v1;
+
 		fp[(0*5)+0]=vx;		fp[(0*5)+1]=vy;		fp[(0*5)+2]=0;		fp[(0*5)+3]=ch->u1;		fp[(0*5)+4]=ch->v1;
-		fp[(1*5)+0]=vx;		fp[(1*5)+1]=vy;		fp[(1*5)+2]=0;		fp[(1*5)+3]=ch->u1;		fp[(1*5)+4]=ch->v1;
-		fp[(2*5)+0]=vx+vxp;	fp[(2*5)+1]=vy;		fp[(2*5)+2]=0;		fp[(2*5)+3]=ch->u2;		fp[(2*5)+4]=ch->v1;
+		fp[(1*5)+0]=vx+vxp;	fp[(1*5)+1]=vy;		fp[(1*5)+2]=0;		fp[(1*5)+3]=ch->u2;		fp[(1*5)+4]=ch->v1;
+		fp[(2*5)+0]=vx;		fp[(2*5)+1]=vy+vyp;	fp[(2*5)+2]=0;		fp[(2*5)+3]=ch->u1;		fp[(2*5)+4]=ch->v2;
+
 		fp[(3*5)+0]=vx;		fp[(3*5)+1]=vy+vyp;	fp[(3*5)+2]=0;		fp[(3*5)+3]=ch->u1;		fp[(3*5)+4]=ch->v2;
-		fp[(4*5)+0]=vx+vxp;	fp[(4*5)+1]=vy+vyp;	fp[(4*5)+2]=0;		fp[(4*5)+3]=ch->u2;		fp[(4*5)+4]=ch->v2;
+		fp[(4*5)+0]=vx+vxp;	fp[(4*5)+1]=vy;		fp[(4*5)+2]=0;		fp[(4*5)+3]=ch->u2;		fp[(4*5)+4]=ch->v1;
 		fp[(5*5)+0]=vx+vxp;	fp[(5*5)+1]=vy+vyp;	fp[(5*5)+2]=0;		fp[(5*5)+3]=ch->u2;		fp[(5*5)+4]=ch->v2;
+
+//		fp[(5*5)+0]=vx+vxp;	fp[(5*5)+1]=vy+vyp;	fp[(5*5)+2]=0;		fp[(5*5)+3]=ch->u2;		fp[(5*5)+4]=ch->v2;
 
 		fp+=6*5;
 		fp_len+=6*5;
@@ -214,7 +219,8 @@ int vid,tid;
 
 // assume stuff has been setup
 
-	glBufferData(GL_ARRAY_BUFFER,fp_len*4,(float *)buf,GL_DYNAMIC_DRAW);
+//	glBufferData(GL_ARRAY_BUFFER,fp_len*4,(float *)buf,GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER,fp_len*4,(float *)buf,GL_STREAM_DRAW);
 
 	glVertexAttribPointer(vid,3,GL_FLOAT,GL_FALSE,5*4,(void*)(0));
 	glEnableVertexAttribArray(vid);
@@ -222,7 +228,8 @@ int vid,tid;
 	glVertexAttribPointer(tid,2,GL_FLOAT,GL_FALSE,5*4,(void*)(3*4));
 	glEnableVertexAttribArray(tid);
 
-	glDrawArrays(GL_TRIANGLE_STRIP,0,fp_len/5);
+//	printf(" %d ",fp_len/5);
+	glDrawArrays(GL_TRIANGLES,0,fp_len/5);
 	
 	return 0;
 }

@@ -3,17 +3,15 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local print=function(...) return _G.print(...) end
 
-module("wetgenes.gamecake.sounds")
-
 local zips=require("wetgenes.zips")
-
 local grd=require("wetgenes.grd")
 local sod=require("wetgenes.sod")
 
 
-function bake(opts)
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-	local sounds={}
+function M.bake(state,sounds)
 
 	local str_func={}
 	local str_meta={__index=str_func}
@@ -21,21 +19,21 @@ function bake(opts)
 	local sfx_func={}
 	local sfx_meta={__index=sfx_func}
 	
+	local opts=state.opts
+	local cake=state.cake
+
+
 	local sfxmax=opts.sfxmax or 4
 	local strmax=opts.strmax or 2
-	
-	sounds.cake=opts.cake
-	
+		
+-- probably nil but we may need to override?
 	sounds.al=opts.al
-	sounds.alc=opts.alc
-	
-	local cake=sounds.cake
+	sounds.alc=opts.alc	
 	local al=sounds.al
 	local alc=sounds.alc
 	
 	sounds.data={}
 	
-	sounds.zip=opts.zip
 	sounds.prefix=opts.sodprefix or "data/"
 	sounds.postfix=opts.sodpostfix or ".wav"
 	
@@ -403,7 +401,7 @@ end
 
 
 
-	if sounds.cake.opts.disable_sounds then -- disable all function in this file
+	if opts.disable_sounds then -- disable all function in this file
 		for n,v in pairs(sounds) do
 			if type(v)=="function" then
 				sounds[n]=function() end
