@@ -177,41 +177,8 @@ function base_sheet.build_vbuf(sheet)
 end
 
 
--- draw one sprite, normal lua indexs, so first sprite is 1 not 0
 function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
-		
-	if px then
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.PushMatrix()
-		gl.Translate(px,py,0)
-		if rz then
-			gl.Rotate(rz,0,0,1)
-		end
-		if sx then
-			sy=sy or sx
-			gl.Scale(sx/sheet[i].hx,sy/sheet[i].hy,1) -- fixed, ignore the base size of image when we scale. So size is absolute
-		end
-	end
-	
-	gl.BindBuffer(gl.ARRAY_BUFFER,sheet.vbuf)
 
-	gl.VertexPointer(   3, gl.FLOAT, 5*4, 0*4 )
-	gl.TexCoordPointer( 2, gl.FLOAT, 5*4, 3*4 )
-
-	gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)
-
-	gl.DrawArrays(gl.TRIANGLE_STRIP,(i-1)*4,4)
-
-	if px then
-		gl.PopMatrix()
-	end
-	
-	return sheet
-end
-
-if gl.fix then -- our faked fixed gles2 setup
-
-function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 
 	if px then
 		gl.MatrixMode(gl.MODELVIEW)
@@ -229,9 +196,9 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 	
 	local p=gl.program("pos_tex")
 	
-	if sheets.UseSheet~=sheet then
+--	if sheets.UseSheet~=sheet then
 	
-		sheets.UseSheet=sheet
+--		sheets.UseSheet=sheet
 
 		gl.BindBuffer(gl.ARRAY_BUFFER,sheet.vbuf)
 
@@ -246,24 +213,24 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 		gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
 		
 
-	else
+--	else
 	
-		if gl.matrixdirty(gl.MODELVIEW) then
-			gl.matrixclean(gl.MODELVIEW)
-			gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
-		end
+--		if gl.matrixdirty(gl.MODELVIEW) then
+--			gl.matrixclean(gl.MODELVIEW)
+--			gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+--		end
 	
-	end
+--	end
 
-	if gl.fix.cache.texture~=sheet.img.id then
-		gl.fix.cache.texture=sheet.img.id
+--	if gl.fix.cache.texture~=sheet.img.id then
+--		gl.fix.cache.texture=sheet.img.id
 		gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)
-	end
+--	end
 
-	if gl.fix.cache.color~=gl.fix.color then -- try  not to update the color?
-		gl.fix.cache.color=gl.fix.color
-		gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
-	end
+--	if gl.fix.cache.color~=gl.fix.color then -- try  not to update the color?
+--		gl.fix.cache.color=gl.fix.color
+		gl.Uniform4f(p:uniform("color"), gl.cache.color )
+--	end
 
 --	gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
 
@@ -276,8 +243,6 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 --	gl.fix.cache.UseProgram=p[0]
 
 	return sheet
-
-end
 
 end
 
