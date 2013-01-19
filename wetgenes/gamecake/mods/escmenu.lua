@@ -24,6 +24,7 @@ function M.bake(state,escmenu)
 		height=480,
 	}
 
+	local gl=state.gl
 	local cake=state.cake
 	local canvas=cake.canvas.child()
 	canvas.layout=false
@@ -111,7 +112,7 @@ function M.bake(state,escmenu)
 	function escmenu.draw()
 	
 		local cake=state.cake
-		local gl=cake.gl
+--		local gl=cake.gl
 --		local canvas=state.canvas
 		local font=canvas.font
 

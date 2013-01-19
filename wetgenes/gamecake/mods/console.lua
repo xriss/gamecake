@@ -267,7 +267,6 @@ font.vbs_idx=1
 		if console.y > 0 then
 		
 			gl.Color(pack.argb4_pmf4(0xc040))
-			
 			flat.quad(0,0,w,console.y)
 
 			gl.Color(pack.argb4_pmf4(0xf4f4))

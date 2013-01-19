@@ -6,11 +6,10 @@ local gles={}
 local core=require("gles.core")
 gles.core=core -- expose the core
 
-local base={}
-local meta={}
-meta.__index=base
-
-setmetatable(gles,meta)
+--local base={}
+--local meta={}
+--meta.__index=base
+--setmetatable(gles,meta)
 
 
 -- copypasta from GLES header, this is a merge of v1 and v2 so we can work with both?
@@ -508,7 +507,7 @@ import=nil -- free it just because
 
 gles.nums={}
 for i,v in pairs(gles.defs) do -- copy vals into base for shorthand gl.FALSE use
-	base[i]=v
+	gles[i]=v
 	gles.nums[v]=i
 end
 
@@ -599,26 +598,13 @@ function gles.GetExtensions()
 	end
 end
 
-gles.gles=gles -- so we can always use gles1.gles or gles2.gles
-gles.gles1=gles
-gles.gles2=gles
-
-if not core.fixed_pipeline_available then -- do not bother trying to fake it
---	if core.programmable_pipeline_available then
---		gles.gles1=require("glesfix").create(gles)
---	else
-		gles.gles1=false
---	end
+if core.fixed_pipeline_available then
+	gles.gles1=gles
 end
-
-if not core.programmable_pipeline_available then
-
-	gles.gles2=false -- sorry but this is not gles2 compatable in any way
-
+if core.programmable_pipeline_available then
+	gles.gles2=gles
 else
 
---force a test of our glesfix, so we never willingly use the fixed pipeline
---	gles.gles1=require("glesfix").create(gles)
 
 end
 

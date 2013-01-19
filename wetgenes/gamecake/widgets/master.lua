@@ -7,13 +7,13 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-local gl=require('gles').gles1
 
 module("wetgenes.gamecake.widgets.master")
 
 function bake(state,wmaster)
 wmaster=wmaster or {}
 
+local gl=state.gl
 local cake=state.cake
 local canvas=state.canvas
 
@@ -75,10 +75,8 @@ function wmaster.setup(widget,def)
 
 
 		gl.Disable(gl.CULL_FACE)
-		gl.Disable(gl.LIGHTING)
 		gl.Disable(gl.DEPTH_TEST)
 
-		gl.MatrixMode(gl.MODELVIEW)
 		gl.PushMatrix()
 		
 --[[

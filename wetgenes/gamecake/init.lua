@@ -42,10 +42,7 @@ function M.bake(state,cake)
 	end
 
 
-
-	local gl=state.gl
-	if gl then gl.GetExtensions() end
-
+	cake.gles 	 = state.rebake("wetgenes.gamecake.gles") -- initalise gles and manage our shaders
 	cake.buffers = state.rebake("wetgenes.gamecake.buffers") -- generic buffer memory is now complex thanks to retardroid
 	cake.images  = state.rebake("wetgenes.gamecake.images") -- we will need to load some images
 	cake.sheets  = state.rebake("wetgenes.gamecake.sheets") -- we will need to manage some sprite sheets

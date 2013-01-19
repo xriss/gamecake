@@ -5,6 +5,8 @@ local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 local core=require("wetgenes.gamecake.core")
 
+local tcore=require("wetgenes.tardis.core")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -23,6 +25,7 @@ function M.bake(state,canvas)
 
 
 canvas.blit = function(t,cx,cy,ix,iy,w,h,cw,ch)
+do return end
 
 --print("gl_blit + ",nacl.time()," ",t.filename )
 	
@@ -84,21 +87,23 @@ canvas.gl_default=function()
 
 	if gl then
 	
-		gl.Disable(gl.LIGHTING)
-		gl.EnableClientState(gl.VERTEX_ARRAY)
-		gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
-		gl.DisableClientState(gl.COLOR_ARRAY)
-		gl.DisableClientState(gl.NORMAL_ARRAY)
+--		gl.Disable(gl.LIGHTING)
+--		gl.EnableClientState(gl.VERTEX_ARRAY)
+--		gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
+--		gl.DisableClientState(gl.COLOR_ARRAY)
+--		gl.DisableClientState(gl.NORMAL_ARRAY)
 
 		gl.Disable(gl.DEPTH_TEST)
 		gl.Disable(gl.CULL_FACE)
-		gl.Enable(gl.TEXTURE_2D)    
+--		gl.Enable(gl.TEXTURE_2D)    
 		
 		gl.Color(1,1,1,1)	
 
 		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 		gl.Enable(gl.BLEND)
 		
+		gl.MatrixMode(gl.MODELVIEW)
+
 	end
 
 end
@@ -256,65 +261,21 @@ font.width=function(text)
 	return x
 end
 
-font.draw=function(text)
-
--- This needs to switch upto C func, with inline blit
-
-	local x=font.x
-	local y=font.y
-	local font_dat=font.dat
-	
-	local s=font.size/font_dat.size
-	
-	local t={}
-	
-	for i=1,#text do
-	
-		local cid=text:byte(i)
-		local c=font_dat.chars[cid] or font_dat.chars[32]
-
-		local vx=x+(c.x*s)
-		local vxp=c.w*s
-		local vy=y+(c.y*s)
-		local vyp=c.h*s
-
-		local ht=#t
-		for i,v in ipairs{
-			vx,		vy,		0,	c.u1,	c.v1, -- doubletap hack so we can start at any location
-			vx,		vy,		0,	c.u1,	c.v1,
-			vx+vxp,	vy,		0,	c.u2,	c.v1,
-			vx,		vy+vyp,	0,	c.u1,	c.v2,
-			vx+vxp,	vy+vyp,	0,	c.u2,	c.v2,
-			vx+vxp,	vy+vyp,	0,	c.u2,	c.v2, -- doubletap hack so we can start at any location
-		} do
-			t[ht+i]=v
-		end
-
-
-		x=x+(c.add*s)+font.add
-	end
-
-	images.bind(font_dat.images[1])
-	flat.tristrip("xyzuv",t)
-	
-	font.x=x
-end
-
 --
 -- I think it is time to drop suport for gles1 in gamecake gonna need gles2...
 --
-if gl.fix then -- our faked fixed gles2 setup
 
-font.vbs={}
-font.vbs_idx=1
+--font.vbs={}
+--font.vbs_idx=1
 
 font.draw = function(text)
 	
 	local p=gl.program("pos_tex")
+	
 	gl.UseProgram( p[0] )
 	gl.UniformMatrix4f( p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
 	gl.UniformMatrix4f( p:uniform("projection"), gl.matrix(gl.PROJECTION) )	
-	gl.Uniform4f( p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
+	gl.Uniform4f( p:uniform("color"), gl.cache.color )
 
 	images.bind(font.dat.images[1])
 	
@@ -322,18 +283,13 @@ font.draw = function(text)
 
 	core.canvas_font_draw(font,text,p:attrib("a_vertex"),p:attrib("a_texcoord"))
 
-	gl.fix.cache.UseProgram=nil	
 end
-font.draw2 = function(text)
-	local p=gl.program("pos_tex")
-	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
-	core.canvas_font_draw(font,text,p:attrib("a_vertex"),p:attrib("a_texcoord"))
-end
+font.draw2 = font.draw
 
-
-end
 
 flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
+
+--print(x1,y1,x2,y2,x3,y3,x4,y4,gl.cache.color,tcore.read(gl.cache.color,1),tcore.read(gl.cache.color,2),tcore.read(gl.cache.color,3),tcore.read(gl.cache.color,4))
 
 	if y4 then
 		pack.save_array({
@@ -351,17 +307,30 @@ flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
 		},"f32",0,5*4,canvas.vdat)	
 	end
 
+	local p=gl.program("pos")
+	gl.UseProgram( p[0] )
+	gl.BindTexture( gl.TEXTURE_2D , 0 )
+
 	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
 	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
 
-	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
-	gl.TexCoordPointer(2,gl.FLOAT,5*4,3*4)
+	gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+	gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+	gl.Uniform4f( p:uniform("color"), gl.cache.color )
 
-	gl.DisableClientState(gl.TEXTURE_COORD_ARRAY)
-	gl.Disable(gl.TEXTURE_2D)    
+	gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,5*4,0)
+	gl.EnableVertexAttribArray(p:attrib("a_vertex"))
+
+--	gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,5*4,3*4)
+--	gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
+
+--	gl.DisableClientState(gl.TEXTURE_COORD_ARRAY)
+--	gl.Disable(gl.TEXTURE_2D)    
+
 	gl.DrawArrays(gl.TRIANGLE_STRIP,0,4)
-	gl.Enable(gl.TEXTURE_2D)    
-	gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
+
+--	gl.Enable(gl.TEXTURE_2D)    
+--	gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
 
 end
 
@@ -373,23 +342,35 @@ flat.tristrip = function(fmt,data)
 	local pstride
 	local ptex
 	local pcolor
-	
+	local p
 	if fmt=="xyz" then -- xyz only
 	
+		p=gl.program("pos")
+		gl.UseProgram( p[0] )
+
 		pstride=12
 	
 	elseif fmt=="xyzuv" then -- xyz and texture
+
+		p=gl.program("pos_tex")
+		gl.UseProgram( p[0] )
 
 		pstride=20
 		ptex=12
 	
 	elseif fmt=="xyzrgba" then -- xyz and color
 
+		p=gl.program("pos_color")
+		gl.UseProgram( p[0] )
+
 		pstride=28
 		pcolor=12
 	
 	elseif fmt=="xyzuvrgba" then -- xyz and texture and color
 	
+		p=gl.program("pos_tex_color")
+		gl.UseProgram( p[0] )
+
 		pstride=36
 		ptex=12
 		pcolor=20
@@ -400,35 +381,30 @@ flat.tristrip = function(fmt,data)
 	local datasize=datalen*4 -- we need this much vdat memory
 	canvas.vdat_check(datasize) -- make sure we have space in the buffer
 	
-	pack.save_array(data,"f32",0,datalen,canvas.vdat)	
+	pack.save_array(data,"f32",0,datalen,canvas.vdat)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
 	gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.DYNAMIC_DRAW)
 
-	gl.VertexPointer(3,gl.FLOAT,pstride,0)
+	gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+	gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+	gl.Uniform4f( p:uniform("color"), gl.cache.color )
+
+	gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,pstride,0)
+	gl.EnableVertexAttribArray(p:attrib("a_vertex"))
 	
 	if ptex then
-		gl.TexCoordPointer(2,gl.FLOAT,pstride,ptex)
-	else
-		gl.DisableClientState(gl.TEXTURE_COORD_ARRAY)
-		gl.Disable(gl.TEXTURE_2D)    
+		gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,pstride,ptex)
+		gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
 	end
 
 	if pcolor then
-		gl.ColorPointer(4,gl.FLOAT,pstride,pcolor)
-		gl.EnableClientState(gl.COLOR_ARRAY)
+		gl.VertexAttribPointer(p:attrib("a_color"),4,gl.FLOAT,gl.FALSE,pstride,pcolor)
+		gl.EnableVertexAttribArray(p:attrib("a_color"))
 	end
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP,0,datasize/pstride)
 		
-	if not ptex then -- revert
-		gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
-		gl.Enable(gl.TEXTURE_2D)    
-	end
-	
-	if pcolor then -- revert
-		gl.DisableClientState(gl.COLOR_ARRAY)
-	end
 	
 end
 
@@ -468,13 +444,11 @@ function canvas.draw()
 	end
 	canvas.vbi_flop=not canvas.vbi_flop
 	cake.sheets.UseSheet=nil
---	gl.fix.cache={}
 end
 
 -- basic setup of canvas
 	canvas.vbs={}
 	canvas.vbi=1
-
 	
 --	canvas.vbuf=canvas.cake.buffers.create()
 	canvas.vdat_size=0

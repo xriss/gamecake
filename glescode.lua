@@ -20,14 +20,22 @@ local glescode={}
 function glescode.create(gl)
 
 	local code={}
-	setmetatable(code,{__index=gl}) -- so we can reference extra gl bits easily
+	for n,v in pairs(gl) do code[n]=v end
+--	setmetatable(code,{__index=gl}) -- so we can reference extra gl bits easily
 	
 	code.cache={}
 	code.cache.color=tcore.new_v4()
+--	print(code,code.cache,code.cache.color,type(code.cache.color))
 	
+	function code.ColorTest()
+--		print(code,code.cache,code.cache.color,type(code.cache.color))
+print("colortest")
+		tcore.set(code.cache.color) -- may not set anything if no arguments are given
+	end
 	function code.Color(...)
+--print("color",...)
 		tcore.set(code.cache.color,...) -- may not set anything if no arguments are given
-		return code.cache.color -- safest way of getting this value (a 4 float userdata)
+		return code.cache.color -- safe way of getting this value (a 4 float userdata)
 	end
 
 
@@ -42,12 +50,12 @@ function glescode.create(gl)
 	end
 	code.reset_stacks() -- setup
 
-	function code.matrixdirty(mode)
-		return code.stacks[mode].dirty
-	end
-	function code.matrixclean(mode)
-		code.stacks[mode].dirty=false
-	end
+--	function code.matrixdirty(mode)
+--		return code.stacks[mode].dirty
+--	end
+--	function code.matrixclean(mode)
+--		code.stacks[mode].dirty=false
+--	end
 
 	function code.matrix(mode)
 		local v=code.stacks[mode]
@@ -60,7 +68,7 @@ function glescode.create(gl)
 		if not code.stack then -- create on use
 --			code.stack={ tardis.m4.new() , dirty=true }
 			local m4=tcore.new_m4() tcore.m4_identity(m4)
-			code.stack={ m4 , dirty=true }
+			code.stack={ m4 --[[, dirty=true]] }
 			code.stacks[code.stack_mode]=code.stack
 		end
 		code.stack_matrix=assert(code.stack[#code.stack])
@@ -69,13 +77,13 @@ function glescode.create(gl)
 	function code.LoadMatrix(...)
 --		code.stack_matrix:set(...)
 		tcore.set(code.stack_matrix,...)
-		code.stack.dirty=true
+--		code.stack.dirty=true
 	end
 
 	function code.MultMatrix(a)
 --		tardis.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
 		tcore.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
-		code.stack.dirty=true
+--		code.stack.dirty=true
 	end
 
 	function code.Frustum(...)
@@ -85,25 +93,25 @@ function glescode.create(gl)
 	function code.LoadIdentity()
 --		code.stack_matrix:identity()
 		tcore.m4_identity(code.stack_matrix)
-		code.stack.dirty=true
+--		code.stack.dirty=true
 	end
 
 	function code.Translate(vx,vy,vz)
 --		code.stack_matrix:translate({vx,vy,vz})
 		tcore.m4_translate(code.stack_matrix,vx,vy,vz)
-		code.stack.dirty=true
+--		code.stack.dirty=true
 	end
 
 	function code.Rotate(d,vx,vy,vz)
 --		code.stack_matrix:rotate(d,{vx,vy,vz})
 		tcore.m4_rotate(code.stack_matrix,d,vx,vy,vz)
-		code.stack.dirty=true
+--		code.stack.dirty=true
 	end
 
 	function code.Scale(vx,vy,vz)
 --		code.stack_matrix:scale_v3({vx,vy,vz})
 		tcore.m4_scale_v3(code.stack_matrix,vx,vy,vz)
-		code.stack.dirty=true
+--		code.stack.dirty=true
 	end
 
 	function code.PushMatrix()		
@@ -111,13 +119,13 @@ function glescode.create(gl)
 		local m4=tcore.new_m4() tcore.set(m4,code.stack_matrix,16)
 		code.stack[#code.stack+1]=m4
 		code.stack_matrix=assert(code.stack[#code.stack])
-		code.stack.dirty=true
+--		code.stack.dirty=true
 	end
 
 	function code.PopMatrix()
 		code.stack[#code.stack]=nil -- remove topmost
 		code.stack_matrix=assert(code.stack[#code.stack]) -- this will assert on too many pops
-		code.stack.dirty=true
+--		code.stack.dirty=true
 	end
 
 -- compiler functions
@@ -168,7 +176,7 @@ function glescode.create(gl)
 		gl.ShaderSource(s[0],s.source)
 		gl.CompileShader(s[0])
 		
-		if gl.GetShader(s[0], code.COMPILE_STATUS) == code.FALSE then -- error
+		if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
 
 			error( "failed to build shader " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. (gl.GetShaderInfoLog(s[0]) or "stoopid droid") .. "\n\n" )
 		end

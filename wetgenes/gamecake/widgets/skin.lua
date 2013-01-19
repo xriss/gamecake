@@ -3,7 +3,6 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 local bit=require('bit')
-local gl=require('gles').gles1
 local grd=require('wetgenes.grd')
 local pack=require('wetgenes.pack')
 
@@ -45,7 +44,7 @@ module("wetgenes.gamecake.widgets.skin")
 function bake(state,wskin)
 wskin=wskin or {}
 
-
+local gl=state.gl
 local cake=state.cake
 local images=cake.images
 local sheets=cake.sheets
@@ -130,19 +129,7 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 		local vww={mw,vw-2*mw,mw}
 		local vhh={mh,vh-2*mh,mh}
 		
---[[
-		gl.Disable(gl.DEPTH_TEST)
-		gl.Disable(gl.LIGHTING)
-		gl.Disable(gl.CULL_FACE)
-		gl.Enable(gl.TEXTURE_2D)
 
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
-		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-]]
-
-
---		gl.Begin(gl.QUADS)
---			gl.Color(1,1,1,1)
 			local t={}
 			local function drawbox() -- draw all 9 parts in one go
 				flat.tristrip("xyzuv",t)
@@ -160,18 +147,6 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 				} do
 					t[ht+i]=v
 				end
---[[
-					tx,		ty,		0,	--vx,		vy,
-					tx+txp,	ty,		0,	--vx+vxp,	vy,
-					tx,		ty+typ,	0,	--vx,		vy+vyp,
-					tx+txp,	ty+typ,	0,	--vx+vxp,	vy+vyp,
-
-
-				gl.TexCoord(tx    ,ty)     gl.Vertex(vx,    vy)
-				gl.TexCoord(tx+txp,ty)     gl.Vertex(vx+vxp,vy)
-				gl.TexCoord(tx+txp,ty+typ) gl.Vertex(vx+vxp,vy+vyp)
-				gl.TexCoord(tx    ,ty+typ) gl.Vertex(vx,    vy+vyp)
-]]
 			end
 			
 		local tx,ty=0,0
@@ -192,8 +167,6 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 			end
 
 		drawbox()
-			
---		gl.End()
 
 
 end
@@ -257,12 +230,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		end
 		
 		widget.dirty=nil
-				
---		gl.Disable(gl.LIGHTING)
---		gl.Disable(gl.DEPTH_TEST)
---		gl.Disable(gl.CULL_FACE)
---		gl.Disable(gl.TEXTURE_2D)
-		
+						
 		local txp,typ=0,0
 		
 		if widget.color then
@@ -477,10 +445,8 @@ else -- we can only draw once
 
 		if widget.fbo then -- we need to draw our cached fbo
 		
-			gl.Disable(gl.LIGHTING)
 			gl.Disable(gl.DEPTH_TEST)
 			gl.Disable(gl.CULL_FACE)
-			gl.Disable(gl.TEXTURE_2D)
 		
 			gl.Translate(widget.sx/2,-widget.sy/2,0)
 			gl.Color(1,1,1,1)

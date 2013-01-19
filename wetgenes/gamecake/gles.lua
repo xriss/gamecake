@@ -1,35 +1,34 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-error("IGNORE ME")
-
 -- this contains mild emulation of the old gl fixed pipeline, such that we can run some code in gles2 and above
 
 local tardis=require("wetgenes.tardis")
 
-local glescode=require("glescode")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-local glesfix={}
+function M.bake(state,gles)
 
+	if not state.gl then -- need a gles2 wrapped in glescode
+	
+		state.gl=require("glescode").create( require("gles").gles2 )
+		
+		state.gl.GetExtensions()
+		
+	end
 
-local shaderprefix="#version 100\nprecision mediump float;\n"
+	local gl=state.gl
 
-
---shaderprefix=="#version 120\n"
-
--- apply our compatibility fixes into the base gles function table
--- return a wrapped table with new functionality
-function glesfix.create(gles)
-
-	local gl=glescode.create(gles)
+--[[
 	gl.fix={}
 	gl.fix.client={}
 	gl.fix.cache={}
 	gl.fix.pointer={}
-
+]]
 
 	gl.shaders.v_pos_tex={
-	source=shaderprefix..[[
+	source=gl.defines.shaderprefix..[[
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -52,7 +51,7 @@ void main()
 }
 
 	gl.shaders.v_pos_tex_color={
-	source=shaderprefix..[[
+	source=gl.defines.shaderprefix..[[
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -76,7 +75,7 @@ void main()
 }
 
 	gl.shaders.v_pos={
-	source=shaderprefix..[[
+	source=gl.defines.shaderprefix..[[
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -96,7 +95,7 @@ void main()
 }
 
 	gl.shaders.v_pos_color={
-	source=shaderprefix..[[
+	source=gl.defines.shaderprefix..[[
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -117,7 +116,7 @@ void main()
 }
 
 	gl.shaders.f_tex={
-	source=shaderprefix..[[
+	source=gl.defines.shaderprefix..[[
 
 uniform sampler2D tex;
 
@@ -133,7 +132,7 @@ void main(void)
 }
 
 	gl.shaders.f_color={
-	source=shaderprefix..[[
+	source=gl.defines.shaderprefix..[[
 
 varying vec4  v_color;
 
@@ -162,10 +161,11 @@ void main(void)
 		fshaders={"f_color"},
 	}
 
-	function gl.Color(...)
-		gl.fix.color={...}
-	end
+--	function gl.Color(...)
+--		gl.fix.color={...}
+--	end
 
+--[[
 	local function EnableDisable(n,v)
 -- need to catch stuff that we suport in our fake fixed pipeline and gles2 does not understand
 
@@ -186,11 +186,11 @@ void main(void)
 	function gl.Disable(n)
 		EnableDisable(n,false)
 	end
+]]
 
 
 
-
-
+--[[
 	function gl.EnableClientState(n)
 		gl.fix.client[n]=true
 	end
@@ -207,7 +207,9 @@ void main(void)
 	function gl.ColorPointer(...)
 		gl.fix.pointer.color={...}
 	end
+]]
 
+--[[
 	function gl.DrawArrays(...) -- make sure state is set before doing
 	
 		local p
@@ -230,6 +232,8 @@ void main(void)
 				p=gl.program("pos")
 			end
 		end
+
+
 
 --hotspot? dont call repeatedly if we can avoid it, these may not change much between invocations?		
 		if gl.fix.cache.UseProgram~=p[0] then
@@ -280,8 +284,8 @@ void main(void)
 		
 		gl.fix.pointer={} -- start again, old pointers are lost
 	end
+]]
 
-	return gl
+	return gles
+
 end
-
-return glesfix
