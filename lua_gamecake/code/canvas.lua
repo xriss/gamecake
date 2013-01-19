@@ -1,38 +1,25 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-
-
-
-
-module("wetgenes.gamecake.canvas")
-
 local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
-
 local core=require("wetgenes.gamecake.core")
 
-function bake(opts)
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-	local canvas={}
+function M.bake(state,canvas)
+		
+-- link together sub parts
 	local font={}
 	local flat={}
-	
--- link together
 	canvas.font,font.canvas=font,canvas
 	canvas.flat,flat.canvas=flat,canvas
--- fill in options	
-	canvas.cake=opts.cake
-	canvas.win=opts.cake.win
-	canvas.gl=opts.gl
 
--- local cache
-	local cake=canvas.cake
-	local win=canvas.win
-	local gl=canvas.gl
+	local gl=state.gl
+	local cake=state.cake
+	local win=state.win
 	local images=cake.images
-
-
 
 
 canvas.blit = function(t,cx,cy,ix,iy,w,h,cw,ch)
@@ -75,7 +62,7 @@ canvas.blit = function(t,cx,cy,ix,iy,w,h,cw,ch)
 	
 --print("gl_blit . ",nacl.time() )
 
-	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf[0])
+	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
 	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
 
 	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
@@ -318,6 +305,9 @@ end
 --
 if gl.fix then -- our faked fixed gles2 setup
 
+font.vbs={}
+font.vbs_idx=1
+
 font.draw = function(text)
 	
 	local p=gl.program("pos_tex")
@@ -327,14 +317,21 @@ font.draw = function(text)
 	gl.Uniform4f( p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
 
 	images.bind(font.dat.images[1])
-	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf[0])
+	
+	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
 
 	core.canvas_font_draw(font,text,p:attrib("a_vertex"),p:attrib("a_texcoord"))
 
+	gl.fix.cache.UseProgram=nil	
+end
+font.draw2 = function(text)
+	local p=gl.program("pos_tex")
+	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
+	core.canvas_font_draw(font,text,p:attrib("a_vertex"),p:attrib("a_texcoord"))
 end
 
-end
 
+end
 
 flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
 
@@ -354,7 +351,7 @@ flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
 		},"f32",0,5*4,canvas.vdat)	
 	end
 
-	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf[0])
+	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
 	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
 
 	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
@@ -405,7 +402,7 @@ flat.tristrip = function(fmt,data)
 	
 	pack.save_array(data,"f32",0,datalen,canvas.vdat)	
 
-	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.vbuf[0])
+	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
 	gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.DYNAMIC_DRAW)
 
 	gl.VertexPointer(3,gl.FLOAT,pstride,0)
@@ -436,8 +433,50 @@ flat.tristrip = function(fmt,data)
 end
 
 
+
+function canvas.delete_vbs()
+	for i,v in ipairs(canvas.vbs) do
+		gl.DeleteBuffer(v)
+	end
+	canvas.vbs={}
+	canvas.vbi=1
+end
+
+function canvas.reuse_vbs()
+	canvas.vbi=1
+end
+
+function canvas.get_vb()
+	local vb=canvas.vbs[canvas.vbi]
+	if not vb then
+		vb=gl.GenBuffer()
+		canvas.vbs[canvas.vbi]=vb
+	end
+	canvas.vbi=canvas.vbi+1
+	return vb
+end
+
+
+function canvas.start()
+end
+function canvas.stop()
+	canvas.delete_vbs()
+end
+function canvas.draw()
+	if canvas.vbi_flop then
+		canvas.reuse_vbs()
+	end
+	canvas.vbi_flop=not canvas.vbi_flop
+	cake.sheets.UseSheet=nil
+--	gl.fix.cache={}
+end
+
 -- basic setup of canvas
-	canvas.vbuf=canvas.cake.buffers.create()
+	canvas.vbs={}
+	canvas.vbi=1
+
+	
+--	canvas.vbuf=canvas.cake.buffers.create()
 	canvas.vdat_size=0
 	canvas.vdat_check=function(size) -- check we have enough buffer
 		if canvas.vdat_size<size then
@@ -447,8 +486,8 @@ end
 	end
 	canvas.vdat_check(1024) -- initial buffer size it may grow but this is probably more than enough
 	
-	canvas.cake.fonts.load(1,1) -- make sure we have loaded the 8x8 font
-	font.set( canvas.cake.fonts.get(1) ) -- now use it
+	cake.fonts.load(1,1) -- make sure we have loaded the 8x8 font
+	font.set( cake.fonts.get(1) ) -- now use it
 	
 	return canvas
 end

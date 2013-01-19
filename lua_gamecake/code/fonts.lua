@@ -1,34 +1,29 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-
-module("wetgenes.gamecake.fonts")
-
 local zips=require("wetgenes.zips")
 
 local ft=require("wetgenes.freetype")
 local grd=require("wetgenes.grd")
 local wwin=require("wetgenes.win")
 
-
 local core=require("wetgenes.gamecake.core")
 
-function bake(opts)
 
-	local fonts={}
-	
-	fonts.cake=opts.cake
-	fonts.gl=opts.gl
-	
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+function M.bake(state,fonts)
+
 	fonts.data={}
 	
+	local opts=state.opts
+	local cake=state.cake
+	local gl=state.gl
+
 	fonts.zip=opts.zip
 	fonts.prefix=opts.fontprefix or "data/fonts/"
 	fonts.postfix=opts.fontpostfix or ".ttf"
-
-
-	local cake=fonts.cake
-	local gl=fonts.gl
 
 
 fonts.get=function(id)
@@ -109,7 +104,7 @@ print("Loading font 8x8")
 
 			end
 
-			t.images[1]=fonts.cake.images.upload_grd(nil,g) -- send to opengl
+			t.images[1]=cake.images.upload_grd(nil,g) -- send to opengl
 
 		end
 		
@@ -188,7 +183,7 @@ print("Loading font ",fname,#d)
 
 	-- we keep the ttf font in memory around so we can reload chars or load new chars as we need them
 
-			t.images[1]=fonts.cake.images.upload_grd(nil,g) -- send to opengl
+			t.images[1]=cake.images.upload_grd(nil,g) -- send to opengl
 
 			
 		end

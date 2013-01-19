@@ -114,7 +114,7 @@ float *fb;
 		lua_toluserdata(l,2,&len);
 		count=((len+1-UDALIGN)/4);
 		if(lua_isnumber(l,3)) { count=(int)lua_tonumber(l,3); } // need to know how many floats to set?
-		if(count<=0) { count=1; } // sanity
+		if(count< 1) { count= 1; } // sanity
 		if(count>16) { count=16; } // sanity
 		fb=(float *)lua_tardis_uda(l,2);
 		for(i=0;i<count;i++)
@@ -126,7 +126,7 @@ float *fb;
 	{
 		for(i=0;i<16;i++)
 		{
-			if(lua_isnil(l,2+i)) { break; }
+			if(lua_isnil(l,2+i)) { break; } // stop on first nil
 			fa[i]=(float)lua_tonumber(l,2+i);
 		}
 	}
@@ -148,6 +148,45 @@ int i=(int)lua_tonumber(l,2);
 	fa[i-1]=(float)lua_tonumber(l,3);
 	return 0;
 }
+
+static int lua_tardis_compare (lua_State *l)
+{
+int count=16;
+int i;
+float *fa=(float *)lua_tardis_uda(l,1);
+float *fb=(float *)lua_tardis_uda(l,1);
+
+	if(!fa)
+	{
+		if(!fb) // both nil, so they are equal
+		{
+			lua_pushboolean(l,1);
+			return 1;
+		}
+		else // not equal
+		{
+			lua_pushboolean(l,0);
+			return 1;
+		}
+	}
+
+	if(lua_isnumber(l,3)) { count=(int)lua_tonumber(l,3); } // need to know how many floats?
+	if(count< 1) { count= 1; } // sanity
+	if(count>16) { count=16; } // sanity
+
+	for(i=0;i<count;i++)
+	{
+		if( fa[i] != fb[i] ) // compare failed
+		{
+			lua_pushboolean(l,0);
+			return 1;
+		}
+	}
+
+	lua_pushboolean(l,1);
+	return 1;
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -201,6 +240,8 @@ float r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16;
 	r14= (fa[12+0]*fb[   1]) + (fa[12+1]*fb[ 4+1]) + (fa[12+2]*fb[ 8+1]) + (fa[12+3]*fb[12+1]);
 	r15= (fa[12+0]*fb[   2]) + (fa[12+1]*fb[ 4+2]) + (fa[12+2]*fb[ 8+2]) + (fa[12+3]*fb[12+2]);
 	r16= (fa[12+0]*fb[   3]) + (fa[12+1]*fb[ 4+3]) + (fa[12+2]*fb[ 8+3]) + (fa[12+3]*fb[12+3]);
+
+// fc may == fa or fb so we have to cache then write.
 
 	fc[ 0]=r1;	fc[ 1]=r2;	fc[ 2]=r3;	fc[ 3]=r4;
 	fc[ 4]=r5;	fc[ 5]=r6;	fc[ 6]=r7;	fc[ 7]=r8;
@@ -453,6 +494,7 @@ LUALIB_API int luaopen_wetgenes_tardis_core (lua_State *l)
 		{"set",						lua_tardis_set},
 		{"read",					lua_tardis_read},
 		{"write",					lua_tardis_write},
+		{"compare",					lua_tardis_compare},
 
 		{"new_m4",					lua_tardis_new_m4},		
 		{"new_v4",					lua_tardis_new_v4},

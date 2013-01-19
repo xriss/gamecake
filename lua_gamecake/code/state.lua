@@ -9,16 +9,55 @@ local wstr=require("wetgenes.string")
 
 local function print(...) return _G.print(...) end
 
-module(...)
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(opts)
+function M.bake(opts)
 
 	local state={}
 
 		state.opts=opts
+		opts.state=state
+		
 		state.baked={}
 		state.mods={}
+
+-- you may perform this bake_cake yourself if you want more control in an app
 		
+		function state.bake_cake()
+
+			state.frame_rate=1/opts.fps -- how fast we want to run
+			state.frame_time=0
+
+			state.gl=require("glescode").create( require("gles").gles2 )
+
+			local inf={width=opts.width,height=opts.height,title=opts.title}
+			local screen=wwin.screen()
+
+			inf.x=(screen.width-inf.width)/2
+			inf.y=(screen.height-inf.height)/2
+
+			state.win=wwin.create(inf)
+			state.win:context({})
+
+			state.rebake("wetgenes.gamecake") -- bake the cake into the state,
+
+			-- the order these are added is important for priority, top of list is lowest priority, bottom is highest.
+			state.require_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style escape menu
+			state.require_mod("wetgenes.gamecake.mods.console") -- console gives us a quake style tilda console
+			state.require_mod("wetgenes.gamecake.mods.keys") -- touchscreen keys and posix keymaping
+			state.require_mod("wetgenes.gamecake.mods.mouse") -- auto fake mouse on non window builds
+			state.require_mod("wetgenes.gamecake.mods.layout") -- screen layout options
+
+			if opts.state_next then
+				state.next=state.rebake(opts.state_next)
+			end
+			
+			return state
+		end
+		
+
+
 -- require and bake state.baked[modules] in such a way that it can have simple circular dependencies
 
 		function state.rebake(name)
@@ -54,8 +93,8 @@ function bake(opts)
 			
 			return m
 		end
-
 		
+
 		if opts.times then
 			state.times={}
 			function state.times.create()
@@ -141,6 +180,9 @@ function bake(opts)
 		function state.start()	
 			state.win:start()
 			state.cake.start()
+			if state.canvas then
+				state.canvas.start()
+			end
 			if state.now and state.now.start then
 				state.now.start()
 			end
@@ -149,6 +191,9 @@ function bake(opts)
 		function state.stop()
 			state.win:stop()
 			state.cake.stop()
+			if state.canvas then
+				state.canvas.stop()
+			end
 			if state.now and state.now.stop then
 				state.now.stop()
 			end
@@ -191,6 +236,10 @@ function bake(opts)
 		end
 
 		function state.draw()
+		
+			if state.canvas then -- use each vb only once per frame
+				state.canvas.draw()
+			end
 			
 --print( "DRAW",math.floor(10000000+(state.win:time()*1000)%1000000) )
 
