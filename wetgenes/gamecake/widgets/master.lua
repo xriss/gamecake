@@ -77,6 +77,8 @@ function wmaster.setup(widget,def)
 		gl.Disable(gl.CULL_FACE)
 		gl.Disable(gl.LIGHTING)
 		gl.Disable(gl.DEPTH_TEST)
+
+		gl.MatrixMode(gl.MODELVIEW)
 		gl.PushMatrix()
 		
 --[[

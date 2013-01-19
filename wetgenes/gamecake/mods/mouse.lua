@@ -27,7 +27,7 @@ function M.bake(state,mouse)
 	local cake=state.cake
 	local gl=cake.gl
 
-	local canvas=state.canvas.child()
+	local canvas=cake.canvas.child()
 	canvas.layout=false
 	local font=canvas.font
 	local flat=canvas.flat

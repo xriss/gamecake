@@ -27,8 +27,15 @@ function M.bake(state,console)
 
 	console.call = {} -- name -> function : functions that should be easily to call on the console command line
 
-	local canvas=state.canvas.child()
+	local gl=state.gl
+	local cake=state.cake
+	local canvas=cake.canvas.child()
 	canvas.layout=false
+
+	local win=state.win
+	local font=canvas.font
+	local flat=canvas.flat
+
 
 	function console.setup()
 		console.replace_print(_G)
@@ -194,12 +201,9 @@ function M.bake(state,console)
 	
 	function console.draw()
 	
-		local win=state.win
-		local cake=state.cake
-		local canvas=state.canvas
-		local font=canvas.font
-		local flat=canvas.flat
-		local gl=cake.gl
+font.vbs_idx=1
+
+
 
 		if state.times and state.win then -- simple benchmarking
 		
@@ -254,6 +258,11 @@ function M.bake(state,console)
 
 		font.set(cake.fonts.get(1))
 		font.set_size(8,0)
+		
+		local fontdraw2=false
+		local function fontdraw(t)
+			if fontdraw2 then font.draw2(t) else fontdraw2=true font.draw(t) end
+		end
 
 		if console.y > 0 then
 		
@@ -268,18 +277,18 @@ function M.bake(state,console)
 			while y>-8 and i>0 do
 			
 				font.set_xy(0,y)
-				font.draw(console.lines[i])
+				fontdraw(console.lines[i])
 				
 				y=y-8
 				i=i-1
 			end
 					
 			font.set_xy(0,console.y-8)
-			font.draw(">"..console.buff.line)
+			fontdraw(">"..console.buff.line)
 
 			if console.buff.throb > 128 then
 				font.set_xy((console.buff.line_idx+1)*8,console.y-8)
-				font.draw("_")
+				fontdraw("_")
 			end
 			
 		end
@@ -296,8 +305,8 @@ function M.bake(state,console)
 			for i,v in ipairs(console.lines_display) do
 			
 				font.set_xy(0,console.y+i*8-8)
-				font.draw(v)
-			
+				fontdraw(v)
+
 			end
 		end
 

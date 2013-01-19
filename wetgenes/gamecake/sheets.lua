@@ -2,28 +2,25 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
-module("wetgenes.gamecake.sheets")
-
-
 local grd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 
 
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(opts)
+function M.bake(state,sheets)
 
 local base_sheet={}
 local meta_sheet={__index=base_sheet}
 
 	local sheets={}
-	
-	sheets.cake=opts.cake
-	sheets.gl=opts.gl
-	
+		
 	sheets.data={}
 	
-	local gl=sheets.gl
-	local cake=sheets.cake
+	local opts=state.opts
+	local cake=state.cake
+	local gl=state.gl
 	local images=cake.images
 	
 sheets.get=function(id)
@@ -229,22 +226,46 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 		end
 	end
 	
-	gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)
-	gl.BindBuffer(gl.ARRAY_BUFFER,sheet.vbuf)
 	
 	local p=gl.program("pos_tex")
 	
-	gl.UseProgram( p[0] )
-	gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
-	gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+	if sheets.UseSheet~=sheet then
+	
+		sheets.UseSheet=sheet
 
-	gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,5*4,0)
-	gl.EnableVertexAttribArray(p:attrib("a_vertex"))
+		gl.BindBuffer(gl.ARRAY_BUFFER,sheet.vbuf)
+
+		gl.UseProgram( p[0] )
+		gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+		gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+
+		gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,5*4,0)
+		gl.EnableVertexAttribArray(p:attrib("a_vertex"))
+			
+		gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,5*4,3*4)
+		gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
 		
-	gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,5*4,3*4)
-	gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
 
-	gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
+	else
+	
+		if gl.matrixdirty(gl.MODELVIEW) then
+			gl.matrixclean(gl.MODELVIEW)
+			gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+		end
+	
+	end
+
+	if gl.fix.cache.texture~=sheet.img.id then
+		gl.fix.cache.texture=sheet.img.id
+		gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)
+	end
+
+	if gl.fix.cache.color~=gl.fix.color then -- try  not to update the color?
+		gl.fix.cache.color=gl.fix.color
+		gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
+	end
+
+--	gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
 
 	gl.core.DrawArrays(gl.TRIANGLE_STRIP,(i-1)*4,4)
 
@@ -252,6 +273,8 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 		gl.PopMatrix()
 	end
 	
+--	gl.fix.cache.UseProgram=p[0]
+
 	return sheet
 
 end

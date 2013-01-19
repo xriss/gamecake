@@ -2,27 +2,21 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
-module("wetgenes.gamecake.images")
-
 local grd=require("wetgenes.grd")
 local zips=require("wetgenes.zips")
 
 
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(opts)
-
-	local images={}
+function M.bake(state,images)
 	
-	images.cake=opts.cake
-	images.gl=opts.gl
-	
-	local cake=images.cake
-	local gl=images.gl
+	local opts=state.opts
+	local cake=state.cake
+	local gl=state.gl
 		
 	images.data={}
 	
-	images.fmt=opts.cake.images_fmt
-	images.zip=opts.zip
 	images.prefix=opts.grdprefix or "data/"
 	images.postfix=opts.grdpostfix or ".png"
 
@@ -75,14 +69,7 @@ print("loading",filename,id)
 		
 		t.filename=filename
 		return t
-	else
-	
-		assert(g:convert(images.fmt))
-		
-		images.set(g,id)
 
-		g.filename=filename
-		return g
 	end
 	
 end

@@ -24,7 +24,8 @@ function M.bake(state,escmenu)
 		height=480,
 	}
 
-	local canvas=state.canvas.child()
+	local cake=state.cake
+	local canvas=cake.canvas.child()
 	canvas.layout=false
 
 	function escmenu.setup()

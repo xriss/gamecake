@@ -3,8 +3,13 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 -- generate a place to compile gl code into
 -- this also contains matrix manipulation functions in the style of normal gl
+-- and a simple Color replacement that just caches the color here for later use
 
 local tardis=require("wetgenes.tardis")
+local tcore=require("wetgenes.tardis.core")
+
+local core=require("gles.core")
+
 
 local glescode={}
 
@@ -16,6 +21,16 @@ function glescode.create(gl)
 
 	local code={}
 	setmetatable(code,{__index=gl}) -- so we can reference extra gl bits easily
+	
+	code.cache={}
+	code.cache.color=tcore.new_v4()
+	
+	function code.Color(...)
+		tcore.set(code.cache.color,...) -- may not set anything if no arguments are given
+		return code.cache.color -- safest way of getting this value (a 4 float userdata)
+	end
+
+
 
 -- matrix functions
 
@@ -43,19 +58,23 @@ function glescode.create(gl)
 		code.stack_mode=mode
 		code.stack=code.stacks[code.stack_mode]
 		if not code.stack then -- create on use
-			code.stack={ tardis.m4.new() , dirty=true }
+--			code.stack={ tardis.m4.new() , dirty=true }
+			local m4=tcore.new_m4() tcore.m4_identity(m4)
+			code.stack={ m4 , dirty=true }
 			code.stacks[code.stack_mode]=code.stack
 		end
 		code.stack_matrix=assert(code.stack[#code.stack])
 	end
 
 	function code.LoadMatrix(...)
-		code.stack_matrix:set(...)
+--		code.stack_matrix:set(...)
+		tcore.set(code.stack_matrix,...)
 		code.stack.dirty=true
 	end
 
 	function code.MultMatrix(a)
-		tardis.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
+--		tardis.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
+		tcore.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
 		code.stack.dirty=true
 	end
 
@@ -64,27 +83,33 @@ function glescode.create(gl)
 	end
 
 	function code.LoadIdentity()
-		code.stack_matrix:identity()
+--		code.stack_matrix:identity()
+		tcore.m4_identity(code.stack_matrix)
 		code.stack.dirty=true
 	end
 
 	function code.Translate(vx,vy,vz)
-		code.stack_matrix:translate({vx,vy,vz})
+--		code.stack_matrix:translate({vx,vy,vz})
+		tcore.m4_translate(code.stack_matrix,vx,vy,vz)
 		code.stack.dirty=true
 	end
 
 	function code.Rotate(d,vx,vy,vz)
-		code.stack_matrix:rotate(d,{vx,vy,vz})
+--		code.stack_matrix:rotate(d,{vx,vy,vz})
+		tcore.m4_rotate(code.stack_matrix,d,vx,vy,vz)
 		code.stack.dirty=true
 	end
 
 	function code.Scale(vx,vy,vz)
-		code.stack_matrix:scale_v3({vx,vy,vz})
+--		code.stack_matrix:scale_v3({vx,vy,vz})
+		tcore.m4_scale_v3(code.stack_matrix,vx,vy,vz)
 		code.stack.dirty=true
 	end
 
 	function code.PushMatrix()		
-		code.stack[#code.stack+1]=tardis.m4.new(code.stack_matrix) -- duplicate to new top
+--		code.stack[#code.stack+1]=tardis.m4.new(code.stack_matrix) -- duplicate to new top
+		local m4=tcore.new_m4() tcore.set(m4,code.stack_matrix,16)
+		code.stack[#code.stack+1]=m4
 		code.stack_matrix=assert(code.stack[#code.stack])
 		code.stack.dirty=true
 	end
@@ -99,7 +124,17 @@ function glescode.create(gl)
 
 	code.shaders={}
 	code.programs={}
-		
+	code.defines={}
+
+-- default shader prefix to use when building
+	code.defines.shaderprefix="#version 100\nprecision mediump float;\n"
+
+	if core.fixed_pipeline_available then -- probably desktop GL so needs haxtbh
+	
+		code.defines.shaderprefix="#version 120\n"
+
+	end
+	
 -- forget cached info when we lose context, it is important to call this
 	function code.forget()
 		for i,v in pairs(code.shaders) do
@@ -162,6 +197,7 @@ function glescode.create(gl)
 		if not p[0] then
 			setmetatable(p,pmeta)
 
+			p.cache={}
 			p.vars={}
 			p[0]=gl.CreateProgram()
 			
@@ -200,6 +236,20 @@ function glescode.create(gl)
 		r=gl.GetUniformLocation(p[0],vname)
 		p.vars[vname]=r
 		return r
+	end
+ 	
+-- set attribs
+ 	function pbase.attrib_ptr(p,vname,size,gltype,normalize,stride,ptr)
+	end
+	function pbase.attrib_stream(p,vname,onoff)
+	end
+	function pbase.attrib_v4(p,vname,v4)
+	end
+
+-- set uniform
+	function pbase.uniform_v4(p,vname,v4)
+	end
+	function pbase.uniform_m4(p,vname,m4)
 	end
 	
 	return code

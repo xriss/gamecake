@@ -49,7 +49,7 @@ wskin=wskin or {}
 local cake=state.cake
 local images=cake.images
 local sheets=cake.sheets
-local canvas=state.canvas
+local canvas=cake.canvas
 local font=canvas.font
 local flat=canvas.flat
 

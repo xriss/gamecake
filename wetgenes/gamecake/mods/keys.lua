@@ -438,7 +438,8 @@ function M.bake(state,keys)
 	keys=keys or {}
 
 	local win=state.win
-	local canvas=state.canvas.child()
+	local cake=state.cake
+	local canvas=cake.canvas.child()
 	canvas.layout=state.rebake("wetgenes.gamecake.mods.layout").keys
 
 	if win.flavour=="raspi" then
