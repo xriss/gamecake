@@ -4,7 +4,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets.drag")
 
-function bake(state,wdrag)
+function bake(oven,wdrag)
 wdrag=wdrag or {}
 
 function wdrag.mouse(widget,act,x,y,key)

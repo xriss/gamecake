@@ -4,14 +4,14 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-M.bake=function(state,keys)
+M.bake=function(oven,keys)
 
 	keys=keys or {}
 	
-	local cake=state.cake
+	local cake=oven.cake
 	local canvas=cake.canvas
 	
-	local recaps=state.rebake("wetgenes.gamecake.spew.recaps")
+	local recaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 	
 	keys.defaults={}
 	keys.defaults[0]={
@@ -70,7 +70,7 @@ M.bake=function(state,keys)
 	end
 
 
--- convert keys or whatever into state recaps changes
+-- convert keys or whatever into recaps changes
 	function keys.msg(m)
 		if not keys.up then return end
 		

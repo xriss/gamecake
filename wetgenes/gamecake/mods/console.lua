@@ -16,7 +16,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 local buffedit=require("wetgenes.gamecake.mods.console.buffedit")
 
 
-function M.bake(state,console)
+function M.bake(oven,console)
 
 	console=console or {}
 
@@ -27,12 +27,12 @@ function M.bake(state,console)
 
 	console.call = {} -- name -> function : functions that should be easily to call on the console command line
 
-	local gl=state.gl
-	local cake=state.cake
+	local gl=oven.gl
+	local cake=oven.cake
 	local canvas=cake.canvas.child()
 	canvas.layout=false
 
-	local win=state.win
+	local win=oven.win
 	local font=canvas.font
 	local flat=canvas.flat
 
@@ -40,7 +40,7 @@ function M.bake(state,console)
 	function console.setup()
 		console.replace_print(_G)
 	
-		state.cake.fonts.loads({1}) -- load builtin font number 1 a basic 8x8 font
+		oven.cake.fonts.loads({1}) -- load builtin font number 1 a basic 8x8 font
 
 		console.buff=buffedit.create() -- create buff edit
 		console.buff.enter=function(_,line) console.dump_eval(line) end
@@ -205,9 +205,9 @@ font.vbs_idx=1
 
 
 
-		if state.times and state.win then -- simple benchmarking
+		if oven.times and oven.win then -- simple benchmarking
 		
-			local t=state.win.time()
+			local t=oven.win.time()
 
 		-- count frames	
 			if (not console.fps) or t-console.fps_last >= 1 then -- update with average value once a sec
@@ -218,14 +218,14 @@ font.vbs_idx=1
 			
 			end
 			
-			state.times.update.done()
-			state.times.draw.done()
+			oven.times.update.done()
+			oven.times.draw.done()
 
 			local gci=gcinfo()
 			local s=string.format("fps=%02.0f %02.2f/%02.2f mem=%0.0fk",
 				console.fps,
-				(state.times.update.time*1000),
-				(state.times.draw.time*1000),
+				(oven.times.update.time*1000),
+				(oven.times.draw.time*1000),
 				math.floor(gci) )
 			
 			if gl.patch_functions_method=="disable" then
@@ -238,8 +238,8 @@ font.vbs_idx=1
 		end
 
 
---		state.win:info()
-		local w,h=state.win.width,state.win.height
+--		oven.win:info()
+		local w,h=oven.win.width,oven.win.height
 		gl.Viewport(0,0,w,h)
 		canvas.gl_default() -- reset gl state
 
@@ -259,11 +259,6 @@ font.vbs_idx=1
 		font.set(cake.fonts.get(1))
 		font.set_size(8,0)
 		
-		local fontdraw2=false
-		local function fontdraw(t)
-			if fontdraw2 then font.draw2(t) else fontdraw2=true font.draw(t) end
-		end
-
 		if console.y > 0 then
 		
 			gl.Color(pack.argb4_pmf4(0xc040))
@@ -276,18 +271,18 @@ font.vbs_idx=1
 			while y>-8 and i>0 do
 			
 				font.set_xy(0,y)
-				fontdraw(console.lines[i])
+				font.draw(console.lines[i])
 				
 				y=y-8
 				i=i-1
 			end
 					
 			font.set_xy(0,console.y-8)
-			fontdraw(">"..console.buff.line)
+			font.draw(">"..console.buff.line)
 
 			if console.buff.throb > 128 then
 				font.set_xy((console.buff.line_idx+1)*8,console.y-8)
-				fontdraw("_")
+				font.draw("_")
 			end
 			
 		end
@@ -304,7 +299,7 @@ font.vbs_idx=1
 			for i,v in ipairs(console.lines_display) do
 			
 				font.set_xy(0,console.y+i*8-8)
-				fontdraw(v)
+				font.draw(v)
 
 			end
 		end

@@ -13,14 +13,14 @@ local snames=require("wetgenes.gamecake.spew.names")
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
-M.bake=function(state,gui)
+M.bake=function(oven,gui)
 
 	gui=gui or {} 
 	gui.modname=M.modname
 
 	gui.pages={} -- put functions to fill in pages in here
 
-	local cake=state.cake
+	local cake=oven.cake
 	local sounds=cake.sounds
 
 
@@ -30,11 +30,11 @@ M.bake=function(state,gui)
 --		gui.page()
 	end
 	
-	local wdata=state.rebake("wetgenes.gamecake.widgets.data")
-	local mkeys=state.rebake("wetgenes.gamecake.mods.keys")
-	local sprofiles=state.rebake("wetgenes.gamecake.spew.profiles")
+	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
+	local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
+	local sprofiles=oven.rebake("wetgenes.gamecake.spew.profiles")
 	
---	local bpages=state.rebake("bulb.pages")
+--	local bpages=oven.rebake("bulb.pages")
 	
 	gui.ids={}
 	gui.data={}
@@ -162,7 +162,7 @@ print("click",id)
 	function gui.page(pname)
 		
 		if not gui.master then
-			gui.master=state.rebake("wetgenes.gamecake.widgets").setup({hx=320,hy=480})
+			gui.master=oven.rebake("wetgenes.gamecake.widgets").setup({hx=320,hy=480})
 		end
 	
 		gui.master:clean_all()

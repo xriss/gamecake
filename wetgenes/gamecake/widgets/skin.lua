@@ -41,11 +41,11 @@ end
 
 module("wetgenes.gamecake.widgets.skin")
 
-function bake(state,wskin)
+function bake(oven,wskin)
 wskin=wskin or {}
 
-local gl=state.gl
-local cake=state.cake
+local gl=oven.gl
+local cake=oven.cake
 local images=cake.images
 local sheets=cake.sheets
 local canvas=cake.canvas
@@ -76,8 +76,6 @@ function wskin.load(name)
 	
 	wskin.unload()
 	
-	local images=state.cake.images
-
 	if name then -- load a named skin
 	
 		if name=="soapbar" then

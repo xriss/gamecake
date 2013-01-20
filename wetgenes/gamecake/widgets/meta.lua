@@ -6,7 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets.meta")
 
-function bake(state,wmeta)
+function bake(oven,wmeta)
 wmeta=wmeta or {}
 
 -- available widget classes
@@ -14,18 +14,18 @@ wmeta.classes={
 
 -- base classes
 
-	["master"]=state.rebake("wetgenes.gamecake.widgets.master"),
-	["button"]=state.rebake("wetgenes.gamecake.widgets.button"),
-	["drag"]=state.rebake("wetgenes.gamecake.widgets.drag"),
-	["text"]=state.rebake("wetgenes.gamecake.widgets.text"),
-	["textedit"]=state.rebake("wetgenes.gamecake.widgets.textedit"),
+	["master"]=oven.rebake("wetgenes.gamecake.widgets.master"),
+	["button"]=oven.rebake("wetgenes.gamecake.widgets.button"),
+	["drag"]=oven.rebake("wetgenes.gamecake.widgets.drag"),
+	["text"]=oven.rebake("wetgenes.gamecake.widgets.text"),
+	["textedit"]=oven.rebake("wetgenes.gamecake.widgets.textedit"),
 
 --classes built out of the base classes
 
-	["pan"]=state.rebake("wetgenes.gamecake.widgets.pan"),
-	["slide"]=state.rebake("wetgenes.gamecake.widgets.slide"),
+	["pan"]=oven.rebake("wetgenes.gamecake.widgets.pan"),
+	["slide"]=oven.rebake("wetgenes.gamecake.widgets.slide"),
 
-	["scroll"]=state.rebake("wetgenes.gamecake.widgets.scroll"),
+	["scroll"]=oven.rebake("wetgenes.gamecake.widgets.scroll"),
 
 }
 

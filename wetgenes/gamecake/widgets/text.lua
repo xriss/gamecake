@@ -4,7 +4,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets.text")
 
-function bake(state,wtext)
+function bake(oven,wtext)
 wtext=wtext or {}
 
 function wtext.mouse(widget,act,x,y,key)

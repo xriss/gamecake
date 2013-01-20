@@ -14,7 +14,7 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(state,layout)
+function M.bake(oven,layout)
 
 	layout=layout or {}
 
@@ -28,20 +28,20 @@ function M.bake(state,layout)
 	layout.keys={}	-- a place to type on devices without a keyboard
 	layout.chat={}  -- a place to view what other people type
 
-	local cake=state.cake
+	local cake=oven.cake
 	local canvas=cake.canvas
 
 	canvas.layout=canvas.layout or layout.main -- set base canvas layout if not already set
 
 	function layout.cycle_mode()
 		if layout.mode=="main" then
-			if state.mods["wetgenes.gamecake.mods.chat"] then
+			if oven.mods["wetgenes.gamecake.mods.chat"] then
 				layout.mode="main+chat"
-			elseif state.mods["wetgenes.gamecake.mods.keys"] then
+			elseif oven.mods["wetgenes.gamecake.mods.keys"] then
 				layout.mode="main+keys"
 			end
 		elseif layout.mode=="main+chat" then
-			if state.mods["wetgenes.gamecake.mods.keys"] then
+			if oven.mods["wetgenes.gamecake.mods.keys"] then
 				layout.mode="main+chat+keys"
 			else
 				layout.mode="main"
@@ -65,10 +65,10 @@ function M.bake(state,layout)
 
 	function layout.update()
 
-		state.win:info()
+		oven.win:info()
 		
-		local w=state.win.width
-		local h=state.win.height
+		local w=oven.win.width
+		local h=oven.win.height
 				
 		layout.main.active=false
 		layout.keys.active=false

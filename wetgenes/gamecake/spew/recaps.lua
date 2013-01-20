@@ -4,14 +4,14 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-M.bake=function(state,recaps)
+M.bake=function(oven,recaps)
 
 	recaps=recaps or {} 
 	
-	local cake=state.cake
+	local cake=oven.cake
 	local canvas=cake.canvas
 	
-	local keys=state.rebake("wetgenes.gamecake.spew.keys")
+	local keys=oven.rebake("wetgenes.gamecake.spew.keys")
 
 
 	function recaps.setup(max_up)

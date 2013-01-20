@@ -4,7 +4,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets.button")
 
-function bake(state,wbutton)
+function bake(oven,wbutton)
 wbutton=wbutton or {}
 
 

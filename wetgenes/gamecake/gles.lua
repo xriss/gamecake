@@ -8,24 +8,18 @@ local tardis=require("wetgenes.tardis")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(state,gles)
+function M.bake(oven,gles)
 
-	if not state.gl then -- need a gles2 wrapped in glescode
+	if not oven.gl then -- need a gles2 wrapped in glescode
 	
-		state.gl=require("glescode").create( require("gles").gles2 )
+		oven.gl=require("glescode").create( require("gles").gles2 )
 		
-		state.gl.GetExtensions()
+		oven.gl.GetExtensions()
 		
 	end
 
-	local gl=state.gl
+	local gl=oven.gl
 
---[[
-	gl.fix={}
-	gl.fix.client={}
-	gl.fix.cache={}
-	gl.fix.pointer={}
-]]
 
 	gl.shaders.v_pos_tex={
 	source=gl.defines.shaderprefix..[[
@@ -161,130 +155,7 @@ void main(void)
 		fshaders={"f_color"},
 	}
 
---	function gl.Color(...)
---		gl.fix.color={...}
---	end
-
---[[
-	local function EnableDisable(n,v)
--- need to catch stuff that we suport in our fake fixed pipeline and gles2 does not understand
-
-		if n then
-			gl.fix.client[n]=v and true or false -- remember state
-		
-			if 			n==gl.LIGHTING 			then
-			elseif 	n==gl.TEXTURE_2D 		then
-			else
-				if v then gles.Enable(n) else gles.Disable(n) end -- pass on
-			end
-		end
-		
-	end
-	function gl.Enable(n)
-		EnableDisable(n,true)
-	end
-	function gl.Disable(n)
-		EnableDisable(n,false)
-	end
-]]
-
-
-
---[[
-	function gl.EnableClientState(n)
-		gl.fix.client[n]=true
-	end
-	function gl.DisableClientState(n)
-		gl.fix.client[n]=false
-	end
-
-	function gl.VertexPointer(...)
-		gl.fix.pointer.vertex={...}
-	end
-	function gl.TexCoordPointer(...)
-		gl.fix.pointer.texcoord={...}
-	end
-	function gl.ColorPointer(...)
-		gl.fix.pointer.color={...}
-	end
-]]
-
---[[
-	function gl.DrawArrays(...) -- make sure state is set before doing
-	
-		local p
-		
-		local got_color=gl.fix.client[gl.COLOR_ARRAY]
-		local got_tex=gl.fix.client[gl.TEXTURE_COORD_ARRAY]
-		
-		if got_tex then
-		
-			if got_color then
-				p=gl.program("pos_tex_color")			
-			else
-				p=gl.program("pos_tex")
-			end
-		else
-		
-			if got_color then
-				p=gl.program("pos_color")
-			else
-				p=gl.program("pos")
-			end
-		end
-
-
-
---hotspot? dont call repeatedly if we can avoid it, these may not change much between invocations?		
-		if gl.fix.cache.UseProgram~=p[0] then
-			gl.fix.cache.color=nil
-			gl.fix.cache.UseProgram=p[0]
-			gl.UseProgram( p[0] )
-			gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
-			gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
-			gl.matrixclean(gl.MODELVIEW)
-			gl.matrixclean(gl.PROJECTION)
-		else
-			if gl.matrixdirty(gl.MODELVIEW) then
-				gl.matrixclean(gl.MODELVIEW)
-				gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
-			end
-			if gl.matrixdirty(gl.PROJECTION) then
-				gl.matrixclean(gl.PROJECTION)
-				gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
-			end		
-		end
-		
-		local v=gl.fix.pointer.vertex
-		gl.VertexAttribPointer(p:attrib("a_vertex"),v[1],v[2],gl.FALSE,v[3],v[4])
-		gl.EnableVertexAttribArray(p:attrib("a_vertex"))
-		
-		if got_tex then
-			local v=gl.fix.pointer.texcoord
-			gl.VertexAttribPointer(p:attrib("a_texcoord"),v[1],v[2],gl.FALSE,v[3],v[4])
-			gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
-		end
-
-		if got_color then
-			local v=gl.fix.pointer.color
-			gl.VertexAttribPointer(p:attrib("a_color"),v[1],v[2],gl.FALSE,v[3],v[4])
-			gl.EnableVertexAttribArray(p:attrib("a_color"))
-		end
-
---		gl.VertexAttrib4f(p:attrib("color"), 1,1,1,1 )
-
---		gl.Uniform1i(p:uniform("tex"), 0 )
-
-		if gl.fix.cache.color~=gl.fix.color then -- try  not to update the color?
-			gl.fix.cache.color=gl.fix.color
-			gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
-		end
-		
-		gl.core.DrawArrays(...)
-		
-		gl.fix.pointer={} -- start again, old pointers are lost
-	end
-]]
+-- we have mostly squirted extra stuff into oven.gl
 
 	return gles
 

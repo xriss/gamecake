@@ -9,7 +9,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets.pan")
 
-function bake(state,wpan)
+function bake(oven,wpan)
 wpan=wpan or {}
 
 function wpan.mouse(widget,act,x,y,key)

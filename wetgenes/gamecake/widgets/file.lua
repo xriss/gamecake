@@ -8,7 +8,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets.file")
 
-function bake(state,wfile)
+function bake(oven,wfile)
 wfile=wfile or {}
 
 function wfile.mouse(widget,act,x,y,key)

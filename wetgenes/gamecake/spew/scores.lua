@@ -4,11 +4,11 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-M.bake=function(state,scores)
+M.bake=function(oven,scores)
 
 	scores=scores or {} 
 	
-	local cake=state.cake
+	local cake=oven.cake
 	local canvas=cake.canvas
 	
 	function scores.setup(max_up)

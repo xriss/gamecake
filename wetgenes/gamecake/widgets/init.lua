@@ -13,11 +13,11 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets")
 
-function bake(state,widgets)
+function bake(oven,widgets)
 widgets=widgets or {}
 
-local wmeta=state.rebake("wetgenes.gamecake.widgets.meta")
-local wskin=state.rebake("wetgenes.gamecake.widgets.skin")
+local wmeta=oven.rebake("wetgenes.gamecake.widgets.meta")
+local wskin=oven.rebake("wetgenes.gamecake.widgets.skin")
 
 --
 -- create a master widget

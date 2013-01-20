@@ -8,7 +8,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets.scroll")
 
-function bake(state,wscroll)
+function bake(oven,wscroll)
 wscroll=wscroll or {}
 
 

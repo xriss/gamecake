@@ -10,12 +10,12 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets.master")
 
-function bake(state,wmaster)
+function bake(oven,wmaster)
 wmaster=wmaster or {}
 
-local gl=state.gl
-local cake=state.cake
-local canvas=state.canvas
+local gl=oven.gl
+local cake=oven.cake
+local canvas=oven.canvas
 
 --
 -- add meta functions

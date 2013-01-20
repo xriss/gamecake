@@ -6,9 +6,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(state,cake)
+function M.bake(oven,cake)
 
-	state.cake=cake
+	oven.cake=cake
 		
 	cake.setup = function()
 		cake.sounds.setup()
@@ -42,13 +42,13 @@ function M.bake(state,cake)
 	end
 
 
-	cake.gles 	 = state.rebake("wetgenes.gamecake.gles") -- initalise gles and manage our shaders
-	cake.buffers = state.rebake("wetgenes.gamecake.buffers") -- generic buffer memory is now complex thanks to retardroid
-	cake.images  = state.rebake("wetgenes.gamecake.images") -- we will need to load some images
-	cake.sheets  = state.rebake("wetgenes.gamecake.sheets") -- we will need to manage some sprite sheets
-	cake.fonts   = state.rebake("wetgenes.gamecake.fonts") -- we will need to load some fonts
-	cake.sounds  = state.rebake("wetgenes.gamecake.sounds") -- we will need to load some sounds
-	cake.canvas  = state.rebake("wetgenes.gamecake.canvas") -- a canvas contains current drawing state and functions
+	cake.gles 	 = oven.rebake("wetgenes.gamecake.gles") -- initalise gles and manage our shaders
+	cake.buffers = oven.rebake("wetgenes.gamecake.buffers") -- generic buffer memory is now complex thanks to retardroid
+	cake.images  = oven.rebake("wetgenes.gamecake.images") -- we will need to load some images
+	cake.sheets  = oven.rebake("wetgenes.gamecake.sheets") -- we will need to manage some sprite sheets
+	cake.fonts   = oven.rebake("wetgenes.gamecake.fonts") -- we will need to load some fonts
+	cake.sounds  = oven.rebake("wetgenes.gamecake.sounds") -- we will need to load some sounds
+	cake.canvas  = oven.rebake("wetgenes.gamecake.canvas") -- a canvas contains current drawing state and functions
 	
 
 

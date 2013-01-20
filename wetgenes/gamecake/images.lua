@@ -9,11 +9,11 @@ local zips=require("wetgenes.zips")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(state,images)
+function M.bake(oven,images)
 	
-	local opts=state.opts
-	local cake=state.cake
-	local gl=state.gl
+	local opts=oven.opts
+	local cake=oven.cake
+	local gl=oven.gl
 		
 	images.data={}
 	

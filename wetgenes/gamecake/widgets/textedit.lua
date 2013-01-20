@@ -9,12 +9,12 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets.textedit")
 
-function bake(state,wtextedit)
+function bake(oven,wtextedit)
 wtextedit=wtextedit or {}
 
-local cake=state.cake
+local cake=oven.cake
 
-local widget_data=state.rebake("wetgenes.gamecake.widgets.data")
+local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
 
 function wtextedit.mouse(widget,act,x,y,key)

@@ -11,7 +11,7 @@ local sod=require("wetgenes.sod")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(state,sounds)
+function M.bake(oven,sounds)
 
 	local str_func={}
 	local str_meta={__index=str_func}
@@ -19,8 +19,8 @@ function M.bake(state,sounds)
 	local sfx_func={}
 	local sfx_meta={__index=sfx_func}
 	
-	local opts=state.opts
-	local cake=state.cake
+	local opts=oven.opts
+	local cake=oven.cake
 
 
 	local sfxmax=opts.sfxmax or 4

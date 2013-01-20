@@ -8,7 +8,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 module("wetgenes.gamecake.widgets.data")
 
-function bake(state,wdata)
+function bake(oven,wdata)
 wdata=wdata or {}
 
 

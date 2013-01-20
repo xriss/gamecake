@@ -9,7 +9,7 @@ local pack=require("wetgenes.pack")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(state,sheets)
+function M.bake(oven,sheets)
 
 local base_sheet={}
 local meta_sheet={__index=base_sheet}
@@ -18,9 +18,9 @@ local meta_sheet={__index=base_sheet}
 		
 	sheets.data={}
 	
-	local opts=state.opts
-	local cake=state.cake
-	local gl=state.gl
+	local opts=oven.opts
+	local cake=oven.cake
+	local gl=oven.gl
 	local images=cake.images
 	
 sheets.get=function(id)

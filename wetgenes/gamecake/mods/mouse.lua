@@ -16,15 +16,15 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 local buffedit=require("wetgenes.gamecake.mods.console.buffedit")
 
 
-function M.bake(state,mouse)
+function M.bake(oven,mouse)
 
 	mouse=mouse or {}
 	mouse.modname=M.modname
 	
 	mouse.active=false
 
-	local win=state.win
-	local cake=state.cake
+	local win=oven.win
+	local cake=oven.cake
 	local gl=cake.gl
 
 	local canvas=cake.canvas.child()
@@ -64,7 +64,7 @@ function M.bake(state,mouse)
 	
 		if not mouse.active then return end
 
-		local w,h=state.win.width,state.win.height
+		local w,h=oven.win.width,oven.win.height
 		gl.Viewport(0,0,w,h)
 		canvas.gl_default() -- reset gl state
 

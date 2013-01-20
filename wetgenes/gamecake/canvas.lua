@@ -10,7 +10,7 @@ local tcore=require("wetgenes.tardis.core")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(state,canvas)
+function M.bake(oven,canvas)
 		
 -- link together sub parts
 	local font={}
@@ -18,84 +18,19 @@ function M.bake(state,canvas)
 	canvas.font,font.canvas=font,canvas
 	canvas.flat,flat.canvas=flat,canvas
 
-	local gl=state.gl
-	local cake=state.cake
-	local win=state.win
+	local gl=oven.gl
+	local cake=oven.cake
+	local win=oven.win
 	local images=cake.images
-
-
-canvas.blit = function(t,cx,cy,ix,iy,w,h,cw,ch)
-do return end
-
---print("gl_blit + ",nacl.time()," ",t.filename )
-	
---	cx=(cx or 0)+t.x -- handle adjustment of the x,y position
---	cy=(cy or 0)+t.y
-
-	ix=ix or 0
-	iy=iy or 0
-	w=w or t.width
-	h=h or t.height
-	cw=cw or w
-	ch=ch or h
-	
-	if cw==0 or ch==0 then return end -- nothing to draw
-	
-	local tw=t.texture_width -- hacks for cards that do not suport non power of two texture sizes
-	local th=t.texture_height -- we just use a part of this bigger texture
-	
-	local cxw=cx+cw
-	local cyh=cy+ch
-	
-	local ixw=(ix+w)/tw
-	local iyh=(iy+h)/th
-	
-	ix=ix/tw
-	iy=iy/th
-
-	pack.save_array({
-		cx,		cy,		0,		ix,		iy,
-		cxw,	cy,		0,		ixw,	iy,
-		cx,		cyh,	0,		ix,		iyh,
-		cxw,	cyh,	0,		ixw,	iyh,
-	},"f32",0,5*4,canvas.vdat)	
-
---	gl.EnableClientState(gl.VERTEX_ARRAY)
---	gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
-	
---print("gl_blit . ",nacl.time() )
-
-	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
-	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
-
-	gl.VertexPointer(3,gl.FLOAT,5*4,0*0)
-	gl.TexCoordPointer(2,gl.FLOAT,5*4,3*4)
-
-	gl.BindTexture(gl.TEXTURE_2D,t.id)
-
-	gl.DrawArrays(gl.TRIANGLE_STRIP,0,4)
-
---print("gl_blit - ",nacl.time() )
-
-end
-
-
 
 canvas.gl_default=function()
 
 -- the default gl state, when we deviate from this we should restore it...
 
 	if gl then
-	
---		gl.Disable(gl.LIGHTING)
---		gl.EnableClientState(gl.VERTEX_ARRAY)
---		gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
---		gl.DisableClientState(gl.COLOR_ARRAY)
---		gl.DisableClientState(gl.NORMAL_ARRAY)
 
 		gl.Disable(gl.DEPTH_TEST)
 		gl.Disable(gl.CULL_FACE)
---		gl.Enable(gl.TEXTURE_2D)    
 		
 		gl.Color(1,1,1,1)	
 
@@ -261,12 +196,6 @@ font.width=function(text)
 	return x
 end
 
---
--- I think it is time to drop suport for gles1 in gamecake gonna need gles2...
---
-
---font.vbs={}
---font.vbs_idx=1
 
 font.draw = function(text)
 	
@@ -284,12 +213,10 @@ font.draw = function(text)
 	core.canvas_font_draw(font,text,p:attrib("a_vertex"),p:attrib("a_texcoord"))
 
 end
-font.draw2 = font.draw
 
 
+-- should replace this with tristrip
 flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
-
---print(x1,y1,x2,y2,x3,y3,x4,y4,gl.cache.color,tcore.read(gl.cache.color,1),tcore.read(gl.cache.color,2),tcore.read(gl.cache.color,3),tcore.read(gl.cache.color,4))
 
 	if y4 then
 		pack.save_array({
@@ -321,16 +248,7 @@ flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
 	gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,5*4,0)
 	gl.EnableVertexAttribArray(p:attrib("a_vertex"))
 
---	gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,5*4,3*4)
---	gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
-
---	gl.DisableClientState(gl.TEXTURE_COORD_ARRAY)
---	gl.Disable(gl.TEXTURE_2D)    
-
 	gl.DrawArrays(gl.TRIANGLE_STRIP,0,4)
-
---	gl.Enable(gl.TEXTURE_2D)    
---	gl.EnableClientState(gl.TEXTURE_COORD_ARRAY)
 
 end
 
@@ -450,7 +368,6 @@ end
 	canvas.vbs={}
 	canvas.vbi=1
 	
---	canvas.vbuf=canvas.cake.buffers.create()
 	canvas.vdat_size=0
 	canvas.vdat_check=function(size) -- check we have enough buffer
 		if canvas.vdat_size<size then

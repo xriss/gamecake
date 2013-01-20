@@ -10,13 +10,13 @@ local snames=require("wetgenes.gamecake.spew.names")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-M.bake=function(state,profiles)
+M.bake=function(oven,profiles)
 
 	profiles=profiles or {}
 
 	profiles.filename=wwin.files_prefix.."profiles.lua"
 	
-	local cake=state.cake
+	local cake=oven.cake
 	local canvas=cake.canvas
 	
 	local p

@@ -6,7 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-M.bake=function(state,names)
+M.bake=function(oven,names)
 
 	names=names or {}
 	

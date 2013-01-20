@@ -433,14 +433,14 @@ local map_ascii={
 
 
 
-function M.bake(state,keys)
+function M.bake(oven,keys)
 
 	keys=keys or {}
 
-	local win=state.win
-	local cake=state.cake
+	local win=oven.win
+	local cake=oven.cake
 	local canvas=cake.canvas.child()
-	canvas.layout=state.rebake("wetgenes.gamecake.mods.layout").keys
+	canvas.layout=oven.rebake("wetgenes.gamecake.mods.layout").keys
 
 	if win.flavour=="raspi" then
 		keys.posix=true -- auto translate posix msgs
@@ -468,7 +468,7 @@ function M.bake(state,keys)
 				name="delete"
 			end
 			
-			local mstack=state.win.msgstack
+			local mstack=oven.win.msgstack
 			mstack[#mstack+1]={
 				time=os.time(),
 				class="key",
@@ -512,7 +512,7 @@ function M.bake(state,keys)
 	function keys.setup()
 	
 
-		keys.master=state.rebake("wetgenes.gamecake.widgets").setup({font="Vera",text_size=24})
+		keys.master=oven.rebake("wetgenes.gamecake.widgets").setup({font="Vera",text_size=24})
 		
 		keys.setup_keyboard_widgets(keys.master)
 	
@@ -547,8 +547,8 @@ function M.bake(state,keys)
 	
 	function keys.draw()
 	
-		local win=state.win
-		local cake=state.cake
+		local win=oven.win
+		local cake=oven.cake
 		local gl=cake.gl
 		local font=canvas.font
 

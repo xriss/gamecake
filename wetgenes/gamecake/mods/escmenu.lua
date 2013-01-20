@@ -15,7 +15,7 @@ local win=require("wetgenes.win")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(state,escmenu)
+function M.bake(oven,escmenu)
 
 	escmenu=escmenu or {}
 	
@@ -24,28 +24,28 @@ function M.bake(state,escmenu)
 		height=480,
 	}
 
-	local gl=state.gl
-	local cake=state.cake
+	local gl=oven.gl
+	local cake=oven.cake
 	local canvas=cake.canvas.child()
 	canvas.layout=false
 
 	function escmenu.setup()
 	
-		state.cake.fonts.loads({1}) -- always load builtin font number 1 a basic 8x8 font		
+		oven.cake.fonts.loads({1}) -- always load builtin font number 1 a basic 8x8 font		
 		opts.font=1
 		
 		if wzips.exists("data/fonts/Vera.ttf") then -- we got us better font to use :)
-			state.cake.fonts.loads({"Vera"})
+			oven.cake.fonts.loads({"Vera"})
 			opts.font="Vera"
 		end
 
 
 		escmenu.show=false
 
-		escmenu.master=state.rebake("wetgenes.gamecake.widgets").setup({})
+		escmenu.master=oven.rebake("wetgenes.gamecake.widgets").setup({})
 		
 		if wzips.exists("data/wskins/soapbar/button.png") then -- we got us better skin to use :)
-			state.rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
+			oven.rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
 		end
 
 		local hooks={}
@@ -53,7 +53,7 @@ function M.bake(state,escmenu)
 			local id=widget.id
 --	print(widget.id)
 			if id=="layout" then
-				local layout=state.mods["wetgenes.gamecake.mods.layout"]
+				local layout=oven.mods["wetgenes.gamecake.mods.layout"]
 				if layout then
 					layout.cycle_mode()
 					escmenu.layout_widget.text="Layout: "..layout.mode
@@ -64,12 +64,12 @@ function M.bake(state,escmenu)
 				
 			elseif id=="restart" then
 			
-				state.next=state.now
+				oven.next=oven.now
 				escmenu.show=false
 				
 			elseif id=="quit" then
 			
-				state.next=true
+				oven.next=true
 				escmenu.show=false
 				
 			end
@@ -77,7 +77,7 @@ function M.bake(state,escmenu)
 		local top=escmenu.master:add({hx=480,hy=480,mx=1,class="hx",ax=0,ay=0,font=opts.font})
 		top:add({sy=1,sx=1})
 		
-		local layout=state.mods["wetgenes.gamecake.mods.layout"]
+		local layout=oven.mods["wetgenes.gamecake.mods.layout"]
 		if layout then
 		
 			escmenu.layout_widget=top:add({text="Layout: "..layout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
@@ -111,9 +111,9 @@ function M.bake(state,escmenu)
 	
 	function escmenu.draw()
 	
-		local cake=state.cake
+		local cake=oven.cake
 --		local gl=cake.gl
---		local canvas=state.canvas
+--		local canvas=oven.canvas
 		local font=canvas.font
 
 		if escmenu.show then
