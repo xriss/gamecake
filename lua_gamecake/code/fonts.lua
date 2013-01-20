@@ -13,13 +13,13 @@ local core=require("wetgenes.gamecake.core")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(state,fonts)
+function M.bake(oven,fonts)
 
 	fonts.data={}
 	
-	local opts=state.opts
-	local cake=state.cake
-	local gl=state.gl
+	local opts=oven.opts
+	local cake=oven.cake
+	local gl=oven.gl
 
 	fonts.zip=opts.zip
 	fonts.prefix=opts.fontprefix or "data/fonts/"

@@ -4,10 +4,10 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(state,buffers)
+function M.bake(oven,buffers)
 		
-	local gl=state.gl
-	local cake=state.cake
+	local gl=oven.gl
+	local cake=oven.cake
 	
 	buffers.data={}
 
