@@ -116,6 +116,7 @@ char *act="";
 char *key="";
 
 char lua=' ';
+PRECT r=0;
 
 	char_buff256[0]=0;
 	char_buff16[0]=0;
@@ -168,6 +169,21 @@ char lua=' ';
 		case WM_XBUTTONUP:
 			ReleaseCapture();
 		break;
+
+		case WM_SIZING:
+			r=(PRECT)lParam;
+/*
+printf("sizing\n");
+			p->width=r->right-r->left;
+			p->height=r->bottom-r->top;
+*/
+		break;
+
+		case WM_SIZE:
+			p->width=GET_X_LPARAM(lParam);
+			p->height=GET_Y_LPARAM(lParam);
+		break;
+
     }
     
     return DefWindowProc( hWnd, msg, wParam, lParam );
@@ -184,6 +200,9 @@ int lua_wetwin_create (lua_State *l)
 wetwin_lua_wrap *wp;
 wetwin_lua *p;
 
+const char *title=" http://gamecake.4lfa.com/ ";
+	lua_getfield(l,1,"title");	if( lua_isstring(l,-1) ) { title=lua_tostring(l,-1);	} lua_pop(l,1);
+
 	wp = (wetwin_lua_wrap *)lua_newuserdata(l, sizeof(wetwin_lua_wrap)); // we need a pointer, this makes lua GC a bit easier
 	memset(wp,0,sizeof(wetwin_lua_wrap)); // make sure it is 0
 	wp->p=wp->a; // point the pointer to the struct
@@ -193,6 +212,9 @@ wetwin_lua *p;
 
 	p->width=640;
 	p->height=480;
+
+	lua_getfield(l,1,"width");	if( lua_isnumber(l,-1) ) { p->width=lua_tonumber(l,-1);		} lua_pop(l,1);
+	lua_getfield(l,1,"height");	if( lua_isnumber(l,-1) ) { p->height=lua_tonumber(l,-1);	} lua_pop(l,1);
 
 // get our filename
 
@@ -228,18 +250,24 @@ wetwin_lua *p;
 	RECT rect[1];
 	rect->left=80;
 	rect->top=80;
+	
+	lua_getfield(l,1,"x");		if( lua_isnumber(l,-1) ) { rect->left=lua_tonumber(l,-1); 		} lua_pop(l,1);
+	lua_getfield(l,1,"y");		if( lua_isnumber(l,-1) ) { rect->top=lua_tonumber(l,-1);		} lua_pop(l,1);
+
 	rect->right=rect->left+p->width;
 	rect->bottom=rect->top+p->height;
 
 	AdjustWindowRect(rect,WS_OVERLAPPEDWINDOW,0);
 
-	p->hwnd = CreateWindow( "GameCake", "http://gamecake.4lfa.com/ ",
+	p->hwnd = CreateWindow( "GameCake", title ,
 						  WS_OVERLAPPEDWINDOW, rect->left, rect->top, rect->right-rect->left, rect->bottom-rect->top,
 						  GetDesktopWindow(), NULL, p->instance, p );
 
 	ShowWindow( p->hwnd, SW_SHOWDEFAULT );
 	
     UpdateWindow( p->hwnd );
+
+	p->winclosed=0;
     
     PIXELFORMATDESCRIPTOR pfd;
     int iFormat;
@@ -269,6 +297,56 @@ wetwin_lua *p;
     return 1;
 	
 bogus:
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// fullscreen a window as best we can...
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_show(lua_State *l)
+{
+wetwin_lua *p=lua_wetwin_check_ptr(l,1);
+
+DWORD f;
+int max=0;
+int full=0;
+
+const char *s=lua_tostring(l,2);
+
+	if(s)
+	{
+		if(strcmp("max",s)==0) { max=1; }   // maximised, can still see taskbar/title
+		if(strcmp("full",s)==0) { full=1; } // try and take over the screen
+	}
+
+	if(full)
+	{
+		f = GetWindowLong(p->hwnd, GWL_STYLE);
+		f &= ~WS_OVERLAPPEDWINDOW;
+		f |= WS_POPUP;
+		SetWindowLong(p->hwnd, GWL_STYLE, f);
+
+		ShowWindow( p->hwnd, SW_MAXIMIZE );
+	}
+	else
+	{
+		f = GetWindowLong(p->hwnd, GWL_STYLE);
+		f |= WS_OVERLAPPEDWINDOW;
+		f &= ~WS_POPUP;
+		SetWindowLong(p->hwnd, GWL_STYLE, f);
+
+		if(max)
+		{
+			ShowWindow( p->hwnd, SW_MAXIMIZE );
+		}
+		else
+		{
+
+			ShowWindow( p->hwnd, SW_RESTORE );
+		}
+	}
 	return 0;
 }
 
@@ -411,108 +489,139 @@ typedef struct tagMSG {
 		if( !GetMessage( &msg, NULL, 0, 0 ) )
 		{ // Simon says shutdown?
 			lua='r';
+			p->winclosed=1;
 		}
-		
-		switch( msg.message )
+		else
 		{
-			case WM_LBUTTONDBLCLK:
-				lua='m';
-				act=2;
-				key="left";
-			break;
-			case WM_LBUTTONDOWN:
-				lua='m';
-				act=1;
-				key="left";
-			break;
-			case WM_LBUTTONUP:
-				lua='m';
-				act=-1;
-				key="left";
-			break;
-			
-			case WM_RBUTTONDBLCLK:
-				lua='m';
-				act=2;
-				key="right";
-			break;
-			case WM_RBUTTONDOWN:
-				lua='m';
-				act=1;
-				key="right";
-			break;
-			case WM_RBUTTONUP:
-				lua='m';
-				act=-1;
-				key="right";
-			break;
-			
-			case WM_MBUTTONDBLCLK:
-				lua='m';
-				act=2;
-				key="middle";
-			break;
-			case WM_MBUTTONDOWN:
-				lua='m';
-				act=1;
-				key="middle";
-			break;
-			case WM_MBUTTONUP:
-				lua='m';
-				act=-1;
-				key="middle";
-			break;
-			
-			case WM_XBUTTONDBLCLK:
-				lua='m';
-				act=2;
-				key="x";
-				if(HIWORD (msg.wParam)==1 ) { key="x1"; }
-				if(HIWORD (msg.wParam)==2 ) { key="x2"; }
-			break;
-			case WM_XBUTTONDOWN:
-				lua='m';
-				act=1;
-				key="x";
-				if(HIWORD(msg.wParam)==1 ) { key="x1"; }
-				if(HIWORD(msg.wParam)==2 ) { key="x2"; }
-			break;
-			case WM_XBUTTONUP:
-				lua='m';
-				act=-1;
-				key="x";
-				if(HIWORD (msg.wParam)==1 ) { key="x1"; }
-				if(HIWORD (msg.wParam)==2 ) { key="x2"; }
-			break;
-			
-			case WM_MOUSEMOVE:
-				lua='m';
-				act=0;
-				key="none";
-			break;
-			
-			case WM_KEYDOWN:
-				lua='k';
-				if(msg.lParam&0x40000000)
-				{
-					act=0;
-				}
-				else
-				{
+			switch( msg.message )
+			{
+				case WM_LBUTTONDBLCLK:
+					lua='m';
+					act=2;
+					key="left";
+				break;
+				case WM_LBUTTONDOWN:
+					lua='m';
 					act=1;
-				}
-			break;
-			
-			case WM_KEYUP:
-			
-				lua='k';
-				act=-1;
+					key="left";
+				break;
+				case WM_LBUTTONUP:
+					lua='m';
+					act=-1;
+					key="left";
+				break;
 				
-			break;
+				case WM_RBUTTONDBLCLK:
+					lua='m';
+					act=2;
+					key="right";
+				break;
+				case WM_RBUTTONDOWN:
+					lua='m';
+					act=1;
+					key="right";
+				break;
+				case WM_RBUTTONUP:
+					lua='m';
+					act=-1;
+					key="right";
+				break;
+				
+				case WM_MBUTTONDBLCLK:
+					lua='m';
+					act=2;
+					key="middle";
+				break;
+				case WM_MBUTTONDOWN:
+					lua='m';
+					act=1;
+					key="middle";
+				break;
+				case WM_MBUTTONUP:
+					lua='m';
+					act=-1;
+					key="middle";
+				break;
+				
+				case WM_XBUTTONDBLCLK:
+					lua='m';
+					act=2;
+					key="x";
+					if(HIWORD (msg.wParam)==1 ) { key="x1"; }
+					if(HIWORD (msg.wParam)==2 ) { key="x2"; }
+				break;
+				case WM_XBUTTONDOWN:
+					lua='m';
+					act=1;
+					key="x";
+					if(HIWORD(msg.wParam)==1 ) { key="x1"; }
+					if(HIWORD(msg.wParam)==2 ) { key="x2"; }
+				break;
+				case WM_XBUTTONUP:
+					lua='m';
+					act=-1;
+					key="x";
+					if(HIWORD (msg.wParam)==1 ) { key="x1"; }
+					if(HIWORD (msg.wParam)==2 ) { key="x2"; }
+				break;
+				
+				case WM_MOUSEMOVE:
+					lua='m';
+					act=0;
+					key="none";
+				break;
+				
+				case WM_KEYDOWN:
+					lua='k';
+					if(msg.lParam&0x40000000)
+					{
+						act=0;
+					}
+					else
+					{
+						act=1;
+					}
+				break;
+				
+				case WM_KEYUP:
+				
+					lua='k';
+					act=-1;
+					
+				break;
+				
+				case WM_SIZE:
+								
+					lua='s';
+					
+					p->width=GET_X_LPARAM(msg.lParam);
+					p->height=GET_Y_LPARAM(msg.lParam);
+
+//printf("new size %d %d \n",p->width,p->height);
+
+				break;
+			}
 		}
-		
 
 		ret=0;
+		if(lua=='r')
+		{
+			lua_newtable(l);
+			lua_pushnumber(l,time);						lua_setfield(l,-2,"time");
+			lua_pushstring(l,"close");					lua_setfield(l,-2,"class");
+			ret=1;
+		}
+		else
+		if(lua=='s')
+		{
+			lua_newtable(l);
+			lua_pushnumber(l,time);						lua_setfield(l,-2,"time");
+			lua_pushstring(l,"size");					lua_setfield(l,-2,"class");
+			lua_pushnumber(l,GET_X_LPARAM(msg.lParam));	lua_setfield(l,-2,"x");
+			lua_pushnumber(l,GET_Y_LPARAM(msg.lParam));	lua_setfield(l,-2,"y");
+			ret=1;
+		}
+		else
 		if(lua=='m')
 		{
 			lua_newtable(l);
@@ -598,6 +707,7 @@ LUALIB_API int luaopen_wetgenes_win_windows_core(lua_State *l)
 		{"create",			lua_wetwin_create},
 		{"destroy",			lua_wetwin_destroy},
 		{"info",			lua_wetwin_info},
+		{"show",			lua_wetwin_show},
 
 		{"context",			lua_wetwin_context},
 		{"swap",			lua_wetwin_swap},

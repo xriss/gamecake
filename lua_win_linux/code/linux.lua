@@ -19,8 +19,8 @@ local core=require("wetgenes.win.linux.core")
 -- well actually I've decided to standardise on the windows vkey codes since
 -- thats the most popular amongst all the platfroms suported (blame NaCl)
 linux.generic_keymap={
-	["grave"]="oem_3",
-	["backspace"]="back",
+	["grave"]="`",
+--	["backspace"]="back",
 }
 
 function linux.keymap(key)

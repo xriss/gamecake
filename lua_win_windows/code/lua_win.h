@@ -38,6 +38,8 @@ typedef struct swetwin_lua {
 
 	int width;
 	int height;
+	
+	int winclosed;
 
 } wetwin_lua ;
 
