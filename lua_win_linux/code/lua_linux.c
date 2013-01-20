@@ -115,7 +115,9 @@ int y=20;
 int width=640;
 int height=480;
 
-const char *title="http://www.WetGenes.com/ - fenestra";
+const char *title=" http://GameCake.4lfa.com/ ";
+
+	lua_getfield(l,1,"title");	if( lua_isstring(l,-1) ) { title=lua_tostring(l,-1);	} lua_pop(l,1);
 
 	lua_getfield(l,1,"width");	if( lua_isnumber(l,-1) ) { width=lua_tonumber(l,-1);	} lua_pop(l,1);
 	lua_getfield(l,1,"height");	if( lua_isnumber(l,-1) ) { height=lua_tonumber(l,-1);	} lua_pop(l,1);
@@ -169,6 +171,87 @@ const char *title="http://www.WetGenes.com/ - fenestra";
 
 	return 1;
 }
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// fullscreen a window as best we can...
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_show(lua_State *l)
+{
+XEvent xev;
+
+wetwin_lua *p=lua_wetwin_check_ptr(l,1);
+
+Atom _NET_WM_STATE 					= XInternAtom(p->dsp, "_NET_WM_STATE", False);
+Atom _NET_WM_STATE_MAXIMIZED_VERT 	= XInternAtom(p->dsp, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+Atom _NET_WM_STATE_MAXIMIZED_HORZ 	= XInternAtom(p->dsp, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+Atom _NET_WM_STATE_FULLSCREEN 		= XInternAtom(p->dsp, "_NET_WM_STATE_FULLSCREEN", False);
+//Atom _NET_WM_STATE_FOCUSED 			= XInternAtom(p->dsp, "_NET_WM_STATE_FOCUSED", False);
+
+int max=0;
+int full=0;
+
+const char *s=lua_tostring(l,2);
+
+	if(s)
+	{
+		if(strcmp("max",s)==0) { max=1; }   // maximised, can still see taskbar/title
+		if(strcmp("full",s)==0) { full=1; } // try and take over the screen
+	}
+
+    if(max || full)
+    {
+		memset(&xev, 0, sizeof(xev));
+		xev.type = ClientMessage;
+		xev.xclient.window = p->win;
+		xev.xclient.message_type = _NET_WM_STATE;
+		xev.xclient.format = 32;
+		xev.xclient.data.l[0] = 1; // add
+		xev.xclient.data.l[1] = _NET_WM_STATE_MAXIMIZED_VERT;
+		xev.xclient.data.l[2] = _NET_WM_STATE_MAXIMIZED_HORZ;
+		XSendEvent(p->dsp, DefaultRootWindow(p->dsp), False, SubstructureNotifyMask, &xev);
+
+		if(full)
+		{
+			memset(&xev, 0, sizeof(xev));
+			xev.type = ClientMessage;
+			xev.xclient.window = p->win;
+			xev.xclient.message_type = _NET_WM_STATE;
+			xev.xclient.format = 32;
+			xev.xclient.data.l[0] = 1; // add
+			xev.xclient.data.l[1] = _NET_WM_STATE_FULLSCREEN;
+			xev.xclient.data.l[2] = _NET_WM_STATE_FULLSCREEN;
+			XSendEvent(p->dsp, DefaultRootWindow(p->dsp), False, SubstructureNotifyMask, &xev);
+		}
+    }
+    else // clear all flags
+    {
+		memset(&xev, 0, sizeof(xev));
+		xev.type = ClientMessage;
+		xev.xclient.window = p->win;
+		xev.xclient.message_type = _NET_WM_STATE;
+		xev.xclient.format = 32;
+		xev.xclient.data.l[0] = 0; // remove
+		xev.xclient.data.l[1] = _NET_WM_STATE_MAXIMIZED_VERT;
+		xev.xclient.data.l[2] = _NET_WM_STATE_MAXIMIZED_HORZ;
+		XSendEvent(p->dsp, DefaultRootWindow(p->dsp), False, SubstructureNotifyMask, &xev);
+
+		memset(&xev, 0, sizeof(xev));
+		xev.type = ClientMessage;
+		xev.xclient.window = p->win;
+		xev.xclient.message_type = _NET_WM_STATE;
+		xev.xclient.format = 32;
+		xev.xclient.data.l[0] = 0; // remove
+		xev.xclient.data.l[1] = _NET_WM_STATE_FULLSCREEN;
+		xev.xclient.data.l[2] = _NET_WM_STATE_FULLSCREEN;
+		XSendEvent(p->dsp, DefaultRootWindow(p->dsp), False, SubstructureNotifyMask, &xev);
+    }
+
+
+	return 0;
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -523,6 +606,7 @@ LUALIB_API int luaopen_wetgenes_win_linux_core(lua_State *l)
 		{"create",			lua_wetwin_create},
 		{"destroy",			lua_wetwin_destroy},
 		{"info",			lua_wetwin_info},
+		{"show",			lua_wetwin_show},
 
 		{"context",			lua_wetwin_context},
 		{"swap",			lua_wetwin_swap},
