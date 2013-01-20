@@ -115,8 +115,7 @@ int y=20;
 int width=640;
 int height=480;
 
-const char *title=" http://GameCake.4lfa.com/ ";
-
+const char *title=" http://gamecake.4lfa.com/ ";
 	lua_getfield(l,1,"title");	if( lua_isstring(l,-1) ) { title=lua_tostring(l,-1);	} lua_pop(l,1);
 
 	lua_getfield(l,1,"width");	if( lua_isnumber(l,-1) ) { width=lua_tonumber(l,-1);	} lua_pop(l,1);
