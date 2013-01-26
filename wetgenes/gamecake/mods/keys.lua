@@ -251,7 +251,7 @@ import=nil -- free it just because
 -- basic american keyboard mappings
 local map_vkeys={
 
-[0x29]=VK.OEM_3, -- ESC
+[0x29]=VK.OEM_3, -- tilde
 [0x02]=VK["1"],
 [0x03]=VK["2"],
 [0x04]=VK["3"],

@@ -149,7 +149,9 @@ function base_sheet.build_vbuf(sheet)
 	
 	local tw=sheet.img.texture_width -- hacks for cards that do not suport non power of two texture sizes
 	local th=sheet.img.texture_height -- we just use a part of this bigger texture
-	
+
+--print("sheet",#sheet,#sheet*4*5*4,(#sheet-1)*4*5*4,5*4)
+
 	for i,v in ipairs(sheet) do
 		
 --		local cxw=cx+cw
@@ -160,6 +162,7 @@ function base_sheet.build_vbuf(sheet)
 		local ix=v.px/tw
 		local iy=v.py/th
 
+--print((i-1)*4*5*4,5*4)
 		pack.save_array({
 			0-v.ox,		0-v.oy,		0,		ix,		iy,
 			v.hx-v.ox,	0-v.oy,		0,		ixw,	iy,
@@ -179,6 +182,7 @@ end
 
 function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 
+	if i<1 or i>#sheet then error("sheet index out of bounds "..i.." of "..#sheet) end
 
 	if px then
 		gl.MatrixMode(gl.MODELVIEW)

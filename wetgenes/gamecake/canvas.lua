@@ -70,7 +70,13 @@ local factory=function(canvas)
 --
 	canvas.project23d = function(width,height,fov,depth)
 		
-		local l=canvas.layout or {x=0,y=0,w=win.width,h=win.height}
+		local l=canvas.layout or {}
+
+-- make sure we have values		
+		l.x=l.x or 0
+		l.y=l.y or 0
+		l.w=l.w or win.width
+		l.h=l.h or win.height
 		
 		local aspect=height/width
 		
@@ -117,6 +123,9 @@ local factory=function(canvas)
 		
 		return m -- return the matrix but we also updated the canvas size/scale for later use
 	end
+	
+-- call once to stop any null references if we recieve msgs before we resize
+	canvas.project23d(640,480,0.5,1024)
 
 -- convert raw xy coords (IE mouse win width and height) into local coords (view width and height) centered on origin
 -- basically do whatever transform we came up with in project23d

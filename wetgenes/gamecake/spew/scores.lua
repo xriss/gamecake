@@ -64,11 +64,11 @@ M.bake=function(oven,scores)
 		
 			local sw=canvas.font.width(s)
 			
-			cake.gl.Color(0,0,0,1)	
+			oven.gl.Color(0,0,0,1)	
 			canvas.font.set_xy( x-(sw/2)+1 , y+1 )
 			canvas.font.draw(s)
 		
-			cake.gl.Color(1,1,1,1)	
+			oven.gl.Color(1,1,1,1)	
 			canvas.font.set_xy( x-(sw/2)-1 , y-1 )
 			canvas.font.draw(s)
 		

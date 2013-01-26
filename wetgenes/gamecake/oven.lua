@@ -22,9 +22,11 @@ function M.bake(opts)
 		oven.baked={}
 		oven.mods={}
 
--- you may perform this bake_cake yourself if you want more control in an app
-		
-		function oven.bake_cake()
+--
+-- preheat a normal oven
+-- you may perform this yourself if you want more control over a cake
+--
+		function oven.preheat()
 
 			oven.frame_rate=1/opts.fps -- how fast we want to run
 			oven.frame_time=0
@@ -35,21 +37,39 @@ function M.bake(opts)
 			inf.x=(screen.width-inf.width)/2
 			inf.y=(screen.height-inf.height)/2
 
+			if wwin.flavour=="raspi" then -- do fullscreen on raspi
+				inf.x=0
+				inf.y=0
+				inf.width=screen.width
+				inf.height=screen.height
+				inf.dest_width=screen.width
+				inf.dest_height=screen.height
+				if inf.height>=480*2 then -- ie a 1080 monitor, double the pixel size
+					inf.width=inf.width/2
+					inf.height=inf.height/2
+				end
+			end
+
 			oven.win=wwin.create(inf)
 			oven.win:context({})
 
-			oven.rebake("wetgenes.gamecake.cake") -- bake the cake into the oven,
+			if opts.show then oven.win:show(opts.show) end
+--			oven.win:show("full")
+--			oven.win:show("max")
+
+			oven.rebake("wetgenes.gamecake.cake") -- bake the cake in the oven,
 
 			-- the order these are added is important for priority, top of list is lowest priority, bottom is highest.
 			oven.require_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style escape menu
 			oven.require_mod("wetgenes.gamecake.mods.console") -- console gives us a quake style tilda console
 			oven.require_mod("wetgenes.gamecake.mods.keys") -- touchscreen keys and posix keymaping
-			oven.require_mod("wetgenes.gamecake.mods.mouse") -- auto fake mouse on non window builds
+			oven.require_mod("wetgenes.gamecake.mods.mouse") -- auto fake mouse on non windows builds
 			oven.require_mod("wetgenes.gamecake.mods.layout") -- screen layout options
 
 			if opts.start then
 				oven.next=oven.rebake(opts.start)
 			end
+			
 			
 			return oven
 		end
@@ -264,6 +284,10 @@ function M.bake(opts)
 		function oven.msgs() -- read and process any msgs we have from win:msg
 			if oven.win then
 				for m in oven.win:msgs() do
+
+					if m.class=="close" then -- window has been closed so do a shutdown
+						oven.next=true
+					end
 
 					if m.class=="mouse" and m.x and m.y then	-- need to fix x,y numbers
 						m.xraw,m.yraw=m.x,m.y					-- remember original

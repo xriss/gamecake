@@ -73,7 +73,7 @@ setmetatable(win,meta)
 
 
 function win.screen()
-	it={}
+	local it={}
 	if hardcore.screen then
 		it.width,it.height=hardcore.screen()
 	else
@@ -82,8 +82,9 @@ function win.screen()
 	return it
 end
 
--- key names are given in raw OS flavour,
--- this maps these raw names to more generic names
+-- key names are given in a raw OS flavour,
+-- this maps tries to map these names to more generic ones
+-- really you can never be sure what name a key has...
 win.generic_keymap={
 
 	["android_04"]="escape",
@@ -96,6 +97,12 @@ win.generic_keymap={
 	["android_15"]="left",
 	["android_16"]="right",
 	["android_17"]="return",
+
+	["backspace"]="back",
+	["kp_enter"]="enter",
+
+	["oem_3"]="`",
+	
 }
 
 function win.keymap(key)
@@ -204,6 +211,12 @@ end
 function base.destroy(w)
 	if hardcore.destroy then
 		hardcore.destroy(w[0],w)
+	end
+end
+
+function base.show(w,s)
+	if hardcore.show then
+		hardcore.show(w[0],s)
 	end
 end
 

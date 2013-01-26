@@ -25,7 +25,7 @@ function M.bake(oven,mouse)
 
 	local win=oven.win
 	local cake=oven.cake
-	local gl=cake.gl
+	local gl=oven.gl
 
 	local canvas=cake.canvas.child()
 	canvas.layout=false

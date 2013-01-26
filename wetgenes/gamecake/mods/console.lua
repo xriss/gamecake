@@ -353,8 +353,9 @@ font.vbs_idx=1
 --		if act==1 then
 --			_G.print(ascii.." "..(key or ""))
 --		end
---print("key",key)
-		if key=="oem_3" then -- terrible name for the ` key
+
+--print("conkey",key)
+		if key=="`" then -- terrible name for the ` key?
 		
 			if act==-1 then
 				if console.show then
