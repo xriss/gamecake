@@ -294,6 +294,12 @@ static int collectargs (char **argv, int *pi, int *pv, int *pe) {
 
 static int runargs (lua_State *L, char **argv, int n) {
   int i;
+
+// set the global arg to *all* arguments, before doing anything else
+  int narg = getargs(L, argv, 0);  /* collect arguments */
+  lua_setglobal(L, "arg");
+  lua_pop(L,narg);
+
   for (i = 1; i < n; i++) {
     if (argv[i] == NULL) continue;
     lua_assert(argv[i][0] == '-');
