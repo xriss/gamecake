@@ -33,28 +33,62 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 // This aligned pointer may, or maynot be the same as the userdata so be careful
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-// this is probably enough alignment to make things go fast, does anything need more?
-#define UDALIGN 16
+// 16 is probably enough alignment to allow things to go fast, does anything need more?
+
+//#define UDALIGN 16
+
+// comment out the define to turn off padding and alignment, set it to enable it
+// make sure to use the functions below when dealing with this aligned data
 
 // force aligned pointer from a possibly non aligned one (safe to call again)
 static unsigned char * lua_tardis_uda_ptr_align (unsigned char *p)
 {
 //printf("uda %08x %08x\n",p,(unsigned char *)(((intptr_t)(p-1+UDALIGN))&(-UDALIGN)));
 //	return p;
+#if defined(UDALIGN)
 	return (unsigned char *)(((intptr_t)(p-1+UDALIGN))&(-UDALIGN)); // force alignment
+#else
+	return p;
+#endif
 }
 
 // allocated aligned pointer and push its userdata on the lua stack
 static unsigned char * lua_tardis_uda_alloc (lua_State *l, int size)
 {
+#if defined(UDALIGN)
 	return lua_tardis_uda_ptr_align((unsigned char *)lua_newuserdata(l,size+UDALIGN-1)); // include a bit of extra buffer
+#else
+	return lua_newuserdata(l,size);
+#endif
 }
 
 // get aligned pointer form a userdata at idx
 unsigned char * lua_tardis_uda (lua_State *l, int idx)
 {
+#if defined(UDALIGN)
 	if(!lua_isuserdata(l,idx)) { return 0; }
 	return lua_tardis_uda_ptr_align(lua_touserdata(l,idx));
+#else
+	return lua_touserdata(l,idx);
+#endif
+}
+
+// get size of allocated data form a userdata at idx
+unsigned int lua_tardis_uda_length (lua_State *l, int idx)
+{
+int len=0;
+#if defined(UDALIGN)
+	if(!lua_isuserdata(l,idx)) { return 0; }
+	lua_toluserdata(l,idx,&len);
+	if(len) // may be 0, if so do not change it
+	{
+		len=len+1-UDALIGN;
+	}
+#else
+	if(!lua_isuserdata(l,idx)) { return 0; }
+	lua_toluserdata(l,idx,&len);
+#endif
+	return len;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -118,8 +152,8 @@ float *fb;
 	else
 	if(lua_isuserdata(l,2))
 	{
-		lua_toluserdata(l,2,&len);
-		count=((len+1-UDALIGN)/4);
+		len=lua_tardis_uda_length(l,2);
+		count=len/4;
 		if(lua_isnumber(l,3)) { count=(int)lua_tonumber(l,3); } // need to know how many floats to set?
 		if(count< 1) { count= 1; } // sanity
 		if(count>16) { count=16; } // sanity
@@ -469,6 +503,7 @@ float x,y,z;
 	}
 	else
 	{
+		fc[ 0]=fa[ 0];
 		fc[ 1]=fa[ 1];
 		fc[ 2]=fa[ 2];
 		fc[ 3]=fa[ 3];

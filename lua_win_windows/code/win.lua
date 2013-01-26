@@ -73,7 +73,7 @@ setmetatable(win,meta)
 
 
 function win.screen()
-	it={}
+	local it={}
 	if hardcore.screen then
 		it.width,it.height=hardcore.screen()
 	else

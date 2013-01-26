@@ -172,7 +172,10 @@ LUALIB_API int luaopen_bit(lua_State *L)
       msg = "arithmetic right-shift broken";
     luaL_error(L, "bit library self-test failed (%s)", msg);
   }
-  luaL_register(L, "bit", bit_funcs);
+// remove globals
+//  luaL_register(L, "bit", bit_funcs);
+	lua_newtable(L);
+	luaL_openlib(L, NULL, bit_funcs, 0);
   return 1;
 }
 

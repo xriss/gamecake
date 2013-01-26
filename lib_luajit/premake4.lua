@@ -142,6 +142,8 @@ else
 --x86
 	includedirs { "asm/x86" }
 	files { "asm/x86/lj_vm.s" }
+	
+--	defines { "LUAJIT_USE_SYSMALLOC" }
 
 end
 

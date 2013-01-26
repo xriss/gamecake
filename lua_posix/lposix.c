@@ -2372,7 +2372,10 @@ static const luaL_Reg R[] =
 
 LUALIB_API int luaopen_posix_c (lua_State *L)
 {
-	luaL_register(L, MYNAME, R);
+// remove globals
+//	luaL_register(L, MYNAME, R);
+	lua_newtable(L);
+	luaL_openlib(L, NULL, R, 0);
 
 	lua_pushliteral(L, MYVERSION);
 	lua_setfield(L, -2, "version");
