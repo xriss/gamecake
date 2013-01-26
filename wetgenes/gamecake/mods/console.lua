@@ -222,12 +222,16 @@ font.vbs_idx=1
 			oven.times.draw.done()
 
 			local gci=gcinfo()
-			local s=string.format("fps=%02.0f %02.2f/%02.2f mem=%0.0fk",
+			local s=string.format("fps=%02.0f %02.2f/%02.2f vb=%d tx=%d fb=%d mem=%0.0fk",
 				console.fps,
 				(oven.times.update.time*1000),
 				(oven.times.draw.time*1000),
+				gl.counts.buffers,
+				gl.counts.textures,
+				gl.counts.framebuffers,
 				math.floor(gci) )
-			
+
+-- print info as we are			
 			if gl.patch_functions_method=="disable" then
 				print(s)
 			end
@@ -366,7 +370,7 @@ font.vbs_idx=1
 				elseif console.show_hud then
 				
 					console.show=true			
-					throb=255
+					console.buff.throb=255
 				else
 					console.show_hud=true
 				end

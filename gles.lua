@@ -12,7 +12,7 @@ gles.core=core -- expose the core
 --setmetatable(gles,meta)
 
 
--- copypasta from GLES header, this is a merge of v1 and v2 so we can work with both?
+-- copypasta from GLES header, we are now v2 focused but we keep some old v1 defines around
 local import=
 [[
 
@@ -30,7 +30,7 @@ local import=
 /*************************************************************/
 /*
  *
- *  Above is selected copypasta GLES1 defines for the glesfix.lua hack
+ *  Above is selected copypasta GLES1 defines
  *  below is a full GLES2 dump
  *
  */
@@ -514,6 +514,43 @@ end
 if core.fixed_pipeline_available then -- the old way
 
 elseif core.programmable_pipeline_available then -- the new way
+
+end
+
+
+-- keep track of basic allocations
+do
+	local counts={}
+	gles.counts=counts
+	
+	counts.reset=function()
+		counts.buffers=0
+		counts.framebuffers=0
+		counts.programs=0
+		counts.renderbuffers=0
+		counts.shaders=0
+		counts.textures=0
+	end
+	counts.reset()
+
+	gles.   GenBuffer=function(  ) counts.buffers=counts.buffers+1 return core.   GenBuffer()   end
+	gles.DeleteBuffer=function(id) counts.buffers=counts.buffers-1 return core.DeleteBuffer(id) end
+
+	gles.   GenFrameBuffer=function(  ) counts.framebuffers=counts.framebuffer+1 return core.   GenFrameBuffer()   end
+	gles.DeleteFrameBuffer=function(id) counts.framebuffers=counts.framebuffer-1 return core.DeleteFrameBuffer(id) end
+
+	gles.   GenProgram=function(  ) counts.programs=counts.programs+1 return core.   GenProgram()   end
+	gles.DeleteProgram=function(id) counts.programs=counts.programs-1 return core.DeleteProgram(id) end
+
+	gles.   GenRenderBuffer=function(  ) counts.renderbuffers=counts.renderbuffers+1 return core.   GenRenderBuffer()   end
+	gles.DeleteRenderBuffer=function(id) counts.renderbuffers=counts.renderbuffers-1 return core.DeleteRenderBuffer(id) end
+
+	gles.   GenShader=function(  ) counts.shaders=counts.shaders+1 return core.   GenShader()   end
+	gles.DeleteShader=function(id) counts.shaders=counts.shaders-1 return core.DeleteShader(id) end
+
+	gles.   GenTexture=function(  ) counts.textures=counts.textures+1 return core.   GenTexture()   end
+	gles.DeleteTexture=function(id) counts.textures=counts.textures-1 return core.DeleteTexture(id) end
+
 
 end
 

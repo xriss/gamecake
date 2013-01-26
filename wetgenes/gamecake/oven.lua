@@ -198,9 +198,7 @@ function M.bake(opts)
 		function oven.start()	
 			oven.win:start()
 			oven.cake.start()
-			if oven.canvas then
-				oven.canvas.start()
-			end
+			oven.cake.canvas.start()
 			if oven.now and oven.now.start then
 				oven.now.start()
 			end
@@ -209,9 +207,7 @@ function M.bake(opts)
 		function oven.stop()
 			oven.win:stop()
 			oven.cake.stop()
-			if oven.canvas then
-				oven.canvas.stop()
-			end
+			oven.cake.canvas.stop()
 			if oven.now and oven.now.stop then
 				oven.now.stop()
 			end
@@ -224,6 +220,14 @@ function M.bake(opts)
 		end
 
 		function oven.update()
+
+--[[
+collectgarbage()
+local gci=gcinfo()		
+local gb=oven.gl.counts.buffers				
+print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
+]]
+
 
 				if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
 					if oven.frame_time<(oven.win:time()-0.5) then oven.frame_time=oven.win:time() end -- prevent race condition
@@ -254,10 +258,7 @@ function M.bake(opts)
 		end
 
 		function oven.draw()
-		
-			if oven.canvas then -- use each vb only once per frame
-				oven.canvas.draw()
-			end
+			oven.cake.canvas.draw()
 			
 --print( "DRAW",math.floor(10000000+(oven.win:time()*1000)%1000000) )
 
