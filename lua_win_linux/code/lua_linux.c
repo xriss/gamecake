@@ -170,6 +170,39 @@ const char *title=" http://gamecake.4lfa.com/ ";
 
 	return 1;
 }
+/*
+ * ICON?
+ * 
+#include <stdlib.h>
+#include <X11/Xlib.h>
+
+int main( int argc, char **argv )
+{
+
+    unsigned int buffer[] = {16, 16, 4294901760, 4294901760, 4294901760, 4294901760, \
+4294901760, 4294901760, 4294901760, 4294901760, 338034905, 3657433343, 0, 184483840, \
+...
+385810432, 251592704, 134152192};
+
+    Display *d = XOpenDisplay(0);
+    int s = DefaultScreen(d);
+    Atom net_wm_icon = XInternAtom(d, "_NET_WM_ICON", False);
+    Atom cardinal = XInternAtom(d, "CARDINAL", False);
+    Window w;
+    XEvent e;
+    w = XCreateWindow(d, RootWindow(d, s), 0, 0, 200, 200, 0,
+                      CopyFromParent, InputOutput, CopyFromParent, 0, 0);
+
+    int length = 2 + 16 * 16 + 2 + 32 * 32;
+    XChangeProperty(d, w, net_wm_icon, cardinal, 32,
+                     PropModeReplace, (const unsigned char*) buffer, length);
+
+
+    XMapWindow(d, w);
+    while(1) XNextEvent(d, &e);
+}
+
+*/
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -199,7 +232,20 @@ const char *s=lua_tostring(l,2);
 		if(strcmp("full",s)==0) { full=1; } // try and take over the screen
 	}
 
-    if(max || full)
+	if(full)
+	{
+		memset(&xev, 0, sizeof(xev));
+		xev.type = ClientMessage;
+		xev.xclient.window = p->win;
+		xev.xclient.message_type = _NET_WM_STATE;
+		xev.xclient.format = 32;
+		xev.xclient.data.l[0] = 1; // add
+		xev.xclient.data.l[1] = _NET_WM_STATE_FULLSCREEN;
+		xev.xclient.data.l[2] = _NET_WM_STATE_FULLSCREEN;
+		XSendEvent(p->dsp, DefaultRootWindow(p->dsp), False, SubstructureNotifyMask, &xev);
+	}
+	else
+    if(max)
     {
 		memset(&xev, 0, sizeof(xev));
 		xev.type = ClientMessage;
@@ -210,20 +256,7 @@ const char *s=lua_tostring(l,2);
 		xev.xclient.data.l[1] = _NET_WM_STATE_MAXIMIZED_VERT;
 		xev.xclient.data.l[2] = _NET_WM_STATE_MAXIMIZED_HORZ;
 		XSendEvent(p->dsp, DefaultRootWindow(p->dsp), False, SubstructureNotifyMask, &xev);
-
-		if(full)
-		{
-			memset(&xev, 0, sizeof(xev));
-			xev.type = ClientMessage;
-			xev.xclient.window = p->win;
-			xev.xclient.message_type = _NET_WM_STATE;
-			xev.xclient.format = 32;
-			xev.xclient.data.l[0] = 1; // add
-			xev.xclient.data.l[1] = _NET_WM_STATE_FULLSCREEN;
-			xev.xclient.data.l[2] = _NET_WM_STATE_FULLSCREEN;
-			XSendEvent(p->dsp, DefaultRootWindow(p->dsp), False, SubstructureNotifyMask, &xev);
-		}
-    }
+	}
     else // clear all flags
     {
 		memset(&xev, 0, sizeof(xev));
