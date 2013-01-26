@@ -527,8 +527,11 @@ static const struct luaL_reg fslib[] = {
 };
 
 LUALIB_API int luaopen_lfs (lua_State *L) {
+// remove globals
 	dir_create_meta (L);
-	luaL_openlib (L, "lfs", fslib, 0);
+//	luaL_openlib (L, "lfs", fslib, 0);
+	lua_newtable(L);
+	luaL_openlib (L, NULL, fslib, 0);
 	set_info (L);
 	return 1;
 }

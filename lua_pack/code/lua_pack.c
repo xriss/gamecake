@@ -427,6 +427,7 @@ int count;
 	
 	if(data_len==0) { return 0; } // no data to pack
 	
+//printf("PACKLOAD %d %d %d\n",data_len,off,len);
 	if(data_len+off>len) // data overflow
 	{
 		lua_pushstring(l,"data pack overflow");
@@ -572,6 +573,7 @@ int sl;
 	
 	if(ptr) // got a buffer to write intoo
 	{
+//printf("PACKSAVE %d %d %d\n",data_len,off,len);
 		if(data_len+off>len) // error buffer is too small
 		{
 			lua_pushstring(l,"data pack overflow");

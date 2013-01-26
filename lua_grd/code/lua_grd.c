@@ -170,7 +170,7 @@ part_ptr new_p;
 	
 	p=lua_grd_get_ptr(l,1);
 
-	if(lua_isnil(l,1)) // just clear what we have
+	if(lua_isnoneornil(l,1)) // just clear what we have
 	{
 		new_p=grd_create(GRD_FMT_U8_ARGB,0,0,0);
 	}
