@@ -588,7 +588,7 @@ function M.bake(oven,keys)
 
 --print("pkey",m.type,m.code,m.value,v)
 
-				act=0
+				local act=0
 				if m.value==0 then act=-1 end
 				if m.value==1 then act= 1 end
 
