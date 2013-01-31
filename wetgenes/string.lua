@@ -631,3 +631,50 @@ local opts=opts or {} --{dbg_html_comments=true} to include html dbg, this will 
 	ret=macro_replace_once(ret,{},opts) -- finally remove temporary chunks
 	return ret
 end
+
+
+-----------------------------------------------------------------------------
+--
+-- wrap a string to a given width, merging all whitespace to spaces but keeping line breaks
+-- return a table of lines
+--
+-----------------------------------------------------------------------------
+function smart_wrap(s,w)
+	local ls=split_whitespace(s)
+	local t={}
+	
+	local wide=0
+	local line={}
+	
+	local function newline()
+		t[#t+1]=table.concat(line," ") or ""
+		wide=0
+		line={}
+	end
+	
+	for i,v in ipairs(ls) do
+	
+		if v:find("%s") then -- just white space
+		
+			for i,v in string.gfind(v,"\n") do -- keep newlines
+				newline()
+			end
+		
+		else -- a normal word
+		
+			if #line>0 then wide=wide+1 end
+
+			if wide + #v > w then -- split
+				newline()
+			end
+			
+			line[#line+1]=v
+			wide=wide+#v
+			
+		end
+	end
+	if wide~=0 then newline() end -- final newline
+	
+	return t
+end
+

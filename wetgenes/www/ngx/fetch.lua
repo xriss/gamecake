@@ -150,7 +150,7 @@ end
 
 
 function post(url,headers,body)
-	log("fetch.post:"..url)
+--	log("fetch.post:"..url)
 	apis()
 	count=count+1
 
@@ -180,7 +180,7 @@ end
 
 
 function get(url,headers,body)
-	log("fetch.get:"..url)
+--	log("fetch.get:"..url)
 --	log(wstr.dump(headers))
 --	log(wstr.dump(body))
 	apis()

@@ -45,7 +45,7 @@ end
 
 
 function sleep(t)
-	log("sys.sleep:")
+--	log("sys.sleep:")
 
 	local res = ngx.location.capture("/@sleep/"..t)
 
@@ -65,7 +65,7 @@ function file_read(filename)
 end
 
 function bytes_split(bytes,size)
-	log("sys.bytes_split:")
+--	log("sys.bytes_split:")
 	
 	local t={}
 	for i=1,#bytes,size do
@@ -93,7 +93,7 @@ function bytes_to_string(bytes)
 end
 
 function bin_encode(enc,s)
-	log("sys.bin_encode:")
+--	log("sys.bin_encode:")
 
 	if enc=="hex" then
 		r=str_to_hex(s)
@@ -108,24 +108,24 @@ function bin_encode(enc,s)
 end
 
 function md5(s,t)
-	log("sys.md5:")
+--	log("sys.md5:")
 	if f=="bin" then return ngx.md5_bin(s) end
 	return ngx.md5(s)
 end
 function sha1(s,f)
-	log("sys.sha1:")
+--	log("sys.sha1:")
 --	if f=="bin" then return ngx.sha1_bin(s) end
 --	return ngx.sha1(s)
 --	return core.sha1(s,f)
 end
 function hmac_sha1(k,s,f)
-	log("sys.hmac_sha1:")
+--	log("sys.hmac_sha1:")
 	if f=="bin" then return do_hmac_sha1(k,s) end
 	return str_to_hex(do_hmac_sha1(k,s))
 end
 
 function zip_list(z)
-	log("sys.zip_list:")
+--	log("sys.zip_list:")
 	local r={}
 	local zf=zip.open_mem(z,#z)
 	if zf then
@@ -138,11 +138,11 @@ function zip_list(z)
 end
 
 function zip_read(z,n)
-	log("zip.read:")
+--	log("zip.read:")
 	
 	local r
 	local zf=zip.open_mem(z,#z)	
-print(n,#z,wstr.dump(zf))
+--print(n,#z,wstr.dump(zf))
 	if zf then
 	
 		local f=zf:open(n)

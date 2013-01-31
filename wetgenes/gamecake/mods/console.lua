@@ -222,14 +222,15 @@ font.vbs_idx=1
 			oven.times.draw.done()
 
 			local gci=gcinfo()
-			local s=string.format("fps=%02.0f %02.2f/%02.2f vb=%d tx=%d fb=%d mem=%0.0fk",
+			local s=string.format("fps=%2d %02d/%02d %5.2fm vb=%d tx=%d fb=%d ",
 				console.fps,
 				(oven.times.update.time*1000),
 				(oven.times.draw.time*1000),
+				gci/1024,
 				gl.counts.buffers,
 				gl.counts.textures,
-				gl.counts.framebuffers,
-				math.floor(gci) )
+				gl.counts.framebuffers
+				)
 
 -- print info as we are			
 			if gl.patch_functions_method=="disable" then

@@ -39,7 +39,7 @@ function new()
 				ngx.print("<script type=\"text/javascript\"> window.location = \""..url.."\"; </script>")
 		end
 			
-		log("srv.set_mimetype:",v)
+--		log("srv.set_mimetype:",v)
 	end
 	
 	srv.set_cookie=function(t)
@@ -53,7 +53,22 @@ function new()
 	end
 
 	srv.reloadcache=function(...)
-		log("srv.reloadcache:",...)
+--		log("srv.reloadcache:",...)
+
+--update options as we probably just edited them
+		local ae_opts=require("wetgenes.www.any.opts")
+		local opts=require("opts")
+
+		local v=opts.vhosts[srv.vhost] or opts
+		v.lua = ae_opts.get_dat("lua") -- this needs to be per vhost
+		if v.lua then
+			local f=loadstring(v.lua)
+			if f then
+				setfenv(f,v)
+				pcall( f )
+			end
+		end
+
 	end
 
 	srv.cache={} -- a very local cache

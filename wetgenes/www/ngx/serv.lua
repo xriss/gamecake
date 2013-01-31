@@ -45,7 +45,7 @@ function serv2()
 		if ngx.var.host:find(v[1]) then break end
 	end	
 	
-	if srv.vhost then log("VHOST = "..srv.vhost) end
+--	if srv.vhost then log("VHOST = "..srv.vhost) end
 	
 	srv.opts=function(...)
 		local t=opts.vhosts[srv.vhost] or opts
@@ -67,7 +67,7 @@ function serv2()
 
 		for n,v in pairs(opts.mods) do
 			if type(n)=="string" then
-				log("require "..n)
+--				log("require "..n)
 				local m,err=pcall(require,n)
 				if not m then
 					log("require failed on mod "..n.."\n"..(err or ""))

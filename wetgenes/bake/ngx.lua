@@ -27,7 +27,7 @@ function build(tab)
 
 -- combine all possible lua files into one lua dir in the .ngx output dir
 
-	local opts={basedir=bake.cd_root.."/bin",dir="lua",filter=""}
+	local opts={basedir=bake.cd_root.."/../bin",dir="lua",filter=""}
 	local r=bake.findfiles(opts)
 	for i,v in ipairs(r.ret) do
 		local fname=bake.cd_out.."/"..v

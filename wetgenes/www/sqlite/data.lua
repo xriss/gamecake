@@ -80,7 +80,7 @@ function del(key,t)
 	local id=key and key.id
 	local ret
 --	log(wstr.serialize(ent))
-	log("data.del:",kind)
+--	log("data.del:",kind)
 	apis()
 	
 	count=count+0.5
@@ -93,7 +93,7 @@ function del(key,t)
 	else
 		s="DELETE FROM "..kind.." WHERE id="..fixvalue(id)..";"
 	end
-log(s)
+--log(s)
 	ret=wsql.exec(db,s)
 	apie()
 	return true
@@ -104,7 +104,7 @@ function put(ent,t)
 	local id=ent and ent.key and ent.key.id
 	local ret
 --	log(wstr.serialize(ent))
-	log("data.put:",kind)
+--	log("data.put:",kind)
 	apis()
 	count=count+0.5
 
@@ -112,7 +112,7 @@ function put(ent,t)
 	
 	local s=wsql.make_replace(kind,ent.props)
 	
-log(s)
+--log(s)
 	ret=wsql.exec(db,s)
 	id=id or db:last_insert_rowid() -- get the new id, unless we forced it
 	
@@ -128,7 +128,7 @@ function get(ent,t)
 	local id=ent and ent.key and ent.key.id
 	local ret
 --	log(wstr.serialize(ent))
-	log("data.get:",kind)
+--	log("data.get:",kind)
 	apis()
 	count=count+0.5
 
@@ -141,7 +141,7 @@ function get(ent,t)
 		s="SELECT *,ROWID FROM "..kind.." WHERE id="..fixvalue(id)..";"
 	end
 
-log(s)
+--log(s)
 	ent.props=wsql.row(db,s)
 	
 	
@@ -161,7 +161,7 @@ function query(q)
 	local kind=fixkind(q and q.kind)
 	
 	local ret={list={}}
-	log("data.query:")
+--	log("data.query:")
 	apis()
 	count=count+1
 	
@@ -216,7 +216,7 @@ end
 --
 -----------------------------------------------------------------------------
 function begin()
-	log("data.begin:")
+--	log("data.begin:")
 
 	local t={}
 --	t.core=core.begin()
@@ -343,7 +343,7 @@ function setup_db(env,srv)
 
 		for n,b in pairs(opts.vhosts) do
 			ngx.ctx.vhost=n
-			log("data.setup_vhost:",ngx.ctx.vhost)
+--			log("data.setup_vhost:",ngx.ctx.vhost)
 			setup_dbv(env,ngx.ctx)
 		end
 
@@ -360,7 +360,7 @@ function setup_dbv(env,srv)
 
 	local kind=env.kind()
 
-	log("data.setup_db:",kind)
+--	log("data.setup_db:",kind)
 
 
 	local db=getdb(kind)

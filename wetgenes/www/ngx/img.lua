@@ -14,7 +14,7 @@ package.loaded["wetgenes.www.any.img"]=_M
 
 
 function get(data,fmt)
-	log("img.get:")
+--	log("img.get:")
 	
 
 	local gfmt=grd.HINT_PNG
@@ -27,7 +27,7 @@ function get(data,fmt)
 end
 
 function resize(g,x,y)
-	log("img.resize:")
+--	log("img.resize:")
 
 	if g.width==0 or g.height==0 then return nil end
 
@@ -47,7 +47,7 @@ function resize(g,x,y)
 end
 
 function composite(t)
-	log("img.composite:")
+--	log("img.composite:")
 
 	local go=grd.create(grd.FMT_U8_ARGB,t.width,t.height,1)
 	

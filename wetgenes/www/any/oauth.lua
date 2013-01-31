@@ -147,7 +147,9 @@ function decode(s)
 	for i=1,#aa do local v=aa[i]
 		local a,b = wet_string.split_equal(v)
 --log("decode : "..v.." : "..type(a).." : "..type(b))		
-		ret[unesc(a)]=unesc(b) -- unescape both sides
+		if a and b then
+			ret[unesc(a)]=unesc(b) -- unescape both sides
+		end
 	end
 	return ret -- return a lookup table, which may be empty
 end

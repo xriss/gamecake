@@ -17,7 +17,6 @@ function M.bake(opts)
 	local oven={}
 
 		oven.opts=opts
-		opts.oven=oven
 		
 		oven.baked={}
 		oven.mods={}
