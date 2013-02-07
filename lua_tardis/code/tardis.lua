@@ -477,7 +477,7 @@ end
 -- then at z=480 we would have one to one pixel scale...
 -- the total view area volume from there would be -320 +320 , -240 +240 , -480 +(1024-480)
 --
--- win_width and win_height must be the current width and height of the display in pixels
+-- win_width and win_height must be the current width and height of the display in pixels or nil
 -- we use this to wout out where to place our view such that it is always visible and keeps its aspect.
 --
 m4_project23d = function(win_width,win_height,width,height,fov,depth)
@@ -489,7 +489,7 @@ m4_project23d = function(win_width,win_height,width,height,fov,depth)
 	local f=depth
 	local n=1
 
-	local win_aspect=(win_height/win_width)
+	local win_aspect=((win_height or height)/(win_width or width))
 		
 	if (win_aspect > (aspect) ) 	then 	-- fit width to screen
 	

@@ -536,14 +536,14 @@ do
 	gles.   GenBuffer=function(  ) counts.buffers=counts.buffers+1 return core.   GenBuffer()   end
 	gles.DeleteBuffer=function(id) counts.buffers=counts.buffers-1 return core.DeleteBuffer(id) end
 
-	gles.   GenFrameBuffer=function(  ) counts.framebuffers=counts.framebuffer+1 return core.   GenFrameBuffer()   end
-	gles.DeleteFrameBuffer=function(id) counts.framebuffers=counts.framebuffer-1 return core.DeleteFrameBuffer(id) end
+	gles.   GenFramebuffer=function(  ) counts.framebuffers=counts.framebuffers+1 return core.   GenFramebuffer()   end
+	gles.DeleteFramebuffer=function(id) counts.framebuffers=counts.framebuffers-1 return core.DeleteFramebuffer(id) end
 
 	gles.   GenProgram=function(  ) counts.programs=counts.programs+1 return core.   GenProgram()   end
 	gles.DeleteProgram=function(id) counts.programs=counts.programs-1 return core.DeleteProgram(id) end
 
-	gles.   GenRenderBuffer=function(  ) counts.renderbuffers=counts.renderbuffers+1 return core.   GenRenderBuffer()   end
-	gles.DeleteRenderBuffer=function(id) counts.renderbuffers=counts.renderbuffers-1 return core.DeleteRenderBuffer(id) end
+	gles.   GenRenderbuffer=function(  ) counts.renderbuffers=counts.renderbuffers+1 return core.   GenRenderbuffer()   end
+	gles.DeleteRenderbuffer=function(id) counts.renderbuffers=counts.renderbuffers-1 return core.DeleteRenderbuffer(id) end
 
 	gles.   GenShader=function(  ) counts.shaders=counts.shaders+1 return core.   GenShader()   end
 	gles.DeleteShader=function(id) counts.shaders=counts.shaders-1 return core.DeleteShader(id) end

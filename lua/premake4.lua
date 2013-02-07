@@ -55,8 +55,8 @@ elseif ANDROID then
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	linkoptions { "-u android_main" } -- we really need an android_main as well
 	
-	links { "GLESv1_CM" }
---	links { "GLESv2" }
+--	links { "GLESv1_CM" }
+	links { "GLESv2" }
 	
 	links { "EGL" , "android" , "jnigraphics" , "OpenSLES" }
 	links { "dl", "log", "c", "m", "gcc" }	

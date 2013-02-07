@@ -1273,8 +1273,9 @@ static int lua_gles_BlendFuncSeparate (lua_State *l)
 }
 static int lua_gles_CheckFramebufferStatus (lua_State *l)
 {
-	int i=glCheckFramebufferStatus(		(int)luaL_checknumber(l,1)	);
-	return i;
+	int n=glCheckFramebufferStatus(		(int)luaL_checknumber(l,1)	);
+	lua_pushnumber(l,n);
+	return 1;
 }
 static int lua_gles_ClearStencil (lua_State *l)
 {
@@ -1389,14 +1390,14 @@ static int lua_gles_FrontFace (lua_State *l)
 	glFrontFace(	(int)luaL_checknumber(l,1)		);
 	return 0;
 }
-static int lua_gles_GenFramebuffers (lua_State *l)
+static int lua_gles_GenFramebuffer (lua_State *l)
 {
 int id=0;
 	glGenFramebuffers(1,&id);
 	lua_pushnumber(l,(double)id);
 	return 1;
 }
-static int lua_gles_GenRenderbuffers (lua_State *l)
+static int lua_gles_GenRenderbuffer (lua_State *l)
 {
 int id=0;
 	glGenRenderbuffers(1,&id);
@@ -1762,8 +1763,8 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"FramebufferTexture2D",				lua_gles_FramebufferTexture2D},
 		{"FrontFace",							lua_gles_FrontFace},
 
-		{"GenFramebuffers",						lua_gles_GenFramebuffers},
-		{"GenRenderbuffers",					lua_gles_GenRenderbuffers},
+		{"GenFramebuffer",						lua_gles_GenFramebuffer},
+		{"GenRenderbuffer",						lua_gles_GenRenderbuffer},
 		{"GenerateMipmap",						lua_gles_GenerateMipmap},
 		{"GetAttachedShaders",					lua_gles_GetAttachedShaders},
 		{"GetFramebufferAttachmentParameter",	lua_gles_GetFramebufferAttachmentParameter},
