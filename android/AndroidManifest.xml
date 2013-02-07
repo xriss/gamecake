@@ -1,20 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.wetgenes.hunted"
-      android:versionCode="13033"
-      android:versionName="13.033"
+        package="com.wetgenes.bulb"
+      android:versionCode="13100"
+      android:versionName="13.100"
 >
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="9" />
 
-    <!-- Tell the system that you need ES 2.0.
+    <!-- Tell the system that you need ES 2.0. -->
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
--->
+
     
         <!-- This .apk has no Java code itself, so set hasCode to false. 
 actually do not as this breaks random shit...
 -->
 
-    <application android:label="hunted" android:icon="@drawable/icon"
+    <application android:label="Bulbaceous Balls" android:icon="@drawable/icon"
 		android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
     >
 
@@ -23,7 +23,7 @@ actually do not as this breaks random shit...
         <!-- Our activity is the built-in NativeActivity framework class.
              This will take care of integrating with our NDK code. -->
         <activity android:name="com.wetgenes.FeralActivity"
-                android:label="hunted"
+                android:label="Bulbaceous Balls"
                 android:configChanges="orientation|keyboardHidden">
             <!-- Tell NativeActivity the name of our .so -->
             <meta-data android:name="android.app.lib_name"
