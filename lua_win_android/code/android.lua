@@ -105,10 +105,10 @@ android.queue_all_msgs=function()
 				table.insert(android.queue,m)
 			end
 		else
-			finshed=true
+			finished=true
 		end
 		
-	until finshed
+	until finished
 	
 end
 
