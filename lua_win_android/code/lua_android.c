@@ -528,6 +528,21 @@ android_lua *p=lua_android_check_ptr(l,1);
 }
 
 
+static EGLint attribute_list[] =
+{
+	
+// hard hax, please not to be reordering
+	EGL_RED_SIZE, 1,	//	[1]	r
+	EGL_GREEN_SIZE, 1,	//	[3]	g
+	EGL_BLUE_SIZE, 1,	//	[5]	b
+	EGL_ALPHA_SIZE, 0,	//	[7]	a
+	EGL_DEPTH_SIZE, 1,	//	[9]	depth
+
+	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+	EGL_RENDERABLE_TYPE,4,
+	EGL_NONE
+};
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // create and return the data
@@ -551,19 +566,7 @@ EGLint format;
 
 //EGLConfig config;
 EGLint num_config;
-EGLint attribute_list[] =
-{
-	
-// hard hax, please not to be reordering
-	EGL_RED_SIZE, 1,	//	[1]	r
-	EGL_GREEN_SIZE, 1,	//	[3]	g
-	EGL_BLUE_SIZE, 1,	//	[5]	b
-	EGL_ALPHA_SIZE, 0,	//	[7]	a
-	EGL_DEPTH_SIZE, 1,	//	[9]	depth
 
-	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-	EGL_NONE
-};
 
 	lua_getfield(l,1,"r");		if( lua_isnumber(l,-1) ) { attribute_list[1]=(int)lua_tonumber(l,-1);	} lua_pop(l,1);
 	lua_getfield(l,1,"g");		if( lua_isnumber(l,-1) ) { attribute_list[3]=(int)lua_tonumber(l,-1);	} lua_pop(l,1);
@@ -620,17 +623,10 @@ int lua_android_start_p (android_lua *p)
 EGLBoolean result;
 
 EGLint num_config;
-EGLint attribute_list[] =
-{
-	
-// hard hax, please not to be reordering
-	EGL_RED_SIZE, 1,	//	[1]	r
-	EGL_GREEN_SIZE, 1,	//	[3]	g
-	EGL_BLUE_SIZE, 1,	//	[5]	b
-	EGL_ALPHA_SIZE, 0,	//	[7]	a
-	EGL_DEPTH_SIZE, 1,	//	[9]	depth
 
-	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+static EGLint attr_list[] =
+{
+	EGL_CONTEXT_CLIENT_VERSION,2,
 	EGL_NONE
 };
 
@@ -656,7 +652,7 @@ llog("START DISPLAY");
 	if(!p->context)
 	{
 llog("START CONTEXT");
-		p->context = eglCreateContext(p->display, p->config, EGL_NO_CONTEXT, NULL);
+		p->context = eglCreateContext(p->display, p->config, EGL_NO_CONTEXT, attr_list);
 		assert(p->context!=EGL_NO_CONTEXT);
 	}
 // create surface
