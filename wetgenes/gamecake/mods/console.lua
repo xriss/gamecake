@@ -97,7 +97,7 @@ function M.bake(oven,console)
 		
 		if args[1] then
 		
-			function lookup(tab,name)
+			local function lookup(tab,name)
 				local names=wstr.split("%.",name)
 				for i,v in ipairs(names) do
 --				print(i.." "..v)

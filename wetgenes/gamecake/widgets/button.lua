@@ -1,10 +1,10 @@
 -- copy all globals into locals
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-module("wetgenes.gamecake.widgets.button")
-
-function bake(oven,wbutton)
+function M.bake(oven,wbutton)
 wbutton=wbutton or {}
 
 

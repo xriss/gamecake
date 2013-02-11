@@ -4,10 +4,14 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- generic default widget functions
 
 
-module("wetgenes.gamecake.widgets.meta")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(oven,wmeta)
+function M.bake(oven,wmeta)
 wmeta=wmeta or {}
+
+local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+
 
 -- available widget classes
 wmeta.classes={
@@ -179,6 +183,10 @@ function wmeta.setup(def)
 		
 		if widget.master.ids and widget.id then widget.master.ids[widget.id]=widget end -- lookup by id
 		
+		if def.fbo then -- an fbo buffer has been requested (can speed rendering up)
+			widget.fbo=framebuffers.create(0,0,0)
+		end
+		
 		widget:set_dirty()
 		
 		return widget
@@ -325,12 +333,12 @@ function wmeta.setup(def)
 --print(w.id or "?",w.px,w.py,w.hx,w.hy)
 		end
 		
-		function endoflines()
+		local function endoflines()
 			widget.hx=mhx
 			widget.hy=mhy
 		end
 		
-		function endofline()
+		local function endofline()
 			hx=0
 			hy=hy+my
 			my=0
@@ -382,7 +390,7 @@ function wmeta.setup(def)
 		local my=0
 		local line=1
 		
-		function endoflines()
+		local function endoflines()
 			local y=0
 			for i,v in ipairs(widget) do
 				v.hy=v.sy*widget.hy/sy
@@ -393,7 +401,7 @@ function wmeta.setup(def)
 			end
 		end
 		
-		function endofline(i)
+		local function endofline(i)
 			local x=0
 			for i=line,i do -- final line layout
 				local v=widget[i]

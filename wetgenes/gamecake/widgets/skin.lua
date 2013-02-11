@@ -5,6 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local bit=require('bit')
 local grd=require('wetgenes.grd')
 local pack=require('wetgenes.pack')
+local tardis=require('wetgenes.tardis')
 
 local wzips=require("wetgenes.zips")
 
@@ -39,9 +40,10 @@ end
 
 
 
-module("wetgenes.gamecake.widgets.skin")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(oven,wskin)
+function M.bake(oven,wskin)
 wskin=wskin or {}
 
 local gl=oven.gl
@@ -187,37 +189,33 @@ end
 		gl.Translate(widget.pxd,widget.pyd,0)
 		
 		if widget.fbo then
-			if widget.fbo.width~=widget.sx or widget.fbo.height~=widget.sy then -- resize so we need a new fbo
-				widget.fbo:clean()
-				widget.fbo=nil
-			end
-			if not widget.fbo then -- allocate a new fbo
+			if widget.fbo.w~=widget.sx or widget.fbo.h~=widget.sy then -- resize so we need a new fbo
 --print("new fbo",widget.sx,widget.sy)
-				widget.fbo=_G.win.fbo(widget.sx,widget.sy,0)
+				widget.fbo:resize(widget.sx,widget.sy,0)
 				widget.dirty=true -- flag redraw
-			end
-				
+			end				
 		end
 
 if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
 
 		if widget.fbo then
---print("into fbo")
+--print("drawing into fbo")
 			
-			gl.MatrixMode(gl.PROJECTION)
-			gl.PushMatrix()
-
-			widget.fbo:bind()
+			widget.fbo:bind_frame()
 			
 --			gl.ClearColor(14/15,14/15,14/15,1)
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
-			win.project23d(widget.sx/widget.sy,1,1024)
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PushMatrix()
+			gl.LoadMatrix( tardis.m4_project23d(nil,nil,widget.sx,widget.sy,0.5,2*(widget.sx+widget.sy)) )
+
+			gl.Viewport(0,0,widget.sx,widget.sy)
 						
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.LoadIdentity()
-			gl.Translate(-widget.sx/2,widget.sy/2,-widget.sy/2)
+			gl.Translate(-widget.sx/2,-widget.sy/2,-widget.sy)
 			gl.Translate(-widget.pxd,-widget.pyd,0)
 
 			if widget.pan_px and widget.pan_py then -- fidle everything
@@ -233,7 +231,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		
 		if widget.color then
 		
-			buttdown=false
+			local buttdown=false
 			if ( master.press and master.over==widget ) or widget.state=="selected" then
 				buttdown=true
 			end
@@ -258,7 +256,13 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 				
 			else -- widget.highlight=="dark" -- default is to darken everything slightly when it is not the active widget
 			
-				if master.over==widget then
+				if not widget.hooks then
+					local c={explode_color(widget.color)}
+					c[3]=c[3]*12/16
+					c[2]=c[2]*12/16
+					c[1]=c[1]*12/16
+					gl.Color( c[1],c[2],c[3],c[4] )
+				elseif master.over==widget then
 					if buttdown then
 						local c={explode_color(widget.color)}
 						c[3]=c[3]*14/16
@@ -303,8 +307,13 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			
 			elseif mode then
 
-		
-				if ( master.press and master.over==widget ) or widget.state=="selected" then
+				if not widget.hooks then
+				
+					images.bind(images.get("wskins/"..mode.."/border"))
+					txp=0
+					typ=-1
+
+				elseif ( master.press and master.over==widget ) or widget.state=="selected" then
 					images.bind(images.get("wskins/"..mode.."/buttin"))
 					txp=0
 					typ=-1
@@ -359,7 +368,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			if f then
 				if type(f)=="number" then
 				else
-					typ=typ-ty/8 -- reposition font slightly as fonts other than the builtin probably have decenders
+					typ=typ-ty/8 -- reposition font slightly as fonts other than the builtin probably have descenders
 				end
 			end
 			
@@ -414,8 +423,8 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 						if widget.master.throb>=128 then
 							local sw=font.width(widget.text:sub(1,widget.data.str_idx))
 
-			font.set_xy(tx+sw,ty)
-			font.draw("_")
+							font.set_xy(tx+sw,ty)
+							font.draw("_")
 						end
 					end
 				end
@@ -436,19 +445,30 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.PopMatrix()
 			
-			win.fbo_bind()
+			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+			
+			canvas.viewport() --restore viewport
 		end
 		
 else -- we can only draw once
 
 		if widget.fbo then -- we need to draw our cached fbo
+
 		
 			gl.Disable(gl.DEPTH_TEST)
 			gl.Disable(gl.CULL_FACE)
 		
-			gl.Translate(widget.sx/2,-widget.sy/2,0)
+--			gl.Translate(widget.sx,-widget.sy,0)
 			gl.Color(1,1,1,1)
-			widget.fbo:draw()
+			
+			widget.fbo:bind_texture()
+			flat.tristrip("xyzuv",{
+				0,				0,				0,	0,1,
+				widget.fbo.w,	0,				0,	1,1,
+				0,				widget.fbo.h,	0,	0,0,
+				widget.fbo.w,	widget.fbo.h,	0,	1,0,
+			})
+
 --print("draw fbo")
 		end
 		

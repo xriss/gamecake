@@ -34,7 +34,7 @@ function serv2()
 
 
 	local opts=require("opts")
-	opts.setup() -- may need to in itialize stuff
+	if opts.setup then opts.setup() end -- may need to in itialize stuff
 
 
 	local srv=require("wetgenes.www.ngx.srv").new()
@@ -63,7 +63,7 @@ function serv2()
 	if not srv.opts().require_all_done then
 		srv.opts().require_all_done=true
 
-		log("require all mods")
+--		log("require all mods")
 
 		for n,v in pairs(opts.mods) do
 			if type(n)=="string" then

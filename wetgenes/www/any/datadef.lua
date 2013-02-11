@@ -110,6 +110,28 @@ function def_get(env,srv,id,tt)
 	return env.check(srv,ent)
 end
 
+--------------------------------------------------------------------------------
+--
+-- Load from database, pass in id or entity
+-- the props will be copied into the cache
+--
+--------------------------------------------------------------------------------
+function def_del(env,srv,id,tt)
+
+	local ent=id
+	
+	if type(ent)~="table" then -- get by id
+		ent=env.create(srv)
+		ent.key.id=id
+	end
+	
+	local t=tt or wdata -- use transaction?
+	t.del(ent)
+
+	local ck=env.cache_key(srv,ent.key.id)
+	cache.del(srv,ck)
+		
+end
 
 
 --------------------------------------------------------------------------------
@@ -290,6 +312,7 @@ function set_defs(env)
 	env.manifest   = env.manifest or	function(srv,id)     return def_manifest(env,srv,id)       end
 	env.put        = env.put or			function(srv,ent,t)  return def_put(env,srv,ent,t)         end
 	env.get        = env.get or			function(srv,id,t)   return def_get(env,srv,id,t)          end
+	env.del        = env.del or			function(srv,id,t)   return def_del(env,srv,id,t)          end
 	env.set        = env.set or			function(srv,id,f)   return def_set(env,srv,id,f)	 	   end
 	env.update     = env.update or		function(srv,id,f)   return def_update(env,srv,id,f)       end
 	env.cache_key  = env.cache_key or	function(srv,id)     return def_cache_key(env,srv,id)      end

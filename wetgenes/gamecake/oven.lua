@@ -59,11 +59,11 @@ function M.bake(opts)
 			oven.rebake("wetgenes.gamecake.cake") -- bake the cake in the oven,
 
 			-- the order these are added is important for priority, top of list is lowest priority, bottom is highest.
-			oven.require_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style escape menu
-			oven.require_mod("wetgenes.gamecake.mods.console") -- console gives us a quake style tilda console
-			oven.require_mod("wetgenes.gamecake.mods.keys") -- touchscreen keys and posix keymaping
-			oven.require_mod("wetgenes.gamecake.mods.mouse") -- auto fake mouse on non windows builds
-			oven.require_mod("wetgenes.gamecake.mods.layout") -- screen layout options
+			oven.rebake_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style escape menu
+			oven.rebake_mod("wetgenes.gamecake.mods.console") -- console gives us a quake style tilda console
+			oven.rebake_mod("wetgenes.gamecake.mods.keys") -- touchscreen keys and posix keymaping
+			oven.rebake_mod("wetgenes.gamecake.mods.mouse") -- auto fake mouse on non windows builds
+			oven.rebake_mod("wetgenes.gamecake.mods.layout") -- screen layout options
 
 			if opts.start then
 				oven.next=oven.rebake(opts.start)
@@ -82,6 +82,10 @@ function M.bake(opts)
 			local ret=oven.baked[name]
 			
 			if not ret then
+		
+				if type(name)=="function" then -- allow bake function instead of a name
+					return name(oven,{})
+				end
 			
 				ret={modname=name}
 				oven.baked[name]=ret
@@ -96,14 +100,12 @@ function M.bake(opts)
 -- this performs a rebake and adds the baked module into every update/draw function
 -- so we may insert extra functionality without having to modify the running app
 -- eg a console or an onscreen keyboard
-		function oven.require_mod(mname)
+		function oven.rebake_mod(name)
 		
-			local m=mname -- can pass in mod table or require name of mod
-			if type(m)=="table" then mname=m.modname end
-			if oven.mods[mname] then return oven.mods[mname] end -- already setup, nothing else to do
-			if type(m)=="string" then m=oven.rebake(mname) end -- rebake mod into this oven
+			if oven.mods[name] then return oven.mods[name] end -- already setup, nothing else to do
+			local m=oven.rebake(name) -- rebake mod into this oven
 
-			oven.mods[mname]=m			-- store baked version by its name
+			oven.mods[name]=m			-- store baked version by its name
 			table.insert(oven.mods,m)		-- and put it at the end of the list for easy iteration
 			
 			m.setup() -- and call setup since it will always be running from now on until it is removed

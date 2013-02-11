@@ -71,16 +71,31 @@ print("click",id)
 
 				gui.data.name:value( snames.random() )
 
-			elseif id=="profile_back" then
-				if widget.user then
+			elseif id=="profile_name_edit" then
+			
+				gui.page("profile_name_edit")
 				
-					sprofiles.set("name",gui.data.name:value())
-				
-					gui.page(widget.user)
+			elseif id=="profile_name_set" then
+			
+				sprofiles.set("name",gui.data.name:value())
+				gui.page("profile")
+
+			elseif id=="profile_return" then
+			
+				if gui.returnpage then gui.returnpage() end -- callback to return to original menu			
 					
-				else
-					if gui.returnpage then gui.returnpage() end -- callback to return to original menu
-				end
+			elseif id=="profile_goto" then
+
+				gui.page(widget.user)
+			
+			elseif id=="profile_cancel" then
+			
+					if widget.user then
+						gui.page(widget.user)
+					else
+						if gui.returnpage then gui.returnpage() end -- callback to return to original menu			
+					end
+
 			end
 		end
 	
@@ -88,14 +103,15 @@ print("click",id)
 
 	
 	function gui.add_part(top,name)
+--[[
 		if name=="profile_bar" then
 			local bback
 			if gui.page_name=="profile" then bback="profiles" end
-			top:add({sx=80,sy=40,color=0xffcccccc,text="back",id="profile_back",hooks=gui.hooks,user=bback})
-			top:add({sx=80,sy=40})
-			top:add({sx=80,sy=40})
-			top:add({sx=80,sy=40})
+			top:add({sx=110,sy=40,color=0xffcccccc,text="OK",id="profile_ok",hooks=gui.hooks,user=bback})
+			top:add({sx=100,sy=40})
+			top:add({sx=110,sy=40,color=0xffcccccc,text="Cancel",id="profile_cancel",hooks=gui.hooks,user=bback})
 		end
+]]
 	end
 
 
@@ -103,19 +119,16 @@ print("click",id)
 
 		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
 
-		gui.add_part(top,"profile_bar")
+		top:add({sx=320,sy=110,text="Choose profile.",text_color=0xffffffff})
 
---		top:add({sx=320,sy=200})
-		
 		for i,v in sprofiles.ipairs() do
-			top:add({sx=320,sy=40})
-			top:add({sx=320,sy=40,color=0xffcccccc,text=i..": "..v.name,id="profiles_select",hooks=gui.hooks,user=i})
+			top:add({sx=320,sy=20})
+			top:add({sx=20,sy=50})
+			top:add({sx=280,sy=50,color=0xffcccccc,text=v.name,id="profiles_select",hooks=gui.hooks,user=i})
+			top:add({sx=20,sy=50})
 		end
-		top:add({sx=320,sy=40})
+		top:add({sx=320,sy=20})
 
-
---		top:add({sx=320,sy=200})
-		
 	end
 		
 	function gui.pages.profile(master)
@@ -123,17 +136,46 @@ print("click",id)
 		
 		gui.data.name:value( sprofiles.get("name") )
 
-		local w=top:add({sx=320,sy=320,mx=320,my=320,class="flow"})
+		top:add({sx=110,sy=40,color=0xffcccccc,text="OK",id="profile_return",hooks=gui.hooks})
+		top:add({sx=100,sy=40})
+		top:add({sx=110,sy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profiles"})
 
-		gui.add_part(w,"profile_bar")
-		w:add({sx=320,sy=40})
-		w:add({sx=320,sy=40,color=0xffcccccc,text="My name is"})
-		w:add({sx=320,sy=40,color=0xffcccccc,data=gui.data.name,id="profile_name",hooks=gui.hooks,class="textedit"})
+		top:add({sx=320,sy=20})
+		top:add({sx=320,sy=40,text_color=0xffffffff,text="My name is"})
+		top:add({sx=320,sy=20})
 
-		w:add({sx=120,sy=40,color=0xffcccccc,text="Clear",id="profile_name_clear",hooks=gui.hooks})
-		w:add({sx=80,sy=40})
-		w:add({sx=120,sy=40,color=0xffcccccc,text="Random",id="profile_name_rand",hooks=gui.hooks})
-		w:add({sx=320,sy=40})
+		top:add({sx=20,sy=40})
+		top:add({sx=280,sy=40,color=0xffcccccc,text=gui.data.name:value(),id="profile_name_edit",hooks=gui.hooks})
+		top:add({sx=20,sy=40})
+
+		top:add({sx=320,sy=40*8})
+
+	end
+
+	function gui.pages.profile_name_edit(master)
+		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+		
+		gui.data.name:value( sprofiles.get("name") )
+
+		top:add({sx=110,sy=40,color=0xffcccccc,text="OK",id="profile_name_set",hooks=gui.hooks})
+		top:add({sx=100,sy=40})
+		top:add({sx=110,sy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profile"})
+
+		top:add({sx=320,sy=80,text_color=0xffffffff,text="Type your name"})
+
+		top:add({sx=20,sy=40})
+		top:add({sx=280,sy=40,color=0xffcccccc,data=gui.data.name,id="profile_name",hooks=gui.hooks,class="textedit"})
+		top:add({sx=20,sy=40})
+
+		top:add({sx=20,sy=40})
+		top:add({sx=120,sy=40,color=0xffcccccc,text="Clear",id="profile_name_clear",hooks=gui.hooks})
+		top:add({sx=40,sy=40})
+		top:add({sx=120,sy=40,color=0xffcccccc,text="Random",id="profile_name_rand",hooks=gui.hooks})
+		top:add({sx=20,sy=40})
+		
+		top:add({sx=320,sy=40})
+		top:add({sx=320,sy=40})
+		top:add({sx=320,sy=40})
 
 		local m=top:add({sx=320,sy=160})		
 		mkeys.setup_keyboard_widgets(m)

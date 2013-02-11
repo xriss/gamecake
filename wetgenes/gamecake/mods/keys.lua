@@ -491,7 +491,7 @@ function M.bake(oven,keys)
 		master:clean_all()
 		master.ids={}
 
-		local top=master:add({py=0,hx=320,hy=160,mx=320,my=240,class="flow",ax=0,ay=0})
+		local top=master:add({py=0,hx=320,hy=160,mx=320,my=240,class="flow",ax=0,ay=0,fbo=true})
 
 		local function key_line(ks)
 			local t=top:add({sx=320,sy=32,mx=320,my=32,class="flow"})
@@ -505,7 +505,7 @@ function M.bake(oven,keys)
 		key_line("qwertyuiop")
 		key_line("asdfghjkl ")
 		key_line(" zxcvbnm:#")
-		key_line("<     ,./>")
+		key_line("<    _,./>")
 					
 	end
 

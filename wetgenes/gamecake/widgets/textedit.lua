@@ -7,9 +7,10 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("wetgenes.gamecake.widgets.textedit")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(oven,wtextedit)
+function M.bake(oven,wtextedit)
 wtextedit=wtextedit or {}
 
 local cake=oven.cake

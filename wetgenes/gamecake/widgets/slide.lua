@@ -5,9 +5,10 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- two basic widgets merged together to give a simple slide or scrollbar 
 
 
-module("wetgenes.gamecake.widgets.slide")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(oven,wslide)
+function M.bake(oven,wslide)
 wslide=wslide or {}
 
 local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")

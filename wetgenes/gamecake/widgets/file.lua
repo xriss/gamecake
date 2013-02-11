@@ -6,9 +6,10 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("wetgenes.gamecake.widgets.file")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(oven,wfile)
+function M.bake(oven,wfile)
 wfile=wfile or {}
 
 function wfile.mouse(widget,act,x,y,key)

@@ -8,14 +8,18 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("wetgenes.gamecake.widgets.master")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(oven,wmaster)
+function M.bake(oven,wmaster)
 wmaster=wmaster or {}
 
 local gl=oven.gl
 local cake=oven.cake
 local canvas=oven.canvas
+
+local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+
 
 --
 -- add meta functions
@@ -29,6 +33,8 @@ function wmaster.setup(widget,def)
 
 	master.throb=0
 --	master.fbo=_G.win.fbo(0,0,0) -- use an fbo
+--	master.fbo=framebuffers.create(0,0,0)
+	master.dirty=true
 
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget)
@@ -54,9 +60,8 @@ function wmaster.setup(widget,def)
 		master.remouse(widget)
 	end
 
---[[
 	local dirty_fbos={}
-	local find_dirty_fbos
+	local find_dirty_fbos -- to recurse is defined...
 	find_dirty_fbos=function(widget)
 		if widget.fbo and widget.dirty then
 			dirty_fbos[ #dirty_fbos+1 ]=widget
@@ -65,27 +70,23 @@ function wmaster.setup(widget,def)
 			find_dirty_fbos(v)
 		end
 	end
-]]	
+
 	function master.draw(widget)
---[[
+
 		dirty_fbos={}
 		find_dirty_fbos(widget)
-]]
-	
-
 
 		gl.Disable(gl.CULL_FACE)
 		gl.Disable(gl.DEPTH_TEST)
 
 		gl.PushMatrix()
 		
---[[
 		if #dirty_fbos>0 then
 			for i=#dirty_fbos,1,-1 do -- call in reverse so sub fbos can work
 				meta.draw(dirty_fbos[i]) -- dirty, so this only builds the fbo
 			end
 		end
-]]		
+
 		meta.draw(widget)
 		
 		gl.PopMatrix()

@@ -11,9 +11,10 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("wetgenes.gamecake.widgets")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(oven,widgets)
+function M.bake(oven,widgets)
 widgets=widgets or {}
 
 local wmeta=oven.rebake("wetgenes.gamecake.widgets.meta")

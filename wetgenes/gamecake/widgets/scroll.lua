@@ -6,9 +6,10 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 
-module("wetgenes.gamecake.widgets.scroll")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function bake(oven,wscroll)
+function M.bake(oven,wscroll)
 wscroll=wscroll or {}
 
 

@@ -9,7 +9,7 @@ package.loaded["wetgenes.www.any.users"]=_M
 
 function login_url(a)
 
-	log("users.login_url:")
+--	log("users.login_url:")
 --	return core.login_url(a)
 
 end
@@ -17,14 +17,14 @@ end
 
 function logout_url(a)
 
-	log("users.logout_url:")
+--	log("users.logout_url:")
 --	return core.logout_url(a)
 
 end
 
 function get_google_user()
 
-	log("users.get_google_user:")
+--	log("users.get_google_user:")
 --	return core.get_google_user()
 
 end
