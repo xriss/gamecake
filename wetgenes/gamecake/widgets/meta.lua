@@ -176,6 +176,7 @@ function wmeta.setup(def)
 		
 		widget.text=def.text -- display this text on the button
 		widget.sheet=def.sheet -- display this sheet (by name) on the button
+		widget.style=def.style -- style the button this way
 		
 		if widget.color or widget.text or widget.sheet then widget.solid=true end
 		widget.solid=widget.solid or def.solid

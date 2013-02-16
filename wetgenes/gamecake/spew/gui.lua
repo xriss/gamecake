@@ -39,7 +39,7 @@ M.bake=function(oven,gui)
 	local sprofiles=oven.rebake("wetgenes.gamecake.spew.profiles")
 	local sscores=oven.rebake("wetgenes.gamecake.spew.scores")
 
-	local sounds=oven.rebake("wetgenes.gamecake.sounds")
+	local ssettings=oven.rebake("wetgenes.gamecake.spew.settings")
 	
 --	local bpages=oven.rebake("bulb.pages")
 	
@@ -49,8 +49,8 @@ M.bake=function(oven,gui)
 		gui.data.mode=1
 		gui.data.score=0
 		gui.data.name=wdata.new_data({class="string",hooks=gui.hooks})
-		gui.data.vol_music=wdata.new_data({id="vol_music",class="number",hooks=gui.hooks,num=100,min=0,max=100,step=1})
-		gui.data.vol_sfx=wdata.new_data({id="vol_sfx",class="number",hooks=gui.hooks,num=100,min=0,max=100,step=1})
+		gui.data.vol_music=wdata.new_data({id="vol_music",class="number",hooks=gui.hooks,num=ssettings.get("vol_music")*11,min=0,max=11,step=1})
+		gui.data.vol_sfx=wdata.new_data({id="vol_sfx",class="number",hooks=gui.hooks,num=ssettings.get("vol_sfx")*11,min=0,max=11,step=1})
 	end
 	
 	function gui.set_all_values()
@@ -67,9 +67,9 @@ M.bake=function(oven,gui)
 
 		if act=="value" then
 			if     id=="vol_music" then
-				sounds.vol_stream=widget.num/100
+				ssettings.set("vol_music",widget.num/11)
 			elseif id=="vol_sfx" then
-				sounds.vol_sfx=widget.num/100
+				ssettings.set("vol_sfx",widget.num/11)
 			end
 		end
 

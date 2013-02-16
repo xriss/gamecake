@@ -115,7 +115,7 @@ function wskin.setup(def)
 --	local font=--[[def.font]]def.state.cake.fonts.get(1)
 
 	
-local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
+local function draw33(tw,th, mw,mh, vxs,vys, vw,vh,invert)
 		
 --		local vw,vh=512,52
 --		local mw,mh=24,24
@@ -146,6 +146,23 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh)
 					vx+vxp,	vy+vyp,	0,	tx+txp,	ty+typ, -- doubletap hack so we can start at any location
 				} do
 					t[ht+i]=v
+				end
+			end
+			
+			if invert then -- draw inverted texture, sometimes useful as it flips highlights
+				tdrawbox=function ( tx,ty, vx,vy , txp,typ, vxp,vyp )
+					local ht=#t
+					for i,v in ipairs{
+						vx,		vy,		0,	1-(tx),		1-(ty), -- doubletap hack so we can start at any location
+						vx,		vy,		0,	1-(tx),		1-(ty),
+						vx+vxp,	vy,		0,	1-(tx+txp),	1-(ty),
+						vx,		vy+vyp,	0,	1-(tx),		1-(ty+typ),
+						vx+vxp,	vy+vyp,	0,	1-(tx+txp),	1-(ty+typ),
+						vx+vxp,	vy+vyp,	0,	1-(tx+txp),	1-(ty+typ), -- doubletap hack so we can start at any location
+						vx+vxp,	vy+vyp,	0,	1-(tx+txp),	1-(ty+typ), -- doubletap hack so we can start at any location
+					} do
+						t[ht+i]=v
+					end
 				end
 			end
 			
@@ -229,8 +246,25 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 						
 		local txp,typ=0,0
 		
-		if widget.color then
+		if widget.color then -- need a color to draw, so no color, no draw
 		
+			local style=widget.style
+			
+			if not style then -- make assumptions
+			
+				style="button" -- default
+
+				if  widget.class=="textedit" then
+				
+					style="indent" -- draw upside down button?
+					
+				elseif (not widget.hooks) then -- probably not a button
+				
+					style="flat"
+				
+				end
+			end
+				
 			local buttdown=false
 			if ( master.press and master.over==widget ) or widget.state=="selected" then
 				buttdown=true
@@ -256,7 +290,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 				
 			else -- widget.highlight=="dark" -- default is to darken everything slightly when it is not the active widget
 			
-				if not widget.hooks then
+				if style=="indent" then
 					local c={explode_color(widget.color)}
 					c[3]=c[3]*12/16
 					c[2]=c[2]*12/16
@@ -305,29 +339,39 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 				sheets.get(widget.sheet):draw(1,0,0,0,hx,hy)
 
 			
-			elseif mode then
-
-				if not widget.hooks then
+			elseif mode then -- got some images to play with
+			
+				if style=="flat" then
 				
 					images.bind(images.get("wskins/"..mode.."/border"))
 					txp=0
 					typ=-1
 
-				elseif ( master.press and master.over==widget ) or widget.state=="selected" then
+					draw33(128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
+
+				elseif style=="indent" then
+
 					images.bind(images.get("wskins/"..mode.."/buttin"))
 					txp=0
-					typ=-1
-				else
-					images.bind(images.get("wskins/"..mode.."/button"))
-					txp=0
-					typ=-2
+					typ=0
+
+					draw33(128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2),true)
+
+				elseif style=="button" then
+
+					if ( master.press and master.over==widget ) or widget.state=="selected" then
+						images.bind(images.get("wskins/"..mode.."/buttin"))
+						txp=0
+						typ=-1
+					else
+						images.bind(images.get("wskins/"..mode.."/button"))
+						txp=0
+						typ=-2
+					end
+					
+					draw33(128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
 				end
-				
-				if widget.class=="string" then -- hack
-					images.bind(images.get("wskins/"..mode.."/border"))
-				end
-				
-				draw33(128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
+								
 			
 			else -- builtin
 			
