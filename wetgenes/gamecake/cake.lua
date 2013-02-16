@@ -32,8 +32,8 @@ function M.bake(oven,cake)
 		cake.images.stop()
 		cake.buffers.stop()
 		cake.sounds.stop()
-		if cake.gl.forget then -- any programs will need to be recompiled
-			cake.gl.forget()
+		if oven.gl.forget then -- any programs will need to be recompiled
+			oven.gl.forget()
 		end
 	end
 

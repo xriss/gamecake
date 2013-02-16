@@ -1,16 +1,63 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local lfs=require("lfs")
+local wwin=require("wetgenes.win") -- system independent helpers
+local wstr=require("wetgenes.string")
+local wsbox=require("wetgenes.sandbox")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.bake=function(oven,scores)
 
 	scores=scores or {} 
+
+	scores.filename=wwin.files_prefix.."scores.lua"
+	scores.mode="none" -- default mode
 	
 	local cake=oven.cake
 	local canvas=cake.canvas
 	
+	local profiles=oven.rebake("wetgenes.gamecake.spew.profiles")
+
+-- very very simple local score data
+	local ss
+
+-- initialise scores data
+	function scores.init()
+		ss={}
+		scores.mode="none"
+		scores.level=1
+		
+		ss.list={}
+		ss.list[scores.mode]={}
+		ss.list[scores.mode][scores.level]={}
+	end
+	
+-- load all scores data
+	function scores.load()
+print("Loading "..scores.filename)
+		local fp=io.open(scores.filename,"r")
+		if fp then
+			local s=fp:read("*all")
+			ss=wsbox.lson(s) -- safeish
+			fp:close()
+			return true
+		end
+		
+		return false
+	end
+	
+-- save all scores data
+	function scores.save()
+print("Saving "..scores.filename)
+		local fp=io.open(scores.filename,"w")
+		fp:write(wstr.serialize(ss))
+		fp:close()
+	end
+
+
 	function scores.setup(max_up)
 		max_up=max_up or 1
 		scores.up={}
@@ -105,6 +152,101 @@ M.bake=function(oven,scores)
 		
 	function scores.msg(m)
 	end
+
+
+	function scores.get_list(opts)
+		local mode=opts.mode or scores.mode or "none"
+		local level=opts.level or scores.level or 1
+		if not ss.list then ss.list={} end
+		if not ss.list[mode] then ss.list[mode]={} end
+		if not ss.list[mode][level] then ss.list[mode][level]={} end	
+		return ss.list[mode][level]
+	end
+
+	function scores.get_high(opts)
+		local r={}
+		for i,v in ipairs( scores.get_list(opts) ) do
+			local t=r[v.name] or v
+			if (v.score>t.score) or ( (v.score==t.score) and (v.time<=t.time) ) then
+				r[v.name]=v
+			end
+		end
+		return r
+	end
+
+-- get a list of scores data
+	function scores.list(opts)
+		
+		
+		local ret={}
+
+		local order=opts.order or "high"
+		local offset=opts.offset or 1
+		local limit=opts.limit or 10
+		
+		if order=="high" then -- normal high score list, one score per name
+
+			local t=scores.high_to_list(scores.get_high(opts))
+			
+			for i=offset,offset+limit do
+				if t[i] then
+					t[i].idx=i -- refresh idx
+					ret[#ret+1]=t[i]
+				end
+			end
+			
+
+		end
+		
+		return ret	
+	end
+	
+	function scores.high_to_list(t)
+		local k={}
+		for i,v in pairs(t) do k[#k+1]=v end		
+		table.sort(k,function(a,b) -- sort by score then time
+			if a.score==b.score then
+				return a.time<b.time
+			end
+			return a.score>b.score
+		end)
+		return k
+	end	
+
+	function scores.get_best_score(opts)
+		local name=opts.name or profiles.get("name")
+		local h=scores.get_high(opts)
+		return h[name]
+	end
+	
+	function scores.final_score(opts)
+	
+		local scr={}
+		
+		scr.idx=0
+		scr.time=opts.time or os.time()
+		scr.name=opts.name or profiles.get("name")
+		scr.score=opts.score or scores.up[1].score
+		scr.pid=opts.pid or profiles.pid -- which profile slot this is associated with
+		
+		local t=scores.get_list(opts)
+		t[#t+1]=scr -- insert
+
+		scores.save() -- always save new scores to disk
+
+		return scr
+	end
+
+
+--make sure we have a dir to load/save profiles into
+lfs.mkdir(wwin.files_prefix:sub(1,-2)) -- skip trailing slash
+
+-- try autoload
+if not scores.load() then
+-- or create and save a default file
+	scores.init()
+	scores.save()
+end
 
 	return scores
 end

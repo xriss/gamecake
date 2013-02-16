@@ -32,6 +32,9 @@ function M.bake(oven,sounds)
 	local al=sounds.al
 	local alc=sounds.alc
 	
+	sounds.vol_stream=1
+	sounds.vol_beep=1
+	
 	sounds.data={}
 	
 	sounds.prefix=opts.sodprefix or "data/"
@@ -73,7 +76,10 @@ sounds.beep=function(d)
 	al.Source(sfx.source, al.BUFFER, d.buff)
 	al.Source(sfx.source, al.LOOPING, d.loop)
 
+	al.Source(sfx.source, al.GAIN, sounds.vol_beep )
+
 	al.SourcePlay(sfx.source)
+
 
 	sounds.beep_idx=sounds.beep_idx+1
 	if sounds.beep_idx > sfxmax then sounds.beep_idx=1 end
@@ -394,7 +400,7 @@ local qq=sounds.queues[str.idx]
 	end
 
 --update every frame
-	al.Source(str.source, al.GAIN, qq.gain or 1)
+	al.Source(str.source, al.GAIN, (qq.gain or 1) * sounds.vol_stream )
 	al.Source(str.source, al.PITCH, qq.pitch or 1)
 
 end

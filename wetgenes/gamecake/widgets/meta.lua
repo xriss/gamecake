@@ -66,16 +66,19 @@ function wmeta.setup(def)
 --
 -- add a new widget as a child to this one
 --
-	function meta.add(parent,def)
-		
-		local widget={}
-		setmetatable(widget,meta)
-		table.insert(parent,widget)
-		widget.parent=parent
-		widget.master=parent.master
-		widget:setup(def)
-		widget.meta=meta		
-		return widget
+	function meta.add(parent,...)		
+		local ret
+		for i,def in pairs{...} do
+			local widget={}
+			setmetatable(widget,meta)
+			table.insert(parent,widget)
+			widget.parent=parent
+			widget.master=parent.master
+			widget:setup(def)
+			widget.meta=meta
+			ret=ret or widget
+		end
+		return ret -- return the first widget added
 	end
 	
 --

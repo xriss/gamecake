@@ -18,13 +18,17 @@ M.bake=function(oven,gui)
 	gui=gui or {} 
 	gui.modname=M.modname
 
+	gui.clicks={} -- put onclick function in here
 	gui.pages={} -- put functions to fill in pages in here
 
 	local cake=oven.cake
 	local sounds=cake.sounds
 
 
+
 	function gui.setup(parent)
+		gui.offset=1
+		
 		gui.parent=parent
 		gui.master=parent.master
 --		gui.page()
@@ -33,6 +37,9 @@ M.bake=function(oven,gui)
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
 	local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
 	local sprofiles=oven.rebake("wetgenes.gamecake.spew.profiles")
+	local sscores=oven.rebake("wetgenes.gamecake.spew.scores")
+
+	local sounds=oven.rebake("wetgenes.gamecake.sounds")
 	
 --	local bpages=oven.rebake("bulb.pages")
 	
@@ -42,6 +49,8 @@ M.bake=function(oven,gui)
 		gui.data.mode=1
 		gui.data.score=0
 		gui.data.name=wdata.new_data({class="string",hooks=gui.hooks})
+		gui.data.vol_music=wdata.new_data({id="vol_music",class="number",hooks=gui.hooks,num=100,min=0,max=100,step=1})
+		gui.data.vol_sfx=wdata.new_data({id="vol_sfx",class="number",hooks=gui.hooks,num=100,min=0,max=100,step=1})
 	end
 	
 	function gui.set_all_values()
@@ -55,10 +64,24 @@ M.bake=function(oven,gui)
 		local ids=gui.master.ids
 		local d=gui.data
 		local id=widget and widget.id
-		
+
+		if act=="value" then
+			if     id=="vol_music" then
+				sounds.vol_stream=widget.num/100
+			elseif id=="vol_sfx" then
+				sounds.vol_sfx=widget.num/100
+			end
+		end
 
 		if act=="click" then
+		
 print("click",id)
+
+			if gui.clicks[id] then
+				return gui.clicks[id](act,widget)
+			end
+
+
 			if id=="profiles_select" then
 				sprofiles.select(widget.user)
 				gui.page("profile")
@@ -96,6 +119,10 @@ print("click",id)
 						if gui.returnpage then gui.returnpage() end -- callback to return to original menu			
 					end
 
+			elseif id=="score_list" then
+
+				gui.offset=1
+				gui.page("score_list")
 			end
 		end
 	
@@ -136,10 +163,6 @@ print("click",id)
 		
 		gui.data.name:value( sprofiles.get("name") )
 
-		top:add({sx=110,sy=40,color=0xffcccccc,text="OK",id="profile_return",hooks=gui.hooks})
-		top:add({sx=100,sy=40})
-		top:add({sx=110,sy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profiles"})
-
 		top:add({sx=320,sy=20})
 		top:add({sx=320,sy=40,text_color=0xffffffff,text="My name is"})
 		top:add({sx=320,sy=20})
@@ -150,16 +173,16 @@ print("click",id)
 
 		top:add({sx=320,sy=40*8})
 
+		top:add({sx=110,sy=40,color=0xffcccccc,text="OK",id="profile_return",hooks=gui.hooks})
+		top:add({sx=100,sy=40})
+		top:add({sx=110,sy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profiles"})
+
 	end
 
 	function gui.pages.profile_name_edit(master)
 		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
 		
 		gui.data.name:value( sprofiles.get("name") )
-
-		top:add({sx=110,sy=40,color=0xffcccccc,text="OK",id="profile_name_set",hooks=gui.hooks})
-		top:add({sx=100,sy=40})
-		top:add({sx=110,sy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profile"})
 
 		top:add({sx=320,sy=80,text_color=0xffffffff,text="Type your name"})
 
@@ -175,6 +198,11 @@ print("click",id)
 		
 		top:add({sx=320,sy=40})
 		top:add({sx=320,sy=40})
+
+		top:add({sx=110,sy=40,color=0xffcccccc,text="OK",id="profile_name_set",hooks=gui.hooks})
+		top:add({sx=100,sy=40})
+		top:add({sx=110,sy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profile"})
+
 		top:add({sx=320,sy=40})
 
 		local m=top:add({sx=320,sy=160})		
@@ -183,24 +211,170 @@ print("click",id)
 	end
 
 	function gui.pages.score(master)
+
+		local score=gui.data.score or 0
+		local best=sscores.list({})[1]			best=(best and best.score) or 0
+		local mine=sscores.get_best_score({})	mine=(mine and mine.score) or 0
+		
+		if best<score then best=score end
+		if mine<score then mine=score end
+		
+		local best_pct=0
+		local mine_pct=0
+		if best<1 then best_pct=0 else best_pct=math.floor(100*score/best) end
+		if mine<1 then mine_pct=0 else mine_pct=math.floor(100*score/mine) end
+
 		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+		top:add({sx=320,sy=40})
 
-		local w=top:add({sx=320,sy=480,mx=320,my=480,class="flow"})
+		top:add({sx=320,sy=80,text_color=0xffffffff,text="You scored!!"})
+		
+		top:add({sx=20,sy=40})
+		top:add({sx=280,sy=40,color=0xffcccccc,text=tostring(score)})
+		top:add({sx=20,sy=40})
+		
+		top:add({sx=320,sy=40})
 
-		gui.add_part(w,"profile_bar")
-		w:add({sx=320,sy=40})
-		w:add({sx=320,sy=40,color=0xffcccccc,text="A new High!!"})
-		w:add({sx=320,sy=40,color=0xffcccccc,text=tostring(gui.data.score)})
-		w:add({sx=100,sy=40,color=0xffcccccc,text="Brag",id="profile_score_brag",hooks=gui.hooks})
-		w:add({sx=10,sy=40})
-		w:add({sx=100,sy=40,color=0xffcccccc,text="List",id="profile_score_list",hooks=gui.hooks})
-		w:add({sx=10,sy=40})
-		w:add({sx=100,sy=40,color=0xffcccccc,text="Submit",id="profile_score_submit",hooks=gui.hooks})
-		w:add({sx=320,sy=40})
+		top:add({sx=20,sy=40})
+		top:add({sx=130,sy=40,color=0xffcccccc,text="Brag",id="score_brag",hooks=gui.hooks})
+		top:add({sx=20,sy=40})
+		top:add({sx=130,sy=40,color=0xffcccccc,text="List",id="score_list",hooks=gui.hooks})
+--		top:add({sx= 5,sy=40})
+--		top:add({sx=90,sy=40,color=0xffcccccc,text="Send",id="profile_score_send",hooks=gui.hooks})
+		top:add({sx=20,sy=40})
+
+		top:add({sx=320,sy=40})
+		top:add({sx=320,sy=60,text_color=0xffffffff,text=""..best_pct.."% success"})
+		top:add({sx=320,sy=60,text_color=0xffffffff,text=""..mine_pct.."% effort"})
+		top:add({sx=320,sy=40})
+		top:add({sx=320,sy=40})
 		
 	end
 
+	function gui.pages.score_list(master)
 
+		gui.clicks.score_list_less=function()
+			gui.offset=gui.offset-5
+			if gui.offset<1 then
+				gui.offset=1
+				if gui.returnpage then gui.returnpage() end -- callback to return to original menu			
+			else
+				gui.page("score_list")
+			end
+		end
+		gui.clicks.score_list_more=function()
+			gui.offset=gui.offset+5
+			gui.page("score_list")
+		end
+	
+		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+		
+		local tab={}
+		local sc=sscores.list({offset=gui.offset})
+		local nomore=not sc[6]
+		for i=1,5 do
+			local v=sc[i]
+			if v then
+				tab[i]={
+					idx=v.idx,
+					name=v.name,
+					score=v.score,
+				}
+			end
+		end
+
+		
+		top:add({sx=320,sy=5})
+
+		top:add({sx=20,sy=30})
+		top:add({sx=280,sy=30,text_color=0xffffffff,text="High Scores"})
+		top:add({sx=20,sy=30})
+
+		top:add({sx=320,sy=5})
+
+
+		for i=1,5 do
+			local v=tab[i]
+
+			top:add({sx=5,sy=60})
+
+			local s=top:add({sx=310,sy=60,hx=310,hy=60,mx=310,my=60,class="flow",ax=0,ay=0,font="Vera",text_size=24})			
+			if v then
+				s:add(
+					{sx=100,sy=30,color=0xffcccccc,text=wstr.str_append_english_number_postfix(v.idx),hooks=gui.hooks},
+					{sx=210,sy=30,color=0xffcccccc,text=wstr.str_insert_number_commas(v.score),hooks=gui.hooks},
+					{sx=310,sy=30,color=0xffcccccc,text=v.name,hooks=gui.hooks})
+			else
+			end
+
+			top:add({sx=5,sy=60})
+
+			top:add({sx=320,sy=10})
+
+		end
+		
+		if nomore then
+			top:add({sx=100,sy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
+			top:add({sx=220,sy=40})
+		else
+			top:add({sx=100,sy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
+			top:add({sx=120,sy=40})
+			top:add({sx=100,sy=40,color=0xffcccccc,text="More",id="score_list_more",hooks=gui.hooks})
+		end
+
+	end
+
+	function gui.pages.settings(master)
+	
+		gui.clicks.settings_return=function()
+			gui.returnpage()
+		end
+		gui.clicks.settings_quit=function()
+			gui.page("quit")
+		end
+
+
+		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+
+		top:add({sx=320,sy=40,text_color=0xffffffff,text="Music volume"})
+		top:add({class="slide",color=0xffcccccc,sx=320,sy=40,datx=gui.data.vol_music,hooks=gui.hooks})
+		top:add({sx=320,sy=40,text_color=0xffffffff,text="Sound effects volume"})
+		top:add({class="slide",color=0xffcccccc,sx=320,sy=40,datx=gui.data.vol_sfx,hooks=gui.hooks})
+
+		top:add({sx=320,sy=40*9})
+
+		top:add({sx=120,sy=40,color=0xffcccccc,text="Back",id="settings_return",hooks=gui.hooks})
+		top:add({sx=80,sy=40})
+		top:add({sx=120,sy=40,color=0xffcc4444,text="Quit",id="settings_quit",hooks=gui.hooks})
+
+
+	end
+	
+	function gui.pages.quit(master)
+
+		gui.clicks.quit_back=function()
+			gui.page("settings")
+		end
+		gui.clicks.quit_exit=function()
+			oven.next=true -- really quit
+		end
+				
+		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+
+		top:add({sx=320,sy=40*3})
+
+		top:add({sx=320,sy=40*2,text_color=0xffffffff,text="Make your time!"})
+
+		top:add({sx=20,sy=40*2})
+		top:add({sx=120,sy=40*2,color=0xffcccccc,text="Back",id="quit_back",hooks=gui.hooks})
+		top:add({sx=40,sy=40*2})
+		top:add({sx=120,sy=40*2,color=0xffcc4444,text="Quit",id="quit_exit",hooks=gui.hooks})
+		top:add({sx=20,sy=40*2})
+
+		top:add({sx=320,sy=40*5})
+		
+	end
+	
 	function gui.page(pname)
 		
 		if not gui.master then

@@ -30,7 +30,7 @@ fonts.get=function(id)
 	return fonts.data[id]
 end
 
-fonts.set=function(d,id)
+fonts.set=function(id,d)
 	fonts.data[id]=d
 end
 
@@ -45,10 +45,12 @@ fonts.unload=function(id)
 	if t then
 		if gl then --gl mode
 			for i,v in pairs(t.images or {}) do -- delete all the chars
-				images.unload( v.id )
+				cake.images.unload( v.id )
 			end
 		end
 	end
+	
+	fonts.set(id,nil)
 end
 
 --
@@ -67,7 +69,7 @@ print("Loading font 8x8")
 		
 			t={}
 			t.filename=filename
-			fonts.set(t,id)
+			fonts.set(id,t)
 			t.size=8
 
 			t.chars={}
@@ -119,7 +121,7 @@ print("Loading font ",fname,#d)
 		
 			t={}
 			t.filename=filename
-			fonts.set(t,id)
+			fonts.set(id,t)
 			
 			t.font=ft.create()
 			t.data=d -- keep the data alive (the loader expects it to continue to exist)

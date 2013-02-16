@@ -23,7 +23,7 @@ function M.bake(opts)
 
 --
 -- preheat a normal oven
--- you may perform this yourself if you want more control over a cake
+-- you may perform this yourself if you want more oven control
 --
 		function oven.preheat()
 

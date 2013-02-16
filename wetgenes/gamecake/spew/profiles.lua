@@ -65,6 +65,7 @@ print("Saving "..profiles.filename)
 
 -- make this profile current
 	function profiles.select(pid)
+		profiles.pid=pid
 		p=ps[pid] or ps[1]
 	end
 

@@ -236,6 +236,41 @@ local fout=opts.fout
 	
 end
 
+-----------------------------------------------------------------------------
+--
+-- append english number postfix, 1st 2nd 3rd 4th etc
+--
+-----------------------------------------------------------------------------
+function str_insert_number_commas(n)
+
+	local s=tostring(math.floor(n))
+	local t={}
+	
+	while #s > 3 do
+		table.insert(t,1,s:sub(-3))
+		s=s:sub(1,-4)
+	end
+	table.insert(t,1,s)
+
+	return table.concat(t,",")
+end
+
+-----------------------------------------------------------------------------
+--
+-- append english number postfix, 1st 2nd 3rd 4th etc
+--
+-----------------------------------------------------------------------------
+function str_append_english_number_postfix(n)
+
+	local ith=n%10
+	if n>10 and n<20 then ith=4 end -- teens are all "th"
+
+	if     ith==1 then return n.."st"
+	elseif ith==2 then return n.."nd"
+	elseif ith==3 then return n.."rd" end
+
+	return n.."th"
+end
 
 -----------------------------------------------------------------------------
 --
