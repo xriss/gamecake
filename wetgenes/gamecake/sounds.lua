@@ -177,6 +177,7 @@ sounds.loads=function(tab)
 			sounds.load(v,i)
 		end
 		
+		oven.preloader()
 	end
 
 end

@@ -213,6 +213,7 @@ fonts.loads=function(tab)
 			fonts.load(v,i)
 		end
 		
+		oven.preloader()
 	end
 
 end

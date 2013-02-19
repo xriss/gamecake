@@ -21,19 +21,11 @@ function glescode.create(gl)
 
 	local code={}
 	for n,v in pairs(gl) do code[n]=v end
---	setmetatable(code,{__index=gl}) -- so we can reference extra gl bits easily
 	
 	code.cache={}
 	code.cache.color=tcore.new_v4()
---	print(code,code.cache,code.cache.color,type(code.cache.color))
 	
-	function code.ColorTest()
---		print(code,code.cache,code.cache.color,type(code.cache.color))
-print("colortest")
-		tcore.set(code.cache.color) -- may not set anything if no arguments are given
-	end
 	function code.Color(...)
---print("color",...)
 		tcore.set(code.cache.color,...) -- may not set anything if no arguments are given
 		return code.cache.color -- safe way of getting this value (a 4 float userdata)
 	end
@@ -50,13 +42,6 @@ print("colortest")
 	end
 	code.reset_stacks() -- setup
 
---	function code.matrixdirty(mode)
---		return code.stacks[mode].dirty
---	end
---	function code.matrixclean(mode)
---		code.stacks[mode].dirty=false
---	end
-
 	function code.matrix(mode)
 		local v=code.stacks[mode]
 		return v[#v]
@@ -66,66 +51,51 @@ print("colortest")
 		code.stack_mode=mode
 		code.stack=code.stacks[code.stack_mode]
 		if not code.stack then -- create on use
---			code.stack={ tardis.m4.new() , dirty=true }
 			local m4=tcore.new_m4() tcore.m4_identity(m4)
-			code.stack={ m4 --[[, dirty=true]] }
+			code.stack={ m4 }
 			code.stacks[code.stack_mode]=code.stack
 		end
 		code.stack_matrix=assert(code.stack[#code.stack])
 	end
 
 	function code.LoadMatrix(...)
---		code.stack_matrix:set(...)
 		tcore.set(code.stack_matrix,...)
---		code.stack.dirty=true
 	end
 
 	function code.MultMatrix(a)
---		tardis.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
 		tcore.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
---		code.stack.dirty=true
 	end
 
+-- we have our own majick code for this sort of thing
 	function code.Frustum(...)
 		error("frustrum not suported")
 	end
 
 	function code.LoadIdentity()
---		code.stack_matrix:identity()
 		tcore.m4_identity(code.stack_matrix)
---		code.stack.dirty=true
 	end
 
 	function code.Translate(vx,vy,vz)
---		code.stack_matrix:translate({vx,vy,vz})
 		tcore.m4_translate(code.stack_matrix,vx,vy,vz)
---		code.stack.dirty=true
 	end
 
 	function code.Rotate(d,vx,vy,vz)
---		code.stack_matrix:rotate(d,{vx,vy,vz})
 		tcore.m4_rotate(code.stack_matrix,d,vx,vy,vz)
---		code.stack.dirty=true
 	end
 
 	function code.Scale(vx,vy,vz)
---		code.stack_matrix:scale_v3({vx,vy,vz})
 		tcore.m4_scale_v3(code.stack_matrix,vx,vy,vz)
---		code.stack.dirty=true
 	end
 
 	function code.PushMatrix()		
---		code.stack[#code.stack+1]=tardis.m4.new(code.stack_matrix) -- duplicate to new top
 		local m4=tcore.new_m4() tcore.set(m4,code.stack_matrix,16)
 		code.stack[#code.stack+1]=m4
 		code.stack_matrix=assert(code.stack[#code.stack])
---		code.stack.dirty=true
 	end
 
 	function code.PopMatrix()
 		code.stack[#code.stack]=nil -- remove topmost
 		code.stack_matrix=assert(code.stack[#code.stack]) -- this will assert on too many pops
---		code.stack.dirty=true
 	end
 
 -- compiler functions
@@ -245,19 +215,66 @@ print("colortest")
 		p.vars[vname]=r
 		return r
 	end
- 	
--- set attribs
- 	function pbase.attrib_ptr(p,vname,size,gltype,normalize,stride,ptr)
+
+-- internal cache helpers
+
+	local function cache_set_v4(p,n,v)
+		if not p.cache[n] then
+			p.cache[n]=tcore.new_v4()
+		end
+		tcore.set(p.cache[n],v)
 	end
-	function pbase.attrib_stream(p,vname,onoff)
-	end
-	function pbase.attrib_v4(p,vname,v4)
+	local function cache_set_m4(p,n,v)
+		if not p.cache[n] then
+			p.cache[n]=tcore.new_m4()
+		end
+		tcore.set(p.cache[n],v)
 	end
 
--- set uniform
+	local function cache_check_v4(p,n,v)
+		if not p.cache[n] then return false end
+		return tcore.compare(p.cache[n],v)
+	end
+	local function cache_check_m4(p,n,v)
+		if not p.cache[n] then return false end
+		return tcore.compare(p.cache[n],v)
+	end
+
+-- set attribs
+-- probably too hard to try and cache these here
+-- due to the nature of vertexbuffers
+
+ 	function pbase.attrib_ptr(p,vname,size,gltype,normalize,stride,ptr)
+		local n=p:attrib(vname)
+		gl.VertexAttribPointer(n,vname,size,gltype,normalize,stride,ptr)
+	end
+	function pbase.attrib_stream(p,vname,onoff)
+		local n=p:attrib(vname)
+		if onoff then
+			gl.EnableVertexAttribArray(n)
+		else
+			gl.DisableVertexAttribArray(n)
+		end
+	end
+	function pbase.attrib_v4(p,vname,v4)
+		local n=p:attrib(vname)
+		gl.VertexAttrib4f(n,v4)
+	end
+
+-- set uniform values
+-- try and cache these values to prevent updates which often seem rather expensive
+
 	function pbase.uniform_v4(p,vname,v4)
+		if cache_check_v4(p,vname,v4) then return end
+		local n=p:uniform(vname)
+		gl.Uniform4f(n,v4)
+		cache_set_v4(p,vname,v4)
 	end
 	function pbase.uniform_m4(p,vname,m4)
+		if cache_check_m4(p,vname,m4) then return end
+		local n=p:uniform(vname)
+		gl.UniformMatrix4f(n,m4)
+		cache_set_m4(p,vname,m4)
 	end
 	
 	return code

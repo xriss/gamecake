@@ -451,6 +451,8 @@ function M.bake(oven,keys)
 
 -- push a keyboard widget into a master
 	function keys.setup_keyboard_widgets(master)
+		local shift=false
+		local top
 		local hooks={}
 		function hooks.click(widget)
 --	print(widget.id)
@@ -466,6 +468,31 @@ function M.bake(oven,keys)
 				ascii=""
 				code=0
 				name="delete"
+			elseif ascii=="^" then -- toggle caps
+			
+				shift=not shift
+			
+				for i,t in ipairs(top) do -- each row of keys
+					for i,v in ipairs(t) do -- each key
+					
+						local otext=v.text
+						local ntext
+						if otext then
+							if shift then
+								ntext=string.upper(otext)
+							else
+								ntext=string.lower(otext)
+							end
+							if otext~=ntext then
+								v.text=ntext
+								v:set_dirty()
+							end
+						end
+					end
+				end
+				
+				return
+
 			end
 			
 			local mstack=oven.win.msgstack
@@ -491,7 +518,7 @@ function M.bake(oven,keys)
 		master:clean_all()
 		master.ids={}
 
-		local top=master:add({py=0,hx=320,hy=160,mx=320,my=240,class="flow",ax=0,ay=0,fbo=true})
+		top=master:add({py=0,hx=320,hy=160,mx=320,my=240,class="flow",ax=0,ay=0,fbo=true})
 
 		local function key_line(ks)
 			local t=top:add({sx=320,sy=32,mx=320,my=32,class="flow"})
@@ -504,7 +531,7 @@ function M.bake(oven,keys)
 		key_line("1234567890")
 		key_line("qwertyuiop")
 		key_line("asdfghjkl ")
-		key_line(" zxcvbnm:#")
+		key_line("^zxcvbnm:#")
 		key_line("<    _,./>")
 					
 	end

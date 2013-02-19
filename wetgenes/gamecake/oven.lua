@@ -258,6 +258,18 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 			end
 		end
 
+		function oven.preloader()
+			if oven.win then
+				oven.msgs()
+				oven.cake.canvas.draw()
+				local p=oven.rebake(opts.preloader or "wetgenes.gamecake.spew.preloader")
+				p.setup() -- warning, this is called repeatedly
+				p.update()
+				p.draw()
+				oven.win:swap()
+			end
+		end
+
 		function oven.draw()
 			oven.cake.canvas.draw()
 			

@@ -120,6 +120,11 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh,invert)
 --		local vw,vh=512,52
 --		local mw,mh=24,24
 
+		local force_tww,force_thh
+		
+		if mw*4>tw then twwidx=1 end -- mipmap hack for small buttons
+		if mh*4>th then thhidx=1 end
+
 		if mw*2 > vw then mw=vw/2 end
 		if mh*2 > vh then mh=vh/2 end
 
@@ -174,7 +179,7 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh,invert)
 				vx=vxs-- -vw/2
 				for ix=1,3 do
 
-					tdrawbox( tx,ty, vx,vy , tww[ix],thh[iy], vww[ix],vhh[iy] )
+					tdrawbox( tx,ty, vx,vy , tww[twwidx or ix],thh[thhidx or iy], vww[ix],vhh[iy] ) -- fake texture sample to con mipmap mode
 
 					tx=tx+tww[ix]
 					vx=vx+vww[ix]
