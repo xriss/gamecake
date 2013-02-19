@@ -164,7 +164,7 @@ main.draw=function()
 	font.set(cake.fonts.get(1)) -- default font
 	font.set_size(8,0) -- 32 pixels high
 
-	gl.Color(pack.argb4_pmf4(0xf0f0))
+	gl.Color(pack.argb4_pmf4(0xf1f1))
 
 	font.set_xy( 8 , 8 )
 	font.draw("MemCheck: "..main.count)
