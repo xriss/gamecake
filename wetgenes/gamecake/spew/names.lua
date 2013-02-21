@@ -15,13 +15,16 @@ M.bake=function(oven,names)
 	return names
 end
 
+function M.random_adjective()
+	return M.txt_adjectives[ math.random(1,#M.txt_adjectives) ]
+end
+
+function M.random_noun()
+	return M.txt_nouns[ math.random(1,#M.txt_nouns) ]
+end
 
 function M.random()
-
-	local adj=M.txt_adjectives[ math.random(1,#M.txt_adjectives) ]
-	local non=M.txt_nouns[ math.random(1,#M.txt_nouns) ]
-	
-	return adj.."_"..non	
+	return M.random_adjective().."_"..M.random_noun()
 end
 
 M.txt_adjectives={

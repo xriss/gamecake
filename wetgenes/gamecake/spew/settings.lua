@@ -34,8 +34,8 @@ M.bake=function(oven,settings)
 -- initialise profile data
 	function settings.init()
 		ss={}
-		ss.vol_music=1
-		ss.vol_sfx=1
+		ss.vol_music=10/11
+		ss.vol_sfx=10/11
 	end
 	
 -- load all profile data

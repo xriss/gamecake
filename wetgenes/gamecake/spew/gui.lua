@@ -25,13 +25,15 @@ M.bake=function(oven,gui)
 	local sounds=cake.sounds
 
 
+	function gui.returnpage()
+		gui.active=false -- stop displaying our stuff
+	end
 
 	function gui.setup(parent)
-		gui.offset=1
-		
-		gui.parent=parent
-		gui.master=parent.master
---		gui.page()
+		if parent then
+			gui.parent=parent
+			gui.master=parent.master
+		end
 	end
 	
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
@@ -46,6 +48,9 @@ M.bake=function(oven,gui)
 	gui.ids={}
 	gui.data={}
 	function gui.initdata() -- call this later
+
+		gui.offset=1
+		
 		gui.data.mode=1
 		gui.data.score=0
 		gui.data.name=wdata.new_data({class="string",hooks=gui.hooks})
@@ -377,6 +382,8 @@ print("click",id)
 	
 	function gui.page(pname)
 		
+		gui.active=true -- display out stuff
+
 		if not gui.master then
 			gui.master=oven.rebake("wetgenes.gamecake.widgets").setup({hx=320,hy=480})
 		end

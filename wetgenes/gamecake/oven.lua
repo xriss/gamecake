@@ -157,9 +157,7 @@ function M.bake(opts)
 
 			if oven.next then
 			
-				if oven.now and oven.now.clean then
-					oven.now.clean()
-				end
+				oven.clean()
 				
 				if type(oven.next)=="string" then	 -- change by required name
 				
@@ -181,9 +179,7 @@ function M.bake(opts)
 					oven.now=oven.next
 					oven.next=nil
 					
-					if oven.now and oven.now.setup then
-						oven.now.setup()
-					end
+					oven.setup()
 				end
 				
 			end
@@ -192,8 +188,9 @@ function M.bake(opts)
 
 		function oven.setup()	
 			if oven.now and oven.now.setup then
-				oven.now.setup()
+				oven.now.setup() -- this will probably load data and call the preloader
 			end
+			oven.preloader_enabled=false -- disabled preloader after first setup completes
 		end
 
 		function oven.start()	
@@ -258,7 +255,9 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 			end
 		end
 
+		oven.preloader_enabled=true
 		function oven.preloader()
+			if not oven.preloader_enabled then return end
 			if oven.win then
 				oven.msgs()
 				oven.cake.canvas.draw()

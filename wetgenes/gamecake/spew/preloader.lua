@@ -6,72 +6,19 @@ local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
+local snames=require("wetgenes.gamecake.spew.names")
+
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 local screen_size=256
 
-local t_things={
-	"toast",
-	"mind",
-	"kitty",
-	"penguin",
-	"wig",
-	"car",
-	"dog",
-	"bus",
-	"tea",
-	"biscuit",
-	"bar",
-	"pub",
-	"house",
-	"bed",
-	"chair",
-	"horse",
-}
-
-local t_actions={
-	"burn",
-	"dunk",
-	"eat",
-	"drop",
-	"sharpen",
-	"drive",
-	"carry",
-	"kick",
-	"bop",
-	"destroy",
-	"love",
-	"tickle",
-	"poke",
-}
-
-local t_adjectives={
-	"smelly",
-	"tiny",
-	"wobbily",
-	"furry",
-	"rainbow",
-	"giant",
-	"broken",
-	"confused",
-	"silent",
-	"epic",
-	"unknown",
-	"blue",
-	"vacant",
-}
-
 local t_randumbs={
---	"Warning!!! Do not {action} the {thing}.",
-	"Preparing to {action} the {thing}.",
 	"Holding the {adjective} {thing}.",
-	"!!!Warning!!! Giant {adjective} {thing} aproaching.",
+	"Giant {adjective} {thing} aproaching.",
 	"This is not my {adjective} {thing}.",
-	"Beware of {thing}.",
---	"{adjective} {action} is my new jam.",
---	"One does not simply {action} the {thing}",
+	"Beware of {adjective} {thing}.",
 	"Lost {adjective} {thing}.",
 	"Found {adjective} {thing}.",
 	"Searching for {adjective} {thing}.",
@@ -121,9 +68,8 @@ main.update=function()
 
 	local s=t_randumbs[math.random(1,#t_randumbs)]
 	local t={}
-	t.thing    =t_things[math.random(1,#t_things)]
-	t.action   =t_actions[math.random(1,#t_actions)]
-	t.adjective=t_adjectives[math.random(1,#t_adjectives)]
+	t.thing    =snames.random_noun()
+	t.adjective=snames.random_adjective()
 	
 	s=wstr.replace(s,t)
 	for i,v in ipairs( wstr.smart_wrap(s,30) ) do
@@ -149,7 +95,7 @@ main.draw=function()
 	canvas.project23d(screen_size,screen_size,1/4,screen_size*4)
 	canvas.gl_default() -- reset gl state
 
-	gl.ClearColor(pack.argb4_pmf4(0xf010))
+	gl.ClearColor(pack.argb4_pmf4(0xf001))
 	gl.Clear(gl.COLOR_BUFFER_BIT)--+gl.DEPTH_BUFFER_BIT)
 
 	gl.MatrixMode(gl.PROJECTION)
@@ -164,11 +110,12 @@ main.draw=function()
 	font.set(cake.fonts.get(1)) -- default font
 	font.set_size(8,0) -- 32 pixels high
 
-	gl.Color(pack.argb4_pmf4(0xf1f1))
+	gl.Color(pack.argb4_pmf4(0xf18f))
 
 	font.set_xy( 8 , 8 )
 	font.draw("MemCheck: "..main.count)
-	
+--print("MemCheck: "..main.count.." : "..tostring(oven.preloader_enabled))
+
 	for i=1,#ts do
 		font.set_xy( 8, 16+i*8 )
 		font.draw(ts[i])

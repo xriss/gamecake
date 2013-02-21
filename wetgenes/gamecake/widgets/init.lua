@@ -41,12 +41,12 @@ function widgets.setup(def)
 	wskin.setup(def)
 	
 -- default GUI size if no other is specified
-	def.hx=def.hx or 640
-	def.hy=def.hy or 480
-	def.px=def.px or 0
-	def.py=def.py or 0
-	def.pxd=def.pxd or 0
-	def.pyd=def.pyd or 0
+	def.hx=def.hx or oven.opts.width
+	def.hy=def.hy or oven.opts.height
+	def.px=def.px or (oven.opts.width-def.hx)/2
+	def.py=def.py or (oven.opts.height-def.hy)/2
+	def.pxd=def.pxd or def.px
+	def.pyd=def.pyd or def.py
 
 	def.class=def.class or "master"
 	
