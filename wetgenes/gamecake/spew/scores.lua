@@ -46,6 +46,7 @@ print("Loading "..scores.filename)
 			return true
 		end
 		
+
 		return false
 	end
 	
@@ -65,6 +66,10 @@ print("Saving "..scores.filename)
 			scores.up[i]={score=0,high=0} -- 1up 2up etc
 		end
 		scores.high=0
+		for i,v in pairs( ss.list[scores.mode][scores.level] ) do
+			if v.score>scores.high then scores.high=v.score end
+		end
+
 		return scores -- so setup is chainable with a bake
 	end
 
@@ -130,18 +135,19 @@ print("Saving "..scores.filename)
 			local fy=math.floor(yh/32)
 
 			canvas.font.set(cake.fonts.get(1))
+			canvas.font.set(cake.fonts.get(1))
 			canvas.font.set_size(fy,0)
 
-			local s=string.format("%d",scores.up[1].score)
+			local s=wstr.str_insert_number_commas(scores.up[1].score)
 			draw_mid_text( (xh*3/16) , fy*0.25 , "1up")
 			draw_mid_text( (xh*3/16) , fy*1.50 , s)
 
-			local s=string.format("%d",scores.high)
+			local s=wstr.str_insert_number_commas(scores.high)
 			draw_mid_text( (xh*8/16) , fy*0.25 , "Hi")
 			draw_mid_text( (xh*8/16) , fy*1.50 , s)
 
 			if scores.up[2] then
-				local s=string.format("%d",scores.up[2].score)
+				local s=wstr.str_insert_number_commas(scores.up[2].score)
 				draw_mid_text( (xh*13/16) , fy*0.25 , "2up")
 				draw_mid_text( (xh*13/16) , fy*1.50 , s)
 			end
@@ -242,6 +248,7 @@ print("Saving "..scores.filename)
 lfs.mkdir(wwin.files_prefix:sub(1,-2)) -- skip trailing slash
 
 -- try autoload
+scores.init()
 if not scores.load() then
 -- or create and save a default file
 	scores.init()

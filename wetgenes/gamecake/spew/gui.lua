@@ -52,7 +52,7 @@ M.bake=function(oven,gui)
 		gui.offset=1
 		
 		gui.data.mode=1
-		gui.data.score=0
+--		gui.data.score=0
 		gui.data.name=wdata.new_data({class="string",hooks=gui.hooks})
 		gui.data.vol_music=wdata.new_data({id="vol_music",class="number",hooks=gui.hooks,num=ssettings.get("vol_music")*11,min=0,max=11,step=1})
 		gui.data.vol_sfx=wdata.new_data({id="vol_sfx",class="number",hooks=gui.hooks,num=ssettings.get("vol_sfx")*11,min=0,max=11,step=1})
@@ -217,7 +217,7 @@ print("click",id)
 
 	function gui.pages.score(master)
 
-		local score=gui.data.score or 0
+		local score=sscores.up[1].score
 		local best=sscores.list({})[1]			best=(best and best.score) or 0
 		local mine=sscores.get_best_score({})	mine=(mine and mine.score) or 0
 		
@@ -235,7 +235,7 @@ print("click",id)
 		top:add({sx=320,sy=80,text_color=0xffffffff,text="You scored!!"})
 		
 		top:add({sx=20,sy=40})
-		top:add({sx=280,sy=40,color=0xffcccccc,text=tostring(score)})
+		top:add({sx=280,sy=40,color=0xffcccccc,text=wstr.str_insert_number_commas(score)})
 		top:add({sx=20,sy=40})
 		
 		top:add({sx=320,sy=40})
