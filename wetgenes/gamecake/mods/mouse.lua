@@ -27,10 +27,10 @@ function M.bake(oven,mouse)
 	local cake=oven.cake
 	local gl=oven.gl
 
-	local canvas=cake.canvas.child()
-	canvas.layout=false
+	local canvas=cake.canvas
 	local font=canvas.font
 	local flat=canvas.flat
+	local layout=cake.layouts.create{} -- fullscreen
 
 	function mouse.setup()
 	
@@ -64,12 +64,13 @@ function M.bake(oven,mouse)
 	
 		if not mouse.active then return end
 
-		local w,h=oven.win.width,oven.win.height
-		gl.Viewport(0,0,w,h)
+		layout.viewport() -- did our window change?
+		layout.project23d(layout.w,layout.h,1/4,layout.h*4)
+		
 		canvas.gl_default() -- reset gl state
 
 		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( tardis.m4_project23d(w,h,w,h,0.5,h*2) )
+		gl.LoadMatrix( layout.pmtx )
 
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.LoadIdentity()

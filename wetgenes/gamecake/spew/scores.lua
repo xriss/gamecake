@@ -130,8 +130,8 @@ print("Saving "..scores.filename)
 -- with the scores on the line bellow
 		if mode=="arcade2" then
 
-			local xh=canvas.view_width
-			local yh=canvas.view_height		
+			local xh=canvas.layout.view_width
+			local yh=canvas.layout.view_height		
 			local fy=math.floor(yh/32)
 
 			canvas.font.set(cake.fonts.get(1))

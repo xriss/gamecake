@@ -29,8 +29,8 @@ function M.bake(oven,console)
 
 	local gl=oven.gl
 	local cake=oven.cake
-	local canvas=cake.canvas.child()
-	canvas.layout=false
+	local canvas=cake.canvas
+	local layout=cake.layouts.create{} -- fullscreen
 
 	local win=oven.win
 	local font=canvas.font
@@ -244,8 +244,10 @@ font.vbs_idx=1
 
 
 --		oven.win:info()
-		local w,h=oven.win.width,oven.win.height
-		gl.Viewport(0,0,w,h)
+
+		layout.viewport() -- did our window change?
+		layout.project23d(layout.w,layout.h,1/4,layout.h*4)
+		
 		canvas.gl_default() -- reset gl state
 
 
@@ -253,11 +255,11 @@ font.vbs_idx=1
 --		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( tardis.m4_project23d(w,h,w,h,0.5,h*2) )
+		gl.LoadMatrix( layout.pmtx )
 
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.LoadIdentity()
-		gl.Translate(-w/2,-h/2,-h) -- top/left 1unit==1pixel
+		gl.Translate(-layout.w/2,-layout.h/2,-layout.h) -- top/left 1unit==1pixel
 		gl.PushMatrix()
 
 

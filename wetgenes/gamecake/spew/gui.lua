@@ -23,10 +23,19 @@ M.bake=function(oven,gui)
 
 	local cake=oven.cake
 	local sounds=cake.sounds
-
+	local canvas=cake.canvas
+	local layout=cake.layouts.create{}
+	
+	local gl=oven.gl
 
 	function gui.returnpage()
 		gui.active=false -- stop displaying our stuff
+	end
+	function gui.mpage(pname) --request that we go to this page please?
+		gui.active=false -- stop displaying our stuff
+		if gui.page_hook then
+			gui.page_hook(pname)
+		end
 	end
 
 	function gui.setup(parent)
@@ -110,8 +119,8 @@ print("click",id)
 
 			elseif id=="profile_return" then
 			
-				if gui.returnpage then gui.returnpage() end -- callback to return to original menu			
-					
+				gui.returnpage()
+				
 			elseif id=="profile_goto" then
 
 				gui.page(widget.user)
@@ -121,7 +130,7 @@ print("click",id)
 					if widget.user then
 						gui.page(widget.user)
 					else
-						if gui.returnpage then gui.returnpage() end -- callback to return to original menu			
+						gui.returnpage()	
 					end
 
 			elseif id=="score_list" then
@@ -217,6 +226,11 @@ print("click",id)
 
 	function gui.pages.score(master)
 
+		gui.clicks.score_back=function()
+			gui.returnpage() -- callback to return to original menu			
+		end
+
+
 		local score=sscores.up[1].score
 		local best=sscores.list({})[1]			best=(best and best.score) or 0
 		local mine=sscores.get_best_score({})	mine=(mine and mine.score) or 0
@@ -252,7 +266,9 @@ print("click",id)
 		top:add({sx=320,sy=60,text_color=0xffffffff,text=""..best_pct.."% success"})
 		top:add({sx=320,sy=60,text_color=0xffffffff,text=""..mine_pct.."% effort"})
 		top:add({sx=320,sy=40})
-		top:add({sx=320,sy=40})
+
+		top:add({sx=120,sy=40,color=0xffcccccc,text="Back",id="score_back",hooks=gui.hooks})
+		top:add({sx=200,sy=40})
 		
 	end
 
@@ -262,7 +278,7 @@ print("click",id)
 			gui.offset=gui.offset-5
 			if gui.offset<1 then
 				gui.offset=1
-				if gui.returnpage then gui.returnpage() end -- callback to return to original menu			
+				gui.returnpage() -- callback to return to original menu			
 			else
 				gui.page("score_list")
 			end
@@ -332,21 +348,31 @@ print("click",id)
 	function gui.pages.settings(master)
 	
 		gui.clicks.settings_return=function()
-			gui.returnpage()
+			gui.mpage("menu")
 		end
 		gui.clicks.settings_quit=function()
 			gui.page("quit")
 		end
+		gui.clicks.settings_game=function()
+			gui.mpage("settings_game")
+		end
 
 
 		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+
+		top:add({sx=100,sy=40,color=0xffcccccc,text="Main",id="settings_main",hooks=gui.hooks})
+		top:add({sx=10,sy=40})
+		top:add({sx=100,sy=40,color=0xffcccccc,text="Game",id="settings_game",hooks=gui.hooks})
+		top:add({sx=10,sy=40})
+		top:add({sx=100,sy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
 
 		top:add({sx=320,sy=40,text_color=0xffffffff,text="Music volume"})
 		top:add({class="slide",color=0xffcccccc,sx=320,sy=40,datx=gui.data.vol_music,hooks=gui.hooks})
 		top:add({sx=320,sy=40,text_color=0xffffffff,text="Sound effects volume"})
 		top:add({class="slide",color=0xffcccccc,sx=320,sy=40,datx=gui.data.vol_sfx,hooks=gui.hooks})
 
-		top:add({sx=320,sy=40*9})
+
+		top:add({sx=320,sy=40*8})
 
 		top:add({sx=120,sy=40,color=0xffcccccc,text="Back",id="settings_return",hooks=gui.hooks})
 		top:add({sx=80,sy=40})
@@ -385,7 +411,7 @@ print("click",id)
 		gui.active=true -- display out stuff
 
 		if not gui.master then
-			gui.master=oven.rebake("wetgenes.gamecake.widgets").setup({hx=320,hy=480})
+			gui.master=oven.rebake("wetgenes.gamecake.widgets").setup({hx=320,hy=480,px=0,py=0})
 		end
 	
 		gui.master:clean_all()
@@ -420,13 +446,33 @@ print("click",id)
 	
 	function gui.msg(m)
 
+		if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
+			m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is now center of screen
+			m.x=m.x+(320/2)
+			m.y=m.y+(480/2)
+		end
+
 		gui.master:msg(m)
 
 	end
 
 	function gui.draw()
-	
-		gui.master:draw()
+
+		layout.viewport() -- set clip area
+		layout.project23d(320,480,1/4,480*4) -- build projection
+
+		gl.MatrixMode(gl.PROJECTION)
+		gl.LoadMatrix( layout.pmtx )
+
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.LoadIdentity()
+		gl.Translate(-320/2,-480/2,-480*2) -- top left corner is origin
+
+		gl.PushMatrix()
+		
+			gui.master:draw()
+
+		gl.PopMatrix()
 
 	end
 	

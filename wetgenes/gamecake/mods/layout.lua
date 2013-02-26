@@ -24,14 +24,13 @@ function M.bake(oven,layout)
 
 -- info about some of the areas we offer
 
-	layout.main={}	-- where you should put your main view
-	layout.keys={}	-- a place to type on devices without a keyboard
-	layout.chat={}  -- a place to view what other people type
-
 	local cake=oven.cake
-	local canvas=cake.canvas
+	local layouts=cake.layouts
 
-	canvas.layout=canvas.layout or layout.main -- set base canvas layout if not already set
+
+	layout.main=layouts.create{}  -- where you should put your main view
+	layout.keys=layouts.create{}  -- a place to type on devices without a keyboard
+	layout.chat=layouts.create{}  -- a place to view what other people type
 
 	function layout.cycle_mode()
 		if layout.mode=="main" then

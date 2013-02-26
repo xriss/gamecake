@@ -44,6 +44,7 @@ M.bake=function(oven,main)
 	local canvas=cake.canvas
 	local font=canvas.font
 	local flat=canvas.flat
+	local layout=cake.layouts.create{}
 	
 main.loads=function()
 	oven.cake.fonts.loads({1}) -- load 1st builtin font, a basic 8x8 font
@@ -91,15 +92,15 @@ main.count=0
 -- and we expect it to be called very sporadically
 main.draw=function()
 
-	canvas.viewport() -- did our window change?
-	canvas.project23d(screen_size,screen_size,1/4,screen_size*4)
+	layout.viewport() -- did our window change?
+	layout.project23d(screen_size,screen_size,1/4,screen_size*4)
 	canvas.gl_default() -- reset gl state
 
 	gl.ClearColor(pack.argb4_pmf4(0xf001))
 	gl.Clear(gl.COLOR_BUFFER_BIT)--+gl.DEPTH_BUFFER_BIT)
 
 	gl.MatrixMode(gl.PROJECTION)
-	gl.LoadMatrix( canvas.pmtx )
+	gl.LoadMatrix( layout.pmtx )
 
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()

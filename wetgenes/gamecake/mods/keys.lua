@@ -439,8 +439,8 @@ function M.bake(oven,keys)
 
 	local win=oven.win
 	local cake=oven.cake
-	local canvas=cake.canvas.child()
-	canvas.layout=oven.rebake("wetgenes.gamecake.mods.layout").keys
+	local canvas=cake.canvas
+	local layout=oven.rebake("wetgenes.gamecake.mods.layout").keys
 
 	if win.flavour=="raspi" then
 		keys.posix=true -- auto translate posix msgs
@@ -555,14 +555,14 @@ function M.bake(oven,keys)
 
 	function keys.update()
 	
-		if canvas.layout.active then
+		if layout.active then
 
 
-			if keys.top.hx~=canvas.layout.w or keys.top.hy~=canvas.layout.h then -- change rez
-				keys.top.hx=canvas.layout.w
-				keys.top.hy=canvas.layout.h
+			if keys.top.hx~=layout.w or keys.top.hy~=layout.h then -- change rez
+				keys.top.hx=layout.w
+				keys.top.hy=layout.h
 				
-				keys.master.text_size=math.floor(canvas.layout.h/6)
+				keys.master.text_size=math.floor(layout.h/6)
 				keys.master:layout()
 			end
 
@@ -579,18 +579,18 @@ function M.bake(oven,keys)
 		local gl=cake.gl
 		local font=canvas.font
 
-		if canvas.layout.active then
+		if layout.active then
 
-		canvas.viewport() -- did our window change?
-		canvas.project23d(canvas.layout.w,canvas.layout.h,1/4,canvas.layout.h*4)
+		layout.viewport() -- did our window change?
+		layout.project23d(layout.w,layout.h,1/4,layout.h*4)
 		canvas.gl_default() -- reset gl state
 
 		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( canvas.pmtx )
+		gl.LoadMatrix( layout.pmtx )
 
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.LoadIdentity()
-		gl.Translate(-canvas.layout.w/2,-canvas.layout.h/2,-canvas.layout.h*2) -- top left corner is origin
+		gl.Translate(-layout.w/2,-layout.h/2,-layout.h*2) -- top left corner is origin
 		gl.PushMatrix()
 
 
@@ -648,11 +648,11 @@ function M.bake(oven,keys)
 			end
 		end
 	
-		if canvas.layout.active then
+		if layout.active then
 			if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
 				m.x,m.y=canvas.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
-				m.x=m.x+(canvas.layout.w/2)
-				m.y=m.y+(canvas.layout.h/2)
+				m.x=m.x+(layout.w/2)
+				m.y=m.y+(layout.h/2)
 			end
 			keys.master:msg(m)
 		end
