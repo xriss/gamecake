@@ -145,7 +145,7 @@ function M.bake(oven,escmenu)
 			if m.class=="key" or m.class=="mouse" then
 
 				if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
-					m.x,m.y=canvas.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
+					m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
 					m.x=m.x+(opts.width/2)
 					m.y=m.y+(opts.height/2)
 				end

@@ -25,10 +25,17 @@ function M.bake(oven,layouts)
 	
 	layout.parent=opts.parent
 	
-	layout.x=opts.x or 0
-	layout.y=opts.y or 0
-	layout.w=opts.w or win.width
-	layout.h=opts.h or win.height
+	if layout.parent then
+		layout.x=opts.x or layout.parent.x
+		layout.y=opts.y or layout.parent.y
+		layout.w=opts.w or layout.parent.w
+		layout.h=opts.h or layout.parent.h
+	else
+		layout.x=opts.x or 0
+		layout.y=opts.y or 0
+		layout.w=opts.w or win.width
+		layout.h=opts.h or win.height
+	end
 	
 --
 -- build a simple field of view projection matrix designed to work in 2d or 3d and keep the numbers
@@ -138,7 +145,6 @@ function M.bake(oven,layouts)
 			return
 			
 		else
-
 			layout.x=l.x
 			layout.y=l.y
 			layout.w=l.w
@@ -149,14 +155,14 @@ function M.bake(oven,layouts)
 				
 			if layout_aspect > aspect then 			-- fit width to screen
 			
-				layout.h=l.w/aspect -- our new display height				
+				layout.h=l.w*aspect -- our new display height				
 				layout.y=l.y+((l.h-layout.h)*0.5) -- centered
 				
 				return
 
 			else											-- fit height to screen
 			
-				layout.w=l.h*aspect -- our new display width
+				layout.w=l.h/aspect -- our new display width
 				layout.x=l.x+((l.w-layout.w)*0.5) -- centered
 				
 				return
@@ -165,23 +171,65 @@ function M.bake(oven,layouts)
 
 	end
 
-	layout.viewport=function(width,height,x,y)
+	layout.restore=function()
 	
 		canvas.layout=layout -- remember current layout in canvas
+
+		if layout.parent then
+			gl.Viewport( layout.x , layout.parent.h-(layout.y+layout.h) , layout.w , layout.h )
+		else
+			gl.Viewport( layout.x , win.height-(layout.y+layout.h) , layout.w , layout.h )
+		end
+
+	end
+	
+	layout.viewport=function(width,height,x,y)
 	
 		win:info()
 		layout.build(width,height,x,y)
 		
-		gl.Viewport( layout.x , win.height-(layout.y+layout.h) , layout.w , layout.h )
-
+		layout.restore()
+		
 	end
 
--- call once to stop any null references if we recieve msgs before we resize
-	layout.viewport()
-	layout.project23d(640,480,0.25,2048)
+	layout.setup=function(w,h,fov,d)
+	
+		local ret=canvas.layout
+	
+		w=w or layout.w
+		h=h or layout.h
+		d=d or layout.h*4
+		fov=fov or 0.25
+		
+		layout.viewport()
+		layout.project23d(w,h,fov,d)
+	
+		gl.MatrixMode(gl.PROJECTION)
+		gl.LoadMatrix( layout.pmtx )
 
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.LoadIdentity()
+		gl.Translate(-w/2,-h/2,(-h/2)/fov) -- top left corner is origin
+		
+--		gl.PushMatrix()
+
+		return ret
+	end
+
+	layout.clean=function()
+
+--		gl.MatrixMode(gl.MODELVIEW)
+--		gl.PopMatrix()
+
+	end
+	
 	return layout
 end
+
+-- init with a default layout
+	local l=(layouts.create{})
+	l.setup()
+	l.clean()
 
 	return layouts
 end

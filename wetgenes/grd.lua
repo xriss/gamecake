@@ -266,9 +266,9 @@ base.convert=function(g,fmt)
 	if type(fmt) == "string" then
 		fmt=grd.stringtonum(fmt)
 	end
-	local r=core.convert(g[0],fmt)
+	local r,e=core.convert(g[0],fmt)
 	core.info(g[0],g)
-	return r and g
+	return (r and g),e
 end
 
 base.quant=function(g,num)

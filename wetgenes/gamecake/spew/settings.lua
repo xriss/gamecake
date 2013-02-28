@@ -1,11 +1,11 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local lfs=require("lfs")
 local wwin=require("wetgenes.win") -- system independent helpers
 local wstr=require("wetgenes.string")
 local wsbox=require("wetgenes.sandbox")
 local snames=require("wetgenes.gamecake.spew.names")
+local lfs ; pcall( function() lfs=require("lfs") end ) -- may not have a filesystem
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -40,28 +40,31 @@ M.bake=function(oven,settings)
 	
 -- load all profile data
 	function settings.load()
+		if lfs then
 print("Loading "..settings.filename)
-		local fp=io.open(settings.filename,"r")
-		if fp then
-			local s=fp:read("*all")
-			ss=wsbox.lson(s) -- safeish
-			fp:close()
-			settings.check()
-			for name,value in pairs(ss) do
-				settings.apply(name,value)
+			local fp=io.open(settings.filename,"r")
+			if fp then
+				local s=fp:read("*all")
+				ss=wsbox.lson(s) -- safeish
+				fp:close()
+				settings.check()
+				for name,value in pairs(ss) do
+					settings.apply(name,value)
+				end
+				return true
 			end
-			return true
 		end
-		
 		return false
 	end
 	
 -- save all profile data
 	function settings.save()
+		if lfs then
 print("Saving "..settings.filename)
-		local fp=io.open(settings.filename,"w")
-		fp:write(wstr.serialize(ss))
-		fp:close()
+			local fp=io.open(settings.filename,"w")
+			fp:write(wstr.serialize(ss))
+			fp:close()
+		end
 	end
 
 -- set a value in the current profile
@@ -96,7 +99,9 @@ print("Saving "..settings.filename)
 	end
 
 --make sure we have a dir to load/save settings into
-lfs.mkdir(wwin.files_prefix:sub(1,-2)) -- skip trailing slash
+if lfs then
+	lfs.mkdir(wwin.files_prefix:sub(1,-2)) -- skip trailing slash
+end
 
 -- try autoload
 if not settings.load() then

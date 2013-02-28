@@ -1,10 +1,10 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local lfs=require("lfs")
 local wwin=require("wetgenes.win") -- system independent helpers
 local wstr=require("wetgenes.string")
 local wsbox=require("wetgenes.sandbox")
+local lfs ; pcall( function() lfs=require("lfs") end ) -- may not have a filesystem
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -37,25 +37,28 @@ M.bake=function(oven,scores)
 	
 -- load all scores data
 	function scores.load()
+		if lfs then
 print("Loading "..scores.filename)
-		local fp=io.open(scores.filename,"r")
-		if fp then
-			local s=fp:read("*all")
-			ss=wsbox.lson(s) -- safeish
-			fp:close()
-			return true
+			local fp=io.open(scores.filename,"r")
+			if fp then
+				local s=fp:read("*all")
+				ss=wsbox.lson(s) -- safeish
+				fp:close()
+				return true
+			end
 		end
-		
 
 		return false
 	end
 	
 -- save all scores data
 	function scores.save()
+		if lfs then
 print("Saving "..scores.filename)
-		local fp=io.open(scores.filename,"w")
-		fp:write(wstr.serialize(ss))
-		fp:close()
+			local fp=io.open(scores.filename,"w")
+			fp:write(wstr.serialize(ss))
+			fp:close()
+		end
 	end
 
 
@@ -245,7 +248,9 @@ print("Saving "..scores.filename)
 
 
 --make sure we have a dir to load/save profiles into
+if lfs then
 lfs.mkdir(wwin.files_prefix:sub(1,-2)) -- skip trailing slash
+end
 
 -- try autoload
 scores.init()

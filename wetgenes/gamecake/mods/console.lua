@@ -242,24 +242,26 @@ font.vbs_idx=1
 			console.fps_count=console.fps_count+1
 		end
 
-
+		layout.setup()
+		
 --		oven.win:info()
 
-		layout.viewport() -- did our window change?
-		layout.project23d(layout.w,layout.h,1/4,layout.h*4)
+--		layout.viewport() -- did our window change?
+--		layout.project23d(layout.w,layout.h,1/4,layout.h*4)
 		
-		canvas.gl_default() -- reset gl state
+--		canvas.gl_default() -- reset gl state
 
 
 --		gl.ClearColor(0,0,0,0)
 --		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
-		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( layout.pmtx )
+--		gl.MatrixMode(gl.PROJECTION)
+--		gl.LoadMatrix( layout.pmtx )
 
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.LoadIdentity()
-		gl.Translate(-layout.w/2,-layout.h/2,-layout.h) -- top/left 1unit==1pixel
+--		gl.MatrixMode(gl.MODELVIEW)
+--		gl.LoadIdentity()
+--		gl.Translate(-layout.w/2,-layout.h/2,-layout.h) -- top/left 1unit==1pixel
+
 		gl.PushMatrix()
 
 
@@ -269,7 +271,7 @@ font.vbs_idx=1
 		if console.y > 0 then
 		
 			gl.Color(pack.argb4_pmf4(0xc040))
-			flat.quad(0,0,w,console.y)
+			flat.quad(0,0,layout.w,console.y)
 
 			gl.Color(pack.argb4_pmf4(0xf4f4))
 

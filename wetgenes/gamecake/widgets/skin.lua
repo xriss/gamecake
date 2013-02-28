@@ -54,6 +54,8 @@ local canvas=cake.canvas
 local font=canvas.font
 local flat=canvas.flat
 
+local layouts=cake.layouts
+
 
 local mode=nil
 local texs={}
@@ -199,15 +201,9 @@ end
 	function meta.draw(widget)
 		
 		if debug_hook then debug_hook("draw",widget) end
-		
-		
-
-		-- draw rectangle
-
 
 		gl.PopMatrix() -- expect the base to be pushed
 		gl.PushMatrix()
-		
 		gl.Translate(widget.pxd,widget.pyd,0)
 		
 		if widget.fbo then
@@ -218,17 +214,29 @@ end
 			end				
 		end
 
+--widget.old_layout
+--widget.layout
+
 if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
 
 		if widget.fbo then
 --print("drawing into fbo")
-			
+
 			widget.fbo:bind_frame()
+			widget.layout=layouts.create{parent={x=0,y=0,w=widget.fbo.w,h=widget.fbo.h}}
 			
---			gl.ClearColor(14/15,14/15,14/15,1)
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PushMatrix()
+			
+			gl.MatrixMode(gl.MODELVIEW)
+			gl.PushMatrix()
+
+			widget.old_layout=widget.layout.setup()
+
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
+--[[
 			gl.MatrixMode(gl.PROJECTION)
 			gl.PushMatrix()
 			gl.LoadMatrix( tardis.m4_project23d(nil,nil,widget.sx,widget.sy,0.5,2*(widget.sx+widget.sy)) )
@@ -243,8 +251,20 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			if widget.pan_px and widget.pan_py then -- fidle everything
 				gl.Translate(widget.pan_px,widget.pan_py,0)
 			end
-						
-			gl.PushMatrix() -- put new base matrix onto stack
+]]
+
+			
+			gl.ClearColor(0,0,0,0)
+			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
+
+			gl.Translate(-widget.pxd,-widget.pyd,0)
+			if widget.pan_px and widget.pan_py then -- fidle everything
+				gl.Translate(widget.pan_px,widget.pan_py,0)
+			end
+			
+			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
+--			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
+
 		end
 		
 		widget.dirty=nil
@@ -488,15 +508,24 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 
 		if widget.fbo then -- we have drawn into the fbo
 			
-			gl.MatrixMode(gl.PROJECTION)
+--			gl.PopMatrix()
 			gl.PopMatrix()
-			
-			gl.MatrixMode(gl.MODELVIEW)
-			gl.PopMatrix()
-			
+
+			widget.layout.clean()
+
+
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 			
-			canvas.viewport() --restore viewport
+
+			widget.old_layout.restore() --restore old viewport
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PopMatrix()			
+			gl.MatrixMode(gl.MODELVIEW)
+			gl.PopMatrix()
+
+
+			widget.layout=nil
+			widget.old_layout=nil
 		end
 		
 else -- we can only draw once

@@ -1,11 +1,11 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local lfs=require("lfs")
 local wwin=require("wetgenes.win") -- system independent helpers
 local wstr=require("wetgenes.string")
 local wsbox=require("wetgenes.sandbox")
 local snames=require("wetgenes.gamecake.spew.names")
+local lfs ; pcall( function() lfs=require("lfs") end ) -- may not have a filesystem
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -41,26 +41,29 @@ M.bake=function(oven,profiles)
 	
 -- load all profile data
 	function profiles.load()
+		if lfs then
 print("Loading "..profiles.filename)
-		local fp=io.open(profiles.filename,"r")
-		if fp then
-			local s=fp:read("*all")
-			ps=wsbox.lson(s) -- safeish
-			fp:close()
-			profiles.select(1)
-			profiles.check()
-			return true
+			local fp=io.open(profiles.filename,"r")
+			if fp then
+				local s=fp:read("*all")
+				ps=wsbox.lson(s) -- safeish
+				fp:close()
+				profiles.select(1)
+				profiles.check()
+				return true
+			end
 		end
-		
 		return false
 	end
 	
 -- save all profile data
 	function profiles.save()
+		if lfs then
 print("Saving "..profiles.filename)
-		local fp=io.open(profiles.filename,"w")
-		fp:write(wstr.serialize(ps))
-		fp:close()
+			local fp=io.open(profiles.filename,"w")
+			fp:write(wstr.serialize(ps))
+			fp:close()
+		end
 	end
 
 -- make this profile current
@@ -97,7 +100,9 @@ print("Saving "..profiles.filename)
 	
 
 --make sure we have a dir to load/save profiles into
-lfs.mkdir(wwin.files_prefix:sub(1,-2)) -- skip trailing slash
+if lfs then
+	lfs.mkdir(wwin.files_prefix:sub(1,-2)) -- skip trailing slash
+end
 
 -- try autoload
 if not profiles.load() then

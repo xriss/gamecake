@@ -28,9 +28,9 @@ M.bake=function(oven,gui)
 	
 	local gl=oven.gl
 
-	function gui.returnpage()
-		gui.active=false -- stop displaying our stuff
-	end
+--	function gui.returnpage()
+--		gui.active=false -- stop displaying our stuff
+--	end
 	function gui.mpage(pname) --request that we go to this page please?
 		gui.active=false -- stop displaying our stuff
 		if gui.page_hook then
@@ -119,7 +119,7 @@ print("click",id)
 
 			elseif id=="profile_return" then
 			
-				gui.returnpage()
+				gui.mpage("menu")
 				
 			elseif id=="profile_goto" then
 
@@ -130,7 +130,7 @@ print("click",id)
 					if widget.user then
 						gui.page(widget.user)
 					else
-						gui.returnpage()	
+						gui.mpage("menu")	
 					end
 
 			elseif id=="score_list" then
@@ -227,7 +227,7 @@ print("click",id)
 	function gui.pages.score(master)
 
 		gui.clicks.score_back=function()
-			gui.returnpage() -- callback to return to original menu			
+			gui.mpage("menu") -- callback to return to original menu			
 		end
 
 
@@ -278,7 +278,7 @@ print("click",id)
 			gui.offset=gui.offset-5
 			if gui.offset<1 then
 				gui.offset=1
-				gui.returnpage() -- callback to return to original menu			
+				gui.mpage("menu") -- callback to return to original menu			
 			else
 				gui.page("score_list")
 			end
@@ -354,7 +354,10 @@ print("click",id)
 			gui.page("quit")
 		end
 		gui.clicks.settings_game=function()
-			gui.mpage("settings_game")
+			if not gui.mpage("settings_game") then gui.mpage("menu") end
+		end
+		gui.clicks.settings_scores=function()
+			gui.page("score_list")
 		end
 
 
@@ -372,7 +375,7 @@ print("click",id)
 		top:add({class="slide",color=0xffcccccc,sx=320,sy=40,datx=gui.data.vol_sfx,hooks=gui.hooks})
 
 
-		top:add({sx=320,sy=40*8})
+		top:add({sx=320,sy=40*6})
 
 		top:add({sx=120,sy=40,color=0xffcccccc,text="Back",id="settings_return",hooks=gui.hooks})
 		top:add({sx=80,sy=40})

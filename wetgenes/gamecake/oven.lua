@@ -226,7 +226,9 @@ local gb=oven.gl.counts.buffers
 print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 ]]
 
-
+			local f
+			f=function()
+			
 				if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
 					if oven.frame_time<(oven.win:time()-0.5) then oven.frame_time=oven.win:time() end -- prevent race condition
 					while (oven.frame_time)>oven.win:time() do oven.win:sleep(0.001) end -- simple frame limit
@@ -248,11 +250,21 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 
 				if oven.times then oven.times.update.stop() end
 				
-			if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
-				if (oven.frame_time-0.001)<=oven.win:time() then -- repeat until we are ahead of real time
-					return oven.update() -- tailcall
+				if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
+					if (oven.frame_time-0.001)<=oven.win:time() then -- repeat until we are ahead of real time
+						return f() -- tailcall
+					end
 				end
+				
 			end
+			
+			if not oven.update_co then -- create a new one
+				oven.update_co=coroutine.create(f)
+			end
+			if coroutine.status(oven.update_co)~="dead" then
+				assert(coroutine.resume(oven.update_co)) -- run it, may need more than one resume before it finishes
+			end
+			
 		end
 
 		oven.preloader_enabled=true
@@ -270,6 +282,12 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 		end
 
 		function oven.draw()
+		
+			if oven.update_co then
+				if coroutine.status(oven.update_co)~="dead" then return end -- draw nothing until it is finished
+				oven.update_co=nil -- create a new one next update
+			end
+		
 			oven.cake.canvas.draw()
 			
 --print( "DRAW",math.floor(10000000+(oven.win:time()*1000)%1000000) )

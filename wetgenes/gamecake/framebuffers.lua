@@ -1,6 +1,8 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local grd=require("wetgenes.grd")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -57,11 +59,19 @@ function M.bake(oven,framebuffers)
 	end
 
 	framebuffers.bind_texture = function(fbo)
-		gl.BindTexture(gl.TEXTURE_2D, fbo.texture or 0)
+		if fbo then
+			gl.BindTexture(gl.TEXTURE_2D, fbo.texture or 0)
+		else
+			gl.BindTexture(gl.TEXTURE_2D, 0)
+		end
 	end
 	
 	framebuffers.bind_frame = function(fbo)
-		gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.frame or 0)
+		if fbo then
+			gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.frame or 0)
+		else
+			gl.BindFramebuffer(gl.FRAMEBUFFER,0)
+		end
 	end
 	
 	framebuffers.check = function(fbo)
@@ -117,6 +127,35 @@ function M.bake(oven,framebuffers)
 		
 	end
 
+-- read back data from a framebuffer, return it in a grd object
+	framebuffers.download = function(fbo,w,h,x,y)
+	
+		w=w or fbo.w
+		h=h or fbo.h
+		x=x or 0
+		y=y or 0
+
+		local g=assert(grd.create(grd.FMT_U8_RGBA_PREMULT,w,h,1))
+
+		framebuffers.bind_frame(fbo)
+		
+		gl.ReadPixels(
+			x,
+			y,
+			w,
+			h,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			g.data )
+			
+		g:flipy() -- opengl data comes in upside down
+		
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+		
+		return g
+	end
+
+
 -- set some functions into the metatable of each fbo
 	for i,n in ipairs({
 		"clean",
@@ -124,6 +163,7 @@ function M.bake(oven,framebuffers)
 		"bind_frame",
 		"bind_texture",
 		"resize",
+		"download",
 		}) do
 		funcs[n]=framebuffers[n]
 	end
