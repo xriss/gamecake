@@ -609,6 +609,53 @@ u8 *pc;
 				return g; // no change needed
 			break;
 			
+			case GRD_FMT_U8_RGBA:
+				gb=grd_create(GRD_FMT_U8_ARGB,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return 0; }
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=grdinfo_get_data(g->bmap,0,y,z);
+						pb=grdinfo_get_data(gb->bmap,0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							pb[0]=pa[3];
+							pb[1]=pa[0];
+							pb[2]=pa[1];
+							pb[3]=pa[2];
+							pa+=4;
+							pb+=4;
+						}
+					}
+				}
+				return gb;
+			break;
+
+			case GRD_FMT_U8_RGBA_PREMULT:
+				gb=grd_create(GRD_FMT_U8_ARGB,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return 0; }
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=grdinfo_get_data(g->bmap,0,y,z);
+						pb=grdinfo_get_data(gb->bmap,0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							u32 a=pa[3]; if(a>0) { a=255/a; }
+							pb[1]=(u8)((pa[0]*a));
+							pb[2]=(u8)((pa[1]*a));
+							pb[3]=(u8)((pa[2]*a));
+							pb[0]=pa[3];
+							pa+=4;
+							pb+=4;
+						}
+					}
+				}
+				return gb;
+			break;
+
 			case GRD_FMT_U8_ALPHA:
 				gb=grd_create(GRD_FMT_U8_ARGB,g->bmap->w,g->bmap->h,g->bmap->d);
 				if(!gb) { return 0; }
