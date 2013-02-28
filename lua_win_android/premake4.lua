@@ -8,6 +8,9 @@ includedirs { "code" }
 
 links { "lib_lua" }
 
+-- turn off noise in glue
+defines { "NDEBUG" }
+
 KIND{lua="wetgenes.win.android.core"}
 
 

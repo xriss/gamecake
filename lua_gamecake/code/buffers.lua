@@ -11,24 +11,28 @@ function M.bake(oven,buffers)
 	
 	buffers.data={}
 
-	buffers.create = function(start,stop)
+	buffers.create = function(tab)
 
-		local v={}
-		
-		v[0]=gl.GenBuffer()
-		
-		v.start=start	-- remember start / stop functions
-		v.stop=stop -- probably dont need a stop function
-
-		if v.start then
-			v:start(buffers) -- and call start now
+		local ret={}
+		for nam,val in pairs(tab) do -- copy
+			ret[nam]=val
 		end
 		
-		buffers.data[v]=v
+		ret[0]=gl.GenBuffer()
+		ret.bind=buffers.bind
 		
-		return v
+		if ret.start then
+			ret:start(buffers) -- and call start now
+		end
+		
+		buffers.data[ret]=ret
+		
+		return ret
 	end
 
+	buffers.bind=function(v)
+		gl.BindBuffer(gl.ARRAY_BUFFER,v[0])
+	end
 
 	buffers.start = function()
 		for v,n in pairs(buffers.data) do

@@ -200,7 +200,10 @@ images.loads=function(tab)
 	local function iorv(i,v) if type(i)=="number" then return v end return i end -- choose i or v
 
 	for i,v in pairs(tab) do
+
 		images.load(v,iorv(i,v))		
+
+		oven.preloader()
 	end
 
 end
