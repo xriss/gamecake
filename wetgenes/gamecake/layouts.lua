@@ -36,6 +36,18 @@ function M.bake(oven,layouts)
 		layout.w=opts.w or win.width
 		layout.h=opts.h or win.height
 	end
+
+-- set all vars to 1 so anycode using them before they get set will not crash
+	layout.view_width=1
+	layout.view_height=1
+	layout.view_fov=1
+	layout.view_depth=1
+	layout.x_scale=1
+	layout.y_scale=1
+	layout.x_origin=1
+	layout.y_origin=1
+	layout.x_size=1
+	layout.y_size=1
 	
 --
 -- build a simple field of view projection matrix designed to work in 2d or 3d and keep the numbers

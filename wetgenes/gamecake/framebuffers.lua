@@ -32,30 +32,42 @@ function M.bake(oven,framebuffers)
 
 	framebuffers.start = function()
 		for v,n in pairs(framebuffers.data) do
-			framebuffers.resize(v,v.w,v.h,v.d) -- realloc
+--			framebuffers.resize(v,v.w,v.h,v.d) -- realloc
 		end
 	end
 
 	framebuffers.stop = function()
 		for v,n in pairs(framebuffers.data) do
-			framebuffers.free(v)
+			framebuffers.clean(fbo)
 		end
 
 	end
 
-	framebuffers.clean = function(fbo)
+	framebuffers.free_depth = function(fbo)
 		if fbo.depth then
 			gl.DeleteRenderbuffer(fbo.depth)
 			fbo.depth=nil
 		end
+	end
+
+	framebuffers.free_texture = function(fbo)
 		if fbo.texture then
 			gl.DeleteTexture(fbo.texture)
 			fbo.texture=nil
 		end
+	end
+
+	framebuffers.free_frame = function(fbo)
 		if fbo.frame then
 			gl.DeleteFramebuffer(fbo.frame)
 			fbo.frame=nil
 		end
+	end
+
+	framebuffers.clean = function(fbo)
+		framebuffers.free_depth(fbo)
+		framebuffers.free_texture(fbo)
+		framebuffers.free_frame(fbo)
 	end
 
 	framebuffers.bind_texture = function(fbo)
@@ -164,6 +176,9 @@ function M.bake(oven,framebuffers)
 		"bind_texture",
 		"resize",
 		"download",
+		"free_depth",
+		"free_texture",
+		"free_frame",
 		}) do
 		funcs[n]=framebuffers[n]
 	end

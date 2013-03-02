@@ -128,6 +128,66 @@ sounds.load_speak=function(tab,id)
 end
 
 --
+-- Load an ogg for use in a soundeffect so read it all in and then push it over to opengl
+--
+sounds.load_ogg=function(filename,id)
+
+	local t=sounds.get(id)
+	
+	if t then return t end --first check it is not already loaded
+
+	local fname=sounds.prefix..filename..".ogg"
+	
+	local d=assert(zips.readfile(fname))
+
+	t={}
+	t.filename=filename
+	
+	
+
+
+--do return false end	
+		
+	local ogg=require("wetgenes.ogg")
+	local og=ogg.create()
+	og:open()
+	
+	local rr={}
+	repeat
+		local done=false
+		local r=og:pull()
+		if not r then
+			if og.err=="push" then
+				og:push(d)
+			elseif og.err then error( og.err ) end
+		else
+			rr[#rr+1]=r
+			if og.err=="end" then done=true
+			elseif og.err then error( og.err ) end
+		end
+		
+	until done
+
+	local fmt=al.FORMAT_MONO16
+	if og.channels==2 then fmt=al.FORMAT_STEREO16 end
+	local rate=og.rate
+
+	t.loop=al.FALSE		
+	t.buff=al.GenBuffer()
+
+	local r=table.concat(rr)
+	al.BufferData(t.buff,fmt,r,#r,rate)
+	
+	sounds.set(t,id) -- remember
+
+--print("loaded",filename)
+--print(#rr,"chunks",#table.concat(rr))
+
+	og:close()
+	return t
+end
+
+--
 -- load a single sound, and make it easy to lookup by the given id
 --
 sounds.load=function(filename,id)
@@ -135,6 +195,8 @@ sounds.load=function(filename,id)
 	local t=sounds.get(id)
 	
 	if t then return t end --first check it is not already loaded
+
+	if zips.exists(sounds.prefix..filename..".ogg") then return sounds.load_ogg(filename,id) end
 
 	local fname=sounds.prefix..filename..sounds.postfix
 	
@@ -145,22 +207,16 @@ sounds.load=function(filename,id)
 	t={}
 	t.filename=filename
 	
-	if al then --al mode
+
+	t.loop=al.FALSE
 	
-		t.loop=al.FALSE
-		
-		t.buff=al.GenBuffer()
-		al.BufferData(t.buff,x) -- all loaded
-		
-		sounds.set(t,id) -- remember
+	t.buff=al.GenBuffer()
+	al.BufferData(t.buff,x) -- all loaded
+	
+	sounds.set(t,id) -- remember
 
 print("loaded",filename)		
-		return t
-		
-	else
-	
-		return nil
-	end
+	return t
 	
 end
 
