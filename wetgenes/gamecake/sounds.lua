@@ -67,22 +67,27 @@ sounds.set=function(d,id)
 end
 
 sounds.beep_idx=1
+sounds.beep_max=sfxmax
 sounds.beep=function(d)
 
+	local inc=true
 	local sfx=sounds.sfxs[sounds.beep_idx]
+	if d.idx then sfx=sounds.sfxs[d.idx] inc=false end
 	
 	al.SourceStop(sfx.source)
 
 	al.Source(sfx.source, al.BUFFER, d.buff)
-	al.Source(sfx.source, al.LOOPING, d.loop)
+	al.Source(sfx.source, al.LOOPING, d.loop or al.FALSE)
 
-	al.Source(sfx.source, al.GAIN, sounds.vol_beep )
+	al.Source(sfx.source, al.PITCH, (d.pitch or 1) )
+	al.Source(sfx.source, al.GAIN, sounds.vol_beep * (d.gain or 1) )
 
 	al.SourcePlay(sfx.source)
 
-
-	sounds.beep_idx=sounds.beep_idx+1
-	if sounds.beep_idx > sfxmax then sounds.beep_idx=1 end
+	if inc then
+		sounds.beep_idx=sounds.beep_idx+1
+		if sounds.beep_idx > sounds.beep_max then sounds.beep_idx=1 end
+	end
 end
 
 sounds.queue_talk=function(d)
@@ -143,8 +148,6 @@ sounds.load_ogg=function(filename,id)
 	t={}
 	t.filename=filename
 	
-	
-
 
 --do return false end	
 		
@@ -168,6 +171,7 @@ sounds.load_ogg=function(filename,id)
 		
 	until done
 
+
 	local fmt=al.FORMAT_MONO16
 	if og.channels==2 then fmt=al.FORMAT_STEREO16 end
 	local rate=og.rate
@@ -177,13 +181,15 @@ sounds.load_ogg=function(filename,id)
 
 	local r=table.concat(rr)
 	al.BufferData(t.buff,fmt,r,#r,rate)
-	
+
 	sounds.set(t,id) -- remember
 
 --print("loaded",filename)
 --print(#rr,"chunks",#table.concat(rr))
 
 	og:close()
+
+print("loaded ogg",filename)
 	return t
 end
 
@@ -215,7 +221,8 @@ sounds.load=function(filename,id)
 	
 	sounds.set(t,id) -- remember
 
-print("loaded",filename)		
+print("loaded",filename)
+
 	return t
 	
 end
