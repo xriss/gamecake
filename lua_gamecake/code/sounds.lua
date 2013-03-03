@@ -402,7 +402,6 @@ local qq=sounds.queues[str.idx]
 
 				local function save(f)
 					if rr then
-print(#rr)
 						local fmt=al.FORMAT_MONO16
 						if qq.og.channels==2 then fmt=al.FORMAT_STEREO16 end
 						local rate=qq.og.rate
@@ -411,7 +410,6 @@ print(#rr)
 					end
 				end
 				local function done(f)
-print(#rr,"done")
 					save() -- save what we have
 					if qq.ogg_loop then
 						qq.oggs[#qq.oggs+1]=qq.fname -- insert ogg back into the end of the list
@@ -423,24 +421,23 @@ print(#rr,"done")
 				
 				local r=qq.og:pull()
 				if not r then
-					if qq.og.err=="push" then
---						qq.og.fpdat=qq.fp:read(4096) -- keep data live
-						local dat=string.sub(qq.fpdat,qq.fpidx,qq.fpidx+4096-1)
-						qq.fpidx=qq.fpidx+4096
---if dat then print("read some ogg ",#dat) end
-						qq.og:push(dat)
-					elseif qq.og.err=="end" then return done(false)
+					if qq.og.err=="push" or qq.og.err=="end" then
+						if qq.fpidx<#qq.fpdat then -- not the end, squirt some more data in
+							local dat=string.sub(qq.fpdat,qq.fpidx,qq.fpidx+4096-1)
+							qq.fpidx=qq.fpidx+4096
+							qq.og:push(dat)
+						elseif qq.og.err=="end" then -- really really the end
+							return done(false)
+						end
 					elseif qq.og.err then error( qq.og.err ) end
 				else
 --print(#r,qq.og.err)
 					if not rr then rr=r else rr=rr..r end
-					
+
 					if #rr>=4096*8 then -- prefer a reasonable chunk of data
 						save()
-						if qq.og.err=="end" then return done(true)
-						elseif qq.og.err then error( od.og.err ) end
+						if qq.og.err then error( qq.og.err ) end
 						return true
---	print("buffered some ogg ",#rr)
 					end
 					
 				end

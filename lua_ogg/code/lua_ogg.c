@@ -208,6 +208,8 @@ int result;
 dogg *dd;
 	dd = lua_dogg_check(l, 1 );
 	
+	dd->err=0;
+	
 	while(1)
 	{
 		if(!dd->done_stream_init)
@@ -347,12 +349,12 @@ while(1){
 		result=ogg_stream_packetout(&dd->os,&dd->op);	  
 		if(result==0)
 		{
+			dd->done_stream_init=0;
 			if(ogg_page_eos(&dd->og)) // check for end of file
 			{
 				dd->err="end";
 				return 0;
 			}
-			dd->done_stream_init=0;
 			dd->err="push"; /* request a push of more data */
 			return 0;
 		}
