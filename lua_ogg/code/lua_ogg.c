@@ -347,6 +347,11 @@ while(1){
 		result=ogg_stream_packetout(&dd->os,&dd->op);	  
 		if(result==0)
 		{
+			if(ogg_page_eos(&dd->og)) // check for end of file
+			{
+				dd->err="end";
+				return 0;
+			}
 			dd->done_stream_init=0;
 			dd->err="push"; /* request a push of more data */
 			return 0;
@@ -395,10 +400,10 @@ while(1){
 								  many samples we
 								  actually consumed */
 								  
-				if(ogg_page_eos(&dd->og)) // check for end of file
-				{
-					dd->err="end";
-				}
+//				if(ogg_page_eos(&dd->og)) // check for end of file
+//				{
+//					dd->err="end";
+//				}
 				
 				lua_pushlstring(l,(const char *)dd->convbuffer,2*dd->vi.channels*bout);
 				return 1;
