@@ -162,6 +162,7 @@ sounds.load_ogg=function(filename,id)
 		if not r then
 			if og.err=="push" then
 				og:push(d)
+			elseif og.err=="end" then done=true
 			elseif og.err then error( og.err ) end
 		else
 			rr[#rr+1]=r
@@ -186,6 +187,17 @@ sounds.load_ogg=function(filename,id)
 
 --print("loaded",filename)
 --print(#rr,"chunks",#table.concat(rr))
+
+--[[
+if filename=="oggs/munch" then
+	print(filename)
+	print("in",#d)
+	print("buffs",#rr)
+	print("out",#r)
+
+exit(0)
+end
+]]
 
 	og:close()
 
@@ -387,6 +399,26 @@ local qq=sounds.queues[str.idx]
 		if qq.og then
 			local rr
 			for i=1,128 do -- may take a few loops before we can return any data
+
+				local function save(f)
+					if rr then
+						local fmt=al.FORMAT_MONO16
+						if qq.og.channels==2 then fmt=al.FORMAT_STEREO16 end
+						local rate=qq.og.rate
+						al.BufferData(b,fmt,rr,#rr,rate) -- C4 hopefully?
+						rr=nil
+					end
+				end
+				local function done(f)
+					save() -- save what we have
+					if qq.ogg_loop then
+						qq.oggs[#qq.oggs+1]=qq.fname -- insert ogg back into the end of the list
+					end
+					qq.og:close()
+					qq.og=nil -- flag end of file
+					return f
+				end
+				
 				local r=qq.og:pull()
 				if not r then
 					if qq.og.err=="push" then
@@ -395,27 +427,20 @@ local qq=sounds.queues[str.idx]
 						qq.fpidx=qq.fpidx+4096
 --if dat then print("read some ogg ",#dat) end
 						qq.og:push(dat)
+					elseif qq.og.err=="end" then return done(false)
 					elseif qq.og.err then error( qq.og.err ) end
 				else
+--print(#r,qq.og.err)
 					if not rr then rr=r else rr=rr..r end
-					if #rr>=4096*8 or qq.og.err=="end" then -- want a reasonable chunk of data
-						local fmt=al.FORMAT_MONO16
-						if qq.og.channels==2 then fmt=al.FORMAT_STEREO16 end
-						local rate=qq.og.rate
-						al.BufferData(b,fmt,rr,#rr,rate) -- C4 hopefully?
-						if qq.og.err and qq.og.err~="end" then error( od.og.err ) end
-						if qq.og.err=="end" then
-							if qq.ogg_loop then
-								qq.oggs[#qq.oggs+1]=qq.fname -- insert ogg back into the end of the list
-							end
---							qq.fp:close()
---							qq.fp=nil
-							qq.og:close()
-							qq.og=nil -- flag end of file
-						end
---	print("buffered some ogg ",#rr)
+					
+					if #rr>=4096*8 then -- prefer a reasonable chunk of data
+						save()
+						if qq.og.err=="end" then return done(true)
+						elseif qq.og.err then error( od.og.err ) end
 						return true
+--	print("buffered some ogg ",#rr)
 					end
+					
 				end
 			end
 		end
