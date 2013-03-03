@@ -397,31 +397,31 @@ local qq=sounds.queues[str.idx]
 		end
 		
 		if qq.og then
-			local rr
+--			local rr
+			local function save(f)
+				if qq.rr then
+--print("buff",#qq.rr)
+					local fmt=al.FORMAT_MONO16
+					if qq.og.channels==2 then fmt=al.FORMAT_STEREO16 end
+					local rate=qq.og.rate
+					al.BufferData(b,fmt,qq.rr,#qq.rr,rate) -- C4 hopefully?
+					qq.rr=nil
+				end
+			end
+			local function done(f)
+--				save() -- save what we have
+				if qq.ogg_loop then
+					qq.oggs[#qq.oggs+1]=qq.fname -- insert ogg back into the end of the list
+				end
+				qq.og:close()
+				qq.og=nil -- flag end of file
+				return f
+			end
 			for i=1,128 do -- may take a few loops before we can return any data
-
-				local function save(f)
-					if rr then
-						local fmt=al.FORMAT_MONO16
-						if qq.og.channels==2 then fmt=al.FORMAT_STEREO16 end
-						local rate=qq.og.rate
-						al.BufferData(b,fmt,rr,#rr,rate) -- C4 hopefully?
-						rr=nil
-					end
-				end
-				local function done(f)
-					save() -- save what we have
-					if qq.ogg_loop then
-						qq.oggs[#qq.oggs+1]=qq.fname -- insert ogg back into the end of the list
-					end
-					qq.og:close()
-					qq.og=nil -- flag end of file
-					return f
-				end
-				
 				local r=qq.og:pull()
 				if not r then
 					if qq.og.err=="push" or qq.og.err=="end" then
+--print(qq.fpidx , #qq.fpdat , qq.og.err)
 						if qq.fpidx<#qq.fpdat then -- not the end, squirt some more data in
 							local dat=string.sub(qq.fpdat,qq.fpidx,qq.fpidx+4096-1)
 							qq.fpidx=qq.fpidx+4096
@@ -432,9 +432,9 @@ local qq=sounds.queues[str.idx]
 					elseif qq.og.err then error( qq.og.err ) end
 				else
 --print(#r,qq.og.err)
-					if not rr then rr=r else rr=rr..r end
+					if not qq.rr then qq.rr=r else qq.rr=qq.rr..r end
 
-					if #rr>=4096*8 then -- prefer a reasonable chunk of data
+					if #qq.rr>=4096*8 then -- prefer a reasonable chunk of data
 						save()
 						if qq.og.err then error( qq.og.err ) end
 						return true
