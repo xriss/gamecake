@@ -67,22 +67,27 @@ sounds.set=function(d,id)
 end
 
 sounds.beep_idx=1
+sounds.beep_max=sfxmax
 sounds.beep=function(d)
 
+	local inc=true
 	local sfx=sounds.sfxs[sounds.beep_idx]
+	if d.idx then sfx=sounds.sfxs[d.idx] inc=false end
 	
 	al.SourceStop(sfx.source)
 
 	al.Source(sfx.source, al.BUFFER, d.buff)
-	al.Source(sfx.source, al.LOOPING, d.loop)
+	al.Source(sfx.source, al.LOOPING, d.loop or al.FALSE)
 
-	al.Source(sfx.source, al.GAIN, sounds.vol_beep )
+	al.Source(sfx.source, al.PITCH, (d.pitch or 1) )
+	al.Source(sfx.source, al.GAIN, sounds.vol_beep * (d.gain or 1) )
 
 	al.SourcePlay(sfx.source)
 
-
-	sounds.beep_idx=sounds.beep_idx+1
-	if sounds.beep_idx > sfxmax then sounds.beep_idx=1 end
+	if inc then
+		sounds.beep_idx=sounds.beep_idx+1
+		if sounds.beep_idx > sounds.beep_max then sounds.beep_idx=1 end
+	end
 end
 
 sounds.queue_talk=function(d)
@@ -128,6 +133,79 @@ sounds.load_speak=function(tab,id)
 end
 
 --
+-- Load an ogg for use in a soundeffect so read it all in and then push it over to opengl
+--
+sounds.load_ogg=function(filename,id)
+
+	local t=sounds.get(id)
+	
+	if t then return t end --first check it is not already loaded
+
+	local fname=sounds.prefix..filename..".ogg"
+	
+	local d=assert(zips.readfile(fname))
+
+	t={}
+	t.filename=filename
+	
+
+--do return false end	
+		
+	local ogg=require("wetgenes.ogg")
+	local og=ogg.create()
+	og:open()
+	
+	local rr={}
+	repeat
+		local done=false
+		local r=og:pull()
+		if not r then
+			if og.err=="push" then
+				og:push(d)
+			elseif og.err=="end" then done=true
+			elseif og.err then error( og.err ) end
+		else
+			rr[#rr+1]=r
+			if og.err=="end" then done=true
+			elseif og.err then error( og.err ) end
+		end
+		
+	until done
+
+
+	local fmt=al.FORMAT_MONO16
+	if og.channels==2 then fmt=al.FORMAT_STEREO16 end
+	local rate=og.rate
+
+	t.loop=al.FALSE		
+	t.buff=al.GenBuffer()
+
+	local r=table.concat(rr)
+	al.BufferData(t.buff,fmt,r,#r,rate)
+
+	sounds.set(t,id) -- remember
+
+--print("loaded",filename)
+--print(#rr,"chunks",#table.concat(rr))
+
+--[[
+if filename=="oggs/munch" then
+	print(filename)
+	print("in",#d)
+	print("buffs",#rr)
+	print("out",#r)
+
+exit(0)
+end
+]]
+
+	og:close()
+
+print("loaded ogg",filename)
+	return t
+end
+
+--
 -- load a single sound, and make it easy to lookup by the given id
 --
 sounds.load=function(filename,id)
@@ -135,6 +213,8 @@ sounds.load=function(filename,id)
 	local t=sounds.get(id)
 	
 	if t then return t end --first check it is not already loaded
+
+	if zips.exists(sounds.prefix..filename..".ogg") then return sounds.load_ogg(filename,id) end
 
 	local fname=sounds.prefix..filename..sounds.postfix
 	
@@ -145,22 +225,17 @@ sounds.load=function(filename,id)
 	t={}
 	t.filename=filename
 	
-	if al then --al mode
-	
-		t.loop=al.FALSE
-		
-		t.buff=al.GenBuffer()
-		al.BufferData(t.buff,x) -- all loaded
-		
-		sounds.set(t,id) -- remember
 
-print("loaded",filename)		
-		return t
-		
-	else
+	t.loop=al.FALSE
 	
-		return nil
-	end
+	t.buff=al.GenBuffer()
+	al.BufferData(t.buff,x) -- all loaded
+	
+	sounds.set(t,id) -- remember
+
+print("loaded",filename)
+
+	return t
 	
 end
 
@@ -324,6 +399,28 @@ local qq=sounds.queues[str.idx]
 		if qq.og then
 			local rr
 			for i=1,128 do -- may take a few loops before we can return any data
+
+				local function save(f)
+					if rr then
+print(#rr)
+						local fmt=al.FORMAT_MONO16
+						if qq.og.channels==2 then fmt=al.FORMAT_STEREO16 end
+						local rate=qq.og.rate
+						al.BufferData(b,fmt,rr,#rr,rate) -- C4 hopefully?
+						rr=nil
+					end
+				end
+				local function done(f)
+print(#rr,"done")
+					save() -- save what we have
+					if qq.ogg_loop then
+						qq.oggs[#qq.oggs+1]=qq.fname -- insert ogg back into the end of the list
+					end
+					qq.og:close()
+					qq.og=nil -- flag end of file
+					return f
+				end
+				
 				local r=qq.og:pull()
 				if not r then
 					if qq.og.err=="push" then
@@ -332,27 +429,20 @@ local qq=sounds.queues[str.idx]
 						qq.fpidx=qq.fpidx+4096
 --if dat then print("read some ogg ",#dat) end
 						qq.og:push(dat)
+					elseif qq.og.err=="end" then return done(false)
 					elseif qq.og.err then error( qq.og.err ) end
 				else
+--print(#r,qq.og.err)
 					if not rr then rr=r else rr=rr..r end
-					if #rr>=4096*8 or qq.og.err=="end" then -- want a reasonable chunk of data
-						local fmt=al.FORMAT_MONO16
-						if qq.og.channels==2 then fmt=al.FORMAT_STEREO16 end
-						local rate=qq.og.rate
-						al.BufferData(b,fmt,rr,#rr,rate) -- C4 hopefully?
-						if qq.og.err and qq.og.err~="end" then error( od.og.err ) end
-						if qq.og.err=="end" then
-							if qq.ogg_loop then
-								qq.oggs[#qq.oggs+1]=qq.fname -- insert ogg back into the end of the list
-							end
---							qq.fp:close()
---							qq.fp=nil
-							qq.og:close()
-							qq.og=nil -- flag end of file
-						end
---	print("buffered some ogg ",#rr)
+					
+					if #rr>=4096*8 then -- prefer a reasonable chunk of data
+						save()
+						if qq.og.err=="end" then return done(true)
+						elseif qq.og.err then error( od.og.err ) end
 						return true
+--	print("buffered some ogg ",#rr)
 					end
+					
 				end
 			end
 		end
