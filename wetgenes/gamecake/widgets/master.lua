@@ -104,9 +104,86 @@ function wmaster.setup(widget,def)
 --
 	function master.key(widget,ascii,key,act)
 
-		if master.focus then -- key focus
+		if master.focus then -- key focus, steals all the key presses until we press enter again
 		
 			master.focus:key(ascii,key,act)
+			
+		else
+		
+			if act==1 then
+				if key=="space" or key=="return" then
+					if master.over then
+						master.over:call_hook("click")
+					end
+					return
+				end
+			
+--print(1,master.over)
+			
+				local vx=0
+				local vy=0
+				if key=="left"  then vx=-1 end
+				if key=="right" then vx= 1 end
+				if key=="up"    then vy=-1 end
+				if key=="down"  then vy= 1 end
+				
+				if vx~=0 or vy~=0 then -- move hover selection
+				
+					if master.over then
+						local over=master.over
+						local best={}
+						local ox=over.pxd+(over.hx/2)
+						local oy=over.pyd+(over.hy/2)
+
+--print("over",ox,oy)
+
+						master:call_descendents(function(w)
+							if w.solid and w.hooks then
+								local wx=w.pxd+(w.hx/2)
+								local wy=w.pyd+(w.hy/2)
+								local dx=wx-ox
+								local dy=wy-oy
+								local dd=0
+								if vx==0 then dd=dd+dx*dx*16 else dd=dd+dx*dx end
+								if vy==0 then dd=dd+dy*dy*16 else dd=dd+dy*dy end
+--print(w,wx,wy,dx,dy,by,by)
+								if	( dx<0 and vx<0 ) or
+									( dx>0 and vx>0 ) or
+									( dy<0 and vy<0 ) or
+									( dy>0 and vy>0 ) then -- right direction
+									
+									if best.over then
+										if best.dd>dd then -- closer
+											best.over=w
+											best.dd=dd
+										end
+									else
+										best.over=w
+										best.dd=dd
+									end
+								end
+							end
+						end)
+						if best.over then
+							over:set_dirty()
+							best.over:set_dirty()
+							master.over=best.over
+						end
+					end
+					if not master.over then
+						master:call_descendents(function(v)
+							if not master.over then
+								if v.solid and v.hooks then
+									master.over=v
+									v:set_dirty()
+								end
+							end
+						end)
+					end
+					
+				end
+--print(2,master.over)
+			end
 		end
 
 	end
@@ -182,6 +259,13 @@ function wmaster.setup(widget,def)
 --		end
 	end
 --
+
+	function master.clean_all(m)
+		meta.clean_all(m)
+		master.over=nil
+		master.active=nil
+		master.focus=nil
+	end
 end
 
 return wmaster

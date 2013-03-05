@@ -17,6 +17,36 @@ function M.bake(oven,layouts)
 	local win=oven.win
 	local canvas=cake.canvas
 
+-- manage a simple stack of layouts
+	local stack
+	layouts.reset=function()
+		stack={}
+		layouts.push( layouts.create{} )
+		return layouts.get()
+	end
+	layouts.pop=function()
+		local l=assert(stack[#stack])
+		stack[#stack]=nil
+		return l
+	end
+	layouts.push=function(l)
+		stack[#stack+1]=l
+		return l
+	end
+	layouts.get=function()
+		return assert(stack[#stack])
+	end
+	layouts.push_child=function(opts)
+		opts=opts or {}
+		opts.parent=layouts.get()
+		return layouts.push( layouts.create(opts) )
+	end
+	layouts.project23d=function(...) return layouts.get().project23d(...) end
+	layouts.xyscale   =function(...) return layouts.get().xyscale(...)    end
+	layouts.build     =function(...) return layouts.get().build(...)      end
+	layouts.restore   =function(...) return layouts.get().restore(...)    end
+	layouts.viewport  =function(...) return layouts.get().viewport(...)   end
+	layouts.apply     =function(...) return layouts.get().apply(...)      end
 
 -- generate functions locked to the canvas
 	layouts.create = function(opts)
@@ -184,7 +214,7 @@ function M.bake(oven,layouts)
 	end
 
 	layout.restore=function()
-	
+
 		canvas.layout=layout -- remember current layout in canvas
 
 		if layout.parent then
@@ -197,14 +227,22 @@ function M.bake(oven,layouts)
 	
 	layout.viewport=function(width,height,x,y)
 	
+		-- adjust the fake root layout
 		win:info()
+		stack[1].x=0
+		stack[1].y=0
+		stack[1].w=win.width
+		stack[1].h=win.height
+		
 		layout.build(width,height,x,y)
 		
 		layout.restore()
 		
 	end
 
-	layout.setup=function(w,h,fov,d)
+-- this applys a full viewport and adjusts opengls projection and model view stacks
+-- push and pop these if you wish to preserve old values
+	layout.apply=function(w,h,fov,d)
 	
 		local ret=canvas.layout
 	
@@ -223,25 +261,20 @@ function M.bake(oven,layouts)
 		gl.LoadIdentity()
 		gl.Translate(-w/2,-h/2,(-h/2)/fov) -- top left corner is origin
 		
---		gl.PushMatrix()
-
 		return ret
 	end
 
-	layout.clean=function()
-
---		gl.MatrixMode(gl.MODELVIEW)
---		gl.PopMatrix()
-
-	end
+-- does nothing?
+--	layout.setup=layout.apply
+--	layout.clean=function()
+--	end
 	
 	return layout
 end
 
 -- init with a default layout
-	local l=(layouts.create{})
-	l.setup()
-	l.clean()
+	layouts.reset()
+	layouts.apply()
 
 	return layouts
 end

@@ -63,21 +63,23 @@ function M.bake(oven,mouse)
 	function mouse.draw()
 	
 		if not mouse.active then return end
+		
+		layout.apply()
 
-		layout.viewport() -- did our window change?
-		layout.project23d(layout.w,layout.h,1/4,layout.h*4)
+--		layout.viewport() -- did our window change?
+--		layout.project23d(layout.w,layout.h,1/4,layout.h*4)
 		
 		canvas.gl_default() -- reset gl state
 
-		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( layout.pmtx )
+--		gl.MatrixMode(gl.PROJECTION)
+--		gl.LoadMatrix( layout.pmtx )
 
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.LoadIdentity()
-		gl.Translate(-w/2,-h/2,-h) -- top/left 1unit==1pixel
+--		gl.MatrixMode(gl.MODELVIEW)
+--		gl.LoadIdentity()
+--		gl.Translate(-w/2,-h/2,-h) -- top/left 1unit==1pixel
 		gl.PushMatrix()
 
-		local wh=w*h
+		local wh=layout.w*layout.h
 		local ss=math.ceil(math.sqrt(wh)/1000)
 		
 

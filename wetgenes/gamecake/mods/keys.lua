@@ -581,16 +581,17 @@ function M.bake(oven,keys)
 
 		if layout.active then
 
-		layout.viewport() -- did our window change?
-		layout.project23d(layout.w,layout.h,1/4,layout.h*4)
+		layout.apply()
+--		layout.viewport() -- did our window change?
+--		layout.project23d(layout.w,layout.h,1/4,layout.h*4)
 		canvas.gl_default() -- reset gl state
 
-		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( layout.pmtx )
+--		gl.MatrixMode(gl.PROJECTION)
+--		gl.LoadMatrix( layout.pmtx )
 
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.LoadIdentity()
-		gl.Translate(-layout.w/2,-layout.h/2,-layout.h*2) -- top left corner is origin
+--		gl.MatrixMode(gl.MODELVIEW)
+--		gl.LoadIdentity()
+--		gl.Translate(-layout.w/2,-layout.h/2,-layout.h*2) -- top left corner is origin
 		gl.PushMatrix()
 
 

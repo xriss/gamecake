@@ -540,6 +540,16 @@ function wmeta.setup(def)
 		end
 	end
 
+--
+-- Call this function for all descendents, recursivly
+--
+	function meta.call_descendents(widget,func)
+		for i,v in ipairs(widget) do
+			meta.call_descendents(v,func)
+			func(v)
+		end
+	end
+
 end
 
 

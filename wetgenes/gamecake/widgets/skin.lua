@@ -231,7 +231,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.PushMatrix()
 
-			widget.old_layout=widget.layout.setup()
+			widget.old_layout=widget.layout.apply()
 
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
@@ -511,7 +511,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 --			gl.PopMatrix()
 			gl.PopMatrix()
 
-			widget.layout.clean()
+--			widget.layout.clean()
 
 
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)

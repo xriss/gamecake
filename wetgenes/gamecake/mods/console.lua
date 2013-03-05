@@ -242,7 +242,7 @@ font.vbs_idx=1
 			console.fps_count=console.fps_count+1
 		end
 
-		layout.setup()
+		layout.apply()
 		
 --		oven.win:info()
 

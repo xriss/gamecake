@@ -150,6 +150,8 @@ function wtextedit.key(widget,ascii,key,act)
 					
 				end
 				
+				master.focus=nil
+
 				changed=true
 			end
 			
