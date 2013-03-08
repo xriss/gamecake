@@ -183,7 +183,7 @@ print("TARGET == "..TARGET.." " ..CPU )
 
 if NACL then
 
-	local naclsdk=path.getabsolute("../sdks/naclsdk/pepper_15")
+	local naclsdk=path.getabsolute("../sdks/naclsdk/pepper_25")
 
 	platforms { "nacl" } --hax
 	
@@ -417,6 +417,7 @@ function KIND(opts)
 
 	configuration {"Release"}
 	flags {"Optimize"}
+--	flags {"Symbols"} -- keep symbols to help with release only crashes
 	
 -- set output dirs
 

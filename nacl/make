@@ -1,7 +1,7 @@
 cd `dirname $0`
 cd ..
 
-naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_18`
+naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_25`
 export PATH=$naclsdk/toolchain/linux_x86_newlib/bin:$PATH
 
 makeopts=""

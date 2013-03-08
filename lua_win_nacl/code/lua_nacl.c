@@ -62,7 +62,7 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
   
   keyboard_input_event_interface = ( PPB_KeyboardInputEvent*)(get_browser_interface(PPB_KEYBOARD_INPUT_EVENT_INTERFACE));
   mouse_input_event_interface = ( PPB_MouseInputEvent*)(get_browser_interface(PPB_MOUSE_INPUT_EVENT_INTERFACE));
-  
+
   if (!glInitializePPAPI(get_browser_interface)) {
     printf("glInitializePPAPI failed\n");
     return PP_ERROR_FAILED;
@@ -359,9 +359,15 @@ PP_EXPORT void PPP_ShutdownModule() {
 int lua_nacl_context (lua_State *l)
 {
 									  
-  int32_t attribs[] = {PP_GRAPHICS3DATTRIB_WIDTH, view_width,
-                       PP_GRAPHICS3DATTRIB_HEIGHT, view_height,
-                       PP_GRAPHICS3DATTRIB_NONE};
+  int32_t attribs[] = {
+//        PP_GRAPHICS3DATTRIB_ALPHA_SIZE,     8,
+//        PP_GRAPHICS3DATTRIB_DEPTH_SIZE,     24,
+//        PP_GRAPHICS3DATTRIB_STENCIL_SIZE,   8,
+//        PP_GRAPHICS3DATTRIB_SAMPLES,      0,
+//        PP_GRAPHICS3DATTRIB_SAMPLE_BUFFERS,   0,
+		PP_GRAPHICS3DATTRIB_WIDTH, view_width,
+		PP_GRAPHICS3DATTRIB_HEIGHT, view_height,
+		PP_GRAPHICS3DATTRIB_NONE};
   nacl_context = graphics3d_interface->Create(nacl_instance, 0, attribs);
   if (nacl_context == 0)
   {
@@ -407,10 +413,18 @@ int lua_nacl_context (lua_State *l)
 // swap a gl surface 
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+static float ffffff=0.0f;
 int lua_nacl_swap (lua_State *l)
 {
-//  glClearColor(1.0f, 0.9f, 0.4f, 0.9f);
-//  glClear(GL_COLOR_BUFFER_BIT);
+/*
+ffffff=ffffff+0.01f;
+if(ffffff>1.0f) { ffffff=0.0f; }
+glSetCurrentContextPPAPI(nacl_context);
+glClearColor(ffffff,ffffff, 1.0f-ffffff, 1.0f);
+glClear(GL_COLOR_BUFFER_BIT);
+//return 1;
+*/
+
 
  
 	struct lua_nacl_callback * cb=lua_nacl_callback_alloc(l,1); // arg is a callback function

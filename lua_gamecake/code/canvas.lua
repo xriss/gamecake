@@ -49,18 +49,24 @@ font.set = function(dat)
 	font.add=0
 	font.x=0
 	font.y=0
-	core.canvas_font_sync(font)
+	if gl.patch_functions_method~="disable" then
+		core.canvas_font_sync(font)
+	end
 end
 
 font.set_size = function(size,add)
 	font.size=size
 	font.add=add or 0 -- clear the x space tweak
-	core.canvas_font_sync(font)
+	if gl.patch_functions_method~="disable" then
+		core.canvas_font_sync(font)
+	end
 end
 font.set_xy = function(x,y)
 	font.x=x or font.x
 	font.y=y or font.y
-	core.canvas_font_sync(font)
+	if gl.patch_functions_method~="disable" then
+		core.canvas_font_sync(font)
+	end
 end
 
 font.xindex=function(text,px)
@@ -112,8 +118,9 @@ font.draw = function(text)
 	
 	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
 
-	core.canvas_font_draw(font,text,p:attrib("a_vertex"),p:attrib("a_texcoord"))
-
+	if gl.patch_functions_method~="disable" then
+		core.canvas_font_draw(font,text,p:attrib("a_vertex"),p:attrib("a_texcoord"))
+	end
 end
 
 
