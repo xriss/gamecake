@@ -137,6 +137,8 @@ elseif ANDROID then
 	includedirs { "asm/arm" }
 	files { "asm/arm/lj_vm.s" }
 
+--	defines { "LUAJIT_DISABLE_JIT" } -- I seem to have android problems with JIT?
+
 else
 
 --x86
