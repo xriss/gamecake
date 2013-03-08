@@ -11,12 +11,6 @@ if ANDROID then
 	
 	files { 
 			prefix.."/Alc/backends/opensl.c",
-			prefix.."/Alc/alcDedicated.c",
-			prefix.."/Alc/helpers.c",
-			prefix.."/Alc/hrtf.c",
-			prefix.."/Alc/backends/loopback.c",
-			prefix.."/Alc/backends/wave.c",
-			prefix.."/Alc/backends/null.c",
 	}
 	defines("HAVE_OPENSL")
 	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
@@ -34,29 +28,15 @@ elseif NACL then
 
 elseif WINDOWS then
 
-	prefix="asoft"
 	files { 
 			prefix.."/Alc/backends/winmm.c",
-			prefix.."/Alc/alcDedicated.c",
-			prefix.."/Alc/helpers.c",
-			prefix.."/Alc/hrtf.c",
-			prefix.."/Alc/backends/loopback.c",
-			prefix.."/Alc/backends/wave.c",
-			prefix.."/Alc/backends/null.c",
 	}
 	defines("HAVE_WINMM")
 
 elseif RASPI then
 
-	prefix="asoft"
 	files { 
 			prefix.."/Alc/backends/alsa.c",
-			prefix.."/Alc/alcDedicated.c",
-			prefix.."/Alc/helpers.c",
-			prefix.."/Alc/hrtf.c",
-			prefix.."/Alc/backends/loopback.c",
-			prefix.."/Alc/backends/wave.c",
-			prefix.."/Alc/backends/null.c",
 	}
 	defines("HAVE_ALSA")
 
@@ -67,12 +47,6 @@ else
 
 	files { 
 			prefix.."/Alc/backends/alsa.c",
-			prefix.."/Alc/alcDedicated.c",
-			prefix.."/Alc/helpers.c",
-			prefix.."/Alc/hrtf.c",
-			prefix.."/Alc/backends/loopback.c",
-			prefix.."/Alc/backends/wave.c",
-			prefix.."/Alc/backends/null.c",
 	}
 	defines("HAVE_ALSA")
 	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
@@ -80,6 +54,16 @@ else
 end
 
 
+if prefix=="asoft" then
+	files { 
+			prefix.."/Alc/alcDedicated.c",
+			prefix.."/Alc/helpers.c",
+			prefix.."/Alc/hrtf.c",
+			prefix.."/Alc/backends/loopback.c",
+			prefix.."/Alc/backends/wave.c",
+			prefix.."/Alc/backends/null.c",
+	}
+end
 
 
 files { 
