@@ -1,6 +1,6 @@
 /**
  * OpenAL cross platform audio library
- * Copyright (C) 2012
+ * Copyright (C) 2011
  * This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Library General Public
  *  License as published by the Free Software Foundation; either
@@ -35,13 +35,12 @@
 /* The output buffer will be this multiple of the OpenAL device update size.
  * This needs to be at least 2 or we can't buffer output properly.
  */
-const ALuint kBufferPadMult = 4;
+const ALuint kBufferPadMult = 4*4;
 /* How many samples for each frame will be buffered to Pepper.
  * Keep this low for low latency, but not too low or we will be CPU bound.
  */
-const ALuint kRequestedFrameCount = 1024;
-/* 4 is 2-channels, 2-bytes per sample. */
-const ALuint kFrameSizeInBytes = 4;
+const ALuint kRequestedFrameCount = 512;
+
 
 typedef struct {
     /* Simple circular buffer (single producer/consumer) to buffer data output
@@ -65,17 +64,19 @@ typedef struct {
 
     volatile int killNow;
     ALvoid *thread;
-    volatile ALuint main_thread_init_status;
+    volatile ALuint initialized;
     ALuint buffer_ready;
 } ppapi_data;
 
 static PP_Instance gInstance;
 static PPB_GetInterface gGetInterface;
 
-AL_API void AL_APIENTRY alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface)
+extern void alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface);
+void alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface)
 {
     gInstance = instance;
     gGetInterface = get_interface;
+    
 }
 
 /* This is the callback from PPAPI to fill in the audio buffer. */
@@ -120,18 +121,21 @@ void PPAPI_Audio_Callback(void *sample_buffer,
 
 static const ALCchar ppapiDevice[] = "PPAPI Output";
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 static ALuint PpapiProc(ALvoid *ptr)
 {
     ALCdevice *Device = (ALCdevice*)ptr;
     ppapi_data *data = (ppapi_data*)Device->ExtraData;
 
-    ALuint UpdateSizeInBytes = Device->UpdateSize * kFrameSizeInBytes;
-    ALuint SampleFrameInBytes = data->sample_frame_count * kFrameSizeInBytes;
+    ALuint UpdateSizeInBytes = Device->UpdateSize * 4;
+    ALuint SampleFrameInBytes = data->sample_frame_count * 4;
     /* Start to buffer when less than this many bytes are buffered. Keep this
      * small for low latency but large enough so we don't starve Pepper.
      */
     const ALuint MinBufferSizeInBytes =
-        min(max(SampleFrameInBytes*4, UpdateSizeInBytes), data->size/2);
+        MIN(MAX(SampleFrameInBytes*4, UpdateSizeInBytes), data->size/2);
 
     while(!data->killNow && Device->Connected)
     {
@@ -158,7 +162,7 @@ static ALuint PpapiProc(ALvoid *ptr)
             if (data->write_ptr >= data->size)
                 data->write_ptr -= data->size;
         }
-        /* Small 1 ms sleep so we don't use too much CPU time. */
+        /* Small sleep so we don't use too much CPU time. */
         Sleep(1);
     }
 
@@ -170,48 +174,39 @@ static void ppapi_open_playback_main_thread(void* user_data, int32_t result)
 {
     ppapi_data *data = (ppapi_data*)user_data;
     (void)result;
+	if(!data->initialized)
+	{
+		data->
+		sample_frame_count =
+			data->
+			audio_config->
+			RecommendSampleFrameCount(PP_AUDIOSAMPLERATE_44100,
+														  kRequestedFrameCount);
 
-    PP_AudioSampleRate rate = PP_AUDIOSAMPLERATE_44100;
-    if (data->device->Frequency == 48000)
-        rate = PP_AUDIOSAMPLERATE_48000;
+		PP_AudioSampleRate rate = PP_AUDIOSAMPLERATE_44100;
+		if (data->device->Frequency == 48000)
+			rate = PP_AUDIOSAMPLERATE_48000;
 
-    data->sample_frame_count =
-        data->audio_config->RecommendSampleFrameCount(gInstance,
-                                                      rate,
-                                                      kRequestedFrameCount);
+		data->
+		audio_config_resource =
+			data->
+			audio_config->
+			CreateStereo16Bit(gInstance,
+												  rate,
+												  data->sample_frame_count);
 
-    data->audio_config_resource =
-        data->audio_config->CreateStereo16Bit(gInstance,
-                                              rate,
-                                              data->sample_frame_count);
+		data->audio_resource = data->audio->Create(gInstance,
+												   data->audio_config_resource,
+												   PPAPI_Audio_Callback,
+												   (void*)data);
 
-    if (PP_FALSE == data->audio_config->IsAudioConfig(data->audio_config_resource)) {
-        AL_PRINT("PPAPI initialization: audio config creation failed."); 
-        data->main_thread_init_status = -1;
-        return;
-    }
+		data->audio->StartPlayback(data->audio_resource);
+		data->initialized = 1;
+	}
 
-    data->audio_resource = data->audio->Create(gInstance,
-                                               data->audio_config_resource,
-                                               PPAPI_Audio_Callback,
-                                               (void*)data);
-
-    if (PP_FALSE == data->audio->IsAudio(data->audio_resource)) {
-        AL_PRINT("PPAPI initialization: audio resource creation failed."); 
-        data->main_thread_init_status = -1;
-        return;
-    }
-
-    if (PP_FALSE == data->audio->StartPlayback(data->audio_resource)) {
-        AL_PRINT("PPAPI initialization: start playback failed."); 
-        data->main_thread_init_status = -1;
-        return;
-    }
-
-    data->main_thread_init_status = 1;
 }
 
-static ALCboolean ppapi_open_playback(ALCdevice *device,
+static ALCenum ppapi_open_playback(ALCdevice *device,
                                       const ALCchar *deviceName)
 {
     ppapi_data *data;
@@ -219,7 +214,7 @@ static ALCboolean ppapi_open_playback(ALCdevice *device,
     if(!deviceName)
         deviceName = ppapiDevice;
     else if(strcmp(deviceName, ppapiDevice) != 0)
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
 
     int channels = ChannelsFromDevFmt(device->FmtChans);
     int bytes = BytesFromDevFmt(device->FmtType);
@@ -227,17 +222,18 @@ static ALCboolean ppapi_open_playback(ALCdevice *device,
     if (channels != 2)
     {
         AL_PRINT("PPAPI only supports 2 channel output\n");
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
     if (bytes != 2)
     {
+printf("format=%s\n",DevFmtTypeString(device->FmtType));
         AL_PRINT("PPAPI only supports 16-bit output\n");
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
     if (device->Frequency != 44100 && device->Frequency != 44800)
     {
         AL_PRINT("PPAPI only supports 44100 and 44800 sample frequencies\n");
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
 
     data = (ppapi_data*)calloc(1, sizeof(*data));
@@ -251,39 +247,31 @@ static ALCboolean ppapi_open_playback(ALCdevice *device,
     if (!data->audio_config)
     {
         free(data);
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
 
     data->audio = (PPB_Audio*)gGetInterface(PPB_AUDIO_INTERFACE);
     if (!data->audio)
     {
         free(data);
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
 
     data->core = (PPB_Core*)gGetInterface(PPB_CORE_INTERFACE);
     if (!data->core)
     {
         free(data);
-        return ALC_FALSE;
+        return ALC_INVALID_VALUE;
     }
+/*
+    struct PP_CompletionCallback cb =
+        PP_MakeCompletionCallback(ppapi_open_playback_main_thread, data);
+    data->core->CallOnMainThread(0, cb, 0);
+*/
+// assume we are on themain thread otherwise we lock because sleep does not sleep?
+ppapi_open_playback_main_thread(data,0);
 
-    if (data->core->IsMainThread()) {
-        ppapi_open_playback_main_thread(data, 0);
-    } else {
-        struct PP_CompletionCallback cb =
-            PP_MakeCompletionCallback(ppapi_open_playback_main_thread, data);
-        data->core->CallOnMainThread(0, cb, 0);
-
-        while (data->main_thread_init_status == 0)
-            Sleep(1);
-    }
-
-    if (data->main_thread_init_status < 0) {
-        free(data);
-        return ALC_FALSE;
-    }
-    return ALC_TRUE;
+    return ALC_NO_ERROR;
 }
 
 
@@ -307,22 +295,25 @@ static void ppapi_close_playback(ALCdevice *device)
 {
     ppapi_data *data = (ppapi_data*)device->ExtraData;
 
-    if (data->core->IsMainThread()) {
-        ppapi_close_playback_main_thread(data, 0);
-    } else {
-        struct PP_CompletionCallback cb =
-            PP_MakeCompletionCallback(ppapi_close_playback_main_thread, data);
-        data->core->CallOnMainThread(0, cb, 0);
-    }
+    struct PP_CompletionCallback cb =
+        PP_MakeCompletionCallback(ppapi_close_playback_main_thread, data);
+    data->core->CallOnMainThread(0, cb, 0);
 
     device->ExtraData = NULL;
 }
 
 static ALCboolean ppapi_reset_playback(ALCdevice *device)
 {
-    ppapi_data *data = (ppapi_data*)device->ExtraData;
 
-    ALuint UpdateSizeInBytes = device->UpdateSize * kFrameSizeInBytes;
+    ppapi_data *data = (ppapi_data*)device->ExtraData;
+    /* Initialization via 'open_playback' happens asychronously, so we
+     * need to wait until this happens in order for data to be ready
+     */
+    while (!data->initialized) Sleep(100);
+    
+
+    /* 4 is 2-channels, 2-bytes per sample. */
+    ALuint UpdateSizeInBytes = device->UpdateSize * 4;
     /* kBufferPadMult is added to protect against buffer underruns. */
     data->size = UpdateSizeInBytes * kBufferPadMult;
     /* Extra UpdateSize added so we can read off the end of the buffer in one
@@ -349,6 +340,16 @@ static ALCboolean ppapi_reset_playback(ALCdevice *device)
     return ALC_TRUE;
 }
 
+static ALCboolean ppapi_start_playback(ALCdevice *device)
+{
+    ppapi_data *data = (ppapi_data*)device->ExtraData;
+    
+	ppapi_open_playback_main_thread(data,0);
+	ppapi_reset_playback(device);
+
+    return ALC_TRUE;
+}
+
 static void ppapi_stop_playback(ALCdevice *device)
 {
     ppapi_data *data = (ppapi_data*)device->ExtraData;
@@ -368,12 +369,12 @@ static void ppapi_stop_playback(ALCdevice *device)
 }
 
 
-static ALCboolean ppapi_open_capture(ALCdevice *device,
+static ALCenum ppapi_open_capture(ALCdevice *device,
                                      const ALCchar *deviceName)
 {
     (void)device;
     (void)deviceName;
-    return ALC_FALSE;
+    return ALC_INVALID_VALUE;
 }
 
 
@@ -381,6 +382,7 @@ BackendFuncs ppapi_funcs = {
     ppapi_open_playback,
     ppapi_close_playback,
     ppapi_reset_playback,
+    ppapi_start_playback,
     ppapi_stop_playback,
     ppapi_open_capture,
     NULL,
@@ -390,19 +392,23 @@ BackendFuncs ppapi_funcs = {
     NULL
 };
 
-void alc_ppapi_init(BackendFuncs *func_list)
+ALCboolean alc_ppapi_init(BackendFuncs *func_list)
 {
     *func_list = ppapi_funcs;
+    
+    return ALC_TRUE;
 }
 
 void alc_ppapi_deinit(void)
 {
 }
 
-void alc_ppapi_probe(int type)
+void alc_ppapi_probe(enum DevProbe type)
 {
-    if(type == DEVICE_PROBE)
-        AppendDeviceList(ppapiDevice);
-    else if(type == ALL_DEVICE_PROBE)
+//    if(type == DEVICE_PROBE)
+//        AppendDeviceList(ppapiDevice);
+//        AppendAllDeviceList(ppapiDevice);
+//    else
+    if(type == ALL_DEVICE_PROBE)
         AppendAllDeviceList(ppapiDevice);
 }
