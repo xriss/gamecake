@@ -41,7 +41,7 @@
 /* #undef HAVE_OPENSL */
 
 /* Define if we have the Wave Writer backend */
-#define HAVE_WAVE
+//#define HAVE_WAVE
 
 /* Define if we have dlfcn.h */
 //#define HAVE_DLFCN_H

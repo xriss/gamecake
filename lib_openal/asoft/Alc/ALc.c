@@ -42,9 +42,6 @@
 
 #define EmptyFuncs { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 static struct BackendInfo BackendList[] = {
-#ifdef HAVE_PPAPI
-    { "ppapi", alc_ppapi_init, alc_ppapi_deinit, alc_ppapi_probe, EmptyFuncs },
-#endif
 #ifdef HAVE_PULSEAUDIO
     { "pulse", alc_pulse_init, alc_pulse_deinit, alc_pulse_probe, EmptyFuncs },
 #endif
