@@ -11,6 +11,12 @@ if ANDROID then
 	
 	files { 
 			prefix.."/Alc/backends/opensl.c",
+			prefix.."/Alc/alcDedicated.c",
+			prefix.."/Alc/helpers.c",
+			prefix.."/Alc/hrtf.c",
+			prefix.."/Alc/backends/loopback.c",
+			prefix.."/Alc/backends/wave.c",
+			prefix.."/Alc/backends/null.c",
 	}
 	defines("HAVE_OPENSL")
 	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
@@ -18,11 +24,12 @@ if ANDROID then
 
 elseif NACL then
 
-	prefix="soft"
+	prefix="openal-soft-1.13"
 	files { 
 			prefix.."/Alc/backends/ppapi.c",
+			prefix.."/OpenAL32/alDatabuffer.c",
 	}
-	defines("HAVE_PPAPI")
+	defines("HAVE_PPAPI","_DEBUG")
 
 
 elseif WINDOWS then
@@ -30,6 +37,12 @@ elseif WINDOWS then
 	prefix="asoft"
 	files { 
 			prefix.."/Alc/backends/winmm.c",
+			prefix.."/Alc/alcDedicated.c",
+			prefix.."/Alc/helpers.c",
+			prefix.."/Alc/hrtf.c",
+			prefix.."/Alc/backends/loopback.c",
+			prefix.."/Alc/backends/wave.c",
+			prefix.."/Alc/backends/null.c",
 	}
 	defines("HAVE_WINMM")
 
@@ -38,6 +51,12 @@ elseif RASPI then
 	prefix="asoft"
 	files { 
 			prefix.."/Alc/backends/alsa.c",
+			prefix.."/Alc/alcDedicated.c",
+			prefix.."/Alc/helpers.c",
+			prefix.."/Alc/hrtf.c",
+			prefix.."/Alc/backends/loopback.c",
+			prefix.."/Alc/backends/wave.c",
+			prefix.."/Alc/backends/null.c",
 	}
 	defines("HAVE_ALSA")
 
@@ -48,6 +67,12 @@ else
 
 	files { 
 			prefix.."/Alc/backends/alsa.c",
+			prefix.."/Alc/alcDedicated.c",
+			prefix.."/Alc/helpers.c",
+			prefix.."/Alc/hrtf.c",
+			prefix.."/Alc/backends/loopback.c",
+			prefix.."/Alc/backends/wave.c",
+			prefix.."/Alc/backends/null.c",
 	}
 	defines("HAVE_ALSA")
 	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
@@ -68,28 +93,17 @@ files {
 		prefix.."/OpenAL32/alSource.c",
 		prefix.."/OpenAL32/alState.c",
 		prefix.."/OpenAL32/alThunk.c",
-}
-
-files { 
 		prefix.."/Alc/ALc.c",
 		prefix.."/Alc/ALu.c",
 		prefix.."/Alc/alcConfig.c",
-		prefix.."/Alc/alcDedicated.c",
 		prefix.."/Alc/alcEcho.c",
 		prefix.."/Alc/alcModulator.c",
 		prefix.."/Alc/alcReverb.c",
 		prefix.."/Alc/alcRing.c",
 		prefix.."/Alc/alcThread.c",
 		prefix.."/Alc/bs2b.c",
-		prefix.."/Alc/helpers.c",
-		prefix.."/Alc/hrtf.c",
 		prefix.."/Alc/mixer.c",
 		prefix.."/Alc/panning.c",
-
-		prefix.."/Alc/backends/loopback.c",
-		prefix.."/Alc/backends/wave.c",
-		prefix.."/Alc/backends/null.c",
-
 }
 
 

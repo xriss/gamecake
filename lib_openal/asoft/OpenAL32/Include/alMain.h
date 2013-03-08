@@ -128,7 +128,7 @@ void *GetSymbol(void *handle, const char *name);
 
 typedef void *volatile XchgPtr;
 
-#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1))&&(!defined(_WIN32))
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1))
 typedef ALuint RefCount;
 static __inline RefCount IncrementRef(volatile RefCount *ptr)
 { return __sync_add_and_fetch(ptr, 1); }
@@ -431,9 +431,6 @@ struct BackendInfo {
     BackendFuncs Funcs;
 };
 
-ALCboolean alc_ppapi_init(BackendFuncs *func_list);
-void alc_ppapi_deinit(void);
-void alc_ppapi_probe(enum DevProbe type);
 ALCboolean alc_alsa_init(BackendFuncs *func_list);
 void alc_alsa_deinit(void);
 void alc_alsa_probe(enum DevProbe type);
@@ -491,7 +488,7 @@ enum DevFmtType {
     DevFmtUInt   = ALC_UNSIGNED_INT_SOFT,
     DevFmtFloat  = ALC_FLOAT_SOFT,
 
-    DevFmtTypeDefault = DevFmtShort//DevFmtFloat
+    DevFmtTypeDefault = DevFmtFloat
 };
 enum DevFmtChannels {
     DevFmtMono   = ALC_MONO_SOFT,

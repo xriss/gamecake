@@ -178,7 +178,7 @@ static void ppapi_open_playback_main_thread(void* user_data, int32_t result)
     sample_frame_count =
         data->
         audio_config->
-        RecommendSampleFrameCount(PP_AUDIOSAMPLERATE_44100,
+        RecommendSampleFrameCount(gInstance,PP_AUDIOSAMPLERATE_44100,
                                                       kRequestedFrameCount);
 
     PP_AudioSampleRate rate = PP_AUDIOSAMPLERATE_44100;

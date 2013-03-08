@@ -83,6 +83,12 @@ void PPAPI_Audio_Callback(void *sample_buffer,
                           uint32_t buffer_size_in_bytes,
                           void* user_data)
 {
+  ppapi_data *data = (ppapi_data*)user_data;
+  (void)buffer_size_in_bytes;
+
+  if(data->buffer_ready)
+      aluMixData(data->device, sample_buffer, data->sample_frame_count);
+/*
     ppapi_data* data = (ppapi_data*)user_data;
     if (!data->buffer_ready) return;
 
@@ -98,7 +104,6 @@ void PPAPI_Audio_Callback(void *sample_buffer,
 
     if (data->read_ptr + buffer_size_in_bytes > data->size)
     {
-        /* This read straddles the buffer boundary, split it up. */
         memcpy(sample_buffer,
                data->buffer + data->read_ptr,
                data->size - data->read_ptr);
@@ -116,54 +121,10 @@ void PPAPI_Audio_Callback(void *sample_buffer,
     data->read_ptr += buffer_size_in_bytes;
     if (data->read_ptr >= data->size)
         data->read_ptr -= data->size;
+*/
 }
 
 static const ALCchar ppapiDevice[] = "PPAPI Output";
-
-static ALuint PpapiProc(ALvoid *ptr)
-{
-    ALCdevice *Device = (ALCdevice*)ptr;
-    ppapi_data *data = (ppapi_data*)Device->ExtraData;
-
-    ALuint UpdateSizeInBytes = Device->UpdateSize * kFrameSizeInBytes;
-    ALuint SampleFrameInBytes = data->sample_frame_count * kFrameSizeInBytes;
-    /* Start to buffer when less than this many bytes are buffered. Keep this
-     * small for low latency but large enough so we don't starve Pepper.
-     */
-    const ALuint MinBufferSizeInBytes =
-        min(max(SampleFrameInBytes*4, UpdateSizeInBytes), data->size/2);
-
-    while(!data->killNow && Device->Connected)
-    {
-        ALuint write_proxy = data->write_ptr;
-        if (data->read_ptr > data->write_ptr)
-            write_proxy = data->write_ptr + data->size;
-
-        if (data->read_ptr + MinBufferSizeInBytes >= write_proxy)
-        {
-            aluMixData(Device,
-                       data->buffer + data->write_ptr,
-                       Device->UpdateSize);
-            if (data->write_ptr + UpdateSizeInBytes > data->size)
-            {
-                /* Spilled over the edge, copy the last bits to the beginning
-                 * of the buffer.
-                 */
-                memcpy(data->buffer,
-                       data->buffer + data->size,
-                       UpdateSizeInBytes - (data->size - data->write_ptr));
-            }
-
-            data->write_ptr += UpdateSizeInBytes;
-            if (data->write_ptr >= data->size)
-                data->write_ptr -= data->size;
-        }
-        /* Small 1 ms sleep so we don't use too much CPU time. */
-        Sleep(1);
-    }
-
-    return 0;
-}
 
 /* This needs to be called on the main PPAPI thread. */
 static void ppapi_open_playback_main_thread(void* user_data, int32_t result)
@@ -338,13 +299,13 @@ static ALCboolean ppapi_reset_playback(ALCdevice *device)
 
     data->read_ptr = 0;
     data->write_ptr = 0;
-    data->thread = StartThread(PpapiProc, device);
-    if(data->thread == NULL)
-    {
-        free(data->buffer);
-        data->buffer = NULL;
-        return ALC_FALSE;
-    }
+//    data->thread = StartThread(PpapiProc, device);
+//    if(data->thread == NULL)
+//    {
+//        free(data->buffer);
+//        data->buffer = NULL;
+//        return ALC_FALSE;
+//    }
     data->buffer_ready = 1;
     return ALC_TRUE;
 }
@@ -353,14 +314,14 @@ static void ppapi_stop_playback(ALCdevice *device)
 {
     ppapi_data *data = (ppapi_data*)device->ExtraData;
 
-    if(!data->thread)
-        return;
+//    if(!data->thread)
+//        return;
 
-    data->killNow = 1;
-    StopThread(data->thread);
-    data->thread = NULL;
+ //   data->killNow = 1;
+ //   StopThread(data->thread);
+ //   data->thread = NULL;
 
-    data->killNow = 0;
+  //  data->killNow = 0;
 
     data->buffer_ready = 0;
     free(data->buffer);
