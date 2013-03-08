@@ -63,7 +63,8 @@ fonts.load=function(filename,id)
 
 	if type(filename)=="number" then -- builtin font id, so far we only have this one
 
-print("Loading font 8x8")
+--print("Loading font 8x8")
+--oven.preloader("font 8x8") --the preloader expects this font so do not confuse it
 
 		if gl then --gl mode
 		
@@ -115,7 +116,9 @@ print("Loading font 8x8")
 		local fname=fonts.prefix..filename..fonts.postfix
 		
 		local d=assert(zips.readfile(fname))
-print("Loading font ",fname,#d)		
+
+--print("Loading font ",fname,#d)		
+oven.preloader(fname)
 
 		if gl then --gl mode
 		
@@ -213,7 +216,6 @@ fonts.loads=function(tab)
 			fonts.load(v,i)
 		end
 		
-		oven.preloader()
 	end
 
 end

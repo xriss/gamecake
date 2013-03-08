@@ -352,7 +352,7 @@ while(1){
 			dd->done_stream_init=0;
 			if(ogg_page_eos(&dd->og)) // check for end of file
 			{
-				dd->err="end";
+				dd->err="end"; // this may be a lie, try and push some more data first if you have it...
 				return 0;
 			}
 			dd->err="push"; /* request a push of more data */

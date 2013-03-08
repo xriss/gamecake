@@ -130,6 +130,8 @@ sounds.load_speak=function(tab,id)
 	
 	sounds.set(t,id) -- remember
 
+oven.preloader(id)
+
 end
 
 --
@@ -201,7 +203,9 @@ end
 
 	og:close()
 
-print("loaded ogg",filename)
+--print("loaded ogg",filename)
+oven.preloader(filename)
+
 	return t
 end
 
@@ -233,7 +237,8 @@ sounds.load=function(filename,id)
 	
 	sounds.set(t,id) -- remember
 
-print("loaded",filename)
+--print("loaded",filename)
+oven.preloader(filename)
 
 	return t
 	
@@ -252,7 +257,6 @@ sounds.loads=function(tab)
 			sounds.load(v,i)
 		end
 		
-		oven.preloader()
 	end
 
 end
@@ -309,7 +313,39 @@ sounds.start = function()
 		if not sounds.queues then
 			sounds.queues={}
 			for i=1,strmax do
-				sounds.queues[i]={}
+				local r={idx=i}
+				sounds.queues[i]=r
+				r.stream_ogg=function(qq,d)
+					local str=sounds.strs[qq.idx]
+					
+					if d.mode=="stop" then
+					
+						qq.state=nil
+						qq.ogg_loop=false
+						qq.og=false
+						qq.oggs=nil
+						
+					else
+						
+						qq.ogg_loop=true
+						qq.state="play_queue"
+						if not qq.oggs then
+							qq.oggs={d.name}
+						end
+						if d.mode=="restart" then -- force a restart of the ogg
+							qq.og=false
+							qq.oggs={d.name}
+							al.SourceStop(str.source)
+						else -- otherwise continue playing what we already are if we can
+							if #qq.oggs==1 and qq.oggs[1]==d.name then -- nothing to change
+							else
+								qq.og=false
+								qq.oggs={d.name}
+								al.SourceStop(str.source)
+							end
+						end
+					end
+				end
 			end
 		end
 
@@ -501,6 +537,8 @@ end
 				sounds[n]=function() end
 			end
 		end
+		sounds.queues={{},{}}
+		sounds.disabled=true
 	end
 
 	return sounds

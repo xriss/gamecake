@@ -1,2 +1,2 @@
 cd `dirname $0`
-../../sdks/android-ndk/ndk-stack -sym libs/armeabi -dump log.txt
+../../sdks/android-ndk/ndk-stack -sym libs/armeabi-v7a -dump log.txt

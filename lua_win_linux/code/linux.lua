@@ -7,6 +7,7 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local wstr=require("wetgenes.string")
 
 local linux={}
 
@@ -37,6 +38,11 @@ linux.msg=function(w)
 		end
 	end
 	return m
+end
+
+linux.send_intent=function(s)
+	local e=wstr.url_encode(s)
+	os.execute("xdg-open \"https://twitter.com/intent/tweet?text="..e.."\"")
 end
 
 --
