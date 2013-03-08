@@ -5,6 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local function print(...) _G.print(...) end
 
 local wstr=require("wetgenes.string")
+local wwin=require("wetgenes.win")
 local pack=require("wetgenes.pack")
 
 local snames=require("wetgenes.gamecake.spew.names")
@@ -17,6 +18,8 @@ M.bake=function(oven,gui)
 
 	gui=gui or {} 
 	gui.modname=M.modname
+
+	gui.strings={} -- put user type strings here
 
 	gui.clicks={} -- put onclick function in here
 	gui.pages={} -- put functions to fill in pages in here
@@ -226,22 +229,35 @@ print("click",id)
 
 	function gui.pages.score(master)
 
-		gui.clicks.score_back=function()
-			gui.mpage("menu") -- callback to return to original menu			
-		end
-
-
 		local score=sscores.up[1].score
 		local best=sscores.list({})[1]			best=(best and best.score) or 0
 		local mine=sscores.get_best_score({})	mine=(mine and mine.score) or 0
-		
 		if best<score then best=score end
 		if mine<score then mine=score end
-		
+
 		local best_pct=0
 		local mine_pct=0
 		if best<1 then best_pct=0 else best_pct=math.floor(100*score/best) end
 		if mine<1 then mine_pct=0 else mine_pct=math.floor(100*score/mine) end
+
+
+		gui.clicks.score_back=function()
+			gui.mpage("menu") -- callback to return to original menu			
+		end
+		
+		gui.clicks.score_brag=function()
+			if wwin.hardcore.send_intent then -- we have a way to brag
+				if gui.strings.brag then
+					wwin.hardcore.send_intent(wstr.replace(
+						gui.strings.brag,
+						{
+							score=wstr.str_insert_number_commas(score)
+						}))
+				end
+			end
+			gui.mpage("menu") -- callback to return to original menu			
+		end
+
 
 		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
 		top:add({sx=320,sy=40})

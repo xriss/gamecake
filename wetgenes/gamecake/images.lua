@@ -53,7 +53,8 @@ images.load=function(filename,id)
 	
 	if t then return t end --first check it is not already loaded
 
-print("loading",filename,id)
+--print("loading",filename,id)
+oven.preloader(filename)
 
 	local fname=images.prefix..filename..images.postfix
 	local g=assert(grd.create())
@@ -202,8 +203,6 @@ images.loads=function(tab)
 	for i,v in pairs(tab) do
 
 		images.load(v,iorv(i,v))		
-
-		oven.preloader()
 	end
 
 end

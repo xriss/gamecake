@@ -17,6 +17,8 @@ function M.bake(opts)
 	local oven={}
 
 		oven.opts=opts
+
+--opts.disable_sounds=true
 		
 		oven.baked={}
 		oven.mods={}
@@ -169,7 +171,8 @@ function M.bake(opts)
 						wwin.hardcore.task_to_back()
 						oven.next=nil
 					else
-						return true
+						oven.next=nil
+						oven.finished=true						
 					end
 					
 				end
@@ -190,6 +193,7 @@ function M.bake(opts)
 			if oven.now and oven.now.setup then
 				oven.now.setup() -- this will probably load data and call the preloader
 			end
+--print("setup preloader=off")
 			oven.preloader_enabled=false -- disabled preloader after first setup completes
 		end
 
@@ -200,9 +204,16 @@ function M.bake(opts)
 			if oven.now and oven.now.start then
 				oven.now.start()
 			end
+--print("start preloader=off")
+			if oven.preloader_enabled=="stop" then -- we turned on at stop so turn off at start
+				oven.preloader_enabled=false
+			end
 		end
 
 		function oven.stop()
+--print("stop preloader=on")
+			oven.rebake(opts.preloader or "wetgenes.gamecake.spew.preloader").reset()
+			oven.preloader_enabled="stop"
 			oven.win:stop()
 			oven.cake.stop()
 			oven.cake.canvas.stop()
@@ -219,6 +230,14 @@ function M.bake(opts)
 
 		function oven.update()
 
+			if oven.update_co then -- just continue coroutine until it ends
+				if coroutine.status(oven.update_co)~="dead" then
+					assert(coroutine.resume(oven.update_co)) -- run it, may need more than one resume before it finishes
+					return
+				else
+					oven.update_co=nil
+				end
+			end
 --[[
 collectgarbage()
 local gci=gcinfo()		
@@ -226,13 +245,25 @@ local gb=oven.gl.counts.buffers
 print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 ]]
 
+			if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
+			
+				if oven.frame_time<(oven.win:time()-0.500) then oven.frame_time=oven.win:time() end -- prevent race condition
+				
+				if wwin.hardcore.sleep then
+					while (oven.frame_time-oven.frame_rate)>oven.win:time() do wwin.hardcore.sleep(0.0001) end -- sleep here until we need to update
+				else
+					if (oven.frame_time-oven.frame_rate)>oven.win:time() then return end -- cant sleep, just skip
+				end
+							
+			end
+
 			local f
 			f=function()
-			
+
+				oven.change() -- run setup/clean codes if we are asked too
+
 				if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
-					if oven.frame_time<(oven.win:time()-0.5) then oven.frame_time=oven.win:time() end -- prevent race condition
-					while (oven.frame_time)>oven.win:time() do oven.win:sleep(0.001) end -- simple frame limit
-					oven.frame_time=oven.frame_time+oven.frame_rate -- step frame forward one tick
+					oven.frame_time=oven.frame_time+oven.frame_rate -- step frame forward one tick				
 				end
 
 --print( "UPDATE",math.floor(10000000+(oven.win:time()*1000)%1000000) )
@@ -251,33 +282,58 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 				if oven.times then oven.times.update.stop() end
 				
 				if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
-					if (oven.frame_time-0.001)<=oven.win:time() then -- repeat until we are ahead of real time
+					if (oven.frame_time-oven.frame_rate)<oven.win:time() then -- repeat until we are a frame ahead of real time
 						return f() -- tailcall
 					end
 				end
 				
 			end
-			
+
 			if not oven.update_co then -- create a new one
 				oven.update_co=coroutine.create(f)
 			end
 			if coroutine.status(oven.update_co)~="dead" then
 				assert(coroutine.resume(oven.update_co)) -- run it, may need more than one resume before it finishes
 			end
-			
+
 		end
 
 		oven.preloader_enabled=true
-		function oven.preloader()
+		function oven.preloader(...)
+			local s=table.concat({...}," ") or ""
+print("Loading : "..s)
 			if not oven.preloader_enabled then return end
 			if oven.win then
+
+				if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
+					if oven.update_co then
+						coroutine.yield() -- try and make it finish
+						coroutine.yield()
+					end
+				end
+
 				oven.msgs()
 				oven.cake.canvas.draw()
 				local p=oven.rebake(opts.preloader or "wetgenes.gamecake.spew.preloader")
 				p.setup() -- warning, this is called repeatedly
-				p.update()
-				p.draw()
-				oven.win:swap()
+				p.update(s)
+				if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
+
+					if oven.update_co then
+						coroutine.yield()
+						coroutine.yield()
+					end
+
+				else
+					p.draw()
+					oven.win:swap()
+				end
+
+				if oven.update_co then
+					coroutine.yield()
+					coroutine.yield()
+				end
+
 			end
 		end
 
@@ -286,9 +342,15 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 			if oven.update_co then
 				if coroutine.status(oven.update_co)~="dead" then return end -- draw nothing until it is finished
 				oven.update_co=nil -- create a new one next update
+			else -- nothing to draw, waiting on update to change things
+				return
 			end
+			
+			if wwin.hardcore and wwin.hardcore.swap_pending then
+				return
+			end -- cock blocked waiting for nacl draw code
 		
-			oven.cake.canvas.draw()
+			oven.cake.canvas.draw() -- prepare tempory buffers
 			
 --print( "DRAW",math.floor(10000000+(oven.win:time()*1000)%1000000) )
 
@@ -358,7 +420,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 		function oven.serv(oven)
 		
 			if oven.win.noblock then
-				return oven
+				return oven -- and expect  serv_pulse to be called as often as possible
 			end
 			
 			local finished
@@ -366,19 +428,21 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 				finished=oven.serv_pulse(oven)
 			until finished
 		end
+
 		function oven.serv_pulse(oven)
-				if oven.change() then return true end
-				oven.msgs()
-				
-				oven.cake.update()
-				if not oven.paused then
-					oven.update()
-					oven.draw()
-				else
-					oven.win:sleep(1/10)
+			if oven.finished then return true end
+			oven.msgs()
+			
+			oven.cake.update()
+
+			if not oven.paused then
+				oven.update()
+				oven.draw()
+			else
+				if wwin.hardcore.sleep then
+					wwin.hardcore.sleep(1/10)
 				end
-				
---				return oven.change()
+			end
 		end
 		
 

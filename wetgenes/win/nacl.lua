@@ -262,9 +262,17 @@ end
 local print=nacl.print
 
 
-
+nacl.swap_pending=false
+function nacl.swap()
+	nacl.swap_pending=true
+--print("swap start",nacl.time())
+	core.swap(function()
+--print("swap stop",nacl.time())
+		nacl.swap_pending=false
+	end)
+end
+	
 nacl.context=core.context
-nacl.swap=core.swap
 nacl.time=core.time
 
 nacl.call=core.call

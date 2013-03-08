@@ -530,38 +530,40 @@ do
 		counts.renderbuffers=0
 		counts.shaders=0
 		counts.textures=0
+		counts.calls=0
 	end
 	counts.reset()
 
-	gles.   GenBuffer=function(  ) counts.buffers=counts.buffers+1 return core.   GenBuffer()   end
-	gles.DeleteBuffer=function(id) counts.buffers=counts.buffers-1 return core.DeleteBuffer(id) end
+	gles.   GenBuffer=function(  ) counts.buffers=counts.buffers+1 counts.calls=counts.calls+1 return core.   GenBuffer()   end
+	gles.DeleteBuffer=function(id) counts.buffers=counts.buffers-1 counts.calls=counts.calls+1 return core.DeleteBuffer(id) end
 
-	gles.   GenFramebuffer=function(  ) counts.framebuffers=counts.framebuffers+1 return core.   GenFramebuffer()   end
-	gles.DeleteFramebuffer=function(id) counts.framebuffers=counts.framebuffers-1 return core.DeleteFramebuffer(id) end
+	gles.   GenFramebuffer=function(  ) counts.framebuffers=counts.framebuffers+1 counts.calls=counts.calls+1 return core.   GenFramebuffer()   end
+	gles.DeleteFramebuffer=function(id) counts.framebuffers=counts.framebuffers-1 counts.calls=counts.calls+1 return core.DeleteFramebuffer(id) end
 
-	gles.   GenProgram=function(  ) counts.programs=counts.programs+1 return core.   GenProgram()   end
-	gles.DeleteProgram=function(id) counts.programs=counts.programs-1 return core.DeleteProgram(id) end
+	gles.   GenProgram=function(  ) counts.programs=counts.programs+1 counts.calls=counts.calls+1 return core.   GenProgram()   end
+	gles.DeleteProgram=function(id) counts.programs=counts.programs-1 counts.calls=counts.calls+1 return core.DeleteProgram(id) end
 
-	gles.   GenRenderbuffer=function(  ) counts.renderbuffers=counts.renderbuffers+1 return core.   GenRenderbuffer()   end
-	gles.DeleteRenderbuffer=function(id) counts.renderbuffers=counts.renderbuffers-1 return core.DeleteRenderbuffer(id) end
+	gles.   GenRenderbuffer=function(  ) counts.renderbuffers=counts.renderbuffers+1 counts.calls=counts.calls+1 return core.   GenRenderbuffer()   end
+	gles.DeleteRenderbuffer=function(id) counts.renderbuffers=counts.renderbuffers-1 counts.calls=counts.calls+1 return core.DeleteRenderbuffer(id) end
 
-	gles.   GenShader=function(  ) counts.shaders=counts.shaders+1 return core.   GenShader()   end
-	gles.DeleteShader=function(id) counts.shaders=counts.shaders-1 return core.DeleteShader(id) end
+	gles.   GenShader=function(  ) counts.shaders=counts.shaders+1 counts.calls=counts.calls+1 return core.   GenShader()   end
+	gles.DeleteShader=function(id) counts.shaders=counts.shaders-1 counts.calls=counts.calls+1 return core.DeleteShader(id) end
 
-	gles.   GenTexture=function(  ) counts.textures=counts.textures+1 return core.   GenTexture()   end
-	gles.DeleteTexture=function(id) counts.textures=counts.textures-1 return core.DeleteTexture(id) end
-
-
-end
+	gles.   GenTexture=function(  ) counts.textures=counts.textures+1 counts.calls=counts.calls+1 return core.   GenTexture()   end
+	gles.DeleteTexture=function(id) counts.textures=counts.textures-1 counts.calls=counts.calls+1 return core.DeleteTexture(id) end
 
 -- export all core functions that have not been explicitly defined *above*
-for n,v in pairs(core) do
-	if type(v)=="function" then
-		if not gles[n] then -- already used
-			gles[n]=v -- copy function
+	for n,v in pairs(core) do
+		if type(v)=="function" then
+			if not gles[n] then -- already used
+				gles[n]=function(...) counts.calls=counts.calls+1 return v(...) end
+			end
 		end
 	end
+	
 end
+
+
 
 
 -- add optional debuggery to every function defined *above*
@@ -580,10 +582,10 @@ print("Patching GLES ",method)
 	for n,f in pairs(gles) do
 		if type(f)=="function" and not ( 
 											n=="CheckError" or 
-											n=="GetError" or 
+--											n=="GetError" or 
 											n=="numtostring" or
-											n=="GetExtensions" or
-											n=="Get" or
+--											n=="GetExtensions" or
+--											n=="Get" or
 											n=="patch_functions"
 										) then	
 		
@@ -613,12 +615,16 @@ print("Patching GLES ",method)
 	
 end
 
+--gles.patch_functions("disable")
+
+
 function gles.numtostring(num)
 	return gles.nums[num]
 end
 
 function gles.CheckError(...)
 	local err=gles.GetError()
+	if err=="" then err=0 end
 	local str=gles.numtostring(err)
 	assert(err==0,str)
 end

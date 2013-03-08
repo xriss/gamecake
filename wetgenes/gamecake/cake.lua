@@ -19,10 +19,11 @@ function M.bake(oven,cake)
 	end
 
 	cake.start = function()
+		cake.fonts.start() -- setup 8x8 font for the preloader first
+		cake.framebuffers.start()
 		cake.buffers.start()
 		cake.images.start()
 		cake.sheets.start()
-		cake.fonts.start()
 		cake.sounds.start()
 	end
 
@@ -31,6 +32,7 @@ function M.bake(oven,cake)
 		cake.sheets.stop()
 		cake.images.stop()
 		cake.buffers.stop()
+		cake.framebuffers.stop()
 		cake.sounds.stop()
 		if oven.gl.forget then -- any programs will need to be recompiled
 			oven.gl.forget()

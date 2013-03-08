@@ -77,7 +77,6 @@ sheets.loads_and_chops=function(tab)
 		local img=sheets.createimg(v[1])
 		img:chop(v[2],v[3],v[4],v[5])
 		
-		oven.preloader()
 	end
 
 end

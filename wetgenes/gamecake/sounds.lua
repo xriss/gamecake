@@ -130,6 +130,8 @@ sounds.load_speak=function(tab,id)
 	
 	sounds.set(t,id) -- remember
 
+oven.preloader(id)
+
 end
 
 --
@@ -201,7 +203,9 @@ end
 
 	og:close()
 
-print("loaded ogg",filename)
+--print("loaded ogg",filename)
+oven.preloader(filename)
+
 	return t
 end
 
@@ -233,7 +237,8 @@ sounds.load=function(filename,id)
 	
 	sounds.set(t,id) -- remember
 
-print("loaded",filename)
+--print("loaded",filename)
+oven.preloader(filename)
 
 	return t
 	
@@ -252,7 +257,6 @@ sounds.loads=function(tab)
 			sounds.load(v,i)
 		end
 		
-		oven.preloader()
 	end
 
 end
@@ -533,6 +537,8 @@ end
 				sounds[n]=function() end
 			end
 		end
+		sounds.queues={{},{}}
+		sounds.disabled=true
 	end
 
 	return sounds

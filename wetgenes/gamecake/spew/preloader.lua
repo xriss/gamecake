@@ -54,8 +54,16 @@ main.setup=function()
 
 	if main.setup_done then return end -- warning, this is called repeatedly...
 
+	main.title=""
+	main.count=0
+
 	main.setup_done=true
 	main.loads()
+end
+
+main.reset=function()
+	main.title=""
+	main.count=0
 end
 
 main.clean=function()
@@ -65,8 +73,10 @@ end
 main.msg=function(m)
 end
 
-main.update=function()
+main.update=function(title)
 
+	main.title=title or ""
+	
 	local s=t_randumbs[math.random(1,#t_randumbs)]
 	local t={}
 	t.thing    =snames.random_noun()
@@ -86,7 +96,6 @@ main.update=function()
 end
 
 
-main.count=0
 
 -- this is the only function we expect to be called
 -- and we expect it to be called very sporadically
@@ -114,7 +123,7 @@ main.draw=function()
 	gl.Color(pack.argb4_pmf4(0xf18f))
 
 	font.set_xy( 8 , 8 )
-	font.draw("MemCheck: "..main.count)
+	font.draw("MemCheck: "..main.count.." "..main.title)
 --print("MemCheck: "..main.count.." : "..tostring(oven.preloader_enabled))
 
 	for i=1,#ts do

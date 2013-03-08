@@ -38,7 +38,7 @@ function M.bake(oven,framebuffers)
 
 	framebuffers.stop = function()
 		for v,n in pairs(framebuffers.data) do
-			framebuffers.clean(fbo)
+			framebuffers.clean(v)
 		end
 
 	end
@@ -115,7 +115,7 @@ function M.bake(oven,framebuffers)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, 0)
-				gl.GenerateMipmap(gl.DONT_CARE)
+				gl.GenerateMipmap(gl.TEXTURE_2D)
 				gl.BindTexture(gl.TEXTURE_2D, 0)
 			end
 			if not fbo.frame then
