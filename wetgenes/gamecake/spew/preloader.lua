@@ -93,6 +93,8 @@ main.update=function(title)
 		table.remove(ts,1)
 	end
 
+	main.count=main.count+1
+
 end
 
 
@@ -133,7 +135,6 @@ main.draw=function()
 
 	gl.PopMatrix()	
 
-	main.count=main.count+1
 end
 		
 	return main
