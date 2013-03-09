@@ -1,0 +1,24 @@
+cd `dirname $0`
+cd ..
+
+if [ "$1" = "clean" ] ; then
+	rm -Rf build-gmake-raspi-native
+fi
+
+
+sdks=`readlink -f ../sdks`
+#export PATH=$sdks/raspi/tools/arm-bcm2708/linux-x86/bin:$PATH
+export PATH=$sdks/gcc/prefix/bin:$PATH
+
+build/premake4 gmake raspi
+
+cd build-gmake-raspi-native
+
+if [ "$1" = "release" ] ; then
+	make config=release_raspi
+else
+	make $*
+fi
+
+cd ..
+

@@ -1,0 +1,115 @@
+<?xml version="1.0" standalone="no" ?>
+<!-- http://www.wetgenes.com/xml/soul -->
+<!-- A wavy soul for all your modern avatar needs -->
+<soul version="1.0">
+    <flavour name="vanilla">
+        <part name="body">
+            <object group="body" name="bare_boobs_small" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="head">
+            <object group="head" name="default" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="mouth">
+            <object />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="nose">
+            <object />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="tail">
+            <object />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="left_hand">
+            <object group="hand" name="default" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="left_foot">
+            <object group="foot" name="bare" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="left_eye">
+            <object />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="left_eyeball">
+            <object />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="left_ear">
+            <object />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="right_hand">
+            <object group="hand" name="default" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="right_foot">
+            <object group="foot" name="bare" />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="right_eye">
+            <object />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="right_eyeball">
+            <object />
+            <object />
+            <object />
+            <object />
+        </part>
+        <part name="right_ear">
+            <object />
+            <object />
+            <object />
+            <object />
+        </part>
+        <surface name="skin" argb="0xffcccccc" spec="0xff000000" gloss="0.000000" />
+        <surface name="lips" argb="0xffcccccc" spec="0xff000000" gloss="0.000000" />
+        <surface name="nipples" argb="0xffd5aaaa" spec="0xff000000" gloss="0.000000" />
+        <surface name="hair" argb="0xfffff817" spec="0xff190000" gloss="0.000000" />
+        <surface name="hairhi" argb="0xffffff6c" spec="0xff190000" gloss="0.000000" />
+        <surface name="hairlo" argb="0xffc5b605" spec="0xff190000" gloss="0.000000" />
+        <surface name="eyebrows" argb="0xffc5b605" spec="0xff190000" gloss="0.000000" />
+        <surface name="beard" argb="0xffc5b605" spec="0xff190000" gloss="0.000000" />
+        <surface name="specs" argb="0xff1e00ff" spec="0xff3b0034" gloss="0.000000" />
+        <surface name="eye" argb="0xffaaaaaa" spec="0xffffffff" gloss="0.125000" />
+        <surface name="iris" argb="0xff000007" spec="0xffffffff" gloss="0.125000" />
+        <surface name="body" argb="0xffffff2c" spec="0xff074000" gloss="0.000000" />
+        <surface name="bodyhi" argb="0xffffff85" spec="0xff074000" gloss="0.000000" />
+        <surface name="bodylo" argb="0xffe4d400" spec="0xff074000" gloss="0.000000" />
+        <surface name="foot" argb="0xffff8300" spec="0xff181e22" gloss="0.000000" />
+        <surface name="toecaps" argb="0xffff6700" spec="0xff181e22" gloss="0.000000" />
+        <surface name="sole" argb="0xffba1c00" spec="0xff181e22" gloss="0.000000" />
+        <surface name="socks" argb="0xfffff231" spec="0xff181e22" gloss="0.000000" />
+    </flavour>
+</soul>

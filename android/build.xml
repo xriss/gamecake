@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dmazed" default="help">
+
+    <loadproperties srcFile="local.properties" />
+    <loadproperties srcFile="/home/kriss/android.properties" />
+
+    <property file="ant.properties" />
+
+    <loadproperties srcFile="project.properties" />
+
+    <fail
+            message="sdk.dir is missing. Make sure to generate local.properties using 'android update project'"
+            unless="sdk.dir"
+    />
+
+    <import file="${sdk.dir}/tools/ant/build.xml" />
+
+</project>
