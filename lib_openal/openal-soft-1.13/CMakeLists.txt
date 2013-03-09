@@ -32,6 +32,7 @@ OPTION(DSOUND  "Check for DirectSound backend"         ON)
 OPTION(WINMM   "Check for Windows Multimedia backend"  ON)
 OPTION(PORTAUDIO  "Check for PortAudio backend"        ON)
 OPTION(PULSEAUDIO "Check for PulseAudio backend"       ON)
+OPTION(PPAPI   "Check for PPAPI backend"               ON)
 OPTION(WAVE    "Enable Wave Writer backend"            ON)
 
 OPTION(DLOPEN  "Check for the dlopen API for loading optional libs"  ON)
@@ -338,6 +339,7 @@ SET(HAVE_DSOUND     0)
 SET(HAVE_WINMM      0)
 SET(HAVE_PORTAUDIO  0)
 SET(HAVE_PULSEAUDIO 0)
+SET(HAVE_PPAPI      0)
 SET(HAVE_WAVE       0)
 
 # Check ALSA backend
@@ -441,6 +443,16 @@ IF(PULSEAUDIO)
                 SET(EXTRA_LIBS pulse ${EXTRA_LIBS})
             ENDIF()
         ENDIF()
+    ENDIF()
+ENDIF()
+
+# Check PPAPI backend
+IF (PPAPI)
+    CHECK_INCLUDE_FILE(ppapi/c/ppb_audio.h HAVE_PPAPI_PPB_AUDIO_H)
+    IF(HAVE_PPAPI_PPB_AUDIO_H)
+      SET(HAVE_PPAPI 1)
+      SET(ALC_OBJS  ${ALC_OBJS}  Alc/ppapi.c)
+      SET(BACKENDS  "${BACKENDS} PPAPI,")
     ENDIF()
 ENDIF()
 

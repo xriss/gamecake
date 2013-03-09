@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <memory.h>
+#include <string.h>
 #include "alMain.h"
 #include "AL/al.h"
 #include "AL/alc.h"

@@ -57,7 +57,7 @@ typedef struct {
     PP_Resource audio_config_resource;
     PP_Resource audio_resource;
     ALuint sample_frame_count;
-    
+
     volatile ALuint read_ptr;
     volatile ALuint write_ptr;
 
@@ -83,12 +83,6 @@ void PPAPI_Audio_Callback(void *sample_buffer,
                           uint32_t buffer_size_in_bytes,
                           void* user_data)
 {
-  ppapi_data *data = (ppapi_data*)user_data;
-  (void)buffer_size_in_bytes;
-
-  if(data->buffer_ready)
-      aluMixData(data->device, sample_buffer, data->sample_frame_count);
-/*
     ppapi_data* data = (ppapi_data*)user_data;
     if (!data->buffer_ready) return;
 
@@ -96,14 +90,18 @@ void PPAPI_Audio_Callback(void *sample_buffer,
     if (data->read_ptr > data->write_ptr)
         write_proxy = data->write_ptr + data->size;
 
-    if (data->read_ptr + buffer_size_in_bytes > write_proxy)
+    int available_bytes = write_proxy - data->read_ptr;
+    if (available_bytes < buffer_size_in_bytes)
     {
-        AL_PRINT("buffer underrun\n");
-        return;
+        AL_PRINT("buffer underrun (buffer size=%d) (only buffering %d)\n", buffer_size_in_bytes, available_bytes);
+        /* Zero the part of the buffer that we cannot fill */
+        memset(sample_buffer + available_bytes, 0, buffer_size_in_bytes - available_bytes);
+        buffer_size_in_bytes = available_bytes;
     }
 
     if (data->read_ptr + buffer_size_in_bytes > data->size)
     {
+        /* This read straddles the buffer boundary, split it up. */
         memcpy(sample_buffer,
                data->buffer + data->read_ptr,
                data->size - data->read_ptr);
@@ -121,10 +119,59 @@ void PPAPI_Audio_Callback(void *sample_buffer,
     data->read_ptr += buffer_size_in_bytes;
     if (data->read_ptr >= data->size)
         data->read_ptr -= data->size;
-*/
 }
 
 static const ALCchar ppapiDevice[] = "PPAPI Output";
+
+static ALuint PpapiProc(ALvoid *ptr)
+{
+    ALCdevice *Device = (ALCdevice*)ptr;
+    ppapi_data *data = (ppapi_data*)Device->ExtraData;
+
+    ALuint UpdateSizeInBytes = Device->UpdateSize * kFrameSizeInBytes;
+    ALuint SampleFrameInBytes = data->sample_frame_count * kFrameSizeInBytes;
+
+    /* Start to buffer when less than this many bytes are buffered. Keep this
+     * small for low latency but large enough so we don't starve Pepper.
+     *
+     * SampleFrameInBytes is the size of the buffer that PPAPI asks for each
+     * callback.  We want to keep twice this amount in the buffer at any given
+     * time.
+     */
+    const ALuint MinBufferSizeInBytes = max(SampleFrameInBytes*2,
+                                            UpdateSizeInBytes);
+
+    while(!data->killNow && Device->Connected)
+    {
+        ALuint write_proxy = data->write_ptr;
+        if (data->read_ptr > data->write_ptr)
+            write_proxy = data->write_ptr + data->size;
+
+        if (data->read_ptr + MinBufferSizeInBytes >= write_proxy)
+        {
+            aluMixData(Device,
+                       data->buffer + data->write_ptr,
+                       Device->UpdateSize);
+            if (data->write_ptr + UpdateSizeInBytes > data->size)
+            {
+                /* Spilled over the edge, copy the last bits to the beginning
+                 * of the buffer.
+                 */
+                memcpy(data->buffer,
+                       data->buffer + data->size,
+                       UpdateSizeInBytes - (data->size - data->write_ptr));
+            }
+
+            data->write_ptr += UpdateSizeInBytes;
+            if (data->write_ptr >= data->size)
+                data->write_ptr -= data->size;
+        }
+        /* Small 1 ms sleep so we don't use too much CPU time. */
+        Sleep(1);
+    }
+
+    return 0;
+}
 
 /* This needs to be called on the main PPAPI thread. */
 static void ppapi_open_playback_main_thread(void* user_data, int32_t result)
@@ -137,7 +184,10 @@ static void ppapi_open_playback_main_thread(void* user_data, int32_t result)
         rate = PP_AUDIOSAMPLERATE_48000;
 
     data->sample_frame_count =
-        data->audio_config->RecommendSampleFrameCount(gInstance,
+        data->audio_config->RecommendSampleFrameCount(
+#ifdef PPB_AUDIO_CONFIG_INTERFACE_1_1
+                                                      gInstance,
+#endif
                                                       rate,
                                                       kRequestedFrameCount);
 
@@ -147,7 +197,7 @@ static void ppapi_open_playback_main_thread(void* user_data, int32_t result)
                                               data->sample_frame_count);
 
     if (PP_FALSE == data->audio_config->IsAudioConfig(data->audio_config_resource)) {
-        AL_PRINT("PPAPI initialization: audio config creation failed."); 
+        AL_PRINT("PPAPI initialization: audio config creation failed.");
         data->main_thread_init_status = -1;
         return;
     }
@@ -158,13 +208,13 @@ static void ppapi_open_playback_main_thread(void* user_data, int32_t result)
                                                (void*)data);
 
     if (PP_FALSE == data->audio->IsAudio(data->audio_resource)) {
-        AL_PRINT("PPAPI initialization: audio resource creation failed."); 
+        AL_PRINT("PPAPI initialization: audio resource creation failed.");
         data->main_thread_init_status = -1;
         return;
     }
 
     if (PP_FALSE == data->audio->StartPlayback(data->audio_resource)) {
-        AL_PRINT("PPAPI initialization: start playback failed."); 
+        AL_PRINT("PPAPI initialization: start playback failed.");
         data->main_thread_init_status = -1;
         return;
     }
@@ -177,9 +227,9 @@ static ALCboolean ppapi_open_playback(ALCdevice *device,
 {
     ppapi_data *data;
 
-    if(!deviceName)
+    if (!deviceName)
         deviceName = ppapiDevice;
-    else if(strcmp(deviceName, ppapiDevice) != 0)
+    else if (strcmp(deviceName, ppapiDevice) != 0)
         return ALC_FALSE;
 
     int channels = ChannelsFromDevFmt(device->FmtChans);
@@ -284,13 +334,15 @@ static ALCboolean ppapi_reset_playback(ALCdevice *device)
     ppapi_data *data = (ppapi_data*)device->ExtraData;
 
     ALuint UpdateSizeInBytes = device->UpdateSize * kFrameSizeInBytes;
+    ALuint SampleFrameInBytes = data->sample_frame_count * kFrameSizeInBytes;
     /* kBufferPadMult is added to protect against buffer underruns. */
-    data->size = UpdateSizeInBytes * kBufferPadMult;
+    data->size = max(UpdateSizeInBytes, SampleFrameInBytes) * kBufferPadMult;
+
     /* Extra UpdateSize added so we can read off the end of the buffer in one
      * shot from aluMixData, but treat the buffer like it's of size data->size.
      */
     data->buffer = calloc(1, data->size + UpdateSizeInBytes);
-    if(!data->buffer)
+    if (!data->buffer)
     {
         AL_PRINT("buffer malloc failed\n");
         return ALC_FALSE;
@@ -299,13 +351,13 @@ static ALCboolean ppapi_reset_playback(ALCdevice *device)
 
     data->read_ptr = 0;
     data->write_ptr = 0;
-//    data->thread = StartThread(PpapiProc, device);
-//    if(data->thread == NULL)
-//    {
-//        free(data->buffer);
-//        data->buffer = NULL;
-//        return ALC_FALSE;
-//    }
+    data->thread = StartThread(PpapiProc, device);
+    if (data->thread == NULL)
+    {
+        free(data->buffer);
+        data->buffer = NULL;
+        return ALC_FALSE;
+    }
     data->buffer_ready = 1;
     return ALC_TRUE;
 }
@@ -314,14 +366,14 @@ static void ppapi_stop_playback(ALCdevice *device)
 {
     ppapi_data *data = (ppapi_data*)device->ExtraData;
 
-//    if(!data->thread)
-//        return;
+    if (!data->thread)
+        return;
 
- //   data->killNow = 1;
- //   StopThread(data->thread);
- //   data->thread = NULL;
+    data->killNow = 1;
+    StopThread(data->thread);
+    data->thread = NULL;
 
-  //  data->killNow = 0;
+    data->killNow = 0;
 
     data->buffer_ready = 0;
     free(data->buffer);
@@ -362,8 +414,8 @@ void alc_ppapi_deinit(void)
 
 void alc_ppapi_probe(int type)
 {
-    if(type == DEVICE_PROBE)
+    if (type == DEVICE_PROBE)
         AppendDeviceList(ppapiDevice);
-    else if(type == ALL_DEVICE_PROBE)
+    else if (type == ALL_DEVICE_PROBE)
         AppendAllDeviceList(ppapiDevice);
 }
