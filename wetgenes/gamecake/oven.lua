@@ -168,12 +168,19 @@ function M.bake(opts)
 				elseif type(oven.next)=="boolean" then -- special exit oven
 				
 					if wwin.hardcore.task_to_back then -- on android there is no quit, only back
-						wwin.hardcore.task_to_back()
-						oven.next=nil
+						wwin.hardcore.task_to_back()						
+						if opts.start then
+							oven.next=oven.rebake(opts.start) -- beter than staying on the menu
+						else
+							oven.next=nil
+						end
 					else
 						oven.next=nil
-						oven.finished=true						
+						oven.finished=true		
 					end
+					
+					oven.last=oven.now
+					oven.now=oven.next
 					
 				end
 
