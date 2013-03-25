@@ -75,7 +75,7 @@ sheets.loads_and_chops=function(tab)
 
 		images.load(v[1],v[1])
 		local img=sheets.createimg(v[1])
-		img:chop(v[2],v[3],v[4],v[5])
+		img:chop(v[2],v[3],v[4],v[5],v[6],v[7])
 		
 	end
 
@@ -91,15 +91,20 @@ function base_sheet.setimg(sheet,img_id)
 end
 
 
-function base_sheet.chop(sheet,hx,hy,ox,oy)
+function base_sheet.chop(sheet,hx,hy,ox,oy,bx,by)
 
 	hx=hx or 1
 	hy=hy or 1
 
 	ox=ox or 0
 	oy=oy or 0
+
+	bx=bx or 0
+	by=by or 0
 	
 -- coords are fractions of image, so the image can scale up/down but the code remains constant
+	bx=bx*sheet.img.width
+	by=by*sheet.img.height
 	hx=hx*sheet.img.width
 	hy=hy*sheet.img.height
 	ox=ox*sheet.img.width
@@ -115,12 +120,12 @@ function base_sheet.chop(sheet,hx,hy,ox,oy)
 			local c={}
 			sheet[i]=c
 			c.sheet=sheet
-			c.px=(ix-1)*hx
-			c.py=(iy-1)*hy
-			c.hx=hx
-			c.hy=hy
-			c.ox=ox
-			c.oy=oy
+			c.px=(ix-1)*hx+bx
+			c.py=(iy-1)*hy+by
+			c.hx=hx-bx*2
+			c.hy=hy-by*2
+			c.ox=ox-bx
+			c.oy=oy-by
 		end
 	end
 	
@@ -181,10 +186,68 @@ function base_sheet.build_vbuf(sheet)
 	return sheet
 end
 
+function base_sheet.batch_draw(sheet)
+
+	gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)	
+	cake.canvas.flat.tristrip("xyzuv",sheet.batch)
+
+end
+
+function base_sheet.batch_start(sheet)
+	sheet.batch={}
+	sheet.batch_record=true
+end
+
+function base_sheet.batch_stop(sheet)
+	sheet.batch_record=false
+end
 
 function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 
 	if i<1 or i>#sheet then error("sheet index out of bounds "..i.." of "..#sheet) end
+	
+	if sheet.batch_record then -- cache for later drawing (rz is currently ignored, soz)
+		local v=sheet[i]
+		
+		local tw=sheet.img.texture_width -- hacks for cards that do not suport non power of two texture sizes
+		local th=sheet.img.texture_height -- we just use a part of this bigger texture
+
+		local ixw=(v.px+v.hx)/tw
+		local iyh=(v.py+v.hy)/th
+		local ix=v.px/tw
+		local iy=v.py/th
+
+		
+		if sx then
+			sy=sy or sx
+			sx=sx/v.hx
+			sy=sy/v.hy
+		else
+			sx=1
+			sy=1
+		end
+		
+		local ox=v.ox*sx
+		local oy=v.oy*sy
+		local hx=v.hx*sx
+		local hy=v.hy*sy
+
+		local t=
+		{
+			px-ox,		py-oy,		0,		ix,		iy,
+			px-ox,		py-oy,		0,		ix,		iy,
+			px+hx-ox,	py-oy,		0,		ixw,	iy,
+			px-ox,		py+hy-oy,	0,		ix,		iyh,
+			px+hx-ox,	py+hy-oy,	0,		ixw,	iyh,
+			px+hx-ox,	py+hy-oy,	0,		ixw,	iyh,
+		}
+		
+		for i,v in ipairs(t) do
+			sheet.batch[ #sheet.batch+1 ]=v
+		end
+		
+		return sheet
+	end
 
 	if px then
 		gl.MatrixMode(gl.MODELVIEW)
@@ -202,44 +265,20 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 	
 	local p=gl.program("pos_tex")
 	
---	if sheets.UseSheet~=sheet then
-	
---		sheets.UseSheet=sheet
+	gl.BindBuffer(gl.ARRAY_BUFFER,sheet.vbuf)
 
-		gl.BindBuffer(gl.ARRAY_BUFFER,sheet.vbuf)
+	gl.UseProgram( p[0] )
+	gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+	gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
 
-		gl.UseProgram( p[0] )
-		gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
-		gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
-
-		gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,5*4,0)
-		gl.EnableVertexAttribArray(p:attrib("a_vertex"))
-			
-		gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,5*4,3*4)
-		gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
+	gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,5*4,0)
+	gl.EnableVertexAttribArray(p:attrib("a_vertex"))
 		
-
---	else
+	gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,5*4,3*4)
+	gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
 	
---		if gl.matrixdirty(gl.MODELVIEW) then
---			gl.matrixclean(gl.MODELVIEW)
---			gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
---		end
-	
---	end
-
---	if gl.fix.cache.texture~=sheet.img.id then
---		gl.fix.cache.texture=sheet.img.id
-		gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)
---	end
-
---	if gl.fix.cache.color~=gl.fix.color then -- try  not to update the color?
---		gl.fix.cache.color=gl.fix.color
-		gl.Uniform4f(p:uniform("color"), gl.cache.color )
---	end
-
---	gl.Uniform4f(p:uniform("color"), gl.fix.color[1],gl.fix.color[2],gl.fix.color[3],gl.fix.color[4] )
-
+	gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)
+	gl.Uniform4f(p:uniform("color"), gl.cache.color )
 	gl.core.DrawArrays(gl.TRIANGLE_STRIP,(i-1)*4,4)
 
 	if px then

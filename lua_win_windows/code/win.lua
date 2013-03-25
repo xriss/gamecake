@@ -151,8 +151,8 @@ function win.android_start(apk)
 	local zips=require("wetgenes.zips")
 	zips.add_apk_file(win.apk)
 	
-	win.files_prefix=hardcore.get_files_prefix()
-	win.cache_prefix=hardcore.get_cache_prefix()
+	win.files_prefix=hardcore.get_files_prefix().."/"
+	win.cache_prefix=hardcore.get_cache_prefix().."/"
 
 --print(win.files_prefix)
 --print(win.cache_prefix)
