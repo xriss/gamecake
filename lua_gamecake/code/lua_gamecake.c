@@ -22,7 +22,7 @@
 // link with lua/hacks.c plz
 extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
-#define SIZEOF_VB 16384
+#define SIZEOF_VB (6*5*4*256)
 static unsigned char vb[SIZEOF_VB]; // vertex buffer space
 
 
@@ -213,7 +213,7 @@ int vid,tid;
 
 		if( (fp_len+(6*5))*4 >= len)
 		{
-//			break;
+			break;
 		}
 	}
 
