@@ -2,6 +2,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local wgrd=require("wetgenes.grd")
+local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local core=require("wetgenes.gamecake.core")
 
@@ -103,6 +104,50 @@ font.width=function(text)
 
 	return x
 end
+
+
+function font.wrap(text,opts)
+	local w=opts.w
+	
+	local ls=wstr.split_whitespace(text)
+	local t={}
+	
+	local wide=0
+	local line={}
+	
+	local function newline()
+		t[#t+1]=table.concat(line," ") or ""
+		wide=0
+		line={}
+	end
+	
+	for i,v in ipairs(ls) do
+	
+		if v:find("%s") then -- just white space
+		
+			for i,v in string.gfind(v,"\n") do -- keep newlines
+				newline()
+			end
+		
+		else -- a normal word
+		
+			local fw=font.width(v)
+			if #line>0 then wide=wide+font.width(" ") end
+
+			if wide + fw > w then -- split
+				newline()
+			end
+			
+			line[#line+1]=v
+			wide=wide+fw
+			
+		end
+	end
+	if wide~=0 then newline() end -- final newline
+	
+	return t
+end
+
 
 
 font.draw = function(text)

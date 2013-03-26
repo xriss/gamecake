@@ -74,20 +74,23 @@ function M.bake(oven,escmenu)
 				
 			end
 		end
-		local top=escmenu.master:add({hx=480,hy=480,mx=1,class="hx",ax=0,ay=0,font=opts.font})
-		top:add({sy=1,sx=1})
+		local top=escmenu.master:add({hx=480,hy=480,class="fill",font=opts.font,text_size=32})
+		top:add({hx=480,hy=80})
 		
 		local mlayout=oven.mods["wetgenes.gamecake.mods.layout"]
-		if mlayout then
-		
-			escmenu.layout_widget=top:add({text="Layout: "..mlayout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
-						
+		if mlayout then		
+			escmenu.layout_widget=top:add({hx=480,hy=80,text="Layout: "..mlayout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
+		else
+			top:add({hx=480,hy=40})
 		end
 		
-		top:add({text="Continue",color=0xff44ff44,id="continue",hooks=hooks,text_size=32})
-		top:add({text="Restart",color=0xffffff44,id="restart",hooks=hooks,text_size=32})
-		top:add({text="Quit",color=0xffff4444,id="quit",hooks=hooks,text_size=32})
-		top:add({sy=1,sx=1})
+		top:add({hx=480,hy=80,text="Continue",color=0xff44ff44,id="continue",hooks=hooks})
+		top:add({hx=480,hy=80,text="Restart",color=0xffffff44,id="restart",hooks=hooks})
+		top:add({hx=480,hy=80,text="Quit",color=0xffff4444,id="quit",hooks=hooks})
+		if not mlayout then		
+			top:add({hx=480,hy=40})
+		end
+		top:add({hx=480,hy=80})
 		
 		escmenu.master:layout()
 

@@ -128,55 +128,50 @@ function wmeta.setup(def)
 		widget.id=def.id
 		widget.user=def.user -- any user data you wish to associate with this widget (we will ignore it)
 		widget.hooks=def.hooks
-		
-		widget.sx=def.sx or def.hx or 1 -- (ratio)size for layout code
-		widget.sy=def.sy or def.hy or 1 -- use hx and hy if its provided
-		
-		widget.mx=def.mx or 0 -- max (ratio)size for layout code
-		widget.my=def.my or 0
-		
+
+
+		widget.sx=def.sx or 1 -- display scale (of children)
+		widget.sy=def.sy or 1
+		widget.pa=def.pa or 0 -- display rotation angle (of children)
 
 		
-		-- if set these will generate rx,ry
+		
+		-- if set then pxf,pyf will generate px,py as fractions of the parent size-thissize
 		widget.pxf=def.pxf      -- local position, for sliders etc, goes from 0-1 
 		widget.pyf=def.pyf      -- fractional position within container
 
-		widget.px=def.px or 0 -- relative pixel position (may generate)
+		widget.px=def.px or 0 -- relative pixel position
 		widget.py=def.py or 0
 		
-		widget.pxd=def.pxd or 0 -- absolute pixel position (very probably generated)
+		widget.pxd=def.pxd or 0 -- absolute pixel position ( generated from px,py )
 		widget.pyd=def.pyd or 0
 		
-		widget.pa=def.pa or 0 -- display rotation angle, possibly
-
-		
-		-- if set these will generate hx,hy
+		-- if set then hxf,hyf will generate hx,hy
 		widget.hxf=def.hxf	  -- optional relative local size of container, possibly best not to use
-		widget.hyf=def.hyf	  -- it does not have a default so may not be set
+		widget.hyf=def.hyf
 		
-		widget.hx=def.hx or 0 -- absolute pixel size (may generate)
+		widget.hx=def.hx or 0 -- absolute pixel size
 		widget.hy=def.hy or 0
 		
-		widget.hx_max=def.hx_max -- clip maximum layout size
-		widget.hy_max=def.hy_max		
-				
-		widget.hx_fill=def.hx_fill -- if we wish to stretch this layout then this widget can fill up
-		widget.hy_fill=def.hy_fill -- this much extra space where 1 is all of the avilable extra space
+
 
 		widget.color=def.color
-		widget.text_color=def.text_color or widget.parent.text_color or 0xff000000 -- black text
-		widget.text_size=def.text_size
 		
-		widget.text_color_shadow=def.text_color_shadow  -- may need a shadow
 		
 		widget.font=def.font or widget.parent.font --  use this font if set or inherit value from parent
 		
+		widget.text_color_shadow=def.text_color_shadow  -- may need a shadow
 		widget.text_color_over=def.text_color_over -- if set, switch text color on hover
-		widget.text_align=def.text_align -- default is center
+		widget.text_color=def.text_color or widget.parent.text_color or 0xff000000 -- black text
+		widget.text_size=def.text_size
+		widget.text_align=def.text_align -- default is "center", and "wrap" will wrap the text
 		
+
 		widget.text=def.text -- display this text on the button
 		widget.sheet=def.sheet -- display this sheet (by name) on the button
 		widget.style=def.style -- style the button this way
+
+
 		
 		if widget.color or widget.text or widget.sheet then widget.solid=true end
 		widget.solid=widget.solid or def.solid
@@ -254,205 +249,6 @@ function wmeta.setup(def)
 				v.pyd=widget.pyd+v.py
 				
 			end
-		end
-	end
-	
---
--- initial layout of widgets, to put them into reasonable positions
---
-	function meta.layout(widget)
---print(widget.class)
-		if widget.class=="flow" or widget.class=="hx" then -- hx will be removed
-			meta.layout_flow(widget)
-		elseif widget.class=="fill" or widget.class=="pan" then
-			meta.layout_fill(widget)
-		elseif widget.class=="slide" or widget.class=="pad" then
-			meta.layout_padding(widget)
-		elseif widget.class=="master" or widget.class=="abs" then
-			meta.layout_base(widget)
-		else
-			meta.layout_base(widget)
-		end
-	end
-	
-	function meta.layout_none(widget)
-		for i,v in ipairs(widget) do
-			v:layout()
-		end
-	end
-	
-	function meta.layout_padding(widget)
-		for i,v in ipairs(widget) do
-
-			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
-			if v.hyf then v.hy=widget.hy*v.hyf end
-			
-			v.px=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
-			v.py=(widget.hy-v.hy)*v.pyf
-
-			v.pxd=widget.pxd+v.px -- local absolute position
-			v.pyd=widget.pyd+v.py
-
-		end
-		for i,v in ipairs(widget) do
-			v:layout()
-		end
-	end
-	
-
-	function meta.layout_base(widget)
-		for i,v in ipairs(widget) do
-		
-			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
-			if v.hyf then v.hy=widget.hy*v.hyf end
-			
-			if v.pxf then v.px=(widget.hx)*v.pxf end -- local position relative to parents size
-			if v.pyf then v.py=(widget.hy)*v.pyf end
-
-			v.pxd=widget.pxd+v.px -- absolute position
-			v.pyd=widget.pyd+v.py
-			
-		end
-		for i,v in ipairs(widget) do
-			v:layout()
-		end
-	end
-
--- this is a fixed layout that works kind of like text
--- we do not adjust the hx,hy size of sub widgets
--- we just place them left to right top to bottom
--- finally we resize this widget to fit its content
--- the widgets sx,sy is used as default hx,hy for layout
-	function meta.layout_fill(widget)
-		
-		local hx,hy=0,0
-		local my=0
-		local mhx,mhy=0,0
-		function addone(w)
-			w.px=hx
-			w.py=hy
-			hx=hx+w.hx
-			if hx > mhx then mhx=hx end -- max x total size
-			if w.hy > my then my=w.hy end -- max y size for this line
---print(w.id or "?",w.px,w.py,w.hx,w.hy)
-		end
-		
-		local function endoflines()
-			widget.hx=mhx
-			widget.hy=mhy
-		end
-		
-		local function endofline()
-			hx=0
-			hy=hy+my
-			my=0
-			mhy=hy
-		end
-		
-		if #widget>0 then
-		
-			widget.hx=widget.sx -- use sx,sy as the base fill size
-			widget.hy=widget.sy
-		
-			for i,w in ipairs(widget) do
-			
-				if hx+w.hx>widget.hx then
-					if hx==0 then -- need one item per line so add it anyway
-						addone(w)
-						endofline()
-					else -- skip this one, push it onto nextline
-						endofline()
-						addone(w)
-					end
-				else -- it fits so just add
-					addone(w)
-				end
-			end
-
-			if hx>0 then endofline() end -- final end of line
-			
-			endoflines()
-			
-		end
-		
-		for i,v in ipairs(widget) do
-			v.pxd=widget.pxd+v.px
-			v.pyd=widget.pyd+v.py
-		end
-
--- layout sub sub widgets	
-		for i,v in ipairs(widget) do
-			v:layout()
-		end
-	end
-	
--- this is the magical layout that works like text
--- except things expand to fit the area
--- use sx,sy and mx,my to control what ends up where
-	function meta.layout_flow(widget)
-		local sx,sy=0,0
-		local my=0
-		local line=1
-		
-		local function endoflines()
-			local y=0
-			for i,v in ipairs(widget) do
-				v.hy=v.sy*widget.hy/sy
-				if v.hy_max and v.hy > v.hy_max then v.hy = v.hy_max end
-				v.py=y
-				if v.endofline then y=y+v.hy end
---print(v.px..","..v.py.." - "..v.hx..","..v.hy)
-			end
-		end
-		
-		local function endofline(i)
-			local x=0
-			for i=line,i do -- final line layout
-				local v=widget[i]
-				v.sy=my
-				v.hx=v.sx*widget.hx/sx
-				if v.hx_max and v.hx > v.hx_max then v.hx = v.hx_max end
-				v.px=x
-				x=x+v.hx
-			end
-			widget[i].endofline=true
-			sx=0
-			sy=sy+my
-			my=0
-			line=i+1
-		end
-		
-		if #widget>0 then
-			for i,v in ipairs(widget) do
-			
-				v.endofline=false
-				if sx+v.sx>widget.mx then
-					if sx==0 then -- only one on line
-						if v.sy>my then my=v.sy end
-						sx=sx+v.sx				
-						endofline(i)
-					else -- skip this one, push onto nextline
-						endofline(i-1)
-						if v.sy>my then my=v.sy end
-						sx=sx+v.sx				
-					end
-				else
-					if v.sy>my then my=v.sy end
-					sx=sx+v.sx				
-				end
-			end
-
-			endofline(#widget)
-			endoflines()
-		end
-		
-		for i,v in ipairs(widget) do
-			v.pxd=widget.pxd+v.px
-			v.pyd=widget.pyd+v.py
-		end
-
-		for i,v in ipairs(widget) do
-			v:layout()
 		end
 	end
 	
@@ -549,6 +345,9 @@ function wmeta.setup(def)
 			func(v)
 		end
 	end
+
+-- more setup, moved to other files
+	oven.rebake("wetgenes.gamecake.widgets.meta_layout").setup(def)
 
 end
 

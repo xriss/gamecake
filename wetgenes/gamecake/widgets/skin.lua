@@ -429,64 +429,69 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		
 		if widget.text then
 		
---print("using font "..(widget.font or widget.master.font or 1))
-
-			local ty=widget:bubble("text_size") or 16
+			local fy=widget:bubble("text_size") or 16
 
 			local f=widget.font or widget.master.font or 1
 			if f then
 				if type(f)=="number" then
 				else
-					typ=typ-ty/8 -- reposition font slightly as fonts other than the builtin probably have descenders
+					typ=typ-fy/8 -- reposition font slightly as fonts other than the builtin probably have descenders
 				end
 			end
 			
 			font.set(cake.fonts.get(f))
-			font.set_size(ty,0)
-			local tx=font.width(widget.text)
+			font.set_size(fy,0)
 
---			local tx,ty=font.size(widget.text,widget.text_size)
+			local lines
 			
+			if widget.text_align=="wrap" then
+				lines=font.wrap(widget.text,{w=widget.hx}) -- break into lines
+				widget.lines=lines -- remember wraped text
+			else
+				lines={widget.text}
+			end
+
+			local ty=typ
 			local c=widget.text_color
-			
 			if widget.text_color_over then
 				if master.over==widget then
 					c=widget.text_color_over
 				end
 			end
 			
-			if widget.text_align=="left" then
-				tx=0
-				ty=0			
-			elseif widget.text_align=="right" then
-				tx=(widget.hx-tx)
-				ty=(widget.hy-ty)			
-			else
-				tx=(widget.hx-tx)/2
-				ty=(widget.hy-ty)/2
-			end
+			for i,line in ipairs(lines) do
 			
-			tx=tx+txp
-			ty=ty+typ
-			
-			widget.text_x=tx
-			widget.text_y=ty
+				local tx=font.width(line)
+				
+				if widget.text_align=="left" or widget.text_align=="wrap" then
+					tx=0
+				elseif widget.text_align=="right" then
+					tx=(widget.hx-tx)
+				elseif widget.text_align=="centerx" then
+					tx=(widget.hx-tx)/2
+				else -- center a single line vertically as well
+					tx=(widget.hx-tx)/2 
+					ty=((widget.hy-fy)/2)+typ
+				end
+				
+				tx=tx+txp
+--				ty=ty+typ
+				
+				if i==1 then -- remember topleft of text position for first line
+					widget.text_x=tx
+					widget.text_y=ty
+				end
 
-			if widget.text_color_shadow then
-				gl.Color( pack.argb8_pmf4(widget.text_color_shadow) )
-				font.set_xy(tx+1,ty+1)
-				font.draw(widget.text)
-			end
-			
-			gl.Color( pack.argb8_pmf4(c) )
-			font.set_xy(tx,ty)
-			font.draw(widget.text)
-
-
---			font.set(tx,-ty,c,widget.text_size)
---			font.draw(widget.text)
-		
-
+				if widget.text_color_shadow then
+					gl.Color( pack.argb8_pmf4(widget.text_color_shadow) )
+					font.set_xy(tx+1,ty+1)
+					font.draw(line)
+				end
+				
+				gl.Color( pack.argb8_pmf4(c) )
+				font.set_xy(tx,ty)
+				font.draw(line)
+				
 				if widget.class=="textedit" then -- hack
 					if widget.master.focus==widget then --only draw curser in active widget
 						if widget.master.throb>=128 then
@@ -498,8 +503,10 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 					end
 				end
 
+				ty=ty+fy
+			end
 		end
-		
+
 		for i,v in ipairs(widget) do
 			if not v.fbo or not v.dirty then -- terminate recursion at dirty fbo
 				v:draw()

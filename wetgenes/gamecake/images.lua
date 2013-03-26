@@ -91,6 +91,7 @@ local function uptwopow(n)
 
 	return 0
 end
+images.uptwopow=uptwopow
 
 images.upload_grd= function(t,g)
 
@@ -123,13 +124,14 @@ images.upload_grd= function(t,g)
 	
 	gl.BindTexture( gl.TEXTURE_2D , t.id )
 	
-	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)
-	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+--	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)
+--	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE)
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)
 
 --best mipmap?
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,t.TEXTURE_MIN_FILTER or images.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,t.TEXTURE_MAG_FILTER or images.TEXTURE_MAG_FILTER or gl.LINEAR)
 
 
 	if g.width==0 or g.height==0 then return t end -- no data to upload

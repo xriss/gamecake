@@ -78,7 +78,11 @@ function wslide.setup(widget,def)
 	widget.style=def.style or "indent"
 
 -- auto add the draging button as a child
-	widget.drag=widget:add({style="button",class="drag",color=widget.color,hy=widget.daty:get_size(widget.hy),hx=widget.datx:get_size(widget.hx),pxf=widget.datx:get_pos(),pyf=widget.daty:get_pos(),data=widget.data})
+	widget.drag=widget:add({style="button",class="drag",color=widget.color,
+		hy=widget.daty:get_size(widget.hy),
+		hx=widget.datx:get_size(widget.hx),
+		pxf=widget.datx:get_pos(),
+		pyf=widget.daty:get_pos(),data=widget.data})
 	
 	return widget
 end

@@ -518,13 +518,13 @@ function M.bake(oven,keys)
 		master:clean_all()
 		master.ids={}
 
-		top=master:add({py=0,hx=320,hy=160,mx=320,my=240,class="flow",ax=0,ay=0,fbo=true})
+		top=master:add({hx=320,hy=160,class="flow",fbo=true})
 
 		local function key_line(ks)
-			local t=top:add({sx=320,sy=32,mx=320,my=32,class="flow"})
+			local t=top:add({hx=320,hy=32,class="flow"})
 			for i=1,#ks do
 				local k=ks:sub(i,i)
-				t:add({sx=320/11,sy=32,color=0xffcccccc,text=k,id="key",hooks=hooks})
+				t:add({hx=320/10,hy=32,color=0xffcccccc,text=k,id="key",hooks=hooks})
 			end
 		end
 		

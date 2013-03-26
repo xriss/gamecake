@@ -277,6 +277,7 @@ font.vbs_idx=1
 
 			gl.Color(pack.argb4_pmf4(0xf4f4))
 
+
 			local i=#console.lines
 			local y=console.y-16
 			while y>-8 and i>0 do
@@ -295,7 +296,7 @@ font.vbs_idx=1
 				font.set_xy((console.buff.line_idx+1)*8,console.y-8)
 				font.draw("_")
 			end
-			
+
 		end
 
 
@@ -309,7 +310,12 @@ font.vbs_idx=1
 			end
 			for i,v in ipairs(console.lines_display) do
 			
+				font.set_xy(1,1+console.y+i*8-8)
+				gl.Color(pack.argb4_pmf4(0xf000))
+				font.draw(v)
+
 				font.set_xy(0,console.y+i*8-8)
+				gl.Color(pack.argb4_pmf4(0xffff))
 				font.draw(v)
 
 			end

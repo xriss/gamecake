@@ -12,6 +12,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wscroll)
 wscroll=wscroll or {}
 
+local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
 function wscroll.mouse(widget,act,x,y,key)
 --	widget.master.focus=widget
@@ -82,14 +83,14 @@ function wscroll.setup(widget,def)
 	if widget.hx<ss*2 then ss=widget.hx/2 end
 	if widget.hy<ss*2 then ss=widget.hy/2 end
 	
-	widget.datx={max=1}
-	widget.daty={max=1}
+	widget.datx=widget_data.new_data{max=1}
+	widget.daty=widget_data.new_data{max=1}
 	
 	widget.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss,	})
 	widget.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
-		datx={max=0},daty=widget.daty,color=0xffffffff})
+		daty=widget.daty,color=0xffffffff})
 	widget.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	px=0,           	py=widget.hy-ss,
-		datx=widget.datx,daty={max=0},color=0xffffffff})
+		datx=widget.datx,color=0xffffffff})
 
 	return widget
 end
