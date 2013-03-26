@@ -54,15 +54,15 @@ function wscroll.layout(widget)
 
 --	local it=widget.scroll
 	
-	widget.meta.layout(widget.pan)
+	widget.meta.layout(widget.pan) -- creates hx_max,hy_max
 
-	widget.datx.max=widget.pan.hx-widget.pan.sx
+	widget.datx.max=widget.pan.hx_max-widget.pan.hx
 	if widget.datx.max<0 then widget.datx.max=0 end
-	widget.datx.size=widget.pan.sx/widget.pan.hx
+	widget.datx.size=widget.pan.hx/widget.pan.hx_max
 	
-	widget.daty.max=widget.pan.hy-widget.pan.sy
+	widget.daty.max=widget.pan.hy_max-widget.pan.hy
 	if widget.daty.max<0 then widget.daty.max=0 end
-	widget.daty.size=widget.pan.sy/widget.pan.hy
+	widget.daty.size=widget.pan.hy/widget.pan.hy_max
 	
 	widget.meta.layout(widget)
 end
@@ -85,8 +85,9 @@ function wscroll.setup(widget,def)
 	
 	widget.datx=widget_data.new_data{max=1}
 	widget.daty=widget_data.new_data{max=1}
-	
-	widget.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss,	})
+	widget.solid=true
+
+	widget.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss	})
 	widget.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
 		daty=widget.daty,color=0xffffffff})
 	widget.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	px=0,           	py=widget.hy-ss,

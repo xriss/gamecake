@@ -26,8 +26,8 @@ function wmeta.setup(def)
 --print(widget.class)
 		if widget.class=="fill" or widget.class=="pan" then
 			meta.layout_fill(widget)
-		elseif widget.class=="slide" or widget.class=="pad" then
-			meta.layout_padding(widget)
+--		elseif widget.class=="slide" or widget.class=="pad" then
+--			meta.layout_padding(widget)
 --		elseif widget.class=="master" or widget.class=="abs" then
 --			meta.layout_base(widget)
 		else
@@ -87,32 +87,28 @@ function wmeta.setup(def)
 		
 		local hx,hy=0,0
 		local my=0
-		local mhx,mhy=0,0
+		widget.hx_max=0
+		widget.hy_max=0
 		local function addone(w)
 			w.px=hx
 			w.py=hy
 			hx=hx+w.hx
-			if hx > mhx then mhx=hx end -- max x total size
+			if hx > widget.hx_max then widget.hx_max=hx end -- max x total size
 			if w.hy > my then my=w.hy end -- max y size for this line
 --print(w.id or "?",w.px,w.py,w.hx,w.hy)
 		end
 		
 		local function endoflines()
-			widget.hx=mhx
-			widget.hy=mhy
 		end
 		
 		local function endofline()
 			hx=0
 			hy=hy+my
 			my=0
-			mhy=hy
+			widget.hy_max=hy
 		end
 		
 		if #widget>0 then
-		
---			widget.hx=widget.sx -- use sx,sy as the base fill size
---			widget.hy=widget.sy
 		
 			for i,w in ipairs(widget) do
 			

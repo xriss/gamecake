@@ -272,6 +272,9 @@ function wmeta.setup(def)
 		
 			if act==1 then
 -- only set if null or our parent...
+--print(widget,widget.class)
+--print("active",widget,widget and widget.class,
+--widget and widget.parent,widget and widget.parent.class)
 				if not widget.master.active or widget.master.active==widget.parent then
 					widget.master.active=widget
 					widget.master.active_x=x-widget.pxd

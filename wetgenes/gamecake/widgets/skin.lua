@@ -207,9 +207,9 @@ end
 		gl.Translate(widget.pxd,widget.pyd,0)
 		
 		if widget.fbo then
-			if widget.fbo.w~=widget.sx or widget.fbo.h~=widget.sy then -- resize so we need a new fbo
+			if widget.fbo.w~=widget.hx or widget.fbo.h~=widget.hy then -- resize so we need a new fbo
 --print("new fbo",widget.sx,widget.sy)
-				widget.fbo:resize(widget.sx,widget.sy,0)
+				widget.fbo:resize(widget.hx,widget.hy,0)
 				widget.dirty=true -- flag redraw
 			end				
 		end

@@ -80,6 +80,9 @@ end
 -- given the parents size and our relative position/size within it
 -- update dat.num and return a new position (for snapping)
 wdata.data_snap=function(dat,psiz,bsiz,bpos)
+
+--print("minmax",dat.min,dat.max)
+
 	if dat.step==0 then -- no snap
 		if dat.max==dat.min then dat:value(dat.min) return 0 end -- do not move
 

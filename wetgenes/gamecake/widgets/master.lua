@@ -205,15 +205,19 @@ function wmaster.setup(widget,def)
 	
 --		if widget.state=="ready" then
 		
-			if master.active and (master.active.parent.class=="slide" or master.active.parent.class=="oldslide") then -- slide :)
+--print("active",master.active,master.active and master.active.class,
+--master.active and master.active.parent,master.active and master.active.parent.class)
+			if master.active and (master.active.parent.class=="slide") then -- slide :)
 			
 				local w=master.active
-				local p=master.active.parent
+				local p=w.parent
 				
 				local minx=p.pxd
-				local miny=p.pyd+p.hy-w.hy
+				local miny=p.pyd
 				local maxx=p.pxd+p.hx-w.hx
-				local maxy=p.pyd
+				local maxy=p.pyd+p.hy-w.hy
+
+--print("slide",miny,maxy)
 				
 				w.pxd=x-master.active_x
 				w.pyd=y-master.active_y

@@ -73,7 +73,7 @@ function wslide.setup(widget,def)
 --setup constraints in x and y 
 	widget.datx=def.datx or widget_data.new_data({max=0})
 	widget.daty=def.daty or widget_data.new_data({max=0})
-	widget.data=def.data or def.datx or def.daty
+	widget.data=def.data -- or def.datx or def.daty
 	
 	widget.style=def.style or "indent"
 
