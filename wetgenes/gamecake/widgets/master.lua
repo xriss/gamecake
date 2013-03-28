@@ -37,7 +37,16 @@ function wmaster.setup(widget,def)
 	master.dirty=true
 
 -- the master gets some special overloaded functions to do a few more things
-	function master.update(widget)
+	function master.update(widget,resize)
+	
+		if resize then
+			if widget.hx==resize.hx and widget.hy==resize.hy then
+			else
+				widget.hx=resize.hx
+				widget.hy=resize.hy
+				widget:layout()
+			end
+		end
 	
 		local throb=(widget.throb<128)
 		
@@ -207,7 +216,7 @@ function wmaster.setup(widget,def)
 		
 --print("active",master.active,master.active and master.active.class,
 --master.active and master.active.parent,master.active and master.active.parent.class)
-			if master.active and (master.active.parent.class=="slide") then -- slide :)
+			if master.dragging() then -- slide :)
 			
 				local w=master.active
 				local p=w.parent
@@ -229,10 +238,16 @@ function wmaster.setup(widget,def)
 				
 				w.px=w.pxd-p.pxd
 				w.py=w.pyd-p.pyd
-			
+				
+				if w.parent.snap then
+					w.parent:snap()
+				end
+				
 				w:call_hook("slide")
 				
 				w:set_dirty()
+				
+				w:layout()
 
 			end
 			
@@ -269,6 +284,15 @@ function wmaster.setup(widget,def)
 		master.over=nil
 		master.active=nil
 		master.focus=nil
+	end
+	
+	function master.dragging()
+
+		if master.active and (master.active.class=="drag") and master.press then
+			return true
+		end
+		
+		return false
 	end
 end
 

@@ -218,7 +218,7 @@ function M.bake(oven,layouts)
 		canvas.layout=layout -- remember current layout in canvas
 
 		if layout.parent then
-			gl.Viewport( layout.x , layout.parent.h-(layout.y+layout.h) , layout.w , layout.h )
+			gl.Viewport( layout.x , (layout.parent.h-(layout.y+layout.h)) , layout.w , layout.h )
 		else
 			gl.Viewport( layout.x , win.height-(layout.y+layout.h) , layout.w , layout.h )
 		end
@@ -244,6 +244,8 @@ function M.bake(oven,layouts)
 -- push and pop these if you wish to preserve old values
 	layout.apply=function(w,h,fov,d)
 	
+		local flag if type(w)=="boolean" then flag=w w=nil end
+	
 		local ret=canvas.layout
 	
 		w=w or layout.w
@@ -251,7 +253,11 @@ function M.bake(oven,layouts)
 		d=d or layout.h*4
 		fov=fov or 0.25
 		
-		layout.viewport()
+		if flag then
+			layout.viewport(w,h,layout.x,layout.y)
+		else
+			layout.viewport()
+		end
 		layout.project23d(w,h,fov,d)
 	
 		gl.MatrixMode(gl.PROJECTION)

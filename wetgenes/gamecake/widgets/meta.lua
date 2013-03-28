@@ -129,30 +129,23 @@ function wmeta.setup(def)
 		widget.user=def.user -- any user data you wish to associate with this widget (we will ignore it)
 		widget.hooks=def.hooks
 
+		widget.clip=def.clip -- use viewport clipping to prevent drawing outside of the area
 
 		widget.sx=def.sx or 1 -- display scale (of children)
 		widget.sy=def.sy or 1
 		widget.pa=def.pa or 0 -- display rotation angle (of children)
-
 		
 		
-		-- if set then pxf,pyf will generate px,py as fractions of the parent size-thissize
-		widget.pxf=def.pxf      -- local position, for sliders etc, goes from 0-1 
-		widget.pyf=def.pyf      -- fractional position within container
-
-		widget.px=def.px or 0 -- relative pixel position
+		widget.px=def.px or 0 -- relative to parent, pixel position
 		widget.py=def.py or 0
-		
-		widget.pxd=def.pxd or 0 -- absolute pixel position ( generated from px,py )
-		widget.pyd=def.pyd or 0
-		
-		-- if set then hxf,hyf will generate hx,hy
-		widget.hxf=def.hxf	  -- optional relative local size of container, possibly best not to use
-		widget.hyf=def.hyf
-		
-		widget.hx=def.hx or 0 -- absolute pixel size
+
+		widget.hx=def.hx or 0 -- absolute pixel size of widget
 		widget.hy=def.hy or 0
 		
+
+		-- turn this into a matrix? so we can rotate and stuff
+		widget.pxd=def.pxd or 0 -- INTERNAL absolute pixel display position ( generated from px,py )
+		widget.pyd=def.pyd or 0
 
 
 		widget.color=def.color
@@ -217,8 +210,10 @@ function wmeta.setup(def)
 	
 		if val=="slide" then
 		
-			local x=(widget.pxd-widget.parent.pxd) / (widget.parent.hx-widget.hx)
-			local y=(widget.pyd-widget.parent.pyd) / (widget.parent.hy-widget.hy)
+--			local x=(widget.pxd-widget.parent.pxd) / (widget.parent.hx-widget.hx)
+--			local y=(widget.pyd-widget.parent.pyd) / (widget.parent.hy-widget.hy)
+			local x=(widget.px) / (widget.parent.hx-widget.hx)
+			local y=(widget.py) / (widget.parent.hy-widget.hy)
 			
 			
 			return x,y
@@ -232,18 +227,21 @@ function wmeta.setup(def)
 		if val=="slide" then
 			for i,v in ipairs(widget) do
 			
+				local pxf=0
+				local pyf=0
 				if type(t[1])=="table" then
-					v.pxf=t[1][1] or v.pxf or 0
-					v.pyf=t[1][2] or v.pyf or 0
+					pxf=t[1][1] or v.pxf or 0
+					pyf=t[1][2] or v.pyf or 0
 				else
-					v.pxf=t[1] or v.pxf or 0
-					v.pyf=t[2] or v.pyf or 0
+					pxf=t[1] or v.pxf or 0
+					pyf=t[2] or v.pyf or 0
 				end
+
 				
 --print("SET",v.pxf,v.pyf)
 
-				v.px=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
-				v.py=(widget.hy-v.hy)*v.pyf
+				v.px=(widget.hx-v.hx)*pxf -- local position relative to parents size
+				v.py=(widget.hy-v.hy)*pyf
 				
 				v.pxd=widget.pxd+v.px -- absolute
 				v.pyd=widget.pyd+v.py
@@ -265,8 +263,8 @@ function wmeta.setup(def)
 	
 --print(x..","..y.." : "..widget.px..","..widget.py)
 
-		if widget.pan_px then x=x-widget.pan_px end
-		if widget.pan_py then y=y-widget.pan_py end
+		if widget.pan_px then x=x+widget.pan_px end
+		if widget.pan_py then y=y+widget.pan_py end
 
 		if widget.solid and x>=widget.pxd and x<widget.pxd+widget.hx and y>=widget.pyd and y<widget.pyd+widget.hy then
 		
@@ -282,14 +280,16 @@ function wmeta.setup(def)
 				end
 			end
 			if act==-1 then
+				if not widget.master.dragging() or widget.master.active==widget then
 --				if widget.master.active and widget.master.active==widget then -- widget clicked
 					widget:call_hook("click")
---				end
+				end
 			end
 
+			if not widget.master.dragging() or widget.master.active==widget then
 --			if not widget.master.active or widget.master.active==widget then -- over widget
 				widget.master.over=widget
---			end
+			end
 		else
 		
 			if widget.master.over==widget then

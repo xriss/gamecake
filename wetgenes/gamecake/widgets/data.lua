@@ -24,10 +24,10 @@ wdata.call_hook=function(dat,hook)
 end
 
 -- set number (may trigger hook)
-wdata.data_value=function(dat,val)
+wdata.data_value=function(dat,val,force)
 	if dat.class=="number" then
 		if val then val=tonumber(val) end -- auto convert from string
-		if val and val~=dat.num then -- change value
+		if ( val and val~=dat.num ) or force then -- change value
 			dat.num=val
 			if dat.min and dat.num<dat.min then dat.num=dat.min end
 			if dat.max and dat.num>dat.max then dat.num=dat.max end
@@ -36,7 +36,7 @@ wdata.data_value=function(dat,val)
 		end
 		return dat.num
 	else
-		if val and val~=dat.str then -- change value
+		if (val and val~=dat.str ) or force  then -- change value
 			dat.str=val
 			dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
 		end
@@ -71,9 +71,9 @@ end
 -- get display pos, given the size of the parent and our size?
 wdata.data_get_pos=function(dat,psiz,bsiz)
 	if dat.step==0 then -- no snap
-		return ((dat.num-dat.min)/(dat.max-dat.min))
+		return ((dat.num-dat.min)/(dat.max-dat.min))*(psiz-bsiz)
 	else
-		return ((dat.num-dat.min)/(dat.max-dat.min))
+		return ((dat.num-dat.min)/(dat.max-dat.min))*(psiz-bsiz)
 	end
 end
 
@@ -108,9 +108,6 @@ end
 function wdata.new_data(dat)
 
 	local dat=dat or {} -- probably use what is passed in only fill in more values
---	dat.widget=it.widget
---	dat.it=it
---	dat.id=id
 
 	dat.class=dat.class or "number" -- could also be a "string"
 
@@ -119,10 +116,8 @@ function wdata.new_data(dat)
 
 	dat.lst=dat.lst or {}
 
-	dat.str=dat.str or ""
 	dat.str_idx=dat.str_idx or 0
 
-	dat.num=dat.num or 0
 	dat.min=dat.min or 0 -- not negative by default
 	dat.max=dat.max or (2^48) -- a big old number
 	dat.size=dat.size or 0 -- if 0 then button is auto sized to some value
@@ -143,7 +138,14 @@ function wdata.new_data(dat)
 -- work out snapping for scroll bars	
 	dat.snap=wdata.data_snap
 
-	dat:value(dat,dat.num) -- triger value changed/set callbacks
+	dat.num=dat.num or 0
+	dat.str=dat.str or ""
+
+--	if dat.class=="number" then
+--		dat:value(dat.num,true) -- triger value changed/set callbacks?
+--	else
+--		dat:value(dat.str,true) -- triger value changed/set callbacks
+--	end
 	
 	return dat
 	

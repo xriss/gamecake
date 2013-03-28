@@ -34,6 +34,8 @@ function wscroll.update(widget)
 	
 	if pan_px~=pan.pan_px or pan_py~=pan.pan_py then
 	
+--print("update",pan_px,pan_py)
+
 		pan.pan_px=pan_px
 		pan.pan_py=pan_py
 		
@@ -87,7 +89,7 @@ function wscroll.setup(widget,def)
 	widget.daty=widget_data.new_data{max=1}
 	widget.solid=true
 
-	widget.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss	})
+	widget.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss	,fbo=true})
 	widget.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
 		daty=widget.daty,color=0xffffffff})
 	widget.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	px=0,           	py=widget.hy-ss,

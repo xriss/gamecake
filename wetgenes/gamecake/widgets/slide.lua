@@ -47,6 +47,9 @@ end
 
 function wslide.slide_snap(it)
 
+	it.drag.hx=it.datx:get_size(it.hx)
+	it.drag.hy=it.daty:get_size(it.hy)
+
 -- auto snap positions when draged
 	it.drag.px=it.datx:snap( it.hx , it.drag.hx , it.drag.px )
 	it.drag.pxd=it.pxd+it.drag.px
@@ -79,10 +82,14 @@ function wslide.setup(widget,def)
 
 -- auto add the draging button as a child
 	widget.drag=widget:add({style="button",class="drag",color=widget.color,
-		hy=widget.daty:get_size(widget.hy),
-		hx=widget.datx:get_size(widget.hx),
-		pxf=widget.datx:get_pos(),
-		pyf=widget.daty:get_pos(),data=widget.data})
+		data=widget.data})
+
+-- set size and position of child
+	widget.drag.hx=widget.datx:get_size(widget.hx)
+	widget.drag.hy=widget.daty:get_size(widget.hy)
+	widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
+	widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
+	widget:snap()
 	
 	return widget
 end

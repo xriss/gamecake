@@ -24,7 +24,7 @@ function wmeta.setup(def)
 --
 	function meta.layout(widget)
 --print(widget.class)
-		if widget.class=="fill" or widget.class=="pan" then
+		if widget.class=="fill" or widget.class=="pan" or widget.class=="drag" then
 			meta.layout_fill(widget)
 --		elseif widget.class=="slide" or widget.class=="pad" then
 --			meta.layout_padding(widget)
@@ -47,8 +47,8 @@ function wmeta.setup(def)
 			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
 			if v.hyf then v.hy=widget.hy*v.hyf end
 			
-			v.px=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
-			v.py=(widget.hy-v.hy)*v.pyf
+--			v.px=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
+--			v.py=(widget.hy-v.hy)*v.pyf
 
 			v.pxd=widget.pxd+v.px -- local absolute position
 			v.pyd=widget.pyd+v.py
@@ -66,8 +66,8 @@ function wmeta.setup(def)
 			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
 			if v.hyf then v.hy=widget.hy*v.hyf end
 			
-			if v.pxf then v.px=(widget.hx)*v.pxf end -- local position relative to parents size
-			if v.pyf then v.py=(widget.hy)*v.pyf end
+--			if v.pxf then v.px=(widget.hx)*v.pxf end -- local position relative to parents size
+--			if v.pyf then v.py=(widget.hy)*v.pyf end
 
 			v.pxd=widget.pxd+v.px -- absolute position
 			v.pyd=widget.pyd+v.py

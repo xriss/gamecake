@@ -68,6 +68,7 @@ M.bake=function(oven,gui)
 		gui.data.name=wdata.new_data({class="string",hooks=gui.hooks})
 		gui.data.vol_music=wdata.new_data({id="vol_music",class="number",hooks=gui.hooks,num=ssettings.get("vol_music")*11,min=0,max=11,step=1})
 		gui.data.vol_sfx=wdata.new_data({id="vol_sfx",class="number",hooks=gui.hooks,num=ssettings.get("vol_sfx")*11,min=0,max=11,step=1})
+
 	end
 	
 	function gui.set_all_values()
@@ -161,68 +162,68 @@ print("click",id)
 
 	function gui.pages.profiles(master)
 
-		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 
-		top:add({sx=320,sy=110,text="Choose profile.",text_color=0xffffffff})
+		top:add({hx=320,hy=110,text="Choose profile.",text_color=0xffffffff})
 
 		for i,v in sprofiles.ipairs() do
-			top:add({sx=320,sy=20})
-			top:add({sx=20,sy=50})
-			top:add({sx=280,sy=50,color=0xffcccccc,text=v.name,id="profiles_select",hooks=gui.hooks,user=i})
-			top:add({sx=20,sy=50})
+			top:add({hx=320,hy=20})
+			top:add({hx=20,hy=50})
+			top:add({hx=280,hy=50,color=0xffcccccc,text=v.name,id="profiles_select",hooks=gui.hooks,user=i})
+			top:add({hx=20,hy=50})
 		end
-		top:add({sx=320,sy=20})
+		top:add({hx=320,hy=20})
 
 	end
 		
 	function gui.pages.profile(master)
-		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 		
 		gui.data.name:value( sprofiles.get("name") )
 
-		top:add({sx=320,sy=20})
-		top:add({sx=320,sy=40,text_color=0xffffffff,text="My name is"})
-		top:add({sx=320,sy=20})
+		top:add({hx=320,hy=20})
+		top:add({hx=320,hy=40,text_color=0xffffffff,text="My name is"})
+		top:add({hx=320,hy=20})
 
-		top:add({sx=20,sy=40})
-		top:add({sx=280,sy=40,color=0xffcccccc,text=gui.data.name:value(),id="profile_name_edit",hooks=gui.hooks})
-		top:add({sx=20,sy=40})
+		top:add({hx=20,hy=40})
+		top:add({hx=280,hy=40,color=0xffcccccc,text=gui.data.name:value(),id="profile_name_edit",hooks=gui.hooks})
+		top:add({hx=20,hy=40})
 
-		top:add({sx=320,sy=40*8})
+		top:add({hx=320,hy=40*8})
 
-		top:add({sx=110,sy=40,color=0xffcccccc,text="OK",id="profile_return",hooks=gui.hooks})
-		top:add({sx=100,sy=40})
-		top:add({sx=110,sy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profiles"})
+		top:add({hx=110,hy=40,color=0xffcccccc,text="OK",id="profile_return",hooks=gui.hooks})
+		top:add({hx=100,hy=40})
+		top:add({hx=110,hy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profiles"})
 
 	end
 
 	function gui.pages.profile_name_edit(master)
-		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 		
 		gui.data.name:value( sprofiles.get("name") )
 
-		top:add({sx=320,sy=80,text_color=0xffffffff,text="Type your name"})
+		top:add({hx=320,hy=80,text_color=0xffffffff,text="Type your name"})
 
-		top:add({sx=20,sy=40})
-		top:add({sx=280,sy=40,color=0xffcccccc,data=gui.data.name,id="profile_name",hooks=gui.hooks,class="textedit"})
-		top:add({sx=20,sy=40})
+		top:add({hx=20,hy=40})
+		top:add({hx=280,hy=40,color=0xffcccccc,data=gui.data.name,id="profile_name",hooks=gui.hooks,class="textedit"})
+		top:add({hx=20,hy=40})
 
-		top:add({sx=20,sy=40})
-		top:add({sx=120,sy=40,color=0xffcccccc,text="Clear",id="profile_name_clear",hooks=gui.hooks})
-		top:add({sx=40,sy=40})
-		top:add({sx=120,sy=40,color=0xffcccccc,text="Random",id="profile_name_rand",hooks=gui.hooks})
-		top:add({sx=20,sy=40})
+		top:add({hx=20,hy=40})
+		top:add({hx=120,hy=40,color=0xffcccccc,text="Clear",id="profile_name_clear",hooks=gui.hooks})
+		top:add({hx=40,hy=40})
+		top:add({hx=120,hy=40,color=0xffcccccc,text="Random",id="profile_name_rand",hooks=gui.hooks})
+		top:add({hx=20,hy=40})
 		
-		top:add({sx=320,sy=40})
-		top:add({sx=320,sy=40})
+		top:add({hx=320,hy=40})
+		top:add({hx=320,hy=40})
 
-		top:add({sx=110,sy=40,color=0xffcccccc,text="OK",id="profile_name_set",hooks=gui.hooks})
-		top:add({sx=100,sy=40})
-		top:add({sx=110,sy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profile"})
+		top:add({hx=110,hy=40,color=0xffcccccc,text="OK",id="profile_name_set",hooks=gui.hooks})
+		top:add({hx=100,hy=40})
+		top:add({hx=110,hy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profile"})
 
-		top:add({sx=320,sy=40})
+		top:add({hx=320,hy=40})
 
-		local m=top:add({sx=320,sy=160})		
+		local m=top:add({hx=320,hy=160})		
 		mkeys.setup_keyboard_widgets(m)
 		
 	end
@@ -259,32 +260,32 @@ print("click",id)
 		end
 
 
-		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
-		top:add({sx=320,sy=40})
+		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
+		top:add({hx=320,hy=40})
 
-		top:add({sx=320,sy=80,text_color=0xffffffff,text="You scored!!"})
+		top:add({hx=320,hy=80,text_color=0xffffffff,text="You scored!!"})
 		
-		top:add({sx=20,sy=40})
-		top:add({sx=280,sy=40,color=0xffcccccc,text=wstr.str_insert_number_commas(score)})
-		top:add({sx=20,sy=40})
+		top:add({hx=20,hy=40})
+		top:add({hx=280,hy=40,color=0xffcccccc,text=wstr.str_insert_number_commas(score)})
+		top:add({hx=20,hy=40})
 		
-		top:add({sx=320,sy=40})
+		top:add({hx=320,hy=40})
 
-		top:add({sx=20,sy=40})
-		top:add({sx=130,sy=40,color=0xffcccccc,text="Brag",id="score_brag",hooks=gui.hooks})
-		top:add({sx=20,sy=40})
-		top:add({sx=130,sy=40,color=0xffcccccc,text="List",id="score_list",hooks=gui.hooks})
---		top:add({sx= 5,sy=40})
---		top:add({sx=90,sy=40,color=0xffcccccc,text="Send",id="profile_score_send",hooks=gui.hooks})
-		top:add({sx=20,sy=40})
+		top:add({hx=20,hy=40})
+		top:add({hx=130,hy=40,color=0xffcccccc,text="Brag",id="score_brag",hooks=gui.hooks})
+		top:add({hx=20,hy=40})
+		top:add({hx=130,hy=40,color=0xffcccccc,text="List",id="score_list",hooks=gui.hooks})
+--		top:add({hx= 5,hy=40})
+--		top:add({hx=90,hy=40,color=0xffcccccc,text="Send",id="profile_score_send",hooks=gui.hooks})
+		top:add({hx=20,hy=40})
 
-		top:add({sx=320,sy=40})
-		top:add({sx=320,sy=60,text_color=0xffffffff,text=""..best_pct.."% success"})
-		top:add({sx=320,sy=60,text_color=0xffffffff,text=""..mine_pct.."% effort"})
-		top:add({sx=320,sy=40})
+		top:add({hx=320,hy=40})
+		top:add({hx=320,hy=60,text_color=0xffffffff,text=""..best_pct.."% success"})
+		top:add({hx=320,hy=60,text_color=0xffffffff,text=""..mine_pct.."% effort"})
+		top:add({hx=320,hy=40})
 
-		top:add({sx=120,sy=40,color=0xffcccccc,text="Back",id="score_back",hooks=gui.hooks})
-		top:add({sx=200,sy=40})
+		top:add({hx=120,hy=40,color=0xffcccccc,text="Back",id="score_back",hooks=gui.hooks})
+		top:add({hx=200,hy=40})
 		
 	end
 
@@ -304,7 +305,7 @@ print("click",id)
 			gui.page("score_list")
 		end
 	
-		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 		
 		local tab={}
 		local sc=sscores.list({offset=gui.offset})
@@ -321,42 +322,42 @@ print("click",id)
 		end
 
 		
-		top:add({sx=320,sy=5})
+		top:add({hx=320,hy=5})
 
-		top:add({sx=20,sy=30})
-		top:add({sx=280,sy=30,text_color=0xffffffff,text="High Scores"})
-		top:add({sx=20,sy=30})
+		top:add({hx=20,hy=30})
+		top:add({hx=280,hy=30,text_color=0xffffffff,text="High Scores"})
+		top:add({hx=20,hy=30})
 
-		top:add({sx=320,sy=5})
+		top:add({hx=320,hy=5})
 
 
 		for i=1,5 do
 			local v=tab[i]
 
-			top:add({sx=5,sy=60})
+			top:add({hx=5,hy=60})
 
-			local s=top:add({sx=310,sy=60,hx=310,hy=60,mx=310,my=60,class="flow",ax=0,ay=0,font="Vera",text_size=24})			
+			local s=top:add({hx=310,hy=60,class="fill",font="Vera",text_size=24})			
 			if v then
 				s:add(
-					{sx=100,sy=30,color=0xffcccccc,text=wstr.str_append_english_number_postfix(v.idx),hooks=gui.hooks},
-					{sx=210,sy=30,color=0xffcccccc,text=wstr.str_insert_number_commas(v.score),hooks=gui.hooks},
-					{sx=310,sy=30,color=0xffcccccc,text=v.name,hooks=gui.hooks})
+					{hx=100,hy=30,color=0xffcccccc,text=wstr.str_append_english_number_postfix(v.idx),hooks=gui.hooks},
+					{hx=210,hy=30,color=0xffcccccc,text=wstr.str_insert_number_commas(v.score),hooks=gui.hooks},
+					{hx=310,hy=30,color=0xffcccccc,text=v.name,hooks=gui.hooks})
 			else
 			end
 
-			top:add({sx=5,sy=60})
+			top:add({hx=5,hy=60})
 
-			top:add({sx=320,sy=10})
+			top:add({hx=320,hy=10})
 
 		end
 		
 		if nomore then
-			top:add({sx=100,sy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
-			top:add({sx=220,sy=40})
+			top:add({hx=100,hy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
+			top:add({hx=220,hy=40})
 		else
-			top:add({sx=100,sy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
-			top:add({sx=120,sy=40})
-			top:add({sx=100,sy=40,color=0xffcccccc,text="More",id="score_list_more",hooks=gui.hooks})
+			top:add({hx=100,hy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
+			top:add({hx=120,hy=40})
+			top:add({hx=100,hy=40,color=0xffcccccc,text="More",id="score_list_more",hooks=gui.hooks})
 		end
 
 	end
@@ -376,27 +377,25 @@ print("click",id)
 			gui.page("score_list")
 		end
 
+		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 
-		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+		top:add({hx=100,hy=40,color=0xffcccccc,text="Main",id="settings_main",hooks=gui.hooks})
+		top:add({hx=10,hy=40})
+		top:add({hx=100,hy=40,color=0xffcccccc,text="Game",id="settings_game",hooks=gui.hooks})
+		top:add({hx=10,hy=40})
+		top:add({hx=100,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
 
-		top:add({sx=100,sy=40,color=0xffcccccc,text="Main",id="settings_main",hooks=gui.hooks})
-		top:add({sx=10,sy=40})
-		top:add({sx=100,sy=40,color=0xffcccccc,text="Game",id="settings_game",hooks=gui.hooks})
-		top:add({sx=10,sy=40})
-		top:add({sx=100,sy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
-
-		top:add({sx=320,sy=40,text_color=0xffffffff,text="Music volume"})
-		top:add({class="slide",color=0xffcccccc,sx=320,sy=40,datx=gui.data.vol_music,hooks=gui.hooks})
-		top:add({sx=320,sy=40,text_color=0xffffffff,text="Sound effects volume"})
-		top:add({class="slide",color=0xffcccccc,sx=320,sy=40,datx=gui.data.vol_sfx,hooks=gui.hooks})
+		top:add({hx=320,hy=40,text_color=0xffffffff,text="Music volume"})
+		top:add({class="slide",color=0xffcccccc,hx=320,hy=40,datx=gui.data.vol_music,data=gui.data.vol_music,hooks=gui.hooks})
+		top:add({hx=320,hy=40,text_color=0xffffffff,text="Sound effects volume"})
+		top:add({class="slide",color=0xffcccccc,hx=320,hy=40,datx=gui.data.vol_sfx,data=gui.data.vol_sfx,hooks=gui.hooks})
 
 
-		top:add({sx=320,sy=40*6})
+		top:add({hx=320,hy=40*6})
 
-		top:add({sx=120,sy=40,color=0xffcccccc,text="Back",id="settings_return",hooks=gui.hooks})
-		top:add({sx=80,sy=40})
-		top:add({sx=120,sy=40,color=0xffcc4444,text="Quit",id="settings_quit",hooks=gui.hooks})
-
+		top:add({hx=120,hy=40,color=0xffcccccc,text="Back",id="settings_return",hooks=gui.hooks})
+		top:add({hx=80,hy=40})
+		top:add({hx=120,hy=40,color=0xffcc4444,text="Quit",id="settings_quit",hooks=gui.hooks})
 
 	end
 	
@@ -409,19 +408,19 @@ print("click",id)
 			oven.next=true -- really quit
 		end
 				
-		local top=master:add({hx=320,hy=480,mx=320,my=480,class="flow",ax=0,ay=0,font="Vera",text_size=24})
+		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 
-		top:add({sx=320,sy=40*3})
+		top:add({hx=320,hy=40*3})
 
-		top:add({sx=320,sy=40*2,text_color=0xffffffff,text="Make your time!"})
+		top:add({hx=320,hy=40*2,text_color=0xffffffff,text="Make your time!"})
 
-		top:add({sx=20,sy=40*2})
-		top:add({sx=120,sy=40*2,color=0xffcccccc,text="Back",id="quit_back",hooks=gui.hooks})
-		top:add({sx=40,sy=40*2})
-		top:add({sx=120,sy=40*2,color=0xffcc4444,text="Quit",id="quit_exit",hooks=gui.hooks})
-		top:add({sx=20,sy=40*2})
+		top:add({hx=20,hy=40*2})
+		top:add({hx=120,hy=40*2,color=0xffcccccc,text="Back",id="quit_back",hooks=gui.hooks})
+		top:add({hx=40,hy=40*2})
+		top:add({hx=120,hy=40*2,color=0xffcc4444,text="Quit",id="quit_exit",hooks=gui.hooks})
+		top:add({hx=20,hy=40*2})
 
-		top:add({sx=320,sy=40*5})
+		top:add({hx=320,hy=40*5})
 		
 	end
 	
