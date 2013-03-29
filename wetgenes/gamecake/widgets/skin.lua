@@ -207,6 +207,10 @@ end
 		gl.PushMatrix()
 		gl.Translate(widget.px,widget.py,0)
 		
+		if widget.anim then
+			widget.anim:draw()		
+		end
+		
 		if widget.clip then
 		
 			widget.layout=layouts.create{parent2={x=0,y=0,w=widget.master.hx,h=widget.master.hy},

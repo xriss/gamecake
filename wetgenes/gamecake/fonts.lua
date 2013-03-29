@@ -131,7 +131,7 @@ oven.preloader(fname)
 			t.font:load_data(t.data)
 			
 			
-			t.size=32
+			t.size=30
 			t.font:size(t.size,t.size) -- render at 32x32 pixel size, all future numbers are relative to this size
 			
 			t.chars={}

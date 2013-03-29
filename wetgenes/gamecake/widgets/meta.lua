@@ -307,6 +307,10 @@ function wmeta.setup(def)
 --
 	function meta.update(widget)
 	
+		if widget.anim then
+			widget.anim:update()
+		end
+	
 		for i,v in ipairs(widget) do
 			v:update()
 		end

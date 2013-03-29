@@ -189,7 +189,11 @@ print("click",id)
 		top:add({hx=280,hy=40,color=0xffcccccc,text=gui.data.name:value(),id="profile_name_edit",hooks=gui.hooks})
 		top:add({hx=20,hy=40})
 
-		top:add({hx=320,hy=40*8})
+		top:add({hx=200,hy=40})
+		top:add({hx=100,hy=40,color=0xffcccccc,text="Edit",id="profile_name_edit",hooks=gui.hooks})
+		top:add({hx=20,hy=40})
+
+		top:add({hx=320,hy=40*7})
 
 		top:add({hx=110,hy=40,color=0xffcccccc,text="OK",id="profile_return",hooks=gui.hooks})
 		top:add({hx=100,hy=40})
@@ -330,6 +334,7 @@ print("click",id)
 
 		top:add({hx=320,hy=5})
 
+		top:add({hx=320,hy=50})
 
 		for i=1,5 do
 			local v=tab[i]
@@ -350,6 +355,7 @@ print("click",id)
 			top:add({hx=320,hy=10})
 
 		end
+		
 		
 		if nomore then
 			top:add({hx=100,hy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
@@ -448,6 +454,9 @@ print("click",id)
 
 		gui.master:layout()
 		
+		if gui.anim_hook then
+			gui.master:call_descendents(function(w) gui.anim_hook(w) end)
+		end
 	end
 
 	function gui.clean()
