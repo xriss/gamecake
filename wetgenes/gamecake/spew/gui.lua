@@ -326,33 +326,39 @@ print("click",id)
 		end
 
 		
-		top:add({hx=320,hy=5})
+		local b=top:add({hx=320,hy=90,class="fill",font="Vera",text_size=24,id="score_title"})			
 
-		top:add({hx=20,hy=30})
-		top:add({hx=280,hy=30,text_color=0xffffffff,text="High Scores"})
-		top:add({hx=20,hy=30})
+		b:add({hx=320,hy=5})
 
-		top:add({hx=320,hy=5})
+		b:add({hx=20,hy=30})
+		b:add({hx=280,hy=30,text_color=0xffffffff,text="High Scores",id="score_title_text"})
+		b:add({hx=20,hy=30})
 
-		top:add({hx=320,hy=50})
+		b:add({hx=320,hy=5})
+
+		b:add({hx=320,hy=50})
 
 		for i=1,5 do
 			local v=tab[i]
 
-			top:add({hx=5,hy=60})
+			local b=top:add({hx=320,hy=70,class="fill",font="Vera",text_size=24,id="score_block"})			
 
-			local s=top:add({hx=310,hy=60,class="fill",font="Vera",text_size=24})			
+			b:add({hx=320,hy=5})
+
+			b:add({hx=5,hy=60})
+
+			local s=b:add({hx=310,hy=60,class="fill"})			
 			if v then
 				s:add(
-					{hx=100,hy=30,color=0xffcccccc,text=wstr.str_append_english_number_postfix(v.idx),hooks=gui.hooks},
-					{hx=210,hy=30,color=0xffcccccc,text=wstr.str_insert_number_commas(v.score),hooks=gui.hooks},
-					{hx=310,hy=30,color=0xffcccccc,text=v.name,hooks=gui.hooks})
+					{hx=100,hy=30,color=0xffcccccc,text=wstr.str_append_english_number_postfix(v.idx),hooks=gui.hooks,id="score_part"},
+					{hx=210,hy=30,color=0xffcccccc,text=wstr.str_insert_number_commas(v.score),hooks=gui.hooks,id="score_part"},
+					{hx=310,hy=30,color=0xffcccccc,text=v.name,hooks=gui.hooks,id="score_part"})
 			else
 			end
 
-			top:add({hx=5,hy=60})
+			b:add({hx=5,hy=60})
 
-			top:add({hx=320,hy=10})
+			b:add({hx=320,hy=5})
 
 		end
 		
@@ -454,8 +460,8 @@ print("click",id)
 
 		gui.master:layout()
 		
-		if gui.anim_hook then
-			gui.master:call_descendents(function(w) gui.anim_hook(w) end)
+		if gui.widget_hook then
+			gui.master:call_descendents(function(w) gui.widget_hook(w) end)
 		end
 	end
 
