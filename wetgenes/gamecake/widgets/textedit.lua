@@ -206,6 +206,8 @@ function wtextedit.update(widget)
 		widget.text = widget.data.str
 		widget:set_dirty()
 	end
+
+	return widget.meta.update(widget)
 end
 
 
