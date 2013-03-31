@@ -139,7 +139,7 @@ print("click",id)
 
 			elseif id=="score_list" then
 
-				gui.offset=1
+--				gui.offset=1
 				gui.page("score_list")
 			end
 		end
@@ -267,7 +267,7 @@ print("click",id)
 		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 		top:add({hx=320,hy=40})
 
-		top:add({hx=320,hy=80,text_color=0xffffffff,text="You scored!!"})
+		top:add({hx=320,hy=80,text_color=0xffffffff,text="You scored "..wstr.str_append_english_number_postfix(gui.offset).."!"})
 		
 		top:add({hx=20,hy=40})
 		top:add({hx=280,hy=40,color=0xffcccccc,text=wstr.str_insert_number_commas(score)})
@@ -297,22 +297,25 @@ print("click",id)
 
 		gui.clicks.score_list_less=function()
 			gui.offset=gui.offset-5
-			if gui.offset<1 then
-				gui.offset=1
-				gui.mpage("menu") -- callback to return to original menu			
-			else
-				gui.page("score_list")
-			end
+			gui.page("score_list")
 		end
 		gui.clicks.score_list_more=function()
 			gui.offset=gui.offset+5
 			gui.page("score_list")
 		end
+		gui.clicks.score_list_exit=function()
+			gui.offset=1
+			gui.mpage("menu") -- callback to return to original menu			
+		end
 	
+		if gui.offset<1 then
+			gui.offset=1
+		end
+
 		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 		
 		local tab={}
-		local sc=sscores.list({offset=gui.offset})
+		local sc=sscores.list({offset=gui.offset,order="full"})
 		local nomore=not sc[6]
 		for i=1,5 do
 			local v=sc[i]
@@ -341,34 +344,44 @@ print("click",id)
 		for i=1,5 do
 			local v=tab[i]
 
-			local b=top:add({hx=320,hy=70,class="fill",font="Vera",text_size=24,id="score_block"})			
-
-			b:add({hx=320,hy=5})
-
-			b:add({hx=5,hy=60})
-
-			local s=b:add({hx=310,hy=60,class="fill"})			
 			if v then
+
+				local b=top:add({hx=320,hy=70,class="fill",font="Vera",text_size=24,id="score_block"})			
+
+				b:add({hx=320,hy=5})
+
+				b:add({hx=5,hy=60})
+
+				local s=b:add({hx=310,hy=60,class="fill"})			
 				s:add(
 					{hx=100,hy=30,color=0xffcccccc,text=wstr.str_append_english_number_postfix(v.idx),hooks=gui.hooks,id="score_part"},
 					{hx=210,hy=30,color=0xffcccccc,text=wstr.str_insert_number_commas(v.score),hooks=gui.hooks,id="score_part"},
 					{hx=310,hy=30,color=0xffcccccc,text=v.name,hooks=gui.hooks,id="score_part"})
+
+				b:add({hx=5,hy=60})
+
+				b:add({hx=320,hy=5})
 			else
+
+				top:add({hx=320,hy=70})
+			
 			end
-
-			b:add({hx=5,hy=60})
-
-			b:add({hx=320,hy=5})
-
 		end
 		
 		
-		if nomore then
+		if gui.offset>1 then
 			top:add({hx=100,hy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
-			top:add({hx=220,hy=40})
+			top:add({hx=10,hy=40})
 		else
-			top:add({hx=100,hy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
-			top:add({hx=120,hy=40})
+			top:add({hx=110,hy=40})
+		end
+
+		top:add({hx=100,hy=40,color=0xffcccccc,text="Exit",id="score_list_exit",hooks=gui.hooks})
+
+		if nomore then
+			top:add({hx=110,hy=40})
+		else
+			top:add({hx=10,hy=40})
 			top:add({hx=100,hy=40,color=0xffcccccc,text="More",id="score_list_more",hooks=gui.hooks})
 		end
 

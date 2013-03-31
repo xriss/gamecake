@@ -192,19 +192,26 @@ print("Saving "..scores.filename)
 		local order=opts.order or "high"
 		local offset=opts.offset or 1
 		local limit=opts.limit or 10
+
+		local t
 		
 		if order=="high" then -- normal high score list, one score per name
+		
+			t=scores.high_to_list(scores.get_high(opts))			
 
-			local t=scores.high_to_list(scores.get_high(opts))
-			
+		else
+
+			t=scores.high_to_list(scores.get_list(opts))			
+		
+		end
+		
+		if t then
 			for i=offset,offset+limit do
 				if t[i] then
 					t[i].idx=i -- refresh idx
 					ret[#ret+1]=t[i]
 				end
 			end
-			
-
 		end
 		
 		return ret	
@@ -240,6 +247,11 @@ print("Saving "..scores.filename)
 		
 		local t=scores.get_list(opts)
 		t[#t+1]=scr -- insert
+		
+		local s=scores.high_to_list(t)
+		for i=1,#s do
+			s[i].idx=i
+		end
 
 		scores.save() -- always save new scores to disk
 
