@@ -66,6 +66,7 @@ function M.bake(opts)
 			oven.rebake_mod("wetgenes.gamecake.mods.keys") -- touchscreen keys and posix keymaping
 			oven.rebake_mod("wetgenes.gamecake.mods.mouse") -- auto fake mouse on non windows builds
 			oven.rebake_mod("wetgenes.gamecake.mods.layout") -- screen layout options
+			oven.rebake_mod("wetgenes.gamecake.mods.snaps") -- builtin screen snapshot code
 
 			if opts.start then
 				oven.next=oven.rebake(opts.start)
