@@ -29,7 +29,7 @@ canvas.gl_default=function()
 -- the default gl state, when we deviate from this we should restore it...
 
 	gl.PixelStore(gl.PACK_ALIGNMENT,1)
-	gl.PixelStore(gl.UNPACK_ALIGNMENT,1)
+	gl.PixelStore(gl.UNPACK_ALIGNMENT,1) -- the grd code expects fully packed bitmaps
 
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Disable(gl.CULL_FACE)

@@ -374,7 +374,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			
 			if widget.sheet then -- custom graphics
 
-				sheets.get(widget.sheet):draw(1,0,0,0,hx,hy)
+				sheets.get(widget.sheet):draw(widget.sheet_id or 1,widget.sheet_px or 0,widget.sheet_py or 0,0,widget.sheet_hx or hx,widget.sheet_hy or hy)
 			
 			elseif mode then -- got some images to play with
 			

@@ -153,15 +153,21 @@ function wmeta.setup(def)
 		
 		widget.font=def.font or widget.parent.font --  use this font if set or inherit value from parent
 		
-		widget.text_color_shadow=def.text_color_shadow  -- may need a shadow
-		widget.text_color_over=def.text_color_over -- if set, switch text color on hover
 		widget.text_color=def.text_color or widget.parent.text_color or 0xff000000 -- black text
+		widget.text_color_over=def.text_color_over -- if set, switch text color on hover
+		widget.text_color_shadow=def.text_color_shadow  -- may need a shadow
 		widget.text_size=def.text_size
 		widget.text_align=def.text_align -- default is "center", and "wrap" will wrap the text
 		
 
-		widget.text=def.text -- display this text on the button
 		widget.sheet=def.sheet -- display this sheet (by name) on the button
+		widget.sheet_id=def.sheet_id
+		widget.sheet_px=def.sheet_px
+		widget.sheet_py=def.sheet_py
+		widget.sheet_hx=def.sheet_hx
+		widget.sheet_hy=def.sheet_hy
+
+		widget.text=def.text -- display this text on the button
 		widget.style=def.style -- style the button this way
 
 
