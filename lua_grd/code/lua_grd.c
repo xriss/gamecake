@@ -858,7 +858,7 @@ struct grd_info gb[1];
 	else
 	{
 		s=lua_tolstring(l,str_idx,&sl);
-		if(sl==0) // passed in a ""
+		if(sl==0) // passed in a "" as a flag
 		{
 			read_tab=0;
 			s=0;

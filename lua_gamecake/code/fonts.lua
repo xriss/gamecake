@@ -90,8 +90,8 @@ fonts.load=function(filename,id)
 				
 				c.add=8 -- character draw width which may be fractional
 
-				c.tx=(idx*16)+8
-				c.ty=(idy*16)+8
+				c.tx=(idx*16)+4
+				c.ty=(idy*16)+4
 
 				c.x=-1 -- offsets to draw the bitmap at, whole pixels
 				c.y=-1
@@ -131,7 +131,7 @@ oven.preloader(fname)
 			t.font:load_data(t.data)
 			
 			
-			t.size=32
+			t.size=30
 			t.font:size(t.size,t.size) -- render at 32x32 pixel size, all future numbers are relative to this size
 			
 			t.chars={}
