@@ -88,6 +88,7 @@ void main()
 	]]
 }
 
+
 	gl.shaders.v_pos_color={
 	source=gl.defines.shaderprefix..[[
 
@@ -138,6 +139,80 @@ void main(void)
 	]]
 }
 
+	gl.shaders.v_pos_normal={
+	source=gl.defines.shaderprefix..[[
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+attribute vec3 a_vertex;
+attribute vec3 a_normal;
+
+varying vec4  v_color;
+varying vec3  v_normal;
+varying vec3  v_pos;
+ 
+void main()
+{
+    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+    v_normal = normalize( mat3( modelview ) * a_normal );
+	v_color=color;
+}
+
+	]]
+}
+
+	gl.shaders.v_pos_normal_tex={
+	source=gl.defines.shaderprefix..[[
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+attribute vec3 a_vertex;
+attribute vec3 a_normal;
+attribute vec2 a_texcoord;
+
+varying vec4  v_color;
+varying vec3  v_normal;
+varying vec3  v_pos;
+varying vec2  v_texcoord;
+ 
+void main()
+{
+    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+    v_normal = normalize( mat3( modelview ) * a_normal );
+	v_texcoord=a_texcoord;
+	v_color=color;
+}
+
+	]]
+}
+
+	gl.shaders.f_phong={
+	source=gl.defines.shaderprefix..[[
+
+varying vec4  v_color;
+varying vec3  v_normal;
+varying vec3  v_pos;
+
+
+vec3 d=vec3(0,0,-1);
+
+void main(void)
+{
+	vec3 n=normalize(v_normal);
+	gl_FragColor= v_color*max( -n.z, 0.25 );
+}
+
+	]]
+}
+
+	gl.programs.pos_normal={
+		vshaders={"v_pos_normal"},
+		fshaders={"f_phong"},
+	}
 	gl.programs.pos_color={
 		vshaders={"v_pos_color"},
 		fshaders={"f_color"},

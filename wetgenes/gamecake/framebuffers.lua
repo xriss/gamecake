@@ -110,8 +110,8 @@ function M.bake(oven,framebuffers)
 			if not fbo.texture then
 				fbo.texture=gl.GenTexture()
 				gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, 0)
@@ -137,6 +137,13 @@ function M.bake(oven,framebuffers)
 		fbo.h=h
 		fbo.d=d
 		
+	end
+	
+	framebuffers.mipmap = function(fbo)
+		if fbo.texture then
+			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
+			gl.GenerateMipmap(gl.TEXTURE_2D)	
+		end
 	end
 
 -- read back data from a framebuffer, return it in a grd object
@@ -176,6 +183,7 @@ function M.bake(oven,framebuffers)
 		"bind_texture",
 		"resize",
 		"download",
+		"mipmap",
 		"free_depth",
 		"free_texture",
 		"free_frame",

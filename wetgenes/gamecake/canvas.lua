@@ -23,6 +23,7 @@ function M.bake(oven,canvas)
 	local cake=oven.cake
 	local win=oven.win
 	local images=cake.images
+	local buffers=cake.buffers
 
 canvas.gl_default=function()
 
@@ -209,42 +210,55 @@ flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
 
 end
 
--- tristrip is the most useful, 3 points gives us a tri
--- 4 gives us a quad, and of course you can keep going to create a strip
-flat.tristrip = function(fmt,data)
+-- this allows us to prepare vertex buffers, then draw at anytime
+-- just call it.draw on the returned table.
+flat.tristrip_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 -- some basic vertexformats
 	local pstride
+	local pnrm
 	local ptex
 	local pcolor
 	local p
+	local progname=it.progname
+	local fmt=it.fmt
 	if fmt=="xyz" then -- xyz only
 	
-		p=gl.program("pos")
-		gl.UseProgram( p[0] )
-
+		progname = progname or "pos"
 		pstride=12
+	
+	elseif fmt=="xyznrm" then -- xyz and normal (so we may light the thing)
+
+		progname = progname or "pos_normal"
+
+		pstride=24
+		pnrm=12
+	
+	elseif fmt=="xyznrmuv" then -- xyz and normal and texture
+
+		progname = progname or "pos_normal_tex"
+
+		pstride=32
+		pnrm=12
+		ptex=24
 	
 	elseif fmt=="xyzuv" then -- xyz and texture
 
-		p=gl.program("pos_tex")
-		gl.UseProgram( p[0] )
+		progname = progname or "pos_tex"
 
 		pstride=20
 		ptex=12
 	
 	elseif fmt=="xyzrgba" then -- xyz and color
 
-		p=gl.program("pos_color")
-		gl.UseProgram( p[0] )
+		progname = progname or "pos_color"
 
 		pstride=28
 		pcolor=12
 	
 	elseif fmt=="xyzuvrgba" then -- xyz and texture and color
 	
-		p=gl.program("pos_tex_color")
-		gl.UseProgram( p[0] )
+		progname = progname or "pos_tex_color"
 
 		pstride=36
 		ptex=12
@@ -252,35 +266,72 @@ flat.tristrip = function(fmt,data)
 
 	end
 	
+	local data=it.data
 	local datalen=#data
 	local datasize=datalen*4 -- we need this much vdat memory
 	canvas.vdat_check(datasize) -- make sure we have space in the buffer
 	
-	pack.save_array(data,"f32",0,datalen,canvas.vdat)
+	if it.vb then
+		if type(it.vb)~="table" then -- need to create
+			it.vb=buffers.create({
+				start=function(vb)
+					vb:bind()
+					pack.save_array(data,"f32",0,datalen,canvas.vdat)
+					gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.STATIC_DRAW)
+				end,
+			})
+		end
+	end
 
-	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
-	gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.DYNAMIC_DRAW)
 
-	gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
-	gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
-	gl.Uniform4f( p:uniform("color"), gl.cache.color )
-
-	gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,pstride,0)
-	gl.EnableVertexAttribArray(p:attrib("a_vertex"))
+	it.draw=function()
 	
-	if ptex then
-		gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,pstride,ptex)
-		gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
-	end
+		local p=gl.program(progname)
+		gl.UseProgram( p[0] )
 
-	if pcolor then
-		gl.VertexAttribPointer(p:attrib("a_color"),4,gl.FLOAT,gl.FALSE,pstride,pcolor)
-		gl.EnableVertexAttribArray(p:attrib("a_color"))
-	end
+		if it.vb then -- use a precached buffer
+			it.vb:bind()
+		else
+			pack.save_array(data,"f32",0,datalen,canvas.vdat)
+			gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
+			gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.DYNAMIC_DRAW)
+		end
 
-	gl.DrawArrays(gl.TRIANGLE_STRIP,0,datasize/pstride)
+		gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+		gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+		gl.Uniform4f( p:uniform("color"), gl.cache.color )
+
+		gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,pstride,0)
+		gl.EnableVertexAttribArray(p:attrib("a_vertex"))
 		
-	
+		if pnrm then
+			gl.VertexAttribPointer(p:attrib("a_normal"),3,gl.FLOAT,gl.TRUE,pstride,pnrm)
+			gl.EnableVertexAttribArray(p:attrib("a_normal"))
+		end
+
+		if ptex then
+			gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,pstride,ptex)
+			gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
+		end
+
+		if pcolor then
+			gl.VertexAttribPointer(p:attrib("a_color"),4,gl.FLOAT,gl.FALSE,pstride,pcolor)
+			gl.EnableVertexAttribArray(p:attrib("a_color"))
+		end
+
+		gl.DrawArrays(gl.TRIANGLE_STRIP,0,datasize/pstride)
+	end
+
+	return it
+end
+
+-- tristrip is the most useful, 3 points gives us a tri
+-- 4 gives us a quad, and of course you can keep going to create a strip
+flat.tristrip = function(fmt,data,progname)
+
+	local it=flat.tristrip_predraw({fmt=fmt,data=data,progname=progname})
+	it.draw()
+
 end
 
 

@@ -242,6 +242,7 @@ function M.bake(oven,layouts)
 
 -- this applys a full viewport and adjusts opengls projection and model view stacks
 -- push and pop these if you wish to preserve old values
+-- returns last applied layout, so you can restore it to undo these changes
 	layout.apply=function(w,h,fov,d)
 	
 		local flag if type(w)=="boolean" then flag=w w=nil end
