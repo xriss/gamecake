@@ -5,6 +5,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- this also contains matrix manipulation functions in the style of normal gl
 -- and a simple Color replacement that just caches the color here for later use
 
+local wstr=require("wetgenes.string")
+
 local tardis=require("wetgenes.tardis")
 local tcore=require("wetgenes.tardis.core")
 
@@ -100,6 +102,18 @@ function glescode.create(gl)
 
 -- compiler functions
 
+-- function to provide simple source for a shader program
+	function code.progsrc(name,vsource,fsource)
+		if not code.programs[name] then -- only do once
+			code.shaders["v_"..name]={source=vsource}
+			code.shaders["f_"..name]={source=fsource}
+			code.programs[name]={
+				vshaders={"v_"..name},
+				fshaders={"f_"..name},
+			}
+		end
+	end
+
 	code.shaders={}
 	code.programs={}
 	code.defines={}
@@ -141,9 +155,12 @@ function glescode.create(gl)
 		
 		if s[0] then return s[0] end
 
+-- Uhm, we could really use a shader lint or precompiler at this point, why does such a thing not exist?
+-- I dont normaly care for lint but it would *really* make sense here...
+
 --print("Compiling shader "..sname)
 		s[0]=gl.CreateShader(stype)
-		gl.ShaderSource(s[0],s.source)
+		gl.ShaderSource(s[0],wstr.replace(s.source,code.defines))
 		gl.CompileShader(s[0])
 		
 		if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
