@@ -60,9 +60,11 @@ print("Saving "..scores.filename)
 			fp:close()
 		end
 	end
-
-
+	
 	function scores.setup(max_up)
+
+		scores.show_high=true
+
 		max_up=max_up or 1
 		scores.up={}
 		for i=1,max_up do
@@ -145,9 +147,11 @@ print("Saving "..scores.filename)
 			draw_mid_text( (xh*3/16) , fy*0.25 , "1up")
 			draw_mid_text( (xh*3/16) , fy*1.50 , s)
 
-			local s=wstr.str_insert_number_commas(scores.high)
-			draw_mid_text( (xh*8/16) , fy*0.25 , "Hi")
-			draw_mid_text( (xh*8/16) , fy*1.50 , s)
+			if scores.show_high then
+				local s=wstr.str_insert_number_commas(scores.high)
+				draw_mid_text( (xh*8/16) , fy*0.25 , "Hi")
+				draw_mid_text( (xh*8/16) , fy*1.50 , s)
+			end
 
 			if scores.up[2] then
 				local s=wstr.str_insert_number_commas(scores.up[2].score)

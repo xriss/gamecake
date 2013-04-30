@@ -7,6 +7,13 @@ local wsbox=require("wetgenes.sandbox")
 local snames=require("wetgenes.gamecake.spew.names")
 local lfs ; pcall( function() lfs=require("lfs") end ) -- may not have a filesystem
 
+
+--local sql=require("sqlite")
+--local db=assert(sql.open(wwin.files_prefix.."profiles.sql"))
+
+
+
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -21,7 +28,7 @@ M.bake=function(oven,profiles)
 	
 	local p
 	local ps={}
-	
+
 -- check profile data is valid
 	function profiles.check()
 		for i,p in pairs(ps) do
@@ -86,12 +93,14 @@ print("Saving "..profiles.filename)
 	end
 
 -- set a score in the current profile
+--[[
 	function profiles.set_score(name,score)
 		local scores=p[scores] or {}
 		p[scores]=scores
 		scores[#scores+1]=score
 		profiles.save()
 	end
+]]
 
 -- simple iteration of all profiles, iterates the profile raw tab (ipairs)
 	function profiles.ipairs()

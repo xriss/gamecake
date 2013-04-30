@@ -160,7 +160,7 @@ function glescode.create(gl)
 
 --print("Compiling shader "..sname)
 		s[0]=gl.CreateShader(stype)
-		gl.ShaderSource(s[0],wstr.replace(s.source,code.defines))
+		gl.ShaderSource(s[0],wstr.macro_replace(s.source,code.defines))
 		gl.CompileShader(s[0])
 		
 		if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
