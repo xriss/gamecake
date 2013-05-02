@@ -25,6 +25,7 @@ local opts={
         namev=opts.title..".v"..version,
         version=version,
         version_int=math.floor(version*1000),
+	orientation=opts.orientation or "unspecified"
 }
 
 bake.replacefile("AndroidManifest.xml.base","AndroidManifest.xml",opts)

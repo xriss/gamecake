@@ -1,0 +1,12 @@
+return {
+	type = 'lua_binary_module',
+	files = {
+		"hid.c",
+		"structs.c",
+		"compat.c",
+		"wstring.c",
+	},
+	dependencies = {'hidapi'},
+}
+
+-- vi: ft=lua
