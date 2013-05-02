@@ -1,7 +1,7 @@
 
 
 project "lua_bit"
-language "C++"
+language "C"
 files { "bit.c" }
 
 links { "lib_lua" }
