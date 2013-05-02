@@ -15,7 +15,7 @@ actually do not as this breaks random shit...
 -->
 
     <application android:label="{title}" android:icon="@drawable/icon"
-		android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+		android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
     >
 
 
@@ -24,7 +24,9 @@ actually do not as this breaks random shit...
              This will take care of integrating with our NDK code. -->
         <activity android:name="com.wetgenes.FeralActivity"
                 android:label="{title}"
-                android:configChanges="orientation|keyboardHidden">
+                android:configChanges="orientation|keyboardHidden"
+		android:screenOrientation="{orientation}"
+	>
             <!-- Tell NativeActivity the name of our .so -->
             <meta-data android:name="android.app.lib_name"
                     android:value="lua" />
