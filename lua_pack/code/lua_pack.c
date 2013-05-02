@@ -393,7 +393,7 @@ int count;
 	{
 		def=arr;
 		def_len=lua_pack_field_size(arr);
-		count=len/def_len;
+		count=( len - off )/def_len;
 		data_len=len;
 		
 	}
@@ -427,9 +427,9 @@ int count;
 	
 	if(data_len==0) { return 0; } // no data to pack
 	
-//printf("PACKLOAD %d %d %d\n",data_len,off,len);
 	if(data_len+off>len) // data overflow
 	{
+//printf("PACKLOAD %d %d %d\n",data_len,off,len);
 		lua_pushstring(l,"data pack overflow");
 		lua_error(l);
 		return 0;
@@ -573,9 +573,9 @@ int sl;
 	
 	if(ptr) // got a buffer to write intoo
 	{
-//printf("PACKSAVE %d %d %d\n",data_len,off,len);
 		if(data_len+off>len) // error buffer is too small
 		{
+//printf("PACKSAVE %d %d %d\n",data_len,off,len);
 			lua_pushstring(l,"data pack overflow");
 			lua_error(l);
 			return 0;

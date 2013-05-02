@@ -440,6 +440,7 @@ LUAMOD_API int luaopen_hid(lua_State* L)
 	lua_pushvalue(L, 2); /* ..., module, udata */
 	setfuncs(L, functions, 1); /* ..., module */
 	
+	lua_settop(L, 1); /* code below assumes exit userdata is at index 2 */
 	/* return module */
 	return 1;
 }
