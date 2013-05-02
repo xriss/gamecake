@@ -62,7 +62,9 @@ BINDING(enumerate)
 	
 	*result = hid_enumerate(vendor_id, product_id);
 	if (!*result)
-		return luaL_error(L, "error in hid_enumerate");
+		return 0;
+// this is not an error, just means no device found
+//		return luaL_error(L, "error in hid_enumerate");
 	
 	/* complete owner */
 	lua_newtable(L);
@@ -401,7 +403,7 @@ static int module_gc(lua_State* L)
 	return 0;
 }
 
-LUAMOD_API int luaopen_module(lua_State* L)
+LUAMOD_API int luaopen_hid(lua_State* L)
 {
 	int i;
 #if LUA_VERSION_NUM==501

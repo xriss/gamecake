@@ -37,7 +37,7 @@ LUA_API const wchar_t *lua_tolwstring (lua_State *L, int index, size_t *length) 
   }
   case LUA_TUSERDATA:
     if (length)
-      *length = rawlen(L, index) / sizeof(wchar_t) - 1;  /* remove trailing 0 */
+      *length = lua_objlen(L, index) / sizeof(wchar_t) - 1;  /* remove trailing 0 */
     return (const wchar_t*)lua_touserdata(L, index);
   default:
     return 0;
@@ -48,17 +48,17 @@ LUA_API const wchar_t *lua_towstring (lua_State *L, int index) {
   return lua_tolwstring(L, index, 0);
 }
 
+LUA_API const wchar_t *luaL_checkwstring (lua_State *L, int index) {
+  if (lua_type(L, index)!=LUA_TUSERDATA)
+    luaL_checkstring(L, index);
+  return lua_towstring(L, index);
+}
+
 LUA_API const wchar_t *luaL_optwstring (lua_State *L, int narg, const wchar_t *def) {
   if (lua_isnoneornil(L, narg))
     return def;
   else
     return luaL_checkwstring(L, narg);
-}
-
-LUA_API const wchar_t *luaL_checkwstring (lua_State *L, int index) {
-  if (lua_type(L, index)!=LUA_TUSERDATA)
-    luaL_checkstring(L, index);
-  return lua_towstring(L, index);
 }
 
 LUA_API const wchar_t *luaL_checklwstring (lua_State *L, int index, size_t *length) {
