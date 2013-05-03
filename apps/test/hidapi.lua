@@ -2,6 +2,11 @@
 
 local bit=require("bit")
 
+local bnot = bit.bnot
+local band, bor, bxor = bit.band, bit.bor, bit.bxor
+local lshift, rshift, rol = bit.lshift, bit.rshift, bit.rol
+
+
 local pack=require("wetgenes.pack")
 local wstr=require("wetgenes.string")
 local hid=require("wetgenes.hid")
@@ -53,7 +58,7 @@ while true do
 
 	if buf then
 
-		bdump(buf)
+--		bdump(buf)
 		
 		local head=pack.load(buf,{
 			"u8","count",
@@ -68,27 +73,36 @@ while true do
 			"u16","magz",
 		},56)
 		
+		local function sign31(n)
+			if n>0x0fffff then return n-0x200000 end
+			return n
+		end
+
 		local function debit(base)
---print(base,8,#buf)	
-			local b={}
-			for i=1,8 do b[i]=pack.read(buf,"u8",base+i-1) end
-			local t={}
+			local b={} for i=1,8 do b[i]=pack.read(buf,"u8",base+i-1) end
+			
+			local t1=sign31( lshift(b[1],13) + lshift(b[2],5) + rshift(band(b[3],0xf8),3) )
+			local t2=sign31( lshift(band(b[3],0x07),18) + lshift(b[4],10) + lshift(b[5],2) + rshift(band(b[6],0xc0),6) )
+			local t3=sign31( lshift(band(b[6],0x3f),15) + lshift(b[7],7) + rshift(band(b[8],0xfe),1) )
 --[[			
     t[1] = (buffer[0] << 13) | (buffer[1] << 5) | ((buffer[2] & 0xF8) >> 3);
     t[2] = ((buffer[2] & 0x07) << 18) | (buffer[3] << 10) | (buffer[4] << 2) | ((buffer[5] & 0xC0) >> 6);
     t[3] = ((buffer[5] & 0x3F) << 15) | (buffer[6] << 7) | (buffer[7] >> 1);
 ]]
-			return t
+			return t1,t2,t3
 		end
 		
 		local data={}
-		for i=1,1 do
-			data[ (i-1)*2 + 0]= debit( 8 +     16*(i-1) )
-			data[ (i-1)*2 + 1]= debit( 8 + 8 + 16*(i-1) )
+		if head.count>2 then head.count=3 end
+		for i=1,head.count do
+			local d={}
+			data[i]=d
+			d.accx , d.accy , d.accz = debit( 8 +     16*(i-1) )
+			d.gyrx , d.gyry , d.gyrz = debit( 8 + 8 + 16*(i-1) )
 		end
 		
-		
-		print( head.count, head.time, head.last, head.temp , tail.magx, tail.magy, tail.magz )
+		print( data[1].accx , data[1].accy , data[1].accz , ".", data[1].gyrx , data[1].gyry , data[1].gyrz , ".", 
+		tail.magx, tail.magy, tail.magz , "-" ,  head.last*65536 + head.time, head.temp )
 	
 	end
 	
