@@ -4,176 +4,56 @@ local bit=require("bit")
 
 local pack=require("wetgenes.pack")
 local wstr=require("wetgenes.string")
+local hid=require("wetgenes.hid")
 
-for i,v in pairs(wstr) do
-	print(i,v)
-end
 
-		print(wstr.serialize({"uhm"}))
-
-local hid = require 'hid'
-
-local MAX_STR = 255
-
--- Enumerate and print the HID devices on the system
-
-local function printf(format, ...)
-	io.write(string.format(format, ...))
-end
-	
-local devs = hid.enumerate(0x0, 0x0)
-local cur_dev = devs
-while cur_dev do
-	printf("Device Found\n  type: %04x %04x\n  path: %s\n  serial_number: %s",
-		cur_dev.vendor_id, cur_dev.product_id, cur_dev.path, cur_dev.serial_number)
-	printf("\n")
-	printf("  Manufacturer: %s\n", cur_dev.manufacturer_string)
-	printf("  Product:      %s\n", cur_dev.product_string)
-	printf("\n")
-	cur_dev = cur_dev.next
-end
-devs = nil
-
-		print(wstr.serialize({"uhm"}))
-
--- Open the device using the VID, PID,
--- and optionally the Serial number.
-local handle = assert(hid.open(0x2833, 0x0001, nil))	-- the oculus rift
-
-		print(wstr.serialize({"uhm"}))
-
--- Read the Manufacturer String
-local wstr = assert(handle:get_manufacturer_string(MAX_STR))
-printf("Manufacturer String: %s\n", wstr)
-
-		print(wstr.serialize({"uhm"}))
-
--- Read the Product String
-local wstr = assert(handle:get_product_string(MAX_STR))
-printf("Product String: %s\n", wstr)
-
-		print(wstr.serialize({"uhm"}))
-
---[[
--- Read the Serial Number String
-local wstr = assert(handle:get_serial_number_string(MAX_STR))
-printf("Serial Number String: %s", wstr)
-printf("\n")
-]]
-
---[[
--- Read a data
-while true do
-	local buf = assert(handle:read(16))
---	printf("Data\n   ");
-	for i=1,#buf do
-		printf("%02x ", string.byte(buf, i))
+local bdump=function(buf)
+	if buf then
+		local t={}
+		for i=1,#buf do t[#t+1]=(string.format("%02x", string.byte(buf, i))) end
+		print(#buf,table.concat(t))
 	end
-	printf("\n");
-end
---]]
-
--- Send a Feature Report to the device
---assert(handle:send_feature_report(0x2, string.char(0xa0, 0x0a)..string.rep("\0", 14)))
-
---[[
--- Read a Feature Report from the device
-local buf = assert(handle:get_feature_report(0x6, 16))
-
--- Print out the returned buffer.
-printf("Feature Report\n   ");
-for i=1,#buf do
-	printf("%02x ", string.byte(buf, i))
-end
-printf("\n");
---]]
-
--- Set the hid_read() function to be non-blocking.
---assert(handle:set_nonblocking(true))
-
---[=[
--- Send an Output report to toggle the LED (cmd 0x80)
-buf[0] = 1; -- First byte is report number
-buf[1] = 0x80;
-res = hid_write(handle, buf, 65);
-
--- Send an Output report to request the state (cmd 0x81)
-buf[1] = 0x81;
-hid_write(handle, buf, 65);
-
--- Read requested state
-res = hid_read(handle, buf, 65);
-if (res < 0) then
-	printf("Unable to read()\n");
 end
 
--- Print out the returned buffer.
-for (i = 0; i < res; i++)
-	printf("buf[%d]: %d\n", i, buf[i]);
-end
-
---]=]
 
 
--- asking for a feature report sees to be needed, no idea wjhat it tells me but whatever
 
-assert(handle:set_nonblocking(true))
+print(wstr.dump(hid))
 
-		print(wstr.serialize({"uhm"}))
+print(wstr.dump(hid.enumerate()))
 
-assert(handle:send_feature_report(0x2, string.char(0xa0, 0x0a)..string.rep("\0", 14)))
--- Read a Feature Report from the device
-local buf = assert(handle:get_feature_report(0x6, 16))
--- Print out the returned buffer.
---[[
-printf("Feature Report\n   ");
-for i=1,#buf do
-	printf("%02x ", string.byte(buf, i))    TrackerMessageType Decode(const UByte* buffer, int size)
-    {
-        if (size < 62)
-            return TrackerMessage_SizeError;
+local dev = hid.open_path("/dev/hidraw0") -- first dev
+print(dev)
+if dev then hid.close(dev) end
 
-        SampleCount		= buffer[1];
-        Timestamp		= DecodeUInt16(buffer + 2);
-        LastCommandID	= DecodeUInt16(buffer + 4);
-        Temperature		= DecodeSInt16(buffer + 6);
-        
-        //if (SampleCount > 2)        
-        //    OVR_DEBUG_LOG_TEXT(("TackerSensor::Decode SampleCount=%d\n", SampleCount));        
+local dev = hid.open_id(0x2833, 0x0001, nil)	-- the oculus rift
+print(dev)
 
-        // Only unpack as many samples as there actually are
-        UByte iterationCount = (SampleCount > 2) ? 3 : SampleCount;
 
-        for (UByte i = 0; i < iterationCount; i++)
-        {
-            UnpackSensor(buffer + 8 + 16 * i,  &Samples[i].AccelX, &Samples[i].AccelY, &Samples[i].AccelZ);
-            UnpackSensor(buffer + 16 + 16 * i, &Samples[i].GyroX,  &Samples[i].GyroY,  &Samples[i].GyroZ);
-        }
+print( "manufacturer" , hid.get_string(dev,"manufacturer") )
+print( "product" , hid.get_string(dev,"product") )
+print( "serial_number" , hid.get_string(dev,"serial_number") )
 
-        MagX = DecodeSInt16(buffer + 56);
-        MagY = DecodeSInt16(buffer + 58);
-        MagZ = DecodeSInt16(buffer + 60);
+print( "error" , hid.error(dev) )
 
-        return TrackerMessage_Sensors;
+--if dev then hid.close(dev) end
 
-end
-printf("\n");
-]]
+hid.set_nonblocking(dev,1)
+
+assert(hid.send_feature_report(dev, string.char(0x2,0xa0, 0x0a)..string.rep("\0", 14)))
+
+local buf = assert(hid.get_feature_report(dev,0x6, 16))
+bdump(buf)
 
 
 -- Read a data
 while true do
-	local buf = assert(handle:read(62))
+	local buf = hid.read(dev,62)
 --	printf("Data\n   ");
 
-	if #buf>0 then
+	if buf then
 
-		for i=1,#buf do
-			printf("%02x", string.byte(buf, i))
-		end
-		if #buf>0 then
-			printf("\n");
-		end
+		bdump(buf)
 		
 		local head=pack.load(buf,{
 			"u8","count",
@@ -208,28 +88,11 @@ while true do
 		end
 		
 		
-		print( head.count,head.time,head.last,head.temp , tail.magx,tail.magy,tail.magz )
+		print( head.count, head.time, head.last, head.temp , tail.magx, tail.magy, tail.magz )
 	
 	end
 	
-	break
 end
 
-		print(wstr.serialize({"uhm"}))
-
---[[
-        // Only unpack as many samples as there actually are
-        UByte iterationCount = (SampleCount > 2) ? 3 : SampleCount;
-
-        for (UByte i = 0; i < iterationCount; i++)
-        {
-            UnpackSensor(buffer + 8 + 16 * i,  &Samples[i].AccelX, &Samples[i].AccelY, &Samples[i].AccelZ);
-            UnpackSensor(buffer + 16 + 16 * i, &Samples[i].GyroX,  &Samples[i].GyroY,  &Samples[i].GyroZ);
-        }
-
-        MagX = DecodeSInt16(buffer + 56);
-        MagY = DecodeSInt16(buffer + 58);
-        MagZ = DecodeSInt16(buffer + 60);
-]]
-
+os.exit(0)
 
