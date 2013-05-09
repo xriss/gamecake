@@ -162,6 +162,53 @@ size_t len;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// twiddle some bits, input is a stereo buffer(string), output is a mono buffer(ud)
+// the merge is performed over a described envelope
+// This is for fake stereo ogg files designed to be merged dynamically in game, into a mono source
+// we return a userdata of exactly half the size handed in which can then be handed on to al.BufferData
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_sod_dynap_st16 (lua_State *l)
+{	
+const signed short *wds,*wdsp,*wdse;
+size_t wds_len;
+size_t wds_len2;
+
+signed short *wd,*wdp;
+
+float l1,l2;
+float r1,r2;
+float rr;
+
+	wds =(const signed short *) luaL_checklstring(l, 1 ,&wds_len);
+	wds_len2=wds_len/2;
+	wdse=wds+wds_len2;
+
+	l1 =(float) luaL_checknumber(l, 2);
+	l2 =(float) luaL_checknumber(l, 3);
+	r1 =(float) luaL_checknumber(l, 4);
+	r2 =(float) luaL_checknumber(l, 5);
+	
+	rr =(float) luaL_checknumber(l, 6);
+
+	
+	wd=(signed short *)lua_newuserdata(l,wds_len2);
+	
+	for( wdsp=wds , wdp=wd ; wdsp < wdse ; wdsp+=2 , wdp++ )
+	{
+		*wdp=(signed short)( (((float)wdsp[0])*l1)  + (((float)wdsp[1])*r1) ) ;
+
+		if(l1>l2){ l1-=rr; if(l1<l2){l1=l2;} } else if(l1<l2){ l1+=rr; if(l1>l2){l1=l2;} }
+		if(r1>r2){ r1-=rr; if(r1<r2){r1=r2;} } else if(r1<r2){ r1+=rr; if(r1>r2){r1=r2;} }
+	}
+	
+	lua_pushnumber(l,(double)l1);
+	lua_pushnumber(l,(double)r1);
+	return 3;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -177,6 +224,10 @@ LUALIB_API int luaopen_wetgenes_sod_core (lua_State *l)
 		{"load_data",		lua_sod_load_data},
 		{"load_file",		lua_sod_load_file},
 //		{"save",			lua_sod_save},
+		
+		
+// hacky ogg data manipulation
+		{"dynap_st16",		lua_sod_dynap_st16},
 		
 		{0,0}
 	};

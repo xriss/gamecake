@@ -44,9 +44,7 @@ print( "error" , hid.error(dev) )
 --if dev then hid.close(dev) end
 
 hid.set_nonblocking(dev,1)
-
 assert(hid.send_feature_report(dev, string.char(0x2,0xa0, 0x0a)..string.rep("\0", 14)))
-
 local buf = assert(hid.get_feature_report(dev,0x6, 16))
 bdump(buf)
 

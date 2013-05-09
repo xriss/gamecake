@@ -440,7 +440,11 @@ local qq=sounds.queues[str.idx]
 					local fmt=al.FORMAT_MONO16
 					if qq.og.channels==2 then fmt=al.FORMAT_STEREO16 end
 					local rate=qq.og.rate
-					al.BufferData(b,fmt,qq.rr,#qq.rr,rate) -- C4 hopefully?
+					if qq.BufferData then -- special munge callback function
+						qq.BufferData(b,fmt,qq.rr,#qq.rr,rate) -- C4 hopefully?
+					else
+						al.BufferData(b,fmt,qq.rr,#qq.rr,rate) -- C4 hopefully?
+					end
 					qq.rr=nil
 				end
 			end
