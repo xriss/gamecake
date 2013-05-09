@@ -5,6 +5,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- this also contains matrix manipulation functions in the style of normal gl
 -- and a simple Color replacement that just caches the color here for later use
 
+local bit=require("bit")
+
 local wstr=require("wetgenes.string")
 
 local tardis=require("wetgenes.tardis")
@@ -32,6 +34,26 @@ function glescode.create(gl)
 		return code.cache.color -- safe way of getting this value (a 4 float userdata)
 	end
 
+-- easy to type color helpers, returns 4 **PREMULTIPLIED** floats from color u16 or u32
+	function code.C4(c) -- 0xffff -- ARGB
+		local r,g,b,a	
+		a=bit.band(bit.rshift(c,12),0xf)
+		r=bit.band(bit.rshift(c, 8),0xf)
+		g=bit.band(bit.rshift(c, 4),0xf)
+		b=bit.band(c,0xf)
+		a=a/0xf
+		return a*r/0xf,a*g/0xf,a*b/0xf,a
+	end
+
+	function code.C8(c) -- 0xffffffff -- AARRGGBB
+		local r,g,b,a	
+		a=bit.band(bit.rshift(c,24),0xff)
+		r=bit.band(bit.rshift(c,16),0xff)
+		g=bit.band(bit.rshift(c, 8),0xff)
+		b=bit.band(c,0xff)
+		a=a/0xff
+		return a*r/0xff,a*g/0xff,a*b/0xff,a
+	end
 
 
 -- matrix functions

@@ -120,6 +120,8 @@ function wmeta.setup(def)
 		
 		widget.meta=meta
 		
+		widget.draw=def.draw -- custom render, probably best to wrap with a widget:draw_base(function)
+		
 		widget.data=def.data -- this widget is synced with this data
 		
 		widget.class=def.class
@@ -172,7 +174,7 @@ function wmeta.setup(def)
 
 
 		
-		if widget.color or widget.text or widget.sheet then widget.solid=true end
+		if widget.hooks then widget.solid=true end
 		widget.solid=widget.solid or def.solid
 		
 		if widget.class and wmeta.classes[widget.class] then -- got a class, call its setup, its setup can override other functions

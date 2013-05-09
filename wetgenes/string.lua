@@ -20,20 +20,17 @@ local tonumber=tonumber
 local log=print
 
 --
--- Some ueful string functions.
+-- Some useful string functions.
 --
 
-module("wetgenes.string")
-
-
-
+local wstr={ modname=(...) } ; package.loaded[wstr.modname]=wstr
 
 -----------------------------------------------------------------------------
 --
 -- split a string into a table, flag enables pattern match on true
 --
 -----------------------------------------------------------------------------
-function str_split(div,str,flag)
+wstr.str_split = function(div,str,flag)
 
 	if (str=='') then return {""} end
 	
@@ -58,7 +55,7 @@ function str_split(div,str,flag)
 	return arr
 end
 --  yeah the above is bad and should be turned into this
-function split(str,div,flag) return str_split(div,str,flag) end
+wstr.split = function (str,div,flag) return wstr.str_split(div,str,flag) end
 
 
 
@@ -69,7 +66,7 @@ function split(str,div,flag) return str_split(div,str,flag) end
 -- returns a string
 --
 -----------------------------------------------------------------------------
-function serialize(o,opts)
+wstr.serialize = function(o,opts)
 opts=opts or {}
 opts.done=opts.done or {} -- only do tables once
 
@@ -83,7 +80,7 @@ local fout=opts.fout
 		opts.fout=function(...)
 			for i,v in ipairs({...}) do ret[#ret+1]=v end
 		end
-		serialize(o,opts)		
+		wstr.serialize(o,opts)		
 		return table.concat(ret)
 	end
 
@@ -119,7 +116,7 @@ local fout=opts.fout
 			
 			for k,v in ipairs(o) do -- dump number keys in order
 				fout(opts.indent)
-				serialize(v,opts)
+				wstr.serialize(v,opts)
 				fout(",",opts.newline)
 				maxi=k -- remember top
 			end
@@ -127,9 +124,9 @@ local fout=opts.fout
 			for k,v in pairs(o) do
 				if (type(k)~="number") or (k<1) or (k>maxi) or (math.floor(k)~=k) then -- skip what we already dumped
 					fout(opts.indent,"[")
-					serialize(k,opts)
+					wstr.serialize(k,opts)
 					fout("]=")
-					serialize(v,opts)
+					wstr.serialize(v,opts)
 					fout(",",opts.newline)
 				end
 			end
@@ -155,7 +152,7 @@ end
 -- returns a string
 --
 -----------------------------------------------------------------------------
-function dump(o,opts)
+wstr.dump = function(o,opts)
 opts=opts or {}
 opts.done=opts.done or {} -- only do tables once
 opts.names=opts.names or {"this"}
@@ -170,7 +167,7 @@ local fout=opts.fout
 		opts.fout=function(...)
 			for i,v in ipairs({...}) do ret[#ret+1]=v end
 		end
-		dump(o,opts)		
+		wstr.dump(o,opts)		
 		return table.concat(ret)
 	end
 
@@ -205,7 +202,7 @@ local fout=opts.fout
 			for k,v in ipairs(o) do -- dump number keys in order
 				table.insert(opts.names,tostring(k))
 				fout(opts.indent)
-				dump(v,opts)
+				wstr.dump(v,opts)
 				fout(",",opts.newline)
 				maxi=k -- remember top
 				table.remove(opts.names)
@@ -215,9 +212,9 @@ local fout=opts.fout
 				if (type(k)~="number") or (k<1) or (k>maxi) or (math.floor(k)~=k) then -- skip what we already dumped
 					table.insert(opts.names,tostring(k))
 					fout(opts.indent,"[")
-					dump(k,opts)
+					wstr.dump(k,opts)
 					fout("]=")
-					dump(v,opts)
+					wstr.dump(v,opts)
 					fout(",",opts.newline)
 					table.remove(opts.names)
 				end
@@ -241,7 +238,7 @@ end
 -- append english number postfix, 1st 2nd 3rd 4th etc
 --
 -----------------------------------------------------------------------------
-function str_insert_number_commas(n)
+wstr.str_insert_number_commas = function (n)
 
 	local s=tostring(math.floor(n))
 	local t={}
@@ -260,7 +257,7 @@ end
 -- append english number postfix, 1st 2nd 3rd 4th etc
 --
 -----------------------------------------------------------------------------
-function str_append_english_number_postfix(n)
+wstr.str_append_english_number_postfix = function(n)
 
 	local ith=n%10
 	if n>10 and n<20 then ith=4 end -- teens are all "th"
@@ -278,7 +275,7 @@ end
 -- returns nil if the table is empty
 --
 -----------------------------------------------------------------------------
-function str_join_english_list(t)
+wstr.str_join_english_list = function(t)
 
 local s
 
@@ -309,7 +306,7 @@ end
 -- convert a string into a hex string
 --
 -----------------------------------------------------------------------------
-function str_to_hex(s)
+wstr.str_to_hex = function(s)
 	return string.gsub(s, ".", function (c)
 		return string.format("%02x", string.byte(c))
 	end)
@@ -320,7 +317,7 @@ end
 -- replace any %xx with the intended char, eg "%20" becomes a " "
 --
 -----------------------------------------------------------------------------
-function url_decode(str)
+wstr.url_decode = function (str)
     return string.gsub(str, "%%(%x%x)", function(hex)
         return string.char(tonumber(hex, 16))
     end)
@@ -332,7 +329,7 @@ end
 -- this is the bare minimum we need to escape so as not to confuse things
 --
 -----------------------------------------------------------------------------
-function url_encode(str)
+wstr.url_encode = function(str)
     return string.gsub(str, "([&=%%#'\"])", function(c)
         return string.format("%%%02X", string.byte(c))
     end)
@@ -344,7 +341,7 @@ end
 -- and converts the entire string to lowercase
 --
 -----------------------------------------------------------------------------
-function alpha_munge(str)
+wstr.alpha_munge = function(str)
     return string.gsub(string.lower(str), "([^a-z0-9])", function(c)
         return "_"
     end)
@@ -355,13 +352,13 @@ end
 -- trime whitespace from ends of string
 --
 -----------------------------------------------------------------------------
-function trim(s)
+wstr.trim = function(s)
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
-function trim_start(s)
+wstr.trim_start = function(s)
   return (s:gsub("^%s*(.-)", "%1"))
 end
-function trim_end(s)
+wstr.trim_end = function(s)
   return (s:gsub("(.-)%s*$", "%1"))
 end
 
@@ -370,7 +367,7 @@ end
 -- split on \n, each line also includes its own \n
 --
 -----------------------------------------------------------------------------
-function split_lines(text)
+wstr.split_lines = function(text)
 	local separator = "\n"
 	
 	local parts = {}  
@@ -396,7 +393,7 @@ end
 -- split on whitespace, throw away all whitespace return only the words
 --
 -----------------------------------------------------------------------------
-function split_words(text,split)
+wstr.split_words = function(text,split)
 	local separator = split or "%s+"
 	
 	local parts = {}  
@@ -425,7 +422,7 @@ end
 -- such that a concat on the result would be a perfect reproduction of the original
 --
 -----------------------------------------------------------------------------
-function split_whitespace(text)
+wstr.split_whitespace = function(text)
 	local separator = "%s+"
 	
 	local parts = {}  
@@ -452,7 +449,7 @@ end
 -- split a string in two on first = 
 --
 -----------------------------------------------------------------------------
-function split_equal(text)
+wstr.split_equal = function(text)
 	local separator = "="
 	
 	local parts = {}
@@ -483,8 +480,7 @@ end
 -- and looped over to produce a result.
 --
 -----------------------------------------------------------------------------
-local replace_lookup
-replace_lookup=function(a,d) -- look up a in table d
+wstr.replace_lookup=function(a,d) -- look up a in table d
 	local t=d[a]
 	if t then
 		if type(t)=="table" then -- if a table then
@@ -522,7 +518,7 @@ replace_lookup=function(a,d) -- look up a in table d
 	local dd=d[a1] -- use the bit before the dot to find the sub table
 	
 	if type(dd)=="table" then -- check we got a table
-		return replace_lookup(a2,dd) -- tail call this function
+		return wstr.replace_lookup(a2,dd) -- tail call this function
 	end
 	
 	return nil -- couldnt find anything returnnil
@@ -535,7 +531,7 @@ end
 -- allow sub table look up with a.b notation in the name
 --
 -----------------------------------------------------------------------------
-function replace(a,d)
+wstr.replace=function(a,d)
 
 return (string.gsub( a , "{([%w%._%-]-)}" , function(a) -- find only words and "._-!" tightly encased in {}
 -- this means that almost all legal use of {} in javascript will not match at all.
@@ -543,7 +539,7 @@ return (string.gsub( a , "{([%w%._%-]-)}" , function(a) -- find only words and "
 -- so the text will just be returned as is.
 -- So it may not be safe, but it is simple to understand and perfecty fine under most use cases.
 
-	return replace_lookup(a,d) or ("{"..a.."}")
+	return wstr.replace_lookup(a,d) or ("{"..a.."}")
 	
 end )) -- note gsub is in brackes so we just get its first return value
 
@@ -557,7 +553,7 @@ end
 -- and that value would last for the rest of the chunk
 --
 -----------------------------------------------------------------------------
-local function macro_replace_once(text,old_d,opts)
+wstr.macro_replace_once = function(text,old_d,opts)
 	opts=opts or {}
 	local opts_clean=opts.clean
 	local opts_htmldbg=opts.dbg_html_comments
@@ -618,7 +614,7 @@ local function macro_replace_once(text,old_d,opts)
 						if opts_clean then dat="" end
 					end
 				else -- normal lookup
-					dat=replace_lookup(tag,d)
+					dat=wstr.replace_lookup(tag,d)
 				end
 			end
 		end
@@ -647,7 +643,7 @@ local function macro_replace_once(text,old_d,opts)
 	return table.concat(ret,""),count
 end
 
-function macro_replace(a,d,opts)
+wstr.macro_replace = function(a,d,opts)
 
 local opts=opts or {} --{dbg_html_comments=true} to include html dbg, this will break some macro use inside javascript or html attributes so is off by default turn on to dbg
 	
@@ -657,13 +653,13 @@ local opts=opts or {} --{dbg_html_comments=true} to include html dbg, this will 
 	opts.clean=false
 	for i=1,100 do -- maximum recursion
 	
-		ret,count=macro_replace_once(ret,d,opts)
+		ret,count=wstr.macro_replace_once(ret,d,opts)
 		
 		if count==0 then break end -- nothing left to replace
 		
 	end
 	opts.clean=true
-	ret=macro_replace_once(ret,{},opts) -- finally remove temporary chunks
+	ret=wstr.macro_replace_once(ret,{},opts) -- finally remove temporary chunks
 	return ret
 end
 
@@ -674,8 +670,8 @@ end
 -- return a table of lines
 --
 -----------------------------------------------------------------------------
-function smart_wrap(s,w)
-	local ls=split_whitespace(s)
+wstr.smart_wrap=function(s,w)
+	local ls=wstr.split_whitespace(s)
 	local t={}
 	
 	local wide=0
@@ -712,4 +708,3 @@ function smart_wrap(s,w)
 	
 	return t
 end
-

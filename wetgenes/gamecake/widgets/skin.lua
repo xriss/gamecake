@@ -199,8 +199,8 @@ end
 --
 -- display this widget and its sub widgets
 --
-	function meta.draw(widget)
-		
+	function meta.draw_base(widget,f)
+	
 		if debug_hook then debug_hook("draw",widget) end
 
 --		gl.PopMatrix() -- expect the base to be pushed
@@ -281,6 +281,88 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		end
 		
 		widget.dirty=nil
+
+		
+if f then f(widget) end		
+		
+
+		for i,v in ipairs(widget) do
+			if not v.fbo or not v.dirty then -- terminate recursion at dirty fbo
+				v:draw()
+			end
+		end
+
+		if widget.fbo then -- we have drawn into the fbo
+			
+--			gl.PopMatrix()
+			gl.PopMatrix()
+
+--			widget.layout.clean()
+
+
+			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+			
+
+			widget.old_layout.restore() --restore old viewport
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PopMatrix()			
+			gl.MatrixMode(gl.MODELVIEW)
+			gl.PopMatrix()
+
+
+			widget.layout=nil
+			widget.old_layout=nil
+		end
+		
+else -- we can only draw once
+
+		if widget.fbo then -- we need to draw our cached fbo
+
+		
+			gl.Disable(gl.DEPTH_TEST)
+			gl.Disable(gl.CULL_FACE)
+		
+--			gl.Translate(widget.sx,-widget.sy,0)
+			gl.Color(1,1,1,1)
+			
+			widget.fbo:bind_texture()
+			flat.tristrip("xyzuv",{
+				0,				0,				0,	0,1,
+				widget.fbo.w,	0,				0,	1,1,
+				0,				widget.fbo.h,	0,	0,0,
+				widget.fbo.w,	widget.fbo.h,	0,	1,0,
+			})
+
+--print("draw fbo")
+		end
+		
+end
+
+		if widget.clip then
+		
+			widget.old_layout.restore() --restore old viewport
+			
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PopMatrix()			
+			gl.MatrixMode(gl.MODELVIEW)
+			gl.PopMatrix()
+
+
+			widget.layout=nil
+			widget.old_layout=nil
+
+		end
+		
+		gl.PopMatrix() -- expect the base to be pushed
+	
+		
+		return widget
+		
+	end
+	
+	function meta.draw(widget)
+	
+		meta.draw_base(widget,function(widget)
 						
 		local txp,typ=0,0
 		
@@ -519,76 +601,8 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 				ty=ty+fy
 			end
 		end
-
-		for i,v in ipairs(widget) do
-			if not v.fbo or not v.dirty then -- terminate recursion at dirty fbo
-				v:draw()
-			end
-		end
-
-		if widget.fbo then -- we have drawn into the fbo
-			
---			gl.PopMatrix()
-			gl.PopMatrix()
-
---			widget.layout.clean()
-
-
-			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-			
-
-			widget.old_layout.restore() --restore old viewport
-			gl.MatrixMode(gl.PROJECTION)
-			gl.PopMatrix()			
-			gl.MatrixMode(gl.MODELVIEW)
-			gl.PopMatrix()
-
-
-			widget.layout=nil
-			widget.old_layout=nil
-		end
 		
-else -- we can only draw once
-
-		if widget.fbo then -- we need to draw our cached fbo
-
-		
-			gl.Disable(gl.DEPTH_TEST)
-			gl.Disable(gl.CULL_FACE)
-		
---			gl.Translate(widget.sx,-widget.sy,0)
-			gl.Color(1,1,1,1)
-			
-			widget.fbo:bind_texture()
-			flat.tristrip("xyzuv",{
-				0,				0,				0,	0,1,
-				widget.fbo.w,	0,				0,	1,1,
-				0,				widget.fbo.h,	0,	0,0,
-				widget.fbo.w,	widget.fbo.h,	0,	1,0,
-			})
-
---print("draw fbo")
-		end
-		
-end
-
-		if widget.clip then
-		
-			widget.old_layout.restore() --restore old viewport
-			
-			gl.MatrixMode(gl.PROJECTION)
-			gl.PopMatrix()			
-			gl.MatrixMode(gl.MODELVIEW)
-			gl.PopMatrix()
-
-
-			widget.layout=nil
-			widget.old_layout=nil
-
-		end
-		
-		gl.PopMatrix() -- expect the base to be pushed
-	
+		end)
 		
 		return widget
 	end

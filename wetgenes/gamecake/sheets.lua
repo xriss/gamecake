@@ -24,10 +24,11 @@ local meta_sheet={__index=base_sheet}
 	local images=cake.images
 	
 sheets.get=function(id)
-	return sheets.data[id]
+	return id and sheets.data[id]
 end
 
 sheets.set=function(d,id)
+	if not id then id = #sheets.data+1 end
 	sheets.data[id]=d
 end
 

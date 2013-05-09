@@ -20,7 +20,7 @@ local bit=require("bit")
 -- Read a single member and return it
 --
 pack.read=function(dats,fmt,off)
-	local datt,len=core.load(dats,fmt,off)
+	local datt,len=core.load(dats,{fmt},off)
 	return datt and datt[1]
 end
 
@@ -28,7 +28,7 @@ end
 -- Read an array of the same type
 --
 pack.load_array=function(dats,fmt,off,count)
-	return core.load(dats,fmt,off)
+	return core.load(dats,fmt,off,count)
 end
 
 --

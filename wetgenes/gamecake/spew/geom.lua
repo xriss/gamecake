@@ -38,7 +38,7 @@ M.bake=function(oven,geom)
 		if not it.predrawn then
 			local orders={}
 			orders[3]={ {3,3,2,1,1}			,	{1,1,2,3,3}		}
-			orders[4]={ {1,1,2,4,3,3} 		,	{3,3,4,2,1,1}	}
+			orders[4]={ {3,3,4,2,1,1}		,	{1,1,2,4,3,3}	}
 			orders[5]={ {4,4,3,5,2,1,1}		,	{1,1,2,5,3,4,4}	}
 
 			local t={}
@@ -134,6 +134,47 @@ M.bake=function(oven,geom)
 		return v
 	end
 
+
+	geom.face_square_uvs=function(it)
+		local t={
+			{0,0},
+			{1,0},
+			{1,1},
+			{0,1},
+		}
+		for i,v in pairs(it.verts) do
+			local idx=((v[8]-1)%4)+1
+			v[7]=t[idx][1]
+			v[8]=t[idx][2]
+		end
+	end
+
+	geom.flip=function(it)
+
+		for i,p in pairs(it.polys) do geom.poly_flip(it,p) end
+		for i,v in pairs(it.verts) do geom.vert_flip(it,v) end
+	end
+		
+	geom.vert_flip=function(it,v)
+		if v[4] then
+			v[4]=-v[4]
+			v[5]=-v[5]
+			v[6]=-v[6]
+		end
+	end
+
+	geom.poly_flip=function(it,p)
+	
+		local n={}
+		for i=#p,1,-1 do
+			n[#n+1]=p[i]
+		end
+		for i=1,#n do
+			p[i]=n[i]
+		end
+
+	end
+
 	geom.fix_poly_order=function(it,p)
 	
 		local v2=it.verts[ p[2] ]
@@ -142,13 +183,7 @@ M.bake=function(oven,geom)
 		local d = vn[1]*v2[1] + vn[2]*v2[2] + vn[3]*v2[3]
 		
 		if d>0 then -- invert poly order
-			local n={}
-			for i=#p,1,-1 do
-				n[#n+1]=p[i]
-			end
-			for i=1,#n do
-				p[i]=n[i]
-			end
+			geom.poly_flip(it,p)
 		end
 	end
 
