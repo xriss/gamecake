@@ -1,0 +1,14 @@
+syntax: glob
+*.orig
+build-*
+*.dbg
+android/bin/*
+android/libs/*
+android/gen/*
+android/res/*
+lua/preloadlibs.c
+lua/cache.c
+*/log.txt
+nacl/nginx/logs/*
+
+

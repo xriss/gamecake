@@ -1,0 +1,4 @@
+cd ../../apps/bulb
+../bake
+cp out/bulb.zip ../../lua/nacl/nginx/static/bulb.zip
+
