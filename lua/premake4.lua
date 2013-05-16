@@ -74,17 +74,19 @@ elseif WINDOWS then
 	links { "opengl32" , "glu32" }
 	links {  "ws2_32" , "gdi32"}
 	
--- gcc only
---	links ( "stdc++" )
---	links { "mingw32" }
+	if GCC then
+		links { "stdc++" , "mingw32" }
+	end
 		
 	links { "winmm" }
 
-	links { "comdlg32" } -- we need to remove this when we impliment our own file-requester
+--	links { "comdlg32" } -- we need to remove this when we impliment our own file-requester
 	
 --	linkoptions{ "--enable-stdcall-fixup" }
 
-	KIND{kind="ConsoleApp",name="lua.exe"}
+	local exe=".exe"
+	if not GCC then exe="" end -- native builds add .exe automatically	
+	KIND{kind="ConsoleApp",name="lua"..exe}
 
 elseif NIX then
 
