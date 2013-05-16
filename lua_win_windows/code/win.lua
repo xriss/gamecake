@@ -151,8 +151,8 @@ function win.android_start(apk)
 	local zips=require("wetgenes.zips")
 	zips.add_apk_file(win.apk)
 	
-	win.files_prefix=hardcore.get_files_prefix()
-	win.cache_prefix=hardcore.get_cache_prefix()
+	win.files_prefix=hardcore.get_files_prefix().."/"
+	win.cache_prefix=hardcore.get_cache_prefix().."/"
 
 --print(win.files_prefix)
 --print(win.cache_prefix)
@@ -388,33 +388,35 @@ function base.posix_open_events(w)
 
 	local kbdcount=0
 	for i=0,#events do local v=events[i]
-		if v.handlers.kbd then -- open as keyboard, there may be many of these and it is all a hacky
-			v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
-			if v.fd then
-				print("opened keyboard "..kbdcount.." on event"..v.event.." "..v.name)
-				v.fd_device=kbdcount
-				v.fd_type="keyboard"
-				kbdcount=kbdcount+1
-			else
-				print("failed to open keyboard "..kbdcount.." on event"..v.event.." "..v.name)
-			end
-		elseif v.js then -- open as joystick	
-			v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
-			if v.fd then
-				print("opened joystick "..v.js.." on event"..v.event.." "..v.name)
-				v.fd_device=v.js
-				v.fd_type="joystick"
-			else
-				print("failed to open joystick "..v.js.." on event"..v.event.." "..v.name)
-			end
-		elseif v.mouse then -- open as mouse
-			v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
-			if v.fd then
-				print("opened mouse "..v.mouse.." on event"..v.event.." "..v.name)
-				v.fd_device=v.mouse
-				v.fd_type="mouse"
-			else
-				print("failed to open mouse "..v.mouse.." on event"..v.event.." "..v.name)
+		if v then
+			if v.handlers.kbd then -- open as keyboard, there may be many of these and it is all a hacky
+				v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
+				if v.fd then
+					print("opened keyboard "..kbdcount.." on event"..v.event.." "..v.name)
+					v.fd_device=kbdcount
+					v.fd_type="keyboard"
+					kbdcount=kbdcount+1
+				else
+					print("failed to open keyboard "..kbdcount.." on event"..v.event.." "..v.name)
+				end
+			elseif v.js then -- open as joystick	
+				v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
+				if v.fd then
+					print("opened joystick "..v.js.." on event"..v.event.." "..v.name)
+					v.fd_device=v.js
+					v.fd_type="joystick"
+				else
+					print("failed to open joystick "..v.js.." on event"..v.event.." "..v.name)
+				end
+			elseif v.mouse then -- open as mouse
+				v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
+				if v.fd then
+					print("opened mouse "..v.mouse.." on event"..v.event.." "..v.name)
+					v.fd_device=v.mouse
+					v.fd_type="mouse"
+				else
+					print("failed to open mouse "..v.mouse.." on event"..v.event.." "..v.name)
+				end
 			end
 		end
 	end
@@ -428,17 +430,19 @@ function base.posix_read_events(w) -- call this until it returns nil to get all 
 	
 	local events=base.posix_events
 	for i=0,#events do local v=events[i]
-		if v.fd then
-			local pkt=posix.read(v.fd,16)
-			if pkt then
-				local tab=pack.load(pkt,{"u32","secs","u32","micros","u16","type","u16","code","u32","value"})
-				tab.time=tab.secs+(tab.micros/1000000)
-				tab.secs=nil
-				tab.micros=nil
-				tab.class="posix_"..v.fd_type
-				tab.posix_device=v -- please do not edit this
---print(tab.class)
-				return tab
+		if v then
+			if v.fd then
+				local pkt=posix.read(v.fd,16)
+				if pkt then
+					local tab=pack.load(pkt,{"u32","secs","u32","micros","u16","type","u16","code","u32","value"})
+					tab.time=tab.secs+(tab.micros/1000000)
+					tab.secs=nil
+					tab.micros=nil
+					tab.class="posix_"..v.fd_type
+					tab.posix_device=v -- please do not edit this
+	--print(tab.class)
+					return tab
+				end
 			end
 		end
 	end

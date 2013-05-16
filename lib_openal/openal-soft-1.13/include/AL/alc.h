@@ -270,6 +270,15 @@ typedef void           (ALC_APIENTRY *LPALCCAPTURESAMPLES)( ALCdevice *device, A
  #pragma export off
 #endif
 
+#if defined(__native_client__)
+#include <ppapi/c/ppp.h>
+#include <ppapi/c/ppp_instance.h>
+/* This function is part of the NaCl libopenal port and is
+ * required to be called before OpenAL initialization.
+ */
+extern void alSetPpapiInfo(PP_Instance, PPB_GetInterface);
+#endif
+
 #if defined(__cplusplus)
 }
 #endif

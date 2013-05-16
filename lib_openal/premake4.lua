@@ -20,7 +20,9 @@ elseif NACL then
 
 	prefix="openal-soft-1.13"
 	files { 
-			prefix.."/Alc/backends/ppapi.c",
+			prefix.."/Alc/wave.c",
+			prefix.."/Alc/null.c",
+			prefix.."/Alc/ppapi.c",
 			prefix.."/OpenAL32/alDatabuffer.c",
 	}
 	defines("HAVE_PPAPI","_DEBUG")

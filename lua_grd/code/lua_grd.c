@@ -64,6 +64,10 @@ int lua_grd_getinfo (lua_State *l, part_ptr p, int tab)
 {
 	if(p)
 	{
+		if(p->cmap->data)
+		{
+			lua_pushliteral(l,"cmap");		lua_pushlightuserdata(l,p->cmap->data);		lua_rawset(l,tab);
+		}
 		lua_pushliteral(l,"data");		lua_pushlightuserdata(l,p->bmap->data);		lua_rawset(l,tab);
 
 		lua_pushliteral(l,"format");	lua_pushnumber(l,p->bmap->fmt);		lua_rawset(l,tab);
@@ -857,7 +861,7 @@ struct grd_info gb[1];
 	else
 	{
 		s=lua_tolstring(l,str_idx,&sl);
-		if(sl==0) // passed in a ""
+		if(sl==0) // passed in a "" as a flag
 		{
 			read_tab=0;
 			s=0;

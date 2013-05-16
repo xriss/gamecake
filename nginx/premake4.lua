@@ -193,6 +193,8 @@ else
 	links { "crypt" }
 	links { "pthread" }
 	links { "dl" , "m" , "rt" }
+
+	links { "X11" , "udev" }
 	
 	KIND{kind="ConsoleApp",name="nginx"}
 

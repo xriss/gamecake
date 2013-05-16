@@ -95,7 +95,7 @@ elseif NIX then
 	links { "GL" , "GLU" }
 	links { "crypt" }
 	links { "pthread" }
---	links { "X11"  }
+	links { "X11"  , "udev" }
 	
 	links { "dl" , "m" , "pthread" , "rt" }
 	

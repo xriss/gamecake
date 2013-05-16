@@ -74,18 +74,45 @@ android.queue_all_msgs=function()
 			elseif ma.event == "motion" then
 			
 				local act=0
-				if ma.action==0 then act= 1 end
-				if ma.action==1 then act=-1 end
-				if ma.action==2 then act= 0 end
+				local action=ma.action%256
+				local actidx=math.floor((ma.action/256)%256) + 1
+
+				if action==0 then act= 1 end -- single touch
+				if action==1 then act=-1 end
+
+				if action==5 then act= 1 end -- multi touch
+				if action==6 then act=-1 end
 				
-				m={
-					time=ma.eventtime,
-					action=act,
-					class="mouse",
-					keycode=1,--ma.pointers[1].id,
-					x=ma.pointers[1].x,
-					y=ma.pointers[1].y,
-				}
+				local fingers={}
+				for i=1,#ma.pointers do
+					local p=ma.pointers[i]
+					if act==0 or i~=actidx then -- just report position
+						fingers[#fingers+1]={
+							time=ma.eventtime,
+							action=0,
+							class="mouse",
+							x=p.x,
+							y=p.y,
+							fingers=fingers,
+							finger=p.id, -- this is a unique id for the duration of this touch
+						}
+					else -- this is a finger going up/down
+						fingers[#fingers+1]={
+							time=ma.eventtime,
+							action=act,
+							class="mouse",
+							keycode=1,	-- always report all fingers as left mouse button
+							x=p.x,
+							y=p.y,
+							fingers=fingers,
+							finger=p.id,
+						}
+					end
+				end
+				-- send them all ourself
+				for i,v in ipairs(fingers) do
+					table.insert(android.queue,v)
+				end
 
 			elseif ma.event == "key" then
 			
