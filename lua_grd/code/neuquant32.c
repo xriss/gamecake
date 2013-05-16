@@ -61,7 +61,7 @@
 
 /* Unbias network to give byte values 0..255 and record position i to prepare for sort
    ----------------------------------------------------------------------------------- */
-static inline double biasvalue(unsigned int temp);
+ static double biasvalue(unsigned int temp);
 
 
 /* Network Definitions
@@ -165,7 +165,7 @@ static unsigned int unbiasvalue(double temp)
     return temp;
 }
 
-static inline unsigned int round_biased(double temp)
+static unsigned int round_biased(double temp)
 {    
     if (temp < 0) return 0;
     temp = floor((temp / 255.0 * 256.0));
@@ -175,7 +175,7 @@ static inline unsigned int round_biased(double temp)
 }
 
 
-inline static double biasvalue(unsigned int temp)
+static double biasvalue(unsigned int temp)
 {    
     return biasvalues[temp];
 }
@@ -206,6 +206,7 @@ static nq_colormap colormap[256];
 
 void neuquant32_inxbuild()
 {
+	nq_colormap tempc;
 	unsigned int i,j,smallpos,smallval;
 	unsigned int previouscol,startpos;
 
@@ -233,7 +234,7 @@ void neuquant32_inxbuild()
 		/* swap colormap[i] (i) and colormap[smallpos] (smallpos) entries */
 		if (i != smallpos) {
 			nq_pixel temp = network[smallpos];   network[smallpos] = network[i];   network[i] = temp;
-			nq_colormap tempc = colormap[smallpos];   colormap[smallpos] = colormap[i];   colormap[i] = tempc;
+			tempc = colormap[smallpos];   colormap[smallpos] = colormap[i];   colormap[i] = tempc;
 		}
 		/* smallval entry is now in position i */
 		if (smallval != previouscol) {
@@ -248,7 +249,7 @@ void neuquant32_inxbuild()
 }
 
         
-inline static double colorimportance(double al)
+ static double colorimportance(double al)
 {
     double transparency = 1.0 - al/255.0;
     return (1.0 - transparency*transparency);
@@ -261,12 +262,11 @@ unsigned int neuquant32_inxsearch( int al, int r, int g, int b)
 {
     unsigned int i,best=0;
     double a,bestd=1<<30,dist;
-    
+    double colimp = colorimportance(al);
+
     r=biasvalue(r);
     g=biasvalue(g);
     b=biasvalue(b);
-   
-    double colimp = colorimportance(al);
     
     for(i=0; i < netsize; i++)
     {
@@ -300,13 +300,14 @@ static int contest(double al,double b,double g,double r)
 
 	unsigned int i; double dist,a,betafreq;
 	unsigned int bestpos,bestbiaspos;double bestd,bestbiasd;
-    
+
+    double colimp = colorimportance(al);
+
 	bestd = 1<<30;
 	bestbiasd = bestd;
 	bestpos = 0;
 	bestbiaspos = bestpos;
 
-    double colimp = colorimportance(al);
     
 	for (i=0; i<netsize; i++) 
     {

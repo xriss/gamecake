@@ -5,7 +5,7 @@ files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 
 links { "lib_lua" }
 
-buildoptions{ "-Wno-multichar" } -- we are using mulibyte char constants so please don't whine
+--buildoptions{ "-Wno-multichar" } -- we are using mulibyte char constants so please don't whine
 
 includedirs { "." }
 

@@ -1231,6 +1231,10 @@ s32 h=bb->h;
 int grd_shrink(struct grd *g,struct grd_area *gc )
 {
 struct grd_info *gi=g->bmap;
+s32 x,y;
+s32 w,h;
+u8 *p;
+u32 a;
 
 	if( ! ( (gi->fmt==GRD_FMT_U8_ARGB) || (gi->fmt==GRD_FMT_U8_ARGB_PREMULT) ) )
 	{
@@ -1245,10 +1249,7 @@ struct grd_info *gi=g->bmap;
 	}
 
 
-s32 x,y;
-s32 w,h;
-u8 *p;
-u32 a;
+
 
 // push down
 	for( y=gc->y ; y<gc->y+gc->h ; y++ )

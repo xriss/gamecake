@@ -42,6 +42,10 @@ extern int wetgenes_cache_loader(lua_State *L)
 
 extern void wetgenes_cache_preloader(lua_State *L)
 {
+// setup the ziploader (which is written in lua)
+	const char *name="wetgenes.zipsloader";
+	const char *data=wetgenes_cache_find(name);
+
 	int numLoaders = 0;
 
 	lua_getfield(L, LUA_GLOBALSINDEX, "package");	// push "package"
@@ -57,10 +61,6 @@ extern void wetgenes_cache_preloader(lua_State *L)
 		lua_pop(L, 1);
 		numLoaders++;
 	}
-
-// setup the ziploader (which is written in lua)
-	const char *name="wetgenes.zipsloader";
-	const char *data=wetgenes_cache_find(name);
 
 	if(data)
 	{

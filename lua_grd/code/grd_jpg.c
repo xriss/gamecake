@@ -68,13 +68,14 @@ static void grd_jpg_load(struct grd * g, struct grd_loader_info * inf )
 
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_error_mgr jerr;
-	
+	FILE *fp=0;
+
 	cinfo.err = jpeg_std_error(&jerr);
 
 	jpeg_create_decompress(&cinfo);
 		
 	/* open file and test for it being a jpeg */
-	FILE *fp=0;
+
 	
 	if(inf->file_name) // reading from a file
 	{

@@ -72,11 +72,13 @@ elseif WINDOWS then
 	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
 
 	links { "opengl32" , "glu32" }
-	links { "stdc++" , "ws2_32" , "gdi32"}
+	links {  "ws2_32" , "gdi32"}
 	
+-- gcc only
+--	links ( "stdc++" )
+--	links { "mingw32" }
+		
 	links { "winmm" }
-	
-	links { "mingw32" }
 
 	links { "comdlg32" } -- we need to remove this when we impliment our own file-requester
 	

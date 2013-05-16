@@ -55,7 +55,7 @@
 #undef HAVE_UINT32_T
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#define HAVE_UNISTD_H 1
+//#define HAVE_UNISTD_H 1
 
 /* Define to 1 if the system has the type `u_int32_t'. */
 #undef HAVE_U_INT32_T

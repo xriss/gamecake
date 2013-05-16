@@ -29,7 +29,7 @@ int   data_size=0;
 
 u32  *offs=0;
 int   offs_size=0;
-
+int i;
 	
 	if(!init)
 	{
@@ -59,7 +59,7 @@ int   offs_size=0;
 	idxs=calloc(offs_size,sizeof(u16 *));
 	idxs_size=offs_size;
 	
-int i;
+
 	for(i=0;i<idxs_size;i++)
 	{
 		idxs[i]=data + (offs[i]/2);

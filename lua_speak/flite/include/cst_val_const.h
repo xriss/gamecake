@@ -116,6 +116,10 @@
 /* other things too                                               */
 #define CST_CONST_INT_MAX 19
 
+
+#define NO_UNION_INITIALIZATION
+
+
 #ifndef NO_UNION_INITIALIZATION
 
 /* This is the simple way when initialization of unions is supported */
