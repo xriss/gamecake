@@ -139,23 +139,28 @@ if t:sub(1,5)=="raspi" then
 	TARGET="RASPI"
 	CPU=t:sub(6)
 	RASPI=true
+	GCC=true
 elseif t:sub(1,4)=="nacl" then
 	TARGET="NACL"
 	CPU=t:sub(5)
 	NACL=true
+	GCC=true
 elseif t:sub(1,7)=="android" then
 	TARGET="ANDROID"
 	CPU=t:sub(8)
 	ANDROID=true
+	GCC=true
 elseif t:sub(1,5)=="mingw" then
 	TARGET="WINDOWS"
 	CPU=t:sub(6)
 	WINDOWS=true
 	MINGW=true
+	GCC=true
 elseif t:sub(1,3)=="nix" then
 	TARGET="NIX"
 	CPU=t:sub(4)
 	NIX=true
+	GCC=true
 elseif os.get() == "windows" then
 	TARGET="WINDOWS"
 	WINDOWS=true
@@ -495,9 +500,11 @@ elseif WINDOWS then -- need windows GL hacks
 
 	includedirs { "lua_win_windows/code" }
 	defines{ "LUA_GLES_GLES2" }
---	defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
---vs?
-	defines{ "INCLUDE_GLES_GL=\"GL3/gl3w.h\"" }
+	if GCC then
+		defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
+	else
+		defines{ "INCLUDE_GLES_GL=\"GL3/gl3w.h\"" }
+	end
 	
 else -- use GL 
 
@@ -516,7 +523,7 @@ all_includes=all_includes or {
 	{"lua_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_bit",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_hid",			WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		},
+	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		RASPI		},
 	{"lua_al",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_tardis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
@@ -538,7 +545,7 @@ all_includes=all_includes or {
 	{"lua_win_android",	nil			or		nil		or		nil		or		ANDROID		or		nil			},
 	{"lua_win_raspi",	nil			or		nil		or		nil		or		nil			or		RASPI		},
 	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lib_hidapi",		WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		},
+	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		RASPI		},
 	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_png",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_jpeg",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
