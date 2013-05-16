@@ -235,7 +235,7 @@ static __inline int SetMixerFPUMode(void)
     newState |= _FPU_SINGLE | _FPU_RC_ZERO;
     _FPU_SETCW(newState);
 #else
-    int fpuState;
+    int fpuState=0;
 #if defined(HAVE__CONTROLFP)
     fpuState = _controlfp(0, 0);
     (void)_controlfp(_RC_CHOP|_PC_24, _MCW_RC|_MCW_PC);

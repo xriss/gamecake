@@ -199,8 +199,12 @@ int lua_wetwin_create (lua_State *l)
 {
 wetwin_lua_wrap *wp;
 wetwin_lua *p;
-
+	RECT rect[1];
+    PIXELFORMATDESCRIPTOR pfd;
+    int iFormat;
+	
 const char *title=" http://gamecake.4lfa.com/ ";
+
 	lua_getfield(l,1,"title");	if( lua_isstring(l,-1) ) { title=lua_tostring(l,-1);	} lua_pop(l,1);
 
 	wp = (wetwin_lua_wrap *)lua_newuserdata(l, sizeof(wetwin_lua_wrap)); // we need a pointer, this makes lua GC a bit easier
@@ -247,7 +251,7 @@ const char *title=" http://gamecake.4lfa.com/ ";
 
     RegisterClassEx( p->wc );
 
-	RECT rect[1];
+
 	rect->left=80;
 	rect->top=80;
 	
@@ -269,8 +273,7 @@ const char *title=" http://gamecake.4lfa.com/ ";
 
 	p->winclosed=0;
     
-    PIXELFORMATDESCRIPTOR pfd;
-    int iFormat;
+
 
     // get the device context (DC)
     p->hDC = GetDC( p->hwnd );
@@ -476,11 +479,11 @@ typedef struct tagMSG {
 	char *key="";
 
 	char lua=' ';
-
+	double time=0.0;
 	char_buff256[0]=0;
 	char_buff16[0]=0;
 	
-	double time=0.0;
+
 
 	if( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
 	{
@@ -736,6 +739,8 @@ LUALIB_API int luaopen_wetgenes_win_windows_core(lua_State *l)
 	lua_newtable(l);
 	luaL_openlib(l, NULL, lib, 0);
 	
+
+
 	return 1;
 }
 

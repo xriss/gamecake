@@ -1814,6 +1814,10 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 	lua_setfield(l,-2,"fixed_pipeline_available");
 #endif
 	
+#if defined(WIN32)
+	gl3wInit();
+#endif
+
 	return 1;
 }
 

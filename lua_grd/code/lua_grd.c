@@ -212,15 +212,16 @@ const char *opts=0;
 
 part_ptr *p;
 part_ptr new_p;
-	
-	new_p=0;
-
-	p=lua_grd_get_ptr(l,1);
-
 const char *filename=0;
 const u8 *data=0;
 s32 data_len=0;
 s32 fmt=0;
+
+	new_p=0;
+
+	p=lua_grd_get_ptr(l,1);
+
+
 
 	if(! lua_istable(l,2) )
 	{
@@ -827,6 +828,10 @@ s32 idx;
 
 int read_tab;
 
+size_t sl=0;
+const char * s=0;
+struct grd_info gb[1];
+
 	idx=1;
 
 // snap x,y,z w,h,d to available pixels
@@ -842,9 +847,7 @@ int read_tab;
 	if(y+h>grd->h)	{	h=grd->h-y;		}
 	if(z+d>grd->d)	{	d=grd->d-z;		}
 
-size_t sl=0;
-const char * s=0;
-struct grd_info gb[1];
+
 	grdinfo_reset(gb);
 
 	if(str_idx==0) // just fill in, dont read

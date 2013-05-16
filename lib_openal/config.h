@@ -126,3 +126,16 @@
 
 /* Define if we have the __restrict keyword */
 #define HAVE___RESTRICT
+
+
+#if defined(WIN32) || defined(WIN64)
+
+#define strcasecmp _stricmp
+#define isfinite(n)  _finite(n)
+#define strncasecmp _strnicmp
+#define snprintf sprintf_s
+
+#undef HAVE_STRTOF
+
+#endif
+

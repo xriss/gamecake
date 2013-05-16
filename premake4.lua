@@ -495,7 +495,9 @@ elseif WINDOWS then -- need windows GL hacks
 
 	includedirs { "lua_win_windows/code" }
 	defines{ "LUA_GLES_GLES2" }
-	defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
+--	defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
+--vs?
+	defines{ "INCLUDE_GLES_GL=\"GL3/gl3w.h\"" }
 	
 else -- use GL 
 
@@ -542,7 +544,7 @@ all_includes=all_includes or {
 	{"lib_z",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		},
-	{"lib_pcre",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
+	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			},
 	{"lib_vorbis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},

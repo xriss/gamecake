@@ -74,13 +74,15 @@ static u32 string_to_id(const char *s)
 	const u32 test4='abcd'; // lets play find the ace
 	const u32 test1='a';	
 	int inyourendo= ( (test4&0xff) == test1 ); // true if first char is at bottom, littleendian
-	
+	int len;
+	cu8 *p;
+
 	if(!s) { return 0; }
 	
-	int len=strlen(s);
+	len=strlen(s);
 	if(len>4) { len=4; } // only first 4 chars of longer strings
 	
-	cu8 *p=(cu8 *)s; // unsigned please
+	p=(cu8 *)s; // unsigned please
 	if(inyourendo)
 	{
 		switch(len)

@@ -20,7 +20,9 @@
 #include "../lib_lua/src/lauxlib.h"
 #include "../lib_lua/src/lualib.h"
 
-
+#ifndef M_PI
+#    define M_PI 3.14159265358979323846
+#endif
 
 // link with lua/hacks.c plz
 extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);

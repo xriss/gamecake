@@ -90,6 +90,8 @@ void lprofP_callhookIN(lprofP_STATE* S, char *func_name, char *file, int linedef
 /* pauses all timers to write a log line and computes the new stack */
 /* returns if there is another function in the stack */
 int lprofP_callhookOUT(lprofP_STATE* S) {
+	char* source;
+	char* name;
 
   if (S->stack_level == 0) {
     return 0;
@@ -104,14 +106,14 @@ int lprofP_callhookOUT(lprofP_STATE* S) {
   info->local_time += function_call_time;
   info->total_time += function_call_time;
   
-  char* source = info->file_defined;
+  source = info->file_defined;
   if (source[0] != '@') {
      source = "(string)";
   }
   else {
      formats(source);
   }
-  char* name = info->function_name;
+  name = info->function_name;
   
   if (strlen(name) > MAX_FUNCTION_NAME_LENGTH) {
      name = malloc(MAX_FUNCTION_NAME_LENGTH+10);

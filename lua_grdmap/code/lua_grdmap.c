@@ -220,15 +220,14 @@ struct grd *g=lua_grd_check_ptr(l,2);
 int lua_grdmap_cutup (lua_State *l)
 {
 part_ptr p=lua_grdmap_get(l,1);
+s32 px;
+s32 py;
 
 	if(!p->g)
 	{
 		luaL_error(l, "missing grd in grdmap" );
 	}
-	
-s32 px;
-s32 py;
-	
+		
 	px=(s32)lua_tonumber(l,2);
 	py=(s32)lua_tonumber(l,3);
 
@@ -257,7 +256,8 @@ part_ptr p=lua_grdmap_get(l,1);
 s32 id;
 s32 x;
 s32 y;
-	
+struct grdmap_tile *t;
+
 	if( lua_isnumber(l,3) ) // x,y ?
 	{
 		x=(s32)lua_tonumber(l,2);
@@ -272,7 +272,7 @@ s32 y;
 	
 	if( (id<0) || (id>=p->numof_tiles) ) { luaL_error(l, "tile out of range" ); }
 	
-	struct grdmap_tile *t=p->tiles+id;
+	t=p->tiles+id;
 	
 	lua_newtable(l);
 	lua_grdmap_tile_getinfo(l, t, lua_gettop(l) );
