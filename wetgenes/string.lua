@@ -490,7 +490,7 @@ wstr.replace_lookup=function(a,d) -- look up a in table d
 					local it=d.it
 					for i,v in ipairs(t) do
 						d.it=v
-						tt[#tt+1]=macro_replace(d[t.plate] or t.plate,d)
+						tt[#tt+1]=wstr.macro_replace(d[t.plate] or t.plate,d)
 					end
 					d.it=it
 					return table.concat(tt)
@@ -499,7 +499,7 @@ wstr.replace_lookup=function(a,d) -- look up a in table d
 				if t.plate then -- how to format
 					local it=d.it
 					d.it=t
-					local tt=macro_replace(d[t.plate] or t.plate,d)
+					local tt=wstr.macro_replace(d[t.plate] or t.plate,d)
 					d.it=it
 					return tt
 				end

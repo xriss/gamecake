@@ -26,7 +26,12 @@
 --
 -- https://bitbucket.org/xixs/bin/src/tip/lua/wetgenes/tardis.lua
 --
--- This also needs to be overloaded with a float based C version...
+-- This also needs to be overloaded with a float based C version
+-- Which does partially exist but is only used in the GLES lib so far
+--
+-- This seems to be the simplest (programmer orientated) description of
+-- most of the maths used here so go read it
+-- http://www.j3d.org/matrix_faq/matrfaq_latest.html
 --
 
 local math=require("math")
@@ -117,6 +122,12 @@ function array.product(a,b,r)
 			return m4_product_v4(a,b,r)
 		elseif mtb=="m4" then
 			return m4_product_m4(a,b,r)
+		end
+	elseif mta=="q4" then
+		if     mtb=="q4" then
+			return q4_product_q4(a,b,r)
+		elseif mtb=="v3" then
+			return q4_product_v3(a,b,r)
 		end
 	end
 	error("tardis : "..mta.." product "..mtb.." not supported",2)
@@ -296,7 +307,7 @@ function m4.scale_v3(it,v3a,r)
 					it[13],		it[14],		it[15],		it[16] )
 end
 
-function m4.rotate(it,degrees,v3a,r)
+function m4.setrot(it,degrees,v3a)
 
 	local c=math.cos(-math.pi*degrees/180)
 	local cc=1-c
@@ -315,12 +326,16 @@ function m4.rotate(it,degrees,v3a,r)
 		z=z/d
 	end
 
-	local m4a=m4.new(
+	return it:set(
 		x*x*cc+c	,	x*y*cc-z*s	,	x*z*cc+y*s	, 	0	,
 		x*y*cc+z*s	,	y*y*cc+c	,	y*z*cc-x*s	,	0	,
         x*z*cc-y*s	,	y*z*cc+x*s	,	z*z*cc+c	,	0	,
         0			,	0			,	0			,	1	)
 
+end
+
+function m4.rotate(it,degrees,v3a,r)
+	local m4a=m4.new():setrot(degrees,v3a)
 	return m4_product_m4(m4a,it,r)
 end
 
@@ -396,9 +411,41 @@ end
 function v4.normalize(it,r)
 	return v4.scale(it,1/v4.len(it),r)
 end
+function v4.add(va,vb,r)
+	r=r or va
+	return r:set( va[1]+vb[1] , va[2]+vb[2] , va[3]+vb[3] , va[4]+vb[4] )
+end
+function v4.sub(va,vb,r)
+	r=r or va
+	return r:set( va[1]-vb[1] , va[2]-vb[2] , va[3]-vb[3] , va[4]-vb[4] )
+end
+function v4.dot(va,vb)
+	return ( (va[1]*vb[1]) + (va[2]*vb[2]) + (va[3]*vb[3]) + (va[4]*vb[4]) )
+end
+
 
 class("q4",v4)
-function q4.new(...) return setmetatable({0,0,0,0},q4):set(...) end
+function q4.new(...) return setmetatable({0,0,0,1},q4):set(...) end
+
+function q4.nlerp(qa,qb,sa,r)
+	local sb=1-sa
+	if qa.dot(qb) < 0 then sa=-sa end -- shortest fix
+	r=r or va
+	r:set( va[1]*sa+vb[1]*sb , va[2]*sa+vb[2]*sb , va[3]*sa+vb[3]*sb , va[4]*sa+vb[4]*sb )
+	return r:normalize()
+end
+
+function q4.setrot(it,degrees,v3a)
+	local ah=degrees * (math.PI/360)
+	local sh=math.sin(ah)
+	return it:set( math.cos(ah) , v3a[1]*sh , v3a[2]*sh , v3a[3]*sh )
+end
+
+function q4.rotate(it,degrees,v3a,r)
+	local q4a=q4.new():setrot(degrees,v3a)
+	return q4_product_q4(q4a,it,r)
+end
+
 
 
 class("line",array)
@@ -419,13 +466,41 @@ function line_intersect_plane(l,p,r)
 	return r:set( l[1][1]+(l[2][1]*d) , l[1][2]+(l[2][2]*d) , l[1][3]+(l[2][3]*d) ) -- the point of intersection
 end
 
-function m4_product_v4(m4a,v4b,r)
-	r=r or v4b
-	local r1= (m4a[   1]*v4b[1]) + (m4a[ 4+1]*v4b[2]) + (m4a[ 8+1]*v4b[3]) + (m4a[12+1]*v4b[4])
-	local r2= (m4a[   2]*v4b[1]) + (m4a[ 4+2]*v4b[2]) + (m4a[ 8+2]*v4b[3]) + (m4a[12+2]*v4b[4])
-	local r3= (m4a[   3]*v4b[1]) + (m4a[ 4+3]*v4b[2]) + (m4a[ 8+3]*v4b[3]) + (m4a[12+3]*v4b[4])
-	local r4= (m4a[   4]*v4b[1]) + (m4a[ 4+4]*v4b[2]) + (m4a[ 8+4]*v4b[3]) + (m4a[12+4]*v4b[4])
+function q4_to_m4(q,m)
+	if not m then m=m4.new() end
+	local w,x,y,z=q[1],q[2],q[3],q[4]
+    local xx,xy,xz,xw=x*x,x*y,x*z,x*w
+    local    yy,yz,yw=    y*y,y*z,y*w
+    local       zz,zw=        z*z,z*w
+
+	return m:set(
+					1 - 2 * ( yy + zz ),
+						2 * ( xy - zw ),
+						2 * ( xz + yw ),0,
+						2 * ( xy + zw ),
+					1 - 2 * ( xx + zz ),
+						2 * ( yz - xw ),0,
+						2 * ( xz - yw ),
+						2 * ( yz + xw ),
+					1 - 2 * ( xx + yy ),0,
+						0,0,0,1				)
+end
+
+function q4_product_q4(q4a,q4b,r)
+	r=r or q4b
+    local r1 =  q4a[1] * q4b[4] + q4a[2] * q4b[3] - q4a[3] * q4b[2] + q4a[4] * q4b[1];
+    local r2 = -q4a[1] * q4b[3] + q4a[2] * q4b[4] + q4a[3] * q4b[1] + q4a[4] * q4b[2];
+    local r3 =  q4a[1] * q4b[2] - q4a[2] * q4b[1] + q4a[3] * q4b[4] + q4a[4] * q4b[3];
+    local r4 = -q4a[1] * q4b[1] - q4a[2] * q4b[2] - q4a[3] * q4b[3] + q4a[4] * q4b[4];
 	return r:set(r1,r2,r3,r4)
+end
+
+function q4_product_v3(q4a,v3b,r)
+	r=r or v3b
+    local r1 =                    q4a[2] * v3b[3] - q4a[3] * v3b[2] + q4a[4] * v3b[1];
+    local r2 = -q4a[1] * v3b[3]                   + q4a[3] * v3b[1] + q4a[4] * v3b[2];
+    local r3 =  q4a[1] * v3b[2] - q4a[2] * v3b[1]                   + q4a[4] * v3b[3];
+	return r:set(r1,r2,r3)
 end
 
 function m4_product_v3(m4a,v3b,r)
@@ -477,10 +552,10 @@ end
 -- then at z=480 we would have one to one pixel scale...
 -- the total view area volume from there would be -320 +320 , -240 +240 , -480 +(1024-480)
 --
--- win_width and win_height must be the current width and height of the display in pixels or nil
+-- view_width and view_height must be the current width and height of the display in pixels or nil
 -- we use this to wout out where to place our view such that it is always visible and keeps its aspect.
 --
-m4_project23d = function(win_width,win_height,width,height,fov,depth)
+m4_project23d = function(view_width,view_height,width,height,fov,depth)
 
 	local aspect=height/width
 
@@ -489,7 +564,7 @@ m4_project23d = function(win_width,win_height,width,height,fov,depth)
 	local f=depth
 	local n=1
 
-	local win_aspect=((win_height or height)/(win_width or width))
+	local win_aspect=((view_height or height)/(view_width or width))
 		
 	if (win_aspect > (aspect) ) 	then 	-- fit width to screen
 	
