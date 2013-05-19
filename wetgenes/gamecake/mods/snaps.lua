@@ -13,7 +13,7 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local win=require("wetgenes.win")
 
 local wgrd   =require("wetgenes.grd")
-local lfs   =require("lfs")
+local lfs ; (function() pcall( function() lfs=require("lfs") end ) end)()
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -28,6 +28,8 @@ function M.bake(oven,snaps)
 	local layout=cake.layouts.create{}
 
 	function snaps.setup()
+		if not lfs then return end
+
 		lfs.mkdir(win.files_prefix.."snaps")
 	end
 
@@ -41,6 +43,8 @@ function M.bake(oven,snaps)
 	end
 		
 	function snaps.msg(m)
+		if not lfs then return m end
+
 		if m.class=="key" and m.keyname=="f12" and m.action==1 then
 			local name=os.date("%Y%m%d_%H%M%S")
 print("Snaps "..name)

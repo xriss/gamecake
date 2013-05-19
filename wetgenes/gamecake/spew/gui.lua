@@ -28,8 +28,13 @@ M.bake=function(oven,gui)
 	local sounds=cake.sounds
 	local canvas=cake.canvas
 	local layout=cake.layouts.create{}
+	local flat=canvas.flat
 	
 	local gl=oven.gl
+
+	local wetiso=oven.rebake("wetgenes.gamecake.spew.geom_wetiso")
+	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
+
 
 --	function gui.returnpage()
 --		gui.active=false -- stop displaying our stuff
@@ -46,6 +51,9 @@ M.bake=function(oven,gui)
 			gui.parent=parent
 			gui.master=parent.master
 		end
+		wetiso.setup()
+		gui.time=0
+
 	end
 	
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
@@ -55,6 +63,8 @@ M.bake=function(oven,gui)
 
 	local ssettings=oven.rebake("wetgenes.gamecake.spew.settings")
 	
+
+
 --	local bpages=oven.rebake("bulb.pages")
 	
 	gui.ids={}
@@ -416,7 +426,25 @@ print("click",id)
 		top:add({class="slide",color=0xffcccccc,hx=320,hy=40,datx=gui.data.vol_sfx,data=gui.data.vol_sfx,hooks=gui.hooks})
 
 
-		top:add({hx=320,hy=40*6})
+		top:add({hx=320,hy=40*1})
+
+		top:add({hx=320,hy=40,color=0xffcccccc,text="About",hooks=gui.hooks}):add{hx=80,hy=80,px=20,py=-20}.draw=function(w)
+			w:draw_base(function(w)
+				gl.Color(0,0.25,0.75,1)
+				gl.PushMatrix()
+				gl.Translate(w.hy*0.5,w.hy*0.5,0)
+				gl.Scale(w.hy,w.hy,w.hy)
+				gl.Rotate(gui.time,0,-1,0)
+				gl.Rotate(gui.time/8,1,0,0)
+				gl.Enable(gl.CULL_FACE)
+				wetiso.draw()
+				gl.Disable(gl.CULL_FACE)
+				gl.PopMatrix()
+			end)
+		end
+						
+						
+		top:add({hx=320,hy=40*4})
 
 		top:add({hx=120,hy=40,color=0xffcccccc,text="Back",id="settings_return",hooks=gui.hooks})
 		top:add({hx=80,hy=40})
@@ -485,6 +513,7 @@ print("click",id)
 	end
 	
 	function gui.update()
+		gui.time=gui.time+1
 	
 		gui.master:update()
 

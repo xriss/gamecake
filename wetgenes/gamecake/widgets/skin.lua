@@ -205,7 +205,7 @@ end
 
 --		gl.PopMatrix() -- expect the base to be pushed
 		gl.PushMatrix()
-		gl.Translate(widget.px,widget.py,0)
+		gl.Translate(widget.px*widget.sx,widget.py*widget.sy,0)
 		
 		if widget.anim then
 			widget.anim:draw()		
@@ -233,7 +233,7 @@ end
 		
 		if widget.pan_px and widget.pan_py and not widget.fbo  then -- fidle everything
 --print("draw",widget.pan_px,widget.pan_py)
-			gl.Translate(-widget.pan_px,-widget.pan_py,0)
+			gl.Translate(-widget.pan_px*widget.sx,-widget.pan_py*widget.sy,0)
 		end
 		
 		if widget.fbo then
@@ -270,9 +270,9 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
-			gl.Translate(-widget.px,-widget.py,0)
+			gl.Translate(-widget.px*widget.sx,-widget.py*widget.sy,0)
 			if widget.pan_px and widget.pan_py then -- fidle everything
-				gl.Translate(-widget.pan_px,-widget.pan_py,0)
+				gl.Translate(-widget.pan_px*widget.sx,-widget.pan_py*widget.sy,0)
 			end
 			
 			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
@@ -360,7 +360,36 @@ end
 		
 	end
 	
+	function meta.draw_color(widget)
+		local w=widget
+		local master=widget.master
+		local buttdown=false
+		if ( master.press and master.over==widget ) or widget.state=="selected" then
+			buttdown=true
+		end
+		if master.over==widget then
+			if buttdown then
+				local c={explode_color(widget.color)}
+				c[3]=c[3]*14/16
+				c[2]=c[2]*14/16
+				c[1]=c[1]*14/16
+				gl.Color( c[1],c[2],c[3],c[4] )
+			else
+				gl.Color( explode_color(widget.color))
+			end
+		else
+			local c={explode_color(widget.color)}
+			c[3]=c[3]*12/16
+			c[2]=c[2]*12/16
+			c[1]=c[1]*12/16
+			gl.Color( c[1],c[2],c[3],c[4] )
+		end
+				
+	end
+	
 	function meta.draw(widget)
+		local w=widget
+		local master=widget.master
 	
 		meta.draw_base(widget,function(widget)
 						
@@ -578,12 +607,12 @@ end
 
 				if widget.text_color_shadow then
 					gl.Color( pack.argb8_pmf4(widget.text_color_shadow) )
-					font.set_xy(tx+1,ty+1)
+					font.set_xy((tx+1)*w.sx,(ty+1)*w.sy)
 					font.draw(line)
 				end
 				
 				gl.Color( pack.argb8_pmf4(c) )
-				font.set_xy(tx,ty)
+				font.set_xy((tx)*w.sx,(ty)*w.sy)
 --print(wstr.dump(line))
 				font.draw(line)
 				
@@ -592,7 +621,7 @@ end
 						if widget.master.throb>=128 then
 							local sw=font.width(widget.text:sub(1,widget.data.str_idx))
 
-							font.set_xy(tx+sw,ty)
+							font.set_xy((tx+sw)*w.sx,(ty)*w.sy)
 							font.draw("_")
 						end
 					end
