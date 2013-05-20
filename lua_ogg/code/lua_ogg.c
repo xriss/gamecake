@@ -394,7 +394,9 @@ while(1){
 					for(j=0;j<bout;j++)
 					{
 						int val=floor(mono[j]*32767.f+.5f);
-						*ptr=val;
+						if(val> 32767) { val= 32767; } else
+						if(val<-32767) { val=-32767; } else
+						*ptr=val; // assume little endian 
 						ptr+=dd->vi.channels;
 					}
 				}
