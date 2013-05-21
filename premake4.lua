@@ -36,15 +36,6 @@ function newgcctoolchain(toolchain)
     }
 end
 
-newplatform {
-    name = "raspi",
-    description = "raspi",
-    gcc = {
-        cc = "gcc",
-        cxx = "g++",
-        cppflags = "",
-    }
-}
 newgcctoolchain {
     name = "raspi",
     description = "raspi",
@@ -53,15 +44,6 @@ newgcctoolchain {
     cppflags = "",
 }
 
-newplatform {
-    name = "android",
-    description = "android",
-    gcc = {
-        cc = "gcc",
-        cxx = "g++",
-        cppflags = "",
-    }
-}
 newgcctoolchain {
     name = "android",
     description = "android",
@@ -69,15 +51,6 @@ newgcctoolchain {
     cppflags = "",
 }
 
-newplatform {
-    name = "android-x86",
-    description = "android-x86",
-    gcc = {
-        cc = "gcc",
-        cxx = "g++",
-        cppflags = "",
-    }
-}
 newgcctoolchain {
     name = "android-x86",
     description = "android-x86",
@@ -85,15 +58,6 @@ newgcctoolchain {
     cppflags = "",
 }
 
-newplatform {
-    name = "nacl",
-    description = "nacl",
-    gcc = {
-        cc = "gcc",
-        cxx = "g++",
-        cppflags = "",
-    }
-}
 newgcctoolchain {
     name = "nacl",
     description = "nacl",
@@ -102,20 +66,22 @@ newgcctoolchain {
 }
 
 
-newplatform {
-    name = "mingw",
-    description = "mingw",
-    gcc = {
-        cc = "gcc",
-        cxx = "g++",
-        cppflags = "",
-    }
-}
 newgcctoolchain {
     name = "mingw",
     description = "mingw",
     prefix = "i586-mingw32msvc-",
     cppflags = "",
+}
+
+newplatform {
+    name = "clang",
+    description = "clang",
+    gcc = {
+        cc = "clang",
+        cxx = "clang++",
+        ar= "ar",
+        cppflags = "-MMD",
+    }
 }
 
 
@@ -133,6 +99,8 @@ MINGW=false
 NIX=false
 CPU="32"
 TARGET="NIX"
+GCC=false
+CLANG=false
 
 local t= _ARGS[1] or ""
 if t:sub(1,5)=="raspi" then
@@ -161,6 +129,12 @@ elseif t:sub(1,3)=="nix" then
 	CPU=t:sub(4)
 	NIX=true
 	GCC=true
+elseif t:sub(1,5)=="clang" then
+	TARGET="NIX"
+	CPU=t:sub(6)
+	NIX=true
+	GCC=true
+	CLANG=true
 elseif os.get() == "windows" then
 	TARGET="WINDOWS"
 	WINDOWS=true
@@ -310,6 +284,10 @@ elseif NIX then
 	defines "X11"
 --	defines	"LUA_USE_DLOPEN"
 	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
+
+	if CLANG then
+		platforms { "clang" } --hax
+	end
 	
 end
 
@@ -320,7 +298,11 @@ end
 
 if not BUILD_DIR_BASE then
 
-	BUILD_DIR_BASE=("build-"..(_ACTION or "gmake").."-"..TARGET.."-"..CPU):lower()
+	local t=TARGET
+	if CLANG then t="clang" end
+
+	BUILD_DIR_BASE=("build-"..(_ACTION or "gmake").."-"..t.."-"..CPU):lower()
+	
 end
 
 if not BUILD_DIR then
