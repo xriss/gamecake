@@ -4,7 +4,7 @@ cd ..
 
 makeopts=""
 if [ "$1" = "release" ] ; then
-makeopts="config=release"
+makeopts="config=release_clang"
 fi
 
 build/premake4 gmake clang-32
