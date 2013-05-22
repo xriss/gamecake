@@ -6,7 +6,7 @@
 -- yielding inside the call to pcall or xpcall.
 --
 -- Authors: Roberto Ierusalimschy and Andre Carregal 
--- Contributors: Thomas Harning Jr., Ignacio Burgueño, Fábio Mascarenhas
+-- Contributors: Thomas Harning Jr., Ignacio Burgueno, Fabio Mascarenhas
 --
 -- Copyright 2005 - Kepler Project (www.keplerproject.org)
 --

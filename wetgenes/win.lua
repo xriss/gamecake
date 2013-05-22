@@ -89,6 +89,8 @@ end
 -- really you can never be sure what name a key has...
 win.generic_keymap={
 
+
+-- android patch
 	["android_04"]="escape",
 	["android_6f"]="escape",
 	["android_42"]="return",
@@ -100,10 +102,15 @@ win.generic_keymap={
 	["android_16"]="right",
 	["android_17"]="return",
 
+
+-- windows patch
 	["backspace"]="back",
 	["kp_enter"]="enter",
-
 	["oem_3"]="`",
+	["esc"]="escape",
+	
+-- linux patch
+	["grave"]="`",
 	
 }
 

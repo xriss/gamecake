@@ -14,29 +14,8 @@ local linux={}
 local core=require("wetgenes.win.linux.core")
 
 
-
--- key names are given in raw OS flavour,
--- this maps these raw names to more generic names
--- well actually I've decided to standardise on the windows vkey codes since
--- thats the most popular amongst all the platfroms suported (blame NaCl)
-linux.generic_keymap={
-	["grave"]="`",
---	["backspace"]="back",
-}
-
-function linux.keymap(key)
-	key=key:lower()
-	return linux.generic_keymap[key] or key
-end
-
-
 linux.msg=function(w)
 	local m=core.msg(w)
-	if m then
-		if m.keyname then -- run it through our keymap probably just force it to lowercase.
-			m.keyname=linux.keymap(m.keyname)
-		end
-	end
 	return m
 end
 
