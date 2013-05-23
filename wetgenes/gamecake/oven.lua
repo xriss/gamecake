@@ -55,6 +55,15 @@ function M.bake(opts)
 			oven.win:context({})
 
 			if opts.show then oven.win:show(opts.show) end
+			for i,v in ipairs(opts) do -- check extra options
+				if     v=="windowed" then
+					oven.win:show("win")
+				elseif v=="fullscreen" then
+					oven.win:show("full")
+				elseif v=="maximised" then
+					oven.win:show("max")
+				end
+			end
 --			oven.win:show("full")
 --			oven.win:show("max")
 
