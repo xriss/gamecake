@@ -10,7 +10,14 @@ export PATH=$andsdkarm/bin:$andsdkx86/bin:$OPATH
 
 build="debug"
 makeopts=""
+
 if [ "$1" = "release" ] ; then
+makeopts="config=release_android"
+makeopts32="config=release_android-x86"
+build="release"
+fi
+
+if [ "$1" = "build" ] ; then
 makeopts="config=release_android"
 makeopts32="config=release_android-x86"
 build="release"
@@ -49,8 +56,18 @@ cd ..
 #make $makeopts32 $2 $3 $4
 #cd ..
 
+
+if [ "$1" == "build" ] ; then
+
+	cd android
+	ant $build
+	exit
+
+fi
+
 cd android
 rm bin/*.apk
 ant uninstall
 ant $build install
+
 
