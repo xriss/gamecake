@@ -111,16 +111,10 @@ varying float v_face;
 void main()
 {
 
-	v_face=a_texcoord.x-1;
+	v_face=a_texcoord.x-1.0;
 
-	float vx=mod(v_face,8);
-//	float vy=floor(v_face/8);
-
-	vec2 aa[3];
-	aa[0]=vec2(	 (vx    )/8.0	,	 0.0	);
-	aa[1]=vec2(	 (vx+0.5)/8.0	,	 1.0	);
-	aa[2]=vec2(	 (vx+1.0)/8.0	,	 0.0	);
-
+	float vx=mod(v_face,8.0);
+//	float vy=floor(v_face/8.0);
 
     gl_Position = projection * modelview * vec4(a_vertex, 1.0);
     v_normal = normalize( mat3( modelview ) * a_normal );
@@ -128,7 +122,10 @@ void main()
 
 	int a=int(clamp(a_texcoord.y-1.0,0.0,2.0));
 	
-	v_texcoord=aa[a];
+	if(a==2) {			v_texcoord=vec2(	 (vx+1.0)/8.0	,	 0.0	);
+	} else if(a==1) {	v_texcoord=vec2(	 (vx+0.5)/8.0	,	 1.0	);
+	} else {			v_texcoord=vec2(	 (vx    )/8.0	,	 0.0	);
+	}
 
 }
 
@@ -148,7 +145,7 @@ varying vec2  v_texcoord;
 varying float v_face;
 
 
-vec3 d=vec3(0,0,-1);
+vec3 d=vec3(0.0,0.0,-1.0);
 
 void main(void)
 {
@@ -159,7 +156,7 @@ void main(void)
 	}
 
 	vec3 n=normalize(v_normal);
-	gl_FragColor= tc + (v_color*max( -n.z, 0.25 ))*(1-tc.a) ;
+	gl_FragColor= tc + (v_color*max( -n.z, 0.25 ))*(1.0-tc.a) ;
 	gl_FragColor.a=1.0;
 }
 
