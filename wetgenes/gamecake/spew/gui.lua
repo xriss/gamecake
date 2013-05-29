@@ -35,7 +35,6 @@ M.bake=function(oven,gui)
 	local wetiso=oven.rebake("wetgenes.gamecake.spew.geom_wetiso")
 	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
 
-
 --	function gui.returnpage()
 --		gui.active=false -- stop displaying our stuff
 --	end
@@ -411,6 +410,9 @@ print("click",id)
 		gui.clicks.settings_scores=function()
 			gui.page("score_list")
 		end
+		gui.clicks.settings_about=function()
+			oven.next=oven.rebake("wetgenes.gamecake.spew.about.sinescroll")
+		end
 
 		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 
@@ -428,7 +430,8 @@ print("click",id)
 
 		top:add({hx=320,hy=40*1})
 
-		top:add({hx=320,hy=40,color=0xffcccccc,text="About",hooks=gui.hooks}):add{hx=80,hy=80,px=20,py=-20}.draw=function(w)
+		top:add({hx=320,hy=40,color=0xffcccccc,text="About",id="settings_about",hooks=gui.hooks}):
+			add{hx=80,hy=80,px=20,py=-20}.draw=function(w)
 			w:draw_base(function(w)
 				gl.Color(0,0.25,0.75,1)
 				gl.PushMatrix()

@@ -262,12 +262,14 @@ function glescode.create(gl)
 			p.cache[n]=tcore.new_v4()
 		end
 		tcore.set(p.cache[n],v)
+		return p.cache[n]
 	end
 	local function cache_set_m4(p,n,v)
 		if not p.cache[n] then
 			p.cache[n]=tcore.new_m4()
 		end
 		tcore.set(p.cache[n],v)
+		return p.cache[n]
 	end
 
 	local function cache_check_v4(p,n,v)
@@ -306,14 +308,12 @@ function glescode.create(gl)
 	function pbase.uniform_v4(p,vname,v4)
 		if cache_check_v4(p,vname,v4) then return end
 		local n=p:uniform(vname)
-		gl.Uniform4f(n,v4)
-		cache_set_v4(p,vname,v4)
+		gl.Uniform4f(n, cache_set_v4(p,vname,v4) )
 	end
 	function pbase.uniform_m4(p,vname,m4)
 		if cache_check_m4(p,vname,m4) then return end
 		local n=p:uniform(vname)
-		gl.UniformMatrix4f(n,m4)
-		cache_set_m4(p,vname,m4)
+		gl.UniformMatrix4f(n,cache_set_m4(p,vname,m4))
 	end
 	
 	return code
