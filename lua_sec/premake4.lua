@@ -6,24 +6,33 @@ files { "src/**.c" , "src/**.cpp" , "src/**.h" }
 
 links { "lib_lua" }
 
+	includedirs "../lib_openssl/include"
+
+
+-- this is all just copies of lua socket, so we do not really need?
+
+	excludes("src/usocket.*")
+	excludes("src/wsocket.*")
+	excludes("src/timeout.*")
+	excludes("src/buffer.*")
+
+
 if WINDOWS then
 
 	excludes("src/usocket.*")
 	
-	links { "WS2_32" , "libcrypto" , "libssl" }
-	
-	includedirs "openssl/include"
-	libdirs "openssl/lib"
+--	links { "WS2_32" , "libcrypto" , "libssl" }
+--	libdirs "openssl/lib"
 
 else -- nix
 
 	excludes("src/wsocket.*")
 
-	links { "crypt" , "ssl" }
+--	links { "crypt" , "ssl" }
 
 end
 
 
-SET_KIND("lua","ssl.core","ssl_core")
-SET_TARGET("/ssl","core")
+KIND{kind="lua",name="ssl.core",luaname="ssl.core",luaopen="ssl_core"}
+
 

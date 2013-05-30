@@ -1,10 +1,9 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.2
- * Copyright (C) 2006-2007 Bruno Silvestre
+ * LuaSec 0.4
+ * Copyright (C) 2006-2009 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
-#include <errno.h>
 #include <string.h>
 
 #include <openssl/ssl.h>
@@ -17,7 +16,6 @@
 #include "buffer.h"
 #include "timeout.h"
 #include "socket.h"
-#include "context.h"
 #include "ssl.h"
 
 /**
@@ -64,11 +62,13 @@ static int meth_destroy(lua_State *L)
  */
 static int handshake(p_ssl ssl)
 {
+  int err;
   p_timeout tm = timeout_markstart(&ssl->tm);
   if (ssl->state == ST_SSL_CLOSED)
     return IO_CLOSED;
   for ( ; ; ) {
-    int err = SSL_do_handshake(ssl->ssl);
+    ERR_clear_error();
+    err = SSL_do_handshake(ssl->ssl);
     ssl->error = SSL_get_error(ssl->ssl, err);
     switch(ssl->error) {
     case SSL_ERROR_NONE:
@@ -91,7 +91,7 @@ static int handshake(p_ssl ssl)
       }
       if (err == 0)
         return IO_CLOSED;
-      return errno;
+      return socket_error();
     default:
       return IO_SSL;
     }
@@ -105,12 +105,14 @@ static int handshake(p_ssl ssl)
 static int ssl_send(void *ctx, const char *data, size_t count, size_t *sent,
    p_timeout tm)
 {
+  int err;
   p_ssl ssl = (p_ssl) ctx;
   if (ssl->state == ST_SSL_CLOSED)
     return IO_CLOSED;
   *sent = 0;
   for ( ; ; ) {
-    int err = SSL_write(ssl->ssl, data, (int) count);
+    ERR_clear_error();
+    err = SSL_write(ssl->ssl, data, (int) count);
     ssl->error = SSL_get_error(ssl->ssl, err);
     switch(ssl->error) {
     case SSL_ERROR_NONE:
@@ -133,7 +135,7 @@ static int ssl_send(void *ctx, const char *data, size_t count, size_t *sent,
       }
       if (err == 0)
         return IO_CLOSED;
-      return errno;
+      return socket_error();
     default:
       return IO_SSL;
     }
@@ -147,17 +149,22 @@ static int ssl_send(void *ctx, const char *data, size_t count, size_t *sent,
 static int ssl_recv(void *ctx, char *data, size_t count, size_t *got,
   p_timeout tm)
 {
+  int err;
   p_ssl ssl = (p_ssl) ctx;
   if (ssl->state == ST_SSL_CLOSED)
     return IO_CLOSED;
   *got = 0;
   for ( ; ; ) {
-    int err = SSL_read(ssl->ssl, data, (int) count);
+    ERR_clear_error();
+    err = SSL_read(ssl->ssl, data, (int) count);
     ssl->error = SSL_get_error(ssl->ssl, err);
     switch(ssl->error) {
     case SSL_ERROR_NONE:
       *got = err;
       return IO_DONE;
+    case SSL_ERROR_ZERO_RETURN:
+      *got = err;
+      return IO_CLOSED;
     case SSL_ERROR_WANT_READ:
       err = socket_waitfd(&ssl->sock, WAITFD_R, tm);
       if (err == IO_TIMEOUT) return IO_SSL;
@@ -175,7 +182,7 @@ static int ssl_recv(void *ctx, char *data, size_t count, size_t *got,
       }
       if (err == 0)
         return IO_CLOSED;
-      return errno;
+      return socket_error();
     default:
       return IO_SSL;
     }
@@ -334,6 +341,16 @@ static int meth_want(lua_State *L)
   return 1;
 }
   
+/**
+ * Return a pointer to SSL structure.
+ */
+static int meth_rawconn(lua_State *L)
+{
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  lua_pushlightuserdata(L, (void*)ssl->ssl);
+  return 1;
+}
+
 /*---------------------------------------------------------------------------*/
 
 
@@ -356,9 +373,10 @@ static luaL_Reg meta[] = {
  * SSL functions 
  */
 static luaL_Reg funcs[] = {
-  {"create", meth_create},
-  {"setfd",  meth_setfd},
-  {NULL,     NULL}
+  {"create",        meth_create},
+  {"setfd",         meth_setfd},
+  {"rawconnection", meth_rawconn},
+  {NULL,            NULL}
 };
 
 /**
@@ -390,4 +408,16 @@ LUASEC_API int luaopen_ssl_core(lua_State *L)
 
   return 1;
 }
+
+#if defined(WIN32)
+	int socket_error()
+	{
+	   return WSAGetLastError();
+	}
+#else
+	int socket_error()
+	{
+	  return errno;
+	}
+#endif
 

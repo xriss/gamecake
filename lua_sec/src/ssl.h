@@ -2,8 +2,8 @@
 #define __SSL_H__
 
 /*--------------------------------------------------------------------------
- * LuaSec 0.2
- * Copyright (C) 2006-2007 Bruno Silvestre
+ * LuaSec 0.4
+ * Copyright (C) 2006-2009 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -13,14 +13,7 @@
 #include "io.h"
 #include "buffer.h"
 #include "timeout.h"
-
-#ifndef LUASEC_API
-# if defined(_MSC_VER)
-#  define LUASEC_API __declspec(dllexport)
-# else
-#  define LUASEC_API extern
-# endif
-#endif
+#include "context.h"
 
 #define ST_SSL_NEW       1
 #define ST_SSL_CONNECTED 2

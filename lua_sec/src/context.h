@@ -2,20 +2,18 @@
 #define __CONTEXT_H__
 
 /*--------------------------------------------------------------------------
- * LuaSec 0.2
- * Copyright (C) 2006-2007 Bruno Silvestre
+ * LuaSec 0.4
+ * Copyright (C) 2006-2009 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
 #include <lua.h>
 #include <openssl/ssl.h>
 
-#ifndef LUASEC_API
-# if defined(_MSC_VER)
-#  define LUASEC_API __declspec(dllexport)
-# else
-#  define LUASEC_API extern
-# endif
+#if defined(_WIN32)
+#define LUASEC_API __declspec(dllexport) 
+#else
+#define LUASEC_API extern
 #endif
 
 #define MD_CTX_INVALID 0

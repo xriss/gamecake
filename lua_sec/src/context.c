@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.2
- * Copyright (C) 2006-2007 Bruno Silvestre
+ * LuaSec 0.4
+ * Copyright (C) 2006-2009 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -51,6 +51,10 @@ static ssl_option_t ssl_options[] = {
   {"cookie_exchange",                  SSL_OP_COOKIE_EXCHANGE},
   {"no_query_mtu",                     SSL_OP_NO_QUERY_MTU},
   {"single_ecdh_use",                  SSL_OP_SINGLE_ECDH_USE},
+#endif
+  /* OpenSSL 0.9.8f and above */
+#if defined(SSL_OP_NO_TICKET)
+  {"no_ticket",                        SSL_OP_NO_TICKET},
 #endif
   {NULL, 0L}
 };
@@ -111,6 +115,27 @@ static int set_verify_flag(const char *str, int *flag)
   if (!strcmp(str, "fail_if_no_peer_cert")) { 
     *flag |= SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
     return 1;
+  }
+  return 0;
+}
+
+/**
+ * Password callback for reading the private key.
+ */
+static int passwd_cb(char *buf, int size, int flag, void *udata)
+{
+  lua_State *L = (lua_State*)udata;
+  switch (lua_type(L, 3)) {
+  case LUA_TFUNCTION:
+    lua_pushvalue(L, 3);
+    lua_call(L, 0, 1);
+    if (lua_type(L, -1) != LUA_TSTRING)
+       return 0;
+    /* fallback */
+  case LUA_TSTRING:
+    strncpy(buf, lua_tostring(L, -1), size);
+    buf[size-1] = '\0';
+    return (int)strlen(buf);
   }
   return 0;
 }
@@ -191,17 +216,32 @@ static int load_cert(lua_State *L)
  */
 static int load_key(lua_State *L)
 {
+  int ret = 1;
   SSL_CTX *ctx = ctx_getcontext(L, 1);
   const char *filename = luaL_checkstring(L, 2);
-  
-  if (SSL_CTX_use_PrivateKey_file(ctx, filename, SSL_FILETYPE_PEM) != 1) {
-    lua_pushboolean(L, 0);
-    lua_pushfstring(L, "error loading private key (%s)",
-      ERR_reason_error_string(ERR_get_error()));
-    return 2;
+  switch (lua_type(L, 3)) {
+  case LUA_TSTRING:
+  case LUA_TFUNCTION:
+    SSL_CTX_set_default_passwd_cb(ctx, passwd_cb);
+    SSL_CTX_set_default_passwd_cb_userdata(ctx, L);
+    /* fallback */
+  case LUA_TNIL: 
+    if (SSL_CTX_use_PrivateKey_file(ctx, filename, SSL_FILETYPE_PEM) == 1)
+      lua_pushboolean(L, 1);
+    else {
+      ret = 2;
+      lua_pushboolean(L, 0);
+      lua_pushfstring(L, "error loading private key (%s)",
+        ERR_reason_error_string(ERR_get_error()));
+    }
+    SSL_CTX_set_default_passwd_cb(ctx, NULL);
+    SSL_CTX_set_default_passwd_cb_userdata(ctx, NULL);
+    break;
+  default:
+    lua_pushstring(L, "invalid callback value");
+    lua_error(L);
   }
-  lua_pushboolean(L, 1);
-  return 1;
+  return ret;
 }
 
 /**
@@ -303,6 +343,16 @@ static int set_mode(lua_State *L)
 }   
 
 /**
+ * Return a pointer to SSL_CTX structure.
+ */
+static int raw_ctx(lua_State *L)
+{
+  p_context ctx = checkctx(L, 1);
+  lua_pushlightuserdata(L, (void*)ctx->context);
+  return 1;
+}
+
+/**
  * Package functions
  */
 static luaL_Reg funcs[] = {
@@ -315,6 +365,7 @@ static luaL_Reg funcs[] = {
   {"setverify",  set_verify},
   {"setoptions", set_options},
   {"setmode",    set_mode},
+  {"rawcontext", raw_ctx},
   {NULL, NULL}
 };
 
