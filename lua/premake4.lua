@@ -92,12 +92,18 @@ elseif NIX then
 
 --	linkoptions { "-v" }
 
+	links { "GL" }
+	links { "udev" }
+
+
+--	linkoptions { "-static" }
+
 	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
 	
-	links { "GL" , "GLU" }
+	links { "GLU" }
 	links { "crypt" }
 	links { "pthread" }
-	links { "X11"  , "udev" }
+	links { "X11"   }
 	
 	links { "dl" , "m" , "pthread" , "rt" }
 	
