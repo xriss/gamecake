@@ -17,7 +17,14 @@ directory and the occasional build/bug/tweak patch.
 The bin dir (expected to be checked out side by side with this repo) 
 is a testbed containing pre-built binaries and lua scripts. This is 
 the final output of this build and is then shared with other, 
-projects.
+projects. This dir must exist when building.
+
+sudo ./get-apts  # grab gcc files
+./make           # build using gcc, see below for more options
+sudo ./install   # copy into /usr/local/bin/gamecake
+
+Afterwhich gamecake will now be a valid command :)
+
 
 The following commands should build everything under ubuntu/debian 
 assuming you have a build environment setup, you will need to install 
@@ -26,6 +33,11 @@ be installed by running ./get-apts first.
 
 gcc/make release
 
+or if you want to try clang (faster build)
+
+clang/make release
+
+
 For windows I've swiched to a mingwin cross compile. This assumes 
 you have my sdks repo checked out side by side to this lua one. 
 There are update or build scripts in the sdks repo that should be 
@@ -33,15 +45,18 @@ run to grab all sorts of horrible sdk and build files.
 
 mingw/make release
 
+
 Build for raspi using a crosscompiler that is built in sdks, you will 
 need to build the cross compiler first.
 
 raspi/make
 
+
 NaCl build using the sdk found in sdks so will not work if you have 
 not populated that first.
 
 nacl/make
+
 
 Build for android, uses the ndk found in sdks and you need to bake a 
 lua project into the source. IE it spits out an apk file that can be 
@@ -49,6 +64,7 @@ installed onto anandroid device, this apk must contain everything
 needed to run an app.
 
 android/make
+
 
 We also have an nginx target which bakes all the lua goodies into 
 nginx. This can be seen serving such websites as 

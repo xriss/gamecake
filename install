@@ -1,0 +1,2 @@
+cp ../bin/exe/lua /usr/local/bin/gamecake
+
