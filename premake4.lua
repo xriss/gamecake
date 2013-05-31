@@ -89,7 +89,7 @@ newplatform {
 -- work out what we should be building for
 ------------------------------------------------------------------------
 
-solution("wetlua")
+solution("gamecake")
 
 -- work out build type and set flags
 NACL=false
