@@ -378,6 +378,13 @@ int has_z=0;
 			has_z=1;
 		}
 	}
+	if(l>5)
+	{
+		if(strncmp((argv[script]+(l-5)),".cake",5)==0)
+		{
+			has_z=1;
+		}
+	}
 	if(has_z)
 	{
 		dolibrary(L,"start"); // mount and run code from that zip

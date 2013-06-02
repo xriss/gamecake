@@ -46,5 +46,10 @@ public class FeralActivity extends NativeActivity
 		String s=f.getAbsolutePath();
 		return s;
 	}
+	
+	public Float GetDensity()
+	{
+		return 	getResources().getDisplayMetrics().density;
+	}
 
 }
