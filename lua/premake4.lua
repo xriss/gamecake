@@ -96,7 +96,7 @@ elseif NIX then
 	links { "udev" }
 
 
---	linkoptions { "-static" }
+	linkoptions { "-static-libgcc" }
 
 	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
 	

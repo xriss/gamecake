@@ -506,6 +506,12 @@ int lua_android_getinfo (lua_State *l, android_lua *p, int tab)
 		}
 		lua_pushnumber(l,p->width);		lua_setfield(l,tab,"width");
 		lua_pushnumber(l,p->height);	lua_setfield(l,tab,"height");
+		
+		if(master_android_app)
+		{
+			lua_pushnumber(l,AConfiguration_getDensity(master_android_app->config));
+			lua_setfield(l,tab,"density");
+		}
 	}
 	else
 	{
