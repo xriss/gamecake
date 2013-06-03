@@ -37,7 +37,7 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 // 16 is probably enough alignment to allow things to go fast, does anything need more?
 
-//#define UDALIGN 16
+#define UDALIGN 16
 
 // comment out the define to turn off padding and alignment, set it to enable it
 // make sure to use the functions below when dealing with this aligned data
@@ -103,7 +103,15 @@ int len=0;
 static int lua_tardis_alloc (lua_State *l)
 {
 	int size=luaL_checknumber(l,1);
-	lua_tardis_uda_alloc(l,size);
+	unsigned char *p=lua_tardis_uda_alloc(l,size);
+	memset(p,0,size);
+	
+	if(lua_istable(l,2)) // also set metatable
+	{
+		lua_pushvalue(l,2);
+		lua_setmetatable(l,-2);
+	}
+
 	return 1;
 }
 
