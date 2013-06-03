@@ -10,7 +10,7 @@ local bit=require("bit")
 local wstr=require("wetgenes.string")
 
 local tardis=require("wetgenes.tardis")
-local tcore=require("wetgenes.tardis.core")
+local tcore=require("wetgenes.tardis.core") -- TODO: patch this into the base tardis core...
 
 local core=require("gles.core")
 
@@ -80,6 +80,12 @@ function glescode.create(gl)
 			code.stacks[code.stack_mode]=code.stack
 		end
 		code.stack_matrix=assert(code.stack[#code.stack])
+	end
+
+-- returns a matrix that can later be used in LoadMatrix
+	function code.SaveMatrix(...)
+		local m4=tcore.new_m4() tcore.set(m4,code.stack_matrix,16)
+		return m4
 	end
 
 	function code.LoadMatrix(...)

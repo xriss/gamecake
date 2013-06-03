@@ -200,19 +200,35 @@ end
 -- display this widget and its sub widgets
 --
 	function meta.draw_base(widget,f)
+		local w=widget
 	
 		if debug_hook then debug_hook("draw",widget) end
 
 --		gl.PopMatrix() -- expect the base to be pushed
 		gl.PushMatrix()
-		gl.Translate(widget.px*widget.sx,widget.py*widget.sy,0)
+--		gl.Translate(widget.px*widget.parent.sx,widget.py*widget.parent.sy,0)
+		gl.Translate(widget.px,widget.py,0)
+		
+		local wsx=1
+		local wsy=1
 		
 		if widget.anim then
 			widget.anim:draw()		
 		end
+
+		if w.sx~=1 or w.sy~=1 then
+			gl.Translate(w.hx/2,w.hy/2,0)
+			gl.Scale(w.sx,w.sy,1)
+			gl.Translate(-w.hx/2,-w.hy/2,0)
+		end
+
+
+-- save draw matrix for later use, probably need to remove master.matrix from this before it is useful?
+widget.matrix=gl.SaveMatrix()
+
 		
 		if widget.clip then
-		
+print("clip widget",widget,widget.px,widget.py,widget.id)		
 			widget.layout=layouts.create{parent2={x=0,y=0,w=widget.master.hx,h=widget.master.hy},
 				x=widget.pxd,
 				y=widget.pyd,
@@ -233,7 +249,7 @@ end
 		
 		if widget.pan_px and widget.pan_py and not widget.fbo  then -- fidle everything
 --print("draw",widget.pan_px,widget.pan_py)
-			gl.Translate(-widget.pan_px*widget.sx,-widget.pan_py*widget.sy,0)
+			gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
 		end
 		
 		if widget.fbo then
@@ -270,9 +286,9 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
-			gl.Translate(-widget.px*widget.sx,-widget.py*widget.sy,0)
+			gl.Translate(-widget.px*wsx,-widget.py*wsy,0)
 			if widget.pan_px and widget.pan_py then -- fidle everything
-				gl.Translate(-widget.pan_px*widget.sx,-widget.pan_py*widget.sy,0)
+				gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
 			end
 			
 			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
@@ -283,10 +299,10 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 		widget.dirty=nil
 
 		
-if f then f(widget) end		
+if f then f(widget) end		-- this does the custom drawing
 		
 
-		for i,v in ipairs(widget) do
+		for i,v in ipairs(widget) do -- iterate on children
 			if not v.fbo or not v.dirty then -- terminate recursion at dirty fbo
 				v:draw()
 			end
@@ -353,7 +369,7 @@ end
 
 		end
 		
-		gl.PopMatrix() -- expect the base to be pushed
+		gl.PopMatrix()
 	
 		
 		return widget
@@ -388,6 +404,9 @@ end
 	end
 	
 	function meta.draw(widget)
+		local wsx=1
+		local wsy=1
+
 		local w=widget
 		local master=widget.master
 	
@@ -607,12 +626,12 @@ end
 
 				if widget.text_color_shadow then
 					gl.Color( pack.argb8_pmf4(widget.text_color_shadow) )
-					font.set_xy((tx+1)*w.sx,(ty+1)*w.sy)
+					font.set_xy((tx+1)*wsx,(ty+1)*wsy)
 					font.draw(line)
 				end
 				
 				gl.Color( pack.argb8_pmf4(c) )
-				font.set_xy((tx)*w.sx,(ty)*w.sy)
+				font.set_xy((tx)*wsx,(ty)*wsy)
 --print(wstr.dump(line))
 				font.draw(line)
 				
@@ -621,7 +640,7 @@ end
 						if widget.master.throb>=128 then
 							local sw=font.width(widget.text:sub(1,widget.data.str_idx))
 
-							font.set_xy((tx+sw)*w.sx,(ty)*w.sy)
+							font.set_xy((tx+sw)*wsx,(ty)*wsy)
 							font.draw("_")
 						end
 					end

@@ -318,6 +318,21 @@ function wmeta.setup(def)
 		if widget.anim then
 			widget.anim:update()
 		end
+
+--[[
+-- cached parent world scale
+		if widget.parent~=widget then
+			widget.p_sx=widget.parent.w_sx
+			widget.p_sy=widget.parent.w_sy
+		else
+			widget.p_sx=1
+			widget.p_sy=1
+		end
+
+-- cache widget world scale
+		widget.w_sx=widget.sx*widget.p_sx
+		widget.w_sy=widget.sy*widget.p_sy
+]]
 	
 		for i,v in ipairs(widget) do
 			v:update()

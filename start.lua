@@ -19,9 +19,12 @@ for i=1,#a do
 	if v=="-lstart" and not done_start then
 		done_start=true
 		v=nil
-	elseif v:sub(-4)==".zip" and not done_zip then
+	elseif v:sub(-4)==".zip" and not done_zip then -- the first zip only
 		wzips.add_zip_file(v)
 		done_zip=true	
+		v=nil
+	elseif v:sub(-5)==".cake" then -- all .cake files we are given
+		wzips.add_zip_file(v)
 		v=nil
 	end
 

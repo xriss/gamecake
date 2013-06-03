@@ -41,7 +41,6 @@ android.create=function(opts)
 	return core.create(opts)
 end
 
-
 android.queue={}
 
 android.queue_all_msgs=function()

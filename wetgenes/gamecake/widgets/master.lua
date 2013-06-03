@@ -90,6 +90,7 @@ function wmaster.setup(widget,def)
 
 		gl.PushMatrix()
 		
+		
 		if #dirty_fbos>0 then
 			for i=#dirty_fbos,1,-1 do -- call in reverse so sub fbos can work
 				meta.draw(dirty_fbos[i]) -- dirty, so this only builds the fbo
