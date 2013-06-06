@@ -129,6 +129,7 @@ varying vec4  v_color;
 void main(void)
 {
 	gl_FragColor=texture2D(tex, v_texcoord) * v_color ;
+	if(length(gl_FragColor)==0.0) discard;
 }
 
 	]]
@@ -142,6 +143,7 @@ varying vec4  v_color;
 void main(void)
 {
 	gl_FragColor=v_color ;
+	if(length(gl_FragColor)==0.0) discard;
 }
 
 	]]
