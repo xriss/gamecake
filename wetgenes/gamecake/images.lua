@@ -212,6 +212,12 @@ end
 
 images.start = function()
 
+	if images.remember then
+		for v,n in pairs(images.preload or {}) do
+			images.load(v,n)
+		end
+	end
+
 	for v,n in pairs(images.remember or {}) do
 		images.load(v,n)
 	end

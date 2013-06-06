@@ -44,10 +44,54 @@ M.bake=function(oven,main)
 	local canvas=cake.canvas
 	local font=canvas.font
 	local flat=canvas.flat
+	local sheets=oven.cake.sheets
 	local layout=cake.layouts.create{}
+	
+	
+
+	
+main.config=function(opts)
+	opts=opts or {}
+	
+	main.screen_hx=opts.screen_hx or 256
+	main.screen_hy=opts.screen_hy or 256
+	main.screen_argb=opts.screen_argb or  0xff000011
+
+-- the origin is in the center and you can guarantee that the above screen size is visible, there may be much more border
+	main.text_dx=opts.text_dx or -128
+	main.text_dy=opts.text_dy or -128
+	main.text_hx=opts.text_hx or  256
+	main.text_hy=opts.text_hy or  256
+	main.text_argb=opts.text_argb or  0xff1188ff
+	
+	main.img=nil -- a background image name, will also be loaded before we load anything else
+	main.img_hx=nil -- size of image to draw, relative to screen_hx/hy size
+	main.img_hy=nil -- always positioned in the center of the screen
+
+--[[
+main.img="imgs/title"
+main.img_hx=512
+main.img_hy=256
+]]
+
+	if main.img then
+		oven.cake.images.preload={ [main.img]=main.img } -- high priority load first
+	else
+		oven.cake.images.preload=nil
+	end
+
+end
+
+main.config() -- call this if you want to chage the settings
+
 	
 main.loads=function()
 	oven.cake.fonts.loads({1}) -- load 1st builtin font, a basic 8x8 font
+	if main.img then
+	sheets.loads_and_chops{
+		{"imgs/title",1,1,0.5,0.5},
+	}
+	end
 end
 
 main.setup=function()
@@ -104,10 +148,10 @@ end
 main.draw=function()
 
 	layout.viewport() -- did our window change?
-	layout.project23d(screen_size,screen_size,1/4,screen_size*4)
+	layout.project23d(main.screen_hx,main.screen_hy,1/4,main.screen_hy*4)
 	canvas.gl_default() -- reset gl state
 
-	gl.ClearColor(pack.argb4_pmf4(0xf001))
+	gl.ClearColor(pack.argb8_pmf4(main.screen_argb))
 	gl.Clear(gl.COLOR_BUFFER_BIT)--+gl.DEPTH_BUFFER_BIT)
 
 	gl.MatrixMode(gl.PROJECTION)
@@ -115,14 +159,25 @@ main.draw=function()
 
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
-	gl.Translate(-screen_size/2,-screen_size/2,-screen_size*2) -- top left corner is origin
+	gl.Translate(0,0,-main.screen_hy*2) -- z depth fixed
+
+	if main.img then
+		local s=sheets.get(main.img)
+		if s then
+			s:draw(1,0,0,nil,main.img_hx,main.img_hy)
+		end
+	end
+
+	gl.Translate(main.text_dx,main.text_dy,0) -- now top left corner is origin
+
+	gl.Scale( main.text_hx / 256 , main.text_hy / 256 , 1 )
 
 	gl.PushMatrix()
 	
 	font.set(cake.fonts.get(1)) -- default font
 	font.set_size(8,0) -- 32 pixels high
 
-	gl.Color(pack.argb4_pmf4(0xf18f))
+	gl.Color(pack.argb8_pmf4(main.text_argb))
 
 	font.set_xy( 8 , 8 )
 	font.draw("MemCheck: "..main.count.." "..main.title)

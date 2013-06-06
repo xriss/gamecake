@@ -22,7 +22,7 @@ function M.bake(oven,cake)
 		cake.fonts.start() -- setup 8x8 font for the preloader first
 		cake.framebuffers.start()
 		cake.buffers.start()
-		cake.images.start()
+		cake.images.start() -- also need to prioritise image for preloader in here
 		cake.sheets.start()
 		cake.sounds.start()
 	end
