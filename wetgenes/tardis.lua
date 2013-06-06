@@ -28,6 +28,7 @@
 --
 -- This also needs to be overloaded with a float based C version
 -- Which does partially exist but is only used in the GLES lib so far
+-- This is now done, but probably should be an optional action.
 --
 -- This seems to be the simplest (programmer orientated) description of
 -- most of the maths used here so go read it

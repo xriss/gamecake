@@ -107,6 +107,42 @@ function wmaster.setup(widget,def)
 			widget:key(m.ascii,m.keyname,m.action)
 		elseif m.class=="mouse" then
 			widget:mouse(m.action,m.x,m.y,m.keycode)
+		elseif m.class=="joystick" then
+		
+				local d=1/8
+				local t,vx,vy
+				local tt,vxx,vyy
+				local nox,noy
+
+				vx=m.lx		vxx=m.lx*m.lx				
+				t=m.rx		tt=t*t			if tt>vxx then vx=t vxx=tt end
+				t=m.dx		tt=t*t			if tt>vxx then vx=t vxx=tt end
+
+				vy=m.ly		vyy=m.ly*m.ly				
+				t=m.ry		tt=t*t			if tt>vyy then vy=t vyy=tt end
+				t=m.dy		tt=t*t			if tt>vyy then vy=t vyy=tt end
+			
+				if vxx/2 > vyy then noy=true end
+				if vyy/2 > vxx then nox=true end
+				
+				if not nox then
+					if     vx>d		then	master.key(widget,"","right",1)
+					elseif vx<-d 	then	master.key(widget,"","left",1)
+					end
+				end
+
+				if not noy then
+					if    	vy>d 	then	master.key(widget,"","down",1)
+					elseif	vy<-d 	then	master.key(widget,"","up",1)
+					end
+				end
+
+		elseif m.class=="joykey" then
+		
+			if m.action==1 then -- key set
+				master.key(widget,"","return",1)
+			end
+
 		end
 	end
 --

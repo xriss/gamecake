@@ -99,6 +99,7 @@ M.bake=function(oven,keys)
 			if not recap then return end
 			
 			if m.class=="key" then
+
 				for n,v in pairs(key.maps) do
 					if m.keyname==n then
 						if m.action==1 then -- key set
@@ -107,8 +108,50 @@ M.bake=function(oven,keys)
 							recap.but(v,false)
 						end
 					end
-				end
+				end				
+
+			elseif m.class=="joystick" then
+
+				local d=1/8
+				local t,vx,vy
+				local tt,vxx,vyy
+				local nox,noy
+
+				vx=m.lx		vxx=m.lx*m.lx				
+				t=m.rx		tt=t*t			if tt>vxx then vx=t vxx=tt end
+				t=m.dx		tt=t*t			if tt>vxx then vx=t vxx=tt end
+
+				vy=m.ly		vyy=m.ly*m.ly				
+				t=m.ry		tt=t*t			if tt>vyy then vy=t vyy=tt end
+				t=m.dy		tt=t*t			if tt>vyy then vy=t vyy=tt end				
 				
+				if vxx/2 > vyy then noy=true end
+				if vyy/2 > vxx then nox=true end
+				
+				if not nox then
+					if     vx>d   then		recap.but("left",false)	recap.but("right",true)
+					elseif vx<-d  then		recap.but("left",true)	recap.but("right",false)
+					else 					recap.but("left",false)	recap.but("right",false)
+					end
+				else 						recap.but("left",false)	recap.but("right",false)
+				end
+
+				if not noy then
+					if    vy>d 		then	recap.but("up",false)	recap.but("down",true)
+					elseif	vy<-d 	then	recap.but("up",true)	recap.but("down",false)
+					else 					recap.but("up",false)	recap.but("down",false)
+					end
+				else 						recap.but("up",false)	recap.but("down",false)
+				end
+
+			elseif m.class=="joykey" then
+			
+				if m.action==1 then -- key set
+					recap.but("fire",true)
+				elseif m.action==-1 then -- key clear
+					recap.but("fire",false)
+				end
+
 			end
 			
 		end

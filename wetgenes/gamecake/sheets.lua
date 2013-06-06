@@ -203,7 +203,9 @@ function base_sheet.batch_stop(sheet)
 	sheet.batch_record=false
 end
 
-function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
+function base_sheet.draw(sheet,i,px,py,rz,sx,sy,zf)
+
+	zf=zf or 0 -- allow z fix hacks
 
 	if i<1 or i>#sheet then error("sheet index out of bounds "..i.." of "..#sheet) end
 	
@@ -235,12 +237,12 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy)
 
 		local t=
 		{
-			px-ox,		py-oy,		0,		ix,		iy,
-			px-ox,		py-oy,		0,		ix,		iy,
-			px+hx-ox,	py-oy,		0,		ixw,	iy,
-			px-ox,		py+hy-oy,	0,		ix,		iyh,
-			px+hx-ox,	py+hy-oy,	0,		ixw,	iyh,
-			px+hx-ox,	py+hy-oy,	0,		ixw,	iyh,
+			px-ox,		py-oy,		zf,		ix,		iy,
+			px-ox,		py-oy,		zf,		ix,		iy,
+			px+hx-ox,	py-oy,		zf,		ixw,	iy,
+			px-ox,		py+hy-oy,	zf,		ix,		iyh,
+			px+hx-ox,	py+hy-oy,	zf,		ixw,	iyh,
+			px+hx-ox,	py+hy-oy,	zf,		ixw,	iyh,
 		}
 		
 		for i,v in ipairs(t) do

@@ -161,6 +161,14 @@ function M.bake(oven,layouts)
 		return x,y
 	end
 
+	layout.xyunscale=function(x,y)
+
+		x=((x * layout.x_size/layout.view_width )/layout.x_scale)+layout.x_origin
+		y=((y * layout.y_size/layout.view_height)/layout.y_scale)+layout.y_origin
+		
+		return x,y
+	end
+
 -- a viewport clip, resize an area of this aspect ratio to fit into the current layout
 -- use this before layout.project23d and you will not have any pixels escaping out of
 -- your draw area
@@ -244,6 +252,7 @@ function M.bake(oven,layouts)
 -- push and pop these if you wish to preserve old values
 -- returns last applied layout, so you can restore it to undo these changes
 	layout.apply=function(w,h,fov,d,clip)
+		layout.revert=function() return layout.apply(w,h,fov,d,clip) end
 	
 		local flag if type(w)=="boolean" then flag=w w=nil end
 	

@@ -21,6 +21,10 @@ function M.bake(oven,gles)
 	local gl=oven.gl
 
 
+-- if there is no normal then assume "special z mode"
+-- where the z component is treated as 0 for vire transform
+-- but added on at the end, for 2d z "polygon offset" hacks
+
 	gl.shaders.v_pos_tex={
 	source=gl.defines.shaderprefix..[[
 
@@ -36,7 +40,8 @@ varying vec4  v_color;
  
 void main()
 {
-    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+    gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
+    gl_Position.z+=a_vertex.z;
 	v_texcoord=a_texcoord;
 	v_color=color;
 }
@@ -60,7 +65,8 @@ varying vec4  v_color;
  
 void main()
 {
-    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+    gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
+    gl_Position.z+=a_vertex.z;
 	v_texcoord=a_texcoord;
 	v_color=a_color*color;
 }
@@ -81,7 +87,8 @@ varying vec4  v_color;
  
 void main()
 {
-    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+    gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
+    gl_Position.z+=a_vertex.z;
 	v_color=color;
 }
 
@@ -103,7 +110,8 @@ varying vec4  v_color;
  
 void main()
 {
-    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+    gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
+    gl_Position.z+=a_vertex.z;
 	v_color=a_color*color;
 }
 

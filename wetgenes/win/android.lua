@@ -14,6 +14,8 @@ local core=require("wetgenes.win.android.core")
 
 local wstr=require("wetgenes.string")
 
+local bit=require("bit")
+
 --
 -- simple debug print function, we wrap the core so it accepts multiple 
 -- args and behaves like luas print
@@ -51,15 +53,15 @@ android.queue_all_msgs=function()
 		local ma=core.msg()
 		
 		if ma then
---			print("andmsg",wstr.dump(ma))
+		
+--print("andmsg",wstr.dump(ma))
+
 			
 			if ma.cmd=="init_window" then android.win_ready=true end -- flag that it is now ok to create
 			
 			local m
 			
 			if ma.event == "app" then
-			
---print("andmsg",wstr.dump(ma))
 
 				m={
 					time=ma.eventtime,
@@ -71,65 +73,105 @@ android.queue_all_msgs=function()
 --				end
 			
 			elseif ma.event == "motion" then
-			
-				local act=0
-				local action=ma.action%256
-				local actidx=math.floor((ma.action/256)%256) + 1
-
-				if action==0 then act= 1 end -- single touch
-				if action==1 then act=-1 end
-
-				if action==5 then act= 1 end -- multi touch
-				if action==6 then act=-1 end
 				
-				local fingers={}
-				for i=1,#ma.pointers do
-					local p=ma.pointers[i]
-					if act==0 or i~=actidx then -- just report position
-						fingers[#fingers+1]={
+				if bit.band( ma.source , 0x01000000 ) == 0x01000000 then -- joystick
+
+					for i=1,#ma.pointers do
+						local p=ma.pointers[i]
+						table.insert(android.queue,{
 							time=ma.eventtime,
-							action=0,
-							class="mouse",
-							x=p.x,
-							y=p.y,
-							fingers=fingers,
-							finger=p.id, -- this is a unique id for the duration of this touch
-						}
-					else -- this is a finger going up/down
-						fingers[#fingers+1]={
-							time=ma.eventtime,
-							action=act,
-							class="mouse",
-							keycode=1,	-- always report all fingers as left mouse button
-							x=p.x,
-							y=p.y,
-							fingers=fingers,
-							finger=p.id,
-						}
+							class="joystick",
+							id=p.id, -- multiple joysticks I think?
+							lx=p.lx,
+							ly=p.ly,
+							rx=p.rx,
+							ry=p.ry,
+							dx=p.dx,
+							dy=p.dy,
+						})
 					end
-				end
-				-- send them all ourself
-				for i,v in ipairs(fingers) do
-					table.insert(android.queue,v)
+					
+				else
+
+					local act=0
+					local action=ma.action%256
+					local actidx=math.floor((ma.action/256)%256) + 1
+
+					if action==0 then act= 1 end -- single touch
+					if action==1 then act=-1 end
+
+					if action==5 then act= 1 end -- multi touch
+					if action==6 then act=-1 end
+					
+					local fingers={}
+					for i=1,#ma.pointers do
+						local p=ma.pointers[i]
+						if act==0 or i~=actidx then -- just report position
+							fingers[#fingers+1]={
+								time=ma.eventtime,
+								action=0,
+								class="mouse",
+								x=p.x,
+								y=p.y,
+								pressure=p.pressure,
+								fingers=fingers,
+								finger=p.id, -- this is a unique id for the duration of this touch
+							}
+						else -- this is a finger going up/down
+							fingers[#fingers+1]={
+								time=ma.eventtime,
+								action=act,
+								class="mouse",
+								keycode=1,	-- always report all fingers as left mouse button
+								x=p.x,
+								y=p.y,
+								pressure=p.pressure,
+								fingers=fingers,
+								finger=p.id,
+							}
+						end
+					end
+					-- send them all ourself
+					for i,v in ipairs(fingers) do
+						table.insert(android.queue,v)
+					end
+					
 				end
 
 			elseif ma.event == "key" then
 			
-				m={
-					time=ma.eventtime,
-					class="key",
-					ascii="",
-					action=( (ma.action==0) and 1 or -1),
-					keycode=ma.keycode,
-					keyname=string.format("android_%02x",ma.keycode)
-				}
+				if bit.band( ma.source , 0x00000400 ) == 0x00000400 then -- joystick
+
+					m={
+						time=ma.eventtime,
+						class="joykey",
+						ascii="",
+						action=( (ma.action==0) and 1 or -1),
+						keycode=ma.keycode,
+						keyname=string.format("android_%02x",ma.keycode)
+					}
+				
+				else
+
+					m={
+						time=ma.eventtime,
+						class="key",
+						ascii="",
+						action=( (ma.action==0) and 1 or -1),
+						keycode=ma.keycode,
+						keyname=string.format("android_%02x",ma.keycode)
+					}
+
+				end
 
 			end
 			
 			if m then
---print("msg",wstr.dump(m))
 				table.insert(android.queue,m)
 			end
+			
+--print("msg",wstr.dump(android.queue[#android.queue]))
+
 		else
 			finished=true
 		end
