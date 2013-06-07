@@ -158,6 +158,11 @@ function wmaster.setup(widget,def)
 		
 			if act==1 then
 				if key=="space" or key=="return" then
+
+					if master.over and master.over.can_focus then
+						master.focus=master.over
+					end
+
 					if master.over then
 						master.over:call_hook("click")
 					end
@@ -190,8 +195,8 @@ function wmaster.setup(widget,def)
 								local dx=wx-ox
 								local dy=wy-oy
 								local dd=0
-								if vx==0 then dd=dd+dx*dx*16 else dd=dd+dx*dx end
-								if vy==0 then dd=dd+dy*dy*16 else dd=dd+dy*dy end
+								if vx==0 then dd=dd+dx*dx*8 else dd=dd+dx*dx end
+								if vy==0 then dd=dd+dy*dy*8 else dd=dd+dy*dy end
 --print(w,wx,wy,dx,dy,by,by)
 								if	( dx<0 and vx<0 ) or
 									( dx>0 and vx>0 ) or

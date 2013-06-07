@@ -21,7 +21,19 @@ end
 
 
 function wslide.key(widget,ascii,key,act)
-	return widget.meta.key(widget,ascii,key,act)
+
+	if key=="enter" or key=="return" or key=="space" then
+		
+			if act==1 then -- ignore repeats on enter key
+				widget:call_hook("click")				
+				widget.master.focus=nil
+			end
+			
+	end
+
+	return true
+
+--	return widget.meta.key(widget,ascii,key,act)
 end
 
 
@@ -90,6 +102,8 @@ function wslide.setup(widget,def)
 	widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
 	widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
 	widget:snap()
+
+	widget.can_focus=true
 	
 	return widget
 end

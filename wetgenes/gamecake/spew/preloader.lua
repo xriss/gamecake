@@ -12,8 +12,6 @@ local snames=require("wetgenes.gamecake.spew.names")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-local screen_size=256
-
 local t_randumbs={
 	"Holding the {adjective} {thing}.",
 	"Giant {adjective} {thing} aproaching.",
@@ -63,10 +61,11 @@ main.config=function(opts)
 	main.text_hx=opts.text_hx or  256
 	main.text_hy=opts.text_hy or  256
 	main.text_argb=opts.text_argb or  0xff1188ff
+	main.text_rz=opts.text_rz or  0
 	
-	main.img=nil -- a background image name, will also be loaded before we load anything else
-	main.img_hx=nil -- size of image to draw, relative to screen_hx/hy size
-	main.img_hy=nil -- always positioned in the center of the screen
+	main.img=opts.img or nil -- a background image name, will also be loaded before we load anything else
+	main.img_hx=opts.img_hx or nil -- size of image to draw, relative to screen_hx/hy size
+	main.img_hy=opts.img_hy or nil -- always positioned in the center of the screen
 
 --[[
 main.img="imgs/title"
@@ -76,6 +75,9 @@ main.img_hy=256
 
 	if main.img then
 		oven.cake.images.preload={ [main.img]=main.img } -- high priority load first
+		sheets.loads_and_chops{
+			{main.img,1,1,0.5,0.5},
+		}
 	else
 		oven.cake.images.preload=nil
 	end
@@ -89,7 +91,7 @@ main.loads=function()
 	oven.cake.fonts.loads({1}) -- load 1st builtin font, a basic 8x8 font
 	if main.img then
 	sheets.loads_and_chops{
-		{"imgs/title",1,1,0.5,0.5},
+		{main.img,1,1,0.5,0.5},
 	}
 	end
 end
@@ -151,7 +153,7 @@ main.draw=function()
 	layout.project23d(main.screen_hx,main.screen_hy,1/4,main.screen_hy*4)
 	canvas.gl_default() -- reset gl state
 
-	gl.ClearColor(pack.argb8_pmf4(main.screen_argb))
+	gl.ClearColor(gl.C8(main.screen_argb))
 	gl.Clear(gl.COLOR_BUFFER_BIT)--+gl.DEPTH_BUFFER_BIT)
 
 	gl.MatrixMode(gl.PROJECTION)
@@ -161,6 +163,7 @@ main.draw=function()
 	gl.LoadIdentity()
 	gl.Translate(0,0,-main.screen_hy*2) -- z depth fixed
 
+
 	if main.img then
 		local s=sheets.get(main.img)
 		if s then
@@ -169,6 +172,7 @@ main.draw=function()
 	end
 
 	gl.Translate(main.text_dx,main.text_dy,0) -- now top left corner is origin
+	gl.Rotate(main.text_rz,0,0,1)
 
 	gl.Scale( main.text_hx / 256 , main.text_hy / 256 , 1 )
 

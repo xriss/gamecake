@@ -29,6 +29,7 @@
 -- This also needs to be overloaded with a float based C version
 -- Which does partially exist but is only used in the GLES lib so far
 -- This is now done, but probably should be an optional action.
+-- Assuming I havent borked anything I can now improve the C side speed.
 --
 -- This seems to be the simplest (programmer orientated) description of
 -- most of the maths used here so go read it
@@ -296,9 +297,9 @@ function m4.identity(it)
 end
 function m4.translate(it,v3a,r)
 	r=r or it
-	local r1=it[12+1]+v3a[1]
-	local r2=it[12+2]+v3a[2]
-	local r3=it[12+3]+v3a[3]
+	local r1=it[12+1]+v3a[1]*it[1]+v3a[2]*it[5]+v3a[3]*it[9]
+	local r2=it[12+2]+v3a[1]*it[2]+v3a[2]*it[6]+v3a[3]*it[10]
+	local r3=it[12+3]+v3a[1]*it[3]+v3a[2]*it[7]+v3a[3]*it[11]
 	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,it[16] )
 end
 

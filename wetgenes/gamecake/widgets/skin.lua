@@ -460,9 +460,15 @@ end
 			
 				if style=="indent" then
 					local c={explode_color(widget.color)}
-					c[3]=c[3]*12/16
-					c[2]=c[2]*12/16
-					c[1]=c[1]*12/16
+					if master.over==widget then
+						c[3]=c[3]*14/16
+						c[2]=c[2]*14/16
+						c[1]=c[1]*14/16
+					else
+						c[3]=c[3]*12/16
+						c[2]=c[2]*12/16
+						c[1]=c[1]*12/16
+					end
 					gl.Color( c[1],c[2],c[3],c[4] )
 				elseif master.over==widget then
 					if buttdown then
