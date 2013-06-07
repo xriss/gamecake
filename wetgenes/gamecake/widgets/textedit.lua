@@ -61,7 +61,23 @@ function wtextedit.key(widget,ascii,key,act)
 
 --print("gotkey",ascii,act)
 	
-	if act==1 or act==0 then
+	
+	if act==-1 then
+
+		if key=="enter" or key=="return" then
+		
+			if widget.data.str and widget.onenter then -- callback?
+			
+				widget:call_hook("click")
+				
+			end
+			
+			master.focus=nil
+
+			changed=true
+		end
+
+	elseif act==1 or act==0 then
 	
 		if key=="left" then
 
@@ -139,22 +155,7 @@ function wtextedit.key(widget,ascii,key,act)
 			end
 			
 			master.throb=255
-			
-		elseif key=="enter" or key=="return" then
-		
-			if act==1 then -- ignore repeats on enter key
-			
-				if widget.data.str and widget.onenter then -- callback?
-				
-					widget:call_hook("click")
-					
-				end
-				
-				master.focus=nil
-
-				changed=true
-			end
-			
+						
 --		elseif key=="up" then
 --		elseif key=="down" then
 		

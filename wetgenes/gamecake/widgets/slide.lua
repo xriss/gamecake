@@ -24,11 +24,35 @@ function wslide.key(widget,ascii,key,act)
 
 	if key=="enter" or key=="return" or key=="space" then
 		
-			if act==1 then -- ignore repeats on enter key
-				widget:call_hook("click")				
-				widget.master.focus=nil
-			end
+		if act==-1 then -- ignore repeats on enter key
+			widget:call_hook("click")				
+			widget.master.focus=nil
+		end
 			
+	elseif key=="left" then
+		if act==1 then -- ignore repeats on enter key
+			widget.datx:dec()
+			widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
+			widget:snap()
+		end
+	elseif key=="right" then
+		if act==1 then -- ignore repeats on enter key
+			widget.datx:inc()
+			widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
+			widget:snap()
+		end
+	elseif key=="up" then
+		if act==1 then -- ignore repeats on enter key
+			widget.daty:dec()
+			widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
+			widget:snap()
+		end
+	elseif key=="down" then
+		if act==1 then -- ignore repeats on enter key
+			widget.daty:inc()
+			widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
+			widget:snap()
+		end
 	end
 
 	return true

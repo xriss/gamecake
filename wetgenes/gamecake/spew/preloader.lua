@@ -166,7 +166,8 @@ main.draw=function()
 
 	if main.img then
 		local s=sheets.get(main.img)
-		if s then
+		sheets.start() -- safe to call multiple times
+		if s and s.img then
 			s:draw(1,0,0,nil,main.img_hx,main.img_hy)
 		end
 	end

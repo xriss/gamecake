@@ -36,7 +36,9 @@ sheets.start=function()
 	for i,v in pairs(sheets.data) do -- refresh image data after a stop
 		if v.img_id and not v.img then
 			v.img=images.get(v.img_id)
-			v:build_vbuf()
+			if v.img then
+				v:build_vbuf()
+			end
 		end
 	end
 	

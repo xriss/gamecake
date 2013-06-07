@@ -156,7 +156,7 @@ function wmaster.setup(widget,def)
 			
 		else
 		
-			if act==1 then
+			if act==-1 then
 				if key=="space" or key=="return" then
 
 					if master.over and master.over.can_focus then
@@ -168,6 +168,8 @@ function wmaster.setup(widget,def)
 					end
 					return
 				end
+			
+			elseif act==1 then
 			
 --print(1,master.over)
 			

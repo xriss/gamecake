@@ -44,6 +44,19 @@ wdata.data_value=function(dat,val,force)
 	end
 end
 
+-- adjust number (may trigger hook)
+wdata.data_inc=function(dat,step)
+	step=step or dat.step
+	if step==0 then step=1 end
+	dat:value(dat.num+step)
+end
+-- adjust number (may trigger hook)
+wdata.data_dec=function(dat,step)
+	step=step or dat.step
+	if step==0 then step=1 end
+	dat:value(dat.num-step)
+end
+
 
 
 -- a string to put in the handle
@@ -134,6 +147,8 @@ function wdata.new_data(dat)
 	
 -- get or set the value
 	dat.value=wdata.data_value
+	dat.inc=wdata.data_inc
+	dat.dec=wdata.data_dec
 
 -- work out snapping for scroll bars	
 	dat.snap=wdata.data_snap

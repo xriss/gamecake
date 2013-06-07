@@ -460,7 +460,11 @@ end
 			
 				if style=="indent" then
 					local c={explode_color(widget.color)}
-					if master.over==widget then
+					if master.focus==widget then
+						c[3]=c[3]*16/16
+						c[2]=c[2]*16/16
+						c[1]=c[1]*16/16
+					elseif master.over==widget then
 						c[3]=c[3]*14/16
 						c[2]=c[2]*14/16
 						c[1]=c[1]*14/16
