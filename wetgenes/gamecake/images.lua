@@ -18,7 +18,7 @@ function M.bake(oven,images)
 	images.data={}
 	
 	images.prefix=opts.grdprefix or "data/"
-	images.postfix=opts.grdpostfix or ".png"
+	images.postfix=opts.grdpostfix or { ".png" , ".jpg" }
 
 
 images.get=function(id)
@@ -56,10 +56,23 @@ images.load=function(filename,id)
 --print("loading",filename,id)
 oven.preloader(filename)
 
-	local fname=images.prefix..filename..images.postfix
+	local fname
+	local fext
+	
+	if type(images.postfix)=="table" then -- try a few formats
+		for i,v in ipairs(images.postfix) do
+			fext=v
+			fname=images.prefix..filename..fext -- hardcode
+			if zips.exists(fname) then  break end -- found it
+		end
+	else
+		fext=images.postfix
+		fname=images.prefix..filename..fext -- hardcode
+	end
+	
 	local g=assert(grd.create())
-	local d=assert(zips.readfile(fname))
-	assert(g:load_data(d,"png"))
+	local d=assert(zips.readfile(fname),"Failed to load "..fname)
+	assert(g:load_data(d,fext:sub(2))) -- skip extension period
 	
 	if gl then --gl mode
 	

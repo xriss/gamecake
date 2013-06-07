@@ -185,7 +185,7 @@ main.draw=function()
 	gl.Color(pack.argb8_pmf4(main.text_argb))
 
 	font.set_xy( 8 , 8 )
-	font.draw("MemCheck: "..main.count.." "..main.title)
+	font.draw("MemCheck: "..main.count.." "..main.title:sub(1,30-13))
 --print("MemCheck: "..main.count.." : "..tostring(oven.preloader_enabled))
 
 	for i=1,#ts do
