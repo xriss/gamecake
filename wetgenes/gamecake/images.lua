@@ -45,6 +45,27 @@ images.unload=function(id)
 	end
 end
 
+-- do we have an image availble to load?
+images.exists=function(filename)
+
+	local fname
+	local fext
+
+	if type(images.postfix)=="table" then -- try a few formats
+		for i,v in ipairs(images.postfix) do
+			fext=v
+			fname=images.prefix..filename..fext -- hardcode
+			if zips.exists(fname) then  return true end -- found it
+		end
+	else
+		fext=images.postfix
+		fname=images.prefix..filename..fext -- hardcode
+	end
+	
+	if zips.exists(fname) then  return true end -- found it
+
+end
+
 --
 -- load a single image, and make it easy to lookup by the given id
 --

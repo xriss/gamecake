@@ -4,6 +4,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local pack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
+local wzips=require("wetgenes.zips")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 local snames=require("wetgenes.gamecake.spew.names")
@@ -85,6 +86,48 @@ main.img_hy=256
 end
 
 main.config() -- call this if you want to chage the settings
+
+main.config_as=function(name)
+
+	if name=="kittychair" then
+		if oven.cake.images.exists("imgs/preloader/kittychair") then
+			main.config{
+				screen_hx=256,
+				screen_hy=512,
+				screen_argb=0x00000000,
+				text_dx=(630/2)-512,
+				text_dy=(460/2)-256,
+				text_hx=(930-630)/2,
+				text_hy=(640-460)/2,
+				text_argb=0xff008800,
+				text_rz=0,
+				img="imgs/preloader/kittychair",
+				img_hx=1024,
+				img_hy=512,
+			}
+		end
+	elseif name=="kittyscreen" then
+		if oven.cake.images.exists("imgs/preloader/kittyscreen") then
+			main.config{
+				screen_hx=256,
+				screen_hy=512,
+				screen_argb=0x00000000,
+				text_dx=(850/2)-512,
+				text_dy=(380/2)-256,
+				text_hx=(1250-860)/2,
+				text_hy=(570-380)/2,
+				text_argb=0xff008800,
+				text_rz=-3,
+				img="imgs/preloader/kittyscreen",
+				img_hx=1024,
+				img_hy=512,
+			}
+		end
+	else
+		main.config()
+	end
+
+end
 
 	
 main.loads=function()
