@@ -349,7 +349,6 @@ print("Loading : "..s)
 				if oven.update_co then
 					coroutine.yield()
 					coroutine.yield()
-for i=1,999999999 do coroutine.yield() end
 				end
 
 			end
