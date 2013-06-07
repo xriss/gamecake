@@ -4,6 +4,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local grd=require("wetgenes.grd")
 local zips=require("wetgenes.zips")
+local wsbox=require("wetgenes.sandbox")
 
 
 --module
@@ -77,6 +78,7 @@ images.load=function(filename,id)
 --print("loading",filename,id)
 oven.preloader(filename)
 
+	local mname=images.prefix..filename..".lua"
 	local fname
 	local fext
 	
@@ -103,6 +105,12 @@ oven.preloader(filename)
 		images.set(t,id)
 		
 		t.filename=filename
+		
+		local lson=zips.readfile(mname)
+		if lson then -- check for lua metadata
+			t.meta=wsbox.lson(lson) -- return it with the image
+		end
+		
 		return t
 
 	end
