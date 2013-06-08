@@ -183,6 +183,8 @@ print("click",id)
 		end
 		top:add({hx=320,hy=20})
 
+		gui.default_id="profiles_select"
+
 	end
 		
 	function gui.pages.profile(master)
@@ -207,6 +209,8 @@ print("click",id)
 		top:add({hx=110,hy=40,color=0xffcccccc,text="OK",id="profile_return",hooks=gui.hooks})
 		top:add({hx=100,hy=40})
 		top:add({hx=110,hy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profiles"})
+
+		gui.default_id="profile_return"
 
 	end
 
@@ -239,6 +243,9 @@ print("click",id)
 		local m=top:add({hx=320,hy=160})		
 		mkeys.setup_keyboard_widgets(m)
 		
+
+		gui.default_id="profile_name_set"
+
 	end
 
 	function gui.pages.score(master)
@@ -299,6 +306,8 @@ print("click",id)
 
 		top:add({hx=120,hy=40,color=0xffcccccc,text="Back",id="score_back",hooks=gui.hooks})
 		top:add({hx=200,hy=40})
+		
+		gui.default_id="score_back"
 		
 	end
 
@@ -394,6 +403,8 @@ print("click",id)
 			top:add({hx=100,hy=40,color=0xffcccccc,text="More",id="score_list_more",hooks=gui.hooks})
 		end
 
+		gui.default_id="score_list_exit"
+
 	end
 
 	function gui.pages.settings(master)
@@ -453,6 +464,8 @@ print("click",id)
 		top:add({hx=80,hy=40})
 		top:add({hx=120,hy=40,color=0xffcc4444,text="Quit",id="settings_quit",hooks=gui.hooks})
 
+		gui.default_id="settings_return"
+
 	end
 	
 	function gui.pages.quit(master)
@@ -477,6 +490,8 @@ print("click",id)
 		top:add({hx=20,hy=40*2})
 
 		top:add({hx=320,hy=40*5})
+		
+		gui.default_id="quit_back"
 		
 	end
 	
@@ -506,6 +521,10 @@ print("click",id)
 		
 		if gui.widget_hook then
 			gui.master:call_descendents(function(w) gui.widget_hook(w) end)
+		end
+		
+		if gui.default_id then
+			gui.master.activate_by_id(gui.default_id)
 		end
 	end
 

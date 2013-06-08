@@ -19,7 +19,7 @@ function M.bake(oven,gles)
 	end
 
 	local gl=oven.gl
-
+	
 
 -- if there is no normal then assume "special z mode"
 -- where the z component is treated as 0 for vire transform
@@ -129,6 +129,21 @@ varying vec4  v_color;
 void main(void)
 {
 	gl_FragColor=texture2D(tex, v_texcoord) * v_color ;
+}
+
+	]]
+}
+	gl.shaders.f_tex_discard={
+	source=gl.defines.shaderprefix..[[
+
+uniform sampler2D tex;
+
+varying vec2  v_texcoord;
+varying vec4  v_color;
+
+void main(void)
+{
+	gl_FragColor=texture2D(tex, v_texcoord) * v_color ;
 	if((gl_FragColor.a)<0.25) discard;
 }
 
@@ -143,12 +158,23 @@ varying vec4  v_color;
 void main(void)
 {
 	gl_FragColor=v_color ;
+}
+
+	]]
+}
+	gl.shaders.f_color_discard={
+	source=gl.defines.shaderprefix..[[
+
+varying vec4  v_color;
+
+void main(void)
+{
+	gl_FragColor=v_color ;
 	if((gl_FragColor.a)<0.25) discard;
 }
 
 	]]
 }
-
 	gl.shaders.v_pos_normal={
 	source=gl.defines.shaderprefix..[[
 
@@ -227,17 +253,33 @@ void main(void)
 		vshaders={"v_pos_color"},
 		fshaders={"f_color"},
 	}
+	gl.programs.pos_color_discard={
+		vshaders={"v_pos_color"},
+		fshaders={"f_color_discard"},
+	}
 	gl.programs.pos_tex={
 		vshaders={"v_pos_tex"},
 		fshaders={"f_tex"},
+	}
+	gl.programs.pos_tex_discard={
+		vshaders={"v_pos_tex"},
+		fshaders={"f_tex_discard"},
 	}
 	gl.programs.pos_tex_color={
 		vshaders={"v_pos_tex_color"},
 		fshaders={"f_tex"},
 	}
+	gl.programs.pos_tex_color_discard={
+		vshaders={"v_pos_tex_color"},
+		fshaders={"f_tex_discard"},
+	}
 	gl.programs.pos={
 		vshaders={"v_pos"},
 		fshaders={"f_color"},
+	}
+	gl.programs.pos_discard={
+		vshaders={"v_pos"},
+		fshaders={"f_color_discard"},
 	}
 
 -- we have mostly squirted extra stuff into oven.gl

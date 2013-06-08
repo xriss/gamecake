@@ -96,6 +96,9 @@ oven.preloader(filename)
 	local g=assert(grd.create())
 	local d=assert(zips.readfile(fname),"Failed to load "..fname)
 	assert(g:load_data(d,fext:sub(2))) -- skip extension period
+
+-- resize?
+--	g:scale(g.width/2,g.height/2,1)
 	
 	if gl then --gl mode
 	

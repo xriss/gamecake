@@ -25,6 +25,9 @@ function M.bake(oven,canvas)
 	local images=cake.images
 	local buffers=cake.buffers
 
+-- prefer shader that discard pixels with low alpha < 0.25
+	canvas.discard_low_alpha=false
+
 canvas.gl_default=function()
 
 -- the default gl state, when we deviate from this we should restore it...
@@ -265,6 +268,11 @@ flat.tristrip_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		pcolor=20
 
 	end
+	
+	if canvas.discard_low_alpha then -- try not to break the zbuffer
+		progname=progname.."_discard"
+	end
+
 	
 	local data=it.data
 	local datalen=#data

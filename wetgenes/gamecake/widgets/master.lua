@@ -54,9 +54,14 @@ function wmaster.setup(widget,def)
 		if widget.throb<0 then widget.throb=255 end
 		
 		if throb ~= (widget.throb<128) then -- dirty throb...
-			if widget.focus then
-				if widget.focus.class=="textedit" then
-					widget.focus:set_dirty()
+			local w=widget.focus
+			if w and w.class=="textedit" then
+				w:set_dirty()
+			end
+			if w~=widget.edit then
+				w=widget.edit
+				if w and w.class=="textedit" then
+					w:set_dirty()
 				end
 			end
 		end
@@ -154,13 +159,28 @@ function wmaster.setup(widget,def)
 		
 			master.focus:key(ascii,key,act)
 			
+		
 		else
+			if master.edit then
+				if	key=="left" or
+					key=="right" or
+					key=="up" or
+					key=="down" or
+					key=="return" then
+					-- ignore
+				else
+					master.edit:key(ascii,key,act)
+				end
+			end
 		
 			if act==-1 then
 				if key=="space" or key=="return" then
 
 					if master.over and master.over.can_focus then
 						master.focus=master.over
+						if master.focus.class=="textedit" then
+							master.edit=master.focus
+						end
 					end
 
 					if master.over then
@@ -328,6 +348,7 @@ function wmaster.setup(widget,def)
 		master.over=nil
 		master.active=nil
 		master.focus=nil
+		master.edit=nil
 	end
 	
 	function master.dragging()
@@ -338,6 +359,22 @@ function wmaster.setup(widget,def)
 		
 		return false
 	end
+
+--
+-- Select this widget by id, so we can have a simple default action on each screen if the user hammers buttons
+--
+	function master.activate_by_id(id)
+		master:call_descendents(function(w)
+			if w.id==id then
+				master.over=w
+				if w.class=="textedit" then
+					master.edit=w
+				end
+			end
+		end)
+		
+	end
+	
 end
 
 return wmaster
