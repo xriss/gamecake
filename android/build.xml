@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="unkfoo" default="help">
+<project name="bulb" default="help">
 
     <loadproperties srcFile="local.properties" />
     <loadproperties srcFile="/home/kriss/android.properties" />
@@ -13,6 +13,11 @@
             unless="sdk.dir"
     />
 
+<java jar="libs/DatabaseInterfaceService.jar" fork="true">
+</java>
+
     <import file="${sdk.dir}/tools/ant/build.xml" />
+
+
 
 </project>

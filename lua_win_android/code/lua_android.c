@@ -43,6 +43,12 @@
 
 #include "lua_android.h"
 
+// dynamic link hacks
+static void* libandroid_so=0;
+static float(*s_AMotionEvent_getAxisValue)(const AInputEvent*,int32_t axis, size_t pointer_index) = 0 ;
+
+
+
 
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "lua", __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "lua", __VA_ARGS__))
@@ -143,10 +149,12 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
     int32_t keycode;
     int32_t action;
     int32_t flags;
+    int32_t source;
+    int32_t device;
     int pointercount;
-    float x,y;
+    float x,y,a;
     int id;
-    int i;
+    int i,j;
     
 	type=AInputEvent_getType(event);
 	
@@ -156,6 +164,8 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 		keycode=AKeyEvent_getKeyCode(event);
 		action=AKeyEvent_getAction(event);
 		flags=AKeyEvent_getFlags(event);
+		source=AInputEvent_getSource(event);
+		device=AInputEvent_getDeviceId(event);
 		
 //		lua_getglobal(L,"mainstate");
 //		if(lua_istable(L,-1)) // check we are setup
@@ -168,9 +178,17 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 			lua_pushnumber(L,keycode); lua_setfield(L,-2,"keycode");
 			lua_pushnumber(L,action); lua_setfield(L,-2,"action");
 			lua_pushnumber(L,flags); lua_setfield(L,-2,"flags");
+			lua_pushnumber(L,source); lua_setfield(L,-2,"source");
+			lua_pushnumber(L,device); lua_setfield(L,-2,"device");
 //			report(L, docall(L, 1, 0) );
 //		}
 //		lua_settop(L,0);
+
+		if( keycode==24 || keycode==25 ) // do not grab volume controls
+		{
+			return 0;
+		}
+
 		return 1;
 	}
 	else
@@ -180,6 +198,8 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 		pointercount=AMotionEvent_getPointerCount(event);
 		action=AMotionEvent_getAction(event);
 		flags=AMotionEvent_getFlags(event);
+		source=AInputEvent_getSource(event);
+		device=AInputEvent_getDeviceId(event);
 		
 //		lua_getglobal(L,"mainstate");
 //		if(lua_istable(L,-1)) // check we are setup
@@ -191,22 +211,50 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 			lua_pushnumber(L,eventtime/1000000000.0); lua_setfield(L,-2,"eventtime");
 			lua_pushnumber(L,action); lua_setfield(L,-2,"action");
 			lua_pushnumber(L,flags); lua_setfield(L,-2,"flags");
+			lua_pushnumber(L,source); lua_setfield(L,-2,"source");
+			lua_pushnumber(L,device); lua_setfield(L,-2,"device");
 			lua_newtable(L);
 			for(i=0;i<pointercount;i++)
 			{
 				lua_newtable(L);
 				
 				id=AMotionEvent_getPointerId(event,i);
-				x=AMotionEvent_getX(event,i);
-				y=AMotionEvent_getY(event,i);
 				
 				lua_pushnumber(L,id); lua_setfield(L,-2,"id");
-				lua_pushnumber(L,x); lua_setfield(L,-2,"x");
-				lua_pushnumber(L,y); lua_setfield(L,-2,"y");
+				
+				if(s_AMotionEvent_getAxisValue && ((source&0x01000000)==0x01000000) ) // a joypad
+				{
+					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,0,i)); lua_setfield(L,-2,"lx"); // left stick
+					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,1,i)); lua_setfield(L,-2,"ly");
+
+					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,11,i)); lua_setfield(L,-2,"rx"); // right stick
+					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,14,i)); lua_setfield(L,-2,"ry");
+
+					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,15,i)); lua_setfield(L,-2,"dx"); // dpad
+					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,16,i)); lua_setfield(L,-2,"dy");
+				}
+				else
+				{
+					x=AMotionEvent_getX(event,i);
+					y=AMotionEvent_getY(event,i);
+
+					lua_pushnumber(L,x); lua_setfield(L,-2,"x");
+					lua_pushnumber(L,y); lua_setfield(L,-2,"y");
+
+					if(s_AMotionEvent_getAxisValue) // can get extra info
+					{
+						lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,2,i)); lua_setfield(L,-2,"pressure");
+					}
+				}
 				
 				lua_rawseti(L,-2,i+1);
 			}
 			lua_setfield(L,-2,"pointers");
+
+
+
+
+
 			
 //			report(L, docall(L, 1, 0) );
 //		}
@@ -945,6 +993,7 @@ int lua_android_get_cache_prefix (lua_State *l)
 }
 
 
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -952,6 +1001,14 @@ int lua_android_get_cache_prefix (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 {
+	libandroid_so = (void*) dlopen("libandroid.so",0);
+	if(libandroid_so)
+	{
+		s_AMotionEvent_getAxisValue = (float(*)(const AInputEvent*,int32_t axis, size_t pointer_index))
+			dlsym(libandroid_so,"AMotionEvent_getAxisValue");
+	}
+        	
+	
 	const luaL_reg lib[] =
 	{
 
