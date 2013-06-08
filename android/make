@@ -17,7 +17,7 @@ makeopts32="config=release_android-x86"
 build="release"
 fi
 
-if [ "$1" = "build" ] ; then
+if [ "$1" = "apk" ] ; then
 makeopts="config=release_android"
 makeopts32="config=release_android-x86"
 build="release"
@@ -30,7 +30,7 @@ build/premake4 gmake android-armv7
 #build/premake4 gmake android-32
 
 
-if [ "$1" == "clean" ] ; then
+if [ "$1" = "clean" ] ; then
 
         rm -rf build-gmake-android-arm
         rm -rf build-gmake-android-armv7
@@ -57,7 +57,7 @@ cd ..
 #cd ..
 
 
-if [ "$1" == "build" ] ; then
+if [ "$1" = "apk" ] ; then
 
 	cd android
 	ant $build
