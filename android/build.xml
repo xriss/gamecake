@@ -13,11 +13,6 @@
             unless="sdk.dir"
     />
 
-<java jar="libs/DatabaseInterfaceService.jar" fork="true">
-</java>
-
     <import file="${sdk.dir}/tools/ant/build.xml" />
-
-
 
 </project>
