@@ -146,6 +146,7 @@ function wmaster.setup(widget,def)
 		
 			if m.action==1 then -- key set
 				master.key(widget,"","return",1)
+				master.key(widget,"","return",-1)
 			end
 
 		end

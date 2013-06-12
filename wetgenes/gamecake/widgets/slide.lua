@@ -16,6 +16,14 @@ local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
 function wslide.mouse(widget,act,x,y,key)
 --	widget.master.focus=widget
+	if act==1 and widget.master.over==widget then
+--print(x,y,widget.drag.px,widget.drag.py)
+		if x<widget.drag.px then widget:key("","left",1) return
+		elseif x>widget.drag.px then widget:key("","right",1) return
+		elseif y<widget.drag.py then widget:key("","up",1) return
+		elseif y>widget.drag.py then widget:key("","down",1) return
+		end
+	end
 	return widget.meta.mouse(widget,act,x,y,key)
 end
 
@@ -117,7 +125,7 @@ function wslide.setup(widget,def)
 	widget.style=def.style or "indent"
 
 -- auto add the draging button as a child
-	widget.drag=widget:add({style="button",class="drag",color=widget.color,
+	widget.drag=widget:add({style="button",class="drag",color=widget.color,solid=true,
 		data=widget.data})
 
 -- set size and position of child

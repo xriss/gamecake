@@ -161,6 +161,8 @@ function win.android_start(apk)
 	win.files_prefix=hardcore.get_files_prefix().."/"
 	win.cache_prefix=hardcore.get_cache_prefix().."/"
 
+	win.smell=hardcore.smell_check()
+
 --print(win.files_prefix)
 --print(win.cache_prefix)
 
@@ -300,6 +302,13 @@ function base.msg(w)
 	end
 	if not m and posix then
 		m=base.posix_msg(w)
+	end
+	if not m and hardcore.smell_msg then
+		m=hardcore.smell_msg() --hardcoded stuff
+		if m then
+			print(wstr.dump(m))
+			m=nil
+		end
 	end
 
 	if m then -- proccess the msg some more
