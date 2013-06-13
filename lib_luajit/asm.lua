@@ -32,48 +32,21 @@ LUALIB_API void luaL_openlibs(lua_State *L)
 
 ]]
 
-
-local wbake=require("wetgenes.bake")
-local wstr=require("wetgenes.string")
-
-local function cleandir()
-	os.execute("rm src/host/*.o")
-	os.execute("rm src/*.o")
-
-for i,v in ipairs{
-	"src/host/buildvm",
-	"src/host/buildvm_arch.h",
-	"src/host/minilua",
-	"src/jit/vmdef.lua",
-	"src/libluajit.a",
-	"src/libluajit.so",
-	"src/lj_bcdef.h",
-	"src/lj_ffdef.h",
-	"src/lj_folddef.h",
-	"src/lj_libdef.h",
-	"src/lj_recdef.h",
-	"src/lj_vm.s",
-	"src/luajit",
-} do
-
-	os.execute("rm "..v)
-end
-	
-end
-
 local function build(mode)
+
+	os.execute("make clean ")
 
 	if mode=="x86" then -- these are local hacks for when I bump the luajit version
 
-		os.execute("make")
+		os.execute("make HOST_CC=\"gcc -m32\" ")
 
 	elseif mode=="arm" then
 
-		os.execute("make CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi-")
+		os.execute("make HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi-")
 
 	elseif mode=="armhf" then
 
-		os.execute("make CROSS=/home/kriss/hg/sdks/gcc/prefix/bin/arm-raspi-linux-gnueabi-")
+		os.execute("make HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/gcc/prefix/bin/arm-raspi-linux-gnueabi-")
 
 	end
 
@@ -89,7 +62,7 @@ local function build(mode)
 	end
 	os.execute("cp src/jit/vmdef.lua asm/"..mode.."/vmdef.lua")
 
-	cleandir()
+	os.execute("make clean ")
 
 end
 
