@@ -16,6 +16,7 @@
 #include "lj_ff.h"
 #include "lj_trace.h"
 #include "lj_vm.h"
+#include "lj_strfmt.h"
 
 /*
 ** LuaJIT can either use internal or external frame unwinding:
@@ -573,7 +574,7 @@ LJ_NORET LJ_NOINLINE static void err_msgv(lua_State *L, ErrMsg em, ...)
   va_list argp;
   va_start(argp, em);
   if (curr_funcisL(L)) L->top = curr_topL(L);
-  msg = lj_str_pushvf(L, err2msg(em), argp);
+  msg = lj_strfmt_pushvf(L, err2msg(em), argp);
   va_end(argp);
   lj_debug_addloc(L, msg, L->base-1, NULL);
   lj_err_run(L);
@@ -591,11 +592,11 @@ LJ_NOINLINE void lj_err_lex(lua_State *L, GCstr *src, const char *tok,
 {
   char buff[LUA_IDSIZE];
   const char *msg;
-  lj_debug_shortname(buff, src);
-  msg = lj_str_pushvf(L, err2msg(em), argp);
-  msg = lj_str_pushf(L, "%s:%d: %s", buff, line, msg);
+  lj_debug_shortname(buff, src, line);
+  msg = lj_strfmt_pushvf(L, err2msg(em), argp);
+  msg = lj_strfmt_pushf(L, "%s:%d: %s", buff, line, msg);
   if (tok)
-    lj_str_pushf(L, err2msg(LJ_ERR_XNEAR), msg, tok);
+    lj_strfmt_pushf(L, err2msg(LJ_ERR_XNEAR), msg, tok);
   lj_err_throw(L, LUA_ERRSYNTAX);
 }
 
@@ -679,7 +680,7 @@ LJ_NOINLINE void lj_err_callerv(lua_State *L, ErrMsg em, ...)
   const char *msg;
   va_list argp;
   va_start(argp, em);
-  msg = lj_str_pushvf(L, err2msg(em), argp);
+  msg = lj_strfmt_pushvf(L, err2msg(em), argp);
   va_end(argp);
   lj_err_callermsg(L, msg);
 }
@@ -699,9 +700,9 @@ LJ_NORET LJ_NOINLINE static void err_argmsg(lua_State *L, int narg,
   if (narg < 0 && narg > LUA_REGISTRYINDEX)
     narg = (int)(L->top - L->base) + narg + 1;
   if (ftype && ftype[3] == 'h' && --narg == 0)  /* Check for "method". */
-    msg = lj_str_pushf(L, err2msg(LJ_ERR_BADSELF), fname, msg);
+    msg = lj_strfmt_pushf(L, err2msg(LJ_ERR_BADSELF), fname, msg);
   else
-    msg = lj_str_pushf(L, err2msg(LJ_ERR_BADARG), narg, fname, msg);
+    msg = lj_strfmt_pushf(L, err2msg(LJ_ERR_BADARG), narg, fname, msg);
   lj_err_callermsg(L, msg);
 }
 
@@ -711,7 +712,7 @@ LJ_NOINLINE void lj_err_argv(lua_State *L, int narg, ErrMsg em, ...)
   const char *msg;
   va_list argp;
   va_start(argp, em);
-  msg = lj_str_pushvf(L, err2msg(em), argp);
+  msg = lj_strfmt_pushvf(L, err2msg(em), argp);
   va_end(argp);
   err_argmsg(L, narg, msg);
 }
@@ -727,7 +728,7 @@ LJ_NOINLINE void lj_err_argtype(lua_State *L, int narg, const char *xname)
 {
   TValue *o = narg < 0 ? L->top + narg : L->base + narg-1;
   const char *tname = o < L->top ? lj_typename(o) : lj_obj_typename[0];
-  const char *msg = lj_str_pushf(L, err2msg(LJ_ERR_BADTYPE), xname, tname);
+  const char *msg = lj_strfmt_pushf(L, err2msg(LJ_ERR_BADTYPE), xname, tname);
   err_argmsg(L, narg, msg);
 }
 
@@ -777,7 +778,7 @@ LUALIB_API int luaL_error(lua_State *L, const char *fmt, ...)
   const char *msg;
   va_list argp;
   va_start(argp, fmt);
-  msg = lj_str_pushvf(L, fmt, argp);
+  msg = lj_strfmt_pushvf(L, fmt, argp);
   va_end(argp);
   lj_err_callermsg(L, msg);
   return 0;  /* unreachable */

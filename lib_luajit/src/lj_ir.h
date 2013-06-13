@@ -120,6 +120,11 @@
   _(CNEW,	AW, ref, ref) \
   _(CNEWI,	NW, ref, ref)  /* CSE is ok, not marked as A. */ \
   \
+  /* Buffer operations. */ \
+  _(BUFHDR,	L , ref, lit) \
+  _(BUFPUT,	L , ref, ref) \
+  _(BUFSTR,	A , ref, ref) \
+  \
   /* Barriers. */ \
   _(TBAR,	S , ref, ___) \
   _(OBAR,	S , ref, ref) \
@@ -128,7 +133,7 @@
   /* Type conversions. */ \
   _(CONV,	NW, ref, lit) \
   _(TOBIT,	N , ref, ref) \
-  _(TOSTR,	N , ref, ___) \
+  _(TOSTR,	N , ref, lit) \
   _(STRTO,	N , ref, ___) \
   \
   /* Calls. */ \
@@ -221,13 +226,16 @@ IRFLDEF(FLENUM)
 #define IRXLOAD_VOLATILE	2	/* Load from volatile data. */
 #define IRXLOAD_UNALIGNED	4	/* Unaligned load. */
 
+/* BUFHDR mode, stored in op2. */
+#define IRBUFHDR_RESET		0	/* Reset buffer. */
+#define IRBUFHDR_APPEND		1	/* Append to buffer. */
+
 /* CONV mode, stored in op2. */
 #define IRCONV_SRCMASK		0x001f	/* Source IRType. */
 #define IRCONV_DSTMASK		0x03e0	/* Dest. IRType (also in ir->t). */
 #define IRCONV_DSH		5
 #define IRCONV_NUM_INT		((IRT_NUM<<IRCONV_DSH)|IRT_INT)
 #define IRCONV_INT_NUM		((IRT_INT<<IRCONV_DSH)|IRT_NUM)
-#define IRCONV_TRUNC		0x0400	/* Truncate number to integer. */
 #define IRCONV_SEXT		0x0800	/* Sign-extend integer to integer. */
 #define IRCONV_MODEMASK		0x0fff
 #define IRCONV_CONVMASK		0xf000
@@ -237,6 +245,11 @@ IRFLDEF(FLENUM)
 #define IRCONV_ANY    (1<<IRCONV_CSH)	/* Any FP number is ok. */
 #define IRCONV_INDEX  (2<<IRCONV_CSH)	/* Check + special backprop rules. */
 #define IRCONV_CHECK  (3<<IRCONV_CSH)	/* Number checked for integerness. */
+
+/* TOSTR mode, stored in op2. */
+#define IRTOSTR_INT		0	/* Convert integer to string. */
+#define IRTOSTR_NUM		1	/* Convert number to string. */
+#define IRTOSTR_CHAR		2	/* Convert char value to string. */
 
 /* -- IR operands --------------------------------------------------------- */
 
