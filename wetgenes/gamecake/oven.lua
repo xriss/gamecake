@@ -323,22 +323,23 @@ print("Loading : "..s)
 			if oven.win then
 
 				if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
-					if oven.update_co then
+					if oven.update_co and (oven.update_co==coroutine.running()) then
 						coroutine.yield() -- try and make it finish
-						coroutine.yield()
+--						coroutine.yield()
 					end
 				end
 
-				oven.msgs()
+--				oven.msgs()
+
 				oven.cake.canvas.draw()
 				local p=oven.rebake(opts.preloader or "wetgenes.gamecake.spew.preloader")
 				p.setup() -- warning, this is called repeatedly
 				p.update(s)
 				if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
 
-					if oven.update_co then
+					if oven.update_co and (oven.update_co==coroutine.running()) then
 						coroutine.yield()
-						coroutine.yield()
+--						coroutine.yield()
 					end
 
 				else
@@ -346,9 +347,9 @@ print("Loading : "..s)
 					oven.win:swap()
 				end
 
-				if oven.update_co then
+				if oven.update_co and (oven.update_co==coroutine.running()) then
 					coroutine.yield()
-					coroutine.yield()
+--					coroutine.yield()
 				end
 
 			end
@@ -392,6 +393,7 @@ print("Loading : "..s)
 		end
 
 		function oven.msgs() -- read and process any msgs we have from win:msg
+
 			if oven.win then
 				for m in oven.win:msgs() do
 

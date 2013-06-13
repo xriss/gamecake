@@ -50,7 +50,14 @@ android.queue_all_msgs=function()
 	local finished=false
 	repeat
 	
+--		debug.sethook( function(event, line)
+--		  local s = debug.getinfo(2).short_src
+--		  print(s .. ":" .. line)
+--		end, "l")
+
 		local ma=core.msg()
+
+--		debug.sethook(nil, "l")
 		
 		if ma then
 		
@@ -74,7 +81,7 @@ android.queue_all_msgs=function()
 			
 			elseif ma.event == "motion" then
 				
-				if bit.band( ma.source , 0x01000000 ) == 0x01000000 then -- joystick
+				if ma.source and bit.band( ma.source , 0x01000000 ) == 0x01000000 then -- joystick
 
 					for i=1,#ma.pointers do
 						local p=ma.pointers[i]
@@ -91,7 +98,7 @@ android.queue_all_msgs=function()
 						})
 					end
 					
-				else
+				elseif ma.action and ma.pointers then
 
 					local act=0
 					local action=ma.action%256
