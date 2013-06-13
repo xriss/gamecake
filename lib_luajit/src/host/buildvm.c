@@ -1,6 +1,6 @@
 /*
 ** LuaJIT VM builder.
-** Copyright (C) 2005-2012 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2013 Mike Pall. See Copyright Notice in luajit.h
 **
 ** This is a tool to build the hand-tuned assembler code required for
 ** LuaJIT's bytecode interpreter. It supports a variety of output formats
@@ -57,10 +57,8 @@ static int collect_reloc(BuildCtx *ctx, uint8_t *addr, int idx, int type);
 /* Embed architecture-specific DynASM encoder. */
 #if LJ_TARGET_X86ORX64
 #include "../dynasm/dasm_x86.h"
-#include "../vm_x86.h"
 #elif LJ_TARGET_ARM
 #include "../dynasm/dasm_arm.h"
-#include "../vm_arm.h"
 #elif LJ_TARGET_PPC
 #include "../dynasm/dasm_ppc.h"
 #elif LJ_TARGET_PPCSPE
@@ -72,7 +70,7 @@ static int collect_reloc(BuildCtx *ctx, uint8_t *addr, int idx, int type);
 #endif
 
 /* Embed generated architecture-specific backend. */
-//#include "buildvm_arch.h"
+#include "buildvm_arch.h"
 
 /* ------------------------------------------------------------------------ */
 
@@ -102,16 +100,24 @@ static const char *sym_decorate(BuildCtx *ctx,
   char *p;
 #if LJ_64
   const char *symprefix = ctx->mode == BUILD_machasm ? "_" : "";
+#elif LJ_TARGET_XBOX360
+  const char *symprefix = "";
 #else
   const char *symprefix = ctx->mode != BUILD_elfasm ? "_" : "";
 #endif
   sprintf(name, "%s%s%s", symprefix, prefix, suffix);
   p = strchr(name, '@');
   if (p) {
+#if LJ_TARGET_X86ORX64
     if (!LJ_64 && (ctx->mode == BUILD_coffasm || ctx->mode == BUILD_peobj))
       name[0] = '@';
     else
       *p = '\0';
+#elif (LJ_TARGET_PPC  || LJ_TARGET_PPCSPE) && !LJ_TARGET_CONSOLE
+    /* Keep @plt. */
+#else
+    *p = '\0';
+#endif
   }
   p = (char *)malloc(strlen(name)+1);  /* MSVC doesn't like strdup. */
   strcpy(p, name);
@@ -138,7 +144,11 @@ static int collect_reloc(BuildCtx *ctx, uint8_t *addr, int idx, int type)
   ctx->reloc[ctx->nreloc].sym = relocmap[idx];
   ctx->reloc[ctx->nreloc].type = type;
   ctx->nreloc++;
+#if LJ_TARGET_XBOX360
+  return (int)(ctx->code - addr) + 4;  /* Encode symbol offset of .text. */
+#else
   return 0;  /* Encode symbol offset of 0. */
+#endif
 }
 
 /* Naive insertion sort. Performance doesn't matter here. */
