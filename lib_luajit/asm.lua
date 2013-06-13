@@ -8,19 +8,19 @@ local function cleandir()
 	os.execute("rm src/*.o")
 
 for i,v in ipairs{
-"src/host/buildvm",
-"src/host/buildvm_arch.h",
-"src/host/minilua",
-"src/jit/vmdef.lua",
-"src/libluajit.a",
-"src/libluajit.so",
-"src/lj_bcdef.h",
-"src/lj_ffdef.h",
-"src/lj_folddef.h",
-"src/lj_libdef.h",
-"src/lj_recdef.h",
-"src/lj_vm.s",
-"src/luajit",
+	"src/host/buildvm",
+	"src/host/buildvm_arch.h",
+	"src/host/minilua",
+	"src/jit/vmdef.lua",
+	"src/libluajit.a",
+	"src/libluajit.so",
+	"src/lj_bcdef.h",
+	"src/lj_ffdef.h",
+	"src/lj_folddef.h",
+	"src/lj_libdef.h",
+	"src/lj_recdef.h",
+	"src/lj_vm.s",
+	"src/luajit",
 } do
 
 	os.execute("rm "..v)
@@ -44,6 +44,17 @@ local function build(mode)
 
 	end
 
+	for i,v in ipairs{
+		"lj_bcdef.h",
+		"lj_ffdef.h",
+		"lj_folddef.h",
+		"lj_libdef.h",
+		"lj_recdef.h",
+		"lj_vm.s",
+	} do
+		os.execute("cp src/"..v.." asm/"..mode.."/"..v)
+	end
+	os.execute("cp src/jit/vmdef.lua asm/"..mode.."/vmdef.lua")
 
 	cleandir()
 
@@ -53,5 +64,9 @@ end
 
 
 build("x86")
+
+build("arm")
+
+build("armhf")
 
 
