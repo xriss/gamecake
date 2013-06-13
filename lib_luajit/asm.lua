@@ -42,11 +42,11 @@ local function build(mode)
 
 	elseif mode=="arm" then
 
-		os.execute("make HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi-")
+		os.execute("make HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi- TARGET_CFLAGS=\" -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3 \" ")
 
 	elseif mode=="armhf" then
 
-		os.execute("make HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/gcc/prefix/bin/arm-raspi-linux-gnueabi-")
+		os.execute("make HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/gcc/prefix/bin/arm-raspi-linux-gnueabi- TARGET_CFLAGS=\" -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s \" ")
 
 	end
 
