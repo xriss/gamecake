@@ -48,6 +48,11 @@ static void* libandroid_so=0;
 static float(*s_AMotionEvent_getAxisValue)(const AInputEvent*,int32_t axis, size_t pointer_index) = 0 ;
 
 
+#define lua_abs_index(L, i) \
+	((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : \
+	lua_gettop(L) + (i) + 1)
+
+
 
 
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "lua", __VA_ARGS__))
@@ -132,10 +137,9 @@ static int dolibrary (lua_State *L, const char *name) {
  */
 struct engine {
 	lua_State *L;
-
     struct android_app* app;
-
 };
+struct engine master_engine;
 
 /**
  * Process the next input event.
@@ -155,6 +159,10 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
     float x,y,a;
     int id;
     int i,j;
+
+//LOGW( "pstack -1 == %d , %d", lua_type(L,-1) , lua_abs_index(L,-1) );
+
+
     
 	type=AInputEvent_getType(event);
 	
@@ -166,23 +174,15 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 		flags=AKeyEvent_getFlags(event);
 		source=AInputEvent_getSource(event);
 		device=AInputEvent_getDeviceId(event);
-		
-//		lua_getglobal(L,"mainstate");
-//		if(lua_istable(L,-1)) // check we are setup
-//		{
-//			lua_getfield(L,-1,"android_msg");
-//			lua_newtable(L);
-			lua_pushstring(L,"key"); lua_setfield(L,-2,"event");
-			lua_pushnumber(L,type); lua_setfield(L,-2,"type");
-			lua_pushnumber(L,eventtime/1000000000.0); lua_setfield(L,-2,"eventtime");
-			lua_pushnumber(L,keycode); lua_setfield(L,-2,"keycode");
-			lua_pushnumber(L,action); lua_setfield(L,-2,"action");
-			lua_pushnumber(L,flags); lua_setfield(L,-2,"flags");
-			lua_pushnumber(L,source); lua_setfield(L,-2,"source");
-			lua_pushnumber(L,device); lua_setfield(L,-2,"device");
-//			report(L, docall(L, 1, 0) );
-//		}
-//		lua_settop(L,0);
+
+		lua_pushstring(L,"key"); lua_setfield(L,-2,"event");
+		lua_pushnumber(L,type); lua_setfield(L,-2,"type");
+		lua_pushnumber(L,eventtime/1000000000.0); lua_setfield(L,-2,"eventtime");
+		lua_pushnumber(L,keycode); lua_setfield(L,-2,"keycode");
+		lua_pushnumber(L,action); lua_setfield(L,-2,"action");
+		lua_pushnumber(L,flags); lua_setfield(L,-2,"flags");
+		lua_pushnumber(L,source); lua_setfield(L,-2,"source");
+		lua_pushnumber(L,device); lua_setfield(L,-2,"device");
 
 		if( keycode==24 || keycode==25 ) // do not grab volume controls
 		{
@@ -191,7 +191,7 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 
 		return 1;
 	}
-	else
+ 	else
     if (type == AINPUT_EVENT_TYPE_MOTION)
     {
 		eventtime=AMotionEvent_getEventTime(event);
@@ -201,72 +201,62 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 		source=AInputEvent_getSource(event);
 		device=AInputEvent_getDeviceId(event);
 		
-//		lua_getglobal(L,"mainstate");
-//		if(lua_istable(L,-1)) // check we are setup
-//		{
-//			lua_getfield(L,-1,"android_msg");
-//			lua_newtable(L);
-			lua_pushstring(L,"motion"); lua_setfield(L,-2,"event");
-			lua_pushnumber(L,type); lua_setfield(L,-2,"type");
-			lua_pushnumber(L,eventtime/1000000000.0); lua_setfield(L,-2,"eventtime");
-			lua_pushnumber(L,action); lua_setfield(L,-2,"action");
-			lua_pushnumber(L,flags); lua_setfield(L,-2,"flags");
-			lua_pushnumber(L,source); lua_setfield(L,-2,"source");
-			lua_pushnumber(L,device); lua_setfield(L,-2,"device");
+		lua_pushstring(L,"motion"); lua_setfield(L,-2,"event");
+		lua_pushnumber(L,type); lua_setfield(L,-2,"type");
+		lua_pushnumber(L,eventtime/1000000000.0); lua_setfield(L,-2,"eventtime");
+		lua_pushnumber(L,action); lua_setfield(L,-2,"action");
+		lua_pushnumber(L,flags); lua_setfield(L,-2,"flags");
+		lua_pushnumber(L,source); lua_setfield(L,-2,"source");
+		lua_pushnumber(L,device); lua_setfield(L,-2,"device");
+		lua_newtable(L);
+		for(i=0;i<pointercount;i++)
+		{
 			lua_newtable(L);
-			for(i=0;i<pointercount;i++)
-			{
-				lua_newtable(L);
-				
-				id=AMotionEvent_getPointerId(event,i);
-				
-				lua_pushnumber(L,id); lua_setfield(L,-2,"id");
-				
-				if(s_AMotionEvent_getAxisValue && ((source&0x01000000)==0x01000000) ) // a joypad
-				{
-					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,0,i)); lua_setfield(L,-2,"lx"); // left stick
-					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,1,i)); lua_setfield(L,-2,"ly");
-
-					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,11,i)); lua_setfield(L,-2,"rx"); // right stick
-					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,14,i)); lua_setfield(L,-2,"ry");
-
-					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,15,i)); lua_setfield(L,-2,"dx"); // dpad
-					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,16,i)); lua_setfield(L,-2,"dy");
-				}
-				else
-				{
-					x=AMotionEvent_getX(event,i);
-					y=AMotionEvent_getY(event,i);
-
-					lua_pushnumber(L,x); lua_setfield(L,-2,"x");
-					lua_pushnumber(L,y); lua_setfield(L,-2,"y");
-
-					if(s_AMotionEvent_getAxisValue) // can get extra info
-					{
-						lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,2,i)); lua_setfield(L,-2,"pressure");
-					}
-				}
-				
-				lua_rawseti(L,-2,i+1);
-			}
-			lua_setfield(L,-2,"pointers");
-
-
-
-
-
 			
-//			report(L, docall(L, 1, 0) );
-//		}
-//		lua_settop(L,0);
+			id=AMotionEvent_getPointerId(event,i);
+			
+			lua_pushnumber(L,id); lua_setfield(L,-2,"id");
+			
+			if(s_AMotionEvent_getAxisValue && ((source&0x01000000)==0x01000000) ) // a joypad
+			{
+				lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,0,i)); lua_setfield(L,-2,"lx"); // left stick
+				lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,1,i)); lua_setfield(L,-2,"ly");
+
+				lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,11,i)); lua_setfield(L,-2,"rx"); // right stick
+				lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,14,i)); lua_setfield(L,-2,"ry");
+
+				lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,15,i)); lua_setfield(L,-2,"dx"); // dpad
+				lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,16,i)); lua_setfield(L,-2,"dy");
+			}
+			else
+			{
+				x=AMotionEvent_getX(event,i);
+				y=AMotionEvent_getY(event,i);
+
+				lua_pushnumber(L,x); lua_setfield(L,-2,"x");
+				lua_pushnumber(L,y); lua_setfield(L,-2,"y");
+
+				if(s_AMotionEvent_getAxisValue) // can get extra info
+				{
+					lua_pushnumber(L,s_AMotionEvent_getAxisValue(event,2,i)); lua_setfield(L,-2,"pressure");
+				}
+			}
+			
+			lua_rawseti(L,-2,i+1);
+		}
+
+		lua_setfield(L,-2,"pointers");
 		return 1;
     }
+
     return 0;
 }
 
 static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
     struct engine* engine = (struct engine*)app->userData;
 	lua_State *L=engine->L;
+
+//LOGW( "cstack -1 == %d , %d", lua_type(L,-1) , lua_abs_index(L,-1) );
 
     switch (cmd) {
 		case APP_CMD_INPUT_CHANGED:
@@ -357,6 +347,8 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 			lua_pushnumber(L,cmd); lua_setfield(L,-2,"cmid");
 		break;
     }
+
+
 }
 
 
@@ -377,7 +369,7 @@ JNI_OnLoad_openal(
  * event loop for receiving input events and doing other things.
  */
 void android_main(struct android_app* state) {
-    struct engine engine;
+//    struct engine engine;
 	lua_State *L;
 	
 
@@ -404,15 +396,15 @@ void android_main(struct android_app* state) {
     // Make sure glue isn't stripped.
     app_dummy();
 
-    memset(&engine, 0, sizeof(engine));
-    state->userData = &engine;
+    memset(&master_engine, 0, sizeof(master_engine));
+    state->userData = &master_engine;
     state->onAppCmd = engine_handle_cmd;
     state->onInputEvent = engine_handle_input;
-    engine.app = state;
+    master_engine.app = state;
 
 
-	engine.L = lua_open();  /* create state */
-	L=engine.L;
+	master_engine.L = lua_open();  /* create state */
+	L=master_engine.L;
 	
 	luaL_openlibs(L);  /* open libraries */
 
@@ -424,43 +416,9 @@ void android_main(struct android_app* state) {
 	lua_pushstring(L,apk);
 
 	(*env)->ReleaseStringUTFChars(env, (jstring)apk_result, apk);
-	(*activity->vm)->DetachCurrentThread(activity->vm);
+//	(*activity->vm)->DetachCurrentThread(activity->vm);
 
 	report(L, docall(L, 1, 0) );		// setup and load and run lua/init.lua from the apks res/raw
-	
-/*
-
-	lua_settop(L,0); // remove all the junk we just built up
-
-	lua_getfield(L,-1,"android_start");
-	report(L, docall(L, 0, 0) );		// begin the main loop ( load and call lua/init.lua )
-
-    while (1)
-    {
-        // Read all pending events.
-        int ident;
-        int events;
-		struct android_poll_source* source;
-		while ((ident=ALooper_pollAll(0, NULL, &events,
-			(void**)&source)) >= 0)
-		{
-			// Process this event.
-			if (source != NULL) {
-				source->process(state, source);
-			}
-			
-		}
-	
-		lua_getglobal(L,"mainstate");
-		if(lua_istable(L,-1)) // check we are setup
-		{
-			lua_getfield(L,-1,"android_serv");
-			report(L, docall(L, 0, 0) );
-		}
-		lua_settop(L,0);
-
-	}
-*/
 
 }
 
@@ -637,33 +595,6 @@ EGLint num_config;
 	
 	lua_android_start_p(p);
 
-/*
-	p->window=master_android_app->window;
-
-	// get an EGL display connection
-	p->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-	assert(p->display!=EGL_NO_DISPLAY);
-
-	// initialize the EGL display connection
-	result = eglInitialize(p->display, NULL, NULL);
-	assert(EGL_FALSE != result);
- 
-  // get an appropriate EGL frame buffer configuration
-   result = eglChooseConfig(p->display, attribute_list, &p->config, 1, &num_config);
-   assert(EGL_FALSE != result);
-
-//    eglGetConfigAttrib(p->display, config, EGL_NATIVE_VISUAL_ID, &format);
-//    ANativeWindow_setBuffersGeometry(p->window, 0, 0, format);
-    
-
-// create an EGL rendering context
-   p->context = eglCreateContext(p->display, p->config, EGL_NO_CONTEXT, NULL);
-   assert(p->context!=EGL_NO_CONTEXT);
-
-// create surface
-	p->surface = eglCreateWindowSurface( p->display, p->config, p->window, NULL );
-	assert(p->surface != EGL_NO_SURFACE);
-*/
 	return 1;
 }
 
@@ -871,9 +802,11 @@ int lua_android_msg (lua_State *l)
 		(void**)&source)) >= 0)
 	{
 		if (source != NULL) {
-			
+
 			lua_newtable(l);
+
 			source->process(master_android_app, source); // this fills in the table we just pushed with android specific msg info
+
 			return 1;
 		}
 	}
@@ -992,6 +925,47 @@ int lua_android_get_cache_prefix (lua_State *l)
 	return lua_android_func_call_void_return_string (l,"GetCachePrefix");
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// Make sure smell code is setup and return a string telling you what smell
+// Always perform a smell check before calling other smell functions
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_smell_check (lua_State *l)
+{
+	return lua_android_func_call_void_return_string (l,"SmellCheck");
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get a pending msg or nil
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_smell_msg (lua_State *l)
+{
+	return lua_android_func_call_void_return_string (l,"SmellMsg");
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// send a final score
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_smell_score_send (lua_State *l)
+{
+	return lua_android_func_call_void_return_string (l,"SmellCheck");
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get a range of scores, eg (1,50) for top 50
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_smell_score_range (lua_State *l)
+{
+	return lua_android_func_call_void_return_string (l,"SmellCheck");
+}
+
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1040,6 +1014,12 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 
 		{"get_files_prefix",			lua_android_get_files_prefix},
 		{"get_cache_prefix",			lua_android_get_cache_prefix},
+
+		{"smell_check",					lua_android_smell_check},
+		{"smell_msg",					lua_android_smell_msg},
+
+		{"smell_score_send",			lua_android_smell_score_send},
+		{"smell_score_range",			lua_android_smell_score_range},
 
 		{0,0}
 	};

@@ -10,22 +10,33 @@ local args={...}
 
 local basedir=assert(args[1],"Must specify basedir, eg \"./bake.lua ../../apps/dike\"")
 
+local smell=args[2] -- optional 
 
 local fdat=assert(zips.readfile(basedir.."/opts.lua"),"opts.lua must exist in the given basedir")
 
 
-local opts=sbox.ini(fdat)
+local preopts=sbox.ini(fdat)
+
+if smell and preopts.smells and preopts.smells[smell] then -- override preopts with smell
+	for i,v in pairs(preopts.smells[smell]) do
+		preopts[i]=v
+	end
+end
 
 --print(wstr.dump(opts))
 
 local version=bake.version_from_time()
 local opts={
-        name=opts.name,
-        title=opts.title,
-        namev=opts.title..".v"..version,
+        name=preopts.name,
+        title=preopts.title,
+        namev=preopts.title..".v"..version,
         version=version,
         version_int=math.floor(version*1000),
-	orientation=opts.orientation or "unspecified"
+	orientation=preopts.orientation or "unspecified",
+	
+	package=preopts.android_package or "com.wetgenes."..preopts.name,
+	activity=preopts.android_activity or "com.wetgenes.FeralActivity",
+	permissions=preopts.android_permissions or "",
 }
 
 bake.replacefile("AndroidManifest.xml.base","AndroidManifest.xml",opts)
