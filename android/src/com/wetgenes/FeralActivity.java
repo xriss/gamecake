@@ -8,6 +8,10 @@ import java.io.File;
 
 public class FeralActivity extends NativeActivity
 {
+	
+	public String smell="none";
+	
+	public GameStick gamestick;
 
 	private static String FA = "FeralActivity";
 	public static void Log(String s)
@@ -46,10 +50,28 @@ public class FeralActivity extends NativeActivity
 		String s=f.getAbsolutePath();
 		return s;
 	}
-	
-	public Float GetDensity()
+
+	public String SmellCheck()
 	{
-		return 	getResources().getDisplayMetrics().density;
+		if(smell=="gamestick")
+		{
+			if(gamestick==null)
+			{
+				gamestick=new GameStick(this);
+			}
+		}
+		
+		return smell;
+	}
+
+	public String SmellMsg()
+	{
+		if(smell=="gamestick")
+		{
+			return gamestick.poll();
+		}
+		
+		return null;
 	}
 
 }

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.wetgenes.{name}"
+        package="{package}"
       android:versionCode="{version_int}"
       android:versionName="{version}"
 >
@@ -9,6 +9,7 @@
     <!-- Tell the system that you need ES 2.0. -->
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
 
+{permissions}
     
         <!-- This .apk has no Java code itself, so set hasCode to false. 
 actually do not as this breaks random shit...
@@ -22,7 +23,7 @@ actually do not as this breaks random shit...
 
         <!-- Our activity is the built-in NativeActivity framework class.
              This will take care of integrating with our NDK code. -->
-        <activity android:name="com.wetgenes.FeralActivity"
+        <activity android:name="{activity}"
                 android:label="{title}"
                 android:configChanges="orientation|keyboardHidden"
 		android:screenOrientation="{orientation}"

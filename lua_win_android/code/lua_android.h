@@ -17,6 +17,7 @@ typedef struct sandroid_lua {
 
 	int width;
 	int height;
+	
 
 EGLConfig config;
 
