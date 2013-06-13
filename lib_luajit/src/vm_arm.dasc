@@ -99,6 +99,7 @@
 |.type NODE,		Node
 |.type NARGS8,		int
 |.type TRACE,		GCtrace
+|.type SBUF,		SBuf
 |
 |//-----------------------------------------------------------------------
 |
@@ -615,6 +616,16 @@ static void build_subroutines(BuildCtx *ctx)
   |  ldr LFUNC:CARG3, [BASE, FRAME_FUNC]  // Guaranteed to be a function here.
   |  b ->vm_call_dispatch_f
   |
+  |->vmeta_tgetr:
+  |  .IOS mov RC, BASE
+  |  bl extern lj_tab_getinth		// (GCtab *t, int32_t key)
+  |  // Returns cTValue * or NULL.
+  |  .IOS mov BASE, RC
+  |  cmp CRET1, #0
+  |  ldrdne CARG12, [CRET1]
+  |  mvneq CARG2, #~LJ_TNIL
+  |  b ->BC_TGETR_Z
+  |
   |//-----------------------------------------------------------------------
   |
   |->vmeta_tsets1:
@@ -671,6 +682,15 @@ static void build_subroutines(BuildCtx *ctx)
   |   add PC, CARG1, BASE
   |  ldr LFUNC:CARG3, [BASE, FRAME_FUNC]  // Guaranteed to be a function here.
   |  b ->vm_call_dispatch_f
+  |
+  |->vmeta_tsetr:
+  |  str BASE, L->base
+  |  .IOS mov RC, BASE
+  |  str PC, SAVE_PC
+  |  bl extern lj_tab_setinth  // (lua_State *L, GCtab *t, int32_t key)
+  |  // Returns TValue *.
+  |  .IOS mov BASE, RC
+  |  b ->BC_TSETR_Z
   |
   |//-- Comparison metamethods ---------------------------------------------
   |
@@ -735,6 +755,17 @@ static void build_subroutines(BuildCtx *ctx)
   |  // Returns 0/1 or TValue * (metamethod).
   |  b <3
   |.endif
+  |
+  |->vmeta_istype:
+  |  sub PC, PC, #4
+  |   str BASE, L->base
+  |   mov CARG1, L
+  |   lsr CARG2, RA, #3
+  |   mov CARG3, RC
+  |  str PC, SAVE_PC
+  |  bl extern lj_meta_istype  // (lua_State *L, BCReg ra, BCReg tp)
+  |  .IOS ldr BASE, L->base
+  |  b ->cont_nop
   |
   |//-- Arithmetic metamethods ---------------------------------------------
   |
@@ -1053,7 +1084,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  ffgccheck
   |  mov CARG1, L
   |  mov CARG2, BASE
-  |  bl extern lj_str_fromnumber	// (lua_State *L, cTValue *o)
+  |  bl extern lj_strfmt_number		// (lua_State *L, cTValue *o)
   |  // Returns GCstr *.
   |  ldr BASE, L->base
   |  mvn CARG2, #~LJ_TSTR
@@ -1501,19 +1532,6 @@ static void build_subroutines(BuildCtx *ctx)
   |  math_extern2 atan2
   |  math_extern2 fmod
   |
-  |->ff_math_deg:
-  |.if FPU
-  |  .ffunc_d math_rad
-  |  vldr d1, CFUNC:CARG3->upvalue[0]
-  |  vmul.f64 d0, d0, d1
-  |  b ->fff_resd
-  |.else
-  |  .ffunc_n math_rad
-  |  ldrd CARG34, CFUNC:CARG3->upvalue[0]
-  |  bl extern __aeabi_dmul
-  |  b ->fff_restv
-  |.endif
-  |
   |.if HFABI
   |  .ffunc math_ldexp
   |  ldr CARG4, [BASE, #4]
@@ -1688,12 +1706,6 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |//-- String library -----------------------------------------------------
   |
-  |.ffunc_1 string_len
-  |  checkstr CARG2, ->fff_fallback
-  |  ldr CARG1, STR:CARG1->len
-  |  mvn CARG2, #~LJ_TISNUM
-  |  b ->fff_restv
-  |
   |.ffunc string_byte			// Only handle the 1-arg case here.
   |  ldrd CARG12, [BASE]
   |    ldr PC, [BASE, FRAME_PC]
@@ -1726,6 +1738,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  mov CARG1, L
   |   str PC, SAVE_PC
   |  bl extern lj_str_new		// (lua_State *L, char *str, size_t l)
+  |->fff_resstr:
   |  // Returns GCstr *.
   |  ldr BASE, L->base
   |   mvn CARG2, #~LJ_TSTR
@@ -1769,91 +1782,28 @@ static void build_subroutines(BuildCtx *ctx)
   |  mvn CARG2, #~LJ_TSTR
   |  b ->fff_restv
   |
-  |.ffunc string_rep			// Only handle the 1-char case inline.
+  |.macro ffstring_op, name
+  |  .ffunc string_ .. name
   |  ffgccheck
-  |  ldrd CARG12, [BASE]
-  |   ldrd CARG34, [BASE, #8]
-  |    cmp NARGS8:RC, #16
-  |    bne ->fff_fallback		// Exactly 2 arguments
-  |  checktp CARG2, LJ_TSTR
-  |   checktpeq CARG4, LJ_TISNUM
-  |   bne ->fff_fallback
-  |  subs CARG4, CARG3, #1
-  |   ldr CARG2, STR:CARG1->len
-  |  blt ->fff_emptystr			// Count <= 0?
-  |   cmp CARG2, #1
-  |   blo ->fff_emptystr		// Zero-length string?
-  |   bne ->fff_fallback		// Fallback for > 1-char strings.
-  |  ldr RB, [DISPATCH, #DISPATCH_GL(tmpbuf.sz)]
-  |   ldr CARG2, [DISPATCH, #DISPATCH_GL(tmpbuf.buf)]
-  |   ldr CARG1, STR:CARG1[1]
-  |  cmp RB, CARG3
-  |  blo ->fff_fallback
-  |1:  // Fill buffer with char.
-  |   strb CARG1, [CARG2, CARG4]
-  |  subs CARG4, CARG4, #1
-  |  bge <1
-  |  b ->fff_newstr
-  |
-  |.ffunc string_reverse
-  |  ffgccheck
-  |  ldrd CARG12, [BASE]
+  |  ldr CARG3, [BASE, #4]
   |   cmp NARGS8:RC, #8
+  |  ldr STR:CARG2, [BASE]
   |   blo ->fff_fallback
-  |  checkstr CARG2, ->fff_fallback
-  |  ldr CARG3, STR:CARG1->len
-  |   ldr RB, [DISPATCH, #DISPATCH_GL(tmpbuf.sz)]
-  |    ldr CARG2, [DISPATCH, #DISPATCH_GL(tmpbuf.buf)]
-  |  mov CARG4, CARG3
-  |  add CARG1, STR:CARG1, #sizeof(GCstr)
-  |   cmp RB, CARG3
-  |   blo ->fff_fallback
-  |1:  // Reverse string copy.
-  |  ldrb RB, [CARG1], #1
-  |   subs CARG4, CARG4, #1
-  |   blt ->fff_newstr
-  |  strb RB, [CARG2, CARG4]
-  |  b <1
-  |
-  |.macro ffstring_case, name, lo
-  |  .ffunc name
-  |  ffgccheck
-  |  ldrd CARG12, [BASE]
-  |   cmp NARGS8:RC, #8
-  |   blo ->fff_fallback
-  |  checkstr CARG2, ->fff_fallback
-  |  ldr CARG3, STR:CARG1->len
-  |   ldr RB, [DISPATCH, #DISPATCH_GL(tmpbuf.sz)]
-  |    ldr CARG2, [DISPATCH, #DISPATCH_GL(tmpbuf.buf)]
-  |  mov CARG4, #0
-  |  add CARG1, STR:CARG1, #sizeof(GCstr)
-  |   cmp RB, CARG3
-  |   blo ->fff_fallback
-  |1:  // ASCII case conversion.
-  |  ldrb RB, [CARG1, CARG4]
-  |   cmp CARG4, CARG3
-  |   bhs ->fff_newstr
-  |  sub RC, RB, #lo
-  |  cmp RC, #26
-  |  eorlo RB, RB, #0x20
-  |  strb RB, [CARG2, CARG4]
-  |   add CARG4, CARG4, #1
-  |  b <1
+  |  sub SBUF:CARG1, DISPATCH, #-DISPATCH_GL(tmpbuf)
+  |  checkstr CARG3, ->fff_fallback
+  |  ldr CARG4, SBUF:CARG1->b
+  |   str BASE, L->base
+  |   str PC, SAVE_PC
+  |   str L, SBUF:CARG1->L
+  |  str CARG4, SBUF:CARG1->p
+  |  bl extern lj_buf_putstr_ .. name
+  |  bl extern lj_buf_tostr
+  |  b ->fff_resstr
   |.endmacro
   |
-  |ffstring_case string_lower, 65
-  |ffstring_case string_upper, 97
-  |
-  |//-- Table library ------------------------------------------------------
-  |
-  |.ffunc_1 table_getn
-  |  checktab CARG2, ->fff_fallback
-  |  .IOS mov RA, BASE
-  |  bl extern lj_tab_len		// (GCtab *t)
-  |  // Returns uint32_t (but less than 2^31).
-  |  .IOS mov BASE, RA
-  |  mvn CARG2, #~LJ_TISNUM
-  |  b ->fff_restv
+  |ffstring_op reverse
+  |ffstring_op lower
+  |ffstring_op upper
   |
   |//-- Bit library --------------------------------------------------------
   |
@@ -2834,6 +2784,25 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  ins_next
     break;
 
+  case BC_ISTYPE:
+    |  // RA = src*8, RC = -type
+    |  ldrd CARG12, [BASE, RA]
+    |   ins_next1
+    |  cmn CARG2, RC
+    |   ins_next2
+    |  bne ->vmeta_istype
+    |   ins_next3
+    break;
+  case BC_ISNUM:
+    |  // RA = src*8, RC = -(TISNUM-1)
+    |  ldrd CARG12, [BASE, RA]
+    |   ins_next1
+    |  checktp CARG2, LJ_TISNUM
+    |   ins_next2
+    |  bhs ->vmeta_istype
+    |   ins_next3
+    break;
+
   /* -- Unary ops --------------------------------------------------------- */
 
   case BC_MOV:
@@ -3504,6 +3473,24 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  bne <1				// 'no __index' flag set: done.
     |  b ->vmeta_tgetb
     break;
+  case BC_TGETR:
+    |  decode_RB8 RB, INS
+    |   decode_RC8 RC, INS
+    |  // RA = dst*8, RB = table*8, RC = key*8
+    |  ldr TAB:CARG1, [BASE, RB]
+    |   ldr CARG2, [BASE, RC]
+    |  ldr CARG4, TAB:CARG1->array
+    |    ldr CARG3, TAB:CARG1->asize
+    |  add CARG4, CARG4, CARG2, lsl #3
+    |    cmp CARG2, CARG3		// In array part?
+    |    bhs ->vmeta_tgetr
+    |  ldrd CARG12, [CARG4]
+    |->BC_TGETR_Z:
+    |   ins_next1
+    |   ins_next2
+    |  strd CARG12, [BASE, RA]
+    |   ins_next3
+    break;
 
   case BC_TSETV:
     |  decode_RB8 RB, INS
@@ -3672,6 +3659,32 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |
     |7:  // Possible table write barrier for the value. Skip valiswhite check.
     |  barrierback TAB:CARG1, INS, CARG3
+    |  b <2
+    break;
+  case BC_TSETR:
+    |  decode_RB8 RB, INS
+    |   decode_RC8 RC, INS
+    |  // RA = dst*8, RB = table*8, RC = key*8
+    |  ldr TAB:CARG2, [BASE, RB]
+    |   ldr CARG3, [BASE, RC]
+    |     ldrb INS, TAB:CARG2->marked
+    |  ldr CARG1, TAB:CARG2->array
+    |    ldr CARG4, TAB:CARG2->asize
+    |     tst INS, #LJ_GC_BLACK		// isblack(table)
+    |  add CARG1, CARG1, CARG3, lsl #3
+    |     bne >7
+    |2:
+    |    cmp CARG3, CARG4		// In array part?
+    |    bhs ->vmeta_tsetr
+    |->BC_TSETR_Z:
+    |  ldrd CARG34, [BASE, RA]
+    |   ins_next1
+    |   ins_next2
+    |  strd CARG34, [CARG1]
+    |   ins_next3
+    |
+    |7:  // Possible table write barrier for the value. Skip valiswhite check.
+    |  barrierback TAB:CARG2, INS, RB
     |  b <2
     break;
 
@@ -4272,6 +4285,7 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  ldr RA, TRACE:RC->mcode
     |   str BASE, [DISPATCH, #DISPATCH_GL(jit_base)]
     |   str L, [DISPATCH, #DISPATCH_GL(jit_L)]
+    |   str L, [DISPATCH, #DISPATCH_GL(tmpbuf.L)]
     |  bx RA
     |.endif
     break;

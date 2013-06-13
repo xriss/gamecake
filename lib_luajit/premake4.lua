@@ -1,6 +1,4 @@
 
---if not NACL then -- we just link with prebuilt?
-
 project "lib_luajit"
 language "C"
 
@@ -57,9 +55,6 @@ files {
 	"src/lj_strscan.c",
 	"src/lj_opt_sink.c",
 
---	"src/luajit.c",
---	"src/ljamalg.c",
-
 	"src/lib_table.c",
 	"src/lib_string.c",
 	"src/lib_package.c",
@@ -74,54 +69,14 @@ files {
 	"src/lib_base.c",
 	"src/lib_aux.c",
 	
---	"src/buildvm_peobj.c",
---	"src/buildvm_lib.c",
---	"src/buildvm_fold.c",
---	"src/buildvm_asm.c",
---	"src/buildvm.c",
-	
---	"src/lj_vm.s",
 	}
-
-
---X86
---    -D JIT -D FFI -D FPU -D HFABI -D VER=
-
--- LJ_TARGET_X86ORX64
-
---arm7
---    -D JIT -D FFI -D DUALNUM -D VER=50
-
-
---raspi
---    -D JIT -D FFI -D DUALNUM -D FPU -D VER=60
-
--- LJ_TARGET_ARM
 
 
 --[[
 
-#run in the src dir after a normal make (so minilua exists)
-
-host/minilua ../dynasm/dynasm.lua -D JIT -D FFI -D FPU -D HFABI -D VER= -o vm_x86.h vm_x86.dasc
-host/minilua ../dynasm/dynasm.lua -D JIT -D FFI -D DUALNUM -D FPU -D VER=60 -o vm_arm.h vm_arm.dasc
-
-hmmm ok need to do a makefile build then yank the following
-
-make CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi-
-make CROSS=/home/kriss/hg/sdks/gcc/prefix/bin/arm-raspi-linux-gnueabi-
-
-lj_vm.s
-lj_ffdef.h
-lj_bcdef.h
-lj_folddef.h
-lj_recdef.h
-lj_libdef.h
-jit/vmdef.lua
+asm.lua builds cached code in the asm dir, needs to be run if we bump the code
 
 ]]
-
-
 
 
 includedirs { "src" }
@@ -137,21 +92,14 @@ elseif ANDROID then
 	includedirs { "asm/arm" }
 	files { "asm/arm/lj_vm.s" }
 
---	defines { "LUAJIT_DISABLE_JIT" } -- I seem to have android problems with JIT?
-
 else
 
---x86
 	includedirs { "asm/x86" }
 	files { "asm/x86/lj_vm.s" }
 	
---	defines { "LUAJIT_USE_SYSMALLOC" }
-
 end
-
 
 defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
 KIND() -- set defaults
 
---end

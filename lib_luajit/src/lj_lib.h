@@ -41,7 +41,6 @@ LJ_FUNC void lj_lib_checknumber(lua_State *L, int narg);
 LJ_FUNC lua_Number lj_lib_checknum(lua_State *L, int narg);
 LJ_FUNC int32_t lj_lib_checkint(lua_State *L, int narg);
 LJ_FUNC int32_t lj_lib_optint(lua_State *L, int narg, int32_t def);
-LJ_FUNC int32_t lj_lib_checkbit(lua_State *L, int narg);
 LJ_FUNC GCfunc *lj_lib_checkfunc(lua_State *L, int narg);
 LJ_FUNC GCtab *lj_lib_checktab(lua_State *L, int narg);
 LJ_FUNC GCtab *lj_lib_checktabornil(lua_State *L, int narg);
@@ -61,14 +60,15 @@ LJ_FUNC int lj_lib_checkopt(lua_State *L, int narg, int def, const char *lst);
 #endif
 
 /* Push internal function on the stack. */
-static LJ_AINLINE void lj_lib_pushcc(lua_State *L, lua_CFunction f,
-				     int id, int n)
+static LJ_AINLINE GCfunc *lj_lib_pushcc(lua_State *L, lua_CFunction f,
+					int id, int n)
 {
   GCfunc *fn;
   lua_pushcclosure(L, f, n);
   fn = funcV(L->top-1);
   fn->c.ffid = (uint8_t)id;
   setmref(fn->c.pc, &G(L)->bc_cfunc_int);
+  return fn;
 }
 
 #define lj_lib_pushcf(L, fn, id)	(lj_lib_pushcc(L, (fn), (id), 0))
@@ -77,6 +77,7 @@ static LJ_AINLINE void lj_lib_pushcc(lua_State *L, lua_CFunction f,
 #define LJLIB_CF(name)		static int lj_cf_##name(lua_State *L)
 #define LJLIB_ASM(name)		static int lj_ffh_##name(lua_State *L)
 #define LJLIB_ASM_(name)
+#define LJLIB_LUA(name)
 #define LJLIB_SET(name)
 #define LJLIB_PUSH(arg)
 #define LJLIB_REC(handler)
@@ -96,7 +97,8 @@ LJ_FUNC void lj_lib_register(lua_State *L, const char *libname,
 #define LIBINIT_ASM	0x40
 #define LIBINIT_ASM_	0x80
 #define LIBINIT_STRING	0xc0
-#define LIBINIT_MAXSTR	0x39
+#define LIBINIT_MAXSTR	0x38
+#define LIBINIT_LUA	0xf9
 #define LIBINIT_SET	0xfa
 #define LIBINIT_NUMBER	0xfb
 #define LIBINIT_COPY	0xfc

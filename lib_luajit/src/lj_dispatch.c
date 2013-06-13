@@ -8,6 +8,7 @@
 
 #include "lj_obj.h"
 #include "lj_err.h"
+#include "lj_buf.h"
 #include "lj_func.h"
 #include "lj_str.h"
 #include "lj_tab.h"
@@ -17,6 +18,7 @@
 #include "lj_frame.h"
 #include "lj_bc.h"
 #include "lj_ff.h"
+#include "lj_strfmt.h"
 #if LJ_HASJIT
 #include "lj_jit.h"
 #endif

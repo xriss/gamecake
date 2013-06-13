@@ -9,11 +9,12 @@
 #include "lj_obj.h"
 #include "lj_err.h"
 #include "lj_debug.h"
-#include "lj_str.h"
+#include "lj_buf.h"
 #include "lj_tab.h"
 #include "lj_state.h"
 #include "lj_frame.h"
 #include "lj_bc.h"
+#include "lj_strfmt.h"
 #if LJ_HASJIT
 #include "lj_jit.h"
 #endif
@@ -133,20 +134,6 @@ static BCLine debug_frameline(lua_State *L, GCfunc *fn, cTValue *nextframe)
 
 /* -- Variable names ------------------------------------------------------ */
 
-/* Read ULEB128 value. */
-static uint32_t debug_read_uleb128(const uint8_t **pp)
-{
-  const uint8_t *p = *pp;
-  uint32_t v = *p++;
-  if (LJ_UNLIKELY(v >= 0x80)) {
-    int sh = 0;
-    v &= 0x7f;
-    do { v |= ((*p & 0x7f) << (sh += 7)); } while (*p++ >= 0x80);
-  }
-  *pp = p;
-  return v;
-}
-
 /* Get name of a local variable from slot number and PC. */
 static const char *debug_varname(const GCproto *pt, BCPos pc, BCReg slot)
 {
@@ -162,9 +149,9 @@ static const char *debug_varname(const GCproto *pt, BCPos pc, BCReg slot)
       } else {
 	while (*p++) ;  /* Skip over variable name string. */
       }
-      lastpc = startpc = lastpc + debug_read_uleb128(&p);
+      lastpc = startpc = lastpc + lj_buf_ruleb128((const char **)&p);
       if (startpc > pc) break;
-      endpc = startpc + debug_read_uleb128(&p);
+      endpc = startpc + lj_buf_ruleb128((const char **)&p);
       if (pc < endpc && slot-- == 0) {
 	if (vn < VARNAME__MAX) {
 #define VARNAMESTR(name, str)	str "\0"
@@ -321,7 +308,7 @@ const char *lj_debug_funcname(lua_State *L, TValue *frame, const char **name)
 /* -- Source code locations ----------------------------------------------- */
 
 /* Generate shortened source name. */
-void lj_debug_shortname(char *out, GCstr *str)
+void lj_debug_shortname(char *out, GCstr *str, BCLine line)
 {
   const char *src = strdata(str);
   if (*src == '=') {
@@ -335,11 +322,11 @@ void lj_debug_shortname(char *out, GCstr *str)
       *out++ = '.'; *out++ = '.'; *out++ = '.';
     }
     strcpy(out, src);
-  } else {  /* Output [string "string"]. */
+  } else {  /* Output [string "string"] or [builtin:name]. */
     size_t len;  /* Length, up to first control char. */
     for (len = 0; len < LUA_IDSIZE-12; len++)
       if (((const unsigned char *)src)[len] < ' ') break;
-    strcpy(out, "[string \""); out += 9;
+    strcpy(out, line == ~(BCLine)0 ? "[builtin:" : "[string \""); out += 9;
     if (src[len] != '\0') {  /* Must truncate? */
       if (len > LUA_IDSIZE-15) len = LUA_IDSIZE-15;
       strncpy(out, src, len); out += len;
@@ -347,7 +334,7 @@ void lj_debug_shortname(char *out, GCstr *str)
     } else {
       strcpy(out, src); out += len;
     }
-    strcpy(out, "\"]");
+    strcpy(out, line == ~(BCLine)0 ? "]" : "\"]");
   }
 }
 
@@ -360,14 +347,15 @@ void lj_debug_addloc(lua_State *L, const char *msg,
     if (isluafunc(fn)) {
       BCLine line = debug_frameline(L, fn, nextframe);
       if (line >= 0) {
+	GCproto *pt = funcproto(fn);
 	char buf[LUA_IDSIZE];
-	lj_debug_shortname(buf, proto_chunkname(funcproto(fn)));
-	lj_str_pushf(L, "%s:%d: %s", buf, line, msg);
+	lj_debug_shortname(buf, proto_chunkname(pt), pt->firstline);
+	lj_strfmt_pushf(L, "%s:%d: %s", buf, line, msg);
 	return;
       }
     }
   }
-  lj_str_pushf(L, "%s", msg);
+  lj_strfmt_pushf(L, "%s", msg);
 }
 
 /* Push location string for a bytecode position to Lua stack. */
@@ -377,20 +365,22 @@ void lj_debug_pushloc(lua_State *L, GCproto *pt, BCPos pc)
   const char *s = strdata(name);
   MSize i, len = name->len;
   BCLine line = lj_debug_line(pt, pc);
-  if (*s == '@') {
+  if (pt->firstline == ~(BCLine)0) {
+    lj_strfmt_pushf(L, "builtin:%s", s);
+  } else if (*s == '@') {
     s++; len--;
     for (i = len; i > 0; i--)
       if (s[i] == '/' || s[i] == '\\') {
 	s += i+1;
 	break;
       }
-    lj_str_pushf(L, "%s:%d", s, line);
+    lj_strfmt_pushf(L, "%s:%d", s, line);
   } else if (len > 40) {
-    lj_str_pushf(L, "%p:%d", pt, line);
+    lj_strfmt_pushf(L, "%p:%d", pt, line);
   } else if (*s == '=') {
-    lj_str_pushf(L, "%s:%d", s+1, line);
+    lj_strfmt_pushf(L, "%s:%d", s+1, line);
   } else {
-    lj_str_pushf(L, "\"%s\":%d", s, line);
+    lj_strfmt_pushf(L, "\"%s\":%d", s, line);
   }
 }
 
@@ -453,7 +443,7 @@ int lj_debug_getinfo(lua_State *L, const char *what, lj_Debug *ar, int ext)
 	BCLine firstline = pt->firstline;
 	GCstr *name = proto_chunkname(pt);
 	ar->source = strdata(name);
-	lj_debug_shortname(ar->short_src, name);
+	lj_debug_shortname(ar->short_src, name, pt->firstline);
 	ar->linedefined = (int)firstline;
 	ar->lastlinedefined = (int)(firstline + pt->numline);
 	ar->what = firstline ? "Lua" : "main";
