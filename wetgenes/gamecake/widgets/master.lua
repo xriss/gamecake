@@ -5,6 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- widget class master
 -- the master widget
 
+local wstr=require("wetgenes.string")
 
 
 
@@ -20,6 +21,7 @@ local canvas=oven.canvas
 
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
+local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
 
 --
 -- add meta functions
@@ -114,39 +116,45 @@ function wmaster.setup(widget,def)
 			widget:mouse(m.action,m.x,m.y,m.keycode)
 		elseif m.class=="joystick" then
 		
-				local d=1/8
-				local t,vx,vy
-				local tt,vxx,vyy
-				local nox,noy
-
-				vx=m.lx		vxx=m.lx*m.lx				
-				t=m.rx		tt=t*t			if tt>vxx then vx=t vxx=tt end
-				t=m.dx		tt=t*t			if tt>vxx then vx=t vxx=tt end
-
-				vy=m.ly		vyy=m.ly*m.ly				
-				t=m.ry		tt=t*t			if tt>vyy then vy=t vyy=tt end
-				t=m.dy		tt=t*t			if tt>vyy then vy=t vyy=tt end
+			local joydir=mkeys.joystick_msg_to_key(m)
 			
-				if vxx/2 > vyy then noy=true end
-				if vyy/2 > vxx then nox=true end
-				
-				if not nox then
-					if     vx>d		then	master.key(widget,"","right",1)
-					elseif vx<-d 	then	master.key(widget,"","left",1)
-					end
+			if master.last_joydir~=joydir then -- only when we change
+				if master.last_joydir then -- first clear any previous key
+					master.key(widget,"",master.last_joydir,-1)
 				end
-
-				if not noy then
-					if    	vy>d 	then	master.key(widget,"","down",1)
-					elseif	vy<-d 	then	master.key(widget,"","up",1)
-					end
+				master.last_joydir=joydir
+				if joydir then
+					master.key(widget,"",joydir,1) -- then send any new key
 				end
+			end
 
 		elseif m.class=="joykey" then
-		
-			if m.action==1 then -- key set
-				master.key(widget,"","return",1)
-				master.key(widget,"","return",-1)
+
+--print(wstr.dump(m))
+
+			if m.keycode==4 then --back
+				if master.go_back_id then
+					local v=master.ids and master.ids[master.go_back_id]
+					if v then
+						if m.action==-1 then
+							v:call_hook("click")
+						end
+					end
+				end
+			elseif m.keycode==108 then --forward
+				if master.go_forward_id then
+					local v=master.ids and master.ids[master.go_forward_id]
+					if v then
+						if m.action==-1 then
+							v:call_hook("click")
+						end
+					end
+				end
+			else
+				if m.action==-1 then -- key set
+					master.key(widget,"","return",1)
+					master.key(widget,"","return",-1)
+				end
 			end
 
 		end
@@ -350,6 +358,9 @@ function wmaster.setup(widget,def)
 		master.active=nil
 		master.focus=nil
 		master.edit=nil
+		master.go_back_id=nil
+		master.go_forward_id=nil
+		master.ids={}
 	end
 	
 	function master.dragging()

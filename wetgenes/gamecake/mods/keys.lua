@@ -661,5 +661,64 @@ function M.bake(oven,keys)
 		
 	end
 
+-- turn a joystick msg into a key name or nil
+-- this works on all axis inputs (bigest movement is chosen)
+	function keys.joystick_msg_to_key(m)
+		if m.class=="joystick" then
+			local d=1/8
+			local t,vx,vy
+			local tt,vxx,vyy
+			local nox,noy
+
+			vx=m.lx		vxx=m.lx*m.lx				
+			t=m.rx		tt=t*t			if tt>vxx then vx=t vxx=tt end
+			t=m.dx		tt=t*t			if tt>vxx then vx=t vxx=tt end
+
+			vy=m.ly		vyy=m.ly*m.ly				
+			t=m.ry		tt=t*t			if tt>vyy then vy=t vyy=tt end
+			t=m.dy		tt=t*t			if tt>vyy then vy=t vyy=tt end
+		
+			if vxx/2 > vyy then noy=true end
+			if vyy/2 > vxx then nox=true end
+			
+			if not nox then
+				if     vx>d		then	return "right"
+				elseif vx<-d 	then	return "left"
+				end
+			end
+
+			if not noy then
+				if    	vy>d 	then	return "down"
+				elseif	vy<-d 	then	return "up"
+				end
+			end
+		end
+	end
+
+-- as above but this works on given axis values, expected to be +-1 range
+	function keys.joystick_axis_to_key(vx,vy)
+		local d=1/8
+		local vxx,vyy
+		local nox,noy
+		
+		vxx=vx*vx				
+		vyy=vy*vy				
+
+		if vxx/2 > vyy then noy=true end
+		if vyy/2 > vxx then nox=true end
+		
+		if not nox then
+			if     vx>d		then	return "right"
+			elseif vx<-d 	then	return "left"
+			end
+		end
+
+		if not noy then
+			if    	vy>d 	then	return "down"
+			elseif	vy<-d 	then	return "up"
+			end
+		end
+	end
+
 	return keys
 end

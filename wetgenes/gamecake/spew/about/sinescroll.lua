@@ -381,7 +381,7 @@ Greetz to No1 and No6!
 
 	function about.msg(m)
 	
-		if m.class=="key" or m.class=="mouse" then
+		if m.class=="key" or m.class=="mouse" or m.class=="joykey" then
 			if m.action==-1 then
 				if oven.last then oven.next=oven.last end -- return
 			end
