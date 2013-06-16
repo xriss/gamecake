@@ -224,7 +224,7 @@ sounds.load=function(filename,id)
 	
 	local x=assert(sod.create())
 	
-	local d=assert(zips.readfile(fname))
+	local d=assert(zips.readfile(fname),fname)
 	assert(x:load_data(d,"wav"))
 	t={}
 	t.filename=filename

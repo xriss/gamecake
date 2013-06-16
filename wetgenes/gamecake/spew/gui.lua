@@ -86,7 +86,17 @@ M.bake=function(oven,gui)
 --		if ids.menu_gamemode then ids.menu_gamemode.text=d.modes[d.mode].title end
 	end
 	
+	
+local beep_play=function() end
+	
+	
 	function gui.hooks(act,widget)
+
+		if gui.beep_hook then
+			beep_play=gui.beep_hook.play
+		else
+			beep_play=function() end
+		end
 
 		local d=gui.data
 		local id=widget and widget.id
@@ -98,6 +108,7 @@ M.bake=function(oven,gui)
 				ssettings.set("vol_sfx",widget.num/11)
 			end
 		end
+		
 
 		if act=="click" then
 		
@@ -109,36 +120,53 @@ print("click",id)
 
 
 			if id=="profiles_select" then
+			
+				beep_play("button")
+			
 				sprofiles.select(widget.user)
 				gui.page("profile")
 				
 			elseif id=="profile_name_clear" then
 
+				beep_play("button")
+
 				gui.data.name:value( "" )
 				
 			elseif id=="profile_name_rand" then
+
+				beep_play("button")
 
 				gui.data.name:value( snames.random() )
 
 			elseif id=="profile_name_edit" then
 			
+				beep_play("button")
+
 				gui.page("profile_name_edit")
 				
 			elseif id=="profile_name_set" then
 			
+				beep_play("button")
+
 				sprofiles.set("name",gui.data.name:value())
 				gui.page("profile")
 
 			elseif id=="profile_return" then
 			
+				beep_play("button")
+
 				gui.mpage("menu")
 				
 			elseif id=="profile_goto" then
+
+				beep_play("button")
 
 				gui.page(widget.user)
 			
 			elseif id=="profile_cancel" then
 			
+				beep_play("button")
+
 					if widget.user then
 						gui.page(widget.user)
 					else
@@ -147,10 +175,15 @@ print("click",id)
 
 			elseif id=="score_list" then
 
+				beep_play("button")
+
 --				gui.offset=1
 				gui.page("score_list")
 
 			elseif id=="score_brag" then
+
+				beep_play("button")
+
 				local score=sscores.up[1].score
 				if wwin.hardcore.send_intent then -- we have a way to brag
 					if gui.strings.brag then
@@ -277,6 +310,7 @@ print("click",id)
 
 
 		gui.clicks.score_back=function()
+			beep_play("button")
 			gui.mpage("menu") -- callback to return to original menu			
 		end
 		
@@ -317,14 +351,17 @@ print("click",id)
 	function gui.pages.score_list(master)
 
 		gui.clicks.score_list_less=function()
+			beep_play("button")
 			gui.offset=gui.offset-5
 			gui.page("score_list")
 		end
 		gui.clicks.score_list_more=function()
+			beep_play("button")
 			gui.offset=gui.offset+5
 			gui.page("score_list")
 		end
 		gui.clicks.score_list_exit=function()
+			beep_play("button")
 			gui.offset=1
 			gui.mpage("menu") -- callback to return to original menu			
 		end
@@ -414,18 +451,23 @@ print("click",id)
 	function gui.pages.settings(master)
 	
 		gui.clicks.settings_return=function()
+			beep_play("button")
 			gui.mpage("menu")
 		end
 		gui.clicks.settings_quit=function()
+			beep_play("button")
 			gui.page("quit")
 		end
 		gui.clicks.settings_game=function()
+			beep_play("button")
 			if not gui.mpage("settings_game") then gui.mpage("menu") end
 		end
 		gui.clicks.settings_scores=function()
+			beep_play("button")
 			gui.page("score_list")
 		end
 		gui.clicks.settings_about=function()
+			beep_play("button")
 			oven.next=oven.rebake("wetgenes.gamecake.spew.about.sinescroll")
 		end
 
@@ -476,9 +518,11 @@ print("click",id)
 	function gui.pages.quit(master)
 
 		gui.clicks.quit_back=function()
+			beep_play("button")
 			gui.page("settings")
 		end
 		gui.clicks.quit_exit=function()
+			beep_play("button")
 			oven.next=true -- really quit
 		end
 				
