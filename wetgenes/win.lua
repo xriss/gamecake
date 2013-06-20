@@ -357,6 +357,11 @@ function base.time()
 end
 win.time=base.time
 
+function base.smell_check()
+	if hardcore.smell_check then
+		return hardcore.smell_check()
+	end
+end
 
 function base.glyph_8x8(n)
 	return softcore.glyph_8x8(n)

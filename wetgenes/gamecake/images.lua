@@ -97,7 +97,15 @@ oven.preloader(filename)
 	local d=assert(zips.readfile(fname),"Failed to load "..fname)
 	assert(g:load_data(d,fext:sub(2))) -- skip extension period
 
--- resize?
+-- clamp to a maximum size
+	local max_size=1024
+	if g.width > max_size or g.height>max_size then
+		local hx=g.width>max_size and max_size or g.width
+		local hy=g.height>max_size and max_size or g.height
+print("Max texture size converting ",g.width,g.height," to ",hx,hy)
+		g:scale( hx , hy ,1)
+	end
+	
 --	g:scale(g.width/2,g.height/2,1)
 	
 	if gl then --gl mode

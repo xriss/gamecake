@@ -16,7 +16,15 @@ function M.bake(opts)
 
 	local oven={}
 
-		oven.opts=opts
+		oven.opts=opts or {}
+		
+		if wwin.flavour=="android" then -- check for special android builds
+
+			if not opts.smell then -- check for some sort of smell and remember it
+				opts.smell=win.smell_check()
+			end
+
+		end
 
 --opts.disable_sounds=true
 		

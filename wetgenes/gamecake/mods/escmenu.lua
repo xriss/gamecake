@@ -145,7 +145,7 @@ function M.bake(oven,escmenu)
 		
 	function escmenu.msg(m)
 		if escmenu.show then
-			if m.class=="key" or m.class=="mouse" then
+			if m.class=="key" or m.class=="mouse" or m.class=="joykey" or m.class=="joystick" then
 
 				if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
 					m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
@@ -161,7 +161,7 @@ function M.bake(oven,escmenu)
 				return nil
 			end
 		end
-		if m.class=="key" and m.keyname=="escape" then
+		if ( m.class=="key" and m.keyname=="escape" ) or ( m.class=="joykey" and m.keycode==4 ) then
 			if m.action==-1 then
 				escmenu.show=not escmenu.show
 			end
