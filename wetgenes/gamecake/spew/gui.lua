@@ -373,75 +373,119 @@ print("click",id)
 		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 		
 		local tab={}
-		local sc=sscores.list({offset=gui.offset,order="full"})
-		local nomore=not sc[6]
-		for i=1,5 do
-			local v=sc[i]
-			if v then
-				tab[i]={
-					idx=v.idx,
-					name=v.name,
-					score=v.score,
-				}
-			end
-		end
 
 		
-		local b=top:add({hx=320,hy=90,class="fill",font="Vera",text_size=24,id="score_title"})			
+		local fill=function()
+		
+			top:clean_all()
+		
+			local b=top:add({hx=320,hy=90,class="fill",font="Vera",text_size=24,id="score_title"})			
 
-		b:add({hx=320,hy=5})
+			b:add({hx=320,hy=5})
 
-		b:add({hx=20,hy=30})
-		b:add({hx=280,hy=30,text_color=0xffffffff,text="High Scores",id="score_title_text"})
-		b:add({hx=20,hy=30})
+			b:add({hx=20,hy=30})
+			b:add({hx=280,hy=30,text_color=0xffffffff,text="High Scores",id="score_title_text"})
+			b:add({hx=20,hy=30})
 
-		b:add({hx=320,hy=5})
+			b:add({hx=320,hy=5})
 
-		b:add({hx=320,hy=50})
+			b:add({hx=320,hy=50})
 
-		for i=1,5 do
-			local v=tab[i]
+			for i=1,5 do
+				local v=tab[i]
 
-			if v then
+				if v then
 
-				local b=top:add({hx=320,hy=70,class="fill",font="Vera",text_size=24,id="score_block"})			
+					local b=top:add({hx=320,hy=70,class="fill",font="Vera",text_size=24,id="score_block"})			
 
-				b:add({hx=320,hy=5})
+					b:add({hx=320,hy=5})
 
-				b:add({hx=5,hy=60})
+					b:add({hx=5,hy=60})
 
-				local s=b:add({hx=310,hy=60,class="fill"})			
-				s:add(
-					{hx=100,hy=30,color=0xffcccccc,text=wstr.str_append_english_number_postfix(v.idx),hooks=gui.hooks,id="score_part"},
-					{hx=210,hy=30,color=0xffcccccc,text=wstr.str_insert_number_commas(v.score),hooks=gui.hooks,id="score_part"},
-					{hx=310,hy=30,color=0xffcccccc,text=v.name,hooks=gui.hooks,id="score_part"})
+					local s=b:add({hx=310,hy=60,class="fill"})			
+					s:add(
+						{hx=100,hy=30,color=0xffcccccc,text=wstr.str_append_english_number_postfix(v.idx),hooks=gui.hooks,id="score_part"},
+						{hx=210,hy=30,color=0xffcccccc,text=wstr.str_insert_number_commas(v.score),hooks=gui.hooks,id="score_part"},
+						{hx=310,hy=30,color=0xffcccccc,text=v.name,hooks=gui.hooks,id="score_part"})
 
-				b:add({hx=5,hy=60})
+					b:add({hx=5,hy=60})
 
-				b:add({hx=320,hy=5})
-			else
+					b:add({hx=320,hy=5})
+				else
 
-				top:add({hx=320,hy=70})
+					top:add({hx=320,hy=70})
+				
+				end
+			end
 			
+			
+			if gui.offset>1 then
+				top:add({hx=100,hy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
+				top:add({hx=10,hy=40})
+			else
+				top:add({hx=110,hy=40})
+			end
+
+			top:add({hx=100,hy=40,color=0xffcccccc,text="Exit",id="score_list_exit",hooks=gui.hooks})
+
+			if nomore then
+				top:add({hx=110,hy=40})
+			else
+				top:add({hx=10,hy=40})
+				top:add({hx=100,hy=40,color=0xffcccccc,text="More",id="score_list_more",hooks=gui.hooks})
 			end
 		end
 		
+
+		if wwin.smell=="gamestick" then
 		
-		if gui.offset>1 then
-			top:add({hx=100,hy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
-			top:add({hx=10,hy=40})
-		else
-			top:add({hx=110,hy=40})
-		end
+			gui.msg_smell_hook=function(m)
 
-		top:add({hx=100,hy=40,color=0xffcccccc,text="Exit",id="score_list_exit",hooks=gui.hooks})
+--print(gui.msg_smell_hook,wstr.dump(m))
 
-		if nomore then
-			top:add({hx=110,hy=40})
+--				if m.class=="LeaderBoard" then
+					if m.data then
+						for i=1,5 do
+							for _,v in ipairs(m.data) do
+								if v.position==gui.offset+i-1 then
+									tab[i]={
+										idx=tonumber(v.position or 0) or 0,
+										name=v.name,
+										score=tonumber(v.score or 0) or 0,
+									}
+								end
+							end
+						end
+
+						fill()
+
+						gui.master:layout()
+						
+					end
+--				end
+			end
+		
+			if wwin.hardcore.smell_score_range then wwin.hardcore.smell_score_range(gui.offset,gui.offset+4) end
+			
 		else
-			top:add({hx=10,hy=40})
-			top:add({hx=100,hy=40,color=0xffcccccc,text="More",id="score_list_more",hooks=gui.hooks})
+		
+			local sc=sscores.list({offset=gui.offset,order="full"})
+			local nomore=not sc[6]
+			for i=1,5 do
+				local v=sc[i]
+				if v then
+					tab[i]={
+						idx=v.idx,
+						name=v.name,
+						score=v.score,
+					}
+				end
+			end
+
 		end
+		
+				
+		fill()
 
 		master.go_back_id="score_list_less"
 		master.go_forward_id="score_list_exit"
@@ -485,7 +529,9 @@ print("click",id)
 		top:add({class="slide",color=0xffcccccc,hx=320,hy=40,datx=gui.data.vol_sfx,data=gui.data.vol_sfx,hooks=gui.hooks})
 
 
-		top:add({hx=320,hy=40*1})
+		local t=top:add({hx=320,hy=40,class="fill",font="Vera",text_size=12,text_color=0xffffffff})
+		t:add{hx=320,hy=20,text=oven.opts.title}
+		t:add{hx=320,hy=20,text=""}
 
 		top:add({hx=320,hy=40,color=0xffcccccc,text="About",id="settings_about",hooks=gui.hooks}):
 			add{hx=80,hy=80,px=20,py=-20}.draw=function(w)
@@ -502,9 +548,16 @@ print("click",id)
 				gl.PopMatrix()
 			end)
 		end
+		
+		local v= ( oven.opts.bake and oven.opts.bake.version ) or 0
+
+		local t=top:add({hx=320,hy=40,class="fill",font="Vera",text_size=12,text_color=0xffffffff})
+		t:add{hx=320,hy=20,text=""}
+		t:add{hx=320,hy=20,text=(wwin.smell or "vanilla") .. " build v".. v}
+
 						
 						
-		top:add({hx=320,hy=40*4})
+		top:add({hx=320,hy=40*3})
 
 		top:add({hx=120,hy=40,color=0xffcccccc,text="Back",id="settings_return",hooks=gui.hooks})
 		top:add({hx=80,hy=40})
@@ -596,6 +649,13 @@ print("click",id)
 			m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is now center of screen
 			m.x=m.x+(320/2)
 			m.y=m.y+(480/2)
+		end
+		
+
+		if gui.msg_smell_hook then
+			if m.cmd and m.cmd:sub(1,11)=="LeaderBoard" then
+				return gui.msg_smell_hook(m)
+			end
 		end
 
 		gui.master:msg(m)

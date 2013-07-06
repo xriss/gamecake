@@ -129,6 +129,8 @@ function wmaster.setup(widget,def)
 			end
 
 		elseif m.class=="joykey" then
+		
+			if m.action==1 then master.last_keycode=m.keycode end -- slight debounce hack?
 
 --print(wstr.dump(m))
 
@@ -151,9 +153,14 @@ function wmaster.setup(widget,def)
 					end
 				end
 			else
-				if m.action==-1 then -- key set
-					master.key(widget,"","return",1)
-					master.key(widget,"","return",-1)
+--print(m.keycode)
+				if m.keycode==0 then -- ignore
+				else
+					if m.action==-1 and master.last_keycode==m.keycode then -- key set
+						master.last_keycode=nil
+						master.key(widget,"","return",1)
+						master.key(widget,"","return",-1)
+					end
 				end
 			end
 

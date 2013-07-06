@@ -152,16 +152,28 @@ function M.bake(oven,escmenu)
 					m.x=m.x+(opts.width/2)
 					m.y=m.y+(opts.height/2)
 				end
-				escmenu.master:msg(m)
 
 				if m.class=="key" and m.action==-1 and m.keyname=="escape" then
 					escmenu.show=not escmenu.show
+					return nil
 				end
 				
+				if ( m.class=="joykey" and m.action==-1 and (m.keycode==4 or m.keycode==0) ) then -- back button
+					escmenu.show=not escmenu.show
+					return nil
+				end
+
+				escmenu.master:msg(m)
+
+				return nil
+			end
+		else
+			if ( m.class=="joykey" and m.action==-1 and m.keycode==0 ) then -- back button
+				escmenu.show=not escmenu.show
 				return nil
 			end
 		end
-		if ( m.class=="key" and m.keyname=="escape" ) or ( m.class=="joykey" and m.keycode==4 ) then
+		if ( m.class=="key" and m.keyname=="escape" ) then
 			if m.action==-1 then
 				escmenu.show=not escmenu.show
 			end

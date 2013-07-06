@@ -3,6 +3,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local jit=jit
 
+local wsbox=require("wetgenes.sandbox")
 local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local bit=require("bit")
@@ -307,8 +308,8 @@ function base.msg(w)
 	if not m and hardcore.smell_msg then
 		m=hardcore.smell_msg() --hardcoded stuff
 		if m then
-			print(wstr.dump(m))
-			m=nil
+			m=wsbox.lson(m)
+--			print(wstr.dump(m))
 		end
 	end
 

@@ -240,6 +240,8 @@ print("Saving "..scores.filename)
 	end
 	
 	function scores.final_score(opts)
+
+		local score=opts.score or scores.up[1].score
 	
 		local scr={}
 		
@@ -258,6 +260,10 @@ print("Saving "..scores.filename)
 		end
 
 		scores.save() -- always save new scores to disk
+		
+		if wwin.smell=="gamestick" then
+			if wwin.hardcore.smell_score_send then wwin.hardcore.smell_score_send(score) end
+		end
 
 		return scr
 	end

@@ -1,6 +1,8 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local wzips=require("wetgenes.zips")
+local wsbox=require("wetgenes.sandbox")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 
@@ -17,15 +19,14 @@ function M.bake(opts)
 	local oven={}
 
 		oven.opts=opts or {}
-		
-		if wwin.flavour=="android" then -- check for special android builds
 
-			if not opts.smell then -- check for some sort of smell and remember it
-				opts.smell=win.smell_check()
-			end
-
+-- pull in info about what art we baked		
+		local lson=wzips.readfile("lua/init_bake.lua")
+		if lson then
+			oven.opts.bake=wsbox.lson(lson)
 		end
 
+		
 --opts.disable_sounds=true
 		
 		oven.baked={}
@@ -223,6 +224,7 @@ function M.bake(opts)
 		end
 
 		function oven.start()	
+
 			oven.win:start()
 			oven.cake.start()
 			oven.cake.canvas.start()
@@ -233,6 +235,8 @@ function M.bake(opts)
 			if oven.preloader_enabled=="stop" then -- we turned on at stop so turn off at start
 				oven.preloader_enabled=false
 			end
+
+
 		end
 
 		function oven.stop()
@@ -427,6 +431,7 @@ print("Loading : "..s)
 							oven.stop()
 						end
 					end
+					
 
 					for i=#oven.mods,1,-1 do -- run it through the mods backwards, so the topmost layer gets first crack at the msgs
 						local v=oven.mods[i]
@@ -437,6 +442,7 @@ print("Loading : "..s)
 					if m and oven.now and oven.now.msg then
 						oven.now.msg(m)
 					end
+						
 				end
 			end
 		end
