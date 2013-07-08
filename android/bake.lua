@@ -27,6 +27,7 @@ end
 
 local version=bake.version_from_time()
 local opts={
+		smell=smell,
         name=preopts.name,
         title=preopts.title,
         namev=preopts.title..".v"..version,
@@ -62,6 +63,10 @@ print(v)
 
 end
 
+-- patch init.lua
+bake.replacefile(basedir.."/lua/init.lua",zips.apk_munge_filename("lua/init.lua"),opts)
+
+
 local ficon=basedir.."/art/icons/android_icon.png"
 if not bake.file_exists(ficon) then
 	ficon="art/icons/android_icon.png"
@@ -77,9 +82,8 @@ if bake.file_exists(ficon) then
 		{s=36,o="ldpi"},
 	} do
 		local gd=assert(wgrd.create(ficon))
-		assert(gd:convert(wgrd.FMT_U8_ARGB_PREMULT))
+		assert(gd:convert(wgrd.FMT_U8_ARGB))
 		gd:scale(v.s,v.s,1)
---		assert(gd:convert(wgrd.FMT_U8_ARGB))
 		local n="res/drawable-"..v.o.."/icon.png"
 		bake.create_dir_for_file(n)
 		gd:save(n)

@@ -184,7 +184,7 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 		lua_pushnumber(L,source); lua_setfield(L,-2,"source");
 		lua_pushnumber(L,device); lua_setfield(L,-2,"device");
 
-		if( keycode==24 || keycode==25 ) // do not grab volume controls
+		if( keycode==24 || keycode==25 ) // do not grab volume controls or menu button
 		{
 			return 0;
 		}
@@ -818,6 +818,45 @@ int lua_android_msg (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// call an int int function that returns a void
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_func_call_int_int_return_void (lua_State *l,char *funcname,int na,int nb)
+{
+	JNIEnv *env=0;
+	ANativeActivity *activity = master_android_app->activity;
+	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);	
+	jclass clazz = (*env)->GetObjectClass(env, activity->clazz);
+
+	jmethodID methodID = (*env)->GetMethodID(env, clazz, funcname, "(II)V");
+	
+	(*env)->CallVoidMethod(env, activity->clazz, methodID , na, nb );
+
+	(*activity->vm)->DetachCurrentThread(activity->vm);
+	return 1;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// call an int function that returns a void
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_func_call_int_return_void (lua_State *l,char *funcname,int num)
+{
+	JNIEnv *env=0;
+	ANativeActivity *activity = master_android_app->activity;
+	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);	
+	jclass clazz = (*env)->GetObjectClass(env, activity->clazz);
+
+	jmethodID methodID = (*env)->GetMethodID(env, clazz, funcname, "(I)V");
+	
+	(*env)->CallVoidMethod(env, activity->clazz, methodID , num );
+
+	(*activity->vm)->DetachCurrentThread(activity->vm);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // call a void function that returns a void
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -953,7 +992,8 @@ int lua_android_smell_msg (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_android_smell_score_send (lua_State *l)
 {
-	return lua_android_func_call_void_return_string (l,"SmellCheck");
+	int num=(int)lua_tonumber(l,1);
+	return lua_android_func_call_int_return_void (l,"SmellSendScore",num);
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -963,7 +1003,9 @@ int lua_android_smell_score_send (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_android_smell_score_range (lua_State *l)
 {
-	return lua_android_func_call_void_return_string (l,"SmellCheck");
+	int a=(int)lua_tonumber(l,1);
+	int b=(int)lua_tonumber(l,2);
+	return lua_android_func_call_int_int_return_void (l,"SmellRangeScore",a,b);
 }
 
 

@@ -9,7 +9,7 @@ import java.io.File;
 public class FeralActivity extends NativeActivity
 {
 	
-	public String smell="none";
+	public String smell="base";
 	
 	public GameStick gamestick;
 
@@ -72,6 +72,22 @@ public class FeralActivity extends NativeActivity
 		}
 		
 		return null;
+	}
+
+	public void SmellSendScore(int n)
+	{
+		if(smell=="gamestick")
+		{
+			gamestick.SendScore(n);
+		}
+	}
+
+	public void SmellRangeScore(int na,int nb)
+	{
+		if(smell=="gamestick")
+		{
+			gamestick.RangeScore(na,nb);
+		}
 	}
 
 }
