@@ -49,9 +49,9 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 		StringBuilder s = new StringBuilder();
 		
 		s.append("{\n");
-		s.append("cmd=\"DownloadFailed\"\n");
-		s.append("url=\""+esc(url)+"\"\n");
-		s.append("why=\""+esc(why)+"\"\n");
+		s.append("cmd=\"DownloadFailed\",\n");
+		s.append("url=\""+esc(url)+"\",\n");
+		s.append("why=\""+esc(why)+"\",\n");
 		s.append("}\n");
 		
 		queue.add(s.toString());
@@ -64,9 +64,9 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 		StringBuilder s = new StringBuilder();
 		
 		s.append("{\n");
-		s.append("cmd=\"DownloadProgress\"\n");
-		s.append("url=\""+esc(url)+"\"\n");
-		s.append("progress="+progress+"\n");
+		s.append("cmd=\"DownloadProgress\",\n");
+		s.append("url=\""+esc(url)+"\",\n");
+		s.append("progress="+progress+",\n");
 		s.append("}\n");
 		
 		queue.add(s.toString());
@@ -80,9 +80,9 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 		StringBuilder s = new StringBuilder();
 		
 		s.append("{\n");
-		s.append("cmd=\"DownloadSuccess\"\n");
-		s.append("url=\""+esc(url)+"\"\n");
-		s.append("data=\""+esc(data)+"\"\n");
+		s.append("cmd=\"DownloadSuccess\",\n");
+		s.append("url=\""+esc(url)+"\",\n");
+		s.append("data=\""+esc(data)+"\",\n");
 		s.append("}\n");
 		
 		queue.add(s.toString());
@@ -94,7 +94,7 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 		StringBuilder s = new StringBuilder();
 		
 		s.append("{\n");
-		s.append("cmd=\""+cmd+"\"\n");
+		s.append("cmd=\""+cmd+"\",\n");
 
 		s.append("data={\n");
 		for (Iterator iterator = data.GetEntries().iterator(); iterator.hasNext();) 
@@ -102,13 +102,13 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 		  LeaderboardData.Entry item = (LeaderboardData.Entry) iterator.next();
 
 			s.append("{\n");
-			s.append("avatar="+item.AvatarID()+"\n");
-			s.append("name=\""+esc(item.Name())+"\"\n");
-			s.append("score="+item.Score()+"\n");
-			s.append("position="+item.Position()+"\n");
+			s.append("avatar="+item.AvatarID()+",\n");
+			s.append("name=\""+esc(item.Name())+"\",\n");
+			s.append("score="+item.Score()+",\n");
+			s.append("position="+item.Position()+",\n");
 			s.append("},\n");
 		}
-		s.append("}\n");
+		s.append("},\n");
 
 		s.append("}\n");
 		
@@ -139,7 +139,7 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 		StringBuilder s = new StringBuilder();
 		
 		s.append("{\n");
-		s.append("cmd=\"LeaderBoard_SaveScore_Response\"\n");
+		s.append("cmd=\"LeaderBoard_SaveScore_Response\",\n");
 		s.append("}\n");
 		
 		queue.add(s.toString());
@@ -152,7 +152,7 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 		StringBuilder s = new StringBuilder();
 		
 		s.append("{\n");
-		s.append("cmd=\"Game_SaveState_Response\"\n");
+		s.append("cmd=\"Game_SaveState_Response\",\n");
 		s.append("}\n");
 		
 		queue.add(s.toString());
@@ -165,7 +165,7 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 		StringBuilder s = new StringBuilder();
 		
 		s.append("{\n");
-		s.append("cmd=\"Game_LoadState_Response\"\n");
+		s.append("cmd=\"Game_LoadState_Response\",\n");
 //		s.append("data=\""+esc(data.toString())+"\"\n");
 		s.append("}\n");
 		
@@ -196,7 +196,7 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 		StringBuilder s = new StringBuilder();
 		
 		s.append("{\n");
-		s.append("cmd=\"Achievement_SetAchievementComplete_Response\"\n");
+		s.append("cmd=\"Achievement_SetAchievementComplete_Response\",\n");
 		s.append("}\n");
 		
 		queue.add(s.toString());
@@ -209,7 +209,7 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 		StringBuilder s = new StringBuilder();
 		
 		s.append("{\n");
-		s.append("cmd=\"Analytics_GameEvent_Response\"\n");
+		s.append("cmd=\"Analytics_GameEvent_Response\",\n");
 		s.append("}\n");
 		
 		queue.add(s.toString());
@@ -246,6 +246,20 @@ public class GameStick  implements DatabaseInterfaceService.IJavaDatabaseInterfa
 	@Override public void DatabaseRequestFailed (DatabaseInterfaceService.Request id, String message)
 	{
 //		Log.d("GameStick", "Error : " + message);
+	}
+	
+	
+// sending
+	
+	public void SendScore(int n)
+	{
+		database.LeaderBoard_SaveScore(n);
+	}
+
+	public void RangeScore(int na,int nb)
+	{
+//		database.LeaderBoard_GetRange(na,nb);
+		database.LeaderBoard_GetTop50();
 	}
 
 }

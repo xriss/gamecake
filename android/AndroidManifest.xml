@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.wetgenes.dmazed"
-      android:versionCode="13450"
-      android:versionName="13.450"
+        package="com.wetgenes.batwsbat"
+      android:versionCode="13516"
+      android:versionName="13.516"
 >
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="9" />
@@ -15,7 +15,7 @@
 actually do not as this breaks random shit...
 -->
 
-    <application android:label="D maze D" android:icon="@drawable/icon"
+    <application android:label="batwsbat" android:icon="@drawable/icon"
 		android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
     >
 
@@ -24,9 +24,9 @@ actually do not as this breaks random shit...
         <!-- Our activity is the built-in NativeActivity framework class.
              This will take care of integrating with our NDK code. -->
         <activity android:name="com.wetgenes.FeralActivity"
-                android:label="D maze D"
+                android:label="batwsbat"
                 android:configChanges="orientation|keyboardHidden"
-		android:screenOrientation="unspecified"
+		android:screenOrientation="landscape"
 	>
             <!-- Tell NativeActivity the name of our .so -->
             <meta-data android:name="android.app.lib_name"
