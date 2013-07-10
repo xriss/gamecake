@@ -288,6 +288,10 @@ elseif NIX then
 	if CLANG then
 		platforms { "clang" } --hax
 	end
+
+-- force 32bit, as, well 64bit is totally untested
+	buildoptions{"-m32"}
+	linkoptions{"-m32"}
 	
 end
 
