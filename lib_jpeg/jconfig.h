@@ -34,7 +34,7 @@ typedef unsigned char boolean;
 #undef RIGHT_SHIFT_IS_UNSIGNED
 #define INLINE
 /* These are for configuring the JPEG memory manager. */
-#undef DEFAULT_MAX_MEM
+#define DEFAULT_MAX_MEM 32000000L
 #undef NO_MKTEMP
 
 #endif /* JPEG_INTERNALS */

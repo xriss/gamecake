@@ -4,10 +4,9 @@ kind "StaticLib"
 language "C"
 files {  "./**.c" , "./**.h" }
 excludes { "jmemdos.c" ,  "jmemmac.c" , "ansi2knr.c" , "example.c" }
-excludes { "cjpeg.c", "djpeg.c" , "rdjpgcom.c" , "wrjpgcom.c" , "ckconfig.c" , "jpegtran.c" }
+excludes { "cdjpeg.c" , "cjpeg.c", "djpeg.c" , "rdjpgcom.c" , "wrjpgcom.c" , "ckconfig.c" , "jpegtran.c" }
 
 defines { "JPEGSTATIC" }
-
 
 
 includedirs { "." }
