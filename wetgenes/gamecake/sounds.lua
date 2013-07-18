@@ -85,8 +85,11 @@ sounds.beep=function(d)
 	al.SourcePlay(sfx.source)
 
 	if inc then
+--print("SFX",sounds.beep_idx,d.name)
 		sounds.beep_idx=sounds.beep_idx+1
 		if sounds.beep_idx > sounds.beep_max then sounds.beep_idx=1 end
+--	else
+--print("SFI",d.idx,d.name)
 	end
 end
 
@@ -187,7 +190,7 @@ sounds.load_ogg=function(filename,id)
 
 	sounds.set(t,id) -- remember
 
---print("loaded",filename)
+--print("load",filename)
 --print(#rr,"chunks",#table.concat(rr))
 
 --[[

@@ -328,7 +328,11 @@ print("click",id)
 		top:add({hx=320,hy=40})
 
 		top:add({hx=20,hy=40})
-		top:add({hx=130,hy=40,color=0xffcccccc,text="Brag",id="score_brag",hooks=gui.hooks})
+		if oven.opts.smell=="gamestick" then -- hide brag button
+			top:add({hx=130,hy=40})
+		else
+			top:add({hx=130,hy=40,color=0xffcccccc,text="Brag",id="score_brag",hooks=gui.hooks})
+		end
 		top:add({hx=20,hy=40})
 		top:add({hx=130,hy=40,color=0xffcccccc,text="List",id="score_list",hooks=gui.hooks})
 --		top:add({hx= 5,hy=40})
