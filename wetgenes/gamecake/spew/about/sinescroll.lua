@@ -387,7 +387,11 @@ Greetz to No1 and No6!
 	
 		if m.class=="key" or m.class=="mouse" or m.class=="joykey" then
 			if m.action==-1 then
-				if oven.last then oven.next=oven.last end -- return
+				if about.exitname then
+					oven.next=oven.rebake(about.exitname)
+				else
+					if oven.last then oven.next=oven.last end -- return
+				end
 			end
 		end
 
