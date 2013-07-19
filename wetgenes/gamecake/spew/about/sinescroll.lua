@@ -125,6 +125,10 @@ Greetz to No1 and No6!
 		about.shaders()
 		about.co=coroutine.create(about.thunk)
 		
+		if about.playtune then
+			about.playtune()
+		end
+		
 	end
 	
 	about.clean=function()
