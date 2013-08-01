@@ -29,6 +29,11 @@ else
 	defines "NGX_THREADS"
 --	defines "NDK"
 
+-- enable SSL
+	defines "NGX_HTTP_SSL"
+	defines "NGX_OPENSSL"
+	defines "NGX_SSL"
+
 	files { "./**.h" }
 	files { "./objs/**.c" }
 	files { "./src/core/**.c" }
@@ -42,7 +47,7 @@ else
 		"./src/event/ngx_event_busy_lock.c",
 		"./src/event/ngx_event_connect.c",
 		"./src/event/ngx_event_mutex.c",
---		"./src/event/ngx_event_openssl.c",
+		"./src/event/ngx_event_openssl.c",
 		"./src/event/ngx_event_pipe.c",
 		"./src/event/ngx_event_pipe.h",
 		"./src/event/ngx_event_posted.c",
@@ -115,7 +120,7 @@ else
 		"./src/http/modules/ngx_http_secure_link_module.c",
 		"./src/http/modules/ngx_http_split_clients_module.c",
 		"./src/http/modules/ngx_http_ssi_filter_module.c",
---		"./src/http/modules/ngx_http_ssl_module.c",
+		"./src/http/modules/ngx_http_ssl_module.c",
 		"./src/http/modules/ngx_http_static_module.c",
 		"./src/http/modules/ngx_http_sub_filter_module.c",
 		"./src/http/modules/ngx_http_upstream_ip_hash_module.c",
@@ -195,6 +200,8 @@ else
 	links { "dl" , "m" , "rt" }
 
 	links { "X11" , "udev" }
+	
+	links { "ssl" , "crypto"}
 	
 	KIND{kind="ConsoleApp",name="nginx"}
 

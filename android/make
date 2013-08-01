@@ -67,7 +67,6 @@ fi
 
 cd android
 rm bin/*.apk
-ant uninstall
 ant $build install
 
 
