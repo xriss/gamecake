@@ -1,0 +1,12 @@
+#rm -Rf build-gmake-nacl
+
+cd `dirname $0`
+
+cd nginx
+
+../../../bin/dbg/nginx -p. -s stop
+../../../bin/dbg/nginx -p.
+
+echo http://host.local:9999
+
+tail -f logs/error.log

@@ -1,0 +1,2 @@
+here=`dirname $0`
+$here/../../sdks/android-sdk/platform-tools/adb $*

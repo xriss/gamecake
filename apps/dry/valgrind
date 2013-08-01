@@ -1,0 +1,4 @@
+cd `dirname $0`
+cd ../../bin/dbg
+valgrind --track-origins=yes ./lua -e"require('apps').start('dry','$*');"
+

@@ -1,0 +1,22 @@
+cd `dirname $0`
+cd ..
+
+
+makeopts=""
+if [ "$1" = "release" ] ; then
+makeopts="config=release_clang"
+fi
+
+build/premake4 gmake clang-32
+
+if [ "$1" == "clean" ] ; then
+
+        rm -rf build-gmake-clang-32
+        exit
+fi
+
+
+cd build-gmake-clang-32
+make $makeopts $2 $3 $4
+cd ..
+
