@@ -13,6 +13,7 @@ extern ngx_module_t  ngx_epoll_module;
 extern ngx_module_t  ngx_regex_module;
 extern ngx_module_t  ngx_http_module;
 extern ngx_module_t  ngx_http_core_module;
+extern ngx_module_t  ngx_http_ssl_module;
 extern ngx_module_t  ngx_http_log_module;
 extern ngx_module_t  ngx_http_upstream_module;
 extern ngx_module_t  ngx_http_static_module;
@@ -72,6 +73,7 @@ ngx_module_t *ngx_modules[] = {
     &ngx_http_auth_basic_module,
     &ngx_http_access_module,
 //    &ngx_http_limit_conn_module,
+    &ngx_http_ssl_module,
     &ngx_http_limit_req_module,
     &ngx_http_geo_module,
     &ngx_http_map_module,
