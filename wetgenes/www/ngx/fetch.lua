@@ -5,13 +5,15 @@ local log=require("wetgenes.www.any.log").log
 local ngx=require("ngx")
 
 local wstr=require("wetgenes.string")
-local socket=require("socket")
-local http=require("socket.http")
-local ltn12=require("ltn12")
+--local socket=require("socket")
+--local http=require("socket.http")
+--local ltn12=require("ltn12")
 
 module(...)
 local _M=require(...)
 package.loaded["wetgenes.www.any.fetch"]=_M
+
+--[[
 
 local function create()
 
@@ -111,6 +113,8 @@ local function create()
 	return p
 end
 
+]]
+
 function countzero()
 	count=0
 	api_time=0
@@ -148,6 +152,7 @@ log(wstr.serialize(ret))
 end
 ]]
 
+--[[
 
 function post(url,headers,body)
 --	log("fetch.post:"..url)
@@ -180,9 +185,9 @@ end
 
 
 function get(url,headers,body)
---	log("fetch.get:"..url)
---	log(wstr.dump(headers))
---	log(wstr.dump(body))
+	log("fetch.get:"..url)
+	log(wstr.dump(headers))
+	log(wstr.dump(body))
 	apis()
 	count=count+1
 
@@ -210,8 +215,63 @@ function get(url,headers,body)
 	ret.body=table.concat(res_body)
 	ret.code=code
 	ret.headers=rheaders
---	log("Received "..tostring(ret.body).."\n")
+	log("Received "..tostring(ret.body).."\n")
 
 	apie()
 	return ret
 end
+]]
+
+
+function get(url,headers,body)
+--	log("NEWfetch.get:"..url)
+
+local ret
+
+	for i=1,10 do -- limit redirects
+
+--	log("NEWfetch.get:"..url)
+
+		ret=ngx.location.capture("/_proxy",{
+			method=ngx.HTTP_GET,
+			body=body,
+			ctx={ headers = headers },
+			vars={ _url = url },
+		})
+		ret.code=ret.status ret.status=nil -- rename status to code
+		ret.mimetype=ret.header["Content-Type"]
+		
+		if ret.code>=300 and ret.code<400 then -- follow redirects
+		
+			url=ret.header.Location
+			
+		else
+			break			
+		end
+		
+	end
+
+--	log("NEWReceived "..tostring(ret.body).."\n")
+
+	return ret
+end
+
+
+function post(url,headers,body)
+--	log("NEWfetch.post:"..url)
+
+
+	local ret=ngx.location.capture("/_proxy",{
+		method=ngx.HTTP_POST,
+		body=body,
+		ctx={ headers = headers },
+		vars={ _url = url },
+	})
+	ret.code=ret.status ret.status=nil -- rename status to code
+	ret.mimetype=ret.header["Content-Type"]
+
+--	log("NEWReceived "..tostring(ret.body).."\n")
+
+	return ret
+end
+

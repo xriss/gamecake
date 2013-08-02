@@ -116,6 +116,9 @@ Greetz to No1 and No6!
 	
 	about.setup=function()
 
+		if oven.last and oven.last~=about then about.exit=oven.last end -- remeber where we came from
+
+
 		wetiso.setup()
 	
 		about.words=wstr.split_words(about.text)
@@ -390,7 +393,7 @@ Greetz to No1 and No6!
 				if about.exitname then
 					oven.next=oven.rebake(about.exitname)
 				else
-					if oven.last then oven.next=oven.last end -- return
+					if about.exit then oven.next=about.exit end
 				end
 			end
 		end
