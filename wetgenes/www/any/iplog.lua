@@ -88,16 +88,15 @@ end
 
 --------------------------------------------------------------------------------
 --
--- increment the current use by one
+-- increment the current use by one or n if given
 --
 --------------------------------------------------------------------------------
-function inc(it)
-	it.mhd[1][1]=it.mhd[1][1]+1
-	it.mhd[1][2]=it.mhd[1][2]+1
-	it.mhd[1][3]=it.mhd[1][3]+1
+function inc(it,n)
+	it.mhd[1][1]=it.mhd[1][1]+(n or 1)
+	it.mhd[1][2]=it.mhd[1][2]+(n or 1)
+	it.mhd[1][3]=it.mhd[1][3]+(n or 1)
 	return it
 end
-
 
 --------------------------------------------------------------------------------
 --
@@ -107,9 +106,9 @@ end
 -- return value for later inspection.
 --
 --------------------------------------------------------------------------------
-function ratelimit(ip)
+function ratelimit(ip,n)
 	local it=manifest(ip)
-	inc(it)
+	inc(it,n)
 	put(it) -- we do not care about overwrites, numbers are fuzzy
 	if it.admin then return true,it end -- admin flag means it is always ok
 	if it.mhd[1][1] > 100   then return false,it end -- max requests per minute

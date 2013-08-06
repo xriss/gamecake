@@ -107,7 +107,7 @@ function bin_encode(enc,s)
 --	return core.bin_encode(t,b)
 end
 
-function md5(s,t)
+function md5(s,f)
 --	log("sys.md5:")
 	if f=="bin" then return ngx.md5_bin(s) end
 	return ngx.md5(s)
