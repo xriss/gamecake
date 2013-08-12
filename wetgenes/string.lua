@@ -472,16 +472,50 @@ end
 --
 -- private replace utility function
 -- look up string a inside data d and return the string we found
--- if we dont find anything then we return {a}
+-- if we dont find anything then we return nil
 --
 -- if we try to look up a table containing a plate field
--- then that plate name will be used to format that table content as {d.it}
+-- then that plate name will be used to format that table content as {it.nameofvar}
 -- if that table contains a [1] then it will be treated as an array of data
 -- and looped over to produce a result.
 --
 -----------------------------------------------------------------------------
+wstr.table_lookup=function(a,d) -- look up a in table d
+
+	local t=d[a] -- as string
+
+	if not t then -- try as number?
+		local n=tonumber(a)
+		if n then
+			t=d[n]
+		end
+	end
+
+	if t then return t end
+	
+	local a1,a2=string.find(a, "%.") -- try and split on first "."
+	if not a1 then return nil end -- didnt find a dot so return nil
+	
+	a1=string.sub(a,1,a1-1) -- the bit before the .
+	a2=string.sub(a,a2+1) -- the bit after the .
+	
+	local dd=d[a1] -- use the bit before the dot to find the sub table
+	
+	if not dd then -- try as number?
+		local n=tonumber(a1)
+		if n then
+			dd=d[n]
+		end
+	end
+	
+	if type(dd)=="table" then -- check we got a table
+		return wstr.replace_lookup(a2,dd) -- tail call this function
+	end
+	
+end
+
 wstr.replace_lookup=function(a,d) -- look up a in table d
-	local t=d[a]
+	local t=wstr.table_lookup(a,d)
 	if t then
 		if type(t)=="table" then -- if a table then
 			if t[1] then -- a list of stuff
@@ -508,20 +542,6 @@ wstr.replace_lookup=function(a,d) -- look up a in table d
 		end
 		return tostring(t) -- simple find, make sure we return a string
 	end
-	
-	local a1,a2=string.find(a, "%.") -- try and split on first "."
-	if not a1 then return nil end -- didnt find a dot so return nil
-	
-	a1=string.sub(a,1,a1-1) -- the bit before the .
-	a2=string.sub(a,a2+1) -- the bit after the .
-	
-	local dd=d[a1] -- use the bit before the dot to find the sub table
-	
-	if type(dd)=="table" then -- check we got a table
-		return wstr.replace_lookup(a2,dd) -- tail call this function
-	end
-	
-	return nil -- couldnt find anything returnnil
 end
 
 
