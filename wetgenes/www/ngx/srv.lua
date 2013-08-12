@@ -97,6 +97,8 @@ function new()
 	srv.query=ngx.var.args -- the query string
 --log(srv.query)
 	
+	srv.qurl=srv.url
+	if srv.query and srv.query~="" then srv.qurl=srv.qurl.."?"..srv.query end
 	
 	srv.headers={}
 	for n,v in pairs( ngx.req.get_headers() ) do

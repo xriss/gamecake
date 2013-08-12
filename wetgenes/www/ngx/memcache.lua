@@ -112,8 +112,8 @@ local function _retrieve(cache, key, str)
     while true do
 	 local line, err = server:receive()
 
-	 if line == 'END' then
-	break
+	if not line then break
+	elseif line == 'END' then break
 	 elseif string.sub(line, 1, 5) == 'VALUE' then
 	local key,flagstr,size,cas = string.match(line, 'VALUE (%S+) (%d+) (%d+)')
 	flags = extract_flags(flagstr)

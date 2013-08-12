@@ -6,6 +6,7 @@
 
 local cache=require("wetgenes.www.any.cache")
 local json=require("wetgenes.json")
+local wstr=require("wetgenes.string")
 
 local log=require("wetgenes.www.any.log").log -- grab the func from the package
 
@@ -130,3 +131,41 @@ function mark_as_admin(ip)
 		put(it) -- we do not care about overwrites, numbers are fuzzy
 	end
 end
+
+
+
+--------------------------------------------------------------------------------
+--
+-- get some html info about this ip (for use on the 503 error page)
+--
+--------------------------------------------------------------------------------
+function html_info(ip)
+	local it=manifest(ip)
+
+	return wstr.replace([[
+<html>
+<title>503 Service Temporarily Unavailable ( RATE LIMITED ) </title>
+<body>
+<center>
+<h1>Your ip {ip} is being RATE LIMITED</h1>
+<h3>You must wait a little while to access this server again.</h3>
+<hr/>
+<br/>
+You have used {pm}% of your quota per minute.<br/>
+<br/>
+You have used {ph}% of your quota per hour.<br/>
+<br/>
+You have used {pd}% of your quota per day.<br/>
+<br/>
+<br/>
+</center>
+</body>
+</html>
+	]],{
+		ip=ip,
+		pm=math.floor(100*it.mhd[1][1]/100),
+		ph=math.floor(100*it.mhd[1][2]/1000),
+		pd=math.floor(100*it.mhd[1][3]/10000),
+	})
+end
+

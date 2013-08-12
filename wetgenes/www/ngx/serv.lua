@@ -30,12 +30,11 @@ function serv()
 	end)
 end
 
-function serv2()
-
+-- work out which is our vhost but do not do any more setup, returns srv
+function serv_srv()
 
 	local opts=require("opts")
 	if opts.setup then opts.setup() end -- may need to in itialize stuff
-
 
 	local srv=require("wetgenes.www.ngx.srv").new()
 	ngx.ctx=srv -- this is out ctx
@@ -44,6 +43,15 @@ function serv2()
 		srv.vhost=v[2]
 		if ngx.var.host:find(v[1]) then break end
 	end	
+
+	return srv
+	
+end
+
+function serv2()
+
+	local opts=require("opts")
+	local srv=serv_srv()
 	
 --	if srv.vhost then log("VHOST = "..srv.vhost) end
 	

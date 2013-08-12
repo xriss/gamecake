@@ -114,7 +114,7 @@ function get(srv,id)
 	local k = getvhost(srv).."&"..id
 	local r = mc:get(k)
 --	local r = ngx.shared.cache:get(k)
-	
+
 	if r then count_got=count_got+1 end
 	
 --[[
