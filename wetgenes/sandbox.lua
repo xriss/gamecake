@@ -138,6 +138,7 @@ function ini(s)
 	local env=make_env()
 	local tab={}
 	local meta={__index=env}
+	env._G=tab
 	setmetatable(tab, meta)
 
 	local f=assert(loadstring(s))
@@ -153,6 +154,7 @@ function lson(s)
 	local env=make_env()
 	local tab={}
 	local meta={__index=env}
+	env._G=tab
 	setmetatable(tab, meta)
 
 	local f=assert(loadstring("return "..s))
