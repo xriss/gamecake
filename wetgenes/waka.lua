@@ -26,7 +26,9 @@ local tostring=tostring
 local require=require
 local loadstring=loadstring
 local setfenv=setfenv
+local setmetatable=setmetatable
 local pcall=pcall
+local error=error
 
 -- my string functions
 local str=require("wetgenes.string")
@@ -396,6 +398,10 @@ function refine_chunks(srv,chunks,opts)
 	for i,v in ipairs(chunks) do
 	
 		if v.opts.form=="lua" then -- we have some lua code for this page
+			local a,b=pcall( function() return sbox.ini(v.text) end )
+			if a then v.env=b end -- success
+			if not a then v.text=b end -- fail, set text to error text
+--[[
 			local e=sbox.make_env()
 			v.env=e -- store it for later
 			e.text=v.text -- let code know its sourcecode
@@ -405,17 +411,18 @@ function refine_chunks(srv,chunks,opts)
 				setfenv(f, e)
 				pcall(f)
 			end
-			
-			if v.env.hook_pageopts then
-				pcall(function() v.env.hook_pageopts(srv.pageopts) end) -- update pageopts?
+]]			
+			if v.env and v.env.hook_pageopts then
+				local a,b = pcall(function() v.env.hook_pageopts(srv.pageopts) end) -- update pageopts?
 			end
+
 		end
 		
 	end
 
 	
 	for i,v in ipairs(chunks) do -- do basic process of all of the page chunks into their prefered form 
-		local s=v.text
+		local s=v.env or v.text
 		
 		local format=v.opts.form
 		local trim=v.opts.trim
@@ -432,7 +439,8 @@ function refine_chunks(srv,chunks,opts)
 			local f,err=loadstring(s)
 			if f then
 				setfenv(f, e)
-				pcall(f)
+				local a,b=pcall(f)
+				if not a then s=b e={} end -- error running chunk, set chunk to error string and clear chunk data
 			else
 				s=err
 			end
@@ -516,16 +524,25 @@ function refine_chunks(srv,chunks,opts)
 				e.plate   = e.plate   or opts.plate -- display plate
 				
 				s=waka_json.getwaka(srv,e) -- get a string or tab
-				
+			
+			else -- raw
+			
+				if e.chunk then
+					local chunk=str.table_lookup(e.chunk,refined)
+--error(str.dump(chunk))
+					if chunk then
+						local meta={__index=chunk}
+						setmetatable(e, meta)
+					end
+				end
+
+				s=e
+			
 			end
 		
 		elseif format=="waka" then -- basic waka format, html allowed but links are upgraded and line ends are <br/>
 
 			s=waka_to_html(s,{base_url=opts.baseurl,escape_html=false})
-
-		else -- raw
-			
-			s=s
 
 		end
 
@@ -534,15 +551,11 @@ function refine_chunks(srv,chunks,opts)
 	
 -- end by running any refined lua hooks
 	for i,v in ipairs(chunks) do
-		if v.opts.form=="lua" then -- we have some lua code for this page
-			
-			if v.env then -- stick the env table in the refined table
-				refined[v.name]=v.env
-				if v.env.hook_refined then
-					pcall(function() v.env.hook_refined(refined) end) -- update refined data
-				end
-			end
+--		if v.opts.form=="lua" then -- we have some lua code for this page
+		if v.env and v.env.hook_refined then
+			pcall(function() v.env.hook_refined(refined) end) -- update refined data
 		end
+--		end
 	end
 
 	
