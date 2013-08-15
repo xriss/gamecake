@@ -318,6 +318,37 @@ sounds.start = function()
 			for i=1,strmax do
 				local r={idx=i}
 				sounds.queues[i]=r
+
+				r.push=function(qq,t)
+					if not t then -- pass in an empty table if you just want it filled
+						t={}
+						qq.stack[#qq.stack+1]=t
+					end
+						
+					for i,v in pairs(qq) do -- copy state into stack
+						t[i]=v
+					end
+
+					return t
+				end
+				r.pop=function(qq,t)
+					local t=t or qq.stack[#qq.stack] -- from the top of the stack or a given table
+					if not t then return end -- ignore bad pops
+					qq.stack[#qq]=nil
+					
+					for i,v in pairs(qq) do -- clear current state
+						qq[i]=nil
+					end
+					for i,v in pairs(t) do -- copy state from stack
+						qq[i]=v
+					end
+
+				end
+				r.clear=function(qq)
+					qq.stack={}
+				end
+				r:clear()
+
 				r.stream_ogg=function(qq,d)
 					local str=sounds.strs[qq.idx]
 					
