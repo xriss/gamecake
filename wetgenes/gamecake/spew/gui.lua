@@ -518,7 +518,7 @@ print("click",id)
 		end
 		gui.clicks.settings_about=function()
 			beep_play("button")
-			oven.next=oven.rebake("wetgenes.gamecake.spew.about.sinescroll")
+			oven.next=oven.rebake(gui.about or "wetgenes.gamecake.spew.about.sinescroll")
 		end
 
 		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
