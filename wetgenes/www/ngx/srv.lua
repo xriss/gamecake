@@ -130,6 +130,8 @@ function new()
 	else
 		body=ngx.req.get_body_data()
 	end
+
+	srv.body=body -- hand the body to the maincode (if we have a body) (probably incoming json)
 	
 	srv.posts={}
 	srv.uploads={}
@@ -138,6 +140,7 @@ function new()
 --log(wstr.serialize(srv.headers))
 	
 	if not content_type then --nothing?
+	
 
 	elseif string.find(content_type, "x-www-form-urlencoded", 1, true) then
 	

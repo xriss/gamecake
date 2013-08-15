@@ -376,31 +376,51 @@ end
 		
 	end
 	
-	function meta.draw_color(widget)
+	function meta.iterate_draw_color(widget)
+		local layer=0
+		return function()
+			layer=layer+1
+			local ret,r,g,b,a=meta.draw_color(widget,layer)
+			if ret then return layer end
+			return nil
+		end 
+	end
+	function meta.draw_color(widget,layer)
+		local hilight=0
 		local w=widget
 		local master=widget.master
 		local buttdown=false
 		if ( master.press and master.over==widget ) or widget.state=="selected" then
 			buttdown=true
 		end
+
+		local c={explode_color(widget.color)}
+
 		if master.over==widget then
 			if buttdown then
-				local c={explode_color(widget.color)}
-				c[3]=c[3]*14/16
-				c[2]=c[2]*14/16
-				c[1]=c[1]*14/16
-				gl.Color( c[1],c[2],c[3],c[4] )
+				if layer>1 then	
+					local a=0.3
+					gl.Color( c[1]*a,c[2]*a,c[3]*a,0 )
+				else
+					gl.Color( c[1],c[2],c[3],c[4] )
+				end
 			else
-				gl.Color( explode_color(widget.color))
+				if layer>1 then
+					local a=0.6
+					gl.Color( c[1]*a,c[2]*a,c[3]*a,0 )
+				else
+					gl.Color( c[1],c[2],c[3],c[4] )
+				end
 			end
 		else
-			local c={explode_color(widget.color)}
-			c[3]=c[3]*12/16
-			c[2]=c[2]*12/16
-			c[1]=c[1]*12/16
-			gl.Color( c[1],c[2],c[3],c[4] )
+				if layer>1 then
+					return false
+				else
+					gl.Color( c[1],c[2],c[3],c[4] )
+				end
 		end
-				
+		if layer>2 then return false end
+		return true
 	end
 	
 	function meta.draw(widget)
@@ -432,68 +452,12 @@ end
 				
 				end
 			end
-				
+						
 			local buttdown=false
 			if ( master.press and master.over==widget ) or widget.state=="selected" then
 				buttdown=true
 			end
 
-
-			if widget.highlight=="shrink" then
-			
-				gl.Color( explode_color(widget.color))
-					
-				if master.over==widget then
-					gl.Translate(widget.hx/16,widget.hy/16,0)
-					gl.Scale(7/8,7/8,1)
-				end
-			
-			elseif widget.highlight=="none" then
-			
-				gl.Color( explode_color(widget.color))
-				
-			elseif widget.highlight=="text" then
-			
-				gl.Color( explode_color(widget.color))
-				
-			else -- widget.highlight=="dark" -- default is to darken everything slightly when it is not the active widget
-			
-				if style=="indent" then
-					local c={explode_color(widget.color)}
-					if master.focus==widget then
-						c[3]=c[3]*16/16
-						c[2]=c[2]*16/16
-						c[1]=c[1]*16/16
-					elseif master.over==widget then
-						c[3]=c[3]*14/16
-						c[2]=c[2]*14/16
-						c[1]=c[1]*14/16
-					else
-						c[3]=c[3]*12/16
-						c[2]=c[2]*12/16
-						c[1]=c[1]*12/16
-					end
-					gl.Color( c[1],c[2],c[3],c[4] )
-				elseif master.over==widget then
-					if buttdown then
-						local c={explode_color(widget.color)}
-						c[3]=c[3]*14/16
-						c[2]=c[2]*14/16
-						c[1]=c[1]*14/16
-						gl.Color( c[1],c[2],c[3],c[4] )
-					else
-						gl.Color( explode_color(widget.color))
-					end
-				else
-					local c={explode_color(widget.color)}
-					c[3]=c[3]*12/16
-					c[2]=c[2]*12/16
-					c[1]=c[1]*12/16
-					gl.Color( c[1],c[2],c[3],c[4] )
-				end
-				
-			end
-			
 			local hx=widget.hx
 			local hy=widget.hy
 			local bb=2
@@ -512,6 +476,8 @@ end
 				typ=1
 			end
 			
+for layer in meta.iterate_draw_color(widget) do -- something to draw, color has been set for this layer
+
 			if widget.sheet then -- custom graphics
 
 				sheets.get(widget.sheet):draw(widget.sheet_id or 1,widget.sheet_px or 0,widget.sheet_py or 0,0,widget.sheet_hx or hx,widget.sheet_hy or hy)
@@ -576,6 +542,7 @@ end
 						hx-bb, hy-bb,
 						hx-bb, bb)
 			end
+end
 			
 		end
 		

@@ -257,6 +257,7 @@ function wmaster.setup(widget,def)
 							over:set_dirty()
 							best.over:set_dirty()
 							master.over=best.over
+							if master.over then master.over:call_hook("over") end
 						end
 					end
 					if not master.over then
@@ -265,6 +266,7 @@ function wmaster.setup(widget,def)
 								if v.solid and v.hooks then
 									master.over=v
 									v:set_dirty()
+									master.over:call_hook("over")
 								end
 							end
 						end)
@@ -353,6 +355,7 @@ function wmaster.setup(widget,def)
 			if master.over~=old_over then
 				if master.over then master.over:set_dirty() end
 				if old_over then old_over:set_dirty() end
+				if master.over then master.over:call_hook("over") end
 			end
 			
 --		end
@@ -389,6 +392,7 @@ function wmaster.setup(widget,def)
 				if w.class=="textedit" then
 					master.edit=w
 				end
+				if master.over then master.over:call_hook("over") end
 			end
 		end)
 		

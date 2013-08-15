@@ -112,9 +112,9 @@ function ratelimit(ip,n)
 	inc(it,n)
 	put(it) -- we do not care about overwrites, numbers are fuzzy
 	if it.admin then return true,it end -- admin flag means it is always ok
-	if it.mhd[1][1] > 100   then return false,it end -- max requests per minute
-	if it.mhd[1][2] > 1000  then return false,it end -- max requests per hour
-	if it.mhd[1][3] > 10000 then return false,it end -- max requests per day
+	if it.mhd[1][1] > 200   then return false,it end -- max requests per minute
+	if it.mhd[1][2] > 2000  then return false,it end -- max requests per hour
+	if it.mhd[1][3] > 20000 then return false,it end -- max requests per day
 	return true,it
 end
 
@@ -143,8 +143,7 @@ function html_info(ip)
 	local it=manifest(ip)
 
 	return wstr.replace([[
-<html>
-<title>503 Service Temporarily Unavailable ( RATE LIMITED ) </title>
+<html> <title> Too Many Requests ( RATE LIMITED ) </title>
 <body>
 <center>
 <h1>Your ip {ip} is being RATE LIMITED</h1>
@@ -163,9 +162,9 @@ You have used {pd}% of your quota per day.<br/>
 </html>
 	]],{
 		ip=ip,
-		pm=math.floor(100*it.mhd[1][1]/100),
-		ph=math.floor(100*it.mhd[1][2]/1000),
-		pd=math.floor(100*it.mhd[1][3]/10000),
+		pm=math.floor(100*it.mhd[1][1]/200),
+		ph=math.floor(100*it.mhd[1][2]/2000),
+		pd=math.floor(100*it.mhd[1][3]/20000),
 	})
 end
 

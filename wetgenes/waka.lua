@@ -447,7 +447,16 @@ function refine_chunks(srv,chunks,opts)
 
 -- this should be split off into a plugin system...
 			
-			if e.import=="blog" then
+			if e.import=="dimeload" then -- include some dimeload info
+			
+				e.hook   = e.hook   or opts.hook
+				
+				if not opts.nodimeload then -- prevent recursions
+					local dl=require("dimeload")
+					s=dl.chunk_import(srv,e)
+				end
+				
+			elseif e.import=="blog" then
 			
 				e.hook   = e.hook   or opts.hook
 				e.limit=e.limit or 5

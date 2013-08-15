@@ -110,6 +110,8 @@ local beep_play=function() end
 		end
 		
 
+		if act=="over" then gui.anim.bounce(widget,0.25) end
+
 		if act=="click" then
 		
 print("click",id)
@@ -625,6 +627,8 @@ print("click",id)
 
 		gui.master:layout()
 		
+		gui.master:call_descendents(function(w) if not w.hooks then return end gui.anim.bounce(w,1) end)
+
 		if gui.widget_hook then
 			gui.master:call_descendents(function(w) gui.widget_hook(w) end)
 		end
@@ -632,6 +636,7 @@ print("click",id)
 		if gui.master.go_forward_id then
 			gui.master.activate_by_id(gui.master.go_forward_id)
 		end
+		
 	end
 
 	function gui.clean()
@@ -686,6 +691,32 @@ print("click",id)
 
 	end
 	
+	gui.anim={}
+	function gui.anim.bounce(w,size)
+		w.anim={
+			widget=w,
+			num=size or 1,
+			vel=0,
+			update=function(anim)
+				anim.vel=anim.vel-(anim.num*1/16)
+				anim.vel=anim.vel*14/16
+				anim.num=anim.num+anim.vel
+				if (math.abs(anim.vel) + math.abs(anim.num)) <(1/1024) then
+					anim.widget.anim=nil
+				end
+				anim.widget:set_dirty()
+
+				local s=1+anim.num
+				w.sx=s
+				w.sy=s
+			end,
+			draw=function(anim)
+			end
+		}
+		return w
+	end
+
+
 	gui.initdata()
 	return gui
 end

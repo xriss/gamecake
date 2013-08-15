@@ -509,7 +509,7 @@ wstr.table_lookup=function(a,d) -- look up a in table d
 	end
 	
 	if type(dd)=="table" then -- check we got a table
-		return wstr.replace_lookup(a2,dd) -- tail call this function
+		return wstr.table_lookup(a2,dd) -- tail call this function
 	end
 	
 end
@@ -522,9 +522,11 @@ wstr.replace_lookup=function(a,d) -- look up a in table d
 				if t.plate then -- how to format
 					local tt={}
 					local it=d.it
-					for i,v in ipairs(t) do
-						d.it=v
+					local i=1
+					while t[i] do -- cant use ipairs or # as this data may only exist via the metatabel
+						d.it=t[i]
 						tt[#tt+1]=wstr.macro_replace(d[t.plate] or t.plate,d)
+						i=i+1
 					end
 					d.it=it
 					return table.concat(tt)
