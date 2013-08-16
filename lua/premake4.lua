@@ -107,7 +107,7 @@ elseif NIX then
 	
 	links { "dl" , "m" , "pthread" , "rt" }
 	
-	if CPU="64" then
+	if CPU=="64" then
 		KIND{kind="ConsoleApp",name="lua.x64"}
 	else
 		KIND{kind="ConsoleApp",name="lua"}

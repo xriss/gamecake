@@ -203,7 +203,7 @@ else
 	
 	links { "ssl" , "crypto"}
 	
-	if CPU="64" then
+	if CPU=="64" then
 		KIND{kind="ConsoleApp",name="nginx.x64"}
 	else
 		KIND{kind="ConsoleApp",name="nginx"}
