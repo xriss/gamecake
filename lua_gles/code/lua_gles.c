@@ -14,6 +14,7 @@
 extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
 
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // turn a string or userdata at given idx into a ptr, returns 0 if not possible
@@ -1818,8 +1819,8 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 	lua_pushboolean(l,1);
 	lua_setfield(l,-2,"fixed_pipeline_available");
 #endif
-	
-#if defined(WIN32)
+
+#if defined(__gl3w_h_)
 	gl3wInit();
 #endif
 
