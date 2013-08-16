@@ -9,6 +9,11 @@
 // we suport various GL versions
 #include INCLUDE_GLES_GL
 
+
+// link with lua/hacks.c plz
+extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // turn a string or userdata at given idx into a ptr, returns 0 if not possible
@@ -17,7 +22,7 @@
 static const unsigned char* lua_gles_topointer (lua_State *l,int idx,int *plen)
 {
 const unsigned char *ptr=0;
-int len=0x7fffffff; // fake max length if we have no idea what it is (light userdata)
+size_t len=0x7fffffff; // fake max length if we have no idea what it is (light userdata)
 
 	if(lua_isnumber(l,idx))
 	{

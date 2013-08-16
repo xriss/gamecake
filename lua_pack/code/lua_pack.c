@@ -341,7 +341,7 @@ static int lua_pack_load (lua_State *l)
 {
 double d;
 const u8 *ptr=0;
-int len;
+size_t len;
 int off=0;
 int n;
 
@@ -491,7 +491,7 @@ int count;
 static int lua_pack_save (lua_State *l)
 {
 double d;
-int len;
+size_t len;
 int off=0;
 int n;
 
@@ -675,7 +675,7 @@ s32 size=(s32)lua_tonumber(l,1);
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_pack_sizeof (lua_State *l)
 {
-int len=0;
+size_t len=0;
 u8 *ptr=0;
 	
 	if(!lua_isuserdata(l,1))
@@ -699,7 +699,7 @@ u8 *ptr=0;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_pack_tostring (lua_State *l)
 {
-int len=0;
+size_t len=0;
 u8 *ptr=0;
 	
 	if(!lua_isuserdata(l,1))

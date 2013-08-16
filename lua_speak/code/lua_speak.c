@@ -25,10 +25,10 @@ static int   idxs_size;
 static int lua_speak_setup (lua_State *l)
 {
 u16  *data=0;
-int   data_size=0;
+size_t   data_size=0;
 
 u32  *offs=0;
-int   offs_size=0;
+size_t   offs_size=0;
 int i;
 	
 	if(!init)

@@ -90,7 +90,7 @@ elseif WINDOWS then
 
 elseif NIX then
 
-	linkoptions { "-static-libgcc" }
+--	linkoptions { "-static-libgcc" }
 
 	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
 	
@@ -107,8 +107,9 @@ elseif NIX then
 	links { "dl" }
 	links { "m" }
 
+	links { "pthread" }
 --	links { "rt" }
-	
+
 	if CPU=="64" then
 		KIND{kind="ConsoleApp",name="lua.x64"}
 	else

@@ -78,7 +78,7 @@ unsigned char * lua_tardis_uda (lua_State *l, int idx)
 // get size of allocated data form a userdata at idx
 unsigned int lua_tardis_uda_length (lua_State *l, int idx)
 {
-int len=0;
+size_t len=0;
 #if defined(UDALIGN)
 	if(!lua_isuserdata(l,idx)) { return 0; }
 	lua_toluserdata(l,idx,&len);
