@@ -9,6 +9,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "../wet/util/pstdint.h"
 #include "../wet/util/wet_types.h"
 #include "../lib_lua/src/lua.h"
 #include "../lib_lua/src/lauxlib.h"
@@ -75,14 +76,14 @@ static u32 string_to_id(const char *s)
 	const u32 test1='a';	
 	int inyourendo= ( (test4&0xff) == test1 ); // true if first char is at bottom, littleendian
 	int len;
-	cu8 *p;
+	const u8 *p;
 
 	if(!s) { return 0; }
 	
 	len=strlen(s);
 	if(len>4) { len=4; } // only first 4 chars of longer strings
 	
-	p=(cu8 *)s; // unsigned please
+	p=(const u8 *)s; // unsigned please
 	if(inyourendo)
 	{
 		switch(len)
@@ -113,17 +114,17 @@ static u32 string_to_id(const char *s)
 // read/write a u32 or s32 or f32
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static u32 lua_pack_read_u32 (cu8 *p, int inyourendo)
+static u32 lua_pack_read_u32 (const u8 *p, int inyourendo)
 {
 	if(inyourendo) { return (p[0]) | (p[1]<<8) | (p[2]<<16) | (p[3]<<24) ; }
 	return (p[3]) | (p[2]<<8) | (p[1]<<16) | (p[0]<<24) ;
 }
-static s32 lua_pack_read_s32 (cu8 *p, int inyourendo)
+static s32 lua_pack_read_s32 (const u8 *p, int inyourendo)
 {
 	u32 r=lua_pack_read_u32 ( p , inyourendo );
 	return *((s32*)(&r));
 }
-static f32 lua_pack_read_f32 (cu8 *p, int inyourendo)
+static f32 lua_pack_read_f32 (const u8 *p, int inyourendo)
 {
 	u32 r=lua_pack_read_u32 ( p , inyourendo );
 	return *((f32*)(&r));
@@ -159,12 +160,12 @@ static void lua_pack_write_f32 (f32 d,u8 *p, int inyourendo )
 // read/write a u16 or s16
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static u16 lua_pack_read_u16 (cu8 *p, int inyourendo )
+static u16 lua_pack_read_u16 (const u8 *p, int inyourendo )
 {
 	if(inyourendo) { return (p[0]) | (p[1]<<8) ; }
 	return (p[1]) | (p[0]<<8) ;
 }
-static s16 lua_pack_read_s16 (cu8 *p, int inyourendo )
+static s16 lua_pack_read_s16 (const u8 *p, int inyourendo )
 {
 	u16 r=lua_pack_read_u16 ( p , inyourendo );
 	return *((s16*)(&r));
@@ -192,11 +193,11 @@ static void lua_pack_write_s16 (s16 d,u8 *p, int inyourendo )
 // read/write a u8 or s8
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static u8 lua_pack_read_u8 (cu8 *p, int inyourendo )
+static u8 lua_pack_read_u8 (const u8 *p, int inyourendo )
 {
 	return *p ;
 }
-static s8 lua_pack_read_s8 (cu8 *p, int inyourendo )
+static s8 lua_pack_read_s8 (const u8 *p, int inyourendo )
 {
 	u8 r=lua_pack_read_u8 ( p , inyourendo );
 	return *((s8*)(&r));
@@ -255,7 +256,7 @@ static int lua_pack_field_size (u32 def)
 // read this field into a double (s32 and u32 will fit with no bitloss)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static double lua_pack_get_field (u32 def,cu8*p)
+static double lua_pack_get_field (u32 def,const u8*p)
 {
 	switch(def)
 	{

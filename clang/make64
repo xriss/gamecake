@@ -2,7 +2,7 @@ cd `dirname $0`
 cd ..
 
 
-cpu=32
+cpu=64
 makeopts=""
 if [ "$1" = "release" ] ; then
 makeopts="config=release_clang"

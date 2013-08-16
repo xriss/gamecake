@@ -289,9 +289,17 @@ elseif NIX then
 		platforms { "clang" } --hax
 	end
 
--- force 32bit, as, well 64bit is totally untested
-	buildoptions{"-m32"}
-	linkoptions{"-m32"}
+	if CPU=="32" then
+	
+		buildoptions{"-m32"}
+		linkoptions{"-m32"}
+		
+	elseif CPU=="64" then
+	
+		buildoptions{"-m64"}
+		linkoptions{"-m64"}
+		
+	end
 	
 end
 
@@ -456,14 +464,21 @@ end
 
 LIB_LUA="lib_lua" -- default 
 
-if NIX or RASPI or ANDROID then -- luajit is working for these builds
+if RASPI or ANDROID then -- luajit is working for these builds
 
 	LIB_LUA="lib_luajit"
 	defines( "LIB_LUAJIT" )
 	
+elseif NIX then
+
+	if CPU=="32" then
+		LIB_LUA="lib_luajit"
+		defines( "LIB_LUAJIT" )
+	end
+
 end
 
--- many many versions of GL to suport, thes make this work -> #include INCLUDE_GLES_GL
+-- many many versions of GL to suport, these make this work -> #include INCLUDE_GLES_GL
 if RASPI then
 
 	defines{ "LUA_GLES_GLES2" }
