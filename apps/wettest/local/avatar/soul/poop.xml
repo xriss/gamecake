@@ -1,0 +1,113 @@
+<?xml version="1.0" standalone="no" ?>
+<soul version="1.0">
+ <flavour name="vanilla">
+  <part name="left_ear">
+   <object group="ear" name="default" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part name="right_hand">
+   <object group="hand" name="default" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part morph1="0.018957" name="head" xsize="1.125000" ysize="0.875000" zsize="1.000000">
+   <object group="head" name="robox" />
+   <object />
+   <object group="hair_xtra" name="bang_hugh" />
+   <object group="hair" name="topspiked_short" />
+  </part>
+  <part name="left_eye">
+   <object group="eye" name="bigbrow" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part name="tail">
+   <object />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part name="left_foot">
+   <object group="foot" name="shoe" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part name="right_ear">
+   <object group="ear" name="default" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part name="right_eye">
+   <object group="eye" name="bigbrow" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part name="right_foot">
+   <object group="foot" name="shoe" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part name="left_hand">
+   <object group="hand" name="default" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part name="right_eyeball">
+   <object group="eyeball" name="default" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part name="nose">
+   <object group="nose" name="snub" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <part name="mouth">
+   <object group="mouth" name="thin" />
+   <object group="beard" name="circle" />
+   <object group="inmouth" name="cigar" />
+   <object />
+  </part>
+  <part morph1="1" morph2="1" name="body">
+   <object group="body" name="coat" />
+   <object group="body" name="tie" />
+   <object />
+   <object />
+  </part>
+  <part name="left_eyeball">
+   <object group="eyeball" name="default" />
+   <object />
+   <object />
+   <object />
+  </part>
+  <surface argb="0xff450000" gloss="0" name="foot" spec="0xff000000" />
+  <surface argb="0xff000000" gloss="0" name="toecaps" spec="0xff330000" />
+  <surface argb="0xff95602e" gloss="0" name="body" spec="0xff000000" />
+  <surface argb="0xff000000" gloss="0" name="socks" spec="0xff3c0000" />
+  <surface argb="0xffffffff" gloss="0" name="bodyhi" spec="0xff000000" />
+  <surface argb="0xff82af8d" gloss="0" name="skin" spec="0xff000000" />
+  <surface argb="0xff000000" gloss="0" name="bodylo" spec="0xff151a00" />
+  <surface argb="0xff375500" gloss="0" name="eyebrows" spec="0xff2f1200" />
+  <surface argb="0xff000000" gloss="0" name="sole" spec="0xff060000" />
+  <surface argb="0xff006600" gloss="0" name="iris" spec="0xff1e1500" />
+  <surface argb="0xff426659" gloss="0.00576" name="lips" spec="0xff000000" />
+  <surface argb="0xff243b20" gloss="0" name="hair" spec="0xff351401" />
+  <surface argb="0xff888888" gloss="0" name="specs" spec="0xffffffff" />
+  <surface argb="0xff000000" gloss="0" name="hairlo" spec="0xff660000" />
+  <surface argb="0xffcccc66" gloss="0.085927" name="eye" spec="0xffffffff" />
+  <surface argb="0xff66cc00" gloss="0" name="nipples" spec="0xff000000" />
+  <surface argb="0xff000000" gloss="0" name="hairhi" spec="0xff660000" />
+  <surface argb="0xff4e4700" gloss="1" name="beard" spec="0xff660000" />
+ </flavour>
+</soul>
