@@ -43,7 +43,7 @@ static unsigned char vb[SIZEOF_VB]; // vertex buffer space
 static int lua_gamecake_fontdata_sync (lua_State *l)
 {
 struct gamecake_fontdata *ud;
-int dlen=0;
+size_t dlen=0;
 int i;
 int image=0;
 
@@ -107,7 +107,7 @@ int image=0;
 static int lua_gamecake_canvas_font_sync (lua_State *l)
 {
 struct gamecake_canvas_font *ud;
-int dlen=0;
+size_t dlen=0;
 int i;
 
 	lua_rawgeti(l,1,0); // get our userdata if it already exists

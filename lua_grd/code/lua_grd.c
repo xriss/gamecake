@@ -218,7 +218,7 @@ part_ptr *p;
 part_ptr new_p;
 const char *filename=0;
 const u8 *data=0;
-s32 data_len=0;
+size_t data_len=0;
 s32 fmt=0;
 
 	new_p=0;
@@ -253,11 +253,11 @@ s32 fmt=0;
 	lua_gettable(l,2);
 	if(lua_isstring(l,-1))
 	{
-		data=(const u8*)lua_tolstring(l,-1,(size_t*)&data_len);
+		data=(const u8*)lua_tolstring(l,-1,&data_len);
 	}
 	if(lua_isuserdata(l,-1))
 	{
-		data=lua_toluserdata(l,-1,(size_t*)&data_len);
+		data=lua_toluserdata(l,-1,&data_len);
 	}
 	lua_pop(l,1);
 

@@ -232,12 +232,17 @@ static int zip_open_mem (lua_State *L) {
 	
 	if(lua_isstring(L,1))
 	{
-		f->data = (unsigned char *)luaL_checklstring(L, 1,&f->size);
+		size_t t;
+		f->data = (unsigned char *)luaL_checklstring(L, 1,&t);
+		f->size=t;
 	}
 	else
 	if(lua_isuserdata(L,1))
 	{
-		f->data = lua_toluserdata(L,1, &f->size);
+		size_t t;
+		f->data = lua_toluserdata(L,1, &t);
+		f->size=t;
+		
 //		f->data = lua_touserdata(L, 1);
 //		f->size = luaL_checknumber(L, 2);
 	}
