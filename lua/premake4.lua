@@ -90,22 +90,24 @@ elseif WINDOWS then
 
 elseif NIX then
 
---	linkoptions { "-v" }
-
-	links { "GL" }
---	links { "udev" }
-
-
 	linkoptions { "-static-libgcc" }
 
 	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
 	
-	links { "GLU" }
+--	linkoptions { "-v" }
+
+	links { "GL" }
+--	links { "GLU" }
+
+--	links { "udev" }
+
 	links { "crypt" }
 	links { "pthread" }
-	links { "X11"   }
-	
-	links { "dl" , "m" , "pthread" , "rt" }
+	links { "X11"   }	
+	links { "dl" }
+	links { "m" }
+
+--	links { "rt" }
 	
 	KIND{kind="ConsoleApp",name="lua"}
 
