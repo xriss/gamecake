@@ -499,7 +499,7 @@ elseif NACL then
 
 elseif WINDOWS then -- need windows GL hacks
 
-	includedirs { "lua_win_windows/code" }
+	includedirs { "lua_gles/code" }
 	defines{ "LUA_GLES_GLES2" }
 	if GCC then
 		defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
@@ -509,8 +509,11 @@ elseif WINDOWS then -- need windows GL hacks
 	
 else -- use GL 
 
-	defines{ "LUA_GLES_GL" }
-	defines{ "INCLUDE_GLES_GL=\\\"GL/gl.h\\\"" }
+	includedirs { "lua_gles/code" }
+	defines{ "LUA_GLES_GLES2" }
+
+	defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
+--	defines{ "INCLUDE_GLES_GL=\\\"GL/gl.h\\\"" }
 
 end
 
