@@ -1,0 +1,24 @@
+cd `dirname $0`
+cd ..
+
+
+cpu=64
+makeopts=""
+if [ "$1" = "release" ] ; then
+makeopts="config=release_clang"
+fi
+
+
+build/premake4 gmake clang-$cpu
+
+if [ "$1" == "clean" ] ; then
+
+        rm -rf build-gmake-clang-$cpu
+        exit
+fi
+
+
+cd build-gmake-clang-$cpu
+make $makeopts $2 $3 $4
+cd ..
+
