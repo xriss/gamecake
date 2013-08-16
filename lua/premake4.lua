@@ -93,7 +93,7 @@ elseif NIX then
 --	linkoptions { "-v" }
 
 	links { "GL" }
-	links { "udev" }
+--	links { "udev" }
 
 
 	linkoptions { "-static-libgcc" }
