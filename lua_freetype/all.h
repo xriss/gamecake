@@ -44,6 +44,7 @@
 
 #endif
 
+#include "../wet/util/pstdint.h"
 #include "../wet/util/wet_types.h"
 
 #ifdef __cplusplus

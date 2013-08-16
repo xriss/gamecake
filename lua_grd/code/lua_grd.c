@@ -253,7 +253,7 @@ s32 fmt=0;
 	lua_gettable(l,2);
 	if(lua_isstring(l,-1))
 	{
-		data=(cu8*)lua_tolstring(l,-1,(size_t*)&data_len);
+		data=(const u8*)lua_tolstring(l,-1,(size_t*)&data_len);
 	}
 	if(lua_isuserdata(l,-1))
 	{

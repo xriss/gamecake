@@ -1,3 +1,13 @@
+#very important, all must install
 apt-get install build-essential libreadline-dev libglu1-mesa-dev xorg-dev libasound2-dev libudev-dev
 
-#also need mingw32 if you want to build for windows
+#needed for nginx
+apt-get install libssl-dev
+
+#mingw32 if you want to build for windows
+apt-get install mingw32
+
+#clang if you want to build using clang
+apt-get install clang
+
+

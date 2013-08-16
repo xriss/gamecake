@@ -1,10 +1,14 @@
 
+
+#include "../wet/util/pstdint.h"
+#include "../wet/util/wet_types.h"
+
 #include "../lib_lua/src/lua.h"
 #include "../lib_lua/src/lauxlib.h"
 #include "../lib_lua/src/lualib.h"
 
 
-static unsigned char const font_bits[16*48]={
+static const u8 font_bits[16*48]={
 
 0x00,0x18,0x66,0x6c,0x18,0x00,0x70,0x18,0x0c,0x30,0x00,0x00,0x00,0x00,0x00,0x06,
 0x00,0x18,0x66,0x6c,0x3e,0x66,0xd8,0x18,0x18,0x18,0xcc,0x30,0x00,0x00,0x00,0x0c,
@@ -73,17 +77,17 @@ static unsigned char const font_bits[16*48]={
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_wetwin_glyph_8x8(lua_State *l)
 {
-unsigned char const *f=font_bits;
-int x,y,xx,yy;
-unsigned char m;
-unsigned char b;
-unsigned long c;
+const u8 *f=font_bits;
+s32 x,y,xx,yy;
+u8 m;
+u8 b;
+u32 c;
 
-unsigned long bmap[8*8];
+u32 bmap[8*8];
 
-int id=0;
+s32 id=0;
 
-	id=(int)(lua_tonumber(l,1));
+	id=(s32)(lua_tonumber(l,1));
 	if( id<32 )  { id=32; }
 	if( id>255 ) { id=255; }
 	
@@ -112,7 +116,7 @@ int id=0;
 		}
 	}
 	
-	lua_pushlstring(l,(char *)bmap,4*8*8);
+	lua_pushlstring(l,(const char *)bmap,4*8*8);
 
 	return 1;
 }
