@@ -563,7 +563,8 @@ all_includes=all_includes or {
 	{"lib_vorbis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua",				WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+
+	{"gamecake",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"nginx",			nil			or		NIX		or		nil		or		nil			or		nil			},
 }
 

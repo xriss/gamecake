@@ -189,7 +189,7 @@ else
 	excludes { "./ndk/src/ndk_http.*" }
 ]]
 
-	files { "../lua/*.c" }
+	files { "../gamecake/*.c" }
 	
 
 	links(static_lib_names)
