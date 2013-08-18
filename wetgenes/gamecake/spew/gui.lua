@@ -578,7 +578,8 @@ print("click",id)
 
 		gui.clicks.quit_back=function()
 			beep_play("button")
-			gui.page("settings")
+			gui.mpage("menu")
+--			gui.page("settings")
 		end
 		gui.clicks.quit_exit=function()
 			beep_play("button")
@@ -589,7 +590,7 @@ print("click",id)
 
 		top:add({hx=320,hy=40*3})
 
-		top:add({hx=320,hy=40*2,text_color=0xffffffff,text="Make your time!"})
+		top:add({hx=320,hy=40*2,text_color=0xffffffff,text="Are you sure?"})
 
 		top:add({hx=20,hy=40*2})
 		top:add({hx=120,hy=40*2,color=0xffcccccc,text="Back",id="quit_back",hooks=gui.hooks})

@@ -134,7 +134,7 @@ function wmaster.setup(widget,def)
 
 --print(wstr.dump(m))
 
-			if m.keycode==4 then --back
+			if m.keycode==4 or ( (oven.opts.smell=="gamestick") and (m.keycode==97) ) then --back
 				if master.go_back_id then
 					local v=master.ids and master.ids[master.go_back_id]
 					if v then
