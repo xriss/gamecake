@@ -19,8 +19,8 @@ is a testbed containing pre-built binaries and lua scripts. This is
 the final output of this build and is then shared with other, 
 projects. This dir must exist when building.
 
-sudo ./get-apts  # grab gcc files
-./make           # build using gcc, see below for more options
+sudo ./apt-gets  # grab *all* dependencies
+./make           # build using clang, see below for more options
 sudo ./install   # copy into /usr/local/bin/gamecake
 
 Afterwhich gamecake will now be a valid command :)
@@ -29,11 +29,8 @@ Afterwhich gamecake will now be a valid command :)
 The following commands should build everything under ubuntu/debian 
 assuming you have a build environment setup, you will need to install 
 some dev packages such as opengl. Hopefully all the bits you need can 
-be installed by running ./get-apts first.
-
-gcc/make release
-
-or if you want to try clang (faster build)
+be installed by running ./apt-gets first. Note I have switched to
+clang so makes sure you have that installed.
 
 clang/make release
 
@@ -65,11 +62,18 @@ needed to run an app.
 
 android/make
 
+Before running make you will probably need to import a project using
+
+android/bake projectdir 
+
+For example any of the directories in gamecakejam can be built on
+andrtoid this way.
+
 
 We also have an nginx target which bakes all the lua goodies into 
 nginx. This can be seen serving such websites as 
 http://gamecake.4lfa.com/ It is built automatically alongside the 
-gmake build on linux systems.
+main build on linux systems.
 
 
 All the above scripts just call premake and premake does of course also 

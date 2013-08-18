@@ -1,3 +1,7 @@
+#build dependencies, run
+#sudo ./apt-gets
+#to try and install all of these or copypasta individual lines
+
 #very important, all must install
 apt-get install build-essential libreadline-dev libglu1-mesa-dev xorg-dev libasound2-dev libudev-dev
 
