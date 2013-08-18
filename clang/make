@@ -1,10 +1,15 @@
 cd `dirname $0`
+#switch to 64bit build?
+test=`getconf LONG_BIT`
+if [ "$test" == "64" ] ; then
+	./make64 $*
+	exit
+fi
 cd ..
-
 
 cpu=32
 makeopts=""
-if [ "$1" = "release" ] ; then
+if [ "$1" == "release" ] ; then
 makeopts="config=release_clang"
 fi
 

@@ -1,2 +1,2 @@
-gcc/make release
+clang/make release
 
