@@ -1,2 +1,4 @@
-clang/make release
+cd `dirname $0`
+
+clang/make release $*
 

@@ -1,5 +1,7 @@
+cd `dirname $0`
+
 test=`getconf LONG_BIT`
-if [ "$test" == "64" ] ; then
+if [ "$test" = "64" ] ; then
 	sudo cp ../bin/exe/gamecake.x64 /usr/local/bin/gamecake
         exit
 fi

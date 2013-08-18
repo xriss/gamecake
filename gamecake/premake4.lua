@@ -1,5 +1,5 @@
 
-project "lua"
+project "gamecake"
 language "C"
 
 includedirs { "../lib_lua/src" }
