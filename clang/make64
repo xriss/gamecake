@@ -11,7 +11,7 @@ fi
 
 build/premake4 gmake clang-$cpu
 
-if [ "$1" == "clean" ] ; then
+if [ "$1" = "clean" ] ; then
 
         rm -rf build-gmake-clang-$cpu
         exit

@@ -1,7 +1,7 @@
 cd `dirname $0`
 #switch to 64bit build?
 test=`getconf LONG_BIT`
-if [ "$test" == "64" ] ; then
+if [ "$test" = "64" ] ; then
 	./make64 $*
 	exit
 fi
@@ -9,14 +9,14 @@ cd ..
 
 cpu=32
 makeopts=""
-if [ "$1" == "release" ] ; then
+if [ "$1" = "release" ] ; then
 makeopts="config=release_clang"
 fi
 
 
 build/premake4 gmake clang-$cpu
 
-if [ "$1" == "clean" ] ; then
+if [ "$1" = "clean" ] ; then
 
         rm -rf build-gmake-clang-$cpu
         exit
