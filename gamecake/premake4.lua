@@ -32,7 +32,7 @@ if RASPI then
 --	linkoptions { "-v -nostdlib" }
 --	links {  "gcc" , "c" , "c++" }
 
-	KIND{kind="ConsoleApp",name="lua.raspi"}
+	KIND{kind="ConsoleApp",name="gamecake.raspi"}
 
 elseif NACL then
 
@@ -47,7 +47,7 @@ elseif NACL then
 	links { "nosys" } -- remove newlib link errors
 	links { "nosys" } -- remove newlib link errors
 	
-	KIND{kind="WindowedApp",name="lua."..CPU..".nexe"}
+	KIND{kind="WindowedApp",name="gamecake."..CPU..".nexe"}
 
 elseif ANDROID then 
 
@@ -86,7 +86,7 @@ elseif WINDOWS then
 
 	local exe=".exe"
 	if not GCC then exe="" end -- native builds add .exe automatically	
-	KIND{kind="ConsoleApp",name="lua"..exe}
+	KIND{kind="ConsoleApp",name="gamecake"..exe}
 
 elseif NIX then
 
@@ -111,9 +111,9 @@ elseif NIX then
 --	links { "rt" }
 
 	if CPU=="64" then
-		KIND{kind="ConsoleApp",name="lua.x64"}
+		KIND{kind="ConsoleApp",name="gamecake.x64"}
 	else
-		KIND{kind="ConsoleApp",name="lua"}
+		KIND{kind="ConsoleApp",name="gamecake"}
 	end
 	
 end

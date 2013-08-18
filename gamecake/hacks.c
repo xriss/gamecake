@@ -42,7 +42,7 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len)
 
 #if defined(NACL)
 
-// we should never really call kill but may accidently link to it with ome libs
+// we should never really call kill but may accidently link to it with some libs
 
 int kill(int pid, int sig)
 {

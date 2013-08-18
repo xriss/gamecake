@@ -6,8 +6,8 @@ android/bin/*
 android/libs/*
 android/gen/*
 android/res/*
-lua/preloadlibs.c
-lua/cache.c
+gamecake/preloadlibs.c
+gamecake/cache.c
 */log.txt
 nacl/nginx/logs/*
 
