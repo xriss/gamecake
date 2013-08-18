@@ -416,7 +416,7 @@ function KIND(opts)
 
 	configuration {"Release"}
 	flags {"Optimize"}
-	flags {"Symbols"} -- keep symbols to help with release only crashes
+--	flags {"Symbols"} -- keep symbols to help with release only crashes
 	
 -- set output dirs
 
