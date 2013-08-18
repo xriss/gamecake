@@ -1,7 +1,7 @@
 test=`getconf LONG_BIT`
 if [ "$test" == "64" ] ; then
-	cp ../bin/exe/gamecake.x64 /usr/local/bin/gamecake
+	sudo cp ../bin/exe/gamecake.x64 /usr/local/bin/gamecake
         exit
 fi
 
-cp ../bin/exe/gamecake /usr/local/bin/gamecake
+sudo cp ../bin/exe/gamecake /usr/local/bin/gamecake
