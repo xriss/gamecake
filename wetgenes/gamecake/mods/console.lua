@@ -238,8 +238,9 @@ font.vbs_idx=1
 			if gl.patch_functions_method=="disable" then
 				print(s)
 			end
-							
-			console.display(s)
+			
+			table.insert(console.lines_display,1,s)
+--			console.display(s)
 
 			console.fps_count=console.fps_count+1
 		end
