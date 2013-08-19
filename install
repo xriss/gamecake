@@ -1,9 +1,15 @@
 cd `dirname $0`
 
+if [ -z "$DESTDIR" ] ; then
+	DESTDIR="/usr/local"
+fi
+
+mkdir -p ${DESTDIR}/bin/
+
 test=`getconf LONG_BIT`
 if [ "$test" = "64" ] ; then
-	sudo cp ../bin/exe/gamecake.x64 /usr/local/bin/gamecake
+	cp ../bin/exe/gamecake.x64 ${DESTDIR}/bin/gamecake
         exit
 fi
 
-sudo cp ../bin/exe/gamecake /usr/local/bin/gamecake
+cp ../bin/exe/gamecake ${DESTDIR}/bin/gamecake
