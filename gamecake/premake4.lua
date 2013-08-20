@@ -107,7 +107,6 @@ elseif NIX then
 	links { "dl" }
 	links { "m" }
 
-	links { "pthread" }
 --	links { "rt" }
 
 	if CPU=="64" then
