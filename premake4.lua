@@ -520,7 +520,7 @@ end
 
 
 all_includes=all_includes or {
---	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		},
+	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		},
 	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
