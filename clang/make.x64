@@ -9,8 +9,6 @@ makeopts="config=release_clang"
 fi
 
 
-build/premake4 gmake clang-$cpu
-
 if [ "$1" = "clean" ] ; then
 
         rm -rf build-gmake-clang-$cpu
@@ -18,6 +16,8 @@ if [ "$1" = "clean" ] ; then
 fi
 
 
+
+build/premake4 gmake clang-$cpu
 cd build-gmake-clang-$cpu
 make $makeopts $2 $3 $4
 cd ..

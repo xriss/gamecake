@@ -8,8 +8,6 @@ makeopts="config=release"
 fi
 
 
-build/premake4 gmake nix-$cpu
-
 if [ "$1" = "clean" ] ; then
 
         rm -rf build-gmake-nix-$cpu
@@ -17,6 +15,8 @@ if [ "$1" = "clean" ] ; then
 fi
 
 
+
+build/premake4 gmake nix-$cpu
 cd build-gmake-nix-$cpu
 make $makeopts $2 $3 $4
 cd ..
