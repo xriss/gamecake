@@ -3,7 +3,7 @@
 #to try and install all of these or copypasta individual lines
 
 #very important, all must install
-apt-get install build-essential libreadline-dev libglu1-mesa-dev libx11-dev libasound2-dev libudev-dev
+apt-get install build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev
 
 #clang if you want to build using clang (recomended)
 apt-get install clang
