@@ -51,7 +51,7 @@ function version_from_time(t,vplus)
 	return string.format("%02d.%03d",maj,min)
 end
 
-	local version=version_from_time()
+	local version=GAMECAKE_VERSION or version_from_time()
 
 
 	local fp=io.open("cache.c","w")

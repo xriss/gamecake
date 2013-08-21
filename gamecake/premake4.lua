@@ -6,6 +6,9 @@ includedirs { "../lib_lua/src" }
 
 files { "hacks.c" }
 
+
+GAMECAKE_VERSION="13.634"
+
 dofile("cache.lua")
 dofile("preloadlibs.lua")
 
