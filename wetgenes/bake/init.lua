@@ -136,6 +136,7 @@ create_dir_for_file=function(n)
 	local t={}
 	for w in string.gmatch(n, "[^/]+") do t[#t+1]=w end
 	local s=""
+	if n:sub(1,1)=="/" then s="/" end -- start with slash
 	t[#t]=nil -- remove the filename
 	for i,v in ipairs(t) do
 		s=s..v
