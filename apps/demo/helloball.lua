@@ -1,4 +1,4 @@
-#!/usr/local/bin/gamecake
+#!/bin/gamecake
 
 -- setup some default search paths,
 require("apps").default_paths()
