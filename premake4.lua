@@ -465,7 +465,7 @@ end
 
 LIB_LUA="lib_lua" -- default 
 
-if --[[RASPI or]] ANDROID then -- luajit is working for these builds
+if RASPI or ANDROID then -- luajit is working for these builds
 
 	LIB_LUA="lib_luajit"
 	defines( "LIB_LUAJIT" )
