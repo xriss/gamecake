@@ -40,7 +40,8 @@ newgcctoolchain {
     name = "raspi",
     description = "raspi",
 --    prefix = "arm-bcm2708-linux-gnueabi-",
-    prefix = "arm-raspi-linux-gnueabi-",
+--    prefix = "arm-raspi-linux-gnueabi-",
+	prefix = "arm-linux-gnueabihf-",
     cppflags = "",
 }
 
