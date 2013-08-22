@@ -6,6 +6,7 @@ local grd=require("wetgenes.grd")
 local zips=require("wetgenes.zips")
 local wsbox=require("wetgenes.sandbox")
 
+local wwin=require("wetgenes.win")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -98,8 +99,14 @@ oven.preloader(filename)
 	assert(g:load_data(d,fext:sub(2))) -- skip extension period
 
 -- clamp to a maximum size
-	local max_size=1024
-	if g.width > max_size or g.height>max_size then
+	local max_size=2048
+
+-- tempory fixes to reduce texture memory footprint
+
+	if wwin.flavour=="android" then max_size=1024 end
+	if wwin.flavour=="raspi" then max_size=512 end
+
+	if max_size and g.width > max_size or g.height>max_size then
 		local hx=g.width>max_size and max_size or g.width
 		local hy=g.height>max_size and max_size or g.height
 print("Max texture size converting ",g.width,g.height," to ",hx,hy)
