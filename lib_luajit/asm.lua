@@ -46,7 +46,7 @@ local function build(mode)
 
 	elseif mode=="armhf" then -- raspi, make sure the flags are shared with the main build
 
-		os.execute("make HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/gcc/prefix/bin/arm-raspi-linux-gnueabi- TARGET_CFLAGS=\" -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s \" ")
+		os.execute("make HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf- TARGET_CFLAGS=\" -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s \" ")
 
 	end
 
