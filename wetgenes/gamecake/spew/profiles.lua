@@ -43,7 +43,16 @@ M.bake=function(oven,profiles)
 			p.name=snames.random()
 			ps[i]=p
 		end
+		
+		if wwin.posix then -- get 1st username from posix?
+			local username=wwin.posix.getenv("USER")
+			if username then
+				ps[1].name=username
+			end
+		end
+		
 		profiles.select(1)
+
 	end
 	
 -- load all profile data
