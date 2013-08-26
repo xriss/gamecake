@@ -228,7 +228,9 @@ widget.matrix=gl.SaveMatrix()
 
 		
 		if widget.clip then
-print("clip widget",widget,widget.px,widget.py,widget.id)		
+
+--print("clip widget",widget,widget.px,widget.py,widget.id)		
+
 			widget.layout=layouts.create{parent2={x=0,y=0,w=widget.master.hx,h=widget.master.hy},
 				x=widget.pxd,
 				y=widget.pyd,
