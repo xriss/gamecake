@@ -35,7 +35,7 @@ function build(tab)
 		bake.copyfile(opts.basedir.."/"..v,fname)
 	end
 
-	local opts={basedir=bake.cd_root.."/lua",dir="lua",filter=""}
+	local opts={basedir=bake.cd_root,dir="lua",filter=""}
 	local r=bake.findfiles(opts)
 	for i,v in ipairs(r.ret) do
 		local fname=bake.cd_out.."/"..v
