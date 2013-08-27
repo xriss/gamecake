@@ -110,7 +110,7 @@ local beep_play=function() end
 		end
 		
 
-		if act=="over" then gui.anim.bounce(widget,0.25) end
+		if act=="over" then gui.anim.bounce(widget,1/16) end
 
 		if act=="click" then
 		
@@ -701,7 +701,9 @@ print("click",id)
 			vel=0,
 			update=function(anim)
 				anim.vel=anim.vel-(anim.num*1/16)
-				anim.vel=anim.vel*14/16
+				if w.master.over ~= w then
+					anim.vel=anim.vel*14/16
+				end
 				anim.num=anim.num+anim.vel
 				if (math.abs(anim.vel) + math.abs(anim.num)) <(1/1024) then
 					anim.widget.anim=nil
