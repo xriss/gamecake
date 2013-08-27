@@ -583,6 +583,7 @@ print("click",id)
 		end
 		gui.clicks.quit_exit=function()
 			beep_play("button")
+			gui.mpage("menu")
 			oven.next=true -- really quit
 		end
 				
