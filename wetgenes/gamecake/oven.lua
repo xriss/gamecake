@@ -11,6 +11,16 @@ local wstr=require("wetgenes.string")
 
 local function print(...) return _G.print(...) end
 
+local function assert_resume(co)
+
+	local a,b=coroutine.resume(co)
+	
+	if a then return a,b end -- no error
+	
+	error( b.."\nin coroutine\n"..debug.traceback(co) ) -- error
+end
+
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -246,7 +256,9 @@ end
 			oven.preloader_enabled=false -- disabled preloader after first setup completes
 		end
 
+		oven.do_start=false
 		function oven.start()	
+			oven.do_start=false
 
 			oven.win:start()
 			oven.cake.start()
@@ -284,7 +296,8 @@ end
 
 			if oven.update_co then -- just continue coroutine until it ends
 				if coroutine.status(oven.update_co)~="dead" then
-					assert(coroutine.resume(oven.update_co)) -- run it, may need more than one resume before it finishes
+--					print( "CO:"..coroutine.status(oven.update_co) )
+					assert_resume(oven.update_co) -- run it, may need more than one resume before it finishes
 					return
 				else
 					oven.update_co=nil
@@ -311,6 +324,10 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 
 			local f
 			f=function()
+			
+				if oven.do_start then
+					oven.start()
+				end
 
 				oven.change() -- run setup/clean codes if we are asked too
 
@@ -345,7 +362,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 				oven.update_co=coroutine.create(f)
 			end
 			if coroutine.status(oven.update_co)~="dead" then
-				assert(coroutine.resume(oven.update_co)) -- run it, may need more than one resume before it finishes
+				assert_resume(oven.update_co) -- run it, may need more than one resume before it finishes
 			end
 
 		end
@@ -356,7 +373,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 print("Loading : "..s)
 			if not oven.preloader_enabled then return end
 			if oven.win then
-
+				
 				if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
 					if oven.update_co and (oven.update_co==coroutine.running()) then
 						coroutine.yield() -- try and make it finish
@@ -364,6 +381,11 @@ print("Loading : "..s)
 					end
 				end
 
+--				if oven.update_co and (oven.update_co==coroutine.running()) then -- we're in update coroutine
+--					if wwin.hardcore and wwin.hardcore.queue_all_msgs then -- read all android messages for later
+--						wwin.hardcore.queue_all_msgs()
+--					end
+--				end
 --				oven.msgs()
 
 				oven.cake.canvas.draw()
@@ -432,18 +454,18 @@ print("Loading : "..s)
 			if oven.win then
 				for m in oven.win:msgs() do
 
+					if m.class=="mouse" and m.x and m.y then	-- need to fix x,y numbers
+						m.xraw,m.yraw=m.x,m.y					-- remember original
+					end
+
 					if m.class=="close" then -- window has been closed so do a shutdown
 						oven.next=true
 					end
 
-					if m.class=="mouse" and m.x and m.y then	-- need to fix x,y numbers
-						m.xraw,m.yraw=m.x,m.y					-- remember original
-					end
-					
 					if m.class=="app" then -- androidy
 --print("caught : ",m.class,m.cmd)
 						if		m.cmd=="init_window" then
-							oven.start()
+							oven.do_start=true --do not clog up the message loop by running start here
 							oven.paused=false
 						elseif	m.cmd=="lost_focus"  then
 							oven.paused=true
@@ -454,18 +476,20 @@ print("Loading : "..s)
 							oven.stop()
 						end
 					end
-					
-
-					for i=#oven.mods,1,-1 do -- run it through the mods backwards, so the topmost layer gets first crack at the msgs
-						local v=oven.mods[i]
-						if m and v and v.msg then
-							m=v.msg(m) -- mods can choose to eat the msgs, they must return it for it to bubble down
-						end
-					end
-					if m and oven.now and oven.now.msg then
-						oven.now.msg(m)
-					end
 						
+					if not oven.preloader_enabled then -- discard all other msgs during preloader
+						
+						for i=#oven.mods,1,-1 do -- run it through the mods backwards, so the topmost layer gets first crack at the msgs
+							local v=oven.mods[i]
+							if m and v and v.msg then
+								m=v.msg(m) -- mods can choose to eat the msgs, they must return it for it to bubble down
+							end
+						end
+						if m and oven.now and oven.now.msg then
+							oven.now.msg(m)
+						end
+						
+					end
 				end
 			end
 		end
