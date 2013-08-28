@@ -145,6 +145,8 @@ function win.android_start(apk)
 
 --print("ANDROID_SETUP with ",apk)
 	
+--	hardcore.queue_all_msgs()
+	
 	return win.load_run_init()
 end
 
