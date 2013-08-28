@@ -57,6 +57,7 @@ end
 		local lson=wzips.readfile("lua/init_bake.lua")
 		if lson then
 			oven.opts.bake=wsbox.lson(lson)
+			oven.opts.smell=oven.opts.bake.smell or oven.opts.smell -- smell overides
 		end
 
 		
