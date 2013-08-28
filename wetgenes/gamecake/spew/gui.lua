@@ -53,6 +53,7 @@ M.bake=function(oven,gui)
 		wetiso.setup()
 		gui.time=0
 
+		if wwin.hardcore.smell_score_range then wwin.hardcore.smell_score_range(1,50) end
 	end
 	
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
@@ -383,6 +384,8 @@ print("click",id)
 		
 		local fill=function()
 		
+			local nomore=false
+		
 			top:clean_all()
 		
 			local b=top:add({hx=320,hy=90,class="fill",font="Vera",text_size=24,id="score_title"})			
@@ -420,6 +423,7 @@ print("click",id)
 				else
 
 					top:add({hx=320,hy=70})
+					nomore=true
 				
 				end
 			end
@@ -452,6 +456,7 @@ print("click",id)
 --				if m.class=="LeaderBoard" then
 					if m.data then
 						for i=1,5 do
+							tab[i]=nil
 							for _,v in ipairs(m.data) do
 								if v.position==gui.offset+i-1 then
 									tab[i]={
@@ -478,6 +483,7 @@ print("click",id)
 			local sc=sscores.list({offset=gui.offset,order="full"})
 			local nomore=not sc[6]
 			for i=1,5 do
+				tab[i]=nil
 				local v=sc[i]
 				if v then
 					tab[i]={
@@ -493,8 +499,13 @@ print("click",id)
 				
 		fill()
 
+		if gui.msg_smell_hook and gui.msg_smell_hook_data then
+			gui.msg_smell_hook(gui.msg_smell_hook_data) -- repost old data
+		end
+
 		master.go_back_id="score_list_less"
 		master.go_forward_id="score_list_exit"
+		
 
 	end
 
@@ -523,12 +534,18 @@ print("click",id)
 
 		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 
-		top:add({hx=100,hy=40,color=0xffcccccc,text="Main",id="settings_main",hooks=gui.hooks})
-		top:add({hx=10,hy=40})
-		top:add({hx=100,hy=40,color=0xffcccccc,text="Game",id="settings_game",hooks=gui.hooks})
-		top:add({hx=10,hy=40})
-		top:add({hx=100,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
-
+		if oven.opts.smell=="gamestick" then
+			top:add({hx=100,hy=40})
+			top:add({hx=120,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
+			top:add({hx=100,hy=40})
+		else
+			top:add({hx=100,hy=40,color=0xffcccccc,text="Main",id="settings_main",hooks=gui.hooks})
+			top:add({hx=10,hy=40})
+			top:add({hx=100,hy=40,color=0xffcccccc,text="Game",id="settings_game",hooks=gui.hooks})
+			top:add({hx=10,hy=40})
+			top:add({hx=100,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
+		end
+		
 		top:add({hx=320,hy=40,text_color=0xffffffff,text="Music volume"})
 		top:add({class="slide",color=0xffcccccc,hx=320,hy=40,datx=gui.data.vol_music,data=gui.data.vol_music,hooks=gui.hooks})
 		top:add({hx=320,hy=40,text_color=0xffffffff,text="Sound effects volume"})
@@ -559,7 +576,7 @@ print("click",id)
 
 		local t=top:add({hx=320,hy=40,class="fill",font="Vera",text_size=12,text_color=0xffffffff})
 		t:add{hx=320,hy=20,text=""}
-		t:add{hx=320,hy=20,text=(wwin.smell or "vanilla") .. " build v".. v}
+		t:add{hx=320,hy=20,text=(oven.opts.smell or "vanilla") .. " build v".. v}
 
 						
 						
@@ -665,6 +682,7 @@ print("click",id)
 
 		if gui.msg_smell_hook then
 			if m.cmd and m.cmd:sub(1,11)=="LeaderBoard" then
+				gui.msg_smell_hook_data=m
 				return gui.msg_smell_hook(m)
 			end
 		end
