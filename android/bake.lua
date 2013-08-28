@@ -1,4 +1,4 @@
-#!/usr/local/bin/gamecake
+#!/usr/bin/env gamecake
 
 local zips=require("wetgenes.zips")
 local bake=require("wetgenes.bake")
@@ -10,14 +10,14 @@ local args={...}
 
 local basedir=assert(args[1],"Must specify basedir, eg \"./bake.lua ../../apps/dike\"")
 
-local smell=args[2] -- optional 
+local smell=args[2] -- optional smell
 
 local fdat=assert(zips.readfile(basedir.."/opts.lua"),"opts.lua must exist in the given basedir")
 
 
 local preopts=sbox.ini(fdat)
 
-if smell and preopts.smells and preopts.smells[smell] then -- override preopts with smell
+if smell and preopts.smells and preopts.smells[smell] then -- override preopts with smell settings
 	for i,v in pairs(preopts.smells[smell]) do
 		preopts[i]=v
 	end
@@ -25,7 +25,7 @@ end
 
 --print(wstr.dump(opts))
 
-local version=bake.version_from_time()
+local version=args[3] or preopts.version or bake.version_from_time()
 local opts={
 		smell=smell,
         name=preopts.name,
@@ -65,6 +65,16 @@ end
 
 -- patch init.lua
 bake.replacefile(basedir.."/lua/init.lua",zips.apk_munge_filename("lua/init.lua"),opts)
+
+local lson=bake.readfile(basedir.."/lua/init_bake.lua")
+if lson then
+	local data=sbox.lson(lson)
+	data.smell=smell -- any given smell overides
+	data.version= opts.version or data.version
+	bake.writefile( zips.apk_munge_filename("lua/init_bake.lua") , wstr.serialize(data) )
+end
+
+
 
 
 local ficon=basedir.."/art/icons/android_icon.png"
