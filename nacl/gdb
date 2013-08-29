@@ -1,0 +1,2 @@
+../sdks/nacl-sdk/pepper_28/toolchain/linux_x86_newlib/bin/x86_64-nacl-gdb -x nacl/gdb.x
+

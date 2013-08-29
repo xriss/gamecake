@@ -29,7 +29,7 @@
 #include "ppapi/c/ppp_input_event.h"
 
 #include "ppapi/gles2/gl2ext_ppapi.h"
-#include "GLES2/gl2.h"
+//#include "GLES2/gl2.h"
 
 #include "lua.h"
 #include "lauxlib.h"

@@ -1,7 +1,7 @@
 cd `dirname $0`
 cd ..
 
-naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_25`
+naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_28`
 export PATH=$naclsdk/toolchain/linux_x86_newlib/bin:$PATH
 
 makeopts=""
@@ -11,11 +11,13 @@ fi
 
 build/premake4 gmake nacl-32
 build/premake4 gmake nacl-64
+#build/premake4 gmake nacl-arm
 
 if [ "$1" == "clean" ] ; then
 
         rm -rf build-gmake-nacl-32
         rm -rf build-gmake-nacl-64
+        rm -rf build-gmake-nacl-arm
         exit
 fi
 
@@ -28,3 +30,6 @@ cd build-gmake-nacl-64
 make $makeopts $2 $3 $4
 cd ..
 
+#cd build-gmake-nacl-arm
+#make $makeopts $2 $3 $4
+#cd ..

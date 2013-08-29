@@ -66,14 +66,15 @@ end
 -- patch init.lua
 bake.replacefile(basedir.."/lua/init.lua",zips.apk_munge_filename("lua/init.lua"),opts)
 
-local lson=bake.readfile(basedir.."/lua/init_bake.lua")
-if lson then
-	local data=sbox.lson(lson)
-	data.smell=smell -- any given smell overides
-	data.version= opts.version or data.version
-	bake.writefile( zips.apk_munge_filename("lua/init_bake.lua") , wstr.serialize(data) )
+if bake.file_exists(basedir.."/lua/init_bake.lua") then
+	local lson=bake.readfile(basedir.."/lua/init_bake.lua")
+	if lson then
+		local data=sbox.lson(lson)
+		data.smell=smell -- any given smell overides
+		data.version= opts.version or data.version
+		bake.writefile( zips.apk_munge_filename("lua/init_bake.lua") , wstr.serialize(data) )
+	end
 end
-
 
 
 

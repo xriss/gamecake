@@ -163,12 +163,14 @@ print("TARGET == "..TARGET.." " ..CPU )
 
 if NACL then
 
-	local naclsdk=path.getabsolute("../sdks/naclsdk/pepper_25")
+	local naclsdk=path.getabsolute("../sdks/nacl-sdk/pepper_28")
 
 	platforms { "nacl" } --hax
 	
 	defines "NACL"
 	
+	includedirs { naclsdk.."/include" }
+
 	if CPU=="32" then
 	
 		buildoptions{"-m32"}
@@ -497,6 +499,7 @@ elseif NACL then
 
 	defines{ "LUA_GLES_GLES2" }
 	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
+--	defines{ "INCLUDE_GLES_GL=\\\"ppapi/c/ppb_opengles2.h\\\"" }
 
 elseif WINDOWS then -- need windows GL hacks
 

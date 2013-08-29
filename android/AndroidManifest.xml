@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.wetgenes.bulb.gamestick"
-      android:versionCode="13650"
-      android:versionName="13.65"
+        package="com.wetgenes.gthang"
+      android:versionCode="13656"
+      android:versionName="13.656"
 >
     <!-- 9 is the platform API where NativeActivity was introduced.
     If I bump the target to a higher number 14 then something goes wrong with screen rotation (GLES context?)
@@ -21,20 +21,18 @@
                   android:xlargeScreens="true"
                   android:anyDensity="true" />
 
-<uses-permission android:name="com.playjam.gamestick.permission.DOWNLOAD_SERVICE"/>
-<uses-permission android:name="com.playjam.gamestick.permission.DATABASE_INTERFACE_SERVICE"/>
 
     
 
-    <application android:label="Dr. Bulbaceous : Puzzle Solver" android:icon="@drawable/icon"
+    <application android:label="gthang" android:icon="@drawable/icon"
 		android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
     >
 
 
         <!-- Our activity is the built-in NativeActivity framework class.
              This will take care of integrating with our NDK code. -->
-        <activity android:name="com.wetgenes.feralactivity.GameStick"
-                android:label="Dr. Bulbaceous : Puzzle Solver"
+        <activity android:name="com.wetgenes.FeralActivity"
+                android:label="gthang"
                 android:configChanges="orientation|keyboardHidden"
 		android:screenOrientation="unspecified"
 	>
