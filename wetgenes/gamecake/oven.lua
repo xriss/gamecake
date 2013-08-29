@@ -30,7 +30,7 @@ function M.bake(opts)
 
 		oven.opts=opts or {}
 
-print(wwin.flavour)
+--print(wwin.flavour)
 
 
 
@@ -373,41 +373,32 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 			local s=table.concat({...}," ") or ""
 print("Loading : "..s)
 			if not oven.preloader_enabled then return end
+
+			if wwin.flavour=="nacl" then
+				wwin.hardcore.print("Loading : "..s)
+				if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
+					coroutine.yield()
+				end
+				return
+			end
+
 			if oven.win then
 				
-				if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
-					if oven.update_co and (oven.update_co==coroutine.running()) then
-						coroutine.yield() -- try and make it finish
---						coroutine.yield()
-					end
-				end
 
---				if oven.update_co and (oven.update_co==coroutine.running()) then -- we're in update coroutine
---					if wwin.hardcore and wwin.hardcore.queue_all_msgs then -- read all android messages for later
---						wwin.hardcore.queue_all_msgs()
---					end
---				end
---				oven.msgs()
-
-				oven.cake.canvas.draw()
 				local p=oven.rebake(opts.preloader or "wetgenes.gamecake.spew.preloader")
 				p.setup() -- warning, this is called repeatedly
 				p.update(s)
+
 				if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
-
-					if oven.update_co and (oven.update_co==coroutine.running()) then
-						coroutine.yield()
---						coroutine.yield()
-					end
-
+					-- do not draw
 				else
+					oven.cake.canvas.draw()
 					p.draw()
 					oven.win:swap()
 				end
 
-				if oven.update_co and (oven.update_co==coroutine.running()) then
+				if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
 					coroutine.yield()
---					coroutine.yield()
 				end
 
 			end
