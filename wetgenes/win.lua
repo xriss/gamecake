@@ -92,6 +92,7 @@ win.generic_keymap={
 
 
 -- android patch
+--[[
 	["android_04"]="escape",
 	["android_6f"]="escape",
 	["android_42"]="return",
@@ -102,7 +103,7 @@ win.generic_keymap={
 	["android_15"]="left",
 	["android_16"]="right",
 	["android_17"]="return",
-
+]]
 
 -- windows patch
 	["backspace"]="back",
@@ -112,8 +113,9 @@ win.generic_keymap={
 	
 -- linux patch
 	["grave"]="`",
-	
+
 }
+
 
 function win.keymap(key)
 	key=key:lower()
