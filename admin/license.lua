@@ -12,7 +12,10 @@ local lcs={
 	["lib_ogg"]			="lib_ogg/COPYING",
 	["lib_openal"]		="lib_openal/asoft/COPYING",
 	["lib_openssl"]		="lib_openssl/LICENSE",
-	["lib_pcre"]		="lib_pcre/LICENSE",
+	["lib_pcre"]		="lib_pcre/LICENCE",
+	["lib_png"]			="lib_png/lpng163/LICENSE",
+	["lib_vorbis"]		="lib_vorbis/COPYING",
+	["lib_vpx"]			="lib_vpx/git/LICENSE",
 
 }
 
