@@ -12,7 +12,7 @@
 
 void read_func(png_structp ptr, png_bytep buff, png_size_t count)
 {
-struct grd_loader_info *inf=(struct grd_loader_info *)ptr->io_ptr;
+struct grd_loader_info *inf=(struct grd_loader_info *)png_get_io_ptr(ptr);
 
 	if(inf == NULL)
 	{
@@ -89,10 +89,10 @@ static void grd_png_load(struct grd * g, struct grd_loader_info * inf )
 
 	png_read_info(png_ptr, info_ptr);
 
-	width = info_ptr->width;
-	height = info_ptr->height;
-	color_type = info_ptr->color_type;
-	bit_depth = info_ptr->bit_depth;
+	width = png_get_image_width(png_ptr,info_ptr);
+	height = png_get_image_height(png_ptr,info_ptr);
+	color_type = png_get_color_type(png_ptr,info_ptr);
+	bit_depth = png_get_bit_depth(png_ptr,info_ptr);
 
 // choose grdfmt
 	grdfmt=GRD_FMT_U8_ARGB;
@@ -114,7 +114,7 @@ static void grd_png_load(struct grd * g, struct grd_loader_info * inf )
 	}
 	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
 	{
-		png_set_gray_1_2_4_to_8(png_ptr);
+		png_set_expand_gray_1_2_4_to_8(png_ptr);
 	}
 	if ( (color_type == PNG_COLOR_TYPE_GRAY_ALPHA ) || ( color_type == PNG_COLOR_TYPE_GRAY ) )
 	{
