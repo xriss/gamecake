@@ -88,7 +88,6 @@ main.img_hy=256
 
 end
 
-main.config() -- call this if you want to chage the settings
 
 main.config_as=function(name)
 
@@ -242,7 +241,8 @@ main.draw=function()
 	gl.PopMatrix()	
 
 end
-		
+
+	main.config() -- call this if you want to chage the settings
 	return main
 end
 

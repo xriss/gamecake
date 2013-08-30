@@ -395,7 +395,7 @@ android.queue_all_msgs=function()
 						keycode=ma.keycode,
 						keyname=akeynames[ma.keycode] or string.format("android_%02x",ma.keycode)
 					}				
-					if #ma.keyname==1 then ma.ascii=ma.keyname end -- cheap ascii hack for now
+					if #m.keyname==1 then m.ascii=m.keyname end -- cheap ascii hack for now
 					
 				else
 
@@ -407,7 +407,7 @@ android.queue_all_msgs=function()
 						keycode=ma.keycode,
 						keyname=akeynames[ma.keycode] or string.format("android_%02x",ma.keycode)
 					}
-					if #ma.keyname==1 then ma.ascii=ma.keyname end -- cheap ascii hack for now
+					if #m.keyname==1 then m.ascii=m.keyname end -- cheap ascii hack for now
 
 				end
 
