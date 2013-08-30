@@ -50,6 +50,9 @@ M.bake=function(oven,main)
 
 	
 main.config=function(opts)
+
+	main.clean() -- remove old loaded datas
+
 	opts=opts or {}
 	
 	main.screen_hx=opts.screen_hx or 256
