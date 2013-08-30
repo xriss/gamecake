@@ -10,5 +10,6 @@ gamecake/preloadlibs.c
 gamecake/cache.c
 */log.txt
 nacl/nginx/logs/*
+nacl/nginx/static/*.zip
 
 
