@@ -23,7 +23,8 @@ License: The MIT License (MIT)
 
 
 Files: lib_vpx/*
-License: 
+Copyright: ...
+License: ...
  Copyright (c) 2010, The WebM Project authors. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -58,7 +59,8 @@ License:
  
 
 Files: lib_luajit/*
-License: 
+Copyright: ...
+License: ...
  ===============================================================================
  LuaJIT -- a Just-In-Time Compiler for Lua. http://luajit.org/
  
@@ -118,7 +120,8 @@ License:
  
 
 Files: lua_zip/*
-License: 
+Copyright: ...
+License: ...
  Copyright &copy; 2003-2007 The Kepler Project.
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -141,7 +144,8 @@ License:
  
 
 Files: lua_lanes/*
-License: 
+Copyright: ...
+License: ...
  
  Lua Lanes is licensed under the same MIT license as the Lua 5.1 source code, 
  reproduced below.
@@ -177,7 +181,8 @@ License:
  
 
 Files: lib_freetype/*
-License: 
+Copyright: ...
+License: ...
  
  The  FreeType 2  font  engine is  copyrighted  work and  cannot be  used
  legally  without a  software license.   In  order to  make this  project
@@ -215,7 +220,8 @@ License:
  
 
 Files: lib_ogg/*
-License: 
+Copyright: ...
+License: ...
  Copyright (c) 2002, Xiph.org Foundation
  
  Redistribution and use in source and binary forms, with or without
@@ -247,7 +253,8 @@ License:
  
 
 Files: lib_openal/*
-License: 
+Copyright: ...
+License: ...
   
  		  GNU LIBRARY GENERAL PUBLIC LICENSE
  		       Version 2, June 1991
@@ -735,7 +742,8 @@ License:
  
 
 Files: lua_zlib/*
-License: 
+Copyright: ...
+License: ...
  LuaZip 1.2.3
  ------------
  
@@ -747,7 +755,8 @@ License:
  
 
 Files: lua_lash/*
-License: 
+Copyright: ...
+License: ...
  /*
   * Copyright (c) 2008 Neil Richardson (nrich@iinet.net.au)
   *
@@ -772,7 +781,8 @@ License:
  
 
 Files: lua_socket/*
-License: 
+Copyright: ...
+License: ...
  LuaSocket 2.0.2 license
  Copyright © 2004-2007 Diego Nehab
  
@@ -796,7 +806,8 @@ License:
  
 
 Files: lua_sec/*
-License: 
+Copyright: ...
+License: ...
  LuaSec 0.4.1 license
  Copyright (C) 2006-2011 Bruno Silvestre, PUC-Rio
  
@@ -845,7 +856,8 @@ License:
  
 
 Files: lib_jpeg/*
-License: 
+Copyright: ...
+License: ...
  The Independent JPEG Group's JPEG software
  ==========================================
  
@@ -1234,7 +1246,8 @@ License:
  
 
 Files: lib_vorbis/*
-License: 
+Copyright: ...
+License: ...
  Copyright (c) 2002-2008 Xiph.org Foundation
  
  Redistribution and use in source and binary forms, with or without
@@ -1266,7 +1279,8 @@ License:
  
 
 Files: lib_gif/*
-License: 
+Copyright: ...
+License: ...
  The GIFLIB distribution is Copyright (c) 1997  Eric S. Raymond
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -1289,7 +1303,8 @@ License:
  
 
 Files: lib_lua/*
-License: 
+Copyright: ...
+License: ...
  Lua License
  -----------
  
@@ -1327,7 +1342,8 @@ License:
  
 
 Files: lua_profiler/*
-License: 
+Copyright: ...
+License: ...
  Copyright (c) 2002-2007 Kepler Project.
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -1350,7 +1366,8 @@ License:
  
 
 Files: lib_z/*
-License: 
+Copyright: ...
+License: ...
  ZLIB DATA COMPRESSION LIBRARY
  
  zlib 1.2.8 is a general purpose data compression library.  All the code is
@@ -1469,7 +1486,8 @@ License:
  
 
 Files: lua_lfs/*
-License: 
+Copyright: ...
+License: ...
  The LuaFileSystem library is designed and implemented by Roberto
  Ierusalimschy, Andr&eacute; Carregal and Tom&aacute;s Guisasola.
  The implementation is not derived from licensed software.
@@ -1498,7 +1516,8 @@ License:
  
 
 Files: lib_zzip/*
-License: 
+Copyright: ...
+License: ...
  		  GNU LIBRARY GENERAL PUBLIC LICENSE
  		       Version 2, June 1991
  
@@ -1983,7 +2002,8 @@ License:
  
 
 Files: lib_png/*
-License: 
+Copyright: ...
+License: ...
  
  This copy of the libpng notices is provided for your convenience.  In case of
  any discrepancy between this copy and the notices in the file png.h that is
@@ -2098,7 +2118,8 @@ License:
  
 
 Files: lib_openssl/*
-License: 
+Copyright: ...
+License: ...
  
    LICENSE ISSUES
    ==============
@@ -2229,7 +2250,8 @@ License:
  
 
 Files: lib_chipmonk/*
-License: 
+Copyright: ...
+License: ...
  Copyright (c) 2007 Scott Lembcke and Howling Moon Software
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -2252,7 +2274,8 @@ License:
  
 
 Files: lua_bit/*
-License: 
+Copyright: ...
+License: ...
  README for Lua BitOp 1.0.1
  --------------------------
  
@@ -2278,7 +2301,8 @@ License:
  
 
 Files: lib_pcre/*
-License: 
+Copyright: ...
+License: ...
  PCRE LICENCE
  ------------
  
@@ -2350,7 +2374,8 @@ License:
  
 
 Files: lua_posix/*
-License: 
+Copyright: ...
+License: ...
  Copyright (C) 2006-2012 luaposix authors
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -2373,7 +2398,8 @@ License:
  
 
 Files: lib_hidapi/*
-License: 
+Copyright: ...
+License: ...
  Copyright (c) 2010, Alan Ott, Signal 11 Software
  All rights reserved.
  

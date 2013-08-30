@@ -69,7 +69,8 @@ for n,v in pairs(lcs) do
 	local t=" "..string.gsub(d,"\n","\n ")
 	
 	print("Files: "..n.."/*")
-	print("License: ")
+	print("Copyright: ...")
+	print("License: ...")
 	print(t.."\n")
 
 end
