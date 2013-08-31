@@ -594,6 +594,28 @@ u8 *pc;
 
 						
 			case GRD_FMT_U8_RGB:
+				gb=grd_create(GRD_FMT_U8_RGB,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return 0; }
+				
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=grdinfo_get_data(g->bmap,0,y,z);
+						pb=grdinfo_get_data(gb->bmap,0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							pb[0]=pa[1];
+							pb[1]=pa[2];
+							pb[2]=pa[3];
+							pa+=4;
+							pb+=3;							
+						}
+					}
+				}
+				
+				return gb ;
+			break;
 			
 			default:
 				return 0;
@@ -601,7 +623,7 @@ u8 *pc;
 		}
 	}
 	else
-	if(fmt==GRD_FMT_U8_ARGB) // convert to BGRA
+	if(fmt==GRD_FMT_U8_ARGB) // convert to ARGB
 	{
 		switch(g->bmap->fmt)
 		{
@@ -737,13 +759,36 @@ u8 *pc;
 			break;
 			
 			case GRD_FMT_U8_RGB:
-			
+				gb=grd_create(GRD_FMT_U8_ARGB,g->bmap->w,g->bmap->h,g->bmap->d);
+				if(!gb) { return 0; }
+				
+				for(z=0;z<g->bmap->d;z++)
+				{
+					for(y=0;y<g->bmap->h;y++)
+					{
+						pa=grdinfo_get_data(g->bmap,0,y,z);
+						pb=grdinfo_get_data(gb->bmap,0,y,z);
+						for(x=0;x<g->bmap->w;x++)
+						{
+							pb[0]=0xff;
+							pb[1]=pa[0];
+							pb[2]=pa[1];
+							pb[3]=pa[2];
+							pa+=3;
+							pb+=4;							
+						}
+					}
+				}
+				
+				return gb ;
+			break;
+						
 			default:
 				return 0;
 			break;	
 		}
 	}
-	else // convert source then try again
+	else // convert source to ARGB and then try again
 	{
 		gb=grd_duplicate_convert(g ,GRD_FMT_U8_ARGB); // this one always makes a new bitmap
 		if(gb==0) { return 0; }
@@ -1145,42 +1190,10 @@ s32 h=bb->h;
 	gb->err=ga->err; // put error in both
 	if(ga->err) { return 0; }
 
-	if( (ba->fmt==GRD_FMT_U8_ARGB) && (bb->fmt==GRD_FMT_U8_ARGB) )
-	{
-		u32 ialpha;
-		for(i=0;i<h;i++)
-		{
-			pa=(u32*)grdinfo_get_data(ba,x,y+i,0);
-			pb=(u32*)grdinfo_get_data(bb,0,i,0);
-			for(j=0;j<w;j++)
-			{
-				b=*(pb++);
-				switch(b&0xff)
-				{
-					case 0xff:
-						*(pa++)=b|0xff;
-					break;
-					case 0x00:
-						pa++;
-					break;
-					default:
-						ialpha=(0x100 - (b&0xff) );
-						a=*(pa);
-						*(pa++)=
-						 ( ( ( ((a>>8)&0x00ff0000) * ialpha ) + (b&0xff000000) ) & 0xff000000 ) |
-						 ( ( ( ((a>>8)&0x0000ff00) * ialpha ) + (b&0x00ff0000) ) & 0x00ff0000 ) |
-						 ( ( ( ((a>>8)&0x000000ff) * ialpha ) + (b&0x0000ff00) ) & 0x0000ff00 ) |
-						 (0xff); // full alpha
-					break;
-				}
-			}
-		}
-
-	}
-	else
 	if( (ba->fmt==GRD_FMT_U8_ARGB) && (bb->fmt==GRD_FMT_U8_ARGB_PREMULT) )
 	{
 		u32 ialpha;
+		u32 ban;
 		for(i=0;i<h;i++)
 		{
 			pa=(u32*)grdinfo_get_data(ba,x,y+i,0);
@@ -1188,22 +1201,23 @@ s32 h=bb->h;
 			for(j=0;j<w;j++)
 			{
 				b=*(pb++);
-				switch(b&0xff)
+				ban=b&0xff;
+				switch(ban)
 				{
 					case 0xff:
-						*(pa++)=b|0xff;
+						*(pa++)=b;
 					break;
 					case 0x00:
 						pa++;
 					break;
 					default:
-						ialpha=(0x100 - (b&0xff) );
 						a=*(pa);
+						ialpha=(0x100-(b&0xff));
 						*(pa++)=
 						 ( ( ( ((a>>8)&0x00ff0000) * ialpha ) + (b&0xff000000) ) & 0xff000000 ) |
 						 ( ( ( ((a>>8)&0x0000ff00) * ialpha ) + (b&0x00ff0000) ) & 0x00ff0000 ) |
 						 ( ( ( ((a>>8)&0x000000ff) * ialpha ) + (b&0x0000ff00) ) & 0x0000ff00 ) |
-						 (0xff); // full alpha
+						 ((a+b)&0x000000ff); // real alpha
 					break;
 				}
 			}

@@ -302,10 +302,17 @@ int lua_grd_save (lua_State *l)
 {
 part_ptr p;
 const char *s;
+s32 n=0;
 
 	p=lua_grd_check_ptr(l,1);
 
 	s=lua_tostring(l,2);
+
+	if(lua_isnumber(l,3))
+	{
+		n=lua_tonumber(l,3);
+	}
+
 
 	if(!s)
 	{
@@ -325,7 +332,7 @@ const char *s;
 		luaL_error(l, "image has 0 depth" );
 	}
 	
-	if(! grd_save_file(p,s,0) )
+	if(! grd_save_file(p,s,n) )
 	{
 		lua_pushnil(l);
 		lua_pushstring(l,"failed to save");
@@ -712,7 +719,7 @@ int read_tab;
 		}
 	}
 	else
-	if( (grd->fmt==GRD_FMT_U8_RGB) )
+	if( grd->fmt==GRD_FMT_U8_RGB )
 	{
 		for( zi=z ; zi<z+d ; zi++ )
 		{
