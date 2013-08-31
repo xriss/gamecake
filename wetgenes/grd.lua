@@ -338,9 +338,7 @@ base.blit=function(ga,gb,x,y,cx,cy,cw,ch)
 
 	if cw<=0 or ch<=0 then return true end -- nothing to draw
 
-	local r=core.blit(ga[0],gb[0],x,y,cx,cy,cw,ch)
-	
-	return r
+	return core.blit(ga[0],gb[0],x,y,cx,cy,cw,ch)
 end
 
 return grd
