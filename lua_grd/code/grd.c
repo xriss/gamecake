@@ -1145,6 +1145,39 @@ s32 h=bb->h;
 	gb->err=ga->err; // put error in both
 	if(ga->err) { return 0; }
 
+	if( (ba->fmt==GRD_FMT_U8_ARGB) && (bb->fmt==GRD_FMT_U8_ARGB) )
+	{
+		u32 ialpha;
+		for(i=0;i<h;i++)
+		{
+			pa=(u32*)grdinfo_get_data(ba,x,y+i,0);
+			pb=(u32*)grdinfo_get_data(bb,0,i,0);
+			for(j=0;j<w;j++)
+			{
+				b=*(pb++);
+				switch(b&0xff)
+				{
+					case 0xff:
+						*(pa++)=b|0xff;
+					break;
+					case 0x00:
+						pa++;
+					break;
+					default:
+						ialpha=(0x100 - (b&0xff) );
+						a=*(pa);
+						*(pa++)=
+						 ( ( ( ((a>>8)&0x00ff0000) * ialpha ) + (b&0xff000000) ) & 0xff000000 ) |
+						 ( ( ( ((a>>8)&0x0000ff00) * ialpha ) + (b&0x00ff0000) ) & 0x00ff0000 ) |
+						 ( ( ( ((a>>8)&0x000000ff) * ialpha ) + (b&0x0000ff00) ) & 0x0000ff00 ) |
+						 (0xff); // full alpha
+					break;
+				}
+			}
+		}
+
+	}
+	else
 	if( (ba->fmt==GRD_FMT_U8_ARGB) && (bb->fmt==GRD_FMT_U8_ARGB_PREMULT) )
 	{
 		u32 ialpha;
