@@ -171,11 +171,55 @@ void grd_jpg_load_data(struct grd * g, const unsigned char* data, int data_len)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// save a grd as a png file
+// save a grd as a jpg file
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_jpg_save_file(struct grd *g , const char* file_name )
 {
-	g->err="jpg save disabled";
-}
+	struct grd *rgb;
+	int quality=85;
+	const char *err=0;
 
+	int image_width=g->bmap->w;
+	int image_height=g->bmap->h;
+	int y;
+
+
+	rgb=grd_duplicate_convert(g,GRD_FMT_U8_RGB); // tempory data?
+
+
+//	g->err="jpg save disabled";
+
+	struct jpeg_compress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+	FILE * outfile;		/* target file */
+	JSAMPROW row_pointer[1];	/* pointer to JSAMPLE row[s] */
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_compress(&cinfo);
+
+	if ((outfile = fopen(file_name, "wb")) == NULL)	{ abort_("jpg open fail"); }
+	jpeg_stdio_dest(&cinfo, outfile);
+
+	cinfo.image_width = image_width; 	/* image width and height, in pixels */
+	cinfo.image_height = image_height;
+	cinfo.input_components = 3;		/* # of color components per pixel */
+	cinfo.in_color_space = JCS_RGB; 	/* colorspace of input image */
+	jpeg_set_defaults(&cinfo);
+	jpeg_set_quality(&cinfo, quality, TRUE /* limit to baseline-JPEG values */);
+
+	jpeg_start_compress(&cinfo, TRUE);
+	y=0;
+	while (cinfo.next_scanline < cinfo.image_height)
+	{
+		row_pointer[0] = grdinfo_get_data(rgb->bmap,0,y++,0);
+		(void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+	}
+	jpeg_finish_compress(&cinfo);
+
+bogus:
+	jpeg_destroy_compress(&cinfo);
+	if(outfile) { fclose(outfile); }
+	if(err) {g->err=err;} else {g->err=0; }
+	if(rgb!=g) { grd_free(rgb); } // destroy tmp bgr grid
+}
