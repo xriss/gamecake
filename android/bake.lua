@@ -14,6 +14,7 @@ local smell=args[2] -- optional smell
 
 local fdat=assert(zips.readfile(basedir.."/opts.lua"),"opts.lua must exist in the given basedir")
 
+os.execute( "cd "..basedir.." ; ../bake "..smell ) --make sure it is baked
 
 local preopts=sbox.ini(fdat)
 
