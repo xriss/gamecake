@@ -405,7 +405,8 @@ end
 --					gl.Color( c[1]*a,c[2]*a,c[3]*a,0 )
 					return false
 				else
-					gl.Color( c[1],c[2],c[3],c[4] )
+					local a=15/16
+					gl.Color( c[1]*a,c[2]*a,c[3]*a,c[4] )
 				end
 			else
 				if layer>1 then

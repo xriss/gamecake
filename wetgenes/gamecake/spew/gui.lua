@@ -384,6 +384,8 @@ print("click",id)
 		
 		local fill=function()
 		
+			local activate_id = gui.master.over and gui.master.over.id
+
 			local nomore=false
 		
 			top:clean_all()
@@ -428,8 +430,14 @@ print("click",id)
 				end
 			end
 			
-			
+--print("nomore",tostring(nomore))
+
+			master.go_back_id="score_list_exit"
+			master.go_forward_id="score_list_exit"
+
+
 			if gui.offset>1 then
+				master.go_back_id="score_list_less"
 				top:add({hx=100,hy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
 				top:add({hx=10,hy=40})
 			else
@@ -441,9 +449,24 @@ print("click",id)
 			if nomore then
 				top:add({hx=110,hy=40})
 			else
+				master.go_forward_id="score_list_more"
 				top:add({hx=10,hy=40})
 				top:add({hx=100,hy=40,color=0xffcccccc,text="More",id="score_list_more",hooks=gui.hooks})
 			end
+
+			gui.master:layout()
+			
+			gui.master:call_descendents(function(w) if not w.hooks then return end gui.anim.bounce(w,1) end)
+
+			if gui.widget_hook then
+				gui.master:call_descendents(function(w) gui.widget_hook(w) end)
+			end
+			
+			if activate_id then -- refresh active button
+print("active:"..gactivate_id)
+				gui.master.activate_by_id(activate_id)
+			end
+
 		end
 		
 
@@ -469,9 +492,6 @@ print("click",id)
 						end
 
 						fill()
-
-						gui.master:layout()
-						
 					end
 --				end
 			end
@@ -481,7 +501,6 @@ print("click",id)
 		else
 		
 			local sc=sscores.list({offset=gui.offset,order="full"})
-			local nomore=not sc[6]
 			for i=1,5 do
 				tab[i]=nil
 				local v=sc[i]
@@ -502,11 +521,7 @@ print("click",id)
 		if gui.msg_smell_hook and gui.msg_smell_hook_data then
 			gui.msg_smell_hook(gui.msg_smell_hook_data) -- repost old data
 		end
-
-		master.go_back_id="score_list_less"
-		master.go_forward_id="score_list_exit"
 		
-
 	end
 
 	function gui.pages.settings(master)
