@@ -398,18 +398,20 @@ end
 
 		local c={explode_color(widget.color)}
 
-		if master.over==widget then
+		if master.over==widget or widget.parent==master.focus then
 			if buttdown then
 				if layer>1 then	
-					local a=0.3
-					gl.Color( c[1]*a,c[2]*a,c[3]*a,0 )
+--					local a=1/16
+--					gl.Color( c[1]*a,c[2]*a,c[3]*a,0 )
+					return false
 				else
 					gl.Color( c[1],c[2],c[3],c[4] )
 				end
 			else
 				if layer>1 then
-					local a=0.6
-					gl.Color( c[1]*a,c[2]*a,c[3]*a,0 )
+--					local a=2/16
+--					gl.Color( c[1]*a,c[2]*a,c[3]*a,0 )
+					return false
 				else
 					gl.Color( c[1],c[2],c[3],c[4] )
 				end
@@ -418,7 +420,8 @@ end
 				if layer>1 then
 					return false
 				else
-					gl.Color( c[1],c[2],c[3],c[4] )
+					local a=13/16
+					gl.Color( c[1]*a,c[2]*a,c[3]*a,c[4] )
 				end
 		end
 		if layer>2 then return false end
