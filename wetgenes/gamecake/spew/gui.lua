@@ -423,8 +423,15 @@ print("click",id)
 
 					b:add({hx=320,hy=5})
 				else
+				
+					if gui.offset==1 and i==1 then -- no scores, probably network issues
+						top:add({hx=320,hy=70})
+							:add({hx=300,hy=50,px=10,py=10,text="Scores unavailable.",text_color=0xffffffff,color=0xffff0000})
+					else
 
-					top:add({hx=320,hy=70})
+						top:add({hx=320,hy=70})
+					end
+
 					nomore=true
 				
 				end
@@ -477,20 +484,32 @@ print("active:"..gactivate_id)
 --print(gui.msg_smell_hook,wstr.dump(m))
 
 --				if m.class=="LeaderBoard" then
+
+
 					if m.data then
-						for i=1,5 do
-							tab[i]=nil
-							for _,v in ipairs(m.data) do
-								if v.position==gui.offset+i-1 then
-									tab[i]={
-										idx=tonumber(v.position or 0) or 0,
-										name=v.name,
-										score=tonumber(v.score or 0) or 0,
-									}
+						tab[1]=nil
+						
+						repeat -- try not to display empty page
+							local done=true
+
+							for i=1,5 do
+								tab[i]=nil
+								for _,v in ipairs(m.data) do
+									if v.position==gui.offset+i-1 then
+										tab[i]={
+											idx=tonumber(v.position or 0) or 0,
+											name=v.name,
+											score=tonumber(v.score or 0) or 0,
+										}
+									end
 								end
 							end
-						end
-
+							
+							if not tab[1] then
+								if gui.offset>1 then gui.offset=gui.offset-1 done=false end
+							end						
+						until done
+						
 						fill()
 					end
 --				end
@@ -500,18 +519,27 @@ print("active:"..gactivate_id)
 			
 		else
 		
-			local sc=sscores.list({offset=gui.offset,order="full"})
-			for i=1,5 do
-				tab[i]=nil
-				local v=sc[i]
-				if v then
-					tab[i]={
-						idx=v.idx,
-						name=v.name,
-						score=v.score,
-					}
+			local sc={}
+			repeat
+				local done=true
+
+				sc=sscores.list({offset=gui.offset,order="full"})
+				for i=1,5 do
+					tab[i]=nil
+					local v=sc[i]
+					if v then
+						tab[i]={
+							idx=v.idx,
+							name=v.name,
+							score=v.score,
+						}
+					end
 				end
-			end
+
+				if not tab[1] then
+					if gui.offset>1 then gui.offset=gui.offset-1 done=false end
+				end
+			until done
 
 		end
 		
