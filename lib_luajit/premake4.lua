@@ -5,7 +5,7 @@ language "C"
 files {
 	"src/*.h",
 
-	"src/lj_amalg.c",
+	"src/ljamalg.c",
 
 --[[	
 	"src/lj_vmmath.c",
@@ -60,7 +60,8 @@ files {
 	"src/lj_load.c",
 	"src/lj_strscan.c",
 	"src/lj_opt_sink.c",
-
+]]
+--[[
 	"src/lib_table.c",
 	"src/lib_string.c",
 	"src/lib_package.c",
@@ -90,17 +91,17 @@ asm.lua builds cached code in the asm dir, needs to be run if we bump the code
 if RASPI then -- hardfloat for raspbian
 
 	includedirs { "asm/armhf" }
---	files { "asm/armhf/lj_vm.s" }
+	files { "asm/armhf/lj_vm.s" }
 
 elseif ANDROID then
 
 	includedirs { "asm/arm" }
---	files { "asm/arm/lj_vm.s" }
+	files { "asm/arm/lj_vm.s" }
 
 else
 
 	includedirs { "asm/x86" }
---	files { "asm/x86/lj_vm.s" }
+	files { "asm/x86/lj_vm.s" }
 	
 end
 
