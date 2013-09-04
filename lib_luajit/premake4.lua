@@ -4,7 +4,10 @@ language "C"
 
 files {
 	"src/*.h",
-	
+
+	"src/lj_amalg.c",
+
+--[[	
 	"src/lj_vmmath.c",
 	"src/lj_vmevent.c",
 	"src/lj_udata.c",
@@ -50,10 +53,10 @@ files {
 	"src/lj_asm.c",
 	"src/lj_api.c",
 	"src/lj_alloc.c",
-
+]]
 --	"src/lj_buf.c",
 --	"src/lj_strfmt.c",
-	
+--[[
 	"src/lj_load.c",
 	"src/lj_strscan.c",
 	"src/lj_opt_sink.c",
@@ -71,7 +74,7 @@ files {
 	"src/lib_bit.c",
 	"src/lib_base.c",
 	"src/lib_aux.c",
-	
+]]
 	}
 
 
@@ -82,25 +85,26 @@ asm.lua builds cached code in the asm dir, needs to be run if we bump the code
 ]]
 
 
-includedirs { "src" }
 
 
 if RASPI then -- hardfloat for raspbian
 
 	includedirs { "asm/armhf" }
-	files { "asm/armhf/lj_vm.s" }
+--	files { "asm/armhf/lj_vm.s" }
 
 elseif ANDROID then
 
 	includedirs { "asm/arm" }
-	files { "asm/arm/lj_vm.s" }
+--	files { "asm/arm/lj_vm.s" }
 
 else
 
 	includedirs { "asm/x86" }
-	files { "asm/x86/lj_vm.s" }
+--	files { "asm/x86/lj_vm.s" }
 	
 end
+
+includedirs { "src" }
 
 defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
