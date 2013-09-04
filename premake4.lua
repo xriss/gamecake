@@ -531,10 +531,7 @@ end
 
 all_includes=all_includes or {
 
-if LIB_LUA=="lib_lua" then
-	{"lua_bit",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-end
-
+	{"lua_bit",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		) and (LIB_LUA=="lib_lua") },
 	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		},
 	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
