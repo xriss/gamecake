@@ -55,7 +55,10 @@ elseif ANDROID then
 --	linkoptions { "-v" }
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	linkoptions { "-u android_main" } -- we really need an android_main as well
-	
+
+    linkoptions { "../lib_luajit/src/libluajit.a" }
+    
+    	
 --	links { "GLESv1_CM" }
 	links { "GLESv2" }
 	
