@@ -576,6 +576,8 @@ end
 --
 -----------------------------------------------------------------------------
 wstr.macro_replace_once = function(text,old_d,opts)
+	if not text then return nil end
+	
 	opts=opts or {}
 	local opts_clean=opts.clean
 	local opts_htmldbg=opts.dbg_html_comments
