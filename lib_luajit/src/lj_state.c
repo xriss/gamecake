@@ -12,7 +12,6 @@
 #include "lj_obj.h"
 #include "lj_gc.h"
 #include "lj_err.h"
-#include "lj_buf.h"
 #include "lj_str.h"
 #include "lj_tab.h"
 #include "lj_func.h"
@@ -165,7 +164,7 @@ static void close_state(lua_State *L)
   lj_ctype_freestate(g);
 #endif
   lj_mem_freevec(g, g->strhash, g->strmask+1, GCRef);
-  lj_buf_free(g, &g->tmpbuf);
+  lj_str_freebuf(g, &g->tmpbuf);
   lj_mem_freevec(g, tvref(L->stack), L->stacksize, TValue);
   lua_assert(g->gc.total == sizeof(GG_State));
 #ifndef LUAJIT_USE_SYSMALLOC
@@ -204,7 +203,7 @@ LUA_API lua_State *lua_newstate(lua_Alloc f, void *ud)
   setnilV(&g->nilnode.val);
   setnilV(&g->nilnode.key);
   setmref(g->nilnode.freetop, &g->nilnode);
-  lj_buf_init(NULL, &g->tmpbuf);
+  lj_str_initbuf(&g->tmpbuf);
   g->gc.state = GCSpause;
   setgcref(g->gc.root, obj2gco(L));
   setmref(g->gc.sweep, &g->gc.root);

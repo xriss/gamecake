@@ -16,7 +16,6 @@
 #include "lj_cconv.h"
 #include "lj_cdata.h"
 #include "lj_clib.h"
-#include "lj_strfmt.h"
 
 /* -- OS-specific functions ----------------------------------------------- */
 
@@ -62,7 +61,7 @@ static const char *clib_extname(lua_State *L, const char *name)
 #endif
      ) {
     if (!strchr(name, '.')) {
-      name = lj_strfmt_pushf(L, CLIB_SOEXT, name);
+      name = lj_str_pushf(L, CLIB_SOEXT, name);
       L->top--;
 #ifdef __CYGWIN__
     } else {
@@ -71,7 +70,7 @@ static const char *clib_extname(lua_State *L, const char *name)
     }
     if (!(name[0] == CLIB_SOPREFIX[0] && name[1] == CLIB_SOPREFIX[1] &&
 	  name[2] == CLIB_SOPREFIX[2])) {
-      name = lj_strfmt_pushf(L, CLIB_SOPREFIX "%s", name);
+      name = lj_str_pushf(L, CLIB_SOPREFIX "%s", name);
       L->top--;
     }
   }
@@ -179,7 +178,7 @@ LJ_NORET LJ_NOINLINE static void clib_error(lua_State *L, const char *fmt,
   if (!FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS|FORMAT_MESSAGE_FROM_SYSTEM,
 		      NULL, err, 0, buf, sizeof(buf), NULL))
     buf[0] = '\0';
-  lj_err_callermsg(L, lj_strfmt_pushf(L, fmt, name, buf));
+  lj_err_callermsg(L, lj_str_pushf(L, fmt, name, buf));
 }
 
 static int clib_needext(const char *s)
@@ -194,7 +193,7 @@ static int clib_needext(const char *s)
 static const char *clib_extname(lua_State *L, const char *name)
 {
   if (clib_needext(name)) {
-    name = lj_strfmt_pushf(L, "%s.dll", name);
+    name = lj_str_pushf(L, "%s.dll", name);
     L->top--;
   }
   return name;
@@ -267,7 +266,7 @@ static void *clib_getsym(CLibrary *cl, const char *name)
 LJ_NORET LJ_NOINLINE static void clib_error(lua_State *L, const char *fmt,
 					    const char *name)
 {
-  lj_err_callermsg(L, lj_strfmt_pushf(L, fmt, name, "no support for this OS"));
+  lj_err_callermsg(L, lj_str_pushf(L, fmt, name, "no support for this OS"));
 }
 
 static void *clib_loadlib(lua_State *L, const char *name, int global)
@@ -351,7 +350,7 @@ TValue *lj_clib_index(lua_State *L, CLibrary *cl, GCstr *name)
 	CTInfo cconv = ctype_cconv(ct->info);
 	if (cconv == CTCC_FASTCALL || cconv == CTCC_STDCALL) {
 	  CTSize sz = clib_func_argsize(cts, ct);
-	  const char *symd = lj_strfmt_pushf(L,
+	  const char *symd = lj_str_pushf(L,
 			       cconv == CTCC_FASTCALL ? "@%s@%d" : "_%s@%d",
 			       sym, sz);
 	  L->top--;

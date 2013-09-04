@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.wetgenes.bulb.gamestick"
-      android:versionCode="13654"
-      android:versionName="13.654"
+        package="com.wetgenes.bulb"
+      android:versionCode="13673"
+      android:versionName="13.673"
 >
     <!-- 9 is the platform API where NativeActivity was introduced.
     If I bump the target to a higher number 14 then something goes wrong with screen rotation (GLES context?)
@@ -21,8 +21,6 @@
                   android:xlargeScreens="true"
                   android:anyDensity="true" />
 
-<uses-permission android:name="com.playjam.gamestick.permission.DOWNLOAD_SERVICE"/>
-<uses-permission android:name="com.playjam.gamestick.permission.DATABASE_INTERFACE_SERVICE"/>
 
     
 
@@ -33,7 +31,7 @@
 
         <!-- Our activity is the built-in NativeActivity framework class.
              This will take care of integrating with our NDK code. -->
-        <activity android:name="com.wetgenes.feralactivity.GameStick"
+        <activity android:name="com.wetgenes.FeralActivity"
                 android:label="Dr. Bulbaceous : Puzzle Solver"
                 android:configChanges="orientation|keyboardHidden"
 		android:screenOrientation="unspecified"

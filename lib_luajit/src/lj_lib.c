@@ -18,9 +18,6 @@
 #include "lj_dispatch.h"
 #include "lj_vm.h"
 #include "lj_strscan.h"
-#include "lj_strfmt.h"
-#include "lj_lex.h"
-#include "lj_bcdump.h"
 #include "lj_lib.h"
 
 /* -- Library initialization ---------------------------------------------- */
@@ -44,28 +41,6 @@ static GCtab *lib_create_table(lua_State *L, const char *libname, int hsize)
     lua_createtable(L, 0, hsize);
   }
   return tabV(L->top-1);
-}
-
-static const uint8_t *lib_read_lfunc(lua_State *L, const uint8_t *p, GCtab *tab)
-{
-  int len = *p++;
-  GCstr *name = lj_str_new(L, (const char *)p, len);
-  LexState ls;
-  GCproto *pt;
-  GCfunc *fn;
-  memset(&ls, 0, sizeof(ls));
-  ls.L = L;
-  ls.p = (const char *)(p+len);
-  ls.pe = (const char *)~(uintptr_t)0;
-  ls.c = -1;
-  ls.level = (BCDUMP_F_STRIP|(LJ_BE*BCDUMP_F_BE));
-  ls.chunkname = name;
-  pt = lj_bcread_proto(&ls);
-  pt->firstline = ~(BCLine)0;
-  fn = lj_func_newL_empty(L, pt, tabref(L->env));
-  /* NOBARRIER: See below for common barrier. */
-  setfuncV(L, lj_tab_setstr(L, tab, name), fn);
-  return (const uint8_t *)ls.p;
 }
 
 void lj_lib_register(lua_State *L, const char *libname,
@@ -112,9 +87,6 @@ void lj_lib_register(lua_State *L, const char *libname,
       ofn = fn;
     } else {
       switch (tag | len) {
-      case LIBINIT_LUA:
-	p = lib_read_lfunc(L, p, tab);
-	break;
       case LIBINIT_SET:
 	L->top -= 2;
 	if (tvisstr(L->top+1) && strV(L->top+1)->len == 0)
@@ -165,7 +137,7 @@ GCstr *lj_lib_checkstr(lua_State *L, int narg)
     if (LJ_LIKELY(tvisstr(o))) {
       return strV(o);
     } else if (tvisnumber(o)) {
-      GCstr *s = lj_strfmt_number(L, o);
+      GCstr *s = lj_str_fromnumber(L, o);
       setstrV(L, o, s);
       return s;
     }
@@ -222,6 +194,20 @@ int32_t lj_lib_optint(lua_State *L, int narg, int32_t def)
 {
   TValue *o = L->base + narg-1;
   return (o < L->top && !tvisnil(o)) ? lj_lib_checkint(L, narg) : def;
+}
+
+int32_t lj_lib_checkbit(lua_State *L, int narg)
+{
+  TValue *o = L->base + narg-1;
+  if (!(o < L->top && lj_strscan_numberobj(o)))
+    lj_err_argt(L, narg, LUA_TNUMBER);
+  if (LJ_LIKELY(tvisint(o))) {
+    return intV(o);
+  } else {
+    int32_t i = lj_num2bit(numV(o));
+    if (LJ_DUALNUM) setintV(o, i);
+    return i;
+  }
 }
 
 GCfunc *lj_lib_checkfunc(lua_State *L, int narg)

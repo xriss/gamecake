@@ -333,8 +333,6 @@ location( BUILD_DIR )
 
 configurations { "Debug", "Release" }
 
-includedirs { "lib_lua/src" }
-
 
 EXE_OUT_DIR=path.getabsolute("../bin/exe")
 DBG_OUT_DIR=path.getabsolute("../bin/dbg")
@@ -476,10 +474,18 @@ elseif NIX then
 
 	if CPU=="32" then
 		LIB_LUA="lib_luajit"
-		defines( "LIB_LUAJIT" )
+		defines( "LIB_LUAJIT" )	
 	end
 
 end
+
+-- make sure we have the right headers
+if LIB_LUA=="lib_lua" then
+	includedirs { "lib_lua/src" }
+else
+	includedirs { "lib_luajit/src" }
+end
+
 
 -- many many versions of GL to suport, these make this work -> #include INCLUDE_GLES_GL
 if RASPI then

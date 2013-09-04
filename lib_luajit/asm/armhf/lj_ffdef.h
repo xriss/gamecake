@@ -53,6 +53,8 @@ FFDEF(math_tanh)
 FFDEF(math_frexp)
 FFDEF(math_modf)
 FFDEF(math_log)
+FFDEF(math_deg)
+FFDEF(math_rad)
 FFDEF(math_atan2)
 FFDEF(math_pow)
 FFDEF(math_fmod)
@@ -73,6 +75,7 @@ FFDEF(bit_band)
 FFDEF(bit_bor)
 FFDEF(bit_bxor)
 FFDEF(bit_tohex)
+FFDEF(string_len)
 FFDEF(string_byte)
 FFDEF(string_char)
 FFDEF(string_sub)
@@ -87,8 +90,12 @@ FFDEF(string_gmatch_aux)
 FFDEF(string_gmatch)
 FFDEF(string_gsub)
 FFDEF(string_format)
+FFDEF(table_foreachi)
+FFDEF(table_foreach)
+FFDEF(table_getn)
 FFDEF(table_maxn)
 FFDEF(table_insert)
+FFDEF(table_remove)
 FFDEF(table_concat)
 FFDEF(table_sort)
 FFDEF(io_method_close)
@@ -198,6 +205,6 @@ FFDEF(ffi_load)
 #undef FFDEF
 
 #ifndef FF_NUM_ASMFUNC
-#define FF_NUM_ASMFUNC 57
+#define FF_NUM_ASMFUNC 62
 #endif
 
