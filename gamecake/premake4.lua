@@ -2,8 +2,6 @@
 project "gamecake"
 language "C"
 
-includedirs { "../lib_lua/src" }
-
 files { "hacks.c" }
 
 
@@ -21,7 +19,7 @@ links(static_lib_names) -- so good, so good, we linked it twice...
 
 if RASPI then
 	
-	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
+	files { "../lib_lua/src/lua.c" }
 	
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
 	links { "crypt" }
@@ -66,13 +64,12 @@ elseif ANDROID then
 	
 --	linkoptions{ "-Bsymbolic"}
 
-	files { "../lib_lua/src/*.h"  }
 	KIND{kind="SharedLib",name="liblua"}
 
 
 elseif WINDOWS then
 
-	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
+	files { "../lib_lua/src/lua.c" }
 
 	links { "opengl32" , "glu32" }
 	links {  "ws2_32" , "gdi32"}
@@ -95,7 +92,7 @@ elseif NIX then
 
 --	linkoptions { "-static-libgcc" }
 
-	files { "../lib_lua/src/*.h", "../lib_lua/src/lua.c" }
+	files { "../lib_lua/src/lua.c" }
 	
 --	linkoptions { "-v" }
 

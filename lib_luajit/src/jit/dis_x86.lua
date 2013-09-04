@@ -28,8 +28,6 @@ local type = type
 local sub, byte, format = string.sub, string.byte, string.format
 local match, gmatch, gsub = string.match, string.gmatch, string.gsub
 local lower, rep = string.lower, string.rep
-local bit = require("bit")
-local tohex = bit.tohex
 
 -- Map for 1st opcode byte in 32 bit mode. Ugly? Well ... read on.
 local map_opc1_32 = {
@@ -534,7 +532,7 @@ local function putpat(ctx, name, pat)
 	local lo = imm % 0x1000000
 	x = format("0x%02x%06x", (imm-lo) / 0x1000000, lo)
       else
-	x = "0x"..tohex(imm)
+	x = format("0x%08x", imm)
       end
     elseif p == "R" then
       local r = byte(code, pos-1, pos-1)%8
@@ -784,7 +782,7 @@ local function disass_block(ctx, ofs, len)
 end
 
 -- Extended API: create a disassembler context. Then call ctx:disass(ofs, len).
-local function create(code, addr, out)
+local function create_(code, addr, out)
   local ctx = {}
   ctx.code = code
   ctx.addr = (addr or 0) - 1
@@ -798,8 +796,8 @@ local function create(code, addr, out)
   return ctx
 end
 
-local function create64(code, addr, out)
-  local ctx = create(code, addr, out)
+local function create64_(code, addr, out)
+  local ctx = create_(code, addr, out)
   ctx.x64 = true
   ctx.map1 = map_opc1_64
   ctx.aregs = map_regs.Q
@@ -807,32 +805,32 @@ local function create64(code, addr, out)
 end
 
 -- Simple API: disassemble code (a string) at address and output via out.
-local function disass(code, addr, out)
-  create(code, addr, out):disass()
+local function disass_(code, addr, out)
+  create_(code, addr, out):disass()
 end
 
-local function disass64(code, addr, out)
-  create64(code, addr, out):disass()
+local function disass64_(code, addr, out)
+  create64_(code, addr, out):disass()
 end
 
 -- Return register name for RID.
-local function regname(r)
+local function regname_(r)
   if r < 8 then return map_regs.D[r+1] end
   return map_regs.X[r-7]
 end
 
-local function regname64(r)
+local function regname64_(r)
   if r < 16 then return map_regs.Q[r+1] end
   return map_regs.X[r-15]
 end
 
 -- Public module functions.
-return {
-  create = create,
-  create64 = create64,
-  disass = disass,
-  disass64 = disass64,
-  regname = regname,
-  regname64 = regname64
-}
+module(...)
+
+create = create_
+create64 = create64_
+disass = disass_
+disass64 = disass64_
+regname = regname_
+regname64 = regname64_
 

@@ -1,4 +1,4 @@
-#!/usr/local/bin/gamecake
+#!/usr/bin/env gamecake
 
 
 

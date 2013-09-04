@@ -51,8 +51,8 @@ files {
 	"src/lj_api.c",
 	"src/lj_alloc.c",
 
-	"src/lj_buf.c",
-	"src/lj_strfmt.c",
+--	"src/lj_buf.c",
+--	"src/lj_strfmt.c",
 	
 	"src/lj_load.c",
 	"src/lj_strscan.c",

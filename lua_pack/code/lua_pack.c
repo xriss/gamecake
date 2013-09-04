@@ -11,9 +11,9 @@
 
 #include "../wet/util/pstdint.h"
 #include "../wet/util/wet_types.h"
-#include "../lib_lua/src/lua.h"
-#include "../lib_lua/src/lauxlib.h"
-#include "../lib_lua/src/lualib.h"
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
 
 
 #include "code/lua_pack.h"

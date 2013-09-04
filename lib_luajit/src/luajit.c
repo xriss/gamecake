@@ -61,9 +61,8 @@ static void laction(int i)
 
 static void print_usage(void)
 {
-  fputs("usage: ", stderr);
-  fputs(progname, stderr);
-  fputs(" [options]... [script [args]...].\n"
+  fprintf(stderr,
+  "usage: %s [options]... [script [args]...].\n"
   "Available options are:\n"
   "  -e chunk  Execute string " LUA_QL("chunk") ".\n"
   "  -l name   Require library " LUA_QL("name") ".\n"
@@ -74,14 +73,16 @@ static void print_usage(void)
   "  -v        Show version information.\n"
   "  -E        Ignore environment variables.\n"
   "  --        Stop handling options.\n"
-  "  -         Execute stdin and stop handling options.\n", stderr);
+  "  -         Execute stdin and stop handling options.\n"
+  ,
+  progname);
   fflush(stderr);
 }
 
 static void l_message(const char *pname, const char *msg)
 {
-  if (pname) { fputs(pname, stderr); fputc(':', stderr); fputc(' ', stderr); }
-  fputs(msg, stderr); fputc('\n', stderr);
+  if (pname) fprintf(stderr, "%s: ", pname);
+  fprintf(stderr, "%s\n", msg);
   fflush(stderr);
 }
 

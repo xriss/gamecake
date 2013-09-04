@@ -9,6 +9,7 @@
 
 #include "lj_gc.h"
 #include "lj_err.h"
+#include "lj_str.h"
 #include "lj_tab.h"
 #include "lj_ctype.h"
 #include "lj_cconv.h"
@@ -26,12 +27,12 @@ GCcdata *lj_cdata_newref(CTState *cts, const void *p, CTypeID id)
 }
 
 /* Allocate variable-sized or specially aligned C data object. */
-GCcdata *lj_cdata_newv(lua_State *L, CTypeID id, CTSize sz, CTSize align)
+GCcdata *lj_cdata_newv(CTState *cts, CTypeID id, CTSize sz, CTSize align)
 {
   global_State *g;
   MSize extra = sizeof(GCcdataVar) + sizeof(GCcdata) +
 		(align > CT_MEMALIGN ? (1u<<align) - (1u<<CT_MEMALIGN) : 0);
-  char *p = lj_mem_newt(L, extra + sz, char);
+  char *p = lj_mem_newt(cts->L, extra + sz, char);
   uintptr_t adata = (uintptr_t)p + sizeof(GCcdataVar) + sizeof(GCcdata);
   uintptr_t almask = (1u << align) - 1u;
   GCcdata *cd = (GCcdata *)(((adata + almask) & ~almask) - sizeof(GCcdata));
@@ -39,7 +40,7 @@ GCcdata *lj_cdata_newv(lua_State *L, CTypeID id, CTSize sz, CTSize align)
   cdatav(cd)->offset = (uint16_t)((char *)cd - p);
   cdatav(cd)->extra = extra;
   cdatav(cd)->len = sz;
-  g = G(L);
+  g = cts->g;
   setgcrefr(cd->nextgc, g->gc.root);
   setgcref(g->gc.root, obj2gco(cd));
   newwhite(g, obj2gco(cd));
@@ -75,20 +76,21 @@ void LJ_FASTCALL lj_cdata_free(global_State *g, GCcdata *cd)
   }
 }
 
-void lj_cdata_setfin(lua_State *L, GCcdata *cd, GCobj *obj, uint32_t it)
+TValue * LJ_FASTCALL lj_cdata_setfin(lua_State *L, GCcdata *cd)
 {
-  GCtab *t = ctype_ctsG(G(L))->finalizer;
+  global_State *g = G(L);
+  GCtab *t = ctype_ctsG(g)->finalizer;
   if (gcref(t->metatable)) {
     /* Add cdata to finalizer table, if still enabled. */
     TValue *tv, tmp;
     setcdataV(L, &tmp, cd);
     lj_gc_anybarriert(L, t);
     tv = lj_tab_set(L, t, &tmp);
-    setgcV(L, tv, obj, it);
-    if (!tvisnil(tv))
-      cd->marked |= LJ_GC_CDATA_FIN;
-    else
-      cd->marked &= ~LJ_GC_CDATA_FIN;
+    cd->marked |= LJ_GC_CDATA_FIN;
+    return tv;
+  } else {
+    /* Otherwise return dummy TValue. */
+    return &g->tmptv;
   }
 }
 
