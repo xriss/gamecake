@@ -42,7 +42,7 @@ local function build(mode)
 
 	elseif mode=="arm" then -- android, make sure the flags are shared with the main build
 
-		os.execute("make amalg HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi- TARGET_CFLAGS=\" -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3 -DLUA_PRELOADLIBS=lua_preloadlibs \" ")
+		os.execute("make amalg HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi- TARGET_CFLAGS=\" -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3 \" ")
 
 	elseif mode=="armhf" then -- raspi, make sure the flags are shared with the main build
 
