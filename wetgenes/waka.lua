@@ -401,17 +401,7 @@ function refine_chunks(srv,chunks,opts)
 			local a,b=pcall( function() return sbox.ini(v.text) end )
 			if a then v.env=b end -- success
 			if not a then v.text=b end -- fail, set text to error text
---[[
-			local e=sbox.make_env()
-			v.env=e -- store it for later
-			e.text=v.text -- let code know its sourcecode
-			local f,err=loadstring(v.text)
-			e.text=err or v.text -- replace with error for simple parse display
-			if f then
-				setfenv(f, e)
-				pcall(f)
-			end
-]]			
+	
 			if v.env and v.env.hook_pageopts then
 				local a,b = pcall(function() v.env.hook_pageopts(srv.pageopts) end) -- update pageopts?
 			end

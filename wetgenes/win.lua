@@ -148,10 +148,10 @@ end
 --
 function win.android_start(apk)
 
---	if jit and jit.off then
+	if jit and jit.off then
 --		jit.off()
 --		hardcore.print("LUA JIT OFF")
---	end -- jit breaks stuff?
+	end -- jit breaks stuff?
 
 
 -- replace print
