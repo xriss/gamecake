@@ -499,15 +499,15 @@ static int handle_luainit(lua_State *L)
     return dostring(L, init, "=" LUA_INIT);
 }
 
-static struct Smain {
+struct Smain {
   char **argv;
   int argc;
   int status;
-} smain;
+};
 
 static int pmain(lua_State *L)
 {
-  struct Smain *s = &smain;
+  struct Smain *s = (struct Smain *)lua_touserdata(L, 1);
   char **argv = s->argv;
   int script;
   int flags = 0;
@@ -556,16 +556,17 @@ static int pmain(lua_State *L)
 int main(int argc, char **argv)
 {
   int status;
+  struct Smain s;
   lua_State *L = lua_open();  /* create state */
   if (L == NULL) {
     l_message(argv[0], "cannot create state: not enough memory");
     return EXIT_FAILURE;
   }
-  smain.argc = argc;
-  smain.argv = argv;
-  status = lua_cpcall(L, pmain, NULL);
+  s.argc = argc;
+  s.argv = argv;
+  status = lua_cpcall(L, pmain, &s);
   report(L, status);
   lua_close(L);
-  return (status || smain.status) ? EXIT_FAILURE : EXIT_SUCCESS;
+  return (status || s.status) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
