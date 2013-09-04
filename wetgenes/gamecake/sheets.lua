@@ -236,15 +236,18 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy,zf)
 		local oy=v.oy*sy
 		local hx=v.hx*sx
 		local hy=v.hy*sy
+		
+		local s=-math.sin(math.pi*rz/180)
+		local c=math.cos(math.pi*rz/180)
 
 		local t=
 		{
-			px-ox,		py-oy,		zf,		ix,		iy,
-			px-ox,		py-oy,		zf,		ix,		iy,
-			px+hx-ox,	py-oy,		zf,		ixw,	iy,
-			px-ox,		py+hy-oy,	zf,		ix,		iyh,
-			px+hx-ox,	py+hy-oy,	zf,		ixw,	iyh,
-			px+hx-ox,	py+hy-oy,	zf,		ixw,	iyh,
+			px-c*(ox)-s*(oy),		py+s*(ox)-c*(oy),		zf,		ix,		iy,
+			px-c*(ox)-s*(oy),		py+s*(ox)-c*(oy),		zf,		ix,		iy,
+			px+c*(hx-ox)-s*(oy),	py-s*(hx-ox)-c*(oy),	zf,		ixw,	iy,
+			px-c*(ox)+s*(hy-oy),	py+s*(ox)+c*(hy-oy),	zf,		ix,		iyh,
+			px+c*(hx-ox)+s*(hy-oy),	py-s*(hx-ox)+c*(hy-oy),	zf,		ixw,	iyh,
+			px+c*(hx-ox)+s*(hy-oy),	py-s*(hx-ox)+c*(hy-oy),	zf,		ixw,	iyh,
 		}
 		
 		for i,v in ipairs(t) do
