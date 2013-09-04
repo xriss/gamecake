@@ -530,12 +530,16 @@ end
 
 
 all_includes=all_includes or {
+
+if LIB_LUA=="lib_lua" then
+	{"lua_bit",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+end
+
 	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		},
 	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_bit",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 	{"lua_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 --	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		nil			},
 	{"lua_al",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
@@ -559,7 +563,7 @@ all_includes=all_includes or {
 	{"lua_win_nacl",	nil			or		nil		or		NACL	or		nil			or		nil			},
 	{"lua_win_android",	nil			or		nil		or		nil		or		ANDROID		or		nil			},
 	{"lua_win_raspi",	nil			or		nil		or		nil		or		nil			or		RASPI		},
---	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
 --	{"lib_openssl",		nil			or		NIX		or		nil		or		nil			or		nil			},
 --	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			},
 	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
