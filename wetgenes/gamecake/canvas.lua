@@ -22,6 +22,7 @@ function M.bake(oven,canvas)
 	local gl=oven.gl
 	local cake=oven.cake
 	local win=oven.win
+	local fonts=cake.fonts
 	local images=cake.images
 	local buffers=cake.buffers
 
@@ -49,6 +50,7 @@ end
 
 
 font.set = function(dat)
+	if type(dat)=="string" then dat=fonts.get(dat)
 	if dat and dat~=font.dat then -- newfont, autokill the cache?
 		font.dat=dat
 	end
