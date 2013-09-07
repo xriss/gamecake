@@ -388,13 +388,11 @@ function refine_chunks(srv,chunks,opts)
 
 	opts=opts or {}
 
-	local refined={}
-	
-	for i,v in pairs(opts) do -- copy opts into refined
-		refined[i]=v
-	end
+	local refined=opts.refined or {} -- can pass in a table to refine into
 
--- start by compiling the lua chunks and running its pageopts hook
+	refined.opts=refined.opts or {}
+
+-- start by compiling any lua chunks and running its pageopts hook
 	for i,v in ipairs(chunks) do
 	
 		if v.opts.form=="lua" then -- we have some lua code for this page
@@ -402,8 +400,8 @@ function refine_chunks(srv,chunks,opts)
 			if a then v.env=b end -- success
 			if not a then v.text=b end -- fail, set text to error text
 	
-			if v.env and v.env.hook_pageopts then
-				local a,b = pcall(function() v.env.hook_pageopts(srv.pageopts) end) -- update pageopts?
+			if v.env and v.env.hook_opts then
+				local a,b = pcall(function() v.env.hook_opts(refined.opts) end) -- update pageopts?
 			end
 
 		end
@@ -545,7 +543,14 @@ function refine_chunks(srv,chunks,opts)
 
 		end
 
-		refined[v.name]=s
+		if v.name=="opts" then -- opts is a special chunkname, full of, well, opts
+			for n,s in pairs(v.opts) do
+				refined.opts[n]=s
+			end
+		end
+		
+		refined[v.name]=refined[v.name] or s -- do not change anything that is already there
+
 	end
 	
 -- end by running any refined lua hooks

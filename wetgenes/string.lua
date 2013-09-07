@@ -337,6 +337,17 @@ end
 
 -----------------------------------------------------------------------------
 --
+-- replace anything that isnt an alphanumeric with %xx codes
+--
+-----------------------------------------------------------------------------
+wstr.url_escape = function(str)
+    return string.gsub(str, "([^%w])", function(c)
+        return string.format("%%%02X", string.byte(c))
+    end)
+end
+
+-----------------------------------------------------------------------------
+--
 -- a one way action that replaces anything that is not a-z or 0-9 with _
 -- and converts the entire string to lowercase
 --
@@ -482,18 +493,28 @@ end
 -----------------------------------------------------------------------------
 wstr.table_lookup=function(a,d) -- look up a in table d
 
-	local t=d[a] -- as string
+	local t
+	
+	repeat local done=true
 
-	if not t then -- try as number?
-		local n=tonumber(a)
-		if n then
-			t=d[n]
+		t=d[a] -- as string
+
+		if not t then -- try as number?
+			local n=tonumber(a)
+			if n then
+				t=d[n]
+			end
 		end
-	end
+		
+		if not t then
+			local fc=string.sub(a,1,1)
+			if fc=="." then done=false a=string.sub(a,2) end -- trim starting dots
+		end
+	until done
 
 	if t then return t end
 	
-	local a1,a2=string.find(a, "%.") -- try and split on first "."
+	local a1,a2=string.find(a, "%.",2) -- try and split on first "."
 	if not a1 then return nil end -- didnt find a dot so return nil
 	
 	a1=string.sub(a,1,a1-1) -- the bit before the .
@@ -555,11 +576,12 @@ end
 -----------------------------------------------------------------------------
 wstr.replace=function(a,d)
 
-return (string.gsub( a , "{([%w%._%-]-)}" , function(a) -- find only words and "._-!" tightly encased in {}
+return (string.gsub( a , "{([%w%._%-]-)}" , function(a) -- find only words and "._-" tightly encased in {}
 -- this means that almost all legal use of {} in javascript will not match at all.
 -- Even when it does (probably as a "{}") then it is unlikley to accidently find anything in the d table
 -- so the text will just be returned as is.
 -- So it may not be safe, but it is simple to understand and perfecty fine under most use cases.
+-- Note: nothing is ever safe...
 
 	return wstr.replace_lookup(a,d) or ("{"..a.."}")
 	
@@ -638,7 +660,15 @@ wstr.macro_replace_once = function(text,old_d,opts)
 						if opts_clean then dat="" end
 					end
 				else -- normal lookup
-					dat=wstr.replace_lookup(tag,d)
+					if opts.escape then -- only tags that begin with .
+						if fc=="." then
+							dat=wstr.replace_lookup(tag,d)
+						end
+					else -- only tags that dont begin with .
+						if fc~="." then
+							dat=wstr.replace_lookup(tag,d)
+						end
+					end
 				end
 			end
 		end
@@ -675,6 +705,7 @@ local opts=opts or {} --{dbg_html_comments=true} to include html dbg, this will 
 	local count=0
 
 	opts.clean=false
+	opts.escape=false
 	for i=1,100 do -- maximum recursion
 	
 		ret,count=wstr.macro_replace_once(ret,d,opts)
@@ -682,8 +713,9 @@ local opts=opts or {} --{dbg_html_comments=true} to include html dbg, this will 
 		if count==0 then break end -- nothing left to replace
 		
 	end
-	opts.clean=true
-	ret=wstr.macro_replace_once(ret,{},opts) -- finally remove temporary chunks
+	opts.clean=true -- a final cleanup of inline assignments
+	opts.escape=true -- a final substitution of escaped chunks
+	ret=wstr.macro_replace_once(ret,d,opts) -- finally remove temporary chunks
 	return ret
 end
 
