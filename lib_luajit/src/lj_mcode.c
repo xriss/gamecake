@@ -201,11 +201,13 @@ static void mcode_protect(jit_State *J, int prot)
 
 #ifdef LJ_TARGET_JUMPRANGE
 
+#if 1
 /* Get memory within relative jump distance of our code in 64 bit mode. */
 static void *mcode_alloc(jit_State *J, size_t sz)
 {
   /* Target an address in the static assembler code (64K aligned).
   ** Try addresses within a distance of target-range/2+1MB..target+range/2-1MB.
+  ** Use half the jump range so every address in the range can reach any other.
   */
 #if LJ_TARGET_MIPS
   /* Use the middle of the 256MB-aligned region. */
@@ -214,7 +216,7 @@ static void *mcode_alloc(jit_State *J, size_t sz)
 #else
   uintptr_t target = (uintptr_t)(void *)lj_vm_exit_handler & ~(uintptr_t)0xffff;
 #endif
-  const uintptr_t range = (1u << LJ_TARGET_JUMPRANGE) - (1u << 21);
+  const uintptr_t range = (1u << (LJ_TARGET_JUMPRANGE-0)) - (1u << 21);
   /* First try a contiguous area below the last one. */
   uintptr_t hint = J->mcarea ? (uintptr_t)J->mcarea - sz : 0;
   int i;
@@ -236,6 +238,59 @@ static void *mcode_alloc(jit_State *J, size_t sz)
   lj_trace_err(J, LJ_TRERR_MCODEAL);  /* Give up. OS probably ignores hints? */
   return NULL;
 }
+#endif
+#if 0
+//#define LJ_TARGET_JUMPRANGE 25
+
+#include <android/log.h>
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "jit", __VA_ARGS__))
+
+/* Get memory within relative jump distance of our code in 64 bit mode. */
+static void *mcode_alloc(jit_State *J, size_t sz)
+{
+LOGI("alloc size %d\n",sz);
+
+  /* Target an address in the static assembler code (64K aligned).
+  ** Try addresses within a distance of target-range/2+1MB..target+range/2-1MB.
+  */
+#if LJ_TARGET_MIPS
+  /* Use the middle of the 256MB-aligned region. */
+  uintptr_t target = ((uintptr_t)(void *)lj_vm_exit_handler & 0xf0000000u) +
+		     0x08000000u;
+#else
+  uintptr_t target = (uintptr_t)(void *)lj_vm_exit_handler & ~(uintptr_t)0xffff;
+#endif
+  const uintptr_t range = (1u << (LJ_TARGET_JUMPRANGE-1)) - (1u << 21);
+LOGI("size 0x%08x\n",sz);
+LOGI("range 0x%08x\n",range);
+  /* First try a contiguous area below the last one. */
+  uintptr_t hint = J->mcarea ? (uintptr_t)J->mcarea - sz : 0;
+  int i;
+  int ri;
+  for (i = 0; i < 32; i++) {  /* 32 attempts ought to be enough ... */
+    if (mcode_validptr(hint)) {
+      void *p = mcode_alloc_at(J, hint, sz, MCPROT_GEN);
+LOGI("%02d: mem:0x%08x hint:0x%08x target:0x%08x diff:0x%08x\n",i,p,hint,target,(target - (uintptr_t)p));
+
+      if (mcode_validptr(p) &&
+	  ((uintptr_t)p + sz - target < range || target - (uintptr_t)p < range))
+	return p;
+      if (p) mcode_free(J, p, sz);  /* Free badly placed area. */
+    }
+    /* Next try probing pseudo-random addresses. */
+    ri=0;
+    do {
+		ri++;
+      hint = (0x78fb ^ LJ_PRNG_BITS(J, 15)) << 16;  /* 64K aligned. */
+    } while (!(hint + sz < range));
+    hint = target + hint - (range>>1);
+//LOGI("random %i\n",ri);
+  }
+  lj_trace_err(J, LJ_TRERR_MCODEAL);  /* Give up. OS probably ignores hints? */
+  return NULL;
+}
+
+#endif
 
 #else
 

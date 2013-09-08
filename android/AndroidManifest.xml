@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.wetgenes.bulb"
-      android:versionCode="13673"
-      android:versionName="13.673"
+      android:versionCode="13675"
+      android:versionName="13.675"
 >
     <!-- 9 is the platform API where NativeActivity was introduced.
     If I bump the target to a higher number 14 then something goes wrong with screen rotation (GLES context?)
