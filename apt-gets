@@ -1,0 +1,16 @@
+#build dependencies, run
+#sudo ./apt-gets
+#to try and install all of these or copypasta individual lines
+
+#very important, all must install
+apt-get install build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev
+
+#clang if you want to build using clang (recomended)
+apt-get install clang
+
+
+#needed for nginx
+apt-get install libssl-dev
+
+#mingw32 if you want to build for windows
+apt-get install mingw32

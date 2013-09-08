@@ -1,0 +1,2 @@
+google-chrome --enable-nacl --enable-nacl-debug --no-sandbox --disable-hang-monitor  http://host.local:9999/bulb.html
+
