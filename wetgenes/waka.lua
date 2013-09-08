@@ -547,9 +547,10 @@ function refine_chunks(srv,chunks,opts)
 			for n,s in pairs(v.opts) do
 				refined.opts[n]=s
 			end
+		else
+			refined[v.name]=s
 		end
 		
-		refined[v.name]=refined[v.name] or s -- do not change anything that is already there
 
 	end
 	

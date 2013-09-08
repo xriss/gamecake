@@ -508,7 +508,7 @@ wstr.table_lookup=function(a,d) -- look up a in table d
 		
 		if not t then
 			local fc=string.sub(a,1,1)
-			if fc=="." then done=false a=string.sub(a,2) end -- trim starting dots
+			if fc=="." or fc=="-" then done=false a=string.sub(a,2) end -- trim starting dot or dash
 		end
 	until done
 
@@ -582,9 +582,7 @@ return (string.gsub( a , "{([%w%._%-]-)}" , function(a) -- find only words and "
 -- so the text will just be returned as is.
 -- So it may not be safe, but it is simple to understand and perfecty fine under most use cases.
 -- Note: nothing is ever safe...
-
-	return wstr.replace_lookup(a,d) or ("{"..a.."}")
-	
+	return wstr.replace_lookup(a,d) or ("{"..a.."}") -- otherwise no change
 end )) -- note gsub is in brackes so we just get its first return value
 
 end
@@ -660,7 +658,21 @@ wstr.macro_replace_once = function(text,old_d,opts)
 						if opts_clean then dat="" end
 					end
 				else -- normal lookup
-					if opts.escape then -- only tags that begin with .
+					if fc=="-" then -- return nothing if chunk is empty
+						dat=wstr.replace_lookup(tag,d)
+						-- perform a single level check, every replacement must exist
+						if dat then
+							local missing=false
+							dat=(string.gsub( dat , "{([%w%._%-]-)}" , function(a)
+								local r=wstr.replace_lookup(a,d)
+								if not r then missing=true end -- flag missing lookup
+								return r
+							end ))
+							if missing then dat=nil end -- first level has missing references, so kill this entire replace
+						end
+						dat=dat or "" -- may remove chunk
+						
+					elseif opts.escape then -- only tags that begin with .
 						if fc=="." then
 							dat=wstr.replace_lookup(tag,d)
 						end
@@ -675,7 +687,7 @@ wstr.macro_replace_once = function(text,old_d,opts)
 		local s
 		if dat then
 			count=count+1
-			if opts_htmldbg and tag then
+			if opts_htmldbg and tag then -- insert html comments so we can "debug" sourcode
 				s="<!--{ "..tag.." }-->\n"..dat
 			else
 				s=dat
