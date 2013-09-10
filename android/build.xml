@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="bulb" default="help">
+<project name="gthang" default="help">
 
     <loadproperties srcFile="local.properties" />
-    <loadproperties srcFile="/home/kriss/android.properties" />
+    <loadproperties srcFile="${user.home}/android.properties" />
 
     <property file="ant.properties" />
 
