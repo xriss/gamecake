@@ -235,6 +235,8 @@ static void *mcode_alloc(jit_State *J, size_t sz)
     } while (!(hint + sz < range));
     hint = target + hint - (range>>1);
   }
+  J->flags &= ~(uint32_t)JIT_F_ON; // turn off jit when allocation fails
+  lj_dispatch_update(J2G(J)); // do I need this?
   lj_trace_err(J, LJ_TRERR_MCODEAL);  /* Give up. OS probably ignores hints? */
   return NULL;
 }
@@ -286,6 +288,8 @@ LOGI("%02d: mem:0x%08x hint:0x%08x target:0x%08x diff:0x%08x\n",i,p,hint,target,
     hint = target + hint - (range>>1);
 //LOGI("random %i\n",ri);
   }
+
+
   lj_trace_err(J, LJ_TRERR_MCODEAL);  /* Give up. OS probably ignores hints? */
   return NULL;
 }
@@ -307,6 +311,9 @@ typedef struct MCLink {
   size_t size;		/* Size of current area. */
 } MCLink;
 
+#include <android/log.h>
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "jit", __VA_ARGS__))
+
 /* Allocate a new MCode area. */
 static void mcode_allocarea(jit_State *J)
 {
@@ -314,10 +321,12 @@ static void mcode_allocarea(jit_State *J)
 	MCode *oldarea = J->mcarea;
 
 	if(!(J->flags&JIT_F_ON)) { return; } // don't bother trying if jit is off?
+LOGI("mcode_allocarea %08x\n",J->flags);
 
 	size_t sz = (size_t)J->param[JIT_P_sizemcode] << 10;
 	sz = (sz + LJ_PAGESIZE-1) & ~(size_t)(LJ_PAGESIZE - 1);
 	newarea=(MCode *)mcode_alloc(J, sz);
+LOGI("newarea %08x\n",newarea);
 	if(newarea)
 	{
 		J->mcarea = newarea;
@@ -333,6 +342,7 @@ static void mcode_allocarea(jit_State *J)
 	{
 		J->flags &= ~(uint32_t)JIT_F_ON; // turn off jit when allocation fails
 		lj_dispatch_update(J2G(J)); // do I need this?
+LOGI("flagoff %08x\n",J->flags);
 	}
 }
 
