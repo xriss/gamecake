@@ -329,6 +329,7 @@ static void mcode_allocarea(jit_State *J)
   else
   {
 	J->flags &= ~(uint32_t)JIT_F_ON; // turn off jit when allocation fails
+	lj_dispatch_update(J2G(J));
   }
 }
 
