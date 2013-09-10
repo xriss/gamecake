@@ -311,39 +311,22 @@ typedef struct MCLink {
   size_t size;		/* Size of current area. */
 } MCLink;
 
-#include <android/log.h>
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "jit", __VA_ARGS__))
 
 /* Allocate a new MCode area. */
 static void mcode_allocarea(jit_State *J)
 {
 	MCode *newarea;
 	MCode *oldarea = J->mcarea;
-
-	if(!(J->flags&JIT_F_ON)) { return; } // don't bother trying if jit is off?
-LOGI("mcode_allocarea %08x\n",J->flags);
-
 	size_t sz = (size_t)J->param[JIT_P_sizemcode] << 10;
 	sz = (sz + LJ_PAGESIZE-1) & ~(size_t)(LJ_PAGESIZE - 1);
-	newarea=(MCode *)mcode_alloc(J, sz);
-LOGI("newarea %08x\n",newarea);
-	if(newarea)
-	{
-		J->mcarea = newarea;
-		J->szmcarea = sz;
-		J->mcprot = MCPROT_GEN;
-		J->mctop = (MCode *)((char *)J->mcarea + J->szmcarea);
-		J->mcbot = (MCode *)((char *)J->mcarea + sizeof(MCLink));
-		((MCLink *)J->mcarea)->next = oldarea;
-		((MCLink *)J->mcarea)->size = sz;
-		J->szallmcarea += sz;
-	}
-	else
-	{
-		J->flags &= ~(uint32_t)JIT_F_ON; // turn off jit when allocation fails
-		lj_dispatch_update(J2G(J)); // do I need this?
-LOGI("flagoff %08x\n",J->flags);
-	}
+	J->mcarea =(MCode *)mcode_alloc(J, sz);
+	J->szmcarea = sz;
+	J->mcprot = MCPROT_GEN;
+	J->mctop = (MCode *)((char *)J->mcarea + J->szmcarea);
+	J->mcbot = (MCode *)((char *)J->mcarea + sizeof(MCLink));
+	((MCLink *)J->mcarea)->next = oldarea;
+	((MCLink *)J->mcarea)->size = sz;
+	J->szallmcarea += sz;
 }
 
 /* Free all MCode areas. */
