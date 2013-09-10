@@ -310,27 +310,30 @@ typedef struct MCLink {
 /* Allocate a new MCode area. */
 static void mcode_allocarea(jit_State *J)
 {
-  MCode *newarea;
-  MCode *oldarea = J->mcarea;
-  size_t sz = (size_t)J->param[JIT_P_sizemcode] << 10;
-  sz = (sz + LJ_PAGESIZE-1) & ~(size_t)(LJ_PAGESIZE - 1);
-  newarea=(MCode *)mcode_alloc(J, sz);
-  if(newarea)
-  {
-	J->mcarea = newarea;
-	J->szmcarea = sz;
-	J->mcprot = MCPROT_GEN;
-	J->mctop = (MCode *)((char *)J->mcarea + J->szmcarea);
-	J->mcbot = (MCode *)((char *)J->mcarea + sizeof(MCLink));
-	((MCLink *)J->mcarea)->next = oldarea;
-	((MCLink *)J->mcarea)->size = sz;
-	J->szallmcarea += sz;
-  }
-  else
-  {
-	J->flags &= ~(uint32_t)JIT_F_ON; // turn off jit when allocation fails
-	lj_dispatch_update(J2G(J));
-  }
+	MCode *newarea;
+	MCode *oldarea = J->mcarea;
+
+	if(!(J->flags&JIT_F_ON)) { return; } // don't bother trying if jit is off?
+
+	size_t sz = (size_t)J->param[JIT_P_sizemcode] << 10;
+	sz = (sz + LJ_PAGESIZE-1) & ~(size_t)(LJ_PAGESIZE - 1);
+	newarea=(MCode *)mcode_alloc(J, sz);
+	if(newarea)
+	{
+		J->mcarea = newarea;
+		J->szmcarea = sz;
+		J->mcprot = MCPROT_GEN;
+		J->mctop = (MCode *)((char *)J->mcarea + J->szmcarea);
+		J->mcbot = (MCode *)((char *)J->mcarea + sizeof(MCLink));
+		((MCLink *)J->mcarea)->next = oldarea;
+		((MCLink *)J->mcarea)->size = sz;
+		J->szallmcarea += sz;
+	}
+	else
+	{
+		J->flags &= ~(uint32_t)JIT_F_ON; // turn off jit when allocation fails
+		lj_dispatch_update(J2G(J)); // do I need this?
+	}
 }
 
 /* Free all MCode areas. */
