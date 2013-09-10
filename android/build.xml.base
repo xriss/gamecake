@@ -2,7 +2,7 @@
 <project name="{name}" default="help">
 
     <loadproperties srcFile="local.properties" />
-    <loadproperties srcFile="/home/kriss/android.properties" />
+    <loadproperties srcFile="${user.home}/android.properties" />
 
     <property file="ant.properties" />
 
