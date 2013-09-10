@@ -216,11 +216,11 @@ static void *mcode_alloc(jit_State *J, size_t sz)
 #else
   uintptr_t target = (uintptr_t)(void *)lj_vm_exit_handler & ~(uintptr_t)0xffff;
 #endif
-  const uintptr_t range = (1u << (LJ_TARGET_JUMPRANGE-0)) - (1u << 21);
+  const uintptr_t range = (1u << (LJ_TARGET_JUMPRANGE-1)) - (1u << 21);
   /* First try a contiguous area below the last one. */
   uintptr_t hint = J->mcarea ? (uintptr_t)J->mcarea - sz : 0;
   int i;
-  for (i = 0; i < 32; i++) {  /* 32 attempts ought to be enough ... */
+  for (i = 0; i < 32*32; i++) {  /* 32 attempts ought to be enough ... Try harder */
     if (mcode_validptr(hint)) {
       void *p = mcode_alloc_at(J, hint, sz, MCPROT_GEN);
 
@@ -310,17 +310,26 @@ typedef struct MCLink {
 /* Allocate a new MCode area. */
 static void mcode_allocarea(jit_State *J)
 {
+  MCode *newarea;
   MCode *oldarea = J->mcarea;
   size_t sz = (size_t)J->param[JIT_P_sizemcode] << 10;
   sz = (sz + LJ_PAGESIZE-1) & ~(size_t)(LJ_PAGESIZE - 1);
-  J->mcarea = (MCode *)mcode_alloc(J, sz);
-  J->szmcarea = sz;
-  J->mcprot = MCPROT_GEN;
-  J->mctop = (MCode *)((char *)J->mcarea + J->szmcarea);
-  J->mcbot = (MCode *)((char *)J->mcarea + sizeof(MCLink));
-  ((MCLink *)J->mcarea)->next = oldarea;
-  ((MCLink *)J->mcarea)->size = sz;
-  J->szallmcarea += sz;
+  newarea=(MCode *)mcode_alloc(J, sz);
+  if(newarea)
+  {
+	J->mcarea = newarea;
+	J->szmcarea = sz;
+	J->mcprot = MCPROT_GEN;
+	J->mctop = (MCode *)((char *)J->mcarea + J->szmcarea);
+	J->mcbot = (MCode *)((char *)J->mcarea + sizeof(MCLink));
+	((MCLink *)J->mcarea)->next = oldarea;
+	((MCLink *)J->mcarea)->size = sz;
+	J->szallmcarea += sz;
+  }
+  else
+  {
+	J->flags &= ~(uint32_t)JIT_F_ON; // turn off jit when allocation fails
+  }
 }
 
 /* Free all MCode areas. */
