@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.wetgenes.bulb"
-      android:versionCode="13673"
-      android:versionName="13.673"
+        package="com.wetgenes.gthang"
+      android:versionCode="13689"
+      android:versionName="13.689"
 >
     <!-- 9 is the platform API where NativeActivity was introduced.
     If I bump the target to a higher number 14 then something goes wrong with screen rotation (GLES context?)
@@ -24,7 +24,7 @@
 
     
 
-    <application android:label="Dr. Bulbaceous : Puzzle Solver" android:icon="@drawable/icon"
+    <application android:label="gthang" android:icon="@drawable/icon"
 		android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
     >
 
@@ -32,7 +32,7 @@
         <!-- Our activity is the built-in NativeActivity framework class.
              This will take care of integrating with our NDK code. -->
         <activity android:name="com.wetgenes.FeralActivity"
-                android:label="Dr. Bulbaceous : Puzzle Solver"
+                android:label="gthang"
                 android:configChanges="orientation|keyboardHidden"
 		android:screenOrientation="unspecified"
 	>
