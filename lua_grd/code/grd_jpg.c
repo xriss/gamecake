@@ -10,6 +10,24 @@
 #define abort_(x) { err=x; goto bogus; }
 
 
+struct my_error_mgr {
+  struct jpeg_error_mgr pub;	/* "public" fields */
+  jmp_buf setjmp_buffer;	/* for return to caller */
+  const char *errstr;
+};
+typedef struct my_error_mgr * my_error_ptr;
+METHODDEF(void)
+my_error_exit (j_common_ptr cinfo)
+{
+  my_error_ptr myerr = (my_error_ptr) cinfo->err;
+  (*cinfo->err->output_message) (cinfo);
+  longjmp(myerr->setjmp_buffer, 1);
+}
+
+
+
+
+
 
 /* Read JPEG image from a memory segment */
 static void init_source (j_decompress_ptr cinfo) {}
@@ -67,10 +85,12 @@ static void grd_jpg_load(struct grd * g, struct grd_loader_info * inf )
 	int row_stride;		/* physical row width in output buffer */
 
 	struct jpeg_decompress_struct cinfo;
-	struct jpeg_error_mgr jerr;
 	FILE *fp=0;
 
-	cinfo.err = jpeg_std_error(&jerr);
+	struct my_error_mgr jerr;
+	cinfo.err = jpeg_std_error(&jerr.pub);
+	jerr.pub.error_exit = my_error_exit;
+	if(setjmp(jerr.setjmp_buffer)) { goto bogus; }
 
 	jpeg_create_decompress(&cinfo);
 		
@@ -191,11 +211,14 @@ void grd_jpg_save_file(struct grd *g , const char* file_name )
 //	g->err="jpg save disabled";
 
 	struct jpeg_compress_struct cinfo;
-	struct jpeg_error_mgr jerr;
 	FILE * outfile;		/* target file */
 	JSAMPROW row_pointer[1];	/* pointer to JSAMPLE row[s] */
 
-	cinfo.err = jpeg_std_error(&jerr);
+	struct my_error_mgr jerr;
+	cinfo.err = jpeg_std_error(&jerr.pub);
+	jerr.pub.error_exit = my_error_exit;
+	if(setjmp(jerr.setjmp_buffer)) { goto bogus; }
+
 	jpeg_create_compress(&cinfo);
 
 	if ((outfile = fopen(file_name, "wb")) == NULL)	{ abort_("jpg open fail"); }

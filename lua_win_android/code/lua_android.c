@@ -833,7 +833,7 @@ int lua_android_func_call_int_int_return_void (lua_State *l,char *funcname,int n
 	(*env)->CallVoidMethod(env, activity->clazz, methodID , na, nb );
 
 	(*activity->vm)->DetachCurrentThread(activity->vm);
-	return 1;
+	return 0;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -852,7 +852,7 @@ int lua_android_func_call_int_return_void (lua_State *l,char *funcname,int num)
 	(*env)->CallVoidMethod(env, activity->clazz, methodID , num );
 
 	(*activity->vm)->DetachCurrentThread(activity->vm);
-	return 1;
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -870,6 +870,27 @@ int lua_android_func_call_void_return_void (lua_State *l,char *funcname)
 	jmethodID methodID = (*env)->GetMethodID(env, clazz, funcname, "()V");
 	
 	(*env)->CallVoidMethod(env, activity->clazz, methodID);
+
+	(*activity->vm)->DetachCurrentThread(activity->vm);
+	return 0;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// call a void function that returns an int
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_func_call_void_return_int (lua_State *l,char *funcname)
+{
+	JNIEnv *env=0;
+	ANativeActivity *activity = master_android_app->activity;
+	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);	
+	jclass clazz = (*env)->GetObjectClass(env, activity->clazz);
+
+	jmethodID methodID = (*env)->GetMethodID(env, clazz, funcname, "()I");
+	
+	int n=(*env)->CallIntMethod(env, activity->clazz, methodID);
+
+	lua_pushnumber(l,(double)n);
 
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 	return 1;
@@ -1009,6 +1030,27 @@ int lua_android_smell_score_range (lua_State *l)
 }
 
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// dumb way to test for controler disconnects
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_count_input_devices (lua_State *l)
+{
+	return lua_android_func_call_void_return_int (l,"CountInputDevices");
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// tell app to quit?
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_finish (lua_State *l)
+{
+	return lua_android_func_call_void_return_void (l,"FinishMe");
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1062,6 +1104,10 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 
 		{"smell_score_send",			lua_android_smell_score_send},
 		{"smell_score_range",			lua_android_smell_score_range},
+
+		{"count_input_devices",			lua_android_count_input_devices},
+
+		{"finish",						lua_android_finish},
 
 		{0,0}
 	};

@@ -5,6 +5,7 @@ import android.util.Log;
 import android.content.Intent;
 import android.content.Context;
 import java.io.File;
+import android.view.InputDevice;
 
 public class FeralActivity extends NativeActivity
 {
@@ -88,6 +89,21 @@ public class FeralActivity extends NativeActivity
 		{
 			gamestick.RangeScore(na,nb);
 		}
+	}
+
+// tell app to quit
+    public void FinishMe() {
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                finish();
+            }
+        });
+    }
+    
+//dumb way to see if a device disconnects (zee number she go down senor)
+	public int CountInputDevices()
+	{
+		return InputDevice.getDeviceIds().length;
 	}
 
 }
