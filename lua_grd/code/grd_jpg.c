@@ -14,6 +14,7 @@ struct my_error_mgr {
   struct jpeg_error_mgr pub;	/* "public" fields */
   jmp_buf setjmp_buffer;	/* for return to caller */
   const char *errstr;
+  char buffer[JMSG_LENGTH_MAX];
 };
 typedef struct my_error_mgr * my_error_ptr;
 METHODDEF(void)
@@ -22,6 +23,13 @@ my_error_exit (j_common_ptr cinfo)
   my_error_ptr myerr = (my_error_ptr) cinfo->err;
   (*cinfo->err->output_message) (cinfo);
   longjmp(myerr->setjmp_buffer, 1);
+}
+METHODDEF(void)
+my_output_message (j_common_ptr cinfo)
+{
+  my_error_ptr myerr = (my_error_ptr) cinfo->err;
+  (*cinfo->err->format_message) (cinfo, myerr->buffer);
+   myerr->errstr=myerr->buffer;
 }
 
 
@@ -88,8 +96,10 @@ static void grd_jpg_load(struct grd * g, struct grd_loader_info * inf )
 	FILE *fp=0;
 
 	struct my_error_mgr jerr;
+	jerr.errstr=0;
 	cinfo.err = jpeg_std_error(&jerr.pub);
 	jerr.pub.error_exit = my_error_exit;
+	jerr.pub.output_message = my_output_message;
 	if(setjmp(jerr.setjmp_buffer)) { goto bogus; }
 
 	jpeg_create_decompress(&cinfo);
@@ -131,12 +141,26 @@ static void grd_jpg_load(struct grd * g, struct grd_loader_info * inf )
 		
 		bo=grdinfo_get_data(g->bmap,0,y,0);
 		bb=buffer[0];
-		for( bi=bb ; bi<bb+(width*3) ; bi+=3 , bo+=4 )
+		
+		if(cinfo.num_components==1) // handle greyscale jpegs
 		{
-			bo[0]=255;
-			bo[1]=bi[0];
-			bo[2]=bi[1];
-			bo[3]=bi[2];
+			for( bi=bb ; bi<bb+(width*1) ; bi+=1 , bo+=4 )
+			{
+				bo[0]=255;
+				bo[1]=bi[0];
+				bo[2]=bi[0];
+				bo[3]=bi[0];
+			}
+		}
+		else
+		{
+			for( bi=bb ; bi<bb+(width*3) ; bi+=3 , bo+=4 )
+			{
+				bo[0]=255;
+				bo[1]=bi[0];
+				bo[2]=bi[1];
+				bo[3]=bi[2];
+			}
 		}
 		
 		y++;
@@ -145,7 +169,7 @@ static void grd_jpg_load(struct grd * g, struct grd_loader_info * inf )
 	jpeg_finish_decompress(&cinfo);
 
 bogus:
-
+	if(jerr.errstr) { err=jerr.errstr; } // internal jpeg error
 	jpeg_destroy_decompress(&cinfo);
 	if (fp)
 	{
@@ -215,8 +239,10 @@ void grd_jpg_save_file(struct grd *g , const char* file_name )
 	JSAMPROW row_pointer[1];	/* pointer to JSAMPLE row[s] */
 
 	struct my_error_mgr jerr;
+	jerr.errstr=0;
 	cinfo.err = jpeg_std_error(&jerr.pub);
 	jerr.pub.error_exit = my_error_exit;
+	jerr.pub.output_message = my_output_message;
 	if(setjmp(jerr.setjmp_buffer)) { goto bogus; }
 
 	jpeg_create_compress(&cinfo);
@@ -241,6 +267,7 @@ void grd_jpg_save_file(struct grd *g , const char* file_name )
 	jpeg_finish_compress(&cinfo);
 
 bogus:
+	if(jerr.errstr) { err=jerr.errstr; } // internal jpeg error
 	jpeg_destroy_compress(&cinfo);
 	if(outfile) { fclose(outfile); }
 	if(err) {g->err=err;} else {g->err=0; }
