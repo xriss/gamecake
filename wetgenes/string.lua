@@ -508,7 +508,7 @@ wstr.table_lookup=function(a,d) -- look up a in table d
 		
 		if not t then
 			local fc=string.sub(a,1,1)
-			if fc=="." or fc=="-" then done=false a=string.sub(a,2) end -- trim starting dot or dash
+			if fc=="." or fc=="-" then done=false a=string.sub(a,2) end -- trim any starting dot or dash
 		end
 	until done
 
@@ -662,15 +662,12 @@ wstr.macro_replace_once = function(text,old_d,opts)
 						dat=wstr.replace_lookup(tag,d)
 						-- perform a single level check, every replacement must exist
 						if dat then
-							local missing=false
-							dat=(string.gsub( dat , "{([%w%._%-]-)}" , function(a)
-								local r=wstr.replace_lookup(a,d)
-								if not r then missing=true end -- flag missing lookup
-								return r
-							end ))
-							if missing then dat=nil end -- first level has missing references, so kill this entire replace
+							string.gsub( dat , "{([%w%._%-]-)}" , function(a)
+								if not wstr.replace_lookup(a,d) then dat=nil end -- clear if not found
+								return ""
+							end )
 						end
-						dat=dat or "" -- may remove chunk
+						dat=dat or "" -- may totally remove chunk if not found
 						
 					elseif opts.escape then -- only tags that begin with .
 						if fc=="." then
@@ -723,11 +720,12 @@ local opts=opts or {} --{dbg_html_comments=true} to include html dbg, this will 
 		ret,count=wstr.macro_replace_once(ret,d,opts)
 		
 		if count==0 then break end -- nothing left to replace
-		
+
 	end
 	opts.clean=true -- a final cleanup of inline assignments
 	opts.escape=true -- a final substitution of escaped chunks
 	ret=wstr.macro_replace_once(ret,d,opts) -- finally remove temporary chunks
+
 	return ret
 end
 

@@ -149,6 +149,9 @@ local chunkend -- special end of chunk test
 			if name:sub(1,3)=="lua" then -- all chunks begining with "lua" are lua code by default
 				opts.form="lua"
 			end
+			if name:sub(1,4)=="opts" then -- all chunks begining with "opts" are also lua code by default
+				opts.form="opts"
+			end
 			
 -- the actual options will overide the defaults
 
@@ -312,7 +315,7 @@ local escape_html=opts.escape_html or false
 	end
 	
 	local function link( url , str )
-		table.insert(r,"<a href=\""..url.."\">"..esc(str).."</a>")
+		table.insert(r,"<a href=\""..esc(url).."\">"..esc(str).."</a>")
 	end
 	local function text( str )
 		table.insert(r,esc(str))
@@ -395,7 +398,7 @@ function refine_chunks(srv,chunks,opts)
 -- start by compiling any lua chunks and running its pageopts hook
 	for i,v in ipairs(chunks) do
 	
-		if v.opts.form=="lua" then -- we have some lua code for this page
+		if v.opts.form=="lua" or v.opts.form=="opts" then -- we have some lua code for this page
 			local a,b=pcall( function() return sbox.ini(v.text) end )
 			if a then v.env=b end -- success
 			if not a then v.text=b end -- fail, set text to error text
@@ -543,9 +546,15 @@ function refine_chunks(srv,chunks,opts)
 
 		end
 
-		if v.name=="opts" then -- opts is a special chunkname, full of, well, opts
+		if v.opts.form=="opts" then -- opts is a special chunk, full of, opts so we merge all values
+			refined[v.name]=refined[v.name] or {}
 			for n,s in pairs(v.opts) do
-				refined.opts[n]=s
+				refined[v.name][n]=s
+			end
+			if type(v.env)=="table" then
+				for n,s in pairs(v.env) do
+					refined[v.name][n]=s
+				end
 			end
 		else
 			refined[v.name]=s

@@ -220,6 +220,10 @@ end
 					
 				elseif type(oven.next)=="boolean" then -- special exit oven
 				
+--					if wwin.hardcore.finish then
+--						wwin.hardcore.finish() -- try a more serious quit?					
+--						oven.next=nil
+--					else
 					if wwin.hardcore.task_to_back then -- on android there is no quit, only back
 						wwin.hardcore.task_to_back()						
 						if opts.start then
