@@ -45,19 +45,22 @@ static u8 * lua_toluserdata (lua_State *L, int idx, size_t *len) {
 	
 	if(!p) { return 0; }
 	
-#if defined(LIB_LUAJIT)
-	g=(GCudata*)(p-sizeof(GCudata));
-#else
-	g=(Udata*)(p-sizeof(Udata));
-#endif
-	
 	if(len)
 	{
+		if(lua_islightuserdata(L,idx))
+		{
+			*len=0x7fffffff;
+		}
+		else
+		{
 #if defined(LIB_LUAJIT)
-		*len=g->len;
+			g=(GCudata*)(p-sizeof(GCudata));
+			*len=g->len;
 #else
-		*len=g->uv.len;
+			g=(Udata*)(p-sizeof(Udata));
+			*len=g->uv.len;
 #endif
+		}	
 	}
 	
 	return p;
@@ -711,6 +714,11 @@ u8 *ptr=0;
 	
 	ptr=lua_toluserdata(l,1,&len);
 	if(!ptr) { return 0; }
+	
+	if(lua_isnumber(l,2)) // force size
+	{
+		len=(size_t)lua_tonumber(l,2);
+	}
 
 	lua_pushlstring(l,ptr,len);
 	return 1;

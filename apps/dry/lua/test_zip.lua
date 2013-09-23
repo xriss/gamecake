@@ -40,7 +40,7 @@ function test_zipmem()
 --print(wstr.dump(z))
 
 	for v in z:files() do
-		print(wstr.dump(v))
+--		print(wstr.dump(v))
 	end
 
 

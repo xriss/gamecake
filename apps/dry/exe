@@ -1,4 +1,3 @@
 cd `dirname $0`
-cd ../../bin/exe
-./lua -e"require('apps').start('dry','$*');"
+../../../bin/exe/gamecake lua/dry.lua $*
 
