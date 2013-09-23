@@ -12,8 +12,8 @@ end
 function test_jpg_8888_t1()
 	do_jpg_8888("t1")
 end
-function test_jpg_1555_t1()
-	do_jpg_1555("t1")
+function test_jpg_5551_t1()
+	do_jpg_5551("t1")
 end
 function test_jpg_8_t1()
 	do_jpg_8("t1")	
@@ -25,8 +25,8 @@ end
 function test_jpg_8888_t2()
 	do_jpg_8888("t2")
 end
-function test_jpg_1555_t2()
-	do_jpg_1555("t2")
+function test_jpg_5551_t2()
+	do_jpg_5551("t2")
 end
 function test_jpg_8_t2()
 	do_jpg_8("t2")	
@@ -49,8 +49,11 @@ end
 function test_png_8888_t3()
 	do_png_8888("t3")
 end
-function test_png_1555_t3()
-	do_png_1555("t3")
+function test_png_5551_t3()
+	do_png_5551("t3")
+end
+function test_png_4444_t3()
+	do_png_4444("t3")
 end
 function test_png_8_t3()
 	do_png_8("t3")
@@ -86,9 +89,9 @@ function do_premult(name)
 
 	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
 
-	g:convert("U8_ARGB_PREMULT")
+	g:convert("U8_RGBA_PREMULT")
 	
-	local c=assert(grd.create("U8_ARGB",320,240,1))
+	local c=assert(grd.create("U8_RGBA",320,240,1))
 	
 	assert( c:blit(g,0,0) )
 	
@@ -124,7 +127,7 @@ end
 function do_jpg_8888(name)
 
 	local g=assert(grd.create("dat/grd/"..name..".bse.jpg","jpg"))
-	g:convert("U8_ARGB")
+	g:convert("U8_RGBA")
 	assert( g:save("dat/grd/"..name..".out.png","png") )
 	
 	assert_true( do_file_compare("dat/grd/"..name..".out.png","dat/grd/"..name..".chk.png") )
@@ -134,31 +137,41 @@ end
 function do_png_8888(name)
 
 	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
-	g:convert("U8_ARGB")
+	g:convert("U8_RGBA")
 	assert( g:save("dat/grd/"..name..".out.png","png") )
 	
 	assert_true( do_file_compare("dat/grd/"..name..".out.png","dat/grd/"..name..".chk.png") )
 
 end
 
-function do_jpg_1555(name)
+function do_jpg_5551(name)
 
 	local g=assert(grd.create("dat/grd/"..name..".bse.jpg","jpg"))
-	assert( g:convert("U16_ARGB_1555") )
-	assert( g:convert("U8_ARGB") )
-	assert( g:save("dat/grd/"..name..".1555.out.png","png") )
+	assert( g:convert("U16_RGBA_5551") )
+	assert( g:convert("U8_RGBA") )
+	assert( g:save("dat/grd/"..name..".5551.out.png","png") )
 
-	assert_true( do_file_compare("dat/grd/"..name..".1555.out.png","dat/grd/"..name..".1555.chk.png") )
+	assert_true( do_file_compare("dat/grd/"..name..".5551.out.png","dat/grd/"..name..".5551.chk.png") )
 end
 
-function do_png_1555(name)
+function do_png_5551(name)
 
 	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
-	assert( g:convert("U16_ARGB_1555") )
-	assert( g:convert("U8_ARGB") )
-	assert( g:save("dat/grd/"..name..".1555.out.png","png") )
+	assert( g:convert("U16_RGBA_5551") )
+	assert( g:convert("U8_RGBA") )
+	assert( g:save("dat/grd/"..name..".5551.out.png","png") )
 
-	assert_true( do_file_compare("dat/grd/"..name..".1555.out.png","dat/grd/"..name..".1555.chk.png") )
+	assert_true( do_file_compare("dat/grd/"..name..".5551.out.png","dat/grd/"..name..".5551.chk.png") )
+end
+
+function do_png_4444(name)
+
+	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
+	assert( g:convert("U16_RGBA_4444") )
+	assert( g:convert("U8_RGBA") )
+	assert( g:save("dat/grd/"..name..".4444.out.png","png") )
+
+	assert_true( do_file_compare("dat/grd/"..name..".4444.out.png","dat/grd/"..name..".4444.chk.png") )
 end
 
 function do_jpg_8(name)
@@ -183,7 +196,7 @@ function do_jpg_8x(name)
 
 	local g=assert(grd.create("dat/grd/"..name..".bse.jpg","jpg"))
 	assert( g:convert("U8_INDEXED") )
-	assert( g:convert("U8_ARGB") )
+	assert( g:convert("U8_RGBA") )
 	assert( g:save("dat/grd/"..name..".8x.out.png","png") )
 
 	assert_true( do_file_compare("dat/grd/"..name..".8x.out.png","dat/grd/"..name..".8x.chk.png") )
@@ -194,7 +207,7 @@ function do_png_8x(name)
 
 	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
 	assert( g:convert("U8_INDEXED") )
-	assert( g:convert("U8_ARGB") )
+	assert( g:convert("U8_RGBA") )
 	assert( g:save("dat/grd/"..name..".8x.out.png","png") )
 
 	assert_true( do_file_compare("dat/grd/"..name..".8x.out.png","dat/grd/"..name..".8x.chk.png") )

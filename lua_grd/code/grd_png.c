@@ -95,7 +95,7 @@ static void grd_png_load(struct grd * g, struct grd_loader_info * inf )
 	bit_depth = png_get_bit_depth(png_ptr,info_ptr);
 
 // choose grdfmt
-	grdfmt=GRD_FMT_U8_ARGB;
+	grdfmt=GRD_FMT_U8_RGBA;
 	if (color_type == PNG_COLOR_TYPE_PALETTE)
 	{
 		grdfmt=GRD_FMT_U8_INDEXED;
@@ -119,16 +119,16 @@ static void grd_png_load(struct grd * g, struct grd_loader_info * inf )
 	if ( (color_type == PNG_COLOR_TYPE_GRAY_ALPHA ) || ( color_type == PNG_COLOR_TYPE_GRAY ) )
 	{
 		png_set_gray_to_rgb(png_ptr);
-		png_set_swap_alpha(png_ptr);
+//		png_set_swap_alpha(png_ptr);
 	}
 	if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA)
 	{
-		png_set_swap_alpha(png_ptr);
+//		png_set_swap_alpha(png_ptr);
 //		png_set_bgr(png_ptr);png_set_gray_1_2_4_to_8
 	}
 	if (color_type == PNG_COLOR_TYPE_RGB)
 	{
-		png_set_filler(png_ptr, 0xff, PNG_FILLER_BEFORE);
+		png_set_filler(png_ptr, 0xff, PNG_FILLER_AFTER);
 	}
 
 
@@ -160,15 +160,15 @@ static void grd_png_load(struct grd * g, struct grd_loader_info * inf )
     for(x=0;x<num_palette;x++)
     {
 	u32 c;
-		c=0x000000ff|
-		    ((palptr[x].red  &0xff)<< 8)|
-		    ((palptr[x].green&0xff)<<16)|
-		    ((palptr[x].blue &0xff)<<24);
+		c=0xff000000|
+		    ((palptr[x].red  &0xff)    )|
+		    ((palptr[x].green&0xff)<< 8)|
+		    ((palptr[x].blue &0xff)<<16);
 		((u32*)g->cmap->data)[x]=c;
 	}
     for(x=0;x<num_trans;x++)
     {
-		((u8*)g->cmap->data)[(4*x)+0]=trans[x];
+		((u8*)g->cmap->data)[(4*x)+3]=trans[x];
 	}
     
 bogus:
@@ -282,10 +282,10 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 		{
 		u32 c=((u32*)g->cmap->data)[x];
 		
-			palptr[x].blue =(c>>24)&0xff;
-			palptr[x].green=(c>>16)&0xff;
-			palptr[x].red  =(c>> 8)&0xff;
-			  tptr[x]      =(c    )&0xff;
+			palptr[x].blue =(c>>16)&0xff;
+			palptr[x].green=(c>> 8)&0xff;
+			palptr[x].red  =(c    )&0xff;
+			  tptr[x]      =(c>>24)&0xff;
 			  
 			if(tptr[x]!=255) { max_trans=x; } // skip some trans values?
 		}
@@ -297,9 +297,9 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 		}
 	}
 	else
-	if( (g->bmap->fmt==GRD_FMT_U8_ARGB) || (g->bmap->fmt==GRD_FMT_U8_ARGB_PREMULT) )
+	if( (g->bmap->fmt==GRD_FMT_U8_RGBA) || (g->bmap->fmt==GRD_FMT_U8_RGBA_PREMULT) )
 	{
-		png_set_swap_alpha(png_ptr);
+//		png_set_swap_alpha(png_ptr);
 //		png_set_bgr(png_ptr);
 	}
 	else

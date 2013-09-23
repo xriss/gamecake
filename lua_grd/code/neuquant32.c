@@ -186,10 +186,10 @@ void neuquant32_getcolormap(unsigned char *map)
 	unsigned int j;
 	for(j=0; j<netsize; j++)
     {
-        *map++ = round_biased(network[j].al);
         *map++ = unbiasvalue(network[j].r);
         *map++ = unbiasvalue(network[j].g);
         *map++ = unbiasvalue(network[j].b);
+        *map++ = round_biased(network[j].al);
 	}
 }
 
@@ -430,12 +430,12 @@ void neuquant32_learn(unsigned int samplefac)//, unsigned int verbose) /* Stu: N
 	i = 0;
 	while (i < samplepixels) 
     {
-        if (p[0])
+        if (p[3])
         {
-            al =p[0];
-            r = biasvalue(p[1]);
-            g = biasvalue(p[2]);
-            b = biasvalue(p[3]);
+            al =p[3];
+            r = biasvalue(p[0]);
+            g = biasvalue(p[1]);
+            b = biasvalue(p[2]);
         }
         else
         {

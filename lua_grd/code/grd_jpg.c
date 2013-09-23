@@ -123,7 +123,7 @@ static void grd_jpg_load(struct grd * g, struct grd_loader_info * inf )
 // choose grdfmt
 	width=cinfo.image_width;
 	height=cinfo.image_height;
-	grdfmt=GRD_FMT_U8_ARGB;
+	grdfmt=GRD_FMT_U8_RGBA;
 	
 	if(!grd_realloc(g,grdfmt,width,height,1))
 		abort_("grd realloc fail");
@@ -146,20 +146,20 @@ static void grd_jpg_load(struct grd * g, struct grd_loader_info * inf )
 		{
 			for( bi=bb ; bi<bb+(width*1) ; bi+=1 , bo+=4 )
 			{
-				bo[0]=255;
+				bo[0]=bi[0];
 				bo[1]=bi[0];
 				bo[2]=bi[0];
-				bo[3]=bi[0];
+				bo[3]=255;
 			}
 		}
 		else
 		{
 			for( bi=bb ; bi<bb+(width*3) ; bi+=3 , bo+=4 )
 			{
-				bo[0]=255;
-				bo[1]=bi[0];
-				bo[2]=bi[1];
-				bo[3]=bi[2];
+				bo[0]=bi[0];
+				bo[1]=bi[1];
+				bo[2]=bi[2];
+				bo[3]=255;
 			}
 		}
 		
