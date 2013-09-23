@@ -217,7 +217,7 @@ void neuquant32_inxbuild()
         colormap[i].b =  biasvalue(unbiasvalue(network[i].b));
         colormap[i].al = round_biased(network[i].al);        
     }
-    
+
 // sort colormap on green        
 	previouscol = 0;
 	startpos = 0;
