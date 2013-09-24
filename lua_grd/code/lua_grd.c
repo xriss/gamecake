@@ -126,7 +126,7 @@ const char *opts=0;
 	}
 	else // just make a default one
 	{
-		(*p)=grd_create(GRD_FMT_U8_ARGB,0,0,0);
+		(*p)=grd_create(GRD_FMT_U8_RGBA,0,0,0);
 	}
 
 	return 1;
@@ -176,7 +176,7 @@ part_ptr new_p;
 
 	if(lua_isnoneornil(l,1)) // just clear what we have
 	{
-		new_p=grd_create(GRD_FMT_U8_ARGB,0,0,0);
+		new_p=grd_create(GRD_FMT_U8_RGBA,0,0,0);
 	}
 	else	// change dimensions
 	{
@@ -649,7 +649,7 @@ int read_tab;
 	}
 
 
-	if( (grd->fmt==GRD_FMT_U8_ARGB) || (grd->fmt==GRD_FMT_U8_RGBA) || (grd->fmt==GRD_FMT_U8_ARGB_PREMULT) || (grd->fmt==GRD_FMT_U8_RGBA_PREMULT) )
+	if( (grd->fmt==GRD_FMT_U8_RGBA) || (grd->fmt==GRD_FMT_U8_RGBA_PREMULT) )
 	{
 		for( zi=z ; zi<z+d ; zi++ )
 		{
