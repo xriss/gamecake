@@ -115,8 +115,8 @@ end
 pack.sizeof=function(ud)
 	return core.sizeof(ud)
 end
-pack.tostring=function(ud)
-	return core.tostring(ud)
+pack.tostring=function(ud,size)
+	return core.tostring(ud,size)
 end
 
 

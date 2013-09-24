@@ -24,90 +24,99 @@ setmetatable(grd,meta)
 local import=[[
 
 //
-// Only have popular/usefull formats as basic types that can be used internaly
+// We shall stop fighting the force of open GL and accept RGBA as the damn color order
 //
-// data is always in ARGB order in memory but these are little endian, hence the BGRA (u32) default 
-//
-// these are all signed values and fit in 16bits
+// Old code will break after this change (its all ARGB order) so keep stuff upto date mkay :)
+// all palettes have been switched to this new order as well
 //
 
 #define	GRD_FMT_NONE								0x0000
 
-// basic formats, most internal manipulations will only work on GRD_FMT_U8_ARGB
-// also you may need to convert to ARGB or RGB or INDEXED before saving and from after loading
-// I'm trying to avoid diferent byte order to keep it simple, so ARGB **memory** order default
+// A is the same as in ARGB but ( RGB=RGB*A )
+// Notice that this is more of a flag ontop of other formats
+#define	GRD_FMT_PREMULT								0x0100
+
+// basic formats, most internal manipulations will only work on GRD_FMT_U8_RGBA
+// in fact many will convert to this as an intermediate step.
+// also you may need to convert to RGBA or RGB or INDEXED before saving and from after loading
+// I'm trying to avoid diferent byte order to keep it simple, so RGBA **memory** order default
+
+// bit swizzzzzzzzled for gls prefered (and only suported) order
+// u32[1] or u8[4] RGBA per pixel, so thats a U32-ABGR (in little endian)
+#define	GRD_FMT_U8_RGBA								0x0001
+#define	GRD_FMT_U8_RGBA_PREMULT						0x0101
 
 // u32[1] or u8[4] ARGB per pixel, so thats a U32-BGRA (in little endian)
-#define	GRD_FMT_U8_ARGB								0x0001
-	
-// A is the same as in ARGB but ( RGB=RGB*A )
-#define	GRD_FMT_U8_ARGB_PREMULT						0x0002
+// This format is not used anywhere internally anymore.
+#define	GRD_FMT_U8_ARGB								0x0002
+#define	GRD_FMT_U8_ARGB_PREMULT						0x0102
 
-// bit swizzzzzzzzled for gles prefered order
-#define	GRD_FMT_U8_RGBA								0x0003
-#define	GRD_FMT_U8_RGBA_PREMULT						0x0004
 
-// u16[1] per pixel, 1 bit alpha , 5 bits red , 5 bits green , 5 bits blue
-#define	GRD_FMT_U16_ARGB_1555						0x0021	
-// again premult makes more sense
-#define	GRD_FMT_U16_ARGB_1555_PREMULT				0x0022
+// u8[3]  per pixel RGB, no alpha
+#define	GRD_FMT_U8_RGB								0x0011
 
-// u16[1] per pixel, 4 bit alpha , 4 bits red , 4 bits green , 4 bits blue
-#define	GRD_FMT_U16_RGBA_4444						0x0023
-// again premult makes more sense
-#define	GRD_FMT_U16_RGBA_4444_PREMULT				0x0024
+
+// u8[1]  per pixel, palette indexed, palette contains alpha (png suports this)
+#define	GRD_FMT_U8_INDEXED							0x0021
+#define	GRD_FMT_U8_INDEXED_PREMULT					0x0121
+
+// u8[1]  per pixel, black to white, gray scale
+#define	GRD_FMT_U8_LUMINANCE						0x0022
+
+// u8[1]  per pixel, alpha chanel only, assume white for rgb values
+#define	GRD_FMT_U8_ALPHA							0x0023
+
+
+// u16[1] per pixel
+#define	GRD_FMT_U16_RGBA_5551						0x0031	
+#define	GRD_FMT_U16_RGBA_5551_PREMULT				0x0131
+
+// u16[1] per pixel
+#define	GRD_FMT_U16_RGBA_4444						0x0032
+#define	GRD_FMT_U16_RGBA_4444_PREMULT				0x0132
 
 // u16[1] an output display 16bit format for gles
-#define	GRD_FMT_U16_RGB_565							0x0025
+#define	GRD_FMT_U16_RGBA_5650						0x0033
+#define	GRD_FMT_U16_RGBA_5650_PREMULT				0x0133
+
+
 
 
 // I think it makes sense to keep all floating point values as premultiplied alpha?
 // a 1.0 in here is the same as a 255 in U8 format
-
+// none of these are used, so lets comment them all out for now
 // f16[4] per pixel
-#define	GRD_FMT_F16_ARGB_PREMULT					0x0041
+//#define	GRD_FMT_F16_RGBA_PREMULT					0x0141
 // f32[4] per pixel
-#define	GRD_FMT_F32_ARGB_PREMULT					0x0062
+//#define	GRD_FMT_F32_RGBA_PREMULT					0x0151
 // f64[4] per pixel
-#define	GRD_FMT_F64_ARGB_PREMULT					0x0083
-
-// u8[3]  per pixel, probably just normal palette information
-#define	GRD_FMT_U8_RGB								0x00a1
-
-// u8[1]  per pixel, forced U8 Indexed input
-#define	GRD_FMT_U8_INDEXED							0x00c1
-
-// u8[1]  per pixel, forced U8 gray scale (treat as indexed)
-#define	GRD_FMT_U8_LUMINANCE						0x00e1
-#define	GRD_FMT_U8_ALPHA							0x00e2
+//#define	GRD_FMT_F64_RGBA_PREMULT					0x0161
 
 
-// more formats, not to be used when mucking about with data
-// these are hints for textures rather than specific formats and don't guarantee any number of bits
-// in fact the texture may even use a simple lossy compressed format if enabled
-// basically it is none of your concern, if you intend to do anything with the dat convert it to one of the
-// basic formats
+// the following are hints for internal code
 
 // just RGB , probably u32 or u16(565)
-#define	GRD_FMT_HINT_NO_ALPHA						0x0101
+#define	GRD_FMT_HINT_NO_ALPHA						0x0201
 
 // and RGB  , probably u32 or u16(1555)
-#define	GRD_FMT_HINT_ALPHA_1BIT						0x0102
+#define	GRD_FMT_HINT_ALPHA_1BIT						0x0202
 
 // and RGB  , probably u32 or u16(4444)
-#define	GRD_FMT_HINT_ALPHA							0x0103
+#define	GRD_FMT_HINT_ALPHA							0x0203
 
 // no RGB   , probably u8
-#define	GRD_FMT_HINT_ONLY_ALPHA						0x0104
+#define	GRD_FMT_HINT_ONLY_ALPHA						0x0204
+
+
 
 // we want to save or load as a png									
-#define	GRD_FMT_HINT_PNG							0x0105
+#define	GRD_FMT_HINT_PNG							0x0401
 
 // we want to save or load as a jpg									
-#define	GRD_FMT_HINT_JPG							0x0106
-	
-// maximum GRD_FMT value		
-#define	GRD_FMT_MAX									0x0107
+#define	GRD_FMT_HINT_JPG							0x0402
+
+// we want to save or load as a jpg									
+#define	GRD_FMT_HINT_GIF							0x0403
 
 ]]
 -- parse the above string for constants, makes updates as easy as a cutnpaste from original source code
@@ -269,6 +278,12 @@ base.convert=function(g,fmt)
 	local r,e=core.convert(g[0],fmt)
 	core.info(g[0],g)
 	return (r and g),e
+end
+
+base.clear=function(g,color)
+	local r=core.clear(g[0],color)
+	core.info(g[0],g)
+	return r and g
 end
 
 base.quant=function(g,num)

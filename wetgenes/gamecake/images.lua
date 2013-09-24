@@ -16,6 +16,8 @@ function M.bake(oven,images)
 	local opts=oven.opts
 	local cake=oven.cake
 	local gl=oven.gl
+	
+	local stash=oven.rebake("wetgenes.gamecake.stash")
 		
 	images.data={}
 	
@@ -76,8 +78,12 @@ images.load=function(filename,id)
 	
 	if t then return t end --first check it is not already loaded
 
+	t={} -- create new
+
 --print("loading",filename,id)
 oven.preloader(filename)
+
+	t.stash=stash.get_image(filename)
 
 	local mname=images.prefix..filename..".lua"
 	local fname
@@ -117,7 +123,6 @@ print("Max texture size converting ",g.width,g.height," to ",hx,hy)
 	
 	if gl then --gl mode
 	
-		t={}
 		images.upload_grd(t,g)
 
 		images.set(t,id)
