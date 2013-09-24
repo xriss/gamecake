@@ -467,9 +467,9 @@ int x,y,z; u8 *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		pb[0]=pa[1];
-		pb[1]=pa[2];
-		pb[2]=pa[3];
+		pb[0]=pa[0];
+		pb[1]=pa[1];
+		pb[2]=pa[2];
 		pa+=4; pb+=3;
 	}}}
 }
@@ -479,9 +479,9 @@ int x,y,z; u8 *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		pb[0]=pa[0];
-		pb[1]=pa[1];
-		pb[2]=pa[2];
+		pb[0]=pa[1];
+		pb[1]=pa[2];
+		pb[2]=pa[3];
 		pa+=4; pb+=3;
 	}}}
 }
@@ -491,10 +491,10 @@ int x,y,z; u8 *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		pb[0]=255;
-		pb[1]=pa[0];
-		pb[2]=pa[1];
-		pb[3]=pa[2];
+		pb[0]=pa[0];
+		pb[1]=pa[1];
+		pb[2]=pa[2];
+		pb[3]=255;
 		pa+=3; pb+=4;
 	}}}
 }
@@ -504,10 +504,10 @@ int x,y,z; u8 *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		pb[0]=pa[0];
-		pb[1]=pa[1];
-		pb[2]=pa[2];
-		pb[3]=255;
+		pb[0]=255;
+		pb[1]=pa[0];
+		pb[2]=pa[1];
+		pb[3]=pa[2];
 		pa+=3; pb+=4;
 	}}}
 }
@@ -742,6 +742,11 @@ u8 *pc;
 					grd_convert_8888_rotate_right(ga,gb);
 				break;
 
+				case GRD_FMT_U8_RGB :
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_8888_8880(ga,gb);
+				break;
+
 				case GRD_FMT_U16_RGBA_5551 :
 					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
 					grd_convert_8888_5551(ga,gb);
@@ -807,6 +812,16 @@ u8 *pc;
 			}
 		break;
 		
+		case GRD_FMT_U8_RGB :
+			switch(fmt)
+			{
+				case GRD_FMT_U8_RGBA :
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_8880_8888(ga,gb);
+				break;
+			}
+		break;
+
 		case GRD_FMT_U16_RGBA_5551 :
 			switch(fmt)
 			{
@@ -1023,7 +1038,7 @@ s32 c=0;
 s32 xx,yy,zz;
 
 u32 *ptr;
-u32 bgra;
+u32 abgr;
 
 // clamp the input values
 	if(x<0) {x=0;}	if(x>=gi->w) {x=gi->w-1;}
@@ -1041,11 +1056,11 @@ u32 bgra;
 			ptr=(u32*)grdinfo_get_data(gi,x,yy,zz);
 			for(xx=x;xx<x+w;xx++)
 			{
-				bgra=*ptr++;
-				a+=(bgra>>24)&0xff;
-				r+=(bgra>>16)&0xff;
-				g+=(bgra>> 8)&0xff;
-				b+=(bgra    )&0xff;
+				abgr=*ptr++;
+				a+=(abgr>>24)&0xff;
+				b+=(abgr>>16)&0xff;
+				g+=(abgr>> 8)&0xff;
+				r+=(abgr    )&0xff;
 				c++;
 			}
 		}
@@ -1054,14 +1069,14 @@ u32 bgra;
 	
 	if(c>0)
 	{
-		bgra=(((a/c)&0xff)<<24)|(((r/c)&0xff)<<16)|(((g/c)&0xff)<<8)|(((b/c)&0xff));
+		abgr=(((a/c)&0xff)<<24)|(((b/c)&0xff)<<16)|(((g/c)&0xff)<<8)|(((r/c)&0xff));
 	}
 	else
 	{
-		bgra=0;
+		abgr=0;
 	}
 
-	return bgra;
+	return abgr;
 }
 
 
@@ -1520,3 +1535,38 @@ u32 a;
 
 	return 1;
 }
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// set the bmap data to the given value (u32) (u16) or (u8)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void grd_clear(struct grd *ga, u32 val )
+{
+int x,y,z; u8 *pa,*pb;
+	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
+	pa=grdinfo_get_data(ga->bmap,0,y,z);
+		switch(grd_sizeof_pixel(ga->bmap->fmt))
+		{
+			case 1:
+				for(x=0;x<ga->bmap->w;x++) {
+					*((u8*)pa)=(u8)val;
+					pa+=1;
+				}
+			break;
+			case 2:
+				for(x=0;x<ga->bmap->w;x++) {
+					*((u16*)pa)=(u16)val;
+					pa+=2;
+				}
+			break;
+			case 4:
+				for(x=0;x<ga->bmap->w;x++) {
+					*((u32*)pa)=(u32)val;
+					pa+=4;
+				}
+			break;
+		}
+	}}
+}
+
