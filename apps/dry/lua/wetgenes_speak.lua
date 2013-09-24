@@ -9,7 +9,7 @@ local alc=require("alc")
 
 
 
-function test_speak()
+function no_speak()
 
 	local t=require("wetgenes.speak.core")
 

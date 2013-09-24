@@ -25,7 +25,7 @@ else
 	lunatest.suite("test_lanes")
 
 	lunatest.suite("test_lua_al")
-	--lunatest.suite("test_lua_freetype")
+	lunatest.suite("test_lua_freetype")
 
 	lunatest.suite("wetgenes_string")
 
@@ -34,7 +34,7 @@ else
 
 	lunatest.suite("wetgenes_pack")
 
-	--lunatest.suite("wetgenes_speak")
+	lunatest.suite("wetgenes_speak")
 
 	lunatest.suite("wetgenes_grd")
 	lunatest.suite("wetgenes_grdmap")

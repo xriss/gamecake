@@ -84,6 +84,7 @@ int grd_sizeof_pixel(int id)
 		case GRD_FMT_U16_RGBA_4444_PREMULT:
 			return 2;
 		case GRD_FMT_U8_INDEXED:
+		case GRD_FMT_U8_INDEXED_PREMULT:
 		case GRD_FMT_U8_LUMINANCE:
 		case GRD_FMT_U8_ALPHA:
 			return 1;
@@ -155,21 +156,21 @@ int i;
 	if(g)
 	{
 		if(!grd_info_alloc(g->bmap, fmt , w, h, d )) { goto bogus; }
-		if(fmt==GRD_FMT_U8_INDEXED) // do we need a palette?
+		if( (fmt&(~GRD_FMT_PREMULT))==GRD_FMT_U8_INDEXED) // do we need a palette?
 		{
 			if(!grd_info_alloc(g->cmap, GRD_FMT_U8_RGBA , 256, 1, 1 )) { goto bogus; }
 		}
 		else
-		if(fmt==GRD_FMT_U8_LUMINANCE) // do we need a palette?
+		if(fmt==GRD_FMT_U8_LUMINANCE) // do we need a fake palette?
 		{
 			if(!grd_info_alloc(g->cmap, GRD_FMT_U8_RGBA , 256, 1, 1 )) { goto bogus; }
 			bp=grdinfo_get_data(g->cmap,0,0,0);
 			for(i=0;i<256;i++)
 			{
-				bp[0]=255;
+				bp[3]=255;
+				bp[0]=i;
 				bp[1]=i;
 				bp[2]=i;
-				bp[3]=i;
 				bp+=4;
 			}
 		}
@@ -197,7 +198,7 @@ struct grd *g=0;
 
 	g=(struct grd *)calloc(sizeof(struct grd),1);
 	
-	if(g && w)
+	if(g)
 	{
 		if(!grd_realloc(g,fmt , w, h, d)){ goto bogus; }
 	}
@@ -644,6 +645,53 @@ int x,y,z; u8 *pa,*pb;
 	}}}
 }
 
+void grd_convert_grey_8888( struct grd *ga , struct grd *gb )
+{
+int x,y,z; u8 *pa,*pb;
+	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
+	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
+	for(x=0;x<ga->bmap->w;x++) {
+		u32 b=(u32)*pa;
+		*((u32*)pb)=0xff000000 | (b<<16) | (b<<8) | (b) ;
+		pa+=1; pb+=4;
+	}}}
+}
+void grd_convert_8888_grey( struct grd *ga , struct grd *gb )
+{
+int x,y,z; u8 *pa,*pb;
+	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
+	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
+	for(x=0;x<ga->bmap->w;x++) {
+		u32 b=*((u32*)pa);
+		*pb=(u8)( ( (((b)&0xff)*54) + (((b>>8)&0xff)*182) + (((b>>16)&0xff)*20) )>>8 );
+		pa+=4; pb+=1;
+	}}}
+}
+
+void grd_convert_0008_8888( struct grd *ga , struct grd *gb )
+{
+int x,y,z; u8 *pa,*pb;
+	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
+	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
+	for(x=0;x<ga->bmap->w;x++) {
+		u32 b=(u32)*pa;
+		*((u32*)pb)=0x00ffffff | (b<<24) ;
+		pa+=1; pb+=4;
+	}}}
+}
+void grd_convert_8888_0008( struct grd *ga , struct grd *gb )
+{
+int x,y,z; u8 *pa,*pb;
+	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
+	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
+	for(x=0;x<ga->bmap->w;x++) {
+		u32 b=*((u32*)pa);
+		*pb=(u8)( ((b>>24)&0xff) );
+		pa+=4; pb+=1;
+	}}}
+}
+
+
 struct grd * grd_duplicate_convert( struct grd *ga , s32 fmt )
 {
 struct grd *gb=0;
@@ -710,9 +758,15 @@ u8 *pc;
 				break;
 
 				case GRD_FMT_U8_LUMINANCE:
-					gb=grd_duplicate_quant(ga,256);
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_8888_grey(ga,gb);
 				break;
 				
+				case GRD_FMT_U8_ALPHA:
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_8888_0008(ga,gb);
+				break;
+
 				case GRD_FMT_U8_INDEXED:
 					gb=grd_duplicate_quant(ga,256);
 				break;
@@ -745,7 +799,11 @@ u8 *pc;
 				case GRD_FMT_U16_RGBA_5650_PREMULT :
 					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
 					grd_convert_8888_5650(ga,gb);
-				break;				
+				break;
+
+				case GRD_FMT_U8_INDEXED_PREMULT:
+					gb=grd_duplicate_quant(ga,256);
+				break;
 			}
 		break;
 		
@@ -814,7 +872,16 @@ u8 *pc;
 			{
 				case GRD_FMT_U8_RGBA :
 					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
-					grd_convert_indexed_8888(ga,gb);
+					grd_convert_grey_8888(ga,gb);
+				break;
+			}
+		break;
+		case GRD_FMT_U8_ALPHA:
+			switch(fmt)
+			{
+				case GRD_FMT_U8_RGBA :
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_0008_8888(ga,gb);
 				break;
 			}
 		break;
@@ -827,16 +894,29 @@ u8 *pc;
 				break;
 			}
 		break;
+
+		case GRD_FMT_U8_INDEXED_PREMULT:
+			switch(fmt)
+			{
+				case GRD_FMT_U8_RGBA_PREMULT :
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_indexed_8888(ga,gb);
+				break;
+			}
+		break;
 		 
 	}
 
 // if nothing above matched then try a multi step convert, first to RGBA, then mayb add/remove premult and then to fmt
-	if( (!gb) && (ga->bmap->fmt!=GRD_FMT_U8_RGBA) )
+	if( (!gb) && (ga->bmap->fmt!=GRD_FMT_U8_RGBA) && (ga->bmap->fmt!=GRD_FMT_U8_RGBA_PREMULT) )
 	{
+
 		gb=grd_duplicate_convert(ga ,GRD_FMT_U8_RGBA | (ga->bmap->fmt&GRD_FMT_PREMULT) ); // this one forces a new bitmap, keep the premult fflag
+
+
 		if(gb)
 		{
-			if( (ga->bmap->fmt&GRD_FMT_PREMULT) != (fmt&GRD_FMT_PREMULT) ) // also need to add or remove premult
+			if( (gb->bmap->fmt&GRD_FMT_PREMULT) != (fmt&GRD_FMT_PREMULT) ) // also need to add or remove premult
 			{
 				if( ! grd_convert(gb , GRD_FMT_U8_RGBA | (fmt&GRD_FMT_PREMULT) ) )
 				{
@@ -886,7 +966,7 @@ u32 *ptr;
 u32 c;
 int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 
-	gb=grd_create(GRD_FMT_U8_INDEXED,g->bmap->w,g->bmap->h,g->bmap->d);
+	gb=grd_create(GRD_FMT_U8_INDEXED | (g->bmap->fmt&GRD_FMT_PREMULT) ,g->bmap->w,g->bmap->h,g->bmap->d);
 	if(!gb) { return 0; }
 	
 	neuquant32_initnet( g->bmap->data , siz*4 , num_colors , 1.0/*1.0/2.2*/ );
@@ -1340,7 +1420,7 @@ s32 w,h;
 u8 *p;
 u32 a;
 
-	if( ! ( (gi->fmt==GRD_FMT_U8_ARGB) || (gi->fmt==GRD_FMT_U8_ARGB_PREMULT) ) )
+	if( ! ( (gi->fmt==GRD_FMT_U8_RGBA) || (gi->fmt==GRD_FMT_U8_RGBA_PREMULT) ) )
 	{
 		g->err="bad shrink format"; // complain
 		return 0;
@@ -1361,7 +1441,7 @@ u32 a;
 		for( x=gc->x ; x<gc->x+gc->w ; x++ )
 		{
 			p=grdinfo_get_data( gi, x , y , gc->z );
-			a=(*p)&0xff;
+			a=p[3];
 			if(a!=0) { break; }
 		}
 		if(a==0) // empty line
@@ -1382,7 +1462,7 @@ u32 a;
 		for( x=gc->x ; x<gc->x+gc->w ; x++ )
 		{
 			p=grdinfo_get_data( gi, x , y , gc->z );
-			a=(*p)&0xff;
+			a=p[3];
 			if(a!=0) { break; }
 		}
 		if(a==0) // empty line
@@ -1402,7 +1482,7 @@ u32 a;
 		for( y=gc->y ; y<gc->y+gc->h ; y++ )
 		{
 			p=grdinfo_get_data( gi, x , y , gc->z );
-			a=(*p)&0xff;
+			a=p[3];
 			if(a!=0) { break; }
 		}
 		if(a==0) // empty line
@@ -1423,7 +1503,7 @@ u32 a;
 		for( y=gc->y ; y<gc->y+gc->h ; y++ )
 		{
 			p=grdinfo_get_data( gi, x , y , gc->z );
-			a=(*p)&0xff;
+			a=p[3];
 			if(a!=0) { break; }
 		}
 		if(a==0) // empty line

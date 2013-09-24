@@ -22,10 +22,10 @@ local g=grd.create()
 f:size(64,64)
 f:render(65)
 f:grd(g)
-g:convert(grd.FMT_U8_ARGB)
+g:convert(grd.FMT_U8_RGBA)
 
-print(wstr.dump(f))
-print(wstr.dump(g))
+--print(wstr.dump(f))
+--print(wstr.dump(g))
 
 --g:save("test.png","png")
 
