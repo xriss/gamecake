@@ -440,7 +440,9 @@ function refine_chunks(srv,chunks,opts)
 			
 			if e.import=="dimeload" then -- include some dimeload info
 			
-				e.hook   = e.hook   or opts.hook
+				e.hook   	= e.hook 	  or opts.hook
+				e.command   = e.command   or opts.command
+				e.plate  	= e.plate 	  or opts.plate
 				
 				if not opts.nodimeload then -- prevent recursions
 					local dl=require("dimeload")
@@ -491,6 +493,21 @@ function refine_chunks(srv,chunks,opts)
 				e.hook   = e.hook   or opts.hook -- callback function to fixup data
 				s=gsheet.getwaka(srv,e) -- get a string
 				
+			elseif e.import=="csv" then -- we need to grab some spreadsheet data from somewhere
+			
+				local gsheet=require("waka.csv")
+				e.random = e.random or opts.random -- import this many random values please
+				e.offset = e.offset or opts.offset -- import values starting at
+				e.limit  = e.limit  or opts.limit  -- and only this many
+				e.url    = e.url    or opts.url    -- where to get data from
+				e.plate  = e.plate  or opts.plate  -- how to render
+				e.hook   = e.hook   or opts.hook   -- callback function to fixup data
+				s=gsheet.chunk_import(srv,e) -- return a table to render
+				
+				if e.hook then -- call hook to fix table and return it
+					s=e.hook(s)
+				end
+
 			elseif e.import=="wikipedia" then -- we need to import some xml from wikipedia
 			
 				local wikipedia=require("waka.wikipedia")
