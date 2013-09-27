@@ -1,4 +1,0 @@
-cd `dirname $0`
-cd ../../bin/dbg
-./lua -e"require('apps').start('wettest','$*');"
-
