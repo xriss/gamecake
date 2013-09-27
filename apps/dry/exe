@@ -1,3 +1,0 @@
-cd `dirname $0`
-../../../bin/exe/gamecake lua/dry.lua $*
-
