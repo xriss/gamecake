@@ -398,7 +398,13 @@ end
 
 		local c={explode_color(widget.color)}
 
-		if master.over==widget or widget.parent==master.focus then
+		if widget.highlight=="none" then
+			if layer>1 then
+				return false
+			else
+				gl.Color( c[1],c[2],c[3],c[4] )
+			end
+		elseif master.over==widget or widget.parent==master.focus then
 			if buttdown then
 				if layer>1 then	
 --					local a=1/16
@@ -484,6 +490,10 @@ end
 			
 for layer in meta.iterate_draw_color(widget) do -- something to draw, color has been set for this layer
 
+
+			local mode=mode
+			if widget.skin then mode=nil end --hack
+			
 			if widget.sheet then -- custom graphics
 
 				sheets.get(widget.sheet):draw(widget.sheet_id or 1,widget.sheet_px or 0,widget.sheet_py or 0,0,widget.sheet_hx or hx,widget.sheet_hy or hy)

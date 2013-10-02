@@ -228,6 +228,8 @@ function wtextedit.setup(widget,def)
 	widget.key=wtextedit.key
 	widget.mouse=wtextedit.mouse
 	
+	widget.solid=true
+
 	widget.can_focus=true
 
 	return widget

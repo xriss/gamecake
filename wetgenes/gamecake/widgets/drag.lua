@@ -43,6 +43,8 @@ function wdrag.setup(widget,def)
 	widget.update=wdrag.update
 	widget.draw=wdrag.draw
 
+	widget.solid=true
+
 	return widget
 end
 

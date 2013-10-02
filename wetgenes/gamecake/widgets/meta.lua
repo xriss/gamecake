@@ -171,6 +171,7 @@ function wmeta.setup(def)
 
 		widget.text=def.text -- display this text on the button
 		widget.style=def.style -- style the button this way
+		widget.skin=def.skin -- skin the button this way
 
 
 		
@@ -290,7 +291,7 @@ function wmeta.setup(def)
 			if act==-1 then
 				if not widget.master.dragging() or widget.master.active==widget then
 --				if widget.master.active and widget.master.active==widget then -- widget clicked
-					widget:call_hook("click")
+					widget:call_hook("click",{key=key})
 				end
 			end
 

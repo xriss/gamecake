@@ -43,6 +43,8 @@ function wbutton.setup(widget,def)
 	widget.update=update
 	widget.draw=draw
 
+	widget.solid=true
+
 	return widget
 end
 

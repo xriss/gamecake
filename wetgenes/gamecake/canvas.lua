@@ -50,7 +50,7 @@ end
 
 
 font.set = function(dat)
-	if type(dat)=="string" then dat=fonts.get(dat) end
+	do local t=type(dat) if t=="string" or t=="number" then dat=fonts.get(dat) end end
 	if dat and dat~=font.dat then -- newfont, autokill the cache?
 		font.dat=dat
 	end

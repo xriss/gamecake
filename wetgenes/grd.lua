@@ -299,6 +299,7 @@ base.pixels=function(g,...)
 end
 
 base.palette=function(g,...)
+	if not g.cmap then return nil end
 	local r=core.palette(g[0],...)
 	core.info(g[0],g)
 	return r
