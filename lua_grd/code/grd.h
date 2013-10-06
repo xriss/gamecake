@@ -101,6 +101,14 @@
 #define	GRD_FMT_HINT_GIF							0x0403
 
 
+// Paint a copy skiping transparent color
+#define	GRD_PAINT_MODE_TRANS						0x0801
+// Paint a single color
+#define	GRD_PAINT_MODE_COLOR						0x0802
+// Paint a copy
+#define	GRD_PAINT_MODE_COPY							0x0803
+
+
 
 // information about a bitmap held in memory (or even a palette)
 // by using scan values we can describe a section of a larger bitmap in this structure
@@ -168,6 +176,7 @@ struct grd_area
 void * grd_info_alloc(struct grd_info *gi,  s32 fmt , s32 w, s32 h, s32 d );
 void grd_info_free(struct grd_info *gi);
 
+void grd_copy_data(struct grd *ga, struct grd *gb );
 
 struct grd * grd_realloc( struct grd *g, s32 fmt , s32 w, s32 h, s32 d );
 
@@ -201,6 +210,7 @@ int grd_layer( struct grd *ga , struct grd *gb , s32 z);
 int grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 w, s32 h);
 
 int grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y);
+int grd_paint( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 mode, u32 trans, u32 color);
 
 int grd_shrink(struct grd *ga,struct grd_area *gc );
 

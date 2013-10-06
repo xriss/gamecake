@@ -344,6 +344,46 @@ s32 n=0;
 	return 1;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// copy bmap (and cmap) from one grd into another (other grid must be the same size/format)
+// arg2 is copied into arg1
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_copy_data (lua_State *l)
+{
+part_ptr pa;
+part_ptr pb;
+
+	pa=lua_grd_check_ptr(l,1);
+	pb=lua_grd_check_ptr(l,2);
+	
+	if(pa->bmap->fmt!=pb->bmap->fmt)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"copy failed on fmt");
+		return 2;
+	}
+
+	if(pa->bmap->w!=pb->bmap->w)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"copy failed on width");
+		return 2;
+	}
+
+	if(pa->bmap->h!=pb->bmap->h)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"copy failed on height");
+		return 2;
+	}
+	
+	grd_copy_data(pa,pb);
+
+	lua_pushvalue(l,1);
+	return 1;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -479,6 +519,72 @@ s32 ch;
 	return 1;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_paint (lua_State *l)
+{
+part_ptr pa;
+part_ptr pb;
+struct grd g[1];
+
+s32 x;
+s32 y;
+
+s32 cx;
+s32 cy;
+s32 cw;
+s32 ch;
+
+s32 mode;
+u32 trans;
+u32 color;
+
+	pa=lua_grd_check_ptr(l,1);
+	pb=lua_grd_check_ptr(l,2);
+	x=(s32)lua_tonumber(l,3);
+	y=(s32)lua_tonumber(l,4);
+
+	if( lua_isnumber(l,5) ) // clip the from grd, pass a false if no need to clip from
+	{
+		cx=(s32)lua_tonumber(l,5);
+		cy=(s32)lua_tonumber(l,6);
+		cw=(s32)lua_tonumber(l,7);
+		ch=(s32)lua_tonumber(l,8);
+		if(!grd_clip(g,pb,cx,cy,cw,ch))
+		{
+			lua_pushboolean(l,0);
+			lua_pushstring(l,g->err);
+			return 2;
+		}
+		
+		mode=(s32)lua_tonumber(l,9);
+		trans=(u32)lua_tonumber(l,10);
+		color=(u32)lua_tonumber(l,11);
+		if(!grd_paint(pa,g,x,y,mode,trans,color))
+		{
+			lua_pushboolean(l,0);
+			lua_pushstring(l,g->err);
+			return 2;
+		}
+	}
+	else // simnple mode without clipping
+	{
+		mode=(s32)lua_tonumber(l,6);
+		trans=(u32)lua_tonumber(l,7);
+		color=(u32)lua_tonumber(l,8);
+		if(!grd_paint(pa,pb,x,y,mode,trans,color))
+		{
+			lua_pushboolean(l,0);
+			lua_pushstring(l,g->err);
+			return 2;
+		}
+	}
+
+	lua_pushvalue(l,1);
+	return 1;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1126,6 +1232,8 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"load",			lua_grd_load},
 		{"save",			lua_grd_save},
 
+		{"copy_data",		lua_grd_copy_data},
+
 		{"convert",			lua_grd_convert},
 		
 		{"quant",			lua_grd_quant},
@@ -1141,6 +1249,8 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"flipy",			lua_grd_flipy},
 		{"blit",			lua_grd_blit},
 		
+		{"paint",			lua_grd_paint},
+
 		{"shrink",			lua_grd_shrink},
 		
 		{"clear",			lua_grd_clear},
