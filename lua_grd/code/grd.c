@@ -1417,6 +1417,87 @@ s32 h=bb->h;
 	return 1;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// paint gb onto ga at x,y (topleft is 0,0) using the given (dpaint) style mode
+//
+// you can use a fake gb to choose a portion of a larger image built using grd_clip and grd_layer
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int grd_paint( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 mode, u32 trans, u32 color)
+{
+struct grd_info *ba=ga->bmap;
+struct grd_info *bb=gb->bmap;
+
+u8 *pa,*pb;
+u32 a,b;
+
+s32 i,j;
+s32 w=bb->w;
+s32 h=bb->h;
+
+	ga->err=0;
+
+	if(x<0)               { ga->err="paint x out of bounds"; }
+	if((x+w)>ga->bmap->w) { ga->err="paint x out of bounds"; }
+	if(y<0)               { ga->err="paint y out of bounds"; }
+	if((y+h)>ga->bmap->h) { ga->err="paint y out of bounds"; }
+
+	gb->err=ga->err; // put error in both
+	if(ga->err) { return 0; }
+
+	if( ((ba->fmt&~GRD_FMT_PREMULT)!=GRD_FMT_U8_INDEXED) || ((bb->fmt&~GRD_FMT_PREMULT)!=GRD_FMT_U8_INDEXED) )
+	{
+		ga->err="bad paint format"; // complain rather than auto convert
+		gb->err=ga->err;
+		return 0;
+	}
+
+	for(i=0;i<h;i++)
+	{
+		pa=(u8*)grdinfo_get_data(ba,x,y+i,0);
+		pb=(u8*)grdinfo_get_data(bb,0,i,0);
+		switch(mode)
+		{
+			case GRD_PAINT_MODE_TRANS:
+				for(j=0;j<w;j++)
+				{
+					b=*(pb++);
+					if(b!=trans)
+					{
+						*(pa++)=b;
+					}
+					else
+					{
+						pa++;
+					}
+				}
+			break;
+			case GRD_PAINT_MODE_COLOR:
+				for(j=0;j<w;j++)
+				{
+					b=*(pb++);
+					if(b!=trans)
+					{
+						*(pa++)=color;
+					}
+					else
+					{
+						pa++;
+					}
+				}
+			break;
+			case GRD_PAINT_MODE_COPY:
+				for(j=0;j<w;j++)
+				{
+					*(pa++)=*(pb++);
+				}
+			break;
+		}
+	}
+	
+	return 1;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1570,3 +1651,24 @@ int x,y,z; u8 *pa,*pb;
 	}}
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// copy the bmap (and cmap) *data* from gb into ga
+// size and fmt *must* match
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void grd_copy_data(struct grd *ga, struct grd *gb )
+{
+int x,y,z; u8 *pa,*pb;
+int s;
+	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
+		pa=grdinfo_get_data(ga->bmap,0,y,z);
+		pb=grdinfo_get_data(gb->bmap,0,y,z);
+		memcpy(pa,pb,grd_sizeof_pixel(ga->bmap->fmt)*ga->bmap->w);
+	}}
+	if(ga->cmap->data && ga->cmap->w)
+	{
+		memcpy(ga->cmap->data,gb->cmap->data,grd_sizeof_pixel(ga->cmap->fmt)*ga->cmap->w);
+	}
+}
