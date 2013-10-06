@@ -50,7 +50,7 @@ function M.bake(oven,snaps)
 print("Snaps "..name)
 			local g=wgrd.create( wgrd.FMT_U8_RGBA_PREMULT , oven.win.width , oven.win.height , 1 )
 			gl.ReadPixels(0,0,oven.win.width,oven.win.height,gl.RGBA,gl.UNSIGNED_BYTE,g.data)
-			g:convert( wgrd.FMT_U8_RGBA ) -- save code expects this format
+--			g:convert( wgrd.FMT_U8_RGBA ) -- save code expects this format
 			g:flipy() -- open gl is upside down
 			g:save(win.files_prefix.."snaps/"..name..".png")
 			return nil

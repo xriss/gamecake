@@ -147,12 +147,11 @@ function glescode.create(gl)
 	code.defines={}
 
 -- default shader prefix to use when building
-	code.defines.shaderprefix="#version 100\nprecision mediump float;\n"
 
-	if core.fixed_pipeline_available then -- probably desktop GL so needs haxtbh
-	
+	if core.GLES2 then -- use GLES2 prefix
+		code.defines.shaderprefix="#version 100\nprecision mediump float;\n"
+	else
 		code.defines.shaderprefix="#version 120\n"
-
 	end
 	
 -- forget cached info when we lose context, it is important to call this

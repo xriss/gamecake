@@ -268,7 +268,7 @@ widget.matrix=gl.SaveMatrix()
 if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
 
 		if widget.fbo then
---print("drawing into fbo")
+--print("into fbo"..wstr.dump(widget.fbo))
 
 			widget.fbo:bind_frame()
 			widget.layout=layouts.create{parent={x=0,y=0,w=widget.fbo.w,h=widget.fbo.h}}
@@ -281,10 +281,6 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 
 			widget.old_layout=widget.layout.apply()
 
-			gl.ClearColor(0,0,0,0)
-			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
-
-		
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
@@ -330,12 +326,14 @@ if f then f(widget) end		-- this does the custom drawing
 
 			widget.layout=nil
 			widget.old_layout=nil
+			
+			widget.fbo:mipmap()
 		end
 		
 else -- we can only draw once
 
 		if widget.fbo then -- we need to draw our cached fbo
-
+--print("draw fbo"..wstr.dump(widget.fbo))
 		
 			gl.Disable(gl.DEPTH_TEST)
 			gl.Disable(gl.CULL_FACE)
@@ -350,7 +348,6 @@ else -- we can only draw once
 				0,				widget.fbo.h,	0,	0,0,
 				widget.fbo.w,	widget.fbo.h,	0,	1,0,
 			})
-
 --print("draw fbo")
 		end
 		

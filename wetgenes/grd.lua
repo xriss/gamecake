@@ -118,6 +118,13 @@ local import=[[
 // we want to save or load as a jpg									
 #define	GRD_FMT_HINT_GIF							0x0403
 
+// Paint a copy skiping transparent color
+#define	GRD_PAINT_MODE_TRANS						0x0801
+// Paint a single color
+#define	GRD_PAINT_MODE_COLOR						0x0802
+// Paint a copy
+#define	GRD_PAINT_MODE_COPY							0x0803
+
 ]]
 -- parse the above string for constants, makes updates as easy as a cutnpaste from original source code
 
@@ -185,7 +192,11 @@ grd.create=function(...)
 	setmetatable(g,meta)
 	
 	if type(args[1]) == "table" then -- duplicate
-	
+
+		local p=args[1]
+		g[0]=core.create(p.format,p.width,p.height,p.depth)
+		core.copy_data(g[0],p[0])
+
 --		local g2=args[1]
 --		g[0]=core.create(g2[0])
 	
@@ -355,6 +366,34 @@ base.blit=function(ga,gb,x,y,cx,cy,cw,ch)
 	if cw<=0 or ch<=0 then return true end -- nothing to draw
 
 	return core.blit(ga[0],gb[0],x,y,cx,cy,cw,ch)
+end
+
+base.paint=function(ga,gb,x,y,cx,cy,cw,ch,mode,trans,color)
+
+	if cx then -- autoclip
+		if cx<0 then cw=cw+cx cx=0 end
+		if cy<0 then ch=ch+cy cy=0 end
+		if (cx+cw)>gb.width  then cw=gb.width -cx end
+		if (cy+ch)>gb.height then ch=gb.height-cy end
+	else -- auto build
+		cx=0
+		cy=0
+		cw=gb.width
+		ch=gb.height
+	end
+	
+	if x<0 then cx=cx-x cw=cw+x x=0 end
+	if y<0 then cy=cy-y ch=ch+y y=0 end	
+	if (x+cw)>ga.width  then cw=ga.width -x end
+	if (y+ch)>ga.height then ch=ga.height-y end
+
+	if cw<=0 or ch<=0 then return true end -- nothing to draw
+
+	return core.paint(ga[0],gb[0],x,y,cx,cy,cw,ch,mode,trans,color)
+end
+
+base.copy_data=function(ga,gb)
+	return core.copy_data(ga[0],gb[0])
 end
 
 return grd

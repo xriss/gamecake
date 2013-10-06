@@ -25,14 +25,18 @@ end
 
 -- set number (may trigger hook)
 wdata.data_value=function(dat,val,force)
+--print(dat,val,force,debug.traceback())
 	if dat.class=="number" then
 		if val then val=tonumber(val) end -- auto convert from string
+		local old=dat.num
 		if ( val and val~=dat.num ) or force then -- change value
 			dat.num=val
 			if dat.min and dat.num<dat.min then dat.num=dat.min end
 			if dat.max and dat.num>dat.max then dat.num=dat.max end
-			dat.str=dat:get_string() -- cache on change
-			dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
+			if old~=dat.num or force then
+				dat.str=dat:get_string() -- cache on change
+				dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
+			end
 		end
 		return dat.num
 	else

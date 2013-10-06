@@ -16,11 +16,11 @@ local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
 function wslide.mouse(widget,act,x,y,key)
 --	widget.master.focus=widget
-	if act==1 and widget.master.over==widget then
-		if x<widget.drag.px then widget:key("","left",1) return
-		elseif x>widget.drag.px then widget:key("","right",1) return
-		elseif y<widget.drag.py then widget:key("","up",1) return
-		elseif y>widget.drag.py then widget:key("","down",1) return
+	if act==1 and ( x>=widget.pxd and y>=widget.pyd and x<widget.pxd+widget.hx and y<widget.pyd+widget.hy ) then
+		if 		x<widget.drag.pxd 					then widget:key("","left",1)
+		elseif 	x>widget.drag.pxd+widget.drag.hx 	then widget:key("","right",1)
+		elseif 	y<widget.drag.pyd 					then widget:key("","up",1)
+		elseif 	y>widget.drag.pyd+widget.drag.hy 	then widget:key("","down",1)
 		end
 	end
 	return widget.meta.mouse(widget,act,x,y,key)
@@ -28,7 +28,6 @@ end
 
 
 function wslide.key(widget,ascii,key,act)
-
 	if key=="enter" or key=="return" or key=="space" then
 		
 		if act==-1 then -- ignore repeats on enter key
@@ -71,7 +70,9 @@ end
 function wslide.update(widget)
 --	local it=widget.slide
 
-
+	
+	widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
+	widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
 	widget:snap()
 
 --	it.drag.text=it.datx:get_string()

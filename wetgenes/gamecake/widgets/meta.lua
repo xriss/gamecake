@@ -272,45 +272,67 @@ function wmeta.setup(def)
 	
 --print(x..","..y.." : "..widget.px..","..widget.py)
 
-		if widget.pan_px then x=x+widget.pan_px end
-		if widget.pan_py then y=y+widget.pan_py end
 
-		if widget.solid and x>=widget.pxd and x<widget.pxd+widget.hx and y>=widget.pyd and y<widget.pyd+widget.hy then
+		if x>=widget.pxd and x<widget.pxd+widget.hx and y>=widget.pyd and y<widget.pyd+widget.hy then
+
+			if widget.pan_px then x=x+widget.pan_px end
+			if widget.pan_py then y=y+widget.pan_py end
 		
-			if act==1 then
--- only set if null or our parent...
---print(widget,widget.class)
---print("active",widget,widget and widget.class,
---widget and widget.parent,widget and widget.parent.class)
-				if not widget.master.active or widget.master.active==widget.parent then
-					widget.master.active=widget
-					widget.master.active_x=x-widget.pxd
-					widget.master.active_y=y-widget.pyd
+			if widget.solid then
+				if act==1 then
+	-- only set if null or our parent...
+	--print(widget,widget.class)
+	--print("active",widget,widget and widget.class,
+	--widget and widget.parent,widget and widget.parent.class)
+					if widget.master.active~=widget and widget:parent_active() then
+						widget.master.active=widget
+						widget.master.active_x=x-widget.pxd
+						widget.master.active_y=y-widget.pyd
+					end
 				end
-			end
-			if act==-1 then
-				if not widget.master.dragging() or widget.master.active==widget then
---				if widget.master.active and widget.master.active==widget then -- widget clicked
-					widget:call_hook("click",{key=key})
+				if act==-1 then
+					if (not widget.master.dragging()) or widget.master.active==widget then
+	--				if widget.master.active and widget.master.active==widget then -- widget clicked
+						widget:call_hook("click",{key=key})
+					end
+				end
+
+				if (not widget.master.dragging()) or widget.master.active==widget then
+	--			if not widget.master.active or widget.master.active==widget then -- over widget
+					widget.master.over=widget
 				end
 			end
 
-			if not widget.master.dragging() or widget.master.active==widget then
---			if not widget.master.active or widget.master.active==widget then -- over widget
-				widget.master.over=widget
+			for i,v in ipairs(widget) do -- children must be within parent bounds to catch clicks
+				v:mouse(act,x,y,key)
 			end
+
 		else
 		
-			if widget.master.over==widget then
+			if (not widget.master.dragging()) and widget.master.active==widget then
 				widget.master.over=nil
 			end
+
+			for i,v in ipairs(widget) do -- ignore clicks, just update position
+				v:mouse(0,x,y,key)
+			end
+
 		end
 	
-		for i,v in ipairs(widget) do
-			v:mouse(act,x,y,key)
-		end
 	end
-	
+
+	function meta.parent_active(widget)
+		if not widget.master.active then return true end
+
+		local w=widget
+		repeat
+			if w==widget.master.active then return true end
+			w=w.parent
+			if w==widget.master.active then return true end
+		until w.parent==w.master -- reached top
+		
+		return false
+	end
 --
 -- update this widget and its sub widgets
 --
