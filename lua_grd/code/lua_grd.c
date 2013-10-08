@@ -695,16 +695,19 @@ struct grd_area gc[1];
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_flipx (lua_State *l)
+{
+part_ptr p;
+	p=lua_grd_check_ptr(l,1);
+	grd_flipx(p);
+	lua_pushvalue(l,1);
+	return 1;
+}
 int lua_grd_flipy (lua_State *l)
 {
 part_ptr p;
-
 	p=lua_grd_check_ptr(l,1);
-
 	grd_flipy(p);
-
-//	lua_grd_getinfo(l,p,1);
-
 	lua_pushvalue(l,1);
 	return 1;
 }
@@ -1246,6 +1249,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"scale",			lua_grd_scale},
 		{"resize",			lua_grd_resize},
 			
+		{"flipx",			lua_grd_flipx},
 		{"flipy",			lua_grd_flipy},
 		{"blit",			lua_grd_blit},
 		

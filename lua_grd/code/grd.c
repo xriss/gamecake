@@ -1040,6 +1040,8 @@ s32 xx,yy,zz;
 u32 *ptr;
 u32 abgr;
 
+u8 *p8;
+
 // clamp the input values
 	if(x<0) {x=0;}	if(x>=gi->w) {x=gi->w-1;}
 	if(y<0) {y=0;}	if(y>=gi->h) {y=gi->h-1;}
@@ -1049,40 +1051,90 @@ u32 abgr;
 	if(h<0) {h=0;}	if(y+h>gi->h) {h=gi->h-y;}
 	if(d<0) {d=0;}	if(z+d>gi->d) {d=gi->d-z;}
 
-	for(zz=z;zz<z+d;zz++)
+	if	( // any U8 32bit format should be fine
+			( gi->fmt==GRD_FMT_U8_ARGB ) ||
+			( gi->fmt==GRD_FMT_U8_ARGB_PREMULT ) ||
+			( gi->fmt==GRD_FMT_U8_RGBA ) ||
+			( gi->fmt==GRD_FMT_U8_RGBA_PREMULT )
+		)
 	{
-		for(yy=y;yy<y+h;yy++)
+		for(zz=z;zz<z+d;zz++)
 		{
-			ptr=(u32*)grdinfo_get_data(gi,x,yy,zz);
-			for(xx=x;xx<x+w;xx++)
+			for(yy=y;yy<y+h;yy++)
 			{
-				abgr=*ptr++;
-				a+=(abgr>>24)&0xff;
-				b+=(abgr>>16)&0xff;
-				g+=(abgr>> 8)&0xff;
-				r+=(abgr    )&0xff;
-				c++;
+				ptr=(u32*)grdinfo_get_data(gi,x,yy,zz);
+				for(xx=x;xx<x+w;xx++)
+				{
+					abgr=*ptr++;
+					a+=(abgr>>24)&0xff;
+					b+=(abgr>>16)&0xff;
+					g+=(abgr>> 8)&0xff;
+					r+=(abgr    )&0xff;
+					c++;
+				}
 			}
 		}
-	}
-	
-	
-	if(c>0)
-	{
-		abgr=(((a/c)&0xff)<<24)|(((b/c)&0xff)<<16)|(((g/c)&0xff)<<8)|(((r/c)&0xff));
-	}
-	else
-	{
-		abgr=0;
+		
+		
+		if(c>0)
+		{
+			abgr=(((a/c)&0xff)<<24)|(((b/c)&0xff)<<16)|(((g/c)&0xff)<<8)|(((r/c)&0xff));
+		}
+		else
+		{
+			abgr=0;
+		}
+
+		return abgr;
 	}
 
-	return abgr;
+	if	( // any U8 32bit format should be fine
+			( gi->fmt==GRD_FMT_U8_LUMINANCE ) ||
+			( gi->fmt==GRD_FMT_U8_ALPHA ) 
+		)
+	{
+		for(zz=z;zz<z+d;zz++)
+		{
+			for(yy=y;yy<y+h;yy++)
+			{
+				p8=(u8*)grdinfo_get_data(gi,x,yy,zz);
+				for(xx=x;xx<x+w;xx++)
+				{
+					a+=*p8++;
+					c++;
+				}
+			}
+		}
+		
+		
+		if(c>0)
+		{
+			a=((a/c)&0xff);
+		}
+		else
+		{
+			a=0;
+		}
+
+		return a;
+	}
+	
+	if	( // just a single byte pickup for indexed images ( no real way to merge )
+			( gi->fmt==GRD_FMT_U8_INDEXED ) ||
+			( gi->fmt==GRD_FMT_U8_INDEXED_PREMULT )
+		)
+	{
+		p8=(u8*)grdinfo_get_data(gi,x,y,z);
+		return (u32)*p8;
+	}
+	
+	return 0;
 }
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// scale image
+// change the size of the image but keep the image data the same, rest of image is filled in with black
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int grd_resize( struct grd *g , s32 w, s32 h, s32 d)
@@ -1144,7 +1196,7 @@ u32 *pts;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// change the size of the image but keep the image data the same
+// scale image
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int grd_scale( struct grd *g , s32 w, s32 h, s32 d)
@@ -1163,14 +1215,19 @@ s32 sd=0;
 f32 fx,fy,fz;
 s32 x,y,z;
 u32 *ptr;
+u8 *p8;
 
 	if( // any U8 32bit format should be fine
+		( g->bmap->fmt!=GRD_FMT_U8_LUMINANCE ) &&
+		( g->bmap->fmt!=GRD_FMT_U8_ALPHA ) &&
+		( g->bmap->fmt!=GRD_FMT_U8_INDEXED ) &&
+		( g->bmap->fmt!=GRD_FMT_U8_INDEXED_PREMULT ) &&
 		( g->bmap->fmt!=GRD_FMT_U8_ARGB ) &&
 		( g->bmap->fmt!=GRD_FMT_U8_ARGB_PREMULT ) &&
 		( g->bmap->fmt!=GRD_FMT_U8_RGBA ) &&
 		( g->bmap->fmt!=GRD_FMT_U8_RGBA_PREMULT )
 
-	) { return 0; } // must be this format
+	) { return 0; } // must be one of these formats
 
 	if( gi->w<1 || gi->h<1 || gi->d<1 ) { return 0; }
 	if( w<1 || h<1 || d<1 ) { return 0; }
@@ -1191,10 +1248,24 @@ u32 *ptr;
 	{
 		for(y=0,fy=0.0f;y<h;y++,fy+=fh)
 		{
-			ptr=(u32*)grdinfo_get_data(gb->bmap,0,y,z);
-			for(x=0,fx=0.0f;x<w;x++,fx+=fw)
+			if( ( g->bmap->fmt==GRD_FMT_U8_INDEXED ) ||
+				( g->bmap->fmt==GRD_FMT_U8_INDEXED_PREMULT ) ||
+				( g->bmap->fmt==GRD_FMT_U8_LUMINANCE ) ||
+				( g->bmap->fmt==GRD_FMT_U8_ALPHA ) )
 			{
-				*ptr++=grd_sample(g, fx,fy,fz, sw,sh,sd );
+				p8=(u8*)grdinfo_get_data(gb->bmap,0,y,z);
+				for(x=0,fx=0.0f;x<w;x++,fx+=fw)
+				{
+					*p8++=(u8)grd_sample(g, fx,fy,fz, sw,sh,sd );
+				}
+			}
+			else
+			{
+				ptr=(u32*)grdinfo_get_data(gb->bmap,0,y,z);
+				for(x=0,fx=0.0f;x<w;x++,fx+=fw)
+				{
+					*ptr++=grd_sample(g, fx,fy,fz, sw,sh,sd ); // this is a terrible way to scale...
+				}
 			}
 		}
 	}
@@ -1204,6 +1275,37 @@ u32 *ptr;
 
 	return 1;
 }
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// flip left to right
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void grd_flipx( struct grd *g )
+{
+struct grd_info *gi=g->bmap;
+s32 x,y,z,i;
+s32 pw;
+u8 *p1;
+u8 *p2;
+u8 b;
+	pw=grd_sizeof_pixel(gi->fmt);
+	for(z=0;z<gi->d;z++)
+	{
+		for(y=0;y<(gi->h);y++)
+		{
+			p1=(u8*)grdinfo_get_data(gi,0,y,z);
+			p2=(u8*)grdinfo_get_data(gi,gi->w-1,y,z);
+			for(x=0;x<(gi->w/2);x++)
+			{
+				for(i=0;i<pw;i++) { b=p1[i]; p1[i]=p2[i]; p2[i]=b; }
+				p1+=pw;
+				p2-=pw;
+			}		
+		}
+	}
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1232,6 +1334,7 @@ u8 b;
 		}
 	}
 }
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1435,6 +1538,8 @@ u32 a,b;
 s32 i,j;
 s32 w=bb->w;
 s32 h=bb->h;
+
+//printf("%d,%d\n",w,h);
 
 	ga->err=0;
 
