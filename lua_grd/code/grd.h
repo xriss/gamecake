@@ -197,6 +197,7 @@ struct grd * grd_duplicate_quant(struct grd *g , s32 num_colors );
 int grd_convert( struct grd *g , s32 fmt );
 int grd_quant(struct grd *g , s32 num_colors );
 
+void grd_flipx( struct grd *g );
 void grd_flipy( struct grd *g );
 
 //int grd_conscale( struct grd *g , f32 base, f32 scale);
