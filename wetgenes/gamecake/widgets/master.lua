@@ -113,7 +113,7 @@ function wmaster.setup(widget,def)
 		if m.class=="key" then
 			widget:key(m.ascii,m.keyname,m.action)
 		elseif m.class=="mouse" then
-			widget:mouse(m.action,m.x,m.y,m.keycode)
+			widget:mouse(m.action,m.x,m.y,m.keyname)
 		elseif m.class=="joystick" then
 		
 			local joydir=mkeys.joystick_msg_to_key(m)
@@ -290,7 +290,7 @@ function wmaster.setup(widget,def)
 --
 -- handle mouse input
 --	
-	function master.mouse(widget,act,x,y,key)
+	function master.mouse(widget,act,x,y,keyname)
 --print(act,x,y,key)	
 		master.last_mouse_position={x,y}
 	
@@ -336,7 +336,7 @@ function wmaster.setup(widget,def)
 			local old_active=master.active
 			local old_over=master.over
 			for i,v in ipairs(widget) do
-				meta.mouse(v,act,x,y,key)
+				meta.mouse(v,act,x,y,keyname)
 			end
 			
 			if act== 1 then

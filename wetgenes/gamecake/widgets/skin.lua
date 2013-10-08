@@ -284,9 +284,10 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
-			gl.Translate(-widget.px*wsx,-widget.py*wsy,0)
+--			gl.Translate(-widget.px*wsx,-widget.py*wsy,0)
+--			gl.Translate(-widget.pxd,-widget.pyd,0)
 			if widget.pan_px and widget.pan_py then -- fidle everything
-				gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
+--				gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
 			end
 			
 			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
@@ -425,6 +426,7 @@ end
 					return false
 				else
 					local a=13/16
+					if widget.state=="selected" then a=15/16 end
 					gl.Color( c[1]*a,c[2]*a,c[3]*a,c[4] )
 				end
 		end

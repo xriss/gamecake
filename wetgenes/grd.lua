@@ -333,6 +333,12 @@ base.flipy=function(g,...)
 	return r and g
 end
 
+base.flipx=function(g,...)
+	local r=core.flipx(g[0],...)
+	core.info(g[0],g)
+	return r and g
+end
+
 base.shrink=function(g,...)
 	local r=core.shrink(g[0],...)
 	core.info(g[0],g)

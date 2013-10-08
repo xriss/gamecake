@@ -317,6 +317,16 @@ function base.msg(w)
 
 	if m then -- proccess the msg some more
 	
+		if m.class=="mouse" then
+			if not m.keyname then
+				if m.keycode==1 then m.keyname="left"
+				elseif m.keycode==2 then m.keyname="middle"
+				elseif m.keycode==3 then m.keyname="right"
+				else m.keyname="mouse"
+				end
+			end
+		end
+	
 		if m.keyname then -- run it through our keymap probably just force it to lowercase.
 			m.keyname=win.keymap(m.keyname)
 		end

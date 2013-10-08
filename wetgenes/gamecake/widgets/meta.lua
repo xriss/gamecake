@@ -268,7 +268,7 @@ function wmeta.setup(def)
 --
 -- handle mouse input
 --
-	function meta.mouse(widget,act,x,y,key)
+	function meta.mouse(widget,act,x,y,keyname)
 	
 --print(x..","..y.." : "..widget.px..","..widget.py)
 
@@ -293,7 +293,7 @@ function wmeta.setup(def)
 				if act==-1 then
 					if (not widget.master.dragging()) or widget.master.active==widget then
 	--				if widget.master.active and widget.master.active==widget then -- widget clicked
-						widget:call_hook("click",{key=key})
+						widget:call_hook("click",{keyname=keyname})
 					end
 				end
 
@@ -304,7 +304,7 @@ function wmeta.setup(def)
 			end
 
 			for i,v in ipairs(widget) do -- children must be within parent bounds to catch clicks
-				v:mouse(act,x,y,key)
+				v:mouse(act,x,y,keyname)
 			end
 
 		else
@@ -314,7 +314,7 @@ function wmeta.setup(def)
 			end
 
 			for i,v in ipairs(widget) do -- ignore clicks, just update position
-				v:mouse(0,x,y,key)
+				v:mouse(0,x,y,keyname)
 			end
 
 		end
