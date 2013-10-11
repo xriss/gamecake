@@ -16,7 +16,7 @@ local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
 function wslide.mouse(widget,act,x,y,key)
 --	widget.master.focus=widget
-	if act==1 and ( x>=widget.pxd and y>=widget.pyd and x<widget.pxd+widget.hx and y<widget.pyd+widget.hy ) then
+	if act==1 and key=="left" and ( x>=widget.pxd and y>=widget.pyd and x<widget.pxd+widget.hx and y<widget.pyd+widget.hy ) then
 		if 		x<widget.drag.pxd 					then widget:key("","left",1)
 		elseif 	x>widget.drag.pxd+widget.drag.hx 	then widget:key("","right",1)
 		elseif 	y<widget.drag.pyd 					then widget:key("","up",1)

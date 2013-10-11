@@ -339,10 +339,10 @@ function wmaster.setup(widget,def)
 				meta.mouse(v,act,x,y,keyname)
 			end
 			
-			if act== 1 then
+			if act== 1 and keyname=="left" then
 				master.press=true
 			end
-			if act==-1 then
+			if act==-1 and keyname=="left" then
 				master.press=false
 				master.active=nil
 			end

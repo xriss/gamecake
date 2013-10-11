@@ -148,10 +148,15 @@ end
 --
 function win.android_start(apk)
 
-	if jit and jit.off then
+	if jit then -- start by tring to force a jit memory allocation
+		require("jit.opt").start("sizemcode=256","maxmcode=256")
+		for i=1,1000 do end
+  	end
+
+--	if jit and jit.off then
 --		jit.off()
 --		hardcore.print("LUA JIT OFF")
-	end -- jit breaks stuff?
+--	end -- jit breaks stuff?
 
 
 -- replace print

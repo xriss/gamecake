@@ -68,6 +68,9 @@ function M.bake(oven,framebuffers)
 		framebuffers.free_depth(fbo)
 		framebuffers.free_texture(fbo)
 		framebuffers.free_frame(fbo)
+		fbo.w=0
+		fbo.h=0
+		fbo.d=0
 	end
 
 	framebuffers.bind_texture = function(fbo)

@@ -287,7 +287,7 @@ if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always d
 --			gl.Translate(-widget.px*wsx,-widget.py*wsy,0)
 --			gl.Translate(-widget.pxd,-widget.pyd,0)
 			if widget.pan_px and widget.pan_py then -- fidle everything
---				gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
+				gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
 			end
 			
 			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?

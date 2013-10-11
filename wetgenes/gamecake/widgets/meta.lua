@@ -279,7 +279,7 @@ function wmeta.setup(def)
 			if widget.pan_py then y=y+widget.pan_py end
 		
 			if widget.solid then
-				if act==1 then
+				if act==1 and keyname=="left" then
 	-- only set if null or our parent...
 	--print(widget,widget.class)
 	--print("active",widget,widget and widget.class,
@@ -290,7 +290,7 @@ function wmeta.setup(def)
 						widget.master.active_y=y-widget.pyd
 					end
 				end
-				if act==-1 then
+				if act==-1 and keyname=="left" then
 					if (not widget.master.dragging()) or widget.master.active==widget then
 	--				if widget.master.active and widget.master.active==widget then -- widget clicked
 						widget:call_hook("click",{keyname=keyname})

@@ -124,6 +124,8 @@ local import=[[
 #define	GRD_PAINT_MODE_COLOR						0x0802
 // Paint a copy
 #define	GRD_PAINT_MODE_COPY							0x0803
+// Paint using XOR
+#define	GRD_PAINT_MODE_XOR							0x0804
 
 ]]
 -- parse the above string for constants, makes updates as easy as a cutnpaste from original source code

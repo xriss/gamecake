@@ -45,8 +45,27 @@ if wwin.flavour=="linux" or wwin.flavour=="raspi" and wwin.posix then -- we need
 		local wbake=require("wetgenes.bake")
 		wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
 		wbake.create_dir_for_file(wwin.cache_prefix.."t.txt")
+
 	end
+	
 end
+
+--[[
+if wwin.flavour=="windows" then -- we need to store in the homedir
+
+	local homedir=wwin.posix.getenv("USERPROFILE")
+
+	if homedir then
+		wwin.files_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/files/"
+		wwin.cache_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/cache/"
+
+		local wbake=require("wetgenes.bake")
+		wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
+		wbake.create_dir_for_file(wwin.cache_prefix.."t.txt")
+	end
+
+end
+]]
 
 --print(wwin.files_prefix)
 --print(wwin.cache_prefix)
