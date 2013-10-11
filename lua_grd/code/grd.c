@@ -1142,19 +1142,21 @@ int grd_resize( struct grd *g , s32 w, s32 h, s32 d)
 struct grd_info *gi=g->bmap;
 struct grd *gb;
 
-
+s32 s;
 s32 ww,hh,dd;
 s32 x,y,z;
-u32 *ptr;
-u32 *pts;
+u8 *ptr;
+u8 *pts;
 
-	if( // any U8 32bit format should be fine
+/*
+ * 	if( // any U8 32bit format should be fine
 		( g->bmap->fmt!=GRD_FMT_U8_ARGB ) &&
 		( g->bmap->fmt!=GRD_FMT_U8_ARGB_PREMULT ) &&
 		( g->bmap->fmt!=GRD_FMT_U8_RGBA ) &&
 		( g->bmap->fmt!=GRD_FMT_U8_RGBA_PREMULT )
 
 	) { return 0; } // must be this format
+*/
 
 	if( gi->w<1 || gi->h<1 || gi->d<1 ) { return 0; }
 	if( w<1 || h<1 || d<1 ) { return 0; }
@@ -1170,21 +1172,31 @@ u32 *pts;
 	{
 		for(y=0;y<h;y++)
 		{
-			ptr=(u32*)grdinfo_get_data(gb->bmap,0,y,z);
-			if(y<hh && z<dd)
+			ptr=(u8*)grdinfo_get_data(gb->bmap,0,y,z);
+			if(y<hh && z<dd && y<h && z<d) // scan line must exist both sides
 			{
-				pts=(u32*)grdinfo_get_data(gi,0,y,z);
+				pts=(u8*)grdinfo_get_data(gi,0,y,z);
+				if(ww<w) { s=ww*grd_sizeof_pixel(gb->bmap->fmt); } else { s=w*grd_sizeof_pixel(gb->bmap->fmt); }
+				memcpy(ptr,pts,s);
 			}
-			else
-			{
-				pts=(u32*)0;
-			}
-			for(x=0;x<w;x++)
-			{
-				if(pts && x<ww) { *ptr++=*pts++; }
-				else { *ptr++=0; }
-			}
+//			else
+//			{
+//				pts=(u8*)0;
+//			}
+//			if(pts)
+//			{
+//			}
+//			for(x=0;x<w;x++)
+//			{
+//				if(pts && x<ww) { *ptr++=*pts++; }
+//				else { *ptr++=0; }
+//			}
 		}
+	}
+
+	if(gb->cmap->data)
+	{
+		memcpy(gb->cmap->data,g->cmap->data,gb->cmap->w*grd_sizeof_pixel(gb->cmap->fmt));
 	}
 	
 	grd_insert(g,gb);
@@ -1596,6 +1608,13 @@ s32 h=bb->h;
 				for(j=0;j<w;j++)
 				{
 					*(pa++)=*(pb++);
+				}
+			break;
+			
+			case GRD_PAINT_MODE_XOR:
+				for(j=0;j<w;j++)
+				{
+					*(pa++)=*(pb++) ^ *(pa);
 				}
 			break;
 		}
