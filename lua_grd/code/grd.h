@@ -107,6 +107,8 @@
 #define	GRD_PAINT_MODE_COLOR						0x0802
 // Paint a copy
 #define	GRD_PAINT_MODE_COPY							0x0803
+// Paint using XOR
+#define	GRD_PAINT_MODE_XOR							0x0804
 
 
 
