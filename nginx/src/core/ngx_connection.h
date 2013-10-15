@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -27,6 +28,11 @@ struct ngx_listening_s {
     int                 backlog;
     int                 rcvbuf;
     int                 sndbuf;
+#if (NGX_HAVE_KEEPALIVE_TUNABLE)
+    int                 keepidle;
+    int                 keepintvl;
+    int                 keepcnt;
+#endif
 
     /* handler of accepted connection */
     ngx_connection_handler_pt   handler;
@@ -58,8 +64,9 @@ struct ngx_listening_s {
     unsigned            addr_ntop:1;
 
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
-    unsigned            ipv6only:2;
+    unsigned            ipv6only:1;
 #endif
+    unsigned            keepalive:2;
 
 #if (NGX_HAVE_DEFERRED_ACCEPT)
     unsigned            deferred_accept:1;
@@ -145,7 +152,6 @@ struct ngx_connection_s {
 
     unsigned            log_error:3;     /* ngx_connection_log_error_e */
 
-    unsigned            single_connection:1;
     unsigned            unexpected_eof:1;
     unsigned            timedout:1;
     unsigned            error:1;

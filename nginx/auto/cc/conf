@@ -1,5 +1,6 @@
 
 # Copyright (C) Igor Sysoev
+# Copyright (C) Nginx, Inc.
 
 
 LINK="\$(CC)"
@@ -53,6 +54,12 @@ else
             #     4.0.0, 4.0.1, 4.1.0
 
             . auto/cc/gcc
+        ;;
+
+        clang)
+            # Clang C compiler
+
+            . auto/cc/clang
         ;;
 
         icc)

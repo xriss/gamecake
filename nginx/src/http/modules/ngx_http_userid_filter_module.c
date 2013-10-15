@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -165,8 +166,8 @@ static ngx_http_module_t  ngx_http_userid_filter_module_ctx = {
     NULL,                                  /* create server configuration */
     NULL,                                  /* merge server configuration */
 
-    ngx_http_userid_create_conf,           /* create location configration */
-    ngx_http_userid_merge_conf             /* merge location configration */
+    ngx_http_userid_create_conf,           /* create location configuration */
+    ngx_http_userid_merge_conf             /* merge location configuration */
 };
 
 
@@ -773,12 +774,8 @@ ngx_http_userid_expires(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
     ucf->expires = ngx_parse_time(&value[1], 1);
-    if (ucf->expires == NGX_ERROR) {
+    if (ucf->expires == (time_t) NGX_ERROR) {
         return "invalid value";
-    }
-
-    if (ucf->expires == NGX_PARSE_LARGE_TIME) {
-        return "value must be less than 68 years";
     }
 
     return NGX_CONF_OK;

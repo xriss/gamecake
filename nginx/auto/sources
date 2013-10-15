@@ -1,5 +1,6 @@
 
 # Copyright (C) Igor Sysoev
+# Copyright (C) Nginx, Inc.
 
 
 CORE_MODULES="ngx_core_module ngx_errlog_module ngx_conf_module"
@@ -69,13 +70,15 @@ CORE_SRCS="src/core/nginx.c \
            src/core/ngx_crypt.c"
 
 
+REGEX_MODULE=ngx_regex_module
 REGEX_DEPS=src/core/ngx_regex.h
 REGEX_SRCS=src/core/ngx_regex.c
 
 
 OPENSSL_MODULE=ngx_openssl_module
 OPENSSL_DEPS=src/event/ngx_event_openssl.h
-OPENSSL_SRCS=src/event/ngx_event_openssl.c
+OPENSSL_SRCS="src/event/ngx_event_openssl.c \
+              src/event/ngx_event_openssl_stapling.c"
 
 
 EVENT_MODULES="ngx_events_module ngx_event_core_module"
@@ -143,6 +146,7 @@ UNIX_DEPS="$CORE_DEPS $EVENT_DEPS \
             src/os/unix/ngx_channel.h \
             src/os/unix/ngx_shmem.h \
             src/os/unix/ngx_process.h \
+            src/os/unix/ngx_setaffinity.h \
             src/os/unix/ngx_setproctitle.h \
             src/os/unix/ngx_atomic.h \
             src/os/unix/ngx_gcc_atomic_x86.h \
@@ -177,6 +181,7 @@ UNIX_SRCS="$CORE_SRCS $EVENT_SRCS \
             src/os/unix/ngx_shmem.c \
             src/os/unix/ngx_process.c \
             src/os/unix/ngx_daemon.c \
+            src/os/unix/ngx_setaffinity.c \
             src/os/unix/ngx_setproctitle.c \
             src/os/unix/ngx_posix_init.c \
             src/os/unix/ngx_user.c \
@@ -319,12 +324,25 @@ HTTP_POSTPONE_FILTER_SRCS=src/http/ngx_http_postpone_filter_module.c
 HTTP_FILE_CACHE_SRCS=src/http/ngx_http_file_cache.c
 
 
+HTTP_SPDY_MODULE=ngx_http_spdy_module
+HTTP_SPDY_FILTER_MODULE=ngx_http_spdy_filter_module
+HTTP_SPDY_DEPS="src/http/ngx_http_spdy.h \
+                src/http/ngx_http_spdy_module.h"
+HTTP_SPDY_SRCS="src/http/ngx_http_spdy.c \
+                src/http/ngx_http_spdy_module.c \
+                src/http/ngx_http_spdy_filter_module.c"
+
+
 HTTP_CHARSET_FILTER_MODULE=ngx_http_charset_filter_module
 HTTP_CHARSET_SRCS=src/http/modules/ngx_http_charset_filter_module.c
 
 
 HTTP_GZIP_FILTER_MODULE=ngx_http_gzip_filter_module
 HTTP_GZIP_SRCS=src/http/modules/ngx_http_gzip_filter_module.c
+
+
+HTTP_GUNZIP_FILTER_MODULE=ngx_http_gunzip_filter_module
+HTTP_GUNZIP_SRCS=src/http/modules/ngx_http_gunzip_filter_module.c
 
 
 HTTP_SSI_FILTER_MODULE=ngx_http_ssi_filter_module
@@ -435,8 +453,8 @@ HTTP_MEMCACHED_MODULE=ngx_http_memcached_module
 HTTP_MEMCACHED_SRCS=src/http/modules/ngx_http_memcached_module.c
 
 
-HTTP_LIMIT_ZONE_MODULE=ngx_http_limit_zone_module
-HTTP_LIMIT_ZONE_SRCS=src/http/modules/ngx_http_limit_zone_module.c
+HTTP_LIMIT_CONN_MODULE=ngx_http_limit_conn_module
+HTTP_LIMIT_CONN_SRCS=src/http/modules/ngx_http_limit_conn_module.c
 
 
 HTTP_LIMIT_REQ_MODULE=ngx_http_limit_req_module
@@ -473,6 +491,16 @@ HTTP_GZIP_STATIC_SRCS=src/http/modules/ngx_http_gzip_static_module.c
 
 HTTP_UPSTREAM_IP_HASH_MODULE=ngx_http_upstream_ip_hash_module
 HTTP_UPSTREAM_IP_HASH_SRCS=src/http/modules/ngx_http_upstream_ip_hash_module.c
+
+
+HTTP_UPSTREAM_LEAST_CONN_MODULE=ngx_http_upstream_least_conn_module
+HTTP_UPSTREAM_LEAST_CONN_SRCS=" \
+    src/http/modules/ngx_http_upstream_least_conn_module.c"
+
+
+HTTP_UPSTREAM_KEEPALIVE_MODULE=ngx_http_upstream_keepalive_module
+HTTP_UPSTREAM_KEEPALIVE_SRCS=" \
+    src/http/modules/ngx_http_upstream_keepalive_module.c"
 
 
 MAIL_INCS="src/mail"

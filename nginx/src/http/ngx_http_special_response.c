@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -70,6 +71,14 @@ static char ngx_http_error_303_page[] =
 "<head><title>303 See Other</title></head>" CRLF
 "<body bgcolor=\"white\">" CRLF
 "<center><h1>303 See Other</h1></center>" CRLF
+;
+
+
+static char ngx_http_error_307_page[] =
+"<html>" CRLF
+"<head><title>307 Temporary Redirect</title></head>" CRLF
+"<body bgcolor=\"white\">" CRLF
+"<center><h1>307 Temporary Redirect</h1></center>" CRLF
 ;
 
 
@@ -251,9 +260,9 @@ static char ngx_http_error_500_page[] =
 
 static char ngx_http_error_501_page[] =
 "<html>" CRLF
-"<head><title>501 Method Not Implemented</title></head>" CRLF
+"<head><title>501 Not Implemented</title></head>" CRLF
 "<body bgcolor=\"white\">" CRLF
-"<center><h1>501 Method Not Implemented</h1></center>" CRLF
+"<center><h1>501 Not Implemented</h1></center>" CRLF
 ;
 
 
@@ -293,16 +302,20 @@ static ngx_str_t ngx_http_error_pages[] = {
 
     ngx_null_string,                     /* 201, 204 */
 
-#define NGX_HTTP_LAST_LEVEL_200  202
-#define NGX_HTTP_LEVEL_200       (NGX_HTTP_LAST_LEVEL_200 - 201)
+#define NGX_HTTP_LAST_2XX  202
+#define NGX_HTTP_OFF_3XX   (NGX_HTTP_LAST_2XX - 201)
 
     /* ngx_null_string, */               /* 300 */
     ngx_string(ngx_http_error_301_page),
     ngx_string(ngx_http_error_302_page),
     ngx_string(ngx_http_error_303_page),
+    ngx_null_string,                     /* 304 */
+    ngx_null_string,                     /* 305 */
+    ngx_null_string,                     /* 306 */
+    ngx_string(ngx_http_error_307_page),
 
-#define NGX_HTTP_LAST_LEVEL_300  304
-#define NGX_HTTP_LEVEL_300       (NGX_HTTP_LAST_LEVEL_300 - 301)
+#define NGX_HTTP_LAST_3XX  308
+#define NGX_HTTP_OFF_4XX   (NGX_HTTP_LAST_3XX - 301 + NGX_HTTP_OFF_3XX)
 
     ngx_string(ngx_http_error_400_page),
     ngx_string(ngx_http_error_401_page),
@@ -322,8 +335,8 @@ static ngx_str_t ngx_http_error_pages[] = {
     ngx_string(ngx_http_error_415_page),
     ngx_string(ngx_http_error_416_page),
 
-#define NGX_HTTP_LAST_LEVEL_400  417
-#define NGX_HTTP_LEVEL_400       (NGX_HTTP_LAST_LEVEL_400 - 400)
+#define NGX_HTTP_LAST_4XX  417
+#define NGX_HTTP_OFF_5XX   (NGX_HTTP_LAST_4XX - 400 + NGX_HTTP_OFF_4XX)
 
     ngx_string(ngx_http_error_494_page), /* 494, request header too large */
     ngx_string(ngx_http_error_495_page), /* 495, https certificate error */
@@ -341,7 +354,7 @@ static ngx_str_t ngx_http_error_pages[] = {
     ngx_null_string,                     /* 506 */
     ngx_string(ngx_http_error_507_page)
 
-#define NGX_HTTP_LAST_LEVEL_500  508
+#define NGX_HTTP_LAST_5XX  508
 
 };
 
@@ -371,6 +384,7 @@ ngx_http_special_response_handler(ngx_http_request_t *r, ngx_int_t error)
             case NGX_HTTPS_CERT_ERROR:
             case NGX_HTTPS_NO_CERT:
             case NGX_HTTP_INTERNAL_SERVER_ERROR:
+            case NGX_HTTP_NOT_IMPLEMENTED:
                 r->keepalive = 0;
         }
     }
@@ -407,7 +421,7 @@ ngx_http_special_response_handler(ngx_http_request_t *r, ngx_int_t error)
     r->expect_tested = 1;
 
     if (ngx_http_discard_request_body(r) != NGX_OK) {
-        error = NGX_HTTP_INTERNAL_SERVER_ERROR;
+        r->keepalive = 0;
     }
 
     if (clcf->msie_refresh
@@ -427,25 +441,22 @@ ngx_http_special_response_handler(ngx_http_request_t *r, ngx_int_t error)
         err = 0;
 
     } else if (error >= NGX_HTTP_MOVED_PERMANENTLY
-               && error < NGX_HTTP_LAST_LEVEL_300)
+               && error < NGX_HTTP_LAST_3XX)
     {
         /* 3XX */
-        err = error - NGX_HTTP_MOVED_PERMANENTLY + NGX_HTTP_LEVEL_200;
+        err = error - NGX_HTTP_MOVED_PERMANENTLY + NGX_HTTP_OFF_3XX;
 
     } else if (error >= NGX_HTTP_BAD_REQUEST
-               && error < NGX_HTTP_LAST_LEVEL_400)
+               && error < NGX_HTTP_LAST_4XX)
     {
         /* 4XX */
-        err = error - NGX_HTTP_BAD_REQUEST + NGX_HTTP_LEVEL_200
-                                           + NGX_HTTP_LEVEL_300;
+        err = error - NGX_HTTP_BAD_REQUEST + NGX_HTTP_OFF_4XX;
 
     } else if (error >= NGX_HTTP_NGINX_CODES
-               && error < NGX_HTTP_LAST_LEVEL_500)
+               && error < NGX_HTTP_LAST_5XX)
     {
         /* 49X, 5XX */
-        err = error - NGX_HTTP_NGINX_CODES + NGX_HTTP_LEVEL_200
-                                           + NGX_HTTP_LEVEL_300
-                                           + NGX_HTTP_LEVEL_400;
+        err = error - NGX_HTTP_NGINX_CODES + NGX_HTTP_OFF_5XX;
         switch (error) {
             case NGX_HTTP_TO_HTTPS:
             case NGX_HTTPS_CERT_ERROR:
@@ -569,12 +580,11 @@ ngx_http_send_error_page(ngx_http_request_t *r, ngx_http_err_page_t *err_page)
         return NGX_ERROR;
     }
 
-    if (overwrite >= NGX_HTTP_MOVED_PERMANENTLY
-        && overwrite <= NGX_HTTP_SEE_OTHER)
+    if (overwrite != NGX_HTTP_MOVED_PERMANENTLY
+        && overwrite != NGX_HTTP_MOVED_TEMPORARILY
+        && overwrite != NGX_HTTP_SEE_OTHER
+        && overwrite != NGX_HTTP_TEMPORARY_REDIRECT)
     {
-        r->err_status = overwrite;
-
-    } else {
         r->err_status = NGX_HTTP_MOVED_TEMPORARILY;
     }
 
@@ -594,7 +604,7 @@ ngx_http_send_error_page(ngx_http_request_t *r, ngx_http_err_page_t *err_page)
 
     return ngx_http_send_special_response(r, clcf, r->err_status
                                                    - NGX_HTTP_MOVED_PERMANENTLY
-                                                   + NGX_HTTP_LEVEL_200);
+                                                   + NGX_HTTP_OFF_3XX);
 }
 
 
@@ -625,7 +635,7 @@ ngx_http_send_special_response(ngx_http_request_t *r,
         if (clcf->msie_padding
             && (r->headers_in.msie || r->headers_in.chrome)
             && r->http_version >= NGX_HTTP_VERSION_10
-            && err >= NGX_HTTP_LEVEL_300)
+            && err >= NGX_HTTP_OFF_4XX)
         {
             r->headers_out.content_length_n +=
                                          sizeof(ngx_http_msie_padding) - 1;
@@ -647,6 +657,7 @@ ngx_http_send_special_response(ngx_http_request_t *r,
 
     ngx_http_clear_accept_ranges(r);
     ngx_http_clear_last_modified(r);
+    ngx_http_clear_etag(r);
 
     rc = ngx_http_send_header(r);
 
@@ -745,6 +756,7 @@ ngx_http_send_refresh(ngx_http_request_t *r)
 
     ngx_http_clear_accept_ranges(r);
     ngx_http_clear_last_modified(r);
+    ngx_http_clear_etag(r);
 
     rc = ngx_http_send_header(r);
 

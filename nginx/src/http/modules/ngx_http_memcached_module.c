@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -12,6 +13,7 @@
 typedef struct {
     ngx_http_upstream_conf_t   upstream;
     ngx_int_t                  index;
+    ngx_uint_t                 gzip_flag;
 } ngx_http_memcached_loc_conf_t;
 
 
@@ -100,6 +102,13 @@ static ngx_command_t  ngx_http_memcached_commands[] = {
       offsetof(ngx_http_memcached_loc_conf_t, upstream.next_upstream),
       &ngx_http_memcached_next_upstream_masks },
 
+    { ngx_string("memcached_gzip_flag"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_num_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_memcached_loc_conf_t, gzip_flag),
+      NULL },
+
       ngx_null_command
 };
 
@@ -114,8 +123,8 @@ static ngx_http_module_t  ngx_http_memcached_module_ctx = {
     NULL,                                  /* create server configuration */
     NULL,                                  /* merge server configuration */
 
-    ngx_http_memcached_create_loc_conf,    /* create location configration */
-    ngx_http_memcached_merge_loc_conf      /* merge location configration */
+    ngx_http_memcached_create_loc_conf,    /* create location configuration */
+    ngx_http_memcached_merge_loc_conf      /* merge location configuration */
 };
 
 
@@ -280,10 +289,13 @@ ngx_http_memcached_reinit_request(ngx_http_request_t *r)
 static ngx_int_t
 ngx_http_memcached_process_header(ngx_http_request_t *r)
 {
-    u_char                    *p, *len;
-    ngx_str_t                  line;
-    ngx_http_upstream_t       *u;
-    ngx_http_memcached_ctx_t  *ctx;
+    u_char                         *p, *start;
+    ngx_str_t                       line;
+    ngx_uint_t                      flags;
+    ngx_table_elt_t                *h;
+    ngx_http_upstream_t            *u;
+    ngx_http_memcached_ctx_t       *ctx;
+    ngx_http_memcached_loc_conf_t  *mlcf;
 
     u = r->upstream;
 
@@ -308,6 +320,7 @@ found:
     p = u->buffer.pos;
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_memcached_module);
+    mlcf = ngx_http_get_module_loc_conf(r, ngx_http_memcached_module);
 
     if (ngx_strncmp(p, "VALUE ", sizeof("VALUE ") - 1) == 0) {
 
@@ -328,24 +341,57 @@ found:
             goto no_valid;
         }
 
-        /* skip flags */
+        /* flags */
+
+        start = p;
 
         while (*p) {
             if (*p++ == ' ') {
-                goto length;
+                if (mlcf->gzip_flag) {
+                    goto flags;
+                } else {
+                    goto length;
+                }
             }
         }
 
         goto no_valid;
 
+    flags:
+
+        flags = ngx_atoi(start, p - start - 1);
+
+        if (flags == (ngx_uint_t) NGX_ERROR) {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                          "memcached sent invalid flags in response \"%V\" "
+                          "for key \"%V\"",
+                          &line, &ctx->key);
+            return NGX_HTTP_UPSTREAM_INVALID_HEADER;
+        }
+
+        if (flags & mlcf->gzip_flag) {
+            h = ngx_list_push(&r->headers_out.headers);
+            if (h == NULL) {
+                return NGX_ERROR;
+            }
+
+            h->hash = 1;
+            h->key.len = sizeof("Content-Encoding") - 1;
+            h->key.data = (u_char *) "Content-Encoding";
+            h->value.len = sizeof("gzip") - 1;
+            h->value.data = (u_char *) "gzip";
+
+            r->headers_out.content_encoding = h;
+        }
+
     length:
 
-        len = p;
+        start = p;
 
         while (*p && *p++ != CR) { /* void */ }
 
-        r->headers_out.content_length_n = ngx_atoof(len, p - len - 1);
-        if (r->headers_out.content_length_n == -1) {
+        u->headers_in.content_length_n = ngx_atoof(start, p - start - 1);
+        if (u->headers_in.content_length_n == -1) {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                           "memcached sent invalid length in response \"%V\" "
                           "for key \"%V\"",
@@ -366,6 +412,7 @@ found:
 
         u->headers_in.status_n = 404;
         u->state->status = 404;
+        u->keepalive = 1;
 
         return NGX_OK;
     }
@@ -407,7 +454,7 @@ ngx_http_memcached_filter(void *data, ssize_t bytes)
     u = ctx->request->upstream;
     b = &u->buffer;
 
-    if (u->length == ctx->rest) {
+    if (u->length == (ssize_t) ctx->rest) {
 
         if (ngx_strncmp(b->last,
                    ngx_http_memcached_end + NGX_HTTP_MEMCACHED_END - ctx->rest,
@@ -425,6 +472,10 @@ ngx_http_memcached_filter(void *data, ssize_t bytes)
 
         u->length -= bytes;
         ctx->rest -= bytes;
+
+        if (u->length == 0) {
+            u->keepalive = 1;
+        }
 
         return NGX_OK;
     }
@@ -463,12 +514,23 @@ ngx_http_memcached_filter(void *data, ssize_t bytes)
     if (ngx_strncmp(last, ngx_http_memcached_end, b->last - last) != 0) {
         ngx_log_error(NGX_LOG_ERR, ctx->request->connection->log, 0,
                       "memcached sent invalid trailer");
+
+        b->last = last;
+        cl->buf->last = last;
+        u->length = 0;
+        ctx->rest = 0;
+
+        return NGX_OK;
     }
 
     ctx->rest -= b->last - last;
     b->last = last;
     cl->buf->last = last;
     u->length = ctx->rest;
+
+    if (u->length == 0) {
+        u->keepalive = 1;
+    }
 
     return NGX_OK;
 }
@@ -512,6 +574,7 @@ ngx_http_memcached_create_loc_conf(ngx_conf_t *cf)
      *     conf->upstream.location = NULL;
      */
 
+    conf->upstream.local = NGX_CONF_UNSET_PTR;
     conf->upstream.connect_timeout = NGX_CONF_UNSET_MSEC;
     conf->upstream.send_timeout = NGX_CONF_UNSET_MSEC;
     conf->upstream.read_timeout = NGX_CONF_UNSET_MSEC;
@@ -533,6 +596,7 @@ ngx_http_memcached_create_loc_conf(ngx_conf_t *cf)
     conf->upstream.pass_request_body = 0;
 
     conf->index = NGX_CONF_UNSET;
+    conf->gzip_flag = NGX_CONF_UNSET_UINT;
 
     return conf;
 }
@@ -543,6 +607,9 @@ ngx_http_memcached_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 {
     ngx_http_memcached_loc_conf_t *prev = parent;
     ngx_http_memcached_loc_conf_t *conf = child;
+
+    ngx_conf_merge_ptr_value(conf->upstream.local,
+                              prev->upstream.local, NULL);
 
     ngx_conf_merge_msec_value(conf->upstream.connect_timeout,
                               prev->upstream.connect_timeout, 60000);
@@ -575,6 +642,8 @@ ngx_http_memcached_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     if (conf->index == NGX_CONF_UNSET) {
         conf->index = prev->index;
     }
+
+    ngx_conf_merge_uint_value(conf->gzip_flag, prev->gzip_flag, 0);
 
     return NGX_CONF_OK;
 }

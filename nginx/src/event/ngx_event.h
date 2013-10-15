@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -82,7 +83,7 @@ struct ngx_event_s {
 #endif
 
 #if (NGX_WIN32)
-    /* setsockopt(SO_UPDATE_ACCEPT_CONTEXT) was succesfull */
+    /* setsockopt(SO_UPDATE_ACCEPT_CONTEXT) was successful */
     unsigned         accept_context_updated:1;
 #endif
 
@@ -218,12 +219,6 @@ struct ngx_event_aio_s {
 };
 
 #endif
-
-
-typedef struct {
-    in_addr_t  mask;
-    in_addr_t  addr;
-} ngx_event_debug_t;
 
 
 typedef struct {
@@ -516,6 +511,7 @@ extern ngx_atomic_t  *ngx_stat_requests;
 extern ngx_atomic_t  *ngx_stat_active;
 extern ngx_atomic_t  *ngx_stat_reading;
 extern ngx_atomic_t  *ngx_stat_writing;
+extern ngx_atomic_t  *ngx_stat_waiting;
 
 #endif
 

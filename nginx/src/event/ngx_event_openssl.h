@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -16,6 +17,7 @@
 #include <openssl/conf.h>
 #include <openssl/engine.h>
 #include <openssl/evp.h>
+#include <openssl/ocsp.h>
 
 #define NGX_SSL_NAME     "OpenSSL"
 
@@ -81,9 +83,11 @@ typedef struct {
 
 
 
-#define NGX_SSL_SSLv2    2
-#define NGX_SSL_SSLv3    4
-#define NGX_SSL_TLSv1    8
+#define NGX_SSL_SSLv2    0x0002
+#define NGX_SSL_SSLv3    0x0004
+#define NGX_SSL_TLSv1    0x0008
+#define NGX_SSL_TLSv1_1  0x0010
+#define NGX_SSL_TLSv1_2  0x0020
 
 
 #define NGX_SSL_BUFFER   1
@@ -98,7 +102,13 @@ ngx_int_t ngx_ssl_certificate(ngx_conf_t *cf, ngx_ssl_t *ssl,
     ngx_str_t *cert, ngx_str_t *key);
 ngx_int_t ngx_ssl_client_certificate(ngx_conf_t *cf, ngx_ssl_t *ssl,
     ngx_str_t *cert, ngx_int_t depth);
+ngx_int_t ngx_ssl_trusted_certificate(ngx_conf_t *cf, ngx_ssl_t *ssl,
+    ngx_str_t *cert, ngx_int_t depth);
 ngx_int_t ngx_ssl_crl(ngx_conf_t *cf, ngx_ssl_t *ssl, ngx_str_t *crl);
+ngx_int_t ngx_ssl_stapling(ngx_conf_t *cf, ngx_ssl_t *ssl,
+    ngx_str_t *file, ngx_str_t *responder, ngx_uint_t verify);
+ngx_int_t ngx_ssl_stapling_resolver(ngx_conf_t *cf, ngx_ssl_t *ssl,
+    ngx_resolver_t *resolver, ngx_msec_t resolver_timeout);
 RSA *ngx_ssl_rsa512_key_callback(SSL *ssl, int is_export, int key_length);
 ngx_int_t ngx_ssl_dhparam(ngx_conf_t *cf, ngx_ssl_t *ssl, ngx_str_t *file);
 ngx_int_t ngx_ssl_ecdh_curve(ngx_conf_t *cf, ngx_ssl_t *ssl, ngx_str_t *name);
@@ -116,6 +126,13 @@ ngx_int_t ngx_ssl_set_session(ngx_connection_t *c, ngx_ssl_session_t *session);
     SSL_get_ex_data(ssl_conn, ngx_ssl_connection_index)
 #define ngx_ssl_get_server_conf(ssl_ctx)                                      \
     SSL_CTX_get_ex_data(ssl_ctx, ngx_ssl_server_conf_index)
+
+#define ngx_ssl_verify_error_optional(n)                                      \
+    (n == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT                              \
+     || n == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN                             \
+     || n == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY                     \
+     || n == X509_V_ERR_CERT_UNTRUSTED                                        \
+     || n == X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE)
 
 
 ngx_int_t ngx_ssl_get_protocol(ngx_connection_t *c, ngx_pool_t *pool,
@@ -154,6 +171,8 @@ void ngx_ssl_cleanup_ctx(void *data);
 extern int  ngx_ssl_connection_index;
 extern int  ngx_ssl_server_conf_index;
 extern int  ngx_ssl_session_cache_index;
+extern int  ngx_ssl_certificate_index;
+extern int  ngx_ssl_stapling_index;
 
 
 #endif /* _NGX_EVENT_OPENSSL_H_INCLUDED_ */

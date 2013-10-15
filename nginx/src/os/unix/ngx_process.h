@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -8,6 +9,7 @@
 #define _NGX_PROCESS_H_INCLUDED_
 
 
+#include <ngx_setaffinity.h>
 #include <ngx_setproctitle.h>
 
 

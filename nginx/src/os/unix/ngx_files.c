@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -138,7 +139,7 @@ ngx_open_tempfile(u_char *name, ngx_uint_t persistent, ngx_uint_t access)
               access ? access : 0600);
 
     if (fd != -1 && !persistent) {
-        unlink((const char *) name);
+        (void) unlink((const char *) name);
     }
 
     return fd;
@@ -153,7 +154,7 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
 {
     u_char        *prev;
     size_t         size;
-    ssize_t        n;
+    ssize_t        total, n;
     ngx_array_t    vec;
     struct iovec  *iov, iovs[NGX_IOVS];
 
@@ -164,6 +165,8 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
                               (size_t) (cl->buf->last - cl->buf->pos),
                               offset);
     }
+
+    total = 0;
 
     vec.elts = iovs;
     vec.size = sizeof(struct iovec);
@@ -202,8 +205,15 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
 
         if (vec.nelts == 1) {
             iov = vec.elts;
-            return ngx_write_file(file, (u_char *) iov[0].iov_base,
-                                  iov[0].iov_len, offset);
+
+            n = ngx_write_file(file, (u_char *) iov[0].iov_base,
+                               iov[0].iov_len, offset);
+
+            if (n == NGX_ERROR) {
+                return n;
+            }
+
+            return total + n;
         }
 
         if (file->sys_offset != offset) {
@@ -231,12 +241,17 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
             return NGX_ERROR;
         }
 
+        ngx_log_debug2(NGX_LOG_DEBUG_CORE, file->log, 0,
+                       "writev: %d, %z", file->fd, n);
+
         file->sys_offset += n;
         file->offset += n;
+        offset += n;
+        total += n;
 
     } while (cl);
 
-    return n;
+    return total;
 }
 
 
@@ -348,7 +363,7 @@ ngx_open_glob(ngx_glob_t *gl)
 {
     int  n;
 
-    n = glob((char *) gl->pattern, GLOB_NOSORT, NULL, &gl->pglob);
+    n = glob((char *) gl->pattern, 0, NULL, &gl->pglob);
 
     if (n == 0) {
         return NGX_OK;
@@ -402,9 +417,7 @@ ngx_trylock_fd(ngx_fd_t fd)
 {
     struct flock  fl;
 
-    fl.l_start = 0;
-    fl.l_len = 0;
-    fl.l_pid = 0;
+    ngx_memzero(&fl, sizeof(struct flock));
     fl.l_type = F_WRLCK;
     fl.l_whence = SEEK_SET;
 
@@ -421,9 +434,7 @@ ngx_lock_fd(ngx_fd_t fd)
 {
     struct flock  fl;
 
-    fl.l_start = 0;
-    fl.l_len = 0;
-    fl.l_pid = 0;
+    ngx_memzero(&fl, sizeof(struct flock));
     fl.l_type = F_WRLCK;
     fl.l_whence = SEEK_SET;
 
@@ -440,9 +451,7 @@ ngx_unlock_fd(ngx_fd_t fd)
 {
     struct flock  fl;
 
-    fl.l_start = 0;
-    fl.l_len = 0;
-    fl.l_pid = 0;
+    ngx_memzero(&fl, sizeof(struct flock));
     fl.l_type = F_UNLCK;
     fl.l_whence = SEEK_SET;
 
@@ -454,7 +463,7 @@ ngx_unlock_fd(ngx_fd_t fd)
 }
 
 
-#if (NGX_HAVE_POSIX_FADVISE)
+#if (NGX_HAVE_POSIX_FADVISE) && !(NGX_HAVE_F_READAHEAD)
 
 ngx_int_t
 ngx_read_ahead(ngx_fd_t fd, size_t n)

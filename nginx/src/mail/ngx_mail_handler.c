@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -36,8 +37,6 @@ ngx_mail_init_connection(ngx_connection_t *c)
 
 
     /* find the server configuration for the address:port */
-
-    /* AF_INET only */
 
     port = c->listening->servers;
 

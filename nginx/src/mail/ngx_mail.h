@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -38,7 +39,13 @@ typedef struct {
     unsigned                ssl:1;
 #endif
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
-    unsigned                ipv6only:2;
+    unsigned                ipv6only:1;
+#endif
+    unsigned                so_keepalive:2;
+#if (NGX_HAVE_KEEPALIVE_TUNABLE)
+    int                     tcp_keepidle;
+    int                     tcp_keepintvl;
+    int                     tcp_keepcnt;
 #endif
 } ngx_mail_listen_t;
 
@@ -93,7 +100,13 @@ typedef struct {
     unsigned                ssl:1;
 #endif
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
-    unsigned                ipv6only:2;
+    unsigned                ipv6only:1;
+#endif
+    unsigned                so_keepalive:2;
+#if (NGX_HAVE_KEEPALIVE_TUNABLE)
+    int                     tcp_keepidle;
+    int                     tcp_keepintvl;
+    int                     tcp_keepcnt;
 #endif
 } ngx_mail_conf_addr_t;
 

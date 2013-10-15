@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -83,7 +84,7 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
     c->log_error = pc->log_error;
 
-    if (pc->sockaddr->sa_family != AF_INET) {
+    if (pc->sockaddr->sa_family == AF_UNIX) {
         c->tcp_nopush = NGX_TCP_NOPUSH_DISABLED;
         c->tcp_nodelay = NGX_TCP_NODELAY_DISABLED;
 
@@ -158,6 +159,9 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
             ngx_log_error(level, c->log, err, "connect() to %V failed",
                           pc->name);
+
+            ngx_close_connection(c);
+            pc->connection = NULL;
 
             return NGX_DECLINED;
         }
@@ -240,12 +244,8 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
 failed:
 
-    ngx_free_connection(c);
-
-    if (ngx_close_socket(s) == -1) {
-        ngx_log_error(NGX_LOG_ALERT, pc->log, ngx_socket_errno,
-                      ngx_close_socket_n " failed");
-    }
+    ngx_close_connection(c);
+    pc->connection = NULL;
 
     return NGX_ERROR;
 }

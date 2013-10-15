@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -8,9 +9,9 @@
 #define _NGINX_H_INCLUDED_
 
 
-#define nginx_version      1000010
-#define NGINX_VERSION      "1.0.10"
-#define NGINX_VER          "ngx_openresty/" NGINX_VERSION ".48"
+#define nginx_version      1004001
+#define NGINX_VERSION      "1.4.1"
+#define NGINX_VER          "nginx/" NGINX_VERSION
 
 #define NGINX_VAR          "NGINX"
 #define NGX_OLDPID_EXT     ".oldbin"

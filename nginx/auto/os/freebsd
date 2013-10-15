@@ -1,5 +1,6 @@
 
 # Copyright (C) Igor Sysoev
+# Copyright (C) Nginx, Inc.
 
 
 have=NGX_FREEBSD . auto/have_headers
@@ -132,4 +133,12 @@ END
 
         exit 1
     fi
+fi
+
+
+# cpuset_setaffinity()
+
+if [ $version -ge 701000 ]; then
+    echo " + cpuset_setaffinity() found"
+    have=NGX_HAVE_CPUSET_SETAFFINITY . auto/have
 fi

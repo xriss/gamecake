@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -121,15 +122,38 @@ void ngx_cdecl ngx_log_debug_core(ngx_log_t *log, ngx_err_t err,
 
 #if (NGX_HAVE_VARIADIC_MACROS)
 
-#define ngx_log_debug0  ngx_log_debug
-#define ngx_log_debug1  ngx_log_debug
-#define ngx_log_debug2  ngx_log_debug
-#define ngx_log_debug3  ngx_log_debug
-#define ngx_log_debug4  ngx_log_debug
-#define ngx_log_debug5  ngx_log_debug
-#define ngx_log_debug6  ngx_log_debug
-#define ngx_log_debug7  ngx_log_debug
-#define ngx_log_debug8  ngx_log_debug
+#define ngx_log_debug0(level, log, err, fmt)                                  \
+        ngx_log_debug(level, log, err, fmt)
+
+#define ngx_log_debug1(level, log, err, fmt, arg1)                            \
+        ngx_log_debug(level, log, err, fmt, arg1)
+
+#define ngx_log_debug2(level, log, err, fmt, arg1, arg2)                      \
+        ngx_log_debug(level, log, err, fmt, arg1, arg2)
+
+#define ngx_log_debug3(level, log, err, fmt, arg1, arg2, arg3)                \
+        ngx_log_debug(level, log, err, fmt, arg1, arg2, arg3)
+
+#define ngx_log_debug4(level, log, err, fmt, arg1, arg2, arg3, arg4)          \
+        ngx_log_debug(level, log, err, fmt, arg1, arg2, arg3, arg4)
+
+#define ngx_log_debug5(level, log, err, fmt, arg1, arg2, arg3, arg4, arg5)    \
+        ngx_log_debug(level, log, err, fmt, arg1, arg2, arg3, arg4, arg5)
+
+#define ngx_log_debug6(level, log, err, fmt,                                  \
+                       arg1, arg2, arg3, arg4, arg5, arg6)                    \
+        ngx_log_debug(level, log, err, fmt,                                   \
+                       arg1, arg2, arg3, arg4, arg5, arg6)
+
+#define ngx_log_debug7(level, log, err, fmt,                                  \
+                       arg1, arg2, arg3, arg4, arg5, arg6, arg7)              \
+        ngx_log_debug(level, log, err, fmt,                                   \
+                       arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+
+#define ngx_log_debug8(level, log, err, fmt,                                  \
+                       arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)        \
+        ngx_log_debug(level, log, err, fmt,                                   \
+                       arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 
 
 #else /* NO VARIADIC MACROS */
@@ -201,6 +225,22 @@ char *ngx_log_set_levels(ngx_conf_t *cf, ngx_log_t *log);
 void ngx_cdecl ngx_log_abort(ngx_err_t err, const char *fmt, ...);
 void ngx_cdecl ngx_log_stderr(ngx_err_t err, const char *fmt, ...);
 u_char *ngx_log_errno(u_char *buf, u_char *last, ngx_err_t err);
+
+
+/*
+ * ngx_write_stderr() cannot be implemented as macro, since
+ * MSVC does not allow to use #ifdef inside macro parameters.
+ *
+ * ngx_write_fd() is used instead of ngx_write_console(), since
+ * CharToOemBuff() inside ngx_write_console() cannot be used with
+ * read only buffer as destination and CharToOemBuff() is not needed
+ * for ngx_write_stderr() anyway.
+ */
+static ngx_inline void
+ngx_write_stderr(char *text)
+{
+    (void) ngx_write_fd(ngx_stderr, text, strlen(text));
+}
 
 
 extern ngx_module_t  ngx_errlog_module;

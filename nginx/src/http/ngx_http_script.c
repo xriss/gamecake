@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -113,11 +114,6 @@ ngx_http_compile_complex_value(ngx_http_compile_complex_value_t *ccv)
 
     v = ccv->value;
 
-    if (v->len == 0) {
-        ngx_conf_log_error(NGX_LOG_EMERG, ccv->cf, 0, "empty parameter");
-        return NGX_ERROR;
-    }
-
     nv = 0;
     nc = 0;
 
@@ -132,8 +128,9 @@ ngx_http_compile_complex_value(ngx_http_compile_complex_value_t *ccv)
         }
     }
 
-    if (v->data[0] != '$' && (ccv->conf_prefix || ccv->root_prefix)) {
-
+    if ((v->len == 0 || v->data[0] != '$')
+        && (ccv->conf_prefix || ccv->root_prefix))
+    {
         if (ngx_conf_full_name(ccv->cf->cycle, v, ccv->conf_prefix) != NGX_OK) {
             return NGX_ERROR;
         }
@@ -1042,7 +1039,6 @@ ngx_http_script_regex_start_code(ngx_http_script_engine_t *e)
         }
 
         e->buf.len = len;
-        e->is_args = le.is_args;
     }
 
     if (code->add_args && r->args.len) {
@@ -1504,6 +1500,12 @@ ngx_http_script_file_code(ngx_http_script_engine_t *e)
     of.test_only = 1;
     of.errors = clcf->open_file_cache_errors;
     of.events = clcf->open_file_cache_events;
+
+    if (ngx_http_set_disable_symlinks(r, clcf, &path, &of) != NGX_OK) {
+        e->ip = ngx_http_script_exit;
+        e->status = NGX_HTTP_INTERNAL_SERVER_ERROR;
+        return;
+    }
 
     if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
         != NGX_OK)

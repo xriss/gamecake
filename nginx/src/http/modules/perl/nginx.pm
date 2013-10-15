@@ -21,7 +21,9 @@ our @EXPORT = qw(
     HTTP_MOVED_PERMANENTLY
     HTTP_MOVED_TEMPORARILY
     HTTP_REDIRECT
+    HTTP_SEE_OTHER
     HTTP_NOT_MODIFIED
+    HTTP_TEMPORARY_REDIRECT
 
     HTTP_BAD_REQUEST
     HTTP_UNAUTHORIZED
@@ -48,7 +50,7 @@ our @EXPORT = qw(
     HTTP_INSUFFICIENT_STORAGE
 );
 
-our $VERSION = '1.0.10';
+our $VERSION = '%%VERSION%%';
 
 require XSLoader;
 XSLoader::load('nginx', $VERSION);
@@ -67,7 +69,9 @@ use constant HTTP_PARTIAL_CONTENT           => 206;
 use constant HTTP_MOVED_PERMANENTLY         => 301;
 use constant HTTP_MOVED_TEMPORARILY         => 302;
 use constant HTTP_REDIRECT                  => 302;
+use constant HTTP_SEE_OTHER                 => 303;
 use constant HTTP_NOT_MODIFIED              => 304;
+use constant HTTP_TEMPORARY_REDIRECT        => 307;
 
 use constant HTTP_BAD_REQUEST               => 400;
 use constant HTTP_UNAUTHORIZED              => 401;
@@ -119,7 +123,7 @@ This module provides a Perl interface to the nginx HTTP server API.
 
 =head1 SEE ALSO
 
-http://sysoev.ru/nginx/docs/http/ngx_http_perl_module.html
+http://nginx.org/en/docs/http/ngx_http_perl_module.html
 
 =head1 AUTHOR
 
@@ -128,6 +132,7 @@ Igor Sysoev
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) Igor Sysoev
+Copyright (C) Nginx, Inc.
 
 
 =cut

@@ -1,5 +1,6 @@
 
 # Copyright (C) Igor Sysoev
+# Copyright (C) Nginx, Inc.
 
 
 echo $ngx_n "checking for $ngx_type size ...$ngx_c"
@@ -19,12 +20,13 @@ cat << END > $NGX_AUTOTEST.c
 #include <sys/time.h>
 $NGX_INCLUDE_UNISTD_H
 #include <signal.h>
+#include <stdio.h>
 #include <sys/resource.h>
 $NGX_INCLUDE_INTTYPES_H
 $NGX_INCLUDE_AUTO_CONFIG_H
 
 int main() {
-    printf("%d", sizeof($ngx_type));
+    printf("%d", (int) sizeof($ngx_type));
     return 0;
 }
 

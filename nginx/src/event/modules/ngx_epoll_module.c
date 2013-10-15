@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -43,15 +44,24 @@ struct epoll_event {
     epoll_data_t  data;
 };
 
+
+int epoll_create(int size);
+
 int epoll_create(int size)
 {
     return -1;
 }
 
+
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event)
 {
     return -1;
 }
+
+
+int epoll_wait(int epfd, struct epoll_event *events, int nevents, int timeout);
 
 int epoll_wait(int epfd, struct epoll_event *events, int nevents, int timeout)
 {
@@ -74,11 +84,6 @@ struct io_event {
     int64_t   res2;  /* secondary result */
 };
 
-
-int eventfd(u_int initval)
-{
-    return -1;
-}
 
 #endif
 #endif
@@ -444,7 +449,7 @@ ngx_epoll_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 
     /*
      * when the file descriptor is closed, the epoll automatically deletes
-     * it from its queue, so we do not need to delete explicity the event
+     * it from its queue, so we do not need to delete explicitly the event
      * before the closing the file descriptor
      */
 
@@ -523,7 +528,7 @@ ngx_epoll_del_connection(ngx_connection_t *c, ngx_uint_t flags)
 
     /*
      * when the file descriptor is closed the epoll automatically deletes
-     * it from its queue so we do not need to delete explicity the event
+     * it from its queue so we do not need to delete explicitly the event
      * before the closing the file descriptor
      */
 
@@ -682,6 +687,7 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
         wev = c->write;
 
         if ((revents & EPOLLOUT) && wev->active) {
+
             if (c->fd == -1 || wev->instance != instance) {
 
                 /*

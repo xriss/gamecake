@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -94,6 +95,10 @@ ngx_http_static_handler(ngx_http_request_t *r)
     of.errors = clcf->open_file_cache_errors;
     of.events = clcf->open_file_cache_events;
 
+    if (ngx_http_set_disable_symlinks(r, clcf, &path, &of) != NGX_OK) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+
     if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
         != NGX_OK)
     {
@@ -111,6 +116,10 @@ ngx_http_static_handler(ngx_http_request_t *r)
             break;
 
         case NGX_EACCES:
+#if (NGX_HAVE_OPENAT)
+        case NGX_EMLINK:
+        case NGX_ELOOP:
+#endif
 
             level = NGX_LOG_ERR;
             rc = NGX_HTTP_FORBIDDEN;
@@ -210,6 +219,10 @@ ngx_http_static_handler(ngx_http_request_t *r)
     r->headers_out.status = NGX_HTTP_OK;
     r->headers_out.content_length_n = of.size;
     r->headers_out.last_modified_time = of.mtime;
+
+    if (ngx_http_set_etag(r) != NGX_OK) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
 
     if (ngx_http_set_content_type(r) != NGX_OK) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;

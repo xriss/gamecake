@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -335,10 +336,10 @@ ngx_open_listening_sockets(ngx_cycle_t *cycle)
 
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
 
-            if (ls[i].sockaddr->sa_family == AF_INET6 && ls[i].ipv6only) {
+            if (ls[i].sockaddr->sa_family == AF_INET6) {
                 int  ipv6only;
 
-                ipv6only = (ls[i].ipv6only == 1);
+                ipv6only = ls[i].ipv6only;
 
                 if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY,
                                (const void *) &ipv6only, sizeof(int))
@@ -411,7 +412,7 @@ ngx_open_listening_sockets(ngx_cycle_t *cycle)
                 }
 
                 if (ngx_test_config) {
-                    if (ngx_delete_file(name) == -1) {
+                    if (ngx_delete_file(name) == NGX_FILE_ERROR) {
                         ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
                                       ngx_delete_file_n " %s failed", name);
                     }
@@ -462,6 +463,7 @@ ngx_open_listening_sockets(ngx_cycle_t *cycle)
 void
 ngx_configure_listening_sockets(ngx_cycle_t *cycle)
 {
+    int                        keepalive;
     ngx_uint_t                 i;
     ngx_listening_t           *ls;
 
@@ -498,6 +500,56 @@ ngx_configure_listening_sockets(ngx_cycle_t *cycle)
                               ls[i].sndbuf, &ls[i].addr_text);
             }
         }
+
+        if (ls[i].keepalive) {
+            keepalive = (ls[i].keepalive == 1) ? 1 : 0;
+
+            if (setsockopt(ls[i].fd, SOL_SOCKET, SO_KEEPALIVE,
+                           (const void *) &keepalive, sizeof(int))
+                == -1)
+            {
+                ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_socket_errno,
+                              "setsockopt(SO_KEEPALIVE, %d) %V failed, ignored",
+                              keepalive, &ls[i].addr_text);
+            }
+        }
+
+#if (NGX_HAVE_KEEPALIVE_TUNABLE)
+
+        if (ls[i].keepidle) {
+            if (setsockopt(ls[i].fd, IPPROTO_TCP, TCP_KEEPIDLE,
+                           (const void *) &ls[i].keepidle, sizeof(int))
+                == -1)
+            {
+                ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_socket_errno,
+                              "setsockopt(TCP_KEEPIDLE, %d) %V failed, ignored",
+                              ls[i].keepidle, &ls[i].addr_text);
+            }
+        }
+
+        if (ls[i].keepintvl) {
+            if (setsockopt(ls[i].fd, IPPROTO_TCP, TCP_KEEPINTVL,
+                           (const void *) &ls[i].keepintvl, sizeof(int))
+                == -1)
+            {
+                ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_socket_errno,
+                             "setsockopt(TCP_KEEPINTVL, %d) %V failed, ignored",
+                             ls[i].keepintvl, &ls[i].addr_text);
+            }
+        }
+
+        if (ls[i].keepcnt) {
+            if (setsockopt(ls[i].fd, IPPROTO_TCP, TCP_KEEPCNT,
+                           (const void *) &ls[i].keepcnt, sizeof(int))
+                == -1)
+            {
+                ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_socket_errno,
+                              "setsockopt(TCP_KEEPCNT, %d) %V failed, ignored",
+                              ls[i].keepcnt, &ls[i].addr_text);
+            }
+        }
+
+#endif
 
 #if (NGX_HAVE_SETFIB)
         if (ls[i].setfib != -1) {
@@ -656,7 +708,7 @@ ngx_close_listening_sockets(ngx_cycle_t *cycle)
                     /*
                      * it seems that Linux-2.6.x OpenVZ sends events
                      * for closed shared listening sockets unless
-                     * the events was explicity deleted
+                     * the events was explicitly deleted
                      */
 
                     ngx_del_event(c->read, NGX_READ_EVENT, 0);
@@ -687,7 +739,7 @@ ngx_close_listening_sockets(ngx_cycle_t *cycle)
         {
             u_char *name = ls[i].addr_text.data + sizeof("unix:") - 1;
 
-            if (ngx_delete_file(name) == -1) {
+            if (ngx_delete_file(name) == NGX_FILE_ERROR) {
                 ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_socket_errno,
                               ngx_delete_file_n " %s failed", name);
             }
@@ -697,6 +749,8 @@ ngx_close_listening_sockets(ngx_cycle_t *cycle)
 
         ls[i].fd = (ngx_socket_t) -1;
     }
+
+    cycle->listening.nelts = 0;
 }
 
 
@@ -846,11 +900,9 @@ ngx_close_connection(ngx_connection_t *c)
     c->read->closed = 1;
     c->write->closed = 1;
 
-    if (c->single_connection) {
-        ngx_unlock(&c->lock);
-        c->read->locked = 0;
-        c->write->locked = 0;
-    }
+    ngx_unlock(&c->lock);
+    c->read->locked = 0;
+    c->write->locked = 0;
 
     ngx_mutex_unlock(ngx_posted_events_mutex);
 
@@ -918,6 +970,10 @@ ngx_reusable_connection(ngx_connection_t *c, ngx_uint_t reusable)
 
     if (c->reusable) {
         ngx_queue_remove(&c->queue);
+
+#if (NGX_STAT_STUB)
+        (void) ngx_atomic_fetch_add(ngx_stat_waiting, -1);
+#endif
     }
 
     c->reusable = reusable;
@@ -927,6 +983,10 @@ ngx_reusable_connection(ngx_connection_t *c, ngx_uint_t reusable)
 
         ngx_queue_insert_head(
             (ngx_queue_t *) &ngx_cycle->reusable_connections_queue, &c->queue);
+
+#if (NGX_STAT_STUB)
+        (void) ngx_atomic_fetch_add(ngx_stat_waiting, 1);
+#endif
     }
 }
 

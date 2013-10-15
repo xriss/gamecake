@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -70,6 +71,10 @@ ngx_readv_chain(ngx_connection_t *c, ngx_chain_t *chain)
             iov->iov_len += chain->buf->end - chain->buf->last;
 
         } else {
+            if (vec.nelts >= IOV_MAX) {
+                break;
+            }
+
             iov = ngx_array_push(&vec);
             if (iov == NULL) {
                 return NGX_ERROR;
@@ -194,6 +199,10 @@ ngx_readv_chain(ngx_connection_t *c, ngx_chain_t *chain)
             iov->iov_len += chain->buf->end - chain->buf->last;
 
         } else {
+            if (vec.nelts >= IOV_MAX) {
+                break;
+            }
+
             iov = ngx_array_push(&vec);
             if (iov == NULL) {
                 return NGX_ERROR;

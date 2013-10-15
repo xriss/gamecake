@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -46,7 +47,13 @@ ngx_os_init(ngx_log_t *log)
 
     for (n = ngx_pagesize; n >>= 1; ngx_pagesize_shift++) { /* void */ }
 
+#if (NGX_HAVE_SC_NPROCESSORS_ONLN)
     if (ngx_ncpu == 0) {
+        ngx_ncpu = sysconf(_SC_NPROCESSORS_ONLN);
+    }
+#endif
+
+    if (ngx_ncpu < 1) {
         ngx_ncpu = 1;
     }
 
@@ -91,6 +98,8 @@ ngx_os_status(ngx_log_t *log)
 }
 
 
+#if 0
+
 ngx_int_t
 ngx_posix_post_conf_init(ngx_log_t *log)
 {
@@ -115,3 +124,5 @@ ngx_posix_post_conf_init(ngx_log_t *log)
 
     return NGX_OK;
 }
+
+#endif

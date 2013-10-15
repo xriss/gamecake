@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -75,6 +76,27 @@ typedef struct {
 #define NGX_FILE_APPEND          O_WRONLY|O_APPEND
 #define NGX_FILE_NONBLOCK        O_NONBLOCK
 
+#if (NGX_HAVE_OPENAT)
+#define NGX_FILE_NOFOLLOW        O_NOFOLLOW
+
+#if defined(O_DIRECTORY)
+#define NGX_FILE_DIRECTORY       O_DIRECTORY
+#else
+#define NGX_FILE_DIRECTORY       0
+#endif
+
+#if defined(O_SEARCH)
+#define NGX_FILE_SEARCH          O_SEARCH|NGX_FILE_DIRECTORY
+
+#elif defined(O_EXEC)
+#define NGX_FILE_SEARCH          O_EXEC|NGX_FILE_DIRECTORY
+
+#else
+#define NGX_FILE_SEARCH          O_RDONLY|NGX_FILE_DIRECTORY
+#endif
+
+#endif /* NGX_HAVE_OPENAT */
+
 #define NGX_FILE_DEFAULT_ACCESS  0644
 #define NGX_FILE_OWNER_ACCESS    0600
 
@@ -128,6 +150,7 @@ ngx_write_fd(ngx_fd_t fd, void *buf, size_t n)
 
 #define ngx_linefeed(p)          *p++ = LF;
 #define NGX_LINEFEED_SIZE        1
+#define NGX_LINEFEED             "\x0a"
 
 
 #define ngx_rename_file(o, n)    rename((const char *) o, (const char *) n)
@@ -157,7 +180,7 @@ ngx_int_t ngx_set_file_time(u_char *name, ngx_fd_t fd, time_t s);
 #define ngx_is_exec(sb)          (((sb)->st_mode & S_IXUSR) == S_IXUSR)
 #define ngx_file_access(sb)      ((sb)->st_mode & 0777)
 #define ngx_file_size(sb)        (sb)->st_size
-#define ngx_file_fs_size(sb)     ((sb)->st_blocks * 512)
+#define ngx_file_fs_size(sb)     ngx_max((sb)->st_size, (sb)->st_blocks * 512)
 #define ngx_file_mtime(sb)       (sb)->st_mtime
 #define ngx_file_uniq(sb)        (sb)->st_ino
 
@@ -177,13 +200,24 @@ void ngx_close_file_mapping(ngx_file_mapping_t *fm);
 #endif
 
 
-#define ngx_realpath(p, r)       realpath((char *) p, (char *) r)
+#define ngx_realpath(p, r)       (u_char *) realpath((char *) p, (char *) r)
 #define ngx_realpath_n           "realpath()"
 #define ngx_getcwd(buf, size)    (getcwd((char *) buf, size) != NULL)
 #define ngx_getcwd_n             "getcwd()"
 #define ngx_path_separator(c)    ((c) == '/')
 
+
+#if defined(PATH_MAX)
+
+#define NGX_HAVE_MAX_PATH        1
 #define NGX_MAX_PATH             PATH_MAX
+
+#else
+
+#define NGX_MAX_PATH             4096
+
+#endif
+
 
 #define NGX_DIR_MASK_LEN         0
 
@@ -253,7 +287,8 @@ ngx_de_info(u_char *name, ngx_dir_t *dir)
 
 #define ngx_de_access(dir)       (((dir)->info.st_mode) & 0777)
 #define ngx_de_size(dir)         (dir)->info.st_size
-#define ngx_de_fs_size(dir)      ((dir)->info.st_blocks * 512)
+#define ngx_de_fs_size(dir)                                                  \
+    ngx_max((dir)->info.st_size, (dir)->info.st_blocks * 512)
 #define ngx_de_mtime(dir)        (dir)->info.st_mtime
 
 
@@ -320,6 +355,23 @@ ngx_int_t ngx_directio_off(ngx_fd_t fd);
 #endif
 
 size_t ngx_fs_bsize(u_char *name);
+
+
+#if (NGX_HAVE_OPENAT)
+
+#define ngx_openat_file(fd, name, mode, create, access)                      \
+    openat(fd, (const char *) name, mode|create, access)
+
+#define ngx_openat_file_n        "openat()"
+
+#define ngx_file_at_info(fd, name, sb, flag)                                 \
+    fstatat(fd, (const char *) name, sb, flag)
+
+#define ngx_file_at_info_n       "fstatat()"
+
+#define NGX_AT_FDCWD             (ngx_fd_t) AT_FDCWD
+
+#endif
 
 
 #define ngx_stderr               STDERR_FILENO

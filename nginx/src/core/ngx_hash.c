@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -277,7 +278,7 @@ ngx_hash_init(ngx_hash_init_t *hinit, ngx_hash_key_t *names, ngx_uint_t nelts)
     start = nelts / (bucket_size / (2 * sizeof(void *)));
     start = start ? start : 1;
 
-    if (hinit->max_size > 10000 && hinit->max_size / nelts < 100) {
+    if (hinit->max_size > 10000 && nelts && hinit->max_size / nelts < 100) {
         start = hinit->max_size - 1000;
     }
 
@@ -923,17 +924,6 @@ wildcard:
     }
 
 
-    hk = ngx_array_push(hwc);
-    if (hk == NULL) {
-        return NGX_ERROR;
-    }
-
-    hk->key.len = last - 1;
-    hk->key.data = p;
-    hk->key_hash = 0;
-    hk->value = value;
-
-
     /* check conflicts in wildcard hash */
 
     name = keys->elts;
@@ -970,6 +960,19 @@ wildcard:
     }
 
     ngx_memcpy(name->data, key->data + skip, name->len);
+
+
+    /* add to wildcard hash */
+
+    hk = ngx_array_push(hwc);
+    if (hk == NULL) {
+        return NGX_ERROR;
+    }
+
+    hk->key.len = last - 1;
+    hk->key.data = p;
+    hk->key_hash = 0;
+    hk->value = value;
 
     return NGX_OK;
 }
