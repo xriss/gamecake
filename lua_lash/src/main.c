@@ -83,16 +83,31 @@ static const luaL_Reg lash_rijndael[] = {
 */
 
 LH_EXPORT int luaopen_lash(lua_State *L) {
-    luaL_register(L, "lash.MD5", lash_md5);
-    luaL_register(L, "lash.CRC32", lash_crc32);
-    luaL_register(L, "lash.SHA1", lash_sha1);
+
+    lua_newtable(L);
+
+    lua_newtable(L);
+    luaL_register(L, 0, lash_md5);
+    lua_setfield(L,-2,"MD5");
+
+    lua_newtable(L);
+    luaL_register(L, 0, lash_crc32);
+    lua_setfield(L,-2,"CRC32");
+    
+    lua_newtable(L);
+    luaL_register(L, 0, lash_sha1);
+    lua_setfield(L,-2,"SHA1");
+
+//    luaL_register(L, "lash.MD5", lash_md5);
+//    luaL_register(L, "lash.CRC32", lash_crc32);
+//    luaL_register(L, "lash.SHA1", lash_sha1);
 //    luaL_register(L, "lash.Rijndael", lash_rijndael);
 
     /*
      * push the created table to the top off the stack
      * so "lash = require('lash')" works
      */
-    lua_getglobal(L, "lash");
+//    lua_getglobal(L, "lash");
 
     return 1;
 }
