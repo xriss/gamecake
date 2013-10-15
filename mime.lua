@@ -13,7 +13,7 @@ local ltn12 = require("ltn12")
 local mime = require("mime.core")
 local io = require("io")
 local string = require("string")
-module("mime")
+module("mime",mime)
 
 -- encode, decode and wrap algorithm tables
 encodet = {}

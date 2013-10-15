@@ -579,7 +579,8 @@ print("active:"..gactivate_id)
 
 		if oven.opts.smell=="gamestick" then
 			top:add({hx=100,hy=40})
-			top:add({hx=120,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
+			top:add({hx=120,hy=40})
+--			top:add({hx=120,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
 			top:add({hx=100,hy=40})
 		else
 			top:add({hx=100,hy=40,color=0xffcccccc,text="Main",id="settings_main",hooks=gui.hooks})

@@ -46,7 +46,9 @@ setmetatable(g, {
 
 local _LOADED = package.loaded
 function _G.module (modname, ...)
+	local dots={...}
 	local ns = {}
+	if dots and type(dots[1])=="table" then ns=dots[1] end -- force this tab
 
 	if type(_LOADED[modname])=="table" then error("module name clash "..modname) end -- check
 	_LOADED[modname]=ns -- set
@@ -57,8 +59,8 @@ function _G.module (modname, ...)
 		ns._PACKAGE = string.gsub (modname, "[^.]*$", "")
 	end
 	setfenv (2, ns)
-	for i, f in ipairs({...}) do
-		f(ns)
+	for i, f in ipairs(dots) do
+		if type(f)=="function" then f(ns) end
 	end
 end
 

@@ -148,9 +148,16 @@ end
 --
 function win.android_start(apk)
 
+-- replace print
+	_G.print=hardcore.print
+	print=_G.print
+
+
 	if jit then -- start by tring to force a jit memory allocation
+		print(jit.status())
 		require("jit.opt").start("sizemcode=256","maxmcode=256")
 		for i=1,1000 do end
+		print(jit.status())
   	end
 
 --	if jit and jit.off then
@@ -159,9 +166,6 @@ function win.android_start(apk)
 --	end -- jit breaks stuff?
 
 
--- replace print
-	_G.print=hardcore.print
-	print=_G.print
 
 	win.apk=apk
 	local zips=require("wetgenes.zips")

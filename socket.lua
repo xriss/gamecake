@@ -19,7 +19,7 @@ local base = _G
 local string = require("string")
 local math = require("math")
 local socket = require("socket.core")
-module("socket")
+module("socket",socket)
 
 -----------------------------------------------------------------------------
 -- Mega hack. Don't try to do this at home.
