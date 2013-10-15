@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -29,7 +30,7 @@
 #if (NGX_HAVE_UNIX_DOMAIN)
 #define NGX_SOCKADDR_STRLEN   (sizeof("unix:") - 1 + NGX_UNIX_ADDRSTRLEN)
 #else
-#define NGX_SOCKADDR_STRLEN   (NGX_INET6_ADDRSTRLEN + sizeof(":65535") - 1)
+#define NGX_SOCKADDR_STRLEN   (NGX_INET6_ADDRSTRLEN + sizeof("[]:65535") - 1)
 #endif
 
 #if (NGX_HAVE_UNIX_DOMAIN)
@@ -86,7 +87,7 @@ typedef struct {
     unsigned                  listen:1;
     unsigned                  uri_part:1;
     unsigned                  no_resolve:1;
-    unsigned                  one_addr:1;
+    unsigned                  one_addr:1;  /* compatibility */
 
     unsigned                  no_port:1;
     unsigned                  wildcard:1;

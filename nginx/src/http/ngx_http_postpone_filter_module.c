@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -45,7 +46,7 @@ ngx_module_t  ngx_http_postpone_filter_module = {
 };
 
 
-static ngx_http_output_body_filter_pt    ngx_http_next_filter;
+static ngx_http_output_body_filter_pt    ngx_http_next_body_filter;
 
 
 static ngx_int_t
@@ -79,7 +80,7 @@ ngx_http_postpone_filter(ngx_http_request_t *r, ngx_chain_t *in)
     if (r->postponed == NULL) {
 
         if (in || c->buffered) {
-            return ngx_http_next_filter(r->main, in);
+            return ngx_http_next_body_filter(r->main, in);
         }
 
         return NGX_OK;
@@ -115,7 +116,7 @@ ngx_http_postpone_filter(ngx_http_request_t *r, ngx_chain_t *in)
                            "http postpone filter output \"%V?%V\"",
                            &r->uri, &r->args);
 
-            if (ngx_http_next_filter(r->main, pr->out) == NGX_ERROR) {
+            if (ngx_http_next_body_filter(r->main, pr->out) == NGX_ERROR) {
                 return NGX_ERROR;
             }
         }
@@ -170,7 +171,7 @@ found:
 static ngx_int_t
 ngx_http_postpone_filter_init(ngx_conf_t *cf)
 {
-    ngx_http_next_filter = ngx_http_top_body_filter;
+    ngx_http_next_body_filter = ngx_http_top_body_filter;
     ngx_http_top_body_filter = ngx_http_postpone_filter;
 
     return NGX_OK;

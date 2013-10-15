@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -207,6 +208,11 @@ ngx_http_dav_put_handler(ngx_http_request_t *r)
     ngx_file_info_t           fi;
     ngx_ext_rename_file_t     ext;
     ngx_http_dav_loc_conf_t  *dlcf;
+
+    if (r->request_body == NULL || r->request_body->temp_file == NULL) {
+        ngx_http_finalize_request(r, NGX_HTTP_INTERNAL_SERVER_ERROR);
+        return;
+    }
 
     ngx_http_map_uri_to_path(r, &path, &root, 0);
 

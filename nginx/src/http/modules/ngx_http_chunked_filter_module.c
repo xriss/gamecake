@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -61,6 +62,7 @@ ngx_http_chunked_header_filter(ngx_http_request_t *r)
 
     if (r->headers_out.status == NGX_HTTP_NOT_MODIFIED
         || r->headers_out.status == NGX_HTTP_NO_CONTENT
+        || r->headers_out.status < NGX_HTTP_OK
         || r != r->main
         || (r->method & NGX_HTTP_HEAD))
     {
@@ -221,7 +223,7 @@ ngx_http_chunked_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
     rc = ngx_http_next_body_filter(r, out);
 
-    ngx_chain_update_chains(&ctx->free, &ctx->busy, &out,
+    ngx_chain_update_chains(r->pool, &ctx->free, &ctx->busy, &out,
                             (ngx_buf_tag_t) &ngx_http_chunked_filter_module);
 
     return rc;

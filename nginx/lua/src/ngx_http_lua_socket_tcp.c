@@ -429,7 +429,8 @@ ngx_http_lua_socket_tcp_connect(lua_State *L)
         u->connect_timeout = u->conf->connect_timeout;
     }
 
-    r->connection->single_connection = 0;
+//H4X
+//    r->connection->single_connection = 0;
 
     rc = ngx_http_lua_get_keepalive_peer(r, L, key_index, u);
 

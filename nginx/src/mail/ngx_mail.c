@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -262,6 +263,12 @@ ngx_mail_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
         break;
 #endif
 
+#if (NGX_HAVE_UNIX_DOMAIN)
+    case AF_UNIX:
+        p = 0;
+        break;
+#endif
+
     default: /* AF_INET */
         sin = (struct sockaddr_in *) sa;
         p = sin->sin_port;
@@ -308,6 +315,12 @@ found:
     addr->ctx = listen->ctx;
     addr->bind = listen->bind;
     addr->wildcard = listen->wildcard;
+    addr->so_keepalive = listen->so_keepalive;
+#if (NGX_HAVE_KEEPALIVE_TUNABLE)
+    addr->tcp_keepidle = listen->tcp_keepidle;
+    addr->tcp_keepintvl = listen->tcp_keepintvl;
+    addr->tcp_keepcnt = listen->tcp_keepcnt;
+#endif
 #if (NGX_MAIL_SSL)
     addr->ssl = listen->ssl;
 #endif
@@ -372,6 +385,13 @@ ngx_mail_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
             ls->logp = &cf->cycle->new_log;
             ls->log.data = &ls->addr_text;
             ls->log.handler = ngx_accept_log_error;
+
+            ls->keepalive = addr[i].so_keepalive;
+#if (NGX_HAVE_KEEPALIVE_TUNABLE)
+            ls->keepidle = addr[i].tcp_keepidle;
+            ls->keepintvl = addr[i].tcp_keepintvl;
+            ls->keepcnt = addr[i].tcp_keepcnt;
+#endif
 
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
             ls->ipv6only = addr[i].ipv6only;
@@ -523,6 +543,11 @@ ngx_mail_cmp_conf_addrs(const void *one, const void *two)
     if (first->wildcard) {
         /* a wildcard must be the last resort, shift it to the end */
         return 1;
+    }
+
+    if (second->wildcard) {
+        /* a wildcard must be the last resort, shift it to the end */
+        return -1;
     }
 
     if (first->bind && !second->bind) {

@@ -1,5 +1,6 @@
 
 # Copyright (C) Igor Sysoev
+# Copyright (C) Nginx, Inc.
 
 
 echo $ngx_n "checking for $ngx_type ...$ngx_c"
@@ -28,7 +29,7 @@ $NGX_INCLUDE_INTTYPES_H
 
 int main() {
     $ngx_try i = 0;
-    return 0;
+    return (int) i;
 }
 
 END

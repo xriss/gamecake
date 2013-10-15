@@ -49,3 +49,6 @@
 #define NGX_HAVE_SYS_VFS_H  1
 #endif
 
+#ifndef NGX_HTTP_X_FORWARDED_FOR
+#define NGX_HTTP_X_FORWARDED_FOR 1
+#endif

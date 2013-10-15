@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -54,9 +55,6 @@ ngx_http_variable_value_t *ngx_http_get_variable(ngx_http_request_t *r,
 
 ngx_int_t ngx_http_variable_unknown_header(ngx_http_variable_value_t *v,
     ngx_str_t *var, ngx_list_part_t *part, size_t prefix);
-
-
-#define ngx_http_clear_variable(r, index) r->variables0[index].text.data = NULL;
 
 
 #if (NGX_PCRE)

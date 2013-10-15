@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -356,7 +357,7 @@ has_request_body(r, next)
 
     ngx_http_perl_set_request(r);
 
-    if (r->headers_in.content_length_n <= 0) {
+    if (r->headers_in.content_length_n <= 0 && !r->headers_in.chunked) {
         XSRETURN_UNDEF;
     }
 
@@ -385,7 +386,10 @@ request_body(r)
 
     dXSTARG;
     ngx_http_request_t  *r;
+    u_char              *p, *data;
     size_t               len;
+    ngx_buf_t           *buf;
+    ngx_chain_t         *cl;
 
     ngx_http_perl_set_request(r);
 
@@ -396,13 +400,43 @@ request_body(r)
         XSRETURN_UNDEF;
     }
 
-    len = r->request_body->bufs->buf->last - r->request_body->bufs->buf->pos;
+    cl = r->request_body->bufs;
+    buf = cl->buf;
+
+    if (cl->next == NULL) {
+        len = buf->last - buf->pos;
+        data = buf->pos;
+        goto done;
+    }
+
+    len = buf->last - buf->pos;
+    cl = cl->next;
+
+    for ( /* void */ ; cl; cl = cl->next) {
+        buf = cl->buf;
+        len += buf->last - buf->pos;
+    }
+
+    p = ngx_pnalloc(r->pool, len);
+    if (p == NULL) {
+        return XSRETURN_UNDEF;
+    }
+
+    data = p;
+    cl = r->request_body->bufs;
+
+    for ( /* void */ ; cl; cl = cl->next) {
+        buf = cl->buf;
+        p = ngx_cpymem(p, buf->pos, buf->last - buf->pos);
+    }
+
+    done:
 
     if (len == 0) {
         XSRETURN_UNDEF;
     }
 
-    ngx_http_perl_set_targ(r->request_body->bufs->buf->pos, len);
+    ngx_http_perl_set_targ(data, len);
 
     ST(0) = TARG;
 
@@ -475,7 +509,7 @@ header_out(r, key, value)
     }
 
     if (header->key.len == sizeof("Content-Encoding") - 1
-        && ngx_strncasecmp(header->key.data, "Content-Encoding",
+        && ngx_strncasecmp(header->key.data, (u_char *) "Content-Encoding",
                            sizeof("Content-Encoding") - 1) == 0)
     {
         r->headers_out.content_encoding = header;
@@ -661,6 +695,10 @@ sendfile(r, filename, offset = -1, bytes = 0)
     of.min_uses = clcf->open_file_cache_min_uses;
     of.errors = clcf->open_file_cache_errors;
     of.events = clcf->open_file_cache_events;
+
+    if (ngx_http_set_disable_symlinks(r, clcf, &path, &of) != NGX_OK) {
+        XSRETURN_EMPTY;
+    }
 
     if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
         != NGX_OK)

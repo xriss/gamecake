@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -94,8 +95,8 @@ static ngx_http_module_t  ngx_http_autoindex_module_ctx = {
     NULL,                                  /* create server configuration */
     NULL,                                  /* merge server configuration */
 
-    ngx_http_autoindex_create_loc_conf,    /* create location configration */
-    ngx_http_autoindex_merge_loc_conf      /* merge location configration */
+    ngx_http_autoindex_create_loc_conf,    /* create location configuration */
+    ngx_http_autoindex_merge_loc_conf      /* merge location configuration */
 };
 
 
@@ -488,8 +489,11 @@ ngx_http_autoindex_handler(ngx_http_request_t *r)
             }
 
             b->last = ngx_cpymem(b->last, "</a>", sizeof("</a>") - 1);
-            ngx_memset(b->last, ' ', NGX_HTTP_AUTOINDEX_NAME_LEN - len);
-            b->last += NGX_HTTP_AUTOINDEX_NAME_LEN - len;
+
+            if (NGX_HTTP_AUTOINDEX_NAME_LEN - len > 0) {
+                ngx_memset(b->last, ' ', NGX_HTTP_AUTOINDEX_NAME_LEN - len);
+                b->last += NGX_HTTP_AUTOINDEX_NAME_LEN - len;
+            }
         }
 
         *b->last++ = ' ';

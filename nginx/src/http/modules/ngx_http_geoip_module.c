@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -12,20 +13,56 @@
 #include <GeoIPCity.h>
 
 
+#define NGX_GEOIP_COUNTRY_CODE   0
+#define NGX_GEOIP_COUNTRY_CODE3  1
+#define NGX_GEOIP_COUNTRY_NAME   2
+
+
 typedef struct {
-    GeoIP      *country;
-    GeoIP      *org;
-    GeoIP      *city;
+    GeoIP        *country;
+    GeoIP        *org;
+    GeoIP        *city;
+    ngx_array_t  *proxies;    /* array of ngx_cidr_t */
+    ngx_flag_t    proxy_recursive;
+#if (NGX_HAVE_GEOIP_V6)
+    unsigned      country_v6:1;
+    unsigned      org_v6:1;
+    unsigned      city_v6:1;
+#endif
 } ngx_http_geoip_conf_t;
 
 
 typedef struct {
-    ngx_str_t  *name;
-    uintptr_t   data;
+    ngx_str_t    *name;
+    uintptr_t     data;
 } ngx_http_geoip_var_t;
 
 
-typedef const char *(*ngx_http_geoip_variable_handler_pt)(GeoIP *, u_long addr);
+typedef const char *(*ngx_http_geoip_variable_handler_pt)(GeoIP *,
+    u_long addr);
+
+
+ngx_http_geoip_variable_handler_pt ngx_http_geoip_country_functions[] = {
+    GeoIP_country_code_by_ipnum,
+    GeoIP_country_code3_by_ipnum,
+    GeoIP_country_name_by_ipnum,
+};
+
+
+#if (NGX_HAVE_GEOIP_V6)
+
+typedef const char *(*ngx_http_geoip_variable_handler_v6_pt)(GeoIP *,
+    geoipv6_t addr);
+
+
+ngx_http_geoip_variable_handler_v6_pt ngx_http_geoip_country_v6_functions[] = {
+    GeoIP_country_code_by_ipnum_v6,
+    GeoIP_country_code3_by_ipnum_v6,
+    GeoIP_country_name_by_ipnum_v6,
+};
+
+#endif
+
 
 static ngx_int_t ngx_http_geoip_country_variable(ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data);
@@ -43,12 +80,17 @@ static GeoIPRecord *ngx_http_geoip_get_city_record(ngx_http_request_t *r);
 
 static ngx_int_t ngx_http_geoip_add_variables(ngx_conf_t *cf);
 static void *ngx_http_geoip_create_conf(ngx_conf_t *cf);
+static char *ngx_http_geoip_init_conf(ngx_conf_t *cf, void *conf);
 static char *ngx_http_geoip_country(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
 static char *ngx_http_geoip_org(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
 static char *ngx_http_geoip_city(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
+static char *ngx_http_geoip_proxy(ngx_conf_t *cf, ngx_command_t *cmd,
+    void *conf);
+static ngx_int_t ngx_http_geoip_cidr_value(ngx_conf_t *cf, ngx_str_t *net,
+    ngx_cidr_t *cidr);
 static void ngx_http_geoip_cleanup(void *data);
 
 
@@ -75,6 +117,20 @@ static ngx_command_t  ngx_http_geoip_commands[] = {
       0,
       NULL },
 
+    { ngx_string("geoip_proxy"),
+      NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE1,
+      ngx_http_geoip_proxy,
+      NGX_HTTP_MAIN_CONF_OFFSET,
+      0,
+      NULL },
+
+    { ngx_string("geoip_proxy_recursive"),
+      NGX_HTTP_MAIN_CONF|NGX_CONF_FLAG,
+      ngx_conf_set_flag_slot,
+      NGX_HTTP_MAIN_CONF_OFFSET,
+      offsetof(ngx_http_geoip_conf_t, proxy_recursive),
+      NULL },
+
       ngx_null_command
 };
 
@@ -84,7 +140,7 @@ static ngx_http_module_t  ngx_http_geoip_module_ctx = {
     NULL,                                  /* postconfiguration */
 
     ngx_http_geoip_create_conf,            /* create main configuration */
-    NULL,                                  /* init main configuration */
+    ngx_http_geoip_init_conf,              /* init main configuration */
 
     NULL,                                  /* create server configuration */
     NULL,                                  /* merge server configuration */
@@ -114,19 +170,19 @@ static ngx_http_variable_t  ngx_http_geoip_vars[] = {
 
     { ngx_string("geoip_country_code"), NULL,
       ngx_http_geoip_country_variable,
-      (uintptr_t) GeoIP_country_code_by_ipnum, 0, 0 },
+      NGX_GEOIP_COUNTRY_CODE, 0, 0 },
 
     { ngx_string("geoip_country_code3"), NULL,
       ngx_http_geoip_country_variable,
-      (uintptr_t) GeoIP_country_code3_by_ipnum, 0, 0 },
+      NGX_GEOIP_COUNTRY_CODE3, 0, 0 },
 
     { ngx_string("geoip_country_name"), NULL,
       ngx_http_geoip_country_variable,
-      (uintptr_t) GeoIP_country_name_by_ipnum, 0, 0 },
+      NGX_GEOIP_COUNTRY_NAME, 0, 0 },
 
     { ngx_string("geoip_org"), NULL,
       ngx_http_geoip_org_variable,
-      (uintptr_t) GeoIP_name_by_ipnum, 0, 0 },
+      0, 0, 0 },
 
     { ngx_string("geoip_city_continent_code"), NULL,
       ngx_http_geoip_city_variable,
@@ -181,49 +237,116 @@ static ngx_http_variable_t  ngx_http_geoip_vars[] = {
 
 
 static u_long
-ngx_http_geoip_addr(ngx_http_request_t *r)
+ngx_http_geoip_addr(ngx_http_request_t *r, ngx_http_geoip_conf_t *gcf)
 {
-    struct sockaddr_in   *sin;
-#if (NGX_HAVE_INET6)
-    u_char               *p;
-    u_long                addr;
-    struct sockaddr_in6  *sin6;
-#endif
+    ngx_addr_t           addr;
+    ngx_array_t         *xfwd;
+    struct sockaddr_in  *sin;
 
-    switch (r->connection->sockaddr->sa_family) {
+    addr.sockaddr = r->connection->sockaddr;
+    addr.socklen = r->connection->socklen;
+    /* addr.name = r->connection->addr_text; */
 
-    case AF_INET:
-        sin = (struct sockaddr_in *) r->connection->sockaddr;
-        return ntohl(sin->sin_addr.s_addr);
+    xfwd = &r->headers_in.x_forwarded_for;
 
-#if (NGX_HAVE_INET6)
-
-    case AF_INET6:
-        sin6 = (struct sockaddr_in6 *) r->connection->sockaddr;
-
-        if (IN6_IS_ADDR_V4MAPPED(&sin6->sin6_addr)) {
-            p = sin6->sin6_addr.s6_addr;
-            addr = p[12] << 24;
-            addr += p[13] << 16;
-            addr += p[14] << 8;
-            addr += p[15];
-
-            return addr;
-        }
-
-#endif
+    if (xfwd->nelts > 0 && gcf->proxies != NULL) {
+        (void) ngx_http_get_forwarded_addr(r, &addr, xfwd, NULL,
+                                           gcf->proxies, gcf->proxy_recursive);
     }
 
-    return INADDR_NONE;
+#if (NGX_HAVE_INET6)
+
+    if (addr.sockaddr->sa_family == AF_INET6) {
+        u_char           *p;
+        in_addr_t         inaddr;
+        struct in6_addr  *inaddr6;
+
+        inaddr6 = &((struct sockaddr_in6 *) addr.sockaddr)->sin6_addr;
+
+        if (IN6_IS_ADDR_V4MAPPED(inaddr6)) {
+            p = inaddr6->s6_addr;
+
+            inaddr = p[12] << 24;
+            inaddr += p[13] << 16;
+            inaddr += p[14] << 8;
+            inaddr += p[15];
+
+            return inaddr;
+        }
+    }
+
+#endif
+
+    if (addr.sockaddr->sa_family != AF_INET) {
+        return INADDR_NONE;
+    }
+
+    sin = (struct sockaddr_in *) addr.sockaddr;
+    return ntohl(sin->sin_addr.s_addr);
 }
+
+
+#if (NGX_HAVE_GEOIP_V6)
+
+static geoipv6_t
+ngx_http_geoip_addr_v6(ngx_http_request_t *r, ngx_http_geoip_conf_t *gcf)
+{
+    ngx_addr_t            addr;
+    ngx_array_t          *xfwd;
+    in_addr_t             addr4;
+    struct in6_addr       addr6;
+    struct sockaddr_in   *sin;
+    struct sockaddr_in6  *sin6;
+
+    addr.sockaddr = r->connection->sockaddr;
+    addr.socklen = r->connection->socklen;
+    /* addr.name = r->connection->addr_text; */
+
+    xfwd = &r->headers_in.x_forwarded_for;
+
+    if (xfwd->nelts > 0 && gcf->proxies != NULL) {
+        (void) ngx_http_get_forwarded_addr(r, &addr, xfwd, NULL,
+                                           gcf->proxies, gcf->proxy_recursive);
+    }
+
+    switch (addr.sockaddr->sa_family) {
+
+    case AF_INET:
+        /* Produce IPv4-mapped IPv6 address. */
+        sin = (struct sockaddr_in *) addr.sockaddr;
+        addr4 = ntohl(sin->sin_addr.s_addr);
+
+        ngx_memzero(&addr6, sizeof(struct in6_addr));
+        addr6.s6_addr[10] = 0xff;
+        addr6.s6_addr[11] = 0xff;
+        addr6.s6_addr[12] = addr4 >> 24;
+        addr6.s6_addr[13] = addr4 >> 16;
+        addr6.s6_addr[14] = addr4 >> 8;
+        addr6.s6_addr[15] = addr4;
+        return addr6;
+
+    case AF_INET6:
+        sin6 = (struct sockaddr_in6 *) addr.sockaddr;
+        return sin6->sin6_addr;
+
+    default:
+        return in6addr_any;
+    }
+}
+
+#endif
 
 
 static ngx_int_t
 ngx_http_geoip_country_variable(ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data)
 {
-    ngx_http_geoip_variable_handler_pt  handler =
-        (ngx_http_geoip_variable_handler_pt) data;
+    ngx_http_geoip_variable_handler_pt     handler =
+        ngx_http_geoip_country_functions[data];
+#if (NGX_HAVE_GEOIP_V6)
+    ngx_http_geoip_variable_handler_v6_pt  handler_v6 =
+        ngx_http_geoip_country_v6_functions[data];
+#endif
 
     const char             *val;
     ngx_http_geoip_conf_t  *gcf;
@@ -234,7 +357,13 @@ ngx_http_geoip_country_variable(ngx_http_request_t *r,
         goto not_found;
     }
 
-    val = handler(gcf->country, ngx_http_geoip_addr(r));
+#if (NGX_HAVE_GEOIP_V6)
+    val = gcf->country_v6
+              ? handler_v6(gcf->country, ngx_http_geoip_addr_v6(r, gcf))
+              : handler(gcf->country, ngx_http_geoip_addr(r, gcf));
+#else
+    val = handler(gcf->country, ngx_http_geoip_addr(r, gcf));
+#endif
 
     if (val == NULL) {
         goto not_found;
@@ -260,10 +389,8 @@ static ngx_int_t
 ngx_http_geoip_org_variable(ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data)
 {
-    ngx_http_geoip_variable_handler_pt  handler =
-        (ngx_http_geoip_variable_handler_pt) data;
-
-    const char             *val;
+    size_t                  len;
+    char                   *val;
     ngx_http_geoip_conf_t  *gcf;
 
     gcf = ngx_http_get_module_main_conf(r, ngx_http_geoip_module);
@@ -272,17 +399,35 @@ ngx_http_geoip_org_variable(ngx_http_request_t *r,
         goto not_found;
     }
 
-    val = handler(gcf->org, ngx_http_geoip_addr(r));
+#if (NGX_HAVE_GEOIP_V6)
+    val = gcf->org_v6
+              ? GeoIP_name_by_ipnum_v6(gcf->org,
+                                       ngx_http_geoip_addr_v6(r, gcf))
+              : GeoIP_name_by_ipnum(gcf->org,
+                                    ngx_http_geoip_addr(r, gcf));
+#else
+    val = GeoIP_name_by_ipnum(gcf->org, ngx_http_geoip_addr(r, gcf));
+#endif
 
     if (val == NULL) {
         goto not_found;
     }
 
-    v->len = ngx_strlen(val);
+    len = ngx_strlen(val);
+    v->data = ngx_pnalloc(r->pool, len);
+    if (v->data == NULL) {
+        ngx_free(val);
+        return NGX_ERROR;
+    }
+
+    ngx_memcpy(v->data, val, len);
+
+    v->len = len;
     v->valid = 1;
     v->no_cacheable = 0;
     v->not_found = 0;
-    v->data = (u_char *) val;
+
+    ngx_free(val);
 
     return NGX_OK;
 
@@ -452,7 +597,15 @@ ngx_http_geoip_get_city_record(ngx_http_request_t *r)
     gcf = ngx_http_get_module_main_conf(r, ngx_http_geoip_module);
 
     if (gcf->city) {
-        return GeoIP_record_by_ipnum(gcf->city, ngx_http_geoip_addr(r));
+#if (NGX_HAVE_GEOIP_V6)
+        return gcf->city_v6
+                   ? GeoIP_record_by_ipnum_v6(gcf->city,
+                                              ngx_http_geoip_addr_v6(r, gcf))
+                   : GeoIP_record_by_ipnum(gcf->city,
+                                           ngx_http_geoip_addr(r, gcf));
+#else
+        return GeoIP_record_by_ipnum(gcf->city, ngx_http_geoip_addr(r, gcf));
+#endif
     }
 
     return NULL;
@@ -489,6 +642,8 @@ ngx_http_geoip_create_conf(ngx_conf_t *cf)
         return NULL;
     }
 
+    conf->proxy_recursive = NGX_CONF_UNSET;
+
     cln = ngx_pool_cleanup_add(cf->pool, 0);
     if (cln == NULL) {
         return NULL;
@@ -498,6 +653,17 @@ ngx_http_geoip_create_conf(ngx_conf_t *cf)
     cln->data = conf;
 
     return conf;
+}
+
+
+static char *
+ngx_http_geoip_init_conf(ngx_conf_t *cf, void *conf)
+{
+    ngx_http_geoip_conf_t  *gcf = conf;
+
+    ngx_conf_init_value(gcf->proxy_recursive, 0);
+
+    return NGX_CONF_OK;
 }
 
 
@@ -537,10 +703,15 @@ ngx_http_geoip_country(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     switch (gcf->country->databaseType) {
 
     case GEOIP_COUNTRY_EDITION:
-    case GEOIP_PROXY_EDITION:
-    case GEOIP_NETSPEED_EDITION:
 
         return NGX_CONF_OK;
+
+#if (NGX_HAVE_GEOIP_V6)
+    case GEOIP_COUNTRY_EDITION_V6:
+
+        gcf->country_v6 = 1;
+        return NGX_CONF_OK;
+#endif
 
     default:
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
@@ -593,6 +764,16 @@ ngx_http_geoip_org(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
         return NGX_CONF_OK;
 
+#if (NGX_HAVE_GEOIP_V6)
+    case GEOIP_ISP_EDITION_V6:
+    case GEOIP_ORG_EDITION_V6:
+    case GEOIP_DOMAIN_EDITION_V6:
+    case GEOIP_ASNUM_EDITION_V6:
+
+        gcf->org_v6 = 1;
+        return NGX_CONF_OK;
+#endif
+
     default:
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "invalid GeoIP database \"%V\" type:%d",
@@ -642,12 +823,80 @@ ngx_http_geoip_city(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
         return NGX_CONF_OK;
 
+#if (NGX_HAVE_GEOIP_V6)
+    case GEOIP_CITY_EDITION_REV0_V6:
+    case GEOIP_CITY_EDITION_REV1_V6:
+
+        gcf->city_v6 = 1;
+        return NGX_CONF_OK;
+#endif
+
     default:
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "invalid GeoIP City database \"%V\" type:%d",
                            &value[1], gcf->city->databaseType);
         return NGX_CONF_ERROR;
     }
+}
+
+
+static char *
+ngx_http_geoip_proxy(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+{
+    ngx_http_geoip_conf_t  *gcf = conf;
+
+    ngx_str_t   *value;
+    ngx_cidr_t  cidr, *c;
+
+    value = cf->args->elts;
+
+    if (ngx_http_geoip_cidr_value(cf, &value[1], &cidr) != NGX_OK) {
+        return NGX_CONF_ERROR;
+    }
+
+    if (gcf->proxies == NULL) {
+        gcf->proxies = ngx_array_create(cf->pool, 4, sizeof(ngx_cidr_t));
+        if (gcf->proxies == NULL) {
+            return NGX_CONF_ERROR;
+        }
+    }
+
+    c = ngx_array_push(gcf->proxies);
+    if (c == NULL) {
+        return NGX_CONF_ERROR;
+    }
+
+    *c = cidr;
+
+    return NGX_CONF_OK;
+}
+
+static ngx_int_t
+ngx_http_geoip_cidr_value(ngx_conf_t *cf, ngx_str_t *net, ngx_cidr_t *cidr)
+{
+    ngx_int_t  rc;
+
+    if (ngx_strcmp(net->data, "255.255.255.255") == 0) {
+        cidr->family = AF_INET;
+        cidr->u.in.addr = 0xffffffff;
+        cidr->u.in.mask = 0xffffffff;
+
+        return NGX_OK;
+    }
+
+    rc = ngx_ptocidr(net, cidr);
+
+    if (rc == NGX_ERROR) {
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid network \"%V\"", net);
+        return NGX_ERROR;
+    }
+
+    if (rc == NGX_DONE) {
+        ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
+                           "low address bits of %V are meaningless", net);
+    }
+
+    return NGX_OK;
 }
 
 

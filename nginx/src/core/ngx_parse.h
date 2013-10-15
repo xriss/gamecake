@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -10,9 +11,6 @@
 
 #include <ngx_config.h>
 #include <ngx_core.h>
-
-
-#define NGX_PARSE_LARGE_TIME  -2
 
 
 ssize_t ngx_parse_size(ngx_str_t *line);

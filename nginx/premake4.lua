@@ -48,6 +48,7 @@ else
 		"./src/event/ngx_event_connect.c",
 		"./src/event/ngx_event_mutex.c",
 		"./src/event/ngx_event_openssl.c",
+		"./src/event/ngx_event_openssl_stapling.c",
 		"./src/event/ngx_event_pipe.c",
 		"./src/event/ngx_event_pipe.h",
 		"./src/event/ngx_event_posted.c",
@@ -131,7 +132,7 @@ else
 
 }
 
-	files { "./src/http/modules/echo/**.c" }
+--	files { "./src/http/modules/echo/**.c" }
 
 
 	files {
@@ -169,6 +170,7 @@ else
 		"./src/os/unix/ngx_udp_recv.c",
 		"./src/os/unix/ngx_user.c",
 		"./src/os/unix/ngx_writev_chain.c",
+		"./src/os/unix/ngx_setaffinity.c",
 	}
 
 	files { "./lua/src/**.h" , "./lua/src/**.c" }

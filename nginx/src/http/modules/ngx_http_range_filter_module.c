@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -145,7 +146,8 @@ static ngx_http_output_body_filter_pt    ngx_http_next_body_filter;
 static ngx_int_t
 ngx_http_range_header_filter(ngx_http_request_t *r)
 {
-    time_t                        if_range;
+    time_t                        if_range_time;
+    ngx_str_t                    *if_range, *etag;
     ngx_http_core_loc_conf_t     *clcf;
     ngx_http_range_filter_ctx_t  *ctx;
 
@@ -173,19 +175,46 @@ ngx_http_range_header_filter(ngx_http_request_t *r)
         goto next_filter;
     }
 
-    if (r->headers_in.if_range && r->headers_out.last_modified_time != -1) {
+    if (r->headers_in.if_range) {
 
-        if_range = ngx_http_parse_time(r->headers_in.if_range->value.data,
-                                       r->headers_in.if_range->value.len);
+        if_range = &r->headers_in.if_range->value;
+
+        if (if_range->len >= 2 && if_range->data[if_range->len - 1] == '"') {
+
+            if (r->headers_out.etag == NULL) {
+                goto next_filter;
+            }
+
+            etag = &r->headers_out.etag->value;
+
+            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                           "http ir:%V etag:%V", if_range, etag);
+
+            if (if_range->len != etag->len
+                || ngx_strncmp(if_range->data, etag->data, etag->len) != 0)
+            {
+                goto next_filter;
+            }
+
+            goto parse;
+        }
+
+        if (r->headers_out.last_modified_time == (time_t) -1) {
+            goto next_filter;
+        }
+
+        if_range_time = ngx_http_parse_time(if_range->data, if_range->len);
 
         ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                        "http ir:%d lm:%d",
-                       if_range, r->headers_out.last_modified_time);
+                       if_range_time, r->headers_out.last_modified_time);
 
-        if (if_range != r->headers_out.last_modified_time) {
+        if (if_range_time != r->headers_out.last_modified_time) {
             goto next_filter;
         }
     }
+
+parse:
 
     ctx = ngx_pcalloc(r->pool, sizeof(ngx_http_range_filter_ctx_t));
     if (ctx == NULL) {
@@ -594,15 +623,8 @@ ngx_http_range_test_overlapped(ngx_http_request_t *r,
     buf = in->buf;
 
     if (!buf->last_buf) {
-
-        if (buf->in_file) {
-            start = buf->file_pos + ctx->offset;
-            last = buf->file_last + ctx->offset;
-
-        } else {
-            start = buf->pos - buf->start + ctx->offset;
-            last = buf->last - buf->start + ctx->offset;
-        }
+        start = ctx->offset;
+        last = ctx->offset + ngx_buf_size(buf);
 
         range = ctx->ranges.elts;
         for (i = 0; i < ctx->ranges.nelts; i++) {
@@ -715,7 +737,6 @@ static ngx_int_t
 ngx_http_range_multipart_body(ngx_http_request_t *r,
     ngx_http_range_filter_ctx_t *ctx, ngx_chain_t *in)
 {
-    off_t              body_start;
     ngx_buf_t         *b, *buf;
     ngx_uint_t         i;
     ngx_chain_t       *out, *hcl, *rcl, *dcl, **ll;
@@ -724,12 +745,6 @@ ngx_http_range_multipart_body(ngx_http_request_t *r,
     ll = &out;
     buf = in->buf;
     range = ctx->ranges.elts;
-
-#if (NGX_HTTP_CACHE)
-    body_start = r->cached ? r->cache->body_start : 0;
-#else
-    body_start = 0;
-#endif
 
     for (i = 0; i < ctx->ranges.nelts; i++) {
 
@@ -791,13 +806,13 @@ ngx_http_range_multipart_body(ngx_http_request_t *r,
         b->file = buf->file;
 
         if (buf->in_file) {
-            b->file_pos = body_start + range[i].start;
-            b->file_last = body_start + range[i].end;
+            b->file_pos = buf->file_pos + range[i].start;
+            b->file_last = buf->file_pos + range[i].end;
         }
 
         if (ngx_buf_in_memory(buf)) {
-            b->pos = buf->start + (size_t) range[i].start;
-            b->last = buf->start + (size_t) range[i].end;
+            b->pos = buf->pos + (size_t) range[i].start;
+            b->last = buf->pos + (size_t) range[i].end;
         }
 
         dcl = ngx_alloc_chain_link(r->pool);

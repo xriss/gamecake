@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -111,8 +112,8 @@ static ngx_http_module_t  ngx_http_rewrite_module_ctx = {
     NULL,                                  /* create server configuration */
     NULL,                                  /* merge server configuration */
 
-    ngx_http_rewrite_create_loc_conf,      /* create location configration */
-    ngx_http_rewrite_merge_loc_conf        /* merge location configration */
+    ngx_http_rewrite_create_loc_conf,      /* create location configuration */
+    ngx_http_rewrite_merge_loc_conf        /* merge location configuration */
 };
 
 
@@ -483,6 +484,12 @@ ngx_http_rewrite_return(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         }
 
     } else {
+
+        if (ret->status > 999) {
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                               "invalid return code \"%V\"", &value[1]);
+            return NGX_CONF_ERROR;
+        }
 
         if (cf->args->nelts == 2) {
             return NGX_CONF_OK;

@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -145,12 +146,12 @@ ngx_vslprintf(u_char *buf, u_char *last, const char *fmt, va_list args)
 {
     u_char                *p, zero;
     int                    d;
-    double                 f, scale;
+    double                 f;
     size_t                 len, slen;
     int64_t                i64;
-    uint64_t               ui64;
+    uint64_t               ui64, frac;
     ngx_msec_t             ms;
-    ngx_uint_t             width, sign, hex, max_width, frac_width, n;
+    ngx_uint_t             width, sign, hex, max_width, frac_width, scale, n;
     ngx_str_t             *v;
     ngx_variable_value_t  *vv;
 
@@ -364,28 +365,31 @@ ngx_vslprintf(u_char *buf, u_char *last, const char *fmt, va_list args)
                 }
 
                 ui64 = (int64_t) f;
+                frac = 0;
+
+                if (frac_width) {
+
+                    scale = 1;
+                    for (n = frac_width; n; n--) {
+                        scale *= 10;
+                    }
+
+                    frac = (uint64_t) ((f - (double) ui64) * scale + 0.5);
+
+                    if (frac == scale) {
+                        ui64++;
+                        frac = 0;
+                    }
+                }
 
                 buf = ngx_sprintf_num(buf, last, ui64, zero, 0, width);
 
                 if (frac_width) {
-
                     if (buf < last) {
                         *buf++ = '.';
                     }
 
-                    scale = 1.0;
-
-                    for (n = frac_width; n; n--) {
-                        scale *= 10.0;
-                    }
-
-                    /*
-                     * (int64_t) cast is required for msvc6:
-                     * it cannot convert uint64_t to double
-                     */
-                    ui64 = (uint64_t) ((f - (int64_t) ui64) * scale + 0.5);
-
-                    buf = ngx_sprintf_num(buf, last, ui64, '0', 0, frac_width);
+                    buf = ngx_sprintf_num(buf, last, frac, '0', 0, frac_width);
                 }
 
                 fmt++;
@@ -1657,6 +1661,10 @@ ngx_escape_html(u_char *dst, u_char *src, size_t size)
                 len += sizeof("&amp;") - 2;
                 break;
 
+            case '"':
+                len += sizeof("&quot;") - 2;
+                break;
+
             default:
                 break;
             }
@@ -1682,6 +1690,11 @@ ngx_escape_html(u_char *dst, u_char *src, size_t size)
         case '&':
             *dst++ = '&'; *dst++ = 'a'; *dst++ = 'm'; *dst++ = 'p';
             *dst++ = ';';
+            break;
+
+        case '"':
+            *dst++ = '&'; *dst++ = 'q'; *dst++ = 'u'; *dst++ = 'o';
+            *dst++ = 't'; *dst++ = ';';
             break;
 
         default:
@@ -1814,7 +1827,7 @@ ngx_sort(void *base, size_t n, size_t size,
 #if (NGX_MEMCPY_LIMIT)
 
 void *
-ngx_memcpy(void *dst, void *src, size_t n)
+ngx_memcpy(void *dst, const void *src, size_t n)
 {
     if (n > NGX_MEMCPY_LIMIT) {
         ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0, "memcpy %uz bytes", n);

@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -28,6 +29,7 @@
 #include <grp.h>
 #include <dirent.h>
 #include <glob.h>
+#include <time.h>
 #include <sys/statvfs.h>        /* statvfs() */
 
 #include <sys/filio.h>          /* FIONBIO */
@@ -98,6 +100,7 @@
 
 
 #define NGX_HAVE_OS_SPECIFIC_INIT    1
+#define ngx_debug_init()
 
 
 extern char **environ;

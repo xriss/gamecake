@@ -1,5 +1,6 @@
 
 # Copyright (C) Igor Sysoev
+# Copyright (C) Nginx, Inc.
 
 
 case "$NGX_CC_NAME" in
@@ -50,7 +51,7 @@ $PCRE/Makefile:	$NGX_MAKEFILE
 	cd $PCRE \\
 	&& if [ -f Makefile ]; then \$(MAKE) distclean; fi \\
 	&& CC="\$(CC)" CFLAGS="$PCRE_OPT" \\
-	./configure --disable-shared
+	./configure --disable-shared $PCRE_CONF_OPT
 
 $PCRE/.libs/libpcre.a:	$PCRE/Makefile
 	cd $PCRE \\

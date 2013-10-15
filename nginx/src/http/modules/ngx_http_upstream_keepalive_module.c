@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Maxim Dounin
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -11,7 +12,6 @@
 
 typedef struct {
     ngx_uint_t                         max_cached;
-    ngx_uint_t                         single;       /* unsigned:1 */
 
     ngx_queue_t                        cache;
     ngx_queue_t                        free;
@@ -36,8 +36,6 @@ typedef struct {
     ngx_event_set_peer_session_pt      original_set_session;
     ngx_event_save_peer_session_pt     original_save_session;
 #endif
-
-    ngx_uint_t                         failed;       /* unsigned:1 */
 
 } ngx_http_upstream_keepalive_peer_data_t;
 
@@ -220,38 +218,11 @@ ngx_http_upstream_get_keepalive_peer(ngx_peer_connection_t *pc, void *data)
     ngx_log_debug0(NGX_LOG_DEBUG_HTTP, pc->log, 0,
                    "get keepalive peer");
 
-    kp->failed = 0;
-
-    /* single pool of cached connections */
-
-    if (kp->conf->single && !ngx_queue_empty(&kp->conf->cache)) {
-
-        q = ngx_queue_head(&kp->conf->cache);
-
-        item = ngx_queue_data(q, ngx_http_upstream_keepalive_cache_t, queue);
-        c = item->connection;
-
-        ngx_queue_remove(q);
-        ngx_queue_insert_head(&kp->conf->free, q);
-
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-                       "get keepalive peer: using connection %p", c);
-
-        c->idle = 0;
-        c->log = pc->log;
-        c->read->log = pc->log;
-        c->write->log = pc->log;
-        c->pool->log = pc->log;
-
-        pc->connection = c;
-        pc->cached = 1;
-
-        return NGX_DONE;
-    }
+    /* ask balancer */
 
     rc = kp->original_get_peer(pc, kp->data);
 
-    if (kp->conf->single || rc != NGX_OK) {
+    if (rc != NGX_OK) {
         return rc;
     }
 
@@ -307,18 +278,12 @@ ngx_http_upstream_free_keepalive_peer(ngx_peer_connection_t *pc, void *data,
     ngx_log_debug0(NGX_LOG_DEBUG_HTTP, pc->log, 0,
                    "free keepalive peer");
 
-    /* remember failed state - peer.free() may be called more than once */
-
-    if (state & NGX_PEER_FAILED) {
-        kp->failed = 1;
-    }
-
     /* cache valid connections */
 
     u = kp->upstream;
     c = pc->connection;
 
-    if (kp->failed
+    if (state & NGX_PEER_FAILED
         || c == NULL
         || c->read->eof
         || c->read->error
@@ -527,6 +492,10 @@ ngx_http_upstream_keepalive(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     kcf = ngx_http_conf_upstream_srv_conf(uscf,
                                           ngx_http_upstream_keepalive_module);
 
+    if (kcf->original_init_upstream) {
+        return "is duplicate";
+    }
+
     kcf->original_init_upstream = uscf->peer.init_upstream
                                   ? uscf->peer.init_upstream
                                   : ngx_http_upstream_init_round_robin;
@@ -551,7 +520,8 @@ ngx_http_upstream_keepalive(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     for (i = 2; i < cf->args->nelts; i++) {
 
         if (ngx_strcmp(value[i].data, "single") == 0) {
-            kcf->single = 1;
+            ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
+                               "the \"single\" parameter is deprecated");
             continue;
         }
 

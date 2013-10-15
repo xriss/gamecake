@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -217,7 +218,7 @@ ngx_mail_pop3_auth_state(ngx_event_t *rev)
 
             break;
 
-        /* suppress warinings */
+        /* suppress warnings */
         case ngx_pop3_passwd:
             break;
 

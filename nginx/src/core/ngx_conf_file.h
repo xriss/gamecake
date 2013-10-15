@@ -1,6 +1,7 @@
 
 /*
  * Copyright (C) Igor Sysoev
+ * Copyright (C) Nginx, Inc.
  */
 
 
@@ -13,7 +14,7 @@
 
 
 /*
- *        AAAA  number of agruments
+ *        AAAA  number of arguments
  *      FF      command flags
  *    TT        command type, i.e. HTTP "location" or "server" command
  */
@@ -44,7 +45,7 @@
 #define NGX_CONF_ANY         0x00000400
 #define NGX_CONF_1MORE       0x00000800
 #define NGX_CONF_2MORE       0x00001000
-#define NGX_CONF_MULTI       0x00002000
+#define NGX_CONF_MULTI       0x00000000  /* compatibility */
 
 #define NGX_DIRECT_CONF      0x00010000
 
@@ -90,17 +91,8 @@ struct ngx_open_file_s {
     ngx_fd_t              fd;
     ngx_str_t             name;
 
-    u_char               *buffer;
-    u_char               *pos;
-    u_char               *last;
-
-#if 0
-    /* e.g. append mode, error_log */
-    ngx_uint_t            flags;
-    /* e.g. reopen db file */
-    ngx_uint_t          (*handler)(void *data, ngx_open_file_t *file);
+    void                (*flush)(ngx_open_file_t *file, ngx_log_t *log);
     void                 *data;
-#endif
 };
 
 
@@ -316,6 +308,7 @@ char *ngx_conf_check_num_bounds(ngx_conf_t *cf, void *post, void *data);
 
 char *ngx_conf_param(ngx_conf_t *cf);
 char *ngx_conf_parse(ngx_conf_t *cf, ngx_str_t *filename);
+char *ngx_conf_include(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
 ngx_int_t ngx_conf_full_name(ngx_cycle_t *cycle, ngx_str_t *name,
