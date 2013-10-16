@@ -1,7 +1,7 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_process_enabled(1);
@@ -14,8 +14,6 @@ plan tests => blocks() * repeat_each() * 3;
 
 #no_diff();
 #no_long_string();
-
-$ENV{TEST_NGINX_PORT} ||= 1984;
 
 run_tests();
 

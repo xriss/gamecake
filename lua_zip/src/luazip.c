@@ -221,15 +221,16 @@ static int zip_open_mem (lua_State *L) {
   ZZIP_FILE** inf;
   char *cp;
   ZZIP_DIR** pf;
+  int i;
 
 	struct zzip_plugin_mem_io_file *f;
 	f=calloc(sizeof(struct zzip_plugin_mem_io_file),1);
 	if(!f) { return 0; } // alloc fail
-	
+
 	cp=f->magic;
 	cp[0]='Z';cp[1]='I';cp[2]='P';cp[3]=0;
 	cp[4]='D';cp[5]='A';cp[6]='T';cp[7]=0;
-	
+		
 	if(lua_isstring(L,1))
 	{
 		size_t t;
@@ -253,8 +254,10 @@ static int zip_open_mem (lua_State *L) {
 	  return 2;
 	}
 	
+
+
   pf = newfile(L);
-  *pf = zzip_dir_open_ext_io(cp, 0,0, (zzip_plugin_io_t)&xio_mem);
+  *pf = zzip_dir_open_ext_io((char*)f, 0,0, (zzip_plugin_io_t)&xio_mem);
   if (*pf == NULL)
   {
     lua_pushnil(L);

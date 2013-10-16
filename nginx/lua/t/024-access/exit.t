@@ -1,7 +1,7 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #repeat_each(20000);
 repeat_each(2);
@@ -12,7 +12,7 @@ repeat_each(2);
 #log_level('warn');
 #worker_connections(1024);
 
-plan tests => repeat_each() * (blocks() * 2);
+plan tests => repeat_each() * (blocks() * 2 + 2);
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 $ENV{TEST_NGINX_MYSQL_PORT} ||= 3306;
@@ -60,7 +60,8 @@ GET /lua
     }
 --- request
 GET /lua
---- ignore_response
+--- response_body
+hi
 --- no_error_log
 [alert]
 --- error_log
@@ -333,7 +334,7 @@ Logged in 56
 
     upstream memc_a {
         server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
-        keepalive 300 single;
+        keepalive 300;
     }
 
     #upstream_list memc_cluster memc_a memc_b;
@@ -403,7 +404,7 @@ GET /baz
 --- response_body_like: 302
 --- error_code: 302
 --- response_headers
-Location: http://localhost:1984/foo/bar
+Location: http://localhost:$ServerPort/foo/bar
 --- SKIP
 
 

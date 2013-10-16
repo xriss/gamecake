@@ -1,3 +1,10 @@
+
+/*
+ * Copyright (C) Xiaozhe Wang (chaoslawful)
+ * Copyright (C) Yichun Zhang (agentzh)
+ */
+
+
 #ifndef DDEBUG
 #define DDEBUG 0
 #endif
@@ -100,19 +107,9 @@ ngx_http_lua_inject_string_api(lua_State *L)
 static int
 ngx_http_lua_ngx_escape_uri(lua_State *L)
 {
-    ngx_http_request_t      *r;
     size_t                   len, dlen;
     uintptr_t                escape;
     u_char                  *src, *dst;
-
-    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
-    lua_rawget(L, LUA_GLOBALSINDEX);
-    r = lua_touserdata(L, -1);
-    lua_pop(L, 1);
-
-    if (r == NULL) {
-        return luaL_error(L, "no request object found");
-    }
 
     if (lua_gettop(L) != 1) {
         return luaL_error(L, "expecting one argument");
@@ -121,27 +118,17 @@ ngx_http_lua_ngx_escape_uri(lua_State *L)
     src = (u_char *) luaL_checklstring(L, 1, &len);
 
     if (len == 0) {
-        lua_pushlstring(L, NULL, 0);
         return 1;
     }
 
     escape = 2 * ngx_http_lua_escape_uri(NULL, src, len, NGX_ESCAPE_URI);
 
-    dlen = escape + len;
-
-    dst = ngx_palloc(r->pool, dlen);
-    if (dst == NULL) {
-        return luaL_error(L, "memory allocation error");
-    }
-
-    if (escape == 0) {
-        ngx_memcpy(dst, src, len);
-
-    } else {
+    if (escape) {
+        dlen = escape + len;
+        dst = lua_newuserdata(L, dlen);
         ngx_http_lua_escape_uri(dst, src, len, NGX_ESCAPE_URI);
+        lua_pushlstring(L, (char *) dst, dlen);
     }
-
-    lua_pushlstring(L, (char *) dst, dlen);
 
     return 1;
 }
@@ -150,19 +137,9 @@ ngx_http_lua_ngx_escape_uri(lua_State *L)
 static int
 ngx_http_lua_ngx_unescape_uri(lua_State *L)
 {
-    ngx_http_request_t      *r;
     size_t                   len, dlen;
     u_char                  *p;
     u_char                  *src, *dst;
-
-    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
-    lua_rawget(L, LUA_GLOBALSINDEX);
-    r = lua_touserdata(L, -1);
-    lua_pop(L, 1);
-
-    if (r == NULL) {
-        return luaL_error(L, "no request object found");
-    }
 
     if (lua_gettop(L) != 1) {
         return luaL_error(L, "expecting one argument");
@@ -173,10 +150,7 @@ ngx_http_lua_ngx_unescape_uri(lua_State *L)
     /* the unescaped string can only be smaller */
     dlen = len;
 
-    p = ngx_palloc(r->pool, dlen);
-    if (p == NULL) {
-        return luaL_error(L, "memory allocation error");
-    }
+    p = lua_newuserdata(L, dlen);
 
     dst = p;
 
@@ -191,19 +165,9 @@ ngx_http_lua_ngx_unescape_uri(lua_State *L)
 static int
 ngx_http_lua_ngx_quote_sql_str(lua_State *L)
 {
-    ngx_http_request_t      *r;
     size_t                   len, dlen, escape;
     u_char                  *p;
     u_char                  *src, *dst;
-
-    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
-    lua_rawget(L, LUA_GLOBALSINDEX);
-    r = lua_touserdata(L, -1);
-    lua_pop(L, 1);
-
-    if (r == NULL) {
-        return luaL_error(L, "no request object found");
-    }
 
     if (lua_gettop(L) != 1) {
         return luaL_error(L, "expecting one argument");
@@ -222,10 +186,7 @@ ngx_http_lua_ngx_quote_sql_str(lua_State *L)
 
     dlen = sizeof("''") - 1 + len + escape;
 
-    p = ngx_palloc(r->pool, dlen);
-    if (p == NULL) {
-        return luaL_error(L, "out of memory");
-    }
+    p = lua_newuserdata(L, dlen);
 
     dst = p;
 
@@ -241,8 +202,6 @@ ngx_http_lua_ngx_quote_sql_str(lua_State *L)
     *p++ = '\'';
 
     if (p != dst + dlen) {
-        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                "ngx.quote_sql_str: buffer error");
         return NGX_ERROR;
     }
 
@@ -253,8 +212,7 @@ ngx_http_lua_ngx_quote_sql_str(lua_State *L)
 
 
 static uintptr_t
-ngx_http_lua_ngx_escape_sql_str(u_char *dst, u_char *src,
-        size_t size)
+ngx_http_lua_ngx_escape_sql_str(u_char *dst, u_char *src, size_t size)
 {
     ngx_uint_t               n;
 
@@ -266,12 +224,15 @@ ngx_http_lua_ngx_escape_sql_str(u_char *dst, u_char *src,
              * is always 1 */
             if ((*src & 0x80) == 0) {
                 switch (*src) {
-                    case '\r':
+                    case '\0':
+                    case '\b':
                     case '\n':
+                    case '\r':
+                    case '\t':
+                    case 26:  /* \z */
                     case '\\':
                     case '\'':
                     case '"':
-                    case '\032':
                         n++;
                         break;
                     default:
@@ -288,14 +249,34 @@ ngx_http_lua_ngx_escape_sql_str(u_char *dst, u_char *src,
     while (size) {
         if ((*src & 0x80) == 0) {
             switch (*src) {
-                case '\r':
+                case '\0':
                     *dst++ = '\\';
-                    *dst++ = 'r';
+                    *dst++ = '0';
+                    break;
+
+                case '\b':
+                    *dst++ = '\\';
+                    *dst++ = 'b';
                     break;
 
                 case '\n':
                     *dst++ = '\\';
                     *dst++ = 'n';
+                    break;
+
+                case '\r':
+                    *dst++ = '\\';
+                    *dst++ = 'r';
+                    break;
+
+                case '\t':
+                    *dst++ = '\\';
+                    *dst++ = 't';
+                    break;
+
+                case 26:
+                    *dst++ = '\\';
+                    *dst++ = 'z';
                     break;
 
                 case '\\':
@@ -311,11 +292,6 @@ ngx_http_lua_ngx_escape_sql_str(u_char *dst, u_char *src,
                 case '"':
                     *dst++ = '\\';
                     *dst++ = '"';
-                    break;
-
-                case '\032':
-                    *dst++ = '\\';
-                    *dst++ = *src;
                     break;
 
                 default:
@@ -347,9 +323,9 @@ ngx_http_lua_ngx_md5(lua_State *L)
         return luaL_error(L, "expecting one argument");
     }
 
-    if (strcmp(luaL_typename(L, 1), (char *) "nil") == 0) {
-        src     = (u_char *) "";
-        slen    = 0;
+    if (lua_isnil(L, 1)) {
+        src = (u_char *) "";
+        slen = 0;
 
     } else {
         src = (u_char *) luaL_checklstring(L, 1, &slen);
@@ -438,25 +414,15 @@ ngx_http_lua_ngx_sha1_bin(lua_State *L)
 static int
 ngx_http_lua_ngx_decode_base64(lua_State *L)
 {
-    ngx_http_request_t      *r;
     ngx_str_t                p, src;
-
-    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
-    lua_rawget(L, LUA_GLOBALSINDEX);
-    r = lua_touserdata(L, -1);
-    lua_pop(L, 1);
-
-    if (r == NULL) {
-        return luaL_error(L, "no request object found");
-    }
 
     if (lua_gettop(L) != 1) {
         return luaL_error(L, "expecting one argument");
     }
 
-    if (strcmp(luaL_typename(L, 1), (char *) "nil") == 0) {
-        src.data     = (u_char *) "";
-        src.len      = 0;
+    if (lua_isnil(L, 1)) {
+        src.data = (u_char *) "";
+        src.len = 0;
 
     } else {
         src.data = (u_char *) luaL_checklstring(L, 1, &src.len);
@@ -464,10 +430,7 @@ ngx_http_lua_ngx_decode_base64(lua_State *L)
 
     p.len = ngx_base64_decoded_length(src.len);
 
-    p.data = ngx_palloc(r->pool, p.len);
-    if (p.data == NULL) {
-        return NGX_ERROR;
-    }
+    p.data = lua_newuserdata(L, p.len);
 
     if (ngx_decode_base64(&p, &src) == NGX_OK) {
         lua_pushlstring(L, (char *) p.data, p.len);
@@ -476,8 +439,6 @@ ngx_http_lua_ngx_decode_base64(lua_State *L)
         lua_pushnil(L);
     }
 
-    ngx_pfree(r->pool, p.data);
-
     return 1;
 }
 
@@ -485,25 +446,15 @@ ngx_http_lua_ngx_decode_base64(lua_State *L)
 static int
 ngx_http_lua_ngx_encode_base64(lua_State *L)
 {
-    ngx_http_request_t      *r;
     ngx_str_t                p, src;
-
-    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
-    lua_rawget(L, LUA_GLOBALSINDEX);
-    r = lua_touserdata(L, -1);
-    lua_pop(L, 1);
-
-    if (r == NULL) {
-        return luaL_error(L, "no request object found");
-    }
 
     if (lua_gettop(L) != 1) {
         return luaL_error(L, "expecting one argument");
     }
 
-    if (strcmp(luaL_typename(L, 1), (char *) "nil") == 0) {
-        src.data     = (u_char *) "";
-        src.len      = 0;
+    if (lua_isnil(L, 1)) {
+        src.data = (u_char *) "";
+        src.len = 0;
 
     } else {
         src.data = (u_char *) luaL_checklstring(L, 1, &src.len);
@@ -511,16 +462,11 @@ ngx_http_lua_ngx_encode_base64(lua_State *L)
 
     p.len = ngx_base64_encoded_length(src.len);
 
-    p.data = ngx_palloc(r->pool, p.len);
-    if (p.data == NULL) {
-        return NGX_ERROR;
-    }
+    p.data = lua_newuserdata(L, p.len);
 
     ngx_encode_base64(&p, &src);
 
     lua_pushlstring(L, (char *) p.data, p.len);
-
-    ngx_pfree(r->pool, p.data);
 
     return 1;
 }
@@ -552,7 +498,7 @@ ngx_http_lua_ngx_crc32_long(lua_State *L)
 
     if (lua_gettop(L) != 1) {
         return luaL_error(L, "expecting one argument, but got %d",
-                lua_gettop(L));
+                          lua_gettop(L));
     }
 
     p = (u_char *) luaL_checklstring(L, 1, &len);
@@ -563,37 +509,27 @@ ngx_http_lua_ngx_crc32_long(lua_State *L)
 
 
 static int
-ngx_http_lua_ngx_encode_args(lua_State *L) {
-    ngx_http_request_t          *r;
+ngx_http_lua_ngx_encode_args(lua_State *L)
+{
     ngx_str_t                    args;
 
     if (lua_gettop(L) != 1) {
         return luaL_error(L, "expecting 1 argument but seen %d",
-                lua_gettop(L));
+                          lua_gettop(L));
     }
 
-    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
-    lua_rawget(L, LUA_GLOBALSINDEX);
-    r = lua_touserdata(L, -1);
-    lua_pop(L, 1);
-
     luaL_checktype(L, 1, LUA_TTABLE);
-
-    ngx_http_lua_process_args_option(r, L, 1, &args);
-
+    ngx_http_lua_process_args_option(NULL, L, 1, &args);
     lua_pushlstring(L, (char *) args.data, args.len);
-
-    ngx_pfree(r->pool, args.data);
-
     return 1;
 }
 
 
 static int
-ngx_http_lua_ngx_decode_args(lua_State *L) {
-    ngx_http_request_t          *r;
+ngx_http_lua_ngx_decode_args(lua_State *L)
+{
     u_char                      *buf;
-    u_char                      *last;
+    u_char                      *tmp;
     size_t                       len = 0;
     int                          n;
     int                          max;
@@ -614,25 +550,16 @@ ngx_http_lua_ngx_decode_args(lua_State *L) {
         max = NGX_HTTP_LUA_MAX_ARGS;
     }
 
-    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
-    lua_rawget(L, LUA_GLOBALSINDEX);
-    r = lua_touserdata(L, -1);
-    lua_pop(L, 1);
-
-    if (r == NULL) {
-        return luaL_error(L, "no request object found");
-    }
+    tmp = lua_newuserdata(L, len);
+    ngx_memcpy(tmp, buf, len);
 
     lua_createtable(L, 0, 4);
 
-    last = buf + len;
-
-    return ngx_http_lua_parse_args(r, L, buf, last, max);
+    return ngx_http_lua_parse_args(L, tmp, tmp + len, max);
 }
 
 
 #if (NGX_OPENSSL)
-
 static int
 ngx_http_lua_ngx_hmac_sha1(lua_State *L)
 {
@@ -644,7 +571,7 @@ ngx_http_lua_ngx_hmac_sha1(lua_State *L)
 
     if (lua_gettop(L) != 2) {
         return luaL_error(L, "expecting one argument, but got %d",
-                lua_gettop(L));
+                          lua_gettop(L));
     }
 
     sec = (u_char *) luaL_checklstring(L, 1, &lsec);
@@ -660,3 +587,4 @@ ngx_http_lua_ngx_hmac_sha1(lua_State *L)
 }
 #endif
 
+/* vi:set ft=c ts=4 sw=4 et fdm=marker: */

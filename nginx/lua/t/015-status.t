@@ -1,7 +1,7 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_process_enabled(1);
@@ -10,7 +10,7 @@ log_level('warn');
 #repeat_each(120);
 repeat_each(2);
 
-plan tests => blocks() * repeat_each() * 2;
+plan tests => repeat_each() * (blocks() * 2 + 5);
 
 #no_diff();
 #no_long_string();
@@ -150,6 +150,88 @@ GET /201
     }
 --- request
 GET /201
---- response_body_like: 500 Internal Server Error
---- error_code: 500
+--- response_body
+created
+--- no_error_log
+[error]
+
+
+
+=== TEST 10: set ngx.status before headers are sent
+--- config
+    location /t {
+        content_by_lua '
+            ngx.say("ok")
+            ngx.status = 201
+        ';
+    }
+--- request
+    GET /t
+--- response_body
+ok
+--- error_code: 200
+--- error_log eval
+qr/\[error\] .*? attempt to set ngx\.status after sending out response headers/
+
+
+
+=== TEST 11: http 1.0 and ngx.status
+--- config
+    location /nil {
+        content_by_lua '
+            ngx.status = ngx.HTTP_UNAUTHORIZED
+            ngx.say("invalid request")
+            ngx.exit(ngx.HTTP_OK)
+        ';
+    }
+--- request
+GET /nil HTTP/1.0
+--- response_body
+invalid request
+--- error_code: 401
+--- no_error_log
+[error]
+
+
+
+=== TEST 12: github issue #221: cannot modify ngx.status for responses from ngx_proxy
+--- config
+    location = /t {
+        proxy_pass http://127.0.0.1:$server_port/;
+        header_filter_by_lua '
+            if ngx.status == 206 then
+                ngx.status = ngx.HTTP_OK
+            end
+        ';
+    }
+
+--- request
+GET /t
+
+--- more_headers
+Range: bytes=0-4
+
+--- response_body chop
+<html
+
+--- error_code: 200
+--- no_error_log
+[error]
+
+
+
+=== TEST 13: 101 response has a complete status line
+--- config
+    location /t {
+        content_by_lua '
+            ngx.status = 101
+            ngx.send_headers()
+        ';
+    }
+--- request
+GET /t
+--- raw_response_headers_like: ^HTTP/1.1 101 Switching Protocols\r\n
+--- error_code: 101
+--- no_error_log
+[error]
 

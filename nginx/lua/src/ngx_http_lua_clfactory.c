@@ -1,12 +1,25 @@
-/* vim:set ft=c ts=4 sw=4 et fdm=marker: */
+
+/*
+ * Copyright (C) Xiaozhe Wang (chaoslawful)
+ * Copyright (C) Yichun Zhang (agentzh)
+ */
+
 
 #ifndef DDEBUG
 #define DDEBUG 0
 #endif
 #include "ddebug.h"
 
+
 #include <nginx.h>
 #include "ngx_http_lua_clfactory.h"
+
+
+#define CLFACTORY_BEGIN_CODE "return function() "
+#define CLFACTORY_BEGIN_SIZE (sizeof(CLFACTORY_BEGIN_CODE) - 1)
+
+#define CLFACTORY_END_CODE "\nend"
+#define CLFACTORY_END_SIZE (sizeof(CLFACTORY_END_CODE) - 1)
 
 
 /*
@@ -62,6 +75,7 @@
 #define    LUA_BIG_ENDIAN_8BYTES_CODE_LEN           (8 + 8 + 8)
 #define    LUAC_HEADERSIZE         12
 #define    LUAC_VERSION            0x51
+
 
 /*
  * taken from chaoslawful:
@@ -240,11 +254,12 @@ typedef enum {
     NGX_LUA_TEXT_FILE,
     NGX_LUA_BT_LUA,
     NGX_LUA_BT_LJ
-} clfactory_file_type_e;
+} ngx_http_lua_clfactory_file_type_e;
 
 
 typedef struct {
-    clfactory_file_type_e file_type;
+    ngx_http_lua_clfactory_file_type_e file_type;
+
     int         sent_begin;
     int         sent_end;
     int         extraline;
@@ -261,7 +276,7 @@ typedef struct {
         char    str[MAX_END_CODE_SIZE];
     }           end_code;
     char        buff[LUAL_BUFFERSIZE];
-} clfactory_file_ctx_t;
+} ngx_http_lua_clfactory_file_ctx_t;
 
 
 typedef struct {
@@ -269,23 +284,28 @@ typedef struct {
     int         sent_end;
     const char *s;
     size_t      size;
-} clfactory_buffer_ctx_t;
+} ngx_http_lua_clfactory_buffer_ctx_t;
 
 
-static const char *clfactory_getF(lua_State *L, void *ud, size_t *size);
-static int clfactory_errfile(lua_State *L, const char *what, int fname_index);
-static const char *clfactory_getS(lua_State *L, void *ud, size_t *size);
+static const char *ngx_http_lua_clfactory_getF(lua_State *L, void *ud,
+    size_t *size);
+static int ngx_http_lua_clfactory_errfile(lua_State *L, const char *what,
+    int fname_index);
+static const char *ngx_http_lua_clfactory_getS(lua_State *L, void *ud,
+    size_t *size);
+static long ngx_http_lua_clfactory_file_size(FILE *f);
 
 
 int
-ngx_http_lua_clfactory_bytecode_prepare(lua_State *L, clfactory_file_ctx_t *lf,
-    int fname_index)
+ngx_http_lua_clfactory_bytecode_prepare(lua_State *L,
+    ngx_http_lua_clfactory_file_ctx_t *lf, int fname_index)
 {
     int                 x = 1, size_of_int, size_of_size_t, little_endian,
                         size_of_inst, version, stripped;
-    size_t              size, bytecode_len;
+    static int          num_of_inst = 3, num_of_inter_func = 1;
     const char         *filename, *emsg, *serr, *bytecode;
-    ngx_file_info_t     fi;
+    size_t              size, bytecode_len;
+    long                fsize;
 
     serr = NULL;
 
@@ -346,19 +366,21 @@ ngx_http_lua_clfactory_bytecode_prepare(lua_State *L, clfactory_file_ctx_t *lf,
             lf->end_code_len = LJ_CODE_LEN;
         }
 
-        if (ngx_fd_info(fileno(lf->f), &fi) == NGX_FILE_ERROR) {
+        fsize = ngx_http_lua_clfactory_file_size(lf->f);
+        if (fsize < 0) {
             serr = strerror(errno);
-            emsg = "cannot fstat";
+            emsg = "cannot fseek/ftell";
             goto error;
         }
 
-        lf->rest_len = ngx_file_size(&fi) - LJ_HEADERSIZE;
+        lf->rest_len = fsize - LJ_HEADERSIZE;
 
 #if defined(DDEBUG) && (DDEBUG)
         {
         size_t i = 0;
         dd("==LJ_END_CODE: %ld rest_len: %ld==", lf->end_code_len,
            lf->rest_len);
+
         for (i = 0; i < lf->end_code_len; i++) {
             dd("%ld: 0x%02X", i, (unsigned) ((u_char) lf->end_code.ptr[i]));
         }
@@ -404,12 +426,13 @@ ngx_http_lua_clfactory_bytecode_prepare(lua_State *L, clfactory_file_ctx_t *lf,
             goto error;
         }
 
-        /* source string length */
-        *(size_t *) (lf->begin_code.str + POS_SOURCE_STR_LEN) = 0;
-        /* start line */
-        *(int *) (lf->begin_code.str + POS_START_LINE) = 0;
-        /* last line */
-        *(int *) (lf->begin_code.str + POS_LAST_LINE) = 0;
+        /* clear the following fields to zero:
+         * - source string length
+         * - start line
+         * - last line
+         */
+        ngx_memzero(lf->begin_code.str + POS_SOURCE_STR_LEN,
+                    sizeof(size_t) + sizeof(int) * 2);
         /* number of upvalues */
         *(lf->begin_code.str + POS_NUM_OF_UPVS) = 0;
         /* number of paramters */
@@ -419,7 +442,8 @@ ngx_http_lua_clfactory_bytecode_prepare(lua_State *L, clfactory_file_ctx_t *lf,
         /* max stack size */
         *(lf->begin_code.str + POS_MAX_STACK_SIZE) = 2;
         /* number of bytecode instructions */
-        *(int *) (lf->begin_code.str + POS_NUM_OF_INST) = 3;
+        ngx_memcpy(lf->begin_code.str + POS_NUM_OF_INST, &num_of_inst,
+                   sizeof(int));
 
         lf->begin_code_len = POS_BYTECODE;
 
@@ -448,10 +472,11 @@ ngx_http_lua_clfactory_bytecode_prepare(lua_State *L, clfactory_file_ctx_t *lf,
         ngx_memcpy(lf->begin_code.str + POS_BYTECODE, bytecode, bytecode_len);
 
         /* number of consts */
-        *(int *) (lf->begin_code.str + POS_BYTECODE + bytecode_len) = 0;
+        ngx_memzero(lf->begin_code.str + POS_BYTECODE + bytecode_len,
+                    sizeof(int));
         /* number of internal functions */
-        *(int *) (lf->begin_code.str + POS_BYTECODE + bytecode_len
-                  + sizeof(int)) = 1;
+        ngx_memcpy(lf->begin_code.str + POS_BYTECODE + bytecode_len
+                   + sizeof(int), &num_of_inter_func, sizeof(int));
 
         lf->begin_code_len += bytecode_len + sizeof(int) + sizeof(int);
 
@@ -492,9 +517,7 @@ ngx_http_lua_clfactory_bytecode_prepare(lua_State *L, clfactory_file_ctx_t *lf,
 
 error:
 
-    if (lf->f != stdin) {
-        fclose(lf->f);  /* close file (even in case of errors) */
-    }
+    fclose(lf->f);  /* close file (even in case of errors) */
 
     filename = lua_tostring(L, fname_index) + 1;
 
@@ -516,7 +539,8 @@ ngx_http_lua_clfactory_loadfile(lua_State *L, const char *filename)
 {
     int                         c, status, readstatus;
     ngx_flag_t                  sharp;
-    clfactory_file_ctx_t        lf;
+
+    ngx_http_lua_clfactory_file_ctx_t        lf;
 
     /* index of filename on the stack */
     int                         fname_index;
@@ -532,17 +556,11 @@ ngx_http_lua_clfactory_loadfile(lua_State *L, const char *filename)
     lf.end_code.ptr = CLFACTORY_END_CODE;
     lf.end_code_len = CLFACTORY_END_SIZE;
 
-    if (filename == NULL) {
-        lua_pushliteral(L, "=stdin");
-        lf.f = stdin;
+    lua_pushfstring(L, "@%s", filename);
 
-    } else {
-        lua_pushfstring(L, "@%s", filename);
-        lf.f = fopen(filename, "r");
-
-        if (lf.f == NULL) {
-            return clfactory_errfile(L, "open", fname_index);
-        }
+    lf.f = fopen(filename, "r");
+    if (lf.f == NULL) {
+        return ngx_http_lua_clfactory_errfile(L, "open", fname_index);
     }
 
     c = getc(lf.f);
@@ -565,7 +583,7 @@ ngx_http_lua_clfactory_loadfile(lua_State *L, const char *filename)
         lf.f = freopen(filename, "rb", lf.f);  /* reopen in binary mode */
 
         if (lf.f == NULL) {
-            return clfactory_errfile(L, "reopen", fname_index);
+            return ngx_http_lua_clfactory_errfile(L, "reopen", fname_index);
         }
 
         /* check whether lib jit exists */
@@ -618,7 +636,8 @@ ngx_http_lua_clfactory_loadfile(lua_State *L, const char *filename)
     }
 
     lf.sent_begin = lf.sent_end = 0;
-    status = lua_load(L, clfactory_getF, &lf, lua_tostring(L, -1));
+    status = lua_load(L, ngx_http_lua_clfactory_getF, &lf,
+                      lua_tostring(L, -1));
 
     readstatus = ferror(lf.f);
 
@@ -628,7 +647,7 @@ ngx_http_lua_clfactory_loadfile(lua_State *L, const char *filename)
 
     if (readstatus) {
         lua_settop(L, fname_index);  /* ignore results from `lua_load' */
-        return clfactory_errfile(L, "read", fname_index);
+        return ngx_http_lua_clfactory_errfile(L, "read", fname_index);
     }
 
     lua_remove(L, fname_index);
@@ -638,34 +657,29 @@ ngx_http_lua_clfactory_loadfile(lua_State *L, const char *filename)
 
 
 int
-ngx_http_lua_clfactory_loadstring(lua_State *L, const char *s)
-{
-    return ngx_http_lua_clfactory_loadbuffer(L, s, strlen(s), s);
-}
-
-
-int
 ngx_http_lua_clfactory_loadbuffer(lua_State *L, const char *buff,
-        size_t size, const char *name)
+    size_t size, const char *name)
 {
-    clfactory_buffer_ctx_t ls;
+    ngx_http_lua_clfactory_buffer_ctx_t     ls;
 
     ls.s = buff;
     ls.size = size;
-    ls.sent_begin = ls.sent_end = 0;
+    ls.sent_begin = 0;
+    ls.sent_end = 0;
 
-    return lua_load(L, clfactory_getS, &ls, name);
+    return lua_load(L, ngx_http_lua_clfactory_getS, &ls, name);
 }
 
 
 static const char *
-clfactory_getF(lua_State *L, void *ud, size_t *size)
+ngx_http_lua_clfactory_getF(lua_State *L, void *ud, size_t *size)
 {
     char                        *buf;
     size_t                       num;
-    clfactory_file_ctx_t        *lf;
 
-    lf = (clfactory_file_ctx_t *) ud;
+    ngx_http_lua_clfactory_file_ctx_t        *lf;
+
+    lf = (ngx_http_lua_clfactory_file_ctx_t *) ud;
 
     if (lf->extraline) {
         lf->extraline = 0;
@@ -730,7 +744,7 @@ clfactory_getF(lua_State *L, void *ud, size_t *size)
 
 
 static int
-clfactory_errfile(lua_State *L, const char *what, int fname_index)
+ngx_http_lua_clfactory_errfile(lua_State *L, const char *what, int fname_index)
 {
     const char      *serr;
     const char      *filename;
@@ -752,11 +766,9 @@ clfactory_errfile(lua_State *L, const char *what, int fname_index)
 
 
 static const char *
-clfactory_getS(lua_State *L, void *ud, size_t *size)
+ngx_http_lua_clfactory_getS(lua_State *L, void *ud, size_t *size)
 {
-    clfactory_buffer_ctx_t      *ls;
-
-    ls = (clfactory_buffer_ctx_t *) ud;
+    ngx_http_lua_clfactory_buffer_ctx_t      *ls = ud;
 
     if (ls->sent_begin == 0) {
         ls->sent_begin = 1;
@@ -781,3 +793,32 @@ clfactory_getS(lua_State *L, void *ud, size_t *size)
     return ls->s;
 }
 
+
+static long
+ngx_http_lua_clfactory_file_size(FILE *f)
+{
+    long              cur_pos, len;
+
+    cur_pos = ftell(f);
+    if (cur_pos == -1) {
+        return -1;
+    }
+
+    if (fseek(f, 0, SEEK_END) != 0) {
+        return -1;
+    }
+
+    len = ftell(f);
+    if (len == -1) {
+        return -1;
+    }
+
+    if (fseek(f, cur_pos, SEEK_SET) != 0) {
+        return -1;
+    }
+
+    return len;
+}
+
+
+/* vi:set ft=c ts=4 sw=4 et fdm=marker: */

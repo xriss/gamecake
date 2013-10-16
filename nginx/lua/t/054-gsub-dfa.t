@@ -1,6 +1,6 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_on();
@@ -9,7 +9,7 @@ use Test::Nginx::Socket;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 2);
+plan tests => repeat_each() * (blocks() * 2 + 5);
 
 #no_diff();
 no_long_string();
@@ -97,14 +97,19 @@ hello, world: 0
 --- config
     location /re {
         content_by_lua '
-            rc, m = pcall(ngx.re.gsub, "hello\\nworld", "(abc", "world", "j")
-            ngx.say(rc, ": ", m)
+            local s, n, err = ngx.re.gsub("hello\\nworld", "(abc", "world", "j")
+            if s then
+                ngx.say("gsub: ", n)
+
+            else
+                ngx.say("error: ", err)
+            end
         ';
     }
 --- request
     GET /re
 --- response_body
-false: bad argument #2 to '?' (failed to compile regex "(abc": pcre_compile() failed: missing ) in "(abc")
+error: pcre_compile() failed: missing ) in "(abc"
 
 
 
@@ -112,12 +117,86 @@ false: bad argument #2 to '?' (failed to compile regex "(abc": pcre_compile() fa
 --- config
     location /re {
         content_by_lua '
-            rc, m = pcall(ngx.re.gsub, "hello\\nworld", "(abc", "world", "jo")
-            ngx.say(rc, ": ", m)
+            local s, n, err = ngx.re.gsub("hello\\nworld", "(abc", "world", "jo")
+            if s then
+                ngx.say("gsub: ", n)
+            else
+                ngx.say("error: ", err)
+            end
         ';
     }
 --- request
     GET /re
 --- response_body
-false: bad argument #2 to '?' (failed to compile regex "(abc": pcre_compile() failed: missing ) in "(abc")
+error: pcre_compile() failed: missing ) in "(abc"
+--- no_error_log
+[error]
+
+
+
+=== TEST 7: UTF-8 mode without UTF-8 sequence checks
+--- config
+    location /re {
+        content_by_lua '
+            local s, n, err = ngx.re.gsub("你好", ".", "a", "Ud")
+            if s then
+                ngx.say("s: ", s)
+            end
+        ';
+    }
+--- stap
+probe process("$LIBPCRE_PATH").function("pcre_compile") {
+    printf("compile opts: %x\n", $options)
+}
+
+probe process("$LIBPCRE_PATH").function("pcre_dfa_exec") {
+    printf("exec opts: %x\n", $options)
+}
+
+--- stap_out
+compile opts: 800
+exec opts: 2000
+exec opts: 2000
+exec opts: 2000
+
+--- request
+    GET /re
+--- response_body
+s: aa
+--- no_error_log
+[error]
+
+
+
+=== TEST 8: UTF-8 mode with UTF-8 sequence checks
+--- config
+    location /re {
+        content_by_lua '
+            local s, n, err = ngx.re.gsub("你好", ".", "a", "ud")
+            if s then
+                ngx.say("s: ", s)
+            end
+        ';
+    }
+--- stap
+probe process("$LIBPCRE_PATH").function("pcre_compile") {
+    printf("compile opts: %x\n", $options)
+}
+
+probe process("$LIBPCRE_PATH").function("pcre_dfa_exec") {
+    printf("exec opts: %x\n", $options)
+}
+
+--- stap_out
+compile opts: 800
+exec opts: 0
+exec opts: 0
+exec opts: 0
+
+--- request
+    GET /re
+--- response_body
+s: aa
+--- no_error_log
+[error]
 

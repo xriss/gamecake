@@ -1,7 +1,7 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_process_enabled(1);
@@ -9,10 +9,10 @@ use Test::Nginx::Socket;
 
 repeat_each(2);
 
-plan tests => (2 * blocks() + 5) * repeat_each();
+plan tests => repeat_each() * (2 * blocks() + 19);
 
 #no_diff();
-no_long_string();
+#no_long_string();
 
 run_tests();
 
@@ -34,6 +34,9 @@ Bar: baz
 --- response_body
 Foo: bar
 Bar: baz
+--- log_level: debug
+--- no_error_log
+lua exceeding request header limit
 
 
 
@@ -42,7 +45,7 @@ Bar: baz
     location /req-header {
         content_by_lua '
             local h = {}
-            for k, v in pairs(ngx.req.get_headers()) do
+            for k, v in pairs(ngx.req.get_headers(nil, true)) do
                 h[k] = v
             end
             ngx.say("Foo: ", h["Foo"] or "nil")
@@ -120,7 +123,7 @@ Foo:
 --- config
     location /bar {
         rewrite_by_lua '
-            ngx.req.set_header("content_length", 2048)
+            ngx.req.set_header("content-length", 2048)
         ';
         echo_read_request_body;
         echo_request_body;
@@ -301,6 +304,7 @@ GET /bar
     }
 --- more_headers
 Foo: foo
+
 --- request
     GET /foo
 --- response_body
@@ -412,11 +416,11 @@ $s
 my @k;
 my $i = 1;
 while ($i <= 98) {
-    push @k, "X-$i";
+    push @k, "x-$i";
     $i++;
 }
-push @k, "Connection: Close\n";
-push @k, "Host: localhost\n";
+push @k, "connection: Close\n";
+push @k, "host: localhost\n";
 @k = sort @k;
 for my $k (@k) {
     if ($k =~ /\d+/) {
@@ -426,7 +430,7 @@ for my $k (@k) {
 CORE::join("", @k);
 --- timeout: 4
 --- error_log
-lua hit request header limit 100
+lua exceeding request header limit 100
 
 
 
@@ -460,11 +464,11 @@ $s
 my @k;
 my $i = 1;
 while ($i <= 100) {
-    push @k, "X-$i";
+    push @k, "x-$i";
     $i++;
 }
-push @k, "Connection: Close\n";
-push @k, "Host: localhost\n";
+push @k, "connection: Close\n";
+push @k, "host: localhost\n";
 @k = sort @k;
 for my $k (@k) {
     if ($k =~ /\d+/) {
@@ -474,7 +478,7 @@ for my $k (@k) {
 CORE::join("", @k);
 --- timeout: 4
 --- error_log
-lua hit request header limit 102
+lua exceeding request header limit 102
 
 
 
@@ -508,11 +512,11 @@ $s
 my @k;
 my $i = 1;
 while ($i <= 105) {
-    push @k, "X-$i";
+    push @k, "x-$i";
     $i++;
 }
-push @k, "Connection: Close\n";
-push @k, "Host: localhost\n";
+push @k, "connection: Close\n";
+push @k, "host: localhost\n";
 @k = sort @k;
 for my $k (@k) {
     if ($k =~ /\d+/) {
@@ -646,7 +650,7 @@ Test-Header: [1]
     }
 
     location /back {
-        echo $echo_client_request_headers;
+        echo -n $echo_client_request_headers;
     }
 --- request
 POST /t
@@ -657,6 +661,7 @@ Test-Header: 1
 --- response_body_like eval
 qr/Connection: close\r
 Test-Header: 1\r
+\r
 $/
 --- no_error_log
 [error]
@@ -730,4 +735,614 @@ Foo20: foo20\r
 Foo21: foo21\r
 Foo22: foo22\r
 /
+
+
+
+=== TEST 27: iterating through headers (raw form)
+--- config
+    location /t {
+        content_by_lua '
+            local h = {}
+            for k, v in pairs(ngx.req.get_headers(nil, true)) do
+                ngx.say(k, ": ", v)
+            end
+        ';
+    }
+--- request
+GET /t
+--- more_headers
+My-Foo: bar
+Bar: baz
+--- response_body
+Host: localhost
+Bar: baz
+My-Foo: bar
+Connection: Close
+
+
+
+=== TEST 28: __index metamethod not working for "raw" mode
+--- config
+    location /t {
+        content_by_lua '
+            local h = ngx.req.get_headers(nil, true)
+            ngx.say("My-Foo-Header: ", h.my_foo_header)
+        ';
+    }
+--- request
+GET /t
+--- more_headers
+My-Foo-Header: Hello World
+--- response_body
+My-Foo-Header: nil
+
+
+
+=== TEST 29: __index metamethod not working for the default mode
+--- config
+    location /t {
+        content_by_lua '
+            local h = ngx.req.get_headers()
+            ngx.say("My-Foo-Header: ", h.my_foo_header)
+        ';
+    }
+--- request
+GET /t
+--- more_headers
+My-Foo-Header: Hello World
+--- response_body
+My-Foo-Header: Hello World
+
+
+
+=== TEST 30: clear input header (just more than 20 headers)
+--- config
+    location = /t {
+        rewrite_by_lua 'ngx.req.clear_header("R")';
+        proxy_pass http://127.0.0.1:$server_port/back;
+        proxy_set_header Host foo;
+        #proxy_pass http://127.0.0.1:1234/back;
+    }
+
+    location = /back {
+        echo -n $echo_client_request_headers;
+    }
+--- request
+GET /t
+--- more_headers eval
+my $s = "User-Agent: curl\n";
+
+for my $i ('a' .. 'r') {
+    $s .= uc($i) . ": " . "$i\n"
+}
+$s
+--- response_body eval
+"GET /back HTTP/1.0\r
+Host: foo\r
+Connection: close\r
+User-Agent: curl\r
+A: a\r
+B: b\r
+C: c\r
+D: d\r
+E: e\r
+F: f\r
+G: g\r
+H: h\r
+I: i\r
+J: j\r
+K: k\r
+L: l\r
+M: m\r
+N: n\r
+O: o\r
+P: p\r
+Q: q\r
+\r
+"
+
+
+
+=== TEST 31: clear input header (just more than 20 headers, and add more)
+--- config
+    location = /t {
+        rewrite_by_lua '
+            ngx.req.clear_header("R")
+            for i = 1, 21 do
+                ngx.req.set_header("foo-" .. i, i)
+            end
+        ';
+        proxy_pass http://127.0.0.1:$server_port/back;
+        proxy_set_header Host foo;
+        #proxy_pass http://127.0.0.1:1234/back;
+    }
+
+    location = /back {
+        echo -n $echo_client_request_headers;
+    }
+--- request
+GET /t
+--- more_headers eval
+my $s = "User-Agent: curl\n";
+
+for my $i ('a' .. 'r') {
+    $s .= uc($i) . ": " . "$i\n"
+}
+$s
+--- response_body eval
+"GET /back HTTP/1.0\r
+Host: foo\r
+Connection: close\r
+User-Agent: curl\r
+A: a\r
+B: b\r
+C: c\r
+D: d\r
+E: e\r
+F: f\r
+G: g\r
+H: h\r
+I: i\r
+J: j\r
+K: k\r
+L: l\r
+M: m\r
+N: n\r
+O: o\r
+P: p\r
+Q: q\r
+foo-1: 1\r
+foo-2: 2\r
+foo-3: 3\r
+foo-4: 4\r
+foo-5: 5\r
+foo-6: 6\r
+foo-7: 7\r
+foo-8: 8\r
+foo-9: 9\r
+foo-10: 10\r
+foo-11: 11\r
+foo-12: 12\r
+foo-13: 13\r
+foo-14: 14\r
+foo-15: 15\r
+foo-16: 16\r
+foo-17: 17\r
+foo-18: 18\r
+foo-19: 19\r
+foo-20: 20\r
+foo-21: 21\r
+\r
+"
+
+
+
+=== TEST 32: clear input header (just more than 21 headers)
+--- config
+    location = /t {
+        rewrite_by_lua '
+            ngx.req.clear_header("R")
+            ngx.req.clear_header("Q")
+        ';
+        proxy_pass http://127.0.0.1:$server_port/back;
+        proxy_set_header Host foo;
+        #proxy_pass http://127.0.0.1:1234/back;
+    }
+
+    location = /back {
+        echo -n $echo_client_request_headers;
+    }
+--- request
+GET /t
+--- more_headers eval
+my $s = "User-Agent: curl\nBah: bah\n";
+
+for my $i ('a' .. 'r') {
+    $s .= uc($i) . ": " . "$i\n"
+}
+$s
+--- response_body eval
+"GET /back HTTP/1.0\r
+Host: foo\r
+Connection: close\r
+User-Agent: curl\r
+Bah: bah\r
+A: a\r
+B: b\r
+C: c\r
+D: d\r
+E: e\r
+F: f\r
+G: g\r
+H: h\r
+I: i\r
+J: j\r
+K: k\r
+L: l\r
+M: m\r
+N: n\r
+O: o\r
+P: p\r
+\r
+"
+
+
+
+=== TEST 33: clear input header (just more than 21 headers)
+--- config
+    location = /t {
+        rewrite_by_lua '
+            ngx.req.clear_header("R")
+            ngx.req.clear_header("Q")
+            for i = 1, 21 do
+                ngx.req.set_header("foo-" .. i, i)
+            end
+        ';
+        proxy_pass http://127.0.0.1:$server_port/back;
+        proxy_set_header Host foo;
+        #proxy_pass http://127.0.0.1:1234/back;
+    }
+
+    location = /back {
+        echo -n $echo_client_request_headers;
+    }
+--- request
+GET /t
+--- more_headers eval
+my $s = "User-Agent: curl\nBah: bah\n";
+
+for my $i ('a' .. 'r') {
+    $s .= uc($i) . ": " . "$i\n"
+}
+$s
+--- response_body eval
+"GET /back HTTP/1.0\r
+Host: foo\r
+Connection: close\r
+User-Agent: curl\r
+Bah: bah\r
+A: a\r
+B: b\r
+C: c\r
+D: d\r
+E: e\r
+F: f\r
+G: g\r
+H: h\r
+I: i\r
+J: j\r
+K: k\r
+L: l\r
+M: m\r
+N: n\r
+O: o\r
+P: p\r
+foo-1: 1\r
+foo-2: 2\r
+foo-3: 3\r
+foo-4: 4\r
+foo-5: 5\r
+foo-6: 6\r
+foo-7: 7\r
+foo-8: 8\r
+foo-9: 9\r
+foo-10: 10\r
+foo-11: 11\r
+foo-12: 12\r
+foo-13: 13\r
+foo-14: 14\r
+foo-15: 15\r
+foo-16: 16\r
+foo-17: 17\r
+foo-18: 18\r
+foo-19: 19\r
+foo-20: 20\r
+foo-21: 21\r
+\r
+"
+
+
+
+=== TEST 34: raw form
+--- config
+    location /t {
+        content_by_lua '
+           -- get ALL the raw headers (0 == no limit, not recommended)
+           local headers = ngx.req.get_headers(0, true)
+           for k, v in pairs(headers) do
+              ngx.say{ k, ": ", v}
+           end
+        ';
+    }
+--- request
+GET /t
+--- more_headers
+My-Foo: bar
+Bar: baz
+--- response_body
+Host: localhost
+Bar: baz
+My-Foo: bar
+Connection: Close
+--- no_error_log
+[error]
+
+
+
+=== TEST 35: clear X-Real-IP
+--- config
+    location /t {
+        rewrite_by_lua '
+           ngx.req.set_header("X-Real-IP", nil)
+        ';
+        echo "X-Real-IP: $http_x_real_ip";
+    }
+--- request
+GET /t
+--- more_headers
+X-Real-IP: 8.8.8.8
+
+--- stap
+F(ngx_http_lua_rewrite_by_chunk) {
+    if (@defined($r->headers_in->x_real_ip) && $r->headers_in->x_real_ip) {
+        printf("rewrite: x-real-ip: %s\n",
+               user_string_n($r->headers_in->x_real_ip->value->data,
+                             $r->headers_in->x_real_ip->value->len))
+    } else {
+        println("rewrite: no x-real-ip")
+    }
+}
+
+F(ngx_http_core_content_phase) {
+    if (@defined($r->headers_in->x_real_ip) && $r->headers_in->x_real_ip) {
+        printf("content: x-real-ip: %s\n",
+               user_string_n($r->headers_in->x_real_ip->value->data,
+                             $r->headers_in->x_real_ip->value->len))
+    } else {
+        println("content: no x-real-ip")
+    }
+}
+
+--- stap_out
+rewrite: x-real-ip: 8.8.8.8
+content: no x-real-ip
+
+--- response_body
+X-Real-IP: 
+
+--- no_error_log
+[error]
+
+
+
+=== TEST 36: set custom X-Real-IP
+--- config
+    location /t {
+        rewrite_by_lua '
+           ngx.req.set_header("X-Real-IP", "8.8.4.4")
+        ';
+        echo "X-Real-IP: $http_x_real_ip";
+    }
+--- request
+GET /t
+
+--- stap
+F(ngx_http_lua_rewrite_by_chunk) {
+    if (@defined($r->headers_in->x_real_ip) && $r->headers_in->x_real_ip) {
+        printf("rewrite: x-real-ip: %s\n",
+               user_string_n($r->headers_in->x_real_ip->value->data,
+                             $r->headers_in->x_real_ip->value->len))
+    } else {
+        println("rewrite: no x-real-ip")
+    }
+
+}
+
+F(ngx_http_core_content_phase) {
+    if (@defined($r->headers_in->x_real_ip) && $r->headers_in->x_real_ip) {
+        printf("content: x-real-ip: %s\n",
+               user_string_n($r->headers_in->x_real_ip->value->data,
+                             $r->headers_in->x_real_ip->value->len))
+    } else {
+        println("content: no x-real-ip")
+    }
+}
+
+--- stap_out
+rewrite: no x-real-ip
+content: x-real-ip: 8.8.4.4
+
+--- response_body
+X-Real-IP: 8.8.4.4
+
+--- no_error_log
+[error]
+
+
+
+=== TEST 37: clear Via
+--- config
+    location /t {
+        rewrite_by_lua '
+           ngx.req.set_header("Via", nil)
+        ';
+        echo "Via: $http_via";
+    }
+--- request
+GET /t
+--- more_headers
+Via: 1.0 fred, 1.1 nowhere.com (Apache/1.1)
+
+--- stap
+F(ngx_http_lua_rewrite_by_chunk) {
+    if (@defined($r->headers_in->via) && $r->headers_in->via) {
+        printf("rewrite: via: %s\n",
+               user_string_n($r->headers_in->via->value->data,
+                             $r->headers_in->via->value->len))
+    } else {
+        println("rewrite: no via")
+    }
+}
+
+F(ngx_http_core_content_phase) {
+    if (@defined($r->headers_in->via) && $r->headers_in->via) {
+        printf("content: via: %s\n",
+               user_string_n($r->headers_in->via->value->data,
+                             $r->headers_in->via->value->len))
+    } else {
+        println("content: no via")
+    }
+}
+
+--- stap_out
+rewrite: via: 1.0 fred, 1.1 nowhere.com (Apache/1.1)
+content: no via
+
+--- response_body
+Via: 
+
+--- no_error_log
+[error]
+
+
+
+=== TEST 38: set custom Via
+--- config
+    location /t {
+        rewrite_by_lua '
+           ngx.req.set_header("Via", "1.0 fred, 1.1 nowhere.com (Apache/1.1)")
+        ';
+        echo "Via: $http_via";
+    }
+--- request
+GET /t
+
+--- stap
+F(ngx_http_lua_rewrite_by_chunk) {
+    if (@defined($r->headers_in->via) && $r->headers_in->via) {
+        printf("rewrite: via: %s\n",
+               user_string_n($r->headers_in->via->value->data,
+                             $r->headers_in->via->value->len))
+    } else {
+        println("rewrite: no via")
+    }
+
+}
+
+F(ngx_http_core_content_phase) {
+    if (@defined($r->headers_in->via) && $r->headers_in->via) {
+        printf("content: via: %s\n",
+               user_string_n($r->headers_in->via->value->data,
+                             $r->headers_in->via->value->len))
+    } else {
+        println("content: no via")
+    }
+}
+
+--- stap_out
+rewrite: no via
+content: via: 1.0 fred, 1.1 nowhere.com (Apache/1.1)
+
+--- response_body
+Via: 1.0 fred, 1.1 nowhere.com (Apache/1.1)
+
+--- no_error_log
+[error]
+
+
+
+=== TEST 39: set input header (with underscores in the header name)
+--- config
+    location /req-header {
+        rewrite_by_lua '
+            ngx.req.set_header("foo_bar", "some value");
+        ';
+        proxy_pass http://127.0.0.1:$server_port/back;
+    }
+    location = /back {
+        echo -n $echo_client_request_headers;
+    }
+--- request
+GET /req-header
+--- response_body_like eval
+qr{^GET /back HTTP/1.0\r
+Host: 127.0.0.1:\d+\r
+Connection: close\r
+foo_bar: some value\r
+\r
+$}
+
+
+
+=== TEST 40: HTTP 0.9 (set & get)
+--- config
+    location /foo {
+        content_by_lua '
+            ngx.req.set_header("X-Foo", "howdy");
+            ngx.say("X-Foo: ", ngx.req.get_headers()["X-Foo"])
+        ';
+    }
+--- raw_request eval
+"GET /foo\r\n"
+--- response_headers
+! X-Foo
+--- response_body
+X-Foo: nil
+--- http09
+--- no_error_log
+[error]
+
+
+
+=== TEST 41: HTTP 0.9 (clear)
+--- config
+    location /foo {
+        content_by_lua '
+            ngx.req.set_header("X-Foo", "howdy");
+            ngx.say("X-Foo: ", ngx.req.get_headers()["X-Foo"])
+        ';
+    }
+--- raw_request eval
+"GET /foo\r\n"
+--- response_headers
+! X-Foo
+--- response_body
+X-Foo: nil
+--- http09
+--- no_error_log
+[error]
+
+
+
+=== TEST 42: Host header with port and $host (github issue #292)
+--- config
+    location /bar {
+        rewrite_by_lua '
+            ngx.req.set_header("Host", "agentzh.org:1984")
+        ';
+        echo "host var: $host";
+        echo "http_host var: $http_host";
+    }
+--- request
+GET /bar
+--- response_body
+host var: agentzh.org
+http_host var: agentzh.org:1984
+
+
+
+=== TEST 43: Host header with upper case letters and $host (github issue #292)
+--- config
+    location /bar {
+        rewrite_by_lua '
+            ngx.req.set_header("Host", "agentZH.org:1984")
+        ';
+        echo "host var: $host";
+        echo "http_host var: $http_host";
+    }
+--- request
+GET /bar
+--- response_body
+host var: agentzh.org
+http_host var: agentZH.org:1984
 

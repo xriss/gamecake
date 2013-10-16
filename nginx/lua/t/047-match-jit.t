@@ -1,6 +1,6 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_on();
@@ -9,7 +9,7 @@ use Test::Nginx::Socket;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 2 + 4);
+plan tests => repeat_each() * (blocks() * 2 + 5);
 
 #no_diff();
 no_long_string();
@@ -105,20 +105,104 @@ pcre JIT compiling result: 1
 --- config
     location /re {
         content_by_lua '
-            rc, m = pcall(ngx.re.match, "hello\\nworld", "(abc", "j")
-            if rc then
-                if m then
-                    ngx.say(m[0])
+            local m, err = ngx.re.match("hello\\nworld", "(abc", "j")
+            if m then
+                ngx.say(m[0])
+
+            else
+                if err then
+                    ngx.say("error: ", err)
+
                 else
                     ngx.say("not matched: ", m)
                 end
-            else
-                ngx.say("error: ", m)
             end
         ';
     }
 --- request
     GET /re
 --- response_body
-error: bad argument #2 to '?' (failed to compile regex "(abc": pcre_compile() failed: missing ) in "(abc")
+error: pcre_compile() failed: missing ) in "(abc"
+--- no_error_log
+[error]
+
+
+
+=== TEST 6: just hit match limit
+--- http_config
+    lua_regex_match_limit 2940;
+--- config
+    location /re {
+        content_by_lua_file html/a.lua;
+    }
+
+--- user_files
+>>> a.lua
+local re = [==[(?i:([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:=|<=>|r?like|sounds\s+like|regexp)([\s'\"`´’‘\(\)]*)?\2|([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:!=|<=|>=|<>|<|>|\^|is\s+not|not\s+like|not\s+regexp)([\s'\"`´’‘\(\)]*)?(?!\6)([\d\w]+))]==]
+
+s = string.rep([[ABCDEFG]], 21)
+
+local start = ngx.now()
+
+local res, err = ngx.re.match(s, re, "jo")
+
+--[[
+ngx.update_time()
+local elapsed = ngx.now() - start
+ngx.say(elapsed, " sec elapsed.")
+]]
+
+if not res then
+    if err then
+        ngx.say("error: ", err)
+        return
+    end
+    ngx.say("failed to match")
+    return
+end
+
+--- request
+    GET /re
+--- response_body
+error: pcre_exec() failed: -8
+
+
+
+=== TEST 7: just not hit match limit
+--- http_config
+    lua_regex_match_limit 2950;
+--- config
+    location /re {
+        content_by_lua_file html/a.lua;
+    }
+
+--- user_files
+>>> a.lua
+local re = [==[(?i:([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:=|<=>|r?like|sounds\s+like|regexp)([\s'\"`´’‘\(\)]*)?\2|([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:!=|<=|>=|<>|<|>|\^|is\s+not|not\s+like|not\s+regexp)([\s'\"`´’‘\(\)]*)?(?!\6)([\d\w]+))]==]
+
+s = string.rep([[ABCDEFG]], 21)
+
+local start = ngx.now()
+
+local res, err = ngx.re.match(s, re, "jo")
+
+--[[
+ngx.update_time()
+local elapsed = ngx.now() - start
+ngx.say(elapsed, " sec elapsed.")
+]]
+
+if not res then
+    if err then
+        ngx.say("error: ", err)
+        return
+    end
+    ngx.say("failed to match")
+    return
+end
+
+--- request
+    GET /re
+--- response_body
+failed to match
 

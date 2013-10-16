@@ -1,13 +1,12 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 repeat_each(2);
 
 plan tests => blocks() * repeat_each() * 2;
 
-$ENV{TEST_NGINX_CLIENT_PORT} ||= server_port();
 $ENV{TEST_NGINX_HTML_DIR} ||= html_dir();
 
 no_long_string();
