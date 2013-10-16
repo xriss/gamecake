@@ -16,6 +16,8 @@ includedirs {	"." ,
 		"src/http/modules/echo" ,
 		"ndk/objs" ,
 		"ndk/src" ,
+		"lua/src" ,
+		"lua/src/api" ,
 		"../lib_z" ,
 		"../lib_pcre" ,
 }

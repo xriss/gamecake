@@ -1,6 +1,6 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_on();
@@ -10,11 +10,9 @@ log_level('warn');
 repeat_each(2);
 #repeat_each(1);
 
-plan tests => repeat_each() * (blocks() * 2 + 5);
+plan tests => repeat_each() * (blocks() * 2 + 16);
 
 no_root_location();
-
-$ENV{TEST_NGINX_CLIENT_PORT} ||= $ENV{TEST_NGINX} ||= server_port();
 
 #no_shuffle();
 #no_diff();
@@ -359,12 +357,15 @@ done
             ngx.req.set_uri_args("hello")
             ngx.req.set_uri("/bar", true);
         ';
-        proxy_pass http://www.taobao.com:5678;
+        proxy_pass http://agentzh.org:12345;
     }
 --- request
     GET /foo?world
 --- response_body
 hello
+--- error_log
+lua set uri jump to "/bar"
+--- log_level: debug
 
 
 
@@ -436,12 +437,14 @@ foo: /bar?hello
             local res, err = pcall(ngx.req.set_uri, "")
             ngx.say("err: ", err)
         ';
-        echo "foo: $uri?$args";
+        content_by_lua '
+            ngx.say("foo: ", ngx.var.uri, "?", ngx.var.args)
+        ';
     }
 --- request
     GET /foo?world
 --- response_body
-err: [string "ngx.req.set_uri"]:1: attempt to use zero-length uri
+err: attempt to use zero-length uri
 foo: /foo?world
 
 
@@ -457,7 +460,7 @@ foo: /foo?world
             ngx.req.set_uri_args("hello")
             ngx.req.set_uri("/bar")
         ';
-        proxy_pass http://127.0.0.1:$TEST_NGINX_CLIENT_PORT;
+        proxy_pass http://127.0.0.1:$TEST_NGINX_SERVER_PORT;
     }
 --- request
     GET /foo?world
@@ -477,7 +480,7 @@ HTTP/1.0 hello
             ngx.req.set_uri("/bar")
             ngx.req.set_uri_args({["ca t"] = "%"})
         ';
-        proxy_pass http://127.0.0.1:$TEST_NGINX_CLIENT_PORT;
+        proxy_pass http://127.0.0.1:$TEST_NGINX_SERVER_PORT;
     }
 --- request
     GET /foo?world
@@ -498,7 +501,7 @@ HTTP/1.0 ca%20t=%25
             ngx.req.set_uri("/bar", true);
             ngx.exit(503)
         ';
-        proxy_pass http://www.taobao.com:5678;
+        proxy_pass http://agentzh.org:12345;
     }
 --- request
     GET /foo?world
@@ -524,7 +527,7 @@ hello
 --- request
     GET /foo?world
 --- response_body
-err: [string "ngx.req.set_uri"]:1: API disabled in the context of access_by_lua*
+err: API disabled in the context of access_by_lua*
 
 
 
@@ -563,7 +566,7 @@ uri: /bar
 --- request
     GET /foo?world
 --- response_body
-err: [string "ngx.req.set_uri"]:1: API disabled in the context of content_by_lua*
+err: API disabled in the context of content_by_lua*
 
 
 
@@ -603,7 +606,7 @@ uri: /bar
 --- request
     GET /foo?world
 --- response_body
-err: [string "ngx.req.set_uri"]:1: API disabled in the context of set_by_lua*
+err: API disabled in the context of set_by_lua*
 
 
 
@@ -683,19 +686,21 @@ args: foo=3
 
 
 
-=== TEST 30: ngx.encode_args (bad table value)
+=== TEST 30: boolean values in ngx.encode_args
 --- config
     location /lua {
-        content_by_lua '
+        set_by_lua $args_str '
             local t = {bar = {32, true}, foo = 3}
-            rc, err = pcall(ngx.encode_args, t)
-            ngx.say("rc: ", rc, ", err: ", err)
+            return ngx.encode_args(t)
         ';
+        echo $args_str;
     }
 --- request
 GET /lua
 --- response_body
-rc: false, err: attempt to use boolean as query arg value
+foo=3&bar=32&bar
+--- no_error_log
+[error]
 
 
 
@@ -982,7 +987,7 @@ CORE::join("", @k);
             ngx.req.set_uri_args({a = 3, b = {5, 6}})
             ngx.req.set_uri("/bar")
         ';
-        proxy_pass http://127.0.0.1:$TEST_NGINX_CLIENT_PORT;
+        proxy_pass http://127.0.0.1:$TEST_NGINX_SERVER_PORT;
     }
 --- request
     GET /foo?world
@@ -1112,4 +1117,226 @@ GET /lua
 --- response_body
 a = bar
 b = foo
+
+
+
+=== TEST 48: ngx.decode_args should not modify lua strings in place
+--- config
+    location /lua {
+        content_by_lua '
+            local s = "f+f=bar&B=foo"
+            args = ngx.decode_args(s)
+            for k, v in pairs(args) do
+                ngx.say("key: ", k)
+            end
+            ngx.say("s = ", s)
+        ';
+    }
+--- request
+GET /lua
+--- response_body
+key: f f
+key: B
+s = f+f=bar&B=foo
+--- no_error_log
+[error]
+
+
+
+=== TEST 49: ngx.decode_args should not modify lua strings in place (sample from Xu Jian)
+--- config
+    lua_need_request_body on;
+    location /t {
+        content_by_lua '
+            function split(s, delimiter)
+                local result = {}
+                local from = 1
+                local delim_from, delim_to = string.find(s, delimiter, from)
+                while delim_from do
+                    table.insert(result, string.sub(s, from, delim_from - 1))
+                    from = delim_to + 1
+                    delim_from, delim_to = string.find(s, delimiter, from)
+                end
+                table.insert(result, string.sub(s, from))
+                return result
+            end
+
+            local post_data = ngx.req.get_body_data()
+
+            local commands = split(post_data, "||")
+            for _, command in pairs(commands) do
+                --command = ngx.unescape_uri(command)
+                local request_args = ngx.decode_args(command, 0)
+                for key, value in pairs(request_args) do
+                    ngx.say(key, ": ", value)
+                end
+                ngx.say(" ===============")
+            end
+        ';
+    }
+--- request
+POST /t
+method=zadd&key=User%3A1227713%3Alikes%3Atwitters&arg1=1356514698&arg2=780984852||method=zadd&key=User%3A1227713%3Alikes%3Atwitters&arg1=1356514698&arg2=780984852||method=zadd&key=User%3A1227713%3Alikes%3Atwitters&arg1=1356514698&arg2=780984852
+--- response_body
+arg2: 780984852
+method: zadd
+key: User:1227713:likes:twitters
+arg1: 1356514698
+ ===============
+arg2: 780984852
+method: zadd
+key: User:1227713:likes:twitters
+arg1: 1356514698
+ ===============
+arg2: 780984852
+method: zadd
+key: User:1227713:likes:twitters
+arg1: 1356514698
+ ===============
+--- no_error_log
+[error]
+
+
+
+=== TEST 50: recursive rewrite
+--- config
+    rewrite_by_lua '
+        local args = ngx.var.args
+        if args == "jump" then
+            ngx.req.set_uri("/jump",true)
+        end
+    ';
+
+    location /jump {
+        echo "Jump around!";
+    }
+
+    location / {
+        echo "$scheme://$http_host$request_uri";
+    }
+--- request
+GET /?jump
+
+--- response_body_like: 500 Internal Server Error
+--- error_code: 500
+
+--- no_error_log
+[alert]
+[crit]
+--- error_log
+rewrite or internal redirection cycle while processing "/jump"
+--- timeout: 10
+--- log_level: debug
+
+
+
+=== TEST 51: boolean values in ngx.encode_args (trailing arg)
+--- config
+    location /lua {
+        set_by_lua $args_str '
+            local t = {a = {32, true}, foo = 3, bar = 5}
+            return ngx.encode_args(t)
+        ';
+        echo $args_str;
+    }
+--- request
+GET /lua
+--- response_body
+foo=3&a=32&a&bar=5
+--- no_error_log
+[error]
+
+
+
+=== TEST 52: false boolean values in ngx.encode_args
+--- config
+    location /lua {
+        set_by_lua $args_str '
+            local t = {a = {32, false}, foo = 3, bar = 5}
+            return ngx.encode_args(t)
+        ';
+        echo $args_str;
+    }
+--- request
+GET /lua
+--- response_body
+foo=3&a=32&bar=5
+--- no_error_log
+[error]
+
+
+
+=== TEST 53: false boolean values in ngx.encode_args (escaping)
+--- config
+    location /lua {
+        set_by_lua $args_str '
+            local t = {["a b"] = {32, false}, foo = 3, bar = 5}
+            return ngx.encode_args(t)
+        ';
+        echo $args_str;
+    }
+--- request
+GET /lua
+--- response_body
+foo=3&a%20b=32&bar=5
+--- no_error_log
+[error]
+
+
+
+=== TEST 54: true boolean values in ngx.encode_args (escaping)
+--- config
+    location /lua {
+        set_by_lua $args_str '
+            local t = {["a b"] = {32, true}, foo = 3, bar = 5}
+            return ngx.encode_args(t)
+        ';
+        echo $args_str;
+    }
+--- request
+GET /lua
+--- response_body
+foo=3&a%20b=32&a%20b&bar=5
+--- no_error_log
+[error]
+
+
+
+=== TEST 55: rewrite uri and args (boolean in multi-value args)
+--- config
+    location /bar {
+        echo $server_protocol $query_string;
+    }
+    location /foo {
+        #rewrite ^ /bar?hello? break;
+        rewrite_by_lua '
+            ngx.req.set_uri_args({a = 3, b = {5, true, 6}})
+            ngx.req.set_uri("/bar")
+        ';
+        proxy_pass http://127.0.0.1:$TEST_NGINX_SERVER_PORT;
+    }
+--- request
+    GET /foo?world
+--- response_body
+HTTP/1.0 a=3&b=5&b&b=6
+
+
+
+=== TEST 56: rewrite uri and args (boolean value)
+--- config
+    location /bar {
+        echo $server_protocol $query_string;
+    }
+    location /foo {
+        #rewrite ^ /bar?hello? break;
+        rewrite_by_lua '
+            ngx.req.set_uri_args({a = 3, b = true})
+            ngx.req.set_uri("/bar")
+        ';
+        proxy_pass http://127.0.0.1:$TEST_NGINX_SERVER_PORT;
+    }
+--- request
+    GET /foo?world
+--- response_body
+HTTP/1.0 a=3&b
 

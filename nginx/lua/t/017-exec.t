@@ -1,16 +1,17 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 repeat_each(2);
 
 plan tests => repeat_each() * (blocks() * 2 + 4);
 
-#no_diff();
-#no_long_string();
-
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
+#no_diff();
+#no_shuffle();
+#no_long_string();
 
 run_tests();
 
@@ -539,6 +540,7 @@ hello
         proxy_pass http://127.0.0.1:$server_port/foo;
     }
     location /foo {
+        #echo_status 201;
         echo bah;
     }
 --- request

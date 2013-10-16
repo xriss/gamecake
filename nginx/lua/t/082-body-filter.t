@@ -1,7 +1,7 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_process_enabled(1);
@@ -11,7 +11,7 @@ log_level('debug');
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3 + 6);
+plan tests => repeat_each() * (blocks() * 3 + 4);
 
 #no_diff();
 #no_long_string();
@@ -482,4 +482,46 @@ stack traceback:
 in function 'error'
 in function 'bar'
 in function 'foo'
+
+
+
+=== TEST 18: setting "eof" in subrequests
+--- config
+    location /t {
+        echo_location /read;
+        echo_location /read;
+    }
+
+    location /read {
+        echo -n hello world;
+        echo -n hiya globe;
+
+        body_filter_by_lua '
+            ngx.arg[2] = 1
+        ';
+    }
+--- request
+GET /t
+--- response_body chop
+hello worldhello world
+--- no_error_log
+[error]
+
+
+
+=== TEST 19: Lua file does not exist
+--- config
+    location /lua {
+        echo ok;
+        body_filter_by_lua_file html/test2.lua;
+    }
+--- user_files
+>>> test.lua
+v = ngx.var["request_uri"]
+ngx.print("request_uri: ", v, "\n")
+--- request
+GET /lua?a=1&b=2
+--- ignore_response
+--- error_log eval
+qr/failed to load external Lua file: cannot open .*? No such file or directory/
 

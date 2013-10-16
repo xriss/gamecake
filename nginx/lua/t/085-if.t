@@ -1,6 +1,6 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_on();
@@ -11,8 +11,6 @@ repeat_each(2);
 #repeat_each(1);
 
 plan tests => repeat_each() * (blocks() * 3 + 2);
-
-$ENV{TEST_NGINX_CLIENT_PORT} ||= server_port();
 
 #no_diff();
 #no_long_string();
@@ -188,7 +186,7 @@ This test case requires the following patch for the nginx core:
 http://mailman.nginx.org/pipermail/nginx-devel/2012-June/002374.html
 --- config
     location /proxy-pass-uri {
-        proxy_pass http://127.0.0.1:$TEST_NGINX_CLIENT_PORT/;
+        proxy_pass http://127.0.0.1:$TEST_NGINX_SERVER_PORT/;
 
         set $true 1;
 

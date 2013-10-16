@@ -1,10 +1,15 @@
-/* vim:set ft=c ts=4 sw=4 et fdm=marker: */
-/* Copyright (C) agentzh */
+
+/*
+ * Copyright (C) Xiaozhe Wang (chaoslawful)
+ * Copyright (C) Yichun Zhang (agentzh)
+ */
+
 
 #ifndef DDEBUG
 #define DDEBUG 0
 #endif
 #include "ddebug.h"
+
 
 #include <nginx.h>
 #include "ngx_http_lua_headers_out.h"
@@ -20,22 +25,22 @@ static ngx_int_t ngx_http_set_header_helper(ngx_http_request_t *r,
 static ngx_int_t ngx_http_set_builtin_header(ngx_http_request_t *r,
     ngx_http_lua_header_val_t *hv, ngx_str_t *value);
 static ngx_int_t ngx_http_set_builtin_multi_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value);
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value);
 static ngx_int_t ngx_http_set_last_modified_header(ngx_http_request_t *r,
     ngx_http_lua_header_val_t *hv, ngx_str_t *value);
 static ngx_int_t ngx_http_set_content_length_header(ngx_http_request_t *r,
     ngx_http_lua_header_val_t *hv, ngx_str_t *value);
 static ngx_int_t ngx_http_set_content_type_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value);
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value);
 static ngx_int_t ngx_http_clear_builtin_header(ngx_http_request_t *r,
     ngx_http_lua_header_val_t *hv, ngx_str_t *value);
 static ngx_int_t ngx_http_clear_last_modified_header(ngx_http_request_t *r,
     ngx_http_lua_header_val_t *hv, ngx_str_t *value);
 static ngx_int_t ngx_http_clear_content_length_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value);
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value);
 
 
-static ngx_http_lua_set_header_t ngx_http_lua_set_handlers[] = {
+static ngx_http_lua_set_header_t  ngx_http_lua_set_handlers[] = {
 
     { ngx_string("Server"),
                  offsetof(ngx_http_headers_out_t, server),
@@ -83,6 +88,10 @@ static ngx_http_lua_set_header_t ngx_http_lua_set_handlers[] = {
                  offsetof(ngx_http_headers_out_t, etag),
                  ngx_http_set_builtin_header },
 
+    { ngx_string("ETag"),
+                 offsetof(ngx_http_headers_out_t, etag),
+                 ngx_http_set_builtin_header },
+
     { ngx_string("Content-Length"),
                  offsetof(ngx_http_headers_out_t, content_length),
                  ngx_http_set_content_length_header },
@@ -103,7 +112,7 @@ static ngx_http_lua_set_header_t ngx_http_lua_set_handlers[] = {
 
 static ngx_int_t
 ngx_http_set_header(ngx_http_request_t *r, ngx_http_lua_header_val_t *hv,
-        ngx_str_t *value)
+    ngx_str_t *value)
 {
     return ngx_http_set_header_helper(r, hv, value, NULL, 0);
 }
@@ -111,8 +120,8 @@ ngx_http_set_header(ngx_http_request_t *r, ngx_http_lua_header_val_t *hv,
 
 static ngx_int_t
 ngx_http_set_header_helper(ngx_http_request_t *r, ngx_http_lua_header_val_t *hv,
-        ngx_str_t *value, ngx_table_elt_t **output_header,
-        unsigned no_create)
+    ngx_str_t *value, ngx_table_elt_t **output_header,
+    unsigned no_create)
 {
     ngx_table_elt_t             *h;
     ngx_list_part_t             *part;
@@ -123,27 +132,45 @@ ngx_http_set_header_helper(ngx_http_request_t *r, ngx_http_lua_header_val_t *hv,
         goto new_header;
     }
 
+#if 1
+    if (r->headers_out.location
+        && r->headers_out.location->value.len
+        && r->headers_out.location->value.data[0] == '/')
+    {
+        /* XXX ngx_http_core_find_config_phase, for example,
+         * may not initialize the "key" and "hash" fields
+         * for a nasty optimization purpose, and
+         * we have to work-around it here */
+
+        r->headers_out.location->hash = ngx_http_lua_location_hash;
+        ngx_str_set(&r->headers_out.location->key, "Location");
+    }
+#endif
+
     part = &r->headers_out.headers.part;
     h = part->elts;
 
     for (i = 0; /* void */; i++) {
+
         if (i >= part->nelts) {
             if (part->next == NULL) {
                 break;
             }
+
             part = part->next;
             h = part->elts;
             i = 0;
         }
 
-        if (h[i].key.len == hv->key.len
+        if (h[i].hash != 0
+            && h[i].key.len == hv->key.len
             && ngx_strncasecmp(hv->key.data, h[i].key.data, h[i].key.len) == 0)
         {
             dd("found out header %.*s", (int) h[i].key.len, h[i].key.data);
 
             if (value->len == 0 || matched) {
                 dd("clearing normal header for %.*s", (int) hv->key.len,
-                        hv->key.data);
+                   hv->key.data);
 
                 h[i].value.len = 0;
                 h[i].hash = 0;
@@ -182,7 +209,7 @@ new_header:
     h = ngx_list_push(&r->headers_out.headers);
 
     if (h == NULL) {
-        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        return NGX_ERROR;
     }
 
     if (value->len == 0) {
@@ -197,7 +224,7 @@ new_header:
 
     h->lowcase_key = ngx_pnalloc(r->pool, h->key.len);
     if (h->lowcase_key == NULL) {
-        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        return NGX_ERROR;
     }
 
     ngx_strlow(h->lowcase_key, h->key.data, h->key.len);
@@ -212,7 +239,7 @@ new_header:
 
 static ngx_int_t
 ngx_http_set_builtin_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value)
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value)
 {
     ngx_table_elt_t  *h, **old;
 
@@ -248,7 +275,7 @@ ngx_http_set_builtin_header(ngx_http_request_t *r,
 
 static ngx_int_t
 ngx_http_set_builtin_multi_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value)
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value)
 {
     ngx_array_t      *pa;
     ngx_table_elt_t  *ho, **ph;
@@ -257,7 +284,8 @@ ngx_http_set_builtin_multi_header(ngx_http_request_t *r,
     pa = (ngx_array_t *) ((char *) &r->headers_out + hv->offset);
 
     if (pa->elts == NULL) {
-        if (ngx_array_init(pa, r->pool, 2, sizeof(ngx_table_elt_t *)) != NGX_OK)
+        if (ngx_array_init(pa, r->pool, 2, sizeof(ngx_table_elt_t *))
+            != NGX_OK)
         {
             return NGX_ERROR;
         }
@@ -309,8 +337,15 @@ create:
     }
 
     ho->value = *value;
-    ho->hash = hv->hash;
-    ngx_str_set(&ho->key, "Cache-Control");
+
+    if (value->len == 0) {
+        ho->hash = 0;
+
+    } else {
+        ho->hash = hv->hash;
+    }
+
+    ho->key = hv->key;
     *ph = ho;
 
     return NGX_OK;
@@ -319,7 +354,7 @@ create:
 
 static ngx_int_t
 ngx_http_set_content_type_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value)
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value)
 {
     r->headers_out.content_type_len = value->len;
     r->headers_out.content_type = *value;
@@ -333,7 +368,7 @@ ngx_http_set_content_type_header(ngx_http_request_t *r,
 
 
 static ngx_int_t ngx_http_set_last_modified_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value)
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value)
 {
     if (value->len == 0) {
         return ngx_http_clear_last_modified_header(r, hv, value);
@@ -350,7 +385,7 @@ static ngx_int_t ngx_http_set_last_modified_header(ngx_http_request_t *r,
 
 static ngx_int_t
 ngx_http_clear_last_modified_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value)
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value)
 {
     r->headers_out.last_modified_time = -1;
 
@@ -360,7 +395,7 @@ ngx_http_clear_last_modified_header(ngx_http_request_t *r,
 
 static ngx_int_t
 ngx_http_set_content_length_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value)
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value)
 {
     off_t           len;
 
@@ -381,7 +416,7 @@ ngx_http_set_content_length_header(ngx_http_request_t *r,
 
 static ngx_int_t
 ngx_http_clear_content_length_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value)
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value)
 {
     r->headers_out.content_length_n = -1;
 
@@ -391,7 +426,7 @@ ngx_http_clear_content_length_header(ngx_http_request_t *r,
 
 static ngx_int_t
 ngx_http_clear_builtin_header(ngx_http_request_t *r,
-        ngx_http_lua_header_val_t *hv, ngx_str_t *value)
+    ngx_http_lua_header_val_t *hv, ngx_str_t *value)
 {
     value->len = 0;
 
@@ -401,7 +436,7 @@ ngx_http_clear_builtin_header(ngx_http_request_t *r,
 
 ngx_int_t
 ngx_http_lua_set_output_header(ngx_http_request_t *r, ngx_str_t key,
-        ngx_str_t value, unsigned override)
+    ngx_str_t value, unsigned override)
 {
     ngx_http_lua_header_val_t         hv;
     ngx_http_lua_set_header_t        *handlers = ngx_http_lua_set_handlers;
@@ -413,16 +448,16 @@ ngx_http_lua_set_output_header(ngx_http_request_t *r, ngx_str_t key,
     hv.key = key;
 
     hv.offset = 0;
-    hv.no_override = ! override;
+    hv.no_override = !override;
     hv.handler = NULL;
 
     for (i = 0; handlers[i].name.len; i++) {
         if (hv.key.len != handlers[i].name.len
-                || ngx_strncasecmp(hv.key.data, handlers[i].name.data,
-                    handlers[i].name.len) != 0)
+            || ngx_strncasecmp(hv.key.data, handlers[i].name.data,
+                               handlers[i].name.len) != 0)
         {
             dd("hv key comparison: %s <> %s", handlers[i].name.data,
-                    hv.key.data);
+               hv.key.data);
 
             continue;
         }
@@ -452,7 +487,7 @@ ngx_http_lua_set_output_header(ngx_http_request_t *r, ngx_str_t key,
 
 int
 ngx_http_lua_get_output_header(lua_State *L, ngx_http_request_t *r,
-        ngx_str_t *key)
+    ngx_str_t *key)
 {
     ngx_table_elt_t            *h;
     ngx_list_part_t            *part;
@@ -478,7 +513,7 @@ ngx_http_lua_get_output_header(lua_State *L, ngx_http_request_t *r,
             && ngx_strncasecmp(key->data, (u_char *) "Content-Type", 12) == 0)
         {
             lua_pushlstring(L, (char *) r->headers_out.content_type.data,
-                    r->headers_out.content_type.len);
+                            r->headers_out.content_type.len);
             return 1;
         }
 
@@ -492,10 +527,26 @@ ngx_http_lua_get_output_header(lua_State *L, ngx_http_request_t *r,
 
     found = 0;
 
+#if 1
+    if (r->headers_out.location
+        && r->headers_out.location->value.len
+        && r->headers_out.location->value.data[0] == '/')
+    {
+        /* XXX ngx_http_core_find_config_phase, for example,
+         * may not initialize the "key" and "hash" fields
+         * for a nasty optimization purpose, and
+         * we have to work-around it here */
+
+        r->headers_out.location->hash = ngx_http_lua_location_hash;
+        ngx_str_set(&r->headers_out.location->key, "Location");
+    }
+#endif
+
     part = &r->headers_out.headers.part;
     h = part->elts;
 
     for (i = 0; /* void */; i++) {
+
         if (i >= part->nelts) {
             if (part->next == NULL) {
                 break;
@@ -510,8 +561,9 @@ ngx_http_lua_get_output_header(lua_State *L, ngx_http_request_t *r,
             continue;
         }
 
-        if (h[i].key.len == key->len && ngx_strncasecmp(key->data,
-                    h[i].key.data, h[i].key.len) == 0)
+        if (h[i].hash != 0
+            && h[i].key.len == key->len
+            && ngx_strncasecmp(key->data, h[i].key.data, h[i].key.len) == 0)
          {
              if (!found) {
                  found = 1;
@@ -541,3 +593,4 @@ ngx_http_lua_get_output_header(lua_State *L, ngx_http_request_t *r,
     return 1;
 }
 
+/* vi:set ft=c ts=4 sw=4 et fdm=marker: */

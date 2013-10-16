@@ -5,7 +5,7 @@ BEGIN {
 }
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_on();
@@ -14,10 +14,10 @@ use Test::Nginx::Socket;
 
 repeat_each(2);
 
-plan tests => repeat_each() * 41;
+plan tests => repeat_each() * 50;
 
 #no_diff();
-#no_long_string();
+no_long_string();
 run_tests();
 
 __DATA__
@@ -27,7 +27,11 @@ __DATA__
     location /test {
         content_by_lua '
             ngx.say("hello, world")
-            ngx.flush(true)
+            local ok, err = ngx.flush(true)
+            if not ok then
+                ngx.log(ngx.ERR, "flush failed: ", err)
+                return
+            end
             ngx.say("hiya")
         ';
     }
@@ -36,6 +40,8 @@ GET /test
 --- response_body
 hello, world
 hiya
+--- no_error_log
+[error]
 --- error_log
 lua reuse free buf memory 13 >= 5
 
@@ -47,7 +53,11 @@ lua reuse free buf memory 13 >= 5
     location /test {
         content_by_lua '
             ngx.say("hello, world")
-            ngx.flush(false)
+            local ok, err = ngx.flush(false)
+            if not ok then
+                ngx.log(ngx.ERR, "flush failed: ", err)
+                return
+            end
             ngx.say("hiya")
         ';
     }
@@ -126,9 +136,15 @@ lua http 1.0 buffering makes ngx.flush() a no-op
     location /test {
         content_by_lua '
             ngx.say("hello, world")
-            ngx.flush(false)
+            local ok, err = ngx.flush(false)
+            if not ok then
+                ngx.log(ngx.WARN, "1: failed to flush: ", err)
+            end
             ngx.say("hiya")
-            ngx.flush(false)
+            local ok, err = ngx.flush(false)
+            if not ok then
+                ngx.log(ngx.WARN, "2: failed to flush: ", err)
+            end
             ngx.say("blah")
         ';
     }
@@ -143,6 +159,8 @@ Content-Length: 23
 --- error_log
 lua buffering output bufs for the HTTP 1.0 request
 lua http 1.0 buffering makes ngx.flush() a no-op
+1: failed to flush: buffering
+2: failed to flush: buffering
 --- timeout: 5
 
 
@@ -293,4 +311,119 @@ Content-Length: 23
 lua buffering output bufs for the HTTP 1.0 request
 lua http 1.0 buffering makes ngx.flush() a no-op
 --- timeout: 5
+
+
+
+=== TEST 13: flush wait in a user coroutine
+--- config
+    location /test {
+        content_by_lua '
+            function f()
+                ngx.say("hello, world")
+                ngx.flush(true)
+                coroutine.yield()
+                ngx.say("hiya")
+            end
+            local c = coroutine.create(f)
+            ngx.say(coroutine.resume(c))
+            ngx.say(coroutine.resume(c))
+        ';
+    }
+--- request
+GET /test
+--- stap2
+F(ngx_http_lua_wev_handler) {
+    printf("wev handler: wev:%d\n", $r->connection->write->ready)
+}
+
+global ids, cur
+
+function gen_id(k) {
+    if (ids[k]) return ids[k]
+    ids[k] = ++cur
+    return cur
+}
+
+F(ngx_http_handler) {
+    delete ids
+    cur = 0
+}
+
+/*
+F(ngx_http_lua_run_thread) {
+    id = gen_id($ctx->cur_co)
+    printf("run thread %d\n", id)
+}
+
+probe process("/usr/local/openresty-debug/luajit/lib/libluajit-5.1.so.2").function("lua_resume") {
+    id = gen_id($L)
+    printf("lua resume %d\n", id)
+}
+*/
+
+M(http-lua-user-coroutine-resume) {
+    p = gen_id($arg2)
+    c = gen_id($arg3)
+    printf("resume %x in %x\n", c, p)
+}
+
+M(http-lua-entry-coroutine-yield) {
+    println("entry coroutine yield")
+}
+
+/*
+F(ngx_http_lua_coroutine_yield) {
+    printf("yield %x\n", gen_id($L))
+}
+*/
+
+M(http-lua-user-coroutine-yield) {
+    p = gen_id($arg2)
+    c = gen_id($arg3)
+    printf("yield %x in %x\n", c, p)
+}
+
+F(ngx_http_lua_atpanic) {
+    printf("lua atpanic(%d):", gen_id($L))
+    print_ubacktrace();
+}
+
+M(http-lua-user-coroutine-create) {
+    p = gen_id($arg2)
+    c = gen_id($arg3)
+    printf("create %x in %x\n", c, p)
+}
+
+F(ngx_http_lua_ngx_exec) { println("exec") }
+
+F(ngx_http_lua_ngx_exit) { println("exit") }
+
+F(ngx_http_writer) { println("http writer") }
+
+--- response_body
+hello, world
+true
+hiya
+true
+--- error_log
+lua reuse free buf memory 13 >= 5
+
+
+
+=== TEST 14: flush before sending out the header
+--- config
+    location /test {
+        content_by_lua '
+            ngx.flush()
+            ngx.status = 404
+            ngx.say("not found")
+        ';
+    }
+--- request
+GET /test
+--- response_body
+not found
+--- error_code: 404
+--- no_error_log
+[error]
 

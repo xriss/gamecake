@@ -1,7 +1,7 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 repeat_each(2);
 #repeat_each(1);
@@ -104,4 +104,29 @@ GET /escape
 baz: %20
 --- response_body
 hello
+
+
+
+=== TEST 8: escape a string that cannot be escaped
+--- config
+    location /escape {
+        set_by_lua $res "return ngx.escape_uri('abc')";
+        echo $res;
+    }
+--- request
+GET /escape
+--- response_body
+abc
+
+
+
+=== TEST 9: escape an empty string that cannot be escaped
+--- config
+    location /escape {
+        set_by_lua $res "return ngx.escape_uri('')";
+        echo $res;
+    }
+--- request
+GET /escape
+--- response_body eval: "\n"
 

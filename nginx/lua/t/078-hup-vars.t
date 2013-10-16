@@ -8,11 +8,12 @@ BEGIN {
 
     } else {
         $ENV{TEST_NGINX_USE_HUP} = 1;
+        undef $ENV{TEST_NGINX_USE_STAP};
     }
 }
 
 use lib 'lib';
-use Test::Nginx::Socket $SkipReason ? (skip_all => $SkipReason) : ();
+use t::TestNginxLua $SkipReason ? (skip_all => $SkipReason) : ();
 
 #worker_connections(1014);
 #master_on();

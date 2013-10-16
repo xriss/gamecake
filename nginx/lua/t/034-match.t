@@ -1,6 +1,6 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
-use lib 'lib';
-use Test::Nginx::Socket;
+
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_on();
@@ -9,7 +9,7 @@ use Test::Nginx::Socket;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 2 + 4);
+plan tests => repeat_each() * (blocks() * 2 + 14);
 
 #no_diff();
 no_long_string();
@@ -241,7 +241,7 @@ hello
 --- request
     GET /re
 --- response_body_like chop
-^(?:FAIL: bad argument \#2 to '\?' \(failed to compile regex "HELLO\.\{2\}": pcre_compile\(\) failed: this version of PCRE is not compiled with PCRE_UTF8 support in "HELLO\.\{2\}" at "HELLO\.\{2\}"\)|hello章亦)$
+^(?:FAIL: bad argument \#2 to '\?' \(pcre_compile\(\) failed: this version of PCRE is not compiled with PCRE_UTF8 support in "HELLO\.\{2\}" at "HELLO\.\{2\}"\)|hello章亦)$
 
 
 
@@ -345,22 +345,26 @@ he
 --- config
     location /re {
         content_by_lua '
-            rc, m = pcall(ngx.re.match, "hello\\nworld", "(abc")
-            if rc then
-                if m then
-                    ngx.say(m[0])
+            local m, err = ngx.re.match("hello\\nworld", "(abc")
+            if m then
+                ngx.say(m[0])
+
+            else
+                if err then
+                    ngx.say("error: ", err)
+
                 else
                     ngx.say("not matched: ", m)
                 end
-            else
-                ngx.say("error: ", m)
             end
         ';
     }
 --- request
     GET /re
 --- response_body
-error: bad argument #2 to '?' (failed to compile regex "(abc": pcre_compile() failed: missing ) in "(abc")
+error: pcre_compile() failed: missing ) in "(abc"
+--- no_error_log
+[error]
 
 
 
@@ -382,8 +386,8 @@ error: bad argument #2 to '?' (failed to compile regex "(abc": pcre_compile() fa
     }
 --- request
     GET /re
---- response_body
-error: bad argument #3 to '?' (unknown flag "H")
+--- response_body_like chop
+error: .*?unknown flag "H"
 
 
 
@@ -628,20 +632,27 @@ regex: (?:>[\w\s]*</?\w{2,}>)
 --- config
     location /re {
         content_by_lua '
-            m = ngx.re.match("hello, 1234", "([0-9]+")
+            local m, err = ngx.re.match("hello, 1234", "([0-9]+")
             if m then
                 ngx.say(m[0])
+
             else
-                ngx.say("not matched!")
+                if err then
+                    ngx.say("error: ", err)
+
+                else
+                    ngx.say("not matched!")
+                end
             end
         ';
     }
 --- request
     GET /re
---- response_body_like: 500 Internal Server Error
---- error_code: 500
---- error_log chop
-lua handler aborted: runtime error: [string "content_by_lua"]:2: bad argument #2 to 'match' (failed to compile regex "([0-9]+": pcre_compile() failed: missing ) in "([0-9]+")
+--- response_body
+error: pcre_compile() failed: missing ) in "([0-9]+"
+
+--- no_error_log
+[error]
 
 
 
@@ -701,4 +712,384 @@ done
     GET /re
 --- response_body
 done
+
+
+
+=== TEST 34: non-empty subject, empty pattern
+--- config
+    location /re {
+        content_by_lua '
+            local ctx = {}
+            local m = ngx.re.match("hello, 1234", "", "", ctx)
+            if m then
+                ngx.say("pos: ", ctx.pos)
+                ngx.say("m: ", m[0])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+pos: 0
+m: 
+--- no_error_log
+[error]
+
+
+
+=== TEST 35: named subpatterns w/ extraction
+--- config
+    location /re {
+        content_by_lua '
+            local m = ngx.re.match("hello, 1234", "(?<first>[a-z]+), [0-9]+")
+            if m then
+                ngx.say(m[0])
+                ngx.say(m[1])
+                ngx.say(m.first)
+                ngx.say(m.second)
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+hello, 1234
+hello
+hello
+nil
+
+
+
+=== TEST 36: duplicate named subpatterns w/ extraction
+--- config
+    location /re {
+        content_by_lua '
+            local m = ngx.re.match("hello, 1234", "(?<first>[a-z]+), (?<first>[0-9]+)", "D")
+            if m then
+                ngx.say(m[0])
+                ngx.say(m[1])
+                ngx.say(m[2])
+                ngx.say(table.concat(m.first,"-"))
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+hello, 1234
+hello
+1234
+hello-1234
+
+
+
+=== TEST 37: named captures are empty strings
+--- config
+    location /re {
+        content_by_lua '
+            local m = ngx.re.match("1234", "(?<first>[a-z]*)([0-9]+)")
+            if m then
+                ngx.say(m[0])
+                ngx.say(m.first)
+                ngx.say(m[1])
+                ngx.say(m[2])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+1234
+
+
+1234
+
+
+
+=== TEST 38: named captures are nil
+--- config
+    location /re {
+        content_by_lua '
+            local m = ngx.re.match("hello, world", "(world)|(hello)|(?<named>howdy)")
+            if m then
+                ngx.say(m[0])
+                ngx.say(m[1])
+                ngx.say(m[2])
+                ngx.say(m[3])
+                ngx.say(m["named"])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+hello
+nil
+hello
+nil
+nil
+
+
+
+=== TEST 39: duplicate named subpatterns
+--- config
+    location /re {
+        content_by_lua '
+            local m = ngx.re.match("hello, world",
+                                   "(?<named>\\\\w+), (?<named>\\\\w+)",
+                                   "D")
+            if m then
+                ngx.say(m[0])
+                ngx.say(m[1])
+                ngx.say(m[2])
+                ngx.say(table.concat(m.named,"-"))
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+hello, world
+hello
+world
+hello-world
+--- no_error_log
+[error]
+
+
+
+=== TEST 40: Javascript compatible mode
+--- config
+    location /t {
+        content_by_lua '
+            local m = ngx.re.match("章", [[\\u7AE0]], "uJ")
+            if m then
+                ngx.say("matched: ", m[0])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+GET /t
+--- response_body
+matched: 章
+--- no_error_log
+[error]
+
+
+
+=== TEST 41: empty duplicate captures
+--- config
+    location = /t {
+        content_by_lua "
+            local target = 'test'
+            local regex = '^(?:(?<group1>(?:foo))|(?<group2>(?:bar))|(?<group3>(?:test)))$'
+
+            -- Note the D here
+            local m = ngx.re.match(target, regex, 'D')
+
+            ngx.say(type(m.group1))
+            ngx.say(type(m.group2))
+        ";
+    }
+--- request
+GET /t
+--- response_body
+nil
+nil
+--- no_error_log
+[error]
+
+
+
+=== TEST 42: bad UTF-8
+--- config
+    location = /t {
+        content_by_lua '
+            local target = "你好"
+            local regex = "你好"
+
+            -- Note the D here
+            local m, err = ngx.re.match(string.sub(target, 1, 4), regex, "u")
+
+            if err then
+                ngx.say("error: ", err)
+                return
+            end
+
+            if m then
+                ngx.say("matched: ", m[0])
+            else
+                ngx.say("not matched")
+            end
+        ';
+    }
+--- request
+GET /t
+--- response_body_like chop
+^error: pcre_exec\(\) failed: -10$
+
+--- no_error_log
+[error]
+
+
+
+=== TEST 43: UTF-8 mode without UTF-8 sequence checks
+--- config
+    location /re {
+        content_by_lua '
+            local m = ngx.re.match("你好", ".", "U")
+            if m then
+                ngx.say(m[0])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- stap
+probe process("$LIBPCRE_PATH").function("pcre_compile") {
+    printf("compile opts: %x\n", $options)
+}
+
+probe process("$LIBPCRE_PATH").function("pcre_exec") {
+    printf("exec opts: %x\n", $options)
+}
+
+--- stap_out
+compile opts: 800
+exec opts: 2000
+
+--- request
+    GET /re
+--- response_body
+你
+--- no_error_log
+[error]
+
+
+
+=== TEST 44: UTF-8 mode with UTF-8 sequence checks
+--- config
+    location /re {
+        content_by_lua '
+            local m = ngx.re.match("你好", ".", "u")
+            if m then
+                ngx.say(m[0])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- stap
+probe process("$LIBPCRE_PATH").function("pcre_compile") {
+    printf("compile opts: %x\n", $options)
+}
+
+probe process("$LIBPCRE_PATH").function("pcre_exec") {
+    printf("exec opts: %x\n", $options)
+}
+
+--- stap_out
+compile opts: 800
+exec opts: 0
+
+--- request
+    GET /re
+--- response_body
+你
+--- no_error_log
+[error]
+
+
+
+=== TEST 45: just hit match limit
+--- http_config
+    lua_regex_match_limit 5600;
+--- config
+    location /re {
+        content_by_lua_file html/a.lua;
+    }
+
+--- user_files
+>>> a.lua
+local re = [==[(?i:([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:=|<=>|r?like|sounds\s+like|regexp)([\s'\"`´’‘\(\)]*)?\2|([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:!=|<=|>=|<>|<|>|\^|is\s+not|not\s+like|not\s+regexp)([\s'\"`´’‘\(\)]*)?(?!\6)([\d\w]+))]==]
+
+s = string.rep([[ABCDEFG]], 10)
+
+local start = ngx.now()
+
+local res, err = ngx.re.match(s, re, "o")
+
+--[[
+ngx.update_time()
+local elapsed = ngx.now() - start
+ngx.say(elapsed, " sec elapsed.")
+]]
+
+if not res then
+    if err then
+        ngx.say("error: ", err)
+        return
+    end
+    ngx.say("failed to match")
+    return
+end
+
+--- request
+    GET /re
+--- response_body
+error: pcre_exec() failed: -8
+
+
+
+=== TEST 46: just not hit match limit
+--- http_config
+    lua_regex_match_limit 5700;
+--- config
+    location /re {
+        content_by_lua_file html/a.lua;
+    }
+
+--- user_files
+>>> a.lua
+local re = [==[(?i:([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:=|<=>|r?like|sounds\s+like|regexp)([\s'\"`´’‘\(\)]*)?\2|([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:!=|<=|>=|<>|<|>|\^|is\s+not|not\s+like|not\s+regexp)([\s'\"`´’‘\(\)]*)?(?!\6)([\d\w]+))]==]
+
+s = string.rep([[ABCDEFG]], 10)
+
+local start = ngx.now()
+
+local res, err = ngx.re.match(s, re, "o")
+
+--[[
+ngx.update_time()
+local elapsed = ngx.now() - start
+ngx.say(elapsed, " sec elapsed.")
+]]
+
+if not res then
+    if err then
+        ngx.say("error: ", err)
+        return
+    end
+    ngx.say("failed to match")
+    return
+end
+
+--- request
+    GET /re
+--- response_body
+failed to match
 

@@ -1,7 +1,15 @@
+
+/*
+ * Copyright (C) Xiaozhe Wang (chaoslawful)
+ * Copyright (C) Yichun Zhang (agentzh)
+ */
+
+
 #ifndef DDEBUG
 #define DDEBUG 0
 #endif
 #include "ddebug.h"
+
 
 #include "ngx_http_lua_variable.h"
 #include "ngx_http_lua_util.h"
@@ -52,14 +60,12 @@ ngx_http_lua_var_get(lua_State *L)
     int                         *cap;
 #endif
 
-    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
-    lua_rawget(L, LUA_GLOBALSINDEX);
-    r = lua_touserdata(L, -1);
-    lua_pop(L, 1);
-
+    r = ngx_http_lua_get_req(L);
     if (r == NULL) {
         return luaL_error(L, "no request object found");
     }
+
+    ngx_http_lua_check_fake_request(L, r);
 
 #if (NGX_PCRE)
     if (lua_type(L, -1) == LUA_TNUMBER) {
@@ -76,8 +82,9 @@ ngx_http_lua_var_get(lua_State *L)
 
         dd("n = %d, ncaptures = %d", (int) n, (int) r->ncaptures);
 
-        if (r->captures == NULL || r->captures_data == NULL ||
-                n >= r->ncaptures)
+        if (r->captures == NULL
+            || r->captures_data == NULL
+            || n >= r->ncaptures)
         {
             lua_pushnil(L);
             return 1;
@@ -99,10 +106,7 @@ ngx_http_lua_var_get(lua_State *L)
 
     p = (u_char *) luaL_checklstring(L, -1, &len);
 
-    lowcase = ngx_palloc(r->pool, len);
-    if (lowcase == NULL) {
-        return luaL_error(L, "memory allocation error");
-    }
+    lowcase = lua_newuserdata(L, len);
 
     hash = ngx_hash_strlow(lowcase, p, len);
 
@@ -117,7 +121,6 @@ ngx_http_lua_var_get(lua_State *L)
     }
 
     lua_pushlstring(L, (const char *) vv->data, (size_t) vv->len);
-
     return 1;
 }
 
@@ -143,14 +146,12 @@ ngx_http_lua_var_set(lua_State *L)
     int                          value_type;
     const char                  *msg;
 
-    lua_pushlightuserdata(L, &ngx_http_lua_request_key);
-    lua_rawget(L, LUA_GLOBALSINDEX);
-    r = lua_touserdata(L, -1);
-    lua_pop(L, 1);
-
+    r = ngx_http_lua_get_req(L);
     if (r == NULL) {
         return luaL_error(L, "no request object found");
     }
+
+    ngx_http_lua_check_fake_request(L, r);
 
     /* we skip the first argument that is the table */
 
@@ -158,14 +159,10 @@ ngx_http_lua_var_set(lua_State *L)
 
     p = (u_char *) luaL_checklstring(L, 2, &len);
 
-    lowcase = ngx_palloc(r->pool, len + 1);
-    if (lowcase == NULL) {
-        return luaL_error(L, "memory allocation error");
-    }
-
-    lowcase[len] = '\0';
+    lowcase = lua_newuserdata(L, len + 1);
 
     hash = ngx_hash_strlow(lowcase, p, len);
+    lowcase[len] = '\0';
 
     name.len = len;
     name.data = lowcase;
@@ -197,7 +194,7 @@ ngx_http_lua_var_set(lua_State *L)
 
     default:
         msg = lua_pushfstring(L, "string, number, or nil expected, "
-                "but got %s", lua_typename(L, value_type));
+                              "but got %s", lua_typename(L, value_type));
         return luaL_argerror(L, 1, msg);
     }
 
@@ -268,14 +265,16 @@ ngx_http_lua_var_set(lua_State *L)
         }
 
         return luaL_error(L, "variable \"%s\" cannot be assigned a value",
-                lowcase);
+                          lowcase);
     }
 
     /* variable not found */
 
-    return luaL_error(L, "varaible \"%s\" not found for writing; "
-                "maybe it is a built-in variable that is not changeable "
-                "or you sould have used \"set $%s '';\" earlier "
-                "in the config file", lowcase, lowcase);
+    return luaL_error(L, "variable \"%s\" not found for writing; "
+                      "maybe it is a built-in variable that is not changeable "
+                      "or you forgot to use \"set $%s '';\" "
+                      "in the config file to define it first",
+                      lowcase, lowcase);
 }
 
+/* vi:set ft=c ts=4 sw=4 et fdm=marker: */

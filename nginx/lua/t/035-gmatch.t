@@ -1,15 +1,15 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_on();
 #workers(2);
 #log_level('warn');
 
-repeat_each(2);
+repeat_each(5);
 
-plan tests => repeat_each() * (blocks() * 2 + 1);
+plan tests => repeat_each() * (blocks() * 2 + 7);
 
 our $HtmlDir = html_dir;
 
@@ -311,6 +311,10 @@ baz
     }
 --- request
     GET /re
+--- stap2
+F(ngx_http_lua_ngx_re_gmatch_iterator) { println("iterator") }
+F(ngx_http_lua_ngx_re_gmatch_gc) { println("gc") }
+F(ngx_http_lua_ngx_re_gmatch_cleanup) { println("cleanup") }
 --- response_body
 hello
 okay
@@ -481,4 +485,421 @@ matched
 sr failed: 500
 --- error_log
 attempt to use ngx.re.gmatch iterator in a request that did not create it
+
+
+
+=== TEST 20: gmatch (empty matched string)
+--- config
+    location /re {
+        content_by_lua '
+            for m in ngx.re.gmatch("hello", "a|") do
+                if m then
+                    ngx.say("matched: [", m[0], "]")
+                else
+                    ngx.say("not matched: ", m)
+                end
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+matched: []
+matched: []
+matched: []
+matched: []
+matched: []
+matched: []
+
+
+
+=== TEST 21: gmatch with named pattern
+--- config
+    location /re {
+        content_by_lua '
+            local it = ngx.re.gmatch("1234, 1234", "(?<first>[0-9]+)")
+            m = it()
+            if m then
+                ngx.say(m[0])
+                ngx.say(m[1])
+                ngx.say(m["first"])
+            else
+                ngx.say("not matched!")
+            end
+
+            m = it()
+            if m then
+                ngx.say(m[0])
+                ngx.say(m[1])
+                ngx.say(m["first"])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+1234
+1234
+1234
+1234
+1234
+1234
+
+
+
+=== TEST 22: gmatch with multiple named pattern
+--- config
+    location /re {
+        content_by_lua '
+            local it = ngx.re.gmatch("1234, abcd, 1234", "(?<first>[0-9]+)|(?<second>[a-z]+)")
+
+            m = it()
+            if m then
+                ngx.say(m[0])
+                ngx.say(m[1])
+                ngx.say(m[2])
+                ngx.say(m["first"])
+                ngx.say(m["second"])
+            else
+                ngx.say("not matched!")
+            end
+
+            m = it()
+            if m then
+                ngx.say(m[0])
+                ngx.say(m[1])
+                ngx.say(m[2])
+                ngx.say(m["first"])
+                ngx.say(m["second"])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+1234
+1234
+nil
+1234
+nil
+abcd
+nil
+abcd
+nil
+abcd
+
+
+
+=== TEST 23: gmatch with duplicate named pattern w/ extraction
+--- config
+    location /re {
+        content_by_lua '
+            local it = ngx.re.gmatch("hello, 1234", "(?<first>[a-z]+), (?<first>[0-9]+)", "D")
+            m = it()
+            if m then
+                ngx.say(m[0])
+                ngx.say(m[1])
+                ngx.say(m[2])
+                ngx.say(table.concat(m.first,"-"))
+            else
+                ngx.say("not matched!")
+            end
+
+            m = it()
+            if m then
+             ngx.say(m[0])
+                ngx.say(m[1])
+                ngx.say(m[2])
+                ngx.say(table.concat(m.first,"-"))
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+hello, 1234
+hello
+1234
+hello-1234
+not matched!
+
+
+
+=== TEST 24: named captures are empty
+--- config
+    location /re {
+        content_by_lua '
+            local it = ngx.re.gmatch("1234", "(?<first>[a-z]*)([0-9]+)", "")
+            local m = it()
+            if m then
+                ngx.say(m[0])
+                ngx.say(m.first)
+                ngx.say(m[1])
+                ngx.say(m[2])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+1234
+
+
+1234
+
+
+
+=== TEST 25: named captures are empty (with regex cache)
+--- config
+    location /re {
+        content_by_lua '
+            local it = ngx.re.gmatch("1234", "(?<first>[a-z]*)([0-9]+)", "o")
+            local m = it()
+            if m then
+                ngx.say(m[0])
+                ngx.say(m.first)
+                ngx.say(m[1])
+                ngx.say(m[2])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+1234
+
+
+1234
+
+
+
+=== TEST 26: bad pattern
+--- config
+    location /re {
+        content_by_lua '
+            local it, err = ngx.re.gmatch("hello\\nworld", "(abc")
+            if not err then
+                ngx.say("good")
+
+            else
+                ngx.say("error: ", err)
+            end
+        ';
+    }
+--- request
+    GET /re
+--- response_body
+error: pcre_compile() failed: missing ) in "(abc"
+--- no_error_log
+[error]
+
+
+
+=== TEST 27: bad UTF-8
+--- config
+    location = /t {
+        content_by_lua '
+            local target = "你好"
+            local regex = "你好"
+
+            -- Note the D here
+            local it, err = ngx.re.gmatch(string.sub(target, 1, 4), regex, "u")
+
+            if err then
+                ngx.say("error: ", err)
+                return
+            end
+
+            local m, err = it()
+            if err then
+                ngx.say("error: ", err)
+                return
+            end
+
+            if m then
+                ngx.say("matched: ", m[0])
+            else
+                ngx.say("not matched")
+            end
+        ';
+    }
+--- request
+GET /t
+--- response_body_like chop
+error: pcre_exec\(\) failed: -10
+
+--- no_error_log
+[error]
+
+
+
+=== TEST 28: UTF-8 mode without UTF-8 sequence checks
+--- config
+    location /re {
+        content_by_lua '
+            local it = ngx.re.gmatch("你好", ".", "U")
+            local m = it()
+            if m then
+                ngx.say(m[0])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- stap
+probe process("$LIBPCRE_PATH").function("pcre_compile") {
+    printf("compile opts: %x\n", $options)
+}
+
+probe process("$LIBPCRE_PATH").function("pcre_exec") {
+    printf("exec opts: %x\n", $options)
+}
+
+--- stap_out
+compile opts: 800
+exec opts: 2000
+
+--- request
+    GET /re
+--- response_body
+你
+--- no_error_log
+[error]
+
+
+
+=== TEST 29: UTF-8 mode with UTF-8 sequence checks
+--- config
+    location /re {
+        content_by_lua '
+            local it = ngx.re.gmatch("你好", ".", "u")
+            local m = it()
+            if m then
+                ngx.say(m[0])
+            else
+                ngx.say("not matched!")
+            end
+        ';
+    }
+--- stap
+probe process("$LIBPCRE_PATH").function("pcre_compile") {
+    printf("compile opts: %x\n", $options)
+}
+
+probe process("$LIBPCRE_PATH").function("pcre_exec") {
+    printf("exec opts: %x\n", $options)
+}
+
+--- stap_out
+compile opts: 800
+exec opts: 0
+
+--- request
+    GET /re
+--- response_body
+你
+--- no_error_log
+[error]
+
+
+
+=== TEST 30: just hit match limit
+--- http_config
+    lua_regex_match_limit 5600;
+--- config
+    location /re {
+        content_by_lua_file html/a.lua;
+    }
+
+--- user_files
+>>> a.lua
+local re = [==[(?i:([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:=|<=>|r?like|sounds\s+like|regexp)([\s'\"`´’‘\(\)]*)?\2|([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:!=|<=|>=|<>|<|>|\^|is\s+not|not\s+like|not\s+regexp)([\s'\"`´’‘\(\)]*)?(?!\6)([\d\w]+))]==]
+
+s = string.rep([[ABCDEFG]], 10)
+
+local start = ngx.now()
+
+local it, err = ngx.re.gmatch(s, re, "o")
+if not it then
+    ngx.say("failed to gen iterator: ", err)
+    return
+end
+
+local res, err = it()
+
+--[[
+ngx.update_time()
+local elapsed = ngx.now() - start
+ngx.say(elapsed, " sec elapsed.")
+]]
+
+if not res then
+    if err then
+        ngx.say("error: ", err)
+        return
+    end
+    ngx.say("failed to match")
+    return
+end
+
+--- request
+    GET /re
+--- response_body
+error: pcre_exec() failed: -8
+
+
+
+=== TEST 31: just not hit match limit
+--- http_config
+    lua_regex_match_limit 5700;
+--- config
+    location /re {
+        content_by_lua_file html/a.lua;
+    }
+
+--- user_files
+>>> a.lua
+local re = [==[(?i:([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:=|<=>|r?like|sounds\s+like|regexp)([\s'\"`´’‘\(\)]*)?\2|([\s'\"`´’‘\(\)]*)?([\d\w]+)([\s'\"`´’‘\(\)]*)?(?:!=|<=|>=|<>|<|>|\^|is\s+not|not\s+like|not\s+regexp)([\s'\"`´’‘\(\)]*)?(?!\6)([\d\w]+))]==]
+
+s = string.rep([[ABCDEFG]], 10)
+
+local start = ngx.now()
+
+local it, err = ngx.re.gmatch(s, re, "o")
+if not it then
+    ngx.say("failed to gen iterator: ", err)
+    return
+end
+
+res, err = it()
+
+--[[
+ngx.update_time()
+local elapsed = ngx.now() - start
+ngx.say(elapsed, " sec elapsed.")
+]]
+
+if not res then
+    if err then
+        ngx.say("error: ", err)
+        return
+    end
+    ngx.say("failed to match")
+    return
+end
+
+--- request
+    GET /re
+--- response_body
+failed to match
 

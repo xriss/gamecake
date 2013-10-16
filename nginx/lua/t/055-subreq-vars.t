@@ -1,13 +1,12 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_process_enabled(1);
 #log_level('warn');
 
 repeat_each(2);
-#repeat_each(1);
 
 plan tests => repeat_each() * (blocks() * 2 + 5);
 
@@ -36,6 +35,33 @@ __DATA__
             ngx.print(res.body)
         ';
     }
+
+--- stap2
+
+global delta = "  "
+
+F(ngx_http_finalize_request) {
+    uri = ngx_http_req_uri($r)
+    printf("finalize req %s: %d\n", uri, $rc)
+    if ($rc == 500) {
+        print_ubacktrace()
+    }
+}
+
+F(ngx_http_lua_run_thread) {
+    uri = ngx_http_req_uri($r)
+    printf("lua run thread %s\n", uri)
+}
+
+M(http-subrequest-start) {
+    r = $arg1
+    n = ngx_http_subreq_depth(r)
+    pr = ngx_http_req_parent(r)
+    printf("%sbegin %s -> %s (%d)\n", ngx_indent(n, delta),
+        ngx_http_req_uri(pr),
+        ngx_http_req_uri(r),
+        n)
+}
 --- request
 GET /lua
 --- response_body_like: 500 Internal Server Error

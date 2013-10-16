@@ -1,7 +1,7 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #repeat_each(20000);
 repeat_each(2);
@@ -11,7 +11,7 @@ repeat_each(2);
 #log_level('warn');
 #worker_connections(1024);
 
-plan tests => repeat_each() * (blocks() * 3 - 1);
+plan tests => repeat_each() * (blocks() * 3 + 4);
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 $ENV{TEST_NGINX_MYSQL_PORT} ||= 3306;
@@ -66,7 +66,8 @@ GET /lua
 attempt to set status 404 via ngx.exit after sending out the response status 200
 --- no_error_log
 alert
---- ignore_response
+--- response_body
+hi
 
 
 
@@ -345,6 +346,7 @@ GET /api?uid=32
 Logged in 56
 --- no_error_log
 [error]
+--- timeout: 5
 
 
 
@@ -358,7 +360,7 @@ Logged in 56
 
     upstream memc_a {
         server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
-        keepalive 300 single;
+        keepalive 300;
     }
 
     #upstream_list memc_cluster memc_a memc_b;
@@ -427,7 +429,7 @@ GET /baz
 --- response_body_like: 302
 --- error_code: 302
 --- response_headers
-Location: http://localhost:1984/foo/bar
+Location: http://localhost:$ServerPort/foo/bar
 --- SKIP
 
 
@@ -480,7 +482,7 @@ hello
 --- request
 GET /lua
 --- error_code: 501
---- response_body_like: 501 Method Not Implemented
+--- response_body_like: 501 (?:Method )?Not Implemented
 --- no_error_log
 [error]
 
@@ -496,7 +498,7 @@ GET /lua
 --- request
 GET /lua
 --- error_code: 501
---- response_body_like: 501 Method Not Implemented
+--- response_body_like: 501 (?:Method )?Not Implemented
 --- no_error_log
 [error]
 
@@ -513,7 +515,8 @@ GET /lua
     }
 --- request
 GET /lua
---- ignore_response
+--- response_body
+Hello World
 --- error_log
 attempt to set status 403 via ngx.exit after sending out the response status 200
 --- no_error_log
@@ -533,6 +536,26 @@ attempt to set status 403 via ngx.exit after sending out the response status 200
     }
 --- request
 GET /lua
+--- response_body
+Hello World
+--- error_code: 403
+--- no_error_log
+[error]
+[alert]
+
+
+
+=== TEST 16: throw 403 after sending out headers with 403 (HTTP 1.0 buffering)
+--- config
+    location /t {
+        rewrite_by_lua '
+            ngx.status = 403
+            ngx.say("Hello World")
+            ngx.exit(403)
+        ';
+    }
+--- request
+GET /t HTTP/1.0
 --- response_body
 Hello World
 --- error_code: 403

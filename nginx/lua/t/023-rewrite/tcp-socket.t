@@ -1,7 +1,7 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 repeat_each(2);
 
@@ -9,7 +9,6 @@ plan tests => repeat_each() * 87;
 
 our $HtmlDir = html_dir;
 
-$ENV{TEST_NGINX_CLIENT_PORT} ||= server_port();
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 $ENV{TEST_NGINX_RESOLVER} ||= '8.8.8.8';
 
@@ -26,7 +25,7 @@ __DATA__
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -96,7 +95,7 @@ close: nil closed
     server_tokens off;
     location /t {
         #set $port 1234;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -165,7 +164,7 @@ closed
     server_tokens off;
     location /t {
         #set $port 1234;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -207,7 +206,7 @@ attempt to send data on a closed socket:
 --- config
     server_tokens off;
     resolver $TEST_NGINX_RESOLVER;
-    resolver_timeout 5s;
+    resolver_timeout 1s;
     location /t {
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -291,8 +290,8 @@ connect: nil connection refused
 send: nil closed
 receive: nil closed
 close: nil closed
---- error_log
-connect() failed (111: Connection refused)
+--- error_log eval
+qr/connect\(\) failed \(\d+: Connection refused\)/
 
 
 
@@ -302,11 +301,11 @@ connect() failed (111: Connection refused)
     lua_socket_connect_timeout 100ms;
     lua_socket_send_timeout 100ms;
     lua_socket_read_timeout 100ms;
-    resolver_timeout 2s;
+    resolver_timeout 1s;
     location /test {
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
-            local ok, err = sock:connect("taobao.com", 16787)
+            local ok, err = sock:connect("agentzh.org", 12345)
             ngx.say("connect: ", ok, " ", err)
 
             local bytes
@@ -340,7 +339,7 @@ lua tcp socket connect timed out
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -374,7 +373,7 @@ connected: 1
 --- config
     server_tokens off;
     resolver $TEST_NGINX_RESOLVER;
-    resolver_timeout 4s;
+    resolver_timeout 1s;
     location /t {
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -447,7 +446,7 @@ attempt to send data on a closed socket
 --- request
 GET /t
 --- response_body_like
-^failed to connect: blah-blah-not-found\.agentzh\.org could not be resolved(?: \(110: Operation timed out\))?
+^failed to connect: blah-blah-not-found\.agentzh\.org could not be resolved(?: \(\d+: Operation timed out\))?
 connected: nil
 failed to send request: closed$
 --- error_log
@@ -460,7 +459,7 @@ attempt to send data on a closed socket
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -530,7 +529,7 @@ close: nil closed
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -600,7 +599,7 @@ close: nil closed
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -682,7 +681,7 @@ close: nil closed
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -760,7 +759,7 @@ close: nil closed
     lua_socket_buffer_size 1;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -837,7 +836,7 @@ close: nil closed
     lua_socket_buffer_size 1;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -907,7 +906,7 @@ close: nil closed
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local port = ngx.var.port
@@ -1000,8 +999,8 @@ close: nil closed
     GET /test
 --- response_body
 failed to connect: connection refused
---- error_log
-connect() failed (111: Connection refused)
+--- error_log eval
+qr/connect\(\) failed \(\d+: Connection refused\)/
 
 
 
@@ -1010,7 +1009,7 @@ connect() failed (111: Connection refused)
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -1437,7 +1436,7 @@ close: 1 nil
     location /t {
         #set $port 5000;
         set $port1 $TEST_NGINX_MEMCACHED_PORT;
-        set $port2 $TEST_NGINX_CLIENT_PORT;
+        set $port2 $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock1 = ngx.socket.tcp()
@@ -1529,7 +1528,7 @@ GET /t
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -1601,7 +1600,7 @@ close: nil closed
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -1662,7 +1661,7 @@ bad argument #1 to 'send' (bad data type nil found)
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -1723,7 +1722,7 @@ bad argument #1 to 'send' (bad data type boolean found)
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -1853,7 +1852,7 @@ subrequest: 200, OK\r
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -1924,7 +1923,7 @@ close: nil closed
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()
@@ -1984,7 +1983,7 @@ close: 1 nil
     server_tokens off;
     location /t {
         #set $port 5000;
-        set $port $TEST_NGINX_CLIENT_PORT;
+        set $port $TEST_NGINX_SERVER_PORT;
 
         rewrite_by_lua '
             local sock = ngx.socket.tcp()

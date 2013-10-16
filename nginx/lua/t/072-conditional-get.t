@@ -1,6 +1,10 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
+use t::StapThread;
+
+our $GCScript = $t::StapThread::GCScript;
+our $StapScript = $t::StapThread::StapScript;
 
 #worker_connections(1014);
 #master_on();
@@ -8,9 +12,8 @@ use Test::Nginx::Socket;
 #log_level('warn');
 
 repeat_each(2);
-#repeat_each(1);
 
-plan tests => repeat_each() * (blocks() * 3);
+plan tests => repeat_each() * (blocks() * 3 + 2);
 
 #no_diff();
 #no_long_string();
@@ -63,15 +66,27 @@ If-Modified-Since: Thu, 10 May 2012 07:50:59 GMT
         #if_modified_since before;
         content_by_lua '
             ngx.header.last_modified = "Thu, 10 May 2012 07:50:48 GMT"
-            ngx.say("hello")
+            local ok, err = ngx.say("hello")
+            if not ok then
+                ngx.log(ngx.WARN, "say failed: ", err)
+            end
         ';
     }
 --- request
 GET /lua
 --- more_headers
 If-Unmodified-Since: Thu, 10 May 2012 07:50:47 GMT
+
+--- stap2 eval: $::StapScript
+--- stap eval: $::GCScript
+--- stap_out
+terminate 1: ok
+delete thread 1
+
 --- response_body_like: 412 Precondition Failed
 --- error_code: 412
 --- error_log
-failed to send data through the output filters
+say failed: nginx output filter error
+--- no_error_log
+[error]
 

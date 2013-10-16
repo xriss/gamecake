@@ -1,7 +1,7 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
 use lib 'lib';
-use Test::Nginx::Socket;
+use t::TestNginxLua;
 
 #worker_connections(1014);
 #master_on();
@@ -10,7 +10,7 @@ log_level('debug');
 
 repeat_each(2);
 
-plan tests => repeat_each() * (11 * blocks());
+plan tests => repeat_each() * 120;
 
 #no_diff();
 #no_long_string();
@@ -34,12 +34,12 @@ GET /t
 --- no_error_log
 lua capture header filter, uri "/t"
 lua capture body filter, uri "/t"
-lua rewrite handler, uri "/t"
-lua access handler, uri "/t"
-lua content handler, uri "/t"
+lua rewrite handler, uri:"/t"
+lua access handler, uri:"/t"
+lua content handler, uri:"/t"
 lua header filter for user lua code, uri "/t"
 lua body filter for user lua code, uri "/t"
-lua log handler, uri "/t"
+lua log handler, uri:"/t"
 [error]
 
 
@@ -55,16 +55,17 @@ GET /t
 --- response_body
 hello
 --- error_log
-lua rewrite handler, uri "/t"
+lua rewrite handler, uri:"/t"
 lua capture header filter, uri "/t"
 lua capture body filter, uri "/t"
 --- no_error_log
-lua access handler, uri "/t"
-lua content handler, uri "/t"
+lua access handler, uri:"/t"
+lua content handler, uri:"/t"
 lua header filter for user lua code, uri "/t"
 lua body filter for user lua code, uri "/t"
-lua log handler, uri "/t"
+lua log handler, uri:"/t"
 [error]
+--- log_level: debug
 
 
 
@@ -79,15 +80,15 @@ GET /t
 --- response_body
 hello
 --- error_log
-lua access handler, uri "/t"
+lua access handler, uri:"/t" c:1
 lua capture body filter, uri "/t"
 lua capture header filter, uri "/t"
 --- no_error_log
-lua rewrite handler, uri "/t"
-lua content handler, uri "/t"
+lua rewrite handler, uri:"/t"
+lua content handler, uri:"/t"
 lua header filter for user lua code, uri "/t"
 lua body filter for user lua code, uri "/t"
-lua log handler, uri "/t"
+lua log handler, uri:"/t"
 [error]
 
 
@@ -102,15 +103,15 @@ GET /t
 --- response_body
 hello
 --- error_log
-lua content handler, uri "/t"
+lua content handler, uri:"/t" c:1
 lua capture body filter, uri "/t"
 lua capture header filter, uri "/t"
 --- no_error_log
-lua access handler, uri "/t"
-lua rewrite handler, uri "/t"
+lua access handler, uri:"/t"
+lua rewrite handler, uri:"/t"
 lua header filter for user lua code, uri "/t"
 lua body filter for user lua code, uri "/t"
-lua log handler, uri "/t"
+lua log handler, uri:"/t"
 [error]
 
 
@@ -129,11 +130,11 @@ hello
 lua header filter for user lua code, uri "/t"
 --- no_error_log
 lua capture header filter, uri "/t"
-lua content handler, uri "/t"
-lua access handler, uri "/t"
-lua rewrite handler, uri "/t"
+lua content handler, uri:"/t"
+lua access handler, uri:"/t"
+lua rewrite handler, uri:"/t"
 lua capture body filter, uri "/t"
-lua log handler, uri "/t"
+lua log handler, uri:"/t"
 lua body filter for user lua code, uri "/t"
 [error]
 
@@ -150,13 +151,13 @@ GET /t
 --- response_body
 hello
 --- error_log
-lua log handler, uri "/t"
+lua log handler, uri:"/t"
 --- no_error_log
 lua header filter for user lua code, uri "/t"
 lua capture header filter, uri "/t"
-lua content handler, uri "/t"
-lua access handler, uri "/t"
-lua rewrite handler, uri "/t"
+lua content handler, uri:"/t"
+lua access handler, uri:"/t"
+lua rewrite handler, uri:"/t"
 lua capture body filter, uri "/t"
 lua body filter for user lua code, uri "/t"
 [error]
@@ -178,11 +179,11 @@ lua header filter for user lua code, uri "/t"
 lua body filter for user lua code, uri "/t"
 --- no_error_log
 lua capture header filter, uri "/t"
-lua content handler, uri "/t"
-lua access handler, uri "/t"
-lua rewrite handler, uri "/t"
+lua content handler, uri:"/t"
+lua access handler, uri:"/t"
+lua rewrite handler, uri:"/t"
 lua capture body filter, uri "/t"
-lua log handler, uri "/t"
+lua log handler, uri:"/t"
 [error]
 
 
@@ -204,11 +205,11 @@ hello
 lua header filter for user lua code, uri "/t"
 --- no_error_log
 lua capture header filter, uri "/t"
-lua content handler, uri "/t"
-lua access handler, uri "/t"
-lua rewrite handler, uri "/t"
+lua content handler, uri:"/t"
+lua access handler, uri:"/t"
+lua rewrite handler, uri:"/t"
 lua capture body filter, uri "/t"
-lua log handler, uri "/t"
+lua log handler, uri:"/t"
 lua body filter for user lua code, uri "/t"
 [error]
 
@@ -225,13 +226,13 @@ GET /t
 --- response_body
 hello
 --- error_log
-lua log handler, uri "/t"
+lua log handler, uri:"/t"
 --- no_error_log
 lua header filter for user lua code, uri "/t"
 lua capture header filter, uri "/t"
-lua content handler, uri "/t"
-lua access handler, uri "/t"
-lua rewrite handler, uri "/t"
+lua content handler, uri:"/t"
+lua access handler, uri:"/t"
+lua rewrite handler, uri:"/t"
 lua capture body filter, uri "/t"
 lua body filter for user lua code, uri "/t"
 [error]
@@ -253,10 +254,82 @@ lua header filter for user lua code, uri "/t"
 lua body filter for user lua code, uri "/t"
 --- no_error_log
 lua capture header filter, uri "/t"
-lua content handler, uri "/t"
-lua access handler, uri "/t"
-lua rewrite handler, uri "/t"
+lua content handler, uri:"/t"
+lua access handler, uri:"/t"
+lua rewrite handler, uri:"/t"
 lua capture body filter, uri "/t"
-lua log handler, uri "/t"
+lua log handler, uri:"/t"
+[error]
+
+
+
+=== TEST 11: header_filter_by_lua with multiple http blocks (github issue #294)
+--- config
+    location = /t {
+        echo ok;
+        header_filter_by_lua '
+            ngx.status = 201
+            ngx.header.Foo = "foo"
+        ';
+
+    }
+--- post_main_config
+    http {
+    }
+--- request
+GET /t
+--- response_headers
+Foo: foo
+--- response_body
+ok
+--- error_code: 201
+--- no_error_log
+[error]
+
+
+
+=== TEST 12: body_filter_by_lua in multiple http blocks (github issue #294)
+--- config
+    location = /t {
+        echo -n ok;
+        body_filter_by_lua '
+            if ngx.arg[2] then
+                ngx.arg[1] = ngx.arg[1] .. "ay\\n"
+            end
+        ';
+
+    }
+--- post_main_config
+    http {
+    }
+--- request
+GET /t
+--- response_body
+okay
+--- no_error_log
+[error]
+
+
+
+=== TEST 13: capture filter with multiple http blocks (github issue #294)
+--- config
+    location = /t {
+        content_by_lua '
+            local res = ngx.location.capture("/sub")
+            ngx.say("sub: ", res.body)
+        ';
+    }
+
+    location = /sub {
+        echo -n sub;
+    }
+--- post_main_config
+    http {
+    }
+--- request
+GET /t
+--- response_body
+sub: sub
+--- no_error_log
 [error]
 

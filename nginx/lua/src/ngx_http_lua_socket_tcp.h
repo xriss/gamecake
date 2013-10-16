@@ -1,5 +1,11 @@
-#ifndef NGX_HTTP_LUA_SOCKET_TCP_H
-#define NGX_HTTP_LUA_SOCKET_TCP_H
+
+/*
+ * Copyright (C) Yichun Zhang (agentzh)
+ */
+
+
+#ifndef _NGX_HTTP_LUA_SOCKET_TCP_H_INCLUDED_
+#define _NGX_HTTP_LUA_SOCKET_TCP_H_INCLUDED_
 
 
 #include "ngx_http_lua_common.h"
@@ -11,7 +17,8 @@
 #define NGX_HTTP_LUA_SOCKET_FT_RESOLVER      0x0008
 #define NGX_HTTP_LUA_SOCKET_FT_BUFTOOSMALL   0x0010
 #define NGX_HTTP_LUA_SOCKET_FT_NOMEM         0x0020
-#define NGX_HTTP_LUA_SOCKET_FT_PARTIALWRITE  0x0020
+#define NGX_HTTP_LUA_SOCKET_FT_PARTIALWRITE  0x0040
+#define NGX_HTTP_LUA_SOCKET_FT_CLIENTABORT   0x0080
 
 
 typedef struct ngx_http_lua_socket_tcp_upstream_s
@@ -29,6 +36,9 @@ typedef void (*ngx_http_lua_socket_tcp_upstream_handler_pt)(
 
 typedef struct {
     ngx_http_lua_main_conf_t          *conf;
+
+    /* active connections == out-of-pool reused connections
+     *                       + in-pool connections */
     ngx_uint_t                         active_connections;
 
     /* queues of ngx_http_lua_socket_pool_item_t: */
@@ -68,22 +78,21 @@ struct ngx_http_lua_socket_tcp_upstream_s {
     ngx_uint_t                       ft_type;
     ngx_err_t                        socket_errno;
 
-    ngx_output_chain_ctx_t           output;
-    ngx_chain_writer_ctx_t           writer;
-
     ngx_int_t                      (*input_filter)(void *data, ssize_t bytes);
     void                            *input_filter_ctx;
 
     size_t                           request_len;
     ngx_chain_t                     *request_bufs;
 
+    ngx_http_lua_co_ctx_t           *co_ctx;
+
     ngx_uint_t                       reused;
 
-    unsigned                         request_sent:1;
-
+    unsigned                         no_close:1;
     unsigned                         waiting:1;
     unsigned                         eof:1;
-    unsigned                         is_downstream:1;
+    unsigned                         body_downstream:1;
+    unsigned                         raw_downstream:1;
 };
 
 
@@ -123,9 +132,9 @@ typedef struct {
 
 
 void ngx_http_lua_inject_socket_tcp_api(ngx_log_t *log, lua_State *L);
-
 void ngx_http_lua_inject_req_socket_api(lua_State *L);
 
 
-#endif /* NGX_HTTP_LUA_SOCKET_TCP_H */
+#endif /* _NGX_HTTP_LUA_SOCKET_TCP_H_INCLUDED_ */
 
+/* vi:set ft=c ts=4 sw=4 et fdm=marker: */
