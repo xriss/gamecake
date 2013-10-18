@@ -45,6 +45,14 @@ elseif RASPI then
 	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
 	includedirs { "./raspi/include" } -- need some extraincludes
 
+elseif OSX then
+
+	files { 
+			prefix.."/Alc/backends/CoreAudio.c",
+	}
+	defines("HAVE_COREAUDIO")
+	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
+	
 else
 
 	files { 
@@ -52,7 +60,7 @@ else
 	}
 	defines("HAVE_ALSA")
 	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
-	
+
 end
 
 

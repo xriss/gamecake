@@ -4,10 +4,10 @@
 #ifndef ANDROID
 
 /* Define this if your system has a crypt() function */
-#define HAVE_CRYPT /**/
+//#define HAVE_CRYPT /**/
 
 /* Define to 1 if you have the <crypt.h> header file. */
-#define HAVE_CRYPT_H 1
+//#define HAVE_CRYPT_H 1
 
 
 /* Define to 1 if a SysV or X/Open compatible Curses library is present */
