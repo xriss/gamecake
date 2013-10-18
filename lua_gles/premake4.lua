@@ -17,6 +17,13 @@ if WINDOWS then
 --	defines "FREEGLUT_LIB_PRAGMAS=0"
 --	defines ""
 	
+elseif OSX then
+
+	files { "code/gl3w.c" }
+
+	links { "GL" }--, "GLU" }
+	defines "HAVE_FCNTL_H=1"
+
 elseif NIX then
 
 	files { "code/gl3w.c" }

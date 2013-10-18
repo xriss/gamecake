@@ -91,6 +91,40 @@ elseif WINDOWS then
 	if not GCC then exe="" end -- native builds add .exe automatically	
 	KIND{kind="ConsoleApp",name="gamecake"..exe}
 
+elseif OSX then
+
+	files { "../lib_lua/src/lua.c" }
+	
+--	linkoptions { "-v" }
+
+	links { "OpenGL.framework" }
+	links { "OpenAL.framework" }
+--	links { "CoreAudio.framework" }
+--	links { "CoreFoundation.framework" }
+	links { "Cocoa.framework" }
+
+
+
+--	links { "Carbon.framework" }
+
+
+
+--	links { "udev" }
+
+--	links { "crypt" }
+	links { "pthread" }
+--	links { "X11"   }	
+	links { "dl" }
+	links { "m" }
+
+--	links { "rt" }
+
+	if CPU=="64" then
+		KIND{kind="ConsoleApp",name="gamecake.osx64"}
+	else
+		KIND{kind="ConsoleApp",name="gamecake.osx"}
+	end
+	
 elseif NIX then
 
 --	linkoptions { "-static-libgcc" }

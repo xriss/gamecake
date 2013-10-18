@@ -136,6 +136,12 @@ elseif t:sub(1,5)=="clang" then
 	NIX=true
 	GCC=true
 	CLANG=true
+elseif t:sub(1,3)=="osx" then
+	TARGET="OSX"
+	CPU=t:sub(4)
+	OSX=true
+	GCC=true
+	CLANG=true
 elseif os.get() == "windows" then
 	TARGET="WINDOWS"
 	WINDOWS=true
@@ -279,6 +285,31 @@ elseif WINDOWS then
 		
 	end
 
+elseif OSX then
+	
+	defines("LUA_USE_MKSTEMP") -- remove warning
+	defines("LUA_USE_POPEN") -- we want to enable popen
+
+--	defines "X11"
+--	defines	"LUA_USE_DLOPEN"
+--	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
+	
+--	if CLANG then
+		platforms { "clang" } --hax
+--	end
+
+	if CPU=="32" then
+	
+		buildoptions{"-m32"}
+		linkoptions{"-m32"}
+		
+	elseif CPU=="64" then
+	
+		buildoptions{"-m64"}
+		linkoptions{"-m64"}
+		
+	end
+	
 elseif NIX then
 	
 	defines("LUA_USE_MKSTEMP") -- remove warning
@@ -314,7 +345,7 @@ end
 if not BUILD_DIR_BASE then
 
 	local t=TARGET
-	if CLANG then t="clang" end
+	if CLANG and t=="NIX" then t="clang" end
 
 	BUILD_DIR_BASE=("build-"..(_ACTION or "gmake").."-"..t.."-"..CPU):lower()
 	
@@ -531,52 +562,53 @@ end
 
 all_includes=all_includes or {
 
-	{"lua_bit",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		) and (LIB_LUA=="lib_lua") },
-	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		},
-	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
---	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		nil			},
-	{"lua_al",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_tardis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_grd",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_grdmap",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_sod",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_lash",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
---	{"lua_sec",			nil			or		NIX		or		nil		or		nil			or		nil			},
-	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		},
-	{"lua_socket",		WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		},
-	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		},
-	{"lua_lanes",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		},
-	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		},
-	{"lua_gamecake",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_win",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lua_win_windows",	WINDOWS		or		nil		or		nil		or		nil			or		nil			},
-	{"lua_win_linux",	nil			or		NIX		or		nil		or		nil			or		nil			},
-	{"lua_win_nacl",	nil			or		nil		or		NACL	or		nil			or		nil			},
-	{"lua_win_android",	nil			or		nil		or		nil		or		ANDROID		or		nil			},
-	{"lua_win_raspi",	nil			or		nil		or		nil		or		nil			or		RASPI		},
-	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
---	{"lib_openssl",		nil			or		NIX		or		nil		or		nil			or		nil			},
---	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			},
-	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lib_png",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lib_jpeg",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lib_gif",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			},
-	{"lib_z",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lib_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		},
-	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			},
-	{"lib_vorbis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lib_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
+	{"lua_bit",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		) and (LIB_LUA=="lib_lua") },
+	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+--	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"lua_al",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_tardis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_grd",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_grdmap",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_sod",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_lash",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	OSX		},
+--	{"lua_sec",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_socket",		WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_lanes",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lua_gamecake",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_win",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_win_windows",	WINDOWS		or		nil		or		nil		or		nil			or		nil			or	nil		},
+	{"lua_win_linux",	nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"lua_win_nacl",	nil			or		nil		or		NACL	or		nil			or		nil			or	nil		},
+	{"lua_win_android",	nil			or		nil		or		nil		or		ANDROID		or		nil			or	nil		},
+	{"lua_win_raspi",	nil			or		nil		or		nil		or		nil			or		RASPI		or	nil		},
+--	{"lua_win_osx",		nil			or		nil		or		nil		or		nil			or		nil			or	OSX		},
+	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+--	{"lib_openssl",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+--	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_png",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_jpeg",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_gif",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	OSX		},
+	{"lib_z",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
+	{"lib_vorbis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		},
 
-	{"gamecake",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		},
-	{"nginx",			nil			or		NIX		or		nil		or		nil			or		nil			},
+	{"gamecake",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"nginx",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 }
 
 ------------------------------------------------------------------------

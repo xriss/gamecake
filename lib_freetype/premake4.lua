@@ -2,9 +2,10 @@
 project "lib_freetype"
 language "C"
 
-defines { "FT2_BUILD_LIBRARY" }
+defines { "FT2_BUILD_LIBRARY" , "DARWIN_NO_CARBON" }
 
 includedirs { "../lib_freetype/freetype/include/" , "." }
+
 
 files {
 
@@ -33,8 +34,6 @@ files {
 	"freetype/src/base/fttype1.c",      -- optional, see <freetype/t1tables.h>
 	"freetype/src/base/ftwinfnt.c",     -- optional, see <freetype/ftwinfnt.h>
 	"freetype/src/base/ftxf86.c",       -- optional, see <freetype/ftxf86.h>
-
---	"freetype/src/base/ftmac.c",        -- only on the Macintosh
 
 	-- font drivers (optional; at least one is needed)
 
