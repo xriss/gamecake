@@ -582,10 +582,10 @@ print("Patching GLES ",method)
 	for n,f in pairs(gles) do
 		if type(f)=="function" and not ( 
 											n=="CheckError" or 
---											n=="GetError" or 
+											n=="GetError" or 
 											n=="numtostring" or
---											n=="GetExtensions" or
---											n=="Get" or
+											n=="GetExtensions" or
+											n=="Get" or
 											n=="patch_functions"
 										) then	
 		
