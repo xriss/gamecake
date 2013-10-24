@@ -19,6 +19,7 @@ local base = _G
 local string = require("string")
 local math = require("math")
 local socket = require("socket.core")
+require("global") -- global replaces module so the following module call will work
 module("socket",socket)
 
 -----------------------------------------------------------------------------

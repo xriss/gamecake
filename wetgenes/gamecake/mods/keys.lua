@@ -512,7 +512,7 @@ function M.bake(oven,keys)
 				keycode=code,
 				keyname=name,
 			}
-			
+
 		end
 
 		master:clean_all()

@@ -217,9 +217,13 @@ end
 		end
 
 		if w.sx~=1 or w.sy~=1 then
-			gl.Translate(w.hx/2,w.hy/2,0)
-			gl.Scale(w.sx,w.sy,1)
-			gl.Translate(-w.hx/2,-w.hy/2,0)
+			if widget.smode=="center" then
+				gl.Translate(w.hx/2,w.hy/2,0)
+				gl.Scale(w.sx,w.sy,1)
+				gl.Translate(-w.hx/2,-w.hy/2,0)
+			else
+				gl.Scale(w.sx,w.sy,1)
+			end
 		end
 
 

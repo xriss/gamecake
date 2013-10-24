@@ -298,28 +298,41 @@ function wmaster.setup(widget,def)
 		
 --print("active",master.active,master.active and master.active.class,
 --master.active and master.active.parent,master.active and master.active.parent.class)
+			
+			local old_active=master.active
+			local old_over=master.over
+			for i,v in ipairs(widget) do
+				meta.mouse(v,act,x,y,keyname)
+			end
+			
 			if master.dragging() then -- slide :)
 			
 				local w=master.active
 				local p=w.parent
+
+				local x=p.mousex
+				local y=p.mousey
 				
-				local minx=p.pxd
-				local miny=p.pyd
-				local maxx=p.pxd+p.hx-w.hx
-				local maxy=p.pyd+p.hy-w.hy
+--				local minx=p.pxd
+--				local miny=p.pyd
+--				local maxx=p.pxd+p.hx-w.hx
+--				local maxy=p.pyd+p.hy-w.hy
+
+				local maxx=p.hx-w.hx
+				local maxy=p.hy-w.hy
 
 --print("slide",miny,maxy)
 				
-				w.pxd=x-master.active_x
-				w.pyd=y-master.active_y
+				w.px=x-master.active_x
+				w.py=y-master.active_y
 				
-				if w.pxd<minx then w.pxd=minx end
-				if w.pxd>maxx then w.pxd=maxx end
-				if w.pyd<miny then w.pyd=miny end
-				if w.pyd>maxy then w.pyd=maxy end
+				if w.px<0    then w.px=0 end
+				if w.px>maxx then w.px=maxx end
+				if w.py<0    then w.py=0 end
+				if w.py>maxy then w.py=maxy end
 				
-				w.px=w.pxd-p.pxd
-				w.py=w.pyd-p.pyd
+--				w.px=w.pxd-p.pxd
+--				w.py=w.pyd-p.pyd
 				
 				if w.parent.snap then
 					w.parent:snap()
@@ -332,17 +345,11 @@ function wmaster.setup(widget,def)
 				w:layout()
 
 			end
-			
-			local old_active=master.active
-			local old_over=master.over
-			for i,v in ipairs(widget) do
-				meta.mouse(v,act,x,y,keyname)
-			end
-			
-			if act== 1 and keyname=="left" then
+
+			if act== 1 and (keyname=="left" or keyname=="right") then
 				master.press=true
 			end
-			if act==-1 and keyname=="left" then
+			if act==-1 and (keyname=="left" or keyname=="right") then
 				master.press=false
 				master.active=nil
 			end

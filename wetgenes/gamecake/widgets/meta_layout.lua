@@ -26,36 +26,8 @@ function wmeta.setup(def)
 --print(widget.class)
 		if widget.class=="fill" or widget.class=="pan" or widget.class=="drag" then
 			meta.layout_fill(widget)
---		elseif widget.class=="slide" or widget.class=="pad" then
---			meta.layout_padding(widget)
---		elseif widget.class=="master" or widget.class=="abs" then
---			meta.layout_base(widget)
 		else
 			meta.layout_base(widget)
-		end
-	end
-	
-	function meta.layout_none(widget)
-		for i,v in ipairs(widget) do
-			v:layout()
-		end
-	end
-	
-	function meta.layout_padding(widget)
-		for i,v in ipairs(widget) do
-
-			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
-			if v.hyf then v.hy=widget.hy*v.hyf end
-			
---			v.px=(widget.hx-v.hx)*v.pxf -- local position relative to parents size
---			v.py=(widget.hy-v.hy)*v.pyf
-
-			v.pxd=widget.pxd+v.px -- local absolute position
-			v.pyd=widget.pyd+v.py
-
-		end
-		for i,v in ipairs(widget) do
-			v:layout()
 		end
 	end
 	
@@ -65,9 +37,6 @@ function wmeta.setup(def)
 		
 			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
 			if v.hyf then v.hy=widget.hy*v.hyf end
-			
---			if v.pxf then v.px=(widget.hx)*v.pxf end -- local position relative to parents size
---			if v.pyf then v.py=(widget.hy)*v.pyf end
 
 			v.pxd=widget.pxd+v.px -- absolute position
 			v.pyd=widget.pyd+v.py
@@ -82,7 +51,6 @@ function wmeta.setup(def)
 -- we do not adjust the hx,hy size of sub widgets
 -- we just place them left to right top to bottom
 -- finally we resize this widget to fit its content
--- the widgets sx,sy is used as default hx,hy for layout
 	function meta.layout_fill(widget)
 		
 		local hx,hy=0,0

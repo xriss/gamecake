@@ -441,7 +441,7 @@ function base.posix_open_events(w)
 					v.fd_type="keyboard"
 					kbdcount=kbdcount+1
 				else
-					print("failed to open keyboard "..kbdcount.." on event"..v.event.." "..v.name)
+--					print("failed to open keyboard "..kbdcount.." on event"..v.event.." "..v.name)
 				end
 			elseif v.js then -- open as joystick	
 				v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
@@ -450,7 +450,7 @@ function base.posix_open_events(w)
 					v.fd_device=v.js
 					v.fd_type="joystick"
 				else
-					print("failed to open joystick "..v.js.." on event"..v.event.." "..v.name)
+--					print("failed to open joystick "..v.js.." on event"..v.event.." "..v.name)
 				end
 			elseif v.mouse then -- open as mouse
 				v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
@@ -459,7 +459,7 @@ function base.posix_open_events(w)
 					v.fd_device=v.mouse
 					v.fd_type="mouse"
 				else
-					print("failed to open mouse "..v.mouse.." on event"..v.event.." "..v.name)
+--					print("failed to open mouse "..v.mouse.." on event"..v.event.." "..v.name)
 				end
 			end
 		end

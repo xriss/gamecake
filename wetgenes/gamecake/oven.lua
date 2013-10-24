@@ -113,6 +113,8 @@ end
 				end
 			end
 
+require("gles").CheckError() -- uhm this fixes an error?
+
 			oven.win=wwin.create(inf)
 			oven.win:context({})
 

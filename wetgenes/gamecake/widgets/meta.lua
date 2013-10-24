@@ -81,6 +81,12 @@ function wmeta.setup(def)
 		return ret -- return the first widget added
 	end
 	
+	function meta.add_border(parent,c)
+		local n=parent:add({hx=c.hx,hy=c.hy}) -- full size
+		c.hx=c.hx-((c.px or 0)*2)
+		c.hy=c.hy-((c.py or 0)*2)
+		return n:add(c) -- smaller and centered
+	end
 --
 -- remove from parent
 --
@@ -133,6 +139,7 @@ function wmeta.setup(def)
 
 		widget.clip=def.clip -- use viewport clipping to prevent drawing outside of the area
 
+		widget.smode=def.smode or "center"
 		widget.sx=def.sx or 1 -- display scale (of children)
 		widget.sy=def.sy or 1
 		widget.pa=def.pa or 0 -- display rotation angle (of children)
@@ -148,6 +155,8 @@ function wmeta.setup(def)
 		-- turn this into a matrix? so we can rotate and stuff
 		widget.pxd=def.pxd or 0 -- INTERNAL absolute pixel display position ( generated from px,py )
 		widget.pyd=def.pyd or 0
+		widget.mousex=0 -- last mouse position
+		widget.mousey=0
 
 
 		widget.color=def.color
@@ -270,27 +279,42 @@ function wmeta.setup(def)
 --
 	function meta.mouse(widget,act,x,y,keyname)
 	
+		if widget.sx==1 and widget.sy==1 then
+				x= x-widget.px
+				y= y-widget.py
+		else
+			if widget.smode=="center" then
+				x= ((x-widget.px-widget.hx*0.5)/widget.parent.sx)+widget.hx*0.5
+				y= ((y-widget.py-widget.hy*0.5)/widget.parent.sy)+widget.hy*0.5
+			else
+				x=((x-widget.px)/widget.sx)
+				y=((y-widget.py)/widget.sy)
+			end
+		end
+		widget.mousex=x -- remember local coords
+		widget.mousey=y
+		
 --print(x..","..y.." : "..widget.px..","..widget.py)
 
-
-		if x>=widget.pxd and x<widget.pxd+widget.hx and y>=widget.pyd and y<widget.pyd+widget.hy then
+--		if x>=widget.pxd and x<widget.pxd+widget.hx and y>=widget.pyd and y<widget.pyd+widget.hy then
+		if x>=0 and x<widget.hx and y>=0 and y<widget.hy then
 
 			if widget.pan_px then x=x+widget.pan_px end
 			if widget.pan_py then y=y+widget.pan_py end
 		
 			if widget.solid then
-				if act==1 and keyname=="left" then
+				if act==1 and (keyname=="left" or keyname=="right") then
 	-- only set if null or our parent...
 	--print(widget,widget.class)
 	--print("active",widget,widget and widget.class,
 	--widget and widget.parent,widget and widget.parent.class)
 					if widget.master.active~=widget and widget:parent_active() then
 						widget.master.active=widget
-						widget.master.active_x=x-widget.pxd
-						widget.master.active_y=y-widget.pyd
+						widget.master.active_x=widget.parent.mousex-widget.px--widget.pxd
+						widget.master.active_y=widget.parent.mousey-widget.py--widget.pyd
 					end
 				end
-				if act==-1 and keyname=="left" then
+				if act==-1 and (keyname=="left" or keyname=="right") then
 					if (not widget.master.dragging()) or widget.master.active==widget then
 	--				if widget.master.active and widget.master.active==widget then -- widget clicked
 						widget:call_hook("click",{keyname=keyname})
