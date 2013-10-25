@@ -15,7 +15,7 @@ local win=require("wetgenes.win").create({})
 local gl=require("glescode").create( assert(require("gles").gles2) )
 
 -- gles needs this header
-local shaderprefix="#version 100\nprecision mediump float;\n"
+--local shaderprefix="#version 100\nprecision mediump float;\n"
 
 -- source code for a simple a shader, the name= are just for debuging
 local prog_color=
@@ -24,7 +24,8 @@ local prog_color=
 	vshaders=
 	{{
 		name="vtx_color",
-		source=shaderprefix..[[
+		source=[[
+{shaderprefix}
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -45,7 +46,8 @@ void main()
 	fshaders=
 	{{
 		name="frg_color",
-		source=shaderprefix..[[
+		source=[[
+{shaderprefix}
 
 varying vec4  v_color;
 

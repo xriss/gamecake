@@ -6,18 +6,19 @@
 
 typedef struct swetwin_lua {
 
-	int			fp_dsp;			// display as file
-	fd_set		set_dsp;		// display as set
-	Display		*dsp;
-	int			screen;
-	Window		win;
+//	int			fp_dsp;			// display as file
+//	fd_set		set_dsp;		// display as set
+//	Display		*dsp;
+//	int			screen;
+//	Window		win;
 	
-	GLXContext context;
+	
+//	GLXContext context;
 
 	int width;
 	int height;
 	
-	int joy_fd[4];
+//	int joy_fd[4];
 
 } wetwin_lua ;
 
@@ -36,7 +37,7 @@ extern "C" {
 #endif
 
 
-LUALIB_API	int luaopen_wetgenes_win_linux (lua_State *l);
+LUALIB_API	int luaopen_wetgenes_win_osx (lua_State *l);
 
 
 #ifdef __cplusplus
