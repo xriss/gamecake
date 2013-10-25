@@ -33,6 +33,7 @@ const char *lua_wetwin_ptr_name="wetwin*ptr";
 {
 	return YES;
 }
+
 @end
 
 
@@ -66,6 +67,17 @@ const char *lua_wetwin_ptr_name="wetwin*ptr";
 	return self;
 }
 
+- (NSSize)windowWillResize:(NSWindow *)sender toSize:(NSSize)framesize
+{
+	return framesize;
+}	
+
+- (BOOL)windowShouldZoom:(NSWindow *)sender toFrame:(NSRect)newFrame
+{
+	return YES;
+}
+			   
+				   
 - (void) windowDidResize: (NSNotification *)notification
 {
 }
