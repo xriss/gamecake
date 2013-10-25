@@ -13,7 +13,7 @@ mode=osx
 cpu=32
 makeopts=""
 if [ "$1" = "release" ] ; then
-makeopts="config=release_$mode"
+makeopts="config=release_clang"
 fi
 
 
