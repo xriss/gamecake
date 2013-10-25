@@ -59,6 +59,13 @@ if not hardcore then
 	end
 end
 
+if not hardcore then
+	local suc,dat=pcall(function() return require("wetgenes.win.osx") end )
+	if suc then hardcore=dat base.flavour="osx"
+--		posix=require("posix")
+	end
+end
+
 win.hardcore=hardcore
 win.softcore=softcore
 win.posix=posix
