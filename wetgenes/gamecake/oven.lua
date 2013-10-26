@@ -113,21 +113,27 @@ end
 				end
 			end
 
-require("gles").CheckError() -- uhm this fixes an error?
 
 			oven.win=wwin.create(inf)
 			oven.win:context({})
 
-			if opts.show then oven.win:show(opts.show) end
+require("gles").GetError()
+require("gles").CheckError() -- uhm this fixes an error?
+
+--wwin.hardcore.peek(oven.win[0])
+
+			local doshow=opts.show
 			for i,v in ipairs(opts) do -- check extra options
 				if     v=="windowed" then
-					oven.win:show("win")
+					doshow="win"
 				elseif v=="fullscreen" then
-					oven.win:show("full")
+					doshow="full"
 				elseif v=="maximised" then
-					oven.win:show("max")
+					doshow="max"
 				end
 			end
+			if doshow then oven.win:show(doshow) end
+
 --			oven.win:show("full")
 --			oven.win:show("max")
 

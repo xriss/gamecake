@@ -121,6 +121,12 @@ win.generic_keymap={
 -- linux patch
 	["grave"]="`",
 
+-- osx patch
+--	["uparrow"]="up",
+--	["downarrow"]="down",
+--	["leftarrow"]="left",
+--	["rightarrow"]="right",
+
 }
 
 
