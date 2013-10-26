@@ -495,6 +495,9 @@ const char *asc="";
 				lua='k';
 			break;
 			case NSMouseMoved:
+			case NSLeftMouseDragged:
+			case NSRightMouseDragged:
+			case NSOtherMouseDragged:
 				lua='m';
 				act=0;
 			break;
