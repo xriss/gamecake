@@ -298,15 +298,18 @@ elseif OSX then
 		platforms { "clang" } --hax
 --	end
 
+	buildoptions{"-mmacosx-version-min=10.7"}
+	linkoptions {"-mmacosx-version-min=10.7"}
+
 	if CPU=="32" then
 	
 		buildoptions{"-m32"}
-		linkoptions{"-m32"}
+		linkoptions {"-m32"}
 		
 	elseif CPU=="64" then
 	
 		buildoptions{"-m64"}
-		linkoptions{"-m64"}
+		linkoptions {"-m64"}
 		
 	end
 	
