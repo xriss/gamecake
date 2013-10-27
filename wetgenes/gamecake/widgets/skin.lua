@@ -565,6 +565,11 @@ end
 			
 		end
 		
+		if widget.sheet_over then -- custom graphics, on top of a button
+			gl.Color( 1,1,1,1 )
+			sheets.get(widget.sheet_over):draw(widget.sheet_id or 1,widget.sheet_px or 0,(widget.sheet_py or 0)+typ,0,widget.sheet_hx or hx,widget.sheet_hy or hy)
+		end
+
 		if widget.text then
 		
 			local fy=widget:bubble("text_size") or 16
