@@ -44,10 +44,6 @@ function M.bake(oven,escmenu)
 
 		escmenu.master=oven.rebake("wetgenes.gamecake.widgets").setup({})
 		
-		if wzips.exists("data/wskins/soapbar.png") then -- we got us better skin to use :)
-			oven.rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
-		end
-
 		local hooks={}
 		function hooks.click(widget)
 			local id=widget.id

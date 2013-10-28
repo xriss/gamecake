@@ -79,22 +79,22 @@ end
 --
 function wskin.load(name)
 	
-	wskin.unload()
+--	wskin.unload()
 	
 	if name then -- load a named skin
 	
-		if name=="soapbar" then
-			mode=name
+--		if name=="soapbar" then
+			mode=mode or name
 			
 			images.TEXTURE_MIN_FILTER=gl.LINEAR -- disable mipmapping? it seems to feck draw33 up somehow?
 			images.loads{
-				"wskins/"..mode,
+				"wskins/"..name,
 			}
 			images.TEXTURE_MIN_FILTER=nil
 			margin=15
 			border=0
 			
-		end
+--		end
 			
 	end
 
@@ -513,7 +513,12 @@ for layer in meta.iterate_draw_color(widget) do -- something to draw, color has 
 
 
 			local mode=mode
-			if widget.skin then mode=nil end --hack
+			if widget.skin then
+				local tt=type(widget.skin)
+				if     tt=="number" then mode=nil -- use builtin 
+				elseif tt=="string" then mode=widget.skin
+				end
+			end
 			
 			if widget.sheet then -- custom graphics
 

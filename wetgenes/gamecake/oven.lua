@@ -147,6 +147,10 @@ require("gles").CheckError() -- uhm this fixes an error?
 			oven.rebake_mod("wetgenes.gamecake.mods.layout") -- screen layout options
 			oven.rebake_mod("wetgenes.gamecake.mods.snaps") -- builtin screen snapshot code
 
+			if wzips.exists("data/wskins/soapbar.png") then -- we got us better skin to use :)
+				oven.rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
+			end
+
 			if opts.start then
 				oven.next=oven.rebake(opts.start)
 			end
