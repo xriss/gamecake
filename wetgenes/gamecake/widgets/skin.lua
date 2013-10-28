@@ -88,10 +88,7 @@ function wskin.load(name)
 			
 			images.TEXTURE_MIN_FILTER=gl.LINEAR -- disable mipmapping? it seems to feck draw33 up somehow?
 			images.loads{
-				"wskins/"..mode.."/border",
-				"wskins/"..mode.."/buttof",
-				"wskins/"..mode.."/button",
-				"wskins/"..mode.."/buttin",
+				"wskins/"..mode,
 			}
 			images.TEXTURE_MIN_FILTER=nil
 			margin=15
@@ -118,7 +115,16 @@ function wskin.setup(def)
 --	local font=--[[def.font]]def.state.cake.fonts.get(1)
 
 	
-local function draw33(tw,th, mw,mh, vxs,vys, vw,vh,invert)
+local function draw33(id,tw,th, mw,mh, vxs,vys, vw,vh)
+
+	local uvs={
+		{0.0,0.0,0.5,0.5},
+		{0.5,0.0,0.5,0.5},
+		{0.0,0.5,0.5,0.5},
+		{0.5,0.5,0.5,0.5},
+	}
+	local uv=uvs[id]
+
 		
 --		local vw,vh=512,52
 --		local mw,mh=24,24
@@ -144,6 +150,11 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh,invert)
 			end
 			local function tdrawbox( tx,ty, vx,vy , txp,typ, vxp,vyp )
 			
+				tx=tx*uv[3]+uv[1]
+				ty=ty*uv[4]+uv[2]
+				txp=txp*uv[3]
+				typ=typ*uv[4]
+			
 				local ht=#t
 				for i,v in ipairs{
 					vx,		vy,		0,	tx,		ty, -- doubletap hack so we can start at any location
@@ -157,22 +168,29 @@ local function draw33(tw,th, mw,mh, vxs,vys, vw,vh,invert)
 				end
 			end
 			
+--[[
 			if invert then -- draw inverted texture, sometimes useful as it flips highlights
 				tdrawbox=function ( tx,ty, vx,vy , txp,typ, vxp,vyp )
+
+					tx=(1-tx)*uv[3]+uv[1]
+					ty=(1-ty)*uv[4]+uv[2]
+					txp=-txp*uv[3]
+					typ=-typ*uv[4]
+
 					local ht=#t
 					for i,v in ipairs{
-						vx,		vy,		0,	1-(tx),		1-(ty), -- doubletap hack so we can start at any location
-						vx,		vy,		0,	1-(tx),		1-(ty),
-						vx+vxp,	vy,		0,	1-(tx+txp),	1-(ty),
-						vx,		vy+vyp,	0,	1-(tx),		1-(ty+typ),
-						vx+vxp,	vy+vyp,	0,	1-(tx+txp),	1-(ty+typ),
-						vx+vxp,	vy+vyp,	0,	1-(tx+txp),	1-(ty+typ), -- doubletap hack so we can start at any location
-						vx+vxp,	vy+vyp,	0,	1-(tx+txp),	1-(ty+typ), -- doubletap hack so we can start at any location
+						vx,		vy,		0,	tx,		ty, -- doubletap hack so we can start at any location
+						vx,		vy,		0,	tx,		ty,
+						vx+vxp,	vy,		0,	tx+txp,	ty,
+						vx,		vy+vyp,	0,	tx,		ty+typ,
+						vx+vxp,	vy+vyp,	0,	tx+txp,	ty+typ,
+						vx+vxp,	vy+vyp,	0,	tx+txp,	ty+typ, -- doubletap hack so we can start at any location
 					} do
 						t[ht+i]=v
 					end
 				end
 			end
+]]
 			
 		local tx,ty=0,0
 		local vx,vy=vxs,vys-- -vw/2,vh/2
@@ -505,33 +523,34 @@ for layer in meta.iterate_draw_color(widget) do -- something to draw, color has 
 			
 				if style=="flat" then
 				
-					images.bind(images.get("wskins/"..mode.."/border"))
+					images.bind(images.get("wskins/"..mode))
 					txp=0
 					typ=-1
 
-					draw33(128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
+					draw33(4,128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
 
 				elseif style=="indent" then
 
-					images.bind(images.get("wskins/"..mode.."/buttin"))
+					images.bind(images.get("wskins/"..mode))
 					txp=0
 					typ=0
 
-					draw33(128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2),true)
+					draw33(3,128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
 
 				elseif style=="button" then
 
 					if ( master.press and master.over==widget ) or widget.state=="selected" then
-						images.bind(images.get("wskins/"..mode.."/buttin"))
+						images.bind(images.get("wskins/"..mode))
 						txp=0
 						typ=-1
+						draw33(2,128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
 					else
-						images.bind(images.get("wskins/"..mode.."/button"))
+						images.bind(images.get("wskins/"..mode))
 						txp=0
 						typ=-2
+						draw33(1,128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
 					end
 					
-					draw33(128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
 				end
 								
 			
