@@ -597,8 +597,7 @@ end
 		if widget.text then
 		
 			local fy=widget:bubble("text_size") or 16
-
-			local f=widget.font or widget.master.font or 1
+			local f=widget:bubble("font") or 1
 			if f then
 				if type(f)=="number" then
 				else
