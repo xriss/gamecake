@@ -62,7 +62,7 @@ end
 if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.osx") end )
 	if suc then hardcore=dat base.flavour="osx"
---		posix=require("posix")
+		posix=require("posix")
 	end
 end
 
@@ -411,36 +411,37 @@ function base.posix_open_events(w)
 	local events=base.posix_events
 	local fp=io.open("/proc/bus/input/devices","r")
 	local tab={}
-	for l in fp:lines() do
-		local t=l:sub(1,3)
-		local v=l:sub(4)
-		if t=="I: " then
-			tab={} -- start new device
-			tab.bus		=string.match(v,"Bus=([^%s]+)")
-			tab.vendor	=string.match(v,"Vendor=([^%s]+)")
-			tab.product	=string.match(v,"Product=([^%s]+)")
-			tab.version	=string.match(v,"Version=([^%s]+)")
-		end
-		if t=="N: " then
-			tab.name=string.match(v,"Name=\"([^\"]+)")
-		end
-		if t=="H: " then
-			local t=string.match(v,"Handlers=(.+)")
-			tab.event=tonumber(string.match(t,"event(%d+)"))
-			tab.js=tonumber(string.match(t,"js(%d+)"))
-			tab.mouse=tonumber(string.match(t,"mouse(%d+)"))
-			events[tab.event]=tab
-			tab.handlers={}
-			for n in string.gmatch(t,"[^%s]+") do
-				tab.handlers[n]=true
-				if n:sub(1,5)~="event" then -- we already have events
-					events[n]=tab
+	if fp then
+		for l in fp:lines() do
+			local t=l:sub(1,3)
+			local v=l:sub(4)
+			if t=="I: " then
+				tab={} -- start new device
+				tab.bus		=string.match(v,"Bus=([^%s]+)")
+				tab.vendor	=string.match(v,"Vendor=([^%s]+)")
+				tab.product	=string.match(v,"Product=([^%s]+)")
+				tab.version	=string.match(v,"Version=([^%s]+)")
+			end
+			if t=="N: " then
+				tab.name=string.match(v,"Name=\"([^\"]+)")
+			end
+			if t=="H: " then
+				local t=string.match(v,"Handlers=(.+)")
+				tab.event=tonumber(string.match(t,"event(%d+)"))
+				tab.js=tonumber(string.match(t,"js(%d+)"))
+				tab.mouse=tonumber(string.match(t,"mouse(%d+)"))
+				events[tab.event]=tab
+				tab.handlers={}
+				for n in string.gmatch(t,"[^%s]+") do
+					tab.handlers[n]=true
+					if n:sub(1,5)~="event" then -- we already have events
+						events[n]=tab
+					end
 				end
 			end
 		end
+		fp:close()
 	end
-	fp:close()
-	
 --	print(wstr.dump(events))
 
 	local kbdcount=0
