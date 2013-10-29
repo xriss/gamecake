@@ -3,6 +3,7 @@ syntax: glob
 build-*
 *.dbg
 android/AndroidManifest.xml
+android/build.xml
 android/bin/*
 android/libs/*
 android/gen/*
