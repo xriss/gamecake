@@ -10,6 +10,7 @@ function M.bake(oven,framebuffers)
 		
 	local gl=oven.gl
 	local cake=oven.cake
+	local images=cake.images
 	
 	local funcs={}
 	local metatable={__index=funcs}
@@ -111,14 +112,20 @@ function M.bake(oven,framebuffers)
 				end
 			end
 			if not fbo.texture then
+			
+				fbo.txw=images.uptwopow(w) -- always keep textures in power of two for simplicity
+				fbo.txh=images.uptwopow(h)
+				fbo.uvw=w/fbo.txw -- need to use these max uv coords when drawing with texture instead of 1
+				fbo.uvh=h/fbo.txh -- unless you know you asked for a power of two in which case its fine to use 1
+				
 				fbo.texture=gl.GenTexture()
 				gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
-				gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
 				gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, 0)
-				gl.GenerateMipmap(gl.TEXTURE_2D)
+				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE, 0)
+--				gl.GenerateMipmap(gl.TEXTURE_2D)
 				gl.BindTexture(gl.TEXTURE_2D, 0)
 			end
 			if not fbo.frame then
@@ -142,9 +149,10 @@ function M.bake(oven,framebuffers)
 		
 	end
 	
-	framebuffers.mipmap = function(fbo)
+	framebuffers.mipmap = function(fbo) -- generate mipmaps and enable default mipmapping filter
 		if fbo.texture then
 			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
 			gl.GenerateMipmap(gl.TEXTURE_2D)	
 		end
 	end

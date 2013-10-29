@@ -366,10 +366,10 @@ else -- we can only draw once
 			
 			widget.fbo:bind_texture()
 			flat.tristrip("xyzuv",{
-				0,				0,				0,	0,1,
-				widget.fbo.w,	0,				0,	1,1,
+				0,				0,				0,	0,widget.fbo.uvh,
+				widget.fbo.w,	0,				0,	widget.fbo.uvw,widget.fbo.uvh,
 				0,				widget.fbo.h,	0,	0,0,
-				widget.fbo.w,	widget.fbo.h,	0,	1,0,
+				widget.fbo.w,	widget.fbo.h,	0,	widget.fbo.uvw,0,
 			})
 --print("draw fbo")
 		end

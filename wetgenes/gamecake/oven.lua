@@ -33,43 +33,58 @@ function M.bake(opts)
 --print(wwin.flavour)
 
 
+-- check if we already have junk in our local dir, and if so then dont use the users HOME dir
 
-if wwin.flavour=="linux" or wwin.flavour=="raspi" and wwin.posix then -- we need to store in the homedir
+oven.homedir="./"
 
-	local homedir=wwin.posix.getenv("HOME")
+local fp=io.open(wwin.files_prefix.."settings.lua","r")
+if fp then -- stick with what we have
+	fp:close()
+else
 
-	if homedir then
-		wwin.files_prefix=homedir.."/.config/"..(opts.name or "gamecake").."/files/"
-		wwin.cache_prefix=homedir.."/.config/"..(opts.name or "gamecake").."/cache/"
 
-		local wbake=require("wetgenes.bake")
-		wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
-		wbake.create_dir_for_file(wwin.cache_prefix.."t.txt")
+	if ( wwin.flavour=="linux" or wwin.flavour=="raspi" or wwin.flavour=="osx" ) and wwin.posix then -- we need to store in the homedir
+
+		local homedir=os.getenv("HOME")
+
+		if homedir then
+			wwin.files_prefix=homedir.."/.config/"..(opts.name or "gamecake").."/files/"
+			wwin.cache_prefix=homedir.."/.config/"..(opts.name or "gamecake").."/cache/"
+
+			local wbake=require("wetgenes.bake")
+			wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
+			wbake.create_dir_for_file(wwin.cache_prefix.."t.txt")
+
+			oven.homedir=homedir.."/"
+		end
+		
+	end
+
+	if wwin.flavour=="windows" then -- we need to store in the homedir
+
+		local homedir=os.getenv("USERPROFILE")
+
+		if homedir then
+			wwin.files_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/files/"
+			wwin.cache_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/cache/"
+
+			local wbake=require("wetgenes.bake")
+			wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
+			wbake.create_dir_for_file(wwin.cache_prefix.."t.txt")
+
+			oven.homedir=homedir.."/"
+		end
 
 	end
 	
 end
 
 --[[
-if wwin.flavour=="windows" then -- we need to store in the homedir
-
-	local homedir=wwin.posix.getenv("USERPROFILE")
-
-	if homedir then
-		wwin.files_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/files/"
-		wwin.cache_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/cache/"
-
-		local wbake=require("wetgenes.bake")
-		wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
-		wbake.create_dir_for_file(wwin.cache_prefix.."t.txt")
-	end
-
-end
+print(wwin.files_prefix)
+print(wwin.cache_prefix)
+print(oven.homedir)
+os.exit()
 ]]
-
---print(wwin.files_prefix)
---print(wwin.cache_prefix)
---exit()
 
 
 -- pull in info about what art we baked		

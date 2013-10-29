@@ -142,19 +142,26 @@ end
 
 local function uptwopow(n)
 
-	if n<1 then return 0
-	elseif n<=16   then return 16
-	elseif n<=32   then return 32
-	elseif n<=64   then return 64
-	elseif n<=128  then return 128
-	elseif n<=256  then return 256
-	elseif n<=512  then return 512
-	elseif n<=1024 then return 1024
-	elseif n<=2048 then return 2048
-	elseif n<=4096 then return 4096
+	if     n<1      then return 0
+	elseif n<=1     then return 1
+	elseif n<=2     then return 2
+	elseif n<=4     then return 4
+	elseif n<=8     then return 8
+	elseif n<=16    then return 16
+	elseif n<=32    then return 32
+	elseif n<=64    then return 64
+	elseif n<=128   then return 128
+	elseif n<=256   then return 256
+	elseif n<=512   then return 512
+	elseif n<=1024  then return 1024
+	elseif n<=2048  then return 2048
+	elseif n<=4096  then return 4096
+	elseif n<=8192  then return 8192
+	elseif n<=16384 then return 16384
+	elseif n<=32768 then return 32768
+--	elseif n<=65536 then return 65536
 	end
-
-	return 0
+	return 65536
 end
 images.uptwopow=uptwopow
 
