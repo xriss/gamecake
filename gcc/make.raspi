@@ -2,9 +2,9 @@ cd `dirname $0`
 cd ..
 
 
-makeopts=""
-if [ "$1" = "release" ] ; then
 makeopts="config=release"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug"
 fi
 
 build/premake4.raspi gmake nix-arm

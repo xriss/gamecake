@@ -2,10 +2,10 @@
 project "lib_gif"
 
 language "C"
-files { "lib/**.c" , "lib/**.h" }
+files { "giflib/lib/**.c" , "giflib/lib/**.h" }
 
-excludes { "lib/getarg.c" } 
-excludes { "lib/qprintf.c" } 
+excludes { "giflib/lib/getarg.c" } 
+excludes { "giflib/lib/qprintf.c" } 
 
 links { "lib_z" }
 
