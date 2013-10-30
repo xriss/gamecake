@@ -10,9 +10,9 @@ fi
 cd ..
 
 cpu=32
-makeopts=""
-if [ "$1" = "release" ] ; then
 makeopts="config=release_clang"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug_clang"
 fi
 
 
