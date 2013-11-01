@@ -231,15 +231,53 @@ void grd_free( struct grd *g )
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// given a 16 byte file header, work out what the file format probably is
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int grd_fileheader_to_format( const unsigned char data[16] )
+{
+	if( data[1]=='P' && data[2]=='N' && data[3]=='G' )
+	{
+		return GRD_FMT_HINT_PNG;
+	}
+	else
+	if( data[0]=='G' && data[1]=='I' && data[2]=='F' )
+	{
+		return GRD_FMT_HINT_GIF;
+	}
+	else
+	if( data[6]=='J' && data[7]=='F' && data[8]=='I' && data[9]=='F' )
+	{
+		return GRD_FMT_HINT_JPG;
+	}
+	
+	return 0; // unknown
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // load an image and fill out a bmp information structure if a pointer is provided
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 struct grd * grd_load_file( const char *filename , int fmt )
 {
+FILE *fp;
+unsigned char data[16];
 struct grd *g=0;
 
 	g=(struct grd *)calloc(sizeof(struct grd),1);
+	
+	if(fmt==0) // read some bytes and pick a format
+	{
+		fp=fopen(filename,"rb");
+		if(fp)
+		{
+			fread(data,1,16,fp);
+			fclose(fp);
+			fmt=grd_fileheader_to_format(data);
+		}
+	}
 
 	if(g)
 	{
@@ -248,6 +286,7 @@ struct grd *g=0;
 			default:
 			case GRD_FMT_HINT_PNG: grd_png_load_file(g,filename); break;
 			case GRD_FMT_HINT_JPG: grd_jpg_load_file(g,filename); break;
+			case GRD_FMT_HINT_GIF: grd_gif_load_file(g,filename); break;
 		}
 	}
 
@@ -259,15 +298,11 @@ struct grd *g=0;
 
 	g=(struct grd *)calloc(sizeof(struct grd),1);
 	
-	if( data[1]=='P' && data[2]=='N' && data[3]=='G' )
+	if(fmt==0)
 	{
-		fmt=GRD_FMT_HINT_PNG;
+		fmt=grd_fileheader_to_format(data);
 	}
-	else
-	{
-		fmt=GRD_FMT_HINT_JPG;
-	}
-
+	
 	if(g)
 	{
 		switch(fmt)
@@ -275,6 +310,7 @@ struct grd *g=0;
 			default:
 			case GRD_FMT_HINT_PNG: grd_png_load_data(g,data,len); break;
 			case GRD_FMT_HINT_JPG: grd_jpg_load_data(g,data,len); break;
+			case GRD_FMT_HINT_GIF: grd_gif_load_data(g,data,len); break;
 		}
 	}
 
@@ -299,6 +335,7 @@ struct grd * grd_save_file( struct grd *g , const char *filename , int fmt )
 			default:
 			case GRD_FMT_HINT_PNG: grd_png_save_file(g,filename); break;
 			case GRD_FMT_HINT_JPG: grd_jpg_save_file(g,filename); break;
+//			case GRD_FMT_HINT_GIF: grd_gif_save_file(g,filename); break;
 		}
 	}
 	
@@ -1290,6 +1327,38 @@ u8 *p8;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// rotate the grd clockwise, write into output grd (probably different aspect)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+/*
+void grd_rotate_clockwise( struct grd *g )
+{
+struct grd_info *gi=g->bmap;
+s32 x,y,z,i;
+s32 pw;
+u8 *p1;
+u8 *p2;
+u8 b;
+	pw=grd_sizeof_pixel(gi->fmt);
+	for(z=0;z<gi->d;z++)
+	{
+		for(y=0;y<((gi->h+1)/2);y++)
+		{
+			for(x=y;x<gi->w-y);x++)
+			{
+				p1=(u8*)grdinfo_get_data(gi,x,y,z);
+				p2=(u8*)grdinfo_get_data(gi,y,x,z);
+				for(i=0;i<pw;i++) { b=p1[i]; p1[i]=p2[i]; p2[i]=b; }
+				p1+=pw;
+				p2-=pw;
+			}		
+		}
+	}
+}
+*/
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // flip left to right
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1614,7 +1683,8 @@ s32 h=bb->h;
 			case GRD_PAINT_MODE_XOR:
 				for(j=0;j<w;j++)
 				{
-					*(pa++)=*(pb++) ^ *(pa);
+					*(pa)=*(pb++) ^ *(pa);
+					pa++;
 				}
 			break;
 		}

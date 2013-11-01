@@ -97,7 +97,7 @@
 // we want to save or load as a jpg									
 #define	GRD_FMT_HINT_JPG							0x0402
 
-// we want to save or load as a jpg									
+// we want to save or load as a gif									
 #define	GRD_FMT_HINT_GIF							0x0403
 
 

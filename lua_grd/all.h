@@ -73,6 +73,7 @@ extern "C" {
 #include "code/grd.h"
 #include "code/grd_png.h"
 #include "code/grd_jpg.h"
+#include "code/grd_gif.h"
 #include "code/lua_grd.h"
 #include "code/neuquant32.h"
 

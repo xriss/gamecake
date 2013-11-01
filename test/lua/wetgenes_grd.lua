@@ -3,6 +3,12 @@
 module(...,package.seeall)
 
 local grd=require("wetgenes.grd")
+local wstr=require("wetgenes.string")
+
+
+function test_gif_t6()
+	do_gif("t6")
+end
 
 
 function test_jpg_mem_t1()
@@ -211,5 +217,18 @@ function do_png_8x(name)
 	assert( g:save("dat/grd/"..name..".8x.out.png","png") )
 
 	assert_true( do_file_compare("dat/grd/"..name..".8x.out.png","dat/grd/"..name..".8x.chk.png") )
+	
+end
+
+function do_gif(name)
+
+	local g=assert(grd.create("dat/grd/"..name..".bse.gif","gif"))
+
+--print( wstr.dump(g) )
+
+--	assert( g:convert("U8_RGBA") )
+	assert( g:save("dat/grd/"..name..".out.png","png") )
+
+	assert_true( do_file_compare("dat/grd/"..name..".out.png","dat/grd/"..name..".chk.png") )
 	
 end
