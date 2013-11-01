@@ -34,6 +34,8 @@
 -- Module --
 ------------
 
+require("global").__newindex_unlock()
+
 -- standard libraries used
 local debug, io, math, os, string, table =
    debug, io, math, os, string, table
