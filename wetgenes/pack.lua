@@ -118,6 +118,9 @@ end
 pack.tostring=function(ud,size)
 	return core.tostring(ud,size)
 end
+pack.tolightuserdata=function(ud,off)
+	return core.tolightuserdata(ud,off)
+end
 
 
 -- convert a 16bit color to 4 floats, with premultiplied alpha

@@ -403,5 +403,8 @@ end
 base.copy_data=function(ga,gb)
 	return core.copy_data(ga[0],gb[0])
 end
+base.copy_data_layer=function(ga,gb,za,zb)
+	return core.copy_data_layer(ga[0],gb[0],za,zb)
+end
 
 return grd
