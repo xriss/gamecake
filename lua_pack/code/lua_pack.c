@@ -726,6 +726,41 @@ u8 *ptr=0;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// convert a userdata into a lightuserdata (with byte offset)
+// be careful not to use this pointer after freeing the userdata
+// this is mostly intensded for temporary use in passing a userdata+offset into a function
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_pack_tolightuserdata (lua_State *l)
+{
+u8 *ptr=0;
+
+	if(!lua_isstring(l,1))
+	{
+		ptr=lua_tostring(l,1);
+	}
+	else
+	if(!lua_isuserdata(l,1))
+	{
+		lua_pushstring(l,"not a userdata");
+		lua_error(l);
+		return 0;
+	}
+	
+	ptr=lua_toluserdata(l,1,0);
+	if(!ptr) { return 0; }
+	
+	if(lua_isnumber(l,2)) // add to ptr
+	{
+		ptr+=(size_t)lua_tonumber(l,2);
+	}
+
+	lua_pushlightuserdata(l,ptr);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -739,6 +774,8 @@ LUALIB_API int luaopen_wetgenes_pack_core (lua_State *l)
 		{"alloc",			lua_pack_alloc},
 		{"sizeof",			lua_pack_sizeof},
 		{"tostring",		lua_pack_tostring},
+
+		{"tolightuserdata",	lua_pack_tolightuserdata},
 
 		{0,0}
 	};
