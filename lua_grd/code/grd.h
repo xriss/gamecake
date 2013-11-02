@@ -179,6 +179,7 @@ void * grd_info_alloc(struct grd_info *gi,  s32 fmt , s32 w, s32 h, s32 d );
 void grd_info_free(struct grd_info *gi);
 
 void grd_copy_data(struct grd *ga, struct grd *gb );
+void grd_copy_data_layer(struct grd *ga, struct grd *gb , int za , int zb );
 
 struct grd * grd_realloc( struct grd *g, s32 fmt , s32 w, s32 h, s32 d );
 

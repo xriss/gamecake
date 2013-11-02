@@ -378,8 +378,72 @@ part_ptr pb;
 		lua_pushstring(l,"copy failed on height");
 		return 2;
 	}
+
+	if(pa->bmap->d!=pb->bmap->d)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"copy failed on depth");
+		return 2;
+	}
 	
 	grd_copy_data(pa,pb);
+
+	lua_pushvalue(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// copy bmap (and cmap) from one grd into another (other grid must be the same size/format)
+// arg2 is copied into arg1
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_copy_data_layer (lua_State *l)
+{
+int za,zb;
+part_ptr pa;
+part_ptr pb;
+
+	pa=lua_grd_check_ptr(l,1);
+	pb=lua_grd_check_ptr(l,2);
+	
+	if(pa->bmap->fmt!=pb->bmap->fmt)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"copy failed on fmt");
+		return 2;
+	}
+
+	if(pa->bmap->w!=pb->bmap->w)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"copy failed on width");
+		return 2;
+	}
+
+	if(pa->bmap->h!=pb->bmap->h)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"copy failed on height");
+		return 2;
+	}
+	za=(int)lua_tonumber(l,3);
+	zb=(int)lua_tonumber(l,4);
+	
+	if( (za<0) || (za>=pa->bmap->d) )
+	{
+		lua_pushnil(l);
+		lua_pushfstring(l,"copy failed invalid destination frame %d",za);
+		return 2;
+	}
+	if( (zb<0) || (zb>=pb->bmap->d) )
+	{
+		lua_pushnil(l);
+		lua_pushfstring(l,"copy failed invalid source frame %d",zb);
+		return 2;
+	}
+	
+	grd_copy_data_layer(pa,pb,za,zb);
 
 	lua_pushvalue(l,1);
 	return 1;
@@ -1236,6 +1300,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"save",			lua_grd_save},
 
 		{"copy_data",		lua_grd_copy_data},
+		{"copy_data_layer",	lua_grd_copy_data_layer},
 
 		{"convert",			lua_grd_convert},
 		

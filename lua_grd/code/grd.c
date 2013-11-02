@@ -1866,3 +1866,26 @@ int s;
 		memcpy(ga->cmap->data,gb->cmap->data,grd_sizeof_pixel(ga->cmap->fmt)*ga->cmap->w);
 	}
 }
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// copy the bmap (and cmap) *data* from gb into ga
+// size and fmt *must* match
+// However we only copy one Z layer, from and too,
+// useful for handling layers as animation frames and moving them around
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void grd_copy_data_layer(struct grd *ga, struct grd *gb , int za , int zb)
+{
+int x,y,z; u8 *pa,*pb;
+int s;
+	for(y=0;y<ga->bmap->h;y++) {
+		pa=grdinfo_get_data(ga->bmap,0,y,za);
+		pb=grdinfo_get_data(gb->bmap,0,y,zb);
+		memcpy(pa,pb,grd_sizeof_pixel(ga->bmap->fmt)*ga->bmap->w);
+	}
+	if(ga->cmap->data && ga->cmap->w)
+	{
+		memcpy(ga->cmap->data,gb->cmap->data,grd_sizeof_pixel(ga->cmap->fmt)*ga->cmap->w);
+	}
+}
