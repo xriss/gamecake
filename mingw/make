@@ -9,10 +9,10 @@ build/premake4 gmake mingw
 
 cd build-gmake-windows-native
 
-if [ "$1" = "release" ] ; then
-	make config=release_mingw
+if [ "$1" = "debug" ] ; then
+	make config=debug_mingw $2 $3 $4
 else
-	make $*
+	make config=release_mingw $2 $3 $4
 fi
 
 cd ..
