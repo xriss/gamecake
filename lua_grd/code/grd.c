@@ -1,6 +1,6 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// (C) Kriss Daniels 2003 http://www.XIXs.com
+// (C) Kriss@XIXs.com 2013
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 #include "all.h"
@@ -335,7 +335,7 @@ struct grd * grd_save_file( struct grd *g , const char *filename , int fmt )
 			default:
 			case GRD_FMT_HINT_PNG: grd_png_save_file(g,filename); break;
 			case GRD_FMT_HINT_JPG: grd_jpg_save_file(g,filename); break;
-//			case GRD_FMT_HINT_GIF: grd_gif_save_file(g,filename); break;
+			case GRD_FMT_HINT_GIF: grd_gif_save_file(g,filename); break;
 		}
 	}
 	
