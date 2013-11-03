@@ -279,11 +279,11 @@ base.save=function(g,opts)
 
 	if not opts.fmt then -- guess
 	
-		if filename:lower():find("%.gif$") then
+		if opts.filename:lower():find("%.gif$") then
 			opts.fmt=grd.FMT_HINT_GIF
-		elseif filename:lower():find("%.jpg$") then
+		elseif opts.filename:lower():find("%.jpg$") then
 			opts.fmt=grd.FMT_HINT_JPG
-		elseif filename:lower():find("%.jpeg$") then
+		elseif opts.filename:lower():find("%.jpeg$") then
 			opts.fmt=grd.FMT_HINT_JPG
 		else
 			opts.fmt=grd.FMT_HINT_PNG
@@ -291,7 +291,7 @@ base.save=function(g,opts)
 	
 	end
 
-	local r=core.save(g[0],filename,opts.fmt)
+	local r=core.save(g[0],opts.filename,opts.fmt)
 	core.info(g[0],g)
 	return r and g
 end
