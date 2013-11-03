@@ -1,10 +1,6 @@
 --
--- Copyright (C) 2012 Kriss Blank < Kriss@XIXs.com >
--- This file is distributed under the terms of the MIT license.
--- http://en.wikipedia.org/wiki/MIT_License
--- Please ping me if you use it for anything cool...
+-- (C) 2013 Kriss@XIXs.com
 --
--- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 -- the core module previously lived in "grd" now it is in "wetgenes.grd.core" with this wrapper code
@@ -255,8 +251,7 @@ end
 base.load=function(g,opts)
 	if opts.fmt=="jpg" then
 		opts.fmt=grd.FMT_HINT_JPG
-	end
-	if opts.fmt=="png" then
+	elseif opts.fmt=="png" then
 		opts.fmt=grd.FMT_HINT_PNG
 	end
 	local r=core.load(g[0],opts)
@@ -264,8 +259,39 @@ base.load=function(g,opts)
 	return r and g
 end
 
-base.save=function(g,filename,opts)
-	local r=core.save(g[0],filename,opts)
+base.save=function(g,opts)
+
+	if type(opts)=="string" then
+		opts={filename=opts}
+	end
+
+	if type(opts.fmt)=="string" then -- convert from string
+		if opts.fmt=="jpg" then
+			opts.fmt=grd.FMT_HINT_JPG
+		elseif opts.fmt=="png" then
+			opts.fmt=grd.FMT_HINT_PNG
+		elseif opts.fmt=="gif" then
+			opts.fmt=grd.FMT_HINT_GIF
+		else
+			opts.fmt=grd.FMT_HINT_PNG
+		end
+	end
+
+	if not opts.fmt then -- guess
+	
+		if filename:lower():find("%.gif$") then
+			opts.fmt=grd.FMT_HINT_GIF
+		elseif filename:lower():find("%.jpg$") then
+			opts.fmt=grd.FMT_HINT_JPG
+		elseif filename:lower():find("%.jpeg$") then
+			opts.fmt=grd.FMT_HINT_JPG
+		else
+			opts.fmt=grd.FMT_HINT_PNG
+		end
+	
+	end
+
+	local r=core.save(g[0],filename,opts.fmt)
 	core.info(g[0],g)
 	return r and g
 end

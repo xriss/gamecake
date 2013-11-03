@@ -1,3 +1,6 @@
+--
+-- (C) 2013 Kriss@XIXs.com
+--
 
 
 local hex=function(str) return tonumber(str,16) end

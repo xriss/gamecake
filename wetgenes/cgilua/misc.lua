@@ -1,3 +1,6 @@
+--
+-- (C) 2013 Kriss@XIXs.com
+--
 
 local assert,error,getfenv,getmetatable,ipairs,loadstring,next,pairs,pcall,print,rawget,rawset,setfenv,setmetatable,tonumber,tostring,type,unpack,xpcall = assert,error,getfenv,getmetatable,ipairs,loadstring,next,pairs,pcall,print,rawget,rawset,setfenv,setmetatable,tonumber,tostring,type,unpack,xpcall
 

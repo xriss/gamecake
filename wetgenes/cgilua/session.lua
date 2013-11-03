@@ -1,4 +1,7 @@
 --
+-- (C) 2013 Kriss@XIXs.com
+--
+--
 -- Mysql helper functions
 --
 

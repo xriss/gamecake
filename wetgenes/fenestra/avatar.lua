@@ -1,3 +1,6 @@
+--
+-- (C) 2013 Kriss@XIXs.com
+--
 
 local bit=require('bit')
 

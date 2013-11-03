@@ -1,5 +1,5 @@
 --
--- Some cgilua helper functions
+-- (C) 2013 Kriss@XIXs.com
 --
 
 local cgi

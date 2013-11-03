@@ -1,3 +1,6 @@
+--
+-- (C) 2013 Kriss@XIXs.com
+--
 
 -- handle mostly opaque data stored in a mysql database
 -- json is the easy/suported data format across various "web" languages i use ( as2/as3/jscript/lua/php )

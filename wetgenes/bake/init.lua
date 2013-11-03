@@ -1,6 +1,5 @@
---+-----------------------------------------------------------------------------------------------------------------+--
 --
--- (C) Kriss Daniels 2005 http://www.XIXs.com
+-- (C) 2013 Kriss@XIXs.com
 --
 -- This file made available under the terms of The MIT License : http://www.opensource.org/licenses/mit-license.php
 --
