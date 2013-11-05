@@ -601,7 +601,7 @@ all_includes=all_includes or {
 	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_png",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_jpeg",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_gif",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	OSX		},
+	{"lib_gif",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_z",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
