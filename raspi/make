@@ -20,10 +20,10 @@ build/premake4 gmake raspi
 
 cd build-gmake-raspi-native
 
-if [ "$1" = "release" ] ; then
-	make config=release_raspi
+if [ "$1" = "debug" ] ; then
+	make config=debug_raspi $2 $3 $4 $5
 else
-	make $*
+	make config=release_raspi $*
 fi
 
 cd ..
