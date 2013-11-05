@@ -29,7 +29,10 @@ end
 wdata.data_value=function(dat,val,force)
 --print(dat,val,force,debug.traceback())
 	if dat.class=="number" then
-		if val then val=tonumber(val) end -- auto convert from string
+		if val then
+			val=tonumber(val) -- auto convert from string 
+			if val*0~=val*0 then val=0 end -- remove inf or nan values?
+		end 
 		local old=dat.num
 		if ( val and val~=dat.num ) or force then -- change value
 			dat.num=val
@@ -159,6 +162,7 @@ function wdata.new_data(dat)
 -- work out snapping for scroll bars	
 	dat.snap=wdata.data_snap
 
+	dat.str=dat.str or ( dat.num and tostring(dat.num) )
 	dat.num=dat.num or 0
 	dat.str=dat.str or ""
 

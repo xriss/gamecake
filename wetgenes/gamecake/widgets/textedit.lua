@@ -192,6 +192,16 @@ function wtextedit.key(widget,ascii,key,act)
 	end
 	
 	if changed then
+	
+		if widget.data.class=="number" then
+			local num=widget.data.num
+			if widget.data.str=="" then num=0 end
+			num=tonumber(widget.data.str) or num
+			widget.data:value(num)
+			widget.data.str=widget.data:get_string()
+		end
+	
+	
 		widget.text=widget.data.str
 		
 		widget:call_hook("update")
