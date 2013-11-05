@@ -85,7 +85,7 @@ static void grd_gif_load(struct grd * g, struct grd_loader_info * inf )
 		goto bogus;
     }
 
-printf("res %d\n",gif->SColorResolution);
+//printf("res %d\n",gif->SColorResolution);
 
 	cmp=gif->SColorMap;
 	if(cmp)
