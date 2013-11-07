@@ -43,6 +43,15 @@ function wmaster.setup(widget,def)
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget,resize)
 	
+		local tim=os.time()
+		for w,t in pairs(master.timehooks) do
+			if t<=tim then
+--print("tim",t)
+				w:call_hook("timedelay",t)
+				master.timehooks[w]=nil
+			end
+		end
+	
 		if resize then
 			if widget.hx==resize.hx and widget.hy==resize.hy then
 			else
@@ -168,6 +177,39 @@ function wmaster.setup(widget,def)
 
 		end
 	end
+
+	function master.set_focus_edit(edit)
+		if master.edit==edit then return end -- no change
+
+		if master.edit then
+			master.edit:call_hook("unfocus_edit")
+			master.edit=nil
+		end
+
+		if edit then -- can set to nil
+			widget.edit=edit
+			master.edit:call_hook("focus_edit")
+		end
+	end
+	
+	function master.set_focus(focus)
+	
+		if master.focus==focus then return end -- no change
+	
+		if master.focus then
+			master.focus:call_hook("unfocus")
+			master.focus=nil
+		end
+
+		if focus then -- can set to nil
+			widget.focus=focus
+			master.focus:call_hook("focus")
+			if focus.class=="textedit" then -- also set edit focus
+				master.set_focus_edit(focus)
+			end
+		end
+	
+	end
 --
 -- handle key input
 --
@@ -195,10 +237,7 @@ function wmaster.setup(widget,def)
 				if key=="space" or key=="return" then
 
 					if master.over and master.over.can_focus then
-						master.focus=master.over
-						if master.focus.class=="textedit" then
-							master.edit=master.focus
-						end
+						master.set_focus(master.over)
 					end
 
 					if master.over then
@@ -380,6 +419,7 @@ function wmaster.setup(widget,def)
 		master.go_back_id=nil
 		master.go_forward_id=nil
 		master.ids={}
+		master.timehooks={}
 	end
 	
 	function master.dragging()

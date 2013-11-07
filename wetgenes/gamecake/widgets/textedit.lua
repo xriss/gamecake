@@ -29,25 +29,51 @@ function wtextedit.mouse(widget,act,x,y,key)
 	
 	if widget.master.active==widget then
 	
-		widget.master.focus=widget
+		widget.master.set_focus(widget)
 		
-		if act==1 then
+		local function get_idx()
+			local idx=0
 			local dx=x-((widget.pxd or 0)+(widget.text_x or 0))
 --print(dx)
 			if dx<0 then -- catch lessthan
-				widget.data.str_idx=0
+				idx=0
 			else
 				local f=widget.font or widget.master.font or 1
-				local font=cake.fonts.get(f)
+				local dat=cake.fonts.get(f)
+				local size=widget:bubble("text_size") or 16
 
-				widget.data.str_idx=0 -- font.which(dx,widget.data.str) // TODO: fix position under mouse
+--				widget.data.str_idx=0 -- font.which(dx,widget.data.str) // TODO: fix position under mouse
 				
-				if widget.data.str_idx<0 then widget.data.str_idx=#widget.data.str end -- catch morethan
+				idx=cake.canvas.font.xindex(widget.data.str,dx,dat,size,0)
+				
 			end
+			
+			if idx<0 then idx=0 end
+			if idx>#widget.data.str then idx=#widget.data.str end
+
+			return idx
+		end
+		
+		if act==1 then
+			widget.mouse_down=true
+			
+			widget.data.str_select=0
+			widget.data.str_idx=get_idx()
+			widget.data.str_select_click=widget.data.str_idx
 
 			widget.master.throb=255
 			widget:set_dirty()
 
+		elseif act==0 then -- drag
+
+			widget.data.str_idx=get_idx()
+			
+			widget.data.str_select = widget.data.str_select_click - widget.data.str_idx
+			
+			widget:set_dirty()
+		
+		elseif act==-1 then
+			widget.mouse_down=false
 		end
 	end
 	
@@ -64,6 +90,22 @@ function wtextedit.key(widget,ascii,key,act)
 --print("gotkey",ascii,act)
 	
 	
+	local function clear_selected_chars()
+		if widget.data.str_select~=0 then
+			if  widget.data.str_select<0 then
+				local s1=widget.data.str:sub(1,widget.data.str_idx+widget.data.str_select)
+				local s2=widget.data.str:sub(widget.data.str_idx+1)
+				widget.data.str=s1..s2
+				widget.data.str_idx=widget.data.str_idx + widget.data.str_select
+			elseif  widget.data.str_select>0 then
+				local s1=widget.data.str:sub(1,widget.data.str_idx)
+				local s2=widget.data.str:sub(widget.data.str_idx+widget.data.str_select+1)
+				widget.data.str=s1..s2
+			end
+			widget.data.str_select=0
+		end
+	end
+	
 	if act==-1 then
 
 		if key=="enter" or key=="return" then
@@ -74,7 +116,7 @@ function wtextedit.key(widget,ascii,key,act)
 				
 			end
 			
-			master.focus=nil
+			master.set_focus(nil)
 
 			changed=true
 		end
@@ -83,6 +125,7 @@ function wtextedit.key(widget,ascii,key,act)
 	
 		if key=="left" then
 
+			widget.data.str_select=0
 			widget.data.str_idx=widget.data.str_idx-1
 			if widget.data.str_idx<0 then widget.data.str_idx=0 end
 			
@@ -91,6 +134,7 @@ function wtextedit.key(widget,ascii,key,act)
 						
 		elseif key=="right" then
 	
+			widget.data.str_select=0
 			widget.data.str_idx=widget.data.str_idx+1
 			if widget.data.str_idx>#widget.data.str then widget.data.str_idx=#widget.data.str end
 			
@@ -99,17 +143,24 @@ function wtextedit.key(widget,ascii,key,act)
 			
 		elseif key=="home" then
 		
+			widget.data.str_select=0
 			widget.data.str_idx=0
 			changed=true
 		
 		elseif key=="end" then
 		
+			widget.data.str_select=0
 			widget.data.str_idx=#widget.data.str
 			changed=true
 		
 		elseif key=="back" then
-	
-			if widget.data.str_idx >= #widget.data.str then -- at end
+			
+			if 	widget.data.str_select~=0 then
+
+				clear_selected_chars()
+				changed=true
+				
+			elseif widget.data.str_idx >= #widget.data.str then -- at end
 			
 				widget.data.str=widget.data.str:sub(1,-2)
 				widget.data.str_idx=#widget.data.str
@@ -138,7 +189,12 @@ function wtextedit.key(widget,ascii,key,act)
 			
 		elseif key=="delete" then
 	
-			if widget.data.str_idx >= #widget.data.str then -- at end
+			if 	widget.data.str_select~=0 then
+
+				clear_selected_chars()
+				changed=true
+				
+			elseif widget.data.str_idx >= #widget.data.str then -- at end
 			
 			elseif widget.data.str_idx < 1 then -- at start
 			
@@ -166,20 +222,25 @@ function wtextedit.key(widget,ascii,key,act)
 			
 			if c>=32 and c<128 then
 			
+				clear_selected_chars()
+
 				if widget.data.str_idx >= #widget.data.str then -- put at end
 				
 					widget.data.str=widget.data.str..ascii
 					widget.data.str_idx=#widget.data.str
+					widget.data.str_select=0
 					
 				elseif widget.data.str_idx < 1 then -- put at start
 				
 					widget.data.str=ascii..widget.data.str
 					widget.data.str_idx=1
+					widget.data.str_select=0
 					
 				else -- need to insert into line
 				
 					widget.data.str=widget.data.str:sub(1,widget.data.str_idx) .. ascii .. widget.data.str:sub(widget.data.str_idx+1)
 					widget.data.str_idx=widget.data.str_idx+1
+					widget.data.str_select=0
 					
 				end
 				
@@ -193,18 +254,11 @@ function wtextedit.key(widget,ascii,key,act)
 	
 	if changed then
 	
-		if widget.data.class=="number" then
-			local num=widget.data.num
-			if widget.data.str=="" then num=0 end
-			num=tonumber(widget.data.str) or num
-			widget.data:value(num)
-			widget.data.str=widget.data:get_string()
-		end
-	
-	
-		widget.text=widget.data.str
+		widget.master.timehooks[widget]=os.time()+2
+
+--		widget.text=widget.data:tostring()
 		
-		widget:call_hook("update")
+		widget:call_hook("changed")
 		widget:set_dirty()
 	end
 	
@@ -212,6 +266,30 @@ function wtextedit.key(widget,ascii,key,act)
 
 end
 
+-- a delayed update action
+function wtextedit.timedelay(widget)
+--print("timedelay")
+	if widget.data then
+		if widget.data.class=="number" then
+			local num=widget.data:tonumber(widget.data.str)
+			widget.data:value(num)
+		end
+	end
+	widget.text=widget.data:tostring()
+	widget:set_dirty()
+end
+
+
+function wtextedit.unfocus(widget)
+
+	if widget.data.class=="number" then
+		local num=widget.data:tonumber(widget.data.str)
+		widget.data:value(num)
+	end
+
+	widget.text=widget.data:tostring()
+	widget:set_dirty()
+end
 
 function wtextedit.update(widget)
 
@@ -239,6 +317,9 @@ function wtextedit.setup(widget,def)
 
 	widget.key=wtextedit.key
 	widget.mouse=wtextedit.mouse
+
+	widget.timedelay=wtextedit.timedelay
+	widget.unfocus=wtextedit.unfocus
 	
 	widget.solid=true
 

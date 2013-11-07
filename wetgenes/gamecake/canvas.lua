@@ -81,20 +81,20 @@ font.set_xy = function(x,y)
 	end
 end
 
-font.xindex=function(text,px)
+font.xindex=function(text,px,dat,size,add)
 	if px<0 then return 1 end
 	
-	local font_dat=font.dat
-	local s=font.size/font_dat.size
+	local font_dat=dat or font.dat
+	local s=(size or font.size)/font_dat.size
 	local x=0
 	for i=1,#text do
 	
 		local cid=text:byte(i)
 		local c=font_dat.chars[cid] or font_dat.chars[32]
 		
-		x=x+(c.add*s)+font.add
+		x=x+(c.add*s)+(add or font.add)
 		
-		if x>=px then return i end
+		if x>=px then return i-1 end
 	end
 
 	return #text

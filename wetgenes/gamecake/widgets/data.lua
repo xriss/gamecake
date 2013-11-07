@@ -30,7 +30,7 @@ wdata.data_value=function(dat,val,force)
 --print(dat,val,force,debug.traceback())
 	if dat.class=="number" then
 		if val then
-			val=tonumber(val) -- auto convert from string 
+			val=dat:tonumber(val) -- auto convert from string 
 			if val*0~=val*0 then val=0 end -- remove inf or nan values?
 		end 
 		local old=dat.num
@@ -39,10 +39,10 @@ wdata.data_value=function(dat,val,force)
 			if dat.min and dat.num<dat.min then dat.num=dat.min end
 			if dat.max and dat.num>dat.max then dat.num=dat.max end
 			if old~=dat.num or force then
-				dat.str=dat:get_string() -- cache on change
 				dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
 			end
 		end
+		dat.str=dat:tostring(dat.num) -- cache on change
 		return dat.num
 	else
 		if (val and val~=dat.str ) or force  then -- change value
@@ -68,10 +68,22 @@ end
 
 
 
--- a string to put in the handle
-wdata.data_get_string=function(dat)
-	if dat.class=="number" then return tostring(dat.num) end
+-- get a string from the number
+wdata.data_tostring=function(dat,num)
+--	num=num or dat.num
+	if num then
+		return tostring(num)
+	end
 	return dat.str
+end
+
+-- get a number from the string
+wdata.data_tonumber=function(dat,str)
+--	str=str or dat.str
+	if str then
+		return tonumber(str)
+	end
+	return dat.num
 end
 
 -- how wide or tall should the handle be given the size of the parent?
@@ -139,6 +151,7 @@ function wdata.new_data(dat)
 	dat.lst=dat.lst or {}
 
 	dat.str_idx=dat.str_idx or 0
+	dat.str_select=dat.str_select or 0
 
 	dat.min=dat.min or 0 -- not negative by default
 	dat.max=dat.max or (2^48) -- a big old number
@@ -150,7 +163,9 @@ function wdata.new_data(dat)
 
 	dat.call_hook=wdata.call_hook
 
-	dat.get_string=wdata.data_get_string -- should be moved into value() ?
+	dat.tostring=dat.tostring or wdata.data_tostring -- convert number value to string (possible custom format)
+	dat.tonumber=dat.tonumber or wdata.data_tonumber -- convert string value to number (possible custom format)
+
 	dat.get_size=wdata.data_get_size
 	dat.get_pos=wdata.data_get_pos
 	
@@ -161,10 +176,12 @@ function wdata.new_data(dat)
 
 -- work out snapping for scroll bars	
 	dat.snap=wdata.data_snap
+	
+	if dat.str and not dat.num then dat.num=dat:tonumber(dat.str) end
+	if dat.num and not dat.str then dat.str=dat:tostring(dat.num) end
 
-	dat.str=dat.str or ( dat.num and tostring(dat.num) )
-	dat.num=dat.num or 0
 	dat.str=dat.str or ""
+	dat.num=dat.num or 0
 
 --	if dat.class=="number" then
 --		dat:value(dat.num,true) -- triger value changed/set callbacks?

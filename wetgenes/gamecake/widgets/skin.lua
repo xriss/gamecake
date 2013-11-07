@@ -669,6 +669,21 @@ end
 							font.set_xy((tx+sw)*wsx,(ty)*wsy)
 							font.draw("_")
 						end
+						
+						if widget.data.str_select~=0 then
+							local s1=font.width(widget.text:sub(1,widget.data.str_idx))
+							local s2=font.width(widget.text:sub(1,widget.data.str_idx+widget.data.str_select))
+
+							local x0,x1= (tx+s1)*wsx , (tx+s2)*wsx
+							local y0,y1= (ty)*wsy	, (ty+fy)*wsy
+							
+							local c1,c2,c3,c4=pack.argb8_pmf4(c)
+							gl.Color( c1,c2,c3,c4*0.25 )
+
+							flat.quad(x0,y0,x1,y0,x1,y1,x0,y1)
+
+						end
+						
 					end
 				end
 

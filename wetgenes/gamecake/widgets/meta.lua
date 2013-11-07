@@ -56,6 +56,9 @@ function wmeta.setup(def)
 	end
 
 	function meta.call_hook(widget,hook,dat)
+		if widget[hook] then -- the widget wants this hook
+			if widget[hook](widget,dat) then return end -- and it can eat the event
+		end
 		local hooks=widget.hooks or widget.master.hooks
 		local type_hooks=type(hooks)
 		if type_hooks=="function" then -- master function
@@ -210,6 +213,8 @@ function wmeta.setup(def)
 		widget:set_dirty()
 		if widget.master.ids and widget.id then widget.master.ids[widget.id]=nil end -- remove id lookup
 		if widget.fbo then widget.fbo:clean() end
+		if widget.master.focus==widget then widget.master.set_focus(nil) end
+		if widget.master.edit ==widget then widget.master.set_focus_edit(nil) end
 		return widget
 	end
 

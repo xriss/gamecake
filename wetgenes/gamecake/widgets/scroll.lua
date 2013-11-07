@@ -17,7 +17,6 @@ wscroll=wscroll or {}
 local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
 function wscroll.mouse(widget,act,x,y,key)
---	widget.master.focus=widget
 	return widget.meta.mouse(widget,act,x,y,key)
 end
 

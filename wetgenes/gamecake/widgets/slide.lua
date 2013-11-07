@@ -17,7 +17,6 @@ local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
 
 function wslide.mouse(widget,act,x,y,key)
---	widget.master.focus=widget
 	if act==1 and key=="left" and ( x>=widget.pxd and y>=widget.pyd and x<widget.pxd+widget.hx and y<widget.pyd+widget.hy ) then
 		if 		x<widget.drag.pxd 					then widget:key("","left",1)
 		elseif 	x>widget.drag.pxd+widget.drag.hx 	then widget:key("","right",1)
@@ -34,7 +33,7 @@ function wslide.key(widget,ascii,key,act)
 		
 		if act==-1 then -- ignore repeats on enter key
 			widget:call_hook("click")				
-			widget.master.focus=nil
+			widget.master.set_focus(nil)
 		end
 			
 	elseif key=="left" then
@@ -76,8 +75,6 @@ function wslide.update(widget)
 	widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
 	widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
 	widget:snap()
-
---	it.drag.text=it.datx:get_string()
 	
 	return widget.meta.update(widget)
 end

@@ -11,7 +11,6 @@ function M.bake(oven,wdrag)
 wdrag=wdrag or {}
 
 function wdrag.mouse(widget,act,x,y,key)
---	widget.master.focus=widget
 	return widget.meta.mouse(widget,act,x,y,key)
 end
 
@@ -24,7 +23,7 @@ end
 function wdrag.update(widget)
 
 	if widget.data then
-		widget.text=widget.data:get_string()
+		widget.text=widget.data:tostring()
 	end
 
 	return widget.meta.update(widget)

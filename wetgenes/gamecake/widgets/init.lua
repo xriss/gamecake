@@ -54,6 +54,8 @@ function widgets.setup(def)
 	
 	master:setup(def)
 	
+	master:clean_all()
+	
 	return master -- our new widget is ready
 
 end
