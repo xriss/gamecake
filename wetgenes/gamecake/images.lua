@@ -194,6 +194,9 @@ images.upload_grd= function(t,g)
 		t.texture_width=uptwopow(g.width)
 		t.texture_height=uptwopow(g.height)
 
+--if t.texture_width <64 then t.texture_width =64 end
+--if t.texture_height<64 then t.texture_height=64 end
+
 --	end
 	
 	gl.BindTexture( gl.TEXTURE_2D , t.id )

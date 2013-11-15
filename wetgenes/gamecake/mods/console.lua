@@ -224,7 +224,7 @@ font.vbs_idx=1
 			oven.times.draw.done()
 
 			local gci=gcinfo()
-			local s=string.format("fps=%2d %02d/%02d %5.2fm vb=%d tx=%d fb=%d gl=%d",
+			local s=string.format("fps=%2d %02d/%02d %5.2fm vb=%d tx=%d fb=%d gl=%d vbi=%d",
 				console.fps,
 				(oven.times.update.time*1000),
 				(oven.times.draw.time*1000),
@@ -232,7 +232,8 @@ font.vbs_idx=1
 				gl.counts.buffers,
 				gl.counts.textures,
 				gl.counts.framebuffers,
-				gl.counts.calls
+				gl.counts.calls,
+				#canvas.vbs
 				)
 			gl.counts.calls=0 -- reset number of gl calls, so we display number of calls per frame.
 

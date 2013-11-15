@@ -367,6 +367,7 @@ function canvas.get_vb()
 		canvas.vbs[canvas.vbi]=vb
 	end
 	canvas.vbi=canvas.vbi+1
+--print(canvas.vbi)
 	return vb
 end
 

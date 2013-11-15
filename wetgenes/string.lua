@@ -24,6 +24,34 @@ local wstr={ modname=(...) } ; package.loaded[wstr.modname]=wstr
 
 -----------------------------------------------------------------------------
 --
+-- turn a number of seconds into a rough duration
+--
+-----------------------------------------------------------------------------
+wstr.rough_english_duration=function(t)
+	t=math.floor(t)
+	if t>=2*365*24*60*60 then
+		return math.floor(t/(365*24*60*60)).." years"
+	elseif t>=2*30*24*60*60 then
+		return math.floor(t/(30*24*60*60)).." months" -- approximate months
+	elseif t>=2*7*24*60*60 then
+		return math.floor(t/(7*24*60*60)).." weeks"
+	elseif t>=2*24*60*60 then
+		return math.floor(t/(24*60*60)).." days"
+	elseif t>=2*60*60 then
+		return math.floor(t/(60*60)).." hours"
+	elseif t>=2*60 then
+		return math.floor(t/(60)).." minutes"
+	elseif t>=2 then
+		return t.." seconds"
+	elseif t==1 then
+		return "1 second"
+	else
+		return "0 seconds"
+	end
+end
+
+-----------------------------------------------------------------------------
+--
 -- split a string into a table, flag enables pattern match on true
 --
 -----------------------------------------------------------------------------
@@ -532,6 +560,14 @@ wstr.table_lookup=function(a,d) -- look up a in table d
 	
 end
 
+wstr.replace_lookup_istable=function(a,d) -- check if this is a special table lookup (so we can leave them til
+	local t=wstr.table_lookup(a,d)
+	if t and type(t)=="table" then -- if a table then
+		return true
+	end
+	return false
+end
+
 wstr.replace_lookup=function(a,d) -- look up a in table d
 	local t=wstr.table_lookup(a,d)
 	if t then
@@ -640,6 +676,20 @@ wstr.macro_replace_once = function(text,old_d,opts)
 				local fc=tag:sub(1,1) -- first char
 				local lc=tag:sub(-1) -- last char
 				
+				local checkminus=function()
+					if fc=="-" then -- need to return nothing if chunk is empty
+						-- perform a single level check, every replacement must exist
+						if dat and not wstr.replace_lookup_istable(tag,d) then -- but cant check tables properly so skip them
+							string.gsub( dat , "{([%w%._%-]-)}" , function(a)
+								if a:sub(1,1)=="-" then return "" end
+								if not wstr.replace_lookup(a,d) then dat=nil end -- clear if not found
+								return ""
+							end )
+						end
+						dat=dat or "" -- may totally remove chunk if not found
+					end
+				end
+				
 				if lc=="=" then -- start of capture
 					if capt==nil then
 						capt=tag:sub(1,-2)
@@ -654,25 +704,22 @@ wstr.macro_replace_once = function(text,old_d,opts)
 						capt=nil
 						if opts_clean then dat="" end
 					end
-				else -- normal lookup
-					if fc=="-" then -- return nothing if chunk is empty
-						dat=wstr.replace_lookup(tag,d)
-						-- perform a single level check, every replacement must exist
-						if dat then
-							string.gsub( dat , "{([%w%._%-]-)}" , function(a)
-								if not wstr.replace_lookup(a,d) then dat=nil end -- clear if not found
-								return ""
-							end )
-						end
-						dat=dat or "" -- may totally remove chunk if not found
-						
-					elseif opts.escape then -- only tags that begin with .
+				else -- normal lookup					
+					if opts.escape then -- only tags that begin with . or table replacements
 						if fc=="." then
 							dat=wstr.replace_lookup(tag,d)
+						else
+							if wstr.replace_lookup_istable(tag,d) then -- do table replaces last
+								dat=wstr.replace_lookup(tag,d)
+								checkminus()
+							end
 						end
 					else -- only tags that dont begin with .
 						if fc~="." then
-							dat=wstr.replace_lookup(tag,d)
+							if not wstr.replace_lookup_istable(tag,d) then -- leave table replaces until last
+								dat=wstr.replace_lookup(tag,d)
+								checkminus()
+							end
 						end
 					end
 				end

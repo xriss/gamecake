@@ -615,7 +615,7 @@ print("Patching GLES ",method)
 	
 end
 
---gles.patch_functions("disable")
+--gles.patch_functions("check")
 
 
 function gles.numtostring(num)

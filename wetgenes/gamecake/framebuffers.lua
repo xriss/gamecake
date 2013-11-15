@@ -97,6 +97,7 @@ function M.bake(oven,framebuffers)
 	end
 	
 	framebuffers.resize = function(fbo,w,h,d)
+--print("fbo resize",w,h,d)
 
 		if w==0 then h=0 d=0 end
 		if h==0 then d=0 w=0 end
@@ -152,6 +153,9 @@ function M.bake(oven,framebuffers)
 	end
 	
 	framebuffers.mipmap = function(fbo) -- generate mipmaps and enable default mipmapping filter
+--print("fbo mipmap???",tostring(fbo.texture))
+--print(debug.traceback())
+
 		if fbo.texture then
 			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
 			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
@@ -161,6 +165,7 @@ function M.bake(oven,framebuffers)
 
 -- read back data from a framebuffer, return it in a grd object
 	framebuffers.download = function(fbo,w,h,x,y)
+--print("fbo download",w,h,x,y)
 	
 		w=w or fbo.w
 		h=h or fbo.h

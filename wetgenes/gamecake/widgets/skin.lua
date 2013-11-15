@@ -353,6 +353,7 @@ if f then f(widget) end		-- this does the custom drawing
 			widget.old_layout=nil
 			
 			widget.fbo:mipmap()
+--			print(widget.class,widget.hx,widget.hy,widget.id)
 		end
 		
 else -- we can only draw once

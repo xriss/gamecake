@@ -117,6 +117,7 @@ function wtextedit.key(widget,ascii,key,act)
 			end
 			
 			master.set_focus(nil)
+			master.set_focus_edit(nil)
 
 			changed=true
 		end

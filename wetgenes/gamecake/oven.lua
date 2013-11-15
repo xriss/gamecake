@@ -421,6 +421,10 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 		end
 
 		oven.preloader_enabled=true
+--		if wwin.flavour=="raspi" then -- do fullscreen on raspi
+--			oven.preloader_enabled=false
+--		end
+		
 		function oven.preloader(...)
 			local s=table.concat({...}," ") or ""
 print("Loading : "..s)
