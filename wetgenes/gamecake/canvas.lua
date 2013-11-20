@@ -159,9 +159,77 @@ function font.wrap(text,opts)
 	return t
 end
 
+font.cache_begin = function()
+--print("font begine",tostring(font.dat))
+	local old=font.cache
+	font.cache={}
+	return function()
+--print("font draw",#font.cache,tostring(font.dat))
+
+	gl.Color(1,1,1,1)	
+		if font.cache and font.cache[1] then
+
+			images.bind(font.dat.images[1])
+					
+			flat.tristrip("rawuvrgba",font.cache)
+
+		end
+		
+		font.cache=old
+	end
+end
+
+font.cache_predraw = function(text)
+
+	local font_dat=font.dat
+	local s=font.size/font_dat.size
+	local x=font.x
+	local y=font.y
+
+	local insert=function(a,b,c,d,e,f,g,h,i)
+		local idx=#font.cache
+		local fc=font.cache
+		fc[idx+1]=a	fc[idx+2]=b	fc[idx+3]=c
+		fc[idx+4]=d	fc[idx+5]=e
+		fc[idx+6]=f	fc[idx+7]=g	fc[idx+8]=h	fc[idx+9]=i			
+	end
+
+	local r,g,b,a=gl.color_get_rgba()
+
+	for i=1,#text do
+	
+		local cid=text:byte(i)
+		local c=font_dat.chars[cid] or font_dat.chars[32]
+				
+		local vx=x+(c.x*s);
+		local vxp=c.w*s;
+		local vy=y+(c.y*s);
+		local vyp=c.h*s;
+
+		local v1=gl.apply_modelview( {vx,vy,0,1} )
+		local v2=gl.apply_modelview( {vx+vxp,vy,0,1} )
+		local v3=gl.apply_modelview( {vx,vy+vyp,0,1} )
+		local v4=gl.apply_modelview( {vx+vxp,vy+vyp,0,1} )
+
+		insert(	v1[1],v1[2],v1[3],	c.u1,c.v1,	r,g,b,a	)
+		insert(	v1[1],v1[2],v1[3],	c.u1,c.v1,	r,g,b,a	)
+		insert(	v2[1],v2[2],v2[3],	c.u2,c.v1,	r,g,b,a	)
+		insert(	v3[1],v3[2],v3[3],	c.u1,c.v2,	r,g,b,a	)
+		insert(	v4[1],v4[2],v4[3],	c.u2,c.v2,	r,g,b,a	)
+		insert(	v4[1],v4[2],v4[3],	c.u2,c.v2,	r,g,b,a	)
+		
+		x=x+(c.add*s)+font.add
+	end
+
+
+end
 
 
 font.draw = function(text)
+
+	if font.cache then
+		return font.cache_predraw(text)
+	end
 	
 	local p=gl.program("pos_tex")
 	
@@ -219,7 +287,7 @@ end
 
 -- this allows us to prepare vertex buffers, then draw at anytime
 -- just call it.draw on the returned table.
-flat.tristrip_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
+flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 -- some basic vertexformats
 	local pstride
@@ -266,6 +334,14 @@ flat.tristrip_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	elseif fmt=="xyzuvrgba" then -- xyz and texture and color
 	
 		progname = progname or "pos_tex_color"
+
+		pstride=36
+		ptex=12
+		pcolor=20
+
+	elseif fmt=="rawuvrgba" then -- raw-xyz and texture and color
+	
+		progname = progname or "raw_tex_color"
 
 		pstride=36
 		ptex=12
@@ -331,17 +407,18 @@ flat.tristrip_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 			gl.EnableVertexAttribArray(p:attrib("a_color"))
 		end
 
-		gl.DrawArrays(gl.TRIANGLE_STRIP,0,datasize/pstride)
+		gl.DrawArrays( it.array or gl.TRIANGLE_STRIP,0,datasize/pstride)
 	end
 
 	return it
 end
+flat.tristrip_predraw=flat.array_predraw
 
 -- tristrip is the most useful, 3 points gives us a tri
 -- 4 gives us a quad, and of course you can keep going to create a strip
 flat.tristrip = function(fmt,data,progname)
 
-	local it=flat.tristrip_predraw({fmt=fmt,data=data,progname=progname})
+	local it=flat.array_predraw({fmt=fmt,data=data,progname=progname,array=gl.TRIANGLE_STRIP})
 	it.draw()
 
 end

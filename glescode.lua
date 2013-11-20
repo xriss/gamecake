@@ -128,6 +128,33 @@ function glescode.create(gl)
 		code.stack_matrix=assert(code.stack[#code.stack]) -- this will assert on too many pops
 	end
 
+
+	function code.color_get_rgba()
+		return tcore.read(code.cache.color,1),tcore.read(code.cache.color,2),tcore.read(code.cache.color,3),tcore.read(code.cache.color,4)
+	end
+	
+-- apply MODELVIEW and PROJECTION to a vertex, return the result
+	function code.apply_modelview(va,vb,vc,vd)
+		local t=type(va)
+		if t=="number" then -- need to convert from a table
+			local v4=tcore.new_v4() tcore.set(v4,va,vb,vc,vd)
+			tcore.m4_product_v4(code.matrix(gl.MODELVIEW),v4)
+--			tcore.m4_product_v4(code.matrix(gl.PROJECTION),v4)
+			return tcore.read(v4,1),tcore.read(v4,2),tcore.read(v4,3),tcore.read(v4,4)
+		elseif t=="table" then -- need to convert from a table
+			local v4=tcore.new_v4() tcore.set(v4,va,4)
+			tcore.m4_product_v4(code.matrix(gl.MODELVIEW),v4)
+--			tcore.m4_product_v4(code.matrix(gl.PROJECTION),v4)
+			va[1]=tcore.read(v4,1) va[2]=tcore.read(v4,2) va[3]=tcore.read(v4,3) va[4]=tcore.read(v4,4)
+			return va
+		else
+			tcore.m4_product_v4(code.matrix(gl.MODELVIEW),va)
+--			tcore.m4_product_v4(code.matrix(gl.PROJECTION),va)
+			return va
+		end
+	end
+
+
 -- compiler functions
 
 -- function to provide simple source for a shader program

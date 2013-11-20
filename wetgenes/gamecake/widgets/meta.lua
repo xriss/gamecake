@@ -5,6 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 -- generic default widget functions
 
+local tardis=require("wetgenes.tardis")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -160,8 +161,8 @@ function wmeta.setup(def)
 		-- turn this into a matrix? so we can rotate and stuff
 		widget.pxd=def.pxd or 0 -- INTERNAL absolute pixel display position ( generated from px,py )
 		widget.pyd=def.pyd or 0
-		widget.mousex=0 -- last mouse position
-		widget.mousey=0
+--		widget.mousex=0 -- last mouse position
+--		widget.mousey=0
 
 
 		widget.color=def.color
@@ -284,8 +285,14 @@ function wmeta.setup(def)
 --
 -- handle mouse input
 --
-	function meta.mouse(widget,act,x,y,keyname)
+	function meta.mousexy(widget,_x,_y)
+		local v4=tardis.v4.new(_x,_y,0,1)
+		widget.m4:product(v4)
+		return v4[1],v4[2]
+	end
 	
+	function meta.mouse(widget,act,_x,_y,keyname)
+--[[
 		if widget.sx==1 and widget.sy==1 then
 				x= x-widget.px
 				y= y-widget.py
@@ -300,11 +307,32 @@ function wmeta.setup(def)
 		end
 		widget.mousex=x -- remember local coords
 		widget.mousey=y
+]]
+		
+		local x,y=widget:mousexy(_x,_y)
+--[[
+if widget.m4 then
+		local v4=tardis.v4.new(_x,_y,0,1)
+		widget.m4:product(v4)
+--print(act,string.format("%4d,%4d - %4d,%4d = %4d,%4d (%4f,%4f)(%4d,%4d)",x,y,v4[1],v4[2],x-v4[1],y-v4[2],widget.sx,widget.sy,widget.px,widget.py))
+--		local x,y=v4[1],v4[2]
+		x,y=v4[1],v4[2]
+else
+		x,y=_x,_y
+end
+]]
+
+--		widget.mousex=x -- remember local coords
+--		widget.mousey=y
 		
 --print(x..","..y.." : "..widget.px..","..widget.py)
+--print(x..","..y.." : "..widget.hx..","..widget.hx)
+
+--widget.hx=widget.hx or 0 -- bug?
+--widget.hy=widget.hy or 0
 
 --		if x>=widget.pxd and x<widget.pxd+widget.hx and y>=widget.pyd and y<widget.pyd+widget.hy then
-		if x>=0 and x<widget.hx and y>=0 and y<widget.hy then
+		if widget==widget.master or ( x>=0 and x<widget.hx and y>=0 and y<widget.hy ) then
 
 			if widget.pan_px then x=x+widget.pan_px end
 			if widget.pan_py then y=y+widget.pan_py end
@@ -317,8 +345,9 @@ function wmeta.setup(def)
 	--widget and widget.parent,widget and widget.parent.class)
 					if widget.master.active~=widget and widget:parent_active() then
 						widget.master.active=widget
-						widget.master.active_x=widget.parent.mousex-widget.px--widget.pxd
-						widget.master.active_y=widget.parent.mousey-widget.py--widget.pyd
+						local rx,ry=widget.parent:mousexy(_x,_y)
+						widget.master.active_x=rx-widget.px--widget.pxd
+						widget.master.active_y=ry-widget.py--widget.pyd
 					end
 				end
 				if act==-1 and (keyname=="left" or keyname=="right") then
@@ -335,7 +364,7 @@ function wmeta.setup(def)
 			end
 
 			for i,v in ipairs(widget) do -- children must be within parent bounds to catch clicks
-				v:mouse(act,x,y,keyname)
+				v:mouse(act,_x,_y,keyname)
 			end
 
 		else
@@ -344,9 +373,9 @@ function wmeta.setup(def)
 				widget.master.over=nil
 			end
 
-			for i,v in ipairs(widget) do -- ignore clicks, just update position
-				v:mouse(0,x,y,keyname)
-			end
+--			for i,v in ipairs(widget) do -- ignore clicks, just update position
+--				v:mouse(0,_x,_y,keyname)
+--			end
 
 		end
 	

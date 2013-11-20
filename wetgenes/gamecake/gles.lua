@@ -76,6 +76,30 @@ void main()
 	]]
 }
 
+	gl.shaders.v_raw_tex_color={
+	source=gl.defines.shaderprefix..[[
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+attribute vec3 a_vertex;
+attribute vec2 a_texcoord;
+attribute vec4 a_color;
+
+varying vec2  v_texcoord;
+varying vec4  v_color;
+ 
+void main()
+{
+    gl_Position = projection * vec4(a_vertex.xyz , 1.0);
+	v_texcoord=a_texcoord;
+	v_color=a_color;
+}
+
+	]]
+}
+
 	gl.shaders.v_pos={
 	source=gl.defines.shaderprefix..[[
 
@@ -273,6 +297,14 @@ void main(void)
 	}
 	gl.programs.pos_tex_color_discard={
 		vshaders={"v_pos_tex_color"},
+		fshaders={"f_tex_discard"},
+	}
+	gl.programs.raw_tex_color={
+		vshaders={"v_raw_tex_color"},
+		fshaders={"f_tex"},
+	}
+	gl.programs.raw_tex_color_discard={
+		vshaders={"v_raw_tex_color"},
 		fshaders={"f_tex_discard"},
 	}
 	gl.programs.pos={

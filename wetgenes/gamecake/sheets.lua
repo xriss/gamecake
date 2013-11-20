@@ -53,6 +53,29 @@ sheets.stop=function()
 	end
 end
 
+
+function sheets.batch_draw()
+	for i,v in pairs(sheets.data) do
+		if v.batch and #v.batch>0 then
+			v:batch_draw()
+		end
+	end
+end
+
+function sheets.batch_start()
+	for i,v in pairs(sheets.data) do
+		v:batch_start()
+	end
+end
+
+function sheets.batch_stop()
+	for i,v in pairs(sheets.data) do
+		v:batch_stop()
+	end
+end
+
+
+
 sheets.create=function(id)
 
 	local sheet=sheets.get(id)
@@ -194,7 +217,7 @@ end
 function base_sheet.batch_draw(sheet)
 
 	gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)	
-	cake.canvas.flat.tristrip("xyzuv",sheet.batch)
+	cake.canvas.flat.tristrip("rawuvrgba",sheet.batch)
 
 end
 
@@ -242,6 +265,24 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy,zf)
 		local s=-math.sin(math.pi*rz/180)
 		local c=math.cos(math.pi*rz/180)
 
+		local r,g,b,a=gl.color_get_rgba()
+		local v1=gl.apply_modelview( {px-c*(ox)-s*(oy),			py+s*(ox)-c*(oy),		zf,1} )
+		local v2=gl.apply_modelview( {px+c*(hx-ox)-s*(oy),		py-s*(hx-ox)-c*(oy),	zf,1} )
+		local v3=gl.apply_modelview( {px-c*(ox)+s*(hy-oy),		py+s*(ox)+c*(hy-oy),	zf,1} )
+		local v4=gl.apply_modelview( {px+c*(hx-ox)+s*(hy-oy),	py-s*(hx-ox)+c*(hy-oy),	zf,1} )
+
+
+		local t=
+		{
+			v1[1],	v1[2],	v1[3],		ix,		iy,			r,g,b,a,
+			v1[1],	v1[2],	v1[3],		ix,		iy,			r,g,b,a,
+			v2[1],	v2[2],	v2[3],		ixw,	iy,			r,g,b,a,
+			v3[1],	v3[2],	v3[3],		ix,		iyh,		r,g,b,a,
+			v4[1],	v4[2],	v4[3],		ixw,	iyh,		r,g,b,a,
+			v4[1],	v4[2],	v4[3],		ixw,	iyh,		r,g,b,a,
+		}
+
+--[[
 		local t=
 		{
 			px-c*(ox)-s*(oy),		py+s*(ox)-c*(oy),		zf,		ix,		iy,
@@ -251,6 +292,7 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy,zf)
 			px+c*(hx-ox)+s*(hy-oy),	py-s*(hx-ox)+c*(hy-oy),	zf,		ixw,	iyh,
 			px+c*(hx-ox)+s*(hy-oy),	py-s*(hx-ox)+c*(hy-oy),	zf,		ixw,	iyh,
 		}
+]]
 		
 		for i,v in ipairs(t) do
 			sheet.batch[ #sheet.batch+1 ]=v

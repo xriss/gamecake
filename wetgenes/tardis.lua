@@ -301,7 +301,8 @@ function m4.translate(it,v3a,r)
 	local r1=it[12+1]+v3a[1]*it[1]+v3a[2]*it[5]+v3a[3]*it[9]
 	local r2=it[12+2]+v3a[1]*it[2]+v3a[2]*it[6]+v3a[3]*it[10]
 	local r3=it[12+3]+v3a[1]*it[3]+v3a[2]*it[7]+v3a[3]*it[11]
-	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,it[16] )
+	local r4=it[12+4]+v3a[1]*it[4]+v3a[2]*it[8]+v3a[3]*it[12]
+	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,r4 )
 end
 
 function m4.scale_v3(it,v3a,r)
@@ -523,6 +524,15 @@ function M.m4_product_v3(m4a,v3b,r)
 	return r:set(r1,r2,r3)
 end
 
+function M.m4_product_v4(m4a,v4b,r)
+	r=r or v4b
+	local r1= ( (m4a[   1]*v4b[1]) + (m4a[ 4+1]*v4b[2]) + (m4a[ 8+1]*v4b[3]) + (m4a[12+1]*v4b[4]) )
+	local r2= ( (m4a[   2]*v4b[1]) + (m4a[ 4+2]*v4b[2]) + (m4a[ 8+2]*v4b[3]) + (m4a[12+2]*v4b[4]) )
+	local r3= ( (m4a[   3]*v4b[1]) + (m4a[ 4+3]*v4b[2]) + (m4a[ 8+3]*v4b[3]) + (m4a[12+3]*v4b[4]) )
+	local r4= ( (m4a[   4]*v4b[1]) + (m4a[ 4+4]*v4b[2]) + (m4a[ 8+4]*v4b[3]) + (m4a[12+4]*v4b[4]) )
+	return r:set(r1,r2,r3,r4)
+end
+
 function M.m4_product_m4(m4a,m4b,r)
 	r=r or m4b
 	local r1 = (m4a[   1]*m4b[   1]) + (m4a[   2]*m4b[ 4+1]) + (m4a[   3]*m4b[ 8+1]) + (m4a[   4]*m4b[12+1])
@@ -602,79 +612,93 @@ end
 --upgrade the above to hopefully faster C versions working on userdata arrays of floats
 
 local tcore=require("wetgenes.tardis.core") -- use a "faster?" f32 C core
+--tcore=nil
+if tcore then
 
--- allow read/write with magical [] lookups
-function array.__len(it) return 1 end
-function array.__index(it,n) return array[n] or tcore.read(it,n) end
-function array.__newindex(it,n,v) tcore.write(it,n,v) end
+	-- allow read/write with magical [] lookups
+	function array.__len(it) return 1 end
+	function array.__index(it,n) return array[n] or tcore.read(it,n) end
+	function array.__newindex(it,n,v) tcore.write(it,n,v) end
 
--- initialise an array
-function array.set(it,...) tcore.set(it,...) return it end
+	-- initialise an array
+	function array.set(it,...) tcore.set(it,...) return it end
 
-m2.set=array.set
-m3.set=array.set
-m4.set=array.set
+	m2.set=array.set
+	m3.set=array.set
+	m4.set=array.set
 
-function m2.new(...) return tcore.alloc(4* 4,m2):set(...) end
-function m3.new(...) return tcore.alloc(4* 9,m3):set(...) end
-function m4.new(...) return tcore.alloc(4*16,m4):set(...) end
+	function m2.new(...) return tcore.alloc(4* 4,m2):set(...) end
+	function m3.new(...) return tcore.alloc(4* 9,m3):set(...) end
+	function m4.new(...) return tcore.alloc(4*16,m4):set(...) end
 
-function m2.__len(it) return 4 end
-function m3.__len(it) return 9 end
-function m4.__len(it) return 16 end
+	function m2.__len(it) return 4 end
+	function m3.__len(it) return 9 end
+	function m4.__len(it) return 16 end
 
-function m2.__index(it,n) return m2[n] or tcore.read(it,n) end
-function m3.__index(it,n) return m3[n] or tcore.read(it,n) end
-function m4.__index(it,n) return m4[n] or tcore.read(it,n) end
+	function m2.__index(it,n) return m2[n] or tcore.read(it,n) end
+	function m3.__index(it,n) return m3[n] or tcore.read(it,n) end
+	function m4.__index(it,n) return m4[n] or tcore.read(it,n) end
 
-m2.__newindex=array.__newindex
-m3.__newindex=array.__newindex
-m4.__newindex=array.__newindex
+	m2.__newindex=array.__newindex
+	m3.__newindex=array.__newindex
+	m4.__newindex=array.__newindex
 
-v2.set=array.set
-v3.set=array.set
-v4.set=array.set
-q4.set=array.set
+	v2.set=array.set
+	v3.set=array.set
+	v4.set=array.set
+	q4.set=array.set
 
-function v2.new(...) return tcore.alloc(4* 2,v2):set(...) end
-function v3.new(...) return tcore.alloc(4* 3,v3):set(...) end
-function v4.new(...) return tcore.alloc(4* 4,v4):set(...) end
-function q4.new(...) return tcore.alloc(4* 4,q4):set(...) end
+	function v2.new(...) return tcore.alloc(4* 2,v2):set(...) end
+	function v3.new(...) return tcore.alloc(4* 3,v3):set(...) end
+	function v4.new(...) return tcore.alloc(4* 4,v4):set(...) end
+	function q4.new(...) return tcore.alloc(4* 4,q4):set(...) end
 
-function v2.__len(it) return 2 end
-function v3.__len(it) return 3 end
-function v4.__len(it) return 4 end
-function q4.__len(it) return 4 end
+	function v2.__len(it) return 2 end
+	function v3.__len(it) return 3 end
+	function v4.__len(it) return 4 end
+	function q4.__len(it) return 4 end
 
-function v2.__index(it,n) return v2[n] or tcore.read(it,n) end
-function v3.__index(it,n) return v3[n] or tcore.read(it,n) end
-function v4.__index(it,n) return v4[n] or tcore.read(it,n) end
-function q4.__index(it,n) return q4[n] or tcore.read(it,n) end
+	function v2.__index(it,n) return v2[n] or tcore.read(it,n) end
+	function v3.__index(it,n) return v3[n] or tcore.read(it,n) end
+	function v4.__index(it,n) return v4[n] or tcore.read(it,n) end
+	function q4.__index(it,n) return q4[n] or tcore.read(it,n) end
 
-v2.__newindex=array.__newindex
-v3.__newindex=array.__newindex
-v4.__newindex=array.__newindex
-q4.__newindex=array.__newindex
+	v2.__newindex=array.__newindex
+	v3.__newindex=array.__newindex
+	v4.__newindex=array.__newindex
+	q4.__newindex=array.__newindex
 
--- replace some functions with C code
+	-- replace some functions with C code
 
-M.m4_product_m4		=	tcore.m4_product_m4
+	M.m4_product_m4		=	tcore.m4_product_m4
+	M.m4_product_v4		=	tcore.m4_product_v4
 
-m4.identity			=	tcore.m4_identity
-m4.rotate			=	tcore.m4_rotate
-m4.scale_v3			=	tcore.m4_scale_v3
-m4.translate		=	tcore.m4_translate
+	m4.identity			=	tcore.m4_identity
+	m4.rotate			=	tcore.m4_rotate
+	m4.scale_v3			=	tcore.m4_scale_v3
+	m4.translate		=	tcore.m4_translate
 
-		
+end
+
 --[[
+local wstr=require("wetgenes.string")
 print("test")
+print("v4",wstr.dump(v4))
+print("v4.set",wstr.dump(v4.set))
+local t=tcore.alloc(4* 4,v4)
+print("v4.set",wstr.dump(t.set))
+--print("v4",wstr.dump(tcore.alloc(4* 4,v4)))
+
+local v=v4.new()--:indentity()
+print("m4",v)
+
 local m=m4.new()--:indentity()
 print("m4",m)
 m:identity()
 print("m4",m)
-m:scale_v3(2,2,2)
+m:scale_v3({2,2,2})
 print("m4",m)
-m:translate(2,2,2)
+m:translate({2,2,2})
 print("m4",m)
 
 

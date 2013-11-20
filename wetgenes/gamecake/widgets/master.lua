@@ -3,6 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local tardis=require("wetgenes.tardis")
 
 -- widget class master
 -- the master widget
@@ -34,6 +35,12 @@ function wmaster.setup(widget,def)
 	local meta=widget.meta
 --	local win=def.win
 
+--meta.setup(widget,def)
+
+--	widget.hx=0
+--	widget.hy=0
+--	widget.sx=1
+--	widget.sy=1
 
 	master.throb=0
 --	master.fbo=_G.win.fbo(0,0,0) -- use an fbo
@@ -83,8 +90,11 @@ function wmaster.setup(widget,def)
 	end
 	
 	function master.layout(widget)
+--print("master layout")
 		meta.layout(widget)
+		meta.build_m4(widget)
 		master.remouse(widget)
+--exit()
 	end
 
 	local dirty_fbos={}
@@ -121,6 +131,8 @@ function wmaster.setup(widget,def)
 	end
 	
 	function master.msg(widget,m)
+--exit()
+--print(string.char(27).."[2J"..string.char(27).."[H")
 		if m.class=="key" then
 			widget:key(m.ascii,m.keyname,m.action)
 		elseif m.class=="mouse" then
@@ -325,14 +337,23 @@ function wmaster.setup(widget,def)
 -- call this after adding/removing widgets to make sure they highlight properly
 --	
 	function master.remouse(widget)
-		local p=widget.last_mouse_position or {0,0}
-		widget.mouse(widget,nil,p[1],p[2],nil)
+		local p=widget.last_mouse_position -- or {0,0}
+		if p then
+			widget.mouse(widget,nil,p[1],p[2],nil)
+		end
 	end
 --
 -- handle mouse input
 --	
 	function master.mouse(widget,act,x,y,keyname)
---print(act,x,y,key)	
+
+--		meta.build_m4(widget)
+
+--print()	
+
+--widget.hx=16384
+--widget.hy=16384
+
 		master.last_mouse_position={x,y}
 	
 --		if widget.state=="ready" then
@@ -340,19 +361,27 @@ function wmaster.setup(widget,def)
 --print("active",master.active,master.active and master.active.class,
 --master.active and master.active.parent,master.active and master.active.parent.class)
 			
+--			if master.active then
+--				meta.mouse(master.active,0,x,y,keyname)
+--			end
+			
 			local old_active=master.active
 			local old_over=master.over
-			for i,v in ipairs(widget) do
-				meta.mouse(v,act,x,y,keyname)
-			end
+--			for i,v in ipairs(widget) do
+				meta.mouse(widget,act,x,y,keyname)
+--			end
 			
 			if master.dragging() then -- slide :)
 			
 				local w=master.active
 				local p=w.parent
 
-				local x=p.mousex
-				local y=p.mousey
+--				local x=p.mousex
+--				local y=p.mousey
+
+		local rx,ry=w.parent:mousexy(x,y)
+		local x,y=rx-master.active_x,ry-master.active_y
+
 				
 --				local minx=p.pxd
 --				local miny=p.pyd
@@ -364,8 +393,8 @@ function wmaster.setup(widget,def)
 
 --print("slide",miny,maxy)
 				
-				w.px=x-master.active_x
-				w.py=y-master.active_y
+				w.px=x
+				w.py=y
 				
 				if w.px<0    then w.px=0 end
 				if w.px>maxx then w.px=maxx end
@@ -384,6 +413,8 @@ function wmaster.setup(widget,def)
 				w:set_dirty()
 				
 				w:layout()
+				w:build_m4()
+
 
 			end
 
