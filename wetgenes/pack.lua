@@ -157,4 +157,47 @@ pack.f4_argb=function(r,g,b,a)
 	return  (a*0x01000000 + r*0x00010000 + g*0x00000100 + b*0x00000001)
 end
 
+pack.stream={}
+
+pack.stream.new=function(initial_size)
+
+	local stream={}
+	
+	stream.pos=0
+	stream.size=initial_size or 1024 -- default size of 1k
+	
+	stream.data=assert(pack.alloc(stream.size))
+	
+	stream.ptr=function(off)
+		if not off then
+			return stream.data
+		elseif off>=0 then
+			return pack.tolightuserdata(stream.data,off)
+		else
+			return pack.tolightuserdata(stream.data,stream.pos+off)
+		end
+	end
+
+	stream.grow=function(d)
+		stream.size=stream.size*d
+		stream.data=assert(core.grow(stream.data , stream.size ))
+	end
+	
+	stream.check=function(len)
+		if strem.pos + len > stream.size then
+			local s=math.ceil( (strem.pos + len)/stream.size )
+			stream.grow(s)
+		end
+	end
+
+	stream.write=function(fmt,buf)
+		stream.check(#buff*4) -- assume max data size of 4bytes
+		core.save(stream.data,fmt,stream.pos,buff)
+	end
+
+	return stream
+end
+
+
+
 return pack

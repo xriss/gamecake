@@ -247,6 +247,7 @@ function win.create(opts)
 	w.msgstack={} -- can feed "fake" msgs into here (fifo stack) with table.push
 	w.width=0
 	w.height=0
+	w.overscale=opts.overscale or 1
 	
 	base.info(w)
 	return w

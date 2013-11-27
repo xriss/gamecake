@@ -286,6 +286,7 @@ function wmeta.setup(def)
 -- handle mouse input
 --
 	function meta.mousexy(widget,_x,_y)
+--		if not widget.m4 then return -1,-1 end
 		local v4=tardis.v4.new(_x,_y,0,1)
 		widget.m4:product(v4)
 		return v4[1],v4[2]
@@ -332,10 +333,12 @@ end
 --widget.hy=widget.hy or 0
 
 --		if x>=widget.pxd and x<widget.pxd+widget.hx and y>=widget.pyd and y<widget.pyd+widget.hy then
-		if widget==widget.master or ( x>=0 and x<widget.hx and y>=0 and y<widget.hy ) then
+		local tx=x-(widget.pan_px or 0)
+		local ty=y-(widget.pan_py or 0)
+		if widget==widget.master or ( tx>=0 and tx<widget.hx and ty>=0 and ty<widget.hy ) then
 
-			if widget.pan_px then x=x+widget.pan_px end
-			if widget.pan_py then y=y+widget.pan_py end
+--			if widget.pan_px then x=x+widget.pan_px end
+--			if widget.pan_py then y=y+widget.pan_py end
 		
 			if widget.solid then
 				if act==1 and (keyname=="left" or keyname=="right") then

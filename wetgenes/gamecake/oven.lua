@@ -111,7 +111,7 @@ os.exit()
 			oven.frame_rate=1/opts.fps -- how fast we want to run
 			oven.frame_time=0
 
-			local inf={width=opts.width,height=opts.height,title=opts.title}
+			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale}
 			local screen=wwin.screen()
 
 			inf.x=(screen.width-inf.width)/2

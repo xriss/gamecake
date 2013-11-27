@@ -27,6 +27,10 @@ function wmeta.setup(def)
 --
 	function meta.layout(widget)
 --print(widget.class)
+--		if widget.pan_px and widget.pan_py then -- fidle everything
+--print("layout",widget.pan_px,widget.pan_py)
+--		end
+		
 		if widget.class=="fill" or widget.class=="pan" or widget.class=="drag" then
 			meta.layout_fill(widget)
 		else
@@ -73,7 +77,13 @@ function wmeta.setup(def)
 			end
 		end
 		
+		if widget.pan_px and widget.pan_py then -- fidle everything
+--print("build",widget.pan_px,widget.pan_py)
+			m4:translate(widget.pan_px,widget.pan_py,0)
+		end
+
 		widget.m4:product(m4,widget.m4)
+
 
 		for i,v in ipairs(widget) do
 			meta.build_m4(v)

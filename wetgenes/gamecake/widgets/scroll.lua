@@ -41,6 +41,7 @@ function wscroll.update(widget)
 		pan.pan_py=pan_py
 		
 		pan:set_dirty()
+		widget.meta.build_m4(widget)
 	end
 
 	return widget.meta.update(widget)
@@ -68,6 +69,7 @@ function wscroll.layout(widget)
 	widget.daty.size=widget.pan.hy/widget.pan.hy_max
 	
 	widget.meta.layout(widget)
+	widget.meta.build_m4(widget)
 end
 
 function wscroll.setup(widget,def)

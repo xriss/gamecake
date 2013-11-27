@@ -253,6 +253,8 @@ base.load=function(g,opts)
 		opts.fmt=grd.FMT_HINT_JPG
 	elseif opts.fmt=="png" then
 		opts.fmt=grd.FMT_HINT_PNG
+	elseif opts.fmt=="gif" then
+		opts.fmt=grd.FMT_HINT_GIF
 	end
 	local r=core.load(g[0],opts)
 	core.info(g[0],g)
@@ -272,8 +274,6 @@ base.save=function(g,opts)
 			opts.fmt=grd.FMT_HINT_PNG
 		elseif opts.fmt=="gif" then
 			opts.fmt=grd.FMT_HINT_GIF
-		else
-			opts.fmt=grd.FMT_HINT_PNG
 		end
 	end
 

@@ -52,7 +52,6 @@ function M.bake(oven,layouts)
 
 -- generate functions locked to the canvas
 	layouts.create = function(opts)
-
 	local layout={}
 	
 	layout.parent=opts.parent
@@ -62,11 +61,13 @@ function M.bake(oven,layouts)
 		layout.y=opts.y or layout.parent.y
 		layout.w=opts.w or layout.parent.w
 		layout.h=opts.h or layout.parent.h
+		layout.overscale=opts.overscale or 1
 	else
 		layout.x=opts.x or 0
 		layout.y=opts.y or 0
 		layout.w=opts.w or win.width
 		layout.h=opts.h or win.height
+		layout.overscale=opts.overscale or win.overscale or 1
 	end
 
 -- set all vars to 1 so anycode using them before they get set will not crash
@@ -148,6 +149,21 @@ function M.bake(oven,layouts)
 
 		m[15] = -2*f*n/(f-n)
 		
+-- apply overscale?
+
+		if layout.overscale and layout.overscale~=1 then
+		
+			m[1] = m[1] * layout.overscale
+			m[6] = m[6] * layout.overscale
+			
+--			layout.x_size = layout.x_size * layout.overscale
+--			layout.y_size = layout.y_size * layout.overscale
+			
+			layout.x_scale = layout.x_scale / layout.overscale
+			layout.y_scale = layout.y_scale / layout.overscale
+		
+		end
+		
 		return m -- return the matrix but we also updated the layout size/scale for later use
 	end
 	
@@ -159,7 +175,7 @@ function M.bake(oven,layouts)
 		-- centered and scaled
 		x=layout.view_width  * ( (x-layout.x_origin) * layout.x_scale ) / layout.x_size
 		y=layout.view_height * ( (y-layout.y_origin) * layout.y_scale ) / layout.y_size
-		
+
 		return x,y
 	end
 
@@ -178,6 +194,15 @@ function M.bake(oven,layouts)
 
 		local l=layout.parent or {x=0,y=0,w=win.width,h=win.height}
 		
+--[[
+		if not l then -- screen , apply scale here?
+			l={x=0,y=0,w=0,h=0}
+			l.w=math.floor(win.width*win.overscale)
+			l.h=math.floor(win.height*win.overscale)
+			l.x=math.floor((win.width-l.w)/2)
+			l.y=math.floor((win.height-l.h)/2)
+		end
+]]
 		if not width or not height then -- full screen
 
 			layout.x=l.x
@@ -213,7 +238,7 @@ function M.bake(oven,layouts)
 				return
 
 			else											-- fit height to screen
-			
+
 				layout.w=l.h/aspect -- our new display width
 				layout.x=l.x+((l.w-layout.w)*0.5) -- centered
 				
@@ -278,6 +303,7 @@ function M.bake(oven,layouts)
 			layout.viewport()
 
 		end
+		
 		layout.project23d(w,h,fov,d)
 	
 		gl.MatrixMode(gl.PROJECTION)

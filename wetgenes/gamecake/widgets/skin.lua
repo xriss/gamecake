@@ -363,6 +363,7 @@ widget.matrix=gl.SaveMatrix()
 		end
 		
 		if widget.fbo then
+--print("draw",widget.pan_px,widget.pan_py)
 			if widget.fbo.w~=widget.hx or widget.fbo.h~=widget.hy then -- resize so we need a new fbo
 --print("new fbo",widget.sx,widget.sy)
 				widget.fbo:resize(widget.hx,widget.hy,0)
