@@ -818,6 +818,11 @@ u8 *pc;
 		case GRD_FMT_U8_RGBA_PREMULT :
 			switch(fmt)
 			{
+				case GRD_FMT_U8_RGB : // premult flag just drops off
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_8888_8880(ga,gb);
+				break;
+
 				case GRD_FMT_U8_RGBA :
 					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
 					grd_convert_8888_divide_a3(ga,gb);

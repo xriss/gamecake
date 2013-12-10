@@ -8,19 +8,14 @@ andsdkx86=`readlink -f ../../sdks/android-9-x86`
 export PATH=$andsdkarm/bin:$andsdkx86/bin:$OPATH
 
 
+makeopts="config=release_android"
+makeopts32="config=release_android-x86"
+build="release"
+
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug_android"
+makeopts32="config=debug_android-x86"
 build="debug"
-makeopts=""
-
-if [ "$1" = "release" ] ; then
-makeopts="config=release_android"
-makeopts32="config=release_android-x86"
-build="release"
-fi
-
-if [ "$1" = "apk" ] ; then
-makeopts="config=release_android"
-makeopts32="config=release_android-x86"
-build="release"
 fi
 
 cd ..

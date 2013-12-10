@@ -615,7 +615,7 @@ print("Patching GLES ",method)
 	
 end
 
---gles.patch_functions("disable")
+--gles.patch_functions("check")
 
 
 function gles.numtostring(num)
@@ -634,10 +634,17 @@ end
 gles.extensions={}
 function gles.GetExtensions()
 	local s=gles.Get(gles.EXTENSIONS)
+	local t={}
 	for w in s:gmatch("([^%s]+)") do
 		if w:sub(1,3)=="GL_" then
-			gles.extensions[w:sub(4)]=true -- skip the "GL_" at the start
+			local s=w:sub(4)
+			t[#t+1]=s
+			gles.extensions[s]=true -- skip the "GL_" at the start
 		end
+	end
+	table.sort(t)
+	for i=1,#t,4 do
+		print(string.format("GLEXT = %-32.32s%-32.32s%-32.32s%-32.32s",t[i] or "",t[i+1] or "",t[i+2] or "",t[i+3] or ""))
 	end
 end
 
