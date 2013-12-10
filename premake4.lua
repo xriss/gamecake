@@ -195,7 +195,8 @@ elseif RASPI then
 	local raspxsdk=path.getabsolute("../sdks/raspx")
 
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include" }
-	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vcos/pthreads"} -- bugfix?
+	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vmcs_host/linux" }
+	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vcos/pthreads"}
 	libdirs { raspisdk.."/firmware/hardfp/opt/vc/lib" }
 
 -- im not sure its even worth trying to run X11 gl code?

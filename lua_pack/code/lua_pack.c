@@ -673,6 +673,48 @@ s32 size=(s32)lua_tonumber(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// grow a userdata, this returns a new bigger data with the old userdata copied into it
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_pack_grow (lua_State *l)
+{
+size_t len=0;
+u8 *ptr=0;
+u8 *newptr=0;
+s32 size=(s32)lua_tonumber(l,2);
+
+	if(lua_isstring(l,1))
+	{
+		ptr=(const u8*)lua_tolstring(l,1,&len);
+	}
+	else
+	if(lua_islightuserdata(l,1))
+	{
+		lua_pushstring(l,"need a userdata to grow");
+		lua_error(l);
+	}
+	else
+	if(lua_isuserdata(l,1)) // must check for light first...
+	{
+		ptr=lua_toluserdata(l,1,&len);
+	}
+	else
+	{
+		lua_pushstring(l,"need a userdata to grow");
+		lua_error(l);
+	}
+	
+	if(size<=len) { lua_pushstring(l,"grow size must be bigger than original"); lua_error(l); }
+	
+	newptr=lua_newuserdata(l,size);
+	
+	memcpy(newptr,ptr,len);
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // find the size of a userdata
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -692,6 +734,23 @@ u8 *ptr=0;
 	if(!ptr) { return 0; }
 
 	lua_pushnumber(l,len);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// find the size of a given type
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_pack_typesize (lua_State *l)
+{
+u32 def;
+int def_len;
+
+	def=string_to_id( (u8*) lua_tostring(l,1) );
+	def_len=lua_pack_field_size(def);
+
+	lua_pushnumber(l,def_len);
 	return 1;
 }
 
@@ -774,6 +833,9 @@ LUALIB_API int luaopen_wetgenes_pack_core (lua_State *l)
 		{"alloc",			lua_pack_alloc},
 		{"sizeof",			lua_pack_sizeof},
 		{"tostring",		lua_pack_tostring},
+
+		{"grow",			lua_pack_grow},
+		{"typesize",		lua_pack_typesize},
 
 		{"tolightuserdata",	lua_pack_tolightuserdata},
 

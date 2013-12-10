@@ -910,12 +910,18 @@ int lua_android_func_call_void_return_string (lua_State *l,char *funcname)
 	jmethodID methodID = (*env)->GetMethodID(env, clazz, funcname, "()Ljava/lang/String;");
 	
 	jobject str_result = (*env)->CallObjectMethod(env, activity->clazz, methodID);
-	jboolean isCopy;
-	const char *str= (*env)->GetStringUTFChars(env, (jstring)str_result, &isCopy);
-
-	lua_pushstring(l,str);
-
-	(*env)->ReleaseStringUTFChars(env, (jstring)str_result, str);
+	if(str_result) // deal with null?
+	{
+		jboolean isCopy;
+		const char *str= (*env)->GetStringUTFChars(env, (jstring)str_result, &isCopy);
+		lua_pushstring(l,str);
+		(*env)->ReleaseStringUTFChars(env, (jstring)str_result, str);
+	}
+	else
+	{
+		lua_pushnil(l);
+	}
+	
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 	return 1;
 }

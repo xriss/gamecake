@@ -306,6 +306,36 @@ float r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16;
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+static void raw_tardis_m4_product_v4(float *fa,float *fb,float *fc)
+{
+float r1,r2,r3,r4;
+
+	if(!fc) // fb is output for default
+	{
+		fc=fb;
+	}
+	
+	r1 = (fa[   0]*fb[   0]) + (fa[ 4+0]*fb[   1]) + (fa[ 8+0]*fb[   2]) + (fa[12+0]*fb[   3]);
+	r2 = (fa[   1]*fb[   0]) + (fa[ 4+1]*fb[   1]) + (fa[ 8+1]*fb[   2]) + (fa[12+1]*fb[   3]);
+	r3 = (fa[   2]*fb[   0]) + (fa[ 4+2]*fb[   1]) + (fa[ 8+2]*fb[   2]) + (fa[12+2]*fb[   3]);
+	r4 = (fa[   3]*fb[   0]) + (fa[ 4+3]*fb[   1]) + (fa[ 8+3]*fb[   2]) + (fa[12+3]*fb[   3]);
+
+
+//	r1 = (fa[   0]*fb[   0]) + (fa[   1]*fb[   1]) + (fa[   2]*fb[   2]) + (fa[   3]*fb[   3]);
+//	r2 = (fa[ 4+0]*fb[   0]) + (fa[ 4+1]*fb[   1]) + (fa[ 4+2]*fb[   2]) + (fa[ 4+3]*fb[   3]);
+//	r3 = (fa[ 8+0]*fb[   0]) + (fa[ 8+1]*fb[   1]) + (fa[ 8+2]*fb[   2]) + (fa[ 8+3]*fb[   3]);
+//	r4 = (fa[12+0]*fb[   0]) + (fa[12+1]*fb[   1]) + (fa[12+2]*fb[   2]) + (fa[12+3]*fb[   3]);
+
+// fc may == fa or fb so we have to cache then write.
+
+	fc[ 0]=r1;	fc[ 1]=r2;	fc[ 2]=r3;	fc[ 3]=r4;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_m4_product_m4 (lua_State *l)
 {
 float *fa=(float *)lua_tardis_uda(l,1);
@@ -316,6 +346,22 @@ float *fc=(float *)lua_tardis_uda(l,3);
 
 	return 0;
 }
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_tardis_m4_product_v4 (lua_State *l)
+{
+float *fa=(float *)lua_tardis_uda(l,1);
+float *fb=(float *)lua_tardis_uda(l,2);
+float *fc=(float *)lua_tardis_uda(l,3);
+
+	raw_tardis_m4_product_v4(fa,fb,fc);
+
+	return 0;
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -514,6 +560,7 @@ float x,y,z;
 		fc[12]+= x*fc[0+0] + y*fc[4+0] + z*fc[8+0];
 		fc[13]+= x*fc[0+1] + y*fc[4+1] + z*fc[8+1];
 		fc[14]+= x*fc[0+2] + y*fc[4+2] + z*fc[8+2];
+		fc[15]+= x*fc[0+3] + y*fc[4+3] + z*fc[8+3];
 	}
 	else
 	{
@@ -532,7 +579,7 @@ float x,y,z;
 		fc[12]=fa[12] + x*fc[0+0] + y*fc[4+0] + z*fc[8+0];
 		fc[13]=fa[13] + x*fc[0+1] + y*fc[4+1] + z*fc[8+1];
 		fc[14]=fa[14] + x*fc[0+2] + y*fc[4+2] + z*fc[8+2];
-		fc[15]=fa[15];
+		fc[15]=fa[15] + x*fc[0+3] + y*fc[4+3] + z*fc[8+3];
 	}
 
 	return 0;
@@ -558,6 +605,7 @@ LUALIB_API int luaopen_wetgenes_tardis_core (lua_State *l)
 		{"new_v4",					lua_tardis_new_v4},
 
 		{"m4_product_m4",			lua_tardis_m4_product_m4},
+		{"m4_product_v4",			lua_tardis_m4_product_v4},
 
 		{"m4_identity",				lua_tardis_m4_identity},
 		{"m4_rotate",				lua_tardis_m4_rotate},
