@@ -216,7 +216,8 @@ end
 
 function base_sheet.batch_draw(sheet)
 
-	gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)	
+	images.bind(sheet.img)
+--	gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)	
 	cake.canvas.flat.tristrip("rawuvrgba",sheet.batch)
 
 end
@@ -329,7 +330,9 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy,zf)
 	gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,5*4,3*4)
 	gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
 	
-	gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)
+	images.bind(sheet.img)
+--	gl.BindTexture(gl.TEXTURE_2D,sheet.img.gl)
+
 	gl.Uniform4f(p:uniform("color"), gl.cache.color )
 	gl.core.DrawArrays(gl.TRIANGLE_STRIP,(i-1)*4,4)
 

@@ -92,8 +92,10 @@ os.exit()
 -- pull in info about what art we baked		
 		local lson=wzips.readfile("lua/init_bake.lua")
 		if lson then
+--print(lson)
 			oven.opts.bake=wsbox.lson(lson)
 			oven.opts.smell=oven.opts.bake.smell or oven.opts.smell -- smell overides
+--print(oven.opts.bake.stamp)
 		end
 
 		
@@ -164,7 +166,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 			oven.rebake_mod("wetgenes.gamecake.mods.layout") -- screen layout options
 			oven.rebake_mod("wetgenes.gamecake.mods.snaps") -- builtin screen snapshot code
 
-			if wzips.exists("data/wskins/soapbar.png") then -- we got us better skin to use :)
+			if wzips.exists("data/wskins/soapbar.png") or wzips.exists("data/wskins/soapbar.00.lua")then -- we got us better skin to use :)
 				oven.rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
 			end
 
@@ -438,23 +440,29 @@ print("Loading : "..s)
 				return
 			end
 
-			if oven.win then
+			if oven.win and oven.rebake("wetgenes.gamecake.images").get("fonts/basefont_8x8") then
 				
 
 				local p=oven.rebake(opts.preloader or "wetgenes.gamecake.spew.preloader")
 				p.setup() -- warning, this is called repeatedly
 				p.update(s)
+				
+				if not oven.preloader_time or ( oven.win:time() > ( oven.preloader_time + (1/60) ) ) then -- avoid frame limiting
+				
+					oven.preloader_time=oven.win:time()
+					
+					if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
+						-- do not draw
+					else
+						oven.cake.canvas.draw()
+						p.draw()
+						oven.win:swap()
+					end
 
-				if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
-					-- do not draw
-				else
-					oven.cake.canvas.draw()
-					p.draw()
-					oven.win:swap()
-				end
-
-				if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
-					coroutine.yield()
+					if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
+						coroutine.yield()
+					end
+					
 				end
 
 			end
@@ -493,6 +501,7 @@ print("Loading : "..s)
 
 			if oven.win then
 				oven.win:swap()
+				oven.cake.images.adjust_mips()
 			end
 			
 		end
@@ -511,7 +520,7 @@ print("Loading : "..s)
 					end
 
 					if m.class=="app" then -- androidy
---print("caught : ",m.class,m.cmd)
+print("caught : ",m.class,m.cmd)
 						if		m.cmd=="init_window" then
 							oven.do_start=true --do not clog up the message loop by running start here
 							oven.paused=false

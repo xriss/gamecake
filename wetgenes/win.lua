@@ -188,6 +188,7 @@ function win.android_start(apk)
 	
 	win.files_prefix=hardcore.get_files_prefix().."/"
 	win.cache_prefix=hardcore.get_cache_prefix().."/"
+--	win.cache_prefix=hardcore.get_files_prefix().."/cache/"
 
 	win.smell=hardcore.smell_check()
 

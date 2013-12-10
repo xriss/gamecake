@@ -52,9 +52,12 @@ M.bake=function(oven,gui)
 			gui.parent=parent
 			gui.master=parent.master
 		end
-		wetiso.setup()
-		gui.time=0
 
+print("Wetiso may fail")
+		wetiso.setup()
+print("Wetiso Sucess")
+
+		gui.time=0
 		if wwin.hardcore.smell_score_range then wwin.hardcore.smell_score_range(1,50) end
 	end
 	

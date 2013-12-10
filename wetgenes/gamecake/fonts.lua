@@ -66,7 +66,7 @@ fonts.load=function(filename,id)
 	if type(filename)=="number" then -- builtin font id, so far we only have this one
 
 --print("Loading font 8x8")
---oven.preloader("font 8x8") --the preloader expects this font so do not confuse it
+oven.preloader("basefont_8x8") --the preloader expects this font so do not confuse it
 
 		if gl then --gl mode
 		
@@ -108,8 +108,11 @@ fonts.load=function(filename,id)
 				g:pixels(c.tx,c.ty,8,8,wwin.glyph_8x8(i)) -- splat into grid
 
 			end
+			
+			t.g=g
 
-			t.images[1]=cake.images.upload_grd(nil,g) -- send to opengl
+--			t.images[1]=cake.images.upload_grd(nil,g) -- send to opengl
+			t.images[1]=cake.images.load("fonts/".."basefont_8x8","fonts/".."basefont_8x8",function() return t.g end)
 
 		end
 		
@@ -117,6 +120,7 @@ fonts.load=function(filename,id)
 
 		local fname=fonts.prefix..filename..fonts.postfix
 		
+print("Loading font ",fname)		
 		local d=assert(zips.readfile(fname))
 
 --print("Loading font ",fname,#d)		
@@ -190,7 +194,10 @@ oven.preloader(fname)
 
 	-- we keep the ttf font in memory around so we can reload chars or load new chars as we need them
 
-			t.images[1]=cake.images.upload_grd(nil,g) -- send to opengl
+			t.g=g
+
+--			t.images[1]=cake.images.upload_grd(nil,g) -- send to opengl
+			t.images[1]=cake.images.load("fonts/"..filename,"fonts/"..filename,function() return t.g end)
 
 			
 		end

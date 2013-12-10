@@ -72,13 +72,16 @@ local ret_stack=2 -- we start by assuming we will be skipping a header
 
 
 
+local tagpatq="<%?(%/?)([%w_%-%:]+)(.-)(%/?)%?>"
+local tagpat ="<(%/?)([%w_%-%:]+)(.-)(%/?)>"
+
 	local j2
 -- find header
-  local ni,j,c,label,args, empty = string.find(s, "<%?(%/?)([%w_]+)(.-)(%/?)%?>")
-  
+  local ni,j,c,label,args, empty = string.find(s, tagpatq)
+
   if not ni then -- ignore missing <? tag header at start
 	ret_stack=1
-	ni,j,c,label,args, empty = string.find(s, "<(%/?)([%w_]+)(.-)(%/?)>")
+	ni,j,c,label,args, empty = string.find(s, tagpat)
   end
   label=(label or "?"):lower()
   
@@ -113,7 +116,12 @@ local ret_stack=2 -- we start by assuming we will be skipping a header
 				autoclose=false
 			  end
 		  end
-		  table.insert(top, toclose)
+		  if top then
+			table.insert(top, toclose)
+		  else
+			warn("Malformed XML.")
+			break
+		  end
 		end
     end 
     i = j+1
@@ -128,7 +136,8 @@ local ret_stack=2 -- we start by assuming we will be skipping a header
 	end
     
     
-    ni,j,c,label,args, empty = string.find(s, "<(%/?)([%w_]+)(.-)(%/?)>", i)
+    ni,j,c,label,args, empty = string.find(s,tagpat, i)
+
     label=(label or "?"):lower()
   end
   local text = string.sub(s, i)

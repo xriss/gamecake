@@ -57,7 +57,7 @@ function wmeta.setup(def)
 	end
 
 	function meta.call_hook(widget,hook,dat)
-		if widget[hook] then -- the widget wants this hook
+		if type(widget[hook])=="function" then -- the widget wants this hook
 			if widget[hook](widget,dat) then return end -- and it can eat the event
 		end
 		local hooks=widget.hooks or widget.master.hooks
@@ -360,10 +360,10 @@ end
 					end
 				end
 
-				if (not widget.master.dragging()) or widget.master.active==widget then
-	--			if not widget.master.active or widget.master.active==widget then -- over widget
-					widget.master.over=widget
-				end
+			end
+			if (not widget.master.dragging()) or widget.master.active==widget then
+--			if not widget.master.active or widget.master.active==widget then -- over widget
+				widget.master.over=widget
 			end
 
 			for i,v in ipairs(widget) do -- children must be within parent bounds to catch clicks

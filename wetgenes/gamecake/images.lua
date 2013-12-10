@@ -19,12 +19,16 @@ function M.bake(oven,images)
 	local cake=oven.cake
 	local gl=oven.gl
 	
-	local stash=oven.rebake("wetgenes.gamecake.stash")
-		
+--	local stash=oven.rebake("wetgenes.gamecake.stash")
+--	images.exists=stash.exists -- check files exists
+
 	images.data={}
+	images.gl_mem=0
 	
 	images.prefix=opts.grdprefix or "data/"
 	images.postfix=opts.grdpostfix or { ".png" , ".jpg" }
+
+
 
 
 images.get=function(id)
@@ -40,106 +44,266 @@ end
 -- unload a previously loaded image
 --
 images.unload=function(id)
-	local t=images.get(id)
+	local t
+	if type(id)=="table" then
+		t=id
+	else
+		t=images.get(id)
+	end
 
-	if t then
-		if gl then --gl mode
-				gl.DeleteTexture( t.id )
-				t.id=nil	
-		end
-		images.set(nil,id)
+	if t and t.gl then
+		gl.DeleteTexture( t.gl )
+		t.gl=nil	
 	end
 end
 
--- do we have an image availble to load?
-images.exists=function(filename)
-
-	local fname
-	local fext
-
-	if type(images.postfix)=="table" then -- try a few formats
-		for i,v in ipairs(images.postfix) do
-			fext=v
-			fname=images.prefix..filename..fext -- hardcode
-			if zips.exists(fname) then  return true end -- found it
-		end
+images.reload=function(id)
+	local t
+	if type(id)=="table" then
+		t=id
 	else
-		fext=images.postfix
-		fname=images.prefix..filename..fext -- hardcode
+		t=images.get(id)
+	end
+
+	if t then
+print("RELOAD",t.id,t.mip)
+		images.upload(t) -- upload to GL
+	end
+end
+
+images.find_image=function(filename)
+
+--	local fname="data/"..filename..".00.lua" -- mips?
+
+	for i,v in ipairs( { ".00.lua" , ".png" , ".jpg" , ".gif" } ) do
+		local fext=v
+		local fname=images.prefix..filename..fext -- hardcode
+		if zips.exists(fname) then  return fname ,fext end -- found it
+	end
+
+end
+images.exists=function(filename)
+	return images.find_image(filename) and true or false
+end
+
+images.prep_image=function(t)
+
+	local lson=zips.readfile(images.prefix..t.filename..".lua")
+	if lson then -- check for lua metadata
+		t.meta=wsbox.lson(lson) -- return it with the image
+	end
+
+	local g
+
+	if t.fg then g=t.fg() end -- image get function
+	
+	if g then -- load image ?
+	
+			t.width=g.width
+			t.height=g.height
+			t.texture_width=t.width
+			t.texture_height=t.height
+
+	else
+	
+		t.dataname,t.fext=images.find_image(t.filename)
+		if t.fext==".00.lua" then -- many files, load and pick
+		
+			t.dataname=nil
+		
+			local lson=zips.readfile(images.prefix..t.filename..".00.lua")
+			if lson then -- check for lua mips metadata
+				t.mips=assert(wsbox.lson(lson)) -- return it with the image
+			end
+
+			t.fext=t.mips.ext
+
+			t.width=t.mips.width
+			t.height=t.mips.height
+			t.texture_width=t.mips.texture_width
+			t.texture_height=t.mips.texture_height
+
+		else -- single file, need to open to get file sizes
+		
+			g=assert(grd.create())
+			local d=assert(zips.readfile(t.dataname),"Failed to load "..t.dataname)
+			assert(g:load_data(d,t.filename:sub(-3))) -- last 3 letters pleaze
+
+
+			local max_size=2^images.max_mips
+
+			if max_size and ( g.width > max_size or g.height>max_size ) then
+				local hx=g.width>max_size and max_size or g.width
+				local hy=g.height>max_size and max_size or g.height
+print("Max texture size converting ",g.width,g.height," to ",hx,hy)
+				g:scale( hx , hy ,1)
+			end
+
+			t.width=g.width
+			t.height=g.height
+			t.texture_width=images.uptwopow(t.width)
+			t.texture_height=images.uptwopow(t.height)
+
+			if t.texture_width~=g.width or t.texture_height~=g.height then 
+				g:resize(t.texture_width,t.texture_height,1) -- resize keeping the image in the topleft corner
+			end
+
+--			error("missing mips")
+--[[		
+			g=assert(grd.create())
+			local d=assert(zips.readfile(t.dataname),"Failed to load "..t.dataname)
+			assert(g:load_data(d,t.filename:sub(-3))) -- last 3 letters pleaze
+
+-- clamp to a maximum used size?
+			local max_size=2^images.max_mips
+
+			if max_size and ( g.width > max_size or g.height>max_size ) then
+				local hx=g.width>max_size and max_size or g.width
+				local hy=g.height>max_size and max_size or g.height
+print("Max texture size converting ",g.width,g.height," to ",hx,hy)
+				g:scale( hx , hy ,1)
+			end
+]]
+		end
 	end
 	
-	if zips.exists(fname) then  return true end -- found it
+--[[
 
+--	assert(g:convert(grd.FMT_U8_RGBA_PREMULT))
+
+-- force powah of 2 sizes, so we can mipmap
+
+	t.width=g.width
+	t.height=g.height
+	t.texture_width=images.uptwopow(t.width)
+	t.texture_height=images.uptwopow(t.height)
+
+	if t.texture_width~=g.width or t.texture_height~=g.height then 
+		g:resize(t.texture_width,t.texture_height,1) -- resize keeping the image in the topleft corner
+	end
+
+	t.texture_width=( t.texture_width > stash.max_texture_size )  and stash.max_texture_size or t.texture_width
+	t.texture_height=( t.texture_height > stash.max_texture_size ) and stash.max_texture_size or t.texture_height
+	g:scale(t.texture_width,t.texture_height,1)
+
+	
+	t.gl_width=t.texture_width
+	t.gl_height=t.texture_height
+	t.gl_internal=gl.RGBA
+	t.gl_format=gl.RGBA
+	t.gl_type=gl.UNSIGNED_BYTE
+
+	t.format=grd.FMT_U8_RGBA_PREMULT
+	t.format_size=4
+		
+	return t,g
+]]
+
+	return t
+end
+
+--
+-- prepare gl values of a given mip, ready for upload
+-- this will probably load a grd
+--
+images.aloc_gl_data=function(t,mip)
+
+	local dataname=t.dataname
+
+	if t.mips then
+
+		if mip<4 then mip=4 end -- minimum mip of 4
+		if mip>t.mips.mip then mip=t.mips.mip end -- clamp to max mip available
+		
+		local m=t.mips[4]
+		dataname=images.prefix..t.filename..((".%02d"):format(mip))..t.fext
+	end
+	
+	local g
+	
+	if t.fg then g=t.fg() end -- use an image get function?
+
+	if not g then --
+		g=assert(grd.create())
+		local d=assert(zips.readfile(dataname),"Failed to load "..dataname)
+		assert(g:load_data(d,t.fext))
+		if not t.mips then
+			assert(g:convert(grd.FMT_U8_RGBA_PREMULT)) -- premult force
+		end
+	end
+
+	if not t.mips then -- may need a power of 2 resize from raw texture
+		local width=images.uptwopow(g.width)
+		local height=images.uptwopow(g.height)
+
+		if width~=g.width or height~=g.height then 
+			g:resize(width,height,1) -- resize keeping the image in the topleft corner
+		end
+	end
+	
+	t.gl_width=g.width
+	t.gl_height=g.height
+	t.gl_internal=gl.RGBA
+	t.gl_format=gl.RGBA
+	t.gl_type=gl.UNSIGNED_BYTE
+	
+	t.gl_grd=g
+	t.gl_data=g.data -- carefulnow
+	
+	t.gl_mem=4*t.gl_width*t.gl_height
+
+end
+images.free_gl_data=function(t,mip)
+	t.gl_grd=nil
+	t.gl_data=nil
 end
 
 --
 -- load a single image, and make it easy to lookup by the given id
 --
-images.load=function(filename,id)
+images.load=function(filename,id,fg)
+
 	local t=images.get(id)
-	
+
 	if t then return t end --first check it is not already loaded
 
 	t={} -- create new
+	t.binds=0
+	t.fg=fg
+	t.id=id
+	t.binds=0 -- count binds, so we can guess which textures are currently in use
+	t.mip=8 -- start with a 256x256 base texture size?
 
 --print("loading",filename,id)
 oven.preloader(filename)
 
-	t.stash=stash.get_image(filename)
-
-	local mname=images.prefix..filename..".lua"
-	local fname
-	local fext
+	t.filename=filename
 	
-	if type(images.postfix)=="table" then -- try a few formats
-		for i,v in ipairs(images.postfix) do
-			fext=v
-			fname=images.prefix..filename..fext -- hardcode
-			if zips.exists(fname) then  break end -- found it
-		end
-	else
-		fext=images.postfix
-		fname=images.prefix..filename..fext -- hardcode
-	end
+	images.prep_image(t)
 	
-	local g=assert(grd.create())
-	local d=assert(zips.readfile(fname),"Failed to load "..fname)
-	assert(g:load_data(d,fext:sub(2))) -- skip extension period
+--[[
+	t.stash=assert(stash.get_image(filename,g))
 
--- clamp to a maximum size
-	local max_size=2048
-
--- tempory fixes to reduce texture memory footprint
-
-	if wwin.flavour=="android" then max_size=1024 end
-	if wwin.flavour=="raspi" then max_size=512 end
-
-	if max_size and g.width > max_size or g.height>max_size then
-		local hx=g.width>max_size and max_size or g.width
-		local hy=g.height>max_size and max_size or g.height
-print("Max texture size converting ",g.width,g.height," to ",hx,hy)
-		g:scale( hx , hy ,1)
-	end
+	if t.stash then -- preloaded image (auto created or read from temporary cache)
 	
---	g:scale(g.width/2,g.height/2,1)
-	
-	if gl then --gl mode
-	
-		images.upload_grd(t,g)
+		t.x=0
+		t.y=0
+		t.meta=t.stash.meta
+		t.width=t.stash.width
+		t.height=t.stash.height
+		t.texture_width=t.stash.texture_width
+		t.texture_height=t.stash.texture_height
 
+		images.upload(t)
 		images.set(t,id)
-		
-		t.filename=filename
-		
-		local lson=zips.readfile(mname)
-		if lson then -- check for lua metadata
-			t.meta=wsbox.lson(lson) -- return it with the image
-		end
-		
 		return t
-
+		
 	end
-	
+]]
+
+	images.data[id]=t
+
+	return t
 end
 
 local function uptwopow(n)
@@ -167,106 +331,51 @@ local function uptwopow(n)
 end
 images.uptwopow=uptwopow
 
-images.upload_grd= function(t,g)
 
-	if not t then
-		t={}
-	end
-	
-	if not t.id then
-		t.id=assert(gl.GenTexture())
-	end
-	
-	t.x=0
-	t.y=0
-	t.width=g.width
-	t.height=g.height
-	
---	gl.extensions.ARB_texture_non_power_of_two=false
---	if gl.extensions.ARB_texture_non_power_of_two then
---		t.texture_width=g.width
---		t.texture_height=g.height
---	else -- need to place the image in a bigger texture and probably disable mipmaps.
-	
--- always need powah of two so we may mipmap
--- probably best to keep textures powah of two if at all possible as well?
+images.bind_and_set_parameters=function(t,minf,maxf,wraps,wrapt)
 
-		t.texture_width=uptwopow(g.width)
-		t.texture_height=uptwopow(g.height)
+	t.TEXTURE_WRAP_S=wraps
+	t.TEXTURE_WRAP_T=wrapt
+	t.TEXTURE_MIN_FILTER=minf
+	t.TEXTURE_MAX_FILTER=maxf
 
---if t.texture_width <64 then t.texture_width =64 end
---if t.texture_height<64 then t.texture_height=64 end
-
---	end
+	gl.BindTexture( gl.TEXTURE_2D , t.gl )
 	
-	gl.BindTexture( gl.TEXTURE_2D , t.id )
-	
---	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)
---	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
-	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE)
-	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)
-
---best mipmap?
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,t.TEXTURE_MIN_FILTER or images.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,t.TEXTURE_MAG_FILTER or images.TEXTURE_MAG_FILTER or gl.LINEAR)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,t.TEXTURE_WRAP_S or images.TEXTURE_WRAP_S or gl.CLAMP_TO_EDGE)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,t.TEXTURE_WRAP_T or images.TEXTURE_WRAP_T or gl.CLAMP_TO_EDGE)
 
-
-	if g.width==0 or g.height==0 then return t end -- no data to upload
-	
---print(require("wetgenes.string").dump(g))
---	if g.format==grd.FMT_U8_RGBA or g.format==grd.FMT_U8_RGBA_PREMULT then
-		-- ok to upload as is
---	else
-
-		assert(g:convert(grd.FMT_U8_RGBA_PREMULT))
-
---	end
-
--- force powah of 2 sizes
-if t.texture_width~=g.width or t.texture_height~=g.height then 
-		g:resize(t.texture_width,t.texture_height,1) -- resize keeping the image in the topleft corner
 end
-	
---local zero=string.rep(string.char(0,0,0,0), t.texture_width * t.texture_height)
 
--- create a possibly bigger texture
+images.upload = function(t)
+
+	if images.check_panic() then return nil end -- do nothing in panic state
+
+	if not t.gl then
+		t.gl=assert(gl.GenTexture())
+		t.glactive=true
+	end
+
+	images.bind_and_set_parameters(t)
+	
+	if t.width==0 or t.height==0 then return t end -- no data to upload
+
+	images.aloc_gl_data(t,t.mip) -- update gl_* params
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
 		0,
-		gl.RGBA,
-		t.texture_width,
-		t.texture_height,
+		t.gl_internal,
+		t.gl_width,
+		t.gl_height,
 		0,
-		gl.RGBA,
-		gl.UNSIGNED_BYTE,
-		g.data ) -- need to zero the texture?
-
--- create mipmaps
-	local w=g.width
-	local h=g.height
-	local idx=0
-	while w>=2 or h>=2 do
-		idx=idx+1
-		w=math.ceil(w/2)
-		h=math.ceil(h/2)
-		g:scale(w,h,1)
---print("mipmap",w,h)
-		
-
--- create a possibly bigger texture
-		gl.TexImage2D(
-			gl.TEXTURE_2D,
-			idx,
-			gl.RGBA,
-			w,
-			h,
-			0,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			g.data ) -- need to zero the texture?
-
-gl.CheckError()
-
+		t.gl_format,
+		t.gl_type,
+		t.gl_data )
+	images.free_gl_data(t) -- free gl_* params we may have locked
+	
+	if not images.check_panic() then -- probably best not to mipmap if upload fails
+		gl.GenerateMipmap(gl.TEXTURE_2D)
 	end
 	
 	return t
@@ -280,7 +389,6 @@ images.loads=function(tab)
 	local function iorv(i,v) if type(i)=="number" then return v end return i end -- choose i or v
 
 	for i,v in pairs(tab) do
-
 		images.load(v,iorv(i,v))		
 	end
 
@@ -289,24 +397,15 @@ end
 
 images.start = function()
 
-	if images.remember then
-		for v,n in pairs(images.preload or {}) do
-			images.load(v,n)
-		end
+	for n,t in pairs(images.data) do
+		images.reload(n)
 	end
 
-	for v,n in pairs(images.remember or {}) do
-		images.load(v,n)
-	end
-	images.remember=nil
 end
 
 images.stop = function()
 
-	images.remember={}
-	
 	for n,t in pairs(images.data) do
-		images.remember[t.filename]=n	
 		images.unload(n)
 	end
 
@@ -314,8 +413,140 @@ end
 
 -- do a gl bind of this texture
 images.bind = function(t)
-	gl.BindTexture( gl.TEXTURE_2D , t.id )
+	if t then
+		t.binds=t.binds+1
+		images.active=true
+		images.make_better(t)
+		gl.BindTexture( gl.TEXTURE_2D , t.gl or 0 )
+	else
+		gl.BindTexture( gl.TEXTURE_2D , 0 )
+	end
 end
+
+images.min_mips=1
+images.max_mips=16
+-- check stats and adjust the used images to higher rez and unused to lower
+images.adjust_mips = function()
+
+	local best
+	local worst
+
+	local total=0
+
+	images.gl_mem=0
+	
+	for n,t in pairs(images.data) do
+
+		if t.gl then
+			images.gl_mem=images.gl_mem+t.gl_mem
+		end
+		
+		if t.binds==0 then
+			t.glactive=false
+		else
+			t.glactive=true
+		end
+
+	end
+	
+	for n,t in pairs(images.data) do -- reset counters
+		t.binds=0
+	end
+
+	images.check_panic()
+	images.cando_panic()
+
+end
+
+
+-- make this texture better (bigger)
+images.make_better = function(t)
+	if t.mip<images.max_mips then
+		t.mip=images.max_mips
+		images.reload(t.id)
+	end
+	if not t.gl then -- unless we have lost the gl
+		images.upload(t) -- may need to upload to gl hardware
+	end
+end
+
+-- panic if we have run out of memory, make every active texture worse (lower the highest version)
+images.flag_panic=false
+images.check_panic=function()	
+
+--[[
+	if images.gl_mem>1024*1024*16 then
+		images.flag_panic=true
+	end
+]]
+
+	if gl.GetError()==gl.OUT_OF_MEMORY then
+		images.flag_panic=true
+	end
+
+	return images.flag_panic
+end
+images.cando_panic=function()
+	if images.flag_panic then
+		return images.panic()
+	end
+end
+images.panic = function()
+
+print("GL PANIC old memory ",images.gl_mem/(1024*1024))	
+
+	images.flag_panic=false
+	
+	local mild=false
+
+	for n,t in pairs(images.data) do -- check for mild panic first
+		if not t.glactive and t.gl then mild=true end
+	end
+
+	if mild then -- mild panic
+
+print("GL MILD MEMORY PANIC",images.max_mips)
+
+		for n,t in pairs(images.data) do -- unload inactive textures
+			if not t.glactive then
+				images.unload(t)
+			end
+		end
+	
+	else -- severe panic
+	
+		if images.max_mips>1 then -- lower overall quality
+			images.max_mips=images.max_mips-1
+		end
+
+print("GL SEVERE MEMORY PANIC",images.max_mips)
+		
+		for n,t in pairs(images.data) do -- unload all textures
+			if t.mip>images.max_mips then t.mip=images.max_mips end
+			images.unload(t)
+		end
+
+		for n,t in pairs(images.data) do -- reload active textures at lower rez
+			if t.glactive then
+				images.reload(t)
+			end
+		end
+	end
+
+-- recalculate gl_mem
+	images.gl_mem=0
+	for n,t in pairs(images.data) do
+		if t.gl then
+			images.gl_mem=images.gl_mem+t.gl_mem
+		end
+	end
+	
+print("GL PANIC new memory ",images.gl_mem/(1024*1024))	
+	
+	images.check_panic()
+	return images.cando_panic()
+end
+
 	
 	return images
 end

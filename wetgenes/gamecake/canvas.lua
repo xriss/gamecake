@@ -164,11 +164,12 @@ font.cache_begin = function()
 	local old=font.cache
 	font.cache={}
 	return function()
---print("font draw",#font.cache,tostring(font.dat))
+print("font draw",#font.cache,tostring(font.dat))
 
 	gl.Color(1,1,1,1)	
 		if font.cache and font.cache[1] then
 
+print("font bind")
 			images.bind(font.dat.images[1])
 					
 			flat.tristrip("rawuvrgba",font.cache)

@@ -218,6 +218,11 @@ replacefile=function(frm,too,opts)
 	writefile(too,text)
 end
 
+-- copy but with macro replacements
+deletefile=function(name)
+	os.remove(name)
+end
+
 -----------------------------------------------------------------------------
 --
 -- convert time stamp into a 2.3 version string like so vv.mmm
