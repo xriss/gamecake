@@ -1254,6 +1254,7 @@ ngx_http_upstream_connect(ngx_http_request_t *r, ngx_http_upstream_t *u)
     }
 
     u->request_sent = 0;
+    u->request_all_sent = 0;
 
     if (rc == NGX_AGAIN) {
         ngx_add_timer(c->write, u->conf->connect_timeout);
@@ -1457,6 +1458,8 @@ ngx_http_upstream_send_request(ngx_http_request_t *r, ngx_http_upstream_t *u)
 
     /* rc == NGX_OK */
 
+    u->request_all_sent = 1;
+
     if (c->tcp_nopush == NGX_TCP_NOPUSH_SET) {
         if (ngx_tcp_push(c->fd) == NGX_ERROR) {
             ngx_log_error(NGX_LOG_CRIT, c->log, ngx_socket_errno,
@@ -1523,7 +1526,7 @@ ngx_http_upstream_send_request_handler(ngx_http_request_t *r,
 
 #endif
 
-    if (u->header_sent) {
+    if (u->request_all_sent) {
         u->write_event_handler = ngx_http_upstream_dummy_handler;
 
         (void) ngx_handle_write_event(c->write, 0);
@@ -2713,7 +2716,7 @@ ngx_http_upstream_process_non_buffered_upstream(ngx_http_request_t *r,
 
     if (c->read->timedout) {
         ngx_connection_error(c, NGX_ETIMEDOUT, "upstream timed out");
-        ngx_http_upstream_finalize_request(r, u, 0);
+        ngx_http_upstream_finalize_request(r, u, NGX_HTTP_GATEWAY_TIME_OUT);
         return;
     }
 
@@ -2760,10 +2763,17 @@ ngx_http_upstream_process_non_buffered_request(ngx_http_request_t *r,
             if (u->busy_bufs == NULL) {
 
                 if (u->length == 0
-                    || upstream->read->eof
-                    || upstream->read->error)
+                    || (upstream->read->eof
+                        && u->length == -1
+                        && u->pipe
+                        && u->pipe->length <= 0))
                 {
                     ngx_http_upstream_finalize_request(r, u, 0);
+                    return;
+                }
+
+                if (upstream->read->eof || upstream->read->error) {
+                    ngx_http_upstream_finalize_request(r, u, NGX_HTTP_BAD_GATEWAY);
                     return;
                 }
 
@@ -3034,7 +3044,9 @@ ngx_http_upstream_process_request(ngx_http_request_t *r)
 
 #endif
 
-        if (p->upstream_done || p->upstream_eof || p->upstream_error) {
+        if (p->upstream_done
+            || (p->upstream_eof && u->length == -1 && p->length <= 0))
+        {
             ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                            "http upstream exit: %p", p->out);
 #if 0
@@ -3043,6 +3055,14 @@ ngx_http_upstream_process_request(ngx_http_request_t *r)
             ngx_http_upstream_finalize_request(r, u, 0);
             return;
         }
+
+        if (p->upstream_eof || p->upstream_error) {
+            ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                           "http upstream exit: %p", p->out);
+
+            ngx_http_upstream_finalize_request(r, u, NGX_HTTP_BAD_GATEWAY);
+            return;
+       }
     }
 
     if (p->downstream_error) {
@@ -3395,9 +3415,9 @@ ngx_http_upstream_finalize_request(ngx_http_request_t *r,
 
     if (u->header_sent
         && rc != NGX_HTTP_REQUEST_TIME_OUT
-        && (rc == NGX_ERROR || rc >= NGX_HTTP_SPECIAL_RESPONSE))
+        && rc >= NGX_HTTP_SPECIAL_RESPONSE)
     {
-        rc = 0;
+        rc = NGX_ERROR;
     }
 
     if (rc == NGX_DECLINED) {

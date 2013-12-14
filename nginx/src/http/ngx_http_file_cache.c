@@ -432,6 +432,7 @@ ngx_http_file_cache_lock_wait_handler(ngx_event_t *ev)
     ngx_uint_t                 wait;
     ngx_msec_t                 timer;
     ngx_http_cache_t          *c;
+    ngx_connection_t          *conn;
     ngx_http_request_t        *r;
     ngx_http_file_cache_t     *cache;
 
@@ -471,7 +472,10 @@ wakeup:
 
     c->waiting = 0;
     r->main->blocked--;
-    r->connection->write->handler(r->connection->write);
+
+    conn = r->connection;
+    r->write_event_handler(r);
+    ngx_http_run_posted_requests(conn);
 }
 
 

@@ -333,6 +333,7 @@ ngx_http_lua_del_thread(ngx_http_request_t *r, lua_State *L,
     luaL_unref(L, -1, coctx->co_ref);
     coctx->co_ref = LUA_NOREF;
     coctx->co_status = NGX_HTTP_LUA_CO_DEAD;
+    coctx->co = NULL;
 
     lua_pop(L, 1);
 }
@@ -365,6 +366,7 @@ ngx_http_lua_del_all_threads(ngx_http_request_t *r, lua_State *L,
                 ctx->uthreads--;
             }
 
+            cc->co = NULL;
             cc->co_status = NGX_HTTP_LUA_CO_DEAD;
         }
 
@@ -403,6 +405,7 @@ ngx_http_lua_del_all_threads(ngx_http_request_t *r, lua_State *L,
                 luaL_unref(L, -1, ref);
                 cc[i].co_ref = LUA_NOREF;
                 cc[i].co_status = NGX_HTTP_LUA_CO_DEAD;
+                cc[i].co = NULL;
                 ctx->uthreads--;
 
                 if (ctx->uthreads == 0) {
@@ -428,6 +431,7 @@ ngx_http_lua_del_all_threads(ngx_http_request_t *r, lua_State *L,
         luaL_unref(L, -1, entry_coctx->co_ref);
         entry_coctx->co_ref = LUA_NOREF;
         entry_coctx->co_status = NGX_HTTP_LUA_CO_DEAD;
+        entry_coctx->co = NULL;
     }
 
     if (inited) {
@@ -2259,7 +2263,13 @@ ngx_http_lua_handle_exit(lua_State *L, ngx_http_request_t *r,
 
     ngx_http_lua_request_cleanup(ctx, 0);
 
-    if (ctx->buffering && r->headers_out.status) {
+    if (ctx->buffering
+        && r->headers_out.status
+        && ctx->exit_code != NGX_ERROR
+        && ctx->exit_code != NGX_HTTP_REQUEST_TIME_OUT
+        && ctx->exit_code != NGX_HTTP_CLIENT_CLOSED_REQUEST
+        && ctx->exit_code != NGX_HTTP_CLOSE)
+    {
         rc = ngx_http_lua_send_chain_link(r, ctx, NULL /* indicate last_buf */);
 
         if (rc == NGX_ERROR || rc >= NGX_HTTP_SPECIAL_RESPONSE) {

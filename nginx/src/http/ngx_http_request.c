@@ -8,6 +8,7 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_http.h>
+#include <ngx_http_probe.h>
 
 
 static void ngx_http_wait_request_handler(ngx_event_t *ev);
@@ -895,6 +896,8 @@ ngx_http_process_request_line(ngx_event_t *rev)
             r->request_line.data = r->request_start;
             r->request_length = r->header_in->pos - r->request_start;
 
+            ngx_http_probe_read_req_line_done(r);
+
             ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
                            "http request line: \"%V\"", &r->request_line);
 
@@ -1254,6 +1257,8 @@ ngx_http_process_request_headers(ngx_event_t *rev)
             if (hh && hh->handler(r, h, hh->offset) != NGX_OK) {
                 return;
             }
+
+            ngx_http_probe_read_req_header_done(r, h);
 
             ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                            "http header: \"%V: %V\"",
@@ -1951,11 +1956,11 @@ ngx_http_set_virtual_server(ngx_http_request_t *r, ngx_str_t *host)
     ngx_int_t                  rc;
     ngx_http_connection_t     *hc;
     ngx_http_core_loc_conf_t  *clcf;
-    ngx_http_core_srv_conf_t  *cscf;
+    ngx_http_core_srv_conf_t  *cscf = NULL;
 
     hc = r->http_connection;
 
-#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+#if (NGX_HTTP_SSL && defined SSL_CTRL_SET_TLSEXT_HOSTNAME)
 
     if (hc->ssl_servername) {
         if (hc->ssl_servername->len == host->len
@@ -1986,7 +1991,7 @@ ngx_http_set_virtual_server(ngx_http_request_t *r, ngx_str_t *host)
         return NGX_ERROR;
     }
 
-#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+#if (NGX_HTTP_SSL && defined SSL_CTRL_SET_TLSEXT_HOSTNAME)
 
     if (hc->ssl_servername) {
         ngx_http_ssl_srv_conf_t  *sscf;
@@ -2053,7 +2058,7 @@ ngx_http_find_virtual_server(ngx_connection_t *c,
 
         sn = virtual_names->regex;
 
-#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+#if (NGX_HTTP_SSL && defined SSL_CTRL_SET_TLSEXT_HOSTNAME)
 
         if (r == NULL) {
             ngx_http_connection_t  *hc;
@@ -2085,7 +2090,7 @@ ngx_http_find_virtual_server(ngx_connection_t *c,
             return NGX_DECLINED;
         }
 
-#endif /* SSL_CTRL_SET_TLSEXT_HOSTNAME */
+#endif /* NGX_HTTP_SSL && defined SSL_CTRL_SET_TLSEXT_HOSTNAME */
 
         for (i = 0; i < virtual_names->nregex; i++) {
 
@@ -2225,7 +2230,11 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
     }
 
     if (r != r->main && r->post_subrequest) {
+        ngx_http_probe_subrequest_post_start(r, rc);
+
         rc = r->post_subrequest->handler(r, r->post_subrequest->data, rc);
+
+        ngx_http_probe_subrequest_post_done(r, rc);
     }
 
     if (rc == NGX_ERROR
@@ -2275,6 +2284,8 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
 
         if (r->buffered || r->postponed) {
 
+            ngx_http_probe_subrequest_finalize_writing(r);
+
             if (ngx_http_set_write_handler(r) != NGX_OK) {
                 ngx_http_terminate_request(r, 0);
             }
@@ -2311,9 +2322,13 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
                 pr->postponed = pr->postponed->next;
             }
 
+            ngx_http_probe_subrequest_done(r);
+
             c->data = pr;
 
         } else {
+
+            ngx_http_probe_subrequest_finalize_nonactive(r);
 
             ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
                            "http finalize non-active request: \"%V?%V\"",
@@ -2325,6 +2340,8 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
                 r->done = 1;
             }
         }
+
+        ngx_http_probe_subrequest_wake_parent(r);
 
         if (ngx_http_post_request(pr, NULL) != NGX_OK) {
             r->main->count++;
