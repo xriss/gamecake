@@ -6,6 +6,7 @@
 #include "all.h"
 
 
+#ifdef USE_GRD_PNG
 
 #define abort_(x) { err=x; goto bogus; }
 
@@ -367,3 +368,4 @@ bogus:
 	if(err) {g->err=err;} else {g->err=0; }
 }
 
+#endif

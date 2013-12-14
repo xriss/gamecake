@@ -46,7 +46,7 @@
 
 
     function luasetup() {
-      naclmod.postMessage('lua\n return require("wetgenes.win").nacl_start("bulb.zip") ');
+      naclmod.postMessage('lua\n return require("wetgenes.win").nacl_start("swpaint.zip") ');
 
 		var requestAnimationFrame = (function(){
 	// it may be nice to use these, but they seem to degrade performance...
@@ -92,20 +92,11 @@ return				  function(callback,element){
       listener.addEventListener('message', handleMessage, true);
     </script>
 
-<!--
     <embed name="nacl_module"
            id="naclmod"
            src="bin/dbg/gamecake.nmf"
            type="application/x-pnacl"
            style=" width:100%; height:100%; position:relative; "/>
--->
-
-    <embed name="nacl_module"
-           id="naclmod"
-           src="bin/dbg/gamecake.32.nmf"
-           type="application/x-nacl"
-           style=" width:100%; height:100%; position:relative; "/>
-
 
   </div>
 

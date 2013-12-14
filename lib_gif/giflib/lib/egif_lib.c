@@ -25,10 +25,12 @@ two modules will be linked.  Preserve this property!
 #include "gif_lib.h"
 #include "gif_lib_private.h"
 
+#ifdef NACL
+#else
 # define S_IREAD        S_IRUSR
 # define S_IWRITE       S_IWUSR
 # define S_IEXEC        S_IXUSR
-
+#endif
 
 /* Masks given codes to BitsPerPixel, to make sure all codes are in range: */
 /*@+charint@*/
