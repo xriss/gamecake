@@ -80,6 +80,8 @@ static int ngx_http_lua_ngx_re_gmatch_iterator(lua_State *L);
 static ngx_uint_t ngx_http_lua_ngx_re_parse_opts(lua_State *L,
     ngx_http_lua_regex_compile_t *re, ngx_str_t *opts, int narg);
 static int ngx_http_lua_ngx_re_sub_helper(lua_State *L, unsigned global);
+static int ngx_http_lua_ngx_re_match_helper(lua_State *L, int wantcaps);
+static int ngx_http_lua_ngx_re_find(lua_State *L);
 static int ngx_http_lua_ngx_re_match(lua_State *L);
 static int ngx_http_lua_ngx_re_gmatch(lua_State *L);
 static int ngx_http_lua_ngx_re_sub(lua_State *L);
@@ -107,6 +109,20 @@ static void ngx_http_lua_re_collect_named_captures(lua_State *L,
 
 static int
 ngx_http_lua_ngx_re_match(lua_State *L)
+{
+    return ngx_http_lua_ngx_re_match_helper(L, 1 /* want captures */);
+}
+
+
+static int
+ngx_http_lua_ngx_re_find(lua_State *L)
+{
+    return ngx_http_lua_ngx_re_match_helper(L, 0 /* want captures */);
+}
+
+
+static int
+ngx_http_lua_ngx_re_match_helper(lua_State *L, int wantcaps)
 {
     /* u_char                      *p; */
     ngx_http_request_t          *r;
@@ -158,8 +174,11 @@ ngx_http_lua_ngx_re_match(lua_State *L)
             lua_getfield(L, 4, "pos");
             if (lua_isnumber(L, -1)) {
                 pos = (ngx_int_t) lua_tointeger(L, -1);
-                if (pos < 0) {
+                if (pos <= 0) {
                     pos = 0;
+
+                } else {
+                    pos--;  /* 1-based on the Lua land */
                 }
 
             } else if (lua_isnil(L, -1)) {
@@ -285,8 +304,11 @@ ngx_http_lua_ngx_re_match(lua_State *L)
         dd("compile failed");
 
         lua_pushnil(L);
+        if (!wantcaps) {
+            lua_pushnil(L);
+        }
         lua_pushlstring(L, (char *) re_comp.err.data, re_comp.err.len);
-        return 2;
+        return wantcaps ? 2 : 3;
     }
 
 #if (LUA_HAVE_PCRE_JIT)
@@ -492,7 +514,19 @@ exec:
 
     dd("rc = %d", (int) rc);
 
-    lua_createtable(L, rc - 1 /* narr */, 1 /* nrec */);
+    if (nargs == 4) { /* having ctx table */
+        pos = cap[1];
+        lua_pushinteger(L, (lua_Integer) (pos + 1));
+        lua_setfield(L, 4, "pos");
+    }
+
+    if (!wantcaps) {
+        lua_pushinteger(L, cap[0] + 1);
+        lua_pushinteger(L, cap[1]);
+        return 2;
+    }
+
+    lua_createtable(L, rc /* narr */, 0 /* nrec */);
 
     for (i = 0, n = 0; i < rc; i++, n += 2) {
         dd("capture %d: %d %d", i, cap[n], cap[n + 1]);
@@ -512,12 +546,6 @@ exec:
     if (name_count > 0) {
         ngx_http_lua_re_collect_named_captures(L, name_table, name_count,
                                                name_entry_size, flags, &subj);
-    }
-
-    if (nargs == 4) { /* having ctx table */
-        pos = cap[1];
-        lua_pushinteger(L, (lua_Integer) pos);
-        lua_setfield(L, 4, "pos");
     }
 
     if (!(flags & NGX_LUA_RE_COMPILE_ONCE)) {
@@ -548,8 +576,11 @@ error:
     }
 
     lua_pushnil(L);
+    if (!wantcaps) {
+        lua_pushnil(L);
+    }
     lua_pushstring(L, msg);
-    return 2;
+    return wantcaps ? 2 : 3;
 }
 
 
@@ -1013,7 +1044,7 @@ ngx_http_lua_ngx_re_gmatch_iterator(lua_State *L)
 
     dd("rc = %d", (int) rc);
 
-    lua_createtable(L, rc - 1 /* narr */, 1 /* nrec */);
+    lua_createtable(L, rc /* narr */, 0 /* nrec */);
 
     for (i = 0, n = 0; i < rc; i++, n += 2) {
         dd("capture %d: %d %d", i, cap[n], cap[n + 1]);
@@ -1807,7 +1838,10 @@ ngx_http_lua_inject_regex_api(lua_State *L)
 {
     /* ngx.re */
 
-    lua_createtable(L, 0, 4 /* nrec */);    /* .re */
+    lua_createtable(L, 0, 5 /* nrec */);    /* .re */
+
+    lua_pushcfunction(L, ngx_http_lua_ngx_re_find);
+    lua_setfield(L, -2, "find");
 
     lua_pushcfunction(L, ngx_http_lua_ngx_re_match);
     lua_setfield(L, -2, "match");

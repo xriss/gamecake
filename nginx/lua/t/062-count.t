@@ -339,7 +339,7 @@ n = 1
 --- request
 GET /test
 --- response_body
-n = 1
+n = 2
 --- no_error_log
 [error]
 
@@ -359,7 +359,7 @@ n = 1
 --- request
 GET /test
 --- response_body
-n = 4
+n = 5
 --- no_error_log
 [error]
 
@@ -387,7 +387,7 @@ probe process("$LIBLUA_PATH").function("rehashtab") {
 --- stap_out2
 3
 --- response_body
-coroutine: 10
+coroutine: 14
 --- no_error_log
 [error]
 

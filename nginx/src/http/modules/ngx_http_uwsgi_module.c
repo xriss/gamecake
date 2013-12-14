@@ -46,6 +46,7 @@ static ngx_int_t ngx_http_uwsgi_process_header(ngx_http_request_t *r);
 static void ngx_http_uwsgi_abort_request(ngx_http_request_t *r);
 static void ngx_http_uwsgi_finalize_request(ngx_http_request_t *r,
     ngx_int_t rc);
+static ngx_int_t ngx_http_uwsgi_input_filter_init(void *data);
 
 static void *ngx_http_uwsgi_create_loc_conf(ngx_conf_t *cf);
 static char *ngx_http_uwsgi_merge_loc_conf(ngx_conf_t *cf, void *parent,
@@ -478,6 +479,8 @@ ngx_http_uwsgi_handler(ngx_http_request_t *r)
 
     u->pipe->input_filter = ngx_event_pipe_copy_input_filter;
     u->pipe->input_ctx = r;
+
+    u->input_filter_init = ngx_http_uwsgi_input_filter_init;
 
     rc = ngx_http_read_client_request_body(r, ngx_http_upstream_init);
 
@@ -1091,6 +1094,17 @@ ngx_http_uwsgi_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
                    "finalize http uwsgi request");
 
     return;
+}
+
+
+static ngx_int_t
+ngx_http_uwsgi_input_filter_init(void *data)
+{
+    ngx_http_request_t    *r = data;
+
+    r->upstream->length = -1;
+
+    return NGX_OK;
 }
 
 

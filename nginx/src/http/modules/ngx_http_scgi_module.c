@@ -39,6 +39,7 @@ static ngx_int_t ngx_http_scgi_process_status_line(ngx_http_request_t *r);
 static ngx_int_t ngx_http_scgi_process_header(ngx_http_request_t *r);
 static void ngx_http_scgi_abort_request(ngx_http_request_t *r);
 static void ngx_http_scgi_finalize_request(ngx_http_request_t *r, ngx_int_t rc);
+static ngx_int_t ngx_http_scgi_input_filter_init(void *data);
 
 static void *ngx_http_scgi_create_loc_conf(ngx_conf_t *cf);
 static char *ngx_http_scgi_merge_loc_conf(ngx_conf_t *cf, void *parent,
@@ -445,6 +446,8 @@ ngx_http_scgi_handler(ngx_http_request_t *r)
 
     u->pipe->input_filter = ngx_event_pipe_copy_input_filter;
     u->pipe->input_ctx = r;
+
+    u->input_filter_init = ngx_http_scgi_input_filter_init;
 
     rc = ngx_http_read_client_request_body(r, ngx_http_upstream_init);
 
@@ -1057,6 +1060,17 @@ ngx_http_scgi_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
                    "finalize http scgi request");
 
     return;
+}
+
+
+static ngx_int_t
+ngx_http_scgi_input_filter_init(void *data)
+{
+    ngx_http_request_t    *r = data;
+
+    r->upstream->length = -1;
+
+    return NGX_OK;
 }
 
 
