@@ -311,9 +311,12 @@ require("gles").CheckError() -- uhm this fixes an error?
 			oven.preloader_enabled=false -- disabled preloader after first setup completes
 		end
 
-		oven.do_start=false
+		oven.started=false -- keep track of startstop state
+		oven.do_start=false -- flag start
 		function oven.start()	
 			oven.do_start=false
+			if oven.started then return end -- already started
+			oven.started=true
 
 			oven.win:start()
 			oven.cake.start()
@@ -326,10 +329,10 @@ require("gles").CheckError() -- uhm this fixes an error?
 				oven.preloader_enabled=false
 			end
 
-
 		end
 
 		function oven.stop()
+			if not oven.started then return end
 --print("stop preloader=on")
 			oven.rebake(opts.preloader or "wetgenes.gamecake.spew.preloader").reset()
 			oven.preloader_enabled="stop"
@@ -339,6 +342,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 			if oven.now and oven.now.stop then
 				oven.now.stop()
 			end
+			oven.started=false
 		end
 
 		function oven.clean()
@@ -348,6 +352,15 @@ require("gles").CheckError() -- uhm this fixes an error?
 		end
 
 		function oven.update()
+
+			if oven.do_backtrace then
+				oven.do_backtrace=false
+				if oven.update_co then
+					print( debug.traceback(oven.update_co) ) -- debug where we are?
+				else
+					print( debug.traceback() ) -- debug where we are?
+				end
+			end
 
 			if oven.update_co then -- just continue coroutine until it ends
 				if coroutine.status(oven.update_co)~="dead" then
@@ -427,25 +440,26 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 --			oven.preloader_enabled=false
 --		end
 		
-		function oven.preloader(...)
-			local s=table.concat({...}," ") or ""
-print("Loading : "..s)
-			if not oven.preloader_enabled then return end
+		function oven.preloader(sa,sb)
+			sa=sa or ""
+			sb=sb or ""
+print(sa.." : "..sb)
 
 			if wwin.flavour=="nacl" then
-				wwin.hardcore.print("Loading : "..s)
+				wwin.hardcore.print(sa.." : "..sb)
 				if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
 					coroutine.yield()
 				end
 				return
 			end
 
+			if not oven.preloader_enabled then return end
+
 			if oven.win and oven.rebake("wetgenes.gamecake.images").get("fonts/basefont_8x8") then
-				
 
 				local p=oven.rebake(opts.preloader or "wetgenes.gamecake.spew.preloader")
 				p.setup() -- warning, this is called repeatedly
-				p.update(s)
+				p.update(sa,sb)
 				
 				if not oven.preloader_time or ( oven.win:time() > ( oven.preloader_time + (1/60) ) ) then -- avoid frame limiting
 				
@@ -457,6 +471,7 @@ print("Loading : "..s)
 						oven.cake.canvas.draw()
 						p.draw()
 						oven.win:swap()
+						oven.cake.images.adjust_mips() -- upgrade visible only
 					end
 
 					if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
@@ -501,7 +516,7 @@ print("Loading : "..s)
 
 			if oven.win then
 				oven.win:swap()
-				oven.cake.images.adjust_mips()
+				oven.cake.images.adjust_mips({force=true}) -- upgrade all textures
 			end
 			
 		end
@@ -510,6 +525,13 @@ print("Loading : "..s)
 
 			if oven.win then
 				for m in oven.win:msgs() do
+
+--[[
+if m.class=="key" and m.keyname=="menu" and m.action==1 then
+print("requesting backtrace")
+	oven.do_backtrace=true
+end
+]]
 
 					if m.class=="mouse" and m.x and m.y then	-- need to fix x,y numbers
 						m.xraw,m.yraw=m.x,m.y					-- remember original
@@ -522,15 +544,13 @@ print("Loading : "..s)
 					if m.class=="app" then -- androidy
 print("caught : ",m.class,m.cmd)
 						if		m.cmd=="init_window" then
-							oven.do_start=true --do not clog up the message loop by running start here
-							oven.paused=false
-						elseif	m.cmd=="lost_focus"  then
-							oven.paused=true
+							oven.do_start=true
 						elseif	m.cmd=="gained_focus"  then
-							oven.paused=false
+							oven.focus=true
+						elseif	m.cmd=="lost_focus"  then
+							oven.focus=false
 						elseif	m.cmd=="term_window"  then
-							oven.paused=true
-							oven.stop()
+							oven.do_stop=true
 						end
 					end
 						
@@ -556,6 +576,11 @@ print("caught : ",m.class,m.cmd)
 -- eg oven.serv_pulse to be called when necesary.
 		function oven.serv(oven)
 		
+			if wwin.flavour~="android" then -- android needs lots of complexity due to its "lifecycle" bollox
+				oven.focus=true -- hack, default to focused
+				oven.do_start=true
+			end
+			
 			if oven.win.noblock then
 				return oven -- and expect  serv_pulse to be called as often as possible
 			end
@@ -571,10 +596,17 @@ print("caught : ",m.class,m.cmd)
 			oven.msgs()
 			
 			oven.cake.update()
+			
+			if oven.do_stop then
+				oven.do_stop=false
+				oven.stop()
+			end
 
-			if not oven.paused then
+			if ( oven.started or oven.do_start ) and oven.focus then -- rolling or ready to roll
 				oven.update()
-				oven.draw()
+				if oven.started then -- can draw?
+					oven.draw()
+				end
 			else
 				if wwin.hardcore.sleep then
 					wwin.hardcore.sleep(1/10)

@@ -36,19 +36,19 @@ end
 
 sheets.start=function()
 	for i,v in pairs(sheets.data) do -- refresh image data after a stop
-		if v.img_id and not v.img then
-			v.img=images.get(v.img_id)
-			if v.img then
+--		if v.img_id and not v.img then
+--			v.img=images.get(v.img_id)
+			if v.img and not v.vbuf then
 				v:build_vbuf()
 			end
-		end
+--		end
 	end
 	
 end
 
 sheets.stop=function()
 	for i,v in pairs(sheets.data) do -- forget everything
-		v.img=nil
+--		v.img=nil
 		v:free_vbuf()
 	end
 end
@@ -232,6 +232,8 @@ function base_sheet.batch_stop(sheet)
 end
 
 function base_sheet.draw(sheet,i,px,py,rz,sx,sy,zf)
+
+--	if not sheet.vbuf then base_sheet.build_vbuf(sheet) end -- may need to rebuild?
 
 	zf=zf or 0 -- allow z fix hacks
 

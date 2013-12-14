@@ -166,9 +166,9 @@ end
 main.msg=function(m)
 end
 
-main.update=function(title)
+main.update=function(sa,title)
 
-	main.title=title or ""
+	main.title=title or sa or ""
 	
 	local s=t_randumbs[math.random(1,#t_randumbs)]
 	local t={}

@@ -66,7 +66,8 @@ images.reload=function(id)
 	end
 
 	if t then
-print("RELOAD",t.id,t.mip)
+oven.preloader("reload",t.id)
+--print("RELOAD",t.id,t.mip)
 		images.upload(t) -- upload to GL
 	end
 end
@@ -114,6 +115,8 @@ images.prep_image=function(t)
 			local lson=zips.readfile(images.prefix..t.filename..".00.lua")
 			if lson then -- check for lua mips metadata
 				t.mips=assert(wsbox.lson(lson)) -- return it with the image
+				t.max_mips=t.mips.mip
+				if t.max_mips > images.max_mips then t.max_mips=images.max_mips end
 			end
 
 			t.fext=t.mips.ext
@@ -215,7 +218,6 @@ images.aloc_gl_data=function(t,mip)
 		if mip<4 then mip=4 end -- minimum mip of 4
 		if mip>t.mips.mip then mip=t.mips.mip end -- clamp to max mip available
 		
-		local m=t.mips[4]
 		dataname=images.prefix..t.filename..((".%02d"):format(mip))..t.fext
 	end
 	
@@ -272,10 +274,11 @@ images.load=function(filename,id,fg)
 	t.fg=fg
 	t.id=id
 	t.binds=0 -- count binds, so we can guess which textures are currently in use
-	t.mip=8 -- start with a 256x256 base texture size?
+	t.mip=4 -- start with a 256x256 base texture size?
+	t.max_mips=images.max_mips
 
 --print("loading",filename,id)
-oven.preloader(filename)
+oven.preloader("load",filename)
 
 	t.filename=filename
 	
@@ -354,14 +357,27 @@ images.upload = function(t)
 
 	if not t.gl then
 		t.gl=assert(gl.GenTexture())
-		t.glactive=true
+		t.gl_active=true
+		t.gl_mip=0 -- force change
 	end
 
+	local mip=t.mip
+	if t.mips then
+		if mip<4 then mip=4 end -- minimum mip of 4
+		if mip>t.mips.mip then mip=t.mips.mip end -- clamp to max mip available
+	end
+
+	if t.gl_mip==mip then -- no need to change
+		return
+	end
+	
+	t.gl_mip=mip
+	
 	images.bind_and_set_parameters(t)
 	
 	if t.width==0 or t.height==0 then return t end -- no data to upload
 
-	images.aloc_gl_data(t,t.mip) -- update gl_* params
+	images.aloc_gl_data(t,t.gl_mip) -- update gl_* params
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
 		0,
@@ -416,17 +432,21 @@ images.bind = function(t)
 	if t then
 		t.binds=t.binds+1
 		images.active=true
-		images.make_better(t)
+--		images.make_better(t)
+		if not t.gl then
+			images.upload(t) -- may need to upload to gl hardware?
+		end
 		gl.BindTexture( gl.TEXTURE_2D , t.gl or 0 )
 	else
 		gl.BindTexture( gl.TEXTURE_2D , 0 )
 	end
 end
 
-images.min_mips=1
+images.min_mips=4
 images.max_mips=16
 -- check stats and adjust the used images to higher rez and unused to lower
-images.adjust_mips = function()
+images.adjust_mips = function(args)
+	args=args or {}
 
 	local best
 	local worst
@@ -435,6 +455,8 @@ images.adjust_mips = function()
 
 	images.gl_mem=0
 	
+	local bet
+	
 	for n,t in pairs(images.data) do
 
 		if t.gl then
@@ -442,31 +464,47 @@ images.adjust_mips = function()
 		end
 		
 		if t.binds==0 then
-			t.glactive=false
+			t.gl_active=false
 		else
-			t.glactive=true
+			t.gl_active=true
+			if t.mip<t.max_mips then -- upgrade
+				bet=t
+			end
 		end
-
+		
 	end
 	
+
+	if (not bet) and args.force then -- find another texture
+		for n,t in pairs(images.data) do
+			if t.mip<t.max_mips then -- upgrade mip of all loaded textures?
+				bet=t
+				break
+			end
+		end
+	end
+
+
 	for n,t in pairs(images.data) do -- reset counters
 		t.binds=0
+	end
+	
+	if bet then
+		images.make_better(bet)
 	end
 
 	images.check_panic()
 	images.cando_panic()
 
+	images.loadblock=false
 end
 
 
 -- make this texture better (bigger)
 images.make_better = function(t)
-	if t.mip<images.max_mips then
-		t.mip=images.max_mips
+	if t.mip<t.max_mips then
+		t.mip=t.max_mips -- images.max_mips
 		images.reload(t.id)
-	end
-	if not t.gl then -- unless we have lost the gl
-		images.upload(t) -- may need to upload to gl hardware
 	end
 end
 
@@ -491,16 +529,16 @@ images.cando_panic=function()
 		return images.panic()
 	end
 end
-images.panic = function()
+images.panic = function(args)
 
 print("GL PANIC old memory ",images.gl_mem/(1024*1024))	
 
 	images.flag_panic=false
 	
-	local mild=false
+	local mild=args and args.mild or false
 
 	for n,t in pairs(images.data) do -- check for mild panic first
-		if not t.glactive and t.gl then mild=true end
+		if not t.gl_active and t.gl then mild=true end
 	end
 
 	if mild then -- mild panic
@@ -508,7 +546,7 @@ print("GL PANIC old memory ",images.gl_mem/(1024*1024))
 print("GL MILD MEMORY PANIC",images.max_mips)
 
 		for n,t in pairs(images.data) do -- unload inactive textures
-			if not t.glactive then
+			if not t.gl_active then
 				images.unload(t)
 			end
 		end
@@ -522,12 +560,13 @@ print("GL MILD MEMORY PANIC",images.max_mips)
 print("GL SEVERE MEMORY PANIC",images.max_mips)
 		
 		for n,t in pairs(images.data) do -- unload all textures
-			if t.mip>images.max_mips then t.mip=images.max_mips end
+			if t.max_mips>images.max_mips then t.max_mips=images.max_mips end
+			if t.mip>t.max_mips then t.mip=t.max_mips end
 			images.unload(t)
 		end
 
-		for n,t in pairs(images.data) do -- reload active textures at lower rez
-			if t.glactive then
+		for n,t in pairs(images.data) do -- reload active textures at new lower rez
+			if t.gl_active then
 				images.reload(t)
 			end
 		end

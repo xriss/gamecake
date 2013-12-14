@@ -24,6 +24,7 @@ function M.bake(oven,sounds)
 	local opts=oven.opts
 	local cake=oven.cake
 
+--opts.disable_sounds=true
 
 	local sfxmax=opts.sfxmax or 4
 	local strmax=opts.strmax or 2
@@ -135,7 +136,7 @@ sounds.load_speak=function(tab,id)
 	
 	sounds.set(t,id) -- remember
 
-oven.preloader(id)
+oven.preloader("speak",id)
 
 end
 
@@ -209,7 +210,7 @@ end
 	og:close()
 
 --print("loaded ogg",filename)
-oven.preloader(filename)
+oven.preloader("ogg",filename)
 
 	return t
 end
@@ -243,7 +244,7 @@ sounds.load=function(filename,id)
 	sounds.set(t,id) -- remember
 
 --print("loaded",filename)
-oven.preloader(filename)
+oven.preloader("wav",filename)
 
 	return t
 	
@@ -423,6 +424,8 @@ end
 
 
 sounds.update = function()
+
+	if not oven.focus then return end -- only play streams when focused
 
 	for i,v in ipairs(sounds.strs) do
 		v:update()
