@@ -4,8 +4,8 @@ cd `dirname $0`
 
 cd nginx
 
-../../../bin/dbg/nginx -p. -s stop
-../../../bin/dbg/nginx -p.
+../../../bin/exe/nginx -p. -s stop
+../../../bin/exe/nginx -p.
 
 echo http://host.local:9999
 

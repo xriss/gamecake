@@ -164,7 +164,7 @@ ALCcontext **context;
 	context = lua_alc_get_context_ptr (l,idx);
 	if(!*context)
 	{
-		luaL_error(l,"alc device is null");
+		luaL_error(l,"alc context is null");
 	}
 	return *context;
 }

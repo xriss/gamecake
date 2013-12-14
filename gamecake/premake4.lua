@@ -37,10 +37,14 @@ if RASPI then
 
 elseif NACL then
 
-	files { "../nacl/code/lua_force_import.c" }
+--	files { "../nacl/code/lua_force_import.c" }
 
-	linkoptions { "-v -O0" }
+--	linkoptions { "-v -O0" }
+	linkoptions { "-v" }
 	
+--use ports version...
+	links { "openal"  }
+
 	links { "ppapi"  }
 	links { "ppapi_gles2" }
 	links { "m" , "stdc++" }
@@ -48,7 +52,7 @@ elseif NACL then
 	links { "nosys" } -- remove newlib link errors
 	links { "nosys" } -- remove newlib link errors
 	
-	KIND{kind="WindowedApp",name="gamecake."..CPU..".nexe"}
+	KIND{kind="WindowedApp",name="gamecake.pexe"}
 
 elseif ANDROID then 
 

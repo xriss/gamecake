@@ -59,13 +59,6 @@ newgcctoolchain {
     cppflags = "",
 }
 
-newgcctoolchain {
-    name = "nacl",
-    description = "nacl",
-    prefix = "i686-nacl-",
-    cppflags = "",
-}
-
 
 newgcctoolchain {
     name = "mingw",
@@ -81,6 +74,17 @@ newplatform {
         cc = "clang",
         cxx = "clang++",
         ar= "ar",
+        cppflags = "-MMD",
+    }
+}
+
+newplatform {
+    name = "nacl",
+    description = "nacl",
+    gcc = {
+        cc = "pnacl-clang",
+        cxx = "pnacl-clang++",
+        ar= "pnacl-ar",
         cppflags = "-MMD",
     }
 }
@@ -169,14 +173,27 @@ print("TARGET == "..TARGET.." " ..CPU )
 
 if NACL then
 
-	local naclsdk=path.getabsolute("../sdks/nacl-sdk/pepper_28")
+	local naclsdk=path.getabsolute("../sdks/nacl-sdk/pepper_32")
 
 	platforms { "nacl" } --hax
 	
 	defines "NACL"
 	
 	includedirs { naclsdk.."/include" }
+--	includedirs { naclsdk.."/ports/include" }
 
+-- libs to link
+	configuration {"Debug"}
+	libdirs { naclsdk.."/ports/lib/newlib_pnacl/Debug" }
+	libdirs { naclsdk.."/lib/pnacl/Debug" }
+
+	configuration {"Release"}
+	libdirs { naclsdk.."/ports/lib/newlib_pnacl/Release" }
+	libdirs { naclsdk.."/lib/pnacl/Release" }
+
+	configuration {}
+
+--[[
 	if CPU=="32" then
 	
 		buildoptions{"-m32"}
@@ -188,6 +205,7 @@ if NACL then
 		linkoptions{"-m64"}
 		
 	end
+]]
 	
 elseif RASPI then
 
@@ -609,7 +627,7 @@ all_includes=all_includes or {
 	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
 	{"lib_vorbis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		},
+	{"lib_openal",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	nil		},
 
 	{"gamecake",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"nginx",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
