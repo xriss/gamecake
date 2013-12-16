@@ -214,6 +214,10 @@ function base_sheet.build_vbuf(sheet)
 	return sheet
 end
 
+function base_sheet.bind(sheet)
+	images.bind(sheet.img)
+end
+
 function base_sheet.batch_draw(sheet)
 
 	images.bind(sheet.img)
