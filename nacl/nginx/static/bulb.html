@@ -46,7 +46,7 @@
 
 
     function luasetup() {
-      naclmod.postMessage('lua\n return require("wetgenes.win").nacl_start("bulb.zip") ');
+      naclmod.postMessage('lua\n return require("wetgenes.win").nacl_start({zips={"bulb.zip"},disable_sounds=true}) ');
 
 		var requestAnimationFrame = (function(){
 	// it may be nice to use these, but they seem to degrade performance...
