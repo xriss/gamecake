@@ -297,6 +297,8 @@ print("click",id)
 
 		local m=top:add({hx=320,hy=160})		
 		mkeys.setup_keyboard_widgets(m)
+
+		master.set_focus(master.ids["profile_name"])
 		
 		master.go_back_id="profile_name_set"
 		master.go_forward_id="profile_name_set"

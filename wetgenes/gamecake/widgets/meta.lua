@@ -393,7 +393,7 @@ end
 			if w==widget.master.active then return true end
 			w=w.parent
 			if w==widget.master.active then return true end
-		until w.parent==w.master -- reached top
+		until w.parent==w -- reached top
 		
 		return false
 	end
