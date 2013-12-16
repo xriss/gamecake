@@ -44,9 +44,13 @@ struct lua_nacl_callback
 	lua_State *l;
 	PP_Resource r;
 	
+	int result;
+
 	void *ret; // return this memory if not 0
 	int ret_size;
 	int ret_prog;
+	
+	int autofree;
 	
 	char state;
 };

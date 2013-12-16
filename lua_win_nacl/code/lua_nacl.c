@@ -464,6 +464,27 @@ struct PP_Var var_result;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// post sends a msg to the javascript side (need javascript side code to handle it)
+// I'm using a cmd=%s\n header, directly followed by custom data depending on the command
+// the idea is this is url encoded args on first line and cmd=blah is just the normal use
+// also remember js strings are 16bit not 8bit, so, you know, that is a bit shit.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_nacl_js_post(lua_State *l)
+{
+struct PP_Var var_result;
+
+	var_result = CStrToVar( lua_tostring(l,1) );
+
+	messaging_interface->PostMessage(nacl_instance, var_result);
+
+	var_interface->Release(var_result);
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // very basic but simple, get of data from a URL, needs a callback as it is async
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -479,6 +500,8 @@ int64_t prog = 0;
 int64_t size = 0;
 
 int finished=0;
+
+	cb->result=result;
 	
 	url_loader_interface->GetDownloadProgress(cb->r,&prog,&size);
 	
@@ -493,6 +516,7 @@ int finished=0;
 			cb->ret_prog=0;
 
 			url_loader_interface->ReadResponseBody(cb->r,cb->ret,cb->ret_size,*cb->pp);
+			lua_nacl_callback_func(user_data,0);
 			return;
 		}
 	}
@@ -505,18 +529,21 @@ int finished=0;
 			
 			if( cb->ret_prog >= cb->ret_size)
 			{
-				lua_nacl_callback_func(user_data,cb->ret_size);
+				lua_nacl_callback_func(user_data,0);
+				lua_nacl_callback_free(l,cb); // and free it
 				return;
 			}
 			else // keep loading
 			{
 				url_loader_interface->ReadResponseBody(cb->r,((char*)(cb->ret))+cb->ret_prog,cb->ret_size-cb->ret_prog,*cb->pp);
+				lua_nacl_callback_func(user_data,0);
 				return;
 			}
 		}
 	}
 	
-	lua_nacl_callback_func(user_data,result);
+	lua_nacl_callback_func(user_data,0);
+	lua_nacl_callback_free(l,cb); // and free it
 	return;
 }
 
@@ -551,6 +578,7 @@ struct PP_CompletionCallback callback = { lua_nacl_getURL_callback, NULL, PP_COM
 	cb->r=load;
 	cb->pp->func=lua_nacl_getURL_callback;
 	cb->state='h';
+	cb->autofree=0;
 	
 	ret=url_loader_interface->Open(load,req,*cb->pp);
 	
@@ -619,8 +647,10 @@ LUALIB_API int luaopen_wetgenes_win_nacl_core(lua_State *l)
 		
 		{	"context",						lua_nacl_context					},
 		{	"swap",							lua_nacl_swap						},
-		{	"print",						lua_nacl_print						},
 		{	"time",							lua_nacl_time						},
+
+		{	"js_post",						lua_nacl_js_post					},
+		{	"print",						lua_nacl_print						},
 
 		{	"info",							lua_nacl_info						},
 		
