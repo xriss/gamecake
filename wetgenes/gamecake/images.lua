@@ -89,6 +89,14 @@ end
 
 images.prep_image=function(t)
 
+-- record image flags at loadtime, so set any flags you want here in images.TEXTURE_*
+-- and they will be copied at this stage
+	t.TEXTURE_MIN_FILTER	=	images.TEXTURE_MIN_FILTER
+	t.TEXTURE_MAG_FILTER	=	images.TEXTURE_MAG_FILTER
+	t.TEXTURE_WRAP_S		=	images.TEXTURE_WRAP_S
+	t.TEXTURE_WRAP_T		=	images.TEXTURE_WRAP_T
+
+
 	local lson=zips.readfile(images.prefix..t.filename..".lua")
 	if lson then -- check for lua metadata
 		t.meta=wsbox.lson(lson) -- return it with the image
@@ -335,19 +343,14 @@ end
 images.uptwopow=uptwopow
 
 
-images.bind_and_set_parameters=function(t,minf,maxf,wraps,wrapt)
-
-	t.TEXTURE_WRAP_S=wraps
-	t.TEXTURE_WRAP_T=wrapt
-	t.TEXTURE_MIN_FILTER=minf
-	t.TEXTURE_MAX_FILTER=maxf
+images.bind_and_set_parameters=function(t)
 
 	gl.BindTexture( gl.TEXTURE_2D , t.gl )
 	
-	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,t.TEXTURE_MIN_FILTER or images.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
-	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,t.TEXTURE_MAG_FILTER or images.TEXTURE_MAG_FILTER or gl.LINEAR)
-	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,t.TEXTURE_WRAP_S or images.TEXTURE_WRAP_S or gl.CLAMP_TO_EDGE)
-	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,t.TEXTURE_WRAP_T or images.TEXTURE_WRAP_T or gl.CLAMP_TO_EDGE)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,t.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,t.TEXTURE_MAG_FILTER or gl.LINEAR)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	t.TEXTURE_WRAP_S or 	gl.CLAMP_TO_EDGE)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	t.TEXTURE_WRAP_T or 	gl.CLAMP_TO_EDGE)
 
 end
 

@@ -31,6 +31,8 @@ local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
 --
 function wmaster.setup(widget,def)
 
+	widget.solid=true -- catch background clicks
+
 	local master=widget
 	local meta=widget.meta
 --	local win=def.win

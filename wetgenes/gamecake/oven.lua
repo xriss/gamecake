@@ -31,6 +31,12 @@ function M.bake(opts)
 	local oven={}
 
 		oven.opts=opts or {}
+		
+		if type(opts[1])=="table" then -- probably passed in from nacl
+			for n,v in pairs(opts[1]) do -- copy it all into opts
+				opts[n]=v
+			end
+		end
 
 --print(wwin.flavour)
 
@@ -143,12 +149,14 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 			local doshow=opts.show
 			for i,v in ipairs(opts) do -- check extra options
-				if     v=="windowed" then
-					doshow="win"
-				elseif v=="fullscreen" then
-					doshow="full"
-				elseif v=="maximised" then
-					doshow="max"
+				if type(v)=="string" then
+					if     v=="windowed" then
+						doshow="win"
+					elseif v=="fullscreen" then
+						doshow="full"
+					elseif v=="maximised" then
+						doshow="max"
+					end
 				end
 			end
 			if doshow then oven.win:show(doshow) end

@@ -137,13 +137,13 @@ function win.keymap(key)
 	return win.generic_keymap[key] or key
 end
 
-function win.load_run_init()
+function win.load_run_init(args)
 
 	local zips=require("wetgenes.zips")
 
 -- Now load and run lua/init.lua which initalizes the window and runs the app
 
-	local s=zips.readfile("lua/init.lua")
+	local s=args.init or zips.readfile("lua/init.lua")
 	
 	assert(s) -- sanity, may want a seperate path for any missing init.lua ?
 
@@ -153,7 +153,7 @@ function win.load_run_init()
 	
 	local f=assert(loadstring(s))
 	
-	return f()
+	return f(args)
 
 end
 
@@ -197,7 +197,7 @@ function win.android_start(apk)
 
 --print("ANDROID_SETUP with ",apk)
 	
-	return win.load_run_init()
+	return win.load_run_init({})
 end
 
 
@@ -206,26 +206,67 @@ end
 -- this does things that must only happen once
 --
 local main -- gonna have to cache the main state here
-function win.nacl_start(url)
+function win.nacl_start(args)
 --	_G.print=hardcore.print
 --	print=_G.print
 	
---	print("nacl start ",url)
+--print("nacl start ")
+
+	if type(args)=="string" then -- just a zip name
+		args={zips={args}}
+	end
 
 	local zips=require("wetgenes.zips")
 	
 -- we want nacl msgs to go here.
 	_G.nacl_input_event=function(...) return hardcore.input_event(...) end
+	
+	local lastpct=-1
+	local loads={}
+	for i,v in ipairs(args.zips) do
+		loads[i]={v,100,0}
+	end
+	for i,v in ipairs(args.zips) do
+		hardcore.getURL(v,function(mem,total,progress)	
+			local l=loads[i]
+			
+			l[2]=total
+			l[3]=progress
+			
+			local t=0
+			local p=0
+			for i,v in ipairs(loads) do
+				t=t+v[2]
+				p=p+v[3]
+			end
 
-	hardcore.getURL(url,function(size,mem)	
---		print("nacl callback",size,mem)
-		
-		zips.add_zip_data(mem)
-		main=win.load_run_init()
+if args.progress then -- callback with progress
+	args.progress(t,p)
+else
+	local pct=math.floor(100*p/t)
+	if lastpct<pct then
+		print(pct) -- progress
+		lastpct=pct
+	end
+end
 
-	end)
+			if total<=progress then -- this file has loaded
 
---	print("nacl start done")
+				zips.add_zip_data(mem)
+
+				if t<=p then --all loaded
+					main=win.load_run_init(args)
+				end
+			end
+		end)		
+	end
+	
+	if not loads[1] then -- no zips?
+		main=win.load_run_init(args)
+	end
+	
+	
+--print("nacl start done")
 
 end
 

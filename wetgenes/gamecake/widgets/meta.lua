@@ -360,10 +360,11 @@ end
 					end
 				end
 
-			end
-			if (not widget.master.dragging()) or widget.master.active==widget then
---			if not widget.master.active or widget.master.active==widget then -- over widget
-				widget.master.over=widget
+				if (not widget.master.dragging()) or widget.master.active==widget then
+	--			if not widget.master.active or widget.master.active==widget then -- over widget
+					widget.master.over=widget
+				end
+
 			end
 
 			for i,v in ipairs(widget) do -- children must be within parent bounds to catch clicks
