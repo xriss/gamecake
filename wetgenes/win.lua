@@ -245,7 +245,7 @@ if args.progress then -- callback with progress
 else
 	local pct=math.floor(100*p/t)
 	if lastpct<pct then
-		print(pct) -- progress
+		hardcore.print(string.format("Preloading zips : %02d%%",pct)) -- progress
 		lastpct=pct
 	end
 end
