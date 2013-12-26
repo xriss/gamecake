@@ -161,19 +161,17 @@ end
 
 font.cache_begin = function()
 --print("font begine",tostring(font.dat))
+	local t={}
 	local old=font.cache
-	font.cache={}
+	font.cache=t
 	return function()
-print("font draw",#font.cache,tostring(font.dat))
-
-	gl.Color(1,1,1,1)	
-		if font.cache and font.cache[1] then
-
-print("font bind")
-			images.bind(font.dat.images[1])
-					
-			flat.tristrip("rawuvrgba",font.cache)
-
+		gl.Color(1,1,1,1)	
+		for d,v in pairs(t) do -- multifonts
+--print("font draw",#v,tostring(d))
+			if v[1] then
+				images.bind(d.images[1])
+				flat.tristrip("rawuvrgba",v)
+			end
 		end
 		
 		font.cache=old
@@ -183,13 +181,16 @@ end
 font.cache_predraw = function(text)
 
 	local font_dat=font.dat
+	local font_cache=font.cache[ font_dat ] or {}
+	font.cache[ font_dat ]=font_cache
+	
 	local s=font.size/font_dat.size
 	local x=font.x
 	local y=font.y
 
 	local insert=function(a,b,c,d,e,f,g,h,i)
-		local idx=#font.cache
-		local fc=font.cache
+		local idx=#font_cache
+		local fc=font_cache
 		fc[idx+1]=a	fc[idx+2]=b	fc[idx+3]=c
 		fc[idx+4]=d	fc[idx+5]=e
 		fc[idx+6]=f	fc[idx+7]=g	fc[idx+8]=h	fc[idx+9]=i			
@@ -419,9 +420,10 @@ flat.tristrip_predraw=flat.array_predraw
 -- 4 gives us a quad, and of course you can keep going to create a strip
 flat.tristrip = function(fmt,data,progname)
 
-	local it=flat.array_predraw({fmt=fmt,data=data,progname=progname,array=gl.TRIANGLE_STRIP})
-	it.draw()
-
+	if #data > 0 then
+		local it=flat.array_predraw({fmt=fmt,data=data,progname=progname,array=gl.TRIANGLE_STRIP})
+		it.draw()
+	end
 end
 
 

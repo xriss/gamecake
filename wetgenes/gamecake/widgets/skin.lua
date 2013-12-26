@@ -88,7 +88,7 @@ function wskin.load(name)
 --		if name=="soapbar" then
 			mode=mode or name
 			
-			images.TEXTURE_MIN_FILTER=gl.LINEAR -- disable mipmapping? it seems to feck draw33 up somehow?
+			images.TEXTURE_MIN_FILTER=gl.LINEAR -- disable mipmapping since GL picks the wrong mips in this case anyhow...
 			images.loads{
 				"wskins/"..name,
 			}
@@ -117,30 +117,62 @@ function wskin.setup(def)
 --	local font=--[[def.font]]def.state.cake.fonts.get(1)
 
 	
+local cache_arrays=nil
 local cache_array=nil
+local cache_binded=images.get("wskins/soapbar")
+
+
+local function cache_smart_bind(img)
+	if not img then
+		gl.BindTexture(gl.TEXTURE_2D, 0)
+	elseif img.gl then
+		images.bind(img)
+	else
+		gl.BindTexture(gl.TEXTURE_2D, img[1] )
+	end
+end
+
+local function cache_bind(img)
+	img=img or images.get("wskins/soapbar")
+	local old=cache_binded
+	cache_binded=img
+	if cache_arrays then
+		cache_array=cache_arrays[img]
+		if not cache_array then
+			cache_array={}
+			cache_arrays[img]=cache_array
+			cache_arrays[#cache_arrays+1]=img
+		end
+	else
+		cache_array=nil
+		cache_smart_bind(img)
+	end
+	return old
+end
 
 local function cache_begin()
 	local t={}
-	local old=cache_array
-	cache_array=t
+	local old=cache_arrays
+	cache_arrays=t
 
+	local oldb=cache_bind()
 	return function()
-		local mode="soapbar"
 		gl.Color(1,1,1,1)
-		images.bind(images.get("wskins/"..mode))
-		flat.tristrip("rawuvrgba",cache_array)
-		cache_array=old
+		for i,n in ipairs(cache_arrays) do
+			cache_smart_bind(n)
+			flat.tristrip("rawuvrgba",cache_arrays[n])
+		end
+		cache_arrays=old
+		cache_bind(oldb)
 	end
 end
 
 local function draw_quad(x1,y1,x2,y2,x3,y3,x4,y4)
 
-	local t
-	if cache_array then t=cache_array else t={} end
+	local t=cache_array or {}
+--	if cache_array then t=cache_array else t={} end
 	local function draw()
 		if cache_array then return end
-		local mode="soapbar"
-		images.bind(images.get("wskins/"..mode))
 		flat.tristrip("rawuvrgba",t)
 	end
 	local ht=#t
@@ -212,8 +244,7 @@ local function draw33(id,tw,th, mw,mh, vxs,vys, vw,vh)
 		local vhh={mh,vh-2*mh,mh}
 		
 
-			local t
-			if cache_array then t=cache_array else t={} end
+			local t=cache_array or {}
 			local function drawbox() -- draw all 9 parts in one go
 				if cache_array then return end
 				flat.tristrip("rawuvrgba",t)
@@ -334,7 +365,15 @@ end
 -- save draw matrix for later use, probably need to remove master.matrix from this before it is useful?
 widget.matrix=gl.SaveMatrix()
 
+--[[		
+		if widget.clip then
 		
+			gl.Scissor(0,0,1,1)
+			gl.Enable(gl.SCISSOR_TEST)
+print(gl.SCISSOR_TEST)
+		end
+]]		
+--[[
 		if widget.clip then
 
 --print("clip widget",widget,widget.px,widget.py,widget.id)		
@@ -356,7 +395,8 @@ widget.matrix=gl.SaveMatrix()
 
 --			gl.Translate(-widget.pxd,-widget.pyd,0)
 		end
-		
+]]
+
 		if widget.pan_px and widget.pan_py and not widget.fbo  then -- fidle everything
 --print("draw",widget.pan_px,widget.pan_py)
 			gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
@@ -405,10 +445,11 @@ local cache_draw=nil
 --			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
 
 
---			cache_draw=cache_begin()
---			sheets.batch_start()
---			font_cache_draw=font.cache_begin()
+			cache_draw=cache_begin()
+			sheets.batch_start()
+			font_cache_draw=font.cache_begin()
 		end
+
 		
 		widget.dirty=nil
 
@@ -421,17 +462,21 @@ if f then f(widget) end		-- this does the custom drawing
 				v:draw()
 			end
 		end
+		
+		
 
 		if widget.fbo then -- we have drawn into the fbo
 
 			gl.PopMatrix()
 
 			if cache_draw then
---				cache_draw()
---				sheets.batch_draw()
---				sheets.batch_stop()
+				cache_draw()
+				sheets.batch_stop()
+				sheets.batch_draw()
 			end
---			font_cache_draw()
+			if font_cache_draw then
+				font_cache_draw()
+			end
 			
 --			gl.PopMatrix()
 
@@ -466,18 +511,54 @@ else -- we can only draw once
 --			gl.Translate(widget.sx,-widget.sy,0)
 			gl.Color(1,1,1,1)
 			
-			widget.fbo:bind_texture()
+--			widget.fbo:bind_texture()
+
+			local old=cache_bind({widget.fbo.texture})
+
+			local t=cache_array or {}
+			
+			local ht=#t
+			
+			local r,g,b,a=gl.color_get_rgba()
+			local v1=gl.apply_modelview( {0,			0,				0,1} )
+			local v2=gl.apply_modelview( {widget.fbo.w,	0,				0,1} )
+			local v3=gl.apply_modelview( {0,			widget.fbo.h,	0,1} )
+			local v4=gl.apply_modelview( {widget.fbo.w,	widget.fbo.h,	0,1} )
+
+			for i,v in ipairs{
+				v1[1],	v1[2],	v1[3],	0,				widget.fbo.uvh,	r,g,b,a,	-- doubletap hack so we can start at any location
+				v1[1],	v1[2],	v1[3],	0,				widget.fbo.uvh,	r,g,b,a,
+				v2[1],	v2[2],	v2[3],	widget.fbo.uvw,	widget.fbo.uvh,	r,g,b,a,
+				v3[1],	v3[2],	v3[3],	0,				0, 				r,g,b,a,
+				v4[1],	v4[2],	v4[3],	widget.fbo.uvw,	0, 				r,g,b,a,
+				v4[1],	v4[2],	v4[3],	widget.fbo.uvw,	0,			 	r,g,b,a, -- doubletap hack so we can start at any location
+			} do
+				t[ht+i]=v
+			end
+
+			if not cache_array then
+				flat.tristrip("rawuvrgba",t)
+			end
+--[[
 			flat.tristrip("xyzuv",{
 				0,				0,				0,	0,widget.fbo.uvh,
 				widget.fbo.w,	0,				0,	widget.fbo.uvw,widget.fbo.uvh,
 				0,				widget.fbo.h,	0,	0,0,
 				widget.fbo.w,	widget.fbo.h,	0,	widget.fbo.uvw,0,
 			})
+]]
+			cache_bind(old)
 --print("draw fbo")
 		end
 		
 end
 
+--[[
+		if widget.clip then
+			gl.Disable(gl.SCISSOR_TEST)
+		end
+]]
+--[[
 		if widget.clip then
 		
 			widget.old_lay.restore() --restore old viewport
@@ -492,6 +573,7 @@ end
 			widget.old_lay=nil
 
 		end
+]]
 		
 		gl.PopMatrix()
 	

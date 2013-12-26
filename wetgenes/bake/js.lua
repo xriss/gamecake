@@ -180,10 +180,12 @@ print('****')
 else
 
 
+opts.compiler=opts.compiler or "../../js/class/compiler.jar" -- need a compiler jar to minify
+
 for i,v in ipairs(bake.files_min_js) do
 print('compressing '..v)
 	bake.execute( bake.cd_base , bake.cmd.java ,
-"-jar ../../js/class/compiler.jar --js_output_file "..bake.cd_out.."/"..v..".min.js --js "..bake.cd_out.."/"..v..".js")
+"-jar "..opts.compiler.." --js_output_file "..bake.cd_out.."/"..v..".min.js --js "..bake.cd_out.."/"..v..".js")
 
 end
 

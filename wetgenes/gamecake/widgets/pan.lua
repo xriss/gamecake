@@ -13,6 +13,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 function M.bake(oven,wpan)
+
+local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+
 wpan=wpan or {}
 
 function wpan.mouse(widget,act,x,y,key)
@@ -42,6 +45,7 @@ function wpan.setup(widget,def)
 	
 	widget.pan_px=0
 	widget.pan_py=0
+--	widget.clip=true
 	
 	widget.key=wpan.key
 	widget.mouse=wpan.mouse
@@ -49,6 +53,9 @@ function wpan.setup(widget,def)
 	widget.draw=wpan.draw
 	
 --	widget.fbo=_G.win.fbo(0,0,0)
+	widget.fbo=framebuffers.create(0,0,0)
+
+--	widget.clip=true
 
 	return widget
 end
