@@ -108,229 +108,192 @@ end
 --
 function wskin.setup(def)
 
---	load(def.win,"test")
-
-
 	local master=def.master
 	local meta=def.meta
 	local win=def.win
---	local font=--[[def.font]]def.state.cake.fonts.get(1)
 
 	
-local cache_arrays=nil
-local cache_array=nil
-local cache_binded=images.get("wskins/soapbar")
+	local cache_arrays=nil
+	local cache_array=nil
+	local cache_binded=nil --images.get("wskins/soapbar")
 
 
-local function cache_smart_bind(img)
-	if not img then
-		gl.BindTexture(gl.TEXTURE_2D, 0)
-	elseif img.gl then
-		images.bind(img)
-	else
-		gl.BindTexture(gl.TEXTURE_2D, img[1] )
-	end
-end
-
-local function cache_bind(img)
-	img=img or images.get("wskins/soapbar")
-	local old=cache_binded
-	cache_binded=img
-	if cache_arrays then
-		cache_array=cache_arrays[img]
-		if not cache_array then
-			cache_array={}
-			cache_arrays[img]=cache_array
-			cache_arrays[#cache_arrays+1]=img
-		end
-	else
-		cache_array=nil
-		cache_smart_bind(img)
-	end
-	return old
-end
-
-local function cache_begin()
-	local t={}
-	local old=cache_arrays
-	cache_arrays=t
-
-	local oldb=cache_bind()
-	return function()
-		gl.Color(1,1,1,1)
-		for i,n in ipairs(cache_arrays) do
-			cache_smart_bind(n)
-			flat.tristrip("rawuvrgba",cache_arrays[n])
-		end
-		cache_arrays=old
-		cache_bind(oldb)
-	end
-end
-
-local function draw_quad(x1,y1,x2,y2,x3,y3,x4,y4)
-
-	local t=cache_array or {}
---	if cache_array then t=cache_array else t={} end
-	local function draw()
-		if cache_array then return end
-		flat.tristrip("rawuvrgba",t)
-	end
-	local ht=#t
-
-	if y4 then
-		local r,g,b,a=gl.color_get_rgba()
-		local v1=gl.apply_modelview( {x1,y1,0,1} )
-		local v2=gl.apply_modelview( {x2,y2,0,1} )
-		local v3=gl.apply_modelview( {x4,y4,0,1} )
-		local v4=gl.apply_modelview( {x3,y3,0,1} )
-		for i,v in ipairs{
-			v1[1],v1[2],v1[3],		0.25,0.25,	r,g,b,a,
-			v1[1],v1[2],v1[3],		0.25,0.25,	r,g,b,a,
-			v2[1],v2[2],v2[3],		0.25,0.25,	r,g,b,a,
-			v3[1],v3[2],v3[3],		0.25,0.25,	r,g,b,a,
-			v4[1],v4[2],v4[3],		0.25,0.25,	r,g,b,a,
-			v4[1],v4[2],v4[3],		0.25,0.25,	r,g,b,a,
-		} do
-			t[ht+i]=v
-		end
-	else
-		local r,g,b,a=gl.color_get_rgba()
-		local v1=gl.apply_modelview( {x1,y1,0,1} )
-		local v2=gl.apply_modelview( {x2,y1,0,1} )
-		local v3=gl.apply_modelview( {x1,y2,0,1} )
-		local v4=gl.apply_modelview( {x2,y2,0,1} )
-		for i,v in ipairs{
-			v1[1],v1[2],v1[3],		0.25,0.25,	r,g,b,a,
-			v1[1],v1[2],v1[3],		0.25,0.25,	r,g,b,a,
-			v2[1],v2[2],v2[3],		0.25,0.25,	r,g,b,a,
-			v3[1],v3[2],v3[3],		0.25,0.25,	r,g,b,a,
-			v4[1],v4[2],v4[3],		0.25,0.25,	r,g,b,a,
-			v4[1],v4[2],v4[3],		0.25,0.25,	r,g,b,a,
-		} do
-			t[ht+i]=v
+	local function cache_smart_bind(img)
+		if not img then
+			gl.BindTexture(gl.TEXTURE_2D, 0)
+		elseif img.gl then
+			images.bind(img)
+		else
+			gl.BindTexture(gl.TEXTURE_2D, img[1] )
 		end
 	end
-	
-	draw()
-end
 
-
-local function draw33(id,tw,th, mw,mh, vxs,vys, vw,vh)
-
-	local uvs={
-		{0.0,0.0,0.5,0.5},
-		{0.5,0.0,0.5,0.5},
-		{0.0,0.5,0.5,0.5},
-		{0.5,0.5,0.5,0.5},
-	}
-	local uv=uvs[id]
-
-		
---		local vw,vh=512,52
---		local mw,mh=24,24
-
-		local force_tww,force_thh
-		
-		if mw*4>tw then twwidx=1 end -- mipmap hack for small buttons
-		if mh*4>th then thhidx=1 end
-
-		if mw*2 > vw then mw=vw/2 end
-		if mh*2 > vh then mh=vh/2 end
-
-		
-		local tww={mw/tw,(tw-2*mw)/tw,mw/tw}
-		local thh={mh/th,(th-2*mh)/th,mh/th}
-		local vww={mw,vw-2*mw,mw}
-		local vhh={mh,vh-2*mh,mh}
-		
-
-			local t=cache_array or {}
-			local function drawbox() -- draw all 9 parts in one go
-				if cache_array then return end
-				flat.tristrip("rawuvrgba",t)
+	local function cache_bind(img)
+		img=img or images.get("wskins/soapbar")
+		local old=cache_binded
+		cache_binded=img
+		if cache_arrays then
+			cache_array=cache_arrays[img]
+			if not cache_array then
+				cache_array={}
+				cache_arrays[img]=cache_array
+				cache_arrays[#cache_arrays+1]=img
 			end
-			local function tdrawbox( tx,ty, vx,vy , txp,typ, vxp,vyp )
+		else
+			cache_array=nil
+			cache_smart_bind(img)
+		end
+		return old
+	end
+
+	local function cache_begin()
+		local t={}
+		local old=cache_arrays
+		cache_arrays=t
+
+		local oldb=cache_bind()
+		return function()
+			gl.Color(1,1,1,1)
+			for i,n in ipairs(cache_arrays) do
+				cache_smart_bind(n)
+				flat.tristrip("rawuvrgba",cache_arrays[n])
+			end
+			cache_arrays=old
+			cache_bind(oldb)
+		end
+	end
+
+	local function draw_quad(x1,y1,x2,y2,x3,y3,x4,y4)
+
+		local t=cache_array or {}
+	--	if cache_array then t=cache_array else t={} end
+		local function draw()
+			if cache_array then return end
+			flat.tristrip("rawuvrgba",t)
+		end
+		local ht=#t
+
+		if y4 then
+			local r,g,b,a=gl.color_get_rgba()
+			local v1=gl.apply_modelview( {x1,y1,0,1} )
+			local v2=gl.apply_modelview( {x2,y2,0,1} )
+			local v3=gl.apply_modelview( {x4,y4,0,1} )
+			local v4=gl.apply_modelview( {x3,y3,0,1} )
+			for i,v in ipairs{
+				v1[1],v1[2],v1[3],		-2,-2,	r,g,b,a,
+				v1[1],v1[2],v1[3],		-2,-2,	r,g,b,a,
+				v2[1],v2[2],v2[3],		-2,-2,	r,g,b,a,
+				v3[1],v3[2],v3[3],		-2,-2,	r,g,b,a,
+				v4[1],v4[2],v4[3],		-2,-2,	r,g,b,a,
+				v4[1],v4[2],v4[3],		-2,-2,	r,g,b,a,
+			} do
+				t[ht+i]=v
+			end
+		else
+			local r,g,b,a=gl.color_get_rgba()
+			local v1=gl.apply_modelview( {x1,y1,0,1} )
+			local v2=gl.apply_modelview( {x2,y1,0,1} )
+			local v3=gl.apply_modelview( {x1,y2,0,1} )
+			local v4=gl.apply_modelview( {x2,y2,0,1} )
+			for i,v in ipairs{
+				v1[1],v1[2],v1[3],		-2,-2,	r,g,b,a,
+				v1[1],v1[2],v1[3],		-2,-2,	r,g,b,a,
+				v2[1],v2[2],v2[3],		-2,-2,	r,g,b,a,
+				v3[1],v3[2],v3[3],		-2,-2,	r,g,b,a,
+				v4[1],v4[2],v4[3],		-2,-2,	r,g,b,a,
+				v4[1],v4[2],v4[3],		-2,-2,	r,g,b,a,
+			} do
+				t[ht+i]=v
+			end
+		end
+		
+		draw()
+	end
+
+
+	local function draw33(id,tw,th, mw,mh, vxs,vys, vw,vh)
+
+		local uvs={
+			{0.0,0.0,0.5,0.5},
+			{0.5,0.0,0.5,0.5},
+			{0.0,0.5,0.5,0.5},
+			{0.5,0.5,0.5,0.5},
+		}
+		local uv=uvs[id]
+
 			
-				tx=tx*uv[3]+uv[1]
-				ty=ty*uv[4]+uv[2]
-				txp=txp*uv[3]
-				typ=typ*uv[4]
+	--		local vw,vh=512,52
+	--		local mw,mh=24,24
+
+			local force_tww,force_thh
 			
-				local ht=#t
-				
-				local r,g,b,a=gl.color_get_rgba()
-				local v1=gl.apply_modelview( {vx,vy,0,1} )
-				local v2=gl.apply_modelview( {vx+vxp,vy,0,1} )
-				local v3=gl.apply_modelview( {vx,vy+vyp,0,1} )
-				local v4=gl.apply_modelview( {vx+vxp,vy+vyp,0,1} )
-				
---[[
-				for i,v in ipairs{
-					vx,		vy,		0,	tx,		ty, 		1,1,1,1,	-- doubletap hack so we can start at any location
-					vx,		vy,		0,	tx,		ty, 		1,1,1,1,
-					vx+vxp,	vy,		0,	tx+txp,	ty, 		1,1,1,1,
-					vx,		vy+vyp,	0,	tx,		ty+typ, 	1,1,1,1,
-					vx+vxp,	vy+vyp,	0,	tx+txp,	ty+typ, 	1,1,1,1,
-					vx+vxp,	vy+vyp,	0,	tx+txp,	ty+typ, 	1,1,1,1, -- doubletap hack so we can start at any location
-]]
-				for i,v in ipairs{
-					v1[1],	v1[2],	v1[3],	tx,		ty, 		r,g,b,a,	-- doubletap hack so we can start at any location
-					v1[1],	v1[2],	v1[3],	tx,		ty, 		r,g,b,a,
-					v2[1],	v2[2],	v2[3],	tx+txp,	ty, 		r,g,b,a,
-					v3[1],	v3[2],	v3[3],	tx,		ty+typ, 	r,g,b,a,
-					v4[1],	v4[2],	v4[3],	tx+txp,	ty+typ, 	r,g,b,a,
-					v4[1],	v4[2],	v4[3],	tx+txp,	ty+typ, 	r,g,b,a, -- doubletap hack so we can start at any location
-				} do
-					t[ht+i]=v
+			if mw*4>tw then twwidx=1 end -- mipmap hack for small buttons
+			if mh*4>th then thhidx=1 end
+
+			if mw*2 > vw then mw=vw/2 end
+			if mh*2 > vh then mh=vh/2 end
+
+			
+			local tww={mw/tw,(tw-2*mw)/tw,mw/tw}
+			local thh={mh/th,(th-2*mh)/th,mh/th}
+			local vww={mw,vw-2*mw,mw}
+			local vhh={mh,vh-2*mh,mh}
+			
+
+				local t=cache_array or {}
+				local function drawbox() -- draw all 9 parts in one go
+					if cache_array then return end
+					flat.tristrip("rawuvrgba",t)
 				end
-			end
-			
---[[
-			if invert then -- draw inverted texture, sometimes useful as it flips highlights
-				tdrawbox=function ( tx,ty, vx,vy , txp,typ, vxp,vyp )
-
-					tx=(1-tx)*uv[3]+uv[1]
-					ty=(1-ty)*uv[4]+uv[2]
-					txp=-txp*uv[3]
-					typ=-typ*uv[4]
-
+				local function tdrawbox( tx,ty, vx,vy , txp,typ, vxp,vyp )
+				
+					tx=tx*uv[3]+uv[1]
+					ty=ty*uv[4]+uv[2]
+					txp=txp*uv[3]
+					typ=typ*uv[4]
+				
 					local ht=#t
+					
+					local r,g,b,a=gl.color_get_rgba()
+					local v1=gl.apply_modelview( {vx,vy,0,1} )
+					local v2=gl.apply_modelview( {vx+vxp,vy,0,1} )
+					local v3=gl.apply_modelview( {vx,vy+vyp,0,1} )
+					local v4=gl.apply_modelview( {vx+vxp,vy+vyp,0,1} )
+					
 					for i,v in ipairs{
-						vx,		vy,		0,	tx,		ty, -- doubletap hack so we can start at any location
-						vx,		vy,		0,	tx,		ty,
-						vx+vxp,	vy,		0,	tx+txp,	ty,
-						vx,		vy+vyp,	0,	tx,		ty+typ,
-						vx+vxp,	vy+vyp,	0,	tx+txp,	ty+typ,
-						vx+vxp,	vy+vyp,	0,	tx+txp,	ty+typ, -- doubletap hack so we can start at any location
+						v1[1],	v1[2],	v1[3],	tx,		ty, 		r,g,b,a,	-- doubletap hack so we can start at any location
+						v1[1],	v1[2],	v1[3],	tx,		ty, 		r,g,b,a,
+						v2[1],	v2[2],	v2[3],	tx+txp,	ty, 		r,g,b,a,
+						v3[1],	v3[2],	v3[3],	tx,		ty+typ, 	r,g,b,a,
+						v4[1],	v4[2],	v4[3],	tx+txp,	ty+typ, 	r,g,b,a,
+						v4[1],	v4[2],	v4[3],	tx+txp,	ty+typ, 	r,g,b,a, -- doubletap hack so we can start at any location
 					} do
 						t[ht+i]=v
 					end
 				end
-			end
-]]
-			
-		local tx,ty=0,0
-		local vx,vy=vxs,vys-- -vw/2,vh/2
+							
+			local tx,ty=0,0
+			local vx,vy=vxs,vys-- -vw/2,vh/2
 
-			for iy=1,3 do
-				tx=0
-				vx=vxs-- -vw/2
-				for ix=1,3 do
+				for iy=1,3 do
+					tx=0
+					vx=vxs-- -vw/2
+					for ix=1,3 do
 
-					tdrawbox( tx,ty, vx,vy , tww[twwidx or ix],thh[thhidx or iy], vww[ix],vhh[iy] ) -- fake texture sample to con mipmap mode
+						tdrawbox( tx,ty, vx,vy , tww[twwidx or ix],thh[thhidx or iy], vww[ix],vhh[iy] ) -- fake texture sample to con mipmap mode
 
-					tx=tx+tww[ix]
-					vx=vx+vww[ix]
+						tx=tx+tww[ix]
+						vx=vx+vww[ix]
+					end
+					ty=ty+thh[iy]
+					vy=vy+vhh[iy]
 				end
-				ty=ty+thh[iy]
-				vy=vy+vhh[iy]
-			end
 
-		drawbox()
+			drawbox()
 
 
-end
-	
+	end
+		
 --
 -- display this widget and its sub widgets
 --
@@ -363,39 +326,7 @@ end
 
 
 -- save draw matrix for later use, probably need to remove master.matrix from this before it is useful?
-widget.matrix=gl.SaveMatrix()
-
---[[		
-		if widget.clip then
-		
-			gl.Scissor(0,0,1,1)
-			gl.Enable(gl.SCISSOR_TEST)
-print(gl.SCISSOR_TEST)
-		end
-]]		
---[[
-		if widget.clip then
-
---print("clip widget",widget,widget.px,widget.py,widget.id)		
-
-			widget.lay=layouts.create{parent2={x=0,y=0,w=widget.master.hx,h=widget.master.hy},
-				x=widget.pxd,
-				y=widget.pyd,
-				w=widget.hx,
-				h=widget.hy}
-			
-			gl.MatrixMode(gl.PROJECTION)
-			gl.PushMatrix()
-			
-			gl.MatrixMode(gl.MODELVIEW)
-			gl.PushMatrix()
-
-
-			widget.old_lay=widget.lay.apply(true) -- forced size
-
---			gl.Translate(-widget.pxd,-widget.pyd,0)
-		end
-]]
+		widget.matrix=gl.SaveMatrix()
 
 		if widget.pan_px and widget.pan_py and not widget.fbo  then -- fidle everything
 --print("draw",widget.pan_px,widget.pan_py)
@@ -435,35 +366,30 @@ local cache_draw=nil
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
---			gl.Translate(-widget.px*wsx,-widget.py*wsy,0)
---			gl.Translate(-widget.pxd,-widget.pyd,0)
 			if widget.pan_px and widget.pan_py then -- fidle everything
 				gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
 			end
 			
 			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
---			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
 
 
-			cache_draw=cache_begin()
-			sheets.batch_start()
-			font_cache_draw=font.cache_begin()
+--			cache_draw=cache_begin()
+--			sheets.batch_start()
+--			font_cache_draw=font.cache_begin()
 		end
 
 		
 		widget.dirty=nil
 
 		
-if f then f(widget) end		-- this does the custom drawing
+		if f then f(widget) end		-- this does the custom drawing
 		
 
 		for i,v in ipairs(widget) do -- iterate on children
 			if not v.fbo or not v.dirty then -- terminate recursion at dirty fbo
 				v:draw()
 			end
-		end
-		
-		
+		end		
 
 		if widget.fbo then -- we have drawn into the fbo
 
@@ -477,15 +403,9 @@ if f then f(widget) end		-- this does the custom drawing
 			if font_cache_draw then
 				font_cache_draw()
 			end
-			
---			gl.PopMatrix()
-
---			widget.layout.clean()
-
 
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 			
-
 			widget.old_lay.restore() --restore old viewport
 			gl.MatrixMode(gl.PROJECTION)
 			gl.PopMatrix()			
@@ -497,21 +417,16 @@ if f then f(widget) end		-- this does the custom drawing
 			widget.old_lay=nil
 			
 			widget.fbo:mipmap()
---			print(widget.class,widget.hx,widget.hy,widget.id)
 		end
 		
 else -- we can only draw once
 
 		if widget.fbo then -- we need to draw our cached fbo
---print("draw fbo"..wstr.dump(widget.fbo))
 		
 			gl.Disable(gl.DEPTH_TEST)
 			gl.Disable(gl.CULL_FACE)
 		
---			gl.Translate(widget.sx,-widget.sy,0)
 			gl.Color(1,1,1,1)
-			
---			widget.fbo:bind_texture()
 
 			local old=cache_bind({widget.fbo.texture})
 
@@ -539,44 +454,13 @@ else -- we can only draw once
 			if not cache_array then
 				flat.tristrip("rawuvrgba",t)
 			end
---[[
-			flat.tristrip("xyzuv",{
-				0,				0,				0,	0,widget.fbo.uvh,
-				widget.fbo.w,	0,				0,	widget.fbo.uvw,widget.fbo.uvh,
-				0,				widget.fbo.h,	0,	0,0,
-				widget.fbo.w,	widget.fbo.h,	0,	widget.fbo.uvw,0,
-			})
-]]
 			cache_bind(old)
---print("draw fbo")
+
 		end
 		
 end
 
---[[
-		if widget.clip then
-			gl.Disable(gl.SCISSOR_TEST)
-		end
-]]
---[[
-		if widget.clip then
-		
-			widget.old_lay.restore() --restore old viewport
-			
-			gl.MatrixMode(gl.PROJECTION)
-			gl.PopMatrix()			
-			gl.MatrixMode(gl.MODELVIEW)
-			gl.PopMatrix()
-
-
-			widget.lay=nil
-			widget.old_lay=nil
-
-		end
-]]
-		
 		gl.PopMatrix()
-	
 		
 		return widget
 		

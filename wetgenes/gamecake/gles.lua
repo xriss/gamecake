@@ -154,7 +154,14 @@ varying vec4  v_color;
 
 void main(void)
 {
-	gl_FragColor=texture2D(tex, v_texcoord) * v_color ;
+	if( v_texcoord[0] <= -1.0 ) // special uv request to ignore the texture (use -2 as flag)
+	{
+		gl_FragColor=v_color ;
+	}
+	else
+	{
+		gl_FragColor=texture2D(tex, v_texcoord) * v_color ;
+	}
 }
 
 	]]
@@ -169,7 +176,14 @@ varying vec4  v_color;
 
 void main(void)
 {
-	gl_FragColor=texture2D(tex, v_texcoord) * v_color ;
+	if( v_texcoord[0] <= -1.0 ) // special uv request to ignore the texture (use -2 as flag)
+	{
+		gl_FragColor=v_color ;
+	}
+	else
+	{
+		gl_FragColor=texture2D(tex, v_texcoord) * v_color ;
+	}
 	if((gl_FragColor.a)<0.25) discard;
 }
 
