@@ -286,11 +286,12 @@ nacl_instance=instance;
   if (message == NULL) { return; }
   
   struct PP_Var var_result = PP_MakeUndefined();
-  if (strncmp(message, "lua\n", strlen("lua\n")) == 0)
+  int slen=strlen("cmd=lua\n");
+  if (strncmp(message, "cmd=lua\n", slen) == 0)
   {
 		int top=lua_gettop(L);
 		
-		dostringr(L,message+4,message+4);
+		dostringr(L,message+slen,message+slen);
 		if(lua_isnumber(L,-1))
 		{
 			var_result = PP_MakeDouble( lua_tonumber(L,-1) );
@@ -302,6 +303,9 @@ nacl_instance=instance;
 		}
 		
 		lua_settop(L,top);
+  }
+  else
+  {
   }
   free(message);
 
@@ -361,7 +365,7 @@ int lua_nacl_context (lua_State *l)
 									  
   int32_t attribs[] = {
 //        PP_GRAPHICS3DATTRIB_ALPHA_SIZE,     8,
-//        PP_GRAPHICS3DATTRIB_DEPTH_SIZE,     24,
+        PP_GRAPHICS3DATTRIB_DEPTH_SIZE,     24,
 //        PP_GRAPHICS3DATTRIB_STENCIL_SIZE,   8,
 //        PP_GRAPHICS3DATTRIB_SAMPLES,      0,
 //        PP_GRAPHICS3DATTRIB_SAMPLE_BUFFERS,   0,
