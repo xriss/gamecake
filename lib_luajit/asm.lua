@@ -81,8 +81,10 @@ local function build(mode)
 	os.execute("cp src/jit/vmdef.lua asm/"..mode.."/vmdef.lua")
 
 	os.execute("cp src/libluajit.a libs/"..mode.."/")
-	os.execute("cp src/luajit.o libs/"..mode.."/")		-- windows only
 
+	if mode=="win32" then
+		os.execute("cp src/luajit.o libs/"..mode.."/")		-- windows only
+	end
 
 	os.execute("make clean ")
 
