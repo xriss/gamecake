@@ -195,6 +195,9 @@ else
 
 	files { "../gamecake/*.c" }
 	
+-- link in luajit that was compiled externaly
+if LUA_LIBDIRS then	libdirs(LUA_LIBDIRS) end
+if LUA_LINKS   then links  (LUA_LINKS)   end
 
 	links(static_lib_names)
 

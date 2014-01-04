@@ -1,3 +1,4 @@
+--[=[
 
 project "lib_luajit"
 language "C"
@@ -129,4 +130,6 @@ end
 defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
 KIND() -- set defaults
+
+]=]
 
