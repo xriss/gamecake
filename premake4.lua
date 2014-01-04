@@ -518,25 +518,20 @@ end
 
 LIB_LUA="lib_lua" -- default 
 
-if RASPI or ANDROID then -- luajit is working for these builds
+if RASPI or ANDROID or NIX or MINGW then -- luajit is working for these builds
 
 	LIB_LUA="lib_luajit"
 	defines( "LIB_LUAJIT" )
-	
-elseif NIX then
-
---	if CPU=="32" then
-		LIB_LUA="lib_luajit"
-		defines( "LIB_LUAJIT" )	
---	end
 
 end
 
 -- make sure we have the right headers
 if LIB_LUA=="lib_lua" then
+
 	includedirs { "lib_lua/src" }
 	LUALINKS= nil
--- assume we have a prebuilt luajit
+
+-- assume we have a prebuilt luajit, use asm.lua in luajit to build them all.
 else
 	includedirs { "lib_luajit/src" }
 	
@@ -550,6 +545,10 @@ else
 	elseif ANDROID then
 
 		LUA_LIBDIRS={ "../lib_luajit/libs/arm/" }
+
+	elseif MINGW then
+
+		LUA_LIBDIRS={ "../lib_luajit/libs/win32/" }
 
 	elseif CPU=="64" then
 		

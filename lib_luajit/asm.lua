@@ -52,11 +52,15 @@ local function build(mode)
 		
 	elseif mode=="arm" then -- android, make sure the flags are shared with the main build
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 \" CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi- TARGET_CFLAGS=\" -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3 \" ")
+		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3  \" HOST_CC=\"gcc -m32 \" CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi- ")
 
 	elseif mode=="armhf" then -- raspi, make sure the flags are shared with the main build
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 \" CROSS=/home/kriss/hg/sdks/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf- TARGET_CFLAGS=\" -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s \" ")
+		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s \" HOST_CC=\"gcc -m32 \" CROSS=/home/kriss/hg/sdks/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf- ")
+
+	elseif mode=="win32" then -- windows 32bit
+
+		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 \" CROSS=i586-mingw32msvc- TARGET_SYS=Windows ")
 
 	end
 
@@ -73,6 +77,7 @@ local function build(mode)
 	os.execute("cp src/jit/vmdef.lua asm/"..mode.."/vmdef.lua")
 
 	os.execute("cp src/libluajit.a libs/"..mode.."/")
+	os.execute("cp src/luajit.o libs/"..mode.."/")		-- windows only
 
 
 	os.execute("make clean ")
@@ -95,5 +100,7 @@ else
 	build("armhf")
 
 	build("x64")
+
+	build("win32")
 
 end
