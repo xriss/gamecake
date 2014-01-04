@@ -64,7 +64,7 @@ local function build(mode)
 
 	elseif mode=="osx" then -- osx 32bit, this must be run on the mac...
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" ")
+		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 \" ")
 
 	end
 
