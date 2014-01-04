@@ -540,27 +540,31 @@ if LIB_LUA=="lib_lua" then
 else
 	includedirs { "lib_luajit/src" }
 	
+	LUA_LINKS= { "luajit" }
+
+
 	if RASPI then -- hardfloat for raspbian
 
-		LUALINKS= { "lib_luajit/libs/armhf/libluajit.a" }
+		LUA_LIBDIRS={ "../lib_luajit/libs/armhf/" }
 
 	elseif ANDROID then
 
-		LUALINKS=  { "lib_luajit/libs/arm/libluajit.a" }
+		LUA_LIBDIRS={ "../lib_luajit/libs/arm/" }
 
-	else
-
-		if CPU=="64" then
+	elseif CPU=="64" then
 		
-			LUALINKS=  { "lib_luajit/libs/x64/libluajit.a" }
+		LUA_LIBDIRS={ "../lib_luajit/libs/x64/" }
 
-		else
-		
-			LUALINKS=  { "lib_luajit/libs/x86/libluajit.a" }
-
-		end
+	elseif CPU=="32" then
 	
+		LUA_LIBDIRS= { "../lib_luajit/libs/x86/"  }
+	
+	else
+	
+		LUA_LIBDIRS= { "../lib_luajit/libs/native/"  }
+
 	end
+
 end
 
 
