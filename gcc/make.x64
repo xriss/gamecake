@@ -1,0 +1,22 @@
+cd `dirname $0`
+cd ..
+
+cpu=64
+makeopts="config=release"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug"
+fi
+
+
+if [ "$1" = "clean" ] ; then
+
+        rm -rf build-gmake-nix-$cpu
+        exit
+fi
+
+
+
+build/premake4 gmake nix-$cpu
+cd build-gmake-nix-$cpu
+make $makeopts $2 $3 $4
+cd ..

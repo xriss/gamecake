@@ -1,0 +1,24 @@
+EXPORTS
+	luaopen_luagl
+	luagl_initconst
+	luagl_get_enum
+  luagl_get_arrayb
+  luagl_get_arrayi
+  luagl_get_arrayui
+  luagl_get_arrayd
+  luagl_get_arrayf
+  luagl_get_arrayuc
+  luagl_get_array2uc
+  luagl_get_array2d
+  luagl_get_array2f
+  luagl_str2mask
+  luagl_mask2str
+  luagl_get_gl_enum
+  luagl_checkboolean
+  luagl_checkuserdata
+  luagl_push_arrayuc
+  luagl_push_arrayb
+  luagl_push_arrayui
+  luagl_push_arrayi
+  luagl_push_arrayf
+  luagl_push_arrayd
