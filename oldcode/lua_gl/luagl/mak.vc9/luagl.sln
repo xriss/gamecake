@@ -1,0 +1,43 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luagl_dll", "luagl_dll.vcproj", "{7243E30E-52D9-384A-91A2-C8783F1F808B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luagl_lib", "luagl_lib.vcproj", "{D7488B96-456A-1E46-8B0B-0F698E025694}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luaglu_dll", "luaglu_dll.vcproj", "{7243E30E-52D9-384A-ABCD-C8783F1F808B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7243E30E-52D9-384A-91A2-C8783F1F808B} = {7243E30E-52D9-384A-91A2-C8783F1F808B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luaglu_lib", "luaglu_lib.vcproj", "{D7488B96-456A-1E46-ABCD-0F698E025694}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7488B96-456A-1E46-8B0B-0F698E025694} = {D7488B96-456A-1E46-8B0B-0F698E025694}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7243E30E-52D9-384A-91A2-C8783F1F808B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7243E30E-52D9-384A-91A2-C8783F1F808B}.Debug|Win32.Build.0 = Debug|Win32
+		{7243E30E-52D9-384A-91A2-C8783F1F808B}.Release|Win32.ActiveCfg = Release|Win32
+		{7243E30E-52D9-384A-91A2-C8783F1F808B}.Release|Win32.Build.0 = Release|Win32
+		{D7488B96-456A-1E46-8B0B-0F698E025694}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D7488B96-456A-1E46-8B0B-0F698E025694}.Debug|Win32.Build.0 = Debug|Win32
+		{D7488B96-456A-1E46-8B0B-0F698E025694}.Release|Win32.ActiveCfg = Release|Win32
+		{D7488B96-456A-1E46-8B0B-0F698E025694}.Release|Win32.Build.0 = Release|Win32
+		{7243E30E-52D9-384A-ABCD-C8783F1F808B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7243E30E-52D9-384A-ABCD-C8783F1F808B}.Debug|Win32.Build.0 = Debug|Win32
+		{7243E30E-52D9-384A-ABCD-C8783F1F808B}.Release|Win32.ActiveCfg = Release|Win32
+		{7243E30E-52D9-384A-ABCD-C8783F1F808B}.Release|Win32.Build.0 = Release|Win32
+		{D7488B96-456A-1E46-ABCD-0F698E025694}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D7488B96-456A-1E46-ABCD-0F698E025694}.Debug|Win32.Build.0 = Debug|Win32
+		{D7488B96-456A-1E46-ABCD-0F698E025694}.Release|Win32.ActiveCfg = Release|Win32
+		{D7488B96-456A-1E46-ABCD-0F698E025694}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,2 @@
+cd `dirname $0`
+../../sdks/android-9-arm/bin/arm-linux-androideabi-addr2line -e libs/armeabi-v7a/liblua.so $*

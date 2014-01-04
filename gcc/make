@@ -1,0 +1,28 @@
+cd `dirname $0`
+
+#switch to 64bit build?
+test=`getconf LONG_BIT`
+if [ "$test" = "64" ] ; then
+	./make.x64 $*
+	exit
+fi
+
+cd ..
+
+cpu=32
+makeopts="config=release"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug"
+fi
+
+
+if [ "$1" = "clean" ] ; then
+
+        rm -rf build-gmake-nix-$cpu
+        exit
+fi
+
+build/premake4 gmake nix-$cpu
+cd build-gmake-nix-$cpu
+make $makeopts $2 $3 $4
+cd ..
