@@ -518,7 +518,7 @@ end
 
 LIB_LUA="lib_lua" -- default 
 
-if RASPI or ANDROID or NIX or MINGW then -- luajit is working for these builds
+if RASPI or ANDROID or NIX or MINGW or OSX then -- luajit is working for these builds
 
 	LIB_LUA="lib_luajit"
 	defines( "LIB_LUAJIT" )
@@ -549,6 +549,10 @@ else
 	elseif MINGW then
 
 		LUA_LIBDIRS={ "../lib_luajit/libs/win32/" }
+
+	elseif OSX then
+
+		LUA_LIBDIRS={ "../lib_luajit/libs/osx/" }
 
 	elseif CPU=="64" then
 		
