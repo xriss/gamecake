@@ -525,18 +525,42 @@ if RASPI or ANDROID then -- luajit is working for these builds
 	
 elseif NIX then
 
-	if CPU=="32" then
+--	if CPU=="32" then
 		LIB_LUA="lib_luajit"
 		defines( "LIB_LUAJIT" )	
-	end
+--	end
 
 end
 
 -- make sure we have the right headers
 if LIB_LUA=="lib_lua" then
 	includedirs { "lib_lua/src" }
+	LUALINKS= nil
+-- assume we have a prebuilt luajit
 else
 	includedirs { "lib_luajit/src" }
+	
+	if RASPI then -- hardfloat for raspbian
+
+		LUALINKS= { "lib_luajit/libs/armhf/libluajit.a" }
+
+	elseif ANDROID then
+
+		LUALINKS=  { "lib_luajit/libs/arm/libluajit.a" }
+
+	else
+
+		if CPU=="64" then
+		
+			LUALINKS=  { "lib_luajit/libs/x64/libluajit.a" }
+
+		else
+		
+			LUALINKS=  { "lib_luajit/libs/x86/libluajit.a" }
+
+		end
+	
+	end
 end
 
 
