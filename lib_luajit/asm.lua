@@ -34,12 +34,19 @@ LUALIB_API void luaL_openlibs(lua_State *L)
 
 local function build(mode)
 
+	os.execute("mkdir libs/"..mode.."/")
+	os.execute("mkdir asm/"..mode.."/")
+
 	os.execute("make clean ")
 
 	if mode=="x86" then -- these are local hacks for when I bump the luajit version
 
 		os.execute("make amalg HOST_CC=\"gcc -m32\" ")
+		
+	elseif mode=="x64" then
 
+		os.execute("make amalg HOST_CC=\"gcc -m64\" ")
+		
 	elseif mode=="arm" then -- android, make sure the flags are shared with the main build
 
 		os.execute("make amalg HOST_CC=\"gcc -m32\" CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi- TARGET_CFLAGS=\" -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3 \" ")
@@ -62,16 +69,28 @@ local function build(mode)
 	end
 	os.execute("cp src/jit/vmdef.lua asm/"..mode.."/vmdef.lua")
 
+	os.execute("cp src/libluajit.* libs/"..mode.."/")
+
+
 	os.execute("make clean ")
 
 end
 
 
+local args={...}
 
-build("x86")
+if args[1] then
 
-build("arm")
+	build(args[1])
 
-build("armhf")
+else
 
+	build("x86")
 
+	build("arm")
+
+	build("armhf")
+
+	build("x64")
+
+end

@@ -16,6 +16,8 @@ links(static_lib_names) -- so good, so good, we linked it twice...
 
 --print("LIBS TO LINK ",table.concat(static_lib_names,","))
 
+if LUALINKS then links(LUALINKS) end
+
 
 if RASPI then
 	

@@ -3,9 +3,11 @@ project "lib_luajit"
 language "C"
 
 files {
-	"src/*.h",
+--	"src/*.h",
+	
+	"libluajit.a"
 
-	"src/ljamalg.c",
+--	"src/ljamalg.c",
 
 --[[	
 	"src/lj_vmmath.c",
@@ -90,22 +92,39 @@ asm.lua builds cached code in the asm dir, needs to be run if we bump the code
 
 if RASPI then -- hardfloat for raspbian
 
-	includedirs { "asm/armhf" }
-	files { "asm/armhf/lj_vm.s" }
+includedirs { "libs/armhf" }
+
+--	includedirs { "asm/armhf" }
+--	files { "asm/armhf/lj_vm.s" }
 
 elseif ANDROID then
 
-	includedirs { "asm/arm" }
-	files { "asm/arm/lj_vm.s" }
+includedirs { "libs/arm" }
+
+--	includedirs { "asm/arm" }
+--	files { "asm/arm/lj_vm.s" }
 
 else
 
-	includedirs { "asm/x86" }
-	files { "asm/x86/lj_vm.s" }
+	if CPU=="64" then
+	
+includedirs { "libs/x64" }
+
+--		includedirs { "asm/x64" }
+--		files { "asm/x86/lj_vm.s" }
+		
+	else
+	
+includedirs { "libs/x86" }
+
+--		includedirs { "asm/x86" }
+--		files { "asm/x86/lj_vm.s" }
+		
+	end
 	
 end
 
-includedirs { "src" }
+--includedirs { "src" }
 
 defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
