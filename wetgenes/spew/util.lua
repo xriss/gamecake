@@ -18,7 +18,7 @@ local tonumber=tonumber
 --
 --
 -----------------------------------------------------------------------------
-module("spew.util")
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
 -----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ end
 -- replace any %xx with the intended char, eg "%20" becomes a " "
 --
 -----------------------------------------------------------------------------
-function url_decode(str)
+function M.url_decode(str)
     return string.gsub(str, "%%(%x%x)", function(hex)
         return string.char(tonumber(hex, 16))
     end)
@@ -65,7 +65,7 @@ end
 -- replace % , & and = chars with %xx codes
 --
 -----------------------------------------------------------------------------
-function url_encode(str)
+function M.url_encode(str)
     return string.gsub(str, "([&=%%])", function(c)
         return string.format("%%%02x", string.byte(c))
     end)
@@ -78,7 +78,7 @@ end
 -- if last is passed in then this table is adjusted rather than a new table being created
 --
 -----------------------------------------------------------------------------
-function str_to_msg(str,last)
+function M.str_to_msg(str,last)
 local msg=last or {}
 local arr
 local set
@@ -93,7 +93,7 @@ local set
 			
 			if set[1] and set[2] then
 			
-				msg[ set[1] ]=url_decode(set[2])
+				msg[ set[1] ]=M.url_decode(set[2])
 			end
 			
 		end
@@ -110,7 +110,7 @@ end
 -- this gives a very simple delta compression
 --
 -----------------------------------------------------------------------------
-function msg_to_str(msg,last)
+function M.msg_to_str(msg,last)
 local str
 local line="&"
 
@@ -118,7 +118,7 @@ local line="&"
 	
 		if (not last) or (last[i]~=v) then -- only store changes in string
 		
-			line=line.. i .."=".. url_encode(v) .."&"
+			line=line.. i .."=".. M.url_encode(v) .."&"
 			
 			if last then last[i]=v end
 			
