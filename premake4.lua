@@ -633,7 +633,7 @@ all_includes=all_includes or {
 	{"lua_lash",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	OSX		},
 --	{"lua_sec",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_socket",		WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lua_socket",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_lanes",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
