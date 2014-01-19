@@ -13,6 +13,7 @@ local ltn12 = require("ltn12")
 local mime = require("mime.core")
 local io = require("io")
 local string = require("string")
+require("global") -- global replaces module so the following module call will work
 module("mime",mime)
 
 -- encode, decode and wrap algorithm tables
