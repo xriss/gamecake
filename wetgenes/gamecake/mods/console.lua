@@ -27,7 +27,12 @@ function M.bake(oven,console)
 	console.dump_depth = 7
 	console.dump_stack = {}
 
+	console.data={}
+	console.data_meta={__index=_G}
 	console.call = {} -- name -> function : functions that should be easily to call on the console command line
+	console.help={} -- simple help text for callable functions
+	
+	setmetatable(console.data,console.data_meta)
 
 	local gl=oven.gl
 	local cake=oven.cake
@@ -49,7 +54,7 @@ function M.bake(oven,console)
 		
 		console.lines={}
 		console.lines_display={}
-		
+		console.line_width=80
 		console.x=0
 		console.y=0
 		console.y_show=8*8
@@ -71,13 +76,50 @@ function M.bake(oven,console)
 
 	end
 	
+	local function lookup(tab,name)
+		local names=wstr.split(name,".")
+		for i,v in ipairs(names) do
+--				print(i.." "..v)
+			if type(tab)=="table" then
+				tab=tab[v]
+			else
+				tab=nil
+			end
+		end
+		return tab
+	end
+
+	console.help.help="List available commands or a specific commands help string."
+	console.call.help=function(name)
 	
-	console.call.help=function()
-		local t={}
+		if name then
+			local s=lookup( console.help , name )
+			if s then return "\n"..s.."\n" end
+		end
+	
+		local t={"\n"}
 		for n,f in pairs(console.call) do
 			t[#t+1]=n
 		end
-		return table.concat(t," ")
+		
+		local s="\n\nFor more info about the above commands, try -> help [name] "
+		
+		return table.concat(t," ") .. s
+	end
+
+	console.help.ls="List data currently set in the console environment."
+	console.call.ls=function(n)
+		local d=console.data
+		if n then d=lookup(d,n) end
+		local t={"\n"}
+		local count=0
+		for n,f in pairs(d) do
+			t[#t+1]=tostring(n)
+			count=count+1
+		end
+		local s="\n\n"..count.." values found"
+		if n then s=s.." in "..n end
+		return table.concat(t," ")..s
 	end
 	
 
@@ -94,50 +136,33 @@ function M.bake(oven,console)
 		local ret={}
 		local args={}
 		
-		
-		if line~="" then args=wstr.split("%s",line) end -- split input on whitespace
+		if line~="" then args=wstr.split(line,"%s",true) end -- split input on whitespace
 		
 		if args[1] then
-		
-			local function lookup(tab,name)
-				local names=wstr.split("%.",name)
-				for i,v in ipairs(names) do
---				print(i.." "..v)
-					if type(tab)=="table" then
-						tab=tab[v]
-					else
-						tab=nil
-					end
-				end
-				return tab
-			end
-			
+					
 			chunk=lookup(console.call,args[1]) -- check special console functions
 			
 			if chunk and type(chunk)=="function" then -- must be a function
-			
+						
+				setfenv(chunk,console.data) -- call with master environment?
 				table.remove(args,1) -- remove the function name
-			
-				setfenv(chunk,_G) -- call with master environment?
+				
 			else
 			
-				chunk=lookup(_G,args[1]) -- check for functions in master environment
+				chunk=lookup(console.data,args[1]) -- check for functions in data or master environment
 				
 				if chunk and type(chunk)=="function" then -- must be a function
-				
 					table.remove(args,1) -- remove the function name
-				
 				else
-					chunk=nil
+					chunk=nil	-- not found
 				end
-				
-				-- do not try and change the fenv of a function in the main envronment...
 			
 			end
 			
 		end
+
 		
-		if not chunk then
+		if not chunk then -- nothing found above
 		
 			args={} -- no arguments
 			
@@ -149,8 +174,9 @@ function M.bake(oven,console)
 			end
 			
 			if chunk then
-				setfenv(chunk,_G) -- compile in master environment will have an overloaded print
+				setfenv(chunk,console.data) -- compile in master environment will have an overloaded print
 			end
+			
 		end
 
 		-- if compiled ok, then evaluate the chunk
@@ -199,6 +225,8 @@ function M.bake(oven,console)
 			end
 		end
 		
+		console.line_width=layout.w/8
+		console.data.main=oven.main
 	end
 	
 	function console.draw()
@@ -335,28 +363,38 @@ font.vbs_idx=1
 
 	end
 	
-	function console.print(s)
-	
+	function console.print(...)
+
 		if not console.lines then return end -- not setup yet
-	
-		if type(s)~="string" then s=wstr.dump(s) end
-	
-		table.insert(console.lines,s)
 		
-		while #console.lines > 64 do
-		
-			table.remove(console.lines,1)
-		
+		local ts={...}
+		for i,s in ipairs(ts) do	
+			if type(s)~="string" then ts[i]=wstr.dump(s) end
 		end
-		
+
+		for _,l in ipairs( wstr.smart_wrap( table.concat(ts,"\t") , console.line_width) ) do
+			table.insert(console.lines,l)
+			
+			while #console.lines > 64 do
+				table.remove(console.lines,1)
+			end
+		end
+			
 	end
 	
-	function console.display(s)
+	function console.display(...)
 	
-		if type(s)~="string" then s=wstr.dump(s) end
+		if not console.lines then return end -- not setup yet
 		
-		table.insert(console.lines_display,s)
-	
+		local ts={...}
+		for i,s in ipairs(ts) do	
+			if type(s)~="string" then ts[i]=wstr.dump(s) end
+		end
+
+		for _,l in ipairs( wstr.smart_wrap( table.concat(ts,"\t") , console.line_width) ) do
+			table.insert(console.lines_display,l)
+		end
+
 	end
 	
 	function console.mouse(act,x,y,key)
@@ -379,7 +417,7 @@ font.vbs_idx=1
 --		end
 
 --print("conkey",key)
-		if key=="`" then -- terrible name for the ` key?
+		if key=="`" then
 		
 			if act==-1 then
 				if console.show then
@@ -428,15 +466,7 @@ font.vbs_idx=1
 		local print_old=g.print
 		console.print_old=g.print
 		local print_new=function(...)
-		
-			local t={}
-			for i,v in ipairs({...}) do
-				if type(v)~="string" then v=wstr.dump(s) end
-				table.insert(t,v)
-			end
---			if not t[1] then t[1]="nil" end
-			
-			console.print( table.concat(t,"\t") )
+			console.print( ... )
 			if print_old then
 				print_old( ... )
 			end

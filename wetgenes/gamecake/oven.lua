@@ -121,6 +121,12 @@ os.exit()
 
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale}
 			local screen=wwin.screen()
+			
+			if opts.bake and opts.bake.smell and opts.version then
+				inf.title=inf.title.." ( "..opts.version.." "..string.upper(opts.bake.smell).." ) "
+			elseif opts.version then
+				inf.title=inf.title.." ( "..opts.version.." ) "
+			end
 
 			inf.x=(screen.width-inf.width)/2
 			inf.y=(screen.height-inf.height)/2
@@ -180,13 +186,12 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 			if opts.start then
 				oven.next=oven.rebake(opts.start)
+				oven.main=oven.next
 			end
 			
 			
 			return oven
 		end
-		
-
 
 -- require and bake oven.baked[modules] in such a way that it can have simple circular dependencies
 
