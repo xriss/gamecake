@@ -142,7 +142,7 @@ function M.create(client)
 -- all msgs
 	function client.got_amsg(msg)
 
-		print(wstr.dump(msg))
+--		print(wstr.dump(msg))
 	
 		if hooks.amsg then hooks.amsg(msg) end
 		if msg.cmd=="ville" then
