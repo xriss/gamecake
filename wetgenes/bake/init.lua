@@ -199,6 +199,7 @@ file_exists=function(name)
 	if fp then fp:close() return true end
 	return false
 end
+fileexists=file_exists
 
 writefile=function(name,data)
 	local fp=assert(io.open(name,"w"))
