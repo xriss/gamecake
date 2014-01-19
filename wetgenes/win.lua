@@ -227,8 +227,14 @@ function win.nacl_start(args)
 		loads[i]={v,100,0}
 	end
 	for i,v in ipairs(args.zips) do
+		local f=function(i,v)
 		hardcore.getURL(v,function(mem,total,progress)	
 			local l=loads[i]
+			
+			if total==0 then
+				hardcore.print(string.format("Failed to load %s (probably a missing size in the html headers)",v))
+				return
+			end 
 			
 			l[2]=total
 			l[3]=progress
@@ -258,13 +264,14 @@ end
 					main=win.load_run_init(args)
 				end
 			end
-		end)		
+		end)
+		end
+		f(i,v)
 	end
-	
+
 	if not loads[1] then -- no zips?
 		main=win.load_run_init(args)
 	end
-	
 	
 --print("nacl start done")
 
