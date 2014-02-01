@@ -8,8 +8,8 @@ cd `dirname $0`
 cd ..
 
 cd lib_luajit
-../build/premake4.nix --file asm.lua native
-
+../build/premake4.nix --file asm.lua
+cd ..
 
 build/premake4.nix gmake nix-native
 cd build-gmake-nix-native
