@@ -16,7 +16,7 @@
 
 static int grd_gif_read(GifFileType *gif,char *buff,int count)
 {
-	struct grd_loader_info *inf=(struct grd_loader_info *)(gif->UserData);
+	struct grd_io_info *inf=(struct grd_io_info *)(gif->UserData);
 	
 	if(inf == NULL)
 	{
@@ -44,7 +44,7 @@ static int grd_gif_read(GifFileType *gif,char *buff,int count)
 // read a gif, into this grd, allocating the correct size (animations just go in the Z depth)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static void grd_gif_load(struct grd * g, struct grd_loader_info * inf )
+static void grd_gif_load(struct grd * g, struct grd_io_info * inf )
 {
 	int x,y,z,j;
     int	i, ErrorCode;
@@ -144,7 +144,7 @@ bogus:
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_gif_load_file(struct grd * g, const char* file_name)
 {
-	struct grd_loader_info inf[1];
+	struct grd_io_info inf[1];
 	
 	inf->file_name=file_name;
 	inf->data=0;
@@ -161,7 +161,7 @@ void grd_gif_load_file(struct grd * g, const char* file_name)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_gif_load_data(struct grd *g, const unsigned char* data, int data_len)
 {
-	struct grd_loader_info inf[1];
+	struct grd_io_info inf[1];
 	
 	inf->file_name=0;
 	inf->data=(u8*)data;

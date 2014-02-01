@@ -156,12 +156,13 @@ struct grd
 	
 };
 
-// everything you need to know to load an image from file or memory
-struct grd_loader_info
+// everything you need to know to load/save an image from/to file or memory
+struct grd_io_info
 {
-	const char * file_name;
+	const char * file_name; // 0 if not a file load/save
 	u8 * data;
 	int data_len;
+	int data_len_max; // data may be stored into a bigger buffer (to reduce realocs while writing)
 	int pos;
 	int fmt;
 };
