@@ -210,7 +210,9 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 	
 	links { "ssl" , "crypto"}
 	
-	if CPU=="64" then
+	if CPU=="native" then
+		KIND{kind="ConsoleApp",name="nginx.nix"}
+	elseif CPU=="64" then
 		KIND{kind="ConsoleApp",name="nginx.x64"}
 	else
 		KIND{kind="ConsoleApp",name="nginx"}
