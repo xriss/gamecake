@@ -1,9 +1,16 @@
+cd `dirname $0`
+
+if [ "$1" = "clean" ] ; then
+
+        rm -rf ../build-gmake-nix-native
+        exit
+fi
+
 makeopts="config=release"
 if [ "$1" = "debug" ] ; then
 makeopts="config=debug"
 fi
 
-cd `dirname $0`
 ../build/tools/bake.nix
 cd ..
 
