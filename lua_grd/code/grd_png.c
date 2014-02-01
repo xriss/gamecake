@@ -11,9 +11,9 @@
 #define abort_(x) { err=x; goto bogus; }
 
 
-void read_func(png_structp ptr, png_bytep buff, png_size_t count)
+static void read_func(png_structp ptr, png_bytep buff, png_size_t count)
 {
-struct grd_loader_info *inf=(struct grd_loader_info *)png_get_io_ptr(ptr);
+struct grd_io_info *inf=(struct grd_io_info *)png_get_io_ptr(ptr);
 
 	if(inf == NULL)
 	{
@@ -30,13 +30,41 @@ struct grd_loader_info *inf=(struct grd_loader_info *)png_get_io_ptr(ptr);
 	inf->pos+=count;
 } 
 
+static void write_func(png_structp ptr, png_bytep buff, png_size_t count)
+{
+	struct grd_io_info *inf=(struct grd_io_info *)png_get_io_ptr(ptr);
+	
+	size_t new_len = inf->data_len + count;
+	
+	if(!inf->data)
+	{
+		inf->data_len_max=1024;
+		while(new_len > inf->data_len_max ) { inf->data_len_max*=2; }
+		inf->data = malloc(inf->data_len_max);
+	}
+	if(new_len > inf->data_len_max )
+	{
+		while(new_len > inf->data_len_max ) { inf->data_len_max*=2; }
+		inf->data = realloc(inf->data, inf->data_len_max);
+	}
+
+	if(!inf->data) { png_error(ptr, "Write Error"); }
+	
+	memcpy(inf->data + inf->data_len, buff, count);
+	inf->data_len+=new_len;
+}
+
+static void flush_func(png_structp ptr)
+{
+	struct grd_io_info *inf=(struct grd_io_info *)png_get_io_ptr(ptr);
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // allocate a grd and read a png file into it
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static void grd_png_load(struct grd * g, struct grd_loader_info * inf )
+void grd_png_load(struct grd * g, struct grd_io_info * inf )
 {
 	const char *err=0;
 	int x, y;
@@ -198,12 +226,9 @@ bogus:
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_png_load_file(struct grd * g, const char* file_name)
 {
-	struct grd_loader_info inf[1];
+	struct grd_io_info inf[1];
 	
 	inf->file_name=file_name;
-	inf->data=0;
-	inf->pos=0;
-	inf->data_len=0;
 	
 	grd_png_load(g,inf);	
 }
@@ -215,7 +240,7 @@ void grd_png_load_file(struct grd * g, const char* file_name)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_png_load_data(struct grd *g, const unsigned char* data, int data_len)
 {
-	struct grd_loader_info inf[1];
+	struct grd_io_info inf[1];
 	
 	inf->file_name=0;
 	inf->data=(u8*)data;
@@ -230,7 +255,7 @@ void grd_png_load_data(struct grd *g, const unsigned char* data, int data_len)
 // save a grd as a png file
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_png_save_file(struct grd *g , const char* file_name )
+void grd_png_save(struct grd *g , struct grd_io_info *inf )
 {
 	const char *err=0;
 
@@ -245,13 +270,9 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 	int number_of_passes;
 	png_bytep * row_pointers=0;
 
-
-	/* create file */
-	FILE *fp = fopen(file_name, "wb");
-	if (!fp)
-		abort_("png file open fail");
-
-
+	/* need to create file ? */
+	FILE *fp = 0;
+	
 	/* initialize stuff */
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
@@ -314,7 +335,17 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 	if (setjmp(png_jmpbuf(png_ptr)))
 		abort_("png init io fail");
 
-	png_init_io(png_ptr, fp);
+	if(inf->file_name)
+	{
+		fopen(inf->file_name, "wb");
+		if (!fp)
+			abort_("png file open fail");
+		png_init_io(png_ptr, fp);
+	}
+	else
+	{
+		png_set_write_fn(png_ptr, inf, write_func, flush_func);
+	}
 
 
 	/* write header */
@@ -367,5 +398,34 @@ bogus:
 	}
 	if(err) {g->err=err;} else {g->err=0; }
 }
+
+void grd_png_save_file(struct grd *g , const char* file_name )
+{
+	struct grd_io_info inf[1];
+	
+	inf->file_name=file_name;
+	
+	grd_png_save(g,inf);
+}
+
+// inf and inf->data must be freed by caller
+struct grd_io_info * grd_png_save_data(struct grd *g )
+{
+	struct grd_io_info *inf;
+	inf=(struct grd_io_info *)calloc(sizeof(struct grd_io_info),1);
+	if(inf)
+	{
+		inf->file_name=0;
+
+		inf->data=0;
+		inf->pos=0;
+		inf->data_len=0;
+		inf->data_len_max=0;
+		
+		grd_png_save(g,inf);
+	}
+	return inf;
+}
+
 
 #endif

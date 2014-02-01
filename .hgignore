@@ -13,5 +13,6 @@ gamecake/cache.c
 */log.txt
 nacl/nginx/logs/*
 nacl/nginx/static/*.zip
-
+build/*.nix
+lib_luajit/*/native/*
 

@@ -42,7 +42,11 @@ local function build(mode)
 
 	os.execute("make clean ")
 
-	if mode=="x86" then -- these are local hacks for when I bump the luajit version
+	if mode=="native" then -- these are local hacks for when I bump the luajit version
+
+		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc\" ")
+		
+	elseif mode=="x86" then -- these are local hacks for when I bump the luajit version
 
 		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 \" ")
 		
@@ -93,11 +97,7 @@ end
 
 local args={...}
 
-if args[1] then
-
-	build(args[1])
-
-else
+if args[1]=="all" then
 
 	build("x86")
 
@@ -108,5 +108,9 @@ else
 	build("x64")
 
 	build("win32")
+
+else
+
+	build("native")
 
 end
