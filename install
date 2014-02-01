@@ -6,10 +6,4 @@ fi
 
 mkdir -p ${DESTDIR}/bin/
 
-test=`getconf LONG_BIT`
-if [ "$test" = "64" ] ; then
-	cp ../bin/exe/gamecake.x64 ${DESTDIR}/bin/gamecake
-        exit
-fi
-
-cp ../bin/exe/gamecake ${DESTDIR}/bin/gamecake
+cp ../bin/exe/gamecake.nix ${DESTDIR}/bin/gamecake

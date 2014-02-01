@@ -1,4 +1,3 @@
 cd `dirname $0`
-
-clang/make release $*
+nix/make release $*
 

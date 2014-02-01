@@ -1,4 +1,4 @@
 cd `dirname $0`
 
-clang/make release clean
+nix/make clean
 
