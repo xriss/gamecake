@@ -247,7 +247,7 @@ function win.nacl_start(args)
 			end
 
 if args.progress then -- callback with progress
-	args.progress(t,p)
+	pcall(function() args.progress(t,p) end)
 else
 	local pct=math.floor(100*p/t)
 	if lastpct<pct then
@@ -301,6 +301,13 @@ function win.create(opts)
 	base.info(w)
 	return w
 end
+
+function win.js_post(m)
+	if hardcore.js_post then
+		hardcore.js_post(m)
+	end
+end
+
 
 function base.destroy(w)
 	if hardcore.destroy then
@@ -569,6 +576,7 @@ function base.posix_msg(w)
 	end
 	return base.posix_read_events(w)
 end
+
 
 
 return win

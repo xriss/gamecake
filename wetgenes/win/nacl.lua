@@ -346,6 +346,22 @@ nacl.msg=function()
 end
 
 
+-- send message to js (nacl only)
+function js_post(m)
+	if type(m)=="table" then
+		local s={}
+		for n,v in pairs(m) do
+			if type(n)=="string" then
+				table.insert(n.."="..wstr.url_encode(v)) -- need to escape values...
+			end
+		end
+		s=table.concat(s,"&").."\n"
+		if m[0] then s=s..m[0] end -- and we have a large data chunk after message
+		return core.js_post(s)
+	end
+	return core.js_post(m)
+end
+
 --
 -- export all core functions not wrapped above
 --

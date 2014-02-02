@@ -226,7 +226,7 @@ function M.bake(oven,console)
 		end
 		
 		console.line_width=layout.w/8
-		console.data.main=oven.main
+		console.data.main=oven.main and oven.main.console or oven.main	-- update best table of app function?
 	end
 	
 	function console.draw()
