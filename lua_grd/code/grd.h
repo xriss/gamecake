@@ -192,6 +192,7 @@ struct grd * grd_load_file( const char *filename , int fmt );
 struct grd * grd_load_data( const unsigned char *data , int len , int fmt );
 
 struct grd * grd_save_file( struct grd *g, const char *filename , int fmt );
+struct grd * grd_save_data( struct grd *g, struct grd_io_info *filedata , int fmt );
 
 
 struct grd * grd_duplicate( struct grd *g );

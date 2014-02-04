@@ -6,8 +6,6 @@
 #include "all.h"
 
 
-#ifdef USE_GRD_PNG
-
 #define abort_(x) { err=x; goto bogus; }
 
 
@@ -337,7 +335,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 
 	if(inf->file_name)
 	{
-		fopen(inf->file_name, "wb");
+		fp=fopen(inf->file_name, "wb");
 		if (!fp)
 			abort_("png file open fail");
 		png_init_io(png_ptr, fp);
@@ -426,6 +424,3 @@ struct grd_io_info * grd_png_save_data(struct grd *g )
 	}
 	return inf;
 }
-
-
-#endif

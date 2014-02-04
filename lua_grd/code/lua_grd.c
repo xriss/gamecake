@@ -312,12 +312,6 @@ s32 n=0;
 	{
 		n=lua_tonumber(l,3);
 	}
-
-
-	if(!s)
-	{
-		luaL_error(l, "no file name specified" );
-	}
 	
 	if( p->bmap->w<1 )
 	{
@@ -332,13 +326,32 @@ s32 n=0;
 		luaL_error(l, "image has 0 depth" );
 	}
 	
-	if(! grd_save_file(p,s,n) )
+	if(s)
 	{
-		lua_pushnil(l);
-		lua_pushstring(l,"failed to save");
-		return 2;
+		if(! grd_save_file(p,s,n) )
+		{
+			lua_pushnil(l);
+			lua_pushstring(l,"failed to save");
+			return 2;
+		}
 	}
-
+	else
+	{
+		struct grd_io_info d[1]={0};
+		if(! grd_save_data(p,d,n) )
+		{
+			if(d->data) { free(d->data); }
+			lua_pushnil(l);
+			lua_pushstring(l,"failed to save");
+			return 2;
+		}
+		if(d->data)
+		{ 
+			lua_pushlstring(l,(const char *)d->data,d->data_len); // just return the data string
+			free(d->data);
+		}
+		return 1;
+	}
 
 	lua_pushvalue(l,1);
 	return 1;
