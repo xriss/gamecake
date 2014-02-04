@@ -1,3 +1,3 @@
 cd `dirname $0`
-nix/make release $*
+nix/make release gamecake
 
