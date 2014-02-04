@@ -284,9 +284,7 @@ struct grd *g=0;
 		switch(fmt)
 		{
 			default:
-#ifdef USE_GRD_PNG
 			case GRD_FMT_HINT_PNG: grd_png_load_file(g,filename); break;
-#endif
 			case GRD_FMT_HINT_JPG: grd_jpg_load_file(g,filename); break;
 			case GRD_FMT_HINT_GIF: grd_gif_load_file(g,filename); break;
 		}
@@ -310,9 +308,7 @@ struct grd *g=0;
 		switch(fmt)
 		{
 			default:
-#ifdef USE_GRD_PNG
 			case GRD_FMT_HINT_PNG: grd_png_load_data(g,data,len); break;
-#endif
 			case GRD_FMT_HINT_JPG: grd_jpg_load_data(g,data,len); break;
 			case GRD_FMT_HINT_GIF: grd_gif_load_data(g,data,len); break;
 		}
@@ -337,9 +333,7 @@ struct grd * grd_save_file( struct grd *g , const char *filename , int fmt )
 		switch(fmt)
 		{
 			default:
-#ifdef USE_GRD_PNG
 			case GRD_FMT_HINT_PNG: grd_png_save_file(g,filename); break;
-#endif
 			case GRD_FMT_HINT_JPG: grd_jpg_save_file(g,filename); break;
 			case GRD_FMT_HINT_GIF: grd_gif_save_file(g,filename); break;
 		}
@@ -348,6 +342,21 @@ struct grd * grd_save_file( struct grd *g , const char *filename , int fmt )
 	return g->err ? 0 : g ;
 }
 
+struct grd * grd_save_data( struct grd *g , struct grd_io_info *filedata , int fmt )
+{
+	if(g)
+	{
+		switch(fmt)
+		{
+			default:
+			case GRD_FMT_HINT_PNG: grd_png_save(g,filedata); break;
+//			case GRD_FMT_HINT_JPG: grd_jpg_save(g,filedata); break;
+//			case GRD_FMT_HINT_GIF: grd_gif_save(g,filedata); break;
+		}
+	}
+	
+	return g->err ? 0 : g ;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //

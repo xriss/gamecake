@@ -8,8 +8,6 @@ links { "lib_lua" , "lib_png" , "lib_z" }
 
 defines { "JPEGSTATIC" }
 
-defines { "USE_GRD_PNG" }
-
 includedirs { "." , "../lib_z" , "../lib_png" , "../lib_jpeg" , "../lib_gif/giflib/lib" }
 
 
