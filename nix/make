@@ -15,7 +15,7 @@ fi
 cd ..
 
 cd lib_luajit
-../build/premake4.nix --file asm.lua
+../build/premake4.nix --file=asm.lua
 cd ..
 
 build/premake4.nix gmake nix-native
