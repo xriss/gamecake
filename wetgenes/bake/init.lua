@@ -270,10 +270,12 @@ end
 function update_lson(fname,args)
 
 	-- read last bake log
-	local lson=readfile(fname)
+	local lson
+	pcall( function() lson=readfile(fname) end )
 	if lson then
 		lson=wsbox.lson(lson)
-	else
+	end
+	if not lson then
 		lson={}
 		lson.version=tonumber(version_from_time()) 
 	end
