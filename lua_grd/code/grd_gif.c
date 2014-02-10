@@ -39,6 +39,32 @@ static int grd_gif_read(GifFileType *gif,char *buff,int count)
 	return count;
 }
 
+static int grd_gif_write(GifFileType *gif,char *buff,int count)
+{
+	struct grd_io_info *inf=(struct grd_io_info *)(gif->UserData);
+	
+	size_t new_len = inf->data_len + count;
+	
+	if(!inf->data)
+	{
+		inf->data_len_max=1024;
+		while(new_len > inf->data_len_max ) { inf->data_len_max*=2; }
+		inf->data = malloc(inf->data_len_max);
+	}
+	if(new_len > inf->data_len_max )
+	{
+		while(new_len > inf->data_len_max ) { inf->data_len_max*=2; }
+		inf->data = realloc(inf->data, inf->data_len_max);
+	}
+
+	if(!inf->data) { return 0; }
+	
+	memcpy(inf->data + inf->data_len, buff, count);
+	inf->data_len+=new_len;
+
+	return count;
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // read a gif, into this grd, allocating the correct size (animations just go in the Z depth)
@@ -180,6 +206,19 @@ void grd_gif_load_data(struct grd *g, const unsigned char* data, int data_len)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_gif_save_file(struct grd * g, const char* file_name)
 {
+	struct grd_io_info inf[1]={0};
+	inf->file_name=file_name;
+	grd_gif_save(g,inf);
+	return;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// save a gif into a file (Z layers are animation frames)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void grd_gif_save(struct grd * g, struct grd_io_info * inf )
+{
 int ErrorCode;
 GifFileType *gif = (GifFileType *)NULL;
 SavedImage img;
@@ -212,19 +251,29 @@ unsigned char wank[3];
 	control.DisposalMode=DISPOSE_BACKGROUND;
 	control.UserInputFlag=0;
 	control.DelayTime=8;
+	
 // speed of animation in 100ths of a second 8 is 12.5fps (80ms)
 // which is nearest the classic "Shooting on twos" speed of 12fps
 
 //unsigned char *data=0;
 
-    if ((gif = EGifOpenFileName(file_name,0,&ErrorCode)) == NULL)
-    {
-		g->err=GifErrorString(ErrorCode);
-//		goto bogus;
-		return;
-    }
+	if(inf->file_name)
+	{
+		if((gif = EGifOpenFileName( inf->file_name , 0, &ErrorCode)) == NULL)
+		{
+			g->err=GifErrorString(ErrorCode);
+			goto bogus;
+		}
+	}
+	else
+	{
+		if((gif = EGifOpen( (void *)inf , (OutputFunc) grd_gif_write , &ErrorCode)) == NULL)
+		{
+			g->err=GifErrorString(ErrorCode);
+			goto bogus;
+		}
+	}
     
-//    data=calloc( g->bmap->w*g->bmap->h , 1 );
 
     gif->SWidth = g->bmap->w;
     gif->SHeight = g->bmap->h;
@@ -273,13 +322,22 @@ unsigned char wank[3];
     if (EGifSpew(gif) == GIF_ERROR)
     {
 		g->err=GifErrorString(ErrorCode);
+		goto bogus;
 	}
 	
-//bogus:
-//	if(data)
-//	{
-//		free(data);
-//	}
+	return;
+
+bogus:
+
+	// free any allocated data
+ 	if(inf->data)
+	{
+		free(inf->data);
+		inf->data=0;
+		inf->data_len_max=0;
+		inf->data_len=0;
+	}
+	return;
 }
 
 

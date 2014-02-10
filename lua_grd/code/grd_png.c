@@ -407,7 +407,8 @@ void grd_png_save_file(struct grd *g , const char* file_name )
 }
 
 // inf and inf->data must be freed by caller
-struct grd_io_info * grd_png_save_data(struct grd *g )
+/*
+ * struct grd_io_info * grd_png_save_data(struct grd *g )
 {
 	struct grd_io_info *inf;
 	inf=(struct grd_io_info *)calloc(sizeof(struct grd_io_info),1);
@@ -424,3 +425,4 @@ struct grd_io_info * grd_png_save_data(struct grd *g )
 	}
 	return inf;
 }
+*/
