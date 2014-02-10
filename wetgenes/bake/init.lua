@@ -28,6 +28,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local lfs=require("lfs")
 local wstr=require("wetgenes.string")
+local wsbox=require("wetgenes.sandbox")
 
 module("wetgenes.bake")
 
@@ -253,3 +254,41 @@ function version_from_time(t,vplus)
 	return string.format("%02d.%03d",maj,min)
 end
 
+-- handle simple args map
+function args(args)
+
+	local i=1 while i<=#args do local v=args[i]
+		
+		args[v]=args[i+1] or true
+		i=i+2 -- skip name and value
+
+	end
+	
+	return args
+end
+-- update (or create) the lua/init_bake.lua file containing build timestamps
+function update_lson(fname,args)
+
+	-- read last bake log
+	local lson=readfile(fname)
+	if lson then
+		lson=wsbox.lson(lson)
+	else
+		lson={}
+		lson.version=tonumber(version_from_time()) 
+	end
+	
+	 -- update build time?
+	if args.bump then
+		lson.version=tonumber(version_from_time())
+	end
+	
+	-- always update the stamp and the smell (this may clear the smell)
+	lson.smell=args.smell
+	lson.stamp=os.time(),
+
+	-- write data bake log
+	writefile(fname,wstr.serialize(lson))
+
+	return lson
+end

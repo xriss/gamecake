@@ -43,7 +43,7 @@ M.bake=function(oven,gui)
 	function gui.mpage(pname) --request that we go to this page please?
 		gui.active=false -- stop displaying our stuff
 		if gui.page_hook then
-			gui.page_hook(pname)
+			return gui.page_hook(pname)
 		end
 	end
 
@@ -770,7 +770,7 @@ print("active:"..gactivate_id)
 			vel=0,
 			update=function(anim)
 				anim.vel=anim.vel-(anim.num*1/16)
-				if w.master.over ~= w then
+				if w.master.over ~= w or (anim.vel*anim.vel)>1/256 then
 					anim.vel=anim.vel*14/16
 				end
 				anim.num=anim.num+anim.vel
