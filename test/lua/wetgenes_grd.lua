@@ -5,8 +5,8 @@ module(...,package.seeall)
 local grd=require("wetgenes.grd")
 local wstr=require("wetgenes.string")
 
-function test_dojpg()
-	dojpg()
+function test_do_jpg()
+	do_jpg()
 end
 
 function test_gif_t6()
@@ -236,7 +236,7 @@ function do_gif(name)
 	
 end
 
-function dojpg()
+function do_jpg()
 	local wgrd=grd
 	local	g=assert(wgrd.create("../../mods/data/imgs/preloader/kittyscreen.jpg")) -- load it
 --print( wstr.dump(g) )
