@@ -351,7 +351,7 @@ struct grd * grd_save_data( struct grd *g , struct grd_io_info *filedata , int f
 			default:
 			case GRD_FMT_HINT_PNG: grd_png_save(g,filedata); break;
 //			case GRD_FMT_HINT_JPG: grd_jpg_save(g,filedata); break;
-//			case GRD_FMT_HINT_GIF: grd_gif_save(g,filedata); break;
+			case GRD_FMT_HINT_GIF: grd_gif_save(g,filedata); break;
 		}
 	}
 	

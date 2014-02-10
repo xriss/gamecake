@@ -12,7 +12,7 @@ function test_win()
 
 --print(wstr.dump(wwin))
 
-local win=assert(wwin.create())
+local win=assert(wwin.create({}))
 
 	win:context()
 	
@@ -20,12 +20,12 @@ local win=assert(wwin.create())
 
 
 
-for i=1,10*50 do
+for i=1,2*50 do
 
 	repeat
 		local t,a,b,c,d=win:msg()
 		if t then
-			print(tostring(t),tostring(a),tostring(b),tostring(c),tostring(d))
+--			print(tostring(t),tostring(a),tostring(b),tostring(c),tostring(d))
 		end
 	until t==nil
 	

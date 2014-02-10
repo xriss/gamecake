@@ -239,9 +239,9 @@ end
 function dojpg()
 	local wgrd=grd
 	local	g=assert(wgrd.create("../../mods/data/imgs/preloader/kittyscreen.jpg")) -- load it
-print( wstr.dump(g) )
+--print( wstr.dump(g) )
 	assert(g:convert(wgrd.FMT_U8_RGBA_PREMULT)) -- premult default
-print( wstr.dump(g) )
+--print( wstr.dump(g) )
 	assert( g:save("dat/grd/kittytest.jpg","jpg") )
 
 

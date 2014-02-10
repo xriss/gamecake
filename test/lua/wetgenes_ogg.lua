@@ -9,7 +9,7 @@ local ogg=require("wetgenes.ogg.core")
 
 function test_ogg()
 
-	ogg.test()
+--	ogg.test()
 
 
 end
