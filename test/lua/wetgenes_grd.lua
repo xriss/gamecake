@@ -5,6 +5,14 @@ module(...,package.seeall)
 local grd=require("wetgenes.grd")
 local wstr=require("wetgenes.string")
 
+function test_do_png_wmem()
+	do_png_wmem("t4")
+end
+
+function test_do_gif_wmem()
+	do_gif_wmem("t6")
+end
+
 function test_do_jpg()
 	do_jpg()
 end
@@ -80,6 +88,12 @@ function test_premult_t3()
 	do_premult("t3")
 end
 
+
+function do_file_write(f,d)
+	local fp=assert(io.open(f,"wb"))
+	local d=assert(fp:write(d))
+	fp:close()
+end
 
 function do_file_read(f)
 	local fp=assert(io.open(f,"rb"))
@@ -245,4 +259,22 @@ function do_jpg()
 	assert( g:save("dat/grd/kittytest.jpg","jpg") )
 
 
+end
+
+function do_png_wmem(name)
+
+	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
+--	print(wstr.dump(g))
+	local d=assert( g:save({fmt="png"}) )
+	do_file_write("dat/grd/"..name..".wmem.out.png",d)
+	assert_true( do_file_compare("dat/grd/"..name..".wmem.out.png","dat/grd/"..name..".wmem.chk.png") )
+end
+
+function do_gif_wmem(name)
+
+	local g=assert(grd.create("dat/grd/"..name..".bse.gif","gif"))
+--	print(wstr.dump(g))
+	local d=assert( g:save({fmt="gif"}) )
+	do_file_write("dat/grd/"..name..".wmem.out.gif",d)
+	assert_true( do_file_compare("dat/grd/"..name..".wmem.out.gif","dat/grd/"..name..".wmem.chk.gif") )
 end

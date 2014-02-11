@@ -49,7 +49,7 @@ static void write_func(png_structp ptr, png_bytep buff, png_size_t count)
 	if(!inf->data) { png_error(ptr, "Write Error"); }
 	
 	memcpy(inf->data + inf->data_len, buff, count);
-	inf->data_len+=new_len;
+	inf->data_len=new_len;
 }
 
 static void flush_func(png_structp ptr)

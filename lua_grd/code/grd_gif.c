@@ -60,7 +60,7 @@ static int grd_gif_write(GifFileType *gif,char *buff,int count)
 	if(!inf->data) { return 0; }
 	
 	memcpy(inf->data + inf->data_len, buff, count);
-	inf->data_len+=new_len;
+	inf->data_len=new_len;
 
 	return count;
 }
