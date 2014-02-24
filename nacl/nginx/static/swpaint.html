@@ -82,6 +82,16 @@ function handleMessage(message_event) {
 			console.log(dat);
 		}
 		else
+		if(m.cmd=="png")
+		{
+			$("#imgpng").attr("src","data:image/png;base64,"+dat);
+		}
+		else
+		if(m.cmd=="fatpng")
+		{
+			$("#imgfatpng").attr("src","data:image/png;base64,"+dat);
+		}
+		else
 		if(m.cmd=="loading") // loading progress
 		{
 			$("#progress_zip").attr("value",Number(m.progress)/Number(m.total));
@@ -98,6 +108,23 @@ function handleMessage(message_event) {
 	}
 }
 
+
+function luaimg() {
+	var t=naclmod.postMessage(
+		'cmd=lua\n'+
+		'local mime=require("mime")\n'+
+		'local win=require("wetgenes.win")\n'+
+		'local oven=win.oven\n'+
+		'local images=oven.rebake(oven.modname..".images")\n'+
+		'local grd=images[images.idx].grd\n'+
+		'local s=mime.b64( (grd:save({fmt="png"})) )\n'+
+		'win.js_post("cmd=png\\n"..s)'+
+		'local grd=images[images.idx].export_grd().g\n'+
+		'local s=mime.b64( (grd:save({fmt="png"})) )\n'+
+		'win.js_post("cmd=fatpng\\n"..s)'+
+		'\n');
+//	console.log(t);
+}
 
 function luasetup() {
 	naclmod.postMessage(
@@ -164,6 +191,9 @@ $(function(){
 		</div>
 
 		<div id="side" style=" width:50%; height:100%; position:absolute; right:0px;">
+			<a href="#" onclick="luaimg(); return false;">update</a>
+			<image id="imgpng" />
+			<image id="imgfatpng" />
 		</div>
 
 	</body>

@@ -1,4 +1,6 @@
 
+if not NACL then -- just grab mime under nacl
+
 project "lua_socket"
 language "C++"
 files { "src/**.c" , "src/**.cpp" , "src/**.h" }
@@ -31,6 +33,8 @@ end
 
 
 KIND{kind="lua",dir="socket",name="core",luaname="socket.core",luaopen="socket_core"}
+
+end
 
 
 project "lua_mime"
