@@ -89,6 +89,14 @@ newplatform {
     }
 }
 
+--[[ ios notez, something like this makefile but platforms are in /Applications
+
+/Applications/Xcode.app/Contents/Developer/Platforms/
+
+https://gitorious.org/mac-app-from-scratch/ios-app-from-scratch/source/ccb29c96bce7ee72aaa9bc222415f4393d008b9f:Makefile#L77
+
+]]
+
 
 ------------------------------------------------------------------------
 -- work out what we should be building for
