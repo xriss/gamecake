@@ -201,7 +201,8 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 
 	links(static_lib_names)
 
-	links { "GL" , "GLU" }
+--	links { "GL" , "GLU" }
+	links { "GL" }
 	links { "crypt" }
 	links { "pthread" }
 	links { "dl" , "m" , "rt" }
