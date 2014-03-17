@@ -477,7 +477,7 @@ print("click",id)
 			end
 			
 			if activate_id then -- refresh active button
-print("active:"..gactivate_id)
+--print("active:"..gactivate_id)
 				gui.master.activate_by_id(activate_id)
 			end
 
