@@ -36,7 +36,9 @@ wetiso.loads=function()
 end
 		
 wetiso.setup=function()
-
+	if wetiso.setup_done then return end
+	wetiso.setup_done=true
+	
 	wetiso.loads()
 
 	wetiso.it=geom.icosahedron()
@@ -86,6 +88,8 @@ wetiso.clean=function()
 
 	wetiso.fbo:clean()
 	wetiso.fbo=nil
+
+	wetiso.setup_done=false
 	
 end
 
