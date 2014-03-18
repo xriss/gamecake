@@ -1,4 +1,5 @@
-Welcome to my windows defenestration attempt, please build and run 
+
+This is my windows defenestration attempt, please build and run 
 under Xubuntu if you have a choice. The Ubuntu and Gnome3 fancy 
 desktops impact the performance of OpenGL code and are not 
 recomended as development or runtime environments.
@@ -19,9 +20,9 @@ is a testbed containing pre-built binaries and lua scripts. This is
 the final output of this build and is then shared with other, 
 projects. This dir must exist when building.
 
-sudo ./apt-gets  # grab *all* dependencies
-./make           # build using clang, see below for more options
-sudo ./install   # copy into /usr/local/bin/gamecake
+	sudo ./apt-gets  # install all build dependencies
+	./make           # build using gcc, see below for more options
+	sudo ./install   # copy into /usr/local/bin/gamecake
 
 Afterwhich gamecake will now be a valid command :)
 
@@ -32,7 +33,7 @@ some dev packages such as opengl. Hopefully all the bits you need can
 be installed by running ./apt-gets first. Note I have switched to
 clang so makes sure you have that installed.
 
-clang/make release
+	clang/make
 
 
 For windows I've swiched to a mingwin cross compile. This assumes 
@@ -40,19 +41,19 @@ you have my sdks repo checked out side by side to this lua one.
 There are update or build scripts in the sdks repo that should be 
 run to grab all sorts of horrible sdk and build files.
 
-mingw/make release
+	mingw/make
 
 
 Build for raspi using a crosscompiler that is built in sdks, you will 
 need to build the cross compiler first.
 
-raspi/make
+	raspi/make
 
 
 NaCl build using the sdk found in sdks so will not work if you have 
 not populated that first.
 
-nacl/make
+	nacl/make
 
 
 Build for android, uses the ndk found in sdks and you need to bake a 
@@ -60,14 +61,14 @@ lua project into the source. IE it spits out an apk file that can be
 installed onto anandroid device, this apk must contain everything 
 needed to run an app.
 
-android/make
+	android/make
 
-Before running make you will probably need to import a project using
+Before running make you will need to import a project using
 
-android/bake projectdir 
+	android/bake projectdir 
 
 For example any of the directories in gamecakejam can be built on
-andrtoid this way.
+android this way.
 
 
 We also have an nginx target which bakes all the lua goodies into 
