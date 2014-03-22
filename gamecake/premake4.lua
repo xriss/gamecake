@@ -154,12 +154,12 @@ elseif NIX then
 
 --	links { "rt" }
 
-	if CPU=="native" then
-		KIND{kind="ConsoleApp",name="gamecake.nix"}
-	elseif CPU=="64" then
+	if CPU=="64" then
 		KIND{kind="ConsoleApp",name="gamecake.x64"}
+	elseif CPU=="32" then
+		KIND{kind="ConsoleApp",name="gamecake.x32"}
 	else
-		KIND{kind="ConsoleApp",name="gamecake"}
+		KIND{kind="ConsoleApp",name="gamecake.nix"}
 	end
 	
 end

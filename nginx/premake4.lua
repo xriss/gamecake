@@ -1,5 +1,5 @@
 
-project "nginx"
+project "pagecake"
 language "C"
 
 includedirs {	"." ,
@@ -211,12 +211,12 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 	
 	links { "ssl" , "crypto"}
 	
-	if CPU=="native" then
-		KIND{kind="ConsoleApp",name="nginx.nix"}
-	elseif CPU=="64" then
-		KIND{kind="ConsoleApp",name="nginx.x64"}
+	if CPU=="64" then
+		KIND{kind="ConsoleApp",name="pagecake.x64"}
+	elseif CPU=="32" then
+		KIND{kind="ConsoleApp",name="pagecake.x32"}
 	else
-		KIND{kind="ConsoleApp",name="nginx"}
+		KIND{kind="ConsoleApp",name="pagecake.nix"}
 	end
 	
 end

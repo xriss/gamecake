@@ -181,7 +181,7 @@ print("TARGET == "..TARGET.." " ..CPU )
 
 if NACL then
 
-	local naclsdk=path.getabsolute("../sdks/nacl-sdk/pepper_32")
+	local naclsdk=path.getabsolute("../sdks/nacl-sdk/pepper_33")
 
 	platforms { "nacl" } --hax
 	
