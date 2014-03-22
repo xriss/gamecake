@@ -291,9 +291,9 @@ base.save=function(g,opts)
 	
 	end
 
-	local r=core.save(g[0],opts.filename,opts.fmt)
+	local r,m=core.save(g[0],opts.filename,opts.fmt)
 	core.info(g[0],g)
-	return r and g
+	return r,m -- first value may be a datatring if no filename was given or g[0] if it was,
 end
 
 base.duplicate=function(g)
