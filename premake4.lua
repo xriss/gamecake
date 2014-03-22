@@ -669,7 +669,7 @@ all_includes=all_includes or {
 	{"lib_openal",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	nil		},
 
 	{"gamecake",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"nginx",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"pagecake",			nil		or		NIX		or		nil		or		nil			or		nil			or	nil		},
 }
 
 ------------------------------------------------------------------------
