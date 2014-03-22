@@ -2,7 +2,7 @@ cd `dirname $0`
 cd ..
 
 #hack until we can install 32 bit and 64 bit devs at same time
-sudo apt-get install libgl1-mesa-dev libx11-dev libasound2-dev
+sudo apt-get install libgl1-mesa-dev libx11-dev libasound2-dev libssl-dev
 
 cpu=64
 makeopts="config=release"
