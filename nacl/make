@@ -28,6 +28,10 @@ pnacl-translate -arch i686 ../bin/$btype/gamecake.pexe -o ../bin/$btype/gamecake
 
 exit
 
+#
+#above is pnacl below is old nacl that we no longer use
+#
+
 naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_28`
 export PATH=$naclsdk/toolchain/linux_x86_newlib/bin:$PATH
 
