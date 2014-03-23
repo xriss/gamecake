@@ -4,8 +4,8 @@ cd `dirname $0`
 
 cd nginx
 
-../../../bin/exe/nginx.x64 -p. -s stop
-../../../bin/exe/nginx.x64 -p.
+../../../bin/exe/pagecake -p. -s stop
+../../../bin/exe/pagecake -p.
 
 echo http://host.local:9999
 
