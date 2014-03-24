@@ -93,7 +93,7 @@ function loader(...)
 					if str:sub(1,2)=="#!" then
 						str="--"..str -- ignore hashbang on first line
 					end
-					local func,err=assert(loadstring(str))
+					local func,err=assert(loadstring(str,name))
 					return func or err
 				end
 			end
