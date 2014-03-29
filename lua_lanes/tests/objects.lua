@@ -5,7 +5,7 @@
 --
 
 local lanes = require "lanes"
-lanes.configure( 1)
+lanes.configure()
 
 local linda= lanes.linda()
 
@@ -19,7 +19,7 @@ local start_lane= lanes.gen( "io",
         local mt1= getmetatable(obj1)
         assert(mt1)
     
-        local obj2= linda:receive("")
+        local k, obj2= linda:receive("")
         assert( obj2 )
         local mt2= getmetatable(obj2)
         assert(mt2)

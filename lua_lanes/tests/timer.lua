@@ -8,8 +8,7 @@
 io.stderr:setvbuf "no"
 
 
-local lanes = require "lanes"
-lanes.configure( 1)
+local lanes = require "lanes".configure()
 
 local linda= lanes.linda()
 
@@ -35,7 +34,7 @@ local caught= {}     -- { [T1]= bool, [T2]= bool }
 
 while true do
     io.stderr:write("waiting...\t")
-    local v,channel= linda:receive( 6.0, T1,T2 )
+    local channel, v = linda:receive( 6.0, T1,T2 )
     assert( channel==T1 or channel==T2 )
     caught[channel]= true
 
@@ -76,6 +75,15 @@ end
 assert( caught[T1] )
 assert( caught[T2] )
 
+
+PRINT( "\n*** Listing timers ***\n" )
+local r = lanes.timers() -- list of {linda, key, {}}
+for _,t in ipairs( r) do
+    local linda, key, timer = t[1], t[2], t[3]
+	print( tostring( linda), key, timer[1], timer[2])
+end
+
+
 PRINT( "\n*** Clearing timers ***\n" )
 
 lanes.timer( linda, T1, 0 )    -- reset; no reoccuring ticks
@@ -89,6 +97,8 @@ assert( linda:get(T2) == nil )
 
 PRINT "...making sure no ticks are coming..."
 
-local v= linda:receive( 1.5, T1,T2 )    -- should not get any
+local k,v= linda:receive( 10, T1,T2 )    -- should not get any
 assert(v==nil)
 
+lanes.timer_lane:cancel()
+print (lanes.timer_lane[1], lanes.timer_lane[2])
