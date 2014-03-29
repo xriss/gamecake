@@ -15,6 +15,8 @@
   #define PLATFORM_XBOX
 #elif (defined _WIN32)
   #define PLATFORM_WIN32
+#elif (defined __ANDROID__)
+  #define PLATFORM_ANDROID
 #elif (defined __linux__)
   #define PLATFORM_LINUX
 #elif (defined __APPLE__) && (defined __MACH__)
