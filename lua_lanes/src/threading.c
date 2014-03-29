@@ -48,7 +48,7 @@ THE SOFTWARE.
 #endif // non-WIN32 timing
 
 
-#if defined(PLATFORM_LINUX) || defined(PLATFORM_CYGWIN)
+#if defined(PLATFORM_LINUX) || defined(PLATFORM_CYGWIN) || defined(PLATFORM_NATIVE_CLIENT) 
 # include <sys/types.h>
 # include <unistd.h>
 #endif
@@ -575,7 +575,14 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
     fprintf( stderr, "%s %d: %s failed, %d %s\n", file, line, name, rc, why );
     abort();
   }
+#if defined(PLATFORM_NATIVE_CLIENT)
+  #define PT_CALL_MAYBE(...)
+#else
+  #define PT_CALL_MAYBE( call ) { int rc= call; if (rc!=0) _PT_FAIL( rc, #call, __FILE__, __LINE__ ); }
+#endif
+
   #define PT_CALL( call ) { int rc= call; if (rc!=0) _PT_FAIL( rc, #call, __FILE__, __LINE__ ); }
+
   //
   void SIGNAL_INIT( SIGNAL_T *ref ) {
     PT_CALL( pthread_cond_init(ref,NULL /*attr*/) );
@@ -724,6 +731,10 @@ static int const gs_prio_remap[] =
 			//#define _PRIO_SCOPE PTHREAD_SCOPE_SYSTEM // but do we need this at all to start with?
 			THREAD_PRIORITY_IDLE, THREAD_PRIORITY_LOWEST, THREAD_PRIORITY_BELOW_NORMAL, THREAD_PRIORITY_NORMAL, THREAD_PRIORITY_ABOVE_NORMAL, THREAD_PRIORITY_HIGHEST, THREAD_PRIORITY_TIME_CRITICAL
 
+#		elif defined(PLATFORM_NATIVE_CLIENT)
+
+// this may end up on any platform, so not sure?
+
 #		else
 #			error "Unknown OS: not implemented!"
 #		endif
@@ -778,17 +789,17 @@ void THREAD_CREATE( THREAD_T* ref, THREAD_RETURN_T (*func)( void*), void* data, 
 		// "The specified scheduling parameters are only used if the scheduling
 		//  parameter inheritance attribute is PTHREAD_EXPLICIT_SCHED."
 		//
-		PT_CALL( pthread_attr_setinheritsched( &a, PTHREAD_EXPLICIT_SCHED));
+		PT_CALL_MAYBE( pthread_attr_setinheritsched( &a, PTHREAD_EXPLICIT_SCHED));
 
 #ifdef _PRIO_SCOPE
 		PT_CALL( pthread_attr_setscope( &a, _PRIO_SCOPE));
 #endif // _PRIO_SCOPE
 
-		PT_CALL( pthread_attr_setschedpolicy( &a, _PRIO_MODE));
+		PT_CALL_MAYBE( pthread_attr_setschedpolicy( &a, _PRIO_MODE));
 
 		// prio range [-3,+3] was checked by the caller
 		sp.sched_priority = gs_prio_remap[ prio + 3];
-		PT_CALL( pthread_attr_setschedparam( &a, &sp));
+		PT_CALL_MAYBE( pthread_attr_setschedparam( &a, &sp));
 	}
 
 	//---
@@ -855,7 +866,7 @@ void THREAD_SET_PRIORITY( int prio)
 		struct sched_param sp;
 		// prio range [-3,+3] was checked by the caller
 		sp.sched_priority = gs_prio_remap[ prio + 3];
-		PT_CALL( pthread_setschedparam( pthread_self(), _PRIO_MODE, &sp));
+		PT_CALL_MAYBE( pthread_setschedparam( pthread_self(), _PRIO_MODE, &sp));
 	}
 }
 
@@ -928,15 +939,22 @@ bool_t THREAD_WAIT( THREAD_T *ref, double secs , SIGNAL_T *signal_ref, MUTEX_T *
   }
 	//
   void THREAD_KILL( THREAD_T *ref ) {
+#if defined PLATFORM_NATIVE_CLIENT
+// does not exist on nacl
+#else
     pthread_cancel( *ref );
+#endif
   }
 
 	void THREAD_MAKE_ASYNCH_CANCELLABLE()
 	{
+#if defined PLATFORM_NATIVE_CLIENT
+#else
 		// that's the default, but just in case...
 		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 		// we want cancellation to take effect immediately if possible, instead of waiting for a cancellation point (which is the default)
 		pthread_setcanceltype( PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+#endif
 	}
 
 	void THREAD_SETNAME( char const* _name)

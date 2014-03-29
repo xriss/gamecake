@@ -25,6 +25,8 @@
   #define PLATFORM_QNX
 #elif (defined __CYGWIN__)
   #define PLATFORM_CYGWIN
+#elif (defined __native_client__)
+  #define PLATFORM_NATIVE_CLIENT
 #else
   #error "Unknown platform!"
 #endif
@@ -163,6 +165,8 @@ enum e_status { PENDING, RUNNING, WAITING, DONE, ERROR_ST, CANCELLED };
     #define YIELD() pthread_yield_np()
   #elif defined( PLATFORM_WIN32) || defined( PLATFORM_POCKETPC) // no PTHREAD for PLATFORM_XBOX
     // for some reason win32-pthread doesn't have pthread_yield(), but sched_yield()
+    #define YIELD() sched_yield()
+  #elif defined( PLATFORM_NATIVE_CLIENT)
     #define YIELD() sched_yield()
   #else
     #define YIELD() pthread_yield()

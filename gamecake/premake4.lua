@@ -5,7 +5,7 @@ language "C"
 files { "hacks.c" }
 
 
-GAMECAKE_VERSION="13.990"
+GAMECAKE_VERSION="14.001"
 
 dofile("cache.lua")
 dofile("preloadlibs.lua")

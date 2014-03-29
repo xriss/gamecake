@@ -43,7 +43,7 @@ void luaL_requiref (lua_State* L, const char* modname, lua_CFunction openf, int 
 
 // For some reason, LuaJIT 64bits doesn't support lua_newstate()
 // If you build specifically for this situation, change value to 0
-#define PROPAGATE_ALLOCF 1
+#define PROPAGATE_ALLOCF 0
 #if PROPAGATE_ALLOCF
 #define PROPAGATE_ALLOCF_PREP( L) void* allocUD; lua_Alloc allocF = lua_getallocf( L, &allocUD)
 #define PROPAGATE_ALLOCF_ALLOC() lua_newstate( allocF, allocUD)
