@@ -29,6 +29,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(opts)
 
 	local oven={}
+	wwin.oven=wwin.oven or oven -- store a global oven on first use
 
 		oven.opts=opts or {}
 		
