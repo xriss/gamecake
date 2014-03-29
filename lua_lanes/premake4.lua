@@ -85,5 +85,5 @@ local function ldump(fni,fno)
 end
 
 -- build this needed source file
-ldump("src/keeper.lua","src/keeper.lch")
+--ldump("src/keeper.lua","src/keeper.lch")
 

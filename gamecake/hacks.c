@@ -56,3 +56,10 @@ int kill(int pid, int sig)
 }
 
 #endif
+
+
+// fix openlib library names
+void LUA_API luaopen_lanes( lua_State* L)
+{
+	luaopen_lanes_embedded(L, 0);
+}
