@@ -13,7 +13,8 @@ if ANDROID then
 	defines("pthread_cancel=0")
 end
 
-KIND{kind="lua",name="lua51-lanes",luaname="lua51-lanes",luaopen="lanes"}
+--KIND{kind="lua",name="lua51-lanes",luaname="lua51-lanes",luaopen="lanes"}
+KIND{lua="lanes.core"}
 
 
 local function ldump(fni,fno)
