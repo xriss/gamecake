@@ -735,6 +735,10 @@ static int const gs_prio_remap[] =
 
 // this may end up on any platform, so not sure?
 
+#		elif defined(PLATFORM_ANDROID)
+
+#			define _PRIO_MODE SCHED_OTHER
+
 #		else
 #			error "Unknown OS: not implemented!"
 #		endif
@@ -789,7 +793,9 @@ void THREAD_CREATE( THREAD_T* ref, THREAD_RETURN_T (*func)( void*), void* data, 
 		// "The specified scheduling parameters are only used if the scheduling
 		//  parameter inheritance attribute is PTHREAD_EXPLICIT_SCHED."
 		//
+#ifdef PTHREAD_EXPLICIT_SCHED
 		PT_CALL_MAYBE( pthread_attr_setinheritsched( &a, PTHREAD_EXPLICIT_SCHED));
+#endif
 
 #ifdef _PRIO_SCOPE
 		PT_CALL( pthread_attr_setscope( &a, _PRIO_SCOPE));
@@ -949,6 +955,9 @@ bool_t THREAD_WAIT( THREAD_T *ref, double secs , SIGNAL_T *signal_ref, MUTEX_T *
 	void THREAD_MAKE_ASYNCH_CANCELLABLE()
 	{
 #if defined PLATFORM_NATIVE_CLIENT
+// NA
+#elif defined PLATFORM_ANDROID
+// NA
 #else
 		// that's the default, but just in case...
 		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
