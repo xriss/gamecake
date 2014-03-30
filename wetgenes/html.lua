@@ -1,20 +1,18 @@
+--
+-- (C) 2013 Kriss@XIXs.com
+--
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local table=table
-local string=string
-
-local type=type
-local tostring=tostring
-local setmetatable=setmetatable
 
 -- my string functions
-local str=require("wetgenes.string")
+local wstr=require("wetgenes.string")
 
 module("wetgenes.html")
 
 --
 -- use the replace function from wetgenes.string
 --
-replace=str.replace
+replace=wstr.replace
 
 
 -----------------------------------------------------------------------------
@@ -132,7 +130,7 @@ local escape_html=opts.escape_html or false
 	end
 
 	local esc=function(s)
-		esc_br(esc_html(s))
+		return esc_br(esc_html(s))
 	end
 
 	local function link( url , str )
@@ -148,7 +146,7 @@ local escape_html=opts.escape_html or false
 
 	local lines=wstr.split_lines(input)
 	
-	for line in ipairs(lines) do
+	for _,line in ipairs(lines) do
 
 		local tokens=wstr.split_whitespace(line)
 		
