@@ -44,9 +44,6 @@
 
 #endif
 
-#include "../wet/util/pstdint.h"
-#include "../wet/util/wet_types.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -64,6 +61,10 @@ extern "C" {
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
+#include "../wet/util/pstdint.h"
+#include "../wet/util/wet_types.h"
+
 
 #include "../lua_freetype/code/lua_freetype.h"
 
