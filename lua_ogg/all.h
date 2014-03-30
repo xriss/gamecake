@@ -37,9 +37,6 @@
 
 #endif
 
-#include "../wet/util/pstdint.h"
-#include "../wet/util/wet_types.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,6 +52,9 @@ extern "C" {
 #endif
 
 #include <vorbis/codec.h>
+
+#include "../wet/util/pstdint.h"
+#include "../wet/util/wet_types.h"
 
 #include "code/lua_ogg.h"
 
