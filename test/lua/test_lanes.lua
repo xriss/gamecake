@@ -1,7 +1,7 @@
 
 --HAXTBH, ffi seems bad so just remove it
-package.preload.ffi=nil
-local lanes=require("lanes").configure(1)
+--package.preload.ffi=nil
+local lanes=require("lanes").configure()
 
 
 module(...,package.seeall)
@@ -29,8 +29,6 @@ local wstr=require("wetgenes.string")
 
 --    assert( lanes==nil )
 --print("oo5")
-    local lanes=require("lanes").configure(1)
---lanes.configure(1)
 --print(wstr.dump(lanes))
 
     local h= lanes.gen( function() return 42 end ) ()
@@ -42,9 +40,9 @@ local wstr=require("wetgenes.string")
 end
 
 function test_require()
-local lanes=require("lanes")
+--local lanes=require("lanes")
 --print("poo1")
-	local gen= lanes.gen( "*", a_lane )
+	local gen= lanes.gen( "", a_lane )
 --print("poo2")
 
 	local h= gen()
@@ -54,7 +52,7 @@ local lanes=require("lanes")
 --print("ret=",ret)
 	assert( ret==true )
 
-	local gen= lanes.gen( "*", a_lane )
+	local gen= lanes.gen( "", a_lane )
 	local h= gen()
 	local ret= h[1]
 
