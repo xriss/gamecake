@@ -9,14 +9,13 @@
 #include <math.h>
 #include <string.h>
 
+#include INCLUDE_GLES_GL
 
 #include "../wet/util/pstdint.h"
 #include "../wet/util/wet_types.h"
 #include "../lib_lua/src/lua.h"
 #include "../lib_lua/src/lauxlib.h"
 #include "../lib_lua/src/lualib.h"
-
-#include INCLUDE_GLES_GL
 
 #include "code/lua_gamecake.h"
 
