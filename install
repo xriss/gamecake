@@ -7,3 +7,4 @@ fi
 mkdir -p ${DESTDIR}/bin/
 
 cp ../bin/exe/gamecake.nix ${DESTDIR}/bin/gamecake
+cp ../bin/exe/pagecake.nix ${DESTDIR}/bin/pagecake
