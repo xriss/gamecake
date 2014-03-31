@@ -1,0 +1,4 @@
+#build dependencies, run sudo ./yum-gets
+
+yum groupinstall 'Development Tools
+
