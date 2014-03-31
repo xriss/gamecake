@@ -1,0 +1,20 @@
+
+#clang if you want to build using clang (recomended)
+apt-get install clang build-essential:i386
+
+#needed for nginx
+apt-get install libssl-dev
+
+#mingw32 if you want to build for windows
+apt-get install mingw32
+
+
+#this doesnt work too well
+#and multilibs for cross compile to 64bit from 32bit
+#dpkg --add-architecture amd64
+#sudo aptitude update
+#apt-get install g++-multilib libgl1:amd64
+
+#32bit builds on 64bit system?
+apt-get install gcc-multilib
+#apt-get install libgl1-mesa-dev:i386 libx11-dev:i386 libasound2-dev:i386
