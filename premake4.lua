@@ -89,6 +89,17 @@ newplatform {
     }
 }
 
+newplatform {
+    name = "lsb",
+    description = "lsb",
+    gcc = {
+        cc = "lsbcc",
+        cxx = "lsbc++",
+        ar= "ar",
+        cppflags = "-MMD",
+    }
+}
+
 --[[ ios notez, something like this makefile but platforms are in /Applications
 
 /Applications/Xcode.app/Contents/Developer/Platforms/
@@ -142,6 +153,12 @@ elseif t:sub(1,3)=="nix" then
 	CPU=t:sub(4)
 	NIX=true
 	GCC=true
+elseif t:sub(1,3)=="lsb" then
+	TARGET="NIX"
+	CPU=t:sub(4)
+	NIX=true
+	GCC=true
+	LSB=true
 elseif t:sub(1,5)=="clang" then
 	TARGET="NIX"
 	CPU=t:sub(6)
@@ -349,7 +366,9 @@ elseif NIX then
 --	defines	"LUA_USE_DLOPEN"
 	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
 
-	if CLANG then
+	if LSB then
+		platforms { "lsb" } --hax
+	elseif CLANG then
 		platforms { "clang" } --hax
 	end
 
@@ -376,6 +395,7 @@ if not BUILD_DIR_BASE then
 
 	local t=TARGET
 	if CLANG and t=="NIX" then t="clang" end
+	if LSB and t=="NIX" then t="lsb" end
 
 	BUILD_DIR_BASE=("build-"..(_ACTION or "gmake").."-"..t.."-"..CPU):lower()
 	
@@ -609,13 +629,21 @@ elseif WINDOWS then -- need windows GL hacks
 		defines{ "INCLUDE_GLES_GL=\"GL3/gl3w.h\"" }
 	end
 	
+--[[
+elseif LSB then -- LSB is special?
+
+	includedirs { "lua_gles/code" }
+	defines{ "LUA_GLES_GL" }
+
+	defines{ "INCLUDE_GLES_GL=\\\"GL/gl.h\\\"" }
+]]
+
 else -- use GL 
 
 	includedirs { "lua_gles/code" }
 	defines{ "LUA_GLES_GL" }
 
 	defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
---	defines{ "INCLUDE_GLES_GL=\\\"GL/gl.h\\\"" }
 
 end
 
@@ -643,7 +671,7 @@ all_includes=all_includes or {
 	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_socket",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_lanes",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+--	{"lua_lanes",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_gamecake",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_win",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},

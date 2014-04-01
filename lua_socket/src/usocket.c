@@ -342,11 +342,29 @@ int socket_gethostbyname(const char *addr, struct hostent **hp) {
 * Error translation functions
 * Make sure important error messages are standard
 \*-------------------------------------------------------------------------*/
+const char *myhstrerror(int err)
+ {
+ 	static char buffer[48];
+ 	switch (err)
+ 	{
+ 	case HOST_NOT_FOUND:
+ 		return "Authoritative answer: host not found";
+ 	case NO_DATA:
+ 		return "Valid name, no data record of requested type";
+ 	case NO_RECOVERY:
+ 		return "Non recoverable errors, FORMERR, REFUSED, NOTIMP";
+ 	case TRY_AGAIN:
+ 		return "Non-authoritative \"host not found\", or SERVERFAIL";
+ 	}
+ 	sprintf(buffer, "Name resolution error %d", err);
+ 	return buffer;
+ }
+
 const char *socket_hoststrerror(int err) {
     if (err <= 0) return io_strerror(err);
     switch (err) {
         case HOST_NOT_FOUND: return "host not found";
-        default: return hstrerror(err);
+        default: return myhstrerror(err);
     }
 }
 

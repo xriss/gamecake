@@ -56,7 +56,7 @@ MAKE_FUNC(snd_pcm_hw_params_set_buffer_time_near);
 MAKE_FUNC(snd_pcm_hw_params_set_period_time_near);
 MAKE_FUNC(snd_pcm_hw_params_set_buffer_size_near);
 MAKE_FUNC(snd_pcm_hw_params_set_period_size_near);
-MAKE_FUNC(snd_pcm_hw_params_set_buffer_size_min);
+//MAKE_FUNC(snd_pcm_hw_params_set_buffer_size_min);
 MAKE_FUNC(snd_pcm_hw_params_get_buffer_size);
 MAKE_FUNC(snd_pcm_hw_params_get_period_size);
 MAKE_FUNC(snd_pcm_hw_params_get_access);
@@ -209,7 +209,7 @@ static ALCboolean alsa_load(void)
         LOAD_FUNC(snd_pcm_hw_params_set_buffer_time_near);
         LOAD_FUNC(snd_pcm_hw_params_set_period_time_near);
         LOAD_FUNC(snd_pcm_hw_params_set_buffer_size_near);
-        LOAD_FUNC(snd_pcm_hw_params_set_buffer_size_min);
+//        LOAD_FUNC(snd_pcm_hw_params_set_buffer_size_min);
         LOAD_FUNC(snd_pcm_hw_params_set_period_size_near);
         LOAD_FUNC(snd_pcm_hw_params_get_buffer_size);
         LOAD_FUNC(snd_pcm_hw_params_get_period_size);
@@ -951,12 +951,12 @@ static ALCenum alsa_open_capture(ALCdevice *pDevice, const ALCchar *deviceName)
     /* set rate (implicitly constrains period/buffer parameters) */
     CHECK(snd_pcm_hw_params_set_rate(data->pcmHandle, hp, pDevice->Frequency, 0));
     /* set buffer size in frame units (implicitly sets period size/bytes/time and buffer time/bytes) */
-    if(snd_pcm_hw_params_set_buffer_size_min(data->pcmHandle, hp, &bufferSizeInFrames) < 0)
-    {
-        TRACE("Buffer too large, using intermediate ring buffer\n");
+//    if(snd_pcm_hw_params_set_buffer_size_min(data->pcmHandle, hp, &bufferSizeInFrames) < 0)
+//    {
+//        TRACE("Buffer too large, using intermediate ring buffer\n");
         needring = AL_TRUE;
         CHECK(snd_pcm_hw_params_set_buffer_size_near(data->pcmHandle, hp, &bufferSizeInFrames));
-    }
+//    }
     /* set buffer size in frame units (implicitly sets period size/bytes/time and buffer time/bytes) */
     CHECK(snd_pcm_hw_params_set_period_size_near(data->pcmHandle, hp, &periodSizeInFrames, NULL));
     /* install and prepare hardware configuration */
