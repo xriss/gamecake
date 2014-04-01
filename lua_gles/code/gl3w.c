@@ -59,7 +59,7 @@ static void *get_proc(const char *proc)
 }
 #else
 #include <dlfcn.h>
-#include <GL/glx.h>
+//#include <GL/glx.h>
 
 static void *libgl;
 

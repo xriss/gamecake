@@ -152,7 +152,8 @@ elseif NIX then
 	links { "dl" }
 	links { "m" }
 
---	links { "rt" }
+	links { "rt" }
+	links { "c" }
 
 	if CPU=="64" then
 		KIND{kind="ConsoleApp",name="gamecake.x64"}
