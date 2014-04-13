@@ -56,11 +56,13 @@ local function build(mode)
 		
 	elseif mode=="lsb32" then -- these are local hacks for when I bump the luajit version
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" CC=\"cc -m32 \" CROSS=\"lsb\" ")
+		os.execute([[make amalg TARGET_CFLAGS="-DLUA_PRELOADLIBS=lua_preloadlibs" STATIC_CC="lsbcc"
+DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m32" ]])
 		
 	elseif mode=="lsb64" then
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m64 \" CC=cc CROSS=\"lsb\" TARGET_FLAGS=\" -m64 \" ")
+		os.execute([[make amalg TARGET_CFLAGS="-DLUA_PRELOADLIBS=lua_preloadlibs" STATIC_CC="lsbcc"
+DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m64" ]])
 
 	elseif mode=="arm" then -- android, make sure the flags are shared with the main build
 
