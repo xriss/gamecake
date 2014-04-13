@@ -44,11 +44,11 @@ local function build(mode)
 
 	if mode=="native" then -- these are local hacks for when I bump the luajit version
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc\" ")
+		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -march=native \" ")
 		
 	elseif mode=="x86" then -- these are local hacks for when I bump the luajit version
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 \" ")
+		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 -msse -msse2 \" ")
 		
 	elseif mode=="x64" then
 
@@ -57,7 +57,7 @@ local function build(mode)
 	elseif mode=="lsb32" then -- these are local hacks for when I bump the luajit version
 
 		os.execute([[make amalg TARGET_CFLAGS="-DLUA_PRELOADLIBS=lua_preloadlibs" STATIC_CC="lsbcc"
-DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m32" ]])
+DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m32 -msse -msse2" ]])
 		
 	elseif mode=="lsb64" then
 
@@ -74,11 +74,11 @@ DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m64" ]])
 
 	elseif mode=="win32" then -- windows 32bit
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 \" CROSS=i586-mingw32msvc- TARGET_SYS=Windows ")
+		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 -msse -msse2 \" CROSS=i586-mingw32msvc- TARGET_SYS=Windows ")
 
 	elseif mode=="osx" then -- osx 32bit, this must be run on the mac...
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" CFLAGS=\" -m32 \" LDFLAGS=\" -m32 \" ")
+		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" CFLAGS=\" -m32 -msse -msse2 \" LDFLAGS=\" -m32 \" ")
 
 	end
 

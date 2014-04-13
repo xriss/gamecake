@@ -347,8 +347,8 @@ elseif OSX then
 
 	if CPU=="32" then
 	
-		buildoptions{"-m32"}
-		linkoptions {"-m32"}
+		buildoptions{"-m32 -msse -msse2"}
+		linkoptions {"-m32 -msse -msse2"}
 		
 	elseif CPU=="64" then
 	
@@ -374,14 +374,19 @@ elseif NIX then
 
 	if CPU=="32" then
 	
-		buildoptions{"-m32"}
-		linkoptions{"-m32"}
+		buildoptions{"-m32 -msse -msse2"}
+		linkoptions{"-m32 -msse -msse2"}
 		
 	elseif CPU=="64" then
 	
 		buildoptions{"-m64"}
 		linkoptions{"-m64"}
-		
+	
+	elseif CPU=="native" then
+	
+		buildoptions{"-march=native"}
+		linkoptions{"-march=native"}
+				
 	end
 	
 end
