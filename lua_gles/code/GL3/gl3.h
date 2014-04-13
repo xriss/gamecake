@@ -87,7 +87,7 @@ extern "C" {
 typedef unsigned int GLenum;
 typedef unsigned char GLboolean;
 typedef unsigned int GLbitfield;
-typedef signed char GLbyte;
+typedef /*signed*/ char GLbyte;
 typedef short GLshort;
 typedef int GLint;
 typedef int GLsizei;

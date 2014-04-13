@@ -1,6 +1,6 @@
 
 project "gamecake"
-language "C"
+language "C++"
 
 files { "hacks.c" }
 
@@ -138,6 +138,11 @@ elseif NIX then
 --	linkoptions { "-static-libgcc" }
 
 	files { "../lib_lua/src/lua.c" }
+
+if LSB then
+	linkoptions { "--lsb-use-default-linker" }
+	linkoptions { "--lsb-besteffort" }
+end
 	
 --	linkoptions { "-v" }
 
@@ -152,7 +157,8 @@ elseif NIX then
 	links { "dl" }
 	links { "m" }
 
---	links { "rt" }
+	links { "rt" }
+	links { "c" }
 
 	if CPU=="64" then
 		KIND{kind="ConsoleApp",name="gamecake.x64"}
