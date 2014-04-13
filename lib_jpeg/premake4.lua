@@ -17,8 +17,7 @@ excludes {
 	"./jpegtran.c" ,
 }
 
-defines { "JPEGSTATIC" }
-
+defines { "JPEGSTATIC" , "NO_GETENV" }
 
 includedirs { "." }
 

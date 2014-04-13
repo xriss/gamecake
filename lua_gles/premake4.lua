@@ -24,6 +24,13 @@ elseif OSX then
 	links { "GL" }--, "GLU" }
 	defines "HAVE_FCNTL_H=1"
 
+elseif LSB then
+
+	files { "code/gl3w.c" }
+
+	links { "GL" }--, "GLU" }
+	defines "HAVE_FCNTL_H=1"
+
 elseif NIX then
 
 	files { "code/gl3w.c" }
