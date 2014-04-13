@@ -1,0 +1,66 @@
+cd `dirname $0`
+cd ..
+
+if [ "$1" == "clean" ] ; then
+        rm -rf build-gmake-nacl-native
+        exit
+fi
+
+naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_33`
+export PATH=$naclsdk/toolchain/linux_pnacl/bin:$PATH
+
+btype="exe"
+makeopts="config=release_nacl"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug_nacl"
+btype="dbg"
+fi
+
+build/premake4 gmake nacl
+
+cd build-gmake-nacl-native
+make $makeopts $2 $3 $4
+cd ..
+
+pnacl-finalize ../bin/$btype/gamecake.pexe
+pnacl-translate -arch i686 ../bin/$btype/gamecake.pexe -o ../bin/$btype/gamecake.32.nexe
+
+
+exit
+
+#
+#above is pnacl below is old nacl that we no longer use
+#
+
+naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_28`
+export PATH=$naclsdk/toolchain/linux_x86_newlib/bin:$PATH
+
+makeopts=""
+if [ "$1" = "release" ] ; then
+makeopts="config=release_nacl"
+fi
+
+build/premake4 gmake nacl-32
+build/premake4 gmake nacl-64
+#build/premake4 gmake nacl-arm
+
+if [ "$1" == "clean" ] ; then
+
+        rm -rf build-gmake-nacl-32
+        rm -rf build-gmake-nacl-64
+        rm -rf build-gmake-nacl-arm
+        exit
+fi
+
+
+cd build-gmake-nacl-32
+make $makeopts $2 $3 $4
+cd ..
+
+cd build-gmake-nacl-64
+make $makeopts $2 $3 $4
+cd ..
+
+#cd build-gmake-nacl-arm
+#make $makeopts $2 $3 $4
+#cd ..

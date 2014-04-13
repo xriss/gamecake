@@ -1,0 +1,24 @@
+cd `dirname $0`
+
+if [ "$1" = "clean" ] ; then
+
+        rm -rf ../build-gmake-nix-native
+        exit
+fi
+
+makeopts="config=release"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug"
+fi
+
+../build/tools/bake.nix
+cd ..
+
+cd lib_luajit
+../build/premake4.nix --file=asm.lua
+cd ..
+
+build/premake4.nix gmake nix-native
+cd build-gmake-nix-native
+make $makeopts $2 $3 $4
+cd ..

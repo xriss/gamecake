@@ -1,0 +1,19 @@
+syntax: glob
+*.git
+*.orig
+build-*
+*.dbg
+android/AndroidManifest.xml
+android/build.xml
+android/bin/*
+android/libs/*
+android/gen/*
+android/res/*
+gamecake/preloadlibs.c
+gamecake/cache.c
+*/log.txt
+nacl/nginx/logs/*
+nacl/nginx/static/*.zip
+build/*.nix
+lib_luajit/*/native/*
+
