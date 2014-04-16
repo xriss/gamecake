@@ -5,7 +5,8 @@ language "C++"
 files { "hacks.c" }
 
 
-GAMECAKE_VERSION="14.001"
+--GAMECAKE_VERSION="14.001"
+dofile("version.lua")
 
 dofile("cache.lua")
 dofile("preloadlibs.lua")
