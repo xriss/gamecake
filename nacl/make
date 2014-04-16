@@ -23,7 +23,7 @@ make $makeopts $2 $3 $4
 cd ..
 
 pnacl-finalize ../bin/$btype/gamecake.pexe
-pnacl-translate -arch i686 ../bin/$btype/gamecake.pexe -o ../bin/$btype/gamecake.32.nexe
+#pnacl-translate -arch i686 ../bin/$btype/gamecake.pexe -o ../bin/$btype/gamecake.32.nexe
 
 
 exit
