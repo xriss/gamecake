@@ -1,10 +1,10 @@
-if [ "$1" = "clean" ] ; then
-	rm -Rf build-gmake-windows-native
-	exit 0
-fi
-
 cd `dirname $0`
 cd ..
+
+if [ "$1" = "clean" ] ; then
+	rm -rf build-gmake-windows-native
+	exit 0
+fi
 
 build/premake4 gmake mingw
 

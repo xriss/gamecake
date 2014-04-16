@@ -2,10 +2,14 @@ cd `dirname $0`
 cd ..
 
 if [ "$1" = "clean" ] ; then
-	rm -Rf build-gmake-raspi-native
+	rm -rf build-gmake-raspi-native
 	exit
 fi
 
+makeopts="config=release_raspi"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug_raspi"
+fi
 
 sdks=`readlink -f ../sdks`
 
@@ -20,11 +24,7 @@ build/premake4 gmake raspi
 
 cd build-gmake-raspi-native
 
-if [ "$1" = "debug" ] ; then
-	make config=debug_raspi $2 $3 $4 $5
-else
-	make config=release_raspi $*
-fi
+make $makeopts $2 $3 $4
 
 cd ..
 
