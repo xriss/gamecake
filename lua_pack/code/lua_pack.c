@@ -393,6 +393,11 @@ int count;
 	{
 		off=(u32)lua_tonumber(l,3);
 	}
+
+	if(lua_isnumber(l,4)) // optional forced length
+	{
+		len=(size_t)lua_tonumber(l,4);
+	}
 	
 	data_len=0;
 	count=0;

@@ -155,27 +155,8 @@ for i,v in pairs(alc.defs) do -- copy vals into base for shorthand al.FALSE use
 	base[v]=i
 end
 
-
-function alc.GetError(...)
-	return core.GetError(...)
-end
-
-function alc.OpenDevice(...)
-	return core.OpenDevice(...)
-end
-function alc.CloseDevice(...)
-	return core.CloseDevice(...)
-end
-
-function alc.CreateContext(...)
-	return core.CreateContext(...)
-end
-function alc.DestroyContext(...)
-	return core.DestroyContext(...)
-end
-
-function alc.MakeContextCurrent(...)
-	return core.MakeContextCurrent(...)
+for n,v in pairs(core) do -- expot all core functions
+	alc[n]=v
 end
 
 --TODO: include device and context options
@@ -188,6 +169,12 @@ function alc.setup(opts)
 	dc.context=alc.CreateContext(dc.device)
 	dc.clean=alc.clean
 	alc.MakeContextCurrent(dc.context)
+	
+	if opts.capture then
+		dc.capture_device=alc.CaptureOpenDevice(nil,44100,alc.CAPTURE_SAMPLES,44100)
+	end
+	
+	
 	return dc
 end
 
@@ -196,6 +183,11 @@ function alc.clean(dc)
 	alc.MakeContextCurrent()
 	if dc.context then dc.context=alc.DestroyContext(dc.context) end
 	if dc.device then dc.device=alc.CloseDevice(dc.device) end
+	
+	if dc.capture_device then
+		alc.CaptureCloseDevice(dc.capture_device)
+	end
+	
 	return dc
 end
 
