@@ -133,7 +133,7 @@ enum e_status { PENDING, RUNNING, WAITING, DONE, ERROR_ST, CANCELLED };
   #include <pthread.h>
 
   #ifdef PLATFORM_LINUX
-  # define _MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE_NP
+  # define _MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE //_NP
   #else
     /* OS X, ... */
   # define _MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE
@@ -171,7 +171,7 @@ enum e_status { PENDING, RUNNING, WAITING, DONE, ERROR_ST, CANCELLED };
   #elif defined( PLATFORM_NATIVE_CLIENT)
     #define YIELD() sched_yield()
   #else
-    #define YIELD() pthread_yield()
+    #define YIELD() sched_yield() //pthread_yield()
   #endif
 	#define THREAD_CALLCONV
 #endif //THREADAPI == THREADAPI_PTHREAD
