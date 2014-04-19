@@ -973,11 +973,13 @@ bool_t THREAD_WAIT( THREAD_T *ref, double secs , SIGNAL_T *signal_ref, MUTEX_T *
 #if defined PLATFORM_BSD
 		pthread_set_name_np( pthread_self(), _name);
 #elif defined PLATFORM_LINUX
-	#if LINUX_USE_PTHREAD_SETNAME_NP
-		pthread_setname_np( pthread_self(), _name);
-	#else // LINUX_USE_PTHREAD_SETNAME_NP
-		 prctl(PR_SET_NAME, _name, 0, 0, 0);
-	#endif // LINUX_USE_PTHREAD_SETNAME_NP
+	#if ! defined(__LSB_VERSION__) // LSB missing funcs
+		#if LINUX_USE_PTHREAD_SETNAME_NP
+			pthread_setname_np( pthread_self(), _name);
+		#else // LINUX_USE_PTHREAD_SETNAME_NP
+			 prctl(PR_SET_NAME, _name, 0, 0, 0);
+		#endif // LINUX_USE_PTHREAD_SETNAME_NP
+	#endif
 #elif defined PLATFORM_QNX || defined PLATFORM_CYGWIN
 		pthread_setname_np( pthread_self(), _name);
 #elif defined PLATFORM_OSX
