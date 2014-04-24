@@ -13,6 +13,9 @@ local posix=require("posix")
 
 local fp=assert(posix.open("/dev/input/event12", posix.O_NONBLOCK + posix.O_RDONLY ))
 
+local hist={}
+local deadzone=24
+
 while true do
 	wwin.sleep(0.0001)
 
@@ -23,15 +26,34 @@ while true do
 	
 	if pkt then
 	
-		local tab
+		local Isecs,Imicros,Itype,Icode,Ivalue
 		if #pkt==24 then
-			tab=pack.load(pkt,{"u32","secs","u32","secs64","u32","micros","u32","micros64","u16","type","u16","code","u32","value"})
+			Isecs=pack.read(pkt,"u32",0)
+			Imicros=pack.read(pkt,"u32",8)
+			Itype=pack.read(pkt,"u16",16)
+			Icode=pack.read(pkt,"u16",18)
+			Ivalue=pack.read(pkt,"u16",20)
 		elseif #pkt==16 then
-			tab=pack.load(pkt,{"u32","secs","u32","micros","u16","type","u16","code","u32","value"})
+			Isecs=pack.read(pkt,"u32",0)
+			Imicros=pack.read(pkt,"u32",4)
+			Itype=pack.read(pkt,"u16",8)
+			Icode=pack.read(pkt,"u16",10)
+			Ivalue=pack.read(pkt,"u16",12)
 		end
+		
+		if Itype==3 then
+			if Ivalue>128-deadzone and Ivalue<128+deadzone then Ivalue=128 end
+		end
+		
+		local key=Itype..":"..Icode
+		local v=hist[key]
+		if v and (v ~= Ivalue) then v=false end
 
-		if tab then
-			print(tab.secs,tab.type,tab.code,tab.value)
+		if not v then -- *new* values only, ignore most junk packets
+			hist[key]=Ivalue
+			
+			local Itime=Isecs+(Imicros/1000000)		
+			print(Itime,Itype,Icode,Ivalue)
 		end
 	end
 	
