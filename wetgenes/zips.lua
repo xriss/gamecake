@@ -122,6 +122,7 @@ function open(fname)
 	return io.open(ioprefix..fname,"rb") -- also try the filesystem
 end
 
+
 --
 -- read the entire file and return the data
 --
@@ -144,5 +145,29 @@ function exists(fname)
 		return true
 	end
 	return false
+end
+
+
+--
+-- get a directory listing of the gicen dirname
+-- we must merge all possible zips with a first come priority to files
+-- apk are special as we have munged filenames in a flat filesystem
+-- so we have to treat the dname as a prefix
+--
+-- this is currently impossible, until we update the zip wossname
+--
+function dir(dname)
+	local ret={}
+	local found=false
+	
+	local mname=(v.munge and v.munge(fname)) or fname -- munge the filename (apk), or just use as is?
+
+	for i,v in ipairs(files) do
+		if v.z then -- this is the pre opened zipfile
+--			local file=v.z:open(mname)
+		end
+	end
+	
+	return found and ret
 end
 
