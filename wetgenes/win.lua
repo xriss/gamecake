@@ -506,6 +506,7 @@ function base.posix_open_events(w)
 	local kbdcount=0
 	for i=0,#events do local v=events[i]
 		if v then
+			v.state=v.state or {}
 			if v.handlers.kbd then -- open as keyboard, there may be many of these and it is all a hacky
 				v.fd=posix.open("/dev/input/event"..v.event, bit.bor(posix.O_NONBLOCK , posix.O_RDONLY) )
 				if v.fd then
@@ -545,26 +546,74 @@ end
 function base.posix_read_events(w) -- call this until it returns nil to get all events
 	if not posix then return end
 	
+	local deadzone=24
+
 	local events=base.posix_events
 	for i=0,#events do local v=events[i]
 		if v then
 			if v.fd then
-				local pkt=posix.read(v.fd,16)
-				if pkt then
-					local tab=pack.load(pkt,{"u32","secs","u32","micros","u16","type","u16","code","u32","value"})
-					tab.time=tab.secs+(tab.micros/1000000)
-					tab.secs=nil
-					tab.micros=nil
-					tab.class="posix_"..v.fd_type
-					tab.posix_device=v -- please do not edit this
-	--print(tab.class)
-					return tab
+--print("read",v.name)
+				local active=true
+				while active do
+					local pkt=posix.read(v.fd,24)
+					if pkt then
+
+						local Isecs,Imicros,Itype,Icode,Ivalue
+						if #pkt==24 then -- 64bit packet hax?
+							Isecs=pack.read(pkt,"u32",0)
+							Imicros=pack.read(pkt,"u32",8)
+							Itype=pack.read(pkt,"u16",16)
+							Icode=pack.read(pkt,"u16",18)
+							Ivalue=pack.read(pkt,"u16",20)
+						elseif #pkt==16 then
+							Isecs=pack.read(pkt,"u32",0)
+							Imicros=pack.read(pkt,"u32",4)
+							Itype=pack.read(pkt,"u16",8)
+							Icode=pack.read(pkt,"u16",10)
+							Ivalue=pack.read(pkt,"u16",12)
+						end
+	--print("got",v.name)
+						if Isecs then -- sanity check
+						
+							if Itype==3 then
+								if Ivalue>128-deadzone and Ivalue<128+deadzone then Ivalue=128 end
+							end
+							
+							local key=Itype..":"..Icode
+							local val=v.state[key]
+							if val and (val ~= Ivalue) then val=false end
+
+							if not val then -- report *new* values only, ignore most junk packets
+								v.state[key]=Ivalue
+								
+								local tab={}
+								
+								tab.type=Itype
+								tab.code=Icode
+								tab.value=Ivalue							
+								tab.time=Isecs+(Imicros/1000000)
+								
+								tab.class="posix_"..v.fd_type
+								tab.posix_num=v.fd_device
+								tab.posix_name=v.name
+								
+	--							tab.posix_device=v -- please do not edit this
+
+								base.push_msg(w,tab)
+	--							return tab
+							end
+						end
+					else
+						active=false
+					end
 				end
 			end
 		end
 	end
 	
+	return table.remove(w.msgstack,1) -- we pushed msgs above, pop and return here
 end
+
 function base.posix_close_events(w)
 	if not posix then return end
 	base.posix_events=nil

@@ -92,6 +92,15 @@ M.bake=function(oven,keys)
 		key.idx=idx
 		key.maps={}
 		
+		key.joy={}					
+		key.joy.class="joystick"
+		key.joy.lx=0
+		key.joy.rx=0
+		key.joy.dx=0
+		key.joy.ly=0
+		key.joy.ry=0
+		key.joy.dy=0
+
 		function key.clear()
 			key.maps={}
 		end
@@ -115,6 +124,48 @@ M.bake=function(oven,keys)
 					end
 				end				
 
+			elseif m.class=="posix_joystick" then
+
+				if m.type==1 then -- keys
+
+					if m.value==1 then -- key set
+						recap.but("fire",true)
+					elseif m.value==0 then -- key clear
+						recap.but("fire",false)
+					end
+
+				elseif m.type==3 then -- sticks ( assume ps3 config )
+				
+					local active=false
+					if m.code==0 then
+						key.joy.lx=(m.value-128)/128
+						active=true
+					elseif m.code==1 then
+						key.joy.ly=(m.value-128)/128
+						active=true
+					elseif m.code==2 then
+						key.joy.rx=(m.value-128)/128
+						active=true
+					elseif m.code==5 then
+						key.joy.ry=(m.value-128)/128
+						active=true
+					end
+
+					if active then
+						local joydir=mkeys.joystick_msg_to_key(key.joy)
+
+						if keys.last_joydir~=joydir then -- only when we change
+							if keys.last_joydir then -- first clear any previous key
+								recap.but(keys.last_joydir,false)
+							end
+							keys.last_joydir=joydir
+							if joydir then
+								recap.but(joydir,true) -- then send any new key
+							end
+						end
+					end
+				end
+			
 			elseif m.class=="joystick" then
 
 				local joydir=mkeys.joystick_msg_to_key(m)

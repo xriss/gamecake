@@ -134,12 +134,75 @@ function wmaster.setup(widget,def)
 	end
 	
 	function master.msg(widget,m)
+	
+		if not master.joy then
+			master.joy={}
+			master.joy.class="joystick"
+			master.joy.lx=0
+			master.joy.rx=0
+			master.joy.dx=0
+			master.joy.ly=0
+			master.joy.ry=0
+			master.joy.dy=0
+		end
+	
 --exit()
 --print(string.char(27).."[2J"..string.char(27).."[H")
 		if m.class=="key" then
 			widget:key(m.ascii,m.keyname,m.action)
 		elseif m.class=="mouse" then
 			widget:mouse(m.action,m.x,m.y,m.keyname)
+
+		elseif m.class=="posix_joystick" then
+
+			if m.type==1 then -- keys
+
+				if m.value==1 then -- key set
+--					recap.but("fire",true)
+--					master.last_keycode==m.keycode
+						master.key(widget,"","return",1)
+				elseif m.value==0 then -- key clear
+--					recap.but("fire",false)
+--					if master.last_keycode==m.keycode then -- key set
+--						master.last_keycode=nil
+--						master.key(widget,"","return",1)
+						master.key(widget,"","return",-1)
+--					end
+				end
+
+			elseif m.type==3 then -- sticks ( assume ps3 config )
+			
+				local active=false
+				if m.code==0 then
+					master.joy.lx=(m.value-128)/128
+					active=true
+				elseif m.code==1 then
+					master.joy.ly=(m.value-128)/128
+					active=true
+				elseif m.code==2 then
+					master.joy.rx=(m.value-128)/128
+					active=true
+				elseif m.code==5 then
+					master.joy.ry=(m.value-128)/128
+					active=true
+				end
+
+				if active then
+					local joydir=mkeys.joystick_msg_to_key(master.joy)
+
+					if master.last_joydir~=joydir then -- only when we change
+						if master.last_joydir then -- first clear any previous key
+							master.key(widget,"",master.last_joydir,-1)
+						end
+						master.last_joydir=joydir
+						if joydir then
+							master.key(widget,"",joydir,1) -- then send any new key
+						end
+					end
+				end
+			end
+		
+
 		elseif m.class=="joystick" then
 		
 			local joydir=mkeys.joystick_msg_to_key(m)
