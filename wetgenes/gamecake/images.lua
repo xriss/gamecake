@@ -25,6 +25,10 @@ function M.bake(oven,images)
 	images.data={}
 	images.gl_mem=0
 	
+	if opts.gl_mem_fake_limit then
+		images.gl_mem_fake_limit=opts.gl_mem_fake_limit -- 1024*1024*16
+	end
+	
 	images.prefix=opts.grdprefix or "data/"
 	images.postfix=opts.grdpostfix or { ".png" , ".jpg" }
 
@@ -53,6 +57,12 @@ images.unload=function(id)
 
 	if t and t.gl then
 		gl.DeleteTexture( t.gl )
+
+		if t.gl_mem then
+			images.gl_mem=images.gl_mem-t.gl_mem
+			t.gl_mem=0
+		end
+
 		t.gl=nil	
 	end
 end
@@ -217,8 +227,8 @@ end
 -- prepare gl values of a given mip, ready for upload
 -- this will probably load a grd
 --
-images.aloc_gl_data=function(t,mip)
-
+images.aloc_gl_data=function(t,_mip)
+	local mip=_mip
 	local dataname=t.dataname
 
 	if t.mips then
@@ -242,13 +252,22 @@ images.aloc_gl_data=function(t,mip)
 		end
 	end
 
-	if not t.mips then -- may need a power of 2 resize from raw texture
+--	if not t.mips then -- may need a power of 2 resize from raw texture
 		local width=images.uptwopow(g.width)
 		local height=images.uptwopow(g.height)
 
 		if width~=g.width or height~=g.height then 
 			g:resize(width,height,1) -- resize keeping the image in the topleft corner
 		end
+---	end
+
+-- perform bad scale fix
+	local mmax=2^_mip
+	if width > mmax  then width=mmax end
+	if height > mmax  then height=mmax end
+
+	if width~=g.width or height~=g.height then
+		g:scale(width,height,1) -- resize
 	end
 	
 	t.gl_width=g.width
@@ -260,7 +279,9 @@ images.aloc_gl_data=function(t,mip)
 	t.gl_grd=g
 	t.gl_data=g.data -- carefulnow
 	
+	images.gl_mem=images.gl_mem-t.gl_mem
 	t.gl_mem=4*t.gl_width*t.gl_height
+	images.gl_mem=images.gl_mem+t.gl_mem
 
 end
 images.free_gl_data=function(t,mip)
@@ -282,7 +303,7 @@ images.load=function(filename,id,fg)
 	t.fg=fg
 	t.id=id
 	t.binds=0 -- count binds, so we can guess which textures are currently in use
-	t.mip=4 -- start with a 256x256 base texture size?
+	t.mip=4 -- start with a 16x16 base texture size for fast loading?
 	t.max_mips=images.max_mips
 
 --print("loading",filename,id)
@@ -356,12 +377,11 @@ end
 
 images.upload = function(t)
 
-	if images.check_panic() then return nil end -- do nothing in panic state
-
 	if not t.gl then
 		t.gl=assert(gl.GenTexture())
 		t.gl_active=true
 		t.gl_mip=0 -- force change
+		t.gl_mem=0
 	end
 
 	local mip=t.mip
@@ -381,6 +401,7 @@ images.upload = function(t)
 	if t.width==0 or t.height==0 then return t end -- no data to upload
 
 	images.aloc_gl_data(t,t.gl_mip) -- update gl_* params
+
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
 		0,
@@ -391,11 +412,13 @@ images.upload = function(t)
 		t.gl_format,
 		t.gl_type,
 		t.gl_data )
+	if gl.GetError()==gl.OUT_OF_MEMORY then
+		images.flag_panic=true
+	end
+
 	images.free_gl_data(t) -- free gl_* params we may have locked
 	
-	if not images.check_panic() then -- probably best not to mipmap if upload fails
-		gl.GenerateMipmap(gl.TEXTURE_2D)
-	end
+	gl.GenerateMipmap(gl.TEXTURE_2D)
 	
 	return t
 end
@@ -515,11 +538,13 @@ end
 images.flag_panic=false
 images.check_panic=function()	
 
---[[
-	if images.gl_mem>1024*1024*16 then
-		images.flag_panic=true
+
+	if images.gl_mem_fake_limit and not images.flag_panic then
+		if images.gl_mem>images.gl_mem_fake_limit then
+print("GL FAKE PANIC mem=",images.gl_mem/(1024*1024))	
+			images.flag_panic=true
+		end
 	end
-]]
 
 	if gl.GetError()==gl.OUT_OF_MEMORY then
 		images.flag_panic=true
@@ -534,19 +559,19 @@ images.cando_panic=function()
 end
 images.panic = function(args)
 
-print("GL PANIC old memory ",images.gl_mem/(1024*1024))	
+print("GL PANIC old memory mem=",images.gl_mem/(1024*1024))	
 
 	images.flag_panic=false
 	
 	local mild=args and args.mild or false
 
-	for n,t in pairs(images.data) do -- check for mild panic first
+	for n,t in pairs(images.data) do -- check for mild panic first (free unused texture)
 		if not t.gl_active and t.gl then mild=true end
 	end
 
 	if mild then -- mild panic
 
-print("GL MILD MEMORY PANIC",images.max_mips)
+print("GL MILD MEMORY PANIC")
 
 		for n,t in pairs(images.data) do -- unload inactive textures
 			if not t.gl_active then
@@ -556,12 +581,29 @@ print("GL MILD MEMORY PANIC",images.max_mips)
 	
 	else -- severe panic
 	
+	
+
+-- first maksure that reducing the max mips will have an effect by setting it to the
+-- maximum mip curently used in the active images
+		local max_active_mip=1
+		for n,t in pairs(images.data) do
+			if t.gl_active then
+				if t.max_mips>max_active_mip then max_active_mip=t.max_mips end
+			end
+		end
+		if max_active_mip < images.max_mips then images.max_mips=max_active_mip end
+
+
 		if images.max_mips>1 then -- lower overall quality
 			images.max_mips=images.max_mips-1
 		end
+print("GL SEVERE MEMORY PANIC "..images.max_mips.."mips" )
 
-print("GL SEVERE MEMORY PANIC",images.max_mips)
-		
+		if ( not images.gl_mem_fake_limit ) or images.gl_mem < images.gl_mem_fake_limit then
+print("GL setting memory limit to ",images.gl_mem/(1024*1024))
+			images.gl_mem_fake_limit=images.gl_mem
+		end
+
 		for n,t in pairs(images.data) do -- unload all textures
 			if t.max_mips>images.max_mips then t.max_mips=images.max_mips end
 			if t.mip>t.max_mips then t.mip=t.max_mips end
@@ -583,7 +625,7 @@ print("GL SEVERE MEMORY PANIC",images.max_mips)
 		end
 	end
 	
-print("GL PANIC new memory ",images.gl_mem/(1024*1024))	
+print("GL PANIC new memory mem=",images.gl_mem/(1024*1024))	
 	
 	images.check_panic()
 	return images.cando_panic()

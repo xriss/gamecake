@@ -37,6 +37,13 @@ M.bake=function(oven,recaps)
 		if recap then return recap.get(nam) end
 	end
 	
+	function recaps.getnow(nam,idx)
+		local idx=idx or 1
+		local recap=recaps.up and recaps.up[idx]
+		if recap then return recap.getnow(nam) end
+	end
+
+
 -- create a new recap table, then we can load or save this data to or from our server
 	function recaps.create(idx)
 		local recap={}
@@ -61,7 +68,7 @@ M.bake=function(oven,recaps)
 			recap.now[nam]=dat
 			recap.autoclear[nam]=true
 		end
-		function recap.now(nam) -- return now or last frame data whatever "volatile" data we have
+		function recap.getnow(nam) -- return now or last frame data whatever "volatile" data we have
 			local v=recap.now[nam]
 			if type(v)=="nil" then v=recap.last[nam] end -- now probably only contains recent changes
 			return v
