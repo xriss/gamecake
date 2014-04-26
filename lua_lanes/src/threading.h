@@ -132,12 +132,11 @@ enum e_status { PENDING, RUNNING, WAITING, DONE, ERROR_ST, CANCELLED };
   #endif // PLATFORM_WIN32
   #include <pthread.h>
 
-//fix missing?
    #ifdef PTHREAD_MUTEX_RECURSIVE_NP
     #define _MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE_NP
    #else
     #define _MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE
-   #end
+   #endif
 
   #define MUTEX_T            pthread_mutex_t
   #define MUTEX_INIT(ref)    pthread_mutex_init(ref,NULL)
