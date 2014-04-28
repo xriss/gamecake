@@ -35,6 +35,8 @@ else
 	defines "NGX_HTTP_SSL"
 	defines "NGX_OPENSSL"
 	defines "NGX_SSL"
+	defines "NGX_HAVE_SHA1"
+	defines "NGX_HAVE_OPENSSL_SHA1_H"
 
 	files { "./**.h" }
 	files { "./objs/**.c" }
