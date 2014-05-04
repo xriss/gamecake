@@ -241,7 +241,10 @@ images.aloc_gl_data=function(t,_mip)
 	
 	local g
 	
-	if t.fg then g=t.fg() end -- use an image get function?
+	if t.fg then -- use an image get function?
+		g=t.fg()
+		g=grd.create(g) -- take a copy so we can scale it later
+	end
 
 	if not g then --
 		g=assert(grd.create())

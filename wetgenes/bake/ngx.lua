@@ -88,6 +88,7 @@ function build(tab)
 		"hoe",
 		"shadow",
 		"paint",
+		"genes",
 	}
 	for i,n in ipairs(modnames) do
 		for i,s in ipairs{"art","css","js"} do

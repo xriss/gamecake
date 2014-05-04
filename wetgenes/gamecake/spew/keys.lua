@@ -19,6 +19,7 @@ M.bake=function(oven,keys)
 	local recaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 	
 	keys.defaults={}
+-- single player covering entire keyboard
 	keys.defaults[0]={
 		["up"]			=	"up",
 		["w"]			=	"up",
@@ -28,13 +29,15 @@ M.bake=function(oven,keys)
 		["a"]			=	"left",
 		["right"]		=	"right",
 		["d"]			=	"right",
-		["rcontrol"]	=	"fire",
-		["rmenu"]		=	"fire",
+		["lshift"]		=	{"fire","x"},
+		["z"]			=	{"fire","y"},
+		["rcontrol"]	=	{"fire","x"},
+		["rmenu"]		=	{"fire","y"},
 		["space"]		=	"fire",
-		["lcontrol"]	=	"fire",
-		["lmenu"]		=	"fire",
+		["lcontrol"]	=	{"fire","a"},
+		["lmenu"]		=	{"fire","b"},
 	}
-
+-- 1up/2up key islands
 	keys.defaults[1]={
 		["w"]			=	"up",
 		["s"]			=	"down",
@@ -50,6 +53,23 @@ M.bake=function(oven,keys)
 		["right"]		=	"right",
 		["rcontrol"]	=	"fire",
 		["rmenu"]		=	"fire",
+	}
+-- single player mame/picade style buttons
+	keys.defaults["picade"]={
+		["up"]			=	"up",
+		["down"]		=	"down",
+		["left"]		=	"left",
+		["right"]		=	"right",
+		["5"]			=	"select",
+		["enter"]		=	"start",
+		["lshift"]		=	{"fire","a"},
+		["z"]			=	{"fire","b"},
+		["x"]			=	{"fire","l1"},
+		["lcontrol"]	=	{"fire","x"},
+		["lmenu"]		=	{"fire","y"},
+		["space"]		=	{"fire","r1"},
+		["1"]			=	"l2",
+		["esc"]			=	"r2",
 	}
 
 	function keys.setup(max_up)

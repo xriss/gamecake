@@ -79,17 +79,20 @@ M.bake=function(oven,recaps)
 		
 -- use this to set button flags, that may trigger a set/clr extra pulse state
 		function recap.but(nam,v)
-			local l=recap.now[nam]
-			if type(l)=="nil" then l=recap.last[nam] end -- now probably only contains recent changes
-			if v then -- set
-				if not l then -- change?
-					recap.set(nam,true)
-					recap.pulse(nam.."_set",true)
-				end
-			else -- clr
-				if l then -- change?
-					recap.set(nam,false)
-					recap.pulse(nam.."_clr",true)
+			if type(nam)=="table" then for _,n in ipairs(but) do recap.but(n,v) end -- multi
+			else
+				local l=recap.now[nam]
+				if type(l)=="nil" then l=recap.last[nam] end -- now probably only contains recent changes
+				if v then -- set
+					if not l then -- change?
+						recap.set(nam,true)
+						recap.pulse(nam.."_set",true)
+					end
+				else -- clr
+					if l then -- change?
+						recap.set(nam,false)
+						recap.pulse(nam.."_clr",true)
+					end
 				end
 			end
 		end
