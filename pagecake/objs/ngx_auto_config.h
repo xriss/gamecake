@@ -41,9 +41,8 @@
 
 
 #ifndef NGX_HAVE_PR_SET_DUMPABLE
-#define NGX_HAVE_PR_SET_DUMPABLE  1
+#define NGX_HAVE_PR_SET_DUMPABLE  0
 #endif
-
 
 #ifndef NGX_HAVE_SCHED_SETAFFINITY
 #define NGX_HAVE_SCHED_SETAFFINITY  1
@@ -51,7 +50,7 @@
 
 
 #ifndef NGX_HAVE_GNU_CRYPT_R
-#define NGX_HAVE_GNU_CRYPT_R  1
+#define NGX_HAVE_GNU_CRYPT_R  0
 #endif
 
 
