@@ -73,22 +73,22 @@
 
 
 #ifndef NGX_HAVE_O_DIRECT
-#define NGX_HAVE_O_DIRECT  1
+#define NGX_HAVE_O_DIRECT  0
 #endif
 
 
 #ifndef NGX_HAVE_ALIGNED_DIRECTIO
-#define NGX_HAVE_ALIGNED_DIRECTIO  1
+#define NGX_HAVE_ALIGNED_DIRECTIO  0
 #endif
 
 
 #ifndef NGX_HAVE_STATFS
-#define NGX_HAVE_STATFS  1
+#define NGX_HAVE_STATFS  0
 #endif
 
 
 #ifndef NGX_HAVE_STATVFS
-#define NGX_HAVE_STATVFS  1
+#define NGX_HAVE_STATVFS  0
 #endif
 
 
@@ -108,7 +108,7 @@
 
 
 #ifndef NGX_HAVE_ACCEPT4
-#define NGX_HAVE_ACCEPT4  1
+#define NGX_HAVE_ACCEPT4  0
 #endif
 
 
@@ -218,7 +218,7 @@
 
 
 #ifndef NGX_HAVE_FIONBIO
-#define NGX_HAVE_FIONBIO  1
+#define NGX_HAVE_FIONBIO  0
 #endif
 
 
@@ -228,7 +228,7 @@
 
 
 #ifndef NGX_HAVE_D_TYPE
-#define NGX_HAVE_D_TYPE  1
+#define NGX_HAVE_D_TYPE  0
 #endif
 
 
@@ -351,3 +351,8 @@
 #define NGX_GROUP  "nogroup"
 #endif
 
+
+#include <limits.h>
+#ifndef IOV_MAX
+#define IOV_MAX 1024
+#endif
