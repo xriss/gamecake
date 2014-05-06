@@ -21,21 +21,25 @@ M.bake=function(oven,keys)
 	keys.defaults={}
 -- single player covering entire keyboard
 	keys.defaults[0]={
-		["up"]			=	"up",
 		["w"]			=	"up",
-		["down"]		=	"down",
 		["s"]			=	"down",
-		["left"]		=	"left",
 		["a"]			=	"left",
-		["right"]		=	"right",
 		["d"]			=	"right",
+		["up"]			=	"up",
+		["down"]		=	"down",
+		["left"]		=	"left",
+		["right"]		=	"right",
 		["lshift"]		=	{"fire","x"},
+		["<"]			=	{"fire","y"},
 		["z"]			=	{"fire","y"},
-		["rcontrol"]	=	{"fire","x"},
-		["rmenu"]		=	{"fire","y"},
-		["space"]		=	"fire",
+		["."]			=	{"fire","x"},
+		["/"]			=	{"fire","x"},
+		["rshift"]		=	{"fire","y"},
 		["lcontrol"]	=	{"fire","a"},
 		["lmenu"]		=	{"fire","b"},
+		["space"]		=	"fire",
+		["rmenu"]		=	{"fire","x"},
+		["rcontrol"]	=	{"fire","y"},
 	}
 -- 1up/2up key islands
 	keys.defaults[1]={
@@ -43,6 +47,7 @@ M.bake=function(oven,keys)
 		["s"]			=	"down",
 		["a"]			=	"left",
 		["d"]			=	"right",
+		["lshift"]	=	"fire",
 		["lcontrol"]	=	"fire",
 		["lmenu"]		=	"fire",
 	}
@@ -51,6 +56,7 @@ M.bake=function(oven,keys)
 		["down"]		=	"down",
 		["left"]		=	"left",
 		["right"]		=	"right",
+		["rshift"]	=	"fire",
 		["rcontrol"]	=	"fire",
 		["rmenu"]		=	"fire",
 	}
@@ -97,12 +103,13 @@ M.bake=function(oven,keys)
 
 -- convert keys or whatever into recaps changes
 	function keys.msg(m)
-		if not keys.up then return end
-		
+		if not keys.up then return end -- no key maping
+
+		local used=false
 		for i,v in ipairs(keys.up) do
-			v.msg(m)
+			used=used or v.msg(m)
 		end
-		
+		return used
 	end
 	
 
@@ -129,6 +136,7 @@ M.bake=function(oven,keys)
 		end
 
 		function key.msg(m)
+			local used=false
 			local recap=key.idx and recaps.up and recaps.up[key.idx]
 			if not recap then return end
 			
@@ -138,8 +146,10 @@ M.bake=function(oven,keys)
 					if m.keyname==n then
 						if m.action==1 then -- key set
 							recap.but(v,true)
+							used=true
 						elseif m.action==-1 then -- key clear
 							recap.but(v,false)
+							used=true
 						end
 					end
 				end				
@@ -150,8 +160,10 @@ M.bake=function(oven,keys)
 
 					if m.value==1 then -- key set
 						recap.but("fire",true)
+						used=true
 					elseif m.value==0 then -- key clear
 						recap.but("fire",false)
+						used=true
 					end
 
 				elseif m.type==3 then -- sticks ( assume ps3 config )
@@ -160,15 +172,19 @@ M.bake=function(oven,keys)
 					if m.code==0 then
 						key.joy.lx=(m.value-128)/128
 						active=true
+						used=true
 					elseif m.code==1 then
 						key.joy.ly=(m.value-128)/128
 						active=true
+						used=true
 					elseif m.code==2 then
 						key.joy.rx=(m.value-128)/128
 						active=true
+						used=true
 					elseif m.code==5 then
 						key.joy.ry=(m.value-128)/128
 						active=true
+						used=true
 					end
 
 					if active then
@@ -181,6 +197,7 @@ M.bake=function(oven,keys)
 							keys.last_joydir=joydir
 							if joydir then
 								recap.but(joydir,true) -- then send any new key
+								used=true
 							end
 						end
 					end
@@ -200,6 +217,7 @@ M.bake=function(oven,keys)
 					keys.last_joydir=joydir
 					if joydir then
 						recap.but(joydir,true) -- then send any new key
+						used=true
 					end
 				end
 
@@ -207,12 +225,15 @@ M.bake=function(oven,keys)
 			
 				if m.action==1 then -- key set
 					recap.but("fire",true)
+					used=true
 				elseif m.action==-1 then -- key clear
 					recap.but("fire",false)
+					used=true
 				end
 
 			end
 			
+			return used -- if we used the msg
 		end
 		
 		return key
