@@ -62,3 +62,31 @@ int kill(int pid, int sig)
 //{
 //	luaopen_lanes_embedded(L, 0);
 //}
+
+
+
+#if defined(__LSB_VERSION__) // LSB hacks
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+
+extern int accept4(int sockfd, struct sockaddr *addr, socklen_t *addrlen, int flags)
+{
+	return accept(sockfd,addr,addrlen);
+}
+
+
+#include <stdarg.h>
+extern int __isoc99_sscanf(const char *a, const char *b, va_list args)
+{
+   int i;
+   va_list ap;
+   va_copy(ap,args);
+   i=sscanf(a,b,ap);
+   va_end(ap);
+   return i;
+}
+
+#endif
+

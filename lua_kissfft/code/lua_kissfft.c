@@ -22,8 +22,8 @@
 #if defined(LIB_LUAJIT)
 #include "../../lib_luajit/src/lj_obj.h"
 #else
-#include "../wet/util/pstdint.h"
-#include "../lib_lua/src/lobject.h"
+#include "../../wet/util/pstdint.h"
+#include "../../lib_lua/src/lobject.h"
 #endif
 
 #include "../../wet/util/wet_types.h"

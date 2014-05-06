@@ -1,6 +1,6 @@
 
 project "pagecake"
-language "C"
+language "C++"
 
 includedirs {	"." ,
 		"objs" ,
@@ -25,6 +25,11 @@ includedirs {	"." ,
 if NACL then
 elseif ANDROID then 
 else
+
+if LSB then
+	linkoptions { "--lsb-use-default-linker" }
+	linkoptions { "--lsb-besteffort" }
+end
 
 --	defines "NGX_HAVE_AIO"
 	defines "NGX_LINUX"
