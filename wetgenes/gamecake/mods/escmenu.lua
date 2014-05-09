@@ -31,6 +31,9 @@ function M.bake(oven,escmenu)
 	local canvas=cake.canvas
 	local layout=cake.layouts.create{}
 
+	local skeys=oven.rebake("wetgenes.gamecake.spew.keys")
+
+
 	function escmenu.setup()
 	
 		oven.cake.fonts.loads({1}) -- always load builtin font number 1 a basic 8x8 font		
@@ -101,7 +104,8 @@ function M.bake(oven,escmenu)
 	
 
 	function escmenu.update()
-	
+
+
 		if escmenu.show then
 
 			escmenu.master:update()
@@ -144,6 +148,8 @@ function M.bake(oven,escmenu)
 	function escmenu.msg(m)
 		if escmenu.show then
 			if m.class=="key" or m.class=="mouse" or m.class=="joykey" or m.class=="joystick" then
+
+				if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
 
 				if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
 					m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen

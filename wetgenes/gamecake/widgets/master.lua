@@ -24,6 +24,9 @@ local canvas=oven.canvas
 
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
+	local skeys=oven.rebake("wetgenes.gamecake.spew.keys")
+	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps")
+
 local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
 
 --
@@ -51,6 +54,33 @@ function wmaster.setup(widget,def)
 
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget,resize)
+
+		if skeys.up then -- use skeys / srecaps code 
+
+			local vx=0
+			local vy=0
+
+			if srecaps.get("left_set")  then vx=-1 end
+			if srecaps.get("right_set") then vx= 1 end
+			if srecaps.get("up_set")    then vy=-1 end
+			if srecaps.get("down_set")  then vy= 1 end
+			
+			master.keymove(vx,vy)
+
+			if srecaps.get("fire_set")  then
+
+				if master.over and master.over.can_focus then
+					master.set_focus(master.over)
+				end
+
+				if master.over then
+					master.over:call_hook("click")
+				end
+
+			end
+
+		end
+
 	
 		local tim=os.time()
 		for w,t in pairs(master.timehooks) do
@@ -135,125 +165,134 @@ function wmaster.setup(widget,def)
 	
 	function master.msg(widget,m)
 	
-		if not master.joy then
-			master.joy={}
-			master.joy.class="joystick"
-			master.joy.lx=0
-			master.joy.rx=0
-			master.joy.dx=0
-			master.joy.ly=0
-			master.joy.ry=0
-			master.joy.dy=0
-		end
-	
---exit()
---print(string.char(27).."[2J"..string.char(27).."[H")
 		if m.class=="key" then
 			widget:key(m.ascii,m.keyname,m.action)
 		elseif m.class=="mouse" then
 			widget:mouse(m.action,m.x,m.y,m.keyname)
-
-		elseif m.class=="posix_joystick" then
-
-			if m.type==1 then -- keys
-
-				if m.value==1 then -- key set
---					recap.but("fire",true)
---					master.last_keycode==m.keycode
-						master.key(widget,"","return",1)
-				elseif m.value==0 then -- key clear
---					recap.but("fire",false)
---					if master.last_keycode==m.keycode then -- key set
---						master.last_keycode=nil
---						master.key(widget,"","return",1)
-						master.key(widget,"","return",-1)
---					end
-				end
-
-			elseif m.type==3 then -- sticks ( assume ps3 config )
-			
-				local active=false
-				if m.code==0 then
-					master.joy.lx=(m.value-128)/128
-					active=true
-				elseif m.code==1 then
-					master.joy.ly=(m.value-128)/128
-					active=true
-				elseif m.code==2 then
-					master.joy.rx=(m.value-128)/128
-					active=true
-				elseif m.code==5 then
-					master.joy.ry=(m.value-128)/128
-					active=true
-				end
-
-				if active then
-					local joydir=mkeys.joystick_msg_to_key(master.joy)
-
-					if master.last_joydir~=joydir then -- only when we change
-						if master.last_joydir then -- first clear any previous key
-							master.key(widget,"",master.last_joydir,-1)
-						end
-						master.last_joydir=joydir
-						if joydir then
-							master.key(widget,"",joydir,1) -- then send any new key
-						end
-					end
-				end
-			end
-		
-
-		elseif m.class=="joystick" then
-		
-			local joydir=mkeys.joystick_msg_to_key(m)
-			
-			if master.last_joydir~=joydir then -- only when we change
-				if master.last_joydir then -- first clear any previous key
-					master.key(widget,"",master.last_joydir,-1)
-				end
-				master.last_joydir=joydir
-				if joydir then
-					master.key(widget,"",joydir,1) -- then send any new key
-				end
-			end
-
-		elseif m.class=="joykey" then
-		
-			if m.action==1 then master.last_keycode=m.keycode end -- slight debounce hack?
-
---print(wstr.dump(m))
-
-			if m.keycode==4 or ( (oven.opts.smell=="gamestick") and (m.keycode==97) ) then --back
-				if master.go_back_id then
-					local v=master.ids and master.ids[master.go_back_id]
-					if v then
-						if m.action==-1 then
-							v:call_hook("click")
-						end
-					end
-				end
-			elseif m.keycode==108 then --forward
-				if master.go_forward_id then
-					local v=master.ids and master.ids[master.go_forward_id]
-					if v then
-						if m.action==-1 then
-							v:call_hook("click")
-						end
-					end
-				end
-			else
---print(m.keycode)
-				if m.keycode==0 then -- ignore
-				else
-					if m.action==-1 and master.last_keycode==m.keycode then -- key set
-						master.last_keycode=nil
-						master.key(widget,"","return",1)
-						master.key(widget,"","return",-1)
-					end
-				end
-			end
-
 		end
+
+--[[
+
+			if not master.joy then
+				master.joy={}
+				master.joy.class="joystick"
+				master.joy.lx=0
+				master.joy.rx=0
+				master.joy.dx=0
+				master.joy.ly=0
+				master.joy.ry=0
+				master.joy.dy=0
+			end
+	
+--exit()
+--print(string.char(27).."[2J"..string.char(27).."[H")
+			if m.class=="key" then
+				widget:key(m.ascii,m.keyname,m.action)
+			elseif m.class=="mouse" then
+				widget:mouse(m.action,m.x,m.y,m.keyname)
+
+			elseif m.class=="posix_joystick" then
+
+				if m.type==1 then -- keys
+
+					if m.value==1 then -- key set
+	--					recap.but("fire",true)
+	--					master.last_keycode==m.keycode
+							master.key(widget,"","return",1)
+					elseif m.value==0 then -- key clear
+	--					recap.but("fire",false)
+	--					if master.last_keycode==m.keycode then -- key set
+	--						master.last_keycode=nil
+	--						master.key(widget,"","return",1)
+							master.key(widget,"","return",-1)
+	--					end
+					end
+
+				elseif m.type==3 then -- sticks ( assume ps3 config )
+				
+					local active=false
+					if m.code==0 then
+						master.joy.lx=(m.value-128)/128
+						active=true
+					elseif m.code==1 then
+						master.joy.ly=(m.value-128)/128
+						active=true
+					elseif m.code==2 then
+						master.joy.rx=(m.value-128)/128
+						active=true
+					elseif m.code==5 then
+						master.joy.ry=(m.value-128)/128
+						active=true
+					end
+
+					if active then
+						local joydir=mkeys.joystick_msg_to_key(master.joy)
+
+						if master.last_joydir~=joydir then -- only when we change
+							if master.last_joydir then -- first clear any previous key
+								master.key(widget,"",master.last_joydir,-1)
+							end
+							master.last_joydir=joydir
+							if joydir then
+								master.key(widget,"",joydir,1) -- then send any new key
+							end
+						end
+					end
+				end
+			
+
+			elseif m.class=="joystick" then
+			
+				local joydir=mkeys.joystick_msg_to_key(m)
+				
+				if master.last_joydir~=joydir then -- only when we change
+					if master.last_joydir then -- first clear any previous key
+						master.key(widget,"",master.last_joydir,-1)
+					end
+					master.last_joydir=joydir
+					if joydir then
+						master.key(widget,"",joydir,1) -- then send any new key
+					end
+				end
+
+			elseif m.class=="joykey" then
+			
+				if m.action==1 then master.last_keycode=m.keycode end -- slight debounce hack?
+
+	--print(wstr.dump(m))
+
+				if m.keycode==4 or ( (oven.opts.smell=="gamestick") and (m.keycode==97) ) then --back
+					if master.go_back_id then
+						local v=master.ids and master.ids[master.go_back_id]
+						if v then
+							if m.action==-1 then
+								v:call_hook("click")
+							end
+						end
+					end
+				elseif m.keycode==108 then --forward
+					if master.go_forward_id then
+						local v=master.ids and master.ids[master.go_forward_id]
+						if v then
+							if m.action==-1 then
+								v:call_hook("click")
+							end
+						end
+					end
+				else
+	--print(m.keycode)
+					if m.keycode==0 then -- ignore
+					else
+						if m.action==-1 and master.last_keycode==m.keycode then -- key set
+							master.last_keycode=nil
+							master.key(widget,"","return",1)
+							master.key(widget,"","return",-1)
+						end
+					end
+				end
+			end
+		end
+]]
 	end
 
 	function master.set_focus_edit(edit)
@@ -299,6 +338,7 @@ function wmaster.setup(widget,def)
 			
 		
 		else
+		
 			if master.edit then
 				if	key=="left" or
 					key=="right" or
@@ -311,6 +351,8 @@ function wmaster.setup(widget,def)
 				end
 			end
 		
+--[[
+
 			if act==-1 then
 				if key=="space" or key=="return" then
 
@@ -335,69 +377,76 @@ function wmaster.setup(widget,def)
 				if key=="up"    then vy=-1 end
 				if key=="down"  then vy= 1 end
 				
-				if vx~=0 or vy~=0 then -- move hover selection
-				
-					if master.over then
-						local over=master.over
-						local best={}
-						local ox=over.pxd+(over.hx/2)
-						local oy=over.pyd+(over.hy/2)
+				master.keymove(vx,vy)
 
---print("over",ox,oy)
-
-						master:call_descendents(function(w)
-							if w.solid and w.hooks then
-								local wx=w.pxd+(w.hx/2)
-								local wy=w.pyd+(w.hy/2)
-								local dx=wx-ox
-								local dy=wy-oy
-								local dd=0
-								if vx==0 then dd=dd+dx*dx*8 else dd=dd+dx*dx end
-								if vy==0 then dd=dd+dy*dy*8 else dd=dd+dy*dy end
---print(w,wx,wy,dx,dy,by,by)
-								if	( dx<0 and vx<0 ) or
-									( dx>0 and vx>0 ) or
-									( dy<0 and vy<0 ) or
-									( dy>0 and vy>0 ) then -- right direction
-									
-									if best.over then
-										if best.dd>dd then -- closer
-											best.over=w
-											best.dd=dd
-										end
-									else
-										best.over=w
-										best.dd=dd
-									end
-								end
-							end
-						end)
-						if best.over then
-							over:set_dirty()
-							best.over:set_dirty()
-							master.over=best.over
-							if master.over then master.over:call_hook("over") end
-						end
-					end
-					if not master.over then
-						master:call_descendents(function(v)
-							if not master.over then
-								if v.solid and v.hooks then
-									master.over=v
-									v:set_dirty()
-									master.over:call_hook("over")
-								end
-							end
-						end)
-					end
-					
-				end
 --print(2,master.over)
 			end
+]]
+
 		end
 
 	end
 
+
+	function master.keymove(vx,vy)
+		if vx~=0 or vy~=0 then -- move hover selection
+		
+			if master.over then
+				local over=master.over
+				local best={}
+				local ox=over.pxd+(over.hx/2)
+				local oy=over.pyd+(over.hy/2)
+
+--print("over",ox,oy)
+
+				master:call_descendents(function(w)
+					if w.solid and w.hooks then
+						local wx=w.pxd+(w.hx/2)
+						local wy=w.pyd+(w.hy/2)
+						local dx=wx-ox
+						local dy=wy-oy
+						local dd=0
+						if vx==0 then dd=dd+dx*dx*8 else dd=dd+dx*dx end
+						if vy==0 then dd=dd+dy*dy*8 else dd=dd+dy*dy end
+--print(w,wx,wy,dx,dy,by,by)
+						if	( dx<0 and vx<0 ) or
+							( dx>0 and vx>0 ) or
+							( dy<0 and vy<0 ) or
+							( dy>0 and vy>0 ) then -- right direction
+							
+							if best.over then
+								if best.dd>dd then -- closer
+									best.over=w
+									best.dd=dd
+								end
+							else
+								best.over=w
+								best.dd=dd
+							end
+						end
+					end
+				end)
+				if best.over then
+					over:set_dirty()
+					best.over:set_dirty()
+					master.over=best.over
+					if master.over then master.over:call_hook("over") end
+				end
+			end
+			if not master.over then
+				master:call_descendents(function(v)
+					if not master.over then
+						if v.solid and v.hooks then
+							master.over=v
+							v:set_dirty()
+							master.over:call_hook("over")
+						end
+					end
+				end)
+			end
+			
+		end
+	end
 --
 -- set the mouse position to its last position
 -- call this after adding/removing widgets to make sure they highlight properly

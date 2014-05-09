@@ -29,6 +29,8 @@ M.bake=function(oven,keys)
 		["down"]		=	"down",
 		["left"]		=	"left",
 		["right"]		=	"right",
+		["tab"]			=	"select",
+		["enter"]		=	"start",
 		["lshift"]		=	{"fire","x"},
 		["<"]			=	{"fire","y"},
 		["z"]			=	{"fire","y"},
@@ -40,6 +42,10 @@ M.bake=function(oven,keys)
 		["space"]		=	"fire",
 		["rmenu"]		=	{"fire","x"},
 		["rcontrol"]	=	{"fire","y"},
+		["-"]			=	"l1",
+		["["]			=	"l2",
+		["="]			=	"r1",
+		["]"]			=	"r2",
 	}
 -- 1up/2up key islands
 	keys.defaults[1]={
@@ -47,7 +53,7 @@ M.bake=function(oven,keys)
 		["s"]			=	"down",
 		["a"]			=	"left",
 		["d"]			=	"right",
-		["lshift"]	=	"fire",
+		["lshift"]		=	"fire",
 		["lcontrol"]	=	"fire",
 		["lmenu"]		=	"fire",
 	}
@@ -56,12 +62,12 @@ M.bake=function(oven,keys)
 		["down"]		=	"down",
 		["left"]		=	"left",
 		["right"]		=	"right",
-		["rshift"]	=	"fire",
+		["rshift"]		=	"fire",
 		["rcontrol"]	=	"fire",
 		["rmenu"]		=	"fire",
 	}
 -- single player mame/picade style buttons
-	keys.defaults["picade"]={
+	keys.defaults["pimoroni"]={
 		["up"]			=	"up",
 		["down"]		=	"down",
 		["left"]		=	"left",
@@ -86,8 +92,14 @@ M.bake=function(oven,keys)
 		end
 		
 		if max_up==1 then -- single player, grab lots of keys
-			for n,v in pairs(keys.defaults[0]) do
-				keys.up[1].set(n,v)
+			if oven.opts.bake.smell=="pimoroni" then
+				for n,v in pairs(keys.defaults["pimoroni"]) do
+					keys.up[1].set(n,v)
+				end
+			else
+				for n,v in pairs(keys.defaults[0]) do
+					keys.up[1].set(n,v)
+				end
 			end
 		else
 			for i=1,max_up do -- multiplayer use keyislands so we can all fit on a keyboard

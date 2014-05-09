@@ -22,6 +22,21 @@ local function assert_resume(co)
 	error( b.."\nin coroutine\n"..debug.traceback(co) ) -- error
 end
 
+--[[#wetgenes.gamecake.oven.bake
+
+Bake creates an instance of a lua module bound to a state. Here we 
+are creating the main state that other modules will then bind to.
+
+We call each state an OVEN to fit into the gamecake naming scheme.
+
+Think of it as a sub version of require, so require gets the global 
+pointer for a module and bake is used to get the a module bound to 
+an oven.
+
+By using this bound state we reduce the verbosity of connecting 
+modules and sharing state between them.
+
+]]
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M

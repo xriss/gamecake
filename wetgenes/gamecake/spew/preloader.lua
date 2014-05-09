@@ -110,6 +110,23 @@ main.config_as=function(name)
 				img_hy=512,
 			}
 		end
+	elseif name=="pimoroni" then
+		if oven.cake.images.exists("imgs/preloader/pimoroni") then
+			main.config{
+				screen_hx=256,
+				screen_hy=512,
+				screen_argb=0x00000000,
+				text_dx=(630/2)-512,
+				text_dy=(460/2)-256,
+				text_hx=(930-630)/2,
+				text_hy=(640-460)/2,
+				text_argb=0xff008800,
+				text_rz=0,
+				img="imgs/preloader/pimoroni",
+				img_hx=1024,
+				img_hy=512,
+			}
+		end
 	elseif name=="kittyscreen" then
 		if oven.cake.images.exists("imgs/preloader/kittyscreen") then
 			main.config{

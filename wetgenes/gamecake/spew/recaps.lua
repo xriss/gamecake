@@ -79,7 +79,8 @@ M.bake=function(oven,recaps)
 		
 -- use this to set button flags, that may trigger a set/clr extra pulse state
 		function recap.but(nam,v)
-			if type(nam)=="table" then for _,n in ipairs(but) do recap.but(n,v) end -- multi
+			if type(nam)=="table" then
+				for _,n in ipairs(nam) do recap.but(n,v) end -- multi
 			else
 				local l=recap.now[nam]
 				if type(l)=="nil" then l=recap.last[nam] end -- now probably only contains recent changes
@@ -98,9 +99,12 @@ M.bake=function(oven,recaps)
 		end
 
 
-		function recap.step()
-			
-			if recap.flow=="record" then
+		function recap.step(flow)
+			flow=flow or recap.flow
+
+--print("step "..tostring(flow))	
+
+			if flow=="record" then
 				local change
 				for n,v in pairs(recap.now) do
 					if recap.last[n]~=v then -- changes
@@ -120,7 +124,7 @@ M.bake=function(oven,recaps)
 					end
 				end
 				
-			elseif recap.flow=="play" then -- grab from the stream
+			elseif flow=="play" then -- grab from the stream
 			
 				if recap.wait>0 then
 				
@@ -156,7 +160,7 @@ M.bake=function(oven,recaps)
 				
 			end
 			
-			if recap.flow~="play" then
+			if flow~="play" then
 				for n,b in pairs(recap.autoclear) do -- auto clear volatile button pulse states
 					recap.now[n]=false
 					recap.autoclear[n]=nil
