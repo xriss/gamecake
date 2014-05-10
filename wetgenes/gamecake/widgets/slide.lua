@@ -14,63 +14,37 @@ function M.bake(oven,wslide)
 wslide=wslide or {}
 
 local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
+local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 
 
 function wslide.mouse(widget,act,x,y,key)
-	if act==1 and key=="left" and ( x>=widget.pxd and y>=widget.pyd and x<widget.pxd+widget.hx and y<widget.pyd+widget.hy ) then
-		if 		x<widget.drag.pxd 					then widget:key("","left",1)
-		elseif 	x>widget.drag.pxd+widget.drag.hx 	then widget:key("","right",1)
-		elseif 	y<widget.drag.pyd 					then widget:key("","up",1)
-		elseif 	y>widget.drag.pyd+widget.drag.hy 	then widget:key("","down",1)
-		end
-	end
 	return widget.meta.mouse(widget,act,x,y,key)
 end
 
 
 function wslide.key(widget,ascii,key,act)
-	if key=="enter" or key=="return" or key=="space" then
-		
-		if act==-1 then -- ignore repeats on enter key
-			widget:call_hook("click")				
-			widget.master.set_focus(nil)
-		end
-			
-	elseif key=="left" then
-		if act==1 then -- ignore repeats on enter key
-			widget.datx:dec()
-			widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
-			widget:snap()
-		end
-	elseif key=="right" then
-		if act==1 then -- ignore repeats on enter key
-			widget.datx:inc()
-			widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
-			widget:snap()
-		end
-	elseif key=="up" then
-		if act==1 then -- ignore repeats on enter key
-			widget.daty:dec()
-			widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
-			widget:snap()
-		end
-	elseif key=="down" then
-		if act==1 then -- ignore repeats on enter key
-			widget.daty:inc()
-			widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
-			widget:snap()
-		end
-	end
-
-	return true
-
---	return widget.meta.key(widget,ascii,key,act)
+	return widget.meta.key(widget,ascii,key,act)
 end
 
 
 function wslide.update(widget)
 --	local it=widget.slide
 
+	if widget.master.active==widget then
+--print("slide update")
+			if srecaps.get("left_set")  then
+				widget.datx:dec()
+			end
+			if srecaps.get("right_set") then
+				widget.datx:inc()
+			end
+			if srecaps.get("up_set")    then
+				widget.daty:dec()
+			end
+			if srecaps.get("down_set")  then
+				widget.daty:inc()
+			end
+	end
 	
 	widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
 	widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
@@ -135,7 +109,7 @@ function wslide.setup(widget,def)
 	widget:snap()
 
 	widget.solid=true
-	widget.can_focus=true
+--	widget.can_focus=true
 	
 	return widget
 end

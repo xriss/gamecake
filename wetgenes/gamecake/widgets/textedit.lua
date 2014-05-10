@@ -29,7 +29,7 @@ function wtextedit.mouse(widget,act,x,y,key)
 	
 	if widget.master.active==widget then
 	
-		widget.master.set_focus(widget)
+--		widget.master.set_focus(widget)
 		
 		local function get_idx()
 			local idx=0
@@ -66,11 +66,15 @@ function wtextedit.mouse(widget,act,x,y,key)
 
 		elseif act==0 then -- drag
 
-			widget.data.str_idx=get_idx()
+			if widget.mouse_down and widget.data.str_select_click then
 			
-			widget.data.str_select = widget.data.str_select_click - widget.data.str_idx
+				widget.data.str_idx=get_idx()
 			
-			widget:set_dirty()
+				widget.data.str_select = widget.data.str_select_click - widget.data.str_idx
+			
+				widget:set_dirty()
+				
+			end
 		
 		elseif act==-1 then
 			widget.mouse_down=false

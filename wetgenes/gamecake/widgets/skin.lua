@@ -492,7 +492,7 @@ end
 			else
 				gl.Color( c[1],c[2],c[3],c[4] )
 			end
-		elseif master.over==widget or widget.parent==master.focus then
+		elseif master.over==widget or widget.parent==master.active then
 			if buttdown then
 				if layer>1 then	
 --					local a=1/16

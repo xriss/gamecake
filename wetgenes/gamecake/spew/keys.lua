@@ -28,8 +28,10 @@ M.bake=function(oven,keys)
 		["down"]		=	"down",
 		["left"]		=	"left",
 		["right"]		=	"right",
-		["tab"]			=	"select",
-		["enter"]		=	"start",
+		["1"]			=	"select",
+		["2"]			=	"start",
+		["return"]		=	"fire",
+		["enter"]		=	"fire",
 		["lshift"]		=	{"fire","x"},
 		["<"]			=	{"fire","y"},
 		["z"]			=	{"fire","y"},
@@ -72,6 +74,7 @@ M.bake=function(oven,keys)
 		["left"]		=	"left",
 		["right"]		=	"right",
 		["5"]			=	"select",
+		["return"]		=	"start",
 		["enter"]		=	"start",
 		["lshift"]		=	{"fire","a"},
 		["z"]			=	{"fire","b"},
@@ -96,6 +99,7 @@ M.bake=function(oven,keys)
 		
 		if opts.max_up==1 then -- single player, grab lots of keys
 			if oven.opts.bake.smell=="pimoroni" then
+				keys.opts.notyping=true
 				for n,v in pairs(keys.defaults["pimoroni"]) do
 					keys.up[1].set(n,v)
 				end
@@ -115,6 +119,10 @@ M.bake=function(oven,keys)
 		return keys -- so setup is chainable with a bake
 	end
 
+	function keys.set_opts(n,v)
+		if n=="typing" and keys.opts.notyping then v=false end -- disable typing../
+		keys.opts[n]=v
+	end
 
 -- convert keys or whatever into recaps changes
 	function keys.msg(m)
@@ -175,19 +183,33 @@ M.bake=function(oven,keys)
 
 			if m.class=="key" then
 
-				for n,v in pairs(key.maps) do
-					if m.keyname==n then
-						if m.action==1 then -- key set
-							recap.but(v,true)
-							used=true
-						elseif m.action==-1 then -- key clear
-							recap.but(v,false)
-							used=true
+				if not key.opts.typing then -- sometimes we need the keyboard for typing
+					for n,v in pairs(key.maps) do
+						if m.keyname==n then
+							if m.action==1 then -- key set
+								recap.but(v,true)
+								used=true
+							elseif m.action==-1 then -- key clear
+								recap.but(v,false)
+								used=true
+							end
 						end
 					end
-				end				
+				end
 
 			elseif m.class=="mouse" then -- swipe to move
+
+				recap.joy({mx=m.x,my=m.y}) -- tell recap about the mouse positions, use a joystick axis mx,my
+
+				if m.action==1 then -- key set
+					if m.keyname then recap.but("mouse_"..m.keyname,true) end
+					recap.but("fire",true)
+					used=true
+				elseif m.action==-1 then -- key clear
+					if m.keyname then recap.but("mouse_"..m.keyname,false) end
+					recap.but("fire",false)
+					used=true
+				end
 
 -- swipe to keypress code
 -- this can be a problem in menus, so is best to only turn it on during gameplay

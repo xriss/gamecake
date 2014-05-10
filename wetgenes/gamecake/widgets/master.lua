@@ -55,28 +55,57 @@ function wmaster.setup(widget,def)
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget,resize)
 
+		
 		if skeys.up then -- use skeys / srecaps code 
 
-			local vx=0
-			local vy=0
+			if master.focus then
+				skeys.set_opts("typing",true)
+			else
+				skeys.set_opts("typing",false)
+			end
 
-			if srecaps.get("left_set")  then vx=-1 end
-			if srecaps.get("right_set") then vx= 1 end
-			if srecaps.get("up_set")    then vy=-1 end
-			if srecaps.get("down_set")  then vy= 1 end
-			
-			master.keymove(vx,vy)
+			if not master.press then -- do not move when button is held down
+				local vx=0
+				local vy=0
+				if srecaps.get("left_set")  then vx=-1 end
+				if srecaps.get("right_set") then vx= 1 end
+				if srecaps.get("up_set")    then vy=-1 end
+				if srecaps.get("down_set")  then vy= 1 end
+				master.keymove(vx,vy)
+			end
 
 			if srecaps.get("fire_set")  then
 
-				if master.over and master.over.can_focus then
-					master.set_focus(master.over)
-				end
+				master.press=true
 
 				if master.over then
-					master.over:call_hook("click")
+
+					if master.active~=master.over then
+						master.active=master.over
+						local j=srecaps.get_joy()
+						local rx,ry=master.over.parent:mousexy(j.mx,j.my)
+						master.active_x=rx-master.over.px--widget.pxd
+						master.active_y=ry-master.over.py--widget.pyd
+					end
+
+					if master.active and master.active.can_focus then
+						master.set_focus(master.active)
+					end
+
 				end
 
+			end
+			
+			if srecaps.get("fire_clr")  then
+
+				master.press=false
+
+				if master.active and master.active==master.over then -- no click if we drag away from button
+					master.active:call_hook("click")
+				end
+				
+				master.active=nil
+				
 			end
 
 		end
@@ -166,7 +195,9 @@ function wmaster.setup(widget,def)
 	function master.msg(widget,m)
 	
 		if m.class=="key" then
-			widget:key(m.ascii,m.keyname,m.action)
+			if skeys.opts.typing or m.softkey then -- fake keyboard only
+				widget:key(m.ascii,m.keyname,m.action)
+			end
 		elseif m.class=="mouse" then
 			widget:mouse(m.action,m.x,m.y,m.keyname)
 		end
@@ -197,7 +228,7 @@ function wmaster.setup(widget,def)
 		end
 
 		if focus then -- can set to nil
-			widget.focus=focus
+			master.focus=focus
 			master.focus:call_hook("focus")
 			if focus.class=="textedit" then -- also set edit focus
 				master.set_focus_edit(focus)
@@ -213,8 +244,7 @@ function wmaster.setup(widget,def)
 		if master.focus then -- key focus, steals all the key presses until we press enter again
 		
 			master.focus:key(ascii,key,act)
-			
-		
+					
 		else
 		
 			if master.edit then
@@ -378,7 +408,7 @@ function wmaster.setup(widget,def)
 
 
 			end
-
+--[[
 			if act== 1 and (keyname=="left" or keyname=="right") then
 				master.press=true
 			end
@@ -386,6 +416,7 @@ function wmaster.setup(widget,def)
 				master.press=false
 				master.active=nil
 			end
+]]
 			
 --mark as dirty
 			if master.active~=old_active then

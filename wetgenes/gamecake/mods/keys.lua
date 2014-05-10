@@ -505,6 +505,7 @@ function M.bake(oven,keys)
 				ascii=ascii,
 				keycode=code,
 				keyname=name,
+				softkey=true,
 			}
 			mstack[#mstack+1]={
 				time=os.time(),
@@ -513,6 +514,7 @@ function M.bake(oven,keys)
 				ascii=ascii,
 				keycode=code,
 				keyname=name,
+				softkey=true,
 			}
 
 		end

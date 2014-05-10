@@ -339,8 +339,9 @@ end
 
 --			if widget.pan_px then x=x+widget.pan_px end
 --			if widget.pan_py then y=y+widget.pan_py end
-		
+
 			if widget.solid then
+--[[
 				if act==1 and (keyname=="left" or keyname=="right") then
 	-- only set if null or our parent...
 	--print(widget,widget.class)
@@ -359,13 +360,14 @@ end
 						widget:call_hook("click",{keyname=keyname})
 					end
 				end
-
+]]
 				if (not widget.master.dragging()) or widget.master.active==widget then
 	--			if not widget.master.active or widget.master.active==widget then -- over widget
 					widget.master.over=widget
 				end
 
 			end
+
 
 			for i,v in ipairs(widget) do -- children must be within parent bounds to catch clicks
 				v:mouse(act,_x,_y,keyname)

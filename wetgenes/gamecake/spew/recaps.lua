@@ -46,7 +46,7 @@ M.bake=function(oven,recaps)
 	function recaps.get_joy(idx) -- return last "valid" frame data not current "volatile" frame data
 		local idx=idx or 1
 		local recap=recaps.up and recaps.up[idx]
-		if recap then return recap.get_joy(nam) end
+		if recap then return recap.get_joy() end
 	end
 
 
@@ -91,8 +91,8 @@ M.bake=function(oven,recaps)
 		
 -- use this to set a joysticks position
 		function recap.joy(m)
-			for _,n in ipairs{"lx","ly","rx","ry","dx","dy"} do
-				if m[n] then recap.joy_now[n]=m[n] end
+			for _,n in ipairs{"lx","ly","rx","ry","dx","dy","mx","my"} do
+				if m[n] then recap.now_joy[n]=m[n] end
 			end
 		end
 
