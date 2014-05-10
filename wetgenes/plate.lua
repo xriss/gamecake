@@ -12,23 +12,22 @@ local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_en
 -- single line replacement for the module creation function
 local M={} ; package.loaded[(...)]=M ; local wplate=M
 
---[[#wetgenes.plate.table_lookup
+--[[#wetgenes.plate.table_lookup flag=1
+
+	value=wetgenes.plate.table_lookup(name,data)
+
+look up name inside data and return the value we found if we don't 
+find anything then we return nil
+
+name.name.name syntax may be used to reference tables within tables.
+
+A name that looks like a number may be converted into a number if it 
+doesnt exist as a string key, so "array.1" can be used to return the 
+first item from an array.
 
 
 ]]
 
------------------------------------------------------------------------------
---
--- private replace utility function
--- look up string a inside data d and return the string we found
--- if we dont find anything then we return nil
---
--- if we try to look up a table containing a plate field
--- then that plate name will be used to format that table content as {it.nameofvar}
--- if that table contains a [1] then it will be treated as an array of data
--- and looped over to produce a result.
---
------------------------------------------------------------------------------
 wplate.table_lookup=function(a,d) -- look up a in table d
 
 	local t
@@ -73,6 +72,14 @@ wplate.table_lookup=function(a,d) -- look up a in table d
 	
 end
 
+--[[#wetgenes.plate.replace_lookup_istable
+
+	bool=wetgenes.plate.replace_lookup_istable(name,data)
+
+Test if the return from "wplate.table_lookup" is a table.
+
+
+]]
 wplate.replace_lookup_istable=function(a,d) -- check if this is a special table lookup (so we can leave them til
 	local t=wplate.table_lookup(a,d)
 	if t and type(t)=="table" then -- if a table then
@@ -81,6 +88,18 @@ wplate.replace_lookup_istable=function(a,d) -- check if this is a special table 
 	return false
 end
 
+--[[#wetgenes.plate.replace_lookup
+
+	value=wetgenes.plate.replace_lookup(name,data)
+
+Calls "wetgenes.plate.table_lookup" then performs special formatting on 
+table returns.
+
+Always returns a string or nil, so number values will converted to a 
+string.
+
+
+]]
 wplate.replace_lookup=function(a,d) -- look up a in table d
 	local t=wplate.table_lookup(a,d)
 	if t then

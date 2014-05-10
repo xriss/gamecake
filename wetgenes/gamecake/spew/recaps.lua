@@ -37,10 +37,16 @@ M.bake=function(oven,recaps)
 		if recap then return recap.get(nam) end
 	end
 	
-	function recaps.getnow(nam,idx)
+	function recaps.get_now(nam,idx)
 		local idx=idx or 1
 		local recap=recaps.up and recaps.up[idx]
-		if recap then return recap.getnow(nam) end
+		if recap then return recap.get_now(nam) end
+	end
+
+	function recaps.get_joy(idx) -- return last "valid" frame data not current "volatile" frame data
+		local idx=idx or 1
+		local recap=recaps.up and recaps.up[idx]
+		if recap then return recap.get_joy(nam) end
 	end
 
 
@@ -54,6 +60,8 @@ M.bake=function(oven,recaps)
 			recap.flow=flow or "none" -- do not play or record by default
 			recap.last={}
 			recap.now={}
+			recap.last_joy={}
+			recap.now_joy={}
 			recap.autoclear={}
 			recap.stream={} -- a stream of change "table"s or "number" frame skips
 			recap.frame=0
@@ -68,7 +76,7 @@ M.bake=function(oven,recaps)
 			recap.now[nam]=dat
 			recap.autoclear[nam]=true
 		end
-		function recap.getnow(nam) -- return now or last frame data whatever "volatile" data we have
+		function recap.get_now(nam) -- return now or last frame data whatever "volatile" data we have
 			local v=recap.now[nam]
 			if type(v)=="nil" then v=recap.last[nam] end -- now probably only contains recent changes
 			return v
@@ -76,7 +84,18 @@ M.bake=function(oven,recaps)
 		function recap.get(nam) -- return last "valid" frame data not current "volatile" frame data
 			return recap.last[nam]
 		end
+
+		function recap.get_joy() -- return last "valid" frame data not current "volatile" frame data
+			return recap.last_joy
+		end
 		
+-- use this to set a joysticks position
+		function recap.joy(m)
+			for _,n in ipairs{"lx","ly","rx","ry","dx","dy"} do
+				if m[n] then recap.joy_now[n]=m[n] end
+			end
+		end
+
 -- use this to set button flags, that may trigger a set/clr extra pulse state
 		function recap.but(nam,v)
 			if type(nam)=="table" then
@@ -151,13 +170,18 @@ M.bake=function(oven,recaps)
 					end
 				end
 			
-			else -- default of do not record do not play just be
+			else -- default of do not record, do not play just be
 			
 				for n,v in pairs(recap.now) do
 					recap.last[n]=v
 					recap.now[n]=nil
 				end
 				
+				for n,v in pairs(recap.now_joy) do
+					recap.last_joy[n]=v
+					recap.now_joy[n]=nil
+				end
+
 			end
 			
 			if flow~="play" then

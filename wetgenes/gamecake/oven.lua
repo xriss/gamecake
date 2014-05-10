@@ -3,13 +3,20 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+--[[#wetgenes.gamecake.oven
+
+	oven=require("wetgenes.gamecake.oven").bake(opts)
+
+The oven module must be baked so only exposes a bake function.
+
+All the other functions are returned from within the bake function.
+
+]]
+
 local wzips=require("wetgenes.zips")
 local wsbox=require("wetgenes.sandbox")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
-
--- handle a simple oven for win programs,
--- all it does is call other ovens/mods functions.
 
 local function print(...) return _G.print(...) end
 
@@ -22,12 +29,19 @@ local function assert_resume(co)
 	error( b.."\nin coroutine\n"..debug.traceback(co) ) -- error
 end
 
+
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+
 --[[#wetgenes.gamecake.oven.bake
+
+
+	oven=wetgenes.gamecake.oven.bake(opts)
 
 Bake creates an instance of a lua module bound to a state. Here we 
 are creating the main state that other modules will then bind to.
 
-We call each state an OVEN to fit into the gamecake naming scheme.
+We call each state an OVEN to fit into the gamecake naming scheme 
+then we bake a module in this oven to bind them to the common state.
 
 Think of it as a sub version of require, so require gets the global 
 pointer for a module and bake is used to get the a module bound to 
@@ -36,11 +50,8 @@ an oven.
 By using this bound state we reduce the verbosity of connecting 
 modules and sharing state between them.
 
+
 ]]
-
---module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
-
 function M.bake(opts)
 
 	local oven={}

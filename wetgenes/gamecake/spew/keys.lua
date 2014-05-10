@@ -15,12 +15,11 @@ M.bake=function(oven,keys)
 	local cake=oven.cake
 	local canvas=cake.canvas
 	
-	local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
 	local recaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 	
 	keys.defaults={}
 -- single player covering entire keyboard
-	keys.defaults[0]={
+	keys.defaults["full"]={
 		["w"]			=	"up",
 		["s"]			=	"down",
 		["a"]			=	"left",
@@ -48,7 +47,7 @@ M.bake=function(oven,keys)
 		["]"]			=	"r2",
 	}
 -- 1up/2up key islands
-	keys.defaults[1]={
+	keys.defaults["island1"]={
 		["w"]			=	"up",
 		["s"]			=	"down",
 		["a"]			=	"left",
@@ -57,7 +56,7 @@ M.bake=function(oven,keys)
 		["lcontrol"]	=	"fire",
 		["lmenu"]		=	"fire",
 	}
-	keys.defaults[2]={
+	keys.defaults["island2"]={
 		["up"]			=	"up",
 		["down"]		=	"down",
 		["left"]		=	"left",
@@ -84,26 +83,30 @@ M.bake=function(oven,keys)
 		["esc"]			=	"r2",
 	}
 
-	function keys.setup(max_up)
-		max_up=max_up or 1
+	function keys.setup(opts)
+		if type(opts)=="number" then opts={max_up=opts} end
+		if not opts then opts={} end
+		keys.opts=opts
+
+		opts.max_up=opts.max_up or 1
 		keys.up={}
-		for i=1,max_up do
-			keys.up[i]=keys.create(i) -- 1up 2up etc
+		for i=1,opts.max_up do
+			keys.up[i]=keys.create(i,opts) -- 1up 2up etc
 		end
 		
-		if max_up==1 then -- single player, grab lots of keys
+		if opts.max_up==1 then -- single player, grab lots of keys
 			if oven.opts.bake.smell=="pimoroni" then
 				for n,v in pairs(keys.defaults["pimoroni"]) do
 					keys.up[1].set(n,v)
 				end
 			else
-				for n,v in pairs(keys.defaults[0]) do
+				for n,v in pairs(keys.defaults["full"]) do
 					keys.up[1].set(n,v)
 				end
 			end
 		else
-			for i=1,max_up do -- multiplayer use keyislands so we can all fit on a keyboard
-				for n,v in pairs(keys.defaults[i] or {}) do
+			for i=1,opts.max_up do -- multiplayer use keyislands so we can all fit on a keyboard
+				for n,v in pairs(keys.defaults["island"..i] or {}) do
 					keys.up[i].set(n,v)
 				end
 			end
@@ -118,16 +121,18 @@ M.bake=function(oven,keys)
 		if not keys.up then return end -- no key maping
 
 		local used=false
-		for i,v in ipairs(keys.up) do
-			used=used or v.msg(m)
+		for i,v in ipairs(keys.up) do -- possibly sort the joy msgs here...
+			local t=v.msg(m)
+			used=used or t
 		end
 		return used
 	end
 	
 
 -- a players key mappings, maybe we need multiple people on the same keyboard or device
-	function keys.create(idx)
+	function keys.create(idx,opts)
 		local key={}
+		key.opts=opts or {}
 		key.idx=idx
 		key.maps={}
 		
@@ -152,6 +157,22 @@ M.bake=function(oven,keys)
 			local recap=key.idx and recaps.up and recaps.up[key.idx]
 			if not recap then return end
 			
+			local new_joydir=function(joydir)
+					-- this does not handle diagonal movement, forces one of 4 directions.
+					if key.last_joydir~=joydir then -- only when we change
+	--print(wstr.dump(m))
+						if key.last_joydir then -- first clear any previous key
+							recap.but(key.last_joydir,false)
+							used=true
+						end
+						key.last_joydir=joydir
+						if joydir then
+							recap.but(joydir,true) -- then send any new key
+							used=true
+						end
+					end
+			end
+
 			if m.class=="key" then
 
 				for n,v in pairs(key.maps) do
@@ -166,6 +187,56 @@ M.bake=function(oven,keys)
 					end
 				end				
 
+			elseif m.class=="mouse" then -- swipe to move
+
+-- swipe to keypress code
+-- this can be a problem in menus, so is best to only turn it on during gameplay
+
+				if key.opts.swipe then -- use touch/mouse to swipe
+				
+					if m.action==1 then -- click
+						key.swipe={m.x,m.y,m.x,m.y}
+					elseif m.action==-1 then -- release
+						key.swipe=nil
+					elseif m.action==0 then --move
+						if key.swipe then
+							key.swipe[3]=m.x
+							key.swipe[4]=m.y
+						end
+					end
+
+					if key.swipe then
+						local function acc() key.swipe[1]=key.swipe[3]  key.swipe[2]=key.swipe[4] end
+						local x=key.swipe[3]-key.swipe[1]
+						local y=key.swipe[4]-key.swipe[2]
+						local xx=x*x
+						local yy=y*y
+						local joydir=nil
+						if xx+yy > 8*8 then
+							if xx > yy then
+								if x>=0 then
+									joydir="right"
+									acc()		
+								else
+									joydir="left"
+									acc()
+								end
+							else
+								if y>=0 then
+									joydir="down"
+									acc()
+								else
+									joydir="up"
+									acc()
+								end
+							end
+						end	
+						new_joydir(joydir)
+					end
+				else
+					key.swipe=nil
+				end
+			
 			elseif m.class=="posix_joystick" then
 
 				if m.type==1 then -- keys
@@ -200,38 +271,15 @@ M.bake=function(oven,keys)
 					end
 
 					if active then
-						local joydir=mkeys.joystick_msg_to_key(key.joy)
-
-						if keys.last_joydir~=joydir then -- only when we change
-							if keys.last_joydir then -- first clear any previous key
-								recap.but(keys.last_joydir,false)
-							end
-							keys.last_joydir=joydir
-							if joydir then
-								recap.but(joydir,true) -- then send any new key
-								used=true
-							end
-						end
+						new_joydir( keys.joystick_msg_to_key(key.joy) )
+						recap.joy(keys.joy) -- tell recap about the joy positions
 					end
 				end
 			
 			elseif m.class=="joystick" then
 
-				local joydir=mkeys.joystick_msg_to_key(m)
-				
-				-- this does not handle diagonal movement, forces one of 4 directions.
-
-				if keys.last_joydir~=joydir then -- only when we change
---print(wstr.dump(m))
-					if keys.last_joydir then -- first clear any previous key
-						recap.but(keys.last_joydir,false)
-					end
-					keys.last_joydir=joydir
-					if joydir then
-						recap.but(joydir,true) -- then send any new key
-						used=true
-					end
-				end
+				new_joydir( keys.joystick_msg_to_key(m) )
+				recap.joy(m) -- tell recap about the joy positions
 
 			elseif m.class=="joykey" then
 			
@@ -247,10 +295,69 @@ M.bake=function(oven,keys)
 			
 			return used -- if we used the msg
 		end
-		
+				
 		return key
 	end
 
+
+-- turn a joystick msg into a key name or nil
+-- this works on all axis inputs (bigest movement is chosen)
+	function keys.joystick_msg_to_key(m)
+		if m.class=="joystick" then
+			local d=1/8
+			local t,vx,vy
+			local tt,vxx,vyy
+			local nox,noy
+
+			vx=m.lx		vxx=m.lx*m.lx				
+			t=m.rx		tt=t*t			if tt>vxx then vx=t vxx=tt end
+			t=m.dx		tt=t*t			if tt>vxx then vx=t vxx=tt end
+
+			vy=m.ly		vyy=m.ly*m.ly				
+			t=m.ry		tt=t*t			if tt>vyy then vy=t vyy=tt end
+			t=m.dy		tt=t*t			if tt>vyy then vy=t vyy=tt end
+		
+			if vxx/2 > vyy then noy=true end
+			if vyy/2 > vxx then nox=true end
+			
+			if not nox then
+				if     vx>d		then	return "right"
+				elseif vx<-d 	then	return "left"
+				end
+			end
+
+			if not noy then
+				if    	vy>d 	then	return "down"
+				elseif	vy<-d 	then	return "up"
+				end
+			end
+		end
+	end
+
+-- as above but this works on given axis values, expected to be +-1 range
+	function keys.joystick_axis_to_key(vx,vy)
+		local d=1/8
+		local vxx,vyy
+		local nox,noy
+		
+		vxx=vx*vx				
+		vyy=vy*vy				
+
+		if vxx/2 > vyy then noy=true end
+		if vyy/2 > vxx then nox=true end
+		
+		if not nox then
+			if     vx>d		then	return "right"
+			elseif vx<-d 	then	return "left"
+			end
+		end
+
+		if not noy then
+			if    	vy>d 	then	return "down"
+			elseif	vy<-d 	then	return "up"
+			end
+		end
+	end
 
 	return keys
 end
