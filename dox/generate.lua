@@ -107,14 +107,6 @@ local function html(v)
 
 end
 
-for n,v in pairs(chunks) do
-	if n~="__flags" then
-		if n:sub(-7)~=".source" then
---			wbake.writefile( "html/"..n..".txt",v)
-			wbake.writefile( "html/"..n..".html",html(v))
-		end
-	end
-end
 
 for n,v in pairs(heirachy) do
 	t={}
@@ -138,6 +130,15 @@ for n,v in pairs(heirachy) do
 		t[n]="<div>"..markdown(s[2]).."</div>"
 	end
 	wbake.writefile( "html/"..n..".html",html(table.concat(t,"<hr/>\n")))
+end
+
+for n,v in pairs(chunks) do
+	if n~="__flags" then
+		if n:sub(-7)~=".source" then
+--			wbake.writefile( "html/"..n..".txt",v)
+			wbake.writefile( "html/"..n..".html",html(v))
+		end
+	end
 end
 
 
