@@ -18,17 +18,6 @@ local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
 wpan=wpan or {}
 
-function wpan.mouse(widget,act,x,y,key)
---	widget.master.focus=widget
-	return widget.meta.mouse(widget,act,x,y,key)
-end
-
-
-function wpan.key(widget,ascii,key,act)
-	return widget.meta.key(widget,ascii,key,act)
-end
-
-
 function wpan.update(widget)
 	return widget.meta.update(widget)
 end

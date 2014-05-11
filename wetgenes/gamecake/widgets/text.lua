@@ -10,16 +10,6 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wtext)
 wtext=wtext or {}
 
-function wtext.mouse(widget,act,x,y,key)
-	return widget.meta.mouse(widget,act,x,y,key)
-end
-
-
-function wtext.key(widget,ascii,key,act)
-	return widget.meta.key(widget,ascii,key,act)
-end
-
-
 function wtext.update(widget)
 
 	if widget.data then

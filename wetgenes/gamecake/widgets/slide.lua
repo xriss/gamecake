@@ -16,17 +16,6 @@ wslide=wslide or {}
 local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 
-
-function wslide.mouse(widget,act,x,y,key)
-	return widget.meta.mouse(widget,act,x,y,key)
-end
-
-
-function wslide.key(widget,ascii,key,act)
-	return widget.meta.key(widget,ascii,key,act)
-end
-
-
 function wslide.update(widget)
 --	local it=widget.slide
 

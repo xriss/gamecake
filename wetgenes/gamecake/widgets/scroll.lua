@@ -16,16 +16,6 @@ wscroll=wscroll or {}
 
 local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
-function wscroll.mouse(widget,act,x,y,key)
-	return widget.meta.mouse(widget,act,x,y,key)
-end
-
-
-function wscroll.key(widget,ascii,key,act)
-	return widget.meta.key(widget,ascii,key,act)
-end
-
-
 function wscroll.update(widget)
 
 	local pan=widget.pan

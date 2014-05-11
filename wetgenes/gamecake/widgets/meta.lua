@@ -293,84 +293,24 @@ function wmeta.setup(def)
 	end
 	
 	function meta.mouse(widget,act,_x,_y,keyname)
---[[
-		if widget.sx==1 and widget.sy==1 then
-				x= x-widget.px
-				y= y-widget.py
-		else
-			if widget.smode=="center" then
-				x= ((x-widget.px-widget.hx*0.5)/widget.parent.sx)+widget.hx*0.5
-				y= ((y-widget.py-widget.hy*0.5)/widget.parent.sy)+widget.hy*0.5
-			else
-				x=((x-widget.px)/widget.sx)
-				y=((y-widget.py)/widget.sy)
-			end
-		end
-		widget.mousex=x -- remember local coords
-		widget.mousey=y
-]]
 		
 		local x,y=widget:mousexy(_x,_y)
---[[
-if widget.m4 then
-		local v4=tardis.v4.new(_x,_y,0,1)
-		widget.m4:product(v4)
---print(act,string.format("%4d,%4d - %4d,%4d = %4d,%4d (%4f,%4f)(%4d,%4d)",x,y,v4[1],v4[2],x-v4[1],y-v4[2],widget.sx,widget.sy,widget.px,widget.py))
---		local x,y=v4[1],v4[2]
-		x,y=v4[1],v4[2]
-else
-		x,y=_x,_y
-end
-]]
 
---		widget.mousex=x -- remember local coords
---		widget.mousey=y
-		
---print(x..","..y.." : "..widget.px..","..widget.py)
---print(x..","..y.." : "..widget.hx..","..widget.hx)
-
---widget.hx=widget.hx or 0 -- bug?
---widget.hy=widget.hy or 0
-
---		if x>=widget.pxd and x<widget.pxd+widget.hx and y>=widget.pyd and y<widget.pyd+widget.hy then
 		local tx=x-(widget.pan_px or 0)
 		local ty=y-(widget.pan_py or 0)
 		if widget==widget.master or ( tx>=0 and tx<widget.hx and ty>=0 and ty<widget.hy ) then
 
---			if widget.pan_px then x=x+widget.pan_px end
---			if widget.pan_py then y=y+widget.pan_py end
-
 			if widget.solid then
---[[
-				if act==1 and (keyname=="left" or keyname=="right") then
-	-- only set if null or our parent...
-	--print(widget,widget.class)
-	--print("active",widget,widget and widget.class,
-	--widget and widget.parent,widget and widget.parent.class)
-					if widget.master.active~=widget and widget:parent_active() then
-						widget.master.active=widget
-						local rx,ry=widget.parent:mousexy(_x,_y)
-						widget.master.active_x=rx-widget.px--widget.pxd
-						widget.master.active_y=ry-widget.py--widget.pyd
-					end
-				end
-				if act==-1 and (keyname=="left" or keyname=="right") then
-					if (not widget.master.dragging()) or widget.master.active==widget then
-	--				if widget.master.active and widget.master.active==widget then -- widget clicked
-						widget:call_hook("click",{keyname=keyname})
-					end
-				end
-]]
 				if (not widget.master.dragging()) or widget.master.active==widget then
-	--			if not widget.master.active or widget.master.active==widget then -- over widget
 					widget.master.over=widget
 				end
-
 			end
 
-
 			for i,v in ipairs(widget) do -- children must be within parent bounds to catch clicks
-				v:mouse(act,_x,_y,keyname)
+				meta.mouse(v,act,_x,_y,keyname)
+				if v.mouse then
+					v:mouse(act,_x,_y,keyname) -- maybe the widget need to do special mouse things (probably shouldnt)
+				end
 			end
 
 		else
@@ -378,10 +318,6 @@ end
 			if (not widget.master.dragging()) and widget.master.active==widget then
 				widget.master.over=nil
 			end
-
---			for i,v in ipairs(widget) do -- ignore clicks, just update position
---				v:mouse(0,_x,_y,keyname)
---			end
 
 		end
 	
@@ -407,21 +343,6 @@ end
 		if widget.anim then
 			widget.anim:update()
 		end
-
---[[
--- cached parent world scale
-		if widget.parent~=widget then
-			widget.p_sx=widget.parent.w_sx
-			widget.p_sy=widget.parent.w_sy
-		else
-			widget.p_sx=1
-			widget.p_sy=1
-		end
-
--- cache widget world scale
-		widget.w_sx=widget.sx*widget.p_sx
-		widget.w_sy=widget.sy*widget.p_sy
-]]
 	
 		for i,v in ipairs(widget) do
 			v:update()

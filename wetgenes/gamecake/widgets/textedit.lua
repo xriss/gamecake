@@ -24,10 +24,7 @@ function wtextedit.mouse(widget,act,x,y,key)
 
 --	local it=widget.string
 
--- call here so we can use any state changes immediatly	
-	local ret=widget.meta.mouse(widget,act,x,y,key)
-	
-	if widget.master.active==widget then
+	if widget.master.over==widget or act==-1 then
 	
 --		widget.master.set_focus(widget)
 		
@@ -80,8 +77,7 @@ function wtextedit.mouse(widget,act,x,y,key)
 			widget.mouse_down=false
 		end
 	end
-	
-	return ret
+
 end
 
 

@@ -338,98 +338,58 @@ function wmaster.setup(widget,def)
 --	
 	function master.mouse(widget,act,x,y,keyname)
 
---		meta.build_m4(widget)
-
---print()	
-
---widget.hx=16384
---widget.hy=16384
-
 		master.last_mouse_position={x,y}
-	
---		if widget.state=="ready" then
+
+		local old_active=master.active
+		local old_over=master.over
+
+		meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		
---print("active",master.active,master.active and master.active.class,
---master.active and master.active.parent,master.active and master.active.parent.class)
-			
---			if master.active then
---				meta.mouse(master.active,0,x,y,keyname)
---			end
-			
-			local old_active=master.active
-			local old_over=master.over
---			for i,v in ipairs(widget) do
-				meta.mouse(widget,act,x,y,keyname)
---			end
-			
-			if master.dragging() then -- slide :)
-			
-				local w=master.active
-				local p=w.parent
+		if master.dragging() then -- slide :)
+		
+			local w=master.active
+			local p=w.parent
 
---				local x=p.mousex
---				local y=p.mousey
+			local rx,ry=w.parent:mousexy(x,y)
+			local x,y=rx-master.active_x,ry-master.active_y
 
-		local rx,ry=w.parent:mousexy(x,y)
-		local x,y=rx-master.active_x,ry-master.active_y
-
-				
---				local minx=p.pxd
---				local miny=p.pyd
---				local maxx=p.pxd+p.hx-w.hx
---				local maxy=p.pyd+p.hy-w.hy
-
-				local maxx=p.hx-w.hx
-				local maxy=p.hy-w.hy
+			local maxx=p.hx-w.hx
+			local maxy=p.hy-w.hy
 
 --print("slide",miny,maxy)
-				
-				w.px=x
-				w.py=y
-				
-				if w.px<0    then w.px=0 end
-				if w.px>maxx then w.px=maxx end
-				if w.py<0    then w.py=0 end
-				if w.py>maxy then w.py=maxy end
-				
---				w.px=w.pxd-p.pxd
---				w.py=w.pyd-p.pyd
-				
-				if w.parent.snap then
-					w.parent:snap()
-				end
-				
-				w:call_hook("slide")
-				
-				w:set_dirty()
-				
-				w:layout()
-				w:build_m4()
-
-
-			end
---[[
-			if act== 1 and (keyname=="left" or keyname=="right") then
-				master.press=true
-			end
-			if act==-1 and (keyname=="left" or keyname=="right") then
-				master.press=false
-				master.active=nil
-			end
-]]
 			
+			w.px=x
+			w.py=y
+			
+			if w.px<0    then w.px=0 end
+			if w.px>maxx then w.px=maxx end
+			if w.py<0    then w.py=0 end
+			if w.py>maxy then w.py=maxy end
+			
+			if w.parent.snap then
+				w.parent:snap()
+			end
+			
+			w:call_hook("slide")
+			
+			w:set_dirty()
+			
+			w:layout()
+			w:build_m4()
+
+		end
+		
 --mark as dirty
-			if master.active~=old_active then
-				if master.active then master.active:set_dirty() end
-				if old_active then old_active:set_dirty() end
-			end
-			if master.over~=old_over then
-				if master.over then master.over:set_dirty() end
-				if old_over then old_over:set_dirty() end
-				if master.over then master.over:call_hook("over") end
-			end
-			
---		end
+		if master.active~=old_active then
+			if master.active then master.active:set_dirty() end
+			if old_active then old_active:set_dirty() end
+		end
+		if master.over~=old_over then
+			if master.over then master.over:set_dirty() end
+			if old_over then old_over:set_dirty() end
+			if master.over then master.over:call_hook("over") end
+		end
+		
 	end
 --
 

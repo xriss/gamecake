@@ -10,16 +10,6 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wdrag)
 wdrag=wdrag or {}
 
-function wdrag.mouse(widget,act,x,y,key)
-	return widget.meta.mouse(widget,act,x,y,key)
-end
-
-
-function wdrag.key(widget,ascii,key,act)
-	return widget.meta.key(widget,ascii,key,act)
-end
-
-
 function wdrag.update(widget)
 
 	if widget.data then

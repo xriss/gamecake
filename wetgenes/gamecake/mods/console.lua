@@ -279,24 +279,6 @@ font.vbs_idx=1
 
 		layout.apply()
 		
---		oven.win:info()
-
---		layout.viewport() -- did our window change?
---		layout.project23d(layout.w,layout.h,1/4,layout.h*4)
-		
---		canvas.gl_default() -- reset gl state
-
-
---		gl.ClearColor(0,0,0,0)
---		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
-
---		gl.MatrixMode(gl.PROJECTION)
---		gl.LoadMatrix( layout.pmtx )
-
---		gl.MatrixMode(gl.MODELVIEW)
---		gl.LoadIdentity()
---		gl.Translate(-layout.w/2,-layout.h/2,-layout.h) -- top/left 1unit==1pixel
-
 		gl.PushMatrix()
 
 
@@ -354,12 +336,9 @@ font.vbs_idx=1
 			end
 		end
 
-
 		console.lines_display={}
 
-
 		gl.PopMatrix()
-
 
 	end
 	
@@ -398,23 +377,17 @@ font.vbs_idx=1
 	end
 	
 	function console.mouse(act,x,y,key)
---		print(act.." "..x..","..y.." "..key)
 	end
 	
 	function console.msg(m)
 		if m.class=="key" then
 			if console.keypress(m.ascii,m.keyname,m.action) then return nil end
---		elseif m.class=="mouse" then
---			console.keypress(m.action,m.x,m.y,m.keycode)
 		end
 		
 		return m
 	end
 
 	function console.keypress(ascii,key,act)
---		if act==1 then
---			_G.print(ascii.." "..(key or ""))
---		end
 
 --print("conkey",key)
 		if key=="`" then
