@@ -93,6 +93,13 @@ end
 
 main.config_as=function(name)
 
+	if not name then -- pick a name, based on available files
+		if     oven.cake.images.exists("imgs/preloader/pimoroni")    then name="pimoroni"
+		elseif oven.cake.images.exists("imgs/preloader/kittyscreen") then name="kittyscreen"
+		elseif oven.cake.images.exists("imgs/preloader/kittychair")  then name="kittychair"
+		end
+	end
+	
 	if name=="kittychair" then
 		if oven.cake.images.exists("imgs/preloader/kittychair") then
 			main.config{
@@ -163,6 +170,8 @@ end
 main.setup=function()
 
 	if main.setup_done then return end -- warning, this is called repeatedly...
+
+--	main.config_as() -- auto config
 
 	main.title=""
 	main.count=0
@@ -261,7 +270,7 @@ main.draw=function()
 
 end
 
-	main.config() -- call this if you want to chage the settings
+	main.config_as() -- call this if you want to chage the settings
 	return main
 end
 

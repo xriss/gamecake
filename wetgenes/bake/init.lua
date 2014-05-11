@@ -258,9 +258,15 @@ end
 function args(args)
 
 	local i=1 while i<=#args do local v=args[i]
-		
-		args[v]=args[i+1] or true
-		i=i+2 -- skip name and value
+	
+		local aa=wstr.split(v,"=")
+		if #aa==2 then -- name=value
+			args[ aa[1] ]=args[ aa[2] ] or true
+			i=i+1
+		else -- name value	
+			args[v]=args[i+1] or true
+			i=i+2 -- skip name and value
+		end
 
 	end
 	

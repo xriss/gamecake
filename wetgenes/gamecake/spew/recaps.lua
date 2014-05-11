@@ -15,11 +15,14 @@ M.bake=function(oven,recaps)
 	
 	local keys=oven.rebake("wetgenes.gamecake.spew.keys")
 
+	function recaps.setup(opts)
+		if type(opts)=="number" then opts={max_up=opts} end
+		if not opts then opts={} end
+		recaps.opts=opts
 
-	function recaps.setup(max_up)
-		max_up=max_up or 1
+		opts.max_up=opts.max_up or 1
 		recaps.up={}
-		for i=1,max_up do
+		for i=1,opts.max_up do
 			recaps.up[i]=recaps.create() -- 1up 2up etc
 		end
 		return recaps -- so setup is chainable with a bake

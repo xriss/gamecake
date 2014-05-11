@@ -56,9 +56,9 @@ function wmaster.setup(widget,def)
 	function master.update(widget,resize)
 
 		
-		if skeys.up then -- use skeys / srecaps code 
+		local ups=srecaps.ups()
+		if ups then -- use skeys / srecaps code 
 
-			local ups=srecaps.ups()
 
 			if master.focus then
 				skeys.set_opts("typing",true)

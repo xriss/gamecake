@@ -90,6 +90,7 @@ M.bake=function(oven,keys)
 		if type(opts)=="number" then opts={max_up=opts} end
 		if not opts then opts={} end
 		keys.opts=opts
+		recaps.setup(opts)	-- also setup recaps
 
 		opts.max_up=opts.max_up or 1
 		keys.up={}
@@ -115,7 +116,7 @@ M.bake=function(oven,keys)
 				end
 			end
 		end
-		
+				
 		return keys -- so setup is chainable with a bake
 	end
 
@@ -163,6 +164,7 @@ M.bake=function(oven,keys)
 		function key.msg(m)
 			local used=false
 			local ups=recaps.ups(key.idx)
+--			if not ups then return end -- nowhere to send the data
 			
 			local new_joydir=function(joydir)
 					-- this does not handle diagonal movement, forces one of 4 directions.
@@ -252,7 +254,8 @@ M.bake=function(oven,keys)
 								end
 							end
 						end	
-						new_joydir(joydir)
+						new_joydir(joydir) -- swipes are single taps
+						new_joydir()
 					end
 				else
 					key.swipe=nil
