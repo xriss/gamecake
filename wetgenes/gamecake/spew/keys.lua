@@ -32,17 +32,17 @@ M.bake=function(oven,keys)
 		["2"]			=	"start",
 		["return"]		=	"fire",
 		["enter"]		=	"fire",
-		["lshift"]		=	{"fire","x"},
+		["shift_l"]		=	{"fire","x"},
 		["<"]			=	{"fire","y"},
 		["z"]			=	{"fire","y"},
 		["."]			=	{"fire","x"},
 		["/"]			=	{"fire","x"},
-		["rshift"]		=	{"fire","y"},
-		["lcontrol"]	=	{"fire","a"},
-		["lmenu"]		=	{"fire","b"},
+		["shift_r"]		=	{"fire","y"},
+		["control_l"]	=	{"fire","a"},
+		["alt_l"]		=	{"fire","b"},
 		["space"]		=	"fire",
-		["rmenu"]		=	{"fire","x"},
-		["rcontrol"]	=	{"fire","y"},
+		["alt_r"]		=	{"fire","x"},
+		["control_r"]	=	{"fire","y"},
 		["-"]			=	"l1",
 		["["]			=	"l2",
 		["="]			=	"r1",
@@ -54,18 +54,18 @@ M.bake=function(oven,keys)
 		["s"]			=	"down",
 		["a"]			=	"left",
 		["d"]			=	"right",
-		["lshift"]		=	"fire",
-		["lcontrol"]	=	"fire",
-		["lmenu"]		=	"fire",
+		["shift_l"]		=	"fire",
+		["control_l"]	=	"fire",
+		["alt_l"]		=	"fire",
 	}
 	keys.defaults["island2"]={
 		["up"]			=	"up",
 		["down"]		=	"down",
 		["left"]		=	"left",
 		["right"]		=	"right",
-		["rshift"]		=	"fire",
-		["rcontrol"]	=	"fire",
-		["rmenu"]		=	"fire",
+		["shift_r"]		=	"fire",
+		["control_r"]	=	"fire",
+		["alt_r"]		=	"fire",
 	}
 -- single player mame/picade style buttons
 	keys.defaults["pimoroni"]={
@@ -76,11 +76,11 @@ M.bake=function(oven,keys)
 		["5"]			=	"select",
 		["return"]		=	"start",
 		["enter"]		=	"start",
-		["lshift"]		=	{"fire","a"},
+		["shift_l"]		=	{"fire","a"},
 		["z"]			=	{"fire","b"},
 		["x"]			=	{"fire","l1"},
-		["lcontrol"]	=	{"fire","x"},
-		["lmenu"]		=	{"fire","y"},
+		["control_l"]	=	{"fire","x"},
+		["alt_l"]		=	{"fire","y"},
 		["space"]		=	{"fire","r1"},
 		["1"]			=	"l2",
 		["esc"]			=	"r2",
@@ -98,7 +98,7 @@ M.bake=function(oven,keys)
 		end
 		
 		if opts.max_up==1 then -- single player, grab lots of keys
-			if oven.opts.bake.smell=="pimoroni" then
+			if oven.opts.bake and oven.opts.bake.smell=="pimoroni" then
 				keys.opts.notyping=true
 				for n,v in pairs(keys.defaults["pimoroni"]) do
 					keys.up[1].set(n,v)
@@ -162,20 +162,19 @@ M.bake=function(oven,keys)
 
 		function key.msg(m)
 			local used=false
-			local recap=key.idx and recaps.up and recaps.up[key.idx]
-			if not recap then return end
+			local ups=recaps.ups(key.idx)
 			
 			local new_joydir=function(joydir)
 					-- this does not handle diagonal movement, forces one of 4 directions.
 					if key.last_joydir~=joydir then -- only when we change
 	--print(wstr.dump(m))
 						if key.last_joydir then -- first clear any previous key
-							recap.but(key.last_joydir,false)
+							ups.set_button(key.last_joydir,false)
 							used=true
 						end
 						key.last_joydir=joydir
 						if joydir then
-							recap.but(joydir,true) -- then send any new key
+							ups.set_button(joydir,true) -- then send any new key
 							used=true
 						end
 					end
@@ -187,10 +186,10 @@ M.bake=function(oven,keys)
 					for n,v in pairs(key.maps) do
 						if m.keyname==n or m.ascii==n then
 							if m.action==1 then -- key set
-								recap.but(v,true)
+								ups.set_button(v,true)
 								used=true
 							elseif m.action==-1 then -- key clear
-								recap.but(v,false)
+								ups.set_button(v,false)
 								used=true
 							end
 						end
@@ -199,15 +198,15 @@ M.bake=function(oven,keys)
 
 			elseif m.class=="mouse" then -- swipe to move
 
-				recap.axis({mx=m.x,my=m.y}) -- tell recap about the mouse positions, mx,my
+				ups.set_axis({mx=m.x,my=m.y}) -- tell recap about the mouse positions, mx,my
 
 				if m.action==1 then -- key set
-					if m.keyname then recap.but("mouse_"..m.keyname,true) end
-					recap.but("fire",true)
+					if m.keyname then ups.set_button("mouse_"..m.keyname,true) end
+					ups.set_button("fire",true)
 					used=true
 				elseif m.action==-1 then -- key clear
-					if m.keyname then recap.but("mouse_"..m.keyname,false) end
-					recap.but("fire",false)
+					if m.keyname then ups.set_button("mouse_"..m.keyname,false) end
+					ups.set_button("fire",false)
 					used=true
 				end
 
@@ -264,10 +263,10 @@ M.bake=function(oven,keys)
 				if m.type==1 then -- keys
 
 					if m.value==1 then -- key set
-						recap.but("fire",true)
+						ups.set_button("fire",true)
 						used=true
 					elseif m.value==0 then -- key clear
-						recap.but("fire",false)
+						ups.set_button("fire",false)
 						used=true
 					end
 
@@ -294,22 +293,22 @@ M.bake=function(oven,keys)
 
 					if active then
 						new_joydir( keys.joystick_msg_to_key(key.joy) )
-						recap.axis(keys.joy) -- tell recap about the joy positions
+						ups.set_axis(keys.joy) -- tell recap about the joy positions
 					end
 				end
 			
 			elseif m.class=="joystick" then
 
 				new_joydir( keys.joystick_msg_to_key(m) )
-				recap.axis(m) -- tell recap about the joy positions
+				ups.set_axis(m) -- tell recap about the joy positions
 
 			elseif m.class=="joykey" then
 			
 				if m.action==1 then -- key set
-					recap.but("fire",true)
+					ups.set_button("fire",true)
 					used=true
 				elseif m.action==-1 then -- key clear
-					recap.but("fire",false)
+					ups.set_button("fire",false)
 					used=true
 				end
 

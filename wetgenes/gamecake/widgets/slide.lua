@@ -21,16 +21,18 @@ function wslide.update(widget)
 
 	if widget.master.active==widget then
 --print("slide update")
-			if srecaps.get("left_set")  then
+			local ups=srecaps.ups()
+
+			if ups.button("left_set")  then
 				widget.datx:dec()
 			end
-			if srecaps.get("right_set") then
+			if ups.button("right_set") then
 				widget.datx:inc()
 			end
-			if srecaps.get("up_set")    then
+			if ups.button("up_set")    then
 				widget.daty:dec()
 			end
-			if srecaps.get("down_set")  then
+			if ups.button("down_set")  then
 				widget.daty:inc()
 			end
 	end

@@ -390,7 +390,7 @@ font.vbs_idx=1
 	function console.keypress(ascii,key,act)
 
 --print("conkey",key)
-		if key=="`" then
+		if key=="grave" or ascii=="`" then
 		
 			if act==-1 then
 				if console.show then
@@ -414,11 +414,11 @@ font.vbs_idx=1
 		
 			if act==1 or act==0 then
 					
-				if key=="page up" or key=="prior" then
+				if key=="prior" then
 				
 					console.y_show=console.y_show-8
 				
-				elseif key=="page down" or key=="next" then
+				elseif key=="next" then
 				
 					console.y_show=console.y_show+8
 

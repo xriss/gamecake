@@ -58,23 +58,25 @@ function wmaster.setup(widget,def)
 		
 		if skeys.up then -- use skeys / srecaps code 
 
+			local ups=srecaps.ups()
+
 			if master.focus then
 				skeys.set_opts("typing",true)
 			else
 				skeys.set_opts("typing",false)
 			end
-
+			
 			if not master.press then -- do not move when button is held down
 				local vx=0
 				local vy=0
-				if srecaps.get("left_set")  then vx=-1 end
-				if srecaps.get("right_set") then vx= 1 end
-				if srecaps.get("up_set")    then vy=-1 end
-				if srecaps.get("down_set")  then vy= 1 end
+				if ups.button("left_set")  then vx=-1 end
+				if ups.button("right_set") then vx= 1 end
+				if ups.button("up_set")    then vy=-1 end
+				if ups.button("down_set")  then vy= 1 end
 				master.keymove(vx,vy)
 			end
 
-			if srecaps.get("fire_set")  then
+			if ups.button("fire_set")  then
 
 				master.press=true
 
@@ -82,7 +84,7 @@ function wmaster.setup(widget,def)
 
 					if master.active~=master.over then
 						master.active=master.over
-						local axis=srecaps.get_axis()
+						local axis=ups.axis()
 						local rx,ry=master.over.parent:mousexy(axis.mx,axis.my)
 						master.active_x=rx-master.over.px--widget.pxd
 						master.active_y=ry-master.over.py--widget.pyd
@@ -96,7 +98,7 @@ function wmaster.setup(widget,def)
 
 			end
 			
-			if srecaps.get("fire_clr")  then
+			if ups.button("fire_clr")  then
 
 				master.press=false
 

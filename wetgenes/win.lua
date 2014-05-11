@@ -99,35 +99,27 @@ end
 -- really you can never be sure what name a key has...
 win.generic_keymap={
 
+-- windows patch, as we aim to use the linux key names
 
--- android patch
---[[
-	["android_04"]="escape",
-	["android_6f"]="escape",
-	["android_42"]="return",
-	["android_43"]="back",
-	["android_70"]="delete",
-	["android_13"]="up",
-	["android_14"]="down",
-	["android_15"]="left",
-	["android_16"]="right",
-	["android_17"]="return",
-]]
-
--- windows patch
 	["backspace"]="back",
 	["kp_enter"]="enter",
-	["oem_3"]="`",
+	["oem_3"]="grave",
 	["esc"]="escape",
-	
--- linux patch
-	["grave"]="`",
 
--- osx patch
---	["uparrow"]="up",
---	["downarrow"]="down",
---	["leftarrow"]="left",
---	["rightarrow"]="right",
+	["lshift"]="shift_l",
+	["rshift"]="shift_r",
+	
+	["lcontrol"]="control_l",
+	["rcontrol"]="control_r",
+	
+	["lmenu"]="alt_l",
+	["rmenu"]="alt_r",
+
+	["page up"]="prior",
+	["page_up"]="prior",
+
+	["page down"]="next",
+	["page_down"]="next",
 
 }
 
