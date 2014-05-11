@@ -185,7 +185,7 @@ M.bake=function(oven,keys)
 
 				if not key.opts.typing then -- sometimes we need the keyboard for typing
 					for n,v in pairs(key.maps) do
-						if m.keyname==n then
+						if m.keyname==n or m.ascii==n then
 							if m.action==1 then -- key set
 								recap.but(v,true)
 								used=true
@@ -199,7 +199,7 @@ M.bake=function(oven,keys)
 
 			elseif m.class=="mouse" then -- swipe to move
 
-				recap.joy({mx=m.x,my=m.y}) -- tell recap about the mouse positions, use a joystick axis mx,my
+				recap.axis({mx=m.x,my=m.y}) -- tell recap about the mouse positions, mx,my
 
 				if m.action==1 then -- key set
 					if m.keyname then recap.but("mouse_"..m.keyname,true) end
@@ -294,14 +294,14 @@ M.bake=function(oven,keys)
 
 					if active then
 						new_joydir( keys.joystick_msg_to_key(key.joy) )
-						recap.joy(keys.joy) -- tell recap about the joy positions
+						recap.axis(keys.joy) -- tell recap about the joy positions
 					end
 				end
 			
 			elseif m.class=="joystick" then
 
 				new_joydir( keys.joystick_msg_to_key(m) )
-				recap.joy(m) -- tell recap about the joy positions
+				recap.axis(m) -- tell recap about the joy positions
 
 			elseif m.class=="joykey" then
 			

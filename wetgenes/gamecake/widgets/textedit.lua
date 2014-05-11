@@ -106,8 +106,8 @@ function wtextedit.key(widget,ascii,key,act)
 		end
 	end
 	
-	if act==-1 then
-
+	if act==1 then
+	
 		if key=="enter" or key=="return" then
 		
 			if widget.data.str and widget.onenter then -- callback?
@@ -120,9 +120,12 @@ function wtextedit.key(widget,ascii,key,act)
 			master.set_focus_edit(nil)
 
 			changed=true
+			
 		end
-
-	elseif act==1 or act==0 then
+		
+	end
+	
+	if act==1 or act==0 then
 	
 		if key=="left" then
 

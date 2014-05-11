@@ -82,8 +82,8 @@ function wmaster.setup(widget,def)
 
 					if master.active~=master.over then
 						master.active=master.over
-						local j=srecaps.get_joy()
-						local rx,ry=master.over.parent:mousexy(j.mx,j.my)
+						local axis=srecaps.get_axis()
+						local rx,ry=master.over.parent:mousexy(axis.mx,axis.my)
 						master.active_x=rx-master.over.px--widget.pxd
 						master.active_y=ry-master.over.py--widget.pyd
 					end
@@ -243,8 +243,10 @@ function wmaster.setup(widget,def)
 
 		if master.focus then -- key focus, steals all the key presses until we press enter again
 		
-			master.focus:key(ascii,key,act)
-					
+			if master.focus.key then
+				master.focus:key(ascii,key,act)
+			end
+			
 		else
 		
 			if master.edit then

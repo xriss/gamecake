@@ -31,24 +31,28 @@ M.bake=function(oven,recaps)
 		end
 	end
 	
+-- pick one of the up[idx] tables
+	function recaps.idx(idx)
+		return recaps.up and ( recaps.up[idx or 1] or recaps.up[1] )
+	end
+
+-- shorthand way to call into the up[1] by omiting the idx
+	function recaps.but(nam,value,idx)
+		return recaps.idx(idx).but(nam,value)
+	end
+
 	function recaps.get(nam,idx)
-		local idx=idx or 1
-		local recap=recaps.up and recaps.up[idx]
-		if recap then return recap.get(nam) end
+		return recaps.idx(idx).get(nam)
 	end
 	
-	function recaps.get_now(nam,idx)
-		local idx=idx or 1
-		local recap=recaps.up and recaps.up[idx]
-		if recap then return recap.get_now(nam) end
+	function recaps.get_axis(idx)
+		return recaps.idx(idx).get_axis()
 	end
 
-	function recaps.get_joy(idx) -- return last "valid" frame data not current "volatile" frame data
-		local idx=idx or 1
-		local recap=recaps.up and recaps.up[idx]
-		if recap then return recap.get_joy() end
-	end
-
+-- do not use this?
+--	function recaps.get_now(nam,idx)
+--		return recaps.idx(idx).get_now(nam)
+--	end
 
 -- create a new recap table, then we can load or save this data to or from our server
 	function recaps.create(idx)
@@ -60,8 +64,8 @@ M.bake=function(oven,recaps)
 			recap.flow=flow or "none" -- do not play or record by default
 			recap.last={}
 			recap.now={}
-			recap.last_joy={}
-			recap.now_joy={}
+			recap.last_axis={}
+			recap.now_axis={}
 			recap.autoclear={}
 			recap.stream={} -- a stream of change "table"s or "number" frame skips
 			recap.frame=0
@@ -85,14 +89,14 @@ M.bake=function(oven,recaps)
 			return recap.last[nam]
 		end
 
-		function recap.get_joy() -- return last "valid" frame data not current "volatile" frame data
-			return recap.last_joy
+		function recap.get_axis() -- return last "valid" frame data not current "volatile" frame data
+			return recap.last_axis
 		end
 		
--- use this to set a joysticks position
-		function recap.joy(m)
+-- use this to set a joysticks/mouse axis position
+		function recap.axis(m)
 			for _,n in ipairs{"lx","ly","rx","ry","dx","dy","mx","my"} do
-				if m[n] then recap.now_joy[n]=m[n] end
+				if m[n] then recap.now_axis[n]=m[n] end
 			end
 		end
 
@@ -177,9 +181,9 @@ M.bake=function(oven,recaps)
 					recap.now[n]=nil
 				end
 				
-				for n,v in pairs(recap.now_joy) do
-					recap.last_joy[n]=v
-					recap.now_joy[n]=nil
+				for n,v in pairs(recap.now_axis) do
+					recap.last_axis[n]=v
+					recap.now_axis[n]=nil
 				end
 
 			end
