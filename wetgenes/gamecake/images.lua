@@ -97,6 +97,15 @@ images.exists=function(filename)
 	return images.find_image(filename) and true or false
 end
 
+local function logmip(x,y)
+
+	local mx=math.ceil(math.log(x)/math.log(2))
+	local my=math.ceil(math.log(y)/math.log(2))
+	
+	if mx>my then return mx else return my end
+
+end
+
 images.prep_image=function(t)
 
 -- record image flags at loadtime, so set any flags you want here in images.TEXTURE_*
@@ -123,6 +132,9 @@ images.prep_image=function(t)
 			t.texture_width=t.width
 			t.texture_height=t.height
 
+			t.max_mips=logmip(g.width,g.height)
+			if t.max_mips > images.max_mips then t.max_mips=images.max_mips end
+
 	else
 	
 		t.dataname,t.fext=images.find_image(t.filename)
@@ -144,14 +156,18 @@ images.prep_image=function(t)
 			t.texture_width=t.mips.texture_width
 			t.texture_height=t.mips.texture_height
 
-		else -- single file, need to open to get file sizes
+		else -- single file, need to open now to get the file sizes
 		
 			g=assert(grd.create())
 			local d=assert(zips.readfile(t.dataname),"Failed to load "..t.dataname)
 			assert(g:load_data(d,t.filename:sub(-3))) -- last 3 letters pleaze
 
+			t.max_mips=logmip(g.width,g.height)
+			if t.max_mips > images.max_mips then t.max_mips=images.max_mips end
 
 			local max_size=2^images.max_mips
+
+			assert(g:convert(grd.FMT_U8_RGBA_PREMULT)) -- premult force
 
 			if max_size and ( g.width > max_size or g.height>max_size ) then
 				local hx=g.width>max_size and max_size or g.width
@@ -169,57 +185,11 @@ print("Max texture size converting ",g.width,g.height," to ",hx,hy)
 				g:resize(t.texture_width,t.texture_height,1) -- resize keeping the image in the topleft corner
 			end
 
---			error("missing mips")
---[[		
-			g=assert(grd.create())
-			local d=assert(zips.readfile(t.dataname),"Failed to load "..t.dataname)
-			assert(g:load_data(d,t.filename:sub(-3))) -- last 3 letters pleaze
+			t.gl_grd=g -- temp image cache
 
--- clamp to a maximum used size?
-			local max_size=2^images.max_mips
-
-			if max_size and ( g.width > max_size or g.height>max_size ) then
-				local hx=g.width>max_size and max_size or g.width
-				local hy=g.height>max_size and max_size or g.height
-print("Max texture size converting ",g.width,g.height," to ",hx,hy)
-				g:scale( hx , hy ,1)
-			end
-]]
 		end
 	end
 	
---[[
-
---	assert(g:convert(grd.FMT_U8_RGBA_PREMULT))
-
--- force powah of 2 sizes, so we can mipmap
-
-	t.width=g.width
-	t.height=g.height
-	t.texture_width=images.uptwopow(t.width)
-	t.texture_height=images.uptwopow(t.height)
-
-	if t.texture_width~=g.width or t.texture_height~=g.height then 
-		g:resize(t.texture_width,t.texture_height,1) -- resize keeping the image in the topleft corner
-	end
-
-	t.texture_width=( t.texture_width > stash.max_texture_size )  and stash.max_texture_size or t.texture_width
-	t.texture_height=( t.texture_height > stash.max_texture_size ) and stash.max_texture_size or t.texture_height
-	g:scale(t.texture_width,t.texture_height,1)
-
-	
-	t.gl_width=t.texture_width
-	t.gl_height=t.texture_height
-	t.gl_internal=gl.RGBA
-	t.gl_format=gl.RGBA
-	t.gl_type=gl.UNSIGNED_BYTE
-
-	t.format=grd.FMT_U8_RGBA_PREMULT
-	t.format_size=4
-		
-	return t,g
-]]
-
 	return t
 end
 
@@ -239,7 +209,7 @@ images.aloc_gl_data=function(t,_mip)
 		dataname=images.prefix..t.filename..((".%02d"):format(mip))..t.fext
 	end
 	
-	local g
+	local g=t.gl_grd -- try last loaded cache
 	
 	if t.fg then -- use an image get function?
 		g=t.fg()
@@ -297,11 +267,16 @@ end
 --
 images.load=function(filename,id,fg)
 
+--print(debug.traceback())
+
 	local t=images.get(id)
 
 	if t then return t end --first check it is not already loaded
 
+
 	t={} -- create new
+	images.data[id]=t
+
 	t.binds=0
 	t.fg=fg
 	t.id=id
@@ -310,37 +285,16 @@ images.load=function(filename,id,fg)
 	t.max_mips=images.max_mips
 
 --print("loading",filename,id)
-oven.preloader("load",filename)
 
 	t.filename=filename
 	
 	images.prep_image(t)
 
-	
---[[
-	t.stash=assert(stash.get_image(filename,g))
-
-	if t.stash then -- preloaded image (auto created or read from temporary cache)
-	
-		t.x=0
-		t.y=0
-		t.meta=t.stash.meta
-		t.width=t.stash.width
-		t.height=t.stash.height
-		t.texture_width=t.stash.texture_width
-		t.texture_height=t.stash.texture_height
-
-		images.upload(t)
-		images.set(t,id)
-		return t
-		
-	end
-]]
-
-	images.data[id]=t
+oven.preloader("load",filename)
 
 	return t
 end
+
 
 local function uptwopow(n)
 
@@ -394,9 +348,10 @@ images.upload = function(t)
 		if mip>t.mips.mip then mip=t.mips.mip end -- clamp to max mip available
 	end
 
-	if t.gl_mip==mip then -- no need to change
+	if ( t.gl_mip==mip ) and ( not t.gl_dirty ) then -- no need to change
 		return
 	end
+	t.gl_dirty=false
 	
 	t.gl_mip=mip
 	
@@ -406,23 +361,31 @@ images.upload = function(t)
 
 	images.aloc_gl_data(t,t.gl_mip) -- update gl_* params
 
-	gl.TexImage2D(
-		gl.TEXTURE_2D,
-		0,
-		t.gl_internal,
-		t.gl_width,
-		t.gl_height,
-		0,
-		t.gl_format,
-		t.gl_type,
-		t.gl_data )
+	if images.flag_panic then
+		t.gl_dirty=true -- so this texture will reloaded again later on
+	else
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			0,
+			t.gl_internal,
+			t.gl_width,
+			t.gl_height,
+			0,
+			t.gl_format,
+			t.gl_type,
+			t.gl_data )
+	end
+	
 	if gl.GetError()==gl.OUT_OF_MEMORY then
 		images.flag_panic=true
+		t.gl_dirty=true -- so this texture will reloaded again later on
 	end
 
 	images.free_gl_data(t) -- free gl_* params we may have locked
 	
-	gl.GenerateMipmap(gl.TEXTURE_2D)
+	if not images.flag_panic then
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+	end
 	
 	return t
 end
@@ -463,8 +426,8 @@ images.bind = function(t)
 		t.binds=t.binds+1
 		images.active=true
 --		images.make_better(t)
-		if not t.gl then
-			images.upload(t) -- may need to upload to gl hardware?
+		if not t.gl or t.gl_dirty then
+			images.reload(t) -- may need to upload to gl hardware?
 		end
 		gl.BindTexture( gl.TEXTURE_2D , t.gl or 0 )
 	else
@@ -505,7 +468,7 @@ images.adjust_mips = function(args)
 	end
 	
 
-	if (not bet) and args.force then -- find another texture
+	if (not bet) and args.force and not images.flag_paniced then -- find another texture
 		for n,t in pairs(images.data) do
 			if t.mip<t.max_mips then -- upgrade mip of all loaded textures?
 				bet=t
@@ -539,9 +502,25 @@ images.make_better = function(t)
 end
 
 -- panic if we have run out of memory, make every active texture worse (lower the highest version)
+images.flag_paniced=false
 images.flag_panic=false
 images.check_panic=function()	
 
+
+	if gl.GetError()==gl.OUT_OF_MEMORY then
+		images.flag_panic=true
+
+-- real memory error
+--[[
+		local memory_headroom=(16*1024*1024)
+		if ( not images.gl_mem_fake_limit ) or images.gl_mem-memory_headroom < images.gl_mem_fake_limit then
+-- any memory errors is bad, opengl can easily get itself in a real state
+-- so be cautious in the future
+			images.gl_mem_fake_limit=images.gl_mem-memory_headroom
+print("setting GL fake memory limit to ",images.gl_mem_fake_limit/(1024*1024))
+		end
+]]
+	end
 
 	if images.gl_mem_fake_limit and not images.flag_panic then
 		if images.gl_mem>images.gl_mem_fake_limit then
@@ -550,14 +529,12 @@ print("GL FAKE PANIC mem=",images.gl_mem/(1024*1024))
 		end
 	end
 
-	if gl.GetError()==gl.OUT_OF_MEMORY then
-		images.flag_panic=true
-	end
 
 	return images.flag_panic
 end
 images.cando_panic=function()
 	if images.flag_panic then
+--		images.flag_paniced=true -- stop upgrading textures
 		return images.panic()
 	end
 end
@@ -569,9 +546,12 @@ print("GL PANIC old memory mem=",images.gl_mem/(1024*1024))
 	
 	local mild=args and args.mild or false
 
-	for n,t in pairs(images.data) do -- check for mild panic first (free unused texture)
+	for n,t in pairs(images.data) do -- check for mild panic first (can free unused texture)
 		if not t.gl_active and t.gl then mild=true end
 	end
+
+-- force severe...
+mild=false
 
 	if mild then -- mild panic
 
@@ -602,11 +582,6 @@ print("GL MILD MEMORY PANIC")
 			images.max_mips=images.max_mips-1
 		end
 print("GL SEVERE MEMORY PANIC "..images.max_mips.."mips" )
-
-		if ( not images.gl_mem_fake_limit ) or images.gl_mem < images.gl_mem_fake_limit then
-print("GL setting memory limit to ",images.gl_mem/(1024*1024))
-			images.gl_mem_fake_limit=images.gl_mem
-		end
 
 		for n,t in pairs(images.data) do -- unload all textures
 			if t.max_mips>images.max_mips then t.max_mips=images.max_mips end

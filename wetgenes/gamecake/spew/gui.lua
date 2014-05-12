@@ -358,7 +358,7 @@ print("click",id)
 		top:add({hx=200,hy=40})
 		
 		master.go_back_id="score_back"
-		master.go_forward_id="score_list"
+		master.go_forward_id="score_back"
 		
 	end
 

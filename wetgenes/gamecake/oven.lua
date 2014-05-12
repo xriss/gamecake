@@ -495,7 +495,8 @@ print(sa.." : "..sb)
 
 			if not oven.preloader_enabled then return end
 
-			if oven.win and oven.rebake("wetgenes.gamecake.images").get("fonts/basefont_8x8") then
+			local t=oven.rebake("wetgenes.gamecake.images").get("fonts/basefont_8x8") -- font loaded test?
+			if oven.win and t and t.gl then
 
 				local p=oven.rebake(opts.preloader or "wetgenes.gamecake.spew.preloader")
 				p.setup() -- warning, this is called repeatedly

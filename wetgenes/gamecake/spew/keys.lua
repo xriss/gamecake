@@ -78,10 +78,10 @@ M.bake=function(oven,keys)
 		["enter"]		=	"start",
 		["shift_l"]		=	{"fire","a"},
 		["z"]			=	{"fire","b"},
-		["x"]			=	{"fire","l1"},
+		["x"]			=	"l1",
 		["control_l"]	=	{"fire","x"},
 		["alt_l"]		=	{"fire","y"},
-		["space"]		=	{"fire","r1"},
+		["space"]		=	"r1",
 		["1"]			=	"l2",
 		["esc"]			=	"r2",
 	}

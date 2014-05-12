@@ -178,7 +178,11 @@ void main(void)
 	
 	end
 
-	if not wetiso.fbo.texture then -- build our texture (happens after any stop/start)
+	local f1=cake.fonts.get("Vera")
+	local f2=f1.images[1]
+	if not wetiso.fbo.texture or wetiso.font_mip~=f2.gl_mip then -- build our texture (happens after any stop/start)
+		wetiso.font_mip=f2.gl_mip
+		wetiso.fbo:clean()
 
 		gl.MatrixMode(gl.PROJECTION)
 		gl.PushMatrix()
