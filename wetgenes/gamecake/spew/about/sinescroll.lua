@@ -44,6 +44,7 @@ function M.bake(oven,about)
 	
 	local wetiso=oven.rebake("wetgenes.gamecake.spew.geom_wetiso")
 	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
+	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 
 
 	local opts={
@@ -144,6 +145,9 @@ Greetz to No1 and No6!
 	end
 	
 	about.update=function()
+		
+		srecaps.step()
+
 		assert(coroutine.resume(about.co))
 	end
 	

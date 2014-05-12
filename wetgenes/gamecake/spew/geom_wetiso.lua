@@ -80,8 +80,10 @@ wetiso.setup=function()
 	geom.apply_bevel(wetiso.it,7/8)
 
 	wetiso.fbo=fbs.create()
+--	wetiso.fbo.TEXTURE_MIN_FILTER=gl.NEAREST
+--	wetiso.fbo.TEXTURE_MAX_FILTER=gl.NEAREST
 
-	wetiso.predraw()
+--	wetiso.predraw()
 end
 
 wetiso.clean=function()
@@ -190,7 +192,9 @@ void main(void)
 		
 		gl.ClearColor(pack.argb4_pmf4(0x0000))
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
-		
+
+		local font_cache_draw = font.cache_begin()
+
 --		cells.draw_walls()
 			font.set(cake.fonts.get("Vera")) -- default font
 			font.set_size(64) -- 32 pixels high
@@ -211,6 +215,8 @@ void main(void)
 			gl.Rotate(180 ,0,0,1 )
 			font.set_xy( -(w/2)  , -32 -32 )
 			font.draw(a)
+			
+		font_cache_draw()
 
 
 		fbs.bind_frame(nil)
@@ -236,7 +242,7 @@ end
 
 wetiso.draw=function()
 
-	wetiso.predraw() -- make sure buffers are valid
+ 	wetiso.predraw() -- make sure buffers are valid
 		
 	wetiso.fbo:bind_texture()
 	geom.draw(wetiso.it,"geom_wetiso")

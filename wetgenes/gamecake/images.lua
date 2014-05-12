@@ -76,9 +76,9 @@ images.reload=function(id)
 	end
 
 	if t then
-oven.preloader("reload",t.id)
 --print("RELOAD",t.id,t.mip)
 		images.upload(t) -- upload to GL
+oven.preloader("reload",string.format("%9s : %s",(t.gl_width or 0).."x"..(t.gl_height or 0),t.id))
 	end
 end
 
@@ -315,6 +315,7 @@ oven.preloader("load",filename)
 	t.filename=filename
 	
 	images.prep_image(t)
+
 	
 --[[
 	t.stash=assert(stash.get_image(filename,g))
