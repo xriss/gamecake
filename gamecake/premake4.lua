@@ -22,6 +22,14 @@ if LUA_LIBDIRS then	libdirs(LUA_LIBDIRS) end
 if LUA_LINKS   then links  (LUA_LINKS)   end
 
 
+-- beter comandline editing where we can
+if NIX or OSX or RASPI then
+        if not LSB then
+                defines("LUA_USE_READLINE")
+        end
+end
+
+
 if RASPI then
 	
 	files { "../lib_lua/src/lua.c" }
@@ -126,6 +134,7 @@ elseif OSX then
 --	links { "X11"   }	
 	links { "dl" }
 	links { "m" }
+	links { "readline" }
 
 --	links { "rt" }
 
@@ -158,6 +167,7 @@ end
 	links { "X11"   }	
 	links { "dl" }
 	links { "m" }
+	links { "readline" }
 
 	links { "rt" }
 	links { "c" }
