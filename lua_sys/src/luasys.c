@@ -233,6 +233,11 @@ sys_xpcall (lua_State *L)
 #include "thread/sys_thread.c"
 
 
+#include "sys_date.c"
+#include "sys_env.c"
+#include "sys_evq.c"
+#include "sys_rand.c"
+
 #ifndef __native_client__
 
 #ifndef _WIN32
@@ -248,10 +253,6 @@ sys_xpcall (lua_State *L)
 
 #endif
 
-#include "sys_evq.c"
-#include "sys_date.c"
-#include "sys_env.c"
-#include "sys_rand.c"
 
 
 static luaL_Reg sys_lib[] = {
@@ -270,11 +271,11 @@ static luaL_Reg sys_lib[] = {
   FS_METHODS,
   LOG_METHODS,
   PROC_METHODS,
+#ifndef _WIN32
   UNIX_METHODS,
 #endif
-  RAND_METHODS,
-#ifndef _WIN32
 #endif
+  RAND_METHODS,
   {NULL, NULL}
 };
 
