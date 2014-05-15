@@ -30,8 +30,7 @@ typedef pthread_t		thread_id_t;
 
 #endif /* !WIN32 */
 
-// LSB missing functions, disable
-#if 1
+#if defined(__LSB_VERSION__) // LSB missing funcs
 static int affin_nprocs (lua_State *L) { return 0; }
 #define AFFIN_METHODS {"nprocs",	0}
 #else
