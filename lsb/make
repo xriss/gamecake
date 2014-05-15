@@ -1,4 +1,4 @@
-export LSBCC_LSBVERSION=4.0
+export LSBCC_LSBVERSION=5.0
 
 cd `dirname $0`
 

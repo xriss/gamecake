@@ -29,6 +29,7 @@ if RASPI then
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
 	links { "crypt" }
 	links { "pthread" }
+	links { "readline" }
 
 --	links { "X11"  }
 	

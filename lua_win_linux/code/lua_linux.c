@@ -649,7 +649,9 @@ LUALIB_API int luaopen_wetgenes_win_linux_core(lua_State *l)
 
 		{"sleep",			lua_wetwin_sleep},
 		{"time",			lua_wetwin_time},
-		
+
+// the following are hacks that will be removed/replaced with less hacks
+
 		{"jread",			lua_wetwin_jread},
 		
 		{"ioctl",			lua_wetwin_ioctl},

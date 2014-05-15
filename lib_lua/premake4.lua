@@ -9,9 +9,12 @@ includedirs { "src" }
 
 defines("LUA_PRELOADLIBS=lua_preloadlibs")
 
-if NACL then -- nacl needs its own flags
+if NIX then -- nacl needs its own flags
 
+if LSB then -- readline is bad for lsb, actually readline is just bad but simple to use
 else
+--defines("LUA_USE_READLINE")
+end
 
 end
 
