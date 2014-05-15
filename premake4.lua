@@ -313,7 +313,7 @@ AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
 
 elseif WINDOWS then
 
-	defines "_WIN32_WINNT=0x0500"
+	defines "_WIN32_WINNT=0x0501"
 	defines "WIN32"
 	defines "_CRT_SECURE_NO_WARNINGS"
 --	defines	"LUA_BUILD_AS_DLL"
@@ -664,7 +664,6 @@ all_includes=all_includes or {
 	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
---	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_al",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_tardis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
@@ -673,11 +672,9 @@ all_includes=all_includes or {
 	{"lua_sod",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_lash",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	OSX		},
---	{"lua_sec",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_socket",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_lanes",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_gamecake",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_win",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
@@ -688,8 +685,6 @@ all_includes=all_includes or {
 	{"lua_win_raspi",	nil			or		nil		or		nil		or		nil			or		RASPI		or	nil		},
 	{"lua_win_osx",		nil			or		nil		or		nil		or		nil			or		nil			or	OSX		},
 	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
---	{"lib_openssl",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
---	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_png",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_jpeg",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
@@ -701,6 +696,20 @@ all_includes=all_includes or {
 	{"lib_vorbis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_openal",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	nil		},
+
+-- old/broken
+
+--	{"lua_lanes",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+--	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+--	{"lua_sec",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+--	{"lib_openssl",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+--	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+
+--new/testing
+
+	{"lua_sys",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
 	{"gamecake",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"pagecake",			nil		or		NIX		or		nil		or		nil			or		nil			or	nil		},
