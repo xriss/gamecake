@@ -700,16 +700,18 @@ all_includes=all_includes or {
 -- old/broken
 
 --	{"lua_lanes",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
---	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 --	{"lua_sec",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 --	{"lib_openssl",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+
+-- need to lazy link to .so
+--	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 --	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
 --new/testing
 
 	{"lua_sys",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	nil		},
-	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	OSX		},
+	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	OSX		},
 
 	{"gamecake",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"pagecake",			nil		or		NIX		or		nil		or		nil			or		nil			or	nil		},
