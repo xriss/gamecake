@@ -657,7 +657,6 @@ end
 all_includes=all_includes or {
 
 	{"lua_bit",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		) and (LIB_LUA=="lib_lua") },
-	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_kissfft",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
@@ -671,13 +670,14 @@ all_includes=all_includes or {
 	{"lua_grdmap",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sod",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_lash",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	OSX		},
-	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_socket",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_gamecake",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_win",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lua_lash",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	OSX		},
 	{"lua_win_windows",	WINDOWS		or		nil		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_win_linux",	nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_win_nacl",	nil			or		nil		or		NACL	or		nil			or		nil			or	nil		},
@@ -691,11 +691,11 @@ all_includes=all_includes or {
 	{"lib_gif",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_z",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
 	{"lib_vorbis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_openal",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	nil		},
+	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		},
+	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
 
 -- old/broken
 
@@ -707,7 +707,7 @@ all_includes=all_includes or {
 
 --new/testing
 
-	{"lua_sys",			WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"lua_sys",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
