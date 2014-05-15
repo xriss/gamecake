@@ -1,7 +1,11 @@
 /* Lua System: File System */
 
 #ifndef _WIN32
+#ifdef __ANDROID__
+#include <sys/vfs.h>
+#else
 #include <sys/statvfs.h>
+#endif
 #include <dirent.h>
 #endif
 
@@ -131,6 +135,9 @@ sys_stat (lua_State *L)
  * Returns: [total_bytes (number), available_bytes (number),
  *	free_bytes (number)]
  */
+#ifdef __ANDROID__
+static int sys_statfs (lua_State *L) { return 0; }
+#else
 static int
 sys_statfs (lua_State *L)
 {
@@ -178,6 +185,7 @@ sys_statfs (lua_State *L)
   }
   return sys_seterror(L, 0);
 }
+#endif
 
 /*
  * Arguments: path (string)
