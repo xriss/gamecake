@@ -23,7 +23,7 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 
 
 -- beter comandline editing where we can
-if NIX or OSX or RASPI then
+if NIX or OSX then
         if not LSB then
                 defines("LUA_USE_READLINE")
         end
@@ -37,7 +37,7 @@ if RASPI then
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
 	links { "crypt" }
 	links { "pthread" }
-	links { "readline" }
+--	links { "readline" }
 
 --	links { "X11"  }
 	
