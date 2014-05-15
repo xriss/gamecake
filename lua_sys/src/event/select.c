@@ -133,6 +133,11 @@ evq_modify (struct event *ev, unsigned int flags)
   return 0;
 }
 
+#ifdef __native_client__
+// not sure where to get this from...
+int select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds, struct timeval *timeout);
+#endif
+
 EVQ_API int
 evq_wait (struct event_queue *evq, struct sys_thread *td, msec_t timeout)
 {

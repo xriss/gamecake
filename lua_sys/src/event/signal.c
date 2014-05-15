@@ -98,6 +98,9 @@ evq_signal (struct event_queue *evq, const int signo)
 EVQ_API int
 signal_set (const int signo, sig_handler_t func)
 {
+#ifdef __native_client__
+  return 0;
+#else
   struct sigaction act;
   int res;
 
@@ -109,6 +112,7 @@ signal_set (const int signo, sig_handler_t func)
   while (res == -1 && errno == EINTR);
 
   return res;
+#endif
 }
 
 #ifdef USE_KQUEUE

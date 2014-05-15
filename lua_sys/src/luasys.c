@@ -7,12 +7,14 @@
 
 #ifndef _WIN32
 
-#include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
 
+#ifndef __native_client__
+#include <sys/ioctl.h>
 #ifndef __ANDROID__
 #include <sys/sysctl.h>
+#endif
 #endif
 
 #define SYS_FILE_PERMISSIONS	0644  /* default file permissions */
@@ -128,6 +130,9 @@ sys_nprocs (lua_State *L)
 /*
  * Returns: processors_load_average (number), is_per_cpu (boolean)
  */
+#ifdef __native_client__
+static int sys_loadavg (lua_State *L) { return 0; }
+#else
 static int
 sys_loadavg (lua_State *L)
 {
@@ -149,11 +154,15 @@ sys_loadavg (lua_State *L)
   }
   return sys_seterror(L, res);
 }
+#endif
 
 /*
  * Arguments: [number_of_files (number)]
  * Returns: number_of_files (number)
  */
+#ifdef __native_client__
+static int sys_limit_nfiles (lua_State *L) { return 0; }
+#else
 static int
 sys_limit_nfiles (lua_State *L)
 {
@@ -180,6 +189,7 @@ sys_limit_nfiles (lua_State *L)
   return 1;
 #endif
 }
+#endif
 
 /*
  * Arguments: string
@@ -222,6 +232,9 @@ sys_xpcall (lua_State *L)
 #include "mem/sys_mem.c"
 #include "thread/sys_thread.c"
 
+
+#ifndef __native_client__
+
 #ifndef _WIN32
 #include "sys_unix.c"
 #else
@@ -229,12 +242,15 @@ sys_xpcall (lua_State *L)
 #endif
 
 #include "sys_file.c"
-#include "sys_date.c"
-#include "sys_env.c"
-#include "sys_evq.c"
 #include "sys_fs.c"
 #include "sys_log.c"
 #include "sys_proc.c"
+
+#endif
+
+#include "sys_evq.c"
+#include "sys_date.c"
+#include "sys_env.c"
 #include "sys_rand.c"
 
 
@@ -248,14 +264,16 @@ static luaL_Reg sys_lib[] = {
   DATE_METHODS,
   ENV_METHODS,
   EVQ_METHODS,
+#ifndef __native_client__
   FCGI_METHODS,
   FD_METHODS,
   FS_METHODS,
   LOG_METHODS,
   PROC_METHODS,
+  UNIX_METHODS,
+#endif
   RAND_METHODS,
 #ifndef _WIN32
-  UNIX_METHODS,
 #endif
   {NULL, NULL}
 };
@@ -273,12 +291,14 @@ createmeta (lua_State *L)
     luaL_Reg *meth;
     int is_index;
   } meta[] = {
-    {DIR_TYPENAME,		dir_meth,	0},
-    {EVQ_TYPENAME,		evq_meth,	1},
-    {FD_TYPENAME,		fd_meth,	1},
     {PERIOD_TYPENAME,		period_meth,	1},
+    {EVQ_TYPENAME,		evq_meth,	1},
+#ifndef __native_client__
+    {DIR_TYPENAME,		dir_meth,	0},
+    {FD_TYPENAME,		fd_meth,	1},
     {PID_TYPENAME,		pid_meth,	1},
     {LOG_TYPENAME,		log_meth,	0},
+#endif
     {RAND_TYPENAME,		rand_meth,	0},
   };
   int i;
@@ -324,7 +344,9 @@ luaopen_sys (lua_State *L)
   luaL_register(L, LUA_SYSLIBNAME, sys_lib);
   createmeta(L);
 
+#ifndef __native_client__
   signal_init();
+#endif
 
 #ifdef _WIN32
   luaopen_sys_win32(L);
