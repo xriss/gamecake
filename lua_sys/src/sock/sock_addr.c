@@ -9,7 +9,13 @@
 #else
 
 #include <net/if.h>
+
+#ifdef __ANDROID__
+#include "android_ifaddrs.h"
+#include "android_ifaddrs.c"
+#else
 #include <ifaddrs.h>
+#endif
 
 #endif /* !WIN32 */
 
