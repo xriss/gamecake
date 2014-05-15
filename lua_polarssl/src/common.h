@@ -12,10 +12,15 @@
 #include "luapolarssl.h"
 
 
+// always just use this to remove global side effects in all versions
+#define luaL_register(L,n,l)	lua_newtable(L); luaL_openlib(L, NULL, l, 0)
+#define luaL_newlib(L,l)		lua_newtable(L); luaL_openlib(L, NULL, l, 0)
+#define luaL_setfuncs(L,l,n)	luaL_openlib(L, NULL, l, n)
+
 #if LUA_VERSION_NUM < 502
 #define lua_rawlen		lua_objlen
 #define lua_resume(L,from,n)	lua_resume((L), (n))
-#define luaL_setfuncs(L,l,n)	luaL_register((L), NULL, (l))
+//#define luaL_setfuncs(L,l,n)	luaL_register((L), NULL, (l))
 
 #define lua_rawgetp(L,idx,p) \
     (lua_pushlightuserdata((L), (p)), \
@@ -24,7 +29,7 @@
     (lua_pushlightuserdata((L), (p)), lua_insert((L), -2), \
      lua_rawset((L), (idx) - ((idx) < 0 && (idx) > -99 ? 1 : 0)))
 #else
-#define luaL_register(L,n,l)	luaL_newlib((L), (l))
+//#define luaL_register(L,n,l)	luaL_newlib((L), (l))
 #define lua_setfenv		lua_setuservalue
 #define lua_getfenv		lua_getuservalue
 #endif
