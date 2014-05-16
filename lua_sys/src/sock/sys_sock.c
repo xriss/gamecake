@@ -253,10 +253,16 @@ sock_nonblocking (lua_State *L)
 {
   sd_t sd = (sd_t) lua_unboxinteger(L, 1, SD_TYPENAME);
   unsigned long opt = lua_toboolean(L, 2);
-
+#ifdef __LSB_VERSION__
+  int flags = fcntl(sd, F_GETFL, 0);
+  lua_settop(L, 1);
+  return !fcntl(sd,F_SETFL,flags|O_NONBLOCK) ? 1
+   : sys_seterror(L, 0);
+#else
   lua_settop(L, 1);
   return !ioctlsocket(sd, FIONBIO, &opt) ? 1
    : sys_seterror(L, 0);
+#endif
 }
 
 #define OPT_START	2
@@ -268,6 +274,10 @@ sock_nonblocking (lua_State *L)
 static int
 sock_sockopt (lua_State *L)
 {
+// LSB hack for missing define
+#ifndef IP_HDRINCL
+#define IP_HDRINCL 0
+#endif
   static const int opt_flags[] = {
     SO_REUSEADDR, SO_TYPE, SO_ERROR, SO_DONTROUTE,
     SO_SNDBUF, SO_RCVBUF, SO_SNDLOWAT, SO_RCVLOWAT,
@@ -284,7 +294,7 @@ sock_sockopt (lua_State *L)
     "broadcast", "keepalive", "oobinline", "linger",
     "tcp_nodelay", "tcp_fastopen",
     "multicast_ttl", "multicast_if", "multicast_loop",
-    "hdrincl", NULL
+    "hdrincl",NULL
   };
 
   sd_t sd = (sd_t) lua_unboxinteger(L, 1, SD_TYPENAME);

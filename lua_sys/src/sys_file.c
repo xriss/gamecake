@@ -825,9 +825,9 @@ sys_tostring (lua_State *L)
   return 1;
 }
 
-
+#ifndef __LSB_VERSION__
 #include "sys_comm.c"
-
+#endif
 
 #define FD_METHODS \
   {"handle",		sys_file}
@@ -853,7 +853,9 @@ static luaL_Reg fd_meth[] = {
   {"utime",		sys_utime},
   {"__tostring",	sys_tostring},
   {"__gc",		sys_close},
+#ifndef __LSB_VERSION__
   COMM_METHODS,
+#endif
 #ifdef _WIN32
   WIN32_METHODS,
 #endif

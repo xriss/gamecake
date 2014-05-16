@@ -591,6 +591,11 @@ sys_dir_next (lua_State *L)
      || (filename[1] == '.' && filename[2] == '\0')));
 
     lua_pushstring(L, filename);
+// missing from LSB, but probably there and some FS will not respect this flag anyway
+// should really be using stat for safeness...
+#ifndef DT_DIR
+#define DT_DIR 4
+#endif
     lua_pushboolean(L, entry->d_type & DT_DIR);
     return 2;
 #else
