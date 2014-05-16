@@ -127,18 +127,18 @@ local function completion_handler(c,s)
 end
 
 local function init_readline()
-  if package.config:match '^/' then -- only for Unix
+ -- if package.config:match '^/' then -- only for Unix
     rl_support,rl = pcall(require,'linenoise')
     if rl_support then
       rl.setcompletion(completion_handler)
-      local luarc = os.getenv 'HOME' .. '/.luairc.lua'
-      local f = io.open(luarc,'r')
-      if f then
-        f:close()
-        dofile(luarc)
-      end
+--      local luarc = os.getenv 'HOME' .. '/.luairc.lua'
+--      local f = io.open(luarc,'r')
+--      if f then
+--        f:close()
+--        dofile(luarc)
+--      end
     end
-  end
+ -- end
 end
 
 
@@ -454,7 +454,7 @@ function M.main(...)
 
 end
 
-l_message(nil, "starting linenoise interactive console ( lua.lua ) ")
+--l_message(nil, "starting linenoise interactive console ( lua.lua ) ")
 dotty()
 
 return M
