@@ -78,9 +78,9 @@ RtlGenRandomFunc RtlGenRandom;
 #define rand() replace_random()
 int replace_random();
 
-#if !defined(ssize_t)
-typedef int ssize_t;
-#endif
+//#if !defined(ssize_t)
+//typedef int ssize_t;
+//#endif
 
 #if !defined(mode_t)
 #define mode_t long
