@@ -9,6 +9,7 @@
 -- Based on lua.c from Lua 5.1.3.
 -- Improvements by Shmuel Zeigerman.
 
+
 -- Variables analogous to those in luaconf.h
 local LUA_INIT = "LUA_INIT"
 local LUA_PROGNAME = "lua"
@@ -23,7 +24,7 @@ local LUA_COPYRIGHT = "Copyright (C) 1994-2008 Lua.org, PUC-Rio"
 
 -- Note: don't allow user scripts to change implementation.
 -- Check for globals with "cat lua.lua | luac -p -l - | grep ETGLOBAL"
-local lua51 = _VERSION:match '5%.1$'
+local lua51 = (_G._VERSION or ""):match '5%.1$'
 local _G = _G
 local assert = assert
 local collectgarbage = collectgarbage
@@ -410,40 +411,50 @@ local function handle_luainit()
   end
 end
 
+local M={}
+-- do not do standard main?
+function M.main(...)
 
-local import = _G.import
-if import then
-  lua_stdin_is_tty = import.lua_stdin_is_tty or lua_stdin_is_tty
-  setsignal        = import.setsignal or setsignal
-  LUA_RELEASE      = import.LUA_RELEASE or LUA_RELEASE
-  LUA_COPYRIGHT    = import.LUA_COPYRIGHT or LUA_COPYRIGHT
-  _G.import = nil
+	local import = _G.import
+	if import then
+	  lua_stdin_is_tty = import.lua_stdin_is_tty or lua_stdin_is_tty
+	  setsignal        = import.setsignal or setsignal
+	  LUA_RELEASE      = import.LUA_RELEASE or LUA_RELEASE
+	  LUA_COPYRIGHT    = import.LUA_COPYRIGHT or LUA_COPYRIGHT
+	  _G.import = nil
+	end
+
+	if _G.arg and _G.arg[0] and #_G.arg[0] > 0 then progname = _G.arg[0] end
+	local argv = {...}
+	handle_luainit()
+	local has = {i=false, v=false, e=false}
+	local script = collectargs(argv, has)
+	if script < 0 then -- invalid args?
+	  print_usage()
+	  os_exit(1)
+	end
+	if has.v then print_version() end
+	local status = runargs(argv, (script > 0) and script-1 or #argv)
+	if not status then os_exit(1) end
+	if script ~= 0 then
+	  status = handle_script(argv, script)
+	  if not status then os_exit(1) end
+	else
+	  _G.arg = nil
+	end
+	if has.i then
+	  dotty()
+	elseif script == 0 and not has.e and not has.v then
+	  if lua_stdin_is_tty() then
+		print_version()
+		dotty()
+	  else dofile(nil)  -- executes stdin as a file
+	  end
+	end
+
 end
 
-if _G.arg and _G.arg[0] and #_G.arg[0] > 0 then progname = _G.arg[0] end
-local argv = {...}
-handle_luainit()
-local has = {i=false, v=false, e=false}
-local script = collectargs(argv, has)
-if script < 0 then -- invalid args?
-  print_usage()
-  os_exit(1)
-end
-if has.v then print_version() end
-local status = runargs(argv, (script > 0) and script-1 or #argv)
-if not status then os_exit(1) end
-if script ~= 0 then
-  status = handle_script(argv, script)
-  if not status then os_exit(1) end
-else
-  _G.arg = nil
-end
-if has.i then
-  dotty()
-elseif script == 0 and not has.e and not has.v then
-  if lua_stdin_is_tty() then
-    print_version()
-    dotty()
-  else dofile(nil)  -- executes stdin as a file
-  end
-end
+l_message(nil, "starting linenoise interactive console ( lua.lua ) ")
+dotty()
+
+return M
