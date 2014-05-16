@@ -80,7 +80,7 @@ end
 
 	const char *wetgenes_wetmods_version()
 	{
-		return "Featuring WetMods V]]..version..[[ https://bitbucket.org/xixs/lua\n]]..libnames..--[["\\n"..srcnames..]][[";
+		return "Gamecake V]]..version..[[ https://bitbucket.org/xixs/lua containing ]]..libnames..[[";
 	}
 
 ]])

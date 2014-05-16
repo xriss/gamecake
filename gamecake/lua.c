@@ -122,7 +122,7 @@ static int docall (lua_State *L, int narg, int clear) {
 
 const char *wetgenes_wetmods_version();
 static void print_version (void) {
-  l_message(NULL, LUA_RELEASE "  " LUA_COPYRIGHT );
+//  l_message(NULL, LUA_RELEASE "  " LUA_COPYRIGHT );
   l_message(NULL, wetgenes_wetmods_version()); // add some extra version info
 }
 
