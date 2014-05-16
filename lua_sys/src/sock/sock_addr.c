@@ -596,14 +596,17 @@ sock_addr_file (lua_State *L)
 
 #ifndef _WIN32
   if (lua_gettop(L) == 1) {
+#ifdef AF_LOCAL
     if (sap->u.addr.sa_family == AF_LOCAL) {
       lua_pushstring(L, sap->u.un.sun_path);
       return 1;
     }
+#endif
   } else {
     size_t len;
     const char *path = luaL_checklstring(L, 2, &len);
 
+#ifdef AF_LOCAL
     if (len < sizeof(sap->u.un.sun_path)) {
       sap->u.un.sun_family = AF_LOCAL;
       sap->addrlen = ++len;
@@ -612,6 +615,7 @@ sock_addr_file (lua_State *L)
       lua_settop(L, 1);
       return 1;
     }
+#endif
   };
 #else
   (void) sap;
