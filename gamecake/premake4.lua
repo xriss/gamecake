@@ -24,7 +24,7 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 
 if RASPI then
 	
-	files { "../lib_lua/src/lua.c" }
+	files { "./lua.c" }
 	
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
 	links { "crypt" }
@@ -81,7 +81,7 @@ elseif ANDROID then
 
 elseif WINDOWS then
 
-	files { "../lib_lua/src/lua.c" }
+	files { "./lua.c" }
 
 	links { "opengl32" , "glu32" }
 	links {  "ws2_32" , "gdi32"}
@@ -102,7 +102,7 @@ elseif WINDOWS then
 
 elseif OSX then
 
-	files { "../lib_lua/src/lua.c" }
+	files { "./lua.c" }
 	
 --	linkoptions { "-v" }
 
@@ -138,7 +138,7 @@ elseif NIX then
 
 --	linkoptions { "-static-libgcc" }
 
-	files { "../lib_lua/src/lua.c" }
+	files { "./lua.c" }
 
 if LSB then
 	linkoptions { "--lsb-use-default-linker" }
