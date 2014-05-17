@@ -22,7 +22,7 @@ http.TIMEOUT = 10
 
 local t = socket.gettime()
 
---host = host or "diego.student.princeton.edu"
+host = host or "diego.student.princeton.edu"
 --host = host or "diego.student.princeton.edu"
 host = host or "localhost"
 proxy = proxy or "http://localhost:3128"
