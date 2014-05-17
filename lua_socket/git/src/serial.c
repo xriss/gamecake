@@ -76,7 +76,7 @@ LUASOCKET_API int luaopen_socket_serial(lua_State *L) {
     (void) func;
 #else
     /* set function into socket namespace */
-    luaL_openlib(L, "socket", func, 0);
+//    luaL_openlib(L, "socket", func, 0);
     lua_pushcfunction(L, global_create);
 #endif
     return 1;

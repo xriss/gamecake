@@ -9,19 +9,17 @@ excludes("git/src/unix.*")
 
 links { "lib_lua" }
 
+defines "LUASOCKET_API=extern"
+defines "LUASOCKET_EXPORTS"
+
 if WINDOWS then
 
+	defines "LUASOCKET_INET_PTON"
+
 	excludes("git/src/usocket.*")
+	excludes("git/src/serial.*")
 
 	links { "ws2_32" }
-
-	defines "LUASOCKET_EXPORTS"
-	
-	if MINGW then -- commandline escape problems?
-		defines "LUASOCKET_API=__declspec\\(dllexport\\)"
-	else
-		defines "LUASOCKET_API=__declspec(dllexport)"
-	end
 	
 else -- nix
 
@@ -43,18 +41,8 @@ files { "git/src/mime.c" ,"git/src/mime.h" }
 
 links { "lib_lua" }
 
-if WINDOWS then
-
-	defines "MIME_EXPORTS"
-	if MINGW then -- commandline escape problems?
-		defines "MIME_API=__declspec\\(dllexport\\)"
-	else
-		defines "MIME_API=__declspec(dllexport)"
-	end
-
-else -- nix
-
-end
+defines "MIME_API=extern"
+defines "MIME_EXPORTS"
 
 KIND{kind="lua",dir="mime",name="core",luaname="mime.core",luaopen="mime_core"}
 
