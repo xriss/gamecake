@@ -2,16 +2,16 @@
 if not NACL then -- just grab mime under nacl
 
 project "lua_socket"
-language "C++"
-files { "src/**.c" , "src/**.cpp" , "src/**.h" }
-excludes("src/mime.*")
-excludes("src/unix.*")
+language "C"
+files { "git/src/**.c" , "git/src/**.cpp" , "git/src/**.h" }
+excludes("git/src/mime.*")
+excludes("git/src/unix.*")
 
 links { "lib_lua" }
 
 if WINDOWS then
 
-	excludes("src/usocket.*")
+	excludes("git/src/usocket.*")
 
 	links { "ws2_32" }
 
@@ -25,7 +25,7 @@ if WINDOWS then
 	
 else -- nix
 
-	excludes("src/wsocket.*")
+	excludes("git/src/wsocket.*")
 
 	links { "crypt" , "ssl" }
 
@@ -39,7 +39,7 @@ end
 
 project "lua_mime"
 language "C++"
-files { "src/mime.c" ,"src/mime.h" }
+files { "git/src/mime.c" ,"git/src/mime.h" }
 
 links { "lib_lua" }
 
