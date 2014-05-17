@@ -48,7 +48,7 @@ elseif NACL then
 	linkoptions { "-v" }
 	
 --use ports version...
-	links { "openal"  }
+--	links { "openal"  }
 
 	links { "ppapi"  }
 	links { "ppapi_gles2" }
