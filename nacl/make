@@ -1,7 +1,7 @@
 cd `dirname $0`
 cd ..
 
-if [ "$1" == "clean" ] ; then
+if [ "$1" = "clean" ] ; then
         rm -rf build-gmake-nacl-native
         exit
 fi
@@ -44,7 +44,7 @@ build/premake4 gmake nacl-32
 build/premake4 gmake nacl-64
 #build/premake4 gmake nacl-arm
 
-if [ "$1" == "clean" ] ; then
+if [ "$1" = "clean" ] ; then
 
         rm -rf build-gmake-nacl-32
         rm -rf build-gmake-nacl-64

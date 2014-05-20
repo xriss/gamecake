@@ -577,6 +577,7 @@ struct PP_CompletionCallback callback = { lua_nacl_getURL_callback, NULL, PP_COM
 	v=CStrToVar( s );
 	url_request_info_interface->SetProperty(req,PP_URLREQUESTPROPERTY_URL,v);
 	url_request_info_interface->SetProperty(req,PP_URLREQUESTPROPERTY_RECORDDOWNLOADPROGRESS,PP_MakeBool(1));
+	url_request_info_interface->SetProperty(req,PP_URLREQUESTPROPERTY_ALLOWCROSSORIGINREQUESTS,PP_MakeBool(1));
 	
 	cb=lua_nacl_callback_alloc(l,2); // arg 2 is a callback function
 	cb->r=load;
