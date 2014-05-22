@@ -520,6 +520,9 @@ wstr.table_lookup=function(a,d) -- look up a in table d
 
 	local t
 	
+	local a1,a2=string.find(a, "%:") -- try and split on first ":" if one exists
+	if a1 then a=string.sub(a,1,a1-1) end -- only use the bit before the :
+
 	repeat local done=true
 
 		t=d[a] -- as string
@@ -572,27 +575,34 @@ wstr.replace_lookup=function(a,d) -- look up a in table d
 	local t=wstr.table_lookup(a,d)
 	if t then
 		if type(t)=="table" then -- if a table then
-			if t[1] then -- a list of stuff
-				if t.plate then -- how to format
-					local tt={}
-					local it=d.it
-					local i=1
-					while t[i] do -- cant use ipairs or # as this data may only exist via the metatabel
-						d.it=t[i]
-						tt[#tt+1]=wstr.macro_replace(d[t.plate] or t.plate,d)
-						i=i+1
-					end
-					d.it=it
-					return table.concat(tt)
+			local plate
+			
+			local a1,a2=string.find(a, "%:") -- try and split on first ":" if one exists
+			if a2 then plate=string.sub(a,a2+1) end -- the bit before the :
+			plate=plate or t.plate
+
+			if t[1] and plate then -- a list of stuff and a plate
+				local tt={}
+				local it=d.it
+				local i=1
+				while t[i] do -- cant use ipairs or # as this data may only exist via the metatabel
+					d.it=t[i]
+					tt[#tt+1]=wstr.macro_replace(d[plate] or plate,d)
+					i=i+1
 				end
-			else -- just one thing
-				if t.plate then -- how to format
+				d.it=it
+				return table.concat(tt)
+			else -- just one thing (or fully dump the list)
+				local tt
+				if plate then -- how to format
 					local it=d.it
 					d.it=t
-					local tt=wstr.macro_replace(d[t.plate] or t.plate,d)
+					tt=wstr.macro_replace(d[plate] or plate,d)
 					d.it=it
-					return tt
+				else
+					tt=wstr.dump(t)
 				end
+				return tt
 			end
 			return nil -- no not expand
 		end
@@ -609,7 +619,7 @@ end
 -----------------------------------------------------------------------------
 wstr.replace=function(a,d)
 
-return (string.gsub( a , "{([%w%._%-]-)}" , function(a) -- find only words and "._-" tightly encased in {}
+return (string.gsub( a , "{([%w%.%_%-%:]-)}" , function(a) -- find only words and "._-:" tightly encased in {}
 -- this means that almost all legal use of {} in javascript will not match at all.
 -- Even when it does (probably as a "{}") then it is unlikley to accidently find anything in the d table
 -- so the text will just be returned as is.
@@ -641,7 +651,7 @@ wstr.macro_replace_once = function(text,old_d,opts)
 	
 	local ret={}
 	
-	local separator = "{[%w%._%-=]-}"
+	local separator = "{[%w%.%_%-%=%:]-}"
 	
 	local parts = {}  
 	local start = 1
@@ -680,7 +690,7 @@ wstr.macro_replace_once = function(text,old_d,opts)
 					if fc=="-" then -- need to return nothing if chunk is empty
 						-- perform a single level check, every replacement must exist
 						if dat and not wstr.replace_lookup_istable(tag,d) then -- but cant check tables properly so skip them
-							string.gsub( dat , "{([%w%._%-]-)}" , function(a)
+							string.gsub( dat , "{([%w%.%_%-%:]-)}" , function(a)
 								if a:sub(1,1)=="-" then return "" end
 								if not wstr.replace_lookup(a,d) then dat=nil end -- clear if not found
 								return ""
