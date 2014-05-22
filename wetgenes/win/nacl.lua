@@ -278,6 +278,7 @@ nacl.info=core.info
 
 nacl.queue={}
 
+local mousenames={"left","middle","right"}
 local lastm
 nacl.input_event=function(...)
 --	print("NACL",...)
@@ -290,14 +291,14 @@ nacl.input_event=function(...)
 		if a[2]==0 then act=1 end -- down
 		if a[2]==1 then act=-1 end --up
 		
-		local k=0
-		if a[3]==0 then k=1 end -- left
+		local k=a[3]+1
 
 		m={
 			time=nacl.time(),
 			action=act,
 			class="mouse",
 			keycode=k,--ma.pointers[1].id,
+			keyname=mousenames[k],
 			x=a[4],
 			y=a[5],
 		}

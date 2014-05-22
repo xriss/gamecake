@@ -103,7 +103,16 @@ function wmaster.setup(widget,def)
 				master.press=false
 
 				if master.active and master.active==master.over then -- no click if we drag away from button
-					master.active:call_hook("click")
+				
+					if ups.button("mouse_left_clr")  then
+						master.active:call_hook("click",{keyname="mouse_left"}) -- its a left click
+					elseif ups.button("mouse_right_clr")  then
+						master.active:call_hook("click",{keyname="mouse_right"}) -- its a right click
+					elseif ups.button("mouse_middle_clr")  then
+						master.active:call_hook("click",{keyname="mouse_middle"}) -- its a right click
+					else
+						master.active:call_hook("click") -- probably not a mouse click
+					end
 				end
 				
 				master.active=nil

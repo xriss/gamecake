@@ -409,7 +409,10 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 			gl.EnableVertexAttribArray(p:attrib("a_color"))
 		end
 
-		gl.DrawArrays( it.array or gl.TRIANGLE_STRIP,0,datasize/pstride)
+		local cc=datasize/pstride
+		if cc>0 then
+			gl.DrawArrays( it.array or gl.TRIANGLE_STRIP,0,cc)
+		end
 	end
 
 	return it
