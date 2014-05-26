@@ -651,7 +651,9 @@ wstr.macro_replace_once = function(text,old_d,opts)
 	
 	local ret={}
 	
-	local separator = "{[%w%.%_%-%=%:]-}"
+	local validchars = "[%w%.%_%-%=%:]-"
+	local separator = "{"..validchars.."}"
+	local capture = "{("..validchars..")}"
 	
 	local parts = {}  
 	local start = 1
@@ -690,7 +692,7 @@ wstr.macro_replace_once = function(text,old_d,opts)
 					if fc=="-" then -- need to return nothing if chunk is empty
 						-- perform a single level check, every replacement must exist
 						if dat and not wstr.replace_lookup_istable(tag,d) then -- but cant check tables properly so skip them
-							string.gsub( dat , "{([%w%.%_%-%:]-)}" , function(a)
+							string.gsub( dat , capture , function(a)
 								if a:sub(1,1)=="-" then return "" end
 								if not wstr.replace_lookup(a,d) then dat=nil end -- clear if not found
 								return ""

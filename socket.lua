@@ -11,6 +11,28 @@ local string = require("string")
 local math = require("math")
 local socket = require("socket.core")
 
+--
+-- HACK: patch protect to allow yields (needed to sendmail on ngx)
+--
+    socket.protect = function (f) 
+        local rm = table.remove 
+        return function (...) 
+            local rets = {pcall(f, ...)} 
+            if rets[1] then 
+                rm(rets, 1); 
+                return unpack(rets) 
+            else 
+                local err = rets[2] 
+                if type(err) == "table" then 
+                    return nil, err[1] 
+                else 
+                    return error(err) 
+                end 
+            end 
+        end 
+    end 
+
+
 local _M = socket
 
 -----------------------------------------------------------------------------

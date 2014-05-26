@@ -280,7 +280,7 @@ function wmaster.setup(widget,def)
 	function master.keymove(vx,vy)
 		if vx~=0 or vy~=0 then -- move hover selection
 		
-			if master.over then
+			if master.over and master.over.hx and master.over.hy then
 				local over=master.over
 				local best={}
 				local ox=over.pxd+(over.hx/2)
