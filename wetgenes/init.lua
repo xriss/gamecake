@@ -11,28 +11,28 @@ local unpack=unpack
 local setfenv=setfenv
 
 --
--- Some generic and useful functions, pull them into locals like so:
+-- Some useful functions, pull them into locals like so:
 --[[
 
 local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_env")
 
 ]]--
 
---local _ENV=require("wetquire").remodule("wetgenes")
-module("wetgenes")
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 -----------------------------------------------------------------------------
 --
 -- export given names from this table as multiple returns
 -- can be used to pull function pointers out of a module
 --
--- local lookup=require("wetgenes.util"):export("lookup")
+-- local lookup=require("wetgenes"):export("lookup")
 --
 -- shove it into your module to have a similar effect
 --
 -----------------------------------------------------------------------------
 
-function export(env,...)
+function M.export(env,...)
 	local tab={}
 	for i,v in ipairs{...} do
 		tab[i]=env[v]
@@ -46,7 +46,7 @@ end
 -- so we never cause an error, just returns nil
 --
 -----------------------------------------------------------------------------
-function lookup(tab,...)
+function M.lookup(tab,...)
 	for i,v in ipairs{...} do
 		if type(tab)~="table" then return nil end
 		tab=tab[v]
@@ -77,7 +77,7 @@ end
 -- local _ENV=require("wetquire").remodule("name")
 --
 -----------------------------------------------------------------------------
-function set_env(env)
+function M.set_env(env)
 	if setfenv then setfenv(2,env) end
 	return env
 end

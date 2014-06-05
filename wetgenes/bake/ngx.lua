@@ -5,6 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local lfs=require("lfs")
 local wstr=require("wetgenes.string")
+local dprint=function(...) print(wstr.dump(...)) end
 
 module(...)
 
@@ -62,34 +63,18 @@ function build(tab)
 	end
 
 
--- now do the same with the modules datas, should auto find these
+-- now do the same with the modules datas
 
-	local modnames={
-		"admin",
-		"base",
-		"blog",
-		"chan",
-		"comic",
-		"console",
-		"data",
-		"dice",
-		"dimeload",
-		"dumid",
-		"forum",
-		"mirror",
-		"note",
-		"port",
-		"profile",
-		"score",
-		"shoop",
-		"thumbcache",
-		"todo",
-		"waka",
-		"hoe",
-		"shadow",
-		"paint",
-		"genes",
-	}
+	local modnames={}
+	for v in lfs.dir(bake.cd_root.."/mods") do
+		local a=lfs.attributes(bake.cd_root.."/mods/"..v)
+		if a.mode=="directory" then
+			if v:sub(1,1)~="." then
+				modnames[#modnames+1]=v
+			end
+		end
+	end
+
 	for i,n in ipairs(modnames) do
 		for i,s in ipairs{"art","css","js"} do
 			local opts={basedir=bake.cd_root.."/mods/"..n.."/"..s,dir="",filter=""}
