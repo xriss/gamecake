@@ -83,15 +83,17 @@ local htmls={}
 for n,v in pairs(chunks) do
 	if n~="__flags" then
 		local aa=wstr.split(n,".")
-		local name
-		for i=1,#aa-1 do
-			if not name then name=aa[i] else name=name.."."..aa[i] end
+		if aa[#aa]~="source" then
+			local name
+			for i=1,#aa do
+				if not name then name=aa[i] else name=name.."."..aa[i] end
+				htmls[name]=htmls[name] or {}
+				htmls[name][n]=v
+			end
+			name="index" -- everything always goes into index.html
 			htmls[name]=htmls[name] or {}
 			htmls[name][n]=v
 		end
-		name="index" -- everything always goes into index.html
-		htmls[name]=htmls[name] or {}
-		htmls[name][n]=v
 	end
 end
 
@@ -102,6 +104,9 @@ local function html(v)
 <html>
 	<head>
 		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
 	</head>
 	<body>
 ]]..(v)..[[
@@ -129,7 +134,7 @@ local function disqus(n)
 
 end
 
--- spit out single html chunks for simple linking to
+--[[ spit out single html chunks for simple linking to
 for n,v in pairs(chunks) do
 	if n~="__flags" then
 		if n:sub(-7)~=".source" then
@@ -137,6 +142,7 @@ for n,v in pairs(chunks) do
 		end
 	end
 end
+]]
 
 -- sit out pages containing many html chunks
 for n,v in pairs(htmls) do
@@ -147,18 +153,25 @@ for n,v in pairs(htmls) do
 		end
 	end
 	table.sort(t,function(a,b)
+	
+--		local ac=0 for n,v in pairs(htmls[ a[1] ]) do ac=ac+1 end
+--		local bc=0 for n,v in pairs(htmls[ b[1] ]) do bc=bc+1 end
+
 		local aa=wstr.split(a[1],".")
 		local bb=wstr.split(b[1],".")
 		local l=#aa > #bb and #aa or #bb
 		for i=1,#bb do
+			-- a shorter name always has higher priority
 			if not aa[i] then return true end
 			if not bb[i] then return false end
-
 			if aa[i+1] and not bb[i+1] then return false end
 			if bb[i+1] and not aa[i+1] then return true end
 
-			if aa[i]=="init" then return true end -- init is the main module documentation
-			if bb[i]=="init" then return false end
+			-- groups have lower priorities
+--			if ac==1 and bc~=1 then return true end
+--			if bc==1 and ac~=1 then return false end
+		
+			-- final string sort
 			if aa[i]<bb[i] then return true end
 			if aa[i]>bb[i] then return false end
 		end
@@ -167,9 +180,16 @@ for n,v in pairs(htmls) do
 	for n,s in pairs(t) do
 		t[n]="<h1><a href=\""..s[1]..".html\">"..s[1].."</a></h1>\n<div>"..markdown(s[2]).."</div>"
 	end
-	if #t>0 then
-		wbake.writefile( "html/"..n..".html",html(table.concat(t,"<hr/>\n")))
+	
+	local links={}
+	links[#links+1]="<h1><a href=\"index.html\">index</a></h1>"
+	local aa=wstr.split(n,".")
+	local name
+	for i=1,#aa-1 do
+		if not name then name=aa[i] else name=name.."."..aa[i] end
+		links[#links+1]="<h1><a href=\""..name..".html\">"..name.."</a></h1>"
 	end
+	wbake.writefile( "html/"..n..".html",html(table.concat(links)..table.concat(t,"<hr/>\n")..disqus(n)))
 end
 
 
