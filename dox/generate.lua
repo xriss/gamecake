@@ -78,7 +78,7 @@ end
 
 --dprint(chunks)
 
-local heirachy={}
+local htmls={}
 
 for n,v in pairs(chunks) do
 	if n~="__flags" then
@@ -86,9 +86,12 @@ for n,v in pairs(chunks) do
 		local name
 		for i=1,#aa-1 do
 			if not name then name=aa[i] else name=name.."."..aa[i] end
-			heirachy[name]=heirachy[name] or {}
-			heirachy[name][n]=v
+			htmls[name]=htmls[name] or {}
+			htmls[name][n]=v
 		end
+		name="index" -- everything always goes into inde.html
+		htmls[name]=htmls[name] or {}
+		htmls[name][n]=v
 	end
 end
 
@@ -108,7 +111,7 @@ local function html(v)
 end
 
 
-for n,v in pairs(heirachy) do
+for n,v in pairs(htmls) do
 	t={}
 	for n,s in pairs(v) do
 		if n:sub(-7)~=".source" then
@@ -118,8 +121,16 @@ for n,v in pairs(heirachy) do
 	table.sort(t,function(a,b)
 		local aa=wstr.split(a[1],".")
 		local bb=wstr.split(b[1],".")
+		local l=#aa > #bb and #aa or #bb
 		for i=1,#bb do
 			if not aa[i] then return true end
+			if not bb[i] then return false end
+
+			if aa[i+1] and not bb[i+1] then return false end
+			if bb[i+1] and not aa[i+1] then return true end
+
+			if aa[i]=="init" then return true end -- init is the main module documentation
+			if bb[i]=="init" then return false end
 			if aa[i]<bb[i] then return true end
 			if aa[i]>bb[i] then return false end
 		end
@@ -127,7 +138,7 @@ for n,v in pairs(heirachy) do
 	end)
 	for n,s in pairs(t) do
 --		t[n]="<div><h1>"..s[1].."</h1>\n"..markdown(s[2]).."</div>"
-		t[n]="<div>"..markdown(s[2]).."</div>"
+		t[n]="<h1>"..s[1].."</h1><div>"..markdown(s[2]).."</div>"
 	end
 	wbake.writefile( "html/"..n..".html",html(table.concat(t,"<hr/>\n")))
 end

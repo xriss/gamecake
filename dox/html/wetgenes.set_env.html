@@ -1,0 +1,27 @@
+<html>
+	<head>
+	</head>
+	<body>
+
+
+<pre><code>local _ENV=set_env(new_environment)
+</code></pre>
+
+<p>Since setfenv is going away in lua 5.2 here is a plan to future 
+proof code that wants to control its own environment</p>
+
+<p>Specifically this is for loading functions sabdboxed into a given 
+table, which we need to do from time to time.</p>
+
+<p>we set the environment of the code that called us only if setfenv 
+exists and we always return the new environment</p>
+
+<p>So the following incantation can be used to change the current environment and 
+it should work exactly the same in lua 5.1 or 5.2</p>
+
+<pre><code>local _ENV=set_env(new_environment)
+</code></pre>
+
+
+	</body>
+</html>

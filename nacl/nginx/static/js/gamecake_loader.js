@@ -10,6 +10,9 @@ gamecake_loader=function(opts)
 	opts.cakefile=opts.cakefile || "/game.cake"; // http location of cakefile
 
 	var gamecake={};
+	
+	gamecake.msg_hook=opts.msg_hook; // a function to handle msgs
+	gamecake.loaded_hook=opts.loaded_hook; // a function to call after everything has loaded
 
 // Indicate success when the NaCl module has loaded.
 	gamecake.loaded=function(event) {
@@ -74,7 +77,7 @@ gamecake_loader=function(opts)
 			var dat=s.substring(sn+1);
 //			console.log(msg);
 			var m=gamecake.str_to_msg(msg);
-			if(m.cmd=="print") // basic print command
+			if(m.cmd=="print") // basic print command (we cant do this from within nacl)
 			{
 				console.log(dat);
 			}
@@ -86,18 +89,28 @@ gamecake_loader=function(opts)
 				{
 					gamecake.progress_salt.hide();
 					gamecake.progress_cake.hide();
+					gamecake.progress_about.hide();
+					if( gamecake.loaded_hook )
+					{
+						gamecake.loaded_hook();
+					}
 				}
 			}
 			else
+			if(gamecake.msg_hook) // pass on
 			{
-				console.log(s);
+				gamecake.msg_hook(m,dat);
 			}
 		}
 	}
 
 
+	gamecake.post_message=function(s){
+		return gamecake.object.postMessage(s);
+	};
+	
 	gamecake.luasetup=function() {
-		gamecake.object.postMessage(
+		gamecake.post_message(
 			'cmd=lua\n'+
 			'local win=require("wetgenes.win")\n'+
 			'return win.\n'+
@@ -112,7 +125,7 @@ gamecake_loader=function(opts)
 
 		var update; update=function() {
 			requestAnimationFrame(update); // we need to always ask to be called again
-			gamecake.object.postMessage('cmd=lua\n return require("wetgenes.win").nacl_pulse() ');
+			gamecake.post_message('cmd=lua\n return require("wetgenes.win").nacl_pulse() ');
 		};
 
 		requestAnimationFrame(update); // start the updates
@@ -121,14 +134,39 @@ gamecake_loader=function(opts)
 // wait for page load
 $(function(){
 
-	gamecake.div=$(opts.div); // where to put stuff
+	var webgl_support=function()
+	{ 
+		try {
+			var canvas = document.createElement( 'canvas' ); 
+			return !! window.WebGLRenderingContext && ( canvas.getContext( 'webgl' ) ||
+			canvas.getContext( 'experimental-webgl' ) );
+		} catch( e ) { return false; }
+	};
 
-	gamecake.listener=$('<div style="width:100%;height:100%;"></div>'); // Main container of stuff
-	gamecake.progress_salt=$('<progress value="0" style="width:50%" title="Loading Salt"></progress>');
-	gamecake.progress_cake=$('<progress value="0" style="width:50%" title="Loading Cake"></progress>');
+	var warning="";
+	
+	if( navigator.mimeTypes['application/x-pnacl'] == undefined)
+	{
+		warning+='<br/>Looks like your browser does not support NaCl!<br/>Please use the latest <a href="https://www.google.com/chrome/browser/">Google Chrome</a>.<br/><br/>';
+	}
+	if(!webgl_support())
+	{
+		warning+='<br/>Something is wrong with WebGL on your browser!<br/>Visit <a href="http://get.webgl.org/">http://get.webgl.org/</a> for help.<br/><br/>';
+	}
+
+	var readme='<br/>Please wait, the first load may be a little bit slow.<br/><br/>';
+	if(warning!="") { readme=warning; }
+
+	gamecake.div=$(opts.div); // where to put stuff	
+
+	gamecake.listener=$('<div style="width:100%;height:100%;position:relative; background-color:#000;"></div>'); // Main container of stuff
+	gamecake.progress_salt=$('<progress value="0" style="width:50%;" title="Loading Salt"></progress>');
+	gamecake.progress_cake=$('<progress value="0" style="width:50%;" title="Loading Cake"></progress>');
+	gamecake.progress_about=$(
+		'<div style="font-family:sans-serif; font-size:2em; color:#fff; line-height:1.5em; text-align:center; width:66%; margin:auto">'+readme+'</div>');
 	gamecake.salt=$('<embed name="nacl_module" id="naclmod" src="'+opts.nmf+
-	'" type="application/x-pnacl" style=" width:100%; height:100%; position:relative; "/>');
-	gamecake.listener.append(gamecake.progress_salt,gamecake.progress_cake,gamecake.salt);
+	'" type="application/x-pnacl" style=" width:100%; height:100%; "/>');
+	gamecake.listener.append(gamecake.progress_salt,gamecake.progress_cake,gamecake.progress_about,gamecake.salt);
 
 	gamecake.div.empty();
 	gamecake.div.append(gamecake.listener);
@@ -138,6 +176,11 @@ $(function(){
 	gamecake.listener[0].addEventListener('load', gamecake.loaded,true);
 	gamecake.listener[0].addEventListener('message', gamecake.msg,true);
 	gamecake.listener[0].addEventListener('progress', gamecake.progress,true);
+	
+	if(warning!="") // hide nacl as it is not going to work.
+	{
+		gamecake.salt.hide();
+	}
 	
 });
 
