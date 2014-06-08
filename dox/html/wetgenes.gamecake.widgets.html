@@ -3,7 +3,51 @@
 		<link rel='stylesheet' href='dox.css' />
 	</head>
 	<body>
+<h1>wetgenes.gamecake.widgets</h1>
+<div>
 
 
-	</body>
+<pre><code>widgets=require("wetgenes.gamecake.widgets").bake(oven,widgets)
+</code></pre>
+
+
+<p>The widgets value returned will be the same table passed in or a new 
+one if you did not. It will be filled with functions/data bound to 
+the oven state which you must supply.</p>
+
+
+<p>A collection of widgets, rendered using gles2 code and controlled 
+using the mouse, keyboard or a joystick. EG click fire and move 
+left/right to adjust a slider value.</p>
+
+<p>This has undergone a number of rewrites as we try to simplify the 
+widget creation and layout process. Eventually we ended up with a 
+fixed size system of widget placement so every widget must have a 
+known size in advance, however we allow scaling to occur so for 
+instance building a 256x256 widget does not mean that it has to be 
+displayed at 256x256 it just means it will be square.</p>
+
+<p>The basic layout just lets you place these widgets in other widgets 
+as left to right lines. So as long as you get your sizes right you 
+can easily place things just using a list and without keeping track 
+of the current position.</p>
+
+<p>Other layout options are available, such as absolute positioning for 
+full control and we have simple custom skin versions of the buttons 
+as well rather than the built in skins.</p>
+
+<p>All value data is handled by data structures that contain ranges and 
+resolutions for data allowing the same data to be bound to multiple 
+display widgets. For instance the same data can be linked to the 
+position of a slider as well as the content of a text display. I 
+think the kids call this sort of thing an MVC pattern but that's a 
+terribly dull name.</p>
+
+<p>Swanky paint is probably the most advanced used of the widgets so far
+but I suspect we will be making a simple text editor in the near 
+future. Designed for advanced in game tweaking of text files.</p>
+
+
+
+</div>	</body>
 </html>
