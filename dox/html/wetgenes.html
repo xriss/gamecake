@@ -3,8 +3,11 @@
 	</head>
 	<body>
 
-<p><h1>wetgenes.init</h1><div></p>
 
+<h1>wetgenes.init</h1>
+
+
+<div>
 
 <pre><code>local wetgenes=require("wetgenes")
 </code></pre>
@@ -13,10 +16,9 @@
 be needed in all wetgenes.* modules.</p>
 
 
-
-<p></div><hr/>
-<h1>wetgenes.export</h1><div></p>
-
+</div><hr/>
+<h1>wetgenes.export</h1>
+<div>
 
 <pre><code>... = wetgenes.export(table,...)
 </code></pre>
@@ -24,21 +26,18 @@ be needed in all wetgenes.* modules.</p>
 <p>Export multiple names from this table as multiple returns, can be 
 used to pull functions out of this module and into locals like so</p>
 
-
-
 <pre><code>local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_env")
 </code></pre>
 
 <p>Or copy it into other modules to provide the same functionality.</p>
-
-
 
 <pre><code>M.lookup=require("wetgenes").lookup
 </code></pre>
 
 
 </div><hr/>
-<h1>wetgenes.lookup</h1><div>
+<h1>wetgenes.lookup</h1>
+<div>
 
 <pre><code>value = wetgenes.lookup(table,...)
 </code></pre>
@@ -47,22 +46,19 @@ used to pull functions out of this module and into locals like so</p>
 the lookup is nil so we never cause an error but just return nil. 
 This is intended to replace the following sort of code</p>
 
-
-
 <pre><code>a = b and b.c and b.c.d and b.c.d.e
 </code></pre>
 
 <p>To get e only if all of its parent bits exist and not to cause any 
 error if they do not. instead use</p>
 
-
-
 <pre><code>a = lookup(b,"c","d","e")
 </code></pre>
 
 
 </div><hr/>
-<h1>wetgenes.set_env</h1><div>
+<h1>wetgenes.set_env</h1>
+<div>
 
 <pre><code>local _ENV=set_env(new_environment)
 </code></pre>
@@ -70,44 +66,34 @@ error if they do not. instead use</p>
 <p>Since setfenv is going away in lua 5.2 here is a plan to future 
 proof code that wants to control its own environment</p>
 
-
-
 <p>Specifically this is for loading functions sabdboxed into a given 
 table, which we need to do from time to time.</p>
-
-
 
 <p>we set the environment of the code that called us only if setfenv 
 exists and we always return the new environment</p>
 
-
-
 <p>So the following incantation can be used to change the current environment and 
 it should work exactly the same in lua 5.1 or 5.2</p>
-
-
 
 <pre><code>local _ENV=set_env(new_environment)
 </code></pre>
 
 
 </div><hr/>
-<h1>wetgenes.gamecake.oven</h1><div>
+<h1>wetgenes.gamecake.oven</h1>
+<div>
 
 <pre><code>oven=require("wetgenes.gamecake.oven").bake(opts)
 </code></pre>
 
 <p>The oven module must be baked so only exposes a bake function.</p>
 
-
-
 <p>All the other functions are returned from within the bake function.</p>
 
 
-
-<p></div><hr/>
-<h1>wetgenes.gamecake.widgets</h1><div></p>
-
+</div><hr/>
+<h1>wetgenes.gamecake.widgets</h1>
+<div>
 
 
 <pre><code>widgets=require("wetgenes.gamecake.widgets").bake(oven,widgets)
@@ -119,13 +105,9 @@ one if you did not. It will be filled with functions/data bound to
 the oven state which you must supply.</p>
 
 
-
-
 <p>A collection of widgets, rendered using gles2 code and controlled 
 using the mouse, keyboard or a joystick. EG click fire and move 
 left/right to adjust a slider value.</p>
-
-
 
 <p>This has undergone a number of rewrites as we try to simplify the 
 widget creation and layout process. Eventually we ended up with a 
@@ -134,20 +116,14 @@ known size in advance, however we allow scaling to occur so for
 instance building a 256x256 widget does not mean that it has to be 
 displayed at 256x256 it just means it will be square.</p>
 
-
-
 <p>The basic layout just lets you place these widgets in other widgets 
 as left to right lines. So as long as you get your sizes right you 
 can easily place things just using a list and without keeping track 
 of the current position.</p>
 
-
-
 <p>Other layout options are available, such as absolute positioning for 
 full control and we have simple custom skin versions of the buttons 
 as well rather than the built in skins.</p>
-
-
 
 <p>All value data is handled by data structures that contain ranges and 
 resolutions for data allowing the same data to be bound to multiple 
@@ -156,18 +132,15 @@ position of a slider as well as the content of a text display. I
 think the kids call this sort of thing an MVC pattern but that's a 
 terribly dull name.</p>
 
-
-
 <p>Swanky paint is probably the most advanced used of the widgets so far
 but I suspect we will be making a simple text editor in the near 
 future. Designed for advanced in game tweaking of text files.</p>
 
 
 
-
-<p></div><hr/>
-<h1>wetgenes.gamecake.oven.bake</h1><div></p>
-
+</div><hr/>
+<h1>wetgenes.gamecake.oven.bake</h1>
+<div>
 
 
 <pre><code>oven=wetgenes.gamecake.oven.bake(opts)
@@ -176,28 +149,21 @@ future. Designed for advanced in game tweaking of text files.</p>
 <p>Bake creates an instance of a lua module bound to a state. Here we 
 are creating the main state that other modules will then bind to.</p>
 
-
-
 <p>We call each state an OVEN to fit into the gamecake naming scheme 
 then we bake a module in this oven to bind them to the common state.</p>
-
-
 
 <p>Think of it as a sub version of require, so require gets the global 
 pointer for a module and bake is used to get the a module bound to 
 an oven.</p>
-
-
 
 <p>By using this bound state we reduce the verbosity of connecting 
 modules and sharing state between them.</p>
 
 
 
-
-<p></div><hr/>
-<h1>wetgenes.plate.replace_lookup</h1><div></p>
-
+</div><hr/>
+<h1>wetgenes.plate.replace_lookup</h1>
+<div>
 
 <pre><code>value=wetgenes.plate.replace_lookup(name,data)
 </code></pre>
@@ -205,17 +171,14 @@ modules and sharing state between them.</p>
 <p>Calls "wetgenes.plate.table_lookup" then performs special formatting on 
 table returns.</p>
 
-
-
 <p>Always returns a string or nil, so number values will converted to a 
 string.</p>
 
 
 
-
-<p></div><hr/>
-<h1>wetgenes.plate.replace<em>lookup</em>istable</h1><div></p>
-
+</div><hr/>
+<h1>wetgenes.plate.replace_lookup_istable</h1>
+<div>
 
 <pre><code>bool=wetgenes.plate.replace_lookup_istable(name,data)
 </code></pre>
@@ -224,10 +187,9 @@ string.</p>
 
 
 
-
-<p></div><hr/>
-<h1>wetgenes.plate.table_lookup</h1><div></p>
-
+</div><hr/>
+<h1>wetgenes.plate.table_lookup</h1>
+<div>
 
 <pre><code>value=wetgenes.plate.table_lookup(name,data)
 </code></pre>
@@ -235,11 +197,7 @@ string.</p>
 <p>look up name inside data and return the value we found if we don't 
 find anything then we return nil</p>
 
-
-
 <p>name.name.name syntax may be used to reference tables within tables.</p>
-
-
 
 <p>A name that looks like a number may be converted into a number if it 
 doesnt exist as a string key, so "array.1" can be used to return the 
@@ -247,7 +205,7 @@ first item from an array.</p>
 
 
 
+</div>
 
-<p></div></p>
 	</body>
 </html>

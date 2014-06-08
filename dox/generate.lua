@@ -137,8 +137,7 @@ for n,v in pairs(htmls) do
 		return false
 	end)
 	for n,s in pairs(t) do
---		t[n]="<div><h1>"..s[1].."</h1>\n"..markdown(s[2]).."</div>"
-		t[n]="<h1>"..s[1].."</h1><div>"..markdown(s[2]).."</div>"
+		t[n]="<h1>"..s[1].."</h1>\n<div>"..markdown(s[2]).."</div>"
 	end
 	wbake.writefile( "html/"..n..".html",html(table.concat(t,"<hr/>\n")))
 end
@@ -146,7 +145,6 @@ end
 for n,v in pairs(chunks) do
 	if n~="__flags" then
 		if n:sub(-7)~=".source" then
---			wbake.writefile( "html/"..n..".txt",v)
 			wbake.writefile( "html/"..n..".html",html(v))
 		end
 	end
