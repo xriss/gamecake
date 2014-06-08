@@ -101,6 +101,7 @@ local function html(v)
 	return [[
 <html>
 	<head>
+		<link rel='stylesheet' href='dox.css' />
 	</head>
 	<body>
 ]]..markdown(v)..[[
@@ -151,6 +152,8 @@ for n,v in pairs(htmls) do
 	wbake.writefile( "html/"..n..".html",html(table.concat(t,"<hr/>\n")))
 end
 
+
+wbake.copyfile( "raw/dox.css","html/dox.css")
 
 
 --print( markdown( table.concat(chunks,"\n") ) )
