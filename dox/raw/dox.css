@@ -122,11 +122,12 @@ sup {
 * {
 	 -webkit-print-color-adjust: exact;
 }
-@media screen and (min-width: 800px) {
+@media screen {
    body {
-      width: 800px;
+      max-width: 800px;
       margin:10px auto;
    }
+	html {overflow-y: scroll;}
 }
 @media print {
 	 body,code,pre code,h1,h2,h3,h4,h5,h6 {

@@ -3,7 +3,25 @@
 		<link rel='stylesheet' href='dox.css' />
 	</head>
 	<body>
+<h1>wetgenes.lookup</h1>
+<div>
+
+<pre><code>value = wetgenes.lookup(table,...)
+</code></pre>
+
+<p>Safe recursive lookup within a table that returns nil if any part of 
+the lookup is nil so we never cause an error but just return nil. 
+This is intended to replace the following sort of code</p>
+
+<pre><code>a = b and b.c and b.c.d and b.c.d.e
+</code></pre>
+
+<p>To get e only if all of its parent bits exist and not to cause any 
+error if they do not. instead use</p>
+
+<pre><code>a = lookup(b,"c","d","e")
+</code></pre>
 
 
-	</body>
+</div>	</body>
 </html>
