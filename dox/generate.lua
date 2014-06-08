@@ -89,7 +89,7 @@ for n,v in pairs(chunks) do
 			htmls[name]=htmls[name] or {}
 			htmls[name][n]=v
 		end
-		name="index" -- everything always goes into inde.html
+		name="index" -- everything always goes into index.html
 		htmls[name]=htmls[name] or {}
 		htmls[name][n]=v
 	end
@@ -110,7 +110,16 @@ local function html(v)
 
 end
 
+-- spit out single html chunks for simple linking to
+for n,v in pairs(chunks) do
+	if n~="__flags" then
+		if n:sub(-7)~=".source" then
+			wbake.writefile( "html/"..n..".html",html(v))
+		end
+	end
+end
 
+-- sit out pages containing many html chunks
 for n,v in pairs(htmls) do
 	t={}
 	for n,s in pairs(v) do
@@ -142,13 +151,6 @@ for n,v in pairs(htmls) do
 	wbake.writefile( "html/"..n..".html",html(table.concat(t,"<hr/>\n")))
 end
 
-for n,v in pairs(chunks) do
-	if n~="__flags" then
-		if n:sub(-7)~=".source" then
-			wbake.writefile( "html/"..n..".html",html(v))
-		end
-	end
-end
 
 
 --print( markdown( table.concat(chunks,"\n") ) )
