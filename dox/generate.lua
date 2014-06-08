@@ -111,11 +111,28 @@ local function html(v)
 
 end
 
+local function disqus(n)
+
+	return [[
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = ']]..n..[[';
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+]]
+
+end
+
 -- spit out single html chunks for simple linking to
 for n,v in pairs(chunks) do
 	if n~="__flags" then
 		if n:sub(-7)~=".source" then
-			wbake.writefile( "html/"..n..".html",html("<h1>"..n.."</h1>\n<div>"..markdown(v).."</div>"))
+			wbake.writefile( "html/"..n..".html",html("<h1>"..n.."</h1>\n<div>"..markdown(v).."</div>"..disqus(n)))
 		end
 	end
 end
