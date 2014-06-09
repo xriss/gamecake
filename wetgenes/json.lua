@@ -3,10 +3,6 @@
 --         version 2011-02-04
 --         use encode to encode a table and decode to decode a json string
 --
--- other json encode/decode pure lua library seemed too slow
--- here is a fast and loose one lets see if it goes any faster :)
--- should be a direct replacement for JSON4Lua which is what I was using before
---
 -- find the latest version online here
 -- http://code.google.com/p/aelua/source/browse/trunk/aelua/lua/wetjson.lua
 --
@@ -32,22 +28,35 @@
 -- THE SOFTWARE.
 --
 
-local table=table
-local string=string
+-- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+-- grab some util functions
+local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_env")
 
-local print=print
-local type=type
-local ipairs=ipairs
-local pairs=pairs
-local tonumber=tonumber
-local tostring=tostring
-local math=math
-local error=error
+-- single line replacement for the module creation function
+local M={} ; package.loaded[(...)]=M ; M.module_name=(...) ; M.export=export
 
-module(...)
+local wjson=M
 
-null=function() return null end -- wetjson.null is a magick value to represent null
+--[[#wetgenes.json
+
+	local wjson=require("wetgenes.json")
+
+other json encode/decode using pure lua library seemed too slow, 
+here is a fast and loose one lets see if it goes any faster :) 
+should be a direct replacement for JSON4Lua which is what I was 
+using before I profiled where all the time was getting spent...
+
+I needed it to be pure json as I was running it on googles appengine so
+the lua was actually running in java, no C available.
+
+Anyhow I hope it is useful, in order to get it running faster I cut 
+across some corners so you may find some obscure problems.
+
+]]
+
+wjson.null=function() return wjson.null end -- wetjson.null is a magick value to represent null
 
 -----------------------------------------------------------------------------
 --
@@ -154,11 +163,19 @@ local function is_array(t)
 end
 
 -----------------------------------------------------------------------------
---
--- json string to table
---
+--[[#wetgenes.json.decode
+
+	json_table = wjson.decode(json_string,opts)
+
+Convert a json string into a lua table.
+
+Set opts.null to wetgenes.json.null (or indeed any othe value) if 
+you would like to have nulls in your results. By default nulls are 
+replaced with nil.
+
+]]
 -----------------------------------------------------------------------------
-function decode(s,opts)
+function wjson.decode(s,opts)
 opts=opts or {}
 
 local t
@@ -261,7 +278,7 @@ local t
 					val=l
 					if val=="true" then val=true
 					elseif val=="false" then val=false
-					elseif val=="null" then val=null
+					elseif val=="null" then val=opts.null -- set opts.null to wjson.null if you wish
 					else
 						val=tonumber(val) or val
 					end
@@ -283,11 +300,22 @@ end
 
 
 -----------------------------------------------------------------------------
---
--- table to json string
---
+--[[#wetgenes.json.encode
+
+	json_string = wjson.encode(json_table)
+
+Convert a lua table into a json string. Note it must be valid json, 
+primarily make sure that the table is either an array or a dictionary 
+but never both.
+
+Also some of the internal lua types will cause errors, eg functions 
+as these can not be converted into json.
+
+include nulls in the output by using wetgenes.json.null
+ 
+]]
 -----------------------------------------------------------------------------
-function encode(tab,opts)
+function wjson.encode(tab,opts)
 opts=opts or {}
 
 local out={}
@@ -316,7 +344,7 @@ local encode_tab
 		elseif t=="boolean" then
 			if it then return "true" else return "false" end
 		elseif t=="function" then
-			if it==null then return "null" end
+			if it==wjson.null then return "null" end
 		else
 			return encode_str(it)
 		end
