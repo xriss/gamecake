@@ -203,22 +203,23 @@ local t
 	local sb -- string buffer building for the use of
 	local sbend -- the string terminator
 	
-	function err(s)
+	local function err(s)
 		error(s.." ("..chash..")")
 	end
 	
-	function push(v)
+	local function push(v)
 		top=v
 		stack[#stack+1]=top
 	end
 	
-	function pop()
+	local function pop()
 		stack[#stack]=nil
 		top=stack[#stack]
 		if not top then err("too many close brackets") end
 	end
 	
-	function setval()
+	local val
+	local function setval()
 		if top.idx==nil then -- set idx not val
 			if type(val)=="table" then err("cannot use table as index") end
 			top.idx=val
@@ -327,7 +328,7 @@ local encode_str
 local encode_it
 local encode_tab
 
-	function err(s)
+	local function err(s)
 		error(s)
 	end
 	
