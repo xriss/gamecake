@@ -373,9 +373,9 @@ local cache_draw=nil
 			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
 
 
---			cache_draw=cache_begin()
---			sheets.batch_start()
---			font_cache_draw=font.cache_begin()
+			cache_draw=cache_begin()
+			sheets.batch_start()
+			font_cache_draw=font.cache_begin()
 		end
 
 		

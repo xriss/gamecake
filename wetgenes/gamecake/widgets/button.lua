@@ -29,9 +29,9 @@ function wbutton.setup(widget,def)
 	widget.class="button"
 	
 	widget.key=key
-	widget.mouse=mouse
-	widget.update=update
-	widget.draw=draw
+	widget.mouse=wbutton.mouse
+	widget.update=wbutton.update
+	widget.draw=wbutton.draw
 
 	widget.solid=true
 

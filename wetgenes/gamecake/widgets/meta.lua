@@ -307,10 +307,10 @@ function wmeta.setup(def)
 			end
 
 			for i,v in ipairs(widget) do -- children must be within parent bounds to catch clicks
-				meta.mouse(v,act,_x,_y,keyname)
-				if v.mouse then
-					v:mouse(act,_x,_y,keyname) -- maybe the widget need to do special mouse things (probably shouldnt)
-				end
+
+-- need to call this yourself in the overloaded widget if you want to bubble down?
+--				meta.mouse(v,act,_x,_y,keyname)
+				v:mouse(act,_x,_y,keyname) -- maybe the widget need to do special mouse things (probably shouldnt)
 			end
 
 		else
