@@ -22,6 +22,8 @@ local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
 function wtextedit.mouse(widget,act,x,y,key)
 
+	widget.meta.mouse(widget,act,x,y,key)
+
 --	local it=widget.string
 
 	if widget.master.over==widget or act==-1 then
@@ -260,7 +262,7 @@ function wtextedit.key(widget,ascii,key,act)
 	
 		widget.master.timehooks[widget]=os.time()+2
 
---		widget.text=widget.data:tostring()
+--		widget.text=widget.data.str
 		
 		widget:call_hook("changed")
 		widget:set_dirty()
@@ -278,8 +280,8 @@ function wtextedit.timedelay(widget)
 			local num=widget.data:tonumber(widget.data.str)
 			widget.data:value(num)
 		end
+		widget.text=widget.data:tostring(widget.data.num)
 	end
-	widget.text=widget.data:tostring()
 	widget:set_dirty()
 end
 
@@ -291,7 +293,7 @@ function wtextedit.unfocus(widget)
 		widget.data:value(num)
 	end
 
-	widget.text=widget.data:tostring()
+	widget.text=widget.data:tostring(widget.data.num)
 	widget:set_dirty()
 end
 

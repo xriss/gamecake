@@ -13,7 +13,7 @@ wdrag=wdrag or {}
 function wdrag.update(widget)
 
 	if widget.data then
-		widget.text=widget.data:tostring()
+		widget.text=widget.data.str
 	end
 
 	return widget.meta.update(widget)

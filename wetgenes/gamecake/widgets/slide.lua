@@ -37,9 +37,14 @@ function wslide.update(widget)
 			end
 	end
 	
+	local oldx=widget.drag.px
+	local oldy=widget.drag.py
 	widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
 	widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
 	widget:snap()
+	if oldx~=widget.drag.px or oldy~=widget.drag.py then
+		widget:build_m4()
+	end
 	
 	return widget.meta.update(widget)
 end

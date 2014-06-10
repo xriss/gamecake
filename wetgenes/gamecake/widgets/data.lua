@@ -30,7 +30,7 @@ wdata.data_value=function(dat,val,force)
 --print(dat,val,force,debug.traceback())
 	if dat.class=="number" then
 		if val then
-			val=dat:tonumber(val) -- auto convert from string 
+			if type(val)=="string" then val=dat:tonumber(val) end -- auto convert from string to number
 			if val*0~=val*0 then val=0 end -- remove inf or nan values?
 		end 
 		local old=dat.num
@@ -38,16 +38,23 @@ wdata.data_value=function(dat,val,force)
 			dat.num=val
 			if dat.min and dat.num<dat.min then dat.num=dat.min end
 			if dat.max and dat.num>dat.max then dat.num=dat.max end
-			if old~=dat.num or force then
-				dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
+			if not force and type(force)=="boolean" then -- set force to false to disable hook
+			else
+				if old~=dat.num or force then
+					dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
+				end
 			end
 		end
 		dat.str=dat:tostring(dat.num) -- cache on change
 		return dat.num
 	else
-		if (val and val~=dat.str ) or force  then -- change value
+		if not force and type(force)=="boolean" then -- set force to false to disable hook
 			dat.str=val
-			dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
+		else
+			if (val and val~=dat.str ) or force  then -- change value
+				dat.str=val
+				dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
+			end
 		end
 		return dat.str
 	end
@@ -70,20 +77,12 @@ end
 
 -- get a string from the number
 wdata.data_tostring=function(dat,num)
---	num=num or dat.num
-	if num then
-		return tostring(num)
-	end
-	return dat.str
+	return tostring(num)
 end
 
 -- get a number from the string
 wdata.data_tonumber=function(dat,str)
---	str=str or dat.str
-	if str then
-		return tonumber(str)
-	end
-	return dat.num
+	return tonumber(str)
 end
 
 -- how wide or tall should the handle be given the size of the parent?
