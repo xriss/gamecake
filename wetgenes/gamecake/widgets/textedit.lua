@@ -20,20 +20,23 @@ local cake=oven.cake
 local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
 
-function wtextedit.mouse(widget,act,x,y,key)
+function wtextedit.mouse(widget,act,_x,_y,key)
 
-	widget.meta.mouse(widget,act,x,y,key)
+	local x,y=widget:mousexy(_x,_y)
+
+--print(act,x,y,key)
+
+	widget.meta.mouse(widget,act,_x,_y,key)
 
 --	local it=widget.string
 
 	if widget.master.over==widget or act==-1 then
-	
+
 --		widget.master.set_focus(widget)
 		
 		local function get_idx()
 			local idx=0
-			local dx=x-((widget.pxd or 0)+(widget.text_x or 0))
---print(dx)
+			local dx=x-(widget.text_x or 0) --[[-((widget.pxd or 0)]]
 			if dx<0 then -- catch lessthan
 				idx=0
 			else
@@ -79,6 +82,9 @@ function wtextedit.mouse(widget,act,x,y,key)
 			widget.mouse_down=false
 		end
 	end
+
+--print("","OVER",widget.data.str_select,widget.data.str_idx,widget.data.str_select_click)
+
 
 end
 
