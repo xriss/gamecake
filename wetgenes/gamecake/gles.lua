@@ -238,6 +238,7 @@ void main()
 
 	]]
 }
+	gl.shaders.v_xyz_normal=gl.shaders.v_pos_normal
 
 	gl.shaders.v_pos_normal_tex={
 	source=gl.defines.shaderprefix..[[
@@ -265,6 +266,38 @@ void main()
 
 	]]
 }
+	gl.shaders.v_xyz_normal_tex=gl.shaders.v_pos_normal_tex
+
+	gl.shaders.v_pos_normal_tex_mat={
+	source=gl.defines.shaderprefix..[[
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+attribute vec3  a_vertex;
+attribute vec3  a_normal;
+attribute vec2  a_texcoord;
+attribute float a_matidx;
+
+varying vec4  v_color;
+varying vec3  v_normal;
+varying vec3  v_pos;
+varying vec2  v_texcoord;
+varying float v_matidx;
+ 
+void main()
+{
+    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+    v_normal = normalize( mat3( modelview ) * a_normal );
+	v_texcoord=a_texcoord;
+	v_color=color;
+	v_matidx=a_matidx;
+}
+
+	]]
+}
+	gl.shaders.v_xyz_normal_tex_mat=gl.shaders.v_pos_normal_tex_mat
 
 	gl.shaders.f_phong={
 	source=gl.defines.shaderprefix..[[
@@ -279,7 +312,58 @@ vec3 d=vec3(0,0,-1);
 void main(void)
 {
 	vec3 n=normalize(v_normal);
-	gl_FragColor= v_color*max( -n.z, 0.25 );
+	gl_FragColor= vec4(v_color.rgb*max( -n.z, 0.25 ),v_color.a);
+}
+
+	]]
+}
+
+	gl.shaders.f_phong_mat={
+	source=gl.defines.shaderprefix..[[
+
+varying vec4  v_color;
+varying vec3  v_normal;
+varying vec3  v_pos;
+varying float v_matidx;
+
+
+uniform vec4 colors[4]=vec4[4](
+	vec4(1.0,0.0,0.0,1.0),
+	vec4(0.0,1.0,0.0,1.0),
+	vec4(0.0,0.0,1.0,1.0),
+	vec4(1.0,1.0,0.0,1.0)
+);
+
+vec3 d=vec3(0,0,1);
+
+void main(void)
+{
+	vec3 n=normalize(v_normal);
+
+	int matidx=int(v_matidx);
+	vec4 c=colors[matidx];
+	
+	gl_FragColor= vec4(c.rgb*max( n.z, 0.25 ),c.a);
+}
+
+	]]
+}
+
+	gl.shaders.v_xyz={
+	source=gl.defines.shaderprefix..[[
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+attribute vec3 a_vertex;
+
+varying vec4  v_color;
+ 
+void main()
+{
+    gl_Position = projection * modelview * vec4(a_vertex , 1.0);
+	v_color=color;
 }
 
 	]]
@@ -330,7 +414,21 @@ void main(void)
 		fshaders={"f_color_discard"},
 	}
 
--- we have mostly squirted extra stuff into oven.gl
+	gl.programs.xyz={
+		vshaders={"v_xyz"},
+		fshaders={"f_color"},
+	}
+	gl.programs.xyz_normal={
+		vshaders={"v_xyz_normal"},
+		fshaders={"f_phong"},
+	}	
+
+	gl.programs.xyz_normal_mat={
+		vshaders={"v_xyz_normal_tex_mat"},
+		fshaders={"f_phong_mat"},
+	}	
+
+	-- we have mostly squirted extra stuff into oven.gl
 
 	return gles
 

@@ -296,6 +296,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	local pnrm
 	local ptex
 	local pcolor
+	local pmat
 	local p
 	local progname=it.progname
 	local fmt=it.fmt
@@ -318,6 +319,15 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		pstride=32
 		pnrm=12
 		ptex=24
+	
+	elseif fmt=="xyznrmuvm" then -- xyz and normal and texture and  material id
+
+		progname = progname or "pos_normal_tex_mat"
+
+		pstride=36
+		pnrm=12
+		ptex=24
+		pmat=32
 	
 	elseif fmt=="xyzuv" then -- xyz and texture
 
@@ -374,7 +384,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	end
 
 
-	it.draw=function()
+	it.draw=function(cb)
 	
 		local p=gl.program(progname)
 		gl.UseProgram( p[0] )
@@ -408,6 +418,13 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 			gl.VertexAttribPointer(p:attrib("a_color"),4,gl.FLOAT,gl.FALSE,pstride,pcolor)
 			gl.EnableVertexAttribArray(p:attrib("a_color"))
 		end
+
+		if pmat then
+			gl.VertexAttribPointer(p:attrib("a_matidx"),1,gl.FLOAT,gl.FALSE,pstride,pmat)
+			gl.EnableVertexAttribArray(p:attrib("a_matidx"))
+		end
+		
+		if cb then cb(p) end -- callback to fill in more uniforms before drawing
 
 		local cc=datasize/pstride
 		if cc>0 then

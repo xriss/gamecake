@@ -61,19 +61,20 @@ M.bake=function(oven,geom)
 
 					t[#t+1]=v[7] or 0
 					t[#t+1]=v[8] or 0
+					t[#t+1]=(p.mat or 1)-1
 
 					f=f+1
 				end
 			end
-			it.predrawn=flat.tristrip_predraw({fmt="xyznrmuv",data=t,progname=progname,vb=true})
+			it.predrawn=flat.tristrip_predraw({fmt="xyznrmuvm",data=t,progname=progname,vb=true})
 		end
 		
 	end
 
 	-- draw the geom (upload first, mkay)
-	geom.draw=function(it,progname)
+	geom.draw=function(it,progname,cb)
 		geom.predraw(it,progname)
-		it.predrawn.draw()
+		it.predrawn.draw(cb)
 	end	
 	
 	-- build the edges
@@ -173,6 +174,40 @@ M.bake=function(oven,geom)
 		end
 		for i=1,#n do
 			p[i]=n[i]
+		end
+
+	end
+
+	geom.build_normals=function(it)
+
+-- reset normals
+		for iv,vv in ipairs(it.verts) do
+			vv[4]=0
+			vv[5]=0
+			vv[6]=0
+			vv.count=0
+		end
+		
+-- add each face to normals
+		for ip,vp in ipairs(it.polys) do
+			local n=geom.normalize( geom.get_poly_normal(it,vp) )
+			for i=1,#vp do
+				local v=it.verts[ vp[i] ]
+				v[4]=v[4]+n[1]
+				v[5]=v[5]+n[2]
+				v[6]=v[6]+n[3]
+				v.count=v.count+1
+			end
+		end
+
+-- normalize the normals and remove count
+		for iv,vv in ipairs(it.verts) do
+			if vv.count>0 then
+				vv[4]=vv[4]/vv.count
+				vv[5]=vv[5]/vv.count
+				vv[6]=vv[6]/vv.count
+			end
+			vv.count=nil
 		end
 
 	end

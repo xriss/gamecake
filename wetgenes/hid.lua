@@ -7,7 +7,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local hid={}
 
-local core=require("wetgenes.hid.core")
+local core={}--require("wetgenes.hid.core")
 
 for n,f in pairs(core) do hid[n]=f end
 
