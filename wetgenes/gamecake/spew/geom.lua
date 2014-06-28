@@ -17,6 +17,7 @@ M.bake=function(oven,geom)
 	geom=geom or {}
 	geom.modname=M.modname
 
+	local gl=oven.gl
 	local cake=oven.cake
 	local canvas=cake.canvas
 	local font=canvas.font
@@ -66,7 +67,7 @@ M.bake=function(oven,geom)
 					f=f+1
 				end
 			end
-			it.predrawn=flat.tristrip_predraw({fmt="xyznrmuvm",data=t,progname=progname,vb=true})
+			it.predrawn=flat.array_predraw({fmt="xyznrmuvm",data=t,progname=progname,array=gl.TRIANGLE_STRIP,vb=true})
 		end
 		
 	end
@@ -77,6 +78,70 @@ M.bake=function(oven,geom)
 		it.predrawn.draw(cb)
 	end	
 	
+	-- allocate and upload the geom to opengl buffers
+	geom.predraw_lines=function(it,progname)
+
+		if not it.predrawn_lines then
+
+			local t={}
+			local f=1
+			for i,p in ipairs(it.lines) do
+				for i=1,2 do
+					local idx=p[i]
+					local v=it.verts[idx]
+					t[#t+1]=v[1]
+					t[#t+1]=v[2]
+					t[#t+1]=v[3]
+
+					t[#t+1]=v[4] or 0
+					t[#t+1]=v[5] or 0
+					t[#t+1]=v[6] or 0
+
+					t[#t+1]=v[7] or 0
+					t[#t+1]=v[8] or 0
+					t[#t+1]=(p.mat or 1)-1
+
+					f=f+1
+				end
+			end
+			it.predrawn_lines=flat.array_predraw({fmt="xyznrmuvm",data=t,progname=progname,array=gl.LINES,vb=true})
+		end
+		
+	end
+
+	-- draw the geom (upload first, mkay)
+	geom.draw_lines=function(it,progname,cb)
+		geom.predraw_lines(it,progname)
+		it.predrawn_lines.draw(cb)
+	end	
+
+	-- build lines from polys
+	geom.build_lines=function(it)
+
+		local ld={}
+		local addline
+		addline=function(l1,l2)
+			if l1>l2 then return addline(l2,l1) end -- force low -> high
+			if not ld[l1] then ld[l1]={} end
+			ld[l1][l2]=true -- merge all lines
+		end
+		
+		for i,p in ipairs(it.polys) do -- each poly
+			local hp=#p
+			for ip,vp in ipairs(p) do -- each line
+				addline(vp,p[(ip%hp)+1])
+			end
+		end
+
+		local lines={} -- pull the lines out of the merged tables
+		it.lines=lines
+		for l1,v in pairs(ld) do
+			for l2,b in pairs(v) do
+				lines[#lines+1]={l1,l2}
+			end
+		end
+	end
+
 	-- build the edges
 	geom.build_edges=function(it)
 		local es={}
@@ -120,9 +185,9 @@ M.bake=function(oven,geom)
 		
 		-- face normal
 		local vn={}
-		vn[1]=va[2]*vb[3] - va[3]*vb[2]
-		vn[2]=va[3]*vb[1] - va[1]*vb[3]
-		vn[3]=va[1]*vb[2] - va[2]*vb[1]
+		vn[1]=va[3]*vb[2] - va[2]*vb[3]
+		vn[2]=va[1]*vb[3] - va[3]*vb[1]
+		vn[3]=va[2]*vb[1] - va[1]*vb[2]
 		
 		return vn
 	end

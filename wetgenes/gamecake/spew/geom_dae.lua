@@ -193,15 +193,22 @@ print("loaded ",#s,"bytes from "..opts.filename)
 					end
 					do_sids(m)
 					
-					mat.diffuse=scan_nums(sids["diffuse"][1])
-					mat.specular=scan_nums(sids["specular"][1])
-					mat.shininess=scan_nums(sids["shininess"][1])
+					mat.diffuse=  sids["diffuse"]   and scan_nums(sids["diffuse"][1])   or {1,1,1,1}
+					mat.specular= sids["specular"]  and scan_nums(sids["specular"][1])  or {0,0,0,1}
+					mat.shininess=sids["shininess"] and scan_nums(sids["shininess"][1]) or {0,0,0,1}
+					
+					mat.diffuse[4]=1
+					
+					mat.idx=idx
 
+--dprint(mat)
 
 					it.mats[idx]=mat
 				end
 				return idx
 			end
+			
+			local need_normals=false
 
 			for ips,ps in ipairs(polys) do
 			
@@ -213,22 +220,29 @@ print("loaded ",#s,"bytes from "..opts.filename)
 					for i=1,pc do -- each vertex 1tri or 2tri (quad)
 						
 						local inp=ps.inputs["VERTEX"]
-						local xyz=ps.p[ off+(ps.stride*(i-1))+inp.offset ]
-						local xyzs=inp.source
-
+						local xyz,xyzs
+						if inp then
+							xyz=ps.p[ off+(ps.stride*(i-1))+inp.offset ]
+							xyzs=inp.source
+						end
+						
 						local inp=ps.inputs["NORMAL"]
-						local nrm=ps.p[ off+(ps.stride*(i-1))+inp.offset ]
-						local nrms=inp.source
+						local nrm,nrms
+						if inp then
+							nrm=ps.p[ off+(ps.stride*(i-1))+inp.offset ]
+							nrms=inp.source
+						else
+							need_normals=true
+						end
 
 						local idx=get_vertex_idx(xyz,nrm)
-
 						it.verts[idx]=	{
-											xyzs.data[ (xyz*xyzs.stride) +1 ] ,
-											xyzs.data[ (xyz*xyzs.stride) +2 ] ,
-											xyzs.data[ (xyz*xyzs.stride) +3 ] ,
-											nrms.data[ (nrm*nrms.stride) +1 ] ,
-											nrms.data[ (nrm*nrms.stride) +2 ] ,
-											nrms.data[ (nrm*nrms.stride) +3 ] ,
+											xyzs and xyzs.data[ (xyz*xyzs.stride) +1 ] or 0,
+											xyzs and xyzs.data[ (xyz*xyzs.stride) +2 ] or 0,
+											xyzs and xyzs.data[ (xyz*xyzs.stride) +3 ] or 0,
+											nrms and nrms.data[ (nrm*nrms.stride) +1 ] or 0,
+											nrms and nrms.data[ (nrm*nrms.stride) +2 ] or 0,
+											nrms and nrms.data[ (nrm*nrms.stride) +3 ] or 0,
 											0,0
 										}
 						poly[#poly+1]=idx
@@ -243,8 +257,10 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			end
 			
 --			dprint(it.verts)
---			geom.build_normals(it)
-
+			if need_normals then
+				geom.build_normals(it)
+			end
+			
 		end
 	end
 

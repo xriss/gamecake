@@ -13,6 +13,10 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wmeta)
 wmeta=wmeta or {}
 
+local cake=oven.cake
+local canvas=cake.canvas
+local font=canvas.font
+
 --
 -- add meta functions
 --
@@ -33,6 +37,8 @@ function wmeta.setup(def)
 		
 		if widget.class=="fill" or widget.class=="pan" or widget.class=="drag" then
 			meta.layout_fill(widget)
+		elseif widget.class=="menu" then
+			meta.layout_menu(widget)
 		else
 			meta.layout_base(widget)
 		end
@@ -170,6 +176,57 @@ function wmeta.setup(def)
 		end
 	end
 
+-- this is a fixed layout that works kind of like text
+-- we do not adjust the hx,hy size of sub widgets
+-- we just place them left to right top to bottom
+-- finally we resize this widget to fit its content
+	function meta.layout_menu(widget)
+		
+		local py=0
+		local hx=0
+		for i,v in ipairs(widget) do
+		
+			v.hx=0
+			v.hy=0
+			
+			if v[1] then -- we have sub widgets, assume layout will generate a size
+				v:layout()
+			else -- use text size
+				if v.text then
+					local f=v:bubble("font") or 1
+					v.hy=v:bubble("text_size") or 16
+					font.set(cake.fonts.get(f))
+					font.set_size(v.hy,0)
+					v.hx=font.width(v.text)
+					
+					v.hy=v.hy+8+8
+					v.hx=v.hx+8
+				end
+			end
+			
+			v.px=0
+			v.py=py
+			
+			py=py+v.hy
+			widget.hy=py
+			
+			if v.hx>hx then hx=v.hx end -- widest
+
+
+			v.pxd=widget.pxd+v.px -- absolute position
+			v.pyd=widget.pyd+v.py	
+		end
+		
+		widget.hx=hx
+
+		for i,v in ipairs(widget) do -- set all to widest
+			v.hx=hx
+		end
+
+		for i,v in ipairs(widget) do -- descend
+			v:layout()
+		end
+	end
 
 end
 

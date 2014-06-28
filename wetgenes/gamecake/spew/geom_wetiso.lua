@@ -164,7 +164,7 @@ void main(void)
 	}
 
 	vec3 n=normalize(v_normal);
-	gl_FragColor= tc + (v_color*max( -n.z, 0.25 ))*(1.0-tc.a) ;
+	gl_FragColor= tc + (v_color*max( n.z, 0.25 ))*(1.0-tc.a) ;
 	gl_FragColor.a=1.0;
 }
 

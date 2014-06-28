@@ -306,13 +306,10 @@ varying vec4  v_color;
 varying vec3  v_normal;
 varying vec3  v_pos;
 
-
-vec3 d=vec3(0,0,-1);
-
 void main(void)
 {
 	vec3 n=normalize(v_normal);
-	gl_FragColor= vec4(v_color.rgb*max( -n.z, 0.25 ),v_color.a);
+	gl_FragColor= vec4(v_color.rgb*max( n.z, 0.25 ),v_color.a);
 }
 
 	]]
@@ -327,12 +324,13 @@ varying vec3  v_pos;
 varying float v_matidx;
 
 
-uniform vec4 colors[4]=vec4[4](
+uniform vec4 colors[4];
+/*=vec4[4](
 	vec4(1.0,0.0,0.0,1.0),
 	vec4(0.0,1.0,0.0,1.0),
 	vec4(0.0,0.0,1.0,1.0),
 	vec4(1.0,1.0,0.0,1.0)
-);
+);*/
 
 vec3 d=vec3(0,0,1);
 
