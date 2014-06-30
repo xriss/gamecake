@@ -88,11 +88,15 @@ function wmaster.setup(widget,def)
 						local rx,ry=master.over.parent:mousexy(axis.mx,axis.my)
 						master.active_x=rx-master.over.px--widget.pxd
 						master.active_y=ry-master.over.py--widget.pyd
+						
+						master.active:call_hook("active") -- an active widget is about to click (button down)
 					end
 
 					if master.active and master.active.can_focus then
 						master.set_focus(master.active)
 					end
+
+					master.over:set_dirty()
 
 				end
 
@@ -102,17 +106,20 @@ function wmaster.setup(widget,def)
 
 				master.press=false
 
-				if master.active and master.active==master.over then -- no click if we drag away from button
+				if master.over --[[ and master.active==master.over ]] then -- no click if we drag away from button
 				
 					if ups.button("mouse_left_clr")  then
-						master.active:call_hook("click",{keyname="mouse_left"}) -- its a left click
+						master.over:call_hook("click",{keyname="mouse_left"}) -- its a left click
 					elseif ups.button("mouse_right_clr")  then
-						master.active:call_hook("click",{keyname="mouse_right"}) -- its a right click
+						master.over:call_hook("click",{keyname="mouse_right"}) -- its a right click
 					elseif ups.button("mouse_middle_clr")  then
-						master.active:call_hook("click",{keyname="mouse_middle"}) -- its a right click
+						master.over:call_hook("click",{keyname="mouse_middle"}) -- its a right click
 					else
-						master.active:call_hook("click") -- probably not a mouse click
+						master.over:call_hook("click") -- probably not a mouse click
 					end
+					
+					master.over:set_dirty()
+					
 				end
 				
 				master.active=nil
@@ -289,7 +296,7 @@ function wmaster.setup(widget,def)
 --print("over",ox,oy)
 
 				master:call_descendents(function(w)
-					if w.solid and w.hooks then
+					if w.solid and w.hooks and not w.hidden then
 						local wx=w.pxd+(w.hx/2)
 						local wy=w.pyd+(w.hy/2)
 						local dx=wx-ox
@@ -325,7 +332,7 @@ function wmaster.setup(widget,def)
 			if not master.over then
 				master:call_descendents(function(v)
 					if not master.over then
-						if v.solid and v.hooks then
+						if v.solid and v.hooks and not v.hidden then
 							master.over=v
 							v:set_dirty()
 							master.over:call_hook("over")

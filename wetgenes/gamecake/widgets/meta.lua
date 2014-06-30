@@ -26,6 +26,8 @@ wmeta.classes={
 	["drag"]=oven.rebake("wetgenes.gamecake.widgets.drag"),
 	["text"]=oven.rebake("wetgenes.gamecake.widgets.text"),
 	["textedit"]=oven.rebake("wetgenes.gamecake.widgets.textedit"),
+	["menu"]=oven.rebake("wetgenes.gamecake.widgets.menu"),
+	["menubar"]=oven.rebake("wetgenes.gamecake.widgets.menubar"),
 
 --classes built out of the base classes
 
@@ -57,8 +59,8 @@ function wmeta.setup(def)
 	end
 
 	function meta.call_hook(widget,hook,dat)
-		if type(widget[hook])=="function" then -- the widget wants this hook
-			if widget[hook](widget,dat) then return end -- and it can eat the event
+		if type(widget[hook])=="function" then -- the widget class wants this hook
+			if widget[hook](widget,dat) then return end -- and it can eat the event if it returns true
 		end
 		local hooks=widget.hooks or widget.master.hooks
 		local type_hooks=type(hooks)
@@ -292,6 +294,14 @@ function wmeta.setup(def)
 		return v4[1],v4[2]
 	end
 	
+	function meta.get_master_xy(w,x,y)
+		local m=tardis.m4.new()
+		w.m4:inverse(m)
+		local v=tardis.v4.new(x or 0,y or 0,0,1)
+		m:product(v)
+		return v[1],v[2]
+	end
+	
 	function meta.mouse(widget,act,_x,_y,keyname)
 		
 		local x,y=widget:mousexy(_x,_y)
@@ -301,7 +311,7 @@ function wmeta.setup(def)
 		if widget==widget.master or ( tx>=0 and tx<widget.hx and ty>=0 and ty<widget.hy ) then
 
 			if widget.solid then
-				if (not widget.master.dragging()) or widget.master.active==widget then
+				if (not widget.master.dragging()) --[[or widget.master.active==widget]] then
 					widget.master.over=widget
 				end
 			end
@@ -310,12 +320,12 @@ function wmeta.setup(def)
 
 -- need to call this yourself in the overloaded widget if you want to bubble down?
 --				meta.mouse(v,act,_x,_y,keyname)
-				v:mouse(act,_x,_y,keyname) -- maybe the widget need to do special mouse things (probably shouldnt)
+				if not v.hidden then v:mouse(act,_x,_y,keyname) end -- maybe the widget need to do special mouse things (probably shouldnt)
 			end
 
 		else
 		
-			if (not widget.master.dragging()) and widget.master.active==widget then
+			if (not widget.master.dragging()) and widget.master.over==widget then
 				widget.master.over=nil
 			end
 
@@ -345,7 +355,7 @@ function wmeta.setup(def)
 		end
 	
 		for i,v in ipairs(widget) do
-			v:update()
+			if not v.hidden then v:update() end -- hidden widgets are ignored
 		end
 	end
 

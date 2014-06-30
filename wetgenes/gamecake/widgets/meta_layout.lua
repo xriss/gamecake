@@ -39,8 +39,10 @@ function wmeta.setup(def)
 			meta.layout_fill(widget)
 		elseif widget.class=="menu" then
 			meta.layout_menu(widget)
+		elseif widget.class=="menubar" then
+			meta.layout_menubar(widget)
 		else
-			meta.layout_base(widget)
+					meta.layout_base(widget)
 		end
 	end
 
@@ -109,7 +111,7 @@ function wmeta.setup(def)
 			
 		end
 		for i,v in ipairs(widget) do
-			v:layout()
+			if not v.hidden then v:layout() end
 		end
 	end
 
@@ -145,17 +147,18 @@ function wmeta.setup(def)
 		if #widget>0 then
 		
 			for i,w in ipairs(widget) do
-			
-				if hx+w.hx>widget.hx then
-					if hx==0 then -- need one item per line so add it anyway
-						addone(w)
-						endofline()
-					else -- skip this one, push it onto nextline
-						endofline()
+				if not w.hidden then
+					if hx+w.hx>widget.hx then
+						if hx==0 then -- need one item per line so add it anyway
+							addone(w)
+							endofline()
+						else -- skip this one, push it onto nextline
+							endofline()
+							addone(w)
+						end
+					else -- it fits so just add
 						addone(w)
 					end
-				else -- it fits so just add
-					addone(w)
 				end
 			end
 
@@ -172,49 +175,48 @@ function wmeta.setup(def)
 
 -- layout sub sub widgets	
 		for i,v in ipairs(widget) do
-			v:layout()
+			if not v.hidden then v:layout() end
 		end
 	end
 
--- this is a fixed layout that works kind of like text
--- we do not adjust the hx,hy size of sub widgets
--- we just place them left to right top to bottom
--- finally we resize this widget to fit its content
+-- auto resize to text contents vertically
 	function meta.layout_menu(widget)
 		
 		local py=0
 		local hx=0
 		for i,v in ipairs(widget) do
-		
-			v.hx=0
-			v.hy=0
+			if not v.hidden then
 			
-			if v[1] then -- we have sub widgets, assume layout will generate a size
-				v:layout()
-			else -- use text size
-				if v.text then
-					local f=v:bubble("font") or 1
-					v.hy=v:bubble("text_size") or 16
-					font.set(cake.fonts.get(f))
-					font.set_size(v.hy,0)
-					v.hx=font.width(v.text)
-					
-					v.hy=v.hy+8+8
-					v.hx=v.hx+8
+				v.hx=0
+				v.hy=0
+				
+				if v[1] then -- we have sub widgets, assume layout will generate a size
+					v:layout()
+				else -- use text size
+					if v.text then
+						local f=v:bubble("font") or 1
+						v.hy=v:bubble("text_size") or 16
+						font.set(cake.fonts.get(f))
+						font.set_size(v.hy,0)
+						v.hx=font.width(v.text)
+						
+						v.hy=v.hy+8+8
+						v.hx=v.hx+8
+					end
 				end
+				
+				v.px=0
+				v.py=py
+				
+				py=py+v.hy
+				widget.hy=py
+				
+				if v.hx>hx then hx=v.hx end -- widest
+
+
+				v.pxd=widget.pxd+v.px -- absolute position
+				v.pyd=widget.pyd+v.py	
 			end
-			
-			v.px=0
-			v.py=py
-			
-			py=py+v.hy
-			widget.hy=py
-			
-			if v.hx>hx then hx=v.hx end -- widest
-
-
-			v.pxd=widget.pxd+v.px -- absolute position
-			v.pyd=widget.pyd+v.py	
 		end
 		
 		widget.hx=hx
@@ -224,7 +226,57 @@ function wmeta.setup(def)
 		end
 
 		for i,v in ipairs(widget) do -- descend
-			v:layout()
+			if not v.hidden then v:layout() end
+		end
+	end
+	
+-- auto resize to text contents horizontally
+	function meta.layout_menubar(widget)
+		
+		local px=0
+		local hy=0
+		for i,v in ipairs(widget) do
+			if not v.hidden then
+			
+				v.hx=0
+				v.hy=0
+				
+				if v[1] then -- we have sub widgets, assume layout will generate a size
+					v:layout()
+				else -- use text size
+					if v.text then
+						local f=v:bubble("font") or 1
+						v.hy=v:bubble("text_size") or 16
+						font.set(cake.fonts.get(f))
+						font.set_size(v.hy,0)
+						v.hx=font.width(v.text)
+						
+						v.hy=v.hy+8+8
+						v.hx=v.hx+8
+					end
+				end
+				
+				v.px=px
+				v.py=0
+				
+				px=px+v.hx
+--				widget.hx=px
+				
+				if v.hy>hy then hy=v.hy end -- tallest
+
+				v.pxd=widget.pxd+v.px -- absolute position
+				v.pyd=widget.pyd+v.py
+			end
+		end
+		
+--		widget.hy=hy
+
+		for i,v in ipairs(widget) do -- set all to tallest
+			v.hy=hy
+		end
+
+		for i,v in ipairs(widget) do -- descend
+			if not v.hidden then v:layout() end
 		end
 	end
 

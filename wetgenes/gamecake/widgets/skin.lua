@@ -387,7 +387,7 @@ local cache_draw=nil
 
 		for i,v in ipairs(widget) do -- iterate on children
 			if not v.fbo or not v.dirty then -- terminate recursion at dirty fbo
-				v:draw()
+				if not v.hidden then v:draw() end
 			end
 		end		
 
@@ -571,7 +571,7 @@ end
 			br[2]=br[2]*br[4]
 			br[3]=br[3]*br[4]
 			
-			if buttdown then -- flip highlight
+			if buttdown and style~="flat" then -- flip highlight on button press for builtin style
 				tl,br=br,tl
 				txp=1
 				typ=1
