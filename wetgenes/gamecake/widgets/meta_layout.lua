@@ -200,8 +200,8 @@ function wmeta.setup(def)
 						font.set_size(v.hy,0)
 						v.hx=font.width(v.text)
 						
-						v.hy=v.hy+8+8
-						v.hx=v.hx+8
+						v.hx=v.hx+v.hy
+						v.hy=v.hy+v.hy
 					end
 				end
 				
@@ -251,8 +251,8 @@ function wmeta.setup(def)
 						font.set_size(v.hy,0)
 						v.hx=font.width(v.text)
 						
-						v.hy=v.hy+8+8
-						v.hx=v.hx+8
+						v.hx=v.hx+v.hy
+						v.hy=widget.hy -- use set hight from parent
 					end
 				end
 				
