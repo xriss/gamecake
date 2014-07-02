@@ -9,14 +9,14 @@
 <h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.json.html">wetgenes.json</a></h1><h1><a href="wetgenes.json.decode.html">wetgenes.json.decode</a></h1>
 <div>
 
-<pre><code>json_table = wjson.decode(json_string)
+<pre><code>json_table = wjson.decode(json_string,opts)
 </code></pre>
 
 <p>Convert a json string into a lua table.</p>
 
-<p>wetgenes.json.null is used to represent any nulls in the json, 
-either test for it explicitly or check its type() which will return 
-"function"</p>
+<p>Set opts.null to wetgenes.json.null (or indeed any othe value) if 
+you would like to have nulls in your results. By default nulls are 
+replaced with nil.</p>
 
 
 </div><div id="disqus_thread"></div>
