@@ -27,6 +27,8 @@ local opts={
 
 opts.start=function(oven,demo)
 
+local layout=oven.cake.layouts.create{}
+
 	demo.loads=function()
 
 		oven.cake.fonts.loads({1}) -- load 1st builtin font, a basic 8x8 font
@@ -34,6 +36,7 @@ opts.start=function(oven,demo)
 	end
 			
 	demo.setup=function()
+
 
 		demo.loads(oven)
 
@@ -65,15 +68,15 @@ opts.start=function(oven,demo)
 		local flat=canvas.flat
 		local gl=oven.gl
 		
-		canvas.viewport() -- did our window change?
-		canvas.project23d(opts.width,opts.height,0.25,opts.height*4)
+		layout.viewport() -- did our window change?
+		layout.project23d(opts.width,opts.height,0.25,opts.height*4)
 		canvas.gl_default() -- reset gl state
 			
 		gl.ClearColor(0,0,0,0)
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( canvas.pmtx )
+		gl.LoadMatrix( layout.pmtx )
 
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.LoadIdentity()

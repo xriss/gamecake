@@ -50,8 +50,8 @@ using before I profiled where all the time was getting spent...</p>
 <p>I needed it to be pure json as I was running it on googles appengine so
 the lua was actually running in java, no C available.</p>
 
-<p>Anyhow I hope its useful, it works, but its a bit hacky as in order 
-to get it running faster I cut across some corners.</p>
+<p>Anyhow I hope it is useful, in order to get it running faster I cut 
+across some corners so you may find some obscure problems.</p>
 
 
 </div><hr/>
@@ -204,14 +204,14 @@ modules and sharing state between them.</p>
 <h1><a href="wetgenes.json.decode.html">wetgenes.json.decode</a></h1>
 <div>
 
-<pre><code>json_table = wjson.decode(json_string)
+<pre><code>json_table = wjson.decode(json_string,opts)
 </code></pre>
 
 <p>Convert a json string into a lua table.</p>
 
-<p>wetgenes.json.null is used to represent any nulls in the json, 
-either test for it explicitly or check its type() which will return 
-"function"</p>
+<p>Set opts.null to wetgenes.json.null (or indeed any othe value) if 
+you would like to have nulls in your results. By default nulls are 
+replaced with nil.</p>
 
 
 </div><hr/>
@@ -227,6 +227,8 @@ but never both.</p>
 
 <p>Also some of the internal lua types will cause errors, eg functions 
 as these can not be converted into json.</p>
+
+<p>include nulls in the output by using wetgenes.json.null</p>
 
 
 </div><hr/>
