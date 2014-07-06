@@ -28,6 +28,7 @@ wmeta.classes={
 	["textedit"]=oven.rebake("wetgenes.gamecake.widgets.textedit"),
 	["menu"]=oven.rebake("wetgenes.gamecake.widgets.menu"),
 	["menubar"]=oven.rebake("wetgenes.gamecake.widgets.menubar"),
+	["menuitem"]=oven.rebake("wetgenes.gamecake.widgets.menuitem"),
 
 --classes built out of the base classes
 
@@ -59,15 +60,15 @@ function wmeta.setup(def)
 	end
 
 	function meta.call_hook(widget,hook,dat)
-		if type(widget[hook])=="function" then -- the widget class wants this hook
-			if widget[hook](widget,dat) then return end -- and it can eat the event if it returns true
+		if type(widget.class_hooks)=="function" then -- the widget class wants to see this hook
+			if widget.class_hooks(hook,widget,dat) then return end -- and it can eat the event if it returns true
 		end
-		local hooks=widget.hooks or widget.master.hooks
+		local hooks=widget.hooks or widget.master.hooks -- can use master hooks
 		local type_hooks=type(hooks)
 		if type_hooks=="function" then -- master function
 			hooks(hook,widget,dat)
 		elseif type_hooks=="table" and hooks[hook] then -- or table of functions
-			hooks[hook](widget,dat)
+			hooks[hook](hook,widget,dat)
 		end
 	end
 
