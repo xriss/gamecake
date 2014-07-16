@@ -28,7 +28,7 @@ end
 -- set number (may trigger hook)
 wdata.data_value=function(dat,val,force)
 --print(dat,val,force,debug.traceback())
-	if dat.class=="number" then
+	if dat.class=="number" or dat.class=="list" then
 		if val then
 			if type(val)=="string" then val=dat:tonumber(val) end -- auto convert from string to number
 			if val*0~=val*0 then val=0 end -- remove inf or nan values?
@@ -79,10 +79,20 @@ end
 wdata.data_tostring=function(dat,num)
 	return tostring(num)
 end
+wdata.data_tostring_from_list=function(dat,num)
+	local d=dat.list[num]
+	return d and d.str
+end
 
 -- get a number from the string
 wdata.data_tonumber=function(dat,str)
 	return tonumber(str)
+end
+wdata.data_tonumber_from_list=function(dat,str)
+	for i,v in ipairs(dat.list) do
+		if v.str==str then return i end
+	end
+	return nil
 end
 
 -- how wide or tall should the handle be given the size of the parent?
@@ -142,13 +152,13 @@ function wdata.new_data(dat)
 
 	local dat=dat or {} -- probably use what is passed in only fill in more values
 
-	dat.class=dat.class or "number" -- could also be a "string"
+	dat.class=dat.class or "number" -- could also be a "string" or "list"
 
 -- make default values and ranges for every possible class
 -- this is very heavy data...
 
-	dat.lst=dat.lst or {}
-
+	dat.list=dat.list or {} -- list of possible values {{ num=1,str="hash1"},{ num=2,str="hash2"},...}
+	
 	dat.str_idx=dat.str_idx or 0
 	dat.str_select=dat.str_select or 0
 
@@ -157,6 +167,14 @@ function wdata.new_data(dat)
 	dat.size=dat.size or 0 -- if 0 then button is auto sized to some value
 	dat.step=dat.step or 0 -- if 0 then there is no quantization
 	
+	if dat.class=="list" then -- build from .list
+		dat.min=1
+		dat.max=#dat.list
+		dat.step=1
+		dat.tostring=dat.tostring or wdata.data_tostring_from_list
+		dat.tonumber=dat.tonumber or wdata.data_tonumber_from_list
+	end
+
 	
 -- setup callback functions
 
