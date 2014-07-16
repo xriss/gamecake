@@ -10,6 +10,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wdrag)
 wdrag=wdrag or {}
 
+local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
+
 function wdrag.update(widget)
 
 	if widget.data then
@@ -33,6 +35,7 @@ function wdrag.setup(widget,def)
 	widget.mouse=wdrag.mouse
 	widget.update=wdrag.update
 	widget.draw=wdrag.draw
+	widget.layout=wfill.layout
 
 	widget.solid=true
 

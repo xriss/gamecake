@@ -16,6 +16,8 @@ function M.bake(oven,wpan)
 
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
+local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
+
 wpan=wpan or {}
 
 function wpan.update(widget)
@@ -40,6 +42,7 @@ function wpan.setup(widget,def)
 	widget.mouse=wpan.mouse
 	widget.update=wpan.update
 	widget.draw=wpan.draw
+	widget.layout=wfill.layout
 	
 --	widget.fbo=_G.win.fbo(0,0,0)
 	widget.fbo=framebuffers.create(0,0,0)

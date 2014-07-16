@@ -22,6 +22,7 @@ wmeta.classes={
 -- base classes
 
 	["master"]=oven.rebake("wetgenes.gamecake.widgets.master"),
+	["fill"]=oven.rebake("wetgenes.gamecake.widgets.fill"),
 	["button"]=oven.rebake("wetgenes.gamecake.widgets.button"),
 	["drag"]=oven.rebake("wetgenes.gamecake.widgets.drag"),
 	["text"]=oven.rebake("wetgenes.gamecake.widgets.text"),

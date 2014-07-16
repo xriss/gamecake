@@ -48,7 +48,7 @@ function wscroll.layout(widget)
 
 --	local it=widget.scroll
 	
-	widget.meta.layout(widget.pan) -- creates hx_max,hy_max
+	widget.pan:layout() -- creates hx_max,hy_max
 
 	widget.datx.max=widget.pan.hx_max-widget.pan.hx
 	if widget.datx.max<0 then widget.datx.max=0 end

@@ -26,26 +26,6 @@ function wmeta.setup(def)
 	local meta=def.meta
 	local win=def.win
 
---
--- initial layout of widgets, to put them into reasonable positions
---
-	function meta.layout(widget)
---print(widget.class)
---		if widget.pan_px and widget.pan_py then -- fidle everything
---print("layout",widget.pan_px,widget.pan_py)
---		end
-		
-		if widget.class=="fill" or widget.class=="pan" or widget.class=="drag" then
-			meta.layout_fill(widget)
-		elseif widget.class=="menu" then
-			meta.layout_menu(widget)
-		elseif widget.class=="menubar" then
-			meta.layout_menubar(widget)
-		else
-					meta.layout_base(widget)
-		end
-	end
-
 	function meta.build_m4(widget)
 	
 		widget.m4=widget.m4 or tardis.m4.new()
@@ -100,7 +80,7 @@ function wmeta.setup(def)
 	end
 	
 
-	function meta.layout_base(widget)
+	function meta.layout(widget)
 		for i,v in ipairs(widget) do
 		
 			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
@@ -111,171 +91,6 @@ function wmeta.setup(def)
 			
 		end
 		for i,v in ipairs(widget) do
-			if not v.hidden then v:layout() end
-		end
-	end
-
--- this is a fixed layout that works kind of like text
--- we do not adjust the hx,hy size of sub widgets
--- we just place them left to right top to bottom
--- finally we resize this widget to fit its content
-	function meta.layout_fill(widget)
-		
-		local hx,hy=0,0
-		local my=0
-		widget.hx_max=0
-		widget.hy_max=0
-		local function addone(w)
-			w.px=hx
-			w.py=hy
-			hx=hx+w.hx
-			if hx > widget.hx_max then widget.hx_max=hx end -- max x total size
-			if w.hy > my then my=w.hy end -- max y size for this line
---print(w.id or "?",w.px,w.py,w.hx,w.hy)
-		end
-		
-		local function endoflines()
-		end
-		
-		local function endofline()
-			hx=0
-			hy=hy+my
-			my=0
-			widget.hy_max=hy
-		end
-		
-		if #widget>0 then
-		
-			for i,w in ipairs(widget) do
-				if not w.hidden then
-					if hx+w.hx>widget.hx then
-						if hx==0 then -- need one item per line so add it anyway
-							addone(w)
-							endofline()
-						else -- skip this one, push it onto nextline
-							endofline()
-							addone(w)
-						end
-					else -- it fits so just add
-						addone(w)
-					end
-				end
-			end
-
-			if hx>0 then endofline() end -- final end of line
-			
-			endoflines()
-			
-		end
-		
-		for i,v in ipairs(widget) do
-			v.pxd=widget.pxd+v.px
-			v.pyd=widget.pyd+v.py
-		end
-
--- layout sub sub widgets	
-		for i,v in ipairs(widget) do
-			if not v.hidden then v:layout() end
-		end
-	end
-
--- auto resize to text contents vertically
-	function meta.layout_menu(widget)
-		
-		local py=0
-		local hx=0
-		for i,v in ipairs(widget) do
-			if not v.hidden then
-			
-				v.hx=0
-				v.hy=0
-				
-				if v[1] then -- we have sub widgets, assume layout will generate a size
-					v:layout()
-				else -- use text size
-					if v.text then
-						local f=v:bubble("font") or 1
-						v.hy=v:bubble("text_size") or 16
-						font.set(cake.fonts.get(f))
-						font.set_size(v.hy,0)
-						v.hx=font.width(v.text)
-						
-						v.hx=v.hx+v.hy
-						v.hy=v.hy+(v.hy/2)
-					end
-				end
-				
-				v.px=0
-				v.py=py
-				
-				py=py+v.hy
-				widget.hy=py
-				
-				if v.hx>hx then hx=v.hx end -- widest
-
-
-				v.pxd=widget.pxd+v.px -- absolute position
-				v.pyd=widget.pyd+v.py	
-			end
-		end
-		
-		widget.hx=hx
-
-		for i,v in ipairs(widget) do -- set all to widest
-			v.hx=hx
-		end
-
-		for i,v in ipairs(widget) do -- descend
-			if not v.hidden then v:layout() end
-		end
-	end
-	
--- auto resize to text contents horizontally
-	function meta.layout_menubar(widget)
-		
-		local px=0
-		local hy=0
-		for i,v in ipairs(widget) do
-			if not v.hidden then
-			
-				v.hx=0
-				v.hy=0
-				
-				if v[1] then -- we have sub widgets, assume layout will generate a size
-					v:layout()
-				else -- use text size
-					if v.text then
-						local f=v:bubble("font") or 1
-						v.hy=v:bubble("text_size") or 16
-						font.set(cake.fonts.get(f))
-						font.set_size(v.hy,0)
-						v.hx=font.width(v.text)
-						
-						v.hx=v.hx+v.hy
-						v.hy=widget.hy -- use set height from parent
-					end
-				end
-				
-				v.px=px
-				v.py=0
-				
-				px=px+v.hx
---				widget.hx=px
-				
-				if v.hy>hy then hy=v.hy end -- tallest
-
-				v.pxd=widget.pxd+v.px -- absolute position
-				v.pyd=widget.pyd+v.py
-			end
-		end
-		
---		widget.hy=hy
-
-		for i,v in ipairs(widget) do -- set all to tallest
-			v.hy=hy
-		end
-
-		for i,v in ipairs(widget) do -- descend
 			if not v.hidden then v:layout() end
 		end
 	end

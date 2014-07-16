@@ -9,6 +9,10 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wmenu)
 wmenu=wmenu or {}
 
+local cake=oven.cake
+local canvas=cake.canvas
+local font=canvas.font
+
 local function isover(widget)
 	local o=widget.master.over
 	if o then
@@ -47,6 +51,56 @@ function wmenu.draw(widget)
 	return widget.meta.draw(widget)
 end
 
+-- auto resize to text contents vertically
+function wmenu.layout(widget)
+	
+	local py=0
+	local hx=0
+	for i,v in ipairs(widget) do
+		if not v.hidden then
+		
+			v.hx=0
+			v.hy=0
+			
+			if v[1] then -- we have sub widgets, assume layout will generate a size
+				v:layout()
+			else -- use text size
+				if v.text then
+					local f=v:bubble("font") or 1
+					v.hy=v:bubble("text_size") or 16
+					font.set(cake.fonts.get(f))
+					font.set_size(v.hy,0)
+					v.hx=font.width(v.text)
+					
+					v.hx=v.hx+v.hy
+					v.hy=v.hy+(v.hy/2)
+				end
+			end
+			
+			v.px=0
+			v.py=py
+			
+			py=py+v.hy
+			widget.hy=py
+			
+			if v.hx>hx then hx=v.hx end -- widest
+
+
+			v.pxd=widget.pxd+v.px -- absolute position
+			v.pyd=widget.pyd+v.py	
+		end
+	end
+	
+	widget.hx=hx
+
+	for i,v in ipairs(widget) do -- set all to widest
+		v.hx=hx
+	end
+
+	for i,v in ipairs(widget) do -- descend
+		if not v.hidden then v:layout() end
+	end
+end
 
 function wmenu.setup(widget,def)
 
@@ -54,6 +108,7 @@ function wmenu.setup(widget,def)
 	
 	widget.update=wmenu.update
 	widget.draw=wmenu.draw
+	widget.layout=wmenu.layout
 
 	widget.solid=true
 
