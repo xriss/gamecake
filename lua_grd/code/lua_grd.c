@@ -486,6 +486,31 @@ s32 num;
 	return 1;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_attr_redux (lua_State *l)
+{
+part_ptr p;
+s32 num,cw,ch;
+
+	p=lua_grd_check_ptr(l,1);
+
+	cw=(s32)lua_tonumber(l,2);
+	ch=(s32)lua_tonumber(l,3);
+	num=(s32)lua_tonumber(l,4);
+	
+	if(num<2) { num=2; }
+	if(num>256) { num=256; }
+	
+	grd_attr_redux(p,cw,ch,num);
+
+//	lua_grd_getinfo(l,p,1);
+
+	lua_pushvalue(l,1);
+	return 1;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1318,6 +1343,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"convert",			lua_grd_convert},
 		
 		{"quant",			lua_grd_quant},
+		{"attr_redux",		lua_grd_attr_redux},
 
 		{"pixels",			lua_grd_pixels},
 		{"palette",			lua_grd_palette},

@@ -1,3 +1,3 @@
 cd `dirname $0`
-gdb --args ../../bin/dbg/gamecake lua/dry.lua $*
+gdb --args ../../bin/dbg/gamecake.x64 lua/dry.lua $*
 
