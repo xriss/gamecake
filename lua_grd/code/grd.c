@@ -1918,9 +1918,11 @@ int s;
 // if cw or ch are 0 then they will be set to the images width or height.
 // reduction is then performed on character areas of that size, eg each 8x8 area is limited to num colors
 // this can be used to simulate spectrum attribute "clash"
+// bak if non negative can be a global background colour that is always allowed
+// this allows c64 multicolor mode simulation
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_attr_redux(struct grd *g, int cw, int ch, int num)
+int grd_attr_redux(struct grd *g, int cw, int ch, int num, int bak)
 {
 int x,y,z,cx,cy;
 u8 *p;
@@ -1962,7 +1964,11 @@ u32 c1,c2;
 					{
 						if	(
 								(j>0) && // last case
-								( look[0][ t ] > look[0][ look[1][j-1] ] ) // compare using lookup counts
+								(t!=bak) && // sort background to bottom
+								(
+									( look[0][ t ] > look[0][ look[1][j-1] ] ) || // compare using lookup counts
+									look[1][j-1]==bak // sort background to bottom
+								)
 							)
 						{
 							look[1][j]=look[1][j-1]; // shift down
@@ -1978,7 +1984,7 @@ u32 c1,c2;
 				// build remap array
 				for(i=0;i<256;i++)
 				{
-					if(i<num) // use as is
+					if( (i<num) || (i==bak) )// use as is
 					{
 						best_i=look[1][i];
 					}
@@ -1987,6 +1993,17 @@ u32 c1,c2;
 						c1=*((u32*)grdinfo_get_data(g->cmap,look[1][i],0,0));
 						best_i=look[1][0];
 						best_d=0x7fffffff;
+						if(bak>=0) // start by selecting bak
+						{
+							c2=*((u32*)grdinfo_get_data(g->cmap,bak,0,0));
+							dd=0;
+							d=((int) (c1&0x000000ff)     )-((int) (c2&0x000000ff)     ); if(d<0){d=-d;} dd+=d;
+							d=((int)((c1&0x0000ff00)>>8) )-((int)((c2&0x0000ff00)>>8) ); if(d<0){d=-d;} dd+=d;
+							d=((int)((c1&0x00ff0000)>>16))-((int)((c2&0x00ff0000)>>16)); if(d<0){d=-d;} dd+=d;
+							d=((int)((c1&0xff000000)>>24))-((int)((c2&0xff000000)>>24)); if(d<0){d=-d;} dd+=d;
+							best_i=bak;
+							best_d=dd;
+						}
 						for(j=0;j<num;j++)
 						{
 							c2=*((u32*)grdinfo_get_data(g->cmap,look[1][j],0,0));
