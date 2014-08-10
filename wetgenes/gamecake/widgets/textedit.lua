@@ -313,6 +313,13 @@ function wtextedit.update(widget)
 	return widget.meta.update(widget)
 end
 
+function wtextedit.class_hooks(hook,widget,dat)
+
+	if hook=="timedelay" then return wtextedit.timedelay(widget) end
+	if hook=="unfocus" then return wtextedit.unfocus(widget) end
+	
+end
+
 
 function wtextedit.setup(widget,def)
 --	local it={}
@@ -330,9 +337,11 @@ function wtextedit.setup(widget,def)
 	widget.key=wtextedit.key
 	widget.mouse=wtextedit.mouse
 
-	widget.timedelay=wtextedit.timedelay
-	widget.unfocus=wtextedit.unfocus
+	widget.class_hooks=wtextedit.class_hooks
 	
+--	widget.timedelay=wtextedit.timedelay
+--	widget.unfocus=wtextedit.unfocus
+		
 	widget.solid=true
 
 	widget.can_focus=true
