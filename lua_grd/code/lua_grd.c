@@ -493,18 +493,21 @@ s32 num;
 int lua_grd_attr_redux (lua_State *l)
 {
 part_ptr p;
-s32 num,cw,ch;
+s32 bak,num,cw,ch;
 
 	p=lua_grd_check_ptr(l,1);
 
 	cw=(s32)lua_tonumber(l,2);
 	ch=(s32)lua_tonumber(l,3);
 	num=(s32)lua_tonumber(l,4);
+	bak=(s32)lua_tonumber(l,5);
 	
 	if(num<2) { num=2; }
 	if(num>256) { num=256; }
+
+	if(bak>255) { bak=255; }
 	
-	grd_attr_redux(p,cw,ch,num);
+	grd_attr_redux(p,cw,ch,num,bak);
 
 //	lua_grd_getinfo(l,p,1);
 
