@@ -88,6 +88,9 @@ function test_premult_t3()
 	do_premult("t3")
 end
 
+function test_png_8_attr_redux()
+	do_png_8_attr_redux("t1")
+end
 
 function do_file_write(f,d)
 	local fp=assert(io.open(f,"wb"))
@@ -277,4 +280,14 @@ function do_gif_wmem(name)
 	local d=assert( g:save({fmt="gif"}) )
 	do_file_write("dat/grd/"..name..".wmem.out.gif",d)
 	assert_true( do_file_compare("dat/grd/"..name..".wmem.out.gif","dat/grd/"..name..".wmem.chk.gif") )
+end
+
+function do_png_8_attr_redux(name)
+
+	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
+	assert( g:convert("U8_INDEXED") )
+	assert( g:attr_redux(8,8,2) )
+	assert( g:save("dat/grd/"..name..".8.attr.out.png","png") )
+
+	assert_true( do_file_compare("dat/grd/"..name..".8.attr.out.png","dat/grd/"..name..".8.attr.chk.png") )
 end

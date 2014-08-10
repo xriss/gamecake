@@ -1909,3 +1909,114 @@ int s;
 		memcpy(ga->cmap->data,gb->cmap->data,grd_sizeof_pixel(ga->cmap->fmt)*ga->cmap->w);
 	}
 }
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// reduce the number of colours in a palleted image to the given value and perform simple remapping.
+// 
+// if cw or ch are 0 then they will be set to the images width or height.
+// reduction is then performed on character areas of that size, eg each 8x8 area is limited to num colors
+// this can be used to simulate spectrum attribute "clash"
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int grd_attr_redux(struct grd *g, int cw, int ch, int num)
+{
+int x,y,z,cx,cy;
+u8 *p;
+int i,j,t;
+int look[3][256]; // [0] counts [1] order [2] remap
+
+int d,dd;
+int best_i=0;
+int best_d=0;
+u32 c1,c2;
+
+	if(cw==0) { cw=g->bmap->w; }
+	if(ch==0) { ch=g->bmap->h; }
+
+	for(z=0;z<g->bmap->d;z++) {
+		for(cy=0;cy<g->bmap->h;cy+=ch) {
+			for(cx=0;cx<g->bmap->w;cx+=cw) {
+		
+				// clear
+				for(j=0;j<3;j++){
+					for(i=0;i<256;i++){look[j][i]=0;}
+				}
+
+				// loop char
+				for( y=0 ; (y<ch)&&(cy+y<g->bmap->h) ; y++ ){
+					p=grdinfo_get_data(g->bmap,cx,cy+y,z);
+					for( x=0 ; (x<cw)&&(cx+x<g->bmap->w) ; x++ ) {
+						look[0][*(p++)]++; // add one for this colours count
+					}
+				}
+	
+				// fill
+				for(i=0;i<256;i++) { look[1][i]=i; }
+				// very simple sort
+				for(i=1;i<256;i++)
+				{
+					t=look[1][i]; // pickup
+					for(j=i;1;j--)
+					{
+						if	(
+								(j>0) && // last case
+								( look[0][ t ] > look[0][ look[1][j-1] ] ) // compare using lookup counts
+							)
+						{
+							look[1][j]=look[1][j-1]; // shift down
+						}
+						else
+						{
+							look[1][j]=t; // place
+							break;
+						}
+					}
+				}
+
+				// build remap array
+				for(i=0;i<256;i++)
+				{
+					if(i<num) // use as is
+					{
+						best_i=look[1][i];
+					}
+					else
+					{
+						c1=*((u32*)grdinfo_get_data(g->cmap,look[1][i],0,0));
+						best_i=look[1][0];
+						best_d=0x7fffffff;
+						for(j=0;j<num;j++)
+						{
+							c2=*((u32*)grdinfo_get_data(g->cmap,look[1][j],0,0));
+							dd=0;
+							d=((int) (c1&0x000000ff)     )-((int) (c2&0x000000ff)     ); if(d<0){d=-d;} dd+=d;
+							d=((int)((c1&0x0000ff00)>>8) )-((int)((c2&0x0000ff00)>>8) ); if(d<0){d=-d;} dd+=d;
+							d=((int)((c1&0x00ff0000)>>16))-((int)((c2&0x00ff0000)>>16)); if(d<0){d=-d;} dd+=d;
+							d=((int)((c1&0xff000000)>>24))-((int)((c2&0xff000000)>>24)); if(d<0){d=-d;} dd+=d;
+							if(dd<best_d)
+							{
+								best_i=look[1][j];
+								best_d=dd;
+							}
+						}
+					}
+					look[2][ look[1][i] ]=best_i;
+				}
+
+				// remap
+				for( y=0 ; (y<ch)&&(cy+y<g->bmap->h) ; y++ ){
+					p=grdinfo_get_data(g->bmap,cx,cy+y,z);
+					for( x=0 ; (x<cw)&&(cx+x<g->bmap->w) ; x++ ) {
+						*p=look[2][*p];
+						p++;
+					}
+				}
+
+			}
+		}
+	}
+
+	return 1;
+}
