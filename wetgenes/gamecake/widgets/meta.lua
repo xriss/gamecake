@@ -38,6 +38,7 @@ wmeta.classes={
 
 	["scroll"]=oven.rebake("wetgenes.gamecake.widgets.scroll"),
 
+	["menudrop"]=oven.rebake("wetgenes.gamecake.widgets.menudrop"),
 }
 
 --
@@ -290,7 +291,7 @@ function wmeta.setup(def)
 -- handle mouse input
 --
 	function meta.mousexy(widget,_x,_y)
---		if not widget.m4 then return -1,-1 end
+		if not widget.m4 then return -1,-1 end
 		local v4=tardis.v4.new(_x,_y,0,1)
 		widget.m4:product(v4)
 		return v4[1],v4[2]

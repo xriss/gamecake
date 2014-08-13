@@ -52,7 +52,9 @@ function wmenuitem.hooks(hook,widget,dat)
 	if widget.hide_when_clicked then
 		if hook=="click" then
 			if widget.parent.class=="menu" then -- only the menu?
+				widget.parent.over_locked=false
 				widget.parent.hidden=true
+				widget.parent.hide_when_not_over=false
 				widget.master:layout()
 			end
 		end

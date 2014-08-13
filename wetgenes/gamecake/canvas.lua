@@ -46,9 +46,8 @@ canvas.gl_default=function()
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	gl.Enable(gl.BLEND)
 	
-	if gl.gles1 then
-		gl.Enable(0x8642) -- #define GL_PROGRAM_POINT_SIZE 0x8642
-	end
+	gl.Enable(0x8642) -- #define GL_PROGRAM_POINT_SIZE 0x8642
+	gl.GetError()     -- ignore any error
 		
 	gl.MatrixMode(gl.MODELVIEW)
 
