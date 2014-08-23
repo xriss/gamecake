@@ -1918,15 +1918,18 @@ int s;
 // if cw or ch are 0 then they will be set to the images width or height.
 // reduction is then performed on character areas of that size, eg each 8x8 area is limited to num colors
 // this can be used to simulate spectrum attribute "clash"
+// sub is the size of sub pallete groups, eg 16 in nes mode or 8 in spectrum mode, EG bright simulation in spectrum mode
+// requires all colors in a attr block to be from the bright palette or the dark palette no mixing so this forces that
+// grouping
 // bak if non negative can be a global background colour that is always allowed
 // this allows c64 multicolor mode simulation
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_attr_redux(struct grd *g, int cw, int ch, int num, int bak)
+int grd_attr_redux(struct grd *g, int cw, int ch, int num, int sub,int bak)
 {
 int x,y,z,cx,cy;
 u8 *p;
-int i,j,t;
+int i,j,t,tsub;
 int look[3][256]; // [0] counts [1] order [2] remap
 
 int d,dd;
@@ -1980,6 +1983,37 @@ u32 c1,c2;
 						}
 					}
 				}
+				
+
+				// force the top colors to be in the same subgroup palette
+				if((sub>0)&&(sub<256))
+				{
+					if(sub<num) { num=sub; } // can only pick this many colors anyhow
+					tsub=look[1][0]/sub;
+					for(i=1;i<256;i++)
+					{
+						t=look[1][i]; // pickup
+						for(j=i;1;j--)
+						{
+							if	(
+									(j>0) && // last case
+									(t!=bak) && // sort background to bottom
+									(
+										(tsub != (look[1][j-1]/sub) ) || // sort bad subgroup colors to bottom
+										look[1][j-1]==bak // sort background to bottom
+									)
+								)
+							{
+								look[1][j]=look[1][j-1]; // shift down
+							}
+							else
+							{
+								look[1][j]=t; // place
+								break;
+							}
+						}
+					}
+				}
 
 				// build remap array
 				for(i=0;i<256;i++)
@@ -1999,7 +2033,7 @@ u32 c1,c2;
 							dd=0;
 							d=((int) (c1&0x000000ff)     )-((int) (c2&0x000000ff)     ); if(d<0){d=-d;} dd+=d;
 							d=((int)((c1&0x0000ff00)>>8) )-((int)((c2&0x0000ff00)>>8) ); if(d<0){d=-d;} dd+=d;
-							d=((int)((c1&0x00ff0000)>>16))-((int)((c2&0x00ff0000)>>16)); if(d<0){d=-d;} dd+=d;
+							d=((int)((c1&0x00ff0000)>>16))-((int)((c2&0x00ff0000)>>16)); if(d<0){d=-d;} dd+=d*2;
 							d=((int)((c1&0xff000000)>>24))-((int)((c2&0xff000000)>>24)); if(d<0){d=-d;} dd+=d;
 							best_i=bak;
 							best_d=dd;
@@ -2010,7 +2044,7 @@ u32 c1,c2;
 							dd=0;
 							d=((int) (c1&0x000000ff)     )-((int) (c2&0x000000ff)     ); if(d<0){d=-d;} dd+=d;
 							d=((int)((c1&0x0000ff00)>>8) )-((int)((c2&0x0000ff00)>>8) ); if(d<0){d=-d;} dd+=d;
-							d=((int)((c1&0x00ff0000)>>16))-((int)((c2&0x00ff0000)>>16)); if(d<0){d=-d;} dd+=d;
+							d=((int)((c1&0x00ff0000)>>16))-((int)((c2&0x00ff0000)>>16)); if(d<0){d=-d;} dd+=d*2;
 							d=((int)((c1&0xff000000)>>24))-((int)((c2&0xff000000)>>24)); if(d<0){d=-d;} dd+=d;
 							if(dd<best_d)
 							{

@@ -709,9 +709,9 @@ all_includes=all_includes or {
 --new/testing
 
 	{"lua_linenoise",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lua_sys",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_sys",			WINDOWS		or		NIX		or		NACL	or		nil			or		RASPI		or	OSX		},
+	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 
 	{"gamecake",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"pagecake",			nil		or		NIX		or		nil		or		nil			or		nil			or	nil		},
