@@ -331,8 +331,8 @@ base.quant=function(g,num)
 	return r and g
 end
 
-base.attr_redux=function(g,cw,ch,num,bak)
-	local r=core.attr_redux(g[0],cw,ch,num,bak)
+base.attr_redux=function(g,cw,ch,num,sub,bak)
+	local r=core.attr_redux(g[0],cw,ch,num,sub,bak)
 	core.info(g[0],g)
 	return r and g
 end
