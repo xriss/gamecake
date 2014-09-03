@@ -6,8 +6,13 @@ import android.content.Intent;
 import android.content.Context;
 import java.io.File;
 import android.view.InputDevice;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.os.PowerManager;
 
-public class FeralActivity extends NativeActivity
+public class FeralActivity extends NativeActivity implements LocationListener
 {
 	
 	public String smell="base";
@@ -105,5 +110,77 @@ public class FeralActivity extends NativeActivity
 	{
 		return InputDevice.getDeviceIds().length;
 	}
+
+//where are we?
+
+	private LocationManager lm;
+	private PowerManager.WakeLock wl;
+		
+@Override
+public void onLocationChanged(Location location) {
+}
+@Override
+public void onProviderDisabled(String provider) {
+}
+
+@Override
+public void onProviderEnabled(String provider) {
+}
+
+@Override
+public void onStatusChanged(String provider, int status, Bundle extras) {
+}
+
+
+ 	private Location location()
+	{
+		if(lm==null)
+		{
+			lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+			runOnUiThread(new Runnable(){
+				@Override
+				public void run(){
+					LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+					lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0, FeralActivity.this);
+					lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0, FeralActivity.this);
+				}
+			});
+		
+			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "FeralActivity");
+            wl.acquire();
+		}
+		Location l = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		if(l==null) { l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER); }
+		return l;
+	}
+
+	private Location loc;
+	public double GetLocation()
+	{
+		loc=location(); // only update here, so next two lng/lat functions use this data
+		if(loc!=null)
+		{
+			return loc.getAccuracy(); // and we return accuracy here
+		}
+		return 999.0;
+	}
+	public double GetLatitude()
+	{
+		if(loc!=null)
+		{
+			return loc.getLatitude();
+		}
+		return 999.0;
+	}
+	public double GetLongitude()
+	{
+		if(loc!=null)
+		{
+			return loc.getLongitude();
+		}
+		return 999.0;
+	}
+
 
 }

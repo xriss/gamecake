@@ -790,18 +790,150 @@ int lua_android_sleep (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// push sensor info
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static void push_sensor_info (lua_State *l,android_lua *p,const ASensor *sensor,const char *id)
+{
+	lua_newtable(l);
+	lua_pushstring(l,id);								lua_setfield(l,-2,"id");
+	lua_pushstring(l,ASensor_getName(sensor));			lua_setfield(l,-2,"name");
+	lua_pushstring(l,ASensor_getVendor(sensor));		lua_setfield(l,-2,"vendor");
+	lua_pushnumber(l,ASensor_getType(sensor));			lua_setfield(l,-2,"type");
+	lua_pushnumber(l,ASensor_getResolution(sensor));	lua_setfield(l,-2,"resolution");
+	lua_pushnumber(l,ASensor_getMinDelay(sensor));		lua_setfield(l,-2,"delay");
+	lua_setfield(l,-2,id);
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// setup sensors (call to start receiving sensor data)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_sensors_setup (lua_State *l)
+{
+	android_lua *p=lua_android_check_ptr(l,1);
+
+	ALooper *looper = ALooper_forThread(); if(!looper) { return 0; }
+
+	ASensorManager *sen = ASensorManager_getInstance();
+	p->sensors = ASensorManager_createEventQueue(sen, looper, LOOPER_ID_USER, 0, 0);
+
+
+	if(p->sensors)
+	{
+		lua_newtable(l);
+		p->sensor_acc  = ASensorManager_getDefaultSensor(sen, ASENSOR_TYPE_ACCELEROMETER);
+		if(p->sensor_acc)
+		{
+			ASensorEventQueue_setEventRate(p->sensors, p->sensor_acc,ASensor_getMinDelay(p->sensor_acc)*1000);
+			ASensorEventQueue_enableSensor(p->sensors, p->sensor_acc);
+			push_sensor_info(l,p,p->sensor_acc,"acc");
+		}
+		p->sensor_gyro = ASensorManager_getDefaultSensor(sen, ASENSOR_TYPE_GYROSCOPE);
+		if(p->sensor_gyro)
+		{
+			ASensorEventQueue_setEventRate(p->sensors, p->sensor_gyro,ASensor_getMinDelay(p->sensor_gyro)*1000);
+			ASensorEventQueue_enableSensor(p->sensors, p->sensor_gyro);
+			push_sensor_info(l,p,p->sensor_gyro,"gyro");
+		}
+		p->sensor_mag  = ASensorManager_getDefaultSensor(sen, ASENSOR_TYPE_MAGNETIC_FIELD);
+		if(p->sensor_mag)
+		{
+			ASensorEventQueue_setEventRate(p->sensors, p->sensor_mag,ASensor_getMinDelay(p->sensor_mag)*1000);
+			ASensorEventQueue_enableSensor(p->sensors, p->sensor_mag);
+			push_sensor_info(l,p,p->sensor_mag,"mag");
+		}
+		return 1;
+	}
+
+	return 0;
+}
+	
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// clean sensors (call to stop receiving sensor data)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_sensors_clean (lua_State *l)
+{
+	android_lua *p=lua_android_check_ptr(l,1);
+
+	ASensorManager *sen = ASensorManager_getInstance();
+	
+	if(p->sensors)
+	{
+		if(p->sensor_acc)
+		{
+			ASensorEventQueue_disableSensor(p->sensors,p->sensor_acc);
+			p->sensor_acc=0;
+		}
+		if(p->sensor_gyro)
+		{
+			ASensorEventQueue_disableSensor(p->sensors,p->sensor_gyro);
+			p->sensor_gyro=0;
+		}
+		if(p->sensor_mag)
+		{
+			ASensorEventQueue_disableSensor(p->sensors,p->sensor_mag);
+			p->sensor_mag=0;
+		}
+		ASensorManager_destroyEventQueue(sen, p->sensors);
+		p->sensors=0;
+	}
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // read a msg if one is there
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_android_msg (lua_State *l)
 {
+	android_lua **pp=0;
+	android_lua *p=0;
 	int ident;
 	int events;
 	struct android_poll_source* source;
-	if ((ident=ALooper_pollAll(0, NULL, &events,
-		(void**)&source)) >= 0)
+	ASensorEvent event;
+	
+	if(lua_isuserdata(l,1))
 	{
-		if (source != NULL) {
+		pp=lua_android_ptr_ptr(l,1);
+		p=(pp?*pp:0);
+		if(p&&p->sensors)
+		{
+			if( ASensorEventQueue_getEvents(p->sensors, &event, 1) >0 )
+			{
+				lua_newtable(l);
+				lua_pushstring(l,"sensor"); lua_setfield(l,-2,"event");
+				if(event.type == ASENSOR_TYPE_ACCELEROMETER)
+				{
+					lua_pushstring(l,"acc"); lua_setfield(l,-2,"sensor");
+				}
+				else if(event.type == ASENSOR_TYPE_GYROSCOPE) 
+				{
+					lua_pushstring(l,"gyro"); lua_setfield(l,-2,"sensor");
+				}
+				else if(event.type == ASENSOR_TYPE_MAGNETIC_FIELD)
+				{
+					lua_pushstring(l,"mag"); lua_setfield(l,-2,"sensor");
+				}
+				lua_pushnumber(l,event.acceleration.x); lua_setfield(l,-2,"x");
+				lua_pushnumber(l,event.acceleration.y); lua_setfield(l,-2,"y");
+				lua_pushnumber(l,event.acceleration.z); lua_setfield(l,-2,"z");
+				lua_pushnumber(l,event.timestamp);      lua_setfield(l,-2,"timestamp");
+				return 1;
+			}
+		}
+	}
+
+	if ((ident=ALooper_pollAll(0, NULL, &events, (void**)&source)) >= 0)
+	{
+		if (source != NULL)
+		{
 
 			lua_newtable(l);
 
@@ -891,6 +1023,27 @@ int lua_android_func_call_void_return_int (lua_State *l,char *funcname)
 	int n=(*env)->CallIntMethod(env, activity->clazz, methodID);
 
 	lua_pushnumber(l,(double)n);
+
+	(*activity->vm)->DetachCurrentThread(activity->vm);
+	return 1;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// call a void function that returns an int
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_func_call_void_return_double (lua_State *l,char *funcname)
+{
+	JNIEnv *env=0;
+	ANativeActivity *activity = master_android_app->activity;
+	(*activity->vm)->AttachCurrentThread(activity->vm, &env, 0);	
+	jclass clazz = (*env)->GetObjectClass(env, activity->clazz);
+
+	jmethodID methodID = (*env)->GetMethodID(env, clazz, funcname, "()D");
+	
+	double n=(*env)->CallDoubleMethod(env, activity->clazz, methodID);
+
+	lua_pushnumber(l,n);
 
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 	return 1;
@@ -1060,6 +1213,25 @@ int lua_android_finish (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// get location
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_get_location (lua_State *l)
+{
+	return lua_android_func_call_void_return_double (l,"GetLocation");
+}
+int lua_android_get_latitude (lua_State *l)
+{
+	return lua_android_func_call_void_return_double (l,"GetLatitude");
+}
+int lua_android_get_longitude (lua_State *l)
+{
+	return lua_android_func_call_void_return_double (l,"GetLongitude");
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1114,6 +1286,13 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 		{"count_input_devices",			lua_android_count_input_devices},
 
 		{"finish",						lua_android_finish},
+		
+		{"sensors_setup",				lua_android_sensors_setup},
+		{"sensors_clean",				lua_android_sensors_clean},
+
+		{"get_location",				lua_android_get_location},
+		{"get_latitude",				lua_android_get_latitude},
+		{"get_longitude",				lua_android_get_longitude},
 
 		{0,0}
 	};

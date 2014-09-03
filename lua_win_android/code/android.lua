@@ -44,12 +44,12 @@ end
 
 android.queue={}
 
-android.queue_all_msgs=function()
+android.queue_all_msgs=function(w)
 
 	local finished=false
 	repeat
 	
-		local ma=core.msg()
+		local ma=core.msg(w)
 		
 		if ma then
 --			print("andmsg",wstr.dump(ma))
@@ -139,8 +139,8 @@ android.queue_all_msgs=function()
 	
 end
 
-android.msg=function()
-	android.queue_all_msgs()
+android.msg=function(w)
+	android.queue_all_msgs(w)
 
 	if android.queue[1] then
 		return table.remove(android.queue,1)
