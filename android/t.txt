@@ -1,0 +1,3 @@
+./bake.lua ../../apps/roadee/ && ./make && ./adb shell am start -n com.wetgenes.roadee/com.wetgenes.FeralActivity && ./logcat lua:I *:S
+
+

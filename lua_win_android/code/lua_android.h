@@ -18,6 +18,11 @@ typedef struct sandroid_lua {
 	int width;
 	int height;
 	
+	ASensorEventQueue *sensors;
+	const ASensor *sensor_acc;
+	const ASensor *sensor_gyro;
+	const ASensor *sensor_mag;
+
 
 EGLConfig config;
 
