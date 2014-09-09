@@ -5,11 +5,13 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local gcinfo=gcinfo
 
 local hex=function(str) return tonumber(str,16) end
+local dprint=function(a) print(require("wetgenes.string").dump(a)) end
 
 local pack=require("wetgenes.pack")
 local wzips=require("wetgenes.zips")
 
 local wstr=require("wetgenes.string")
+
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 local win=require("wetgenes.win")
@@ -50,9 +52,8 @@ function M.bake(oven,escmenu)
 		escmenu.master=oven.rebake("wetgenes.gamecake.widgets").setup({})
 		
 		local hooks={}
-		function hooks.click(widget)
+		function hooks.click(act,widget)
 			local id=widget.id
---	print(widget.id)
 			if id=="layout" then
 				local mlayout=oven.mods["wetgenes.gamecake.mods.layout"]
 				if mlayout then
@@ -146,6 +147,7 @@ function M.bake(oven,escmenu)
 	end
 		
 	function escmenu.msg(m)
+--dprint(m)
 		if escmenu.show then
 			if m.class=="key" or m.class=="mouse" or m.class=="joykey" or m.class=="joystick" then
 

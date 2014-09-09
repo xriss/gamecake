@@ -279,7 +279,7 @@ end
 
 android.queue={}
 
-android.queue_all_msgs=function()
+android.queue_all_msgs=function(win)
 
 	local finished=false
 	repeat
@@ -289,7 +289,7 @@ android.queue_all_msgs=function()
 --		  print(s .. ":" .. line)
 --		end, "l")
 
-		local ma=core.msg()
+		local ma=core.msg(win)
 
 --		debug.sethook(nil, "l")
 		
@@ -407,6 +407,15 @@ android.queue_all_msgs=function()
 
 				end
 
+			elseif ma.event == "sensor" then
+					m={
+						class="sensor",
+						sensor=ma.sensor,
+						x=ma.x,
+						y=ma.y,
+						z=ma.z,
+						time=ma.timestamp,
+					}
 			end
 			
 			if m then
@@ -423,8 +432,8 @@ android.queue_all_msgs=function()
 	
 end
 
-android.msg=function()
-	android.queue_all_msgs()
+android.msg=function(win)
+	android.queue_all_msgs(win)
 
 	if android.queue[1] then
 		return table.remove(android.queue,1)

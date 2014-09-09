@@ -384,8 +384,10 @@ function wmeta.setup(def)
 		
 		local len=#widget
 		for i=1,len do
-			widget[i]:clean()
-			widget[i]=nil
+			if widget[i] then
+				widget[i]:clean()
+				widget[i]=nil
+			end
 		end
 	end
 

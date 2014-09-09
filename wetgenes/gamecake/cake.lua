@@ -41,8 +41,12 @@ function M.bake(oven,cake)
 		end
 	end
 
+	cake.updates={}
 	cake.update = function()
 		cake.sounds.update()
+		for n,v in pairs(cake.updates) do
+			v()
+		end
 	end
 
 
