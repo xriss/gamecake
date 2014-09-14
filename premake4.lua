@@ -656,6 +656,7 @@ end
 
 all_includes=all_includes or {
 
+-- lua bindings
 	{"lua_bit",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		) and (LIB_LUA=="lib_lua") },
 	{"lua_kissfft",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
@@ -669,7 +670,6 @@ all_includes=all_includes or {
 	{"lua_grd",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_grdmap",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sod",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_socket",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_gamecake",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_win",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
@@ -684,7 +684,18 @@ all_includes=all_includes or {
 	{"lua_win_android",	nil			or		nil		or		nil		or		ANDROID		or		nil			or	nil		},
 	{"lua_win_raspi",	nil			or		nil		or		nil		or		nil			or		RASPI		or	nil		},
 	{"lua_win_osx",		nil			or		nil		or		nil		or		nil			or		nil			or	OSX		},
+
+--new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
+	{"lua_linenoise",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lua_sys",			WINDOWS		or		NIX		or		NACL	or		nil			or		RASPI		or	OSX		},
+	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lua_bins",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+
+-- this may be the main lua or luajit lib depending on build
 	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+
+-- static libs used by the lua bindings
 	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_png",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_jpeg",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
@@ -697,24 +708,17 @@ all_includes=all_includes or {
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
 
--- old/broken
+-- old/broken and no longer supported but will probably still build
+--	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 --	{"lua_lanes",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 --	{"lua_sec",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 --	{"lib_openssl",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
--- need to lazy link to .so
+-- need to lazy link to .so before we can add these back in otherwise they force unwanted dependencies
 --	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 --	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
---new/testing
-
-
-	{"lua_linenoise",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lua_sys",			WINDOWS		or		NIX		or		NACL	or		nil			or		RASPI		or	OSX		},
-	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lua_bins",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-
+-- the output executables
 	{"gamecake",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"pagecake",			nil		or		NIX		or		nil		or		nil			or		nil			or	nil		},
 }
