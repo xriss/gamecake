@@ -5,6 +5,10 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 
 
+// memory has been borrowed from another GRD and should not be freed
+#define	GRD_FLAGS_BORROWED								0x0001
+
+
 //
 // We shall stop fighting the force of open GL and accept RGBA as the damn color order
 //
@@ -118,7 +122,8 @@
 
 struct grd_info
 {
-	s32	fmt;			// format of data
+	s16	fmt;			// format of data
+	s16	flags;			// flags of data
 	
 	s32	w,h,d;			// width and height and depth of image
 
@@ -214,7 +219,7 @@ int grd_scale( struct grd *g , s32 w, s32 h, s32 d);
 
 int grd_layer( struct grd *ga , struct grd *gb , s32 z);
 
-int grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 w, s32 h);
+int grd_clip( struct grd *ga , struct grd *gb ,  s32 x, s32 y, s32 z, s32 w, s32 h, s32 d);
 
 int grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y);
 int grd_paint( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 mode, u32 trans, u32 color);
