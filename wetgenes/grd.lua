@@ -122,6 +122,8 @@ local import=[[
 #define	GRD_PAINT_MODE_COPY							0x0803
 // Paint using XOR
 #define	GRD_PAINT_MODE_XOR							0x0804
+// Paint using ALPHA from palette (skip if < 0x80)
+#define	GRD_PAINT_MODE_ALPHA						0x0805
 
 ]]
 -- parse the above string for constants, makes updates as easy as a cutnpaste from original source code
@@ -444,7 +446,7 @@ base.clip=function(ga,x,y,z,w,h,d)
 	local g={}
 	g.parent=ga -- help make sure this master grd stays alive
 	setmetatable(g,meta)
-	g[0]=core.clip(ga[0],x,y,z,w,h,d)
+	g[0]=assert(core.clip(ga[0],x,y,z,w,h,d))
 	core.info(g[0],g)
 	return g
 end
