@@ -1639,6 +1639,7 @@ int grd_paint( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 mode, u32 tra
 {
 struct grd_info *ba=ga->bmap;
 struct grd_info *bb=gb->bmap;
+struct grd_info *cb=gb->cmap;
 
 u8 *pa,*pb;
 u32 a,b;
@@ -1672,6 +1673,20 @@ s32 h=bb->h;
 		pb=(u8*)grdinfo_get_data(bb,0,i,0);
 		switch(mode)
 		{
+			case GRD_PAINT_MODE_ALPHA:
+				for(j=0;j<w;j++)
+				{
+					b=*(pb++);
+					if(cb->data[3+b*4]>=128) // simple alpha check against rgba
+					{
+						*(pa++)=b;
+					}
+					else
+					{
+						pa++;
+					}
+				}
+			break;
 			case GRD_PAINT_MODE_TRANS:
 				for(j=0;j<w;j++)
 				{

@@ -113,6 +113,8 @@
 #define	GRD_PAINT_MODE_COPY							0x0803
 // Paint using XOR
 #define	GRD_PAINT_MODE_XOR							0x0804
+// Paint using ALPHA from palette (skip if < 0x80)
+#define	GRD_PAINT_MODE_ALPHA						0x0805
 
 
 
