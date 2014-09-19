@@ -572,6 +572,42 @@ s32 fmt;
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_clip (lua_State *l)
+{
+part_ptr *g;
+part_ptr p;
+s32 cx;
+s32 cy;
+s32 cz;
+s32 cw;
+s32 ch;
+s32 cd;
+
+	p=lua_grd_check_ptr(l,1);
+	cx=(s32)lua_tonumber(l,2);
+	cy=(s32)lua_tonumber(l,3);
+	cz=(s32)lua_tonumber(l,4);
+	cw=(s32)lua_tonumber(l,5);
+	ch=(s32)lua_tonumber(l,6);
+	cd=(s32)lua_tonumber(l,7);
+
+	g=lua_grd_create_ptr(l);
+	(*g)=grd_create(GRD_FMT_U8_RGBA,0,0,0);
+
+	if(!grd_clip(*g,p,cx,cy,cz,cw,ch,cd))
+	{
+		lua_pop(l,1); // remove result from stack and replace with error
+		lua_pushboolean(l,0);
+		lua_pushstring(l,(*g)->err);
+		return 2;
+	}
+	
+	return 1;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_blit (lua_State *l)
 {
 part_ptr pa;
@@ -591,13 +627,13 @@ s32 ch;
 	x=(s32)lua_tonumber(l,3);
 	y=(s32)lua_tonumber(l,4);
 
-	if( lua_isnumber(l,5) ) // clip the from grd
+	if( lua_isnumber(l,5) ) // clip the from grd,  pass a false if no need to clip from
 	{
 		cx=(s32)lua_tonumber(l,5);
 		cy=(s32)lua_tonumber(l,6);
 		cw=(s32)lua_tonumber(l,7);
 		ch=(s32)lua_tonumber(l,8);
-		if(!grd_clip(g,pb,cx,cy,cw,ch))
+		if(!grd_clip(g,pb,cx,cy,0,cw,ch,1))
 		{
 			lua_pushboolean(l,0);
 			lua_pushstring(l,g->err);
@@ -658,7 +694,7 @@ u32 color;
 		cy=(s32)lua_tonumber(l,6);
 		cw=(s32)lua_tonumber(l,7);
 		ch=(s32)lua_tonumber(l,8);
-		if(!grd_clip(g,pb,cx,cy,cw,ch))
+		if(!grd_clip(g,pb,cx,cy,0,cw,ch,1))
 		{
 			lua_pushboolean(l,0);
 			lua_pushstring(l,g->err);
@@ -1366,6 +1402,8 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"shrink",			lua_grd_shrink},
 		
 		{"clear",			lua_grd_clear},
+		
+		{"clip",			lua_grd_clip}, // be careful with this, you must stop the master data from getting GCd
 
 		{0,0}
 	};

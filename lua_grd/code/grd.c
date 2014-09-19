@@ -18,6 +18,7 @@
 void grdinfo_reset(struct grd_info *gi)
 {
 	gi->fmt=GRD_FMT_NONE;
+	gi->flags=0;
 
 	gi->w=0;
 	gi->h=0;
@@ -33,6 +34,7 @@ void grdinfo_reset(struct grd_info *gi)
 void grdinfo_set(  struct grd_info *gi , struct grd_info *ga )
 {
 	gi->fmt=ga->fmt;
+	gi->flags=ga->flags;
 
 	gi->w=ga->w;
 	gi->h=ga->h;
@@ -138,7 +140,10 @@ void grd_info_free(struct grd_info *gi)
 {
 	if(gi->data)
 	{
-		free(gi->data);
+		if(!(gi->flags&GRD_FLAGS_BORROWED)) // do not free if memory was only borrowed
+		{
+			free(gi->data);
+		}
 	}
 	grdinfo_reset(gi);
 }
@@ -1461,14 +1466,14 @@ int grd_layer( struct grd *ga , struct grd *gb , s32 z)
 	ga->err=gb->err; // put error in both
 	if(ga->err) { return 0; }
 
-	if(ga!=gb)
-	{
-		grdinfo_set(ga->cmap,gb->cmap);
-		grdinfo_set(ga->bmap,gb->bmap);
-	}
+	grdinfo_set(ga->cmap,gb->cmap);
+	grdinfo_set(ga->bmap,gb->bmap);
 	
 	ga->bmap->d=1;
 	ga->bmap->data+=(ga->bmap->zscan*z);
+
+	ga->cmap->flags|=GRD_FLAGS_BORROWED; // flag this memory as do not free
+	ga->bmap->flags|=GRD_FLAGS_BORROWED; // flag this memory as do not free
 
 	return 1;
 }
@@ -1490,7 +1495,7 @@ int grd_layer( struct grd *ga , struct grd *gb , s32 z)
 // if gb==ga then it is not copied just adjusted
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 w, s32 h)
+int grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 z, s32 w, s32 h, s32 d)
 {
 	gb->err=0;
 	
@@ -1498,20 +1503,22 @@ int grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 w, s32 h)
 	if((x+w)>gb->bmap->w) { gb->err="clip x out of bounds"; }
 	if(y<0)               { gb->err="clip y out of bounds"; }
 	if((y+h)>gb->bmap->h) { gb->err="clip y out of bounds"; }
+	if(z<0)               { gb->err="clip z out of bounds"; }
+	if((z+d)>gb->bmap->d) { gb->err="clip z out of bounds"; }
 	
 	ga->err=gb->err; // put error in both
 	if(ga->err) { return 0; }
 	
-	if(ga!=gb)
-	{
-		grdinfo_set(ga->cmap,gb->cmap);
-		grdinfo_set(ga->bmap,gb->bmap);
-	}
+	grdinfo_set(ga->cmap,gb->cmap);
+	grdinfo_set(ga->bmap,gb->bmap);
 	
 	ga->bmap->w=w;
 	ga->bmap->h=h;
-	ga->bmap->d=1;
-	ga->bmap->data+=(ga->bmap->xscan*x)+(ga->bmap->yscan*y);
+	ga->bmap->d=d;
+	ga->bmap->data+=(ga->bmap->xscan*x)+(ga->bmap->yscan*y)+(ga->bmap->zscan*z);
+
+	ga->cmap->flags|=GRD_FLAGS_BORROWED; // flag this memory as do not free
+	ga->bmap->flags|=GRD_FLAGS_BORROWED; // flag this memory as do not free
 
 	return 1;
 }
