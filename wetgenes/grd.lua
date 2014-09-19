@@ -439,4 +439,14 @@ base.copy_data_layer=function(ga,gb,za,zb)
 	return core.copy_data_layer(ga[0],gb[0],za,zb)
 end
 
+
+base.clip=function(ga,x,y,z,w,h,d)
+	local g={}
+	g.parent=ga -- help make sure this master grd stays alive
+	setmetatable(g,meta)
+	g[0]=core.clip(ga[0],x,y,z,w,h,d)
+	core.info(g[0],g)
+	return g
+end
+
 return grd

@@ -95,7 +95,7 @@ function wslide.setup(widget,def)
 
 -- auto add the draging button as a child
 	widget.drag=widget:add({style="button",class="drag",color=widget.color,solid=true,
-		data=widget.data})
+		data=widget.data,skin=widget.skin})
 
 -- set size and position of child
 	widget.drag.hx=widget.datx:get_size(widget.hx)
