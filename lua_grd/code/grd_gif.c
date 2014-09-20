@@ -226,32 +226,41 @@ GifColorType colors[256];
 int i;
 unsigned char *p;
 
-ExtensionBlock ext[3];
-GraphicsControlBlock control;
+ExtensionBlock ext[4];
+unsigned char control[4];
 unsigned char wank[3];
 
-	ext[0].ByteCount=sizeof(GraphicsControlBlock);
-	ext[0].Bytes=(GifByteType*)&control;
-	ext[0].Function=GRAPHICS_EXT_FUNC_CODE;
 
-	ext[1].ByteCount=11;
-	ext[1].Bytes=(GifByteType *)"NETSCAPE2.0";
-	ext[1].Function=APPLICATION_EXT_FUNC_CODE;
 
-	ext[2].ByteCount=3;
-	ext[2].Bytes=wank;
-	ext[2].Function=CONTINUE_EXT_FUNC_CODE;
-	
+	ext[0].ByteCount=11;
+	ext[0].Bytes=(GifByteType *)"NETSCAPE2.0";
+	ext[0].Function=APPLICATION_EXT_FUNC_CODE;
+
+	ext[1].ByteCount=3;
+	ext[1].Bytes=wank;
+	ext[1].Function=CONTINUE_EXT_FUNC_CODE;
+
+	ext[2].ByteCount=4;
+	ext[2].Bytes=(GifByteType*)control;
+	ext[2].Function=GRAPHICS_EXT_FUNC_CODE;
+
 	wank[0]=0x01;
-	wank[1]=0xff; // loop 4 ever, well for as long as we can
-	wank[2]=0xff;
+	wank[1]=0x00; // loop 4 ever, well for as long as we can
+	wank[2]=0x00;
 
+	control[0]=0x09;
+	control[1]=8;
+	control[2]=0;
+	control[3]=0; // find first fully alpha color and to use
+	for(i=0;i<256;i++)
+	{
+		if(g->cmap->data[3+i*4]==0)
+		{
+			control[3]=i;
+			break;
+		}
+	}
 
-	control.TransparentColor=0; 
-	control.DisposalMode=DISPOSE_BACKGROUND;
-	control.UserInputFlag=0;
-	control.DelayTime=8;
-	
 // speed of animation in 100ths of a second 8 is 12.5fps (80ms)
 // which is nearest the classic "Shooting on twos" speed of 12fps
 
@@ -273,7 +282,7 @@ unsigned char wank[3];
 			goto bogus;
 		}
 	}
-    
+//    EGifSetGifVersion(gif,1); // must be set for transparency to work?
 
     gif->SWidth = g->bmap->w;
     gif->SHeight = g->bmap->h;
@@ -288,7 +297,7 @@ unsigned char wank[3];
 	}
     
     gif->SColorResolution = 8;
-    gif->SBackGroundColor = 0;
+    gif->SBackGroundColor = control[3];
     gif->SColorMap = GifMakeMapObject(256,colors);
 
     for (i = 0; i < g->bmap->d; i++)
@@ -313,7 +322,7 @@ unsigned char wank[3];
 		else
 		{
 			img.ExtensionBlockCount=1;
-			img.ExtensionBlocks=ext;
+			img.ExtensionBlocks=ext+2;
 		}
 		
 		(void) GifMakeSavedImage(gif,&img);
