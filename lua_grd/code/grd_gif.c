@@ -245,24 +245,24 @@ unsigned char wank[3];
 	ext[2].Function=GRAPHICS_EXT_FUNC_CODE;
 
 	wank[0]=0x01;
-	wank[1]=0x00; // loop 4 ever, well for as long as we can
+	wank[1]=0x00; // loop 4 ever
 	wank[2]=0x00;
 
-	control[0]=0x09;
-	control[1]=8;
-	control[2]=0;
-	control[3]=0; // find first fully alpha color and to use
+	control[0]=0x08; // flags: 
+	control[1]=8; // speed_lo: speed of animation in 100ths of a second, so 8 is 12.5fps (80ms)
+	control[2]=0; // speed_hi: which is near the classic "Shooting on twos" speed of 12fps
+	control[3]=0; // alpha: find first fully alpha color to use as transparent 
 	for(i=0;i<256;i++)
 	{
 		if(g->cmap->data[3+i*4]==0)
 		{
 			control[3]=i;
+			control[0]|=0x01; // set flag to use a transparent color
 			break;
 		}
 	}
-
-// speed of animation in 100ths of a second 8 is 12.5fps (80ms)
-// which is nearest the classic "Shooting on twos" speed of 12fps
+// Actually I think gifs are broken if you use any index other than 0 for the transparency...
+// it breaks the dispose method, whatever you choose...
 
 //unsigned char *data=0;
 
