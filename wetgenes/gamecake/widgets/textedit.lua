@@ -116,7 +116,7 @@ function wtextedit.key(widget,ascii,key,act)
 	
 	if act==1 then
 	
-		if key=="enter" or key=="return" then
+		if key=="enter" or key=="return" or key=="tab" then
 		
 			if widget.data.str and widget.onenter then -- callback?
 			
@@ -124,9 +124,34 @@ function wtextedit.key(widget,ascii,key,act)
 				
 			end
 			
-			master.set_focus(nil)
-			master.set_focus_edit(nil)
+			if key=="tab" then -- tab to the next textedit we can find
+			
+				local n,nf,nn
+				local f
+				f=function(w)
+					if nn and n then return end
+					if w.class=="textedit" and not w.hidden then
+						nf=nf or w
+						if nn then n=w end
+					end
+					for i,v in ipairs(w) do
+						f(v)
+					end
+					if w==master.focus then nn=true end
+				end
+				f(master)
+--				print("found",n,nf,nn)
+				n=n or nf
+				master.set_focus(n)
+				master.set_focus_edit(n)
+				
+				if n then wtextedit.select_all(n) end
 
+			else
+				master.set_focus(nil)
+				master.set_focus_edit(nil)
+			end
+			
 			changed=true
 			
 		end
@@ -292,6 +317,11 @@ function wtextedit.timedelay(widget)
 end
 
 
+function wtextedit.select_all(widget)
+	widget.data.str_idx=0
+	widget.data.str_select=#widget.data.str
+end
+
 function wtextedit.unfocus(widget)
 
 	if widget.data.class=="number" then
@@ -325,7 +355,9 @@ function wtextedit.setup(widget,def)
 --	local it={}
 --	widget.string=it
 	widget.class="textedit"
-	
+	widget.class_funcs=wtextedit
+	widget.class_hooks=wtextedit.class_hooks
+
 	widget.data=widget.data or widget_data.new_data({})
 	
 --	widget.data.str=""
@@ -337,7 +369,6 @@ function wtextedit.setup(widget,def)
 	widget.key=wtextedit.key
 	widget.mouse=wtextedit.mouse
 
-	widget.class_hooks=wtextedit.class_hooks
 	
 --	widget.timedelay=wtextedit.timedelay
 --	widget.unfocus=wtextedit.unfocus
