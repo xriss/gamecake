@@ -360,6 +360,18 @@ const char *myhstrerror(int err)
  	return buffer;
  }
 
+/*-------------------------------------------------------------------------*\
+* Error translation functions
+* Make sure important error messages are standard
+\*-------------------------------------------------------------------------*/
+const char *socket_hoststrerror(int err) {
+    if (err <= 0) return io_strerror(err);
+    switch (err) {
+        case HOST_NOT_FOUND: return "host not found";
+        default: return myhstrerror(err);
+    }
+}
+
 const char *socket_hoststrerror(int err) {
     if (err <= 0) return io_strerror(err);
     switch (err) {
