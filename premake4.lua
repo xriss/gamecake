@@ -690,7 +690,6 @@ all_includes=all_includes or {
 	{"lua_brimworks_zip",WINDOWS	or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sys",			WINDOWS		or		NIX		or		NACL	or		nil			or		RASPI		or	OSX		},
 	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
---	{"lua_bins",		WINDOWS		or		NIX		or		NACL	or		nil			or		RASPI		or	OSX		},
 	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lib_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 

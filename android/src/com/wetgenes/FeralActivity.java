@@ -11,6 +11,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.os.Environment;
 
 public class FeralActivity extends NativeActivity implements LocationListener
 {
@@ -57,6 +58,12 @@ public class FeralActivity extends NativeActivity implements LocationListener
 		return s;
 	}
 
+	public String GetExternalStoragePrefix()
+	{
+		String s=Environment.getExternalStorageDirectory().getAbsolutePath();
+		return s;
+	}
+	
 	public String SmellCheck()
 	{
 		if(smell=="gamestick")
