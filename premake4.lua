@@ -687,10 +687,12 @@ all_includes=all_includes or {
 
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
 	{"lua_linenoise",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lua_brimworks_zip",WINDOWS	or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sys",			WINDOWS		or		NIX		or		NACL	or		nil			or		RASPI		or	OSX		},
 	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lua_bins",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+--	{"lua_bins",		WINDOWS		or		NIX		or		NACL	or		nil			or		RASPI		or	OSX		},
 	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
+	{"lib_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 
 -- this may be the main lua or luajit lib depending on build
 	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},

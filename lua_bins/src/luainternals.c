@@ -31,7 +31,7 @@ typedef unsigned char lu_byte;
 /*
 * BEGIN COPY-PASTE FROM Lua 5.1.4 lobject.c
 */
-
+/*
 int luaO_log2 (unsigned int x) {
   static const lu_byte log_2[256] = {
     0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
@@ -48,6 +48,7 @@ int luaO_log2 (unsigned int x) {
   return l + log_2[x];
 
 }
+*/
 
 /*
 * END COPY-PASTE FROM Lua 5.1.4 lobject.c
