@@ -1146,6 +1146,17 @@ int lua_android_get_cache_prefix (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// get a full path of a place to store sdcard files
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_get_external_prefix (lua_State *l)
+{
+	return lua_android_func_call_void_return_string (l,"GetExternalStoragePrefix");
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // Make sure smell code is setup and return a string telling you what smell
 // Always perform a smell check before calling other smell functions
 //
@@ -1276,6 +1287,7 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 
 		{"get_files_prefix",			lua_android_get_files_prefix},
 		{"get_cache_prefix",			lua_android_get_cache_prefix},
+		{"get_external_prefix",			lua_android_get_external_prefix},
 
 		{"smell_check",					lua_android_smell_check},
 		{"smell_msg",					lua_android_smell_msg},
