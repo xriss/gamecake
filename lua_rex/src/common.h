@@ -74,6 +74,7 @@ void freelist_init (TFreeList *fl);
 void freelist_add (TFreeList *fl, TBuffer *buf);
 void freelist_free (TFreeList *fl);
 
+// name clash with buffer_init in another file so renamed
 void rex_buffer_init (TBuffer *buf, size_t sz, lua_State *L, TFreeList *fl);
 void buffer_free (TBuffer *buf);
 void buffer_clear (TBuffer *buf);
