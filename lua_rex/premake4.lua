@@ -2,7 +2,7 @@
 project "lua_rex_pcre"
 language "C"
 
-files { "src/common.c" , "src/common.h" , "src/algo.h" }
+files { "src/common.c" , "src/common.h" }
 
 files { "src/pcre/lpcre.c" , "src/pcre/lpcre_f.c" }
 

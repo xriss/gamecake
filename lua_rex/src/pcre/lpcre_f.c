@@ -1,7 +1,7 @@
 /* lpcre.c - PCRE regular expression library */
 /* See Copyright Notice in the file LICENSE */
 
-#include "pcre.h"
+#include <pcre.h>
 #include "lua.h"
 #include "lauxlib.h"
 #include "../common.h"

@@ -1,3 +1,0 @@
-  * Fixed Lua 5.1 compatibility, broken in 2.7.0.
-  * Added ability to specify no replacement to gsub with a nil or
-    false replacement argument.

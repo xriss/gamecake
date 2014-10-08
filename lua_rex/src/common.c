@@ -30,10 +30,19 @@ void set_int_field (lua_State *L, const char* field, int val)
 void *Lmalloc(lua_State *L, size_t size) {
   void *ud;
   lua_Alloc lalloc = lua_getallocf(L, &ud);
-  void *p = lalloc(L, NULL, 0, size);
-  if(p == NULL)
-    luaL_error(L, "malloc failed");
-  return p;
+  return lalloc(ud, NULL, 0, size);
+}
+
+void *Lrealloc(lua_State *L, void *p, size_t osize, size_t nsize) {
+  void *ud;
+  lua_Alloc lalloc = lua_getallocf(L, &ud);
+  return lalloc(ud, p, osize, nsize);
+}
+
+void Lfree(lua_State *L, void *p, size_t osize) {
+  void *ud;
+  lua_Alloc lalloc = lua_getallocf(L, &ud);
+  lalloc(ud, p, osize, 0);
 }
 
 /* This function fills a table with string-number pairs.
@@ -116,10 +125,8 @@ void freelist_free (TFreeList *fl) {
 
 enum { ID_NUMBER, ID_STRING };
 
-void rex_buffer_init (TBuffer *buf, size_t sz, lua_State *L, TFreeList *fl) {
-  void *ud;
-  lua_Alloc lalloc = lua_getallocf(L, &ud);
-  buf->arr = (char*) lalloc (ud, NULL, 0, sz);
+void REX_buffer_init (TBuffer *buf, size_t sz, lua_State *L, TFreeList *fl) {
+  buf->arr = Lmalloc(L, sz);
   if (!buf->arr) {
     freelist_free (fl);
     luaL_error (L, "malloc failed");
@@ -132,9 +139,7 @@ void rex_buffer_init (TBuffer *buf, size_t sz, lua_State *L, TFreeList *fl) {
 }
 
 void buffer_free (TBuffer *buf) {
-  void *ud;
-  lua_Alloc lalloc = lua_getallocf(buf->L, &ud);
-  lalloc (buf->L, buf->arr, buf->size, 0);
+  Lfree(buf->L, buf->arr, buf->size);
 }
 
 void buffer_clear (TBuffer *buf) {
@@ -152,9 +157,7 @@ void buffer_addbuffer (TBuffer *trg, TBuffer *src) {
 void buffer_addlstring (TBuffer *buf, const void *src, size_t sz) {
   size_t newtop = buf->top + sz;
   if (newtop > buf->size) {
-    void *ud;
-    lua_Alloc lalloc = lua_getallocf(buf->L, &ud);
-    char *p = (char*) lalloc (buf->L, buf->arr, buf->size, 2 * newtop);   /* 2x expansion */
+    char *p = (char*) Lrealloc (buf->L, buf->arr, buf->size, 2 * newtop);   /* 2x expansion */
     if (!p) {
       freelist_free (buf->freelist);
       luaL_error (buf->L, "realloc failed");
@@ -261,3 +264,32 @@ int luaL_typerror (lua_State *L, int narg, const char *tname) {
   return luaL_argerror(L, narg, msg);
 }
 #endif
+
+#ifndef REX_NOEMBEDDEDTEST
+static int ud_topointer (lua_State *L) {
+  lua_pushlightuserdata (L, lua_touserdata (L, 1));
+  return 1;
+}
+
+static int ud_len (lua_State *L) {
+  lua_pushinteger (L, lua_objlen (L, 1));
+  return 1;
+}
+
+/* for testing purposes only */
+int newmembuffer (lua_State *L) {
+  size_t len;
+  const char* s = luaL_checklstring (L, 1, &len);
+  void *ud = lua_newuserdata (L, len);
+  memcpy (ud, s, len);
+  lua_newtable (L); /* metatable */
+  lua_pushvalue (L, -1);
+  lua_setfield (L, -2, "__index"); /* metatable.__index = metatable */
+  lua_pushcfunction (L, ud_topointer);
+  lua_setfield (L, -2, "topointer");
+  lua_pushcfunction (L, ud_len);
+  lua_setfield (L, -2, "__len");
+  lua_setmetatable (L, -2);
+  return 1;
+}
+#endif /* #ifndef REX_NOEMBEDDEDTEST */

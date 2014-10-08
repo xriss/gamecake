@@ -7,6 +7,7 @@
 #include "lua.h"
 
 #if LUA_VERSION_NUM > 501
+# define lua_objlen lua_rawlen
   int luaL_typerror (lua_State *L, int narg, const char *tname);
 #endif
 
@@ -74,8 +75,8 @@ void freelist_init (TFreeList *fl);
 void freelist_add (TFreeList *fl, TBuffer *buf);
 void freelist_free (TFreeList *fl);
 
-// name clash with buffer_init in another file so renamed
-void rex_buffer_init (TBuffer *buf, size_t sz, lua_State *L, TFreeList *fl);
+// hack clashing name
+void REX_buffer_init (TBuffer *buf, size_t sz, lua_State *L, TFreeList *fl);
 void buffer_free (TBuffer *buf);
 void buffer_clear (TBuffer *buf);
 void buffer_addbuffer (TBuffer *trg, TBuffer *src);
@@ -93,5 +94,11 @@ void set_int_field (lua_State *L, const char* field, int val);
 int  get_flags (lua_State *L, const flag_pair **arr);
 const char *get_flag_key (const flag_pair *fp, int val);
 void *Lmalloc (lua_State *L, size_t size);
+void *Lrealloc (lua_State *L, void *p, size_t osize, size_t nsize);
+void Lfree (lua_State *L, void *p, size_t size);
+
+#ifndef REX_NOEMBEDDEDTEST
+int newmembuffer (lua_State *L);
+#endif
 
 #endif
