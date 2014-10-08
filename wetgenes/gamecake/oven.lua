@@ -154,9 +154,12 @@ os.exit()
 			elseif opts.version then
 				inf.title=inf.title.." ( "..opts.version.." ) "
 			end
+			
 
-			inf.x=(screen.width-inf.width)/2
-			inf.y=(screen.height-inf.height)/2
+			inf.x=math.floor((screen.width-inf.width)/2)
+			inf.y=math.floor((screen.height-inf.height)/2)
+			if inf.x<0 then inf.x=0 end
+			if inf.y<0 then inf.y=0 end
 
 			if wwin.flavour=="raspi" then -- do fullscreen on raspi
 				inf.x=0
@@ -255,6 +258,8 @@ require("gles").CheckError() -- uhm this fixes an error?
 			
 			m.setup() -- and call setup since it will always be running from now on until it is removed
 			
+			local shortname=name:gmatch("%.([^.]*)$")() -- get the bit after the last .
+			oven[shortname]=m -- and store in main oven for easy access to this mod
 			return m
 		end
 		
