@@ -5,7 +5,7 @@
 #include <string.h>
 #include <locale.h>
 #include <ctype.h>
-#include "pcre.h"
+#include <pcre.h>
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -48,7 +48,7 @@ static void checkarg_compile (lua_State *L, int pos, TArgComp *argC);
   lua_pushlstring (L, (text) + ALG_SUBBEG(ud,n), ALG_SUBLEN(ud,n))
 
 #define ALG_PUSHSUB_OR_FALSE(L,ud,text,n) \
-  (ALG_SUBVALID(ud,n) ? ALG_PUSHSUB (L,ud,text,n) : lua_pushboolean (L,0))
+  (ALG_SUBVALID(ud,n) ? (void) ALG_PUSHSUB (L,ud,text,n) : lua_pushboolean (L,0))
 
 #define ALG_PUSHSTART(L,ud,offs,n)   lua_pushinteger(L, (offs) + ALG_SUBBEG(ud,n) + 1)
 #define ALG_PUSHEND(L,ud,offs,n)     lua_pushinteger(L, (offs) + ALG_SUBEND(ud,n))
@@ -57,7 +57,6 @@ static void checkarg_compile (lua_State *L, int pos, TArgComp *argC);
 
 #define ALG_BASE(st)  0
 #define ALG_PULL
-#define ALG_USERETRY
 
 typedef struct {
   pcre       * pr;
@@ -221,6 +220,8 @@ static int compile_regex (lua_State *L, const TArgComp *argC, TPcre **pud) {
   pcre_fullinfo (ud->pr, ud->extra, PCRE_INFO_CAPTURECOUNT, &ud->ncapt);
   /* need (2 ints per capture, plus one for substring match) * 3/2 */
   ud->match = (int *) Lmalloc (L, (ALG_NSUB(ud) + 1) * 3 * sizeof (int));
+  if (!ud->match)
+    luaL_error (L, "malloc failed");
 
   if (pud) *pud = ud;
   return 1;
@@ -258,9 +259,13 @@ static int Lpcre_dfa_exec (lua_State *L)
   TPcre *ud;
   int res;
   int *buf, *ovector, *wspace;
+  size_t bufsize;
 
   checkarg_dfa_exec (L, &argE, &ud);
-  buf = (int*) Lmalloc (L, (argE.ovecsize + argE.wscount) * sizeof(int));
+  bufsize = (argE.ovecsize + argE.wscount) * sizeof(int);
+  buf = (int*) Lmalloc (L, bufsize);
+  if (!buf)
+    luaL_error (L, "malloc failed");
   ovector = buf;
   wspace = buf + argE.ovecsize;
 
@@ -277,11 +282,11 @@ static int Lpcre_dfa_exec (lua_State *L)
       lua_rawseti (L, -2, i+1);
     }
     lua_pushinteger (L, res);                    /* 3-rd return value */
-    free (buf);
+    Lfree (L, buf, bufsize);
     return 3;
   }
   else {
-    free (buf);
+    Lfree (L, buf, bufsize);
     if (ALG_NOMATCH (res))
       return lua_pushnil (L), 1;
     else
@@ -290,18 +295,10 @@ static int Lpcre_dfa_exec (lua_State *L)
 }
 #endif /* #if PCRE_MAJOR >= 6 */
 
-#ifdef ALG_USERETRY
-  static int gmatch_exec (TUserdata *ud, TArgExec *argE, int retry) {
-    int eflags = retry ? (argE->eflags|PCRE_NOTEMPTY|PCRE_ANCHORED) : argE->eflags;
-    return pcre_exec (ud->pr, ud->extra, argE->text, argE->textlen,
-      argE->startoffset, eflags, ud->match, (ALG_NSUB(ud) + 1) * 3);
-  }
-#else
-  static int gmatch_exec (TUserdata *ud, TArgExec *argE) {
-    return pcre_exec (ud->pr, ud->extra, argE->text, argE->textlen,
-      argE->startoffset, argE->eflags, ud->match, (ALG_NSUB(ud) + 1) * 3);
-  }
-#endif
+static int gmatch_exec (TUserdata *ud, TArgExec *argE) {
+  return pcre_exec (ud->pr, ud->extra, argE->text, argE->textlen,
+    argE->startoffset, argE->eflags, ud->match, (ALG_NSUB(ud) + 1) * 3);
+}
 
 static void gmatch_pushsubject (lua_State *L, TArgExec *argE) {
   lua_pushlstring (L, argE->text, argE->textlen);
@@ -312,18 +309,10 @@ static int findmatch_exec (TPcre *ud, TArgExec *argE) {
     argE->startoffset, argE->eflags, ud->match, (ALG_NSUB(ud) + 1) * 3);
 }
 
-#ifdef ALG_USERETRY
-  static int gsub_exec (TPcre *ud, TArgExec *argE, int st, int retry) {
-    int eflags = retry ? (argE->eflags|PCRE_NOTEMPTY|PCRE_ANCHORED) : argE->eflags;
-    return pcre_exec (ud->pr, ud->extra, argE->text, argE->textlen,
-      st, eflags, ud->match, (ALG_NSUB(ud) + 1) * 3);
-  }
-#else
-  static int gsub_exec (TPcre *ud, TArgExec *argE, int st) {
-    return pcre_exec (ud->pr, ud->extra, argE->text, argE->textlen,
-      st, argE->eflags, ud->match, (ALG_NSUB(ud) + 1) * 3);
-  }
-#endif
+static int gsub_exec (TPcre *ud, TArgExec *argE, int st) {
+  return pcre_exec (ud->pr, ud->extra, argE->text, argE->textlen,
+    st, argE->eflags, ud->match, (ALG_NSUB(ud) + 1) * 3);
+}
 
 static int split_exec (TPcre *ud, TArgExec *argE, int offset) {
   return pcre_exec (ud->pr, ud->extra, argE->text, argE->textlen, offset,
@@ -337,7 +326,7 @@ static int Lpcre_gc (lua_State *L) {
     if (ud->pr)      pcre_free (ud->pr);
     if (ud->extra)   pcre_free (ud->extra);
     if (ud->tables)  pcre_free ((void *)ud->tables);
-    free (ud->match);
+    Lfree (L, ud->match, (ALG_NSUB(ud) + 1) * 3 * sizeof (int));
   }
   return 0;
 }
@@ -386,6 +375,7 @@ static const luaL_Reg r_functions[] = {
   { "find",        algf_find },
   { "gmatch",      algf_gmatch },
   { "gsub",        algf_gsub },
+  { "count",       algf_count },
   { "split",       algf_split },
   { "new",         algf_new },
   { "flags",       Lpcre_get_flags },

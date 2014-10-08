@@ -50,7 +50,7 @@ static const unsigned char *gettranslate (lua_State *L, int pos);
   lua_pushlstring (L, (text) + ALG_SUBBEG(ud,n), ALG_SUBLEN(ud,n))
 
 #define ALG_PUSHSUB_OR_FALSE(L,ud,text,n) \
-  (ALG_SUBVALID(ud,n) ? ALG_PUSHSUB (L,ud,text,n) : lua_pushboolean (L,0))
+  (ALG_SUBVALID(ud,n) ? (void) ALG_PUSHSUB (L,ud,text,n) : lua_pushboolean (L,0))
 
 #define ALG_PUSHSTART(L,ud,offs,n)   lua_pushinteger(L, (offs) + ALG_SUBBEG(ud,n) + 1)
 #define ALG_PUSHEND(L,ud,offs,n)     lua_pushinteger(L, (offs) + ALG_SUBEND(ud,n))
@@ -105,7 +105,9 @@ static const unsigned char *gettranslate (lua_State *L, int pos) {
   if (lua_isnoneornil (L, pos))
     return NULL;
 
-  translate = (const unsigned char *) Lmalloc (L, ALG_TRANSLATE_SIZE);
+  translate = (const unsigned char *) malloc (ALG_TRANSLATE_SIZE);
+  if (!translate)
+    luaL_error (L, "malloc failed");
   memset ((unsigned char *) translate, 0, ALG_TRANSLATE_SIZE); /* initialize all members to 0 */
   for (i = 0; i <= UCHAR_MAX; i++) {
     lua_pushinteger (L, i);
@@ -297,6 +299,7 @@ static const luaL_Reg r_functions[] = {
   { "find",       algf_find },
   { "gmatch",     algf_gmatch },
   { "gsub",       algf_gsub },
+  { "count",      algf_count },
   { "split",      algf_split },
   { "new",        algf_new },
   { "flags",      Gnu_get_flags },

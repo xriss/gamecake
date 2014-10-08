@@ -61,7 +61,7 @@
   lua_pushlstring (L, (text) + ALG_SUBBEG(ud,n), ALG_SUBLEN(ud,n))
 
 #define ALG_PUSHSUB_OR_FALSE(L,ud,text,n) \
-  (ALG_SUBVALID(ud,n) ? ALG_PUSHSUB (L,ud,text,n) : lua_pushboolean (L,0))
+  (ALG_SUBVALID(ud,n) ? (void) ALG_PUSHSUB (L,ud,text,n) : lua_pushboolean (L,0))
 
 #define ALG_PUSHSTART(L,ud,offs,n)   lua_pushinteger(L, (offs) + ALG_SUBBEG(ud,n) + 1)
 #define ALG_PUSHEND(L,ud,offs,n)     lua_pushinteger(L, (offs) + ALG_SUBEND(ud,n))
@@ -110,6 +110,8 @@ static int compile_regex (lua_State *L, const TArgComp *argC, TPosix **pud) {
   if (argC->cflags & REG_NOSUB)
     ud->r.re_nsub = 0;
   ud->match = (regmatch_t *) Lmalloc (L, (ALG_NSUB(ud) + 1) * sizeof (regmatch_t));
+  if (!ud->match)
+    luaL_error (L, "malloc failed");
   lua_pushvalue (L, ALG_ENVIRONINDEX);
   lua_setmetatable (L, -2);
 
@@ -184,7 +186,7 @@ static int Posix_gc (lua_State *L) {
   if (ud->freed == 0) {           /* precaution against "manual" __gc calling */
     ud->freed = 1;
     regfree (&ud->r);
-    free (ud->match);
+    Lfree (L, ud->match, (ALG_NSUB(ud) + 1) * sizeof (regmatch_t));
   }
   return 0;
 }
@@ -261,6 +263,7 @@ static const luaL_Reg r_functions[] = {
   { "find",       algf_find },
   { "gmatch",     algf_gmatch },
   { "gsub",       algf_gsub },
+  { "count",      algf_count },
   { "split",      algf_split },
   { "new",        algf_new },
   { "flags",      Posix_get_flags },
