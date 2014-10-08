@@ -85,7 +85,7 @@ if (re->magic_number != MAGIC_NUMBER)
   }
 if (optptr != NULL) *optptr = (int)(re->options & PUBLIC_COMPILE_OPTIONS);
 if (first_byte != NULL)
-  *first_byte = ((re->flags & PCRE_FIRSTSET) != 0)? re->first_byte :
+  *first_byte = ((re->flags & PCRE_FIRSTSET) != 0)? re->first_char :
      ((re->flags & PCRE_STARTLINE) != 0)? -1 : -2;
 return re->top_bracket;
 }

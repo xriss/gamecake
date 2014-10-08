@@ -35,7 +35,8 @@ man page, in case the conversion went wrong.
 The C++ wrapper for PCRE was provided by Google Inc. Some additional
 functionality was added by Giuseppe Maxia. This brief man page was constructed
 from the notes in the <i>pcrecpp.h</i> file, which should be consulted for
-further details.
+further details. Note that the C++ wrapper supports only the original 8-bit
+PCRE library. There is no 16-bit or 32-bit support at present.
 </P>
 <br><a name="SEC3" href="#TOC1">MATCHING INTERFACE</a><br>
 <P>
@@ -191,7 +192,7 @@ supported:
    PCRE_DOTALL           dot matches newlines        /s
    PCRE_DOLLAR_ENDONLY   $ matches only at end       N/A
    PCRE_EXTRA            strict escape parsing       N/A
-   PCRE_EXTENDED         ignore whitespaces          /x
+   PCRE_EXTENDED         ignore white spaces         /x
    PCRE_UTF8             handles UTF8 chars          built-in
    PCRE_UNGREEDY         reverses * and *?           N/A
    PCRE_NO_AUTO_CAPTURE  disables capturing parens   N/A (*)
@@ -360,9 +361,7 @@ Copyright &copy; 2007 Google Inc.
 </P>
 <br><a name="SEC12" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 March 2009
-<br>
-Minor typo fixed: 25 July 2011
+Last updated: 08 January 2012
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

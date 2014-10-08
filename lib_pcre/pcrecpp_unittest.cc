@@ -833,6 +833,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
+  printf("PCRE C++ wrapper tests\n");
   printf("Testing FullMatch\n");
 
   int i;
