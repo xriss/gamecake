@@ -5,7 +5,7 @@
 #include <string.h>
 #include <locale.h>
 #include <ctype.h>
-#include <pcre.h>
+#include "pcre.h"
 
 #include "lua.h"
 #include "lauxlib.h"

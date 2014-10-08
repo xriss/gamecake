@@ -10,7 +10,7 @@ links { "lib_lua" , "lib_pcre" }
 
 defines "VERSION=\\\"2.7.1\\\""
 
-includedirs { "src" , "src/pcre" }
+includedirs { "src" , "src/pcre" , "../lib_pcre"}
 
 KIND{kind="lua",name="rex_pcre"}
 
