@@ -1,4 +1,4 @@
-.TH PCRECPP 3
+.TH PCRECPP 3 "08 January 2012" "PCRE 8.30"
 .SH NAME
 PCRE - Perl-compatible regular expressions.
 .SH "SYNOPSIS OF C++ WRAPPER"
@@ -12,7 +12,8 @@ PCRE - Perl-compatible regular expressions.
 The C++ wrapper for PCRE was provided by Google Inc. Some additional
 functionality was added by Giuseppe Maxia. This brief man page was constructed
 from the notes in the \fIpcrecpp.h\fP file, which should be consulted for
-further details.
+further details. Note that the C++ wrapper supports only the original 8-bit
+PCRE library. There is no 16-bit or 32-bit support at present.
 .
 .
 .SH "MATCHING INTERFACE"
@@ -172,7 +173,7 @@ supported:
    PCRE_DOTALL           dot matches newlines        /s
    PCRE_DOLLAR_ENDONLY   $ matches only at end       N/A
    PCRE_EXTRA            strict escape parsing       N/A
-   PCRE_EXTENDED         ignore whitespaces          /x
+   PCRE_EXTENDED         ignore white spaces         /x
    PCRE_UTF8             handles UTF8 chars          built-in
    PCRE_UNGREEDY         reverses * and *?           N/A
    PCRE_NO_AUTO_CAPTURE  disables capturing parens   N/A (*)
@@ -343,6 +344,5 @@ Copyright (c) 2007 Google Inc.
 .rs
 .sp
 .nf
-Last updated: 17 March 2009
-Minor typo fixed: 25 July 2011
+Last updated: 08 January 2012
 .fi

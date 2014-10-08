@@ -113,10 +113,10 @@ internal_re->top_bracket =
   (pcre_uint16)byteflip(re->top_bracket, sizeof(re->top_bracket));
 internal_re->top_backref =
   (pcre_uint16)byteflip(re->top_backref, sizeof(re->top_backref));
-internal_re->first_byte =
-  (pcre_uint16)byteflip(re->first_byte, sizeof(re->first_byte));
-internal_re->req_byte =
-  (pcre_uint16)byteflip(re->req_byte, sizeof(re->req_byte));
+internal_re->first_char =
+  (pcre_uint16)byteflip(re->first_char, sizeof(re->first_char));
+internal_re->req_char =
+  (pcre_uint16)byteflip(re->req_char, sizeof(re->req_char));
 internal_re->name_table_offset =
   (pcre_uint16)byteflip(re->name_table_offset, sizeof(re->name_table_offset));
 internal_re->name_entry_size =

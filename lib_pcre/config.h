@@ -269,3 +269,6 @@ them both to 0; an emulation function will be used. */
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 /* #undef size_t */
+
+
+#define PARENS_NEST_LIMIT 250

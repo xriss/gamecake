@@ -384,7 +384,6 @@ int RE::GlobalReplace(const StringPiece& rewrite,
   int vec[kVecSize];
   string out;
   int start = 0;
-  int lastend = -1;
   bool last_match_was_empty_string = false;
 
   while (start <= static_cast<int>(str->length())) {
@@ -440,7 +439,6 @@ int RE::GlobalReplace(const StringPiece& rewrite,
     out.append(*str, start, matchstart - start);
     Rewrite(&out, rewrite, *str, vec, matches);
     start = matchend;
-    lastend = matchend;
     count++;
     last_match_was_empty_string = (matchstart == matchend);
   }
@@ -513,7 +511,7 @@ int RE::TryMatch(const StringPiece& text,
     return 0;
   }
 
-  pcre_extra extra = { 0, 0, 0, 0, 0, 0 };
+  pcre_extra extra = { 0, 0, 0, 0, 0, 0, 0, 0 };
   if (options_.match_limit() > 0) {
     extra.flags |= PCRE_EXTRA_MATCH_LIMIT;
     extra.match_limit = options_.match_limit();
@@ -523,7 +521,10 @@ int RE::TryMatch(const StringPiece& text,
     extra.match_limit_recursion = options_.match_limit_recursion();
   }
 
-  int options = 0;
+  // int options = 0;
+  // Changed by PH as a result of bugzilla #1288
+  int options = (options_.all_options() & PCRE_NO_UTF8_CHECK);
+
   if (anchor != UNANCHORED)
     options |= PCRE_ANCHORED;
   if (!empty_ok)
@@ -659,6 +660,8 @@ int RE::NumberOfCapturingGroups() const {
 /***** Parsers for various types *****/
 
 bool Arg::parse_null(const char* str, int n, void* dest) {
+  (void)str;
+  (void)n;
   // We fail if somebody asked us to store into a non-NULL void* pointer
   return (dest == NULL);
 }
