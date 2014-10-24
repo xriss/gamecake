@@ -300,7 +300,7 @@ M.bake=function(oven,keys)
 
 					if active then
 						new_joydir( keys.joystick_msg_to_key(key.joy) )
-						ups.set_axis(keys.joy) -- tell recap about the joy positions
+						ups.set_axis(key.joy) -- tell recap about the joy positions
 					end
 				end
 			
