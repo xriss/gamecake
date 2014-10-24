@@ -203,7 +203,7 @@ posix.win_caps=false
 posix.win_shift=false
 
 
-function posix.win_translate_msg_keys_and_mouse(m)
+function posix.win_translate_msg_keys_and_mouse(win,m)
 	if not m then return nil end
 	
 	if m.class=="posix_mouse" then
