@@ -291,7 +291,7 @@ function win.create(opts)
 	
 	base.info(w)
 
-	if posix and base.flavour="raspi" then
+	if posix and base.flavour=="raspi" then
 		posix.win_translate_msg=function(m) return posix.win_translate_msg_keys_and_mouse(win,m) end -- need to make real keyboard/mouse msgs
 	end
 
