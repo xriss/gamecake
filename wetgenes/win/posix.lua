@@ -215,11 +215,12 @@ function posix.win_translate_msg_keys_and_mouse(win,m)
 			inp.x=inp.x+dx
 			inp.y=inp.y+dy
 			
+
 			if inp.x<0   then inp.x=0    end
 			if inp.y<0   then inp.y=0    end
 			if inp.x>=win.width  then inp.x=win.width-1 end
 			if inp.y>=win.height then inp.y=win.height-1 end
-			
+
 			table.insert(posix.win_msgstack,
 			{time=os.time(),class="mouse",x=inp.x,y=inp.y,action=0,keycode=0})
 			
@@ -238,7 +239,8 @@ function posix.win_translate_msg_keys_and_mouse(win,m)
 		if m.type==2 then -- movement
 		
 			local v=m.value
-			if v >= 0x80000000 then v=v-0x100000000 end
+			if v >= 0x80000000 then v=v-0x100000000 end -- maybe 32bit
+			if v >= 0x8000 then v=v-0x10000 end         -- maybe 16bit
 
 			if m.code==0 then -- x
 				adjust(v,0)
