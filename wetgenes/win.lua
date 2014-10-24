@@ -44,7 +44,9 @@ end
 
 if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.raspi") end )
-	if suc then hardcore=dat base.flavour="raspi" end
+	if suc then hardcore=dat base.flavour="raspi"
+		posix=require("wetgenes.win.posix")
+	end
 end
 
 if not hardcore then
