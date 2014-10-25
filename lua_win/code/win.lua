@@ -46,7 +46,6 @@ if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.raspi") end )
 	if suc then hardcore=dat base.flavour="raspi"
 		posix=require("wetgenes.win.posix")
-		posix.win_translate_msg=posix.win_translate_msg_keys_and_mouse -- need to make real keyboard/mouse msgs
 	end
 end
 
@@ -293,6 +292,11 @@ function win.create(opts)
 	w.overscale=opts.overscale or 1
 	
 	base.info(w)
+
+	if posix and base.flavour=="raspi" then
+		posix.win_translate_msg=function(m) return posix.win_translate_msg_keys_and_mouse(w,m) end -- need to make real keyboard/mouse msgs
+	end
+
 	return w
 end
 
