@@ -188,7 +188,7 @@ end
 
 
 readfile=function(name)
-	local fp=assert(io.open(name,"r"))
+	local fp=assert(io.open(name,"rb"))
 	local d=fp:read("*all")
 	fp:close()
 	return d
@@ -203,7 +203,7 @@ end
 fileexists=file_exists
 
 writefile=function(name,data)
-	local fp=assert(io.open(name,"w"))
+	local fp=assert(io.open(name,"wb"))
 	fp:write(data)
 	fp:close()
 end
