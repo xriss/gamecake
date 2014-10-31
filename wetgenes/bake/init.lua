@@ -194,13 +194,14 @@ readfile=function(name)
 	return d
 end
 
-file_exists=function(name)
+isfile=function(name)
 	local fp=(io.open(name,"r"))
 --print(fp)
 	if fp then fp:close() return true end
 	return false
 end
-fileexists=file_exists
+fileexists=isfile -- alias for old code, do not use in new code
+file_exists=isfile -- alias for old code, do not use in new code
 
 writefile=function(name,data)
 	local fp=assert(io.open(name,"wb"))
