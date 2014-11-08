@@ -160,7 +160,7 @@ local escape_html=opts.escape_html or false
 			
 				local c1=token:sub(1,1) -- some chars to check
 				
-				if c1 == "/" then -- a very simple link relative to where we are
+				if c1 == "/" and (not opts.no_slash_links) then -- a very simple link relative to where we are
 				
 					local chars="[%w/%-%+_#%.:]+"
 					

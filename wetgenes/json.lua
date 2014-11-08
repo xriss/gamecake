@@ -319,9 +319,31 @@ include nulls in the output by using wetgenes.json.null
 function wjson.encode(tab,opts)
 opts=opts or {}
 
+local indent=0
+
 local out={}
 local put=function(s)
 	out[#out+1]=s or ""
+end
+
+local indent_add=function()
+	indent=indent+1
+end
+local indent_sub=function()
+	indent=indent-1
+end
+
+local put_indent=function(s)
+	if opts.pretty then
+		put(string.rep(" ",indent))
+	end
+	if s then put(s) end
+end
+local put_newline=function(s)
+	if s then put_indent(s) end
+	if opts.pretty then
+		put("\n")
+	end
 end
 
 local encode_str
@@ -357,9 +379,13 @@ local encode_tab
 		local t
 		local comma=false
 		if array then
+		
 			put("[")
+			indent_add()
 			for i=1,#vv do local v=vv[i]
 				put(comma and ",") comma=true
+				put_newline()
+				put_indent()
 				t=type(v)
 				if t=="table" then
 					encode_tab(v,is_array(v))
@@ -367,12 +393,15 @@ local encode_tab
 					put(encode_it(v,t))
 				end
 			end
+			indent_sub()
 			put("]")
 		else
 			put("{")
+			indent_add()
 			for i,v in pairs(vv) do
 				put(comma and ",") comma=true
-				put(encode_it(i)) -- allow numbers or strings
+				put_newline()
+				put_indent(encode_it(i)) -- allow numbers or strings
 				put(":")
 				t=type(v)
 				if t=="table" then
@@ -381,6 +410,7 @@ local encode_tab
 					put(encode_it(v,t))
 				end
 			end
+			indent_sub()
 			put("}")
 		end
 	end
