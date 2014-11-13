@@ -329,6 +329,7 @@ function posix.win_open_events(w)
 			local v=l:sub(4)
 			if t=="I: " then
 				tab={} -- start new device
+				tab.calibration={}
 				tab.bus		=string.match(v,"Bus=([^%s]+)")
 				tab.vendor	=string.match(v,"Vendor=([^%s]+)")
 				tab.product	=string.match(v,"Product=([^%s]+)")
@@ -398,7 +399,7 @@ function posix.win_open_events(w)
 end
 function posix.win_read_events(w) -- call this until it returns nil to get all events
 	
-	local deadzone=24
+	local deadzone=48 -- a big one helps deal with loose sticks
 
 	local events=posix.win_events
 	for i=0,#events do local v=events[i]
@@ -427,9 +428,40 @@ function posix.win_read_events(w) -- call this until it returns nil to get all e
 	--print("got",v.name)
 						if Isecs then -- sanity check
 						
+							if Ivalue>=32768 then	-- assume xbox controller
+								Ivalue=Ivalue-65536
+							end
+							
+							if Itype==3 then -- auto calibrate on use...
+								local cc=v.calibration[Icode]
+								if not cc then -- new
+									cc={}
+									v.calibration[Icode]=cc
+									cc.min=-1
+									cc.max=1
+								end
+								if Ivalue<cc.min then cc.min=Ivalue end
+								if Ivalue>cc.max then cc.max=Ivalue end
+								
+--								if cc.max>cc.min then
+									if Ivalue>=0 then
+										Ivalue=Ivalue/cc.max
+									elseif Ivalue<=0 then
+										Ivalue=Ivalue/(-cc.min)
+									end
+--									Ivalue=(Ivalue-cc.min)/(cc.max-cc.min)
+--								else
+--									Ivalue=0
+--								end
+							end
+
+--[[
 							if Itype==3 then
 								if Ivalue>128-deadzone and Ivalue<128+deadzone then Ivalue=128 end
+								if Ivalue<=128-deadzone then Ivalue=math.floor(128       *((    Ivalue /(128-deadzone)))) end
+								if Ivalue>=128+deadzone then Ivalue=math.floor(256 - (128*((256-Ivalue)/(128-deadzone)))) end
 							end
+]]
 							
 							local key=Itype..":"..Icode
 							local val=v.state[key]

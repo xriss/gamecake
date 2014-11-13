@@ -50,15 +50,6 @@ M.bake=function(oven,keys)
 	}
 -- 1up/2up key islands
 	keys.defaults["island1"]={
-		["w"]			=	"up",
-		["s"]			=	"down",
-		["a"]			=	"left",
-		["d"]			=	"right",
-		["shift_l"]		=	"fire",
-		["control_l"]	=	"fire",
-		["alt_l"]		=	"fire",
-	}
-	keys.defaults["island2"]={
 		["up"]			=	"up",
 		["down"]		=	"down",
 		["left"]		=	"left",
@@ -66,6 +57,16 @@ M.bake=function(oven,keys)
 		["shift_r"]		=	"fire",
 		["control_r"]	=	"fire",
 		["alt_r"]		=	"fire",
+		["space"]		=	"fire",
+	}
+	keys.defaults["island2"]={
+		["w"]			=	"up",
+		["s"]			=	"down",
+		["a"]			=	"left",
+		["d"]			=	"right",
+		["shift_l"]		=	"fire",
+		["control_l"]	=	"fire",
+		["alt_l"]		=	"fire",
 	}
 -- single player mame/picade style buttons
 	keys.defaults["pimoroni"]={
@@ -131,8 +132,12 @@ M.bake=function(oven,keys)
 
 		local used=false
 		for i,v in ipairs(keys.up) do -- possibly sort the joy msgs here...
-			local t=v.msg(m)
-			used=used or t
+--			if m.class=="posix_joystick" and ( m.code==59 or m.code==60 or m.code==61 ) then -- ignore crappy acc spam from a ds3
+--			else
+--print(wstr.dump(m))
+				local t=v.msg(m)
+				used=used or t
+--			end
 		end
 		return used
 	end
@@ -147,6 +152,8 @@ M.bake=function(oven,keys)
 		
 		key.joy={}					
 		key.joy.class="joystick"
+		key.joy.lt=0
+		key.joy.rt=0
 		key.joy.lx=0
 		key.joy.rx=0
 		key.joy.dx=0
@@ -243,7 +250,7 @@ M.bake=function(oven,keys)
 							if xx > yy then
 								if x>=0 then
 									joydir="right"
-									acc()		
+									acc()
 								else
 									joydir="left"
 									acc()
@@ -266,44 +273,52 @@ M.bake=function(oven,keys)
 				end
 			
 			elseif m.class=="posix_joystick" then
+				if key.idx-1==m.posix_num%key.opts.max_up then -- only take inputs from one joystick for multiplayer
+					if m.type==1 then -- keys
 
-				if m.type==1 then -- keys
+						if m.value==1 then -- key set
+							ups.set_button("fire",true)
+							used=true
+						elseif m.value==0 then -- key clear
+							ups.set_button("fire",false)
+							used=true
+						end
 
-					if m.value==1 then -- key set
-						ups.set_button("fire",true)
-						used=true
-					elseif m.value==0 then -- key clear
-						ups.set_button("fire",false)
-						used=true
-					end
+					elseif m.type==3 then -- sticks ( assume ps3 config )
+					
+						local active=false
+						if m.code==0 then
+							key.joy.lx=m.value
+							active=true
+							used=true
+						elseif m.code==1 then
+							key.joy.ly=m.value
+							active=true
+							used=true
+						elseif m.code==2 then
+							key.joy.lt=m.value
+							active=true
+							used=true
+						elseif m.code==5 then
+							key.joy.rt=m.value
+							active=true
+							used=true
+						elseif m.code==16 then
+							key.joy.dx=m.value
+							active=true
+							used=true
+						elseif m.code==17 then
+							key.joy.dy=m.value
+							active=true
+							used=true
+						end
 
-				elseif m.type==3 then -- sticks ( assume ps3 config )
-				
-					local active=false
-					if m.code==0 then
-						key.joy.lx=(m.value-128)/128
-						active=true
-						used=true
-					elseif m.code==1 then
-						key.joy.ly=(m.value-128)/128
-						active=true
-						used=true
-					elseif m.code==2 then
-						key.joy.rx=(m.value-128)/128
-						active=true
-						used=true
-					elseif m.code==5 then
-						key.joy.ry=(m.value-128)/128
-						active=true
-						used=true
-					end
-
-					if active then
-						new_joydir( keys.joystick_msg_to_key(key.joy) )
-						ups.set_axis(key.joy) -- tell recap about the joy positions
+						if active then
+							new_joydir( keys.joystick_msg_to_key(key.joy) )
+							ups.set_axis(key.joy) -- tell recap about the joy positions
+						end
 					end
 				end
-			
 			elseif m.class=="joystick" then
 
 				new_joydir( keys.joystick_msg_to_key(m) )
@@ -332,7 +347,7 @@ M.bake=function(oven,keys)
 -- this works on all axis inputs (bigest movement is chosen)
 	function keys.joystick_msg_to_key(m)
 		if m.class=="joystick" then
-			local d=1/8
+			local d=3/8
 			local t,vx,vy
 			local tt,vxx,vyy
 			local nox,noy
@@ -347,7 +362,7 @@ M.bake=function(oven,keys)
 		
 			if vxx/2 > vyy then noy=true end
 			if vyy/2 > vxx then nox=true end
-			
+
 			if not nox then
 				if     vx>d		then	return "right"
 				elseif vx<-d 	then	return "left"
@@ -364,7 +379,7 @@ M.bake=function(oven,keys)
 
 -- as above but this works on given axis values, expected to be +-1 range
 	function keys.joystick_axis_to_key(vx,vy)
-		local d=1/8
+		local d=1/4
 		local vxx,vyy
 		local nox,noy
 		
