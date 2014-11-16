@@ -151,7 +151,7 @@ $(function(){
 	}
 	if(!webgl_support())
 	{
-		warning+='<br/>Something is wrong with WebGL on your browser!<br/>Visit <a href="http://get.webgl.org/">http://get.webgl.org/</a> for help.<br/><br/>';
+		warning+='<br/>Something is wrong with WebGL on your browser!<br/>Visit <a href="http://get.webgl.org/">http://get.webgl.org/</a> for help.<br/><br/>Maybe Chrome needs you to run with the command line option --disable-gpu-sandbox to work.<br/><br/>';
 	}
 
 	var readme='<br/>Please wait, the first load may be a little bit slow.<br/><br/>';
