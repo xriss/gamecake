@@ -68,7 +68,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			id=id:sub(2)
 		end
 		local d=ids[id]
-		if d[0]=="source" or d[0]=="float_array" then
+		if type(d[0])=="string" and ( string.lower(d[0])=="source" or string.lower(d[0])=="float_array" or string.lower(d[0])=="name_array") then
 			return d 
 		else
 			local t=wxml.descendent(d,"input")
@@ -80,7 +80,11 @@ print("loaded ",#s,"bytes from "..opts.filename)
 		local a={}
 		for w in string.gfind(s, "([^%s]+)") do
 			local n=tonumber(w)
-			a[#a+1]=n
+			if n then
+				a[#a+1]=n
+			else
+				a[#a+1]=w
+			end
 		end	
 		return a
 	end
@@ -106,9 +110,90 @@ print("loaded ",#s,"bytes from "..opts.filename)
 		sources[id]=it
 		return it
 	end
+	
+	local scene=wxml.descendent(x,"visual_scene") -- just grab the first scene and look for an armature
+	local joints={}
+	if scene then 
+		local parse
+		parse=function(nodes,joints)
+			for i,v in ipairs(nodes) do
+				local joint
+				if type(v)=="table" then
+					if	( string.lower(v[0]      or "")=="node"  )
+					and	( string.lower(v["type"] or "")=="joint" ) then -- found a joint
+						joint={name=v.name}
+						joints[#joints+1]=joint
+						local m=wxml.descendent(v,"matrix")
+						if m then
+							joint.matrix=scan_nums(m[1])
+						end
+					end
+					parse(v,joint or joints) -- recurse
+				end
+			end
+		end
+		parse(scene,joints)
+	end
+	local get_joint
+	get_joint=function(name,js)
+		js=js or joints
+		for i,v in ipairs(js) do
+			if v.name==name then return v end
+			local j=get_joint(name,v)
+			if j then return j end
+		end
+	end
+--	print(wstr.dump(joints))
+	
+	local aas=wxml.descendent(x,"library_animations")
+	local anims={}
+	for i,v in ipairs(aas or {}) do -- just check the top level for anims 
+		if v[0]=="animation" then
+			local d=wxml.descendent(v,"channel")
+			if d and d.target then
+				local target=wstr.split(d.target,"/")
+				local joint=get_joint(target[1])
+				local samp=get_by_id(d.source)
+				local src={}
+				for i,v in ipairs(samp) do
+					if type(v)=="table" and v[0]=="input" then
+						if     v.semantic=="INPUT" then -- time
+							src.time=get_source(v.source)
+						elseif v.semantic=="OUTPUT" then -- matrix
+							src.matrix=get_source(v.source)
+						elseif v.semantic=="INTERPOLATION" then -- tween
+							src.tween=get_source(v.source)
+						end
+					end
+				end
+				if joint and src.time and src.matrix and src.tween then -- got some animation we can use
+					local anim={}
+					for i=1,#src.time.data do
+						local frame={}
+						frame.time=src.time.data[i]
+						frame.tween=src.tween.data[i]
+						frame.matrix={}
+						for j=1,16 do
+							frame.matrix[j]=src.matrix.data[((i-1)*16)+j]
+						end
+						anim[i]=frame
+					end
+					joint.anim=anim
+--					print(target[1],target[2],#anim)
+				end
+			end
+--			local t=get_by_id(id)
+		end
+	end
+--	print(wstr.dump(joints))
+
 
 -- need to handle multiple geometries here...
-	geoms={}
+	local geoms={}
+	
+	if joints[1] then
+		geoms.joints=joints
+	end
 
 	local geo
 	local t=wxml.descendent(x,"library_geometries")
@@ -157,7 +242,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 			end
 
-			print("found poly list count "..#polys)
+--			print("found poly list count "..#polys)
 
 		-- turn dae split vertexs into a single vertex idx
 			local vertex_idxs={}
@@ -212,7 +297,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 			for ips,ps in ipairs(polys) do
 			
-		print("found poly count "..#ps.vcount.." material "..ps.material)
+--		print("found poly count "..#ps.vcount.." material "..ps.material)
 				local off=1
 				for ipc,pc in ipairs(ps.vcount) do
 					local poly={}
