@@ -88,12 +88,22 @@ function glescode.create(gl)
 		return m4
 	end
 
+-- create a new matrix to mult by
+	function code.CreateMatrix(a)
+		local m4=tcore.new_m4() tcore.set(m4,a,16)
+		return m4
+	end
+
 	function code.LoadMatrix(...)
 		tcore.set(code.stack_matrix,...)
 	end
 
 	function code.MultMatrix(a)
 		tcore.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
+	end
+
+	function code.PreMultMatrix(a)
+		tcore.m4_product_m4(a,code.stack_matrix,code.stack_matrix)
 	end
 
 -- we have our own majick code for this sort of thing

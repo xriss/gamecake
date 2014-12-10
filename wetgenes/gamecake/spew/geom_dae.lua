@@ -204,7 +204,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			geo.mesh=wxml.descendent(v,"mesh")
 
 
-			local it={}
+			local it=geom.new(it)
 			it.verts={}
 			it.polys={}
 			it.mats={}
@@ -280,9 +280,10 @@ print("loaded ",#s,"bytes from "..opts.filename)
 					
 					mat.diffuse=  sids["diffuse"]   and scan_nums(sids["diffuse"][1])   or {1,1,1,1}
 					mat.specular= sids["specular"]  and scan_nums(sids["specular"][1])  or {0,0,0,1}
-					mat.shininess=sids["shininess"] and scan_nums(sids["shininess"][1]) or {0,0,0,1}
+					mat.shininess=sids["shininess"] and scan_nums(sids["shininess"][1]) or {4}
 					
 					mat.diffuse[4]=1
+					mat.specular[4]=1
 					
 					mat.idx=idx
 

@@ -17,6 +17,10 @@ M.bake=function(oven,geom)
 	geom=geom or {}
 	geom.modname=M.modname
 
+	geom.meta={__index=geom}
+	geom.new=function(it) it=it or {} setmetatable(it,geom.meta) return it end
+
+
 	local gl=oven.gl
 	local cake=oven.cake
 	local canvas=cake.canvas
@@ -33,6 +37,7 @@ M.bake=function(oven,geom)
 			v[2]=v[2]*s
 			v[3]=v[3]*s
 		end
+		return it
 	end
 
 	-- allocate and upload the geom to opengl buffers
@@ -70,12 +75,15 @@ M.bake=function(oven,geom)
 			it.predrawn=flat.array_predraw({fmt="xyznrmuvm",data=t,progname=progname,array=gl.TRIANGLE_STRIP,vb=true})
 		end
 		
+		return it
 	end
 
 	-- draw the geom (upload first, mkay)
 	geom.draw=function(it,progname,cb)
 		geom.predraw(it,progname)
 		it.predrawn.draw(cb)
+		
+		return it
 	end	
 	
 	-- allocate and upload the geom to opengl buffers
@@ -107,12 +115,14 @@ M.bake=function(oven,geom)
 			it.predrawn_lines=flat.array_predraw({fmt="xyznrmuvm",data=t,progname=progname,array=gl.LINES,vb=true})
 		end
 		
+		return it
 	end
 
 	-- draw the geom (upload first, mkay)
 	geom.draw_lines=function(it,progname,cb)
 		geom.predraw_lines(it,progname)
 		it.predrawn_lines.draw(cb)
+		return it
 	end	
 
 	-- build lines from polys
@@ -140,6 +150,7 @@ M.bake=function(oven,geom)
 				lines[#lines+1]={l1,l2}
 			end
 		end
+		return it
 	end
 
 	-- build the edges
@@ -166,6 +177,7 @@ M.bake=function(oven,geom)
 				it.edges[#it.edges+1]={i1,i2} -- each edge will only get added once
 			end
 		end
+		return it
 	end
 	
 -- uses first 3 verts, does not fix the length
@@ -215,12 +227,13 @@ M.bake=function(oven,geom)
 			v[7]=t[idx][1]
 			v[8]=t[idx][2]
 		end
+		return it
 	end
 
 	geom.flip=function(it)
-
 		for i,p in pairs(it.polys) do geom.poly_flip(it,p) end
 		for i,v in pairs(it.verts) do geom.vert_flip(it,v) end
+		return it
 	end
 		
 	geom.vert_flip=function(it,v)
@@ -229,6 +242,7 @@ M.bake=function(oven,geom)
 			v[5]=-v[5]
 			v[6]=-v[6]
 		end
+		return it
 	end
 
 	geom.poly_flip=function(it,p)
@@ -241,6 +255,7 @@ M.bake=function(oven,geom)
 			p[i]=n[i]
 		end
 
+		return it
 	end
 
 	geom.build_normals=function(it)
@@ -275,8 +290,10 @@ M.bake=function(oven,geom)
 			vv.count=nil
 		end
 
+		return it
 	end
 
+-- face polys away from the origin
 	geom.fix_poly_order=function(it,p)
 	
 		local v2=it.verts[ p[2] ]
@@ -287,6 +304,8 @@ M.bake=function(oven,geom)
 		if d>0 then -- invert poly order
 			geom.poly_flip(it,p)
 		end
+
+		return it
 	end
 
 	-- bevil a base object, s is how much each face is scaled, so 7/8 is a nice bevel
@@ -417,11 +436,12 @@ M.bake=function(oven,geom)
 			geom.fix_poly_order(it,p)
 		end
 			
+		return it
 	end
 
 
 	geom.tetrahedron=function(it)
-		it=it or {}
+		it=geom.new(it)
 		
 		it.verts={
 				{ 0.5, 0.5, 0.5},
@@ -444,7 +464,7 @@ M.bake=function(oven,geom)
 	end
 
 	geom.octahedron=function(it)
-		it=it or {}
+		it=geom.new(it)
 		
 		local a=1/(2*math.sqrt(2))
 		local b=1/2
@@ -476,7 +496,7 @@ M.bake=function(oven,geom)
 	end
 	
 	geom.hexahedron=function(it)
-		it=it or {}
+		it=geom.new(it)
 		
 		it.verts={
 				{ 0.5, 0.5, 0.5},
@@ -505,7 +525,7 @@ M.bake=function(oven,geom)
 	end
 
 	geom.icosahedron=function(it)
-		it=it or {}
+		it=geom.new(it)
 		
 		local a=1/2
 		local b=1/(1+math.sqrt(5))
@@ -555,7 +575,7 @@ M.bake=function(oven,geom)
 	end
 
 	geom.dodecahedron=function(it)
-		it=it or {}
+		it=geom.new(it)
 		
 		local phi=(1+math.sqrt(5))/2
 		local a=1/2

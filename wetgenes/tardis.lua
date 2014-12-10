@@ -269,8 +269,39 @@ function m4.transpose(it,r)
 end
 function m4.scale(it,s,r)
 	r=r or it
-	return r:set(it[1]*s,it[2]*s,it[3]*s,it[4]*s, it[4+1]*s,it[4+2]*s,it[4+3]*s,it[4+4]*s, it[8+1]*s,it[8+2]*s,it[8+3]*s,it[8+4]*s, it[12+1]*s,it[12+2]*s,it[12+3]*s,it[12+4]*s)
+	return r:set(
+		it[ 1]*s,it[ 2]*s,it[ 3]*s,it[ 4]*s,
+		it[ 5]*s,it[ 6]*s,it[ 7]*s,it[ 8]*s,
+		it[ 9]*s,it[10]*s,it[11]*s,it[12]*s,
+		it[13]*s,it[14]*s,it[15]*s,it[16]*s)
 end
+
+function m4.add(it,m,r)
+	r=r or it
+	return r:set(
+		it[ 1]+m[ 1],it[ 2]+m[ 2],it[ 3]+m[ 3],it[ 4]+m[ 4],
+		it[ 5]+m[ 5],it[ 6]+m[ 6],it[ 7]+m[ 7],it[ 8]+m[ 8],
+		it[ 9]+m[ 9],it[10]+m[10],it[11]+m[11],it[12]+m[12],
+		it[13]+m[13],it[14]+m[14],it[15]+m[15],it[16]+m[16])
+end
+function m4.sub(it,m,r)
+	r=r or it
+	return r:set(
+		it[ 1]-m[ 1],it[ 2]-m[ 2],it[ 3]-m[ 3],it[ 4]-m[ 4],
+		it[ 5]-m[ 5],it[ 6]-m[ 6],it[ 7]-m[ 7],it[ 8]-m[ 8],
+		it[ 9]-m[ 9],it[10]-m[10],it[11]-m[11],it[12]-m[12],
+		it[13]-m[13],it[14]-m[14],it[15]-m[15],it[16]-m[16])
+end
+
+function m4.lerp(it,m,s,r)
+	r=r or m4.new()
+	r:set(m)
+	r:sub(it)
+	r:scale(s)
+	r:add(it)
+	return r
+end
+
 function m4.cofactor(it,r)
 	r=r or it
 	local t={}
@@ -314,6 +345,16 @@ function m4.scale_v3(it,v3a,r)
 					s2*it[5],	s2*it[6],	s2*it[7],	s2*it[8],
 					s3*it[9],	s3*it[10],	s3*it[11],	s3*it[12],
 					it[13],		it[14],		it[15],		it[16] )
+end
+
+-- get v3 scale from a scale/rot/trans matrix
+function m4.get_scale_v3(it,r)
+	r=r or M.v3.new()
+	return r:set(
+		math.sqrt(it[1]*it[1]+it[5]*it[5]+it[ 9]*it[ 9]),
+		math.sqrt(it[2]*it[2]+it[6]*it[6]+it[10]*it[10]),
+		math.sqrt(it[3]*it[3]+it[7]*it[7]+it[11]*it[11])
+	)
 end
 
 function m4.setrot(it,degrees,v3a)
@@ -373,6 +414,10 @@ function v3.lenlen(it)
 end
 function v3.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3]) )
+end
+function v3.oo(it,r)
+	r=r or it
+	return r:set( 1/it[1] , 1/it[2] , 1/it[3] )
 end
 function v3.scale(it,s,r)
 	r=r or it
