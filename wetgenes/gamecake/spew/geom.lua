@@ -69,10 +69,15 @@ M.bake=function(oven,geom)
 					t[#t+1]=v[8] or 0
 					t[#t+1]=(p.mat or 1)-1
 
+					t[#t+1]=v[9] or 0
+					t[#t+1]=v[10] or 0
+					t[#t+1]=v[11] or 0
+					t[#t+1]=v[12] or 0
+
 					f=f+1
 				end
 			end
-			it.predrawn=flat.array_predraw({fmt="xyznrmuvm",data=t,progname=progname,array=gl.TRIANGLE_STRIP,vb=true})
+			it.predrawn=flat.array_predraw({fmt="xyznrmuvmbone",data=t,progname=progname,array=gl.TRIANGLE_STRIP,vb=true})
 		end
 		
 		return it
@@ -109,10 +114,15 @@ M.bake=function(oven,geom)
 					t[#t+1]=v[8] or 0
 					t[#t+1]=(p.mat or 1)-1
 
+					t[#t+1]=v[9] or 0
+					t[#t+1]=v[10] or 0
+					t[#t+1]=v[11] or 0
+					t[#t+1]=v[12] or 0
+
 					f=f+1
 				end
 			end
-			it.predrawn_lines=flat.array_predraw({fmt="xyznrmuvm",data=t,progname=progname,array=gl.LINES,vb=true})
+			it.predrawn_lines=flat.array_predraw({fmt="xyznrmuvmbone",data=t,progname=progname,array=gl.LINES,vb=true})
 		end
 		
 		return it

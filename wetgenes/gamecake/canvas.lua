@@ -304,6 +304,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	local ptex
 	local pcolor
 	local pmat
+	local pbone
 	local p
 	local progname=it.progname
 	local fmt=it.fmt
@@ -336,6 +337,16 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		ptex=24
 		pmat=32
 	
+	elseif fmt=="xyznrmuvmbone" then -- xyz and normal and texture and  material id and bones
+
+		progname = progname or "pos_normal_tex_mat_bone"
+
+		pstride=52
+		pnrm=12
+		ptex=24
+		pmat=32
+		pbone=36
+
 	elseif fmt=="xyzuv" then -- xyz and texture
 
 		progname = progname or "pos_tex"
@@ -431,6 +442,11 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 			gl.EnableVertexAttribArray(p:attrib("a_matidx"))
 		end
 		
+		if pbone then
+			gl.VertexAttribPointer(p:attrib("a_bone"),4,gl.FLOAT,gl.FALSE,pstride,pbone)
+			gl.EnableVertexAttribArray(p:attrib("a_bone"))
+		end
+
 		if cb then cb(p) end -- callback to fill in more uniforms before drawing
 
 		local cc=datasize/pstride

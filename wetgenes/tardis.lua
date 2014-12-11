@@ -10,6 +10,10 @@
 -- a lua library for manipulating time and space
 -- pure lua by default and opengl in flavour
 --
+-- The easy way of remembering the opengl 4x4 matrix layout is that the
+-- translate x,y,z values sit at 13,14,15 and 4,8,12,16 is normally set
+-- to the constant 0,0,0,1 for most transforms.
+--
 -- recoil in terror as we use two glyph names to describe structures
 -- whilst typing in random strings of numbers that may or may not
 -- contain tyops
@@ -205,7 +209,7 @@ function m3.minor_xy(it,x,y)
 	return m2.determinant(t)
 end
 function m3.transpose(it,r)
-	r=r or it
+	r=r or r
 	return	 r:set(it[1],it[3+1],it[6+1], it[2],it[3+2],it[6+2], it[3],it[3+3],it[6+3])
 end
 function m3.scale(it,s,r)
@@ -264,7 +268,7 @@ function m4.minor_xy(it,x,y)
 	return m3.determinant(t)
 end
 function m4.transpose(it,r)
-	r=r or r
+--	r=r or r
 	return	 r:set(it[1],it[4+1],it[8+1],it[12+1], it[2],it[4+2],it[8+2],it[12+2], it[3],it[4+3],it[8+3],it[12+3], it[4],it[4+4],it[8+4],it[12+4])
 end
 function m4.scale(it,s,r)

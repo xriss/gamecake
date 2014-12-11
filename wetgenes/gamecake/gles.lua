@@ -299,6 +299,59 @@ void main()
 }
 	gl.shaders.v_xyz_normal_tex_mat=gl.shaders.v_pos_normal_tex_mat
 
+	gl.shaders.v_pos_normal_tex_mat_bone={
+	source=gl.defines.shaderprefix..[[
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+uniform mat4 bones[64]; // 64 bones
+uniform vec4 bone_fix; // min,max,0,0 (bone ids stored in bones array)
+
+attribute vec3  a_vertex;
+attribute vec3  a_normal;
+attribute vec2  a_texcoord;
+attribute float a_matidx;
+attribute vec4  a_bone;
+
+varying vec4  v_color;
+varying vec3  v_normal;
+varying vec3  v_pos;
+varying vec2  v_texcoord;
+varying float v_matidx;
+ 
+void main()
+{
+	mat4 m=mat4(0.0);
+	vec4 v=vec4(a_vertex, 1.0);
+	vec3 n=vec3(a_normal);
+	int b;
+	if( a_bone[0] > 0.0 ) // got bones
+	{
+		for(b=0;b<4;b++)
+		{
+			int i=int(a_bone[b]);
+			if(i>=1)
+			{
+				m+=bones[i-1]*(1.0-fract(a_bone[b]));
+			}
+		}
+		v=m*v;
+		n=mat3(m)*n;
+	}
+	
+    gl_Position = projection * modelview * v;
+    v_normal = normalize( mat3( modelview ) * n );
+	v_texcoord=a_texcoord;
+	v_color=color;
+	v_matidx=a_matidx;
+}
+
+	]]
+}
+	gl.shaders.v_xyz_normal_tex_mat_bone=gl.shaders.v_pos_normal_tex_mat_bone
+
 	gl.shaders.f_phong={
 	source=gl.defines.shaderprefix..[[
 
@@ -423,6 +476,11 @@ void main()
 
 	gl.programs.xyz_normal_mat={
 		vshaders={"v_xyz_normal_tex_mat"},
+		fshaders={"f_phong_mat"},
+	}	
+
+	gl.programs.xyz_normal_mat_bone={
+		vshaders={"v_xyz_normal_tex_mat_bone"},
 		fshaders={"f_phong_mat"},
 	}	
 

@@ -134,15 +134,25 @@ print("loaded ",#s,"bytes from "..opts.filename)
 		end
 		parse(scene,joints)
 	end
-	local get_joint
-	get_joint=function(name,js)
-		js=js or joints
-		for i,v in ipairs(js) do
-			if v.name==name then return v end
-			local j=get_joint(name,v)
-			if j then return j end
+
+	local joint_lookup={}
+	local idx=1
+	local recurse recurse=function(it) -- hand out joint idxs
+		for i,v in ipairs(it) do
+			v.idx=idx
+			joint_lookup[v.name]=v --  and build lookup table by name or idx
+			joint_lookup[v.idx]=v
+			idx=idx+1
 		end
+		for i,v in ipairs(it) do
+			recurse(v)
+		end
+	end recurse(joints)
+
+	local get_joint=function(name)
+		return joint_lookup[name]
 	end
+
 --	print(wstr.dump(joints))
 	
 	local aas=wxml.descendent(x,"library_animations")
@@ -187,6 +197,53 @@ print("loaded ",#s,"bytes from "..opts.filename)
 	end
 --	print(wstr.dump(joints))
 
+-- find skin weights so we can fetch them and apply to geoms later
+	local ccs=wxml.descendent(x,"library_controllers")
+	local skins={}
+	local weights={}
+	for i,v in ipairs(ccs or {}) do -- just check the top level for controlers
+		if v[0]=="controller" then
+			local skin=wxml.descendent(v,"skin")
+			if skin and skin.source then
+				local n=skin.source:sub(2) -- skip leading hash
+				skins[n]=skin
+				local dat={}
+				weights[n]=dat
+				
+				local inputs={}
+				local ws=wxml.descendent(skin,"vertex_weights")
+				for i,l in ipairs( wxml.descendents(ws,"input") ) do
+					local input={}
+					input.idx=#inputs+1		
+					input.semantic=l.semantic
+					input.offset=tonumber(l.offset)
+					input.source=get_source(l.source)
+					inputs[input.idx]=input
+					inputs[input.semantic:lower()]=input
+				end
+
+				local vc=scan_nums( wxml.descendent(v,"vcount")[1] )
+				local vs=scan_nums( wxml.descendent(v,"v")[1] )
+--print(wstr.dump(inputs))
+				local vi=1
+				for i,v in ipairs(vc) do
+					local ws={}
+					dat[#dat+1]=ws
+					for i=1,v do
+						local n=vs[vi] vi=vi+1
+						local w=vs[vi] vi=vi+1
+						local name=inputs.joint.source.data[n+1]
+						local weight=inputs.weight.source.data[w+1]
+						ws[#ws+1]=name
+						ws[#ws+1]=weight
+					end
+				end
+--print(wstr.dump(dat))
+			end
+		end
+	end 
+
+
 
 -- need to handle multiple geometries here...
 	local geoms={}
@@ -200,6 +257,9 @@ print("loaded ",#s,"bytes from "..opts.filename)
 	for i=1,#t do local v=t[i]
 		if v[0]=="geometry" then
 			geo={}
+
+			local weights=v.id and weights[v.id]
+
 			geo.name=v.name
 			geo.mesh=wxml.descendent(v,"mesh")
 
@@ -320,7 +380,30 @@ print("loaded ",#s,"bytes from "..opts.filename)
 						else
 							need_normals=true
 						end
-
+						
+						local w1=0 -- 0 means no bone weight (100% default)
+						local w2=0
+						local w3=0
+						local w4=0
+						if weights then
+							local ws=weights[xyz+1]
+							local calc=function(n,w)
+								if n and w then
+									n=get_joint(n)
+									if n then
+										return n.idx+(1-w) 	-- joint id + fractional weight 
+															-- (id.0==100% id.25=75% id.5=50% id.75=25%)
+									end
+								end
+								return 0
+							end
+							if ws then
+								w1=calc(ws[1],ws[2])
+								w2=calc(ws[3],ws[4])
+								w3=calc(ws[5],ws[6])
+								w4=calc(ws[7],ws[8])
+							end
+						end
 						local idx=get_vertex_idx(xyz,nrm)
 						it.verts[idx]=	{
 											xyzs and xyzs.data[ (xyz*xyzs.stride) +1 ] or 0,
@@ -329,7 +412,8 @@ print("loaded ",#s,"bytes from "..opts.filename)
 											nrms and nrms.data[ (nrm*nrms.stride) +1 ] or 0,
 											nrms and nrms.data[ (nrm*nrms.stride) +2 ] or 0,
 											nrms and nrms.data[ (nrm*nrms.stride) +3 ] or 0,
-											0,0
+											0,0, -- uv
+											w1,w2,w3,w4 -- 4 bone ids and weights
 										}
 						poly[#poly+1]=idx
 						
