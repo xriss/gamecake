@@ -183,7 +183,8 @@ float *fb;
 		}
 //printf("set %08x var %d\n"	,fa,i);
 	}
-	return 0;
+	lua_pushvalue(l,1); // return passed in value for chain function calls
+	return 1;
 }
 
 static int lua_tardis_read (lua_State *l)
@@ -344,7 +345,8 @@ float *fc=(float *)lua_tardis_uda(l,3);
 
 	raw_tardis_m4_product_m4(fa,fb,fc);
 
-	return 0;
+	lua_pushvalue(l,3); // return passed in value for chain function calls
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -359,7 +361,8 @@ float *fc=(float *)lua_tardis_uda(l,3);
 
 	raw_tardis_m4_product_v4(fa,fb,fc);
 
-	return 0;
+	lua_pushvalue(l,3); // return passed in value for chain function calls
+	return 1;
 }
 
 
@@ -376,7 +379,8 @@ float *fa=(float *)lua_tardis_uda(l,1);
 	fa[ 8]=0.0f; fa[ 9]=0.0f; fa[10]=1.0f; fa[11]=0.0f;
 	fa[12]=0.0f; fa[13]=0.0f; fa[14]=0.0f; fa[15]=1.0f;
 
-	return 0;
+	lua_pushvalue(l,1); // return passed in value for chain function calls
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -442,7 +446,7 @@ int fc_idx=4;
 	fa=(float *)lua_tardis_uda(l,1);
 	degrees=(float)lua_tonumber(l,2);
 	fc=(float *)lua_tardis_uda(l,fc_idx);
-	if(!fc) { fc=fa; }
+	if(!fc) { fc=fa; fc_idx=1; }
 //printf("(fa,fc)=(%08x,%08x)\n",fa,fc);
 
 	c=cosf(degrees*((float)(-M_PI/180.0f)));
@@ -466,7 +470,8 @@ int fc_idx=4;
 
 	raw_tardis_m4_product_m4(fb,fa,fc);
 
-	return 0;
+	lua_pushvalue(l,fc_idx); // return passed in value for chain function calls
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -478,6 +483,7 @@ static int lua_tardis_m4_scale_v3 (lua_State *l)
 float *fa;
 float *fb;
 float *fc;
+int fc_idx;
 float x,y,z;
 
 	if(lua_isuserdata(l,2))
@@ -486,7 +492,7 @@ float x,y,z;
 		x=fb[0];
 		y=fb[1];
 		z=fb[2];
-		fc=(float *)lua_tardis_uda(l,3);
+		fc_idx=3;
 	}
 	else
 	if(lua_isnumber(l,2))
@@ -494,7 +500,7 @@ float x,y,z;
 		x=(float)lua_tonumber(l,2);
 		y=(float)lua_tonumber(l,3);
 		z=(float)lua_tonumber(l,4);
-		fc=(float *)lua_tardis_uda(l,5);
+		fc_idx=5;
 	}
 	else
 	{
@@ -502,18 +508,20 @@ float x,y,z;
 		lua_rawgeti(l,2,1); x=(float)lua_tonumber(l,-1); lua_pop(l,1);
 		lua_rawgeti(l,2,2); y=(float)lua_tonumber(l,-1); lua_pop(l,1);
 		lua_rawgeti(l,2,3); z=(float)lua_tonumber(l,-1); lua_pop(l,1);
-		fc=(float *)lua_tardis_uda(l,3);
+		fc_idx=3;
 	}
 
 	fa=(float *)lua_tardis_uda(l,1);
-	if(!fc) { fc=fa; }
+	fc=(float *)lua_tardis_uda(l,fc_idx);
+	if(!fc) { fc=fa; fc_idx=1; }
 
 	fc[ 0]=x*fa[ 0];		fc[ 1]=x*fa[ 1];		fc[ 2]=x*fa[ 2];		fc[ 3]=x*fa[ 3];
 	fc[ 4]=y*fa[ 4];		fc[ 5]=y*fa[ 5];		fc[ 6]=y*fa[ 6];		fc[ 7]=y*fa[ 7];
 	fc[ 8]=z*fa[ 8];		fc[ 9]=z*fa[ 9];		fc[10]=z*fa[10];		fc[11]=z*fa[11];
 	fc[12]=fa[12];			fc[13]=fa[13];			fc[14]=fa[14];			fc[15]=fa[15];
 
-	return 0;
+	lua_pushvalue(l,fc_idx); // return passed in value for chain function calls
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -525,6 +533,7 @@ static int lua_tardis_m4_translate (lua_State *l)
 float *fa;
 float *fb;
 float *fc;
+int fc_idx=4;
 float x,y,z;
 
 	if(lua_isuserdata(l,2))
@@ -533,7 +542,7 @@ float x,y,z;
 		x=fb[0];
 		y=fb[1];
 		z=fb[2];
-		fc=(float *)lua_tardis_uda(l,3);
+		fc_idx=3;
 	}
 	else
 	if(lua_isnumber(l,2))
@@ -541,7 +550,7 @@ float x,y,z;
 		x=(float)lua_tonumber(l,2);
 		y=(float)lua_tonumber(l,3);
 		z=(float)lua_tonumber(l,4);
-		fc=(float *)lua_tardis_uda(l,5);
+		fc_idx=5;
 	}
 	else
 	{
@@ -549,11 +558,12 @@ float x,y,z;
 		lua_rawgeti(l,2,1); x=(float)lua_tonumber(l,-1); lua_pop(l,1);
 		lua_rawgeti(l,2,2); y=(float)lua_tonumber(l,-1); lua_pop(l,1);
 		lua_rawgeti(l,2,3); z=(float)lua_tonumber(l,-1); lua_pop(l,1);
-		fc=(float *)lua_tardis_uda(l,3);
+		fc_idx=3;
 	}
 
 	fa=(float *)lua_tardis_uda(l,1);
-	if(!fc) { fc=fa; }
+	fc=(float *)lua_tardis_uda(l,fc_idx);
+	if(!fc) { fc=fa; fc_idx=1; }
 
 	if(fa==fc) // no need to copy
 	{
@@ -582,7 +592,8 @@ float x,y,z;
 		fc[15]=fa[15] + x*fc[0+3] + y*fc[4+3] + z*fc[8+3];
 	}
 
-	return 0;
+	lua_pushvalue(l,fc_idx); // return passed in value for chain function calls
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
