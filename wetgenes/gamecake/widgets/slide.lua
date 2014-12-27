@@ -65,11 +65,9 @@ function wslide.slide_snap(it)
 
 -- auto snap positions when draged
 	it.drag.px=it.datx:snap( it.hx , it.drag.hx , it.drag.px )
-	it.drag.pxd=it.pxd+it.drag.px
 	
 -- y is now the right way up
 	it.drag.py=it.daty:snap( it.hy , it.drag.hy , it.drag.py )
-	it.drag.pyd=it.pyd+it.drag.py
 	
 end
 	

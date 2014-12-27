@@ -36,7 +36,7 @@ function wtextedit.mouse(widget,act,_x,_y,key)
 		
 		local function get_idx()
 			local idx=0
-			local dx=x-(widget.text_x or 0) --[[-((widget.pxd or 0)]]
+			local dx=x-(widget.text_x or 0)
 			if dx<0 then -- catch lessthan
 				idx=0
 			else

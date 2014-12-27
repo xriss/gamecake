@@ -86,8 +86,8 @@ function wmaster.setup(widget,def)
 						master.active=master.over
 						local axis=ups.axis()
 						local rx,ry=master.over.parent:mousexy(axis.mx,axis.my)
-						master.active_x=rx-master.over.px--widget.pxd
-						master.active_y=ry-master.over.py--widget.pyd
+						master.active_x=rx-master.over.px
+						master.active_y=ry-master.over.py
 						
 						master.active:call_hook("active") -- an active widget is about to click (button down)
 					end
@@ -291,17 +291,13 @@ function wmaster.setup(widget,def)
 			if master.over and master.over.hx and master.over.hy then
 				local over=master.over
 				local best={}
-				local ox=over.pxd+(over.hx/2)
-				local oy=over.pyd+(over.hy/2)
-
---print("over",ox,oy)
 
 				master:call_descendents(function(w)
 					if w.solid and w.hooks and not w.hidden then
-						local wx=w.pxd+(w.hx/2)
-						local wy=w.pyd+(w.hy/2)
-						local dx=wx-ox
-						local dy=wy-oy
+						local wx=w.px+(w.hx/2)
+						local wy=w.py+(w.hy/2)
+						local dx=wx--ox
+						local dy=wy--oy
 						local dd=0
 						if vx==0 then dd=dd+dx*dx*8 else dd=dd+dx*dx end
 						if vy==0 then dd=dd+dy*dy*8 else dd=dd+dy*dy end

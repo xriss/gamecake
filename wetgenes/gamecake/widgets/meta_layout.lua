@@ -100,9 +100,6 @@ function wmeta.setup(def)
 
 			end
 		
-			v.pxd=widget.pxd+v.px -- absolute position
-			v.pyd=widget.pyd+v.py
-			
 		end
 		for i,v in ipairs(widget) do
 			if not v.hidden then v:layout() end

@@ -129,15 +129,6 @@ function wsplit.layout(widget)
 			end
 		end
 
-		v.pxd=widget.pxd+v.px -- absolute position
-		v.pyd=widget.pyd+v.py
-
-		if widget[s2] then
-			local v=widget[s2]
-			v.pxd=widget.pxd+v.px -- absolute position
-			v.pyd=widget.pyd+v.py
-		end
-
 	end
 
 

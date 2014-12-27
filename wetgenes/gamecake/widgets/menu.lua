@@ -86,8 +86,6 @@ function wmenu.layout(widget)
 			if v.hx>hx then hx=v.hx end -- widest
 
 
-			v.pxd=widget.pxd+v.px -- absolute position
-			v.pyd=widget.pyd+v.py	
 		end
 	end
 	

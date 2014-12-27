@@ -79,11 +79,6 @@ function wfill.layout(widget)
 		
 	end
 	
-	for i,v in ipairs(widget) do
-		v.pxd=widget.pxd+v.px
-		v.pyd=widget.pyd+v.py
-	end
-
 -- layout sub sub widgets	
 	for i,v in ipairs(widget) do
 		if not v.hidden then v:layout() end

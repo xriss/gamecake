@@ -165,14 +165,6 @@ function wmeta.setup(def)
 
 		widget.hx=def.hx or 0 -- absolute pixel size of widget
 		widget.hy=def.hy or 0
-		
-
-		-- turn this into a matrix? so we can rotate and stuff
-		widget.pxd=def.pxd or 0 -- INTERNAL absolute pixel display position ( generated from px,py )
-		widget.pyd=def.pyd or 0
---		widget.mousex=0 -- last mouse position
---		widget.mousey=0
-
 
 		widget.color=def.color
 		
@@ -245,8 +237,6 @@ function wmeta.setup(def)
 	
 		if val=="slide" then
 		
---			local x=(widget.pxd-widget.parent.pxd) / (widget.parent.hx-widget.hx)
---			local y=(widget.pyd-widget.parent.pyd) / (widget.parent.hy-widget.hy)
 			local x=(widget.px) / (widget.parent.hx-widget.hx)
 			local y=(widget.py) / (widget.parent.hy-widget.hy)
 			
@@ -277,9 +267,6 @@ function wmeta.setup(def)
 
 				v.px=(widget.hx-v.hx)*pxf -- local position relative to parents size
 				v.py=(widget.hy-v.hy)*pyf
-				
-				v.pxd=widget.pxd+v.px -- absolute
-				v.pyd=widget.pyd+v.py
 				
 			end
 		end

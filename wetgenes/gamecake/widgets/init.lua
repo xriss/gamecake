@@ -86,8 +86,6 @@ function widgets.setup(def)
 	def.hy=def.hy or oven.opts.height
 	def.px=def.px or (oven.opts.width-def.hx)/2
 	def.py=def.py or (oven.opts.height-def.hy)/2
-	def.pxd=def.pxd or def.px
-	def.pyd=def.pyd or def.py
 
 	def.class=def.class or "master"
 	

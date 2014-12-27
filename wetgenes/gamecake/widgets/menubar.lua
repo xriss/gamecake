@@ -85,8 +85,6 @@ function wmenubar.layout(widget)
 			
 			if v.hy>hy then hy=v.hy end -- tallest
 
-			v.pxd=widget.pxd+v.px -- absolute position
-			v.pyd=widget.pyd+v.py
 		end
 	end
 	
