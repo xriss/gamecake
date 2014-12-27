@@ -23,6 +23,8 @@ wmeta.classes={
 
 	["master"]=oven.rebake("wetgenes.gamecake.widgets.master"),
 	["fill"]=oven.rebake("wetgenes.gamecake.widgets.fill"),
+	["split"]=oven.rebake("wetgenes.gamecake.widgets.split"),
+	["panel"]=oven.rebake("wetgenes.gamecake.widgets.panel"),
 	["button"]=oven.rebake("wetgenes.gamecake.widgets.button"),
 	["drag"]=oven.rebake("wetgenes.gamecake.widgets.drag"),
 	["text"]=oven.rebake("wetgenes.gamecake.widgets.text"),
@@ -155,6 +157,8 @@ function wmeta.setup(def)
 		widget.sy=def.sy or 1
 		widget.pa=def.pa or 0 -- display rotation angle (of children)
 		
+		widget.size=def.size 	-- special layout action flag
+								--	"full" 	==	Expand to fullsize of widget
 		
 		widget.px=def.px or 0 -- relative to parent, pixel position
 		widget.py=def.py or 0

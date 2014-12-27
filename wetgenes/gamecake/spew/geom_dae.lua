@@ -136,6 +136,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 	end
 
 	local joint_lookup={}
+	local joint_flipidx={}
 	local idx=1
 	local recurse recurse=function(it) -- hand out joint idxs
 		for i,v in ipairs(it) do
@@ -151,6 +152,17 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 	local get_joint=function(name)
 		return joint_lookup[name]
+	end
+	
+	for i,v in pairs(joint_lookup) do
+		local ln=v.name:sub(-1)
+		if     ln=="L" then ln="R"
+		elseif ln=="R" then ln="L" end
+		ln=v.name:sub(1,-2)..ln
+		local j=get_joint(ln)
+		if j then
+			joint_flipidx[v.idx]=j.idx
+		end
 	end
 
 --	print(wstr.dump(joints))
@@ -426,6 +438,50 @@ print("loaded ",#s,"bytes from "..opts.filename)
 				
 			end
 			
+			if opts.mirror then
+				local f=function(n)
+					local i,f=math.modf(n)
+					i=joint_flipidx[i] or i
+					return i+f
+				end
+				geom.mirror(it,opts.mirror,function(it,dupe)
+					if dupe then
+						for i=9,12 do
+							it[i]=f(it[i])
+						end
+					else
+						local t={}
+						for i=9,12 do
+							if it[i] and it[i]~=0 then
+								t[#t+1]=it[i]
+							end
+						end
+						local m=#t
+						for i=1,m do
+							if f(t[i])~=t[i] then -- add mirrored (duplicate weight)
+								t[#t+1]=f(t[i]) -- insert at end
+							end
+						end
+						local m=0 -- so we need to calculate total weight
+						for i=1,4 do local v=t[i]
+							if v then
+								local n,f=math.modf(v)
+								m=m+(1-f)
+							end
+						end
+						if m>0 then
+							m=1/m -- and scale weights so they add up to 1
+							for i=1,4 do
+								if t[i] and t[i]~=0 then
+									local n,f=math.modf(t[i])
+									f=1-((1-f)*m)
+									it[8+i]=n+f
+								end
+							end
+						end
+					end
+				end)
+			end
 --			dprint(it.verts)
 			if need_normals then
 				geom.build_normals(it)

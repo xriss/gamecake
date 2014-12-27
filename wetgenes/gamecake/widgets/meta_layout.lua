@@ -83,9 +83,23 @@ function wmeta.setup(def)
 	function meta.layout(widget)
 		for i,v in ipairs(widget) do
 		
-			if v.hxf then v.hx=widget.hx*v.hxf end -- generate size as a fraction of parent
-			if v.hyf then v.hy=widget.hy*v.hyf end
+			if v.size=="full" then -- force full size
 
+				v.px=0
+				v.py=0
+				v.hx=widget.hx
+				v.hy=widget.hy
+
+--print("full",v.px,v.py,v.hx,v.hy)
+--print("parent class",widget.parent.class)
+
+			elseif v.size=="border" then -- force a fixed border size
+
+				v.hx=widget.hx-v.px
+				v.hy=widget.hy-v.py
+
+			end
+		
 			v.pxd=widget.pxd+v.px -- absolute position
 			v.pyd=widget.pyd+v.py
 			

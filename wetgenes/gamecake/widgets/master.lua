@@ -139,10 +139,11 @@ function wmaster.setup(widget,def)
 		end
 	
 		if resize then
+--print("resize",wstr.dump(resize))
 			if widget.hx==resize.hx and widget.hy==resize.hy then
 			else
-				widget.hx=resize.hx
-				widget.hy=resize.hy
+				widget.hx=resize.hx or widget.hx
+				widget.hy=resize.hy or widget.hy
 				widget:layout()
 			end
 		end

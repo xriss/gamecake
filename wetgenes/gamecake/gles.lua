@@ -306,7 +306,7 @@ uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
 
-uniform mat4 bones[64]; // 64 bones
+uniform vec4 bones[64*3]; // 64 bones
 uniform vec4 bone_fix; // min,max,0,0 (bone ids stored in bones array)
 
 attribute vec3  a_vertex;
@@ -331,14 +331,16 @@ void main()
 	{
 		for(b=0;b<4;b++)
 		{
-			int i=int(a_bone[b]);
-			if(i>=1)
+			int i=int(a_bone[b])*3;
+			if(i>=3)
 			{
-				m+=bones[i-1]*(1.0-fract(a_bone[b]));
+				m+=mat4(bones[i-3],bones[i-2],bones[i-1],vec4(0.0,0.0,0.0,1.0))
+					*(1.0-fract(a_bone[b]));
 			}
+			else { break; }
 		}
-		v=m*v;
-		n=mat3(m)*n;
+		v=v*m;
+		n=n*mat3(m);
 	}
 	
     gl_Position = projection * modelview * v;
@@ -377,24 +379,24 @@ varying vec3  v_pos;
 varying float v_matidx;
 
 
-uniform vec4 colors[4];
-/*=vec4[4](
-	vec4(1.0,0.0,0.0,1.0),
-	vec4(0.0,1.0,0.0,1.0),
-	vec4(0.0,0.0,1.0,1.0),
-	vec4(1.0,1.0,0.0,1.0)
-);*/
+uniform vec4 color0[8];
+uniform vec4 color1[8];
+uniform vec4 color2[8];
 
 vec3 d=vec3(0,0,1);
 
 void main(void)
 {
 	vec3 n=normalize(v_normal);
+	vec3 l=normalize(vec3(0.0,-0.5,1.0));
 
 	int matidx=int(v_matidx);
-	vec4 c=colors[matidx];
-	
-	gl_FragColor= vec4(c.rgb*max( n.z, 0.25 ),c.a);
+	vec4 c0=color0[matidx];
+	vec4 c1=color1[matidx];
+	vec4 c2=color2[matidx];
+
+	gl_FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
+						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c0[0] )).rgb , c1.a );
 }
 
 	]]

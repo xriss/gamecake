@@ -268,6 +268,46 @@ M.bake=function(oven,geom)
 		return it
 	end
 
+-- dupe+mirror point and polygons around the origin on the given axis 1=x 2=y 3=z
+	geom.mirror=function(it,axis,cb)
+	
+		local vmap={} -- map vertexes to their mirrored one
+		
+		local dupe=function(it)
+			local r={}
+			for i,v in ipairs(it) do r[i]=v end
+			r.mat=it.mat
+			return r
+		end
+
+		local mv=#it.verts
+		for iv=1,mv do local vv=it.verts[iv]
+			if vv[axis] == 0 then -- noflip
+				if cb then cb(vv,false) end
+			else
+				local id=#it.verts+1
+				local vd=dupe(vv)
+				it.verts[id]=vd
+				vmap[iv]=id
+				vd[axis]=-vd[axis]
+				vd[axis+3]=-vd[axis+3]
+				if cb then cb(vd,true) end
+			end
+		end
+
+		local mp=#it.polys
+		for ip=1,mp do local vp=it.polys[ip]
+				local id=#it.polys+1
+				local vd=dupe(vp)
+				it.polys[id]=vd
+				for i,v in ipairs(vd) do
+					vd[i]=vmap[v] or v
+				end
+				geom.poly_flip(it,vd)
+		end
+	
+	end
+
 	geom.build_normals=function(it)
 
 -- reset normals
