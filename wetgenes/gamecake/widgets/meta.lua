@@ -281,6 +281,7 @@ function wmeta.setup(def)
 --
 -- handle mouse input
 --
+
 	function meta.mousexy(widget,_x,_y)
 		if not widget.m4 then return -1,-1 end
 		local v4=tardis.v4.new(_x,_y,0,1)

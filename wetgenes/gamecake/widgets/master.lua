@@ -178,7 +178,23 @@ function wmaster.setup(widget,def)
 	end
 
 	local dirty_fbos={}
+	local mark_dirty_fbos -- to recurse is defined...
 	local find_dirty_fbos -- to recurse is defined...
+
+	mark_dirty_fbos=function(widget)
+		if widget.fbo then
+			if widget.fbo.w~=widget.hx or widget.fbo.h~=widget.hy then -- resize so we need a new fbo
+print("resize fbo",widget.hx,widget.hy)
+				widget.fbo:resize(widget.hx,widget.hy,0)
+				widget:set_dirty() -- flag redraw
+			end				
+		end
+		for i,v in ipairs(widget) do
+			mark_dirty_fbos(v)
+		end
+	end
+
+
 	find_dirty_fbos=function(widget)
 		if widget.fbo and widget.dirty then
 			dirty_fbos[ #dirty_fbos+1 ]=widget
@@ -191,6 +207,7 @@ function wmaster.setup(widget,def)
 	function master.draw(widget)
 
 		dirty_fbos={}
+--		mark_dirty_fbos(widget)
 		find_dirty_fbos(widget)
 
 		gl.Disable(gl.CULL_FACE)
@@ -201,7 +218,6 @@ function wmaster.setup(widget,def)
 		
 		if #dirty_fbos>0 then
 			for i=#dirty_fbos,1,-1 do -- call in reverse so sub fbos can work
---print("DIRTY",i)
 				meta.draw(dirty_fbos[i]) -- dirty, so this only builds the fbo
 			end
 		end

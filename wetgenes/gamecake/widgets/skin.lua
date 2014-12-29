@@ -121,10 +121,10 @@ function wskin.setup(def)
 	local function cache_smart_bind(img)
 		if not img then
 			gl.BindTexture(gl.TEXTURE_2D, 0)
+		elseif img[1] then
+			gl.BindTexture(gl.TEXTURE_2D, img[1] )
 		elseif img.gl then
 			images.bind(img)
-		else
-			gl.BindTexture(gl.TEXTURE_2D, img[1] )
 		end
 	end
 
@@ -338,9 +338,10 @@ function wskin.setup(def)
 			if widget.fbo.w~=widget.hx or widget.fbo.h~=widget.hy then -- resize so we need a new fbo
 --print("new fbo",widget.sx,widget.sy)
 				widget.fbo:resize(widget.hx,widget.hy,0)
-				widget.dirty=true -- flag redraw
+--				widget.dirty=true -- flag redraw
 			end				
 		end
+
 
 --widget.old_layout
 --widget.layout
@@ -354,6 +355,8 @@ local cache_draw=nil
 
 			widget.fbo:bind_frame()
 			widget.lay=layouts.create{parent={x=0,y=0,w=widget.fbo.w,h=widget.fbo.h}}
+
+			canvas.gl_default()
 			
 			gl.MatrixMode(gl.PROJECTION)
 			gl.PushMatrix()
@@ -373,9 +376,9 @@ local cache_draw=nil
 			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
 
 
-			cache_draw=cache_begin()
-			sheets.batch_start()
-			font_cache_draw=font.cache_begin()
+--			cache_draw=cache_begin()
+--			sheets.batch_start()
+--			font_cache_draw=font.cache_begin()
 		end
 
 		
@@ -423,10 +426,10 @@ else -- we can only draw once
 
 		if widget.fbo then -- we need to draw our cached fbo
 		
-			gl.Disable(gl.DEPTH_TEST)
-			gl.Disable(gl.CULL_FACE)
+--			gl.Disable(gl.DEPTH_TEST)
+--			gl.Disable(gl.CULL_FACE)
 		
-			gl.Color(1,1,1,1)
+--			gl.Color(1,1,1,1)
 
 			local old=cache_bind({widget.fbo.texture})
 
@@ -441,12 +444,12 @@ else -- we can only draw once
 			local v4=gl.apply_modelview( {widget.fbo.w,	widget.fbo.h,	0,1} )
 
 			for i,v in ipairs{
-				v1[1],	v1[2],	v1[3],	0,				widget.fbo.uvh,	r,g,b,a,	-- doubletap hack so we can start at any location
+				v1[1],	v1[2],	v1[3],	0,				widget.fbo.uvh,	r,g,b,a,	-- doubletap hack
 				v1[1],	v1[2],	v1[3],	0,				widget.fbo.uvh,	r,g,b,a,
 				v2[1],	v2[2],	v2[3],	widget.fbo.uvw,	widget.fbo.uvh,	r,g,b,a,
 				v3[1],	v3[2],	v3[3],	0,				0, 				r,g,b,a,
 				v4[1],	v4[2],	v4[3],	widget.fbo.uvw,	0, 				r,g,b,a,
-				v4[1],	v4[2],	v4[3],	widget.fbo.uvw,	0,			 	r,g,b,a, -- doubletap hack so we can start at any location
+				v4[1],	v4[2],	v4[3],	widget.fbo.uvw,	0,			 	r,g,b,a, 	-- doubletap hack
 			} do
 				t[ht+i]=v
 			end
@@ -454,6 +457,7 @@ else -- we can only draw once
 			if not cache_array then
 				flat.tristrip("rawuvrgba",t)
 			end
+			
 			cache_bind(old)
 
 		end

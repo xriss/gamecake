@@ -4,9 +4,6 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
--- an fbo cached area, that is an area which should always be drawn to a special buffer
--- and then the special buffer should be displayed
-
 
 
 --module
@@ -44,7 +41,6 @@ function wpan.setup(widget,def)
 	widget.draw=wpan.draw
 	widget.layout=wfill.layout
 	
---	widget.fbo=_G.win.fbo(0,0,0)
 	widget.fbo=framebuffers.create(0,0,0)
 
 --	widget.clip=true

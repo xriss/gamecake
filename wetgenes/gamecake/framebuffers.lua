@@ -4,6 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local grd=require("wetgenes.grd")
+local pack=require("wetgenes.pack")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -95,61 +96,61 @@ function M.bake(oven,framebuffers)
 	framebuffers.check = function(fbo)
 		framebuffers.resize(fbo,fbo.w,fbo.h,fbo.d) -- realloc if we need to
 	end
-	
+
 	framebuffers.resize = function(fbo,w,h,d)
 --print("fbo resize",w,h,d)
 
 		if w==0 then h=0 d=0 end
 		if h==0 then d=0 w=0 end
 	
-		if w==0 or h==0 or w~=fbo.w or h~=fbo.h or d~=fbo.d then -- size 0 or any change means free everything
-			framebuffers.clean(fbo)
-		end
+		if w==0 or h==0 then framebuffers.free_texture(fbo) end
 		
+		if d==0 then framebuffers.free_depth(fbo) end
+
 		if w~=0 and h~=0 then 
 			if d~=0 then
 				if not fbo.depth then
 					fbo.depth=gl.GenRenderbuffer()
-					gl.BindRenderbuffer(gl.RENDERBUFFER, fbo.depth)
-					gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h)
 				end
+				gl.BindRenderbuffer(gl.RENDERBUFFER, fbo.depth)
+				gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h)
 			end
 			if not fbo.texture then
-			
-				fbo.txw=images.uptwopow(w) -- always keep textures in power of two for simplicity
-				fbo.txh=images.uptwopow(h)
-				fbo.uvw=w/fbo.txw -- need to use these max uv coords when drawing with texture instead of 1
-				fbo.uvh=h/fbo.txh -- unless you know you asked for a power of two in which case its fine to use 1
-				
 				fbo.texture=gl.GenTexture()
-				gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
-				gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
-				gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE, 0)
---				gl.GenerateMipmap(gl.TEXTURE_2D)
-				gl.BindTexture(gl.TEXTURE_2D, 0)
 			end
+			fbo.txw=images.uptwopow(w) -- always keep textures in power of two for simplicity
+			fbo.txh=images.uptwopow(h)
+			fbo.uvw=w/fbo.txw -- need to use these max uv coords when drawing with texture instead of 1
+			fbo.uvh=h/fbo.txh -- unless you know you asked for a power of two in which case its fine to use 1
+			
+			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE, string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- need some zero data, depends on driver...
+			framebuffers.mipmap(fbo)
+			gl.BindTexture(gl.TEXTURE_2D, 0)
+			
 			if not fbo.frame then
 				fbo.frame=gl.GenFramebuffer()
-				gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.frame)
-
-				if fbo.depth then -- optional depth
-					gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, fbo.depth)
-				end
-				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
-
-				assert( gl.CheckFramebufferStatus(gl.FRAMEBUFFER) == gl.FRAMEBUFFER_COMPLETE)
-				
-				gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 			end
+			gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.frame)
+
+			if fbo.depth then -- optional depth
+				gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, fbo.depth)
+			end
+			gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
+
+			assert( gl.CheckFramebufferStatus(gl.FRAMEBUFFER) == gl.FRAMEBUFFER_COMPLETE)
+			
+			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 		end
 		
 		fbo.w=w
 		fbo.h=h
 		fbo.d=d
-		
+
 	end
 	
 	framebuffers.mipmap = function(fbo) -- generate mipmaps and enable default mipmapping filter
