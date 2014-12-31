@@ -128,9 +128,10 @@ end
 -- turns a string containing lua code into a table containing the globals it sets
 -- IE read an ini file, run it through this
 --
-function ini(s)
+function ini(s,import)
 
 	local env=make_env()
+	for n,v in pairs(import or {}) do env[n]=v end
 	local tab={}
 	local meta={__index=env}
 	env._G=tab
@@ -144,9 +145,10 @@ function ini(s)
 end
 
 -- this performs the opposite of a string.serialize
-function lson(s)
+function lson(s,import)
 
 	local env=make_env()
+	for n,v in pairs(import or {}) do env[n]=v end
 	local tab={}
 	local meta={__index=env}
 	env._G=tab
