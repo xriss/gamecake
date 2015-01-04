@@ -184,8 +184,8 @@ function wmaster.setup(widget,def)
 	mark_dirty_fbos=function(widget)
 		if widget.fbo then
 			if widget.fbo.w~=widget.hx or widget.fbo.h~=widget.hy then -- resize so we need a new fbo
-print("resize fbo",widget.hx,widget.hy)
-				widget.fbo:resize(widget.hx,widget.hy,0)
+--print("resize fbo",widget.hx,widget.hy)
+				widget.fbo:resize(widget.hx,widget.hy,widget.hz or 0)
 				widget:set_dirty() -- flag redraw
 			end				
 		end
@@ -207,7 +207,7 @@ print("resize fbo",widget.hx,widget.hy)
 	function master.draw(widget)
 
 		dirty_fbos={}
---		mark_dirty_fbos(widget)
+		mark_dirty_fbos(widget)
 		find_dirty_fbos(widget)
 
 		gl.Disable(gl.CULL_FACE)
@@ -217,8 +217,8 @@ print("resize fbo",widget.hx,widget.hy)
 		
 		
 		if #dirty_fbos>0 then
-			for i=#dirty_fbos,1,-1 do -- call in reverse so sub fbos can work
-				meta.draw(dirty_fbos[i]) -- dirty, so this only builds the fbo
+			for i=#dirty_fbos,1,-1 do -- call in reverse so sub fbos can use their child fbo data
+				dirty_fbos[i]:draw() -- dirty, so this only draws into the fbo
 			end
 		end
 

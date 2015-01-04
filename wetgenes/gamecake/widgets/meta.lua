@@ -163,8 +163,9 @@ function wmeta.setup(def)
 		widget.px=def.px or 0 -- relative to parent, pixel position
 		widget.py=def.py or 0
 
-		widget.hx=def.hx or 0 -- absolute pixel size of widget
+		widget.hx=def.hx or 0 -- absolute pixel size of widget (in parents space)
 		widget.hy=def.hy or 0
+		widget.hz=def.hz or 0 -- used to signal an fbo with a depth buffer
 
 		widget.color=def.color
 		

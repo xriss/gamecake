@@ -95,8 +95,8 @@ function wmeta.setup(def)
 
 			elseif v.size=="border" then -- force a fixed border size
 
-				v.hx=widget.hx-v.px
-				v.hy=widget.hy-v.py
+				v.hx=widget.hx-(v.px*2)
+				v.hy=widget.hy-(v.py*2)
 
 			end
 		

@@ -333,30 +333,36 @@ function wskin.setup(def)
 			gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
 		end
 		
+--[[
 		if widget.fbo then
 --print("draw",widget.pan_px,widget.pan_py)
 			if widget.fbo.w~=widget.hx or widget.fbo.h~=widget.hy then -- resize so we need a new fbo
 --print("new fbo",widget.sx,widget.sy)
-				widget.fbo:resize(widget.hx,widget.hy,0)
---				widget.dirty=true -- flag redraw
+				widget.fbo:resize(widget.hx,widget.hy,widget.hz or 0)
+				widget.dirty=true -- flag redraw
 			end				
 		end
+]]
 
 
 --widget.old_layout
 --widget.layout
 
 if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
-local cache_draw=nil
 
-	local font_cache_draw
+local cache_draw
+local font_cache_draw
+
 		if widget.fbo then
 --print("into fbo"..wstr.dump(widget.fbo))
 
 			widget.fbo:bind_frame()
 			widget.lay=layouts.create{parent={x=0,y=0,w=widget.fbo.w,h=widget.fbo.h}}
 
-			canvas.gl_default()
+			gl.Disable(gl.DEPTH_TEST)
+			gl.Disable(gl.CULL_FACE)
+			gl.Color(1,1,1,1)
+--			canvas.gl_default()
 			
 			gl.MatrixMode(gl.PROJECTION)
 			gl.PushMatrix()
@@ -376,9 +382,9 @@ local cache_draw=nil
 			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
 
 
---			cache_draw=cache_begin()
---			sheets.batch_start()
---			font_cache_draw=font.cache_begin()
+			cache_draw=cache_begin()
+			sheets.batch_start()
+			font_cache_draw=font.cache_begin()
 		end
 
 		
@@ -426,10 +432,9 @@ else -- we can only draw once
 
 		if widget.fbo then -- we need to draw our cached fbo
 		
---			gl.Disable(gl.DEPTH_TEST)
---			gl.Disable(gl.CULL_FACE)
-		
---			gl.Color(1,1,1,1)
+			gl.Disable(gl.DEPTH_TEST)
+			gl.Disable(gl.CULL_FACE)
+			gl.Color(1,1,1,1)
 
 			local old=cache_bind({widget.fbo.texture})
 
