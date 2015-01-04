@@ -132,7 +132,6 @@ function wmaster.setup(widget,def)
 		local tim=os.time()
 		for w,t in pairs(master.timehooks) do
 			if t<=tim then
---print("tim",t)
 				w:call_hook("timedelay",t)
 				master.timehooks[w]=nil
 			end

@@ -38,9 +38,9 @@ function wpanel.layout(widget)
 		end
 	end
 
-	for i,v in ipairs(widget) do
-		if not v.hidden then v:layout() end
-	end
+-- also layout any other children
+	widget.meta.layout(widget,1)
+
 end
 
 function wpanel.setup(widget,def)

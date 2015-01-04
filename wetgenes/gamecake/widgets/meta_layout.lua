@@ -80,8 +80,9 @@ function wmeta.setup(def)
 	end
 	
 
-	function meta.layout(widget)
-		for i,v in ipairs(widget) do
+	function meta.layout(widget,mini)
+		mini=mini or 0
+		for i,v in ipairs(widget) do if i>mini then
 		
 			if v.size=="full" then -- force full size
 
@@ -100,7 +101,7 @@ function wmeta.setup(def)
 
 			end
 		
-		end
+		end end
 		for i,v in ipairs(widget) do
 			if not v.hidden then v:layout() end
 		end

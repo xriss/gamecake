@@ -127,10 +127,9 @@ function wsplit.layout(widget)
 
 	end
 
+-- also layout any other children
+	widget.meta.layout(widget,2)
 
-	for i,v in ipairs(widget) do
-		if not v.hidden then v:layout() end
-	end
 end
 
 function wsplit.setup(widget,def)
