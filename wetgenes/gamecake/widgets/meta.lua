@@ -283,14 +283,18 @@ function wmeta.setup(def)
 -- handle mouse input
 --
 
-	function meta.mousexy(widget,_x,_y)
-		if not widget.m4 then return -1,-1 end
+-- get local x,y from master coordinates
+	function meta.get_local_xy(w,_x,_y)
+		if not w.m4 then return -1,-1 end
 		local v4=tardis.v4.new(_x,_y,0,1)
-		widget.m4:product(v4)
+		w.m4:product(v4)
 		return v4[1],v4[2]
 	end
-	
+	meta.mousexy=meta.get_local_xy
+
+-- get master xy from local coordinates
 	function meta.get_master_xy(w,x,y)
+		if not w.m4 then return -1,-1 end
 		local m=tardis.m4.new()
 		w.m4:inverse(m)
 		local v=tardis.v4.new(x or 0,y or 0,0,1)

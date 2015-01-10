@@ -10,6 +10,21 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 local function dprint(a) print(wstr.dump(a)) end
 
+-- verts are just a bunch of numbers rather than names
+-- (hopefully a mild step towards optimisation without too much pain)
+-- .plan is to turn this into large native memory arrays for speed at a later point
+
+-- v[1,2,3]			== xyz position
+-- v[4,5,6]			== xyz normal
+-- v[7,8]			== uv texture coords
+-- v[9,10,11,12]	== bone id and weights. integer is the bone id and 1-frac is the bone weight
+
+-- v.mask			== mask value for selecting verts for transforms and special display
+
+-- all of these values may actually be nil and should default to 0 if they are
+
+-- polygons or lines are just a list of vertex indexes
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -27,6 +42,9 @@ M.bake=function(oven,geom)
 	local font=canvas.font
 	local flat=canvas.flat
 	
+	require("wetgenes.gamecake.spew.geom_draw").fill(oven,geom)
+	require("wetgenes.gamecake.spew.geom_solids").fill(oven,geom)
+
 		
 	-- scale the geom
 	geom.adjust_scale=function(it,s)
@@ -39,101 +57,17 @@ M.bake=function(oven,geom)
 		end
 		return it
 	end
-
-	-- allocate and upload the geom to opengl buffers
-	geom.predraw=function(it,progname)
-
-		if not it.predrawn then
-			local orders={}
-			orders[3]={ {3,3,2,1,1}			,	{1,1,2,3,3}		}
-			orders[4]={ {3,3,4,2,1,1}		,	{1,1,2,4,3,3}	}
-			orders[5]={ {4,4,3,5,2,1,1}		,	{1,1,2,5,3,4,4}	}
-
-			local t={}
-			local f=1
-			for i,p in ipairs(it.polys) do
-	--			local c=cs[1+(i%#cs)]
-				local o=orders[#p][1+f%2]
-				for _,i in ipairs(o) do
-					local idx=p[i]
-					local v=it.verts[idx]
-					t[#t+1]=v[1]
-					t[#t+1]=v[2]
-					t[#t+1]=v[3]
-
-					t[#t+1]=v[4] or 0
-					t[#t+1]=v[5] or 0
-					t[#t+1]=v[6] or 0
-
-					t[#t+1]=v[7] or 0
-					t[#t+1]=v[8] or 0
-					t[#t+1]=(p.mat or 1)-1
-
-					t[#t+1]=v[9] or 0
-					t[#t+1]=v[10] or 0
-					t[#t+1]=v[11] or 0
-					t[#t+1]=v[12] or 0
-
-					f=f+1
-				end
-			end
-			it.predrawn=flat.array_predraw({fmt="xyznrmuvmbone",data=t,progname=progname,array=gl.TRIANGLE_STRIP,vb=true})
-		end
-		
-		return it
-	end
-
-	-- draw the geom (upload first, mkay)
-	geom.draw=function(it,progname,cb)
-		geom.predraw(it,progname)
-		it.predrawn.draw(cb)
-		
-		return it
-	end	
 	
-	-- allocate and upload the geom to opengl buffers
-	geom.predraw_lines=function(it,progname)
-
-		if not it.predrawn_lines then
-
-			local t={}
-			local f=1
-			for i,p in ipairs(it.lines) do
-				for i=1,2 do
-					local idx=p[i]
-					local v=it.verts[idx]
-					t[#t+1]=v[1]
-					t[#t+1]=v[2]
-					t[#t+1]=v[3]
-
-					t[#t+1]=v[4] or 0
-					t[#t+1]=v[5] or 0
-					t[#t+1]=v[6] or 0
-
-					t[#t+1]=v[7] or 0
-					t[#t+1]=v[8] or 0
-					t[#t+1]=(p.mat or 1)-1
-
-					t[#t+1]=v[9] or 0
-					t[#t+1]=v[10] or 0
-					t[#t+1]=v[11] or 0
-					t[#t+1]=v[12] or 0
-
-					f=f+1
-				end
-			end
-			it.predrawn_lines=flat.array_predraw({fmt="xyznrmuvmbone",data=t,progname=progname,array=gl.LINES,vb=true})
+	-- position the geom
+	geom.adjust_position=function(it,dx,dy,dz)
+		local vs=it.verts
+		for i=1,#vs do local v=vs[i]
+			v[1]=v[1]+dx
+			v[2]=v[2]+dy
+			v[3]=v[3]+dz
 		end
-		
 		return it
 	end
-
-	-- draw the geom (upload first, mkay)
-	geom.draw_lines=function(it,progname,cb)
-		geom.predraw_lines(it,progname)
-		it.predrawn_lines.draw(cb)
-		return it
-	end	
 
 	-- build lines from polys
 	geom.build_lines=function(it)
@@ -489,192 +423,6 @@ M.bake=function(oven,geom)
 		return it
 	end
 
-
-	geom.tetrahedron=function(it)
-		it=geom.new(it)
-		
-		it.verts={
-				{ 0.5, 0.5, 0.5},
-				{-0.5, 0.5,-0.5},
-				{ 0.5,-0.5,-0.5},
-				{-0.5,-0.5, 0.5},
-			}
-			
-		it.polys={
-				{1,2,3},
-				{2,4,3},
-				{1,3,4},
-				{1,4,2},
-			}
-			
---		it.strips={1,2,3,4,1,2}
-		
-		for i,p in pairs(it.polys) do geom.fix_poly_order(it,p) end
-		return it
-	end
-
-	geom.octahedron=function(it)
-		it=geom.new(it)
-		
-		local a=1/(2*math.sqrt(2))
-		local b=1/2
-		
-		it.verts={
-				{ a, 0, a},
-				{ a, 0,-a},
-				{-a, 0, a},
-				{-a, 0,-a},
-				{ 0, b, 0},
-				{ 0,-b, 0},
-			}
-			
-		it.polys={
-				{3,4,5},
-				{4,2,5},
-				{2,1,5},
-				{1,3,5},
-				{2,4,6},
-				{4,3,6},
-				{1,2,6},
-				{3,1,6},
-			}
-			
---		it.strips={}
-		
-		for i,p in pairs(it.polys) do geom.fix_poly_order(it,p) end
-		return it
-	end
-	
-	geom.hexahedron=function(it)
-		it=geom.new(it)
-		
-		it.verts={
-				{ 0.5, 0.5, 0.5},
-				{ 0.5, 0.5,-0.5},
-				{ 0.5,-0.5, 0.5},
-				{ 0.5,-0.5,-0.5},
-				{-0.5, 0.5, 0.5},
-				{-0.5, 0.5,-0.5},
-				{-0.5,-0.5, 0.5},
-				{-0.5,-0.5,-0.5},
-			}
-			
-		it.polys={
-				{8,4,3,7},
-				{8,7,5,6},
-				{7,3,1,5},
-				{6,5,1,2},
-				{4,2,1,3},
-				{8,6,2,4},
-			}
-			
---		it.strips={}
-		
-		for i,p in pairs(it.polys) do geom.fix_poly_order(it,p) end
-		return it
-	end
-
-	geom.icosahedron=function(it)
-		it=geom.new(it)
-		
-		local a=1/2
-		local b=1/(1+math.sqrt(5))
-		
-		it.verts={
-				{ 0, b, a}, -- 1
-				{ 0, b,-a}, -- 2
-				{ 0,-b, a}, -- 3
-				{ 0,-b,-a}, -- 4
-				{ a, 0, b}, -- 5
-				{ a, 0,-b}, -- 6
-				{-a, 0, b}, -- 7
-				{-a, 0,-b}, -- 8
-				{ b, a, 0}, -- 9
-				{ b,-a, 0}, --10
-				{-b, a, 0}, --11
-				{-b,-a, 0}, --12
-			}
-			
-		it.polys={
-				{2,9,11},
-				{1,11,9},
-				{1,3,7},
-				{1,5,3},
-				{2,4,6},
-				{2,8,4},
-				{3,10,12},
-				{4,12,10},
-				{11,7,8},
-				{12,8,7},
-				{9,6,5},
-				{10,5,6},
-				{1,7,11},
-				{1,9,5},
-				{2,11,8},
-				{2,6,9},
-				{4,8,12},
-				{4,10,6},
-				{3,12,7},
-				{3,5,10}, 
- 			}
-			
---		it.strips={}
-		
-		for i,p in pairs(it.polys) do geom.fix_poly_order(it,p) end
-		return it
-	end
-
-	geom.dodecahedron=function(it)
-		it=geom.new(it)
-		
-		local phi=(1+math.sqrt(5))/2
-		local a=1/2
-		local b=(1/phi)/2
-		local c=(2-phi)/2
-		
-		it.verts={
-				{ 0, a, c}, -- 1
-				{ 0, a,-c}, -- 2
-				{ 0,-a, c}, -- 3
-				{ 0,-a,-c}, -- 4
-				{ c, 0, a}, -- 5
-				{ c, 0,-a}, -- 6
-				{-c, 0, a}, -- 7
-				{-c, 0,-a}, -- 8
-				{ a, c, 0}, -- 9
-				{ a,-c, 0}, --10
-				{-a, c, 0}, --11
-				{-a,-c, 0}, --12
-				{ b, b, b}, --13
-				{ b, b,-b}, --14
-				{ b,-b, b}, --15
-				{ b,-b,-b}, --16
-				{-b, b, b}, --17
-				{-b, b,-b}, --18
-				{-b,-b, b}, --19
-				{-b,-b,-b}, --20
-			}
-			
-		it.polys={
-			{5,7,17,1,13},
-			{7,5,15,3,19},
-			{6,8,20,4,16},
-			{8,6,14,2,18},
-			{14,9,13,1,2},
-			{17,11,18,2,1},
-			{20,12,19,3,4},
-			{15,10,16,4,3},
-			{9,10,15,5,13},
-			{10,9,14,6,16},
-			{11,12,20,8,18},
-			{12,11,17,7,19},
-		}
-			
---		it.strips={}
-		
-		for i,p in pairs(it.polys) do geom.fix_poly_order(it,p) end
-		return it
-	end
 
 	return geom
 end

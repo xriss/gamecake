@@ -306,23 +306,23 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	local pmat
 	local pbone
 	local p
-	local progname=it.progname
+	local def_progname
 	local fmt=it.fmt
 	if fmt=="xyz" then -- xyz only
 	
-		progname = progname or "pos"
+		def_progname="pos"
 		pstride=12
 	
 	elseif fmt=="xyznrm" then -- xyz and normal (so we may light the thing)
 
-		progname = progname or "pos_normal"
+		def_progname="pos_normal"
 
 		pstride=24
 		pnrm=12
 	
 	elseif fmt=="xyznrmuv" then -- xyz and normal and texture
 
-		progname = progname or "pos_normal_tex"
+		def_progname="pos_normal_tex"
 
 		pstride=32
 		pnrm=12
@@ -330,7 +330,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	
 	elseif fmt=="xyznrmuvm" then -- xyz and normal and texture and  material id
 
-		progname = progname or "pos_normal_tex_mat"
+		def_progname="pos_normal_tex_mat"
 
 		pstride=36
 		pnrm=12
@@ -339,7 +339,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	
 	elseif fmt=="xyznrmuvmbone" then -- xyz and normal and texture and  material id and bones
 
-		progname = progname or "pos_normal_tex_mat_bone"
+		def_progname="pos_normal_tex_mat_bone"
 
 		pstride=52
 		pnrm=12
@@ -349,21 +349,21 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 	elseif fmt=="xyzuv" then -- xyz and texture
 
-		progname = progname or "pos_tex"
+		def_progname="pos_tex"
 
 		pstride=20
 		ptex=12
 	
 	elseif fmt=="xyzrgba" then -- xyz and color
 
-		progname = progname or "pos_color"
+		def_progname="pos_color"
 
 		pstride=28
 		pcolor=12
 	
 	elseif fmt=="xyzuvrgba" then -- xyz and texture and color
 	
-		progname = progname or "pos_tex_color"
+		def_progname="pos_tex_color"
 
 		pstride=36
 		ptex=12
@@ -371,7 +371,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 	elseif fmt=="rawuvrgba" then -- raw-xyz and texture and color
 	
-		progname = progname or "raw_tex_color"
+		def_progname="raw_tex_color"
 
 		pstride=36
 		ptex=12
@@ -380,7 +380,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	end
 	
 	if canvas.discard_low_alpha then -- try not to break the zbuffer
-		progname=progname.."_discard"
+		def_progname=def_progname.."_discard"
 	end
 
 	
@@ -402,9 +402,9 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	end
 
 
-	it.draw=function(cb)
+	it.draw=function(cb,progname)
 	
-		local p=gl.program(progname)
+		local p=gl.program(progname or it.progname or def_progname)
 		gl.UseProgram( p[0] )
 
 		if it.vb then -- use a precached buffer
