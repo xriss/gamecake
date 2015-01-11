@@ -260,6 +260,44 @@ M.fill=function(oven,geom)
 		return it
 	end
 	
+	geom.box=function(it,dd)
+		it=geom.new(it)
+		
+		local minx=dd[1][1]
+		local miny=dd[1][2]
+		local minz=dd[1][3]
+
+		local maxx=dd[2][1]
+		local maxy=dd[2][2]
+		local maxz=dd[2][3]
+		
+		if minx>maxx then minx,maxx=maxx,minx end
+		if miny>maxy then miny,maxy=maxy,miny end
+		if minz>maxz then minz,maxz=maxz,minz end
+		
+		it.verts={
+			{ minx, miny, minz},
+			{ minx, miny, maxz},
+			{ minx, maxy, minz},
+			{ minx, maxy, maxz},
+			{ maxx, miny, minz},
+			{ maxx, miny, maxz},
+			{ maxx, maxy, minz},
+			{ maxx, maxy, maxz},
+		}
+		
+		it.polys={
+			{8,4,3,7},
+			{8,7,5,6},
+			{7,3,1,5},
+			{6,5,1,2},
+			{4,2,1,3},
+			{8,6,2,4},
+		}
+		
+		return it
+	end
+
 			
 	return geom
 end
