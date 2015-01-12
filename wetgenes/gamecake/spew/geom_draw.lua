@@ -108,6 +108,7 @@ M.fill=function(oven,geom)
 
 		local t={}
 		local f=1
+		local mask=it.mask and it.mask.polys or {}
 		for i,p in ipairs(it.polys) do
 			local o=orders[#p][1+f%2]
 			for _,i in ipairs(o) do
@@ -123,7 +124,7 @@ M.fill=function(oven,geom)
 
 				t[#t+1]=v[7] or 0
 				t[#t+1]=v[8] or 0
-				t[#t+1]=v.mask or 0
+				t[#t+1]=mask[v] or 0
 
 				t[#t+1]=v[9] or 0
 				t[#t+1]=v[10] or 0
@@ -171,6 +172,7 @@ M.fill=function(oven,geom)
 	geom.predraw_lines_mask=function(it)
 		local t={}
 		local f=1
+		local mask=it.mask and it.mask.lines or {}
 		for i,p in ipairs(it.lines) do
 			for i=1,2 do
 				local idx=p[i]
@@ -185,7 +187,7 @@ M.fill=function(oven,geom)
 
 				t[#t+1]=v[7] or 0
 				t[#t+1]=v[8] or 0
-				t[#t+1]=v.mask or p.mask or 0
+				t[#t+1]=mask[v] or 0
 
 				t[#t+1]=v[9] or 0
 				t[#t+1]=v[10] or 0
@@ -199,9 +201,10 @@ M.fill=function(oven,geom)
 	end
 
 -- make a predraw buffer to draw points not triangles and use mask rather than materials
-	geom.predraw_points_mask=function(it)
+	geom.predraw_verts_mask=function(it)
 		local t={}
 		local f=1
+		local mask=it.mask and it.mask.verts or {}
 		for i,v in ipairs(it.verts) do
 			t[#t+1]=v[1]
 			t[#t+1]=v[2]
@@ -213,7 +216,7 @@ M.fill=function(oven,geom)
 
 			t[#t+1]=v[7] or 0
 			t[#t+1]=v[8] or 0
-			t[#t+1]=v.mask or 0
+			t[#t+1]=mask[v] or 0
 
 			t[#t+1]=v[9] or 0
 			t[#t+1]=v[10] or 0
@@ -262,9 +265,9 @@ M.fill=function(oven,geom)
 		return it
 	end	
 
-	geom.draw_points_mask=function(it,progname,cb)
-		local pd="pd_points_mask"
-		if not it[pd] then it[pd]=geom.predraw_points_mask(it) end
+	geom.draw_verts_mask=function(it,progname,cb)
+		local pd="pd_verts_mask"
+		if not it[pd] then it[pd]=geom.predraw_verts_mask(it) end
 		it[pd].draw(cb,progname)
 		return it
 	end	
@@ -277,7 +280,7 @@ M.fill=function(oven,geom)
 		it.pd_polys_mask=nil
 		it.pd_flatpolys_mask=nil
 		it.pd_lines_mask=nil
-		it.pd_points_mask=nil
+		it.pd_verts_mask=nil
 	end
 
 -- default draw is polys

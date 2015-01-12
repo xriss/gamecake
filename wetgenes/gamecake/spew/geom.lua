@@ -44,6 +44,7 @@ M.bake=function(oven,geom)
 	
 	require("wetgenes.gamecake.spew.geom_draw").fill(oven,geom)
 	require("wetgenes.gamecake.spew.geom_solids").fill(oven,geom)
+	require("wetgenes.gamecake.spew.geom_mask").fill(oven,geom)
 
 		
 	-- scale the geom
