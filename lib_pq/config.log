@@ -360,7 +360,7 @@ configure:7539: $? = 0
 configure:7548: result: yes
 configure:7559: checking for library containing setproctitle
 configure:7590: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lm  >&5
-/tmp/ccj3LW9q.o: In function `main':
+/tmp/ccbYFCkG.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `setproctitle'
 collect2: error: ld returned 1 exit status
 configure:7590: $? = 1
@@ -401,7 +401,7 @@ configure: failed program was:
 |   return 0;
 | }
 configure:7590: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lutil  -lm  >&5
-/tmp/ccuHJ6Iw.o: In function `main':
+/tmp/ccV3gMtM.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `setproctitle'
 collect2: error: ld returned 1 exit status
 configure:7590: $? = 1
@@ -444,7 +444,7 @@ configure: failed program was:
 configure:7607: result: no
 configure:7615: checking for library containing dlopen
 configure:7646: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lm  >&5
-/tmp/cc2aPhzB.o: In function `main':
+/tmp/ccPFQ4lO.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `dlopen'
 collect2: error: ld returned 1 exit status
 configure:7646: $? = 1
@@ -493,7 +493,7 @@ configure:7702: $? = 0
 configure:7719: result: none required
 configure:7727: checking for library containing shl_load
 configure:7758: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -ldl -lm  >&5
-/tmp/ccBDZL2I.o: In function `main':
+/tmp/cc0pkhA3.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `shl_load'
 collect2: error: ld returned 1 exit status
 configure:7758: $? = 1
@@ -580,7 +580,7 @@ configure:7875: $? = 0
 configure:7892: result: none required
 configure:7900: checking for library containing crypt
 configure:7931: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -ldl -lm  >&5
-/tmp/cc1EQHpU.o: In function `main':
+/tmp/cc3cL6ce.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `crypt'
 collect2: error: ld returned 1 exit status
 configure:7931: $? = 1
@@ -625,7 +625,7 @@ configure:7931: $? = 0
 configure:7948: result: -lcrypt
 configure:7956: checking for library containing shm_open
 configure:7987: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lcrypt -ldl -lm  >&5
-/tmp/ccHSsVu4.o: In function `main':
+/tmp/cchORITk.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `shm_open'
 collect2: error: ld returned 1 exit status
 configure:7987: $? = 1
@@ -4268,7 +4268,7 @@ configure:11307: $? = 0
 configure:11307: result: yes
 configure:11307: checking for getpeerucred
 configure:11307: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lz  -lrt -lcrypt -ldl -lm  >&5
-/tmp/ccTR1yfp.o: In function `main':
+/tmp/ccIFZsxV.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `getpeerucred'
 collect2: error: ld returned 1 exit status
 configure:11307: $? = 1
@@ -4407,7 +4407,7 @@ configure:11307: $? = 0
 configure:11307: result: yes
 configure:11307: checking for mbstowcs_l
 configure:11307: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lz  -lrt -lcrypt -ldl -lm  >&5
-/tmp/cc1DqZRn.o: In function `main':
+/tmp/cc1W24X4.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `mbstowcs_l'
 collect2: error: ld returned 1 exit status
 configure:11307: $? = 1
@@ -4554,7 +4554,7 @@ configure:11307: $? = 0
 configure:11307: result: yes
 configure:11307: checking for pstat
 configure:11307: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lz  -lrt -lcrypt -ldl -lm  >&5
-/tmp/ccUXCAHz.o: In function `main':
+/tmp/ccHCu7bk.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `pstat'
 collect2: error: ld returned 1 exit status
 configure:11307: $? = 1
@@ -4696,7 +4696,7 @@ configure:11307: $? = 0
 configure:11307: result: yes
 configure:11307: checking for setproctitle
 configure:11307: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lz  -lrt -lcrypt -ldl -lm  >&5
-/tmp/ccjswCoL.o: In function `main':
+/tmp/ccY0QXcm.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `setproctitle'
 collect2: error: ld returned 1 exit status
 configure:11307: $? = 1
@@ -4874,7 +4874,7 @@ configure:11307: $? = 0
 configure:11307: result: yes
 configure:11307: checking for wcstombs_l
 configure:11307: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lz  -lrt -lcrypt -ldl -lm  >&5
-/tmp/ccxTPsMw.o: In function `main':
+/tmp/ccxVgE77.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `wcstombs_l'
 collect2: error: ld returned 1 exit status
 configure:11307: $? = 1
@@ -5831,7 +5831,7 @@ configure:11682: $? = 0
 configure:11682: result: yes
 configure:11695: checking for fls
 configure:11695: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lz  -lrt -lcrypt -ldl -lm  >&5
-/tmp/cc3D65kI.o: In function `main':
+/tmp/ccaMOdQc.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `fls'
 collect2: error: ld returned 1 exit status
 configure:11695: $? = 1
@@ -6029,7 +6029,7 @@ configure:11799: $? = 0
 configure:11799: result: yes
 configure:11812: checking for strlcat
 configure:11812: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lz  -lrt -lcrypt -ldl -lm  >&5
-/tmp/cc7aGOHp.o: In function `main':
+/tmp/ccbUp1RL.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `strlcat'
 collect2: error: ld returned 1 exit status
 configure:11812: $? = 1
@@ -6200,7 +6200,7 @@ configure: failed program was:
 configure:11812: result: no
 configure:11825: checking for strlcpy
 configure:11825: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lz  -lrt -lcrypt -ldl -lm  >&5
-/tmp/ccGP1s5q.o: In function `main':
+/tmp/ccfC4l1R.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `strlcpy'
 collect2: error: ld returned 1 exit status
 configure:11825: $? = 1
@@ -6375,7 +6375,7 @@ configure:11855: $? = 0
 configure:11855: result: yes
 configure:11868: checking for getpeereid
 configure:11868: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lz  -lrt -lcrypt -ldl -lm  >&5
-/tmp/ccpwtUqC.o: In function `main':
+/tmp/ccypxA20.o: In function `main':
 conftest.c:(.text.startup+0x7): undefined reference to `getpeereid'
 collect2: error: ld returned 1 exit status
 configure:11868: $? = 1
@@ -6581,7 +6581,7 @@ configure:12128: $? = 0
 configure:12136: result: yes
 configure:12144: checking for optreset
 configure:12160: gcc -o conftest -O2 -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard  -D_GNU_SOURCE    conftest.c -lz  -lrt -lcrypt -ldl -lm  >&5
-/tmp/ccpq5NY5.o: In function `main':
+/tmp/ccLAEPTx.o: In function `main':
 conftest.c:(.text.startup+0x2): undefined reference to `optreset'
 collect2: error: ld returned 1 exit status
 configure:12160: $? = 1
@@ -6940,7 +6940,7 @@ conftest.c:147:22: warning: null argument where non-null required (argument 3) [
 conftest.c:145:15: warning: 'th' is used uninitialized in this function [-Wuninitialized]
  pthread_t th; pthread_join(th, 0);
                ^
-/tmp/ccD2UzCO.o: In function `main':
+/tmp/cchiFCOd.o: In function `main':
 conftest.c:(.text.startup+0x19): undefined reference to `pthread_join'
 conftest.c:(.text.startup+0x36): undefined reference to `__pthread_register_cancel'
 conftest.c:(.text.startup+0x43): undefined reference to `pthread_create'
@@ -9667,8 +9667,11 @@ on len
 config.status:1087: creating GNUmakefile
 config.status:1087: creating src/Makefile.global
 config.status:1087: creating src/include/pg_config.h
+config.status:1268: src/include/pg_config.h is unchanged
 config.status:1087: creating src/include/pg_config_ext.h
+config.status:1268: src/include/pg_config_ext.h is unchanged
 config.status:1087: creating src/interfaces/ecpg/include/ecpg_config.h
+config.status:1268: src/interfaces/ecpg/include/ecpg_config.h is unchanged
 config.status:1294: linking src/backend/port/tas/dummy.s to src/backend/port/tas.s
 config.status:1294: linking src/backend/port/dynloader/linux.c to src/backend/port/dynloader.c
 config.status:1294: linking src/backend/port/sysv_sema.c to src/backend/port/pg_sema.c
