@@ -693,6 +693,8 @@ all_includes=all_includes or {
 	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lib_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_pgsql",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"lib_pq",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
 -- this may be the main lua or luajit lib depending on build
 	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
