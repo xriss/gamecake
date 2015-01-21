@@ -34,7 +34,7 @@
 int
 getpeereid(int sock, uid_t *uid, gid_t *gid)
 {
-#if defined(SO_PEERCRED)
+#if defined(SO_PEERCREDH4X)
 	/* Linux: use getsockopt(SO_PEERCRED) */
 	struct ucred peercred;
 	ACCEPT_TYPE_ARG3 so_len = sizeof(peercred);
