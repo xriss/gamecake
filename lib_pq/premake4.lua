@@ -3,17 +3,17 @@ project "lib_pq"
 kind "StaticLib"
 language "C"
 files {
-	"src/interface/libpq/fe-auth.c",
-	"src/interface/libpq/fe-connect.c",
-	"src/interface/libpq/fe-exec.c",
-	"src/interface/libpq/fe-misc.c",
-	"src/interface/libpq/fe-print.c",
-	"src/interface/libpq/fe-lobj.c",
-	"src/interface/libpq/fe-protocol2.c",
-	"src/interface/libpq/fe-protocol3.c",
-	"src/interface/libpq/pqexpbuffer.c",
-	"src/interface/libpq/fe-secure.c",
-	"src/interface/libpq/libpq-events.c",	
+	"./src/interfaces/libpq/fe-auth.c",
+	"./src/interfaces/libpq/fe-connect.c",
+	"./src/interfaces/libpq/fe-exec.c",
+	"./src/interfaces/libpq/fe-misc.c",
+	"./src/interfaces/libpq/fe-print.c",
+	"./src/interfaces/libpq/fe-lobj.c",
+	"./src/interfaces/libpq/fe-protocol2.c",
+	"./src/interfaces/libpq/fe-protocol3.c",
+	"./src/interfaces/libpq/pqexpbuffer.c",
+	"./src/interfaces/libpq/fe-secure.c",
+	"./src/interfaces/libpq/libpq-events.c",	
 	
 	}
 --[[
@@ -35,7 +35,7 @@ OBJS += encnames.o wchar.o
 
 
 
-includedirs { "." }
+includedirs { "." , "./src/include" , "./src/interfaces/libpq"}
 
 
 KIND{}
