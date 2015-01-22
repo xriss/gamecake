@@ -83,6 +83,7 @@ M.fill=function(oven,geom)
 	end
 
 	geom.mask_save_verts=function(it)
+		if not it.mask then it:mask_clear() end
 		it.mask.verts=it.mask.verts or {}
 		local m=it.mask.verts
 		local r={}
@@ -95,6 +96,7 @@ M.fill=function(oven,geom)
 	end
 
 	geom.mask_load_verts=function(it)
+		if not it.mask then it:mask_clear() end
 		it.mask.verts=it.mask.verts or {}
 		local m=it.mask.verts
 		local idx=0

@@ -240,7 +240,7 @@ void main(void)
 
 	end
 	
-	geom.predraw(wetiso.it,"geom_wetiso")
+	geom.predraw_polys(wetiso.it,"geom_wetiso")
 
 end
 
@@ -249,7 +249,7 @@ wetiso.draw=function()
  	wetiso.predraw() -- make sure buffers are valid
 		
 	wetiso.fbo:bind_texture()
-	geom.draw(wetiso.it,"geom_wetiso")
+	geom.draw_polys(wetiso.it,"geom_wetiso")
 	
 end
 
