@@ -380,7 +380,7 @@ int count;
 	
 	if(lua_isstring(l,2))
 	{
-		arr=string_to_id( (u8*) lua_tostring(l,2) ); // array flag and default
+		arr=string_to_id(  lua_tostring(l,2) ); // array flag and default
 	}
 	else
 	if(!lua_istable(l,2))
@@ -427,7 +427,7 @@ int count;
 			}
 			else
 			{
-				def=string_to_id( (u8*) lua_tostring(l,-1) );
+				def=string_to_id( lua_tostring(l,-1) );
 				def_len=lua_pack_field_size(def);
 			}
 			lua_pop(l,1);
@@ -467,7 +467,7 @@ int count;
 			}
 			else
 			{
-				def=string_to_id( (u8*) lua_tostring(l,-1) );
+				def=string_to_id( lua_tostring(l,-1) );
 				def_len=lua_pack_field_size(def);
 			}
 			lua_pop(l,1);
@@ -475,7 +475,7 @@ int count;
 		
 		if(def==0)
 		{
-			lua_pushlstring(l,ptr+off,def_len);
+			lua_pushlstring(l,(const char *)(ptr+off),def_len);
 			lua_rawseti(l,-2,n); // save in table
 		}
 		else
@@ -515,7 +515,7 @@ u8 *ptr=0;
 int count;
 
 const char *s;
-int sl;
+size_t sl;
 
 	if(!lua_istable(l,1))
 	{
@@ -525,7 +525,7 @@ int sl;
 	
 	if(lua_isstring(l,2))
 	{
-		arr=string_to_id( (u8*) lua_tostring(l,2) ); // array flag and default
+		arr=string_to_id( lua_tostring(l,2) ); // array flag and default
 	}
 	else
 	if(!lua_istable(l,2))
@@ -571,7 +571,7 @@ int sl;
 			}
 			else
 			{
-				def=string_to_id( (u8*) lua_tostring(l,-1) );
+				def=string_to_id( lua_tostring(l,-1) );
 				def_len=lua_pack_field_size(def);
 			}
 			lua_pop(l,1);
@@ -621,7 +621,7 @@ int sl;
 			}
 			else
 			{
-				def=string_to_id( (u8*) lua_tostring(l,-1) );
+				def=string_to_id( lua_tostring(l,-1) );
 				def_len=lua_pack_field_size(def);
 			}
 			lua_pop(l,1);
@@ -673,6 +673,12 @@ s32 size=(s32)lua_tonumber(l,1);
 	if(size<=0) { lua_pushstring(l,"alloc size must be > 0"); lua_error(l); }
 	
 	lua_newuserdata(l,size);
+	
+	if( lua_istable(l,2) ) // optionally supply a metatable for the userdata
+	{
+		lua_pushvalue(l,2);
+		lua_setmetatable(l,1);
+	}
 
 	return 1;
 }
@@ -691,7 +697,7 @@ s32 size=(s32)lua_tonumber(l,2);
 
 	if(lua_isstring(l,1))
 	{
-		ptr=(const u8*)lua_tolstring(l,1,&len);
+		ptr=(u8*)lua_tolstring(l,1,&len);
 	}
 	else
 	if(lua_islightuserdata(l,1))
@@ -753,7 +759,7 @@ static int lua_pack_typesize (lua_State *l)
 u32 def;
 int def_len;
 
-	def=string_to_id( (u8*) lua_tostring(l,1) );
+	def=string_to_id( lua_tostring(l,1) );
 	def_len=lua_pack_field_size(def);
 
 	lua_pushnumber(l,def_len);
@@ -785,7 +791,7 @@ u8 *ptr=0;
 		len=(size_t)lua_tonumber(l,2);
 	}
 
-	lua_pushlstring(l,ptr,len);
+	lua_pushlstring(l,(const char *)ptr,len);
 	return 1;
 }
 
@@ -802,7 +808,7 @@ u8 *ptr=0;
 
 	if(!lua_isstring(l,1))
 	{
-		ptr=lua_tostring(l,1);
+		ptr=(u8*)lua_tostring(l,1);
 	}
 	else
 	if(!lua_isuserdata(l,1))
