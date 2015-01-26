@@ -18,7 +18,7 @@ function M.bake(oven,framebuffers)
 	local funcs={}
 	local metatable={__index=funcs}
 	
-	framebuffers.data={}
+	framebuffers.data=setmetatable({}, { __mode = 'vk' })
 
 	framebuffers.create = function(w,h,d)
 
@@ -29,6 +29,7 @@ function M.bake(oven,framebuffers)
 		framebuffers.data[fbo]=fbo
 		
 		setmetatable(fbo,metatable)
+		fbo.__gc=pack.alloc(1,{__gc=function() fbo:clean() end})
 		
 		return fbo
 	end

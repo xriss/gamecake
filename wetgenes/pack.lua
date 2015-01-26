@@ -105,8 +105,8 @@ pack.save=function(data,fmts,off)
 	return dat,len -- we return the parsed data and the length of the data we just read in bytes
 end
 
-pack.alloc=function(size)
-	return core.alloc(size)
+pack.alloc=function(size,meta)
+	return core.alloc(size,meta)
 end
 pack.sizeof=function(ud)
 	return core.sizeof(ud)

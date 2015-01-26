@@ -239,8 +239,6 @@ void main(void)
 		oldlay.restore()
 
 	end
-	
-	geom.predraw_polys(wetiso.it,"geom_wetiso")
 
 end
 

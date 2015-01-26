@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local pack=require("wetgenes.pack")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -11,29 +13,34 @@ function M.bake(oven,buffers)
 	local gl=oven.gl
 	local cake=oven.cake
 	
-	buffers.data={}
+	local funcs={}
+	local metatable={__index=funcs}
+
+	buffers.data=setmetatable({}, { __mode = 'vk' })
 
 	buffers.create = function(tab)
 
-		local ret={}
+		local it={}
+		setmetatable(it,metatable)
 		for nam,val in pairs(tab) do -- copy
-			ret[nam]=val
+			it[nam]=val
 		end
 		
-		ret[0]=gl.GenBuffer()
-		ret.bind=buffers.bind
+		it[0]=gl.GenBuffer()
+		it.__gc=pack.alloc(1,{__gc=function() it:clean() end})
 		
-		if ret.start then
-			ret:start(buffers) -- and call start now
+		if it.start then
+			it:start(buffers) -- and call start now
 		end
 		
-		buffers.data[ret]=ret
+		buffers.data[it]=it
+
 		
-		return ret
+		return it
 	end
 
-	buffers.bind=function(v)
-		gl.BindBuffer(gl.ARRAY_BUFFER,v[0])
+	buffers.bind=function(it)
+		gl.BindBuffer(gl.ARRAY_BUFFER,it[0])
 	end
 
 	buffers.start = function()
@@ -49,7 +56,7 @@ function M.bake(oven,buffers)
 
 	buffers.stop = function()
 		for v,n in pairs(buffers.data) do
-			gl.DeleteBuffer(v[0])
+			if v[0] then gl.DeleteBuffer(v[0]) end
 			v[0]=nil
 			if v.stop then
 				v:stop(buffers)
@@ -58,7 +65,21 @@ function M.bake(oven,buffers)
 
 	end
 
+	buffers.clean = function(it)
+		buffers.data[it]=nil
+		if it[0] then gl.DeleteBuffer(it[0]) end
+		it[0]=nil
+		if it.stop then it:stop(buffers) end
+	end
 
+-- set some functions into the metatable 
+	for i,n in ipairs({
+		"bind",
+		"clean",
+		}) do
+		funcs[n]=buffers[n]
+	end
+	
 	return buffers
 end
 
