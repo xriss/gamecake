@@ -677,7 +677,7 @@ s32 size=(s32)lua_tonumber(l,1);
 	if( lua_istable(l,2) ) // optionally supply a metatable for the userdata
 	{
 		lua_pushvalue(l,2);
-		lua_setmetatable(l,1);
+		lua_setmetatable(l,-2);
 	}
 
 	return 1;
