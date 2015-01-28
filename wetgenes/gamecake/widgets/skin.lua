@@ -370,7 +370,7 @@ local font_cache_draw
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.PushMatrix()
 
-			widget.old_lay=widget.lay.apply()
+			widget.old_lay=widget.lay.apply(nil,nil,widget.fbo_fov)
 
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)

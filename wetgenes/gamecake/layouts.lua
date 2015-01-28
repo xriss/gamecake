@@ -121,20 +121,41 @@ function M.bake(oven,layouts)
 		local n=1
 
 		local layout_aspect=(l.h/l.w)
-			
-		if (layout_aspect > (aspect) ) 	then 	-- fit width to screen
-			m[1] = ((aspect)*1)/fov
-			m[6] = -((aspect)/layout_aspect)/fov
-			
-			layout.x_scale=1
-			layout.y_scale=layout_aspect/aspect
-		else									-- fit height to screen
 		
-			m[1] = layout_aspect/fov
-			m[6] = -1/fov
+		if fov==0 then
+		
+			if (layout_aspect > (aspect) ) 	then 	-- fit width to screen
 			
-			layout.x_scale=aspect/layout_aspect
-			layout.y_scale=1
+				m[1] = 2/l.w
+				m[6] = -2/l.h
+				
+				layout.x_scale=1
+				layout.y_scale=layout_aspect/aspect
+			else									-- fit height to screen
+			
+				m[1] = 2/l.w
+				m[6] = -2/l.h
+				
+				layout.x_scale=aspect/layout_aspect
+				layout.y_scale=1
+			end
+
+		else
+			
+			if (layout_aspect > (aspect) ) 	then 	-- fit width to screen
+				m[1] = ((aspect)*1)/fov
+				m[6] = -((aspect)/layout_aspect)/fov
+				
+				layout.x_scale=1
+				layout.y_scale=layout_aspect/aspect
+			else									-- fit height to screen
+			
+				m[1] = layout_aspect/fov
+				m[6] = -1/fov
+				
+				layout.x_scale=aspect/layout_aspect
+				layout.y_scale=1
+			end
 		end
 
 		layout.x_origin=l.x+l.w/2
@@ -144,10 +165,16 @@ function M.bake(oven,layouts)
 
 	-- we reposition with the viewport, so only need to fix the size in the matrix when using a layout.	
 		
-		m[11] = -(f+n)/(f-n)
-		m[12] = -1
+		if fov==0 then
+			m[11] = -2/(f+n)
+			m[15] = -(f+n)/(f-n)
+			m[16] = 1
+		else
+			m[11] = -(f+n)/(f-n)
+			m[12] = -1
+			m[15] = -2*f*n/(f-n)
+		end
 
-		m[15] = -2*f*n/(f-n)
 		
 -- apply overscale?
 
@@ -311,7 +338,11 @@ function M.bake(oven,layouts)
 
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.LoadIdentity()
-		gl.Translate(-w/2,-h/2,(-h/2)/fov) -- top left corner is origin
+		if fov==0 then
+			gl.Translate(-w/2,-h/2,(-d/2)) -- top left corner is origin
+		else
+			gl.Translate(-w/2,-h/2,(-h/2)/fov) -- top left corner is origin
+		end
 		
 		return ret
 	end
