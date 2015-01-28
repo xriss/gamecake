@@ -400,6 +400,31 @@ void main(void)
 	]]
 }
 
+	gl.shaders.f_phong_light={
+	source=[[{shaderprefix}
+
+varying vec4  v_color;
+varying vec3  v_normal;
+varying vec3  v_pos;
+
+uniform mat4 modelview;
+
+uniform vec3  light_normal;
+uniform vec4  light_color;
+
+void main(void)
+{
+	vec3 n=normalize( v_normal );
+	vec3 l=normalize( mat3( modelview ) * light_normal );
+	
+	gl_FragColor=vec4(
+		v_color.rgb*light_color.rgb * max( dot(l,n),
+		light_color.a ),v_color.a);
+}
+
+	]]
+}
+
 	gl.shaders.f_phong_mat={
 	source=[[{shaderprefix}
 
@@ -480,6 +505,10 @@ void main()
 		vshaders={"v_pos_normal"},
 		fshaders={"f_phong"},
 	}
+	gl.programs.pos_normal_light={
+		vshaders={"v_pos_normal"},
+		fshaders={"f_phong_light"},
+	}
 	gl.programs.pos_color={
 		vshaders={"v_pos_color"},
 		fshaders={"f_color"},
@@ -532,6 +561,10 @@ void main()
 	gl.programs.xyz_normal={
 		vshaders={"v_xyz_normal"},
 		fshaders={"f_phong"},
+	}	
+	gl.programs.xyz_normal_light={
+		vshaders={"v_xyz_normal"},
+		fshaders={"f_phong_light"},
 	}	
 
 	gl.programs.xyz_normal_mat={
