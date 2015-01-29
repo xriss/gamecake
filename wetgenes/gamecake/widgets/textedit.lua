@@ -254,7 +254,7 @@ function wtextedit.key(widget,ascii,key,act)
 --		elseif key=="up" then
 --		elseif key=="down" then
 		
-		elseif ascii~="" then -- not a blank string
+		elseif ascii and ascii~="" then -- not a blank string
 			local c=string.byte(ascii)
 			
 			if c>=32 and c<128 then

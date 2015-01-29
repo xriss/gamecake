@@ -35,6 +35,8 @@ function M.bake(oven,gles)
 
 	gl.shaders.v_pos_tex={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -48,7 +50,7 @@ varying vec4  v_color;
  
 void main()
 {
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
     gl_Position.z+=a_vertex.z;
 	v_texcoord=a_texcoord;
@@ -60,6 +62,8 @@ void main()
 
 	gl.shaders.v_pos_tex_color={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -74,7 +78,7 @@ varying vec4  v_color;
  
 void main()
 {
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
     gl_Position.z+=a_vertex.z;
 	v_texcoord=a_texcoord;
@@ -86,6 +90,8 @@ void main()
 
 	gl.shaders.v_raw_tex_color={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -100,7 +106,7 @@ varying vec4  v_color;
  
 void main()
 {
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * vec4(a_vertex.xyz , 1.0);
 	v_texcoord=a_texcoord;
 	v_color=a_color;
@@ -111,6 +117,8 @@ void main()
 
 	gl.shaders.v_pos={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -122,7 +130,7 @@ varying vec4  v_color;
  
 void main()
 {
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
     gl_Position.z+=a_vertex.z;
 	v_color=color;
@@ -134,6 +142,8 @@ void main()
 
 	gl.shaders.v_pos_color={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -146,7 +156,7 @@ varying vec4  v_color;
  
 void main()
 {
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
     gl_Position.z+=a_vertex.z;
 	v_color=a_color*color;
@@ -157,6 +167,8 @@ void main()
 
 	gl.shaders.f_tex={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform sampler2D tex;
 
@@ -179,6 +191,8 @@ void main(void)
 }
 	gl.shaders.f_tex_discard={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform sampler2D tex;
 
@@ -203,6 +217,8 @@ void main(void)
 
 	gl.shaders.f_color={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 varying vec4  v_color;
 
@@ -215,6 +231,8 @@ void main(void)
 }
 	gl.shaders.f_color_discard={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 varying vec4  v_color;
 
@@ -228,6 +246,8 @@ void main(void)
 }
 	gl.shaders.f_color_mask={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 varying vec4  v_color;
 varying float v_matidx;
@@ -243,6 +263,8 @@ void main(void)
 }
 	gl.shaders.v_pos_normal={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -257,7 +279,7 @@ varying vec3  v_pos;
  
 void main()
 {
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * modelview * vec4(a_vertex, 1.0);
     v_normal = normalize( mat3( modelview ) * a_normal );
 	v_color=color;
@@ -269,6 +291,8 @@ void main()
 
 	gl.shaders.v_pos_normal_tex={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -285,7 +309,7 @@ varying vec2  v_texcoord;
  
 void main()
 {
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * modelview * vec4(a_vertex, 1.0);
     v_normal = normalize( mat3( modelview ) * a_normal );
 	v_texcoord=a_texcoord;
@@ -298,6 +322,8 @@ void main()
 
 	gl.shaders.v_pos_normal_tex_mat={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -316,7 +342,7 @@ varying float v_matidx;
  
 void main()
 {
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * modelview * vec4(a_vertex, 1.0);
     v_normal = normalize( mat3( modelview ) * a_normal );
 	v_texcoord=a_texcoord;
@@ -330,6 +356,8 @@ void main()
 
 	gl.shaders.v_pos_normal_tex_mat_bone={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -372,7 +400,7 @@ void main()
 		n=n*mat3(m);
 	}
 	
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * modelview * v;
     v_normal = normalize( mat3( modelview ) * n );
 	v_texcoord=a_texcoord;
@@ -386,6 +414,8 @@ void main()
 
 	gl.shaders.f_phong={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 varying vec4  v_color;
 varying vec3  v_normal;
@@ -402,6 +432,8 @@ void main(void)
 
 	gl.shaders.f_phong_light={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 varying vec4  v_color;
 varying vec3  v_normal;
@@ -427,6 +459,8 @@ void main(void)
 
 	gl.shaders.f_phong_mat={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 varying vec4  v_color;
 varying vec3  v_normal;
@@ -459,6 +493,8 @@ void main(void)
 
 	gl.shaders.v_xyz={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -470,7 +506,7 @@ varying vec4  v_color;
  
 void main()
 {
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * modelview * vec4(a_vertex , 1.0);
 	v_color=color;
 }
@@ -479,6 +515,8 @@ void main()
 }
 	gl.shaders.v_xyz_mask={
 	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -492,7 +530,7 @@ varying float v_matidx;
  
 void main()
 {
-	gl_PointSize=3;
+	gl_PointSize=3.0;
     gl_Position = projection * modelview * vec4(a_vertex , 1.0);
 	v_color=color;
 	v_matidx=a_matidx;
