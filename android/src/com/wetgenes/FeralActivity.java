@@ -1,6 +1,7 @@
 package com.wetgenes;
 
 import android.app.NativeActivity;
+import android.app.ActivityManager;
 import android.util.Log;
 import android.content.Intent;
 import android.content.Context;
@@ -43,6 +44,13 @@ public class FeralActivity extends NativeActivity implements LocationListener
 	public void TaskToBack()
 	{
 		moveTaskToBack(true);
+	}
+
+	public int GetMemoryClass()
+	{
+		ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		int memoryClass = am.getMemoryClass();
+		return memoryClass;
 	}
 
 	public String GetFilesPrefix()

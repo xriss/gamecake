@@ -1210,6 +1210,16 @@ int lua_android_count_input_devices (lua_State *l)
 	return lua_android_func_call_void_return_int (l,"CountInputDevices");
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// dumb way to test for controler disconnects
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_android_get_memory_class (lua_State *l)
+{
+	return lua_android_func_call_void_return_int (l,"GetMemoryClass");
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1284,6 +1294,8 @@ LUALIB_API int luaopen_wetgenes_win_android_core(lua_State *l)
 		{"task_to_back",				lua_android_task_to_back},
 
 		{"send_intent",					lua_android_send_intent},
+
+		{"get_memory_class",			lua_android_get_memory_class},
 
 		{"get_files_prefix",			lua_android_get_files_prefix},
 		{"get_cache_prefix",			lua_android_get_cache_prefix},

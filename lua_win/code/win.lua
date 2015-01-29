@@ -167,6 +167,10 @@ function win.android_start(apk)
 		print(jit.status())
   	end
 
+	if hardcore.get_memory_class then
+		print("memory class "..hardcore.get_memory_class().." meg")
+	end
+
 --	if jit and jit.off then
 --		jit.off()
 --		hardcore.print("LUA JIT OFF")
@@ -480,4 +484,9 @@ function base.posix_msg(w)
 	return posix.win_msg(w)
 end
 
+function base.get_memory_class(w)
+	if hardcore.get_memory_class then
+		return hardcore.get_memory_class()
+	end
+end
 return win
