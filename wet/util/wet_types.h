@@ -6,6 +6,8 @@
 #ifndef wet_types_h
 #define wet_types_h
 
+#include <stdint.h>
+
 
 #define U32_ID4(a,b,c,d) ((u32)(((a)<<24)|((b)<<16)|((c)<<8)|(d)))
 

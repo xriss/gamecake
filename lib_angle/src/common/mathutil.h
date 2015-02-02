@@ -110,7 +110,7 @@ inline unsigned int unorm(float x)
 
 inline bool supportsSSE2()
 {
-#if defined(ANGLE_PLATFORM_WINDOWS) && !defined(_M_ARM)
+#if 0// defined(ANGLE_PLATFORM_WINDOWS) && !defined(_M_ARM)
     static bool checked = false;
     static bool supports = false;
 
@@ -133,6 +133,9 @@ inline bool supportsSSE2()
 
     return supports;
 #else
+// maybe?
+// if(__builtin_cpu_supports("mmx"))
+
     UNIMPLEMENTED();
     return false;
 #endif
