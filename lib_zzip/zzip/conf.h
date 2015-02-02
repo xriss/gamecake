@@ -208,6 +208,13 @@
 #     endif
 
 
+// hacks
+
+#define ZIP_EXTERN
+#define _zzip_export extern
+
+#if 0
+
 #if defined ZZIP_EXPORTS || defined ZZIPLIB_EXPORTS
 # undef ZZIP_DLL
 #define ZZIP_DLL 1
@@ -257,6 +264,8 @@
 #  else
 #  define _zzip_export extern
 #  endif
+#endif
+
 #endif
 
 #endif

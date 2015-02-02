@@ -327,6 +327,8 @@ elseif WINDOWS then
 		includedirs { w32api.."/include" }
 		libdirs { w32api.."/lib" }
 		
+		linkoptions { "-static-libgcc" }
+		
 	end
 
 elseif OSX then
@@ -626,6 +628,12 @@ elseif NACL then
 
 elseif WINDOWS then -- need windows GL hacks
 
+--[[
+	defines{ "LUA_GLES_GLES2" }
+	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
+	includedirs { "lib_angle/include" }
+]]
+
 	includedirs { "lua_gles/code" }
 	defines{ "LUA_GLES_GL" }
 	if GCC then
@@ -633,15 +641,6 @@ elseif WINDOWS then -- need windows GL hacks
 	else
 		defines{ "INCLUDE_GLES_GL=\"GL3/gl3w.h\"" }
 	end
-	
---[[
-elseif LSB then -- LSB is special?
-
-	includedirs { "lua_gles/code" }
-	defines{ "LUA_GLES_GL" }
-
-	defines{ "INCLUDE_GLES_GL=\\\"GL/gl.h\\\"" }
-]]
 
 else -- use GL 
 
@@ -711,6 +710,7 @@ all_includes=all_includes or {
 	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
+	{"lib_angle",		nil			or		nil		or		nil		or		nil			or		nil			or	nil		},
 
 -- old/broken and no longer supported but will probably still build
 --	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},

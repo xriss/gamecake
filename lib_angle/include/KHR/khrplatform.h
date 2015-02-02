@@ -97,6 +97,7 @@
  *-------------------------------------------------------------------------
  * This precedes the return type of the function in the function prototype.
  */
+#if 0
 #if defined(_WIN32) && !defined(__SCITECH_SNAP__)
 #   define KHRONOS_APICALL __declspec(dllimport)
 #elif defined (__SYMBIAN32__)
@@ -104,6 +105,9 @@
 #else
 #   define KHRONOS_APICALL
 #endif
+#endif
+#define KHRONOS_APICALL extern
+#define KHRONOS_APIENTRY __stdcall
 
 /*-------------------------------------------------------------------------
  * Definition of KHRONOS_APIENTRY
@@ -111,11 +115,13 @@
  * This follows the return type of the function  and precedes the function
  * name in the function prototype.
  */
+#if 0
 #if defined(_WIN32) && !defined(_WIN32_WCE) && !defined(__SCITECH_SNAP__)
     /* Win32 but not WinCE */
 #   define KHRONOS_APIENTRY __stdcall
 #else
 #   define KHRONOS_APIENTRY
+#endif
 #endif
 
 /*-------------------------------------------------------------------------

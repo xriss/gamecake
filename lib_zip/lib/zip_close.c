@@ -588,6 +588,18 @@ _zip_changed(const struct zip *za, zip_uint64_t *survivorsp)
 
 
 
+#if defined(__MINGW32__)
+
+static int mkstemp(char *template)
+{
+char *filename = mktemp(template);
+if (filename == NULL)
+return -1;
+return open(filename, O_RDWR | O_CREAT, 0600);
+}
+
+#endif
+
 static char *
 _zip_create_temp_output(struct zip *za, FILE **outp)
 {

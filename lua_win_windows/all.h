@@ -19,7 +19,7 @@
 #define __TIMESTAMP__ 0
 #endif
 
-#include <GL3/gl3w.h>
+//#include <GL3/gl3w.h>
 
 
 #include <io.h>
