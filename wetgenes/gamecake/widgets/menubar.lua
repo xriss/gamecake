@@ -19,7 +19,7 @@ local function isover(widget)
 		while o~=o.parent do -- need to check all parents
 			if o==widget then return true end
 			if widget.also_over then -- these widgets also count as over
-				for i,v in ipairs(widget.also_over) do
+				for i,v in pairs(widget.also_over) do
 					if o==v then return true end
 				end
 			end
@@ -30,20 +30,15 @@ local function isover(widget)
 end
 
 function wmenubar.update(widget)
-
-	if     widget.hide_when_not_over then -- must stay over widget
-		if isover(widget) then
-			widget.over_locked=true
-		else
-			if widget.over_locked then
-				widget.over_locked=false
+	if not widget.hidden then
+		if widget.hide_when_not_over then -- must stay over widget
+			if not isover(widget) then
 				widget.hidden=true
 				widget.hide_when_not_over=false
 				widget.master:layout()
 			end
 		end
 	end
-	
 	return widget.meta.update(widget)
 end
 
