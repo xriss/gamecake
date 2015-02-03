@@ -13,26 +13,11 @@ local cake=oven.cake
 local canvas=cake.canvas
 local font=canvas.font
 
-local function isover(widget)
-	local o=widget.master.over
-	if o then
-		while o~=o.parent do -- need to check all parents
-			if o==widget then return true end
-			if widget.also_over then -- these widgets also count as over
-				for i,v in pairs(widget.also_over) do
-					if o==v then return true end
-				end
-			end
-			o=o.parent
-		end
-	end
-	return false
-end
 
 function wmenubar.update(widget)
 	if not widget.hidden then
 		if widget.hide_when_not_over then -- must stay over widget
-			if not isover(widget) then
+			if not widget:isover() then
 				widget.hidden=true
 				widget.hide_when_not_over=false
 				widget.master:layout()
@@ -103,6 +88,7 @@ function wmenubar.setup(widget,def)
 	widget.layout=wmenubar.layout
 
 	widget.solid=true
+--	widget.can_focus=true
 
 	return widget
 end

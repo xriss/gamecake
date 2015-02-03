@@ -9,27 +9,11 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wmenuitem)
 wmenuitem=wmenuitem or {}
 
-local function isover(widget)
-	local o=widget.master.over
-	if o then
-		while o~=o.parent do -- need to check all parents
-			if o==widget then return true end
-			if widget.also_over then -- these widgets also count as over
-				for i,v in pairs(widget.also_over) do
-					if o==v then return true end
-				end
-			end
-			o=o.parent
-		end
-	end
-	return false
-end
-
 function wmenuitem.update(widget)
 
 	if not widget.hidden then
 		if widget.hide_when_not_over then -- must stay over widget
-			if not isover(widget) then
+			if not widget:isover() then
 				widget.hidden=true
 				widget.hide_when_not_over=false
 				widget.master:layout()
@@ -110,6 +94,8 @@ end
 function wmenuitem.hooks(hook,widget,dat)
 
 	if hook=="over" then
+	
+		widget.master.menu=widget
 
 		if widget.menu_data then -- add a sub menu using this data
 
@@ -137,6 +123,8 @@ function wmenuitem.hooks(hook,widget,dat)
 	end
 	
 	if hook=="click" then
+	
+		widget.master.menu=nil
 	
 		if widget.menu_data then -- add a sub menu using this data
 			

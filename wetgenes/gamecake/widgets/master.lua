@@ -106,6 +106,10 @@ function wmaster.setup(widget,def)
 
 				master.press=false
 
+				if master.menu then
+					master.menu=nil
+				end
+
 				if master.over --[[ and master.active==master.over ]] then -- no click if we drag away from button
 				
 					if ups.button("mouse_left_clr")  then
@@ -113,7 +117,7 @@ function wmaster.setup(widget,def)
 					elseif ups.button("mouse_right_clr")  then
 						master.over:call_hook("click",{keyname="mouse_right"}) -- its a right click
 					elseif ups.button("mouse_middle_clr")  then
-						master.over:call_hook("click",{keyname="mouse_middle"}) -- its a right click
+						master.over:call_hook("click",{keyname="mouse_middle"}) -- its a middle click
 					else
 						master.over:call_hook("click") -- probably not a mouse click
 					end
@@ -253,7 +257,7 @@ function wmaster.setup(widget,def)
 	end
 	
 	function master.set_focus(focus)
-	
+--print("focus",tostring(focus))
 		if master.focus==focus then return end -- no change
 	
 		if master.focus then

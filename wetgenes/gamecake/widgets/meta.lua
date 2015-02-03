@@ -399,6 +399,23 @@ function wmeta.setup(def)
 		end
 	end
 
+	meta.isover=function(widget)
+--		local o=widget.master.over
+		local o=widget.master.menu
+		if o then
+			while o~=o.parent do -- need to check all parents
+				if o==widget then return true end
+				if widget.also_over then -- these widgets also count as over
+					for i,v in pairs(widget.also_over) do
+						if o==v then return true end
+					end
+				end
+				o=o.parent
+			end
+		end
+		return false
+	end
+
 -- more setup, moved to other files
 	oven.rebake("wetgenes.gamecake.widgets.meta_layout").setup(def)
 
