@@ -28,6 +28,8 @@ end
 
 function wmenudrop.drop(widget)
 
+	widget.master.menu=widget
+
 	local def=widget.def
 	
 	local hooks=function(hook,w,dat)

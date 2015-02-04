@@ -106,9 +106,7 @@ function wmaster.setup(widget,def)
 
 				master.press=false
 
-				if master.menu then
-					master.menu=nil
-				end
+				master.menu=nil
 
 				if master.over --[[ and master.active==master.over ]] then -- no click if we drag away from button
 				

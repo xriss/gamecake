@@ -123,6 +123,7 @@ M.bake=function(oven,keys)
 
 	function keys.set_opts(n,v)
 		if n=="typing" and keys.opts.notyping then v=false end -- disable typing../
+		if n=="typing" and keys.opts.yestyping then v=true end -- disable non typing../
 		keys.opts[n]=v
 	end
 
