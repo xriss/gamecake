@@ -93,52 +93,66 @@ end
 
 function wmenuitem.hooks(hook,widget,dat)
 
-	if hook=="over" then
-	
+local showmenu=function()
+
+	if widget.menu_data and widget.master.menu~=widget then -- add a sub menu using this data
+
 		widget.master.menu=widget
 
-		if widget.menu_data then -- add a sub menu using this data
-
-			local w=widget:menu_add(widget.menu_data)
-			local map={}
-			local bubble
-			bubble=function(p)
-				if not p then return end
-				if map[p] then return end
-				map[p]=true
-				while p and p~=p.parent do
-					if p.also_over then
-						for i,v in pairs(p.also_over) do
-							if not v.parent then p.also_over[i]=nil end -- its been deleted, clear it
-							bubble(v)
-						end
-						p.also_over[w]=w
+		local w=widget:menu_add(widget.menu_data)
+		local map={}
+		local bubble
+		bubble=function(p)
+			if not p then return end
+			if map[p] then return end
+			map[p]=true
+			while p and p~=p.parent do
+				if p.also_over then
+					for i,v in pairs(p.also_over) do
+						if not v.parent then p.also_over[i]=nil end -- its been deleted, clear it
+						bubble(v)
 					end
-					p=p.parent
+					p.also_over[w]=w
 				end
+				p=p.parent
 			end
-			bubble(w)
+		end
+		bubble(w)
 
+	end
+end
+
+	if hook=="over" and widget.master.menu then
+		showmenu()
+	end
+
+print(hook,widget.parent.class,widget.master.menu)
+	if hook=="active" then
+		if widget.parent.class=="menubar" then
+			showmenu()
 		end
 	end
 	
 	if hook=="click" then
 	
-		widget.master.menu=nil
+		if widget.parent.class~="menubar" then
+			widget.master.menu=nil
 	
-		if widget.menu_data then -- add a sub menu using this data
-			
-		elseif widget.hide_when_clicked then
-			if widget.parent.class=="menu" then -- only the menu?
-				widget.parent.over_locked=false
-				widget.parent.hidden=true
-				widget.parent.hide_when_not_over=false
-				widget.master:layout()
+			if widget.menu_data then -- add a sub menu using this data
+				
+			elseif widget.hide_when_clicked then
+				if widget.parent.class=="menu" then -- only the menu?
+					widget.parent.over_locked=false
+					widget.parent.hidden=true
+					widget.parent.hide_when_not_over=false
+					widget.master:layout()
+				end
+	--		elseif widget.remove_when_clicked then
+	--			if widget.parent.class=="menu" then -- only the menu?
+	--				widget.parent:remove()
+	--			end
 			end
-		elseif widget.remove_when_clicked then
-			if widget.parent.class=="menu" then -- only the menu?
-				widget.parent:remove()
-			end
+
 		end
 
 	end
@@ -158,7 +172,7 @@ function wmenuitem.setup(widget,def)
 	widget.class_hooks=wmenuitem.hooks
 	
 	widget.hide_when_clicked=def.hide_when_clicked
-	widget.remove_when_clicked=def.remove_when_clicked
+--	widget.remove_when_clicked=def.remove_when_clicked
 
 	widget.menu_add=wmenuitem.menu_add
 

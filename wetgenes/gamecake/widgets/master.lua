@@ -106,8 +106,10 @@ function wmaster.setup(widget,def)
 
 				master.press=false
 
-				master.menu=nil
-
+				if master.menu~=master.over then
+					master.menu=nil
+				end
+				
 				if master.over --[[ and master.active==master.over ]] then -- no click if we drag away from button
 				
 					if ups.button("mouse_left_clr")  then
