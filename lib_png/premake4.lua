@@ -2,8 +2,11 @@
 project "lib_png"
 kind "StaticLib"
 language "C"
-files { "./*.cpp" , "./*.c" , "./*.h" }
-excludes { "./pngtest.c" , "./example.c"}
+
+local D="./fixed"
+
+files { D.."/*.cpp" , D.."/*.c" , D.."/*.h" }
+excludes { D.."/pngtest.c" , D.."/example.c"}
 
 links { "lib_z" }
 
