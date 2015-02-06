@@ -8,7 +8,7 @@ links { "lib_lua" , "lib_png" , "lib_z" }
 
 defines { "JPEGSTATIC" }
 
-includedirs { "." , "../lib_z" , "../fixed/lib_png" , "../lib_jpeg" , "../lib_gif/giflib/lib" }
+includedirs { "." , "../lib_z" , "../lib_png/fixed" , "../lib_jpeg" , "../lib_gif/giflib/lib" }
 
 
 

@@ -656,7 +656,8 @@ end
 all_includes=all_includes or {
 
 -- lua bindings
-	{"lua_bit",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		) and (LIB_LUA=="lib_lua") },
+	{"lua_bit",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		)
+																						and		(LIB_LUA=="lib_lua") 	},
 	{"lua_kissfft",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
@@ -710,7 +711,9 @@ all_includes=all_includes or {
 	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
-	{"lib_angle",		nil			or		nil		or		nil		or		nil			or		nil			or	nil		},
+
+-- dont think building this is a good idea?
+--	{"lib_angle",		nil			or		nil		or		nil		or		nil			or		nil			or	nil		},
 
 -- old/broken and no longer supported but will probably still build
 --	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
