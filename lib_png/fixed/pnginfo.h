@@ -121,7 +121,7 @@ struct png_info_def
    int num_text; /* number of comments read or comments to write */
    int max_text; /* current size of text array */
    png_textp text; /* array of comments read or comments to write */
-#endif /* PNG_TEXT_SUPPORTED */
+#endif /* TEXT */
 
 #ifdef PNG_tIME_SUPPORTED
    /* The tIME chunk holds the last time the displayed image data was
@@ -254,6 +254,19 @@ defined(PNG_READ_BACKGROUND_SUPPORTED)
       non-zero */
    /* Data valid if (valid & PNG_INFO_IDAT) non-zero */
    png_bytepp row_pointers;        /* the image bits */
+#endif
+
+#ifdef PNG_APNG_SUPPORTED
+   png_uint_32 num_frames; /* including default image */
+   png_uint_32 num_plays;
+   png_uint_32 next_frame_width;
+   png_uint_32 next_frame_height;
+   png_uint_32 next_frame_x_offset;
+   png_uint_32 next_frame_y_offset;
+   png_uint_16 next_frame_delay_num;
+   png_uint_16 next_frame_delay_den;
+   png_byte next_frame_dispose_op;
+   png_byte next_frame_blend_op;
 #endif
 
 };
