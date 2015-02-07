@@ -150,6 +150,7 @@ lprofP_STATE* lprofP_init_core_profiler(const char *_out_filename, int isto_prin
         
   /* the random string to build the logname is extracted */
   /* from 'tmpnam()' (the '/tmp/' part is deleted)     */
+/*
   randstr = tmpnam(NULL);
   for (s = strtok(randstr, "/\\"); s; s = strtok(NULL, "/\\")) {
     randstr = s;
@@ -157,8 +158,9 @@ lprofP_STATE* lprofP_init_core_profiler(const char *_out_filename, int isto_prin
 
   if(randstr[strlen(randstr)-1]=='.')
     randstr[strlen(randstr)-1]='\0';
+*/
 
-  sprintf(auxs, out_filename, randstr);
+  sprintf(auxs, out_filename, "DEADBEEF");
   outf = fopen(auxs, "a");
   if (!outf) {
     return 0;
