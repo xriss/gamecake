@@ -278,7 +278,7 @@ nacl.info=core.info
 
 nacl.queue={}
 
-local mousenames={"left","middle","right"}
+local mousenames={"left","middle","right","wheel_add","wheel_sub"}
 local lastm
 nacl.input_event=function(...)
 --	print("NACL",...)
@@ -301,6 +301,25 @@ nacl.input_event=function(...)
 			keyname=mousenames[k],
 			x=a[4],
 			y=a[5],
+		}
+		
+	elseif a[1]=="wheel" then
+	
+		local k=0
+		
+		if a[4]>0 then
+			k=4
+		elseif a[4]<0 then
+			k=5
+		end
+		
+
+		m={
+			time=nacl.time(),
+			action=-1,
+			class="mouse",
+			keycode=k,
+			keyname=mousenames[k],
 		}
 		
 	elseif a[1]=="key" then

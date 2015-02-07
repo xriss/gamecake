@@ -19,6 +19,7 @@ local cake=oven.cake
 
 local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
+local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
 function wtextedit.mouse(widget,act,_x,_y,key)
 
@@ -376,6 +377,8 @@ function wtextedit.setup(widget,def)
 	widget.solid=true
 
 	widget.can_focus=true
+	
+	widget.fbo=framebuffers.create(0,0,0) -- need framebuffer for clipping
 
 	return widget
 end

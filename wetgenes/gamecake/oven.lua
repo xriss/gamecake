@@ -567,6 +567,7 @@ print(sa.." : "..sb)
 			
 		end
 
+		local old_mouse={x=0,y=0}
 		function oven.msgs() -- read and process any msgs we have from win:msg
 
 			if oven.win then
@@ -579,8 +580,13 @@ print("requesting backtrace")
 end
 ]]
 
-					if m.class=="mouse" and m.x and m.y then	-- need to fix x,y numbers
-						m.xraw,m.yraw=m.x,m.y					-- remember original
+					if m.class=="mouse" then	-- need to fix x,y numbers
+						m.x=m.x or old_mouse.x	-- restore if missing
+						m.y=m.y or old_mouse.y
+						old_mouse.x=m.x			-- remember locally
+						old_mouse.x=m.y
+						m.xraw=m.x				-- remember in message
+						m.yraw=m.y	
 					end
 
 					if m.class=="close" then -- window has been closed so do a shutdown
