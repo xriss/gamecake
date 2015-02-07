@@ -461,6 +461,8 @@ wetwin_lua *p=lua_wetwin_check_ptr(l,1);
 
 int typ=0;
 double tim=0.0;
+double wheelx=0.0;
+double wheely=0.0;
 
 char lua=' ';
 int act=0;
@@ -531,6 +533,23 @@ const char *asc="";
 				act=-1;
 				key=2;
 			break;
+			case NSScrollWheel:
+				wheelx=[theEvent deltaX];
+				wheely=[theEvent deltaY];
+				if(wheely>0.0)
+				{
+					lua='m';
+					act=-1;
+					key=4;
+				}
+				else
+				if(wheely<0.0)
+				{
+					lua='m';
+					act=-1;
+					key=5;
+				}
+			break
 		}
 
 		if(lua=='k')

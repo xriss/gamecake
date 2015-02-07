@@ -568,6 +568,14 @@ typedef struct tagMSG {
 					if(HIWORD (msg.wParam)==2 ) { key="x2"; }
 				break;
 				
+				case WM_MOUSEWHEEL:
+					lua='m';
+					act=-1;
+					if(HIWORD (msg.wParam)>=0x8000 ) { key="wheel_sub"; }
+					else
+					if(HIWORD (msg.wParam)>0 ) { key="wheel_add"; }
+				break;
+				
 				case WM_MOUSEMOVE:
 					lua='m';
 					act=0;

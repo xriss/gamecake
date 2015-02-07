@@ -401,10 +401,12 @@ function base.msg(w)
 	if m then -- proccess the msg some more
 	
 		if m.class=="mouse" then
-			if not m.keyname then
+			if not m.keyname then -- apply mouse buttn names if all we have is a keycode
 				if m.keycode==1 then m.keyname="left"
 				elseif m.keycode==2 then m.keyname="middle"
 				elseif m.keycode==3 then m.keyname="right"
+				elseif m.keycode==4 then m.keyname="wheel_add"
+				elseif m.keycode==5 then m.keyname="wheel_sub"
 				else m.keyname="mouse"
 				end
 			end
