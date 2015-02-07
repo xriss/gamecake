@@ -183,7 +183,7 @@ bogus:
 // read a jpg into a grd from a file
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_jpg_load_file(struct grd * g, const char* file_name)
+void grd_jpg_load_file(struct grd * g, const char* file_name, void *tags)
 {
 	struct grd_io_info inf[1];
 	
@@ -200,7 +200,7 @@ void grd_jpg_load_file(struct grd * g, const char* file_name)
 // read a jpg into a grd from data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_jpg_load_data(struct grd * g, const unsigned char* data, int data_len)
+void grd_jpg_load_data(struct grd * g, const unsigned char* data, int data_len, void *tags)
 {
 	struct grd_io_info inf[1];
 	
@@ -218,7 +218,7 @@ void grd_jpg_load_data(struct grd * g, const unsigned char* data, int data_len)
 // save a grd as a jpg file
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_jpg_save_file(struct grd *g , const char* file_name )
+void grd_jpg_save_file(struct grd *g , const char* file_name , void *tags)
 {
 	struct grd *rgb;
 	int quality=85;

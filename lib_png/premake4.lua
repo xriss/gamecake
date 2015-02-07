@@ -10,7 +10,7 @@ excludes { D.."/pngtest.c" , D.."/example.c"}
 
 links { "lib_z" }
 
-defines { "PNG_STATIC" }
+defines { "PNG_STATIC" , "PNG_NO_CONSOLE_IO" }
 
 
 

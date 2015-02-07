@@ -265,7 +265,7 @@ static int grd_fileheader_to_format( const unsigned char data[16] )
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct grd * grd_load_file( const char *filename , int fmt )
+struct grd * grd_load_file( const char *filename , int fmt , void *tags)
 {
 FILE *fp;
 unsigned char data[16];
@@ -289,15 +289,15 @@ struct grd *g=0;
 		switch(fmt)
 		{
 			default:
-			case GRD_FMT_HINT_PNG: grd_png_load_file(g,filename); break;
-			case GRD_FMT_HINT_JPG: grd_jpg_load_file(g,filename); break;
-			case GRD_FMT_HINT_GIF: grd_gif_load_file(g,filename); break;
+			case GRD_FMT_HINT_PNG: grd_png_load_file(g,filename,tags); break;
+			case GRD_FMT_HINT_JPG: grd_jpg_load_file(g,filename,tags); break;
+			case GRD_FMT_HINT_GIF: grd_gif_load_file(g,filename,tags); break;
 		}
 	}
 
 	return g;
 }
-struct grd * grd_load_data( const unsigned char *data , int len,  int fmt )
+struct grd * grd_load_data( const unsigned char *data , int len,  int fmt , void *tags)
 {
 struct grd *g=0;
 
@@ -313,9 +313,9 @@ struct grd *g=0;
 		switch(fmt)
 		{
 			default:
-			case GRD_FMT_HINT_PNG: grd_png_load_data(g,data,len); break;
-			case GRD_FMT_HINT_JPG: grd_jpg_load_data(g,data,len); break;
-			case GRD_FMT_HINT_GIF: grd_gif_load_data(g,data,len); break;
+			case GRD_FMT_HINT_PNG: grd_png_load_data(g,data,len,tags); break;
+			case GRD_FMT_HINT_JPG: grd_jpg_load_data(g,data,len,tags); break;
+			case GRD_FMT_HINT_GIF: grd_gif_load_data(g,data,len,tags); break;
 		}
 	}
 
@@ -331,16 +331,16 @@ struct grd *g=0;
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct grd * grd_save_file( struct grd *g , const char *filename , int fmt )
+struct grd * grd_save_file( struct grd *g , const char *filename , int fmt , void *tags)
 {
 	if(g)
 	{
 		switch(fmt)
 		{
 			default:
-			case GRD_FMT_HINT_PNG: grd_png_save_file(g,filename); break;
-			case GRD_FMT_HINT_JPG: grd_jpg_save_file(g,filename); break;
-			case GRD_FMT_HINT_GIF: grd_gif_save_file(g,filename); break;
+			case GRD_FMT_HINT_PNG: grd_png_save_file(g,filename,tags); break;
+			case GRD_FMT_HINT_JPG: grd_jpg_save_file(g,filename,tags); break;
+			case GRD_FMT_HINT_GIF: grd_gif_save_file(g,filename,tags); break;
 		}
 	}
 	

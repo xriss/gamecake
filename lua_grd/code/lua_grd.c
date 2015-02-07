@@ -263,12 +263,12 @@ s32 fmt=0;
 
 	if(filename)
 	{
-		new_p=grd_load_file(filename,fmt);
+		new_p=grd_load_file(filename,fmt,0);
 	}
 	else
 	if(data)
 	{
-		new_p=grd_load_data(data,data_len,fmt);
+		new_p=grd_load_data(data,data_len,fmt,0);
 	}
 		
 	if(new_p!=0) // loaded something
@@ -328,7 +328,7 @@ s32 n=0;
 	
 	if(s)
 	{
-		if(! grd_save_file(p,s,n) )
+		if(! grd_save_file(p,s,n,0) )
 		{
 			lua_pushnil(l);
 			lua_pushstring(l,"failed to save");
