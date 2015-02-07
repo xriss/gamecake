@@ -126,7 +126,6 @@ end
 		showmenu()
 	end
 
-print(hook,widget.parent.class,widget.master.menu)
 	if hook=="active" then
 		if widget.parent.class=="menubar" then
 			showmenu()

@@ -24,7 +24,7 @@ scan[ 10] = "9"
 scan[ 11] = "0"
 scan[ 12] = "minus"
 scan[ 13] = "equal"
-scan[ 14] = "delete"
+scan[ 14] = "back"
 scan[ 15] = "tab"
 scan[ 16] = "q"
 scan[ 17] = "w"
@@ -121,7 +121,7 @@ scan[107] = "select"
 scan[108] = "down"
 scan[109] = "next"
 scan[110] = "insert"
-scan[111] = "remove"
+scan[111] = "delete"
 scan[112] = "macro"
 scan[113] = "f13"
 scan[114] = "f14"
@@ -254,6 +254,8 @@ function posix.win_translate_msg_keys_and_mouse(win,m)
 		
 			local k=1+m.code-272 -- 1 is the left mouse button
 			
+			if k==2 then k=3 elseif k==3 then k=2 end -- middle / right need numbers swapped
+			
 			if m.value==0 then --up
 				click(k,-1)
 			elseif m.value==1 then --down
@@ -266,7 +268,7 @@ function posix.win_translate_msg_keys_and_mouse(win,m)
 	end
 
 	if m.class=="posix_keyboard" then -- re jiggle to a normal key msg
-	
+
 		if m.type==17 and m.code==1 and m.value==1 then posix.win_caps=false end -- reset caps
 		if m.type~=1 then return nil end -- ignore
 

@@ -29,8 +29,9 @@ function M.bake(oven,keys)
 	function keys.setup_keyboard_widgets(master)
 		local shift=false
 		local top
-		local hooks={}
-		function hooks.click(widget)
+		local hooks=function(act,widget)
+		if act=="click" then
+
 --	print(widget.id)
 			local ascii=widget.text
 			local code=0
@@ -90,7 +91,7 @@ function M.bake(oven,keys)
 				keyname=name,
 				softkey=true,
 			}
-
+		end
 		end
 
 		master:clean_all()
