@@ -35,6 +35,7 @@ static PPB_URLResponseInfo* url_response_info_interface = NULL;
 static PPB_InputEvent* input_event_interface = NULL;
 static PPB_KeyboardInputEvent* keyboard_input_event_interface = NULL;
 static PPB_MouseInputEvent* mouse_input_event_interface = NULL;
+static PPB_WheelInputEvent* wheel_input_event_interface = NULL;
 static PPB_GetInterface get_browser_interface = NULL;
 
 static lua_State *L=0;
@@ -62,6 +63,7 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
   
   keyboard_input_event_interface = ( PPB_KeyboardInputEvent*)(get_browser_interface(PPB_KEYBOARD_INPUT_EVENT_INTERFACE));
   mouse_input_event_interface = ( PPB_MouseInputEvent*)(get_browser_interface(PPB_MOUSE_INPUT_EVENT_INTERFACE));
+  wheel_input_event_interface = ( PPB_WheelInputEvent*)(get_browser_interface(PPB_WHEEL_INPUT_EVENT_INTERFACE));
 
   if (!glInitializePPAPI(get_browser_interface)) {
     printf("glInitializePPAPI failed\n");
@@ -112,6 +114,7 @@ static struct PP_Var CStrToVar(const char* str) {
 
 
 extern void alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface);
+extern void luaL_openlibs (lua_State *L);
 
 static PP_Bool Instance_DidCreate(PP_Instance instance,
                                   uint32_t argc,
@@ -240,7 +243,7 @@ PP_Bool Input_HandleInputEvent( PP_Instance instance , PP_Resource input_event )
 		{
 			PP_InputEvent_Type 			t = input_event_interface->GetType(input_event);
 			PP_InputEvent_MouseButton 	b = mouse_input_event_interface->GetButton(input_event);
-			struct PP_Point			p = mouse_input_event_interface->GetPosition(input_event);
+			struct PP_Point				p = mouse_input_event_interface->GetPosition(input_event);
 			int							c = mouse_input_event_interface->GetClickCount(input_event);
 			
 			lua_pushstring(L,"mouse");
@@ -252,14 +255,26 @@ PP_Bool Input_HandleInputEvent( PP_Instance instance , PP_Resource input_event )
 			lua_call(L,6,0);
 		}
 		else
+		if (wheel_input_event_interface->IsWheelInputEvent(input_event))
+		{
+			PP_InputEvent_Type 		t = input_event_interface->GetType(input_event);
+			struct PP_FloatPoint	d = wheel_input_event_interface->GetDelta(input_event);
+			
+			lua_pushstring(L,"wheel");
+			lua_pushnumber(L,t);
+			lua_pushnumber(L,d.x);
+			lua_pushnumber(L,d.y);
+			lua_call(L,4,0);
+		}
+		else
 		if( keyboard_input_event_interface->IsKeyboardInputEvent(input_event) )
 		{
 				PP_InputEvent_Type 			t = input_event_interface->GetType(input_event);
 
-				int 				k = keyboard_input_event_interface->GetKeyCode(input_event);
-				struct PP_Var				v = keyboard_input_event_interface->GetCharacterText(input_event);
+				int 			k = keyboard_input_event_interface->GetKeyCode(input_event);
+				struct PP_Var	v = keyboard_input_event_interface->GetCharacterText(input_event);
 				int 			sl=0;
-				const char* 	s = var_interface->VarToUtf8(v, &sl);
+				const char* 	s = var_interface->VarToUtf8(v, (uint32_t*)&sl);
 
 				lua_pushstring(L,"key");
 				lua_pushnumber(L,t);
@@ -272,6 +287,7 @@ PP_Bool Input_HandleInputEvent( PP_Instance instance , PP_Resource input_event )
 	{
 		lua_pop(L,1);
 	}
+	return PP_FALSE;
 }
 
 void Messaging_HandleMessage(PP_Instance instance, struct PP_Var var_message) {
