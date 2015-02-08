@@ -253,6 +253,7 @@ PP_Bool Input_HandleInputEvent( PP_Instance instance , PP_Resource input_event )
 			lua_pushnumber(L,p.y);
 			lua_pushnumber(L,c);
 			lua_call(L,6,0);
+			return PP_TRUE;
 		}
 		else
 		if (wheel_input_event_interface->IsWheelInputEvent(input_event))
@@ -265,22 +266,24 @@ PP_Bool Input_HandleInputEvent( PP_Instance instance , PP_Resource input_event )
 			lua_pushnumber(L,d.x);
 			lua_pushnumber(L,d.y);
 			lua_call(L,4,0);
+			return PP_TRUE;
 		}
 		else
 		if( keyboard_input_event_interface->IsKeyboardInputEvent(input_event) )
 		{
-				PP_InputEvent_Type 			t = input_event_interface->GetType(input_event);
+			PP_InputEvent_Type 			t = input_event_interface->GetType(input_event);
 
-				int 			k = keyboard_input_event_interface->GetKeyCode(input_event);
-				struct PP_Var	v = keyboard_input_event_interface->GetCharacterText(input_event);
-				int 			sl=0;
-				const char* 	s = var_interface->VarToUtf8(v, (uint32_t*)&sl);
+			int 			k = keyboard_input_event_interface->GetKeyCode(input_event);
+			struct PP_Var	v = keyboard_input_event_interface->GetCharacterText(input_event);
+			int 			sl=0;
+			const char* 	s = var_interface->VarToUtf8(v, (uint32_t*)&sl);
 
-				lua_pushstring(L,"key");
-				lua_pushnumber(L,t);
-				lua_pushnumber(L,k);
-				lua_pushlstring(L,s,sl);
-				lua_call(L,4,0);
+			lua_pushstring(L,"key");
+			lua_pushnumber(L,t);
+			lua_pushnumber(L,k);
+			lua_pushlstring(L,s,sl);
+			lua_call(L,4,0);
+			return PP_TRUE;
 		}
 	}
 	else
