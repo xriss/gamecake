@@ -299,8 +299,7 @@ base.save=function(g,opts)
 end
 
 base.duplicate=function(g)
-	local r=core.duplicate(g[0])
-	return grd.create(r)
+	return grd.create(g)
 end
 
 base.duplicate_convert=function(g,fmt)

@@ -312,7 +312,6 @@ nacl.input_event=function(...)
 		elseif a[4]<0 then
 			k=5
 		end
-		
 
 		m={
 			time=nacl.time(),

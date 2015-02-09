@@ -584,7 +584,7 @@ end
 						m.x=m.x or old_mouse.x	-- restore if missing
 						m.y=m.y or old_mouse.y
 						old_mouse.x=m.x			-- remember locally
-						old_mouse.x=m.y
+						old_mouse.y=m.y
 						m.xraw=m.x				-- remember in message
 						m.yraw=m.y	
 					end

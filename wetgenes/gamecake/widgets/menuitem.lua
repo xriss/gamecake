@@ -110,6 +110,8 @@ local showmenu=function()
 				if p.also_over then
 					for i,v in pairs(p.also_over) do
 						if not v.parent then p.also_over[i]=nil end -- its been deleted, clear it
+					end
+					for i,v in pairs(p.also_over) do
 						bubble(v)
 					end
 					p.also_over[w]=w
