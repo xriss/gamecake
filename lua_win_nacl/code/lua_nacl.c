@@ -129,7 +129,7 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
 	L = lua_open();  /* create state */
 	luaL_openlibs(L);  /* open libraries */
 
-	input_event_interface->RequestInputEvents(nacl_instance , PP_INPUTEVENT_CLASS_MOUSE | PP_INPUTEVENT_CLASS_KEYBOARD );
+	input_event_interface->RequestInputEvents(nacl_instance , PP_INPUTEVENT_CLASS_WHEEL | PP_INPUTEVENT_CLASS_MOUSE | PP_INPUTEVENT_CLASS_KEYBOARD );
 
   return PP_TRUE;
 }
