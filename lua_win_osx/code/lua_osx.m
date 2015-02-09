@@ -534,8 +534,8 @@ const char *asc="";
 				key=2;
 			break;
 			case NSScrollWheel:
-				wheelx=[theEvent deltaX];
-				wheely=[theEvent deltaY];
+				wheelx=[event deltaX];
+				wheely=[event deltaY];
 				if(wheely>0.0)
 				{
 					lua='m';
