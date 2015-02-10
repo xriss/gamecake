@@ -549,7 +549,7 @@ const char *asc="";
 					act=-1;
 					key=5;
 				}
-			break
+			break;
 		}
 
 		if(lua=='k')
