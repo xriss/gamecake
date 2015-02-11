@@ -377,6 +377,13 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		ptex=12
 		pcolor=20
 
+	elseif fmt=="rawuv" then -- raw-xyz and texture and color
+	
+		def_progname="raw_tex"
+
+		pstride=20
+		ptex=12
+
 	end
 	
 	if canvas.discard_low_alpha then -- try not to break the zbuffer
