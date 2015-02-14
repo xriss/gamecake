@@ -306,17 +306,20 @@ function wmaster.setup(widget,def)
 
 	function master.keymove(vx,vy)
 		if vx~=0 or vy~=0 then -- move hover selection
+
+-- print(vx,vy)
 		
 			if master.over and master.over.hx and master.over.hy then
 				local over=master.over
 				local best={}
 
+				local ox,oy=over:get_master_xy(over.hx/2,over.hy/2)
+				
 				master:call_descendents(function(w)
 					if w.solid and w.hooks and not w.hidden then
-						local wx=w.px+(w.hx/2)
-						local wy=w.py+(w.hy/2)
-						local dx=wx--ox
-						local dy=wy--oy
+						local wx,wy=w:get_master_xy(w.hx/2,w.hy/2)
+						local dx=wx-ox
+						local dy=wy-oy
 						local dd=0
 						if vx==0 then dd=dd+dx*dx*8 else dd=dd+dx*dx end
 						if vy==0 then dd=dd+dy*dy*8 else dd=dd+dy*dy end
@@ -345,6 +348,7 @@ function wmaster.setup(widget,def)
 					if master.over then master.over:call_hook("over") end
 				end
 			end
+
 			if not master.over then
 				master:call_descendents(function(v)
 					if not master.over then

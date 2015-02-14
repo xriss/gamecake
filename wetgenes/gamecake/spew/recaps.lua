@@ -91,6 +91,7 @@ M.bake=function(oven,recaps)
 
 -- use this to set button flags, that may trigger a set/clr extra pulse state
 		function recap.set_button(nam,v)
+--print(nam,v)
 			if type(nam)=="table" then
 				for _,n in ipairs(nam) do recap.set_button(n,v) end -- multi
 			else
