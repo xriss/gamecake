@@ -1,18 +1,28 @@
 --
 -- (C) 2013 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local function print(...) _G.print(...) end
+local function dprint(a) print(require("wetgenes.string").dump(a)) end
 
--- a scrolling area, the widget is biger than display area but scroll bars allow you to see it all
+local wwin=require("wetgenes.win")
+local wstr=require("wetgenes.string")
+local pack=require("wetgenes.pack")
 
+local _,lfs=pcall( function() return require("lfs") end )
 
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(oven,wfile)
-wfile=wfile or {}
+
+M.bake=function(oven,wfile)
+
+	wfile=wfile or {} 
+	wfile.modname=M.modname
+	
+	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
 
 function wfile.update(widget)
 	return widget.meta.update(widget)
@@ -22,28 +32,289 @@ function wfile.draw(widget)
 	return widget.meta.draw(widget)
 end
 
-function wfile.setup(widget,def)
-	widget.class="file"
-	
-	widget.key=wfile.key
-	widget.mouse=wfile.mouse
-	widget.update=wfile.update
-	widget.draw=wfile.draw
+function wfile.layout(widget)
+	widget.meta.layout(widget)
+	widget.meta.build_m4(widget)
+end
 
--- auto add the draging button as a child
---[[
-	local ss=16
-	if widget.hx<ss*2 then ss=widget.hx/2 end
-	if widget.hy<ss*2 then ss=widget.hy/2 end
+-- get or set path
+wfile.path=function(widget,s)
+	if s then -- set
+		local t=wstr.split(s,"/")
+		for i=#t,1,-1 do local v=t[i]
+			if t[i]=="" and t[i-1]=="" then -- remove double dash
+				table.remove(t,i)
+			end
+		end
+		if #t>1 then
+			widget.file:value(t[#t])
+			t[#t]=nil
+			widget.dir:value(table.concat(t,"/"))
+		elseif #t==1 then
+			widget.file:value(t[1])
+		end
+	end
+	if widget.refresh then widget:refresh() end
+	return widget.dir:value() .."/".. widget.file:value()
+end
+
+wfile.refresh=function(widget)
+	widget:file_scan()
+	widget:file_refresh()
+	widget:layout()
+	widget:build_m4()
+end
+
+
+
+wfile.file_scan=function(widget,cd)
 	
-	widget.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss,	})
-	widget.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
-		datx={max=0},daty={max=1},color=0xffffffff})
-	widget.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	px=0,           	py=widget.hy-ss,
-		datx={max=1},daty={max=0},color=0xffffffff})
-]]
+	cd=cd or widget.dir:value()
+	widget.files={}
+	pcall( function()
+		for n in lfs.dir(cd) do
+			if n~="." and n~=".." then
+				local t=lfs.attributes(cd.."/"..n)
+				if t then
+					t.name=n
+					widget.files[#widget.files+1]=t
+				end
+			end
+		end
+	end)
+	
+	table.sort(widget.files,function(a,b)
+		if a.mode == b.mode then
+			return b.name > a.name
+		else
+			return b.mode > a.mode
+		end
+	end)
+	
 	return widget
 end
 
-return wfile
+wfile.file_dir=function(widget,u)
+
+	local t=wstr.split(widget.dir:value(),"/")
+	for i=#t,1,-1 do local v=t[i]
+		if t[i]=="" and t[i-1]=="" then
+			table.remove(t,i)
+		end
+	end
+
+	if type(u)=="string" then
+		widget.dir:value( u )
+		widget.history[ u ]=true
+	else
+		if u.name=="." then
+		elseif u.name==".." then
+			t[#t]=nil
+			widget.dir:value( table.concat(t,"/") )
+		else
+			t[#t+1]=u.name
+			widget.dir:value(  table.concat(t,"/") )
+		end
+--dprint(t)				
+		if widget.dir:value()=="" then widget.dir:value( "/" ) end
+
+		widget.history[ widget.dir:value() ]=true
+	end
+	
+	widget:refresh()
+end
+
+
+wfile.file_hooks=function(widget,act,w)
+--print(act,w.id)
+	if act=="unfocus_edit" or act=="timedelay" then
+		if w.id=="dir" then
+			widget:file_dir({name="."})
+		end
+	end
+	if act=="click" then
+		if w.id then
+			if w.id=="cancel" then
+--						gui.side_page_next="menu"
+			elseif w.id=="load" then
+--						gui.side_page_next="menu"
+				doload()
+			elseif w.id=="save" then
+--						gui.side_page_next="menu"
+--						dosave()
+			elseif w.id=="export" then
+--						gui.side_page_next="menu"
+--						doexport()
+			elseif w.id=="parent" then
+				widget.view="file"
+				widget:file_dir({name=".."})
+			elseif w.id=="history" then
+				if widget.view=="history" then
+					widget.view="view"
+				else
+					widget.view="history"
+				end
+				widget:file_refresh()
+				widget:layout()
+				widget:build_m4()
+			elseif w.id=="goto" then
+				widget.view="file"
+				widget:file_dir(w.user)
+			end
+		else
+			local u=w.user
+			if type(u)=="table" then
+--	print(u.name,u.file)
+				if u.mode=="file" then
+					widget.file:value( u.name )
+--							if     mode=="load" then
+--								doload()
+--							elseif mode=="save" then -- no auto save
+--								dosave()
+--							end
+				else
+					widget:file_dir(u)
+				end
+			end
+		end
+	end
+end
+
+wfile.file_refresh=function(widget)
+
+	local pan=widget.scroll_widget.pan
+	pan:remove_all()
+	
+	if widget.view=="history" then
+	
+		local t={}
+		for n,b in pairs(widget.history) do
+			t[#t+1]=n
+		end
+--				print(wstr.dump(t))
+		table.sort(t)
+		for i,v in ipairs(t) do
+				pan:add({hx=pan.hx,hy=20,text=v,text_align="left",hooks=widget.file_hooks,user=v,id="goto",
+				text_color=0xff000044,
+				text_color_over=0xff000088,
+				})
+		end
+	
+	else
+	
+		for i,t in ipairs(widget.files) do
+			if t.mode=="file" then
+				pan:add({hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
+				text_color=0xff004400,
+				text_color_over=0xff008800,
+				})
+			elseif t.mode=="directory" then
+				pan:add({hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
+				text_color=0xff000044,
+				text_color_over=0xff000088,
+				})
+			else
+				pan:add({hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
+				text_color=0xff440000,
+				text_color_over=0xff440000,
+				})
+			end
+		end
+		
+	end
+
+end
+
+
+function wfile.setup(widget,def)
+
+	widget.class="file"
+	
+--	widget.key=wfile.key
+--	widget.mouse=wfile.mouse
+	widget.update=wfile.update
+	widget.layout=wfile.layout
+	widget.draw=wfile.draw
+
+-- auto add the draging button as a child
+	widget.history=def.history or {}
+	widget.files={}
+	widget.view="file"
+
+
+	widget.dir=wdata.new_data({class="string",str="./"})
+	widget.file=wdata.new_data({class="string",str=""})
+
+
+-- external functions, use can be expected to call these
+	widget.path			=	wfile.path
+	widget.refresh		=	wfile.refresh
+
+
+-- internal functions
+	widget.file_scan	=	wfile.file_scan
+	widget.file_dir		=	wfile.file_dir
+	widget.file_refresh	=	wfile.file_refresh
+	widget.file_hooks	=	function(act,w) return wfile.file_hooks(widget,act,w) end
+
+	local top=widget:add({hx=320,hy=480,class="drag",font="Vera",text_size=16,color=0xffcccccc,highlight="none"})
+	top.px=(widget.hx-top.hx)/2
+	top.py=(widget.hy-top.hy)/2	
+				
+	top:add({hx=320,hy=5})
+	
+	top:add({hx=5,hy=25})
+	top:add({hx=80,hy=25,color=0xffcccccc,text="parent",hooks=widget.file_hooks,id="parent"})
+	top:add({hx=80,hy=25,color=0xffcccccc,text="history",hooks=widget.file_hooks,id="history"})
+	top:add({hx=150,hy=25})
+	top:add({hx=5,hy=25})
+
+	top:add({hx=320,hy=5})
+
+	top:add({hx=5,hy=25})
+	top:add({hx=310,hy=25,class="textedit",color=0xffcccccc,data=widget.dir,clip2=true,hooks=widget.file_hooks,id="dir"})
+	top:add({hx=5,hy=25})
+	
+	top:add({hx=320,hy=5})
+
+	top:add({hx=10,hy=280})
+	widget.scroll_widget=top:add({hx=300,hy=350,class="scroll"})
+	top:add({hx=10,hy=280})
+
+
+	top:add({hx=320,hy=5})
+
+	top:add({hx=5,hy=25})
+	top:add({hx=310,hy=25,class="textedit",color=0xffcccccc,data=widget.file,clip2=true})
+	top:add({hx=5,hy=25})
+
+	top:add({hx=320,hy=5})
+
+	top:add({hx=5,hy=25})
+	top:add({hx=80,hy=25,color=0xffcccccc,text="Cancel",hooks=widget.file_hooks,id="cancel"})
+	top:add({hx=150,hy=25})
+	
+--	if mode=="load" then
+		top:add({hx=80,hy=25,color=0xffcccccc,text="Load",hooks=widget.file_hooks,id="load"})
+--	elseif mode=="save" then
+--		top:add({hx=80,hy=25,color=0xffcccccc,text="Save",hooks=widget.file_hooks,id="save"})
+--	elseif mode=="export" then
+--		top:add({hx=80,hy=25,color=0xffcccccc,text="Export",hooks=widget.file_hooks,id="export"})
+--	else
+--		top:add({hx=80,hy=25})
+--	end
+
+	top:add({hx=5,hy=25})
+
+	top:add({hx=320,hy=5})
+
+	widget:file_scan()
+	widget:file_refresh()
+
+
+	return widget
+end
+
+
+	return wfile
 end
