@@ -15,6 +15,19 @@ local font=canvas.font
 
 local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
+function wmenudrop.mouse(widget,act,_x,_y,keyname)
+
+	if keyname=="wheel_add" and act==-1 then
+		widget.data:inc()
+		return
+	elseif keyname=="wheel_sub" and act==-1  then
+		widget.data:dec()
+		return
+	end
+
+	return widget.meta.mouse(widget,act,_x,_y,keyname)
+end
+
 function wmenudrop.update(widget)
 	if widget.data and widget.data.class=="list" then
 		widget.text=widget.data.list[ widget.data.num ].str
@@ -67,6 +80,7 @@ function wmenudrop.setup(widget,def)
 
 	widget.class="menudrop"
 	
+	widget.mouse=wmenudrop.mouse
 	widget.update=wmenudrop.update
 	widget.draw=wmenudrop.draw
 	widget.layout=wmenudrop.layout

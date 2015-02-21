@@ -16,6 +16,19 @@ wscroll=wscroll or {}
 
 local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
+function wscroll.mouse(widget,act,_x,_y,keyname)
+
+	if keyname=="wheel_add" and act==-1 then
+		widget.daty:inc()
+		return
+	elseif keyname=="wheel_sub" and act==-1  then
+		widget.daty:dec()
+		return
+	end
+
+	return widget.meta.mouse(widget,act,_x,_y,keyname)
+end
+
 function wscroll.update(widget)
 
 	local pan=widget.pan
@@ -53,10 +66,12 @@ function wscroll.layout(widget)
 	widget.datx.max=widget.pan.hx_max-widget.pan.hx
 	if widget.datx.max<0 then widget.datx.max=0 end
 	widget.datx.size=widget.pan.hx/widget.pan.hx_max
+	widget.datx.step= widget:bubble("text_size") or 16 
 	
 	widget.daty.max=widget.pan.hy_max-widget.pan.hy
 	if widget.daty.max<0 then widget.daty.max=0 end
 	widget.daty.size=widget.pan.hy/widget.pan.hy_max
+	widget.daty.step= widget:bubble("text_size") or 16 
 	
 	widget.meta.layout(widget)
 	widget.meta.build_m4(widget)

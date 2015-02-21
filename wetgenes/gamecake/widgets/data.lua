@@ -77,18 +77,19 @@ end
 
 -- get a string from the number
 wdata.data_tostring=function(dat,num)
-	return tostring(num)
+	return tostring(num or dat:value() )
 end
 wdata.data_tostring_from_list=function(dat,num)
-	local d=dat.list[num]
+	local d=dat.list[ num or dat:value() ]
 	return d and d.str
 end
 
 -- get a number from the string
 wdata.data_tonumber=function(dat,str)
-	return tonumber(str)
+	return tonumber(str or dat:value())
 end
 wdata.data_tonumber_from_list=function(dat,str)
+	str=str or dat:value()
 	for i,v in ipairs(dat.list) do
 		if v.str==str then return i end
 	end
