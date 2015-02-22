@@ -246,8 +246,8 @@ function wfile.setup(widget,def)
 	widget.file_hooks		=	function(act,w) return wfile.file_hooks(widget,act,w) end
 
 
-	widget:add({hx=widget.hx/2,hy=25,color=0xffcccccc,text="parent",hooks=widget.file_hooks,id="parent"})
-	widget:add({hx=widget.hx/2,hy=25,color=0xffcccccc,text="history",hooks=widget.file_hooks,id="history"})
+
+	widget:add({hx=widget.hx,hy=25,class="textedit",color=0xffcccccc,data=widget.data_name,clip2=true})
 
 	widget:add({hx=widget.hx,hy=5})
 
@@ -255,11 +255,14 @@ function wfile.setup(widget,def)
 	
 	widget:add({hx=widget.hx,hy=5})
 
-	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy-90,class="scroll"})
+	widget:add({hx=widget.hx/4,hy=25,color=0xffcccccc,text="Parent",hooks=widget.file_hooks,id="parent"})
+	widget:add({hx=widget.hx/2,hy=25})
+	widget:add({hx=widget.hx/4,hy=25,color=0xffcccccc,text="History",hooks=widget.file_hooks,id="history"})
 
 	widget:add({hx=widget.hx,hy=5})
 
-	widget:add({hx=widget.hx,hy=25,class="textedit",color=0xffcccccc,data=widget.data_name,clip2=true})
+	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy-90,class="scroll"})
+
 
 	widget:file_scan()
 	widget:file_refresh()

@@ -17,15 +17,6 @@ wscroll=wscroll or {}
 local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
 
 function wscroll.mouse(widget,act,_x,_y,keyname)
-
-	if keyname=="wheel_add" and act==-1 then
-		widget.daty:inc()
-		return
-	elseif keyname=="wheel_sub" and act==-1  then
-		widget.daty:dec()
-		return
-	end
-
 	return widget.meta.mouse(widget,act,_x,_y,keyname)
 end
 
