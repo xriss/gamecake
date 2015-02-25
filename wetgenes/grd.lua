@@ -7,6 +7,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local grd={}
 
+local wjson=require("wetgenes.json")
+
 local core=require("wetgenes.grd.core")
 
 
@@ -251,6 +253,9 @@ base.load_data=function(g,data,fmt)
 end
 
 base.load=function(g,opts)
+	if type(opts)=="string" then
+		opts={filename=opts}
+	end
 	if opts.fmt=="jpg" then
 		opts.fmt=grd.FMT_HINT_JPG
 	elseif opts.fmt=="png" then
@@ -258,8 +263,9 @@ base.load=function(g,opts)
 	elseif opts.fmt=="gif" then
 		opts.fmt=grd.FMT_HINT_GIF
 	end
-	local r=core.load(g[0],opts)
+	local r,j=core.load(g[0],opts)
 	core.info(g[0],g)
+	if j then g.json=wjson.decode(j) end -- may have some json as well
 	return r and g
 end
 
@@ -293,9 +299,9 @@ base.save=function(g,opts)
 	
 	end
 
-	local r,m=core.save(g[0],opts.filename,opts.fmt)
+	local r,m=core.save(g[0],opts)
 	core.info(g[0],g)
-	return r,m -- first value may be a datatring if no filename was given or g[0] if it was,
+	return r,m -- first value may be a datastring if no filename was given or g[0] if it was,
 end
 
 base.duplicate=function(g)
