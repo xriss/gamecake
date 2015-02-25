@@ -168,14 +168,15 @@ bogus:
 // read a gif into a grd from a file
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_gif_load_file(struct grd * g, const char* file_name, void *tags)
+void grd_gif_load_file(struct grd * g, const char* file_name, u32 *tags)
 {
-	struct grd_io_info inf[1];
+	struct grd_io_info inf[1]={0};
 	
 	inf->file_name=file_name;
 	inf->data=0;
 	inf->pos=0;
 	inf->data_len=0;
+	inf->tags=tags;
 	
 	grd_gif_load(g,inf);	
 }
@@ -185,14 +186,15 @@ void grd_gif_load_file(struct grd * g, const char* file_name, void *tags)
 // read a gif into a grd from data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_gif_load_data(struct grd *g, const unsigned char* data, int data_len, void *tags)
+void grd_gif_load_data(struct grd *g, const unsigned char* data, int data_len, u32 *tags)
 {
-	struct grd_io_info inf[1];
+	struct grd_io_info inf[1]={0};
 	
 	inf->file_name=0;
 	inf->data=(u8*)data;
 	inf->pos=0;
 	inf->data_len=data_len;
+	inf->tags=tags;
 	
 	grd_gif_load(g,inf);
 }
@@ -204,7 +206,7 @@ void grd_gif_load_data(struct grd *g, const unsigned char* data, int data_len, v
 // save a gif into a file (Z layers are animation frames)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_gif_save_file(struct grd * g, const char* file_name, void *tags)
+void grd_gif_save_file(struct grd * g, const char* file_name, u32 *tags)
 {
 	struct grd_io_info inf[1]={0};
 	inf->file_name=file_name;

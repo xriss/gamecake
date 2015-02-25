@@ -265,7 +265,7 @@ static int grd_fileheader_to_format( const unsigned char data[16] )
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct grd * grd_load_file( const char *filename , int fmt , void *tags)
+struct grd * grd_load_file( const char *filename , int fmt , u32 *tags)
 {
 FILE *fp;
 unsigned char data[16];
@@ -297,7 +297,7 @@ struct grd *g=0;
 
 	return g;
 }
-struct grd * grd_load_data( const unsigned char *data , int len,  int fmt , void *tags)
+struct grd * grd_load_data( const unsigned char *data , int len,  int fmt , u32 *tags)
 {
 struct grd *g=0;
 
@@ -331,7 +331,7 @@ struct grd *g=0;
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct grd * grd_save_file( struct grd *g , const char *filename , int fmt , void *tags)
+struct grd * grd_save_file( struct grd *g , const char *filename , int fmt , u32 *tags)
 {
 	if(g)
 	{
@@ -2092,4 +2092,28 @@ u32 c1,c2;
 	}
 
 	return 1;
+}
+
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// find the first tag of the given ID
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+u32* grd_tags_find(u32 *tags,u32 id)
+{
+	if(!tags){ return 0;}
+	
+	u32 *td=tags;
+	while( td[0] != 0 ) // null terminated
+	{
+		if(td[1]==id)
+		{
+			return td;
+		}
+		td=td+((td[0]+3)>>2); // next tag round size up to 4 bytes
+	}
+	
+	return 0;
 }

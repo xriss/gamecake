@@ -222,11 +222,12 @@ bogus:
 // read a jpg into a grd from a file
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_png_load_file(struct grd * g, const char* file_name, void *tags)
+void grd_png_load_file(struct grd * g, const char* file_name, u32 *tags)
 {
-	struct grd_io_info inf[1];
+	struct grd_io_info inf[1]={0};
 	
 	inf->file_name=file_name;
+	inf->tags=tags;
 	
 	grd_png_load(g,inf);	
 }
@@ -236,14 +237,15 @@ void grd_png_load_file(struct grd * g, const char* file_name, void *tags)
 // read a jpg into a grd from data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_png_load_data(struct grd *g, const unsigned char* data, int data_len, void *tags)
+void grd_png_load_data(struct grd *g, const unsigned char* data, int data_len, u32 *tags)
 {
-	struct grd_io_info inf[1];
+	struct grd_io_info inf[1]={0};
 	
 	inf->file_name=0;
 	inf->data=(u8*)data;
 	inf->pos=0;
 	inf->data_len=data_len;
+	inf->tags=tags;
 	
 	grd_png_load(g,inf);
 }
@@ -267,7 +269,43 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 	png_infop info_ptr=0;
 	int number_of_passes;
 	png_bytep * row_pointers=0;
+	
+    png_textp text_ptr;
+	int num_text;
 
+	png_text  text[1];
+	
+	u32 *tag_JSON=grd_tags_find(inf->tags,GRD_TAG_DEF('J','S','O','N'));
+
+/*
+   {
+      png_textp text_ptr;
+      int num_text;
+
+      if (png_get_text(read_ptr, end_info_ptr, &text_ptr, &num_text) > 0)
+      {
+         pngtest_debug1("Handling %d iTXt/tEXt/zTXt chunks", num_text);
+
+         pngtest_check_text_support(read_ptr, text_ptr, num_text);
+
+         if (verbose != 0)
+         {
+            int i;
+
+            printf("\n");
+            for (i=0; i<num_text; i++)
+            {
+               printf("   Text compression[%d]=%d\n",
+                     i, text_ptr[i].compression);
+            }
+         }
+
+         png_set_text(write_ptr, write_end_info_ptr, text_ptr, num_text);
+      }
+   }
+   
+*/
+   
 	/* need to create file ? */
 	FILE *fp = 0;
 	
@@ -354,6 +392,18 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 	             bit_depth, color_type, PNG_INTERLACE_NONE,
 	             PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
+// add a json chunk containing extra info?
+	if(tag_JSON)
+	{
+		if(*((char **)(tag_JSON+2)))
+		{
+			text[0].compression = PNG_TEXT_COMPRESSION_NONE;
+			text[0].key = "JSON";
+			text[0].text = *((char **)(tag_JSON+2));
+			png_set_text(png_ptr, info_ptr, text, 1);
+		}
+	}
+
 	png_write_info(png_ptr, info_ptr);
 
 
@@ -397,11 +447,12 @@ bogus:
 	if(err) {g->err=err;} else {g->err=0; }
 }
 
-void grd_png_save_file(struct grd *g , const char* file_name , void *tags)
+void grd_png_save_file(struct grd *g , const char* file_name , u32 *tags)
 {
-	struct grd_io_info inf[1];
+	struct grd_io_info inf[1]={0};
 	
 	inf->file_name=file_name;
+	inf->tags=tags;
 	
 	grd_png_save(g,inf);
 }
