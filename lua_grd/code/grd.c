@@ -2098,7 +2098,15 @@ u32 c1,c2;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// find the first tag of the given ID
+// tags are a dumb and extendable stream of extra data.
+//
+// u32 size of chunk (will be roundup to nearest 4 bytes)
+// u32 id of chunk
+// ... any data in this chunk but be careful with pointer sizes, 8bytes should be safe, probably.
+//
+// this is null terminated so ends at the first 0 size.
+// 
+// find the first tag of the given ID and return a pointer to it
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 u32* grd_tags_find(u32 *tags,u32 id)

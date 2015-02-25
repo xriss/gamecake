@@ -5,6 +5,10 @@ module(...,package.seeall)
 local grd=require("wetgenes.grd")
 local wstr=require("wetgenes.string")
 
+function test_do_png_json()
+	do_png_json("t1")
+end
+
 function test_do_png_wmem()
 	do_png_wmem("t4")
 end
@@ -290,4 +294,17 @@ function do_png_8_attr_redux(name)
 	assert( g:save("dat/grd/"..name..".8.attr.out.png","png") )
 
 	assert_true( do_file_compare("dat/grd/"..name..".8.attr.out.png","dat/grd/"..name..".8.attr.chk.png") )
+end
+
+function do_png_json(name)
+
+	local json=[[{"test":"data","more":"data"}]]
+
+	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
+	assert( g:save({filename="dat/grd/"..name..".json.png",fmt="png",json=json}) )
+	local g=assert(grd.create("dat/grd/"..name..".json.png","png"))
+
+	assert_true( g.json ) -- check we got some json back
+--	print(wstr.dump(g.json))
+
 end
