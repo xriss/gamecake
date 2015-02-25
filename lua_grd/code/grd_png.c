@@ -66,7 +66,8 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 {
 	const char *err=0;
 	int x, y;
-
+	int i;
+	
 	int width, height;
 	png_byte color_type;
 	png_byte bit_depth;
@@ -81,6 +82,9 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	u8 *trans;
 	png_color_16 *trans_values;
 	
+	png_textp text_ptr;
+	int num_text;
+
 	int grdfmt;
 
 //	char header[8];	// 8 is the maximum size that can be checked
@@ -198,6 +202,22 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 		((u8*)g->cmap->data)[(4*x)+3]=trans[x];
 	}
     
+	if (png_get_text(png_ptr, info_ptr, &text_ptr, &num_text) > 0)
+	{
+		for (i=0; i<num_text; i++)
+		{
+			if( strcmp(text_ptr[i].key,"JSON")==0 )
+			{
+				g->data_sizeof=strlen(text_ptr[i].text)+1;
+				g->data=calloc(g->data_sizeof,1);
+				if(!g->data) { abort_("text json alloc fail"); }
+				strncpy(g->data,text_ptr[i].text,g->data_sizeof);
+			}
+//		   printf("text[%s]=%s\n",text_ptr[i].key, text_ptr[i].text);
+		}
+	}
+
+
 bogus:
 
 	if( png_ptr )
@@ -277,35 +297,6 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 	
 	u32 *tag_JSON=grd_tags_find(inf->tags,GRD_TAG_DEF('J','S','O','N'));
 
-/*
-   {
-      png_textp text_ptr;
-      int num_text;
-
-      if (png_get_text(read_ptr, end_info_ptr, &text_ptr, &num_text) > 0)
-      {
-         pngtest_debug1("Handling %d iTXt/tEXt/zTXt chunks", num_text);
-
-         pngtest_check_text_support(read_ptr, text_ptr, num_text);
-
-         if (verbose != 0)
-         {
-            int i;
-
-            printf("\n");
-            for (i=0; i<num_text; i++)
-            {
-               printf("   Text compression[%d]=%d\n",
-                     i, text_ptr[i].compression);
-            }
-         }
-
-         png_set_text(write_ptr, write_end_info_ptr, text_ptr, num_text);
-      }
-   }
-   
-*/
-   
 	/* need to create file ? */
 	FILE *fp = 0;
 	

@@ -233,32 +233,17 @@ s32 fmt=0;
 		lua_error(l);
 	}
 	
-	lua_pushstring(l,"fmt");
-	lua_gettable(l,2);
-	if(lua_isnumber(l,-1))
-	{
-		fmt=lua_tonumber(l,-1);
-	}
+	lua_getfield(l,2,"fmt");
+	if(lua_isnumber(l,-1)) { fmt=lua_tonumber(l,-1); }
 	lua_pop(l,1);
 	
-	lua_pushstring(l,"filename");
-	lua_gettable(l,2);
-	if(lua_isstring(l,-1))
-	{
-		filename=lua_tostring(l,-1);
-	}
+	lua_getfield(l,2,"filename");
+	if(lua_isstring(l,-1)) { filename=lua_tostring(l,-1); }
 	lua_pop(l,1);
 
-	lua_pushstring(l,"data");
-	lua_gettable(l,2);
-	if(lua_isstring(l,-1))
-	{
-		data=(const u8*)lua_tolstring(l,-1,&data_len);
-	}
-	if(lua_isuserdata(l,-1))
-	{
-		data=lua_toluserdata(l,-1,&data_len);
-	}
+	lua_getfield(l,2,"data");
+	if(lua_isstring(l,-1))   { data=(const u8*)lua_tolstring(l,-1,&data_len); }
+	if(lua_isuserdata(l,-1)) { data=lua_toluserdata(l,-1,&data_len); }
 	lua_pop(l,1);
 
 	if(filename)
@@ -294,6 +279,9 @@ s32 fmt=0;
 	if(new_p && new_p->data) // also loaded some special json so return that too?
 	{
 		lua_pushstring(l,new_p->data);
+		free(new_p->data);
+		new_p->data=0;
+		new_p->data_sizeof=0;
 		return 2;
 	}
 
@@ -308,7 +296,7 @@ s32 fmt=0;
 int lua_grd_save (lua_State *l)
 {
 part_ptr p;
-const char *s;
+const char *s=0;
 s32 n=0;
 
 u32 tags[16];
@@ -323,39 +311,40 @@ u32 tags[16];
 
 	tags[6]=4<<2;
 	tags[7]=GRD_TAG_DEF('J','S','O','N');
-	tags[8]=0;
-	tags[9]=0;
+	tags[8]=0; //pointer
+	tags[9]=0; //16bytes
 
 	tags[10]=0;
 
 
 	p=lua_grd_check_ptr(l,1);
 
-	s=lua_tostring(l,2);
-
-	if(lua_isnumber(l,3))
+	if(! lua_istable(l,2) )
 	{
-		n=lua_tonumber(l,3);
+		lua_pushstring(l,"grd save needs options table");
+		lua_error(l);
 	}
 
-	if(lua_istable(l,3)) // table contain more control over how to save
-	{
-		lua_getfield(l,3,"format");
-		if(lua_isnumber(l,-1)) { n=(u32)lua_tonumber(l,-1); }
-		lua_pop(l,1);
+	lua_getfield(l,2,"filename");
+	if(lua_isstring(l,-1)) { s=lua_tostring(l,-1); }
+	lua_pop(l,1);
 
-		lua_getfield(l,3,"quality");
-		if(lua_isnumber(l,-1)) { tags[2]=(u32)lua_tonumber(l,-1); }
-		lua_pop(l,1);
+	lua_getfield(l,2,"fmt");
+	if(lua_isnumber(l,-1)) { n=(u32)lua_tonumber(l,-1); }
+	lua_pop(l,1);
 
-		lua_getfield(l,3,"speed");
-		if(lua_isnumber(l,-1)) { tags[5]=(u32)lua_tonumber(l,-1); }
-		lua_pop(l,1);
+	lua_getfield(l,2,"quality");
+	if(lua_isnumber(l,-1)) { tags[2]=(u32)lua_tonumber(l,-1); }
+	lua_pop(l,1);
 
-		lua_getfield(l,3,"json");
-		if(lua_isstring(l,-1)) { *((const char**)(tags+8))=lua_tostring(l,-1); }
-		lua_pop(l,1);
-	}
+	lua_getfield(l,2,"speed");
+	if(lua_isnumber(l,-1)) { tags[5]=(u32)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"json");
+	if(lua_isstring(l,-1)) { *((const char**)(tags+8))=lua_tostring(l,-1); }
+	lua_pop(l,1);
+
 	
 	if( p->bmap->w<1 )
 	{
