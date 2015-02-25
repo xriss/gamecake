@@ -117,6 +117,9 @@
 #define	GRD_PAINT_MODE_ALPHA						0x0805
 
 
+// little endian
+#define	GRD_TAG_DEF(a,b,c,d) (((((u32)d)<<24)+(((u32)c)<<16)+(((u32)b)<<8)+((u32)a)))
+
 
 // information about a bitmap held in memory (or even a palette)
 // by using scan values we can describe a section of a larger bitmap in this structure
@@ -172,7 +175,7 @@ struct grd_io_info
 	int data_len_max; // data may be stored into a bigger buffer (to reduce realocs while writing)
 	int pos;
 	int fmt;
-	void *tags;
+	u32 *tags;
 };
 
 
@@ -196,10 +199,10 @@ struct grd * grd_create( s32 fmt , s32 w, s32 h, s32 d );
 
 void grd_free( struct grd *g );
 
-struct grd * grd_load_file( const char *filename , int fmt , void *tags );
-struct grd * grd_load_data( const unsigned char *data , int len , int fmt , void *tags );
+struct grd * grd_load_file( const char *filename , int fmt , u32 *tags );
+struct grd * grd_load_data( const unsigned char *data , int len , int fmt , u32 *tags );
 
-struct grd * grd_save_file( struct grd *g, const char *filename , int fmt , void *tags );
+struct grd * grd_save_file( struct grd *g, const char *filename , int fmt , u32 *tags );
 struct grd * grd_save_data( struct grd *g, struct grd_io_info *filedata , int fmt );
 
 
@@ -230,6 +233,8 @@ int grd_paint( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 mode, u32 tra
 int grd_shrink(struct grd *ga,struct grd_area *gc );
 
 void grd_clear( struct grd *g , u32 val);
+
+u32* grd_tags_find(u32 *tags,u32 id);
 
 
 

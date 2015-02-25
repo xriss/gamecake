@@ -290,6 +290,13 @@ s32 fmt=0;
 	}
 
 	lua_pushvalue(l,1);
+	
+	if(new_p && new_p->data) // also loaded some special json so return that too?
+	{
+		lua_pushstring(l,new_p->data);
+		return 2;
+	}
+
 	return 1;
 }
 
@@ -304,6 +311,24 @@ part_ptr p;
 const char *s;
 s32 n=0;
 
+u32 tags[16];
+
+	tags[0]=3<<2;
+	tags[1]=GRD_TAG_DEF('Q','U','A','L');
+	tags[2]=100;
+
+	tags[3]=3<<2;
+	tags[4]=GRD_TAG_DEF('S','P','E','D');
+	tags[5]=12;
+
+	tags[6]=4<<2;
+	tags[7]=GRD_TAG_DEF('J','S','O','N');
+	tags[8]=0;
+	tags[9]=0;
+
+	tags[10]=0;
+
+
 	p=lua_grd_check_ptr(l,1);
 
 	s=lua_tostring(l,2);
@@ -311,6 +336,25 @@ s32 n=0;
 	if(lua_isnumber(l,3))
 	{
 		n=lua_tonumber(l,3);
+	}
+
+	if(lua_istable(l,3)) // table contain more control over how to save
+	{
+		lua_getfield(l,3,"format");
+		if(lua_isnumber(l,-1)) { n=(u32)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,3,"quality");
+		if(lua_isnumber(l,-1)) { tags[2]=(u32)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,3,"speed");
+		if(lua_isnumber(l,-1)) { tags[5]=(u32)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,3,"json");
+		if(lua_isstring(l,-1)) { *((const char**)(tags+8))=lua_tostring(l,-1); }
+		lua_pop(l,1);
 	}
 	
 	if( p->bmap->w<1 )
@@ -326,9 +370,10 @@ s32 n=0;
 		luaL_error(l, "image has 0 depth" );
 	}
 	
+
 	if(s)
 	{
-		if(! grd_save_file(p,s,n,0) )
+		if(! grd_save_file(p,s,n,tags) )
 		{
 			lua_pushnil(l);
 			lua_pushstring(l,"failed to save");
@@ -337,7 +382,7 @@ s32 n=0;
 	}
 	else
 	{
-		struct grd_io_info d[1]={0};
+		struct grd_io_info d[1]={0}; d->tags=tags;
 		if(! grd_save_data(p,d,n) )
 		{
 			if(d->data) { free(d->data); }
