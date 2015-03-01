@@ -116,7 +116,15 @@ int width=640;
 int height=480;
 
 const char *title=" http://gamecake.4lfa.com/ ";
+const char *name="GameCake";
+
+XClassHint class_hint;
+
 	lua_getfield(l,1,"title");	if( lua_isstring(l,-1) ) { title=lua_tostring(l,-1);	} lua_pop(l,1);
+	lua_getfield(l,1,"name");	if( lua_isstring(l,-1) ) { name=lua_tostring(l,-1);		} lua_pop(l,1);
+
+	class_hint.res_name=(char*)name;
+	class_hint.res_class=(char*)name;
 
 	lua_getfield(l,1,"width");	if( lua_isnumber(l,-1) ) { width=lua_tonumber(l,-1);	} lua_pop(l,1);
 	lua_getfield(l,1,"height");	if( lua_isnumber(l,-1) ) { height=lua_tonumber(l,-1);	} lua_pop(l,1);
@@ -156,6 +164,8 @@ const char *title=" http://gamecake.4lfa.com/ ";
 
 			XStoreName( p->dsp, p->win, title );
 
+			XSetClassHint( p->dsp, p->win, &class_hint );
+
 			XSelectInput( p->dsp , p->win ,
 				KeyPressMask | KeyReleaseMask |
 				ButtonPressMask | ButtonReleaseMask |
@@ -170,39 +180,42 @@ const char *title=" http://gamecake.4lfa.com/ ";
 
 	return 1;
 }
-/*
- * ICON?
- * 
-#include <stdlib.h>
-#include <X11/Xlib.h>
 
-int main( int argc, char **argv )
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// set an icon (raw unix icon data) 16x16 or 32x32?
+// we will convert from a grd to this in lua code.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_rawicon(lua_State *l)
 {
+XEvent xev;
+size_t len;
+const char *data;
+long *lbuff;
+int i;
 
-    unsigned int buffer[] = {16, 16, 4294901760, 4294901760, 4294901760, 4294901760, \
-4294901760, 4294901760, 4294901760, 4294901760, 338034905, 3657433343, 0, 184483840, \
-...
-385810432, 251592704, 134152192};
+	wetwin_lua *p=lua_wetwin_check_ptr(l,1);
+	data=lua_tolstring(l,2,&len);
 
-    Display *d = XOpenDisplay(0);
-    int s = DefaultScreen(d);
-    Atom net_wm_icon = XInternAtom(d, "_NET_WM_ICON", False);
-    Atom cardinal = XInternAtom(d, "CARDINAL", False);
-    Window w;
-    XEvent e;
-    w = XCreateWindow(d, RootWindow(d, s), 0, 0, 200, 200, 0,
-                      CopyFromParent, InputOutput, CopyFromParent, 0, 0);
+    Atom net_wm_icon = XInternAtom(p->dsp, "_NET_WM_ICON", False);
+    Atom cardinal = XInternAtom(p->dsp, "CARDINAL", False);
 
-    int length = 2 + 16 * 16 + 2 + 32 * 32;
-    XChangeProperty(d, w, net_wm_icon, cardinal, 32,
-                     PropModeReplace, (const unsigned char*) buffer, length);
+// FFS array must be cast to (long) as it *may* be expecting 64bit values 
+	lbuff=(long*)calloc(len/4,sizeof(long));
+	if(lbuff)
+	{
+		for(i=0;i<len/4;i++)
+		{
+			lbuff[i]=((u32*)data)[i];
+		}
+		XChangeProperty(p->dsp , p->win, net_wm_icon, cardinal, 32, PropModeReplace, (const unsigned char*) lbuff, len/4);
+		free(lbuff);
+	}
 
 
-    XMapWindow(d, w);
-    while(1) XNextEvent(d, &e);
+	return 0;
 }
-
-*/
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -396,6 +409,8 @@ wetwin_lua *p=lua_wetwin_check_ptr(l,1);
 	tv.tv_usec = 1000; // 1ms
 	
 	select(p->fp_dsp, &p->set_dsp, 0, 0, &tv);
+	
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -576,7 +591,7 @@ char s[256];
 	{
 		if( read(p->joy_fd[n], b, 8) == 8 )
 		{
-			lua_pushlstring(l,b,8);
+			lua_pushlstring(l,(const char *)b,8);
 			return 1;
 		}
 	}
@@ -639,6 +654,7 @@ LUALIB_API int luaopen_wetgenes_win_linux_core(lua_State *l)
 		{"destroy",			lua_wetwin_destroy},
 		{"info",			lua_wetwin_info},
 		{"show",			lua_wetwin_show},
+		{"rawicon",			lua_wetwin_rawicon},
 
 		{"context",			lua_wetwin_context},
 		{"swap",			lua_wetwin_swap},
