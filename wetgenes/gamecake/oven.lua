@@ -17,6 +17,7 @@ local wzips=require("wetgenes.zips")
 local wsbox=require("wetgenes.sandbox")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
+local pack=require("wetgenes.pack")
 
 local function print(...) return _G.print(...) end
 
@@ -148,7 +149,9 @@ os.exit()
 
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale}
 			local screen=wwin.screen()
-			
+
+			inf.name=opts.class_name or opts.title
+
 			if opts.bake and opts.bake.smell and opts.version then
 				inf.title=inf.title.." ( "..opts.version.." "..string.upper(opts.bake.smell).." ) "
 			elseif opts.version then
@@ -183,6 +186,9 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 --wwin.hardcore.peek(oven.win[0])
 
+	
+	
+	
 			local doshow=opts.show
 			for i,v in ipairs(opts) do -- check extra options
 				if type(v)=="string" then
