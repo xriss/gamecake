@@ -41,12 +41,18 @@
 
 #include <X11/Xlib.h> 
 #include <X11/Xatom.h>
+#include <X11/XKBlib.h>
+
 
 #include <GL/gl.h>
 #include <GL/glx.h>
 
 #include <strings.h>
 #include <sys/time.h>
+
+#include <time.h>
+#include <unistd.h>
+#include <stropts.h>
 
 #endif
 
