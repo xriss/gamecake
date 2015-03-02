@@ -298,6 +298,10 @@ base.save=function(g,opts)
 		end
 	
 	end
+	
+	if type(opts.json)=="table" then -- turn json opts into string
+		opts.json=wjson.encode(opts.json)
+	end
 
 	local r,m=core.save(g[0],opts)
 	core.info(g[0],g)
