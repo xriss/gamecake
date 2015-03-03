@@ -388,7 +388,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 	{
 		if(*((char **)(tag_JSON+2)))
 		{
-			text[0].compression = PNG_TEXT_COMPRESSION_NONE;
+			text[0].compression = PNG_TEXT_COMPRESSION_zTXt; // PNG_TEXT_COMPRESSION_NONE;
 			text[0].key = "JSON";
 			text[0].text = *((char **)(tag_JSON+2));
 			png_set_text(png_ptr, info_ptr, text, 1);
