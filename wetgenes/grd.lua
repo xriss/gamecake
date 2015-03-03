@@ -265,8 +265,8 @@ base.load=function(g,opts)
 	end
 	local r,j=core.load(g[0],opts)
 	core.info(g[0],g)
-	if j then g.json=wjson.decode(j) end -- may have some json as well
-	return r and g
+	if r and j then g.json=wjson.decode(j) end -- may have some json as well
+	return (r and g),g.err
 end
 
 base.save=function(g,opts)
