@@ -65,10 +65,10 @@ static void flush_func(png_structp ptr)
 void grd_png_load(struct grd * g, struct grd_io_info * inf )
 {
 	const char *err=0;
-	int x, y;
+	int x, y, z;
 	int i;
 	
-	int width, height;
+	int width, height,depth;
 	png_byte color_type;
 	png_byte bit_depth;
 
@@ -85,7 +85,18 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	png_textp text_ptr;
 	int num_text;
 
+    png_uint_32 next_frame_width;
+    png_uint_32 next_frame_height;
+    png_uint_32 next_frame_x_offset;
+    png_uint_32 next_frame_y_offset;
+    png_uint_16 next_frame_delay_num;
+    png_uint_16 next_frame_delay_den;
+    png_byte next_frame_dispose_op;
+    png_byte next_frame_blend_op;
+    
 	int grdfmt;
+
+	g->err="unknown error";
 
 //	char header[8];	// 8 is the maximum size that can be checked
 
@@ -125,6 +136,12 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	color_type = png_get_color_type(png_ptr,info_ptr);
 	bit_depth = png_get_bit_depth(png_ptr,info_ptr);
 
+	depth=1;
+	if(png_get_valid(png_ptr, info_ptr, PNG_INFO_acTL))
+	{
+		depth=png_get_num_frames(png_ptr, info_ptr);
+	}
+	
 // choose grdfmt
 	grdfmt=GRD_FMT_U8_RGBA;
 	if (color_type == PNG_COLOR_TYPE_PALETTE)
@@ -163,26 +180,54 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	}
 
 
-
 	number_of_passes = png_set_interlace_handling(png_ptr);
 	png_read_update_info(png_ptr, info_ptr);
 
-
-	/* read file */
-	if (setjmp(png_jmpbuf(png_ptr)))
-		abort_("png read fail");
-
-	if(!grd_realloc(g,grdfmt,width,height,1))
+	if(!grd_realloc(g,grdfmt,width,height,depth))
 		abort_("grd realloc fail");
 
 	row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * height);
 	if (!row_pointers)
 		abort_("png alloc rows fail");
 
-	for (y=0; y<height; y++)
-		row_pointers[y] = grdinfo_get_data(g->bmap,0,y,0); //(png_byte*) malloc(info_ptr->rowbytes);
 
-	png_read_image(png_ptr, row_pointers);
+	/* read file */
+	if (setjmp(png_jmpbuf(png_ptr)))
+		abort_("png read fail");
+		
+	if(png_get_valid(png_ptr, info_ptr, PNG_INFO_acTL))
+	{
+		for(z=0;z<depth;z++)
+		{
+			png_read_frame_head(png_ptr, info_ptr);
+
+			if(png_get_valid(png_ptr, info_ptr, PNG_INFO_fcTL))
+			{
+				png_get_next_frame_fcTL(png_ptr, info_ptr,
+					&next_frame_width, &next_frame_height,
+					&next_frame_x_offset, &next_frame_y_offset,
+					&next_frame_delay_num, &next_frame_delay_den,
+					&next_frame_dispose_op, &next_frame_blend_op);
+
+				for (y=0; y<next_frame_height; y++)
+				{
+					row_pointers[y] = grdinfo_get_data( g->bmap,next_frame_x_offset , next_frame_y_offset+y , z );
+				}
+				png_read_image(png_ptr, row_pointers);
+			}
+			else
+			{
+				for (y=0; y<height; y++) { row_pointers[y] = grdinfo_get_data(g->bmap,0,y,z); }
+				png_read_image(png_ptr, row_pointers);
+			}
+		}
+	}
+	else
+	{
+		for (y=0; y<height; y++) { row_pointers[y] = grdinfo_get_data(g->bmap,0,y,0); }
+		png_read_image(png_ptr, row_pointers);
+	}
+	
 	
 	num_palette=0;num_trans=0;
 	png_get_PLTE(png_ptr, info_ptr, &palptr , &num_palette);
@@ -216,7 +261,6 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 //		   printf("text[%s]=%s\n",text_ptr[i].key, text_ptr[i].text);
 		}
 	}
-
 
 bogus:
 

@@ -272,20 +272,26 @@ s32 fmt=0;
 		}
 
 		(*p)=new_p;
+
+		lua_pushvalue(l,1);
+
+		if(new_p->data) // also loaded some special json so return that too?
+		{
+			lua_pushstring(l,new_p->data);
+			free(new_p->data);
+			new_p->data=0;
+			new_p->data_sizeof=0;
+			return 2;
+		}
+		
+		return 1; // just the result
 	}
 
-	lua_pushvalue(l,1);
-	
-	if(new_p && new_p->data) // also loaded some special json so return that too?
-	{
-		lua_pushstring(l,new_p->data);
-		free(new_p->data);
-		new_p->data=0;
-		new_p->data_sizeof=0;
-		return 2;
-	}
+// should not get here
 
-	return 1;
+	lua_pushnil(l);
+	lua_pushstring(l,"no grd allocated");
+	return 2;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
