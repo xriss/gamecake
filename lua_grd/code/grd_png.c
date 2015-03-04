@@ -323,9 +323,9 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 {
 	const char *err=0;
 
-	int x, y;
+	int x, y, z;
 
-	int width, height;
+	int width, height, frames;
 	png_byte color_type;
 	png_byte bit_depth;
 
@@ -340,6 +340,10 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 	png_text  text[1];
 	
 	u32 *tag_JSON=grd_tags_find(inf->tags,GRD_TAG_DEF('J','S','O','N'));
+	u32 *tag_SPED=grd_tags_find(inf->tags,GRD_TAG_DEF('S','P','E','D'));
+	u32 speed=8;
+	if(tag_JSON) { speed=*((u32*)(tag_JSON+2)); } // get speed in 1/100 seconds (GIF timing)
+	
 
 	/* need to create file ? */
 	FILE *fp = 0;
@@ -357,6 +361,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 
 	width=g->bmap->w;
 	height=g->bmap->h;
+	frames=g->bmap->d;
 	bit_depth=8;
 	color_type = PNG_COLOR_TYPE_RGB_ALPHA;
 //	png_set_filler(png_ptr, 0, PNG_FILLER_AFTER);
@@ -438,26 +443,50 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 			png_set_text(png_ptr, info_ptr, text, 1);
 		}
 	}
-
+	
+	if(frames>0)
+	{
+		png_set_acTL(png_ptr, info_ptr, frames, 0);
+	}
+	
 	png_write_info(png_ptr, info_ptr);
-
 
 	row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * height);
 	if (!row_pointers)
 		abort_("png alloc rows fail");
 
-	for (y=0; y<height; y++)
-		row_pointers[y] = grdinfo_get_data(g->bmap,0,y,0); //(png_byte*) malloc(info_ptr->rowbytes);
-
-
-
 	/* write bytes */
 	if (setjmp(png_jmpbuf(png_ptr)))
 		abort_("png write fail");
 
-	png_write_image(png_ptr, row_pointers);
+	for(z=0 ; z<frames ; z++)
+	{
+		for (y=0; y<height; y++)
+		{
+			row_pointers[y] = grdinfo_get_data(g->bmap,0,y,z);
+		}
 
+		if(frames>0)
+		{
+			png_write_frame_head(png_ptr, info_ptr, row_pointers, 
+				width, 					/* width */
+				height,					/* height */
+				0,						/* x offset */
+				0,						/* y offset */
+				speed, 100,				/* delay numerator and denominator */
+				PNG_DISPOSE_OP_NONE,	/* dispose */
+				PNG_BLEND_OP_SOURCE		/* blend */
+				);
+		}
+		
+		png_write_image(png_ptr, row_pointers);
 
+		if(frames>0)
+		{
+			png_write_frame_tail(png_ptr, info_ptr);
+		}
+	}
+	
 	/* end write */
 	if (setjmp(png_jmpbuf(png_ptr)))
 		abort_("png write end fail");
