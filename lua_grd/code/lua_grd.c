@@ -313,12 +313,12 @@ u32 tags[16];
 
 	tags[3]=3<<2;
 	tags[4]=GRD_TAG_DEF('S','P','E','D');
-	tags[5]=12;
+	tags[5]=80; // speed in ms
 
 	tags[6]=4<<2;
 	tags[7]=GRD_TAG_DEF('J','S','O','N');
-	tags[8]=0; //pointer
-	tags[9]=0; //16bytes
+	tags[8]=0; //just a pointer but we
+	tags[9]=0; //need 16 bytes for 64bit build
 
 	tags[10]=0;
 
@@ -371,7 +371,7 @@ u32 tags[16];
 		if(! grd_save_file(p,s,n,tags) )
 		{
 			lua_pushnil(l);
-			lua_pushstring(l,"failed to save");
+			lua_pushstring(l,p->err ? p->err : "failed to save");
 			return 2;
 		}
 	}
@@ -382,7 +382,7 @@ u32 tags[16];
 		{
 			if(d->data) { free(d->data); }
 			lua_pushnil(l);
-			lua_pushstring(l,"failed to save");
+			lua_pushstring(l,p->err ? p->err : "failed to save");
 			return 2;
 		}
 		if(d->data)
