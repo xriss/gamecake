@@ -341,8 +341,8 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 	
 	u32 *tag_JSON=grd_tags_find(inf->tags,GRD_TAG_DEF('J','S','O','N'));
 	u32 *tag_SPED=grd_tags_find(inf->tags,GRD_TAG_DEF('S','P','E','D'));
-	u32 speed=8;
-	if(tag_JSON) { speed=*((u32*)(tag_JSON+2)); } // get speed in 1/100 seconds (GIF timing)
+	u32 speed=80;
+	if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 	
 
 	/* need to create file ? */
@@ -473,7 +473,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 				height,					/* height */
 				0,						/* x offset */
 				0,						/* y offset */
-				speed, 100,				/* delay numerator and denominator */
+				speed,1000,				/* delay numerator and denominator */
 				PNG_DISPOSE_OP_NONE,	/* dispose */
 				PNG_BLEND_OP_SOURCE		/* blend */
 				);

@@ -232,6 +232,9 @@ ExtensionBlock ext[4];
 unsigned char control[4];
 unsigned char wank[3];
 
+	u32 *tag_SPED=grd_tags_find(inf->tags,GRD_TAG_DEF('S','P','E','D'));
+	u32 speed=80;
+	if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 
 
 	ext[0].ByteCount=11;
@@ -251,8 +254,8 @@ unsigned char wank[3];
 	wank[2]=0x00;
 
 	control[0]=0x08; // flags: 
-	control[1]=8; // speed_lo: speed of animation in 100ths of a second, so 8 is 12.5fps (80ms)
-	control[2]=0; // speed_hi: which is near the classic "Shooting on twos" speed of 12fps
+	control[1]=((speed/10)    )&0xff; // speed_lo: speed of animation in 100ths of a second, so 8 is 12.5fps (80ms)
+	control[2]=((speed/10)>>16)&0xff; // speed_hi: which is near the classic "Shooting on twos" speed of 12fps
 	control[3]=0; // alpha: find first fully alpha color to use as transparent 
 	for(i=0;i<256;i++)
 	{
