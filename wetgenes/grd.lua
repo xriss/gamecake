@@ -265,6 +265,7 @@ base.load=function(g,opts)
 	end
 	local r,j=core.load(g[0],opts)
 	core.info(g[0],g)
+	if not r then g.err=j end -- special error return
 	if r and j then g.json=wjson.decode(j) end -- may have some json as well
 	return (r and g),g.err
 end
@@ -305,6 +306,7 @@ base.save=function(g,opts)
 
 	local r,m=core.save(g[0],opts)
 	core.info(g[0],g)
+	if not r and g.err then return nil,g.err end
 	return r,m -- first value may be a datastring if no filename was given or g[0] if it was,
 end
 
