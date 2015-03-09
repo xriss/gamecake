@@ -59,8 +59,6 @@ function wslide.update(widget)
 	
 	local oldx=widget.drag.px
 	local oldy=widget.drag.py
-	widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
-	widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
 	widget:snap()
 	if oldx~=widget.drag.px or oldy~=widget.drag.py then
 		widget:build_m4()
@@ -79,6 +77,9 @@ function wslide.layout(widget)
 end
 
 function wslide.slide_snap(it)
+
+	it.drag.px=it.datx:get_pos(it.hx,it.drag.hx)
+	it.drag.py=it.daty:get_pos(it.hy,it.drag.hy)
 
 	it.drag.hx=it.datx:get_size(it.hx)
 	it.drag.hy=it.daty:get_size(it.hy)
