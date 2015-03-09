@@ -76,11 +76,13 @@ function wslide.layout(widget)
 	
 end
 
-function wslide.slide_snap(it)
+function wslide.slide_snap(it,useloc)
 
-	it.drag.px=it.datx:get_pos(it.hx,it.drag.hx)
-	it.drag.py=it.daty:get_pos(it.hy,it.drag.hy)
-
+	if not useloc then
+		it.drag.px=it.datx:get_pos(it.hx,it.drag.hx)
+		it.drag.py=it.daty:get_pos(it.hy,it.drag.hy)
+	end
+	
 	it.drag.hx=it.datx:get_size(it.hx)
 	it.drag.hy=it.daty:get_size(it.hy)
 

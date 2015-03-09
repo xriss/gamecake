@@ -407,7 +407,7 @@ function wmaster.setup(widget,def)
 			if w.py>maxy then w.py=maxy end
 			
 			if w.parent.snap then
-				w.parent:snap()
+				w.parent:snap(true)
 			end
 			
 			w:call_hook("slide")
