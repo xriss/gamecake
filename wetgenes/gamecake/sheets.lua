@@ -24,7 +24,7 @@ local meta_sheet={__index=base_sheet}
 	local cake=oven.cake
 	local gl=oven.gl
 	local images=cake.images
-	
+		
 sheets.get=function(id)
 	return id and sheets.data[id]
 end
@@ -322,7 +322,13 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy,zf)
 	end
 	
 	
-	local p=gl.program("pos_tex")
+	local p
+
+	if sheets.discard_low_alpha then -- try not to break the zbuffer
+		p=gl.program("pos_tex_discard")
+	else
+		p=gl.program("pos_tex")
+	end
 	
 	gl.BindBuffer(gl.ARRAY_BUFFER,sheet.vbuf)
 
