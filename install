@@ -6,5 +6,5 @@ fi
 
 mkdir -p ${DESTDIR}/bin/
 
-cp ../bin/exe/gamecake.nix ${DESTDIR}/bin/gamecake
-cp ../bin/exe/pagecake.nix ${DESTDIR}/bin/pagecake
+cp ../bin/exe/gamecake.x64 ${DESTDIR}/bin/gamecake
+cp ../bin/exe/pagecake.x64 ${DESTDIR}/bin/pagecake

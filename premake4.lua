@@ -686,6 +686,7 @@ all_includes=all_includes or {
 	{"lua_win_osx",		nil			or		nil		or		nil		or		nil			or		nil			or	OSX		},
 
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
+	{"lua_v4l2",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	nil		},
 	{"lua_rex",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_linenoise",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_brimworkszip",WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
