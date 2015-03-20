@@ -16,30 +16,30 @@ lfs.chdir(apps.dir)
 
 if arg[1] then
 
-	lunatest.suite("dry."..arg[1])
+	lunatest.suite("unit."..arg[1])
 
 else
 
-	lunatest.suite("dry.test_zip")
+	lunatest.suite("unit.test_zip")
 
---	lunatest.suite("dry.test_lanes")
+--	lunatest.suite("unit.test_lanes")
 
-	lunatest.suite("dry.test_lua_al")
-	lunatest.suite("dry.test_lua_freetype")
+	lunatest.suite("unit.test_lua_al")
+	lunatest.suite("unit.test_lua_freetype")
 
-	lunatest.suite("dry.wetgenes_string")
+	lunatest.suite("unit.wetgenes_string")
 
-	lunatest.suite("dry.wetgenes_sod")
-	lunatest.suite("dry.wetgenes_ogg")
+	lunatest.suite("unit.wetgenes_sod")
+	lunatest.suite("unit.wetgenes_ogg")
 
-	lunatest.suite("dry.wetgenes_pack")
+	lunatest.suite("unit.wetgenes_pack")
 
-	lunatest.suite("dry.wetgenes_speak")
+	lunatest.suite("unit.wetgenes_speak")
 
-	lunatest.suite("dry.wetgenes_grd")
-	lunatest.suite("dry.wetgenes_grdmap")
+	lunatest.suite("unit.wetgenes_grd")
+	lunatest.suite("unit.wetgenes_grdmap")
 
-	lunatest.suite("dry.wetgenes_win")
+	lunatest.suite("unit.wetgenes_win")
 
 end
 
