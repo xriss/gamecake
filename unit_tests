@@ -2,7 +2,7 @@ cd `dirname $0`
 
 cd test
 
-./exe $*
+./unit $*
 
 
 

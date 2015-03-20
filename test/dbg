@@ -1,3 +1,0 @@
-cd `dirname $0`
-../../bin/dbg/gamecake lua/unit.lua $*
-
