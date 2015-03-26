@@ -25,22 +25,28 @@ print(wv4l2.open("/dev/video2"))
 ]]
 
 
-local p=wv4l2.open("/dev/video1")
+local p=assert(wv4l2.open("/dev/video0"))
 print(wstr.dump(wv4l2.capture_list(p)))
-wv4l2.capture_start(p,{width=640,height=400,buffer_count=4,format="UYVY"})
+wv4l2.capture_start(p,{width=640,height=480,buffer_count=2,format="UYVY"})
 print(wstr.dump(wv4l2.info(p)))
 
+local g
 local gs={}
-for i=1,10000000 do
-	local t=wv4l2.capture_read_grd(p)
+local miss=0
+while #gs<20 do
+	local t=wv4l2.capture_read_grd(p,g and g[0]) -- reuse last grd
 	if t then
-		local g=wgrd.create(t)
-		gs[#gs+1]=g
-		g:convert("FMT_U8_RGBA")
-		g:save("test"..#gs..".png")
+		g=g or wgrd.create(t)
+		gs[#gs+1]=true
+		print(os.time(),miss,t)
+		miss=0
+--		g:convert("FMT_U8_RGBA")
+--		g:save("test"..#gs..".png")
+	else
+		miss=miss+1
 	end
 end
-print(wstr.dump(gs))
+--print(wstr.dump(gs))
 
 wv4l2.capture_stop(p)
 wv4l2.close(p)

@@ -1281,8 +1281,12 @@ uint8_t *pp=0;
 uint8_t *bp=0;
 uint8_t *cp=0;
 int size;
-struct grd **gg;
+struct grd **gg=0;
 
+	if(lua_isuserdata(l,2))
+	{
+		gg=lua_grd_get_ptr(l,2); // might have one passed in
+	}
 
 	CLEAR(buf);
 	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1304,15 +1308,34 @@ struct grd **gg;
 	pp=(uint8_t*)buf.m.userptr;
 	size=buf.bytesused;
 
-	gg=lua_grd_create_ptr(l);
-	*gg=grd_create(GRD_FMT_U8_RGB,p->width,p->height,1);
+	if(gg) // use passed in
+	{
+		if	(
+				((*gg)->bmap->fmt == GRD_FMT_U8_RGB)	&&
+				((*gg)->bmap->w   == p->width) 			&&
+				((*gg)->bmap->h   == p->height)
+			)
+		{
+			// we can reuse
+		}
+		else
+		{
+			gg=0; // re-allocate
+		}
+	}
+	
+	if(!gg) // allocate
+	{
+		gg=lua_grd_create_ptr(l);
+		*gg=grd_create(GRD_FMT_U8_RGB,p->width,p->height,1);
+	}
 	if(*gg)
 	{
 		switch(p->format)
 		{
 			case V4L2_PIX_FMT_YUYV:
 
-				for( cp=(uint8_t*)pp , bp=(*gg)->bmap->data ; cp<((uint8_t*)pp)+size ; cp=cp+4 , bp=bp+6 )
+				for( cp=(uint8_t*)pp , bp=(*gg)->bmap->data ; bp<(*gg)->bmap->data+(*gg)->bmap->zscan ; cp=cp+4 , bp=bp+6 )
 				{
 					YuvPixel(cp[0], cp[1], cp[3], bp+2, bp+1, bp+0);
 					YuvPixel(cp[2], cp[1], cp[3], bp+5, bp+4, bp+3);
@@ -1321,7 +1344,7 @@ struct grd **gg;
 			break;
 			case V4L2_PIX_FMT_UYVY:
 
-				for( cp=(uint8_t*)pp , bp=(*gg)->bmap->data ; cp<((uint8_t*)pp)+size ; cp=cp+4 , bp=bp+6 )
+				for( cp=(uint8_t*)pp , bp=(*gg)->bmap->data ; bp<(*gg)->bmap->data+(*gg)->bmap->zscan ; cp=cp+4 , bp=bp+6 )
 				{
 					YuvPixel(cp[1], cp[0], cp[2], bp+2, bp+1, bp+0);
 					YuvPixel(cp[3], cp[0], cp[2], bp+5, bp+4, bp+3);
