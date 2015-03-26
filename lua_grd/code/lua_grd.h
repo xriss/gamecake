@@ -24,3 +24,5 @@ extern const char *lua_grd_ptr_name;
 
 struct grd * lua_grd_check_ptr (lua_State *l, int idx);
 
+struct grd **lua_grd_create_ptr(lua_State *l);
+
