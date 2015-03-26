@@ -16,3 +16,14 @@ LUALIB_API int luaopen_wetgenes_v4l2_core (lua_State *l);
 };
 #endif
 
+
+struct lua_v4l2_struct
+{
+	int fd;
+	int buffer_count	;	// number of buffers
+	int buffer_size;		// size of each buffer
+	uint8_t *buffer_data;	// pointer to buffers
+	int width;
+	int height;
+	int format;
+};
