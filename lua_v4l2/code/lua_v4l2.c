@@ -29,6 +29,10 @@
 
 #include "code/lua_v4l2.h"
 
+#include "../wet/util/wet_types.h"
+#include "../lua_grd/code/grd.h"
+#include "../lua_grd/code/lua_grd.h"
+
 /*
  *  V4L2 video capture example
  *
@@ -1057,6 +1061,7 @@ enum v4l2_buf_type type;
 
 unsigned int min;
 int i;
+const char *s;
 
 	p->width=480;
 	p->height=480;
@@ -1075,6 +1080,11 @@ int i;
 
 		lua_getfield(l,2,"format");
 		if(lua_isnumber(l,-1)) { p->format=(int)lua_tonumber(l,-1); }
+		if(lua_isstring(l,-1))
+		{
+			s=lua_tostring(l,-1);
+			p->format=v4l2_fourcc(s[0],s[1],s[2],s[3]);
+		}
 		lua_pop(l,1);
 
 		lua_getfield(l,2,"buffer_count");
@@ -1100,12 +1110,12 @@ int i;
 	CLEAR(cropcap);
 	cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-	if (0 == xioctl(fd, VIDIOC_CROPCAP, &cropcap))
+	if (0 == xioctl(p->fd, VIDIOC_CROPCAP, &cropcap))
 	{
 		crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		crop.c = cropcap.defrect; /* reset to default */
 
-		if (-1 == xioctl(fd, VIDIOC_S_CROP, &crop))
+		if (-1 == xioctl(p->fd, VIDIOC_S_CROP, &crop))
 		{
 			switch (errno)
 			{
@@ -1130,10 +1140,17 @@ int i;
 	fmt.fmt.pix.pixelformat = p->format; 	//replace
 	fmt.fmt.pix.field       = V4L2_FIELD_ANY;
 
-	if(-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
+//printf(" %d %d %d \n",fmt.fmt.pix.width , fmt.fmt.pix.height , fmt.fmt.pix.pixelformat);
+
+	if(-1 == xioctl(p->fd, VIDIOC_S_FMT, &fmt))
 	{
 		luaL_error(l, "invalid format" );
 	}
+
+// may have a different format out this end?
+	p->width=fmt.fmt.pix.width;
+	p->height=fmt.fmt.pix.height;
+	p->format=fmt.fmt.pix.pixelformat;
 
 	p->buffer_size=fmt.fmt.pix.sizeimage;
 
@@ -1145,7 +1162,7 @@ int i;
 	req.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	req.memory = V4L2_MEMORY_USERPTR;
 
-	if (-1 == xioctl(fd, VIDIOC_REQBUFS, &req))
+	if (-1 == xioctl(p->fd, VIDIOC_REQBUFS, &req))
 	{
 		if (EINVAL == errno)
 		{
@@ -1175,7 +1192,7 @@ int i;
 		buf.m.userptr = (unsigned long) (p->buffer_data + (i*p->buffer_size)) ;
 		buf.length = p->buffer_size;
 
-		if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
+		if (-1 == xioctl(p->fd, VIDIOC_QBUF, &buf))
 		{
 			luaL_error(l, "VIDIOC_QBUF" );
 		}
@@ -1183,7 +1200,7 @@ int i;
 
 // and start capture
 	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	if (-1 == xioctl(fd, VIDIOC_STREAMON, &type))
+	if (-1 == xioctl(p->fd, VIDIOC_STREAMON, &type))
 	{
 		luaL_error(l, "VIDIOC_STREAMON" );
 	}
@@ -1205,11 +1222,121 @@ part_ptr *p=lua_v4l2_get_ptr(l,1,1);
 
 	enum v4l2_buf_type type;
 	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	if (-1 == xioctl(fd, VIDIOC_STREAMOFF, &type))
+	if (-1 == xioctl(p->fd, VIDIOC_STREAMOFF, &type))
 	{
 		luaL_error(l, "VIDIOC_STREAMOFF" );
 	}
 	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// stop capture
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_v4l2_info (lua_State *l)
+{
+part_ptr *p=lua_v4l2_get_ptr(l,1,1);
+
+char format[5];
+
+	if(lua_istable(l,2)) // reuse
+	{
+		lua_pushvalue(l,2);
+	}
+	else
+	{
+		lua_newtable(l);
+	}
+
+	lua_pushliteral(l,"buffer_size");		lua_pushnumber(l,p->buffer_size);		lua_rawset(l,-3);
+	lua_pushliteral(l,"buffer_count");		lua_pushnumber(l,p->buffer_count);		lua_rawset(l,-3);
+
+	lua_pushliteral(l,"width");		lua_pushnumber(l,p->width);		lua_rawset(l,-3);
+	lua_pushliteral(l,"height");	lua_pushnumber(l,p->height);	lua_rawset(l,-3);
+	
+	format[0]=(p->format>>0)&0xff;
+	format[1]=(p->format>>8)&0xff;
+	format[2]=(p->format>>16)&0xff;
+	format[3]=(p->format>>24)&0xff;
+	format[4]=0;
+	lua_pushliteral(l,"format");	lua_pushstring(l,format);	lua_rawset(l,-3);
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// read GRD
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_v4l2_capture_read_grd (lua_State *l)
+{
+part_ptr *p=lua_v4l2_get_ptr(l,1,1);
+
+struct v4l2_buffer buf;
+int i;
+
+uint8_t *pp=0;
+uint8_t *bp=0;
+uint8_t *cp=0;
+int size;
+struct grd **gg;
+
+
+	CLEAR(buf);
+	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	buf.memory = V4L2_MEMORY_USERPTR;
+
+	if (-1 == xioctl(p->fd, VIDIOC_DQBUF, &buf))
+	{
+		switch(errno)
+		{
+			case EAGAIN:
+			return 0;
+
+			case EIO:
+			default:
+				luaL_error(l,"VIDIOC_DQBUF");
+		}
+	}
+
+	pp=(uint8_t*)buf.m.userptr;
+	size=buf.bytesused;
+
+	gg=lua_grd_create_ptr(l);
+	*gg=grd_create(GRD_FMT_U8_RGB,p->width,p->height,1);
+	if(*gg)
+	{
+		switch(p->format)
+		{
+			case V4L2_PIX_FMT_YUYV:
+
+				for( cp=(uint8_t*)pp , bp=(*gg)->bmap->data ; cp<((uint8_t*)pp)+size ; cp=cp+4 , bp=bp+6 )
+				{
+					YuvPixel(cp[0], cp[1], cp[3], bp+2, bp+1, bp+0);
+					YuvPixel(cp[2], cp[1], cp[3], bp+5, bp+4, bp+3);
+				}
+
+			break;
+			case V4L2_PIX_FMT_UYVY:
+
+				for( cp=(uint8_t*)pp , bp=(*gg)->bmap->data ; cp<((uint8_t*)pp)+size ; cp=cp+4 , bp=bp+6 )
+				{
+					YuvPixel(cp[1], cp[0], cp[2], bp+2, bp+1, bp+0);
+					YuvPixel(cp[3], cp[0], cp[2], bp+5, bp+4, bp+3);
+				}
+
+			break;
+		}
+	}
+
+	if (-1 == xioctl(p->fd, VIDIOC_QBUF, &buf))
+	{
+			luaL_error(l,"VIDIOC_QBUF");
+	}
+
+	return 1;
 }
 
 
@@ -1227,11 +1354,12 @@ LUALIB_API int luaopen_wetgenes_v4l2_core (lua_State *l)
 
 		{"open",			lua_v4l2_open},
 		{"close",			lua_v4l2_close},
+		{"info",			lua_v4l2_info},
 
-		{"capture_list",	lua_v4l2_capture_list},
-		{"capture_start",	lua_v4l2_capture_start},
-//		{"capture_read",	lua_v4l2_capture_read},
-		{"capture_stop",	lua_v4l2_capture_stop},
+		{"capture_list",		lua_v4l2_capture_list},
+		{"capture_start",		lua_v4l2_capture_start},
+		{"capture_read_grd",	lua_v4l2_capture_read_grd},
+		{"capture_stop",		lua_v4l2_capture_stop},
 
 		{0,0}
 	};
