@@ -5,8 +5,6 @@ language "C"
 files { "./*.cpp" , "./*.c" , "./*.h" }
 
 
-
-
 includedirs { "." }
 
 

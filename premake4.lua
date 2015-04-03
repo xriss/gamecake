@@ -128,6 +128,7 @@ solution("gamecake")
 
 -- work out build type and set flags
 NACL=false
+PEPPER=false
 ANDROID=false
 WINDOWS=false
 MINGW=false
@@ -152,6 +153,7 @@ elseif t:sub(1,6)=="pepper" then
 	TARGET="PEPPER"
 	CPU=t:sub(7)
 	NACL=true
+	PEPPER=true
 	GCC=true
 elseif t:sub(1,7)=="android" then
 	TARGET="ANDROID"
@@ -684,7 +686,8 @@ all_includes=all_includes or {
 	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_al",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_al",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		)
+																						and		(not PEPPER) 			},
 	{"lua_tardis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_grd",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
@@ -730,7 +733,8 @@ all_includes=all_includes or {
 	{"lib_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_vorbis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		},
+	{"lib_openal",	   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		)
+																						and		(not PEPPER) 			},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
 
