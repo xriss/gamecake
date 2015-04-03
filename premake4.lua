@@ -100,6 +100,17 @@ newplatform {
     }
 }
 
+newplatform {
+    name = "pepper",
+    description = "pepper",
+    gcc = {
+        cc = "emcc",
+        cxx = "em++",
+        ar= "ar",
+        cppflags = "-MMD",
+    }
+}
+
 --[[ ios notez, something like this makefile but platforms are in /Applications
 
 /Applications/Xcode.app/Contents/Developer/Platforms/
@@ -135,6 +146,11 @@ if t:sub(1,5)=="raspi" then
 elseif t:sub(1,4)=="nacl" then
 	TARGET="NACL"
 	CPU=t:sub(5)
+	NACL=true
+	GCC=true
+elseif t:sub(1,6)=="pepper" then
+	TARGET="PEPPER"
+	CPU=t:sub(7)
 	NACL=true
 	GCC=true
 elseif t:sub(1,7)=="android" then
@@ -200,7 +216,11 @@ if NACL then
 
 	local naclsdk=path.getabsolute("../sdks/nacl-sdk/pepper_33")
 
-	platforms { "nacl" } --hax
+	if TARGET=="PEPPER" then
+		platforms { "pepper" } --hax
+	else
+		platforms { "nacl" } --hax
+	end
 	
 	defines "NACL"
 	
@@ -690,7 +710,7 @@ all_includes=all_includes or {
 	{"lua_rex",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_linenoise",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_brimworkszip",WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_sys",			WINDOWS		or		NIX		or		NACL	or		nil			or		RASPI		or	OSX		},
+	{"lua_sys",			WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lib_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
@@ -698,6 +718,7 @@ all_includes=all_includes or {
 	{"lib_pq",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
 -- this may be the main lua or luajit lib depending on build
+-- would really like to just use luajit but nacl mkes this a problem...
 	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 
 -- static libs used by the lua bindings

@@ -1,0 +1,24 @@
+cd `dirname $0`
+cd ..
+
+if [ "$1" = "clean" ] ; then
+        rm -rf build-gmake-pepper-native
+        exit
+fi
+
+naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_33`
+#export PATH=$naclsdk/toolchain/linux_pnacl/bin:$PATH
+
+btype="exe"
+makeopts="config=release_pepper"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug_pepper"
+btype="dbg"
+fi
+
+build/premake4 gmake pepper
+
+cd build-gmake-pepper-native
+make $makeopts $2 $3 $4
+cd ..
+

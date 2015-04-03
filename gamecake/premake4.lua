@@ -57,7 +57,12 @@ elseif NACL then
 	links { "nosys" } -- remove newlib link errors
 	links { "nosys" } -- remove newlib link errors
 	
-	KIND{kind="WindowedApp",name="gamecake.pexe"}
+	if TARGET=="PEPPER" then
+		KIND{kind="WindowedApp",name="gamecake.js"}
+	else
+		KIND{kind="WindowedApp",name="gamecake.pexe"}
+	end
+
 
 elseif ANDROID then 
 
