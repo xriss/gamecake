@@ -53,7 +53,7 @@ elseif NACL then
 	links { "m" }
 	
 	if TARGET=="PEPPER" then
-
+		
 		KIND{kind="WindowedApp",name="gamecake.js"}
 
 	else
