@@ -73,7 +73,8 @@ _zip_mkstemp(char *path)
 	static char xtra[2] = "aa";
 	int xcnt = 0;
 
-	pid = getpid();
+// do not want to use this stuff anyway, just make it compile
+	pid = rand(); //getpid();
 
 	/* Move to end of path and count trailing X's. */
 	for (trv = path; *trv; ++trv)

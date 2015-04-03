@@ -7,7 +7,7 @@ if [ "$1" = "clean" ] ; then
 fi
 
 naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_33`
-#export PATH=$naclsdk/toolchain/linux_pnacl/bin:$PATH
+source ../sdks/emsdk_portable/emsdk_env.sh
 
 btype="exe"
 makeopts="config=release_pepper"

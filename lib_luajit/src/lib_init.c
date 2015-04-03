@@ -36,6 +36,10 @@ static const luaL_Reg lj_lib_preload[] = {
   { NULL,		NULL }
 };
 
+#ifdef LUA_PRELOADLIBS
+extern int LUA_PRELOADLIBS(lua_State *L);
+#endif
+
 LUALIB_API void luaL_openlibs(lua_State *L)
 {
   const luaL_Reg *lib;
