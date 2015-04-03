@@ -224,9 +224,23 @@ if NACL then
 		buildoptions{
 			"-s RESERVED_FUNCTION_POINTERS=325",
 			"-s TOTAL_MEMORY=134217728",			-- 128meg
-			"-lppapi",
+--			"-lppapi",
 			"-s EXPORTED_FUNCTIONS=\"['_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']\"",
 			"--pre-js "..pepperjs.."/ppapi_preamble.js",
+--			"--pre-js "..pepperjs.."/wrappers/audio.js",
+			"--pre-js "..pepperjs.."/wrappers/base.js",
+			"--pre-js "..pepperjs.."/wrappers/file.js",
+			"--pre-js "..pepperjs.."/wrappers/gles.js",
+			"--pre-js "..pepperjs.."/wrappers/gles_ext.js",
+			"--pre-js "..pepperjs.."/wrappers/graphics_2d.js",
+			"--pre-js "..pepperjs.."/wrappers/graphics_3d.js",
+			"--pre-js "..pepperjs.."/wrappers/input_events.js",
+			"--pre-js "..pepperjs.."/wrappers/mouse_lock.js",
+			"--pre-js "..pepperjs.."/wrappers/url_loader.js",
+			"--pre-js "..pepperjs.."/wrappers/view.js",
+			"--pre-js "..pepperjs.."/wrappers/web_socket.js",
+--			"--pre-js "..pepperjs.."/third_party/w3c_audio.js",
+--			"--pre-js "..pepperjs.."/third_party/idb.filesystem.js",
 		}
 	
 		platforms { "pepper" } --hax
@@ -747,6 +761,9 @@ all_includes=all_includes or {
 																						and		(not PEPPER) 			},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
+
+-- pepper.js hacks
+	{"pepper",			nil			or		nil		or		nil		or		nil			or		PEPPER		or	nil		},
 
 -- dont think building this is a good idea?
 --	{"lib_angle",		nil			or		nil		or		nil		or		nil			or		nil			or	nil		},
