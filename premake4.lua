@@ -217,8 +217,18 @@ print("TARGET == "..TARGET.." " ..CPU )
 if NACL then
 
 	local naclsdk=path.getabsolute("../sdks/nacl-sdk/pepper_33")
+	local pepperjs=path.getabsolute("./pepper/pepper.js")
 
 	if TARGET=="PEPPER" then
+	
+		buildoptions{
+			"-s RESERVED_FUNCTION_POINTERS=325",
+			"-s TOTAL_MEMORY=134217728",			-- 128meg
+			"-lppapi",
+			"-s EXPORTED_FUNCTIONS=\"['_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']\"",
+			"--pre-js "..pepperjs.."/ppapi_preamble.js",
+		}
+	
 		platforms { "pepper" } --hax
 	else
 		platforms { "nacl" } --hax
