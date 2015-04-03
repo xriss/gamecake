@@ -217,6 +217,7 @@ print("TARGET == "..TARGET.." " ..CPU )
 if NACL then
 
 	local naclsdk=path.getabsolute("../sdks/nacl-sdk/pepper_33")
+	naclsdk_path=naclsdk
 	local pepperjs=path.getabsolute("./pepper/pepper.js")
 
 	if TARGET=="PEPPER" then

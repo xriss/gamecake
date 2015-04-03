@@ -24,3 +24,5 @@ lib_pq/src/backend/*
 lib_pq/doc/*
 lib_pq/contrib/*
 lib_pq/config/*
+
+pepper/pepper.js/*/*/emscripten/*
