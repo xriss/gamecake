@@ -216,34 +216,31 @@ print("TARGET == "..TARGET.." " ..CPU )
 
 if NACL then
 
-	local naclsdk=path.getabsolute("../sdks/nacl-sdk/pepper_33")
-	naclsdk_path=naclsdk
-	local pepperjs=path.getabsolute("./pepper/pepper.js")
+	naclsdk_path=path.getabsolute("../sdks/nacl-sdk/pepper_33")
+	pepperjs_path=path.getabsolute("./pepper/pepper.js")
 
 	if TARGET=="PEPPER" then
-	
-		buildoptions{
+		linkoptions{
 			"-s RESERVED_FUNCTION_POINTERS=325",
 			"-s TOTAL_MEMORY=134217728",			-- 128meg
---			"-lppapi",
 			"-s EXPORTED_FUNCTIONS=\"['_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']\"",
-			"--pre-js "..pepperjs.."/ppapi_preamble.js",
---			"--pre-js "..pepperjs.."/wrappers/audio.js",
-			"--pre-js "..pepperjs.."/wrappers/base.js",
-			"--pre-js "..pepperjs.."/wrappers/file.js",
-			"--pre-js "..pepperjs.."/wrappers/gles.js",
-			"--pre-js "..pepperjs.."/wrappers/gles_ext.js",
-			"--pre-js "..pepperjs.."/wrappers/graphics_2d.js",
-			"--pre-js "..pepperjs.."/wrappers/graphics_3d.js",
-			"--pre-js "..pepperjs.."/wrappers/input_events.js",
-			"--pre-js "..pepperjs.."/wrappers/mouse_lock.js",
-			"--pre-js "..pepperjs.."/wrappers/url_loader.js",
-			"--pre-js "..pepperjs.."/wrappers/view.js",
-			"--pre-js "..pepperjs.."/wrappers/web_socket.js",
---			"--pre-js "..pepperjs.."/third_party/w3c_audio.js",
---			"--pre-js "..pepperjs.."/third_party/idb.filesystem.js",
+			"--pre-js "..pepperjs_path.."/ppapi_preamble.js",
+--			"--pre-js "..pepperjs_path.."/wrappers/audio.js",
+			"--pre-js "..pepperjs_path.."/wrappers/base.js",
+			"--pre-js "..pepperjs_path.."/wrappers/file.js",
+			"--pre-js "..pepperjs_path.."/wrappers/gles.js",
+			"--pre-js "..pepperjs_path.."/wrappers/gles_ext.js",
+			"--pre-js "..pepperjs_path.."/wrappers/graphics_2d.js",
+			"--pre-js "..pepperjs_path.."/wrappers/graphics_3d.js",
+			"--pre-js "..pepperjs_path.."/wrappers/input_events.js",
+			"--pre-js "..pepperjs_path.."/wrappers/mouse_lock.js",
+			"--pre-js "..pepperjs_path.."/wrappers/url_loader.js",
+			"--pre-js "..pepperjs_path.."/wrappers/view.js",
+			"--pre-js "..pepperjs_path.."/wrappers/web_socket.js",
+--			"--pre-js "..pepperjs_path.."/third_party/w3c_audio.js",
+--			"--pre-js "..pepperjs_path.."/third_party/idb.filesystem.js",
 		}
-	
+		
 		platforms { "pepper" } --hax
 	else
 		platforms { "nacl" } --hax
@@ -251,17 +248,17 @@ if NACL then
 	
 	defines "NACL"
 	
-	includedirs { naclsdk.."/include" }
---	includedirs { naclsdk.."/ports/include" }
+	includedirs { naclsdk_path.."/include" }
+--	includedirs { naclsdk_path.."/ports/include" }
 
 -- libs to link
 	configuration {"Debug"}
-	libdirs { naclsdk.."/ports/lib/newlib_pnacl/Debug" }
-	libdirs { naclsdk.."/lib/pnacl/Debug" }
+	libdirs { naclsdk_path.."/ports/lib/newlib_pnacl/Debug" }
+	libdirs { naclsdk_path.."/lib/pnacl/Debug" }
 
 	configuration {"Release"}
-	libdirs { naclsdk.."/ports/lib/newlib_pnacl/Release" }
-	libdirs { naclsdk.."/lib/pnacl/Release" }
+	libdirs { naclsdk_path.."/ports/lib/newlib_pnacl/Release" }
+	libdirs { naclsdk_path.."/lib/pnacl/Release" }
 
 	configuration {}
 

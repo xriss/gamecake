@@ -86,17 +86,14 @@ return				  function(callback,element){
 
   <div id="listener" style=" width:100%; height:100%; position:absolute; ">
 	  
+    <div id="naclmod" style=" width:100%; height:100%; position:relative; "/>
+	<script type="text/javascript" src="bin/exe/gamecake.js"></script>
     <script type="text/javascript">
+      CreateInstance(100, 100, document.getElementById('naclmod') );
       var listener = document.getElementById('listener')
       listener.addEventListener('load', moduleDidLoad, true);
       listener.addEventListener('message', handleMessage, true);
     </script>
-
-    <embed name="nacl_module"
-           id="naclmod"
-			src="bin/exe/gamecake.nmf"
-			type="application/x-pnacl"
-           style=" width:100%; height:100%; position:relative; "/>
 
   </div>
 
