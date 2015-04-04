@@ -123,8 +123,9 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
 
 	nacl_instance=instance;
 
-
+#if !defined(PEPPER)
 	alSetPpapiInfo( nacl_instance , get_browser_interface );
+#endif
 									  
 	L = lua_open();  /* create state */
 	luaL_openlibs(L);  /* open libraries */
