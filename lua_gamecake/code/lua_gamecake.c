@@ -183,7 +183,7 @@ int vid,tid;
 	x=ud->x;
 	y=ud->y;
 
-	while(c=*s++)
+	while((c=*s++))
 	{
 
 		ch=ud->fontdata->chars+c;

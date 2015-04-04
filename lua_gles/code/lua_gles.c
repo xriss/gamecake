@@ -136,7 +136,7 @@ int i;
 		case 's':
 			for(i=0;i<num;i++) // this should only ever be 1
 			{
-				lua_pushstring(l, glGetString(def) );
+				lua_pushstring(l, (const char *)glGetString(def) );
 			}
 		break;
 	}
@@ -343,7 +343,7 @@ static int lua_gles_PopMatrix (lua_State *l)
 static int lua_gles_GenTexture (lua_State *l)
 {
 int id;
-	glGenTextures(1,&id);
+	glGenTextures(1,(unsigned int *)&id);
 	lua_pushnumber(l,(double)id);
 	return 1;
 }
@@ -357,7 +357,7 @@ static int lua_gles_BindTexture (lua_State *l)
 static int lua_gles_DeleteTexture (lua_State *l)
 {
 int id=(int)luaL_checknumber(l,1);
-	glDeleteTextures(1,&id);
+	glDeleteTextures(1,(const unsigned int*)&id);
 	return 0;
 }
 
@@ -524,14 +524,14 @@ static int lua_gles_DrawElements (lua_State *l)
 static int lua_gles_GenBuffer (lua_State *l)
 {
 int id;
-	glGenBuffers(1,&id);
+	glGenBuffers(1,(unsigned int*)&id);
 	lua_pushnumber(l,(double)id);
 	return 1;
 }
 static int lua_gles_DeleteBuffer (lua_State *l)
 {
 int id=luaL_checknumber(l,1);
-	glDeleteBuffers(1,&id);
+	glDeleteBuffers(1,(const unsigned int*)&id);
 	return 0;
 }
 static int lua_gles_BindBuffer (lua_State *l)
@@ -1064,7 +1064,7 @@ int type=0;
 						256,
 						0,
 						&size,
-						&type,
+						(unsigned int*)&type,
 						name);
 	lua_pushstring(l,name);
 	lua_pushnumber(l,(double)type);
@@ -1082,7 +1082,7 @@ int type=0;
 						256,
 						0,
 						&size,
-						&type,
+						(unsigned int*)&type,
 						name);
 	lua_pushstring(l,name);
 	lua_pushnumber(l,(double)type);
@@ -1359,13 +1359,13 @@ static int lua_gles_CullFace (lua_State *l)
 static int lua_gles_DeleteFramebuffer (lua_State *l)
 {
 int id=luaL_checknumber(l,1);
-	glDeleteFramebuffers(1,&id);
+	glDeleteFramebuffers(1,(const unsigned int*)&id);
 	return 0;
 }
 static int lua_gles_DeleteRenderbuffer (lua_State *l)
 {
-int id=luaL_checknumber(l,1);
-	glDeleteRenderbuffers(1,&id);
+unsigned int id=luaL_checknumber(l,1);
+	glDeleteRenderbuffers(1,(const unsigned int*)&id);
 	return 0;
 }
 static int lua_gles_DetachShader (lua_State *l)
@@ -1398,14 +1398,14 @@ static int lua_gles_FrontFace (lua_State *l)
 }
 static int lua_gles_GenFramebuffer (lua_State *l)
 {
-int id=0;
+unsigned int id=0;
 	glGenFramebuffers(1,&id);
 	lua_pushnumber(l,(double)id);
 	return 1;
 }
 static int lua_gles_GenRenderbuffer (lua_State *l)
 {
-int id=0;
+unsigned int id=0;
 	glGenRenderbuffers(1,&id);
 	lua_pushnumber(l,(double)id);
 	return 1;
@@ -1421,7 +1421,7 @@ int i;
 int count=0;
 int ret[16];
 
-	glGetAttachedShaders( (int)luaL_checknumber(l,1)	, 16 , &count, ret);
+	glGetAttachedShaders( (int)luaL_checknumber(l,1)	, 16 , (int *)&count, (unsigned int *)ret);
 	for(i=0;i<count;i++)
 	{
 		lua_pushnumber(l,(double)ret[i]);
@@ -1571,7 +1571,7 @@ static int lua_gles_ShaderBinary (lua_State *l)
 	void *ptr=(void*)lua_gles_topointer(l,3,&len);
 	
 	glShaderBinary(		1								,
-						&a								,
+						(const unsigned int *)&a								,
 						(int)luaL_checknumber(l,2)		,
 						(void*)ptr						,
 						(int)len						);

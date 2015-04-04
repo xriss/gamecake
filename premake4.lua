@@ -221,8 +221,12 @@ if NACL then
 
 	if TARGET=="PEPPER" then
 
-	defines "PEPPER"
-	
+		defines "PEPPER"	
+		defines "NACL_ARCH=x86_32"
+
+			buildoptions{
+				"-Werror"
+			}
 			linkoptions{
 			"-s RESERVED_FUNCTION_POINTERS=325",
 			"-s TOTAL_MEMORY=134217728",			-- 128meg
