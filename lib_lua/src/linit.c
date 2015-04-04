@@ -28,7 +28,7 @@ static const luaL_Reg lualibs[] = {
 
 
 #ifdef LUA_PRELOADLIBS
-extern int LUA_PRELOADLIBS(lua_State *L);
+extern void LUA_PRELOADLIBS(lua_State *L);
 #endif
 
 LUALIB_API void luaL_openlibs (lua_State *L) {

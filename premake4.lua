@@ -220,7 +220,10 @@ if NACL then
 	pepperjs_path=path.getabsolute("./pepper/pepper.js")
 
 	if TARGET=="PEPPER" then
-		linkoptions{
+
+	defines "PEPPER"
+	
+			linkoptions{
 			"-s RESERVED_FUNCTION_POINTERS=325",
 			"-s TOTAL_MEMORY=134217728",			-- 128meg
 			"-s EXPORTED_FUNCTIONS=\"['_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']\"",
