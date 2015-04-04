@@ -1,4 +1,7 @@
 
+
+function buildlinkoptions(t) buildoptions(t) linkoptions(t) end
+
 ------------------------------------------------------------------------
 -- hacky premake functions
 ------------------------------------------------------------------------
@@ -224,11 +227,15 @@ if NACL then
 		defines "PEPPER"	
 		defines "NACL_ARCH=x86_32"
 
-			buildoptions{
-				"-Werror"
+			buildlinkoptions{
+				"-Wno-warn-absolute-paths",
+				"-Wno-long-long",
+				"-Werror",
 			}
+
 			linkoptions{
-			"-s RESERVED_FUNCTION_POINTERS=325",
+			"-as-needed",
+			"-s RESERVED_FUNCTION_POINTERS=400",
 			"-s TOTAL_MEMORY=134217728",			-- 128meg
 			"-s EXPORTED_FUNCTIONS=\"['_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']\"",
 			"--pre-js "..pepperjs_path.."/ppapi_preamble.js",
@@ -263,9 +270,27 @@ if NACL then
 	libdirs { naclsdk_path.."/ports/lib/newlib_pnacl/Debug" }
 	libdirs { naclsdk_path.."/lib/pnacl/Debug" }
 
+	if TARGET=="PEPPER" then
+		buildlinkoptions{
+			"-O0",
+			"-g4",
+			"-s ASSERTIONS=2",
+			"-s SAFE_HEAP=3",
+			"-s ALIASING_FUNCTION_POINTERS=0",
+			"--minify 0",
+		}
+	end
+
 	configuration {"Release"}
 	libdirs { naclsdk_path.."/ports/lib/newlib_pnacl/Release" }
 	libdirs { naclsdk_path.."/lib/pnacl/Release" }
+
+	if TARGET=="PEPPER" then
+		buildlinkoptions{
+			"-O3",
+			"-g0",
+		}
+	end
 
 	configuration {}
 
