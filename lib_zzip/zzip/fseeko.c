@@ -81,6 +81,9 @@
 
 /* we try to round all seeks to the pagesize - since we do not use
  * the sys/mmap interface we have to guess a good value here: */
+#if defined(PAGESIZE)
+#undef PAGESIZE
+#endif
 #define PAGESIZE 8192
 
 /* ====================================================================== */

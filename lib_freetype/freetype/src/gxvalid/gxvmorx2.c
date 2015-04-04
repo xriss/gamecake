@@ -198,7 +198,7 @@
       }
       else if ( ( offset & 0x3FFF0000UL ) == 0x0000000UL )
       {
-        if ( offset + valid->face->num_glyphs < 0 )
+        if ( (int)offset + (int)valid->face->num_glyphs < 0 )
           return;
 
         GXV_TRACE(( "ligature action table includes"

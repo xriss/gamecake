@@ -181,7 +181,7 @@ static int lua_dogg_push (lua_State *l)
 {	
 dogg *dd;
 const char *s;
-int slen;
+size_t slen;
 
 	dd = lua_dogg_check(l, 1 );
 	s = lua_tolstring(l, 2 ,&slen);
