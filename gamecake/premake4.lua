@@ -164,7 +164,8 @@ end
 
 	links { "crypt" }
 	links { "pthread" }
-	links { "X11"   }	
+--	links { "Xrandr" }
+	links { "X11"   }
 	links { "dl" }
 	links { "m" }
 
