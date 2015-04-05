@@ -3,7 +3,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-       
+
+#include <X11/extensions/Xrandr.h>
        
 //
 // we can use either this string as a string identifier
@@ -88,10 +89,24 @@ int lua_wetwin_screen (lua_State *l)
 {
 	Display		*dsp = XOpenDisplay( NULL );
 
+/*
+	Rotation original_rotation;
+	int num_sizes;
+	Window root = RootWindow(dsp, 0);
+	XRRScreenSize *xrrs = XRRSizes(dsp, 0, &num_sizes);
 
+	XRRScreenConfiguration *conf = XRRGetScreenInfo(dsp, root);
+	short original_rate = XRRConfigCurrentRate(conf);
+	SizeID original_size_id = XRRConfigCurrentConfiguration(conf, &original_rotation);
+
+// size of single screen
+	lua_pushnumber(l, xrrs[original_size_id].width);
+	lua_pushnumber(l, xrrs[original_size_id].height);
+*/
+
+// size of all screens joined
 	lua_pushnumber(l,DisplayWidth(dsp,0));
 	lua_pushnumber(l,DisplayHeight(dsp,0));
-	
 	
 	XCloseDisplay( dsp );
 	
@@ -109,8 +124,8 @@ int lua_wetwin_create (lua_State *l)
 wetwin_lua_wrap *wp;
 wetwin_lua *p;
 
-int x=20;
-int y=20;
+int x=0;
+int y=0;
 
 int width=640;
 int height=480;
@@ -154,7 +169,7 @@ XClassHint class_hint;
 		unsigned long black = BlackPixel(p->dsp,p->screen);	
 		p->win = XCreateSimpleWindow(p->dsp,
 										DefaultRootWindow(p->dsp),
-										x, y,   					// origin
+										0, 0,   					// origin
 										width, height, 				// size
 										0, white, 					// border
 										black );  					// backcolour
@@ -171,8 +186,11 @@ XClassHint class_hint;
 				ButtonPressMask | ButtonReleaseMask |
 				PointerMotionMask | StructureNotifyMask );
 
-			XMoveWindow( p->dsp , p->win , x,y);
-
+			if( (x>=0) && (y>=0) )
+			{
+				XMoveWindow( p->dsp , p->win , x,y);
+			}
+			
 			XFlush(p->dsp);
 		}
 

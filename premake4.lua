@@ -99,7 +99,7 @@ newplatform {
         cc = "lsbcc",
         cxx = "lsbc++",
         ar= "ar",
-        cppflags = "-MMD -D_FORTIFY_SOURCE=0 --lsb-use-default-linker",
+        cppflags = "-MMD -D_FORTIFY_SOURCE=0",
     }
 }
 

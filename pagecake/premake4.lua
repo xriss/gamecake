@@ -215,8 +215,9 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 	links { "pthread" }
 	links { "dl" , "m" , "rt" }
 
+--	links { "Xrandr" }
 	links { "X11" }
-	
+
 	links { "ssl" , "crypto"}
 	
 	if CPU=="64" then
