@@ -186,7 +186,7 @@ XClassHint class_hint;
 				ButtonPressMask | ButtonReleaseMask |
 				PointerMotionMask | StructureNotifyMask );
 
-			if( (x>=0) && (y>=0) )
+			if( (x>0) && (y>0) )
 			{
 				XMoveWindow( p->dsp , p->win , x,y);
 			}
