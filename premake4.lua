@@ -220,7 +220,7 @@ print("TARGET == "..TARGET.." " ..CPU )
 if NACL then
 
 	naclsdk_path=path.getabsolute("../sdks/nacl-sdk/pepper_33")
-	pepperjs_path=path.getabsolute("./pepper/pepper.js")
+	pepperjs_path=path.getabsolute("./lib_pepperjs/pepper.js")
 
 	if TARGET=="PEPPER" then
 
@@ -793,7 +793,7 @@ all_includes=all_includes or {
 	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
 
 -- pepper.js hacks
-	{"pepper",			nil			or		nil		or		nil		or		nil			or		PEPPER		or	nil		},
+	{"lib_pepperjs",	nil			or		nil		or		nil		or		nil			or		PEPPER		or	nil		},
 
 -- dont think building this is a good idea?
 --	{"lib_angle",		nil			or		nil		or		nil		or		nil			or		nil			or	nil		},
