@@ -809,8 +809,8 @@ all_includes=all_includes or {
 --	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
 -- the output executables
-	{"gamecake",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"pagecake",			nil		or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"exe_gamecake",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"exe_pagecake",	nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 }
 
 ------------------------------------------------------------------------
