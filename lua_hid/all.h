@@ -45,7 +45,7 @@
 
 #endif
 
-#include "../wet/util/wet_types.h"
+#include "../lib_wet/util/wet_types.h"
 
 
 #ifdef __cplusplus

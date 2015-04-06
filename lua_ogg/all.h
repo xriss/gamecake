@@ -53,8 +53,8 @@ extern "C" {
 
 #include <vorbis/codec.h>
 
-#include "../wet/util/pstdint.h"
-#include "../wet/util/wet_types.h"
+#include "../lib_wet/util/pstdint.h"
+#include "../lib_wet/util/wet_types.h"
 
 #include "code/lua_ogg.h"
 

@@ -42,7 +42,7 @@ extern "C" {
 };
 #endif
 
-#include "../wet/util/wet_types.h"
+#include "../lib_wet/util/wet_types.h"
 
 
 #include "code/lua_win.h"

@@ -52,11 +52,11 @@ alcGetProcAddress
 #if defined(LIB_LUAJIT)
 #include "../../lib_luajit/src/lj_obj.h"
 #else
-#include "../../wet/util/pstdint.h"
+#include "../../lib_wet/util/pstdint.h"
 #include "../../lib_lua/src/lobject.h"
 #endif
 
-#include "../../wet/util/wet_types.h"
+#include "../../lib_wet/util/wet_types.h"
 
 static u8 * lua_toluserdata (lua_State *L, int idx, size_t *len) {
 

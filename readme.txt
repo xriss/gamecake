@@ -30,8 +30,9 @@ Afterwhich gamecake will now be a valid command :)
 The following commands should build everything under ubuntu/debian 
 assuming you have a build environment setup, you will need to install 
 some dev packages such as opengl. Hopefully all the bits you need can 
-be installed by running ./apt-gets first. Note I have switched to
-clang so makes sure you have that installed.
+be installed by running ./apt-gets first. Note I have switched to clang 
+so make sure you have that installed. gcc/make will also probably work 
+but is not tested as often.
 
 	clang/make
 

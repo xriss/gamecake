@@ -37,7 +37,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "../wet/util/win_types.h"
+#include "../lib_wet/util/win_types.h"
 
 #elif defined(X11)
 
@@ -46,11 +46,11 @@
 #include <strings.h>
 #include <sys/time.h>
 
-#include "../wet/util/nix_types.h"
+#include "../lib_wet/util/nix_types.h"
 
 #endif
 
-#include "../wet/util/f32_math.h"
+#include "../lib_wet/util/f32_math.h"
 
 
 #include "code/GLee.h"
@@ -86,9 +86,9 @@ extern "C" {
 
 // data file header descriptions
 
-#include "../wet/file/file_xox.h"
-#include "../wet/file/file_xsx.h"
-#include "../wet/file/file_xtx.h"
+#include "../lib_wet/file/file_xox.h"
+#include "../lib_wet/file/file_xsx.h"
+#include "../lib_wet/file/file_xtx.h"
 
 
 #include "../lua_grd/code/grd.h"
