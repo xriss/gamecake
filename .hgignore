@@ -25,6 +25,6 @@ lib_pq/doc/*
 lib_pq/contrib/*
 lib_pq/config/*
 
-pepper/pepper.js/*/*/emscripten/*
-pepper/nginx/logs/*
-pepper/nginx/static/*.zip
+lib_pepperjs/pepper.js/*/*/emscripten/*
+pepperjs/nginx/logs/*
+pepperjs/nginx/static/*.zip

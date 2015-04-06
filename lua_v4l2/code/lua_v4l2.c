@@ -29,7 +29,7 @@
 
 #include "code/lua_v4l2.h"
 
-#include "../wet/util/wet_types.h"
+#include "../lib_wet/util/wet_types.h"
 #include "../lua_grd/code/grd.h"
 #include "../lua_grd/code/lua_grd.h"
 

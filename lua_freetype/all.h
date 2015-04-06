@@ -62,8 +62,8 @@ extern "C" {
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "../wet/util/pstdint.h"
-#include "../wet/util/wet_types.h"
+#include "../lib_wet/util/pstdint.h"
+#include "../lib_wet/util/wet_types.h"
 
 
 #include "../lua_freetype/code/lua_freetype.h"

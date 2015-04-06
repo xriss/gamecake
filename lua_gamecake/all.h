@@ -45,9 +45,9 @@
 #endif
 
 
-#include "../wet/util/pstdint.h"
-#include "../wet/util/wet_types.h"
-//#include "../wet/util/f32_math.h"
+#include "../lib_wet/util/pstdint.h"
+#include "../lib_wet/util/wet_types.h"
+//#include "../lib_wet/util/f32_math.h"
 
 
 #ifdef __cplusplus
