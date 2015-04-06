@@ -200,8 +200,8 @@ end
 	excludes { "./ndk/src/ndk_http.*" }
 ]]
 
-	files { "../gamecake/*.c" }
-	excludes { "../gamecake/lua.c" }
+	files { "../exe_gamecake/*.c" }
+	excludes { "../exe_gamecake/lua.c" }
 	
 -- link in luajit that was compiled externaly
 if LUA_LIBDIRS then	libdirs(LUA_LIBDIRS) end

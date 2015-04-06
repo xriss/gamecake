@@ -9,8 +9,8 @@ android/bin/*
 android/libs/*
 android/gen/*
 android/res/*
-gamecake/preloadlibs.c
-gamecake/cache.c
+exe_gamecake/preloadlibs.c
+exe_gamecake/cache.c
 */log.txt
 nacl/nginx/logs/*
 nacl/nginx/static/*.zip
