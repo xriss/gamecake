@@ -4,7 +4,7 @@ under Xubuntu if you have a choice. The Ubuntu and Gnome3 fancy
 desktops impact the performance of OpenGL code and are not 
 recomended as development or runtime environments.
 
-All C code is packaged up inside lua libraries and C++ 
+All C code is packaged up inside lua libraries and most C++ 
 code/dependencies have been removed from the project.
 
 So this dir contains lua modules and premake build scripts for them 
