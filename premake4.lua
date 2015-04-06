@@ -114,6 +114,17 @@ newplatform {
     }
 }
 
+newplatform {
+    name = "emcc",
+    description = "emcc",
+    gcc = {
+        cc = "emcc",
+        cxx = "em++",
+        ar= "ar",
+        cppflags = "-MMD",
+    }
+}
+
 --[[ ios notez, something like this makefile but platforms are in /Applications
 
 /Applications/Xcode.app/Contents/Developer/Platforms/
@@ -287,7 +298,7 @@ if NACL then
 
 	if TARGET=="PEPPER" then
 		buildlinkoptions{
-			"-O3",
+			"-O1",
 			"-g0",
 		}
 	end
@@ -774,6 +785,9 @@ all_includes=all_includes or {
 	{"lua_pgsql",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
+-- if we have an SDL2 binding we can do some easier ports?
+	{"lua_sdl2",	   (nil			or		NIX		or		nil		or		nil			or		nil			or	nil		)
+																						and		(not LSB) 				},
 -- this may be the main lua or luajit lib depending on build
 -- would really like to just use luajit but nacl mkes this a problem...
 	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},

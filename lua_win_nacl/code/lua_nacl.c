@@ -46,25 +46,39 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
   get_browser_interface=_get_browser_interface;
 
   module_id = a_module_id;
+//printf("core\n");
   core_interface = ( PPB_Core*)(get_browser_interface(PPB_CORE_INTERFACE));
+//printf("var\n");
   var_interface = ( PPB_Var*)(get_browser_interface(PPB_VAR_INTERFACE));
 
+//printf("view\n");
   view_interface = ( PPB_View*)(get_browser_interface(PPB_VIEW_INTERFACE));
 
+//printf("urlloader\n");
   url_loader_interface = ( PPB_URLLoader*)(get_browser_interface(PPB_URLLOADER_INTERFACE));
+//printf("request\n");
   url_request_info_interface = ( PPB_URLRequestInfo*)(get_browser_interface(PPB_URLREQUESTINFO_INTERFACE));
+//printf("response\n");
   url_response_info_interface = ( PPB_URLResponseInfo*)(get_browser_interface(PPB_URLRESPONSEINFO_INTERFACE));
 
+//printf("messaging\n");
   messaging_interface = ( PPB_Messaging*)(get_browser_interface(PPB_MESSAGING_INTERFACE));
+//printf("graphics3d\n");
   graphics3d_interface = ( PPB_Graphics3D*)(get_browser_interface(PPB_GRAPHICS_3D_INTERFACE));
+//printf("instance\n");
   instance_interface = ( PPB_Instance*)(get_browser_interface(PPB_INSTANCE_INTERFACE));
 
+//printf("event\n");
   input_event_interface = ( PPB_InputEvent*)(get_browser_interface(PPB_INPUT_EVENT_INTERFACE));
   
+//printf("keyboard\n");
   keyboard_input_event_interface = ( PPB_KeyboardInputEvent*)(get_browser_interface(PPB_KEYBOARD_INPUT_EVENT_INTERFACE));
+//printf("mouse\n");
   mouse_input_event_interface = ( PPB_MouseInputEvent*)(get_browser_interface(PPB_MOUSE_INPUT_EVENT_INTERFACE));
+//printf("wheel\n");
   wheel_input_event_interface = ( PPB_WheelInputEvent*)(get_browser_interface(PPB_WHEEL_INPUT_EVENT_INTERFACE));
 
+//printf("glinit\n");
   if (!glInitializePPAPI(get_browser_interface)) {
     printf("glInitializePPAPI failed\n");
     return PP_ERROR_FAILED;
@@ -147,14 +161,17 @@ static void Instance_DidChangeView(PP_Instance instance,
 {
 struct PP_Rect clip;
 
-	view_interface->GetRect(view_resource,&clip);
-
-	view_width=clip.size.width;
-	view_height=clip.size.height;
-
-	if(nacl_context)
+	if(view_interface)
 	{
-		graphics3d_interface->ResizeBuffers(nacl_context, view_width, view_height);
+		view_interface->GetRect(view_resource,&clip);
+
+		view_width=clip.size.width;
+		view_height=clip.size.height;
+
+		if(nacl_context)
+		{
+			graphics3d_interface->ResizeBuffers(nacl_context, view_width, view_height);
+		}
 	}
 }
 
