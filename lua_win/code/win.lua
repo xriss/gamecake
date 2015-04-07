@@ -29,6 +29,11 @@ if type(args[2]=="table" ) then -- you can force a core by using a second arg to
 	hardcore=args[2]
 end
 
+-- see if we have an SDL2 build
+if not hardcore then
+	local suc,dat=pcall(function() return require("SDL") end )
+--	if suc then hardcore=require("wetgenes.win.sdl") base.flavour="sdl" end
+end
 
 if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.nacl") end )
@@ -67,6 +72,8 @@ if not hardcore then
 		posix=require("wetgenes.win.posix")
 	end
 end
+
+print(base.flavour)
 
 win.hardcore=hardcore
 win.softcore=softcore
@@ -121,6 +128,8 @@ win.generic_keymap={
 
 	["page down"]="next",
 	["page_down"]="next",
+	
+	["`"]="grave",
 
 }
 
