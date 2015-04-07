@@ -42,12 +42,48 @@ function M.bake(oven,snaps)
 	end
 	
 	function snaps.draw()
+--[[
+		if snaps.auto then
+			snaps.frame=snaps.frame+1
+			local name=snaps.auto.."_"..(("%04d"):format(snaps.frame))
+print("Snaps "..name)
+			local g=wgrd.create( wgrd.FMT_U8_RGBA_PREMULT , oven.win.width , oven.win.height , 1 )
+			gl.ReadPixels(0,0,oven.win.width,oven.win.height,gl.RGBA,gl.UNSIGNED_BYTE,g.data)
+--			g:convert( wgrd.FMT_U8_RGBA ) -- save code expects this format
+			g:flipy() -- open gl is upside down
+			g:save(win.files_prefix.."snaps/"..name..".png")
+			return nil
+		end
+]]
 	end
 		
+	snaps.shift_key=false
+	snaps.auto=false
+	snaps.frame=0
 	function snaps.msg(m)
 		if not lfs then return m end
 
-		if m.class=="key" and m.keyname=="f12" and m.action==1 then
+--print(wstr.dump(m))
+
+--[[
+		if     m.class=="key" and ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) and m.action==1 then
+			snaps.shift_key=true
+		elseif m.class=="key" and ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) and m.action==-1 then
+			snaps.shift_key=false
+		end
+]]		
+		if ( m.class=="key" and m.keyname=="f12" and m.action==1 ) then
+--[[
+			if snaps.shift_key then
+				if snaps.auto then
+					snaps.auto=nil
+				else
+					snaps.auto=os.date("%Y%m%d_%H%M%S")
+					snaps.frame=0
+				end
+				print("auto",snaps.auto)
+			end
+]]
 			local name=os.date("%Y%m%d_%H%M%S")
 print("Snaps "..name)
 			local g=wgrd.create( wgrd.FMT_U8_RGBA_PREMULT , oven.win.width , oven.win.height , 1 )

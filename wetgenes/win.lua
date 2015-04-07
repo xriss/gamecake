@@ -29,6 +29,11 @@ if type(args[2]=="table" ) then -- you can force a core by using a second arg to
 	hardcore=args[2]
 end
 
+-- see if we have an SDL2 build
+if not hardcore then
+	local suc,dat=pcall(function() return require("SDL") end )
+--	if suc then hardcore=require("wetgenes.win.sdl") base.flavour="sdl" end
+end
 
 if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.nacl") end )
@@ -68,6 +73,8 @@ if not hardcore then
 	end
 end
 
+print(base.flavour)
+
 win.hardcore=hardcore
 win.softcore=softcore
 win.posix=posix
@@ -87,6 +94,7 @@ setmetatable(win,meta)
 function win.screen()
 	local it={}
 	if hardcore.screen then
+--		print("SCREEN",hardcore.screen())
 		it.width,it.height=hardcore.screen()
 	else
 		it.width,it.height=0,0
@@ -120,6 +128,8 @@ win.generic_keymap={
 
 	["page down"]="next",
 	["page_down"]="next",
+	
+	["`"]="grave",
 
 }
 

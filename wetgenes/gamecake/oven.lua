@@ -20,6 +20,7 @@ local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 
 local function print(...) return _G.print(...) end
+local dprint=function(a) print(wstr.dump(a)) end
 
 local function assert_resume(co)
 
@@ -158,7 +159,6 @@ os.exit()
 				inf.title=inf.title.." ( "..opts.version.." ) "
 			end
 			
-
 			inf.x=math.floor((screen.width-inf.width)*(opts.win_px or 0.5))
 			inf.y=math.floor((screen.height-inf.height)*(opts.win_py or 0.5))
 			if inf.x<0 then inf.x=0 end

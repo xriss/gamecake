@@ -27,8 +27,9 @@ end
 
 -- set number (may trigger hook)
 wdata.data_value=function(dat,val,force)
---print(dat,val,force,debug.traceback())
+
 	if dat.class=="number" or dat.class=="list" then
+--print(dat,val,force)
 		if val then
 			if type(val)=="string" then val=dat:tonumber(val) end -- auto convert from string to number
 			if val*0~=val*0 then val=0 end -- remove inf or nan values?
@@ -44,8 +45,8 @@ wdata.data_value=function(dat,val,force)
 					dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
 				end
 			end
+			dat.str=dat:tostring(dat.num) -- cache on change
 		end
-		dat.str=dat:tostring(dat.num) -- cache on change
 		return dat.num
 	else
 		if not force and type(force)=="boolean" then -- set force to false to disable hook
