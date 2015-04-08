@@ -40,7 +40,20 @@ if RASPI then
 
 	KIND{kind="ConsoleApp",name="gamecake.raspi"}
 
+elseif EMCC then
+
+	buildlinkoptions{
+		"-s USE_SDL=2",
+	}
+	
+	linkoptions { "-v" }
+	
+	links { "m" }
+	
+	KIND{kind="WindowedApp",name="gamecake.js"}
+
 elseif NACL then
+
 
 --	files { "../nacl/code/lua_force_import.c" }
 

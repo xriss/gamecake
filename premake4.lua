@@ -138,9 +138,10 @@ https://gitorious.org/mac-app-from-scratch/ios-app-from-scratch/source/ccb29c96b
 -- work out what we should be building for
 ------------------------------------------------------------------------
 
-solution("gamecake")
+solution("wetgenes")
 
 -- work out build type and set flags
+EMCC=false
 NACL=false
 PEPPER=false
 ANDROID=false
@@ -168,6 +169,11 @@ elseif t:sub(1,6)=="pepper" then
 	CPU=t:sub(7)
 	NACL=true
 	PEPPER=true
+	GCC=true
+elseif t:sub(1,4)=="emcc" then
+	TARGET="EMCC"
+	CPU=t:sub(5)
+	EMCC=true
 	GCC=true
 elseif t:sub(1,7)=="android" then
 	TARGET="ANDROID"
@@ -228,7 +234,45 @@ end
 
 print("TARGET == "..TARGET.." " ..CPU )
 
-if NACL then
+if EMCC then
+
+	defines "EMCC"
+
+	buildlinkoptions{
+		"-Wno-warn-absolute-paths",
+		"-Wno-long-long",
+		"-Werror",
+	}
+
+	linkoptions{
+--		"-as-needed",
+		"-s RESERVED_FUNCTION_POINTERS=400",
+		"-s TOTAL_MEMORY=134217728",			-- 128meg
+		"-s EXPORTED_FUNCTIONS=\"['_main_post']\"",
+--		"--pre-js "..pepperjs_path.."/ppapi_preamble.js",
+	}
+	
+	platforms { "emcc" }
+
+-- set debug/release build flags
+	configuration {"Debug"}
+		buildlinkoptions{
+			"-O0",
+			"-g4",
+			"-s ASSERTIONS=2",
+			"-s SAFE_HEAP=3",
+			"-s ALIASING_FUNCTION_POINTERS=0",
+			"--minify 0",
+		}
+	configuration {"Release"}
+		buildlinkoptions{
+			"-O1",
+			"-g0",
+		}
+	configuration {}
+
+
+elseif NACL then
 
 	naclsdk_path=path.getabsolute("../sdks/nacl-sdk/pepper_33")
 	pepperjs_path=path.getabsolute("./lib_pepperjs/pepper.js")
@@ -305,20 +349,6 @@ if NACL then
 
 	configuration {}
 
---[[
-	if CPU=="32" then
-	
-		buildoptions{"-m32"}
-		linkoptions{"-m32"}
-		
-	elseif CPU=="64" then
-	
-		buildoptions{"-m64"}
-		linkoptions{"-m64"}
-		
-	end
-]]
-	
 elseif RASPI then
 
 	local raspisdk=path.getabsolute("../sdks/raspi")
@@ -356,7 +386,6 @@ elseif ANDROID then
 
 	local androidsdk=path.getabsolute("../sdks/android-sdk")
 	local androidsys=path.getabsolute("../sdks/android-9-arm/sysroot/usr")
-
 
 
 	defines "ANDROID"
@@ -707,7 +736,7 @@ elseif ANDROID then
 	defines{ "LUA_GLES_GLES2" }
 	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
 	
-elseif NACL then
+elseif NACL or EMCC then
 
 	defines{ "LUA_GLES_GLES2" }
 	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
@@ -738,29 +767,30 @@ else -- use GL
 
 end
 
-
+-- Any web type build these are all kinda similar
+WEB=NACL or EMCC or PEPPER
 
 all_includes=all_includes or {
 
 -- lua bindings
-	{"lua_bit",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		)
+	{"lua_bit",		   (WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		)
 																						and		(LIB_LUA=="lib_lua") 	},
-	{"lua_kissfft",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_pack",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_zlib",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_kissfft",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_pack",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_zip",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_zlib",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_freetype",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_ogg",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_al",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		)
 																						and		(not PEPPER) 			},
-	{"lua_tardis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_gles",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_grd",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_grdmap",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_sod",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_tardis",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_gles",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_grd",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_grdmap",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_sod",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_socket",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_gamecake",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_win",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_gamecake",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_win",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
@@ -769,38 +799,38 @@ all_includes=all_includes or {
 	{"lua_win_windows",	WINDOWS		or		nil		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_win_linux",	nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_win_nacl",	nil			or		nil		or		NACL	or		nil			or		nil			or	nil		},
+	{"lua_win_emcc",	nil			or		nil		or		EMCC	or		nil			or		nil			or	nil		},
 	{"lua_win_android",	nil			or		nil		or		nil		or		ANDROID		or		nil			or	nil		},
 	{"lua_win_raspi",	nil			or		nil		or		nil		or		nil			or		RASPI		or	nil		},
 	{"lua_win_osx",		nil			or		nil		or		nil		or		nil			or		nil			or	OSX		},
+	{"lua_sdl2",	   (nil			or		NIX		or		EMCC	or		nil			or		nil			or	nil		)
+																						and		(not LSB) 				},
 
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
 	{"lua_v4l2",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	nil		},
 	{"lua_rex",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_linenoise",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lua_brimworkszip",WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_brimworkszip",WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sys",			WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lib_zip",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_zip",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_pgsql",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
--- if we have an SDL2 binding we can do some easier ports?
-	{"lua_sdl2",	   (nil			or		NIX		or		nil		or		nil			or		nil			or	nil		)
-																						and		(not LSB) 				},
 -- this may be the main lua or luajit lib depending on build
 -- would really like to just use luajit but nacl mkes this a problem...
-	{LIB_LUA,			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{LIB_LUA,			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 
 -- static libs used by the lua bindings
-	{"lib_zzip",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_png",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_jpeg",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_gif",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_z",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_freetype",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_vorbis",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_ogg",			WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_zzip",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_png",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_jpeg",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_gif",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_z",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_freetype",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_vorbis",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_ogg",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_openal",	   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		)
 																						and		(not PEPPER) 			},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
@@ -823,7 +853,7 @@ all_includes=all_includes or {
 --	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 
 -- the output executables
-	{"exe_gamecake",	WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"exe_gamecake",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"exe_pagecake",	nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 }
 
