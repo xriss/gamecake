@@ -1,12 +1,11 @@
 
-// this file handles the basic nacl interface setup
-// the creation of the master lua state under nacl
-// as well as the lua interface into nacl (wetgenes.nacl.core)
 
 #include "lua_emcc.h"
 
 
 static lua_State *L=0;
+
+
 
 
 static void l_message (const char *pname, const char *msg) {
@@ -65,48 +64,6 @@ static int dostringr (lua_State *L, const char *s, const char *name) {
 }
 
 
-/*
-void Messaging_HandleMessage(PP_Instance instance, struct PP_Var var_message) {
-
-nacl_instance=instance;
-
-  if (var_message.type != PP_VARTYPE_STRING) {
-    return;
-  }
-  char* message = VarToCStr(var_message);
-  if (message == NULL) { return; }
-  
-  struct PP_Var var_result = PP_MakeUndefined();
-  int slen=strlen("cmd=lua\n");
-  if (strncmp(message, "cmd=lua\n", slen) == 0)
-  {
-		int top=lua_gettop(L);
-		
-		dostringr(L,message+slen,message+slen);
-		if(lua_isnumber(L,-1))
-		{
-			var_result = PP_MakeDouble( lua_tonumber(L,-1) );
-		}
-		else
-		if(lua_isstring(L,-1))
-		{
-			var_result = CStrToVar( lua_tostring(L,-1) );
-		}
-		
-		lua_settop(L,top);
-  }
-  else
-  {
-  }
-  free(message);
-
-  messaging_interface->PostMessage(instance, var_result);
-  if (var_result.type == PP_VARTYPE_STRING) {
-    var_interface->Release(var_result);
-  }
-}
-*/
-
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -116,7 +73,7 @@ nacl_instance=instance;
 // also remember js strings are 16bit not 8bit, so, you know, that is a bit shit.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_nacl_js_post(lua_State *l)
+int lua_emcc_js_post(lua_State *l)
 {
 //struct PP_Var var_result;
 //	var_result = CStrToVar( lua_tostring(l,1) );
@@ -166,7 +123,7 @@ LUALIB_API int luaopen_wetgenes_win_emcc_core(lua_State *l)
 	const luaL_reg lib[] =
 	{
 		
-		{	"js_post",						lua_nacl_js_post					},
+		{	"js_post",						lua_emcc_js_post					},
 
 		{0,0}
 	};
