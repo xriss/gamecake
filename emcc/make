@@ -2,23 +2,22 @@ cd `dirname $0`
 cd ..
 
 if [ "$1" = "clean" ] ; then
-        rm -rf build-gmake-pepper-native
+        rm -rf build-gmake-emcc-native
         exit
 fi
 
-naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_33`
 source ../sdks/emsdk_portable/emsdk_env.sh
 
 btype="exe"
-makeopts="config=release_pepper"
+makeopts="config=release_emcc"
 if [ "$1" = "debug" ] ; then
-makeopts="config=debug_pepper"
+makeopts="config=debug_emcc"
 btype="dbg"
 fi
 
-build/premake4 gmake pepper
+build/premake4 gmake emcc
 
-cd build-gmake-pepper-native
+cd build-gmake-emcc-native
 make $makeopts $2 $3 $4
 cd ..
 
