@@ -188,7 +188,7 @@ XClassHint class_hint;
 
 			if( (x>0) && (y>0) )
 			{
-				XMoveWindow( p->dsp , p->win , x,y);
+//				XMoveWindow( p->dsp , p->win , x,y);
 			}
 			
 			XFlush(p->dsp);

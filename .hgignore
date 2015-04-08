@@ -28,3 +28,6 @@ lib_pq/config/*
 lib_pepperjs/pepper.js/*/*/emscripten/*
 pepperjs/nginx/logs/*
 pepperjs/nginx/static/*.zip
+
+emcc/nginx/logs/*
+emcc/nginx/static/*.zip
