@@ -32,7 +32,8 @@ end
 -- see if we have an SDL2 build
 if not hardcore then
 	local suc,dat=pcall(function() return require("SDL") end )
---	if suc then hardcore=require("wetgenes.win.sdl") base.flavour="sdl" end
+print("SDL",suc,dat)
+	if suc then hardcore=require("wetgenes.win.sdl") base.flavour="sdl" end
 end
 
 if not hardcore then

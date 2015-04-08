@@ -93,6 +93,8 @@ int main()
 
 int main_post(const char *message)
 {
+	if(!L) { main(); }
+	printf("%X\n",(unsigned int)L);
 	int slen=strlen("cmd=lua\n");
 	if (strncmp(message, "cmd=lua\n", slen) == 0)
 	{

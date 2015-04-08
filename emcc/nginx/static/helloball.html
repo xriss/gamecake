@@ -48,7 +48,9 @@
 		function luasetup() {
 
 //initialise luaside
-			naclmod.postMessage('cmd=lua\n'+$("#gamecake_init_lua").text());
+			main_post('cmd=lua\n'+"print('testing')");
+
+			main_post('cmd=lua\n'+$("#gamecake_init_lua").text());
 
 //find a callmelater function
 			var requestAnimationFrame = (function(){
@@ -61,7 +63,7 @@
 			var pulse;
 			pulse=function() {
 				requestAnimationFrame(pulse); // we need to always ask to be called again
-				naclmod.postMessage('cmd=lua\n return gamecake_pulse() ');
+				main_post('cmd=lua\n return gamecake_pulse() ');
 			};
 			requestAnimationFrame(pulse); // start the updates
 		}
@@ -93,7 +95,7 @@ local wstr=require("wetgenes.string")	-- string helpers
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 -- a window/screen handler this works in windows/linux/nacl/android/raspi
-local win=require("wetgenes.win").create({})
+local win=require("wetgenes.win").create({width=640,height=480})
 
 -- wrap some extra shader compiler functions around a basic gles2 library
 local gl=require("glescode").create( assert(require("gles").gles2) )
@@ -320,16 +322,12 @@ gamecake_pulse=pulse
 
 
 	<div id="listener" style=" width:100%; height:100%; position:absolute; ">
-		<div id="naclmod" style=" width:100%; height:100%; position:absolute; ">
-		</div>
-		<script type="text/javascript" src="hg/bin/exe/gamecake.js"></script>
+		<canvas id="canvas" style=" width:400px; height:400px; position:absolute; " oncontextmenu="event.preventDefault()"></canvas>
+		<script type="text/javascript" src="hg/bin/dbg/gamecake.js"></script>
 		<script type="text/javascript">
-			var listener = document.getElementById('listener')
-			naclmod = document.getElementById('naclmod')
-			listener.addEventListener('load', moduleDidLoad, true);
-			listener.addEventListener('message', handleMessage, true);
-			CreateInstance(640, 480, naclmod );
-			naclmod.finishLoading();
+			Module.canvas=document.getElementById("canvas");
+			main_post = Module.cwrap('main_post', 'int', ['string']);
+			luasetup();
 		</script>
 	</div>
 
