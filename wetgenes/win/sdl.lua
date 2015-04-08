@@ -31,6 +31,7 @@ end
 
 sdl.create=function(t)
 	print("SDL create")
+	sdl.video_init()
 
 --[[
 	SDL.glSetAttribute(SDL.glAttr.RedSize, 1);
