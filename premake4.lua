@@ -245,8 +245,8 @@ if EMCC then
 	}
 
 	linkoptions{
---		"-as-needed",
-		"-s RESERVED_FUNCTION_POINTERS=400",
+		"-as-needed",
+		"-s RESERVED_FUNCTION_POINTERS=256",
 		"-s TOTAL_MEMORY=134217728",			-- 128meg
 		"-s EXPORTED_FUNCTIONS=\"['_main_post']\"",
 --		"--pre-js "..pepperjs_path.."/ppapi_preamble.js",
@@ -258,11 +258,11 @@ if EMCC then
 	configuration {"Debug"}
 		buildlinkoptions{
 			"-O0",
-			"-g4",
-			"-s ASSERTIONS=2",
-			"-s SAFE_HEAP=3",
-			"-s ALIASING_FUNCTION_POINTERS=0",
-			"--minify 0",
+			"-g3",
+			"-s ASSERTIONS=1",
+--			"-s SAFE_HEAP=3",
+--			"-s ALIASING_FUNCTION_POINTERS=0",
+--			"--minify 0",
 		}
 	configuration {"Release"}
 		buildlinkoptions{
