@@ -429,6 +429,7 @@ local gb=oven.gl.counts.buffers
 print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 ]]
 
+
 			if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
 			
 				if oven.frame_time<(oven.win:time()-0.500) then oven.frame_time=oven.win:time() end -- prevent race condition
@@ -441,6 +442,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 							
 			end
 
+			local time=oven.win:time() -- cache time here to prevent possible race
 			local f
 			f=function()
 			
@@ -470,7 +472,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 				if oven.times then oven.times.update.stop() end
 				
 				if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
-					if (oven.frame_time-oven.frame_rate)<oven.win:time() then -- repeat until we are a frame ahead of real time
+					if (oven.frame_time-oven.frame_rate)<time then -- repeat until we are a frame ahead of real time
 						return f() -- tailcall
 					end
 				end
