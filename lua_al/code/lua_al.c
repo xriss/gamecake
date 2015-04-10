@@ -5,6 +5,20 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
+#if defined(EMCC)
+// emscripten does not have all the damn functions...
+#define alGetFloatv(a,b)
+#define alGetListeneriv alGetListeneri
+#define alGetListenerfv alGetListenerf
+#define alGetBufferiv alGetBufferi
+#define alGetSourceiv alGetSourcei
+#define alSourceiv(a,b,c) alSourcei(a,b,*c)
+#define alGetIntegerv(a,b) /* (*b=alGetInteger(a)) */
+#define alListeneriv(a,b) /* alListeneri(a,*b) */
+#define alBufferfv(a,b,c) /* alBufferf(a,b,*c) */
+#define alBufferiv(a,b,c) /* alBufferi(a,b,*c) */
+#define alGetBufferfv(a,b,c) /* alGetBufferf(a,b,*c) */
+#endif
 
 /*
 alEnable
@@ -90,7 +104,7 @@ alDistanceModel
 static int lua_al_GenBuffer (lua_State *l)
 {	
 int buff;
-	alGenBuffers(1,&buff);
+	alGenBuffers(1,(unsigned int *)&buff);
 	lua_pushnumber(l,buff);
 	return 1;
 }
@@ -103,7 +117,7 @@ static int lua_al_DeleteBuffer (lua_State *l)
 {	
 int buff;
 	buff=luaL_checknumber(l,1);
-	alDeleteBuffers(1,&buff);
+	alDeleteBuffers(1,(unsigned int *)&buff);
 	return 0;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -120,7 +134,7 @@ void *data;
 	fmt=luaL_checknumber(l,2);
 	if(lua_isstring(l,3))
 	{
-		data=(void*)luaL_checklstring(l,3,&size);
+		data=(void*)luaL_checklstring(l,3,(unsigned int *)&size);
 	}
 	else
 	if(lua_isuserdata(l,3))
@@ -148,7 +162,7 @@ void *data;
 static int lua_al_GenSource (lua_State *l)
 {	
 int src;
-	alGenSources(1,&src);
+	alGenSources(1,(unsigned int *)&src);
 	lua_pushnumber(l,src);
 	return 1;
 }
@@ -161,7 +175,7 @@ static int lua_al_DeleteSource (lua_State *l)
 {	
 int src;
 	src=luaL_checknumber(l,1);
-	alDeleteSources(1,&src);
+	alDeleteSources(1,(unsigned int *)&src);
 	return 0;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -205,14 +219,14 @@ static int lua_al_SourceQueueBuffer (lua_State *l)
 {
 int src=luaL_checknumber(l,1);
 int buf=luaL_checknumber(l,2);
-	alSourceQueueBuffers(src,1,&buf);
+	alSourceQueueBuffers(src,1,(unsigned int *)&buf);
 	return 0;
 }
 static int lua_al_SourceUnqueueBuffer (lua_State *l)
 {
 int src=luaL_checknumber(l,1);
 int buf=-1;
-	alSourceUnqueueBuffers(src,1,&buf);
+	alSourceUnqueueBuffers(src,1,(unsigned int *)&buf);
 	lua_pushnumber(l,buf);
 	return 1;
 }

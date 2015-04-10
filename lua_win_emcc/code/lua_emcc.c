@@ -83,24 +83,23 @@ int lua_emcc_js_post(lua_State *l)
 	return 0;
 }
 
-int main()
+void main_setup()
 {
 // L is static see top of file
 	L = lua_open();  /* create state */
 	luaL_openlibs(L);  /* open libraries */
-	return 0;
 }
 
-int main_post(const char *message)
+int main_post(const char *message,const char *data)
 {
-	if(!L) { main(); }
-	printf("%X\n",(unsigned int)L);
-	int slen=strlen("cmd=lua\n");
-	if (strncmp(message, "cmd=lua\n", slen) == 0)
+	if(!L) { main_setup(); }
+	
+	int slen=strlen("cmd=lua");
+	if (strncmp(message, "cmd=lua", slen) == 0)
 	{
 		int top=lua_gettop(L);
-
-		dostringr(L,message+slen,message+slen);
+		data=data ? data : (message+slen+1);
+		dostringr(L,data,data);
 		if(lua_isnumber(L,-1))
 		{
 //			var_result = PP_MakeDouble( lua_tonumber(L,-1) );

@@ -5,6 +5,14 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
+#if defined(EMCC)
+#define alcCaptureCloseDevice(a)
+#define alcCaptureOpenDevice(a,b,c,d) 0
+#define alcCaptureSamples(a,b,c)
+#define alcCaptureStart(a)
+#define alcCaptureStop(a)
+#endif
+
 //
 // we can use either these strings as a string identifier
 // or the address as a light userdata identifier, both unique

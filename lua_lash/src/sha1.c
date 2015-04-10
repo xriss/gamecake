@@ -417,7 +417,7 @@ int SHA1String(lua_State *L) {
 
 	hashstring[40] = '\0';
 	lua_pushstring(L, hashstring);
-	lua_pushlstring(L, binstring,20);
+	lua_pushlstring(L, (const char *)binstring,20);
     }
 
     return 2;
