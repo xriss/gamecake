@@ -242,13 +242,15 @@ if EMCC then
 		"-Wno-warn-absolute-paths",
 		"-Wno-long-long",
 		"-Werror",
+		"-s NO_EXIT_RUNTIME=1",
+		"-s ALLOW_MEMORY_GROWTH=1",
 	}
 
 	linkoptions{
 		"-as-needed",
-		"-s RESERVED_FUNCTION_POINTERS=256",
-		"-s TOTAL_MEMORY=134217728",			-- 128meg
-		"-s EXPORTED_FUNCTIONS=\"['_main_post']\"",
+--		"-s RESERVED_FUNCTION_POINTERS=256",
+--		"-s TOTAL_MEMORY=134217728",			-- 128meg
+		"-s EXPORTED_FUNCTIONS=\"['_main','_main_post']\"",
 --		"--pre-js "..pepperjs_path.."/ppapi_preamble.js",
 	}
 	
@@ -266,7 +268,7 @@ if EMCC then
 		}
 	configuration {"Release"}
 		buildlinkoptions{
-			"-O1",
+			"-O3",
 			"-g0",
 		}
 	configuration {}
@@ -781,7 +783,7 @@ all_includes=all_includes or {
 	{"lua_zlib",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_freetype",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_ogg",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_al",		   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		)
+	{"lua_al",		   (WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		)
 																						and		(not PEPPER) 			},
 	{"lua_tardis",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_gles",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
@@ -791,11 +793,11 @@ all_includes=all_includes or {
 	{"lua_socket",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_gamecake",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_win",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_lfs",			WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_lfs",			WINDOWS		or		NIX		or		EMCC	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lua_lash",		WINDOWS		or		NIX		or		nil		or		nil			or		nil			or	OSX		},
+	{"lua_lash",		WINDOWS		or		NIX		or		EMCC	or		nil			or		nil			or	OSX		},
 	{"lua_win_windows",	WINDOWS		or		nil		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_win_linux",	nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_win_nacl",	nil			or		nil		or		NACL	or		nil			or		nil			or	nil		},
