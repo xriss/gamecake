@@ -42,6 +42,7 @@ sdl.create=function(t)
 ]]
 
 	local it={}
+	sdl.it=it
 	it.win= assert(SDL.createWindow {
 		title   = t.title,
 		width   = t.width,
@@ -56,23 +57,32 @@ end
 
 sdl.destroy=function(it)
 	print("SDL destroy")
+	it=it or sdl.it
 	return nil
 end
 
 sdl.info=function(it,w)
 --	print("SDL info")
+	it=it or sdl.it
 	w=w or {}
 	w.width,w.height=it.win:getSize()
 end
 
+sdl.resize=function(it,w,h)
+	it=it or sdl.it
+	if it and it.win then it.win:setSize(w,h) end
+end
+
 sdl.show=function(it)
 	print("SDL show")
+	it=it or sdl.it
 	it.win:show()
 	return nil
 end
 
 sdl.context=function(it)
 	print("SDL context")
+	it=it or sdl.it
 	it.ctx=assert(SDL.glCreateContext(it.win))
 	SDL.glMakeCurrent(it.win, it.ctx)
 	return it.ctx
@@ -80,14 +90,15 @@ end
 
 sdl.swap=function(it)
 --	print("SDL swap")
+	it=it or sdl.it
 	SDL.glSwapWindow(it.win)
 end
 	
 
-sdl.sleep=function()
+--sdl.sleep=function()
 --	print("SDL sleep")
-	return nil
-end
+--	return nil
+--end
 sdl.time=function()
 --	print("SDL time")
 	return SDL.getTicks()/1000

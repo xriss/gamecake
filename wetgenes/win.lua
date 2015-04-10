@@ -36,6 +36,11 @@ if not hardcore then
 end
 
 if not hardcore then
+	local suc,dat=pcall(function() return require("wetgenes.win.emcc") end )
+	if suc then hardcore=dat base.flavour="emcc" base.noblock=true end
+end
+
+if not hardcore then
 	local suc,dat=pcall(function() return require("wetgenes.win.nacl") end )
 	if suc then hardcore=dat base.flavour="nacl" base.noblock=true end
 end
@@ -291,6 +296,12 @@ function win.nacl_pulse() -- called 60ish times a second depending upon how reta
 	end
 end
 
+function win.emcc_start(args)
+	local zips=require("wetgenes.zips")
+	assert(zips.add_zip_file(args.zip or "gamecake.zip"))
+	local main=win.load_run_init(args)
+	require("global").gamecake_pulse=function() main:serv_pulse() end
+end
 
 function win.create(opts)
 
