@@ -1,8 +1,8 @@
 cd `dirname $0`
 cd ..
 
-cd ../apps/swpaint
-../bake smell thin
-cp out/swpaint.zip ../../lua/nacl/nginx/static/swpaint.zip
+cd ../apps/swankypaint
+../bake
+cp out/swankypaint.zip ../../lua/nginx/static/swankypaint.zip
 cd ..
 

@@ -3,11 +3,11 @@ cd ..
 
 cd ../apps/bulb
 ../bake
-cp out/bulb.zip ../../lua/nacl/nginx/static/bulb.zip
+cp out/bulb.zip ../../lua/nginx/static/bulb.zip
 cd ..
 
-cd ../apps/swpaint
+cd ../apps/swankypaint
 ../bake
-cp out/swpaint.zip ../../lua/nacl/nginx/static/swpaint.zip
+cp out/swankypaint.zip ../../lua/nginx/static/swankypaint.zip
 cd ..
 
