@@ -52,6 +52,40 @@ gamecake_loader=function(opts)
 		return msg;
 	};
 
+	gamecake.msg=function(m,d) {
+
+		if("string" == typeof m) // string to decode
+		{
+			m=gamecake.str_to_msg(m);
+		}
+
+		if(m.cmd=="print") // basic print command (we cant do this from within nacl)
+		{
+			console.log(dat);
+		}
+		else
+		if(m.cmd=="loading") // loading progress
+		{
+			gamecake.progress_bar.attr("value",0.5+(0.5*Number(m.progress)/Number(m.total)));
+			if(m.progress==m.total)
+			{
+				gamecake.progress_bar.hide();
+				gamecake.progress_about.hide();
+				if( gamecake.loaded_hook )
+				{
+					gamecake.loaded_hook();
+				}
+			}
+		}
+		else
+		{
+			if(gamecake.msg_hook) // pass on
+			{
+				gamecake.msg_hook(m,d);
+			}
+		}
+	};
+
 // Handle a message coming from the NaCl module.
 	gamecake.nacl_msg=function(message_event) {
 		if( typeof(message_event.data)=='string' )
@@ -61,30 +95,7 @@ gamecake_loader=function(opts)
 			var msg=s.substring(0,sn);
 			var dat=s.substring(sn+1);
 //			console.log(msg);
-			var m=gamecake.str_to_msg(msg);
-			if(m.cmd=="print") // basic print command (we cant do this from within nacl)
-			{
-				console.log(dat);
-			}
-			else
-			if(m.cmd=="loading") // loading progress
-			{
-				gamecake.progress_bar.attr("value",0.5+(0.5*Number(m.progress)/Number(m.total)));
-				if(m.progress==m.total)
-				{
-					gamecake.progress_bar.hide();
-					gamecake.progress_about.hide();
-					if( gamecake.loaded_hook )
-					{
-						gamecake.loaded_hook();
-					}
-				}
-			}
-			else
-			if(gamecake.msg_hook) // pass on
-			{
-				gamecake.msg_hook(m,dat);
-			}
+			gamecake.msg(msg,dat);
 		}
 	}
 
@@ -185,12 +196,17 @@ $(function(){
 		};
 		window.addEventListener("resize",resize);
 		Module={};
+		Module.msg=gamecake.msg;
 		Module.canvas=gamecake.canvas[0];
 		Module.memoryInitializerPrefixURL=opts.dir;
 		Module['_main'] = function() {
 			gamecake.post = Module.cwrap('main_post', 'int', ['string','string']);
 			gamecake_start();
 			resize();
+			if( gamecake.loaded_hook )
+			{
+				gamecake.loaded_hook();
+			}
 		};
 		Module["preInit"] = function() {
 			FS.createPreloadedFile('/', "gamecake.zip", opts.cakefile, true, false);
