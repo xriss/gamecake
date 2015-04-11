@@ -12,8 +12,6 @@ android/res/*
 exe_gamecake/preloadlibs.c
 exe_gamecake/cache.c
 */log.txt
-nacl/nginx/logs/*
-nacl/nginx/static/*.zip
 build/*.nix
 lib_luajit/*/native/*
 
@@ -26,8 +24,6 @@ lib_pq/contrib/*
 lib_pq/config/*
 
 lib_pepperjs/pepper.js/*/*/emscripten/*
-pepperjs/nginx/logs/*
-pepperjs/nginx/static/*.zip
 
-emcc/nginx/logs/*
-emcc/nginx/static/*.zip
+nginx/logs/*
+nginx/static/*.zip
