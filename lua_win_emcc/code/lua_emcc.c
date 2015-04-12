@@ -1,4 +1,5 @@
 
+#include <emscripten.h>
 
 #include "lua_emcc.h"
 
@@ -75,11 +76,33 @@ static int dostringr (lua_State *L, const char *s, const char *name) {
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_emcc_js_post(lua_State *l)
 {
-//struct PP_Var var_result;
-//	var_result = CStrToVar( lua_tostring(l,1) );
-//	messaging_interface->PostMessage(nacl_instance, var_result);
-//	var_interface->Release(var_result);
+const char *s1=0;
+const char *s2=0;
+	
+	s1=lua_tostring(l,1);
 
+	if( lua_isstring(l,2) )
+	{
+		s2=lua_tostring(l,2);
+	}
+
+	if(s2)
+	{
+		EM_ASM_ARGS({
+			setTimeout(function(){
+				Module.msg(Pointer_stringify($0),Pointer_stringify($1));
+			},0);
+		},s1,s2);
+	}
+	else
+	{
+		EM_ASM_ARGS({
+			setTimeout(function(){
+				Module.msg(Pointer_stringify($0));
+			},0);
+		},s1);
+	}
+	
 	return 0;
 }
 
