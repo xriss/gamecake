@@ -790,7 +790,7 @@ all_includes=all_includes or {
 	{"lua_grd",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_grdmap",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sod",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_socket",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_socket",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_gamecake",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_win",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_lfs",			WINDOWS		or		NIX		or		EMCC	or		ANDROID		or		RASPI		or	OSX		},
