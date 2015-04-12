@@ -89,16 +89,19 @@ const char *s2=0;
 	if(s2)
 	{
 		EM_ASM_ARGS({
+			var s0=Pointer_stringify($0);
+			var s1=Pointer_stringify($1);
 			setTimeout(function(){
-				Module.msg(Pointer_stringify($0),Pointer_stringify($1));
+				Module.msg(s0,s1);
 			},0);
 		},s1,s2);
 	}
 	else
 	{
 		EM_ASM_ARGS({
+			var s0=Pointer_stringify($0);
 			setTimeout(function(){
-				Module.msg(Pointer_stringify($0));
+				Module.msg(s0);
 			},0);
 		},s1);
 	}
