@@ -56,7 +56,7 @@ gamecake_loader=function(opts)
 
 		if("string" == typeof m) // string to decode
 		{
-			m=gamecake.str_to_msg(String.trim(m));
+			m=gamecake.str_to_msg( m.replace(/^\s+|\s+$/g,'') );
 		}
 
 		if(m.cmd=="print") // basic print command (we cant do this from within nacl)
