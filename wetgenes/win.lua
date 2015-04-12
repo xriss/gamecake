@@ -325,9 +325,9 @@ function win.create(opts)
 	return w
 end
 
-function win.js_post(m)
+function win.js_post(m,d)
 	if hardcore.js_post then
-		hardcore.js_post(m)
+		hardcore.js_post(m,d)
 	end
 end
 

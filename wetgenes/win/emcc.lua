@@ -11,7 +11,7 @@ local sdl=require("wetgenes.win.sdl")
 local wstr=require("wetgenes.string")
 
 -- send message to js (nacl only)
-emcc.js_post=function(m)
+emcc.js_post=function(m,d)
 	if type(m)=="table" then
 		local s={}
 		for n,v in pairs(m) do
@@ -23,7 +23,7 @@ emcc.js_post=function(m)
 --		if m[0] then s=s..m[0] end -- and we have a large data chunk after message
 		return core.js_post(s,m[0])
 	end
-	return core.js_post(m) -- just a string
+	return core.js_post(m,d) -- just a string
 end
 
 

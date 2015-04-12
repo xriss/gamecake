@@ -366,7 +366,7 @@ end
 
 
 -- send message to js (nacl only)
-function js_post(m)
+nacl.js_post=function(m,d)
 	if type(m)=="table" then
 		local s={}
 		for n,v in pairs(m) do
@@ -378,6 +378,7 @@ function js_post(m)
 		if m[0] then s=s..m[0] end -- and we have a large data chunk after message
 		return core.js_post(s)
 	end
+	if d then return core.js_post(m..d) end
 	return core.js_post(m)
 end
 
