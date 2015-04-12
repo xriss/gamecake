@@ -290,6 +290,7 @@ gamecake_pulse=pulse
 			window.addEventListener("resize",resize);
 			Module={};
 			Module.canvas=document.getElementById("gamecake_canvas");
+			Module.canvas_resize=resize;
 			Module.memoryInitializerPrefixURL="hg/bin/exe/";
 			Module['_main'] = function() {
 				gamecake_post = Module.cwrap('main_post', 'int', ['string','string']);

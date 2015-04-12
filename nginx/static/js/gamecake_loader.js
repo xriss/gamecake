@@ -56,12 +56,12 @@ gamecake_loader=function(opts)
 
 		if("string" == typeof m) // string to decode
 		{
-			m=gamecake.str_to_msg(m);
+			m=gamecake.str_to_msg(String.trim(m));
 		}
 
 		if(m.cmd=="print") // basic print command (we cant do this from within nacl)
 		{
-			console.log(dat);
+			console.log(d);
 		}
 		else
 		if(m.cmd=="loading") // loading progress
@@ -217,6 +217,8 @@ $(function(){
 		var js=document.createElement('script');
 		js.src=opts.dir+"gamecake.js";
 		first.parentNode.insertBefore(js, first);
+
+		gamecake.div.resize(resize);
 
 	}
 	else // use pnacl

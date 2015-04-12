@@ -1,5 +1,5 @@
 
-if not NACL then -- just grab mime under nacl
+if not WEB then -- just grab mime under nacl
 
 project "lua_socket"
 language "C"
