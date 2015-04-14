@@ -54,19 +54,24 @@ M.bake=function(oven,keys)
 		["down"]		=	"down",
 		["left"]		=	"left",
 		["right"]		=	"right",
-		["shift_r"]		=	"fire",
-		["control_r"]	=	"fire",
-		["alt_r"]		=	"fire",
-		["space"]		=	"fire",
+		["shift_r"]		=	{"fire","a"},
+		["control_r"]	=	{"fire","b"},
+		["alt_r"]		=	{"fire","b"},
+		["space"]		=	{"fire","a"},
+		["return"]		=	{"fire","a"},
+		["enter"]		=	{"fire","b"},
 	}
 	keys.defaults["island2"]={
 		["w"]			=	"up",
 		["s"]			=	"down",
 		["a"]			=	"left",
 		["d"]			=	"right",
-		["shift_l"]		=	"fire",
-		["control_l"]	=	"fire",
-		["alt_l"]		=	"fire",
+		["shift"]		=	{"fire","a"}, -- grab all the shift
+		["control"]		=	{"fire","b"}, -- control and alt keys
+		["alt"]			=	{"fire","b"}, -- if we cant tell which side is which
+		["shift_l"]		=	{"fire","a"},
+		["control_l"]	=	{"fire","b"},
+		["alt_l"]		=	{"fire","b"},
 	}
 -- single player mame/picade style buttons
 	keys.defaults["pimoroni"]={
@@ -193,6 +198,7 @@ M.bake=function(oven,keys)
 			if m.class=="key" then
 
 				if not key.opts.typing then -- sometimes we need the keyboard for typing
+print( m.keyname)
 					for n,v in pairs(key.maps) do
 						if m.keyname==n or m.ascii==n then
 							if m.action==1 then -- key set
