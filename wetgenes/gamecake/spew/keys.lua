@@ -198,7 +198,7 @@ M.bake=function(oven,keys)
 			if m.class=="key" then
 
 				if not key.opts.typing then -- sometimes we need the keyboard for typing
-print( m.keyname)
+--print( m.keyname)
 					for n,v in pairs(key.maps) do
 						if m.keyname==n or m.ascii==n then
 							if m.action==1 then -- key set
