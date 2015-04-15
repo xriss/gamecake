@@ -141,8 +141,8 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
 #if !defined(PEPPER)
 	alSetPpapiInfo( nacl_instance , get_browser_interface );
 // setup fake file system
-//	nacl_io_init_ppapi(nacl_instance,get_browser_interface);
-	nacl_io_init();
+	nacl_io_init_ppapi(nacl_instance,get_browser_interface);
+//	nacl_io_init();
 #endif
 									  
 	L = lua_open();  /* create state */
