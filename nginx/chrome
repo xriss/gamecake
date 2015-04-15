@@ -1,1 +1,1 @@
-google-chrome --enable-nacl --no-sandbox --disable-hang-monitor --disable-pnacl-crash-throttling http://host.local:9999/
+google-chrome --enable-nacl --no-sandbox --disable-hang-monitor --disable-pnacl-crash-throttling --vmodule=ppb*=4 --enable-logging=stderr http://host.local:9999/

@@ -1,4 +1,6 @@
-nacl-manifest nacl/nginx/static/bin/exe/gamecake.nmf
-nacl-irt /opt/google/chrome/nacl_irt_x86_64.nexe
 target remote localhost:4014
 
+remote get nexe proxy_temp/out.nexe
+file proxy_temp/out.nexe
+remote get irt proxy_temp/out.irt
+nacl-irt proxy_temp/out.irt
