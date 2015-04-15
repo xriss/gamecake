@@ -58,7 +58,7 @@ typedef ptrdiff_t ALsizeiptrEXT;
 #elif defined(HAVE___RESTRICT)
 #define RESTRICT __restrict
 #else
-#define RESTRICT
+//#define RESTRICT
 #endif
 
 
