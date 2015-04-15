@@ -165,16 +165,16 @@ function alc.setup(opts)
 	local dc={}
 	dc.alc=alc
 	dc.opts=opts
-print("AL","OpenDevice")
+--print("AL","OpenDevice")
 	dc.device=alc.OpenDevice()
-print("AL","CreateContext")
+--print("AL","CreateContext")
 	dc.context=alc.CreateContext(dc.device)
 	dc.clean=alc.clean
-print("AL","MakeContextCurrent")
+--print("AL","MakeContextCurrent")
 	alc.MakeContextCurrent(dc.context)
 	
 	if opts.capture then
-print("AL","CaptureOpenDevice")
+--print("AL","CaptureOpenDevice")
 		dc.capture_device=alc.CaptureOpenDevice(nil,44100,alc.CAPTURE_SAMPLES,44100)
 	end
 	
