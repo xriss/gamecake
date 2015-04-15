@@ -112,7 +112,8 @@ end
 -- really you can never be sure what name a key has...
 win.generic_keymap={
 
--- windows patch, as we aim to use the linux key names
+-- windows/nacl/emcc/osx/raspi patch, as we aim to use the linux key names
+-- might not catch everything here its mostly added when I see its wrong
 
 	["backspace"]="back",
 	["kp_enter"]="enter",
@@ -121,18 +122,32 @@ win.generic_keymap={
 
 	["lshift"]="shift_l",
 	["rshift"]="shift_r",
+
+	["left shift"]="shift_l",
+	["right shift"]="shift_r",
 	
 	["lcontrol"]="control_l",
 	["rcontrol"]="control_r",
 	
+	["left control"]="control_l",
+	["right control"]="control_r",
+
 	["lmenu"]="alt_l",
 	["rmenu"]="alt_r",
+
+	["left alt"]="alt_l",
+	["right alt"]="alt_r",
 
 	["page up"]="prior",
 	["page_up"]="prior",
 
 	["page down"]="next",
 	["page_down"]="next",
+
+	["keypad /"]="kp_divide",
+	["keypad *"]="kp_multiply",
+	["keypad -"]="kp_subtract",
+	["keypad +"]="kp_add",
 	
 	["`"]="grave",
 
