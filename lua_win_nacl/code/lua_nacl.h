@@ -31,6 +31,8 @@
 #include "ppapi/gles2/gl2ext_ppapi.h"
 //#include "GLES2/gl2.h"
 
+#include "nacl_io/nacl_io.h"
+
 #include "lua.h"
 #include "lauxlib.h"
 

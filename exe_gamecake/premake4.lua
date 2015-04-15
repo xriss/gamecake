@@ -74,9 +74,11 @@ elseif NACL then
 		links { "stdc++" }
 		links { "ppapi"  }
 		links { "ppapi_gles2" }
+		links { "nacl_io" }
 		links { "pthread" }
 		links { "nosys" } -- remove newlib link errors
 		links { "nosys" } -- remove newlib link errors
+
 
 		KIND{kind="WindowedApp",name="gamecake.pexe"}
 	end

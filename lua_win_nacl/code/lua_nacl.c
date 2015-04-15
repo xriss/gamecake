@@ -44,6 +44,7 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
                                        PPB_GetInterface _get_browser_interface) {
 										   
   get_browser_interface=_get_browser_interface;
+  
 
   module_id = a_module_id;
 //printf("core\n");
@@ -83,7 +84,7 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id,
     printf("glInitializePPAPI failed\n");
     return PP_ERROR_FAILED;
   }
-
+  
   return PP_OK;
 }
 
@@ -139,6 +140,9 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
 
 #if !defined(PEPPER)
 	alSetPpapiInfo( nacl_instance , get_browser_interface );
+// setup fake file system
+//	nacl_io_init_ppapi(nacl_instance,get_browser_interface);
+	nacl_io_init();
 #endif
 									  
 	L = lua_open();  /* create state */
