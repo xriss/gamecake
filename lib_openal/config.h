@@ -125,7 +125,7 @@
 /* #undef HAVE_RESTRICT */
 
 /* Define if we have the __restrict keyword */
-#define HAVE___RESTRICT
+//#define HAVE___RESTRICT
 
 
 #if defined(WIN32) || defined(WIN64)
@@ -138,3 +138,6 @@
 #endif
 #endif
 
+
+#define ALIGN(x) __attribute__((aligned(x)))
+#define RESTRICT restrict

@@ -18,16 +18,33 @@ if ANDROID then
 
 elseif NACL then
 
+
 	prefix="openal-soft-1.13"
 	files { 
 			prefix.."/Alc/wave.c",
 			prefix.."/Alc/null.c",
 			prefix.."/Alc/ppapi.c",
+--			prefix.."/Alc/alcDedicated.c",
 			prefix.."/OpenAL32/alDatabuffer.c",
 	}
+
+--[[
+	prefix="openal-soft-1.15"
+	files { 
+			prefix.."/Alc/backends/wave.c",
+			prefix.."/Alc/backends/null.c",
+			prefix.."/Alc/backends/ppapi.c",
+			prefix.."/Alc/alcDedicated.c",
+			prefix.."/Alc/helpers.c",
+			prefix.."/Alc/hrtf.c",
+			prefix.."/Alc/mixer_c.c",
+			prefix.."/Alc/backends/loopback.c",
+	}
+]]
+
 	defines("HAVE_PPAPI","_DEBUG")
-
-
+	
+	
 elseif WINDOWS then
 
 	files { 
