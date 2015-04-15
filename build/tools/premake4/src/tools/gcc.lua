@@ -141,7 +141,7 @@
 			if cfg.system == "macosx" then
 				table.insert(result, "-Wl,-x")
 			else
-				table.insert(result, "-s")
+--				table.insert(result, "-s")
 			end
 		end
 	
