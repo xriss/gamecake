@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include <sys/time.h>
+#include <sys/mount.h>
 
 #include "ppapi/c/pp_errors.h"
 #include "ppapi/c/pp_module.h"
