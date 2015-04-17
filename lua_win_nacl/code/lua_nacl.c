@@ -142,7 +142,8 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
 	alSetPpapiInfo( nacl_instance , get_browser_interface );
 // setup fake file system
 	nacl_io_init_ppapi(nacl_instance,get_browser_interface);
-//	nacl_io_init();
+	umount("/");
+	mount("", "/", "memfs", 0, "");
 #endif
 									  
 	L = lua_open();  /* create state */

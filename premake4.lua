@@ -320,6 +320,8 @@ elseif NACL then
 	defines "NACL"
 	
 	includedirs { naclsdk_path.."/include" }
+	includedirs { naclsdk_path.."/include/newlib" }
+
 --	includedirs { naclsdk_path.."/ports/include" }
 
 -- libs to link
@@ -793,7 +795,7 @@ all_includes=all_includes or {
 	{"lua_socket",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_gamecake",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_win",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_lfs",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_lfs",			WINDOWS		or		NIX		or		EMCC	or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
