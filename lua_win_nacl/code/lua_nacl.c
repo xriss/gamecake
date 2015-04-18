@@ -144,6 +144,8 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
 	nacl_io_init_ppapi(nacl_instance,get_browser_interface);
 	umount("/");
 	mount("", "/", "memfs", 0, "");
+//	mount("", "/dev", "dev", 0, "");
+
 #endif
 									  
 	L = lua_open();  /* create state */
