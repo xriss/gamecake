@@ -104,17 +104,6 @@ newplatform {
 }
 
 newplatform {
-    name = "pepper",
-    description = "pepper",
-    gcc = {
-        cc = "emcc",
-        cxx = "em++",
-        ar= "ar",
-        cppflags = "-MMD",
-    }
-}
-
-newplatform {
     name = "emcc",
     description = "emcc",
     gcc = {
@@ -143,7 +132,6 @@ solution("wetgenes")
 -- work out build type and set flags
 EMCC=false
 NACL=false
-PEPPER=false
 ANDROID=false
 WINDOWS=false
 MINGW=false
@@ -163,12 +151,6 @@ elseif t:sub(1,4)=="nacl" then
 	TARGET="NACL"
 	CPU=t:sub(5)
 	NACL=true
-	GCC=true
-elseif t:sub(1,6)=="pepper" then
-	TARGET="PEPPER"
-	CPU=t:sub(7)
-	NACL=true
-	PEPPER=true
 	GCC=true
 elseif t:sub(1,4)=="emcc" then
 	TARGET="EMCC"
@@ -251,7 +233,6 @@ if EMCC then
 --		"-s RESERVED_FUNCTION_POINTERS=256",
 --		"-s TOTAL_MEMORY=134217728",			-- 128meg
 		"-s EXPORTED_FUNCTIONS=\"['_main','_main_post']\"",
---		"--pre-js "..pepperjs_path.."/ppapi_preamble.js",
 	}
 	
 	platforms { "emcc" }
@@ -279,43 +260,7 @@ elseif NACL then
 	naclsdk_path=path.getabsolute("../sdks/nacl-sdk/pepper_41")
 	pepperjs_path=path.getabsolute("./lib_pepperjs/pepper.js")
 
-	if TARGET=="PEPPER" then
-
-		defines "PEPPER"	
-		defines "NACL_ARCH=x86_32"
-
-			buildlinkoptions{
-				"-Wno-warn-absolute-paths",
-				"-Wno-long-long",
-				"-Werror",
-			}
-
-			linkoptions{
-			"-as-needed",
-			"-s RESERVED_FUNCTION_POINTERS=400",
-			"-s TOTAL_MEMORY=134217728",			-- 128meg
-			"-s EXPORTED_FUNCTIONS=\"['_DoPostMessage', '_DoChangeView', '_DoChangeFocus', '_NativeCreateInstance', '_HandleInputEvent']\"",
-			"--pre-js "..pepperjs_path.."/ppapi_preamble.js",
---			"--pre-js "..pepperjs_path.."/wrappers/audio.js",
-			"--pre-js "..pepperjs_path.."/wrappers/base.js",
-			"--pre-js "..pepperjs_path.."/wrappers/file.js",
-			"--pre-js "..pepperjs_path.."/wrappers/gles.js",
-			"--pre-js "..pepperjs_path.."/wrappers/gles_ext.js",
-			"--pre-js "..pepperjs_path.."/wrappers/graphics_2d.js",
-			"--pre-js "..pepperjs_path.."/wrappers/graphics_3d.js",
-			"--pre-js "..pepperjs_path.."/wrappers/input_events.js",
-			"--pre-js "..pepperjs_path.."/wrappers/mouse_lock.js",
-			"--pre-js "..pepperjs_path.."/wrappers/url_loader.js",
-			"--pre-js "..pepperjs_path.."/wrappers/view.js",
-			"--pre-js "..pepperjs_path.."/wrappers/web_socket.js",
---			"--pre-js "..pepperjs_path.."/third_party/w3c_audio.js",
---			"--pre-js "..pepperjs_path.."/third_party/idb.filesystem.js",
-		}
-		
-		platforms { "pepper" } --hax
-	else
-		platforms { "nacl" } --hax
-	end
+	platforms { "nacl" } --hax
 	
 	defines "NACL"
 	
@@ -329,27 +274,9 @@ elseif NACL then
 	libdirs { naclsdk_path.."/ports/lib/newlib_pnacl/Debug" }
 	libdirs { naclsdk_path.."/lib/pnacl/Debug" }
 
-	if TARGET=="PEPPER" then
-		buildlinkoptions{
-			"-O0",
-			"-g4",
-			"-s ASSERTIONS=2",
-			"-s SAFE_HEAP=3",
-			"-s ALIASING_FUNCTION_POINTERS=0",
-			"--minify 0",
-		}
-	end
-
 	configuration {"Release"}
 	libdirs { naclsdk_path.."/ports/lib/newlib_pnacl/Release" }
 	libdirs { naclsdk_path.."/lib/pnacl/Release" }
-
-	if TARGET=="PEPPER" then
-		buildlinkoptions{
-			"-O1",
-			"-g0",
-		}
-	end
 
 	configuration {}
 
@@ -772,7 +699,7 @@ else -- use GL
 end
 
 -- Any web type build these are all kinda similar
-WEB=NACL or EMCC or PEPPER
+WEB=NACL or EMCC
 
 all_includes=all_includes or {
 
@@ -835,13 +762,9 @@ all_includes=all_includes or {
 	{"lib_freetype",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_vorbis",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_openal",	   (WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		)
-																						and		(not PEPPER) 			},
+	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
-
--- pepper.js hacks
-	{"lib_pepperjs",	nil			or		nil		or		nil		or		nil			or		PEPPER		or	nil		},
 
 -- dont think building this is a good idea?
 --	{"lib_angle",		nil			or		nil		or		nil		or		nil			or		nil			or	nil		},
