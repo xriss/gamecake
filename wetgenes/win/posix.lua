@@ -439,10 +439,10 @@ function posix.win_read_events(w) -- call this until it returns nil to get all e
 								if not cc then -- new
 									cc={}
 									v.calibration[Icode]=cc
-									cc.min=-1
-									cc.max=1
+									cc.min=-255
+									cc.max=255
 								end
-								if Ivalue<cc.min then cc.min=Ivalue end
+								if Ivalue<cc.min then cc.min=Ivalue end -- xbox may be +- 32768
 								if Ivalue>cc.max then cc.max=Ivalue end
 								
 --								if cc.max>cc.min then
