@@ -18,34 +18,13 @@ M.bake=function(oven,keys)
 	local recaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 	
 	keys.defaults={}
--- single player covering entire keyboard
+-- single player covering entire keyboard (also merge the island1&2 keys in here)
 	keys.defaults["full"]={
-		["w"]			=	"up",
-		["s"]			=	"down",
-		["a"]			=	"left",
-		["d"]			=	"right",
-		["up"]			=	"up",
-		["down"]		=	"down",
-		["left"]		=	"left",
-		["right"]		=	"right",
 		["1"]			=	"select",
 		["2"]			=	"start",
-		["return"]		=	"fire",
-		["enter"]		=	"fire",
-		["shift_l"]		=	{"fire","x"},
-		["<"]			=	{"fire","y"},
-		["z"]			=	{"fire","y"},
-		["."]			=	{"fire","x"},
-		["/"]			=	{"fire","x"},
-		["shift_r"]		=	{"fire","y"},
-		["control_l"]	=	{"fire","a"},
-		["alt_l"]		=	{"fire","b"},
-		["space"]		=	"fire",
-		["alt_r"]		=	{"fire","x"},
-		["control_r"]	=	{"fire","y"},
 		["-"]			=	"l1",
-		["["]			=	"l2",
 		["="]			=	"r1",
+		["["]			=	"l2",
 		["]"]			=	"r2",
 	}
 -- 1up/2up key islands
@@ -54,25 +33,33 @@ M.bake=function(oven,keys)
 		["down"]		=	"down",
 		["left"]		=	"left",
 		["right"]		=	"right",
-		["shift_r"]		=	{"fire","a"},
+		["."]			=	{"fire","x"},
+		["/"]			=	{"fire","x"},
+		["shift_r"]		=	{"fire","y"},
+		["alt_r"]		=	{"fire","a"},
 		["control_r"]	=	{"fire","b"},
-		["alt_r"]		=	{"fire","b"},
-		["space"]		=	{"fire","a"},
+		["space"]		=	{"fire","x"},
 		["return"]		=	{"fire","a"},
 		["enter"]		=	{"fire","b"},
 	}
+	for n,v in pairs(keys.defaults["island1"]) do keys.defaults["full"][n]=v end
+
 	keys.defaults["island2"]={
 		["w"]			=	"up",
 		["s"]			=	"down",
 		["a"]			=	"left",
 		["d"]			=	"right",
-		["shift"]		=	{"fire","a"}, -- grab all the shift
-		["control"]		=	{"fire","b"}, -- control and alt keys
-		["alt"]			=	{"fire","b"}, -- if we cant tell which side is which
-		["shift_l"]		=	{"fire","a"},
-		["control_l"]	=	{"fire","b"},
+		["<"]			=	{"fire","y"},
+		["z"]			=	{"fire","y"},
+		["shift_l"]		=	{"fire","x"},
+		["control_l"]	=	{"fire","a"},
 		["alt_l"]		=	{"fire","b"},
+		["shift"]		=	{"fire","x"}, -- 1up grabs both the shift
+		["control"]		=	{"fire","a"}, -- control and alt keys
+		["alt"]			=	{"fire","b"}, -- if we cant tell left from right
 	}
+	for n,v in pairs(keys.defaults["island2"]) do keys.defaults["full"][n]=v end
+
 -- single player mame/picade style buttons
 	keys.defaults["pimoroni"]={
 		["up"]			=	"up",
@@ -199,9 +186,11 @@ M.bake=function(oven,keys)
 
 				if not key.opts.typing then -- sometimes we need the keyboard for typing
 --print( m.keyname)
+--print(m.keyname)
 					for n,v in pairs(key.maps) do
 						if m.keyname==n or m.ascii==n then
 							if m.action==1 then -- key set
+--print("->"..table.concat( (type(v)=="table") and v or {v},",") )
 								ups.set_button(v,true)
 								used=true
 							elseif m.action==-1 then -- key clear
