@@ -153,6 +153,8 @@ M.bake=function(oven,keys)
 		key.joy.ly=0
 		key.joy.ry=0
 		key.joy.dy=0
+		
+		key.posxbox=true -- assume xbox
 
 		function key.clear()
 			key.maps={}
@@ -162,24 +164,41 @@ M.bake=function(oven,keys)
 		end
 
 		function key.msg(m)
---print(wstr.dump(m))
+
 
 			local used=false
 			local ups=recaps.ups(key.idx)
 --			if not ups then return end -- nowhere to send the data
 			
 			local new_joydir=function(joydir)
-					-- this does not handle diagonal movement, forces one of 4 directions.
-					if key.last_joydir~=joydir then -- only when we change
+					-- handle diagonal movement
+					local map={
+						["left"]={"left"},
+						["right"]={"right"},
+						["up"]={"up"},
+						["down"]={"down"},
+						["up_left"]={"up","left"},
+						["up_right"]={"up","right"},
+						["down_left"]={"down","left"},
+						["down_right"]={"down","right"},
+					}
+					
+					if key.last_joydir~=joydir then -- only when we change direction
+--print(key.last_joydir,joydir)
 	--print(wstr.dump(m))
-						if key.last_joydir then -- first clear any previous key
-							ups.set_button(key.last_joydir,false)
+						local setclr={}
+						if key.last_joydir then -- clear all old keys
+							for _,n in ipairs(map[key.last_joydir]  ) do setclr[n]="clr" end
 							used=true
 						end
 						key.last_joydir=joydir
-						if joydir then
-							ups.set_button(joydir,true) -- then send any new key
+						if joydir then -- set all new keys
+							for _,n in ipairs(map[joydir]  ) do setclr[n]="set" end
 							used=true
+						end
+						for n,v in pairs(setclr) do -- send new state (sets may have replaced clrs)
+							if v=="clr" then ups.set_button(n,false) end
+							if v=="set" then ups.set_button(n,true) end
 						end
 					end
 			end
@@ -297,19 +316,53 @@ M.bake=function(oven,keys)
 						elseif m.code==311 then docode("r1")
 						elseif m.code==314 then docode("select")
 						elseif m.code==315 then docode("start")
+-- check for ps3 key codes
+						elseif m.code==292 then docode("up")
+						elseif m.code==293 then docode("right")
+						elseif m.code==294 then docode("down")
+						elseif m.code==295 then docode("left")
+						elseif m.code==296 then docode("l2")
+						elseif m.code==297 then docode("r2")
+						elseif m.code==298 then docode("l1")
+						elseif m.code==299 then docode("r1")
+						elseif m.code==300 then docode("y") docode("fire")
+						elseif m.code==301 then docode("b") docode("fire")
+						elseif m.code==302 then docode("a") docode("fire")
+						elseif m.code==303 then docode("x") docode("fire")
 						else
+--print(wstr.dump(m))
 							docode("fire") -- all other buttons are fire
 						end
 
 					elseif m.type==3 then -- sticks ( assume ps3/xbox config )
-					
+
+
+						local docode=function(name)
+							if m.value==0 then -- key clear
+								ups.set_button(name,false)
+								used=true
+							else -- key set
+								ups.set_button(name,true)
+								used=true
+							end
+						end
+
+						local fixy=function(v)
+							if v<0 then key.posxbox=true end
+							if not key.posxbox then v=v*2-1 end -- ps3 range is 0,+1 xbox is -1,+1
+							return v
+						end
+						
 						local active=false
-						if m.code==0 then
-							key.joy.lx=m.value
+						if m.code==59 or m.code==60 or m.code==61 then
+							key.posxbox=false
+-- stupid ps3 controller waving around bullshit
+						elseif m.code==0 then
+							key.joy.lx=fixy(m.value)
 							active=true
 							used=true
 						elseif m.code==1 then
-							key.joy.ly=m.value
+							key.joy.ly=fixy(m.value)
 							active=true
 							used=true
 						elseif m.code==2 then
@@ -328,6 +381,20 @@ M.bake=function(oven,keys)
 							key.joy.dy=m.value
 							active=true
 							used=true
+						elseif m.code== 44 then docode("up")				key.posxbox=false
+						elseif m.code== 45 then docode("right")				key.posxbox=false
+						elseif m.code== 46 then docode("down")				key.posxbox=false
+						-- 47? left seems to be missing?
+						elseif m.code== 48 then docode("l2")				key.posxbox=false
+						elseif m.code== 49 then docode("r2")				key.posxbox=false
+						elseif m.code== 50 then docode("l1")				key.posxbox=false
+						elseif m.code== 51 then docode("r1")				key.posxbox=false
+						elseif m.code== 52 then docode("y") docode("fire")	key.posxbox=false
+						elseif m.code== 53 then docode("b") docode("fire")	key.posxbox=false
+						elseif m.code== 54 then docode("a") docode("fire")	key.posxbox=false
+						elseif m.code== 55 then docode("x") docode("fire")	key.posxbox=false
+						else
+--print(wstr.dump(m))
 						end
 
 						if active then
@@ -366,33 +433,24 @@ M.bake=function(oven,keys)
 -- this works on all axis inputs (bigest movement is chosen)
 	function keys.joystick_msg_to_key(m)
 		if m.class=="joystick" then
+--print(m.lx,m.ly)
 			local d=3/8
-			local t,vx,vy
-			local tt,vxx,vyy
-			local nox,noy
-
-			vx=m.lx		vxx=m.lx*m.lx				
-			t=m.rx		tt=t*t			if tt>vxx then vx=t vxx=tt end
-			t=m.dx		tt=t*t			if tt>vxx then vx=t vxx=tt end
-
-			vy=m.ly		vyy=m.ly*m.ly				
-			t=m.ry		tt=t*t			if tt>vyy then vy=t vyy=tt end
-			t=m.dy		tt=t*t			if tt>vyy then vy=t vyy=tt end
-		
-			if vxx/2 > vyy then noy=true end
-			if vyy/2 > vxx then nox=true end
-
-			if not nox then
-				if     vx>d		then	return "right"
-				elseif vx<-d 	then	return "left"
+			if  		m.ly and m.ly>d 	then
+				if    	m.lx and m.lx>d		then	return "down_right"
+				elseif 	m.lx and m.lx<-d 	then	return "down_left"
+				else								return "down"
+				end
+			elseif		m.ly and m.ly<-d 	then
+				if     	m.lx and m.lx>d		then	return "up_right"
+				elseif 	m.lx and m.lx<-d 	then	return "up_left"
+				else								return "up"
+				end
+			else
+				if     	m.lx and m.lx>d		then	return "right"
+				elseif 	m.lx and m.lx<-d 	then	return "left"
 				end
 			end
 
-			if not noy then
-				if    	vy>d 	then	return "down"
-				elseif	vy<-d 	then	return "up"
-				end
-			end
 		end
 	end
 
