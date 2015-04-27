@@ -365,11 +365,11 @@ M.bake=function(oven,keys)
 							key.joy.ly=fixy(m.value)
 							active=true
 							used=true
-						elseif m.code==2 then
+						elseif m.code==2 then	docode("l2")
 							key.joy.lt=m.value
 							active=true
 							used=true
-						elseif m.code==5 then
+						elseif m.code==5 then	docode("r2")
 							key.joy.rt=m.value
 							active=true
 							used=true
