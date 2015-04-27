@@ -154,8 +154,19 @@ M.bake=function(oven,keys)
 		key.joy.ry=0
 		key.joy.dy=0
 		
-		key.posxbox=true -- assume xbox
-
+		key.posxbox=nil -- assume xbox
+		key.posxbox_set=function(posxbox)
+			if key.posxbox~=posxbox then -- new style joystick, reset stuff
+				local ups=recaps.ups(key.idx)
+				key.posxbox=posxbox
+				key.joy.lx=0
+				key.joy.ly=0
+				for _,n in ipairs{"left","right","up","down","l2","r2"} do
+					ups.set_button(n,false)
+				end
+			end
+		end
+		
 		function key.clear()
 			key.maps={}
 		end
@@ -164,6 +175,14 @@ M.bake=function(oven,keys)
 		end
 
 		function key.msg(m)
+		
+			if type(key.posxbox)=="nil" then
+				if m.posix_name then
+					local s=string.lower(m.posix_name)
+					if string.find(s,"xbox") then key.posxbox_set(true) end
+					if string.find(s,"ps3") then key.posxbox_set(false) end
+				end
+			end
 
 
 			local used=false
@@ -348,14 +367,12 @@ M.bake=function(oven,keys)
 						end
 
 						local fixy=function(v)
-							if v<0 then key.posxbox=true end
 							if not key.posxbox then v=v*2-1 end -- ps3 range is 0,+1 xbox is -1,+1
 							return v
 						end
 						
 						local active=false
 						if m.code==59 or m.code==60 or m.code==61 then
-							key.posxbox=false
 -- stupid ps3 controller waving around bullshit
 						elseif m.code==0 then
 							key.joy.lx=fixy(m.value)
@@ -365,11 +382,11 @@ M.bake=function(oven,keys)
 							key.joy.ly=fixy(m.value)
 							active=true
 							used=true
-						elseif m.code==2 then	docode("l2")
+						elseif m.code==2 then	if key.posxbox then docode("l2") end
 							key.joy.lt=m.value
 							active=true
 							used=true
-						elseif m.code==5 then	docode("r2")
+						elseif m.code==5 then	if key.posxbox then docode("r2") end
 							key.joy.rt=m.value
 							active=true
 							used=true
@@ -381,18 +398,20 @@ M.bake=function(oven,keys)
 							key.joy.dy=m.value
 							active=true
 							used=true
-						elseif m.code== 44 then docode("up")				key.posxbox=false
-						elseif m.code== 45 then docode("right")				key.posxbox=false
-						elseif m.code== 46 then docode("down")				key.posxbox=false
-						-- 47? left seems to be missing?
-						elseif m.code== 48 then docode("l2")				key.posxbox=false
-						elseif m.code== 49 then docode("r2")				key.posxbox=false
-						elseif m.code== 50 then docode("l1")				key.posxbox=false
-						elseif m.code== 51 then docode("r1")				key.posxbox=false
-						elseif m.code== 52 then docode("y") docode("fire")	key.posxbox=false
-						elseif m.code== 53 then docode("b") docode("fire")	key.posxbox=false
-						elseif m.code== 54 then docode("a") docode("fire")	key.posxbox=false
-						elseif m.code== 55 then docode("x") docode("fire")	key.posxbox=false
+
+						elseif m.code== 44 then docode("up")
+						elseif m.code== 45 then docode("right")
+						elseif m.code== 46 then docode("down")
+-- 47? left seems to be missing?
+						elseif m.code== 48 then docode("l2")
+						elseif m.code== 49 then docode("r2")
+						elseif m.code== 50 then docode("l1")
+						elseif m.code== 51 then docode("r1")
+						elseif m.code== 52 then docode("y") docode("fire")
+						elseif m.code== 53 then docode("b") docode("fire")
+						elseif m.code== 54 then docode("a") docode("fire")
+						elseif m.code== 55 then docode("x") docode("fire")
+
 						else
 --print(wstr.dump(m))
 						end

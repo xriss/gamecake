@@ -430,7 +430,7 @@ function posix.win_read_events(w) -- call this until it returns nil to get all e
 	--print("got",v.name)
 						if Isecs then -- sanity check
 						
-							if Ivalue>=32768 then	-- assume xbox controller
+							if Ivalue>=32768 then	-- assume signed 16bit (the ps3 is unsigned 8bit)
 								Ivalue=Ivalue-65536
 							end
 							
