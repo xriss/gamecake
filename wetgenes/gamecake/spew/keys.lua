@@ -162,6 +162,8 @@ M.bake=function(oven,keys)
 		end
 
 		function key.msg(m)
+--print(wstr.dump(m))
+
 			local used=false
 			local ups=recaps.ups(key.idx)
 --			if not ups then return end -- nowhere to send the data
@@ -272,15 +274,34 @@ M.bake=function(oven,keys)
 				if key.idx-1==m.posix_num%key.opts.max_up then -- only take inputs from one joystick for multiplayer
 					if m.type==1 then -- keys
 
-						if m.value==1 then -- key set
-							ups.set_button("fire",true)
-							used=true
-						elseif m.value==0 then -- key clear
-							ups.set_button("fire",false)
-							used=true
+						local docode=function(name)
+							if m.value==1 then -- key set
+								ups.set_button(name,true)
+								used=true
+							elseif m.value==0 then -- key clear
+								ups.set_button(name,false)
+								used=true
+							end
 						end
 
-					elseif m.type==3 then -- sticks ( assume ps3 config )
+-- check for xbox key codes
+						if     m.code==704 then docode("left")
+						elseif m.code==705 then docode("right")
+						elseif m.code==706 then docode("up")
+						elseif m.code==707 then docode("down")
+						elseif m.code==304 then docode("a") docode("fire")
+						elseif m.code==305 then docode("b") docode("fire")
+						elseif m.code==307 then docode("x") docode("fire")
+						elseif m.code==308 then docode("y") docode("fire")
+						elseif m.code==310 then docode("l1")
+						elseif m.code==311 then docode("r1")
+						elseif m.code==314 then docode("select")
+						elseif m.code==315 then docode("start")
+						else
+							docode("fire") -- all other buttons are fire
+						end
+
+					elseif m.type==3 then -- sticks ( assume ps3/xbox config )
 					
 						local active=false
 						if m.code==0 then
@@ -321,7 +342,9 @@ M.bake=function(oven,keys)
 				ups.set_axis(m) -- tell recap about the joy positions
 
 			elseif m.class=="joykey" then
-			
+
+
+
 				if m.action==1 then -- key set
 					ups.set_button("fire",true)
 					used=true
