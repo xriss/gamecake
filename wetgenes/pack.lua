@@ -145,6 +145,20 @@ pack.argb8_pmf4=function(c)
 	a=a/0xff
 	return a*r/0xff,a*g/0xff,a*b/0xff,a
 end
+pack.argb_pmf4=pack.argb8_pmf4
+
+-- and without the multiply
+pack.argb8_f4=function(c)
+	local r,g,b,a
+	
+	a=bit.band(bit.rshift(c,24),0xff)
+	r=bit.band(bit.rshift(c,16),0xff)
+	g=bit.band(bit.rshift(c, 8),0xff)
+	b=bit.band(c,0xff)
+
+	return r/0xff,g/0xff,b/0xff,a/0xff
+end
+pack.argb_f4=pack.argb8_f4
 
 -- pack 4 gl floats into 1 32bit color
 pack.f4_argb=function(r,g,b,a)
