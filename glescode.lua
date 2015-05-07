@@ -166,12 +166,37 @@ function glescode.create(gl)
 
 
 -- compiler functions
+--
+-- function to provide source for a named shader program
+-- this adds any needed GLSL version header and defines
+-- VERTEX_SHADER or FRAGMENT_SHADER appropriately
+-- so only one source is required
+--
+	function code.shader_source(name,vsource,fsource)
+		if not code.programs[name] then -- only do once
 
--- function to provide simple source for a shader program
+			local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
+			local vhead=code.defines.shaderprefix.."#define VERTEX_SHADER 1\n#line "..line.."\n"
+			local fhead=code.defines.shaderprefix.."#define FRAGMENT_SHADER 1\n#line "..line.."\n"
+		
+			code.shaders["v_"..name]={ source=vhead..(vsource) }
+			code.shaders["f_"..name]={ source=fhead..(fsource or vsource) } -- single source trick
+			code.programs[name]={
+				vshaders={"v_"..name},
+				fshaders={"f_"..name},
+			}
+-- check that the code compiles OK now
+			assert(code.shader(gl.VERTEX_SHADER,"v_"..name))
+			assert(code.shader(gl.FRAGMENT_SHADER,"f_"..name))
+			
+		end
+	end
+
+-- legacy version, obsolete, use the new shader_source instead
 	function code.progsrc(name,vsource,fsource)
 		if not code.programs[name] then -- only do once
-			code.shaders["v_"..name]={source=vsource}
-			code.shaders["f_"..name]={source=fsource}
+			code.shaders["v_"..name]={ (vsource) }
+			code.shaders["f_"..name]={ (fsource) }
 			code.programs[name]={
 				vshaders={"v_"..name},
 				fshaders={"f_"..name},
