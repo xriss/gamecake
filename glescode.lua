@@ -172,7 +172,7 @@ function glescode.create(gl)
 -- VERTEX_SHADER or FRAGMENT_SHADER appropriately
 -- so only one source is required
 --
-	function code.shader_source(name,vsource,fsource)
+	function code.shader_source(name,vsource,fsource,filename)
 		if not code.programs[name] then -- only do once
 
 			local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
@@ -186,11 +186,47 @@ function glescode.create(gl)
 				fshaders={"f_"..name},
 			}
 -- check that the code compiles OK now
-			assert(code.shader(gl.VERTEX_SHADER,"v_"..name))
-			assert(code.shader(gl.FRAGMENT_SHADER,"f_"..name))
+			assert(code.shader(gl.VERTEX_SHADER,"v_"..name,filename))
+			assert(code.shader(gl.FRAGMENT_SHADER,"f_"..name,filename))
 			
 		end
 	end
+
+-- load multiple shader sources from a single file
+-- #SHADER "nameofshader"
+-- is used at the start of a line to name each shader chunk and the split results are fed into
+-- the shader_source function
+--
+	function code.shader_sources(text,filename)
+	
+		local ss=wstr.split(text,"\n")
+		local chunks={}
+		local c
+		for i,l in ipairs(ss) do
+			if l:sub(1,7):lower()=="#shader" then -- new chunk
+				c={}
+				assert(chunks[l]==nil) -- two chunks with same name
+				chunks[l]=c
+				c[1]="#line "..i	-- remember line number from file
+			else
+				if c then	-- remember each line
+					c[#c+1]=l
+				end
+			end
+		end
+		for n,v in pairs(chunks) do
+			local name=n:sub(8) -- remove #shader
+			name=wstr.trim(name) -- kill whitespace
+			if name:sub(1,1)=="\"" and name:sub(-1)=="\"" then -- valid names are wrapped in quotes
+				name=name:sub(2,-2)
+--print("SHADER",name,#v)
+				code.shader_source(name,table.concat(v,"\n"),nil,filename)
+			end
+		end
+		
+	end
+
+
 
 -- legacy version, obsolete, use the new shader_source instead
 	function code.progsrc(name,vsource,fsource)
@@ -226,7 +262,7 @@ function glescode.create(gl)
 		end
 	end
 	
-	function code.shader(stype,sname)
+	function code.shader(stype,sname,filename)
 
 		local s
 		
@@ -254,7 +290,7 @@ function glescode.create(gl)
 		
 		if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
 
-			error( "failed to build shader " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. (gl.GetShaderInfoLog(s[0]) or "stoopid droid") .. "\n\n" )
+			error( "failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. (gl.GetShaderInfoLog(s[0]) or "stoopid droid") .. "\n\n" )
 		end
 	
 		return s[0]
