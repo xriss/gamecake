@@ -18,7 +18,7 @@ if ANDROID then
 
 elseif NACL then
 
-
+	defines{ "HAVE_RESTRICT" }
 --[[
 	prefix="openal-soft-1.13"
 	files { 
