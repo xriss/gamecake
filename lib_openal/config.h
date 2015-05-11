@@ -144,6 +144,7 @@
 #define ALIGN(x) __attribute__((aligned(x)))
 #endif
 
-#if !defined(RESTRICT)
-#define RESTRICT restrict
-#endif
+// use HAVE_RESTRICT
+//#if !defined(RESTRICT)
+//#define RESTRICT restrict
+//#endif
