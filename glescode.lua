@@ -237,7 +237,7 @@ function glescode.create(gl)
 				vshaders={"v_"..name},
 				fshaders={"f_"..name},
 			}
-print(name,#vsource,#fsource)
+--print(name,#vsource,#fsource)
 		end
 	end
 
@@ -284,7 +284,7 @@ print(name,#vsource,#fsource)
 -- Uhm, we could really use a shader lint or precompiler at this point, why does such a thing not exist?
 -- I dont normaly care for lint but it would *really* make sense here...
 
-print("Compiling shader "..sname,wstr.dump(s))
+--print("Compiling shader "..sname,wstr.dump(s))
 		s[0]=gl.CreateShader(stype)
 		gl.ShaderSource(s[0],wstr.macro_replace(s.source,code.defines))
 		gl.CompileShader(s[0])
