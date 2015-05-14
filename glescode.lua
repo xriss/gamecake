@@ -231,12 +231,13 @@ function glescode.create(gl)
 -- legacy version, obsolete, use the new shader_source instead
 	function code.progsrc(name,vsource,fsource)
 		if not code.programs[name] then -- only do once
-			code.shaders["v_"..name]={ (vsource) }
-			code.shaders["f_"..name]={ (fsource) }
+			code.shaders["v_"..name]={ source=(vsource) }
+			code.shaders["f_"..name]={ source=(fsource) }
 			code.programs[name]={
 				vshaders={"v_"..name},
 				fshaders={"f_"..name},
 			}
+print(name,#vsource,#fsource)
 		end
 	end
 
@@ -283,7 +284,7 @@ function glescode.create(gl)
 -- Uhm, we could really use a shader lint or precompiler at this point, why does such a thing not exist?
 -- I dont normaly care for lint but it would *really* make sense here...
 
---print("Compiling shader "..sname)
+print("Compiling shader "..sname,wstr.dump(s))
 		s[0]=gl.CreateShader(stype)
 		gl.ShaderSource(s[0],wstr.macro_replace(s.source,code.defines))
 		gl.CompileShader(s[0])
