@@ -23,7 +23,7 @@ function wslide.mouse(widget,act,_x,_y,keyname)
 	local ty=y-(widget.pan_py or 0)
 	if tx>=0 and tx<widget.hx and ty>=0 and ty<widget.hy then
 		local d=widget.data or widget.daty
-		if d then
+		if d --[[and ( not widget.not_mousewheel )]] then
 			if keyname=="wheel_add" and act==-1 then
 				d:inc()
 				return
@@ -39,7 +39,7 @@ end
 function wslide.update(widget)
 --	local it=widget.slide
 
-	if widget.master.active==widget then
+	if widget.master.active==widget --[[and ( not widget.not_mousewheel )]] then
 --print("slide update")
 			local ups=srecaps.ups()
 
