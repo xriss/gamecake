@@ -15,11 +15,11 @@ local function dprint(a) print(wstr.dump(a)) end
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-M.bake=function(oven,geom_dae)
-	local geom_dae=geom_dae or {}
-	geom_dae.oven=oven
+M.bake=function(oven,geom_obj)
+	local geom_obj=geom_obj or {}
+	geom_obj.oven=oven
 	
-	geom_dae.modname=M.modname
+	geom_obj.modname=M.modname
 
 	local cake=oven.cake
 	local opts=oven.opts
@@ -33,14 +33,19 @@ M.bake=function(oven,geom_dae)
 	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
 
 
-	function geom_dae.load(opts)
+	function geom_obj.load(opts)
 	
-
+-- return value is a list of geoms (a list of 1)
+	local geoms={}
+	
 	if type(opts)=="string" then
 		opts={filename=opts}
 	end
 	local s=wzips.readfile(opts.filename)
 print("loaded ",#s,"bytes from "..opts.filename)
+
+
+--[[
 	local x=wxml.parse(s)
 
 	--print("loaded ",wxml.unparse(x))
@@ -330,7 +335,6 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			end
 			local material_idxs={}
 			local function get_material_idx(id)
-				if not id then return nil end
 				local idx=material_idxs[id]
 				if not idx then
 					idx=#material_idxs+1
@@ -375,7 +379,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 				local off=1
 				for ipc,pc in ipairs(ps.vcount) do
 					local poly={}
-					poly.mat=get_material_idx(ps.material) or 0
+					poly.mat=get_material_idx(ps.material)
 					for i=1,pc do -- each vertex 1tri or 2tri (quad)
 						
 						local inp=ps.inputs["VERTEX"]
@@ -393,14 +397,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 						else
 							need_normals=true
 						end
-
-						local inp=ps.inputs["TEXCOORD"]
-						local uv,uvs
-						if inp then
-							uv=ps.p[ off+(ps.stride*(i-1))+inp.offset ]
-							uvs=inp.source
-						end
-												
+						
 						local w1=0 -- 0 means no bone weight (100% default)
 						local w2=0
 						local w3=0
@@ -424,7 +421,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 								w4=calc(ws[7],ws[8])
 							end
 						end
-						local idx=get_vertex_idx(xyz,nrm,uv)
+						local idx=get_vertex_idx(xyz,nrm)
 						it.verts[idx]=	{
 											xyzs and xyzs.data[ (xyz*xyzs.stride) +1 ] or 0,
 											xyzs and xyzs.data[ (xyz*xyzs.stride) +2 ] or 0,
@@ -432,10 +429,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 											nrms and nrms.data[ (nrm*nrms.stride) +1 ] or 0,
 											nrms and nrms.data[ (nrm*nrms.stride) +2 ] or 0,
 											nrms and nrms.data[ (nrm*nrms.stride) +3 ] or 0,
-											
-											uvs and uvs.data[ (uv*uvs.stride) +1 ] or 0,
-											uvs and uvs.data[ (uv*uvs.stride) +2 ] or 0,
-											
+											0,0, -- uv
 											w1,w2,w3,w4 -- 4 bone ids and weights
 										}
 						poly[#poly+1]=idx
@@ -502,10 +496,10 @@ print("loaded ",#s,"bytes from "..opts.filename)
 	end
 
 		
-		
+]]
 		return geoms
 	end
 
 
-	return geom_dae
+	return geom_obj
 end

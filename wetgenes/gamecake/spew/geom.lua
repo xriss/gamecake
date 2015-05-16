@@ -203,6 +203,15 @@ M.bake=function(oven,geom)
 		return it
 	end
 
+
+	geom.flipaxis=function(it,axis)
+		local mv=#it.verts
+		for iv=1,mv do local vv=it.verts[iv]
+			vv[axis]=-vv[axis]
+			vv[axis+3]=-vv[axis+3]
+		end
+	end
+	
 -- dupe+mirror point and polygons around the origin on the given axis 1=x 2=y 3=z
 	geom.mirror=function(it,axis,cb)
 	
@@ -424,6 +433,19 @@ M.bake=function(oven,geom)
 		return it
 	end
 
+-- find the radius of this object from 0,0,0
+
+	geom.max_radius=function(it)
+
+		local maxdd=0
+		
+		for iv,vv in ipairs(it.verts) do
+			local dd=vv[1]*vv[1]+vv[2]*vv[2]+vv[3]*vv[3]
+			if dd>maxdd then maxdd=dd end
+		end
+
+		return math.sqrt(maxdd)
+	end
 
 	return geom
 end
