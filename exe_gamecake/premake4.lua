@@ -154,9 +154,11 @@ elseif OSX then
 --	links { "rt" }
 
 	if CPU=="64" then
-		KIND{kind="ConsoleApp",name="gamecake.osx64"}
+--		KIND{kind="ConsoleApp",name="gamecake.osx64"}
+		KIND{kind="WindowedApp",name="gamecake.osx64"}
 	else
-		KIND{kind="ConsoleApp",name="gamecake.osx"}
+--		KIND{kind="ConsoleApp",name="gamecake.osx"}
+		KIND{kind="WindowedApp",name="gamecake.osx"}
 	end
 	
 elseif NIX then
