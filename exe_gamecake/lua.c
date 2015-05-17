@@ -431,7 +431,6 @@ int has_z=0;
   return 0;
 }
 
-
 int main (int argc, char **argv) {
   int status;
   struct Smain s;
@@ -448,3 +447,18 @@ int main (int argc, char **argv) {
   return (status || s.status) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
+
+#ifdef WIN32
+#include <windows.h>
+int PASCAL WinMain(HINSTANCE hinst, HINSTANCE hprev, LPSTR cmdline, int ncmdshow)
+{
+	int rc;
+
+	extern int __argc;
+	extern char** __argv;
+
+	rc = main(__argc, __argv);
+
+	return rc;
+}
+#endif
