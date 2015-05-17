@@ -123,7 +123,7 @@ elseif WINDOWS then
 
 	local exe=".exe"
 	if not GCC then exe="" end -- native builds add .exe automatically	
-	KIND{kind="ConsoleApp",name="gamecake"..exe}
+	KIND{kind="WindowedApp",name="gamecake"..exe}
 
 elseif OSX then
 
