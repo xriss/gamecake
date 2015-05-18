@@ -704,6 +704,81 @@ s64 tim;
 	
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// set an icon from windows bmp
+// we will convert from a grd to this in lua code.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_bmpicon(lua_State *l)
+{
+size_t len;
+const char *data;
+HICON hicon = NULL;
+
+	wetwin_lua *p=lua_wetwin_check_ptr(l,1);
+	data=lua_tolstring(l,2,&len);
+
+	hicon = CreateIconFromResource((PBYTE)data, len, TRUE, 0x00030000);
+
+	SendMessage(p->hwnd, WM_SETICON, ICON_SMALL, (LPARAM) hicon);
+	SendMessage(p->hwnd, WM_SETICON, ICON_BIG, (LPARAM) hicon);
+
+/*
+    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
+    HICON hicon = NULL;
+    BYTE *icon_bmp;
+    int icon_len, y;
+    SDL_RWops *dst;
+
+//     Create temporary bitmap buffer 
+    icon_len = 40 + icon->h * icon->w * 4;
+    icon_bmp = SDL_stack_alloc(BYTE, icon_len);
+    dst = SDL_RWFromMem(icon_bmp, icon_len);
+    if (!dst) {
+        SDL_stack_free(icon_bmp);
+        return;
+    }
+
+//     Write the BITMAPINFO header 
+    SDL_WriteLE32(dst, 40);
+    SDL_WriteLE32(dst, icon->w);
+    SDL_WriteLE32(dst, icon->h * 2);
+    SDL_WriteLE16(dst, 1);
+    SDL_WriteLE16(dst, 32);
+    SDL_WriteLE32(dst, BI_RGB);
+    SDL_WriteLE32(dst, icon->h * icon->w * 4);
+    SDL_WriteLE32(dst, 0);
+    SDL_WriteLE32(dst, 0);
+    SDL_WriteLE32(dst, 0);
+    SDL_WriteLE32(dst, 0);
+
+//     Write the pixels upside down into the bitmap buffer 
+    SDL_assert(icon->format->format == SDL_PIXELFORMAT_ARGB8888);
+    y = icon->h;
+    while (y--) {
+        Uint8 *src = (Uint8 *) icon->pixels + y * icon->pitch;
+        SDL_RWwrite(dst, src, icon->pitch, 1);
+    }
+
+    hicon = CreateIconFromResource(icon_bmp, icon_len, TRUE, 0x00030000);
+
+    SDL_RWclose(dst);
+    SDL_stack_free(icon_bmp);
+
+//     Set the icon for the window 
+    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM) hicon);
+
+//     Set the icon in the task manager (should we do this?) 
+    SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM) hicon);
+
+*/
+
+	return 0;
+}
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -719,6 +794,7 @@ LUALIB_API int luaopen_wetgenes_win_windows_core(lua_State *l)
 		{"destroy",			lua_wetwin_destroy},
 		{"info",			lua_wetwin_info},
 		{"show",			lua_wetwin_show},
+		{"bmpicon",			lua_wetwin_bmpicon},
 
 		{"context",			lua_wetwin_context},
 		{"swap",			lua_wetwin_swap},
@@ -729,6 +805,7 @@ LUALIB_API int luaopen_wetgenes_win_windows_core(lua_State *l)
 
 		{"sleep",			lua_wetwin_sleep},
 		{"time",			lua_wetwin_time},
+		
 		
 		{0,0}
 	};

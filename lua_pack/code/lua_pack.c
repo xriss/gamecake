@@ -504,6 +504,14 @@ size_t len;
 int off=0;
 int n;
 
+int defidx=2;
+int defadd=0;
+int defmul=1;
+
+int datidx=1;
+int datadd=0;
+int datmul=1;
+
 u32 arr=0;
 
 u32 def;
@@ -530,8 +538,12 @@ size_t sl;
 	else
 	if(!lua_istable(l,2))
 	{
-		lua_pushstring(l,"need a table to describe packed data");
-		lua_error(l);
+		defidx=1;
+		defadd=-1;
+		defmul=2;
+		datidx=1;
+		datadd=0;
+		datmul=2; // use interleaved data in a single table (very simple structure defines)
 	}
 	
 	if(lua_isnumber(l,3)) // optional start point
@@ -557,7 +569,7 @@ size_t sl;
 	{
 		for(n=1;1;n++)
 		{
-			lua_rawgeti(l,2,n);
+			lua_rawgeti(l,defidx,defadd+(n*defmul));
 			if(lua_isnil(l,-1))// the end
 			{
 				lua_pop(l,1);
@@ -608,7 +620,7 @@ size_t sl;
 	{
 		if(!arr)
 		{
-			lua_rawgeti(l,2,n);
+			lua_rawgeti(l,defidx,defadd+(n*defmul));
 			if(lua_isnil(l,-1)) // the end
 			{
 				lua_pop(l,1);
@@ -629,7 +641,7 @@ size_t sl;
 		
 		if(def==0) // raw string to insert
 		{
-			lua_rawgeti(l,1,n); // write data
+			lua_rawgeti(l,datidx,datadd+(n*datmul));
 			s=lua_tolstring(l,-1,&sl);
 			lua_pop(l,1);
 			if(sl<def_len) { memcpy(data+off,s,sl); }
@@ -637,7 +649,7 @@ size_t sl;
 		}
 		else
 		{
-			lua_rawgeti(l,1,n); // write data
+			lua_rawgeti(l,datidx,datadd+(n*datmul));
 			d=lua_tonumber(l,-1);
 			lua_pop(l,1);
 			
