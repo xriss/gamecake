@@ -7,6 +7,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local pack={}
 
 local core=require("wetgenes.pack.core")
+pack.core=core
 
 local wstr=require("wetgenes.string")
 
@@ -33,6 +34,11 @@ end
 pack.save_array=function(dats,fmt,off,count,buff)
 	return core.save(dats,fmt,off,buff)
 end
+
+
+-- raw access to the core load/save functions
+pack.load_raw=function(...) return core.load(...) end
+pack.save_raw=function(...) return core.save(...) end
 
 --
 -- wrap the core functions with easier to use utility code
