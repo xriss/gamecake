@@ -28,7 +28,7 @@ ifeq ($(config),release)
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -Wall -Os
   CXXFLAGS  += $(CFLAGS) 
-  LDFLAGS   += -s
+  LDFLAGS   += -s --lsb-use-default-linker --lsb-besteffort
   RESFLAGS  += $(DEFINES) $(INCLUDES) 
   LIBS      += -lm -ldl
   LDDEPS    += 
