@@ -485,11 +485,7 @@
 /*
 @@ LUAL_BUFFERSIZE is the buffer size used by the lauxlib buffer system.
 */
-#ifdef BUFSIZ
 #define LUAL_BUFFERSIZE		BUFSIZ
-#else
-#define LUAL_BUFFERSIZE		4096
-#endif
 
 /* }================================================================== */
 
