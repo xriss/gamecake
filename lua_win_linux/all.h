@@ -52,7 +52,7 @@
 
 #include <time.h>
 #include <unistd.h>
-#include <stropts.h>
+//#include <stropts.h>
 
 #endif
 
