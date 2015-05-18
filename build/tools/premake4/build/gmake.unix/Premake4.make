@@ -23,7 +23,7 @@ ifeq ($(config),release)
   OBJDIR     = obj/Release
   TARGETDIR  = ../../bin/release
   TARGET     = $(TARGETDIR)/premake4
-  DEFINES   += -DNDEBUG -DLUA_USE_POSIX -DLUA_USE_DLOPEN
+  DEFINES   += -DNDEBUG -DLUA_USE_POSIX -DLUA_USE_DLOPEN -D_FORTIFY_SOURCE=0
   INCLUDES  += -I../../src/host/lua-5.1.4/src
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -Wall -Os
