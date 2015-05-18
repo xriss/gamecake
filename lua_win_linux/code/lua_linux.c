@@ -4,8 +4,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <X11/extensions/Xrandr.h>
-       
 //
 // we can use either this string as a string identifier
 // or its address as a light userdata identifier, both will be unique
