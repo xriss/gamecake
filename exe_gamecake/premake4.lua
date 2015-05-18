@@ -121,6 +121,8 @@ elseif WINDOWS then
 	
 --	linkoptions{ "--enable-stdcall-fixup" }
 
+	linkoptions{ "-mwindows" }
+
 	local exe=".exe"
 	if not GCC then exe="" end -- native builds add .exe automatically	
 	KIND{kind="WindowedApp",name="gamecake"..exe}
