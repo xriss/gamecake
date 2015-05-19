@@ -132,6 +132,11 @@ function wmaster.setup(widget,def)
 
 		end
 
+
+		for f,v in pairs(master.deferred) do -- some functions should be called later
+			f(v)
+			master.deferred[f]=nil
+		end
 	
 		local tim=os.time()
 		for w,t in pairs(master.timehooks) do
@@ -443,6 +448,7 @@ function wmaster.setup(widget,def)
 		master.go_forward_id=nil
 		master.ids={}
 		master.timehooks={}
+		master.deferred={}
 	end
 	
 	function master.dragging()

@@ -55,8 +55,14 @@ wfile.path=function(widget,s)
 			widget.data_name:value(t[1])
 		end
 	end
-	if widget.refresh then widget:refresh() end
+	if widget.refresh_defer then widget:refresh_defer() end
 	return widget.data_dir:value() .."/".. widget.data_name:value()
+end
+
+
+wfile.refresh_defer=function(widget)
+	local f=function() widget:refresh() end
+	widget.master.deferred[f]=true
 end
 
 wfile.refresh=function(widget)
@@ -86,7 +92,7 @@ wfile.file_scan=function(widget,cd)
 	
 	table.sort(widget.files,function(a,b)
 		if a.mode == b.mode then
-			return b.name > a.name
+			return b.name:lower() > a.name:lower()
 		else
 			return b.mode > a.mode
 		end
@@ -122,7 +128,7 @@ wfile.file_dir=function(widget,u)
 		widget.history[ widget.data_dir:value() ]=true
 	end
 	
-	widget:refresh()
+	widget:refresh_defer()
 end
 
 
@@ -144,9 +150,7 @@ wfile.file_hooks=function(widget,act,w)
 				else
 					widget.view="history"
 				end
-				widget:file_refresh()
-				widget:layout()
-				widget:build_m4()
+				widget:refresh_defer()
 			elseif w.id=="goto" then
 				widget.view="file"
 				widget:file_dir(w.user)
@@ -235,8 +239,9 @@ function wfile.setup(widget,def)
 	widget.history[ widget.data_dir:value() ]=true
 
 -- external functions, use can be expected to call these
-	widget.path			=	wfile.path
-	widget.refresh		=	wfile.refresh
+	widget.path				=	wfile.path
+	widget.refresh			=	wfile.refresh
+	widget.refresh_defer	=	wfile.refresh_defer
 
 
 -- internal functions
