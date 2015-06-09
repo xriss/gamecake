@@ -79,6 +79,24 @@ function M.bake(oven,buffers)
 		}) do
 		funcs[n]=buffers[n]
 	end
+
+-- create a simple number sequence in a fmt="u16" buffer
+-- the buffer is filled in using a standard lua for loop with the provided range
+-- this is intended to produce a buffer of unique IDs for procedural
+-- vertex code ruining in a vertex shader
+	buffers.create_sequence=function(fmt,min,max,stp)
+		stp=stp or 1
+		local vb=buffers.create({
+			start=function(vb)
+				vb:bind()
+				local d={}
+				for i=min,max,stp do d[#d+1]=i end
+				local s=pack.save_array(d,fmt)
+				gl.BufferData(gl.ARRAY_BUFFER,#s,s,gl.STATIC_DRAW)
+			end,
+		})
+		return vb
+	end
 	
 	return buffers
 end

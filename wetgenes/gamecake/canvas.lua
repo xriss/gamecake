@@ -468,17 +468,17 @@ flat.tristrip_predraw=flat.array_predraw
 
 -- tristrip is the most useful, 3 points gives us a tri
 -- 4 gives us a quad, and of course you can keep going to create a strip
-flat.tristrip = function(fmt,data,progname)
+flat.tristrip = function(fmt,data,progname,cb)
 	if #data > 0 then
 		local it=flat.array_predraw({fmt=fmt,data=data,progname=progname,array=gl.TRIANGLE_STRIP})
-		it.draw()
+		it.draw(cb)
 	end
 end
 
-flat.lines = function(fmt,data,progname)
+flat.lines = function(fmt,data,progname,cb)
 	if #data > 0 then
 		local it=flat.array_predraw({fmt=fmt,data=data,progname=progname,array=gl.LINES})
-		it.draw()
+		it.draw(cb)
 	end
 end
 
