@@ -130,6 +130,7 @@ static struct PP_Var CStrToVar(const char* str) {
 
 extern void alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface);
 extern void luaL_openlibs (lua_State *L);
+extern void lua_preloadlibs(lua_State *L);
 
 static PP_Bool Instance_DidCreate(PP_Instance instance,
                                   uint32_t argc,
@@ -151,6 +152,7 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
 	L = lua_open();  /* create state */
 	luaL_openlibs(L);  /* open libraries */
 	lua_preloadlibs(L); /* preload gamecake builtin libs */
+	
 
 	input_event_interface->RequestInputEvents(nacl_instance , PP_INPUTEVENT_CLASS_WHEEL | PP_INPUTEVENT_CLASS_MOUSE | PP_INPUTEVENT_CLASS_KEYBOARD );
 
