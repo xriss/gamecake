@@ -1,7 +1,8 @@
-#build all we can on this machine
+#build all we can on this machine which is most bits (64bit linux host)
 ./asm.lua all
 
-#build lsb versions 32 and 64
+#build lsb versions 32 and 64 (luajit does not want to build under LSB?)
+#so this does not work...
 #schroot -c saucy_amd64 -u kriss -- bash -c "cd ~/hg/lua/lib_luajit;luajit asm.lua lsb64"
 #schroot -c saucy_i386 -u kriss -- bash -c "cd ~/hg/lua/lib_luajit;luajit asm.lua lsb32"
 
@@ -16,4 +17,3 @@ hg addremove
 hg ci -mluajitbump
 hg fetch
 hg push
-

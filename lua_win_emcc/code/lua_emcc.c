@@ -109,6 +109,7 @@ const char *s2=0;
 	return 0;
 }
 
+extern void lua_preloadlibs(lua_State *L);
 void main_setup()
 {
 // L is static see top of file
