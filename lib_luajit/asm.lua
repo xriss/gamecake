@@ -10,7 +10,7 @@ local function build(mode)
 	print("")
 
 	os.execute("mkdir -p libs/"..mode)
-	os.execute("mkdir -p asm/"..mode)
+--	os.execute("mkdir -p asm/"..mode)
 
 	os.execute("make clean ")
 
@@ -46,7 +46,7 @@ DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m64" ]])
 
 	elseif mode=="win32" then -- windows 32bit
 
-		os.execute("make amalg HOST_LUA=luajit  CFLAGS=\" -m32 -msse -msse2 \" LDFLAGS=\" -m32 \" CROSS=i586-mingw32msvc- TARGET_SYS=Windows ")
+		os.execute("make amalg HOST_LUA=luajit BUILDMODE=static CFLAGS=\" -m32 -msse -msse2 \" LDFLAGS=\" -m32 \" CROSS=i586-mingw32msvc- TARGET_SYS=Windows ")
 
 	elseif mode=="osx" then -- osx 32bit, this must be run on the mac...
 
@@ -54,24 +54,9 @@ DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m64" ]])
 
 	end
 
-	for i,v in ipairs{
-		"lj_bcdef.h",
-		"lj_ffdef.h",
-		"lj_folddef.h",
-		"lj_libdef.h",
-		"lj_recdef.h",
-		"lj_vm.s",			-- this is missing on windows build... 
-	} do
-		os.execute("cp src/"..v.." asm/"..mode.."/"..v)
-	end
-	os.execute("cp src/jit/vmdef.lua asm/"..mode.."/vmdef.lua")
+-- we want libluajit.a so copy it into the lib cache
 
-
-	if mode=="win32" then
-		os.execute("cp src/luajit.o libs/"..mode.."/")		-- windows .o
-	else
-		os.execute("cp src/libluajit.a libs/"..mode.."/")	-- everyone else is .a
-	end
+	os.execute("cp src/libluajit.a libs/"..mode.."/")
 
 	os.execute("make clean ")
 

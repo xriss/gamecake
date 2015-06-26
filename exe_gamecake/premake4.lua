@@ -106,6 +106,8 @@ elseif ANDROID then
 
 elseif WINDOWS then
 
+	linkoptions { "-v" }
+
 	files { "./lua.c" }
 
 	links { "opengl32" , "glu32" }
@@ -116,10 +118,6 @@ elseif WINDOWS then
 	end
 		
 	links { "winmm" }
-
---	links { "comdlg32" } -- we need to remove this when we impliment our own file-requester
-	
---	linkoptions{ "--enable-stdcall-fixup" }
 
 	linkoptions{ "-mwindows" }
 

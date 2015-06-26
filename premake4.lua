@@ -613,7 +613,16 @@ if LIB_LUA=="lib_lua" then
 	includedirs { "lib_lua/src" }
 	LUALINKS= nil
 
--- assume we have a prebuilt luajit, use asm.lua in luajit to build them all.
+--
+-- assume we have a prebuilt luajit.so for the target platform
+--
+-- use asm.sh in lib_luajit to build them all
+--
+-- this only needs to be done if you change buildflags or luajit code
+-- so it should be a very rare action 
+-- it seems to be OK to link the x32/x64 linux libs on LSB builds
+-- these built binary files are added into the repository.
+--
 else
 	includedirs { "lib_luajit/src" }
 	
