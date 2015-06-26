@@ -818,19 +818,22 @@ static int lua_pack_tolightuserdata (lua_State *l)
 {
 u8 *ptr=0;
 
-	if(!lua_isstring(l,1))
+	if(lua_isstring(l,1))
 	{
 		ptr=(u8*)lua_tostring(l,1);
 	}
 	else
-	if(!lua_isuserdata(l,1))
+	if(lua_isuserdata(l,1))
+	{
+		ptr=lua_toluserdata(l,1,0);
+	}
+	else
 	{
 		lua_pushstring(l,"not a userdata");
 		lua_error(l);
 		return 0;
 	}
 	
-	ptr=lua_toluserdata(l,1,0);
 	if(!ptr) { return 0; }
 	
 	if(lua_isnumber(l,2)) // add to ptr
@@ -844,6 +847,56 @@ u8 *ptr=0;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// copy a string or userdata into a userdata
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_pack_copy (lua_State *l)
+{
+u8 *ptr=0;
+size_t len;
+size_t newlen;
+u8 *newptr=0;
+
+	if(lua_isstring(l,1))
+	{
+		ptr=(u8*)lua_tolstring(l,1,&len);
+	}
+	else
+	if(lua_isuserdata(l,1))
+	{
+		ptr=lua_toluserdata(l,1,&len);
+	}
+	else
+	{
+		lua_pushstring(l,"not a userdata");
+		lua_error(l);
+		return 0;
+	}
+
+	if(lua_isuserdata(l,2))
+	{
+		newptr=lua_toluserdata(l,2,&newlen);
+		if(len>newlen)
+		{
+			lua_pushstring(l,"destination too small");
+			lua_error(l);
+			return 0;
+		}
+		memcpy(newptr,ptr,len);
+		lua_pushvalue(l,2);
+	}
+	else
+	{
+		newptr=lua_newuserdata(l,len);
+		memcpy(newptr,ptr,len);
+	}
+	
+	return 1;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -853,6 +906,7 @@ LUALIB_API int luaopen_wetgenes_pack_core (lua_State *l)
 	{
 		{"load",			lua_pack_load},
 		{"save",			lua_pack_save},
+		{"copy",			lua_pack_copy},
 
 		{"alloc",			lua_pack_alloc},
 		{"sizeof",			lua_pack_sizeof},
