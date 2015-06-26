@@ -131,7 +131,7 @@ function M.bake(oven,framebuffers)
 			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,
 				string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver...
-			gl.GenerateMipmap(gl.TEXTURE_2D)
+			gl.GenerateMipmap(gl.TEXTURE_2D) -- some drivers bugout if we do not generate mipmaps here...
 
 --			framebuffers.mipmap(fbo)
 			gl.BindTexture(gl.TEXTURE_2D, 0)

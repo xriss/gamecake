@@ -245,6 +245,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 				oven.baked[name]=ret
 				ret=assert(require(name)).bake(oven,ret)
 				
+--				print("REBAKED",name,ret)
 			end
 
 			return ret
