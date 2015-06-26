@@ -114,6 +114,7 @@ void main_setup()
 // L is static see top of file
 	L = lua_open();  /* create state */
 	luaL_openlibs(L);  /* open libraries */
+	lua_preloadlibs(L); /* preload gamecake builtin libs */
 }
 
 int main_post(const char *message,const char *data)

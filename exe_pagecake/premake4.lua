@@ -1,4 +1,11 @@
 
+--[[
+
+make sure lua_preloadlibs is called in ngx_http_lua_util.c if we bump nginx sourcecode
+
+]]
+
+
 project "pagecake"
 language "C++"
 

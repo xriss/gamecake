@@ -198,6 +198,7 @@ ngx_http_lua_new_state(ngx_conf_t *cf, ngx_http_lua_main_conf_t *lmcf)
     }
 
     luaL_openlibs(L);
+	lua_preloadlibs(L); /* preload gamecake builtin libs */
 
     lua_getglobal(L, "package");
 

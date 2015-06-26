@@ -1,88 +1,56 @@
 #!/usr/bin/env gamecake
 
 
-
---[[
-
-when bumping the source
-make sure lib_init.c has the following LUA_PRELOADLIBS code patch
-
---
-
-#ifdef LUA_PRELOADLIBS
-  extern void LUA_PRELOADLIBS(lua_State *L);
-#endif
-
-LUALIB_API void luaL_openlibs(lua_State *L)
-{
-  const luaL_Reg *lib;
-  for (lib = lj_lib_load; lib->func; lib++) {
-    lua_pushcfunction(L, lib->func);
-    lua_pushstring(L, lib->name);
-    lua_call(L, 1, 0);
-  }
-#ifdef LUA_PRELOADLIBS
-  LUA_PRELOADLIBS(L);
-#endif
-  luaL_findtable(L, LUA_REGISTRYINDEX, "_PRELOAD",
-		 sizeof(lj_lib_preload)/sizeof(lj_lib_preload[0])-1);
-  for (lib = lj_lib_preload; lib->func; lib++) {
-    lua_pushcfunction(L, lib->func);
-    lua_setfield(L, -2, lib->name);
-  }
-  lua_pop(L, 1);
-}
-
-
-]]
-
 local function build(mode)
 
-	os.execute("mkdir libs")
-	os.execute("mkdir libs/"..mode)
+	print("")
+	print("################")
+	print("## BUILD MODE ## = "..mode)
+	print("################")
+	print("")
 
-	os.execute("mkdir asm")
-	os.execute("mkdir asm/"..mode)
+	os.execute("mkdir -p libs/"..mode)
+	os.execute("mkdir -p asm/"..mode)
 
 	os.execute("make clean ")
 
 	if mode=="native" then -- these are local hacks for when I bump the luajit version
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -march=native \" ")
+		os.execute("make amalg HOST_LUA=luajit CFLAGS=\" -march=native \" ")
 		
 	elseif mode=="x86" then -- these are local hacks for when I bump the luajit version
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 -msse -msse2 \" ")
+		os.execute("make amalg HOST_LUA=luajit CFLAGS=\" -m32 -msse -msse2 \" LDFLAGS=\" -m32 \" ")
 		
 	elseif mode=="x64" then
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m64  \" ")
+		os.execute("make amalg HOST_LUA=luajit CFLAGS=\" -m64  \" LDFLAGS=\" -m64 \" ")
 		
 	elseif mode=="lsb32" then -- these are local hacks for when I bump the luajit version
 
-		os.execute([[make amalg TARGET_CFLAGS="-DLUA_PRELOADLIBS=lua_preloadlibs" STATIC_CC="lsbcc"
+		os.execute([[make amalg TARGET_STATIC_CC="lsbcc"
 DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m32 -msse -msse2" ]])
 		
 	elseif mode=="lsb64" then
 
-		os.execute([[make amalg TARGET_CFLAGS="-DLUA_PRELOADLIBS=lua_preloadlibs" STATIC_CC="lsbcc"
+		os.execute([[make amalg STATIC_CC="lsbcc"
 DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m64" ]])
 
 	elseif mode=="arm" then -- android, make sure the flags are shared with the main build
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3  \" HOST_CC=\"gcc -m32 \" CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi- ")
+		os.execute("make amalg HOST_LUA=luajit TARGET_CFLAGS=\" -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3  \" HOST_CC=\"gcc -m32 \" CROSS=/home/kriss/hg/sdks/android-9-arm/bin/arm-linux-androideabi- ")
 
 	elseif mode=="armhf" then -- raspi, make sure the flags are shared with the main build
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s \" HOST_CC=\"gcc -m32 \" CROSS=/home/kriss/hg/sdks/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf- ")
+		os.execute("make amalg HOST_LUA=luajit  TARGET_CFLAGS=\" -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s \" HOST_CC=\"gcc -m32 \" CROSS=/home/kriss/hg/sdks/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf- ")
 
 	elseif mode=="win32" then -- windows 32bit
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" HOST_CC=\"gcc -m32 -msse -msse2 \" CROSS=i586-mingw32msvc- TARGET_SYS=Windows ")
+		os.execute("make amalg HOST_LUA=luajit  CFLAGS=\" -m32 -msse -msse2 \" LDFLAGS=\" -m32 \" CROSS=i586-mingw32msvc- TARGET_SYS=Windows ")
 
 	elseif mode=="osx" then -- osx 32bit, this must be run on the mac...
 
-		os.execute("make amalg TARGET_CFLAGS=\" -DLUA_PRELOADLIBS=lua_preloadlibs \" CFLAGS=\" -m32 -msse -msse2 \" LDFLAGS=\" -m32 \" ")
+		os.execute("make amalg CFLAGS=\" -m32 -msse -msse2 \" LDFLAGS=\" -m32 \" ")
 
 	end
 
@@ -92,16 +60,17 @@ DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m64" ]])
 		"lj_folddef.h",
 		"lj_libdef.h",
 		"lj_recdef.h",
-		"lj_vm.s",
+		"lj_vm.s",			-- this is missing on windows build... 
 	} do
 		os.execute("cp src/"..v.." asm/"..mode.."/"..v)
 	end
 	os.execute("cp src/jit/vmdef.lua asm/"..mode.."/vmdef.lua")
 
-	os.execute("cp src/libluajit.a libs/"..mode.."/")
 
 	if mode=="win32" then
-		os.execute("cp src/luajit.o libs/"..mode.."/")		-- windows only
+		os.execute("cp src/luajit.o libs/"..mode.."/")		-- windows .o
+	else
+		os.execute("cp src/libluajit.a libs/"..mode.."/")	-- everyone else is .a
 	end
 
 	os.execute("make clean ")

@@ -407,6 +407,7 @@ void android_main(struct android_app* state) {
 	L=master_engine.L;
 	
 	luaL_openlibs(L);  /* open libraries */
+	lua_preloadlibs(L); /* preload gamecake builtin libs */
 
 	lua_getglobal(L,"require");
 	lua_pushstring(L,"wetgenes.win");	
