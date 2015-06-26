@@ -1,6 +1,6 @@
 /*
 ** Library initialization.
-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
 **
 ** Major parts taken verbatim from the Lua interpreter.
 ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
@@ -37,9 +37,8 @@ static const luaL_Reg lj_lib_preload[] = {
 };
 
 #ifdef LUA_PRELOADLIBS
-extern void LUA_PRELOADLIBS(lua_State *L);
+  extern void LUA_PRELOADLIBS(lua_State *L);
 #endif
-
 LUALIB_API void luaL_openlibs(lua_State *L)
 {
   const luaL_Reg *lib;
@@ -49,7 +48,7 @@ LUALIB_API void luaL_openlibs(lua_State *L)
     lua_call(L, 1, 0);
   }
 #ifdef LUA_PRELOADLIBS
-        LUA_PRELOADLIBS(L);
+  LUA_PRELOADLIBS(L);
 #endif
   luaL_findtable(L, LUA_REGISTRYINDEX, "_PRELOAD",
 		 sizeof(lj_lib_preload)/sizeof(lj_lib_preload[0])-1);

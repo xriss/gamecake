@@ -1,0 +1,3945 @@
+diff -r 42da0b3d2406 lib_luajit/COPYRIGHT
+--- a/lib_luajit/COPYRIGHT	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/COPYRIGHT	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ===============================================================================
+ LuaJIT -- a Just-In-Time Compiler for Lua. http://luajit.org/
+ 
+-Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+diff -r 42da0b3d2406 lib_luajit/Makefile
+--- a/lib_luajit/Makefile	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/Makefile	Fri Jun 26 20:15:20 2015 +0100
+@@ -10,12 +10,12 @@
+ # For MSVC, please follow the instructions given in src/msvcbuild.bat.
+ # For MinGW and Cygwin, cd to src and run make with the Makefile there.
+ #
+-# Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++# Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ ##############################################################################
+ 
+ MAJVER=  2
+ MINVER=  0
+-RELVER=  3
++RELVER=  4
+ VERSION= $(MAJVER).$(MINVER).$(RELVER)
+ ABIVER=  5.1
+ 
+diff -r 42da0b3d2406 lib_luajit/README
+--- a/lib_luajit/README	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/README	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,11 +1,11 @@
+-README for LuaJIT 2.0.3
++README for LuaJIT 2.0.4
+ -----------------------
+ 
+ LuaJIT is a Just-In-Time (JIT) compiler for the Lua programming language.
+ 
+ Project Homepage: http://luajit.org/
+ 
+-LuaJIT is Copyright (C) 2005-2014 Mike Pall.
++LuaJIT is Copyright (C) 2005-2015 Mike Pall.
+ LuaJIT is free software, released under the MIT license.
+ See full Copyright Notice in the COPYRIGHT file or in luajit.h.
+ 
+diff -r 42da0b3d2406 lib_luajit/doc/bluequad-print.css
+--- a/lib_luajit/doc/bluequad-print.css	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/bluequad-print.css	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,4 +1,4 @@
+-/* Copyright (C) 2004-2014 Mike Pall.
++/* Copyright (C) 2004-2015 Mike Pall.
+  *
+  * You are welcome to use the general ideas of this design for your own sites.
+  * But please do not steal the stylesheet, the layout or the color scheme.
+diff -r 42da0b3d2406 lib_luajit/doc/bluequad.css
+--- a/lib_luajit/doc/bluequad.css	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/bluequad.css	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,4 +1,4 @@
+-/* Copyright (C) 2004-2014 Mike Pall.
++/* Copyright (C) 2004-2015 Mike Pall.
+  *
+  * You are welcome to use the general ideas of this design for your own sites.
+  * But please do not steal the stylesheet, the layout or the color scheme.
+diff -r 42da0b3d2406 lib_luajit/doc/changes.html
+--- a/lib_luajit/doc/changes.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/changes.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>LuaJIT Change History</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -63,7 +63,7 @@
+ <div id="main">
+ <p>
+ This is a list of changes between the released versions of LuaJIT.<br>
+-The current <span style="color: #0000c0;">stable version</span> is <strong>LuaJIT&nbsp;2.0.3</strong>.<br>
++The current <span style="color: #0000c0;">stable version</span> is <strong>LuaJIT&nbsp;2.0.4</strong>.<br>
+ </p>
+ <p>
+ Please check the
+@@ -72,6 +72,56 @@
+ </p>
+ 
+ <div class="major" style="background: #d0d0ff;">
++<h2 id="LuaJIT-2.0.4">LuaJIT 2.0.4 &mdash; 2015-05-14</h2>
++<ul>
++<li>Fix stack check in narrowing optimization.</li>
++<li>Fix Lua/C API typecheck error for special indexes.</li>
++<li>Fix string to number conversion.</li>
++<li>Fix lexer error for chunks without tokens.</li>
++<li>Don't compile <tt>IR_RETF</tt> after <tt>CALLT</tt> to ff with-side effects.</li>
++<li>Fix <tt>BC_UCLO</tt>/<tt>BC_JMP</tt> join optimization in Lua parser.</li>
++<li>Fix corner case in string to number conversion.</li>
++<li>Gracefully handle <tt>lua_error()</tt> for a suspended coroutine.</li>
++<li>Avoid error messages when building with Clang.</li>
++<li>Fix snapshot #0 handling for traces with a stack check on entry.</li>
++<li>Fix fused constant loads under high register pressure.</li>
++<li>Invalidate backpropagation cache after DCE.</li>
++<li>Fix ABC elimination.</li>
++<li>Fix debug info for main chunk of stripped bytecode.</li>
++<li>Fix FOLD rule for <tt>string.sub(s, ...) == k</tt>.</li>
++<li>Fix FOLD rule for <tt>STRREF</tt> of <tt>SNEW</tt>.</li>
++<li>Fix frame traversal while searching for error function.</li>
++<li>Prevent GC estimate miscalculation due to buffer growth.</li>
++<li>Prevent adding side traces for stack checks.</li>
++<li>Fix top slot calculation for snapshots with continuations.</li>
++<li>Fix check for reuse of SCEV results in <tt>FORL</tt>.</li>
++<li>Add PS Vita port.</li>
++<li>Fix compatibility issues with Illumos.</li>
++<li>Fix DragonFly build (unsupported).</li>
++<li>OpenBSD/x86: Better executable memory allocation for W^X mode.</li>
++<li>x86: Fix argument checks for <tt>ipairs()</tt> iterator.</li>
++<li>x86: <tt>lj_math_random_step()</tt> clobbers XMM regs on OSX Clang.</li>
++<li>x86: Fix code generation for unused result of <tt>math.random()</tt>.</li>
++<li>x64: Allow building with <tt>LUAJIT_USE_SYSMALLOC</tt> and <tt>LUAJIT_USE_VALGRIND</tt>.</li>
++<li>x86/x64: Fix argument check for bit shifts.</li>
++<li>x86/x64: Fix code generation for fused test/arith ops.</li>
++<li>ARM: Fix write barrier check in <tt>BC_USETS</tt>.</li>
++<li>PPC: Fix red zone overflow in machine code generation.</li>
++<li>PPC: Don't use <tt>mcrxr</tt> on PPE.</li>
++<li>Various archs: Fix excess stack growth in interpreter.</li>
++<li>FFI: Fix FOLD rule for <tt>TOBIT</tt> + <tt>CONV num.u32</tt>.</li>
++<li>FFI: Prevent DSE across <tt>ffi.string()</tt>.</li>
++<li>FFI: No meta fallback when indexing pointer to incomplete struct.</li>
++<li>FFI: Fix initialization of unions of subtypes.</li>
++<li>FFI: Fix cdata vs. non-cdata arithmetic and comparisons.</li>
++<li>FFI: Fix <tt>__index</tt>/<tt>__newindex</tt> metamethod resolution for ctypes.</li>
++<li>FFI: Fix compilation of reference field access.</li>
++<li>FFI: Fix frame traversal for backtraces with FFI callbacks.</li>
++<li>FFI: Fix recording of indexing a struct pointer ctype object itself.</li>
++<li>FFI: Allow non-scalar cdata to be compared for equality by address.</li>
++<li>FFI: Fix pseudo type conversions for type punning.</li>
++</ul>
++
+ <h2 id="LuaJIT-2.0.3">LuaJIT 2.0.3 &mdash; 2014-03-12</h2>
+ <ul>
+ <li>Add PS4 port.</li>
+@@ -918,7 +968,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/contact.html
+--- a/lib_luajit/doc/contact.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/contact.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>Contact</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -84,7 +84,7 @@
+ <h2>Copyright</h2>
+ <p>
+ All documentation is
+-Copyright &copy; 2005-2014 Mike Pall.
++Copyright &copy; 2005-2015 Mike Pall.
+ </p>
+ 
+ 
+@@ -92,7 +92,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/ext_c_api.html
+--- a/lib_luajit/doc/ext_c_api.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/ext_c_api.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>Lua/C API Extensions</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -177,7 +177,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/ext_ffi.html
+--- a/lib_luajit/doc/ext_ffi.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/ext_ffi.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>FFI Library</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -320,7 +320,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/ext_ffi_api.html
+--- a/lib_luajit/doc/ext_ffi_api.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/ext_ffi_api.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>ffi.* API Functions</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -556,7 +556,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/ext_ffi_semantics.html
+--- a/lib_luajit/doc/ext_ffi_semantics.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/ext_ffi_semantics.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>FFI Semantics</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -1235,7 +1235,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/ext_ffi_tutorial.html
+--- a/lib_luajit/doc/ext_ffi_tutorial.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/ext_ffi_tutorial.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>FFI Tutorial</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -564,7 +564,7 @@
+ individual C&nbsp;functions like this:
+ </p>
+ <pre class="code">
+-local <b>funca</b>, <b>funcb</b> = ffi.C.funcb, ffi.C.funcb -- <span style="color:#c00000;">Not helpful!</span>
++local <b>funca</b>, <b>funcb</b> = ffi.C.funca, ffi.C.funcb -- <span style="color:#c00000;">Not helpful!</span>
+ local function foo(x, n)
+   for i=1,n do <b>funcb</b>(<b>funca</b>(x, i), 1) end
+ end
+@@ -591,7 +591,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/ext_jit.html
+--- a/lib_luajit/doc/ext_jit.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/ext_jit.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>jit.* Library</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -151,7 +151,7 @@
+ <h3 id="jit_arch"><tt>jit.arch</tt></h3>
+ <p>
+ Contains the target architecture name:
+-"x86", "x64" or "ppcspe".
++"x86", "x64", "arm", "ppc", "ppcspe", or "mips".
+ </p>
+ 
+ <h2 id="jit_opt"><tt>jit.opt.*</tt> &mdash; JIT compiler optimization control</h2>
+@@ -189,7 +189,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/extensions.html
+--- a/lib_luajit/doc/extensions.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/extensions.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>Extensions</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -398,7 +398,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/faq.html
+--- a/lib_luajit/doc/faq.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/faq.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>Frequently Asked Questions (FAQ)</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -174,7 +174,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/install.html
+--- a/lib_luajit/doc/install.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/install.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>Installation</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -127,7 +127,7 @@
+ <tr class="odd">
+ <td class="compatcpu"><a href="#cross2">ARMv5+<br>ARM9E+</a></td>
+ <td class="compatos">GCC 4.2+</td>
+-<td class="compatos">GCC 4.2+</td>
++<td class="compatos">GCC 4.2+<br>PSP2 (<a href="#psvita">PS VITA</a>)</td>
+ <td class="compatos">GCC 4.2+</td>
+ <td class="compatos compatno">&nbsp;</td>
+ </tr>
+@@ -188,8 +188,8 @@
+ and change to the newly created directory:
+ </p>
+ <pre class="code">
+-tar zxf LuaJIT-2.0.3.tar.gz
+-cd LuaJIT-2.0.3</pre>
++tar zxf LuaJIT-2.0.4.tar.gz
++cd LuaJIT-2.0.4</pre>
+ <h3>Building LuaJIT</h3>
+ <p>
+ The supplied Makefiles try to auto-detect the settings needed for your
+@@ -458,41 +458,56 @@
+ make HOST_CC="gcc -m32 -arch i386" CROSS=$ISDKP TARGET_FLAGS="$ISDKF" \
+      TARGET_SYS=iOS
+ </pre>
++
++<h3 id="consoles">Cross-compiling for consoles</h3>
+ <p>
+-You can cross-compile for <b id="ps3">PS3</b> using the PS3&nbsp;SDK from
+-a Linux host or a Windows host (requires 32&nbsp;bit MinGW (GCC) on the host,
+-too). Due to restrictions on consoles, the JIT compiler is disabled and
+-only the fast interpreter is built:
++Building LuaJIT for consoles requires both a supported host compiler
++(x86 or x64) and a cross-compiler (to PPC or ARM) from the official
++console SDK.
++</p>
++<p>
++Due to restrictions on consoles, the JIT compiler is disabled and only
++the fast interpreter is built. This is still faster than plain Lua,
++but much slower than the JIT compiler. The FFI is disabled, too, since
++it's not very useful in such an environment.
++</p>
++<p>
++The following commands build a static library <tt>libluajit.a</tt>,
++which can be linked against your game, just like the Lua library.
++</p>
++<p>
++To cross-compile for <b id="ps3">PS3</b> from a Linux host (requires
++32&nbsp;bit GCC, i.e. multilib Linux/x64) or a Windows host (requires
++32&nbsp;bit MinGW), run this command:
+ </p>
+ <pre class="code">
+ make HOST_CC="gcc -m32" CROSS=ppu-lv2-
+ </pre>
+ <p>
+-You can cross-compile for <b id="ps4">PS4</b> from a Windows host using
+-the PS4&nbsp;SDK (ORBIS) plus 64&nbsp;bit MSVC. Due to restrictions on
+-consoles, the JIT compiler is disabled and only the fast interpreter
+-is built.
+-</p>
+-<p>
+-Open a "Visual Studio .NET Command Prompt" (64&nbsp;bit host compiler),
+-<tt>cd</tt> to the directory where you've unpacked the sources and run
+-the following commands. This builds a static library <tt>libluajit.a</tt>,
+-which can be linked against your game, just like the Lua library.
++To cross-compile for <b id="ps4">PS4</b> from a Windows host,
++open a "Visual Studio .NET Command Prompt" (64&nbsp;bit host compiler),
++<tt>cd</tt> to the directory where you've unpacked the sources and
++run the following commands:
+ </p>
+ <pre class="code">
+ cd src
+ ps4build
+ </pre>
+ <p>
+-You can cross-compile for <b id="xbox360">Xbox 360</b> using the
+-Xbox&nbsp;360 SDK (MSVC + XEDK). Due to restrictions on consoles, the
+-JIT compiler is disabled and only the fast interpreter is built.
++To cross-compile for <b id="psvita">PS Vita</b> from a Windows host,
++open a "Visual Studio .NET Command Prompt" (32&nbsp;bit host compiler),
++<tt>cd</tt> to the directory where you've unpacked the sources and
++run the following commands:
+ </p>
++<pre class="code">
++cd src
++psvitabuild
++</pre>
+ <p>
+-Open a "Visual Studio .NET Command Prompt" (32&nbsp;bit host compiler),
++To cross-compile for <b id="xbox360">Xbox 360</b> from a Windows host,
++open a "Visual Studio .NET Command Prompt" (32&nbsp;bit host compiler),
+ <tt>cd</tt> to the directory where you've unpacked the sources and run
+-the following commands. This builds a static library <tt>luajit20.lib</tt>,
+-which can be linked against your game, just like the Lua library.
++the following commands:
+ </p>
+ <pre class="code">
+ cd src
+@@ -621,7 +636,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/luajit.html
+--- a/lib_luajit/doc/luajit.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/luajit.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>LuaJIT</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -38,6 +38,9 @@
+ table.os2 td {
+   color: #ffa040;
+ }
++table.os3 td {
++  color: #40ffff;
++}
+ table.compiler td {
+   color: #2080ff;
+   background: #62bf41;
+@@ -147,7 +150,7 @@
+ It may be embedded or used as a general-purpose, stand-alone language.
+ </p>
+ <p>
+-LuaJIT is Copyright &copy; 2005-2014 Mike Pall, released under the
++LuaJIT is Copyright &copy; 2005-2015 Mike Pall, released under the
+ <a href="http://www.opensource.org/licenses/mit-license.php"><span class="ext">&raquo;</span>&nbsp;MIT open source license</a>.
+ </p>
+ <p>
+@@ -158,7 +161,10 @@
+ <tr><td>Windows</td><td>Linux</td><td>BSD</td><td>OSX</td><td>POSIX</td></tr>
+ </table>
+ <table class="feature os os2">
+-<tr><td><span style="font-size:90%;">Embedded</span></td><td>Android</td><td>iOS</td><td>PS3</td><td>PS4</td><td>Xbox 360</td></tr>
++<tr><td><span style="font-size:90%;">Embedded</span></td><td>Android</td><td>iOS</td></tr>
++</table>
++<table class="feature os os3">
++<tr><td>PS3</td><td>PS4</td><td>PS Vita</td><td>Xbox 360</td></tr>
+ </table>
+ <table class="feature compiler">
+ <tr><td>GCC</td><td>CLANG<br>LLVM</td><td>MSVC</td></tr>
+@@ -218,7 +224,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/running.html
+--- a/lib_luajit/doc/running.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/running.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -4,7 +4,7 @@
+ <title>Running LuaJIT</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -186,7 +186,7 @@
+ read the comment block at the start of their source.
+ They can be found in the <tt>lib</tt> directory of the source
+ distribution or installed under the <tt>jit</tt> directory. By default
+-this is <tt>/usr/local/share/luajit-2.0.3/jit</tt> on POSIX
++this is <tt>/usr/local/share/luajit-2.0.4/jit</tt> on POSIX
+ systems.
+ </p>
+ 
+@@ -296,7 +296,7 @@
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/doc/status.html
+--- a/lib_luajit/doc/status.html	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/doc/status.html	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,10 +1,10 @@
+ <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+ <html>
+ <head>
+-<title>Status &amp; Roadmap</title>
++<title>Status</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+ <meta name="Author" content="Mike Pall">
+-<meta name="Copyright" content="Copyright (C) 2005-2014, Mike Pall">
++<meta name="Copyright" content="Copyright (C) 2005-2015, Mike Pall">
+ <meta name="Language" content="en">
+ <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
+@@ -17,7 +17,7 @@
+ <a href="http://luajit.org"><span>Lua<span id="logo">JIT</span></span></a>
+ </div>
+ <div id="head">
+-<h1>Status &amp; Roadmap</h1>
++<h1>Status</h1>
+ </div>
+ <div id="nav">
+ <ul><li>
+@@ -102,20 +102,11 @@
+ garbage collector.
+ </li>
+ </ul>
+-
+-<h2>Roadmap</h2>
+-<p>
+-Please refer to the
+-<a href="http://www.freelists.org/post/luajit/LuaJIT-Roadmap-20122013"><span class="ext">&raquo;</span>&nbsp;LuaJIT Roadmap 2012/2013</a> and an
+-<a href="http://www.freelists.org/post/luajit/LuaJIT-Roadmap-20122013-UPDATE"><span class="ext">&raquo;</span>&nbsp;update on release planning</a> for details.
+-</p>
+-<p>
+-</p>
+ <br class="flush">
+ </div>
+ <div id="foot">
+ <hr class="hide">
+-Copyright &copy; 2005-2014 Mike Pall
++Copyright &copy; 2005-2015 Mike Pall
+ <span class="noprint">
+ &middot;
+ <a href="contact.html">Contact</a>
+diff -r 42da0b3d2406 lib_luajit/dynasm/dasm_arm.h
+--- a/lib_luajit/dynasm/dasm_arm.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dasm_arm.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** DynASM ARM encoding engine.
+-** Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++** Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ ** Released under the MIT license. See dynasm.lua for full copyright notice.
+ */
+ 
+diff -r 42da0b3d2406 lib_luajit/dynasm/dasm_arm.lua
+--- a/lib_luajit/dynasm/dasm_arm.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dasm_arm.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ------------------------------------------------------------------------------
+ -- DynASM ARM module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- See dynasm.lua for full copyright notice.
+ ------------------------------------------------------------------------------
+ 
+@@ -923,19 +923,22 @@
+ end
+ 
+ map_op[".template__"] = function(params, template, nparams)
+-  if not params then return sub(template, 9) end
++  if not params then return template:gsub("%x%x%x%x%x%x%x%x", "") end
+ 
+   -- Limit number of section buffer positions used by a single dasm_put().
+   -- A single opcode needs a maximum of 3 positions.
+   if secpos+3 > maxsecpos then wflush() end
+   local pos = wpos()
+-  local apos, spos = #actargs, secpos
++  local lpos, apos, spos = #actlist, #actargs, secpos
+ 
+   local ok, err
+   for t in gmatch(template, "[^|]+") do
+     ok, err = pcall(parse_template, params, t, nparams, pos)
+     if ok then return end
+     secpos = spos
++    actlist[lpos+1] = nil
++    actlist[lpos+2] = nil
++    actlist[lpos+3] = nil
+     actargs[apos+1] = nil
+     actargs[apos+2] = nil
+     actargs[apos+3] = nil
+diff -r 42da0b3d2406 lib_luajit/dynasm/dasm_mips.h
+--- a/lib_luajit/dynasm/dasm_mips.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dasm_mips.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** DynASM MIPS encoding engine.
+-** Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++** Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ ** Released under the MIT license. See dynasm.lua for full copyright notice.
+ */
+ 
+diff -r 42da0b3d2406 lib_luajit/dynasm/dasm_mips.lua
+--- a/lib_luajit/dynasm/dasm_mips.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dasm_mips.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ------------------------------------------------------------------------------
+ -- DynASM MIPS module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- See dynasm.lua for full copyright notice.
+ ------------------------------------------------------------------------------
+ 
+diff -r 42da0b3d2406 lib_luajit/dynasm/dasm_ppc.h
+--- a/lib_luajit/dynasm/dasm_ppc.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dasm_ppc.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** DynASM PPC encoding engine.
+-** Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++** Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ ** Released under the MIT license. See dynasm.lua for full copyright notice.
+ */
+ 
+diff -r 42da0b3d2406 lib_luajit/dynasm/dasm_ppc.lua
+--- a/lib_luajit/dynasm/dasm_ppc.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dasm_ppc.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ------------------------------------------------------------------------------
+ -- DynASM PPC module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- See dynasm.lua for full copyright notice.
+ ------------------------------------------------------------------------------
+ 
+diff -r 42da0b3d2406 lib_luajit/dynasm/dasm_proto.h
+--- a/lib_luajit/dynasm/dasm_proto.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dasm_proto.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** DynASM encoding engine prototypes.
+-** Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++** Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ ** Released under the MIT license. See dynasm.lua for full copyright notice.
+ */
+ 
+diff -r 42da0b3d2406 lib_luajit/dynasm/dasm_x64.lua
+--- a/lib_luajit/dynasm/dasm_x64.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dasm_x64.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ------------------------------------------------------------------------------
+ -- DynASM x64 module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- See dynasm.lua for full copyright notice.
+ ------------------------------------------------------------------------------
+ -- This module just sets 64 bit mode for the combined x86/x64 module.
+diff -r 42da0b3d2406 lib_luajit/dynasm/dasm_x86.h
+--- a/lib_luajit/dynasm/dasm_x86.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dasm_x86.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** DynASM x86 encoding engine.
+-** Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++** Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ ** Released under the MIT license. See dynasm.lua for full copyright notice.
+ */
+ 
+diff -r 42da0b3d2406 lib_luajit/dynasm/dasm_x86.lua
+--- a/lib_luajit/dynasm/dasm_x86.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dasm_x86.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ------------------------------------------------------------------------------
+ -- DynASM x86/x64 module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- See dynasm.lua for full copyright notice.
+ ------------------------------------------------------------------------------
+ 
+@@ -1081,6 +1081,9 @@
+   btr_2 =	"mrqdw:0FB3Rm|miqdw:0FBA6mU",
+   bts_2 =	"mrqdw:0FABRm|miqdw:0FBA5mU",
+ 
++  shld_3 =	"mriqdw:0FA4RmU|mrCqdw:0FA5Rm",
++  shrd_3 =	"mriqdw:0FACRmU|mrCqdw:0FADRm",
++
+   rdtsc_0 =	"0F31", -- P1+
+   cpuid_0 =	"0FA2", -- P1+
+ 
+@@ -1114,6 +1117,9 @@
+   fucompp_0 =	"DAE9",
+   fcompp_0 =	"DED9",
+ 
++  fldenv_1 =	"x.:D94m",
++  fnstenv_1 =	"x.:D96m",
++  fstenv_1 =	"x.:9BD96m",
+   fldcw_1 =	"xw:nD95m",
+   fstcw_1 =	"xw:n9BD97m",
+   fnstcw_1 =	"xw:nD97m",
+@@ -1189,6 +1195,8 @@
+   cvttps2dq_2 =	"rmo:F30F5BrM",
+   cvttsd2si_2 =	"rr/do:F20F2CrM|rr/qo:|rx/dq:|rxq:",
+   cvttss2si_2 =	"rr/do:F30F2CrM|rr/qo:|rxd:|rx/qd:",
++  fxsave_1 =	"x.:0FAE0m",
++  fxrstor_1 =	"x.:0FAE1m",
+   ldmxcsr_1 =	"xd:0FAE2m",
+   lfence_0 =	"0FAEE8",
+   maskmovdqu_2 = "rro:660FF7rM",
+diff -r 42da0b3d2406 lib_luajit/dynasm/dynasm.lua
+--- a/lib_luajit/dynasm/dynasm.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/dynasm/dynasm.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -2,7 +2,7 @@
+ -- DynASM. A dynamic assembler for code generation engines.
+ -- Originally designed and implemented for LuaJIT.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- See below for full copyright notice.
+ ------------------------------------------------------------------------------
+ 
+@@ -17,7 +17,7 @@
+   url =		"http://luajit.org/dynasm.html",
+   license =	"MIT",
+   copyright =	[[
+-Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ 
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+diff -r 42da0b3d2406 lib_luajit/etc/luajit.1
+--- a/lib_luajit/etc/luajit.1	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/etc/luajit.1	Fri Jun 26 20:15:20 2015 +0100
+@@ -74,7 +74,7 @@
+ Runs some nested loops and shows the resulting traces.
+ .SH COPYRIGHT
+ .PP
+-\fBLuaJIT\fR is Copyright \(co 2005-2014 Mike Pall.
++\fBLuaJIT\fR is Copyright \(co 2005-2015 Mike Pall.
+ .br
+ \fBLuaJIT\fR is open source software, released under the MIT license.
+ .SH SEE ALSO
+diff -r 42da0b3d2406 lib_luajit/etc/luajit.pc
+--- a/lib_luajit/etc/luajit.pc	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/etc/luajit.pc	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ # Package information for LuaJIT to be used by pkg-config.
+ majver=2
+ minver=0
+-relver=3
++relver=4
+ version=${majver}.${minver}.${relver}
+ abiver=5.1
+ 
+diff -r 42da0b3d2406 lib_luajit/src/Makefile
+--- a/lib_luajit/src/Makefile	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/Makefile	Fri Jun 26 20:15:20 2015 +0100
+@@ -7,12 +7,12 @@
+ # Also works with MinGW and Cygwin on Windows.
+ # Please check msvcbuild.bat for building with MSVC on Windows.
+ #
+-# Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++# Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ ##############################################################################
+ 
+ MAJVER=  2
+ MINVER=  0
+-RELVER=  3
++RELVER=  4
+ ABIVER=  5.1
+ NODOTABIVER= 51
+ 
+@@ -122,8 +122,10 @@
+ #
+ # Use the system provided memory allocator (realloc) instead of the
+ # bundled memory allocator. This is slower, but sometimes helpful for
+-# debugging. It's helpful for Valgrind's memcheck tool, too. This option
+-# cannot be enabled on x64, since the built-in allocator is mandatory.
++# debugging. This option cannot be enabled on x64, since realloc usually
++# doesn't return addresses in the right address range.
++# OTOH this option is mandatory for Valgrind's memcheck tool on x64 and
++# the only way to get useful results from it for all other architectures.
+ #XCFLAGS+= -DLUAJIT_USE_SYSMALLOC
+ #
+ # This define is required to run LuaJIT under Valgrind. The Valgrind
+@@ -241,9 +243,6 @@
+   TARGET_ARCH+= -D__CELLOS_LV2__
+   TARGET_XCFLAGS+= -DLUAJIT_USE_SYSMALLOC
+ endif
+-ifneq (,$(findstring LJ_NO_UNWIND 1,$(TARGET_TESTARCH)))
+-  TARGET_ARCH+= -DLUAJIT_NO_UNWIND
+-endif
+ 
+ TARGET_XCFLAGS+= $(CCOPT_$(TARGET_LJARCH))
+ TARGET_ARCH+= $(patsubst %,-DLUAJIT_TARGET=LUAJIT_ARCH_%,$(TARGET_LJARCH))
+@@ -288,15 +287,15 @@
+   TARGET_XSHLDFLAGS= -shared
+   TARGET_DYNXLDOPTS=
+ else
++ifeq (,$(shell $(TARGET_CC) -o /dev/null -c -x c /dev/null -fno-stack-protector 2>/dev/null || echo 1))
++  TARGET_XCFLAGS+= -fno-stack-protector
++endif
+ ifeq (Darwin,$(TARGET_SYS))
+   ifeq (,$(MACOSX_DEPLOYMENT_TARGET))
+     export MACOSX_DEPLOYMENT_TARGET=10.4
+   endif
+   TARGET_STRIP+= -x
+   TARGET_AR+= 2>/dev/null
+-  ifeq (,$(shell $(TARGET_CC) -o /dev/null -c -x c /dev/null -fno-stack-protector 2>/dev/null || echo 1))
+-    TARGET_XCFLAGS+= -fno-stack-protector
+-  endif
+   TARGET_XSHLDFLAGS= -dynamiclib -single_module -undefined dynamic_lookup -fPIC
+   TARGET_DYNXLDOPTS=
+   TARGET_XSHLDFLAGS+= -install_name $(TARGET_DYLIBPATH) -compatibility_version $(MAJVER).$(MINVER) -current_version $(MAJVER).$(MINVER).$(RELVER)
+@@ -308,14 +307,10 @@
+ ifeq (iOS,$(TARGET_SYS))
+   TARGET_STRIP+= -x
+   TARGET_AR+= 2>/dev/null
+-  TARGET_XCFLAGS+= -fno-stack-protector
+   TARGET_XSHLDFLAGS= -dynamiclib -single_module -undefined dynamic_lookup -fPIC
+   TARGET_DYNXLDOPTS=
+   TARGET_XSHLDFLAGS+= -install_name $(TARGET_DYLIBPATH) -compatibility_version $(MAJVER).$(MINVER) -current_version $(MAJVER).$(MINVER).$(RELVER)
+ else
+-  ifneq (,$(findstring stack-protector,$(shell $(TARGET_CC) -dumpspecs)))
+-    TARGET_XCFLAGS+= -fno-stack-protector
+-  endif
+   ifneq (SunOS,$(TARGET_SYS))
+     ifneq (PS3,$(TARGET_SYS))
+       TARGET_XLDFLAGS+= -Wl,-E
+@@ -399,6 +394,10 @@
+ else
+   TARGET_ARCH+= -DLJ_ABI_SOFTFP=1
+ endif
++ifneq (,$(findstring LJ_NO_UNWIND 1,$(TARGET_TESTARCH)))
++  DASM_AFLAGS+= -D NO_UNWIND
++  TARGET_ARCH+= -DLUAJIT_NO_UNWIND
++endif
+ DASM_AFLAGS+= -D VER=$(subst LJ_ARCH_VERSION_,,$(filter LJ_ARCH_VERSION_%,$(subst LJ_ARCH_VERSION ,LJ_ARCH_VERSION_,$(TARGET_TESTARCH))))
+ ifeq (Windows,$(TARGET_SYS))
+   DASM_AFLAGS+= -D WIN
+diff -r 42da0b3d2406 lib_luajit/src/Makefile.dep
+--- a/lib_luajit/src/Makefile.dep	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/Makefile.dep	Fri Jun 26 20:15:20 2015 +0100
+@@ -90,7 +90,7 @@
+  lj_gc.h lj_err.h lj_errmsg.h lj_str.h lj_tab.h lj_ctype.h lj_ccallback.h
+ lj_debug.o: lj_debug.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h \
+  lj_err.h lj_errmsg.h lj_debug.h lj_str.h lj_tab.h lj_state.h lj_frame.h \
+- lj_bc.h lj_jit.h lj_ir.h
++ lj_bc.h lj_vm.h lj_jit.h lj_ir.h
+ lj_dispatch.o: lj_dispatch.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h \
+  lj_err.h lj_errmsg.h lj_func.h lj_str.h lj_tab.h lj_meta.h lj_debug.h \
+  lj_state.h lj_frame.h lj_bc.h lj_ff.h lj_ffdef.h lj_jit.h lj_ir.h \
+diff -r 42da0b3d2406 lib_luajit/src/host/buildvm.c
+--- a/lib_luajit/src/host/buildvm.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/host/buildvm.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LuaJIT VM builder.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** This is a tool to build the hand-tuned assembler code required for
+ ** LuaJIT's bytecode interpreter. It supports a variety of output formats
+diff -r 42da0b3d2406 lib_luajit/src/host/buildvm.h
+--- a/lib_luajit/src/host/buildvm.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/host/buildvm.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LuaJIT VM builder.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _BUILDVM_H
+diff -r 42da0b3d2406 lib_luajit/src/host/buildvm_asm.c
+--- a/lib_luajit/src/host/buildvm_asm.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/host/buildvm_asm.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LuaJIT VM builder: Assembler source code emitter.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "buildvm.h"
+@@ -286,7 +286,7 @@
+   fprintf(ctx->fp, "\n");
+   switch (ctx->mode) {
+   case BUILD_elfasm:
+-#if !LJ_TARGET_PS3
++#if !(LJ_TARGET_PS3 || LJ_TARGET_PSVITA)
+     fprintf(ctx->fp, "\t.section .note.GNU-stack,\"\"," ELFASM_PX "progbits\n");
+ #endif
+ #if LJ_TARGET_PPCSPE
+diff -r 42da0b3d2406 lib_luajit/src/host/buildvm_fold.c
+--- a/lib_luajit/src/host/buildvm_fold.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/host/buildvm_fold.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LuaJIT VM builder: IR folding hash table generator.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "buildvm.h"
+diff -r 42da0b3d2406 lib_luajit/src/host/buildvm_lib.c
+--- a/lib_luajit/src/host/buildvm_lib.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/host/buildvm_lib.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LuaJIT VM builder: library definition compiler.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "buildvm.h"
+diff -r 42da0b3d2406 lib_luajit/src/host/buildvm_peobj.c
+--- a/lib_luajit/src/host/buildvm_peobj.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/host/buildvm_peobj.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LuaJIT VM builder: PE object emitter.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Only used for building on Windows, since we cannot assume the presence
+ ** of a suitable assembler. The host and target byte order must match.
+diff -r 42da0b3d2406 lib_luajit/src/host/genminilua.lua
+--- a/lib_luajit/src/host/genminilua.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/host/genminilua.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -2,7 +2,7 @@
+ -- Lua script to generate a customized, minified version of Lua.
+ -- The resulting 'minilua' is used for the build process of LuaJIT.
+ ----------------------------------------------------------------------------
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ 
+diff -r 42da0b3d2406 lib_luajit/src/jit/bc.lua
+--- a/lib_luajit/src/jit/bc.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/jit/bc.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ----------------------------------------------------------------------------
+ -- LuaJIT bytecode listing module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ --
+@@ -41,7 +41,7 @@
+ 
+ -- Cache some library functions and objects.
+ local jit = require("jit")
+-assert(jit.version_num == 20003, "LuaJIT core/library version mismatch")
++assert(jit.version_num == 20004, "LuaJIT core/library version mismatch")
+ local jutil = require("jit.util")
+ local vmdef = require("jit.vmdef")
+ local bit = require("bit")
+diff -r 42da0b3d2406 lib_luajit/src/jit/bcsave.lua
+--- a/lib_luajit/src/jit/bcsave.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/jit/bcsave.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ----------------------------------------------------------------------------
+ -- LuaJIT module to save/list bytecode.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ --
+@@ -11,7 +11,7 @@
+ ------------------------------------------------------------------------------
+ 
+ local jit = require("jit")
+-assert(jit.version_num == 20003, "LuaJIT core/library version mismatch")
++assert(jit.version_num == 20004, "LuaJIT core/library version mismatch")
+ local bit = require("bit")
+ 
+ -- Symbol name prefix for LuaJIT bytecode.
+@@ -69,7 +69,7 @@
+ 
+ local map_os = {
+   linux = true, windows = true, osx = true, freebsd = true, netbsd = true,
+-  openbsd = true, solaris = true,
++  openbsd = true, dragonfly = true, solaris = true,
+ }
+ 
+ local function checkarg(str, map, err)
+diff -r 42da0b3d2406 lib_luajit/src/jit/dis_arm.lua
+--- a/lib_luajit/src/jit/dis_arm.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/jit/dis_arm.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ----------------------------------------------------------------------------
+ -- LuaJIT ARM disassembler module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ -- This is a helper module used by the LuaJIT machine code dumper module.
+diff -r 42da0b3d2406 lib_luajit/src/jit/dis_mips.lua
+--- a/lib_luajit/src/jit/dis_mips.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/jit/dis_mips.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ----------------------------------------------------------------------------
+ -- LuaJIT MIPS disassembler module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT/X license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ -- This is a helper module used by the LuaJIT machine code dumper module.
+diff -r 42da0b3d2406 lib_luajit/src/jit/dis_mipsel.lua
+--- a/lib_luajit/src/jit/dis_mipsel.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/jit/dis_mipsel.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ----------------------------------------------------------------------------
+ -- LuaJIT MIPSEL disassembler wrapper module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ -- This module just exports the little-endian functions from the
+diff -r 42da0b3d2406 lib_luajit/src/jit/dis_ppc.lua
+--- a/lib_luajit/src/jit/dis_ppc.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/jit/dis_ppc.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ----------------------------------------------------------------------------
+ -- LuaJIT PPC disassembler module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT/X license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ -- This is a helper module used by the LuaJIT machine code dumper module.
+diff -r 42da0b3d2406 lib_luajit/src/jit/dis_x64.lua
+--- a/lib_luajit/src/jit/dis_x64.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/jit/dis_x64.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ----------------------------------------------------------------------------
+ -- LuaJIT x64 disassembler wrapper module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ -- This module just exports the 64 bit functions from the combined
+diff -r 42da0b3d2406 lib_luajit/src/jit/dis_x86.lua
+--- a/lib_luajit/src/jit/dis_x86.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/jit/dis_x86.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ----------------------------------------------------------------------------
+ -- LuaJIT x86/x64 disassembler module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ -- This is a helper module used by the LuaJIT machine code dumper module.
+diff -r 42da0b3d2406 lib_luajit/src/jit/dump.lua
+--- a/lib_luajit/src/jit/dump.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/jit/dump.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ----------------------------------------------------------------------------
+ -- LuaJIT compiler dump module.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ --
+@@ -55,7 +55,7 @@
+ 
+ -- Cache some library functions and objects.
+ local jit = require("jit")
+-assert(jit.version_num == 20003, "LuaJIT core/library version mismatch")
++assert(jit.version_num == 20004, "LuaJIT core/library version mismatch")
+ local jutil = require("jit.util")
+ local vmdef = require("jit.vmdef")
+ local funcinfo, funcbc = jutil.funcinfo, jutil.funcbc
+diff -r 42da0b3d2406 lib_luajit/src/jit/v.lua
+--- a/lib_luajit/src/jit/v.lua	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/jit/v.lua	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ ----------------------------------------------------------------------------
+ -- Verbose mode of the LuaJIT compiler.
+ --
+--- Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++-- Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ -- Released under the MIT license. See Copyright Notice in luajit.h
+ ----------------------------------------------------------------------------
+ --
+@@ -59,7 +59,7 @@
+ 
+ -- Cache some library functions and objects.
+ local jit = require("jit")
+-assert(jit.version_num == 20003, "LuaJIT core/library version mismatch")
++assert(jit.version_num == 20004, "LuaJIT core/library version mismatch")
+ local jutil = require("jit.util")
+ local vmdef = require("jit.vmdef")
+ local funcinfo, traceinfo = jutil.funcinfo, jutil.traceinfo
+diff -r 42da0b3d2406 lib_luajit/src/lib_aux.c
+--- a/lib_luajit/src/lib_aux.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_aux.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Auxiliary library for the Lua/C API.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major parts taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+@@ -302,7 +302,7 @@
+ 
+ #ifdef LUAJIT_USE_SYSMALLOC
+ 
+-#if LJ_64
++#if LJ_64 && !defined(LUAJIT_USE_VALGRIND)
+ #error "Must use builtin allocator for 64 bit target"
+ #endif
+ 
+diff -r 42da0b3d2406 lib_luajit/src/lib_base.c
+--- a/lib_luajit/src/lib_base.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_base.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Base and coroutine library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2011 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lib_bit.c
+--- a/lib_luajit/src/lib_bit.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_bit.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Bit manipulation library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lib_bit_c
+diff -r 42da0b3d2406 lib_luajit/src/lib_debug.c
+--- a/lib_luajit/src/lib_debug.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_debug.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Debug library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lib_ffi.c
+--- a/lib_luajit/src/lib_ffi.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_ffi.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** FFI library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lib_ffi_c
+@@ -136,6 +136,7 @@
+ 	return 0;
+       }
+     }
++    copyTV(L, base, L->top);
+     tv = L->top-1;
+   }
+   return lj_meta_tailcall(L, tv);
+diff -r 42da0b3d2406 lib_luajit/src/lib_init.c
+--- a/lib_luajit/src/lib_init.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_init.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Library initialization.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major parts taken verbatim from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+@@ -36,10 +36,6 @@
+   { NULL,		NULL }
+ };
+ 
+-#ifdef LUA_PRELOADLIBS
+-extern void LUA_PRELOADLIBS(lua_State *L);
+-#endif
+-
+ LUALIB_API void luaL_openlibs(lua_State *L)
+ {
+   const luaL_Reg *lib;
+@@ -48,9 +44,6 @@
+     lua_pushstring(L, lib->name);
+     lua_call(L, 1, 0);
+   }
+-#ifdef LUA_PRELOADLIBS
+-        LUA_PRELOADLIBS(L);
+-#endif
+   luaL_findtable(L, LUA_REGISTRYINDEX, "_PRELOAD",
+ 		 sizeof(lj_lib_preload)/sizeof(lj_lib_preload[0])-1);
+   for (lib = lj_lib_preload; lib->func; lib++) {
+diff -r 42da0b3d2406 lib_luajit/src/lib_io.c
+--- a/lib_luajit/src/lib_io.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_io.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** I/O library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2011 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+@@ -426,7 +426,7 @@
+ LJLIB_CF(io_tmpfile)
+ {
+   IOFileUD *iof = io_file_new(L);
+-#if LJ_TARGET_PS3 || LJ_TARGET_PS4
++#if LJ_TARGET_PS3 || LJ_TARGET_PS4 || LJ_TARGET_PSVITA
+   iof->fp = NULL; errno = ENOSYS;
+ #else
+   iof->fp = tmpfile();
+diff -r 42da0b3d2406 lib_luajit/src/lib_jit.c
+--- a/lib_luajit/src/lib_jit.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_jit.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** JIT library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lib_jit_c
+diff -r 42da0b3d2406 lib_luajit/src/lib_math.c
+--- a/lib_luajit/src/lib_math.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_math.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Math library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include <math.h>
+diff -r 42da0b3d2406 lib_luajit/src/lib_os.c
+--- a/lib_luajit/src/lib_os.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_os.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,13 +1,12 @@
+ /*
+ ** OS library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+ */
+ 
+ #include <errno.h>
+-#include <locale.h>
+ #include <time.h>
+ 
+ #define lib_os_c
+@@ -27,6 +26,10 @@
+ #include <stdio.h>
+ #endif
+ 
++#if !LJ_TARGET_PSVITA
++#include <locale.h>
++#endif
++
+ /* ------------------------------------------------------------------------ */
+ 
+ #define LJLIB_MODULE_os
+@@ -70,7 +73,7 @@
+ 
+ LJLIB_CF(os_tmpname)
+ {
+-#if LJ_TARGET_PS3 || LJ_TARGET_PS4
++#if LJ_TARGET_PS3 || LJ_TARGET_PS4 || LJ_TARGET_PSVITA
+   lj_err_caller(L, LJ_ERR_OSUNIQF);
+   return 0;
+ #else
+@@ -254,6 +257,9 @@
+ 
+ LJLIB_CF(os_setlocale)
+ {
++#if LJ_TARGET_PSVITA
++  lua_pushliteral(L, "C");
++#else
+   GCstr *s = lj_lib_optstr(L, 1);
+   const char *str = s ? strdata(s) : NULL;
+   int opt = lj_lib_checkopt(L, 2, 6,
+@@ -265,6 +271,7 @@
+   else if (opt == 4) opt = LC_MONETARY;
+   else if (opt == 6) opt = LC_ALL;
+   lua_pushstring(L, setlocale(opt, str));
++#endif
+   return 1;
+ }
+ 
+diff -r 42da0b3d2406 lib_luajit/src/lib_package.c
+--- a/lib_luajit/src/lib_package.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_package.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Package library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2012 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lib_string.c
+--- a/lib_luajit/src/lib_string.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_string.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** String library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lib_table.c
+--- a/lib_luajit/src/lib_table.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lib_table.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Table library.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lj_alloc.c
+--- a/lib_luajit/src/lj_alloc.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_alloc.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -179,23 +179,29 @@
+ 
+ #if defined(MAP_32BIT)
+ 
++#if defined(__sun__)
++#define MMAP_REGION_START	((uintptr_t)0x1000)
++#else
+ /* Actually this only gives us max. 1GB in current Linux kernels. */
++#define MMAP_REGION_START	((uintptr_t)0)
++#endif
++
+ static LJ_AINLINE void *CALL_MMAP(size_t size)
+ {
+   int olderr = errno;
+-  void *ptr = mmap(NULL, size, MMAP_PROT, MAP_32BIT|MMAP_FLAGS, -1, 0);
++  void *ptr = mmap((void *)MMAP_REGION_START, size, MMAP_PROT, MAP_32BIT|MMAP_FLAGS, -1, 0);
+   errno = olderr;
+   return ptr;
+ }
+ 
+-#elif LJ_TARGET_OSX || LJ_TARGET_PS4 || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun__)
++#elif LJ_TARGET_OSX || LJ_TARGET_PS4 || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__sun__)
+ 
+ /* OSX and FreeBSD mmap() use a naive first-fit linear search.
+ ** That's perfect for us. Except that -pagezero_size must be set for OSX,
+ ** otherwise the lower 4GB are blocked. And the 32GB RLIMIT_DATA needs
+ ** to be reduced to 250MB on FreeBSD.
+ */
+-#if LJ_TARGET_OSX
++#if LJ_TARGET_OSX || defined(__DragonFly__)
+ #define MMAP_REGION_START	((uintptr_t)0x10000)
+ #elif LJ_TARGET_PS4
+ #define MMAP_REGION_START	((uintptr_t)0x4000)
+@@ -232,7 +238,7 @@
+       return p;
+     }
+     if (p != CMFAIL) munmap(p, size);
+-#ifdef __sun__
++#if defined(__sun__) || defined(__DragonFly__)
+     alloc_hint += 0x1000000;  /* Need near-exhaustive linear scan. */
+     if (alloc_hint + size < MMAP_REGION_END) continue;
+ #endif
+diff -r 42da0b3d2406 lib_luajit/src/lj_api.c
+--- a/lib_luajit/src/lj_api.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_api.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Public Lua/C API.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lj_arch.h
+--- a/lib_luajit/src/lj_arch.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_arch.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Target architecture selection.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_ARCH_H
+@@ -67,7 +67,8 @@
+ #elif defined(__MACH__) && defined(__APPLE__)
+ #define LUAJIT_OS	LUAJIT_OS_OSX
+ #elif (defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || \
+-       defined(__NetBSD__) || defined(__OpenBSD__)) && !defined(__ORBIS__)
++       defined(__NetBSD__) || defined(__OpenBSD__) || \
++       defined(__DragonFly__)) && !defined(__ORBIS__)
+ #define LUAJIT_OS	LUAJIT_OS_BSD
+ #elif (defined(__sun__) && defined(__svr4__)) || defined(__CYGWIN__)
+ #define LUAJIT_OS	LUAJIT_OS_POSIX
+@@ -111,6 +112,11 @@
+ #define NULL ((void*)0)
+ #endif
+ 
++#ifdef __psp2__
++#define LJ_TARGET_PSVITA	1
++#define LJ_TARGET_CONSOLE	1
++#endif
++
+ #if _XBOX_VER >= 200
+ #define LJ_TARGET_XBOX360	1
+ #define LJ_TARGET_CONSOLE	1
+@@ -175,7 +181,9 @@
+ #define LJ_TARGET_UNIFYROT	2	/* Want only IR_BROR. */
+ #define LJ_ARCH_NUMMODE		LJ_NUMMODE_DUAL
+ 
+-#if __ARM_ARCH_7__ || __ARM_ARCH_7A__ || __ARM_ARCH_7R__ || __ARM_ARCH_7S__
++#if __ARM_ARCH____ARM_ARCH_8__ || __ARM_ARCH_8A__
++#define LJ_ARCH_VERSION		80
++#elif __ARM_ARCH_7__ || __ARM_ARCH_7A__ || __ARM_ARCH_7R__ || __ARM_ARCH_7S__ || __ARM_ARCH_7VE__
+ #define LJ_ARCH_VERSION		70
+ #elif __ARM_ARCH_6T2__
+ #define LJ_ARCH_VERSION		61
+@@ -334,6 +342,9 @@
+ #if defined(__mips_soft_float)
+ #error "No support for MIPS CPUs without FPU"
+ #endif
++#if defined(_LP64)
++#error "No support for MIPS64"
++#endif
+ #endif
+ #endif
+ 
+@@ -412,7 +423,7 @@
+ #define LUAJIT_NO_EXP2
+ #endif
+ 
+-#if defined(LUAJIT_NO_UNWIND) || defined(__symbian__) || LJ_TARGET_IOS || LJ_TARGET_PS3
++#if defined(LUAJIT_NO_UNWIND) || defined(__symbian__) || LJ_TARGET_IOS || LJ_TARGET_PS3 || LJ_TARGET_PS4
+ #define LJ_NO_UNWIND		1
+ #endif
+ 
+diff -r 42da0b3d2406 lib_luajit/src/lj_asm.c
+--- a/lib_luajit/src/lj_asm.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_asm.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** IR assembler (SSA IR -> machine code).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_asm_c
+@@ -353,6 +353,7 @@
+ static int32_t ra_spill(ASMState *as, IRIns *ir)
+ {
+   int32_t slot = ir->s;
++  lua_assert(ir >= as->ir + REF_TRUE);
+   if (!ra_hasspill(slot)) {
+     if (irt_is64(ir->t)) {
+       slot = as->evenspill;
+@@ -1372,6 +1373,11 @@
+   int pass3 = 0;
+   IRRef i;
+ 
++  if (as->snapno && as->topslot > as->parent->topslot) {
++    /* Force snap #0 alloc to prevent register overwrite in stack check. */
++    as->snapno = 0;
++    asm_snap_alloc(as);
++  }
+   allow = asm_head_side_base(as, irp, allow);
+ 
+   /* Scan all parent SLOADs and collect register dependencies. */
+diff -r 42da0b3d2406 lib_luajit/src/lj_asm.h
+--- a/lib_luajit/src/lj_asm.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_asm.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** IR assembler (SSA IR -> machine code).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_ASM_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_asm_arm.h
+--- a/lib_luajit/src/lj_asm_arm.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_asm_arm.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** ARM IR assembler (SSA IR -> machine code).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /* -- Register allocator extensions --------------------------------------- */
+diff -r 42da0b3d2406 lib_luajit/src/lj_asm_mips.h
+--- a/lib_luajit/src/lj_asm_mips.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_asm_mips.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** MIPS IR assembler (SSA IR -> machine code).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /* -- Register allocator extensions --------------------------------------- */
+diff -r 42da0b3d2406 lib_luajit/src/lj_asm_ppc.h
+--- a/lib_luajit/src/lj_asm_ppc.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_asm_ppc.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** PPC IR assembler (SSA IR -> machine code).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /* -- Register allocator extensions --------------------------------------- */
+@@ -49,6 +49,8 @@
+ {
+   ExitNo i;
+   MCode *mxp = as->mctop;
++  if (mxp - (nexits + 3 + MCLIM_REDZONE) < as->mclim)
++    asm_mclimit(as);
+   /* 1: mflr r0; bl ->vm_exit_handler; li r0, traceno; bl <1; bl <1; ... */
+   for (i = nexits-1; (int32_t)i >= 0; i--)
+     *--mxp = PPCI_BL|(((-3-i)&0x00ffffffu)<<2);
+diff -r 42da0b3d2406 lib_luajit/src/lj_asm_x86.h
+--- a/lib_luajit/src/lj_asm_x86.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_asm_x86.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** x86/x64 IR assembler (SSA IR -> machine code).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /* -- Guard handling ------------------------------------------------------ */
+@@ -325,6 +325,14 @@
+       as->mrm.base = as->mrm.idx = RID_NONE;
+       return RID_MRM;
+     }
++  } else if (ir->o == IR_KINT64) {
++    RegSet avail = as->freeset & ~as->modset & RSET_GPR;
++    lua_assert(allow != RSET_EMPTY);
++    if (!(avail & (avail-1))) {  /* Fuse if less than two regs available. */
++      as->mrm.ofs = ptr2addr(ir_kint64(ir));
++      as->mrm.base = as->mrm.idx = RID_NONE;
++      return RID_MRM;
++    }
+   } else if (mayfuse(as, ref)) {
+     RegSet xallow = (allow & RSET_GPR) ? allow : RSET_GPR;
+     if (ir->o == IR_SLOAD) {
+@@ -361,7 +369,7 @@
+       return RID_MRM;
+     }
+   }
+-  if (!(as->freeset & allow) &&
++  if (!(as->freeset & allow) && !irref_isk(ref) &&
+       (allow == RSET_EMPTY || ra_hasspill(ir->s) || iscrossref(as, ref)))
+     goto fusespill;
+   return ra_allocref(as, ref, allow);
+@@ -571,7 +579,7 @@
+       lua_assert(!irt_ispri(ir->t));
+       ra_destreg(as, ir, RID_RET);
+     }
+-  } else if (LJ_32 && irt_isfp(ir->t)) {
++  } else if (LJ_32 && irt_isfp(ir->t) && !(ci->flags & CCI_CASTU64)) {
+     emit_x87op(as, XI_FPOP);  /* Pop unused result from x87 st0. */
+   }
+ }
+@@ -1828,8 +1836,12 @@
+   Reg dest, right;
+   int32_t k = 0;
+   if (as->flagmcp == as->mcp) {  /* Drop test r,r instruction. */
+-    as->flagmcp = NULL;
+-    as->mcp += (LJ_64 && *as->mcp < XI_TESTb) ? 3 : 2;
++    MCode *p = as->mcp + ((LJ_64 && *as->mcp < XI_TESTb) ? 3 : 2);
++    if ((p[1] & 15) < 14) {
++      if ((p[1] & 15) >= 12) p[1] -= 4;  /* L <->S, NL <-> NS */
++      as->flagmcp = NULL;
++      as->mcp = p;
++    }  /* else: cannot transform LE/NLE to cc without use of OF. */
+   }
+   right = IR(rref)->r;
+   if (ra_hasreg(right)) {
+diff -r 42da0b3d2406 lib_luajit/src/lj_bc.c
+--- a/lib_luajit/src/lj_bc.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_bc.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Bytecode instruction modes.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_bc_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_bc.h
+--- a/lib_luajit/src/lj_bc.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_bc.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Bytecode instruction format.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_BC_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_bcdump.h
+--- a/lib_luajit/src/lj_bcdump.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_bcdump.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Bytecode dump definitions.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_BCDUMP_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_bcread.c
+--- a/lib_luajit/src/lj_bcread.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_bcread.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Bytecode reader.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_bcread_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_bcwrite.c
+--- a/lib_luajit/src/lj_bcwrite.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_bcwrite.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Bytecode writer.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_bcwrite_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_carith.c
+--- a/lib_luajit/src/lj_carith.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_carith.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** C data arithmetic.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "lj_obj.h"
+@@ -62,7 +62,7 @@
+       TValue *o2 = i == 0 ? o+1 : o-1;
+       CType *ct = ctype_raw(cts, cdataV(o2)->ctypeid);
+       ca->ct[i] = NULL;
+-      ca->p[i] = NULL;
++      ca->p[i] = (uint8_t *)strVdata(o);
+       ok = 0;
+       if (ctype_isenum(ct->info)) {
+ 	CTSize ofs;
+@@ -79,7 +79,7 @@
+       }
+     } else {
+       ca->ct[i] = NULL;
+-      ca->p[i] = NULL;
++      ca->p[i] = (void *)(intptr_t)1;  /* To make it unequal. */
+       ok = 0;
+     }
+   }
+@@ -234,7 +234,9 @@
+     const char *repr[2];
+     int i, isenum = -1, isstr = -1;
+     if (mm == MM_eq) {  /* Equality checks never raise an error. */
+-      setboolV(L->top-1, 0);
++      int eq = ca->p[0] == ca->p[1];
++      setboolV(L->top-1, eq);
++      setboolV(&G(L)->tmptv2, eq);  /* Remember for trace recorder. */
+       return 1;
+     }
+     for (i = 0; i < 2; i++) {
+diff -r 42da0b3d2406 lib_luajit/src/lj_carith.h
+--- a/lib_luajit/src/lj_carith.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_carith.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** C data arithmetic.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_CARITH_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_ccall.c
+--- a/lib_luajit/src/lj_ccall.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ccall.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** FFI C call handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "lj_obj.h"
+diff -r 42da0b3d2406 lib_luajit/src/lj_ccall.h
+--- a/lib_luajit/src/lj_ccall.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ccall.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** FFI C call handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_CCALL_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_ccallback.c
+--- a/lib_luajit/src/lj_ccallback.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ccallback.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** FFI C callback handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "lj_obj.h"
+diff -r 42da0b3d2406 lib_luajit/src/lj_ccallback.h
+--- a/lib_luajit/src/lj_ccallback.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ccallback.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** FFI C callback handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_CCALLBACK_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_cconv.c
+--- a/lib_luajit/src/lj_cconv.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_cconv.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** C type conversions.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "lj_obj.h"
+@@ -702,6 +702,7 @@
+     } else if (ctype_isxattrib(df->info, CTA_SUBTYPE)) {
+       cconv_substruct_init(cts, ctype_rawchild(cts, df),
+ 			   dp+df->size, o, len, ip);
++      if ((d->info & CTF_UNION)) break;
+     }  /* Ignore all other entries in the chain. */
+   }
+ }
+diff -r 42da0b3d2406 lib_luajit/src/lj_cconv.h
+--- a/lib_luajit/src/lj_cconv.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_cconv.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** C type conversions.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_CCONV_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_cdata.c
+--- a/lib_luajit/src/lj_cdata.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_cdata.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** C data management.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "lj_obj.h"
+@@ -127,16 +127,16 @@
+   integer_key:
+     if (ctype_ispointer(ct->info)) {
+       CTSize sz = lj_ctype_size(cts, ctype_cid(ct->info));  /* Element size. */
+-      if (sz != CTSIZE_INVALID) {
+-	if (ctype_isptr(ct->info)) {
+-	  p = (uint8_t *)cdata_getptr(p, ct->size);
+-	} else if ((ct->info & (CTF_VECTOR|CTF_COMPLEX))) {
+-	  if ((ct->info & CTF_COMPLEX)) idx &= 1;
+-	  *qual |= CTF_CONST;  /* Valarray elements are constant. */
+-	}
+-	*pp = p + idx*(int32_t)sz;
+-	return ct;
++      if (sz == CTSIZE_INVALID)
++	lj_err_caller(cts->L, LJ_ERR_FFI_INVSIZE);
++      if (ctype_isptr(ct->info)) {
++	p = (uint8_t *)cdata_getptr(p, ct->size);
++      } else if ((ct->info & (CTF_VECTOR|CTF_COMPLEX))) {
++	if ((ct->info & CTF_COMPLEX)) idx &= 1;
++	*qual |= CTF_CONST;  /* Valarray elements are constant. */
+       }
++      *pp = p + idx*(int32_t)sz;
++      return ct;
+     }
+   } else if (tviscdata(key)) {  /* Integer cdata key. */
+     GCcdata *cdk = cdataV(key);
+diff -r 42da0b3d2406 lib_luajit/src/lj_cdata.h
+--- a/lib_luajit/src/lj_cdata.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_cdata.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** C data management.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_CDATA_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_clib.c
+--- a/lib_luajit/src/lj_clib.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_clib.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** FFI C library loader.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "lj_obj.h"
+diff -r 42da0b3d2406 lib_luajit/src/lj_clib.h
+--- a/lib_luajit/src/lj_clib.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_clib.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** FFI C library loader.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_CLIB_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_cparse.c
+--- a/lib_luajit/src/lj_cparse.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_cparse.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** C declaration parser.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "lj_obj.h"
+diff -r 42da0b3d2406 lib_luajit/src/lj_cparse.h
+--- a/lib_luajit/src/lj_cparse.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_cparse.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** C declaration parser.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_CPARSE_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_crecord.c
+--- a/lib_luajit/src/lj_crecord.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_crecord.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Trace recorder for C data operations.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_ffrecord_c
+@@ -794,7 +794,7 @@
+     }
+   } else if (tref_isstr(idx)) {
+     GCstr *name = strV(&rd->argv[1]);
+-    if (cd->ctypeid == CTID_CTYPEID)
++    if (cd && cd->ctypeid == CTID_CTYPEID)
+       ct = ctype_raw(cts, crec_constructor(J, cd, ptr));
+     if (ctype_isstruct(ct->info)) {
+       CTSize fofs;
+@@ -835,6 +835,7 @@
+       CType *cct = ctype_rawchild(cts, ct);
+       if (ctype_isstruct(cct->info)) {
+ 	ct = cct;
++	cd = NULL;
+ 	if (tref_isstr(idx)) goto again;
+       }
+     }
+@@ -847,8 +848,11 @@
+ 
+   /* Resolve reference for field. */
+   ct = ctype_get(cts, sid);
+-  if (ctype_isref(ct->info))
++  if (ctype_isref(ct->info)) {
+     ptr = emitir(IRT(IR_XLOAD, IRT_PTR), ptr, 0);
++    sid = ctype_cid(ct->info);
++    ct = ctype_get(cts, sid);
++  }
+ 
+   while (ctype_isattrib(ct->info))
+     ct = ctype_child(cts, ct);  /* Skip attributes. */
+@@ -1317,7 +1321,8 @@
+ }
+ 
+ /* Record ctype arithmetic metamethods. */
+-static void crec_arith_meta(jit_State *J, CTState *cts, RecordFFData *rd)
++static TRef crec_arith_meta(jit_State *J, TRef *sp, CType **s, CTState *cts,
++			    RecordFFData *rd)
+ {
+   cTValue *tv = NULL;
+   if (J->base[0]) {
+@@ -1338,13 +1343,20 @@
+     if (tvisfunc(tv)) {
+       J->base[-1] = lj_ir_kfunc(J, funcV(tv)) | TREF_FRAME;
+       rd->nres = -1;  /* Pending tailcall. */
+-      return;
++      return 0;
+     }  /* NYI: non-function metamethods. */
+-  } else if ((MMS)rd->data == MM_eq) {
+-    J->base[0] = TREF_FALSE;
+-    return;
++  } else if ((MMS)rd->data == MM_eq) {  /* Fallback cdata pointer comparison. */
++    if (sp[0] && sp[1] && ctype_isnum(s[0]->info) == ctype_isnum(s[1]->info)) {
++      /* Assume true comparison. Fixup and emit pending guard later. */
++      lj_ir_set(J, IRTG(IR_EQ, IRT_PTR), sp[0], sp[1]);
++      J->postproc = LJ_POST_FIXGUARD;
++      return TREF_TRUE;
++    } else {
++      return TREF_FALSE;
++    }
+   }
+   lj_trace_err(J, LJ_TRERR_BADTYPE);
++  return 0;
+ }
+ 
+ void LJ_FASTCALL recff_cdata_arith(jit_State *J, RecordFFData *rd)
+@@ -1357,7 +1369,7 @@
+     TRef tr = J->base[i];
+     CType *ct = ctype_get(cts, CTID_DOUBLE);
+     if (!tr) {
+-      goto trymeta;
++      lj_trace_err(J, LJ_TRERR_BADTYPE);
+     } else if (tref_iscdata(tr)) {
+       CTypeID id = argv2cdata(J, tr, &rd->argv[i])->ctypeid;
+       IRType t;
+@@ -1387,11 +1399,12 @@
+       }
+       if (ctype_isenum(ct->info)) ct = ctype_child(cts, ct);
+       if (ctype_isnum(ct->info)) {
+-	if (t == IRT_CDATA) goto trymeta;
+-	if (t == IRT_I64 || t == IRT_U64) lj_needsplit(J);
+-	tr = emitir(IRT(IR_XLOAD, t), tr, 0);
+-      } else if (!(ctype_isptr(ct->info) || ctype_isrefarray(ct->info))) {
+-	goto trymeta;
++	if (t == IRT_CDATA) {
++	  tr = 0;
++	} else {
++	  if (t == IRT_I64 || t == IRT_U64) lj_needsplit(J);
++	  tr = emitir(IRT(IR_XLOAD, t), tr, 0);
++	}
+       }
+     } else if (tref_isnil(tr)) {
+       tr = lj_ir_kptr(J, NULL);
+@@ -1411,10 +1424,17 @@
+ 	  emitir(IRTG(IR_EQ, IRT_STR), tr, lj_ir_kstr(J, str));
+ 	  ct = ctype_child(cts, cct);
+ 	  tr = lj_ir_kint(J, (int32_t)ofs);
+-	}  /* else: interpreter will throw. */
+-      }  /* else: interpreter will throw. */
++	} else {  /* Interpreter will throw or return false. */
++	  ct = ctype_get(cts, CTID_P_VOID);
++	}
++      } else if (ctype_isptr(ct->info)) {
++	tr = emitir(IRT(IR_ADD, IRT_PTR), tr, lj_ir_kintp(J, sizeof(GCstr)));
++      } else {
++	ct = ctype_get(cts, CTID_P_VOID);
++      }
+     } else if (!tref_isnum(tr)) {
+-      goto trymeta;
++      tr = 0;
++      ct = ctype_get(cts, CTID_P_VOID);
+     }
+   ok:
+     s[i] = ct;
+@@ -1422,22 +1442,20 @@
+   }
+   {
+     TRef tr;
+-    if ((tr = crec_arith_int64(J, sp, s, (MMS)rd->data)) ||
+-	(tr = crec_arith_ptr(J, sp, s, (MMS)rd->data))) {
+-      J->base[0] = tr;
+-      /* Fixup cdata comparisons, too. Avoids some cdata escapes. */
+-      if (J->postproc == LJ_POST_FIXGUARD && frame_iscont(J->L->base-1) &&
+-	  !irt_isguard(J->guardemit)) {
+-	const BCIns *pc = frame_contpc(J->L->base-1) - 1;
+-	if (bc_op(*pc) <= BC_ISNEP) {
+-	  setframe_pc(&J2G(J)->tmptv, pc);
+-	  J2G(J)->tmptv.u32.lo = ((tref_istrue(tr) ^ bc_op(*pc)) & 1);
+-	  J->postproc = LJ_POST_FIXCOMP;
+-	}
++    if (!(tr = crec_arith_int64(J, sp, s, (MMS)rd->data)) &&
++	!(tr = crec_arith_ptr(J, sp, s, (MMS)rd->data)) &&
++	!(tr = crec_arith_meta(J, sp, s, cts, rd)))
++      return;
++    J->base[0] = tr;
++    /* Fixup cdata comparisons, too. Avoids some cdata escapes. */
++    if (J->postproc == LJ_POST_FIXGUARD && frame_iscont(J->L->base-1) &&
++	!irt_isguard(J->guardemit)) {
++      const BCIns *pc = frame_contpc(J->L->base-1) - 1;
++      if (bc_op(*pc) <= BC_ISNEP) {
++	setframe_pc(&J2G(J)->tmptv, pc);
++	J2G(J)->tmptv.u32.lo = ((tref_istrue(tr) ^ bc_op(*pc)) & 1);
++	J->postproc = LJ_POST_FIXCOMP;
+       }
+-    } else {
+-    trymeta:
+-      crec_arith_meta(J, cts, rd);
+     }
+   }
+ }
+diff -r 42da0b3d2406 lib_luajit/src/lj_crecord.h
+--- a/lib_luajit/src/lj_crecord.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_crecord.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Trace recorder for C data operations.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_CRECORD_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_ctype.c
+--- a/lib_luajit/src/lj_ctype.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ctype.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** C type management.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include "lj_obj.h"
+diff -r 42da0b3d2406 lib_luajit/src/lj_ctype.h
+--- a/lib_luajit/src/lj_ctype.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ctype.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** C type management.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_CTYPE_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_debug.c
+--- a/lib_luajit/src/lj_debug.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_debug.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Debugging and introspection.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_debug_c
+@@ -14,6 +14,7 @@
+ #include "lj_state.h"
+ #include "lj_frame.h"
+ #include "lj_bc.h"
++#include "lj_vm.h"
+ #if LJ_HASJIT
+ #include "lj_jit.h"
+ #endif
+@@ -86,7 +87,8 @@
+ 	if (frame_islua(f)) {
+ 	  f = frame_prevl(f);
+ 	} else {
+-	  if (frame_isc(f))
++	  if (frame_isc(f) || (LJ_HASFFI && frame_iscont(f) &&
++			       (f-1)->u32.lo == LJ_CONT_FFI_CALLBACK))
+ 	    cf = cframe_raw(cframe_prev(cf));
+ 	  f = frame_prevd(f);
+ 	}
+@@ -463,7 +465,7 @@
+ 	lj_debug_shortname(ar->short_src, name);
+ 	ar->linedefined = (int)firstline;
+ 	ar->lastlinedefined = (int)(firstline + pt->numline);
+-	ar->what = firstline ? "Lua" : "main";
++	ar->what = (firstline || !pt->numline) ? "Lua" : "main";
+       } else {
+ 	ar->source = "=[C]";
+ 	ar->short_src[0] = '[';
+diff -r 42da0b3d2406 lib_luajit/src/lj_debug.h
+--- a/lib_luajit/src/lj_debug.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_debug.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Debugging and introspection.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_DEBUG_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_def.h
+--- a/lib_luajit/src/lj_def.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_def.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LuaJIT common internal definitions.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_DEF_H
+@@ -111,7 +111,7 @@
+ #define bloomset(b, x)	((b) |= bloombit((x)))
+ #define bloomtest(b, x)	((b) & bloombit((x)))
+ 
+-#if defined(__GNUC__)
++#if defined(__GNUC__) || defined(__psp2__)
+ 
+ #define LJ_NORET	__attribute__((noreturn))
+ #define LJ_ALIGN(n)	__attribute__((aligned(n)))
+@@ -119,7 +119,7 @@
+ #define LJ_AINLINE	inline __attribute__((always_inline))
+ #define LJ_NOINLINE	__attribute__((noinline))
+ 
+-#if defined(__ELF__) || defined(__MACH__)
++#if defined(__ELF__) || defined(__MACH__) || defined(__psp2__)
+ #if !((defined(__sun__) && defined(__svr4__)) || defined(__CELLOS_LV2__))
+ #define LJ_NOAPI	extern __attribute__((visibility("hidden")))
+ #endif
+@@ -150,6 +150,9 @@
+ #if defined(__arm__)
+ static LJ_AINLINE uint32_t lj_bswap(uint32_t x)
+ {
++#if defined(__psp2__)
++  return __builtin_rev(x);
++#else
+   uint32_t r;
+ #if __ARM_ARCH_6__ || __ARM_ARCH_6J__ || __ARM_ARCH_6T2__ || __ARM_ARCH_6Z__ ||\
+     __ARM_ARCH_6ZK__ || __ARM_ARCH_7__ || __ARM_ARCH_7A__ || __ARM_ARCH_7R__
+@@ -163,6 +166,7 @@
+ #endif
+   return ((r & 0xff00ffffu) >> 8) ^ lj_ror(x, 8);
+ #endif
++#endif
+ }
+ 
+ static LJ_AINLINE uint64_t lj_bswap64(uint64_t x)
+diff -r 42da0b3d2406 lib_luajit/src/lj_dispatch.c
+--- a/lib_luajit/src/lj_dispatch.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_dispatch.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Instruction dispatch handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_dispatch_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_dispatch.h
+--- a/lib_luajit/src/lj_dispatch.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_dispatch.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Instruction dispatch handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_DISPATCH_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_emit_arm.h
+--- a/lib_luajit/src/lj_emit_arm.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_emit_arm.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** ARM instruction emitter.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /* -- Constant encoding --------------------------------------------------- */
+diff -r 42da0b3d2406 lib_luajit/src/lj_emit_mips.h
+--- a/lib_luajit/src/lj_emit_mips.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_emit_mips.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** MIPS instruction emitter.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /* -- Emit basic instructions --------------------------------------------- */
+diff -r 42da0b3d2406 lib_luajit/src/lj_emit_ppc.h
+--- a/lib_luajit/src/lj_emit_ppc.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_emit_ppc.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** PPC instruction emitter.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /* -- Emit basic instructions --------------------------------------------- */
+diff -r 42da0b3d2406 lib_luajit/src/lj_emit_x86.h
+--- a/lib_luajit/src/lj_emit_x86.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_emit_x86.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** x86/x64 instruction emitter.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /* -- Emit basic instructions --------------------------------------------- */
+diff -r 42da0b3d2406 lib_luajit/src/lj_err.c
+--- a/lib_luajit/src/lj_err.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_err.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Error handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_err_c
+@@ -57,10 +57,10 @@
+ ** EXT cannot be enabled on WIN32 since system exceptions use code-driven SEH.
+ ** EXT is mandatory on WIN64 since the calling convention has an abundance
+ ** of callee-saved registers (rbx, rbp, rsi, rdi, r12-r15, xmm6-xmm15).
+-** EXT is mandatory on POSIX/x64 since the interpreter doesn't save r12/r13.
++** The POSIX/x64 interpreter only saves r12/r13 for INT (e.g. PS4).
+ */
+ 
+-#if defined(__GNUC__) && (LJ_TARGET_X64 || defined(LUAJIT_UNWIND_EXTERNAL))
++#if defined(__GNUC__) && (LJ_TARGET_X64 || defined(LUAJIT_UNWIND_EXTERNAL)) && !LJ_NO_UNWIND
+ #define LJ_UNWIND_EXT	1
+ #elif LJ_TARGET_X64 && LJ_TARGET_WINDOWS
+ #define LJ_UNWIND_EXT	1
+@@ -378,7 +378,7 @@
+   ULONG64 EstablisherFrame;
+   ULONG64 TargetIp;
+   PCONTEXT ContextRecord;
+-  PEXCEPTION_ROUTINE LanguageHandler;
++  void (*LanguageHandler)(void);
+   PVOID HandlerData;
+   PUNWIND_HISTORY_TABLE HistoryTable;
+   ULONG ScopeIndex;
+@@ -499,8 +499,7 @@
+ {
+   cTValue *frame = L->base-1, *bot = tvref(L->stack);
+   void *cf = L->cframe;
+-  while (frame > bot) {
+-    lua_assert(cf != NULL);
++  while (frame > bot && cf) {
+     while (cframe_nres(cframe_raw(cf)) < 0) {  /* cframe without frame? */
+       if (frame >= restorestack(L, -cframe_nres(cf)))
+ 	break;
+@@ -518,12 +517,14 @@
+     case FRAME_C:
+       cf = cframe_prev(cf);
+       /* fallthrough */
++    case FRAME_VARG:
++      frame = frame_prevd(frame);
++      break;
+     case FRAME_CONT:
+ #if LJ_HASFFI
+       if ((frame-1)->u32.lo == LJ_CONT_FFI_CALLBACK)
+ 	cf = cframe_prev(cf);
+ #endif
+-    case FRAME_VARG:
+       frame = frame_prevd(frame);
+       break;
+     case FRAME_CP:
+@@ -725,9 +726,23 @@
+ /* Typecheck error for arguments. */
+ LJ_NOINLINE void lj_err_argtype(lua_State *L, int narg, const char *xname)
+ {
+-  TValue *o = narg < 0 ? L->top + narg : L->base + narg-1;
+-  const char *tname = o < L->top ? lj_typename(o) : lj_obj_typename[0];
+-  const char *msg = lj_str_pushf(L, err2msg(LJ_ERR_BADTYPE), xname, tname);
++  const char *tname, *msg;
++  if (narg <= LUA_REGISTRYINDEX) {
++    if (narg >= LUA_GLOBALSINDEX) {
++      tname = lj_obj_itypename[~LJ_TTAB];
++    } else {
++      GCfunc *fn = curr_func(L);
++      int idx = LUA_GLOBALSINDEX - narg;
++      if (idx <= fn->c.nupvalues)
++	tname = lj_typename(&fn->c.upvalue[idx-1]);
++      else
++	tname = lj_obj_typename[0];
++    }
++  } else {
++    TValue *o = narg < 0 ? L->top + narg : L->base + narg-1;
++    tname = o < L->top ? lj_typename(o) : lj_obj_typename[0];
++  }
++  msg = lj_str_pushf(L, err2msg(LJ_ERR_BADTYPE), xname, tname);
+   err_argmsg(L, narg, msg);
+ }
+ 
+diff -r 42da0b3d2406 lib_luajit/src/lj_err.h
+--- a/lib_luajit/src/lj_err.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_err.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Error handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_ERR_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_errmsg.h
+--- a/lib_luajit/src/lj_errmsg.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_errmsg.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** VM error messages.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /* This file may be included multiple times with different ERRDEF macros. */
+diff -r 42da0b3d2406 lib_luajit/src/lj_ff.h
+--- a/lib_luajit/src/lj_ff.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ff.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Fast function IDs.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_FF_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_ffrecord.c
+--- a/lib_luajit/src/lj_ffrecord.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ffrecord.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Fast function call recorder.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_ffrecord_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_ffrecord.h
+--- a/lib_luajit/src/lj_ffrecord.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ffrecord.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Fast function call recorder.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_FFRECORD_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_frame.h
+--- a/lib_luajit/src/lj_frame.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_frame.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Stack frames.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_FRAME_H
+@@ -86,7 +86,11 @@
+ #define CFRAME_OFS_ERRF		(5*4)
+ #define CFRAME_OFS_NRES		(4*4)
+ #define CFRAME_OFS_MULTRES	(1*4)
++#if LJ_NO_UNWIND
++#define CFRAME_SIZE		(12*8)
++#else
+ #define CFRAME_SIZE		(10*8)
++#endif
+ #define CFRAME_SIZE_JIT		(CFRAME_SIZE + 16)
+ #define CFRAME_SHIFT_MULTRES	0
+ #endif
+diff -r 42da0b3d2406 lib_luajit/src/lj_func.c
+--- a/lib_luajit/src/lj_func.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_func.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Function handling (prototypes, functions and upvalues).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lj_func.h
+--- a/lib_luajit/src/lj_func.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_func.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Function handling (prototypes, functions and upvalues).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_FUNC_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_gc.c
+--- a/lib_luajit/src/lj_gc.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_gc.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Garbage collector.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+@@ -631,6 +631,8 @@
+   case GCSsweep: {
+     MSize old = g->gc.total;
+     setmref(g->gc.sweep, gc_sweep(g, mref(g->gc.sweep, GCRef), GCSWEEPMAX));
++    lua_assert(old >= g->gc.total);
++    g->gc.estimate -= old - g->gc.total;
+     if (gcref(*mref(g->gc.sweep, GCRef)) == NULL) {
+       gc_shrink(g, L);
+       if (gcref(g->gc.mmudata)) {  /* Need any finalizations? */
+@@ -643,8 +645,6 @@
+ 	g->gc.debt = 0;
+       }
+     }
+-    lua_assert(old >= g->gc.total);
+-    g->gc.estimate -= old - g->gc.total;
+     return GCSWEEPMAX*GCSWEEPCOST;
+     }
+   case GCSfinalize:
+diff -r 42da0b3d2406 lib_luajit/src/lj_gc.h
+--- a/lib_luajit/src/lj_gc.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_gc.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Garbage collector.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_GC_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_gdbjit.c
+--- a/lib_luajit/src/lj_gdbjit.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_gdbjit.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Client for the GDB JIT API.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_gdbjit_c
+@@ -356,6 +356,8 @@
+   .eosabi = 2,
+ #elif defined(__OpenBSD__)
+   .eosabi = 12,
++#elif defined(__DragonFly__)
++  .eosabi = 0,
+ #elif (defined(__sun__) && defined(__svr4__))
+   .eosabi = 6,
+ #else
+diff -r 42da0b3d2406 lib_luajit/src/lj_gdbjit.h
+--- a/lib_luajit/src/lj_gdbjit.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_gdbjit.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Client for the GDB JIT API.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_GDBJIT_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_ir.c
+--- a/lib_luajit/src/lj_ir.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ir.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** SSA IR (Intermediate Representation) emitter.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_ir_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_ir.h
+--- a/lib_luajit/src/lj_ir.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ir.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** SSA IR (Intermediate Representation) format.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_IR_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_ircall.h
+--- a/lib_luajit/src/lj_ircall.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_ircall.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** IR CALL* instruction definitions.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_IRCALL_H
+@@ -86,6 +86,12 @@
+ #define IRCALLCOND_FFI32(x)		NULL
+ #endif
+ 
++#if LJ_TARGET_X86
++#define CCI_RANDFPR	0	/* Clang on OSX/x86 is overzealous. */
++#else
++#define CCI_RANDFPR	CCI_NOFPRCLOBBER
++#endif
++
+ #if LJ_SOFTFP
+ #define ARG1_FP		2	/* Treat as 2 32 bit arguments. */
+ #else
+@@ -112,7 +118,7 @@
+   _(ANY,	lj_gc_step_jit,		2,  FS, NIL, CCI_L) \
+   _(ANY,	lj_gc_barrieruv,	2,  FS, NIL, 0) \
+   _(ANY,	lj_mem_newgco,		2,  FS, P32, CCI_L) \
+-  _(ANY,	lj_math_random_step, 1, FS, NUM, CCI_CASTU64|CCI_NOFPRCLOBBER) \
++  _(ANY,	lj_math_random_step, 1, FS, NUM, CCI_CASTU64|CCI_RANDFPR)\
+   _(ANY,	lj_vm_modi,		2,  FN, INT, 0) \
+   _(ANY,	sinh,			ARG1_FP,  N, NUM, 0) \
+   _(ANY,	cosh,			ARG1_FP,  N, NUM, 0) \
+diff -r 42da0b3d2406 lib_luajit/src/lj_iropt.h
+--- a/lib_luajit/src/lj_iropt.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_iropt.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Common header for IR emitter and optimizations.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_IROPT_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_jit.h
+--- a/lib_luajit/src/lj_jit.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_jit.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Common definitions for the JIT compiler.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_JIT_H
+@@ -279,6 +279,7 @@
+ 
+ /* Scalar evolution analysis cache. */
+ typedef struct ScEvEntry {
++  MRef pc;		/* Bytecode PC of FORI. */
+   IRRef1 idx;		/* Index reference. */
+   IRRef1 start;		/* Constant start reference. */
+   IRRef1 stop;		/* Constant stop reference. */
+diff -r 42da0b3d2406 lib_luajit/src/lj_lex.c
+--- a/lib_luajit/src/lj_lex.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_lex.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Lexical analyzer.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+@@ -378,6 +378,7 @@
+   ls->vtop = 0;
+   ls->bcstack = NULL;
+   ls->sizebcstack = 0;
++  ls->token = 0;
+   ls->lookahead = TK_eof;  /* No look-ahead token. */
+   ls->linenumber = 1;
+   ls->lastline = 1;
+diff -r 42da0b3d2406 lib_luajit/src/lj_lex.h
+--- a/lib_luajit/src/lj_lex.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_lex.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Lexical analyzer.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_LEX_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_lib.c
+--- a/lib_luajit/src/lj_lib.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_lib.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Library function support.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_lib_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_lib.h
+--- a/lib_luajit/src/lj_lib.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_lib.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Library function support.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_LIB_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_load.c
+--- a/lib_luajit/src/lj_load.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_load.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Load and dump code.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include <errno.h>
+diff -r 42da0b3d2406 lib_luajit/src/lj_mcode.c
+--- a/lib_luajit/src/lj_mcode.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_mcode.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Machine code management.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_mcode_c
+@@ -145,7 +145,7 @@
+ 
+ /* -- MCode area protection ----------------------------------------------- */
+ 
+-/* Define this ONLY if the page protection twiddling becomes a bottleneck. */
++/* Define this ONLY if page protection twiddling becomes a bottleneck. */
+ #ifdef LUAJIT_UNPROTECT_MCODE
+ 
+ /* It's generally considered to be a potential security risk to have
+@@ -252,7 +252,20 @@
+ #else
+ 
+ /* All memory addresses are reachable by relative jumps. */
+-#define mcode_alloc(J, sz)	mcode_alloc_at((J), 0, (sz), MCPROT_GEN)
++static void *mcode_alloc(jit_State *J, size_t sz)
++{
++#ifdef __OpenBSD__
++  /* Allow better executable memory allocation for OpenBSD W^X mode. */
++  void *p = mcode_alloc_at(J, 0, sz, MCPROT_RUN);
++  if (p && mcode_setprot(p, sz, MCPROT_GEN)) {
++    mcode_free(J, p, sz);
++    return NULL;
++  }
++  return p;
++#else
++  return mcode_alloc_at(J, 0, sz, MCPROT_GEN);
++#endif
++}
+ 
+ #endif
+ 
+diff -r 42da0b3d2406 lib_luajit/src/lj_mcode.h
+--- a/lib_luajit/src/lj_mcode.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_mcode.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Machine code management.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_MCODE_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_meta.c
+--- a/lib_luajit/src/lj_meta.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_meta.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Metamethod handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lj_meta.h
+--- a/lib_luajit/src/lj_meta.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_meta.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Metamethod handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_META_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_obj.c
+--- a/lib_luajit/src/lj_obj.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_obj.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Miscellaneous object handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_obj_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_obj.h
+--- a/lib_luajit/src/lj_obj.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_obj.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LuaJIT VM tags, values and objects.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lj_opt_dce.c
+--- a/lib_luajit/src/lj_opt_dce.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_opt_dce.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** DCE: Dead Code Elimination. Pre-LOOP only -- ASM already performs DCE.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_opt_dce_c
+@@ -69,6 +69,7 @@
+   if ((J->flags & JIT_F_OPT_DCE)) {
+     dce_marksnap(J);
+     dce_propagate(J);
++    memset(J->bpropcache, 0, sizeof(J->bpropcache));  /* Invalidate cache. */
+   }
+ }
+ 
+diff -r 42da0b3d2406 lib_luajit/src/lj_opt_fold.c
+--- a/lib_luajit/src/lj_opt_fold.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_opt_fold.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -2,7 +2,7 @@
+ ** FOLD: Constant Folding, Algebraic Simplifications and Reassociation.
+ ** ABCelim: Array Bounds Check Elimination.
+ ** CSE: Common-Subexpression Elimination.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_opt_fold_c
+@@ -505,13 +505,14 @@
+   } else {
+     /* Reassociate: strref(snew(strref(str, a), len), b) ==> strref(str, a+b) */
+     IRIns *ir = IR(fleft->op1);
+-    IRRef1 str = ir->op1;  /* IRIns * is not valid across emitir. */
+-    lua_assert(ir->o == IR_STRREF);
+-    PHIBARRIER(ir);
+-    fins->op2 = emitir(IRTI(IR_ADD), ir->op2, fins->op2);  /* Clobbers fins! */
+-    fins->op1 = str;
+-    fins->ot = IRT(IR_STRREF, IRT_P32);
+-    return RETRYFOLD;
++    if (ir->o == IR_STRREF) {
++      IRRef1 str = ir->op1;  /* IRIns * is not valid across emitir. */
++      PHIBARRIER(ir);
++      fins->op2 = emitir(IRTI(IR_ADD), ir->op2, fins->op2); /* Clobbers fins! */
++      fins->op1 = str;
++      fins->ot = IRT(IR_STRREF, IRT_P32);
++      return RETRYFOLD;
++    }
+   }
+   return NEXTFOLD;
+ }
+@@ -1005,11 +1006,16 @@
+ LJFOLD(TOBIT CONV KNUM)
+ LJFOLDF(simplify_tobit_conv)
+ {
+-  if ((fleft->op2 & IRCONV_SRCMASK) == IRT_INT ||
+-      (fleft->op2 & IRCONV_SRCMASK) == IRT_U32) {
+-    /* Fold even across PHI to avoid expensive num->int conversions in loop. */
++  /* Fold even across PHI to avoid expensive num->int conversions in loop. */
++  if ((fleft->op2 & IRCONV_SRCMASK) == IRT_INT) {
+     lua_assert(irt_isnum(fleft->t));
+     return fleft->op1;
++  } else if ((fleft->op2 & IRCONV_SRCMASK) == IRT_U32) {
++    lua_assert(irt_isnum(fleft->t));
++    fins->o = IR_CONV;
++    fins->op1 = fleft->op1;
++    fins->op2 = (IRT_INT<<5)|IRT_U32;
++    return RETRYFOLD;
+   }
+   return NEXTFOLD;
+ }
+@@ -1825,7 +1831,8 @@
+   if (len <= FOLD_SNEW_MAX_LEN) {
+     IROp op = (IROp)fins->o;
+     IRRef strref = fleft->op1;
+-    lua_assert(IR(strref)->o == IR_STRREF);
++    if (IR(strref)->o != IR_STRREF)
++      return NEXTFOLD;
+     if (op == IR_EQ) {
+       emitir(IRTGI(IR_EQ), fleft->op2, lj_ir_kint(J, len));
+       /* Caveat: fins/fleft/fright is no longer valid after emitir. */
+diff -r 42da0b3d2406 lib_luajit/src/lj_opt_loop.c
+--- a/lib_luajit/src/lj_opt_loop.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_opt_loop.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LOOP: Loop Optimizations.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_opt_loop_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_opt_mem.c
+--- a/lib_luajit/src/lj_opt_mem.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_opt_mem.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -3,7 +3,7 @@
+ ** AA: Alias Analysis using high-level semantic disambiguation.
+ ** FWD: Load Forwarding (L2L) + Store Forwarding (S2L).
+ ** DSE: Dead-Store Elimination.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_opt_mem_c
+@@ -740,21 +740,19 @@
+     case ALIAS_MUST:
+       /* Emit conversion if the loaded type doesn't match the forwarded type. */
+       if (!irt_sametype(fins->t, IR(store->op2)->t)) {
+-	IRType st = irt_type(fins->t);
+-	if (st == IRT_I8 || st == IRT_I16) {  /* Trunc + sign-extend. */
+-	  st |= IRCONV_SEXT;
+-	} else if (st == IRT_U8 || st == IRT_U16) {  /* Trunc + zero-extend. */
+-	} else if (st == IRT_INT) {
+-	  st = irt_type(IR(store->op2)->t);  /* Needs dummy CONV.int.*. */
+-	} else {  /* I64/U64 are boxed, U32 is hidden behind a CONV.num.u32. */
+-	  goto store_fwd;
++	IRType dt = irt_type(fins->t), st = irt_type(IR(store->op2)->t);
++	if (dt == IRT_I8 || dt == IRT_I16) {  /* Trunc + sign-extend. */
++	  st = dt | IRCONV_SEXT;
++	  dt = IRT_INT;
++	} else if (dt == IRT_U8 || dt == IRT_U16) {  /* Trunc + zero-extend. */
++	  st = dt;
++	  dt = IRT_INT;
+ 	}
+-	fins->ot = IRTI(IR_CONV);
++	fins->ot = IRT(IR_CONV, dt);
+ 	fins->op1 = store->op2;
+-	fins->op2 = (IRT_INT<<5)|st;
++	fins->op2 = (dt<<5)|st;
+ 	return RETRYFOLD;
+       }
+-    store_fwd:
+       return store->op2;  /* Store forwarding. */
+     }
+     ref = store->prev;
+@@ -795,6 +793,7 @@
+   IRRef ref = *refp;
+   if (J->chain[IR_CALLXS] > lim) lim = J->chain[IR_CALLXS];
+   if (J->chain[IR_XBAR] > lim) lim = J->chain[IR_XBAR];
++  if (J->chain[IR_XSNEW] > lim) lim = J->chain[IR_XSNEW];
+   while (ref > lim) {  /* Search for redundant or conflicting stores. */
+     IRIns *store = IR(ref);
+     switch (aa_xref(J, xr, fins, store)) {
+diff -r 42da0b3d2406 lib_luajit/src/lj_opt_narrow.c
+--- a/lib_luajit/src/lj_opt_narrow.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_opt_narrow.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ /*
+ ** NARROW: Narrowing of numbers to integers (double to int32_t).
+ ** STRIPOV: Stripping of overflow checks.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_opt_narrow_c
+@@ -205,7 +205,6 @@
+   jit_State *J;		/* JIT compiler state. */
+   NarrowIns *sp;	/* Current stack pointer. */
+   NarrowIns *maxsp;	/* Maximum stack pointer minus redzone. */
+-  int lim;		/* Limit on the number of emitted conversions. */
+   IRRef mode;		/* Conversion mode (IRCONV_*). */
+   IRType t;		/* Destination type: IRT_INT or IRT_I64. */
+   NarrowIns stack[NARROW_MAX_STACK];  /* Stack holding stack-machine code. */
+@@ -247,10 +246,16 @@
+     if (bp) {
+       ref = bp->val;
+     } else if (++depth < NARROW_MAX_BACKPROP && nc->sp < nc->maxsp) {
++      NarrowIns *savesp = nc->sp;
+       narrow_stripov_backprop(nc, ir->op1, depth);
+-      narrow_stripov_backprop(nc, ir->op2, depth);
+-      *nc->sp++ = NARROWINS(IRT(ir->o - IR_ADDOV + IR_ADD, IRT_INT), ref);
+-      return;
++      if (nc->sp < nc->maxsp) {
++	narrow_stripov_backprop(nc, ir->op2, depth);
++	if (nc->sp < nc->maxsp) {
++	  *nc->sp++ = NARROWINS(IRT(ir->o - IR_ADDOV + IR_ADD, IRT_INT), ref);
++	  return;
++	}
++      }
++      nc->sp = savesp;  /* Path too deep, need to backtrack. */
+     }
+   }
+   *nc->sp++ = NARROWINS(NARROW_REF, ref);
+@@ -263,6 +268,8 @@
+   IRIns *ir = IR(ref);
+   IRRef cref;
+ 
++  if (nc->sp >= nc->maxsp) return 10;  /* Path too deep. */
++
+   /* Check the easy cases first. */
+   if (ir->o == IR_CONV && (ir->op2 & IRCONV_SRCMASK) == IRT_INT) {
+     if ((nc->mode & IRCONV_CONVMASK) <= IRCONV_ANY)
+@@ -334,7 +341,7 @@
+       NarrowIns *savesp = nc->sp;
+       int count = narrow_conv_backprop(nc, ir->op1, depth);
+       count += narrow_conv_backprop(nc, ir->op2, depth);
+-      if (count <= nc->lim) {  /* Limit total number of conversions. */
++      if (count <= 1) {  /* Limit total number of conversions. */
+ 	*nc->sp++ = NARROWINS(IRT(ir->o, nc->t), ref);
+ 	return count;
+       }
+@@ -406,12 +413,10 @@
+     nc.t = irt_type(fins->t);
+     if (fins->o == IR_TOBIT) {
+       nc.mode = IRCONV_TOBIT;  /* Used only in the backpropagation cache. */
+-      nc.lim = 2;  /* TOBIT can use a more optimistic rule. */
+     } else {
+       nc.mode = fins->op2;
+-      nc.lim = 1;
+     }
+-    if (narrow_conv_backprop(&nc, fins->op1, 0) <= nc.lim)
++    if (narrow_conv_backprop(&nc, fins->op1, 0) <= 1)
+       return narrow_conv_emit(J, &nc);
+   }
+   return NEXTFOLD;
+diff -r 42da0b3d2406 lib_luajit/src/lj_opt_sink.c
+--- a/lib_luajit/src/lj_opt_sink.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_opt_sink.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** SINK: Allocation Sinking and Store Sinking.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_opt_sink_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_opt_split.c
+--- a/lib_luajit/src/lj_opt_split.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_opt_split.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** SPLIT: Split 64 bit IR instructions into 32 bit IR instructions.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_opt_split_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_parse.c
+--- a/lib_luajit/src/lj_parse.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_parse.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Lua parser (source code -> bytecode).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+@@ -685,10 +685,12 @@
+   BCPos j = fs->pc - 1;
+   BCIns *ip = &fs->bcbase[j].ins;
+   fs->jpc = NO_JMP;
+-  if ((int32_t)j >= (int32_t)fs->lasttarget && bc_op(*ip) == BC_UCLO)
++  if ((int32_t)j >= (int32_t)fs->lasttarget && bc_op(*ip) == BC_UCLO) {
+     setbc_j(ip, NO_JMP);
+-  else
++    fs->lasttarget = j+1;
++  } else {
+     j = bcemit_AJ(fs, BC_JMP, fs->freereg, NO_JMP);
++  }
+   jmp_append(fs, &j, jpc);
+   return j;
+ }
+diff -r 42da0b3d2406 lib_luajit/src/lj_parse.h
+--- a/lib_luajit/src/lj_parse.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_parse.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Lua parser (source code -> bytecode).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_PARSE_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_record.c
+--- a/lib_luajit/src/lj_record.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_record.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Trace recorder (bytecode -> SSA IR).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_record_c
+@@ -421,6 +421,7 @@
+     J->base[ra+FORL_IDX] = idx = emitir(IRT(IR_ADD, t), idx, step);
+   J->base[ra+FORL_EXT] = idx;
+   scev->idx = tref_ref(idx);
++  setmref(scev->pc, fori);
+   J->maxslot = ra+FORL_EXT+1;
+ }
+ 
+@@ -436,7 +437,7 @@
+   IRType t;
+   if (isforl) {  /* Handle FORL/JFORL opcodes. */
+     TRef idx = tr[FORL_IDX];
+-    if (tref_ref(idx) == J->scev.idx) {
++    if (mref(J->scev.pc, const BCIns) == fori && tref_ref(idx) == J->scev.idx) {
+       t = J->scev.t.irt;
+       stop = J->scev.stop;
+       idx = emitir(IRT(IR_ADD, t), idx, J->scev.step);
+@@ -744,6 +745,8 @@
+     } else if (J->parent == 0 && !bc_isret(bc_op(J->cur.startins))) {
+       /* Return to lower frame would leave the loop in a root trace. */
+       lj_trace_err(J, LJ_TRERR_LLEAVE);
++    } else if (J->needsnap) {  /* Tailcalled to ff with side-effects. */
++      lj_trace_err(J, LJ_TRERR_NYIRETL);  /* No way to insert snapshot here. */
+     } else {  /* Return to lower frame. Guard for the target we return to. */
+       TRef trpt = lj_ir_kgc(J, obj2gco(pt), IRT_PROTO);
+       TRef trpc = lj_ir_kptr(J, (void *)frame_pc(frame));
+@@ -1059,7 +1062,7 @@
+       lua_assert(irt_isint(J->scev.t) && ir->o == IR_SLOAD);
+       stop = numberVint(&(J->L->base - J->baseslot)[ir->op1 + FORL_STOP]);
+       /* Runtime value for stop of loop is within bounds? */
+-      if ((int64_t)stop + ofs < (int64_t)asize) {
++      if ((uint64_t)stop + ofs < (uint64_t)asize) {
+ 	/* Emit invariant bounds check for stop. */
+ 	emitir(IRTG(IR_ABC, IRT_P32), asizeref, ofs == 0 ? J->scev.stop :
+ 	       emitir(IRTI(IR_ADD), J->scev.stop, ofsref));
+@@ -2153,6 +2156,7 @@
+   memset(J->chain, 0, sizeof(J->chain));
+   memset(J->bpropcache, 0, sizeof(J->bpropcache));
+   J->scev.idx = REF_NIL;
++  setmref(J->scev.pc, NULL);
+ 
+   J->baseslot = 1;  /* Invoking function is at base[-1]. */
+   J->base = J->slot + J->baseslot;
+diff -r 42da0b3d2406 lib_luajit/src/lj_record.h
+--- a/lib_luajit/src/lj_record.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_record.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Trace recorder (bytecode -> SSA IR).
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_RECORD_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_snap.c
+--- a/lib_luajit/src/lj_snap.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_snap.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Snapshot handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_snap_c
+@@ -104,8 +104,6 @@
+     if (frame_islua(frame)) {
+       map[f++] = SNAP_MKPC(frame_pc(frame));
+       frame = frame_prevl(frame);
+-      if (frame + funcproto(frame_func(frame))->framesize > ftop)
+-	ftop = frame + funcproto(frame_func(frame))->framesize;
+     } else if (frame_iscont(frame)) {
+       map[f++] = SNAP_MKFTSZ(frame_ftsz(frame));
+       map[f++] = SNAP_MKPC(frame_contpc(frame));
+@@ -114,7 +112,10 @@
+       lua_assert(!frame_isc(frame));
+       map[f++] = SNAP_MKFTSZ(frame_ftsz(frame));
+       frame = frame_prevd(frame);
++      continue;
+     }
++    if (frame + funcproto(frame_func(frame))->framesize > ftop)
++      ftop = frame + funcproto(frame_func(frame))->framesize;
+   }
+   lua_assert(f == (MSize)(1 + J->framedepth));
+   return (BCReg)(ftop - lim);
+diff -r 42da0b3d2406 lib_luajit/src/lj_snap.h
+--- a/lib_luajit/src/lj_snap.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_snap.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Snapshot handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_SNAP_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_state.c
+--- a/lib_luajit/src/lj_state.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_state.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** State and stack handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+@@ -175,7 +175,7 @@
+     g->allocf(g->allocd, G2GG(g), sizeof(GG_State), 0);
+ }
+ 
+-#if LJ_64
++#if LJ_64 && !(defined(LUAJIT_USE_VALGRIND) && defined(LUAJIT_USE_SYSMALLOC))
+ lua_State *lj_state_newstate(lua_Alloc f, void *ud)
+ #else
+ LUA_API lua_State *lua_newstate(lua_Alloc f, void *ud)
+diff -r 42da0b3d2406 lib_luajit/src/lj_state.h
+--- a/lib_luajit/src/lj_state.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_state.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** State and stack handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_STATE_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_str.c
+--- a/lib_luajit/src/lj_str.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_str.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** String handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lj_str.h
+--- a/lib_luajit/src/lj_str.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_str.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** String handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_STR_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_strscan.c
+--- a/lib_luajit/src/lj_strscan.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_strscan.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** String scanning.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include <math.h>
+@@ -199,7 +199,7 @@
+       *xip++ = d + ((*p != '.' ? *p : *++p) & 15); p++;
+     }
+     /* Scan and realign trailing digit. */
+-    if (i) *xip++ = 10 * ((*p != '.' ? *p : *++p) & 15), ex10--, p++;
++    if (i) *xip++ = 10 * ((*p != '.' ? *p : *++p) & 15), ex10--, dig++, p++;
+ 
+     /* Summarize rounding-effect of excess digits. */
+     if (dig > STRSCAN_MAXDIG) {
+@@ -289,14 +289,15 @@
+ 
+     /* Scale down until no more than 17 or 18 integer part digits remain. */
+     while (idig > 9) {
+-      uint32_t i, cy = 0;
++      uint32_t i = hi, cy = 0;
+       ex2 += 6;
+-      for (i = hi; i != lo; i = DNEXT(i)) {
++      do {
+ 	cy += xi[i];
+ 	xi[i] = (cy >> 6);
+ 	cy = 100 * (cy & 0x3f);
+ 	if (xi[i] == 0 && i == hi) hi = DNEXT(hi), idig--;
+-      }
++	i = DNEXT(i);
++      } while (i != lo);
+       while (cy) {
+ 	if (hi == lo) { xi[DPREV(lo)] |= 1; break; }
+ 	xi[lo] = (cy >> 6); lo = DNEXT(lo);
+diff -r 42da0b3d2406 lib_luajit/src/lj_strscan.h
+--- a/lib_luajit/src/lj_strscan.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_strscan.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** String scanning.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_STRSCAN_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_tab.c
+--- a/lib_luajit/src/lj_tab.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_tab.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Table handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+diff -r 42da0b3d2406 lib_luajit/src/lj_tab.h
+--- a/lib_luajit/src/lj_tab.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_tab.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Table handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_TAB_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_target.h
+--- a/lib_luajit/src/lj_target.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_target.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Definitions for target CPU.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_TARGET_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_target_arm.h
+--- a/lib_luajit/src/lj_target_arm.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_target_arm.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Definitions for ARM CPUs.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_TARGET_ARM_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_target_mips.h
+--- a/lib_luajit/src/lj_target_mips.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_target_mips.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Definitions for MIPS CPUs.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_TARGET_MIPS_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_target_ppc.h
+--- a/lib_luajit/src/lj_target_ppc.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_target_ppc.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Definitions for PPC CPUs.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_TARGET_PPC_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_target_x86.h
+--- a/lib_luajit/src/lj_target_x86.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_target_x86.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Definitions for x86 and x64 CPUs.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_TARGET_X86_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_trace.c
+--- a/lib_luajit/src/lj_trace.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_trace.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Trace management.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_trace_c
+@@ -607,6 +607,7 @@
+       }
+       lj_opt_split(J);
+       lj_opt_sink(J);
++      if (!J->loopref) J->cur.snap[J->cur.nsnap-1].count = SNAPCOUNT_DONE;
+       J->state = LJ_TRACE_ASM;
+       break;
+ 
+diff -r 42da0b3d2406 lib_luajit/src/lj_trace.h
+--- a/lib_luajit/src/lj_trace.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_trace.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Trace management.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_TRACE_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_traceerr.h
+--- a/lib_luajit/src/lj_traceerr.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_traceerr.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Trace compiler error messages.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /* This file may be included multiple times with different TREDEF macros. */
+diff -r 42da0b3d2406 lib_luajit/src/lj_udata.c
+--- a/lib_luajit/src/lj_udata.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_udata.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Userdata handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_udata_c
+diff -r 42da0b3d2406 lib_luajit/src/lj_udata.h
+--- a/lib_luajit/src/lj_udata.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_udata.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Userdata handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_UDATA_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_vm.h
+--- a/lib_luajit/src/lj_vm.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_vm.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Assembler VM interface definitions.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_VM_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_vmevent.c
+--- a/lib_luajit/src/lj_vmevent.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_vmevent.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** VM event handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #include <stdio.h>
+diff -r 42da0b3d2406 lib_luajit/src/lj_vmevent.h
+--- a/lib_luajit/src/lj_vmevent.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_vmevent.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** VM event handling.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LJ_VMEVENT_H
+diff -r 42da0b3d2406 lib_luajit/src/lj_vmmath.c
+--- a/lib_luajit/src/lj_vmmath.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lj_vmmath.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Math helper functions for assembler VM.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #define lj_vmmath_c
+diff -r 42da0b3d2406 lib_luajit/src/ljamalg.c
+--- a/lib_luajit/src/ljamalg.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/ljamalg.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LuaJIT core and libraries amalgamation.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ /*
+diff -r 42da0b3d2406 lib_luajit/src/luaconf.h
+--- a/lib_luajit/src/luaconf.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/luaconf.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Configuration header.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef luaconf_h
+@@ -37,7 +37,7 @@
+ #endif
+ #define LUA_LROOT	"/usr/local"
+ #define LUA_LUADIR	"/lua/5.1/"
+-#define LUA_LJDIR	"/luajit-2.0.3/"
++#define LUA_LJDIR	"/luajit-2.0.4/"
+ 
+ #ifdef LUA_ROOT
+ #define LUA_JROOT	LUA_ROOT
+diff -r 42da0b3d2406 lib_luajit/src/luajit.c
+--- a/lib_luajit/src/luajit.c	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/luajit.c	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** LuaJIT frontend. Runs commands, scripts, read-eval-print (REPL) etc.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ **
+ ** Major portions taken verbatim or adapted from the Lua interpreter.
+ ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
+@@ -301,17 +301,17 @@
+   lua_concat(L, 2);
+   if (lua_pcall(L, 1, 1, 0)) {
+     const char *msg = lua_tostring(L, -1);
+-    if (msg && !strncmp(msg, "module ", 7)) {
+-    err:
+-      l_message(progname,
+-		"unknown luaJIT command or jit.* modules not installed");
+-      return 1;
+-    } else {
+-      return report(L, 1);
+-    }
++    if (msg && !strncmp(msg, "module ", 7))
++      goto nomodule;
++    return report(L, 1);
+   }
+   lua_getfield(L, -1, "start");
+-  if (lua_isnil(L, -1)) goto err;
++  if (lua_isnil(L, -1)) {
++  nomodule:
++    l_message(progname,
++	      "unknown luaJIT command or jit.* modules not installed");
++    return 1;
++  }
+   lua_remove(L, -2);  /* Drop module table. */
+   return 0;
+ }
+diff -r 42da0b3d2406 lib_luajit/src/luajit.h
+--- a/lib_luajit/src/luajit.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/luajit.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,7 +1,7 @@
+ /*
+ ** LuaJIT -- a Just-In-Time Compiler for Lua. http://luajit.org/
+ **
+-** Copyright (C) 2005-2014 Mike Pall. All rights reserved.
++** Copyright (C) 2005-2015 Mike Pall. All rights reserved.
+ **
+ ** Permission is hereby granted, free of charge, to any person obtaining
+ ** a copy of this software and associated documentation files (the
+@@ -30,10 +30,10 @@
+ 
+ #include "lua.h"
+ 
+-#define LUAJIT_VERSION		"LuaJIT 2.0.3"
+-#define LUAJIT_VERSION_NUM	20003  /* Version 2.0.3 = 02.00.03. */
+-#define LUAJIT_VERSION_SYM	luaJIT_version_2_0_3
+-#define LUAJIT_COPYRIGHT	"Copyright (C) 2005-2014 Mike Pall"
++#define LUAJIT_VERSION		"LuaJIT 2.0.4"
++#define LUAJIT_VERSION_NUM	20004  /* Version 2.0.4 = 02.00.04. */
++#define LUAJIT_VERSION_SYM	luaJIT_version_2_0_4
++#define LUAJIT_COPYRIGHT	"Copyright (C) 2005-2015 Mike Pall"
+ #define LUAJIT_URL		"http://luajit.org/"
+ 
+ /* Modes for luaJIT_setmode. */
+diff -r 42da0b3d2406 lib_luajit/src/lualib.h
+--- a/lib_luajit/src/lualib.h	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/lualib.h	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ /*
+ ** Standard library header.
+-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ */
+ 
+ #ifndef _LUALIB_H
+diff -r 42da0b3d2406 lib_luajit/src/msvcbuild.bat
+--- a/lib_luajit/src/msvcbuild.bat	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/msvcbuild.bat	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,5 +1,5 @@
+ @rem Script to build LuaJIT with MSVC.
+-@rem Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++@rem Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ @rem
+ @rem Either open a "Visual Studio .NET Command Prompt"
+ @rem (Note that the Express Edition does not contain an x64 compiler)
+diff -r 42da0b3d2406 lib_luajit/src/ps4build.bat
+--- a/lib_luajit/src/ps4build.bat	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/ps4build.bat	Fri Jun 26 20:15:20 2015 +0100
+@@ -27,11 +27,11 @@
+ @minilua
+ @if not errorlevel 8 goto :FAIL
+ 
+-@set DASMFLAGS=-D P64
++@set DASMFLAGS=-D P64 -D NO_UNWIND
+ minilua %DASM% -LN %DASMFLAGS% -o host\buildvm_arch.h vm_x86.dasc
+ @if errorlevel 1 goto :BAD
+ 
+-%LJCOMPILE% /I "." /I %DASMDIR% -DLUAJIT_TARGET=LUAJIT_ARCH_X64 -DLUAJIT_OS=LUAJIT_OS_OTHER -DLUAJIT_DISABLE_JIT -DLUAJIT_DISABLE_FFI host\buildvm*.c
++%LJCOMPILE% /I "." /I %DASMDIR% -DLUAJIT_TARGET=LUAJIT_ARCH_X64 -DLUAJIT_OS=LUAJIT_OS_OTHER -DLUAJIT_DISABLE_JIT -DLUAJIT_DISABLE_FFI -DLUAJIT_NO_UNWIND host\buildvm*.c
+ @if errorlevel 1 goto :BAD
+ %LJLINK% /out:buildvm.exe buildvm*.obj
+ @if errorlevel 1 goto :BAD
+diff -r 42da0b3d2406 lib_luajit/src/vm_arm.dasc
+--- a/lib_luajit/src/vm_arm.dasc	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/vm_arm.dasc	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ |// Low-level VM code for ARM CPUs.
+ |// Bytecode interpreter, fast functions and helper functions.
+-|// Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++|// Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ |
+ |.arch arm
+ |.section code_op, code_sub
+@@ -335,7 +335,7 @@
+   |  // - The GC shrinks the stack in between.
+   |  // - A return back from a lua_call() with (high) nresults adjustment.
+   |  str BASE, L->top			// Save current top held in BASE (yes).
+-  |  mov CARG2, KBASE
++  |  lsr CARG2, KBASE, #3
+   |  mov CARG1, L
+   |  bl extern lj_state_growstack	// (lua_State *L, int n)
+   |  ldr BASE, L->top			// Need the (realloced) L->top in BASE.
+@@ -389,7 +389,7 @@
+   |  str BASE, L->base
+   |   add PC, PC, #4			// Must point after first instruction.
+   |  str RC, L->top
+-  |   lsr CARG3, RA, #3
++  |   lsr CARG2, RA, #3
+   |2:
+   |  // L->base = new base, L->top = top
+   |  str PC, SAVE_PC
+@@ -539,9 +539,8 @@
+   |1:
+   |  beq ->cont_ffi_callback		// cont = 1: return from FFI callback.
+   |  // cont = 0: tailcall from C function.
+-  |  ldr CARG3, [BASE, FRAME_FUNC]
+-  |   sub CARG4, CARG4, #16
+-  |   sub RC, CARG4, BASE
++  |  sub CARG4, CARG4, #16
++  |  sub RC, CARG4, BASE
+   |  b ->vm_call_tail
+   |.endif
+   |
+@@ -3241,10 +3240,10 @@
+     |    mvn RC, RC
+     |  ldr UPVAL:CARG2, [LFUNC:CARG2, RA]
+     |    ldr STR:CARG3, [KBASE, RC, lsl #2]
++    |  ldrb RB, UPVAL:CARG2->marked
++    |     ldrb RC, UPVAL:CARG2->closed
++    |   ldr CARG2, UPVAL:CARG2->v
+     |    mvn CARG4, #~LJ_TSTR
+-    |  ldrb RB, UPVAL:CARG2->marked
+-    |   ldr CARG2, UPVAL:CARG2->v
+-    |     ldrb RC, UPVAL:CARG2->closed
+     |  tst RB, #LJ_GC_BLACK		// isblack(uv)
+     |    ldrb RB, STR:CARG3->marked
+     |   strd CARG34, [CARG2]
+diff -r 42da0b3d2406 lib_luajit/src/vm_mips.dasc
+--- a/lib_luajit/src/vm_mips.dasc	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/vm_mips.dasc	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ |// Low-level VM code for MIPS CPUs.
+ |// Bytecode interpreter, fast functions and helper functions.
+-|// Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++|// Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ |
+ |.arch mips
+ |.section code_op, code_sub
+@@ -398,7 +398,7 @@
+   |  // - A return back from a lua_call() with (high) nresults adjustment.
+   |  load_got lj_state_growstack
+   |   move MULTRES, RD
+-  |  move CARG2, TMP2
++  |  srl CARG2, TMP2, 3
+   |  call_intern lj_state_growstack	// (lua_State *L, int n)
+   |.  move CARG1, L
+   |    lw TMP2, SAVE_NRES
+diff -r 42da0b3d2406 lib_luajit/src/vm_ppc.dasc
+--- a/lib_luajit/src/vm_ppc.dasc	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/vm_ppc.dasc	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ |// Low-level VM code for PowerPC CPUs.
+ |// Bytecode interpreter, fast functions and helper functions.
+-|// Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++|// Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ |
+ |.arch ppc
+ |.section code_op, code_sub
+@@ -75,6 +75,29 @@
+ |.endif
+ |.endmacro
+ |
++|.macro clrso, reg
++|.if PPE
++|  li reg, 0
++|  mtxer reg
++|.else
++|  mcrxr cr0
++|.endif
++|.endmacro
++|
++|.macro checkov, reg, noov
++|.if PPE
++|  mfxer reg
++|  add reg, reg, reg
++|  cmpwi reg, 0
++|   li reg, 0
++|   mtxer reg
++|  bgey noov
++|.else
++|  mcrxr cr0
++|  bley noov
++|.endif
++|.endmacro
++|
+ |//-----------------------------------------------------------------------
+ |
+ |// Fixed register assignments for the interpreter.
+@@ -563,7 +586,7 @@
+   |  // - A return back from a lua_call() with (high) nresults adjustment.
+   |  stp BASE, L->top			// Save current top held in BASE (yes).
+   |   mr SAVE0, RD
+-  |  mr CARG2, TMP2
++  |  srwi CARG2, TMP2, 3
+   |  mr CARG1, L
+   |  bl extern lj_state_growstack	// (lua_State *L, int n)
+   |    lwz TMP2, SAVE_NRES
+@@ -2587,7 +2610,7 @@
+   |    stw CARG2, DISPATCH_GL(vmstate)(DISPATCH)
+   |  savex_ 0,1,2,3
+   |   stw CARG1, 0(sp)			// Store extended stack chain.
+-  |   mcrxr cr0				// Clear SO flag.
++  |   clrso TMP1
+   |  savex_ 4,5,6,7
+   |   addi CARG2, sp, 16+32*8+32*4	// Recompute original value of sp.
+   |  savex_ 8,9,10,11
+@@ -2706,7 +2729,7 @@
+   |  cmpwi CARG2, 0
+   |   li CARG1, 0
+   |  beqlr
+-  |  mcrxr cr0			// Clear SO for -2147483648 % -1 and return 0.
++  |  clrso TMP0			// Clear SO for -2147483648 % -1 and return 0.
+   |  blr
+   |
+   |//-----------------------------------------------------------------------
+@@ -3309,7 +3332,7 @@
+     |4:
+     |.if not GPR64
+     |  // Potential overflow.
+-    |  mcrxr cr0; bley <1		// Ignore unrelated overflow.
++    |  checkov TMP1, <1			// Ignore unrelated overflow.
+     |.endif
+     |  lus TMP1, 0x41e0			// 2^31.
+     |  li TMP0, 0
+@@ -3494,7 +3517,7 @@
+     |2:
+     |  ins_next2
+     |4:  // Overflow.
+-    |  mcrxr cr0; bley <1		// Ignore unrelated overflow.
++    |  checkov TMP0, <1			// Ignore unrelated overflow.
+     |  ins_arithfallback b
+     |5:  // FP variant.
+     ||if (vk == 1) {
+@@ -4692,7 +4715,7 @@
+     |  b <1
+     if (vk) {
+       |6:  // Potential overflow.
+-      |  mcrxr cr0; bley <4		// Ignore unrelated overflow.
++      |  checkov TMP0, <4		// Ignore unrelated overflow.
+       |  b <2
+     }
+     |.endif
+@@ -4832,7 +4855,7 @@
+     |  // Traces on PPC don't store the trace number, so use 0.
+     |   stw ZERO, DISPATCH_GL(vmstate)(DISPATCH)
+     |  lwzx TRACE:TMP2, TMP1, RD
+-    |  mcrxr cr0			// Clear SO flag.
++    |  clrso TMP1
+     |  lp TMP2, TRACE:TMP2->mcode
+     |   stw BASE, DISPATCH_GL(jit_base)(DISPATCH)
+     |  mtctr TMP2
+diff -r 42da0b3d2406 lib_luajit/src/vm_ppcspe.dasc
+--- a/lib_luajit/src/vm_ppcspe.dasc	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/vm_ppcspe.dasc	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ |// Low-level VM code for PowerPC/e500 CPUs.
+ |// Bytecode interpreter, fast functions and helper functions.
+-|// Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++|// Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ |
+ |.arch ppc
+ |.section code_op, code_sub
+diff -r 42da0b3d2406 lib_luajit/src/vm_x86.dasc
+--- a/lib_luajit/src/vm_x86.dasc	Fri Jun 26 20:12:27 2015 +0100
++++ b/lib_luajit/src/vm_x86.dasc	Fri Jun 26 20:15:20 2015 +0100
+@@ -1,6 +1,6 @@
+ |// Low-level VM code for x86 CPUs.
+ |// Bytecode interpreter, fast functions and helper functions.
+-|// Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
++|// Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+ |
+ |.if P64
+ |.arch x64
+@@ -222,6 +222,9 @@
+ |.define CFRAME_SPACE,	aword*5			// Delta for rsp (see <--).
+ |.macro saveregs_
+ |  push rbx; push r15; push r14
++|.if NO_UNWIND
++|  push r13; push r12
++|.endif
+ |  sub rsp, CFRAME_SPACE
+ |.endmacro
+ |.macro saveregs
+@@ -229,15 +232,28 @@
+ |.endmacro
+ |.macro restoreregs
+ |  add rsp, CFRAME_SPACE
++|.if NO_UNWIND
++|  pop r12; pop r13
++|.endif
+ |  pop r14; pop r15; pop rbx; pop rbp
+ |.endmacro
+ |
+ |//----- 16 byte aligned,
++|.if NO_UNWIND
++|.define SAVE_RET,	aword [rsp+aword*11]	//<-- rsp entering interpreter.
++|.define SAVE_R4,	aword [rsp+aword*10]
++|.define SAVE_R3,	aword [rsp+aword*9]
++|.define SAVE_R2,	aword [rsp+aword*8]
++|.define SAVE_R1,	aword [rsp+aword*7]
++|.define SAVE_RU2,	aword [rsp+aword*6]
++|.define SAVE_RU1,	aword [rsp+aword*5]	//<-- rsp after register saves.
++|.else
+ |.define SAVE_RET,	aword [rsp+aword*9]	//<-- rsp entering interpreter.
+ |.define SAVE_R4,	aword [rsp+aword*8]
+ |.define SAVE_R3,	aword [rsp+aword*7]
+ |.define SAVE_R2,	aword [rsp+aword*6]
+ |.define SAVE_R1,	aword [rsp+aword*5]	//<-- rsp after register saves.
++|.endif
+ |.define SAVE_CFRAME,	aword [rsp+aword*4]
+ |.define SAVE_PC,	dword [rsp+dword*7]
+ |.define SAVE_L,	dword [rsp+dword*6]
+@@ -1617,7 +1633,7 @@
+   |  mov RD, 1+3
+   |  jmp ->fff_res
+   |
+-  |.ffunc_1 ipairs_aux
++  |.ffunc_2 ipairs_aux
+   |  cmp dword [BASE+4], LJ_TTAB;  jne ->fff_fallback
+   |  cmp dword [BASE+12], LJ_TISNUM
+   |.if DUALNUM
+@@ -2198,7 +2214,7 @@
+   |.endif
+   |
+   |.ffunc_nnr math_fmod
+-  |1: ; fprem; fnstsw ax; sahf; jp <1
++  |1: ; fprem; fnstsw ax; and ax, 0x400; jnz <1
+   |  fpop1
+   |  jmp ->fff_resn
+   |
+@@ -2564,8 +2580,8 @@
+   |
+   |.define TOBIT_BIAS, 0x59c00000	// 2^52 + 2^51 (float, not double!).
+   |
+-  |.macro .ffunc_bit, name, kind
+-  |  .ffunc_1 name
++  |.macro .ffunc_bit, name, kind, fdef
++  |  fdef name
+   |.if kind == 2
+   |.if SSE
+   |  sseconst_tobit xmm1, RBa
+@@ -2608,6 +2624,10 @@
+   |2:
+   |.endmacro
+   |
++  |.macro .ffunc_bit, name, kind
++  |  .ffunc_bit name, kind, .ffunc_1
++  |.endmacro
++  |
+   |.ffunc_bit bit_tobit, 0
+   |.if DUALNUM or SSE
+   |.if not SSE
+@@ -2681,7 +2701,7 @@
+   |
+   |.macro .ffunc_bit_sh, name, ins
+   |.if DUALNUM
+-  |  .ffunc_bit name, 1
++  |  .ffunc_bit name, 1, .ffunc_2
+   |  // Note: no inline conversion from number for 2nd argument!
+   |  cmp dword [BASE+12], LJ_TISNUM; jne ->fff_fallback
+   |  mov RA, dword [BASE+8]
+@@ -5320,8 +5340,7 @@
+     |  jnz <4
+     |  movzx RA, PC_RA
+     |  not RAa
+-    |  lea RA, [BASE+RA*8]
+-    |  mov LFUNC:KBASE, [RA-8]		// Need to prepare KBASE.
++    |  mov LFUNC:KBASE, [BASE+RA*8-8]	// Need to prepare KBASE.
+     |  mov KBASE, LFUNC:KBASE->pc
+     |  mov KBASE, [KBASE+PC2PROTO(k)]
+     |  jmp <4
+@@ -6116,6 +6135,10 @@
+ 	"\t.byte 0x83\n\t.uleb128 0x3\n"	/* offset rbx */
+ 	"\t.byte 0x8f\n\t.uleb128 0x4\n"	/* offset r15 */
+ 	"\t.byte 0x8e\n\t.uleb128 0x5\n"	/* offset r14 */
++#if LJ_NO_UNWIND
++	"\t.byte 0x8d\n\t.uleb128 0x6\n"	/* offset r13 */
++	"\t.byte 0x8c\n\t.uleb128 0x7\n"	/* offset r12 */
++#endif
+ #else
+ 	"\t.long .Lbegin\n"
+ 	"\t.long %d\n"
+@@ -6151,6 +6174,7 @@
+ 	"\t.align " SZPTR "\n"
+ 	".LEFDE1:\n\n", (int)ctx->codesz - fcofs);
+ #endif
++#if !LJ_NO_UNWIND
+ #if (defined(__sun__) && defined(__svr4__))
+ #if LJ_64
+     fprintf(ctx->fp, "\t.section .eh_frame,\"a\",@unwind\n");
+@@ -6239,7 +6263,9 @@
+ 	"\t.align " SZPTR "\n"
+ 	".LEFDE3:\n\n", (int)ctx->codesz - fcofs);
+ #endif
++#endif
+     break;
++#if !LJ_NO_UNWIND
+   /* Mental note: never let Apple design an assembler.
+   ** Or a linker. Or a plastic case. But I digress.
+   */
+@@ -6367,6 +6393,7 @@
+ #endif
+     }
+     break;
++#endif
+   default:  /* Difficult for other modes. */
+     break;
+   }

@@ -5,9 +5,13 @@
 --[[
 
 when bumping the source
-make sure lib_init.c has the following code patch
+make sure lib_init.c has the following LUA_PRELOADLIBS code patch
 
 --
+
+#ifdef LUA_PRELOADLIBS
+  extern void LUA_PRELOADLIBS(lua_State *L);
+#endif
 
 LUALIB_API void luaL_openlibs(lua_State *L)
 {
@@ -18,7 +22,7 @@ LUALIB_API void luaL_openlibs(lua_State *L)
     lua_call(L, 1, 0);
   }
 #ifdef LUA_PRELOADLIBS
-        LUA_PRELOADLIBS(L);
+  LUA_PRELOADLIBS(L);
 #endif
   luaL_findtable(L, LUA_REGISTRYINDEX, "_PRELOAD",
 		 sizeof(lj_lib_preload)/sizeof(lj_lib_preload[0])-1);
