@@ -246,7 +246,12 @@ function posix.win_translate_msg_keys_and_mouse(win,m)
 				adjust(v,0)
 			elseif m.code==1 then -- y
 				adjust(0,v)			
-	--		elseif m.code==8 then -- mouse wheel
+			elseif m.code==8 then -- mouse wheel
+				if v>0 then
+					for i=1,v do click(4,1) click(4,-1) end -- fake buttons
+				elseif v<0 then
+					for i=-1,v,-1 do click(5,1) click(5,-1) end -- fake buttons
+				end
 	--			print("z",v)
 			end
 			
