@@ -25,7 +25,13 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 if RASPI then
 	
 	files { "./lua.c" }
-	
+
+-- use prebuilt SDL2 lib	
+	libdirs { "../lib_sdl2/raspi/usr/local/lib/" }
+	links { "SDL2" }
+	linkoptions { "-Wl,-R./" }
+
+
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
 	links { "crypt" }
 	links { "pthread" }
