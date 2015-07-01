@@ -13,7 +13,7 @@ local bit=require("bit")
 local win={}
 local base={}
 
-local flavour_request
+local flavour_request=flavour_request or os.getenv("gamecake_flavour")
 
 local softcore=require("wetgenes.win.core") -- we keep some generic C functions here
 
@@ -33,6 +33,7 @@ elseif type(args[2]=="string" ) then
 	flavour_request=args[2]
 end
 
+if flavour_request then print("The requested flavour of win is "..(flavour_request or "any")) end
 
 if not hardcore or flavour_request=="emcc" then
 	local suc,dat=pcall(function() return require("wetgenes.win.emcc") end )
