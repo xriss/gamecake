@@ -80,7 +80,7 @@ if fp then -- stick with what we have
 else
 
 
-	if ( wwin.flavour=="linux" or wwin.flavour=="raspi" or wwin.flavour=="osx" ) and wwin.posix then -- we need to store in the homedir
+	if ( wwin.flavour=="linux" or wwin.flavour=="raspi" or wwin.flavour=="osx" or wwin.flavour=="sdl" ) and wwin.posix then -- we need to store in the homedir
 
 		local homedir=os.getenv("HOME")
 
