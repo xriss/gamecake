@@ -747,6 +747,7 @@ all_includes=all_includes or {
 																						and		(not LSB) 				},
 
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
+	{"lua_periphery",	nil			or		NIX		or		nil		or		nil			or		RASPI		or	nil		},
 	{"lua_v4l2",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	nil		},
 	{"lua_rex",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_linenoise",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
