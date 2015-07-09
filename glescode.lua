@@ -172,63 +172,88 @@ function glescode.create(gl)
 -- VERTEX_SHADER or FRAGMENT_SHADER appropriately
 -- so only one source is required
 --
-	function code.shader_source(name,vsource,fsource,filename)
-		if not code.programs[name] then -- only do once
+	function code.program_source(name,vsource,fsource,filename)
+		if 	code.programs[name] then return code.programs[name] end -- only do once
 
-			local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
-			local vhead=code.defines.shaderprefix.."#define VERTEX_SHADER 1\n#line "..line.."\n"
-			local fhead=code.defines.shaderprefix.."#define FRAGMENT_SHADER 1\n#line "..line.."\n"
-		
-			code.shaders["v_"..name]={ source=vhead..(vsource) }
-			code.shaders["f_"..name]={ source=fhead..(fsource or vsource) } -- single source trick
-			code.programs[name]={
-				vshaders={"v_"..name},
-				fshaders={"f_"..name},
-			}
--- check that the code compiles OK now
-			assert(code.shader(gl.VERTEX_SHADER,"v_"..name,filename))
-			assert(code.shader(gl.FRAGMENT_SHADER,"f_"..name,filename))
-			
+		local aa=wstr.split(name,"?")
+		local basename=aa[1]
+		local params=aa[2]
+		local paramdefs=""
+		if params then -- query style
+			paramdefs={}
+			for _,d in ipairs( wstr.split(params,"&") ) do
+				local dd=wstr.split(d,"=")
+				paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
+			end
+			paramdefs=table.concat(paramdefs,"\n")
 		end
+	
+		local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
+		local vhead=code.defines.shaderprefix.."#define VERTEX_SHADER 1\n"..paramdefs.."#line "..line.."\n"
+		local fhead=code.defines.shaderprefix.."#define FRAGMENT_SHADER 1\n"..paramdefs.."#line "..line.."\n"
+
+		code.shaders["v_"..name]={ source=vhead..(vsource) }
+		code.shaders["f_"..name]={ source=fhead..(fsource or vsource) } -- single source trick
+		code.programs[name]={
+			vshaders={"v_"..name},
+			fshaders={"f_"..name},
+			name=name,
+			vsource=vsource,
+			fsource=fsource,
+			filename=filename,
+		}
+-- check that the code compiles OK right now?
+		assert(code.shader(gl.VERTEX_SHADER,"v_"..name,filename))
+		assert(code.shader(gl.FRAGMENT_SHADER,"f_"..name,filename))
+
+		return code.programs[name]
 	end
 
 -- load multiple shader sources from a single file
+--
 -- #SHADER "nameofshader"
--- is used at the start of a line to name each shader chunk and the split results are fed into
--- the shader_source function
+-- or
+-- #SHADER "nameofshader1" "nameofshader2" "nameofshader3" ...
+--
+-- is used at the start of a line to say which chunk or chunks the following text
+-- should go into
 --
 	function code.shader_sources(text,filename)
 	
 		local ss=wstr.split(text,"\n")
 		local chunks={}
-		local c
+		local cs
 		for i,l in ipairs(ss) do
-			if l:sub(1,7):lower()=="#shader" then -- new chunk
-				c={}
-				assert(chunks[l]==nil) -- two chunks with same name
-				chunks[l]=c
-				c[1]="#line "..i	-- remember line number from file
+			if l:sub(1,7):lower()=="#shader" then -- new chunk must be at start of line
+			
+				local aa=wstr.split(l,"\"")
+				cs={}
+				for idx=2,#aa,2 do -- allow multiple names and they will all be filled with the following text
+					local n=aa[idx]
+					chunks[n]=chunks[n] or {}
+					local c=chunks[n]
+					cs[#cs+1]=c
+					c[#c+1]="#line "..i	-- remember the line number from this file
+				end
 			else
-				if c then	-- remember each line
-					c[#c+1]=l
+				for _,c in ipairs(cs or {}) do
+					if c then	-- remember each line for each chunk
+						c[#c+1]=l
+					end
 				end
 			end
 		end
 		for n,v in pairs(chunks) do
-			local name=n:sub(8) -- remove #shader
-			name=wstr.trim(name) -- kill whitespace
-			if name:sub(1,1)=="\"" and name:sub(-1)=="\"" then -- valid names are wrapped in quotes
-				name=name:sub(2,-2)
---print("SHADER",name,#v)
-				code.shader_source(name,table.concat(v,"\n"),nil,filename)
-			end
+print("PROGRAM",n,#v)
+			code.program_source(n,table.concat(v,"\n"),nil,filename)
 		end
 		
 	end
 
 
 
--- legacy version, obsolete, use the new shader_source instead
+-- legacy version, obsolete, use the new program_source instead
+-- this will be removed shortly
 	function code.progsrc(name,vsource,fsource)
 		if not code.programs[name] then -- only do once
 			code.shaders["v_"..name]={ source=(vsource) }
@@ -237,7 +262,7 @@ function glescode.create(gl)
 				vshaders={"v_"..name},
 				fshaders={"f_"..name},
 			}
---print(name,#vsource,#fsource)
+print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		end
 	end
 
@@ -304,7 +329,16 @@ function glescode.create(gl)
 		local p
 		
 		if type(pname)=="string" then
-			p=assert(code.programs[pname])
+		
+			p=code.programs[pname]
+			if not p then -- try basename
+				local basename=wstr.split(pname,"?")[1]
+				p=code.programs[basename]
+				if p then -- try to build using the query string and the *original* source from the base shader
+					p=code.program_source(pname,p.vsource,p.fsource,p.filename)
+				end
+			end
+			assert(p)
 		else
 			p=pname
 			if not code.programs[p] then
