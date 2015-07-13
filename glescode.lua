@@ -178,15 +178,14 @@ function glescode.create(gl)
 		local aa=wstr.split(name,"?")
 		local basename=aa[1]
 		local params=aa[2]
-		local paramdefs=""
+		local paramdefs={"#define SHADER_NAME_"..basename:gsub("[^%w_]*","").." 1"}
 		if params then -- query style
-			paramdefs={}
 			for _,d in ipairs( wstr.split(params,"&") ) do
 				local dd=wstr.split(d,"=")
 				paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
 			end
-			paramdefs=table.concat(paramdefs,"\n")
 		end
+		paramdefs=table.concat(paramdefs,"\n")
 	
 		local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
 		local vhead=code.defines.shaderprefix.."#define VERTEX_SHADER 1\n"..paramdefs.."#line "..line.."\n"
