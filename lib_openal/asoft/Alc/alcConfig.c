@@ -19,11 +19,11 @@
  */
 
 #ifdef _WIN32
-#ifdef __MINGW64__
+//#ifdef __MINGW64__
 #define _WIN32_IE 0x501
-#else
-#define _WIN32_IE 0x400
-#endif
+//#else
+//#define _WIN32_IE 0x400
+//#endif
 #endif
 
 #include "config.h"
