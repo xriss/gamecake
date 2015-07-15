@@ -24,7 +24,7 @@ fi
 
 
 
-build/premake4 gmake clang-$cpu
+build/premake4 gmake clang-$cpu || exit 1
 cd build-gmake-clang-$cpu
 make $makeopts $2 $3 $4 || exit 1
 cd ..
