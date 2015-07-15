@@ -4,7 +4,7 @@ module(...,package.seeall)
 local wstr=require("wetgenes.string")
 
 
-function test_al()
+local function test_al()
 
 local al=require("al")
 local alc=require("alc")
