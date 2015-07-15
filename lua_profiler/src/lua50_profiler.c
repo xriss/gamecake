@@ -176,6 +176,8 @@ static int profiler_init(lua_State *L) {
   return 1;
 }
 
+extern void lprofP_close_core_profiler(lprofP_STATE*);
+
 static int profiler_stop(lua_State *L) {
   lprofP_STATE* S;
   lua_sethook(L, (lua_Hook)callhook, 0, 0);
