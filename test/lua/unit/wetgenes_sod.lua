@@ -29,7 +29,7 @@ function do_file_read(f)
 end
 
 
-function test_al()
+local function test_al()
 
 local al=require("al")
 local alc=require("alc")
