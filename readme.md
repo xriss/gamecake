@@ -25,7 +25,7 @@ projects. This dir must exist when building.
 
 Afterwhich gamecake will now be a valid command :)
 
-[![Build Status](https://drone.io/bitbucket.org/xixs/lua/status.png)](https://drone.io/bitbucket.org/xixs/lua/latest)
+Check drone.io for build tests -> [![Build Status](https://drone.io/bitbucket.org/xixs/lua/status.png)](https://drone.io/bitbucket.org/xixs/lua/latest)
 
 The following commands should build everything under ubuntu/debian 
 assuming you have a build environment setup, you will need to install 
