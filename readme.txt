@@ -1,4 +1,3 @@
-
 This is my windows defenestration attempt, please build and run 
 under Xubuntu if you have a choice. The Ubuntu and Gnome3 fancy 
 desktops impact the performance of OpenGL code and are not 
@@ -26,6 +25,7 @@ projects. This dir must exist when building.
 
 Afterwhich gamecake will now be a valid command :)
 
+[![Build Status](https://drone.io/bitbucket.org/xixs/lua/status.png)](https://drone.io/bitbucket.org/xixs/lua/latest)
 
 The following commands should build everything under ubuntu/debian 
 assuming you have a build environment setup, you will need to install 
