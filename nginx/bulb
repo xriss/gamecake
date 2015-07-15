@@ -1,0 +1,12 @@
+cd `dirname $0`
+cd ..
+
+cd ../apps/bulb
+../bake
+cp out/bulb.zip ../../lua/nginx/static/bulb.zip
+cd ..
+
+cd ../lua
+nacl/make
+
+

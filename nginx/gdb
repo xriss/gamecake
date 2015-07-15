@@ -1,0 +1,4 @@
+cd `dirname $0`
+
+../../sdks/nacl-sdk/pepper_41/toolchain/linux_x86_newlib/bin/i686-nacl-gdb -x gdb.x
+
