@@ -70,7 +70,8 @@ pqStrerror(int errnum, char *strerrbuf, size_t buflen)
 		return "Unknown error";
 #else
 	/* GNU libc */
-	return strerror_r(errnum, strerrbuf, buflen);
+	strerror_r(errnum, strerrbuf, buflen);
+	return strerrbuf;
 #endif
 #else
 	/* no strerror_r() available, just use strerror */
