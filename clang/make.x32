@@ -1,0 +1,24 @@
+cd `dirname $0`
+cd ..
+
+
+cpu=32
+makeopts="config=release_clang"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug_clang"
+fi
+
+
+if [ "$1" = "clean" ] ; then
+
+        rm -rf build-gmake-clang-$cpu
+        exit
+fi
+
+
+
+build/premake4 gmake clang-$cpu
+cd build-gmake-clang-$cpu
+make $makeopts $2 $3 $4
+cd ..
+

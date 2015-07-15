@@ -1,0 +1,67 @@
+cd `dirname $0`
+
+OPATH=$PATH
+
+andsdkarm=`readlink -f ../../sdks/android-9-arm`
+andsdkx86=`readlink -f ../../sdks/android-9-x86`
+
+export PATH=$andsdkarm/bin:$andsdkx86/bin:$OPATH
+
+
+makeopts="config=release_android"
+makeopts32="config=release_android-x86"
+build="release"
+
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug_android"
+makeopts32="config=debug_android-x86"
+build="debug"
+fi
+
+cd ..
+
+#build/premake4 gmake android-arm
+build/premake4 gmake android-armv7
+#build/premake4 gmake android-32
+
+
+if [ "$1" = "clean" ] ; then
+
+        rm -rf build-gmake-android-arm
+        rm -rf build-gmake-android-armv7
+        rm -rf build-gmake-android-32
+        rm -rf libs
+        cd android
+		rm bin/*.apk
+		ant uninstall
+        exit
+
+fi
+
+
+#cd build-gmake-android-arm
+#make $makeopts $2 $3 $4
+#cd ..
+
+cd build-gmake-android-armv7
+make $makeopts $2 $3 $4
+cd ..
+
+#cd build-gmake-android-32
+#make $makeopts32 $2 $3 $4
+#cd ..
+
+
+if [ "$1" = "apk" ] ; then
+
+	cd android
+	ant $build
+	exit
+
+fi
+
+cd android
+rm bin/*.apk
+ant $build install
+
+

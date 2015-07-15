@@ -1,0 +1,290 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1>
+<div>
+
+<pre><code>local wetgenes=require("wetgenes")
+</code></pre>
+
+<p>Simple generic functions that are intended to be useful for all 
+wetgenes.* modules.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.export.html">wetgenes.export</a></h1>
+<div>
+
+<pre><code>... = wetgenes.export(table,...)
+</code></pre>
+
+<p>Export multiple names from this table as multiple returns, can be 
+used to pull functions out of this module and into locals like so</p>
+
+<pre><code>local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_env")
+</code></pre>
+
+<p>Or copy it into other modules to provide them with the same functionality.</p>
+
+<pre><code>M.lookup=require("wetgenes").lookup
+</code></pre>
+
+
+</div><hr/>
+<h1><a href="wetgenes.json.html">wetgenes.json</a></h1>
+<div>
+
+<pre><code>local wjson=require("wetgenes.json")
+</code></pre>
+
+<p>other json encode/decode using pure lua library seemed too slow, 
+here is a fast and loose one lets see if it goes any faster :) 
+should be a direct replacement for JSON4Lua which is what I was 
+using before I profiled where all the time was getting spent...</p>
+
+<p>I needed it to be pure json as I was running it on googles appengine so
+the lua was actually running in java, no C available.</p>
+
+<p>Anyhow I hope it is useful, in order to get it running faster I cut 
+across some corners so you may find some obscure problems.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.lookup.html">wetgenes.lookup</a></h1>
+<div>
+
+<pre><code>value = wetgenes.lookup(table,...)
+</code></pre>
+
+<p>Safe recursive lookup within a table that returns nil if any part of 
+the lookup is nil so we never cause an error but just return nil. 
+This is intended to replace the following sort of code</p>
+
+<pre><code>a = b and b.c and b.c.d and b.c.d.e
+</code></pre>
+
+<p>To get e only if all of its parent bits exist and not to cause any 
+error if they do not. instead use</p>
+
+<pre><code>a = lookup(b,"c","d","e")
+</code></pre>
+
+
+</div><hr/>
+<h1><a href="wetgenes.set_env.html">wetgenes.set_env</a></h1>
+<div>
+
+<pre><code>local _ENV=set_env(new_environment)
+</code></pre>
+
+<p>Since setfenv is going away in lua 5.2 here is a plan to future 
+proof code that wants to control its own environment</p>
+
+<p>Specifically this is for loading functions sabdboxed into a given 
+table, which we need to do from time to time.</p>
+
+<p>we set the environment of the code that called us only if setfenv 
+exists and we always return the new environment</p>
+
+<p>So the following incantation can be used to change the current environment and 
+it should work exactly the same in lua 5.1 or 5.2</p>
+
+<pre><code>local _ENV=set_env(new_environment)
+</code></pre>
+
+
+</div><hr/>
+<h1><a href="wetgenes.snippets.html">wetgenes.snippets</a></h1>
+<div>
+
+<pre><code>-- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+-- grab some util functions
+local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_env")
+
+-- single line replacement for the module creation function
+local M={} ; package.loaded[(...)]=M ; M.module_name=(...) ; M.export=export
+</code></pre>
+
+
+<p>A place to keep bits of code that needs to be copypasta into most 
+modules, for instance above is the current boilerplate code to be 
+used when starting a new module.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.gamecake.oven.html">wetgenes.gamecake.oven</a></h1>
+<div>
+
+<pre><code>oven=require("wetgenes.gamecake.oven").bake(opts)
+</code></pre>
+
+<p>The oven module must be baked so only exposes a bake function.</p>
+
+<p>All the other functions are returned from within the bake function.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.gamecake.widgets.html">wetgenes.gamecake.widgets</a></h1>
+<div>
+
+
+<pre><code>widgets=require("wetgenes.gamecake.widgets").bake(oven,widgets)
+</code></pre>
+
+
+<p>The widgets value returned will be the same table passed in or a new 
+one if you did not. It will be filled with functions/data bound to 
+the oven state which you must supply.</p>
+
+
+<p>A collection of widgets, rendered using gles2 code and controlled 
+using the mouse, keyboard or a joystick. EG click fire and move 
+left/right to adjust a slider value.</p>
+
+<p>This has undergone a number of rewrites as we try to simplify the 
+widget creation and layout process. Eventually we ended up with a 
+fixed size system of widget placement so every widget must have a 
+known size in advance, however we allow scaling to occur so for 
+instance building a 256x256 widget does not mean that it has to be 
+displayed at 256x256 it just means it will be square.</p>
+
+<p>The basic layout just lets you place these widgets in other widgets 
+as left to right lines. So as long as you get your sizes right you 
+can easily place things just using a list and without keeping track 
+of the current position.</p>
+
+<p>Other layout options are available, such as absolute positioning for 
+full control and we have simple custom skin versions of the buttons 
+as well rather than the built in skins.</p>
+
+<p>All value data is handled by data structures that contain ranges and 
+resolutions for data allowing the same data to be bound to multiple 
+display widgets. For instance the same data can be linked to the 
+position of a slider as well as the content of a text display. I 
+think the kids call this sort of thing an MVC pattern but that's a 
+terribly dull name.</p>
+
+<p>Swanky paint is probably the most advanced used of the widgets so far
+but I suspect we will be making a simple text editor in the near 
+future. Designed for advanced in game tweaking of text files.</p>
+
+
+
+</div><hr/>
+<h1><a href="wetgenes.gamecake.oven.bake.html">wetgenes.gamecake.oven.bake</a></h1>
+<div>
+
+
+<pre><code>oven=wetgenes.gamecake.oven.bake(opts)
+</code></pre>
+
+<p>Bake creates an instance of a lua module bound to a state. Here we 
+are creating the main state that other modules will then bind to.</p>
+
+<p>We call each state an OVEN to fit into the gamecake naming scheme 
+then we bake a module in this oven to bind them to the common state.</p>
+
+<p>Think of it as a sub version of require, so require gets the global 
+pointer for a module and bake is used to get the a module bound to 
+an oven.</p>
+
+<p>By using this bound state we reduce the verbosity of connecting 
+modules and sharing state between them.</p>
+
+
+
+</div><hr/>
+<h1><a href="wetgenes.json.decode.html">wetgenes.json.decode</a></h1>
+<div>
+
+<pre><code>json_table = wjson.decode(json_string,opts)
+</code></pre>
+
+<p>Convert a json string into a lua table.</p>
+
+<p>Set opts.null to wetgenes.json.null (or indeed any othe value) if 
+you would like to have nulls in your results. By default nulls are 
+replaced with nil.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.json.encode.html">wetgenes.json.encode</a></h1>
+<div>
+
+<pre><code>json_string = wjson.encode(json_table)
+</code></pre>
+
+<p>Convert a lua table into a json string. Note it must be valid json, 
+primarily make sure that the table is either an array or a dictionary 
+but never both.</p>
+
+<p>Also some of the internal lua types will cause errors, eg functions 
+as these can not be converted into json.</p>
+
+<p>include nulls in the output by using wetgenes.json.null</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.plate.replace_lookup.html">wetgenes.plate.replace_lookup</a></h1>
+<div>
+
+<pre><code>value=wetgenes.plate.replace_lookup(name,data)
+</code></pre>
+
+<p>Calls "wetgenes.plate.table_lookup" then performs special formatting on 
+table returns.</p>
+
+<p>Always returns a string or nil, so number values will converted to a 
+string.</p>
+
+
+
+</div><hr/>
+<h1><a href="wetgenes.plate.replace_lookup_istable.html">wetgenes.plate.replace_lookup_istable</a></h1>
+<div>
+
+<pre><code>bool=wetgenes.plate.replace_lookup_istable(name,data)
+</code></pre>
+
+<p>Test if the return from "wplate.table_lookup" is a table.</p>
+
+
+
+</div><hr/>
+<h1><a href="wetgenes.plate.table_lookup.html">wetgenes.plate.table_lookup</a></h1>
+<div>
+
+<pre><code>value=wetgenes.plate.table_lookup(name,data)
+</code></pre>
+
+<p>look up name inside data and return the value we found if we don't 
+find anything then we return nil</p>
+
+<p>name.name.name syntax may be used to reference tables within tables.</p>
+
+<p>A name that looks like a number may be converted into a number if it 
+doesnt exist as a string key, so "array.1" can be used to return the 
+first item from an array.</p>
+
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'index';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>
