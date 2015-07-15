@@ -69,7 +69,7 @@ newplatform {
     gcc = {
         cc = "i586-mingw32msvc-cc",
         cxx = "i586-mingw32msvc-c++",
-        ar= "ar",
+        ar= "i686-w64-mingw32-ar",
         cppflags = "-MMD",
     },
 }
