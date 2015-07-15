@@ -72,9 +72,6 @@ Returns:        number of capturing subpatterns
                 or negative values on error
 */
 
-real_pcre *
-_pcre_try_flipped(const real_pcre *re, real_pcre *internal_re,
-  const pcre_study_data *study, pcre_study_data *internal_study);
   
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_info(const pcre *argument_re, int *optptr, int *first_byte)

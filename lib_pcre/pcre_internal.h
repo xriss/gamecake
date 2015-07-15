@@ -2776,6 +2776,10 @@ extern const int         PRIV(ucp_typerange)[];
 
 #endif /* SUPPORT_UCP */
 
+real_pcre *
+_pcre_try_flipped(const real_pcre *re, real_pcre *internal_re,
+  const pcre_study_data *study, pcre_study_data *internal_study);
+
 #endif
 
 /* End of pcre_internal.h */
