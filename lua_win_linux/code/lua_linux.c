@@ -3,7 +3,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <sys/ioctl.h>
+ 
 //
 // we can use either this string as a string identifier
 // or its address as a light userdata identifier, both will be unique
