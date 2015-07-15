@@ -743,7 +743,7 @@ all_includes=all_includes or {
 	{"lua_win_android",	nil			or		nil		or		nil		or		ANDROID		or		nil			or	nil		},
 	{"lua_win_raspi",	nil			or		nil		or		nil		or		nil			or		RASPI		or	nil		},
 	{"lua_win_osx",		nil			or		nil		or		nil		or		nil			or		nil			or	OSX		},
-	{"lua_sdl2",	   (nil			or		NIX		or		EMCC	or		nil			or		RASPI		or	nil		)
+	{"lua_sdl2",	   (nil			or		nil		or		EMCC	or		nil			or		RASPI		or	nil		)
 																						and		(not LSB) 				},
 
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)

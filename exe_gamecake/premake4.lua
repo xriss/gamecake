@@ -48,6 +48,8 @@ if RASPI then
 
 elseif EMCC then
 
+	linkoptions { "-rdynamic" }
+	
 	buildlinkoptions{
 		"-s USE_SDL=2",
 	}
@@ -92,6 +94,8 @@ elseif NACL then
 
 elseif ANDROID then 
 
+	linkoptions { "-rdynamic" }
+	
 --	linkoptions { "-v" }
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	linkoptions { "-u android_main" } -- we really need an android_main as well
@@ -111,6 +115,8 @@ elseif ANDROID then
 
 
 elseif WINDOWS then
+
+	linkoptions { "-Wl,--export-all-symbols" }
 
 	linkoptions { "-v" }
 
@@ -168,6 +174,8 @@ elseif OSX then
 	end
 	
 elseif NIX then
+
+	linkoptions { "-rdynamic" }
 
 --	linkoptions { "-static-libgcc" }
 
