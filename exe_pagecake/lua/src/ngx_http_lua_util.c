@@ -178,6 +178,7 @@ ngx_http_lua_create_new_global_table(lua_State *L, int narr, int nrec)
     lua_setfield(L, -2, "_G");
 }
 
+extern int lua_preloadlibs(lua_State *);
 
 lua_State *
 ngx_http_lua_new_state(ngx_conf_t *cf, ngx_http_lua_main_conf_t *lmcf)
