@@ -1,0 +1,20 @@
+cd `dirname $0`
+cd ..
+
+if [ "$1" = "clean" ] ; then
+	rm -rf build-gmake-windows-native
+	exit 0
+fi
+
+build/premake4 gmake mingw
+
+cd build-gmake-windows-native
+
+if [ "$1" = "debug" ] ; then
+	make config=debug_mingw $2 $3 $4
+else
+	make config=release_mingw $2 $3 $4
+fi
+
+cd ..
+

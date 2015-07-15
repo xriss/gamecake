@@ -1,0 +1,6 @@
+cd `dirname $0`
+
+./bake.lua $* && ./make && ./logcat
+
+
+

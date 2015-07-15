@@ -1,0 +1,61 @@
+.TH "ZIP_SOURCE_FILEP" "3" "August 1, 2008" "NiH" "Library Functions Manual"
+.nh
+.if n .ad l
+.SH "NAME"
+\fBzip_source_filep\fR
+\- create data source from FILE *
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+\fIstruct\ zip_source\ *\fR
+.br
+\fBzip_source_filep\fR(\fIstruct zip *archive\fR,\ \fIFILE *file\fR,\ \fIzip_uint64_t start\fR,\ \fIzip_int64_t len\fR);
+.SH "DESCRIPTION"
+The function
+\fBzip_source_filep\fR()
+creates a zip source from a file stream.
+\fBzip_source_filep\fR()
+reads
+\fIlen\fR
+bytes from offset
+\fIstart\fR
+from the open file stream
+\fIfile\fR.
+If
+\fIlen\fR
+is 0 or \-1, the whole file (starting from
+\fIstart\fR)
+is used.
+.SH "RETURN VALUES"
+Upon successful completion, the created source is returned.
+Otherwise,
+\fRNULL\fR
+is returned and the error code in
+\fIarchive\fR
+is set to indicate the error.
+.SH "ERRORS"
+\fBzip_source_filep\fR()
+fails if:
+.TP 19n
+[\fRZIP_ER_INVAL\fR]
+\fIfile\fR,
+\fIstart\fR,
+or
+\fIlen\fR
+are invalid.
+.TP 19n
+[\fRZIP_ER_MEMORY\fR]
+Required memory could not be allocated.
+.SH "SEE ALSO"
+libzip(3),
+zip_add(3),
+zip_replace(3),
+zip_source_buffer(3),
+zip_source_file(3),
+zip_source_free(3),
+zip_source_function(3),
+zip_source_zip(3)
+.SH "AUTHORS"
+Dieter Baron <\fIdillo@nih.at\fR>
+and
+Thomas Klausner <\fItk@giga.or.at\fR>

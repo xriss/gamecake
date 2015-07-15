@@ -1,0 +1,9 @@
+*.[oa]
+*~
+*.so.*
+*.so
+ChangeLog
+*.zip
+release-notes
+/*.rockspec
+/luarocks

@@ -1,0 +1,11 @@
+#rm -Rf build-gmake-nacl
+
+cd `dirname $0`
+
+
+../../bin/exe/pagecake.x32 -p. -s stop
+../../bin/exe/pagecake.x32 -p.
+
+echo http://host.local:9999
+
+tail -f logs/error.log

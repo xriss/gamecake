@@ -1,0 +1,39 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.export.html">wetgenes.export</a></h1>
+<div>
+
+<pre><code>... = wetgenes.export(table,...)
+</code></pre>
+
+<p>Export multiple names from this table as multiple returns, can be 
+used to pull functions out of this module and into locals like so</p>
+
+<pre><code>local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_env")
+</code></pre>
+
+<p>Or copy it into other modules to provide them with the same functionality.</p>
+
+<pre><code>M.lookup=require("wetgenes").lookup
+</code></pre>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.export';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>

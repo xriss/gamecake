@@ -1,0 +1,8 @@
+cd `dirname $0`
+cd ..
+
+cd ../apps/swankypaint
+../bake
+cp out/swankypaint.zip ../../lua/nginx/static/swankypaint.zip
+cd ..
+

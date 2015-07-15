@@ -1,0 +1,43 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.set_env.html">wetgenes.set_env</a></h1>
+<div>
+
+<pre><code>local _ENV=set_env(new_environment)
+</code></pre>
+
+<p>Since setfenv is going away in lua 5.2 here is a plan to future 
+proof code that wants to control its own environment</p>
+
+<p>Specifically this is for loading functions sabdboxed into a given 
+table, which we need to do from time to time.</p>
+
+<p>we set the environment of the code that called us only if setfenv 
+exists and we always return the new environment</p>
+
+<p>So the following incantation can be used to change the current environment and 
+it should work exactly the same in lua 5.1 or 5.2</p>
+
+<pre><code>local _ENV=set_env(new_environment)
+</code></pre>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.set_env';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>

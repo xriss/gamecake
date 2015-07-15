@@ -1,0 +1,25 @@
+cd `dirname $0`
+cd ..
+
+
+mode=osx
+cpu=64
+makeopts=""
+if [ "$1" = "release" ] ; then
+makeopts="config=release_$mode"
+fi
+
+
+if [ "$1" = "clean" ] ; then
+
+        rm -rf build-gmake-$mode-$cpu
+        exit
+fi
+
+
+
+build/premake4.osx gmake $mode-$cpu
+cd build-gmake-$mode-$cpu
+make $makeopts $2 $3 $4
+cd ..
+
