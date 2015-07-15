@@ -127,14 +127,15 @@ int buff;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_al_BufferData (lua_State *l)
 {
-int buff,fmt,size,freq;
+int buff,fmt,freq;
+size_t size;
 void *data;
 
 	buff=luaL_checknumber(l,1);
 	fmt=luaL_checknumber(l,2);
 	if(lua_isstring(l,3))
 	{
-		data=(void*)luaL_checklstring(l,3,(unsigned int *)&size);
+		data=(void*)luaL_checklstring(l,3,&size);
 	}
 	else
 	if(lua_isuserdata(l,3))
@@ -146,10 +147,10 @@ void *data;
 	{
 		data=(void*)lua_touserdata(l,3);
 	}
-	size=luaL_checknumber(l,4);
+	size=(size_t)luaL_checknumber(l,4);
 	freq=luaL_checknumber(l,5);
 
-	alBufferData(buff,fmt,data,size,freq);
+	alBufferData(buff,fmt,data,(int)size,freq);
 	
 	return 0;
 }
