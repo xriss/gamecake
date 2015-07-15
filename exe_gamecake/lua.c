@@ -358,6 +358,7 @@ struct Smain {
   int status;
 };
 
+extern int lua_preloadlibs(lua_State *);
 
 static int pmain (lua_State *L) {
 FILE *ft=0;
