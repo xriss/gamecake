@@ -1,7 +1,9 @@
+[![Build Status](https://drone.io/bitbucket.org/xixs/lua/status.png)](https://drone.io/bitbucket.org/xixs/lua/latest)
+
 This is my windows defenestration attempt, please build and run 
 under Xubuntu if you have a choice. The Ubuntu and Gnome3 fancy 
 desktops impact the performance of OpenGL code and are not 
-recomended as development or runtime environments.
+recommended as development or runtime environments.
 
 All C code is packaged up inside lua libraries and most C++ 
 code/dependencies have been removed from the project.
@@ -23,9 +25,7 @@ projects. This dir must exist when building.
 	./make           # build using gcc, see below for more options
 	sudo ./install   # copy into /usr/local/bin/gamecake
 
-Afterwhich gamecake will now be a valid command :)
-
-Check drone.io for build tests -> [![Build Status](https://drone.io/bitbucket.org/xixs/lua/status.png)](https://drone.io/bitbucket.org/xixs/lua/latest)
+After which gamecake will now be a valid command :)
 
 The following commands should build everything under ubuntu/debian 
 assuming you have a build environment setup, you will need to install 
@@ -37,7 +37,7 @@ but is not tested as often.
 	clang/make
 
 
-For windows I've swiched to a mingwin cross compile. This assumes 
+For windows I've switched to a mingwin cross compile. This assumes 
 you have my sdks repo checked out side by side to this lua one. 
 There are update or build scripts in the sdks repo that should be 
 run to grab all sorts of horrible sdk and build files.
@@ -45,8 +45,10 @@ run to grab all sorts of horrible sdk and build files.
 	mingw/make
 
 
-Build for raspi using a crosscompiler that is built in sdks, you will 
-need to build the cross compiler first.
+Build for raspi using a cross-compiler that is built in sdks, you will 
+need to build the cross compiler first. Currently we have a slight SDL2 problem
+as it is not yet available under raspbian but will be needed to run gamecake.
+So the appropriate .so needs to be included along with the gamecake binary.
 
 	raspi/make
 
@@ -56,6 +58,10 @@ not populated that first.
 
 	nacl/make
 
+Emscripten build using the sdk found in sdks so will not work if you have 
+not populated that first.
+
+	emcc/make
 
 Build for android, uses the ndk found in sdks and you need to bake a 
 lua project into the source. IE it spits out an apk file that can be 
@@ -79,13 +85,13 @@ main build on linux systems.
 
 
 All the above scripts just call premake and premake does of course also 
-suport other build tools as output targets but these are the ones I use 
+support other build tools as output targets but these are the ones I use 
 and test and you can assume are working.
 
 If you are very very lucky then the linux and windows/wine binaries 
-found under bin will simply work and there wll be no need to build 
-anything. These Binaries actually have all of the lua scripts in 
+found under bin will simply work and there will be no need to build 
+anything. These binaries actually have all of the lua scripts 
 found in bin/lua baked into them so are "standalone" binary blobs. 
 
-Just grab the apropriate binary from there and this engine is ready 
+Just grab the appropriate binary from there and this engine is ready 
 to go.
