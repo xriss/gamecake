@@ -63,11 +63,15 @@ newgcctoolchain {
 }
 
 
-newgcctoolchain {
+newplatform {
     name = "mingw",
     description = "mingw",
-    prefix = "i586-mingw32msvc-",
-    cppflags = "",
+    gcc = {
+        cc = "i586-mingw32msvc-cc",
+        cxx = "i586-mingw32msvc-c++",
+        ar= "ar",
+        cppflags = "-MMD",
+    },
 }
 
 newplatform {
