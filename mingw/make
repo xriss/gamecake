@@ -6,14 +6,14 @@ if [ "$1" = "clean" ] ; then
 	exit 0
 fi
 
-build/premake4 gmake mingw
+build/premake4 gmake mingw || exit 1
 
 cd build-gmake-windows-native
 
 if [ "$1" = "debug" ] ; then
-	make config=debug_mingw $2 $3 $4
+	make config=debug_mingw $2 $3 $4 || exit 1
 else
-	make config=release_mingw $2 $3 $4
+	make config=release_mingw $2 $3 $4 || exit 1
 fi
 
 cd ..
