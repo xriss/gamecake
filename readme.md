@@ -1,16 +1,10 @@
 [![Build Status](https://drone.io/bitbucket.org/xixs/lua/status.png)](https://drone.io/bitbucket.org/xixs/lua/latest)
 
-This is my windows defenestration attempt, please build and run 
-under Xubuntu if you have a choice. The Ubuntu and Gnome3 fancy 
-desktops impact the performance of OpenGL code and are not 
-recommended as development or runtime environments.
+This is the collection of Lua libraries and their dependencies that are
+built into the gamecake and pagecake engine .
 
-All C code is packaged up inside lua libraries and most C++ 
-code/dependencies have been removed from the project.
-
-So this dir contains lua modules and premake build scripts for them 
-either my own or snapshots of public libraries possibly with custom 
-wrappers.
+C++ code/dependencies are avoided if at all possible but some 
+still remains.
 
 Unless noted otherwise the snapshots of public libraries will be 
 unmodified except to contain a premake4.lua build control file in their 
@@ -19,7 +13,13 @@ directory and the occasional build/bug/tweak patch.
 The bin dir (expected to be checked out side by side with this repo) 
 is a testbed containing pre-built binaries and lua scripts. This is 
 the final output of this build and is then shared with other, 
-projects. This dir must exist when building.
+projects. This directory must exist when building as it contains Lua
+source which is packaged into the output executable.
+
+I know a little bit confusing that lua is full of C code and bin is 
+full of Lua code but that's how things are.
+
+To perform a normal build try the following.
 
 	sudo ./apt-gets  # install all build dependencies
 	./make           # build using gcc, see below for more options
