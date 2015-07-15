@@ -8,7 +8,7 @@ local gl=require("gles")
 
 
 
-function test_win()
+local function test_win()
 
 --print(wstr.dump(wwin))
 
