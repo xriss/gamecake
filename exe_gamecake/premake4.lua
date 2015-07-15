@@ -185,7 +185,7 @@ if LSB then
 	linkoptions { "--lsb-use-default-linker" }
 	linkoptions { "--lsb-besteffort" }
 else
-	links { "SDL2" }
+--	links { "SDL2" }
 end
 	
 --	linkoptions { "-v" }
