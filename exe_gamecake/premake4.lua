@@ -24,12 +24,14 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 
 if RASPI then
 	
+--	linkoptions { "-Wl,-static" }
+
 	files { "./lua.c" }
 
 -- use prebuilt SDL2 lib	
 	libdirs { "../lib_sdl2/raspi/usr/local/lib/" }
 	links { "SDL2" }
-	linkoptions { "-Wl,-R./" }
+--	linkoptions { "-Wl,-R./" }
 
 
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
@@ -94,6 +96,7 @@ elseif NACL then
 
 elseif ANDROID then 
 
+--	linkoptions { "-Wl,-static" }
 	linkoptions { "-rdynamic" }
 	
 --	linkoptions { "-v" }
@@ -117,6 +120,7 @@ elseif ANDROID then
 elseif WINDOWS then
 
 	linkoptions { "-Wl,--export-all-symbols" }
+--	linkoptions { "-Wl,-static" }
 
 	linkoptions { "-v" }
 
@@ -175,6 +179,7 @@ elseif OSX then
 	
 elseif NIX then
 
+--	linkoptions { "-Wl,-static" }
 	linkoptions { "-rdynamic" }
 
 --	linkoptions { "-static-libgcc" }
@@ -187,7 +192,18 @@ if LSB then
 else
 --	links { "SDL2" }
 end
-	
+
+
+-- use prebuilt SDL2 lib
+	if CPU=="64" then
+		libdirs { "../../sdks/sdl2/sdl2_x64/build/.libs/" }
+	elseif CPU=="32" then
+		libdirs { "../../sdks/sdl2/sdl2_x32/build/.libs/" }
+	end
+	links { "SDL2" }
+
+
+
 --	linkoptions { "-v" }
 
 	links { "GL" }
