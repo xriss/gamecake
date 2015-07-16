@@ -42,7 +42,15 @@ if LSB then
 else
 --	links { "SDL2" }
 end
-
+-- use prebuilt SDL2 lib
+	if CPU=="64" then
+		libdirs { "../../sdks/sdl2/sdl2_x64/build/.libs/" }
+	elseif CPU=="32" then
+		libdirs { "../../sdks/sdl2/sdl2_x32/build/.libs/" }
+	end
+	links { "SDL2" }
+	
+	
 --	defines "NGX_HAVE_AIO"
 	defines "NGX_LINUX"
 	defines "NGX_THREADS"

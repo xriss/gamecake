@@ -11,7 +11,7 @@ files {
 includedirs {
 	"luasdl2",
 	"luasdl2/src",
-	"/usr/include/SDL2",
+	"../../sdks/sdl2/sdl2_x32/include",
 }
 
 
