@@ -154,7 +154,11 @@ elseif OSX then
 	links { "Cocoa.framework" }
 
 
-
+-- use static SDL2 from sdks
+	libdirs { "../../sdks/sdl2/sdl2_osx/build/.libs/" }
+	links { "SDL2" }
+	
+	
 --	links { "Carbon.framework" }
 
 

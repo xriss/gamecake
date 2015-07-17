@@ -1,0 +1,9 @@
+cd `dirname $0`
+
+#build on remote mac machine and grab the binary back to this system
+
+ssh donald.local " bash --login -c hg/bin/hgfetch"
+ssh donald.local " bash --login -c \"hg/lua/osx/make clean\""
+ssh donald.local " bash --login -c \"hg/lua/osx/make release gamecake\""
+scp donald.local:hg/bin/exe/gamecake.osx ../../bin/exe
+ssh donald.local " bash --login -c hg/bin/revert_exe"
