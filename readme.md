@@ -1,4 +1,4 @@
-[![Build Status](https://drone.io/bitbucket.org/xixs/lua/status.png)](https://drone.io/bitbucket.org/xixs/lua/latest) producing bleeding edge binaries at https://drone.io/bitbucket.org/xixs/lua/files
+[![Build Status](https://drone.io/bitbucket.org/xixs/lua/status.png)](https://drone.io/bitbucket.org/xixs/lua/latest) bleeding binaries at https://drone.io/bitbucket.org/xixs/lua/files
 
 This is the collection of Lua libraries and their dependencies that are
 built into the gamecake and pagecake engine .
