@@ -1,0 +1,58 @@
+.TH "ZIP_ERROR_TO_STR" "3" "March 10, 2009" "NiH" "Library Functions Manual"
+.nh
+.if n .ad l
+.SH "NAME"
+\fBzip_error_to_str\fR
+\- get string representation of zip error
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+\fB#include <zip.h>\fR
+.sp
+\fIint\fR
+.br
+\fBzip_error_to_str\fR(\fIchar *buf\fR,\ \fIzip_uint64_t len\fR,\ \fIint ze\fR,\ \fIint se\fR);
+.SH "DESCRIPTION"
+The
+\fBzip_error_to_str\fR()
+function stores a string describing the libzip error code
+\fIze\fR
+in the user-provided buffer
+\fIbuf\fR
+which has size
+\fIlen\fR.
+The buffer is always NUL-terminated.
+\fIse\fR
+should be the value of the global variable
+\fIerrno\fR
+at the time of the error or the zlib error code, depending on
+\fIze\fR.
+.PP
+\fBzip_error_to_str\fR()
+is especially useful if
+\fBzip_open\fR()
+failed, since then there is no
+\fIstruct zip\fR
+is available to store the error code; otherwise
+\fBzip_strerror\fR()
+or
+\fBzip_file_strerror\fR()
+are more convenient.
+.SH "RETURN VALUES"
+\fBzip_error_to_str\fR()
+returns the number of characters that would have been written to a
+sufficiently sized
+\fIbuf\fR,
+excluding the terminating NUL character.
+.SH "SEE ALSO"
+libzip(3),
+zip_error_get(3),
+zip_error_get_sys_type(3),
+zip_file_error_get(3),
+zip_file_strerror(3),
+zip_open(3),
+zip_strerror(3)
+.SH "AUTHORS"
+Dieter Baron <\fIdillo@nih.at\fR>
+and
+Thomas Klausner <\fItk@giga.or.at\fR>

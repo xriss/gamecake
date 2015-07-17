@@ -1,0 +1,145 @@
+.TH "ZIP_SOURCE_FUNCTION" "3" "September 22, 2013" "NiH" "Library Functions Manual"
+.nh
+.if n .ad l
+.SH "NAME"
+\fBzip_source_function\fR
+\- create data source from function
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+\fB#include <zip.h>\fR
+.sp
+\fIstruct\ zip_source\ *\fR
+.br
+\fBzip_source_function\fR(\fIstruct zip *archive\fR,\ \fIzip_source_callback fn\fR,\ \fIvoid *userdata\fR);
+.SH "DESCRIPTION"
+The function
+\fBzip_source_function\fR()
+creates a zip source from the user-provided function
+\fIfn\fR,
+which must be of the following type:
+.nf
+.sp
+.RS 0n
+typedef zip_int64_t (*zip_source_callback)(void *state,
+    void *data, zip_uint64_t len, enum zip_source_cmd cmd);
+.RE
+.fi
+.PP
+When called by the library, the first argument is the
+\fIuserdata\fR
+argument supplied to
+\fBzip_source_function\fR().
+The next two arguments are a buffer
+\fIdata\fR
+of size
+\fIlen\fR
+when data is expected to be returned, or else
+\fRNULL\fR
+and 0.
+The last argument,
+\fIcmd\fR,
+specifies which action the function should perform:
+.RS 6n
+.TP 21n
+\fRZIP_SOURCE_OPEN\fR
+Prepare for reading.
+Return 0 on success, \-1 on error.
+.TP 21n
+\fRZIP_SOURCE_READ\fR
+Read data into the buffer
+\fIdata\fR
+of size
+\fIlen\fR.
+Return the number of bytes placed into
+\fIdata\fR
+on success, \-1 on error.
+.TP 21n
+\fRZIP_SOURCE_CLOSE\fR
+Reading is done.
+Return 0.
+.TP 21n
+\fRZIP_SOURCE_STAT\fR
+Get meta information for the input data.
+\fIdata\fR
+points to an allocated
+\fIstruct zip_stat\fR,
+which should be initialized using
+zip_stat_init(3)
+and then filled in.
+Information only available after the source has been read (e.g. size)
+can be omitted in an earlier call.
+Return sizeof(struct zip_stat) on success, \-1 on error.
+\fINOTE\fR:
+\fBzip_source_function\fR()
+may be called with this argument even after being called with
+\fRZIP_SOURCE_CLOSE\fR.
+.TP 21n
+\fRZIP_SOURCE_ERROR\fR
+Get error information.
+\fIdata\fR
+points to an array of two ints, which should be filled with the libzip
+error code and the corresponding system error code for the error that
+occurred.
+See
+zip_errors(3)
+for details on the error codes.
+Return return(2 * sizeof(int)).
+.TP 21n
+\fRZIP_SOURCE_FREE\fR
+Clean up and free all resources.
+Return 0.
+.RE
+.PP
+The library will always issue
+\fRZIP_SOURCE_OPEN\fR
+before issuing
+\fRZIP_SOURCE_READ\fR.
+When it no longer wishes to read from this source, it will issue
+\fRZIP_SOURCE_CLOSE\fR.
+If the library wishes to read the data again, it will issue
+\fRZIP_SOURCE_OPEN\fR
+a second time.
+If the function is unable to provide the data again, it should
+return \-1.
+.PP
+\fRZIP_SOURCE_STAT\fR
+can be issued at any time.
+\fRZIP_SOURCE_ERROR\fR
+will only be issued in response to the function
+returning \-1.
+\fRZIP_SOURCE_FREE\fR
+will be the last command issued;
+if
+\fRZIP_SOURCE_OPEN\fR
+was called and succeeded,
+\fRZIP_SOURCE_CLOSE\fR
+will be called before
+\fRZIP_SOURCE_FREE\fR.
+.SH "RETURN VALUES"
+Upon successful completion, the created source is returned.
+Otherwise,
+\fRNULL\fR
+is returned and the error code in
+\fIarchive\fR
+is set to indicate the error.
+.SH "ERRORS"
+\fBzip_source_function\fR()
+fails if:
+.TP 19n
+[\fRZIP_ER_MEMORY\fR]
+Required memory could not be allocated.
+.SH "SEE ALSO"
+libzip(3),
+zip_add(3),
+zip_replace(3),
+zip_source_buffer(3),
+zip_source_file(3),
+zip_source_filep(3),
+zip_source_free(3),
+zip_source_zip(3),
+zip_stat_init(3)
+.SH "AUTHORS"
+Dieter Baron <\fIdillo@nih.at\fR>
+and
+Thomas Klausner <\fItk@giga.or.at\fR>

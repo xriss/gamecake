@@ -1,0 +1,2 @@
+cd `dirname $0`
+javah -classpath bin/classes -d code com.wetgenes.Bulb.Bulb

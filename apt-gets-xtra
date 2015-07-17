@@ -1,0 +1,12 @@
+
+#clang if you want to build using clang (recomended)
+
+apt-get install clang
+
+
+
+#mingw32 if you want to build for windows
+
+apt-get install mingw32
+
+

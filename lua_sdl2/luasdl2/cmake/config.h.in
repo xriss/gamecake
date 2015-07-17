@@ -1,0 +1,7 @@
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
+
+#define	VERSION_BINDING	@BINDING@
+#define	VERSION_BINDING_PATCH	@BINDING_PATCH@
+
+#endif /* !_CONFIG_H_ */

@@ -1,0 +1,30 @@
+LUA_INC=c:\lua5.1\include
+LUA_DIR=c:\lua5.1\lua
+LUA_LIBDIR=c:\lua5.1
+LUA_LIB=c:\lua5.1\lua5.1.lib
+
+OBJS= src\luazip.obj
+
+ZZLIB_INCLUDE=c:\zziplib-0.13.49
+ZZLIB_LIB=c:\zziplib-0.13.49\zzip\zziplib.lib
+
+ZLIB_INCLUDE=c:\zziplib-0.13.49\zlib\include
+ZLIB_LIB=c:\zziplib-0.13.49\zlib\lib\zlib.lib
+
+.c.obj:
+	cl /c /Fo$@ /O2 /I$(LUA_INC) /I$(ZZLIB_INCLUDE) /I$(ZLIB_INCLUDE) /D_CRT_SECURE_NO_DEPRECATE $<
+
+src\zip.dll: $(OBJS)
+	link /dll /def:src\luazip.def /out:$@ $(OBJS) $(ZZLIB_LIB) $(ZLIB_LIB) $(LUA_LIB) 
+
+install: src\zip.dll
+	IF NOT EXIST $(LUA_LIBDIR) mkdir $(LUA_LIBDIR)
+	copy src\zip.dll $(LUA_LIBDIR)
+
+clean:
+	del src\zip.dll
+	del src\*.obj
+    del src\zip.exp
+    del src\zip.lib
+
+# $Id: makefile.win,v 1.2 2007-06-13 23:41:54 carregal Exp $

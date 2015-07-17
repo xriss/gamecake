@@ -1,0 +1,43 @@
+<html>
+<head>
+	<title>Swanky Paint</title>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/gamecake_loader.js"></script>
+	<script>
+		var paint_configure=function(lson) {
+			var t=gamecake.post(
+		'cmd=lua\n',
+		'local win=require("wetgenes.win")\n'+
+		'local oven=win.oven\n'+
+		'local paint=oven.rebake(oven.modname..".main_paint")\n'+
+		'paint.quicksave_hook=function()\n'+
+		' local images=oven.rebake(oven.modname..".images")\n'+
+		' local mime=require("mime")\n'+
+		' local grd=images.get().grd\n'+
+		' local s=mime.b64( (grd:save({fmt="png"})) )\n'+
+		' win.js_post("cmd=pix\\n",s)\n'+
+		' local grd=images.get().export_grd().g\n'+
+		' local s=mime.b64( (grd:save({fmt="png"})) )\n'+
+		' win.js_post("cmd=fat\\n",s)\n'+
+		' images.set_modified(false)\n'+
+		'end\n');
+//		'paint.configure( [==['+lson+']==] )\n');
+		};
+		var msg_hook=function(m,d){
+			console.log([m,d]);
+		};
+		var loaded_hook=function(m,d){
+			paint_configure("{}");
+		};
+		gamecake=gamecake_loader({
+			msg_hook:msg_hook,
+			loaded_hook:loaded_hook,
+			cakefile:"swankypaint.zip",
+			div:"#gamecake",
+			dir:"hg/bin/exe/"});
+		</script>
+</head>
+<body style=" margin:0; padding:0; border:0; overflow:hidden; ">
+	<div id="gamecake" style=" width:100%; height:100%; position:absolute; "></div>
+</body>
+</html>
