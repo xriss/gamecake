@@ -9,9 +9,6 @@ make sure lua_preloadlibs is called in ngx_http_lua_util.c if we bump nginx sour
 project "pagecake"
 language "C++"
 
-linkoptions { "-rdynamic" }
-
-
 includedirs {	"." ,
 		"objs" ,
 		"src" ,
@@ -36,25 +33,26 @@ if NACL then
 elseif ANDROID then 
 else
 
+-- look around the exe for any dynamic code we might want	
+	linkoptions { "-Wl,-R\\$$ORIGIN" } -- so much escape \\$$ -> $
+
+
 if LSB then
 	linkoptions { "--lsb-use-default-linker" }
 	linkoptions { "--lsb-besteffort" }
-else
---	links { "SDL2" }
 end
+
 -- use prebuilt SDL2 lib
 	if CPU=="64" then
 		libdirs { "../../sdks/sdl2/sdl2_x64/build/.libs/" }
 	elseif CPU=="32" then
 		libdirs { "../../sdks/sdl2/sdl2_x32/build/.libs/" }
 	end
-	links { "SDL2" }
+	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- prefer static SDL?
 	
 	
---	defines "NGX_HAVE_AIO"
 	defines "NGX_LINUX"
 	defines "NGX_THREADS"
---	defines "NDK"
 
 -- enable SSL
 	defines "NGX_HTTP_SSL"
@@ -66,8 +64,6 @@ end
 	files { "./**.h" }
 	files { "./objs/**.c" }
 	files { "./src/core/**.c" }
-
---	files { "./src/misc/**.c" }
 
 	files { --"./src/event/**.c" }
 --		"./src/event/modules",
@@ -203,22 +199,6 @@ end
 	}
 
 	files { "./lua/src/**.h" , "./lua/src/**.c" }
---	excludes { "./lua/src/ngx_http_lua_ndk.c" }
---	excludes { "./lua/src/ngx_http_lua_directive.c" }
-
---	files { "./ndk/src/**.h" }
---	files { "./ndk/src/ndk.c" }
---[[
-	files { "./ndk/src/**.h" , "./ndk/src/**.c" }
-	excludes { "./ndk/src/ndk_upstream_list.*" }
-	excludes { "./ndk/src/ndk_process.*" }
-	excludes { "./ndk/src/ndk_uri.*" }
-	excludes { "./ndk/src/ndk_complex_path.*" }
-	excludes { "./ndk/src/ndk_set_var.*" }
-	excludes { "./ndk/src/ndk_encoding.*" }
-	excludes { "./ndk/src/ndk_regex.*" }
-	excludes { "./ndk/src/ndk_http.*" }
-]]
 
 	files { "../exe_gamecake/*.c" }
 	excludes { "../exe_gamecake/lua.c" }
@@ -229,13 +209,10 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 
 	links(static_lib_names)
 
---	links { "GL" , "GLU" }
 	links { "GL" }
 	links { "crypt" }
 	links { "pthread" }
 	links { "dl" , "m" , "rt" }
-
---	links { "Xrandr" }
 	links { "X11" }
 
 	links { "ssl" , "crypto"}
