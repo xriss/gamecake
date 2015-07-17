@@ -46,9 +46,7 @@ run to grab all sorts of horrible sdk and build files.
 
 
 Build for raspi using a cross-compiler that is built in sdks, you will 
-need to build the cross compiler first. Currently we have a slight SDL2 problem
-as it is not yet available under raspbian but will be needed to run gamecake.
-So the appropriate .so needs to be included along with the gamecake binary.
+need to build the cross compiler first. 
 
 	raspi/make
 
