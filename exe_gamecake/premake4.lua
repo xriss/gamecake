@@ -31,7 +31,7 @@ if RASPI then
 -- use prebuilt SDL2 lib	
 	libdirs { "../lib_sdl2/raspi/usr/local/lib/" }
 	links { "SDL2" }
---	linkoptions { "-Wl,-R./" }
+	linkoptions { "-Wl,-R\\$$ORIGIN" } -- so much escape \\$$ -> $
 
 
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
