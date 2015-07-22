@@ -331,6 +331,7 @@ static int lua_alc_CreateContext(lua_State *l)
 {
 	ALCdevice *device;
 	ALCcontext **context;
+	ALint attr[] = { ALC_FREQUENCY, 48000, 0 };
 
 // must pass in a device
 	device = lua_alc_check_device(l, 1);
@@ -342,8 +343,9 @@ static int lua_alc_CreateContext(lua_State *l)
 	lua_setmetatable(l, -2);
 
 //open the actual context
-	(*context)=alcCreateContext(device,NULL);
-	if(!(*context)) { return 0; }
+	(*context)=alcCreateContext(device,attr);							// request 48k mixer by default
+	if(!(*context)) { (*context)=alcCreateContext(device,NULL); }	 	// try again with no attribs
+	if(!(*context)) { return 0; } 										// fail at this point
 
 //return the userdata	
 	return 1;
@@ -438,14 +440,26 @@ void lua_alc_get_prop_info (int def, char *flag, int *num)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_alc_Get (lua_State *l)
 {	
-ALCdevice *device;
+ALCdevice **ddevice;
+ALCdevice *device=0;
 
 char flag;
 int num;
 
 int vi[16]={0};
 
-	device = lua_alc_check_capture_device(l, 1 );
+	ddevice = lua_alc_get_device_ptr(l, 1); // try output device first but don't raise an error on fail
+	if(ddevice)
+	{
+		if(*ddevice)
+		{
+			device=*ddevice;
+		}
+	}
+	if(!device)
+	{
+		device = lua_alc_check_capture_device(l, 1 ); // else check capture device
+	}
 	
 	int def=lua_tonumber(l,2);
 	
