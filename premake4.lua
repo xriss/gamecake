@@ -762,7 +762,8 @@ all_includes=all_includes or {
 	{"lib_zip",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_pgsql",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
-	{"lib_opus",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_opus",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_opus",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 
 -- this may be the main lua or luajit lib depending on build
 -- would really like to just use luajit but nacl mkes this a problem...
