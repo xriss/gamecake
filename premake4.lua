@@ -764,6 +764,7 @@ all_includes=all_includes or {
 	{"lib_pq",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 	{"lua_opus",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lib_opus",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_speexdsp",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 
 -- this may be the main lua or luajit lib depending on build
 -- would really like to just use luajit but nacl mkes this a problem...
