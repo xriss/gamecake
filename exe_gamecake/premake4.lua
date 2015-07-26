@@ -20,7 +20,7 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 if RASPI then
 	
 -- look around the exe for any dynamic code we might want	
-	linkoptions { "-Wl,-R\\$$ORIGIN" } -- so much escape \\$$ -> $
+	linkoptions { "-Wl,-R\\$$ORIGIN/rpi" } -- so much escape \\$$ -> $
 
 	files { "./lua.c" }
 
@@ -113,7 +113,7 @@ elseif WINDOWS then
 elseif OSX then
 
 -- look around the exe for any dynamic code we might want	
-	linkoptions { "-Wl,-R\\$$ORIGIN" } -- so much escape \\$$ -> $
+	linkoptions { "-Wl,-R\\$$ORIGIN/osx" } -- so much escape \\$$ -> $
 
 	files { "./lua.c" }
 	
@@ -140,8 +140,11 @@ elseif OSX then
 elseif NIX then
 
 -- look around the exe for any dynamic code we might want	
-	linkoptions { "-Wl,-R\\$$ORIGIN" } -- so much escape \\$$ -> $
-
+	if CPU=="64" then
+		linkoptions { "-Wl,-R\\$$ORIGIN/x64" } -- so much escape \\$$ -> $
+	else
+		linkoptions { "-Wl,-R\\$$ORIGIN/x32" } -- so much escape \\$$ -> $
+	end
 
 --	linkoptions { "-static-libgcc" }
 
