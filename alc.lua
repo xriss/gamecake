@@ -175,10 +175,12 @@ function alc.setup(opts)
 	
 	if opts.capture then
 --print("AL","CaptureOpenDevice")
-		dc.capture_device=alc.CaptureOpenDevice(nil,44100,alc.CAPTURE_SAMPLES,44100)
+--		dc.capture_device=alc.CaptureOpenDevice(nil,44100,alc.CAPTURE_SAMPLES,44100)
+		dc.capture_device=alc.CaptureOpenDevice(nil,48000,al.FORMAT_MONO16,32768)
 	end
 	
-print("AL","setup done")
+print("AL","setup done","freq",	alc.Get(dc.device,alc.FREQUENCY),
+			dc.capture_device and alc.Get(dc.capture_device,alc.FREQUENCY) )
 	
 	return dc
 end

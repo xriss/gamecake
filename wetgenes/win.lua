@@ -10,8 +10,12 @@ local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local bit=require("bit")
 
+
 local win={}
 local base={}
+
+local steam=require("wetgenes.win.steam") -- try and setup steam 
+if steam.loaded then win.steam=steam end  -- put steam inside win if it got loaded so we can use flag if(win.steam)
 
 local flavour_request=flavour_request or os.getenv("gamecake_flavour")
 

@@ -70,15 +70,31 @@ function M.bake(opts)
 --print(wwin.flavour)
 
 
--- check if we already have junk in our local dir, and if so then dont use the users HOME dir
+-- check if we already have settings in our local dir, and if so then we will keep using that
+-- so you can force appdir use with a touch files/settings.lua command
 
 oven.homedir="./"
+local sniff_homedir=true
 
 local fp=io.open(wwin.files_prefix.."settings.lua","r")
-if fp then -- stick with what we have
+if fp then -- stick with the default files in the app dir (lets the user force local use)
 	fp:close()
-else
+	sniff_homedir=false
+end
 
+
+if wwin.steam then -- steamcloud prefers files in your app dir for easy sync between multiple platforms
+
+	local wbake=require("wetgenes.bake")
+			
+	wwin.files_prefix=wwin.files_prefix..(wwin.steam.userid).."/"
+	wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
+	
+	sniff_homedir=false
+end
+
+
+if sniff_homedir then -- finally setup to save files into some sort of user file area depending on OS
 
 	if ( wwin.flavour=="linux" or wwin.flavour=="raspi" or wwin.flavour=="osx" or wwin.flavour=="sdl" ) and wwin.posix then -- we need to store in the homedir
 
