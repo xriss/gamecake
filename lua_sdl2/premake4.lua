@@ -29,6 +29,10 @@ if WINDOWS then
 	includedirs {	"../lib_sdl2/win32/i686-w64-mingw32/include/SDL2",	}
 end
 
+if RASPI then
+	includedirs {	"../lib_sdl2/raspi/usr/local/include/SDL2",	}
+end
+
 
 KIND{kind="lua",name="SDL"}
 
