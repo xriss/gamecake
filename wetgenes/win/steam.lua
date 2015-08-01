@@ -28,12 +28,10 @@ local lib		pcall(function() libpath=libdirname..libname		lib=ffi.load(libpath) e
 if not lib then	pcall(function() libpath=libname					lib=ffi.load(libpath) end) end
 
 
-print("STEAM",libpath,tostring(lib))
+--print("STEAM",libpath,tostring(lib))
 
 -- no steam lib found
 if not lib then return steam end
-
-print(pragma_pack)
 
 ffi.cdef( [[
 
