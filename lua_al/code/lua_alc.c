@@ -226,6 +226,25 @@ ALCdevice **device;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// get (capture or output) *device and error if it is 0
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+ALCdevice * lua_alc_check_any_device (lua_State *l,int idx)
+{	
+ALCdevice **device;
+	device = (ALCdevice**)lua_touserdata(l, idx);
+	if(!device)
+	{
+		luaL_error(l,"alc any device not a userdata");
+	}
+	if(!*device)
+	{
+		luaL_error(l,"alc any device is null");
+	}
+	return *device;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // __GC for device ptr (may be null)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -317,7 +336,7 @@ size_t len;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_alc_GetError (lua_State *l)
 {
-	ALCdevice *device = lua_alc_check_device(l, 1 );
+	ALCdevice *device = lua_alc_check_any_device(l, 1 );
 	lua_pushnumber(l,alcGetError(device));
 	return 1;
 }
@@ -440,7 +459,6 @@ void lua_alc_get_prop_info (int def, char *flag, int *num)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_alc_Get (lua_State *l)
 {	
-ALCdevice **ddevice;
 ALCdevice *device=0;
 
 char flag;
@@ -448,18 +466,7 @@ int num;
 
 int vi[16]={0};
 
-	ddevice = lua_alc_get_device_ptr(l, 1); // try output device first but don't raise an error on fail
-	if(ddevice)
-	{
-		if(*ddevice)
-		{
-			device=*ddevice;
-		}
-	}
-	if(!device)
-	{
-		device = lua_alc_check_capture_device(l, 1 ); // else check capture device
-	}
+	device = lua_alc_check_any_device(l, 1); // try input or output device
 	
 	int def=lua_tonumber(l,2);
 	
