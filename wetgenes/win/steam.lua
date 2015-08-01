@@ -33,8 +33,9 @@ print("STEAM",libpath,tostring(lib))
 -- no steam lib found
 if not lib then return steam end
 
+print(pragma_pack)
 
-ffi.cdef[[
+ffi.cdef( [[
 
 void *SteamApps();
 void *SteamUtils();
@@ -60,14 +61,14 @@ bool SteamAPI_ISteamUserStats_StoreStats(void *_p);
 bool SteamAPI_ISteamUserStats_GetAchievement(void *_p, const char * pchName, bool * pbAchieved);
 bool SteamAPI_ISteamUserStats_SetAchievement(void *_p, const char * pchName);
 bool SteamAPI_ISteamUserStats_ClearAchievement(void *_p, const char * pchName);
-bool SteamAPI_ISteamUserStats_IndicateAchievementProgress(void *_p, const char * pchName, uint32 nCurProgress, uint32 nMaxProgress);
+bool SteamAPI_ISteamUserStats_IndicateAchievementProgress(void *_p, const char * pchName, uint32_t nCurProgress, uint32_t nMaxProgress);
 
 
 
 bool SteamAPI_Init();
 bool InitSafe();
 
-#pragma pack( push, ]]..( jit.os=="Linux" or jit.os=="OSX" ) and 4 or 8)..[[
+#pragma pack( push, ]]..(( jit.os=="Linux" or jit.os=="OSX" ) and "4" or "8")..[[)
 
 struct LeaderboardFindResult_t
 {
@@ -87,8 +88,7 @@ struct LeaderboardScoreUploaded_t
 
 #pragma pack( pop )
 
-
-]]
+]])
 
 -- failed to init
 if lib.InitSafe then -- use wrapper
