@@ -10,9 +10,8 @@
 extern "C" {
 #endif
 
-extern unsigned char * lua_pack_toluserdata (lua_State *L, int idx, size_t *len);
 
-LUALIB_API int luaopen_wetgenes_pack (lua_State *l);
+LUALIB_API int luaopen_wetgenes_opus_core (lua_State *l);
 
 #ifdef __cplusplus
 };
