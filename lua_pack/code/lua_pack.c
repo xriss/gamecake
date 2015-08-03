@@ -21,7 +21,7 @@
 // or with + to force big endian
 
 
-// hax to be honest, all this to create a lua_toluserdata function
+// hax to be honest, all this to create a lua_pack_toluserdata function
 // if lua or luajit change then this will break
 // it is however still better than not having any bounds checking
 
@@ -34,7 +34,7 @@
 
 #include "../lib_wet/util/wet_types.h"
 
-static u8 * lua_toluserdata (lua_State *L, int idx, size_t *len) {
+extern unsigned char * lua_pack_toluserdata (lua_State *L, int idx, size_t *len) {
 
 #if defined(LIB_LUAJIT)
 	GCudata *g;
@@ -42,7 +42,7 @@ static u8 * lua_toluserdata (lua_State *L, int idx, size_t *len) {
 	Udata *g;
 #endif
 
-	u8 *p=lua_touserdata(L,idx);
+	unsigned char *p=lua_touserdata(L,idx);
 	
 	if(!p) { return 0; }
 	
@@ -370,7 +370,7 @@ int count;
 	else
 	if(lua_isuserdata(l,1)) // must check for light first...
 	{
-		ptr=lua_toluserdata(l,1,&len);
+		ptr=lua_pack_toluserdata(l,1,&len);
 	}
 	else
 	{
@@ -553,7 +553,7 @@ size_t sl;
 
 	if(lua_isuserdata(l,4)) // optional buffer to write too
 	{
-		ptr=lua_toluserdata(l,4,&len);
+		ptr=lua_pack_toluserdata(l,4,&len);
 	}
 	
 	data_len=0;
@@ -720,7 +720,7 @@ s32 size=(s32)lua_tonumber(l,2);
 	else
 	if(lua_isuserdata(l,1)) // must check for light first...
 	{
-		ptr=lua_toluserdata(l,1,&len);
+		ptr=lua_pack_toluserdata(l,1,&len);
 	}
 	else
 	{
@@ -754,7 +754,7 @@ u8 *ptr=0;
 		return 0;
 	}
 	
-	ptr=lua_toluserdata(l,1,&len);
+	ptr=lua_pack_toluserdata(l,1,&len);
 	if(!ptr) { return 0; }
 
 	lua_pushnumber(l,len);
@@ -795,7 +795,7 @@ u8 *ptr=0;
 		return 0;
 	}
 	
-	ptr=lua_toluserdata(l,1,&len);
+	ptr=lua_pack_toluserdata(l,1,&len);
 	if(!ptr) { return 0; }
 	
 	if(lua_isnumber(l,2)) // force size
@@ -825,7 +825,7 @@ u8 *ptr=0;
 	else
 	if(lua_isuserdata(l,1))
 	{
-		ptr=lua_toluserdata(l,1,0);
+		ptr=lua_pack_toluserdata(l,1,0);
 	}
 	else
 	{
@@ -864,7 +864,7 @@ u8 *newptr=0;
 	else
 	if(lua_isuserdata(l,1))
 	{
-		ptr=lua_toluserdata(l,1,&len);
+		ptr=lua_pack_toluserdata(l,1,&len);
 	}
 	else
 	{
@@ -873,9 +873,22 @@ u8 *newptr=0;
 		return 0;
 	}
 
+	if(lua_isnumber(l,2))
+	{
+		newlen=lua_tonumber(l,2);
+		newptr=lua_newuserdata(l,newlen);
+		if(len<=newlen)
+		{
+			lua_pushstring(l,"source too small");
+			lua_error(l);
+			return 0;
+		}
+		memcpy(newptr,ptr,newlen);
+	}
+	else
 	if(lua_isuserdata(l,2))
 	{
-		newptr=lua_toluserdata(l,2,&newlen);
+		newptr=lua_pack_toluserdata(l,2,&newlen);
 		if(len>newlen)
 		{
 			lua_pushstring(l,"destination too small");
