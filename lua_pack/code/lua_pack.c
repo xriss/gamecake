@@ -34,21 +34,19 @@
 
 #include "../lib_wet/util/wet_types.h"
 
-extern unsigned char * lua_pack_toluserdata (lua_State *L, int idx, size_t *len) {
-
+extern unsigned char * lua_pack_toluserdata (lua_State *l, int idx, size_t *len)
+{
 #if defined(LIB_LUAJIT)
 	GCudata *g;
 #else
 	Udata *g;
 #endif
 
-	unsigned char *p=lua_touserdata(L,idx);
-	
+	unsigned char *p=lua_touserdata(l,idx);
 	if(!p) { return 0; }
-	
 	if(len)
 	{
-		if(lua_islightuserdata(L,idx))
+		if(lua_islightuserdata(l,idx))
 		{
 			*len=0x7fffffff;
 		}
@@ -67,6 +65,104 @@ extern unsigned char * lua_pack_toluserdata (lua_State *L, int idx, size_t *len)
 	return p;
 }
 
+
+extern unsigned char * lua_pack_to_buffer (lua_State *l, int idx, size_t *len)
+{
+
+#if defined(LIB_LUAJIT)
+	GCudata *g;
+#else
+	Udata *g;
+#endif
+
+	unsigned char *p;
+
+// we can also use a table that gives us a pointer an offset and a size
+// you should also keep any original userdata in this table as a reference to keep the memory alive
+	if(lua_istable(l,idx))
+	{
+		lua_getfield(l,idx,"buffer");
+		p=lua_pack_to_buffer(l,lua_gettop(l),len); // possible recursion
+		lua_pop(l,1);
+
+		if(len) // we want a size
+		{
+			lua_getfield(l,idx,"sizeof");
+			if(lua_isnumber(l,-1))
+			{
+				*len=lua_tonumber(l,-1);
+			}
+			lua_pop(l,1);
+		}
+		
+		lua_getfield(l,idx,"offset");
+		if(lua_isnumber(l,-1))
+		{
+			size_t offset=(size_t)lua_tonumber(l,-1);
+			p+=offset; // fix pointer using offset (which must not be negative)
+			if(len)
+			{
+				(*len)-=offset; // length is now smaller
+			}
+		}
+		lua_pop(l,1);
+
+		return p;
+	}
+	
+	return lua_pack_toluserdata(l,idx,len);
+}
+
+// same as lua_pack_to_buffer but also allows strings
+extern const unsigned char * lua_pack_to_const_buffer (lua_State *l, int idx, size_t *len)
+{
+const unsigned char *p;
+
+// we can also use a table that gives us a pointer an offset and a size
+// you should also keep any original userdata in this table as a reference to keep the memory alive
+	if(lua_istable(l,idx))
+	{
+		lua_getfield(l,idx,"buffer");
+		p=lua_pack_to_const_buffer(l,lua_gettop(l),len); // possible recursion
+		lua_pop(l,1);
+
+		if(len) // we want a size
+		{
+			lua_getfield(l,idx,"sizeof");
+			if(lua_isnumber(l,-1))
+			{
+				*len=lua_tonumber(l,-1);
+			}
+			lua_pop(l,1);
+		}
+		
+		lua_getfield(l,idx,"offset");
+		if(lua_isnumber(l,-1))
+		{
+			size_t offset=(size_t)lua_tonumber(l,-1);
+			p+=offset; // fix pointer using offset (which must not be negative)
+			if(len)
+			{
+				(*len)-=offset; // length is now smaller
+			}
+		}
+		lua_pop(l,1);
+
+		return p;
+	}
+	if(lua_isstring(l,idx))
+	{
+		if(len)
+		{
+			return (const unsigned char *) lua_tolstring(l,idx,len);
+		}
+		else
+		{
+			return (const unsigned char *) lua_tostring(l,idx);
+		}
+	}
+	return (const unsigned char *) lua_pack_toluserdata(l,idx,len);
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -357,25 +453,11 @@ int def_len;
 int data_len=0;
 int count;
 
-	if(lua_isstring(l,1))
+	ptr=lua_pack_to_const_buffer(l,1,&len);
+	if(ptr==0)
 	{
-		ptr=(const u8*)lua_tolstring(l,1,&len);
-	}
-	else
-	if(lua_islightuserdata(l,1))
-	{
-		ptr=lua_touserdata(l,1);
-		len=0x7fffffff; // fake length as we have no idea
-	}
-	else
-	if(lua_isuserdata(l,1)) // must check for light first...
-	{
-		ptr=lua_pack_toluserdata(l,1,&len);
-	}
-	else
-	{
-		lua_pushstring(l,"need a string to load packed data from");
-		lua_error(l);
+		lua_pushstring(l,"need data to pack load from");
+		return lua_error(l);
 	}
 	
 	if(lua_isstring(l,2))
@@ -386,7 +468,7 @@ int count;
 	if(!lua_istable(l,2))
 	{
 		lua_pushstring(l,"need a table to describe packed data");
-		lua_error(l);
+		return lua_error(l);
 	}
 	
 	if(lua_isnumber(l,3)) // optional start point
@@ -443,8 +525,7 @@ int count;
 	{
 //printf("PACKLOAD %d %d %d\n",data_len,off,len);
 		lua_pushstring(l,"data pack overflow");
-		lua_error(l);
-		return 0;
+		return lua_error(l);
 	}
 
 	
@@ -527,8 +608,8 @@ size_t sl;
 
 	if(!lua_istable(l,1))
 	{
-		lua_pushstring(l,"need a table to save packed data from");
-		lua_error(l);
+		lua_pushstring(l,"need table to pack save from");
+		return lua_error(l);
 	}
 	
 	if(lua_isstring(l,2))
@@ -551,10 +632,7 @@ size_t sl;
 		off=(u32)lua_tonumber(l,3);
 	}
 
-	if(lua_isuserdata(l,4)) // optional buffer to write too
-	{
-		ptr=lua_pack_toluserdata(l,4,&len);
-	}
+	ptr=lua_pack_to_buffer(l,4,&len); // optional buffer to write too
 	
 	data_len=0;
 	count=0;
@@ -601,8 +679,7 @@ size_t sl;
 		{
 //printf("PACKSAVE %d %d %d\n",data_len,off,len);
 			lua_pushstring(l,"data pack overflow");
-			lua_error(l);
-			return 0;
+			return lua_error(l);
 		}
 		data=ptr;
 	}
@@ -612,7 +689,7 @@ size_t sl;
 		if(!data)
 		{
 			lua_pushstring(l,"failed to allocate pack data buffer");
-			lua_error(l);
+			return lua_error(l);
 		}
 	}
 	
@@ -682,11 +759,15 @@ static int lua_pack_alloc (lua_State *l)
 {
 s32 size=(s32)lua_tonumber(l,1);
 
-	if(size<=0) { lua_pushstring(l,"alloc size must be > 0"); lua_error(l); }
+	if(size<=0)
+	{
+		lua_pushstring(l,"alloc size must be > 0");
+		return lua_error(l);
+	}
 	
 	lua_newuserdata(l,size);
 	
-	if( lua_istable(l,2) ) // optionally supply a metatable for the userdata
+	if( lua_istable(l,2) ) // optionally supply a metatable for the new userdata
 	{
 		lua_pushvalue(l,2);
 		lua_setmetatable(l,-2);
@@ -703,32 +784,23 @@ s32 size=(s32)lua_tonumber(l,1);
 static int lua_pack_grow (lua_State *l)
 {
 size_t len=0;
-u8 *ptr=0;
+const u8 *ptr=0;
 u8 *newptr=0;
 s32 size=(s32)lua_tonumber(l,2);
 
-	if(lua_isstring(l,1))
-	{
-		ptr=(u8*)lua_tolstring(l,1,&len);
-	}
-	else
-	if(lua_islightuserdata(l,1))
+	ptr=lua_pack_to_const_buffer(l,1,&len); // also allow input strings
+	if(!ptr)
 	{
 		lua_pushstring(l,"need a userdata to grow");
-		lua_error(l);
+		return lua_error(l);
 	}
-	else
-	if(lua_isuserdata(l,1)) // must check for light first...
+
+// this may also get triggered by a light userdata which will have a very large size	
+	if(size<=len)
 	{
-		ptr=lua_pack_toluserdata(l,1,&len);
+		lua_pushstring(l,"grow size must be bigger than original");
+		return lua_error(l);
 	}
-	else
-	{
-		lua_pushstring(l,"need a userdata to grow");
-		lua_error(l);
-	}
-	
-	if(size<=len) { lua_pushstring(l,"grow size must be bigger than original"); lua_error(l); }
 	
 	newptr=lua_newuserdata(l,size);
 	
@@ -739,22 +811,15 @@ s32 size=(s32)lua_tonumber(l,2);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// find the size of a userdata
+// find the size of a userdata or string or buffer table
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_pack_sizeof (lua_State *l)
 {
 size_t len=0;
-u8 *ptr=0;
+const u8 *ptr=0;
 	
-	if(!lua_isuserdata(l,1))
-	{
-		lua_pushstring(l,"not a userdata");
-		lua_error(l);
-		return 0;
-	}
-	
-	ptr=lua_pack_toluserdata(l,1,&len);
+	ptr=lua_pack_to_const_buffer(l,1,&len);
 	if(!ptr) { return 0; }
 
 	lua_pushnumber(l,len);
@@ -786,16 +851,9 @@ int def_len;
 static int lua_pack_tostring (lua_State *l)
 {
 size_t len=0;
-u8 *ptr=0;
+const u8 *ptr=0;
 	
-	if(!lua_isuserdata(l,1))
-	{
-		lua_pushstring(l,"not a userdata");
-		lua_error(l);
-		return 0;
-	}
-	
-	ptr=lua_pack_toluserdata(l,1,&len);
+	ptr=lua_pack_to_const_buffer(l,1,&len);
 	if(!ptr) { return 0; }
 	
 	if(lua_isnumber(l,2)) // force size
@@ -811,37 +869,30 @@ u8 *ptr=0;
 //
 // convert a userdata into a lightuserdata (with byte offset)
 // be careful not to use this pointer after freeing the userdata
-// this is mostly intensded for temporary use in passing a userdata+offset into a function
+// this is mostly intended for temporary use as an alternative to a buffer table
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_pack_tolightuserdata (lua_State *l)
 {
-u8 *ptr=0;
+size_t len;
+size_t offset;
+const u8 *ptr=0;
 
-	if(lua_isstring(l,1))
-	{
-		ptr=(u8*)lua_tostring(l,1);
-	}
-	else
-	if(lua_isuserdata(l,1))
-	{
-		ptr=lua_pack_toluserdata(l,1,0);
-	}
-	else
-	{
-		lua_pushstring(l,"not a userdata");
-		lua_error(l);
-		return 0;
-	}
-	
+	ptr=lua_pack_to_const_buffer(l,1,&len);
 	if(!ptr) { return 0; }
-	
+
 	if(lua_isnumber(l,2)) // add to ptr
 	{
-		ptr+=(size_t)lua_tonumber(l,2);
+		offset=(size_t)lua_tonumber(l,2);
+		if(offset>=len)
+		{
+			lua_pushstring(l,"offset too large");
+			return lua_error(l);
+		}
+		ptr+=offset;
 	}
 
-	lua_pushlightuserdata(l,ptr);
+	lua_pushlightuserdata(l,(void *)ptr);
 	return 1;
 }
 
@@ -852,53 +903,37 @@ u8 *ptr=0;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_pack_copy (lua_State *l)
 {
-u8 *ptr=0;
+const u8 *ptr=0;
 size_t len;
 size_t newlen;
 u8 *newptr=0;
 
-	if(lua_isstring(l,1))
-	{
-		ptr=(u8*)lua_tolstring(l,1,&len);
-	}
-	else
-	if(lua_isuserdata(l,1))
-	{
-		ptr=lua_pack_toluserdata(l,1,&len);
-	}
-	else
-	{
-		lua_pushstring(l,"not a userdata");
-		lua_error(l);
-		return 0;
-	}
+	ptr=lua_pack_to_const_buffer(l,1,&len);
 
-	if(lua_isnumber(l,2))
+	if(lua_isnumber(l,2)) // copy this much from the start of the buffer
 	{
 		newlen=lua_tonumber(l,2);
 		newptr=lua_newuserdata(l,newlen);
 		if(len<=newlen)
 		{
 			lua_pushstring(l,"source too small");
-			lua_error(l);
-			return 0;
+			return lua_error(l);
 		}
 		memcpy(newptr,ptr,newlen);
 	}
 	else
-	if(lua_isuserdata(l,2))
+	if(lua_isuserdata(l,2)) // copy into this buffer
 	{
-		newptr=lua_pack_toluserdata(l,2,&newlen);
+		newptr=lua_pack_to_buffer(l,2,&newlen);
 		if(len>newlen)
 		{
 			lua_pushstring(l,"destination too small");
-			lua_error(l);
-			return 0;
+			return lua_error(l);
 		}
 		memcpy(newptr,ptr,len);
 		lua_pushvalue(l,2);
 	}
-	else
+	else // create a new buffer
 	{
 		newptr=lua_newuserdata(l,len);
 		memcpy(newptr,ptr,len);
