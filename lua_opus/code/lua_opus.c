@@ -166,7 +166,7 @@ static int lua_opus_encode (lua_State *l)
 {
 	opus_encoder_ptr ptr;
 	
-	unsigned char *wav;
+	const unsigned char *wav;
 	size_t wav_len;
 	unsigned char *dat;
 	size_t dat_len;
@@ -174,8 +174,8 @@ static int lua_opus_encode (lua_State *l)
 	int ret=0;
 
 	ptr=lua_opus_encoder_check(l,1);
-	wav=lua_pack_toluserdata(l,2,&wav_len);
-	dat=lua_pack_toluserdata(l,3,&dat_len);
+	wav=lua_pack_to_const_buffer(l,2,&wav_len);
+	dat=lua_pack_to_buffer(l,3,&dat_len);
 	
 	ret=opus_encode(ptr,(const opus_int16 *)wav,wav_len/2,dat,dat_len);
 
@@ -196,14 +196,14 @@ static int lua_opus_decode (lua_State *l)
 	
 	unsigned char *wav;
 	size_t wav_len;
-	unsigned char *dat;
+	const unsigned char *dat;
 	size_t dat_len;
 	
 	int ret=0;
 
 	ptr=lua_opus_decoder_check(l,1);
-	dat=lua_pack_toluserdata(l,2,&dat_len);
-	wav=lua_pack_toluserdata(l,3,&wav_len);
+	dat=lua_pack_to_const_buffer(l,2,&dat_len);
+	wav=lua_pack_to_buffer(l,3,&wav_len);
 	flag=lua_tonumber(l,4);
 
 	ret=opus_decode(ptr,dat,dat_len,(opus_int16 *)wav,wav_len/2,flag);
