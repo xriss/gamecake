@@ -18,9 +18,11 @@
 #include "lua_opus.h"
 
 #include "opus.h"
+#include "speex/speex_echo.h"
 
-typedef OpusEncoder *opus_encoder_ptr;
-typedef OpusDecoder *opus_decoder_ptr;
+typedef OpusEncoder    *opus_encoder_ptr;
+typedef OpusDecoder    *opus_decoder_ptr;
+typedef SpeexEchoState *opus_echo_ptr;
 
 //
 // we can use either these strings as a string identifier
@@ -28,6 +30,7 @@ typedef OpusDecoder *opus_decoder_ptr;
 //
 const char *lua_opus_encoder_meta_name="opus_encoder*ptr";
 const char *lua_opus_decoder_meta_name="opus_decoder*ptr";
+const char *lua_opus_echo_meta_name="opus_echo*ptr";
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -44,6 +47,12 @@ opus_decoder_ptr * lua_opus_decoder_check_ptr (lua_State *l,int idx)
 {
 opus_decoder_ptr *ptr;
 	ptr = (opus_decoder_ptr*)luaL_checkudata(l, idx , lua_opus_decoder_meta_name);
+	return ptr;
+}
+opus_echo_ptr * lua_opus_echo_check_ptr (lua_State *l,int idx)
+{
+opus_echo_ptr *ptr;
+	ptr = (opus_echo_ptr*)luaL_checkudata(l, idx , lua_opus_echo_meta_name);
 	return ptr;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -71,6 +80,16 @@ opus_decoder_ptr *ptr;
 	}
 	return *ptr;
 }
+opus_echo_ptr lua_opus_echo_check (lua_State *l,int idx)
+{	
+opus_echo_ptr *ptr;
+	ptr = lua_opus_echo_check_ptr (l, idx);
+	if(!*ptr)
+	{
+		luaL_error(l,"speex echo ptr is null");
+	}
+	return *ptr;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -83,7 +102,7 @@ opus_encoder_ptr *ptr;
 	ptr = lua_opus_encoder_check_ptr (l, 1);
 	if(*ptr)
 	{
-//		free(*ptr); (*ptr)=0;
+		opus_encoder_destroy(*ptr); (*ptr)=0;
 	}
 
 	return 0;
@@ -94,7 +113,18 @@ opus_decoder_ptr *ptr;
 	ptr = lua_opus_decoder_check_ptr (l, 1);
 	if(*ptr)
 	{
-//		free(*ptr); (*ptr)=0;
+		opus_decoder_destroy(*ptr); (*ptr)=0;
+	}
+
+	return 0;
+}
+static int lua_opus_echo_destroy (lua_State *l)
+{
+opus_echo_ptr *ptr;
+	ptr = lua_opus_echo_check_ptr (l, 1);
+	if(*ptr)
+	{
+		speex_echo_state_destroy(*ptr); (*ptr)=0;
 	}
 
 	return 0;
@@ -111,12 +141,14 @@ static int lua_opus_encoder_create (lua_State *l)
 	int freq=48000;
 	int chan=1;
 	int app=OPUS_APPLICATION_AUDIO;
+	int bits=48000*8;
 	int err=0;
 	opus_encoder_ptr *ptr;
 
 	if(lua_isnumber(l,1)) { freq=(int)lua_tonumber(l,1); }
 	if(lua_isnumber(l,2)) { chan=(int)lua_tonumber(l,2); }
 	if(lua_isnumber(l,3)) { app =(int)lua_tonumber(l,3); }
+	if(lua_isnumber(l,4)) { bits=(int)lua_tonumber(l,4); }
 
 // create an ptr userdata pointer pointer
 	ptr = (opus_encoder_ptr*)lua_newuserdata(l, sizeof(opus_encoder_ptr*));	
@@ -128,6 +160,8 @@ static int lua_opus_encoder_create (lua_State *l)
 //	(*ptr)=calloc(sizeof(opusdat),1);
 	(*ptr)=opus_encoder_create(freq,chan,app,&err);
 	if((!(*ptr))||(err)) { return 0; }
+	
+	opus_encoder_ctl(*ptr, OPUS_SET_BITRATE(bits));
 
 //return the userdata	
 	return 1;
@@ -152,6 +186,29 @@ static int lua_opus_decoder_create (lua_State *l)
 //	(*ptr)=calloc(sizeof(opusdat),1);
 	(*ptr)=opus_decoder_create(freq,chan,&err);
 	if((!(*ptr))||(err)) { return 0; }
+
+//return the userdata	
+	return 1;
+}
+static int lua_opus_echo_create (lua_State *l)
+{
+	int frames=20*48000/1000;
+	int checks=100*48000/1000;
+	int err;
+	opus_echo_ptr *ptr;
+
+	if(lua_isnumber(l,1)) { frames=(int)lua_tonumber(l,1); }
+	if(lua_isnumber(l,2)) { checks=(int)lua_tonumber(l,2); }
+
+// create an ptr userdata pointer pointer
+	ptr = (opus_echo_ptr*)lua_newuserdata(l, sizeof(opus_echo_ptr*));	
+	(*ptr)=0;
+	luaL_getmetatable(l, lua_opus_echo_meta_name);
+	lua_setmetatable(l, -2);
+
+//allocate and setup the base data
+	(*ptr)=speex_echo_state_init(frames,checks);
+	if(!(*ptr)) { return 0; }
 
 //return the userdata	
 	return 1;
@@ -215,6 +272,70 @@ static int lua_opus_decode (lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// sample data to be ignored
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_opus_echo_playback (lua_State *l)
+{
+	opus_echo_ptr ptr;
+	
+	const unsigned char *wav;
+	size_t wav_len;
+
+	ptr=lua_opus_echo_check(l,1);
+	wav=lua_pack_to_const_buffer(l,2,0);
+
+	speex_echo_playback(ptr,(const spx_int16_t *)wav);
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// remove previously set samples
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_opus_echo_capture (lua_State *l)
+{
+	opus_echo_ptr ptr;
+	
+	const unsigned char *wav_in;
+	unsigned char *wav_out;
+
+	ptr=lua_opus_echo_check(l,1);
+	wav_in=lua_pack_to_const_buffer(l,2,0);
+	wav_out=lua_pack_to_buffer(l,3,0);
+
+	speex_echo_capture(ptr, (const spx_int16_t *)wav_in, (spx_int16_t *)wav_out);
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// remove using these samples
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_opus_echo_cancel (lua_State *l)
+{
+	opus_echo_ptr ptr;
+	
+	const unsigned char *wav_in;
+	const unsigned char *wav_echo;
+	unsigned char *wav_out;
+
+	ptr=lua_opus_echo_check(l,1);
+	wav_in=lua_pack_to_const_buffer(l,2,0);
+	wav_echo=lua_pack_to_const_buffer(l,3,0);
+	wav_out=lua_pack_to_buffer(l,4,0);
+
+	speex_echo_cancellation(ptr, (const spx_int16_t *)wav_in, (const spx_int16_t *)wav_echo, (spx_int16_t *)wav_out);
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -232,6 +353,15 @@ LUALIB_API int luaopen_wetgenes_opus_core (lua_State *l)
 
 		{"decode",					lua_opus_decode},
 
+		{"echo_create",				lua_opus_echo_create},
+		{"echo_destroy",			lua_opus_echo_destroy},
+
+		{"echo_cancel",				lua_opus_echo_cancel},
+
+		{"echo_playback",			lua_opus_echo_playback},
+		{"echo_capture",			lua_opus_echo_capture},
+
+
 		{0,0}
 	};
 	const luaL_reg encoder_meta[] =
@@ -244,6 +374,11 @@ LUALIB_API int luaopen_wetgenes_opus_core (lua_State *l)
 		{"__gc",			lua_opus_decoder_destroy},
 		{0,0}
 	};
+	const luaL_reg echo_meta[] =
+	{
+		{"__gc",			lua_opus_echo_destroy},
+		{0,0}
+	};
 
 	luaL_newmetatable(l, lua_opus_encoder_meta_name);
 	luaL_openlib(l, NULL, encoder_meta, 0);
@@ -251,6 +386,10 @@ LUALIB_API int luaopen_wetgenes_opus_core (lua_State *l)
 
 	luaL_newmetatable(l, lua_opus_decoder_meta_name);
 	luaL_openlib(l, NULL, decoder_meta, 0);
+	lua_pop(l,1);
+
+	luaL_newmetatable(l, lua_opus_echo_meta_name);
+	luaL_openlib(l, NULL, echo_meta, 0);
 	lua_pop(l,1);
 
 	lua_newtable(l);

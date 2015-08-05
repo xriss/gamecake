@@ -914,7 +914,7 @@ u8 *newptr=0;
 	{
 		newlen=lua_tonumber(l,2);
 		newptr=lua_newuserdata(l,newlen);
-		if(len<=newlen)
+		if(len<newlen)
 		{
 			lua_pushstring(l,"source too small");
 			return lua_error(l);
