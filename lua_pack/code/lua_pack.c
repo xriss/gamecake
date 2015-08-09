@@ -942,7 +942,6 @@ u8 *newptr=0;
 	return 1;
 }
 
-
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -964,7 +963,7 @@ LUALIB_API int luaopen_wetgenes_pack_core (lua_State *l)
 		{"typesize",		lua_pack_typesize},
 
 		{"tolightuserdata",	lua_pack_tolightuserdata},
-
+		
 		{0,0}
 	};
 		
