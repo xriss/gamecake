@@ -187,9 +187,11 @@ os.exit()
 				inf.height=screen.height
 				inf.dest_width=screen.width
 				inf.dest_height=screen.height
-				if inf.height>=480*2 then -- ie a 1080 monitor, double the pixel size
-					inf.width=inf.width/2
-					inf.height=inf.height/2
+				if not opts.winfullrez then -- set this to disable this x2 hack
+					if inf.height>=480*2 then -- ie a 1080 monitor, double the pixel size
+						inf.width=inf.width/2
+						inf.height=inf.height/2
+					end
 				end
 			end
 
