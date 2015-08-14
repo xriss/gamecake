@@ -88,15 +88,13 @@ struct LeaderboardScoreUploaded_t
 
 ]])
 
--- failed to init
-if lib.InitSafe then -- use wrapper
-	if not lib.InitSafe() then return steam end
-else
-	if not lib.SteamAPI_Init() then return steam end
-end
+-- try a few ways to initalise
+local steam_active=false
+if not steam_active then pcall(function() if lib.InitSafe      and lib.InitSafe()      then steam_active=true end end) end
+if not steam_active then pcall(function() if lib.SteamAPI_Init and lib.SteamAPI_Init() then steam_active=true end end) end
+if not steam_active then return steam end
 
 --print("STEAM","Init")
-
 
 local lib_SteamApps      = lib.SteamApps()
 local lib_SteamUtils     = lib.SteamUtils()
