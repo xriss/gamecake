@@ -104,11 +104,14 @@ elseif WINDOWS then
 		
 	links { "winmm" }
 
-	linkoptions{ "-mwindows" }
+--	linkoptions{ "-mwindows" }
+	linkoptions{ "-mconsole" }
 
 	local exe=".exe"
 	if not GCC then exe="" end -- native builds add .exe automatically	
-	KIND{kind="WindowedApp",name="gamecake"..exe}
+
+--	KIND{kind="WindowedApp",name="gamecake"..exe}
+	KIND{kind="ConsoleApp",name="gamecake"..exe}
 
 elseif OSX then
 
