@@ -205,6 +205,10 @@ wetwin_lua *p;
 	
 const char *title=" http://gamecake.4lfa.com/ ";
 
+
+// hack to remove starting console unless console is set to true
+	lua_getfield(l,1,"console");	if( ! lua_toboolean(l,-1)) { FreeConsole(); } lua_pop(l,1);
+
 	lua_getfield(l,1,"title");	if( lua_isstring(l,-1) ) { title=lua_tostring(l,-1);	} lua_pop(l,1);
 
 	wp = (wetwin_lua_wrap *)lua_newuserdata(l, sizeof(wetwin_lua_wrap)); // we need a pointer, this makes lua GC a bit easier
