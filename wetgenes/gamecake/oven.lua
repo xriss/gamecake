@@ -67,6 +67,26 @@ function M.bake(opts)
 			end
 		end
 
+-- handle commandline options, copy --flags into opts.args and put other args into number keys
+		opts.args=opts.args or {}
+		for i=0,#opts do local v=opts[i]
+			if type(v)=="string" then
+				if v:sub(1,2)=="--" then -- strip --from-start-of-flags
+					local s,e = v:find("=")
+					if s then -- its a setting so set it
+						local n=v:sub(3,s-1)
+						local s=v:sub(e+1)
+						opts.args[ n ]=s -- simple setting, strings only
+					else
+						opts.args[ v:sub(3) ]=true -- just a flag
+					end
+				else
+					opts.args[#opts.args+1]=v -- normal arg
+				end
+			end
+		end
+--dprint(opts)
+
 --print(wwin.flavour)
 
 
@@ -164,7 +184,8 @@ os.exit()
 			oven.frame_rate=1/opts.fps -- how fast we want to run
 			oven.frame_time=0
 
-			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale}
+			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
+				console=opts.args.console} -- add --console to commandline to keep console open
 			local screen=wwin.screen()
 
 			inf.name=opts.class_name or opts.title
@@ -203,22 +224,11 @@ require("gles").GetError()
 require("gles").CheckError() -- uhm this fixes an error?
 
 --wwin.hardcore.peek(oven.win[0])
-
 	
-	
-	
-			local doshow=opts.show
-			for i,v in ipairs(opts) do -- check extra options
-				if type(v)=="string" then
-					if     v=="windowed" then
-						doshow="win"
-					elseif v=="fullscreen" then
-						doshow="full"
-					elseif v=="maximised" then
-						doshow="max"
-					end
-				end
-			end
+			local doshow=opts.show or "win" -- default window display
+			if opts.args.windowed   then doshow="win" end
+			if opts.args.fullscreen then doshow="full" end
+			if opts.args.maximised  then doshow="max" end
 			if doshow then oven.win:show(doshow) end
 
 --			oven.win:show("full")
