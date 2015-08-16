@@ -6,7 +6,7 @@ local wstr=require("wetgenes.string")
 local gl=require("gles")
 
 
-
+-- disable
 local function test_win()
 
 local wwin=require("wetgenes.win")
