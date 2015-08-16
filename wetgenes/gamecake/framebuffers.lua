@@ -123,7 +123,7 @@ function M.bake(oven,framebuffers)
 			fbo.txh=images.uptwopow(h)
 			fbo.uvw=w/fbo.txw -- need to use these max uv coords when drawing with texture instead of 1
 			fbo.uvh=h/fbo.txh -- unless you know you asked for a power of two in which case its fine to use 1
-			
+
 			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
 			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
 			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
@@ -131,9 +131,7 @@ function M.bake(oven,framebuffers)
 			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,
 				string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver...
-			gl.GenerateMipmap(gl.TEXTURE_2D) -- some drivers bugout if we do not generate mipmaps here...
 
---			framebuffers.mipmap(fbo)
 			gl.BindTexture(gl.TEXTURE_2D, 0)
 			
 			if not fbo.frame then
@@ -149,6 +147,13 @@ function M.bake(oven,framebuffers)
 			assert( gl.CheckFramebufferStatus(gl.FRAMEBUFFER) == gl.FRAMEBUFFER_COMPLETE)
 			
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+-- hackfix, for some drivers, but it seems to make other drivers crash...
+-- print("FBO1",fbo.txw, fbo.txh,gl.GetError())
+--			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
+--			gl.GenerateMipmap(gl.TEXTURE_2D) -- some drivers bugout if we do not generate mipmaps here...
+--			gl.BindTexture(gl.TEXTURE_2D, 0)
+
 		end
 		
 		fbo.w=w
@@ -164,6 +169,7 @@ function M.bake(oven,framebuffers)
 		if fbo.texture then
 			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
 			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
+--print("FBmipmap",fbo.texture,fbo.txw, fbo.txh,gl.GetError())
 			gl.GenerateMipmap(gl.TEXTURE_2D)	
 		end
 	end
