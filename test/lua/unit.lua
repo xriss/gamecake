@@ -3,6 +3,11 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 require("apps").default_paths() -- default search paths so things can easily be found
 
+-- complain about global vars?
+-- I dont think this helps as all the tests are wrapped
+local global=require("global")
+
+
 local apps=require("apps")
 
 local lfs=require("lfs")
@@ -20,6 +25,8 @@ if arg[1] then
 
 else
 
+	lunatest.suite("unit.test_require")
+	
 	lunatest.suite("unit.test_zip")
 
 --	lunatest.suite("unit.test_lanes")
