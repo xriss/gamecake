@@ -3,12 +3,13 @@
 module(...,package.seeall)
 
 local wstr=require("wetgenes.string")
-local wwin=require("wetgenes.win")
 local gl=require("gles")
 
 
 
 local function test_win()
+
+local wwin=require("wetgenes.win")
 
 --print(wstr.dump(wwin))
 
