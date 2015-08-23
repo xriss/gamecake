@@ -33,6 +33,11 @@ if RASPI then
 	includedirs {	"../lib_sdl2/raspi/usr/local/include/SDL2",	}
 end
 
+if EMCC then
+	buildlinkoptions{
+		"-s USE_SDL=2","-Wno-error=format-security",
+	}
+end
 
 KIND{kind="lua",name="SDL"}
 
