@@ -33,7 +33,7 @@ files {
 	"freetype/src/base/ftsynth.c",      -- optional, see <freetype/ftsynth.h>
 	"freetype/src/base/fttype1.c",      -- optional, see <freetype/t1tables.h>
 	"freetype/src/base/ftwinfnt.c",     -- optional, see <freetype/ftwinfnt.h>
-	"freetype/src/base/ftxf86.c",       -- optional, see <freetype/ftxf86.h>
+--	"freetype/src/base/ftxf86.c",       -- optional, see <freetype/ftxf86.h>
 
 	-- font drivers (optional; at least one is needed)
 
@@ -61,9 +61,9 @@ files {
 
 	"freetype/src/autofit/autofit.c",   -- auto hinting module
 	"freetype/src/cache/ftcache.c",     -- cache sub-system (in beta)
---	"freetype/src/gzip/ftgzip.c",       -- support for compressed fonts (.gz)
---	"freetype/src/lzw/ftlzw.c",         -- support for compressed fonts (.Z)
---	"freetype/src/bzip2/ftbzip2.c",     -- support for compressed fonts (.bz2)
+	"freetype/src/gzip/ftgzip.c",       -- support for compressed fonts (.gz)
+	"freetype/src/lzw/ftlzw.c",         -- support for compressed fonts (.Z)
+	"freetype/src/bzip2/ftbzip2.c",     -- support for compressed fonts (.bz2)
 	"freetype/src/gxvalid/gxvalid.c",   -- TrueTypeGX/AAT table validation
 	"freetype/src/otvalid/otvalid.c",   -- OpenType table validation
 	"freetype/src/psaux/psaux.c",       -- PostScript Type 1 parsing
@@ -72,6 +72,12 @@ files {
 
 
 }
+
+if EMCC then
+--	buildlinkoptions{
+--		"-Wno-error=pointer-bool-conversion",
+--	}
+end
 
 
 KIND{}
