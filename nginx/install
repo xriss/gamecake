@@ -16,3 +16,8 @@ cd ../gamecakejam/gthang
 cp out/gthang.zip ../../lua/nginx/static/gthang.zip
 cd ..
 
+cd ../gamecakejam/umon
+../bake
+cp out/umon.zip ../../lua/nginx/static/umon.zip
+cd ..
+
