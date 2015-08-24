@@ -278,21 +278,26 @@ int lua_freetype_render (lua_State *l)
 {
 part_ptr p=lua_freetype_check_ptr(l,1);
 
-int ucode=lua_tonumber(l,2);
+int ucode=(int)lua_tonumber(l,2);
 
 int glyph_index=FT_Get_Char_Index( p->face, ucode);
 
-	p->error=FT_Load_Glyph( p->face, glyph_index , 0 );
+	if(glyph_index==0) // bad code
+	{
+		lua_pushboolean(l,0);
+		return 1;
+	}
 
-	if(!p->error)
+	p->error=FT_Load_Glyph( p->face, glyph_index , FT_LOAD_RENDER );
+
+	if(p->error)
 	{
-		p->error = FT_Render_Glyph( p->face->glyph , FT_RENDER_MODE_NORMAL ); 
+//printf("ERROR %d\n",p->error);
+		lua_pushboolean(l,0);
+		return 1;
 	}
-	else
-	{
-printf("ERROR %d\n",p->error);
-	}
-	return 0;
+	lua_pushboolean(l,1);
+	return 1;
 }
 
 
@@ -373,6 +378,8 @@ struct grd *g;
 			}
 			b+=p->face->glyph->bitmap.pitch;
 		}
+		
+		lua_pushboolean(l,1);
 		
 	}
 	else
