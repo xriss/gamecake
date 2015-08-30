@@ -232,7 +232,7 @@ int vid,tid;
 //	printf(" %d ",fp_len/5);
 	glDrawArrays(GL_TRIANGLES,0,fp_len/5);
 	
-printf("font draw %d\n",fp_len/5);
+//printf("font draw %d\n",fp_len/5);
 
 	return 0;
 }

@@ -19,6 +19,7 @@ if NIX then
 	elseif CPU=="32" then
 		includedirs {	"../../sdks/sdl2/sdl2_x32/include",	}
 	end
+	includedirs {	"/usr/include/SDL2/"	} -- check the dumb system as well
 end
 
 if OSX then
