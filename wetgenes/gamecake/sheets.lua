@@ -121,13 +121,16 @@ end
 
 function base_sheet.chop(sheet,hx,hy,ox,oy,bx,by)
 
-	hx=hx or 1
+	hx=hx or 1 -- default to full size chop
 	hy=hy or 1
+	
+	if hx>1 then hx=1/hx end -- auto invert so we can say eg 4,4 instead of 1/4,1/4
+	if hy>1 then hy=1/hy end -- these should never be >1 so it's safe to do
 
-	ox=ox or 0
-	oy=oy or 0
+	ox=ox or hx/2	-- default is center if no handle is given
+	oy=oy or hy/2
 
-	bx=bx or 0
+	bx=bx or 0 -- and of course no border by deafult
 	by=by or 0
 	
 -- coords are fractions of image, so the image can scale up/down but the code remains constant
