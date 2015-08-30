@@ -167,7 +167,7 @@ end
 	end
 	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- prefer static SDL?
 
-	links { "xext" } -- SDL wants this... ?
+	links { "Xext" } -- SDL wants this... ?
 	
 	links { "GL" }
 	links { "crypt" }
