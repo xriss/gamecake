@@ -219,7 +219,7 @@ font.cache_predraw = function(text)
 		local v2=gl.apply_modelview( {vx+vxp,vy,0,1} )
 		local v3=gl.apply_modelview( {vx,vy+vyp,0,1} )
 		local v4=gl.apply_modelview( {vx+vxp,vy+vyp,0,1} )
-
+		
 		insert(	v1[1],v1[2],v1[3],	c.u1,c.v1,	r,g,b,a	)
 		insert(	v1[1],v1[2],v1[3],	c.u1,c.v1,	r,g,b,a	)
 		insert(	v2[1],v2[2],v2[3],	c.u2,c.v1,	r,g,b,a	)
@@ -238,6 +238,12 @@ font.draw = function(text)
 
 	if font.cache then
 		return font.cache_predraw(text)
+	else
+-- always use cache code to draw... EMCC breaks if I use core.canvas_font_draw 
+		local f=font.cache_begin()
+		font.cache_predraw(text)
+		f()
+		return
 	end
 	
 	local p=gl.program("pos_tex")

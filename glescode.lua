@@ -185,7 +185,7 @@ function glescode.create(gl)
 				paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
 			end
 		end
-		paramdefs=table.concat(paramdefs,"\n")
+		paramdefs=table.concat(paramdefs,"\n").."\n"
 	
 		local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
 		local vhead=code.defines.shaderprefix.."#define VERTEX_SHADER 1\n"..paramdefs.."#line "..line.."\n"

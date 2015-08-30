@@ -71,11 +71,11 @@ end
 
 base.info=function(ft)
 	core.info(ft[0],ft)
---[[
+
 	if ft.error then
 		assert(not ft.error,ft.error)
 	end
-]]
+
 	return ft
 end
 
