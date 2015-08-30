@@ -165,10 +165,8 @@ end
 	elseif CPU=="32" then
 		libdirs { "../../sdks/sdl2/sdl2_x32/build/.libs/" }
 	end
-	linkoptions { " -Wl,-Bstatic,-lSDL2,-Xext,-Bdynamic " } -- prefer static SDL?
+	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- prefer static SDL?
 
---	links { "Xext" } -- SDL wants this... ?
-	
 	links { "GL" }
 	links { "crypt" }
 	links { "pthread" }
