@@ -12,10 +12,10 @@ wmenuitem=wmenuitem or {}
 function wmenuitem.update(widget)
 
 	if not widget.hidden then
-		if widget.hide_when_not_over then -- must stay over widget
-			if not widget:isover() then
+		if widget.hide_when_not then -- must stay over widget
+			if not widget:isover(widget.hide_when_not) then
 				widget.hidden=true
-				widget.hide_when_not_over=false
+				widget.hide_when_not=nil
 				widget.master:layout()
 			end
 		end
@@ -82,7 +82,7 @@ function wmenuitem.menu_add(widget,opts)
 	
 	top.also_over={top,widget} -- include these widgets in over test
 	top.hidden=false
-	top.hide_when_not_over=true
+	top.hide_when_not="menu"
 
 	widget.master:layout()
 	widget.master.focus=nil
@@ -125,7 +125,9 @@ local showmenu=function()
 end
 
 	if hook=="over" and widget.master.menu then
-		showmenu()
+		if widget.parent.class~="menubar" then -- menubar needs clicks
+			showmenu()
+		end
 	end
 
 	if hook=="active" then
@@ -143,9 +145,8 @@ end
 				
 			elseif widget.hide_when_clicked then
 				if widget.parent.class=="menu" then -- only the menu?
-					widget.parent.over_locked=false
 					widget.parent.hidden=true
-					widget.parent.hide_when_not_over=false
+					widget.parent.hide_when_not=nil
 					widget.master:layout()
 				end
 	--		elseif widget.remove_when_clicked then

@@ -406,9 +406,9 @@ function wmeta.setup(def)
 		end
 	end
 
-	meta.isover=function(widget)
---		local o=widget.master.over
-		local o=widget.master.menu
+	meta.isover=function(widget,mode)
+		local o=widget.master.over
+		if mode=="menu" then o=widget.master.menu end
 		if o then
 			while o~=o.parent do -- need to check all parents
 				if o==widget then return true end

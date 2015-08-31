@@ -16,10 +16,10 @@ local font=canvas.font
 function wmenu.update(widget)
 
 	if not widget.hidden then
-		if widget.hide_when_not_over then -- must stay over widget
-			if not widget:isover() then
+		if widget.hide_when_not then -- must stay over widget
+			if not widget:isover(widget.hide_when_not) then
 				widget.hidden=true
-				widget.hide_when_not_over=false
+				widget.hide_when_not=nil
 				widget.master:layout()
 			end
 		end
