@@ -9,7 +9,7 @@ local tardis=require("wetgenes.tardis")
 -- the master widget
 
 local wstr=require("wetgenes.string")
-
+local dprint=function(a) print(wstr.dump(a)) end
 
 
 --module
@@ -89,7 +89,7 @@ function wmaster.setup(widget,def)
 						master.active_x=rx-master.over.px
 						master.active_y=ry-master.over.py
 						
-						master.active:call_hook("active") -- an active widget is about to click (button down)
+						master.active:call_hook_later("active") -- an active widget is about to click (button down)
 					end
 
 					if master.active and master.active.can_focus then
@@ -113,13 +113,13 @@ function wmaster.setup(widget,def)
 				if master.over --[[ and master.active==master.over ]] then -- no click if we drag away from button
 				
 					if ups.button("mouse_left_clr")  then
-						master.over:call_hook("click",{keyname="mouse_left"}) -- its a left click
+						master.over:call_hook_later("click",{keyname="mouse_left"}) -- its a left click
 					elseif ups.button("mouse_right_clr")  then
-						master.over:call_hook("click",{keyname="mouse_right"}) -- its a right click
+						master.over:call_hook_later("click",{keyname="mouse_right"}) -- its a right click
 					elseif ups.button("mouse_middle_clr")  then
-						master.over:call_hook("click",{keyname="mouse_middle"}) -- its a middle click
+						master.over:call_hook_later("click",{keyname="mouse_middle"}) -- its a middle click
 					else
-						master.over:call_hook("click") -- probably not a mouse click
+						master.over:call_hook_later("click") -- probably not a mouse click
 					end
 					
 					master.over:set_dirty()
@@ -132,12 +132,22 @@ function wmaster.setup(widget,def)
 
 		end
 
-
-		for f,v in pairs(master.deferred) do -- some functions should be called later
-			f(v)
-			master.deferred[f]=nil
+-- loop over and call all later function then empty the table
+-- later functions can add more functions as they are called
+		if true then
+			local i=0
+			local f=function(c,...) return c(...) end
+			repeat
+				i=i+1
+				local v=master.later[i]
+				if v then
+					if type(v[1])~="function" then dprint(tostring(v[1])) end
+					f(unpack(v))
+				end
+			until not v
 		end
-	
+		master.later={}
+		
 		local tim=os.time()
 		for w,t in pairs(master.timehooks) do
 			if t<=tim then
@@ -251,13 +261,13 @@ function wmaster.setup(widget,def)
 		if master.edit==edit then return end -- no change
 
 		if master.edit then
-			master.edit:call_hook("unfocus_edit")
+			master.edit:call_hook_later("unfocus_edit")
 			master.edit=nil
 		end
 
 		if edit then -- can set to nil
 			widget.edit=edit
-			master.edit:call_hook("focus_edit")
+			master.edit:call_hook_later("focus_edit")
 		end
 	end
 	
@@ -266,13 +276,13 @@ function wmaster.setup(widget,def)
 		if master.focus==focus then return end -- no change
 	
 		if master.focus then
-			master.focus:call_hook("unfocus")
+			master.focus:call_hook_later("unfocus")
 			master.focus=nil
 		end
 
 		if focus then -- can set to nil
 			master.focus=focus
-			master.focus:call_hook("focus")
+			master.focus:call_hook_later("focus")
 			if focus.class=="textedit" then -- also set edit focus
 				master.set_focus_edit(focus)
 			end
@@ -350,7 +360,7 @@ function wmaster.setup(widget,def)
 					over:set_dirty()
 					best.over:set_dirty()
 					master.over=best.over
-					if master.over then master.over:call_hook("over") end
+					if master.over then master.over:call_hook_later("over") end
 				end
 			end
 
@@ -360,7 +370,7 @@ function wmaster.setup(widget,def)
 						if v.solid and v.hooks and not v.hidden then
 							master.over=v
 							v:set_dirty()
-							master.over:call_hook("over")
+							master.over:call_hook_later("over")
 						end
 					end
 				end)
@@ -415,7 +425,7 @@ function wmaster.setup(widget,def)
 				w.parent:snap(true)
 			end
 			
-			w:call_hook("slide")
+			w:call_hook_later("slide")
 			
 			w:set_dirty()
 			
@@ -432,7 +442,7 @@ function wmaster.setup(widget,def)
 		if master.over~=old_over then
 			if master.over then master.over:set_dirty() end
 			if old_over then old_over:set_dirty() end
-			if master.over then master.over:call_hook("over") end
+			if master.over then master.over:call_hook_later("over") end
 		end
 		
 	end
@@ -448,7 +458,8 @@ function wmaster.setup(widget,def)
 		master.go_forward_id=nil
 		master.ids={}
 		master.timehooks={}
-		master.deferred={}
+		master.later={}
+		master.later_append=function(f,...) assert(type(f)=="function") master.later[#master.later+1]={f,...} end
 	end
 	
 	function master.dragging()
@@ -470,7 +481,7 @@ function wmaster.setup(widget,def)
 				if w.class=="textedit" then
 					master.edit=w
 				end
-				if master.over then master.over:call_hook("over") end
+				if master.over then master.over:call_hook_later("over") end
 			end
 		end)
 		

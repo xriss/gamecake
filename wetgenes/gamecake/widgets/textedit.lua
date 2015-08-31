@@ -121,7 +121,7 @@ function wtextedit.key(widget,ascii,key,act)
 		
 			if widget.data.str and widget.onenter then -- callback?
 			
-				widget:call_hook("click")
+				widget:call_hook_later("click")
 				
 			end
 			
@@ -296,7 +296,7 @@ function wtextedit.key(widget,ascii,key,act)
 
 --		widget.text=widget.data.str
 		
-		widget:call_hook("changed")
+		widget:call_hook_later("changed")
 		widget:set_dirty()
 	end
 	
