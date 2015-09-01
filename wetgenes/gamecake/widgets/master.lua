@@ -112,6 +112,11 @@ function wmaster.setup(widget,def)
 				
 				if master.over --[[ and master.active==master.over ]] then -- no click if we drag away from button
 				
+					if not master.over.never_set_focus_edit then
+--						print("click",master.edit,master.focus)
+						master.set_focus_edit(master.over)
+						master.set_focus(master.over)
+					end
 					if ups.button("mouse_left_clr")  then
 						master.over:call_hook_later("click",{keyname="mouse_left"}) -- its a left click
 					elseif ups.button("mouse_right_clr")  then
@@ -266,8 +271,10 @@ function wmaster.setup(widget,def)
 		end
 
 		if edit then -- can set to nil
-			widget.edit=edit
-			master.edit:call_hook_later("focus_edit")
+			if edit.class=="textedit" then -- also set edit focus
+				widget.edit=edit
+				master.edit:call_hook_later("focus_edit")
+			end
 		end
 	end
 	
@@ -281,10 +288,12 @@ function wmaster.setup(widget,def)
 		end
 
 		if focus then -- can set to nil
-			master.focus=focus
-			master.focus:call_hook_later("focus")
-			if focus.class=="textedit" then -- also set edit focus
-				master.set_focus_edit(focus)
+			if focus.can_focus then
+				master.focus=focus
+				master.focus:call_hook_later("focus")
+				if focus.class=="textedit" then -- also set edit focus
+					master.set_focus_edit(focus)
+				end
 			end
 		end
 	

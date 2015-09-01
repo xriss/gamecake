@@ -324,7 +324,6 @@ function wtextedit.select_all(widget)
 end
 
 function wtextedit.unfocus(widget)
-
 	if widget.data.class=="number" then
 		local num=widget.data:tonumber(widget.data.str)
 		widget.data:value(num)
