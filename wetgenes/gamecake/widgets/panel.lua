@@ -29,11 +29,17 @@ function wpanel.layout(widget)
 
 	local v=widget[1]
 	if v then
-		if widget.panel_mode=="scale" then
+		if widget.panel_mode=="scale" then -- maintain aspect
+
 			v.sx=widget.hx/v.hx
 			v.sy=widget.hy/v.hy
 
 			if v.sx<v.sy then v.sy=v.sx else v.sx=v.sy end
+
+		elseif widget.panel_mode=="stretch" then -- stretch to fit any area
+
+			v.sx=widget.hx/v.hx
+			v.sy=widget.hy/v.hy
 
 		end
 	end
@@ -47,7 +53,7 @@ function wpanel.setup(widget,def)
 
 	widget.class="panel"
 
-	widget.panel_mode="scale" 	-- scale the child to fit
+	widget.panel_mode=def.panel_mode or "scale" 	-- scale the child to fit
 
 	widget.update=wpanel.update
 	widget.draw=wpanel.draw

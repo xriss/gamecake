@@ -16,6 +16,8 @@ local font=canvas.font
 
 function wmenubar.update(widget)
 	if not widget.hidden then
+--print(widget.hide_when_not)
+--[[
 		if widget.hide_when_not then -- must stay over widget
 			if not widget:isover(widget.hide_when_not) then
 				widget.hidden=true
@@ -23,12 +25,19 @@ function wmenubar.update(widget)
 				widget.master:layout()
 			end
 		end
+]]
 	end
 	return widget.meta.update(widget)
 end
 
 function wmenubar.draw(widget)
-	return widget.meta.draw(widget)
+-- only draw when over the menubar 
+	local o=widget.master.over
+	local d=false
+	if widget.parent==o then d=true end
+	if widget==o then d=true end
+	for i,v in ipairs(widget) do if v==o then d=true end end
+	if d then return widget.meta.draw(widget) else return end
 end
 
 -- auto resize to text contents horizontally

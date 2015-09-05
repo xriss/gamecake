@@ -125,14 +125,18 @@ local showmenu=function()
 end
 
 	if hook=="over" and widget.master.menu then
-		if widget.parent.class~="menubar" then -- menubar needs clicks
+--		if widget.parent.class~="menubar" then -- menubar needs clicks
 			showmenu()
-		end
+--		end
 	end
 
 	if hook=="active" then
 		if widget.parent.class=="menubar" then
-			showmenu()
+			if widget.master.menu then
+				widget.master.menu=nil
+			else
+				showmenu()
+			end
 		end
 	end
 	
