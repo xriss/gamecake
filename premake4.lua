@@ -62,16 +62,28 @@ newgcctoolchain {
     cppflags = "",
 }
 
+newplatform {
+    name = "mingw32",
+    description = "mingw32",
+	gcc=
+	{
+		cc ="i586-mingw32msvc-cc",
+		cxx="i586-mingw32msvc-c++",
+		ar ="i586-mingw32msvc-ar",
+		cppflags = "-MMD",
+	}
+}
 
 newplatform {
     name = "mingw",
     description = "mingw",
-    gcc = {
-        cc = "i586-mingw32msvc-cc",
-        cxx = "i586-mingw32msvc-c++",
-        ar= "i686-w64-mingw32-ar",
-        cppflags = "-MMD",
-    },
+	gcc=
+	{
+		cc ="i686-w64-mingw32-gcc",
+		cxx="i686-w64-mingw32-c++",
+		ar ="i686-w64-mingw32-ar",
+		cppflags = "-MMD",
+	}
 }
 
 newplatform {
@@ -167,6 +179,12 @@ elseif t:sub(1,7)=="android" then
 	ANDROID=true
 	GCC=true
 elseif t:sub(1,5)=="mingw" then
+	if t:sub(1,7)=="mingw32" then MINGW32=true end -- use old compiler
+	TARGET="WINDOWS"
+	CPU=t:sub(6)
+	WINDOWS=true
+	MINGW=true
+	GCC=true
 	TARGET="WINDOWS"
 	CPU=t:sub(6)
 	WINDOWS=true
@@ -371,8 +389,10 @@ elseif WINDOWS then
 
 	if MINGW then
 	
-		platforms { "mingw" } --hax
-
+		if MINGW32 then		platforms { "mingw32" } --use old 32 bit compiler
+		else				platforms { "mingw" }	--use new 64 bit compiler
+		end
+		
 		local w32api=path.getabsolute("../sdks/w32api")
 		
 		includedirs { w32api.."/include" }

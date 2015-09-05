@@ -5,8 +5,9 @@ apt-get install clang
 
 
 
-#mingw32 if you want to build for windows
+#mingw32 if you want to build for windows, one of these will probably work
 
 apt-get install mingw32
+apt-get install mingw-w64
 
 
