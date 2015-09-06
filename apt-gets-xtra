@@ -4,10 +4,18 @@
 apt-get install clang
 
 
-
 #mingw32 if you want to build for windows, one of these will probably work
 
 apt-get install mingw32
 apt-get install mingw-w64
 
+
+#raspi builds need this cross compiler *and* you will need to download rasbian into the sdks repo using the scripts provided
+#we require 4.9 specifically 
+
+apt-get install gcc-arm-linux-gnueabihf
+apt-get install g++-arm-linux-gnueabihf
+
+apt-get install gcc-4.9-arm-linux-gnueabihf
+apt-get install g++-4.9-arm-linux-gnueabihf
 

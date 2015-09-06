@@ -39,14 +39,35 @@ function newgcctoolchain(toolchain)
     }
 end
 
-newgcctoolchain {
+newplatform {
     name = "raspi",
     description = "raspi",
 --    prefix = "arm-bcm2708-linux-gnueabi-",
 --    prefix = "arm-raspi-linux-gnueabi-",
-	prefix = "arm-linux-gnueabihf-",
-    cppflags = "",
+--	prefix = "arm-linux-gnueabihf-",
+	gcc = {
+		cc = "arm-linux-gnueabihf-gcc-4.9",
+		cxx = "arm-linux-gnueabihf-g++-4.9",
+		ar = "arm-linux-gnueabihf-ar",
+		cppflags = "-MMD -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s",
+	}
 }
+
+newplatform {
+    name = "raspi-clang",
+    description = "raspi",
+--    prefix = "arm-bcm2708-linux-gnueabi-",
+--    prefix = "arm-raspi-linux-gnueabi-",
+--	prefix = "arm-linux-gnueabihf-",
+    gcc = {
+        cc = "clang",
+        cxx = "clang++",
+        ar= "ar",
+		cppflags = "-target armv7-eab -marm -mfpu=vfp -mcpu=arm1176jzf-s -mtune=arm1176jzf-s -mfloat-abi=hard",
+    }
+}
+
+
 
 newgcctoolchain {
     name = "android",
@@ -305,36 +326,19 @@ elseif NACL then
 elseif RASPI then
 
 	local raspisdk=path.getabsolute("../sdks/raspi")
-	local raspxsdk=path.getabsolute("../sdks/raspx")
 
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include" }
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vmcs_host/linux" }
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vcos/pthreads"}
 	libdirs { raspisdk.."/firmware/hardfp/opt/vc/lib" }
 
--- im not sure its even worth trying to run X11 gl code?
--- best case is we use a large background window to catch clicks/keys but do
--- everything  else the same and take over the screen.
-
---	includedirs { raspisdk.."/raspx/usr/include" } -- extra includes?
---	libdirs { raspisdk.."/raspx/usr/lib/arm-linux-gnueabihf/" } -- extra libs?
-
---	includedirs { raspxsdk.."/include" } -- extra includes?
---	libdirs { raspxsdk.."/lib/arm-linux-gnueabihf" } -- extra libs?
---	libdirs { raspxsdk.."/lib" } -- extra libs?
-
 	platforms { "raspi" } --hax
 
---	defines "X11"
 	defines "RASPI"
 
 	defines("LUA_USE_POSIX")
 	
---	buildoptions{"-march=armv6zk -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s" }
-	buildoptions{"-mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s" }
-
-
-
+	
 elseif ANDROID then
 
 	local androidsdk=path.getabsolute("../sdks/android-sdk")
