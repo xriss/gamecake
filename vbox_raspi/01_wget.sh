@@ -6,8 +6,9 @@ if [ -f 2015-02-18-wheezy-minibian.img ] ; then
 
 else
 
-	wget -o minibian.img.tar.gz http://sourceforge.net/projects/minibian/files/2015-02-18-wheezy-m inibian.tar.gz/download
+	wget -O minibian.img.tar.gz http://sourceforge.net/projects/minibian/files/2015-02-18-wheezy-minibian.tar.gz/download
 	tar xvfz minibian.img.tar.gz
+	rm minibian.img.tar.gz
 
 fi
 
