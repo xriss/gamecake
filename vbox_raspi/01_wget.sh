@@ -25,3 +25,4 @@ fi
 echo " installing qemu "
 
 sudo apt-get install qemu-system
+
