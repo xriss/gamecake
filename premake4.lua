@@ -39,15 +39,16 @@ function newgcctoolchain(toolchain)
     }
 end
 
+--	local raspisdk=path.getabsolute("../sdks/raspi")
+--	local raspisdk_gcc=raspisdk.."/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/"
+
+-- use the cross compiler from ../sdks/raspi/tools
 newplatform {
     name = "raspi",
     description = "raspi",
---    prefix = "arm-bcm2708-linux-gnueabi-",
---    prefix = "arm-raspi-linux-gnueabi-",
---	prefix = "arm-linux-gnueabihf-",
 	gcc = {
-		cc = "arm-linux-gnueabihf-gcc-4.9",
-		cxx = "arm-linux-gnueabihf-g++-4.9",
+		cc = "arm-linux-gnueabihf-gcc-4.8.3",
+		cxx = "arm-linux-gnueabihf-g++",
 		ar = "arm-linux-gnueabihf-ar",
 		cppflags = "-MMD -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s",
 	}
@@ -326,6 +327,7 @@ elseif NACL then
 elseif RASPI then
 
 	local raspisdk=path.getabsolute("../sdks/raspi")
+
 
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include" }
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vmcs_host/linux" }

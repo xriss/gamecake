@@ -17,4 +17,8 @@ config.vm.provider "virtualbox" do |v|
   v.memory = 1024
 end
 
+if Vagrant.has_plugin?("vagrant-cachier")
+  config.cache.scope = :box
+end
+
 end

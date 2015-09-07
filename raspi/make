@@ -12,15 +12,17 @@ makeopts="config=debug_raspi"
 fi
 
 sdks=`readlink -f ../sdks`
+echo $sdks
 
 #export PATH=$sdks/raspi/tools/arm-bcm2708/linux-x86/bin:$PATH
 #export PATH=$sdks/gcc/prefix/bin:$PATH
 
-export PATH=$sdks/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin:$PATH
+#export PATH=$sdks/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin:$PATH
+export PATH=$sdks/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin:$PATH
 
 
 
-build/premake4 gmake raspi
+build/premake4.deb gmake raspi
 
 cd build-gmake-raspi-native
 
