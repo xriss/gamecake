@@ -633,7 +633,7 @@ end
 -- this may need to be called after setting up a context to be valid...
 gles.extensions={}
 function gles.GetExtensions()
-	local s=gles.Get(gles.EXTENSIONS)
+	local s=gles.Get(gles.EXTENSIONS) or ""
 	local t={}
 	for w in s:gmatch("([^%s]+)") do
 		if w:sub(1,3)=="GL_" then

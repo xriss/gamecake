@@ -350,12 +350,14 @@ function posix.win_open_events(w)
 				tab.event=tonumber(string.match(t,"event(%d+)"))
 				tab.js=tonumber(string.match(t,"js(%d+)"))
 				tab.mouse=tonumber(string.match(t,"mouse(%d+)"))
-				events[tab.event]=tab
-				tab.handlers={}
-				for n in string.gmatch(t,"[^%s]+") do
-					tab.handlers[n]=true
-					if n:sub(1,5)~="event" then -- we already have events
-						events[n]=tab
+				if tab.event and events[tab.event] then
+					events[tab.event]=tab
+					tab.handlers={}
+					for n in string.gmatch(t,"[^%s]+") do
+						tab.handlers[n]=true
+						if n:sub(1,5)~="event" then -- we already have events
+							events[n]=tab
+						end
 					end
 				end
 			end

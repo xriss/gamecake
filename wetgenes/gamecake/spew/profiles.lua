@@ -64,7 +64,7 @@ print("Loading "..profiles.filename)
 			local fp=io.open(profiles.filename,"r")
 			if fp then
 				local s=fp:read("*all")
-				ps=wsbox.lson(s) -- safeish
+				ps=wsbox.lson(s) or {} -- safeish
 				fp:close()
 				profiles.select(1)
 				profiles.check()
