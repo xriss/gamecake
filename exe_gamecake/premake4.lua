@@ -24,8 +24,8 @@ if RASPI then
 
 	files { "./lua.c" }
 
-	libdirs { "../lib_sdl2/raspi/usr/local/lib/" }
-	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- prefer static SDL?
+	libdirs { "../lib_sdl2/raspi/usr/local/lib/" } -- we have SDL2 binary for raspi
+	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
 
 
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
@@ -92,8 +92,8 @@ elseif WINDOWS then
 
 	files { "./lua.c" }
 
-	libdirs { "../lib_sdl2/win32/i686-w64-mingw32/lib/" }
-	linkoptions { " -Wl,-Bstatic,-lSDL2,-lm,-ldinput8,-ldxguid,-ldxerr8,-luser32,-lgdi32,-lwinmm,-limm32,-lole32,-loleaut32,-lshell32,-lversion,-luuid,-Bdynamic " } -- prefer static SDL and its dependencies? 
+	libdirs { "../lib_sdl2/win32/i686-w64-mingw32/lib/" } -- we have SDL2 binary for windows
+	linkoptions { " -Wl,-Bstatic,-lSDL2,-lm,-ldinput8,-ldxguid,-ldxerr8,-luser32,-lgdi32,-lwinmm,-limm32,-lole32,-loleaut32,-lshell32,-lversion,-luuid,-Bdynamic " }  -- force static SDL2 linking
 
 	links { "opengl32" , "glu32" }
 	links {  "ws2_32" , "gdi32"}
@@ -127,8 +127,8 @@ elseif OSX then
 
 
 -- use static SDL2 from sdks
-	libdirs { "../../sdks/sdl2/sdl2_osx/build/.libs/" }
-	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- prefer static SDL?
+--	libdirs { "../../sdks/sdl2/sdl2_osx/build/.libs/" }
+	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
 
 	links { "pthread" }
 	links { "dl" }
@@ -159,13 +159,18 @@ if LSB then
 end
 
 
--- use prebuilt SDL2 lib
+-- SDL2 dev must be installed...
+-- use the vagrant boxes if you sont want to deal with it
+
+--[[
 	if CPU=="64" then
 		libdirs { "../../sdks/sdl2/sdl2_x64/build/.libs/" }
 	elseif CPU=="32" then
 		libdirs { "../../sdks/sdl2/sdl2_x32/build/.libs/" }
 	end
-	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- prefer static SDL?
+]]
+
+	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
 
 	links { "GL" }
 	links { "crypt" }
