@@ -160,7 +160,7 @@ end
 
 
 -- SDL2 dev must be installed...
--- use the vagrant boxes if you sont want to deal with it
+-- use the vagrant boxes if you dont want to deal with it
 
 --[[
 	if CPU=="64" then
@@ -169,8 +169,15 @@ end
 		libdirs { "../../sdks/sdl2/sdl2_x32/build/.libs/" }
 	end
 ]]
+	
+--	linkoptions { " -Wl,-Bstatic" }
+--	linkoptions { " -v" }
+	
+	linkoptions { " -Wl,-llua_sdl2,-Bstatic,-lSDL2,--no-undefined,-Bdynamic " } -- force static SDL2 linking (note the -llua_sdl2 to hack the order)
 
-	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
+	if CPU=="native" then
+		linkoptions { " -Wl,-Bstatic,-lluajit-5.1,-Bdynamic " } -- force static luajit linking
+	end
 
 	links { "GL" }
 	links { "crypt" }

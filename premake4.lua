@@ -656,37 +656,45 @@ if LIB_LUA=="lib_lua" then
 else
 	includedirs { "lib_luajit/src" }
 	
-	LUA_LINKS= { "luajit" }
 
 
 	if RASPI then -- hardfloat for raspbian
 
 		LUA_LIBDIRS={ "../lib_luajit/libs/armhf/" }
+		LUA_LINKS= { "luajit" }
 
 	elseif ANDROID then
 
 		LUA_LIBDIRS={ "../lib_luajit/libs/arm/" }
+		LUA_LINKS= { "luajit" }
 
 	elseif MINGW then
 
 		LUA_LIBDIRS={ "../lib_luajit/libs/win32/" }
+		LUA_LINKS= { "luajit" }
 
 	elseif OSX then
 
 		LUA_LIBDIRS={ "../lib_luajit/libs/osx/" }
+		LUA_LINKS= { "luajit" }
 
 	elseif CPU=="64" then
 		
 		LUA_LIBDIRS={ "../lib_luajit/libs/x64/" }
+		LUA_LINKS= { "luajit" }
 
 	elseif CPU=="32" then
 	
 		LUA_LIBDIRS= { "../lib_luajit/libs/x86/"  }
+		LUA_LINKS= { "luajit" }
 	
 	else
-	
-		LUA_LIBDIRS= { "../lib_luajit/libs/native/"  }
 
+-- expect it to be provided by the system
+
+--		LUA_LIBDIRS= { "/usr/local/lib"  }
+--		LUA_LIBDIRS= { "/hg/lua/build/depends/SDL-2.0.4-9799/build/.libs/" }
+	
 	end
 
 end
