@@ -13,9 +13,6 @@ fi
 
 cd ..
 
-cd lib_luajit
-premake4 --file=asm.lua
-cd ..
 
 premake4 gmake nix-native
 cd build-gmake-nix-native

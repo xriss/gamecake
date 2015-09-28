@@ -209,6 +209,12 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 
 	links(static_lib_names)
 
+	linkoptions { " -Wl,-llua_sdl2,-Bstatic,-lSDL2,--no-undefined,-Bdynamic " } -- force static SDL2 linking (note the -llua_sdl2 to hack the order)
+
+	if CPU=="native" then
+		linkoptions { " -Wl,-Bstatic,-lluajit-5.1,-Bdynamic " } -- force static luajit linking
+	end
+
 	links { "GL" }
 	links { "crypt" }
 	links { "pthread" }

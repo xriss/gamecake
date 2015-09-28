@@ -18,6 +18,9 @@ if NIX then
 		includedirs {	"../../sdks/sdl2/sdl2_x64/include",	}
 	elseif CPU=="32" then
 		includedirs {	"../../sdks/sdl2/sdl2_x32/include",	}
+	else
+-- use system includes
+--		includedirs { "/hg/lua/build/depends/SDL-2.0.4-9799/include" }
 	end
 end
 
