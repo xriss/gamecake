@@ -20,7 +20,7 @@ if NIX then
 		includedirs {	"../../sdks/sdl2/sdl2_x32/include",	}
 	else
 -- use system includes
---		includedirs { "/hg/lua/build/depends/SDL-2.0.4-9799/include" }
+		includedirs { "/usr/local/include/SDL2" }
 	end
 end
 
