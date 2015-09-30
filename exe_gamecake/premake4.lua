@@ -116,7 +116,7 @@ elseif WINDOWS then
 elseif OSX then
 
 -- look around the exe for any dynamic code we might want	
-	linkoptions { "-Wl,-R\\$$ORIGIN/osx" } -- so much escape \\$$ -> $
+--	linkoptions { "-Wl,-R\\$$ORIGIN/osx" } -- so much escape \\$$ -> $
 
 	files { "./lua.c" }
 	
@@ -124,11 +124,17 @@ elseif OSX then
 	links { "OpenGL.framework" }
 	links { "OpenAL.framework" }
 	links { "Cocoa.framework" }
+--	links { "SDL2.framework" }
 
 
 -- use static SDL2 from sdks
 --	libdirs { "../../sdks/sdl2/sdl2_osx/build/.libs/" }
-	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
+--	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
+
+	linkoptions { " /usr/local/lib/libluajit-5.1.a " } -- force static luajit linking
+
+	libdirs { "/usr/local/lib/" }
+	links { "SDL2" }
 
 	links { "pthread" }
 	links { "dl" }
