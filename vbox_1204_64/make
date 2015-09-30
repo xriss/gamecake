@@ -9,3 +9,4 @@ vagrant halt
 # rename the binaries
 cp ../../bin/exe/gamecake.nix ../../bin/exe/gamecake.x64
 cp ../../bin/exe/pagecake.nix ../../bin/exe/pagecake.x64
+rm ../../bin/exe/*.nix
