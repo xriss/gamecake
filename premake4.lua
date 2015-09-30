@@ -675,8 +675,10 @@ else
 
 	elseif OSX then
 
-		LUA_LIBDIRS={ "../lib_luajit/libs/osx/" }
-		LUA_LINKS= { "luajit" }
+-- expect it to be provided by the system
+
+--		LUA_LIBDIRS={ "../lib_luajit/libs/osx/" }
+--		LUA_LINKS= { "luajit" }
 
 	elseif CPU=="64" then
 		
