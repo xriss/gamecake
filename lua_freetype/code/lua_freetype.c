@@ -158,12 +158,12 @@ int lua_freetype_load_file (lua_State *l)
 {
 part_ptr p=lua_freetype_check_ptr(l,1);
 const char *s;
-int slen;
+size_t slen;
 	
 	p->error = FT_Init_FreeType( &p->library );
 	if( !p->error )
 	{
-		s=lua_tolstring(l,2,(size_t*)&slen); // the file name of the font to open
+		s=lua_tolstring(l,2,&slen); // the file name of the font to open
 		p->error = FT_New_Face( p->library,
 			s,
 			0,
@@ -182,12 +182,12 @@ int lua_freetype_load_data (lua_State *l)
 {
 part_ptr p=lua_freetype_check_ptr(l,1);
 const char *s;
-int slen;
+size_t slen;
 	
 	p->error = FT_Init_FreeType( &p->library );
 	if( !p->error )
 	{
-		s=lua_tolstring(l,2,(size_t*)&slen); // the file name of the font to open
+		s=lua_tolstring(l,2,&slen); // the file name of the font to open
 		p->error = FT_New_Memory_Face( p->library,
 						  (const FT_Byte*)s,
 						  slen,
