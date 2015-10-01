@@ -1,3 +1,3 @@
 cd `dirname $0`
-../../bin/exe/gamecake.x64 lua/unit.lua $*
+../../bin/exe/gamecake lua/unit.lua $*
 
