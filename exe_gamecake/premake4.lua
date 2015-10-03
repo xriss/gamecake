@@ -60,6 +60,8 @@ elseif NACL then
 
 	else
 
+		links { "SDL2" }	-- expected to be pre-built
+		
 		links { "stdc++" }
 		links { "ppapi"  }
 		links { "ppapi_gles2" }
@@ -78,13 +80,14 @@ elseif ANDROID then
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	linkoptions { "-u android_main" } -- we really need an android_main as well
 
+	links { "SDL2" }	-- expected to be pre-built
+
 	links { "GLESv2" }
 	
 	links { "EGL" , "android" , "jnigraphics" , "OpenSLES" }
-	links { "dl", "log", "c", "m", "gcc" }	
+	links { "dl", "log", "c", "m", "gcc" }
 
 	KIND{kind="SharedLib",name="liblua"}
-
 
 elseif WINDOWS then
 
@@ -119,26 +122,27 @@ elseif OSX then
 --	linkoptions { "-Wl,-R\\$$ORIGIN/osx" } -- so much escape \\$$ -> $
 
 	files { "./lua.c" }
-	
+
+	libdirs { "/usr/local/lib/" }
+	linkoptions { " /usr/local/lib/libluajit-5.1.a " } -- force static luajit linking
+	linkoptions { " /usr/local/lib/libSDL2.a " } -- force static SDL2 linking
+
+	links { "ForceFeedback.framework" } -- SDL2 requires these frameworks
+	links { "Carbon.framework" }
+	links { "IOKit.framework" }
+	links { "CoreAudio.framework" }
+	links { "AudioToolbox.framework" }
+	links { "AudioUnit.framework" }
 
 	links { "OpenGL.framework" }
 	links { "OpenAL.framework" }
 	links { "Cocoa.framework" }
---	links { "SDL2.framework" }
-
-
--- use static SDL2 from sdks
---	libdirs { "../../sdks/sdl2/sdl2_osx/build/.libs/" }
---	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
-
-	linkoptions { " /usr/local/lib/libluajit-5.1.a " } -- force static luajit linking
-
-	libdirs { "/usr/local/lib/" }
-	links { "SDL2" }
 
 	links { "pthread" }
 	links { "dl" }
 	links { "m" }
+	links { "objc" }
+	links { "iconv" }
 
 	if CPU=="64" then
 		KIND{kind="WindowedApp",name="gamecake.osx64"}
@@ -151,39 +155,24 @@ elseif NIX then
 -- look around the exe for any dynamic code we might want	
 	if CPU=="64" then
 		linkoptions { "-Wl,-R\\$$ORIGIN/x64" } -- so much escape \\$$ -> $
-	else
+	elseif CPU=="32" then
 		linkoptions { "-Wl,-R\\$$ORIGIN/x32" } -- so much escape \\$$ -> $
+	else
+		linkoptions { "-Wl,-R\\$$ORIGIN" } -- so much escape \\$$ -> $
 	end
-
---	linkoptions { "-static-libgcc" }
 
 	files { "./lua.c" }
 
-if LSB then
-	linkoptions { "--lsb-use-default-linker" }
-	linkoptions { "--lsb-besteffort" }
-end
-
+	if LSB then
+		linkoptions { "--lsb-use-default-linker" }
+		linkoptions { "--lsb-besteffort" }
+	end
 
 -- SDL2 dev must be installed...
 -- use the vagrant boxes if you dont want to deal with it
-
---[[
-	if CPU=="64" then
-		libdirs { "../../sdks/sdl2/sdl2_x64/build/.libs/" }
-	elseif CPU=="32" then
-		libdirs { "../../sdks/sdl2/sdl2_x32/build/.libs/" }
-	end
-]]
-	
---	linkoptions { " -Wl,-Bstatic" }
---	linkoptions { " -v" }
-	
-	linkoptions { " -Wl,-llua_sdl2,-Bstatic,-lSDL2,--no-undefined,-Bdynamic " } -- force static SDL2 linking (note the -llua_sdl2 to hack the order)
-
-	if CPU=="native" then
-		linkoptions { " -Wl,-Bstatic,-lluajit-5.1,-Bdynamic " } -- force static luajit linking
-	end
+	libdirs { "/usr/local/lib/" }
+	linkoptions { " /usr/local/lib/libSDL2.a " } -- force static SDL2 linking
+	linkoptions { " /usr/local/lib/libluajit-5.1.a " } -- force static luajit linking
 
 	links { "GL" }
 	links { "crypt" }
