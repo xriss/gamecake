@@ -630,7 +630,7 @@ end
 
 LIB_LUA="lib_lua" -- default 
 
-if RASPI or ANDROID or NIX or MINGW or OSX then -- luajit is working for these builds
+if RASPI or ANDROID or NIX or MINGW or OSX then -- luajit is enabled for these builds
 
 	LIB_LUA="lib_luajit"
 	defines( "LIB_LUAJIT" )
@@ -643,6 +643,9 @@ if LIB_LUA=="lib_lua" then
 	includedirs { "lib_lua/src" }
 	LUALINKS= nil
 
+else
+	includedirs { "lib_luajit/src" }
+	
 --
 -- assume we have a prebuilt luajit.so for the target platform
 --
@@ -653,9 +656,6 @@ if LIB_LUA=="lib_lua" then
 -- it seems to be OK to link the x32/x64 linux libs on LSB builds
 -- these built binary files are added into the repository.
 --
-else
-	includedirs { "lib_luajit/src" }
-	
 
 
 	if RASPI then -- hardfloat for raspbian
@@ -673,30 +673,10 @@ else
 		LUA_LIBDIRS={ "../lib_luajit/libs/win32/" }
 		LUA_LINKS= { "luajit" }
 
-	elseif OSX then
-
--- expect it to be provided by the system
-
---		LUA_LIBDIRS={ "../lib_luajit/libs/osx/" }
---		LUA_LINKS= { "luajit" }
-
-	elseif CPU=="64" then
-		
-		LUA_LIBDIRS={ "../lib_luajit/libs/x64/" }
-		LUA_LINKS= { "luajit" }
-
-	elseif CPU=="32" then
-	
-		LUA_LIBDIRS= { "../lib_luajit/libs/x86/"  }
-		LUA_LINKS= { "luajit" }
-	
 	else
 
--- expect it to be provided by the system
+-- expect it to be provided in the system -> /usr/local/lib
 
---		LUA_LIBDIRS= { "/usr/local/lib"  }
---		LUA_LIBDIRS= { "/hg/lua/build/depends/SDL-2.0.4-9799/build/.libs/" }
-	
 	end
 
 end
@@ -710,9 +690,6 @@ if RASPI then
 	
 elseif ANDROID then
 
---	defines{ "LUA_GLES_GLES1" }
---	defines{ "INCLUDE_GLES_GL=\\\"GLES/gl.h\\\"" }
-
 	defines{ "LUA_GLES_GLES2" }
 	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
 	
@@ -720,15 +697,8 @@ elseif NACL or EMCC then
 
 	defines{ "LUA_GLES_GLES2" }
 	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
---	defines{ "INCLUDE_GLES_GL=\\\"ppapi/c/ppb_opengles2.h\\\"" }
 
 elseif WINDOWS then -- need windows GL hacks
-
---[[
-	defines{ "LUA_GLES_GLES2" }
-	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
-	includedirs { "lib_angle/include" }
-]]
 
 	includedirs { "lua_gles/code" }
 	defines{ "LUA_GLES_GL" }

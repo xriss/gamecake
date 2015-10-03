@@ -208,12 +208,11 @@ if LUA_LIBDIRS then	libdirs(LUA_LIBDIRS) end
 if LUA_LINKS   then links  (LUA_LINKS)   end
 
 	links(static_lib_names)
-
-	linkoptions { " -Wl,-llua_sdl2,-Bstatic,-lSDL2,--no-undefined,-Bdynamic " } -- force static SDL2 linking (note the -llua_sdl2 to hack the order)
-
-	if CPU=="native" then
-		linkoptions { " -Wl,-Bstatic,-lluajit-5.1,-Bdynamic " } -- force static luajit linking
-	end
+-- SDL2 dev must be installed...
+-- use the vagrant boxes if you dont want to deal with it
+	libdirs { "/usr/local/lib/" }
+	linkoptions { " /usr/local/lib/libSDL2.a " } -- force static SDL2 linking
+	linkoptions { " /usr/local/lib/libluajit-5.1.a " } -- force static luajit linking
 
 	links { "GL" }
 	links { "crypt" }
