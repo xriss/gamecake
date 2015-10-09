@@ -41,14 +41,6 @@ if LSB then
 	linkoptions { "--lsb-use-default-linker" }
 	linkoptions { "--lsb-besteffort" }
 end
-
--- use prebuilt SDL2 lib
-	if CPU=="64" then
-		libdirs { "../../sdks/sdl2/sdl2_x64/build/.libs/" }
-	elseif CPU=="32" then
-		libdirs { "../../sdks/sdl2/sdl2_x32/build/.libs/" }
-	end
-	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- prefer static SDL?
 	
 	
 	defines "NGX_LINUX"
