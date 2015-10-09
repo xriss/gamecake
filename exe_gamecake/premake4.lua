@@ -60,7 +60,7 @@ elseif NACL then
 
 	else
 
-		links { "SDL2" }	-- expected to be pre-built
+--		links { "SDL2" }	-- expected to be pre-built
 		
 		links { "stdc++" }
 		links { "ppapi"  }
@@ -80,7 +80,7 @@ elseif ANDROID then
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	linkoptions { "-u android_main" } -- we really need an android_main as well
 
-	links { "SDL2" }	-- expected to be pre-built
+--	links { "SDL2" }	-- expected to be pre-built
 
 	links { "GLESv2" }
 	
@@ -124,7 +124,12 @@ elseif OSX then
 	files { "./lua.c" }
 
 	libdirs { "/usr/local/lib/" }
-	linkoptions { " /usr/local/lib/libluajit-5.1.a " } -- force static luajit linking
+	if CPU=="64" then
+		libdirs { "/usr/local/64/lib/" }
+		linkoptions { " /usr/local/64/lib/libluajit-5.1.a " } -- force static luajit linking
+	else
+		linkoptions { " /usr/local/lib/libluajit-5.1.a " } -- force static luajit linking
+	end
 	linkoptions { " /usr/local/lib/libSDL2.a " } -- force static SDL2 linking
 
 	links { "ForceFeedback.framework" } -- SDL2 requires these frameworks
@@ -145,9 +150,11 @@ elseif OSX then
 	links { "iconv" }
 
 	if CPU=="64" then
+		linkoptions { "-pagezero_size 10000","-image_base 100000000" }
+	
 		KIND{kind="WindowedApp",name="gamecake.osx64"}
 	else
-		KIND{kind="WindowedApp",name="gamecake.osx"}
+		KIND{kind="WindowedApp",name="gamecake.osx32"}
 	end
 	
 elseif NIX then

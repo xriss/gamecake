@@ -23,7 +23,17 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=-1
+current_page=9
+FILE_NAME_0=1178;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Fexe_gamecake%2Fpremake4.lua;0;4
+FILE_NAME_1=13416;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Fpremake4.lua;0;4
+FILE_NAME_2=0;None;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Fvbox_1204_32%2Fmake;0;4
+FILE_NAME_3=239;None;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Fvbox_1204_64%2Fmake;0;4
+FILE_NAME_4=7047;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Fexe_pagecake%2Fpremake4.lua;0;4
+FILE_NAME_5=348;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Flua_sdl2%2Fpremake4.lua;0;4
+FILE_NAME_6=0;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Froadee%2Flua%2Froadee%2Fmain.lua;0;4
+FILE_NAME_7=4622;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Froadee%2Flua%2Froadee%2Fmain_menu.lua;0;4
+FILE_NAME_8=2335;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Froadee%2Flua%2Froadee%2Fgui.lua;0;4
+FILE_NAME_9=1034;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Froadee%2Flua%2Froadee%2Fmain_sensors.lua;0;4
 
 [VTE]
 last_dir=/home/kriss/hg/lua/lib_png
