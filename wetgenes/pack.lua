@@ -85,6 +85,18 @@ end
 -- we return a string and the length of the data written in bytes, ie the length of the string
 --
 pack.save=function(data,fmts,off)
+
+	if data and (not fmts or type(fmts)=="number") then -- interleaved save  eg {"u8",24,"s32",16}
+		off=fmts fmts=nil -- offset is in wrong var, fix it
+		local d,f={},{}
+		for i=1,#data,2 do
+			f[#f+1]=data[i]
+			d[#d+1]=data[i+1]
+		end
+		local dat,len=core.save(d,f,off)
+		return dat,len -- we return the parsed data and the length of the data we just read in bytes
+	end
+
 	local fmtt={} -- format field type
 	local fmtn={} -- format field name
 	

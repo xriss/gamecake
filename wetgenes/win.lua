@@ -39,6 +39,9 @@ end
 
 if flavour_request then print("The requested flavour of win is "..(flavour_request or "any")) end
 
+
+-- these are special bindings since the web and android are "special"
+
 if not hardcore or flavour_request=="emcc" then
 	local suc,dat=pcall(function() return require("wetgenes.win.emcc") end )
 	if suc then hardcore=dat base.flavour="emcc" base.noblock=true end
@@ -55,6 +58,17 @@ if not hardcore or flavour_request=="android"  then
 --		posix=require("wetgenes.win.posix")
 	end
 end
+
+
+-- see if we have an SDL2 build to use
+
+if not hardcore or flavour_request=="sdl" then
+	local suc,dat=pcall(function() return require("SDL") end )
+	if suc then pcall(function() hardcore=require("wetgenes.win.sdl") base.flavour="sdl" end ) end -- try SDL 
+end
+
+
+-- the bindings below are depreciated in favour of SDL above but can still be forced with a flavour request
 
 if not hardcore or flavour_request=="windows" then
 	local suc,dat=pcall(function() return require("wetgenes.win.windows") end )
@@ -73,12 +87,6 @@ if not hardcore or flavour_request=="osx"  then
 	if suc then hardcore=dat base.flavour="osx"
 		posix=require("wetgenes.win.posix")
 	end
-end
-
--- see if we have an SDL2 build (in preference to raspi)
-if not hardcore or flavour_request=="sdl" then
-	local suc,dat=pcall(function() return require("SDL") end )
-	if suc then pcall(function() hardcore=require("wetgenes.win.sdl") base.flavour="sdl" end ) end -- try SDL 
 end
 
 if not hardcore or flavour_request=="raspi"  then

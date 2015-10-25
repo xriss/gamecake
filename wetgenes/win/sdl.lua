@@ -188,9 +188,35 @@ sdl.msg_fetch=function()
 			sdl.mousexy[2]=e.y
 	
 		
-		
+		elseif	(e.type == SDL.event.WindowEvent) then
+
+--[[
+			for n,i in pairs(SDL.eventWindow) do
+				if e.event==i then
+					print("WindowEvent "..n.." : "..i)
+				end
+			end
+			dprint(e)
+]]
+
+		elseif	(e.type == SDL.event.Quit) then -- window close button, or alt f4
+
+			local t={}
+			t.time=sdl.time()
+			t.class="close"
+
+			sdl.queue[#sdl.queue+1]=t
+
 		else
---			dprint(e)
+
+--[[
+			for n,i in pairs(SDL.event) do
+				if e.type==i then
+					print(n.." : "..i)
+				end
+			end
+			dprint(e)
+]]
 		end
 	end
 	
@@ -209,6 +235,70 @@ sdl.msg_fetch=function()
 ]]
 
 end
+
+
+sdl.icon=function(w,g)
+
+	local wgrd=require("wetgenes.grd")
+	local pack=require("wetgenes.pack")
+
+	assert(g:convert(wgrd.U8_RGBA)) -- make sure it is this format
+	assert(g:flipy()) -- needs to be the other way up
+	
+	local argb=g:pixels(0,0,g.width,g.height)
+	for i=0,g.width*g.height*4-1,4 do argb[i+1],argb[i+3]=argb[i+3],argb[i+1] end -- swap red and blue
+
+-- create a bmp in memory
+	local bmp_data=pack.save_array(argb,"u8",0,#argb)
+	local bmp_file=pack.save{2,"BM","u32",14+40+#bmp_data,"u16",0,"u16",0,"u32",14+40}
+	local bmp_head=pack.save{"u32",40,"u32",g.width,"u32",g.height,"u16",1,"u16",32,"u32",0,"u32",#bmp_data,"u32",0,"u32",0,"u32",0,"u32",0}
+
+--print("ICON",#bmp_file,type(bmp_file),#bmp_head,type(bmp_file),#bmp_data,type(bmp_data))
+
+-- create a bmp stream for SDL to read...
+	local it={}
+	it.dat=bmp_file..bmp_head..bmp_data
+	it.off=0
+	function it.size()
+		return #it.dat
+	end
+	function it.close()
+	end
+	function it.seek(offset, whence)
+		if whence == SDL.rwopsSeek.Set then
+			it.off=offset
+		elseif whence == SDL.rwopsSeek.Current then
+			it.off=it.off+offset
+		elseif whence == SDL.rwopsSeek.End then
+			it.off=#it.dat-offset
+		end
+		if it.off<0 then it.off=0 end
+		if it.off>#it.dat then it.off=#it.dat end
+		return it.off
+	end
+	function it.read(n, size)
+		local i=n*size
+		if i>0 then
+			local d=it.dat:sub(it.off+1,it.off+i)
+			it.off=it.off+i
+			return d,#d
+		else
+			return nil
+		end
+	end
+	function it.write(data, n, size)
+	end
+	local rw=assert(SDL.RWCreate(it))
+	local surf=assert(SDL.loadBMP_RW(rw))
+
+	w.win:setIcon(surf)
+
+
+--	core.rawicon(w,pack.save_array({g.width,g.height},"u32",0,2)..pack.save_array(argb,"u8",0,#argb))
+
+end
+
+
 
 
 return sdl

@@ -20,7 +20,7 @@ local libname="steam_api.dll"
 if jit.os=="Windows" and jit.arch=="x64" then libdirname=""     libname="steam_api64.dll"		end
 if jit.os=="Linux"   and jit.arch=="x86" then libdirname="x32/" libname="libsteam_api_wrap.so"	end
 if jit.os=="Linux"   and jit.arch=="x64" then libdirname="x64/" libname="libsteam_api_wrap.so"	end
-if jit.os=="OSX"                         then libdirname="osx/" libname="libsteam_api.dylib"	end
+if jit.os=="OSX"                         then libdirname=""     libname="steam_api.dylib"		end
 
 -- search for the steam_api library
 local libpath
