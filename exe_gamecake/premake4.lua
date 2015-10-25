@@ -126,11 +126,9 @@ elseif OSX then
 	libdirs { "/usr/local/lib/" }
 	if CPU=="64" then
 		libdirs { "/usr/local/64/lib/" }
-		linkoptions { " /usr/local/64/lib/libluajit-5.1.a " } -- force static luajit linking
-	else
-		linkoptions { " /usr/local/lib/libluajit-5.1.a " } -- force static luajit linking
 	end
-	linkoptions { " /usr/local/lib/libSDL2.a " } -- force static SDL2 linking
+	links { "luajit-5.1" }
+	links { "SDL2" }	
 
 	links { "ForceFeedback.framework" } -- SDL2 requires these frameworks
 	links { "Carbon.framework" }
@@ -175,11 +173,11 @@ elseif NIX then
 		linkoptions { "--lsb-besteffort" }
 	end
 
--- SDL2 dev must be installed...
+-- luajit and SDL2 dev must be available
 -- use the vagrant boxes if you dont want to deal with it
 	libdirs { "/usr/local/lib/" }
-	linkoptions { " /usr/local/lib/libSDL2.a " } -- force static SDL2 linking
-	linkoptions { " /usr/local/lib/libluajit-5.1.a " } -- force static luajit linking
+	links { "luajit-5.1" }
+	links { "SDL2" }	
 
 	links { "GL" }
 	links { "crypt" }

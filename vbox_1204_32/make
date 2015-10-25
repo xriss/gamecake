@@ -2,7 +2,7 @@ cd `dirname $0`
 
 vagrant up
 
-vagrant ssh -c " cd /hg/lua ; gcc/make clean ; gcc/make "
+vagrant ssh -c " cd /hg/lua ; nix/make clean ; nix/make "
 
 vagrant halt
 
