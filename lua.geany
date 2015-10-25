@@ -24,16 +24,17 @@ long_line_column=72
 
 [files]
 current_page=9
-FILE_NAME_0=1178;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Fexe_gamecake%2Fpremake4.lua;0;4
-FILE_NAME_1=13416;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Fpremake4.lua;0;4
-FILE_NAME_2=0;None;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Fvbox_1204_32%2Fmake;0;4
-FILE_NAME_3=239;None;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Fvbox_1204_64%2Fmake;0;4
-FILE_NAME_4=7047;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Fexe_pagecake%2Fpremake4.lua;0;4
-FILE_NAME_5=348;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Flua%2Flua_sdl2%2Fpremake4.lua;0;4
-FILE_NAME_6=0;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Froadee%2Flua%2Froadee%2Fmain.lua;0;4
-FILE_NAME_7=4622;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Froadee%2Flua%2Froadee%2Fmain_menu.lua;0;4
-FILE_NAME_8=2335;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Froadee%2Flua%2Froadee%2Fgui.lua;0;4
-FILE_NAME_9=1034;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Froadee%2Flua%2Froadee%2Fmain_sensors.lua;0;4
+FILE_NAME_0=578;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2F05-setup-box.sh;0;4
+FILE_NAME_1=888;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2F06-read-only-pi.sh;0;4
+FILE_NAME_2=388;HTML;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fdi-web-box%2Fdi-website%2Fwp%2Fwp-content%2Fthemes%2FdiConcept%2Fpages%2FCountry%2Fcountry.html;0;4
+FILE_NAME_3=0;Javascript;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fdi-web-box%2Fdi-website%2Fwp%2Fwp-content%2Fthemes%2FdiConcept%2Fpages%2FCountry%2FCountryController.js;0;4
+FILE_NAME_4=105;None;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2Fbox-up;0;4
+FILE_NAME_5=44;None;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2Fbox-down;0;4
+FILE_NAME_6=0;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2F04-run-box.sh;0;4
+FILE_NAME_7=0;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2F02-install.sh;0;4
+FILE_NAME_8=173;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2F07-boot-fix.sh;0;4
+FILE_NAME_9=492;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2F01-download-and-install.sh;0;4
+FILE_NAME_10=315;Markdown;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2FREADME.md;0;4
 
 [VTE]
 last_dir=/home/kriss/hg/lua/lib_png
