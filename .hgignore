@@ -33,4 +33,7 @@ nginx/static/*.zip
 vbox_raspi/2015-02-18-wheezy-minibian.img
 vbox_raspi/kernel-qemu
 
+build/depends/premake-4.4-beta5/*
+build/depends/SDL2-2.0.3/*
+build/depends/LuaJIT-2.1.0-beta1/*
 
