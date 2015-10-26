@@ -34,7 +34,13 @@ elseif ANDROID then
 else
 
 -- look around the exe for any dynamic code we might want	
-	linkoptions { "-Wl,-R\\$$ORIGIN" } -- so much escape \\$$ -> $
+	if CPU=="64" or ( CPU~="32" and BUILD_CPU="64" ) then
+		linkoptions { "-Wl,-R\\$$ORIGIN/x64" } -- so much escape \\$$ -> $
+	elseif CPU=="32" or BUILD_CPU="64" then
+		linkoptions { "-Wl,-R\\$$ORIGIN/x32" } -- so much escape \\$$ -> $
+	else
+		linkoptions { "-Wl,-R\\$$ORIGIN" } -- so much escape \\$$ -> $
+	end
 
 
 if LSB then
