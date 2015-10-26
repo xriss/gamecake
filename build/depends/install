@@ -20,6 +20,8 @@ cd ..
 
 #force static link by deleting the .so
 sudo rm -f /usr/local/lib/libluajit-5.1.so
+sudo rm -f /usr/local/64/lib/libluajit-5.1.dylib
+sudo rm -f /usr/local/lib/libluajit-5.1.dylib
 
 
 # make a version of premake4 and install it
@@ -44,3 +46,4 @@ cd ..
 
 #force static link by deleting the .so
 sudo rm -f /usr/local/lib/libSDL2.so
+sudo rm -f /usr/local/lib/libSDL2.dylib
