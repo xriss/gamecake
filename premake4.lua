@@ -438,6 +438,19 @@ elseif OSX then
 	end
 	
 elseif NIX then
+
+	function os.capture(cmd, raw)
+	  local f = assert(io.popen(cmd, 'r'))
+	  local s = assert(f:read('*a'))
+	  f:close()
+	  if raw then return s end
+	  s = string.gsub(s, '^%s+', '')
+	  s = string.gsub(s, '%s+$', '')
+	  s = string.gsub(s, '[\n\r]+', ' ')
+	  return s
+	end
+
+	BUILD_CPU = os.capture("getconf LONG_BIT") -- remember the build cpu
 	
 	defines("LUA_USE_MKSTEMP") -- remove warning
 	defines("LUA_USE_POPEN") -- we want to enable popen
