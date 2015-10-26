@@ -7,6 +7,6 @@ vagrant ssh -c " cd /hg/lua ; nix/make clean ; nix/make "
 vagrant halt
 
 # rename the binaries
-#cp ../../bin/exe/gamecake.nix ../../bin/exe/gamecake.x32
-#cp ../../bin/exe/pagecake.nix ../../bin/exe/pagecake.x32
-#rm ../../bin/exe/*.nix
+cp ../../bin/exe/gamecake.nix ../../bin/exe/gamecake.x32
+cp ../../bin/exe/pagecake.nix ../../bin/exe/pagecake.x32
+rm ../../bin/exe/*.nix

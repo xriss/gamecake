@@ -265,7 +265,8 @@ if EMCC then
 	defines "EMCC"
 
 	buildlinkoptions{
-		"-Wno-warn-absolute-paths",
+--		"-Wno-warn-absolute-paths",
+		"-Wno-error-shift-negative-value",
 		"-Wno-long-long",
 		"-Werror",
 		"-s NO_EXIT_RUNTIME=1",
@@ -301,7 +302,7 @@ if EMCC then
 
 elseif NACL then
 
-	naclsdk_path=path.getabsolute("../sdks/nacl-sdk/pepper_41")
+	naclsdk_path=path.getabsolute("../sdks/nacl-sdk/pepper_46")
 	pepperjs_path=path.getabsolute("./lib_pepperjs/pepper.js")
 
 	platforms { "nacl" } --hax

@@ -62,7 +62,7 @@ elseif NACL then
 
 --		links { "SDL2" }	-- expected to be pre-built
 		
-		links { "stdc++" }
+--		links { "stdc++" }
 		links { "ppapi"  }
 		links { "ppapi_gles2" }
 		links { "nacl_io" }
@@ -123,10 +123,12 @@ elseif OSX then
 
 	files { "./lua.c" }
 
-	libdirs { "/usr/local/lib/" }
-	if CPU=="64" then
-		libdirs { "/usr/local/64/lib/" }
-	end
+--	if CPU=="64" then
+--		libdirs { "/usr/local/64/lib/" }
+--	else
+		libdirs { "/usr/local/lib/" }
+--	end
+
 	links { "luajit-5.1" }
 	links { "SDL2" }	
 
@@ -150,7 +152,7 @@ elseif OSX then
 	if CPU=="64" then
 		linkoptions { "-pagezero_size 10000","-image_base 100000000" }
 	
-		KIND{kind="WindowedApp",name="gamecake.osx64"}
+		KIND{kind="WindowedApp",name="gamecake.osx"}
 	else
 		KIND{kind="WindowedApp",name="gamecake.osx32"}
 	end

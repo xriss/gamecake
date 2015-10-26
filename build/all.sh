@@ -22,11 +22,11 @@ cd `dirname $0`
 
 ../../lua/vbox_1204_64/make
 
-#build 32bit ubuntu 12.04 version using schroot
+#build 32bit ubuntu 12.04 version 
 
 ../../lua/vbox_1204_32/make
 
-#build on remote mac machine and grab the binary back to this system
+#build osx version 32+64
 
 ../../lua/vbox_osx/make
 
