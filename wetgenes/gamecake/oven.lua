@@ -244,6 +244,21 @@ require("gles").CheckError() -- uhm this fixes an error?
 			oven.rebake_mod("wetgenes.gamecake.mods.layout") -- screen layout options
 			oven.rebake_mod("wetgenes.gamecake.mods.snaps") -- builtin screen snapshot code
 
+-- handle default win icon if it exists and we need it .06.png will be 64x64 version
+			if wwin.hardcore.icon then
+				local fname
+				if     wzips.exists("data/icons/win_icon.png")    then fname="data/icons/win_icon.png"
+				elseif wzips.exists("data/icons/win_icon.06.png") then fname="data/icons/win_icon.06.png"
+				end
+				if fname then
+					local wgrd=require("wetgenes.grd")
+					local g=assert(wgrd.create())
+					local d=assert(wzips.readfile(fname),"Failed to load "..fname)
+					assert(g:load_data(d,"png")) -- last 3 letters pleaze
+					wwin.hardcore.icon(oven.win[0],g)
+				end
+			end
+
 			if wzips.exists("data/wskins/soapbar.png") or wzips.exists("data/wskins/soapbar.00.lua")then -- we got us better skin to use :)
 				oven.rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
 			end
