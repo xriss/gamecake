@@ -162,7 +162,7 @@ elseif NIX then
 -- look around the exe for any dynamic code we might want	
 	if CPU=="64" or ( CPU~="32" and BUILD_CPU=="64" ) then
 		linkoptions { "-Wl,-R\\$$ORIGIN/x64" } -- so much escape \\$$ -> $
-	elseif CPU=="32" or BUILD_CPU=="64" then
+	elseif CPU=="32" or BUILD_CPU=="32" then
 		linkoptions { "-Wl,-R\\$$ORIGIN/x32" } -- so much escape \\$$ -> $
 	else
 		linkoptions { "-Wl,-R\\$$ORIGIN" } -- so much escape \\$$ -> $
