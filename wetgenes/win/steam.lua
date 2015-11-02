@@ -45,6 +45,7 @@ void *SteamUser();
 void *SteamUserStats();
 
 const char * SteamAPI_ISteamApps_GetCurrentGameLanguage(void *_p);
+const char * SteamAPI_ISteamUtils_GetSteamUILanguage(void *_p);
 
 
 uint64_t SteamAPI_ISteamUser_GetSteamID(void *_p);
@@ -106,12 +107,12 @@ local lib_SteamUser      = lib.SteamUser()
 local lib_SteamUserStats = lib.SteamUserStats()
 
 
-
-local a=lib.SteamAPI_ISteamApps_GetCurrentGameLanguage(lib_SteamApps)
-if a then
-	steam.language=a and ffi.string(a)
-end
-print("STEAM language",steam.language)
+-- get language of game, will be nil if unknown
+local a=lib.SteamAPI_ISteamApps_GetCurrentGameLanguage(lib_SteamApps)		-- check game language
+--if not a then a=lib.SteamAPI_ISteamUtils_GetSteamUILanguage(lib_SteamUser) end	-- or steam UI language
+if a then steam.language=ffi.string(a) end
+if steam.language=="" then steam.language=nil end
+print("STEAM language",tostring(steam.language))
 
 local a=lib.SteamAPI_ISteamUser_GetSteamID(lib_SteamUser)
 if a then
