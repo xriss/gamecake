@@ -15,14 +15,15 @@ local steam={}
 local jit pcall(function() jit=require("jit") end) if not jit then return steam end
 local ffi pcall(function() ffi=require("ffi") end) if not ffi then return steam end
 
+local pragma_pack_size=1
 local libdirname=""
 local libname="steam_api.dll"
-if jit.os=="Windows" and jit.arch=="x64" then libdirname=""     libname="steam_api64.dll"		end
-if jit.os=="Linux"   and jit.arch=="x86" then libdirname="x32/" libname="libsteam_api_wrap.so"	end
-if jit.os=="Linux"   and jit.arch=="x64" then libdirname="x64/" libname="libsteam_api_wrap.so"	end
-if jit.os=="OSX"                         then libdirname=""     libname="steam_api.dylib"		end
+if jit.os=="Windows" and jit.arch=="x64" then libdirname=""     libname="steam_api64.dll"		pragma_pack_size=16		end
+if jit.os=="Linux"   and jit.arch=="x86" then libdirname="x32/" libname="libsteam_api.so"								end
+if jit.os=="Linux"   and jit.arch=="x64" then libdirname="x64/" libname="libsteam_api.so"								end
+if jit.os=="OSX"                         then libdirname="osx/" libname="libsteam_api.dylib"							end
 
--- search for the steam_api library
+-- search for the steam_api library, libdirname is probably not needed due to rpath linker config but just in case we mucked that up
 local libpath
 local lib		pcall(function() libpath=libdirname..libname		lib=ffi.load(libpath) end)
 if not lib then	pcall(function() libpath=libname					lib=ffi.load(libpath) end) end
@@ -32,6 +33,9 @@ if not lib then	pcall(function() libpath=libname					lib=ffi.load(libpath) end) 
 
 -- no steam lib found
 if not lib then return steam end
+
+print("STEAM API -> "..libpath.." pack("..pragma_pack_size..")")
+
 
 ffi.cdef( [[
 
@@ -66,7 +70,7 @@ bool SteamAPI_ISteamUserStats_IndicateAchievementProgress(void *_p, const char *
 bool SteamAPI_Init();
 bool InitSafe();
 
-#pragma pack( push, ]]..(( jit.os=="Linux" or jit.os=="OSX" ) and "4" or "8")..[[)
+#pragma pack( push, ]]..pragma_pack_size..[[)
 
 struct LeaderboardFindResult_t
 {
@@ -115,60 +119,141 @@ if a then
 end
 print("STEAM userid",steam.userid)
 
+-- table of [functions]=true to call until they return true
+steam.results={}
+
+-- call every function in results until it returns true, returns total number of functions called, so 0 when done
+-- you can wrap a result function with a callback that would then complete here
+steam.results_call=function()
+	local count=0
+	for result in pairs(steam.results) do
+		count=count+1
+		if result() then steam.results[result]=nil end -- call and forget if it returns true
+	end
+	return count
+end
+
 steam.leaderboards={}
 
+-- *busywait* to get the board of the given name (probably preloaded by leaderboards_prepare function)
+steam.leaderboards_board=function(name)
+	if not steam.leaderboards[name] then
+		steam.results[steam.leaderboards_setup(name)]=true
+		repeat until steam.results_call()==0 -- busy wait here for everything we are waiting on
+	end
+	if type(steam.leaderboards[name])=="table" then	return steam.leaderboards[name] end
+end
+
+-- initial leaderboard setup, fetch id and setup board table
+-- return a result function that needs to be polled until it returns a result
 steam.leaderboards_setup=function(name)
 	local req=lib.SteamAPI_ISteamUserStats_FindLeaderboard(lib_SteamUserStats,name)
 	local ret=ffi.new("struct LeaderboardFindResult_t")
 	local dropped=ffi.new("bool[1]")
-	
-	return function()
-		repeat until lib.SteamAPI_ISteamUtils_GetAPICallResult(lb_SteamUtils, req, ret, ffi.sizeof(ret), 1104, dropped)
---print(ffi.sizeof(ret),dropped[0],ret.m_hSteamLeaderboard,ret.m_bLeaderboardFound)
 
-		steam.leaderboards[name]={}
-		steam.leaderboards[name].id=ret.m_hSteamLeaderboard
-
-		return ret.m_hSteamLeaderboard
+	local done
+	return function() -- result
+		if done then return done end
+		if lib.SteamAPI_ISteamUtils_GetAPICallResult(lib_SteamUtils, req, ret, ffi.sizeof(ret), 1104, dropped) then
+			done=ret
+			if ret.m_bLeaderboardFound~=0 then -- success
+				local board=steam.leaderboards[name] or {} -- reuse table if called multiple times
+				steam.leaderboards[name]=board
+				board.name=name
+				board.id=ret.m_hSteamLeaderboard
+			end
+			return done
+		end
 	end
 end
 
+-- submit a new leaderboard score to steam
+-- return a result function that needs to be polled until it returns a result
 steam.leaderboards_score=function(name,score)
-	local req=lib.SteamAPI_ISteamUserStats_UploadLeaderboardScore(lib_SteamUserStats,steam.leaderboards[name].id,1,score,nil,0)
+	local board=steam.leaderboards_board(name)
+	if not board then return end
+	
+	local req=lib.SteamAPI_ISteamUserStats_UploadLeaderboardScore(lib_SteamUserStats,board.id,1,score,nil,0)
 	local ret=ffi.new("struct LeaderboardScoreUploaded_t")
 	local dropped=ffi.new("bool[1]")
 	
-	return function()
-	repeat until lib.SteamAPI_ISteamUtils_GetAPICallResult(lb_SteamUtils, req, ret, ffi.sizeof(ret), 1106, dropped)
-
-		steam.leaderboards[name].rank=m_nGlobalRankNew
-		return ret.m_bSuccess
-
+	local done
+	return function() -- result
+		if done then return done end
+		if lib.SteamAPI_ISteamUtils_GetAPICallResult(lib_SteamUtils, req, ret, ffi.sizeof(ret), 1106, dropped) then
+			done=ret
+			board.rank=ret.m_nGlobalRankNew
+			return done
+		end
 	end
 end
 
+-- local unlocked cache
+steam.achievements={}
 
-
-local ns={"scores","levels","cookies"}
-local bs={}
-for i,n in ipairs(ns) do
-	bs[n]=steam.leaderboards_find(n) -- request leader board ids
+-- i dont think this is actually needed but we might want to call store stats in a batched way
+-- so currently it does nothing unless you call with steam.achievement_store(true)
+steam.achievement_store_locked=true
+steam.achievement_store=function(forced)
+	if (not steam.achievement_store_locked) or forced then
+		lib.SteamAPI_ISteamUserStats_StoreStats(lib_SteamUserStats)
+	end
 end
-for i,n in ipairs(ns) do
-	bs[n]() -- block for return values
-	print("STEAM leaderboards."..n,steam.leaderboards[n].id)
+
+-- unlock or lock a named achievement
+steam.achievement_set=function(name,value)
+	if type(value)=="boolean" and (not value) then -- clear if value is false
+		steam.achievements[name]=false
+		lib.SteamAPI_ISteamUserStats_ClearAchievement(lib_SteamUserStats,name)
+		steam.achievement_store()
+	else -- set if value is missing or is true
+		steam.achievements[name]=true
+		lib.SteamAPI_ISteamUserStats_SetAchievement(lib_SteamUserStats,name)
+		steam.achievement_store()
+	end
 end
 
+-- get state of an achievement (using local cache)
+steam.achievement_get=function(name)
+	if type(steam.achievements[name])=="boolean" then return steam.achievements[name] end -- use cache
+	local ret=ffi.new("bool[1]") ret[0]=0
+	lib.SteamAPI_ISteamUserStats_GetAchievement(lib_SteamUserStats,name,ret)
+	local value=ret[0] and true or false
+	steam.achievements[name]=value
+	return value
+end
+
+
+-- test codes
 --[[
-local req=lib.SteamAPI_ISteamUserStats_UploadLeaderboardScore(lib_SteamUserStats,steam.leaderboard_scores,1,13,nil,0)
-local ret=ffi.new("struct LeaderboardScoreUploaded_t")
-local dropped=ffi.new("bool[1]")
-repeat until lib.SteamAPI_ISteamUtils_GetAPICallResult(lb_SteamUtils, req, ret, ffi.sizeof(ret), 1106, dropped)
-print(ffi.sizeof(ret),dropped[0],ret.m_hSteamLeaderboard,ret.m_bSuccess)
+
+-- request leaderboards
+for index,name in ipairs{"scores","levels","cookies"} do
+	steam.results[steam.leaderboards_setup(name)]=true
+end
+
+-- wait for leaderboards results
+repeat until steam.results_call()==0
+
+-- print leaderboards info
+for n,board in pairs(steam.leaderboards) do
+	print(" STEAM leaderboard "..board.name.." : "..tostring(board.id) )
+end
+
+
+print( "achievement unlocked " .. tostring(steam.achievement_get("level")) )
+steam.achievement_set("level",false)
+print( "achievement unlocked " .. tostring(steam.achievement_get("level")) )
+steam.achievement_set("level",true)
+print( "achievement unlocked " .. tostring(steam.achievement_get("level")) )
+steam.achievement_store()
+
+
+os.exit(0)
+
 ]]
 
---os.exit()
-
 steam.loaded=true -- flag that steam is loaded and setup has been done
+
 
 return steam
