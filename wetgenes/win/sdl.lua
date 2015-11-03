@@ -73,10 +73,17 @@ sdl.resize=function(it,w,h)
 	if it and it.win then it.win:setSize(w,h) end
 end
 
-sdl.show=function(it)
+sdl.show=function(it,view)
 	print("SDL show")
 	it=it or sdl.it
 	it.win:show()
+	
+	if     view=="full" then	 it.win:Window:setFullscreen(SDL.window.Desktop)
+	elseif view=="max"  then	 it.win:Window:setFullscreen(SDL.window.Maximized)
+	else						 it.win:Window:setFullscreen(0)
+	end
+	
+	
 	return nil
 end
 
