@@ -192,9 +192,8 @@ end
 -- local unlocked cache
 steam.achievements={}
 
--- i dont think this is actually needed but we might want to call store stats in a batched way
--- so currently it does nothing unless you call with steam.achievement_store(true)
-steam.achievement_store_locked=true
+-- you don't get a achievment popup *until* you call SteamAPI_ISteamUserStats_StoreStats
+steam.achievement_store_locked=false
 steam.achievement_store=function(forced)
 	if (not steam.achievement_store_locked) or forced then
 		lib.SteamAPI_ISteamUserStats_StoreStats(lib_SteamUserStats)

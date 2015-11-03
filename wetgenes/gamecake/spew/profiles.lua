@@ -91,10 +91,10 @@ print("Saving "..profiles.filename)
 	end
 
 -- set a value in the current profile
-	function profiles.set(name,value)
+	function profiles.set(name,value,nosave)
 		if p[name]~=value then
 			p[name]=value
-			profiles.save()
+			if not nosave then profiles.save() end
 		end
 	end
 	
