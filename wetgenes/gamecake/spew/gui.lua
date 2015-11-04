@@ -590,11 +590,19 @@ print("click",id)
 --			top:add({hx=120,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
 			top:add({hx=100,hy=40})
 		else
-			top:add({hx=100,hy=40,color=0xffcccccc,text="Main",id="settings_main",hooks=gui.hooks})
-			top:add({hx=10,hy=40})
-			top:add({hx=100,hy=40,color=0xffcccccc,text="Game",id="settings_game",hooks=gui.hooks})
-			top:add({hx=10,hy=40})
-			top:add({hx=100,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
+			if wwin.steam then
+				top:add({hx=100,hy=40})
+				top:add({hx=10,hy=40})
+				top:add({hx=100,hy=40,color=0xffcccccc,text="Game",id="settings_game",hooks=gui.hooks})
+				top:add({hx=10,hy=40})
+				top:add({hx=100,hy=40})
+			else
+				top:add({hx=100,hy=40,color=0xffcccccc,text="Main",id="settings_main",hooks=gui.hooks})
+				top:add({hx=10,hy=40})
+				top:add({hx=100,hy=40,color=0xffcccccc,text="Game",id="settings_game",hooks=gui.hooks})
+				top:add({hx=10,hy=40})
+				top:add({hx=100,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
+			end
 		end
 		
 		top:add({hx=320,hy=40,text_color=0xffffffff,text="Music volume"})
