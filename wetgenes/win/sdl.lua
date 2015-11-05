@@ -25,6 +25,11 @@ sdl.screen=function()
 	print("SDL screen")
 	sdl.video_init()
 	local b=SDL.getDisplayBounds(0)
+	
+-- PI SDL may return nil at this point?
+-- in which case just lie and return 640x480
+	if not b then return 640,480 end
+
 	return b.w,b.h
 end
 
