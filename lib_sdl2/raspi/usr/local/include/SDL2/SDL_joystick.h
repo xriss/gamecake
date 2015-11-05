@@ -71,6 +71,16 @@ typedef struct {
 
 typedef Sint32 SDL_JoystickID;
 
+typedef enum
+{
+    SDL_JOYSTICK_POWER_UNKNOWN = -1,
+    SDL_JOYSTICK_POWER_EMPTY,
+    SDL_JOYSTICK_POWER_LOW,
+    SDL_JOYSTICK_POWER_MEDIUM,
+    SDL_JOYSTICK_POWER_FULL,
+    SDL_JOYSTICK_POWER_WIRED,
+    SDL_JOYSTICK_POWER_MAX
+} SDL_JoystickPowerLevel;
 
 /* Function prototypes */
 /**
@@ -190,7 +200,7 @@ extern DECLSPEC Sint16 SDLCALL SDL_JoystickGetAxis(SDL_Joystick * joystick,
  */
 /* @{ */
 #define SDL_HAT_CENTERED    0x00
-#define SDL_HAT_UP      0x01
+#define SDL_HAT_UP          0x01
 #define SDL_HAT_RIGHT       0x02
 #define SDL_HAT_DOWN        0x04
 #define SDL_HAT_LEFT        0x08
@@ -241,6 +251,11 @@ extern DECLSPEC Uint8 SDLCALL SDL_JoystickGetButton(SDL_Joystick * joystick,
  *  Close a joystick previously opened with SDL_JoystickOpen().
  */
 extern DECLSPEC void SDLCALL SDL_JoystickClose(SDL_Joystick * joystick);
+
+/**
+*  Return the battery level of this joystick
+*/
+extern DECLSPEC SDL_JoystickPowerLevel SDLCALL SDL_JoystickCurrentPowerLevel(SDL_Joystick * joystick);
 
 
 /* Ends C function definitions when using C++ */
