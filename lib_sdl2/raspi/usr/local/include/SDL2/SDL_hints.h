@@ -186,6 +186,20 @@ extern "C" {
 #define SDL_HINT_VIDEO_X11_XRANDR           "SDL_VIDEO_X11_XRANDR"
 
 /**
+ *  \brief  A variable controlling whether the X11 _NET_WM_PING protocol should be supported.
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - Disable _NET_WM_PING
+ *    "1"       - Enable _NET_WM_PING
+ *
+ *  By default SDL will use _NET_WM_PING, but for applications that know they
+ *  will not always be able to respond to ping requests in a timely manner they can
+ *  turn it off to avoid the window manager thinking the app is hung.
+ *  The hint is checked in CreateWindow.
+ */
+#define SDL_HINT_VIDEO_X11_NET_WM_PING      "SDL_VIDEO_X11_NET_WM_PING"
+
+/**
  *  \brief  A variable controlling whether the window frame and title bar are interactive when the cursor is hidden 
  *
  *  This variable can be set to the following values:
@@ -526,12 +540,34 @@ extern "C" {
 #define SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES    "SDL_VIDEO_MAC_FULLSCREEN_SPACES"
 
 /**
+*  \brief  When set don't force the SDL app to become a foreground process
+*
+*  This hint only applies to Mac OS X.
+*
+*/
+#define SDL_HINT_MAC_BACKGROUND_APP    "SDL_MAC_BACKGROUND_APP"
+
+/**
  * \brief Android APK expansion main file version. Should be a string number like "1", "2" etc.
+ *
+ * Must be set together with SDL_HINT_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION.
+ *
+ * If both hints were set then SDL_RWFromFile() will look into expansion files
+ * after a given relative path was not found in the internal storage and assets.
+ *
+ * By default this hint is not set and the APK expansion files are not searched.
  */
 #define SDL_HINT_ANDROID_APK_EXPANSION_MAIN_FILE_VERSION "SDL_ANDROID_APK_EXPANSION_MAIN_FILE_VERSION"
  
 /**
  * \brief Android APK expansion patch file version. Should be a string number like "1", "2" etc.
+ *
+ * Must be set together with SDL_HINT_ANDROID_APK_EXPANSION_MAIN_FILE_VERSION.
+ *
+ * If both hints were set then SDL_RWFromFile() will look into expansion files
+ * after a given relative path was not found in the internal storage and assets.
+ *
+ * By default this hint is not set and the APK expansion files are not searched.
  */
 #define SDL_HINT_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION "SDL_ANDROID_APK_EXPANSION_PATCH_FILE_VERSION"
 
@@ -584,6 +620,15 @@ extern "C" {
  *   "1"       - SDL will not install a signal handler at all.
  */
 #define SDL_HINT_NO_SIGNAL_HANDLERS   "SDL_NO_SIGNAL_HANDLERS"
+
+/**
+ *  \brief Tell SDL not to generate window-close events for Alt+F4 on Windows.
+ *
+ * The variable can be set to the following values:
+ *   "0"       - SDL will generate a window-close event when it sees Alt+F4.
+ *   "1"       - SDL will only do normal key handling for Alt+F4.
+ */
+#define SDL_HINT_WINDOWS_NO_CLOSE_ON_ALT_F4	"SDL_WINDOWS_NO_CLOSE_ON_ALT_F4"
 
 /**
  *  \brief  An enumeration of hint priorities
