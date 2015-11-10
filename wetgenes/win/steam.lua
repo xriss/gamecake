@@ -107,12 +107,17 @@ local lib_SteamUser      = lib.SteamUser()
 local lib_SteamUserStats = lib.SteamUserStats()
 
 
--- get language of game, will be nil if unknown
-local a=lib.SteamAPI_ISteamApps_GetCurrentGameLanguage(lib_SteamApps)		-- check game language
---if not a then a=lib.SteamAPI_ISteamUtils_GetSteamUILanguage(lib_SteamUser) end	-- or steam UI language
-if a then steam.language=ffi.string(a) end
-if steam.language=="" then steam.language=nil end
-print("STEAM language",tostring(steam.language))
+-- get language of game, not sure how the game language gets set, so use UILanguage only?
+local a
+--a=lib.SteamAPI_ISteamApps_GetCurrentGameLanguage(lib_SteamApps)			-- check game language
+--a=a and ffi.string(a) ; if a=="" then a=nil end							-- maybe ""?
+
+if not a then a=lib.SteamAPI_ISteamUtils_GetSteamUILanguage(lib_SteamUtils) end	-- check steam UI language
+a=a and ffi.string(a) ; if a=="" then a=nil end									-- maybe ""?
+
+steam.language=a or "english"
+
+print("STEAM language ",tostring(steam.language))
 
 local a=lib.SteamAPI_ISteamUser_GetSteamID(lib_SteamUser)
 if a then

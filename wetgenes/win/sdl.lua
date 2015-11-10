@@ -17,7 +17,8 @@ sdl.video_init_done=false
 sdl.video_init=function()
 	if not sdl.video_init_done then
 		sdl.video_init_done=true
-		SDL.videoInit()
+		SDL.init{ SDL.flags.Video, SDL.flags.Joystick, SDL.flags.GameController, SDL.flags.Events, }
+--		SDL.videoInit()
 	end
 end
 
@@ -48,11 +49,17 @@ sdl.create=function(t)
 
 	local it={}
 	sdl.it=it
+	
+	local flags={ SDL.window.Resizable , SDL.window.OpenGL }
+	if     view=="full" then	 flags={SDL.window.Desktop,SDL.window.OpenGL}
+	elseif view=="max"  then	 flags={SDL.window.Maximized,SDL.window.OpenGL}
+	end
+	
 	it.win= assert(SDL.createWindow {
 		title   = t.title,
 		width   = t.width,
 		height  = t.height,
-		flags   = { SDL.window.Resizable , SDL.window.OpenGL },
+		flags   = flags,--{ SDL.window.Resizable , SDL.window.OpenGL },
 		x       = t.x,
 		y       = t.y,
 	})
@@ -83,9 +90,9 @@ sdl.show=function(it,view)
 	it=it or sdl.it
 	it.win:show()
 	
-	if     view=="full" then	 it.win:Window:setFullscreen(SDL.window.Desktop)
-	elseif view=="max"  then	 it.win:Window:setFullscreen(SDL.window.Maximized)
-	else						 it.win:Window:setFullscreen(0)
+	if     view=="full" then	 it.win:setFullscreen(SDL.window.Desktop)
+	elseif view=="max"  then	 it.win:setFullscreen(SDL.window.Maximized)
+	else						 it.win:setFullscreen(0)
 	end
 	
 	

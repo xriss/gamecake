@@ -12,6 +12,8 @@ local pack=require("wetgenes.pack")
 
 local snames=require("wetgenes.gamecake.spew.names")
 
+local XLT=require("wetgenes.tongues").translate
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -226,7 +228,7 @@ print("click",id)
 
 		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 
-		top:add({hx=320,hy=110,text="Choose profile.",text_color=0xffffffff})
+		top:add({hx=320,hy=110,text=XLT"Choose profile.",text_color=0xffffffff})
 
 		for i,v in sprofiles.ipairs() do
 			top:add({hx=320,hy=20})
@@ -247,7 +249,7 @@ print("click",id)
 		gui.data.name:value( sprofiles.get("name") )
 
 		top:add({hx=320,hy=20})
-		top:add({hx=320,hy=40,text_color=0xffffffff,text="My name is"})
+		top:add({hx=320,hy=40,text_color=0xffffffff,text=XLT"My name is"})
 		top:add({hx=320,hy=20})
 
 		top:add({hx=20,hy=40})
@@ -255,14 +257,14 @@ print("click",id)
 		top:add({hx=20,hy=40})
 
 		top:add({hx=200,hy=40})
-		top:add({hx=100,hy=40,color=0xffcccccc,text="Edit",id="profile_name_edit",hooks=gui.hooks})
+		top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Edit",id="profile_name_edit",hooks=gui.hooks})
 		top:add({hx=20,hy=40})
 
 		top:add({hx=320,hy=40*7})
 
-		top:add({hx=110,hy=40,color=0xffcccccc,text="OK",id="profile_return",hooks=gui.hooks})
+		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"OK",id="profile_return",hooks=gui.hooks})
 		top:add({hx=100,hy=40})
-		top:add({hx=110,hy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profiles"})
+		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"Cancel",id="profile_goto",hooks=gui.hooks,user="profiles"})
 
 		master.go_back_id="profile_return"
 		master.go_forward_id="profile_return"
@@ -274,24 +276,24 @@ print("click",id)
 		
 		gui.data.name:value( sprofiles.get("name") )
 
-		top:add({hx=320,hy=80,text_color=0xffffffff,text="Type your name"})
+		top:add({hx=320,hy=80,text_color=0xffffffff,text=XLT"Type your name"})
 
 		top:add({hx=20,hy=40})
 		top:add({hx=280,hy=40,color=0xffcccccc,data=gui.data.name,id="profile_name",hooks=gui.hooks,class="textedit"})
 		top:add({hx=20,hy=40})
 
 		top:add({hx=20,hy=40})
-		top:add({hx=120,hy=40,color=0xffcccccc,text="Clear",id="profile_name_clear",hooks=gui.hooks})
+		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Clear",id="profile_name_clear",hooks=gui.hooks})
 		top:add({hx=40,hy=40})
-		top:add({hx=120,hy=40,color=0xffcccccc,text="Random",id="profile_name_rand",hooks=gui.hooks})
+		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Random",id="profile_name_rand",hooks=gui.hooks})
 		top:add({hx=20,hy=40})
 		
 		top:add({hx=320,hy=40})
 		top:add({hx=320,hy=40})
 
-		top:add({hx=110,hy=40,color=0xffcccccc,text="OK",id="profile_name_set",hooks=gui.hooks})
+		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"OK",id="profile_name_set",hooks=gui.hooks})
 		top:add({hx=100,hy=40})
-		top:add({hx=110,hy=40,color=0xffcccccc,text="Cancel",id="profile_goto",hooks=gui.hooks,user="profile"})
+		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"Cancel",id="profile_goto",hooks=gui.hooks,user="profile"})
 
 		top:add({hx=320,hy=40})
 
@@ -329,7 +331,7 @@ print("click",id)
 		local top=master:add({hx=320,hy=480,class="fill",font="Vera",text_size=24})
 		top:add({hx=320,hy=40})
 
-		top:add({hx=320,hy=80,text_color=0xffffffff,text="You scored "..wstr.str_append_english_number_postfix(gui.offset).."!"})
+		top:add({hx=320,hy=80,text_color=0xffffffff,text=XLT"You scored "..wstr.str_append_english_number_postfix(gui.offset).."!"})
 		
 		top:add({hx=20,hy=40})
 		top:add({hx=280,hy=40,color=0xffcccccc,text=wstr.str_insert_number_commas(score)})
@@ -341,20 +343,20 @@ print("click",id)
 		if oven.opts.smell=="gamestick" then -- hide brag button
 			top:add({hx=130,hy=40})
 		else
-			top:add({hx=130,hy=40,color=0xffcccccc,text="Brag",id="score_brag",hooks=gui.hooks})
+			top:add({hx=130,hy=40,color=0xffcccccc,text=XLT"Brag",id="score_brag",hooks=gui.hooks})
 		end
 		top:add({hx=20,hy=40})
-		top:add({hx=130,hy=40,color=0xffcccccc,text="List",id="score_list",hooks=gui.hooks})
+		top:add({hx=130,hy=40,color=0xffcccccc,text=XLT"List",id="score_list",hooks=gui.hooks})
 --		top:add({hx= 5,hy=40})
---		top:add({hx=90,hy=40,color=0xffcccccc,text="Send",id="profile_score_send",hooks=gui.hooks})
+--		top:add({hx=90,hy=40,color=0xffcccccc,text=XLT"Send",id="profile_score_send",hooks=gui.hooks})
 		top:add({hx=20,hy=40})
 
 		top:add({hx=320,hy=40})
-		top:add({hx=320,hy=60,text_color=0xffffffff,text=""..best_pct.."% success"})
-		top:add({hx=320,hy=60,text_color=0xffffffff,text=""..mine_pct.."% effort"})
+		top:add({hx=320,hy=60,text_color=0xffffffff,text=""..best_pct..XLT"% success"})
+		top:add({hx=320,hy=60,text_color=0xffffffff,text=""..mine_pct..XLT"% effort"})
 		top:add({hx=320,hy=40})
 
-		top:add({hx=120,hy=40,color=0xffcccccc,text="Back",id="score_back",hooks=gui.hooks})
+		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Back",id="score_back",hooks=gui.hooks})
 		top:add({hx=200,hy=40})
 		
 		master.go_back_id="score_back"
@@ -402,7 +404,7 @@ print("click",id)
 			b:add({hx=320,hy=5})
 
 			b:add({hx=20,hy=30})
-			b:add({hx=280,hy=30,text_color=0xffffffff,text="High Scores",id="score_title_text"})
+			b:add({hx=280,hy=30,text_color=0xffffffff,text=XLT"High Scores",id="score_title_text"})
 			b:add({hx=20,hy=30})
 
 			b:add({hx=320,hy=5})
@@ -433,7 +435,7 @@ print("click",id)
 				
 					if gui.offset==1 and i==1 then -- no scores, probably network issues
 						top:add({hx=320,hy=70})
-							:add({hx=300,hy=50,px=10,py=10,text="Scores unavailable.",text_color=0xffffffff,color=0xffff0000})
+							:add({hx=300,hy=50,px=10,py=10,text=XLT"Scores unavailable.",text_color=0xffffffff,color=0xffff0000})
 					else
 
 						top:add({hx=320,hy=70})
@@ -452,20 +454,20 @@ print("click",id)
 
 			if gui.offset>1 then
 				master.go_back_id="score_list_less"
-				top:add({hx=100,hy=40,color=0xffcccccc,text="Back",id="score_list_less",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Back",id="score_list_less",hooks=gui.hooks})
 				top:add({hx=10,hy=40})
 			else
 				top:add({hx=110,hy=40})
 			end
 
-			top:add({hx=100,hy=40,color=0xffcccccc,text="Exit",id="score_list_exit",hooks=gui.hooks})
+			top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Exit",id="score_list_exit",hooks=gui.hooks})
 
 			if nomore then
 				top:add({hx=110,hy=40})
 			else
 				master.go_forward_id="score_list_more"
 				top:add({hx=10,hy=40})
-				top:add({hx=100,hy=40,color=0xffcccccc,text="More",id="score_list_more",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"More",id="score_list_more",hooks=gui.hooks})
 			end
 
 			gui.master:layout()
@@ -587,27 +589,27 @@ print("click",id)
 		if oven.opts.smell=="gamestick" then
 			top:add({hx=100,hy=40})
 			top:add({hx=120,hy=40})
---			top:add({hx=120,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
+--			top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Scores",id="settings_scores",hooks=gui.hooks})
 			top:add({hx=100,hy=40})
 		else
 			if wwin.steam then
 				top:add({hx=100,hy=40})
 				top:add({hx=10,hy=40})
-				top:add({hx=100,hy=40,color=0xffcccccc,text="Game",id="settings_game",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Game",id="settings_game",hooks=gui.hooks})
 				top:add({hx=10,hy=40})
 				top:add({hx=100,hy=40})
 			else
-				top:add({hx=100,hy=40,color=0xffcccccc,text="Main",id="settings_main",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Main",id="settings_main",hooks=gui.hooks})
 				top:add({hx=10,hy=40})
-				top:add({hx=100,hy=40,color=0xffcccccc,text="Game",id="settings_game",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Game",id="settings_game",hooks=gui.hooks})
 				top:add({hx=10,hy=40})
-				top:add({hx=100,hy=40,color=0xffcccccc,text="Scores",id="settings_scores",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Scores",id="settings_scores",hooks=gui.hooks})
 			end
 		end
 		
-		top:add({hx=320,hy=40,text_color=0xffffffff,text="Music volume"})
+		top:add({hx=320,hy=40,text_color=0xffffffff,text=XLT"Music volume"})
 		top:add({class="slide",color=0xffcccccc,hx=320,hy=40,datx=gui.data.vol_music,data=gui.data.vol_music,hooks=gui.hooks})
-		top:add({hx=320,hy=40,text_color=0xffffffff,text="Sound effects volume"})
+		top:add({hx=320,hy=40,text_color=0xffffffff,text=XLT"Sound effects volume"})
 		top:add({class="slide",color=0xffcccccc,hx=320,hy=40,datx=gui.data.vol_sfx,data=gui.data.vol_sfx,hooks=gui.hooks})
 
 
@@ -615,7 +617,7 @@ print("click",id)
 		t:add{hx=320,hy=20,text=oven.opts.title}
 		t:add{hx=320,hy=20,text=""}
 
-		top:add({hx=320,hy=40,color=0xffcccccc,text="About",id="settings_about",hooks=gui.hooks}):
+		top:add({hx=320,hy=40,color=0xffcccccc,text=XLT"About",id="settings_about",hooks=gui.hooks}):
 			add{hx=80,hy=80,px=20,py=-20}.draw=function(w)
 			w:draw_base(function(w)
 				gl.Color(0,0.25,0.75,1)
@@ -641,9 +643,9 @@ print("click",id)
 						
 		top:add({hx=320,hy=40*3})
 
-		top:add({hx=120,hy=40,color=0xffcccccc,text="Back",id="settings_return",hooks=gui.hooks})
+		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Back",id="settings_return",hooks=gui.hooks})
 		top:add({hx=80,hy=40})
-		top:add({hx=120,hy=40,color=0xffcc4444,text="Quit",id="settings_quit",hooks=gui.hooks})
+		top:add({hx=120,hy=40,color=0xffcc4444,text=XLT"Quit",id="settings_quit",hooks=gui.hooks})
 
 		master.go_back_id="settings_return"
 		master.go_forward_id="settings_return"
@@ -667,12 +669,12 @@ print("click",id)
 
 		top:add({hx=320,hy=40*3})
 
-		top:add({hx=320,hy=40*2,text_color=0xffffffff,text="Are you sure?"})
+		top:add({hx=320,hy=40*2,text_color=0xffffffff,text=XLT"Are you sure?"})
 
 		top:add({hx=20,hy=40*2})
-		top:add({hx=120,hy=40*2,color=0xffcccccc,text="Back",id="quit_back",hooks=gui.hooks})
+		top:add({hx=120,hy=40*2,color=0xffcccccc,text=XLT"Back",id="quit_back",hooks=gui.hooks})
 		top:add({hx=40,hy=40*2})
-		top:add({hx=120,hy=40*2,color=0xffcc4444,text="Quit",id="quit_exit",hooks=gui.hooks})
+		top:add({hx=120,hy=40*2,color=0xffcc4444,text=XLT"Quit",id="quit_exit",hooks=gui.hooks})
 		top:add({hx=20,hy=40*2})
 
 		top:add({hx=320,hy=40*5})

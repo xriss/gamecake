@@ -18,6 +18,7 @@ local wsbox=require("wetgenes.sandbox")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
+local wtongues=require("wetgenes.tongues")
 
 local function print(...) return _G.print(...) end
 local dprint=function(a) print(wstr.dump(a)) end
@@ -171,6 +172,13 @@ os.exit()
 
 		
 --opts.disable_sounds=true
+
+
+-- handle language loading, you will need to load again to change language
+
+		wtongues.set(os.getenv("gamecake_language") or ( wwin.steam and wwin.steam.language ) or "english")
+		wtongues.load()
+
 		
 		oven.baked={}
 		oven.mods={}
@@ -693,6 +701,9 @@ print("caught : ",m.class,m.cmd)
 			repeat
 				finished=oven.serv_pulse(oven)
 			until finished
+			
+			wtongues.save() -- last thing we do is remember any new text ids used in this run
+
 		end
 
 		function oven.serv_pulse(oven)
