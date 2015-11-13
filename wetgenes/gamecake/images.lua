@@ -9,6 +9,7 @@ local zips=require("wetgenes.zips")
 local wsbox=require("wetgenes.sandbox")
 
 local wwin=require("wetgenes.win")
+local wtongues=require("wetgenes.tongues")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -285,6 +286,17 @@ images.load=function(filename,id,fg)
 	t.max_mips=images.max_mips
 
 --print("loading",filename,id)
+
+	if filename and filename:find("%$TONGUE") then -- find and use a $TONGUE replacement token
+		
+		local fn=filename:gsub("%$TONGUE",wtongues.get())
+		if images.exists(fn) then -- try the current langauge
+			filename=fn
+		else
+			filename=filename:gsub("%$TONGUE","english") -- default to english
+		end
+		
+	end
 
 	t.filename=filename
 	

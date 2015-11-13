@@ -60,6 +60,16 @@ function M.copymips(args)
 
 	end
 	
+	if args.shrink then -- shrink and remember in meta info
+		local m={x=0,y=0,z=0,w=g.width,h=g.height,d=1}
+		m.sw=m.w		m.sh=m.h		m.sd=m.d -- also remember starting size
+		it.shrink=m
+		g:shrink(it.shrink)
+		local p=g:pixels(m.x,m.y,m.w,m.h,"") -- ask for a string
+		g:scale(m.w,m.h,1) -- fake scale as we will replace the pixels
+		g:pixels(0,0,m.w,m.h,p) -- replace pixels
+	end
+	
 	local too=args.too:sub(1,-5)
 	local text=args.too:sub(-4)
 	
@@ -111,4 +121,5 @@ function M.copymips(args)
 --	dprint(it)
 --os.exit()
 
+	return it
 end

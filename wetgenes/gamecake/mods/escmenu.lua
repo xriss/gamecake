@@ -16,6 +16,9 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 local win=require("wetgenes.win")
 
+local XLT=require("wetgenes.tongues").translate
+
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -58,7 +61,7 @@ function M.bake(oven,escmenu)
 				local mlayout=oven.mods["wetgenes.gamecake.mods.layout"]
 				if mlayout then
 					mlayout.cycle_mode()
-					escmenu.layout_widget.text="Layout: "..mlayout.mode
+					escmenu.layout_widget.text=XLT"Layout: "..mlayout.mode
 				end
 			elseif id=="continue" then
 			
@@ -81,14 +84,14 @@ function M.bake(oven,escmenu)
 		
 		local mlayout=oven.mods["wetgenes.gamecake.mods.layout"]
 		if mlayout then		
-			escmenu.layout_widget=top:add({hx=480,hy=80,text="Layout: "..mlayout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
+			escmenu.layout_widget=top:add({hx=480,hy=80,text=XLT"Layout: "..mlayout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
 		else
 			top:add({hx=480,hy=40})
 		end
 		
-		top:add({hx=480,hy=80,text="Continue",color=0xff44ff44,id="continue",hooks=hooks})
-		top:add({hx=480,hy=80,text="Restart",color=0xffffff44,id="restart",hooks=hooks})
-		top:add({hx=480,hy=80,text="Quit",color=0xffff4444,id="quit",hooks=hooks})
+		top:add({hx=480,hy=80,text=XLT"Continue",color=0xff44ff44,id="continue",hooks=hooks})
+		top:add({hx=480,hy=80,text=XLT"Restart",color=0xffffff44,id="restart",hooks=hooks})
+		top:add({hx=480,hy=80,text=XLT"Quit",color=0xffff4444,id="quit",hooks=hooks})
 		if not mlayout then		
 			top:add({hx=480,hy=40})
 		end
