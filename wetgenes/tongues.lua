@@ -12,6 +12,129 @@ local wstr=require("wetgenes.string")
 
 local tongues={}
 
+-- flag, (set by default) that removes high UTF8 characters from the translated strings
+tongues.strip_UTF8=true
+
+
+local chars={}
+tongues.chars=chars
+
+chars.french={
+["À"]="A",--Capital A-grave
+["à"]="a",--Lowercase a-grave
+["Â"]="A",--Capital A-circumflex
+["â"]="a",--Lowercase a-circumflex
+["Æ"]="A",--Capital AE Ligature
+["æ"]="a",--Lowercase AE Ligature
+["Ç"]="C",--Capital C-cedilla
+["ç"]="c",--Lowercase c-cedilla
+["È"]="E",--Capital E-grave
+["è"]="e",--Lowercase e-grave
+["É"]="E",--Capital E-acute
+["é"]="e",--Lowercase e-acute
+["Ê"]="E",--Capital E-circumflex
+["ê"]="e",--Lowercase e-circumflex
+["Ë"]="E",--Capital E-umlaut
+["ë"]="e",--Lowercase e-umlaut
+["Î"]="I",--Capital I-circumflex
+["î"]="i",--Lowercase i-circumflex
+["Ï"]="I",--Capital I-umlaut
+["ï"]="i",--Lowercase i-umlaut
+["Ô"]="O",--Capital O-circumflex
+["ô"]="o",--Lowercase o-circumflex
+["Œ"]="O",--Capital OE ligature
+["œ"]="o",--Lowercase oe ligature
+["Ù"]="U",--Capital U-grave
+["ù"]="u",--Lowercase u-grave
+["Û"]="U",--Capital U-circumflex
+["û"]="u",--Lowercase U-circumflex
+["Ü"]="U",--Capital U-umlaut
+["ü"]="u",--Lowercase U-umlaut
+["«"]="<",--Left angle quotes
+["»"]=">",--Right angle quotes
+["€"]="E",--Euro
+["₣"]="F",--Franc
+}
+chars.german={
+["Ä"]="A",--Capital A-umlaut
+["ä"]="a",--Lowercase a-umlaut
+["É"]="E",--Capital E-acute
+["é"]="e",--Lowercase E-acute
+["Ö"]="O",--Capital O-umlaut
+["ö"]="o",--Lowercase o-umlaut
+["Ü"]="U",--Capital U-umlaut
+["ü"]="u",--Lowercase u-umlaut
+["ß"]="B",--SZ ligature
+["«"]="<",--Left angle quotes
+["»"]=">",--Right angle quotes
+["„"]='"',--Left lower quotes
+["“"]='"',--Left quotes
+["”"]='"',--Right quotes
+["°"]='"',--Degree sign (Grad)
+["€"]="E",--Euro
+["£"]="P",--Pound Sterling
+}
+
+chars.italian={
+["À"]="A",--Capital A-grave
+["à"]="a",--Lowercase a-grave
+["Á"]="A",--Capital A-acute
+["á"]="a",--Lowercase A-acute
+["È"]="E",--Capital E-grave
+["è"]="e",--Lowercase e-grave
+["É"]="E",--Capital E-acute
+["é"]="e",--Lowercase e-acute
+["Ì"]="I",--Capital I-grave
+["ì"]="i",--Lowercase i-grave
+["Í"]="I",--Capital I-acute
+["í"]="i",--Lowercase I-acute
+["Ò"]="O",--Capital O-grave
+["ò"]="o",--Lowercase o-grave
+["Ó"]="O",--Capital O-acute
+["ó"]="o",--Lowercase o-acute
+["Ù"]="U",--Capital U-grave
+["ù"]="u",--Lowercase u-grave
+["Ú"]="U",--Capital U-acute
+["ú"]="u",--Lowercase U-acute
+["«"]="<",--Left angle quotes
+["»"]=">",--Right angle quotes
+["€"]="E",--Euro
+["₤"]="L",--Lira
+}
+
+chars.spanish={
+["Á"]="A",--Capital A-acute
+["á"]="a",--Lowercase a-acute
+["É"]="E",--Capital E-acute
+["é"]="e",--Lowercase e-acute
+["Í"]="I",--Capital I-acute
+["í"]="i",--Lowercase i-acute
+["Ñ"]="N",--Capital N-tilde
+["ñ"]="n",--Lowercase n-tilde
+["Ó"]="O",--Capital O-acute
+["ó"]="o",--Lowercase o-acute
+["Ú"]="U",--Capital U-acute
+["ú"]="u",--Lowercase u-acute
+["Ü"]="U",--Capital U-umlaut
+["ü"]="u",--Lowercase u-umlaut
+["«"]="<",--Left angle quotes
+["»"]=">",--Right angle quotes
+["¿"]="?",--Inverted question mark
+["¡"]="!",--Inverted exclamation point
+["€"]="E",--Euro
+["₧"]="P",--Peseta
+}
+
+local all={}
+for n,v in pairs(chars) do
+	for c1,c2 in pairs(v) do
+		all[c1]=c2
+	end
+end
+chars.all=all -- merge them all together
+-- now we can use this table for a very simple utf8 -> 7bit string lookup conversion
+
+
 tongues.loadfilename="data/tongues.tsv"
 tongues.savefilename=wwin.files_prefix.."tongues.new.tsv"
 
@@ -109,7 +232,16 @@ end
 -- translate a string to tongues.lang
 tongues.translate=function(str)
 	tongues.used[str]=true
-	return tongues.lookup[str] or str
+	local s=tongues.lookup[str] or str
+
+-- remove high UTF8 codes preferably by stripping diacritics
+	if tongues.strip_UTF8 then
+		s=s:gsub("[\xC2-\xF4][\x80-\xBF]*",function(su)
+			return chars.all[su] or ""
+		end)
+	end
+
+	return s
 end
 
 

@@ -11,7 +11,6 @@ local wwin=require("wetgenes.win")
 
 local core=require("wetgenes.gamecake.core")
 
-
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
