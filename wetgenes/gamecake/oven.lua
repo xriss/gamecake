@@ -11,6 +11,11 @@ The oven module must be baked so only exposes a bake function.
 
 All the other functions are returned from within the bake function.
 
+possible ENV settings
+
+	gamecake_tongue=english
+	gamecake_flavour=sdl
+
 ]]
 
 local wzips=require("wetgenes.zips")
@@ -176,7 +181,7 @@ os.exit()
 
 -- handle language loading, you will need to load again to change language
 
-		wtongues.set(os.getenv("gamecake_language") or ( wwin.steam and wwin.steam.language ) or "english")
+		wtongues.set(os.getenv("gamecake_tongue") or ( wwin.steam and wwin.steam.language ) or "english")
 		wtongues.load()
 
 		
