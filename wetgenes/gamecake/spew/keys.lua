@@ -439,6 +439,64 @@ M.bake=function(oven,keys)
 					used=true
 				end
 
+			elseif m.class=="padaxis" then
+
+				if key.idx == m.id then
+					used=true
+
+					local zone=32768/4
+
+					local doaxis=function(name1,name2)
+						if     m.value <= -zone then	ups.set_button(name1,true)	ups.set_button(name2,false)
+						elseif m.value >=  zone then	ups.set_button(name1,false)	ups.set_button(name2,true)
+						else							ups.set_button(name1,false)	ups.set_button(name2,false)
+						end
+					end
+
+					local dotrig=function(name)
+						if     m.value >= zone then		ups.set_button(name,true)
+						else							ups.set_button(name,false)
+						end
+					end
+
+					if     m.name=="LeftX"			then		doaxis("left","right")
+					elseif m.name=="LeftY"			then		doaxis("up","down")
+					elseif m.name=="RightX"			then		doaxis("left","right")
+					elseif m.name=="RightY"			then		doaxis("up","down")
+					elseif m.name=="TriggerLeft"	then		dotrig("l2")
+					elseif m.name=="TriggerRight"	then		dotrig("r2")
+					end
+
+				end
+
+			elseif m.class=="padkey" then
+
+				if key.idx == m.id then
+					used=true
+
+					local docode=function(name)
+						if		m.value==1  then	ups.set_button(name,true)	-- key set
+						elseif	m.value==-1 then	ups.set_button(name,false)	-- key clear
+						end
+					end
+
+					if     m.name=="Left"			then docode("left")
+					elseif m.name=="Right"			then docode("right")
+					elseif m.name=="Up"				then docode("up")
+					elseif m.name=="Down"			then docode("down")
+					elseif m.name=="A"				then docode("a") docode("fire")
+					elseif m.name=="B"				then docode("b") docode("fire")
+					elseif m.name=="X"				then docode("x") docode("fire")
+					elseif m.name=="Y"				then docode("y") docode("fire")
+					elseif m.name=="LeftShoulder"	then docode("l1")
+					elseif m.name=="RightShoulder"	then docode("r1")
+					elseif m.name=="Back"			then docode("select")
+					elseif m.name=="Start"			then docode("start")
+					else docode("fire") -- other buttons are fire
+					end
+					
+				end
+
 			end
 			
 			return used -- if we used the msg

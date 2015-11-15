@@ -249,7 +249,7 @@ sdl.msg_fetch=function()
 			sdl.pads[#sdl.pads+1]=SDL.gameControllerOpen(e.which)
 			sdl.pads_fix()
 
-print("SDL","Open",e.which,dev)
+--print("SDL","Open",e.which)
 
 		elseif	(e.type == SDL.event.JoyDeviceRemoved) then --ignore
 		elseif	(e.type == SDL.event.ControllerDeviceRemoved) then
@@ -257,31 +257,43 @@ print("SDL","Open",e.which,dev)
 			sdl.pads[e.which+1]="CLOSED"
 			sdl.pads_fix()
 			
-print("SDL","Close",e.which)
+--print("SDL","Close",e.which)
 
 		elseif	(e.type == SDL.event.JoyAxisMotion) then --ignore
 		elseif	(e.type == SDL.event.ControllerAxisMotion) then
 
 			local dev=sdl.pads[e.which+1]
-			local idx=sdl.pads_map[e.which+1]
+			local id=sdl.pads_map[e.which+1]
 
-print("SDL","AXIS",e.which,idx,lookup(SDL.controllerAxis,e.axis),e.value)
+--print("SDL","AXIS",e.which,id,lookup(SDL.controllerAxis,e.axis),e.value)
 
-		elseif	(e.type == SDL.event.JoyButtonDown) then --ignore
-		elseif	(e.type == SDL.event.ControllerButtonDown) then
+			local t={}
+			t.time=sdl.time()
+			t.class="padaxis"
+			t.value=e.value
+			t.code=e.axis
+			t.name=lookup(SDL.controllerAxis,e.axis)
+			t.id=id
+
+			sdl.queue[#sdl.queue+1]=t
+			
+		elseif	(e.type == SDL.event.JoyButtonDown)        or (e.type == SDL.event.JoyButtonUp)        then --ignore
+		elseif	(e.type == SDL.event.ControllerButtonDown) or (e.type == SDL.event.ControllerButtonUp) then
 
 			local dev=sdl.pads[e.which+1]
-			local idx=sdl.pads_map[e.which+1]
+			local id=sdl.pads_map[e.which+1]
 
-print("SDL","BUT",e.which,idx,lookup(SDL.controllerButton,e.button),e.state)
+--print("SDL","KEY",e.which,id,lookup(SDL.controllerButton,e.button),e.state)
 
-		elseif	(e.type == SDL.event.JoyButtonUp) then --ignore
-		elseif	(e.type == SDL.event.ControllerButtonUp) then
+			local t={}
+			t.time=sdl.time()
+			t.class="padkey"
+			t.value=e.state and 1 or -1
+			t.code=e.button
+			t.name=lookup(SDL.controllerButton,e.button)
+			t.id=id
 
-			local dev=sdl.pads[e.which+1]
-			local idx=sdl.pads_map[e.which+1]
-
-print("SDL","BUT",e.which,idx,lookup(SDL.controllerButton,e.button),e.state)
+			sdl.queue[#sdl.queue+1]=t
 
 		else
 
@@ -291,20 +303,6 @@ print("SDL","BUT",e.which,idx,lookup(SDL.controllerButton,e.button),e.state)
 
 		end
 	end
-	
---[[
-		if e.type == SDL.event.Quit then
-								running = false
-		elseif e.type == SDL.event.KeyDown then
-		print(string.format("key down: %d -> %s", e.keysym.sym, SDL.getKeyName(e.keysym.sym)))
-		elseif e.type == SDL.event.MouseWheel then
-		print(string.format("mouse wheel: %d, x=%d, y=%d", e.which, e.x, e.y))
-		elseif e.type == SDL.event.MouseButtonDown then
-		print(string.format("mouse button down: %d, x=%d, y=%d", e.button, e.x, e.y))
-		elseif e.type == SDL.event.MouseMotion then
-		print(string.format("mouse motion: x=%d, y=%d", e.x, e.y))
-		end
-]]
 
 end
 
