@@ -590,15 +590,17 @@ _zip_changed(const struct zip *za, zip_uint64_t *survivorsp)
 
 #if defined(__MINGW32__)
 
-/*
-static int mkstemp(char *template)
+static int mkstemp_hax(char *template)
 {
 char *filename = mktemp(template);
 if (filename == NULL)
 return -1;
 return open(filename, O_RDWR | O_CREAT, 0600);
 }
-*/
+
+#else
+
+#define mkstemp_hax mkstemp
 
 #endif
 
@@ -624,7 +626,7 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
         sprintf(temp, "%s.XXXXXX", za->zn);
     }
 
-    if ((tfd=mkstemp(temp)) == -1) {
+    if ((tfd=mkstemp_hax(temp)) == -1) {
 	_zip_error_set(&za->error, ZIP_ER_TMPOPEN, errno);
 	free(temp);
 	return NULL;
