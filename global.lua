@@ -9,6 +9,10 @@
 -- doing anything with function environment so I'm free to set or clear it at will
 -- 
 --
+-- the suggested way to enable global with a fallback to _G so that code remains portable
+--
+-- local global=_G ; pcall(function() global=require("global") end)
+--
 
 local _G=_G
 local rawget=rawget

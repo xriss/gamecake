@@ -3,8 +3,32 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+-- do a reverse enum lookup, get a name from a value
+local lookup=function(tab,num)
+	for n,v in pairs(tab) do
+	if v==num then
+		return n end
+	end
+end
 
 local sdl={}
+
+sdl.pads_map={}
+sdl.pads={}
+
+-- build a map of pads idx to player idx
+sdl.pads_fix=function()
+	local idx=0
+	for i=1,#sdl.pads do
+		local v=sdl.pads[i]
+		if type(v)~="string" then
+			idx=idx+1
+			sdl.pads_map[i]=idx
+		else
+			sdl.pads_map[i]=nil
+		end
+	end
+end
 
 local SDL=require("SDL")
 
@@ -18,6 +42,7 @@ sdl.video_init=function()
 	if not sdl.video_init_done then
 		sdl.video_init_done=true
 		SDL.init{ SDL.flags.Video, SDL.flags.Joystick, SDL.flags.GameController, SDL.flags.Events, }
+--		SDL.init{ SDL.flags.Everything, }
 --		SDL.videoInit()
 	end
 end
@@ -145,6 +170,7 @@ end
 
 sdl.mousexy={0,0}
 sdl.msg_fetch=function()
+
 	for e in SDL.pollEvent() do
 
 		if     	(e.type == SDL.event.KeyDown) or 
@@ -207,16 +233,7 @@ sdl.msg_fetch=function()
 			sdl.mousexy[2]=e.y
 	
 		
-		elseif	(e.type == SDL.event.WindowEvent) then
-
---[[
-			for n,i in pairs(SDL.eventWindow) do
-				if e.event==i then
-					print("WindowEvent "..n.." : "..i)
-				end
-			end
-			dprint(e)
-]]
+		elseif	(e.type == SDL.event.WindowEvent) then -- ignore
 
 		elseif	(e.type == SDL.event.Quit) then -- window close button, or alt f4
 
@@ -226,16 +243,52 @@ sdl.msg_fetch=function()
 
 			sdl.queue[#sdl.queue+1]=t
 
+		elseif	(e.type == SDL.event.JoyDeviceAdded) then --ignore
+		elseif	(e.type == SDL.event.ControllerDeviceAdded) then
+		
+			sdl.pads[#sdl.pads+1]=SDL.gameControllerOpen(e.which)
+			sdl.pads_fix()
+
+print("SDL","Open",e.which,dev)
+
+		elseif	(e.type == SDL.event.JoyDeviceRemoved) then --ignore
+		elseif	(e.type == SDL.event.ControllerDeviceRemoved) then
+
+			sdl.pads[e.which+1]="CLOSED"
+			sdl.pads_fix()
+			
+print("SDL","Close",e.which)
+
+		elseif	(e.type == SDL.event.JoyAxisMotion) then --ignore
+		elseif	(e.type == SDL.event.ControllerAxisMotion) then
+
+			local dev=sdl.pads[e.which+1]
+			local idx=sdl.pads_map[e.which+1]
+
+print("SDL","AXIS",e.which,idx,lookup(SDL.controllerAxis,e.axis),e.value)
+
+		elseif	(e.type == SDL.event.JoyButtonDown) then --ignore
+		elseif	(e.type == SDL.event.ControllerButtonDown) then
+
+			local dev=sdl.pads[e.which+1]
+			local idx=sdl.pads_map[e.which+1]
+
+print("SDL","BUT",e.which,idx,lookup(SDL.controllerButton,e.button),e.state)
+
+		elseif	(e.type == SDL.event.JoyButtonUp) then --ignore
+		elseif	(e.type == SDL.event.ControllerButtonUp) then
+
+			local dev=sdl.pads[e.which+1]
+			local idx=sdl.pads_map[e.which+1]
+
+print("SDL","BUT",e.which,idx,lookup(SDL.controllerButton,e.button),e.state)
+
 		else
 
---[[
-			for n,i in pairs(SDL.event) do
-				if e.type==i then
-					print(n.." : "..i)
-				end
-			end
+			local s=lookup(SDL.event,e.type)
+			print(s.." : "..e.type)
 			dprint(e)
-]]
+
 		end
 	end
 	
