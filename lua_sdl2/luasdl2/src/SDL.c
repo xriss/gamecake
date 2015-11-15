@@ -65,6 +65,19 @@ static const CommonEnum InitFlags[] = {
 	{ NULL,			-1			}
 };
 
+/*
+ * SDL.enums
+ */
+const CommonEnum GeneralEnums[] = {
+	{ "Enable",			SDL_ENABLE		},
+	{ "Ignore",			SDL_IGNORE		},
+	{ "Query",			SDL_QUERY		},
+	{ "True",			SDL_TRUE		},
+	{ "False",			SDL_FALSE		},
+	{ NULL,				-1			}
+};
+
+
 typedef int (*InitFunc)(Uint32 flags);
 
 static int
@@ -303,6 +316,7 @@ static const struct {
 	{ ChannelFunctions				},
 
 	/* Event group */
+	{ GamectlFunctions				},
 	{ JoystickFunctions				},
 	{ KeyboardFunctions				},
 	{ MouseFunctions				},
@@ -351,6 +365,10 @@ static const struct {
 	/* Joystick values */
 	{ "joyHat",		EventJoyHat			},
 
+	/* Game Controller values */
+	{ "controllerAxis",	GameCtlAxis			},
+	{ "controllerButton",	GameCtlButton			},
+
 	/* Keyboard */
 	{ "key",		KeyboardCodes			},
 	{ "keymod",		KeyboardModifiers		},
@@ -361,6 +379,7 @@ static const struct {
 
 	/* General */
 	{ "flags",		InitFlags			},
+	{ "enums",		GeneralEnums			},
 
 	{ "mouseButton",	MouseButtons			},
 	{ "mouseMask",		MouseMask			},
