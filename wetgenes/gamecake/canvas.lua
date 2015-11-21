@@ -172,6 +172,7 @@ font.cache_begin = function()
 	local old=font.cache
 	font.cache=t
 	return function()
+		local r,g,b,a=gl.color_get_rgba()
 		gl.Color(1,1,1,1)	
 		for d,v in pairs(t) do -- multifonts
 --print("font draw",#v,tostring(d))
@@ -180,7 +181,7 @@ font.cache_begin = function()
 				flat.tristrip("rawuvrgba",v)
 			end
 		end
-		
+		gl.Color(r,g,b,a)
 		font.cache=old
 	end
 end

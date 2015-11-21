@@ -96,6 +96,10 @@ Greetz to No1 and No6!
 
 		]],[[{shaderprefix}
 
+#if defined(GL_FRAGMENT_PRECISION_HIGH)
+precision highp float; /* really need better numbers if possible */
+#endif
+
 		uniform vec4 vars;
 
 		uniform sampler2D tex;
@@ -300,12 +304,15 @@ Greetz to No1 and No6!
 			font.set(cake.fonts.get("Vera")) -- default font
 			font.set_size(160,0)
 			local w=font.width(s)
+
 			gl.Color(spine2((tim%64)/64)+0.5,spine2((tim%128)/128),spine2((tim%96)/96),1)
+
 			font.set_xy((w-640)*-spine2((tim%128)/128),-40)
 			font.draw(s)
 
 			font.set_xy((w-640)*-spine2(((tim+64)%128)/128),480-160)
 			font.draw(s)
+
 		end
 
 		local setup_bobs=function()
@@ -357,8 +364,8 @@ Greetz to No1 and No6!
 		
 		local draw=function()
 			draw_bobs()
-			draw_title()
 			draw_scroll()
+			draw_title()
 
 			local c=about.clear_color or {0,0,0,0}
 			if c[4]>0 then
@@ -394,7 +401,7 @@ Greetz to No1 and No6!
 
 	function about.msg(m)
 	
-		if m.class=="key" or m.class=="mouse" or m.class=="joykey" then
+		if m.class=="key" or m.class=="mouse" or m.class=="joykey" or m.class=="padkey" then
 			if m.action==-1 then
 				if about.exitname then
 					oven.next=oven.rebake(about.exitname)
