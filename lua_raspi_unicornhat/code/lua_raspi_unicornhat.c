@@ -30,7 +30,7 @@
 #define HEIGHT         8
 #define LED_COUNT      (WIDTH * HEIGHT)
 
-ws2811_t ledstring =
+static ws2811_t ledstring =
 {
     .freq = TARGET_FREQ,
     .dmanum = DMA,
@@ -50,7 +50,7 @@ ws2811_t ledstring =
 // we can use either this string as a string identifier
 // or its address as a light userdata identifier, both will be unique
 //
-const char *lua_raspi_unicornhat_ptr_name="raspi_unicornhat*ptr";
+//const char *lua_raspi_unicornhat_ptr_name="raspi_unicornhat*ptr";
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -85,6 +85,9 @@ LUALIB_API int lua_raspi_unicornhat_destroy(lua_State *l)
 LUALIB_API int lua_raspi_unicornhat_brightness(lua_State *l)
 {
 	int b=0;
+
+	b=lua_tonumber(l,1);
+
     ledstring.channel[0].brightness = b;
 	return 0;
 }
@@ -101,7 +104,18 @@ LUALIB_API int lua_raspi_unicornhat_pixel(lua_State *l)
 	int r=0;
 	int g=0;
 	int b=0;
-    ledstring.channel[0].leds[i] = (r << 16) | (g << 8) | b;
+
+	i=lua_tonumber(l,1);
+
+	if( lua_isnumber(l,2) ) { r=lua_tonumber(l,2); }
+	if( lua_isnumber(l,3) ) { g=lua_tonumber(l,3); }
+	if( lua_isnumber(l,4) ) { b=lua_tonumber(l,4); }
+
+	if( (i>=0) && (i<LED_COUNT) ) // sanity
+	{
+		ledstring.channel[0].leds[i] = (r << 16) | (g << 8) | b;
+	}
+	
 	return 0;
 }
 
@@ -116,9 +130,15 @@ LUALIB_API int lua_raspi_unicornhat_clear(lua_State *l)
 	int r=0;
 	int g=0;
 	int b=0;
+	
+	if( lua_isnumber(l,1) ) { r=lua_tonumber(l,1); }
+	if( lua_isnumber(l,2) ) { g=lua_tonumber(l,2); }
+	if( lua_isnumber(l,3) ) { b=lua_tonumber(l,3); }
+	
     for(i=0; i<LED_COUNT;i++){
 		ledstring.channel[0].leds[i] = (r << 16) | (g << 8) | b;
     }
+    
 	return 0;
 }
 
