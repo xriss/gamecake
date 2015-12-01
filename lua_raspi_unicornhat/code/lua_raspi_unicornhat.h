@@ -6,7 +6,7 @@
 
 
 
-extern const char *lua_raspi_unicornhat_ptr_name;
+//extern const char *lua_raspi_unicornhat_ptr_name;
 
 
 #ifdef __cplusplus
