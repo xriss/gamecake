@@ -10,8 +10,14 @@ local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local bit=require("bit")
 
+
 local win={}
 local base={}
+
+local steam=require("wetgenes.win.steam") -- try and setup steam 
+if steam.loaded then win.steam=steam end  -- put steam inside win if it got loaded so we can use flag if(win.steam)
+
+local flavour_request=flavour_request or os.getenv("gamecake_flavour")
 
 local softcore=require("wetgenes.win.core") -- we keep some generic C functions here
 
@@ -27,58 +33,70 @@ base.flavour="raw"
 
 if type(args[2]=="table" ) then -- you can force a core by using a second arg to require
 	hardcore=args[2]
+elseif type(args[2]=="string" ) then
+	flavour_request=args[2]
 end
 
--- see if we have an SDL2 build
-if not hardcore then
-	local suc,dat=pcall(function() return require("SDL") end )
---	if suc then hardcore=require("wetgenes.win.sdl") base.flavour="sdl" end
-end
+if flavour_request then print("The requested flavour of win is "..(flavour_request or "any")) end
 
-if not hardcore then
+
+-- these are special bindings since the web and android are "special"
+
+if not hardcore or flavour_request=="emcc" then
 	local suc,dat=pcall(function() return require("wetgenes.win.emcc") end )
 	if suc then hardcore=dat base.flavour="emcc" base.noblock=true end
 end
 
-if not hardcore then
+if not hardcore or flavour_request=="nacl" then
 	local suc,dat=pcall(function() return require("wetgenes.win.nacl") end )
 	if suc then hardcore=dat base.flavour="nacl" base.noblock=true end
 end
 
-if not hardcore then
+if not hardcore or flavour_request=="android"  then
 	local suc,dat=pcall(function() return require("wetgenes.win.android") end )
 	if suc then hardcore=dat base.flavour="android"
 --		posix=require("wetgenes.win.posix")
 	end
 end
 
-if not hardcore then
-	local suc,dat=pcall(function() return require("wetgenes.win.raspi") end )
-	if suc then hardcore=dat base.flavour="raspi"
-		posix=require("wetgenes.win.posix")
-	end
+
+-- see if we have an SDL2 build to use
+
+if not hardcore or flavour_request=="sdl" then
+	local suc,dat=pcall(function() return require("SDL") end )
+	if suc then pcall(function() hardcore=require("wetgenes.win.sdl") base.flavour="sdl" end ) end -- try SDL 
 end
 
-if not hardcore then
+
+-- the bindings below are depreciated in favour of SDL above but can still be forced with a flavour request
+
+if not hardcore or flavour_request=="windows" then
 	local suc,dat=pcall(function() return require("wetgenes.win.windows") end )
 	if suc then hardcore=dat base.flavour="windows" end
 end
 
-if not hardcore then
+if not hardcore or flavour_request=="linux" then
 	local suc,dat=pcall(function() return require("wetgenes.win.linux") end )
 	if suc then hardcore=dat base.flavour="linux"
 		posix=require("wetgenes.win.posix")
 	end
 end
 
-if not hardcore then
+if not hardcore or flavour_request=="osx"  then
 	local suc,dat=pcall(function() return require("wetgenes.win.osx") end )
 	if suc then hardcore=dat base.flavour="osx"
 		posix=require("wetgenes.win.posix")
 	end
 end
 
-print(base.flavour)
+if not hardcore or flavour_request=="raspi"  then
+	local suc,dat=pcall(function() return require("wetgenes.win.raspi") end )
+	if suc then hardcore=dat base.flavour="raspi"
+		posix=require("wetgenes.win.posix")
+	end
+end
+
+print("The flavour of win is "..base.flavour)
 
 win.hardcore=hardcore
 win.softcore=softcore

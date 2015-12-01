@@ -9,3 +9,5 @@ lua_win_nacl/make_file_links
 lua_win_osx/make_file_links
 lua_win_raspi/make_file_links
 lua_win_windows/make_file_links
+
+lua_raspi_unicornhat/make_file_links
