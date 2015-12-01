@@ -1,0 +1,15 @@
+2.0.0
+-----
+
+* Major switch over to rpi_ws281x library
+* Raspberry Pi 2 compatibility
+
+1.0.1
+-----
+
+* Fix to rotation()
+
+1.0.0
+-----
+
+* Initial Release
