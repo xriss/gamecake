@@ -64,7 +64,11 @@ end
 
 if not hardcore or flavour_request=="sdl" then
 	local suc,dat=pcall(function() return require("SDL") end )
-	if suc then pcall(function() hardcore=require("wetgenes.win.sdl") base.flavour="sdl" end ) end -- try SDL 
+	if suc then pcall(function()
+		hardcore=require("wetgenes.win.sdl")
+		base.flavour="sdl"
+		base.sdl_platform=hardcore.platform
+	end ) end -- try SDL
 end
 
 

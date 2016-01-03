@@ -369,6 +369,7 @@ sdl.icon=function(w,g)
 end
 
 
+sdl.platform=SDL.getPlatform() -- remember platform
 
 
 return sdl

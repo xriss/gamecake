@@ -119,12 +119,31 @@ if wwin.steam then -- steamcloud prefers files in your app dir for easy sync bet
 	sniff_homedir=false
 end
 
+if sniff_homedir then -- smart setup to save files into some sort of user file area depending on OS
 
-if sniff_homedir then -- finally setup to save files into some sort of user file area depending on OS
+	local homedir
 
-	if ( wwin.flavour=="linux" or wwin.flavour=="raspi" or wwin.flavour=="osx" or wwin.flavour=="sdl" ) and wwin.posix then -- we need to store in the homedir
+	if not homedir and (wwin.flavour=="win" or wwin.sdl_platform=="Windows" ) then
+	
+		homedir=os.getenv("USERPROFILE") -- windows only check
 
-		local homedir=os.getenv("HOME")
+		if homedir then
+			wwin.files_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/files/"
+			wwin.cache_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/cache/"
+
+			local wbake=require("wetgenes.bake")
+			wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
+			wbake.create_dir_for_file(wwin.cache_prefix.."t.txt")
+
+			oven.homedir=homedir.."/"
+		end
+
+	end
+
+
+	if not homedir then
+	
+		homedir=os.getenv("HOME") -- good for most everyone else
 
 		if homedir then
 			wwin.files_prefix=homedir.."/.config/"..(opts.name or "gamecake").."/files/"
@@ -139,23 +158,6 @@ if sniff_homedir then -- finally setup to save files into some sort of user file
 		
 	end
 
-	if wwin.flavour=="windows" then -- we need to store in the homedir
-
-		local homedir=os.getenv("USERPROFILE")
-
-		if homedir then
-			wwin.files_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/files/"
-			wwin.cache_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/cache/"
-
-			local wbake=require("wetgenes.bake")
-			wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
-			wbake.create_dir_for_file(wwin.cache_prefix.."t.txt")
-
-			oven.homedir=homedir.."/"
-		end
-
-	end
-	
 end
 
 --[[
