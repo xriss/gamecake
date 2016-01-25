@@ -22,4 +22,4 @@ files { "code/*.c" }
 includedirs { "code" }
 
 
-KIND{lua="raspi.unicornhat"}
+KIND{lua="raspi.unicornhat.core"}

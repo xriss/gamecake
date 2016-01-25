@@ -41,7 +41,7 @@ static ws2811_t ledstring =
             .gpionum    = GPIO_PIN,
             .count      = LED_COUNT,
             .invert     = 0,
-            .brightness = 128,
+            .brightness = 16,
         }
     }
 };
@@ -59,9 +59,10 @@ static ws2811_t ledstring =
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int lua_raspi_unicornhat_create(lua_State *l)
 {
-    if(ws2811_init(&ledstring))
+    if(ws2811_init(&ledstring)==0)
     {
-		return 0;
+		lua_pushboolean(l,1); // return true
+		return 1;
 	}
 	return 0;
 }
@@ -107,13 +108,13 @@ LUALIB_API int lua_raspi_unicornhat_pixel(lua_State *l)
 
 	i=lua_tonumber(l,1);
 
-	if( lua_isnumber(l,2) ) { r=lua_tonumber(l,2); }
-	if( lua_isnumber(l,3) ) { g=lua_tonumber(l,3); }
-	if( lua_isnumber(l,4) ) { b=lua_tonumber(l,4); }
+	r=lua_tonumber(l,2);
+	g=lua_tonumber(l,3);
+	b=lua_tonumber(l,4);
 
 	if( (i>=0) && (i<LED_COUNT) ) // sanity
 	{
-		ledstring.channel[0].leds[i] = (r << 16) | (g << 8) | b;
+		ledstring.channel[0].leds[i] = ((r&255) << 16) | ((g&255) << 8) | (b&255);
 	}
 	
 	return 0;
@@ -131,12 +132,13 @@ LUALIB_API int lua_raspi_unicornhat_clear(lua_State *l)
 	int g=0;
 	int b=0;
 	
-	if( lua_isnumber(l,1) ) { r=lua_tonumber(l,1); }
-	if( lua_isnumber(l,2) ) { g=lua_tonumber(l,2); }
-	if( lua_isnumber(l,3) ) { b=lua_tonumber(l,3); }
+	r=lua_tonumber(l,1);
+	g=lua_tonumber(l,2);
+	b=lua_tonumber(l,3);
 	
-    for(i=0; i<LED_COUNT;i++){
-		ledstring.channel[0].leds[i] = (r << 16) | (g << 8) | b;
+    for(i=0; i<LED_COUNT;i++)
+    {
+		ledstring.channel[0].leds[i] = ((r&255) << 16) | ((g&255) << 8) | (b&255);
     }
     
 	return 0;
@@ -158,7 +160,7 @@ LUALIB_API int lua_raspi_unicornhat_show(lua_State *l)
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_raspi_unicornhat(lua_State *l)
+LUALIB_API int luaopen_raspi_unicornhat_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{

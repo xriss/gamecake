@@ -14,7 +14,7 @@ extern "C" {
 #endif
 
 
-LUALIB_API	int luaopen_raspi_unicornhat (lua_State *l);
+LUALIB_API	int luaopen_raspi_unicornhat_core (lua_State *l);
 
 
 #ifdef __cplusplus
