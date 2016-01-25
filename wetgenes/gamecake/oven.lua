@@ -109,16 +109,6 @@ if fp then -- stick with the default files in the app dir (lets the user force l
 end
 
 
-if wwin.steam then -- steamcloud prefers files in your app dir for easy sync between multiple platforms
-
-	local wbake=require("wetgenes.bake")
-			
-	wwin.files_prefix=wwin.files_prefix..(wwin.steam.userid).."/"
-	wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
-	
-	sniff_homedir=false
-end
-
 if sniff_homedir then -- smart setup to save files into some sort of user file area depending on OS
 
 	local homedir
@@ -159,6 +149,17 @@ if sniff_homedir then -- smart setup to save files into some sort of user file a
 	end
 
 end
+
+if wwin.steam then -- steamcloud prefers files in your app dir for easy sync between multiple platforms
+
+	local wbake=require("wetgenes.bake")
+			
+	wwin.files_prefix=wwin.files_prefix..(wwin.steam.userid).."/"
+	wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
+	
+	sniff_homedir=false
+end
+
 
 --[[
 print(wwin.files_prefix)
