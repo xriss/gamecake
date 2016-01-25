@@ -23,25 +23,10 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=16
-FILE_NAME_0=5683;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fbulb%2Flua%2Fbulb%2Fgame.lua;0;4
-FILE_NAME_1=0;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fbulb%2Flua%2Fbulb%2Flevelsdata.lua;0;4
-FILE_NAME_2=0;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fmmesh%2Flua%2Fmmesh%2Fmain_gpios.lua;0;4
-FILE_NAME_3=0;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fmmesh%2Flua%2Fmmesh%2Fmain_sock.lua;0;4
-FILE_NAME_4=7238;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fmmesh%2Flua%2Fmmesh%2Fmain_sound.lua;0;4
-FILE_NAME_5=425;GLSL;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fswankypaint%2Flua%2Fswanky%2Fpaint%2Fbloom.glsl;0;4
-FILE_NAME_6=1583;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fswankypaint%2Flua%2Fswanky%2Fpaint%2Fbloom.lua;0;4
-FILE_NAME_7=6274;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fwetgenes%2Fgamecake%2Fspew%2Fabout%2Fsinescroll.lua;0;4
-FILE_NAME_8=2598;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fbulb%2Flua%2Fbulb%2Fgui.lua;0;4
-FILE_NAME_9=0;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fwetgenes%2Fgamecake%2Fmods%2Fkeys.lua;0;4
-FILE_NAME_10=6540;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fwetgenes%2Fwin%2Fsdl.lua;0;4
-FILE_NAME_11=4167;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fwetgenes%2Fgamecake%2Fcanvas.lua;0;4
-FILE_NAME_12=10436;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fwetgenes%2Fgamecake%2Fgles.lua;0;4
-FILE_NAME_13=4085;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fglescode.lua;0;4
-FILE_NAME_14=0;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fpagecake%2Fmods%2Froadee%2Flua%2Flogs.lua;0;4
-FILE_NAME_15=5890;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fpagecake%2Fmods%2Froadee%2Flua%2Finit.lua;0;4
-FILE_NAME_16=1890;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fpagecake%2Flua%2Fwetgenes%2Fwww%2Fsqlite%2Finit.lua;0;4
-FILE_NAME_17=0;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fpagecake%2Flua%2Fwetgenes%2Fwww%2Fsqlite%2Fdata.lua;0;4
+current_page=2
+FILE_NAME_0=448;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fclapi%2Fpinstall.sh;0;4
+FILE_NAME_1=1317;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2F03-box-init.sh;0;4
+FILE_NAME_2=230;Javascript;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fd-portal%2Fdstore%2Fjs%2Fdstore_pg.js;0;4
 
 [VTE]
 last_dir=/home/kriss/hg/lua/lib_png
