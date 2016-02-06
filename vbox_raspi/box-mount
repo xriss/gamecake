@@ -1,11 +1,11 @@
 cd `dirname $0`
 
 # Get the starting offset of the root partition (not sure about trailing s)
-PART_ROOT_START=$(parted monster-mesh.img -ms unit s print | grep "^2" | cut -f 2 -d: | cut -f 1 -ds)
+PART_ROOT_START=$(parted raspi.img -ms unit s print | grep "^2" | cut -f 2 -d: | cut -f 1 -ds)
 
 echo " mounting root "
 mkdir root
-sudo mount -o rw,loop,offset=$(($PART_ROOT_START * 512)) monster-mesh.img ./root
+sudo mount -o rw,loop,offset=$(($PART_ROOT_START * 512)) raspi.img ./root
 #ls ./root
 
 echo " remember to umount before using the box "
