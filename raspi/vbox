@@ -1,0 +1,5 @@
+cd `dirname $0`
+
+alias premake=/home/pi/lua/build/premake4.raspi
+
+./make
