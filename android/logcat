@@ -1,0 +1,9 @@
+cd `dirname $0`
+
+andsdk=`readlink -f ../../sdks/android-9-arm`
+export PATH=$andsdk/bin:$andsdk/../android-sdk/platform-tools:$PATH
+
+adb logcat lua:I *:S
+
+
+

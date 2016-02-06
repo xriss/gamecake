@@ -1,0 +1,3 @@
+cd `dirname $0`
+schroot -c precise_x32 -u kriss -- bash -c "./make clean ; ./make release"
+schroot -c precise_x64 -u kriss -- bash -c "./make clean ; ./make release"

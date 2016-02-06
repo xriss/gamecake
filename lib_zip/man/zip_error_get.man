@@ -1,0 +1,53 @@
+.TH "ZIP_ERROR_GET" "3" "October 4, 2006" "NiH" "Library Functions Manual"
+.nh
+.if n .ad l
+.SH "NAME"
+\fBzip_error_get\fR,
+\fBzip_file_error_get\fR
+\- get error codes for archive or file
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+\fB#include <zip.h>\fR
+.sp
+\fIvoid\fR
+.br
+\fBzip_error_get\fR(\fIstruct zip *archive\fR,\ \fIint *zep\fR,\ \fIint *sep\fR);
+.sp
+\fIvoid\fR
+.br
+\fBzip_file_error_get\fR(\fIstruct zip_file *file\fR,\ \fIint *zep\fR,\ \fIint *sep\fR);
+.SH "DESCRIPTION"
+The
+\fBzip_error_get\fR()
+function returns the error codes for the zip archive
+\fIarchive\fR.
+If
+\fIzep\fR
+is not
+\fRNULL\fR,
+\fI*zep\fR
+will be filled in with the error code from libzip.
+Similarly,
+\fI*sep\fR
+will contain the corresponding system error code, if
+\fIsep\fR
+is not
+\fRNULL\fR;
+use
+\fBzip_error_get_sys_type\fR()
+to determine the type of system error code.
+.PP
+The
+\fBzip_file_error_get\fR()
+function does the same for the zip file
+\fIfile\fR.
+.SH "SEE ALSO"
+libzip(3),
+zip_error_clear(3),
+zip_error_get_sys_type(3),
+zip_error_to_str(3)
+.SH "AUTHORS"
+Dieter Baron <\fIdillo@nih.at\fR>
+and
+Thomas Klausner <\fItk@giga.or.at\fR>
