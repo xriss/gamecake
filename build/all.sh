@@ -10,8 +10,7 @@ cd `dirname $0`
 
 #build raspi
 
-../../lua/raspi/make clean
-../../lua/raspi/make release gamecake
+../../lua/vbox_raspi/make
 
 #build nacl
 
