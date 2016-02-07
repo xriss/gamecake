@@ -734,6 +734,28 @@ end
 -- Any web type build these are all kinda similar
 WEB=NACL or EMCC
 
+
+-- pick the os interface we will build, you can force one with environment
+-- most of them are variants on linux so this can be useful
+GAMECAKE_WIN_TYPE=os.getenv("GAMECAKE_WIN_TYPE")
+print(GAMECAKE_WIN_TYPE)
+-- or we look at what code we are building
+if not GAMECAKE_WIN_TYPE then
+	
+	if     WINDOWS then GAMECAKE_WIN_TYPE="windows"
+	elseif NIX     then GAMECAKE_WIN_TYPE="linux"
+	elseif NACL    then GAMECAKE_WIN_TYPE="nacl"
+	elseif EMCC    then GAMECAKE_WIN_TYPE="emcc"
+	elseif ANDROID then GAMECAKE_WIN_TYPE="android"
+	elseif RASPI   then GAMECAKE_WIN_TYPE="raspi"
+	elseif OSX     then GAMECAKE_WIN_TYPE="osx"
+	end
+
+end
+-- allow no win option, maybe usefull?
+if GAMECAKE_WIN_TYPE=="none" then GAMECAKE_WIN_TYPE=false end
+
+	
 all_includes=all_includes or {
 
 -- lua bindings
@@ -760,13 +782,9 @@ all_includes=all_includes or {
 	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_lash",		WINDOWS		or		NIX		or		EMCC	or		nil			or		nil			or	OSX		},
-	{"lua_win_windows",	WINDOWS		or		nil		or		nil		or		nil			or		nil			or	nil		},
-	{"lua_win_linux",	nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
-	{"lua_win_nacl",	nil			or		nil		or		NACL	or		nil			or		nil			or	nil		},
-	{"lua_win_emcc",	nil			or		nil		or		EMCC	or		nil			or		nil			or	nil		},
-	{"lua_win_android",	nil			or		nil		or		nil		or		ANDROID		or		nil			or	nil		},
-	{"lua_win_raspi",	nil			or		nil		or		nil		or		nil			or		RASPI		or	nil		},
-	{"lua_win_osx",		nil			or		nil		or		nil		or		nil			or		nil			or	OSX		},
+	
+	{"lua_win_"..GAMECAKE_WIN_TYPE, GAMECAKE_WIN_TYPE }, -- pick the os interface, see above
+
 	{"lua_sdl2",	   (WINDOWS		or		NIX		or		EMCC	or		nil			or		RASPI		or	OSX		)
 																						and		(not LSB) 				},
 
