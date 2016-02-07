@@ -1,9 +1,0 @@
-cd `dirname $0`
-
-if [ -z "$DESTDIR" ] ; then
-	DESTDIR="/usr/local"
-fi
-
-mkdir -p ${DESTDIR}/bin/
-
-cp ./premake4.raspi ${DESTDIR}/bin/premake4

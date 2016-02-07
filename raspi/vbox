@@ -1,8 +1,5 @@
 cd `dirname $0`
 
-#install premake4
-sudo ../build/install
-
 cd ..
 
 export GAMECAKE_WIN_TYPE=raspi
