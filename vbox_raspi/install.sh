@@ -109,4 +109,5 @@ echo " updating apt info and sites"
 echo " installing packages we will need for building etc"
 ./ssh " sudo apt-get -y install aptitude sudo nano byobu pkg-config raspi-config lynx curl git mercurial gcc build-essential cmake "
 
-
+echo " installing build dependencies"
+./ssh " sudo apt-get -y install libssl-dev libluajit-5.1-dev libsdl2-dev "
