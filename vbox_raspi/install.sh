@@ -66,6 +66,7 @@ w
 EOF
 
 #these config changes are needed to allow qemu to boot
+# we mount the image locally then make the changes then umount
 #the image will no longer boot as an sdcard
 
 ./box-mount
@@ -78,12 +79,14 @@ EOF
 
 sudo tee root/etc/fstab >/dev/null <<EOF
 
-proc             /proc           proc    defaults          0       0
+proc       /proc           proc    defaults          0       0
 /dev/sda2  /               ext4    defaults,noatime  0       1
 
 EOF
 
 ./box-umount
+
+
 
 echo "starting qemu but detaching it from this shell, wait until we can login before running the next script"
 ./box-up >/dev/null &
