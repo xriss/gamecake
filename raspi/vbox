@@ -1,5 +1,10 @@
 cd `dirname $0`
 
-alias premake=/home/pi/lua/build/premake4.raspi
+#install premake4
+sudo ../build/install
+
+cd ..
+
+export GAMECAKE_WIN_TYPE=raspi
 
 ./make
