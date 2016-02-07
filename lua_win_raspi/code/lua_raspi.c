@@ -14,8 +14,8 @@
 #include "lua.h"
 #include "lauxlib.h"
 
-#include "bcm_host.h"
-#include "EGL/egl.h"
+//#include "bcm_host.h"
+//#include "EGL/egl.h"
 
 #include "lua_raspi.h"
 
@@ -98,6 +98,7 @@ raspi_lua *p=lua_raspi_check_ptr(l,1);
 }
 
 
+#if 0
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // get info about the screen size
@@ -256,43 +257,6 @@ EGLint context_attributes[] =
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// destroy data if it exists
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_raspi_destroy (lua_State *l)
-{
-raspi_lua **pp=lua_raspi_ptr_ptr(l,1);
-raspi_lua *p;
-
-	if(*pp)
-	{
-		p=*pp;
-		
-		if(p->display)
-		{
-			// Release OpenGL resources
-			eglMakeCurrent( p->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
-			if(p->surface)
-			{
-				eglDestroySurface( p->display, p->surface );
-				p->surface=0;
-			}
-			if(p->context)
-			{
-				eglDestroyContext( p->display, p->context );
-				p->context=0;
-			}
-			eglTerminate( p->display );
-			p->display=0;
-		}
-	}
-	(*pp)=0;
-
-	return 0;
-}
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
 // prepare a gl surface in the window
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -325,6 +289,47 @@ raspi_lua *p=lua_raspi_check_ptr(l,1);
 
 	return 0;
 }
+
+#endif
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// destroy data if it exists
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_raspi_destroy (lua_State *l)
+{
+raspi_lua **pp=lua_raspi_ptr_ptr(l,1);
+raspi_lua *p;
+
+	if(*pp)
+	{
+		p=*pp;
+		
+//		if(p->display)
+//		{
+			// Release OpenGL resources
+//			eglMakeCurrent( p->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
+//			if(p->surface)
+//			{
+//				eglDestroySurface( p->display, p->surface );
+//				p->surface=0;
+//			}
+//			if(p->context)
+//			{
+//				eglDestroyContext( p->display, p->context );
+//				p->context=0;
+//			}
+//			eglTerminate( p->display );
+//			p->display=0;
+//		}
+	}
+	(*pp)=0;
+
+	return 0;
+}
+
 
 
 
@@ -446,14 +451,14 @@ LUALIB_API int luaopen_wetgenes_win_raspi_core(lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
-		{"screen",			lua_raspi_screen},
+//		{"screen",			lua_raspi_screen},
 		
-		{"create",			lua_raspi_create},
-		{"destroy",			lua_raspi_destroy},
-		{"info",			lua_raspi_info},
+//		{"create",			lua_raspi_create},
+//		{"destroy",			lua_raspi_destroy},
+//		{"info",			lua_raspi_info},
 
-		{"context",			lua_raspi_context},
-		{"swap",			lua_raspi_swap},
+//		{"context",			lua_raspi_context},
+//		{"swap",			lua_raspi_swap},
 
 //		{"peek",			lua_raspi_peek},
 //		{"wait",			lua_raspi_wait},
@@ -484,7 +489,7 @@ LUALIB_API int luaopen_wetgenes_win_raspi_core(lua_State *l)
 	lua_newtable(l);
 	luaL_openlib(l, NULL, lib, 0);
 	
-	bcm_host_init(); // always need this bit?
+//	bcm_host_init(); // always need this bit?
 
 	return 1;
 }

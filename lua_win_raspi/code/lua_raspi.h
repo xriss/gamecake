@@ -16,11 +16,11 @@ typedef struct sraspi_lua {
 	GLXContext context;
 */
 
-	EGLDisplay display;
-	EGLSurface surface;
-	EGLContext context;
+//	EGLDisplay display;
+//	EGLSurface surface;
+//	EGLContext context;
 
-	EGL_DISPMANX_WINDOW_T nativewindow;
+//	EGL_DISPMANX_WINDOW_T nativewindow;
 	
 	int screen_width;
 	int screen_height;
