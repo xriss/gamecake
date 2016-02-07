@@ -738,7 +738,7 @@ WEB=NACL or EMCC
 -- pick the os interface we will build, you can force one with environment
 -- most of them are variants on linux so this can be useful
 GAMECAKE_WIN_TYPE=os.getenv("GAMECAKE_WIN_TYPE")
-
+print(GAMECAKE_WIN_TYPE)
 -- or we look at what code we are building
 if not GAMECAKE_WIN_TYPE then
 	
