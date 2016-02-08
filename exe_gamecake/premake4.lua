@@ -17,7 +17,7 @@ if LUA_LIBDIRS then	libdirs(LUA_LIBDIRS) end
 if LUA_LINKS   then links  (LUA_LINKS)   end
 
 
-if RASPI then
+if RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 	
 -- look around the exe for any dynamic code we might want	
 	linkoptions { "-Wl,-R\\$$ORIGIN/rpi" } -- so much escape \\$$ -> $
