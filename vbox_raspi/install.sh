@@ -112,5 +112,10 @@ echo " installing packages we will need for building etc"
 echo " installing build dependencies"
 ./ssh " sudo apt-get -y install libssl-dev " # libluajit-5.1-dev libsdl2-dev "
 
-echo " building build dependencies"
-./ssh " cd lua/build/depends ; ./install "
+
+echo " cloaning the gamecake repo so we can use scripts from inside it"
+./ssh " cd bin && hg pull -u && cd .. || hg clone https://bitbucket.org/xixs/bin "
+./ssh " cd lua && hg pull -u && cd .. || hg clone https://bitbucket.org/xixs/lua "
+
+echo " building build dependencies premake, luajit and sdl2"
+./ssh " cd lua/build/depends ; ./install.raspi "
