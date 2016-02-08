@@ -24,8 +24,18 @@ if RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 
 	files { "./lua.c" }
 
-	libdirs { "/opt/vc/lib" , --[[ "../lib_sdl2/raspi/usr/local/lib/" ]] } -- we have SDL2 binary for raspi
-	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
+-- now building in qemu vbox, so must fiddle :/
+
+-- luajit and SDL2 dev must be available
+-- use the qemu box if you dont want to deal with it
+	libdirs { "/opt/vc/lib" }
+	libdirs { "/usr/local/lib/" }
+	links { "luajit-5.1" }
+	links { "SDL2" }
+	
+	
+--	libdirs { "../lib_sdl2/raspi/usr/local/lib/" } -- we have SDL2 binary for raspi
+--	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
 
 
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
