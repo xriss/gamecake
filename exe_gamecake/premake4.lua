@@ -32,6 +32,7 @@ if RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 	libdirs { "/usr/local/lib/" }
 	links { "luajit-5.1" }
 	links { "SDL2" }
+	links { "GL" }
 	
 	
 --	libdirs { "../lib_sdl2/raspi/usr/local/lib/" } -- we have SDL2 binary for raspi
