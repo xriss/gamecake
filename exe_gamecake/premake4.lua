@@ -24,7 +24,7 @@ if RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 
 	files { "./lua.c" }
 
-	libdirs { "../lib_sdl2/raspi/usr/local/lib/" } -- we have SDL2 binary for raspi
+	libdirs { "/opt/vc/lib" , --[[ "../lib_sdl2/raspi/usr/local/lib/" ]] } -- we have SDL2 binary for raspi
 	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
 
 
