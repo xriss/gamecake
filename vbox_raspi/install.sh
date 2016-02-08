@@ -119,3 +119,7 @@ echo " cloaning the gamecake repo so we can use scripts from inside it"
 
 echo " building build dependencies premake, luajit and sdl2"
 ./ssh " cd lua/build/depends ; ./install.raspi "
+
+./box-down
+
+
