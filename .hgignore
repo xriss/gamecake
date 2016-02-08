@@ -35,5 +35,6 @@ vbox_raspi/kernel-qemu
 
 build/depends/premake-4.4-beta5/*
 build/depends/SDL2-2.0.3/*
+build/depends/SDL2-2.0.4/*
 build/depends/LuaJIT-2.1.0-beta1/*
 
