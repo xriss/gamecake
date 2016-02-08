@@ -210,9 +210,12 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 -- luajit and SDL2 dev must be available
 -- use the vagrant boxes if you dont want to deal with it
 	libdirs { "/opt/vc/lib" }
+	
 	libdirs { "/usr/local/lib/" }
 	links { "luajit-5.1" }
 	links { "SDL2" }	
+
+	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
 
 	links { "GL" }
 	links { "crypt" }
