@@ -14,6 +14,14 @@ fi
 sdks=`readlink -f ../sdks`
 echo $sdks
 
+here=`readlink -f .`
+
+# will need to add this linkpath to cross link since we now build in a vbox
+# lib_sdl2/raspi/usr/local/lib/
+
+export LD_LIBRARY_PATH=$here/lib_sdl2/raspi/usr/local/lib/
+
+
 #export PATH=$sdks/raspi/tools/arm-bcm2708/linux-x86/bin:$PATH
 #export PATH=$sdks/gcc/prefix/bin:$PATH
 
