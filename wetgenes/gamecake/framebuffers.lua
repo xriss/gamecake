@@ -144,7 +144,9 @@ function M.bake(oven,framebuffers)
 			end
 			gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
 
-			assert( gl.CheckFramebufferStatus(gl.FRAMEBUFFER) == gl.FRAMEBUFFER_COMPLETE)
+			if( gl.CheckFramebufferStatus(gl.FRAMEBUFFER) ~= gl.FRAMEBUFFER_COMPLETE) then
+				print("FBO error",fbo.depth,gl.CheckFramebufferStatus(gl.FRAMEBUFFER),gl.GetError())
+			end
 			
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
