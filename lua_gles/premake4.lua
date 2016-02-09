@@ -33,6 +33,9 @@ elseif LSB then
 
 elseif RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 
+	libdirs { "/opt/vc/lib" }
+	libdirs { "/usr/local/lib/" }
+
 -- dont gl3w ??
 
 elseif NIX then
