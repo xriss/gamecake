@@ -695,9 +695,29 @@ else
 
 end
 
+-- pick the os interface we will build, you can force one with environment
+-- most of them are variants on linux so this can be useful
+GAMECAKE_WIN_TYPE=os.getenv("GAMECAKE_WIN_TYPE")
+
+-- or we look at what code we are building
+if not GAMECAKE_WIN_TYPE then
+	
+	if     WINDOWS then GAMECAKE_WIN_TYPE="windows"
+	elseif NIX     then GAMECAKE_WIN_TYPE="linux"
+	elseif NACL    then GAMECAKE_WIN_TYPE="nacl"
+	elseif EMCC    then GAMECAKE_WIN_TYPE="emcc"
+	elseif ANDROID then GAMECAKE_WIN_TYPE="android"
+	elseif RASPI   then GAMECAKE_WIN_TYPE="raspi"
+	elseif OSX     then GAMECAKE_WIN_TYPE="osx"
+	end
+
+end
+-- allow no win option, maybe usefull?
+if GAMECAKE_WIN_TYPE=="none" then GAMECAKE_WIN_TYPE=false end
+
 
 -- many many versions of GL to suport, these make this work -> #include INCLUDE_GLES_GL
-if RASPI then
+if RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 
 	defines{ "LUA_GLES_GLES2" }
 	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
@@ -735,25 +755,6 @@ end
 WEB=NACL or EMCC
 
 
--- pick the os interface we will build, you can force one with environment
--- most of them are variants on linux so this can be useful
-GAMECAKE_WIN_TYPE=os.getenv("GAMECAKE_WIN_TYPE")
-
--- or we look at what code we are building
-if not GAMECAKE_WIN_TYPE then
-	
-	if     WINDOWS then GAMECAKE_WIN_TYPE="windows"
-	elseif NIX     then GAMECAKE_WIN_TYPE="linux"
-	elseif NACL    then GAMECAKE_WIN_TYPE="nacl"
-	elseif EMCC    then GAMECAKE_WIN_TYPE="emcc"
-	elseif ANDROID then GAMECAKE_WIN_TYPE="android"
-	elseif RASPI   then GAMECAKE_WIN_TYPE="raspi"
-	elseif OSX     then GAMECAKE_WIN_TYPE="osx"
-	end
-
-end
--- allow no win option, maybe usefull?
-if GAMECAKE_WIN_TYPE=="none" then GAMECAKE_WIN_TYPE=false end
 
 	
 all_includes=all_includes or {
