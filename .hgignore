@@ -32,6 +32,8 @@ nginx/static/*.zip
 
 vbox_raspi/*.img
 vbox_raspi/kernel-qemu
+vbox_arm32/*.img
+vbox_arm32/kernel-qemu
 
 build/depends/premake-4.4-beta5/*
 build/depends/SDL2-2.0.3/*

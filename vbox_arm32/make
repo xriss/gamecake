@@ -1,0 +1,17 @@
+cd `dirname $0`
+
+
+./box-up-wait
+
+./ssh " cd bin && hg pull -u && cd .. || hg clone https://bitbucket.org/xixs/bin "
+./ssh " cd lua && hg pull -u && cd .. || hg clone https://bitbucket.org/xixs/lua "
+./ssh " lua/make "
+
+
+# rename the binaries
+
+scp -P 5522 pi@localhost:bin/exe/gamecake.nix ../../bin/exe/gamecake.arm32
+scp -P 5522 pi@localhost:bin/exe/pagecake.nix ../../bin/exe/pagecake.arm32
+
+./box-down
+

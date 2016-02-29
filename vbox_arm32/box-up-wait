@@ -1,0 +1,12 @@
+cd `dirname $0`
+
+echo " Running box in background and waiting until we can ssh into it " 
+
+./box-up >/dev/null &
+
+while ! ssh -p 5522 pi@localhost " echo BOX UP "
+do
+    sleep 1
+    echo "Waiting..."
+done
+
