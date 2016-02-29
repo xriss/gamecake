@@ -828,6 +828,9 @@ all_includes=all_includes or {
 -- dont think building this is a good idea?
 --	{"lib_angle",		nil			or		nil		or		nil		or		nil			or		nil			or	nil		},
 
+-- link lanes on nix?
+	{"lua_lanes",		NIX		},
+
 -- old/broken and no longer supported but will probably still build
 --	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 --	{"lua_lanes",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
