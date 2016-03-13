@@ -144,7 +144,7 @@ for n,v in pairs(chunks) do
 end
 ]]
 
--- sit out pages containing many html chunks
+-- spit out pages containing many html chunks
 for n,v in pairs(htmls) do
 	t={}
 	for n,s in pairs(v) do
@@ -160,20 +160,14 @@ for n,v in pairs(htmls) do
 		local aa=wstr.split(a[1],".")
 		local bb=wstr.split(b[1],".")
 		local l=#aa > #bb and #aa or #bb
-		for i=1,#bb do
+		for i=1,l do
 			-- a shorter name always has higher priority
 			if not aa[i] then return true end
 			if not bb[i] then return false end
-			if aa[i+1] and not bb[i+1] then return false end
-			if bb[i+1] and not aa[i+1] then return true end
 
-			-- groups have lower priorities
---			if ac==1 and bc~=1 then return true end
---			if bc==1 and ac~=1 then return false end
-		
-			-- final string sort
 			if aa[i]<bb[i] then return true end
 			if aa[i]>bb[i] then return false end
+
 		end
 		return false
 	end)

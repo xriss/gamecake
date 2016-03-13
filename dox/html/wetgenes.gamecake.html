@@ -16,6 +16,35 @@
 
 <p>All the other functions are returned from within the bake function.</p>
 
+<p>possible ENV settings</p>
+
+<pre><code>gamecake_tongue=english
+gamecake_flavour=sdl
+</code></pre>
+
+
+</div><hr/>
+<h1><a href="wetgenes.gamecake.oven.bake.html">wetgenes.gamecake.oven.bake</a></h1>
+<div>
+
+
+<pre><code>oven=wetgenes.gamecake.oven.bake(opts)
+</code></pre>
+
+<p>Bake creates an instance of a lua module bound to a state. Here we 
+are creating the main state that other modules will then bind to.</p>
+
+<p>We call each state an OVEN to fit into the gamecake naming scheme 
+then we bake a module in this oven to bind them to the common state.</p>
+
+<p>Think of it as a sub version of require, so require gets the global 
+pointer for a module and bake is used to get the a module bound to 
+an oven.</p>
+
+<p>By using this bound state we reduce the verbosity of connecting 
+modules and sharing state between them.</p>
+
+
 
 </div><hr/>
 <h1><a href="wetgenes.gamecake.widgets.html">wetgenes.gamecake.widgets</a></h1>
@@ -61,29 +90,6 @@ terribly dull name.</p>
 <p>Swanky paint is probably the most advanced used of the widgets so far
 but I suspect we will be making a simple text editor in the near 
 future. Designed for advanced in game tweaking of text files.</p>
-
-
-
-</div><hr/>
-<h1><a href="wetgenes.gamecake.oven.bake.html">wetgenes.gamecake.oven.bake</a></h1>
-<div>
-
-
-<pre><code>oven=wetgenes.gamecake.oven.bake(opts)
-</code></pre>
-
-<p>Bake creates an instance of a lua module bound to a state. Here we 
-are creating the main state that other modules will then bind to.</p>
-
-<p>We call each state an OVEN to fit into the gamecake naming scheme 
-then we bake a module in this oven to bind them to the common state.</p>
-
-<p>Think of it as a sub version of require, so require gets the global 
-pointer for a module and bake is used to get the a module bound to 
-an oven.</p>
-
-<p>By using this bound state we reduce the verbosity of connecting 
-modules and sharing state between them.</p>
 
 
 

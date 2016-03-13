@@ -1,0 +1,44 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.grd.html">wetgenes.grd</a></h1><h1><a href="wetgenes.grd.blit.html">wetgenes.grd.blit</a></h1>
+<div>
+
+<pre><code>g:blit(gb,x,y,cx,cy,cw,ch)
+</code></pre>
+
+<p>Blit a 2D area from one grd into another.</p>
+
+<p>gb is the grd to blit from.</p>
+
+<p>x,y is the location to blit too.</p>
+
+<p>cx,cy,cw,ch is a clip area that should be applied to gb before it is 
+blitted. EG to specify an area within gb. If not provided it will 
+default to the entirety of gb,</p>
+
+<p>g (destination) must be FMT<em>U8</em>RGBA and gb (source) must be 
+FMT<em>U8</em>RGBA_PREMULT this function will blend the images using normal 
+alpha blending.</p>
+
+<p>This is not overly optimised but should be reasonably fast.</p>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.grd.blit';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>

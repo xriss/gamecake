@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.grd.html">wetgenes.grd</a></h1><h1><a href="wetgenes.grd.clip.html">wetgenes.grd.clip</a></h1>
+<div>
+
+<pre><code>gr=g:clip(x,y,z,w,h,d)
+</code></pre>
+
+<p>create a clipped window into this grd</p>
+
+<p>the actual data is still stored in the original, so any changes there will effect the newly returned grd</p>
+
+<p>x,y,z are the staring pixel and w,h,d are the width height and depth in pixels.</p>
+
+<p>If you intend to use this clipped area for an extended period of time then you should duplicate this grd once you do this.</p>
+
+<p>This returns a new grd with gr.parent set to g (the original grd)</p>
+
+<p>This is a very shallow dangerous copy and should only really be used for temporary actions.</p>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.grd.clip';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>
