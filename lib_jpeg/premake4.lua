@@ -6,6 +6,8 @@ files {  "./**.c" , "./**.h" }
 excludes {
 	"./jmemdos.c" ,
 	"./jmemmac.c" ,
+	"./jmemansi.c" ,
+	"./jmemname.c" ,
 	"./ansi2knr.c" ,
 	"./example.c" ,
 	"./cdjpeg.c" , 
