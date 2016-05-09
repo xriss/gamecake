@@ -17,7 +17,8 @@ local function dprint(a) print(wstr.dump(a)) end
 -- v[1,2,3]			== xyz position
 -- v[4,5,6]			== xyz normal
 -- v[7,8]			== uv texture coords
--- v[9,10,11,12]	== bone id and weights. integer is the bone id and 1-frac is the bone weight
+-- v[9,10,11,12]	== texture tangent(xyz) and sign(+1 or -1) of bitangent for simple tangent space matrix reconstruction
+-- v[13,14,15,16]	== array of combined bone id and weights. integer part is the bone id and 1-frac is the bone weight
 
 -- v.mask			== mask value for selecting verts for transforms and special display
 
@@ -282,6 +283,117 @@ M.bake=function(oven,geom)
 				vv[6]=vv[6]/vv.count
 			end
 			vv.count=nil
+		end
+
+		return it
+	end
+
+	geom.build_tangents=function(it)
+
+-- reset tangents
+		for iv,vv in ipairs(it.verts) do
+			vv[9]=0
+			vv[10]=0
+			vv[11]=0
+			vv[12]=0
+		end
+		
+-- check each poly edge and add a weighted version of its normal to the tangent
+		for ip,vp in ipairs(it.polys) do
+			for i=1,#vp do
+				local v1=it.verts[ vp[i] ]
+				local v2=it.verts[ vp[(i%#vp)+1] ]
+				local n={ v2[1]-v1[1] , v2[2]-v1[2] , v2[3]-v1[3] , v2[7]-v1[7] , v2[8]-v1[8] }
+
+				local dd=math.sqrt(n[1]*n[1] + n[2]*n[2] + n[3]*n[3]) -- unit length
+				if dd==0 then dd=1 end
+				n[1]=n[1]/dd
+				n[2]=n[2]/dd
+				n[3]=n[3]/dd
+				local dd=math.sqrt(n[4]*n[4] + n[5]*n[5] ) -- unit length
+				if dd==0 then dd=1 end
+				n[4]=n[4]/dd
+				n[5]=n[5]/dd
+
+				v1[ 9]=v1[ 9]+(n[1]*n[5])
+				v1[10]=v1[10]+(n[2]*n[5])
+				v1[11]=v1[11]+(n[3]*n[5])
+
+				v2[ 9]=v2[ 9]+(n[1]*n[5])
+				v2[10]=v2[10]+(n[2]*n[5])
+				v2[11]=v2[11]+(n[3]*n[5])
+
+
+			end
+		end
+		
+-- merge tangents of vertexs that are in same 3d location
+		local merge={}
+		for iv,vv in ipairs(it.verts) do
+			local s=vv[1]..","..vv[2]..","..vv[3]
+			merge[s]=merge[s] or {}
+			local t=merge[s]
+			t[#t+1]=vv
+		end
+		for nv,vv in pairs(merge) do
+			if #vv>1 then
+				for i=2,#vv do
+					vv[1][ 9]=vv[1][ 9]+vv[i][ 9]
+					vv[1][10]=vv[1][10]+vv[i][10]
+					vv[1][11]=vv[1][11]+vv[i][11]
+					vv[i][ 9]=vv[1][ 9]
+					vv[i][10]=vv[1][10]
+					vv[i][11]=vv[1][11]
+				end
+			end
+		end
+
+-- remove normal to place tangent on surface and then fix its length
+		for iv,vv in ipairs(it.verts) do
+			local n=( (vv[9]*vv[4]) + (vv[10]*vv[5]) + (vv[11]*vv[6]) ) -- dot
+			vv[ 9]=vv[ 9]-(n*vv[4])
+			vv[10]=vv[10]-(n*vv[5])
+			vv[11]=vv[11]-(n*vv[6])
+
+			local dd=math.sqrt(vv[9]*vv[9] + vv[10]*vv[10] + vv[11]*vv[11])
+			if dd==0 then dd=1 end
+			vv[ 9]=vv[ 9]/dd
+			vv[10]=vv[10]/dd
+			vv[11]=vv[11]/dd
+		end
+
+-- work out the sign for the bitangent
+		for ip,vp in ipairs(it.polys) do
+			for i=1,#vp do
+				local v1=it.verts[ vp[i] ]
+				local v2=it.verts[ vp[(i%#vp)+1] ]
+				local n={ v2[1]-v1[1] , v2[2]-v1[2] , v2[3]-v1[3] , v2[7]-v1[7] , v2[8]-v1[8] }
+
+				local dd=math.sqrt(n[1]*n[1] + n[2]*n[2] + n[3]*n[3]) -- unit length
+				if dd==0 then dd=1 end
+				n[1]=n[1]/dd
+				n[2]=n[2]/dd
+				n[3]=n[3]/dd
+				local dd=math.sqrt(n[4]*n[4] + n[5]*n[5] ) -- unit length
+				if dd==0 then dd=1 end
+				n[4]=n[4]/dd
+				n[5]=n[5]/dd
+
+				n[1]=(n[1]*n[4])
+				n[2]=(n[2]*n[4])
+				n[3]=(n[3]*n[4])
+
+				local b={ -- bitangent is cross product of normal and tangent
+							(v1[2]*v1[11])-(v1[3]*v1[10]) ,
+							(v1[3]*v1[9] )-(v1[1]*v1[11]) ,
+							(v1[1]*v1[10])-(v1[2]*v1[9] )
+						}
+
+				v1[12]=v1[12]+( (b[1]*n[1]) + (b[2]*n[2]) + (b[3]*n[3]) )
+			end
+		end
+		for iv,vv in ipairs(it.verts) do
+			if vv[12]>=0 then vv[12]=1 else vv[12]=-1 end
 		end
 
 		return it

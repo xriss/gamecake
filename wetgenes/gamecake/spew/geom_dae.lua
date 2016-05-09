@@ -31,6 +31,7 @@ M.bake=function(oven,geom_dae)
 	local fbs=cake.framebuffers
 
 	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
+	local geoms=oven.rebake("wetgenes.gamecake.spew.geoms")
 
 
 	function geom_dae.load(opts)
@@ -258,10 +259,10 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 
 -- need to handle multiple geometries here...
-	local geoms={}
+	local its=geoms.new()
 	
 	if joints[1] then
-		geoms.joints=joints
+		its.joints=joints
 	end
 
 	local geo
@@ -280,7 +281,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			it.verts={}
 			it.polys={}
 			it.mats={}
-			geoms[#geoms+1]=it
+			its[#its+1]=it
 
 			--print("loading object named \""..geo.name.."\"")
 
@@ -318,13 +319,16 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 		-- turn dae split vertexs into a single vertex idx
 			local vertex_idxs={}
-			local function get_vertex_idx(xyz,nrm,uv)
-				local id=(xyz or "")..":"..(nrm or "")..":"..(uv or "")
+			local function get_vertex_idx(xyz,nrm,uv,bone)
+				local id=(xyz or "")..":"..(nrm or "")..":"..(uv or "")..":"..(bone or "")
 				local idx=vertex_idxs[id]
 				if not idx then
 					idx=#vertex_idxs+1
 					vertex_idxs[idx]=idx
 					vertex_idxs[id]=idx
+--					print("NEW",id)
+				else
+--					print(idx,id)
 				end
 				return idx
 			end
@@ -424,8 +428,10 @@ print("loaded ",#s,"bytes from "..opts.filename)
 								w4=calc(ws[7],ws[8])
 							end
 						end
-						local idx=get_vertex_idx(xyz,nrm,uv)
-						it.verts[idx]=	{
+
+-- blender fucks up the unique uv indexes, each is unique, so we merge matching ones here
+
+						local vert=	{
 											xyzs and xyzs.data[ (xyz*xyzs.stride) +1 ] or 0,
 											xyzs and xyzs.data[ (xyz*xyzs.stride) +2 ] or 0,
 											xyzs and xyzs.data[ (xyz*xyzs.stride) +3 ] or 0,
@@ -436,8 +442,20 @@ print("loaded ",#s,"bytes from "..opts.filename)
 											uvs and uvs.data[ (uv*uvs.stride) +1 ] or 0,
 											uvs and uvs.data[ (uv*uvs.stride) +2 ] or 0,
 											
+											0,0,0,0, -- blender fails to export tangents
+											
 											w1,w2,w3,w4 -- 4 bone ids and weights
 										}
+
+						local xyz_merge="["..vert[1]..","..vert[2]..","..vert[3].."]"						
+						local nrm_merge="["..vert[4]..","..vert[5]..","..vert[6].."]"						
+						local uv_merge ="["..vert[7]..","..vert[8].."]"
+						local bone_merge ="["..vert[13]..","..vert[14]..","..vert[15]..","..vert[16].."]"
+
+--						local idx=get_vertex_idx(xyz_merge,nrm_merge,uv_merge,bone_merge)
+						local idx=get_vertex_idx(xyz,nrm,uv,bone_merge)
+						
+						it.verts[idx]=	vert
 						poly[#poly+1]=idx
 						
 					end
@@ -503,7 +521,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 		
 		
-		return geoms
+		return its
 	end
 
 

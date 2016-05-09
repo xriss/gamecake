@@ -48,10 +48,10 @@ M.fill=function(oven,geom)
 				t[#t+1]=v[8] or 0
 				t[#t+1]=(p.mat or 1)-1
 
-				t[#t+1]=v[9] or 0
-				t[#t+1]=v[10] or 0
-				t[#t+1]=v[11] or 0
-				t[#t+1]=v[12] or 0
+				t[#t+1]=v[13] or 0
+				t[#t+1]=v[14] or 0
+				t[#t+1]=v[15] or 0
+				t[#t+1]=v[16] or 0
 
 				f=f+1
 			end
@@ -87,10 +87,10 @@ M.fill=function(oven,geom)
 				t[#t+1]=v[8] or 0
 				t[#t+1]=(p.mat or 1)-1
 
-				t[#t+1]=v[9] or 0
-				t[#t+1]=v[10] or 0
-				t[#t+1]=v[11] or 0
-				t[#t+1]=v[12] or 0
+				t[#t+1]=v[13] or 0
+				t[#t+1]=v[14] or 0
+				t[#t+1]=v[15] or 0
+				t[#t+1]=v[16] or 0
 
 				f=f+1
 			end
@@ -126,10 +126,10 @@ M.fill=function(oven,geom)
 				t[#t+1]=v[8] or 0
 				t[#t+1]=mask[v] or 0
 
-				t[#t+1]=v[9] or 0
-				t[#t+1]=v[10] or 0
-				t[#t+1]=v[11] or 0
-				t[#t+1]=v[12] or 0
+				t[#t+1]=v[13] or 0
+				t[#t+1]=v[14] or 0
+				t[#t+1]=v[15] or 0
+				t[#t+1]=v[16] or 0
 
 				f=f+1
 			end
@@ -157,10 +157,10 @@ M.fill=function(oven,geom)
 				t[#t+1]=v[8] or 0
 				t[#t+1]=(p.mat or 1)-1
 
-				t[#t+1]=v[9] or 0
-				t[#t+1]=v[10] or 0
-				t[#t+1]=v[11] or 0
-				t[#t+1]=v[12] or 0
+				t[#t+1]=v[13] or 0
+				t[#t+1]=v[14] or 0
+				t[#t+1]=v[15] or 0
+				t[#t+1]=v[16] or 0
 
 				f=f+1
 			end
@@ -189,10 +189,10 @@ M.fill=function(oven,geom)
 				t[#t+1]=v[8] or 0
 				t[#t+1]=mask[v] or 0
 
-				t[#t+1]=v[9] or 0
-				t[#t+1]=v[10] or 0
-				t[#t+1]=v[11] or 0
-				t[#t+1]=v[12] or 0
+				t[#t+1]=v[13] or 0
+				t[#t+1]=v[14] or 0
+				t[#t+1]=v[15] or 0
+				t[#t+1]=v[16] or 0
 
 				f=f+1
 			end
@@ -218,14 +218,71 @@ M.fill=function(oven,geom)
 			t[#t+1]=v[8] or 0
 			t[#t+1]=mask[v] or 0
 
-			t[#t+1]=v[9] or 0
-			t[#t+1]=v[10] or 0
-			t[#t+1]=v[11] or 0
-			t[#t+1]=v[12] or 0
+			t[#t+1]=v[13] or 0
+			t[#t+1]=v[14] or 0
+			t[#t+1]=v[15] or 0
+			t[#t+1]=v[16] or 0
 
 			f=f+1
 		end
 		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.POINTS,vb=true})
+	end
+
+-- make a predraw line buffer containing normals for each vertex, scale controls its length.
+	geom.predraw_normals=function(it,scale)
+		scale=scale or it.normal_scale or 1
+		local t={}
+		local mask=it.mask and it.mask.verts or {}
+		for i,v in ipairs(it.verts) do
+			t[#t+1]=v[1]
+			t[#t+1]=v[2]
+			t[#t+1]=v[3]
+
+			t[#t+1]=v[1]+((v[4] or 0)*scale)
+			t[#t+1]=v[2]+((v[5] or 0)*scale)
+			t[#t+1]=v[3]+((v[6] or 0)*scale)
+		end
+		return flat.array_predraw({fmt="xyz",data=t,array=gl.LINES,vb=true})
+	end
+
+-- make a predraw line buffer containing tangents for each vertex, scale controls its length.
+	geom.predraw_tangents=function(it,scale)
+		scale=scale or it.normal_scale or 1
+		local t={}
+		local mask=it.mask and it.mask.verts or {}
+		for i,v in ipairs(it.verts) do
+			t[#t+1]=v[1]
+			t[#t+1]=v[2]
+			t[#t+1]=v[3]
+
+			t[#t+1]=v[1]+((v[9] or 0)*scale)
+			t[#t+1]=v[2]+((v[10] or 0)*scale)
+			t[#t+1]=v[3]+((v[11] or 0)*scale)
+		end
+		return flat.array_predraw({fmt="xyz",data=t,array=gl.LINES,vb=true})
+	end
+
+-- make a predraw line buffer containing tangents for each vertex, scale controls its length.
+	geom.predraw_bitangents=function(it,scale)
+		scale=scale or it.normal_scale or 1
+		local t={}
+		local mask=it.mask and it.mask.verts or {}
+		for i,v in ipairs(it.verts) do
+			t[#t+1]=v[1]
+			t[#t+1]=v[2]
+			t[#t+1]=v[3]
+			
+			local b={ -- bitangent is cross product of normal and tangent
+						(((v[5] or 0)*(v[11] or 0))-((v[6] or 0)*(v[10] or 0))) ,
+						(((v[6] or 0)*(v[9]  or 0))-((v[4] or 0)*(v[11] or 0))) ,
+						(((v[4] or 0)*(v[10] or 0))-((v[5] or 0)*(v[9]  or 0)))
+					}
+
+			t[#t+1]=v[1]+(b[1]*(v[12] or 1)*scale)
+			t[#t+1]=v[2]+(b[2]*(v[12] or 1)*scale)
+			t[#t+1]=v[3]+(b[3]*(v[12] or 1)*scale)
+		end
+		return flat.array_predraw({fmt="xyz",data=t,array=gl.LINES,vb=true})
 	end
 
 	geom.draw_polys=function(it,progname,cb)
@@ -272,6 +329,27 @@ M.fill=function(oven,geom)
 		return it
 	end	
 
+	geom.draw_normals=function(it,progname,cb)
+		local pd="pd_normals"
+		if not it[pd] then it[pd]=geom.predraw_normals(it) end
+		it[pd].draw(cb,progname)
+		return it
+	end	
+
+	geom.draw_tangents=function(it,progname,cb)
+		local pd="pd_tangents"
+		if not it[pd] then it[pd]=geom.predraw_tangents(it) end
+		it[pd].draw(cb,progname)
+		return it
+	end	
+
+	geom.draw_bitangents=function(it,progname,cb)
+		local pd="pd_bitangents"
+		if not it[pd] then it[pd]=geom.predraw_bitangents(it) end
+		it[pd].draw(cb,progname)
+		return it
+	end	
+
 -- remove all predraw buffers so we will resync base data next time we draw
 	geom.clear_predraw=function(it)
 		it.pd_polys=nil
@@ -281,6 +359,9 @@ M.fill=function(oven,geom)
 		it.pd_flatpolys_mask=nil
 		it.pd_lines_mask=nil
 		it.pd_verts_mask=nil
+		it.pd_normals=nil
+		it.pd_tangents=nil
+		it.pd_bitangents=nil
 	end
 
 -- default draw is polys
