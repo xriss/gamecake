@@ -5,6 +5,7 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 #include "all.h"
 
+
 //
 // GRD Image handling layer, load/save/manipulate
 //
@@ -1270,6 +1271,15 @@ u8 *pts;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// better image resize code, static include for use in next function
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#define STB_IMAGE_RESIZE_STATIC
+#include "stb_image_resize.h"
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // scale image
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1290,6 +1300,7 @@ f32 fx,fy,fz;
 s32 x,y,z;
 u32 *ptr;
 u8 *p8;
+int suc;
 
 	if( // any U8 32bit format should be fine
 		( g->bmap->fmt!=GRD_FMT_U8_LUMINANCE ) &&
@@ -1308,24 +1319,25 @@ u8 *p8;
 	
 	gb=grd_create(g->bmap->fmt,w,h,d);
 	if(!gb) { return 0; }
-
-	fw=( (f32)gi->w / (f32)w );
-	sw=(s32)ceilf(fw);
-
-	fh=( (f32)gi->h / (f32)h );
-	sh=(s32)ceilf(fh);
-
-	fd=( (f32)gi->d / (f32)d );
-	sd=(s32)ceilf(fd);
 	
-	for(z=0,fz=0.0f;z<d;z++,fz+=fd)
+
+	// need our own code for index images which just picks the closest pixel
+	if( ( g->bmap->fmt==GRD_FMT_U8_INDEXED ) ||
+		( g->bmap->fmt==GRD_FMT_U8_INDEXED_PREMULT ) )
 	{
-		for(y=0,fy=0.0f;y<h;y++,fy+=fh)
+
+		fw=( (f32)gi->w / (f32)w );
+		sw=(s32)ceilf(fw);
+
+		fh=( (f32)gi->h / (f32)h );
+		sh=(s32)ceilf(fh);
+
+		fd=( (f32)gi->d / (f32)d );
+		sd=(s32)ceilf(fd);
+		
+		for(z=0,fz=0.0f;z<d;z++,fz+=fd)
 		{
-			if( ( g->bmap->fmt==GRD_FMT_U8_INDEXED ) ||
-				( g->bmap->fmt==GRD_FMT_U8_INDEXED_PREMULT ) ||
-				( g->bmap->fmt==GRD_FMT_U8_LUMINANCE ) ||
-				( g->bmap->fmt==GRD_FMT_U8_ALPHA ) )
+			for(y=0,fy=0.0f;y<h;y++,fy+=fh)
 			{
 				p8=(u8*)grdinfo_get_data(gb->bmap,0,y,z);
 				for(x=0,fx=0.0f;x<w;x++,fx+=fw)
@@ -1333,17 +1345,18 @@ u8 *p8;
 					*p8++=(u8)grd_sample(g, fx,fy,fz, sw,sh,sd );
 				}
 			}
-			else
-			{
-				ptr=(u32*)grdinfo_get_data(gb->bmap,0,y,z);
-				for(x=0,fx=0.0f;x<w;x++,fx+=fw)
-				{
-					*ptr++=grd_sample(g, fx,fy,fz, sw,sh,sd ); // this is a terrible way to scale...
-				}
-			}
 		}
+
 	}
-	
+	else // use stb_image_resize code
+	{
+		if(!
+			stbir_resize_uint8(	g->bmap->data,	g->bmap->w,		g->bmap->h,		g->bmap->yscan,
+								gb->bmap->data,	gb->bmap->w,	gb->bmap->h,	gb->bmap->yscan,
+								grd_sizeof_pixel(g->bmap->fmt) )
+		) { return 0; }
+	}
+
 	grd_insert(g,gb);
 	grd_free(gb);
 
