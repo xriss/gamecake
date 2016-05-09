@@ -1271,7 +1271,7 @@ u8 *pts;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// better image resize code, static include for use in next function
+// better image resize code, static include for use in grd_scale
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
@@ -1350,11 +1350,17 @@ int suc;
 	}
 	else // use stb_image_resize code
 	{
-		if(!
-			stbir_resize_uint8(	g->bmap->data,	g->bmap->w,		g->bmap->h,		g->bmap->yscan,
-								gb->bmap->data,	gb->bmap->w,	gb->bmap->h,	gb->bmap->yscan,
-								grd_sizeof_pixel(g->bmap->fmt) )
-		) { return 0; }
+		fd=( (f32)gi->d / (f32)d );
+		sd=(s32)ceilf(fd);
+		
+		for(z=0,fz=0.0f;z<d;z++,fz+=fd) // simple z scale, just pick the closest z
+		{
+			if(!
+				stbir_resize_uint8(	grdinfo_get_data(gi,0,0,(s32)fz),	gi->w,			gi->h,			gi->yscan,
+									grdinfo_get_data(gb->bmap,0,0,z),	gb->bmap->w,	gb->bmap->h,	gb->bmap->yscan,
+									grd_sizeof_pixel(gi->fmt) )
+			) { return 0; }
+		}
 	}
 
 	grd_insert(g,gb);
