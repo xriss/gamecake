@@ -5,6 +5,12 @@ module(...,package.seeall)
 local grd=require("wetgenes.grd")
 local wstr=require("wetgenes.string")
 
+
+function test_do_png_bump()
+	do_png_bump("bump")
+end
+
+
 function test_do_png_json()
 	do_png_json("t1")
 end
@@ -306,5 +312,20 @@ function do_png_json(name)
 
 	assert_true( g.json ) -- check we got some json back
 --	print(wstr.dump(g.json))
+
+end
+
+function do_png_bump(name)
+
+	local json=[[{"test":"data","more":"data"}]]
+
+	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
+	assert( g:convert("U8_LUMINANCE") )
+	local b=assert(g:create_normal())
+	assert( b:save("dat/grd/"..name..".normal.out.png","png") )
+
+
+	assert_true( do_file_compare("dat/grd/"..name..".normal.out.png","dat/grd/"..name..".normal.chk.png") )
+
 
 end
