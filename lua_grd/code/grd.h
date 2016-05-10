@@ -209,7 +209,9 @@ struct grd * grd_save_data( struct grd *g, struct grd_io_info *filedata , int fm
 struct grd * grd_duplicate( struct grd *g );
 struct grd * grd_duplicate_convert( struct grd *g , s32 fmt );
 struct grd * grd_duplicate_quant(struct grd *g , s32 num_colors );
+struct grd * grd_duplicate_sobelnormal(struct grd *g );
 
+int grd_sobelnormal( struct grd *g );
 int grd_convert( struct grd *g , s32 fmt );
 int grd_quant(struct grd *g , s32 num_colors );
 int grd_attr_redux(struct grd *g, int cw, int ch, int num, int sub, int bak);

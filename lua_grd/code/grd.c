@@ -1194,6 +1194,93 @@ u8 *p8;
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// a height map (greyscale) to normal (rgb) conversion
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int grd_sobelnormal(struct grd *g )
+{
+	struct grd *gb=grd_duplicate_sobelnormal(g );
+	
+	if( gb == 0 ) { return 0; }
+	grd_insert(g,gb);
+	grd_free(gb);
+	return 1;
+}
+struct grd * grd_duplicate_sobelnormal(struct grd *g )
+{
+struct grd *r;
+int i;
+u8 *optr;
+u32 *ptr;
+u32 c;
+s32 w,h,d;
+s32 x,y,z;
+f32 nx,ny,nz,nd;
+
+	if( g->bmap->fmt!=GRD_FMT_U8_LUMINANCE) { return 0; }
+	if( g->bmap->w<1 || g->bmap->h<1 || g->bmap->d<1 ) { return 0; }
+
+	r=grd_create(GRD_FMT_U8_RGB ,g->bmap->w,g->bmap->h,g->bmap->d);
+	if(!r) { return 0; }
+
+	w=g->bmap->w;
+	h=g->bmap->h;
+	d=g->bmap->d;
+
+	for(z=0;z<d;z++)
+	{
+		for(y=0;y<h;y++)
+		{
+			optr=(u8*)grdinfo_get_data(r->bmap,0,y,z);
+			for(x=0;x<w;x++)
+			{
+				// sample gradient
+				nx =	grd_sample(g,(x  +1)%w,(y  +1)%h,z,1,1,1)  +
+						grd_sample(g,(x  +1)%w, y     ,z,1,1,1)*2+
+						grd_sample(g,(x  +1)%w,(y+h-1)%h,z,1,1,1)  ;
+
+				nx-=	grd_sample(g,(x+w-1)%w,(y  +1)%h,z,1,1,1)  +
+						grd_sample(g,(x+w-1)%w, y     ,z,1,1,1)*2+
+						grd_sample(g,(x+w-1)%w,(y+h-1)%h,z,1,1,1)  ;
+
+				ny =	grd_sample(g,(x  +1)%w,(y  +1)%h,z,1,1,1)  +
+						grd_sample(g, x       ,(y  +1)%h,z,1,1,1)*2+
+						grd_sample(g,(x+w-1)%w,(y  +1)%h,z,1,1,1)  ;
+
+				ny-=	grd_sample(g,(x  +1)%w,(y+h-1)%h,z,1,1,1)  +
+						grd_sample(g, x       ,(y+h-1)%h,z,1,1,1)*2+
+						grd_sample(g,(x+w-1)%w,(y+h-1)%h,z,1,1,1)  ;
+				
+				// fix range to within +1 and -1
+				nx/=255.0f*4.0f;
+				ny/=255.0f*4.0f;
+				nx=-nx;
+				
+				// add the outward z but try not to overwhelm the x and y
+				nz=1.0f - sqrtf(nx*nx+ny*ny);
+				if(nz<0.0f) { nz=0.0f; }
+				
+				// normalize? as we may still be a little bit off
+				nd=sqrtf(nx*nx+ny*ny+nz*nz);
+				if(nd<=0.0f) { nd=1.0f; }
+				nx/=nd;
+				ny/=nd;
+				nz/=nd;
+				
+				// output rgb (should be safe to skip the clamping)
+				*optr++=(u8)(((nx+1.0f)*0.5f)*255.0f); // r
+				*optr++=(u8)(((ny+1.0f)*0.5f)*255.0f); // g
+				*optr++=(u8)(((nz+1.0f)*0.5f)*255.0f); // b
+
+			}
+		}
+	}
+	
+	return r;
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
