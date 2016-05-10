@@ -969,4 +969,17 @@ base.clip=function(ga,x,y,z,w,h,d)
 	return g
 end
 
+
+--[[#wetgenes.grd.create_normal
+
+	gr=g:create_normal()
+
+convert a greyscale height map  into an rgb normal map using the sobel filter.
+
+]]
+base.create_normal=function(ga)
+	local gd=assert(core.create_normal(ga[0]))
+	return grd.create(gd)
+end
+
 return grd
