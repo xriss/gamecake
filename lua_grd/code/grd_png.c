@@ -395,6 +395,11 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 		}
 	}
 	else
+	if( (g->bmap->fmt==GRD_FMT_U8_RGB) )
+	{
+		color_type = PNG_COLOR_TYPE_RGB;
+	}
+	else
 	if( (g->bmap->fmt==GRD_FMT_U8_RGBA) || (g->bmap->fmt==GRD_FMT_U8_RGBA_PREMULT) )
 	{
 //		png_set_swap_alpha(png_ptr);
