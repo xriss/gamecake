@@ -10,6 +10,9 @@ function test_do_png_bump()
 	do_png_bump("bump")
 end
 
+function test_do_png_bump2()
+	do_png_bump("bump2")
+end
 
 function test_do_png_json()
 	do_png_json("t1")
