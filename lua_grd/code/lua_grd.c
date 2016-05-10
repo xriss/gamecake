@@ -582,7 +582,7 @@ s32 fmt;
 	return 1;
 }
 
-int lua_grd_duplicate_convert (lua_State *l)
+int lua_grd_create_convert (lua_State *l)
 {
 part_ptr p;
 part_ptr *pp;
@@ -594,6 +594,54 @@ s32 fmt;
 	fmt=(s32)lua_tonumber(l,2);
 
 	p2=grd_duplicate_convert(p,fmt);
+
+	if(! p2 )
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"failed to convert");
+		return 2;
+	}
+
+	pp=lua_grd_create_ptr(l);
+	*pp=p2;
+	
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_normal (lua_State *l)
+{
+part_ptr p;
+s32 fmt;
+
+	p=lua_grd_check_ptr(l,1);
+
+	if(! grd_sobelnormal(p) )
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"failed to convert");
+		return 2;
+	}
+
+//	lua_grd_getinfo(l,p,1);
+
+	lua_pushvalue(l,1);
+	return 1;
+}
+
+int lua_grd_create_normal (lua_State *l)
+{
+part_ptr p;
+part_ptr *pp;
+part_ptr p2;
+s32 fmt;
+
+	p=lua_grd_check_ptr(l,1);
+
+	p2=grd_duplicate_sobelnormal(p);
 
 	if(! p2 )
 	{
@@ -1421,6 +1469,8 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"copy_data_layer",	lua_grd_copy_data_layer},
 
 		{"convert",			lua_grd_convert},
+
+		{"create_normal",	lua_grd_create_normal},
 		
 		{"quant",			lua_grd_quant},
 		{"attr_redux",		lua_grd_attr_redux},
