@@ -347,6 +347,7 @@ grd.create=function(...)
 	core.info(g[0],g)
 	return g
 end
+base.create=grd.create
 
 --[[#wetgenes.grd.destroy
 
@@ -528,25 +529,6 @@ base.duplicate=function(g)
 	return grd.create(g)
 end
 
---[[#wetgenes.grd.duplicate_convert
-
-	ga = g:duplicate_convert(fmt)
-
-Create a duplicate of this grd converted to a new format and return it.
-
-Returns nil,error if something goes wrong so can be used with assert 
-otherwise returns g so that we can chain the result.
-
-]]
-base.duplicate_convert=function(g,fmt)
-	if type(fmt) == "string" then
-		fmt=grd.stringtonum(fmt)
-	end
-	local r=core.duplicate_convert(g[0],fmt)
-	if r==g[0] then r=core.duplicate(g[0]) end -- force duplication
-	return grd.create(r)
-end
-
 --[[#wetgenes.grd.convert
 
 	g:convert(fmt)
@@ -565,6 +547,21 @@ base.convert=function(g,fmt)
 	local r,e=core.convert(g[0],fmt)
 	core.info(g[0],g)
 	return (r and g),e
+end
+
+--[[#wetgenes.grd.create_convert
+
+	g:create_convert(fmt)
+
+Like convert but returns a new grd rather than converting in place.
+
+]]
+base.create_convert=function(g,fmt)
+	if type(fmt) == "string" then
+		fmt=grd.stringtonum(fmt)
+	end
+	local r,e=core.create_convert(g[0],fmt)
+	return (r and grd.create(r)),e
 end
 
 --[[#wetgenes.grd.clear
@@ -978,8 +975,8 @@ convert a greyscale height map  into an rgb normal map using the sobel filter.
 
 ]]
 base.create_normal=function(ga)
-	local gd=assert(core.create_normal(ga[0]))
-	return grd.create(gd)
+	local gd,e=core.create_normal(ga[0])
+	return gd and grd.create(gd) , e
 end
 
 return grd
