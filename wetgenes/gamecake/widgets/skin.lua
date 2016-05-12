@@ -426,7 +426,11 @@ local font_cache_draw
 
 			widget.lay=nil
 			widget.old_lay=nil
+
+-- call mipmap twice because driver bugs
+-- gl.Flush did not help but this does?
 			
+			widget.fbo:mipmap()
 			widget.fbo:mipmap()
 		end
 		
