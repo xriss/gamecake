@@ -143,7 +143,7 @@ function wsplit.setup(widget,def)
 	widget.split_num  =def.split_num			-- fixed pixel size of split
 	widget.split_fit  =def.split_fit			-- desired aspect ratio of split , width*this == height or height*this=width
 	widget.split_fnum =def.split_fnum or 0.5	-- fixed fractional size of split
-	widget.split_scale=def.split_scale or 1		-- scale the fir by this amount (must be <=1)
+	widget.split_scale=def.split_scale or 1		-- scale the fit by this amount (must be <=1)
 
 -- limits
 	widget.split_min =def.split_min		-- minimum pixel size of split

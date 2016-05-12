@@ -35,6 +35,9 @@ function wpanel.layout(widget)
 			v.sy=widget.hy/v.hy
 
 			if v.sx<v.sy then v.sy=v.sx else v.sx=v.sy end
+			
+			v.px=(widget.hx-v.hx*v.sx)/2
+			v.py=(widget.hy-v.hy*v.sy)/2
 
 		elseif widget.panel_mode=="stretch" then -- stretch to fit any area
 
