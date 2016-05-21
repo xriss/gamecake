@@ -369,6 +369,19 @@ sdl.icon=function(w,g)
 end
 
 
+sdl.has_clipboard=function()
+	return SDL.hasClipboardText()
+end
+
+sdl.get_clipboard=function()
+	return SDL.getClipboardText()
+end
+
+sdl.set_clipboard=function(s)
+	return SDL.setClipboardText(s)
+end
+
+
 sdl.platform=SDL.getPlatform() -- remember platform
 
 
