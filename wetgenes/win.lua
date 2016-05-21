@@ -359,6 +359,13 @@ function win.create(opts)
 		posix.win_translate_msg=function(m) return posix.win_translate_msg_keys_and_mouse(w,m) end -- need to make real keyboard/mouse msgs
 	end
 
+--[[ test clipboard
+print("has_clipboard",w:has_clipboard())
+print("get_clipboard",w:get_clipboard())
+print("set_clipboard",w:set_clipboard("poop"))
+print("get_clipboard",w:get_clipboard())
+]]
+
 	return w
 end
 
@@ -549,4 +556,30 @@ function base.get_memory_class(w)
 		return hardcore.get_memory_class()
 	end
 end
+
+
+-- clipboard (only SDL2 and only text)
+
+function base.get_clipboard()
+	if hardcore.get_clipboard then
+		return hardcore.get_clipboard()
+	end
+end
+
+function base.set_clipboard(w,s)
+	s=s or w -- first arg may be window for : calling
+	if hardcore.set_clipboard then
+		return hardcore.set_clipboard(s)
+	end
+end
+
+function base.has_clipboard()
+	if     hardcore.has_clipboard then
+		return hardcore.has_clipboard()
+	elseif hardcore.get_clipboard then
+		return hardcore.get_clipboard() and true or false
+	end
+end
+
+
 return win
