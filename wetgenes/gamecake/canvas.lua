@@ -311,6 +311,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	local ptex
 	local pcolor
 	local pmat
+	local ptans
 	local pbone
 	local p
 	local def_progname
@@ -353,6 +354,27 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		ptex=24
 		pmat=32
 		pbone=36
+
+	elseif fmt=="xyznrmuvmtansbone" then -- xyz and normal and texture and  material id and tangent and bones
+
+		def_progname="pos_normal_tex_mat_tans_bone"
+
+		pstride=68
+		pnrm=12
+		ptex=24
+		pmat=32
+		ptans=36
+		pbone=52
+
+	elseif fmt=="xyznrmuvmtans" then -- xyz and normal and texture and  material id and tangent
+
+		def_progname="pos_normal_tex_mat_tans"
+
+		pstride=52
+		pnrm=12
+		ptex=24
+		pmat=32
+		ptans=36
 
 	elseif fmt=="xyzuv" then -- xyz and texture
 
@@ -456,6 +478,11 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 			gl.EnableVertexAttribArray(p:attrib("a_matidx"))
 		end
 		
+		if ptans then
+			gl.VertexAttribPointer(p:attrib("a_tangent"),4,gl.FLOAT,gl.FALSE,pstride,ptangent)
+			gl.EnableVertexAttribArray(p:attrib("a_tangent"))
+		end
+
 		if pbone then
 			gl.VertexAttribPointer(p:attrib("a_bone"),4,gl.FLOAT,gl.FALSE,pstride,pbone)
 			gl.EnableVertexAttribArray(p:attrib("a_bone"))

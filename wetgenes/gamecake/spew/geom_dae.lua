@@ -372,6 +372,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			end
 			
 			local need_normals=false
+			local need_tangents=true
 
 			for ips,ps in ipairs(polys) do
 			
@@ -514,6 +515,9 @@ print("loaded ",#s,"bytes from "..opts.filename)
 --			dprint(it.verts)
 			if need_normals then
 				geom.build_normals(it)
+			end
+			if need_tangents then
+				geom.build_tangents(it)
 			end
 			
 		end

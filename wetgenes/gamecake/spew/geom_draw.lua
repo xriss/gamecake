@@ -48,6 +48,11 @@ M.fill=function(oven,geom)
 				t[#t+1]=v[8] or 0
 				t[#t+1]=(p.mat or 1)-1
 
+				t[#t+1]=v[9] or 0
+				t[#t+1]=v[10] or 0
+				t[#t+1]=v[11] or 0
+				t[#t+1]=v[12] or 0
+
 				t[#t+1]=v[13] or 0
 				t[#t+1]=v[14] or 0
 				t[#t+1]=v[15] or 0
@@ -56,7 +61,7 @@ M.fill=function(oven,geom)
 				f=f+1
 			end
 		end
-		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.TRIANGLE_STRIP,vb=true})
+		return flat.array_predraw({fmt="xyznrmuvmtansbone",data=t,array=gl.TRIANGLE_STRIP,vb=true})
 	end
 
 -- make a predraw buffer to draw triangles
