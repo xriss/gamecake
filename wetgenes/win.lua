@@ -581,5 +581,11 @@ function base.has_clipboard()
 	end
 end
 
+-- x and y are windows coords, as if from an input mouse position
+function base.warp_mouse(w,x,y)
+	if     hardcore.warp_mouse then
+		return hardcore.warp_mouse(w[0],x,y)
+	end
+end
 
 return win

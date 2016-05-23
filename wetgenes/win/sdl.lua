@@ -94,7 +94,12 @@ end
 
 sdl.destroy=function(it)
 	print("SDL destroy")
-	it=it or sdl.it
+	if it then
+		SDL.destroyWindow(it.win)
+	elseif sdl.it then
+		SDL.destroyWindow(sdl.it.win)
+		sdl.it=nil
+	end
 	return nil
 end
 
@@ -305,6 +310,14 @@ sdl.msg_fetch=function()
 	end
 
 end
+
+
+sdl.warp_mouse=function(it,x,y)
+	it=it or sdl.it
+	it.win:warpMouse(x,y)
+	return true
+end
+
 
 
 sdl.icon=function(w,g)
