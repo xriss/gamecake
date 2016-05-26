@@ -36,6 +36,14 @@ M.bake=function(oven,geom)
 	geom.meta={__index=geom}
 	geom.new=function(it) it=it or {} setmetatable(it,geom.meta) return it end
 
+geom.idxs=	{
+				POS_X= 1, POS_Y= 2, POS_Z= 3,
+				NRM_X= 4, NRM_Y= 5, NRM_Z= 6,
+				TEX_U= 7, TEX_V= 8,
+				TAN_X= 9, TAN_Y=10, TAN_Z=11, TAN_W=12,
+				BNE_A=13, BNE_B=14, BNE_C=15, BNE_D=16
+			}
+
 
 	local gl=oven.gl
 	local cake=oven.cake
@@ -210,6 +218,7 @@ M.bake=function(oven,geom)
 		for iv=1,mv do local vv=it.verts[iv]
 			vv[axis]=-vv[axis]
 			vv[axis+3]=-vv[axis+3]
+			vv[axis+8]=-vv[axis+8]
 		end
 	end
 	

@@ -267,6 +267,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 	local geo
 	local t=wxml.descendent(x,"library_geometries")
+	if t then
 	for i=1,#t do local v=t[i]
 		if v[0]=="geometry" then
 			geo={}
@@ -457,6 +458,9 @@ print("loaded ",#s,"bytes from "..opts.filename)
 						local idx=get_vertex_idx(xyz,nrm,uv,bone_merge)
 						
 						it.verts[idx]=	vert
+
+--print(idx,xyz,nrm,uv,bone_merge,vert[4],vert[5],vert[6])
+
 						poly[#poly+1]=idx
 						
 					end
@@ -476,12 +480,12 @@ print("loaded ",#s,"bytes from "..opts.filename)
 				end
 				geom.mirror(it,opts.mirror,function(it,dupe)
 					if dupe then
-						for i=9,12 do
+						for i=13,16 do
 							it[i]=f(it[i])
 						end
 					else
 						local t={}
-						for i=9,12 do
+						for i=13,16 do
 							if it[i] and it[i]~=0 then
 								t[#t+1]=it[i]
 							end
@@ -505,7 +509,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 								if t[i] and t[i]~=0 then
 									local n,f=math.modf(t[i])
 									f=1-((1-f)*m)
-									it[8+i]=n+f
+									it[12+i]=n+f
 								end
 							end
 						end
@@ -522,7 +526,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			
 		end
 	end
-
+	end
 		
 		
 		return its

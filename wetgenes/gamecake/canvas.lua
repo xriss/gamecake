@@ -459,7 +459,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		gl.EnableVertexAttribArray(p:attrib("a_vertex"))
 		
 		if pnrm then
-			gl.VertexAttribPointer(p:attrib("a_normal"),3,gl.FLOAT,gl.TRUE,pstride,pnrm)
+			gl.VertexAttribPointer(p:attrib("a_normal"),3,gl.FLOAT,gl.FALSE,pstride,pnrm)
 			gl.EnableVertexAttribArray(p:attrib("a_normal"))
 		end
 
