@@ -644,7 +644,9 @@ function gles.GetExtensions()
 	end
 	table.sort(t)
 	for i=1,#t,4 do
-		print(string.format("GLEXT = %-32.32s %-32.32s %-32.32s %-32.32s",t[i] or "",t[i+1] or "",t[i+2] or "",t[i+3] or ""))
+		if gles.debug then -- only spew junk in debug mode
+			print(string.format("GLEXT = %-32.32s %-32.32s %-32.32s %-32.32s",t[i] or "",t[i+1] or "",t[i+2] or "",t[i+3] or ""))
+		end
 	end
 end
 

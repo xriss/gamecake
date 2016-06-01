@@ -497,6 +497,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 				if wwin.hardcore.sleep then
 					while (oven.frame_time-oven.frame_rate)>oven.win:time() do wwin.hardcore.sleep(0.0001) end -- sleep here until we need to update
 				else
+--print("NOSLEEP")
 					if (oven.frame_time-oven.frame_rate)>oven.win:time() then return end -- cant sleep, just skip
 				end
 							

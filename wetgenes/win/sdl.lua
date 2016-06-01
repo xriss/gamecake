@@ -48,7 +48,7 @@ sdl.video_init=function()
 end
 
 sdl.screen=function()
-	print("SDL screen")
+--	print("SDL screen")
 	sdl.video_init()
 	local b=SDL.getDisplayBounds(0)
 	
@@ -61,7 +61,7 @@ end
 
 
 sdl.create=function(t)
-	print("SDL create")
+--	print("SDL create")
 	sdl.video_init()
 
 --[[
@@ -93,7 +93,7 @@ sdl.create=function(t)
 end
 
 sdl.destroy=function(it)
-	print("SDL destroy")
+--	print("SDL destroy")
 	if it then
 		SDL.destroyWindow(it.win)
 	elseif sdl.it then
@@ -116,7 +116,7 @@ sdl.resize=function(it,w,h)
 end
 
 sdl.show=function(it,view)
-	print("SDL show")
+--	print("SDL show")
 	it=it or sdl.it
 	it.win:show()
 	
@@ -130,7 +130,7 @@ sdl.show=function(it,view)
 end
 
 sdl.context=function(it)
-	print("SDL context")
+--	print("SDL context")
 	it=it or sdl.it
 	it.ctx=assert(SDL.glCreateContext(it.win))
 	SDL.glMakeCurrent(it.win, it.ctx)
@@ -144,10 +144,12 @@ sdl.swap=function(it)
 end
 	
 
---sdl.sleep=function()
+sdl.sleep=function(ms)
 --	print("SDL sleep")
---	return nil
---end
+	SDL.delay(ms)
+	return nil
+end
+
 sdl.time=function()
 --	print("SDL time")
 	return SDL.getTicks()/1000
@@ -163,7 +165,7 @@ sdl.msg=function()
 end
 
 sdl.peek=function()
-	print("SDL peek")
+--	print("SDL peek")
 	sdl.msg_fetch()
 	return sdl.queue[1]
 end
