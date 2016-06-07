@@ -23,10 +23,20 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=2
-FILE_NAME_0=448;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fclapi%2Fpinstall.sh;0;4
-FILE_NAME_1=1317;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fmonster-mesh%2Fbox%2F03-box-init.sh;0;4
-FILE_NAME_2=230;Javascript;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fgit%2Fd-portal%2Fdstore%2Fjs%2Fdstore_pg.js;0;4
+current_page=12
+FILE_NAME_0=10161;XML;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fsync%2Fkriss%2Fblender%2Fgamecake%2Fdino18c.dae;0;4
+FILE_NAME_1=0;XML;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fsync%2Fkriss%2Fblender%2Fgamecake%2Fdino18a.dae;0;4
+FILE_NAME_2=11991;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fwetgenes%2Fgamecake%2Fspew%2Fgeom_dae.lua;0;4
+FILE_NAME_3=1971;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fswankypaint%2Flua%2Fswanky%2Fpaint%2Fuvmap.lua;0;4
+FILE_NAME_4=6914;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fwetgenes%2Fgamecake%2Fspew%2Fgeom.lua;0;4
+FILE_NAME_5=1506;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fwetgenes%2Fgamecake%2Fspew%2Fgeom_draw.lua;0;4
+FILE_NAME_6=8046;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fswankypaint%2Flua%2Fswanky%2Fpaint%2Fview.lua;0;4
+FILE_NAME_7=1878;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fddd%2Flua%2Finit.lua;0;4
+FILE_NAME_8=1666;GLSL;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fswankypaint%2Flua%2Fswanky%2Fpaint%2Fuvmap.glsl;0;4
+FILE_NAME_9=11107;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fwetgenes%2Fgamecake%2Fcanvas.lua;0;4
+FILE_NAME_10=15112;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fapps%2Fswankypaint%2Flua%2Fswanky%2Fpaint%2Fgui_page.lua;0;4
+FILE_NAME_11=66;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fsync%2Fapps%2Fupdate.sh;0;4
+FILE_NAME_12=749;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fkriss%2Fhg%2Fbin%2Flua%2Fgles.lua;0;4
 
 [VTE]
 last_dir=/home/kriss/hg/lua/lib_png

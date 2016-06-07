@@ -39,66 +39,69 @@ end
 
 if flavour_request then print("The requested flavour of win is "..(flavour_request or "any")) end
 
+-- probe for available hardcores, 
+local hardcores={}
+for _,it in ipairs({
+		{name="sdl",		noblock=false,	posix=false,	},
+		{name="emcc",		noblock=true,	posix=false,	},
+		{name="nacl",		noblock=true,	posix=false,	},
+		{name="android",	noblock=false,	posix=false,	},
+		{name="windows",	noblock=false,	posix=false,	},
+		{name="linux",		noblock=false,	posix=true,		},
+		{name="osx",		noblock=false,	posix=true,		},
+		{name="raspi",		noblock=false,	posix=true,		},
+	}) do
+	
 
--- these are special bindings since the web and android are "special"
-
-if not hardcore or flavour_request=="emcc" then
-	local suc,dat=pcall(function() return require("wetgenes.win.emcc") end )
-	if suc then hardcore=dat base.flavour="emcc" base.noblock=true end
-end
-
-if not hardcore or flavour_request=="nacl" then
-	local suc,dat=pcall(function() return require("wetgenes.win.nacl") end )
-	if suc then hardcore=dat base.flavour="nacl" base.noblock=true end
-end
-
-if not hardcore or flavour_request=="android"  then
-	local suc,dat=pcall(function() return require("wetgenes.win.android") end )
-	if suc then hardcore=dat base.flavour="android"
---		posix=require("wetgenes.win.posix")
+	local suc,lib=pcall(function() return require("wetgenes.win."..it.name) end )
+	
+	if suc then
+		it.lib=lib
+		hardcores[it.name]=it
+		
+		hardcores["any"]=it
 	end
+
 end
 
+-- choose hardcore
+local info
 
--- see if we have an SDL2 build to use
+if flavour_request and hardcores[flavour_request] then -- force this one
 
-if not hardcore or flavour_request=="sdl" then
-	local suc,dat=pcall(function() return require("SDL") end )
-	if suc then pcall(function()
-		hardcore=require("wetgenes.win.sdl")
-		base.flavour="sdl"
+	info=hardcores[flavour_request]
+
+end
+
+if (not info) and hardcores.sdl and ( pcall(function() return require("SDL") end ) ) then -- prefer sdl if we have it available
+
+	info=hardcores.sdl
+
+end
+
+if not info then info=hardcores.any end -- otherwise use any core
+
+
+if info then -- finish setup
+
+	base.flavour=info.name
+	base.noblock=info.noblock
+	hardcore=info.lib
+
+	if info.name=="sdl" then
+
 		base.sdl_platform=hardcore.platform
-	end ) end -- try SDL
-end
 
-
--- the bindings below are depreciated in favour of SDL above but can still be forced with a flavour request
-
-if not hardcore or flavour_request=="windows" then
-	local suc,dat=pcall(function() return require("wetgenes.win.windows") end )
-	if suc then hardcore=dat base.flavour="windows" end
-end
-
-if not hardcore or flavour_request=="linux" then
-	local suc,dat=pcall(function() return require("wetgenes.win.linux") end )
-	if suc then hardcore=dat base.flavour="linux"
-		posix=require("wetgenes.win.posix")
 	end
+	
+	if info.posix then
+
+		posix=require("wetgenes.win.posix")
+	
+	end
+	
 end
 
-if not hardcore or flavour_request=="osx"  then
-	local suc,dat=pcall(function() return require("wetgenes.win.osx") end )
-	if suc then hardcore=dat base.flavour="osx"
-		posix=require("wetgenes.win.posix")
-	end
-end
-
-if not hardcore or flavour_request=="raspi"  then
-	local suc,dat=pcall(function() return require("wetgenes.win.raspi") end )
-	if suc then hardcore=dat base.flavour="raspi"
-		posix=require("wetgenes.win.posix")
-	end
-end
 
 print("The flavour of win is "..base.flavour)
 
@@ -549,4 +552,39 @@ function base.get_memory_class(w)
 		return hardcore.get_memory_class()
 	end
 end
+
+
+-- clipboard (only SDL2 and only text)
+
+function base.get_clipboard()
+	if hardcore.get_clipboard then
+		return hardcore.get_clipboard()
+	end
+end
+
+function base.set_clipboard(w,s)
+	s=s or w -- first arg may be window for : calling
+	if hardcore.set_clipboard then
+		return hardcore.set_clipboard(s)
+	end
+end
+
+function base.has_clipboard()
+	if     hardcore.has_clipboard then
+		return hardcore.has_clipboard()
+	elseif hardcore.get_clipboard then
+		return hardcore.get_clipboard() and true or false
+	end
+end
+
+
+-- again SDL only
+-- x and y are windows coords, as if from an input mouse position
+
+function base.warp_mouse(w,x,y)
+	if     hardcore.warp_mouse then
+		return hardcore.warp_mouse(w[0],x,y)
+	end
+end
+
 return win
