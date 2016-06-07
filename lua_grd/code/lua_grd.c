@@ -1469,6 +1469,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"copy_data_layer",	lua_grd_copy_data_layer},
 
 		{"convert",			lua_grd_convert},
+		{"create_convert",	lua_grd_create_convert},
 
 		{"create_normal",	lua_grd_create_normal},
 		
