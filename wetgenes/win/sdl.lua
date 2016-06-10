@@ -64,6 +64,18 @@ sdl.create=function(t)
 --	print("SDL create")
 	sdl.video_init()
 
+	if not t.console then -- try and free the windows console unless asked not to
+		
+		pcall( function() -- we dont care if this fails, just means we are not running on windows
+		
+			local ffi=require("ffi")
+			ffi.cdef(" void FreeConsole(void); ")
+			ffi.C.FreeConsole()
+
+		end)
+		
+	end
+
 --[[
 	SDL.glSetAttribute(SDL.glAttr.RedSize, 1);
 	SDL.glSetAttribute(SDL.glAttr.GreenSize, 1);
