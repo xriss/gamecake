@@ -274,7 +274,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 	if core.GLES2 then -- use GLES2 prefix
 		code.defines.shaderprefix="#version 100\nprecision mediump float;\n"
 	else
-		code.defines.shaderprefix="#version 120\n"
+		code.defines.shaderprefix="#version 130\n"
 	end
 	
 -- forget cached info when we lose context, it is important to call this
