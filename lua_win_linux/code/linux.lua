@@ -45,5 +45,4 @@ for n,v in pairs(core) do -- check the core
 end
 
 
-
 return linux
