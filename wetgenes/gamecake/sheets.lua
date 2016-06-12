@@ -16,7 +16,7 @@ function M.bake(oven,sheets)
 local base_sheet={}
 local meta_sheet={__index=base_sheet}
 
-	local sheets={}
+	sheets=sheets or {}
 		
 	sheets.data={}
 	
