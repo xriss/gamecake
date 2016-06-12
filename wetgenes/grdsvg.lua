@@ -52,7 +52,12 @@ wgrdsvg.string=function(grd,opts)
 				}
 	
 	tab:push([[
-<svg width="{width}" height="{height}">
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="{width}"
+	height="{height}"
+	>
 ]],{width=grd.width*opts.scalex,height=grd.height*opts.scaley})
 	
 	tab:push([[
@@ -68,7 +73,7 @@ wgrdsvg.string=function(grd,opts)
 		
 		tab:push([[
 	.{class} { fill:{color}; fill-opacity:{alpha}; }
-]],{class=string.format("C%02X",i),color=string.format("#%02X%02X%02X",p[1],p[2],p[3]),alpha=string.format("%6f",p[4]/255)})
+]],{class=string.format("C%02X",i),color=string.format("#%02X%02X%02X",p[1],p[2],p[3]),alpha=string.format("%.3f",p[4]/255)})
 	end
 	tab:push([=[
 ]]></style>
