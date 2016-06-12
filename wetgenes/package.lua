@@ -28,27 +28,41 @@ luck.
 ]]
 M.reload=function(name)
 
-	local m=package.loaded[name] -- do we have this module
+	if name=="*" then
 	
-	if type(m)=="table" then -- can attempt a reload
-	
-		package.loaded[name]=nil -- forget old table
-		
-		local m2=require(name)
-		
-		for n,v in pairs(m2) do -- shallow copy new (hopefully mostly code) over old module replacing old values
-			m[n]=v
+		for n,v in pairs(package.loaded) do -- reload all baked modules
+			print("reload",n)
+			local suc,err=pcall(function()
+				M.reload(n)
+			end)
+			if not suc then print("IGNORE",err) end
 		end
-		
-		package.loaded[name]=m -- replace with old merged table
+	
+	else
 
-	else -- just a normal require
-
-		m=require(name)
+		local m=package.loaded[name] -- do we have this module
 		
+		if type(m)=="table" then -- can attempt a reload
+		
+			package.loaded[name]=nil -- forget old table
+			
+			local m2=require(name)
+			
+			for n,v in pairs(m2) do -- shallow copy new (hopefully mostly code) over old module replacing old values
+				m[n]=v
+			end
+			
+			package.loaded[name]=m -- replace with old merged table
+
+		else -- just a normal require
+
+			m=require(name)
+			
+		end
+
+		return m
+
 	end
-
-	return m
-
+	
 end
 

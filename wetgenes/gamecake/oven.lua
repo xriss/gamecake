@@ -313,11 +313,25 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 		function oven.reload(name)
 
-			local ret=oven.rebake(name) -- make sure it has been baked once ( probably just finds it)
+			if name=="*" then
+			
+				for n,v in pairs(oven.baked) do -- reload all baked modules
+					print("rebake",n)
+					local suc,err=pcall(function()
+						oven.reload(n)
+					end)
+					if not suc then print("IGNORE",err) end
+				end
+			
+			else
 
-			assert(wpackage.reload(name)).bake(oven,ret) -- then bake again
+				local ret=oven.rebake(name) -- make sure it has been baked once ( probably just finds it)
 
-			return ret
+				assert(wpackage.reload(name)).bake(oven,ret) -- then bake again
+
+				return ret
+			
+			end
 		end
 
 -- this performs a rebake and adds the baked module into every update/draw function
