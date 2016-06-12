@@ -3,9 +3,9 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---[[#wetgenes
+--[[#wetgenes.package
 
-	wetgenes=require("wetgenes")
+	wpackage=require("wetgenes.package")
 
 Some generic lowlevel functions for messing about with how lua works, 
 eg how modules are loaded.
@@ -16,9 +16,9 @@ eg how modules are loaded.
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
---[[#wetgenes.reload
+--[[#wetgenes.package.reload
 
-	local module=wetgenes.reload(modulename)
+	local module=wpackage.reload(modulename)
 
 A wrapper for require that forces a very dumb module reload by merging 
 a newly loaded module into the old module table if one already exists 
