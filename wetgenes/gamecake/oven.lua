@@ -18,6 +18,7 @@ possible ENV settings
 
 ]]
 
+local wpackage=require("wetgenes.package")
 local wzips=require("wetgenes.zips")
 local wsbox=require("wetgenes.sandbox")
 local wwin=require("wetgenes.win")
@@ -310,6 +311,14 @@ require("gles").CheckError() -- uhm this fixes an error?
 			return ret
 		end
 
+		function oven.reload(name)
+
+			local ret=oven.rebake(name) -- make sure it has been baked once ( probably just finds it)
+
+			assert(wpackage.reload(name)).bake(oven,ret) -- then bake again
+
+			return ret
+		end
 
 -- this performs a rebake and adds the baked module into every update/draw function
 -- so we may insert extra functionality without having to modify the running app

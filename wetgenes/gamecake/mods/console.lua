@@ -8,6 +8,8 @@ local hex=function(str) return tonumber(str,16) end
 
 local pack=require("wetgenes.pack")
 
+local wpackage=require("wetgenes.package")
+local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
@@ -106,6 +108,12 @@ function M.bake(oven,console)
 		
 		return table.concat(t," ") .. s
 	end
+
+	console.help.reload="Force reload a module."
+	console.call.reload=wpackage.reload
+
+	console.help.rebake="Force reload a baked module using global oven."
+	console.call.rebake=function(n) if wwin.oven then return wwin.oven.reload(n) end end
 
 	console.help.ls="List data currently set in the console environment."
 	console.call.ls=function(n)
