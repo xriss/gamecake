@@ -274,7 +274,14 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 	if core.GLES2 then -- use GLES2 prefix
 		code.defines.shaderprefix="#version 100\nprecision mediump float;\n"
 	else
-		code.defines.shaderprefix="#version 130\n"
+		code.defines_shaderprefix_tab={
+			"#version 120\n", -- seems to work on osx?
+			"#version 130\n", -- fails on osx?
+--			"#version xxx\n", -- test fail case recovery
+		}
+		code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
+		code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
+
 	end
 	
 -- forget cached info when we lose context, it is important to call this
@@ -310,13 +317,31 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 --print("Compiling shader "..sname,wstr.dump(s))
 		s[0]=gl.CreateShader(stype)
-		gl.ShaderSource(s[0],wstr.macro_replace(s.source,code.defines))
-		gl.CompileShader(s[0])
-		
-		if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
 
-			error( "failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. (gl.GetShaderInfoLog(s[0]) or "stoopid droid") .. "\n\n" )
-		end
+		repeat local done=false
+
+			gl.ShaderSource(s[0],wstr.macro_replace(s.source,code.defines))
+			gl.CompileShader(s[0])
+			
+			if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
+			
+				if code.defines_shaderprefix_idx and code.defines_shaderprefix_idx>1 then -- try and brute force a working version number 
+
+					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
+					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
+					
+				else -- give up
+
+					error( "failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. (gl.GetShaderInfoLog(s[0]) or "stoopid droid") .. "\n\n" )
+					done=true
+				
+				end
+
+			else
+				done=true
+			end
+			
+		until done
 	
 		return s[0]
 	end
