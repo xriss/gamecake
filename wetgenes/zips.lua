@@ -6,11 +6,14 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- handle zip files containing lua code and data
 
 local zip=require("zip")
+local wsandbox=require("wetgenes.sandbox")
 
 
 module("wetgenes.zips")
 
 files={} -- zip files for loader to search
+
+--dirs={} -- dirs to check in file system
 
 -- prefix to use when io.opening 
 ioprefix=""
@@ -132,6 +135,16 @@ function readfile(fname)
 		local d=f:read("*a")
 		f:close()
 		return d
+	end
+end
+
+--
+-- read the entire file and return the data
+--
+function readlson(fname)
+	local d=readfile(fname)
+	if d then
+		return wsandbox.lson(d) -- decode
 	end
 end
 

@@ -29,8 +29,10 @@ function wmenudrop.mouse(widget,act,_x,_y,keyname)
 end
 
 function wmenudrop.update(widget)
-	if widget.data and widget.data.class=="list" then
-		widget.text=widget.data.list[ widget.data.num ].str
+	if not widget.def.text then -- auto text only if not given
+		if widget.data and widget.data.class=="list" then
+			widget.text=widget.data.list[ widget.data.num ].str
+		end
 	end
 	return widget.meta.update(widget)
 end
@@ -49,6 +51,7 @@ function wmenudrop.drop(widget)
 		if hook=="click" then
 			widget.data:value(w.id)
 			widget:update()
+			widget:call_hook_later("menudrop",{value=widget.data:value()}) -- tell the master widget that we dropped and changed
 		end
 	end
 	local d={}
