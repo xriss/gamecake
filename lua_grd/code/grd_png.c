@@ -395,7 +395,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 		}
 	}
 	else
-	if( (g->bmap->fmt==GRD_FMT_U8_RGB) )
+	if( g->bmap->fmt==GRD_FMT_U8_RGB )
 	{
 		color_type = PNG_COLOR_TYPE_RGB;
 	}
