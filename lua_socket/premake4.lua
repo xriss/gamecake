@@ -9,6 +9,7 @@ excludes("git/src/unix.*")
 
 links { "lib_lua" }
 
+defines "LUA_VERSION_NUM=501"
 defines "LUASOCKET_API=extern"
 defines "LUASOCKET_EXPORTS"
 
@@ -36,11 +37,12 @@ end
 
 
 project "lua_mime"
-language "C++"
-files { "git/src/mime.c" ,"git/src/mime.h" }
+language "C"
+files { "git/src/mime.c" ,"git/src/mime.h" , "git/src/compat.c" , "git/src/compat.h" }
 
 links { "lib_lua" }
 
+defines "LUA_VERSION_NUM=501"
 defines "MIME_API=extern"
 defines "MIME_EXPORTS"
 
