@@ -24,7 +24,7 @@ fi
 rm -rf LuaJIT-2.1.0-beta2
 tar zxvf LuaJIT-2.1.0-beta2.tar.gz
 cd LuaJIT-2.1.0-beta2
-make && sudo make install
+make -j4 && sudo make install
 cd ..
 
 #force static link by deleting the .so
@@ -38,7 +38,7 @@ sudo rm -f /usr/local/lib/libluajit-5.1.dylib
 rm -rf premake-4.4-beta5
 unzip premake-4.4-beta5-src.zip
 cd premake-4.4-beta5/build/gmake.unix
-make
+make -j4
 cd ../../..
 sudo cp premake-4.4-beta5/bin/release/premake4 /usr/local/bin/
 
@@ -52,7 +52,7 @@ cd SDL2-2.0.4
  --enable-alsa --enable-alsa-shared --enable-pulseaudio --enable-pulseaudio-shared --enable-x11-shared \
  --enable-sdl-dlopen --disable-input-tslib
 
-make
+make -j4
 sudo make install
 cd ..
 
