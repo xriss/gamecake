@@ -133,11 +133,10 @@ elseif OSX then
 
 	files { "./lua.c" }
 
---	if CPU=="64" then
---		libdirs { "/usr/local/64/lib/" }
---	else
-		libdirs { "/usr/local/lib/" }
---	end
+	if CPU=="64" then
+		libdirs { "/usr/local/64/lib/" }
+	end
+	libdirs { "/usr/local/lib/" }
 
 	links { "luajit-5.1" }
 	links { "SDL2" }	
@@ -146,6 +145,7 @@ elseif OSX then
 	links { "Carbon.framework" }
 	links { "IOKit.framework" }
 	links { "CoreAudio.framework" }
+	links { "CoreVideo.framework" }
 	links { "AudioToolbox.framework" }
 	links { "AudioUnit.framework" }
 
