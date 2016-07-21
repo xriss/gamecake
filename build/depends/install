@@ -12,9 +12,9 @@ fi
 
 # make a version of luajit and install it
 
-rm -rf LuaJIT-2.1.0-beta1
-tar zxvf LuaJIT-2.1.0-beta1.tar.gz
-cd LuaJIT-2.1.0-beta1
+rm -rf LuaJIT-2.1.0-beta2
+tar zxvf LuaJIT-2.1.0-beta2.tar.gz
+cd LuaJIT-2.1.0-beta2
 make && sudo make install
 cd ..
 
