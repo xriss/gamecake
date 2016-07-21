@@ -66,6 +66,9 @@ function M.bake(opts)
 	local oven={}
 	wwin.oven=wwin.oven or oven -- store a global oven on first use
 
+
+	oven.enable_close_window=true -- let the close button, close the window (otherwise you should catch close messages in app)
+
 		oven.opts=opts or {}
 		
 		if type(opts[1])=="table" then -- probably passed in from nacl
@@ -682,7 +685,9 @@ end
 					end
 
 					if m.class=="close" then -- window has been closed so do a shutdown
-						oven.next=true
+						if oven.enable_close_window then
+							oven.next=true
+						end
 					end
 
 					if m.class=="app" then -- androidy
