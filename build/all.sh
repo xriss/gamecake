@@ -17,6 +17,11 @@ cd `dirname $0`
 ../../lua/nacl/make clean
 ../../lua/nacl/make release gamecake
 
+#build emscipten
+
+../../lua/emcc/make clean
+../../lua/emcc/make release gamecake
+
 # build 64bit ubuntu 12.04 version
 
 ../../lua/vbox_1204_64/make
