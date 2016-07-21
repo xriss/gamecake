@@ -4,28 +4,7 @@ cd `dirname $0`
 test=`getconf LONG_BIT`
 if [ "$test" = "64" ] ; then
 	./make.x64 $*
-	exit
+else
+	./make.x32 $*
 fi
-
-cd ..
-
-cpu=32
-makeopts="config=release_clang"
-if [ "$1" = "debug" ] ; then
-makeopts="config=debug_clang"
-fi
-
-
-if [ "$1" = "clean" ] ; then
-
-        rm -rf build-gmake-clang-$cpu
-        exit
-fi
-
-
-
-premake4 gmake clang-$cpu || exit 1
-cd build-gmake-clang-$cpu
-make $makeopts $2 $3 $4 || exit 1
-cd ..
-
+k

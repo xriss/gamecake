@@ -17,8 +17,8 @@ fi
 
 
 
-build/premake4 gmake clang-$cpu
+premake4 gmake clang-$cpu
 cd build-gmake-clang-$cpu
-make $makeopts $2 $3 $4
+make -j4 $makeopts $2 $3 $4
 cd ..
 
