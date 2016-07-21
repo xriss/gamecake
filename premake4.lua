@@ -340,6 +340,8 @@ elseif RASPI then
 	defines "RASPI"
 
 	defines("LUA_USE_POSIX")
+
+	buildoptions{ "-mtune=generic" }
 	
 	
 elseif ANDROID then
@@ -363,14 +365,14 @@ AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
 		
 		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/x86")
 
---		buildoptions{ "-m32" }
+		buildoptions{ "-mtune=generic" }
 --		linkoptions{ "-m32" }
 		
 	elseif CPU=="arm" then
 	
 		platforms { "android" } --hax
 		
-		buildoptions{ "-mthumb" }
+		buildoptions{ "-mthumb" , "-mtune=generic" }
 		
 		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi")
 		
@@ -378,7 +380,7 @@ AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
 	
 		platforms { "android" } --hax
 
-		buildoptions{ "-march=armv7-a" , "-mfloat-abi=softfp" , "-mfpu=vfpv3" }
+		buildoptions{ "-march=armv7-a" , "-mfloat-abi=softfp" , "-mfpu=vfpv3" ,"-mtune=generic"}
 		linkoptions{ "--fix-cortex-a8" }
 
 		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi-v7a")
@@ -407,6 +409,9 @@ elseif WINDOWS then
 		
 		linkoptions { "-static-libgcc" }
 		
+		buildoptions{"-mtune=generic"}
+		linkoptions {"-mtune=generic"}
+
 	end
 
 elseif OSX then
@@ -427,13 +432,13 @@ elseif OSX then
 
 	if CPU=="32" then
 	
-		buildoptions{"-m32 -msse -msse2"}
-		linkoptions {"-m32 -msse -msse2"}
+		buildoptions{"-m32 -msse -msse2 -mtune=generic"}
+		linkoptions {"-m32 -msse -msse2 -mtune=generic"}
 		
 	elseif CPU=="64" then
 	
-		buildoptions{"-m64"}
-		linkoptions {"-m64"}
+		buildoptions{"-m64 -mtune=generic"}
+		linkoptions {"-m64 -mtune=generic"}
 		
 	end
 	
@@ -467,13 +472,13 @@ elseif NIX then
 
 	if CPU=="32" then
 	
-		buildoptions{"-m32 -msse -msse2"}
-		linkoptions{"-m32 -msse -msse2"}
+		buildoptions{"-m32 -msse -msse2 -mtune=generic"}
+		linkoptions{"-m32 -msse -msse2 -mtune=generic"}
 		
 	elseif CPU=="64" then
 	
-		buildoptions{"-m64"}
-		linkoptions{"-m64"}
+		buildoptions{"-m64 -mtune=generic"}
+		linkoptions{"-m64 -mtune=generic"}
 	
 	elseif CPU=="native" then
 	
