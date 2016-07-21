@@ -22,13 +22,13 @@ cd `dirname $0`
 ../../lua/emcc/make clean
 ../../lua/emcc/make release gamecake
 
-# build 64bit ubuntu 14.04 version
+# build 64bit ubuntu 12.04 version
 
-../../lua/vbox_1404_64/make
+../../lua/vbox_1204_64/make
 
-#build 32bit ubuntu 14.04 version 
+#build 32bit ubuntu 12.04 version 
 
-../../lua/vbox_1404_32/make
+../../lua/vbox_1204_32/make
 
 #build osx version 64 (dont think anything uses 32 anymore)
 
