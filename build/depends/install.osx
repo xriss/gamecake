@@ -6,13 +6,13 @@ cd `dirname $0`
 rm -rf LuaJIT-2.1.0-beta2
 tar zxvf LuaJIT-2.1.0-beta2.tar.gz
 cd LuaJIT-2.1.0-beta2
-#make CC="gcc -m32" && sudo make install PREFIX=/usr/local
-#make clean
-#sudo mkdir /usr/local/64
+make CC="gcc -m32" && sudo make install PREFIX=/usr/local
+make clean
+sudo mkdir -p /usr/local/64
 make CC="gcc -m64" && sudo make install PREFIX=/usr/local/64
 cd ..
 
-#force static link by deleting the .so
+#force static link by deleting the .dylib
 sudo rm -f /usr/local/64/lib/libluajit-5.1.dylib
 sudo rm -f /usr/local/lib/libluajit-5.1.dylib
 
