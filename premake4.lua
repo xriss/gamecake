@@ -341,7 +341,7 @@ elseif RASPI then
 
 	defines("LUA_USE_POSIX")
 
-	buildoptions{ "-mtune=generic" }
+--	buildoptions{ "-mtune=generic" }
 	
 	
 elseif ANDROID then
@@ -372,7 +372,7 @@ AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
 	
 		platforms { "android" } --hax
 		
-		buildoptions{ "-mthumb" , "-mtune=generic" }
+		buildoptions{ "-mthumb"  }
 		
 		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi")
 		
@@ -380,7 +380,7 @@ AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
 	
 		platforms { "android" } --hax
 
-		buildoptions{ "-march=armv7-a" , "-mfloat-abi=softfp" , "-mfpu=vfpv3" ,"-mtune=generic"}
+		buildoptions{ "-march=armv7-a" , "-mfloat-abi=softfp" , "-mfpu=vfpv3" }
 		linkoptions{ "--fix-cortex-a8" }
 
 		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi-v7a")
