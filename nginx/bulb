@@ -8,5 +8,6 @@ cd ..
 
 cd ../lua
 nacl/make
+emcc/make
 
 

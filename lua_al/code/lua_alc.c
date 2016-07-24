@@ -461,7 +461,7 @@ static int lua_alc_Get (lua_State *l)
 {	
 ALCdevice *device=0;
 
-char flag;
+char flag=' ';
 int num;
 
 int vi[16]={0};
