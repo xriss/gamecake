@@ -24,7 +24,10 @@
 extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
 #define SIZEOF_VB (6*5*4*256)
-static unsigned char vb[SIZEOF_VB]; // vertex buffer space
+
+// vertex buffer space
+//static unsigned char vb[SIZEOF_VB]; // this one breaks when floats are written to it with emcc?
+static float vb[SIZEOF_VB/4]; // this one works with emcc?
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -146,7 +149,7 @@ int i;
 unsigned char *buf=0;
 int len=0;
 
-unsigned char *s;
+unsigned char *s,*text;
 unsigned char c;
 struct gamecake_fontdata_char *ch;
 
@@ -163,16 +166,17 @@ int fp_len;
 int vid,tid;
 
 // hacks
-	vid=(int)luaL_checknumber(l,3);
-	tid=(int)luaL_checknumber(l,4);
+//	vid=(int)luaL_checknumber(l,3);
+//	tid=(int)luaL_checknumber(l,4);
 
 	lua_rawgeti(l,1,0); // get our userdata if it already exists
 	ud=(struct gamecake_canvas_font *)lua_toluserdata(l,-1,0);
 	lua_pop(l,1);
 	
-	s=(unsigned char *)luaL_checkstring(l,2);
+	text=(unsigned char *)luaL_checkstring(l,2);
+	s=text;
 	
-	buf=vb;
+	buf=(unsigned char *)vb;
 	len=SIZEOF_VB;
 	
 	fp=(float *)buf;
@@ -217,24 +221,11 @@ int vid,tid;
 			break;
 		}
 	}
-
-// assume stuff has been setup
-
-//	glBufferData(GL_ARRAY_BUFFER,fp_len*4,(float *)buf,GL_DYNAMIC_DRAW);
-	glBufferData(GL_ARRAY_BUFFER,fp_len*4,(float *)buf,GL_STREAM_DRAW);
-
-	glVertexAttribPointer(vid,3,GL_FLOAT,GL_FALSE,5*4,(void*)(0));
-	glEnableVertexAttribArray(vid);
 	
-	glVertexAttribPointer(tid,2,GL_FLOAT,GL_FALSE,5*4,(void*)(3*4));
-	glEnableVertexAttribArray(tid);
+	lua_pushlightuserdata(l,vb);
+	lua_pushnumber(l,fp_len);
 
-//	printf(" %d ",fp_len/5);
-	glDrawArrays(GL_TRIANGLES,0,fp_len/5);
-	
-//printf("font draw %d\n",fp_len/5);
-
-	return 0;
+	return 2;
 }
 
 

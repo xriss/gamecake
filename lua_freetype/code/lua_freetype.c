@@ -65,35 +65,35 @@ int lua_freetype_getinfo (lua_State *l, part_ptr p, int tab)
 		if(p->face)
 		{
 			
-lua_pushliteral(l,"num_glyphs"); if(p->face) { lua_pushnumber(l,p->face->num_glyphs);  } else { lua_pushnil(l); } lua_rawset(l,tab);
-lua_pushliteral(l,"family_name");if(p->face) { lua_pushstring(l,p->face->family_name); } else { lua_pushnil(l); } lua_rawset(l,tab);
-lua_pushliteral(l,"style_name"); if(p->face) { lua_pushstring(l,p->face->style_name);  } else { lua_pushnil(l); } lua_rawset(l,tab);
+lua_pushliteral(l,"num_glyphs"); if(p->face             ) { lua_pushnumber(l,p->face->num_glyphs);  } else { lua_pushnil(l); } lua_rawset(l,tab);
+lua_pushliteral(l,"family_name");if(p->face->family_name) { lua_pushstring(l,p->face->family_name); } else { lua_pushnil(l); } lua_rawset(l,tab);
+lua_pushliteral(l,"style_name"); if(p->face->style_name ) { lua_pushstring(l,p->face->style_name);  } else { lua_pushnil(l); } lua_rawset(l,tab);
 
 			lua_pushliteral(l,"font_box");
-			if(p->face)
-			{
+//			if(p->face->bbox)
+//			{
 				lua_newtable(l);
 				lua_pushliteral(l,"xmin"); lua_pushnumber(l,p->face->bbox.xMin/64.0); lua_rawset(l,-3);
 				lua_pushliteral(l,"xmax"); lua_pushnumber(l,p->face->bbox.xMax/64.0); lua_rawset(l,-3);
 				lua_pushliteral(l,"ymin"); lua_pushnumber(l,p->face->bbox.yMin/64.0); lua_rawset(l,-3);
 				lua_pushliteral(l,"ymax"); lua_pushnumber(l,p->face->bbox.yMax/64.0); lua_rawset(l,-3);
-			}
-			else
-			{
-				lua_pushnil(l);
-			}
+//			}
+//			else
+//			{
+//				lua_pushnil(l);
+//			}
 			lua_rawset(l,tab);
 
 
 			if(p->face->glyph)
 			{
-				lua_pushliteral(l,"bitmap_left"); lua_pushnumber(l,p->face->glyph->bitmap_left); lua_rawset(l,tab);
-				lua_pushliteral(l,"bitmap_top"); lua_pushnumber(l,p->face->glyph->bitmap_top); lua_rawset(l,tab);
-				lua_pushliteral(l,"bitmap_width"); lua_pushnumber(l,p->face->glyph->bitmap.width); lua_rawset(l,tab);
-				lua_pushliteral(l,"bitmap_height"); lua_pushnumber(l,p->face->glyph->bitmap.rows); lua_rawset(l,tab);
+				lua_pushliteral(l,"bitmap_left");   lua_pushnumber(l,p->face->glyph->bitmap_left);  lua_rawset(l,tab);
+				lua_pushliteral(l,"bitmap_top");    lua_pushnumber(l,p->face->glyph->bitmap_top);   lua_rawset(l,tab);
+				lua_pushliteral(l,"bitmap_width");  lua_pushnumber(l,p->face->glyph->bitmap.width); lua_rawset(l,tab);
+				lua_pushliteral(l,"bitmap_height"); lua_pushnumber(l,p->face->glyph->bitmap.rows);  lua_rawset(l,tab);
 				
-				lua_pushliteral(l,"advance"); lua_pushnumber(l,p->face->glyph->linearHoriAdvance/65536.0); lua_rawset(l,tab);
-				lua_pushliteral(l,"advance_vert"); lua_pushnumber(l,p->face->glyph->linearVertAdvance/65536.0); lua_rawset(l,tab);
+				lua_pushliteral(l,"advance");       lua_pushnumber(l,p->face->glyph->linearHoriAdvance/65536.0); lua_rawset(l,tab);
+				lua_pushliteral(l,"advance_vert");  lua_pushnumber(l,p->face->glyph->linearVertAdvance/65536.0); lua_rawset(l,tab);
 			}
 
 		}
