@@ -76,6 +76,8 @@ end
 if (not info) and hardcores.sdl and ( pcall(function() return require("SDL") end ) ) then -- prefer sdl if we have it available
 
 	info=hardcores.sdl
+	
+	if hardcores.emcc then info=hardcores.emcc end -- emcc is a tweaked sdl and should be used instead
 
 end
 
@@ -104,6 +106,7 @@ end
 
 
 print("The flavour of win is "..base.flavour)
+print(hardcores)
 
 win.hardcore=hardcore
 win.softcore=softcore

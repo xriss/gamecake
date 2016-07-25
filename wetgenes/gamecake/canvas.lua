@@ -68,24 +68,24 @@ font.set = function(dat)
 	font.add=0
 	font.x=0
 	font.y=0
-	if gl.patch_functions_method~="disable" then
+--	if gl.patch_functions_method~="disable" then
 		core.canvas_font_sync(font)
-	end
+--	end
 end
 
 font.set_size = function(size,add)
 	font.size=size
 	font.add=add or 0 -- clear the x space tweak
-	if gl.patch_functions_method~="disable" then
+--	if gl.patch_functions_method~="disable" then
 		core.canvas_font_sync(font)
-	end
+--	end
 end
 font.set_xy = function(x,y)
 	font.x=x or font.x
 	font.y=y or font.y
-	if gl.patch_functions_method~="disable" then
+--	if gl.patch_functions_method~="disable" then
 		core.canvas_font_sync(font)
-	end
+--	end
 end
 
 font.xindex=function(text,px,dat,size,add)
@@ -239,28 +239,16 @@ font.draw = function(text)
 
 	if font.cache then
 		return font.cache_predraw(text)
-	else
--- always use cache code to draw... EMCC breaks if I use core.canvas_font_draw 
-		local f=font.cache_begin()
-		font.cache_predraw(text)
-		f()
-		return
 	end
-	
-	local p=gl.program("pos_tex")
-	
-	gl.UseProgram( p[0] )
-	gl.UniformMatrix4f( p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
-	gl.UniformMatrix4f( p:uniform("projection"), gl.matrix(gl.PROJECTION) )	
-	gl.Uniform4f( p:uniform("color"), gl.cache.color )
 
-	images.bind(font.dat.images[1])
-	
-	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
 
-	if gl.patch_functions_method~="disable" then
-		core.canvas_font_draw(font,text,p:attrib("a_vertex"),p:attrib("a_texcoord"))
+	local dataraw,datalen=core.canvas_font_draw(font,text)
+	if datalen/5>=1 then -- need something to draw
+		images.bind(font.dat.images[1])
+		local it=flat.array_predraw({fmt="xyzuv",dataraw=dataraw,datalen=datalen,array=gl.TRIANGLES})
+		it.draw(cb)
 	end
+
 end
 
 
@@ -421,7 +409,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 	
 	local data=it.data
-	local datalen=#data
+	local datalen=it.datalen or #data
 	local datasize=datalen*4 -- we need this much vdat memory
 	canvas.vdat_check(datasize) -- make sure we have space in the buffer
 	
@@ -445,6 +433,9 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 		if it.vb then -- use a precached buffer
 			it.vb:bind()
+		elseif it.dataraw then -- use prebuilt data
+			gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
+			gl.BufferData(gl.ARRAY_BUFFER,datasize,it.dataraw,gl.DYNAMIC_DRAW)
 		else
 			pack.save_array(data,"f32",0,datalen,canvas.vdat)
 			gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())

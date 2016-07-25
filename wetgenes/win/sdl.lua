@@ -88,9 +88,11 @@ sdl.create=function(t)
 	sdl.it=it
 	
 	local flags={ SDL.window.Resizable , SDL.window.OpenGL }
+--[[
 	if     view=="full" then	 flags={SDL.window.Desktop,SDL.window.OpenGL}
 	elseif view=="max"  then	 flags={SDL.window.Maximized,SDL.window.OpenGL}
 	end
+]]
 	
 	it.win= assert(SDL.createWindow {
 		title   = t.title,

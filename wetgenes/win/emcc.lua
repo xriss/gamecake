@@ -26,7 +26,9 @@ emcc.js_post=function(m,d)
 	return core.js_post(m,d) -- just a string
 end
 
-
+emcc.show=function(it,view)
+	return sdl.show(it) -- ignore fullscreen flag
+end
 
 --
 -- export all core functions not wrapped above
