@@ -26,8 +26,8 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 #define SIZEOF_VB (6*5*4*256)
 
 // vertex buffer space
-//static unsigned char vb[SIZEOF_VB]; // this one breaks when floats are written to it with emcc?
-static float vb[SIZEOF_VB/4]; // this one works with emcc?
+static unsigned char vb[SIZEOF_VB] __attribute__((aligned (16)));
+
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
