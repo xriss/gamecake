@@ -126,6 +126,7 @@ chars.spanish={
 }
 
 local all={}
+for i=1,127 do local b=string.char(i) all[b]=b end -- all 7bit chars map to themselves
 for n,v in pairs(chars) do
 	for c1,c2 in pairs(v) do
 		all[c1]=c2
@@ -233,14 +234,13 @@ end
 tongues.translate=function(str)
 	tongues.used[str]=true
 	local s=tongues.lookup[str] or str
-
 -- remove high UTF8 codes preferably by stripping diacritics
 	if tongues.strip_UTF8 then
-		s=s:gsub("[\xC2-\xF4][\x80-\xBF]*",function(su)
+		s=s:gsub("([%z\1-\127\194-\244][\128-\191]*)",function(su)
 			return chars.all[su] or ""
 		end)
 	end
-
+	
 	return s
 end
 
