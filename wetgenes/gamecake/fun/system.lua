@@ -11,6 +11,26 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 function M.bake(oven,system)
 
+	system.charmap=oven.rebake("wetgenes.gamecake.fun.charmap")
+	system.codemap=oven.rebake("wetgenes.gamecake.fun.codemap")
+	system.screen =oven.rebake("wetgenes.gamecake.fun.screen")
+
+	system.config={}
+	system.components={}
+	
+	system.opts=oven.opts.fun or {} -- place your fun system setup in lua/init.lua -> opts.fun={}
+
+
+system.setup=function()
+end
+system.clean=function()
+end
+system.msg=function(m)
+end
+system.update=function()
+end
+system.draw=function()
+end
 
 	return system
 end
