@@ -4,11 +4,16 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
+local wgrd=require("wetgenes.grd")
+local wstr=require("wetgenes.string")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 local s={}
 
+-- export the raw strings
+M.textmap=s;
 
 -- Numbers
 
@@ -231,11 +236,11 @@ s["N"]=[[
 ]]
 
 s["O"]=[[
-. # . . 
+. # # . 
 # . # . 
 # . # . 
 # . # . 
-. # . . 
+# # . . 
 . . . . 
 ]]
 
@@ -249,11 +254,11 @@ s["P"]=[[
 ]]
 
 s["Q"]=[[
-. # . . 
-# . # . 
-# . # . 
-# . # . 
 . # # . 
+# . # . 
+# . # . 
+# # # . 
+# # # . 
 . . . . 
 ]]
 
@@ -342,7 +347,7 @@ s["Z"]=[[
 
 s["a"]=[[
 . . . . 
-# # # . 
+# # . . 
 . . # . 
 # # # . 
 # # # . 
@@ -351,8 +356,8 @@ s["a"]=[[
 
 s["b"]=[[
 # . . . 
-# . . . 
 # # # . 
+# . # . 
 # . # . 
 # # # . 
 . . . . 
@@ -360,17 +365,17 @@ s["b"]=[[
 
 s["c"]=[[
 . . . . 
-. # # . 
+# # # . 
 # . . . 
 # . . . 
-. # # . 
+# # # . 
 . . . . 
 ]]
 
 s["d"]=[[
 . . # . 
-. . # . 
 # # # . 
+# . # . 
 # . # . 
 # # # . 
 . . . . 
@@ -381,7 +386,7 @@ s["e"]=[[
 # # # . 
 # # # . 
 # . . . 
-# # # . 
+. # # . 
 . . . . 
 ]]
 
@@ -399,22 +404,22 @@ s["g"]=[[
 # # # . 
 # # # . 
 . . # . 
-# # # . 
+# # . . 
 . . . . 
 ]]
 
 s["h"]=[[
 # . . . 
-# . . . 
 # # # . 
+# . # . 
 # . # . 
 # . # . 
 . . . . 
 ]]
 
 s["i"]=[[
-. # . . 
 . . . . 
+. # . . 
 . # . . 
 . # . . 
 . # . . 
@@ -422,8 +427,8 @@ s["i"]=[[
 ]]
 
 s["j"]=[[
-. . # . 
 . . . . 
+. . # . 
 . . # . 
 # . # . 
 # # # . 
@@ -432,9 +437,9 @@ s["j"]=[[
 
 s["k"]=[[
 # . . . 
-# . . . 
 # . # . 
 # # . . 
+# . # . 
 # . # . 
 . . . . 
 ]]
@@ -468,10 +473,10 @@ s["n"]=[[
 
 s["o"]=[[
 . . . . 
-. # . . 
+# # # . 
 # . # . 
 # . # . 
-. # . . 
+# # # . 
 . . . . 
 ]]
 
@@ -533,7 +538,7 @@ s["v"]=[[
 . . . . 
 # . # . 
 # . # . 
-. # . . 
+# . # . 
 . # . . 
 . . . . 
 ]]
@@ -759,7 +764,7 @@ s[">"]=[[
 
 s["?"]=[[
 # # # . 
-. . # . 
+# . # . 
 . # # . 
 . # . . 
 . # . . 
@@ -767,11 +772,11 @@ s["?"]=[[
 ]]
 
 s["@"]=[[
-# # # . 
+. # # . 
 # . # . 
 # # # . 
 # . . . 
-# # # . 
+. # # . 
 . . . . 
 ]]
 
@@ -873,3 +878,41 @@ s["~"]=[[
 . . . . 
 . . . . 
 ]]
+
+-- build a bitmap which is a 128x1 array of characters.
+M.grd_mask=wgrd.create("U8_RGBA_PREMULT",128*4,1*6,1);
+
+-- calling this function repeatedly is inefficient but we do not care
+local solid_check=function(idx,x,y)
+	local m=s[string.char(idx)]
+	if m then
+		local lines=wstr.split(m,"\n")
+		local line=lines[y+1]
+		if line then
+			local c=line:sub(1+x*2,1+x*2)
+			if c=="#" then return true end
+		end
+	end
+	return false
+end
+
+for i=0,127 do -- import each ascii char from textmaps above
+	local t={}
+	for y=0,5 do
+		for x=0,3 do
+			if solid_check(i,x,y) then
+				t[#t+1]=255
+				t[#t+1]=255
+				t[#t+1]=255
+				t[#t+1]=255
+			else
+				t[#t+1]=0
+				t[#t+1]=0
+				t[#t+1]=0
+				t[#t+1]=0
+			end
+		end
+	end
+	M.grd_mask:pixels(i*4,0,4,6,t)
+end
+
