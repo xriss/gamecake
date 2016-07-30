@@ -11,7 +11,13 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 function M.bake(oven,system)
 
-	system.charmap=oven.rebake("wetgenes.gamecake.fun.charmap")
+	local gl=oven.gl
+	local cake=oven.cake
+	local canvas=cake.canvas
+	local flat=canvas.flat
+
+
+	system.charmap=oven.rebake("wetgenes.gamecake.fun.charmap").setup()
 	system.codemap=oven.rebake("wetgenes.gamecake.fun.codemap")
 	system.screen =oven.rebake("wetgenes.gamecake.fun.screen")
 
@@ -49,6 +55,8 @@ print("system setup")
 		end
 		
 	end
+	
+	assert(system.components.screen,"need a screen component")
 
 end
 

@@ -7,6 +7,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local zip=require("zip")
 local wsandbox=require("wetgenes.sandbox")
+local apps ; pcall( function() apps=require("apps") end )
+local core ; pcall( function() core=require("wetgenes.gamecake.core") end )
 
 
 module("wetgenes.zips")
@@ -17,6 +19,9 @@ files={} -- zip files for loader to search
 
 -- prefix to use when io.opening 
 ioprefix=""
+
+-- bindir for second chance
+binprefix=apps and apps.find_bin()
 
 
 -- convert a sensible name into something we can store in an apk
@@ -122,7 +127,15 @@ function open(fname)
 			end
 		end
 	end
-	return io.open(ioprefix..fname,"rb") -- also try the filesystem
+	local ret
+
+	ret=io.open(ioprefix..fname,"rb") -- also try the filesystem
+	if ret then return ret end
+
+	ret=io.open(binprefix..fname,"rb") -- also try the filesystem
+	if ret then return ret end
+
+	return ret
 end
 
 
@@ -135,6 +148,10 @@ function readfile(fname)
 		local d=f:read("*a")
 		f:close()
 		return d
+	end
+	
+	if core then -- final attempt at getting a cached string
+		return core.get_cache_string(fname)
 	end
 end
 

@@ -22,17 +22,22 @@ module("apps")
 -- get/set current dir
 --
 local get_cd=function()
-	local lfs=require("lfs")
 
-	return string.gsub(lfs.currentdir(),'\\','/')
+	local lfs ; pcall( function() lfs=require("lfs") end )
+
+	if lfs then	return string.gsub(lfs.currentdir(),'\\','/') end
+	
+	return "." -- lfs is not available
 
 end
+
 local set_cd=function(str)
 	local lfs=require("lfs")
 
 	lfs.chdir(str)
 
 end
+
 local file_exists=function(str)
 	local fp=io.open(str,"r")
 	if fp then fp:close() return true end
