@@ -132,8 +132,10 @@ function open(fname)
 	ret=io.open(ioprefix..fname,"rb") -- also try the filesystem
 	if ret then return ret end
 
-	ret=io.open(binprefix..fname,"rb") -- also try the filesystem
-	if ret then return ret end
+	if binprefix then
+		ret=io.open(binprefix..fname,"rb") -- final try of the filesystem
+		if ret then return ret end
+	end
 
 	return ret
 end
