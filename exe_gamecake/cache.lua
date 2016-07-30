@@ -15,7 +15,15 @@ function dofilename(i,v)
 end
 
 
+function dorawfilename(i,v)
+	local m=v:sub(v:find("/lua/")+5,-1) -- strip upto this starting part of the path (mostly works)
+	m="lua/"..m
+	mod_files[m]=v
+--	print(m,v)
+end
+
 for i,v in ipairs( os.matchfiles("../../bin/lua/**.lua") or {} ) do dofilename(i,v) end
+for i,v in ipairs( os.matchfiles("../../bin/lua/**.glsl") or {} ) do dorawfilename(i,v) end
 
 
 for i,v in ipairs( LUA_CACHE_FILES or {} ) do
