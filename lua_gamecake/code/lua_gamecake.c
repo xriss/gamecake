@@ -29,6 +29,8 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 static unsigned char vb[SIZEOF_VB] __attribute__((aligned (16)));
 
 
+extern const char* wetgenes_cache_lua_mods[];
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -229,6 +231,30 @@ int vid,tid;
 }
 
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// load a cached string, probably a lua file (using module nameing) or a text datafile
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gamecake_get_cache_string(lua_State *l)
+{
+	const char *name = (const char *)luaL_checkstring(l, 1);
+
+	int i;
+	for(i=0;wetgenes_cache_lua_mods[i];i+=2)
+	{
+		if(strcmp(name,wetgenes_cache_lua_mods[i])==0)
+		{
+			lua_pushstring(l,wetgenes_cache_lua_mods[i+1]);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -238,6 +264,8 @@ LUALIB_API int luaopen_wetgenes_gamecake_core (lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
+		{"get_cache_string",		lua_gamecake_get_cache_string},
+
 		{"fontdata_sync",			lua_gamecake_fontdata_sync},
 
 		{"canvas_font_sync",		lua_gamecake_canvas_font_sync},
