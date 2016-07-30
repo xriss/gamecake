@@ -165,6 +165,9 @@ local import=[[
 #define	GRD_FMT_U16_RGBA_5650						0x0033
 #define	GRD_FMT_U16_RGBA_5650_PREMULT				0x0133
 
+// u8[2]  luminance and alpha
+#define	GRD_FMT_U8_LUMINANCE_ALPHA					0x0034
+#define	GRD_FMT_U8_LUMINANCE_ALPHA_PREMULT			0x0134
 
 
 

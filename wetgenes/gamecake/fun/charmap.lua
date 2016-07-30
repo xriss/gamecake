@@ -10,6 +10,12 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 function M.bake(oven,charmap)
 
+	charmap.create=function(it,opts)
+		it=it or {}
+		it.opts=opts
+		
+		return it
+	end
 
 	return charmap
 end

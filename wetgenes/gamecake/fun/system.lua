@@ -22,14 +22,67 @@ function M.bake(oven,system)
 
 
 system.setup=function()
+
+print("system setup")
+	for i,v in ipairs(oven.opts.fun) do
+	
+		local it
+	
+		
+		if     v.component=="screen" then
+
+			it=system.screen.create({},v)
+
+		elseif v.component=="charmap" then
+
+			it=system.charmap.create({},v)
+
+		end
+		
+		if it then
+
+			print("+",v.component,v.name or v.component)
+		
+			system.components[#system.components+1]=it
+			system.components[v.name or v.component]=it	-- quick lookup by name
+
+		end
+		
+	end
+
 end
+
 system.clean=function()
+	for _,it in ipairs(system.components) do
+		if it.clean then it.clean() end
+	end
 end
+
 system.msg=function(m)
+	for _,it in ipairs(system.components) do
+		if it.msg then it.msg(m) end
+	end
 end
+
 system.update=function()
+	for _,it in ipairs(system.components) do
+		if it.update then it.update() end
+	end
 end
+
 system.draw=function()
+
+	local screen=system.components.screen
+
+	screen.draw_into_start()
+
+	for _,it in ipairs(system.components) do
+		if it.draw then it.draw() end
+	end
+
+	screen.draw_into_finish()
+	screen.draw_fbo()
+
 end
 
 	return system
