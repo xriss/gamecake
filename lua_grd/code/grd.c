@@ -79,6 +79,8 @@ int grd_sizeof_pixel(int id)
 			return 4;
 		case GRD_FMT_U8_RGB:
 			return 3;
+		case GRD_FMT_U8_LUMINANCE_ALPHA:
+		case GRD_FMT_U8_LUMINANCE_ALPHA_PREMULT:
 		case GRD_FMT_U16_RGBA_5551:
 		case GRD_FMT_U16_RGBA_5551_PREMULT:
 		case GRD_FMT_U16_RGBA_5650:
@@ -749,6 +751,30 @@ int x,y,z; u8 *pa,*pb;
 	}}}
 }
 
+void grd_convert_8008_8888( struct grd *ga , struct grd *gb )
+{
+int x,y,z; u8 *pa,*pb;
+	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
+	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
+	for(x=0;x<ga->bmap->w;x++) {
+		u32 b=(u32)pa[0];
+		u32 a=(u32)pa[1];
+		*((u32*)pb)=(a<<24) | (b<<16) | (b<<8) | (b) ;
+		pa+=2; pb+=4;
+	}}}
+}
+void grd_convert_8888_8008( struct grd *ga , struct grd *gb )
+{
+int x,y,z; u8 *pa,*pb;
+	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
+	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
+	for(x=0;x<ga->bmap->w;x++) {
+		u32 b=*((u32*)pa);
+		pb[0]=(u8)( ( (((b)&0xff)*54) + (((b>>8)&0xff)*182) + (((b>>16)&0xff)*20) )>>8 );
+		pb[1]=(u8)( ((b>>24)&0xff) );
+		pa+=4; pb+=2;
+	}}}
+}
 
 struct grd * grd_duplicate_convert( struct grd *ga , s32 fmt )
 {
@@ -830,6 +856,11 @@ u8 *pc;
 					grd_convert_8888_0008(ga,gb);
 				break;
 
+				case GRD_FMT_U8_LUMINANCE_ALPHA:
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_8888_8008(ga,gb);
+				break;
+
 				case GRD_FMT_U8_INDEXED:
 					gb=grd_duplicate_quant(ga,256);
 				break;
@@ -867,6 +898,11 @@ u8 *pc;
 				case GRD_FMT_U16_RGBA_5650_PREMULT :
 					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
 					grd_convert_8888_5650(ga,gb);
+				break;
+
+				case GRD_FMT_U8_LUMINANCE_ALPHA_PREMULT:
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_8888_8008(ga,gb);
 				break;
 
 				case GRD_FMT_U8_INDEXED_PREMULT:
@@ -941,6 +977,26 @@ u8 *pc;
 				case GRD_FMT_U8_RGBA_PREMULT :
 					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
 					grd_convert_5650_8888(ga,gb);
+				break;
+			}
+		break;
+
+		case GRD_FMT_U8_LUMINANCE_ALPHA:
+			switch(fmt)
+			{
+				case GRD_FMT_U8_RGBA :
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_8008_8888(ga,gb);
+				break;
+			}
+		break;
+
+		case GRD_FMT_U8_LUMINANCE_ALPHA_PREMULT:
+			switch(fmt)
+			{
+				case GRD_FMT_U8_RGBA_PREMULT :
+					gb=grd_create(fmt,ga->bmap->w,ga->bmap->h,ga->bmap->d); if(!gb) { return 0; }
+					grd_convert_8008_8888(ga,gb);
 				break;
 			}
 		break;
