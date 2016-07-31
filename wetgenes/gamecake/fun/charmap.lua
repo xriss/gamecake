@@ -3,6 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local wgrd =require("wetgenes.grd")
 local wpack=require("wetgenes.pack")
 local wzips=require("wetgenes.zips")
 
@@ -46,9 +47,9 @@ charmap.create=function(it,opts)
 	it.charmap_xh=it.opts.charmap_size and it.opts.charmap_size[1] or 256
 	it.charmap_yh=it.opts.charmap_size and it.opts.charmap_size[2] or 256
 	
-	it.bitmap_data =wpack.alloc( it.char_xh*it.bitmap_xh * it.char_yh*it.bitmap_yh * 4 )
-	it.charmap_data=wpack.alloc( it.charmap_xh * it.charmap_yh * 4 )
-	
+	it.bitmap_grd  =wgrd.create("U8_RGBA", it.char_xh*it.bitmap_xh , it.char_yh*it.bitmap_yh , 1)
+	it.charmap_grd =wgrd.create("U8_RGBA", it.charmap_xh           , it.charmap_yh           , 1)
+
 	return it
 end
 

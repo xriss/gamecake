@@ -43,15 +43,13 @@ varying vec4  v_color;
 
 void main(void)
 {
-	float c;
 	vec4 d;
 	vec2 t1=v_texcoord.xy+map_pos.xy;				// input uv
 	vec2 t2=floor(mod(t1.xy,fnt_siz.xy)) ;			// char uv
 	vec2 t3=floor(t1.xy/fnt_siz.xy)/map_pos.zw;		// map uv
 
 	d=texture2D(tex_map, t3).rgba;	
-	c=texture2D(tex_fnt, (t2+(floor((d.xy*255.0*fnt_siz.xy)+vec2(0.5,0.5))))/fnt_siz.zw , -16.0).r;
-	gl_FragColor=c;
+	gl_FragColor=texture2D(tex_fnt, (t2+(floor((d.xy*255.0*fnt_siz.xy)+vec2(0.5,0.5))))/fnt_siz.zw , -16.0);
 
 }
 

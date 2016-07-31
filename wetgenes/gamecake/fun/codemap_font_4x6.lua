@@ -880,7 +880,7 @@ s["~"]=[[
 ]]
 
 -- build a bitmap which is a 128x1 array of characters.
-M.grd_mask=wgrd.create("U8_RGBA_PREMULT",128*4,1*6,1);
+M.grd_mask=wgrd.create("U8_RGBA_PREMULT",128*4,1*6,1)
 
 -- calling this function repeatedly is inefficient but we do not care
 local solid_check=function(idx,x,y)
