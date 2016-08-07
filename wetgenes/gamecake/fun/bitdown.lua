@@ -9,11 +9,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(oven,codemap)
-
 -- swanky32
 
-codemap.char_to_color={
+M.char_to_color={
 
 	["."]=0x00000000,
 	["g"]=0xff336622,
@@ -52,7 +50,3 @@ codemap.char_to_color={
 	["7"]=0xffffffff,
 	
 }
-
-	return codemap
-end
-

@@ -1,6 +1,6 @@
 
 
-#shader "fun_draw_chars"
+#shader "fun_draw_charmap"
 
 #ifdef VERTEX_SHADER
 
@@ -30,12 +30,11 @@ precision highp float; /* really need better numbers if possible */
 #endif
 
 
-uniform sampler2D tex_fnt;
+uniform sampler2D tex_char;
 uniform sampler2D tex_map;
-uniform sampler2D tex_pal;
 
-uniform vec4  fnt_siz; /* 0,1 char size eg 8x8 and 2,3 the font texture size*/
-uniform vec4  map_pos; /* 0,1 just add this to texcoord and 2,3 the map texture size*/
+uniform vec4  char_info; /* 0,1 char size eg 8x8 and 2,3 the font texture size*/
+uniform vec4  map_info; /* 0,1 just add this to texcoord and 2,3 the map texture size*/
 
 varying vec2  v_texcoord;
 varying vec4  v_color;
@@ -43,13 +42,16 @@ varying vec4  v_color;
 
 void main(void)
 {
+	vec4 c;
 	vec4 d;
-	vec2 t1=v_texcoord.xy+map_pos.xy;				// input uv
-	vec2 t2=floor(mod(t1.xy,fnt_siz.xy)) ;			// char uv
-	vec2 t3=floor(t1.xy/fnt_siz.xy)/map_pos.zw;		// map uv
+	vec2 uv=v_texcoord.xy+map_info.xy;		// base uv
+	vec2 tc=fract(uv);						// char uv
+	vec2 tm=(floor(uv)+vec2(0.5,0.5))/map_info.zw;			// map uv
 
-	d=texture2D(tex_map, t3).rgba;	
-	gl_FragColor=texture2D(tex_fnt, (t2+(floor((d.xy*255.0*fnt_siz.xy)+vec2(0.5,0.5))))/fnt_siz.zw , -16.0);
+	d=texture2D(tex_map, tm).rgba;	
+	c=texture2D(tex_char, (((d.rg*vec2(255.0,255.0))+tc)*char_info.xy)/char_info.zw ).rgba;	
+
+	gl_FragColor=c;
 
 }
 
