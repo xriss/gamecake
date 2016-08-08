@@ -141,6 +141,39 @@ charmap.create=function(it,opts)
 
 	end
 
+-- if you load a 128x1 font data then the following functions can be used to print 7bit ascii text	
+	it.text_x=0
+	it.text_y=0
+	it.text_xy=function(x,y)
+		it.text_x=x or it.text_x
+		it.text_y=y or it.text_y
+	end
+	
+	it.text_print_char=function(c,x,y)
+		it.charmap_grd:pixels( x,y, 1,1, {c:byte(),0,0,0} )
+	end
+
+	it.text_print=function(s)
+		local x,y=it.text_x,it.text_y
+		for i=1,#s do
+			local c=s:sub(i,i)
+			it.text_print_char(c,x,y)
+			x=x+1
+			if x>=it.charmap_xh then
+				x=0
+				y=y+1
+			end
+			if y>=it.charmap_yh then
+				break
+			end
+		end
+		it.text_xy(x,y)
+	end
+
+	it.text_scroll=function(x,y)
+	end
+
+
 	return it
 end
 

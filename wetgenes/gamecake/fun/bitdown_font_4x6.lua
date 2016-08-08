@@ -418,12 +418,12 @@ s["h"]=[[
 ]]
 
 s["i"]=[[
-. # . . 
 . . . . 
+# # # . 
 . # . . 
 . # . . 
-. # . . 
-. . . . 
+# # # . 
+. . . .
 ]]
 
 s["j"]=[[
@@ -685,8 +685,8 @@ s[","]=[[
 . . . . 
 . . . . 
 . . . . 
-. # . . 
-. . # . 
+# . . . 
+# . . . 
 . . . . 
 ]]
 
@@ -703,8 +703,8 @@ s["."]=[[
 . . . . 
 . . . . 
 . . . . 
-. # # . 
-. # # . 
+# # . . 
+# # . . 
 . . . . 
 ]]
 
@@ -731,7 +731,7 @@ s[";"]=[[
 . # # . 
 . . . . 
 . # . . 
-. . # . 
+. # . . 
 . . . . 
 ]]
 
@@ -896,23 +896,36 @@ local solid_check=function(idx,x,y)
 	return false
 end
 
-for i=0,127 do -- import each ascii char from textmaps above
-	local t={}
-	for y=0,5 do
-		for x=0,3 do
-			if solid_check(i,x,y) then
-				t[#t+1]=255
-				t[#t+1]=255
-				t[#t+1]=255
-				t[#t+1]=255
-			else
-				t[#t+1]=0
-				t[#t+1]=0
-				t[#t+1]=0
-				t[#t+1]=0
+M.build_grd=function(g,w)
+
+	local dx=0
+	local dy=0
+
+	for i=0,127 do -- import each ascii char from textmaps above
+		local t={}
+		for y=0,5 do
+			for x=0,3 do
+				if solid_check(i,x,y) then
+					t[#t+1]=255
+					t[#t+1]=255
+					t[#t+1]=255
+					t[#t+1]=255
+				else
+					t[#t+1]=0
+					t[#t+1]=0
+					t[#t+1]=0
+					t[#t+1]=0
+				end
 			end
 		end
+		g:pixels(dx*4,dy*6,4,6,t)
+		dx=dx+1
+		if dx>=w then
+			dx=0
+			dy=dy+1
+		end
 	end
-	M.grd_mask:pixels(i*4,0,4,6,t)
+
 end
 
+M.build_grd(M.grd_mask,128)
