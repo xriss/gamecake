@@ -4,6 +4,9 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
+local wgrd=require("wetgenes.grd")
+local wstr=require("wetgenes.string")
+
 
 
 --module
@@ -50,3 +53,53 @@ M.char_to_color={
 	["7"]=0xffffffff,
 	
 }
+
+
+
+
+
+M.font_grd=function(s,g,cx,cy,w)
+
+	-- calling this function repeatedly is inefficient but we do not care
+	local solid_check=function(idx,x,y)
+		local m=s[string.char(idx)]
+		if m then
+			local lines=wstr.split(m,"\n")
+			local line=lines[y+1]
+			if line then
+				local c=line:sub(1+x*2,1+x*2)
+				if c=="#" then return true end
+			end
+		end
+		return false
+	end
+
+	local dx=0
+	local dy=0
+
+	for i=0,127 do -- import each ascii char from textmaps above
+		local t={}
+		for y=0,cy-1 do
+			for x=0,cx-1 do
+				if solid_check(i,x,y) then
+					t[#t+1]=255
+					t[#t+1]=255
+					t[#t+1]=255
+					t[#t+1]=255
+				else
+					t[#t+1]=0
+					t[#t+1]=0
+					t[#t+1]=0
+					t[#t+1]=0
+				end
+			end
+		end
+		g:pixels(dx*cx,dy*cy,cx,cy,t)
+		dx=dx+1
+		if dx>=w then
+			dx=0
+			dy=dy+1
+		end
+	end
+
+end
