@@ -193,6 +193,33 @@ pack.f4_argb=function(r,g,b,a)
 	return  (a*0x01000000 + r*0x00010000 + g*0x00000100 + b*0x00000001)
 end
 
+-- pull 4 premultiplied byte values out of a single 32bit color
+pack.argb8_pmb4=function(c)
+	local r,g,b,a,af
+	
+	a=bit.band(bit.rshift(c,24),0xff)
+	r=bit.band(bit.rshift(c,16),0xff)
+	g=bit.band(bit.rshift(c, 8),0xff)
+	b=bit.band(c,0xff)
+
+	af=a/0xff
+	return math.floor(af*r),math.floor(af*g),math.floor(af*b),a
+end
+pack.argb_pmb4=pack.argb8_pmb4
+
+-- pull 4 byte values out of a single 32bit color
+pack.argb8_b4=function(c)
+	local r,g,b,a
+	
+	a=bit.band(bit.rshift(c,24),0xff)
+	r=bit.band(bit.rshift(c,16),0xff)
+	g=bit.band(bit.rshift(c, 8),0xff)
+	b=bit.band(c,0xff)
+
+	return r,g,b,a
+end
+pack.argb_b4=pack.argb8_b4
+
 pack.stream={}
 
 pack.stream.new=function(initial_size)

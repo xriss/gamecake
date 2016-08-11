@@ -148,25 +148,26 @@ charmap.create=function(it,opts)
 		it.text_x=x or it.text_x
 		it.text_y=y or it.text_y
 	end
-	
-	it.text_print_char=function(c,x,y)
-		it.charmap_grd:pixels( x,y, 1,1, {c:byte(),0,0,0} )
+
+-- replace this function if your font is somewhere else, or you wish to handle more than 128 chars (utf8)
+	it.text_char=function(c)
+		return {c:byte(),0,0,0}
 	end
 
-	it.text_print=function(s)
-		local x,y=it.text_x,it.text_y
-		for i=1,#s do
-			local c=s:sub(i,i)
-			it.text_print_char(c,x,y)
+	it.text_print_char=function(c,x,y)
+		it.charmap_grd:pixels( x,y, 1,1, it.text_char(c) )
+	end
+
+	it.text_print=function(s,x,y)
+		local x,y=x or it.text_x,y or it.text_y
+
+		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
+			if x>=0 and y>=0 and x<it.charmap_xh and y<it.charmap_yh then
+				it.text_print_char(c,x,y)
+			end
 			x=x+1
-			if x>=it.charmap_xh then
-				x=0
-				y=y+1
-			end
-			if y>=it.charmap_yh then
-				break
-			end
 		end
+
 		it.text_xy(x,y)
 	end
 
