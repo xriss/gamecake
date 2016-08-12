@@ -13,47 +13,47 @@ local wstr=require("wetgenes.string")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
--- swanky32
+-- swanky32 default color map
 
-M.map_color={
+M.map={
 
-	[0]=0x00000000, -- default
+	[0]={bgra=0x00000000}, -- default
 
-	["."]=0x00000000,
-	["g"]=0xff336622,
-	["G"]=0xff448822,
-	["d"]=0xff66aa33,
-	["D"]=0xff66bb77,
-	["C"]=0xff66cccc,
-	["c"]=0xff5599cc,
-	["B"]=0xff5577cc,
+	["."]={bgra=0x00000000},
+	["g"]={bgra=0xff336622},
+	["G"]={bgra=0xff448822},
+	["d"]={bgra=0xff66aa33},
+	["D"]={bgra=0xff66bb77},
+	["C"]={bgra=0xff66cccc},
+	["c"]={bgra=0xff5599cc},
+	["B"]={bgra=0xff5577cc},
 
-	["b"]=0xff445599,
-	["I"]=0xff333366,
-	["i"]=0xff332244,
-	["j"]=0xff442233,
-	["f"]=0xff663333,
-	["F"]=0xff884433,
-	["s"]=0xffbb7766,
-	["S"]=0xffeeaa99,
+	["b"]={bgra=0xff445599},
+	["I"]={bgra=0xff333366},
+	["i"]={bgra=0xff332244},
+	["j"]={bgra=0xff442233},
+	["f"]={bgra=0xff663333},
+	["F"]={bgra=0xff884433},
+	["s"]={bgra=0xffbb7766},
+	["S"]={bgra=0xffeeaa99},
 
-	["M"]=0xffee88bb,
-	["m"]=0xffdd6666,
-	["R"]=0xffcc3333,
-	["r"]=0xffdd5533,
-	["O"]=0xffdd7733,
-	["o"]=0xffddaa33,
-	["Y"]=0xffdddd44,
-	["y"]=0xff888833,
+	["M"]={bgra=0xffee88bb},
+	["m"]={bgra=0xffdd6666},
+	["R"]={bgra=0xffcc3333},
+	["r"]={bgra=0xffdd5533},
+	["O"]={bgra=0xffdd7733},
+	["o"]={bgra=0xffddaa33},
+	["Y"]={bgra=0xffdddd44},
+	["y"]={bgra=0xff888833},
 
-	["0"]=0xff000000,
-	["1"]=0xff222222,
-	["2"]=0xff444444,
-	["3"]=0xff666666,
-	["4"]=0xff888888,
-	["5"]=0xffaaaaaa,
-	["6"]=0xffcccccc,
-	["7"]=0xffffffff,
+	["0"]={bgra=0xff000000},
+	["1"]={bgra=0xff222222},
+	["2"]={bgra=0xff444444},
+	["3"]={bgra=0xff666666},
+	["4"]={bgra=0xff888888},
+	["5"]={bgra=0xffaaaaaa},
+	["6"]={bgra=0xffcccccc},
+	["7"]={bgra=0xffffffff},
 	
 }
 
@@ -107,11 +107,10 @@ M.font_grd=function(s,g,cx,cy,w)
 
 end
 
--- turn 32bit argb numbers into 4 bytes rgba with a premultiplyed alpha, return a new map to be used in pix_grd
-M.map_premultiply=function(mapin)
-	local map={}
-	for n,v in pairs(mapin) do
-		map[n]={wpack.argb_pmb4(v)}
+-- turn 32bit .bgra numbers into 4 bytes rgba with a premultiplyed alpha placed in map[1] to map[4]
+M.map_bgra_premultiply=function(map)
+	for n,v in pairs(map) do
+		v[1],v[2],v[3],v[4]=wpack.argb_pmb4(v.bgra)
 	end
 	return map
 end
@@ -153,5 +152,5 @@ M.pix_grd=function(str,map,gout,xp,yp,xh,yh)
 
 end
 
-M.map=M.map_premultiply(M.map_color)
+M.map_bgra_premultiply(M.map)
 
