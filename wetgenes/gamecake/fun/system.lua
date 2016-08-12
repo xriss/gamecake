@@ -29,6 +29,7 @@ print("system setup")
 
 -- possible components and perform global setup, even if they never get used
 
+	system.sprites=oven.rebake("wetgenes.gamecake.fun.sprites").setup()
 	system.charmap=oven.rebake("wetgenes.gamecake.fun.charmap").setup()
 	system.screen =oven.rebake("wetgenes.gamecake.fun.screen").setup()
 
@@ -41,6 +42,10 @@ print("system setup")
 		if     v.component=="screen" then
 
 			it=system.screen.create({},v)
+
+		elseif v.component=="sprites" then
+
+			it=system.sprites.create({},v)
 
 		elseif v.component=="charmap" then
 

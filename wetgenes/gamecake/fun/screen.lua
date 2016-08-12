@@ -47,6 +47,10 @@ screen.create=function(it,opts)
 
 	it.fbo=framebuffers.create(it.xh,it.yh,1)
 	it.lay=layouts.create{parent={x=0,y=0,w=it.xh,h=it.yh}}
+
+-- need two buffers to generate bloom
+--	it.fxbo1=framebuffers.create(it.xh,it.yh,0)
+--	it.fxbo2=framebuffers.create(it.xh,it.yh,0)
 	
 	-- clear fbo and prepare for drawing into
 	it.draw_into_start=function()
