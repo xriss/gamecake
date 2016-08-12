@@ -388,6 +388,16 @@ font.vbs_idx=1
 	end
 	
 	function console.msg(m)
+
+		if ( m.class=="key" and m.keyname=="f11" and m.action==1 ) then -- fullscreen toggle
+			if win.view then
+				win:show()
+			else
+				win:show("full")
+			end
+			return nil
+		end
+
 		if m.class=="key" then
 			if console.keypress(m.ascii,m.keyname,m.action) then return nil end
 		end
