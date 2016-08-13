@@ -201,8 +201,10 @@ os.exit()
 --
 		function oven.preheat()
 
-			oven.frame_rate=1/opts.fps -- how fast we want to run
-			oven.frame_time=0
+			if opts.fps then
+				oven.frame_rate=1/opts.fps -- how fast we want to run
+				oven.frame_time=0
+			end
 
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
 				console=opts.args.console} -- add --console to commandline to keep console open
