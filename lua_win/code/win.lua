@@ -382,6 +382,7 @@ function base.destroy(w)
 end
 
 function base.show(w,s)
+	w.view=s
 	if hardcore.show then
 		hardcore.show(w[0],s)
 	end
