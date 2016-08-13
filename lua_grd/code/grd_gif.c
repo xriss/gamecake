@@ -5,8 +5,6 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 #include "all.h"
 
-#include "gif_lib.h"
-
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -65,6 +63,18 @@ static int grd_gif_write(GifFileType *gif,char *buff,int count)
 	return count;
 }
 
+void grd_gif_inf_clean(struct grd_io_info *inf)
+{
+	// free any allocated data
+ 	if(inf->data)
+	{
+		free(inf->data);
+		inf->data=0;
+		inf->data_len_max=0;
+		inf->data_len=0;
+	}
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // read a gif, into this grd, allocating the correct size (animations just go in the Z depth)
@@ -73,8 +83,8 @@ static int grd_gif_write(GifFileType *gif,char *buff,int count)
 static void grd_gif_load(struct grd * g, struct grd_io_info * inf )
 {
 	int x,y,z,j;
-    int	i, ErrorCode;
-    GifFileType *gif = (GifFileType *)NULL;
+	int	i, ErrorCode;
+	GifFileType *gif = (GifFileType *)NULL;
 	SavedImage *img;
 	GifImageDesc *dsc;
 	ColorMapObject *cmp;
@@ -99,17 +109,17 @@ static void grd_gif_load(struct grd * g, struct grd_io_info * inf )
 		}
 	}
 	
-    if (DGifSlurp(gif) == GIF_ERROR)
-    {
+	if (DGifSlurp(gif) == GIF_ERROR)
+	{
 		g->err=GifErrorString(ErrorCode);
 		goto bogus;
-    }
-    
+	}
+	
 	if(!grd_realloc(g,GRD_FMT_U8_INDEXED,gif->SWidth,gif->SHeight,gif->ImageCount))
-    {
+	{
 		g->err="grd realloc fail";
 		goto bogus;
-    }
+	}
 
 //printf("res %d\n",gif->SColorResolution);
 
@@ -130,8 +140,8 @@ static void grd_gif_load(struct grd * g, struct grd_io_info * inf )
 		g->cmap->data[j*4+3]=0x00;
 	}
 
-    for (z = 0; z < gif->ImageCount; z++)
-    {
+	for (z = 0; z < gif->ImageCount; z++)
+	{
 		img=gif->SavedImages+z;
 		dsc=&img->ImageDesc;
 		
@@ -151,7 +161,7 @@ static void grd_gif_load(struct grd * g, struct grd_io_info * inf )
 
 	}
 
-    
+	
 bogus:
 	if(gif)
 	{
@@ -221,6 +231,28 @@ void grd_gif_save_file(struct grd * g, const char* file_name, u32 *tags)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_gif_save(struct grd * g, struct grd_io_info * inf )
 {
+	int i;
+	struct grd_io_gif *sgif;
+	
+	sgif=grd_gif_save_stream_open(g,inf);
+	if(!sgif) { goto bogus; }
+
+	for (i = 0; i < g->bmap->d; i++)
+	{
+		sgif->z=i;
+		grd_gif_save_stream_write(g,sgif);
+	}
+	grd_gif_save_stream_close(g,sgif);
+
+	return;
+
+bogus:
+
+	grd_gif_inf_clean(inf);
+	return;
+}
+
+/*{
 int ErrorCode;
 GifFileType *gif = (GifFileType *)NULL;
 SavedImage img;
@@ -289,24 +321,24 @@ unsigned char wank[3];
 	}
 //    EGifSetGifVersion(gif,1); // must be set for transparency to work?
 
-    gif->SWidth = g->bmap->w;
-    gif->SHeight = g->bmap->h;
-    
-    p=grdinfo_get_data(g->cmap,0,0,0);
-    for(i=0;i<256;i++)
-    {
+	gif->SWidth = g->bmap->w;
+	gif->SHeight = g->bmap->h;
+	
+	p=grdinfo_get_data(g->cmap,0,0,0);
+	for(i=0;i<256;i++)
+	{
 		colors[i].Red=p[0];
 		colors[i].Green=p[1];
 		colors[i].Blue=p[2];
 		p=p+4;
 	}
-    
-    gif->SColorResolution = 8;
-    gif->SBackGroundColor = control[3];
-    gif->SColorMap = GifMakeMapObject(256,colors);
+	
+	gif->SColorResolution = 8;
+	gif->SBackGroundColor = control[3];
+	gif->SColorMap = GifMakeMapObject(256,colors);
 
-    for (i = 0; i < g->bmap->d; i++)
-    {
+	for (i = 0; i < g->bmap->d; i++)
+	{
 		img.ImageDesc.Left=0;
 		img.ImageDesc.Top=0;
 		img.ImageDesc.Width=g->bmap->w;
@@ -333,8 +365,8 @@ unsigned char wank[3];
 		(void) GifMakeSavedImage(gif,&img);
 	}
 
-    if (EGifSpew(gif) == GIF_ERROR)
-    {
+	if (EGifSpew(gif) == GIF_ERROR)
+	{
 		g->err=GifErrorString(ErrorCode);
 		goto bogus;
 	}
@@ -352,6 +384,151 @@ bogus:
 		inf->data_len=0;
 	}
 	return;
+}*/
+
+
+
+struct grd_io_gif * grd_gif_save_stream_open(struct grd * g, struct grd_io_info * inf)
+{
+int ErrorCode;
+int i;
+unsigned char *p;
+
+u32 *tag_SPED=grd_tags_find(inf->tags,GRD_TAG_DEF('S','P','E','D'));
+u32 speed=80;
+if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
+
+	struct grd_io_gif *sgif=calloc(sizeof(struct grd_io_gif),1);
+	if(!sgif)
+	{
+		g->err="alloc fail";
+		goto bogus;
+	}
+	
+	sgif->inf=inf;
+
+	sgif->ext[0].ByteCount=11;
+	sgif->ext[0].Bytes=(GifByteType *)"NETSCAPE2.0";
+	sgif->ext[0].Function=APPLICATION_EXT_FUNC_CODE;
+
+	sgif->ext[1].ByteCount=3;
+	sgif->ext[1].Bytes=sgif->wank;
+	sgif->ext[1].Function=CONTINUE_EXT_FUNC_CODE;
+
+	sgif->ext[2].ByteCount=4;
+	sgif->ext[2].Bytes=(GifByteType*)sgif->control;
+	sgif->ext[2].Function=GRAPHICS_EXT_FUNC_CODE;
+
+	sgif->wank[0]=0x01;
+	sgif->wank[1]=0x00; // loop 4 ever
+	sgif->wank[2]=0x00;
+
+	sgif->control[0]=0x08; // flags: 
+	sgif->control[1]=((speed/10)    )&0xff; // speed_lo: speed of animation in 100ths of a second, so 8 is 12.5fps (80ms)
+	sgif->control[2]=((speed/10)>>16)&0xff; // speed_hi: which is near the classic "Shooting on twos" speed of 12fps
+	sgif->control[3]=0; // alpha: find first fully alpha color to use as transparent 
+	for(i=0;i<256;i++)
+	{
+		if(g->cmap->data[3+i*4]==0)
+		{
+			sgif->control[3]=i;
+			sgif->control[0]|=0x01; // set flag to use a transparent color
+			break;
+		}
+	}
+// Actually I think gifs are broken if you use any index other than 0 for the transparency...
+// it breaks the dispose method, whatever you choose...
+
+//unsigned char *data=0;
+
+	if(inf->file_name)
+	{
+		if((sgif->gif = EGifOpenFileName( inf->file_name , 0, &ErrorCode)) == NULL)
+		{
+			g->err=GifErrorString(ErrorCode);
+			goto bogus;
+		}
+	}
+	else
+	{
+		if((sgif->gif = EGifOpen( (void *)inf , (OutputFunc) grd_gif_write , &ErrorCode)) == NULL)
+		{
+			g->err=GifErrorString(ErrorCode);
+			goto bogus;
+		}
+	}
+//    EGifSetGifVersion(gif,1); // must be set for transparency to work?
+
+	sgif->gif->SWidth = g->bmap->w;
+	sgif->gif->SHeight = g->bmap->h;
+	
+	p=grdinfo_get_data(g->cmap,0,0,0);
+	for(i=0;i<256;i++)
+	{
+		sgif->colors[i].Red=p[0];
+		sgif->colors[i].Green=p[1];
+		sgif->colors[i].Blue=p[2];
+		p=p+4;
+	}
+	
+	sgif->gif->SColorResolution = 8;
+	sgif->gif->SBackGroundColor = sgif->control[3];
+	sgif->gif->SColorMap = GifMakeMapObject(256,sgif->colors);
+
+	sgif->i=0;
+
+	return sgif;
+
+bogus:
+
+	grd_gif_inf_clean(inf);
+	return 0;
 }
 
+void grd_gif_save_stream_write(struct grd * g, struct grd_io_gif *sgif)
+{
+	sgif->img.ImageDesc.Left=0;
+	sgif->img.ImageDesc.Top=0;
+	sgif->img.ImageDesc.Width=g->bmap->w;
+	sgif->img.ImageDesc.Height=g->bmap->h;
+	sgif->img.ImageDesc.Interlace=0;
+	sgif->img.ImageDesc.ColorMap=0;
+	
+	sgif->img.RasterBits=grdinfo_get_data(g->bmap,0,0,sgif->z);
+	
+	sgif->img.ExtensionBlockCount=0;
+	sgif->img.ExtensionBlocks=0;
+	
+	if(sgif->i==0)
+	{
+		sgif->img.ExtensionBlockCount=3;
+		sgif->img.ExtensionBlocks=sgif->ext;
+	}
+	else
+	{
+		sgif->img.ExtensionBlockCount=1;
+		sgif->img.ExtensionBlocks=sgif->ext+2;
+	}
+	
+	(void) GifMakeSavedImage(sgif->gif,&sgif->img);
 
+	sgif->i++;
+
+}
+
+void grd_gif_save_stream_close(struct grd * g,struct grd_io_gif *sgif)
+{
+
+	if (EGifSpew(sgif->gif) == GIF_ERROR)
+	{
+		g->err="write fail";
+		goto bogus;
+	}
+	
+	free(sgif);	
+	return;
+bogus:
+	grd_gif_inf_clean(sgif->inf);
+	free(sgif);
+	return;
+}
