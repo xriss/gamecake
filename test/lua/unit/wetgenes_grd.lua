@@ -26,6 +26,10 @@ function test_do_gif_wmem()
 	do_gif_wmem("t6")
 end
 
+function test_do_gif_stream()
+	do_gif_stream("t6")
+end
+
 function test_do_jpg()
 	do_jpg()
 end
@@ -293,6 +297,25 @@ function do_gif_wmem(name)
 	local d=assert( g:save({fmt="gif"}) )
 	do_file_write("dat/grd/"..name..".wmem.out.gif",d)
 	assert_true( do_file_compare("dat/grd/"..name..".wmem.out.gif","dat/grd/"..name..".wmem.chk.gif") )
+end
+
+function do_gif_stream(name)
+
+	local g=assert(grd.create("dat/grd/"..name..".bse.gif","gif"))
+--	print(wstr.dump(g))
+--	local d=assert( g:save({fmt="gif"}) )
+--	do_file_write("dat/grd/"..name..".stream.out.gif",d)
+
+	local stream=g:stream({filename="dat/grd/"..name..".stream.out.gif"})
+	stream.write(g:clip(0,0,0,g.width,g.height,1))
+	stream.write(g:clip(0,0,1,g.width,g.height,1))
+	stream.write(g:clip(0,0,2,g.width,g.height,1))
+	stream.write(g:clip(0,0,3,g.width,g.height,1))
+	stream.write(g:clip(0,0,2,g.width,g.height,1))
+	stream.write(g:clip(0,0,1,g.width,g.height,1))
+	stream.close(g)
+
+	assert_true( do_file_compare("dat/grd/"..name..".stream.out.gif","dat/grd/"..name..".stream.chk.gif") )
 end
 
 function do_png_8_attr_redux(name)

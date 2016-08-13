@@ -232,11 +232,10 @@ void grd_gif_save_file(struct grd * g, const char* file_name, u32 *tags)
 void grd_gif_save(struct grd * g, struct grd_io_info * inf )
 {
 	int i;
-	struct grd_io_gif *sgif;
+	struct grd_io_gif sgif[1]={0};
+	memcpy(sgif->inf,inf,sizeof(sgif->inf));
 	
-	sgif=grd_gif_save_stream_open(g,inf);
-	if(!sgif) { goto bogus; }
-
+	grd_gif_save_stream_open(g,sgif);
 	for (i = 0; i < g->bmap->d; i++)
 	{
 		sgif->z=i;
@@ -244,6 +243,7 @@ void grd_gif_save(struct grd * g, struct grd_io_info * inf )
 	}
 	grd_gif_save_stream_close(g,sgif);
 
+	memcpy(inf,sgif->inf,sizeof(sgif->inf)); // may contain return values so copy it back
 	return;
 
 bogus:
@@ -388,25 +388,16 @@ bogus:
 
 
 
-struct grd_io_gif * grd_gif_save_stream_open(struct grd * g, struct grd_io_info * inf)
+void grd_gif_save_stream_open(struct grd * g, struct grd_io_gif *sgif)
 {
 int ErrorCode;
 int i;
 unsigned char *p;
 
-u32 *tag_SPED=grd_tags_find(inf->tags,GRD_TAG_DEF('S','P','E','D'));
+u32 *tag_SPED=grd_tags_find(sgif->inf->tags,GRD_TAG_DEF('S','P','E','D'));
 u32 speed=80;
 if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
-
-	struct grd_io_gif *sgif=calloc(sizeof(struct grd_io_gif),1);
-	if(!sgif)
-	{
-		g->err="alloc fail";
-		goto bogus;
-	}
 	
-	sgif->inf=inf;
-
 	sgif->ext[0].ByteCount=11;
 	sgif->ext[0].Bytes=(GifByteType *)"NETSCAPE2.0";
 	sgif->ext[0].Function=APPLICATION_EXT_FUNC_CODE;
@@ -441,9 +432,9 @@ if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 
 //unsigned char *data=0;
 
-	if(inf->file_name)
+	if(sgif->inf->file_name)
 	{
-		if((sgif->gif = EGifOpenFileName( inf->file_name , 0, &ErrorCode)) == NULL)
+		if((sgif->gif = EGifOpenFileName( sgif->inf->file_name , 0, &ErrorCode)) == NULL)
 		{
 			g->err=GifErrorString(ErrorCode);
 			goto bogus;
@@ -451,7 +442,7 @@ if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 	}
 	else
 	{
-		if((sgif->gif = EGifOpen( (void *)inf , (OutputFunc) grd_gif_write , &ErrorCode)) == NULL)
+		if((sgif->gif = EGifOpen( (void *)sgif->inf , (OutputFunc) grd_gif_write , &ErrorCode)) == NULL)
 		{
 			g->err=GifErrorString(ErrorCode);
 			goto bogus;
@@ -477,12 +468,9 @@ if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 
 	sgif->i=0;
 
-	return sgif;
-
+	return;
 bogus:
-
-	grd_gif_inf_clean(inf);
-	return 0;
+	grd_gif_inf_clean(sgif->inf);
 }
 
 void grd_gif_save_stream_write(struct grd * g, struct grd_io_gif *sgif)
@@ -525,10 +513,7 @@ void grd_gif_save_stream_close(struct grd * g,struct grd_io_gif *sgif)
 		goto bogus;
 	}
 	
-	free(sgif);	
 	return;
 bogus:
 	grd_gif_inf_clean(sgif->inf);
-	free(sgif);
-	return;
 }
