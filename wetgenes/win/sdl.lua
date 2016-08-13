@@ -148,6 +148,7 @@ sdl.context=function(it)
 	it=it or sdl.it
 	it.ctx=assert(SDL.glCreateContext(it.win))
 	SDL.glMakeCurrent(it.win, it.ctx)
+	SDL.glSetSwapInterval(1) -- enable vsync by default
 	return it.ctx
 end
 
