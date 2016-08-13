@@ -41,15 +41,15 @@ print("system setup")
 		
 		if     v.component=="screen" then
 
-			it=system.screen.create({},v)
+			it=system.screen.create({system=system},v)
 
 		elseif v.component=="sprites" then
 
-			it=system.sprites.create({},v)
+			it=system.sprites.create({system=system},v)
 
 		elseif v.component=="charmap" then
 
-			it=system.charmap.create({},v)
+			it=system.charmap.create({system=system},v)
 
 		end
 		
@@ -58,19 +58,16 @@ print("system setup")
 			print("+",v.component,v.name or v.component)
 		
 			system.components[#system.components+1]=it
+			system.components[it.name or it.component]=it	-- link by name
 
 		end
 		
 	end
 	
-	system.setup_names()
-
 	assert(system.components.screen,"need a screen component")
 
 -- perform specific setup of used components
 	local opts={
-		system=it,
-		screen=system.components.screen,
 	}
 	for _,it in ipairs(system.components) do
 		if it.setup then it.setup(opts) end

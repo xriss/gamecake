@@ -34,10 +34,18 @@ charmap.setup=function()
 end
 
 charmap.create=function(it,opts)
-	it=it or {}
+	it.screen=it.system.components.screen -- system will have been passed in
 	it.opts=opts
 	it.component="charmap"
 	it.name=opts.name
+	
+	it.xp=0
+	it.yp=0
+
+	it.window_xp=it.opts.window and it.opts.window[1] or 0
+	it.window_yp=it.opts.window and it.opts.window[2] or 0
+	it.window_xh=it.opts.window and it.opts.window[3] or it.screen.xh
+	it.window_yh=it.opts.window and it.opts.window[4] or it.screen.yh
 
 	it.char_xh=it.opts.char_size and it.opts.char_size[1] or 8
 	it.char_yh=it.opts.char_size and it.opts.char_size[2] or 8
@@ -50,10 +58,6 @@ charmap.create=function(it,opts)
 	
 
 	it.setup=function(opts)
-		it.screen=opts.screen
-		
-		it.xp=0 -- display x offset 1 is a single char wide
-		it.yp=0 -- display y offset 1 is a single char high
 		
 		it.bitmap_grd  =wgrd.create("U8_RGBA", it.char_xh*it.bitmap_xh , it.char_yh*it.bitmap_yh , 1)
 		it.charmap_grd =wgrd.create("U8_RGBA", it.charmap_xh           , it.charmap_yh           , 1)
@@ -116,8 +120,8 @@ charmap.create=function(it,opts)
 
 
 
-		local x,y,xh,yh=0,0,it.screen.xh,it.screen.yh
-		local u,v,uh,vh=0,0,it.screen.xh/it.char_xh,it.screen.yh/it.char_yh
+		local x,y,xh,yh=it.window_xp , it.window_yp , it.window_xh , it.window_yh
+		local u,v,uh,vh=it.xp/it.char_xh , it.yp/it.char_yh , xh/it.char_xh , yh/it.char_yh
 		local t={
 			x,		y+yh,	0,	u,		v+vh, 			
 			x,		y,		0,	u,		v,
@@ -142,16 +146,14 @@ charmap.create=function(it,opts)
 	end
 
 -- if you load a 128x1 font data then the following functions can be used to print 7bit ascii text	
-	it.text_x=0
-	it.text_y=0
-	it.text_xy=function(x,y)
-		it.text_x=x or it.text_x
-		it.text_y=y or it.text_y
-	end
+	it.text_xp=0
+	it.text_yp=0
+	it.text_xh=it.charmap_xh
+	it.text_yh=it.charmap_yh
 
 -- replace this function if your font is somewhere else, or you wish to handle more than 128 chars (utf8)
 	it.text_char=function(c)
-		return {c:byte(),0,0,0}
+		return {(c:byte()),0,0,0}
 	end
 
 	it.text_print_char=function(c,x,y)
@@ -159,16 +161,14 @@ charmap.create=function(it,opts)
 	end
 
 	it.text_print=function(s,x,y)
-		local x,y=x or it.text_x,y or it.text_y
-
 		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
-			if x>=0 and y>=0 and x<it.charmap_xh and y<it.charmap_yh then
+			if x>=it.text_xp and y>=it.text_yp and x<it.text_xp+it.text_xh and y<it.text_yp+it.text_yh then
 				it.text_print_char(c,x,y)
 			end
 			x=x+1
 		end
 
-		it.text_xy(x,y)
+		return x,y
 	end
 
 	it.text_scroll=function(x,y)

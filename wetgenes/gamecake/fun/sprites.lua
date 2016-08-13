@@ -34,20 +34,19 @@ sprites.setup=function()
 end
 
 sprites.create=function(it,opts)
-	it=it or {}
+	it.screen=it.system.components.screen -- system will have been passed in
 	it.opts=opts
 	it.component="sprites"
 	it.name=opts.name
 
-	it.sprite_xh=it.opts.char_size and it.opts.char_size[1] or 8
-	it.sprite_yh=it.opts.char_size and it.opts.char_size[2] or 8
+	it.sprite_xh=it.opts.sprite_size and it.opts.sprite_size[1] or 8
+	it.sprite_yh=it.opts.sprite_size and it.opts.sprite_size[2] or 8
 
 	it.bitmap_xh=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
 	it.bitmap_yh=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
 	
 
 	it.setup=function(opts)
-		it.screen=opts.screen
 		
 		it.xp=0 -- display x offset 1 is a single char wide
 		it.yp=0 -- display y offset 1 is a single char high
@@ -60,6 +59,8 @@ sprites.create=function(it,opts)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
+		
+		it.list={}
 
 	end
 
@@ -68,6 +69,35 @@ sprites.create=function(it,opts)
 			gl.DeleteTexture( it.bitmap_tex )
 			it.bitmap_tex=nil
 		end
+	end
+	
+	it.list_reset=function()
+		it.list={}
+	end
+	it.list_add=function(v)
+
+		v.cx=v.cx or 0
+		v.cy=v.cy or 0
+
+		v.ox=v.ox or it.sprite_xh/2
+		v.oy=v.oy or it.sprite_yh/2
+		
+		v.px=v.px or 0
+		v.py=v.py or 0
+
+		v.rz=v.rz or 0
+
+		v.sx=v.sx or 1
+		v.sy=v.sy or 1
+
+		v.zf=v.zf or 0
+
+		v.r=v.r or 1
+		v.g=v.g or 1
+		v.b=v.b or 1
+		v.a=v.a or 1
+
+		it.list[#it.list+1]=v
 	end
 
 	it.update=function()
@@ -87,30 +117,43 @@ sprites.create=function(it,opts)
 			gl.UNSIGNED_BYTE,
 			it.bitmap_grd.data )
 
---[[
-		local x,y,xh,yh=0,0,it.screen.xh,it.screen.yh
-		local u,v,uh,vh=0,0,it.screen.xh/it.char_xh,it.screen.yh/it.char_yh
-		local t={
-			x,		y+yh,	0,	u,		v+vh, 			
-			x,		y,		0,	u,		v,
-			x+xh,	y+yh,	0,	u+uh,	v+vh, 			
-			x+xh,	y,		0,	u+uh,	v,
-		}
+		
+		local batch={}
+		for idx,v in ipairs(it.list) do
 
+			local ixw=(v.cx+1)/it.bitmap_xh
+			local iyh=(v.cy+1)/it.bitmap_yh
+			local ix=v.cx/it.bitmap_xh
+			local iy=v.cy/it.bitmap_yh
+			
+			local ox=(v.ox)*(v.sx)
+			local oy=(v.oy)*(v.sy)
+			local hx=it.sprite_xh*(v.sx)
+			local hy=it.sprite_yh*(v.sy)
+			
+			local s=-math.sin(math.pi*(v.rz)/180)
+			local c= math.cos(math.pi*(v.rz)/180)
 
-		flat.tristrip("rawuv",t,"fun_draw_sprites",function(p)
+			local v1=gl.apply_modelview( {v.px-c*(ox)-s*(oy),			v.py+s*(ox)-c*(oy),			v.zf,1} )
+			local v2=gl.apply_modelview( {v.px+c*(hx-ox)-s*(oy),		v.py-s*(hx-ox)-c*(oy),		v.zf,1} )
+			local v3=gl.apply_modelview( {v.px-c*(ox)+s*(hy-oy),		v.py+s*(ox)+c*(hy-oy),		v.zf,1} )
+			local v4=gl.apply_modelview( {v.px+c*(hx-ox)+s*(hy-oy),		v.py-s*(hx-ox)+c*(hy-oy),	v.zf,1} )
 
-			gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_map"), 1 )
-			gl.BindTexture( gl.TEXTURE_2D , it.sprites_tex )
+			local t=
+			{
+				v1[1],	v1[2],	v1[3],		ix,		iy,			v.r,v.g,v.b,v.a,
+				v1[1],	v1[2],	v1[3],		ix,		iy,			v.r,v.g,v.b,v.a,
+				v2[1],	v2[2],	v2[3],		ixw,	iy,			v.r,v.g,v.b,v.a,
+				v3[1],	v3[2],	v3[3],		ix,		iyh,		v.r,v.g,v.b,v.a,
+				v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r,v.g,v.b,v.a,
+				v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r,v.g,v.b,v.a,
+			}
+			
+			local l=#batch for i,v in ipairs(t) do batch[ l+i ]=v end
 
-			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_char"), 0 )
-			gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )
+		end
 
-			gl.Uniform4f( p:uniform("char_info"), it.char_xh,it.char_yh,it.char_xh*it.bitmap_xh,it.char_yh*it.bitmap_yh )
-			gl.Uniform4f( p:uniform("map_info"),  0,0,it.sprites_xh,it.sprites_yh )
-
-		end)
-]]
+		flat.tristrip("rawuvrgba",batch)
 
 	end
 
