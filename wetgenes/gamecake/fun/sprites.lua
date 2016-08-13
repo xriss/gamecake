@@ -74,7 +74,7 @@ sprites.create=function(it,opts)
 	it.list_reset=function()
 		it.list={}
 	end
-	it.list_add=function(v)
+	it.list_add=function(v,idx)
 
 		v.cx=v.cx or 0
 		v.cy=v.cy or 0
@@ -97,7 +97,7 @@ sprites.create=function(it,opts)
 		v.b=v.b or 1
 		v.a=v.a or 1
 
-		it.list[#it.list+1]=v
+		it.list[ (idx or (#it.list+1) ) ]=v
 	end
 
 	it.update=function()
@@ -119,7 +119,7 @@ sprites.create=function(it,opts)
 
 		
 		local batch={}
-		for idx,v in ipairs(it.list) do
+		for idx,v in pairs(it.list) do
 
 			local ixw=(v.cx+1)/it.bitmap_xh
 			local iyh=(v.cy+1)/it.bitmap_yh

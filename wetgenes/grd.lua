@@ -982,4 +982,49 @@ base.create_normal=function(ga)
 	return gd and grd.create(gd) , e
 end
 
+	
+--[[#wetgenes.grd.stream
+
+	stream=g:stream(filename)
+	stream=g:stream({filename=filename,...})
+
+Open a GIF stream, returns a table with the following functions,
+
+	stream:write(ga)
+	
+Add a frame to the gif, each frame should be the same size and color map.
+
+	stream:close(ga)
+
+Close the stream and finalise the GIF.
+
+]]
+base.stream=function(ga,opts)
+
+	if type(opts)=="string" then
+		opts={filename=opts}
+	end
+
+	local stream=core.stream_open(ga[0],opts)
+	core.info(ga[0],ga)
+	local it={[0]=stream}
+
+	it.write=function(ga)
+		core.stream_write(ga[0],stream)
+		core.info(ga[0],ga)
+		return it
+	end
+
+	it.close=function(ga)
+		core.stream_close(ga[0],stream)
+		core.info(ga[0],ga)
+		return it
+	end
+
+	return it
+
+end
+
+
+
 return grd
