@@ -1446,6 +1446,124 @@ part_ptr p;
 	return 0;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// save an image
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_stream_open (lua_State *l)
+{
+part_ptr p;
+const char *s=0;
+s32 n=0;
+
+u32 tags[16];
+
+	tags[0]=3<<2;
+	tags[1]=GRD_TAG_DEF('Q','U','A','L');
+	tags[2]=100;
+
+	tags[3]=3<<2;
+	tags[4]=GRD_TAG_DEF('S','P','E','D');
+	tags[5]=80; // speed in ms
+
+	tags[6]=4<<2;
+	tags[7]=GRD_TAG_DEF('J','S','O','N');
+	tags[8]=0; //just a pointer but we
+	tags[9]=0; //need 16 bytes for 64bit build
+
+	tags[10]=0;
+
+
+	p=lua_grd_check_ptr(l,1);
+
+	if(! lua_istable(l,2) )
+	{
+		lua_pushstring(l,"grd stream needs options table");
+		lua_error(l);
+	}
+
+	lua_getfield(l,2,"filename");
+	if(lua_isstring(l,-1)) { s=lua_tostring(l,-1); }
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"fmt");
+	if(lua_isnumber(l,-1)) { n=(u32)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"quality");
+	if(lua_isnumber(l,-1)) { tags[2]=(u32)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"speed");
+	if(lua_isnumber(l,-1)) { tags[5]=(u32)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"json");
+	if(lua_isstring(l,-1)) { *((const char**)(tags+8))=lua_tostring(l,-1); }
+	lua_pop(l,1);
+
+	
+	if( p->bmap->w<1 )
+	{
+		luaL_error(l, "image has 0 width" );
+	}
+	if( p->bmap->h<1 )
+	{
+		luaL_error(l, "image has 0 height" );
+	}
+	if( p->bmap->d<1 )
+	{
+		luaL_error(l, "image has 0 depth" );
+	}
+	
+	
+	struct grd_io_gif *sgif = (struct grd_io_gif *)lua_newuserdata(l, sizeof(struct grd_io_gif));
+	memset(sgif,0,sizeof(struct grd_io_gif)); // make sure it is all set to 0
+
+	sgif->inf->tags=tags;
+	sgif->inf->file_name=s;
+
+	grd_gif_save_stream_open(p,sgif);
+
+	return 1;
+}
+
+int lua_grd_stream_write(lua_State *l)
+{
+part_ptr p;
+struct grd_io_gif *sgif;
+
+	p=lua_grd_check_ptr(l,1);
+	sgif=((struct grd_io_gif *)lua_touserdata(l, 2 ));
+
+	grd_gif_save_stream_write(p,sgif);
+
+	return 0;
+}
+
+int lua_grd_stream_close(lua_State *l)
+{
+part_ptr p;
+struct grd_io_gif *sgif;
+
+	p=lua_grd_check_ptr(l,1);
+	sgif=((struct grd_io_gif *)lua_touserdata(l, 2 ));
+
+	grd_gif_save_stream_close(p,sgif);
+
+	if(sgif->inf->data)
+	{ 
+		lua_pushlstring(l,(const char *)sgif->inf->data,sgif->inf->data_len); // just return the data string
+		free(sgif->inf->data);
+		return 1;
+	}
+
+	return 0;
+}
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -1495,6 +1613,12 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"clear",			lua_grd_clear},
 		
 		{"clip",			lua_grd_clip}, // be careful with this, you must stop the master data from getting GCd
+
+// simple API (hack) to stream gif animations one frame at a time
+// don't use. may break any time now :)
+		{"stream_open",		lua_grd_stream_open},
+		{"stream_write",	lua_grd_stream_write},
+		{"stream_close",	lua_grd_stream_close},
 
 		{0,0}
 	};
