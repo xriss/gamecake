@@ -390,8 +390,8 @@ font.vbs_idx=1
 	function console.msg(m)
 
 		if ( m.class=="key" and m.keyname=="f11" and m.action==1 ) then -- fullscreen toggle
-			if win.view then
-				win:show()
+			if win.view and (win.view~="win") then
+				win:show("win")
 			else
 				win:show("full")
 			end
