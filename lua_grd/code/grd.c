@@ -2310,12 +2310,11 @@ int r,g,b,a;
 
 	for(z=0;z<ga->bmap->d;z++) {
 		for(y=0;y<ga->bmap->h;y++) {
-			for(x=0;x<ga->bmap->w;x++) {
-				pa=grdinfo_get_data(ga->bmap,x,y,z);
-				pb=grdinfo_get_data(gb->bmap,x,y,z);
-				
-				r=*pa++; g=*pa++; b=*pa++; a=*pa++;
-				*pb++=grd_remap_find(gb,r,g,b,a);
+			pa=grdinfo_get_data(ga->bmap,0,y,z);
+			pb=grdinfo_get_data(gb->bmap,0,y,z);
+
+			for(x=0;x<ga->bmap->w;x++) {				
+				*pb++=grd_remap_find(gb,pa[0],pa[1],pa[2],pa[3]); pa+=4;
 			}
 		}
 	}
