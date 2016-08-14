@@ -96,6 +96,11 @@ function test_png_8x_t3()
 	do_png_8x("t3")
 end
 
+function test_png_remap_t3()
+	do_png_remap("t3")
+end
+
+
 function test_png_grey_t3()
 	do_png_8888("grey")
 end
@@ -355,3 +360,37 @@ function do_png_bump(name)
 
 
 end
+
+function do_png_remap(name)
+
+	local ga=assert(grd.create("dat/grd/"..name..".bse.png","png"))
+	assert( ga:convert("U8_RGBA") )
+
+	local gb=assert(grd.create("U8_INDEXED",ga.width,ga.height,ga.depth))
+	gb:palette(0,16,{
+		0,0,0,0,
+		0,0,0,255,
+		255,0,0,255,
+		128,0,0,255,
+		0,255,0,255,
+		0,128,0,255,
+		0,0,255,255,
+		0,0,128,255,
+		255,64,64,255,
+		128,64,64,255,
+		64,255,64,255,
+		64,128,64,255,
+		64,64,255,255,
+		64,64,128,255,
+		64,64,64,255,
+		128,128,128,255,
+	})
+	assert( ga:remap(gb) )
+
+
+	assert( gb:save("dat/grd/"..name..".remap.out.png","png") )
+
+	assert_true( do_file_compare("dat/grd/"..name..".remap.out.png","dat/grd/"..name..".remap.chk.png") )
+end
+
+

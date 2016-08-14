@@ -2257,6 +2257,70 @@ u32 c1,c2;
 }
 
 
+// find the index ( in g->cmap ) that best matches this rgba value.
+static int grd_remap_find(struct grd *ga, int r, int g, int b, int a)
+{
+	int i;
+	int d;
+	int dd;
+	
+	
+	int best;
+	int bestdd;
+
+	u8 *cc;
+
+	best=0;
+	bestdd=0x7fffffff;
+
+	for(i=0,cc=ga->cmap->data;i<ga->cmap->w;i++,cc+=4)
+	{
+		dd=0;
+		
+		d=r-((int)cc[0]); dd+=d*d;
+		d=g-((int)cc[1]); dd+=d*d;
+		d=b-((int)cc[2]); dd+=d*d;
+		d=a-((int)cc[3]); dd+=4*d*d;
+		
+		if(dd<bestdd)
+		{
+			best=i;
+			bestdd=dd;
+		}
+		
+	}
+
+    return best;
+}
+
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// remap the pixels in ga into gb, using the palette that is *already* there
+// ga must be rgba
+// gb must be indexed and of the same size as ga
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void grd_remap(struct grd *ga, struct grd *gb)
+{
+int x,y,z;
+u8 *pa,*pb;
+int r,g,b,a;
+
+	for(z=0;z<ga->bmap->d;z++) {
+		for(y=0;y<ga->bmap->h;y++) {
+			for(x=0;x<ga->bmap->w;x++) {
+				pa=grdinfo_get_data(ga->bmap,x,y,z);
+				pb=grdinfo_get_data(gb->bmap,x,y,z);
+				
+				r=*pa++; g=*pa++; b=*pa++; a=*pa++;
+				*pb++=grd_remap_find(gb,r,g,b,a);
+			}
+		}
+	}
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
