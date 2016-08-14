@@ -520,8 +520,6 @@ s32 num;
 	
 	grd_quant(p,num);
 
-//	lua_grd_getinfo(l,p,1);
-
 	lua_pushvalue(l,1);
 	return 1;
 }
@@ -553,6 +551,59 @@ s32 bak,num,cw,ch,sub;
 //	lua_grd_getinfo(l,p,1);
 
 	lua_pushvalue(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_remap (lua_State *l)
+{
+part_ptr pa;
+part_ptr pb;
+
+	pa=lua_grd_check_ptr(l,1);
+	pb=lua_grd_check_ptr(l,2);
+
+	if((pa->bmap->fmt&~GRD_FMT_PREMULT)!=GRD_FMT_U8_RGBA)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"from format must be rgba");
+		return 2;
+	}
+
+	if((pb->bmap->fmt&~GRD_FMT_PREMULT)!=GRD_FMT_U8_INDEXED)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"to format must be indexed");
+		return 2;
+	}
+
+	if(pa->bmap->w!=pb->bmap->w)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"remap failed on width");
+		return 2;
+	}
+
+	if(pa->bmap->h!=pb->bmap->h)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"remap failed on height");
+		return 2;
+	}
+	if(pa->bmap->d!=pb->bmap->d)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"remap failed on depth");
+		return 2;
+	}
+	
+		
+	grd_remap(pa,pb);
+
+	lua_pushvalue(l,2);
 	return 1;
 }
 
@@ -1593,6 +1644,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		
 		{"quant",			lua_grd_quant},
 		{"attr_redux",		lua_grd_attr_redux},
+		{"remap",			lua_grd_remap},
 
 		{"pixels",			lua_grd_pixels},
 		{"palette",			lua_grd_palette},
