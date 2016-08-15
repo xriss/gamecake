@@ -9,6 +9,11 @@ local core=require("wetgenes.gamecake.core")
 
 local tcore=require("wetgenes.tardis.core")
 
+-- This is all hideously complex, should be replaced with something "simple" and a bit more stack based as the stack was retro fitted here.
+-- we also need with switching to and from fbo as render targets, again this has just been hacked in.
+-- so stop using this and start again, lets call the new one views...
+
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 

@@ -32,6 +32,7 @@ print("system setup")
 	system.sprites=oven.rebake("wetgenes.gamecake.fun.sprites").setup()
 	system.charmap=oven.rebake("wetgenes.gamecake.fun.charmap").setup()
 	system.screen =oven.rebake("wetgenes.gamecake.fun.screen").setup()
+	system.copper =oven.rebake("wetgenes.gamecake.fun.copper").setup()
 
 
 	for i,v in ipairs(oven.opts.fun) do
@@ -50,6 +51,10 @@ print("system setup")
 		elseif v.component=="charmap" then
 
 			it=system.charmap.create({system=system},v)
+
+		elseif v.component=="copper" then
+
+			it=system.copper.create({system=system},v)
 
 		end
 		
@@ -118,6 +123,8 @@ system.draw=function()
 	for _,it in ipairs(system.components) do
 		if it.draw then it.draw() end
 	end
+	
+--	system.components.copper.draw()
 
 	screen.draw_into_finish()
 	screen.draw_fbo()

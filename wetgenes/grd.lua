@@ -1025,6 +1025,17 @@ base.stream=function(ga,opts)
 
 end
 
+--[[#wetgenes.grd.remap
+
+	ga:remap(gb)
+
+Fill gb with a remaped version of ga, each pixel is mapped to the closest palette entry.
+
+]]
+base.remap=function(ga,gb)
+	local r,m=core.remap(ga[0],gb[0])
+	return r and gb,m
+end
 
 
 return grd

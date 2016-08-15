@@ -42,8 +42,8 @@ screen.create=function(it,opts)
 	it.component="screen"
 	it.name=opts.name
 	
-	it.xh=it.opts.size and it.opts.size[1] or 160
-	it.yh=it.opts.size and it.opts.size[2] or 120
+	it.xh=it.opts.size and it.opts.size[1] or 360
+	it.yh=it.opts.size and it.opts.size[2] or 240
 
 	it.fbo=framebuffers.create(it.xh,it.yh,1)
 	it.lay=layouts.create{parent={x=0,y=0,w=it.xh,h=it.yh}}

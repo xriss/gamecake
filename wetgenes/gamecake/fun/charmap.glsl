@@ -52,6 +52,7 @@ void main(void)
 	c=texture2D(tex_char, (((d.rg*vec2(255.0,255.0))+tc)*char_info.xy)/char_info.zw ).rgba;	
 
 	gl_FragColor=c;
+	if((gl_FragColor.a)<0.25) discard;
 
 }
 
