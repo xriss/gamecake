@@ -135,7 +135,7 @@ void main()
 	gl_PointSize=3.0;
     gl_Position = projection * vec4(a_vertex.xyz , 1.0);
 	v_texcoord=a_texcoord;
-	v_color=vec4(1.0,1.0,1.0,1.0);
+	v_color=color;
 }
 
 	]]
