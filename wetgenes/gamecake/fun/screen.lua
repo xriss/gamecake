@@ -42,15 +42,19 @@ screen.create=function(it,opts)
 	it.component="screen"
 	it.name=opts.name
 	
+	it.bloom=it.opts.bloom
+	
+	it.filter=it.opts.filter or "none"
+	
 	it.xh=it.opts.size and it.opts.size[1] or 360
 	it.yh=it.opts.size and it.opts.size[2] or 240
 
 	it.fbo=framebuffers.create(it.xh,it.yh,1)
 	it.lay=layouts.create{parent={x=0,y=0,w=it.xh,h=it.yh}}
 
--- need two buffers to generate bloom
---	it.fxbo1=framebuffers.create(it.xh,it.yh,0)
---	it.fxbo2=framebuffers.create(it.xh,it.yh,0)
+-- need another two buffers (no depth) to generate bloom with
+	it.fxbo1=framebuffers.create(it.xh,it.yh,0)
+	it.fxbo2=framebuffers.create(it.xh,it.yh,0)
 	
 	-- clear fbo and prepare for drawing into
 	it.draw_into_start=function()
@@ -77,9 +81,6 @@ screen.create=function(it,opts)
 	it.draw_into_finish=function()
 
 	--	screen.fbo:mipmap()
-		
---		screen.draw_bloom_setup()
---		screen.draw_bloom_blur()
 
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
 
@@ -89,6 +90,8 @@ screen.create=function(it,opts)
 		gl.PopMatrix()			
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.PopMatrix()
+
+		it.create_bloom()
 
 	end
 
@@ -114,11 +117,82 @@ screen.create=function(it,opts)
 			v2[1],	v2[2],	v2[3],	it.fbo.uvw,	it.fbo.uvh,
 		}
 
-		flat.tristrip("rawuv",t,"raw_tex")
+		if it.filter=="scanline" then
+			flat.tristrip("rawuv",t,"fun_screen_scanline",function(p)
+				local l=layouts.get() -- the size of what we are rendering too, so we can calculate display pixel size in uv space (siz.zw)
+				gl.Uniform4f( p:uniform("siz"), it.fbo.txw					,	it.fbo.txh, 
+												it.fbo.uvw/l.w*l.x_scale	,	it.fbo.uvh/l.h*l.y_scale	)
+			end)
+		else
+			flat.tristrip("rawuv",t,"raw_tex")
+		end
 
 --			gl.PopMatrix()
-		
+
+		if it.bloom then -- bloom on
+
+			gl.Color(it.bloom,it.bloom,it.bloom,0)
+			it.fxbo1:bind_texture()
+			flat.tristrip("rawuv",t,"raw_tex")
+			gl.Color(r,g,b,a)
+			
+		end
+
 	end
+
+	-- create the bloom 
+	it.create_bloom=function()
+	
+		if not it.bloom then return end
+
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PushMatrix()		
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PushMatrix()
+		it.lay_orig=it.lay.apply(nil,nil,0)
+
+		local v3=gl.apply_modelview( {it.fbo.w*-0,	it.fbo.h* 1,	0,1} )
+		local v1=gl.apply_modelview( {it.fbo.w*-0,	it.fbo.h*-0,	0,1} )
+		local v4=gl.apply_modelview( {it.fbo.w* 1,	it.fbo.h* 1,	0,1} )
+		local v2=gl.apply_modelview( {it.fbo.w* 1,	it.fbo.h*-0,	0,1} )
+		local t={
+			v3[1],	v3[2],	v3[3],	0,			0, 			
+			v1[1],	v1[2],	v1[3],	0,			it.fbo.uvh,
+			v4[1],	v4[2],	v4[3],	it.fbo.uvw,	0, 			
+			v2[1],	v2[2],	v2[3],	it.fbo.uvw,	it.fbo.uvh,
+		}
+
+
+		it.fxbo1:bind_frame()
+		flat.tristrip("rawuv",t,"fun_screen_bloom_pick",function(p)
+			it.fbo:bind_texture()
+		end)
+
+
+		it.fxbo2:bind_frame()
+		flat.tristrip("rawuv",t,"fun_screen_bloom_blur",function(p)
+			it.fxbo1:bind_texture()
+			gl.Uniform4f( p:uniform("pix_siz"), it.fbo.uvw/it.fbo.w,0,0,1 )
+		end)
+
+
+		it.fxbo1:bind_frame()
+		flat.tristrip("rawuv",t,"fun_screen_bloom_blur",function(p)
+			it.fxbo2:bind_texture()
+			gl.Uniform4f( p:uniform("pix_siz"), 0,it.fbo.uvh/it.fbo.h,0,1 )
+		end)
+
+
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
+		it.lay_orig.restore()
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PopMatrix()			
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PopMatrix()
+
+	end
+
+
 
 	return it
 end

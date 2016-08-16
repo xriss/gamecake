@@ -49,6 +49,7 @@ copper.create=function(it,opts)
 
 	it.shader_name="fun_copper_back_y5"
 	it.shader_uniforms={
+		ticks={0,0,0,0},
 		sizpos={it.xh,it.yh,0,0},
 		cy0={ 0.5 , 0   , 0.0 , 1 },
 		cy1={ 0   , 0   , 1.0 , 1 },
@@ -58,6 +59,14 @@ copper.create=function(it,opts)
 	}
 	it.shader_function=function()end
 	
+	it.update=function()
+		local u=it.shader_uniforms
+		u.ticks[1]=u.ticks[1]+1
+		u.ticks[2]=u.ticks[1]%(256*256*256)
+		u.ticks[3]=u.ticks[1]%(256*256)
+		u.ticks[4]=u.ticks[1]%(256)
+	end
+
 	it.draw=function()
 
 --			gl.PushMatrix()
@@ -77,8 +86,14 @@ copper.create=function(it,opts)
 		flat.tristrip("rawuv",t,it.shader_name,function(p)
 			for n,v in pairs(it.shader_uniforms) do
 
-				gl.Uniform4f( p:uniform(n), unpack(v) )
-			
+				local id=p:uniform(n)
+				
+				if id then
+					if #v==4 then
+						gl.Uniform4f( id, unpack(v) )
+					end
+				end
+
 			end
 		end)
 

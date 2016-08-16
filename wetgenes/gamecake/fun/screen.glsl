@@ -2,6 +2,10 @@
 #shader "fun_screen_bloom_pick"
 #ifdef VERTEX_SHADER
 
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
 attribute vec3 a_vertex;
 attribute vec2 a_texcoord;
 
@@ -9,7 +13,7 @@ varying vec2  v_texcoord;
  
 void main()
 {
-    gl_Position = vec4(a_vertex, 1.0);
+    gl_Position = projection * vec4(a_vertex , 1.0);
 	v_texcoord=a_texcoord;
 }
 
@@ -57,7 +61,7 @@ varying vec2  v_texcoord;
  
 void main()
 {
-    gl_Position = vec4(a_vertex, 1.0);
+    gl_Position = projection * vec4(a_vertex , 1.0);
 	v_texcoord=a_texcoord;
 }
 
@@ -95,47 +99,6 @@ void main(void)
 #endif
 
 
-#shader "fun_screen_bloom"
-#ifdef VERTEX_SHADER
-
-uniform mat4 modelview;
-uniform mat4 projection;
-uniform vec4 color;
-
-attribute vec3 a_vertex;
-attribute vec2 a_texcoord;
-
-varying vec2  v_texcoord;
-varying vec4  v_color;
- 
-void main()
-{
-    gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
-    gl_Position.z+=a_vertex.z;
-	v_texcoord=a_texcoord;
-	v_color=color;
-}
-
-#endif
-#ifdef FRAGMENT_SHADER
-
-#if defined(GL_FRAGMENT_PRECISION_HIGH)
-precision highp float; /* really need better numbers if possible */
-#endif
-
-uniform sampler2D tex0;
-
-varying vec2  v_texcoord;
-varying vec4  v_color;
-
-void main(void)
-{
-	gl_FragColor=vec4( texture2D(tex0, v_texcoord).rgb, 0.0 )*v_color;
-}
-
-#endif
-
-
 #shader "fun_screen_scanline"
 #ifdef VERTEX_SHADER
 
@@ -151,8 +114,7 @@ varying vec4  v_color;
  
 void main()
 {
-    gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
-    gl_Position.z+=a_vertex.z;
+    gl_Position = projection * vec4(a_vertex, 1.0);
 	v_texcoord=a_texcoord;
 	v_color=color;
 }
@@ -169,25 +131,24 @@ uniform sampler2D tex;
 varying vec2  v_texcoord;
 varying vec4  v_color;
 
+uniform vec4 siz;
 
-const vec2 xo = vec2(1.0/256.0,0.0);
-const vec2 ss = vec2(256.0,128.0);
-const vec2 oo = vec2(1.0/256.0,1.0/128.0);
-
-void main(void)
+vec4 render(vec2 uv)
 {
+	vec2 xo = vec2(1.0/siz.x,0.0);
+	
 	vec2 tb;
 
 	vec4  c,c2;
 	
 	float aa;
 
-	tb=(floor(v_texcoord*ss)+vec2(0.5,0.5))*oo;
+	tb=(floor(uv*siz.xy)+vec2(0.5,0.5))/siz.xy;
 
 	c=texture2D(tex, tb).rgba;
 
 
-	aa=2.0*(fract(v_texcoord.x*256.0)-0.5);
+	aa=2.0*(fract(uv.x*siz.x)-0.5);
 	if(aa<0.0)
 	{
 		c2=texture2D(tex, tb-xo ).rgba;
@@ -205,12 +166,23 @@ void main(void)
 
 
 // scanline	
-	aa=2.0*(fract(v_texcoord.y*128.0)-0.5);
+	aa=2.0*(fract(uv.y*siz.y)-0.5);
 	aa*=aa*aa*aa;
 	c.rgb=c.rgb*(1.0-aa);
 	
-	gl_FragColor=vec4(c.rgb,1.0)*v_color;
+	return vec4(c.rgb,1.0);
 
+}
+
+void main(void)
+{
+// do 4x sampling to try and smooth out any interferance, siz.zw is a display pixel in uv space
+	gl_FragColor=	(
+						render( v_texcoord               ) +
+						render( v_texcoord+(siz.zw*0.25) ) +
+						render( v_texcoord+(siz.zw*0.50) ) +
+						render( v_texcoord+(siz.zw*0.75) ) 
+					)*v_color*0.25;
 }
 
 #endif
