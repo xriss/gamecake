@@ -39,19 +39,19 @@ sprites.create=function(it,opts)
 	it.component="sprites"
 	it.name=opts.name
 
-	it.sprite_xh=it.opts.sprite_size and it.opts.sprite_size[1] or 8
-	it.sprite_yh=it.opts.sprite_size and it.opts.sprite_size[2] or 8
+	it.sprite_hx=it.opts.sprite_size and it.opts.sprite_size[1] or 8
+	it.sprite_hy=it.opts.sprite_size and it.opts.sprite_size[2] or 8
 
-	it.bitmap_xh=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
-	it.bitmap_yh=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
+	it.bitmap_hx=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
+	it.bitmap_hy=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
 	
 
 	it.setup=function(opts)
 		
-		it.xp=0 -- display x offset 1 is a single char wide
-		it.yp=0 -- display y offset 1 is a single char high
+		it.px=0 -- display x offset 1 is a single char wide
+		it.py=0 -- display y offset 1 is a single char high
 		
-		it.bitmap_grd  =wgrd.create("U8_RGBA", it.sprite_xh*it.bitmap_xh , it.sprite_yh*it.bitmap_yh , 1)
+		it.bitmap_grd  =wgrd.create("U8_RGBA", it.sprite_hx*it.bitmap_hx , it.sprite_hy*it.bitmap_hy , 1)
 
 		it.bitmap_tex=gl.GenTexture()
 		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	
@@ -76,11 +76,14 @@ sprites.create=function(it,opts)
 	end
 	it.list_add=function(v,idx)
 
+		v.idx=(idx or v.idx or (#it.list+1) )
+		it.list[ v.idx ]=v
+		
 		v.cx=v.cx or 0
 		v.cy=v.cy or 0
 
-		v.ox=v.ox or it.sprite_xh/2
-		v.oy=v.oy or it.sprite_yh/2
+		v.ox=v.ox or it.sprite_hx/2
+		v.oy=v.oy or it.sprite_hy/2
 		
 		v.px=v.px or 0
 		v.py=v.py or 0
@@ -96,8 +99,7 @@ sprites.create=function(it,opts)
 		v.g=v.g or 1
 		v.b=v.b or 1
 		v.a=v.a or 1
-
-		it.list[ (idx or (#it.list+1) ) ]=v
+		
 	end
 
 	it.update=function()
@@ -121,15 +123,15 @@ sprites.create=function(it,opts)
 		local batch={}
 		for idx,v in pairs(it.list) do
 
-			local ixw=(v.cx+1)/it.bitmap_xh
-			local iyh=(v.cy+1)/it.bitmap_yh
-			local ix=v.cx/it.bitmap_xh
-			local iy=v.cy/it.bitmap_yh
+			local ixw=(v.cx+1)/it.bitmap_hx
+			local iyh=(v.cy+1)/it.bitmap_hy
+			local ix=v.cx/it.bitmap_hx
+			local iy=v.cy/it.bitmap_hy
 			
 			local ox=(v.ox)*(v.sx)
 			local oy=(v.oy)*(v.sy)
-			local hx=it.sprite_xh*(v.sx)
-			local hy=it.sprite_yh*(v.sy)
+			local hx=it.sprite_hx*(v.sx)
+			local hy=it.sprite_hy*(v.sy)
 			
 			local s=-math.sin(math.pi*(v.rz)/180)
 			local c= math.cos(math.pi*(v.rz)/180)

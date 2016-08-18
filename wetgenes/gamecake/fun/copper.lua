@@ -42,15 +42,15 @@ copper.create=function(it,opts)
 	it.component="copper"
 	it.name=opts.name
 	
-	it.xh=it.opts.size and it.opts.size[1] or it.screen.xh or 360
-	it.yh=it.opts.size and it.opts.size[2] or it.screen.yh or 240
+	it.hx=it.opts.size and it.opts.size[1] or it.screen.hx or 360
+	it.hy=it.opts.size and it.opts.size[2] or it.screen.hy or 240
 
 -- set shader program name and callback to fill in uniform values
 
 	it.shader_name="fun_copper_back_y5"
 	it.shader_uniforms={
 		ticks={0,0,0,0},
-		sizpos={it.xh,it.yh,0,0},
+		sizpos={it.hx,it.hy,0,0},
 		cy0={ 0.5 , 0   , 0.0 , 1 },
 		cy1={ 0   , 0   , 1.0 , 1 },
 		cy2={ 0   , 0.5 , 1.0 , 1 },
@@ -71,16 +71,16 @@ copper.create=function(it,opts)
 
 --			gl.PushMatrix()
 
-		local v3=gl.apply_modelview( {it.screen.xh*-0.0,	it.screen.yh* 1.0,	0,1} )
-		local v1=gl.apply_modelview( {it.screen.xh*-0.0,	it.screen.yh*-0.0,	0,1} )
-		local v4=gl.apply_modelview( {it.screen.xh* 1.0,	it.screen.yh* 1.0,	0,1} )
-		local v2=gl.apply_modelview( {it.screen.xh* 1.0,	it.screen.yh*-0.0,	0,1} )
+		local v3=gl.apply_modelview( {it.screen.hx*-0.0,	it.screen.hy* 1.0,	0,1} )
+		local v1=gl.apply_modelview( {it.screen.hx*-0.0,	it.screen.hy*-0.0,	0,1} )
+		local v4=gl.apply_modelview( {it.screen.hx* 1.0,	it.screen.hy* 1.0,	0,1} )
+		local v2=gl.apply_modelview( {it.screen.hx* 1.0,	it.screen.hy*-0.0,	0,1} )
 
 		local t={
-			v3[1],	v3[2],	v3[3],	0,		it.yh, 			
+			v3[1],	v3[2],	v3[3],	0,		it.hy,
 			v1[1],	v1[2],	v1[3],	0,		0,
-			v4[1],	v4[2],	v4[3],	it.xh,	it.yh, 			
-			v2[1],	v2[2],	v2[3],	it.xh,	0,
+			v4[1],	v4[2],	v4[3],	it.hx,	it.hy, 			
+			v2[1],	v2[2],	v2[3],	it.hx,	0,
 		}
 
 		flat.tristrip("rawuv",t,it.shader_name,function(p)

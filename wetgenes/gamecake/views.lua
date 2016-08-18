@@ -52,7 +52,6 @@ function M.bake(oven,views)
 		view.hx=opts.hx
 		view.hy=opts.hy
 
-
 -- the projection view size, mostly aspect, that we will be aiming for
 		view.vx=opts.vx -- width
 		view.vy=opts.vy -- height
@@ -61,13 +60,16 @@ function M.bake(oven,views)
 
 		view.fov=opts.fov or 0 -- field of view, a tan like value, so 1 would be 90deg, 0.5 would be 45deg and so on
 
---		view.sx=opts.overscan or 1 -- scale vx,vy by this value, to allow simple overscan
+--		view.ss=opts.overscan or 1 -- scale vx,vy by this value, to allow simple overscan
 		
 --		view.aspect=opts.aspect or 1 -- pixel aspect fix, normally 1/1 can also set to 0 for scale to total available area
 
 -- these values are updated when you call update()
 		view.pmtx={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 	-- projection matrix
 		view.port={0,0,0,0}								-- view port x,y,w,h
+
+		view.sx=1	-- view scale
+		view.sy=1
 
 		view.resize=function()	-- update px,py,hx,hy
 
@@ -139,16 +141,16 @@ function M.bake(oven,views)
 					view.pmtx[1] = 2/view.hx
 					view.pmtx[6] = -2/view.hy
 					
-					view.port.sx=1
-					view.port.sy=pa/va
+					view.sx=1
+					view.sy=pa/va
 
 				else									-- fit height to screen
 				
 					view.pmtx[1] = 2/view.hx
 					view.pmtx[6] = -2/view.hy
 					
-					view.port.sx=va/pa
-					view.port.sy=1
+					view.sx=va/pa
+					view.sy=1
 
 				end
 
@@ -159,8 +161,8 @@ function M.bake(oven,views)
 					view.pmtx[1] = va/view.fov
 					view.pmtx[6] = -1/view.fov
 					
-					view.port.sx=1
-					view.port.sy=1
+					view.sx=1
+					view.sy=1
 
 				
 				elseif (pa > (va) ) 	then 	-- fit width to screen
@@ -168,16 +170,16 @@ function M.bake(oven,views)
 					view.pmtx[1] = ((va)*1)/view.fov
 					view.pmtx[6] = -((va)/pa)/view.fov
 					
-					view.port.sx=1
-					view.port.sy=pa/va
+					view.sx=1
+					view.sy=pa/va
 
 				else									-- fit height to screen
 				
 					view.pmtx[1] = pa/view.fov
 					view.pmtx[6] = -1/view.fov
 					
-					view.port.sx=va/pa
-					view.port.sy=1
+					view.sx=va/pa
+					view.sy=1
 
 				end
 			end
@@ -230,8 +232,8 @@ function M.bake(oven,views)
 
 			if msg.xraw and msg.yraw then	-- we need to fix raw x,y mouse numbers
 			
-				msg.x=( view.vx * ( (msg.xraw-(view.hx*0.5+view.px)) * view.port.sx ) / view.hx ) + view.vx*0.5
-				msg.y=( view.vy * ( (msg.yraw-(view.hy*0.5+view.py)) * view.port.sy ) / view.hy ) + view.vy*0.5
+				msg.x=( view.vx * ( (msg.xraw-(view.hx*0.5+view.px)) * view.sx ) / view.hx ) + view.vx*0.5
+				msg.y=( view.vy * ( (msg.yraw-(view.hy*0.5+view.py)) * view.sy ) / view.hy ) + view.vy*0.5
 
 				return true
 			end

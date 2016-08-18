@@ -47,22 +47,22 @@ screen.create=function(it,opts)
 	
 	it.filter=it.opts.filter or "none"
 	
-	it.xh=it.opts.size and it.opts.size[1] or 360
-	it.yh=it.opts.size and it.opts.size[2] or 240
+	it.hx=it.opts.size and it.opts.size[1] or 360
+	it.hy=it.opts.size and it.opts.size[2] or 240
 
-	it.fbo=framebuffers.create(it.xh,it.yh,1)
-	it.lay=layouts.create{parent={x=0,y=0,w=it.xh,h=it.yh}}
+	it.fbo=framebuffers.create(it.hx,it.hy,1)
+--	it.lay=layouts.create{parent={x=0,y=0,w=it.hx,h=it.hy}}
 	it.view=views.create({
 		mode="fbo",
 		fbo=it.fbo,
-		vx=it.xh,
-		vy=it.yh,
-		vz=it.yh*4,
+		vx=it.hx,
+		vy=it.hy,
+		vz=it.hy*4,
 	})
 
 -- need another two buffers (no depth) to generate bloom with
-	it.fxbo1=framebuffers.create(it.xh,it.yh,0)
-	it.fxbo2=framebuffers.create(it.xh,it.yh,0)
+	it.fxbo1=framebuffers.create(it.hx,it.hy,0)
+	it.fxbo2=framebuffers.create(it.hx,it.hy,0)
 	
 	-- clear fbo and prepare for drawing into
 	it.draw_into_start=function()
@@ -129,9 +129,10 @@ screen.create=function(it,opts)
 
 		if it.filter=="scanline" then
 			flat.tristrip("rawuv",t,"fun_screen_scanline",function(p)
-				local l=layouts.get() -- the size of what we are rendering too, so we can calculate display pixel size in uv space (siz.zw)
+				local v=views.get()
+--				local l=layouts.get() -- the size of what we are rendering too, so we can calculate display pixel size in uv space (siz.zw)
 				gl.Uniform4f( p:uniform("siz"), it.fbo.txw					,	it.fbo.txh, 
-												it.fbo.uvw/l.w*l.x_scale	,	it.fbo.uvh/l.h*l.y_scale	)
+												it.fbo.uvw/v.hx*v.sx	,	it.fbo.uvh/v.hy*v.sy	)
 			end)
 		else
 			flat.tristrip("rawuv",t,"raw_tex")

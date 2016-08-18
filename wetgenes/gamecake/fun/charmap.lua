@@ -39,28 +39,28 @@ charmap.create=function(it,opts)
 	it.component="charmap"
 	it.name=opts.name
 	
-	it.xp=0
-	it.yp=0
+	it.px=0
+	it.py=0
 
-	it.window_xp=it.opts.window and it.opts.window[1] or 0
-	it.window_yp=it.opts.window and it.opts.window[2] or 0
-	it.window_xh=it.opts.window and it.opts.window[3] or it.screen.xh
-	it.window_yh=it.opts.window and it.opts.window[4] or it.screen.yh
+	it.window_px=it.opts.window and it.opts.window[1] or 0
+	it.window_py=it.opts.window and it.opts.window[2] or 0
+	it.window_hx=it.opts.window and it.opts.window[3] or it.screen.hx
+	it.window_hy=it.opts.window and it.opts.window[4] or it.screen.hy
 
-	it.char_xh=it.opts.char_size and it.opts.char_size[1] or 8
-	it.char_yh=it.opts.char_size and it.opts.char_size[2] or 8
+	it.char_hx=it.opts.char_size and it.opts.char_size[1] or 8
+	it.char_hy=it.opts.char_size and it.opts.char_size[2] or 8
 
-	it.bitmap_xh=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
-	it.bitmap_yh=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
+	it.bitmap_hx=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
+	it.bitmap_hy=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
 
-	it.charmap_xh=it.opts.charmap_size and it.opts.charmap_size[1] or 256
-	it.charmap_yh=it.opts.charmap_size and it.opts.charmap_size[2] or 256
+	it.charmap_hx=it.opts.charmap_size and it.opts.charmap_size[1] or 256
+	it.charmap_hy=it.opts.charmap_size and it.opts.charmap_size[2] or 256
 	
 
 	it.setup=function(opts)
 		
-		it.bitmap_grd  =wgrd.create("U8_RGBA", it.char_xh*it.bitmap_xh , it.char_yh*it.bitmap_yh , 1)
-		it.charmap_grd =wgrd.create("U8_RGBA", it.charmap_xh           , it.charmap_yh           , 1)
+		it.bitmap_grd  =wgrd.create("U8_RGBA", it.char_hx*it.bitmap_hx , it.char_hy*it.bitmap_hy , 1)
+		it.charmap_grd =wgrd.create("U8_RGBA", it.charmap_hx           , it.charmap_hy           , 1)
 
 		it.bitmap_tex=gl.GenTexture()
 		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	
@@ -120,13 +120,13 @@ charmap.create=function(it,opts)
 
 
 
-		local x,y,xh,yh=it.window_xp , it.window_yp , it.window_xh , it.window_yh
-		local u,v,uh,vh=it.xp/it.char_xh , it.yp/it.char_yh , xh/it.char_xh , yh/it.char_yh
+		local x,y,hx,hy=it.window_px , it.window_py , it.window_hx , it.window_hy
+		local u,v,hu,hv=it.px/it.char_hx , it.py/it.char_hy , hx/it.char_hx , hy/it.char_hy
 		local t={
-			x,		y+yh,	0,	u,		v+vh, 			
+			x,		y+hy,	0,	u,		v+hv, 			
 			x,		y,		0,	u,		v,
-			x+xh,	y+yh,	0,	u+uh,	v+vh, 			
-			x+xh,	y,		0,	u+uh,	v,
+			x+hx,	y+hy,	0,	u+hu,	v+hv, 			
+			x+hx,	y,		0,	u+hu,	v,
 		}
 
 
@@ -138,18 +138,18 @@ charmap.create=function(it,opts)
 			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_char"), 0 )
 			gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )
 
-			gl.Uniform4f( p:uniform("char_info"), it.char_xh,it.char_yh,it.char_xh*it.bitmap_xh,it.char_yh*it.bitmap_yh )
-			gl.Uniform4f( p:uniform("map_info"),  0,0,it.charmap_xh,it.charmap_yh )
+			gl.Uniform4f( p:uniform("char_info"), it.char_hx,it.char_hy,it.char_hx*it.bitmap_hx,it.char_hy*it.bitmap_hy )
+			gl.Uniform4f( p:uniform("map_info"),  0,0,it.charmap_hx,it.charmap_hy )
 
 		end)
 
 	end
 
 -- if you load a 128x1 font data then the following functions can be used to print 7bit ascii text	
-	it.text_xp=0
-	it.text_yp=0
-	it.text_xh=it.charmap_xh
-	it.text_yh=it.charmap_yh
+	it.text_px=0
+	it.text_py=0
+	it.text_hx=it.charmap_hx
+	it.text_hy=it.charmap_hy
 
 -- replace this function if your font is somewhere else, or you wish to handle more than 128 chars (utf8)
 	it.text_char=function(c)
@@ -162,7 +162,7 @@ charmap.create=function(it,opts)
 
 	it.text_print=function(s,x,y)
 		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
-			if x>=it.text_xp and y>=it.text_yp and x<it.text_xp+it.text_xh and y<it.text_yp+it.text_yh then
+			if x>=it.text_px and y>=it.text_py and x<it.text_px+it.text_hx and y<it.text_py+it.text_hy then
 				it.text_print_char(c,x,y)
 			end
 			x=x+1
