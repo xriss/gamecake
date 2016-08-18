@@ -28,9 +28,12 @@ function M.bake(oven,views)
 -- the oven creates a master win related view at startup
 
 	views.stack={}
-	views.push=function(view) views.stack[#views.stack+1]=view end
 	views.get=function() return assert(views.stack[#views.stack]) end
+	views.push=function(view) views.stack[#views.stack+1]=view end
 	views.pop=function() local view=views.get() views.stack[#views.stack]=nil return view end
+	views.apply=function() views.get().apply() end
+	views.push_and_apply=function(view) views.push(view) views.apply() end
+	views.pop_and_apply=function() views.pop() views.apply() end
 	
 -- create a view, for main screen or FBO.
 	views.create=function(opts)
@@ -51,12 +54,12 @@ function M.bake(oven,views)
 
 
 -- the projection view size, mostly aspect, that we will be aiming for
-		view.vx=vx -- width
-		view.vy=vy -- height
+		view.vx=opts.vx -- width
+		view.vy=opts.vy -- height
 
-		view.vz=vz -- depth range of the zbuffer
+		view.vz=opts.vz or (view.vy and view.vy*4)-- depth range of the zbuffer
 
-		view.fov=opts.fov -- field of view, a tan like value, so 1 would be 90deg, 0.5 would be 45deg and so on
+		view.fov=opts.fov or 0 -- field of view, a tan like value, so 1 would be 90deg, 0.5 would be 45deg and so on
 
 --		view.sx=opts.overscan or 1 -- scale vx,vy by this value, to allow simple overscan
 		
@@ -86,8 +89,8 @@ function M.bake(oven,views)
 
 				view.px=0
 				view.py=0
-				view.hx=view.fbo.width
-				view.hy=view.fbo.height
+				view.hx=view.fbo.w
+				view.hy=view.fbo.h
 
 			elseif view.mode=="full" then
 
@@ -105,6 +108,7 @@ function M.bake(oven,views)
 
 			end
 
+			return view
 		end
 		
 		view.update=function()	-- update pmtx and port
@@ -186,6 +190,7 @@ function M.bake(oven,views)
 
 			end
 
+			return view
 		end
 
 		
@@ -201,10 +206,25 @@ function M.bake(oven,views)
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.LoadIdentity()
 			
-			if view.view.fov==0 then
+			if view.fov==0 then
 				gl.Translate(-view.vx/2,-view.vy/2,(-view.vz/2)) -- top left corner is origin
 			else
 				gl.Translate(-view.vx/2,-view.vy/2,(-view.vy/2)/view.fov) -- top left corner is origin
+			end
+
+
+			return view
+		end
+
+-- convert rawx,rawy to x,y in msg		
+		view.msg=function(msg)
+
+			if msg.xraw and msg.yraw then	-- we need to fix raw x,y mouse numbers
+			
+				msg.x=( view.vx * ( (msg.xraw-(view.hx*0.5+view.px)) * view.port.sx ) / view.hx ) + view.vx*0.5
+				msg.y=( view.vy * ( (msg.yraw-(view.hy*0.5+view.py)) * view.port.sy ) / view.hy ) + view.vy*0.5
+
+				return true
 			end
 
 		end

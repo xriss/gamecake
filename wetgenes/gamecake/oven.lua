@@ -263,6 +263,9 @@ require("gles").CheckError() -- uhm this fixes an error?
 				
 					mode="win",
 					win=oven.win,
+					vx=oven.win.width,
+					vy=oven.win.height,
+					fov=0,
 					
 				})
 			)

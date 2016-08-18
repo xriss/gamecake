@@ -17,6 +17,7 @@ function M.bake(oven,screen)
 	local canvas=cake.canvas
 	local flat=canvas.flat
 	local layouts=cake.layouts
+	local views=cake.views
 
 	local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
@@ -51,6 +52,13 @@ screen.create=function(it,opts)
 
 	it.fbo=framebuffers.create(it.xh,it.yh,1)
 	it.lay=layouts.create{parent={x=0,y=0,w=it.xh,h=it.yh}}
+	it.view=views.create({
+		mode="fbo",
+		fbo=it.fbo,
+		vx=it.xh,
+		vy=it.yh,
+		vz=it.yh*4,
+	})
 
 -- need another two buffers (no depth) to generate bloom with
 	it.fxbo1=framebuffers.create(it.xh,it.yh,0)
@@ -67,7 +75,8 @@ screen.create=function(it,opts)
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.PushMatrix()
 
-		it.lay_orig=it.lay.apply(nil,nil,0)
+		views.push_and_apply(it.view)
+--		it.lay_orig=it.lay.apply(nil,nil,0)
 
 		gl.ClearColor(0,0,0,1)
 		gl.DepthMask(gl.TRUE)
@@ -84,7 +93,8 @@ screen.create=function(it,opts)
 
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
 
-		it.lay_orig.restore()
+		views.pop_and_apply()
+--		it.lay_orig.restore()
 
 		gl.MatrixMode(gl.PROJECTION)
 		gl.PopMatrix()			
@@ -149,7 +159,9 @@ screen.create=function(it,opts)
 		gl.PushMatrix()		
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.PushMatrix()
-		it.lay_orig=it.lay.apply(nil,nil,0)
+
+		views.push_and_apply(it.view)
+--		it.lay_orig=it.lay.apply(nil,nil,0)
 
 		local v3=gl.apply_modelview( {it.fbo.w*-0,	it.fbo.h* 1,	0,1} )
 		local v1=gl.apply_modelview( {it.fbo.w*-0,	it.fbo.h*-0,	0,1} )
@@ -184,7 +196,8 @@ screen.create=function(it,opts)
 
 
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
-		it.lay_orig.restore()
+		views.pop_and_apply()
+--		it.lay_orig.restore()
 		gl.MatrixMode(gl.PROJECTION)
 		gl.PopMatrix()			
 		gl.MatrixMode(gl.MODELVIEW)
