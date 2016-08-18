@@ -322,7 +322,7 @@ void main(void)
 	vec2 uv=(v_texcoord+sizpos.zw)/sizpos.xy;
 	vec4 c;
 	
-	float g=cellular(vec3(v_texcoord.y,0.0,ticks.y/8.0)).x*0.5+0.5;
+	float g=cellular(vec3(v_texcoord.x,v_texcoord.y,ticks.y/32.0)).x*0.5+0.5;
 
 	if(uv.y<0.00)
 	{

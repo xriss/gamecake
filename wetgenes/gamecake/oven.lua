@@ -258,6 +258,15 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 			oven.rebake("wetgenes.gamecake.cake") -- bake the cake in the oven,
 
+			oven.cake.views.push( -- add master view which is the size of the main window
+				oven.cake.views.create({
+				
+					mode="win",
+					win=oven.win,
+					
+				})
+			)
+
 			-- the order these are added is important for priority, top of list is lowest priority, bottom is highest.
 			oven.rebake_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style escape menu
 			oven.rebake_mod("wetgenes.gamecake.mods.console") -- console gives us a quake style tilda console
@@ -284,6 +293,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 			if wzips.exists("data/wskins/soapbar.png") or wzips.exists("data/wskins/soapbar.00.lua")then -- we got us better skin to use :)
 				oven.rebake("wetgenes.gamecake.widgets.skin").load("soapbar")
 			end
+
 
 			if opts.start then
 				oven.next=oven.rebake(opts.start)

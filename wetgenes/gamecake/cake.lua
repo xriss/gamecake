@@ -57,7 +57,8 @@ function M.bake(oven,cake)
 	cake.fonts   = oven.rebake("wetgenes.gamecake.fonts") -- we will need to load some fonts
 	cake.sounds  = oven.rebake("wetgenes.gamecake.sounds") -- we will need to load some sounds
 	cake.canvas  = oven.rebake("wetgenes.gamecake.canvas") -- a canvas contains current drawing state and functions
-	cake.layouts = oven.rebake("wetgenes.gamecake.layouts") -- display layout functions, 
+	cake.views   = oven.rebake("wetgenes.gamecake.views") -- new display layout functions, 
+	cake.layouts = oven.rebake("wetgenes.gamecake.layouts") -- old display layout functions, 
 	cake.framebuffers = oven.rebake("wetgenes.gamecake.framebuffers") -- render to functions, 
 	
 
