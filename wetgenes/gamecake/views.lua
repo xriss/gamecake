@@ -154,7 +154,16 @@ function M.bake(oven,views)
 
 			else
 				
-				if (pa > (va) ) 	then 	-- fit width to screen
+				if view.master.stretch then
+
+					view.pmtx[1] = va/view.fov
+					view.pmtx[6] = -1/view.fov
+					
+					view.port.sx=1
+					view.port.sy=1
+
+				
+				elseif (pa > (va) ) 	then 	-- fit width to screen
 				
 					view.pmtx[1] = ((va)*1)/view.fov
 					view.pmtx[6] = -((va)/pa)/view.fov

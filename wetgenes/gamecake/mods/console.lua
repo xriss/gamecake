@@ -389,11 +389,21 @@ font.vbs_idx=1
 	
 	function console.msg(m)
 
+		if     m.class=="key" and ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) and m.action==1 then
+			console.shift_key=true
+		elseif m.class=="key" and ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) and m.action==-1 then
+			console.shift_key=false
+		end
+
 		if ( m.class=="key" and m.keyname=="f11" and m.action==1 ) then -- fullscreen toggle
-			if win.view and (win.view~="win") then
-				win:show("win")
+			if console.shift_key then
+				oven.view.stretch=not oven.view.stretch
 			else
-				win:show("full")
+				if win.view and (win.view~="win") then
+					win:show("win")
+				else
+					win:show("full")
+				end
 			end
 			return nil
 		end

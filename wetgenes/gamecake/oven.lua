@@ -258,17 +258,16 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 			oven.rebake("wetgenes.gamecake.cake") -- bake the cake in the oven,
 
-			oven.cake.views.push( -- add master view which is the size of the main window
-				oven.cake.views.create({
+			oven.view=oven.cake.views.create({
+			
+				mode="win",
+				win=oven.win,
+				vx=oven.win.width,
+				vy=oven.win.height,
+				fov=0,
 				
-					mode="win",
-					win=oven.win,
-					vx=oven.win.width,
-					vy=oven.win.height,
-					fov=0,
-					
-				})
-			)
+			})
+			oven.cake.views.push(oven.view) -- add master view which is the size of the main window
 
 			-- the order these are added is important for priority, top of list is lowest priority, bottom is highest.
 			oven.rebake_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style escape menu
