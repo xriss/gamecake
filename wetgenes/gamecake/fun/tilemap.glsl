@@ -1,6 +1,6 @@
 
 
-#shader "fun_draw_charmap"
+#shader "fun_draw_tilemap"
 
 #ifdef VERTEX_SHADER
 

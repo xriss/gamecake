@@ -11,32 +11,32 @@ local wzips=require("wetgenes.zips")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(oven,charmap)
+function M.bake(oven,tilemap)
 
 	local gl=oven.gl
 	local cake=oven.cake
 	local canvas=cake.canvas
 	local flat=canvas.flat
 
-charmap.load=function()
+tilemap.load=function()
 
 	local filename="lua/"..(M.modname):gsub("%.","/")..".glsl"
 	gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
 
-	return charmap
+	return tilemap
 end
 
-charmap.setup=function()
+tilemap.setup=function()
 
-	charmap.load()
+	tilemap.load()
 
-	return charmap
+	return tilemap
 end
 
-charmap.create=function(it,opts)
+tilemap.create=function(it,opts)
 	it.screen=it.system.components.screen -- system will have been passed in
 	it.opts=opts
-	it.component="charmap"
+	it.component="tilemap"
 	it.name=opts.name
 	
 	it.px=0
@@ -53,14 +53,14 @@ charmap.create=function(it,opts)
 	it.bitmap_hx=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
 	it.bitmap_hy=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
 
-	it.charmap_hx=it.opts.charmap_size and it.opts.charmap_size[1] or 256
-	it.charmap_hy=it.opts.charmap_size and it.opts.charmap_size[2] or 256
+	it.tilemap_hx=it.opts.tilemap_size and it.opts.tilemap_size[1] or 256
+	it.tilemap_hy=it.opts.tilemap_size and it.opts.tilemap_size[2] or 256
 	
 
 	it.setup=function(opts)
 		
 		it.bitmap_grd  =wgrd.create("U8_RGBA", it.char_hx*it.bitmap_hx , it.char_hy*it.bitmap_hy , 1)
-		it.charmap_grd =wgrd.create("U8_RGBA", it.charmap_hx           , it.charmap_hy           , 1)
+		it.tilemap_grd =wgrd.create("U8_RGBA", it.tilemap_hx           , it.tilemap_hy           , 1)
 
 		it.bitmap_tex=gl.GenTexture()
 		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	
@@ -69,8 +69,8 @@ charmap.create=function(it,opts)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
 
-		it.charmap_tex=gl.GenTexture()
-		gl.BindTexture( gl.TEXTURE_2D , it.charmap_tex )	
+		it.tilemap_tex=gl.GenTexture()
+		gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )	
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.REPEAT)
@@ -83,9 +83,9 @@ charmap.create=function(it,opts)
 			gl.DeleteTexture( it.bitmap_tex )
 			it.bitmap_tex=nil
 		end
-		if it.charmap_tex then
-			gl.DeleteTexture( it.charmap_tex )
-			it.charmap_tex=nil
+		if it.tilemap_tex then
+			gl.DeleteTexture( it.tilemap_tex )
+			it.tilemap_tex=nil
 		end
 	end
 
@@ -106,17 +106,17 @@ charmap.create=function(it,opts)
 			gl.UNSIGNED_BYTE,
 			it.bitmap_grd.data )
 
-		gl.BindTexture( gl.TEXTURE_2D , it.charmap_tex )	
+		gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )	
 		gl.TexImage2D(
 			gl.TEXTURE_2D,
 			0,
 			gl.RGBA,
-			it.charmap_grd.width,
-			it.charmap_grd.height,
+			it.tilemap_grd.width,
+			it.tilemap_grd.height,
 			0,
 			gl.RGBA,
 			gl.UNSIGNED_BYTE,
-			it.charmap_grd.data )
+			it.tilemap_grd.data )
 
 
 
@@ -130,16 +130,16 @@ charmap.create=function(it,opts)
 		}
 
 
-		flat.tristrip("rawuv",t,"fun_draw_charmap",function(p)
+		flat.tristrip("rawuv",t,"fun_draw_tilemap",function(p)
 
 			gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_map"), 1 )
-			gl.BindTexture( gl.TEXTURE_2D , it.charmap_tex )
+			gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
 
 			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_char"), 0 )
 			gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )
 
 			gl.Uniform4f( p:uniform("char_info"), it.char_hx,it.char_hy,it.char_hx*it.bitmap_hx,it.char_hy*it.bitmap_hy )
-			gl.Uniform4f( p:uniform("map_info"),  0,0,it.charmap_hx,it.charmap_hy )
+			gl.Uniform4f( p:uniform("map_info"),  0,0,it.tilemap_hx,it.tilemap_hy )
 
 		end)
 
@@ -148,8 +148,8 @@ charmap.create=function(it,opts)
 -- if you load a 128x1 font data then the following functions can be used to print 7bit ascii text	
 	it.text_px=0
 	it.text_py=0
-	it.text_hx=it.charmap_hx
-	it.text_hy=it.charmap_hy
+	it.text_hx=it.tilemap_hx
+	it.text_hy=it.tilemap_hy
 
 -- replace this function if your font is somewhere else, or you wish to handle more than 128 chars (utf8)
 	it.text_char=function(c)
@@ -157,7 +157,7 @@ charmap.create=function(it,opts)
 	end
 
 	it.text_print_char=function(c,x,y)
-		it.charmap_grd:pixels( x,y, 1,1, it.text_char(c) )
+		it.tilemap_grd:pixels( x,y, 1,1, it.text_char(c) )
 	end
 
 	it.text_print=function(s,x,y)
@@ -178,7 +178,7 @@ charmap.create=function(it,opts)
 	return it
 end
 
-	return charmap
+	return tilemap
 end
 
 

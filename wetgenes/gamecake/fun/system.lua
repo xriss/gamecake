@@ -30,7 +30,7 @@ print("system setup")
 -- possible components and perform global setup, even if they never get used
 
 	system.sprites=oven.rebake("wetgenes.gamecake.fun.sprites").setup()
-	system.charmap=oven.rebake("wetgenes.gamecake.fun.charmap").setup()
+	system.tilemap=oven.rebake("wetgenes.gamecake.fun.tilemap").setup()
 	system.screen =oven.rebake("wetgenes.gamecake.fun.screen").setup()
 	system.copper =oven.rebake("wetgenes.gamecake.fun.copper").setup()
 
@@ -48,9 +48,9 @@ print("system setup")
 
 			it=system.sprites.create({system=system},v)
 
-		elseif v.component=="charmap" then
+		elseif v.component=="tilemap" then
 
-			it=system.charmap.create({system=system},v)
+			it=system.tilemap.create({system=system},v)
 
 		elseif v.component=="copper" then
 
