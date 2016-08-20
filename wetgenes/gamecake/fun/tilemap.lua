@@ -47,8 +47,8 @@ tilemap.create=function(it,opts)
 	it.window_hx=it.opts.window and it.opts.window[3] or it.screen.hx
 	it.window_hy=it.opts.window and it.opts.window[4] or it.screen.hy
 
-	it.char_hx=it.opts.char_size and it.opts.char_size[1] or 8
-	it.char_hy=it.opts.char_size and it.opts.char_size[2] or 8
+	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or 8
+	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or 8
 
 	it.bitmap_hx=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
 	it.bitmap_hy=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
@@ -59,7 +59,7 @@ tilemap.create=function(it,opts)
 
 	it.setup=function(opts)
 		
-		it.bitmap_grd  =wgrd.create("U8_RGBA", it.char_hx*it.bitmap_hx , it.char_hy*it.bitmap_hy , 1)
+		it.bitmap_grd  =wgrd.create("U8_RGBA", it.tile_hx*it.bitmap_hx , it.tile_hy*it.bitmap_hy , 1)
 		it.tilemap_grd =wgrd.create("U8_RGBA", it.tilemap_hx           , it.tilemap_hy           , 1)
 
 		it.bitmap_tex=gl.GenTexture()
@@ -121,7 +121,7 @@ tilemap.create=function(it,opts)
 
 
 		local x,y,hx,hy=it.window_px , it.window_py , it.window_hx , it.window_hy
-		local u,v,hu,hv=it.px/it.char_hx , it.py/it.char_hy , hx/it.char_hx , hy/it.char_hy
+		local u,v,hu,hv=it.px/it.tile_hx , it.py/it.tile_hy , hx/it.tile_hx , hy/it.tile_hy
 		local t={
 			x,		y+hy,	0,	u,		v+hv, 			
 			x,		y,		0,	u,		v,
@@ -135,10 +135,10 @@ tilemap.create=function(it,opts)
 			gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_map"), 1 )
 			gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
 
-			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_char"), 0 )
+			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_tile"), 0 )
 			gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )
 
-			gl.Uniform4f( p:uniform("char_info"), it.char_hx,it.char_hy,it.char_hx*it.bitmap_hx,it.char_hy*it.bitmap_hy )
+			gl.Uniform4f( p:uniform("tile_info"), it.tile_hx,it.tile_hy,it.tile_hx*it.bitmap_hx,it.tile_hy*it.bitmap_hy )
 			gl.Uniform4f( p:uniform("map_info"),  0,0,it.tilemap_hx,it.tilemap_hy )
 
 		end)
@@ -151,19 +151,19 @@ tilemap.create=function(it,opts)
 	it.text_hx=it.tilemap_hx
 	it.text_hy=it.tilemap_hy
 
--- replace this function if your font is somewhere else, or you wish to handle more than 128 chars (utf8)
-	it.text_char=function(c)
+-- replace this function if your font is somewhere else, or you wish to handle more than 128 tiles (utf8)
+	it.text_tile=function(c)
 		return {(c:byte()),0,0,0}
 	end
 
-	it.text_print_char=function(c,x,y)
-		it.tilemap_grd:pixels( x,y, 1,1, it.text_char(c) )
+	it.text_print_tile=function(c,x,y)
+		it.tilemap_grd:pixels( x,y, 1,1, it.text_tile(c) )
 	end
 
 	it.text_print=function(s,x,y)
 		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
 			if x>=it.text_px and y>=it.text_py and x<it.text_px+it.text_hx and y<it.text_py+it.text_hy then
-				it.text_print_char(c,x,y)
+				it.text_print_tile(c,x,y)
 			end
 			x=x+1
 		end

@@ -30,10 +30,10 @@ precision highp float; /* really need better numbers if possible */
 #endif
 
 
-uniform sampler2D tex_char;
+uniform sampler2D tex_tile;
 uniform sampler2D tex_map;
 
-uniform vec4  char_info; /* 0,1 char size eg 8x8 and 2,3 the font texture size*/
+uniform vec4  tile_info; /* 0,1 tile size eg 8x8 and 2,3 the font texture size*/
 uniform vec4  map_info; /* 0,1 just add this to texcoord and 2,3 the map texture size*/
 
 varying vec2  v_texcoord;
@@ -45,11 +45,11 @@ void main(void)
 	vec4 c;
 	vec4 d;
 	vec2 uv=v_texcoord.xy+map_info.xy;		// base uv
-	vec2 tc=fract(uv);						// char uv
+	vec2 tc=fract(uv);						// tile uv
 	vec2 tm=(floor(uv)+vec2(0.5,0.5))/map_info.zw;			// map uv
 
 	d=texture2D(tex_map, tm).rgba;	
-	c=texture2D(tex_char, (((d.rg*vec2(255.0,255.0))+tc)*char_info.xy)/char_info.zw ).rgba;	
+	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba;	
 
 	gl_FragColor=c;
 	if((gl_FragColor.a)<0.25) discard;

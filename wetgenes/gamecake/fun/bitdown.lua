@@ -13,47 +13,122 @@ local wstr=require("wetgenes.string")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
--- swanky32 default color map
 
 M.map={
 
-	[0]={bgra=0x00000000}, -- default
+-- swanky32 by index
 
-	["."]={bgra=0x00000000},
-	["g"]={bgra=0xff336622},
-	["G"]={bgra=0xff448822},
-	["d"]={bgra=0xff66aa33},
-	["D"]={bgra=0xff66bb77},
-	["C"]={bgra=0xff66cccc},
-	["c"]={bgra=0xff5599cc},
-	["B"]={bgra=0xff5577cc},
+	[ 0]={bgra=0x00000000},
+	[ 1]={bgra=0xff336622},
+	[ 2]={bgra=0xff448822},
+	[ 3]={bgra=0xff66aa33},
+	[ 4]={bgra=0xff66bb77},
+	[ 5]={bgra=0xff66cccc},
+	[ 6]={bgra=0xff5599cc},
+	[ 7]={bgra=0xff5577cc},
 
-	["b"]={bgra=0xff445599},
-	["I"]={bgra=0xff333366},
-	["i"]={bgra=0xff332244},
-	["j"]={bgra=0xff442233},
-	["f"]={bgra=0xff663333},
-	["F"]={bgra=0xff884433},
-	["s"]={bgra=0xffbb7766},
-	["S"]={bgra=0xffeeaa99},
+	[ 8]={bgra=0xff445599},
+	[ 9]={bgra=0xff333366},
+	[10]={bgra=0xff332244},
+	[11]={bgra=0xff442233},
+	[12]={bgra=0xff663333},
+	[13]={bgra=0xff884433},
+	[14]={bgra=0xffbb7766},
+	[15]={bgra=0xffeeaa99},
 
-	["M"]={bgra=0xffee88bb},
-	["m"]={bgra=0xffdd6666},
-	["R"]={bgra=0xffcc3333},
-	["r"]={bgra=0xffdd5533},
-	["O"]={bgra=0xffdd7733},
-	["o"]={bgra=0xffddaa33},
-	["Y"]={bgra=0xffdddd44},
-	["y"]={bgra=0xff888833},
+	[16]={bgra=0xffee88bb},
+	[17]={bgra=0xffdd6666},
+	[18]={bgra=0xffcc3333},
+	[19]={bgra=0xffdd5533},
+	[20]={bgra=0xffdd7733},
+	[21]={bgra=0xffddaa33},
+	[22]={bgra=0xffdddd44},
+	[23]={bgra=0xff888833},
 
-	["0"]={bgra=0xff000000},
-	["1"]={bgra=0xff222222},
-	["2"]={bgra=0xff444444},
-	["3"]={bgra=0xff666666},
-	["4"]={bgra=0xff888888},
-	["5"]={bgra=0xffaaaaaa},
-	["6"]={bgra=0xffcccccc},
-	["7"]={bgra=0xffffffff},
+	[24]={bgra=0xff000000},
+	[25]={bgra=0xff222222},
+	[26]={bgra=0xff444444},
+	[27]={bgra=0xff666666},
+	[28]={bgra=0xff888888},
+	[29]={bgra=0xffaaaaaa},
+	[30]={bgra=0xffcccccc},
+	[31]={bgra=0xffffffff},
+
+-- hex maps
+
+	["00"]=0,
+	["01"]=1,
+	["02"]=2,
+	["03"]=3,
+	["04"]=4,
+	["05"]=5,
+	["06"]=6,
+	["07"]=7,
+
+	["08"]=8,
+	["09"]=9,
+	["0A"]=10,
+	["0B"]=11,
+	["0C"]=12,
+	["0D"]=13,
+	["0E"]=14,
+	["0F"]=15,
+
+	["10"]=16,
+	["11"]=17,
+	["12"]=18,
+	["13"]=19,
+	["14"]=20,
+	["15"]=21,
+	["16"]=22,
+	["17"]=23,
+
+	["18"]=24,
+	["19"]=25,
+	["1A"]=26,
+	["1B"]=27,
+	["1C"]=28,
+	["1D"]=29,
+	["1E"]=30,
+	["1F"]=31,
+
+-- custom maps for nicer looking handmade ascii
+
+	["."]=0,
+	["g"]=1,
+	["G"]=2,
+	["d"]=3,
+	["D"]=4,
+	["C"]=5,
+	["c"]=6,
+	["B"]=7,
+
+	["b"]=8,
+	["I"]=9,
+	["i"]=10,
+	["j"]=11,
+	["f"]=12,
+	["F"]=13,
+	["s"]=14,
+	["S"]=15,
+
+	["M"]=16,
+	["m"]=17,
+	["R"]=18,
+	["r"]=19,
+	["O"]=20,
+	["o"]=21,
+	["Y"]=22,
+	["y"]=23,
+
+	["0"]=24,
+	["1"]=25,
+	["2"]=26,
+	["3"]=27,
+	["4"]=28,
+	["5"]=29,
+	["6"]=30,
+	["7"]=31,
 	
 }
 
@@ -110,7 +185,11 @@ end
 -- turn 32bit .bgra numbers into 4 bytes rgba with a premultiplyed alpha placed in map[1] to map[4]
 M.map_bgra_premultiply=function(map)
 	for n,v in pairs(map) do
-		v[1],v[2],v[3],v[4]=wpack.argb_pmb4(v.bgra)
+		while v and type(v)~="table" do v=map[v] end -- fill in any references
+		map[n]=v -- remember the result
+		if v then -- turn hex value into premult-bytes
+			v[1],v[2],v[3],v[4]=wpack.argb_pmb4(v.bgra)
+		end
 	end
 	return map
 end

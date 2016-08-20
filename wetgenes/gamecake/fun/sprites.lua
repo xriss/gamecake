@@ -48,8 +48,8 @@ sprites.create=function(it,opts)
 
 	it.setup=function(opts)
 		
-		it.px=0 -- display x offset 1 is a single char wide
-		it.py=0 -- display y offset 1 is a single char high
+		it.px=0 -- display x offset 1 is a single tile wide
+		it.py=0 -- display y offset 1 is a single tile high
 		
 		it.bitmap_grd  =wgrd.create("U8_RGBA", it.sprite_hx*it.bitmap_hx , it.sprite_hy*it.bitmap_hy , 1)
 
