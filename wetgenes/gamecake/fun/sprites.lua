@@ -39,8 +39,8 @@ sprites.create=function(it,opts)
 	it.component="sprites"
 	it.name=opts.name
 
-	it.sprite_hx=it.opts.sprite_size and it.opts.sprite_size[1] or 8
-	it.sprite_hy=it.opts.sprite_size and it.opts.sprite_size[2] or 8
+	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or 8
+	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or 8
 
 	it.bitmap_hx=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
 	it.bitmap_hy=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
@@ -51,7 +51,7 @@ sprites.create=function(it,opts)
 		it.px=0 -- display x offset 1 is a single tile wide
 		it.py=0 -- display y offset 1 is a single tile high
 		
-		it.bitmap_grd  =wgrd.create("U8_RGBA", it.sprite_hx*it.bitmap_hx , it.sprite_hy*it.bitmap_hy , 1)
+		it.bitmap_grd  =wgrd.create("U8_RGBA", it.tile_hx*it.bitmap_hx , it.tile_hy*it.bitmap_hy , 1)
 
 		it.bitmap_tex=gl.GenTexture()
 		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	
@@ -79,19 +79,22 @@ sprites.create=function(it,opts)
 		v.idx=(idx or v.idx or (#it.list+1) )
 		it.list[ v.idx ]=v
 		
-		v.cx=v.cx or 0
-		v.cy=v.cy or 0
+		v.hx=v.hx or v.h or it.tile_hx
+		v.hy=v.hy or v.h or it.tile_hy
 
-		v.ox=v.ox or it.sprite_hx/2
-		v.oy=v.oy or it.sprite_hy/2
+		v.tx=v.tx or (           ( (v.t or 0)%256 ) * math.ceil(v.hx/it.tile_hx) )
+		v.ty=v.ty or ( math.floor( (v.t or 0)/256 ) * math.ceil(v.hy/it.tile_hy) )
+
+		v.ox=v.ox or v.hx/2
+		v.oy=v.oy or v.hy/2
 		
 		v.px=v.px or 0
 		v.py=v.py or 0
 
 		v.rz=v.rz or 0
 
-		v.sx=v.sx or 1
-		v.sy=v.sy or 1
+		v.sx=v.sx or v.s or 1
+		v.sy=v.sy or v.s or 1
 
 		v.zf=v.zf or 0
 
@@ -123,15 +126,15 @@ sprites.create=function(it,opts)
 		local batch={}
 		for idx,v in pairs(it.list) do
 
-			local ixw=(v.cx+1)/it.bitmap_hx
-			local iyh=(v.cy+1)/it.bitmap_hy
-			local ix=v.cx/it.bitmap_hx
-			local iy=v.cy/it.bitmap_hy
+			local ixw=(v.tx+(v.hx/it.tile_hx))/it.bitmap_hx
+			local iyh=(v.ty+(v.hy/it.tile_hy))/it.bitmap_hy
+			local ix=v.tx/it.bitmap_hx
+			local iy=v.ty/it.bitmap_hy
 			
 			local ox=(v.ox)*(v.sx)
 			local oy=(v.oy)*(v.sy)
-			local hx=it.sprite_hx*(v.sx)
-			local hy=it.sprite_hy*(v.sy)
+			local hx=v.hx*(v.sx)
+			local hy=v.hy*(v.sy)
 			
 			local s=-math.sin(math.pi*(v.rz)/180)
 			local c= math.cos(math.pi*(v.rz)/180)

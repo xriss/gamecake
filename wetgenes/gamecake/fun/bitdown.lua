@@ -12,7 +12,7 @@ local wstr=require("wetgenes.string")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
-
+local bitdown=M
 
 M.map={
 
@@ -194,18 +194,40 @@ M.map_bgra_premultiply=function(map)
 	return map
 end
 
+-- find the size of some bitdown in pixels, possibly rounded up
+M.pix_size=function(str,rx,ry)
+
+	rx=rx or 1
+	ry=ry or 1
+
+	local ls=wstr.split(str,"\n")
+
+	if string.len(ls[1])==0 then table.remove(ls,1) end
+	if string.len(ls[#ls])==0 then table.remove(ls,#ls) end
+	
+	local l=0 for i=1,#ls do l=l+string.len(ls[i]) end
+	
+	local x=math.floor(l/(#ls*2))
+	local y=#ls
+
+	x=math.ceil(x/rx)*rx
+	y=math.ceil(y/ry)*ry
+
+	return x,y
+end
+
+
 -- write some ascii art into an x,y grd location
-M.pix_grd=function(str,map,gout,xp,yp,xh,yh)
+M.pix_grd=function(str,map,gout,px,py,hx,hy)
 
 	local ls=wstr.split(str,"\n")
 
 	map=map or M.map
 
-	xp=xp or 0
-	yp=yp or 0
+	px=px or 0
+	py=py or 0
 	
-	xh=xh or (#(ls[1]))/2
-	yh=yh or #ls-1
+	if not hx and not hy then hx,hy=M.pix_size(str) end
 
 	local getxy=function(x,y)
 		local l=ls[1+y]
@@ -219,17 +241,29 @@ M.pix_grd=function(str,map,gout,xp,yp,xh,yh)
 	end
 	
 	local t={}
-	for y=0,yh-1 do
-		for x=0,xh-1 do
+	for y=0,hx-1 do
+		for x=0,hx-1 do
 			local s=getxy(x,y) or ". "
 			local c=getc(s) or {0,0,0,0}
 			local l=#t
 			t[l+1]=c[1] t[l+2]=c[2] t[l+3]=c[3] t[l+4]=c[4]
 		end
 	end
-	gout:pixels(xp,yp,xh,yh,t)
+	gout:pixels(px,py,hx,hy,t)
 
 end
 
+-- write a bunch of ascii into this bitmap, using its index as its location 0xYYXX,
+M.pixtab_grd=function(tab,map,gout)
+
+	for n,v in pairs(tab) do
+		local hx,hy=bitdown.pix_size(v,8,8)
+		local px=math.floor(n%256)*hx
+		local py=math.floor((n)/256)*hy
+		bitdown.pix_grd(v,map,gout,px,py,hx,hy)
+	end
+
+end
+	
 M.map_bgra_premultiply(M.map)
 
