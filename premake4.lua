@@ -795,6 +795,7 @@ all_includes=all_includes or {
 																						and		(not LSB) 				},
 
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
+	{"lua_chipmunk",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_raspi_unicornhat",																	RASPI					},
 	{"lua_utf8",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_cmsgpack",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
