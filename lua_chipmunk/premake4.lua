@@ -1,11 +1,12 @@
 
 project "lua_chipmunk"
-language "C++"
-files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
+language "C"
+files { "code/**.c" , "code/**.h" , "all.h" }
+files { "master/src/**.c" , "master/src/**.h" , "master/include/**.h" }
 
 links { "lib_lua" }
 
-includedirs { "." }
+includedirs { "." , "master/include" }
 
 
 KIND{lua="wetgenes.chipmunk.core"}
