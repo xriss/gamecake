@@ -11,7 +11,7 @@
 // or its address as a light userdata identifier, both unique
 //
 const char *lua_chipmunk_space_meta_name="chipmunk_space*ptr";
-const char *lua_chipmunk_body_meta_name="chipmunk_body*ptr";
+const char *lua_chipmunk_body_meta_name ="chipmunk_body*ptr";
 const char *lua_chipmunk_shape_meta_name="chipmunk_shape*ptr";
 
 
@@ -38,7 +38,7 @@ cpSpace **pp;
 
 static int lua_chipmunk_space_create (lua_State *l)
 {	
-	cpSpace **pp;
+cpSpace **pp;
 
 // create ptr ptr userdata
 	pp=(cpSpace**)lua_newuserdata(l, sizeof(cpSpace*));
@@ -86,7 +86,7 @@ cpBody **pp;
 
 static int lua_chipmunk_body_create (lua_State *l)
 {	
-	cpBody **pp;
+cpBody **pp;
 
 // create ptr ptr userdata
 	pp=(cpBody**)lua_newuserdata(l, sizeof(cpBody*));
@@ -133,7 +133,7 @@ cpShape **pp;
 
 static int lua_chipmunk_shape_create (lua_State *l)
 {	
-	cpShape **pp;
+cpShape **pp;
 
 // create ptr ptr userdata
 	pp=(cpShape**)lua_newuserdata(l, sizeof(cpShape*));
