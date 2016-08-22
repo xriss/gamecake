@@ -95,6 +95,21 @@ copper.create=function(it,opts)
 				end
 
 			end
+
+-- shadertoy compatability
+			local id=p:uniform("iResolution")
+			if id then
+				gl.Uniform3f( id, it.screen.hx,it.screen.hy,0 )
+			end
+
+			local id=p:uniform("iGlobalTime")
+			if id then
+				gl.Uniform1f( id, it.system.ticks/60 )
+			end
+
+
+
+
 		end)
 
 --			gl.PopMatrix()

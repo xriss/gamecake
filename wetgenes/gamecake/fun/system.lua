@@ -54,6 +54,8 @@ end
 
 system.setup=function(code)
 
+	system.ticks=0
+
 print("system setup")
 
 	if code then
@@ -155,6 +157,7 @@ end
 
 system.update=function()
 
+	system.ticks=system.ticks+1
 	system.resume({update=true})
 
 	for _,it in ipairs(system.components) do
