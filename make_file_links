@@ -11,3 +11,5 @@ lua_win_raspi/make_file_links
 lua_win_windows/make_file_links
 
 lua_raspi_unicornhat/make_file_links
+
+lua_chipmunk/make_file_links
