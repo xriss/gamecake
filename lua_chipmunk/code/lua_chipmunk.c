@@ -79,6 +79,12 @@ cpBody **pp;
 cpBody *  lua_chipmunk_body_ptr (lua_State *l,int idx)
 {
 cpBody **pp;
+cpSpace *space;
+
+// check if we are given a space, return the default static body from it
+ 	space=(cpSpace**)luaL_testudata(l, idx , lua_chipmunk_space_meta_name);
+	if(space) { return cpSpaceGetStaticBody(space); }
+
 	pp=lua_chipmunk_body_ptr_ptr(l,idx);
 	if(!*pp) { luaL_error(l,"chipmunk body is null"); }
 	return *pp;
@@ -430,6 +436,8 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 
 	const luaL_reg meta_space[] =
 	{
+		{"step",			lua_chipmunk_space_step},
+
 		{"iterations",		lua_chipmunk_space_iterations},
 		{"gravity",			lua_chipmunk_space_gravity},
 		{"damping",			lua_chipmunk_space_damping},
@@ -439,6 +447,8 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 
 	const luaL_reg meta_body[] =
 	{
+		{"position",		lua_chipmunk_body_position},
+		{"angle",			lua_chipmunk_body_angle},
 		{"__gc",			lua_chipmunk_body_destroy},
 		{0,0}
 	};
