@@ -12,5 +12,8 @@ includedirs { "." , "master/include" }
 
 buildoptions{ "-std=c99" } -- newfangled flag
 
+-- disable debugs and asserts
+--defines{"NDEBUG"}
+
 KIND{lua="wetgenes.chipmunk.core"}
 
