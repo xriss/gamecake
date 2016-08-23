@@ -79,11 +79,11 @@ cpBody **pp;
 cpBody *  lua_chipmunk_body_ptr (lua_State *l,int idx)
 {
 cpBody **pp;
-cpSpace *space;
+cpSpace **space;
 
-// check if we are given a space, return the default static body from it
+// check if we are given a space, try and return the default static body from it
  	space=(cpSpace**)luaL_testudata(l, idx , lua_chipmunk_space_meta_name);
-	if(space) { return cpSpaceGetStaticBody(space); }
+	if(space&&*space) { return cpSpaceGetStaticBody(*space); }
 
 	pp=lua_chipmunk_body_ptr_ptr(l,idx);
 	if(!*pp) { luaL_error(l,"chipmunk body is null"); }
@@ -177,10 +177,10 @@ double br;
 	lua_setmetatable(l, -2);
 
 // allocate cpShape
-		tp=luaL_checkstring(l,1);
+		body=lua_chipmunk_body_ptr(l,1);
+		tp=luaL_checkstring(l,2);
 		if(0==strcmp(tp,"circle"))
 		{
-			body=lua_chipmunk_body_ptr(l,2);
 			cr=luaL_checknumber(l,3);
 			cx=luaL_checknumber(l,4);
 			cy=luaL_checknumber(l,5);
@@ -189,7 +189,6 @@ double br;
 		else
 		if(0==strcmp(tp,"segment"))
 		{
-			body=lua_chipmunk_body_ptr(l,2);
 			sxa=luaL_checknumber(l,3);
 			sya=luaL_checknumber(l,4);
 			sxb=luaL_checknumber(l,5);
@@ -205,7 +204,6 @@ double br;
 		else
 		if(0==strcmp(tp,"box"))
 		{
-			body=lua_chipmunk_body_ptr(l,2);
 			bb.l=luaL_checknumber(l,3);
 			bb.b=luaL_checknumber(l,4);
 			bb.r=luaL_checknumber(l,5);
@@ -312,6 +310,52 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// space add body
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_add_body (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpBody  *body=lua_chipmunk_body_ptr(l,2);
+
+	cpSpaceAddBody(space,body);
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// space remove body
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_remove_body (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpBody  *body=lua_chipmunk_body_ptr(l,2);
+
+	cpSpaceRemoveBody(space,body);
+
+	return 0;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// space contains body
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_contains_body (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpBody  *body=lua_chipmunk_body_ptr(l,2);
+
+	lua_pushboolean(l,cpSpaceContainsBody(space,body));
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // body get/set position
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -356,6 +400,90 @@ cpBody *body=lua_chipmunk_body_ptr(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// shape get/set elasticity
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_shape_elasticity (lua_State *l)
+{	
+cpShape *shape=lua_chipmunk_shape_ptr(l,1);
+
+	if(lua_isnumber(l,2))
+	{
+		cpShapeSetElasticity(shape, luaL_checknumber(l,2) );
+	}
+	
+	lua_pushnumber(l, cpShapeGetElasticity(shape) );
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// shape get/set friction
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_shape_friction (lua_State *l)
+{	
+cpShape *shape=lua_chipmunk_shape_ptr(l,1);
+
+	if(lua_isnumber(l,2))
+	{
+		cpShapeSetFriction(shape, luaL_checknumber(l,2) );
+	}
+	
+	lua_pushnumber(l, cpShapeGetFriction(shape) );
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------1------------------------------------------------+*/
+//
+// space add shape
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_add_shape (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpShape *shape=lua_chipmunk_shape_ptr(l,2);
+
+	cpSpaceAddShape(space,shape);
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// space remove shape
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_remove_shape (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpShape *shape=lua_chipmunk_shape_ptr(l,2);
+
+	cpSpaceRemoveShape(space,shape);
+
+	return 0;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// space contains shape
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_contains_shape (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpShape *shape=lua_chipmunk_shape_ptr(l,2);
+
+	lua_pushboolean(l,cpSpaceContainsShape(space,shape));
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -375,13 +503,13 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 //		{"constraint_create",				lua_chipmunk_constraint_create},
 //		{"constraint_destroy",				lua_chipmunk_constraint_destroy},
 
-//		{"space_add_body",					lua_chipmunk_space_add_body},
-//		{"space_remove_body",				lua_chipmunk_space_remove_body},
-//		{"space_contains_body",				lua_chipmunk_space_contains_body},
+		{"space_add_body",					lua_chipmunk_space_add_body},
+		{"space_remove_body",				lua_chipmunk_space_remove_body},
+		{"space_contains_body",				lua_chipmunk_space_contains_body},
 
-//		{"space_add_shape",					lua_chipmunk_space_add_shape},
-//		{"space_remove_shape",				lua_chipmunk_space_remove_shape},
-//		{"space_contains_shape",			lua_chipmunk_space_contains_shape},
+		{"space_add_shape",					lua_chipmunk_space_add_shape},
+		{"space_remove_shape",				lua_chipmunk_space_remove_shape},
+		{"space_contains_shape",			lua_chipmunk_space_contains_shape},
 		
 //		{"space_add_constraint",			lua_chipmunk_space_add_constraint},
 //		{"space_remove_constraint",			lua_chipmunk_space_remove_constraint},
@@ -421,8 +549,8 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 //		{"shape_body",						lua_chipmunk_shape_body},
 //		{"shape_bounding_box",				lua_chipmunk_shape_bounding_box},
 //		{"shape_sensor",					lua_chipmunk_shape_sensor},
-//		{"shape_elasticity",				lua_chipmunk_shape_elasticity},
-//		{"shape_friction",					lua_chipmunk_shape_friction},
+		{"shape_elasticity",				lua_chipmunk_shape_elasticity},
+		{"shape_friction",					lua_chipmunk_shape_friction},
 //		{"shape_surface_velocity",			lua_chipmunk_shape_surface_velocity},
 //		{"shape_collision_type",			lua_chipmunk_shape_collision_type},
 //		{"shape_filter",					lua_chipmunk_shape_filter},
@@ -436,19 +564,12 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 
 	const luaL_reg meta_space[] =
 	{
-		{"step",			lua_chipmunk_space_step},
-
-		{"iterations",		lua_chipmunk_space_iterations},
-		{"gravity",			lua_chipmunk_space_gravity},
-		{"damping",			lua_chipmunk_space_damping},
 		{"__gc",			lua_chipmunk_space_destroy},
 		{0,0}
 	};
 
 	const luaL_reg meta_body[] =
 	{
-		{"position",		lua_chipmunk_body_position},
-		{"angle",			lua_chipmunk_body_angle},
 		{"__gc",			lua_chipmunk_body_destroy},
 		{0,0}
 	};
