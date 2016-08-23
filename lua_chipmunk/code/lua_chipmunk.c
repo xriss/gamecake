@@ -291,6 +291,65 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// space step
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_step (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+
+	cpSpaceStep(space, luaL_checknumber(l,2) );
+
+	return 0;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// body get/set position
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_body_position (lua_State *l)
+{	
+cpBody *body=lua_chipmunk_body_ptr(l,1);
+cpVect v;
+
+	if(lua_isnumber(l,2))
+	{
+		v.x=luaL_checknumber(l,2);
+		v.y=luaL_checknumber(l,3);
+		cpBodySetPosition(body, v );
+	}
+	
+	v=cpBodyGetPosition(body);
+	lua_pushnumber(l,v.x);
+	lua_pushnumber(l,v.y);
+
+	return 2;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// body get/set angle
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_body_angle (lua_State *l)
+{	
+cpBody *body=lua_chipmunk_body_ptr(l,1);
+
+	if(lua_isnumber(l,2))
+	{
+		cpBodySetAngle(body, luaL_checknumber(l,2) );
+	}
+	
+	lua_pushnumber(l, cpBodyGetAngle(body) );
+
+	return 1;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -298,18 +357,73 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
-		{"space_create",			lua_chipmunk_space_create},
-		{"space_destroy",			lua_chipmunk_space_destroy},
+		{"space_create",					lua_chipmunk_space_create},
+		{"space_destroy",					lua_chipmunk_space_destroy},
 		
-		{"body_create",				lua_chipmunk_body_create},
-		{"body_destroy",			lua_chipmunk_body_destroy},
+		{"body_create",						lua_chipmunk_body_create},
+		{"body_destroy",					lua_chipmunk_body_destroy},
 
-		{"shape_create",			lua_chipmunk_body_create},
-		{"shape_destroy",			lua_chipmunk_body_destroy},
+		{"shape_create",					lua_chipmunk_shape_create},
+		{"shape_destroy",					lua_chipmunk_shape_destroy},
+
+//		{"constraint_create",				lua_chipmunk_constraint_create},
+//		{"constraint_destroy",				lua_chipmunk_constraint_destroy},
+
+//		{"space_add_body",					lua_chipmunk_space_add_body},
+//		{"space_remove_body",				lua_chipmunk_space_remove_body},
+//		{"space_contains_body",				lua_chipmunk_space_contains_body},
+
+//		{"space_add_shape",					lua_chipmunk_space_add_shape},
+//		{"space_remove_shape",				lua_chipmunk_space_remove_shape},
+//		{"space_contains_shape",			lua_chipmunk_space_contains_shape},
 		
-		{"space_iterations",		lua_chipmunk_space_iterations},
-		{"space_gravity",			lua_chipmunk_space_gravity},
-		{"space_damping",			lua_chipmunk_space_damping},
+//		{"space_add_constraint",			lua_chipmunk_space_add_constraint},
+//		{"space_remove_constraint",			lua_chipmunk_space_remove_constraint},
+//		{"space_contains_constraint",		lua_chipmunk_space_contains_constraint},
+
+//		{"space_reindex_shape",				lua_chipmunk_space_reindex_shape},
+//		{"space_reindex_shapes_for_body",	lua_chipmunk_space_reindex_shapes_for_body},
+//		{"space_reindex_static",			lua_chipmunk_space_reindex_static},
+		{"space_step",						lua_chipmunk_space_step},
+
+//getset
+		{"space_iterations",				lua_chipmunk_space_iterations},
+		{"space_gravity",					lua_chipmunk_space_gravity},
+		{"space_damping",					lua_chipmunk_space_damping},
+//		{"space_idle_speed_threshold",		lua_chipmunk_space_idle_speed_threshold},
+//		{"space_sleep_time_threshold",		lua_chipmunk_space_sleep_time_threshold},
+//		{"space_collision_slop",			lua_chipmunk_space_collision_slop},
+//		{"space_collision_bias",			lua_chipmunk_space_collision_bias},
+//		{"space_collision_persistence",		lua_chipmunk_space_collision_persistence},
+//		{"space_user_data",					lua_chipmunk_space_user_data},
+//		{"space_current_time_step",			lua_chipmunk_space_current_time_step},
+//		{"space_locked",					lua_chipmunk_space_locked},
+
+//		{"body_type",						lua_chipmunk_body_type},
+//		{"body_space",						lua_chipmunk_body_space},
+//		{"body_mass",						lua_chipmunk_body_mass},
+//		{"body_moment",						lua_chipmunk_body_moment},
+		{"body_position",					lua_chipmunk_body_position},
+//		{"body_center_of_gravity",			lua_chipmunk_body_center_of_gravity},
+//		{"body_velocity",					lua_chipmunk_body_velocity},
+//		{"body_force",						lua_chipmunk_body_force},
+		{"body_angle",						lua_chipmunk_body_angle},
+//		{"body_angular_velocity",			lua_chipmunk_body_angular_velocity},
+//		{"body_torque",						lua_chipmunk_body_torque},
+//		{"body_user_data",					lua_chipmunk_body_user_data},
+
+//		{"shape_body",						lua_chipmunk_shape_body},
+//		{"shape_bounding_box",				lua_chipmunk_shape_bounding_box},
+//		{"shape_sensor",					lua_chipmunk_shape_sensor},
+//		{"shape_elasticity",				lua_chipmunk_shape_elasticity},
+//		{"shape_friction",					lua_chipmunk_shape_friction},
+//		{"shape_surface_velocity",			lua_chipmunk_shape_surface_velocity},
+//		{"shape_collision_type",			lua_chipmunk_shape_collision_type},
+//		{"shape_filter",					lua_chipmunk_shape_filter},
+//		{"shape_space",						lua_chipmunk_shape_space},
+//		{"shape_user_data",					lua_chipmunk_shape_user_data},
+
+
 
 		{0,0}
 	};
