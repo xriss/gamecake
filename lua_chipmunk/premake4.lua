@@ -8,6 +8,7 @@ links { "lib_lua" }
 
 includedirs { "." , "master/include" }
 
+buildoptions{ "-std=c99" } -- newfangled flag
 
 KIND{lua="wetgenes.chipmunk.core"}
 
