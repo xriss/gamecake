@@ -253,6 +253,44 @@ M.pix_grd=function(str,map,gout,px,py,hx,hy)
 
 end
 
+-- convert some pixel art into 2D tile array
+M.pix_tiles=function(str,map,gout,px,py,hx,hy,tiles)
+
+	local ls=wstr.split(str,"\n")
+
+	map=map or M.map
+
+	px=px or 0
+	py=py or 0
+
+	if not hx and not hy then hx,hy=M.pix_size(str) end
+
+	tiles=tiles or {}
+
+	local getxy=function(x,y)
+		local l=ls[1+y]
+		if l then
+			return l:sub(1+x*2,1+x*2+1)
+		end
+	end
+
+	local getc=function(s)
+		return map[s] or map[s:sub(1,1)] or map[0]
+	end
+	
+	for y=0,hx-1 do
+		tiles[y+py]=tiles[y+py] or {}
+		for x=0,hx-1 do
+			local s=getxy(x,y) or ". "
+			local c=getc(s) or {0,0,0,0}
+			tiles[y+py][x+px]=c
+		end
+	end
+
+
+	return tiles
+end
+
 -- write a bunch of ascii into this bitmap, using its index as its location 0xYYXX,
 M.pixtab_grd=function(tab,map,gout)
 
