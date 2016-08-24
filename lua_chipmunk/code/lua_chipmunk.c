@@ -49,6 +49,14 @@ cpSpace **pp;
 // allocate cpSpace
 	*pp=cpSpaceNew();
 
+// use registry so we can find the space table from space ptr,
+// this has the side effect that space MUST be destroyed,
+// it will not be GCd as this will keep it alive.
+	lua_pushlightuserdata(l,*pp);
+	lua_pushvalue(l,1); // this will be the lua space table
+	lua_settable(l,LUA_REGISTRYINDEX);
+
+
 	return 1;
 }
 
@@ -57,6 +65,11 @@ static int lua_chipmunk_space_destroy (lua_State *l)
 cpSpace **pp=lua_chipmunk_space_ptr_ptr(l, 1 );
 	if(*pp)
 	{
+// remove registry link
+		lua_pushlightuserdata(l,*pp);
+		lua_pushnil(l);
+		lua_settable(l,LUA_REGISTRYINDEX);
+		
 		cpSpaceFree(*pp);
 		(*pp)=0;
 	}	
@@ -140,6 +153,30 @@ cpBody **pp=lua_chipmunk_body_ptr_ptr(l, 1 );
 	}	
 	return 0;
 }
+
+static int lua_chipmunk_body_lookup (lua_State *l)
+{	
+cpBody *p=lua_chipmunk_body_ptr(l, 1 );
+	if( lua_isboolean(l,3) ) // forget
+	{
+		lua_pushlightuserdata(l,p);
+		lua_pushnil(l);
+		lua_settable(l,2);		
+	}
+	else
+	if( lua_istable(l,3) ) // remember
+	{
+		lua_pushlightuserdata(l,p);
+		lua_pushvalue(l,3);
+		lua_settable(l,2);
+	}
+
+	lua_pushlightuserdata(l,p);
+	lua_gettable(l,2);
+
+	return 1;
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -230,6 +267,28 @@ cpShape **pp=lua_chipmunk_shape_ptr_ptr(l, 1 );
 	return 0;
 }
 
+static int lua_chipmunk_shape_lookup (lua_State *l)
+{	
+cpShape *p=lua_chipmunk_shape_ptr(l, 1 );
+	if( lua_isboolean(l,3) ) // forget
+	{
+		lua_pushlightuserdata(l,p);
+		lua_pushnil(l);
+		lua_settable(l,2);		
+	}
+	else
+	if( lua_istable(l,3) ) // remember
+	{
+		lua_pushlightuserdata(l,p);
+		lua_pushvalue(l,3);
+		lua_settable(l,2);
+	}
+
+	lua_pushlightuserdata(l,p);
+	lua_gettable(l,2);
+
+	return 1;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -310,6 +369,193 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// space callbacks
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static void lua_chipmunk_space_callback_all(cpArbiter *arb, cpSpace *space, cpDataPointer data)
+{
+lua_State *l=*(lua_State **)data;
+CP_ARBITER_GET_SHAPES(arb, a, b);
+cpVect n=cpArbiterGetNormal(arb);
+
+// get space table
+	lua_pushlightuserdata(l,space);
+	lua_gettable(l,LUA_REGISTRYINDEX);
+
+//get space.shapes
+	lua_getfield(l,-1,"shapes");
+	lua_pushlightuserdata(l,a);
+	lua_gettable(l,-2);
+	lua_pushlightuserdata(l,b);
+	lua_gettable(l,-3);
+
+//get space.callbacks
+	lua_getfield(l,-4,"callbacks");
+
+//get space.callbacks[*]
+	lua_pushlightuserdata(l,data);
+	lua_gettable(l,-2);
+
+//set shapes
+	lua_pushvalue(l,-4);
+	lua_setfield(l,-2,"shape_a");
+	lua_pushvalue(l,-3);
+	lua_setfield(l,-2,"shape_b");
+
+	lua_pushnumber(l,n.x);
+	lua_setfield(l,-2,"normal_x");
+	lua_pushnumber(l,n.y);
+	lua_setfield(l,-2,"normal_y");
+	
+
+// 6 values are now on the stack
+}
+
+static cpBool lua_chipmunk_space_callback_begin(cpArbiter *arb, cpSpace *space, cpDataPointer data)
+{
+lua_State *l=*(lua_State **)data;
+cpBool r;
+
+	lua_chipmunk_space_callback_all(arb,space,data);
+
+//get function to call
+	lua_getfield(l,-1,"begin");
+	lua_pushvalue(l,-2);
+	lua_call(l,1,1);
+	r=lua_toboolean(l,-1)?cpTrue:cpFalse;
+
+// pop bool , tab , space.callbacks , shape_a , shape_b , shapes , space
+	lua_pop(l,7);
+	
+	return r;
+}
+
+static cpBool lua_chipmunk_space_callback_presolve(cpArbiter *arb, cpSpace *space, cpDataPointer data)
+{
+lua_State *l=*(lua_State **)data;
+cpBool r;
+
+	lua_chipmunk_space_callback_all(arb,space,data);
+
+//get function to call
+	lua_getfield(l,-1,"presolve");
+	lua_pushvalue(l,-2);
+	lua_call(l,1,1);
+	r=lua_toboolean(l,-1)?cpTrue:cpFalse;
+
+// pop bool , tab , space.callbacks , shape_a , shape_b , shapes , space
+	lua_pop(l,7);
+	
+	return r;
+}
+
+static void lua_chipmunk_space_callback_postsolve(cpArbiter *arb, cpSpace *space, cpDataPointer data)
+{
+lua_State *l=*(lua_State **)data;
+
+	lua_chipmunk_space_callback_all(arb,space,data);
+
+//get function to call
+	lua_getfield(l,-1,"postsolve");
+	lua_pushvalue(l,-2);
+	lua_call(l,1,0);
+
+// pop tab , space.callbacks , shape_a , shape_b , shapes , space
+	lua_pop(l,6);
+}
+
+static void lua_chipmunk_space_callback_separate(cpArbiter *arb, cpSpace *space, cpDataPointer data)
+{
+lua_State *l=*(lua_State **)data;
+
+	lua_chipmunk_space_callback_all(arb,space,data);
+
+//get function to call
+	lua_getfield(l,-1,"separate");
+	lua_pushvalue(l,-2);
+	lua_call(l,1,0);
+
+// pop tab , space.callbacks , shape_a , shape_b , shapes , space
+	lua_pop(l,6);
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// space add handler, this will setup collision callbacks for the given types
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_add_handler (lua_State *l)
+{	
+lua_State **ll;
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpCollisionHandler *handler=0;
+	if( lua_isnumber(l,3) && lua_isnumber(l,4) ) // specific
+	{
+		handler=cpSpaceAddCollisionHandler(space,lua_tonumber(l,3),lua_tonumber(l,4));
+	}
+	else
+	if( lua_isnumber(l,3) ) // wildcard
+	{
+		handler=cpSpaceAddWildcardHandler(space,lua_tonumber(l,3));
+	}
+	else // global
+	{
+		handler=cpSpaceAddDefaultCollisionHandler(space);
+	}
+	
+	lua_getfield(l,2,"begin");
+	if(!lua_isnil(l,-1))
+	{
+		handler->beginFunc=lua_chipmunk_space_callback_begin;
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"presolve");
+	if(!lua_isnil(l,-1))
+	{
+		handler->preSolveFunc=lua_chipmunk_space_callback_presolve;
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"postsolve");
+	if(!lua_isnil(l,-1))
+	{
+		handler->postSolveFunc=lua_chipmunk_space_callback_postsolve;
+	}
+	lua_pop(l,1);
+		
+	lua_getfield(l,2,"separate");
+	if(!lua_isnil(l,-1))
+	{
+		handler->separateFunc=lua_chipmunk_space_callback_separate;
+	}
+	lua_pop(l,1);
+
+	ll=(lua_State**)lua_newuserdata(l, sizeof(lua_State*));
+	*ll=l;
+	lua_rawseti(l,2,0); // keep it alive by putting it in the table
+	handler->userData=ll; // this is a unique value and a way for us to get the lua state in the callback function
+
+// get space table
+	lua_pushlightuserdata(l,space);
+	lua_gettable(l,LUA_REGISTRYINDEX);
+
+//get space.callbacks
+	lua_getfield(l,-1,"callbacks");
+
+//remember callback function in space.callbacks
+	lua_pushlightuserdata(l,ll);
+	lua_pushvalue(l,2); // store the table, containing the newly allocated userdata and functions to call for each callback
+	lua_settable(l,-3);
+
+// pop space.callbacks , space
+	lua_pop(l,2);
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // space add body
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -380,6 +626,30 @@ cpVect v;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// body get/set velocity
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_body_velocity (lua_State *l)
+{	
+cpBody *body=lua_chipmunk_body_ptr(l,1);
+cpVect v;
+
+	if(lua_isnumber(l,2))
+	{
+		v.x=luaL_checknumber(l,2);
+		v.y=luaL_checknumber(l,3);
+		cpBodySetVelocity(body, v );
+	}
+	
+	v=cpBodyGetVelocity(body);
+	lua_pushnumber(l,v.x);
+	lua_pushnumber(l,v.y);
+
+	return 2;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // body get/set angle
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -397,6 +667,24 @@ cpBody *body=lua_chipmunk_body_ptr(l,1);
 	return 1;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// body get/set angle
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_body_angular_velocity (lua_State *l)
+{	
+cpBody *body=lua_chipmunk_body_ptr(l,1);
+
+	if(lua_isnumber(l,2))
+	{
+		cpBodySetAngularVelocity(body, luaL_checknumber(l,2) );
+	}
+	
+	lua_pushnumber(l, cpBodyGetAngularVelocity(body) );
+
+	return 1;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -496,12 +784,16 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		
 		{"body_create",						lua_chipmunk_body_create},
 		{"body_destroy",					lua_chipmunk_body_destroy},
+		{"body_lookup",						lua_chipmunk_body_lookup},
 
 		{"shape_create",					lua_chipmunk_shape_create},
 		{"shape_destroy",					lua_chipmunk_shape_destroy},
+		{"shape_lookup",					lua_chipmunk_shape_lookup},
 
 //		{"constraint_create",				lua_chipmunk_constraint_create},
 //		{"constraint_destroy",				lua_chipmunk_constraint_destroy},
+
+		{"space_add_handler",				lua_chipmunk_space_add_handler},
 
 		{"space_add_body",					lua_chipmunk_space_add_body},
 		{"space_remove_body",				lua_chipmunk_space_remove_body},
@@ -539,10 +831,10 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 //		{"body_moment",						lua_chipmunk_body_moment},
 		{"body_position",					lua_chipmunk_body_position},
 //		{"body_center_of_gravity",			lua_chipmunk_body_center_of_gravity},
-//		{"body_velocity",					lua_chipmunk_body_velocity},
+		{"body_velocity",					lua_chipmunk_body_velocity},
 //		{"body_force",						lua_chipmunk_body_force},
 		{"body_angle",						lua_chipmunk_body_angle},
-//		{"body_angular_velocity",			lua_chipmunk_body_angular_velocity},
+		{"body_angular_velocity",			lua_chipmunk_body_angular_velocity},
 //		{"body_torque",						lua_chipmunk_body_torque},
 //		{"body_user_data",					lua_chipmunk_body_user_data},
 
