@@ -376,7 +376,6 @@ static void lua_chipmunk_space_callback_all(cpArbiter *arb, cpSpace *space, cpDa
 {
 lua_State *l=*(lua_State **)data;
 CP_ARBITER_GET_SHAPES(arb, a, b);
-cpVect n=cpArbiterGetNormal(arb);
 
 // get space table
 	lua_pushlightuserdata(l,space);
@@ -400,13 +399,35 @@ cpVect n=cpArbiterGetNormal(arb);
 	lua_pushvalue(l,-4);
 	lua_setfield(l,-2,"shape_a");
 	lua_pushvalue(l,-3);
-	lua_setfield(l,-2,"shape_b");
+	lua_setfield(l,-2,"shape_b");	
 
-	lua_pushnumber(l,n.x);
+
+// we can adjust this in presolve and it will be written back after the callback
+	cpContactPointSet set = cpArbiterGetContactPointSet(arb);
+
+	lua_pushnumber(l,set.normal.x);
 	lua_setfield(l,-2,"normal_x");
-	lua_pushnumber(l,n.y);
+
+	lua_pushnumber(l,set.normal.y);
 	lua_setfield(l,-2,"normal_y");
-	
+
+// number of points in array
+	lua_pushnumber(l,set.count);
+	lua_setfield(l,-2,"point_count");
+
+// size of each point in array (sanity, future proof)
+	lua_pushnumber(l,5);
+	lua_setfield(l,-2,"point_scan");
+
+//get contact info ax,ay,bx,by,d for each point, fill up array of numbers (easy code, clean it up lua side)
+
+	for(int i=0; i<set.count; i++){
+		lua_pushnumber(l,set.points[i].pointA.x); lua_rawseti(l,-2,1+i*5);
+		lua_pushnumber(l,set.points[i].pointA.y); lua_rawseti(l,-2,2+i*5);
+		lua_pushnumber(l,set.points[i].pointB.x); lua_rawseti(l,-2,3+i*5);
+		lua_pushnumber(l,set.points[i].pointB.y); lua_rawseti(l,-2,4+i*5);
+		lua_pushnumber(l,set.points[i].distance); lua_rawseti(l,-2,5+i*5);
+	}
 
 // 6 values are now on the stack
 }
@@ -442,6 +463,22 @@ cpBool r;
 	lua_pushvalue(l,-2);
 	lua_call(l,1,1);
 	r=lua_toboolean(l,-1)?cpTrue:cpFalse;
+
+//allow adjust of contact points by call back but only in presolve?
+	cpContactPointSet set = cpArbiterGetContactPointSet(arb);
+
+	lua_getfield(l,-2,"normal_x"); set.normal.x=lua_tonumber(l,-1); lua_pop(l,1);
+	lua_getfield(l,-2,"normal_y"); set.normal.y=lua_tonumber(l,-1); lua_pop(l,1);
+
+	for(int i=0; i<set.count; i++){
+		lua_rawgeti(l,-2,1+i*5); set.points[i].pointA.x=lua_tonumber(l,-1); lua_pop(l,1);
+		lua_rawgeti(l,-2,2+i*5); set.points[i].pointA.y=lua_tonumber(l,-1); lua_pop(l,1);
+		lua_rawgeti(l,-2,3+i*5); set.points[i].pointB.x=lua_tonumber(l,-1); lua_pop(l,1);
+		lua_rawgeti(l,-2,4+i*5); set.points[i].pointB.y=lua_tonumber(l,-1); lua_pop(l,1);
+		lua_rawgeti(l,-2,5+i*5); set.points[i].distance=lua_tonumber(l,-1); lua_pop(l,1);
+	}
+	
+	cpArbiterSetContactPointSet(arb,&set);
 
 // pop bool , tab , space.callbacks , shape_a , shape_b , shapes , space
 	lua_pop(l,7);
