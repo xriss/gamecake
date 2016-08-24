@@ -5,7 +5,7 @@
 
 
 local wzips=package.loaded["wetgenes.zips"] -- must be required and setup for this to work
-if wzips and wzips.loader then
+if type(wzips)=="table" and wzips.loader then
 	return wzips.loader(...) -- real code lives here
 end
 
