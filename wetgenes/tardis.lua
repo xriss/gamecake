@@ -402,12 +402,34 @@ end
 function v2.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) )
 end
+function v2.oo(it,r)
+	r=r or it
+	return r:set( 1/it[1] , 1/it[2] )
+end
 function v2.scale(it,s,r)
 	r=r or it
 	return r:set( it[1]*s , it[2]*s )
 end
 function v2.normalize(it,r)
 	return v2.scale(it,1/v2.len(it),r)
+end
+function v2.add(va,vb,r)
+	r=r or va
+	return r:set( va[1]+vb[1] , va[2]+vb[2] )
+end
+function v2.sub(va,vb,r)
+	r=r or va
+	return r:set( va[1]-vb[1] , va[2]-vb[2] )
+end
+function v2.mul(va,vb,r)
+	r=r or va
+	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) )
+end
+function v2.dot(va,vb)
+	return ( (va[1]*vb[1]) + (va[2]*vb[2]) )
+end
+function v2.cross(va,vb) -- extend to 3d then only return z value as x and y are always 0
+	return (va[1]*vb[2])-(va[2]*vb[1])
 end
 
 local v3=class("v3",v2)
@@ -658,8 +680,8 @@ function M.m4_project23d(view_width,view_height,width,height,fov,depth)
 end
 
 
+if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first use to disable use of tardis f32 core
 --upgrade the above to hopefully faster C versions working on userdata arrays of floats
-
 local tcore=require("wetgenes.tardis.core") -- use a "faster?" f32 C core
 --tcore=nil
 if tcore then
@@ -728,6 +750,8 @@ if tcore then
 	m4.translate		=	tcore.m4_translate
 
 end
+end
+
 
 --[[
 local wstr=require("wetgenes.string")
