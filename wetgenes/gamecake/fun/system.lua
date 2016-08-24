@@ -64,6 +64,7 @@ print("system setup")
 			system=system,
 			oven=oven,
 			require=require,
+			ups=oven.rebake("wetgenes.gamecake.spew.recaps").ups, -- input, for 1up - 6up 
 		})
 		system.opts=system.code.hardware
 		system.co=coroutine.create(system.code.main)

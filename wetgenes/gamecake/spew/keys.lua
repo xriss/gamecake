@@ -82,6 +82,7 @@ M.bake=function(oven,keys)
 	function keys.setup(opts)
 		if type(opts)=="number" then opts={max_up=opts} end
 		if not opts then opts={} end
+		opts.pad_map=opts.pad_map or 0
 		keys.opts=opts
 		recaps.setup(opts)	-- also setup recaps
 
@@ -309,7 +310,7 @@ M.bake=function(oven,keys)
 				end
 			
 			elseif m.class=="posix_joystick" then
-				if key.idx-1==m.posix_num%key.opts.max_up then -- only take inputs from one joystick for multiplayer
+				if key.idx-1==(m.posix_num+key.opts.pad_map)%key.opts.max_up then -- only take inputs from one joystick for multiplayer
 					if m.type==1 then -- keys
 
 						local docode=function(name)
@@ -441,7 +442,7 @@ M.bake=function(oven,keys)
 
 			elseif m.class=="padaxis" then
 
-				if key.idx == m.id then
+				if key.idx-1 == (m.id+key.opts.pad_map-1)%key.opts.max_up then
 					used=true
 
 					local zone=32768/4
@@ -471,7 +472,7 @@ M.bake=function(oven,keys)
 
 			elseif m.class=="padkey" then
 
-				if key.idx == m.id then
+				if key.idx-1 == (m.id+key.opts.pad_map-1)%key.opts.max_up then
 					used=true
 
 					local docode=function(name)

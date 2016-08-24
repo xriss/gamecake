@@ -319,9 +319,12 @@ sdl.msg_fetch=function()
 
 		else
 
+-- handle JoyHatMotion ?
+
+
 			local s=lookup(SDL.event,e.type)
-			print(s.." : "..e.type)
-			dprint(e)
+--			print(s.." : "..e.type)
+--			dprint(e)
 
 		end
 	end

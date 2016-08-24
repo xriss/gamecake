@@ -51,11 +51,11 @@ copper.create=function(it,opts)
 	it.shader_uniforms={
 		ticks={0,0,0,0},
 		sizpos={it.hx,it.hy,0,0},
-		cy0={ 0.5 , 0   , 0.0 , 1 },
-		cy1={ 0   , 0   , 1.0 , 1 },
-		cy2={ 0   , 0.5 , 1.0 , 1 },
-		cy3={ 0   , 0   , 1.0 , 1 },
-		cy4={ 0   , 0.5 , 0.0 , 1 },
+		cy0={ 0.5  , 0    , 0.0  , 1   },
+		cy1={ 0    , 0    , 1.0  , 1   },
+		cy2={ 0.125, 0.125, 1.0  , 1   },
+		cy3={ 0    , 0    , 1.0  , 1   },
+		cy4={ 0    , 0.5  , 0.0  , 1   },
 	}
 	it.shader_function=function()end
 	
