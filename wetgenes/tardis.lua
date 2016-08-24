@@ -645,7 +645,7 @@ end
 -- the total view area volume from there would be -320 +320 , -240 +240 , -480 +(1024-480)
 --
 -- view_width and view_height must be the current width and height of the display in pixels or nil
--- we use this to wout out where to place our view such that it is always visible and keeps its aspect.
+-- we use this to work out where to place our view such that it is always visible and keeps its aspect.
 --
 function M.m4_project23d(view_width,view_height,width,height,fov,depth)
 
