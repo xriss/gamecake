@@ -46,7 +46,7 @@ DYNAMIC_CC="lsbcc -fPIC" CFLAGS="-m64" ]])
 
 	elseif mode=="win32" then -- windows 32bit
 
-		os.execute("make amalg HOST_LUA=luajit BUILDMODE=static CFLAGS=\" -m32 -msse -msse2 \" LDFLAGS=\" -m32 \" CROSS=i586-mingw32msvc- TARGET_SYS=Windows ")
+		os.execute("make amalg HOST_LUA=luajit BUILDMODE=static CFLAGS=\" -m32 -msse -msse2 -mtune=generic \" LDFLAGS=\" -m32 \" CROSS=i586-mingw32msvc- TARGET_SYS=Windows ")
 
 	elseif mode=="osx" then -- osx 32bit, this must be run on the mac...
 
