@@ -680,7 +680,7 @@ function M.m4_project23d(view_width,view_height,width,height,fov,depth)
 end
 
 
-if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first use to disable use of tardis f32 core
+if  DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first use to disable use of tardis f32 core
 --upgrade the above to hopefully faster C versions working on userdata arrays of floats
 local tcore=require("wetgenes.tardis.core") -- use a "faster?" f32 C core
 --tcore=nil
