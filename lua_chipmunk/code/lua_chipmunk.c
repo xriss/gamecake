@@ -354,6 +354,44 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// space get/set collision slop
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_collision_slop (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+
+	if(lua_isnumber(l,2))
+	{
+		cpSpaceSetCollisionSlop(space, luaL_checknumber(l,2) );
+	}
+	
+	lua_pushnumber(l, cpSpaceGetCollisionSlop(space) );
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// space get/set collision bias
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_collision_bias (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+
+	if(lua_isnumber(l,2))
+	{
+		cpSpaceSetCollisionBias(space, luaL_checknumber(l,2) );
+	}
+	
+	lua_pushnumber(l, cpSpaceGetCollisionBias(space) );
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // space step
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -401,33 +439,9 @@ CP_ARBITER_GET_SHAPES(arb, a, b);
 	lua_pushvalue(l,-3);
 	lua_setfield(l,-2,"shape_b");	
 
-
-// we can adjust this in presolve and it will be written back after the callback
-	cpContactPointSet set = cpArbiterGetContactPointSet(arb);
-
-	lua_pushnumber(l,set.normal.x);
-	lua_setfield(l,-2,"normal_x");
-
-	lua_pushnumber(l,set.normal.y);
-	lua_setfield(l,-2,"normal_y");
-
-// number of points in array
-	lua_pushnumber(l,set.count);
-	lua_setfield(l,-2,"point_count");
-
-// size of each point in array (sanity, future proof)
-	lua_pushnumber(l,5);
-	lua_setfield(l,-2,"point_scan");
-
-//get contact info ax,ay,bx,by,d for each point, fill up array of numbers (easy code, clean it up lua side)
-
-	for(int i=0; i<set.count; i++){
-		lua_pushnumber(l,set.points[i].pointA.x); lua_rawseti(l,-2,1+i*5);
-		lua_pushnumber(l,set.points[i].pointA.y); lua_rawseti(l,-2,2+i*5);
-		lua_pushnumber(l,set.points[i].pointB.x); lua_rawseti(l,-2,3+i*5);
-		lua_pushnumber(l,set.points[i].pointB.y); lua_rawseti(l,-2,4+i*5);
-		lua_pushnumber(l,set.points[i].distance); lua_rawseti(l,-2,5+i*5);
-	}
+// set arbiter pointer
+	lua_pushlightuserdata(l,arb);
+	lua_rawseti(l,-2,0);
 
 // 6 values are now on the stack
 }
@@ -463,22 +477,6 @@ cpBool r;
 	lua_pushvalue(l,-2);
 	lua_call(l,1,1);
 	r=lua_toboolean(l,-1)?cpTrue:cpFalse;
-
-//allow adjust of contact points by call back but only in presolve?
-	cpContactPointSet set = cpArbiterGetContactPointSet(arb);
-
-	lua_getfield(l,-2,"normal_x"); set.normal.x=lua_tonumber(l,-1); lua_pop(l,1);
-	lua_getfield(l,-2,"normal_y"); set.normal.y=lua_tonumber(l,-1); lua_pop(l,1);
-
-	for(int i=0; i<set.count; i++){
-		lua_rawgeti(l,-2,1+i*5); set.points[i].pointA.x=lua_tonumber(l,-1); lua_pop(l,1);
-		lua_rawgeti(l,-2,2+i*5); set.points[i].pointA.y=lua_tonumber(l,-1); lua_pop(l,1);
-		lua_rawgeti(l,-2,3+i*5); set.points[i].pointB.x=lua_tonumber(l,-1); lua_pop(l,1);
-		lua_rawgeti(l,-2,4+i*5); set.points[i].pointB.y=lua_tonumber(l,-1); lua_pop(l,1);
-		lua_rawgeti(l,-2,5+i*5); set.points[i].distance=lua_tonumber(l,-1); lua_pop(l,1);
-	}
-	
-	cpArbiterSetContactPointSet(arb,&set);
 
 // pop bool , tab , space.callbacks , shape_a , shape_b , shapes , space
 	lua_pop(l,7);
@@ -570,7 +568,8 @@ cpCollisionHandler *handler=0;
 
 	ll=(lua_State**)lua_newuserdata(l, sizeof(lua_State*));
 	*ll=l;
-	lua_rawseti(l,2,0); // keep it alive by putting it in the table
+	lua_pushvalue(l,-1); // table[userdata]=userdata as all want to do is keep a reference
+	lua_settable(l,2); // keep it alive by putting it in the table
 	handler->userData=ll; // this is a unique value and a way for us to get the lua state in the callback function
 
 // get space table
@@ -587,6 +586,101 @@ cpCollisionHandler *handler=0;
 
 // pop space.callbacks , space
 	lua_pop(l,2);
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// arbiter get/set points ( any table of values passed in will be returned )
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_arbiter_points (lua_State *l)
+{	
+cpArbiter *arbiter=(cpArbiter *)lua_touserdata(l,1); if(!arbiter){ lua_pushstring(l,"missing arbiter"); lua_error(l); }
+cpVect v;
+
+	cpContactPointSet set = cpArbiterGetContactPointSet(arbiter);
+
+	if(lua_istable(l,2))
+	{
+		lua_getfield(l,2,"normal_x"); set.normal.x=lua_tonumber(l,-1); lua_pop(l,1);
+		lua_getfield(l,2,"normal_y"); set.normal.y=lua_tonumber(l,-1); lua_pop(l,1);
+
+		for(int i=0; i<set.count; i++){
+			lua_rawgeti(l,2,1+i*5); set.points[i].pointA.x=lua_tonumber(l,-1); lua_pop(l,1);
+			lua_rawgeti(l,2,2+i*5); set.points[i].pointA.y=lua_tonumber(l,-1); lua_pop(l,1);
+			lua_rawgeti(l,2,3+i*5); set.points[i].pointB.x=lua_tonumber(l,-1); lua_pop(l,1);
+			lua_rawgeti(l,2,4+i*5); set.points[i].pointB.y=lua_tonumber(l,-1); lua_pop(l,1);
+			lua_rawgeti(l,2,5+i*5); set.points[i].distance=lua_tonumber(l,-1); lua_pop(l,1);
+		}
+		
+		cpArbiterSetContactPointSet(arbiter,&set);
+		
+		cpArbiterSetContactPointSet(arbiter,&set);
+		lua_pushvalue(l,2); // return the same table
+	}
+	else
+	{
+		lua_newtable(l);
+	}
+	
+	lua_pushnumber(l,set.normal.x); lua_setfield(l,-2,"normal_x");
+	lua_pushnumber(l,set.normal.y); lua_setfield(l,-2,"normal_y");
+
+// number of points in array
+	lua_pushnumber(l,set.count); lua_setfield(l,-2,"point_count");
+
+// size of each point in array (sanity, future proof)
+	lua_pushnumber(l,5); lua_setfield(l,-2,"point_scan");
+
+//get contact info ax,ay,bx,by,d for each point, fill up array of numbers (easy code here, clean it up lua side)
+
+	for(int i=0; i<set.count; i++){
+		lua_pushnumber(l,set.points[i].pointA.x); lua_rawseti(l,-2,1+i*5);
+		lua_pushnumber(l,set.points[i].pointA.y); lua_rawseti(l,-2,2+i*5);
+		lua_pushnumber(l,set.points[i].pointB.x); lua_rawseti(l,-2,3+i*5);
+		lua_pushnumber(l,set.points[i].pointB.y); lua_rawseti(l,-2,4+i*5);
+		lua_pushnumber(l,set.points[i].distance); lua_rawseti(l,-2,5+i*5);
+	}
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// arbiter get/set surface velocity
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_arbiter_surface_velocity (lua_State *l)
+{	
+cpArbiter *arbiter=(cpArbiter *)lua_touserdata(l,1); if(!arbiter){ lua_pushstring(l,"missing arbiter"); lua_error(l); }
+cpVect v;
+
+	if(lua_isnumber(l,2))
+	{
+		v.x=luaL_checknumber(l,2);
+		v.y=luaL_checknumber(l,3);
+		cpArbiterSetSurfaceVelocity(arbiter, v );
+	}
+	
+	v=cpArbiterGetSurfaceVelocity(arbiter);
+	lua_pushnumber(l,v.x);
+	lua_pushnumber(l,v.y);
+
+	return 2;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// arbiter ignore collision ( lasts until the objects separate )
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_arbiter_ignore (lua_State *l)
+{	
+cpArbiter *arbiter=(cpArbiter *)lua_touserdata(l,1); if(!arbiter){ lua_pushstring(l,"missing arbiter"); lua_error(l); }
+
+	cpArbiterIgnore(arbiter);
 
 	return 0;
 }
@@ -725,6 +819,25 @@ cpBody *body=lua_chipmunk_body_ptr(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// shape get bounding box (min_x,min_y,max_x,max_y)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_shape_bounding_box (lua_State *l)
+{	
+cpShape *shape=lua_chipmunk_shape_ptr(l,1);
+cpBB bb;
+	
+	bb=cpShapeGetBB(shape);
+	lua_pushnumber(l,bb.l);
+	lua_pushnumber(l,bb.b);
+	lua_pushnumber(l,bb.r);
+	lua_pushnumber(l,bb.t);
+
+	return 4;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // shape get/set elasticity
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -759,6 +872,50 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 	lua_pushnumber(l, cpShapeGetFriction(shape) );
 
 	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// shape get/set collision type
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_shape_collision_type (lua_State *l)
+{	
+cpShape *shape=lua_chipmunk_shape_ptr(l,1);
+
+	if(lua_isnumber(l,2))
+	{
+		cpShapeSetCollisionType(shape, luaL_checknumber(l,2) );
+	}
+	
+	lua_pushnumber(l, cpShapeGetCollisionType(shape) );
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// shape get/set filter
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_shape_filter (lua_State *l)
+{	
+cpShape *shape=lua_chipmunk_shape_ptr(l,1);
+cpShapeFilter filter;
+	if(lua_isnumber(l,2))
+	{
+		filter.group=luaL_checknumber(l,2);
+		filter.categories=luaL_checknumber(l,3);
+		filter.mask=luaL_checknumber(l,4);
+		cpShapeSetFilter(shape, filter );
+	}
+	
+	filter=cpShapeGetFilter(shape);
+	lua_pushnumber(l,filter.group);
+	lua_pushnumber(l,filter.categories);
+	lua_pushnumber(l,filter.mask);
+
+	return 3;
 }
 
 /*+-----------------------------------------------------------------1------------------------------------------------+*/
@@ -806,6 +963,7 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,2);
 
 	return 1;
 }
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -855,8 +1013,8 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"space_damping",					lua_chipmunk_space_damping},
 //		{"space_idle_speed_threshold",		lua_chipmunk_space_idle_speed_threshold},
 //		{"space_sleep_time_threshold",		lua_chipmunk_space_sleep_time_threshold},
-//		{"space_collision_slop",			lua_chipmunk_space_collision_slop},
-//		{"space_collision_bias",			lua_chipmunk_space_collision_bias},
+		{"space_collision_slop",			lua_chipmunk_space_collision_slop},
+		{"space_collision_bias",			lua_chipmunk_space_collision_bias},
 //		{"space_collision_persistence",		lua_chipmunk_space_collision_persistence},
 //		{"space_user_data",					lua_chipmunk_space_user_data},
 //		{"space_current_time_step",			lua_chipmunk_space_current_time_step},
@@ -873,19 +1031,18 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"body_angle",						lua_chipmunk_body_angle},
 		{"body_angular_velocity",			lua_chipmunk_body_angular_velocity},
 //		{"body_torque",						lua_chipmunk_body_torque},
-//		{"body_user_data",					lua_chipmunk_body_user_data},
 
-//		{"shape_body",						lua_chipmunk_shape_body},
-//		{"shape_bounding_box",				lua_chipmunk_shape_bounding_box},
+		{"shape_bounding_box",				lua_chipmunk_shape_bounding_box},
 //		{"shape_sensor",					lua_chipmunk_shape_sensor},
 		{"shape_elasticity",				lua_chipmunk_shape_elasticity},
 		{"shape_friction",					lua_chipmunk_shape_friction},
 //		{"shape_surface_velocity",			lua_chipmunk_shape_surface_velocity},
-//		{"shape_collision_type",			lua_chipmunk_shape_collision_type},
-//		{"shape_filter",					lua_chipmunk_shape_filter},
-//		{"shape_space",						lua_chipmunk_shape_space},
-//		{"shape_user_data",					lua_chipmunk_shape_user_data},
+		{"shape_collision_type",			lua_chipmunk_shape_collision_type},
+		{"shape_filter",					lua_chipmunk_shape_filter},
 
+		{"arbiter_surface_velocity",		lua_chipmunk_arbiter_surface_velocity},
+		{"arbiter_points",					lua_chipmunk_arbiter_points},
+		{"arbiter_ignore",					lua_chipmunk_arbiter_ignore},
 
 
 		{0,0}
