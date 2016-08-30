@@ -85,6 +85,17 @@ newgcctoolchain {
 }
 
 newplatform {
+    name = "mingwin",
+    description = "mingw on windows",
+	gcc=
+	{
+		cc ="gcc",
+		cxx="c++",
+		ar ="ar",
+		cppflags = "-MMD",
+	}
+}
+newplatform {
     name = "mingw32",
     description = "mingw32",
 	gcc=
@@ -202,6 +213,7 @@ elseif t:sub(1,7)=="android" then
 	GCC=true
 elseif t:sub(1,5)=="mingw" then
 	if t:sub(1,7)=="mingw32" then MINGW32=true end -- use old compiler
+	if t:sub(1,7)=="mingwin" then MINGWIN=true end -- use exe compiler
 	TARGET="WINDOWS"
 	CPU=t:sub(6)
 	WINDOWS=true
@@ -399,6 +411,7 @@ elseif WINDOWS then
 	if MINGW then
 	
 		if MINGW32 then		platforms { "mingw32" } --use old 32 bit compiler
+		elseif MINGWIN then	platforms { "mingwin" } --use exe compiler
 		else				platforms { "mingw" }	--use new 64 bit compiler
 		end
 		
