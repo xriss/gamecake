@@ -1,0 +1,7 @@
+#build dependencies, run sudo ./apt-gets
+
+apt-get install build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev 
+
+#needed for pagecake (can ignore a fail to install if you only want gamecake)
+apt-get install libssl-dev
+

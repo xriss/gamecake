@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.grd.html">wetgenes.grd</a></h1><h1><a href="wetgenes.grd.shrink.html">wetgenes.grd.shrink</a></h1>
+<div>
+
+<pre><code>g:shrink(area)
+</code></pre>
+
+<p>area is an {x=0,y=0,z=0,w=100,h=100,d=100} style table specifying a 3D
+area, set {z=0,d=1} for a 2D area.</p>
+
+<p>You should set this to the full size of the image.</p>
+
+<p>This function looks at the pixels in that area and shrinks each edge 
+inwards if it is fully transparent then return this new area in the 
+same table that was passed in.</p>
+
+<p>You can then use this information to crop this image resulting is a 
+smaller sized grd containing all the solid pixels.</p>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.grd.shrink';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>

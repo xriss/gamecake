@@ -1,0 +1,41 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.lookup.html">wetgenes.lookup</a></h1>
+<div>
+
+<pre><code>value = wetgenes.lookup(table,...)
+</code></pre>
+
+<p>Safe recursive lookup within a table that returns nil if any part of 
+the lookup is nil so we never cause an error but just return nil. 
+This is intended to replace the following sort of code</p>
+
+<pre><code>a = b and b.c and b.c.d and b.c.d.e
+</code></pre>
+
+<p>To get e only if all of its parent bits exist and not to cause any 
+error if they do not. instead use</p>
+
+<pre><code>a = lookup(b,"c","d","e")
+</code></pre>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.lookup';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>

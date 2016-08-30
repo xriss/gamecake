@@ -1,0 +1,46 @@
+[file_prefs]
+final_new_line=true
+ensure_convert_new_lines=false
+strip_trailing_spaces=false
+replace_tabs=false
+
+[indentation]
+indent_width=4
+indent_type=1
+indent_hard_tab_width=8
+detect_indent=false
+detect_indent_width=false
+indent_mode=2
+
+[project]
+name=lua
+base_path=/home/kriss/hg/lua/
+description=
+file_patterns=
+
+[long line marker]
+long_line_behaviour=1
+long_line_column=72
+
+[files]
+current_page=-1
+
+[VTE]
+last_dir=/home/kriss/hg/lua/lib_png
+
+[build-menu]
+NF_00_LB=_Make
+NF_00_CM=clang/make
+NF_00_WD=%p
+NF_01_LB=Make Custom _Target...
+NF_01_CM=clang/make 
+NF_01_WD=%p
+LuaFT_00_LB=clean
+LuaFT_00_CM=clang/make clean
+LuaFT_00_WD=%p
+filetypes=Lua;
+
+[editor]
+line_wrapping=false
+line_break_column=72
+auto_continue_multiline=false

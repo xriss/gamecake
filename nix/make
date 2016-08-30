@@ -1,0 +1,20 @@
+cd `dirname $0`
+
+if [ "$1" = "clean" ] ; then
+
+        rm -rf ../build-gmake-nix-native
+        exit
+fi
+
+makeopts="config=release"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug"
+fi
+
+cd ..
+
+
+premake4 gmake nix-native
+cd build-gmake-nix-native
+make $makeopts $2 $3 $4
+cd ..

@@ -1,0 +1,61 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.gamecake.html">wetgenes.gamecake</a></h1><h1><a href="wetgenes.gamecake.oven.html">wetgenes.gamecake.oven</a></h1>
+<div>
+
+<pre><code>oven=require("wetgenes.gamecake.oven").bake(opts)
+</code></pre>
+
+<p>The oven module must be baked so only exposes a bake function.</p>
+
+<p>All the other functions are returned from within the bake function.</p>
+
+<p>possible ENV settings</p>
+
+<pre><code>gamecake_tongue=english
+gamecake_flavour=sdl
+</code></pre>
+
+
+</div><hr/>
+<h1><a href="wetgenes.gamecake.oven.bake.html">wetgenes.gamecake.oven.bake</a></h1>
+<div>
+
+
+<pre><code>oven=wetgenes.gamecake.oven.bake(opts)
+</code></pre>
+
+<p>Bake creates an instance of a lua module bound to a state. Here we 
+are creating the main state that other modules will then bind to.</p>
+
+<p>We call each state an OVEN to fit into the gamecake naming scheme 
+then we bake a module in this oven to bind them to the common state.</p>
+
+<p>Think of it as a sub version of require, so require gets the global 
+pointer for a module and bake is used to get the a module bound to 
+an oven.</p>
+
+<p>By using this bound state we reduce the verbosity of connecting 
+modules and sharing state between them.</p>
+
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.gamecake.oven';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>

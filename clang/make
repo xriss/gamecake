@@ -1,0 +1,10 @@
+cd `dirname $0`
+
+#switch to 64bit build?
+test=`getconf LONG_BIT`
+if [ "$test" = "64" ] ; then
+	./make.x64 $*
+else
+	./make.x32 $*
+fi
+

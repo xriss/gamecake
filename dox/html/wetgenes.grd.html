@@ -1,0 +1,635 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.grd.html">wetgenes.grd</a></h1>
+<div>
+
+<pre><code>local wgrd=require("wetgenes.grd")
+</code></pre>
+
+<p>We use wgrd as the local name of this library.</p>
+
+<p>Handle bitmap creation, loading, saving and blitting. The bitmap and 
+the colormap for indexed bitmaps are represented by the same data 
+structure which describes a continuous chunk of memory with optional 
+ability to select an area of a larger chunk using simple byte spans.</p>
+
+<p>Swanky Paint uses this to manage its bitmaps and its also used to 
+convert art into data at build time for use in the GameCake engine. The 
+PageCake engine uses this for image management, creating live thumbnails 
+and so on.</p>
+
+<p>We load and save jpeg, png and gif. The png lib contains extensions for 
+apng which allows animation chunks. Animations are contained in the Z 
+(depth) dimension of the grd.</p>
+
+<p>The following are possible format options that we support. Most of them 
+are OpenGL friendly.</p>
+
+<pre><code>wgrd.FMT_U8_RGBA
+</code></pre>
+
+<p>32 bits per pixel with a byte order of red, green, blue, alpha and a 
+little endian U32 of ABGR. We prefer this byte order because OpenGL.</p>
+
+<pre><code>wgrd.FMT_U8_ARGB
+</code></pre>
+
+<p>32 bits per pixel with a byte order of alpha, red, green, blue and a 
+little endian U32 of BGRA.</p>
+
+<pre><code>wgrd.FMT_U8_RGB
+</code></pre>
+
+<p>24 bits per pixel with a byte order of red, green, blue.</p>
+
+<pre><code>wgrd.FMT_U8_INDEXED
+</code></pre>
+
+<p>8 bits per pixel which indexes a wgrd.FMT<em>U8</em>RGBA palette.</p>
+
+<pre><code>wgrd.FMT_U8_LUMINANCE
+</code></pre>
+
+<p>8 bits per pixel, grey scale only.</p>
+
+<pre><code>wgrd.FMT_U8_ALPHA
+</code></pre>
+
+<p>8 bits per pixel, alpha only.</p>
+
+<pre><code>wgrd.FMT_U16_RGBA_5551
+</code></pre>
+
+<p>16 bits per pixel with 5 bits each of red,green,blue and 1 bit of alpha 
+packed into a single U16.</p>
+
+<pre><code>wgrd.FMT_U16_RGBA_4444
+</code></pre>
+
+<p>16 bits per pixel with 4 bits each of red,green,blue,alpha packed into 
+a single U16.</p>
+
+<pre><code>wgrd.FMT_U16_RGBA_5650
+</code></pre>
+
+<p>16 bits per pixel with 4 bits of red, 5 bits of green and 4 bits of 
+blue packed into a single U16.</p>
+
+
+<pre><code>wgrd.FMT_U8_RGBA_PREMULT
+wgrd.FMT_U8_ARGB_PREMULT
+wgrd.FMT_U8_INDEXED_PREMULT
+wgrd.FMT_U16_RGBA_5551_PREMULT
+wgrd.FMT_U16_RGBA_4444_PREMULT
+wgrd.FMT_U16_RGBA_5650_PREMULT
+</code></pre>
+
+<p>Are all just pre-multiplied alpha versions of the base format described 
+above.</p>
+
+<p>Check this link out for why pre-multiplied alpha is a good idea for any 
+image that will be used as a texture 
+http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx</p>
+
+
+<pre><code>wgrd.GRD_FMT_HINT_PNG
+wgrd.GRD_FMT_HINT_JPG
+wgrd.GRD_FMT_HINT_GIF
+</code></pre>
+
+<p>These are used to choose a specific file format when loading or saving.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.attr_redux.html">wetgenes.grd.attr_redux</a></h1>
+<div>
+
+<pre><code>g:attr_redux(cw,ch,num,sub,bak)
+</code></pre>
+
+<p>Perform attribute clash simulation on an indexed image.</p>
+
+<p>cw,ch are the width and height of each character we are simulating, 8x8 
+is the right size for spectrum attrs but could be 4x8 for c64 multicolor 
+mode.</p>
+
+<p>num is the number of colors allowed within this area, so 2 for spectrum mode.</p>
+
+<p>sub is the size of sub pallete groups, eg 16 in nes mode or 8 in 
+spectrum mode, EG bright simulation in spectrum mode requires all 
+colors in a attr block to be from the bright palette or the dark 
+palette no mixing so this forces that grouping. Set to 0 or 256 and 
+this restriction will be disabled.</p>
+
+<p>bak is the index of the background color that is shared across all 
+characters, set to -1 if there is no shared background color.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.blit.html">wetgenes.grd.blit</a></h1>
+<div>
+
+<pre><code>g:blit(gb,x,y,cx,cy,cw,ch)
+</code></pre>
+
+<p>Blit a 2D area from one grd into another.</p>
+
+<p>gb is the grd to blit from.</p>
+
+<p>x,y is the location to blit too.</p>
+
+<p>cx,cy,cw,ch is a clip area that should be applied to gb before it is 
+blitted. EG to specify an area within gb. If not provided it will 
+default to the entirety of gb,</p>
+
+<p>g (destination) must be FMT<em>U8</em>RGBA and gb (source) must be 
+FMT<em>U8</em>RGBA_PREMULT this function will blend the images using normal 
+alpha blending.</p>
+
+<p>This is not overly optimised but should be reasonably fast.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.clear.html">wetgenes.grd.clear</a></h1>
+<div>
+
+<pre><code>g:clear(color)
+</code></pre>
+
+<p>Fill this grd with a single color, the color passed in depends on the 
+format of the grd, it could be an index value for 8bit images or a 
+32bit value for rgba images.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.clip.html">wetgenes.grd.clip</a></h1>
+<div>
+
+<pre><code>gr=g:clip(x,y,z,w,h,d)
+</code></pre>
+
+<p>create a clipped window into this grd</p>
+
+<p>the actual data is still stored in the original, so any changes there will effect the newly returned grd</p>
+
+<p>x,y,z are the staring pixel and w,h,d are the width height and depth in pixels.</p>
+
+<p>If you intend to use this clipped area for an extended period of time then you should duplicate this grd once you do this.</p>
+
+<p>This returns a new grd with gr.parent set to g (the original grd)</p>
+
+<p>This is a very shallow dangerous copy and should only really be used for temporary actions.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.convert.html">wetgenes.grd.convert</a></h1>
+<div>
+
+<pre><code>g:convert(fmt)
+</code></pre>
+
+<p>Convert this grd to a new format, eg start with an 8 bit indexed grd 
+and convert it to 32 bit like by passing in wgrd.FMT<em>U8</em>RGBA as the fmt.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.copy_data.html">wetgenes.grd.copy_data</a></h1>
+<div>
+
+<pre><code>g:copy_data(gb)
+</code></pre>
+
+<p>Copy all of the bitmap data from gb into g.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.copy_data_layer.html">wetgenes.grd.copy_data_layer</a></h1>
+<div>
+
+<pre><code>g:copy_data_layer(gb,z,zb)
+</code></pre>
+
+<p>Copy one layer (frame) of the bitmap data from gb into g. z is the 
+depth of the layer to copy into zb is the depth of the layer to copy 
+from.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.create.html">wetgenes.grd.create</a></h1>
+<div>
+
+<pre><code>ga=wgrd.create(gb)
+</code></pre>
+
+<p>Duplicate the grd.</p>
+
+<pre><code>ga=wgrd.create(format,width,height,depth)
+</code></pre>
+
+<p>Create a grd in the given format with the given width height and depth. </p>
+
+<pre><code>ga=wgrd.create(filename,opts)
+</code></pre>
+
+<p>Load an image from the file system.</p>
+
+<pre><code>ga=wgrd.create()
+</code></pre>
+
+<p>Create a blank grd of 0 dimensions.</p>
+
+<p>This is usually the only wgrd function you would need to call as once you 
+have a grd you can use the : calling convention to modify it. The other 
+functions will be shown as examples using the : calling convention.</p>
+
+<pre><code>wgrd.create():load(opts)
+</code></pre>
+
+<p>For instance could be used if you wish to perform a more esoteric load 
+than from the file system.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns a grd object.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.destroy.html">wetgenes.grd.destroy</a></h1>
+<div>
+
+<pre><code>g:destroy()
+</code></pre>
+
+<p>Free the grd and associated memory. This will of course be done 
+automatically by garbage collection but you can force it explicitly 
+using this function.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.duplicate.html">wetgenes.grd.duplicate</a></h1>
+<div>
+
+<pre><code>ga = g:duplicate()
+</code></pre>
+
+<p>Create a duplicate of this grd and return it.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.duplicate_convert.html">wetgenes.grd.duplicate_convert</a></h1>
+<div>
+
+<pre><code>ga = g:duplicate_convert(fmt)
+</code></pre>
+
+<p>Create a duplicate of this grd converted to a new format and return it.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.flipy.html">wetgenes.grd.flipy</a></h1>
+<div>
+
+<pre><code>g:flipy()
+</code></pre>
+
+<p>This function flips the image reversing the y axis.</p>
+
+<p>Some image formats and rendering engines like to use upside down images 
+so this is rather useful.</p>
+
+
+<pre><code>g:flipx()
+</code></pre>
+
+<p>This function flips the image reversing the x axis.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.info.html">wetgenes.grd.info</a></h1>
+<div>
+
+<pre><code>g:info()
+</code></pre>
+
+<p>This function looks at the userdata stored in g[0] and fills in the g 
+table with its values. So it refreshes the width height etc values to 
+reflect any changes. This should not need to be called explicitly as it 
+is called whenever we change anything.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.load.html">wetgenes.grd.load</a></h1>
+<div>
+
+<pre><code>g:load(opts)
+</code></pre>
+
+<p>Load an image from memory or file system depending on settings in opts.</p>
+
+<pre><code>opts.fmt
+</code></pre>
+
+<p>Lets you choose an image format, the strings "jpg","png" or "gif" will 
+be converted to the appropriate wgrd.FMT<em>HINT</em>* value.</p>
+
+<pre><code>opts.data
+</code></pre>
+
+<p>Flags this as a load from memory and provides the data string to load 
+from.</p>
+
+<pre><code>opts.filename
+</code></pre>
+
+<p>Flags this as a load the file system and provides the file name to 
+open.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.load_data.html">wetgenes.grd.load_data</a></h1>
+<div>
+
+<pre><code>g:load_data(datastring,format)
+</code></pre>
+
+<p>Load an image from memory.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.load_file.html">wetgenes.grd.load_file</a></h1>
+<div>
+
+<pre><code>g:load_file(filename,format)
+</code></pre>
+
+<p>Load an image from the file system.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.paint.html">wetgenes.grd.paint</a></h1>
+<div>
+
+<pre><code>g:paint(gb,x,y,cx,cy,cw,ch,mode,trans,color)
+</code></pre>
+
+<p>Blit a 2D area from one grd into another using dpaint style paint modes.</p>
+
+<p>Both grids must be indexed - FMT<em>U8</em>INDEXED</p>
+
+<p>gb is the grd to blit from.</p>
+
+<p>x,y is the location to blit too.</p>
+
+<p>cx,cy,cw,ch is a clip area that should be applied to gb before it is 
+blitted. EG to specify an area within gb. If not provided it will 
+default to the entirety of gb,</p>
+
+<p>mode is one of the following</p>
+
+<pre><code>PAINT_MODE_TRANS
+</code></pre>
+
+<p>Skip the transparent color.</p>
+
+<pre><code>GRD_PAINT_MODE_COLOR
+</code></pre>
+
+<p>Skip the transparent color and make every solid pixel the same color.</p>
+
+<pre><code>GRD_PAINT_MODE_COPY
+</code></pre>
+
+<p>Copy the entire area.</p>
+
+<pre><code>GRD_PAINT_MODE_XOR
+</code></pre>
+
+<p>XOR the values. (Can be used to find differences in an image)</p>
+
+<pre><code>GRD_PAINT_MODE_ALPHA
+</code></pre>
+
+<p>Skip the transparent colors as defined in the palette.</p>
+
+
+<p>trans is the index of the transparent color, bground color, for use in 
+the appropriate modes.</p>
+
+<p>color is the index of the drawing color, foreground color, for use in 
+the appropriate modes. </p>
+
+
+<p>This is not overly optimised but should be reasonably fast.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.palette.html">wetgenes.grd.palette</a></h1>
+<div>
+
+<pre><code>g:palette(x,w)
+g:palette(x,w,"")
+g:palette(x,w,tab)
+g:palette(x,w,str)
+</code></pre>
+
+<p>These are the same as g:pixels() but refer to the palette information 
+which is stored as a 1 pixel high 256 pixel wide rgba image. The use of 
+"" to read a string of bytes and passing in either a table of numerical 
+values or string of bytes to write into the palette is the same system 
+as used with pixels.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.pixels.html">wetgenes.grd.pixels</a></h1>
+<div>
+
+<pre><code>g:pixels(x,y,w,h)
+g:pixels(x,y,z,w,h,d)
+</code></pre>
+
+<p>Read the area of pixels as a table of numerical values, the amount of 
+numbers you get per pixel <em>depends</em> on the format of the grd.</p>
+
+<pre><code>g:pixels(x,y,w,h,"")
+g:pixels(x,y,z,w,h,d,"")
+</code></pre>
+
+<p>Read the area of pixels as a string of byte values, the amount of bytes 
+you get per pixel <em>depends</em> on the format of the grd. Note the passing 
+in of an empty string to indicate that you with to receive a string.</p>
+
+
+<pre><code>g:pixels(x,y,w,h,tab)
+g:pixels(x,y,z,w,h,d,tab)
+</code></pre>
+
+<p>Write the area of pixels from a table of numerical values which is 
+provided in tab, the amount of numbers you need to provide per pixel 
+<em>depends</em> on the format of the grd.</p>
+
+<pre><code>g:pixels(x,y,w,h,str)
+g:pixels(x,y,z,w,h,d,str)
+</code></pre>
+
+<p>Write the area of pixels from a string of bytes which is provided in 
+str, the amount of bytes you need to provide per pixel <em>depends</em> on the 
+format of the grd.</p>
+
+<p>As you can see depending on the arguments given this does one of two 
+things, read some pixels or write some pixels. The area that is to be 
+used is provided first, as a 2d(x,y,w,h) or 3d(x,y,z,w,h,d) area. To 
+read or write the entire 2d image or the first frame of an animation 
+use (0,0,g.width,g.height)</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns the requested data.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.quant.html">wetgenes.grd.quant</a></h1>
+<div>
+
+<pre><code>g:quant(num)
+</code></pre>
+
+<p>Convert to an 8bit indexed image containing a palette of the requested size.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.reset.html">wetgenes.grd.reset</a></h1>
+<div>
+
+<pre><code>g:reset()
+</code></pre>
+
+<p>Reset the grd which will now be a blank image of 0 dimensions.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.resize.html">wetgenes.grd.resize</a></h1>
+<div>
+
+<pre><code>g:resize(w,h,d)
+</code></pre>
+
+<p>Resize the image to the given dimensions, this does not scale the image 
+data so instead each pixel will be in the same place after the resize. 
+This gives a crop effect when shrinking and extra blank area at the 
+bottom right when growing. Useful if for instance you want to upload a 
+texture to OpenGL and need to change the size to be a power of two in 
+width and height so you can mipmap it.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.save.html">wetgenes.grd.save</a></h1>
+<div>
+
+<pre><code>g:save(opts)
+</code></pre>
+
+<p>Save an image to memory or filesytem depending on settings in opts.</p>
+
+<pre><code>opts.fmt
+</code></pre>
+
+<p>Lets you choose an image format, the strings "jpg","png" or "gif" will 
+be converted to the appropriate wgrd.FMT<em>HINT</em>* value.</p>
+
+<p>We will guess opts.fmt from the file name extension if it is not 
+provided and a file name is.</p>
+
+<pre><code>opts.filename
+</code></pre>
+
+<p>Flags this as a load the file system and provides the file name to 
+write to. If no filename is given then we will be saving into memory 
+and be returning that data string as the first return value.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert.</p>
+
+<p>If no file name is given then we <em>return</em> the data string that we saved.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.scale.html">wetgenes.grd.scale</a></h1>
+<div>
+
+<pre><code>g:scale(w,h,d)
+</code></pre>
+
+<p>Scale the image to the given dimensions, this is currently using a 
+terrible scale filter that is only any good at halving or doubling the 
+size.</p>
+
+<p>This should only be used to create mipmaps until it is replaced with a 
+better scale filter.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.shrink.html">wetgenes.grd.shrink</a></h1>
+<div>
+
+<pre><code>g:shrink(area)
+</code></pre>
+
+<p>area is an {x=0,y=0,z=0,w=100,h=100,d=100} style table specifying a 3D
+area, set {z=0,d=1} for a 2D area.</p>
+
+<p>You should set this to the full size of the image.</p>
+
+<p>This function looks at the pixels in that area and shrinks each edge 
+inwards if it is fully transparent then return this new area in the 
+same table that was passed in.</p>
+
+<p>You can then use this information to crop this image resulting is a 
+smaller sized grd containing all the solid pixels.</p>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.grd';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>

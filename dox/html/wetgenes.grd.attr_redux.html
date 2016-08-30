@@ -1,0 +1,48 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.grd.html">wetgenes.grd</a></h1><h1><a href="wetgenes.grd.attr_redux.html">wetgenes.grd.attr_redux</a></h1>
+<div>
+
+<pre><code>g:attr_redux(cw,ch,num,sub,bak)
+</code></pre>
+
+<p>Perform attribute clash simulation on an indexed image.</p>
+
+<p>cw,ch are the width and height of each character we are simulating, 8x8 
+is the right size for spectrum attrs but could be 4x8 for c64 multicolor 
+mode.</p>
+
+<p>num is the number of colors allowed within this area, so 2 for spectrum mode.</p>
+
+<p>sub is the size of sub pallete groups, eg 16 in nes mode or 8 in 
+spectrum mode, EG bright simulation in spectrum mode requires all 
+colors in a attr block to be from the bright palette or the dark 
+palette no mixing so this forces that grouping. Set to 0 or 256 and 
+this restriction will be disabled.</p>
+
+<p>bak is the index of the background color that is shared across all 
+characters, set to -1 if there is no shared background color.</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns g so that we can chain the result.</p>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.grd.attr_redux';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>

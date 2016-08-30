@@ -1,0 +1,7 @@
+cd `dirname $0`
+
+cd ..
+
+export GAMECAKE_WIN_TYPE=raspi
+
+./make

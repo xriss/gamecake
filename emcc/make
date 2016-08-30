@@ -1,0 +1,23 @@
+cd `dirname $0`
+cd ..
+
+if [ "$1" = "clean" ] ; then
+        rm -rf build-gmake-emcc-native
+        exit
+fi
+
+source ../sdks/emsdk_portable/emsdk_env.sh
+
+btype="exe"
+makeopts="config=release_emcc"
+if [ "$1" = "debug" ] ; then
+makeopts="config=debug_emcc"
+btype="dbg"
+fi
+
+build/premake4 gmake emcc
+
+cd build-gmake-emcc-native
+make $makeopts $2 $3 $4
+cd ..
+

@@ -1,0 +1,8 @@
+cd `dirname $0`
+
+vagrant up
+
+vagrant ssh -c " cd /hg/lua ; clang/make clean ; clang/make "
+
+vagrant halt
+

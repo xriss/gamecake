@@ -1,0 +1,25 @@
+cd `dirname $0`
+cd ..
+
+# thank you for making this "better" and more "standard"
+
+
+
+if [ "$1" = "clean" ] ; then
+	rm -rf build-gmake-windows-native
+	exit 0
+fi
+
+type i686-w64-mingw32-gcc >/dev/null 2>&1 && build/premake4 gmake mingw   || exit 1
+type i686-w64-mingw32-gcc >/dev/null 2>&1 || build/premake4 gmake mingw32 || exit 1
+
+cd build-gmake-windows-native
+
+if [ "$1" = "debug" ] ; then
+	make -j4 config=debug_mingw $2 $3 $4 || exit 1
+else
+	make -j4 config=release_mingw $2 $3 $4 || exit 1
+fi
+
+cd ..
+

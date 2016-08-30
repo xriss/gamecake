@@ -1,0 +1,66 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.grd.html">wetgenes.grd</a></h1><h1><a href="wetgenes.grd.pixels.html">wetgenes.grd.pixels</a></h1>
+<div>
+
+<pre><code>g:pixels(x,y,w,h)
+g:pixels(x,y,z,w,h,d)
+</code></pre>
+
+<p>Read the area of pixels as a table of numerical values, the amount of 
+numbers you get per pixel <em>depends</em> on the format of the grd.</p>
+
+<pre><code>g:pixels(x,y,w,h,"")
+g:pixels(x,y,z,w,h,d,"")
+</code></pre>
+
+<p>Read the area of pixels as a string of byte values, the amount of bytes 
+you get per pixel <em>depends</em> on the format of the grd. Note the passing 
+in of an empty string to indicate that you with to receive a string.</p>
+
+
+<pre><code>g:pixels(x,y,w,h,tab)
+g:pixels(x,y,z,w,h,d,tab)
+</code></pre>
+
+<p>Write the area of pixels from a table of numerical values which is 
+provided in tab, the amount of numbers you need to provide per pixel 
+<em>depends</em> on the format of the grd.</p>
+
+<pre><code>g:pixels(x,y,w,h,str)
+g:pixels(x,y,z,w,h,d,str)
+</code></pre>
+
+<p>Write the area of pixels from a string of bytes which is provided in 
+str, the amount of bytes you need to provide per pixel <em>depends</em> on the 
+format of the grd.</p>
+
+<p>As you can see depending on the arguments given this does one of two 
+things, read some pixels or write some pixels. The area that is to be 
+used is provided first, as a 2d(x,y,w,h) or 3d(x,y,z,w,h,d) area. To 
+read or write the entire 2d image or the first frame of an animation 
+use (0,0,g.width,g.height)</p>
+
+<p>Returns nil,error if something goes wrong so can be used with assert 
+otherwise returns the requested data.</p>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.grd.pixels';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>
