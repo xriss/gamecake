@@ -368,6 +368,7 @@ function win.create(opts)
 	return w
 end
 
+
 function win.js_post(m,d)
 	if hardcore.js_post then
 		hardcore.js_post(m,d)
@@ -392,6 +393,12 @@ function base.info(w)
 	if hardcore.info then
 		hardcore.info(w[0],w)
 --		print("WH",w.width,w.height)
+	end
+end
+
+function base.resize(w,width,height)
+	if hardcore.resize then
+		hardcore.resize(w[0],width,height)
 	end
 end
 
