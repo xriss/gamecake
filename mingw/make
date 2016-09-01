@@ -11,12 +11,14 @@ fi
 MINGW=mingw
 BUILD=build-gmake-windows-native
 
-if hash i586-mingw32msvc-gcc 2>/dev/null; then
-	MINGW=mingw32
-	BUILD=build-gmake-windows-32
-fi
 
-build/premake4 gmake $MINGW
+# 32bit mingw32 doesnt really work anymore, force 64bit?
+#if hash i586-mingw32msvc-gcc 2>/dev/null; then
+#	MINGW=mingw32
+#	BUILD=build-gmake-windows-32
+#fi
+
+premake4 gmake $MINGW
 
 cd $BUILD
 
