@@ -105,8 +105,12 @@ elseif WINDOWS then
 
 	files { "./lua.c" }
 
-	libdirs { "../lib_sdl2/win32/i686-w64-mingw32/lib/" } -- we have SDL2 binary for windows
-	linkoptions { " -Wl,-Bstatic,-lSDL2,-lm,-ldinput8,-ldxguid,-ldxerr8,-luser32,-lgdi32,-lwinmm,-limm32,-lole32,-loleaut32,-lshell32,-lversion,-luuid,-Bdynamic " }  -- force static SDL2 linking
+	libdirs { "../lib_sdl2/win32/i686-w64-mingw32/lib/" } -- we have SDL2 binary for windows, and have deleted the dll, so it has no choice but static
+	links { "SDL2" , "m" , "dinput8" , "dxguid" , "dxerr8" , "user32" , "gdi32" , "winmm" , "imm32" , "ole32" , "oleaut32" , "shell32" , "version" , "uuid" }
+
+-- old hack?
+--	linkoptions { " -Wl,-Bstatic,-lSDL2,-lm,-ldinput8,-ldxguid,-ldxerr8,-luser32,-lgdi32,-lwinmm,-limm32,-lole32,-loleaut32,-lshell32,-lversion,-luuid,-Bdynamic " }  -- force static SDL2 linking
+
 
 	links { "opengl32" , "glu32" }
 	links {  "ws2_32" , "gdi32"}
