@@ -44,6 +44,8 @@ screen.create=function(it,opts)
 	it.name=opts.name
 	
 	it.bloom=it.opts.bloom
+
+	it.scale=it.opts.scale or 3
 	
 	it.filter=it.opts.filter or "none"
 	
