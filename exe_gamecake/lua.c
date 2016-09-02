@@ -364,6 +364,7 @@ static int pmain (lua_State *L) {
 FILE *ft=0;
 int l=0;
 int has_z=0;
+int has_fun=0;
   struct Smain *s = (struct Smain *)lua_touserdata(L, 1);
   char **argv = s->argv;
   int script;
@@ -402,6 +403,18 @@ int has_z=0;
 			has_z=1;
 		}
 	}
+	if(l>8)
+	{
+		if(strncmp((argv[script]+(l-8)),".fun.lua",8)==0)
+		{
+			has_fun=1;
+		}
+	}
+	if(has_fun)
+	{
+		dolibrary(L,"fun"); // have some fun
+	}
+	else
 	if(has_z)
 	{
 		dolibrary(L,"start"); // mount and run code from that zip
