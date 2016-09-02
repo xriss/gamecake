@@ -64,8 +64,8 @@ sprites.create=function(it,opts)
 		v.hx=v.hx or v.h or it.tiles.tile_hx
 		v.hy=v.hy or v.h or it.tiles.tile_hy
 
-		v.tx=v.tx or (           ( (v.t or 0)%256 ) * math.ceil(v.hx/it.tiles.tile_hx) )
-		v.ty=v.ty or ( math.floor( (v.t or 0)/256 ) * math.ceil(v.hy/it.tiles.tile_hy) )
+		v.tx=v.tx or (           ( (v.t or 0)%256 ) )--* math.ceil(v.hx/it.tiles.tile_hx) )
+		v.ty=v.ty or ( math.floor( (v.t or 0)/256 ) )--* math.ceil(v.hy/it.tiles.tile_hy) )
 
 		v.ox=v.ox or v.hx/2
 		v.oy=v.oy or v.hy/2
