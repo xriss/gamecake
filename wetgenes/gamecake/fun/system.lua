@@ -21,7 +21,6 @@ function M.bake(oven,system)
 	local flat=canvas.flat
 
 	system.components={}
-	system.opts=oven.opts.fun or {} -- you can place your fun system setup in lua/init.lua -> opts.fun={}
 
 -- utility code
 
@@ -43,6 +42,7 @@ end
 
 system.load_and_setup=function(name,path)
 
+	name=assert(name or oven.opts.fun)
 	path=path or ""
 	local lua=assert(wzips.readfile(path..name..".fun.lua"),"file not found: "..path..name..".fun.lua")
 	local glsl=wzips.readfile(path..name..".fun.glsl")

@@ -60,6 +60,8 @@ function M.bake(oven,console)
 		console.x=0
 		console.y=0
 		console.y_show=8*8
+
+		console.fps_updates=0
 		
 		console.show=false
 --		console.show_hud=true
@@ -213,6 +215,8 @@ function M.bake(oven,console)
 
 	function console.update()
 	
+		console.fps_updates=console.fps_updates+1
+
 		console.buff:update()
 		
 		if console.show then
@@ -260,8 +264,9 @@ font.vbs_idx=1
 			oven.times.draw.done()
 
 			local gci=gcinfo()
-			local s=string.format("fps=%2d %02d/%02d %5.2fm vb=%d tx=%d fb=%d gl=%d vbi=%d gm=%d",
+			local s=string.format("fps=%2d %-4s% 02d/%02d %5.2fm vb=%d tx=%d fb=%d gl=%d vbi=%d gm=%d",
 				console.fps,
+				string.rep("x",console.fps_updates), -- idealy we only want 1 x 
 				(oven.times.update.time*1000),
 				(oven.times.draw.time*1000),
 				gci/1024,
@@ -273,6 +278,7 @@ font.vbs_idx=1
 				cake.images.gl_mem/(1024*1024)
 				)
 			gl.counts.calls=0 -- reset number of gl calls, so we display number of calls per frame.
+			console.fps_updates=0
 
 -- print info as we are			
 			if gl.patch_functions_method=="disable" then
