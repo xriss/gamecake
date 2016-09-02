@@ -72,6 +72,7 @@ print("system setup")
 
 -- possible components and perform global setup, even if they never get used
 
+	system.tiles  =oven.rebake("wetgenes.gamecake.fun.tiles").setup()
 	system.sprites=oven.rebake("wetgenes.gamecake.fun.sprites").setup()
 	system.tilemap=oven.rebake("wetgenes.gamecake.fun.tilemap").setup()
 	system.screen =oven.rebake("wetgenes.gamecake.fun.screen").setup()
@@ -86,6 +87,10 @@ print("system setup")
 		if     v.component=="screen" then
 
 			it=system.screen.create({system=system},v)
+
+		elseif v.component=="tiles" then
+
+			it=system.tiles.create({system=system},v)
 
 		elseif v.component=="sprites" then
 

@@ -39,36 +39,18 @@ sprites.create=function(it,opts)
 	it.component="sprites"
 	it.name=opts.name
 
-	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or 8
-	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or 8
-
-	it.bitmap_hx=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
-	it.bitmap_hy=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
-	
+	it.tiles=assert(it.system.components[it.opts.tiles or "tiles"]) -- find tile bitmap by name
 
 	it.setup=function(opts)
 		
 		it.px=0 -- display x offset 1 is a single tile wide
 		it.py=0 -- display y offset 1 is a single tile high
-		
-		it.bitmap_grd  =wgrd.create("U8_RGBA", it.tile_hx*it.bitmap_hx , it.tile_hy*it.bitmap_hy , 1)
-
-		it.bitmap_tex=gl.GenTexture()
-		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
-		
+				
 		it.list={}
 
 	end
 
 	it.clean=function()
-		if it.bitmap_tex then
-			gl.DeleteTexture( it.bitmap_tex )
-			it.bitmap_tex=nil
-		end
 	end
 	
 	it.list_reset=function()
@@ -79,11 +61,11 @@ sprites.create=function(it,opts)
 		v.idx=(idx or v.idx or (#it.list+1) )
 		it.list[ v.idx ]=v
 		
-		v.hx=v.hx or v.h or it.tile_hx
-		v.hy=v.hy or v.h or it.tile_hy
+		v.hx=v.hx or v.h or it.tiles.tile_hx
+		v.hy=v.hy or v.h or it.tiles.tile_hy
 
-		v.tx=v.tx or (           ( (v.t or 0)%256 ) * math.ceil(v.hx/it.tile_hx) )
-		v.ty=v.ty or ( math.floor( (v.t or 0)/256 ) * math.ceil(v.hy/it.tile_hy) )
+		v.tx=v.tx or (           ( (v.t or 0)%256 ) * math.ceil(v.hx/it.tiles.tile_hx) )
+		v.ty=v.ty or ( math.floor( (v.t or 0)/256 ) * math.ceil(v.hy/it.tiles.tile_hy) )
 
 		v.ox=v.ox or v.hx/2
 		v.oy=v.oy or v.hy/2
@@ -109,27 +91,14 @@ sprites.create=function(it,opts)
 	end
 	
 	it.draw=function()
-
-		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	
-		gl.TexImage2D(
-			gl.TEXTURE_2D,
-			0,
-			gl.RGBA,
-			it.bitmap_grd.width,
-			it.bitmap_grd.height,
-			0,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			it.bitmap_grd.data )
-
 		
 		local batch={}
 		for idx,v in pairs(it.list) do
 
-			local ixw=(v.tx+(v.hx/it.tile_hx))/it.bitmap_hx
-			local iyh=(v.ty+(v.hy/it.tile_hy))/it.bitmap_hy
-			local ix=v.tx/it.bitmap_hx
-			local iy=v.ty/it.bitmap_hy
+			local ixw=(v.tx+(v.hx/it.tiles.tile_hx))/it.tiles.bitmap_hx
+			local iyh=(v.ty+(v.hy/it.tiles.tile_hy))/it.tiles.bitmap_hy
+			local ix=v.tx/it.tiles.bitmap_hx
+			local iy=v.ty/it.tiles.bitmap_hy
 			
 			local ox=(v.ox)*(v.sx)
 			local oy=(v.oy)*(v.sy)

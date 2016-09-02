@@ -47,11 +47,7 @@ tilemap.create=function(it,opts)
 	it.window_hx=it.opts.window and it.opts.window[3] or it.screen.hx
 	it.window_hy=it.opts.window and it.opts.window[4] or it.screen.hy
 
-	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or 8
-	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or 8
-
-	it.bitmap_hx=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
-	it.bitmap_hy=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
+	it.tiles=assert(it.system.components[it.opts.tiles or "tiles"]) -- find tile bitmap by name
 
 	it.tilemap_hx=it.opts.tilemap_size and it.opts.tilemap_size[1] or 256
 	it.tilemap_hy=it.opts.tilemap_size and it.opts.tilemap_size[2] or 256
@@ -59,15 +55,7 @@ tilemap.create=function(it,opts)
 
 	it.setup=function(opts)
 		
-		it.bitmap_grd  =wgrd.create("U8_RGBA", it.tile_hx*it.bitmap_hx , it.tile_hy*it.bitmap_hy , 1)
 		it.tilemap_grd =wgrd.create("U8_RGBA", it.tilemap_hx           , it.tilemap_hy           , 1)
-
-		it.bitmap_tex=gl.GenTexture()
-		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
 
 		it.tilemap_tex=gl.GenTexture()
 		gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )	
@@ -79,10 +67,6 @@ tilemap.create=function(it,opts)
 	end
 
 	it.clean=function()
-		if it.bitmap_tex then
-			gl.DeleteTexture( it.bitmap_tex )
-			it.bitmap_tex=nil
-		end
 		if it.tilemap_tex then
 			gl.DeleteTexture( it.tilemap_tex )
 			it.tilemap_tex=nil
@@ -93,18 +77,6 @@ tilemap.create=function(it,opts)
 	end
 	
 	it.draw=function()
-
-		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	
-		gl.TexImage2D(
-			gl.TEXTURE_2D,
-			0,
-			gl.RGBA,
-			it.bitmap_grd.width,
-			it.bitmap_grd.height,
-			0,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			it.bitmap_grd.data )
 
 		gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )	
 		gl.TexImage2D(
@@ -121,7 +93,7 @@ tilemap.create=function(it,opts)
 
 
 		local x,y,hx,hy=it.window_px , it.window_py , it.window_hx , it.window_hy
-		local u,v,hu,hv=it.px/it.tile_hx , it.py/it.tile_hy , hx/it.tile_hx , hy/it.tile_hy
+		local u,v,hu,hv=it.px/it.tiles.tile_hx , it.py/it.tiles.tile_hy , hx/it.tiles.tile_hx , hy/it.tiles.tile_hy
 		local t={
 			x,		y+hy,	0,	u,		v+hv, 			
 			x,		y,		0,	u,		v,
@@ -136,10 +108,13 @@ tilemap.create=function(it,opts)
 			gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
 
 			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_tile"), 0 )
-			gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )
+			gl.BindTexture( gl.TEXTURE_2D , it.tiles.bitmap_tex )
 
-			gl.Uniform4f( p:uniform("tile_info"), it.tile_hx,it.tile_hy,it.tile_hx*it.bitmap_hx,it.tile_hy*it.bitmap_hy )
-			gl.Uniform4f( p:uniform("map_info"),  0,0,it.tilemap_hx,it.tilemap_hy )
+			gl.Uniform4f( p:uniform("tile_info"),	it.tiles.tile_hx,
+													it.tiles.tile_hy,
+													it.tiles.tile_hx*it.tiles.bitmap_hx,
+													it.tiles.tile_hy*it.tiles.bitmap_hy )
+			gl.Uniform4f( p:uniform("map_info"), 	0,0,it.tilemap_hx,it.tilemap_hy )
 
 		end)
 
