@@ -77,6 +77,7 @@ print("system setup")
 	system.tilemap=oven.rebake("wetgenes.gamecake.fun.tilemap").setup()
 	system.screen =oven.rebake("wetgenes.gamecake.fun.screen").setup()
 	system.copper =oven.rebake("wetgenes.gamecake.fun.copper").setup()
+	system.sfx    =oven.rebake("wetgenes.gamecake.fun.sfx").setup()
 
 
 	for i,v in ipairs(system.opts) do
@@ -103,6 +104,10 @@ print("system setup")
 		elseif v.component=="copper" then
 
 			it=system.copper.create({system=system},v)
+
+		elseif v.component=="sfx" then
+
+			it=system.sfx.create({system=system},v)
 
 		end
 		

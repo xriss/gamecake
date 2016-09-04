@@ -134,7 +134,7 @@ sounds.load_wavtab=function(tab,id,freq)
 	t.buff=t.buff or al.GenBuffer()
 
 	local dat,len=wpack.save_array(tab,"s16")
-	al.BufferData(t.buff,al.FORMAT_MONO16,dat,len,freq or 261.626*8*8) -- C4 hopefully?
+	al.BufferData(t.buff,al.FORMAT_MONO16,dat,len,freq or 48000) -- C4 hopefully?
 	
 	sounds.set(t,id) -- remember
 

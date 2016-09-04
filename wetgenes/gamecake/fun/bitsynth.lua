@@ -232,6 +232,8 @@ bitsynth.sound={}
 bitsynth.sound.simple=function(ot)
 	local it={}
 	
+	it.name=ot.name -- remember our name
+	
 	it.fread=ot.fread or function(it,t) end
 
 	it.gwav=bitsynth.gwav(ot)
