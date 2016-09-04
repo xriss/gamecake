@@ -5,6 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local print=function(...) return _G.print(...) end
 
+local wpack=require("wetgenes.pack")
 local zips=require("wetgenes.zips")
 local grd=require("wetgenes.grd")
 local sod=require("wetgenes.sod")
@@ -118,6 +119,31 @@ end
 --
 -- pre bake some speech, and make it easy to lookup by the given ids
 --
+sounds.load_wavtab=function(tab,id,freq)
+
+	local t=sounds.get(id)
+	if t then return t end --first check it is not already loaded
+	
+	t={}
+	t.filename=tab
+	
+	t.loop=al.FALSE
+	
+	t.buff=al.GenBuffer()
+
+	local dat,len=wpack.save_array(tab,"s16")
+	al.BufferData(t.buff,al.FORMAT_MONO16,dat,len,freq or 261.626*8*8) -- C4 hopefully?
+	
+	sounds.set(t,id) -- remember
+
+oven.preloader("wavtab",id)
+
+	return t
+end
+
+--
+-- pre bake some speech, and make it easy to lookup by the given ids
+--
 sounds.load_speak=function(tab,id)
 	if type(tab)=="string" then tab={text=tab} end -- default options
 
@@ -138,6 +164,7 @@ sounds.load_speak=function(tab,id)
 
 oven.preloader("speak",id)
 
+	return t
 end
 
 --
