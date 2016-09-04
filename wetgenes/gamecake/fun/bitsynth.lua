@@ -79,6 +79,20 @@ bitsynth.note2freq=function(s,n)
 	return assert(bitsynth.note_freq[s][n]) -- check the range is ok as we return
 end
 
+-- also add quick lookups of notes to bitsynth globals
+
+bitsynth.fillnotes=function(t)
+	for n=1,12 do
+		for o=1,8 do
+			local s=bitsynth.note_names[n]..o
+			local f=bitsynth.note2freq(s)
+			t[s]=f
+			t[s:gsub("#","s")]=f -- also use H as # is a special symbol
+		end
+	end
+end
+
+bitsynth.fillnotes(bitsynth) -- we can now use bitsynth.C4 or bitsynth.CH4 which is easier than bitsynth["C#4"]
 
 
 -- repeating wave functions
@@ -143,12 +157,19 @@ end
 -- rt (release) is time to reach 0
 -- we feed these values into flinear and return the function,length
 bitsynth.fadsr=function(sv,at,dt,st,rt)
-	return bitsynth.flinear( 0,0, at,1, at+dt,sv, at+dt+st,sv, at+dt+st+rt,0 ),at+dt+st+rt
+	if type(sv)=="table" then sv,at,dt,st,rt=unpack(sv) end -- maybe unpack inputs from table
+	local t={0,0}
+	if at~=0 then t[#t+1]=at          t[#t+1]=1  end -- deal with 0 amounts of time
+	if dt~=0 then t[#t+1]=at+dt       t[#t+1]=sv end
+	if st~=0 then t[#t+1]=at+dt+st    t[#t+1]=sv end
+	if rt~=0 then t[#t+1]=at+dt+st+rt t[#t+1]=0  end
+	return bitsynth.flinear( unpack(t) ),at+dt+st+rt
 end
 
 
 -- turn a -1 +1 signal into a frequency signal -1==f1 0==f2 +1==f3
 bitsynth.freq_range=function(f1,f2,f3)
+	if type(f1)=="table" then f1,f2,f3=unpack(f1) end -- maybe unpack inputs from table
 	f1=bitsynth.note2freq(f1)
 	f2=bitsynth.note2freq(f2)
 	f3=bitsynth.note2freq(f3)
@@ -172,7 +193,7 @@ bitsynth.gwav=function(ot)
 
 	it.phase=ot.phase or 0 -- 0 to 1 starting phase of wave, this is auto adjusted as we change the frequency
 
-	it.frequency=bitsynth.note2freq("C4") -- default frequency of C4
+	it.frequency=bitsynth.C4 -- default frequency of C4
 	it.wavelength=bitsynth.samplerate/it.frequency -- and default wavelength
 
 -- adjust the frequency but keep the wave at a stable point.
@@ -191,7 +212,7 @@ bitsynth.gwav=function(ot)
 			while it.phase<0 do it.phase=it.phase+1 end -- make sure phase is not a negative value
 		end
 	end
-	it.set_frequency( bitsynth.note2freq(ot.frequency) or bitsynth.note2freq("C4") ) -- start at this frequency
+	it.set_frequency( bitsynth.note2freq(ot.frequency) or bitsynth.C4 ) -- start at this frequency
 
 -- read a sample, and advance the sample counter by one.
 	it.read=function()
@@ -211,14 +232,11 @@ bitsynth.sound={}
 bitsynth.sound.simple=function(ot)
 	local it={}
 	
+	it.func=ot.func or function(it,t) end
+
 	it.gwav=bitsynth.gwav(ot)
 
-	it.fadsr,it.seconds=bitsynth.fadsr(
-					ot.sustain_value or 0.70 ,
-					ot.attack_time   or 0.10 ,
-					ot.decay_time    or 0.10 ,
-					ot.sustain_time  or 1.70 ,
-					ot.release_time  or 0.10 )
+	it.fadsr,it.seconds=bitsynth.fadsr(ot.adsr)
 
 	it.samples=it.seconds*bitsynth.samplerate
 	it.sample=0
@@ -239,31 +257,29 @@ bitsynth.sound.fm_wav=function(ot)
 	ot.fm=ot.fm or {}
 	local it={}
 
+	it.func=ot.func or function(it,t) end
+
 	it.gwav=bitsynth.gwav(ot)
 
 	it.fm_gwav=bitsynth.gwav(ot.fm) -- another wave
-	it.fm_range=ot.fm.range or function(v,s) return v end
-	it.fm_fix=ot.fm.fix or function(v,s) return v end
+	it.fm_frange=ot.fm.frange or function(v,s) return v end
+	it.fm_ffix=ot.fm.ffix or function(v,s) return v end
 
-	if ot.fm.frequency_low and ot.fm.frequency_mid and ot.fm.frequency_high then
-		it.fm_range=bitsynth.freq_range(ot.fm.frequency_low, ot.fm.frequency_mid, ot.fm.frequency_high )
+	if ot.fm.range then
+		it.fm_frange=bitsynth.freq_range(ot.fm.range)
 	end
 
-	it.fadsr,it.seconds=bitsynth.fadsr(
-					ot.sustain_value or 1.00 ,
-					ot.attack_time   or 0.00 ,
-					ot.decay_time    or 0.00 ,
-					ot.sustain_time  or 0.00 ,
-					ot.release_time  or 0.00 )
+	it.fadsr,it.seconds=bitsynth.fadsr(ot.adsr)
 
 	it.samples=it.seconds*bitsynth.samplerate
 	it.sample=0
 
 	it.read=function()
-		local s=it.sample/bitsynth.samplerate
-		local e=it.fadsr(s)
+		local t=it.sample/bitsynth.samplerate
+		it.func(it,t)
+		local e=it.fadsr(t)
 		local m=it.fm_gwav.read()
-		it.gwav.set_frequency( it.fm_fix(it.fm_range(m,s),s) )
+		it.gwav.set_frequency( it.fm_ffix(it.fm_frange(m,t),t) )
 		local v=it.gwav.read()
 		it.sample=it.sample+1
 		return e*v

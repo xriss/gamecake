@@ -117,26 +117,26 @@ end
 
 
 --
--- pre bake some speech, and make it easy to lookup by the given ids
+-- load a generated sound, replace any other sound already loaded with this name
 --
 sounds.load_wavtab=function(tab,id,freq)
 
 	local t=sounds.get(id)
-	if t then return t end --first check it is not already loaded
+
+-- this is generated sounds so allow changes 
+--	if t then return t end --first check it is not already loaded
 	
-	t={}
+	t=t or {}
 	t.filename=tab
 	
 	t.loop=al.FALSE
 	
-	t.buff=al.GenBuffer()
+	t.buff=t.buff or al.GenBuffer()
 
 	local dat,len=wpack.save_array(tab,"s16")
 	al.BufferData(t.buff,al.FORMAT_MONO16,dat,len,freq or 261.626*8*8) -- C4 hopefully?
 	
 	sounds.set(t,id) -- remember
-
-oven.preloader("wavtab",id)
 
 	return t
 end
