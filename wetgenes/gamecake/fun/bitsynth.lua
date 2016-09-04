@@ -228,23 +228,28 @@ end
 -- generic sound types with a few options
 bitsynth.sound={}
 
--- most basic sound, nothing clever just a waveform and a volume envelop
+-- most basic sound, nothing clever just a waveform and a volume envelope
 bitsynth.sound.simple=function(ot)
 	local it={}
 	
-	it.func=ot.func or function(it,t) end
+	it.fread=ot.fread or function(it,t) end
 
 	it.gwav=bitsynth.gwav(ot)
 
-	it.fadsr,it.seconds=bitsynth.fadsr(ot.adsr)
+	it.fadsr,it.time=bitsynth.fadsr(ot.adsr)
 
-	it.samples=it.seconds*bitsynth.samplerate
+	it.samples=it.time*bitsynth.samplerate
 	it.sample=0
 	it.read=function()
-		local e=it.fadsr(it.sample/bitsynth.samplerate)
-		local v=it.gwav.read()
+		local t=it.sample/bitsynth.samplerate
+
+		it.fread(it,t) -- main callback can change settings by time
+		
+		local e=it.fadsr(t) -- envelope
+		local w=it.gwav.read() -- waveform
+
 		it.sample=it.sample+1
-		return e*v
+		return e*w
 	end
 
 	it.rewind=function() it.sample=0 end
@@ -253,39 +258,31 @@ bitsynth.sound.simple=function(ot)
 end
 
 -- a simple sound, with its frequency messed with
-bitsynth.sound.fm_wav=function(ot)
-	ot.fm=ot.fm or {}
-	local it={}
+bitsynth.sound.simple_fm=function(ot)
 
-	it.func=ot.func or function(it,t) end
-
-	it.gwav=bitsynth.gwav(ot)
+	assert(type(ot.fm)=="table") -- this must be a table
+	
+	local it=bitsynth.sound.simple(ot) -- build on top of the simple code
 
 	it.fm_gwav=bitsynth.gwav(ot.fm) -- another wave
-	it.fm_frange=ot.fm.frange or function(v,s) return v end
-	it.fm_ffix=ot.fm.ffix or function(v,s) return v end
+	it.fm_frange=ot.fm.frange or function(v,s) return v end -- auto warble between given notes
 
-	if ot.fm.range then
-		it.fm_frange=bitsynth.freq_range(ot.fm.range)
-	end
-
-	it.fadsr,it.seconds=bitsynth.fadsr(ot.adsr)
-
-	it.samples=it.seconds*bitsynth.samplerate
-	it.sample=0
+	if ot.fm.range then it.fm_frange=bitsynth.freq_range(ot.fm.range) end
 
 	it.read=function()
 		local t=it.sample/bitsynth.samplerate
-		it.func(it,t)
-		local e=it.fadsr(t)
-		local m=it.fm_gwav.read()
-		it.gwav.set_frequency( it.fm_ffix(it.fm_frange(m,t),t) )
-		local v=it.gwav.read()
-		it.sample=it.sample+1
-		return e*v
-	end
+		
+		it.fread(it,t) -- main callback can change settings by time
 
-	it.rewind=function() it.sample=0 end
+		local m=it.fm_gwav.read() -- get the modulation value
+		it.gwav.set_frequency( it.fm_frange(m,t) ) -- apply it to the main frequency
+
+		local e=it.fadsr(t) -- envelope
+		local w=it.gwav.read() -- waveform
+
+		it.sample=it.sample+1
+		return e*w
+	end
 	
 	return it
 end
