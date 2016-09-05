@@ -31,10 +31,11 @@
 --
 -- https://bitbucket.org/xixs/bin/src/tip/lua/wetgenes/tardis.lua
 --
--- This also needs to be overloaded with a float based C version
--- Which does partially exist but is only used in the GLES lib so far
--- This is now done, but probably should be an optional action.
--- Assuming I havent borked anything I can now improve the C side speed.
+-- Some of the Lua code here is overloaded with a float based C version, 
+-- possibly faster, possibly slower? use DISABLE_WETGENES_TARDIS_CORE 
+-- before requiring this file to turn it on or off.
+--
+-- With DISABLE_WETGENES_TARDIS_CORE set this is a pure Lua library
 --
 -- This seems to be the simplest (programmer orientated) description of
 -- most of the maths used here so go read it
@@ -331,7 +332,9 @@ end
 function m4.identity(it)
 	return it:set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1)
 end
-function m4.translate(it,v3a,r)
+function m4.translate(it,a,b,c,d) -- (it,v3a,r) or (it,x,y,z,r)
+	local v3a,r
+	if type(a)~="number" then v3a=M.v3.new(a,b,c) r=d else v3a=a r=b end
 	r=r or it
 	local r1=it[12+1]+v3a[1]*it[1]+v3a[2]*it[5]+v3a[3]*it[9]
 	local r2=it[12+2]+v3a[1]*it[2]+v3a[2]*it[6]+v3a[3]*it[10]
@@ -340,7 +343,9 @@ function m4.translate(it,v3a,r)
 	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,r4 )
 end
 
-function m4.scale_v3(it,v3a,r)
+function m4.scale_v3(it,a,b,c,d)
+	local v3a,r
+	if type(a)~="number" then v3a=M.v3.new(a,b,c) r=d else v3a=a r=b end
 	r=r or it
 	local s1=v3a[1]
 	local s2=v3a[2]
@@ -680,10 +685,9 @@ function M.m4_project23d(view_width,view_height,width,height,fov,depth)
 end
 
 
-if  DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first use to disable use of tardis f32 core
+if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first use to disable use of tardis f32 core
 --upgrade the above to hopefully faster C versions working on userdata arrays of floats
 local tcore=require("wetgenes.tardis.core") -- use a "faster?" f32 C core
---tcore=nil
 if tcore then
 
 	-- allow read/write with magical [] lookups
@@ -751,38 +755,3 @@ if tcore then
 
 end
 end
-
-
---[[
-local wstr=require("wetgenes.string")
-print("test")
-print("v4",wstr.dump(v4))
-print("v4.set",wstr.dump(v4.set))
-local t=tcore.alloc(4* 4,v4)
-print("v4.set",wstr.dump(t.set))
---print("v4",wstr.dump(tcore.alloc(4* 4,v4)))
-
-local v=v4.new()--:indentity()
-print("m4",v)
-
-local m=m4.new()--:indentity()
-print("m4",m)
-m:identity()
-print("m4",m)
-m:scale_v3({2,2,2})
-print("m4",m)
-m:translate({2,2,2})
-print("m4",m)
-
-
-print("test")
-local m=m2.new()--:indentity()
-print("m2",m)
-m:identity()
-print("m2",m)
-m:scale(2)
-print("m2",m)
-
-os.exit(0)
-]]
-

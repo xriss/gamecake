@@ -67,7 +67,7 @@ function wmeta.setup(def)
 		
 		if widget.pan_px and widget.pan_py then -- fidle everything
 --print("build",widget.pan_px,widget.pan_py)
-			m4:translate(widget.pan_px,widget.pan_py,0)
+			m4:translate({widget.pan_px,widget.pan_py,0})
 		end
 
 		widget.m4:product(m4,widget.m4)
