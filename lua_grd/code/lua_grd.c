@@ -32,7 +32,7 @@ part_ptr *lua_grd_get_ptr (lua_State *l, int idx)
 {
 part_ptr *p=0;
 
-	p = ((part_ptr *)luaL_checkudata(l, idx , lua_grd_ptr_name));
+	p = ((part_ptr *)luaL_testudata(l, idx , lua_grd_ptr_name));
 
 	return p;
 }
@@ -47,7 +47,7 @@ part_ptr lua_grd_check_ptr (lua_State *l, int idx)
 {
 part_ptr *p=lua_grd_get_ptr(l,idx);
 
-	if (*p == 0)
+	if( (p == 0) || (*p == 0) )
 	{
 		luaL_error(l, "bad grd userdata" );
 	}
@@ -141,12 +141,14 @@ int lua_grd_destroy_idx (lua_State *l, int idx)
 {
 part_ptr *p=lua_grd_get_ptr(l,idx);
 
-	if(*p)
+	if(p)
 	{
-		grd_free(*p);
+		if(*p)
+		{
+			grd_free(*p);
+		}
+		(*p)=0;
 	}
-	(*p)=0;
-
 	return 0;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -173,6 +175,7 @@ part_ptr new_p;
 	new_p=0;
 	
 	p=lua_grd_get_ptr(l,1);
+	if(!p) { lua_grd_check_ptr(l,1); } // force error
 
 	if(lua_isnoneornil(l,1)) // just clear what we have
 	{
@@ -224,7 +227,7 @@ s32 fmt=0;
 	new_p=0;
 
 	p=lua_grd_get_ptr(l,1);
-
+	if(!p) { lua_grd_check_ptr(l,1); } // force error
 
 
 	if(! lua_istable(l,2) )
@@ -1323,6 +1326,52 @@ struct grd_info gb[1];
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// a grd version of lua_grd_pix for when you dont want to deal with writing string data :)
+// you can not read with this format, just write one grd into another
+// use clip to limit the source grd if you dont want all of it
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_pix_grd(lua_State *l , struct grd_info *src , struct grd_info *dst , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
+{
+
+s32 xi,yi,zi;
+s32 xscan;
+
+// sanity clipping, so we don't trash random memory super easily.
+
+	if(x<0)			{	x=0;			} // clip position in destination
+	if(x>dst->w-1)	{	x=dst->w-1;		}
+	if(y<0)			{	y=0;			}
+	if(y>dst->h-1)	{	y=dst->h-1;		}
+	if(z<0)			{	z=0;			}
+	if(z>dst->d-1)	{	z=dst->d-1;		}
+
+	if(x+w>dst->w)	{	w=dst->w-x;		} // clip size to destination
+	if(y+h>dst->h)	{	h=dst->h-y;		}
+	if(z+d>dst->d)	{	d=dst->d-z;		}
+
+	if(w>src->w)	{	w=src->w-x;		} // clip size to source 
+	if(h>src->h)	{	h=src->h-y;		}
+	if(d>src->d)	{	d=src->d-z;		}
+	
+	xscan=dst->xscan; // prefer destination xscan0
+	if( xscan>src->xscan ) { xscan=src->xscan; } // but also clip so we don't read from bad memory
+
+	for( zi=0 ; zi<d ; zi++ )
+	{
+		for( yi=0 ; yi<h ; yi++ )
+		{
+			memcpy(
+				grdinfo_get_data(dst,x,y+yi,z+zi), // dst
+				grdinfo_get_data(src,0,yi,zi), // src
+				w*xscan); // xscan deals with all formats
+		}
+	}
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // return palette in a table
 //
 // possibly requests are
@@ -1348,10 +1397,6 @@ s32 w;
 	x=(s32)lua_tonumber(l,2);
 	w= (s32)lua_tonumber(l,3);
 
-	if(x<0)			{	luaL_error(l, "x<0" );		}
-	if(x>grd->w-1)	{	luaL_error(l, "x>width" );	}
-	if(x+w>grd->w)	{	luaL_error(l, "w>width" );	}
-
 	if(lua_istable(l,4))
 	{
 		lua_grd_pix(l,4,grd,x,0,0,w,1,1);
@@ -1361,6 +1406,11 @@ s32 w;
 	if(lua_isstring(l,4))
 	{
 		return lua_grd_pix_str(l,4,grd,x,0,0,w,1,1);
+	}
+	else
+	if(lua_grd_get_ptr(l,4))
+	{
+		return lua_grd_pix_grd(l,lua_grd_check_ptr(l,4)->cmap,grd,x,0,0,w,1,1);
 	}
 	else
 	{
@@ -1408,7 +1458,7 @@ s32 tab_idx;
 		w=(s32)lua_tonumber(l,5);
 		h=(s32)lua_tonumber(l,6);
 		d=(s32)lua_tonumber(l,7);
-		if( lua_istable(l,8) || lua_isstring(l,8) ) { tab_idx=8; }
+		if( lua_istable(l,8) || lua_isstring(l,8) || lua_grd_get_ptr(l,8) ) { tab_idx=8; }
 	}
 	else
 	if( lua_isnumber(l,5) )
@@ -1420,7 +1470,7 @@ s32 tab_idx;
 		w=(s32)lua_tonumber(l,4);
 		h=(s32)lua_tonumber(l,5);
 		d=1;
-		if( lua_istable(l,6) || lua_isstring(l,6) ) { tab_idx=6; }
+		if( lua_istable(l,6) || lua_isstring(l,6) || lua_grd_get_ptr(l,6) ) { tab_idx=6; }
 	}
 	else
 	{
@@ -1431,28 +1481,18 @@ s32 tab_idx;
 		w=1;
 		h=1;
 		d=1;
-		if( lua_istable(l,4) || lua_isstring(l,4) ) { tab_idx=4; }
+		if( lua_istable(l,4) || lua_isstring(l,4) || lua_grd_get_ptr(l,4) ) { tab_idx=4; }
 	}
-
-
-// error on out of range
-
-
-	if(x<0)			{	luaL_error(l, "x<0" );		}
-	if(x>grd->w-1)	{	luaL_error(l, "x>width" );	}
-	if(y<0)			{	luaL_error(l, "y<0" );		}
-	if(y>grd->h-1)	{	luaL_error(l, "y>height" );	}
-	if(z<0)			{	luaL_error(l, "z<0" );		}
-	if(z>grd->d-1)	{	luaL_error(l, "z>depth" );	}
-
-	if(x+w>grd->w)	{	luaL_error(l, "w>width" );	}
-	if(y+h>grd->h)	{	luaL_error(l, "h>height" );	}
-	if(z+d>grd->d)	{	luaL_error(l, "d>depth" );	}
 
 
 	if( (tab_idx>0) && lua_isstring(l,tab_idx) )
 	{
 		return lua_grd_pix_str(l,tab_idx,grd,x,y,z,w,h,d);
+	}
+	else
+	if( (tab_idx>0) && lua_grd_get_ptr(l,tab_idx) )
+	{
+		return lua_grd_pix_grd(l,lua_grd_check_ptr(l,tab_idx)->bmap,grd,x,y,z,w,h,d);
 	}
 	else
 	{
