@@ -647,7 +647,6 @@ Read the area of pixels as a string of byte values, the amount of bytes
 you get per pixel *depends* on the format of the grd. Note the passing 
 in of an empty string to indicate that you with to receive a string.
 
-
 	g:pixels(x,y,w,h,tab)
 	g:pixels(x,y,z,w,h,d,tab)
 
@@ -662,6 +661,12 @@ Write the area of pixels from a string of bytes which is provided in
 str, the amount of bytes you need to provide per pixel *depends* on the 
 format of the grd.
 
+	g:pixels(x,y,w,h,grd)
+	g:pixels(x,y,z,w,h,d,grd)
+
+Write the area of pixels from a grd which is provided in grd. use 
+clip/layer functions to select a portion of a larger grd.
+
 As you can see depending on the arguments given this does one of two 
 things, read some pixels or write some pixels. The area that is to be 
 used is provided first, as a 2d(x,y,w,h) or 3d(x,y,z,w,h,d) area. To 
@@ -673,7 +678,10 @@ otherwise returns the requested data.
 
 ]]
 base.pixels=function(g,...)
-	local r=core.pixels(g[0],...)
+	local a={...}
+	local la=#a
+	if type(a[la])=="table" and type(a[la][0])=="userdata" then a[la]=a[la][0] end -- get the grd userdata
+	local r=core.pixels(g[0],unpack(a))
 	core.info(g[0],g)
 	return r
 end
@@ -684,6 +692,7 @@ end
 	g:palette(x,w,"")
 	g:palette(x,w,tab)
 	g:palette(x,w,str)
+	g:palette(x,w,grd)
 
 These are the same as g:pixels() but refer to the palette information 
 which is stored as a 1 pixel high 256 pixel wide rgba image. The use of 
@@ -693,8 +702,11 @@ as used with pixels.
 
 ]]
 base.palette=function(g,...)
+	local a={...}
+	local la=#a
+	if type(a[la])=="table" and type(a[la][0])=="userdata" then a[la]=a[la][0] end -- get the grd userdata
 	if not g.cmap then return nil end
-	local r=core.palette(g[0],...)
+	local r=core.palette(g[0],unpack(a))
 	core.info(g[0],g)
 	return r
 end

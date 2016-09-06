@@ -6,6 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- Main Good Luck Have Fun system virtual machine management.
 
 
+local wgrd =require("wetgenes.grd")
 local wsandbox=require("wetgenes.sandbox")
 local wzips=require("wetgenes.zips")
 
@@ -39,14 +40,19 @@ system.resume=function(need)
 	end
 end
 
-
 system.load_and_setup=function(name,path)
-
+	
 	name=assert(name or oven.opts.fun)
 	path=path or ""
-	local lua=assert(wzips.readfile(path..name..".fun.lua"),"file not found: "..path..name..".fun.lua")
-	local glsl=wzips.readfile(path..name..".fun.glsl")
-	if glsl then gl.shader_sources( glsl , path..name..".fun.glsl" ) end
+
+-- remember source text
+	system.source_filename=path..name
+	system.source={}
+	system.source.glsl=wzips.readfile(system.source_filename..".fun.glsl")
+	system.source.lua=wzips.readfile(system.source_filename..".fun.lua")
+
+	local lua=assert(system.source.lua,"file not found: "..system.source_filename..".fun.lua")
+	if system.source.glsl then gl.shader_sources( system.source.glsl , system.source_filename..".fun.glsl" ) end
 	system.setup(lua)
 
 	return system
@@ -133,6 +139,9 @@ print("system setup")
 
 	system.resume({setup=true})
 
+--hax
+--	system.save_fun_png()
+
 	return system
 end
 
@@ -194,6 +203,76 @@ system.draw=function()
 	screen.draw_fbo()
 
 end
+
+-- try and turn textfiles and memory into a fun.png format image
+-- this may include the graphics twice once in the png, once in the source
+-- but should look like the final plan we have for .fun.png files 
+system.save_fun_png=function(name,path)
+
+	local its={}
+
+-- find grds
+	for n,it in ipairs(system.components) do
+		local t
+		if it.bitmap_grd then
+			t=t or {}
+			t.component=it
+			t.grd=it.bitmap_grd
+		end
+		if it.tilemap_grd then
+			t=t or {}
+			t.component=it
+			t.grd=it.tilemap_grd
+		end
+		if t then
+			its[#its+1]=t
+		end
+	end
+
+-- sort largest grds first
+	table.sort(its,function(a,b)
+		if a.grd.width == b.grd.width then return a.grd.height > b.grd.height end
+		return a.grd.width > b.grd.width
+	end)
+
+	local bb=8
+	local ax,ay,bx,by=0,0,0,0 -- dumb layout code points
+	for i,it in ipairs(its) do
+		it.hx=it.grd.width
+		it.hy=it.grd.height
+		if ay+it.hy > by then -- start a new row
+			ay=by
+			ax=0 -- reset
+			it.px=ax+bb
+			it.py=ay+bb
+			bx=ax+bb+it.hx
+			by=ay+bb+it.hy
+			ax=bx -- place next grd to right
+		else -- add to right of current row
+			it.px=ax+bb
+			it.py=ay+bb
+			ay=ay+bb+it.hy
+		end
+	end
+
+-- debug
+	local hx,hy=0,0
+	for i,it in ipairs(its) do
+		if it.px+it.hx+bb > hx then hx=it.px+it.hx+bb end
+		if it.py+it.hy+bb > hy then hy=it.py+it.hy+bb end
+	end
+	print(0,0,0,hx,hy,"BITMAP")
+	local g=wgrd.create("U8_RGBA", hx , hy , 1)
+
+	for i,it in ipairs(its) do
+		g:pixels(it.px,it.py,it.hx,it.hy, it.grd )
+		print(i,it.px,it.py,it.hx,it.hy,it.component.name)
+	end
+	
+	g:save(system.source_filename..".fun.png")
+
+end
+
 
 	return system
 end
