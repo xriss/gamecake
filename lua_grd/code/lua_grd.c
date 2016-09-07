@@ -1708,6 +1708,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 
 // simple API (hack) to stream gif animations one frame at a time
 // don't use. may break any time now :)
+// GIFs are so slow anyhow, just ended up using a series of PNG files...
 		{"stream_open",		lua_grd_stream_open},
 		{"stream_write",	lua_grd_stream_write},
 		{"stream_close",	lua_grd_stream_close},
