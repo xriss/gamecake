@@ -84,8 +84,8 @@ tiles.create=function(it,opts)
 			gl.UNSIGNED_BYTE,
 			it.bitmap_grd.data )
 
-	end
-
+	end	
+	
 	return it
 end
 

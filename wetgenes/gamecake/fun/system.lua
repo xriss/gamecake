@@ -9,7 +9,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local wgrd =require("wetgenes.grd")
 local wsandbox=require("wetgenes.sandbox")
 local wzips=require("wetgenes.zips")
-
+local bitdown=require("wetgenes.gamecake.fun.bitdown")
+local wjson=require("wetgenes.json")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -196,8 +197,6 @@ system.draw=function()
 	for _,it in ipairs(system.components) do
 		if it.draw then it.draw() end
 	end
-	
---	system.components.copper.draw()
 
 	screen.draw_into_finish()
 	screen.draw_fbo()
@@ -208,6 +207,7 @@ end
 -- this may include the graphics twice once in the png, once in the source
 -- but should look like the final plan we have for .fun.png files 
 system.save_fun_png=function(name,path)
+
 
 	local its={}
 
@@ -255,19 +255,87 @@ system.save_fun_png=function(name,path)
 		end
 	end
 
--- debug
+-- work out size of output image
 	local hx,hy=0,0
 	for i,it in ipairs(its) do
 		if it.px+it.hx+bb > hx then hx=it.px+it.hx+bb end
 		if it.py+it.hy+bb > hy then hy=it.py+it.hy+bb end
 	end
-	print(0,0,0,hx,hy,"BITMAP")
-	local g=wgrd.create("U8_RGBA", hx , hy , 1)
+	if hx<64 then hx=64 end -- minimum width so data can encode
 
+-- build data string that we will encode into the bottom of the image
+	local data={}
+	data.source=system.source
+	data.images={}
+	for i,it in ipairs(its) do
+		local t={}
+		t.px=it.px
+		t.py=it.py
+		t.hx=it.hx
+		t.hy=it.hy
+		t.name=it.component.name
+		data.images[#data.images+1]=t
+	end
+	local dstr=wjson.encode(data)
+
+	local dsize=#dstr+12 -- header size is 12
+	local dh=math.ceil(dsize/(hx*4))
+	
+	print(0,0,0,hx,hy,"BITMAP")
+	print(0,0,0,hx,dh,"DATA",dsize)
+	
+	local g=wgrd.create("U8_RGBA", hx , hy+dh , 1)
+	g:clear(0xff000000) -- start with a solid black
+
+	-- add data at bottom of image, filling upwards
+
+-- s32 to 4 byte string
+	local s32_to_string=function(n)
+		local a=string.char(bit.band(n/0x01000000,0xff))
+		local b=string.char(bit.band(n/0x010000,0xff))
+		local c=string.char(bit.band(n/0x0100,0xff))
+		local d=string.char(bit.band(n,0xff))
+		return d..c..b..a
+	end
+	
+	local doff=0 -- data offset
+	for i=1,dh do
+		local d
+		if i==1 then -- add a header then start the string
+			d="FUN\0"..s32_to_string(0)..s32_to_string(dsize)..dstr:sub(doff+1,doff+(hx*4)+1-12)
+			doff=doff+(hx*4)-12
+		else
+			d=dstr:sub(doff+1,doff+(hx*4)+1) -- the last line will automatically be shorter if needed
+			doff=doff+(hx*4)
+			if i==dh then d=d..(("\0\0\0\0"):rep(hx)) end -- padding of final line
+		end
+		g:pixels(0,hy+dh-i,hx,1, d )
+	end
+
+	-- add each component ( some pixels will now be transparent
 	for i,it in ipairs(its) do
 		g:pixels(it.px,it.py,it.hx,it.hy, it.grd )
 		print(i,it.px,it.py,it.hx,it.hy,it.component.name)
 	end
+
+	-- with a lighter core
+	for i,it in ipairs(its) do		
+		g:clip( it.px-5       , it.py-5       , 0 , 2        , it.hy+10 , 1 ):clear(0xff444444)
+		g:clip( it.px-5       , it.py-5       , 0 , it.hx+10 , 2        , 1 ):clear(0xff444444)
+		g:clip( it.px+it.hx+3 , it.py-5       , 0 , 2        , it.hy+10 , 1 ):clear(0xff444444)
+		g:clip( it.px-5       , it.py+it.hy+3 , 0 , it.hx+10 , 2        , 1 ):clear(0xff444444)
+
+	end
+
+-- draw title
+	local font=bitdown.setup_blit_font()
+	for i,it in ipairs(its) do
+		local s=it.component.name:upper()
+		s=s:sub(1,math.floor(it.hx/4)) -- fit into box
+		font.draw(g,it.px,it.py-8,s)
+	end
+
+
 	
 	g:save(system.source_filename..".fun.png")
 

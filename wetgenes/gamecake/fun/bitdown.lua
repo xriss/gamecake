@@ -305,3 +305,29 @@ end
 	
 M.map_bgra_premultiply(M.map)
 
+
+-- a simple way of writing some text directly into a bitmap
+M.setup_blit_font=function(g,w,h)
+	local it={}
+	
+	if not g then -- build a 4x8 font
+		w=4 h=8
+		g=require("wetgenes.gamecake.fun.bitdown_font_4x8").grd_mask
+	end
+	
+	it.grd=g
+	it.w=w
+	it.h=h
+
+	it.draw=function(dest,x,y,s) -- blit some text at this location
+
+		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
+			dest:blit(it.grd,x,y,(c:byte()%128)*it.w,0,it.w,it.h)
+			x=x+it.w
+		end
+
+	end
+	
+	return it
+end
+
