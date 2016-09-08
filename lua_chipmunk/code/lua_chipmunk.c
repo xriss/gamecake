@@ -13,6 +13,7 @@
 const char *lua_chipmunk_space_meta_name="chipmunk_space*ptr";
 const char *lua_chipmunk_body_meta_name ="chipmunk_body*ptr";
 const char *lua_chipmunk_shape_meta_name="chipmunk_shape*ptr";
+const char *lua_chipmunk_constraint_meta_name="chipmunk_constraint*ptr";
 
 
 
@@ -270,6 +271,188 @@ cpShape **pp=lua_chipmunk_shape_ptr_ptr(l, 1 );
 static int lua_chipmunk_shape_lookup (lua_State *l)
 {	
 cpShape *p=lua_chipmunk_shape_ptr(l, 1 );
+	if( lua_isboolean(l,3) ) // forget
+	{
+		lua_pushlightuserdata(l,p);
+		lua_pushnil(l);
+		lua_settable(l,2);		
+	}
+	else
+	if( lua_istable(l,3) ) // remember
+	{
+		lua_pushlightuserdata(l,p);
+		lua_pushvalue(l,3);
+		lua_settable(l,2);
+	}
+
+	lua_pushlightuserdata(l,p);
+	lua_gettable(l,2);
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// constraint create/destroy
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+cpConstraint ** lua_chipmunk_constraint_ptr_ptr (lua_State *l,int idx)
+{
+cpConstraint **pp;
+	pp=(cpConstraint**)luaL_checkudata(l, idx , lua_chipmunk_constraint_meta_name);
+	return pp;
+}
+
+cpConstraint *  lua_chipmunk_constraint_ptr (lua_State *l,int idx)
+{
+cpConstraint **pp;
+	pp=lua_chipmunk_constraint_ptr_ptr(l,idx);
+	if(!*pp) { luaL_error(l,"chipmunk constraint is null"); }
+	return *pp;
+}
+
+static int lua_chipmunk_constraint_create (lua_State *l)
+{
+const char *tp;
+cpConstraint **pp;
+cpBody *abody;
+cpBody *bbody;
+double ax,ay,bx,by,cx,cy;
+double fa,fl,fh,fs,fd,fp,fr;
+// create ptr ptr userdata
+	pp=(cpConstraint**)lua_newuserdata(l, sizeof(cpConstraint*));
+	(*pp)=0;
+	luaL_getmetatable(l, lua_chipmunk_constraint_meta_name);
+	lua_setmetatable(l, -2);
+
+// allocate cpConstraint
+		abody=lua_chipmunk_body_ptr(l,1);
+		tp=luaL_checkstring(l,2);
+		if(0==strcmp(tp,"pin_joint"))
+		{
+			bbody=lua_chipmunk_body_ptr(l,3);
+			ax=luaL_checknumber(l,4);
+			ay=luaL_checknumber(l,5);
+			bx=luaL_checknumber(l,6);
+			by=luaL_checknumber(l,7);
+			*pp=cpPinJointNew(abody,bbody,cpv(ax,ay),cpv(bx,by));
+		}
+		else
+		if(0==strcmp(tp,"slide_joint"))
+		{
+			bbody=lua_chipmunk_body_ptr(l,3);
+			ax=luaL_checknumber(l,4);
+			ay=luaL_checknumber(l,5);
+			bx=luaL_checknumber(l,6);
+			by=luaL_checknumber(l,7);
+			fl=luaL_checknumber(l,8);
+			fh=luaL_checknumber(l,9);
+			*pp=cpSlideJointNew(abody,bbody,cpv(ax,ay),cpv(bx,by),fl,fh);
+		}
+		else
+		if(0==strcmp(tp,"pivot_joint"))
+		{
+			bbody=lua_chipmunk_body_ptr(l,3);
+			ax=luaL_checknumber(l,4);
+			ay=luaL_checknumber(l,5);
+			if(lua_isnumber(l,6)) // we have two local space pos
+			{
+				bx=luaL_checknumber(l,6);
+				by=luaL_checknumber(l,7);
+				*pp=cpPivotJointNew2(abody,bbody,cpv(ax,ay),cpv(bx,by));
+			}
+			else // we have 1 world space pos (will be converted to local for both both bodies)
+			{
+				*pp=cpPivotJointNew(abody,bbody,cpv(ax,ay));
+			}
+		}
+		else
+		if(0==strcmp(tp,"groove_joint"))
+		{
+			bbody=lua_chipmunk_body_ptr(l,3);
+			ax=luaL_checknumber(l,4);
+			ay=luaL_checknumber(l,5);
+			bx=luaL_checknumber(l,6);
+			by=luaL_checknumber(l,7);
+			cx=luaL_checknumber(l,8);
+			cy=luaL_checknumber(l,9);
+			*pp=cpGrooveJointNew(abody,bbody,cpv(ax,ay),cpv(bx,by),cpv(cx,cy));
+		}
+		else
+		if(0==strcmp(tp,"damped_spring"))
+		{
+			bbody=lua_chipmunk_body_ptr(l,3);
+			ax=luaL_checknumber(l,4);
+			ay=luaL_checknumber(l,5);
+			bx=luaL_checknumber(l,6);
+			by=luaL_checknumber(l,7);
+			fl=luaL_checknumber(l,8);
+			fs=luaL_checknumber(l,9);
+			fd=luaL_checknumber(l,10);
+			*pp=cpDampedSpringNew(abody,bbody,cpv(ax,ay),cpv(bx,by),fl,fs,fd);
+		}
+		else
+		if(0==strcmp(tp,"damped_rotary_spring"))
+		{
+			bbody=lua_chipmunk_body_ptr(l,3);
+			fa=luaL_checknumber(l,4);
+			fs=luaL_checknumber(l,5);
+			fd=luaL_checknumber(l,6);
+			*pp=cpDampedRotarySpringNew(abody,bbody,fa,fs,fd);
+		}
+		else
+		if(0==strcmp(tp,"rotary_limit_joint"))
+		{
+			bbody=lua_chipmunk_body_ptr(l,3);
+			fl=luaL_checknumber(l,4);
+			fh=luaL_checknumber(l,5);
+			*pp=cpRotaryLimitJointNew(abody,bbody,fl,fh);
+		}
+		else
+		if(0==strcmp(tp,"ratchet_joint"))
+		{
+			bbody=lua_chipmunk_body_ptr(l,3);
+			fp=luaL_checknumber(l,4);
+			fr=luaL_checknumber(l,5);
+			*pp=cpRatchetJointNew(abody,bbody,fp,fr);
+		}
+		else
+		if(0==strcmp(tp,"gear_joint"))
+		{
+			bbody=lua_chipmunk_body_ptr(l,3);
+			fp=luaL_checknumber(l,4);
+			fr=luaL_checknumber(l,5);
+			*pp=cpGearJointNew(abody,bbody,fp,fr);
+		}
+		else
+		if(0==strcmp(tp,"simple_motor"))
+		{
+			bbody=lua_chipmunk_body_ptr(l,3);
+			fr=luaL_checknumber(l,4);
+			*pp=cpSimpleMotorNew(abody,bbody,fr);
+		}
+		else
+		{
+			lua_pushstring(l,"unknown constraint type"); lua_error(l);
+		}
+
+	return 1;
+}
+
+static int lua_chipmunk_constraint_destroy (lua_State *l)
+{	
+cpConstraint **pp=lua_chipmunk_constraint_ptr_ptr(l, 1 );
+	if(*pp)
+	{
+		cpConstraintFree(*pp);
+		(*pp)=0;
+	}	
+	return 0;
+}
+
+static int lua_chipmunk_constraint_lookup (lua_State *l)
+{
+cpConstraint *p=lua_chipmunk_constraint_ptr(l, 1 );
 	if( lua_isboolean(l,3) ) // forget
 	{
 		lua_pushlightuserdata(l,p);
@@ -985,8 +1168,9 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"shape_destroy",					lua_chipmunk_shape_destroy},
 		{"shape_lookup",					lua_chipmunk_shape_lookup},
 
-//		{"constraint_create",				lua_chipmunk_constraint_create},
-//		{"constraint_destroy",				lua_chipmunk_constraint_destroy},
+		{"constraint_create",				lua_chipmunk_constraint_create},
+		{"constraint_destroy",				lua_chipmunk_constraint_destroy},
+		{"constraint_lookup",				lua_chipmunk_constraint_lookup},
 
 		{"space_add_handler",				lua_chipmunk_space_add_handler},
 
@@ -1066,6 +1250,12 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{0,0}
 	};
 
+	const luaL_reg constraint_shape[] =
+	{
+		{"__gc",			lua_chipmunk_constraint_destroy},
+		{0,0}
+	};
+
 	luaL_newmetatable(l, lua_chipmunk_space_meta_name);
 	luaL_openlib(l, NULL, meta_space, 0);
 	lua_pop(l,1);
@@ -1076,6 +1266,10 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		
 	luaL_newmetatable(l, lua_chipmunk_shape_meta_name);
 	luaL_openlib(l, NULL, meta_shape, 0);
+	lua_pop(l,1);
+
+	luaL_newmetatable(l, lua_chipmunk_constraint_meta_name);
+	luaL_openlib(l, NULL, constraint_shape, 0);
 	lua_pop(l,1);
 
 	lua_newtable(l);
