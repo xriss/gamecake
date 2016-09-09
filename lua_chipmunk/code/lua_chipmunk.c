@@ -1250,6 +1250,52 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,2);
 	return 1;
 }
 
+/*+-----------------------------------------------------------------1------------------------------------------------+*/
+//
+// space add constraint
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_add_constraint (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,2);
+
+	cpSpaceAddConstraint(space,constraint);
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// space remove constraint
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_remove_constraint (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,2);
+
+	cpSpaceRemoveConstraint(space,constraint);
+
+	return 0;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// space contains constraint
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_space_contains_constraint (lua_State *l)
+{	
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,2);
+
+	lua_pushboolean(l,cpSpaceContainsConstraint(space,constraint));
+
+	return 1;
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1285,16 +1331,14 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"space_remove_shape",				lua_chipmunk_space_remove_shape},
 		{"space_contains_shape",			lua_chipmunk_space_contains_shape},
 		
-//		{"space_add_constraint",			lua_chipmunk_space_add_constraint},
-//		{"space_remove_constraint",			lua_chipmunk_space_remove_constraint},
-//		{"space_contains_constraint",		lua_chipmunk_space_contains_constraint},
+		{"space_add_constraint",			lua_chipmunk_space_add_constraint},
+		{"space_remove_constraint",			lua_chipmunk_space_remove_constraint},
+		{"space_contains_constraint",		lua_chipmunk_space_contains_constraint},
 
 //		{"space_reindex_shape",				lua_chipmunk_space_reindex_shape},
 //		{"space_reindex_shapes_for_body",	lua_chipmunk_space_reindex_shapes_for_body},
 //		{"space_reindex_static",			lua_chipmunk_space_reindex_static},
 		{"space_step",						lua_chipmunk_space_step},
-
-//getset
 		{"space_iterations",				lua_chipmunk_space_iterations},
 		{"space_gravity",					lua_chipmunk_space_gravity},
 		{"space_damping",					lua_chipmunk_space_damping},
