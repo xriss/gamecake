@@ -60,15 +60,19 @@ end
 
 --[[#wetgenes.chipmunk.body
 
-	body=chipmunk.body("kinematic")
 	body=chipmunk.body(mass,inertia)
 
-Create a kinematic body, with the given mass and inertia.
+Create a dynamic body, with the given mass and inertia.
 
 You will need to add the body to a space before it exists so it is 
 normally preferable to use the space:body function which will call this 
 function and then automatically add the body into the space.
 
+	body=chipmunk.body("kinematic")
+
+Create a kinematic body, these are bodies that we can move around, by 
+setting its velocity, but are not effected by collisions with other 
+bodies. EG a moving platform.
 
 	body=chipmunk.body("static")
 
