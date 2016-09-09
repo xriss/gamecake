@@ -327,10 +327,10 @@ double fa,fl,fh,fs,fd,fp,fr;
 
 // allocate cpConstraint
 		abody=lua_chipmunk_body_ptr(l,1);
-		tp=luaL_checkstring(l,2);
+		bbody=lua_chipmunk_body_ptr(l,2);
+		tp=luaL_checkstring(l,3);
 		if(0==strcmp(tp,"pin_joint"))
 		{
-			bbody=lua_chipmunk_body_ptr(l,3);
 			ax=luaL_checknumber(l,4);
 			ay=luaL_checknumber(l,5);
 			bx=luaL_checknumber(l,6);
@@ -340,7 +340,6 @@ double fa,fl,fh,fs,fd,fp,fr;
 		else
 		if(0==strcmp(tp,"slide_joint"))
 		{
-			bbody=lua_chipmunk_body_ptr(l,3);
 			ax=luaL_checknumber(l,4);
 			ay=luaL_checknumber(l,5);
 			bx=luaL_checknumber(l,6);
@@ -352,7 +351,6 @@ double fa,fl,fh,fs,fd,fp,fr;
 		else
 		if(0==strcmp(tp,"pivot_joint"))
 		{
-			bbody=lua_chipmunk_body_ptr(l,3);
 			ax=luaL_checknumber(l,4);
 			ay=luaL_checknumber(l,5);
 			if(lua_isnumber(l,6)) // we have two local space pos
@@ -369,7 +367,6 @@ double fa,fl,fh,fs,fd,fp,fr;
 		else
 		if(0==strcmp(tp,"groove_joint"))
 		{
-			bbody=lua_chipmunk_body_ptr(l,3);
 			ax=luaL_checknumber(l,4);
 			ay=luaL_checknumber(l,5);
 			bx=luaL_checknumber(l,6);
@@ -381,7 +378,6 @@ double fa,fl,fh,fs,fd,fp,fr;
 		else
 		if(0==strcmp(tp,"damped_spring"))
 		{
-			bbody=lua_chipmunk_body_ptr(l,3);
 			ax=luaL_checknumber(l,4);
 			ay=luaL_checknumber(l,5);
 			bx=luaL_checknumber(l,6);
@@ -394,7 +390,6 @@ double fa,fl,fh,fs,fd,fp,fr;
 		else
 		if(0==strcmp(tp,"damped_rotary_spring"))
 		{
-			bbody=lua_chipmunk_body_ptr(l,3);
 			fa=luaL_checknumber(l,4);
 			fs=luaL_checknumber(l,5);
 			fd=luaL_checknumber(l,6);
@@ -403,7 +398,6 @@ double fa,fl,fh,fs,fd,fp,fr;
 		else
 		if(0==strcmp(tp,"rotary_limit_joint"))
 		{
-			bbody=lua_chipmunk_body_ptr(l,3);
 			fl=luaL_checknumber(l,4);
 			fh=luaL_checknumber(l,5);
 			*pp=cpRotaryLimitJointNew(abody,bbody,fl,fh);
@@ -411,7 +405,6 @@ double fa,fl,fh,fs,fd,fp,fr;
 		else
 		if(0==strcmp(tp,"ratchet_joint"))
 		{
-			bbody=lua_chipmunk_body_ptr(l,3);
 			fp=luaL_checknumber(l,4);
 			fr=luaL_checknumber(l,5);
 			*pp=cpRatchetJointNew(abody,bbody,fp,fr);
@@ -419,7 +412,6 @@ double fa,fl,fh,fs,fd,fp,fr;
 		else
 		if(0==strcmp(tp,"gear_joint"))
 		{
-			bbody=lua_chipmunk_body_ptr(l,3);
 			fp=luaL_checknumber(l,4);
 			fr=luaL_checknumber(l,5);
 			*pp=cpGearJointNew(abody,bbody,fp,fr);
@@ -427,7 +419,6 @@ double fa,fl,fh,fs,fd,fp,fr;
 		else
 		if(0==strcmp(tp,"simple_motor"))
 		{
-			bbody=lua_chipmunk_body_ptr(l,3);
 			fr=luaL_checknumber(l,4);
 			*pp=cpSimpleMotorNew(abody,bbody,fr);
 		}
