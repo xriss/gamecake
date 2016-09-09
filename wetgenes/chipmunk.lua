@@ -35,6 +35,7 @@ chipmunk.constraint_functions={is="constraint"}
 chipmunk.constraint_metatable={__index=chipmunk.constraint_functions}
 
 
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space
 
 	space=chipmunk.space()
@@ -57,7 +58,7 @@ chipmunk.space=function(...)
 	
 	return space
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body
 
 	body=chipmunk.body(mass,inertia)
@@ -93,7 +94,7 @@ chipmunk.body=function(a,...)
 	end
 	return body
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.shape
 
 	shape=chipmunk.shape(body,form...)
@@ -126,7 +127,6 @@ Form of "box" needs two points for opposite corners, lowest pair
 followed by highest pair and a radius. The radius should be 0 unless 
 you want rounded corners
 
-
 ]]
 chipmunk.shape=function(body,form,...)
 	local shape={form=form}
@@ -134,7 +134,7 @@ chipmunk.shape=function(body,form,...)
 	shape[0]=core.shape_create(body[0],form,...)
 	return shape
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.constraint
 
 	constraint=chipmunk.constraint(abody,bbody,form,...)
@@ -146,7 +146,6 @@ so it is normally preferable to use the space:constraint function which
 will call this function and then automatically add the constraint into 
 the space.
 
-
 ]]
 chipmunk.constraint=function(abody,bbody,form,...)
 	local constraint={form=form}
@@ -154,7 +153,7 @@ chipmunk.constraint=function(abody,bbody,form,...)
 	constraint[0]=core.constraint_create(abody[0],bbody[0],form,...)
 	return constraint
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.iterations
 
 	v=space:iterations()
@@ -166,7 +165,7 @@ Get and/or Set the iterations for this space.
 chipmunk.space_functions.iterations=function(space,v)
 	return core.space_iterations(space[0],v)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.gravity
 
 	vx,vy=space:gravity()
@@ -178,7 +177,7 @@ Get and/or Set the gravity vector for this space.
 chipmunk.space_functions.gravity=function(space,vx,vy)
 	return core.space_gravity(space[0],vx,vy)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.damping
 
 	v=space:damping()
@@ -190,7 +189,7 @@ Get and/or Set the damping for this space.
 chipmunk.space_functions.damping=function(space,v)
 	return core.space_damping(space[0],v)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.collision_slop
 
 	v=space:collision_slop()
@@ -202,7 +201,7 @@ Get and/or Set the colision slop for this space.
 chipmunk.space_functions.collision_slop=function(space,v)
 	return core.space_collision_slop(space[0],v)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.collision_bias
 
 	v=space:collision_bias()
@@ -214,7 +213,7 @@ Get and/or Set the colision bias for this space.
 chipmunk.space_functions.collision_bias=function(space,v)
 	return core.space_collision_bias(space[0],v)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.add_handler
 
 	space:add_handler(handler,id1,id2)
@@ -235,7 +234,7 @@ chipmunk.space_functions.add_handler=function(space,arbiter,id1,id2)
 	return core.space_add_handler(space[0],arbiter,id1,id2)
 
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.add
 
 	space:add(body)
@@ -268,7 +267,7 @@ chipmunk.space_functions.add=function(space,it)
 		error("unknown "..it.is)
 	end
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.remove
 
 	space:remove(body)
@@ -301,7 +300,7 @@ chipmunk.space_functions.remove=function(space,it)
 		error("unknown "..it.is)
 	end
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.contains
 
 	space:contains(body)
@@ -329,8 +328,7 @@ chipmunk.space_functions.contains=function(space,it)
 		error("unknown "..it.is)
 	end
 end
-
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.body
 
 	space:body(...)
@@ -343,7 +341,7 @@ chipmunk.space_functions.body=function(space,...)
 	space:add(body)
 	return body
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.constraint
 
 	space:constraint(...)
@@ -356,7 +354,7 @@ chipmunk.space_functions.constraint=function(space,...)
 	space:add(body)
 	return constraint
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.step
 
 	space:step(time)
@@ -367,7 +365,7 @@ Run the simulation for time in seconds. EG 1/60.
 chipmunk.space_functions.step=function(space,ts)
 	return core.space_step(space[0],ts)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.position
 
 	vx,vy=body:position()
@@ -379,7 +377,7 @@ Get and/or Set the position for this body.
 chipmunk.body_functions.position=function(body,vx,vy)
 	return core.body_position(body[0],vx,vy)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.velocity
 
 	vx,vy=body:velocity()
@@ -391,7 +389,20 @@ Get and/or Set the velocity for this body.
 chipmunk.body_functions.velocity=function(body,vx,vy)
 	return core.body_velocity(body[0],vx,vy)
 end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.body.force
 
+	vx,vy=body:force()
+	vx,vy=body:force(vx,vy)
+
+Get and/or Set the force for this body. This is reset back to 0 after 
+each step.
+
+]]
+chipmunk.body_functions.force=function(body,vx,vy)
+	return core.body_force(body[0],vx,vy)
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.angle
 
 	a=body:angle()
@@ -403,7 +414,7 @@ Get and/or Set the rotation angle in radians for this body.
 chipmunk.body_functions.angle=function(body,a)
 	return core.body_angle(body[0],a)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.angular_velocity
 
 	a=body:angular_velocity()
@@ -415,7 +426,43 @@ Get and/or Set the angular velocity in radians for this body.
 chipmunk.body_functions.angular_velocity=function(body,a)
 	return core.body_angular_velocity(body[0],a)
 end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.body.apply_force
 
+	body:apply_force(fx,fy,px,py)
+	body:apply_force(fx,fy,px,py,"world")
+
+Apply a force to this body at a specific point, the point can be in 
+world coordinates if you include the "world" flag but defaults to local 
+object coordinates.
+
+]]
+chipmunk.body_functions.apply_force=function(body,fx,fy,px,py,world)
+	if world=="world" then
+		return core.body_apply_force_world_point(body[0],fx,fy,px,py)
+	else
+		return core.body_apply_force_local_point(body[0],fx,fy,px,py)
+	end
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.body.apply_impulse
+
+	body:apply_impulse(ix,iy,px,py)
+	body:apply_impulse(ix,iy,px,py,"world")
+
+Apply a force to this body at a specific point, the point can be in 
+world coordinates if you include the "world" flag but defaults to local 
+object coordinates.
+
+]]
+chipmunk.body_functions.apply_impulse=function(body,ix,iy,px,py,world)
+	if world=="world" then
+		return core.body_apply_impulse_world_point(body[0],ix,iy,px,py)
+	else
+		return core.body_apply_impulse_local_point(body[0],ix,iy,px,py)
+	end
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.shape
 
 	shape=body:shape(form,...)
@@ -425,13 +472,13 @@ modification.
 
 ]]
 chipmunk.body_functions.shape=function(body,...)
-	local shape=chipmunk.shape(body[0],...)
+	local shape=chipmunk.shape(body,...)
 	shape.in_body=body
 	body.shapes[shape]=shape
 	body.in_space:add(shape)
 	return shape
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.shape.bounding_box
 
 	min_x,min_y,max_x,max_y=shape:bounding_box()
@@ -453,7 +500,7 @@ Get and/or Set the elasticity for this shape.
 chipmunk.shape_functions.elasticity=function(shape,f)
 	return core.shape_elasticity(shape[0],f)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.shape.friction
 
 	f=shape:friction()
@@ -465,7 +512,19 @@ Get and/or Set the friction for this shape.
 chipmunk.shape_functions.friction=function(shape,f)
 	return core.shape_friction(shape[0],f)
 end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.shape.surface_velocity
 
+	vx,vy=shape:surface_velocity()
+	vx,vy=shape:surface_velocity(vx,vy)
+
+Get and/or Set the surface velocity for this shape.
+
+]]
+chipmunk.shape_functions.surface_velocity=function(shape,vx,vy)
+	return core.shape_surface_velocity(shape[0],vx,vy)
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.shape.collision_type
 
 	f=shape:collision_type()
@@ -477,7 +536,7 @@ Get and/or Set the collision type for this shape.
 chipmunk.shape_functions.collision_type=function(shape,f)
 	return core.shape_collision_type(shape[0],f)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.shape.filter
 
 	f=shape:filter()
@@ -489,7 +548,7 @@ Get and/or Set the filter for this shape.
 chipmunk.shape_functions.filter=function(shape,group,categories,mask)
 	return core.shape_filter(shape[0],group,categories,mask)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.arbiter.points
 
 	points=arbiter:points()
@@ -501,7 +560,7 @@ Get and/or Set the points data for this arbiter.
 chipmunk.arbiter_functions.points=function(arbiter,points)
 	return core.arbiter_points(arbiter[0],points)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.arbiter.surface_velocity
 
 	vx,vy=arbiter:surface_velocity()
@@ -513,7 +572,7 @@ Get and/or Set the surface velocity for this arbiter.
 chipmunk.arbiter_functions.surface_velocity=function(arbiter,vx,vy)
 	return core.arbiter_surface_velocity(arbiter[0],vx,vy)
 end
-
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.arbiter.ignore
 
 	return arbiter:ignore()
@@ -525,6 +584,7 @@ chipmunk.arbiter_functions.ignore=function(arbiter)
 	core.arbiter_ignore(arbiter[0])
 	return false
 end
+------------------------------------------------------------------------
 
 
 return chipmunk
