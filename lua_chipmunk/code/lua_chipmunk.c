@@ -955,6 +955,30 @@ cpVect v;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// body get/set force
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_body_force (lua_State *l)
+{	
+cpBody *body=lua_chipmunk_body_ptr(l,1);
+cpVect v;
+
+	if(lua_isnumber(l,2))
+	{
+		v.x=luaL_checknumber(l,2);
+		v.y=luaL_checknumber(l,3);
+		cpBodySetForce(body, v );
+	}
+	
+	v=cpBodyGetForce(body);
+	lua_pushnumber(l,v.x);
+	lua_pushnumber(l,v.y);
+
+	return 2;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // body get/set angle
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -989,6 +1013,70 @@ cpBody *body=lua_chipmunk_body_ptr(l,1);
 	lua_pushnumber(l, cpBodyGetAngularVelocity(body) );
 
 	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// body apply force
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_body_apply_force_local_point (lua_State *l)
+{	
+cpBody *body=lua_chipmunk_body_ptr(l,1);
+cpVect v,p;
+
+	v.x=luaL_checknumber(l,2);
+	v.y=luaL_checknumber(l,3);
+	p.x=luaL_checknumber(l,4);
+	p.y=luaL_checknumber(l,5);
+	cpBodyApplyForceAtLocalPoint(body, v , p );
+
+	return 0;
+}
+static int lua_chipmunk_body_apply_force_world_point (lua_State *l)
+{	
+cpBody *body=lua_chipmunk_body_ptr(l,1);
+cpVect v,p;
+
+	v.x=luaL_checknumber(l,2);
+	v.y=luaL_checknumber(l,3);
+	p.x=luaL_checknumber(l,4);
+	p.y=luaL_checknumber(l,5);
+	cpBodyApplyForceAtWorldPoint(body, v , p );
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// body apply impulse
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_body_apply_impulse_local_point (lua_State *l)
+{	
+cpBody *body=lua_chipmunk_body_ptr(l,1);
+cpVect v,p;
+
+	v.x=luaL_checknumber(l,2);
+	v.y=luaL_checknumber(l,3);
+	p.x=luaL_checknumber(l,4);
+	p.y=luaL_checknumber(l,5);
+	cpBodyApplyImpulseAtLocalPoint(body, v , p );
+
+	return 0;
+}
+static int lua_chipmunk_body_apply_impulse_world_point (lua_State *l)
+{	
+cpBody *body=lua_chipmunk_body_ptr(l,1);
+cpVect v,p;
+
+	v.x=luaL_checknumber(l,2);
+	v.y=luaL_checknumber(l,3);
+	p.x=luaL_checknumber(l,4);
+	p.y=luaL_checknumber(l,5);
+	cpBodyApplyImpulseAtWorldPoint(body, v , p );
+
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1046,6 +1134,30 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 	lua_pushnumber(l, cpShapeGetFriction(shape) );
 
 	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// shape get/set surface velocity
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_shape_surface_velocity (lua_State *l)
+{	
+cpShape *shape=lua_chipmunk_shape_ptr(l,1);
+cpVect v;
+
+	if(lua_isnumber(l,2))
+	{
+		v.x=luaL_checknumber(l,2);
+		v.y=luaL_checknumber(l,3);
+		cpShapeSetSurfaceVelocity(shape, v );
+	}
+	
+	v=cpShapeGetSurfaceVelocity(shape);
+	lua_pushnumber(l,v.x);
+	lua_pushnumber(l,v.y);
+
+	return 2;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1202,16 +1314,20 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"body_position",					lua_chipmunk_body_position},
 //		{"body_center_of_gravity",			lua_chipmunk_body_center_of_gravity},
 		{"body_velocity",					lua_chipmunk_body_velocity},
-//		{"body_force",						lua_chipmunk_body_force},
+		{"body_force",						lua_chipmunk_body_force},
 		{"body_angle",						lua_chipmunk_body_angle},
 		{"body_angular_velocity",			lua_chipmunk_body_angular_velocity},
 //		{"body_torque",						lua_chipmunk_body_torque},
+		{"body_apply_force_local_point",	lua_chipmunk_body_apply_force_local_point},
+		{"body_apply_force_world_point",	lua_chipmunk_body_apply_force_world_point},
+		{"body_apply_impulse_local_point",	lua_chipmunk_body_apply_impulse_local_point},
+		{"body_apply_impulse_world_point",	lua_chipmunk_body_apply_impulse_world_point},
 
 		{"shape_bounding_box",				lua_chipmunk_shape_bounding_box},
 //		{"shape_sensor",					lua_chipmunk_shape_sensor},
 		{"shape_elasticity",				lua_chipmunk_shape_elasticity},
 		{"shape_friction",					lua_chipmunk_shape_friction},
-//		{"shape_surface_velocity",			lua_chipmunk_shape_surface_velocity},
+		{"shape_surface_velocity",			lua_chipmunk_shape_surface_velocity},
 		{"shape_collision_type",			lua_chipmunk_shape_collision_type},
 		{"shape_filter",					lua_chipmunk_shape_filter},
 
