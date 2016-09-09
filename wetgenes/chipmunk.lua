@@ -9,7 +9,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 We use chipmunk as the local name of this library.
 
-A lua binding to the Chipmunk2D phsics library https://chipmunk-physics.net/
+A lua binding to the Chipmunk2D physics library https://chipmunk-physics.net/
 
 ]]
 
@@ -51,7 +51,7 @@ chipmunk.space=function(...)
 	space[0]=core.space_create(space)
 
 -- hack in this spaces default static body
--- we have a special case in the binding that automatically gets the body from the space ptr
+-- we have a special case in the binding that automatically gets the static body from the space ptr
 	space.static=chipmunk.body(space[0])
 	space.static.in_space=space
 	
@@ -60,17 +60,22 @@ end
 
 --[[#wetgenes.chipmunk.body
 
+	body=chipmunk.body("kinematic")
 	body=chipmunk.body(mass,inertia)
 
-Create a body with the given mass and inertia.
+Create a kinematic body, with the given mass and inertia.
 
-	body=chipmunk.body("kinematic")
+You will need to add the body to a space before it exists so it is 
+normally preferable to use the space:body function which will call this 
+function and then automatically add the body into the space.
 
-Create a kinematic body.
 
 	body=chipmunk.body("static")
 
-Create a static body.
+Create a static body, mostly you can just use space.static as the 
+default static body but you may create more if you wish to group your 
+static shapes into multiple bodies.
+
 
 ]]
 chipmunk.body=function(a,...)
@@ -87,18 +92,64 @@ end
 
 --[[#wetgenes.chipmunk.shape
 
-	shape=chipmunk.shape()
+	shape=chipmunk.shape(body,form...)
+	
+Create a shape, added to the given body. Shapes are always added to a 
+body but must be added to a space before they have any effect. So it is 
+normally preferable to use the body:shape function which will 
+automatically add the shape into the space that the body belongs to.
 
-Create a shape.
+	shape=chipmunk.shape(space.static,form...)
+
+Create a static shape in world space. We use space.static as the body. 
+
+	shape=chipmunk.shape(body,"circle",radius,x,y)
+	
+Form of "circle" needs a radius and a centre point.
+
+	shape=chipmunk.shape(body,"segment",ax,ay,bx,by,radius)
+
+Form of "segment" needs two points and a radius.
+
+	shape=chipmunk.shape(body,"poly",...)
+
+Form of "poly" is not wired up to anything yet but probably a stream of 
+points?
+
+	shape=chipmunk.shape(body,"box",minx,miny,maxx,maxy,radius)
+
+Form of "box" needs two points for opposite corners, lowest pair 
+followed by highest pair and a radius. The radius should be 0 unless 
+you want rounded corners
+
 
 ]]
-chipmunk.shape=function(...)
-	local shape={}
+chipmunk.shape=function(body,form,...)
+	local shape={form=form}
 	setmetatable(shape,chipmunk.shape_metatable)
-	shape[0]=core.shape_create(...)
+	shape[0]=core.shape_create(body[0],form,...)
 	return shape
 end
 
+--[[#wetgenes.chipmunk.constraint
+
+	constraint=chipmunk.constraint(abody,bbody,form,...)
+
+Create a constraint between two bodies.
+
+You will need to add the constraint to a space before it has any effect 
+so it is normally preferable to use the space:constraint function which 
+will call this function and then automatically add the constraint into 
+the space.
+
+
+]]
+chipmunk.constraint=function(abody,bbody,form,...)
+	local constraint={form=form}
+	setmetatable(shape,chipmunk.constraint_metatable)
+	constraint[0]=core.constraint_create(abody[0],bbody[0],form,...)
+	return constraint
+end
 
 --[[#wetgenes.chipmunk.space.iterations
 
@@ -168,7 +219,10 @@ end
 
 Add collision callback handler, for the given collision types.
 
-The handler table will have other values inserted in it and will be used as an arbiter table in callbacks. So *always* pass in a new one to this function. There does not seem to be a way to free handlers so be careful what you add.
+The handler table will have other values inserted in it and will be 
+used as an arbiter table in callbacks. So *always* pass in a new one to 
+this function. There does not seem to be a way to free handlers so be 
+careful what you add.
 
 ]]
 chipmunk.space_functions.add_handler=function(space,arbiter,id1,id2)
@@ -181,29 +235,31 @@ end
 --[[#wetgenes.chipmunk.space.add
 
 	space:add(body)
-
-Add a body to the space.
-
 	space:add(shape)
+	space:add(constraint)
 
-Add a shape to the space.
+Add a body/shape/constraint to the space.
 
 ]]
 chipmunk.space_functions.add=function(space,it)
 	if     it.is=="body" then
 
 		it.in_space=space
---		space.bodies[it]=it
 		core.body_lookup(it[0],space.bodies,it)
 		return core.space_add_body(space[0],it[0])
 
 	elseif it.is=="shape" then
 
 		it.in_space=space
---		space.shapes[it]=it
 		core.shape_lookup(it[0],space.shapes,it)
 		return core.space_add_shape(space[0],it[0])
 	
+	elseif it.is=="constraint" then
+
+		it.in_space=space
+		core.constraint_lookup(it[0],space.constraints,it)
+		return core.space_add_constraint(space[0],it[0])
+
 	else
 		error("unknown "..it.is)
 	end
@@ -212,28 +268,30 @@ end
 --[[#wetgenes.chipmunk.space.remove
 
 	space:remove(body)
-
-Remove a body from this space.
-
 	space:remove(shape)
+	space:remove(constraint)
 
-Remove a shape from this space.
+Remove a body/shape/constraint from this space.
 
 ]]
 chipmunk.space_functions.remove=function(space,it)
 	if     it.is=="body" then
 
 		it.in_space=nil
---		space.bodies[it]=it
 		core.body_lookup(it[0],space.bodies,false)
 		return core.space_remove_body(space[0],it[0])
 
 	elseif it.is=="shape" then
 
 		it.in_space=nil
---		space.shapes[it]=nil
 		core.shape_lookup(it[0],space.shapes,false)
 		return core.space_remove_shape(space[0],it[0])
+	
+	elseif it.is=="constraint" then
+
+		it.in_space=nil
+		core.constraint_lookup(it[0],space.constraints,false)
+		return core.space_remove_constraint(space[0],it[0])
 	
 	else
 		error("unknown "..it.is)
@@ -242,9 +300,12 @@ end
 
 --[[#wetgenes.chipmunk.space.contains
 
-	space:remove(body)
+	space:contains(body)
+	space:contains(shape)
+	space:contains(constraint)
 
-Does the space contain this body, possibly superfluous as we can check our own records.
+Does the space contain this body/shape/constraint, possibly superfluous 
+as we can check our own records.
 
 ]]
 chipmunk.space_functions.contains=function(space,it)
@@ -256,6 +317,10 @@ chipmunk.space_functions.contains=function(space,it)
 
 		return core.space_contains_shape(space[0],it[0])
 	
+	elseif it.is=="constraint" then
+
+		return core.space_contains_constraint(space[0],it[0])
+
 	else
 		error("unknown "..it.is)
 	end
@@ -264,7 +329,7 @@ end
 
 --[[#wetgenes.chipmunk.space.body
 
-	space:body(time)
+	space:body(...)
 
 Create and add this body to the space.
 
@@ -273,6 +338,19 @@ chipmunk.space_functions.body=function(space,...)
 	local body=chipmunk.body(...)
 	space:add(body)
 	return body
+end
+
+--[[#wetgenes.chipmunk.space.constraint
+
+	space:constraint(...)
+
+Create and add this constraint to the space.
+
+]]
+chipmunk.space_functions.constraint=function(space,...)
+	local constraint=chipmunk.constraint(...)
+	space:add(body)
+	return constraint
 end
 
 --[[#wetgenes.chipmunk.space.step
@@ -336,12 +414,10 @@ end
 
 --[[#wetgenes.chipmunk.body.shape
 
-	shape=body:shape("circle",radius,x,y)
-	shape=body:shape("segment",ax,ay,bx,by,radius)
-	shape=body:shape("poly",...)
-	shape=body:shape("box",minx,miny,maxx,maxy,radius)
+	shape=body:shape(form,...)
 
-Add a new shape to this body, returns the shape for further modification.
+Add a new shape to this body, returns the shape for further 
+modification.
 
 ]]
 chipmunk.body_functions.shape=function(body,...)

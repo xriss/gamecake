@@ -278,11 +278,17 @@ M.pix_tiles=function(str,map,tout,px,py,hx,hy,tiles)
 		return map[s] or map[s:sub(1,1)] or map[0]
 	end
 	
-	for y=0,hx-1 do
+	local scopy=function(t) -- shallow copy
+		local v={}
+		for a,b in pairs(t) do v[a]=b end
+		return v
+	end
+	
+	for y=0,hy-1 do
 		tiles[y+py]=tiles[y+py] or {}
 		for x=0,hx-1 do
 			local s=getxy(x,y) or ". "
-			local c=getc(s) or {0,0,0,0}
+			local c=scopy(getc(s) or {0,0,0,0}) -- this will be a new table per cell, shallow copy
 			tiles[y+py][x+px]=c
 		end
 	end
