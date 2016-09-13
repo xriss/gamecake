@@ -80,6 +80,68 @@ cpSpace **pp=lua_chipmunk_space_ptr_ptr(l, 1 );
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// body callback setup
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static void lua_chipmunk_body_callback_setup(lua_State *l,cpBody *body,int body_table_idx)
+{
+lua_State **ll;
+
+	if(cpBodyGetUserData(body)) { return; } // already setup
+
+	ll=(lua_State**)lua_newuserdata(l, sizeof(lua_State*));
+	*ll=l;
+	lua_pushvalue(l,-1); // table[userdata]=userdata as all we want to do is keep it alive with a reference
+	lua_settable(l,body_table_idx); // keep it alive by putting it in the body table
+	cpBodySetUserData(body,ll); // this is a unique value so is used to find our body table and is also a way for us to get the lua state easily
+
+// after calling this you will find a body[userdata]=userdata in your body table, best not to delete it in your lua code, eh?
+// we could hide it in the registry instead I suppose, but it feels simple to keep it with its owner.
+
+// get space table, so only call after adding body to a space.
+	lua_pushlightuserdata(l,cpBodyGetSpace(body));
+	lua_gettable(l,LUA_REGISTRYINDEX);
+
+//get space.callbacks
+	lua_getfield(l,-1,"callbacks");
+
+//remember callback body table containing the callback functions in space.callbacks
+	lua_pushlightuserdata(l,ll);
+	lua_pushvalue(l,body_table_idx); // store the body table
+	lua_settable(l,-3);
+
+// pop space.callbacks , space
+	lua_pop(l,2);
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// body callback setup
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static void lua_chipmunk_body_callback_cleanup(lua_State *l,cpBody *body)
+{
+	if(!cpBodyGetUserData(body)) { return; } // already removed
+
+// get space table
+	lua_pushlightuserdata(l,cpBodyGetSpace(body));
+	lua_gettable(l,LUA_REGISTRYINDEX);
+
+//get space.callbacks
+	lua_getfield(l,-1,"callbacks");
+
+// clear it, so we can no longer run callbacks
+	lua_pushlightuserdata(l,cpBodyGetUserData(body));
+	lua_pushnil(l);
+	lua_settable(l,-3);
+
+// pop space.callbacks , space
+	lua_pop(l,2);
+
+// finally forget the userdata
+	cpBodySetUserData(body,0);
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // body create/destroy
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -149,6 +211,7 @@ static int lua_chipmunk_body_destroy (lua_State *l)
 cpBody **pp=lua_chipmunk_body_ptr_ptr(l, 1 );
 	if(*pp)
 	{
+		lua_chipmunk_body_callback_cleanup(l,*pp); // make sure any callbacks are also removed
 		cpBodyFree(*pp);
 		(*pp)=0;
 	}	
@@ -1081,6 +1144,96 @@ cpVect v,p;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// body velocity callback
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static void lua_chipmunk_body_velocity_callback(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
+{
+int body_table_idx;
+cpVect  updated_gravity;
+cpFloat updated_damping;
+cpFloat updated_dt;
+
+lua_State *l=*(lua_State **)cpBodyGetUserData(body);
+
+// get space table
+	lua_pushlightuserdata(l,cpBodyGetSpace(body));
+	lua_gettable(l,LUA_REGISTRYINDEX);
+
+//get space.callbacks
+	lua_getfield(l,-1,"callbacks");
+
+//get body table from space.callbacks[*]
+	lua_pushlightuserdata(l,cpBodyGetUserData(body));
+	lua_gettable(l,-2);
+	body_table_idx=lua_gettop(l); // remember the body table index to make the code more readable
+
+// store values into body for reading by the callback
+
+	lua_pushnumber(l,gravity.x);
+	lua_setfield(l,body_table_idx,"gravity_x");
+	lua_pushnumber(l,gravity.y);
+	lua_setfield(l,body_table_idx,"gravity_y");
+	lua_pushnumber(l,damping);
+	lua_setfield(l,body_table_idx,"damping");
+	lua_pushnumber(l,dt);
+	lua_setfield(l,body_table_idx,"delta_time");
+
+// call the callback function
+	lua_getfield(l,body_table_idx,"velocity_callback");
+	lua_pushvalue(l,body_table_idx);
+	lua_call(l,1,1);
+	
+	if( lua_toboolean(l,-1) ) //  the callback requested that we call the normal function with updated values
+	{
+		lua_getfield(l,body_table_idx,"gravity_x");  updated_gravity.x=lua_tonumber(l,-1); lua_pop(l,1);
+		lua_getfield(l,body_table_idx,"gravity_y");  updated_gravity.y=lua_tonumber(l,-1); lua_pop(l,1);
+		lua_getfield(l,body_table_idx,"damping");    updated_damping  =lua_tonumber(l,-1); lua_pop(l,1);
+		lua_getfield(l,body_table_idx,"delta_time"); updated_dt       =lua_tonumber(l,-1); lua_pop(l,1);
+		
+		cpBodyUpdateVelocity(body,updated_gravity,updated_damping,updated_dt);
+	}
+
+// pop the space, space.callbacks, body, result
+	lua_pop(l,4);
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// body set or clear the velocity callback function, arg 1 is a body table as we need access to that.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_body_velocity_func (lua_State *l)
+{
+cpBody *body=0;
+
+// get body pointer form body[0]
+	lua_rawgeti(l,1,0);
+	body=lua_chipmunk_body_ptr(l,-1);
+	lua_pop(l,1);
+
+// make sure we have callbacks setup for this body, its not expensive but we only do it when you first set a callback
+	lua_chipmunk_body_callback_setup(l,body,1);
+	
+	if( lua_isfunction(l,2) ) // set callback
+	{
+		lua_pushvalue(l,2);
+		lua_setfield(l,1,"velocity_callback");
+		cpBodySetVelocityUpdateFunc(body,lua_chipmunk_body_velocity_callback);
+	}
+	else // clear callback
+	{
+		lua_pushnil(l);
+		lua_setfield(l,1,"velocity_callback");
+		cpBodySetVelocityUpdateFunc(body,cpBodyUpdateVelocity);
+	}
+
+	return 0;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // shape get bounding box (min_x,min_y,max_x,max_y)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1366,6 +1519,9 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"body_apply_force_world_point",	lua_chipmunk_body_apply_force_world_point},
 		{"body_apply_impulse_local_point",	lua_chipmunk_body_apply_impulse_local_point},
 		{"body_apply_impulse_world_point",	lua_chipmunk_body_apply_impulse_world_point},
+
+		{"body_velocity_func",				lua_chipmunk_body_velocity_func},
+//		{"body_position_func",				lua_chipmunk_body_position_func},
 
 		{"shape_bounding_box",				lua_chipmunk_shape_bounding_box},
 //		{"shape_sensor",					lua_chipmunk_shape_sensor},
