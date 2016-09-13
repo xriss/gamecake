@@ -463,6 +463,35 @@ chipmunk.body_functions.apply_impulse=function(body,ix,iy,px,py,world)
 	end
 end
 ------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.body.velocity_func
+
+	body:velocity_func(velocity_callback)
+	body:velocity_func()
+
+Set or clear the velocity callback update function for this body.
+
+	velocity_callback(body)
+
+	body.gravity_x
+	body.gravity_y
+	body.damping
+	body.delta_time
+
+This callback will be called with the above values set into body, you 
+can adjust these and return true to perform a normal update but with 
+these new values.
+
+IE you can choose a new gravity vector for this body which is the 
+simplest most useful change to make.
+
+Alternatively you can update the bodys velocity directly and 
+return false so the normal velocity update will not be run.
+
+]]
+chipmunk.body_functions.velocity_func=function(body,cb)
+	core.body_velocity_func(body,cb)
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.shape
 
 	shape=body:shape(form,...)
