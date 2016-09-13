@@ -1234,6 +1234,84 @@ cpBody *body=0;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// body position callback
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static void lua_chipmunk_body_position_callback(cpBody *body, cpFloat dt)
+{
+int body_table_idx;
+cpFloat updated_dt;
+
+lua_State *l=*(lua_State **)cpBodyGetUserData(body);
+
+// get space table
+	lua_pushlightuserdata(l,cpBodyGetSpace(body));
+	lua_gettable(l,LUA_REGISTRYINDEX);
+
+//get space.callbacks
+	lua_getfield(l,-1,"callbacks");
+
+//get body table from space.callbacks[*]
+	lua_pushlightuserdata(l,cpBodyGetUserData(body));
+	lua_gettable(l,-2);
+	body_table_idx=lua_gettop(l); // remember the body table index to make the code more readable
+
+// store values into body for reading by the callback
+
+	lua_pushnumber(l,dt);
+	lua_setfield(l,body_table_idx,"delta_time");
+
+// call the callback function
+	lua_getfield(l,body_table_idx,"position_callback");
+	lua_pushvalue(l,body_table_idx);
+	lua_call(l,1,1);
+	
+	if( lua_toboolean(l,-1) ) //  the callback requested that we call the normal function with updated values
+	{
+		lua_getfield(l,body_table_idx,"delta_time"); updated_dt       =lua_tonumber(l,-1); lua_pop(l,1);
+		
+		cpBodyUpdatePosition(body,updated_dt);
+	}
+
+// pop the space, space.callbacks, body, result
+	lua_pop(l,4);
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// body set or clear the position callback function, arg 1 is a body table as we need access to that.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_body_position_func (lua_State *l)
+{
+cpBody *body=0;
+
+// get body pointer form body[0]
+	lua_rawgeti(l,1,0);
+	body=lua_chipmunk_body_ptr(l,-1);
+	lua_pop(l,1);
+
+// make sure we have callbacks setup for this body, its not expensive but we only do it when you first set a callback
+	lua_chipmunk_body_callback_setup(l,body,1);
+	
+	if( lua_isfunction(l,2) ) // set callback
+	{
+		lua_pushvalue(l,2);
+		lua_setfield(l,1,"position_callback");
+		cpBodySetPositionUpdateFunc(body,lua_chipmunk_body_position_callback);
+	}
+	else // clear callback
+	{
+		lua_pushnil(l);
+		lua_setfield(l,1,"position_callback");
+		cpBodySetPositionUpdateFunc(body,cpBodyUpdatePosition);
+	}
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // shape get bounding box (min_x,min_y,max_x,max_y)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1521,7 +1599,7 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"body_apply_impulse_world_point",	lua_chipmunk_body_apply_impulse_world_point},
 
 		{"body_velocity_func",				lua_chipmunk_body_velocity_func},
-//		{"body_position_func",				lua_chipmunk_body_position_func},
+		{"body_position_func",				lua_chipmunk_body_position_func},
 
 		{"shape_bounding_box",				lua_chipmunk_shape_bounding_box},
 //		{"shape_sensor",					lua_chipmunk_shape_sensor},
