@@ -601,6 +601,19 @@ chipmunk.shape_functions.filter=function(shape,group,categories,mask)
 	return core.shape_filter(shape[0],group,categories,mask)
 end
 ------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.shape.radius
+
+	radius=shape:radius()
+	radius=shape:radius(radius)
+
+Get and/or Set the radius for this shape. Setting is unsafe and may 
+break the physics simulation.
+
+]]
+chipmunk.shape_functions.radius=function(shape,radius)
+	return core.shape_radius(shape[0],radius)
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.arbiter.points
 
 	points=arbiter:points()
