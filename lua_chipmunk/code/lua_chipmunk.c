@@ -1435,7 +1435,52 @@ cpShapeFilter filter;
 	return 3;
 }
 
-/*+-----------------------------------------------------------------1------------------------------------------------+*/
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// shape get/set radius (set is unsafe)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_shape_radius (lua_State *l)
+{	
+cpShape *shape=lua_chipmunk_shape_ptr(l,1);
+
+	if(lua_isnumber(l,2))
+	{
+		if( shape->klass->type == CP_CIRCLE_SHAPE )
+		{
+			cpCircleShapeSetRadius(shape,luaL_checknumber(l,2));
+		}
+		else
+		if( shape->klass->type == CP_SEGMENT_SHAPE )
+		{
+			cpSegmentShapeSetRadius(shape,luaL_checknumber(l,2));
+		}
+		else
+		if( shape->klass->type == CP_POLY_SHAPE )
+		{
+			cpPolyShapeSetRadius(shape,luaL_checknumber(l,2));
+		}
+	}
+	
+	if( shape->klass->type == CP_CIRCLE_SHAPE )
+	{
+		lua_pushnumber(l, cpCircleShapeGetRadius(shape) );
+	}
+	else
+	if( shape->klass->type == CP_SEGMENT_SHAPE )
+	{
+		lua_pushnumber(l, cpSegmentShapeGetRadius(shape) );
+	}
+	else
+	if( shape->klass->type == CP_POLY_SHAPE )
+	{
+		lua_pushnumber(l, cpPolyShapeGetRadius(shape) );
+	}
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // space add shape
 //
@@ -1608,6 +1653,8 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"shape_surface_velocity",			lua_chipmunk_shape_surface_velocity},
 		{"shape_collision_type",			lua_chipmunk_shape_collision_type},
 		{"shape_filter",					lua_chipmunk_shape_filter},
+
+		{"shape_radius",					lua_chipmunk_shape_radius},
 
 		{"arbiter_surface_velocity",		lua_chipmunk_arbiter_surface_velocity},
 		{"arbiter_points",					lua_chipmunk_arbiter_points},

@@ -65,6 +65,8 @@ extern "C" {
 #endif
 
 #include "chipmunk/chipmunk.h"
+#include "chipmunk/chipmunk_structs.h"
+#include "chipmunk/chipmunk_unsafe.h"
 #include "code/lua_chipmunk.h"
 
 
