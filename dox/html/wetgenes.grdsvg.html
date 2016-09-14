@@ -1,0 +1,58 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.grdsvg.html">wetgenes.grdsvg</a></h1>
+<div>
+
+<pre><code>wgrdsvg=require("wetgenes.grdsvg")
+</code></pre>
+
+<p>Build svg files from grd data (bitmaps)</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grdsvg.string.html">wetgenes.grdsvg.string</a></h1>
+<div>
+
+<pre><code>local svgstring=wgrdsvg.string(grd,opts)
+</code></pre>
+
+<p>Return an svg formated string that represents the input grd which must 
+be an indexed (8bit) format. Each pixel will be converted into a filled 
+svg rectangle element. Opts can contain the following options to 
+control the generation of the svg file.</p>
+
+<pre><code>opts.skip_transparent_pixels=true
+</code></pre>
+
+<p>Do not export a rectangle for fully transparent pixels.</p>
+
+<pre><code>opts.scalex=1
+</code></pre>
+
+<p>Width of each exported pixel.</p>
+
+<pre><code>opts.scaley=1
+</code></pre>
+
+<p>Height of each exported pixel.</p>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.grdsvg';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>

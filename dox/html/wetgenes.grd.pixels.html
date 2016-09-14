@@ -24,7 +24,6 @@ g:pixels(x,y,z,w,h,d,"")
 you get per pixel <em>depends</em> on the format of the grd. Note the passing 
 in of an empty string to indicate that you with to receive a string.</p>
 
-
 <pre><code>g:pixels(x,y,w,h,tab)
 g:pixels(x,y,z,w,h,d,tab)
 </code></pre>
@@ -40,6 +39,13 @@ g:pixels(x,y,z,w,h,d,str)
 <p>Write the area of pixels from a string of bytes which is provided in 
 str, the amount of bytes you need to provide per pixel <em>depends</em> on the 
 format of the grd.</p>
+
+<pre><code>g:pixels(x,y,w,h,grd)
+g:pixels(x,y,z,w,h,d,grd)
+</code></pre>
+
+<p>Write the area of pixels from a grd which is provided in grd. use 
+clip/layer functions to select a portion of a larger grd.</p>
 
 <p>As you can see depending on the arguments given this does one of two 
 things, read some pixels or write some pixels. The area that is to be 

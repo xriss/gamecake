@@ -6,27 +6,20 @@
 		<script>hljs.initHighlightingOnLoad();</script>
 	</head>
 	<body>
-<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.grd.html">wetgenes.grd</a></h1><h1><a href="wetgenes.grd.palette.html">wetgenes.grd.palette</a></h1>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.chipmunk.html">wetgenes.chipmunk</a></h1><h1><a href="wetgenes.chipmunk.arbiter.html">wetgenes.chipmunk.arbiter</a></h1><h1><a href="wetgenes.chipmunk.arbiter.surface_velocity.html">wetgenes.chipmunk.arbiter.surface_velocity</a></h1>
 <div>
 
-<pre><code>g:palette(x,w)
-g:palette(x,w,"")
-g:palette(x,w,tab)
-g:palette(x,w,str)
-g:palette(x,w,grd)
+<pre><code>vx,vy=arbiter:surface_velocity()
+vx,vy=arbiter:surface_velocity(vx,vy)
 </code></pre>
 
-<p>These are the same as g:pixels() but refer to the palette information 
-which is stored as a 1 pixel high 256 pixel wide rgba image. The use of 
-"" to read a string of bytes and passing in either a table of numerical 
-values or string of bytes to write into the palette is the same system 
-as used with pixels.</p>
+<p>Get and/or Set the surface velocity for this arbiter.</p>
 
 
 </div><div id="disqus_thread"></div>
 <script type="text/javascript">
 	var disqus_shortname = 'gamecake';
-	var disqus_identifier = 'wetgenes.grd.palette';
+	var disqus_identifier = 'wetgenes.chipmunk.arbiter.surface_velocity';
 	var disqus_title=disqus_identifier;
 	(function() {
 		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

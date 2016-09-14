@@ -1,0 +1,138 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.chipmunk.html">wetgenes.chipmunk</a></h1><h1><a href="wetgenes.chipmunk.shape.html">wetgenes.chipmunk.shape</a></h1>
+<div>
+
+<pre><code>shape=chipmunk.shape(body,form...)
+</code></pre>
+
+<p>Create a shape, added to the given body. Shapes are always added to a 
+body but must be added to a space before they have any effect. So it is 
+normally preferable to use the body:shape function which will 
+automatically add the shape into the space that the body belongs to.</p>
+
+<pre><code>shape=chipmunk.shape(space.static,form...)
+</code></pre>
+
+<p>Create a static shape in world space. We use space.static as the body. </p>
+
+<pre><code>shape=chipmunk.shape(body,"circle",radius,x,y)
+</code></pre>
+
+<p>Form of "circle" needs a radius and a centre point.</p>
+
+<pre><code>shape=chipmunk.shape(body,"segment",ax,ay,bx,by,radius)
+</code></pre>
+
+<p>Form of "segment" needs two points and a radius.</p>
+
+<pre><code>shape=chipmunk.shape(body,"poly",...)
+</code></pre>
+
+<p>Form of "poly" is not wired up to anything yet but probably a stream of 
+points?</p>
+
+<pre><code>shape=chipmunk.shape(body,"box",minx,miny,maxx,maxy,radius)
+</code></pre>
+
+<p>Form of "box" needs two points for opposite corners, lowest pair 
+followed by highest pair and a radius. The radius should be 0 unless 
+you want rounded corners</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.bounding_box.html">wetgenes.chipmunk.shape.bounding_box</a></h1>
+<div>
+
+<pre><code>min_x,min_y,max_x,max_y=shape:bounding_box()
+</code></pre>
+
+<p>Get the current bounding box for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.collision_type.html">wetgenes.chipmunk.shape.collision_type</a></h1>
+<div>
+
+<pre><code>f=shape:collision_type()
+f=shape:collision_type(f)
+</code></pre>
+
+<p>Get and/or Set the collision type for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.elasticity.html">wetgenes.chipmunk.shape.elasticity</a></h1>
+<div>
+
+<pre><code>f=shape:elasticity()
+f=shape:elasticity(f)
+</code></pre>
+
+<p>Get and/or Set the elasticity for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.filter.html">wetgenes.chipmunk.shape.filter</a></h1>
+<div>
+
+<pre><code>f=shape:filter()
+f=shape:filter(f)
+</code></pre>
+
+<p>Get and/or Set the filter for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.friction.html">wetgenes.chipmunk.shape.friction</a></h1>
+<div>
+
+<pre><code>f=shape:friction()
+f=shape:friction(f)
+</code></pre>
+
+<p>Get and/or Set the friction for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.radius.html">wetgenes.chipmunk.shape.radius</a></h1>
+<div>
+
+<pre><code>radius=shape:radius()
+radius=shape:radius(radius)
+</code></pre>
+
+<p>Get and/or Set the radius for this shape. Setting is unsafe and may 
+break the physics simulation.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.surface_velocity.html">wetgenes.chipmunk.shape.surface_velocity</a></h1>
+<div>
+
+<pre><code>vx,vy=shape:surface_velocity()
+vx,vy=shape:surface_velocity(vx,vy)
+</code></pre>
+
+<p>Get and/or Set the surface velocity for this shape.</p>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.chipmunk.shape';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>
