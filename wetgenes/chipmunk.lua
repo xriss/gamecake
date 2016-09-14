@@ -478,14 +478,37 @@ Set or clear the velocity callback update function for this body.
 	body.delta_time
 
 This callback will be called with the above values set into body, you 
-can adjust these and return true to perform a normal update but with 
-these new values.
+can adjust these and return true to perform a normal velocity update 
+but with these new values.
 
 IE you can choose a new gravity vector for this body which is the 
-simplest most useful change to make.
+simplest change to make.
 
-Alternatively you can update the bodys velocity directly and 
-return false so the normal velocity update will not be run.
+Alternatively you can update the bodys velocity directly and return 
+false so the normal velocity update code will not be run.
+
+]]
+chipmunk.body_functions.velocity_func=function(body,cb)
+	core.body_velocity_func(body,cb)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.body.position_func
+
+	body:position_func(position_callback)
+	body:position_func()
+
+Set or clear the position callback update function for this body.
+
+	position_callback(body)
+
+	body.delta_time
+
+This callback will be called with the above values set into body, you 
+can adjust these and return true to perform a normal position update 
+but with these new values.
+
+Alternatively you can update the bodys position directly and return 
+false so the normal position update code will not be run.
 
 ]]
 chipmunk.body_functions.velocity_func=function(body,cb)
@@ -576,6 +599,19 @@ Get and/or Set the filter for this shape.
 ]]
 chipmunk.shape_functions.filter=function(shape,group,categories,mask)
 	return core.shape_filter(shape[0],group,categories,mask)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.shape.radius
+
+	radius=shape:radius()
+	radius=shape:radius(radius)
+
+Get and/or Set the radius for this shape. Setting is unsafe and may 
+break the physics simulation.
+
+]]
+chipmunk.shape_functions.radius=function(shape,radius)
+	return core.shape_radius(shape[0],radius)
 end
 ------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.arbiter.points
