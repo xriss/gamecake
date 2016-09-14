@@ -6,27 +6,22 @@
 		<script>hljs.initHighlightingOnLoad();</script>
 	</head>
 	<body>
-<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.grd.html">wetgenes.grd</a></h1><h1><a href="wetgenes.grd.palette.html">wetgenes.grd.palette</a></h1>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.package.html">wetgenes.package</a></h1><h1><a href="wetgenes.package.reload.html">wetgenes.package.reload</a></h1>
 <div>
 
-<pre><code>g:palette(x,w)
-g:palette(x,w,"")
-g:palette(x,w,tab)
-g:palette(x,w,str)
-g:palette(x,w,grd)
+<pre><code>local module=wpackage.reload(modulename)
 </code></pre>
 
-<p>These are the same as g:pixels() but refer to the palette information 
-which is stored as a 1 pixel high 256 pixel wide rgba image. The use of 
-"" to read a string of bytes and passing in either a table of numerical 
-values or string of bytes to write into the palette is the same system 
-as used with pixels.</p>
+<p>A wrapper for require that forces a very dumb module reload by merging 
+a newly loaded module into the old module table if one already exists 
+this can easily break everything but should mostly work out of dumb 
+luck.</p>
 
 
 </div><div id="disqus_thread"></div>
 <script type="text/javascript">
 	var disqus_shortname = 'gamecake';
-	var disqus_identifier = 'wetgenes.grd.palette';
+	var disqus_identifier = 'wetgenes.package.reload';
 	var disqus_title=disqus_identifier;
 	(function() {
 		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

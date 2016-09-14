@@ -268,6 +268,26 @@ otherwise returns a grd object.</p>
 
 
 </div><hr/>
+<h1><a href="wetgenes.grd.create_convert.html">wetgenes.grd.create_convert</a></h1>
+<div>
+
+<pre><code>g:create_convert(fmt)
+</code></pre>
+
+<p>Like convert but returns a new grd rather than converting in place.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.create_normal.html">wetgenes.grd.create_normal</a></h1>
+<div>
+
+<pre><code>gr=g:create_normal()
+</code></pre>
+
+<p>convert a greyscale height map  into an rgb normal map using the sobel filter.</p>
+
+
+</div><hr/>
 <h1><a href="wetgenes.grd.destroy.html">wetgenes.grd.destroy</a></h1>
 <div>
 
@@ -287,19 +307,6 @@ using this function.</p>
 </code></pre>
 
 <p>Create a duplicate of this grd and return it.</p>
-
-<p>Returns nil,error if something goes wrong so can be used with assert 
-otherwise returns g so that we can chain the result.</p>
-
-
-</div><hr/>
-<h1><a href="wetgenes.grd.duplicate_convert.html">wetgenes.grd.duplicate_convert</a></h1>
-<div>
-
-<pre><code>ga = g:duplicate_convert(fmt)
-</code></pre>
-
-<p>Create a duplicate of this grd converted to a new format and return it.</p>
 
 <p>Returns nil,error if something goes wrong so can be used with assert 
 otherwise returns g so that we can chain the result.</p>
@@ -459,6 +466,7 @@ the appropriate modes. </p>
 g:palette(x,w,"")
 g:palette(x,w,tab)
 g:palette(x,w,str)
+g:palette(x,w,grd)
 </code></pre>
 
 <p>These are the same as g:pixels() but refer to the palette information 
@@ -487,7 +495,6 @@ g:pixels(x,y,z,w,h,d,"")
 you get per pixel <em>depends</em> on the format of the grd. Note the passing 
 in of an empty string to indicate that you with to receive a string.</p>
 
-
 <pre><code>g:pixels(x,y,w,h,tab)
 g:pixels(x,y,z,w,h,d,tab)
 </code></pre>
@@ -503,6 +510,13 @@ g:pixels(x,y,z,w,h,d,str)
 <p>Write the area of pixels from a string of bytes which is provided in 
 str, the amount of bytes you need to provide per pixel <em>depends</em> on the 
 format of the grd.</p>
+
+<pre><code>g:pixels(x,y,w,h,grd)
+g:pixels(x,y,z,w,h,d,grd)
+</code></pre>
+
+<p>Write the area of pixels from a grd which is provided in grd. use 
+clip/layer functions to select a portion of a larger grd.</p>
 
 <p>As you can see depending on the arguments given this does one of two 
 things, read some pixels or write some pixels. The area that is to be 
@@ -525,6 +539,16 @@ otherwise returns the requested data.</p>
 
 <p>Returns nil,error if something goes wrong so can be used with assert 
 otherwise returns g so that we can chain the result.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.remap.html">wetgenes.grd.remap</a></h1>
+<div>
+
+<pre><code>ga:remap(gb)
+</code></pre>
+
+<p>Fill gb with a remaped version of ga, each pixel is mapped to the closest palette entry.</p>
 
 
 </div><hr/>
@@ -618,6 +642,27 @@ same table that was passed in.</p>
 
 <p>You can then use this information to crop this image resulting is a 
 smaller sized grd containing all the solid pixels.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.grd.stream.html">wetgenes.grd.stream</a></h1>
+<div>
+
+<pre><code>stream=g:stream(filename)
+stream=g:stream({filename=filename,...})
+</code></pre>
+
+<p>Open a GIF stream, returns a table with the following functions,</p>
+
+<pre><code>stream:write(ga)
+</code></pre>
+
+<p>Add a frame to the gif, each frame should be the same size and color map.</p>
+
+<pre><code>stream:close(ga)
+</code></pre>
+
+<p>Close the stream and finalise the GIF.</p>
 
 
 </div><div id="disqus_thread"></div>

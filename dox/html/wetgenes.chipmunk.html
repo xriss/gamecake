@@ -1,0 +1,520 @@
+<html>
+	<head>
+		<link rel='stylesheet' href='dox.css' />
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+<h1><a href="index.html">index</a></h1><h1><a href="wetgenes.html">wetgenes</a></h1><h1><a href="wetgenes.chipmunk.html">wetgenes.chipmunk</a></h1>
+<div>
+
+<pre><code>local chipmunk=require("wetgenes.chipmunk")
+</code></pre>
+
+<p>We use chipmunk as the local name of this library.</p>
+
+<p>A lua binding to the Chipmunk2D physics library https://chipmunk-physics.net/</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.arbiter.ignore.html">wetgenes.chipmunk.arbiter.ignore</a></h1>
+<div>
+
+<pre><code>return arbiter:ignore()
+</code></pre>
+
+<p>Ignore this collision, from now until the shapes separate.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.arbiter.points.html">wetgenes.chipmunk.arbiter.points</a></h1>
+<div>
+
+<pre><code>points=arbiter:points()
+points=arbiter:points(points)
+</code></pre>
+
+<p>Get and/or Set the points data for this arbiter.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.arbiter.surface_velocity.html">wetgenes.chipmunk.arbiter.surface_velocity</a></h1>
+<div>
+
+<pre><code>vx,vy=arbiter:surface_velocity()
+vx,vy=arbiter:surface_velocity(vx,vy)
+</code></pre>
+
+<p>Get and/or Set the surface velocity for this arbiter.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.html">wetgenes.chipmunk.body</a></h1>
+<div>
+
+<pre><code>body=chipmunk.body(mass,inertia)
+</code></pre>
+
+<p>Create a dynamic body, with the given mass and inertia.</p>
+
+<p>You will need to add the body to a space before it exists so it is 
+normally preferable to use the space:body function which will call this 
+function and then automatically add the body into the space.</p>
+
+<pre><code>body=chipmunk.body("kinematic")
+</code></pre>
+
+<p>Create a kinematic body, these are bodies that we can move around, by 
+setting its velocity, but are not effected by collisions with other 
+bodies. EG a moving platform.</p>
+
+<pre><code>body=chipmunk.body("static")
+</code></pre>
+
+<p>Create a static body, mostly you can just use space.static as the 
+default static body but you may create more if you wish to group your 
+static shapes into multiple bodies.</p>
+
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.angle.html">wetgenes.chipmunk.body.angle</a></h1>
+<div>
+
+<pre><code>a=body:angle()
+a=body:angle(a)
+</code></pre>
+
+<p>Get and/or Set the rotation angle in radians for this body.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.angular_velocity.html">wetgenes.chipmunk.body.angular_velocity</a></h1>
+<div>
+
+<pre><code>a=body:angular_velocity()
+a=body:angular_velocity(a)
+</code></pre>
+
+<p>Get and/or Set the angular velocity in radians for this body.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.apply_force.html">wetgenes.chipmunk.body.apply_force</a></h1>
+<div>
+
+<pre><code>body:apply_force(fx,fy,px,py)
+body:apply_force(fx,fy,px,py,"world")
+</code></pre>
+
+<p>Apply a force to this body at a specific point, the point can be in 
+world coordinates if you include the "world" flag but defaults to local 
+object coordinates.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.apply_impulse.html">wetgenes.chipmunk.body.apply_impulse</a></h1>
+<div>
+
+<pre><code>body:apply_impulse(ix,iy,px,py)
+body:apply_impulse(ix,iy,px,py,"world")
+</code></pre>
+
+<p>Apply a force to this body at a specific point, the point can be in 
+world coordinates if you include the "world" flag but defaults to local 
+object coordinates.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.force.html">wetgenes.chipmunk.body.force</a></h1>
+<div>
+
+<pre><code>vx,vy=body:force()
+vx,vy=body:force(vx,vy)
+</code></pre>
+
+<p>Get and/or Set the force for this body. This is reset back to 0 after 
+each step.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.position.html">wetgenes.chipmunk.body.position</a></h1>
+<div>
+
+<pre><code>vx,vy=body:position()
+vx,vy=body:position(vx,vy)
+</code></pre>
+
+<p>Get and/or Set the position for this body.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.position_func.html">wetgenes.chipmunk.body.position_func</a></h1>
+<div>
+
+<pre><code>body:position_func(position_callback)
+body:position_func()
+</code></pre>
+
+<p>Set or clear the position callback update function for this body.</p>
+
+<pre><code>position_callback(body)
+
+body.delta_time
+</code></pre>
+
+<p>This callback will be called with the above values set into body, you 
+can adjust these and return true to perform a normal position update 
+but with these new values.</p>
+
+<p>Alternatively you can update the bodys position directly and return 
+false so the normal position update code will not be run.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.shape.html">wetgenes.chipmunk.body.shape</a></h1>
+<div>
+
+<pre><code>shape=body:shape(form,...)
+</code></pre>
+
+<p>Add a new shape to this body, returns the shape for further 
+modification.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.velocity.html">wetgenes.chipmunk.body.velocity</a></h1>
+<div>
+
+<pre><code>vx,vy=body:velocity()
+vx,vy=body:velocity(vx,vy)
+</code></pre>
+
+<p>Get and/or Set the velocity for this body.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.body.velocity_func.html">wetgenes.chipmunk.body.velocity_func</a></h1>
+<div>
+
+<pre><code>body:velocity_func(velocity_callback)
+body:velocity_func()
+</code></pre>
+
+<p>Set or clear the velocity callback update function for this body.</p>
+
+<pre><code>velocity_callback(body)
+
+body.gravity_x
+body.gravity_y
+body.damping
+body.delta_time
+</code></pre>
+
+<p>This callback will be called with the above values set into body, you 
+can adjust these and return true to perform a normal velocity update 
+but with these new values.</p>
+
+<p>IE you can choose a new gravity vector for this body which is the 
+simplest change to make.</p>
+
+<p>Alternatively you can update the bodys velocity directly and return 
+false so the normal velocity update code will not be run.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.constraint.html">wetgenes.chipmunk.constraint</a></h1>
+<div>
+
+<pre><code>constraint=chipmunk.constraint(abody,bbody,form,...)
+</code></pre>
+
+<p>Create a constraint between two bodies.</p>
+
+<p>You will need to add the constraint to a space before it has any effect 
+so it is normally preferable to use the space:constraint function which 
+will call this function and then automatically add the constraint into 
+the space.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.html">wetgenes.chipmunk.shape</a></h1>
+<div>
+
+<pre><code>shape=chipmunk.shape(body,form...)
+</code></pre>
+
+<p>Create a shape, added to the given body. Shapes are always added to a 
+body but must be added to a space before they have any effect. So it is 
+normally preferable to use the body:shape function which will 
+automatically add the shape into the space that the body belongs to.</p>
+
+<pre><code>shape=chipmunk.shape(space.static,form...)
+</code></pre>
+
+<p>Create a static shape in world space. We use space.static as the body. </p>
+
+<pre><code>shape=chipmunk.shape(body,"circle",radius,x,y)
+</code></pre>
+
+<p>Form of "circle" needs a radius and a centre point.</p>
+
+<pre><code>shape=chipmunk.shape(body,"segment",ax,ay,bx,by,radius)
+</code></pre>
+
+<p>Form of "segment" needs two points and a radius.</p>
+
+<pre><code>shape=chipmunk.shape(body,"poly",...)
+</code></pre>
+
+<p>Form of "poly" is not wired up to anything yet but probably a stream of 
+points?</p>
+
+<pre><code>shape=chipmunk.shape(body,"box",minx,miny,maxx,maxy,radius)
+</code></pre>
+
+<p>Form of "box" needs two points for opposite corners, lowest pair 
+followed by highest pair and a radius. The radius should be 0 unless 
+you want rounded corners</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.bounding_box.html">wetgenes.chipmunk.shape.bounding_box</a></h1>
+<div>
+
+<pre><code>min_x,min_y,max_x,max_y=shape:bounding_box()
+</code></pre>
+
+<p>Get the current bounding box for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.collision_type.html">wetgenes.chipmunk.shape.collision_type</a></h1>
+<div>
+
+<pre><code>f=shape:collision_type()
+f=shape:collision_type(f)
+</code></pre>
+
+<p>Get and/or Set the collision type for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.elasticity.html">wetgenes.chipmunk.shape.elasticity</a></h1>
+<div>
+
+<pre><code>f=shape:elasticity()
+f=shape:elasticity(f)
+</code></pre>
+
+<p>Get and/or Set the elasticity for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.filter.html">wetgenes.chipmunk.shape.filter</a></h1>
+<div>
+
+<pre><code>f=shape:filter()
+f=shape:filter(f)
+</code></pre>
+
+<p>Get and/or Set the filter for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.friction.html">wetgenes.chipmunk.shape.friction</a></h1>
+<div>
+
+<pre><code>f=shape:friction()
+f=shape:friction(f)
+</code></pre>
+
+<p>Get and/or Set the friction for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.radius.html">wetgenes.chipmunk.shape.radius</a></h1>
+<div>
+
+<pre><code>radius=shape:radius()
+radius=shape:radius(radius)
+</code></pre>
+
+<p>Get and/or Set the radius for this shape. Setting is unsafe and may 
+break the physics simulation.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.surface_velocity.html">wetgenes.chipmunk.shape.surface_velocity</a></h1>
+<div>
+
+<pre><code>vx,vy=shape:surface_velocity()
+vx,vy=shape:surface_velocity(vx,vy)
+</code></pre>
+
+<p>Get and/or Set the surface velocity for this shape.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.html">wetgenes.chipmunk.space</a></h1>
+<div>
+
+<pre><code>space=chipmunk.space()
+</code></pre>
+
+<p>Create the space you will be simulating physics in.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.add.html">wetgenes.chipmunk.space.add</a></h1>
+<div>
+
+<pre><code>space:add(body)
+space:add(shape)
+space:add(constraint)
+</code></pre>
+
+<p>Add a body/shape/constraint to the space.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.add_handler.html">wetgenes.chipmunk.space.add_handler</a></h1>
+<div>
+
+<pre><code>space:add_handler(handler,id1,id2)
+space:add_handler(handler,id1)
+space:add_handler(handler)
+</code></pre>
+
+<p>Add collision callback handler, for the given collision types.</p>
+
+<p>The handler table will have other values inserted in it and will be 
+used as an arbiter table in callbacks. So <em>always</em> pass in a new one to 
+this function. There does not seem to be a way to free handlers so be 
+careful what you add.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.body.html">wetgenes.chipmunk.space.body</a></h1>
+<div>
+
+<pre><code>space:body(...)
+</code></pre>
+
+<p>Create and add this body to the space.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.collision_bias.html">wetgenes.chipmunk.space.collision_bias</a></h1>
+<div>
+
+<pre><code>v=space:collision_bias()
+v=space:collision_bias(v)
+</code></pre>
+
+<p>Get and/or Set the colision bias for this space.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.collision_slop.html">wetgenes.chipmunk.space.collision_slop</a></h1>
+<div>
+
+<pre><code>v=space:collision_slop()
+v=space:collision_slop(v)
+</code></pre>
+
+<p>Get and/or Set the colision slop for this space.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.constraint.html">wetgenes.chipmunk.space.constraint</a></h1>
+<div>
+
+<pre><code>space:constraint(...)
+</code></pre>
+
+<p>Create and add this constraint to the space.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.contains.html">wetgenes.chipmunk.space.contains</a></h1>
+<div>
+
+<pre><code>space:contains(body)
+space:contains(shape)
+space:contains(constraint)
+</code></pre>
+
+<p>Does the space contain this body/shape/constraint, possibly superfluous 
+as we can check our own records.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.damping.html">wetgenes.chipmunk.space.damping</a></h1>
+<div>
+
+<pre><code>v=space:damping()
+v=space:damping(v)
+</code></pre>
+
+<p>Get and/or Set the damping for this space.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.gravity.html">wetgenes.chipmunk.space.gravity</a></h1>
+<div>
+
+<pre><code>vx,vy=space:gravity()
+vx,vy=space:gravity(vx,vy)
+</code></pre>
+
+<p>Get and/or Set the gravity vector for this space.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.iterations.html">wetgenes.chipmunk.space.iterations</a></h1>
+<div>
+
+<pre><code>v=space:iterations()
+v=space:iterations(v)
+</code></pre>
+
+<p>Get and/or Set the iterations for this space.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.remove.html">wetgenes.chipmunk.space.remove</a></h1>
+<div>
+
+<pre><code>space:remove(body)
+space:remove(shape)
+space:remove(constraint)
+</code></pre>
+
+<p>Remove a body/shape/constraint from this space.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.space.step.html">wetgenes.chipmunk.space.step</a></h1>
+<div>
+
+<pre><code>space:step(time)
+</code></pre>
+
+<p>Run the simulation for time in seconds. EG 1/60.</p>
+
+
+</div><div id="disqus_thread"></div>
+<script type="text/javascript">
+	var disqus_shortname = 'gamecake';
+	var disqus_identifier = 'wetgenes.chipmunk';
+	var disqus_title=disqus_identifier;
+	(function() {
+		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
+</script>
+	</body>
+</html>
