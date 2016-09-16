@@ -87,12 +87,12 @@ bitsynth.fillnotes=function(t)
 			local s=bitsynth.note_names[n]..o
 			local f=bitsynth.note2freq(s)
 			t[s]=f
-			t[s:gsub("#","s")]=f -- also use H as # is a special symbol
+			t[s:gsub("#","s")]=f -- also use s for sharp as # is an operator
 		end
 	end
 end
 
-bitsynth.fillnotes(bitsynth) -- we can now use bitsynth.C4 or bitsynth.CH4 which is easier than bitsynth["C#4"]
+bitsynth.fillnotes(bitsynth) -- we can now use bitsynth.C4 or bitsynth.Cs4 which is easier than bitsynth["C#4"]
 
 
 -- repeating wave functions
@@ -110,6 +110,10 @@ end
 
 bitsynth.fwav.sawtooth=function(t)
 	return (((t+0.75)%1)*-2)+1
+end
+
+bitsynth.fwav.whitenoise=function(t)
+	return (math.random()-0.5)*2 -- probably need a better random function?
 end
 
 bitsynth.fwav.triangle=function(t)

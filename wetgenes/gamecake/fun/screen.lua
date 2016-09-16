@@ -51,6 +51,8 @@ screen.create=function(it,opts)
 	
 	it.hx=it.opts.size and it.opts.size[1] or 360
 	it.hy=it.opts.size and it.opts.size[2] or 240
+	
+	it.drawlist=opts.drawlist
 
 	it.fbo=framebuffers.create(it.hx,it.hy,1)
 --	it.lay=layouts.create{parent={x=0,y=0,w=it.hx,h=it.hy}}

@@ -52,7 +52,7 @@ void main(void)
 	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba;	
 
 	gl_FragColor=c;
-	if((gl_FragColor.a)<0.25) discard;
+	if((gl_FragColor.a)<0.0625) discard;
 
 }
 

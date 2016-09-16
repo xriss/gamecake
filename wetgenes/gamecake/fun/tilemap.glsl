@@ -49,10 +49,10 @@ void main(void)
 	vec2 tm=(floor(uv)+vec2(0.5,0.5))/map_info.zw;			// map uv
 
 	d=texture2D(tex_map, tm).rgba;	
-	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba;	
+	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba * v_color;	
 
 	gl_FragColor=c;
-	if((gl_FragColor.a)<0.25) discard;
+	if((gl_FragColor.a)<0.0625) discard;
 
 }
 

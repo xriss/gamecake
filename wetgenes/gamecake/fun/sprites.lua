@@ -41,6 +41,11 @@ sprites.create=function(it,opts)
 
 	it.tiles=assert(it.system.components[it.opts.tiles or "tiles"]) -- find tile bitmap by name
 
+	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per sprite component
+	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
+
+	it.drawlist=opts.drawlist or { { color={1,1,1,1} , dx=0 , dy=0 } } -- use this to add drop shadows
+
 	it.setup=function(opts)
 		
 		it.px=0 -- display x offset 1 is a single tile wide
@@ -61,11 +66,11 @@ sprites.create=function(it,opts)
 		v.idx=(idx or v.idx or (#it.list+1) )
 		it.list[ v.idx ]=v
 		
-		v.hx=v.hx or v.h or it.tiles.tile_hx
-		v.hy=v.hy or v.h or it.tiles.tile_hy
+		v.hx=v.hx or v.h or it.tile_hx
+		v.hy=v.hy or v.h or it.tile_hy
 
-		v.tx=v.tx or (           ( (v.t or 0)%256 ) )--* math.ceil(v.hx/it.tiles.tile_hx) )
-		v.ty=v.ty or ( math.floor( (v.t or 0)/256 ) )--* math.ceil(v.hy/it.tiles.tile_hy) )
+		v.tx=v.tx or (           ( (v.t or 0)%256 ) )
+		v.ty=v.ty or ( math.floor( (v.t or 0)/256 ) )
 
 		v.ox=v.ox or v.hx/2
 		v.oy=v.oy or v.hy/2
@@ -80,10 +85,10 @@ sprites.create=function(it,opts)
 
 		v.zf=v.zf or 0
 
-		v.r=v.r or 1
-		v.g=v.g or 1
-		v.b=v.b or 1
-		v.a=v.a or 1
+		v.r=v.r or ( v.color and ( v.color[1] or v.color.r ) ) or 1
+		v.g=v.g or ( v.color and ( v.color[2] or v.color.g ) ) or 1
+		v.b=v.b or ( v.color and ( v.color[3] or v.color.b ) ) or 1
+		v.a=v.a or ( v.color and ( v.color[4] or v.color.a ) ) or 1
 		
 	end
 
@@ -92,42 +97,46 @@ sprites.create=function(it,opts)
 	
 	it.draw=function()
 		
-		local batch={}
-		for idx,v in pairs(it.list) do
+		for i,dl in ipairs(it.drawlist) do
 
-			local ixw=(v.tx+(v.hx/it.tiles.tile_hx))/it.tiles.bitmap_hx
-			local iyh=(v.ty+(v.hy/it.tiles.tile_hy))/it.tiles.bitmap_hy
-			local ix=v.tx/it.tiles.bitmap_hx
-			local iy=v.ty/it.tiles.bitmap_hy
+			local batch={}
+			for idx,v in pairs(it.list) do
+
+				local ixw=(v.tx*it.tile_hx+v.hx)/(it.tiles.bitmap_hx*it.tiles.tile_hx)
+				local iyh=(v.ty*it.tile_hy+v.hy)/(it.tiles.bitmap_hy*it.tiles.tile_hy)
+				local ix= (v.tx*it.tile_hx     )/(it.tiles.bitmap_hx*it.tiles.tile_hx)
+				local iy= (v.ty*it.tile_hy     )/(it.tiles.bitmap_hy*it.tiles.tile_hy)
+				
+				local ox=(v.ox)*(v.sx)
+				local oy=(v.oy)*(v.sy)
+				local hx=v.hx*(v.sx)
+				local hy=v.hy*(v.sy)
+				
+				local s=-math.sin(math.pi*(v.rz)/180)
+				local c= math.cos(math.pi*(v.rz)/180)
+
+				local v1=gl.apply_modelview( {dl.dx+v.px-c*(ox)-s*(oy),			dl.dy+v.py+s*(ox)-c*(oy),			v.zf,1} )
+				local v2=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)-s*(oy),		dl.dy+v.py-s*(hx-ox)-c*(oy),		v.zf,1} )
+				local v3=gl.apply_modelview( {dl.dx+v.px-c*(ox)+s*(hy-oy),		dl.dy+v.py+s*(ox)+c*(hy-oy),		v.zf,1} )
+				local v4=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)+s*(hy-oy),	dl.dy+v.py-s*(hx-ox)+c*(hy-oy),		v.zf,1} )
+
+				local t=
+				{
+					v1[1],	v1[2],	v1[3],		ix,		iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+					v1[1],	v1[2],	v1[3],		ix,		iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+					v2[1],	v2[2],	v2[3],		ixw,	iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+					v3[1],	v3[2],	v3[3],		ix,		iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+					v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+					v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+				}
+				
+				local l=#batch for i,v in ipairs(t) do batch[ l+i ]=v end
+
+			end
+
+			flat.tristrip("rawuvrgba",batch)
 			
-			local ox=(v.ox)*(v.sx)
-			local oy=(v.oy)*(v.sy)
-			local hx=v.hx*(v.sx)
-			local hy=v.hy*(v.sy)
-			
-			local s=-math.sin(math.pi*(v.rz)/180)
-			local c= math.cos(math.pi*(v.rz)/180)
-
-			local v1=gl.apply_modelview( {v.px-c*(ox)-s*(oy),			v.py+s*(ox)-c*(oy),			v.zf,1} )
-			local v2=gl.apply_modelview( {v.px+c*(hx-ox)-s*(oy),		v.py-s*(hx-ox)-c*(oy),		v.zf,1} )
-			local v3=gl.apply_modelview( {v.px-c*(ox)+s*(hy-oy),		v.py+s*(ox)+c*(hy-oy),		v.zf,1} )
-			local v4=gl.apply_modelview( {v.px+c*(hx-ox)+s*(hy-oy),		v.py-s*(hx-ox)+c*(hy-oy),	v.zf,1} )
-
-			local t=
-			{
-				v1[1],	v1[2],	v1[3],		ix,		iy,			v.r,v.g,v.b,v.a,
-				v1[1],	v1[2],	v1[3],		ix,		iy,			v.r,v.g,v.b,v.a,
-				v2[1],	v2[2],	v2[3],		ixw,	iy,			v.r,v.g,v.b,v.a,
-				v3[1],	v3[2],	v3[3],		ix,		iyh,		v.r,v.g,v.b,v.a,
-				v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r,v.g,v.b,v.a,
-				v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r,v.g,v.b,v.a,
-			}
-			
-			local l=#batch for i,v in ipairs(t) do batch[ l+i ]=v end
-
 		end
-
-		flat.tristrip("rawuvrgba",batch)
 
 	end
 

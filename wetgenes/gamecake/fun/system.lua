@@ -194,8 +194,25 @@ system.draw=function()
 
 	screen.draw_into_start()
 
-	for _,it in ipairs(system.components) do
-		if it.draw then it.draw() end
+	if screen.drawlist then -- we want to combine drop shadows
+		for i,dl in ipairs(screen.drawlist) do
+			for _,it in ipairs(system.components) do
+				if it.draw then
+					if it.drawlist or i==1 then
+						if it.drawlist then
+							it.drawlist={dl}
+						end
+						it.draw()
+					end
+				end
+			end
+		end
+	else
+		for _,it in ipairs(system.components) do
+			if it.draw then
+				it.draw()
+			end
+		end
 	end
 
 	screen.draw_into_finish()
@@ -219,11 +236,13 @@ system.save_fun_png=function(name,path)
 			t.component=it
 			t.grd=it.bitmap_grd
 		end
+--[[
 		if it.tilemap_grd then
 			t=t or {}
 			t.component=it
 			t.grd=it.tilemap_grd
 		end
+]]
 		if t then
 			its[#its+1]=t
 		end
@@ -299,10 +318,11 @@ system.save_fun_png=function(name,path)
 	end
 	
 	local doff=0 -- data offset
+	local checksum=0
 	for i=1,dh do
 		local d
 		if i==1 then -- add a header then start the string
-			d="FUN\0"..s32_to_string(0)..s32_to_string(dsize)..dstr:sub(doff+1,doff+(hx*4)+1-12)
+			d="FUN\0"..s32_to_string(checksum)..s32_to_string(dsize)..dstr:sub(doff+1,doff+(hx*4)+1-12)
 			doff=doff+(hx*4)-12
 		else
 			d=dstr:sub(doff+1,doff+(hx*4)+1) -- the last line will automatically be shorter if needed
@@ -318,16 +338,15 @@ system.save_fun_png=function(name,path)
 		print(i,it.px,it.py,it.hx,it.hy,it.component.name)
 	end
 
-	-- with a lighter core
+	-- draw box around area
 	for i,it in ipairs(its) do		
 		g:clip( it.px-5       , it.py-5       , 0 , 2        , it.hy+10 , 1 ):clear(0xff444444)
 		g:clip( it.px-5       , it.py-5       , 0 , it.hx+10 , 2        , 1 ):clear(0xff444444)
 		g:clip( it.px+it.hx+3 , it.py-5       , 0 , 2        , it.hy+10 , 1 ):clear(0xff444444)
 		g:clip( it.px-5       , it.py+it.hy+3 , 0 , it.hx+10 , 2        , 1 ):clear(0xff444444)
-
 	end
 
--- draw title
+	-- draw title
 	local font=bitdown.setup_blit_font()
 	for i,it in ipairs(its) do
 		local s=it.component.name:upper()
