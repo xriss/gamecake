@@ -45,10 +45,15 @@ tiles.create=function(it,opts)
 	it.bitmap_hx=it.opts.bitmap_size and it.opts.bitmap_size[1] or 16
 	it.bitmap_hy=it.opts.bitmap_size and it.opts.bitmap_size[2] or 16
 	
+	it.hx=it.tile_hx*it.bitmap_hx
+	it.hy=it.tile_hy*it.bitmap_hy
+	
+--	it.hx=2^math.ceil( math.log(it.hx)/math.log(2) ) -- force power of 2?
+--	it.hy=2^math.ceil( math.log(it.hy)/math.log(2) )
 
 	it.setup=function(opts)
 		
-		it.bitmap_grd  =wgrd.create("U8_RGBA", it.tile_hx*it.bitmap_hx , it.tile_hy*it.bitmap_hy , 1)
+		it.bitmap_grd  =wgrd.create("U8_RGBA", it.hx , it.hy , 1)
 
 		it.bitmap_tex=gl.GenTexture()
 		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	

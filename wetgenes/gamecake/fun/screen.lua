@@ -49,7 +49,7 @@ screen.create=function(it,opts)
 	
 	it.filter=it.opts.filter or "none"
 	
-	it.hx=it.opts.size and it.opts.size[1] or 360
+	it.hx=it.opts.size and it.opts.size[1] or 320
 	it.hy=it.opts.size and it.opts.size[2] or 240
 	
 	it.drawlist=opts.drawlist

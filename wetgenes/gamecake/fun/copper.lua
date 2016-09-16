@@ -42,7 +42,7 @@ copper.create=function(it,opts)
 	it.component="copper"
 	it.name=opts.name
 	
-	it.hx=it.opts.size and it.opts.size[1] or it.screen.hx or 360
+	it.hx=it.opts.size and it.opts.size[1] or it.screen.hx or 320
 	it.hy=it.opts.size and it.opts.size[2] or it.screen.hy or 240
 
 -- set shader program name and callback to fill in uniform values

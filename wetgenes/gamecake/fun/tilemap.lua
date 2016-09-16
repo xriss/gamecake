@@ -52,6 +52,9 @@ tilemap.create=function(it,opts)
 	it.tilemap_hx=it.opts.tilemap_size and it.opts.tilemap_size[1] or 256
 	it.tilemap_hy=it.opts.tilemap_size and it.opts.tilemap_size[2] or 256
 	
+--	it.tilemap_hx=2^math.ceil( math.log(it.tilemap_hx)/math.log(2) ) -- force power of 2?
+--	it.tilemap_hy=2^math.ceil( math.log(it.tilemap_hy)/math.log(2) )
+	
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per map
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
 	
@@ -65,8 +68,8 @@ tilemap.create=function(it,opts)
 		gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )	
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.REPEAT)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.REPEAT)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
 
 	end
 
@@ -117,8 +120,8 @@ tilemap.create=function(it,opts)
 
 				gl.Uniform4f( p:uniform("tile_info"),	it.tile_hx,
 														it.tile_hy,
-														it.tiles.tile_hx*it.tiles.bitmap_hx,
-														it.tiles.tile_hy*it.tiles.bitmap_hy )
+														it.tiles.hx,
+														it.tiles.hy )
 				gl.Uniform4f( p:uniform("map_info"), 	0,0,it.tilemap_hx,it.tilemap_hy )
 
 				gl.Uniform4f( p:uniform("color"), 	dl.color[1],dl.color[2],dl.color[3],dl.color[4] )
