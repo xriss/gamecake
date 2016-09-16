@@ -62,6 +62,18 @@ main.setup=function()
 --		.load_and_setup("test",
 --		"lua/"..(M.modname):gsub("%.","/"):gsub("[^/]+$",""))
 
+	local screen=main.system.components.screen
+	oven.win:resize(screen.hx*screen.scale,screen.hy*screen.scale)
+
+	view=views.create({
+		parent=views.get(),
+		mode="full",
+		vx=screen.hx*screen.scale,
+		vy=screen.hy*screen.scale,
+		vz=screen.hy*screen.scale*4,
+		fov=1/4,
+	})
+	
 end
 
 
