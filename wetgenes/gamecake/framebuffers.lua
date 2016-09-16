@@ -109,18 +109,18 @@ function M.bake(oven,framebuffers)
 		if d==0 then framebuffers.free_depth(fbo) end
 
 		if w~=0 and h~=0 then 
+			fbo.txw=images.uptwopow(w) -- always keep textures in power of two for simplicity
+			fbo.txh=images.uptwopow(h)
 			if d~=0 then
 				if not fbo.depth then
 					fbo.depth=gl.GenRenderbuffer()
 				end
 				gl.BindRenderbuffer(gl.RENDERBUFFER, fbo.depth)
-				gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h)
+				gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh)
 			end
 			if not fbo.texture then
 				fbo.texture=gl.GenTexture()
 			end
-			fbo.txw=images.uptwopow(w) -- always keep textures in power of two for simplicity
-			fbo.txh=images.uptwopow(h)
 			fbo.uvw=w/fbo.txw -- need to use these max uv coords when drawing with texture instead of 1
 			fbo.uvh=h/fbo.txh -- unless you know you asked for a power of two in which case its fine to use 1
 
