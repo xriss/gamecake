@@ -88,3 +88,52 @@ function M.set_env(env)
 	if setfenv then setfenv(2,env) end
 	return env
 end
+
+
+-----------------------------------------------------------------------------
+--[[#wetgenes.set_env
+
+	gamecake -e" require('wetgenes').savescripts('./') "
+
+Run the above from the command line.
+
+This will export all the gamecake internal strings into the file system 
+it is saved into the current directory so be care full where you run it.
+
+Game Cake checks the files system first so, these files can be modified 
+and they will replace the built in versions.
+
+	gamecake -e" require('wetgenes').savescripts('./internal/') "
+
+This is a safer version that will save the files to ./internal/lua/* 
+instead of just ./lua/*
+
+]]
+-----------------------------------------------------------------------------
+M.savescripts=function(basedir)
+
+	assert(basedir, "missing destination path")
+
+	local wbake=require("wetgenes.bake")
+	local wgc=require("wetgenes.gamecake.core")
+	local names=wgc.list_cache_strings()
+
+	for n,v in pairs(names) do
+
+		local fname
+		if "lua/"==v:sub(1,4) then -- these are extra files, eg .glsl code
+			fname=v
+		else -- these are modules, so need to be turned into files
+			fname="lua/"..v:gsub("%.","/")..".lua"
+		end
+
+		local data=wgc.get_cache_string(v)
+		
+		print( "saving" , #data , " bytes as ", basedir..fname )
+		
+		wbake.create_dir_for_file( basedir..fname )
+		wbake.writefile( basedir..fname , data )
+		
+	end
+
+end
