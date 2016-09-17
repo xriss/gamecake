@@ -254,6 +254,23 @@ static int lua_gamecake_get_cache_string(lua_State *l)
 }
 
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// list all available cached strings, return a table with all the names
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gamecake_list_cache_strings(lua_State *l)
+{
+	int i;
+	lua_newtable(l);
+	for(i=0;wetgenes_cache_lua_mods[i];i+=2)
+	{
+		lua_pushstring(l, wetgenes_cache_lua_mods[i] );
+		lua_rawseti(l,-2,1+(i/2));
+	}
+	return 1;
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -264,6 +281,7 @@ LUALIB_API int luaopen_wetgenes_gamecake_core (lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
+		{"list_cache_strings",		lua_gamecake_list_cache_strings},
 		{"get_cache_string",		lua_gamecake_get_cache_string},
 
 		{"fontdata_sync",			lua_gamecake_fontdata_sync},
