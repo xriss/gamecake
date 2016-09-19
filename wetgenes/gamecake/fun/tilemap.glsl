@@ -30,6 +30,7 @@ precision highp float; /* really need better numbers if possible */
 #endif
 
 
+uniform sampler2D tex_cmap;
 uniform sampler2D tex_tile;
 uniform sampler2D tex_map;
 
@@ -42,15 +43,21 @@ varying vec4  v_color;
 
 void main(void)
 {
+	vec4 bg,fg; // colors
 	vec4 c;
 	vec4 d;
 	vec2 uv=v_texcoord.xy+map_info.xy;		// base uv
 	vec2 tc=fract(uv);						// tile uv
 	vec2 tm=(floor(uv)+vec2(0.5,0.5))/map_info.zw;			// map uv
-
+	
 	d=texture2D(tex_map, tm).rgba;	
-	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba * v_color;	
+	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba;
+	fg=texture2D(tex_cmap, vec2( d.b,0.5) ).rgba;
+	bg=texture2D(tex_cmap, vec2( d.a,0.5) ).rgba;
 
+	c*=fg; // forground tint, can adjust its alpha
+	c=((bg*(1.0-c.a))+c)* v_color; // background color mixed with pre-multiplied foreground and then finally tint all of it by the main color
+ 
 	gl_FragColor=c;
 	if((gl_FragColor.a)<0.0625) discard;
 

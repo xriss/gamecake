@@ -64,7 +64,7 @@ screen.create=function(it,opts)
 		vz=it.hy*4,
 	})
 
--- need another two buffers (no depth) to generate bloom with
+-- need another two buffers (no depth) to perform full screen shader fx and generate bloom with
 	it.fxbo1=framebuffers.create(it.hx,it.hy,0)
 	it.fxbo2=framebuffers.create(it.hx,it.hy,0)
 	

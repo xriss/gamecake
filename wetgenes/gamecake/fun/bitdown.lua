@@ -14,101 +14,87 @@ local wstr=require("wetgenes.string")
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local bitdown=M
 
-M.map={
+-- swanky32 base palette
+M.cmap_swanky32={
+	[ 0]={bgra=0x00000000,code=". ",name="transparent"},
+	[ 1]={bgra=0xff336622,code="g ",name="green_dark"},
+	[ 2]={bgra=0xff448822,code="G ",name="green"},
+	[ 3]={bgra=0xff66aa33,code="d ",name="green_light"},
+	[ 4]={bgra=0xff66bb77,code="D ",name="green_blue"},
+	[ 5]={bgra=0xff66cccc,code="C ",name="cyan"},
+	[ 6]={bgra=0xff5599cc,code="c ",name="cyan_blue"},
+	[ 7]={bgra=0xff5577cc,code="B ",name="blue"},
 
--- swanky32 by index
+	[ 8]={bgra=0xff445599,code="b ",name="blue_dark"},
+	[ 9]={bgra=0xff333366,code="I ",name="indigo"},
+	[10]={bgra=0xff332244,code="i ",name="indigo_dark"},
+	[11]={bgra=0xff442233,code="j ",name="brown_blue"},
+	[12]={bgra=0xff663333,code="f ",name="brown_dark"},
+	[13]={bgra=0xff884433,code="F ",name="brown"},
+	[14]={bgra=0xffbb7766,code="s ",name="brown_light"},
+	[15]={bgra=0xffeeaa99,code="S ",name="brown_magenta"},
 
-	[ 0]={bgra=0x00000000},
-	[ 1]={bgra=0xff336622},
-	[ 2]={bgra=0xff448822},
-	[ 3]={bgra=0xff66aa33},
-	[ 4]={bgra=0xff66bb77},
-	[ 5]={bgra=0xff66cccc},
-	[ 6]={bgra=0xff5599cc},
-	[ 7]={bgra=0xff5577cc},
+	[16]={bgra=0xffee88bb,code="M ",name="magenta"},
+	[17]={bgra=0xffdd6666,code="m ",name="magenta_red"},
+	[18]={bgra=0xffcc3333,code="R ",name="red"},
+	[19]={bgra=0xffdd5533,code="r ",name="red_orange"},
+	[20]={bgra=0xffdd7733,code="O ",name="orange"},
+	[21]={bgra=0xffddaa33,code="o ",name="orange_yellow"},
+	[22]={bgra=0xffdddd44,code="Y ",name="yellow"},
+	[23]={bgra=0xff888833,code="y ",name="yellow_dark"},
 
-	[ 8]={bgra=0xff445599},
-	[ 9]={bgra=0xff333366},
-	[10]={bgra=0xff332244},
-	[11]={bgra=0xff442233},
-	[12]={bgra=0xff663333},
-	[13]={bgra=0xff884433},
-	[14]={bgra=0xffbb7766},
-	[15]={bgra=0xffeeaa99},
-
-	[16]={bgra=0xffee88bb},
-	[17]={bgra=0xffdd6666},
-	[18]={bgra=0xffcc3333},
-	[19]={bgra=0xffdd5533},
-	[20]={bgra=0xffdd7733},
-	[21]={bgra=0xffddaa33},
-	[22]={bgra=0xffdddd44},
-	[23]={bgra=0xff888833},
-
-	[24]={bgra=0xff000000},
-	[25]={bgra=0xff222222},
-	[26]={bgra=0xff444444},
-	[27]={bgra=0xff666666},
-	[28]={bgra=0xff888888},
-	[29]={bgra=0xffaaaaaa},
-	[30]={bgra=0xffcccccc},
-	[31]={bgra=0xffffffff},
-
--- custom map codes for nicer looking handmade ascii
-
-	["."]=0,
-	["g"]=1,
-	["G"]=2,
-	["d"]=3,
-	["D"]=4,
-	["C"]=5,
-	["c"]=6,
-	["B"]=7,
-
-	["b"]=8,
-	["I"]=9,
-	["i"]=10,
-	["j"]=11,
-	["f"]=12,
-	["F"]=13,
-	["s"]=14,
-	["S"]=15,
-
-	["M"]=16,
-	["m"]=17,
-	["R"]=18,
-	["r"]=19,
-	["O"]=20,
-	["o"]=21,
-	["Y"]=22,
-	["y"]=23,
-
-	["0"]=24,
-	["1"]=25,
-	["2"]=26,
-	["3"]=27,
-	["4"]=28,
-	["5"]=29,
-	["6"]=30,
-	["7"]=31,
-	
+	[24]={bgra=0xff000000,code="0 ",name="black"},
+	[25]={bgra=0xff222222,code="1 ",name="grey_darkest"},
+	[26]={bgra=0xff444444,code="2 ",name="grey_darker"},
+	[27]={bgra=0xff666666,code="3 ",name="grey_dark"},
+	[28]={bgra=0xff888888,code="4 ",name="grey"},
+	[29]={bgra=0xffaaaaaa,code="5 ",name="grey_light"},
+	[30]={bgra=0xffcccccc,code="6 ",name="grey_lightest"},
+	[31]={bgra=0xffffffff,code="7 ",name="white"},
 }
-for i=32,255 do M.map[i]={bgra=0x00000000} end -- fill in the rest of the colors, so we can user all 255 indexs
 
-for n,v in pairs(M.map) do
-	if type(v)=="number" and type(n)=="string" then
-		local t=M.map[v]
-		if t then
-			if #n==1 then -- force chars , set the prefered color code when asciiing
-				t.code=n.." "
-			else
-				t.code=n
-			end
+M.cmap_build=function(cmap_data)
+	local cmap={}
+	for i=0,255 do
+		cmap[i]={bgra=0x00000000,code=string.format("%02X",i),idx=i}  -- reset color
+		cmap[ string.format("%02X",i)]=cmap[i] -- allow hex ascii maps, that are upper *or* lower case
+		cmap[ string.format("%02x",i)]=cmap[i]
+	end
+	if cmap_data then -- shallow copy the palette data
+		for i,v in ipairs(cmap_data) do
+			local color=cmap[i] -- output
+			for cn,cv in pairs(v) do color[cn]=cv end 
 		end
 	end
+	for i=255,0,-1 do -- add quick code lookups, lower indexs get code priority (possibly break the hexmaps)
+		local color=cmap[i]
+		if color.code then
+			cmap[color.code:sub(1,2)]=color -- double letter codes only
+		end
+	end
+	for i=0,255 do -- premultiply the colors as this is the data we actually need
+		local color=cmap[i]
+		if color.bgra then
+			color[1],color[2],color[3],color[4]=wpack.argb_pmb4(color.bgra)
+		end
+	end
+	
+	cmap.data={} -- build data table
+	for i=0,255 do
+		cmap.data[i*4+1]=cmap[i][1]
+		cmap.data[i*4+2]=cmap[i][2]
+		cmap.data[i*4+3]=cmap[i][3]
+		cmap.data[i*4+4]=cmap[i][4]
+	end
+	
+	cmap.grd=wgrd.create("U8_RGBA",256,1,1) -- a palette grd
+	cmap.grd:pixels(0,0,256,1,cmap.data)
+
+	return cmap
 end
 
-for i=0,255 do M.map[ string.format("%02X",i)]=i M.map[ string.format("%02x",i)]=i end -- allow hex maps, upper or lower case
+M.cmap=M.cmap_build(M.cmap_swanky32) -- set the default palette to swanky32
+-- this is the global default but you can pass in a different cmap to functions
 
 
 M.font_grd=function(s,g,cx,cy,w)
@@ -157,18 +143,6 @@ M.font_grd=function(s,g,cx,cy,w)
 
 end
 
--- turn 32bit .bgra numbers into 4 bytes rgba with a premultiplyed alpha placed in map[1] to map[4]
-M.map_bgra_premultiply=function(map)
-	for n,v in pairs(map) do
-		if type(n)=="number" and type(v)=="table" then v.idx=n end -- remember color index
-		while v and type(v)~="table" do v=map[v] end -- fill in any references
-		map[n]=v -- remember the result
-		if v then -- turn hex value into premult-bytes
-			v[1],v[2],v[3],v[4]=wpack.argb_pmb4(v.bgra)
-		end
-	end
-	return map
-end
 
 -- find the size of some bitdown in pixels, possibly rounded up
 M.pix_size=function(str,rx,ry)
@@ -198,7 +172,7 @@ M.pix_grd=function(str,map,gout,px,py,hx,hy)
 
 	local ls=wstr.split(str,"\n")
 
-	map=map or M.map
+	map=map or M.cmap
 
 	px=px or 0
 	py=py or 0
@@ -234,7 +208,7 @@ M.pix_grd_idx=function(str,map,gout,px,py,hx,hy)
 
 	local ls=wstr.split(str,"\n")
 
-	map=map or M.map
+	map=map or M.cmap
 
 	px=px or 0
 	py=py or 0
@@ -268,7 +242,7 @@ end
 -- write a grd into some ascii art from an x,y grd location
 M.grd_pix_idx=function(g,map,px,py,hx,hy)
 
-	map=map or M.map
+	map=map or M.cmap
 
 	px=px or 0
 	py=py or 0
@@ -295,7 +269,7 @@ M.grd_pix_idx=function(g,map,px,py,hx,hy)
 
 		local s={}
 		for i,v in ipairs(t) do
-			s[#s+1]=swanky32 and bitdown.map[v].code or string.format("%02X",v)
+			s[#s+1]=swanky32 and bitdown.cmap[v].code or string.format("%02X",v)
 		end
 
 		ss=ss..table.concat(s,"").."\n"
@@ -309,7 +283,7 @@ M.pix_tiles=function(str,map,tout,px,py,hx,hy,tiles)
 
 	local ls=wstr.split(str,"\n")
 
-	map=map or M.map
+	map=map or M.cmap
 
 	px=px or 0
 	py=py or 0
@@ -527,9 +501,6 @@ M.pixtab_tiles=function(tab,map,tout)
 	end
 
 end
-	
-M.map_bgra_premultiply(M.map)
-
 
 -- a simple way of writing some text directly into a bitmap
 M.setup_blit_font=function(g,w,h)

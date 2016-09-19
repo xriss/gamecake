@@ -194,24 +194,28 @@ system.draw=function()
 
 	screen.draw_into_start()
 
-	if screen.drawlist then -- we want to combine drop shadows
+	if screen.drawlist then -- we want to merge drop shadows
+		for _,it in ipairs(system.components) do
+			if it.drawtype=="first" then
+				if it.draw then it.draw() end
+			end
+		end
 		for i,dl in ipairs(screen.drawlist) do
 			for _,it in ipairs(system.components) do
-				if it.draw then
-					if it.drawlist or i==1 then
-						if it.drawlist then
-							it.drawlist={dl}
-						end
-						it.draw()
-					end
+				if it.drawtype=="merge" then
+					it.drawlist={dl}
+					if it.draw then it.draw() end
 				end
+			end
+		end
+		for _,it in ipairs(system.components) do
+			if it.drawtype=="last" then
+				if it.draw then it.draw() end
 			end
 		end
 	else
 		for _,it in ipairs(system.components) do
-			if it.draw then
-				it.draw()
-			end
+			if it.draw then it.draw() end
 		end
 	end
 

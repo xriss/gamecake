@@ -7,6 +7,7 @@ local wgrd =require("wetgenes.grd")
 local wpack=require("wetgenes.pack")
 local wzips=require("wetgenes.zips")
 
+local bitdown=require("wetgenes.gamecake.fun.bitdown")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -39,6 +40,8 @@ tilemap.create=function(it,opts)
 	it.component="tilemap"
 	it.name=opts.name
 	
+	it.cmap=opts.cmap or bitdown.cmap
+	
 	it.px=0
 	it.py=0
 
@@ -59,6 +62,7 @@ tilemap.create=function(it,opts)
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
 	
 	it.drawlist=opts.drawlist or { { color={1,1,1,1} , dx=0 , dy=0 } } -- use this to add drop shadows
+	it.drawtype=opts.drawtype
 
 	it.setup=function(opts)
 		
@@ -71,11 +75,22 @@ tilemap.create=function(it,opts)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
 
+		it.cmap_tex=gl.GenTexture()
+		gl.BindTexture( gl.TEXTURE_2D , it.cmap_tex )	
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
+
 	end
 
 	it.clean=function()
 		if it.tilemap_tex then
 			gl.DeleteTexture( it.tilemap_tex )
+			it.tilemap_tex=nil
+		end
+		if it.cmap_tex then
+			gl.DeleteTexture( it.cmap_tex )
 			it.tilemap_tex=nil
 		end
 	end
@@ -85,7 +100,19 @@ tilemap.create=function(it,opts)
 	
 	it.draw=function()
 
-		gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )	
+		gl.BindTexture( gl.TEXTURE_2D , it.cmap_tex )	
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			0,
+			gl.RGBA,
+			256,
+			1,
+			0,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			it.cmap.grd.data ) -- it.cmap.grd contains a 256x1 color map texture
+
+		gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
 		gl.TexImage2D(
 			gl.TEXTURE_2D,
 			0,
@@ -97,6 +124,7 @@ tilemap.create=function(it,opts)
 			gl.UNSIGNED_BYTE,
 			it.tilemap_grd.data )
 
+		gl.Color(1,1,1,1)
 
 		for i,dl in ipairs(it.drawlist) do
 
@@ -111,6 +139,9 @@ tilemap.create=function(it,opts)
 
 
 			flat.tristrip("rawuv",t,"fun_draw_tilemap",function(p)
+
+				gl.ActiveTexture(gl.TEXTURE2) gl.Uniform1i( p:uniform("tex_cmap"), 2 )
+				gl.BindTexture( gl.TEXTURE_2D , it.cmap_tex )
 
 				gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_map"), 1 )
 				gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
@@ -138,19 +169,22 @@ tilemap.create=function(it,opts)
 	it.text_hx=it.tilemap_hx
 	it.text_hy=it.tilemap_hy
 
+	it.text_fg=31 -- default foreground color index, white in swanky32
+	it.text_bg=0  -- default background color index, transparent in swanky32
+	
 -- replace this function if your font is somewhere else, or you wish to handle more than 128 tiles (utf8)
-	it.text_tile=function(c)
-		return {(c:byte()),0,0,0}
+	it.text_tile=function(c,fg,bg)
+		return {(c:byte()),0,fg or it.text_fg,bg or it.text_bg}
 	end
 
-	it.text_print_tile=function(c,x,y)
-		it.tilemap_grd:pixels( x,y, 1,1, it.text_tile(c) )
+	it.text_print_tile=function(c,x,y,fg,bg)
+		it.tilemap_grd:pixels( x,y, 1,1, it.text_tile(c,fg,bg) )
 	end
 
-	it.text_print=function(s,x,y)
+	it.text_print=function(s,x,y,fg,bg)
 		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
 			if x>=it.text_px and y>=it.text_py and x<it.text_px+it.text_hx and y<it.text_py+it.text_hy then
-				it.text_print_tile(c,x,y)
+				it.text_print_tile(c,x,y,fg,bg)
 			end
 			x=x+1
 		end

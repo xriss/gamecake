@@ -7,6 +7,7 @@ local wgrd =require("wetgenes.grd")
 local wpack=require("wetgenes.pack")
 local wzips=require("wetgenes.zips")
 
+local bitdown=require("wetgenes.gamecake.fun.bitdown")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -39,6 +40,9 @@ tiles.create=function(it,opts)
 	it.component="tiles"
 	it.name=opts.name
 	
+	it.names={}
+	it.tiles={}
+	
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or 8
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or 8
 
@@ -50,6 +54,8 @@ tiles.create=function(it,opts)
 	
 --	it.hx=2^math.ceil( math.log(it.hx)/math.log(2) ) -- force power of 2?
 --	it.hy=2^math.ceil( math.log(it.hy)/math.log(2) )
+
+	it.drawtype=opts.drawtype or "first"
 
 	it.setup=function(opts)
 		
@@ -89,7 +95,19 @@ tiles.create=function(it,opts)
 			gl.UNSIGNED_BYTE,
 			it.bitmap_grd.data )
 
-	end	
+	end
+
+-- optionally keep track of bitmap tiles with names	
+	it.set_tile_name=function(tile,name,data)
+		if not name then name=string.format("tile_%04X",tile) end
+		it.names[name]=tile
+		it.tiles[tile]=data
+
+	end
+-- upload all the named tiles previously set with set_tile_name
+	it.upload_tiles=function()
+		bitdown.pixtab_tiles( it.tiles, it.cmap or bitdown.cmap, it ) -- probably use default cmap
+	end
 	
 	return it
 end

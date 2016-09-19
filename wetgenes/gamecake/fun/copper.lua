@@ -41,6 +41,8 @@ copper.create=function(it,opts)
 	it.opts=opts
 	it.component="copper"
 	it.name=opts.name
+
+	it.drawtype=opts.drawtype
 	
 	it.hx=it.opts.size and it.opts.size[1] or it.screen.hx or 320
 	it.hy=it.opts.size and it.opts.size[2] or it.screen.hy or 240
@@ -70,6 +72,8 @@ copper.create=function(it,opts)
 	it.draw=function()
 
 --			gl.PushMatrix()
+
+		gl.Color(1,1,1,1)
 
 		local v3=gl.apply_modelview( {it.screen.hx*-0.0,	it.screen.hy* 1.0,	0,1} )
 		local v1=gl.apply_modelview( {it.screen.hx*-0.0,	it.screen.hy*-0.0,	0,1} )
