@@ -48,7 +48,7 @@ void main(void)
 	vec4 d;
 	vec2 uv=v_texcoord.xy+map_info.xy;		// base uv
 	vec2 tc=fract(uv);						// tile uv
-	vec2 tm=(floor(uv)+vec2(0.5,0.5))/map_info.zw;			// map uv
+	vec2 tm=(floor(mod(uv,map_info.zw))+vec2(0.5,0.5))/map_info.zw;			// map uv
 	
 	d=texture2D(tex_map, tm).rgba;	
 	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba;
