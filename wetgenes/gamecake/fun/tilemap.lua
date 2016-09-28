@@ -74,6 +74,7 @@ tilemap.create=function(it,opts)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
+		it.tilemap_dirty=true
 
 		it.cmap_tex=gl.GenTexture()
 		gl.BindTexture( gl.TEXTURE_2D , it.cmap_tex )	
@@ -81,6 +82,7 @@ tilemap.create=function(it,opts)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
+		it.cmap_dirty=true
 
 	end
 
@@ -100,29 +102,35 @@ tilemap.create=function(it,opts)
 	
 	it.draw=function()
 
-		gl.BindTexture( gl.TEXTURE_2D , it.cmap_tex )	
-		gl.TexImage2D(
-			gl.TEXTURE_2D,
-			0,
-			gl.RGBA,
-			256,
-			1,
-			0,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			it.cmap.grd.data ) -- it.cmap.grd contains a 256x1 color map texture
+		if it.cmap_dirty then
+			it.cmap_dirty=false
+			gl.BindTexture( gl.TEXTURE_2D , it.cmap_tex )	
+			gl.TexImage2D(
+				gl.TEXTURE_2D,
+				0,
+				gl.RGBA,
+				256,
+				1,
+				0,
+				gl.RGBA,
+				gl.UNSIGNED_BYTE,
+				it.cmap.grd.data ) -- it.cmap.grd contains a 256x1 color map texture
+		end
 
-		gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
-		gl.TexImage2D(
-			gl.TEXTURE_2D,
-			0,
-			gl.RGBA,
-			it.tilemap_grd.width,
-			it.tilemap_grd.height,
-			0,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			it.tilemap_grd.data )
+		if it.tilemap_dirty then
+			it.tilemap_dirty=false
+			gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
+			gl.TexImage2D(
+				gl.TEXTURE_2D,
+				0,
+				gl.RGBA,
+				it.tilemap_grd.width,
+				it.tilemap_grd.height,
+				0,
+				gl.RGBA,
+				gl.UNSIGNED_BYTE,
+				it.tilemap_grd.data )
+		end
 
 		gl.Color(1,1,1,1)
 
@@ -190,9 +198,6 @@ tilemap.create=function(it,opts)
 		end
 
 		return x,y
-	end
-
-	it.text_scroll=function(x,y)
 	end
 
 

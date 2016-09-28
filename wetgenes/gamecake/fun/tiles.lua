@@ -67,6 +67,7 @@ tiles.create=function(it,opts)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
+		it.bitmap_dirty=true
 
 	end
 
@@ -83,17 +84,20 @@ tiles.create=function(it,opts)
 	it.draw=function()
 
 -- update the bitmap, but do not draw anything
-		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	
-		gl.TexImage2D(
-			gl.TEXTURE_2D,
-			0,
-			gl.RGBA,
-			it.bitmap_grd.width,
-			it.bitmap_grd.height,
-			0,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			it.bitmap_grd.data )
+		if it.bitmap_dirty then
+			it.bitmap_dirty=false
+			gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	
+			gl.TexImage2D(
+				gl.TEXTURE_2D,
+				0,
+				gl.RGBA,
+				it.bitmap_grd.width,
+				it.bitmap_grd.height,
+				0,
+				gl.RGBA,
+				gl.UNSIGNED_BYTE,
+				it.bitmap_grd.data )
+		end
 
 	end
 
