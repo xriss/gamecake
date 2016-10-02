@@ -62,11 +62,11 @@ copper.create=function(it,opts)
 	it.shader_function=function()end
 	
 	it.update=function()
-		local u=it.shader_uniforms
-		u.ticks[1]=u.ticks[1]+1
-		u.ticks[2]=u.ticks[1]%(256*256*256)
-		u.ticks[3]=u.ticks[1]%(256*256)
-		u.ticks[4]=u.ticks[1]%(256)
+--		local u=it.shader_uniforms
+--		u.ticks[1]=u.ticks[1]+1
+--		u.ticks[2]=u.ticks[1]%(256*256*256)
+--		u.ticks[3]=u.ticks[1]%(256*256)
+--		u.ticks[4]=u.ticks[1]%(256)
 	end
 
 	it.draw=function()
