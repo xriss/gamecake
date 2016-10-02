@@ -30,7 +30,6 @@ sfx.setup=function()
 end
 
 sfx.create=function(it,opts)
-	it.screen=it.system.components.screen -- system will have been passed in
 	it.opts=opts
 	it.component="sfx"
 	it.name=opts.name

@@ -37,7 +37,9 @@ tilemap.setup=function()
 end
 
 tilemap.create=function(it,opts)
-	it.screen=it.system.components.screen -- system will have been passed in
+	it.screen=assert(it.system.components[opts.screen or "screen"]) -- find linked components by name
+	it.colors=assert(it.system.components[opts.colors or "colors"])
+	it.tiles =assert(it.system.components[opts.tiles  or "tiles" ])
 	it.opts=opts
 	it.component="tilemap"
 	it.name=opts.name
@@ -49,9 +51,6 @@ tilemap.create=function(it,opts)
 	it.window_py=it.opts.window and it.opts.window[2] or 0
 	it.window_hx=it.opts.window and it.opts.window[3] or it.screen.hx
 	it.window_hy=it.opts.window and it.opts.window[4] or it.screen.hy
-
-	it.colors=assert(it.system.components[it.opts.colors or "colors"]) -- find colors bitmap by name
-	it.tiles=assert(it.system.components[it.opts.tiles or "tiles"]) -- find tile bitmap by name
 
 	it.tilemap_hx=it.opts.tilemap_size and it.opts.tilemap_size[1] or 256
 	it.tilemap_hy=it.opts.tilemap_size and it.opts.tilemap_size[2] or 256

@@ -34,12 +34,11 @@ sprites.setup=function()
 end
 
 sprites.create=function(it,opts)
-	it.screen=it.system.components.screen -- system will have been passed in
+	it.screen=assert(it.system.components[opts.screen or "screen"]) -- find linked components by name
+	it.tiles =assert(it.system.components[opts.tiles  or "tiles" ])
 	it.opts=opts
 	it.component="sprites"
 	it.name=opts.name
-
-	it.tiles=assert(it.system.components[it.opts.tiles or "tiles"]) -- find tile bitmap by name
 
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per sprite component
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy

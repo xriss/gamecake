@@ -32,7 +32,6 @@ colors.setup=function()
 end
 
 colors.create=function(it,opts)
-	it.screen=it.system.components.screen -- system will have been passed in
 	it.opts=opts
 	it.component="colors"
 	it.name=opts.name

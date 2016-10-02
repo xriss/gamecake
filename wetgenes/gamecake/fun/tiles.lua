@@ -35,7 +35,8 @@ tiles.setup=function()
 end
 
 tiles.create=function(it,opts)
-	it.screen=it.system.components.screen -- system will have been passed in
+	it.screen=assert(it.system.components[opts.screen or "screen"]) -- find linked components by name
+	it.colors=assert(it.system.components[opts.colors or "colors"])
 	it.opts=opts
 	it.component="tiles"
 	it.name=opts.name
@@ -55,7 +56,6 @@ tiles.create=function(it,opts)
 --	it.hx=2^math.ceil( math.log(it.hx)/math.log(2) ) -- force power of 2?
 --	it.hy=2^math.ceil( math.log(it.hy)/math.log(2) )
 
-	it.colors=assert(it.system.components[it.opts.colors or "colors"]) -- find colors bitmap by name
 
 	it.drawtype=opts.drawtype or "first"
 

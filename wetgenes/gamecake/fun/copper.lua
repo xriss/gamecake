@@ -37,7 +37,7 @@ copper.setup=function()
 end
 
 copper.create=function(it,opts)
-	it.screen=it.system.components.screen -- system will have been passed in
+	it.screen=assert(it.system.components[opts.screen or "screen"]) -- find linked components by name
 	it.opts=opts
 	it.component="copper"
 	it.name=opts.name
