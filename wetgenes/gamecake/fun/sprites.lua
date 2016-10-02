@@ -62,8 +62,9 @@ sprites.create=function(it,opts)
 	it.list_reset=function()
 		it.list={}
 	end
+	
 	it.list_add=function(v,idx)
-
+	
 		v.idx=(idx or v.idx or (#it.list+1) )
 		it.list[ v.idx ]=v
 		
@@ -76,10 +77,10 @@ sprites.create=function(it,opts)
 		v.ox=v.ox or v.hx/2
 		v.oy=v.oy or v.hy/2
 		
-		v.px=v.px or 0
-		v.py=v.py or 0
+		v.px=(v.px or 0)
+		v.py=(v.py or 0)
 
-		v.rz=v.rz or 0
+		v.rz=(v.rz or 0)
 
 		v.sx=v.sx or v.s or 1
 		v.sy=v.sy or v.s or 1

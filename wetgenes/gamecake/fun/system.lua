@@ -79,6 +79,7 @@ print("system setup")
 
 -- possible components and perform global setup, even if they never get used
 
+	system.colors =oven.rebake("wetgenes.gamecake.fun.colors").setup()
 	system.tiles  =oven.rebake("wetgenes.gamecake.fun.tiles").setup()
 	system.sprites=oven.rebake("wetgenes.gamecake.fun.sprites").setup()
 	system.tilemap=oven.rebake("wetgenes.gamecake.fun.tilemap").setup()
@@ -99,6 +100,10 @@ print("system setup")
 		elseif v.component=="tiles" then
 
 			it=system.tiles.create({system=system},v)
+
+		elseif v.component=="colors" then
+
+			it=system.colors.create({system=system},v)
 
 		elseif v.component=="sprites" then
 
@@ -223,6 +228,23 @@ system.draw=function()
 	screen.draw_fbo()
 
 end
+
+-- returns true if any component is dirty
+system.dirty=function(flag)
+	local dirty=false
+
+	if type(flag)=="boolean" then
+		for n,it in ipairs(system.components) do
+			if it.dirty then it.dirty(flag) end
+		end
+	end
+
+	for n,it in ipairs(system.components) do
+		dirty=dirty or ( it.dirty and it.dirty() )
+	end
+	return dirty
+end
+
 
 -- try and turn textfiles and memory into a fun.png format image
 -- this may include the graphics twice once in the png, once in the source
