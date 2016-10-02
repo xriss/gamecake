@@ -242,71 +242,111 @@ M.bake=function(oven,keys)
 					end
 				end
 
+			elseif m.class=="touch" then -- touch areas
+
+				if ups.touch == "left_right_fire" then -- use a left/right + fire button control system
+				
+					if m.action>0 then
+						if m.x<=0.5 then
+							if ups.get("right") then -- left+right==fire
+								ups.set_button("fire",true)
+							else
+								ups.set_button("left",true)
+							end
+						else
+							if ups.get("left") then -- left+right==fire
+								ups.set_button("fire",true)
+							else
+								ups.set_button("right",true)
+							end
+						end
+					elseif m.action<0 then
+						if m.x<=0.5 then
+							if ( not ups.get("left") ) and ups.get("fire") then -- undo fire?
+								ups.set_button("fire",false)
+							else
+								ups.set_button("left",false)
+							end
+						else
+							if ( not ups.get("right") ) and ups.get("fire") then -- undo fire?
+								ups.set_button("fire",false)
+							else
+								ups.set_button("right",false)
+							end
+						end
+					end
+				
+				end
+			
 			elseif m.class=="mouse" then -- swipe to move
 
-				ups.set_axis({mx=m.x,my=m.y}) -- tell recap about the mouse positions, mx,my
+				if not ups.touch then -- use a touch controller, rather than mouse
+				
+					ups.set_axis({mx=m.x,my=m.y}) -- tell recap about the mouse positions, mx,my
 
-				if m.action==1 then -- key set
-					if m.keyname then ups.set_button("mouse_"..m.keyname,true) end
-					if m.keyname=="left" or m.keyname=="right" or m.keyname=="middle" then
-						ups.set_button("fire",true)
+					if m.action==1 then -- key set
+						if m.keyname then ups.set_button("mouse_"..m.keyname,true) end
+						if m.keyname=="left" or m.keyname=="right" or m.keyname=="middle" then
+							ups.set_button("fire",true)
+						end
+						used=true
+					elseif m.action==-1 then -- key clear
+						if m.keyname then ups.set_button("mouse_"..m.keyname,false) end
+						if m.keyname=="left" or m.keyname=="right" or m.keyname=="middle" then
+							ups.set_button("fire",false)
+						end
+						used=true
 					end
-					used=true
-				elseif m.action==-1 then -- key clear
-					if m.keyname then ups.set_button("mouse_"..m.keyname,false) end
-					if m.keyname=="left" or m.keyname=="right" or m.keyname=="middle" then
-						ups.set_button("fire",false)
-					end
-					used=true
-				end
 
 -- swipe to keypress code
 -- this can be a problem in menus, so is best to only turn it on during gameplay
 
-				if key.opts.swipe then -- use touch/mouse to swipe
-				
-					if m.action==1 then -- click
-						key.swipe={m.x,m.y,m.x,m.y}
-					elseif m.action==-1 then -- release
-						key.swipe=nil
-					elseif m.action==0 then --move
-						if key.swipe then
-							key.swipe[3]=m.x
-							key.swipe[4]=m.y
-						end
-					end
-
-					if key.swipe then
-						local function acc() key.swipe[1]=key.swipe[3]  key.swipe[2]=key.swipe[4] end
-						local x=key.swipe[3]-key.swipe[1]
-						local y=key.swipe[4]-key.swipe[2]
-						local xx=x*x
-						local yy=y*y
-						local joydir=nil
-						if xx+yy > 8*8 then
-							if xx > yy then
-								if x>=0 then
-									joydir="right"
-									acc()
-								else
-									joydir="left"
-									acc()
-								end
-							else
-								if y>=0 then
-									joydir="down"
-									acc()
-								else
-									joydir="up"
-									acc()
-								end
+					if key.opts.swipe then -- use mouse to swipe
+					
+						if m.action==1 then -- click
+							key.swipe={m.x,m.y,m.x,m.y}
+						elseif m.action==-1 then -- release
+							key.swipe=nil
+						elseif m.action==0 then --move
+							if key.swipe then
+								key.swipe[3]=m.x
+								key.swipe[4]=m.y
 							end
-						end	
-						new_joydir(joydir) -- swipes are single taps
-						new_joydir()
+						end
+
+						if key.swipe then
+							local function acc() key.swipe[1]=key.swipe[3]  key.swipe[2]=key.swipe[4] end
+							local x=key.swipe[3]-key.swipe[1]
+							local y=key.swipe[4]-key.swipe[2]
+							local xx=x*x
+							local yy=y*y
+							local joydir=nil
+							if xx+yy > 8*8 then
+								if xx > yy then
+									if x>=0 then
+										joydir="right"
+										acc()
+									else
+										joydir="left"
+										acc()
+									end
+								else
+									if y>=0 then
+										joydir="down"
+										acc()
+									else
+										joydir="up"
+										acc()
+									end
+								end
+							end	
+							new_joydir(joydir) -- swipes are single taps
+							new_joydir()
+						end
+					else
+						key.swipe=nil
 					end
-				else
-					key.swipe=nil
+					
 				end
 			
 			elseif m.class=="posix_joystick" then

@@ -61,6 +61,9 @@ M.bake=function(oven,recaps)
 		function recap.set(nam,dat) -- set the volatile data,this gets copied into state before it should be used
 			recap.now[nam]=dat
 		end
+		function recap.get(nam) -- get the volatile data
+			return recap.now[nam]
+		end
 		function recap.pulse(nam,dat) -- set the volatile data but *only* for one frame
 			recap.now[nam]=dat
 			recap.autoclear[nam]=true

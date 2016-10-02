@@ -255,6 +255,27 @@ sdl.msg_fetch=function()
 			sdl.mousexy[2]=e.y
 	
 		
+		elseif	(e.type == SDL.event.FingerDown) or 
+				(e.type == SDL.event.FingerUp) or 
+				(e.type == SDL.event.FingerMotion) then
+
+			local t={}
+			t.time=sdl.time()
+			t.class="touch"
+			t.action=(e.type==SDL.event.FingerUp) and -1 or ( (e.type==SDL.event.FingerDown) and 1 or 0 )
+			t.x=e.x
+			t.y=e.y
+			t.id=e.fingerid
+			t.pressure=e.pressure
+			
+--			dprint(t)
+
+			sdl.queue[#sdl.queue+1]=t
+
+--			sdl.mousexy[1]=e.x
+--			sdl.mousexy[2]=e.y
+	
+		
 		elseif	(e.type == SDL.event.WindowEvent) then -- ignore
 
 		elseif	(e.type == SDL.event.Quit) then -- window close button, or alt f4

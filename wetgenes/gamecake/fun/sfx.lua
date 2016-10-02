@@ -45,7 +45,7 @@ sfx.create=function(it,opts)
 	end
 
 	it.play=function(name,pitch,gain) -- play a previously rendered sound, pitch and gain are scalars so default to 1
-		local d=assert(sounds.get(name))
+		local d=it.get(name)
 		local op,og=d.pitch,d.gain
 		d.pitch,d.gain=pitch or 1,gain or 1
 		sounds.beep( d )
