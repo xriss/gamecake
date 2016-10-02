@@ -244,35 +244,19 @@ M.bake=function(oven,keys)
 
 			elseif m.class=="touch" then -- touch areas
 
-				if ups.touch == "left_right_fire" then -- use a left/right + fire button control system
+				if ups.touch == "left_right" then -- use a left/right + fire button control system
 				
 					if m.action>0 then
 						if m.x<=0.5 then
-							if ups.get("right") then -- left+right==fire
-								ups.set_button("fire",true)
-							else
-								ups.set_button("left",true)
-							end
+							ups.set_button("left",true)
 						else
-							if ups.get("left") then -- left+right==fire
-								ups.set_button("fire",true)
-							else
-								ups.set_button("right",true)
-							end
+							ups.set_button("right",true)
 						end
 					elseif m.action<0 then
 						if m.x<=0.5 then
-							if ( not ups.get("left") ) and ups.get("fire") then -- undo fire?
-								ups.set_button("fire",false)
-							else
-								ups.set_button("left",false)
-							end
+							ups.set_button("left",false)
 						else
-							if ( not ups.get("right") ) and ups.get("fire") then -- undo fire?
-								ups.set_button("fire",false)
-							else
-								ups.set_button("right",false)
-							end
+							ups.set_button("right",false)
 						end
 					end
 				
