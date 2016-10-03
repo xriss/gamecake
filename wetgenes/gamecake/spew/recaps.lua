@@ -58,7 +58,7 @@ M.bake=function(oven,recaps)
 			recap.wait=0
 			recap.touch="" -- you can replace this with a requested touch control scheme
 
--- "left_right_fire" is a two button touch screen split + fire if both buttons are pressed simultaneously		
+-- "left_right" is a two button touch screen split
 			
 		end
 		
