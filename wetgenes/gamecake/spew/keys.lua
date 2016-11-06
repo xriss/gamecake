@@ -247,16 +247,26 @@ M.bake=function(oven,keys)
 				if ups.touch == "left_right" then -- use a left/right + fire button control system
 				
 					if m.action>0 then
-						if m.x<=0.5 then
-							ups.set_button("left",true)
-						else
-							ups.set_button("right",true)
+						if m.x<=1/2 then			ups.set_button("left",true)
+						else						ups.set_button("right",true)
 						end
 					elseif m.action<0 then
-						if m.x<=0.5 then
-							ups.set_button("left",false)
-						else
-							ups.set_button("right",false)
+						if m.x<=1/2 then			ups.set_button("left",false)
+						else						ups.set_button("right",false)
+						end
+					end
+				
+				elseif ups.touch == "left_fire_right" then -- use a left/right + fire button control system
+				
+					if m.action>0 then
+						if m.x<=1/3 then			ups.set_button("left",true)
+						elseif m.x<=2/3 then		ups.set_button("fire",true)
+						else						ups.set_button("right",true)
+						end
+					elseif m.action<0 then
+						if m.x<=1/3 then			ups.set_button("left",false)
+						elseif m.x<=2/3 then		ups.set_button("fire",false)
+						else						ups.set_button("right",false)
 						end
 					end
 				
@@ -264,7 +274,7 @@ M.bake=function(oven,keys)
 			
 			elseif m.class=="mouse" then -- swipe to move
 
-				if not ups.touch then -- use a touch controller, rather than mouse
+				if not ups.touch then -- use a touch controller, rather than fake mouse
 				
 					ups.set_axis({mx=m.x,my=m.y}) -- tell recap about the mouse positions, mx,my
 
