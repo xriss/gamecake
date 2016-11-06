@@ -47,6 +47,7 @@ chipmunk.space=function(...)
 	local space={}
 	space.bodies={}
 	space.shapes={}
+	space.constraints={}
 	space.callbacks={}
 	setmetatable(space,chipmunk.space_metatable)
 	space[0]=core.space_create(space)
@@ -149,7 +150,7 @@ the space.
 ]]
 chipmunk.constraint=function(abody,bbody,form,...)
 	local constraint={form=form}
-	setmetatable(shape,chipmunk.constraint_metatable)
+	setmetatable(constraint,chipmunk.constraint_metatable)
 	constraint[0]=core.constraint_create(abody[0],bbody[0],form,...)
 	return constraint
 end
@@ -351,7 +352,7 @@ Create and add this constraint to the space.
 ]]
 chipmunk.space_functions.constraint=function(space,...)
 	local constraint=chipmunk.constraint(...)
-	space:add(body)
+	space:add(constraint)
 	return constraint
 end
 ------------------------------------------------------------------------
