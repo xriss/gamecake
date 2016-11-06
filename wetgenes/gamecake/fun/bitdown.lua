@@ -499,18 +499,6 @@ M.map_build_collision_strips=function(map,callback)
 	return map
 end
 
--- write a bunch of ascii into this bitmap, using its index as its location 0xYYXX,
-M.pixtab_tiles=function(tab,map,tout)
-
-	for n,v in pairs(tab) do
-		local hx,hy=bitdown.pix_size(v,8,8)
-		local px=math.floor(n%256)*tout.tile_hx
-		local py=math.floor((n)/256)*tout.tile_hy
-		bitdown.pix_grd(v,map,tout.bitmap_grd,px,py,hx,hy)
-	end
-
-end
-
 -- a simple way of writing some text directly into a bitmap
 M.setup_blit_font=function(g,w,h)
 	local it={}

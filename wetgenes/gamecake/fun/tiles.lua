@@ -42,7 +42,6 @@ tiles.create=function(it,opts)
 	it.name=opts.name or it.component
 	
 	it.names={}
-	it.tiles={}
 	
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or 8
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or 8
@@ -104,18 +103,28 @@ tiles.create=function(it,opts)
 
 	end
 
--- optionally keep track of bitmap tiles with names	
-	it.set_tile_name=function(tile,name,data)
-		if not name then name=string.format("tile_%04X",tile) end
-		it.names[name]=tile
-		it.tiles[tile]=data
+-- upload all the given tiles t[1]=idx t[2]=name t[3]=ascii
+	it.upload_tiles=function(graphics)
+		for n,v in pairs(graphics) do
+			local t={}
+			t.idx=v[1]
+			t.name=v[2]
+			t.ascii=v[3]
+			local hx,hy=bitdown.pix_size(t.ascii,8,8)
+			t.hx=hx
+			t.hy=hy
+			
+			t.px=math.floor(t.idx%256)*it.tile_hx
+			t.py=math.floor((t.idx)/256)*it.tile_hy
+			
+			bitdown.pix_grd(t.ascii,map,it.bitmap_grd,t.px,t.py,t.hx,t.hy)
 
+			-- keep lookups
+			it.names[t.name]=t -- by name
+			it.names[t.idx]=t -- by number
+		end
 	end
--- upload all the named tiles previously set with set_tile_name
-	it.upload_tiles=function()
-		bitdown.pixtab_tiles( it.tiles, it.colors.cmap , it )
-	end
-	
+		
 	it.dirty_flag=true
 	it.dirty=function(flag)
 		if type(flag)=="boolean" then it.dirty_flag=flag end
