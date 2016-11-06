@@ -41,7 +41,7 @@ screen.create=function(it,opts)
 	it=it or {}
 	it.opts=opts or {}
 	it.component="screen"
-	it.name=opts.name
+	it.name=opts.name or it.component
 	
 	it.bloom=it.opts.bloom
 

@@ -42,7 +42,7 @@ tilemap.create=function(it,opts)
 	it.tiles =assert(it.system.components[opts.tiles  or "tiles" ])
 	it.opts=opts
 	it.component="tilemap"
-	it.name=opts.name
+	it.name=opts.name or it.component
 	
 	it.px=0
 	it.py=0

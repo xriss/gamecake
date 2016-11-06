@@ -35,7 +35,7 @@ system.resume=function(need)
 			
 			if a then return a,b end -- no error
 			
-			error( b.."\nin coroutine\n"..debug.traceback(system.co) ) -- error
+			error( b.."\nin coroutine\n"..debug.traceback(system.co) , 2 ) -- error
 			
 		end
 	end
@@ -67,6 +67,8 @@ print("system setup")
 
 	if code then
 		system.code=wsandbox.ini(code,{ -- we are not really trying to sandbox, just a convenient function
+			args=oven.opts.args, -- commandline settings
+			debug=debug,
 			print=print,
 			system=system,
 			oven=oven,
@@ -144,10 +146,7 @@ print("system setup")
 	end
 
 	system.resume({setup=true})
-
---hax
---	system.save_fun_png()
-
+	
 	return system
 end
 
@@ -227,6 +226,15 @@ system.draw=function()
 	screen.draw_into_finish()
 	screen.draw_fbo()
 
+
+--hax
+	if not system.done_save_fun_png then
+		system.done_save_fun_png=true
+		if oven.opts.args.savepng then -- pass --savepng on commandline to dump grafix memory after setup
+			system.save_fun_png()
+		end
+	end
+
 end
 
 -- returns true if any component is dirty
@@ -257,6 +265,13 @@ system.save_fun_png=function(name,path)
 -- find grds
 	for n,it in ipairs(system.components) do
 		local t
+		
+		if it.fbo then --dump screen fbo
+			t=t or {}
+			t.component=it
+			t.grd=it.fbo:download()
+		end
+		
 		if it.bitmap_grd then
 			t=t or {}
 			t.component=it
@@ -321,7 +336,7 @@ system.save_fun_png=function(name,path)
 		t.name=it.component.name
 		data.images[#data.images+1]=t
 	end
-	local dstr=wjson.encode(data)
+	local dstr=(require("zlib").deflate())( wjson.encode(data) ,"finish") -- zlib compressed json
 
 	local dsize=#dstr+12 -- header size is 12
 	local dh=math.ceil(dsize/(hx*4))

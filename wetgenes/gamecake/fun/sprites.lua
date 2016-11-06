@@ -38,7 +38,7 @@ sprites.create=function(it,opts)
 	it.tiles =assert(it.system.components[opts.tiles  or "tiles" ])
 	it.opts=opts
 	it.component="sprites"
-	it.name=opts.name
+	it.name=opts.name or it.component
 
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per sprite component
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
@@ -86,10 +86,10 @@ sprites.create=function(it,opts)
 
 		v.zf=v.zf or 0
 
-		v.r=v.r or ( v.color and ( v.color[1] or v.color.r ) ) or 1
-		v.g=v.g or ( v.color and ( v.color[2] or v.color.g ) ) or 1
-		v.b=v.b or ( v.color and ( v.color[3] or v.color.b ) ) or 1
-		v.a=v.a or ( v.color and ( v.color[4] or v.color.a ) ) or 1
+		v.r=v.color and v.color.r or 1
+		v.g=v.color and v.color.g or 1
+		v.b=v.color and v.color.b or 1
+		v.a=v.color and v.color.a or 1
 		
 	end
 

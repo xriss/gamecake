@@ -40,7 +40,7 @@ copper.create=function(it,opts)
 	it.screen=assert(it.system.components[opts.screen or "screen"]) -- find linked components by name
 	it.opts=opts
 	it.component="copper"
-	it.name=opts.name
+	it.name=opts.name or it.component
 
 	it.drawtype=opts.drawtype
 	

@@ -71,12 +71,19 @@ M.cmap_build=function(cmap_data)
 		if color.code then
 			cmap[color.code:sub(1,2)]=color -- double letter codes only
 		end
+		if color.name then
+			cmap[ color.name ]=color -- allow easy lookup by name ( names must not be 2 hex chars )
+		end
 	end
 	for i=0,255 do -- premultiply the colors as this is the data we actually need
 		local color=cmap[i]
 		if color.bgra then
-			color[1],color[2],color[3],color[4]=wpack.argb_pmb4(color.bgra)
+			color[1],color[2],color[3],color[4]=wpack.argb_pmb4(color.bgra) -- wgrd style 4 byte array
 		end
+		color.r=color[1]/255 -- opengl style floats
+		color.g=color[2]/255
+		color.b=color[3]/255
+		color.a=color[4]/255
 	end
 	
 	cmap.data={} -- build data table
@@ -314,6 +321,8 @@ M.pix_tiles=function(str,map,tout,px,py,hx,hy,tiles)
 		for x=0,hx-1 do
 			local s=getxy(x,y) or ". "
 			local c=scopy(getc(s) or {0,0,0,0}) -- this will be a new table per cell, shallow copy
+			c.x=x+px -- add x,y of tile to the copied data
+			c.y=y+py
 			tiles[y+py][x+px]=c
 		end
 	end

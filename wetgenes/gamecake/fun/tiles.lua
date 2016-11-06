@@ -39,7 +39,7 @@ tiles.create=function(it,opts)
 	it.colors=assert(it.system.components[opts.colors or "colors"])
 	it.opts=opts
 	it.component="tiles"
-	it.name=opts.name
+	it.name=opts.name or it.component
 	
 	it.names={}
 	it.tiles={}

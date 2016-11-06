@@ -34,7 +34,7 @@ end
 colors.create=function(it,opts)
 	it.opts=opts
 	it.component="colors"
-	it.name=opts.name
+	it.name=opts.name or it.component
 	
 	it.cmap=opts.cmap or bitdown.cmap
 
