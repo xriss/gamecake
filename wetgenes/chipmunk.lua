@@ -117,10 +117,9 @@ Form of "circle" needs a radius and a centre point.
 
 Form of "segment" needs two points and a radius.
 
-	shape=chipmunk.shape(body,"poly",...)
+	shape=chipmunk.shape(body,"poly",{x1,y1,x2,y2,...},radius)
 
-Form of "poly" is not wired up to anything yet but probably a stream of 
-points?
+Form of "poly" is a generic polygon defined by a table of points.
 
 	shape=chipmunk.shape(body,"box",minx,miny,maxx,maxy,radius)
 
@@ -146,6 +145,47 @@ You will need to add the constraint to a space before it has any effect
 so it is normally preferable to use the space:constraint function which 
 will call this function and then automatically add the constraint into 
 the space.
+
+	constraint=chipmunk.constraint(abody,bbody,"pin_join",ax,ay,bx,by)
+
+form of "pin_joint" ...
+
+	constraint=chipmunk.constraint(abody,bbody,"slide_joint",ax,ay,bx,by,fl,fh)
+
+form of "slide_joint" ...
+
+	constraint=chipmunk.constraint(abody,bbody,"pivot_joint",x,y)
+	constraint=chipmunk.constraint(abody,bbody,"pivot_joint",ax,ay,bx,by)
+
+form of "pivot_joint" ...
+
+	constraint=chipmunk.constraint(abody,bbody,"groove_joint",ax,ay,bx,by,cx,cy)
+
+form of "groove_joint" ...
+
+	constraint=chipmunk.constraint(abody,bbody,"damped_spring",ax,ay,bx,by,fl,fs,fd)
+
+form of "damped_spring" ...
+
+	constraint=chipmunk.constraint(abody,bbody,"damped_rotary_spring",fa,fs,fd)
+
+form or "damped_rotary_spring" ...
+
+	constraint=chipmunk.constraint(abody,bbody,"rotary_limit_joint",fl,fh)
+
+form of "rotary_limit_joint" ...
+
+	constraint=chipmunk.constraint(abody,bbody,"ratchet_joint",fp,fr)
+
+form of "ratchet_joint" ...
+
+	constraint=chipmunk.constraint(abody,bbody,"gear_joint",fp,fr)
+
+form of "gear_joint" ...
+
+	constraint=chipmunk.constraint(abody,bbody,"simple_motor",fr)
+
+form of "simple_motor" ...
 
 ]]
 chipmunk.constraint=function(abody,bbody,form,...)
@@ -191,6 +231,30 @@ chipmunk.space_functions.damping=function(space,v)
 	return core.space_damping(space[0],v)
 end
 ------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.idle_speed_threshold
+
+	v=space:idle_speed_threshold()
+	v=space:idle_speed_threshold(v)
+
+Get and/or Set the idle speed threshold for this space.
+
+]]
+chipmunk.space_functions.idle_speed_threshold=function(space,v)
+	return core.space_idle_speed_threshold(space[0],v)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.sleep_time_threshold
+
+	v=space:sleep_time_threshold()
+	v=space:sleep_time_threshold(v)
+
+Get and/or Set the sleep time threshold for this space.
+
+]]
+chipmunk.space_functions.sleep_time_threshold=function(space,v)
+	return core.space_sleep_time_threshold(space[0],v)
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.collision_slop
 
 	v=space:collision_slop()
@@ -213,6 +277,40 @@ Get and/or Set the colision bias for this space.
 ]]
 chipmunk.space_functions.collision_bias=function(space,v)
 	return core.space_collision_bias(space[0],v)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.collision_persistence
+
+	v=space:collision_persistence()
+	v=space:collision_persistence(v)
+
+Get and/or Set the collision persistence for this space.
+
+]]
+chipmunk.space_functions.collision_persistence=function(space,v)
+	return core.space_collision_persistence(space[0],v)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.current_time_step
+
+	v=space:current_time_step()
+
+Get the current time step for this space.
+
+]]
+chipmunk.space_functions.current_time_step=function(space)
+	return core.space_current_time_step(space[0])
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.locked
+
+	v=space:locked()
+
+Get the locked state for this space, if true we cannot change shapes.
+
+]]
+chipmunk.space_functions.locked=function(space)
+	return core.space_locked(space[0])
 end
 ------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.add_handler
@@ -330,6 +428,34 @@ chipmunk.space_functions.contains=function(space,it)
 	end
 end
 ------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.reindex
+
+	space:reindex(shape)
+	space:reindex(body)
+	space:reindex()
+
+Reindex the shapes, either a specific shape, all the shapes in a body 
+or just all the static shapes.
+
+]]
+chipmunk.space_functions.reindex=function(space,it)
+	if not it then
+
+		return core.space_reindex_static(space[0])
+
+	elseif it.is=="body" then
+
+		return core.space_reindex_shapes_for_body(space[0],it[0])
+
+	elseif it.is=="shape" then
+
+		return core.space_reindex_shape(space[0],it[0])
+	
+	else
+		error("unknown "..it.is)
+	end
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.body
 
 	space:body(...)
@@ -367,6 +493,45 @@ chipmunk.space_functions.step=function(space,ts)
 	return core.space_step(space[0],ts)
 end
 ------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.body.type
+
+	t=body:type()
+	t=body:type(t)
+
+Get and/or Set the type for this body.
+
+]]
+chipmunk.body_functions.type=function(body,t)
+	local tt={ dynamic=1,kinematic=2,static=3} -- string to number
+	local rr={"dynamic","kinematic","static" } -- number to string
+	local r=core.body_type(body[0],tt[t])
+	return rr[r]
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.body.mass
+
+	m=body:mass()
+	m=body:mass(m)
+
+Get and/or Set the mass for this body.
+
+]]
+chipmunk.body_functions.mass=function(body,m)
+	return core.body_mass(body[0],m)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.body.moment
+
+	m=body:moment()
+	m=body:moment(m)
+
+Get and/or Set the moment for this body.
+
+]]
+chipmunk.body_functions.moment=function(body,m)
+	return core.body_moment(body[0],m)
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.position
 
 	vx,vy=body:position()
@@ -377,6 +542,18 @@ Get and/or Set the position for this body.
 ]]
 chipmunk.body_functions.position=function(body,vx,vy)
 	return core.body_position(body[0],vx,vy)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.body.center_of_gravity
+
+	vx,vy=body:center_of_gravity()
+	vx,vy=body:center_of_gravity(vx,vy)
+
+Get and/or Set the center of gravity for this body.
+
+]]
+chipmunk.body_functions.center_of_gravity=function(body,vx,vy)
+	return core.body_center_of_gravity(body[0],vx,vy)
 end
 ------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.velocity
@@ -426,6 +603,18 @@ Get and/or Set the angular velocity in radians for this body.
 ]]
 chipmunk.body_functions.angular_velocity=function(body,a)
 	return core.body_angular_velocity(body[0],a)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.body.torque
+
+	a=body:torque()
+	a=body:torque(a)
+
+Get and/or Set the torque for this body.
+
+]]
+chipmunk.body_functions.torque=function(body,a)
+	return core.body_torque(body[0],a)
 end
 ------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.apply_force
@@ -542,6 +731,19 @@ Get the current bounding box for this shape.
 chipmunk.shape_functions.bounding_box=function(shape)
 	return core.shape_bounding_box(shape[0])
 end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.shape.sensor
+
+	f=shape:sensor()
+	f=shape:sensor(f)
+
+Get and/or Set the sensor flag for this shape.
+
+]]
+chipmunk.shape_functions.sensor=function(shape,f)
+	return core.shape_sensor(shape[0],f)
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.shape.elasticity
 
 	f=shape:elasticity()
@@ -649,6 +851,65 @@ Ignore this collision, from now until the shapes separate.
 chipmunk.arbiter_functions.ignore=function(arbiter)
 	core.arbiter_ignore(arbiter[0])
 	return false
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.constraint.max_force
+
+	v=constraint:max_force()
+	v=constraint:max_force(v)
+
+Get and/or Set the max force for this constraint.
+
+]]
+chipmunk.constraint_functions.max_force=function(constraint,v)
+	return core.constraint_max_force(constraint[0],v)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.constraint.error_bias
+
+	v=constraint:error_bias()
+	v=constraint:error_bias(v)
+
+Get and/or Set the error bias for this constraint.
+
+]]
+chipmunk.constraint_functions.error_bias=function(constraint,v)
+	return core.constraint_error_bias(constraint[0],v)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.constraint.max_bias
+
+	v=constraint:max_bias()
+	v=constraint:max_bias(v)
+
+Get and/or Set the max bias for this constraint.
+
+]]
+chipmunk.constraint_functions.max_bias=function(constraint,v)
+	return core.constraint_max_bias(constraint[0],v)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.constraint.collide_bodies
+
+	v=constraint:collide_bodies()
+	v=constraint:collide_bodies(v)
+
+Get and/or Set the max collide bodies flag for this constraint.
+
+]]
+chipmunk.constraint_functions.collide_bodies=function(constraint,v)
+	return core.constraint_collide_bodies(constraint[0],v)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.constraint.impulse
+
+	v=constraint:impulse()
+
+Get the last impulse for this constraint.
+
+]]
+chipmunk.constraint_functions.impulse=function(constraint)
+	return core.constraint_impulse(constraint[0])
 end
 ------------------------------------------------------------------------
 
