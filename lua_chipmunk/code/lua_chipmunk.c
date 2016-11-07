@@ -1983,6 +1983,7 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"space_reindex_shape",				lua_chipmunk_space_reindex_shape},
 		{"space_reindex_shapes_for_body",	lua_chipmunk_space_reindex_shapes_for_body},
 		{"space_reindex_static",			lua_chipmunk_space_reindex_static},
+		
 		{"space_step",						lua_chipmunk_space_step},
 		{"space_iterations",				lua_chipmunk_space_iterations},
 		{"space_gravity",					lua_chipmunk_space_gravity},
