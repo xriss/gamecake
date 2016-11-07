@@ -1855,7 +1855,7 @@ cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,2);
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_constraint_max_force (lua_State *l)
 {	
-cpConstraint *constraint=(cpConstraint *)lua_touserdata(l,1); if(!constraint){ lua_pushstring(l,"missing constraint"); lua_error(l); }
+cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,1);
 
 	if( lua_isnumber(l,2) )
 	{
@@ -1874,7 +1874,7 @@ cpConstraint *constraint=(cpConstraint *)lua_touserdata(l,1); if(!constraint){ l
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_constraint_error_bias (lua_State *l)
 {	
-cpConstraint *constraint=(cpConstraint *)lua_touserdata(l,1); if(!constraint){ lua_pushstring(l,"missing constraint"); lua_error(l); }
+cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,1);
 
 	if( lua_isnumber(l,2) )
 	{
@@ -1893,7 +1893,7 @@ cpConstraint *constraint=(cpConstraint *)lua_touserdata(l,1); if(!constraint){ l
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_constraint_max_bias (lua_State *l)
 {	
-cpConstraint *constraint=(cpConstraint *)lua_touserdata(l,1); if(!constraint){ lua_pushstring(l,"missing constraint"); lua_error(l); }
+cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,1);
 
 	if( lua_isnumber(l,2) )
 	{
@@ -1912,18 +1912,14 @@ cpConstraint *constraint=(cpConstraint *)lua_touserdata(l,1); if(!constraint){ l
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_constraint_collide_bodies (lua_State *l)
 {	
-cpConstraint *constraint=(cpConstraint *)lua_touserdata(l,1); if(!constraint){ lua_pushstring(l,"missing constraint"); lua_error(l); }
-cpBool b;
+cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,1);
 
 	if( lua_isboolean(l,2) )
 	{
-		b=lua_toboolean(l,2);
-		cpConstraintSetCollideBodies(constraint,b);
+		cpConstraintSetCollideBodies(constraint,lua_toboolean(l,2));
 	}
 
-	b=cpConstraintGetCollideBodies(constraint);
-
-	lua_pushboolean(l,b);
+	lua_pushboolean(l,cpConstraintGetCollideBodies(constraint));
 
 	return 1;
 }
@@ -1935,7 +1931,7 @@ cpBool b;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_constraint_impulse (lua_State *l)
 {	
-cpConstraint *constraint=(cpConstraint *)lua_touserdata(l,1); if(!constraint){ lua_pushstring(l,"missing constraint"); lua_error(l); }
+cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,1);
 
 	lua_pushnumber(l, cpConstraintGetImpulse(constraint) );
 
