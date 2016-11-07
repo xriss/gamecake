@@ -3,8 +3,10 @@ cd `dirname $0`
 
 ./box-up-wait
 
-./ssh " cd bin && hg pull -u && cd .. || hg clone https://bitbucket.org/xixs/bin "
-./ssh " cd lua && hg pull -u && cd .. || hg clone https://bitbucket.org/xixs/lua "
+./ssh " cd bin && hg recover "
+./ssh " cd lua && hg recover "
+./ssh " cd bin && hg pull -u -v && cd .. || hg clone https://bitbucket.org/xixs/bin "
+./ssh " cd lua && hg pull -u -v && cd .. || hg clone https://bitbucket.org/xixs/lua "
 ./ssh " lua/raspi/vbox "
 
 
