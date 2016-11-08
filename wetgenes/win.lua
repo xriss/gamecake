@@ -106,7 +106,7 @@ end
 
 
 print("The flavour of win is "..base.flavour)
-print(hardcores)
+--print(hardcores)
 
 win.hardcore=hardcore
 win.softcore=softcore
