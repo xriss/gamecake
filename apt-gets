@@ -1,7 +1,30 @@
 #build dependencies, run sudo ./apt-gets
 
+
 apt-get install build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev 
 
-#needed for pagecake (can ignore a fail to install if you only want gamecake)
+
 apt-get install libssl-dev
+
+
+
+if [ "$1" = "xtra" ]; then
+
+	#clang if you want to build using clang (recomended)
+	apt-get install clang
+
+
+	#mingw32 if you want to build for windows, one of these will probably work
+	apt-get install mingw32
+	apt-get install mingw-w64
+
+else
+
+	echo ""
+	echo " installed base dependencies only "
+	echo ""
+	echo " Run with extra, eg ./apt-get xtra to install xtra dependencies "
+	echo ""
+
+fi
 
