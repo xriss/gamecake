@@ -1,0 +1,17 @@
+
+if [ -e "`dirname $0`/pagecake.nix" ] ; then
+	`dirname $0`/pagecake.nix $*
+
+elif [ "`uname`" = "Darwin" ] ; then
+	`dirname $0`/pagecake.osx $*
+
+elif [ "`uname -m`" = "armv6l" ] ; then
+	`dirname $0`/pagecake.raspi $*
+
+elif [ "`getconf LONG_BIT`" = "64" ] ; then
+	`dirname $0`/pagecake.x64 $*
+
+else
+	`dirname $0`/pagecake.x32 $*
+
+fi
