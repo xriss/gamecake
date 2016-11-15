@@ -1,4 +1,4 @@
-syntax: glob
+
 *.vagrant
 *.git
 *.orig
