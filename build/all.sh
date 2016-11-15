@@ -41,5 +41,9 @@ upx -9 ../exe/*
 
 #show status, this should list new versions of everything we just built
 
-hg status -R ../../bin
+cd ../exe
 
+git status
+
+#add and commit changed files
+./update_files
