@@ -48,9 +48,11 @@ screen.create=function(it,opts)
 	it.scale=it.opts.scale or 3
 	
 	it.filter=it.opts.filter or "none"
+	it.shadow=it.opts.shadow or "none"
 	
 	it.hx=it.opts.size and it.opts.size[1] or 320
 	it.hy=it.opts.size and it.opts.size[2] or 240
+
 	
 --	it.drawlist=opts.drawlist
 
@@ -173,13 +175,20 @@ screen.create=function(it,opts)
 			v2[1],	v2[2],	v2[3],	fbo.uvw,	fbo.uvh,
 		}
 
-		flat.tristrip("rawuv",t,"fun_screen_dropshadow",function(p)
-			local v=views.get()
-			gl.Uniform4f( p:uniform("siz"), it.fbo.txw				,	it.fbo.txh, 
-											it.fbo.uvw/v.hx*v.sx	,	it.fbo.uvh/v.hy*v.sy	)
-		end)
-		
---		flat.tristrip("rawuv",t,"raw_tex")
+
+		if it.shadow=="drop" then
+			flat.tristrip("rawuv",t,"fun_screen_dropshadow",function(p)
+				local v=views.get()
+				gl.Uniform4f( p:uniform("siz"), it.fbo.txw				,	it.fbo.txh, 
+												it.fbo.uvw/v.hx*v.sx	,	it.fbo.uvh/v.hy*v.sy	)
+
+				gl.Uniform4f( p:uniform("shadow_info"), 1	,	it.shadow_max or 0.4, 
+														2	,	it.shadow_min or 0.8	)
+
+			end)
+		else
+			flat.tristrip("rawuv",t,"raw_tex")
+		end
 
 	end
 

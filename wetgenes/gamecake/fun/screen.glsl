@@ -221,6 +221,8 @@ varying vec4  v_color;
 
 uniform vec4 siz;
 
+uniform vec4  shadow_info; /* 0,1 tile size eg 8x8 and 2,3 the font texture size*/
+
 vec4 render(vec2 uv)
 {
 	vec2 tb;
@@ -231,22 +233,16 @@ vec4 render(vec2 uv)
 
 	c=texture2D(tex, tb).rgba;
 	
-	if	(	/*(c.a<texture2D(tex, tb+(vec2(-1.0, 0.0)/siz.xy)).a)	||
-			(c.a<texture2D(tex, tb+(vec2( 0.0, 1.0)/siz.xy)).a)	||*/
-			(c.a<texture2D(tex, tb+(vec2(-1.0, 1.0)/siz.xy)).a)	)
+	if	(	(c.a<texture2D(tex, tb+(vec2(-shadow_info[0], shadow_info[0])/siz.xy)).a)	)
 	{ 
-		c=(c*0.4);
-		c.a=c.a+0.6;
+		c=(c*shadow_info[1]);
+		c.a=c.a+(1.0-shadow_info[1]);
 	}
 	else
-	if	(	/*(c.a<texture2D(tex, tb+(vec2(-2.0, 0.0)/siz.xy)).a)	||
-			(c.a<texture2D(tex, tb+(vec2( 0.0, 2.0)/siz.xy)).a)	||
-			(c.a<texture2D(tex, tb+(vec2(-2.0, 1.0)/siz.xy)).a)	||
-			(c.a<texture2D(tex, tb+(vec2(-1.0, 2.0)/siz.xy)).a)	||*/
-			(c.a<texture2D(tex, tb+(vec2(-2.0, 2.0)/siz.xy)).a)	)
+	if	(	(c.a<texture2D(tex, tb+(vec2(-shadow_info[2], shadow_info[2])/siz.xy)).a)	)
 	{
-		c=(c*0.8);
-		c.a=c.a+0.2;
+		c=(c*shadow_info[3]);
+		c.a=c.a+(1.0-shadow_info[3]);
 	}
 	
 	return c;
