@@ -28,11 +28,11 @@ sudo port -v selfupdate
 
 sudo port install bindfs
 
-sudo mkdir /hg_fix
-sudo bindfs -m vagrant /hg /hg_fix
-cd /hg_fix
+sudo mkdir /gamecake_fix
+sudo bindfs -m vagrant /gamecake /gamecake_fix
+cd /gamecake_fix
 
 # OK we now have fixed permission and can hopefully build and install
 
-/hg_fix/lua/build/depends/install
+/gamecake_fix/build/depends/install
 
