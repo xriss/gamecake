@@ -531,8 +531,8 @@ location( BUILD_DIR )
 configurations { "Debug", "Release" }
 
 
-EXE_OUT_DIR=path.getabsolute("../bin/exe")
-DBG_OUT_DIR=path.getabsolute("../bin/dbg")
+EXE_OUT_DIR=path.getabsolute("exe")
+DBG_OUT_DIR=path.getabsolute("dbg")
 
 
 

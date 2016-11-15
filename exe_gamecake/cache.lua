@@ -22,8 +22,8 @@ function dorawfilename(i,v)
 --	print(m,v)
 end
 
-for i,v in ipairs( os.matchfiles("../../bin/lua/**.lua") or {} ) do dofilename(i,v) end
-for i,v in ipairs( os.matchfiles("../../bin/lua/**.glsl") or {} ) do dorawfilename(i,v) end
+for i,v in ipairs( os.matchfiles("../lua/**.lua") or {} ) do dofilename(i,v) end
+for i,v in ipairs( os.matchfiles("../lua/**.glsl") or {} ) do dorawfilename(i,v) end
 
 
 for i,v in ipairs( LUA_CACHE_FILES or {} ) do
@@ -88,7 +88,7 @@ end
 
 	const char *wetgenes_wetmods_version()
 	{
-		return "Gamecake V]]..version..[[ https://bitbucket.org/xixs/lua containing ]]..libnames..[[";
+		return "Gamecake V]]..version..[[ https://github.com/xriss/gamecake containing ]]..libnames..[[";
 	}
 
 ]])
