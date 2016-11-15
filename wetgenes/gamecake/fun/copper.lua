@@ -42,7 +42,8 @@ copper.create=function(it,opts)
 	it.component="copper"
 	it.name=opts.name or it.component
 
-	it.drawtype=opts.drawtype
+--	it.drawtype=opts.drawtype
+	it.layer=opts.layer or 1
 	
 	it.hx=it.opts.size and it.opts.size[1] or it.screen.hx or 320
 	it.hy=it.opts.size and it.opts.size[2] or it.screen.hy or 240
@@ -75,10 +76,10 @@ copper.create=function(it,opts)
 
 		gl.Color(1,1,1,1)
 
-		local v3=gl.apply_modelview( {it.screen.hx*-0.0,	it.screen.hy* 1.0,	0,1} )
-		local v1=gl.apply_modelview( {it.screen.hx*-0.0,	it.screen.hy*-0.0,	0,1} )
-		local v4=gl.apply_modelview( {it.screen.hx* 1.0,	it.screen.hy* 1.0,	0,1} )
-		local v2=gl.apply_modelview( {it.screen.hx* 1.0,	it.screen.hy*-0.0,	0,1} )
+		local v3=gl.apply_modelview( {it.screen.hx*-0.0,	it.screen.hy* 1.0,	-32,1} )
+		local v1=gl.apply_modelview( {it.screen.hx*-0.0,	it.screen.hy*-0.0,	-32,1} )
+		local v4=gl.apply_modelview( {it.screen.hx* 1.0,	it.screen.hy* 1.0,	-32,1} )
+		local v2=gl.apply_modelview( {it.screen.hx* 1.0,	it.screen.hy*-0.0,	-32,1} )
 
 		local t={
 			v3[1],	v3[2],	v3[3],	0,		it.hy,
@@ -86,6 +87,8 @@ copper.create=function(it,opts)
 			v4[1],	v4[2],	v4[3],	it.hx,	it.hy, 			
 			v2[1],	v2[2],	v2[3],	it.hx,	0,
 		}
+
+		gl.DepthMask(gl.FALSE)
 
 		flat.tristrip("rawuv",t,it.shader_name,function(p)
 			for n,v in pairs(it.shader_uniforms) do
@@ -115,6 +118,7 @@ copper.create=function(it,opts)
 
 
 		end)
+		gl.DepthMask(gl.TRUE)
 
 --			gl.PopMatrix()
 		

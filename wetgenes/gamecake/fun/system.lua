@@ -196,36 +196,29 @@ system.draw=function()
 
 	local screen=system.components.screen
 
-	screen.draw_into_start()
-
-	if screen.drawlist then -- we want to merge drop shadows
-		for _,it in ipairs(system.components) do
-			if it.drawtype=="first" then
-				if it.draw then it.draw() end
-			end
-		end
-		for i,dl in ipairs(screen.drawlist) do
-			for _,it in ipairs(system.components) do
-				if it.drawtype=="merge" then
-					it.drawlist={dl}
-					if it.draw then it.draw() end
-				end
-			end
-		end
-		for _,it in ipairs(system.components) do
-			if it.drawtype=="last" then
-				if it.draw then it.draw() end
-			end
-		end
-	else
-		for _,it in ipairs(system.components) do
-			if it.draw then it.draw() end
-		end
+-- layer 0 is used for uploading textures
+	for _,it in ipairs(system.components) do
+		if it.draw and it.layer==0 then it.draw() end
 	end
 
-	screen.draw_into_finish()
-	screen.draw_fbo()
 
+	for idx=1,#screen.layers do
+
+		screen.draw_into_layer_start(idx)
+
+		for _,it in ipairs(system.components) do
+			if it.draw and it.layer==idx then it.draw() end
+		end
+
+		screen.draw_into_layer_finish(idx)
+
+	end
+
+	screen.draw_into_screen_start()
+	for idx=1,#screen.layers do screen.draw_layer(idx) end
+	screen.draw_into_screen_finish()
+	
+	screen.draw_screen()
 
 --hax
 	if not system.done_save_fun_png then

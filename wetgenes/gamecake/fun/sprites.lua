@@ -43,8 +43,9 @@ sprites.create=function(it,opts)
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per sprite component
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
 
-	it.drawlist=opts.drawlist or { { color={1,1,1,1} , dx=0 , dy=0 } } -- use this to add drop shadows
-	it.drawtype=opts.drawtype
+--	it.drawlist=opts.drawlist or { { color={1,1,1,1} , dx=0 , dy=0 } } -- use this to add drop shadows
+--	it.drawtype=opts.drawtype
+	it.layer=opts.layer or 1
 
 	it.setup=function(opts)
 		
@@ -84,7 +85,7 @@ sprites.create=function(it,opts)
 		v.sx=v.sx or v.s or 1
 		v.sy=v.sy or v.s or 1
 
-		v.zf=v.zf or 0
+		v.pz=v.pz or 0
 
 		v.r=v.color and v.color.r or 1
 		v.g=v.color and v.color.g or 1
@@ -100,7 +101,9 @@ sprites.create=function(it,opts)
 		
 		gl.Color(1,1,1,1)
 
-		for i,dl in ipairs(it.drawlist) do
+--		for i,dl in ipairs(it.drawlist) do
+
+		local dl={ color={1,1,1,1} , dx=0 , dy=0 }
 
 			local batch={}
 			for idx,v in pairs(it.list) do
@@ -118,10 +121,10 @@ sprites.create=function(it,opts)
 				local s=-math.sin(math.pi*(v.rz)/180)
 				local c= math.cos(math.pi*(v.rz)/180)
 
-				local v1=gl.apply_modelview( {dl.dx+v.px-c*(ox)-s*(oy),			dl.dy+v.py+s*(ox)-c*(oy),			v.zf,1} )
-				local v2=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)-s*(oy),		dl.dy+v.py-s*(hx-ox)-c*(oy),		v.zf,1} )
-				local v3=gl.apply_modelview( {dl.dx+v.px-c*(ox)+s*(hy-oy),		dl.dy+v.py+s*(ox)+c*(hy-oy),		v.zf,1} )
-				local v4=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)+s*(hy-oy),	dl.dy+v.py-s*(hx-ox)+c*(hy-oy),		v.zf,1} )
+				local v1=gl.apply_modelview( {dl.dx+v.px-c*(ox)-s*(oy),			dl.dy+v.py+s*(ox)-c*(oy),			v.pz,1} )
+				local v2=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)-s*(oy),		dl.dy+v.py-s*(hx-ox)-c*(oy),		v.pz,1} )
+				local v3=gl.apply_modelview( {dl.dx+v.px-c*(ox)+s*(hy-oy),		dl.dy+v.py+s*(ox)+c*(hy-oy),		v.pz,1} )
+				local v4=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)+s*(hy-oy),	dl.dy+v.py-s*(hx-ox)+c*(hy-oy),		v.pz,1} )
 
 				local t=
 				{
@@ -137,9 +140,9 @@ sprites.create=function(it,opts)
 
 			end
 
-			flat.tristrip("rawuvrgba",batch)
+			flat.tristrip("rawuvrgba",batch,"fun_draw_sprites")
 			
-		end
+--		end
 
 	end
 

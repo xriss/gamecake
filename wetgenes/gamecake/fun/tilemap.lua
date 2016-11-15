@@ -61,8 +61,9 @@ tilemap.create=function(it,opts)
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per map
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
 	
-	it.drawlist=opts.drawlist or { { color={1,1,1,1} , dx=0 , dy=0 } } -- use this to add drop shadows
-	it.drawtype=opts.drawtype
+--	it.drawlist=opts.drawlist or { { color={1,1,1,1} , dx=0 , dy=0 } } -- use this to add drop shadows
+--	it.drawtype=opts.drawtype
+	it.layer=opts.layer or 1
 
 	it.setup=function(opts)
 		
@@ -111,7 +112,9 @@ tilemap.create=function(it,opts)
 
 		gl.Color(1,1,1,1)
 
-		for i,dl in ipairs(it.drawlist) do
+--		for i,dl in ipairs(it.drawlist) do
+		local dl={ color={1,1,1,1} , dx=0 , dy=0 }
+		
 
 			local x,y,hx,hy=it.window_px+dl.dx , it.window_py+dl.dy , it.window_hx , it.window_hy
 			local u,v,hu,hv=it.px/it.tile_hx , it.py/it.tile_hy , hx/it.tile_hx , hy/it.tile_hy
@@ -144,7 +147,7 @@ tilemap.create=function(it,opts)
 
 			end)
 			
-		end
+--		end
 
 	end
 

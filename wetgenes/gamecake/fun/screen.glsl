@@ -186,3 +186,75 @@ void main(void)
 }
 
 #endif
+
+#shader "fun_screen_dropshadow"
+#ifdef VERTEX_SHADER
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+attribute vec3 a_vertex;
+attribute vec2 a_texcoord;
+
+varying vec2  v_texcoord;
+varying vec4  v_color;
+ 
+void main()
+{
+    gl_Position = projection * vec4(a_vertex, 1.0);
+	v_texcoord=a_texcoord;
+	v_color=color;
+}
+
+#endif
+#ifdef FRAGMENT_SHADER
+
+#if defined(GL_FRAGMENT_PRECISION_HIGH)
+precision highp float; /* really need better numbers if possible */
+#endif
+
+uniform sampler2D tex;
+
+varying vec2  v_texcoord;
+varying vec4  v_color;
+
+uniform vec4 siz;
+
+vec4 render(vec2 uv)
+{
+	vec2 tb;
+
+	vec4  c;
+
+	tb=(floor(uv*siz.xy)+vec2(0.5,0.5))/siz.xy;
+
+	c=texture2D(tex, tb).rgba;
+	
+	if	(	/*(c.a<texture2D(tex, tb+(vec2(-1.0, 0.0)/siz.xy)).a)	||
+			(c.a<texture2D(tex, tb+(vec2( 0.0, 1.0)/siz.xy)).a)	||*/
+			(c.a<texture2D(tex, tb+(vec2(-1.0, 1.0)/siz.xy)).a)	)
+	{ 
+		c=(c*0.4);
+		c.a=c.a+0.6;
+	}
+	else
+	if	(	/*(c.a<texture2D(tex, tb+(vec2(-2.0, 0.0)/siz.xy)).a)	||
+			(c.a<texture2D(tex, tb+(vec2( 0.0, 2.0)/siz.xy)).a)	||
+			(c.a<texture2D(tex, tb+(vec2(-2.0, 1.0)/siz.xy)).a)	||
+			(c.a<texture2D(tex, tb+(vec2(-1.0, 2.0)/siz.xy)).a)	||*/
+			(c.a<texture2D(tex, tb+(vec2(-2.0, 2.0)/siz.xy)).a)	)
+	{
+		c=(c*0.8);
+		c.a=c.a+0.2;
+	}
+	
+	return c;
+}
+
+void main(void)
+{
+	gl_FragColor=	render(v_texcoord)*v_color;
+}
+
+#endif

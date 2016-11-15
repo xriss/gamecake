@@ -56,7 +56,8 @@ tiles.create=function(it,opts)
 --	it.hy=2^math.ceil( math.log(it.hy)/math.log(2) )
 
 
-	it.drawtype=opts.drawtype or "first"
+--	it.drawtype=opts.drawtype or "first"
+	it.layer=opts.layer or 0
 
 	it.setup=function(opts)
 		

@@ -52,9 +52,9 @@ screen.create=function(it,opts)
 	it.hx=it.opts.size and it.opts.size[1] or 320
 	it.hy=it.opts.size and it.opts.size[2] or 240
 	
-	it.drawlist=opts.drawlist
+--	it.drawlist=opts.drawlist
 
-	it.fbo=framebuffers.create(it.hx,it.hy,1)
+	it.fbo=framebuffers.create(it.hx,it.hy,0)
 --	it.lay=layouts.create{parent={x=0,y=0,w=it.hx,h=it.hy}}
 	it.view=views.create({
 		mode="fbo",
@@ -63,13 +63,52 @@ screen.create=function(it,opts)
 		vy=it.hy,
 		vz=it.hy*4,
 	})
+	
+	it.layers={}
+	for i=1,opts.layers do -- create a bunch of layers
+		it.layers[i]=framebuffers.create(it.hx,it.hy,1)
+	end
 
 -- need another two buffers (no depth) to perform full screen shader fx and generate bloom with
 	it.fxbo1=framebuffers.create(it.hx,it.hy,0)
 	it.fxbo2=framebuffers.create(it.hx,it.hy,0)
 	
 	-- clear fbo and prepare for drawing into
-	it.draw_into_start=function()
+	it.draw_into_layer_start=function(idx)
+
+		it.layers[idx]:bind_frame()
+
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PushMatrix()
+		
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PushMatrix()
+
+		views.push_and_apply(it.view)
+
+		gl.ClearColor(0,0,0,0)
+		gl.DepthMask(gl.TRUE)
+		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
+		gl.Enable(gl.DEPTH_TEST)
+	end
+
+
+	-- finish drawing
+	it.draw_into_layer_finish=function(idx)
+
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
+
+		views.pop_and_apply()
+
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PopMatrix()			
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PopMatrix()
+
+	end
+
+	-- clear fbo and prepare for drawing into
+	it.draw_into_screen_start=function()
 
 		it.fbo:bind_frame()
 
@@ -85,13 +124,13 @@ screen.create=function(it,opts)
 		gl.ClearColor(0,0,0,1)
 		gl.DepthMask(gl.TRUE)
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
-		gl.DepthMask(gl.FALSE)
+		gl.Disable(gl.DEPTH_TEST)
 
 	end
 
 
 	-- finish drawing
-	it.draw_into_finish=function()
+	it.draw_into_screen_finish=function()
 
 	--	screen.fbo:mipmap()
 
@@ -107,10 +146,45 @@ screen.create=function(it,opts)
 
 		it.create_bloom()
 
+		gl.DepthMask(gl.TRUE)
+	end
+	
+	-- draw layer fbo, probably with a drop shadow effect
+	it.draw_layer=function(idx)
+	
+		local fbo=it.layers[idx]
+
+		fbo:bind_texture()
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
+
+			gl.Color(1,1,1,1)
+
+		local r,g,b,a=gl.color_get_rgba()
+		local v3=gl.apply_modelview( {fbo.w*-0.0,	fbo.h* 1.0,	0,1} )
+		local v1=gl.apply_modelview( {fbo.w*-0.0,	fbo.h*-0.0,	0,1} )
+		local v4=gl.apply_modelview( {fbo.w* 1.0,	fbo.h* 1.0,	0,1} )
+		local v2=gl.apply_modelview( {fbo.w* 1.0,	fbo.h*-0.0,	0,1} )
+
+		local t={
+			v3[1],	v3[2],	v3[3],	0,			0, 			
+			v1[1],	v1[2],	v1[3],	0,			fbo.uvh,
+			v4[1],	v4[2],	v4[3],	fbo.uvw,	0, 			
+			v2[1],	v2[2],	v2[3],	fbo.uvw,	fbo.uvh,
+		}
+
+		flat.tristrip("rawuv",t,"fun_screen_dropshadow",function(p)
+			local v=views.get()
+			gl.Uniform4f( p:uniform("siz"), it.fbo.txw				,	it.fbo.txh, 
+											it.fbo.uvw/v.hx*v.sx	,	it.fbo.uvh/v.hy*v.sy	)
+		end)
+		
+--		flat.tristrip("rawuv",t,"raw_tex")
+
 	end
 
-	-- draw fbo to the main screen
-	it.draw_fbo=function()
+	-- draw screen fbo
+	it.draw_screen=function()
 
 --			gl.PushMatrix()
 
@@ -134,8 +208,8 @@ screen.create=function(it,opts)
 		if it.filter=="scanline" then
 			flat.tristrip("rawuv",t,"fun_screen_scanline",function(p)
 				local v=views.get()
---				local l=layouts.get() -- the size of what we are rendering too, so we can calculate display pixel size in uv space (siz.zw)
-				gl.Uniform4f( p:uniform("siz"), it.fbo.txw					,	it.fbo.txh, 
+--				local l=layouts.get() -- the size of what we are rendering, so we can calculate display pixel size in uv space (siz.zw)
+				gl.Uniform4f( p:uniform("siz"), it.fbo.txw				,	it.fbo.txh, 
 												it.fbo.uvw/v.hx*v.sx	,	it.fbo.uvh/v.hy*v.sy	)
 			end)
 		else
