@@ -2,7 +2,7 @@ cd `dirname $0`
 
 vagrant up
 
-vagrant ssh -c " cd /hg/lua ; clang/make clean ; clang/make "
+vagrant ssh -c " cd /gamecake ; build/clang/make clean ; build/clang/make "
 
 vagrant halt
 

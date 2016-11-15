@@ -3,17 +3,14 @@ cd `dirname $0`
 
 ./box-up-wait
 
-./ssh " cd bin && hg recover "
-./ssh " cd lua && hg recover "
-./ssh " cd bin && hg pull -u -v && cd .. || hg clone https://bitbucket.org/xixs/bin "
-./ssh " cd lua && hg pull -u -v && cd .. || hg clone https://bitbucket.org/xixs/lua "
-./ssh " lua/raspi/vbox "
+./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive https://github.com/xriss/gamecake.git "
+./ssh " gamecake/build/raspi/vbox "
 
 
 # rename the binaries
 
-scp -P 5522 pi@localhost:bin/exe/gamecake.raspi ../../bin/exe/gamecake.raspi
-scp -P 5522 pi@localhost:bin/exe/pagecake.nix ../../bin/exe/pagecake.raspi
+scp -P 5522 pi@localhost:gamecake/exe/gamecake.raspi ../exe/gamecake.raspi
+scp -P 5522 pi@localhost:gamecake/exe/pagecake.nix ../exe/pagecake.raspi
 
 ./box-down
 

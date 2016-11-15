@@ -114,11 +114,10 @@ echo " installing build dependencies"
 
 
 echo " cloaning the gamecake repo so we can use scripts from inside it"
-./ssh " cd bin && hg pull -u && cd .. || hg clone https://bitbucket.org/xixs/bin "
-./ssh " cd lua && hg pull -u && cd .. || hg clone https://bitbucket.org/xixs/lua "
+./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive https://github.com/xriss/gamecake.git "
 
 echo " building build dependencies premake, luajit and sdl2"
-./ssh " cd lua/build/depends ; ./install.raspi "
+./ssh " cd gamecake/build/depends ; ./install.raspi "
 
 ./box-down
 

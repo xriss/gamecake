@@ -3,5 +3,5 @@
 
 sudo apt-get update
 
-/hg/lua/build/depends/install
+/gamecake/build/depends/install
 
