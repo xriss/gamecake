@@ -1,5 +1,5 @@
 cd `dirname $0`
-cd ..
+cd ../..
 
 # thank you for making this "better" and more "standard"
 

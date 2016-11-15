@@ -1,12 +1,12 @@
 cd `dirname $0`
-cd ..
+cd ../..
 
 if [ "$1" = "clean" ] ; then
         rm -rf build-gmake-nacl-native
         exit
 fi
 
-naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_46`
+naclsdk=`readlink -f sdks/nacl-sdk/pepper_46`
 export PATH=$naclsdk/toolchain/linux_pnacl/bin:$PATH
 
 btype="exe"
@@ -32,7 +32,7 @@ exit
 #above is pnacl below is old nacl that we no longer use
 #
 
-naclsdk=`readlink -f ../sdks/nacl-sdk/pepper_28`
+naclsdk=`readlink -f sdks/nacl-sdk/pepper_28`
 export PATH=$naclsdk/toolchain/linux_x86_newlib/bin:$PATH
 
 makeopts=""

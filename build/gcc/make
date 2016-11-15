@@ -8,7 +8,7 @@ if [ "$test" = "64" ] ; then
 	cpu=64
 fi
 
-cd ..
+cd ../..
 
 makeopts="config=release"
 if [ "$1" = "debug" ] ; then

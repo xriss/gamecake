@@ -10,7 +10,7 @@ if [ "$test" = "64" ] ; then
 	cpu=64
 fi
 
-cd ..
+cd ../..
 
 makeopts="config=release_lsb"
 if [ "$1" = "debug" ] ; then

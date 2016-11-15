@@ -18,7 +18,7 @@ makeopts32="config=debug_android-x86"
 build="debug"
 fi
 
-cd ..
+cd ../..
 
 #build/premake4 gmake android-arm
 build/premake4 gmake android-armv7

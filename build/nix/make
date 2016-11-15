@@ -11,7 +11,7 @@ if [ "$1" = "debug" ] ; then
 makeopts="config=debug"
 fi
 
-cd ..
+cd ../..
 
 
 premake4 gmake nix-native

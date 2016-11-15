@@ -1,5 +1,5 @@
 cd `dirname $0`
-cd ..
+cd ../..
 
 #hack until we can install 32 bit and 64 bit devs at same time
 #sudo apt-get install libgl1-mesa-dev:i386 libx11-dev:i386 libasound2-dev:i386 libssl-dev:i386
