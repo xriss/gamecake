@@ -1,0 +1,10 @@
+#
+# script to run within the chroot
+#
+
+useradd -m -s /bin/bash pi
+echo "deb http://archive.raspbian.org/raspbian wheezy main" >> /etc/apt/sources.list
+wget http://archive.raspbian.org/raspbian.public.key -O - | apt-key add -
+apt-get update
+apt-get install build-essential libreadline-dev libglu1-mesa-dev xorg-dev libasound2-dev
+exit

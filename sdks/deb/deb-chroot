@@ -1,0 +1,11 @@
+mk-sbuild precise
+mount -o bind /home /var/lib/schroot/chroots/precise-i386/home
+
+
+#to enter the chroot
+#sudo chroot /var/lib/schroot/chroots/precise-i386
+
+#run once in new chroot
+#adduser kriss
+
+#then we can apt-get everything else and then su kriss to build stuff

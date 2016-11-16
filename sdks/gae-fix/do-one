@@ -1,0 +1,10 @@
+cd `dirname $0`
+
+
+mkdir ./apps/$1
+#../appengine-java-sdk/bin/appcfg.sh -A $1 download_app ./apps/$1
+cp ./apps/$1/WEB-INF/appengine-generated/index.yaml ./apps/$1/WEB-INF/index.yaml
+../appengine-java-sdk/bin/appcfg.sh -A $1-hrd update ./apps/$1
+
+
+
