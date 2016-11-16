@@ -42,7 +42,7 @@ cp raspbian.img raspi.img
 
 
 
-echo " resizing to 3gig "
+echo " resizing to 4gig "
 qemu-img resize -f raw raspi.img 4G
 
 echo " checking partition information "
@@ -92,6 +92,7 @@ echo "starting qemu but detaching it from this shell, wait until we can login be
 ./box-up >/dev/null &
 
 echo " copying your id_rsa.pub to the PIs authorised keys for auto login "
+sleep 10
 ssh-keygen -f "$HOME/.ssh/known_hosts" -R [localhost]:5522
 while ! cat ~/.ssh/id_rsa.pub | sshpass -p raspberry ssh -oStrictHostKeyChecking=no -p 5522 pi@localhost " mkdir -p .ssh ; cat >> .ssh/authorized_keys "
 do
