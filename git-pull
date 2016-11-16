@@ -1,4 +1,4 @@
 cd `dirname $0`
 
-git pull --recurse && git submodule update --recursive --remote
+git pull --recurse-submodules && git submodule update --recursive --remote
 

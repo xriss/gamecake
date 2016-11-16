@@ -43,7 +43,7 @@ cp raspbian.img raspi.img
 
 
 echo " resizing to 3gig "
-qemu-img resize -f raw raspi.img 3G
+qemu-img resize -f raw raspi.img 4G
 
 echo " checking partition information "
 
@@ -114,7 +114,7 @@ echo " installing build dependencies"
 
 
 echo " cloaning the gamecake repo so we can use scripts from inside it"
-./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive https://github.com/xriss/gamecake.git "
+./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
 
 echo " building build dependencies premake, luajit and sdl2"
 ./ssh " cd gamecake/build/depends ; ./install.raspi "

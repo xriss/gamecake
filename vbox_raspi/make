@@ -3,7 +3,7 @@ cd `dirname $0`
 
 ./box-up-wait
 
-./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive https://github.com/xriss/gamecake.git "
+./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
 ./ssh " gamecake/build/raspi/vbox "
 
 
