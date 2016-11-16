@@ -5,18 +5,18 @@ cd `dirname $0`
 
 #build windows
 
-../mingw/make clean
-../mingw/make release gamecake
+./mingw/make clean
+./mingw/make release gamecake
 
 #build nacl
 
-../nacl/make clean
-../nacl/make release gamecake
+./nacl/make clean
+./nacl/make release gamecake
 
 #build emscipten
 
-../emcc/make clean
-../emcc/make release gamecake
+./emcc/make clean
+./emcc/make release gamecake
 
 # build 64bit ubuntu 12.04 version
 
@@ -28,11 +28,11 @@ cd `dirname $0`
 
 #build osx version 64 (dont think anything uses 32 anymore)
 
-../vbox_osx/make
+#../vbox_osx/make
 
 #build raspi
 
-../vbox_raspi/make
+#../vbox_raspi/make
 
 #compress files
 
