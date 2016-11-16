@@ -46,4 +46,4 @@ cd ../exe
 git status
 
 #add and commit changed files
-./update_files
+./update-files
