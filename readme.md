@@ -2,7 +2,7 @@
 slightly broken, stuff is getting moved around from multiple hg repos 
 to one git repo, check back when it is fixed
 
-Check out droneio ( [![Build Status](https://drone.io/github.com/xriss/gamecake/status.png)](https://drone.io/github.com/xriss/gamecake/latest) ) for latest untested binaries at https://drone.io/github.com/xriss/gamecake/files
+Check out drone.io ( [![Build Status](https://drone.io/github.com/xriss/gamecake/status.png)](https://drone.io/github.com/xriss/gamecake/latest) ) for latest builds -> https://drone.io/github.com/xriss/gamecake/files
 
 
 
