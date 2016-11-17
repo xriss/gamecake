@@ -3,4 +3,3 @@
 	url = git@github.com:xriss/gamecake.git
 	branch = exe
 	shallow = true
-	fetchRecurseSubmodules = true
