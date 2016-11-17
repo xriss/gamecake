@@ -10,8 +10,8 @@ cd `dirname $0`
 
 #build nacl
 
-./nacl/make clean
-./nacl/make release gamecake
+#./nacl/make clean
+#./nacl/make release gamecake
 
 #build emscipten
 
@@ -20,10 +20,12 @@ cd `dirname $0`
 
 # build 64bit ubuntu 12.04 version
 
+../vbox_1204_64/make clean
 ../vbox_1204_64/make
 
 #build 32bit ubuntu 12.04 version 
 
+../vbox_1204_32/make clean
 ../vbox_1204_32/make
 
 #build osx version 64 (dont think anything uses 32 anymore)
