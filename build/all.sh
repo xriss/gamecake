@@ -20,13 +20,11 @@ cd `dirname $0`
 
 # build 64bit ubuntu 12.04 version
 
-../vbox_1204_64/make clean
-../vbox_1204_64/make
+../vbox_1204_64/make full
 
 #build 32bit ubuntu 12.04 version 
 
-../vbox_1204_32/make clean
-../vbox_1204_32/make
+../vbox_1204_32/make full
 
 #build osx version 64 (dont think anything uses 32 anymore)
 
