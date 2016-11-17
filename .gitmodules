@@ -1,5 +1,5 @@
 [submodule "exe"]
 	path = exe
-	url = git@github.com:xriss/gamecake.git
+	url = https://github.com/xriss/gamecake.git
 	branch = exe
 	shallow = true
