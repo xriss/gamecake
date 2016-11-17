@@ -39,10 +39,10 @@ function newgcctoolchain(toolchain)
     }
 end
 
---	local raspisdk=path.getabsolute("../sdks/raspi")
+--	local raspisdk=path.getabsolute("./sdks/raspi")
 --	local raspisdk_gcc=raspisdk.."/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/"
 
--- use the cross compiler from ../sdks/raspi/tools
+-- use the cross compiler from ./sdks/raspi/tools
 newplatform {
     name = "raspi",
     description = "raspi",
@@ -314,7 +314,7 @@ if EMCC then
 
 elseif NACL then
 
-	naclsdk_path=path.getabsolute("../sdks/nacl-sdk/pepper_46")
+	naclsdk_path=path.getabsolute("./sdks/nacl-sdk/pepper_46")
 	pepperjs_path=path.getabsolute("./lib_pepperjs/pepper.js")
 
 	platforms { "nacl" } --hax
@@ -339,7 +339,7 @@ elseif NACL then
 
 elseif RASPI then
 
-	local raspisdk=path.getabsolute("../sdks/raspi")
+	local raspisdk=path.getabsolute("./sdks/raspi")
 
 
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include" }
@@ -358,8 +358,8 @@ elseif RASPI then
 	
 elseif ANDROID then
 
-	local androidsdk=path.getabsolute("../sdks/android-sdk")
-	local androidsys=path.getabsolute("../sdks/android-9-arm/sysroot/usr")
+	local androidsdk=path.getabsolute("./sdks/android-sdk")
+	local androidsys=path.getabsolute("./sdks/android-9-arm/sysroot/usr")
 
 
 	defines "ANDROID"
@@ -373,7 +373,7 @@ AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
 
 		platforms { "android-x86" } --hax
 	
-		androidsys=path.getabsolute("../sdks/android-9-x86/sysroot/usr")
+		androidsys=path.getabsolute("./sdks/android-9-x86/sysroot/usr")
 		
 		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/x86")
 
@@ -415,7 +415,7 @@ elseif WINDOWS then
 		else				platforms { "mingw" }	--use new 64 bit compiler
 		end
 		
-		local w32api=path.getabsolute("../sdks/w32api")
+		local w32api=path.getabsolute("./sdks/w32api") -- do we still need this?
 		
 		includedirs { w32api.."/include" }
 		libdirs { w32api.."/lib" }
