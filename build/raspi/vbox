@@ -4,4 +4,4 @@ cd ../..
 
 export GAMECAKE_WIN_TYPE=raspi
 
-./make
+./make $*

@@ -4,8 +4,12 @@ cd `dirname $0`
 ./box-up-wait
 
 ./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
-./ssh " gamecake/build/raspi/vbox "
 
+if [ "$1" = "clean" ] ; then
+	./ssh " gamecake/build/raspi/vbox clean ; gamecake/build/raspi/vbox "
+fi
+	./ssh " gamecake/build/raspi/vbox "
+end
 
 # rename the binaries
 
