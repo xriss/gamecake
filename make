@@ -1,4 +1,4 @@
 cd `dirname $0`
-nix/make release $*
+build/nix/make release $*
 
 
