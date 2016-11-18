@@ -32,7 +32,8 @@ cd `dirname $0`
 
 #build raspi
 
-#../vbox_raspi/make
+#a full build would be really darn slow, so dont bother cleaning
+../vbox_raspi/make
 
 #compress files
 
