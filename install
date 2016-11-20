@@ -1,10 +1,1 @@
-cd `dirname $0`
-
-if [ -z "$DESTDIR" ] ; then
-	DESTDIR="/usr/local"
-fi
-
-mkdir -p ${DESTDIR}/bin/
-
-cp ../bin/exe/gamecake.x64 ${DESTDIR}/bin/gamecake
-cp ../bin/exe/pagecake.x64 ${DESTDIR}/bin/pagecake
+`dirname $0`/exe/install
