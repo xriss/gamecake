@@ -138,7 +138,7 @@ end
 for n,v in pairs(chunks) do
 	if n~="__flags" then
 		if n:sub(-7)~=".source" then
-			wbake.writefile( "html/"..n..".html",html("<h1>"..n.."</h1>\n<div>"..markdown(v).."</div>"..disqus(n)))
+			wbake.writefile( "./"..n..".html",html("<h1>"..n.."</h1>\n<div>"..markdown(v).."</div>"..disqus(n)))
 		end
 	end
 end
@@ -183,11 +183,9 @@ for n,v in pairs(htmls) do
 		if not name then name=aa[i] else name=name.."."..aa[i] end
 		links[#links+1]="<h1><a href=\""..name..".html\">"..name.."</a></h1>"
 	end
-	wbake.writefile( "html/"..n..".html",html(table.concat(links)..table.concat(t,"<hr/>\n")..disqus(n)))
+	wbake.writefile( "./"..n..".html",html(table.concat(links)..table.concat(t,"<hr/>\n")..disqus(n)))
 end
 
-
-wbake.copyfile( "raw/dox.css","html/dox.css")
 
 
 --print( markdown( table.concat(chunks,"\n") ) )
