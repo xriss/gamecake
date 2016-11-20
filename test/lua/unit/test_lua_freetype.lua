@@ -9,7 +9,7 @@ function test_freetype()
 local ft=require("wetgenes.freetype")
 local grd=require("wetgenes.grd")
 
-local fp=io.open("../../mods/data/fonts/Vera.ttf","rb")
+local fp=io.open("../mods/data/fonts/Vera.ttf","rb")
 local d=fp:read("*a")
 fp:close()
 
