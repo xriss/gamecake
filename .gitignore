@@ -1,4 +1,6 @@
 
+dbg/*
+
 *.vagrant
 *.git
 *.orig
