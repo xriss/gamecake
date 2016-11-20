@@ -1,4 +1,3 @@
 cd `dirname $0`
-
-nix/make clean
+build/nix/make clean
 

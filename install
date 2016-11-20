@@ -1,1 +1,2 @@
-`dirname $0`/exe/install
+cd `dirname $0`
+exe/install

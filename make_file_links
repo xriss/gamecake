@@ -2,14 +2,27 @@ cd `dirname $0`
 
 echo "linking all .lua fles from the main lua dir so we dont accidently edit multiple copies"
 
-lua_win/make_file_links
-lua_win_android/make_file_links
-lua_win_linux/make_file_links
-lua_win_nacl/make_file_links
-lua_win_osx/make_file_links
-lua_win_raspi/make_file_links
-lua_win_windows/make_file_links
 
-lua_raspi_unicornhat/make_file_links
+ln -f lua/gles.lua                 lua_gles/code/gles.lua
+ln -f lua/al.lua                   lua_al/code/al.lua
+ln -f lua/alc.lua                  lua_al/code/alc.lua
 
-lua_chipmunk/make_file_links
+ln -f lua/wetgenes/win/android.lua lua_win_android/code/android.lua
+ln -f lua/wetgenes/win/linux.lua   lua_win_linux/code/linux.lua
+ln -f lua/wetgenes/win/osx.lua     lua_win_osx/code/osx.lua
+ln -f lua/wetgenes/win/nacl.lua    lua_win_nacl/code/nacl.lua
+ln -f lua/wetgenes/win/windows.lua lua_win_windows/code/windows.lua
+ln -f lua/wetgenes/win/raspi.lua   lua_win_raspi/code/raspi.lua
+ln -f lua/wetgenes/win/emcc.lua    lua_win_emcc/code/emcc.lua
+
+ln -f lua/wetgenes/v4l2.lua        lua_v4l2/code/v4l2.lua
+ln -f lua/wetgenes/hid.lua         lua_hid/code/hid.lua
+ln -f lua/wetgenes/chipmunk.lua    lua_chipmunk/code/chipmunk.lua
+ln -f lua/wetgenes/pack.lua        lua_pack/code/pack.lua
+ln -f lua/wetgenes/ogg.lua         lua_ogg/code/ogg.lua
+ln -f lua/wetgenes/kissfft.lua     lua_kissfft/code/kissfft.lua
+ln -f lua/wetgenes/speak.lua       lua_speak/code/speak.lua
+ln -f lua/wetgenes/opus.lua        lua_opus/code/opus.lua
+
+ln -f lua/raspi/unicornhat.lua     lua_raspi_unicornhat/code/unicornhat.lua
+
