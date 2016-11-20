@@ -21,7 +21,10 @@ documented here yet.
 
 Releases are built using the vbox_* directories which contain 
 vagrant/qemu boxes setup to build the code in a controlled environment. 
-Running the ./make script will setup everything and then build it. The latest code built this way can be found in the exe branch, a zip of them all can be downloaded from https://github.com/xriss/gamecake/archive/exe.zip
+Running the ./make script will setup everything and then build it. The 
+latest code built this way can be found in the exe branch, a zip of 
+them all can be downloaded from 
+https://github.com/xriss/gamecake/archive/exe.zip
 
 For a linuxy build, the required lib dependencies are luajit and SDL2. 
 Install these then you may use the following scripts to 
@@ -34,4 +37,6 @@ make and install.
 Once built the engine lives in one single fat binary that includes many 
 lua libraries. For convenience gamecake is a command line compatible 
 replacement for lua and pagecake is a command line compatible 
-replacement for nginx (open resty). The only diference is we have C libraries and Lua libraries from this repository embeded ready to be required in you lua script.
+replacement for nginx (open resty). The only diference is we have C 
+libraries and Lua libraries from this repository embeded ready to be 
+required in you lua script.
