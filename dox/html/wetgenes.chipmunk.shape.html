@@ -32,11 +32,10 @@ automatically add the shape into the space that the body belongs to.</p>
 
 <p>Form of "segment" needs two points and a radius.</p>
 
-<pre><code>shape=chipmunk.shape(body,"poly",...)
+<pre><code>shape=chipmunk.shape(body,"poly",{x1,y1,x2,y2,...},radius)
 </code></pre>
 
-<p>Form of "poly" is not wired up to anything yet but probably a stream of 
-points?</p>
+<p>Form of "poly" is a generic polygon defined by a table of points.</p>
 
 <pre><code>shape=chipmunk.shape(body,"box",minx,miny,maxx,maxy,radius)
 </code></pre>
@@ -110,6 +109,17 @@ radius=shape:radius(radius)
 
 <p>Get and/or Set the radius for this shape. Setting is unsafe and may 
 break the physics simulation.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.shape.sensor.html">wetgenes.chipmunk.shape.sensor</a></h1>
+<div>
+
+<pre><code>f=shape:sensor()
+f=shape:sensor(f)
+</code></pre>
+
+<p>Get and/or Set the sensor flag for this shape.</p>
 
 
 </div><hr/>

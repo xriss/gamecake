@@ -8,7 +8,7 @@ local markdown	=require("markdown")
 local dprint=function(...) print(wstr.dump(...)) end
 
 
-local basedir="../../bin/lua/"
+local basedir="../lua/"
 
 local files=wbake.findfiles{basedir=basedir,dir="",filter="."}.ret
 

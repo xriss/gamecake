@@ -19,6 +19,111 @@ so it is normally preferable to use the space:constraint function which
 will call this function and then automatically add the constraint into 
 the space.</p>
 
+<pre><code>constraint=chipmunk.constraint(abody,bbody,"pin_join",ax,ay,bx,by)
+</code></pre>
+
+<p>form of "pin_joint" ...</p>
+
+<pre><code>constraint=chipmunk.constraint(abody,bbody,"slide_joint",ax,ay,bx,by,fl,fh)
+</code></pre>
+
+<p>form of "slide_joint" ...</p>
+
+<pre><code>constraint=chipmunk.constraint(abody,bbody,"pivot_joint",x,y)
+constraint=chipmunk.constraint(abody,bbody,"pivot_joint",ax,ay,bx,by)
+</code></pre>
+
+<p>form of "pivot_joint" ...</p>
+
+<pre><code>constraint=chipmunk.constraint(abody,bbody,"groove_joint",ax,ay,bx,by,cx,cy)
+</code></pre>
+
+<p>form of "groove_joint" ...</p>
+
+<pre><code>constraint=chipmunk.constraint(abody,bbody,"damped_spring",ax,ay,bx,by,fl,fs,fd)
+</code></pre>
+
+<p>form of "damped_spring" ...</p>
+
+<pre><code>constraint=chipmunk.constraint(abody,bbody,"damped_rotary_spring",fa,fs,fd)
+</code></pre>
+
+<p>form or "damped<em>rotary</em>spring" ...</p>
+
+<pre><code>constraint=chipmunk.constraint(abody,bbody,"rotary_limit_joint",fl,fh)
+</code></pre>
+
+<p>form of "rotary<em>limit</em>joint" ...</p>
+
+<pre><code>constraint=chipmunk.constraint(abody,bbody,"ratchet_joint",fp,fr)
+</code></pre>
+
+<p>form of "ratchet_joint" ...</p>
+
+<pre><code>constraint=chipmunk.constraint(abody,bbody,"gear_joint",fp,fr)
+</code></pre>
+
+<p>form of "gear_joint" ...</p>
+
+<pre><code>constraint=chipmunk.constraint(abody,bbody,"simple_motor",fr)
+</code></pre>
+
+<p>form of "simple_motor" ...</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.constraint.collide_bodies.html">wetgenes.chipmunk.constraint.collide_bodies</a></h1>
+<div>
+
+<pre><code>v=constraint:collide_bodies()
+v=constraint:collide_bodies(v)
+</code></pre>
+
+<p>Get and/or Set the max collide bodies flag for this constraint.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.constraint.error_bias.html">wetgenes.chipmunk.constraint.error_bias</a></h1>
+<div>
+
+<pre><code>v=constraint:error_bias()
+v=constraint:error_bias(v)
+</code></pre>
+
+<p>Get and/or Set the error bias for this constraint.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.constraint.impulse.html">wetgenes.chipmunk.constraint.impulse</a></h1>
+<div>
+
+<pre><code>v=constraint:impulse()
+</code></pre>
+
+<p>Get the last impulse for this constraint.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.constraint.max_bias.html">wetgenes.chipmunk.constraint.max_bias</a></h1>
+<div>
+
+<pre><code>v=constraint:max_bias()
+v=constraint:max_bias(v)
+</code></pre>
+
+<p>Get and/or Set the max bias for this constraint.</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.chipmunk.constraint.max_force.html">wetgenes.chipmunk.constraint.max_force</a></h1>
+<div>
+
+<pre><code>v=constraint:max_force()
+v=constraint:max_force(v)
+</code></pre>
+
+<p>Get and/or Set the max force for this constraint.</p>
+
 
 </div><div id="disqus_thread"></div>
 <script type="text/javascript">

@@ -25,7 +25,24 @@ exists and we always return the new environment</p>
 it should work exactly the same in lua 5.1 or 5.2</p>
 
 <pre><code>local _ENV=set_env(new_environment)
+
+
+gamecake -e" require('wetgenes').savescripts('./') "
 </code></pre>
+
+<p>Run the above from the command line.</p>
+
+<p>This will export all the gamecake internal strings into the file system 
+it is saved into the current directory so be care full where you run it.</p>
+
+<p>Game Cake checks the files system first so, these files can be modified 
+and they will replace the built in versions.</p>
+
+<pre><code>gamecake -e" require('wetgenes').savescripts('./internal/') "
+</code></pre>
+
+<p>This is a safer version that will save the files to ./internal/lua/* 
+instead of just ./lua/*</p>
 
 
 </div><div id="disqus_thread"></div>
