@@ -20,9 +20,7 @@ ln -f lua/wetgenes/hid.lua         lua_hid/code/hid.lua
 ln -f lua/wetgenes/chipmunk.lua    lua_chipmunk/code/chipmunk.lua
 ln -f lua/wetgenes/pack.lua        lua_pack/code/pack.lua
 ln -f lua/wetgenes/ogg.lua         lua_ogg/code/ogg.lua
-ln -f lua/wetgenes/kissfft.lua     lua_kissfft/code/kissfft.lua
 ln -f lua/wetgenes/speak.lua       lua_speak/code/speak.lua
-ln -f lua/wetgenes/opus.lua        lua_opus/code/opus.lua
 
 ln -f lua/raspi/unicornhat.lua     lua_raspi_unicornhat/code/unicornhat.lua
 
