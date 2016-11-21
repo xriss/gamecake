@@ -273,8 +273,7 @@ M.bake=function(oven,keys)
 				end
 			
 			elseif m.class=="mouse" then -- swipe to move
-
-				if not ups.touch then -- use a touch controller, rather than fake mouse
+				if not ups.touch or ups.touch=="" then -- use a touch controller, rather than fake mouse
 				
 					ups.set_axis({mx=m.x,my=m.y}) -- tell recap about the mouse positions, mx,my
 
