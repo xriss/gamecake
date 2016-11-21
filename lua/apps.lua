@@ -78,15 +78,9 @@ function find_bin()
 
 	local tdirs={ -- look in these dirs
 		dir,
-		dir.."/bin",
+		dir.."/gamecake",
 		dir.."/..",
-		dir.."/../bin",
-		dir.."/../lua",
-		dir.."/../lua/bin",
-		dir.."/../..",
-		dir.."/../../bin",
-		dir.."/../../..",
-		dir.."/../../../bin",
+		dir.."/../gamecake",
 	}
 	local bin_dir=dir.."/"
 	for i=1,#tdirs do local v=tdirs[i]
@@ -121,6 +115,7 @@ function default_paths()
 	
 	dir=get_cd() -- use cd as base dir
 	
+	return bin_dir
 end
 
 --
