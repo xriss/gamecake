@@ -1,6 +1,0 @@
-cd `dirname $0`
-
-echo " un mounting root "
-sudo umount ./root
-rm -rf ./root
-
