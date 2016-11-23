@@ -1,0 +1,28 @@
+## Customize the test machine
+machine:
+
+  # Add some environment variables
+  environment:
+    CIRCLE_ENV: test
+
+## Customize checkout
+checkout:
+  post:
+    - git submodule sync --reference .
+    - git submodule update --reference . --init # use submodules
+
+## Customize dependencies
+dependencies:
+  pre:
+    - sudo apt-get install libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev p7zip-full upx
+    - build/depends/install
+
+  override:
+    - build/gcc/make
+  
+
+
+## Customize test commands
+test:
+  override:
+    - ./unit-tests
