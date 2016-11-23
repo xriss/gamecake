@@ -8,12 +8,14 @@ CircleCI -> [![CircleCI](https://circleci.com/gh/xriss/gamecake.svg?style=svg)](
 
 
 Be sure to clone repo with submodules as the engine binaries live in a 
-permanently orphaned branch.
+permanently orphaned branch. The following is the optimal way to git 
+clone so that the submodule references itself rather than downloading 
+the repo twice.
 
-	git clone --recursive --verbose --reference . https://github.com/xriss/gamecake.git
+	git clone https://github.com/xriss/gamecake.git && cd gamecake && git submodule update --init --reference .
 
-The same also needs to be done when you pull updates, so best to use 
-this script.
+The submodules also need care when you pull updates, so best to use 
+this script to get the latest everything.
 
 	./git-pull
 
