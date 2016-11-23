@@ -7,7 +7,7 @@ for binaries built from latest commits -> https://drone.io/github.com/xriss/game
 Be sure to clone repo with submodules as the engine binaries live in a 
 permanently orphaned branch.
 
-	git clone --recursive https://github.com/xriss/gamecake.git
+	git clone --recursive --verbose --reference . https://github.com/xriss/gamecake.git
 
 The same also needs to be done when you pull updates, so best to use 
 this script.
@@ -38,5 +38,5 @@ Once built the engine lives in one single fat binary that includes many
 lua libraries. For convenience gamecake is a command line compatible 
 replacement for lua and pagecake is a command line compatible 
 replacement for nginx (open resty). The only diference is we have C 
-libraries and Lua libraries from this repository embeded ready to be 
-required in you lua script.
+libraries and Lua libraries from this repository embedded and ready to 
+be required by your lua code.
