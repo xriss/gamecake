@@ -2,7 +2,7 @@
 | Provider | Type | Result |
 | --- | --- | --- |
 | drone.io | build | [![Build Status](https://drone.io/github.com/xriss/gamecake/status.png)](https://drone.io/github.com/xriss/gamecake/latest) |
-| drone.io | doownload | https://drone.io/github.com/xriss/gamecake/files |
+| drone.io | download | https://drone.io/github.com/xriss/gamecake/files |
 | CircleCI | build | [![CircleCI](https://circleci.com/gh/xriss/gamecake.svg?style=svg)](https://circleci.com/gh/xriss/gamecake) |
 
 
