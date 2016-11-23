@@ -1,7 +1,10 @@
 
-Check out drone.io
+drone.io ->
 ( [![Build Status](https://drone.io/github.com/xriss/gamecake/status.png)](https://drone.io/github.com/xriss/gamecake/latest) )
-for binaries built from latest commits -> https://drone.io/github.com/xriss/gamecake/files
+
+drone.io binaries -> https://drone.io/github.com/xriss/gamecake/files
+
+CircleCI -> [![CircleCI](https://circleci.com/gh/xriss/gamecake.svg?style=svg)](https://circleci.com/gh/xriss/gamecake)
 
 
 Be sure to clone repo with submodules as the engine binaries live in a 
