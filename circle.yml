@@ -20,6 +20,8 @@ dependencies:
 
   override:
     - build/gcc/make
+    - build/mingw/make
+#    - build/emcc/make
   
 
 
