@@ -8,6 +8,7 @@ machine:
 ## Customize checkout
 checkout:
   post:
+    - git fetch
     - git submodule sync
     - git submodule update --reference . --init # use submodules
 
