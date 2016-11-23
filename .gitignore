@@ -44,3 +44,5 @@ build/depends/LuaJIT-2.1.0-beta1/*
 build/depends/LuaJIT-2.1.0-beta2/*
 
 sdks/emsdk_portable
+
+test/dat/grd/*.out.*

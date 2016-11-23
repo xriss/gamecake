@@ -22,13 +22,13 @@ function test_do_png_wmem()
 	do_png_wmem("t4")
 end
 
-function test_do_gif_wmem()
-	do_gif_wmem("t6")
-end
+--function test_do_gif_wmem()
+--	do_gif_wmem("t6")
+--end
 
-function test_do_gif_stream()
-	do_gif_stream("t6")
-end
+--function test_do_gif_stream()
+--	do_gif_stream("t6")
+--end
 
 function test_do_jpg()
 	do_jpg()
