@@ -18,6 +18,7 @@ function M.bake(oven,autocell)
 	local cake=oven.cake
 	local canvas=cake.canvas
 	local flat=canvas.flat
+	local views=cake.views
 
 	local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 	
@@ -68,16 +69,26 @@ autocell.create=function(it,opts)
 		it.autocell_grd =wgrd.create("U8_RGBA", it.autocell_hx           , it.autocell_hy           , 1)
 		it.frames={}
 		it.frame=1
-		it.frames[1]=framebuffers.create(it.hx,it.hy,0) -- no depth, just rgba
-		it.frames[2]=framebuffers.create(it.hx,it.hy,0)
+		it.frames[1]=framebuffers.create(it.autocell_hx,it.autocell_hy,0) -- no depth, just rgba
+		it.frames[2]=framebuffers.create(it.autocell_hx,it.autocell_hy,0)
 
-		for i,v in pairs( it.frames or {} ) do
-			v:bind_texture()
-			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
-			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
-			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
-			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
+		for i=1,2 do
+			it.frames[i]=framebuffers.create(it.autocell_hx,it.autocell_hy,0,{
+				no_uptwopow=true,
+				TEXTURE_MIN_FILTER=gl.NEAREST,
+				TEXTURE_MAG_FILTER=gl.NEAREST,
+				TEXTURE_WRAP_S=gl.CLAMP_TO_EDGE,
+				TEXTURE_WRAP_T=gl.CLAMP_TO_EDGE,
+			})
 		end
+
+		it.view=views.create({
+			mode="fbo",
+			fbo=it.frames[1],
+			vx=it.autocell_hx,
+			vy=it.autocell_hy,
+			vz=it.autocell_hy*4,
+		})
 
 		it.dirty(true)
 
@@ -92,8 +103,57 @@ autocell.create=function(it,opts)
 -- this performs a single cellular step from one fbo to the other
 	it.update=function()
 
-		gl.ActiveTexture(gl.TEXTURE0)
-		it.frames[it.frame]:bind_texture()
+-- setup to draw
+		local fbo=it.frames[it.frame%2+1] -- %2+1 looks backwards but is the right way to pick the other frame
+		fbo:bind_frame()
+
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PushMatrix()
+		
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PushMatrix()
+
+		views.push_and_apply(it.view)
+
+		gl.ClearColor(0,0,0,0)
+		gl.Clear(gl.COLOR_BUFFER_BIT)
+
+-- update cells using glsl (draw)
+
+		local v3=gl.apply_modelview( {fbo.w*-0.0,	fbo.h* 1.0,	0,1} )
+		local v1=gl.apply_modelview( {fbo.w*-0.0,	fbo.h*-0.0,	0,1} )
+		local v4=gl.apply_modelview( {fbo.w* 1.0,	fbo.h* 1.0,	0,1} )
+		local v2=gl.apply_modelview( {fbo.w* 1.0,	fbo.h*-0.0,	0,1} )
+
+		local t={
+			v3[1],	v3[2],	v3[3],	0,			0, 			
+			v1[1],	v1[2],	v1[3],	0,			fbo.uvh,
+			v4[1],	v4[2],	v4[3],	fbo.uvw,	0, 			
+			v2[1],	v2[2],	v2[3],	fbo.uvw,	fbo.uvh,
+		}
+
+		flat.tristrip("rawuv",t,it.shader_step_name,function(p)
+
+			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_cell"), 0 )
+			it.frames[it.frame]:bind_texture()
+
+		end)
+
+-- cleanup drawing
+
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
+
+		views.pop_and_apply()
+
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PopMatrix()			
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PopMatrix()
+		
+		
+		it.frame=it.frame%2+1 -- advance frame
+
+--print(it.frame)
 
 	end
 	

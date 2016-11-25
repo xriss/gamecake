@@ -14,8 +14,7 @@ varying vec2  v_texcoord;
  
 void main()
 {
-    gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
-    gl_Position.z+=a_vertex.z;
+	gl_Position = projection * vec4(a_vertex , 1.0);
 	v_texcoord=a_texcoord;
 }
 
@@ -37,6 +36,13 @@ void main(void)
 {
 	vec4 c=texture2D(tex_cell, v_texcoord ).rgba;
 
+	if( c.r==1.0 ) { c.r=0.0; } else { c.r+=1.0/255.0; }
+	
+//	c.r=4.0/255.0;
+	c.g=1.0/255.0;
+	c.b=31.0/255.0;
+	c.a=0.0/255.0;
+	
 	gl_FragColor=c;
 }
 
@@ -94,7 +100,12 @@ void main(void)
 	vec2 tm=(floor(mod(uv,map_info.zw))+vec2(0.5,0.5))/map_info.zw;			// map uv
 	
 	d=texture2D(tex_map, tm).rgba;
-	d=vec4(4.0/255.0,1.0/255.0,31.0/255.0,0.0/255.0);
+
+//	d.r=4.0/255.0;
+//	d.g=1.0/255.0;
+//	d.b=31.0/255.0;
+//	d.a=0.0/255.0;
+	
 	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba;
 	fg=texture2D(tex_cmap, vec2( d.b,0.5) ).rgba;
 	bg=texture2D(tex_cmap, vec2( d.a,0.5) ).rgba;

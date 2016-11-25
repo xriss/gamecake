@@ -20,10 +20,14 @@ function M.bake(oven,framebuffers)
 	
 	framebuffers.data=setmetatable({}, { __mode = 'vk' })
 
-	framebuffers.create = function(w,h,d)
+	framebuffers.create = function(w,h,d,def)
 
-		local fbo={w=0,h=0,d=0}
+		local fbo=def or {} -- allow default settings on 4th param
 		
+		fbo.w=0 -- no memory alloced at start
+		fbo.h=0
+		fbo.d=0
+			
 		framebuffers.resize(fbo,w or 0,h or 0,d or 0)
 				
 		framebuffers.data[fbo]=fbo
@@ -108,9 +112,14 @@ function M.bake(oven,framebuffers)
 		
 		if d==0 then framebuffers.free_depth(fbo) end
 
-		if w~=0 and h~=0 then 
-			fbo.txw=images.uptwopow(w) -- always keep textures in power of two for simplicity
-			fbo.txh=images.uptwopow(h)
+		if w~=0 and h~=0 then
+			if fbo.no_uptwopow then -- do not auto increase size of fbo
+				fbo.txw=w
+				fbo.txh=h
+			else
+				fbo.txw=images.uptwopow(w) -- always keep textures in power of two for simplicity (hardware probs)
+				fbo.txh=images.uptwopow(h)
+			end
 			if d~=0 then
 				if not fbo.depth then
 					fbo.depth=gl.GenRenderbuffer()
@@ -122,15 +131,15 @@ function M.bake(oven,framebuffers)
 				fbo.texture=gl.GenTexture()
 			end
 			fbo.uvw=w/fbo.txw -- need to use these max uv coords when drawing with texture instead of 1
-			fbo.uvh=h/fbo.txh -- unless you know you asked for a power of two in which case its fine to use 1
+			fbo.uvh=h/fbo.txh 
 
 			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
-			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
-			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
-			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     fbo.TEXTURE_WRAP_S     or framebuffers.TEXTURE_WRAP_S     or gl.CLAMP_TO_EDGE)
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     fbo.TEXTURE_WRAP_T     or framebuffers.TEXTURE_WRAP_T     or gl.CLAMP_TO_EDGE)
 			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-				string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver...
+				string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver so safest to provide it.
 
 			gl.BindTexture(gl.TEXTURE_2D, 0)
 			
@@ -149,12 +158,6 @@ function M.bake(oven,framebuffers)
 			end
 			
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-
--- hackfix, for some drivers, but it seems to make other drivers crash...
--- print("FBO1",fbo.txw, fbo.txh,gl.GetError())
---			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
---			gl.GenerateMipmap(gl.TEXTURE_2D) -- some drivers bugout if we do not generate mipmaps here...
---			gl.BindTexture(gl.TEXTURE_2D, 0)
 
 		end
 		
