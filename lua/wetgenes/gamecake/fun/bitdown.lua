@@ -175,7 +175,7 @@ end
 
 
 -- write some ascii art into an x,y grd location
-M.pix_grd=function(str,map,gout,px,py,hx,hy)
+M.pix_grd=function(str,map,gout,px,py,hx,hy,sub)
 
 	local ls=wstr.split(str,"\n")
 
@@ -195,6 +195,11 @@ M.pix_grd=function(str,map,gout,px,py,hx,hy)
 
 	local getc=function(s)
 		return map[s] or map[s:sub(1,1)] or map[0]
+	end
+	if sub then -- use a sub color
+		getc=function(s)
+			return (map[s] or map[s:sub(1,1)] or map[0])[sub]
+		end
 	end
 	
 	local t={}
