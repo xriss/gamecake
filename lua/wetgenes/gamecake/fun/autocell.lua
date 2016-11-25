@@ -12,36 +12,36 @@ local bitdown=require("wetgenes.gamecake.fun.bitdown")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(oven,tilemap)
+function M.bake(oven,autocell)
 
 	local gl=oven.gl
 	local cake=oven.cake
 	local canvas=cake.canvas
 	local flat=canvas.flat
-	
-	tilemap.text=oven.rebake("wetgenes.gamecake.fun.tilemap_text") -- require text sub module
 
-tilemap.load=function()
+	local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+	
+autocell.load=function()
 
 	local filename="lua/"..(M.modname):gsub("%.","/")..".glsl"
 	gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
 
-	return tilemap
+	return autocell
 end
 
-tilemap.setup=function()
+autocell.setup=function()
 
-	tilemap.load()
+	autocell.load()
 
-	return tilemap
+	return autocell
 end
 
-tilemap.create=function(it,opts)
+autocell.create=function(it,opts)
 	it.screen=assert(it.system.components[opts.screen or "screen"]) -- find linked components by name
 	it.colors=assert(it.system.components[opts.colors or "colors"])
 	it.tiles =assert(it.system.components[opts.tiles  or "tiles" ])
 	it.opts=opts
-	it.component="tilemap"
+	it.component="autocell"
 	it.name=opts.name or it.component
 	
 	it.px=0
@@ -52,61 +52,68 @@ tilemap.create=function(it,opts)
 	it.window_hx=it.opts.window and it.opts.window[3] or it.screen.hx
 	it.window_hy=it.opts.window and it.opts.window[4] or it.screen.hy
 
-	it.tilemap_hx=it.opts.tilemap_size and it.opts.tilemap_size[1] or 256
-	it.tilemap_hy=it.opts.tilemap_size and it.opts.tilemap_size[2] or 256
-	
---	it.tilemap_hx=2^math.ceil( math.log(it.tilemap_hx)/math.log(2) ) -- force power of 2?
---	it.tilemap_hy=2^math.ceil( math.log(it.tilemap_hy)/math.log(2) )
+	it.autocell_hx=it.opts.autocell_size and it.opts.autocell_size[1] or 256
+	it.autocell_hy=it.opts.autocell_size and it.opts.autocell_size[2] or 256
 	
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per map
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
 	
---	it.drawlist=opts.drawlist or { { color={1,1,1,1} , dx=0 , dy=0 } } -- use this to add drop shadows
---	it.drawtype=opts.drawtype
 	it.layer=opts.layer or 1
+
+	it.shader_step_name=opts.shader_step_name or "fun_step_autocell"
+	it.shader_draw_name=opts.shader_draw_name or "fun_draw_autocell"
 
 	it.setup=function(opts)
 		
-		it.tilemap_grd =wgrd.create("U8_RGBA", it.tilemap_hx           , it.tilemap_hy           , 1)
+		it.autocell_grd =wgrd.create("U8_RGBA", it.autocell_hx           , it.autocell_hy           , 1)
+		it.frames={}
+		it.frame=1
+		it.frames[1]=framebuffers.create(it.hx,it.hy,0) -- no depth, just rgba
+		it.frames[2]=framebuffers.create(it.hx,it.hy,0)
 
-		it.tilemap_tex=gl.GenTexture()
-		gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )	
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
+		for i,v in pairs( it.frames or {} ) do
+			v:bind_texture()
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
+			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
+		end
 
 		it.dirty(true)
 
 	end
 
 	it.clean=function()
-		if it.tilemap_tex then
-			gl.DeleteTexture( it.tilemap_tex )
-			it.tilemap_tex=nil
+		for i,v in pairs( it.frames or {} ) do
+			v:clean()
 		end
 	end
 
+-- this performs a single cellular step from one fbo to the other
 	it.update=function()
+
+		gl.ActiveTexture(gl.TEXTURE0)
+		it.frames[it.frame]:bind_texture()
+
 	end
 	
 	it.draw=function()
 
-		if it.dirty() then
+		if it.dirty() then -- force a replacement of the current cell fbo image data (ie at the start)
 		
 			it.dirty(false)
 
-			gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
+			it.frames[it.frame]:bind_texture()
 			gl.TexImage2D(
 				gl.TEXTURE_2D,
 				0,
 				gl.RGBA,
-				it.tilemap_grd.width,
-				it.tilemap_grd.height,
+				it.autocell_grd.width,
+				it.autocell_grd.height,
 				0,
 				gl.RGBA,
 				gl.UNSIGNED_BYTE,
-				it.tilemap_grd.data )
+				it.autocell_grd.data )
 
 		end
 
@@ -126,7 +133,7 @@ tilemap.create=function(it,opts)
 			}
 
 
-			flat.tristrip("rawuv",t,"fun_draw_tilemap",function(p)
+			flat.tristrip("rawuv",t,it.shader_draw_name,function(p)
 
 				gl.ActiveTexture(gl.TEXTURE2) gl.Uniform1i( p:uniform("tex_cmap"), 2 )
 				gl.BindTexture( gl.TEXTURE_2D , it.colors.cmap_tex )
@@ -135,14 +142,14 @@ tilemap.create=function(it,opts)
 				gl.BindTexture( gl.TEXTURE_2D , it.tiles.bitmap_tex )
 
 				gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_map"), 0 )
-				gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
+				it.frames[it.frame]:bind_texture()
 
 
 				gl.Uniform4f( p:uniform("tile_info"),	it.tile_hx,
 														it.tile_hy,
 														it.tiles.hx,
 														it.tiles.hy )
-				gl.Uniform4f( p:uniform("map_info"), 	0,0,it.tilemap_hx,it.tilemap_hy )
+				gl.Uniform4f( p:uniform("map_info"), 	0,0,it.autocell_hx,it.autocell_hy )
 
 				gl.Uniform4f( p:uniform("color"), 	dl.color[1],dl.color[2],dl.color[3],dl.color[4] )
 
@@ -158,13 +165,10 @@ tilemap.create=function(it,opts)
 		return it.dirty_flag
 	end
 	
--- add text functions
-	tilemap.text.inject(it,opts)
-
 	return it
 end
 
-	return tilemap
+	return autocell
 end
 
 
