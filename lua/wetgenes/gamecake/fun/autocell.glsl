@@ -37,11 +37,14 @@ void main(void)
 	vec4 c=texture2D(tex_cell, v_texcoord ).rgba;
 
 	if( c.r==1.0 ) { c.r=0.0; } else { c.r+=1.0/255.0; }
+	if( c.g==1.0 ) { c.g=0.0; } else { c.g+=1.0/255.0; }
+	if( c.b==1.0 ) { c.b=0.0; } else { c.b+=1.0/255.0; }
+	if( c.a==1.0 ) { c.a=0.0; } else { c.a+=1.0/255.0; }
 	
 //	c.r=4.0/255.0;
-	c.g=1.0/255.0;
-	c.b=31.0/255.0;
-	c.a=0.0/255.0;
+//	c.g=1.0/255.0;
+//	c.b=31.0/255.0;
+//	c.a=0.0/255.0;
 	
 	gl_FragColor=c;
 }
