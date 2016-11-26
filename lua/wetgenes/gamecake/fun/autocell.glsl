@@ -29,6 +29,8 @@ precision highp float; /* really need better numbers if possible */
 
 uniform sampler2D tex_cell;
 
+uniform vec4  map_info; /* 2,3 the map texture size*/
+
 varying vec2  v_texcoord;
 
 

@@ -63,6 +63,8 @@ autocell.create=function(it,opts)
 
 	it.shader_step_name=opts.shader_step_name or "fun_step_autocell"
 	it.shader_draw_name=opts.shader_draw_name or "fun_draw_autocell"
+	
+	it.rate=opts.rate or 1
 
 	it.setup=function(opts)
 		
@@ -103,62 +105,6 @@ autocell.create=function(it,opts)
 -- this performs a single cellular step from one fbo to the other
 	it.update=function()
 
--- setup to draw
-		local fbo=it.frames[it.frame%2+1] -- %2+1 looks backwards but is the right way to pick the other frame
-		fbo:bind_frame()
-
-		gl.MatrixMode(gl.PROJECTION)
-		gl.PushMatrix()
-		
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.PushMatrix()
-
-		views.push_and_apply(it.view)
-
-		gl.ClearColor(0,0,0,0)
-		gl.Clear(gl.COLOR_BUFFER_BIT)
-
--- update cells using glsl (draw)
-
-		local v3=gl.apply_modelview( {fbo.w*-0.0,	fbo.h* 1.0,	0,1} )
-		local v1=gl.apply_modelview( {fbo.w*-0.0,	fbo.h*-0.0,	0,1} )
-		local v4=gl.apply_modelview( {fbo.w* 1.0,	fbo.h* 1.0,	0,1} )
-		local v2=gl.apply_modelview( {fbo.w* 1.0,	fbo.h*-0.0,	0,1} )
-
-		local t={
-			v3[1],	v3[2],	v3[3],	0,			0, 			
-			v1[1],	v1[2],	v1[3],	0,			fbo.uvh,
-			v4[1],	v4[2],	v4[3],	fbo.uvw,	0, 			
-			v2[1],	v2[2],	v2[3],	fbo.uvw,	fbo.uvh,
-		}
-
-		flat.tristrip("rawuv",t,it.shader_step_name,function(p)
-
-			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_cell"), 0 )
-			it.frames[it.frame]:bind_texture()
-
-		end)
-
--- cleanup drawing
-
-		gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
-
-		views.pop_and_apply()
-
-		gl.MatrixMode(gl.PROJECTION)
-		gl.PopMatrix()			
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.PopMatrix()
-		
-		
-		it.frame=it.frame%2+1 -- advance frame
-
---print(it.frame)
-
-	end
-	
-	it.draw=function()
-
 		if it.dirty() then -- force a replacement of the current cell fbo image data (ie at the start)
 		
 			it.dirty(false)
@@ -176,6 +122,69 @@ autocell.create=function(it,opts)
 				it.autocell_grd.data )
 
 		end
+		
+		if it.system.ticks%it.rate==0 then
+
+-- setup to draw
+			gl.Disable(gl.BLEND)
+
+			local fbo=it.frames[it.frame%2+1] -- %2+1 looks backwards but is the right math to pick the other frame
+			fbo:bind_frame()
+
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PushMatrix()
+			
+			gl.MatrixMode(gl.MODELVIEW)
+			gl.PushMatrix()
+
+			views.push_and_apply(it.view)
+
+			gl.ClearColor(0,0,0,0)
+			gl.Clear(gl.COLOR_BUFFER_BIT)
+
+-- update cells using glsl (draw)
+
+			local v3=gl.apply_modelview( {fbo.w*-0.0,	fbo.h* 1.0,	0,1} )
+			local v1=gl.apply_modelview( {fbo.w*-0.0,	fbo.h*-0.0,	0,1} )
+			local v4=gl.apply_modelview( {fbo.w* 1.0,	fbo.h* 1.0,	0,1} )
+			local v2=gl.apply_modelview( {fbo.w* 1.0,	fbo.h*-0.0,	0,1} )
+
+			local t={
+				v3[1],	v3[2],	v3[3],	0,			0, 			
+				v1[1],	v1[2],	v1[3],	0,			fbo.uvh,
+				v4[1],	v4[2],	v4[3],	fbo.uvw,	0, 			
+				v2[1],	v2[2],	v2[3],	fbo.uvw,	fbo.uvh,
+			}
+
+			flat.tristrip("rawuv",t,it.shader_step_name,function(p)
+
+				gl.Uniform4f( p:uniform("map_info"), 	0,0,it.autocell_hx,it.autocell_hy )
+
+				gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_cell"), 0 )
+				it.frames[it.frame]:bind_texture()
+
+			end)
+
+-- cleanup drawing
+
+			gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
+
+			views.pop_and_apply()
+
+			gl.MatrixMode(gl.PROJECTION)
+			gl.PopMatrix()			
+			gl.MatrixMode(gl.MODELVIEW)
+			gl.PopMatrix()
+			
+			
+			it.frame=it.frame%2+1 -- advance frame
+
+			gl.Enable(gl.BLEND)
+
+		end
+	end
+	
+	it.draw=function()
 
 		gl.Color(1,1,1,1)
 
@@ -209,6 +218,7 @@ autocell.create=function(it,opts)
 														it.tile_hy,
 														it.tiles.hx,
 														it.tiles.hy )
+
 				gl.Uniform4f( p:uniform("map_info"), 	0,0,it.autocell_hx,it.autocell_hy )
 
 				gl.Uniform4f( p:uniform("color"), 	dl.color[1],dl.color[2],dl.color[3],dl.color[4] )

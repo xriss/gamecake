@@ -242,6 +242,8 @@ screen.create=function(it,opts)
 	it.create_bloom=function()
 	
 		if not it.bloom then return end
+		
+		gl.Disable(gl.BLEND)
 
 		gl.MatrixMode(gl.PROJECTION)
 		gl.PushMatrix()		
@@ -290,6 +292,8 @@ screen.create=function(it,opts)
 		gl.PopMatrix()			
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.PopMatrix()
+
+		gl.Enable(gl.BLEND)
 
 	end
 
