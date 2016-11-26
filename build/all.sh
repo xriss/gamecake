@@ -28,7 +28,7 @@ cd `dirname $0`
 
 #build osx version 64 (dont think anything uses 32 anymore)
 
-#../vbox_osx/make
+../vbox_osx/make
 
 #build raspi
 
