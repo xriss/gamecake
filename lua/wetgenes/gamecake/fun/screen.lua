@@ -124,7 +124,7 @@ screen.create=function(it,opts)
 --		it.lay_orig=it.lay.apply(nil,nil,0)
 
 		gl.ClearColor(0,0,0,1)
-		gl.DepthMask(gl.TRUE)
+		gl.DepthMask(gl.FALSE)
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 		gl.Disable(gl.DEPTH_TEST)
 

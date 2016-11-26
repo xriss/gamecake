@@ -140,7 +140,11 @@ sprites.create=function(it,opts)
 
 			end
 
-			flat.tristrip("rawuvrgba",batch,"fun_draw_sprites")
+
+			flat.tristrip("rawuvrgba",batch,"fun_draw_sprites",function(p)
+				gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex"), 0 )
+				gl.BindTexture( gl.TEXTURE_2D , it.tiles.bitmap_tex )
+			end)
 			
 --		end
 

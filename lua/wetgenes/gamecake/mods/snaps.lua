@@ -142,7 +142,7 @@ end
 	snaps.auto=false
 	snaps.idx=0
 	snaps.frame=0
-	snaps.frame_max=60*6   -- six seconds, at 60fps
+	snaps.frame_max=60*12  -- tweleve seconds, at 60fps
 	snaps.frame_skip=2     -- only record every other frame, so 30 fps output.
 	snaps.encode_gif=false -- encode to gif? nah, best not to.
 	function snaps.msg(m)
