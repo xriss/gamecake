@@ -2,11 +2,18 @@
 
 #shader "fun_copper_back_y5"
 
-#ifdef VERTEX_SHADER
-
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
+// 4 colors to blend vertically
+uniform	vec4 cy0;
+uniform	vec4 cy1;
+uniform	vec4 cy2;
+uniform	vec4 cy3;
+uniform	vec4 cy4;
+uniform	vec4 sizpos;
+
+#ifdef VERTEX_SHADER
 
 attribute vec3 a_vertex;
 attribute vec2 a_texcoord;
@@ -32,15 +39,6 @@ precision highp float; /* really need better numbers if possible */
 
 varying vec2  v_texcoord;
 varying vec4  v_color;
-
-// 4 colors to blend vertically
-uniform	vec4 cy0;
-uniform	vec4 cy1;
-uniform	vec4 cy2;
-uniform	vec4 cy3;
-uniform	vec4 cy4;
-
-uniform	vec4 sizpos;
 
 void main(void)
 {
@@ -88,11 +86,19 @@ void main(void)
 
 #shader "fun_copper_back_noise"
 
-#ifdef VERTEX_SHADER
-
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
+// 4 colors to blend vertically
+uniform	vec4 cy0;
+uniform	vec4 cy1;
+uniform	vec4 cy2;
+uniform	vec4 cy3;
+uniform	vec4 cy4;
+
+uniform	vec4 sizpos;
+
+#ifdef VERTEX_SHADER
 
 attribute vec3 a_vertex;
 attribute vec2 a_texcoord;
@@ -118,16 +124,6 @@ precision highp float; /* really need better numbers if possible */
 
 varying vec2  v_texcoord;
 varying vec4  v_color;
-
-// 4 colors to blend vertically
-uniform	vec4 cy0;
-uniform	vec4 cy1;
-uniform	vec4 cy2;
-uniform	vec4 cy3;
-uniform	vec4 cy4;
-
-uniform	vec4 sizpos;
-
 
 void main(void)
 {

@@ -2,11 +2,18 @@
 
 #shader "fun_draw_tilemap"
 
-#ifdef VERTEX_SHADER
-
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
+
+uniform sampler2D tex_cmap;
+uniform sampler2D tex_tile;
+uniform sampler2D tex_map;
+
+uniform vec4  tile_info; /* 0,1 tile size eg 8x8 and 2,3 the font texture size*/
+uniform vec4  map_info; /* 0,1 just add this to texcoord and 2,3 the map texture size*/
+
+#ifdef VERTEX_SHADER
 
 attribute vec3 a_vertex;
 attribute vec2 a_texcoord;
@@ -29,14 +36,6 @@ void main()
 #if defined(GL_FRAGMENT_PRECISION_HIGH)
 precision highp float; /* really need better numbers if possible */
 #endif
-
-
-uniform sampler2D tex_cmap;
-uniform sampler2D tex_tile;
-uniform sampler2D tex_map;
-
-uniform vec4  tile_info; /* 0,1 tile size eg 8x8 and 2,3 the font texture size*/
-uniform vec4  map_info; /* 0,1 just add this to texcoord and 2,3 the map texture size*/
 
 varying vec2  v_texcoord;
 varying vec4  v_color;

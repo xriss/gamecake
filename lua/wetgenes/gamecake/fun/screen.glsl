@@ -1,10 +1,14 @@
 
 #shader "fun_screen_bloom_pick"
-#ifdef VERTEX_SHADER
 
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
+uniform sampler2D tex;
+uniform vec4  img_siz; /* 0,1 image size and 2,3 size of texture */
+uniform vec4  img_off; /* texture offset (for sub layers) */
+
+#ifdef VERTEX_SHADER
 
 attribute vec3 a_vertex;
 attribute vec2 a_texcoord;
@@ -23,11 +27,6 @@ void main()
 #if defined(GL_FRAGMENT_PRECISION_HIGH)
 precision highp float; /* really need better numbers if possible */
 #endif
-
-uniform sampler2D tex;
-
-uniform vec4  img_siz; /* 0,1 image size and 2,3 size of texture */
-uniform vec4  img_off; /* texture offset (for sub layers) */
 
 varying vec2  v_texcoord;
 
@@ -48,11 +47,14 @@ void main(void)
 
 
 #shader "fun_screen_bloom_blur"
-#ifdef VERTEX_SHADER
 
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
+uniform sampler2D tex;
+uniform vec4  pix_siz; /* 0,1 pixel size */
+
+#ifdef VERTEX_SHADER
 
 attribute vec3 a_vertex;
 attribute vec2 a_texcoord;
@@ -72,11 +74,7 @@ void main()
 precision highp float; /* really need better numbers if possible */
 #endif
 
-uniform sampler2D tex;
-
 varying vec2  v_texcoord;
-
-uniform vec4  pix_siz; /* 0,1 pixel size */
 
 
 void main(void)
@@ -100,11 +98,15 @@ void main(void)
 
 
 #shader "fun_screen_scanline"
-#ifdef VERTEX_SHADER
 
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
+uniform sampler2D tex;
+uniform vec4 siz;
+
+
+#ifdef VERTEX_SHADER
 
 attribute vec3 a_vertex;
 attribute vec2 a_texcoord;
@@ -126,12 +128,8 @@ void main()
 precision highp float; /* really need better numbers if possible */
 #endif
 
-uniform sampler2D tex;
-
 varying vec2  v_texcoord;
 varying vec4  v_color;
-
-uniform vec4 siz;
 
 vec4 render(vec2 uv)
 {
@@ -188,11 +186,15 @@ void main(void)
 #endif
 
 #shader "fun_screen_dropshadow"
-#ifdef VERTEX_SHADER
 
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
+uniform sampler2D tex;
+uniform vec4 siz;
+uniform vec4  shadow_info; /* 0,1 tile size eg 8x8 and 2,3 the font texture size*/
+
+#ifdef VERTEX_SHADER
 
 attribute vec3 a_vertex;
 attribute vec2 a_texcoord;
@@ -214,14 +216,8 @@ void main()
 precision highp float; /* really need better numbers if possible */
 #endif
 
-uniform sampler2D tex;
-
 varying vec2  v_texcoord;
 varying vec4  v_color;
-
-uniform vec4 siz;
-
-uniform vec4  shadow_info; /* 0,1 tile size eg 8x8 and 2,3 the font texture size*/
 
 vec4 render(vec2 uv)
 {

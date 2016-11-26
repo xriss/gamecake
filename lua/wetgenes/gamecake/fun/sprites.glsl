@@ -2,11 +2,12 @@
 
 #shader "fun_draw_sprites"
 
-#ifdef VERTEX_SHADER
-
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
+uniform sampler2D tex;
+
+#ifdef VERTEX_SHADER
 
 attribute vec4 a_color;
 attribute vec3 a_vertex;
@@ -30,13 +31,9 @@ void main()
 precision highp float; /* really need better numbers if possible */
 #endif
 
-
-uniform sampler2D tex;
-
 varying vec2  v_texcoord;
 varying vec4  v_color;
 
-uniform vec4 color;
 
 void main(void)
 {
