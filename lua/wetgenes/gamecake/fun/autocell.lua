@@ -184,6 +184,14 @@ autocell.create=function(it,opts)
 		end
 	end
 	
+-- update the grd from the last rendered frame
+	it.download=function()
+
+		it.frames[it.frame]:download(it.autocell_grd,it.autocell_grd.width,it.autocell_grd.height,0,0)
+		
+		return it.autocell_grd
+	end
+	
 	it.draw=function()
 
 		gl.Color(1,1,1,1)
