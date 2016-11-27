@@ -113,10 +113,17 @@ function default_paths()
 	
 	setpaths(dll,{bin_dir,"./"})
 	
-	dir=get_cd() -- use cd as base dir
+	local dir=get_cd() -- use cd as base dir
 	
 	return bin_dir
 end
+
+
+
+
+
+-- the stuff below is old and should not be used anymore
+-- just call default_paths() in your init.lua to make sure we have paths setup OK
 
 --
 -- this needs to get more searchy so it can find where the lua app is without any explicit values
@@ -137,7 +144,7 @@ function find(name)
 	local dll="dll"
 	if osflavour=="nix" then dll="so" end
 
-	bin_dir=find_bin()
+	local bin_dir=find_bin()
 	
 print("BIN PATH",bin_dir,dll)
 
