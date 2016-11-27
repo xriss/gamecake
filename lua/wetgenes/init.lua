@@ -11,6 +11,46 @@ wetgenes.* modules.
 ]]
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+
+
+-----------------------------------------------------------------------------
+--[[#wetgenes.safecall
+
+	... = wetgenes.safecall(func,...)
+
+Call a function func(...) wrapped in an xpcall to catch and ignore 
+errors, the errors are printed to stderr with a traceback and the 
+function returns nil on an error.
+
+So provided the function returns not nil on success then you can still 
+tell if the function completed OK. Best to use for things that are OK 
+to fail and the rest of the code will work around it.
+
+]]
+-----------------------------------------------------------------------------
+M.safecall=function(f,...)
+	local a={...}
+	local r={ xpcall(function() return f(unpack(a)) end,function(err) return "safecall ignoring error: "..debug.traceback(err).."\n" end) }
+	if not r[1] then io.stderr:write(r[2]) return end -- print error and return nil on error
+	return select(2,unpack(r))
+end	
+
+-----------------------------------------------------------------------------
+--[[#wetgenes.safewrap
+
+	savefunc = wetgenes.safecall(func)
+
+Wrap a funciton in safecall, so it will never generate errors but can 
+be called as normal.
+
+]]
+-----------------------------------------------------------------------------
+M.safewrap=function(f)
+	return function(...)
+		return M.safecall(f,...)
+	end
+end	
+
 -----------------------------------------------------------------------------
 --[[#wetgenes.export
 
@@ -28,7 +68,7 @@ Or copy it into other modules to provide them with the same functionality.
 ]]
 -----------------------------------------------------------------------------
 
-function M.export(env,...)
+M.export=function(env,...)
 	local tab={}
 	for i,v in ipairs{...} do
 		tab[i]=env[v]
@@ -54,7 +94,7 @@ error if they do not. instead use
 
 ]]
 -----------------------------------------------------------------------------
-function M.lookup(tab,...)
+M.lookup=function(tab,...)
 	for i,v in ipairs{...} do
 		if type(tab)~="table" then return nil end
 		tab=tab[v]
@@ -84,7 +124,7 @@ it should work exactly the same in lua 5.1 or 5.2
 
 ]]
 -----------------------------------------------------------------------------
-function M.set_env(env)
+M.set_env=function(env)
 	if setfenv then setfenv(2,env) end
 	return env
 end
@@ -98,7 +138,7 @@ end
 Run the above from the command line.
 
 This will export all the gamecake internal strings into the file system 
-it is saved into the current directory so be care full where you run it.
+it is saved into the current directory so be careful where you run it.
 
 Game Cake checks the files system first so, these files can be modified 
 and they will replace the built in versions.
