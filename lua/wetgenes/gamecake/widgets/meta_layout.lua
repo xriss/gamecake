@@ -94,6 +94,12 @@ function wmeta.setup(def)
 --print("full",v.px,v.py,v.hx,v.hy)
 --print("parent class",widget.parent.class)
 
+			elseif v.size=="fullx" then -- force full size X only
+				v.px=0
+				v.hx=widget.hx
+			elseif v.size=="fully" then -- force full size Y only
+				v.py=0
+				v.hy=widget.hy
 			elseif v.size=="border" then -- force a fixed border size
 
 				v.hx=widget.hx-(v.px*2)
