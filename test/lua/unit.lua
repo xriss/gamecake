@@ -8,16 +8,12 @@ require("apps").default_paths() -- default search paths so things can easily be 
 local global=require("global")
 
 
-local apps=require("apps")
-
 local lfs=require("lfs")
 local wstr=require("wetgenes.string")
 
 -- pass these args into lunatest
 arg={...}
 local lunatest=require("lunatest")
-
-lfs.chdir(apps.dir)
 
 if arg[1] then
 
