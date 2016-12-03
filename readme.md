@@ -13,7 +13,7 @@ the repo twice.
 
 	git clone https://github.com/xriss/gamecake.git
 	cd gamecake
-	./git-submodule-init
+	./git-init
 
 The submodules also need care when pulling updates, use this script to 
 get the latest everything.
