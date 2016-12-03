@@ -7,6 +7,7 @@ ln -f lua/gles.lua                 lua_gles/code/gles.lua
 ln -f lua/al.lua                   lua_al/code/al.lua
 ln -f lua/alc.lua                  lua_al/code/alc.lua
 
+ln -f lua/wetgenes/win.lua         lua_win/code/win.lua
 ln -f lua/wetgenes/win/android.lua lua_win_android/code/android.lua
 ln -f lua/wetgenes/win/linux.lua   lua_win_linux/code/linux.lua
 ln -f lua/wetgenes/win/osx.lua     lua_win_osx/code/osx.lua

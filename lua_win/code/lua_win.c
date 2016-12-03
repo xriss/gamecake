@@ -7,6 +7,9 @@
 #include "../lib_lua/src/lauxlib.h"
 #include "../lib_lua/src/lualib.h"
 
+#include "whereami.h"
+
+#include <stdlib.h>
 
 static const u8 font_bits[16*48]={
 
@@ -122,6 +125,71 @@ s32 id=0;
 }
 
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get path for exe
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_get_exe_path(lua_State *l)
+{
+int length;
+char *path=0;
+	
+	length=wai_getExecutablePath(NULL, 0, NULL);
+
+	if(length>0)
+	{
+		path = (char*)malloc(length + 1);
+	}
+
+	if( path )
+	{
+		wai_getExecutablePath(path, length, NULL);
+		path[length]='\0';
+		
+		lua_pushstring(l,path);
+		
+		free(path);
+
+		return 1;
+	}
+
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// get path for mod (parent of exe)
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_get_mod_path(lua_State *l)
+{
+int length;
+char *path=0;
+	
+	length=wai_getModulePath(NULL, 0, NULL);
+
+	if(length>0)
+	{
+		path = (char*)malloc(length + 1);
+	}
+
+	if( path )
+	{
+		wai_getModulePath(path, length, NULL);
+		path[length]='\0';
+		
+		lua_pushstring(l,path);
+		
+		free(path);
+
+		return 1;
+	}
+
+	return 0;
+}
+
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -133,6 +201,11 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 	const luaL_reg lib[] =
 	{
 		{"glyph_8x8",			lua_wetwin_glyph_8x8},
+
+// find ourselves
+
+		{"get_exe_path",		lua_wetwin_get_exe_path},
+		{"get_mod_path",		lua_wetwin_get_mod_path},
 		
 		{0,0}
 	};

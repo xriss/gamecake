@@ -106,7 +106,7 @@ end
 
 
 print("The flavour of win is "..base.flavour)
-print(hardcores)
+--print(hardcores)
 
 win.hardcore=hardcore
 win.softcore=softcore
@@ -537,6 +537,17 @@ function base.glyph_8x8(n)
 	return softcore.glyph_8x8(n)
 end
 win.glyph_8x8=base.glyph_8x8
+
+function base.get_exe_path()
+	return softcore.get_exe_path()
+end
+win.get_exe_path=base.get_exe_path
+
+function base.get_mod_path()
+	return softcore.get_mod_path()
+end
+win.get_mod_path=base.get_mod_path
+
 
 function base.posix_open_events(w)
 	if not posix then return end
