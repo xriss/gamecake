@@ -653,7 +653,22 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 
 #else
 
-#error unsupported platform
+//#warning unsupported platform
+
+WAI_FUNCSPEC
+int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
+{
+  if(dirname_length) { *dirname_length=0; }
+  return 0;
+}
+
+WAI_FUNCSPEC
+int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
+{
+  if(dirname_length) { *dirname_length=0; }
+  return 0;
+}
+
 
 #endif
 

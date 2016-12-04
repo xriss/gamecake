@@ -7,6 +7,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local tardis=require("wetgenes.tardis")
 
+local wstr=require("wetgenes.string")
+local ls=function(...) print(wstr.dump(...)) end
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -14,7 +17,6 @@ function M.bake(oven,wmeta)
 wmeta=wmeta or {}
 
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
-
 
 -- available widget classes
 wmeta.classes={
@@ -235,6 +237,7 @@ function wmeta.setup(def)
 		local w=widget
 		repeat
 			if w[name] then return w[name] end
+			if w==w.parent then break end -- loop sanity
 			w=w.parent
 		until not w
 	end

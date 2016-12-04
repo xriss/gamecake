@@ -264,7 +264,22 @@ int ucode=lua_tonumber(l,2);
 
 int glyph_index=FT_Get_Char_Index( p->face, ucode);
 
-	p->error=FT_Load_Glyph( p->face, glyph_index , 0 );
+/*
+	if(glyph_index==0) // replace missing glyphs with spaces?
+	{
+		glyph_index=FT_Get_Char_Index( p->face, 32);
+		if(glyph_index!=0)
+		{
+			p->error=FT_Load_Glyph( p->face, glyph_index , 0 );
+		}
+	}
+	else
+	{
+		p->error=FT_Load_Glyph( p->face, glyph_index , 0 );
+	}
+*/
+
+	p->error=FT_Load_Glyph( p->face, glyph_index , 0 );	
 
 	return 0;
 }

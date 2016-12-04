@@ -75,12 +75,23 @@ end
 function find_bin()
 
 	local dir=get_cd()
+	local exe="."
+	local exe_path
+	pcall(function() exe_path=require("wetgenes.win.core").get_exe_path() end)
+	if exe_path then -- remove filename
+		local dir,name,ext=string.match(exe_path,"(.-)([^\\/]-%.?([^%.\\/]*))$")
+		exe=dir:sub(1,-2) -- remove trailing / or \
+	end
+
+-- print(dir,exe)
 
 	local tdirs={ -- look in these dirs
 		dir,
-		dir.."/gamecake",
 		dir.."/..",
-		dir.."/../gamecake",
+		dir.."/../..",
+		exe,
+		exe.."/..",
+		exe.."/../..",
 	}
 	local bin_dir=dir.."/"
 	for i=1,#tdirs do local v=tdirs[i]
