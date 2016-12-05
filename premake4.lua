@@ -315,7 +315,7 @@ if EMCC then
 
 elseif NACL then
 
-	naclsdk_path=path.getabsolute("./sdks/nacl-sdk/pepper_49")
+	naclsdk_path=path.getabsolute( os.getenv("NACLPATH") ) -- set by make script as this keeps changing
 	pepperjs_path=path.getabsolute("./lib_pepperjs/pepper.js")
 
 	platforms { "nacl" } --hax

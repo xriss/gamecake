@@ -6,8 +6,8 @@ if [ "$1" = "clean" ] ; then
         exit
 fi
 
-naclsdk=`readlink -f sdks/nacl-sdk/pepper_49`
-export PATH=$naclsdk/toolchain/linux_pnacl/bin:$PATH
+export NACLPATH=`readlink -f sdks/nacl-sdk/pepper_49`
+export PATH=$NACLPATH/toolchain/linux_pnacl/bin:$PATH
 
 btype="exe"
 makeopts="config=release_nacl"
