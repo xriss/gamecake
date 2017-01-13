@@ -2165,6 +2165,25 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 	return 6;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// callback for lua_chipmunk_query_bounding_box
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+
+void lua_chipmunk_query_bounding_box_callback(cpShape *shape, void *data)
+{
+lua_State *l=(lua_State *)data;
+
+int idx=lua_tonumber(l,-1);
+	lua_pop(l,1);
+
+	lua_pushlightuserdata( l, (void*)shape ); lua_rawseti(l,-2,idx++);
+
+	lua_pushnumber(l,idx);
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // query the shapes within this bounding box
@@ -2172,7 +2191,26 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_query_bounding_box (lua_State *l)
 {
-	return 0;
+
+cpBB bb;
+cpShapeFilter filter;
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+
+	bb.l=luaL_checknumber(l,2);
+	bb.b=luaL_checknumber(l,3);
+	bb.r=luaL_checknumber(l,4);
+	bb.t=luaL_checknumber(l,5);
+
+	filter.group=luaL_checknumber(l,6);
+	filter.categories=luaL_checknumber(l,7);
+	filter.mask=luaL_checknumber(l,8);
+
+	lua_newtable(l);
+	lua_pushnumber(l,1);
+	cpSpaceBBQuery(space,bb,filter,lua_chipmunk_query_bounding_box_callback,(void*)l);
+	lua_pop(l,1);
+
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
