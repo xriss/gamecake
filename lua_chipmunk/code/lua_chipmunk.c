@@ -2171,7 +2171,6 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 // callback for lua_chipmunk_query_bounding_box
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-
 void lua_chipmunk_query_bounding_box_callback(cpShape *shape, void *data)
 {
 lua_State *l=(lua_State *)data;
@@ -2213,6 +2212,37 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 	return 1;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// callback for lua_chipmunk_query_shape
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void lua_chipmunk_query_shape_callback(cpShape *shape, cpContactPointSet *set, void *data)
+{
+lua_State *l=(lua_State *)data;
+
+int idx=lua_tonumber(l,-1);
+	lua_pop(l,1);
+
+	lua_pushlightuserdata( l, (void*)shape  ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, set->normal.x ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, set->normal.y ); lua_rawseti(l,-2,idx++);
+	
+	lua_newtable(l);
+	for(int i=0; i<set->count; i++){
+		lua_pushnumber(l,set->points[i].pointA.x); lua_rawseti(l,-2,1+i*5);
+		lua_pushnumber(l,set->points[i].pointA.y); lua_rawseti(l,-2,2+i*5);
+		lua_pushnumber(l,set->points[i].pointB.x); lua_rawseti(l,-2,3+i*5);
+		lua_pushnumber(l,set->points[i].pointB.y); lua_rawseti(l,-2,4+i*5);
+		lua_pushnumber(l,set->points[i].distance); lua_rawseti(l,-2,5+i*5);
+	}
+	lua_rawseti(l,-2,idx++);
+
+	lua_pushnumber(l,idx);
+}
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // query the shapes within this shape
@@ -2220,7 +2250,15 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_query_shape (lua_State *l)
 {
-	return 0;
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+cpShape *shape=lua_chipmunk_shape_ptr(l,2);
+
+	lua_newtable(l);
+	lua_pushnumber(l,1);
+	cpSpaceShapeQuery(space,shape,lua_chipmunk_query_shape_callback,(void*)l);
+	lua_pop(l,1);
+
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
