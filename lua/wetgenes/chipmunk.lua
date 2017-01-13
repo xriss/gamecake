@@ -493,6 +493,49 @@ chipmunk.space_functions.step=function(space,ts)
 	return core.space_step(space[0],ts)
 end
 ------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.query_point
+
+	space:query_point(x,y,d,group,categories,mask)
+
+Find the shapes that are within d distance from the point at x,y.
+Use group,categories and mask to filter the results.
+]]
+chipmunk.space_functions.query_point=function(space,x,y,d,group,categories,mask)
+	local dat=core.space_query_point(space[0],x,y,d,group,categories,mask)
+	local tab={}
+	for i=0,#dat-1,6 do -- format the output so it is a little bit nicer
+		local it={}
+		tab[1+(i/6)]=it
+		it.shape=space.shapes[ dat[1+i] ] -- convert userdata to shape
+		it.point_x=dat[2+i]
+		it.point_y=dat[3+i]
+		it.distance=dat[4+i]
+		it.gradient_x=dat[5+i]
+		it.gradient_y=dat[6+i]
+	end
+	return tab -- an empty table would be no hits
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.query_point_nearest
+
+	space:query_point_nearest(x,y,d,group,categories,mask)
+
+Find the nearest shape that is within d distance from the point at x,y.
+Use group,categories and mask to filter the results.
+]]
+chipmunk.space_functions.query_point_nearest=function(space,x,y,d,group,categories,mask)
+	local rs,px,py,rd,gx,gy=core.space_query_point_nearest(space[0],x,y,d,group,categories,mask)
+	if not rs then return end -- return nil for no hit
+	local it={}
+	it.shape=space.shapes[ rs ] -- convert userdata to shape
+	it.point_x=px
+	it.point_y=py
+	it.distance=rd
+	it.gradient_x=gx
+	it.gradient_y=gy
+	return it
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.type
 
 	t=body:type()

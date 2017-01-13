@@ -2010,6 +2010,7 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 	filter.mask=luaL_checknumber(l,7);
 
 	cpSpacePointQueryNearest(space,p,maxd,filter,out);
+	if( out->shape == 0 ) { return 0; } // no hit
 	
 	lua_pushlightuserdata( l, (void*)out->shape );
 	lua_pushnumber(        l, out->point.x      );
@@ -2036,6 +2037,7 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 	p.y=luaL_checknumber(l,3);
 
 	cpShapePointQuery(shape,p,out);
+	if( out->shape == 0 ) { return 0; } // no hit
 	
 	lua_pushlightuserdata( l, (void*)out->shape );
 	lua_pushnumber(        l, out->point.x      );
@@ -2124,6 +2126,7 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 	filter.mask=luaL_checknumber(l,9);
 
 	cpSpaceSegmentQueryFirst(space,pstart,pend,radius,filter,out);
+	if( out->shape == 0 ) { return 0; } // no hit
 	
 	lua_pushlightuserdata( l, (void*)out->shape );
 	lua_pushnumber(        l, out->point.x      );
@@ -2154,6 +2157,7 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 	radius=luaL_checknumber(l,6);
 
 	cpShapeSegmentQuery(shape,pstart,pend,radius,out);
+	if( out->shape == 0 ) { return 0; } // no hit
 	
 	lua_pushlightuserdata( l, (void*)out->shape );
 	lua_pushnumber(        l, out->point.x      );
