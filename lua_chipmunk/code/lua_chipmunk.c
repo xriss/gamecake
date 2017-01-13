@@ -1938,6 +1938,29 @@ cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,1);
 	return 1;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// callback for lua_chipmunk_query_point
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void lua_chipmunk_query_point_callback(cpShape *shape, cpVect point, cpFloat distance, cpVect gradient, void *data)
+{
+lua_State *l=(lua_State *)data;
+
+int idx=lua_tonumber(l,-1);
+	lua_pop(l,1);
+
+	lua_pushlightuserdata( l, (void*)shape ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, point.x      ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, point.y      ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, distance     ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, gradient.x   ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, gradient.y   ); lua_rawseti(l,-2,idx++);
+
+	lua_pushnumber(l,idx);
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // query
@@ -1945,9 +1968,27 @@ cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,1);
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_query_point (lua_State *l)
 {
-	return 0;
-}
+cpVect p;
+cpFloat maxd;
+cpShapeFilter filter;
+cpPointQueryInfo out[1];
 
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+	p.x=luaL_checknumber(l,2);
+	p.y=luaL_checknumber(l,3);
+	maxd=luaL_checknumber(l,4);
+
+	filter.group=luaL_checknumber(l,5);
+	filter.categories=luaL_checknumber(l,6);
+	filter.mask=luaL_checknumber(l,7);
+
+	lua_newtable(l);
+	lua_pushnumber(l,1);
+	cpSpacePointQuery(space,p,maxd,filter,lua_chipmunk_query_point_callback,(void*)l);
+	lua_pop(l,1);
+	
+	return 1;
+}
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // query the nearest shape to a point
@@ -1955,7 +1996,30 @@ static int lua_chipmunk_query_point (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_query_point_nearest (lua_State *l)
 {
-	return 0;
+cpVect p;
+cpFloat maxd;
+cpShapeFilter filter;
+cpPointQueryInfo out[1];
+
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+	p.x=luaL_checknumber(l,2);
+	p.y=luaL_checknumber(l,3);
+	maxd=luaL_checknumber(l,4);
+
+	filter.group=luaL_checknumber(l,5);
+	filter.categories=luaL_checknumber(l,6);
+	filter.mask=luaL_checknumber(l,7);
+
+	cpSpacePointQueryNearest(space,p,maxd,filter,out);
+	
+	lua_pushlightuserdata( l, (void*)out->shape );
+	lua_pushnumber(        l, out->point.x      );
+	lua_pushnumber(        l, out->point.y      );
+	lua_pushnumber(        l, out->distance     );
+	lua_pushnumber(        l, out->gradient.x   );
+	lua_pushnumber(        l, out->gradient.y   );
+
+	return 6;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1969,28 +2033,19 @@ cpVect p;
 cpPointQueryInfo out[1];
 
 cpShape *shape=lua_chipmunk_shape_ptr(l,1);
-	p.x=lua_tonumber(l,2);
-	p.y=lua_tonumber(l,3);
+	p.x=luaL_checknumber(l,2);
+	p.y=luaL_checknumber(l,3);
 
 	cpShapePointQuery(shape,p,out);
 	
-	if(lua_istable(l,4)) // reuse this table
-	{
-		lua_pushvalue(l,4);
-	}
-	else // make a new table for return values
-	{
-		lua_newtable(l);
-	}
+	lua_pushlightuserdata( l, (void*)out->shape );
+	lua_pushnumber(        l, out->point.x      );
+	lua_pushnumber(        l, out->point.y      );
+	lua_pushnumber(        l, out->distance     );
+	lua_pushnumber(        l, out->gradient.x   );
+	lua_pushnumber(        l, out->gradient.y   );
 
-	lua_pushlightuserdata( l, (void*)out->shape ); lua_setfield(l,-2, "shape_ptr"  );
-	lua_pushnumber(        l, out->point.x      ); lua_setfield(l,-2, "point_x"    );
-	lua_pushnumber(        l, out->point.y      ); lua_setfield(l,-2, "point_y"    );
-	lua_pushnumber(        l, out->distance     ); lua_setfield(l,-2, "distance"   );
-	lua_pushnumber(        l, out->gradient.x   ); lua_setfield(l,-2, "gradient_x" );
-	lua_pushnumber(        l, out->gradient.y   ); lua_setfield(l,-2, "gradient_y" );
-
-	return 1;
+	return 6;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
