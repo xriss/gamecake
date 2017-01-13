@@ -2315,6 +2315,13 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"space_current_time_step",			lua_chipmunk_space_current_time_step},
 		{"space_locked",					lua_chipmunk_space_locked},
 
+		{"space_query_point",				lua_chipmunk_space_query_point},				// cpSpacePointQuery
+		{"space_query_point_nearest",		lua_chipmunk_space_query_point_nearest},		// cpSpacePointQueryNearest
+		{"space_query_segment",				lua_chipmunk_space_query_segment},				// cpSpaceSegmentQuery
+		{"space_query_segment_first",		lua_chipmunk_space_query_segment_first},		// cpSpaceSegmentQueryFirst
+		{"space_query_bounding_box",		lua_chipmunk_space_query_bounding_box},			// cpSpaceBBQuery
+		{"space_query_shape",				lua_chipmunk_space_query_shape},				// cpSpaceShapeQuery
+
 		{"body_type",						lua_chipmunk_body_type},
 		{"body_mass",						lua_chipmunk_body_mass},
 		{"body_moment",						lua_chipmunk_body_moment},
@@ -2343,6 +2350,9 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 
 		{"shape_radius",					lua_chipmunk_shape_radius},
 
+		{"shape_query_point",				lua_chipmunk_shape_query_point},				// cpShapePointQuery
+		{"shape_query_segment",				lua_chipmunk_shape_query_segment},				// cpShapeSegmentQuery
+
 		{"arbiter_surface_velocity",		lua_chipmunk_arbiter_surface_velocity},
 		{"arbiter_points",					lua_chipmunk_arbiter_points},
 		{"arbiter_ignore",					lua_chipmunk_arbiter_ignore},
@@ -2352,16 +2362,6 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"constraint_max_bias",				lua_chipmunk_constraint_max_bias},
 		{"constraint_collide_bodies",		lua_chipmunk_constraint_collide_bodies},
 		{"constraint_impulse",				lua_chipmunk_constraint_impulse},
-
-		{"space_query_point",				lua_chipmunk_space_query_point},				// cpSpacePointQuery
-		{"space_query_point_nearest",		lua_chipmunk_space_query_point_nearest},		// cpSpacePointQueryNearest
-		{"shape_query_point",				lua_chipmunk_shape_query_point},				// cpShapePointQuery
-		{"space_query_segment",				lua_chipmunk_space_query_segment},				// cpSpaceSegmentQuery
-		{"space_query_segment_first",		lua_chipmunk_space_query_segment_first},		// cpSpaceSegmentQueryFirst
-		{"shape_query_segment",				lua_chipmunk_shape_query_segment},				// cpShapeSegmentQuery
-		{"space_query_bounding_box",		lua_chipmunk_space_query_bounding_box},			// cpSpaceBBQuery
-		{"space_query_shape",				lua_chipmunk_space_query_shape},				// cpSpaceShapeQuery
-
 
 		{0,0}
 	};
