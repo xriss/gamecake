@@ -1944,7 +1944,7 @@ cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,1);
 // callback for lua_chipmunk_query_point
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void lua_chipmunk_query_point_callback(cpShape *shape, cpVect point, cpFloat distance, cpVect gradient, void *data)
+void lua_chipmunk_space_query_point_callback(cpShape *shape, cpVect point, cpFloat distance, cpVect gradient, void *data)
 {
 lua_State *l=(lua_State *)data;
 
@@ -1966,7 +1966,7 @@ int idx=lua_tonumber(l,-1);
 // query
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_chipmunk_query_point (lua_State *l)
+static int lua_chipmunk_space_query_point (lua_State *l)
 {
 cpVect p;
 cpFloat maxd;
@@ -1983,7 +1983,7 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 
 	lua_newtable(l);
 	lua_pushnumber(l,1);
-	cpSpacePointQuery(space,p,maxd,filter,lua_chipmunk_query_point_callback,(void*)l);
+	cpSpacePointQuery(space,p,maxd,filter,lua_chipmunk_space_query_point_callback,(void*)l);
 	lua_pop(l,1);
 	
 	return 1;
@@ -1993,7 +1993,7 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 // query the nearest shape to a point
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_chipmunk_query_point_nearest (lua_State *l)
+static int lua_chipmunk_space_query_point_nearest (lua_State *l)
 {
 cpVect p;
 cpFloat maxd;
@@ -2026,7 +2026,7 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 // query the distance from a point to a shape
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_chipmunk_query_point_shape (lua_State *l)
+static int lua_chipmunk_shape_query_point (lua_State *l)
 {
 cpVect p;
 cpPointQueryInfo out[1];
@@ -2053,7 +2053,7 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 // callback for lua_chipmunk_query_segment
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void lua_chipmunk_query_segment_callback(cpShape *shape, cpVect point, cpVect normal, cpFloat alpha, void *data)
+void lua_chipmunk_space_query_segment_callback(cpShape *shape, cpVect point, cpVect normal, cpFloat alpha, void *data)
 {
 lua_State *l=(lua_State *)data;
 
@@ -2075,7 +2075,7 @@ int idx=lua_tonumber(l,-1);
 // query the shapes along a raytraced line segment
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_chipmunk_query_segment (lua_State *l)
+static int lua_chipmunk_space_query_segment (lua_State *l)
 {
 cpVect pstart,pend;
 cpFloat radius;
@@ -2094,7 +2094,7 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 
 	lua_newtable(l);
 	lua_pushnumber(l,1);
-	cpSpaceSegmentQuery(space,pstart,pend,radius,filter,lua_chipmunk_query_segment_callback,(void*)l);
+	cpSpaceSegmentQuery(space,pstart,pend,radius,filter,lua_chipmunk_space_query_segment_callback,(void*)l);
 	lua_pop(l,1);
 	
 	return 1;
@@ -2105,7 +2105,7 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 // query the first shape along a raytraced line segment
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_chipmunk_query_segment_first (lua_State *l)
+static int lua_chipmunk_space_query_segment_first (lua_State *l)
 {
 cpVect pstart,pend;
 cpFloat radius;
@@ -2140,7 +2140,7 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 // query the point where this segment hits this shape
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_chipmunk_query_segment_shape (lua_State *l)
+static int lua_chipmunk_shape_query_segment (lua_State *l)
 {
 cpVect pstart,pend;
 cpFloat radius;
@@ -2168,10 +2168,10 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// callback for lua_chipmunk_query_bounding_box
+// callback for lua_chipmunk_space_query_bounding_box
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void lua_chipmunk_query_bounding_box_callback(cpShape *shape, void *data)
+void lua_chipmunk_space_query_bounding_box_callback(cpShape *shape, void *data)
 {
 lua_State *l=(lua_State *)data;
 
@@ -2188,7 +2188,7 @@ int idx=lua_tonumber(l,-1);
 // query the shapes within this bounding box
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_chipmunk_query_bounding_box (lua_State *l)
+static int lua_chipmunk_space_query_bounding_box (lua_State *l)
 {
 
 cpBB bb;
@@ -2206,7 +2206,7 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 
 	lua_newtable(l);
 	lua_pushnumber(l,1);
-	cpSpaceBBQuery(space,bb,filter,lua_chipmunk_query_bounding_box_callback,(void*)l);
+	cpSpaceBBQuery(space,bb,filter,lua_chipmunk_space_query_bounding_box_callback,(void*)l);
 	lua_pop(l,1);
 
 	return 1;
@@ -2215,10 +2215,10 @@ cpSpace *space=lua_chipmunk_space_ptr(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// callback for lua_chipmunk_query_shape
+// callback for lua_chipmunk_space_query_shape
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void lua_chipmunk_query_shape_callback(cpShape *shape, cpContactPointSet *set, void *data)
+void lua_chipmunk_space_query_shape_callback(cpShape *shape, cpContactPointSet *set, void *data)
 {
 lua_State *l=(lua_State *)data;
 
@@ -2248,14 +2248,14 @@ int idx=lua_tonumber(l,-1);
 // query the shapes within this shape
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_chipmunk_query_shape (lua_State *l)
+static int lua_chipmunk_space_query_shape (lua_State *l)
 {
 cpSpace *space=lua_chipmunk_space_ptr(l,1);
 cpShape *shape=lua_chipmunk_shape_ptr(l,2);
 
 	lua_newtable(l);
 	lua_pushnumber(l,1);
-	cpSpaceShapeQuery(space,shape,lua_chipmunk_query_shape_callback,(void*)l);
+	cpSpaceShapeQuery(space,shape,lua_chipmunk_space_query_shape_callback,(void*)l);
 	lua_pop(l,1);
 
 	return 1;
@@ -2353,17 +2353,14 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"constraint_collide_bodies",		lua_chipmunk_constraint_collide_bodies},
 		{"constraint_impulse",				lua_chipmunk_constraint_impulse},
 
-		{"query_point",						lua_chipmunk_query_point},						// cpSpacePointQuery
-		{"query_point_nearest",				lua_chipmunk_query_point_nearest},				// cpSpacePointQueryNearest
-		{"query_point_shape",				lua_chipmunk_query_point_shape},				// cpShapePointQuery
-
-		{"query_segment",					lua_chipmunk_query_segment},					// cpSpaceSegmentQuery
-		{"query_segment_first",				lua_chipmunk_query_segment_first},				// cpSpaceSegmentQueryFirst
-		{"query_segment_shape",				lua_chipmunk_query_segment_shape},				// cpShapeSegmentQuery
-
-		{"query_bounding_box",				lua_chipmunk_query_bounding_box},				// cpSpaceBBQuery
-
-		{"query_shape",						lua_chipmunk_query_shape},						// cpSpaceShapeQuery
+		{"space_query_point",				lua_chipmunk_space_query_point},				// cpSpacePointQuery
+		{"space_query_point_nearest",		lua_chipmunk_space_query_point_nearest},		// cpSpacePointQueryNearest
+		{"shape_query_point",				lua_chipmunk_shape_query_point},				// cpShapePointQuery
+		{"space_query_segment",				lua_chipmunk_space_query_segment},				// cpSpaceSegmentQuery
+		{"space_query_segment_first",		lua_chipmunk_space_query_segment_first},		// cpSpaceSegmentQueryFirst
+		{"shape_query_segment",				lua_chipmunk_shape_query_segment},				// cpShapeSegmentQuery
+		{"space_query_bounding_box",		lua_chipmunk_space_query_bounding_box},			// cpSpaceBBQuery
+		{"space_query_shape",				lua_chipmunk_space_query_shape},				// cpSpaceShapeQuery
 
 
 		{0,0}
