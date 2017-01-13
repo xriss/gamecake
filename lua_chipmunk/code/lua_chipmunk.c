@@ -1971,7 +1971,6 @@ static int lua_chipmunk_query_point (lua_State *l)
 cpVect p;
 cpFloat maxd;
 cpShapeFilter filter;
-cpPointQueryInfo out[1];
 
 cpSpace *space=lua_chipmunk_space_ptr(l,1);
 	p.x=luaL_checknumber(l,2);
@@ -2048,6 +2047,29 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 	return 6;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// callback for lua_chipmunk_query_segment
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void lua_chipmunk_query_segment_callback(cpShape *shape, cpVect point, cpVect normal, cpFloat alpha, void *data)
+{
+lua_State *l=(lua_State *)data;
+
+int idx=lua_tonumber(l,-1);
+	lua_pop(l,1);
+
+	lua_pushlightuserdata( l, (void*)shape ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, point.x      ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, point.y      ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, normal.x     ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, normal.y     ); lua_rawseti(l,-2,idx++);
+	lua_pushnumber(        l, alpha        ); lua_rawseti(l,-2,idx++);
+
+	lua_pushnumber(l,idx);
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // query the shapes along a raytraced line segment
@@ -2055,7 +2077,27 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,1);
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_query_segment (lua_State *l)
 {
-	return 0;
+cpVect pstart,pend;
+cpFloat radius;
+cpShapeFilter filter;
+
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+	pstart.x=luaL_checknumber(l,2);
+	pstart.y=luaL_checknumber(l,3);
+	pend.x=luaL_checknumber(l,4);
+	pend.y=luaL_checknumber(l,5);
+	radius=luaL_checknumber(l,6);
+
+	filter.group=luaL_checknumber(l,7);
+	filter.categories=luaL_checknumber(l,8);
+	filter.mask=luaL_checknumber(l,9);
+
+	lua_newtable(l);
+	lua_pushnumber(l,1);
+	cpSpaceSegmentQuery(space,pstart,pend,radius,filter,lua_chipmunk_query_segment_callback,(void*)l);
+	lua_pop(l,1);
+	
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -2065,7 +2107,32 @@ static int lua_chipmunk_query_segment (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_query_segment_first (lua_State *l)
 {
-	return 0;
+cpVect pstart,pend;
+cpFloat radius;
+cpShapeFilter filter;
+cpSegmentQueryInfo out[1];
+
+cpSpace *space=lua_chipmunk_space_ptr(l,1);
+	pstart.x=luaL_checknumber(l,2);
+	pstart.y=luaL_checknumber(l,3);
+	pend.x=luaL_checknumber(l,4);
+	pend.y=luaL_checknumber(l,5);
+	radius=luaL_checknumber(l,6);
+
+	filter.group=luaL_checknumber(l,7);
+	filter.categories=luaL_checknumber(l,8);
+	filter.mask=luaL_checknumber(l,9);
+
+	cpSpaceSegmentQueryFirst(space,pstart,pend,radius,filter,out);
+	
+	lua_pushlightuserdata( l, (void*)out->shape );
+	lua_pushnumber(        l, out->point.x      );
+	lua_pushnumber(        l, out->point.y      );
+	lua_pushnumber(        l, out->normal.x     );
+	lua_pushnumber(        l, out->normal.y     );
+	lua_pushnumber(        l, out->alpha        );
+
+	return 6;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -2075,7 +2142,27 @@ static int lua_chipmunk_query_segment_first (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_chipmunk_query_segment_shape (lua_State *l)
 {
-	return 0;
+cpVect pstart,pend;
+cpFloat radius;
+cpSegmentQueryInfo out[1];
+
+cpShape *shape=lua_chipmunk_shape_ptr(l,1);
+	pstart.x=luaL_checknumber(l,2);
+	pstart.y=luaL_checknumber(l,3);
+	pend.x=luaL_checknumber(l,4);
+	pend.y=luaL_checknumber(l,5);
+	radius=luaL_checknumber(l,6);
+
+	cpShapeSegmentQuery(shape,pstart,pend,radius,out);
+	
+	lua_pushlightuserdata( l, (void*)out->shape );
+	lua_pushnumber(        l, out->point.x      );
+	lua_pushnumber(        l, out->point.y      );
+	lua_pushnumber(        l, out->normal.x     );
+	lua_pushnumber(        l, out->normal.y     );
+	lua_pushnumber(        l, out->alpha        );
+
+	return 6;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
