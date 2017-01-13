@@ -1940,6 +1940,111 @@ cpConstraint *constraint=lua_chipmunk_constraint_ptr(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// query
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_query_point (lua_State *l)
+{
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// query the nearest shape to a point
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_query_point_nearest (lua_State *l)
+{
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// query the distance from a point to a shape
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_query_point_shape (lua_State *l)
+{
+cpVect p;
+cpPointQueryInfo out[1];
+
+cpShape *shape=lua_chipmunk_shape_ptr(l,1);
+	p.x=lua_tonumber(l,2);
+	p.y=lua_tonumber(l,3);
+
+	cpShapePointQuery(shape,p,out);
+	
+	if(lua_istable(l,4)) // reuse this table
+	{
+		lua_pushvalue(l,4);
+	}
+	else // make a new table for return values
+	{
+		lua_newtable(l);
+	}
+
+	lua_pushlightuserdata( l, (void*)out->shape ); lua_setfield(l,-2, "shape_ptr"  );
+	lua_pushnumber(        l, out->point.x      ); lua_setfield(l,-2, "point_x"    );
+	lua_pushnumber(        l, out->point.y      ); lua_setfield(l,-2, "point_y"    );
+	lua_pushnumber(        l, out->distance     ); lua_setfield(l,-2, "distance"   );
+	lua_pushnumber(        l, out->gradient.x   ); lua_setfield(l,-2, "gradient_x" );
+	lua_pushnumber(        l, out->gradient.y   ); lua_setfield(l,-2, "gradient_y" );
+
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// query the shapes along a raytraced line segment
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_query_segment (lua_State *l)
+{
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// query the first shape along a raytraced line segment
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_query_segment_first (lua_State *l)
+{
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// query the point where this segment hits this shape
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_query_segment_shape (lua_State *l)
+{
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// query the shapes within this bounding box
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_query_bounding_box (lua_State *l)
+{
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// query the shapes within this shape
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_query_shape (lua_State *l)
+{
+	return 0;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -2030,7 +2135,18 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"constraint_collide_bodies",		lua_chipmunk_constraint_collide_bodies},
 		{"constraint_impulse",				lua_chipmunk_constraint_impulse},
 
-//TODO: add queries
+		{"query_point",						lua_chipmunk_query_point},						// cpSpacePointQuery
+		{"query_point_nearest",				lua_chipmunk_query_point_nearest},				// cpSpacePointQueryNearest
+		{"query_point_shape",				lua_chipmunk_query_point_shape},				// cpShapePointQuery
+
+		{"query_segment",					lua_chipmunk_query_segment},					// cpSpaceSegmentQuery
+		{"query_segment_first",				lua_chipmunk_query_segment_first},				// cpSpaceSegmentQueryFirst
+		{"query_segment_shape",				lua_chipmunk_query_segment_shape},				// cpShapeSegmentQuery
+
+		{"query_bounding_box",				lua_chipmunk_query_bounding_box},				// cpSpaceBBQuery
+
+		{"query_shape",						lua_chipmunk_query_shape},						// cpSpaceShapeQuery
+
 
 		{0,0}
 	};
