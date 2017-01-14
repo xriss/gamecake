@@ -631,8 +631,8 @@ Use group,categories and mask to filter the results.
 Returns an array of shapes.
 
 ]]
-chipmunk.space_functions.query_bounding_box=function(space,sx,sy,ex,ey,r,group,categories,mask)
-	local dat=core.space_query_bounding_box(space[0],sx,sy,ex,ey,r,group,categories,mask)
+chipmunk.space_functions.query_bounding_box=function(space,lx,ly,hx,hy,group,categories,mask)
+	local dat=core.space_query_bounding_box(space[0],lx,ly,hx,hy,group,categories,mask)
 	for i=1,#dat do
 		dat[i]=space.shapes[ dat[i] ] -- convert userdata to shape table
 	end
