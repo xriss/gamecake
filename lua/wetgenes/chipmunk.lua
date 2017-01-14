@@ -621,6 +621,24 @@ chipmunk.space_functions.query_segment=function(space,sx,sy,ex,ey,r,group,catego
 	return it
 end
 ------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.query_bounding_box
+
+	array = space:query_bounding_box(lx,ly,hx,hy,group,categories,mask)
+
+Find the shapes that are within this bounding box (lx,ly) to (hx,hy).
+Use group,categories and mask to filter the results.
+
+Returns an array of shapes.
+
+]]
+chipmunk.space_functions.query_bounding_box=function(space,sx,sy,ex,ey,r,group,categories,mask)
+	local dat=core.space_query_bounding_box(space[0],sx,sy,ex,ey,r,group,categories,mask)
+	for i=1,#dat do
+		dat[i]=space.shapes[ dat[i] ] -- convert userdata to shape table
+	end
+	return dat -- an empty table would be no hits
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.type
 
 	t=body:type()
