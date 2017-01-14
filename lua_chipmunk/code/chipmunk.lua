@@ -495,10 +495,20 @@ end
 ------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.query_point
 
-	space:query_point(x,y,d,group,categories,mask)
+	array = space:query_point(x,y,d,group,categories,mask)
 
 Find the shapes that are within d distance from the point at x,y.
 Use group,categories and mask to filter the results.
+
+Returns an array of hit data, with each item containing the following.
+
+	it.shape		-- the shape
+	it.point_x		-- the point of contact (x)
+	it.point_y		-- the point of contact (y)
+	it.distance		-- the distance to the point of contact
+	it.gradient_x	-- the normalised vector to collision (x)
+	it.gradient_y	-- the normalised vector to collision (y)
+
 ]]
 chipmunk.space_functions.query_point=function(space,x,y,d,group,categories,mask)
 	local dat=core.space_query_point(space[0],x,y,d,group,categories,mask)
@@ -506,33 +516,108 @@ chipmunk.space_functions.query_point=function(space,x,y,d,group,categories,mask)
 	for i=0,#dat-1,6 do -- format the output so it is a little bit nicer
 		local it={}
 		tab[1+(i/6)]=it
-		it.shape=space.shapes[ dat[1+i] ] -- convert userdata to shape
-		it.point_x=dat[2+i]
-		it.point_y=dat[3+i]
-		it.distance=dat[4+i]
-		it.gradient_x=dat[5+i]
-		it.gradient_y=dat[6+i]
+		it.shape=space.shapes[ dat[1+i] ] -- convert userdata to shape table
+		it.point_x    = dat[2+i]
+		it.point_y    = dat[3+i]
+		it.distance   = dat[4+i]
+		it.gradient_x = dat[5+i]
+		it.gradient_y = dat[6+i]
 	end
 	return tab -- an empty table would be no hits
 end
 ------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space.query_point_nearest
 
-	space:query_point_nearest(x,y,d,group,categories,mask)
+	item = space:query_point_nearest(x,y,d,group,categories,mask)
 
 Find the nearest shape that is within d distance from the point at x,y.
 Use group,categories and mask to filter the results.
+
+returns a table with the following info or nil for no hit
+
+	it.shape		-- the shape
+	it.point_x		-- the point of contact (x)
+	it.point_y		-- the point of contact (y)
+	it.distance		-- the distance to the point of contact
+	it.gradient_x	-- the normalised vector to collision (x)
+	it.gradient_y	-- the normalised vector to collision (y)
+
 ]]
 chipmunk.space_functions.query_point_nearest=function(space,x,y,d,group,categories,mask)
 	local rs,px,py,rd,gx,gy=core.space_query_point_nearest(space[0],x,y,d,group,categories,mask)
 	if not rs then return end -- return nil for no hit
 	local it={}
-	it.shape=space.shapes[ rs ] -- convert userdata to shape
-	it.point_x=px
-	it.point_y=py
-	it.distance=rd
-	it.gradient_x=gx
-	it.gradient_y=gy
+	it.shape=space.shapes[ rs ] -- convert userdata to shape table
+	it.point_x    = px
+	it.point_y    = py
+	it.distance   = rd
+	it.gradient_x = gx
+	it.gradient_y = gy
+	return it
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.query_segment
+
+	array = space:query_segment(sx,sy,ex,ey,r,group,categories,mask)
+
+Find the shapes that are along this raycast segment, from (sx,sy) to 
+(ex,ey) with a radius of r. Use group,categories and mask to filter the 
+results.
+
+Returns an array of hit data, with each item containing the following.
+
+	it.shape		-- the shape
+	it.point_x		-- the point of contact (x)
+	it.point_y		-- the point of contact (y)
+	it.normal_x		-- the normal at contact (x)
+	it.normal_y		-- the normal at contact (y)
+	it.alpha		-- how far along the segment the contact happened (0 to 1)
+
+]]
+chipmunk.space_functions.query_segment=function(space,sx,sy,ex,ey,r,group,categories,mask)
+	local dat=core.space_query_segment(space[0],sx,sy,ex,ey,r,group,categories,mask)
+	local tab={}
+	for i=0,#dat-1,6 do -- format the output so it is a little bit nicer
+		local it={}
+		tab[1+(i/6)]=it
+		it.shape=space.shapes[ dat[1+i] ] -- convert userdata to shape table
+		it.point_x  = dat[2+i]
+		it.point_y  = dat[3+i]
+		it.normal_x = dat[4+i]
+		it.normal_y = dat[5+i]
+		it.alpha    = dat[6+i]
+	end
+	return tab -- an empty table would be no hits
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.query_segment_first
+
+	it = space:query_segment_first(sx,sy,ex,ey,r,group,categories,mask)
+
+Find the shapes that are along this raycast segment, from (sx,sy) to 
+(ex,ey) with a radius of r. Use group,categories and mask to filter the 
+results.
+
+Returns a table with the following info or nil for no hit
+
+	it.shape		-- the shape
+	it.point_x		-- the point of contact (x)
+	it.point_y		-- the point of contact (y)
+	it.normal_x		-- the normal at contact (x)
+	it.normal_y		-- the normal at contact (y)
+	it.alpha		-- how far along the segment the contact happened (0 to 1)
+
+]]
+chipmunk.space_functions.query_segment=function(space,sx,sy,ex,ey,r,group,categories,mask)
+	local rs,px,py,nx,ny,a=core.space_query_segment_first(space[0],sx,sy,ex,ey,r,group,categories,mask)
+	if not rs then return end -- return nil for no hit
+	local it={}
+	it.shape=space.shapes[ rs ] -- convert userdata to shape table
+	it.point_x  = px
+	it.point_y  = py
+	it.normal_x = nx
+	it.normal_y = ny
+	it.alpha    = a
 	return it
 end
 ------------------------------------------------------------------------
