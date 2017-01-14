@@ -639,6 +639,34 @@ chipmunk.space_functions.query_bounding_box=function(space,lx,ly,hx,hy,group,cat
 	return dat -- an empty table would be no hits
 end
 ------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.query_shape
+
+	array = space:query_shape(shape)
+
+Find the shapes that intersect with the given shape.
+
+Returns an array of hit data, with each item containing the following.
+
+	it.shape		-- the shape
+	it.normal_x		-- the normal at contact (x)
+	it.normal_y		-- the normal at contact (y)
+	it.contacts		-- array of contact points -> {ax,ay,bx,by,distance,etc...}
+
+]]
+chipmunk.space_functions.query_shape=function(space,shape)
+	local dat=core.space_query_shape(space[0],shape[0])
+	local tab={}
+	for i=0,#dat-1,4 do -- format the output so it is a little bit nicer
+		local it={}
+		tab[1+(i/4)]=it
+		it.shape=space.shapes[ dat[1+i] ] -- convert userdata to shape table
+		it.normal_x = dat[2+i]
+		it.normal_y = dat[3+i]
+		it.contacts = dat[4+i]
+	end
+	return tab -- an empty table would be no hits
+end
+------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body.type
 
 	t=body:type()
@@ -961,6 +989,65 @@ break the physics simulation.
 ]]
 chipmunk.shape_functions.radius=function(shape,radius)
 	return core.shape_radius(shape[0],radius)
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.shape.query_point
+
+	item = shape:query_point(x,y)
+
+Find the nearest point on the shape from the point at x,y.
+
+returns a table with the following info or nil for no hit
+
+	it.shape		-- the shape
+	it.point_x		-- the point of contact (x)
+	it.point_y		-- the point of contact (y)
+	it.distance		-- the distance to the point of contact
+	it.gradient_x	-- the normalised vector to collision (x)
+	it.gradient_y	-- the normalised vector to collision (y)
+
+]]
+chipmunk.shape_functions.query_point=function(shape,x,y)
+	local rs,px,py,rd,gx,gy=core.shape_query_point(shape[0],x,y)
+	if not rs then return end -- return nil for no hit
+	local it={}
+	it.shape=space.shapes[ rs ] -- convert userdata to shape table
+	it.point_x    = px
+	it.point_y    = py
+	it.distance   = rd
+	it.gradient_x = gx
+	it.gradient_y = gy
+	return it
+end
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.shape.query_segment
+
+	it = shape:query_segment(sx,sy,ex,ey,r)
+
+Find the hitpoint along this raycast segment, from (sx,sy) to 
+(ex,ey) with a radius of r. 
+
+Returns a table with the following info or nil for no hit
+
+	it.shape		-- the shape
+	it.point_x		-- the point of contact (x)
+	it.point_y		-- the point of contact (y)
+	it.normal_x		-- the normal at contact (x)
+	it.normal_y		-- the normal at contact (y)
+	it.alpha		-- how far along the segment the contact happened (0 to 1)
+
+]]
+chipmunk.shape_functions.query_segment=function(shape,sx,sy,ex,ey,r)
+	local rs,px,py,nx,ny,a=core.shape_query_segment(shape[0],sx,sy,ex,ey,r)
+	if not rs then return end -- return nil for no hit
+	local it={}
+	it.shape=space.shapes[ rs ] -- convert userdata to shape table
+	it.point_x  = px
+	it.point_y  = py
+	it.normal_x = nx
+	it.normal_y = ny
+	it.alpha    = a
+	return it
 end
 ------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.arbiter.points
