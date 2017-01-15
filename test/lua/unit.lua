@@ -44,6 +44,7 @@ else
 
 	lunatest.suite("unit.wetgenes_win")
 
+	lunatest.suite("unit.wetgenes_chipmunk")
 end
 
 lunatest.run()
