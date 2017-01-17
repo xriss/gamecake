@@ -9,7 +9,7 @@ machine:
 checkout:
   post:
     - git submodule sync
-    - git submodule update --init # use submodules
+#    - git submodule update --init # use submodules
 
 ## Customize dependencies
 dependencies:
@@ -27,4 +27,4 @@ dependencies:
 ## Customize test commands
 test:
   override:
-    - ./unit-tests
+    - cd test ; ../exe/gamecake.x64 lua/unit.lua
