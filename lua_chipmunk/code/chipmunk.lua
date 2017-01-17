@@ -35,6 +35,11 @@ chipmunk.constraint_functions={is="constraint"}
 chipmunk.constraint_metatable={__index=chipmunk.constraint_functions}
 
 
+-- default values to be used if nil
+local group_categories_mask=function(group,categories,mask)
+	return group or 0,categories or 0xffffffff,mask or 0xffffffff
+end
+
 ------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.space
 
@@ -511,6 +516,7 @@ Returns an array of hit data, with each item containing the following.
 
 ]]
 chipmunk.space_functions.query_point=function(space,x,y,d,group,categories,mask)
+	group,categories,mask=group_categories_mask(group,categories,mask)
 	local dat=core.space_query_point(space[0],x,y,d,group,categories,mask)
 	local tab={}
 	for i=0,#dat-1,6 do -- format the output so it is a little bit nicer
@@ -544,6 +550,7 @@ returns a table with the following info or nil for no hit
 
 ]]
 chipmunk.space_functions.query_point_nearest=function(space,x,y,d,group,categories,mask)
+	group,categories,mask=group_categories_mask(group,categories,mask)
 	local rs,px,py,rd,gx,gy=core.space_query_point_nearest(space[0],x,y,d,group,categories,mask)
 	if not rs then return end -- return nil for no hit
 	local it={}
@@ -575,6 +582,7 @@ Returns an array of hit data, with each item containing the following.
 
 ]]
 chipmunk.space_functions.query_segment=function(space,sx,sy,ex,ey,r,group,categories,mask)
+	group,categories,mask=group_categories_mask(group,categories,mask)
 	local dat=core.space_query_segment(space[0],sx,sy,ex,ey,r,group,categories,mask)
 	local tab={}
 	for i=0,#dat-1,6 do -- format the output so it is a little bit nicer
@@ -609,6 +617,7 @@ Returns a table with the following info or nil for no hit
 
 ]]
 chipmunk.space_functions.query_segment=function(space,sx,sy,ex,ey,r,group,categories,mask)
+	group,categories,mask=group_categories_mask(group,categories,mask)
 	local rs,px,py,nx,ny,a=core.space_query_segment_first(space[0],sx,sy,ex,ey,r,group,categories,mask)
 	if not rs then return end -- return nil for no hit
 	local it={}
@@ -632,6 +641,7 @@ Returns an array of shapes.
 
 ]]
 chipmunk.space_functions.query_bounding_box=function(space,lx,ly,hx,hy,group,categories,mask)
+	group,categories,mask=group_categories_mask(group,categories,mask)
 	local dat=core.space_query_bounding_box(space[0],lx,ly,hx,hy,group,categories,mask)
 	for i=1,#dat do
 		dat[i]=space.shapes[ dat[i] ] -- convert userdata to shape table
@@ -975,6 +985,7 @@ Get and/or Set the filter for this shape.
 
 ]]
 chipmunk.shape_functions.filter=function(shape,group,categories,mask)
+	group,categories,mask=group_categories_mask(group,categories,mask)
 	return core.shape_filter(shape[0],group,categories,mask)
 end
 ------------------------------------------------------------------------

@@ -4,7 +4,7 @@ module(...,package.seeall)
 
 local wstr=require("wetgenes.string")
 local chipmunk=require("wetgenes.chipmunk")
-
+local ls=function(...)print(wstr.dump(...)) end
 
 
 function test_space()
@@ -43,3 +43,65 @@ function test_body()
 
 end
 
+
+local function space_setup()
+
+	local space=chipmunk.space()
+
+	local bodys={}
+	local shapes={}
+	local function ball(x,y,r)
+		local body=space:body(0.1,0.1)
+		local shape=body:shape("circle",r,x,y)
+		bodys[#bodys]=body
+		shapes[#shapes]=shape
+		return shape,body
+	end
+	
+	ball(-10,0,3)
+	ball( -5,0,2)
+	ball(  0,0,1)
+	ball(  5,0,2)
+	ball( 10,0,3)
+	ball(0,-10,3)
+	ball(0, -5,2)
+	ball(0,  5,2)
+	ball(0, 10,3)
+	
+	return space,bodys,shapes
+
+end
+
+function test_query_point()
+
+	local space,bodys,shapes=space_setup()
+	
+	local ret=space:query_point(0,0,10,0,0xffffffff,0xffffffff)
+	assert(#ret==9)
+
+	local ret=space:query_point(1,0,1,0,0xffffffff,0xffffffff)
+	assert(#ret==1)
+
+	local ret=space:query_point(0,25,20,0,0xffffffff,0xffffffff)
+	assert(#ret==2)
+
+	local ret=space:query_point(5,5,4,0,0xffffffff,0xffffffff)
+	assert(#ret==2)
+
+	local ret=space:query_point(10,10,2,0,0xffffffff,0xffffffff)
+	assert(#ret==0)
+
+end
+
+function test_query_point_nearest()
+
+	local space,bodys,shapes=space_setup()
+		
+	local ret=space:query_point_nearest(10,10,2,0,0xffffffff,0xffffffff)
+	assert(ret==nil)
+
+	local ret=space:query_point_nearest(10,10,100,0,0xffffffff,0xffffffff)
+	assert(ret.point_x==10)
+	assert(ret.point_y==3)
+
+end
