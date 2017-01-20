@@ -3,6 +3,10 @@ cd `dirname $0`
 #prepare
 #../exe/revert_exe
 
+#build osx version 64 (dont think anything uses 32 anymore)
+
+../vbox_osx/make
+
 #build windows
 
 ./mingw/make clean
@@ -25,10 +29,6 @@ cd `dirname $0`
 #build 32bit ubuntu 12.04 version 
 
 ../vbox_1204_32/make full
-
-#build osx version 64 (dont think anything uses 32 anymore)
-
-../vbox_osx/make
 
 #build raspi
 

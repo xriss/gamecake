@@ -53,7 +53,11 @@ system.load_and_setup=function(name,path)
 	system.source.lua=wzips.readfile(system.source_filename..".fun.lua")
 
 	local lua=assert(system.source.lua,"file not found: "..system.source_filename..".fun.lua")
+	
 	if system.source.glsl then gl.shader_sources( system.source.glsl , system.source_filename..".fun.glsl" ) end
+	
+	gl.shader_sources( system.source.lua , system.source_filename..".fun.lua" ) -- also try and load GLSL embeded in the lua file -> #SHADER
+
 	system.setup(lua)
 
 	return system

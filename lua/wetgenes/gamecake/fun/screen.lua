@@ -67,7 +67,7 @@ screen.create=function(it,opts)
 	})
 	
 	it.layers={}
-	for i=1,opts.layers do -- create a bunch of layers
+	for i=1,(opts.layers or 1) do -- create a bunch of layers
 		it.layers[i]=framebuffers.create(it.hx,it.hy,1)
 	end
 
