@@ -1,3 +1,8 @@
+general:
+  branches:
+    only:
+     - master # list of branches to build
+
 ## Customize the test machine
 machine:
 
