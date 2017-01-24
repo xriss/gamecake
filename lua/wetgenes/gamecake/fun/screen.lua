@@ -67,8 +67,25 @@ screen.create=function(it,opts)
 	})
 	
 	it.layers={}
-	for i=1,(opts.layers or 1) do -- create a bunch of layers
-		it.layers[i]=framebuffers.create(it.hx,it.hy,1)
+
+	local opts_layers=opts.layers or 1 -- temporary layer info list
+	
+	if type(opts_layers)=="number" then -- create table of given length
+		local t={}
+		for i=1,opts_layers do t[i]={} end
+		opts_layers=t
+	end
+
+	for i,v in ipairs(opts_layers) do -- create a bunch of layers
+		local layer={}
+		it.layers[i]=layer
+		
+		layer.clip_px=v.clip and v.clip[1] or 0
+		layer.clip_py=v.clip and v.clip[2] or 0
+		layer.clip_hx=v.clip and v.clip[3] or it.hx
+		layer.clip_hy=v.clip and v.clip[4] or it.hy
+		
+		layer.fbo=framebuffers.create(it.hx,it.hy,1)
 	end
 
 -- need another two buffers (no depth) to perform full screen shader fx and generate bloom with
@@ -78,7 +95,7 @@ screen.create=function(it,opts)
 	-- clear fbo and prepare for drawing into
 	it.draw_into_layer_start=function(idx)
 
-		it.layers[idx]:bind_frame()
+		it.layers[idx].fbo:bind_frame()
 
 		gl.MatrixMode(gl.PROJECTION)
 		gl.PushMatrix()
@@ -154,25 +171,31 @@ screen.create=function(it,opts)
 	-- draw layer fbo, probably with a drop shadow effect
 	it.draw_layer=function(idx)
 	
-		local fbo=it.layers[idx]
+		local layer=it.layers[idx]
+		local fbo=layer.fbo
+		
+		local fpx=layer.clip_px/it.hx
+		local fpy=layer.clip_py/it.hy
+		local fhx=(layer.clip_px+layer.clip_hx)/it.hx
+		local fhy=(layer.clip_py+layer.clip_hy)/it.hy
 
 		fbo:bind_texture()
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
 
-			gl.Color(1,1,1,1)
+		gl.Color(1,1,1,1)
 
 		local r,g,b,a=gl.color_get_rgba()
-		local v3=gl.apply_modelview( {fbo.w*-0.0,	fbo.h* 1.0,	0,1} )
-		local v1=gl.apply_modelview( {fbo.w*-0.0,	fbo.h*-0.0,	0,1} )
-		local v4=gl.apply_modelview( {fbo.w* 1.0,	fbo.h* 1.0,	0,1} )
-		local v2=gl.apply_modelview( {fbo.w* 1.0,	fbo.h*-0.0,	0,1} )
+		local v3=gl.apply_modelview( {fbo.w*fpx,	fbo.h*fhy,	0,1} )
+		local v1=gl.apply_modelview( {fbo.w*fpx,	fbo.h*fpy,	0,1} )
+		local v4=gl.apply_modelview( {fbo.w*fhx,	fbo.h*fhy,	0,1} )
+		local v2=gl.apply_modelview( {fbo.w*fhx,	fbo.h*fpy,	0,1} )
 
 		local t={
-			v3[1],	v3[2],	v3[3],	0,			0, 			
-			v1[1],	v1[2],	v1[3],	0,			fbo.uvh,
-			v4[1],	v4[2],	v4[3],	fbo.uvw,	0, 			
-			v2[1],	v2[2],	v2[3],	fbo.uvw,	fbo.uvh,
+			v3[1],	v3[2],	v3[3],	fpx*fbo.uvw,	fpy*fbo.uvh,
+			v1[1],	v1[2],	v1[3],	fpx*fbo.uvw,	fhy*fbo.uvh,
+			v4[1],	v4[2],	v4[3],	fhx*fbo.uvw,	fpy*fbo.uvh,
+			v2[1],	v2[2],	v2[3],	fhx*fbo.uvw,	fhy*fbo.uvh,
 		}
 
 
