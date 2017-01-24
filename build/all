@@ -1,5 +1,8 @@
 cd `dirname $0`
 
+echo "probably need sudo for the mac build so ask for password now"
+sudo echo
+
 #prepare
 #../exe/revert_exe
 
