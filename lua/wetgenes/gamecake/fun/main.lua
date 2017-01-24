@@ -64,10 +64,16 @@ main.setup=function()
 
 	local screen=main.system.components.screen
 	oven.win:resize(screen.hx*screen.scale,screen.hy*screen.scale)
+	
+	opts.width=screen.hx*screen.scale
+	opts.height=screen.hy*screen.scale
+	opts.screen_scale=screen.scale
 
 	view=views.create({
-		parent=views.get(),
-		mode="full",
+		mode="win",
+		win=oven.win,
+--		parent=view.parent,
+--		mode="full",
 		vx=screen.hx*screen.scale,
 		vy=screen.hy*screen.scale,
 		vz=screen.hy*screen.scale*4,
