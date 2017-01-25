@@ -43,9 +43,11 @@ tilemap.create=function(it,opts)
 	it.opts=opts
 	it.component="tilemap"
 	it.name=opts.name or it.component
+
+	it.layer=opts.layer or 1
 	
-	it.px=0
-	it.py=0
+	it.px=it.opts.scroll and it.opts.scroll[1] or 0	-- scroll
+	it.py=it.opts.scroll and it.opts.scroll[2] or 0
 
 	it.window_px=it.opts.window and it.opts.window[1] or 0
 	it.window_py=it.opts.window and it.opts.window[2] or 0
@@ -61,10 +63,6 @@ tilemap.create=function(it,opts)
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per map
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
 	
---	it.drawlist=opts.drawlist or { { color={1,1,1,1} , dx=0 , dy=0 } } -- use this to add drop shadows
---	it.drawtype=opts.drawtype
-	it.layer=opts.layer or 1
-
 	it.setup=function(opts)
 		
 		it.tilemap_grd =wgrd.create("U8_RGBA", it.tilemap_hx           , it.tilemap_hy           , 1)
@@ -112,43 +110,39 @@ tilemap.create=function(it,opts)
 
 		gl.Color(1,1,1,1)
 
---		for i,dl in ipairs(it.drawlist) do
 		local dl={ color={1,1,1,1} , dx=0 , dy=0 }
-		
 
-			local x,y,hx,hy=it.window_px+dl.dx , it.window_py+dl.dy , it.window_hx , it.window_hy
-			local u,v,hu,hv=it.px/it.tile_hx , it.py/it.tile_hy , hx/it.tile_hx , hy/it.tile_hy
-			local t={
-				x,		y+hy,	0,	u,		v+hv, 			
-				x,		y,		0,	u,		v,
-				x+hx,	y+hy,	0,	u+hu,	v+hv, 			
-				x+hx,	y,		0,	u+hu,	v,
-			}
-
-
-			flat.tristrip("rawuv",t,"fun_draw_tilemap",function(p)
-
-				gl.ActiveTexture(gl.TEXTURE2) gl.Uniform1i( p:uniform("tex_cmap"), 2 )
-				gl.BindTexture( gl.TEXTURE_2D , it.colors.cmap_tex )
-
-				gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_tile"), 1 )
-				gl.BindTexture( gl.TEXTURE_2D , it.tiles.bitmap_tex )
-
-				gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_map"), 0 )
-				gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
+		local x,y,hx,hy=it.window_px+dl.dx , it.window_py+dl.dy , it.window_hx , it.window_hy
+		local u,v,hu,hv=it.px/it.tile_hx , it.py/it.tile_hy , hx/it.tile_hx , hy/it.tile_hy
+		local t={
+			x,		y+hy,	0,	u,		v+hv, 			
+			x,		y,		0,	u,		v,
+			x+hx,	y+hy,	0,	u+hu,	v+hv, 			
+			x+hx,	y,		0,	u+hu,	v,
+		}
 
 
-				gl.Uniform4f( p:uniform("tile_info"),	it.tile_hx,
-														it.tile_hy,
-														it.tiles.hx,
-														it.tiles.hy )
-				gl.Uniform4f( p:uniform("map_info"), 	0,0,it.tilemap_hx,it.tilemap_hy )
+		flat.tristrip("rawuv",t,"fun_draw_tilemap",function(p)
 
-				gl.Uniform4f( p:uniform("color"), 	dl.color[1],dl.color[2],dl.color[3],dl.color[4] )
+			gl.ActiveTexture(gl.TEXTURE2) gl.Uniform1i( p:uniform("tex_cmap"), 2 )
+			gl.BindTexture( gl.TEXTURE_2D , it.colors.cmap_tex )
 
-			end)
-			
---		end
+			gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_tile"), 1 )
+			gl.BindTexture( gl.TEXTURE_2D , it.tiles.bitmap_tex )
+
+			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_map"), 0 )
+			gl.BindTexture( gl.TEXTURE_2D , it.tilemap_tex )
+
+
+			gl.Uniform4f( p:uniform("tile_info"),	it.tile_hx,
+													it.tile_hy,
+													it.tiles.hx,
+													it.tiles.hy )
+			gl.Uniform4f( p:uniform("map_info"), 	0,0,it.tilemap_hx,it.tilemap_hy )
+
+			gl.Uniform4f( p:uniform("color"), 	dl.color[1],dl.color[2],dl.color[3],dl.color[4] )
+
+		end)
 
 	end
 

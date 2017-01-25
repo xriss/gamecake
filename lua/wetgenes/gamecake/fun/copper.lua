@@ -42,11 +42,11 @@ copper.create=function(it,opts)
 	it.component="copper"
 	it.name=opts.name or it.component
 
---	it.drawtype=opts.drawtype
 	it.layer=opts.layer or 1
+	local layer=assert(it.screen.layers[it.layer])
 	
-	it.hx=it.opts.size and it.opts.size[1] or it.screen.hx or 320
-	it.hy=it.opts.size and it.opts.size[2] or it.screen.hy or 240
+	it.hx=it.opts.size and it.opts.size[1] or layer.hx or 320
+	it.hy=it.opts.size and it.opts.size[2] or layer.hy or 240
 
 -- set shader program name and callback to fill in uniform values
 
@@ -63,23 +63,18 @@ copper.create=function(it,opts)
 	it.shader_function=function()end
 	
 	it.update=function()
---		local u=it.shader_uniforms
---		u.ticks[1]=u.ticks[1]+1
---		u.ticks[2]=u.ticks[1]%(256*256*256)
---		u.ticks[3]=u.ticks[1]%(256*256)
---		u.ticks[4]=u.ticks[1]%(256)
 	end
 
 	it.draw=function()
 
---			gl.PushMatrix()
+		local layer=it.screen.layers[it.layer]
 
 		gl.Color(1,1,1,1)
 
-		local v3=gl.apply_modelview( {it.screen.hx*-0.0,	it.screen.hy* 1.0,	-32,1} )
-		local v1=gl.apply_modelview( {it.screen.hx*-0.0,	it.screen.hy*-0.0,	-32,1} )
-		local v4=gl.apply_modelview( {it.screen.hx* 1.0,	it.screen.hy* 1.0,	-32,1} )
-		local v2=gl.apply_modelview( {it.screen.hx* 1.0,	it.screen.hy*-0.0,	-32,1} )
+		local v3=gl.apply_modelview( {layer.hx*-0.0,	layer.hy* 1.0,	-32,1} )
+		local v1=gl.apply_modelview( {layer.hx*-0.0,	layer.hy*-0.0,	-32,1} )
+		local v4=gl.apply_modelview( {layer.hx* 1.0,	layer.hy* 1.0,	-32,1} )
+		local v2=gl.apply_modelview( {layer.hx* 1.0,	layer.hy*-0.0,	-32,1} )
 
 		local t={
 			v3[1],	v3[2],	v3[3],	0,		it.hy,
@@ -106,7 +101,7 @@ copper.create=function(it,opts)
 -- shadertoy compatability
 			local id=p:uniform("iResolution")
 			if id then
-				gl.Uniform3f( id, it.screen.hx,it.screen.hy,0 )
+				gl.Uniform3f( id, it.hx,it.hy,0 )
 			end
 
 			local id=p:uniform("iGlobalTime")
@@ -119,8 +114,6 @@ copper.create=function(it,opts)
 
 		end)
 		gl.DepthMask(gl.TRUE)
-
---			gl.PopMatrix()
 		
 	end
 

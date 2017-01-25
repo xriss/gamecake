@@ -45,8 +45,11 @@ autocell.create=function(it,opts)
 	it.component="autocell"
 	it.name=opts.name or it.component
 	
-	it.px=0
-	it.py=0
+	it.layer=opts.layer or 1
+	local layer=assert(it.screen.layers[it.layer])
+	
+	it.px=it.opts.scroll and it.opts.scroll[1] or 0	-- scroll
+	it.py=it.opts.scroll and it.opts.scroll[2] or 0
 
 	it.window_px=it.opts.window and it.opts.window[1] or 0
 	it.window_py=it.opts.window and it.opts.window[2] or 0
@@ -59,8 +62,6 @@ autocell.create=function(it,opts)
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per map
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
 	
-	it.layer=opts.layer or 1
-
 	it.shader_step_name=opts.shader_step_name or "fun_step_autocell"
 	it.shader_draw_name=opts.shader_draw_name or "fun_draw_autocell"
 	

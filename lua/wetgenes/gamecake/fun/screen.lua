@@ -53,11 +53,7 @@ screen.create=function(it,opts)
 	it.hx=it.opts.size and it.opts.size[1] or 320
 	it.hy=it.opts.size and it.opts.size[2] or 240
 
-	
---	it.drawlist=opts.drawlist
-
 	it.fbo=framebuffers.create(it.hx,it.hy,0)
---	it.lay=layouts.create{parent={x=0,y=0,w=it.hx,h=it.hy}}
 	it.view=views.create({
 		mode="fbo",
 		fbo=it.fbo,
@@ -80,12 +76,27 @@ screen.create=function(it,opts)
 		local layer={}
 		it.layers[i]=layer
 		
-		layer.clip_px=v.clip and v.clip[1] or 0
+		layer.clip_px=v.clip and v.clip[1] or 0 -- layer display area in screen space
 		layer.clip_py=v.clip and v.clip[2] or 0
 		layer.clip_hx=v.clip and v.clip[3] or it.hx
 		layer.clip_hy=v.clip and v.clip[4] or it.hy
+
+		layer.px=v.scroll and v.scroll[1] or 0	-- layer scroll
+		layer.py=v.scroll and v.scroll[2] or 0
+
+		layer.hx=v.size and v.size[1] or it.hx -- layer size
+		layer.hy=v.size and v.size[2] or it.hy
 		
-		layer.fbo=framebuffers.create(it.hx,it.hy,1)
+		layer.fbo=framebuffers.create(layer.hx,layer.hy,1)
+
+		layer.view=views.create({
+			mode="fbo",
+			fbo=layer.fbo,
+			vx=layer.hx,
+			vy=layer.hy,
+			vz=layer.hy*4,
+		})
+
 	end
 
 -- need another two buffers (no depth) to perform full screen shader fx and generate bloom with
@@ -103,7 +114,7 @@ screen.create=function(it,opts)
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.PushMatrix()
 
-		views.push_and_apply(it.view)
+		views.push_and_apply(it.layers[idx].view)
 
 		gl.ClearColor(0,0,0,0)
 		gl.DepthMask(gl.TRUE)
@@ -138,7 +149,6 @@ screen.create=function(it,opts)
 		gl.PushMatrix()
 
 		views.push_and_apply(it.view)
---		it.lay_orig=it.lay.apply(nil,nil,0)
 
 		gl.ClearColor(0,0,0,1)
 		gl.DepthMask(gl.FALSE)
@@ -151,12 +161,9 @@ screen.create=function(it,opts)
 	-- finish drawing
 	it.draw_into_screen_finish=function()
 
-	--	screen.fbo:mipmap()
-
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
 
 		views.pop_and_apply()
---		it.lay_orig.restore()
 
 		gl.MatrixMode(gl.PROJECTION)
 		gl.PopMatrix()			
@@ -171,13 +178,13 @@ screen.create=function(it,opts)
 	-- draw layer fbo, probably with a drop shadow effect
 	it.draw_layer=function(idx)
 	
-		local layer=it.layers[idx]
+		local layer=assert(it.layers[idx])
 		local fbo=layer.fbo
 		
-		local fpx=layer.clip_px/it.hx
-		local fpy=layer.clip_py/it.hy
-		local fhx=(layer.clip_px+layer.clip_hx)/it.hx
-		local fhy=(layer.clip_py+layer.clip_hy)/it.hy
+		local fpx=layer.clip_px
+		local fpy=layer.clip_py
+		local fhx=(layer.clip_px+layer.clip_hx)
+		local fhy=(layer.clip_py+layer.clip_hy)
 
 		fbo:bind_texture()
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
@@ -186,16 +193,16 @@ screen.create=function(it,opts)
 		gl.Color(1,1,1,1)
 
 		local r,g,b,a=gl.color_get_rgba()
-		local v3=gl.apply_modelview( {fbo.w*fpx,	fbo.h*fhy,	0,1} )
-		local v1=gl.apply_modelview( {fbo.w*fpx,	fbo.h*fpy,	0,1} )
-		local v4=gl.apply_modelview( {fbo.w*fhx,	fbo.h*fhy,	0,1} )
-		local v2=gl.apply_modelview( {fbo.w*fhx,	fbo.h*fpy,	0,1} )
+		local v3=gl.apply_modelview( {fpx,	fhy,	0,1} )
+		local v1=gl.apply_modelview( {fpx,	fpy,	0,1} )
+		local v4=gl.apply_modelview( {fhx,	fhy,	0,1} )
+		local v2=gl.apply_modelview( {fhx,	fpy,	0,1} )
 
 		local t={
-			v3[1],	v3[2],	v3[3],	fpx*fbo.uvw,	fpy*fbo.uvh,
-			v1[1],	v1[2],	v1[3],	fpx*fbo.uvw,	fhy*fbo.uvh,
-			v4[1],	v4[2],	v4[3],	fhx*fbo.uvw,	fpy*fbo.uvh,
-			v2[1],	v2[2],	v2[3],	fhx*fbo.uvw,	fhy*fbo.uvh,
+			v3[1],	v3[2],	v3[3],	(layer.px+fpx)*fbo.uvw/layer.hx,	(layer.py+fpy)*fbo.uvh/layer.hy,
+			v1[1],	v1[2],	v1[3],	(layer.px+fpx)*fbo.uvw/layer.hx,	(layer.py+fhy)*fbo.uvh/layer.hy,
+			v4[1],	v4[2],	v4[3],	(layer.px+fhx)*fbo.uvw/layer.hx,	(layer.py+fpy)*fbo.uvh/layer.hy,
+			v2[1],	v2[2],	v2[3],	(layer.px+fhx)*fbo.uvw/layer.hx,	(layer.py+fhy)*fbo.uvh/layer.hy,
 		}
 
 
@@ -218,8 +225,6 @@ screen.create=function(it,opts)
 	-- draw screen fbo
 	it.draw_screen=function()
 
---			gl.PushMatrix()
-
 		it.fbo:bind_texture()
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
@@ -240,15 +245,12 @@ screen.create=function(it,opts)
 		if it.filter=="scanline" then
 			flat.tristrip("rawuv",t,"fun_screen_scanline",function(p)
 				local v=views.get()
---				local l=layouts.get() -- the size of what we are rendering, so we can calculate display pixel size in uv space (siz.zw)
 				gl.Uniform4f( p:uniform("siz"), it.fbo.txw				,	it.fbo.txh, 
 												it.fbo.uvw/v.hx*v.sx	,	it.fbo.uvh/v.hy*v.sy	)
 			end)
 		else
 			flat.tristrip("rawuv",t,"raw_tex")
 		end
-
---			gl.PopMatrix()
 
 		if it.bloom then -- bloom on
 
@@ -310,7 +312,6 @@ screen.create=function(it,opts)
 
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
 		views.pop_and_apply()
---		it.lay_orig.restore()
 		gl.MatrixMode(gl.PROJECTION)
 		gl.PopMatrix()			
 		gl.MatrixMode(gl.MODELVIEW)

@@ -43,15 +43,10 @@ sprites.create=function(it,opts)
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per sprite component
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
 
---	it.drawlist=opts.drawlist or { { color={1,1,1,1} , dx=0 , dy=0 } } -- use this to add drop shadows
---	it.drawtype=opts.drawtype
 	it.layer=opts.layer or 1
 
 	it.setup=function(opts)
 		
-		it.px=0 -- display x offset 1 is a single tile wide
-		it.py=0 -- display y offset 1 is a single tile high
-				
 		it.list={}
 
 	end
@@ -101,53 +96,49 @@ sprites.create=function(it,opts)
 		
 		gl.Color(1,1,1,1)
 
---		for i,dl in ipairs(it.drawlist) do
-
 		local dl={ color={1,1,1,1} , dx=0 , dy=0 }
 
-			local batch={}
-			for idx,v in pairs(it.list) do
+		local batch={}
+		for idx,v in pairs(it.list) do
 
-				local ixw=(v.tx*it.tile_hx+v.hx)/(it.tiles.hx)
-				local iyh=(v.ty*it.tile_hy+v.hy)/(it.tiles.hy)
-				local ix= (v.tx*it.tile_hx     )/(it.tiles.hx)
-				local iy= (v.ty*it.tile_hy     )/(it.tiles.hy)
-				
-				local ox=(v.ox)*(v.sx)
-				local oy=(v.oy)*(v.sy)
-				local hx=v.hx*(v.sx)
-				local hy=v.hy*(v.sy)
-				
-				local s=-math.sin(math.pi*(v.rz)/180)
-				local c= math.cos(math.pi*(v.rz)/180)
-
-				local v1=gl.apply_modelview( {dl.dx+v.px-c*(ox)-s*(oy),			dl.dy+v.py+s*(ox)-c*(oy),			v.pz,1} )
-				local v2=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)-s*(oy),		dl.dy+v.py-s*(hx-ox)-c*(oy),		v.pz,1} )
-				local v3=gl.apply_modelview( {dl.dx+v.px-c*(ox)+s*(hy-oy),		dl.dy+v.py+s*(ox)+c*(hy-oy),		v.pz,1} )
-				local v4=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)+s*(hy-oy),	dl.dy+v.py-s*(hx-ox)+c*(hy-oy),		v.pz,1} )
-
-				local t=
-				{
-					v1[1],	v1[2],	v1[3],		ix,		iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-					v1[1],	v1[2],	v1[3],		ix,		iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-					v2[1],	v2[2],	v2[3],		ixw,	iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-					v3[1],	v3[2],	v3[3],		ix,		iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-					v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-					v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-				}
-				
-				local l=#batch for i,v in ipairs(t) do batch[ l+i ]=v end
-
-			end
-
-
-			flat.tristrip("rawuvrgba",batch,"fun_draw_sprites",function(p)
-				gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex"), 0 )
-				gl.BindTexture( gl.TEXTURE_2D , it.tiles.bitmap_tex )
-			end)
+			local ixw=(v.tx*it.tile_hx+v.hx)/(it.tiles.hx)
+			local iyh=(v.ty*it.tile_hy+v.hy)/(it.tiles.hy)
+			local ix= (v.tx*it.tile_hx     )/(it.tiles.hx)
+			local iy= (v.ty*it.tile_hy     )/(it.tiles.hy)
 			
---		end
+			local ox=(v.ox)*(v.sx)
+			local oy=(v.oy)*(v.sy)
+			local hx=v.hx*(v.sx)
+			local hy=v.hy*(v.sy)
+			
+			local s=-math.sin(math.pi*(v.rz)/180)
+			local c= math.cos(math.pi*(v.rz)/180)
 
+			local v1=gl.apply_modelview( {dl.dx+v.px-c*(ox)-s*(oy),			dl.dy+v.py+s*(ox)-c*(oy),			v.pz,1} )
+			local v2=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)-s*(oy),		dl.dy+v.py-s*(hx-ox)-c*(oy),		v.pz,1} )
+			local v3=gl.apply_modelview( {dl.dx+v.px-c*(ox)+s*(hy-oy),		dl.dy+v.py+s*(ox)+c*(hy-oy),		v.pz,1} )
+			local v4=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)+s*(hy-oy),	dl.dy+v.py-s*(hx-ox)+c*(hy-oy),		v.pz,1} )
+
+			local t=
+			{
+				v1[1],	v1[2],	v1[3],		ix,		iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+				v1[1],	v1[2],	v1[3],		ix,		iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+				v2[1],	v2[2],	v2[3],		ixw,	iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+				v3[1],	v3[2],	v3[3],		ix,		iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+				v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+				v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+			}
+			
+			local l=#batch for i,v in ipairs(t) do batch[ l+i ]=v end
+
+		end
+
+
+		flat.tristrip("rawuvrgba",batch,"fun_draw_sprites",function(p)
+			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex"), 0 )
+			gl.BindTexture( gl.TEXTURE_2D , it.tiles.bitmap_tex )
+		end)
+			
 	end
 
 	return it
