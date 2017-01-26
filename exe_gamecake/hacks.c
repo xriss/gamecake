@@ -8,6 +8,33 @@
 #include "../lib_lua/src/lobject.h"
 #endif
 
+#include "lua.h"
+#include "lauxlib.h"
+
+#if defined(LIB_LUAJIT)
+extern void *
+luaL_testudata(lua_State *L, int index, const char *tname)
+{
+	void *p = lua_touserdata(L, index);
+
+	if (p != NULL) {
+		if (lua_getmetatable(L, index)) {
+			luaL_getmetatable(L, tname);
+
+			if (!lua_rawequal(L, -1, -2))
+				p = NULL;
+
+			lua_pop(L, 2);
+
+			return p;
+		}
+	}
+
+	return NULL;
+}
+#endif
+
+
 extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len)
 {
 
