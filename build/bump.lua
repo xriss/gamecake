@@ -11,5 +11,4 @@ version=wbake.version_from_time(os.time(),vplus)
 local ss="GAMECAKE_VERSION=\""..version.."\"\n"
 wbake.writefile("../exe_gamecake/version.lua",ss)
 
-print(ss)
-print("\nBesure to checkin and push this version number change!")
+print(version)

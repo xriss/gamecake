@@ -1,7 +1,11 @@
-\cd `dirname $0`
+cd `dirname $0`
 
-./bump.lua
+VNUM=`./bump.lua`
+
+echo $VNUM
 
 ../git-dot
 
-git push
+git tag -a V$VNUM -m "VERSION $VNUM"
+
+git push origin --tags

@@ -76,6 +76,8 @@ screen.create=function(it,opts)
 		local layer={}
 		it.layers[i]=layer
 		
+		layer.shadow=v.shadow or it.shadow or "none"
+
 		layer.clip_px=v.clip and v.clip[1] or 0 -- layer display area in screen space
 		layer.clip_py=v.clip and v.clip[2] or 0
 		layer.clip_hx=v.clip and v.clip[3] or it.hx
@@ -206,7 +208,7 @@ screen.create=function(it,opts)
 		}
 
 
-		if it.shadow=="drop" then
+		if layer.shadow=="drop" then
 			flat.tristrip("rawuv",t,"fun_screen_dropshadow",function(p)
 				local v=views.get()
 				gl.Uniform4f( p:uniform("siz"), it.fbo.txw				,	it.fbo.txh, 
