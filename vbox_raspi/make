@@ -7,9 +7,9 @@ cd `dirname $0`
 
 if [ "$1" = "clean" ] ; then
 	./ssh " gamecake/build/raspi/vbox clean ; gamecake/build/raspi/vbox "
-fi
+else
 	./ssh " gamecake/build/raspi/vbox "
-end
+fi
 
 # rename the binaries
 
