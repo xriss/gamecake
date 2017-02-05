@@ -211,12 +211,63 @@ function glescode.create(gl)
 -- load multiple shader sources from a single file
 --
 -- #SHADER "nameofshader"
--- or
--- #SHADER "nameofshader1" "nameofshader2" "nameofshader3" ...
 --
--- is used at the start of a line to say which chunk or chunks the following text
+-- is used at the start of a line to say which chunk the following text
 -- should go into
 --
+-- #HEADER "nameofheader"
+--
+-- can be used to define part of a shader, which can later be included in another shader by using
+--
+-- #INCLUDE "nameofheader"
+--
+-- #SHADER or #HEADER
+--
+-- without a name can be used to ignore the next part of a file, any text at the start of a file before
+-- the first #SHADER or #HEADER is also ignored
+--
+	code.headers={}
+	function code.shader_sources(text,filename)
+	
+		local ss=wstr.split(text,"\n")
+		local shaders={}
+		local chunk
+		for i,l in ipairs(ss) do
+			local flag=l:sub(1,7):lower()
+			if flag=="#header" or flag=="#shader" then -- new chunk must be at start of line
+				chunk=nil -- forget last chunk
+				local name=l:match([["([^"]+)"]]) -- get name from inside quotes
+				if name then -- from now on all lines go into this chunk
+					chunk={}
+					chunk[#chunk+1]="#line "..i	-- remember the line number from this file
+					if flag=="#header" then
+						code.headers[name]=chunk
+					elseif flag=="#shader" then
+						shaders[name]=chunk
+					end
+				end
+			else
+				if chunk then -- only if we are in a chunk
+					if l:sub(1,8):lower()=="#include" then -- include a previously declared chunk
+						local name=l:match([["([^"]+)"]]) -- get name from inside quotes
+						for _,line in ipairs(code.headers[name]) do  -- include lines
+							chunk[#chunk+1]=line
+						end
+						chunk[#chunk+1]="#line "..i	-- reset the line number from this file
+					else
+						chunk[#chunk+1]=l
+					end
+				end
+			end
+		end		
+
+		for n,v in pairs(shaders) do
+print("PROGRAM",n,#v)
+			code.program_source(n,table.concat(v,"\n"),nil,filename)
+		end
+
+	end
+--[[	
 	function code.shader_sources(text,filename)
 	
 		local ss=wstr.split(text,"\n")
@@ -248,7 +299,7 @@ print("PROGRAM",n,#v)
 		end
 		
 	end
-
+]]
 
 
 -- legacy version, obsolete, use the new program_source instead
