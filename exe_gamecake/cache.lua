@@ -60,6 +60,7 @@ function version_from_time(t,vplus)
 end
 
 	local version=GAMECAKE_VERSION or version_from_time()
+	local buildtime=os.date(" %Y-%m-%d %H:%M:%S")
 
 
 	local fp=io.open("cache.c","w")
@@ -88,7 +89,7 @@ end
 
 	const char *wetgenes_wetmods_version()
 	{
-		return "Gamecake V]]..version..[[ https://github.com/xriss/gamecake containing ]]..libnames..[[";
+		return "Gamecake V]]..version..buildtime..[[ https://github.com/xriss/gamecake containing ]]..libnames..[[";
 	}
 
 ]])
