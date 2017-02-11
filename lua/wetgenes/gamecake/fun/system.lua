@@ -76,6 +76,7 @@ print("system setup")
 			print=print,
 			system=system,
 			oven=oven,
+			gl=oven.gl,
 			require=require,
 			ups=oven.rebake("wetgenes.gamecake.spew.recaps").ups, -- input, for 1up - 6up 
 		})
@@ -401,6 +402,114 @@ system.save_fun_png=function(name,path)
 	
 	g:save(system.source_filename..".fun.png")
 
+end
+
+system.configurator=function(opts)
+
+	local bitdown=require("wetgenes.gamecake.fun.bitdown")
+	local bitdown_font_4x8=require("wetgenes.gamecake.fun.bitdown_font_4x8")
+
+	local fatpix=true
+
+	local hardware,main
+
+	local done=false
+
+	if opts.mode=="fun64" then -- default settings
+	
+		local cmap=bitdown.cmap -- use default swanky32 colors
+
+		local screen={hx=320,hy=240,ss=3,fps=60}
+
+		hardware={
+			{
+				component="screen",
+				size={screen.hx,screen.hy},
+				bloom=fatpix and 0.75 or 0,
+				filter=fatpix and "scanline" or nil,
+				shadow=fatpix and "drop" or nil,
+				scale=screen.ss,
+				fps=screen.fps,
+				layers=3,
+			},
+			{
+				component="colors",
+				cmap=cmap, -- swanky32 palette
+			},
+			{
+				component="tiles",
+				name="tiles",
+				tile_size={8,8},
+				bitmap_size={64,64},
+			},
+			{
+				component="copper",
+				name="copper",
+				size={screen.hx,screen.hy},
+				layer=1,
+			},
+			{
+				component="tilemap",
+				name="map",
+				tiles="tiles",
+				tilemap_size={math.ceil(screen.hx/8),math.ceil(screen.hy/8)},
+				layer=2,
+			},
+			{
+				component="sprites",
+				name="sprites",
+				tiles="tiles",
+				layer=2,
+			},
+			{
+				component="tilemap",
+				name="text",
+				tiles="tiles",
+				tile_size={4,8}, -- use half width tiles for font
+				tilemap_size={math.ceil(screen.hx/4),math.ceil(screen.hy/8)},
+				layer=3,
+			},
+		}
+		
+		main=function(need)
+
+			if not need.setup then need=coroutine.yield() end -- wait for setup request (should always be first call)
+
+			-- copy font data tiles into top line
+			system.components.tiles.bitmap_grd:pixels(0,0,128*4,8, bitdown_font_4x8.grd_mask:pixels(0,0,128*4,8,"") )
+
+			-- upload graphics
+			if opts.graphics then
+				system.components.tiles.upload_tiles( opts.graphics )
+			end
+			
+			-- set background
+--			system.copper.
+			
+			-- after setup we should yield and then perform updates only if requested from a yield
+			local done=false while not done do
+				need=coroutine.yield()
+				if need.update then
+				
+					system.components.text.dirty(true)
+					system.components.text.text_window()
+					system.components.text.text_clear(0x00000000)
+					system.components.sprites.list_reset()
+					
+					if opts.update then opts.update() end
+				end
+				if need.draw then
+				end
+				if need.clean then done=true end -- cleanup requested
+			end
+
+		-- perform cleanup here
+
+		end
+
+	end
+
+	return hardware,main
 end
 
 

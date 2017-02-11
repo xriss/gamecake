@@ -83,8 +83,7 @@ void main(void)
 
 
 
-
-#shader "fun_copper_back_noise"
+#shader "fun_copper_back_y3"
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -93,9 +92,6 @@ uniform vec4 color;
 uniform	vec4 cy0;
 uniform	vec4 cy1;
 uniform	vec4 cy2;
-uniform	vec4 cy3;
-uniform	vec4 cy4;
-
 uniform	vec4 sizpos;
 
 #ifdef VERTEX_SHADER
@@ -105,7 +101,7 @@ attribute vec2 a_texcoord;
 
 varying vec2  v_texcoord;
 varying vec4  v_color;
-
+ 
 void main()
 {
     gl_Position = projection * vec4(a_vertex, 1.0);
@@ -127,7 +123,7 @@ varying vec4  v_color;
 
 void main(void)
 {
-	vec2 uv=(v_texcoord+sizpos.zw)/sizpos.xy;
+	vec2 uv=(v_texcoord+sizpos.wz)/sizpos.xy;
 	vec4 c;
 	
 	if(uv.y<0.00)
@@ -135,28 +131,18 @@ void main(void)
 		c=cy0;
 	}
 	else
-	if(uv.y<0.25)
+	if(uv.y<0.5)
 	{
 		c=mix(cy0,cy1,uv.y*4.0);
 	}
 	else
-	if(uv.y<0.50)
-	{
-		c=mix(cy1,cy2,(uv.y-0.25)*4.0);
-	}
-	else
-	if(uv.y<0.75)
-	{
-		c=mix(cy2,cy3,(uv.y-0.50)*4.0);
-	}
-	else
 	if(uv.y<1.00)
 	{
-		c=mix(cy3,cy4,(uv.y-0.75)*4.0);
+		c=mix(cy1,cy2,(uv.y-0.75)*4.0);
 	}
 	else
 	{
-		c=cy4;
+		c=cy2;
 	}
 	
 	
@@ -165,4 +151,3 @@ void main(void)
 }
 
 #endif
-
