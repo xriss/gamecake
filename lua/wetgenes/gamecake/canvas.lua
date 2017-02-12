@@ -245,7 +245,7 @@ font.draw = function(text)
 	local dataraw,datalen=core.canvas_font_draw(font,text)
 	if datalen/5>=1 then -- need something to draw
 		images.bind(font.dat.images[1])
-		local it=flat.array_predraw({fmt="xyzuv",dataraw=dataraw,datalen=datalen,array=gl.TRIANGLES})
+		local it=flat.array_predraw({fmt="posuv",dataraw=dataraw,datalen=datalen,array=gl.TRIANGLES})
 		it.draw(cb)
 	end
 
@@ -304,38 +304,38 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	local p
 	local def_progname
 	local fmt=it.fmt
-	if fmt=="xyz" then -- xyz only
+	if fmt=="xyz" or fmt=="pos" then -- xyz or pos only
 	
-		def_progname="pos"
+		def_progname=fmt:sub(1,3)
 		pstride=12
 	
-	elseif fmt=="xyznrm" then -- xyz and normal (so we may light the thing)
+	elseif fmt=="xyznrm" or fmt=="posnrm" then -- xyz and normal (so we may light the thing)
 
-		def_progname="pos_normal"
+		def_progname=fmt:sub(1,3).."_normal"
 
 		pstride=24
 		pnrm=12
 	
-	elseif fmt=="xyznrmuv" then -- xyz and normal and texture
+	elseif fmt=="xyznrmuv" or fmt=="posnrmuv" then -- xyz and normal and texture
 
-		def_progname="pos_normal_tex"
+		def_progname=fmt:sub(1,3).."_normal_tex"
 
 		pstride=32
 		pnrm=12
 		ptex=24
 	
-	elseif fmt=="xyznrmuvm" then -- xyz and normal and texture and  material id
+	elseif fmt=="xyznrmuvm" or fmt=="posnrmuvm" then -- xyz and normal and texture and  material id
 
-		def_progname="pos_normal_tex_mat"
+		def_progname=fmt:sub(1,3).."_normal_tex_mat"
 
 		pstride=36
 		pnrm=12
 		ptex=24
 		pmat=32
 	
-	elseif fmt=="xyznrmuvmbone" then -- xyz and normal and texture and  material id and bones
+	elseif fmt=="xyznrmuvmbone" or fmt=="posnrmuvmbone" then -- xyz and normal and texture and  material id and bones
 
-		def_progname="pos_normal_tex_mat_bone"
+		def_progname=fmt:sub(1,3).."_normal_tex_mat_bone"
 
 		pstride=52
 		pnrm=12
@@ -343,9 +343,9 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		pmat=32
 		pbone=36
 
-	elseif fmt=="xyznrmuvmtansbone" then -- xyz and normal and texture and  material id and tangent and bones
+	elseif fmt=="xyznrmuvmtansbone" or fmt=="posnrmuvmtansbone" then -- xyz and normal and texture and  material id and tangent and bones
 
-		def_progname="pos_normal_tex_mat_tans_bone"
+		def_progname=fmt:sub(1,3).."_normal_tex_mat_tans_bone"
 
 		pstride=68
 		pnrm=12
@@ -354,9 +354,9 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		ptans=36
 		pbone=52
 
-	elseif fmt=="xyznrmuvmtans" then -- xyz and normal and texture and  material id and tangent
+	elseif fmt=="xyznrmuvmtans" or fmt=="posnrmuvmtans" then -- xyz and normal and texture and  material id and tangent
 
-		def_progname="pos_normal_tex_mat_tans"
+		def_progname=fmt:sub(1,3).."_normal_tex_mat_tans"
 
 		pstride=52
 		pnrm=12
@@ -364,23 +364,23 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		pmat=32
 		ptans=36
 
-	elseif fmt=="xyzuv" then -- xyz and texture
+	elseif fmt=="xyzuv" or fmt=="posuv" then -- xyz and texture
 
-		def_progname="pos_tex"
+		def_progname=fmt:sub(1,3).."_tex"
 
 		pstride=20
 		ptex=12
 	
-	elseif fmt=="xyzrgba" then -- xyz and color
+	elseif fmt=="xyzrgba" or fmt=="posrgba" then -- xyz and color
 
-		def_progname="pos_color"
+		def_progname=fmt:sub(1,3).."_color"
 
 		pstride=28
 		pcolor=12
 	
-	elseif fmt=="xyzuvrgba" then -- xyz and texture and color
+	elseif fmt=="xyzuvrgba" or fmt=="posuvrgba" then -- xyz and texture and color
 	
-		def_progname="pos_tex_color"
+		def_progname=fmt:sub(1,3).."_tex_color"
 
 		pstride=36
 		ptex=12
