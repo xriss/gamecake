@@ -482,7 +482,9 @@ system.configurator=function(opts)
 
 			-- upload graphics
 			if opts.graphics then
-				system.components.tiles.upload_tiles( opts.graphics )
+				local graphics=opts.graphics
+				if type(graphics)=="function" then graphics=graphics() end -- allow callback to grab value from other environment
+				system.components.tiles.upload_tiles( graphics )
 			end
 			
 			-- set background
