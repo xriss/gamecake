@@ -220,6 +220,8 @@ system.draw=function()
 			if it.draw and it.layer==idx then it.draw() end
 		end
 
+		screen.hooks(idx) -- custom extra lowlevel drawing for this layer
+
 		screen.draw_into_layer_finish(idx)
 
 	end

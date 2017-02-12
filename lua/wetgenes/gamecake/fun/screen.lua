@@ -76,6 +76,8 @@ screen.create=function(it,opts)
 		local layer={}
 		it.layers[i]=layer
 		
+		layer.idx=i
+		
 		layer.shadow=v.shadow or it.shadow or "none"
 
 		layer.clip_px=v.clip and v.clip[1] or 0 -- layer display area in screen space
@@ -98,6 +100,8 @@ screen.create=function(it,opts)
 			vy=layer.hy,
 			vz=layer.hy*4,
 		})
+		
+		layer.hooks={} -- user managable list of gl drawing callback functions (lowlevel hacks)
 
 	end
 
@@ -124,6 +128,19 @@ screen.create=function(it,opts)
 		gl.Enable(gl.DEPTH_TEST)
 	end
 
+
+	-- extra drawing functions called while layer fbo is bound after main components
+	it.hooks=function(idx)
+
+		local layer=it.layers[idx]
+		
+		for i,v in ipairs(layer.hooks) do
+		
+			v(layer)
+			
+		end
+
+	end
 
 	-- finish drawing
 	it.draw_into_layer_finish=function(idx)
