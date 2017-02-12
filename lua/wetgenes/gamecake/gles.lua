@@ -60,6 +60,33 @@ void main()
 	]]
 }
 
+	gl.shaders.v_xyz_tex={
+	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+attribute vec3 a_vertex;
+attribute vec2 a_texcoord;
+
+varying vec2  v_texcoord;
+varying vec4  v_color;
+ 
+void main()
+{
+	gl_PointSize=3.0;
+    gl_Position = projection * modelview * vec4(a_vertex.xyz , 1.0);
+	v_texcoord=a_texcoord;
+	v_color=color;
+}
+
+	]]
+}
+
+
 	gl.shaders.v_pos_tex_color={
 	source=[[{shaderprefix}
 #line ]]..debug.getinfo(1).currentline..[[
@@ -135,6 +162,29 @@ void main()
 	gl_PointSize=3.0;
     gl_Position = projection * vec4(a_vertex.xyz , 1.0);
 	v_texcoord=a_texcoord;
+	v_color=color;
+}
+
+	]]
+}
+
+	gl.shaders.v_xyz={
+	source=[[{shaderprefix}
+#line ]]..debug.getinfo(1).currentline..[[
+
+
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+attribute vec3 a_vertex;
+
+varying vec4  v_color;
+ 
+void main()
+{
+	gl_PointSize=3.0;
+    gl_Position = projection * modelview * vec4(a_vertex.xyz , 1.0);
 	v_color=color;
 }
 
@@ -581,9 +631,17 @@ void main()
 		vshaders={"v_pos_color"},
 		fshaders={"f_color_discard"},
 	}
+	gl.programs.xyz_tex={
+		vshaders={"v_xyz_tex"},
+		fshaders={"f_tex"},
+	}
 	gl.programs.pos_tex={
 		vshaders={"v_pos_tex"},
 		fshaders={"f_tex"},
+	}
+	gl.programs.xyz_tex_discard={
+		vshaders={"v_xyz_tex"},
+		fshaders={"f_tex_discard"},
 	}
 	gl.programs.pos_tex_discard={
 		vshaders={"v_pos_tex"},
@@ -612,6 +670,10 @@ void main()
 	gl.programs.raw_tex_discard={
 		vshaders={"v_raw_tex"},
 		fshaders={"f_tex_discard"},
+	}
+	gl.programs.xyz={
+		vshaders={"v_xyz"},
+		fshaders={"f_color"},
 	}
 	gl.programs.pos={
 		vshaders={"v_pos"},
