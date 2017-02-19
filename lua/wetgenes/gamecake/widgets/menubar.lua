@@ -31,13 +31,16 @@ function wmenubar.update(widget)
 end
 
 function wmenubar.draw(widget)
--- only draw when over the menubar 
-	local o=widget.master.over
-	local d=false
-	if widget.parent==o then d=true end
-	if widget==o then d=true end
-	for i,v in ipairs(widget) do if v==o then d=true end end
-	if d then return widget.meta.draw(widget) else return end
+	if widget.always_draw then -- allways draw this menubar
+		return widget.meta.draw(widget)
+	else -- only draw when hovering over the menubar 
+		local o=widget.master.over
+		local d=false
+		if widget.parent==o then d=true end
+		if widget==o then d=true end
+		for i,v in ipairs(widget) do if v==o then d=true end end
+		if d then return widget.meta.draw(widget) else return end
+	end
 end
 
 -- auto resize to text contents horizontally
@@ -95,6 +98,8 @@ function wmenubar.setup(widget,def)
 	widget.update=wmenubar.update
 	widget.draw=wmenubar.draw
 	widget.layout=wmenubar.layout
+
+	widget.always_draw=def.always_draw
 
 	widget.solid=true
 --	widget.can_focus=true
