@@ -302,7 +302,7 @@ sounds.start = function()
 		sounds.context=alc.setup()
 		
 		al.Listener(al.POSITION, 0, 0, 0)
-		al.Listener(al.VELOCITY, 0, 0, 0)
+--		al.Listener(al.VELOCITY, 0, 0, 0)
 		al.Listener(al.ORIENTATION, 0, 0, -1, 0,1,0 )
 
 -- one off sound effect type things		
@@ -315,7 +315,7 @@ sounds.start = function()
 			al.Source(s, al.PITCH, 1)
 			al.Source(s, al.GAIN, 1)
 			al.Source(s, al.POSITION, 0, 0, 0)
-			al.Source(s, al.VELOCITY, 0, 0, 0)
+--			al.Source(s, al.VELOCITY, 0, 0, 0)
 			al.Source(s, al.LOOPING, al.FALSE)
 			setmetatable(sfx,sfx_meta)
 		end
@@ -330,7 +330,7 @@ sounds.start = function()
 			al.Source(s, al.PITCH, 1)
 			al.Source(s, al.GAIN, 1)
 			al.Source(s, al.POSITION, 0, 0, 0)
-			al.Source(s, al.VELOCITY, 0, 0, 0)
+--			al.Source(s, al.VELOCITY, 0, 0, 0)
 			al.Source(s, al.LOOPING, al.FALSE)
 
 			str.buffers={al.GenBuffer(),al.GenBuffer(),al.GenBuffer()} -- triple buffer sound renderer
