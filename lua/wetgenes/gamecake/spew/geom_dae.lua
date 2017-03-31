@@ -279,6 +279,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 
 			local it=geom.new(it)
+			it.name=v.name
 			it.verts={}
 			it.polys={}
 			it.mats={}
@@ -364,6 +365,9 @@ print("loaded ",#s,"bytes from "..opts.filename)
 					mat.specular[4]=1
 					
 					mat.idx=idx
+					
+					mat.name=v.name
+
 
 --dprint(mat)
 
@@ -515,6 +519,9 @@ print("loaded ",#s,"bytes from "..opts.filename)
 						end
 					end
 				end)
+				-- after mirroring I think it is best to rebuild all the normals/tangents
+				need_normals=true
+				need_tangents=true
 			end
 --			dprint(it.verts)
 			if need_normals then

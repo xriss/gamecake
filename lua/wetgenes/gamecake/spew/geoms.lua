@@ -26,7 +26,6 @@ M.bake=function(oven,geoms)
 	geoms.call=function(its,name,...)
 		for i,it in ipairs(its) do
 			it[name](it,...)
-print(i,name)
 		end
 		return its
 	end
