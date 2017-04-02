@@ -29,6 +29,11 @@ local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
 local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
 
+
+local wdatas=oven.rebake("wetgenes.gamecake.widgets.datas")
+
+
+
 --
 -- add meta functions
 --
@@ -51,6 +56,12 @@ function wmaster.setup(widget,def)
 --	master.fbo=_G.win.fbo(0,0,0) -- use an fbo
 --	master.fbo=framebuffers.create(0,0,0)
 	master.dirty=true
+
+
+-- create or reuse datas interface
+	master.datas=master.datas or wdatas.new_datas({
+	})
+
 
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget,resize)

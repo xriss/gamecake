@@ -3,6 +3,9 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local wstr=require("wetgenes.string")
+local dprint=function(a) print(wstr.dump(a)) end
+
 --
 -- handle widgets
 --
@@ -65,6 +68,10 @@ local wskin=oven.rebake("wetgenes.gamecake.widgets.skin")
 -- create a master widget
 --
 function widgets.setup(def)
+
+--print("SETUP")
+--dprint(def)
+--print(debug.traceback())
 
 	local meta={}
 	meta.__index=meta

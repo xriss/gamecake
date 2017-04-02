@@ -362,7 +362,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 			oven.mods[name]=m			-- store baked version by its name
 			table.insert(oven.mods,m)		-- and put it at the end of the list for easy iteration
 			
-			m.setup() -- and call setup since it will always be running from now on until it is removed
+			if m.setup then m.setup() end -- and call setup since it will always be running from now on until it is removed
 			
 			local shortname=name:gmatch("%.([^.]*)$")() -- get the bit after the last .
 			oven[shortname]=m -- and store in main oven for easy access to this mod

@@ -15,6 +15,17 @@ function M.bake(oven,wdata)
 wdata=wdata or {}
 
 
+wdata.call_hook_later=function(dat,hook)
+	if not dat.master then return wdata.call_hook(dat,hook) end -- can not defer without master
+	local hooks=dat.hooks
+	local type_hooks=type(hooks)
+	if type_hooks=="function" then -- master function
+		return dat.master.later_append( hooks , hook , dat )
+	elseif type_hooks=="table" and hooks[hook] then -- or table of functions
+		return dat.master.later_append( hooks[hook] , dat )
+	end
+end
+
 wdata.call_hook=function(dat,hook)
 	local hooks=dat.hooks
 	local type_hooks=type(hooks)
@@ -42,7 +53,7 @@ wdata.data_value=function(dat,val,force)
 			if not force and type(force)=="boolean" then -- set force to false to disable hook
 			else
 				if old~=dat.num or force then
-					dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
+					dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
 				end
 			end
 			dat.str=dat:tostring(dat.num) -- cache on change
@@ -54,7 +65,7 @@ wdata.data_value=function(dat,val,force)
 		else
 			if (val and val~=dat.str ) or force  then -- change value
 				dat.str=val
-				dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
+				dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
 			end
 		end
 		return dat.str
@@ -181,6 +192,7 @@ function wdata.new_data(dat)
 -- setup callback functions
 
 	dat.call_hook=wdata.call_hook
+	dat.call_hook_later=wdata.call_hook_later
 
 	dat.tostring=dat.tostring or wdata.data_tostring -- convert number value to string (possible custom format)
 	dat.tonumber=dat.tonumber or wdata.data_tonumber -- convert string value to number (possible custom format)
