@@ -228,8 +228,8 @@ function wfile.setup(widget,def)
 	widget.view="file"
 
 
-	widget.data_dir  = def.data_dir  or wdata.new_data({class="string",str="."})
-	widget.data_name = def.data_name or wdata.new_data({class="string",str=""})
+	widget.data_dir  = def.data_dir  or wdata.new_data({class="string",str=".",master=widget.master})
+	widget.data_name = def.data_name or wdata.new_data({class="string",str="",master=widget.master})
 
 	widget.history[ widget.data_dir:value() ]=true
 

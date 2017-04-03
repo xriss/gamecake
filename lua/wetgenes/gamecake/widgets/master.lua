@@ -59,8 +59,7 @@ function wmaster.setup(widget,def)
 
 
 -- create or reuse datas interface
-	master.datas=master.datas or wdatas.new_datas({
-	})
+	master.datas=master.datas or wdatas.new_datas({master=master})
 
 
 -- the master gets some special overloaded functions to do a few more things

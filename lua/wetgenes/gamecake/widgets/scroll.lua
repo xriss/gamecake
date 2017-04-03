@@ -84,8 +84,8 @@ function wscroll.setup(widget,def)
 	if widget.hx<ss*2 then ss=widget.hx/2 end
 	if widget.hy<ss*2 then ss=widget.hy/2 end
 	
-	widget.datx=widget_data.new_data{max=1}
-	widget.daty=widget_data.new_data{max=1}
+	widget.datx=widget_data.new_data{max=1,master=widget.master}
+	widget.daty=widget_data.new_data{max=1,master=widget.master}
 	widget.solid=true
 
 	widget.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss	})
