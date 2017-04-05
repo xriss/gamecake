@@ -124,7 +124,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 				if type(v)=="table" then
 					if	( string.lower(v[0]      or "")=="node"  )
 					and	( string.lower(v["type"] or "")=="joint" ) then -- found a joint
-						joint={name=v.name}
+						joint={name=v.name,id=v.id,sid=v.sid}
 						joints[#joints+1]=joint
 						local m=wxml.descendent(v,"matrix")
 						if m then
@@ -138,13 +138,16 @@ print("loaded ",#s,"bytes from "..opts.filename)
 		parse(scene,joints)
 	end
 
+
 	local joint_lookup={}
 	local joint_flipidx={}
 	local idx=1
 	local recurse recurse=function(it) -- hand out joint idxs
 		for i,v in ipairs(it) do
 			v.idx=idx
-			joint_lookup[v.name]=v --  and build lookup table by name or idx
+			joint_lookup[v.name]=v --  and build lookup table by name or id or sid or numeric idx
+			joint_lookup[v.id]=v
+			joint_lookup[v.sid]=v
 			joint_lookup[v.idx]=v
 			idx=idx+1
 		end
@@ -152,6 +155,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			recurse(v)
 		end
 	end recurse(joints)
+
 
 	local get_joint=function(name)
 		return joint_lookup[name]
@@ -170,47 +174,67 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 --	print(wstr.dump(joints))
 	
-	local aas=wxml.descendent(x,"library_animations")
+	local aas=wxml.descendent(x,"library_animation_clips")
 	local anims={}
-	for i,v in ipairs(aas or {}) do -- just check the top level for anims 
-		if v[0]=="animation" then
-			local d=wxml.descendent(v,"channel")
-			if d and d.target then
-				local target=wstr.split(d.target,"/")
-				local joint=get_joint(target[1])
-				local samp=get_by_id(d.source)
-				local src={}
-				for i,v in ipairs(samp) do
-					if type(v)=="table" and v[0]=="input" then
-						if     v.semantic=="INPUT" then -- time
-							src.time=get_source(v.source)
-						elseif v.semantic=="OUTPUT" then -- matrix
-							src.matrix=get_source(v.source)
-						elseif v.semantic=="INTERPOLATION" then -- tween
-							src.tween=get_source(v.source)
+	for ia,va in ipairs(aas or {}) do -- just check the top level for anims 
+		if va[0]=="animation_clip" then
+			local anim={name=va["name"],time_start=tonumber(va["start"]),time_end=tonumber(va["end"])}
+			anims[va.name]=anim
+print(va["name"],va["start"],va["end"])
+			for i,v in ipairs(va or {}) do -- just check the top level for anims 
+				if v.url then v=get_by_id(v.url) end -- reference
+				local d=wxml.descendent(v,"channel")
+				if d and d.target then
+					local target=wstr.split(d.target,"/")
+					local joint=get_joint(target[1])
+					local samp=get_by_id(d.source)
+					local src={}
+					for i,v in ipairs(samp) do
+						if type(v)=="table" and v[0]=="input" then
+							if     v.semantic=="INPUT" then -- time
+								src.time=get_source(v.source)
+							elseif v.semantic=="OUTPUT" then -- matrix
+								src.matrix=get_source(v.source)
+							elseif v.semantic=="INTERPOLATION" then -- tween
+								src.tween=get_source(v.source)
+							end
 						end
 					end
-				end
-				if joint and src.time and src.matrix and src.tween then -- got some animation we can use
-					local anim={}
-					for i=1,#src.time.data do
-						local frame={}
-						frame.time=src.time.data[i]
-						frame.tween=src.tween.data[i]
-						frame.matrix={}
-						for j=1,16 do
-							frame.matrix[j]=src.matrix.data[((i-1)*16)+j]
+					if joint and src.time and src.matrix and src.tween then -- got some animation we can use
+print(joint.idx,target[1],src.time,src.matrix,src.tween)
+						local frames={}
+						for i=1,#src.time.data do
+							local frame={}
+							frame.time=src.time.data[i]
+							frame.tween=src.tween.data[i]
+							frame.matrix={}
+							for j=1,16 do
+								frame.matrix[j]=src.matrix.data[((i-1)*16)+j]
+							end
+							frames[i]=frame
 						end
-						anim[i]=frame
+						anim[joint.idx]=frames
+--test hax
+joint.frames=frames
+	--					print(target[1],target[2],#anim)
 					end
-					joint.anim=anim
---					print(target[1],target[2],#anim)
 				end
 			end
 --			local t=get_by_id(id)
 		end
 	end
 --	print(wstr.dump(joints))
+
+--[[
+for n,v in pairs(anims) do
+	print(n)
+	for n,v in pairs(v) do
+		if type(n)=="number" then
+			print("",n,#v)
+		end
+	end
+end
+]]
 
 -- find skin weights so we can fetch them and apply to geoms later
 	local ccs=wxml.descendent(x,"library_controllers")
@@ -249,7 +273,8 @@ print("loaded ",#s,"bytes from "..opts.filename)
 						local w=vs[vi] vi=vi+1
 						local name=inputs.joint.source.data[n+1]
 						local weight=inputs.weight.source.data[w+1]
-						ws[#ws+1]=name
+						local joint=get_joint(name)
+						ws[#ws+1]=joint.idx
 						ws[#ws+1]=weight
 					end
 				end
@@ -257,7 +282,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			end
 		end
 	end 
-
+--dprint(weights)
 
 
 -- need to handle multiple geometries here...
