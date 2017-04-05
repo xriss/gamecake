@@ -47,10 +47,12 @@ print("loaded ",#s,"bytes from "..opts.filename)
 	--print("loaded ",wxml.unparse(x))
 
 	local ids={}
+	local symbols={}
 	local function do_ids(t)
 		for i=1,#t do local v=t[i]
 			if type(v)=="table" then
 				if v.id then ids[v.id]=v end
+				if v.symbol then symbols[v.symbol]=v end
 				do_ids(v)
 			end
 		end
@@ -60,7 +62,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 		if id:sub(1,1) == "#" then
 			id=id:sub(2)
 		end
-		local d=ids[id]
+		local d=ids[id] or symbols[id] 
 		return d
 	end
 
@@ -68,7 +70,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 		if id:sub(1,1) == "#" then
 			id=id:sub(2)
 		end
-		local d=ids[id]
+		local d=ids[id] or symbols[id] 
 		if type(d[0])=="string" and ( string.lower(d[0])=="source" or string.lower(d[0])=="float_array" or string.lower(d[0])=="name_array") then
 			return d 
 		else
@@ -316,6 +318,86 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			--	dprint( p )
 
 			end
+			for i,v in ipairs( wxml.descendents(geo.mesh,"polygons")) do -- handle each polylist chunk
+
+				local p={}
+				polys[#polys+1]=p
+				
+				p.material=v.material
+				
+				p.inputs={}
+				
+				p.stride=0
+				for i,l in ipairs( wxml.descendents(v,"input") ) do
+					local m={}
+					m.idx=#p.inputs+1		
+					m.semantic=l.semantic
+					m.offset=tonumber(l.offset)
+					m.source=get_source(l.source)
+					if m.offset > p.stride then p.stride=m.offset end
+
+					p.inputs[m.idx]=m
+					p.inputs[m.semantic]=m -- easy lookup by name
+				end
+				p.stride=p.stride+1 -- this is how we guess this number, it will be one more than the inputs?
+
+				p.vcount={}
+				p.p={}
+				for ia,va in ipairs( wxml.descendents(v,"p")) do -- handle each polygon chunk
+
+					local ns=scan_nums(va[1])
+					
+					table.insert(p.vcount,#ns)
+					for ib=1,#ns do table.insert(p.p,ns[ib]) end
+					
+				end
+				
+
+			end
+
+			for i,v in ipairs( wxml.descendents(geo.mesh,"triangles")) do -- handle each triangles chunk
+
+				local p={}
+				polys[#polys+1]=p
+				
+				p.material=v.material
+				
+				p.inputs={}
+				
+				p.stride=0
+				for i,l in ipairs( wxml.descendents(v,"input") ) do
+					local m={}
+					m.idx=#p.inputs+1		
+					m.semantic=l.semantic
+					m.offset=tonumber(l.offset)
+					m.source=get_source(l.source)
+					if m.offset > p.stride then p.stride=m.offset end
+
+					p.inputs[m.idx]=m
+					p.inputs[m.semantic]=m -- easy lookup by name
+				end
+				p.stride=p.stride+1 -- this is how we guess this number, it will be one more than the inputs?
+
+				p.vcount={}
+				p.p={}
+				for ia,va in ipairs( wxml.descendents(v,"p")) do -- handle each polygon triangle chunk
+
+					local ns=scan_nums(va[1])
+					
+					for ib=1,#ns,3 do
+
+						table.insert(p.vcount,3)
+
+						table.insert(p.p,ns[ib+0])
+						table.insert(p.p,ns[ib+1])
+						table.insert(p.p,ns[ib+2])
+					end
+					
+				end
+				
+
+			end
+
 
 --			print("found poly list count "..#polys)
 
@@ -336,6 +418,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 			end
 			local material_idxs={}
 			local function get_material_idx(id)
+
 				if not id then return nil end
 				local idx=material_idxs[id]
 				if not idx then
@@ -345,21 +428,23 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 					local mat={}
 					local v=get_by_id(id)
-					local m=get_by_id(v[1].url)
+
+					if v.target then v=get_by_id(v.target) end -- another level of redirection
+					local m=get_by_id( v[1] and v[1].url )
 					local sids={}
 					local function do_sids(t)
 						for i=1,#t do local v=t[i]
 							if type(v)=="table" then
-								if v.sid then sids[v.sid]=v end
+								if v.sid then sids[v.sid]=v else sids[v[0]]=v[1] end
 								do_sids(v)
 							end
 						end
 					end
 					do_sids(m)
-					
-					mat.diffuse=  sids["diffuse"]   and scan_nums(sids["diffuse"][1])   or {1,1,1,1}
-					mat.specular= sids["specular"]  and scan_nums(sids["specular"][1])  or {0,0,0,1}
-					mat.shininess=sids["shininess"] and scan_nums(sids["shininess"][1]) or {4}
+
+					mat.diffuse=  sids["diffuse"]   and scan_nums(sids["diffuse"][1]   ) or {1,1,1,1}
+					mat.specular= sids["specular"]  and scan_nums(sids["specular"][1]  ) or {0,0,0,1}
+					mat.shininess=sids["shininess"] and scan_nums(sids["shininess"][1] ) or {4}
 					
 					mat.diffuse[4]=1
 					mat.specular[4]=1
