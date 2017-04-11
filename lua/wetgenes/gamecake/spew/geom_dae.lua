@@ -21,6 +21,8 @@ M.bake=function(oven,geom_dae)
 	
 	geom_dae.modname=M.modname
 
+	geom_dae.fps=24 -- assumed fps, need "smart" code to work out on load the minimum time between frames
+
 	local cake=oven.cake
 	local opts=oven.opts
 	local canvas=cake.canvas
@@ -178,9 +180,9 @@ print("loaded ",#s,"bytes from "..opts.filename)
 	local anims={}
 	for ia,va in ipairs(aas or {}) do -- just check the top level for anims 
 		if va[0]=="animation_clip" then
-			local anim={name=va["name"],time_start=tonumber(va["start"]),time_end=tonumber(va["end"])}
+			local anim={name=va["name"],time_start=math.floor(tonumber(va["start"])*geom_dae.fps+0.5),time_end=math.floor(tonumber(va["end"])*geom_dae.fps+0.5)}
 			anims[va.name]=anim
-print(va["name"],va["start"],va["end"])
+print(anim.name,anim.time_start,anim.time_end)
 			for i,v in ipairs(va or {}) do -- just check the top level for anims 
 				if v.url then v=get_by_id(v.url) end -- reference
 				local d=wxml.descendent(v,"channel")
@@ -201,7 +203,7 @@ print(va["name"],va["start"],va["end"])
 						end
 					end
 					if joint and src.time and src.matrix and src.tween then -- got some animation we can use
-print(joint.idx,target[1],src.time,src.matrix,src.tween)
+--print(joint.idx,target[1],src.time,src.matrix,src.tween)
 						local frames={}
 						for i=1,#src.time.data do
 							local frame={}
@@ -211,11 +213,11 @@ print(joint.idx,target[1],src.time,src.matrix,src.tween)
 							for j=1,16 do
 								frame.matrix[j]=src.matrix.data[((i-1)*16)+j]
 							end
-							frames[i]=frame
+							frames[math.floor(frame.time*geom_dae.fps+0.5)]=frame
 						end
 						anim[joint.idx]=frames
 --test hax
-joint.frames=frames
+--joint.frames=frames
 	--					print(target[1],target[2],#anim)
 					end
 				end
@@ -288,6 +290,8 @@ end
 -- need to handle multiple geometries here...
 	local its=geoms.new()
 	
+	its.anims=anims
+
 	if joints[1] then
 		its.joints=joints
 	end
@@ -644,6 +648,107 @@ end
 		end
 	end
 	end
+	
+	
+	its.anim_setup=function()
+	
+		its.anim={}
+		its.anim.rest={}
+		its.anim.bones={}
+
+		if its.joints then -- got a rig, build rest positions
+
+				local recurse recurse=function(it,mp)
+
+					if it.matrix then -- top level has no matrix
+					
+						local b=tardis.m4.new(it.matrix):transpose(tardis.m4.new()) -- transpose
+										
+						its.anim.rest[it.idx]=b:product(mp,tardis.m4.new())
+
+						mp=its.anim.rest[it.idx]
+					end
+
+					for i,v in ipairs(it) do recurse(v,mp) end
+
+				end	recurse(its.joints,tardis.m4.new():identity())
+
+		end
+	end
+	its.anim_setup()
+
+		
+	its.anim_update=function(name,frame)
+	
+		its.anim.name=name
+		its.anim.frame=frame
+		its.anim.data=its.anims[name]
+
+		if its.joints then -- got a rig
+
+				local recurse recurse=function(it,mp)
+
+					if it.matrix then -- top level has no matrix
+					
+						local b=tardis.m4.new(it.matrix)
+						local frames=its.anim.data and its.anim.data[it.idx]
+						
+						local getm=function(f) return frames and frames[f] and frames[f].matrix end
+						local i,f = math.modf(frame)
+						local m1=tardis.m4.new(getm(i  ) or b)
+						local m2=tardis.m4.new(getm(i+1) or b)
+						local m=m1:lerp(m2,f):transpose(tardis.m4.new()) -- transpose after lerp
+						
+						mp=m:product(mp,tardis.m4.new())
+						
+						local t=tardis.m4.new()				
+						its.anim.bones[it.idx]=its.anim.rest[it.idx]:inverse(t):product(mp,t)
+
+					end
+
+					for i,v in ipairs(it) do recurse(v,mp) end
+
+				end	recurse(its.joints,tardis.m4.new():identity())
+
+		end
+
+	end
+
+	its.anim_draw=function()
+
+--			gl.Enable(gl.DEPTH_TEST)
+--			gl.Enable(gl.CULL_FACE)
+			
+			for i=1,#its do
+				local v=its[i]
+				if not its.filter or its.filter[ v.name ] then
+					geom.draw(v,"xyz_normal_mat_bone",function(p)
+						for mi=1,8 do
+							local m=v.mats[mi]
+							if m then
+								local c1=m.diffuse
+								local c2=m.specular
+								local c0=m.shininess
+								gl.Uniform4f( p:uniform("color1["..(mi-1).."]"), c1[1],c1[2],c1[3],c1[4] )
+								gl.Uniform4f( p:uniform("color2["..(mi-1).."]"), c2[1],c2[2],c2[3],c2[4] )
+								gl.Uniform4f( p:uniform("color0["..(mi-1).."]"), c0[1],0,0,0 )
+							end
+						end
+						for bi,m in ipairs(its.anim.bones) do
+							gl.Uniform4f( p:uniform("bones["..(0+(bi-1)*3).."]"),m[1],m[5],m[ 9],m[13])
+							gl.Uniform4f( p:uniform("bones["..(1+(bi-1)*3).."]"),m[2],m[6],m[10],m[14])
+							gl.Uniform4f( p:uniform("bones["..(2+(bi-1)*3).."]"),m[3],m[7],m[11],m[15])
+						end
+					end)
+
+				end
+
+			end
+			
+--			gl.Disable(gl.DEPTH_TEST)
+--			gl.Disable(gl.CULL_FACE)
+		
+		end
 		
 		
 		return its
