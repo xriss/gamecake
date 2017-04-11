@@ -555,7 +555,7 @@ void main(void)
 	vec3 n=normalize(v_normal);
 	vec3 l=normalize(vec3(0.0,-0.5,1.0));
 
-	int matidx=int(v_matidx);
+	int matidx=int(floor(v_matidx+0.5));
 	vec4 c0=color0[matidx];
 	vec4 c1=color1[matidx];
 	vec4 c2=color2[matidx];

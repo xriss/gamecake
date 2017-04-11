@@ -569,7 +569,7 @@ end
 
 						local xyz_merge="["..vert[1]..","..vert[2]..","..vert[3].."]"						
 						local nrm_merge="["..vert[4]..","..vert[5]..","..vert[6].."]"						
-						local uv_merge ="["..vert[7]..","..vert[8].."]"
+						local uv_merge ="["..vert[7]..","..vert[8].."],"..poly.mat
 						local bone_merge ="["..vert[13]..","..vert[14]..","..vert[15]..","..vert[16].."]"
 
 --						local idx=get_vertex_idx(xyz_merge,nrm_merge,uv_merge,bone_merge)
