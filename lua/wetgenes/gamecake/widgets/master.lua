@@ -424,6 +424,8 @@ function wmaster.setup(widget,def)
 			local w=master.active
 			local p=w.parent
 
+			w.parent:insert(w) -- move to top
+
 			local rx,ry=w.parent:mousexy(x,y)
 			local x,y=rx-master.active_x,ry-master.active_y
 
@@ -483,7 +485,7 @@ function wmaster.setup(widget,def)
 	
 	function master.dragging()
 
-		if master.active and (master.active.class=="drag") and master.press then
+		if master.active and (master.active.class=="drag" or master.active.class=="window" ) and master.press then
 			return true
 		end
 		
