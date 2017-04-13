@@ -12,6 +12,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wwindow)
 
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
 wwindow=wwindow or {}
 
@@ -61,7 +62,7 @@ end
 
 function wwindow.layout(widget)
 
-	local v=widget[1]
+	local v=widget.win_fbo
 	if v then
 		if widget.panel_mode=="scale" then -- maintain aspect
 
@@ -86,6 +87,28 @@ function wwindow.layout(widget)
 
 end
 
+wwindow.win_hooks=function(widget,act,w)
+--print(act,w.id)
+	if act=="click" then
+		if w.id=="win_hide" then
+		
+			widget.hidden=true
+			
+		elseif w.id=="win_grow" then
+			widget.hx=widget.hx*1.5
+			widget.hy=widget.hy*1.5
+			widget:layout()
+			widget:build_m4()
+
+		elseif w.id=="win_shrink" then
+			widget.hx=widget.hx/1.5
+			widget.hy=widget.hy/1.5
+			widget:layout()
+			widget:build_m4()
+		end
+	end
+end
+
 function wwindow.setup(widget,def)
 
 	widget.class="window"
@@ -97,6 +120,99 @@ function wwindow.setup(widget,def)
 	widget.update=wwindow.update
 	widget.draw=wwindow.draw
 	widget.layout=wwindow.layout
+	
+	widget.win_hooks = function(act,w) return wwindow.win_hooks(widget,act,w) end
+
+	widget.menu_data=widget.menu_data or {
+		{	id="win_hide",		text="Hide Window",		},
+		{	id="win_shrink",	text="Shrink Window",	},
+		{	id="win_grow",		text="Grow Window",		},
+		hooks=widget.win_hooks,
+	}
+	
+	local ss=24
+	local color=0xffaaaaaa
+
+
+
+
+-- add all the trimmings
+	widget.win_fbo=widget:add({
+				hx=def.hx,
+				hy=def.hy+ss,
+				px=0,
+				py=0,
+--				class="fill",
+				color=color,
+				fbo=true,
+				style="flat",
+				skin=1,
+				highlight="none",
+				smode="topleft",
+			})
+
+	widget.win_canvas=widget.win_fbo:add({
+				class="fill",
+				px=0,
+				py=ss,
+				hx=def.hx,
+				hy=def.hy,
+				color=color,
+				skin=1,
+--				solid=true,
+				highlight="none",
+			})
+
+	widget.win_menu=widget.win_fbo:add({
+				class="menuitem",
+				px=0,
+				py=0,
+				hx=ss,
+				hy=ss,
+				text=".",
+				color=color,
+				skin=1,
+				solid=true,
+				menu_data=widget.menu_data,
+			})
+
+	widget.win_title=widget.win_fbo:add({
+				px=ss,
+				py=0,
+				hx=def.hx-ss*2,
+				hy=ss,
+				text="Title.",
+				color=color,
+				skin=1,
+			})
+
+	widget.win_shrink=widget.win_fbo:add({
+				px=def.hx-ss*2,
+				py=0,
+				hx=ss,
+				hy=ss,
+				text="-",
+				color=color,
+				skin=1,
+				solid=true,
+				hooks=widget.win_hooks,
+				id="win_shrink",
+			})
+
+	widget.win_grow=widget.win_fbo:add({
+				px=def.hx-ss,
+				py=0,
+				hx=ss,
+				hy=ss,
+				text="+",
+				color=color,
+				skin=1,
+				solid=true,
+				hooks=widget.win_hooks,
+				id="win_grow",
+			})
+
+	widget.hy=def.hy+ss
 	
 	return widget
 end

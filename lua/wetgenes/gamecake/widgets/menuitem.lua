@@ -124,9 +124,22 @@ local showmenu=function()
 	end
 end
 
+local togglemenu=function()
+	if widget.menu and ( not widget.menu.hidden ) then -- already visible so hide it
+		widget.menu:remove()
+		widget.menu=nil
+		widget.master.menu=nil
+	else
+		showmenu()
+	end
+end
+
+
 	if hook=="over" and widget.master.menu then
 --		if widget.parent.class~="menubar" then -- menubar needs clicks
+		if widget.parent.class=="menu" or widget.parent.class=="menubar" then -- only the menu?
 			showmenu()
+		end
 --		end
 	end
 
@@ -147,6 +160,10 @@ end
 	
 			if widget.menu_data then -- add a sub menu using this data
 				
+				if widget.parent.class~="menubar" then
+					togglemenu()
+				end
+
 			elseif widget.hide_when_clicked then
 				if widget.parent.class=="menu" then -- only the menu?
 					widget.parent.hidden=true
@@ -158,7 +175,6 @@ end
 	--				widget.parent:remove()
 	--			end
 			end
-
 		end
 
 	end
