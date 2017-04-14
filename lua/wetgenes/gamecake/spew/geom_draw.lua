@@ -24,124 +24,106 @@ M.fill=function(oven,geom)
 -- make a predraw buffer to draw triangles
 	geom.predraw_polys=function(it)
 
-		local orders={}
-		orders[3]={ {3,3,2,1,1}			,	{1,1,2,3,3}		}
-		orders[4]={ {3,3,4,2,1,1}		,	{1,1,2,4,3,3}	}
-		orders[5]={ {4,4,3,5,2,1,1}		,	{1,1,2,5,3,4,4}	}
-
 		local t={}
-		local f=1
 		for i,p in ipairs(it.polys) do
-			local o=orders[#p][1+f%2]
-			for _,i in ipairs(o) do
-				local idx=p[i]
-				local v=it.verts[idx]
-				t[#t+1]=v[1]
-				t[#t+1]=v[2]
-				t[#t+1]=v[3]
+			for ti=0,(#p-3) do
+				for i=2,0,-1 do
+					local tv=1+ti+i if i==0 then tv=1 end
+					local idx=p[tv]
+					local v=it.verts[idx]
+					
+					t[#t+1]=v[1]
+					t[#t+1]=v[2]
+					t[#t+1]=v[3]
 
-				t[#t+1]=v[4] or 0
-				t[#t+1]=v[5] or 0
-				t[#t+1]=v[6] or 0
+					t[#t+1]=v[4] or 0
+					t[#t+1]=v[5] or 0
+					t[#t+1]=v[6] or 0
 
-				t[#t+1]=v[7] or 0
-				t[#t+1]=v[8] or 0
-				t[#t+1]=(p.mat or 1)-1
+					t[#t+1]=v[7] or 0
+					t[#t+1]=v[8] or 0
+					t[#t+1]=(p.mat or 1)-1
 
-				t[#t+1]=v[9] or 0
-				t[#t+1]=v[10] or 0
-				t[#t+1]=v[11] or 0
-				t[#t+1]=v[12] or 0
+					t[#t+1]=v[9] or 0
+					t[#t+1]=v[10] or 0
+					t[#t+1]=v[11] or 0
+					t[#t+1]=v[12] or 0
 
-				t[#t+1]=v[13] or 0
-				t[#t+1]=v[14] or 0
-				t[#t+1]=v[15] or 0
-				t[#t+1]=v[16] or 0
-
---print(idx,v[12])
-
-				f=f+1
+					t[#t+1]=v[13] or 0
+					t[#t+1]=v[14] or 0
+					t[#t+1]=v[15] or 0
+					t[#t+1]=v[16] or 0
+				end
 			end
 		end
-		return flat.array_predraw({fmt="xyznrmuvmtansbone",data=t,array=gl.TRIANGLE_STRIP,vb=true})
+		return flat.array_predraw({fmt="xyznrmuvmtansbone",data=t,array=gl.TRIANGLES,vb=true})
 	end
 
 -- make a predraw buffer to draw triangles
 	geom.predraw_flatpolys=function(it)
 
-		local orders={}
-		orders[3]={ {3,3,2,1,1}			,	{1,1,2,3,3}		}
-		orders[4]={ {3,3,4,2,1,1}		,	{1,1,2,4,3,3}	}
-		orders[5]={ {4,4,3,5,2,1,1}		,	{1,1,2,5,3,4,4}	}
-
 		local t={}
-		local f=1
 		for i,p in ipairs(it.polys) do
 			local n=geom.get_poly_normal(it,p)
-			local o=orders[#p][1+f%2]
-			for _,i in ipairs(o) do
-				local idx=p[i]
-				local v=it.verts[idx]
-				t[#t+1]=v[1]
-				t[#t+1]=v[2]
-				t[#t+1]=v[3]
+			for ti=0,(#p-3) do
+				for i=2,0,-1 do
+					local tv=1+ti+i if i==0 then tv=1 end
+					local idx=p[tv]
+					local v=it.verts[idx]
+					t[#t+1]=v[1]
+					t[#t+1]=v[2]
+					t[#t+1]=v[3]
 
-				t[#t+1]=n[1] or 0
-				t[#t+1]=n[2] or 0
-				t[#t+1]=n[3] or 0
+					t[#t+1]=n[1] or 0
+					t[#t+1]=n[2] or 0
+					t[#t+1]=n[3] or 0
 
-				t[#t+1]=v[7] or 0
-				t[#t+1]=v[8] or 0
-				t[#t+1]=(p.mat or 1)-1
+					t[#t+1]=v[7] or 0
+					t[#t+1]=v[8] or 0
+					t[#t+1]=(p.mat or 1)-1
 
-				t[#t+1]=v[13] or 0
-				t[#t+1]=v[14] or 0
-				t[#t+1]=v[15] or 0
-				t[#t+1]=v[16] or 0
-
-				f=f+1
+					t[#t+1]=v[13] or 0
+					t[#t+1]=v[14] or 0
+					t[#t+1]=v[15] or 0
+					t[#t+1]=v[16] or 0
+				end
 			end
 		end
-		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.TRIANGLE_STRIP,vb=true})
+		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.TRIANGLES,vb=true})
 	end
 
 -- make a predraw buffer to draw triangles but with mask instead of material
 	geom.predraw_polys_mask=function(it)
 	
-		local orders={}
-		orders[3]={ {3,3,2,1,1}			,	{1,1,2,3,3}		}
-		orders[4]={ {3,3,4,2,1,1}		,	{1,1,2,4,3,3}	}
-		orders[5]={ {4,4,3,5,2,1,1}		,	{1,1,2,5,3,4,4}	}
-
 		local t={}
-		local f=1
 		local mask=it.mask and it.mask.polys or {}
 		for i,p in ipairs(it.polys) do
-			local o=orders[#p][1+f%2]
-			for _,i in ipairs(o) do
-				local idx=p[i]
-				local v=it.verts[idx]
-				t[#t+1]=v[1]
-				t[#t+1]=v[2]
-				t[#t+1]=v[3]
+			for ti=0,(#p-3) do
+				for i=2,0,-1 do
+					local tv=1+ti+i if i==0 then tv=1 end
+					local idx=p[tv]
+					local v=it.verts[idx]
+					local v=it.verts[idx]
+					t[#t+1]=v[1]
+					t[#t+1]=v[2]
+					t[#t+1]=v[3]
 
-				t[#t+1]=v[4] or 0
-				t[#t+1]=v[5] or 0
-				t[#t+1]=v[6] or 0
+					t[#t+1]=v[4] or 0
+					t[#t+1]=v[5] or 0
+					t[#t+1]=v[6] or 0
 
-				t[#t+1]=v[7] or 0
-				t[#t+1]=v[8] or 0
-				t[#t+1]=mask[v] or 0
+					t[#t+1]=v[7] or 0
+					t[#t+1]=v[8] or 0
+					t[#t+1]=mask[v] or 0
 
-				t[#t+1]=v[13] or 0
-				t[#t+1]=v[14] or 0
-				t[#t+1]=v[15] or 0
-				t[#t+1]=v[16] or 0
-
-				f=f+1
+					t[#t+1]=v[13] or 0
+					t[#t+1]=v[14] or 0
+					t[#t+1]=v[15] or 0
+					t[#t+1]=v[16] or 0
+				end
 			end
 		end
-		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.TRIANGLE_STRIP,vb=true})
+		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.TRIANGLES,vb=true})
 	end
 
 -- make a predraw buffer to draw lines not triangles

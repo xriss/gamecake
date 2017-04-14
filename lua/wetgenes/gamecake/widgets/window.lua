@@ -181,7 +181,7 @@ function wwindow.setup(widget,def)
 				py=0,
 				hx=def.hx-ss*2,
 				hy=ss,
-				text="Title.",
+				text=def.title or "...",
 				color=color,
 				skin=1,
 			})
