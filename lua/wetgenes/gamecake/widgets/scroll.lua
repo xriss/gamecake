@@ -58,11 +58,13 @@ function wscroll.layout(widget)
 	if widget.datx.max<0 then widget.datx.max=0 end
 	widget.datx.size=widget.pan.hx/widget.pan.hx_max
 	widget.datx.step= widget:bubble("text_size") or 16 
+	widget.datx:value() -- clamp
 	
 	widget.daty.max=widget.pan.hy_max-widget.pan.hy
 	if widget.daty.max<0 then widget.daty.max=0 end
 	widget.daty.size=widget.pan.hy/widget.pan.hy_max
-	widget.daty.step= widget:bubble("text_size") or 16 
+	widget.daty.step= widget:bubble("text_size") or 16 	
+	widget.daty:value() -- clamp
 	
 	widget.meta.layout(widget)
 	widget.meta.build_m4(widget)

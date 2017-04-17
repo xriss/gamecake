@@ -46,25 +46,25 @@ wdata.data_value=function(dat,val,force)
 			if val*0~=val*0 then val=0 end -- remove inf or nan values?
 		end 
 		local old=dat.num
+		if dat.min and dat.num<dat.min then dat.num=dat.min end
+		if dat.max and dat.num>dat.max then dat.num=dat.max end
 		if ( val and val~=dat.num ) or force then -- change value
-			dat.num=val
-			if dat.min and dat.num<dat.min then dat.num=dat.min end
-			if dat.max and dat.num>dat.max then dat.num=dat.max end
+			dat.num=val or dat.num
+		end
+		if old~=dat.num or force then
+			dat.str=dat:tostring(dat.num) -- cache on change
 			if not force and type(force)=="boolean" then -- set force to false to disable hook
 			else
-				if old~=dat.num or force then
-					dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
-				end
+				dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
 			end
-			dat.str=dat:tostring(dat.num) -- cache on change
 		end
 		return dat.num
 	else
 		if not force and type(force)=="boolean" then -- set force to false to disable hook
-			dat.str=val
+			dat.str=val or dat.str
 		else
 			if (val and val~=dat.str ) or force  then -- change value
-				dat.str=val
+				dat.str=val or dat.str
 				dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
 			end
 		end

@@ -98,6 +98,8 @@ end
 
 wfile.file_dir=function(widget,u)
 
+	widget.scroll_widget.daty:value(0) -- reset scroll on click
+
 	local t=wstr.split(widget.data_dir:value(),"/")
 	for i=#t,1,-1 do local v=t[i]
 		if t[i]=="" and t[i-1]=="" then
