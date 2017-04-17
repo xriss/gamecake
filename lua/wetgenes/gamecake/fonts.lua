@@ -27,7 +27,10 @@ function M.bake(oven,fonts)
 	fonts.postfix=opts.fontpostfix or ".ttf"
 
 
-fonts.get=function(id)
+fonts.get=function(id,ignore)
+	if not ignore then
+		assert(fonts.data[id],"Unknown font :"..id)
+	end
 	return fonts.data[id]
 end
 
@@ -58,7 +61,7 @@ end
 -- load a single image, and make it easy to lookup by the given id
 --
 fonts.load=function(filename,id)
-	local t=fonts.get(id)
+	local t=fonts.get(id,true)
 	
 	if t then return t end --first check it is not already loaded
 
