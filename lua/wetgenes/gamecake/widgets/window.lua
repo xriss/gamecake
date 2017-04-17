@@ -146,7 +146,7 @@ function wwindow.setup(widget,def)
 				color=color,
 				fbo=true,
 				style="flat",
-				skin=1,
+				skin=0,
 				highlight="none",
 				smode="topleft",
 			})
@@ -158,7 +158,7 @@ function wwindow.setup(widget,def)
 				hx=def.hx,
 				hy=def.hy,
 				color=color,
-				skin=1,
+				skin=0,
 --				solid=true,
 				highlight="none",
 			})
@@ -171,7 +171,7 @@ function wwindow.setup(widget,def)
 				hy=ss,
 				text=".",
 				color=color,
-				skin=1,
+				skin=0,
 				solid=true,
 				menu_data=widget.menu_data,
 			})
@@ -179,11 +179,11 @@ function wwindow.setup(widget,def)
 	widget.win_title=widget.win_fbo:add({
 				px=ss,
 				py=0,
-				hx=def.hx-ss*2,
+				hx=def.hx-ss*3,
 				hy=ss,
 				text=def.title or "...",
 				color=color,
-				skin=1,
+				skin=0,
 			})
 
 	widget.win_shrink=widget.win_fbo:add({
@@ -193,7 +193,7 @@ function wwindow.setup(widget,def)
 				hy=ss,
 				text="-",
 				color=color,
-				skin=1,
+				skin=0,
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_shrink",
@@ -206,7 +206,7 @@ function wwindow.setup(widget,def)
 				hy=ss,
 				text="+",
 				color=color,
-				skin=1,
+				skin=0,
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_grow",

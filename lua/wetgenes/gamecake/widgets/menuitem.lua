@@ -42,9 +42,10 @@ function wmenuitem.menu_add(widget,opts)
 			class="menu",
 			color=opts.color or 0xffaaaaaa,
 			style=opts.style or "button",
-			skin=opts.skin or 1,
+			skin=opts.skin or 0,
 			solid=true,
 			highlight="none",
+			fbo=true,
 		})
 
 	end
@@ -72,7 +73,7 @@ function wmenuitem.menu_add(widget,opts)
 
 			color     = opts.color     or md.color     or 0xffcccccc,
 			style     = opts.style     or md.style     or "button",
-			skin      = opts.skin      or md.skin      or 1,
+			skin      = opts.skin      or md.skin      or 0,
 			text_size = opts.text_size or md.text_size,
 			menu_px   = opts.menu_px   or md.menu_px,
 			menu_py   = opts.menu_py   or md.menu_py,

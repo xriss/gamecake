@@ -52,7 +52,7 @@ function wmenu.layout(widget)
 					font.set(cake.fonts.get(f))
 					font.set_size(v.hy,0)
 					v.hx=font.width(v.text)
-					
+										
 					v.hx=v.hx+v.hy
 					v.hy=v.hy+(v.hy/2)
 				end
@@ -75,7 +75,6 @@ function wmenu.layout(widget)
 	for i,v in ipairs(widget) do -- set all to widest
 		v.hx=hx
 	end
-
 	for i,v in ipairs(widget) do -- descend
 		if not v.hidden then v:layout() end
 	end

@@ -481,63 +481,6 @@ end
 		
 	end
 	
-	function meta.iterate_draw_color(widget)
-		local layer=0
-		return function()
-			layer=layer+1
-			local ret,r,g,b,a=meta.draw_color(widget,layer)
-			if ret then return layer end
-			return nil
-		end 
-	end
-	function meta.draw_color(widget,layer)
-		local hilight=0
-		local w=widget
-		local master=widget.master
-		local buttdown=false
-		if ( master.press and master.over==widget ) or widget.state=="selected" then
-			buttdown=true
-		end
-
-		local c={explode_color(widget.color)}
-
-		if widget.highlight=="none" then
-			if layer>1 then
-				return false
-			else
-				gl.Color( c[1],c[2],c[3],c[4] )
-			end
-		elseif master.over==widget or widget.parent==master.active then
-			if buttdown then
-				if layer>1 then	
---					local a=1/16
---					gl.Color( c[1]*a,c[2]*a,c[3]*a,0 )
-					return false
-				else
-					local a=15/16
-					gl.Color( c[1]*a,c[2]*a,c[3]*a,c[4] )
-				end
-			else
-				if layer>1 then
---					local a=2/16
---					gl.Color( c[1]*a,c[2]*a,c[3]*a,0 )
-					return false
-				else
-					gl.Color( c[1],c[2],c[3],c[4] )
-				end
-			end
-		else
-				if layer>1 then
-					return false
-				else
-					local a=13/16
-					if widget.state=="selected" then a=15/16 end
-					gl.Color( c[1]*a,c[2]*a,c[3]*a,c[4] )
-				end
-		end
-		if layer>2 then return false end
-		return true
-	end
 	
 	function meta.draw(widget)
 		local wsx=1
@@ -591,27 +534,50 @@ end
 				txp=1
 				typ=1
 			end
-			
-for layer in meta.iterate_draw_color(widget) do -- something to draw, color has been set for this layer
 
 
-			local mode=mode
-			if widget.skin then
-				local tt=type(widget.skin)
-				if     tt=="number" then mode=nil -- use builtin 
-				elseif tt=="string" then mode=widget.skin
-				end
+
+			local c={explode_color(widget.color)}
+
+			if style=="indent" then
+				local a=14/16
+				c[1]=c[1]*a
+				c[2]=c[2]*a
+				c[3]=c[3]*a
+			elseif widget.solid then
+				local a=15/16
+				c[1]=c[1]*a
+				c[2]=c[2]*a
+				c[3]=c[3]*a
 			end
+
+			if widget.highlight=="none" then
+				gl.Color( c[1],c[2],c[3],c[4] )
+			elseif master.over==widget or widget.parent==master.active then
+				if buttdown then
+					local a=15/16
+					gl.Color( c[1]*a,c[2]*a,c[3]*a,c[4] )
+				else
+					gl.Color( c[1],c[2],c[3],c[4] )
+				end
+			else
+				local a=13/16
+				if widget.state=="selected" then a=15/16 end
+				gl.Color( c[1]*a,c[2]*a,c[3]*a,c[4] )
+			end
+	
+			local skin=widget:bubble("skin") or mode
+
 			
 			if widget.sheet then -- custom graphics
 
 				sheets.get(widget.sheet):draw(widget.sheet_id or 1,widget.sheet_px or 0,widget.sheet_py or 0,0,widget.sheet_hx or hx,widget.sheet_hy or hy)
 			
-			elseif mode then -- got some images to play with
+			elseif type(skin)=="string" then -- got some images to play with
 			
 				if style=="flat" then
 				
-					images.bind(images.get("wskins/"..mode))
+					images.bind(images.get("wskins/"..skin))
 					txp=0
 					typ=-1
 
@@ -619,7 +585,7 @@ for layer in meta.iterate_draw_color(widget) do -- something to draw, color has 
 
 				elseif style=="indent" then
 
-					images.bind(images.get("wskins/"..mode))
+					images.bind(images.get("wskins/"..skin))
 					txp=0
 					typ=0
 
@@ -628,12 +594,12 @@ for layer in meta.iterate_draw_color(widget) do -- something to draw, color has 
 				elseif style=="button" then
 
 					if ( master.press and master.over==widget ) or widget.state=="selected" then
-						images.bind(images.get("wskins/"..mode))
+						images.bind(images.get("wskins/"..skin))
 						txp=0
 						typ=-1
 						draw33(2,128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
 					else
-						images.bind(images.get("wskins/"..mode))
+						images.bind(images.get("wskins/"..skin))
 						txp=0
 						typ=-2
 						draw33(1,128,128, 24,24, 0-margin,0-margin, hx+(margin*2),hy+(margin*2))
@@ -642,7 +608,7 @@ for layer in meta.iterate_draw_color(widget) do -- something to draw, color has 
 				end
 								
 			
-			else -- builtin
+			elseif skin==1 then -- builtin border
 			
 			
 			draw_quad(	0,		0,
@@ -667,8 +633,16 @@ for layer in meta.iterate_draw_color(widget) do -- something to draw, color has 
 						hx,    hy,
 						hx-bb, hy-bb,
 						hx-bb, bb)
+
+			elseif skin==0 then -- builtin flat
+
+			draw_quad(	0,		0,
+						hx,		0,
+						hx,		hy,
+						0,		hy)
+
 			end
-end
+--end
 			
 		end
 		
