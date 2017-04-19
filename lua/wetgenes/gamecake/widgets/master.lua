@@ -69,8 +69,9 @@ function wmaster.setup(widget,def)
 
 -- built in color themes, 
 
-	master.color_theme_bright={ { 0.00, 0.00, 0.00, 1.00 },{ 0.60, 0.60, 0.60, 1.00 },{ 1.00, 1.00, 1.00, 1.00 }	}
-	master.color_theme_dark  ={ { 0.60, 0.60, 0.60, 1.00 },{ 0.30, 0.30, 0.30, 1.00 },{ 0.00, 0.00, 0.00, 1.00 }	}
+	master.color_theme_bright={ { 0.00, 0.00, 0.00, 1.00 },{ 0.60, 0.60, 0.60, 1.00 },{ 1.00, 1.00, 1.00, 1.00 },text=0	}
+--	master.color_theme_dark  ={ { 0.80, 0.80, 0.80, 1.00 },{ 0.30, 0.30, 0.30, 1.00 },{ 0.00, 0.00, 0.00, 1.00 },text=0	}
+	master.color_theme_dark  ={ { 0.00, 0.00, 0.00, 1.00 },{ 0.30, 0.30, 0.30, 1.00 },{ 1.00, 1.00, 1.00, 1.00 },text=2	}
 
 -- global GUI color theme
 
@@ -81,6 +82,8 @@ function wmaster.setup(widget,def)
 	function master.get_color(val,tint)
 	
 		local t=master.color_theme
+
+		if not val then val=t.text end -- text color
 	
 		local c={}
 

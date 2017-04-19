@@ -183,7 +183,7 @@ wfile.file_refresh=function(widget)
 		table.sort(t)
 		for i,v in ipairs(t) do
 				pan:add({hx=pan.hx,hy=20,text=v,text_align="left",hooks=widget.file_hooks,user=v,id="goto",
-				color=0x1fffffff,
+				color=0x1f000000,
 				})
 		end
 	
@@ -196,7 +196,7 @@ wfile.file_refresh=function(widget)
 				})
 			elseif t.mode=="directory" then
 				pan:add({hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
-				color=0x1fffffff,
+				color=0x1f000000,
 				})
 			end
 		end

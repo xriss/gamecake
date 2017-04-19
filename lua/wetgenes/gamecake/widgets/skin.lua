@@ -534,7 +534,7 @@ end
 
 			if style=="indent" then
 				color_level=color_level-(2/16)
-			elseif widget.solid then
+			elseif style=="button"  then
 				color_level=color_level+(2/16)
 			end
 
@@ -546,7 +546,7 @@ end
 					if buttdown then
 						color_level=color_level-(1/16)
 					else
-						color_level=color_level+(2/16)
+						color_level=color_level+(3/16)
 					end
 				end
 			end
@@ -691,12 +691,12 @@ end
 				end
 
 				if widget.text_color_shadow then
-					gl.Color( unpack(master.get_color(0,widget.text_color_shadow)) )
+					gl.Color( unpack(master.get_color(nil,widget.text_color_shadow)) )
 					font.set_xy((tx+1)*wsx,(ty+1)*wsy)
 					font.draw(line)
 				end
 				
-				gl.Color( unpack(master.get_color(0,widget.text_color)) )
+				gl.Color( unpack(master.get_color(nil,widget.text_color)) )
 				font.set_xy((tx)*wsx,(ty)*wsy)
 				font.draw(line)
 				
@@ -716,7 +716,7 @@ end
 							local x0,x1= (tx+s1)*wsx , (tx+s2)*wsx
 							local y0,y1= (ty)*wsy	, (ty+fy)*wsy
 							
-							local cc=master.get_color(0,widget.text_color)
+							local cc=master.get_color(nil,widget.text_color)
 							cc[4]=cc[4]*0.25
 							gl.Color( unpack(cc) )
 
