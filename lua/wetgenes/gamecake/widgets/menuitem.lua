@@ -40,7 +40,7 @@ function wmenuitem.menu_add(widget,opts)
 
 		widget.menu=widget.master:add({
 			class="menu",
-			color=opts.color or 0xffaaaaaa,
+			color=opts.color or 0,
 			style=opts.style or "button",
 			skin=opts.skin or 0,
 			solid=true,
@@ -71,7 +71,7 @@ function wmenuitem.menu_add(widget,opts)
 
 			hide_when_clicked=true,
 
-			color     = opts.color     or md.color     or 0xffcccccc,
+			color     = opts.color     or md.color     or 0,
 			style     = opts.style     or md.style     or "button",
 			skin      = opts.skin      or md.skin      or 0,
 			text_size = opts.text_size or md.text_size,

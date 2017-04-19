@@ -131,7 +131,7 @@ function wwindow.setup(widget,def)
 	}
 	
 	local ss=24
-	local color=0xffaaaaaa
+	local color=0
 
 
 

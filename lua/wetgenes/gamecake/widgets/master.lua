@@ -39,6 +39,10 @@ local wdatas=oven.rebake("wetgenes.gamecake.widgets.datas")
 --
 function wmaster.setup(widget,def)
 
+
+
+
+
 	widget.solid=true -- catch background clicks
 
 	local master=widget
@@ -60,6 +64,59 @@ function wmaster.setup(widget,def)
 
 -- create or reuse datas interface
 	master.datas=master.datas or wdatas.new_datas({master=master})
+
+
+
+-- built in color themes, 
+
+	master.color_theme_bright={ { 0.00, 0.00, 0.00, 1.00 },{ 0.60, 0.60, 0.60, 1.00 },{ 1.00, 1.00, 1.00, 1.00 }	}
+	master.color_theme_dark  ={ { 0.60, 0.60, 0.60, 1.00 },{ 0.30, 0.30, 0.30, 1.00 },{ 0.00, 0.00, 0.00, 1.00 }	}
+
+-- global GUI color theme
+
+	master.color_theme=master.color_theme_bright
+--	master.color_theme=master.color_theme_dark
+
+-- get a color from a theme and optionally apply a tint
+	function master.get_color(val,tint)
+	
+		local t=master.color_theme
+	
+		local c={}
+
+		if val<0 then val=0 end -- clamp
+		if val>2 then val=2 end
+
+		if val<1 then
+			for i=1,4 do c[i]=t[1][i]*(1-val) + t[2][i]*(val) end -- blend down
+		elseif val>=1 then
+			for i=1,4 do c[i]=t[2][i]*(2-val) + t[3][i]*(val-1) end -- blend up
+		end
+		
+		if c[4]<=0 then c[4]=1 end -- fix possible divide by zero?
+		for i=1,3 do c[i]=c[i]/c[4] end -- normalise
+		
+		if tint then
+			if type(tint)=="number" then -- convert from 0xAARRGGBB
+				local r,g,b,a	
+				a=bit.band(bit.rshift(tint,24),0xff)
+				r=bit.band(bit.rshift(tint,16),0xff)
+				g=bit.band(bit.rshift(tint, 8),0xff)
+				b=bit.band(tint,0xff)
+				tint={r/0xff,g/0xff,b/0xff,a/0xff}
+			end
+			local v=tint[4]
+			if v<0 then v=0 end -- clamp
+			if v>1 then v=1 end
+			for i=1,3 do c[i]=c[i]*(1-v) + tint[i]*(v) end -- skip alpha
+		end
+
+		for i=1,3 do if c[i]<0 then c[i]=0 end if c[i]>1 then c[i]=1 end end -- clamp result
+		
+		c[4]=1 -- full alpha only
+	
+		return c
+	end
 
 
 -- the master gets some special overloaded functions to do a few more things

@@ -556,12 +556,11 @@ void main(void)
 	vec3 l=normalize(vec3(0.0,-0.5,1.0));
 
 	int matidx=int(floor(v_matidx+0.5));
-	vec4 c0=color0[matidx];
 	vec4 c1=color1[matidx];
 	vec4 c2=color2[matidx];
 
 	gl_FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
-						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c0[0] )).rgb , c1.a );
+						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a )).rgb , c1.a );
 }
 
 	]]

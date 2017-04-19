@@ -730,8 +730,7 @@ end
 								local c2=m.specular
 								local c0=m.shininess
 								gl.Uniform4f( p:uniform("color1["..(mi-1).."]"), c1[1],c1[2],c1[3],c1[4] )
-								gl.Uniform4f( p:uniform("color2["..(mi-1).."]"), c2[1],c2[2],c2[3],c2[4] )
-								gl.Uniform4f( p:uniform("color0["..(mi-1).."]"), c0[1],0,0,0 )
+								gl.Uniform4f( p:uniform("color2["..(mi-1).."]"), c2[1],c2[2],c2[3],c0[1] )
 							end
 						end
 						for bi,m in ipairs(its.anim.bones) do
