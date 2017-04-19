@@ -75,7 +75,7 @@ function wmaster.setup(widget,def)
 -- global GUI color theme
 
 	master.color_theme=master.color_theme_bright
---	master.color_theme=master.color_theme_dark
+	master.color_theme=master.color_theme_dark
 
 -- get a color from a theme and optionally apply a tint
 	function master.get_color(val,tint)

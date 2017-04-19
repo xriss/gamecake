@@ -192,7 +192,7 @@ wfile.file_refresh=function(widget)
 		for i,t in ipairs(widget.files) do
 			if t.mode=="file" then
 				pan:add({hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
---				color=0x1f000000,
+				color=0,
 				})
 			elseif t.mode=="directory" then
 				pan:add({hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
@@ -240,17 +240,17 @@ function wfile.setup(widget,def)
 
 
 
-	widget:add({hx=widget.hx,hy=25,class="textedit",color=0xffcccccc,data=widget.data_name,clip2=true})
+	widget:add({hx=widget.hx,hy=25,class="textedit",color=0,data=widget.data_name,clip2=true})
 
 	widget:add({hx=widget.hx,hy=5})
 
-	widget:add({hx=widget.hx,hy=25,class="textedit",color=0xffcccccc,data=widget.data_dir,clip2=true,hooks=widget.file_hooks,id="dir"})
+	widget:add({hx=widget.hx,hy=25,class="textedit",color=0,data=widget.data_dir,clip2=true,hooks=widget.file_hooks,id="dir"})
 	
 	widget:add({hx=widget.hx,hy=5})
 
-	widget:add({hx=widget.hx/4,hy=25,color=0xffcccccc,text="Parent",hooks=widget.file_hooks,id="parent"})
+	widget:add({hx=widget.hx/4,hy=25,color=0,text="Parent",hooks=widget.file_hooks,id="parent"})
 	widget:add({hx=widget.hx/2,hy=25})
-	widget:add({hx=widget.hx/4,hy=25,color=0xffcccccc,text="History",hooks=widget.file_hooks,id="history"})
+	widget:add({hx=widget.hx/4,hy=25,color=0,text="History",hooks=widget.file_hooks,id="history"})
 
 	widget:add({hx=widget.hx,hy=5})
 

@@ -92,9 +92,9 @@ function wscroll.setup(widget,def)
 
 	widget.pan=		widget:add({class="pan",	hx=widget.hx-ss,	hy=widget.hy-ss	})
 	widget.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
-		daty=widget.daty,color=0xffcccccc})
+		daty=widget.daty,color=0})
 	widget.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	px=0,           	py=widget.hy-ss,
-		datx=widget.datx,color=0xffcccccc})
+		datx=widget.datx,color=0})
 
 	return widget
 end
