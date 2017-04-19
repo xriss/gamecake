@@ -89,9 +89,9 @@ function M.bake(oven,escmenu)
 			top:add({hx=480,hy=40})
 		end
 		
-		top:add({hx=480,hy=80,text=XLT"Continue",color=0xff44ff44,id="continue",hooks=hooks})
-		top:add({hx=480,hy=80,text=XLT"Restart",color=0xffffff44,id="restart",hooks=hooks})
-		top:add({hx=480,hy=80,text=XLT"Quit",color=0xffff4444,id="quit",hooks=hooks})
+		top:add({hx=480,hy=80,text=XLT"Continue",color=0x7f00ff00,id="continue",hooks=hooks})
+		top:add({hx=480,hy=80,text=XLT"Restart",color=0x7fffff00,id="restart",hooks=hooks})
+		top:add({hx=480,hy=80,text=XLT"Quit",color=0x7fff0000,id="quit",hooks=hooks})
 		if not mlayout then		
 			top:add({hx=480,hy=40})
 		end

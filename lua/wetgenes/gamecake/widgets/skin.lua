@@ -512,21 +512,13 @@ end
 			end
 						
 			local buttdown=false
-			if ( master.press and master.over==widget ) or widget.state=="selected" then
+			if ( master.press and master.over==widget ) then
 				buttdown=true
 			end
 
 			local hx=widget.hx
 			local hy=widget.hy
 			local bb=2
---			local tl={1,1,1,0.25}
---			local br={0,0,0,0.25}
---			tl[1]=tl[1]*tl[4]
---			tl[2]=tl[2]*tl[4]
---			tl[3]=tl[3]*tl[4]
---			br[1]=br[1]*br[4]
---			br[2]=br[2]*br[4]
---			br[3]=br[3]*br[4]
 			local tl= 1
 			local br=-1
 			
@@ -536,43 +528,27 @@ end
 				typ=1
 			end
 
-
-
 			local c={explode_color(widget.color)}
 			
 			local color_level=1
 
 			if style=="indent" then
 				color_level=color_level-(2/16)
---				local a=14/16
---				c[1]=c[1]*a
---				c[2]=c[2]*a
---				c[3]=c[3]*a
 			elseif widget.solid then
 				color_level=color_level+(2/16)
---				color_level=1.00
---				local a=15/16
---				c[1]=c[1]*a
---				c[2]=c[2]*a
---				c[3]=c[3]*a
 			end
 
+
 			if widget.highlight=="none" then
---				gl.Color( c[1],c[2],c[3],c[4] )
-			elseif master.over==widget or widget.parent==master.active then
-				if buttdown then
-					color_level=color_level-(1/16)
----					local a=15/16
---					gl.Color( c[1]*a,c[2]*a,c[3]*a,c[4] )
-				else
-					color_level=color_level+(1/16)
---					gl.Color( c[1],c[2],c[3],c[4] )
-				end
 			else
---				local a=13/16
---				if widget.state=="selected" then a=15/16 end
---				gl.Color( c[1]*a,c[2]*a,c[3]*a,c[4] )
-				if widget.state=="selected" then color_level=color_level+(1/16) end
+				if widget.state=="selected" then color_level=color_level+(2/16) end
+				if master.over==widget or widget.parent==master.active then
+					if buttdown then
+						color_level=color_level-(1/16)
+					else
+						color_level=color_level+(2/16)
+					end
+				end
 			end
 			
 			gl.Color( unpack(master.get_color(color_level,widget.color)) )
@@ -627,7 +603,6 @@ end
 						hx,		hy,
 						0,		hy)
 			gl.Color( unpack(master.get_color(color_level+(tl*(4/16)),widget.color )) )
---			gl.Color( tl[1],tl[2],tl[3],tl[4] )
 			draw_quad(	0,		0,
 						hx,		0,
 						hx-bb,	bb,
@@ -637,7 +612,6 @@ end
 						0+bb, 	hy-bb,
 						0,    	hy)
 			gl.Color( unpack(master.get_color(color_level+(br*(4/16)),widget.color )) )
---			gl.Color( br[1],br[2],br[3],br[4] )
 			draw_quad( hx,  	hy,
 						0,  	hy,
 						0+bb,	hy-bb,
@@ -690,13 +664,6 @@ end
 
 			local ty=typ
 
---			local c=widget.text_color
---			if widget.text_color_over then
---				if master.over==widget then
---					c=widget.text_color_over
---				end
---			end
-			
 			for i,line in ipairs(lines) do
 			
 				local tx=font.width(line)
@@ -724,17 +691,13 @@ end
 				end
 
 				if widget.text_color_shadow then
---					gl.Color( unpack(master.get_color(0,widget.text_color_shadow)) )
---					gl.Color( pack.argb8_pmf4(widget.text_color_shadow) )
 					gl.Color( unpack(master.get_color(0,widget.text_color_shadow)) )
 					font.set_xy((tx+1)*wsx,(ty+1)*wsy)
 					font.draw(line)
 				end
 				
---				gl.Color( pack.argb8_pmf4(c) )
 				gl.Color( unpack(master.get_color(0,widget.text_color)) )
 				font.set_xy((tx)*wsx,(ty)*wsy)
---print(wstr.dump(line))
 				font.draw(line)
 				
 				if widget.class=="textedit" then -- hack
@@ -753,11 +716,9 @@ end
 							local x0,x1= (tx+s1)*wsx , (tx+s2)*wsx
 							local y0,y1= (ty)*wsy	, (ty+fy)*wsy
 							
-							local c1,c2,c3,c4=pack.argb8_pmf4(c)
 							local cc=master.get_color(0,widget.text_color)
 							cc[4]=cc[4]*0.25
 							gl.Color( unpack(cc) )
---							gl.Color( c1,c2,c3,c4*0.25 )
 
 							draw_quad(x0,y0,x1,y0,x1,y1,x0,y1)
 
