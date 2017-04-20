@@ -162,6 +162,63 @@ function wskin.setup(def)
 		end
 	end
 
+	local function draw_outline(x1,y1,x2,y2,s,c1,c2)
+	
+		c2=c2 or c1
+	
+		local t=cache_array or {}
+		local ht=#t
+
+		local function draw()
+			if cache_array then return end
+			flat.tristrip("rawuvrgba",t)
+		end
+
+		local c={}
+		c[1]={explode_color(c1)}
+		c[2]={explode_color(c2)}
+
+		local v={}
+		v[#v+1]=gl.apply_modelview( {x1  ,y1  ,0,1} )
+		v[#v+1]=gl.apply_modelview( {x1-s,y1-s,0,1} )
+		v[#v+1]=gl.apply_modelview( {x2  ,y1  ,0,1} )
+		v[#v+1]=gl.apply_modelview( {x2+s,y1-s,0,1} )
+		v[#v+1]=gl.apply_modelview( {x2  ,y2  ,0,1} )
+		v[#v+1]=gl.apply_modelview( {x2+s,y2+s,0,1} )
+		v[#v+1]=gl.apply_modelview( {x1  ,y2  ,0,1} )
+		v[#v+1]=gl.apply_modelview( {x1-s,y2+s,0,1} )
+
+		for i,idx in ipairs{
+			{1,1},
+			{1,1},
+			{2,2},
+			{3,1},
+			{4,2},
+			{5,1},
+			{6,2},
+			{7,1},
+			{8,2},
+			{1,1},
+			{2,2},
+			{2,2},
+		} do
+			local vi=idx[1]
+			local ci=idx[2]
+			t[#t+1]=v[vi][1]
+			t[#t+1]=v[vi][2]
+			t[#t+1]=v[vi][3]
+			t[#t+1]=-2
+			t[#t+1]=-2
+			t[#t+1]=c[ci][1]
+			t[#t+1]=c[ci][2]
+			t[#t+1]=c[ci][3]
+			t[#t+1]=c[ci][4]
+		end
+		
+		draw()
+
+	end
+
 	local function draw_quad(x1,y1,x2,y2,x3,y3,x4,y4)
 
 		local t=cache_array or {}
@@ -492,6 +549,12 @@ end
 						
 		local txp,typ=0,0
 		
+		if widget.outline_size then -- draw a solid outline / border
+		
+			draw_outline(0,0,widget.hx,widget.hy,widget.outline_size or 2,widget.outline_color or 0xff000000 , widget.outline_fade_color or widget.outline_color or 0xff000000 )
+			
+		end
+
 		if widget.color then -- need a color to draw, so no color, no draw
 		
 			local style=widget.style
@@ -629,6 +692,7 @@ end
 						0,		hy)
 
 			end
+			
 --end
 			
 		end

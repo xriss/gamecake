@@ -137,6 +137,9 @@ function wwindow.setup(widget,def)
 	local ss_corner=ss/4
 
 
+	widget.outline_size=ss_side
+
+	widget.win_scale=def.win_scale or 0
 
 
 -- add all the trimmings
