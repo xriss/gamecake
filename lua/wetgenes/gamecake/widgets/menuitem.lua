@@ -191,6 +191,7 @@ function wmenuitem.setup(widget,def)
 
 
 	widget.solid=true
+	widget.style=widget.style or "button"
 
 	widget.class_hooks=wmenuitem.hooks
 	

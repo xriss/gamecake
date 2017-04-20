@@ -69,9 +69,8 @@ function wmaster.setup(widget,def)
 
 -- built in color themes, 
 
-	master.color_theme_bright={ { 0.00, 0.00, 0.00, 1.00 },{ 0.60, 0.60, 0.60, 1.00 },{ 1.00, 1.00, 1.00, 1.00 },text=0	}
---	master.color_theme_dark  ={ { 0.80, 0.80, 0.80, 1.00 },{ 0.30, 0.30, 0.30, 1.00 },{ 0.00, 0.00, 0.00, 1.00 },text=0	}
-	master.color_theme_dark  ={ { 0.00, 0.00, 0.00, 1.00 },{ 0.30, 0.30, 0.30, 1.00 },{ 1.00, 1.00, 1.00, 1.00 },text=2	}
+	master.color_theme_bright={ { 0.00, 0.00, 0.00 },{ 0.60, 0.60, 0.60 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, }
+	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, }
 
 -- global GUI color theme
 
@@ -87,17 +86,19 @@ function wmaster.setup(widget,def)
 	
 		local c={}
 
+		val=((val-1)*t.scale)+1 -- theme scale intensity
+
 		if val<0 then val=0 end -- clamp
 		if val>2 then val=2 end
 
 		if val<1 then
-			for i=1,4 do c[i]=t[1][i]*(1-val) + t[2][i]*(val) end -- blend down
+			for i=1,3 do c[i]=t[1][i]*(1-val) + t[2][i]*(val) end -- blend down
 		elseif val>=1 then
-			for i=1,4 do c[i]=t[2][i]*(2-val) + t[3][i]*(val-1) end -- blend up
+			for i=1,3 do c[i]=t[2][i]*(2-val) + t[3][i]*(val-1) end -- blend up
 		end
 		
-		if c[4]<=0 then c[4]=1 end -- fix possible divide by zero?
-		for i=1,3 do c[i]=c[i]/c[4] end -- normalise
+--		if c[4]<=0 then c[4]=1 end -- fix possible divide by zero?
+--		for i=1,3 do c[i]=c[i]/c[4] end -- normalise
 		
 		if tint then
 			if type(tint)=="number" then -- convert from 0xAARRGGBB

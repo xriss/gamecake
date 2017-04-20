@@ -110,6 +110,17 @@ function wmeta.setup(def)
 		c.hy=c.hy-((c.py or 0)*2)
 		return n:add(c) -- smaller and centered
 	end
+
+	function meta.add_indent(parent,c,t)
+		t=t or 1
+		local n=parent:add({px=c.px,py=c.py,hx=c.hx,hy=c.hy}) -- full size
+		c.px=t*1
+		c.py=t*1
+		c.hx=c.hx-t*2
+		c.hy=c.hy-t*2
+		return n:add(c) -- smaller
+	end
+
 --
 -- remove from parent
 --

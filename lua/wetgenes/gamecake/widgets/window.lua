@@ -133,6 +133,9 @@ function wwindow.setup(widget,def)
 	local ss=24
 	local color=0
 
+	local ss_side=ss/8
+	local ss_corner=ss/4
+
 
 
 
@@ -163,7 +166,7 @@ function wwindow.setup(widget,def)
 				highlight="none",
 			})
 
-	widget.win_menu=widget.win_fbo:add({
+	widget.win_menu=widget.win_fbo:add_indent({
 				class="menuitem",
 				px=0,
 				py=0,
@@ -174,9 +177,9 @@ function wwindow.setup(widget,def)
 				skin=0,
 				solid=true,
 				menu_data=widget.menu_data,
-			})
+			},ss1)
 
-	widget.win_title=widget.win_fbo:add({
+	widget.win_title=widget.win_fbo:add_indent({
 				px=ss,
 				py=0,
 				hx=def.hx-ss*3,
@@ -184,9 +187,9 @@ function wwindow.setup(widget,def)
 				text=def.title or "...",
 				color=color,
 				skin=0,
-			})
+			},ss1)
 
-	widget.win_shrink=widget.win_fbo:add({
+	widget.win_shrink=widget.win_fbo:add_indent({
 				px=def.hx-ss*2,
 				py=0,
 				hx=ss,
@@ -197,9 +200,9 @@ function wwindow.setup(widget,def)
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_shrink",
-			})
+			},ss1)
 
-	widget.win_grow=widget.win_fbo:add({
+	widget.win_grow=widget.win_fbo:add_indent({
 				px=def.hx-ss,
 				py=0,
 				hx=ss,
@@ -210,8 +213,9 @@ function wwindow.setup(widget,def)
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_grow",
-			})
+			},ss1)
 
+	widget.hx=def.hx
 	widget.hy=def.hy+ss
 	
 	return widget

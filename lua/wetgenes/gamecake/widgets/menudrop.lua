@@ -89,6 +89,7 @@ function wmenudrop.setup(widget,def)
 	widget.layout=wmenudrop.layout
 
 	widget.solid=true
+	widget.style=widget.style or "button"
 
 	widget.menu_px=def.menu_px or 1 -- where to drop
 	widget.menu_py=def.menu_py or 0
