@@ -170,6 +170,10 @@ commonPushUserdata(lua_State *L, const char *tname, void *data)
 CommonUserdata *
 commonGetUserdata(lua_State *L, int index, const char *tname)
 {
+
+// This test is not working? Bad constant strings maybe?
+// just disable for now
+
 //	return luaL_checkudata(L, index, tname);
 	return lua_touserdata(L, index);
 }
