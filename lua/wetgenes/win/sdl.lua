@@ -435,6 +435,28 @@ sdl.set_clipboard=function(s)
 	return SDL.setClipboardText(s)
 end
 
+sdl._cursors={}
+sdl._cursor=function(s)
+
+	local v=sdl._cursors[s]
+	if v then return v end
+
+	v=assert( SDL.createSystemCursor( SDL.systemCursor[s] ) )
+
+	sdl._cursors[s]=v
+
+	return v
+end
+
+sdl.cursor=function(s)
+
+	local v=sdl._cursor(s)
+
+	SDL.setCursor(v)
+	
+end
+
+
 
 sdl.platform=SDL.getPlatform() -- remember platform
 

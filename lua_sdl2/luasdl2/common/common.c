@@ -170,7 +170,8 @@ commonPushUserdata(lua_State *L, const char *tname, void *data)
 CommonUserdata *
 commonGetUserdata(lua_State *L, int index, const char *tname)
 {
-	return luaL_checkudata(L, index, tname);
+//	return luaL_checkudata(L, index, tname);
+	return lua_touserdata(L, index);
 }
 
 int

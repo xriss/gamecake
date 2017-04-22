@@ -31,4 +31,6 @@ extern const CommonEnum MouseButtons[];
 
 extern const CommonEnum MouseMask[];
 
+extern const CommonEnum SystemCursor[];
+
 #endif /* !_MOUSE_H_ */

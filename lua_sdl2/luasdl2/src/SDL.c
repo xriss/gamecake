@@ -383,6 +383,9 @@ static const struct {
 
 	{ "mouseButton",	MouseButtons			},
 	{ "mouseMask",		MouseMask			},
+
+	{ "systemCursor",	SystemCursor			},
+
 	{ "event",		EventType			},
 	{ "eventAction",	EventAction			},
 	{ "eventWindow",	EventWindow			},
