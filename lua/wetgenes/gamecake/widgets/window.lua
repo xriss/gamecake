@@ -138,6 +138,7 @@ function wwindow.setup(widget,def)
 
 
 	widget.outline_size=ss_side
+--	widget.outline_color=0xcc000000
 
 	widget.win_scale=def.win_scale or 0
 

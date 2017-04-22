@@ -19,6 +19,7 @@ function M.bake(oven,images)
 	local opts=oven.opts
 	local cake=oven.cake
 	local gl=oven.gl
+			
 	
 --	local stash=oven.rebake("wetgenes.gamecake.stash")
 --	images.exists=stash.exists -- check files exists
@@ -80,6 +81,9 @@ images.reload=function(id)
 --print("RELOAD",t.id,t.mip)
 		images.upload(t) -- upload to GL
 oven.preloader("reload",string.format("%9s : %s",(t.gl_width or 0).."x"..(t.gl_height or 0),t.id))
+
+		local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+		framebuffers.dirty() -- ask for all cached fbo to redraw, as they may now be out of sync
 	end
 end
 

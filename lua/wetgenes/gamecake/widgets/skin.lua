@@ -404,12 +404,15 @@ function wskin.setup(def)
 --widget.old_layout
 --widget.layout
 
-if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
+if ( not widget.fbo ) or widget.dirty or (widget.fbo and widget.fbo.dirty) then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
 
 local cache_draw
 local font_cache_draw
 
 		if widget.fbo then
+		
+			widget.fbo.dirty=false
+			
 --print("into fbo"..wstr.dump(widget.fbo))
 
 			widget.fbo:bind_frame()

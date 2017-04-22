@@ -20,6 +20,12 @@ function M.bake(oven,framebuffers)
 	
 	framebuffers.data=setmetatable({}, { __mode = 'vk' })
 
+	framebuffers.dirty = function()
+		for n,v in pairs(framebuffers.data) do
+			v.dirty=true
+		end
+	end
+
 	framebuffers.create = function(w,h,d,def)
 
 		local fbo=def or {} -- allow default settings on 4th param
