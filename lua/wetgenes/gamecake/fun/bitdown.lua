@@ -164,7 +164,7 @@ M.pix_size=function(str,rx,ry)
 	
 	local l=0 for i=1,#ls do l=l+string.len(ls[i]) end
 	
-	local x=math.floor(l/(#ls*2))
+	local x=math.floor((l/(#ls*2))+0.5)
 	local y=#ls
 
 	x=math.ceil(x/rx)*rx
@@ -211,8 +211,12 @@ M.pix_grd=function(str,map,gout,px,py,hx,hy,sub)
 			t[l+1]=c[1] t[l+2]=c[2] t[l+3]=c[3] t[l+4]=c[4]
 		end
 	end
+	
+	if not gout then gout=wgrd.create("U8_RGBA_PREMULT",hx,hy,1) end 
+	
 	gout:pixels(px,py,hx,hy,t)
 
+	return gout
 end
 
 -- write some ascii art into an x,y grd location

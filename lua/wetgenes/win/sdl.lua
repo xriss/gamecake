@@ -359,12 +359,20 @@ sdl.warp_mouse=function(it,x,y)
 	return true
 end
 
-
-
-sdl.icon=function(w,g)
+--
+-- kinda hacky, but turn a grd into a surface via a bitmap structure...
+--
+local _grd_to_surface=function(g)
 
 	local wgrd=require("wetgenes.grd")
 	local pack=require("wetgenes.pack")
+
+	if type(g)=="string" then -- assume swanky32 bitdown format and convert to grd
+
+		g=require("wetgenes.gamecake.fun.bitdown").pix_grd(g) -- convert to grd
+
+	end
+
 
 	assert(g:convert(wgrd.U8_RGBA)) -- make sure it is this format
 	assert(g:flipy()) -- needs to be the other way up
@@ -376,8 +384,6 @@ sdl.icon=function(w,g)
 	local bmp_data=pack.save_array(argb,"u8",0,#argb)
 	local bmp_file=pack.save{2,"BM","u32",14+40+#bmp_data,"u16",0,"u16",0,"u32",14+40}
 	local bmp_head=pack.save{"u32",40,"u32",g.width,"u32",g.height,"u16",1,"u16",32,"u32",0,"u32",#bmp_data,"u32",0,"u32",0,"u32",0,"u32",0}
-
---print("ICON",#bmp_file,type(bmp_file),#bmp_head,type(bmp_file),#bmp_data,type(bmp_data))
 
 -- create a bmp stream for SDL to read...
 	local it={}
@@ -415,10 +421,12 @@ sdl.icon=function(w,g)
 	local rw=assert(SDL.RWCreate(it))
 	local surf=assert(SDL.loadBMP_RW(rw))
 
-	w.win:setIcon(surf)
+	return surf
+end
 
+sdl.icon=function(w,g)
 
---	core.rawicon(w,pack.save_array({g.width,g.height},"u32",0,2)..pack.save_array(argb,"u8",0,#argb))
+	w.win:setIcon(_grd_to_surface(g))
 
 end
 
@@ -435,22 +443,47 @@ sdl.set_clipboard=function(s)
 	return SDL.setClipboardText(s)
 end
 
-sdl._cursors={}
-sdl._cursor=function(s)
+-- we want lowercase only, and map to these capitals
+local _cursor_names={
+	"Arrow","Ibeam","Wait","Crosshair","WaitArrow",
+	"SizeNWSE","SizeNESW","SizeWE","SizeNS","SizeAll",
+	"No","Hand",
+}
 
-	local v=sdl._cursors[s]
+
+
+local _cursors={}
+local _cursor=function(s,dat,px,py)
+
+	if dat then -- remember a new one
+			
+		dat=_grd_to_surface(dat) -- convert from grd to surface
+		
+		_cursors[s]=assert(SDL.createColorCursor(dat , px or 0 , py or 0 ))
+	
+	end
+
+	local v=_cursors[s]
 	if v then return v end
+	
+	local S=s -- fix capitals
+	for i,v in ipairs(_cursor_names) do
+		if v:lower()==s then S=v break end
+	end
 
-	v=assert( SDL.createSystemCursor( SDL.systemCursor[s] ) )
+	v=assert( SDL.createSystemCursor( SDL.systemCursor[S] ) )
 
-	sdl._cursors[s]=v
+	_cursors[s]=v
 
 	return v
 end
 
-sdl.cursor=function(s)
+sdl.cursor_from_grd=_cursor
+sdl.cursor_from_bitdown=_cursor
 
-	local v=sdl._cursor(s)
+sdl.cursor=function(...)
+
+	local v=_cursor(...)
 
 	SDL.setCursor(v)
 	
