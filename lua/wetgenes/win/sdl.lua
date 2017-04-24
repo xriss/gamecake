@@ -451,6 +451,35 @@ local _cursor_names={
 }
 
 
+-- 24x24 is probably a safe and reasonable size?
+--[=[
+		wwin.cursor("test",[[
+0 0 0 0 . . . . . . . . . . . . 0 0 0 0 . . . .
+0 7 7 0 . . . . . . . . . . . . 0 7 7 0 . . . .
+0 7 7 0 . . . . . . . . . . . . 0 7 7 0 . . . .
+0 0 0 7 . . . . . . . . . . . . 0 0 0 7 . . . .
+. . . . 7 . . . . . . . . . . . . . . . 7 . . .
+. . . . . 7 . . . . . . . . . . . . . . . 7 . .
+. . . . . . R R R R . . . . . . . . . . . . R R 
+. . . . . . R R R R . . . . . . . . . . . . R R 
+. . . . . . R R R R . . . . . . . . . . . . R R 
+. . . . . . R R R R . . . . . . . . . . . . R R 
+. . . . . . . . . . 7 . . . . . . . . . . . . . 
+. . . . . . . . . . . 7 . . . . . . . . . . . . 
+. . . . . . . . . . . . 7 0 0 0 . . . . . . . . 
+. . . . . . . . . . . . 0 7 7 0 . . . . . . . . 
+. . . . . . . . . . . . 0 7 7 0 . . . . . . . . 
+. . . . . . . . . . . . 0 0 0 0 . . . . . . . . 
+0 0 0 0 . . . . . . . . . . . . 0 0 0 0 . . . . 
+0 7 7 0 . . . . . . . . . . . . 0 7 7 0 . . . . 
+0 7 7 0 . . . . . . . . . . . . 0 7 7 0 . . . . 
+0 0 0 7 . . . . . . . . . . . . 0 0 0 7 . . . . 
+. . . . 7 . . . . . . . . . . . . . . . 7 . . . 
+. . . . . 7 . . . . . . . . . . . . . . . 7 . . 
+. . . . . . 7 . . . . . . . . . . . . . . . 7 . 
+. . . . . . . 7 . . . . . . . . . . . . . . . 7 
+]])
+]=]
 
 local _cursors={}
 local _cursor=function(s,dat,px,py)
@@ -466,6 +495,8 @@ local _cursor=function(s,dat,px,py)
 	local v=_cursors[s]
 	if v then return v end
 	
+	if type(s)~="string" then return end
+	
 	local S=s -- fix capitals
 	for i,v in ipairs(_cursor_names) do
 		if v:lower()==s then S=v break end
@@ -478,14 +509,18 @@ local _cursor=function(s,dat,px,py)
 	return v
 end
 
-sdl.cursor_from_grd=_cursor
-sdl.cursor_from_bitdown=_cursor
+sdl.cursor=function(s,dat,px,py)
 
-sdl.cursor=function(...)
+	local v=_cursor(s,dat,px,py)
 
-	local v=_cursor(...)
-
-	SDL.setCursor(v)
+	if not dat then -- if not setting an image then change the actual cursor
+		if v then
+			SDL.setCursor(v)
+		else
+			if type(s)=="boolean" then -- show/hide
+			end
+		end
+	end
 	
 end
 
