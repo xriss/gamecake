@@ -744,7 +744,7 @@ end
 				elseif widget.text_align=="centerx" then
 					tx=(widget.hx-tx)/2
 				elseif widget.text_align=="left_center" then
-					tx=widget.hy/2
+					tx=widget.hy/4
 					ty=((widget.hy/2-fy*0.7))+typ
 				else -- center a single line vertically as well
 					tx=(widget.hx-tx)/2 

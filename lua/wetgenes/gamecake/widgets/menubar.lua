@@ -62,7 +62,7 @@ function wmenubar.layout(widget)
 					local fs=v:bubble("text_size") or 16
 					font.set(cake.fonts.get(f))
 					font.set_size(fs,0)
-					v.hx=font.width(v.text)+widget.hy					
+					v.hx=font.width(v.text)+widget.hy/2					
 					v.hy=widget.hy -- use set height from parent
 				end
 			end
