@@ -40,6 +40,7 @@ function wmenuitem.menu_add(widget,opts)
 
 		widget.menu=widget.master:add({
 			class="menu",
+			grid_size=opts.grid_size or widget.master.grid_size,
 			color=opts.color or 0,
 			style=opts.style or "button",
 			skin=opts.skin or 0,

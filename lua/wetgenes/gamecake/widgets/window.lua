@@ -130,7 +130,7 @@ function wwindow.setup(widget,def)
 		hooks=widget.win_hooks,
 	}
 	
-	local ss=24
+	local ss=widget.master.grid_size or 24
 	local color=0
 
 	local ss_side=ss/8

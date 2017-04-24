@@ -199,6 +199,7 @@ function wmeta.setup(def)
 		widget.text_size=def.text_size
 		widget.text_align=def.text_align -- default is "center", and "wrap" will wrap the text
 		
+		widget.grid_size=def.grid_size
 
 		widget.sheet=def.sheet -- display this sheet (by name) on the button
 		widget.sheet_id=def.sheet_id
