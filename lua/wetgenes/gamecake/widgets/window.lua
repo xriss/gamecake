@@ -23,6 +23,8 @@ function wwindow.edge_drag(widget,x,y)
 	local window=parent.parent
 	local active_xy=master.active_xy
 	
+	master:insert(window) -- move to top
+
 	if not active_xy.edge then -- fill in starting edge on the first call
 
 		active_xy.edge=widget.id
@@ -69,6 +71,19 @@ function wwindow.edge_drag(widget,x,y)
 			window.py=active_xy.py+(my-active_xy.wy)
 			window.hy=active_xy.hy-(my-active_xy.wy)
 		end
+
+	end
+	
+	if window.panel_mode=="scale" then -- keep aspect when scaling
+
+		local sx=window.hx/window.win_fbo.hx
+		local sy=window.hy/window.win_fbo.hy
+		local s=sx<sy and sx or sy
+		if	master.active_xy.edge=="win_edge_t" or master.active_xy.edge=="win_edge_b" then s=sy end
+		if	master.active_xy.edge=="win_edge_l" or master.active_xy.edge=="win_edge_r" then s=sx end
+		
+		window.hx=window.win_fbo.hx*s
+		window.hy=window.win_fbo.hy*s
 
 	end
 
@@ -184,7 +199,7 @@ function wwindow.setup(widget,def)
 
 	widget.class="window"
 
-	widget.panel_mode=def.panel_mode or "stretch" 	-- scale the child to fit
+	widget.panel_mode=def.panel_mode or "scale" 	-- scale the child to fit
 
 --	widget.key=wwindow.key
 --	widget.mouse=wwindow.mouse
