@@ -1,7 +1,7 @@
 #build dependencies, run sudo ./apt-gets
 
 
-apt-get install build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev 
+apt-get install build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev libsdl2-dev premake4
 
 
 apt-get install libssl-dev
