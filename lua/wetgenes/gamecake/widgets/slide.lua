@@ -125,7 +125,7 @@ function wslide.setup(widget,def)
 	widget.knob.py=widget.daty:get_pos(widget.hy,widget.knob.hy)
 	widget:snap()
 
-	widget.solid=true
+	widget.solid=false
 --	widget.can_focus=true
 	
 	return widget

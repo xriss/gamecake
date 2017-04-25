@@ -661,7 +661,7 @@ end
 				end
 								
 			
-			elseif skin==1 then -- builtin border
+			elseif skin==2 then -- builtin border
 			
 			
 			draw_quad(	0,		0,
@@ -678,6 +678,33 @@ end
 						0+bb, 	hy-bb,
 						0,    	hy)
 			gl.Color( unpack(master.get_color(color_level+(br*(4/16)),widget.color )) )
+			draw_quad( hx,  	hy,
+						0,  	hy,
+						0+bb,	hy-bb,
+						hx-bb,	hy-bb)
+			draw_quad(  hx,    0,
+						hx,    hy,
+						hx-bb, hy-bb,
+						hx-bb, bb)
+
+			elseif skin==1 then -- builtin border
+			
+			
+			draw_quad(	0,		0,
+						hx,		0,
+						hx,		hy,
+						0,		hy)
+
+			bb=1
+			gl.Color( unpack(master.get_color(color_level+(br*(4/16)),widget.color )) )
+			draw_quad(	0,		0,
+						hx,		0,
+						hx-bb,	bb,
+						0+bb, 	bb)
+			draw_quad(	0,		0,
+						0+bb,	bb,
+						0+bb, 	hy-bb,
+						0,    	hy)
 			draw_quad( hx,  	hy,
 						0,  	hy,
 						0+bb,	hy-bb,
