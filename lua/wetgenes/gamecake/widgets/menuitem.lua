@@ -54,7 +54,7 @@ function wmenuitem.menu_add(widget,opts)
 	local md=opts.menu_data or widget.menu_data
 	if type(md)=="function" then md=md() end
 
-	top.px,top.py=widget:get_master_xy(widget.hx*widget.menu_px,widget.hy*widget.menu_py)
+	top.px,top.py=widget:get_master_xy(widget.hx*(widget.menu_px or 0),widget.hy*(widget.menu_py or 0))
 
 	local func_text=opts.func_text or md.func_text or function(a) return tostring(a) end 
 	for i,v in ipairs(md) do

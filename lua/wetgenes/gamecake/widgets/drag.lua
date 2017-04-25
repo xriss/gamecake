@@ -12,6 +12,37 @@ wdrag=wdrag or {}
 
 local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
 
+function wdrag.drag(widget,x,y)
+
+	local parent=widget.parent
+	local master=widget.master
+
+	local rx,ry=parent:mousexy(x,y)
+	local x,y=rx-master.active_xy[1],ry-master.active_xy[2]
+
+	local maxx=parent.hx-widget.hx
+	local maxy=parent.hy-widget.hy
+	
+	widget.px=x
+	widget.py=y
+	
+	if widget.px<0    then widget.px=0 end
+	if widget.px>maxx then widget.px=maxx end
+	if widget.py<0    then widget.py=0 end
+	if widget.py>maxy then widget.py=maxy end
+	
+	if parent.snap then
+		parent:snap(true)
+	end
+	
+	widget:call_hook_later("slide")
+	
+	widget:set_dirty()
+	
+	widget:layout()
+	widget:build_m4()
+end
+
 function wdrag.update(widget)
 
 	if widget.data then
@@ -27,10 +58,10 @@ end
 
 
 function wdrag.setup(widget,def)
---	local it={}
---	widget.drag=it
+
 	widget.class="drag"
 	
+	widget.drag=wdrag.drag
 	widget.key=wdrag.key
 	widget.mouse=wdrag.mouse
 	widget.update=wdrag.update

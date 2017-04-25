@@ -16,38 +16,101 @@ local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
 wwindow=wwindow or {}
 
-function wwindow.mouse(widget,act,_x,_y,keyname)
+function wwindow.edge_drag(widget,x,y)
 
--- check children first
-	local ret=widget.meta.mouse(widget,act,_x,_y,keyname)
---[[
-	if widget.panel_mode=="window" then -- window move?
+	local parent=widget.parent
+	local master=widget.master
+	local window=parent.parent
+	local active_xy=master.active_xy
+	
+	if not active_xy.edge then -- fill in starting edge on the first call
 
-		local x,y=widget.parent:mousexy(_x,_y)
+		active_xy.edge=widget.id
+		
+		active_xy.wx,active_xy.wy=window.parent:mousexy(active_xy.mx,active_xy.my)
 
-		if widget.drag_mouse then
-			if act==-1 and keyname=="left" then
-				widget.drag_mouse=nil
-			else
-				widget.px=widget.drag_mouse[1]+x
-				widget.py=widget.drag_mouse[2]+y
-				widget:set_dirty()
-				widget.meta.build_m4(widget)
-			end
-		else
-			if act==1 and keyname=="left" then
-				if widget.master.over==widget then --clicking on us?
-					widget.drag_mouse={widget.px-x,widget.py-y}
-					widget.parent:insert(widget) -- move to top
-				end
-			end
-		end
-
-print(ret,x,y,act,keyname)
+		active_xy.px=window.px
+		active_xy.py=window.py
+		active_xy.hx=window.hx
+		active_xy.hy=window.hy
 
 	end
+
+	local mx,my=window.parent:mousexy(x,y)
+
+	if	master.active_xy.edge=="win_edge_br" or 
+		master.active_xy.edge=="win_edge_bl" or 
+		master.active_xy.edge=="win_edge_tr" or 
+		master.active_xy.edge=="win_edge_b"  or 
+		master.active_xy.edge=="win_edge_r"  then
+		
+		if master.active_xy.edge=="win_edge_br" or master.active_xy.edge=="win_edge_r" or master.active_xy.edge=="win_edge_tr" then
+			window.hx=active_xy.hx+(mx-active_xy.wx)
+		end
+		
+		if master.active_xy.edge=="win_edge_br" or master.active_xy.edge=="win_edge_b" or master.active_xy.edge=="win_edge_bl" then
+			window.hy=active_xy.hy+(my-active_xy.wy)
+		end
+
+	end
+
+	if	master.active_xy.edge=="win_edge_tl" or
+		master.active_xy.edge=="win_edge_tr" or
+		master.active_xy.edge=="win_edge_bl" or
+		master.active_xy.edge=="win_edge_t" or
+		master.active_xy.edge=="win_edge_l" then
+		
+		if master.active_xy.edge=="win_edge_tl" or master.active_xy.edge=="win_edge_l" or master.active_xy.edge=="win_edge_bl" then
+			window.px=active_xy.px+(mx-active_xy.wx)
+			window.hx=active_xy.hx-(mx-active_xy.wx)
+		end
+		
+		if master.active_xy.edge=="win_edge_tl" or master.active_xy.edge=="win_edge_t" or master.active_xy.edge=="win_edge_tr" then
+			window.py=active_xy.py+(my-active_xy.wy)
+			window.hy=active_xy.hy-(my-active_xy.wy)
+		end
+
+	end
+
+	window:set_dirty()	
+	window:layout()
+	window:build_m4()
+
+end
+
+function wwindow.drag(widget,x,y)
+
+	local parent=widget.parent
+	local master=widget.master
+
+	parent:insert(widget) -- move to top
+
+	local rx,ry=parent:mousexy(x,y)
+	local x,y=rx-master.active_xy[1],ry-master.active_xy[2]
+
+--	local maxx=parent.hx-widget.hx
+--	local maxy=parent.hy-widget.hy
+
+	widget.px=x
+	widget.py=y
+	
+--[[
+	if widget.px<0    then widget.px=0 end
+	if widget.px>maxx then widget.px=maxx end
+	if widget.py<0    then widget.py=0 end
+	if widget.py>maxy then widget.py=maxy end
+	
+	if parent.snap then
+		parent:snap(true)
+	end
 ]]
-	return ret
+
+	widget:call_hook_later("slide")
+	
+	widget:set_dirty()
+	
+	widget:layout()
+	widget:build_m4()
 end
 
 function wwindow.update(widget)
@@ -105,6 +168,14 @@ wwindow.win_hooks=function(widget,act,w)
 			widget.hy=widget.hy/1.5
 			widget:layout()
 			widget:build_m4()
+
+		elseif w.id=="win_reset" then
+
+			widget.hx=widget.win_fbo.hx
+			widget.hy=widget.win_fbo.hy
+			widget:layout()
+			widget:build_m4()
+
 		end
 	end
 end
@@ -113,10 +184,11 @@ function wwindow.setup(widget,def)
 
 	widget.class="window"
 
-	widget.panel_mode=def.panel_mode or "scale" 	-- scale the child to fit
+	widget.panel_mode=def.panel_mode or "stretch" 	-- scale the child to fit
 
 --	widget.key=wwindow.key
-	widget.mouse=wwindow.mouse
+--	widget.mouse=wwindow.mouse
+	widget.drag=wwindow.drag
 	widget.update=wwindow.update
 	widget.draw=wwindow.draw
 	widget.layout=wwindow.layout
@@ -125,6 +197,7 @@ function wwindow.setup(widget,def)
 
 	widget.menu_data=widget.menu_data or {
 		{	id="win_hide",		text="Hide Window",		},
+		{	id="win_reset",		text="Reset Window",	},
 		{	id="win_shrink",	text="Shrink Window",	},
 		{	id="win_grow",		text="Grow Window",		},
 		hooks=widget.win_hooks,
@@ -181,6 +254,7 @@ function wwindow.setup(widget,def)
 				skin=0,
 				solid=true,
 				menu_data=widget.menu_data,
+				cursor="hand",
 			},ss1)
 
 	widget.win_title=widget.win_fbo:add_indent({
@@ -204,6 +278,7 @@ function wwindow.setup(widget,def)
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_shrink",
+				cursor="hand",
 			},ss1)
 
 	widget.win_grow=widget.win_fbo:add_indent({
@@ -217,7 +292,99 @@ function wwindow.setup(widget,def)
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_grow",
+				cursor="hand",
 			},ss1)
+
+	widget.win_edge_l=widget.win_fbo:add({
+				px=0,
+				py=0,
+				hx=ss/8,
+				hy=def.hy+ss,
+				solid=true,
+				hooks=widget.win_hooks,
+				id="win_edge_l",
+				cursor="sizewe",
+				drag=wwindow.edge_drag,
+			})
+	widget.win_edge_r=widget.win_fbo:add({
+				px=def.hx-ss/8,
+				py=0,
+				hx=ss/8,
+				hy=def.hy+ss,
+				solid=true,
+				hooks=widget.win_hooks,
+				id="win_edge_r",
+				cursor="sizewe",
+				drag=wwindow.edge_drag,
+			})
+	widget.win_edge_t=widget.win_fbo:add({
+				px=0,
+				py=0,
+				hx=def.hx,
+				hy=ss/8,
+				solid=true,
+				hooks=widget.win_hooks,
+				id="win_edge_t",
+				cursor="sizens",
+				drag=wwindow.edge_drag,
+			})
+	widget.win_edge_b=widget.win_fbo:add({
+				px=0,
+				py=def.hy+ss-ss/8,
+				hx=def.hx,
+				hy=ss/8,
+				solid=true,
+				hooks=widget.win_hooks,
+				id="win_edge_b",
+				cursor="sizens",
+				drag=wwindow.edge_drag,
+			})
+
+	widget.win_edge_tl=widget.win_fbo:add({
+				px=0,
+				py=0,
+				hx=ss/4,
+				hy=ss/4,
+				solid=true,
+				hooks=widget.win_hooks,
+				id="win_edge_tl",
+				cursor="sizenwse",
+				drag=wwindow.edge_drag,
+			})
+	widget.win_edge_tr=widget.win_fbo:add({
+				px=def.hx-ss/4,
+				py=0,
+				hx=ss/4,
+				hy=ss/4,
+				solid=true,
+				hooks=widget.win_hooks,
+				id="win_edge_tr",
+				cursor="sizenesw",
+				drag=wwindow.edge_drag,
+			})
+	widget.win_edge_bl=widget.win_fbo:add({
+				px=0,
+				py=def.hy+ss-ss/4,
+				hx=ss/4,
+				hy=ss/4,
+				solid=true,
+				hooks=widget.win_hooks,
+				id="win_edge_bl",
+				cursor="sizenwse",
+				drag=wwindow.edge_drag,
+			})
+	widget.win_edge_br=widget.win_fbo:add({
+				px=def.hx-ss/4,
+				py=def.hy+ss-ss/4,
+				hx=ss/4,
+				hy=ss/4,
+				solid=true,
+				hooks=widget.win_hooks,
+				id="win_edge_br",
+				cursor="sizenesw",
+				drag=wwindow.edge_drag,
+			})
+
 
 	widget.hx=def.hx
 	widget.hy=def.hy+ss

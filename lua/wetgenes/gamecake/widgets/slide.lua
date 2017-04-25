@@ -57,10 +57,10 @@ function wslide.update(widget)
 			end
 	end
 	
-	local oldx=widget.drag.px
-	local oldy=widget.drag.py
+	local oldx=widget.knob.px
+	local oldy=widget.knob.py
 	widget:snap()
-	if oldx~=widget.drag.px or oldy~=widget.drag.py then
+	if oldx~=widget.knob.px or oldy~=widget.knob.py then
 		widget:build_m4()
 	end
 	
@@ -69,8 +69,8 @@ end
 
 function wslide.layout(widget)
 
-	widget.drag.hx=widget.datx:get_size(widget.hx)
-	widget.drag.hy=widget.daty:get_size(widget.hy)
+	widget.knob.hx=widget.datx:get_size(widget.hx)
+	widget.knob.hy=widget.daty:get_size(widget.hy)
 
 	widget.meta.layout(widget)	
 	
@@ -79,18 +79,18 @@ end
 function wslide.slide_snap(it,useloc)
 
 	if not useloc then
-		it.drag.px=it.datx:get_pos(it.hx,it.drag.hx)
-		it.drag.py=it.daty:get_pos(it.hy,it.drag.hy)
+		it.knob.px=it.datx:get_pos(it.hx,it.knob.hx)
+		it.knob.py=it.daty:get_pos(it.hy,it.knob.hy)
 	end
 	
-	it.drag.hx=it.datx:get_size(it.hx)
-	it.drag.hy=it.daty:get_size(it.hy)
+	it.knob.hx=it.datx:get_size(it.hx)
+	it.knob.hy=it.daty:get_size(it.hy)
 
 -- auto snap positions when draged
-	it.drag.px=it.datx:snap( it.hx , it.drag.hx , it.drag.px )
+	it.knob.px=it.datx:snap( it.hx , it.knob.hx , it.knob.px )
 	
 -- y is now the right way up
-	it.drag.py=it.daty:snap( it.hy , it.drag.hy , it.drag.py )
+	it.knob.py=it.daty:snap( it.hy , it.knob.hy , it.knob.py )
 	
 end
 	
@@ -115,14 +115,14 @@ function wslide.setup(widget,def)
 	widget.style=def.style or "indent"
 
 -- auto add the draging button as a child
-	widget.drag=widget:add({style="button",class="drag",color=widget.color,solid=true,
+	widget.knob=widget:add({style="button",class="drag",color=widget.color,solid=true,
 		data=widget.data,skin=widget.skin})
 
 -- set size and position of child
-	widget.drag.hx=widget.datx:get_size(widget.hx)
-	widget.drag.hy=widget.daty:get_size(widget.hy)
-	widget.drag.px=widget.datx:get_pos(widget.hx,widget.drag.hx)
-	widget.drag.py=widget.daty:get_pos(widget.hy,widget.drag.hy)
+	widget.knob.hx=widget.datx:get_size(widget.hx)
+	widget.knob.hy=widget.daty:get_size(widget.hy)
+	widget.knob.px=widget.datx:get_pos(widget.hx,widget.knob.hx)
+	widget.knob.py=widget.daty:get_pos(widget.hy,widget.knob.hy)
 	widget:snap()
 
 	widget.solid=true

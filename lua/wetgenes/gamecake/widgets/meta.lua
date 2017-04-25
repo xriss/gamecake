@@ -190,6 +190,8 @@ function wmeta.setup(def)
 
 		widget.color=def.color
 		
+		widget.cursor=def.cursor
+		widget.drag=def.drag
 		
 		widget.font=def.font or widget.parent.font --  use this font if set or inherit value from parent
 		

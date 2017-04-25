@@ -3,6 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+--local wwin=require("wetgenes.win")
 local tardis=require("wetgenes.tardis")
 
 -- widget class master
@@ -61,6 +62,7 @@ function wmaster.setup(widget,def)
 --	master.fbo=framebuffers.create(0,0,0)
 	master.dirty=true
 
+	master.active_xy={0,0}
 
 -- create or reuse datas interface
 	master.datas=master.datas or wdatas.new_datas({master=master})
@@ -157,8 +159,7 @@ function wmaster.setup(widget,def)
 						master.active=master.over
 						local axis=ups.axis()
 						local rx,ry=master.over.parent:mousexy(axis.mx,axis.my)
-						master.active_x=rx-master.over.px
-						master.active_y=ry-master.over.py
+						master.active_xy={rx-master.over.px,ry-master.over.py,mx=axis.mx,my=axis.my}
 						
 						master.active:call_hook_later("active") -- an active widget is about to click (button down)
 					end
@@ -261,6 +262,11 @@ function wmaster.setup(widget,def)
 		end
 
 		meta.update(widget)
+		
+		if master.over then
+			master.cursor=master.over.cursor
+		end
+		
 	end
 	
 	function master.layout(widget)
@@ -480,39 +486,8 @@ function wmaster.setup(widget,def)
 
 		meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		
-		if master.dragging() then -- slide :)
-		
-			local w=master.active
-			local p=w.parent
-
-			w.parent:insert(w) -- move to top
-
-			local rx,ry=w.parent:mousexy(x,y)
-			local x,y=rx-master.active_x,ry-master.active_y
-
-			local maxx=p.hx-w.hx
-			local maxy=p.hy-w.hy
-
---print("slide",miny,maxy)
-			
-			w.px=x
-			w.py=y
-			
-			if w.px<0    then w.px=0 end
-			if w.px>maxx then w.px=maxx end
-			if w.py<0    then w.py=0 end
-			if w.py>maxy then w.py=maxy end
-			
-			if w.parent.snap then
-				w.parent:snap(true)
-			end
-			
-			w:call_hook_later("slide")
-			
-			w:set_dirty()
-			
-			w:layout()
-			w:build_m4()
+		if master.dragging() then -- handle mouse drag logic
+			master.active:drag(x,y)
 
 		end
 		
@@ -546,7 +521,7 @@ function wmaster.setup(widget,def)
 	
 	function master.dragging()
 
-		if master.active and (master.active.class=="drag" or master.active.class=="window" ) and master.press then
+		if master.active and master.active.drag and master.press then
 			return true
 		end
 		

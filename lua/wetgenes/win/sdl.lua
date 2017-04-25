@@ -517,7 +517,12 @@ sdl.cursor=function(s,dat,px,py)
 		if v then
 			SDL.setCursor(v)
 		else
-			if type(s)=="boolean" then -- show/hide
+			if type(s)=="nil" then -- default
+				local v=_cursor("arrow")
+				if v then SDL.setCursor(v) end
+				SDL.showCursor(true)
+			elseif type(s)=="boolean" then -- show/hide
+				SDL.showCursor(s)
 			end
 		end
 	end
