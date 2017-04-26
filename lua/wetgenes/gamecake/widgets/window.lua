@@ -74,13 +74,23 @@ function wwindow.edge_drag(widget,x,y)
 
 	end
 	
+	if window.hx > window.parent.hx then window.hx=window.parent.hx end
+	if window.hy > window.parent.hy then window.hy=window.parent.hy end
+	
 	if window.panel_mode=="scale" then -- keep aspect when scaling
 
 		local sx=window.hx/window.win_fbo.hx
 		local sy=window.hy/window.win_fbo.hy
+
+		if window.win_fbo.hx*sx > window.parent.hx then sx=window.parent.hx/window.win_fbo.hx end
+		if window.win_fbo.hy*sx > window.parent.hy then sx=window.parent.hy/window.win_fbo.hy end
+		if window.win_fbo.hx*sy > window.parent.hx then sy=window.parent.hx/window.win_fbo.hx end
+		if window.win_fbo.hy*sy > window.parent.hy then sy=window.parent.hy/window.win_fbo.hy end
+
 		local s=sx<sy and sx or sy
 		if	master.active_xy.edge=="win_edge_t" or master.active_xy.edge=="win_edge_b" then s=sy end
 		if	master.active_xy.edge=="win_edge_l" or master.active_xy.edge=="win_edge_r" then s=sx end
+
 		
 		window.hx=window.win_fbo.hx*s
 		window.hy=window.win_fbo.hy*s
@@ -141,21 +151,26 @@ end
 function wwindow.layout(widget)
 
 	local v=widget.win_fbo
-	if v then
-		if widget.panel_mode=="scale" then -- maintain aspect
+	local window=widget
+	
+	if window.hx > window.parent.hx then window.hx = window.parent.hx end
+	if window.hy > window.parent.hy then window.hy = window.parent.hy end
 
-			v.sx=widget.hx/v.hx
-			v.sy=widget.hy/v.hy
+	if v then
+		if window.panel_mode=="scale" then -- maintain aspect
+
+			v.sx=window.hx/v.hx
+			v.sy=window.hy/v.hy
 
 			if v.sx<v.sy then v.sy=v.sx else v.sx=v.sy end
-			
-			v.px=(widget.hx-v.hx*v.sx)/2
-			v.py=(widget.hy-v.hy*v.sy)/2
 
-		elseif widget.panel_mode=="stretch" then -- stretch to fit any area
+			v.px=(window.hx-v.hx*v.sx)/2
+			v.py=(window.hy-v.hy*v.sy)/2
 
-			v.sx=widget.hx/v.hx
-			v.sy=widget.hy/v.hy
+		elseif window.panel_mode=="stretch" then -- stretch to fit any area
+
+			v.sx=window.hx/v.hx
+			v.sy=window.hy/v.hy
 
 		end
 	end
@@ -167,6 +182,23 @@ end
 
 wwindow.win_hooks=function(widget,act,w)
 --print(act,w.id)
+
+	local winclamp=function(window)
+		if window.hx > window.parent.hx then window.hx = window.parent.hx end
+		if window.hy > window.parent.hy then window.hy = window.parent.hy end
+		if window.panel_mode=="scale" then -- maintain aspect
+			local sx=window.hx/window.win_fbo.hx
+			local sy=window.hy/window.win_fbo.hy
+			local s=sx<sy and sx or sy
+			window.hx=window.win_fbo.hx*s
+			window.hy=window.win_fbo.hy*s
+		end
+		if window.px<0 then window.px=0 end
+		if window.py<0 then window.py=0 end
+		if window.px+window.hx>window.parent.hx then window.px=window.parent.hx-window.hx end
+		if window.py+window.hy>window.parent.hy then window.py=window.parent.hy-window.hy end
+	end
+
 	if act=="click" then
 		if w.id=="win_hide" then
 		
@@ -175,12 +207,14 @@ wwindow.win_hooks=function(widget,act,w)
 		elseif w.id=="win_grow" then
 			widget.hx=widget.hx*1.5
 			widget.hy=widget.hy*1.5
+			winclamp(widget)
 			widget:layout()
 			widget:build_m4()
 
 		elseif w.id=="win_shrink" then
 			widget.hx=widget.hx/1.5
 			widget.hy=widget.hy/1.5
+			winclamp(widget)
 			widget:layout()
 			widget:build_m4()
 
@@ -188,6 +222,7 @@ wwindow.win_hooks=function(widget,act,w)
 
 			widget.hx=widget.win_fbo.hx
 			widget.hy=widget.win_fbo.hy
+			winclamp(widget)
 			widget:layout()
 			widget:build_m4()
 
