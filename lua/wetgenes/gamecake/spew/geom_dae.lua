@@ -648,8 +648,86 @@ end
 		end
 	end
 	end
-	
-	
+
+
+	its.filter=opts.filter
+-- merge all objects into one
+	its.anim_merge=function()
+
+print("merging")
+		local obj=its.anim_merged or geom.new()
+		its.anim_merged=obj
+
+		obj:clear_predraw()
+		obj.verts={}
+		obj.mats={}
+		obj.polys={}
+		obj.name="merged"
+		
+
+		local verts_idx=0
+		local polys_idx=0
+		local mats_map={}
+
+-- merge all materials
+		for i=1,#its do
+			local it=its[i]
+			if not its.filter or its.filter[ it.name ] then
+			
+				for im = 1 , #it.mats do local mat=it.mats[im]
+					if not mats_map[ mat.name ] then 
+					
+						local m={}
+						mats_map[ mat.name ]=m
+						
+						m.name=mat.name
+						m.diffuse={unpack(mat.diffuse)}
+						m.specular={unpack(mat.specular)}
+						m.shininess={unpack(mat.shininess)}
+
+					end
+				end
+			end
+		end
+
+-- reidx materials		
+		local idx=1
+		for n,v in pairs(mats_map) do
+			v.idx=idx
+			obj.mats[idx]=v
+			idx=idx+1
+		end
+
+		for i=1,#its do
+			local it=its[i]
+			if not its.filter or its.filter[ it.name ] then
+			
+				-- build mat remap idx to idx table
+				local mats_map_idx={}
+				for im = 1 , #it.mats do local mat=it.mats[im]
+					mats_map_idx[mat.idx]=mats_map[mat.name].idx
+				end
+			
+				for iv = 1 , #it.verts do local vert=it.verts[iv]
+					local v={unpack(vert)}
+					obj.verts[ verts_idx+iv ]=v
+				end
+				
+				for iv = 1 , #it.polys do local poly=it.polys[iv]
+					local p={unpack(poly)}
+					for i=1,#p do p[i]=p[i]+verts_idx end
+					p.mat=mats_map_idx[poly.mat]
+					obj.polys[ polys_idx+iv ]=p
+				end
+				
+				verts_idx=verts_idx+#it.verts
+				polys_idx=polys_idx+#it.polys
+			
+			end
+		end
+
+	end
+
 	its.anim_setup=function()
 	
 		its.anim={}
@@ -674,6 +752,8 @@ end
 				end	recurse(its.joints,tardis.m4.new():identity())
 
 		end
+		
+		its.anim_merge()
 	end
 	its.anim_setup()
 
@@ -719,12 +799,14 @@ end
 --			gl.Enable(gl.DEPTH_TEST)
 --			gl.Enable(gl.CULL_FACE)
 			
-			for i=1,#its do
-				local v=its[i]
-				if not its.filter or its.filter[ v.name ] then
-					geom.draw(v,"xyz_normal_mat_bone",function(p)
+--			for i=1,#its do
+--				local v=its[i]
+--				if not its.filter or its.filter[ v.name ] then
+					local it=its.anim_merged
+--					print(it)
+					it.draw(it,"xyz_normal_mat_bone",function(p)
 						for mi=1,8 do
-							local m=v.mats[mi]
+							local m=it.mats[mi]
 							if m then
 								local c1=m.diffuse
 								local c2=m.specular
@@ -740,9 +822,9 @@ end
 						end
 					end)
 
-				end
+--				end
 
-			end
+--			end
 			
 --			gl.Disable(gl.DEPTH_TEST)
 --			gl.Disable(gl.CULL_FACE)
