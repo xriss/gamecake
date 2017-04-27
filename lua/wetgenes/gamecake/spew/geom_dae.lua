@@ -797,19 +797,16 @@ print("merging")
 
 	its.anim_draw=function()
 
---			gl.Enable(gl.DEPTH_TEST)
---			gl.Enable(gl.CULL_FACE)
-			
---			for i=1,#its do
---				local v=its[i]
---				if not its.filter or its.filter[ v.name ] then
-					local it=its.anim_merged
---					print(it)
-			local colors=tardis.f32.new_v4(#it.mats*2)
-			local bones=tardis.f32.new_v4(#its.anim.bones*3)
-print(#it.mats,#its.anim.bones,#it.mats*2+#its.anim.bones*3)
-			local t={}
-			local tl=0
+		local it=its.anim_merged
+
+		local colors=tardis.f32.new_v4(#it.mats*2)
+		local bones=tardis.f32.new_v4(#its.anim.bones*3)
+
+--are we using too many uniforms?
+--print(#it.mats,#its.anim.bones,#it.mats*2+#its.anim.bones*3)
+
+		do
+			local t,tl={},0
 			for _,m in ipairs(it.mats) do
 				local c0=m.shininess
 				local c1=m.diffuse
@@ -818,28 +815,24 @@ print(#it.mats,#its.anim.bones,#it.mats*2+#its.anim.bones*3)
 				t[tl+1]=c2[1] t[tl+2]=c2[2] t[tl+3]=c2[3] t[tl+4]=c0[1] tl=tl+4
 			end
 			tardis.f32.set(colors,t)
+		end
 
-			local t={}
-			local tl=0
+		do
+			local t,tl={},0
 			for _,m in ipairs(its.anim.bones) do
 				t[tl+1]=m[1] t[tl+2]=m[5] t[tl+3]=m[9 ] t[tl+4]=m[13] tl=tl+4
 				t[tl+1]=m[2] t[tl+2]=m[6] t[tl+3]=m[10] t[tl+4]=m[14] tl=tl+4
 				t[tl+1]=m[3] t[tl+2]=m[7] t[tl+3]=m[11] t[tl+4]=m[15] tl=tl+4
 			end
 			tardis.f32.set(bones,t)
-					it.draw(it,"xyz_normal_mat_bone",function(p)
-					gl.Uniform4f( p:uniform("colors"), colors )
-					gl.Uniform4f( p:uniform("bones"), bones )
-					end)
-
---				end
-
---			end
-			
---			gl.Disable(gl.DEPTH_TEST)
---			gl.Disable(gl.CULL_FACE)
-		
 		end
+
+		it.draw(it,"xyz_normal_mat_bone",function(p)
+		gl.Uniform4f( p:uniform("colors"), colors )
+		gl.Uniform4f( p:uniform("bones"), bones )
+		end)
+	
+	end
 		
 		
 		return its
