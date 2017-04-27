@@ -24,7 +24,7 @@ local function dprint(a) print(wstr.dump(a)) end
 
 -- all of these values may actually be nil and should default to 0 if they are
 
--- polygons or lines are just a list of vertex indexes
+-- polygons or lines are just a list of vertex indexes, and a material index in p.mat
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -35,6 +35,41 @@ M.bake=function(oven,geom)
 
 	geom.meta={__index=geom}
 	geom.new=function(it) it=it or {} setmetatable(it,geom.meta) return it end
+
+	geom.duplicate=function(it)
+		return geom.copy(it,geom.new())
+	end
+
+	geom.copy=function(src,dst)
+-- reset
+		dst.verts={}
+		dst.mats={}
+		dst.polys={}
+		dst.name=src.name
+		dst:clear_predraw()
+-- copy mats
+		for im = 1 , #src.mats do local mat=src.mats[im]
+			local m={}
+			m.name=mat.name
+			m.diffuse={unpack(mat.diffuse)}
+			m.specular={unpack(mat.specular)}
+			m.shininess={unpack(mat.shininess)}
+			dst.mats[ im ]=m
+		end
+-- copy verts
+		for iv = 1 , #src.verts do local vert=src.verts[iv]
+			localv={unpack(vert)}
+			dst.verts[ iv ]=v
+		end
+--copy polys		
+		for iv = 1 , #src.polys do local poly=src.polys[iv]
+			local p={unpack(poly)}
+			p.mat=mats_map_idx[poly.mat]
+			dst.polys[ iv ]=p
+		end
+		return dst
+	end
+
 
 geom.idxs=	{
 				POS_X= 1, POS_Y= 2, POS_Z= 3,

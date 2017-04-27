@@ -650,7 +650,8 @@ end
 	end
 
 
-	its.filter=opts.filter
+	its.filter=opts.filter or {}
+	
 -- merge all objects into one
 	its.anim_merge=function()
 
@@ -672,7 +673,7 @@ print("merging")
 -- merge all materials
 		for i=1,#its do
 			local it=its[i]
-			if not its.filter or its.filter[ it.name ] then
+			if not its.filter.show_objects or its.filter.show_objects[ it.name ] then
 			
 				for im = 1 , #it.mats do local mat=it.mats[im]
 					if not mats_map[ mat.name ] then 
@@ -700,7 +701,7 @@ print("merging")
 
 		for i=1,#its do
 			local it=its[i]
-			if not its.filter or its.filter[ it.name ] then
+			if not its.filter.show_objects or its.filter.show_objects[ it.name ] then
 			
 				-- build mat remap idx to idx table
 				local mats_map_idx={}
@@ -811,8 +812,8 @@ print("merging")
 								local c1=m.diffuse
 								local c2=m.specular
 								local c0=m.shininess
-								gl.Uniform4f( p:uniform("color1["..(mi-1).."]"), c1[1],c1[2],c1[3],c1[4] )
-								gl.Uniform4f( p:uniform("color2["..(mi-1).."]"), c2[1],c2[2],c2[3],c0[1] )
+								gl.Uniform4f( p:uniform("colors["..(0+(mi-1)*2).."]"), c1[1],c1[2],c1[3],c1[4] )
+								gl.Uniform4f( p:uniform("colors["..(1+(mi-1)*2).."]"), c2[1],c2[2],c2[3],c0[1] )
 							end
 						end
 						for bi,m in ipairs(its.anim.bones) do

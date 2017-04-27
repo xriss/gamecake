@@ -544,9 +544,7 @@ varying vec3  v_pos;
 varying float v_matidx;
 
 
-uniform vec4 color0[8];
-uniform vec4 color1[8];
-uniform vec4 color2[8];
+uniform vec4 colors[2*8];
 
 vec3 d=vec3(0,0,1);
 
@@ -556,8 +554,8 @@ void main(void)
 	vec3 l=normalize(vec3(0.0,-0.5,1.0));
 
 	int matidx=int(floor(v_matidx+0.5));
-	vec4 c1=color1[matidx];
-	vec4 c2=color2[matidx];
+	vec4 c1=colors[0+matidx*2];
+	vec4 c2=colors[1+matidx*2];
 
 	gl_FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
 						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a )).rgb , c1.a );

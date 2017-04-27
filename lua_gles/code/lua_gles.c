@@ -863,14 +863,19 @@ static int lua_gles_Uniform1f (lua_State *l)
 int i;
 float *fp;
 float ff[1];
+int len=1;
 	i=(int)luaL_checknumber(l,1);
 	fp=(float*)lua_tardis_uda(l,2);
-	if(!fp)
+	if(fp)
+	{
+		len=lua_tardis_uda_count(l,2)/1;
+	}
+	else
 	{
 		fp=ff;
 		ff[0]=(float)luaL_checknumber(l,2);
 	}
-	glUniform1fv(i,1,fp);
+	glUniform1fv(i,len,fp);
 	return 0;
 }
 static int lua_gles_Uniform2f (lua_State *l)
@@ -878,15 +883,20 @@ static int lua_gles_Uniform2f (lua_State *l)
 int i;
 float *fp;
 float ff[2];
+int len=1;
 	i=(int)luaL_checknumber(l,1);
 	fp=(float*)lua_tardis_uda(l,2);
-	if(!fp)
+	if(fp)
+	{
+		len=lua_tardis_uda_count(l,2)/2;
+	}
+	else
 	{
 		fp=ff;
 		ff[0]=(float)luaL_checknumber(l,2);
 		ff[1]=(float)luaL_checknumber(l,3);
 	}
-	glUniform2fv(i,1,fp);
+	glUniform2fv(i,len,fp);
 	return 0;
 }
 static int lua_gles_Uniform3f (lua_State *l)
@@ -894,16 +904,21 @@ static int lua_gles_Uniform3f (lua_State *l)
 int i;
 float *fp;
 float ff[3];
+int len=1;
 	i=(int)luaL_checknumber(l,1);
 	fp=(float*)lua_tardis_uda(l,2);
-	if(!fp)
+	if(fp)
+	{
+		len=lua_tardis_uda_count(l,2)/3;
+	}
+	else
 	{
 		fp=ff;
 		ff[0]=(float)luaL_checknumber(l,2);
 		ff[1]=(float)luaL_checknumber(l,3);
 		ff[2]=(float)luaL_checknumber(l,4);
 	}
-	glUniform3fv(i,1,fp);
+	glUniform3fv(i,len,fp);
 	return 0;
 }
 static int lua_gles_Uniform4f (lua_State *l)
@@ -911,10 +926,15 @@ static int lua_gles_Uniform4f (lua_State *l)
 int i;
 float *fp;
 float ff[4];
+int len=1;
 	i=(int)luaL_checknumber(l,1);
 	
 	fp=(float*)lua_tardis_uda(l,2);
-	if(!fp)
+	if(fp)
+	{
+		len=lua_tardis_uda_count(l,2)/4;
+	}
+	else
 	{
 		fp=ff;
 		ff[0]=(float)luaL_checknumber(l,2);
@@ -922,7 +942,7 @@ float ff[4];
 		ff[2]=(float)luaL_checknumber(l,4);
 		ff[3]=(float)luaL_checknumber(l,5);
 	}
-	glUniform4fv(i,1,fp);
+	glUniform4fv(i,len,fp);
 	return 0;
 }
 

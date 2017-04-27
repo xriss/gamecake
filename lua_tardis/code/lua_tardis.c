@@ -93,6 +93,12 @@ size_t len=0;
 	return len;
 }
 
+// get count of numbers in this uda
+unsigned int lua_tardis_uda_count (lua_State *l, int idx)
+{
+	return lua_tardis_uda_length(l,idx)/4;
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // allocate some aligned memory on thelua stack, use lua_tardis_uda to get this ptr again
@@ -135,22 +141,23 @@ static int lua_tardis_ptr (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // set some members, please not to supply more numbers than there is memory as no bounds checking is performed
-// also only a maximum of 16 numbers may be set at once
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_set (lua_State *l)
 {
-int len,count;
+int count_out;
+int count;
 int i;
 float *fa=(float *)lua_tardis_uda(l,1);
 float *fb;
 
 	if(!fa)	{ return luaL_error(l,"Bad tardis ptr"); }
+	count_out=lua_tardis_uda_count(l,1);
 
 
 	if(lua_istable(l,2))
 	{
-		for(i=0;i<16;i++)
+		for(i=0;i<count_out;i++)
 		{
 			lua_rawgeti(l,2,i+1);
 			if(!lua_isnumber(l,-1)) { lua_pop(l,1); break; }
@@ -162,11 +169,11 @@ float *fb;
 	else
 	if(lua_isuserdata(l,2))
 	{
-		len=lua_tardis_uda_length(l,2);
-		count=len/4;
+		count=lua_tardis_uda_count(l,2);
+		if(count>count_out){count=count_out;}
 		if(lua_isnumber(l,3)) { count=(int)lua_tonumber(l,3); } // need to know how many floats to set?
 		if(count< 1) { count= 1; } // sanity
-		if(count>16) { count=16; } // sanity
+//		if(count>16) { count=16; } // sanity
 		fb=(float *)lua_tardis_uda(l,2);
 		for(i=0;i<count;i++)
 		{
@@ -176,7 +183,7 @@ float *fb;
 	}
 	else
 	{
-		for(i=0;i<16;i++)
+		for(i=0;i<count_out;i++)
 		{
 			if(!lua_isnumber(l,2+i)) { break; } // stop on first nil
 			fa[i]=(float)lua_tonumber(l,2+i);
@@ -190,7 +197,10 @@ float *fb;
 static int lua_tardis_read (lua_State *l)
 {
 float *fa=(float *)lua_tardis_uda(l,1);
+int	count=lua_tardis_uda_count(l,1);
 int i=(int)lua_tonumber(l,2);
+	if(i<1){i=1;}
+	if(i>count){i=count;}
 	lua_pushnumber(l,fa[i-1]);
 	return 1;
 }
@@ -198,17 +208,20 @@ int i=(int)lua_tonumber(l,2);
 static int lua_tardis_write (lua_State *l)
 {
 float *fa=(float *)lua_tardis_uda(l,1);
+int	count=lua_tardis_uda_count(l,1);
 int i=(int)lua_tonumber(l,2);
+	if(i<1){i=1;}
+	if(i>count){i=count;}
 	fa[i-1]=(float)lua_tonumber(l,3);
 	return 0;
 }
 
 static int lua_tardis_compare (lua_State *l)
 {
-int count=16;
 int i;
 float *fa=(float *)lua_tardis_uda(l,1);
 float *fb=(float *)lua_tardis_uda(l,1);
+int	count=lua_tardis_uda_count(l,1);
 
 	if(!fa)
 	{
@@ -226,7 +239,7 @@ float *fb=(float *)lua_tardis_uda(l,1);
 
 	if(lua_isnumber(l,3)) { count=(int)lua_tonumber(l,3); } // need to know how many floats?
 	if(count< 1) { count= 1; } // sanity
-	if(count>16) { count=16; } // sanity
+//	if(count>16) { count=16; } // sanity
 
 	for(i=0;i<count;i++)
 	{
@@ -244,23 +257,27 @@ float *fb=(float *)lua_tardis_uda(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// create a new m4
+// create a new m4 (possibly an array)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_new_m4 (lua_State *l)
 {
-	lua_tardis_uda_alloc(l,4*16);
+int count=(int)lua_tonumber(l,1);
+	if(count<1){count=1;}
+	lua_tardis_uda_alloc(l,count*4*16);
 	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// create a new v4
+// create a new v4 (possibly an array)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_new_v4 (lua_State *l)
 {
-	lua_tardis_uda_alloc(l,4*4);
+int count=(int)lua_tonumber(l,1);
+	if(count<1){count=1;}
+	lua_tardis_uda_alloc(l,count*4*4);
 	return 1;
 }
 
