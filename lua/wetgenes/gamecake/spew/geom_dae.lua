@@ -805,22 +805,31 @@ print("merging")
 --				if not its.filter or its.filter[ v.name ] then
 					local it=its.anim_merged
 --					print(it)
+			local colors=tardis.f32.new_v4(#it.mats*2)
+			local bones=tardis.f32.new_v4(#its.anim.bones*3)
+print(#it.mats,#its.anim.bones,#it.mats*2+#its.anim.bones*3)
+			local t={}
+			local tl=0
+			for _,m in ipairs(it.mats) do
+				local c0=m.shininess
+				local c1=m.diffuse
+				local c2=m.specular
+				t[tl+1]=c1[1] t[tl+2]=c1[2] t[tl+3]=c1[3] t[tl+4]=c1[4] tl=tl+4
+				t[tl+1]=c2[1] t[tl+2]=c2[2] t[tl+3]=c2[3] t[tl+4]=c0[1] tl=tl+4
+			end
+			tardis.f32.set(colors,t)
+
+			local t={}
+			local tl=0
+			for _,m in ipairs(its.anim.bones) do
+				t[tl+1]=m[1] t[tl+2]=m[5] t[tl+3]=m[9 ] t[tl+4]=m[13] tl=tl+4
+				t[tl+1]=m[2] t[tl+2]=m[6] t[tl+3]=m[10] t[tl+4]=m[14] tl=tl+4
+				t[tl+1]=m[3] t[tl+2]=m[7] t[tl+3]=m[11] t[tl+4]=m[15] tl=tl+4
+			end
+			tardis.f32.set(bones,t)
 					it.draw(it,"xyz_normal_mat_bone",function(p)
-						for mi=1,8 do
-							local m=it.mats[mi]
-							if m then
-								local c1=m.diffuse
-								local c2=m.specular
-								local c0=m.shininess
-								gl.Uniform4f( p:uniform("colors["..(0+(mi-1)*2).."]"), c1[1],c1[2],c1[3],c1[4] )
-								gl.Uniform4f( p:uniform("colors["..(1+(mi-1)*2).."]"), c2[1],c2[2],c2[3],c0[1] )
-							end
-						end
-						for bi,m in ipairs(its.anim.bones) do
-							gl.Uniform4f( p:uniform("bones["..(0+(bi-1)*3).."]"),m[1],m[5],m[ 9],m[13])
-							gl.Uniform4f( p:uniform("bones["..(1+(bi-1)*3).."]"),m[2],m[6],m[10],m[14])
-							gl.Uniform4f( p:uniform("bones["..(2+(bi-1)*3).."]"),m[3],m[7],m[11],m[15])
-						end
+					gl.Uniform4f( p:uniform("colors"), colors )
+					gl.Uniform4f( p:uniform("bones"), bones )
 					end)
 
 --				end
