@@ -1,5 +1,6 @@
 --
--- Copyright (C) 2012 Kriss Blank < Kriss@XIXs.com >
+-- (C) 2013 Kriss@XIXs.com
+--
 -- This file is distributed under the terms of the MIT license.
 -- http://en.wikipedia.org/wiki/MIT_License
 -- Please ping me if you use it for anything cool...
@@ -8,6 +9,18 @@
 --
 -- a lua library for manipulating time and space
 -- pure lua by default and opengl in flavour
+--
+-- The easy way of remembering the opengl 4x4 matrix layout is that the
+-- translate x,y,z values sit at 13,14,15 and 4,8,12,16 is normally set
+-- to the constant 0,0,0,1 for most transforms.
+--
+--      | 1  5  9  13 |
+--      |             |
+--      | 2  6  10 14 |
+-- M4 = |             |
+--      | 3  7  11 15 |
+--      |             |
+--      | 4  8  12 16 |
 --
 -- recoil in terror as we use two glyph names to describe structures
 -- whilst typing in random strings of numbers that may or may not
@@ -26,8 +39,11 @@
 --
 -- https://bitbucket.org/xixs/bin/src/tip/lua/wetgenes/tardis.lua
 --
--- This also needs to be overloaded with a float based C version
--- Which does partially exist but is only used in the GLES lib so far
+-- Some of the Lua code here is overloaded with a float based C version, 
+-- possibly faster, possibly slower? use DISABLE_WETGENES_TARDIS_CORE 
+-- before requiring this file to turn it on or off.
+--
+-- With DISABLE_WETGENES_TARDIS_CORE set this is a pure Lua library
 --
 -- This seems to be the simplest (programmer orientated) description of
 -- most of the maths used here so go read it
@@ -49,19 +65,21 @@ local tonumber=tonumber
 local require=require
 local error=error
 
-module(...)
-local _M=require(...) -- do not rely on *any* questionable side effects of module
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 -- a metatable typeof function
-mtype_lookup=mtype_lookup or {}
-function mtype(it)
-	return mtype_lookup[getmetatable(it) or 0] or type(it)
+M.mtype_lookup=mtype_lookup or {}
+function M.mtype(it)
+	return M.mtype_lookup[getmetatable(it) or 0] or type(it)
 end
 
 -- dumb class inheritance metatable creation
 local function class(name,...)
 
-	local tab=_M[name] or {} -- use old or create new?
+	if M[name] then return M[name] end
+	
+	local tab={} -- create new
 	local sub={...} -- possibly multiple sub classes
 
 	if #sub>0 then -- inherit?
@@ -72,20 +90,20 @@ local function class(name,...)
 
 	tab.__index=tab -- this metatable is its own index
 
-	mtype_lookup[name]=tab -- classtype metatable lookup
-	mtype_lookup[tab]=name -- tab->name or name->tab
+	M.mtype_lookup[name]=tab -- classtype metatable lookup
+	M.mtype_lookup[tab]=name -- tab->name or name->tab
 
-	_M[name]=tab
+	M[name]=tab
 	return tab
 end
 
 
 
-class("array")
+local array=class("array")
 
 function array.__tostring(it) -- these classes are all just 1d arrays of numbers
 	local t={}
-	t[#t+1]=mtype(it)
+	t[#t+1]=M.mtype(it)
 	t[#t+1]="={"
 	for i=1,#it do
 		t[#t+1]=tostring(it[i])
@@ -113,29 +131,30 @@ function array.set(it,...)
 end
 
 function array.product(a,b,r)
-	local mta=mtype(a)
-	local mtb=mtype(b)
+	local mta=M.mtype(a)
+	local mtb=M.mtype(b)
 	if mta=="m4" then
 		if     mtb=="v3" then
-			return m4_product_v3(a,b,r)
+			return M.m4_product_v3(a,b,r)
 		elseif mtb=="v4" then
-			return m4_product_v4(a,b,r)
+			return M.m4_product_v4(a,b,r)
 		elseif mtb=="m4" then
-			return m4_product_m4(a,b,r)
+			return M.m4_product_m4(a,b,r)
 		end
 	elseif mta=="q4" then
 		if     mtb=="q4" then
-			return q4_product_q4(a,b,r)
+			return M.q4_product_q4(a,b,r)
 		elseif mtb=="v3" then
-			return q4_product_v3(a,b,r)
+			return M.q4_product_v3(a,b,r)
 		end
 	end
 	error("tardis : "..mta.." product "..mtb.." not supported",2)
 end
 
 
-class("m2",array)
+local m2=class("m2",array)
 function m2.new(...) return setmetatable({0,0,0,0},m2):set(...) end
+function m2.identity(it) return it:set(1,0, 0,1) end 
 function m2.determinant(it)
 	return	 ( it[ 1 ]*it[ 2+2 ] )
 			+( it[ 2 ]*it[ 2+1 ] )
@@ -176,8 +195,9 @@ function m2.inverse(it,r)
 	return m2.scale(m2.cofactor(m2.transpose(it,m2.new())),ood,r)
 end
 
-class("m3",m2)
+local m3=class("m3",m2)
 function m3.new(...) return setmetatable({0,0,0,0,0,0,0,0,0},m3):set(...) end
+function m3.identity(it) return it:set(1,0,0, 0,1,0, 0,0,1) end 
 function m3.determinant(it)
 	return	 ( it[ 1 ]*it[ 3+2 ]*it[ 6+3 ] )
 			+( it[ 2 ]*it[ 3+3 ]*it[ 6+1 ] )
@@ -198,7 +218,7 @@ function m3.minor_xy(it,x,y)
 	return m2.determinant(t)
 end
 function m3.transpose(it,r)
-	r=r or it
+	r=r or r
 	return	 r:set(it[1],it[3+1],it[6+1], it[2],it[3+2],it[6+2], it[3],it[3+3],it[6+3])
 end
 function m3.scale(it,s,r)
@@ -228,8 +248,9 @@ function m3.inverse(it,r)
 	return m3.scale(m3.cofactor(m3.transpose(it,m3.new())),ood,r)
 end
 
-class("m4",m3)
+local m4=class("m4",m3)
 function m4.new(...) return setmetatable({0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},m4):set(...) end
+function m4.identity(it) return it:set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1) end 
 function m4.determinant(it)
 return	(it[ 4 ] * it[ 4+3 ] * it[ 8+2 ] * it[ 12+1 ])-(it[ 3 ] * it[ 4+4 ] * it[ 8+2 ] * it[ 12+1 ])-
 		(it[ 4 ] * it[ 4+2 ] * it[ 8+3 ] * it[ 12+1 ])+(it[ 2 ] * it[ 4+4 ] * it[ 8+3 ] * it[ 12+1 ])+
@@ -256,13 +277,44 @@ function m4.minor_xy(it,x,y)
 	return m3.determinant(t)
 end
 function m4.transpose(it,r)
-	r=r or r
+--	r=r or r
 	return	 r:set(it[1],it[4+1],it[8+1],it[12+1], it[2],it[4+2],it[8+2],it[12+2], it[3],it[4+3],it[8+3],it[12+3], it[4],it[4+4],it[8+4],it[12+4])
 end
 function m4.scale(it,s,r)
 	r=r or it
-	return r:set(it[1]*s,it[2]*s,it[3]*s,it[4]*s, it[4+1]*s,it[4+2]*s,it[4+3]*s,it[4+4]*s, it[8+1]*s,it[8+2]*s,it[8+3]*s,it[8+4]*s, it[12+1]*s,it[12+2]*s,it[12+3]*s,it[12+4]*s)
+	return r:set(
+		it[ 1]*s,it[ 2]*s,it[ 3]*s,it[ 4]*s,
+		it[ 5]*s,it[ 6]*s,it[ 7]*s,it[ 8]*s,
+		it[ 9]*s,it[10]*s,it[11]*s,it[12]*s,
+		it[13]*s,it[14]*s,it[15]*s,it[16]*s)
 end
+
+function m4.add(it,m,r)
+	r=r or it
+	return r:set(
+		it[ 1]+m[ 1],it[ 2]+m[ 2],it[ 3]+m[ 3],it[ 4]+m[ 4],
+		it[ 5]+m[ 5],it[ 6]+m[ 6],it[ 7]+m[ 7],it[ 8]+m[ 8],
+		it[ 9]+m[ 9],it[10]+m[10],it[11]+m[11],it[12]+m[12],
+		it[13]+m[13],it[14]+m[14],it[15]+m[15],it[16]+m[16])
+end
+function m4.sub(it,m,r)
+	r=r or it
+	return r:set(
+		it[ 1]-m[ 1],it[ 2]-m[ 2],it[ 3]-m[ 3],it[ 4]-m[ 4],
+		it[ 5]-m[ 5],it[ 6]-m[ 6],it[ 7]-m[ 7],it[ 8]-m[ 8],
+		it[ 9]-m[ 9],it[10]-m[10],it[11]-m[11],it[12]-m[12],
+		it[13]-m[13],it[14]-m[14],it[15]-m[15],it[16]-m[16])
+end
+
+function m4.lerp(it,m,s,r)
+	r=r or m4.new()
+	r:set(m)
+	r:sub(it)
+	r:scale(s)
+	r:add(it)
+	return r
+end
+
 function m4.cofactor(it,r)
 	r=r or it
 	local t={}
@@ -288,15 +340,20 @@ end
 function m4.identity(it)
 	return it:set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1)
 end
-function m4.translate(it,v3a,r)
+function m4.translate(it,a,b,c,d) -- (it,v3a,r) or (it,x,y,z,r)
+	local v3a,r
+	if type(a)~="number" then v3a=M.v3.new(a,b,c) r=d else v3a=a r=b end
 	r=r or it
-	local r1=it[12+1]+v3a[1]
-	local r2=it[12+2]+v3a[2]
-	local r3=it[12+3]+v3a[3]
-	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,it[16] )
+	local r1=it[12+1]+v3a[1]*it[1]+v3a[2]*it[5]+v3a[3]*it[9]
+	local r2=it[12+2]+v3a[1]*it[2]+v3a[2]*it[6]+v3a[3]*it[10]
+	local r3=it[12+3]+v3a[1]*it[3]+v3a[2]*it[7]+v3a[3]*it[11]
+	local r4=it[12+4]+v3a[1]*it[4]+v3a[2]*it[8]+v3a[3]*it[12]
+	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,r4 )
 end
 
-function m4.scale_v3(it,v3a,r)
+function m4.scale_v3(it,a,b,c,d)
+	local v3a,r
+	if type(a)~="number" then v3a=M.v3.new(a,b,c) r=d else v3a=a r=b end
 	r=r or it
 	local s1=v3a[1]
 	local s2=v3a[2]
@@ -305,6 +362,16 @@ function m4.scale_v3(it,v3a,r)
 					s2*it[5],	s2*it[6],	s2*it[7],	s2*it[8],
 					s3*it[9],	s3*it[10],	s3*it[11],	s3*it[12],
 					it[13],		it[14],		it[15],		it[16] )
+end
+
+-- get v3 scale from a scale/rot/trans matrix
+function m4.get_scale_v3(it,r)
+	r=r or M.v3.new()
+	return r:set(
+		math.sqrt(it[1]*it[1]+it[5]*it[5]+it[ 9]*it[ 9]),
+		math.sqrt(it[2]*it[2]+it[6]*it[6]+it[10]*it[10]),
+		math.sqrt(it[3]*it[3]+it[7]*it[7]+it[11]*it[11])
+	)
 end
 
 function m4.setrot(it,degrees,v3a)
@@ -336,16 +403,21 @@ end
 
 function m4.rotate(it,degrees,v3a,r)
 	local m4a=m4.new():setrot(degrees,v3a)
-	return m4_product_m4(m4a,it,r)
+	return M.m4_product_m4(m4a,it,r)
 end
 
-class("v2",array)
+local v2=class("v2",array)
 function v2.new(...) return setmetatable({0,0},v2):set(...) end
+function v2.identity(it) return it:set(0,0) end 
 function v2.lenlen(it)
 	return (it[1]*it[1]) + (it[2]*it[2])
 end
 function v2.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) )
+end
+function v2.oo(it,r)
+	r=r or it
+	return r:set( 1/it[1] , 1/it[2] )
 end
 function v2.scale(it,s,r)
 	r=r or it
@@ -354,14 +426,37 @@ end
 function v2.normalize(it,r)
 	return v2.scale(it,1/v2.len(it),r)
 end
+function v2.add(va,vb,r)
+	r=r or va
+	return r:set( va[1]+vb[1] , va[2]+vb[2] )
+end
+function v2.sub(va,vb,r)
+	r=r or va
+	return r:set( va[1]-vb[1] , va[2]-vb[2] )
+end
+function v2.mul(va,vb,r)
+	r=r or va
+	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) )
+end
+function v2.dot(va,vb)
+	return ( (va[1]*vb[1]) + (va[2]*vb[2]) )
+end
+function v2.cross(va,vb) -- extend to 3d then only return z value as x and y are always 0
+	return (va[1]*vb[2])-(va[2]*vb[1])
+end
 
-class("v3",v2)
+local v3=class("v3",v2)
 function v3.new(...) return setmetatable({0,0,0},v3):set(...) end
+function v3.identity(it) return it:set(0,0,0) end 
 function v3.lenlen(it)
 	return (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3])
 end
 function v3.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3]) )
+end
+function v3.oo(it,r)
+	r=r or it
+	return r:set( 1/it[1] , 1/it[2] , 1/it[3] )
 end
 function v3.scale(it,s,r)
 	r=r or it
@@ -391,8 +486,9 @@ function v3.cross(va,vb,r)
 end
 
 
-class("v4",v3)
+local v4=class("v4",v3)
 function v4.new(...) return setmetatable({0,0,0,0},v4):set(...) end
+function v4.identity(it) return it:set(0,0,0,0) end 
 function v4.to_v3(it,r) -- scale [4] to 1 then throw it away so we have a v3 xyz
 	r=r or v3.new()
 	local oow=1/it[4]
@@ -424,9 +520,9 @@ function v4.dot(va,vb)
 end
 
 
-class("q4",v4)
+local q4=class("q4",v4)
 function q4.new(...) return setmetatable({0,0,0,1},q4):set(...) end
-
+function q4.identity(it) return it:set(0,0,0,1) end 
 function q4.nlerp(qa,qb,sa,r)
 	local sb=1-sa
 	if qa.dot(qb) < 0 then sa=-sa end -- shortest fix
@@ -443,20 +539,20 @@ end
 
 function q4.rotate(it,degrees,v3a,r)
 	local q4a=q4.new():setrot(degrees,v3a)
-	return q4_product_q4(q4a,it,r)
+	return M.q4_product_q4(q4a,it,r)
 end
 
 
 
-class("line",array)
+local line=class("line",array)
 line.set=nil -- disable
 function line.new(...) return setmetatable({v3.new(),v3.new()},line) end -- [1]position , [2]normal
 
-class("plane",line)
+local plane=class("plane",line)
 function plane.new(...) return setmetatable({v3.new(),v3.new()},plane) end -- [1]position , [2]normal
 
 
-function line_intersect_plane(l,p,r)
+function M.line_intersect_plane(l,p,r)
 	r=r or v3.new()
 	local t=v3.new(p[1]):sub(l[1]) -- the line position relative to the plane
 	local d=l[2]:dot(p[2]) -- the length of the line until it hits the plane
@@ -466,7 +562,7 @@ function line_intersect_plane(l,p,r)
 	return r:set( l[1][1]+(l[2][1]*d) , l[1][2]+(l[2][2]*d) , l[1][3]+(l[2][3]*d) ) -- the point of intersection
 end
 
-function q4_to_m4(q,m)
+function M.q4_to_m4(q,m)
 	if not m then m=m4.new() end
 	local w,x,y,z=q[1],q[2],q[3],q[4]
     local xx,xy,xz,xw=x*x,x*y,x*z,x*w
@@ -486,7 +582,7 @@ function q4_to_m4(q,m)
 						0,0,0,1				)
 end
 
-function q4_product_q4(q4a,q4b,r)
+function M.q4_product_q4(q4a,q4b,r)
 	r=r or q4b
     local r1 =  q4a[1] * q4b[4] + q4a[2] * q4b[3] - q4a[3] * q4b[2] + q4a[4] * q4b[1];
     local r2 = -q4a[1] * q4b[3] + q4a[2] * q4b[4] + q4a[3] * q4b[1] + q4a[4] * q4b[2];
@@ -495,7 +591,7 @@ function q4_product_q4(q4a,q4b,r)
 	return r:set(r1,r2,r3,r4)
 end
 
-function q4_product_v3(q4a,v3b,r)
+function M.q4_product_v3(q4a,v3b,r)
 	r=r or v3b
     local r1 =                    q4a[2] * v3b[3] - q4a[3] * v3b[2] + q4a[4] * v3b[1];
     local r2 = -q4a[1] * v3b[3]                   + q4a[3] * v3b[1] + q4a[4] * v3b[2];
@@ -503,7 +599,7 @@ function q4_product_v3(q4a,v3b,r)
 	return r:set(r1,r2,r3)
 end
 
-function m4_product_v3(m4a,v3b,r)
+function M.m4_product_v3(m4a,v3b,r)
 	r=r or v3b
 	local oow=1/( (m4a[   4]*v3b[1]) + (m4a[ 4+4]*v3b[2]) + (m4a[ 8+4]*v3b[3]) + (m4a[12+4] ) )
 	local r1= oow * ( (m4a[   1]*v3b[1]) + (m4a[ 4+1]*v3b[2]) + (m4a[ 8+1]*v3b[3]) + (m4a[12+1] ) )
@@ -512,7 +608,16 @@ function m4_product_v3(m4a,v3b,r)
 	return r:set(r1,r2,r3)
 end
 
-function m4_product_m4(m4a,m4b,r)
+function M.m4_product_v4(m4a,v4b,r)
+	r=r or v4b
+	local r1= ( (m4a[   1]*v4b[1]) + (m4a[ 4+1]*v4b[2]) + (m4a[ 8+1]*v4b[3]) + (m4a[12+1]*v4b[4]) )
+	local r2= ( (m4a[   2]*v4b[1]) + (m4a[ 4+2]*v4b[2]) + (m4a[ 8+2]*v4b[3]) + (m4a[12+2]*v4b[4]) )
+	local r3= ( (m4a[   3]*v4b[1]) + (m4a[ 4+3]*v4b[2]) + (m4a[ 8+3]*v4b[3]) + (m4a[12+3]*v4b[4]) )
+	local r4= ( (m4a[   4]*v4b[1]) + (m4a[ 4+4]*v4b[2]) + (m4a[ 8+4]*v4b[3]) + (m4a[12+4]*v4b[4]) )
+	return r:set(r1,r2,r3,r4)
+end
+
+function M.m4_product_m4(m4a,m4b,r)
 	r=r or m4b
 	local r1 = (m4a[   1]*m4b[   1]) + (m4a[   2]*m4b[ 4+1]) + (m4a[   3]*m4b[ 8+1]) + (m4a[   4]*m4b[12+1])
 	local r2 = (m4a[   1]*m4b[   2]) + (m4a[   2]*m4b[ 4+2]) + (m4a[   3]*m4b[ 8+2]) + (m4a[   4]*m4b[12+2])
@@ -553,9 +658,9 @@ end
 -- the total view area volume from there would be -320 +320 , -240 +240 , -480 +(1024-480)
 --
 -- view_width and view_height must be the current width and height of the display in pixels or nil
--- we use this to wout out where to place our view such that it is always visible and keeps its aspect.
+-- we use this to work out where to place our view such that it is always visible and keeps its aspect.
 --
-m4_project23d = function(view_width,view_height,width,height,fov,depth)
+function M.m4_project23d(view_width,view_height,width,height,fov,depth)
 
 	local aspect=height/width
 
@@ -587,3 +692,74 @@ m4_project23d = function(view_width,view_height,width,height,fov,depth)
 	return m
 end
 
+
+if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first use to disable use of tardis f32 core
+--upgrade the above to hopefully faster C versions working on userdata arrays of floats
+local tcore=require("wetgenes.tardis.core") -- use a "faster?" f32 C core
+if tcore then
+
+	-- allow read/write with magical [] lookups
+	function array.__len(it) return 1 end
+	function array.__index(it,n) return array[n] or tcore.read(it,n) end
+	function array.__newindex(it,n,v) tcore.write(it,n,v) end
+
+	-- initialise an array
+	function array.set(it,...) tcore.set(it,...) return it end
+
+	m2.set=array.set
+	m3.set=array.set
+	m4.set=array.set
+
+	function m2.new(...) return tcore.alloc(4* 4,m2):set(...) end
+	function m3.new(...) return tcore.alloc(4* 9,m3):set(...) end
+	function m4.new(...) return tcore.alloc(4*16,m4):set(...) end
+
+	function m2.__len(it) return 4 end
+	function m3.__len(it) return 9 end
+	function m4.__len(it) return 16 end
+
+	function m2.__index(it,n) return m2[n] or tcore.read(it,n) end
+	function m3.__index(it,n) return m3[n] or tcore.read(it,n) end
+	function m4.__index(it,n) return m4[n] or tcore.read(it,n) end
+
+	m2.__newindex=array.__newindex
+	m3.__newindex=array.__newindex
+	m4.__newindex=array.__newindex
+
+	v2.set=array.set
+	v3.set=array.set
+	v4.set=array.set
+	q4.set=array.set
+
+	function v2.new(...) return tcore.alloc(4* 2,v2):set(...) end
+	function v3.new(...) return tcore.alloc(4* 3,v3):set(...) end
+	function v4.new(...) return tcore.alloc(4* 4,v4):set(...) end
+	function q4.new(...) return tcore.alloc(4* 4,q4):set(...) end
+
+	function v2.__len(it) return 2 end
+	function v3.__len(it) return 3 end
+	function v4.__len(it) return 4 end
+	function q4.__len(it) return 4 end
+
+	function v2.__index(it,n) return v2[n] or tcore.read(it,n) end
+	function v3.__index(it,n) return v3[n] or tcore.read(it,n) end
+	function v4.__index(it,n) return v4[n] or tcore.read(it,n) end
+	function q4.__index(it,n) return q4[n] or tcore.read(it,n) end
+
+	v2.__newindex=array.__newindex
+	v3.__newindex=array.__newindex
+	v4.__newindex=array.__newindex
+	q4.__newindex=array.__newindex
+
+	-- replace some functions with C code
+
+	M.m4_product_m4		=	tcore.m4_product_m4
+	M.m4_product_v4		=	tcore.m4_product_v4
+
+	m4.identity			=	tcore.m4_identity
+	m4.rotate			=	tcore.m4_rotate
+	m4.scale_v3			=	tcore.m4_scale_v3
+	m4.translate		=	tcore.m4_translate
+
+end
+end

@@ -14,6 +14,14 @@
 -- translate x,y,z values sit at 13,14,15 and 4,8,12,16 is normally set
 -- to the constant 0,0,0,1 for most transforms.
 --
+--      | 1  5  9  13 |
+--      |             |
+--      | 2  6  10 14 |
+-- M4 = |             |
+--      | 3  7  11 15 |
+--      |             |
+--      | 4  8  12 16 |
+--
 -- recoil in terror as we use two glyph names to describe structures
 -- whilst typing in random strings of numbers that may or may not
 -- contain tyops
