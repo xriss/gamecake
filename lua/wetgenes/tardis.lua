@@ -17,7 +17,7 @@
 --      | 1  5  9  13 |
 --      |             |
 --      | 2  6  10 14 |
--- M4 = |             |
+-- m4 = |             |
 --      | 3  7  11 15 |
 --      |             |
 --      | 4  8  12 16 |
@@ -66,18 +66,18 @@ local require=require
 local error=error
 
 --module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
+local tardis={ modname=(...) } ; package.loaded[tardis.modname]=tardis
 
 -- a metatable typeof function
-M.mtype_lookup=mtype_lookup or {}
-function M.mtype(it)
-	return M.mtype_lookup[getmetatable(it) or 0] or type(it)
+tardis.mtype_lookup=mtype_lookup or {}
+function tardis.mtype(it)
+	return tardis.mtype_lookup[getmetatable(it) or 0] or type(it)
 end
 
 -- dumb class inheritance metatable creation
 local function class(name,...)
 
-	if M[name] then return M[name] end
+	if tardis[name] then return tardis[name] end
 	
 	local tab={} -- create new
 	local sub={...} -- possibly multiple sub classes
@@ -90,10 +90,10 @@ local function class(name,...)
 
 	tab.__index=tab -- this metatable is its own index
 
-	M.mtype_lookup[name]=tab -- classtype metatable lookup
-	M.mtype_lookup[tab]=name -- tab->name or name->tab
+	tardis.mtype_lookup[name]=tab -- classtype metatable lookup
+	tardis.mtype_lookup[tab]=name -- tab->name or name->tab
 
-	M[name]=tab
+	tardis[name]=tab
 	return tab
 end
 
@@ -103,7 +103,7 @@ local array=class("array")
 
 function array.__tostring(it) -- these classes are all just 1d arrays of numbers
 	local t={}
-	t[#t+1]=M.mtype(it)
+	t[#t+1]=tardis.mtype(it)
 	t[#t+1]="={"
 	for i=1,#it do
 		t[#t+1]=tostring(it[i])
@@ -131,21 +131,21 @@ function array.set(it,...)
 end
 
 function array.product(a,b,r)
-	local mta=M.mtype(a)
-	local mtb=M.mtype(b)
+	local mta=tardis.mtype(a)
+	local mtb=tardis.mtype(b)
 	if mta=="m4" then
 		if     mtb=="v3" then
-			return M.m4_product_v3(a,b,r)
+			return tardis.m4_product_v3(a,b,r)
 		elseif mtb=="v4" then
-			return M.m4_product_v4(a,b,r)
+			return tardis.m4_product_v4(a,b,r)
 		elseif mtb=="m4" then
-			return M.m4_product_m4(a,b,r)
+			return tardis.m4_product_m4(a,b,r)
 		end
 	elseif mta=="q4" then
 		if     mtb=="q4" then
-			return M.q4_product_q4(a,b,r)
+			return tardis.q4_product_q4(a,b,r)
 		elseif mtb=="v3" then
-			return M.q4_product_v3(a,b,r)
+			return tardis.q4_product_v3(a,b,r)
 		end
 	end
 	error("tardis : "..mta.." product "..mtb.." not supported",2)
@@ -342,7 +342,7 @@ function m4.identity(it)
 end
 function m4.translate(it,a,b,c,d) -- (it,v3a,r) or (it,x,y,z,r)
 	local v3a,r
-	if type(a)~="number" then v3a=M.v3.new(a,b,c) r=d else v3a=a r=b end
+	if type(a)~="number" then v3a=tardis.v3.new(a,b,c) r=d else v3a=a r=b end
 	r=r or it
 	local r1=it[12+1]+v3a[1]*it[1]+v3a[2]*it[5]+v3a[3]*it[9]
 	local r2=it[12+2]+v3a[1]*it[2]+v3a[2]*it[6]+v3a[3]*it[10]
@@ -353,7 +353,7 @@ end
 
 function m4.scale_v3(it,a,b,c,d)
 	local v3a,r
-	if type(a)~="number" then v3a=M.v3.new(a,b,c) r=d else v3a=a r=b end
+	if type(a)~="number" then v3a=tardis.v3.new(a,b,c) r=d else v3a=a r=b end
 	r=r or it
 	local s1=v3a[1]
 	local s2=v3a[2]
@@ -366,7 +366,7 @@ end
 
 -- get v3 scale from a scale/rot/trans matrix
 function m4.get_scale_v3(it,r)
-	r=r or M.v3.new()
+	r=r or tardis.v3.new()
 	return r:set(
 		math.sqrt(it[1]*it[1]+it[5]*it[5]+it[ 9]*it[ 9]),
 		math.sqrt(it[2]*it[2]+it[6]*it[6]+it[10]*it[10]),
@@ -403,7 +403,7 @@ end
 
 function m4.rotate(it,degrees,v3a,r)
 	local m4a=m4.new():setrot(degrees,v3a)
-	return M.m4_product_m4(m4a,it,r)
+	return tardis.m4_product_m4(m4a,it,r)
 end
 
 local v2=class("v2",array)
@@ -539,7 +539,7 @@ end
 
 function q4.rotate(it,degrees,v3a,r)
 	local q4a=q4.new():setrot(degrees,v3a)
-	return M.q4_product_q4(q4a,it,r)
+	return tardis.q4_product_q4(q4a,it,r)
 end
 
 
@@ -552,7 +552,7 @@ local plane=class("plane",line)
 function plane.new(...) return setmetatable({v3.new(),v3.new()},plane) end -- [1]position , [2]normal
 
 
-function M.line_intersect_plane(l,p,r)
+function tardis.line_intersect_plane(l,p,r)
 	r=r or v3.new()
 	local t=v3.new(p[1]):sub(l[1]) -- the line position relative to the plane
 	local d=l[2]:dot(p[2]) -- the length of the line until it hits the plane
@@ -562,7 +562,7 @@ function M.line_intersect_plane(l,p,r)
 	return r:set( l[1][1]+(l[2][1]*d) , l[1][2]+(l[2][2]*d) , l[1][3]+(l[2][3]*d) ) -- the point of intersection
 end
 
-function M.q4_to_m4(q,m)
+function tardis.q4_to_m4(q,m)
 	if not m then m=m4.new() end
 	local w,x,y,z=q[1],q[2],q[3],q[4]
     local xx,xy,xz,xw=x*x,x*y,x*z,x*w
@@ -582,7 +582,7 @@ function M.q4_to_m4(q,m)
 						0,0,0,1				)
 end
 
-function M.q4_product_q4(q4a,q4b,r)
+function tardis.q4_product_q4(q4a,q4b,r)
 	r=r or q4b
     local r1 =  q4a[1] * q4b[4] + q4a[2] * q4b[3] - q4a[3] * q4b[2] + q4a[4] * q4b[1];
     local r2 = -q4a[1] * q4b[3] + q4a[2] * q4b[4] + q4a[3] * q4b[1] + q4a[4] * q4b[2];
@@ -591,7 +591,7 @@ function M.q4_product_q4(q4a,q4b,r)
 	return r:set(r1,r2,r3,r4)
 end
 
-function M.q4_product_v3(q4a,v3b,r)
+function tardis.q4_product_v3(q4a,v3b,r)
 	r=r or v3b
     local r1 =                    q4a[2] * v3b[3] - q4a[3] * v3b[2] + q4a[4] * v3b[1];
     local r2 = -q4a[1] * v3b[3]                   + q4a[3] * v3b[1] + q4a[4] * v3b[2];
@@ -599,7 +599,7 @@ function M.q4_product_v3(q4a,v3b,r)
 	return r:set(r1,r2,r3)
 end
 
-function M.m4_product_v3(m4a,v3b,r)
+function tardis.m4_product_v3(m4a,v3b,r)
 	r=r or v3b
 	local oow=1/( (m4a[   4]*v3b[1]) + (m4a[ 4+4]*v3b[2]) + (m4a[ 8+4]*v3b[3]) + (m4a[12+4] ) )
 	local r1= oow * ( (m4a[   1]*v3b[1]) + (m4a[ 4+1]*v3b[2]) + (m4a[ 8+1]*v3b[3]) + (m4a[12+1] ) )
@@ -608,7 +608,7 @@ function M.m4_product_v3(m4a,v3b,r)
 	return r:set(r1,r2,r3)
 end
 
-function M.m4_product_v4(m4a,v4b,r)
+function tardis.m4_product_v4(m4a,v4b,r)
 	r=r or v4b
 	local r1= ( (m4a[   1]*v4b[1]) + (m4a[ 4+1]*v4b[2]) + (m4a[ 8+1]*v4b[3]) + (m4a[12+1]*v4b[4]) )
 	local r2= ( (m4a[   2]*v4b[1]) + (m4a[ 4+2]*v4b[2]) + (m4a[ 8+2]*v4b[3]) + (m4a[12+2]*v4b[4]) )
@@ -617,7 +617,7 @@ function M.m4_product_v4(m4a,v4b,r)
 	return r:set(r1,r2,r3,r4)
 end
 
-function M.m4_product_m4(m4a,m4b,r)
+function tardis.m4_product_m4(m4a,m4b,r)
 	r=r or m4b
 	local r1 = (m4a[   1]*m4b[   1]) + (m4a[   2]*m4b[ 4+1]) + (m4a[   3]*m4b[ 8+1]) + (m4a[   4]*m4b[12+1])
 	local r2 = (m4a[   1]*m4b[   2]) + (m4a[   2]*m4b[ 4+2]) + (m4a[   3]*m4b[ 8+2]) + (m4a[   4]*m4b[12+2])
@@ -660,7 +660,7 @@ end
 -- view_width and view_height must be the current width and height of the display in pixels or nil
 -- we use this to work out where to place our view such that it is always visible and keeps its aspect.
 --
-function M.m4_project23d(view_width,view_height,width,height,fov,depth)
+function tardis.m4_project23d(view_width,view_height,width,height,fov,depth)
 
 	local aspect=height/width
 
@@ -694,10 +694,11 @@ end
 
 
 if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first use to disable use of tardis f32 core
---upgrade the above to hopefully faster C versions working on userdata arrays of floats
+--upgrade the above to hopefully faster C versions working on 16byte aligned userdata arrays of floats
 local tcore=require("wetgenes.tardis.core") -- use a "faster?" f32 C core
 if tcore then
-
+	tardis.f32=tcore -- expose f32 core
+	
 	-- allow read/write with magical [] lookups
 	function array.__len(it) return 1 end
 	function array.__index(it,n) return array[n] or tcore.read(it,n) end
@@ -753,8 +754,8 @@ if tcore then
 
 	-- replace some functions with C code
 
-	M.m4_product_m4		=	tcore.m4_product_m4
-	M.m4_product_v4		=	tcore.m4_product_v4
+	tardis.m4_product_m4		=	tcore.m4_product_m4
+	tardis.m4_product_v4		=	tcore.m4_product_v4
 
 	m4.identity			=	tcore.m4_identity
 	m4.rotate			=	tcore.m4_rotate
