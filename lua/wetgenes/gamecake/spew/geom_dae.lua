@@ -656,6 +656,36 @@ end
 	its.anim_merge=function()
 
 print("merging")
+
+		local tweaks={}
+		
+		if its.filter.bone_tweaks then -- per character bone tweaks that should be applied to the vertexes
+			if its.joints then -- got a rig
+
+					local recurse recurse=function(it,mp)
+
+						if it.matrix then -- top level has no matrix
+							
+							local tweak=its.filter.bone_tweaks[it.name]
+							if tweak then
+
+								local inv=its.anim.rest[it.idx]:inverse( tardis.m4.new() )
+								tweaks[it.idx]=tardis.m4.new()
+
+							else
+
+								tweaks[it.idx]=tardis.m4.new()
+
+							end
+						end
+
+						for i,v in ipairs(it) do recurse(v,mp) end
+
+					end	recurse(its.joints,tardis.m4.new():identity())
+
+			end
+		end
+
 		local obj=its.anim_merged or geom.new()
 		its.anim_merged=obj
 
@@ -691,7 +721,7 @@ print("merging")
 			end
 		end
 
--- reidx materials		
+-- reindex materials		
 		local idx=1
 		for n,v in pairs(mats_map) do
 			v.idx=idx
