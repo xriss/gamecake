@@ -57,8 +57,8 @@ chatdown.parse=function(chat_text)
 	local decisions={}
 	local decision={}
 
-	local responces={}
-	local responce={}
+	local responses={}
+	local response={}
 
 	local proxies={}
 	local proxy={}
