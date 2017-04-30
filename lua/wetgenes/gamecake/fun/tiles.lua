@@ -6,6 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local wgrd =require("wetgenes.grd")
 local wpack=require("wetgenes.pack")
 local wzips=require("wetgenes.zips")
+local wstr=require("wetgenes.string")
 
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
 
@@ -51,6 +52,8 @@ tiles.create=function(it,opts)
 	
 	it.hx=it.tile_hx*it.bitmap_hx
 	it.hy=it.tile_hy*it.bitmap_hy
+	
+	it.idxnames={}
 	
 --	it.hx=2^math.ceil( math.log(it.hx)/math.log(2) ) -- force power of 2?
 --	it.hy=2^math.ceil( math.log(it.hy)/math.log(2) )
@@ -110,20 +113,90 @@ tiles.create=function(it,opts)
 			local t={}
 			t.idx=v[1]
 			t.name=v[2]
-			t.ascii=v[3]
-			local hx,hy=bitdown.pix_size(t.ascii,8,8)
-			t.hx=hx
-			t.hy=hy
-			
-			t.px=math.floor(t.idx%256)*it.tile_hx
-			t.py=math.floor((t.idx)/256)*it.tile_hy
-			
-			bitdown.pix_grd(t.ascii,map,it.bitmap_grd,t.px,t.py,t.hx,t.hy)
 
+			if type(v[3])=="number" then -- just mark as allocated
+			
+				t.ascii=nil
+
+				t.hx=math.floor(v[3]%256)*it.tile_hx
+				t.hy=math.floor((v[3])/256)*it.tile_hy
+			
+			else
+
+				t.ascii=v[3]
+
+				t.hx,t.hy=bitdown.pix_size(t.ascii,it.tile_hx,it.tile_hy)
+				
+			
+			end
+			
+			if t.idx then
+
+				t.px=math.floor(t.idx%256)*it.tile_hx
+				t.py=math.floor((t.idx)/256)*it.tile_hy
+				
+			else -- find a free spot
+			
+			
+				local tilecheck=function(px,py,hx,hy)
+					for y=py,py+hy-1 do
+						for x=px,px+hx-1 do
+							if x<1 or y<1 or x>it.bitmap_hx or y>it.bitmap_hy then return false end -- out of bounds
+							if it.idxnames[ x + ((y-1)*256) ] then return false end -- already used
+						end
+					end
+					return true
+				end
+			
+				local hx,hy=t.hx/it.tile_hx,t.hy/it.tile_hy
+--				print(t.name,hx,hy)
+				for y=1,it.bitmap_hy do
+					for x=1,it.bitmap_hx do
+						if tilecheck(x,y,hx,hy) then
+							t.px=(x-1)*it.tile_hx
+							t.py=(y-1)*it.tile_hy
+							t.idx=(y-1)*256+(x-1)
+							break
+						end
+					end
+					if t.idx then break end
+				end
+--				print(string.format("%04x",t.idx),hx,hy,t.name)
+			
+			end
+			
+			assert(t.idx) -- make sure we found a place to live
+			
+			if t.ascii then
+				bitdown.pix_grd(t.ascii,map,it.bitmap_grd,t.px,t.py,t.hx,t.hy)
+			end
+			
 			-- keep lookups
 			it.names[t.name]=t -- by name
 			it.names[t.idx]=t -- by number
+
+			-- remember allocated zones
+
+			local px,py=t.px/it.tile_hx,t.py/it.tile_hy		
+			local hx,hy=t.hx/it.tile_hx,t.hy/it.tile_hy		
+			for y=py,py+hy-1 do
+				for x=px,px+hx-1 do
+					it.idxnames[ 1 + x + y*256 ]=t.name
+				end
+			end
+
 		end
+
+--[[
+			for y=0,it.bitmap_hy-1 do
+				for x=0,it.bitmap_hx-1 do
+					if it.idxnames[ 1 + x + y*256 ] then
+						print(string.format("%04x %s",x+y*256,it.idxnames[ 1 + x + y*256 ]))
+					end
+				end
+			end
+]]
+
 	end
 		
 	it.dirty_flag=true
