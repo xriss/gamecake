@@ -101,8 +101,7 @@ function wdatas.new_datas(datas)
 	end
 
 
-
-print("DATA SETUP")	
+--print("DATA SETUP")	
 
 	return datas
 	

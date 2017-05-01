@@ -544,6 +544,17 @@ function wmaster.setup(widget,def)
 		
 	end
 	
+--
+-- mark all widgets that reference this data as dirty
+--
+	function master.dirty_by_data(data)
+		master:call_descendents(function(w)
+			if w.data==data then
+				w:set_dirty()
+			end
+		end)		
+	end
+
 end
 
 return wmaster

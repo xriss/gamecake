@@ -56,6 +56,7 @@ wdata.data_value=function(dat,val,force)
 			if not force and type(force)=="boolean" then -- set force to false to disable hook
 			else
 				dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
+				if dat.master then dat.master.dirty_by_data(dat) end
 			end
 		end
 		return dat.num
@@ -66,6 +67,7 @@ wdata.data_value=function(dat,val,force)
 			if (val and val~=dat.str ) or force  then -- change value
 				dat.str=val or dat.str
 				dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
+				if dat.master then dat.master.dirty_by_data(dat) end
 			end
 		end
 		return dat.str
