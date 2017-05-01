@@ -63,7 +63,7 @@ function wmenudrop.drop(widget)
 			hooks=hooks
 		}
 	end
-	widgets_menuitem.menu_add(widget,{menu_data=d})
+	widget.menu=widgets_menuitem.menu_add(widget,{menu_data=d})
 	
 end
 
@@ -71,9 +71,14 @@ end
 
 function wmenudrop.class_hooks(hook,widget,dat)
 	if hook=="active" then
-		wmenudrop.drop(widget)
+		if widget.master.menu==widget and ( not widget.menu.hidden ) then -- hide
+			widget.menu:remove()
+			widget.menu=nil
+			widget.master.menu=nil
+		else
+			wmenudrop.drop(widget)
+		end
 	end
-	
 end
 
 
