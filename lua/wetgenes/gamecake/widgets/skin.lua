@@ -813,6 +813,9 @@ end
 							local y0,y1= (ty)*wsy	, (ty+fy)*wsy
 							
 							local cc=master.get_color(nil,widget.text_color)
+							cc[1]=cc[1]*0.25
+							cc[2]=cc[2]*0.25
+							cc[3]=cc[3]*0.25
 							cc[4]=cc[4]*0.25
 							gl.Color( unpack(cc) )
 
