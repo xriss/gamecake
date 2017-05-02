@@ -150,6 +150,7 @@ end
 
 function wwindow.layout(widget)
 
+
 	local v=widget.win_fbo
 	local window=widget
 	
@@ -176,7 +177,29 @@ function wwindow.layout(widget)
 	end
 
 -- also layout any other children
-	widget.meta.layout(widget,1)
+	widget.meta.layout(widget)
+
+	local ss=(widget.master.grid_size or 24)
+	local hy=widget.win_canvas.hy+ss
+	if hy~=widget.win_fbo.hy then -- resize widgets
+		widget.hy=hy
+		widget.win_fbo.hy=hy
+
+		widget.win_edge_l.hy=hy+ss
+		widget.win_edge_r.hy=hy+ss
+		
+		widget.win_edge_b.py=hy-ss/8
+		widget.win_edge_bl.py=hy-ss/4
+		widget.win_edge_br.py=hy-ss/4
+		
+
+				
+--		print(widget.win_canvas.hy)
+
+		widget:build_m4()
+		return wwindow.layout(widget)
+	end
+	
 
 end
 
@@ -286,6 +309,7 @@ function wwindow.setup(widget,def)
 				py=ss,
 				hx=def.hx,
 				hy=def.hy,
+				size="fit",
 				color=color,
 				highlight="none",
 			})

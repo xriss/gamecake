@@ -74,6 +74,10 @@ function wfill.layout(widget)
 		
 	end
 	
+	if widget.size=="fit" then -- fit the height of the children
+		widget.hy=widget.hy_max
+	end
+	
 -- layout sub sub widgets	
 	for i,v in ipairs(widget) do
 		if not v.hidden then v:layout() end
