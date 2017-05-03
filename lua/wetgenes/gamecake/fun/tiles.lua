@@ -22,8 +22,8 @@ function M.bake(oven,tiles)
 
 tiles.load=function()
 
---	local filename="lua/"..(M.modname):gsub("%.","/")..".glsl"
---	gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
+	local filename="lua/"..(M.modname):gsub("%.","/")..".glsl"
+	gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
 
 	return tiles
 end

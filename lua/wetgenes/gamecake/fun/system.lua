@@ -242,6 +242,33 @@ system.draw=function()
 
 end
 
+system.draw_debug=function()
+
+	local screen=system.components.screen
+	local tiles=system.components.tiles
+	local colors=system.components.colors
+	
+	if screen and tiles and colors then -- draw raw tiles
+
+		local t={
+			0,			tiles.hy,	0, 0,1,
+			0,			0,			0, 0,0,
+			tiles.hx,	tiles.hy,	0, 1,1,
+			tiles.hx,	0,			0, 1,0,
+		}
+
+		flat.tristrip("rawuv",t,"fun_draw_tiles_debug",function(p)
+
+			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_tile"), 0 )
+			gl.BindTexture( gl.TEXTURE_2D , tiles.bitmap_tex )
+
+		end)
+	
+	end
+
+
+end
+
 -- returns true if any component is dirty
 system.dirty=function(flag)
 	local dirty=false
