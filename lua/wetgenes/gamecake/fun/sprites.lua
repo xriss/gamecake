@@ -101,10 +101,10 @@ sprites.create=function(it,opts)
 		local batch={}
 		for idx,v in pairs(it.list) do
 
-			local ixw=(v.tx*it.tile_hx+v.hx)/(it.tiles.hx)
-			local iyh=(v.ty*it.tile_hy+v.hy)/(it.tiles.hy)
-			local ix= (v.tx*it.tile_hx     )/(it.tiles.hx)
-			local iy= (v.ty*it.tile_hy     )/(it.tiles.hy)
+			local ixw=(v.tx*it.tile_hx+v.hx-0.00390625)/(it.tiles.hx)
+			local iyh=(v.ty*it.tile_hy+v.hy-0.00390625)/(it.tiles.hy)
+			local ix= (v.tx*it.tile_hx     +0.00390625)/(it.tiles.hx)
+			local iy= (v.ty*it.tile_hy     +0.00390625)/(it.tiles.hy)
 			
 			local ox=(v.ox)*(v.sx)
 			local oy=(v.oy)*(v.sy)
