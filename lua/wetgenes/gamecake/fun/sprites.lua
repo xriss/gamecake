@@ -101,10 +101,10 @@ sprites.create=function(it,opts)
 		local batch={}
 		for idx,v in pairs(it.list) do
 
-			local ixw=(v.tx*it.tile_hx+v.hx-0.00390625)/(it.tiles.hx)
-			local iyh=(v.ty*it.tile_hy+v.hy-0.00390625)/(it.tiles.hy)
-			local ix= (v.tx*it.tile_hx     +0.00390625)/(it.tiles.hx)
-			local iy= (v.ty*it.tile_hy     +0.00390625)/(it.tiles.hy)
+			local ixw=(v.tx*it.tile_hx+v.hx)/(it.tiles.hx)
+			local iyh=(v.ty*it.tile_hy+v.hy)/(it.tiles.hy)
+			local ix= (v.tx*it.tile_hx     )/(it.tiles.hx)
+			local iy= (v.ty*it.tile_hy     )/(it.tiles.hy)
 			
 			local ox=(v.ox)*(v.sx)
 			local oy=(v.oy)*(v.sy)
@@ -113,11 +113,14 @@ sprites.create=function(it,opts)
 			
 			local s=-math.sin(math.pi*(v.rz)/180)
 			local c= math.cos(math.pi*(v.rz)/180)
+			
+			local px=math.floor(v.px+0.5)
+			local py=math.floor(v.py+0.5)
 
-			local v1=gl.apply_modelview( {dl.dx+v.px-c*(ox)-s*(oy),			dl.dy+v.py+s*(ox)-c*(oy),			v.pz,1} )
-			local v2=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)-s*(oy),		dl.dy+v.py-s*(hx-ox)-c*(oy),		v.pz,1} )
-			local v3=gl.apply_modelview( {dl.dx+v.px-c*(ox)+s*(hy-oy),		dl.dy+v.py+s*(ox)+c*(hy-oy),		v.pz,1} )
-			local v4=gl.apply_modelview( {dl.dx+v.px+c*(hx-ox)+s*(hy-oy),	dl.dy+v.py-s*(hx-ox)+c*(hy-oy),		v.pz,1} )
+			local v1=gl.apply_modelview( {dl.dx+px-c*(ox)-s*(oy),			dl.dy+py+s*(ox)-c*(oy),			v.pz,1} )
+			local v2=gl.apply_modelview( {dl.dx+px+c*(hx-ox)-s*(oy),		dl.dy+py-s*(hx-ox)-c*(oy),		v.pz,1} )
+			local v3=gl.apply_modelview( {dl.dx+px-c*(ox)+s*(hy-oy),		dl.dy+py+s*(ox)+c*(hy-oy),		v.pz,1} )
+			local v4=gl.apply_modelview( {dl.dx+px+c*(hx-ox)+s*(hy-oy),		dl.dy+py-s*(hx-ox)+c*(hy-oy),	v.pz,1} )
 
 			local t=
 			{
