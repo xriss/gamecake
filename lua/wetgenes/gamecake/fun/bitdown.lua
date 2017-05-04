@@ -272,13 +272,15 @@ M.grd_pix_idx=function(g,map,px,py,hx,hy)
 	local swanky32=true -- use the swanky32 palette nicer looking ascii codes
 
 	local t=g:palette(0,256)
-	for i=0,255 do
-		local r=t[1+i*4]
-		local g=t[2+i*4]
-		local b=t[3+i*4]
-		local a=t[4+i*4]
-		local bgra=a*0x01000000 + r*0x00010000 + g*0x00000100 + b -- 32bit little endian
-		if bgra ~= map[i].bgra then swanky32=false break end
+	if t then
+		for i=0,255 do
+			local r=t[1+i*4]
+			local g=t[2+i*4]
+			local b=t[3+i*4]
+			local a=t[4+i*4]
+			local bgra=a*0x01000000 + r*0x00010000 + g*0x00000100 + b -- 32bit little endian
+			if bgra ~= map[i].bgra then swanky32=false break end
+		end
 	end
 
 	for y=py,py+hy-1 do -- one line at a time
