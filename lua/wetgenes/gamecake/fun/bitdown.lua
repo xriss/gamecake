@@ -61,9 +61,11 @@ M.cmap_build=function(cmap_data)
 		cmap[ string.format("%02x",i)]=cmap[i]
 	end
 	if cmap_data then -- shallow copy the palette data
-		for i,v in ipairs(cmap_data) do
-			local color=cmap[i] -- output
-			for cn,cv in pairs(v) do color[cn]=cv end 
+		for i=0,#cmap_data do local v=cmap_data[i]
+			if v then
+				local color=cmap[i] -- output
+				for cn,cv in pairs(v) do color[cn]=cv end 
+			end
 		end
 	end
 	for i=255,0,-1 do -- add quick code lookups, lower indexs get code priority (possibly break the hexmaps)
