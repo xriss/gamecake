@@ -103,11 +103,11 @@ local function html(content,index)
 	return [[
 <html>
 	<head>
-		<link rel="shortcut icon" href="/data/gcdoc.png" />
+		<link rel="shortcut icon" href="data/gcdoc.png" />
 		<link rel='stylesheet' href='data/dox.css' />
 		<link rel="stylesheet" href="//yandex.st/highlightjs/8.0/styles/sunburst.min.css">
 		<script src="data/jquery.min.js"></script>
-		<script src="data.dox.js"></script>
+		<script src="data/dox.js"></script>
 		<script src="//yandex.st/highlightjs/8.0/highlight.min.js"></script>
 		<script>hljs.initHighlightingOnLoad();</script>
 	</head>
