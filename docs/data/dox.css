@@ -148,7 +148,7 @@ a.top			{display:block; margin-top:60px;}
 
 /*	Sidebar styling	*/
 
-a.meca			{display:block; background:url('data/gcdoc.png')no-repeat; width:150px; height:150px; margin-bottom:20px;}
+a.meca			{display:block; background:url('gcdoc.png')no-repeat; width:150px; height:150px; margin-bottom:20px;}
 
 ul				{margin:0; padding:0 0 0 0; list-style-position:inside;}
 ul li			{padding:5px 0 0 5px;}
