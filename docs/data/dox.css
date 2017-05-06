@@ -165,9 +165,9 @@ ul:nth-of-type(1)	{list-style-type:none; display:block;}
 ul:nth-of-type(1) li{padding:5px 0 0 0;}
 
 
-/*	Code snippets styling	*/
+/*	Code snippets styling -- used !important to override google prettyprint https://xriss.github.io/gamecake/data/google-code-prettify/skins/sons-of-obsidian.css	*/
 
-.prettyprint	{display:block; padding:.5em; background:#000; color:#f8f8f8}
+.prettyprint	{display:block; padding:.5em; background:#000 !important; color:#f8f8f8}
 
 
 @media screen {
