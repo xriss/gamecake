@@ -128,6 +128,8 @@ end
 
 local function disqus(n)
 
+	do return "" end -- disable discus
+
 	return [[
 <div id="disqus_thread"></div>
 <script type="text/javascript">
