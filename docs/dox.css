@@ -6,9 +6,11 @@ body {
    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
    font-size: 13px;
    line-height: 18px;
-   color: #fff;
+   color: #d2d2d2;
    background-color: #110F14;
    margin: 10px 13px 10px 13px;
+   position:relative;
+   width:960px;
 }
 table {
 	 margin: 10px 0 15px 0;
@@ -22,24 +24,26 @@ th {
 	 padding: 5px 10px;	
 }
 a {
-   color: #59acf3;
+   color: #ddd;
+   text-decoration: none;
 }
 a:hover {
-   color: #a7d8ff;
-   text-decoration: none;
+   color: #59acf3;
 }
 a img {
    border: none;
 }
 p {
-   margin-bottom: 9px;
+   margin-bottom: 16px;
+   font-size: 18px;
+   line-height: 26px;
 }
 h1, h2, h3, h4, h5, h6 {
    color: #fff;
    line-height: 36px;
 }
 h1 {
-   margin-bottom: 18px;
+   margin-bottom: 26px;
    font-size: 30px;
 }
 h2 {
@@ -58,9 +62,9 @@ h6 {
    font-size: 13px;
 }
 hr {
-   margin: 0 0 19px;
+   margin: 60px 0;
    border: 0;
-   border-bottom: 1px solid #ccc;
+   border-bottom:1px solid #282a36;
 }
 blockquote {
    padding: 13px 13px 21px 15px;
@@ -99,7 +103,7 @@ code {
 pre {
    display: block;
    padding: 14px;
-   margin: 0 0 18px;
+   margin: 32px 0 18px 0;
    line-height: 16px;
    font-size: 11px;
    border: 1px solid #334;
@@ -110,7 +114,8 @@ pre {
    border-radius: 6px;
 }
 pre code {
-   font-size: 11px;
+   font-size: 14px;
+   line-height: 26px;
    padding: 0;
    background: transparent;
 }
@@ -121,7 +126,46 @@ sup {
 }
 * {
 	 -webkit-print-color-adjust: exact;
+	 box-sizing:border-box;
 }
+
+/*	Wrappers	*/
+
+.content		{display:inline-block; vertical-align:top; width:720px; position:absolute; top:0; left:220px; padding-left:20px; margin-bottom:60px;}
+.index			{display:inline-block; vertical-align:top; width:220px; position:absolute; top:0; left:0; margin-top:10px;}
+
+
+/*	Breadcrumbs styling	*/
+
+.crumbs_wrap	{margin-top:20px; margin-bottom:40px;}
+.crumbs			{display:inline-block; vertical-align:top; margin-right:5px; font-size:14px;}
+
+
+/*	Link to top styling	*/
+
+a.top			{display:block; margin-top:60px;}
+
+
+/*	Sidebar styling	*/
+
+a.meca			{display:block; background:url('data/gcdoc.png')no-repeat; width:150px; height:150px; margin-bottom:20px;}
+
+ul				{margin:0; padding:0 0 0 0; list-style-position:inside;}
+ul li			{padding:5px 0 0 5px;}
+ul li a			{margin-left:-10px;}
+
+ul:nth-child(2)	{list-style-type:disc;}
+ul:nth-child(2) > li	{padding:5px 0 0 0px;}
+ul:nth-child(2) > li > ul > li	{padding:5px 0 0 5px;}
+ul:nth-child(2) > li > ul	{list-style-type:disc;}
+ul:nth-child(2) > li > ul > li > ul	{list-style-type:square;}
+ul:nth-child(2) > li > ul > li > ul > li > ul	{list-style-type:circle;}
+
+ul:nth-of-type(1)	{list-style-type:none; display:block;}
+ul:nth-of-type(1) li{padding:5px 0 0 0;}
+
+
+
 @media screen {
    body {
       max-width: 800px;
