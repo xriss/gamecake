@@ -2,11 +2,17 @@
 	<head>
 		<link rel="shortcut icon" href="data/gcdoc.png" />
 		<link rel='stylesheet' href='data/dox.css' />
-		<link rel="stylesheet" href="//yandex.st/highlightjs/8.0/styles/sunburst.min.css">
 		<script src="data/jquery.min.js"></script>
 		<script src="data/dox.js"></script>
-		<script src="//yandex.st/highlightjs/8.0/highlight.min.js"></script>
-		<script>hljs.initHighlightingOnLoad();</script>
+		<script	src="data/google-code-prettify/prettify.js" ></script>
+		<script	src="data/google-code-prettify/lang-lua.js" ></script>
+		<link rel="stylesheet" type="text/css" href="data/google-code-prettify/skins/sons-of-obsidian.css" />
+		<script>
+			$(function(){
+				$("code").addClass("prettyprint").addClass("lang-lua");
+				PR.prettyPrint();
+			});
+		</script>
 	</head>
 	<body>
 		<div class="content">
