@@ -934,6 +934,50 @@ used to pull functions out of this module and into locals like so</p>
 
 
 </div><hr/>
+<h1><a href="wetgenes.gamecake.fun.chatdown.parse.html">wetgenes.gamecake.fun.chatdown.parse</a></h1>
+<div>
+
+<pre><code>chats = chatdown.parse(text)
+</code></pre>
+
+<p>Parse text from flat text chatdown format into heirachical chat data, 
+something that can be output easily as json.</p>
+
+<p>This gives us a readonly data structure that can be used to control 
+what text is displayed during a chat session.</p>
+
+<p>This is intended to be descriptive and logic less, any decision logic 
+should be added using a real language that operates on this data and 
+gets triggered by the names used. EG, filter out decisions unless 
+certain conditions are met or change responses to redirect to an 
+alternative.</p>
+
+
+
+</div><hr/>
+<h1><a href="wetgenes.gamecake.fun.chatdown.setup.html">wetgenes.gamecake.fun.chatdown.setup</a></h1>
+<div>
+
+<pre><code>chats = chatdown.setup(chat_text)
+</code></pre>
+
+<p>parse and initialise state data for every chat chunk</p>
+
+
+</div><hr/>
+<h1><a href="wetgenes.gamecake.fun.chatdown.setup_chat.html">wetgenes.gamecake.fun.chatdown.setup_chat</a></h1>
+<div>
+
+<pre><code>chat = chatdown.setup_chat(chat,chats,chat_name,response_name)
+</code></pre>
+
+<p>Setup the state for a chat using this array of chats as text data to be 
+displayed.</p>
+
+<p>We manage proxy data and callbacks from decisions here.</p>
+
+
+</div><hr/>
 <h1><a href="wetgenes.gamecake.oven.html">wetgenes.gamecake.oven</a></h1>
 <div>
 
@@ -1951,20 +1995,6 @@ used when starting a new module.</p>
 			<a href="index.html" class="meca" title="To Docs Cave!"></a>
 <ul>
 <li>
-<a href="chatdown.html" class="ul-expand" >chatdown</a>
-<ul>
-<li>
-<a href="chatdown.parse.html" class="ul-link" >parse</a>
-</li>
-<li>
-<a href="chatdown.setup.html" class="ul-link" >setup</a>
-</li>
-<li>
-<a href="chatdown.setup_chat.html" class="ul-link" >setup_chat</a>
-</li>
-</ul>
-</li>
-<li>
 <a href="wetgenes.html" class="ul-expand" >wetgenes</a>
 <ul>
 <li>
@@ -2174,6 +2204,25 @@ used when starting a new module.</p>
 <li>
 <a href="wetgenes.gamecake.html" class="ul-expand" >gamecake</a>
 <ul>
+<li>
+<a href="wetgenes.gamecake.fun.html" class="ul-expand" >fun</a>
+<ul>
+<li>
+<a href="wetgenes.gamecake.fun.chatdown.html" class="ul-expand" >chatdown</a>
+<ul>
+<li>
+<a href="wetgenes.gamecake.fun.chatdown.parse.html" class="ul-link" >parse</a>
+</li>
+<li>
+<a href="wetgenes.gamecake.fun.chatdown.setup.html" class="ul-link" >setup</a>
+</li>
+<li>
+<a href="wetgenes.gamecake.fun.chatdown.setup_chat.html" class="ul-link" >setup_chat</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li>
 <a href="wetgenes.gamecake.oven.html" class="ul-expand" >oven</a>
 <ul>
