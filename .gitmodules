@@ -2,4 +2,3 @@
 	path = exe
 	url = https://github.com/xriss/gamecake.git
 	branch = exe
-	shallow = true
