@@ -104,10 +104,10 @@ local function html(content,index)
 <html>
 	<head>
 		<link rel='stylesheet' href='dox.css' />
-		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<link rel="stylesheet" href="//yandex.st/highlightjs/8.0/styles/sunburst.min.css">
 		<script src="jquery.min.js"></script>
 		<script src="dox.js"></script>
-		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+		<script src="//yandex.st/highlightjs/8.0/highlight.min.js"></script>
 		<script>hljs.initHighlightingOnLoad();</script>
 	</head>
 	<body>
