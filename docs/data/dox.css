@@ -165,6 +165,10 @@ ul:nth-of-type(1)	{list-style-type:none; display:block;}
 ul:nth-of-type(1) li{padding:5px 0 0 0;}
 
 
+/*	Code snippets styling	*/
+
+.prettyprint	{display:block; padding:.5em; background:#000; color:#f8f8f8}
+
 
 @media screen {
    body {
