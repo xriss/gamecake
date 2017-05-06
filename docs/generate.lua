@@ -111,10 +111,12 @@ local function html(content,index)
 		<script>hljs.initHighlightingOnLoad();</script>
 	</head>
 	<body>
-		<div class=="content">
+		<div class="content">
 ]]..(content)..[[
+			<a href="#" class="top">Back to top</a>
 		</div>
-		<div class=="index">
+		<div class="index">
+			<a href="index.html" class="meca" title="To Docs Cave!"></a>
 ]]..(index)..[[
 		</div>
 	</body>
@@ -278,13 +280,15 @@ for n,v in pairs(htmls) do
 	end
 	
 	local links={}
-	links[#links+1]="<h1><a href=\"index.html\">index</a></h1>"
+	links[#links+1]="<div class=\"crumbs_wrap\">"
+	links[#links+1]="<div class=\"crumbs\"><a href=\"index.html\">home</a> &gt; </div>"
 	local aa=wstr.split(n,".")
 	local name
 	for i=1,#aa-1 do
 		if not name then name=aa[i] else name=name.."."..aa[i] end
-		links[#links+1]="<h1><a href=\""..name..".html\">"..name.."</a></h1>"
+		links[#links+1]="<div class=\"crumbs\"><a href=\""..name..".html\">"..name.."</a> &gt; </div>"
 	end
+	links[#links+1]="</div>"
 	wbake.writefile( "./"..n..".html",html(table.concat(links)..table.concat(t,"<hr/>\n")..disqus(n),index))
 end
 
