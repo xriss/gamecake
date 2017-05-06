@@ -98,18 +98,25 @@ for n,v in pairs(chunks) do
 end
 
 
-local function html(v)
+local function html(content,index)
 
 	return [[
 <html>
 	<head>
 		<link rel='stylesheet' href='dox.css' />
 		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/sunburst.min.css">
+		<script src="jquery.min.js"></script>
+		<script src="dox.js"></script>
 		<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
 		<script>hljs.initHighlightingOnLoad();</script>
 	</head>
 	<body>
-]]..(v)..[[
+		<div class=="content">
+]]..(content)..[[
+		</div>
+		<div class=="index">
+]]..(index)..[[
+		</div>
 	</body>
 </html>
 ]]
@@ -143,6 +150,101 @@ for n,v in pairs(chunks) do
 	end
 end
 ]]
+
+
+local index="" -- all ul within ul links to files
+
+do
+-- heirachical index
+	t={}
+
+	for n,v in pairs(htmls) do
+
+		for n,s in pairs(v) do
+		
+			if n:sub(-7)~=".source" then
+
+				local aa=wstr.split(n,".")
+				
+				local level=t
+				for idx=1,#aa do
+					local name=aa[idx]
+					
+					level[name]=level[name] or {}
+					
+					level=level[name]
+				end
+
+			end
+			
+		end
+
+	end
+
+	local sorted={}
+	do
+		local recurse
+		recurse=function(parent)
+		
+			local tab={}
+
+			local names={}
+			for n,v in pairs(parent) do names[#names+1]=n end
+			table.sort(names)
+			
+			for i,name in ipairs(names) do
+			
+				tab[i]={name,recurse(parent[name])}
+				
+			end
+			
+			return tab
+		end
+
+		sorted=recurse(t)
+	end
+	
+
+	local lines={}
+	local push=function(s) lines[#lines+1]=s end
+	do
+		local recurse
+		recurse=function(parent,pname,proot)
+			
+			push("<ul>")
+			
+			for i,v in ipairs(parent) do
+
+				local name=v[1]
+				local children=v[2]
+				local root=(proot=="") and name or proot.."."..name
+				
+				push("<li>")
+				
+				local class=" class=\"ul-link\" "
+				if children[1] then
+					class=" class=\"ul-expand\" "
+				end
+
+				push("<a href=\""..root..".html\""..class..">"..name.."</a>")
+				
+				if children[1] then
+					recurse(children,name, root )
+				end
+
+				push("</li>")
+				
+			end
+			
+			push("</ul>")
+
+		end
+		recurse(sorted,"","")
+	end
+
+	index=table.concat(lines,"\n")
+end
+
 
 -- spit out pages containing many html chunks
 for n,v in pairs(htmls) do
@@ -183,7 +285,7 @@ for n,v in pairs(htmls) do
 		if not name then name=aa[i] else name=name.."."..aa[i] end
 		links[#links+1]="<h1><a href=\""..name..".html\">"..name.."</a></h1>"
 	end
-	wbake.writefile( "./"..n..".html",html(table.concat(links)..table.concat(t,"<hr/>\n")..disqus(n)))
+	wbake.writefile( "./"..n..".html",html(table.concat(links)..table.concat(t,"<hr/>\n")..disqus(n),index))
 end
 
 
