@@ -8,9 +8,9 @@ body {
    line-height: 18px;
    color: #d2d2d2;
    background-color: #110F14;
-   margin: 10px 13px 10px 13px;
    position:relative;
    width:960px;
+   margin:0 auto;
 }
 table {
 	 margin: 10px 0 15px 0;
@@ -170,13 +170,7 @@ ul:nth-of-type(1) li{padding:5px 0 0 0;}
 .prettyprint	{display:block; padding:.5em; background:#000 !important; color:#f8f8f8}
 
 
-@media screen {
-   body {
-      max-width: 800px;
-      margin:10px auto;
-   }
-	html {overflow-y: scroll;}
-}
+
 @media print {
 	 body,code,pre code,h1,h2,h3,h4,h5,h6 {
 		  color: black;
