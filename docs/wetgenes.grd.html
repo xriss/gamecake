@@ -16,7 +16,11 @@
 	</head>
 	<body>
 		<div class="content">
-<div class="crumbs_wrap"><div class="crumbs"><a href="index.html">home</a> &gt; </div><div class="crumbs"><a href="wetgenes.html">wetgenes</a> &gt; </div></div><h1><a href="wetgenes.grd.html">wetgenes.grd</a></h1>
+<div class="crumbs_wrap"><div class="crumbs"><a href="index.html">home</a> &gt; </div><div class="crumbs"><a href="wetgenes.html">wetgenes</a> &gt; </div></div>
+<h1><a href="wetgenes.grd.html">wetgenes.grd</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L6">lua/wetgenes/grd.lua#6</a>
+
 <div>
 
 <pre><code>local wgrd=require("wetgenes.grd")
@@ -116,8 +120,14 @@ wgrd.GRD_FMT_HINT_GIF
 <p>These are used to choose a specific file format when loading or saving.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.attr_redux.html">wetgenes.grd.attr_redux</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L604">lua/wetgenes/grd.lua#604</a>
+
 <div>
 
 <pre><code>g:attr_redux(cw,ch,num,sub,bak)
@@ -144,8 +154,14 @@ characters, set to -1 if there is no shared background color.</p>
 otherwise returns g so that we can chain the result.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.blit.html">wetgenes.grd.blit</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L817">lua/wetgenes/grd.lua#817</a>
+
 <div>
 
 <pre><code>g:blit(gb,x,y,cx,cy,cw,ch)
@@ -168,8 +184,14 @@ alpha blending.</p>
 <p>This is not overly optimised but should be reasonably fast.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.clear.html">wetgenes.grd.clear</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L570">lua/wetgenes/grd.lua#570</a>
+
 <div>
 
 <pre><code>g:clear(color)
@@ -183,8 +205,14 @@ format of the grd, it could be an index value for 8bit images or a
 otherwise returns g so that we can chain the result.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.clip.html">wetgenes.grd.clip</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L958">lua/wetgenes/grd.lua#958</a>
+
 <div>
 
 <pre><code>gr=g:clip(x,y,z,w,h,d)
@@ -203,8 +231,14 @@ otherwise returns g so that we can chain the result.</p>
 <p>This is a very shallow dangerous copy and should only really be used for temporary actions.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.convert.html">wetgenes.grd.convert</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L535">lua/wetgenes/grd.lua#535</a>
+
 <div>
 
 <pre><code>g:convert(fmt)
@@ -217,8 +251,14 @@ and convert it to 32 bit like by passing in wgrd.FMT<em>U8</em>RGBA as the fmt.<
 otherwise returns g so that we can chain the result.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.copy_data.html">wetgenes.grd.copy_data</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L935">lua/wetgenes/grd.lua#935</a>
+
 <div>
 
 <pre><code>g:copy_data(gb)
@@ -227,8 +267,14 @@ otherwise returns g so that we can chain the result.</p>
 <p>Copy all of the bitmap data from gb into g.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.copy_data_layer.html">wetgenes.grd.copy_data_layer</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L945">lua/wetgenes/grd.lua#945</a>
+
 <div>
 
 <pre><code>g:copy_data_layer(gb,z,zb)
@@ -239,8 +285,14 @@ depth of the layer to copy into zb is the depth of the layer to copy
 from.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.create.html">wetgenes.grd.create</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L277">lua/wetgenes/grd.lua#277</a>
+
 <div>
 
 <pre><code>ga=wgrd.create(gb)
@@ -277,8 +329,14 @@ than from the file system.</p>
 otherwise returns a grd object.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.create_convert.html">wetgenes.grd.create_convert</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L555">lua/wetgenes/grd.lua#555</a>
+
 <div>
 
 <pre><code>g:create_convert(fmt)
@@ -287,8 +345,14 @@ otherwise returns a grd object.</p>
 <p>Like convert but returns a new grd rather than converting in place.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.create_normal.html">wetgenes.grd.create_normal</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L985">lua/wetgenes/grd.lua#985</a>
+
 <div>
 
 <pre><code>gr=g:create_normal()
@@ -297,8 +361,14 @@ otherwise returns a grd object.</p>
 <p>convert a greyscale height map  into an rgb normal map using the sobel filter.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.destroy.html">wetgenes.grd.destroy</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L355">lua/wetgenes/grd.lua#355</a>
+
 <div>
 
 <pre><code>g:destroy()
@@ -309,8 +379,14 @@ automatically by garbage collection but you can force it explicitly
 using this function.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.duplicate.html">wetgenes.grd.duplicate</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L521">lua/wetgenes/grd.lua#521</a>
+
 <div>
 
 <pre><code>ga = g:duplicate()
@@ -322,8 +398,14 @@ using this function.</p>
 otherwise returns g so that we can chain the result.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.flipy.html">wetgenes.grd.flipy</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L766">lua/wetgenes/grd.lua#766</a>
+
 <div>
 
 <pre><code>g:flipy()
@@ -341,8 +423,14 @@ so this is rather useful.</p>
 <p>This function flips the image reversing the x axis.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.info.html">wetgenes.grd.info</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L802">lua/wetgenes/grd.lua#802</a>
+
 <div>
 
 <pre><code>g:info()
@@ -354,8 +442,14 @@ reflect any changes. This should not need to be called explicitly as it
 is called whenever we change anything.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.load.html">wetgenes.grd.load</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L413">lua/wetgenes/grd.lua#413</a>
+
 <div>
 
 <pre><code>g:load(opts)
@@ -385,8 +479,14 @@ open.</p>
 otherwise returns g so that we can chain the result.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.load_data.html">wetgenes.grd.load_data</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L399">lua/wetgenes/grd.lua#399</a>
+
 <div>
 
 <pre><code>g:load_data(datastring,format)
@@ -398,8 +498,14 @@ otherwise returns g so that we can chain the result.</p>
 otherwise returns g so that we can chain the result.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.load_file.html">wetgenes.grd.load_file</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L385">lua/wetgenes/grd.lua#385</a>
+
 <div>
 
 <pre><code>g:load_file(filename,format)
@@ -411,8 +517,14 @@ otherwise returns g so that we can chain the result.</p>
 otherwise returns g so that we can chain the result.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.paint.html">wetgenes.grd.paint</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L862">lua/wetgenes/grd.lua#862</a>
+
 <div>
 
 <pre><code>g:paint(gb,x,y,cx,cy,cw,ch,mode,trans,color)
@@ -468,8 +580,14 @@ the appropriate modes. </p>
 <p>This is not overly optimised but should be reasonably fast.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.palette.html">wetgenes.grd.palette</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L689">lua/wetgenes/grd.lua#689</a>
+
 <div>
 
 <pre><code>g:palette(x,w)
@@ -486,8 +604,14 @@ values or string of bytes to write into the palette is the same system
 as used with pixels.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.pixels.html">wetgenes.grd.pixels</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L635">lua/wetgenes/grd.lua#635</a>
+
 <div>
 
 <pre><code>g:pixels(x,y,w,h)
@@ -538,8 +662,14 @@ use (0,0,g.width,g.height)</p>
 otherwise returns the requested data.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.quant.html">wetgenes.grd.quant</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L588">lua/wetgenes/grd.lua#588</a>
+
 <div>
 
 <pre><code>g:quant(num)
@@ -551,8 +681,14 @@ otherwise returns the requested data.</p>
 otherwise returns g so that we can chain the result.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.remap.html">wetgenes.grd.remap</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L1040">lua/wetgenes/grd.lua#1040</a>
+
 <div>
 
 <pre><code>ga:remap(gb)
@@ -561,8 +697,14 @@ otherwise returns g so that we can chain the result.</p>
 <p>Fill gb with a remaped version of ga, each pixel is mapped to the closest palette entry.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.reset.html">wetgenes.grd.reset</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L369">lua/wetgenes/grd.lua#369</a>
+
 <div>
 
 <pre><code>g:reset()
@@ -574,8 +716,14 @@ otherwise returns g so that we can chain the result.</p>
 otherwise returns g so that we can chain the result.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.resize.html">wetgenes.grd.resize</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L714">lua/wetgenes/grd.lua#714</a>
+
 <div>
 
 <pre><code>g:resize(w,h,d)
@@ -589,8 +737,14 @@ texture to OpenGL and need to change the size to be a power of two in
 width and height so you can mipmap it.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.save.html">wetgenes.grd.save</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L456">lua/wetgenes/grd.lua#456</a>
+
 <div>
 
 <pre><code>g:save(opts)
@@ -619,8 +773,14 @@ and be returning that data string as the first return value.</p>
 <p>If no file name is given then we <em>return</em> the data string that we saved.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.scale.html">wetgenes.grd.scale</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L732">lua/wetgenes/grd.lua#732</a>
+
 <div>
 
 <pre><code>g:scale(w,h,d)
@@ -634,8 +794,14 @@ size.</p>
 better scale filter.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.shrink.html">wetgenes.grd.shrink</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L779">lua/wetgenes/grd.lua#779</a>
+
 <div>
 
 <pre><code>g:shrink(area)
@@ -654,8 +820,14 @@ same table that was passed in.</p>
 smaller sized grd containing all the solid pixels.</p>
 
 
-</div><hr/>
+</div>
+
+<hr/>
+
 <h1><a href="wetgenes.grd.stream.html">wetgenes.grd.stream</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grd.lua#L998">lua/wetgenes/grd.lua#998</a>
+
 <div>
 
 <pre><code>stream=g:stream(filename)
@@ -675,7 +847,9 @@ stream=g:stream({filename=filename,...})
 <p>Close the stream and finalise the GIF.</p>
 
 
-</div>			<a href="#" class="top">Back to top</a>
+</div>
+
+			<a href="#" class="top">Back to top</a>
 		</div>
 		<div class="index">
 			<a href="index.html" class="meca" title="To Docs Cave!"></a>
