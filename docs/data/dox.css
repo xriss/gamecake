@@ -8,9 +8,10 @@ body {
    line-height: 18px;
    color: #d2d2d2;
    background-color: #110F14;
-   margin: 10px 13px 10px 13px;
    position:relative;
    width:960px;
+   margin:0 auto;
+   margin-top:10px;
 }
 table {
 	 margin: 10px 0 15px 0;
@@ -131,8 +132,9 @@ sup {
 
 /*	Wrappers	*/
 
-.content		{display:inline-block; vertical-align:top; width:720px; position:absolute; top:0; left:220px; padding-left:20px; margin-bottom:60px;}
-.index			{display:inline-block; vertical-align:top; width:220px; position:absolute; top:0; left:0; margin-top:10px;}
+.content, .index{display:inline-block; vertical-align:top; position:absolute; top:0; margin-bottom:60px;}
+.content		{width:720px; left:220px; padding-left:20px;}
+.index			{width:220px; left:0; margin-top:10px;}
 
 
 /*	Breadcrumbs styling	*/
@@ -165,19 +167,6 @@ ul:nth-of-type(1)	{list-style-type:none; display:block;}
 ul:nth-of-type(1) li{padding:5px 0 0 0;}
 
 
+/*	Code snippets styling -- used !important to override google prettyprint https://xriss.github.io/gamecake/data/google-code-prettify/skins/sons-of-obsidian.css	*/
 
-@media screen {
-   body {
-      max-width: 800px;
-      margin:10px auto;
-   }
-	html {overflow-y: scroll;}
-}
-@media print {
-	 body,code,pre code,h1,h2,h3,h4,h5,h6 {
-		  color: black;
-	 }
-	 table, pre {
-		  page-break-inside: avoid;
-	 }
-}
+.prettyprint	{display:block; padding:.5em; background:#000 !important; color:#f8f8f8}
