@@ -9,7 +9,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 We use chipmunk as the local name of this library.
 
-A lua binding to the Chipmunk2D physics library https://chipmunk-physics.net/
+A lua binding to the Chipmunk2D physics library [chipmunk-physics.net](https://chipmunk-physics.net/)
 
 ]]
 
