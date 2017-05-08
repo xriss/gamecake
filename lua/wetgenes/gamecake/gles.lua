@@ -544,7 +544,7 @@ varying vec3  v_pos;
 varying float v_matidx;
 
 
-uniform vec4 colors[2*8];
+uniform vec4 colors[2*16]; // 16 materials
 
 vec3 d=vec3(0,0,1);
 

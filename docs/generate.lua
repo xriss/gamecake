@@ -36,11 +36,13 @@ for _,filename in ipairs(files) do
 			if splits[1] and splits[1]~="" then
 				mode="dox"
 				chunkname=splits[1]
+				chunks.__flags[chunkname]=chunks.__flags[chunkname] or {}
+				chunks.__flags[chunkname].filename=filename
+				chunks.__flags[chunkname].fileline=i
 				for i=2,#splits do
 					local v=splits[i]
 					local aa=wstr.split(v,"=")
 					if aa[1] and aa[2] then
-						chunks.__flags[chunkname]=chunks.__flags[chunkname] or {}
 						chunks.__flags[chunkname][ aa[1] ]=aa[2] -- assign flag
 					end
 				end
@@ -284,8 +286,27 @@ for n,v in pairs(htmls) do
 		end
 		return false
 	end)
-	for n,s in pairs(t) do
-		t[n]="<h1><a href=\""..s[1]..".html\">"..s[1].."</a></h1>\n<div>"..markdown(s[2]).."</div>"
+	for n,s in ipairs(t) do
+		local chunkname=s[1]
+		local chunktext=s[2]
+		local filename=chunks.__flags[chunkname].filename
+		local fileline=chunks.__flags[chunkname].fileline
+		local url="https://github.com/xriss/gamecake/blob/master/lua"..filename.."#L"..fileline
+
+		t[n]=[[
+
+<h1><a href="]]..chunkname..[[.html">]]..chunkname..[[</a></h1>
+
+<a class="sourcecode-link" href="]]..url..[[">lua]]..filename..[[#]]..fileline..[[</a>
+
+<div>]]..
+
+markdown(chunktext)
+
+..[[</div>
+
+]]
+
 	end
 	
 	local links={}

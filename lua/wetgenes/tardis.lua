@@ -277,7 +277,7 @@ function m4.minor_xy(it,x,y)
 	return m3.determinant(t)
 end
 function m4.transpose(it,r)
---	r=r or r
+	r=r or it
 	return	 r:set(it[1],it[4+1],it[8+1],it[12+1], it[2],it[4+2],it[8+2],it[12+2], it[3],it[4+3],it[8+3],it[12+3], it[4],it[4+4],it[8+4],it[12+4])
 end
 function m4.scale(it,s,r)
@@ -583,7 +583,7 @@ function tardis.q4_to_m4(q,m)
 end
 
 function tardis.q4_product_q4(q4a,q4b,r)
-	r=r or q4b
+	r=r or q4a
     local r1 =  q4a[1] * q4b[4] + q4a[2] * q4b[3] - q4a[3] * q4b[2] + q4a[4] * q4b[1];
     local r2 = -q4a[1] * q4b[3] + q4a[2] * q4b[4] + q4a[3] * q4b[1] + q4a[4] * q4b[2];
     local r3 =  q4a[1] * q4b[2] - q4a[2] * q4b[1] + q4a[3] * q4b[4] + q4a[4] * q4b[3];
@@ -609,7 +609,7 @@ function tardis.m4_product_v3(m4a,v3b,r)
 end
 
 function tardis.m4_product_v4(m4a,v4b,r)
-	r=r or v4b
+	r=r or v4a
 	local r1= ( (m4a[   1]*v4b[1]) + (m4a[ 4+1]*v4b[2]) + (m4a[ 8+1]*v4b[3]) + (m4a[12+1]*v4b[4]) )
 	local r2= ( (m4a[   2]*v4b[1]) + (m4a[ 4+2]*v4b[2]) + (m4a[ 8+2]*v4b[3]) + (m4a[12+2]*v4b[4]) )
 	local r3= ( (m4a[   3]*v4b[1]) + (m4a[ 4+3]*v4b[2]) + (m4a[ 8+3]*v4b[3]) + (m4a[12+3]*v4b[4]) )
@@ -618,7 +618,7 @@ function tardis.m4_product_v4(m4a,v4b,r)
 end
 
 function tardis.m4_product_m4(m4a,m4b,r)
-	r=r or m4b
+	r=r or m4a
 	local r1 = (m4a[   1]*m4b[   1]) + (m4a[   2]*m4b[ 4+1]) + (m4a[   3]*m4b[ 8+1]) + (m4a[   4]*m4b[12+1])
 	local r2 = (m4a[   1]*m4b[   2]) + (m4a[   2]*m4b[ 4+2]) + (m4a[   3]*m4b[ 8+2]) + (m4a[   4]*m4b[12+2])
 	local r3 = (m4a[   1]*m4b[   3]) + (m4a[   2]*m4b[ 4+3]) + (m4a[   3]*m4b[ 8+3]) + (m4a[   4]*m4b[12+3])
