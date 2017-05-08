@@ -289,11 +289,6 @@ int count=(int)lua_tonumber(l,1);
 static void raw_tardis_m4_product_m4(float *fa,float *fb,float *fc)
 {
 float r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16;
-
-	if(!fc) // fb is output for default
-	{
-		fc=fb;
-	}
 	
 	r1 = (fa[   0]*fb[   0]) + (fa[   1]*fb[ 4+0]) + (fa[   2]*fb[ 8+0]) + (fa[   3]*fb[12+0]);
 	r2 = (fa[   0]*fb[   1]) + (fa[   1]*fb[ 4+1]) + (fa[   2]*fb[ 8+1]) + (fa[   3]*fb[12+1]);
@@ -327,22 +322,11 @@ float r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16;
 static void raw_tardis_m4_product_v4(float *fa,float *fb,float *fc)
 {
 float r1,r2,r3,r4;
-
-	if(!fc) // fb is output for default
-	{
-		fc=fb;
-	}
 	
 	r1 = (fa[   0]*fb[   0]) + (fa[ 4+0]*fb[   1]) + (fa[ 8+0]*fb[   2]) + (fa[12+0]*fb[   3]);
 	r2 = (fa[   1]*fb[   0]) + (fa[ 4+1]*fb[   1]) + (fa[ 8+1]*fb[   2]) + (fa[12+1]*fb[   3]);
 	r3 = (fa[   2]*fb[   0]) + (fa[ 4+2]*fb[   1]) + (fa[ 8+2]*fb[   2]) + (fa[12+2]*fb[   3]);
 	r4 = (fa[   3]*fb[   0]) + (fa[ 4+3]*fb[   1]) + (fa[ 8+3]*fb[   2]) + (fa[12+3]*fb[   3]);
-
-
-//	r1 = (fa[   0]*fb[   0]) + (fa[   1]*fb[   1]) + (fa[   2]*fb[   2]) + (fa[   3]*fb[   3]);
-//	r2 = (fa[ 4+0]*fb[   0]) + (fa[ 4+1]*fb[   1]) + (fa[ 4+2]*fb[   2]) + (fa[ 4+3]*fb[   3]);
-//	r3 = (fa[ 8+0]*fb[   0]) + (fa[ 8+1]*fb[   1]) + (fa[ 8+2]*fb[   2]) + (fa[ 8+3]*fb[   3]);
-//	r4 = (fa[12+0]*fb[   0]) + (fa[12+1]*fb[   1]) + (fa[12+2]*fb[   2]) + (fa[12+3]*fb[   3]);
 
 // fc may == fa or fb so we have to cache then write.
 
@@ -359,10 +343,13 @@ static int lua_tardis_m4_product_m4 (lua_State *l)
 float *fa=(float *)lua_tardis_uda(l,1);
 float *fb=(float *)lua_tardis_uda(l,2);
 float *fc=(float *)lua_tardis_uda(l,3);
+int ridx=3;
+
+	if(!fc) { fc=fa; ridx=1; }
 
 	raw_tardis_m4_product_m4(fa,fb,fc);
 
-	lua_pushvalue(l,3); // return passed in value for chain function calls
+	lua_pushvalue(l,ridx); // return passed in value for chain function calls
 	return 1;
 }
 
@@ -376,9 +363,13 @@ float *fa=(float *)lua_tardis_uda(l,1);
 float *fb=(float *)lua_tardis_uda(l,2);
 float *fc=(float *)lua_tardis_uda(l,3);
 
+int ridx=3;
+
+	if(!fc) { fc=fb; ridx=2; }
+
 	raw_tardis_m4_product_v4(fa,fb,fc);
 
-	lua_pushvalue(l,3); // return passed in value for chain function calls
+	lua_pushvalue(l,ridx); // return passed in value for chain function calls
 	return 1;
 }
 
