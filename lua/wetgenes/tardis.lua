@@ -68,33 +68,28 @@ local error=error
 --module
 local tardis={ modname=(...) } ; package.loaded[tardis.modname]=tardis
 
--- a metatable typeof function
-tardis.mtype_lookup=mtype_lookup or {}
-function tardis.mtype(it)
-	return tardis.mtype_lookup[getmetatable(it) or 0] or type(it)
-end
+-- a class enabled version of type
+function tardis.type(it) return it.__type or type(it) end
 
 -- dumb class inheritance metatable creation
 local function class(name,...)
 
 	if tardis[name] then return tardis[name] end
 	
-	local tab={} -- create new
+	local meta={} -- create new
 	local sub={...} -- possibly multiple sub classes
 
 	if #sub>0 then -- inherit?
 		for idx=#sub,1,-1 do -- reverse sub class order, so the ones to the left overwrite the ones on the right
-			for i,v in pairs(sub[idx]) do tab[i]=v end -- each subclass overwrites all values
+			for n,v in pairs(sub[idx]) do meta[n]=v end -- each subclass overwrites all values
 		end
 	end
 
-	tab.__index=tab -- this metatable is its own index
+	meta.__index=tab -- this metatable is its own index
+	meta.__type=name -- class name
 
-	tardis.mtype_lookup[name]=tab -- classtype metatable lookup
-	tardis.mtype_lookup[tab]=name -- tab->name or name->tab
-
-	tardis[name]=tab
-	return tab
+	tardis[name]=meta
+	return meta
 end
 
 
@@ -103,7 +98,7 @@ local array=class("array")
 
 function array.__tostring(it) -- these classes are all just 1d arrays of numbers
 	local t={}
-	t[#t+1]=tardis.mtype(it)
+	t[#t+1]=tardis.type(it)
 	t[#t+1]="={"
 	for i=1,#it do
 		t[#t+1]=tostring(it[i])
@@ -131,8 +126,8 @@ function array.set(it,...)
 end
 
 function array.product(a,b,r)
-	local mta=tardis.mtype(a)
-	local mtb=tardis.mtype(b)
+	local mta=tardis.type(a)
+	local mtb=tardis.type(b)
 	if mta=="m4" then
 		if     mtb=="v3" then
 			return tardis.m4_product_v3(a,b,r)
