@@ -813,18 +813,27 @@ print("merging")
 						local m=m1:lerp(m2,f) -- :transpose(tardis.m4.new()) -- transpose after lerp
 						
 						
-						local tweak=its.filter.tweaks and its.filter.tweaks[it.name]
-						if tweak then
-							tweak:product(m,m)
-						end
+
+
 
 						m:transpose(m)
+
+
 						mp=m:product(mp,m)
+
+						local tweak=its.filter.tweaks and its.filter.tweaks[it.name]
+						if tweak then
 						
-						
+							local t=tardis.m4.new()				
+							its.anim.bones[it.idx]=its.anim.rest[it.idx]:inverse(t):product(tweak):product(its.anim.rest[it.idx])
+
+							mp:product(t)
+						end
+
 
 						local t=tardis.m4.new()				
 						its.anim.bones[it.idx]=its.anim.rest[it.idx]:inverse(t):product(mp,t)
+
 
 
 					end

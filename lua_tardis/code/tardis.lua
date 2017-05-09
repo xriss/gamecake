@@ -286,7 +286,7 @@ function m4.scale(it,s,r)
 		it[ 1]*s,it[ 2]*s,it[ 3]*s,it[ 4]*s,
 		it[ 5]*s,it[ 6]*s,it[ 7]*s,it[ 8]*s,
 		it[ 9]*s,it[10]*s,it[11]*s,it[12]*s,
-		it[13]*s,it[14]*s,it[15]*s,it[16]*s)
+		it[13]  ,it[14]  ,it[15]  ,it[16]  )
 end
 
 function m4.add(it,m,r)
@@ -342,7 +342,7 @@ function m4.identity(it)
 end
 function m4.translate(it,a,b,c,d) -- (it,v3a,r) or (it,x,y,z,r)
 	local v3a,r
-	if type(a)~="number" then v3a=tardis.v3.new(a,b,c) r=d else v3a=a r=b end
+	if type(a)=="number" then v3a=tardis.v3.new(a,b,c) r=d else v3a=a r=b end
 	r=r or it
 	local r1=it[12+1]+v3a[1]*it[1]+v3a[2]*it[5]+v3a[3]*it[9]
 	local r2=it[12+2]+v3a[1]*it[2]+v3a[2]*it[6]+v3a[3]*it[10]
@@ -760,6 +760,7 @@ if tcore then
 	m4.identity			=	tcore.m4_identity
 	m4.rotate			=	tcore.m4_rotate
 	m4.scale_v3			=	tcore.m4_scale_v3
+	m4.scale			=	tcore.m4_scale
 	m4.translate		=	tcore.m4_translate
 
 end

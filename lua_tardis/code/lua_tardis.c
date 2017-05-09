@@ -536,6 +536,36 @@ float x,y,z;
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_tardis_m4_scale (lua_State *l)
+{
+float *fa;
+float *fb;
+float *fc;
+int fc_idx;
+float x,y,z;
+
+	x=(float)lua_tonumber(l,2);
+	y=x;
+	z=x;
+	fc_idx=3;
+
+	fa=(float *)lua_tardis_uda(l,1);
+	fc=(float *)lua_tardis_uda(l,fc_idx);
+	if(!fc) { fc=fa; fc_idx=1; }
+
+	fc[ 0]=x*fa[ 0];		fc[ 1]=x*fa[ 1];		fc[ 2]=x*fa[ 2];		fc[ 3]=x*fa[ 3];
+	fc[ 4]=y*fa[ 4];		fc[ 5]=y*fa[ 5];		fc[ 6]=y*fa[ 6];		fc[ 7]=y*fa[ 7];
+	fc[ 8]=z*fa[ 8];		fc[ 9]=z*fa[ 9];		fc[10]=z*fa[10];		fc[11]=z*fa[11];
+	fc[12]=fa[12];			fc[13]=fa[13];			fc[14]=fa[14];			fc[15]=fa[15];
+
+	lua_pushvalue(l,fc_idx); // return passed in value for chain function calls
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_tardis_m4_translate (lua_State *l)
 {
 float *fa;
@@ -628,6 +658,7 @@ LUALIB_API int luaopen_wetgenes_tardis_core (lua_State *l)
 
 		{"m4_identity",				lua_tardis_m4_identity},
 		{"m4_rotate",				lua_tardis_m4_rotate},
+		{"m4_scale",				lua_tardis_m4_scale},
 		{"m4_scale_v3",				lua_tardis_m4_scale_v3},
 		{"m4_translate",			lua_tardis_m4_translate},
 
