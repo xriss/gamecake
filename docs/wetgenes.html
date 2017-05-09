@@ -2679,6 +2679,329 @@ used when starting a new module.</p>
 
 </div>
 
+<hr/>
+
+<h1><a href="wetgenes.tardis.html">wetgenes.tardis</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L26">lua/wetgenes/tardis.lua#26</a>
+
+<div>
+
+<p>Time And Relative Dimensions In Space</p>
+
+<pre><code>local tardis=require("wetgenes.tardis")
+</code></pre>
+
+<p>a lua library for manipulating time and space
+pure lua by default and opengl in flavour</p>
+
+<p>The easy way of remembering the opengl 4x4 matrix layout is that the
+translate x,y,z values sit at 13,14,15 and 4,8,12,16 is normally set
+to the constant 0,0,0,1 for most transforms.</p>
+
+<pre><code>     | 1  5  9  13 |
+     |             |
+     | 2  6  10 14 |
+m4 = |             |
+     | 3  7  11 15 |
+     |             |
+     | 4  8  12 16 |
+</code></pre>
+
+<p>recoil in terror as we use two glyph names to describe structures
+whilst typing in random strings of numbers that may or may not
+contain tyops</p>
+
+<p>v# vector [#]
+m# matrix [#][#]
+q4 quaternion (yeah its just a repackaged v4)</p>
+
+<p>each class is a table of # values [1] to [#] , just access them
+directly they are number streams formated the same way as opengl
+(row-major) metatables are used to provide advanced functionality</p>
+
+<p>This code may contain bugs,
+do not use if you are not prepared to fix them.</p>
+
+<p>https://bitbucket.org/xixs/bin/src/tip/lua/wetgenes/tardis.lua</p>
+
+<p>Some of the Lua code here is overloaded with a float based C version, 
+possibly faster, possibly slower? use DISABLE<em>WETGENES</em>TARDIS_CORE 
+before requiring this file to turn it on or off.</p>
+
+<p>With DISABLE<em>WETGENES</em>TARDIS_CORE set this is a pure Lua library</p>
+
+<p>This seems to be the simplest (programmer orientated) description of
+most of the maths used here so go read it
+http://www.j3d.org/matrix<em>faq/matrfaq</em>latest.html</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.array.html">wetgenes.tardis.array</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L118">lua/wetgenes/tardis.lua#118</a>
+
+<div>
+
+
+<p>Array is the base class for all other tardis classes, it is just a 
+stream of numbers, probably in a table but possibly a chunk of f32 
+values in a userdata.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.array.__tostring.html">wetgenes.tardis.array.__tostring</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L128">lua/wetgenes/tardis.lua#128</a>
+
+<div>
+
+<pre><code>string = array.__tostring(it)
+</code></pre>
+
+<p>Convert an array to a string this is called by the lua tostring() function,</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.array.m2.new.html">wetgenes.tardis.array.m2.new</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L205">lua/wetgenes/tardis.lua#205</a>
+
+<div>
+
+<pre><code>m2 = tardis.m2.new()
+</code></pre>
+
+<p>Create a new m2 and optionally set it to the given values, m2 methods 
+usually return the input m2 for easy function chaining.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.array.product.html">wetgenes.tardis.array.product</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L169">lua/wetgenes/tardis.lua#169</a>
+
+<div>
+
+<p>Look at the type and call the appropriate product function.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.array.set.html">wetgenes.tardis.array.set</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L147">lua/wetgenes/tardis.lua#147</a>
+
+<div>
+
+<p>Convert an array to a string for debug printing,</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.class.html">wetgenes.tardis.class</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L88">lua/wetgenes/tardis.lua#88</a>
+
+<div>
+
+<pre><code>metatable=tardis.class(name,class,...)
+</code></pre>
+
+<p>Create a new metatable for an object class, optionally inheriting from other previously 
+declared classes.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.m2.html">wetgenes.tardis.m2</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L198">lua/wetgenes/tardis.lua#198</a>
+
+<div>
+
+<p>A 2x2 matrix, metatable.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.m2.adjugate.html">wetgenes.tardis.m2.adjugate</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L303">lua/wetgenes/tardis.lua#303</a>
+
+<div>
+
+<pre><code>m2 = m2:adjugate(r)
+</code></pre>
+
+<p>Adjugate this m2.</p>
+
+<p>If r is provided then the result is written into r and returned 
+otherwise m2 is modified and returned.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.m2.cofactor.html">wetgenes.tardis.m2.cofactor</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L279">lua/wetgenes/tardis.lua#279</a>
+
+<div>
+
+<pre><code>m2 = m2:cofactor(r)
+</code></pre>
+
+<p>Cofactor this m2.</p>
+
+<p>If r is provided then the result is written into r and returned 
+otherwise m2 is modified and returned.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.m2.determinant.html">wetgenes.tardis.m2.determinant</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L224">lua/wetgenes/tardis.lua#224</a>
+
+<div>
+
+<pre><code>value = m2:determinant()
+</code></pre>
+
+<p>Return the determinant value of this m2.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.m2.identity.html">wetgenes.tardis.m2.identity</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L215">lua/wetgenes/tardis.lua#215</a>
+
+<div>
+
+<pre><code>m2 = m2:identity()
+</code></pre>
+
+<p>Set this m2 to the identity matrix.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.m2.inverse.html">wetgenes.tardis.m2.inverse</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L318">lua/wetgenes/tardis.lua#318</a>
+
+<div>
+
+<pre><code>m2 = m2:inverse(r)
+</code></pre>
+
+<p>Inverse this m2.</p>
+
+<p>If r is provided then the result is written into r and returned 
+otherwise m2 is modified and returned.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.m2.minor_xy.html">wetgenes.tardis.m2.minor_xy</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L238">lua/wetgenes/tardis.lua#238</a>
+
+<div>
+
+<pre><code>value = m2:minor_xy()
+</code></pre>
+
+<p>Return the minor_xy value of this m2.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.m2.scale.html">wetgenes.tardis.m2.scale</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L264">lua/wetgenes/tardis.lua#264</a>
+
+<div>
+
+<pre><code>m2 = m2:scale(s,r)
+</code></pre>
+
+<p>Scale this m2 by s.</p>
+
+<p>If r is provided then the result is written into r and returned 
+otherwise m2 is modified and returned.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.m2.transpose.html">wetgenes.tardis.m2.transpose</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L249">lua/wetgenes/tardis.lua#249</a>
+
+<div>
+
+<pre><code>m2 = m2:transpose(r)
+</code></pre>
+
+<p>Transpose this m2.</p>
+
+<p>If r is provided then the result is written into r and returned 
+otherwise m2 is modified and returned.</p>
+
+
+</div>
+
+<hr/>
+
+<h1><a href="wetgenes.tardis.type.html">wetgenes.tardis.type</a></h1>
+
+<a class="sourcecode-link" href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L79">lua/wetgenes/tardis.lua#79</a>
+
+<div>
+
+<pre><code>name=tardis.type(object)
+</code></pre>
+
+<p>This will return the type of an object previously registered with class</p>
+
+
+</div>
+
 			<a href="#" class="top">Back to top</a>
 		</div>
 		<div class="index">
@@ -3070,6 +3393,68 @@ used when starting a new module.</p>
 </li>
 <li>
 <a href="wetgenes.snippets.html" class="ul-link" >snippets</a>
+</li>
+<li>
+<a href="wetgenes.tardis.html" class="ul-expand" >tardis</a>
+<ul>
+<li>
+<a href="wetgenes.tardis.array.html" class="ul-expand" >array</a>
+<ul>
+<li>
+<a href="wetgenes.tardis.array.__tostring.html" class="ul-link" >__tostring</a>
+</li>
+<li>
+<a href="wetgenes.tardis.array.m2.html" class="ul-expand" >m2</a>
+<ul>
+<li>
+<a href="wetgenes.tardis.array.m2.new.html" class="ul-link" >new</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="wetgenes.tardis.array.product.html" class="ul-link" >product</a>
+</li>
+<li>
+<a href="wetgenes.tardis.array.set.html" class="ul-link" >set</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="wetgenes.tardis.class.html" class="ul-link" >class</a>
+</li>
+<li>
+<a href="wetgenes.tardis.m2.html" class="ul-expand" >m2</a>
+<ul>
+<li>
+<a href="wetgenes.tardis.m2.adjugate.html" class="ul-link" >adjugate</a>
+</li>
+<li>
+<a href="wetgenes.tardis.m2.cofactor.html" class="ul-link" >cofactor</a>
+</li>
+<li>
+<a href="wetgenes.tardis.m2.determinant.html" class="ul-link" >determinant</a>
+</li>
+<li>
+<a href="wetgenes.tardis.m2.identity.html" class="ul-link" >identity</a>
+</li>
+<li>
+<a href="wetgenes.tardis.m2.inverse.html" class="ul-link" >inverse</a>
+</li>
+<li>
+<a href="wetgenes.tardis.m2.minor_xy.html" class="ul-link" >minor_xy</a>
+</li>
+<li>
+<a href="wetgenes.tardis.m2.scale.html" class="ul-link" >scale</a>
+</li>
+<li>
+<a href="wetgenes.tardis.m2.transpose.html" class="ul-link" >transpose</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="wetgenes.tardis.type.html" class="ul-link" >type</a>
+</li>
+</ul>
 </li>
 </ul>
 </li>

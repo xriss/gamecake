@@ -5,50 +5,8 @@
 -- http://en.wikipedia.org/wiki/MIT_License
 -- Please ping me if you use it for anything cool...
 --
--- Time And Relative Dimensions In Space
---
--- a lua library for manipulating time and space
--- pure lua by default and opengl in flavour
---
--- The easy way of remembering the opengl 4x4 matrix layout is that the
--- translate x,y,z values sit at 13,14,15 and 4,8,12,16 is normally set
--- to the constant 0,0,0,1 for most transforms.
---
---      | 1  5  9  13 |
---      |             |
---      | 2  6  10 14 |
--- m4 = |             |
---      | 3  7  11 15 |
---      |             |
---      | 4  8  12 16 |
---
--- recoil in terror as we use two glyph names to describe structures
--- whilst typing in random strings of numbers that may or may not
--- contain tyops
---
--- v# vector [#]
--- m# matrix [#][#]
--- q4 quaternion (yeah its just a repackaged v4)
---
--- each class is a table of # values [1] to [#] , just access them
--- directly they are number streams formated the same way as opengl
--- (row-major) metatables are used to provide advanced functionality
---
--- This code may contain bugs,
--- do not use if you are not prepared to fix them.
---
--- https://bitbucket.org/xixs/bin/src/tip/lua/wetgenes/tardis.lua
---
--- Some of the Lua code here is overloaded with a float based C version, 
--- possibly faster, possibly slower? use DISABLE_WETGENES_TARDIS_CORE 
--- before requiring this file to turn it on or off.
---
--- With DISABLE_WETGENES_TARDIS_CORE set this is a pure Lua library
---
--- This seems to be the simplest (programmer orientated) description of
--- most of the maths used here so go read it
--- http://www.j3d.org/matrix_faq/matrfaq_latest.html
---
+
+
 
 local math=require("math")
 local table=require("table")
@@ -65,14 +23,77 @@ local tonumber=tonumber
 local require=require
 local error=error
 
+--[[#wetgenes.tardis
+
+Time And Relative Dimensions In Space
+
+	local tardis=require("wetgenes.tardis")
+
+a lua library for manipulating time and space
+pure lua by default and opengl in flavour
+
+The easy way of remembering the opengl 4x4 matrix layout is that the
+translate x,y,z values sit at 13,14,15 and 4,8,12,16 is normally set
+to the constant 0,0,0,1 for most transforms.
+
+		 | 1  5  9  13 |
+		 |             |
+		 | 2  6  10 14 |
+	m4 = |             |
+		 | 3  7  11 15 |
+		 |             |
+		 | 4  8  12 16 |
+
+recoil in terror as we use two glyph names to describe structures
+whilst typing in random strings of numbers that may or may not
+contain tyops
+
+v# vector [#]
+m# matrix [#][#]
+q4 quaternion (yeah its just a repackaged v4)
+
+each class is a table of # values [1] to [#] , just access them
+directly they are number streams formated the same way as opengl
+(row-major) metatables are used to provide advanced functionality
+
+This code may contain bugs,
+do not use if you are not prepared to fix them.
+
+https://bitbucket.org/xixs/bin/src/tip/lua/wetgenes/tardis.lua
+
+Some of the Lua code here is overloaded with a float based C version, 
+possibly faster, possibly slower? use DISABLE_WETGENES_TARDIS_CORE 
+before requiring this file to turn it on or off.
+
+With DISABLE_WETGENES_TARDIS_CORE set this is a pure Lua library
+
+This seems to be the simplest (programmer orientated) description of
+most of the maths used here so go read it
+http://www.j3d.org/matrix_faq/matrfaq_latest.html
+
+]]
+
 --module
 local tardis={ modname=(...) } ; package.loaded[tardis.modname]=tardis
 
--- a class enabled version of type
+--[[#wetgenes.tardis.type
+
+	name=tardis.type(object)
+
+This will return the type of an object previously registered with class
+
+]]
 function tardis.type(it) return it.__type or type(it) end
 
--- dumb class inheritance metatable creation
-local function class(name,...)
+--[[#wetgenes.tardis.class
+
+	metatable=tardis.class(name,class,...)
+
+Create a new metatable for an object class, optionally inheriting from other previously 
+declared classes.
+
+]]
+function tardis.class(name,...)
 
 	if tardis[name] then return tardis[name] end
 	
@@ -88,14 +109,29 @@ local function class(name,...)
 	meta.__index=tab -- this metatable is its own index
 	meta.__type=name -- class name
 
-	tardis[name]=meta
+	tardis[name]=meta -- save in using name and return table
 	return meta
 end
 
 
 
-local array=class("array")
+--[[#wetgenes.tardis.array
 
+
+Array is the base class for all other tardis classes, it is just a 
+stream of numbers, probably in a table but possibly a chunk of f32 
+values in a userdata.
+
+]]
+local array=tardis.class("array")
+
+--[[#wetgenes.tardis.array.__tostring
+
+	string = array.__tostring(it)
+
+Convert an array to a string this is called by the lua tostring() function,
+
+]]
 function array.__tostring(it) -- these classes are all just 1d arrays of numbers
 	local t={}
 	t[#t+1]=tardis.type(it)
@@ -108,6 +144,11 @@ function array.__tostring(it) -- these classes are all just 1d arrays of numbers
 	return table.concat(t)
 end
 
+--[[#wetgenes.tardis.array.set
+
+Convert an array to a string for debug printing,
+
+]]
 function array.set(it,...)
 	local n=1
 	for i,v in ipairs{...} do
@@ -125,9 +166,15 @@ function array.set(it,...)
 	return it
 end
 
+--[[#wetgenes.tardis.array.product
+
+Look at the type and call the appropriate product function.
+
+]]
 function array.product(a,b,r)
 	local mta=tardis.type(a)
 	local mtb=tardis.type(b)
+
 	if mta=="m4" then
 		if     mtb=="v3" then
 			return tardis.m4_product_v3(a,b,r)
@@ -143,30 +190,102 @@ function array.product(a,b,r)
 			return tardis.q4_product_v3(a,b,r)
 		end
 	end
+
 	error("tardis : "..mta.." product "..mtb.." not supported",2)
 end
 
 
-local m2=class("m2",array)
+--[[#wetgenes.tardis.m2
+
+A 2x2 matrix, metatable.
+
+]]
+local m2=tardis.class("m2",array)
+
+--[[#wetgenes.tardis.array.m2.new
+
+	m2 = tardis.m2.new()
+
+Create a new m2 and optionally set it to the given values, m2 methods 
+usually return the input m2 for easy function chaining.
+
+]]
 function m2.new(...) return setmetatable({0,0,0,0},m2):set(...) end
+
+--[[#wetgenes.tardis.m2.identity
+
+	m2 = m2:identity()
+
+Set this m2 to the identity matrix.
+
+]]
 function m2.identity(it) return it:set(1,0, 0,1) end 
+
+--[[#wetgenes.tardis.m2.determinant
+
+	value = m2:determinant()
+
+Return the determinant value of this m2.
+
+]]
 function m2.determinant(it)
 	return	 ( it[ 1 ]*it[ 2+2 ] )
 			+( it[ 2 ]*it[ 2+1 ] )
 			-( it[ 1 ]*it[ 2+1 ] )
 			-( it[ 2 ]*it[ 2+1 ] )
 end
+
+--[[#wetgenes.tardis.m2.minor_xy
+
+	value = m2:minor_xy()
+
+Return the minor_xy value of this m2.
+
+]]
 function m2.minor_xy(it,x,y)
 	return it[1+(2-(x-1))+((2-(y-1))*2)]
 end
+
+--[[#wetgenes.tardis.m2.transpose
+
+	m2 = m2:transpose(r)
+
+Transpose this m2.
+
+If r is provided then the result is written into r and returned 
+otherwise m2 is modified and returned.
+
+]]
 function m2.transpose(it,r)
 	r=r or it
 	return	 r:set(it[1],it[2+1], it[2],it[2+2])
 end
+
+--[[#wetgenes.tardis.m2.scale
+
+	m2 = m2:scale(s,r)
+
+Scale this m2 by s.
+
+If r is provided then the result is written into r and returned 
+otherwise m2 is modified and returned.
+
+]]
 function m2.scale(it,s,r)
 	r=r or it
 	return r:set(it[1]*s,it[2]*s, it[2+1]*s,it[2+2]*s)
 end
+
+--[[#wetgenes.tardis.m2.cofactor
+
+	m2 = m2:cofactor(r)
+
+Cofactor this m2.
+
+If r is provided then the result is written into r and returned 
+otherwise m2 is modified and returned.
+
+]]
 function m2.cofactor(it,r)
 	r=r or it
 	local t={}
@@ -180,17 +299,39 @@ function m2.cofactor(it,r)
 	end
 	return r
 end
+
+--[[#wetgenes.tardis.m2.adjugate
+
+	m2 = m2:adjugate(r)
+
+Adjugate this m2.
+
+If r is provided then the result is written into r and returned 
+otherwise m2 is modified and returned.
+
+]]
 function m2.adjugate(it,r)
 	r=r or it
 	return m2.cofactor(m2.transpose(it,m2.new()),r)
 end
+
+--[[#wetgenes.tardis.m2.inverse
+
+	m2 = m2:inverse(r)
+
+Inverse this m2.
+
+If r is provided then the result is written into r and returned 
+otherwise m2 is modified and returned.
+
+]]
 function m2.inverse(it,r)
 	r=r or it
 	local ood=1/m2.determinant(it)	
 	return m2.scale(m2.cofactor(m2.transpose(it,m2.new())),ood,r)
 end
 
-local m3=class("m3",m2)
+local m3=tardis.class("m3",m2)
 function m3.new(...) return setmetatable({0,0,0,0,0,0,0,0,0},m3):set(...) end
 function m3.identity(it) return it:set(1,0,0, 0,1,0, 0,0,1) end 
 function m3.determinant(it)
@@ -243,7 +384,7 @@ function m3.inverse(it,r)
 	return m3.scale(m3.cofactor(m3.transpose(it,m3.new())),ood,r)
 end
 
-local m4=class("m4",m3)
+local m4=tardis.class("m4",m3)
 function m4.new(...) return setmetatable({0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},m4):set(...) end
 function m4.identity(it) return it:set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1) end 
 function m4.determinant(it)
@@ -401,7 +542,7 @@ function m4.rotate(it,degrees,v3a,r)
 	return tardis.m4_product_m4(m4a,it,r)
 end
 
-local v2=class("v2",array)
+local v2=tardis.class("v2",array)
 function v2.new(...) return setmetatable({0,0},v2):set(...) end
 function v2.identity(it) return it:set(0,0) end 
 function v2.lenlen(it)
@@ -440,7 +581,7 @@ function v2.cross(va,vb) -- extend to 3d then only return z value as x and y are
 	return (va[1]*vb[2])-(va[2]*vb[1])
 end
 
-local v3=class("v3",v2)
+local v3=tardis.class("v3",v2)
 function v3.new(...) return setmetatable({0,0,0},v3):set(...) end
 function v3.identity(it) return it:set(0,0,0) end 
 function v3.lenlen(it)
@@ -481,7 +622,7 @@ function v3.cross(va,vb,r)
 end
 
 
-local v4=class("v4",v3)
+local v4=tardis.class("v4",v3)
 function v4.new(...) return setmetatable({0,0,0,0},v4):set(...) end
 function v4.identity(it) return it:set(0,0,0,0) end 
 function v4.to_v3(it,r) -- scale [4] to 1 then throw it away so we have a v3 xyz
@@ -515,7 +656,7 @@ function v4.dot(va,vb)
 end
 
 
-local q4=class("q4",v4)
+local q4=tardis.class("q4",v4)
 function q4.new(...) return setmetatable({0,0,0,1},q4):set(...) end
 function q4.identity(it) return it:set(0,0,0,1) end 
 function q4.nlerp(qa,qb,sa,r)
@@ -539,11 +680,11 @@ end
 
 
 
-local line=class("line",array)
+local line=tardis.class("line",array)
 line.set=nil -- disable
 function line.new(...) return setmetatable({v3.new(),v3.new()},line) end -- [1]position , [2]normal
 
-local plane=class("plane",line)
+local plane=tardis.class("plane",line)
 function plane.new(...) return setmetatable({v3.new(),v3.new()},plane) end -- [1]position , [2]normal
 
 
