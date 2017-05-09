@@ -25,50 +25,44 @@ local error=error
 
 --[[#wetgenes.tardis
 
-Time And Relative Dimensions In Space
+Time And Relative Dimensions In Space is of course the perfect name for 
+a library of matrix based math functions.
 
 	local tardis=require("wetgenes.tardis")
 
-a lua library for manipulating time and space
-pure lua by default and opengl in flavour
+This tardis is a lua library for manipulating time and space with 
+numbers. Designed to work as pure lua but with a faster, but less 
+accurate, f32 core by default.
+
+Recoil in terror as we use two glyph names for classes whilst typing in 
+random strings of numbers and operators that may or may not contain 
+tyops.
+
+	v# vector [#]
+	m# matrix [#][#]
+	q4 quaternion
+
+Each class is a table of # values [1] to [#] the 2d number streams are 
+formatted the same as opengl (row-major) and metatables are used to 
+provide methods.
 
 The easy way of remembering the opengl 4x4 matrix layout is that the
 translate x,y,z values sit at 13,14,15 and 4,8,12,16 is normally set
 to the constant 0,0,0,1 for most transforms.
 
 		 | 1  5  9  13 |
-		 |             |
 		 | 2  6  10 14 |
-	m4 = |             |
-		 | 3  7  11 15 |
-		 |             |
+	m4 = | 3  7  11 15 |
 		 | 4  8  12 16 |
 
-recoil in terror as we use two glyph names to describe structures
-whilst typing in random strings of numbers that may or may not
-contain tyops
+The Lua code is normally replaced with a hopefully faster f32 based C 
+version, Use DISABLE_WETGENES_TARDIS_CORE before requiring this file to 
+turn it off and get a pure lua library.
 
-v# vector [#]
-m# matrix [#][#]
-q4 quaternion (yeah its just a repackaged v4)
+This seems to be the simplest (programmer orientated) description of 
+most of the maths used here so go read it if you want to know what the 
+funny words mean.
 
-each class is a table of # values [1] to [#] , just access them
-directly they are number streams formated the same way as opengl
-(row-major) metatables are used to provide advanced functionality
-
-This code may contain bugs,
-do not use if you are not prepared to fix them.
-
-https://bitbucket.org/xixs/bin/src/tip/lua/wetgenes/tardis.lua
-
-Some of the Lua code here is overloaded with a float based C version, 
-possibly faster, possibly slower? use DISABLE_WETGENES_TARDIS_CORE 
-before requiring this file to turn it on or off.
-
-With DISABLE_WETGENES_TARDIS_CORE set this is a pure Lua library
-
-This seems to be the simplest (programmer orientated) description of
-most of the maths used here so go read it
 http://www.j3d.org/matrix_faq/matrfaq_latest.html
 
 ]]
@@ -168,7 +162,17 @@ end
 
 --[[#wetgenes.tardis.array.product
 
-Look at the type and call the appropriate product function.
+	ma = ma:product(mb,r)
+
+Look at the type and call the appropriate product function, to produce 
+
+	mb x ma
+	
+Note the right to left application and default returning of the 
+leftmost term for chaining. This seems to make the most sense.
+
+If r is provided then the result is written into r and returned 
+otherwise ma is modified and returned.
 
 ]]
 function array.product(a,b,r)
@@ -197,7 +201,9 @@ end
 
 --[[#wetgenes.tardis.m2
 
-A 2x2 matrix, metatable.
+The metatable for a 2x2 matrix class, use the new function to actually create an object.
+
+We also inherit all the functions from tardis.array
 
 ]]
 local m2=tardis.class("m2",array)
@@ -331,9 +337,43 @@ function m2.inverse(it,r)
 	return m2.scale(m2.cofactor(m2.transpose(it,m2.new())),ood,r)
 end
 
-local m3=tardis.class("m3",m2)
+
+
+--[[#wetgenes.tardis.m3
+
+The metatable for a 3x3 matrix class, use the new function to actually create an object.
+
+We also inherit all the functions from tardis.array
+
+]]
+local m3=tardis.class("m3",array)
+
+--[[#wetgenes.tardis.array.m3.new
+
+	m3 = tardis.m3.new()
+
+Create a new m3 and optionally set it to the given values, m3 methods 
+usually return the input m3 for easy function chaining.
+
+]]
 function m3.new(...) return setmetatable({0,0,0,0,0,0,0,0,0},m3):set(...) end
+
+--[[#wetgenes.tardis.m3.identity
+
+	m3 = m3:identity()
+
+Set this m3 to the identity matrix.
+
+]]
 function m3.identity(it) return it:set(1,0,0, 0,1,0, 0,0,1) end 
+
+--[[#wetgenes.tardis.m3.determinant
+
+	value = m3:determinant()
+
+Return the determinant value of this m3.
+
+]]
 function m3.determinant(it)
 	return	 ( it[ 1 ]*it[ 3+2 ]*it[ 6+3 ] )
 			+( it[ 2 ]*it[ 3+3 ]*it[ 6+1 ] )
@@ -342,6 +382,14 @@ function m3.determinant(it)
 			-( it[ 2 ]*it[ 3+1 ]*it[ 6+3 ] )
 			-( it[ 3 ]*it[ 3+2 ]*it[ 6+1 ] )
 end
+
+--[[#wetgenes.tardis.m3.minor_xy
+
+	value = m3:minor_xy()
+
+Return the minor_xy value of this m3.
+
+]]
 function m3.minor_xy(it,x,y)
 	local t={}
 	for ix=1,3 do
@@ -353,14 +401,47 @@ function m3.minor_xy(it,x,y)
 	end
 	return m2.determinant(t)
 end
+
+--[[#wetgenes.tardis.m3.transpose
+
+	m3 = m3:transpose(r)
+
+Transpose this m3.
+
+If r is provided then the result is written into r and returned 
+otherwise m3 is modified and returned.
+
+]]
 function m3.transpose(it,r)
 	r=r or r
 	return	 r:set(it[1],it[3+1],it[6+1], it[2],it[3+2],it[6+2], it[3],it[3+3],it[6+3])
 end
+
+--[[#wetgenes.tardis.m3.scale
+
+	m3 = m3:scale(s,r)
+
+Scale this m3 by s.
+
+If r is provided then the result is written into r and returned 
+otherwise m3 is modified and returned.
+
+]]
 function m3.scale(it,s,r)
 	r=r or it
 	return r:set(it[1]*s,it[2]*s,it[3]*s, it[3+1]*s,it[3+2]*s,it[3+3]*s, it[6+1]*s,it[6+2]*s,it[6+3]*s)
 end
+
+--[[#wetgenes.tardis.m3.cofactor
+
+	m3 = m3:cofactor(r)
+
+Cofactor this m3.
+
+If r is provided then the result is written into r and returned 
+otherwise m3 is modified and returned.
+
+]]
 function m3.cofactor(it,r)
 	r=r or it
 	local t={}
@@ -374,19 +455,73 @@ function m3.cofactor(it,r)
 	end
 	return r:set(t)
 end
+
+--[[#wetgenes.tardis.m3.adjugate
+
+	m3 = m3:adjugate(r)
+
+Adjugate this m3.
+
+If r is provided then the result is written into r and returned 
+otherwise m3 is modified and returned.
+
+]]
 function m3.adjugate(it,r)
 	r=r or it
 	return m3.cofactor(m3.transpose(it,m3.new()),r)
 end
+
+--[[#wetgenes.tardis.m3.inverse
+
+	m3 = m3:inverse(r)
+
+Inverse this m3.
+
+If r is provided then the result is written into r and returned 
+otherwise m3 is modified and returned.
+
+]]
 function m3.inverse(it,r)
 	r=r or it
 	local ood=1/m3.determinant(it)	
 	return m3.scale(m3.cofactor(m3.transpose(it,m3.new())),ood,r)
 end
 
-local m4=tardis.class("m4",m3)
+--[[#wetgenes.tardis.m4
+
+The metatable for a 4x4 matrix class, use the new function to actually create an object.
+
+We also inherit all the functions from tardis.array
+
+]]
+local m4=tardis.class("m4",array)
+
+--[[#wetgenes.tardis.array.m4.new
+
+	m4 = tardis.m4.new()
+
+Create a new m4 and optionally set it to the given values, m4 methods 
+usually return the input m4 for easy function chaining.
+
+]]
 function m4.new(...) return setmetatable({0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},m4):set(...) end
+
+--[[#wetgenes.tardis.m4.identity
+
+	m4 = m4:identity()
+
+Set this m4 to the identity matrix.
+
+]]
 function m4.identity(it) return it:set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1) end 
+
+--[[#wetgenes.tardis.m4.determinant
+
+	value = m4:determinant()
+
+Return the determinant value of this m4.
+
+]]
 function m4.determinant(it)
 return	(it[ 4 ] * it[ 4+3 ] * it[ 8+2 ] * it[ 12+1 ])-(it[ 3 ] * it[ 4+4 ] * it[ 8+2 ] * it[ 12+1 ])-
 		(it[ 4 ] * it[ 4+2 ] * it[ 8+3 ] * it[ 12+1 ])+(it[ 2 ] * it[ 4+4 ] * it[ 8+3 ] * it[ 12+1 ])+
@@ -401,6 +536,14 @@ return	(it[ 4 ] * it[ 4+3 ] * it[ 8+2 ] * it[ 12+1 ])-(it[ 3 ] * it[ 4+4 ] * it[
 		(it[ 3 ] * it[ 4+1 ] * it[ 8+2 ] * it[ 12+4 ])-(it[ 1 ] * it[ 4+3 ] * it[ 8+2 ] * it[ 12+4 ])-
 		(it[ 2 ] * it[ 4+1 ] * it[ 8+3 ] * it[ 12+4 ])+(it[ 1 ] * it[ 4+2 ] * it[ 8+3 ] * it[ 12+4 ])	
 end
+
+--[[#wetgenes.tardis.m4.minor_xy
+
+	value = m4:minor_xy()
+
+Return the minor_xy value of this m4.
+
+]]
 function m4.minor_xy(it,x,y)
 	local t={}
 	for ix=1,4 do
@@ -412,10 +555,32 @@ function m4.minor_xy(it,x,y)
 	end
 	return m3.determinant(t)
 end
+
+--[[#wetgenes.tardis.m4.transpose
+
+	m4 = m4:transpose(r)
+
+Transpose this m4.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.transpose(it,r)
 	r=r or it
 	return	 r:set(it[1],it[4+1],it[8+1],it[12+1], it[2],it[4+2],it[8+2],it[12+2], it[3],it[4+3],it[8+3],it[12+3], it[4],it[4+4],it[8+4],it[12+4])
 end
+
+--[[#wetgenes.tardis.m4.scale
+
+	m4 = m4:scale(s,r)
+
+Scale this m4 by s.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.scale(it,s,r)
 	r=r or it
 	return r:set(
@@ -425,6 +590,16 @@ function m4.scale(it,s,r)
 		it[13]  ,it[14]  ,it[15]  ,it[16]  )
 end
 
+--[[#wetgenes.tardis.m4.add
+
+	m4 = m4:add(m4b,r)
+
+Add m4b this m4.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.add(it,m,r)
 	r=r or it
 	return r:set(
@@ -433,6 +608,17 @@ function m4.add(it,m,r)
 		it[ 9]+m[ 9],it[10]+m[10],it[11]+m[11],it[12]+m[12],
 		it[13]+m[13],it[14]+m[14],it[15]+m[15],it[16]+m[16])
 end
+
+--[[#wetgenes.tardis.m4.sub
+
+	m4 = m4:sub(m4b,r)
+
+Subtract m4b this m4.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.sub(it,m,r)
 	r=r or it
 	return r:set(
@@ -442,6 +628,16 @@ function m4.sub(it,m,r)
 		it[13]-m[13],it[14]-m[14],it[15]-m[15],it[16]-m[16])
 end
 
+--[[#wetgenes.tardis.m4.lerp
+
+	m4 = m4:sub(m4b,s,r)
+
+Lerp from m4 to m4b by s.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.lerp(it,m,s,r)
 	r=r or m4.new()
 	r:set(m)
@@ -451,6 +647,16 @@ function m4.lerp(it,m,s,r)
 	return r
 end
 
+--[[#wetgenes.tardis.m4.cofactor
+
+	m4 = m4:cofactor(r)
+
+Cofactor this m4.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.cofactor(it,r)
 	r=r or it
 	local t={}
@@ -464,18 +670,49 @@ function m4.cofactor(it,r)
 	end
 	return r:set(t)
 end
+
+--[[#wetgenes.tardis.m4.adjugate
+
+	m4 = m4:adjugate(r)
+
+Adjugate this m4.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.adjugate(it,r)
 	r=r or it
 	return 	m4.cofactor(m4.transpose(it,m4.new()),r)
 end
+
+--[[#wetgenes.tardis.m4.inverse
+
+	m4 = m4:inverse(r)
+
+Inverse this m4.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.inverse(it,r)
 	r=r or it
 	local ood=1/m4.determinant(it)	
 	return m4.scale(m4.cofactor(m4.transpose(it,m4.new())),ood,r)
 end
-function m4.identity(it)
-	return it:set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1)
-end
+
+--[[#wetgenes.tardis.m4.translate
+
+	m4 = m4:translate(x,y,z,r)
+	m4 = m4:translate(v3,r)
+
+Translate this m4 along its local axis by {x,y,z} or v3.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.translate(it,a,b,c,d) -- (it,v3a,r) or (it,x,y,z,r)
 	local v3a,r
 	if type(a)=="number" then v3a=tardis.v3.new(a,b,c) r=d else v3a=a r=b end
@@ -487,6 +724,17 @@ function m4.translate(it,a,b,c,d) -- (it,v3a,r) or (it,x,y,z,r)
 	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,r4 )
 end
 
+--[[#wetgenes.tardis.m4.scale_v3
+
+	m4 = m4:scale_v3(x,y,z,r)
+	m4 = m4:scale_v3(v3,r)
+
+Scale this m4 by {x,y,z} or v3.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.scale_v3(it,a,b,c,d)
 	local v3a,r
 	if type(a)~="number" then v3a=tardis.v3.new(a,b,c) r=d else v3a=a r=b end
@@ -500,7 +748,17 @@ function m4.scale_v3(it,a,b,c,d)
 					it[13],		it[14],		it[15],		it[16] )
 end
 
--- get v3 scale from a scale/rot/trans matrix
+--[[#wetgenes.tardis.m4.scale_v3
+
+	v3 = m4:scale_v3(x,y,z,r)
+	v3 = m4:scale_v3(v3,r)
+
+Get v3 scale from a scale/rot/trans matrix
+
+If r is provided then the result is written into r and returned 
+otherwise a new v3 is created and returned.
+
+]]
 function m4.get_scale_v3(it,r)
 	r=r or tardis.v3.new()
 	return r:set(
@@ -510,6 +768,13 @@ function m4.get_scale_v3(it,r)
 	)
 end
 
+--[[#wetgenes.tardis.m4.setrot
+
+	m4 = m4:scale_v3(degrees,v3a)
+
+Set this matrix to a rotation matrix around the given normal.
+
+]]
 function m4.setrot(it,degrees,v3a)
 
 	local c=math.cos(-math.pi*degrees/180)
@@ -537,9 +802,19 @@ function m4.setrot(it,degrees,v3a)
 
 end
 
+--[[#wetgenes.tardis.m4.rotate
+
+	m4 = m4:rotate(degrees,v3a,r)
+
+Apply a rotation to this matrix.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
 function m4.rotate(it,degrees,v3a,r)
 	local m4a=m4.new():setrot(degrees,v3a)
-	return tardis.m4_product_m4(m4a,it,r)
+	return tardis.m4_product_m4(m4a,it,r or it)
 end
 
 local v2=tardis.class("v2",array)
@@ -581,7 +856,7 @@ function v2.cross(va,vb) -- extend to 3d then only return z value as x and y are
 	return (va[1]*vb[2])-(va[2]*vb[1])
 end
 
-local v3=tardis.class("v3",v2)
+local v3=tardis.class("v3",array)
 function v3.new(...) return setmetatable({0,0,0},v3):set(...) end
 function v3.identity(it) return it:set(0,0,0) end 
 function v3.lenlen(it)
@@ -622,7 +897,7 @@ function v3.cross(va,vb,r)
 end
 
 
-local v4=tardis.class("v4",v3)
+local v4=tardis.class("v4",array)
 function v4.new(...) return setmetatable({0,0,0,0},v4):set(...) end
 function v4.identity(it) return it:set(0,0,0,0) end 
 function v4.to_v3(it,r) -- scale [4] to 1 then throw it away so we have a v3 xyz
