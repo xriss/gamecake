@@ -8,7 +8,6 @@ local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
-local tcore=require("wetgenes.tardis.core")
 
 -- This curve used here is the curvy part of splines.
 -- input 0 to 1 and output 0 to 1 smoothing into and from the 0 and 1  (like a sinwave going from -1 to +1)

@@ -100,7 +100,7 @@ function tardis.class(name,...)
 		end
 	end
 
-	meta.__index=tab -- this metatable is its own index
+	meta.__index=meta -- this metatable is its own index
 	meta.__type=name -- class name
 
 	tardis[name]=meta -- save in using name and return table
@@ -180,20 +180,11 @@ function array.product(a,b,r)
 	local mta=tardis.type(a)
 	local mtb=tardis.type(b)
 
-	if mta=="m4" then
-		if     mtb=="v3" then
-			return tardis.m4_product_v3(a,b,r)
-		elseif mtb=="v4" then
-			return tardis.m4_product_v4(a,b,r)
-		elseif mtb=="m4" then
-			return tardis.m4_product_m4(a,b,r)
-		end
-	elseif mta=="q4" then
-		if     mtb=="q4" then
-			return tardis.q4_product_q4(a,b,r)
-		elseif mtb=="v3" then
-			return tardis.q4_product_v3(a,b,r)
-		end
+	if     mta=="v3" and mtb=="m4" then return tardis.v3_product_m4(a,b,r)
+	elseif mta=="v3" and mtb=="q4" then return tardis.v3_product_q4(a,b,r)
+	elseif mta=="v4" and mtb=="m4" then return tardis.v4_product_m4(a,b,r)
+	elseif mta=="m4" and mtb=="m4" then return tardis.m4_product_m4(a,b,r)
+	elseif mta=="q4" and mtb=="q4" then return tardis.q4_product_q4(a,b,r)
 	end
 
 	error("tardis : "..mta.." product "..mtb.." not supported",2)
@@ -842,7 +833,7 @@ otherwise m4 is modified and returned.
 ]]
 function m4.rotate(it,degrees,v3a,r)
 	local m4a=m4.new():setrot(degrees,v3a)
-	return tardis.m4_product_m4(m4a,it,r or it)
+	return tardis.m4_product_m4(it,m4a,r)
 end
 
 --[[#wetgenes.tardis.v2
@@ -1438,7 +1429,7 @@ otherwise q4 is modified and returned.
 ]]
 function q4.rotate(it,degrees,v3a,r)
 	local q4a=q4.new():setrot(degrees,v3a)
-	return tardis.q4_product_q4(q4a,it,r)
+	return tardis.q4_product_q4(it,q4a,r)
 end
 
 
@@ -1518,57 +1509,57 @@ end
 
 function tardis.q4_product_q4(q4a,q4b,r)
 	r=r or q4a
-    local r1 =  q4a[1] * q4b[4] + q4a[2] * q4b[3] - q4a[3] * q4b[2] + q4a[4] * q4b[1];
-    local r2 = -q4a[1] * q4b[3] + q4a[2] * q4b[4] + q4a[3] * q4b[1] + q4a[4] * q4b[2];
-    local r3 =  q4a[1] * q4b[2] - q4a[2] * q4b[1] + q4a[3] * q4b[4] + q4a[4] * q4b[3];
-    local r4 = -q4a[1] * q4b[1] - q4a[2] * q4b[2] - q4a[3] * q4b[3] + q4a[4] * q4b[4];
+    local r1 =  q4b[1] * q4a[4] + q4b[2] * q4a[3] - q4b[3] * q4a[2] + q4b[4] * q4a[1];
+    local r2 = -q4b[1] * q4a[3] + q4b[2] * q4a[4] + q4b[3] * q4a[1] + q4b[4] * q4a[2];
+    local r3 =  q4b[1] * q4a[2] - q4b[2] * q4a[1] + q4b[3] * q4a[4] + q4b[4] * q4a[3];
+    local r4 = -q4b[1] * q4a[1] - q4b[2] * q4a[2] - q4b[3] * q4a[3] + q4b[4] * q4a[4];
 	return r:set(r1,r2,r3,r4)
 end
 
-function tardis.q4_product_v3(q4a,v3b,r)
-	r=r or v3b
-    local r1 =                    q4a[2] * v3b[3] - q4a[3] * v3b[2] + q4a[4] * v3b[1];
-    local r2 = -q4a[1] * v3b[3]                   + q4a[3] * v3b[1] + q4a[4] * v3b[2];
-    local r3 =  q4a[1] * v3b[2] - q4a[2] * v3b[1]                   + q4a[4] * v3b[3];
+function tardis.v3_product_q4(v3,q4,r)
+	r=r or v3
+    local r1 =                  q4[2] * v3[3] - q4[3] * v3[2] + q4[4] * v3[1];
+    local r2 = -q4[1] * v3[3]                 + q4[3] * v3[1] + q4[4] * v3[2];
+    local r3 =  q4[1] * v3[2] - q4[2] * v3[1]                 + q4[4] * v3[3];
 	return r:set(r1,r2,r3)
 end
 
-function tardis.m4_product_v3(m4a,v3b,r)
-	r=r or v3b
-	local oow=1/( (m4a[   4]*v3b[1]) + (m4a[ 4+4]*v3b[2]) + (m4a[ 8+4]*v3b[3]) + (m4a[12+4] ) )
-	local r1= oow * ( (m4a[   1]*v3b[1]) + (m4a[ 4+1]*v3b[2]) + (m4a[ 8+1]*v3b[3]) + (m4a[12+1] ) )
-	local r2= oow * ( (m4a[   2]*v3b[1]) + (m4a[ 4+2]*v3b[2]) + (m4a[ 8+2]*v3b[3]) + (m4a[12+2] ) )
-	local r3= oow * ( (m4a[   3]*v3b[1]) + (m4a[ 4+3]*v3b[2]) + (m4a[ 8+3]*v3b[3]) + (m4a[12+3] ) )
+function tardis.v3_product_m4(v3,m4,r)
+	r=r or v3
+	local oow=1/( (m4[   4]*v3[1]) + (m4[ 4+4]*v3[2]) + (m4[ 8+4]*v3[3]) + (m4[12+4] ) )
+	local r1= oow * ( (m4[   1]*v3[1]) + (m4[ 4+1]*v3[2]) + (m4[ 8+1]*v3[3]) + (m4[12+1] ) )
+	local r2= oow * ( (m4[   2]*v3[1]) + (m4[ 4+2]*v3[2]) + (m4[ 8+2]*v3[3]) + (m4[12+2] ) )
+	local r3= oow * ( (m4[   3]*v3[1]) + (m4[ 4+3]*v3[2]) + (m4[ 8+3]*v3[3]) + (m4[12+3] ) )
 	return r:set(r1,r2,r3)
 end
 
-function tardis.m4_product_v4(m4a,v4b,r)
-	r=r or v4a
-	local r1= ( (m4a[   1]*v4b[1]) + (m4a[ 4+1]*v4b[2]) + (m4a[ 8+1]*v4b[3]) + (m4a[12+1]*v4b[4]) )
-	local r2= ( (m4a[   2]*v4b[1]) + (m4a[ 4+2]*v4b[2]) + (m4a[ 8+2]*v4b[3]) + (m4a[12+2]*v4b[4]) )
-	local r3= ( (m4a[   3]*v4b[1]) + (m4a[ 4+3]*v4b[2]) + (m4a[ 8+3]*v4b[3]) + (m4a[12+3]*v4b[4]) )
-	local r4= ( (m4a[   4]*v4b[1]) + (m4a[ 4+4]*v4b[2]) + (m4a[ 8+4]*v4b[3]) + (m4a[12+4]*v4b[4]) )
+function tardis.v4_product_m4(v4,m4,r)
+	r=r or v4
+	local r1= ( (m4[   1]*v4[1]) + (m4[ 4+1]*v4[2]) + (m4[ 8+1]*v4[3]) + (m4[12+1]*v4[4]) )
+	local r2= ( (m4[   2]*v4[1]) + (m4[ 4+2]*v4[2]) + (m4[ 8+2]*v4[3]) + (m4[12+2]*v4[4]) )
+	local r3= ( (m4[   3]*v4[1]) + (m4[ 4+3]*v4[2]) + (m4[ 8+3]*v4[3]) + (m4[12+3]*v4[4]) )
+	local r4= ( (m4[   4]*v4[1]) + (m4[ 4+4]*v4[2]) + (m4[ 8+4]*v4[3]) + (m4[12+4]*v4[4]) )
 	return r:set(r1,r2,r3,r4)
 end
 
 function tardis.m4_product_m4(m4a,m4b,r)
 	r=r or m4a
-	local r1 = (m4a[   1]*m4b[   1]) + (m4a[   2]*m4b[ 4+1]) + (m4a[   3]*m4b[ 8+1]) + (m4a[   4]*m4b[12+1])
-	local r2 = (m4a[   1]*m4b[   2]) + (m4a[   2]*m4b[ 4+2]) + (m4a[   3]*m4b[ 8+2]) + (m4a[   4]*m4b[12+2])
-	local r3 = (m4a[   1]*m4b[   3]) + (m4a[   2]*m4b[ 4+3]) + (m4a[   3]*m4b[ 8+3]) + (m4a[   4]*m4b[12+3])
-	local r4 = (m4a[   1]*m4b[   4]) + (m4a[   2]*m4b[ 4+4]) + (m4a[   3]*m4b[ 8+4]) + (m4a[   4]*m4b[12+4])
-	local r5 = (m4a[ 4+1]*m4b[   1]) + (m4a[ 4+2]*m4b[ 4+1]) + (m4a[ 4+3]*m4b[ 8+1]) + (m4a[ 4+4]*m4b[12+1])
-	local r6 = (m4a[ 4+1]*m4b[   2]) + (m4a[ 4+2]*m4b[ 4+2]) + (m4a[ 4+3]*m4b[ 8+2]) + (m4a[ 4+4]*m4b[12+2])
-	local r7 = (m4a[ 4+1]*m4b[   3]) + (m4a[ 4+2]*m4b[ 4+3]) + (m4a[ 4+3]*m4b[ 8+3]) + (m4a[ 4+4]*m4b[12+3])
-	local r8 = (m4a[ 4+1]*m4b[   4]) + (m4a[ 4+2]*m4b[ 4+4]) + (m4a[ 4+3]*m4b[ 8+4]) + (m4a[ 4+4]*m4b[12+4])
-	local r9 = (m4a[ 8+1]*m4b[   1]) + (m4a[ 8+2]*m4b[ 4+1]) + (m4a[ 8+3]*m4b[ 8+1]) + (m4a[ 8+4]*m4b[12+1])
-	local r10= (m4a[ 8+1]*m4b[   2]) + (m4a[ 8+2]*m4b[ 4+2]) + (m4a[ 8+3]*m4b[ 8+2]) + (m4a[ 8+4]*m4b[12+2])
-	local r11= (m4a[ 8+1]*m4b[   3]) + (m4a[ 8+2]*m4b[ 4+3]) + (m4a[ 8+3]*m4b[ 8+3]) + (m4a[ 8+4]*m4b[12+3])
-	local r12= (m4a[ 8+1]*m4b[   4]) + (m4a[ 8+2]*m4b[ 4+4]) + (m4a[ 8+3]*m4b[ 8+4]) + (m4a[ 8+4]*m4b[12+4])
-	local r13= (m4a[12+1]*m4b[   1]) + (m4a[12+2]*m4b[ 4+1]) + (m4a[12+3]*m4b[ 8+1]) + (m4a[12+4]*m4b[12+1])
-	local r14= (m4a[12+1]*m4b[   2]) + (m4a[12+2]*m4b[ 4+2]) + (m4a[12+3]*m4b[ 8+2]) + (m4a[12+4]*m4b[12+2])
-	local r15= (m4a[12+1]*m4b[   3]) + (m4a[12+2]*m4b[ 4+3]) + (m4a[12+3]*m4b[ 8+3]) + (m4a[12+4]*m4b[12+3])
-	local r16= (m4a[12+1]*m4b[   4]) + (m4a[12+2]*m4b[ 4+4]) + (m4a[12+3]*m4b[ 8+4]) + (m4a[12+4]*m4b[12+4])
+	local r1 = (m4b[   1]*m4a[   1]) + (m4b[   2]*m4a[ 4+1]) + (m4b[   3]*m4a[ 8+1]) + (m4b[   4]*m4a[12+1])
+	local r2 = (m4b[   1]*m4a[   2]) + (m4b[   2]*m4a[ 4+2]) + (m4b[   3]*m4a[ 8+2]) + (m4b[   4]*m4a[12+2])
+	local r3 = (m4b[   1]*m4a[   3]) + (m4b[   2]*m4a[ 4+3]) + (m4b[   3]*m4a[ 8+3]) + (m4b[   4]*m4a[12+3])
+	local r4 = (m4b[   1]*m4a[   4]) + (m4b[   2]*m4a[ 4+4]) + (m4b[   3]*m4a[ 8+4]) + (m4b[   4]*m4a[12+4])
+	local r5 = (m4b[ 4+1]*m4a[   1]) + (m4b[ 4+2]*m4a[ 4+1]) + (m4b[ 4+3]*m4a[ 8+1]) + (m4b[ 4+4]*m4a[12+1])
+	local r6 = (m4b[ 4+1]*m4a[   2]) + (m4b[ 4+2]*m4a[ 4+2]) + (m4b[ 4+3]*m4a[ 8+2]) + (m4b[ 4+4]*m4a[12+2])
+	local r7 = (m4b[ 4+1]*m4a[   3]) + (m4b[ 4+2]*m4a[ 4+3]) + (m4b[ 4+3]*m4a[ 8+3]) + (m4b[ 4+4]*m4a[12+3])
+	local r8 = (m4b[ 4+1]*m4a[   4]) + (m4b[ 4+2]*m4a[ 4+4]) + (m4b[ 4+3]*m4a[ 8+4]) + (m4b[ 4+4]*m4a[12+4])
+	local r9 = (m4b[ 8+1]*m4a[   1]) + (m4b[ 8+2]*m4a[ 4+1]) + (m4b[ 8+3]*m4a[ 8+1]) + (m4b[ 8+4]*m4a[12+1])
+	local r10= (m4b[ 8+1]*m4a[   2]) + (m4b[ 8+2]*m4a[ 4+2]) + (m4b[ 8+3]*m4a[ 8+2]) + (m4b[ 8+4]*m4a[12+2])
+	local r11= (m4b[ 8+1]*m4a[   3]) + (m4b[ 8+2]*m4a[ 4+3]) + (m4b[ 8+3]*m4a[ 8+3]) + (m4b[ 8+4]*m4a[12+3])
+	local r12= (m4b[ 8+1]*m4a[   4]) + (m4b[ 8+2]*m4a[ 4+4]) + (m4b[ 8+3]*m4a[ 8+4]) + (m4b[ 8+4]*m4a[12+4])
+	local r13= (m4b[12+1]*m4a[   1]) + (m4b[12+2]*m4a[ 4+1]) + (m4b[12+3]*m4a[ 8+1]) + (m4b[12+4]*m4a[12+1])
+	local r14= (m4b[12+1]*m4a[   2]) + (m4b[12+2]*m4a[ 4+2]) + (m4b[12+3]*m4a[ 8+2]) + (m4b[12+4]*m4a[12+2])
+	local r15= (m4b[12+1]*m4a[   3]) + (m4b[12+2]*m4a[ 4+3]) + (m4b[12+3]*m4a[ 8+3]) + (m4b[12+4]*m4a[12+3])
+	local r16= (m4b[12+1]*m4a[   4]) + (m4b[12+2]*m4a[ 4+4]) + (m4b[12+3]*m4a[ 8+4]) + (m4b[12+4]*m4a[12+4])
 	return r:set(r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16)
 end
 
@@ -1627,12 +1618,13 @@ function tardis.m4_project23d(view_width,view_height,width,height,fov,depth)
 end
 
 
+tardis.f32=require("wetgenes.tardis.core") -- use a "faster?" f32 C core
+
 if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first use to disable use of tardis f32 core
 --upgrade the above to hopefully faster C versions working on 16byte aligned userdata arrays of floats
-local tcore=require("wetgenes.tardis.core") -- use a "faster?" f32 C core
-if tcore then
-	tardis.f32=tcore -- expose f32 core
-	
+
+	local tcore=tardis.f32
+		
 	-- allow read/write with magical [] lookups
 	function array.__len(it) return 1 end
 	function array.__index(it,n) return array[n] or tcore.read(it,n) end
@@ -1689,7 +1681,7 @@ if tcore then
 	-- replace some functions with C code
 
 	tardis.m4_product_m4		=	tcore.m4_product_m4
-	tardis.m4_product_v4		=	tcore.m4_product_v4
+	tardis.v4_product_m4		=	tcore.v4_product_m4
 
 	m4.identity			=	tcore.m4_identity
 	m4.rotate			=	tcore.m4_rotate
@@ -1697,5 +1689,4 @@ if tcore then
 	m4.scale			=	tcore.m4_scale
 	m4.translate		=	tcore.m4_translate
 
-end
 end

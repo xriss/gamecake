@@ -70,7 +70,7 @@ function wmeta.setup(def)
 			m4:translate({widget.pan_px,widget.pan_py,0})
 		end
 
-		widget.m4:product(m4,widget.m4)
+		m4:product(widget.m4,widget.m4)
 
 
 		for i,v in ipairs(widget) do

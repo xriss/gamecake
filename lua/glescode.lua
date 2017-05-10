@@ -28,9 +28,11 @@ function glescode.create(gl)
 	
 	code.cache={}
 	code.cache.color=tcore.new_v4()
+--	code.cache.color=tardis.v4.new()
 	
 	function code.Color(...)
 		tcore.set(code.cache.color,...) -- may not set anything if no arguments are given
+--		code.cache.color:set(...) -- may not set anything if no arguments are given
 		return code.cache.color -- safe way of getting this value (a 4 float userdata)
 	end
 
@@ -76,6 +78,7 @@ function glescode.create(gl)
 		code.stack=code.stacks[code.stack_mode]
 		if not code.stack then -- create on use
 			local m4=tcore.new_m4() tcore.m4_identity(m4)
+--			local m4=tardis.m4.new():identity()
 			code.stack={ m4 }
 			code.stacks[code.stack_mode]=code.stack
 		end
@@ -85,25 +88,32 @@ function glescode.create(gl)
 -- returns a matrix that can later be used in LoadMatrix
 	function code.SaveMatrix(...)
 		local m4=tcore.new_m4() tcore.set(m4,code.stack_matrix,16)
+--		local m4=tardis.m4.new(code.stack_matrix)
 		return m4
 	end
 
 -- create a new matrix to mult by
 	function code.CreateMatrix(a)
 		local m4=tcore.new_m4() tcore.set(m4,a,16)
+--		local m4=tardis.m4.new(a)
 		return m4
 	end
 
 	function code.LoadMatrix(...)
 		tcore.set(code.stack_matrix,...)
+--		code.stack_matrix:set(...)
 	end
 
 	function code.MultMatrix(a)
 		tcore.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
+--		tcore.m4_product_m4(a,code.stack_matrix,code.stack_matrix)
+--		a:product(code.stack_matrix,code.stack_matrix)
 	end
 
 	function code.PreMultMatrix(a)
 		tcore.m4_product_m4(a,code.stack_matrix,code.stack_matrix)
+--		tcore.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
+--		code.stack_matrix:product(a,code.stack_matrix)
 	end
 
 -- we have our own majick code for this sort of thing
@@ -113,22 +123,27 @@ function glescode.create(gl)
 
 	function code.LoadIdentity()
 		tcore.m4_identity(code.stack_matrix)
+--		code.stack_matrix:identity()
 	end
 
 	function code.Translate(vx,vy,vz)
 		tcore.m4_translate(code.stack_matrix,vx,vy,vz)
+--		code.stack_matrix:translate(vx,vy,vz)
 	end
 
 	function code.Rotate(d,vx,vy,vz)
 		tcore.m4_rotate(code.stack_matrix,d,vx,vy,vz)
+--		code.stack_matrix:rotate(d,{vx,vy,vz})
 	end
 
 	function code.Scale(vx,vy,vz)
 		tcore.m4_scale_v3(code.stack_matrix,vx,vy,vz)
+--		code.stack_matrix:scale_v3({vx,vy,vz})
 	end
 
 	function code.PushMatrix()		
 		local m4=tcore.new_m4() tcore.set(m4,code.stack_matrix,16)
+--		local m4=tardis.m4.new(m4,code.stack_matrix)
 		code.stack[#code.stack+1]=m4
 		code.stack_matrix=assert(code.stack[#code.stack])
 	end
@@ -141,22 +156,30 @@ function glescode.create(gl)
 
 	function code.color_get_rgba()
 		return tcore.read(code.cache.color,1),tcore.read(code.cache.color,2),tcore.read(code.cache.color,3),tcore.read(code.cache.color,4)
+--		return code.cache.color[1],code.cache.color[2],code.cache.color[3],code.cache.color[4]
 	end
 	
 -- apply MODELVIEW to a vertex, return the result
 	function code.apply_modelview(va,vb,vc,vd)
 		local t=type(va)
-		if t=="number" then -- need to convert from a table
+		if t=="number" then -- numbers
 			local v4=tcore.new_v4() tcore.set(v4,va,vb,vc,vd)
-			tcore.m4_product_v4(code.matrix(gl.MODELVIEW),v4)
+--			local v4=tardis.v4.new(va,vb,vc,vd)
+			tcore.v4_product_m4(v4,code.matrix(gl.MODELVIEW))
+--			v4:product(code.matrix(gl.MODELVIEW))
 			return tcore.read(v4,1),tcore.read(v4,2),tcore.read(v4,3),tcore.read(v4,4)
+--			return v4[1],v4[2],v4[3],v4[4]
 		elseif t=="table" then -- need to convert from a table
 			local v4=tcore.new_v4() tcore.set(v4,va,4)
-			tcore.m4_product_v4(code.matrix(gl.MODELVIEW),v4)
+--			local v4=tardis.v4.new(va)
+			tcore.v4_product_m4(v4,code.matrix(gl.MODELVIEW))
+--			v4:product(code.matrix(gl.MODELVIEW))
 			va[1]=tcore.read(v4,1) va[2]=tcore.read(v4,2) va[3]=tcore.read(v4,3) va[4]=tcore.read(v4,4)
+--			va[1]=v4[1] va[2]=v4[2] va[3]=v4[3] va[4]=v4[4]
 			return va
 		else
-			tcore.m4_product_v4(code.matrix(gl.MODELVIEW),va)
+			tcore.v4_product_m4(va,code.matrix(gl.MODELVIEW))
+--			va:product(code.matrix(gl.MODELVIEW))
 			return va
 		end
 	end

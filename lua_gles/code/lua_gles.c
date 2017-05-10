@@ -871,6 +871,12 @@ int len=1;
 		len=lua_tardis_uda_count(l,2)/1;
 	}
 	else
+	if( lua_istable(l,2))
+	{
+		fp=ff;
+		lua_rawgeti(l,2,1); ff[0]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+	}
+	else
 	{
 		fp=ff;
 		ff[0]=(float)luaL_checknumber(l,2);
@@ -889,6 +895,13 @@ int len=1;
 	if(fp)
 	{
 		len=lua_tardis_uda_count(l,2)/2;
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		fp=ff;
+		lua_rawgeti(l,2,1); ff[0]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		lua_rawgeti(l,2,2); ff[1]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
 	}
 	else
 	{
@@ -912,6 +925,14 @@ int len=1;
 		len=lua_tardis_uda_count(l,2)/3;
 	}
 	else
+	if( lua_istable(l,2))
+	{
+		fp=ff;
+		lua_rawgeti(l,2,1); ff[0]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		lua_rawgeti(l,2,2); ff[1]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		lua_rawgeti(l,2,3); ff[2]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+	}
+	else
 	{
 		fp=ff;
 		ff[0]=(float)luaL_checknumber(l,2);
@@ -933,6 +954,15 @@ int len=1;
 	if(fp)
 	{
 		len=lua_tardis_uda_count(l,2)/4;
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		fp=ff;
+		lua_rawgeti(l,2,1); ff[0]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		lua_rawgeti(l,2,2); ff[1]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		lua_rawgeti(l,2,3); ff[2]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		lua_rawgeti(l,2,4); ff[3]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
 	}
 	else
 	{
