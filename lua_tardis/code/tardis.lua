@@ -162,6 +162,7 @@ end
 
 --[[#wetgenes.tardis.array.product
 
+	ma = ma:product(mb)
 	ma = ma:product(mb,r)
 
 Look at the type and call the appropriate product function, to produce 
@@ -254,6 +255,7 @@ end
 
 --[[#wetgenes.tardis.m2.transpose
 
+	m2 = m2:transpose()
 	m2 = m2:transpose(r)
 
 Transpose this m2.
@@ -269,6 +271,7 @@ end
 
 --[[#wetgenes.tardis.m2.scale
 
+	m2 = m2:scale(s)
 	m2 = m2:scale(s,r)
 
 Scale this m2 by s.
@@ -284,6 +287,7 @@ end
 
 --[[#wetgenes.tardis.m2.cofactor
 
+	m2 = m2:cofactor()
 	m2 = m2:cofactor(r)
 
 Cofactor this m2.
@@ -308,6 +312,7 @@ end
 
 --[[#wetgenes.tardis.m2.adjugate
 
+	m2 = m2:adjugate()
 	m2 = m2:adjugate(r)
 
 Adjugate this m2.
@@ -323,6 +328,7 @@ end
 
 --[[#wetgenes.tardis.m2.inverse
 
+	m2 = m2:inverse()
 	m2 = m2:inverse(r)
 
 Inverse this m2.
@@ -341,7 +347,8 @@ end
 
 --[[#wetgenes.tardis.m3
 
-The metatable for a 3x3 matrix class, use the new function to actually create an object.
+The metatable for a 3x3 matrix class, use the new function to actually 
+create an object.
 
 We also inherit all the functions from tardis.array
 
@@ -404,6 +411,7 @@ end
 
 --[[#wetgenes.tardis.m3.transpose
 
+	m3 = m3:transpose()
 	m3 = m3:transpose(r)
 
 Transpose this m3.
@@ -419,6 +427,7 @@ end
 
 --[[#wetgenes.tardis.m3.scale
 
+	m3 = m3:scale(s)
 	m3 = m3:scale(s,r)
 
 Scale this m3 by s.
@@ -434,6 +443,7 @@ end
 
 --[[#wetgenes.tardis.m3.cofactor
 
+	m3 = m3:cofactor()
 	m3 = m3:cofactor(r)
 
 Cofactor this m3.
@@ -458,6 +468,7 @@ end
 
 --[[#wetgenes.tardis.m3.adjugate
 
+	m3 = m3:adjugate()
 	m3 = m3:adjugate(r)
 
 Adjugate this m3.
@@ -473,6 +484,7 @@ end
 
 --[[#wetgenes.tardis.m3.inverse
 
+	m3 = m3:inverse()
 	m3 = m3:inverse(r)
 
 Inverse this m3.
@@ -489,7 +501,8 @@ end
 
 --[[#wetgenes.tardis.m4
 
-The metatable for a 4x4 matrix class, use the new function to actually create an object.
+The metatable for a 4x4 matrix class, use the new function to actually 
+create an object.
 
 We also inherit all the functions from tardis.array
 
@@ -558,6 +571,7 @@ end
 
 --[[#wetgenes.tardis.m4.transpose
 
+	m4 = m4:transpose()
 	m4 = m4:transpose(r)
 
 Transpose this m4.
@@ -573,6 +587,7 @@ end
 
 --[[#wetgenes.tardis.m4.scale
 
+	m4 = m4:scale(s)
 	m4 = m4:scale(s,r)
 
 Scale this m4 by s.
@@ -592,6 +607,7 @@ end
 
 --[[#wetgenes.tardis.m4.add
 
+	m4 = m4:add(m4b)
 	m4 = m4:add(m4b,r)
 
 Add m4b this m4.
@@ -611,6 +627,7 @@ end
 
 --[[#wetgenes.tardis.m4.sub
 
+	m4 = m4:sub(m4b)
 	m4 = m4:sub(m4b,r)
 
 Subtract m4b this m4.
@@ -630,6 +647,7 @@ end
 
 --[[#wetgenes.tardis.m4.lerp
 
+	m4 = m4:lerp(m4b,s)
 	m4 = m4:lerp(m4b,s,r)
 
 Lerp from m4 to m4b by s.
@@ -649,6 +667,7 @@ end
 
 --[[#wetgenes.tardis.m4.cofactor
 
+	m4 = m4:cofactor()
 	m4 = m4:cofactor(r)
 
 Cofactor this m4.
@@ -673,6 +692,7 @@ end
 
 --[[#wetgenes.tardis.m4.adjugate
 
+	m4 = m4:adjugate()
 	m4 = m4:adjugate(r)
 
 Adjugate this m4.
@@ -688,6 +708,7 @@ end
 
 --[[#wetgenes.tardis.m4.inverse
 
+	m4 = m4:inverse()
 	m4 = m4:inverse(r)
 
 Inverse this m4.
@@ -704,7 +725,9 @@ end
 
 --[[#wetgenes.tardis.m4.translate
 
+	m4 = m4:translate(x,y,z)
 	m4 = m4:translate(x,y,z,r)
+	m4 = m4:translate(v3)
 	m4 = m4:translate(v3,r)
 
 Translate this m4 along its local axis by {x,y,z} or v3.
@@ -713,7 +736,7 @@ If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
-function m4.translate(it,a,b,c,d) -- (it,v3a,r) or (it,x,y,z,r)
+function m4.translate(it,a,b,c,d)
 	local v3a,r
 	if type(a)=="number" then v3a=tardis.v3.new(a,b,c) r=d else v3a=a r=b end
 	r=r or it
@@ -726,7 +749,9 @@ end
 
 --[[#wetgenes.tardis.m4.scale_v3
 
+	m4 = m4:scale_v3(x,y,z)
 	m4 = m4:scale_v3(x,y,z,r)
+	m4 = m4:scale_v3(v3)
 	m4 = m4:scale_v3(v3,r)
 
 Scale this m4 by {x,y,z} or v3.
@@ -750,7 +775,9 @@ end
 
 --[[#wetgenes.tardis.m4.scale_v3
 
+	v3 = m4:scale_v3(x,y,z)
 	v3 = m4:scale_v3(x,y,z,r)
+	v3 = m4:scale_v3(v3)
 	v3 = m4:scale_v3(v3,r)
 
 Get v3 scale from a scale/rot/trans matrix
@@ -804,6 +831,7 @@ end
 
 --[[#wetgenes.tardis.m4.rotate
 
+	m4 = m4:rotate(degrees,v3a)
 	m4 = m4:rotate(degrees,v3a,r)
 
 Apply a rotation to this matrix.
@@ -819,7 +847,8 @@ end
 
 --[[#wetgenes.tardis.v2
 
-The metatable for a 2d vector class, use the new function to actually create an object.
+The metatable for a 2d vector class, use the new function to actually 
+create an object.
 
 We also inherit all the functions from tardis.array
 
@@ -870,6 +899,7 @@ end
 
 --[[#wetgenes.tardis.v2.oo
 
+	v2 = v2:oo()
 	v2 = v2:oo(r)
 
 One Over value. Build the reciprocal of all elements. 
@@ -885,6 +915,7 @@ end
 
 --[[#wetgenes.tardis.v2.scale
 
+	v2 = v2:scale(s)
 	v2 = v2:scale(s,r)
 
 Scale this v2 by s.
@@ -900,6 +931,7 @@ end
 
 --[[#wetgenes.tardis.v2.normalize
 
+	v2 = v2:normalize()
 	v2 = v2:normalize(r)
 
 Adjust the length of this vector to 1.
@@ -914,6 +946,7 @@ end
 
 --[[#wetgenes.tardis.v2.add
 
+	v2 = v2:add(v2b)
 	v2 = v2:add(v2b,r)
 
 Add v2b to v2.
@@ -929,6 +962,7 @@ end
 
 --[[#wetgenes.tardis.v2.sub
 
+	v2 = v2:sub(v2b)
 	v2 = v2:sub(v2b,r)
 
 Subtract v2b from v2.
@@ -944,6 +978,7 @@ end
 
 --[[#wetgenes.tardis.v2.mul
 
+	v2 = v2:mul(v2b)
 	v2 = v2:mul(v2b,r)
 
 Multiply v2 by v2b.
@@ -981,7 +1016,8 @@ end
 
 --[[#wetgenes.tardis.v3
 
-The metatable for a 3d vector class, use the new function to actually create an object.
+The metatable for a 3d vector class, use the new function to actually 
+create an object.
 
 We also inherit all the functions from tardis.array
 
@@ -1032,6 +1068,7 @@ end
 
 --[[#wetgenes.tardis.v3.oo
 
+	v3 = v3:oo()
 	v3 = v3:oo(r)
 
 One Over value. Build the reciprocal of all elements. 
@@ -1047,6 +1084,7 @@ end
 
 --[[#wetgenes.tardis.v3.scale
 
+	v3 = v3:scale(s)
 	v3 = v3:scale(s,r)
 
 Scale this v3 by s.
@@ -1062,6 +1100,7 @@ end
 
 --[[#wetgenes.tardis.v3.normalize
 
+	v3 = v3:normalize()
 	v3 = v3:normalize(r)
 
 Adjust the length of this vector to 1.
@@ -1076,6 +1115,7 @@ end
 
 --[[#wetgenes.tardis.v3.add
 
+	v3 = v3:add(v3b)
 	v3 = v3:add(v3b,r)
 
 Add v3b to v3.
@@ -1091,6 +1131,7 @@ end
 
 --[[#wetgenes.tardis.v3.sub
 
+	v3 = v3:sub(v3b)
 	v3 = v3:sub(v3b,r)
 
 Subtract v3b from v3.
@@ -1106,6 +1147,7 @@ end
 
 --[[#wetgenes.tardis.v3.mul
 
+	v3 = v3:mul(v3b)
 	v3 = v3:mul(v3b,r)
 
 Multiply v3 by v3b.
@@ -1132,6 +1174,7 @@ end
 
 --[[#wetgenes.tardis.v3.cross
 
+	v2 = v2:dot(v2b)
 	v2 = v2:dot(v2b,r)
 
 Return the cross product of these two vectors.
@@ -1148,7 +1191,8 @@ end
 
 --[[#wetgenes.tardis.v4
 
-The metatable for a 4d vector class, use the new function to actually create an object.
+The metatable for a 4d vector class, use the new function to actually 
+create an object.
 
 We also inherit all the functions from tardis.array
 
@@ -1176,6 +1220,7 @@ function v4.identity(it) return it:set(0,0,0,0) end
 
 --[[#wetgenes.tardis.v4.to_v3
 
+	v3 = v4:to_v3()
 	v3 = v4:to_v3(r)
 
 scale [4] to 1 then throw it away so we have a v3 xyz
@@ -1215,6 +1260,7 @@ end
 
 --[[#wetgenes.tardis.v4.oo
 
+	v4 = v4:oo()
 	v4 = v4:oo(r)
 
 One Over value. Build the reciprocal of all elements. 
@@ -1230,6 +1276,7 @@ end
 
 --[[#wetgenes.tardis.v4.scale
 
+	v4 = v4:scale(s)
 	v4 = v4:scale(s,r)
 
 Scale this v4 by s.
@@ -1245,6 +1292,7 @@ end
 
 --[[#wetgenes.tardis.v4.normalize
 
+	v4 = v4:normalize()
 	v4 = v4:normalize(r)
 
 Adjust the length of this vector to 1.
@@ -1259,6 +1307,7 @@ end
 
 --[[#wetgenes.tardis.v4.add
 
+	v4 = v4:add(v4b)
 	v4 = v4:add(v4b,r)
 
 Add v4b to v4.
@@ -1274,6 +1323,7 @@ end
 
 --[[#wetgenes.tardis.v4.sub
 
+	v4 = v4:sub(v4b)
 	v4 = v4:sub(v4b,r)
 
 Subtract v4b from v4.
@@ -1289,6 +1339,7 @@ end
 
 --[[#wetgenes.tardis.v4.mul
 
+	v4 = v4:mul(v4b)
 	v4 = v4:mul(v4b,r)
 
 Multiply v4 by v4b.
@@ -1344,6 +1395,7 @@ function q4.identity(it) return it:set(0,0,0,1) end
 
 --[[#wetgenes.tardis.q4.lerp
 
+	q4 = q4:lerp(q4b,s)
 	q4 = q4:lerp(q4b,s,r)
 
 Nlerp from q4 to q4b by s.
@@ -1375,6 +1427,7 @@ end
 
 --[[#wetgenes.tardis.q4.rotate
 
+	q4 = q4:rotate(degrees,v3a)
 	q4 = q4:rotate(degrees,v3a,r)
 
 Apply a rotation to this quaternion.
