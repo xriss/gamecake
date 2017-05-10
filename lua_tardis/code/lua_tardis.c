@@ -290,22 +290,22 @@ static void raw_tardis_m4_product_m4(float *fa,float *fb,float *fc)
 {
 float r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16;
 	
-	r1 = (fa[   0]*fb[   0]) + (fa[   1]*fb[ 4+0]) + (fa[   2]*fb[ 8+0]) + (fa[   3]*fb[12+0]);
-	r2 = (fa[   0]*fb[   1]) + (fa[   1]*fb[ 4+1]) + (fa[   2]*fb[ 8+1]) + (fa[   3]*fb[12+1]);
-	r3 = (fa[   0]*fb[   2]) + (fa[   1]*fb[ 4+2]) + (fa[   2]*fb[ 8+2]) + (fa[   3]*fb[12+2]);
-	r4 = (fa[   0]*fb[   3]) + (fa[   1]*fb[ 4+3]) + (fa[   2]*fb[ 8+3]) + (fa[   3]*fb[12+3]);
-	r5 = (fa[ 4+0]*fb[   0]) + (fa[ 4+1]*fb[ 4+0]) + (fa[ 4+2]*fb[ 8+0]) + (fa[ 4+3]*fb[12+0]);
-	r6 = (fa[ 4+0]*fb[   1]) + (fa[ 4+1]*fb[ 4+1]) + (fa[ 4+2]*fb[ 8+1]) + (fa[ 4+3]*fb[12+1]);
-	r7 = (fa[ 4+0]*fb[   2]) + (fa[ 4+1]*fb[ 4+2]) + (fa[ 4+2]*fb[ 8+2]) + (fa[ 4+3]*fb[12+2]);
-	r8 = (fa[ 4+0]*fb[   3]) + (fa[ 4+1]*fb[ 4+3]) + (fa[ 4+2]*fb[ 8+3]) + (fa[ 4+3]*fb[12+3]);
-	r9 = (fa[ 8+0]*fb[   0]) + (fa[ 8+1]*fb[ 4+0]) + (fa[ 8+2]*fb[ 8+0]) + (fa[ 8+3]*fb[12+0]);
-	r10= (fa[ 8+0]*fb[   1]) + (fa[ 8+1]*fb[ 4+1]) + (fa[ 8+2]*fb[ 8+1]) + (fa[ 8+3]*fb[12+1]);
-	r11= (fa[ 8+0]*fb[   2]) + (fa[ 8+1]*fb[ 4+2]) + (fa[ 8+2]*fb[ 8+2]) + (fa[ 8+3]*fb[12+2]);
-	r12= (fa[ 8+0]*fb[   3]) + (fa[ 8+1]*fb[ 4+3]) + (fa[ 8+2]*fb[ 8+3]) + (fa[ 8+3]*fb[12+3]);
-	r13= (fa[12+0]*fb[   0]) + (fa[12+1]*fb[ 4+0]) + (fa[12+2]*fb[ 8+0]) + (fa[12+3]*fb[12+0]);
-	r14= (fa[12+0]*fb[   1]) + (fa[12+1]*fb[ 4+1]) + (fa[12+2]*fb[ 8+1]) + (fa[12+3]*fb[12+1]);
-	r15= (fa[12+0]*fb[   2]) + (fa[12+1]*fb[ 4+2]) + (fa[12+2]*fb[ 8+2]) + (fa[12+3]*fb[12+2]);
-	r16= (fa[12+0]*fb[   3]) + (fa[12+1]*fb[ 4+3]) + (fa[12+2]*fb[ 8+3]) + (fa[12+3]*fb[12+3]);
+	r1 = (fb[   0]*fa[   0]) + (fb[   1]*fa[ 4+0]) + (fb[   2]*fa[ 8+0]) + (fb[   3]*fa[12+0]);
+	r2 = (fb[   0]*fa[   1]) + (fb[   1]*fa[ 4+1]) + (fb[   2]*fa[ 8+1]) + (fb[   3]*fa[12+1]);
+	r3 = (fb[   0]*fa[   2]) + (fb[   1]*fa[ 4+2]) + (fb[   2]*fa[ 8+2]) + (fb[   3]*fa[12+2]);
+	r4 = (fb[   0]*fa[   3]) + (fb[   1]*fa[ 4+3]) + (fb[   2]*fa[ 8+3]) + (fb[   3]*fa[12+3]);
+	r5 = (fb[ 4+0]*fa[   0]) + (fb[ 4+1]*fa[ 4+0]) + (fb[ 4+2]*fa[ 8+0]) + (fb[ 4+3]*fa[12+0]);
+	r6 = (fb[ 4+0]*fa[   1]) + (fb[ 4+1]*fa[ 4+1]) + (fb[ 4+2]*fa[ 8+1]) + (fb[ 4+3]*fa[12+1]);
+	r7 = (fb[ 4+0]*fa[   2]) + (fb[ 4+1]*fa[ 4+2]) + (fb[ 4+2]*fa[ 8+2]) + (fb[ 4+3]*fa[12+2]);
+	r8 = (fb[ 4+0]*fa[   3]) + (fb[ 4+1]*fa[ 4+3]) + (fb[ 4+2]*fa[ 8+3]) + (fb[ 4+3]*fa[12+3]);
+	r9 = (fb[ 8+0]*fa[   0]) + (fb[ 8+1]*fa[ 4+0]) + (fb[ 8+2]*fa[ 8+0]) + (fb[ 8+3]*fa[12+0]);
+	r10= (fb[ 8+0]*fa[   1]) + (fb[ 8+1]*fa[ 4+1]) + (fb[ 8+2]*fa[ 8+1]) + (fb[ 8+3]*fa[12+1]);
+	r11= (fb[ 8+0]*fa[   2]) + (fb[ 8+1]*fa[ 4+2]) + (fb[ 8+2]*fa[ 8+2]) + (fb[ 8+3]*fa[12+2]);
+	r12= (fb[ 8+0]*fa[   3]) + (fb[ 8+1]*fa[ 4+3]) + (fb[ 8+2]*fa[ 8+3]) + (fb[ 8+3]*fa[12+3]);
+	r13= (fb[12+0]*fa[   0]) + (fb[12+1]*fa[ 4+0]) + (fb[12+2]*fa[ 8+0]) + (fb[12+3]*fa[12+0]);
+	r14= (fb[12+0]*fa[   1]) + (fb[12+1]*fa[ 4+1]) + (fb[12+2]*fa[ 8+1]) + (fb[12+3]*fa[12+1]);
+	r15= (fb[12+0]*fa[   2]) + (fb[12+1]*fa[ 4+2]) + (fb[12+2]*fa[ 8+2]) + (fb[12+3]*fa[12+2]);
+	r16= (fb[12+0]*fa[   3]) + (fb[12+1]*fa[ 4+3]) + (fb[12+2]*fa[ 8+3]) + (fb[12+3]*fa[12+3]);
 
 // fc may == fa or fb so we have to cache then write.
 
@@ -319,14 +319,14 @@ float r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16;
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static void raw_tardis_m4_product_v4(float *fa,float *fb,float *fc)
+static void raw_tardis_v4_product_m4(float *fa,float *fb,float *fc)
 {
 float r1,r2,r3,r4;
 	
-	r1 = (fa[   0]*fb[   0]) + (fa[ 4+0]*fb[   1]) + (fa[ 8+0]*fb[   2]) + (fa[12+0]*fb[   3]);
-	r2 = (fa[   1]*fb[   0]) + (fa[ 4+1]*fb[   1]) + (fa[ 8+1]*fb[   2]) + (fa[12+1]*fb[   3]);
-	r3 = (fa[   2]*fb[   0]) + (fa[ 4+2]*fb[   1]) + (fa[ 8+2]*fb[   2]) + (fa[12+2]*fb[   3]);
-	r4 = (fa[   3]*fb[   0]) + (fa[ 4+3]*fb[   1]) + (fa[ 8+3]*fb[   2]) + (fa[12+3]*fb[   3]);
+	r1 = (fb[   0]*fa[   0]) + (fb[ 4+0]*fa[   1]) + (fb[ 8+0]*fa[   2]) + (fb[12+0]*fa[   3]);
+	r2 = (fb[   1]*fa[   0]) + (fb[ 4+1]*fa[   1]) + (fb[ 8+1]*fa[   2]) + (fb[12+1]*fa[   3]);
+	r3 = (fb[   2]*fa[   0]) + (fb[ 4+2]*fa[   1]) + (fb[ 8+2]*fa[   2]) + (fb[12+2]*fa[   3]);
+	r4 = (fb[   3]*fa[   0]) + (fb[ 4+3]*fa[   1]) + (fb[ 8+3]*fa[   2]) + (fb[12+3]*fa[   3]);
 
 // fc may == fa or fb so we have to cache then write.
 
@@ -357,7 +357,7 @@ int ridx=3;
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_tardis_m4_product_v4 (lua_State *l)
+static int lua_tardis_v4_product_m4 (lua_State *l)
 {
 float *fa=(float *)lua_tardis_uda(l,1);
 float *fb=(float *)lua_tardis_uda(l,2);
@@ -365,9 +365,9 @@ float *fc=(float *)lua_tardis_uda(l,3);
 
 int ridx=3;
 
-	if(!fc) { fc=fb; ridx=2; }
+	if(!fc) { fc=fa; ridx=1; }
 
-	raw_tardis_m4_product_v4(fa,fb,fc);
+	raw_tardis_v4_product_m4(fa,fb,fc);
 
 	lua_pushvalue(l,ridx); // return passed in value for chain function calls
 	return 1;
@@ -476,7 +476,7 @@ int fc_idx=4;
 	fb[ 8]=x*z*cc-y*s;	fb[ 9]=y*z*cc+x*s;	fb[10]=z*z*cc+c;	fb[11]=0.0f;
 	fb[12]=0.0f;		fb[13]=0.0f;		fb[14]=0.0f;		fb[15]=1.0f;
 
-	raw_tardis_m4_product_m4(fb,fa,fc);
+	raw_tardis_m4_product_m4(fa,fb,fc);
 
 	lua_pushvalue(l,fc_idx); // return passed in value for chain function calls
 	return 1;
@@ -654,7 +654,7 @@ LUALIB_API int luaopen_wetgenes_tardis_core (lua_State *l)
 		{"new_v4",					lua_tardis_new_v4},
 
 		{"m4_product_m4",			lua_tardis_m4_product_m4},
-		{"m4_product_v4",			lua_tardis_m4_product_v4},
+		{"v4_product_m4",			lua_tardis_v4_product_m4},
 
 		{"m4_identity",				lua_tardis_m4_identity},
 		{"m4_rotate",				lua_tardis_m4_rotate},

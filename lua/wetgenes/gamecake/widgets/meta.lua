@@ -313,7 +313,7 @@ function wmeta.setup(def)
 	function meta.get_local_xy(w,_x,_y)
 		if not w.m4 then return -1,-1 end
 		local v4=tardis.v4.new(_x,_y,0,1)
-		w.m4:product(v4)
+		v4:product(w.m4)
 		return v4[1],v4[2]
 	end
 	meta.mousexy=meta.get_local_xy
@@ -324,7 +324,7 @@ function wmeta.setup(def)
 		local m=tardis.m4.new()
 		w.m4:inverse(m)
 		local v=tardis.v4.new(x or 0,y or 0,0,1)
-		m:product(v)
+		v:product(m)
 		return v[1],v[2]
 	end
 	

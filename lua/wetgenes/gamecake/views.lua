@@ -7,7 +7,6 @@ local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 local core=require("wetgenes.gamecake.core")
 
-local tcore=require("wetgenes.tardis.core")
 
 -- Layout replacement...
 -- Maintain a hierarchical system of views so we can render into sub parts of the main screen.

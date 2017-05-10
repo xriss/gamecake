@@ -773,7 +773,7 @@ print("merging")
 					
 						local b=tardis.m4.new(it.matrix):transpose(tardis.m4.new()) -- transpose
 										
-						its.anim.rest[it.idx]=b:product(mp,tardis.m4.new())
+						its.anim.rest[it.idx]=mp:product(b,tardis.m4.new())
 
 						mp=its.anim.rest[it.idx]
 					end
@@ -819,7 +819,7 @@ print("merging")
 						m:transpose(m)
 
 
-						mp=m:product(mp,m)
+						mp=mp:product(m,m)
 
 						local tweak=its.filter.tweaks and its.filter.tweaks[it.name]
 						if tweak then
@@ -827,14 +827,15 @@ print("merging")
 							local rest=its.anim.rest[it.idx]
 							local restinv=its.anim.rest[it.idx]:inverse(tardis.m4.new())
 							local t=tardis.m4.new()
+
 							its.anim.bones[it.idx]=tweak:product(restinv,t):product(rest)
 
-							t:product(mp,mp)
+							mp:product(t,mp)
 						end
 
 
 						local t=tardis.m4.new()				
-						its.anim.bones[it.idx]=its.anim.rest[it.idx]:inverse(t):product(mp,t)
+						its.anim.bones[it.idx]=mp:product(its.anim.rest[it.idx]:inverse(t),t)
 
 
 

@@ -8,7 +8,6 @@ local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local core=require("wetgenes.gamecake.core")
 
-local tcore=require("wetgenes.tardis.core")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
