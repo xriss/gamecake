@@ -208,7 +208,7 @@ We also inherit all the functions from tardis.array
 ]]
 local m2=tardis.class("m2",array)
 
---[[#wetgenes.tardis.array.m2.new
+--[[#wetgenes.tardis.m2.new
 
 	m2 = tardis.m2.new()
 
@@ -348,7 +348,7 @@ We also inherit all the functions from tardis.array
 ]]
 local m3=tardis.class("m3",array)
 
---[[#wetgenes.tardis.array.m3.new
+--[[#wetgenes.tardis.m3.new
 
 	m3 = tardis.m3.new()
 
@@ -496,7 +496,7 @@ We also inherit all the functions from tardis.array
 ]]
 local m4=tardis.class("m4",array)
 
---[[#wetgenes.tardis.array.m4.new
+--[[#wetgenes.tardis.m4.new
 
 	m4 = tardis.m4.new()
 
@@ -630,7 +630,7 @@ end
 
 --[[#wetgenes.tardis.m4.lerp
 
-	m4 = m4:sub(m4b,s,r)
+	m4 = m4:lerp(m4b,s,r)
 
 Lerp from m4 to m4b by s.
 
@@ -770,7 +770,7 @@ end
 
 --[[#wetgenes.tardis.m4.setrot
 
-	m4 = m4:scale_v3(degrees,v3a)
+	m4 = m4:setrot(degrees,v3a)
 
 Set this matrix to a rotation matrix around the given normal.
 
@@ -817,123 +817,541 @@ function m4.rotate(it,degrees,v3a,r)
 	return tardis.m4_product_m4(m4a,it,r or it)
 end
 
+--[[#wetgenes.tardis.v2
+
+The metatable for a 2d vector class, use the new function to actually create an object.
+
+We also inherit all the functions from tardis.array
+
+]]
 local v2=tardis.class("v2",array)
+
+--[[#wetgenes.tardis.v2.new
+
+	v2 = tardis.v2.new()
+
+Create a new v2 and optionally set it to the given values, v2 methods 
+usually return the input v2 for easy function chaining.
+
+]]
 function v2.new(...) return setmetatable({0,0},v2):set(...) end
+
+--[[#wetgenes.tardis.v2.identity
+
+	v2 = v2:identity()
+
+Set this v2 to all zeros.
+
+]]
 function v2.identity(it) return it:set(0,0) end 
+
+--[[#wetgenes.tardis.v2.lenlen
+
+	value = v2:lenlen()
+
+Returns the length of this vector, squared, this is often all you need 
+for comparisons so lets us skip the sqrt.
+
+]]
 function v2.lenlen(it)
 	return (it[1]*it[1]) + (it[2]*it[2])
 end
+
+--[[#wetgenes.tardis.v2.len
+
+	value = v2:len()
+
+Returns the length of this vector.
+
+]]
 function v2.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) )
 end
+
+--[[#wetgenes.tardis.v2.oo
+
+	v2 = v2:oo(r)
+
+One Over value. Build the reciprocal of all elements. 
+
+If r is provided then the result is written into r and returned 
+otherwise v2 is modified and returned.
+
+]]
 function v2.oo(it,r)
 	r=r or it
 	return r:set( 1/it[1] , 1/it[2] )
 end
+
+--[[#wetgenes.tardis.v2.scale
+
+	v2 = v2:scale(s,r)
+
+Scale this v2 by s.
+
+If r is provided then the result is written into r and returned 
+otherwise v2 is modified and returned.
+
+]]
 function v2.scale(it,s,r)
 	r=r or it
 	return r:set( it[1]*s , it[2]*s )
 end
+
+--[[#wetgenes.tardis.v2.normalize
+
+	v2 = v2:normalize(r)
+
+Adjust the length of this vector to 1.
+
+If r is provided then the result is written into r and returned 
+otherwise v2 is modified and returned.
+
+]]
 function v2.normalize(it,r)
 	return v2.scale(it,1/v2.len(it),r)
 end
+
+--[[#wetgenes.tardis.v2.add
+
+	v2 = v2:add(v2b,r)
+
+Add v2b to v2.
+
+If r is provided then the result is written into r and returned 
+otherwise v2 is modified and returned.
+
+]]
 function v2.add(va,vb,r)
 	r=r or va
 	return r:set( va[1]+vb[1] , va[2]+vb[2] )
 end
+
+--[[#wetgenes.tardis.v2.sub
+
+	v2 = v2:sub(v2b,r)
+
+Subtract v2b from v2.
+
+If r is provided then the result is written into r and returned 
+otherwise v2 is modified and returned.
+
+]]
 function v2.sub(va,vb,r)
 	r=r or va
 	return r:set( va[1]-vb[1] , va[2]-vb[2] )
 end
+
+--[[#wetgenes.tardis.v2.mul
+
+	v2 = v2:mul(v2b,r)
+
+Multiply v2 by v2b.
+
+If r is provided then the result is written into r and returned 
+otherwise v2 is modified and returned.
+
+]]
 function v2.mul(va,vb,r)
 	r=r or va
 	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) )
 end
+
+--[[#wetgenes.tardis.v2.dot
+
+	value = v2:dot(v2b)
+
+Return the dot product of these two vectors.
+
+]]
 function v2.dot(va,vb)
 	return ( (va[1]*vb[1]) + (va[2]*vb[2]) )
 end
-function v2.cross(va,vb) -- extend to 3d then only return z value as x and y are always 0
+
+--[[#wetgenes.tardis.v2.cross
+
+	value = v2:cross(v2b)
+
+Extend to 3d then only return z value as x and y are always 0
+
+]]
+function v2.cross(va,vb)
 	return (va[1]*vb[2])-(va[2]*vb[1])
 end
 
+--[[#wetgenes.tardis.v3
+
+The metatable for a 3d vector class, use the new function to actually create an object.
+
+We also inherit all the functions from tardis.array
+
+]]
 local v3=tardis.class("v3",array)
+
+--[[#wetgenes.tardis.v3.new
+
+	v3 = tardis.v3.new()
+
+Create a new v3 and optionally set it to the given values, v3 methods 
+usually return the input v3 for easy function chaining.
+
+]]
 function v3.new(...) return setmetatable({0,0,0},v3):set(...) end
+
+--[[#wetgenes.tardis.v3.identity
+
+	v3 = v3:identity()
+
+Set this v3 to all zeros.
+
+]]
 function v3.identity(it) return it:set(0,0,0) end 
+
+--[[#wetgenes.tardis.v3.lenlen
+
+	value = v3:lenlen()
+
+Returns the length of this vector, squared, this is often all you need 
+for comparisons so lets us skip the sqrt.
+
+]]
 function v3.lenlen(it)
 	return (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3])
 end
+
+--[[#wetgenes.tardis.v3.len
+
+	value = v3:len()
+
+Returns the length of this vector.
+
+]]
 function v3.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3]) )
 end
+
+--[[#wetgenes.tardis.v3.oo
+
+	v3 = v3:oo(r)
+
+One Over value. Build the reciprocal of all elements. 
+
+If r is provided then the result is written into r and returned 
+otherwise v3 is modified and returned.
+
+]]
 function v3.oo(it,r)
 	r=r or it
 	return r:set( 1/it[1] , 1/it[2] , 1/it[3] )
 end
+
+--[[#wetgenes.tardis.v3.scale
+
+	v3 = v3:scale(s,r)
+
+Scale this v3 by s.
+
+If r is provided then the result is written into r and returned 
+otherwise v3 is modified and returned.
+
+]]
 function v3.scale(it,s,r)
 	r=r or it
 	return r:set( it[1]*s , it[2]*s , it[3]*s )
 end
+
+--[[#wetgenes.tardis.v3.normalize
+
+	v3 = v3:normalize(r)
+
+Adjust the length of this vector to 1.
+
+If r is provided then the result is written into r and returned 
+otherwise v3 is modified and returned.
+
+]]
 function v3.normalize(it,r)
 	return v3.scale(it,1/v3.len(it),r)
 end
+
+--[[#wetgenes.tardis.v3.add
+
+	v3 = v3:add(v3b,r)
+
+Add v3b to v3.
+
+If r is provided then the result is written into r and returned 
+otherwise v3 is modified and returned.
+
+]]
 function v3.add(va,vb,r)
 	r=r or va
 	return r:set( va[1]+vb[1] , va[2]+vb[2] , va[3]+vb[3] )
 end
+
+--[[#wetgenes.tardis.v3.sub
+
+	v3 = v3:sub(v3b,r)
+
+Subtract v3b from v3.
+
+If r is provided then the result is written into r and returned 
+otherwise v3 is modified and returned.
+
+]]
 function v3.sub(va,vb,r)
 	r=r or va
 	return r:set( va[1]-vb[1] , va[2]-vb[2] , va[3]-vb[3] )
 end
+
+--[[#wetgenes.tardis.v3.mul
+
+	v3 = v3:mul(v3b,r)
+
+Multiply v3 by v3b.
+
+If r is provided then the result is written into r and returned 
+otherwise v3 is modified and returned.
+
+]]
 function v3.mul(va,vb,r)
 	r=r or va
 	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) , (va[3]*vb[3]) )
 end
+
+--[[#wetgenes.tardis.v3.dot
+
+	value = v3:dot(v3b)
+
+Return the dot product of these two vectors.
+
+]]
 function v3.dot(va,vb)
 	return ( (va[1]*vb[1]) + (va[2]*vb[2]) + (va[3]*vb[3]) )
 end
+
+--[[#wetgenes.tardis.v3.cross
+
+	v2 = v2:dot(v2b,r)
+
+Return the cross product of these two vectors.
+
+If r is provided then the result is written into r and returned 
+otherwise v3 is modified and returned.
+
+]]
 function v3.cross(va,vb,r)
 	r=r or va
 	return r:set( (va[2]*vb[3])-(va[3]*vb[2]) , (va[3]*vb[1])-(va[1]*vb[3]) , (va[1]*vb[2])-(va[2]*vb[1]) )
 end
 
 
+--[[#wetgenes.tardis.v4
+
+The metatable for a 4d vector class, use the new function to actually create an object.
+
+We also inherit all the functions from tardis.array
+
+]]
 local v4=tardis.class("v4",array)
+
+--[[#wetgenes.tardis.v4.new
+
+	v4 = tardis.v4.new()
+
+Create a new v4 and optionally set it to the given values, v4 methods 
+usually return the input v4 for easy function chaining.
+
+]]
 function v4.new(...) return setmetatable({0,0,0,0},v4):set(...) end
-function v4.identity(it) return it:set(0,0,0,0) end 
-function v4.to_v3(it,r) -- scale [4] to 1 then throw it away so we have a v3 xyz
+
+--[[#wetgenes.tardis.v4.identity
+
+	v4 = v4:identity()
+
+Set this v4 to all zeros.
+
+]]
+function v4.identity(it) return it:set(0,0,0,0) end
+
+--[[#wetgenes.tardis.v4.to_v3
+
+	v3 = v4:to_v3(r)
+
+scale [4] to 1 then throw it away so we have a v3 xyz
+ 
+If r is provided then the result is written into r and returned 
+otherwise a new v3 is created and returned.
+
+]]
+function v4.to_v3(it,r)
 	r=r or v3.new()
 	local oow=1/it[4]
 	return r:set( it[1]*oow , it[2]*oow , it[3]*oow )
 end
+
+--[[#wetgenes.tardis.v4.lenlen
+
+	value = v4:lenlen()
+
+Returns the length of this vector, squared, this is often all you need 
+for comparisons so lets us skip the sqrt.
+
+]]
 function v4.lenlen(it)
 	return (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3]) + (it[4]*it[4])
 end
+
+--[[#wetgenes.tardis.v4.len
+
+	value = v4:len()
+
+Returns the length of this vector.
+
+]]
 function v4.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3]) + (it[4]*it[4]) )
 end
+
+--[[#wetgenes.tardis.v4.oo
+
+	v4 = v4:oo(r)
+
+One Over value. Build the reciprocal of all elements. 
+
+If r is provided then the result is written into r and returned 
+otherwise v4 is modified and returned.
+
+]]
+function v4.oo(it,r)
+	r=r or it
+	return r:set( 1/it[1] , 1/it[2] , 1/it[3] , 1/it[4] )
+end
+
+--[[#wetgenes.tardis.v4.scale
+
+	v4 = v4:scale(s,r)
+
+Scale this v4 by s.
+
+If r is provided then the result is written into r and returned 
+otherwise v4 is modified and returned.
+
+]]
 function v4.scale(it,s,r)
 	r=r or it
 	return r:set( it[1]*s , it[2]*s , it[3]*s , it[4]*s )
 end
+
+--[[#wetgenes.tardis.v4.normalize
+
+	v4 = v4:normalize(r)
+
+Adjust the length of this vector to 1.
+
+If r is provided then the result is written into r and returned 
+otherwise v4 is modified and returned.
+
+]]
 function v4.normalize(it,r)
 	return v4.scale(it,1/v4.len(it),r)
 end
+
+--[[#wetgenes.tardis.v4.add
+
+	v4 = v4:add(v4b,r)
+
+Add v4b to v4.
+
+If r is provided then the result is written into r and returned 
+otherwise v4 is modified and returned.
+
+]]
 function v4.add(va,vb,r)
 	r=r or va
 	return r:set( va[1]+vb[1] , va[2]+vb[2] , va[3]+vb[3] , va[4]+vb[4] )
 end
+
+--[[#wetgenes.tardis.v4.sub
+
+	v4 = v4:sub(v4b,r)
+
+Subtract v4b from v4.
+
+If r is provided then the result is written into r and returned 
+otherwise v4 is modified and returned.
+
+]]
 function v4.sub(va,vb,r)
 	r=r or va
 	return r:set( va[1]-vb[1] , va[2]-vb[2] , va[3]-vb[3] , va[4]-vb[4] )
 end
+
+--[[#wetgenes.tardis.v4.mul
+
+	v4 = v4:mul(v4b,r)
+
+Multiply v4 by v4b.
+
+If r is provided then the result is written into r and returned 
+otherwise v4 is modified and returned.
+
+]]
+function v4.mul(va,vb,r)
+	r=r or va
+	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) , (va[3]*vb[3]) , (va[4]*vb[4]) )
+end
+
+--[[#wetgenes.tardis.v4.dot
+
+	value = v4:dot(v4b)
+
+Return the dot product of these two vectors.
+
+]]
 function v4.dot(va,vb)
 	return ( (va[1]*vb[1]) + (va[2]*vb[2]) + (va[3]*vb[3]) + (va[4]*vb[4]) )
 end
 
 
+--[[#wetgenes.tardis.q4
+
+The metatable for a quaternion class, use the new function to actually create an object.
+
+We also inherit all the functions from tardis.v4
+
+]]
 local q4=tardis.class("q4",v4)
-function q4.new(...) return setmetatable({0,0,0,1},q4):set(...) end
+
+--[[#wetgenes.tardis.q4.new
+
+	q4 = tardis.q4.new()
+
+Create a new q4 and optionally set it to the given values, q4 methods 
+usually return the input q4 for easy function chaining.
+
+]]
+function q4.new(...) return setmetatable({0,0,0,0},q4):set(...) end
+
+--[[#wetgenes.tardis.q4.identity
+
+	q4 = q4:identity()
+
+Set this q4 to its 0,0,0,1 identity
+
+]]
 function q4.identity(it) return it:set(0,0,0,1) end 
+
+--[[#wetgenes.tardis.q4.lerp
+
+	q4 = q4:lerp(q4b,s,r)
+
+Nlerp from q4 to q4b by s.
+
+If r is provided then the result is written into r and returned 
+otherwise q4 is modified and returned.
+
+]]
 function q4.nlerp(qa,qb,sa,r)
 	local sb=1-sa
 	if qa.dot(qb) < 0 then sa=-sa end -- shortest fix
@@ -942,12 +1360,29 @@ function q4.nlerp(qa,qb,sa,r)
 	return r:normalize()
 end
 
+--[[#wetgenes.tardis.q4.setrot
+
+	q4 = q4:setrot(degrees,v3a)
+
+Set this matrix to a rotation matrix around the given normal.
+
+]]
 function q4.setrot(it,degrees,v3a)
 	local ah=degrees * (math.PI/360)
 	local sh=math.sin(ah)
 	return it:set( math.cos(ah) , v3a[1]*sh , v3a[2]*sh , v3a[3]*sh )
 end
 
+--[[#wetgenes.tardis.q4.rotate
+
+	q4 = q4:rotate(degrees,v3a,r)
+
+Apply a rotation to this quaternion.
+
+If r is provided then the result is written into r and returned 
+otherwise q4 is modified and returned.
+
+]]
 function q4.rotate(it,degrees,v3a,r)
 	local q4a=q4.new():setrot(degrees,v3a)
 	return tardis.q4_product_q4(q4a,it,r)
@@ -955,12 +1390,47 @@ end
 
 
 
+--[[#wetgenes.tardis.line
+
+A 3d space line class.
+
+[1]position , [2]normal
+
+We also inherit all the functions from tardis.array
+
+]]
 local line=tardis.class("line",array)
 line.set=nil -- disable
-function line.new(...) return setmetatable({v3.new(),v3.new()},line) end -- [1]position , [2]normal
 
-local plane=tardis.class("plane",line)
-function plane.new(...) return setmetatable({v3.new(),v3.new()},plane) end -- [1]position , [2]normal
+--[[#wetgenes.tardis.line.new
+
+	line = tardis.line.new(p,n)
+
+Create a new line and optionally set it to the given values.
+
+]]
+function line.new(p,n) return setmetatable({p or v3.new(),n or v3.new()},line) end
+
+--[[#wetgenes.tardis.plane
+
+A 3d space plane class.
+
+[1]position , [2]normal
+
+We also inherit all the functions from tardis.array
+
+]]
+local plane=tardis.class("plane",array)
+plane.set=nil -- disable
+
+--[[#wetgenes.tardis.plane.new
+
+	plane = tardis.plane.new(p,n)
+
+Create a new plane and optionally set it to the given values.
+
+]]
+function plane.new(p,n) return setmetatable({p or v3.new(),n or v3.new()},plane) end
 
 
 function tardis.line_intersect_plane(l,p,r)
