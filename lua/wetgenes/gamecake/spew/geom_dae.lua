@@ -827,7 +827,8 @@ print("merging")
 							local rest=its.anim.rest[it.idx]
 							local restinv=its.anim.rest[it.idx]:inverse(tardis.m4.new())
 							local t=tardis.m4.new()
-							its.anim.bones[it.idx]=restinv:product(tweak,t):product(rest)
+
+							its.anim.bones[it.idx]=tweak:product(restinv,t):product(rest)
 
 							mp:product(t,mp)
 						end
