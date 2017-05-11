@@ -50,14 +50,14 @@ function wmeta.setup(def)
 --print("noscale",sx,sy)
 		else
 			if widget.smode=="center" then
-print("CCCscale",widget.sx,widget.sy)
+--print("CCCscale",widget.sx,widget.sy)
 				m4:translate( tardis.v3.new(widget.hx*0.5,widget.hy*0.5,0) )
 				m4:scale_v3(  tardis.v3.new(1/widget.sx,1/widget.sy,1) )
 				m4:translate( tardis.v3.new(-widget.px-widget.hx*0.5,-widget.py-widget.hy*0.5,0,0) )
 --				x= ((x-widget.px-widget.hx*0.5)/widget.parent.sx)+widget.hx*0.5
 --				y= ((y-widget.py-widget.hy*0.5)/widget.parent.sy)+widget.hy*0.5
 			else
-print("scale",widget.sx,widget.sy)
+--print("scale",widget.sx,widget.sy)
 				m4:scale_v3(  tardis.v3.new(1/widget.sx,1/widget.sy,1) )
 				m4:translate( tardis.v3.new(-widget.px,-widget.py,0) )
 --				x=((x-widget.px)/widget.sx)
