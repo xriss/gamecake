@@ -140,7 +140,17 @@ end
 
 --[[#wetgenes.tardis.array.set
 
-Convert an array to a string for debug printing,
+	a=a:set(1,2,3,4)
+	a=a:set({1,2,3,4})
+	a=a:set({1,2},{3,4})
+
+Assign some numbers to an array, all the above examples will assign 
+1,2,3,4 to the first four slots in the given array, as you can see we 
+allow one level of tables. Any class that is based on this array 
+class can be used instead of an explicit table. So we can use a v2 or v3 or m4 etc etc.
+
+if more numbers are given than the size of the array then they will be 
+ignored.
 
 ]]
 function array.set(it,...)
@@ -158,6 +168,38 @@ function array.set(it,...)
 		end
 	end
 	return it
+end
+
+--[[#wetgenes.tardis.array.compare
+
+	a=a:compare(b)
+	a=a:compare(1,2,3,4)
+
+Are the numbers in b the same as the numbers in a, this function will 
+return true if they are and false if they are not.
+
+If the arrays are of different lengths then this will return false.
+
+Numbers to test for can be given explicitly in the arguments and we 
+follow the same one level of tables rule as we do with array.set so any 
+class derived from array can be used.
+
+]]
+function array.compare(it,...)
+	local n=1
+	for i,v in ipairs{...} do
+		if type(v)=="number" then
+			if it[n]~=v then return false end
+			n=n+1
+		else
+			for ii,vv in ipairs(v) do -- allow one depth of tables
+				if it[n]~=vv then return false end
+				n=n+1
+			end
+		end
+	end
+	if it[n] then return false end -- array has more numbers than provided for test
+	return true
 end
 
 --[[#wetgenes.tardis.array.product
