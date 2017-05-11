@@ -1,3 +1,11 @@
+*{box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box; -o-box-sizing:border-box; -ms-box-sizing:border-box;}
+
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{border:0;font-size:100%;font:inherit;vertical-align:top;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}	/* Resets */
+
+a,img		{border:0; outline:none;}textarea:focus,input:focus{outline:0;}*:focus{outline:0;}
+body, html	{-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+body		{min-width:100%; min-height:100%; margin:0 auto;}
+
 h1, h2, h3, h4, h5, h6, p, blockquote {
    margin: 0;
    padding: 0;
@@ -8,10 +16,7 @@ body {
    line-height: 18px;
    color: #d2d2d2;
    background-color: #110F14;
-   position:relative;
-   width:960px;
-   margin:0 auto;
-   margin-top:10px;
+   width:100%;
 }
 table {
 	 margin: 10px 0 15px 0;
@@ -114,6 +119,7 @@ pre {
    background-color: #282a36;
    border-radius: 6px;
 }
+pre:first-of-type	{margin-top:0;}
 pre code {
    font-size: 14px;
    line-height: 26px;
@@ -125,13 +131,10 @@ sup {
    vertical-align: super;
    line-height: 0;
 }
-* {
-	 -webkit-print-color-adjust: exact;
-	 box-sizing:border-box;
-}
 
 /*	Wrappers	*/
 
+#main_wrap		{width:960px; margin:0 auto; margin-top:10px; position:relative;}
 .content, .index{display:inline-block; vertical-align:top; position:absolute; top:0; margin-bottom:60px;}
 .content		{width:720px; left:220px; padding-left:20px;}
 .index			{width:220px; left:0; margin-top:10px;}
@@ -167,9 +170,14 @@ ul:nth-of-type(1)	{list-style-type:none; display:block;}
 ul:nth-of-type(1) li{padding:5px 0 0 0;}
 
 
+/*	Title links to individual pages	*/
+
+h1 a		{font-weight:bold;}
+
 /*	Sourcecode links to Github under title links	*/
 
 a.sourcecode-link:before	{display:inline; content:'source: '; font-style:italic;}
+a.sourcecode-link			{display:block; margin-bottom:32px;}
 
 
 /*	Code snippets styling -- used !important to override google prettyprint https://xriss.github.io/gamecake/data/google-code-prettify/skins/sons-of-obsidian.css	*/

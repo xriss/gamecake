@@ -120,13 +120,15 @@ local function html(content,index)
 		</script>
 	</head>
 	<body>
-		<div class="content">
-]]..(content)..[[
-			<a href="#" class="top">Back to top</a>
-		</div>
-		<div class="index">
-			<a href="index.html" class="meca" title="To Docs Cave!"></a>
-]]..(index)..[[
+		<div id="main_wrap">
+			<div class="content">
+	]]..(content)..[[
+				<a href="#" class="top">Back to top</a>
+			</div>
+			<div class="index">
+				<a href="index.html" class="meca" title="To Docs Cave!"></a>
+	]]..(index)..[[
+			</div>
 		</div>
 	</body>
 </html>
