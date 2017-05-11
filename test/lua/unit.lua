@@ -31,6 +31,7 @@ else
 	lunatest.suite("unit.test_lua_freetype")
 
 	lunatest.suite("unit.wetgenes_string")
+	lunatest.suite("unit.wetgenes_tardis")
 
 	lunatest.suite("unit.wetgenes_sod")
 	lunatest.suite("unit.wetgenes_ogg")

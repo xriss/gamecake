@@ -199,8 +199,8 @@ static int lua_tardis_read (lua_State *l)
 float *fa=(float *)lua_tardis_uda(l,1);
 int	count=lua_tardis_uda_count(l,1);
 int i=(int)lua_tonumber(l,2);
-	if(i<1){i=1;}
-	if(i>count){i=count;}
+	if(i<1){ lua_pushnil(l); return 1; }
+	if(i>count){ lua_pushnil(l); return 1; }
 	lua_pushnumber(l,fa[i-1]);
 	return 1;
 }
@@ -210,8 +210,8 @@ static int lua_tardis_write (lua_State *l)
 float *fa=(float *)lua_tardis_uda(l,1);
 int	count=lua_tardis_uda_count(l,1);
 int i=(int)lua_tonumber(l,2);
-	if(i<1){i=1;}
-	if(i>count){i=count;}
+	if(i<1){ return 0; }
+	if(i>count){ return 0; }
 	fa[i-1]=(float)lua_tonumber(l,3);
 	return 0;
 }
@@ -542,21 +542,19 @@ float *fa;
 float *fb;
 float *fc;
 int fc_idx;
-float x,y,z;
+float s;
 
-	x=(float)lua_tonumber(l,2);
-	y=x;
-	z=x;
+	s=(float)lua_tonumber(l,2);
 	fc_idx=3;
 
 	fa=(float *)lua_tardis_uda(l,1);
 	fc=(float *)lua_tardis_uda(l,fc_idx);
 	if(!fc) { fc=fa; fc_idx=1; }
 
-	fc[ 0]=x*fa[ 0];		fc[ 1]=x*fa[ 1];		fc[ 2]=x*fa[ 2];		fc[ 3]=x*fa[ 3];
-	fc[ 4]=y*fa[ 4];		fc[ 5]=y*fa[ 5];		fc[ 6]=y*fa[ 6];		fc[ 7]=y*fa[ 7];
-	fc[ 8]=z*fa[ 8];		fc[ 9]=z*fa[ 9];		fc[10]=z*fa[10];		fc[11]=z*fa[11];
-	fc[12]=fa[12];			fc[13]=fa[13];			fc[14]=fa[14];			fc[15]=fa[15];
+	fc[ 0]=s*fa[ 0];		fc[ 1]=s*fa[ 1];		fc[ 2]=s*fa[ 2];		fc[ 3]=s*fa[ 3];
+	fc[ 4]=s*fa[ 4];		fc[ 5]=s*fa[ 5];		fc[ 6]=s*fa[ 6];		fc[ 7]=s*fa[ 7];
+	fc[ 8]=s*fa[ 8];		fc[ 9]=s*fa[ 9];		fc[10]=s*fa[10];		fc[11]=s*fa[11];
+	fc[12]=s*fa[12];		fc[13]=s*fa[13];		fc[14]=s*fa[14];		fc[15]=s*fa[15];
 
 	lua_pushvalue(l,fc_idx); // return passed in value for chain function calls
 	return 1;
