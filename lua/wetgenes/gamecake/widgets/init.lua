@@ -12,18 +12,14 @@ local dprint=function(a) print(wstr.dump(a)) end
 
 --[[#wetgenes.gamecake.widgets
 
-
-	widgets=require("wetgenes.gamecake.widgets").bake(oven,widgets)
-
-
-The widgets value returned will be the same table passed in or a new 
-one if you did not. It will be filled with functions/data bound to 
-the oven state which you must supply.
-
+	local widgets=oven.rebake("wetgenes.gamecake.widgets")
 
 A collection of widgets, rendered using gles2 code and controlled 
 using the mouse, keyboard or a joystick. EG click fire and move 
 left/right to adjust a slider value.
+
+Widgets must be created and bound to an oven, using the 
+oven.rebake function.
 
 This has undergone a number of rewrites as we try to simplify the 
 widget creation and layout process. Eventually we ended up with a 
@@ -64,9 +60,35 @@ widgets=widgets or {}
 local wmeta=oven.rebake("wetgenes.gamecake.widgets.meta")
 local wskin=oven.rebake("wetgenes.gamecake.widgets.skin")
 
---
--- create a master widget
---
+--[[#wetgenes.gamecake.widgets.setup
+
+	master=oven.rebake("wetgenes.gamecake.widgets").setup()
+
+	master=oven.rebake("wetgenes.gamecake.widgets").setup(
+		{font="Vera",text_size=16,grid_size=32,skin=0} )
+
+Create a master widget, this widget which is considered the root of 
+your GUI. It will be filled with functions/data and should contain all 
+the functions you need to add data and widgets.
+
+You can pass in these configuration values in a table, the example 
+shown above has soom good defaults.
+
+	font="Vera"
+
+The default font to use, this must have already been loaded via 
+wetgenes.gamecake.fonts functions.
+
+	text_size=16
+	
+The default pixel height to render text at.
+
+	grid_size=32
+	
+The size in pixels that we try and create buttons at.
+
+
+]]
 function widgets.setup(def)
 
 --print("SETUP")
