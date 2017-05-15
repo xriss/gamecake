@@ -106,6 +106,8 @@ function wmeta.setup(def)
 				v.hy=widget.hy-(v.py*2)
 
 			end
+			
+			if v.before_layout then v:before_layout() end
 		
 		end end
 		for i,v in ipairs(widget) do

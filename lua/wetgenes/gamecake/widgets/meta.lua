@@ -188,6 +188,8 @@ function wmeta.setup(def)
 		widget.hy=def.hy or 0
 		widget.hz=def.hz or 0 -- used to signal an fbo with a depth buffer
 
+		widget.before_layout=def.before_layout -- small auto resize function for dynamic positions/sizes called at layout time to adjust hx,hy
+
 		widget.color=def.color
 		
 		widget.cursor=def.cursor
@@ -215,8 +217,8 @@ function wmeta.setup(def)
 		widget.skin=def.skin -- skin the button this way
 
 
-		
-		if widget.hooks then widget.solid=true end
+-- remove auto solid, need to make sure that all buttons now have a class of button.
+--		if widget.hooks then widget.solid=true end
 		widget.solid=widget.solid or def.solid
 		
 		if widget.class and wmeta.classes[widget.class] then -- got a class, call its setup, its setup can override other functions

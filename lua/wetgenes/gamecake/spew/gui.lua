@@ -233,7 +233,7 @@ print("click",id)
 		for i,v in sprofiles.ipairs() do
 			top:add({hx=320,hy=20})
 			top:add({hx=20,hy=50})
-			top:add({hx=280,hy=50,color=0xffcccccc,text=v.name,id="profiles_select",hooks=gui.hooks,user=i})
+			top:add({hx=280,hy=50,color=0xffcccccc,text=v.name,id="profiles_select",hooks=gui.hooks,class="button",user=i})
 			top:add({hx=20,hy=50})
 		end
 		top:add({hx=320,hy=20})
@@ -253,18 +253,18 @@ print("click",id)
 		top:add({hx=320,hy=20})
 
 		top:add({hx=20,hy=40})
-		top:add({hx=280,hy=40,color=0xffcccccc,text=gui.data.name:value(),id="profile_name_edit",hooks=gui.hooks})
+		top:add({hx=280,hy=40,color=0xffcccccc,text=gui.data.name:value(),id="profile_name_edit",hooks=gui.hooks,class="button"})
 		top:add({hx=20,hy=40})
 
 		top:add({hx=200,hy=40})
-		top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Edit",id="profile_name_edit",hooks=gui.hooks})
+		top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Edit",id="profile_name_edit",hooks=gui.hooks,class="button"})
 		top:add({hx=20,hy=40})
 
 		top:add({hx=320,hy=40*7})
 
-		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"OK",id="profile_return",hooks=gui.hooks})
+		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"OK",id="profile_return",hooks=gui.hooks,class="button"})
 		top:add({hx=100,hy=40})
-		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"Cancel",id="profile_goto",hooks=gui.hooks,user="profiles"})
+		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"Cancel",id="profile_goto",hooks=gui.hooks,class="button",user="profiles"})
 
 		master.go_back_id="profile_return"
 		master.go_forward_id="profile_return"
@@ -283,17 +283,17 @@ print("click",id)
 		top:add({hx=20,hy=40})
 
 		top:add({hx=20,hy=40})
-		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Clear",id="profile_name_clear",hooks=gui.hooks})
+		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Clear",id="profile_name_clear",hooks=gui.hooks,class="button"})
 		top:add({hx=40,hy=40})
-		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Random",id="profile_name_rand",hooks=gui.hooks})
+		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Random",id="profile_name_rand",hooks=gui.hooks,class="button"})
 		top:add({hx=20,hy=40})
 		
 		top:add({hx=320,hy=40})
 		top:add({hx=320,hy=40})
 
-		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"OK",id="profile_name_set",hooks=gui.hooks})
+		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"OK",id="profile_name_set",hooks=gui.hooks,class="button"})
 		top:add({hx=100,hy=40})
-		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"Cancel",id="profile_goto",hooks=gui.hooks,user="profile"})
+		top:add({hx=110,hy=40,color=0xffcccccc,text=XLT"Cancel",id="profile_goto",hooks=gui.hooks,class="button",user="profile"})
 
 		top:add({hx=320,hy=40})
 
@@ -343,12 +343,12 @@ print("click",id)
 		if oven.opts.smell=="gamestick" then -- hide brag button
 			top:add({hx=130,hy=40})
 		else
-			top:add({hx=130,hy=40,color=0xffcccccc,text=XLT"Brag",id="score_brag",hooks=gui.hooks})
+			top:add({hx=130,hy=40,color=0xffcccccc,text=XLT"Brag",id="score_brag",hooks=gui.hooks,class="button"})
 		end
 		top:add({hx=20,hy=40})
-		top:add({hx=130,hy=40,color=0xffcccccc,text=XLT"List",id="score_list",hooks=gui.hooks})
+		top:add({hx=130,hy=40,color=0xffcccccc,text=XLT"List",id="score_list",hooks=gui.hooks,class="button"})
 --		top:add({hx= 5,hy=40})
---		top:add({hx=90,hy=40,color=0xffcccccc,text=XLT"Send",id="profile_score_send",hooks=gui.hooks})
+--		top:add({hx=90,hy=40,color=0xffcccccc,text=XLT"Send",id="profile_score_send",hooks=gui.hooks,class="button"})
 		top:add({hx=20,hy=40})
 
 		top:add({hx=320,hy=40})
@@ -356,7 +356,7 @@ print("click",id)
 		top:add({hx=320,hy=60,text_color=0xffffffff,text=""..mine_pct..XLT"% effort"})
 		top:add({hx=320,hy=40})
 
-		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Back",id="score_back",hooks=gui.hooks})
+		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Back",id="score_back",hooks=gui.hooks,class="button"})
 		top:add({hx=200,hy=40})
 		
 		master.go_back_id="score_back"
@@ -424,9 +424,9 @@ print("click",id)
 
 					local s=b:add({hx=310,hy=60,class="fill"})			
 					s:add(
-						{hx=100,hy=30,color=0xffcccccc,text=wstr.str_append_english_number_postfix(v.idx),hooks=gui.hooks,id="score_part"},
-						{hx=210,hy=30,color=0xffcccccc,text=wstr.str_insert_number_commas(v.score),hooks=gui.hooks,id="score_part"},
-						{hx=310,hy=30,color=0xffcccccc,text=v.name,hooks=gui.hooks,id="score_part"})
+						{hx=100,hy=30,color=0xffcccccc,text=wstr.str_append_english_number_postfix(v.idx),hooks=gui.hooks,class="button",id="score_part"},
+						{hx=210,hy=30,color=0xffcccccc,text=wstr.str_insert_number_commas(v.score),hooks=gui.hooks,class="button",id="score_part"},
+						{hx=310,hy=30,color=0xffcccccc,text=v.name,hooks=gui.hooks,class="button",id="score_part"})
 
 					b:add({hx=5,hy=60})
 
@@ -454,20 +454,20 @@ print("click",id)
 
 			if gui.offset>1 then
 				master.go_back_id="score_list_less"
-				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Back",id="score_list_less",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Back",id="score_list_less",hooks=gui.hooks,class="button"})
 				top:add({hx=10,hy=40})
 			else
 				top:add({hx=110,hy=40})
 			end
 
-			top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Exit",id="score_list_exit",hooks=gui.hooks})
+			top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Exit",id="score_list_exit",hooks=gui.hooks,class="button"})
 
 			if nomore then
 				top:add({hx=110,hy=40})
 			else
 				master.go_forward_id="score_list_more"
 				top:add({hx=10,hy=40})
-				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"More",id="score_list_more",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"More",id="score_list_more",hooks=gui.hooks,class="button"})
 			end
 
 			gui.master:layout()
@@ -595,15 +595,15 @@ print("click",id)
 			if wwin.steam then
 				top:add({hx=100,hy=40})
 				top:add({hx=10,hy=40})
-				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Game",id="settings_game",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Game",id="settings_game",hooks=gui.hooks,class="button"})
 				top:add({hx=10,hy=40})
 				top:add({hx=100,hy=40})
 			else
-				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Main",id="settings_main",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Main",id="settings_main",hooks=gui.hooks,class="button"})
 				top:add({hx=10,hy=40})
-				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Game",id="settings_game",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Game",id="settings_game",hooks=gui.hooks,class="button"})
 				top:add({hx=10,hy=40})
-				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Scores",id="settings_scores",hooks=gui.hooks})
+				top:add({hx=100,hy=40,color=0xffcccccc,text=XLT"Scores",id="settings_scores",hooks=gui.hooks,class="button"})
 			end
 		end
 		
@@ -617,7 +617,7 @@ print("click",id)
 		t:add{hx=320,hy=20,text=oven.opts.title}
 		t:add{hx=320,hy=20,text=""}
 
-		top:add({hx=320,hy=40,color=0xffcccccc,text=XLT"About",id="settings_about",hooks=gui.hooks}):
+		top:add({hx=320,hy=40,color=0xffcccccc,text=XLT"About",id="settings_about",hooks=gui.hooks,class="button"}):
 			add{hx=80,hy=80,px=20,py=-20}.draw=function(w)
 			w:draw_base(function(w)
 				gl.Color(0,0.25,0.75,1)
@@ -643,9 +643,9 @@ print("click",id)
 						
 		top:add({hx=320,hy=40*3})
 
-		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Back",id="settings_return",hooks=gui.hooks})
+		top:add({hx=120,hy=40,color=0xffcccccc,text=XLT"Back",id="settings_return",hooks=gui.hooks,class="button"})
 		top:add({hx=80,hy=40})
-		top:add({hx=120,hy=40,color=0xffcc4444,text=XLT"Quit",id="settings_quit",hooks=gui.hooks})
+		top:add({hx=120,hy=40,color=0xffcc4444,text=XLT"Quit",id="settings_quit",hooks=gui.hooks,class="button"})
 
 		master.go_back_id="settings_return"
 		master.go_forward_id="settings_return"
@@ -672,9 +672,9 @@ print("click",id)
 		top:add({hx=320,hy=40*2,text_color=0xffffffff,text=XLT"Are you sure?"})
 
 		top:add({hx=20,hy=40*2})
-		top:add({hx=120,hy=40*2,color=0xffcccccc,text=XLT"Back",id="quit_back",hooks=gui.hooks})
+		top:add({hx=120,hy=40*2,color=0xffcccccc,text=XLT"Back",id="quit_back",hooks=gui.hooks,class="button"})
 		top:add({hx=40,hy=40*2})
-		top:add({hx=120,hy=40*2,color=0xffcc4444,text=XLT"Quit",id="quit_exit",hooks=gui.hooks})
+		top:add({hx=120,hy=40*2,color=0xffcc4444,text=XLT"Quit",id="quit_exit",hooks=gui.hooks,class="button"})
 		top:add({hx=20,hy=40*2})
 
 		top:add({hx=320,hy=40*5})

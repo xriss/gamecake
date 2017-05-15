@@ -182,7 +182,7 @@ wfile.file_refresh=function(widget)
 --				print(wstr.dump(t))
 		table.sort(t)
 		for i,v in ipairs(t) do
-				pan:add({hx=pan.hx,hy=20,text=v,text_align="left",hooks=widget.file_hooks,user=v,id="goto",
+				pan:add({class="button",hx=pan.hx,hy=20,text=v,text_align="left",hooks=widget.file_hooks,user=v,id="goto",
 				color=0x1f000000,
 				})
 		end
@@ -191,11 +191,11 @@ wfile.file_refresh=function(widget)
 	
 		for i,t in ipairs(widget.files) do
 			if t.mode=="file" then
-				pan:add({hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
+				pan:add({class="button",hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
 				color=0,
 				})
 			elseif t.mode=="directory" then
-				pan:add({hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
+				pan:add({class="button",hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
 				color=0x1f000000,
 				})
 			end
@@ -248,9 +248,9 @@ function wfile.setup(widget,def)
 	
 	widget:add({hx=widget.hx,hy=5})
 
-	widget:add({hx=widget.hx/4,hy=25,color=0,text="Parent",hooks=widget.file_hooks,id="parent"})
+	widget:add({hx=widget.hx/4,hy=25,class="button",color=0,text="Parent",hooks=widget.file_hooks,id="parent"})
 	widget:add({hx=widget.hx/2,hy=25})
-	widget:add({hx=widget.hx/4,hy=25,color=0,text="History",hooks=widget.file_hooks,id="history"})
+	widget:add({hx=widget.hx/4,hy=25,class="button",color=0,text="History",hooks=widget.file_hooks,id="history"})
 
 	widget:add({hx=widget.hx,hy=5})
 
