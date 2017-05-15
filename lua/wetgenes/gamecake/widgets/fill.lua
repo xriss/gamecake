@@ -53,7 +53,6 @@ function wfill.layout(widget)
 	if #widget>0 then
 	
 		for i,w in ipairs(widget) do
-			if w.before_layout then w:before_layout() end
 			if not w.hidden then
 				if hx+w.hx>widget.hx then
 					if hx==0 then -- need one item per line so add it anyway

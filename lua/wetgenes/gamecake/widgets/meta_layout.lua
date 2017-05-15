@@ -79,8 +79,8 @@ function wmeta.setup(def)
 
 	end
 	
-
-	function meta.layout(widget,mini)
+-- resize is performed recursively before layout so that layout can position its children
+	function meta.resize(widget,mini)
 		mini=mini or 0
 		for i,v in ipairs(widget) do if i>mini then
 		
@@ -107,12 +107,27 @@ function wmeta.setup(def)
 
 			end
 			
-			if v.before_layout then v:before_layout() end
-		
 		end end
+		for i,v in ipairs(widget) do
+			if not v.hidden then v:resize() end
+		end
+	end
+
+	function meta.layout(widget,mini)
+		mini=mini or 0
+--		for i,v in ipairs(widget) do if i>mini then
+--		end end
 		for i,v in ipairs(widget) do
 			if not v.hidden then v:layout() end
 		end
+	end
+
+	function meta.resize_and_layout(widget)
+--print("master layout")
+		widget:resize()
+		widget:layout()
+		widget:build_m4()
+--exit()
 	end
 
 end

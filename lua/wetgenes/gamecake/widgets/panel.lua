@@ -46,7 +46,6 @@ function wpanel.layout(widget)
 
 		end
 
-		if v.before_layout then v:before_layout() end
 	end
 
 -- also layout any other children

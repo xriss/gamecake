@@ -154,8 +154,8 @@ function wwindow.layout(widget)
 	local v=widget.win_fbo
 	local window=widget
 	
-	if window.hx > window.parent.hx then window.hx = window.parent.hx end
-	if window.hy > window.parent.hy then window.hy = window.parent.hy end
+--	if window.hx > window.parent.hx then window.hx = window.parent.hx end
+--	if window.hy > window.parent.hy then window.hy = window.parent.hy end
 
 	if v then
 		if window.panel_mode=="scale" then -- maintain aspect
@@ -207,8 +207,8 @@ wwindow.win_hooks=function(widget,act,w)
 --print(act,w.id)
 
 	local winclamp=function(window)
-		if window.hx > window.parent.hx then window.hx = window.parent.hx end
-		if window.hy > window.parent.hy then window.hy = window.parent.hy end
+--		if window.hx > window.parent.hx then window.hx = window.parent.hx end
+--		if window.hy > window.parent.hy then window.hy = window.parent.hy end
 		if window.panel_mode=="scale" then -- maintain aspect
 			local sx=window.hx/window.win_fbo.hx
 			local sy=window.hy/window.win_fbo.hy
@@ -279,6 +279,7 @@ function wwindow.setup(widget,def)
 	local ss=widget.master.grid_size or 24
 	local color=0
 
+	local ss1=ss/24
 	local ss_side=ss/8
 	local ss_corner=ss/4
 

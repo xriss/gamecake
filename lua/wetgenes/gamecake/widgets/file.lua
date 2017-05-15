@@ -238,23 +238,26 @@ function wfile.setup(widget,def)
 	widget.file_refresh		=	wfile.file_refresh
 	widget.file_hooks		=	function(act,w) return wfile.file_hooks(widget,act,w) end
 
+	local ss=widget.master.grid_size or 24
+	local ss1=ss/24
+	local ss2=ss/12
 
 
-	widget:add({hx=widget.hx,hy=25,class="textedit",color=0,data=widget.data_name,clip2=true})
+	widget:add_indent({hx=widget.hx,hy=ss,class="textedit",color=0,data=widget.data_name,clip2=true},ss1)
 
-	widget:add({hx=widget.hx,hy=5})
+--	widget:add({hx=widget.hx,hy=5})
 
-	widget:add({hx=widget.hx,hy=25,class="textedit",color=0,data=widget.data_dir,clip2=true,hooks=widget.file_hooks,id="dir"})
+	widget:add_indent({hx=widget.hx,hy=ss,class="textedit",color=0,data=widget.data_dir,clip2=true,hooks=widget.file_hooks,id="dir"},ss1)
 	
-	widget:add({hx=widget.hx,hy=5})
+--	widget:add({hx=widget.hx,hy=5})
 
-	widget:add({hx=widget.hx/4,hy=25,class="button",color=0,text="Parent",hooks=widget.file_hooks,id="parent"})
-	widget:add({hx=widget.hx/2,hy=25})
-	widget:add({hx=widget.hx/4,hy=25,class="button",color=0,text="History",hooks=widget.file_hooks,id="history"})
+	widget:add_indent({hx=widget.hx/4,hy=ss,class="button",color=0,text="Parent",hooks=widget.file_hooks,id="parent"},ss1)
+	widget:add_indent({hx=widget.hx/2,hy=ss},ss1)
+	widget:add_indent({hx=widget.hx/4,hy=ss,class="button",color=0,text="History",hooks=widget.file_hooks,id="history"},ss1)
 
-	widget:add({hx=widget.hx,hy=5})
+--	widget:add({hx=widget.hx,hy=5})
 
-	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy-90,class="scroll"})
+	widget.scroll_widget=widget:add_indent({hx=widget.hx,hy=widget.hy-(ss*3),class="scroll"},ss1)
 
 
 	widget:file_scan()

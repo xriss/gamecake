@@ -188,8 +188,6 @@ function wmeta.setup(def)
 		widget.hy=def.hy or 0
 		widget.hz=def.hz or 0 -- used to signal an fbo with a depth buffer
 
-		widget.before_layout=def.before_layout -- small auto resize function for dynamic positions/sizes called at layout time to adjust hx,hy
-
 		widget.color=def.color
 		
 		widget.cursor=def.cursor

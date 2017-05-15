@@ -239,7 +239,7 @@ function wmaster.setup(widget,def)
 			else
 				widget.hx=resize.hx or widget.hx
 				widget.hy=resize.hy or widget.hy
-				widget:layout()
+				widget:resize_and_layout()
 			end
 		end
 	
@@ -269,13 +269,15 @@ function wmaster.setup(widget,def)
 		
 	end
 	
-	function master.layout(widget)
+	function master.resize_and_layout(widget)
 --print("master layout")
+		meta.resize(widget)
 		meta.layout(widget)
 		meta.build_m4(widget)
 		master.remouse(widget)
 --exit()
 	end
+	master.layout=master.resize_and_layout
 
 	local dirty_fbos={}
 	local mark_dirty_fbos -- to recurse is defined...
