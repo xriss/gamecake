@@ -16,6 +16,25 @@ local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
 wwindow=wwindow or {}
 
+	local winclamp=function(window)
+		if window.hx > window.parent.hx then window.hx = window.parent.hx end
+		if window.hy > window.parent.hy then window.hy = window.parent.hy end
+		if window.px<0    then window.px=0 end
+		if window.py<0    then window.py=0 end
+		if window.panel_mode=="scale" then -- maintain aspect
+			local sx=window.hx/window.win_fbo.hx
+			local sy=window.hy/window.win_fbo.hy
+			local s=sx<sy and sx or sy
+			window.hx=window.win_fbo.hx*s
+			window.hy=window.win_fbo.hy*s
+		end
+		if window.px<0 then window.px=0 end
+		if window.py<0 then window.py=0 end
+		if window.px+window.hx>window.parent.hx then window.px=window.parent.hx-window.hx end
+		if window.py+window.hy>window.parent.hy then window.py=window.parent.hy-window.hy end
+	end
+
+
 function wwindow.edge_drag(widget,x,y)
 
 	local parent=widget.parent
@@ -97,6 +116,8 @@ function wwindow.edge_drag(widget,x,y)
 
 	end
 
+	winclamp(window)
+
 	window:set_dirty()	
 	window:layout()
 	window:build_m4()
@@ -129,6 +150,8 @@ function wwindow.drag(widget,x,y)
 		parent:snap(true)
 	end
 ]]
+
+	winclamp(widget)
 
 	widget:call_hook_later("slide")
 	
@@ -206,21 +229,6 @@ end
 wwindow.win_hooks=function(widget,act,w)
 --print(act,w.id)
 
-	local winclamp=function(window)
---		if window.hx > window.parent.hx then window.hx = window.parent.hx end
---		if window.hy > window.parent.hy then window.hy = window.parent.hy end
-		if window.panel_mode=="scale" then -- maintain aspect
-			local sx=window.hx/window.win_fbo.hx
-			local sy=window.hy/window.win_fbo.hy
-			local s=sx<sy and sx or sy
-			window.hx=window.win_fbo.hx*s
-			window.hy=window.win_fbo.hy*s
-		end
-		if window.px<0 then window.px=0 end
-		if window.py<0 then window.py=0 end
-		if window.px+window.hx>window.parent.hx then window.px=window.parent.hx-window.hx end
-		if window.py+window.hy>window.parent.hy then window.py=window.parent.hy-window.hy end
-	end
 
 	if act=="click" then
 		if w.id=="win_hide" then
@@ -302,6 +310,7 @@ function wwindow.setup(widget,def)
 				style="flat",
 				highlight="none",
 				smode="topleft",
+				outline_size=widget.outline_size -- will not get displayed but is needed to catch edge clicks
 			})
 
 	widget.win_canvas=widget.win_fbo:add({
@@ -364,9 +373,9 @@ function wwindow.setup(widget,def)
 			},ss1)
 
 	widget.win_edge_l=widget.win_fbo:add({
-				px=0,
+				px=-ss/8,
 				py=0,
-				hx=ss/8,
+				hx=ss/4,
 				hy=def.hy+ss,
 				solid=true,
 				hooks=widget.win_hooks,
@@ -377,7 +386,7 @@ function wwindow.setup(widget,def)
 	widget.win_edge_r=widget.win_fbo:add({
 				px=def.hx-ss/8,
 				py=0,
-				hx=ss/8,
+				hx=ss/4,
 				hy=def.hy+ss,
 				solid=true,
 				hooks=widget.win_hooks,
@@ -387,9 +396,9 @@ function wwindow.setup(widget,def)
 			})
 	widget.win_edge_t=widget.win_fbo:add({
 				px=0,
-				py=0,
+				py=-ss/8,
 				hx=def.hx,
-				hy=ss/8,
+				hy=ss/4,
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_edge_t",
@@ -400,7 +409,7 @@ function wwindow.setup(widget,def)
 				px=0,
 				py=def.hy+ss-ss/8,
 				hx=def.hx,
-				hy=ss/8,
+				hy=ss/4,
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_edge_b",
@@ -409,10 +418,10 @@ function wwindow.setup(widget,def)
 			})
 
 	widget.win_edge_tl=widget.win_fbo:add({
-				px=0,
-				py=0,
-				hx=ss/4,
-				hy=ss/4,
+				px=-ss/4,
+				py=-ss/4,
+				hx=ss/2,
+				hy=ss/2,
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_edge_tl",
@@ -421,9 +430,9 @@ function wwindow.setup(widget,def)
 			})
 	widget.win_edge_tr=widget.win_fbo:add({
 				px=def.hx-ss/4,
-				py=0,
-				hx=ss/4,
-				hy=ss/4,
+				py=-ss/4,
+				hx=ss/2,
+				hy=ss/2,
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_edge_tr",
@@ -431,10 +440,10 @@ function wwindow.setup(widget,def)
 				drag=wwindow.edge_drag,
 			})
 	widget.win_edge_bl=widget.win_fbo:add({
-				px=0,
+				px=-ss/4,
 				py=def.hy+ss-ss/4,
-				hx=ss/4,
-				hy=ss/4,
+				hx=ss/2,
+				hy=ss/2,
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_edge_bl",
@@ -444,8 +453,8 @@ function wwindow.setup(widget,def)
 	widget.win_edge_br=widget.win_fbo:add({
 				px=def.hx-ss/4,
 				py=def.hy+ss-ss/4,
-				hx=ss/4,
-				hy=ss/4,
+				hx=ss/2,
+				hy=ss/2,
 				solid=true,
 				hooks=widget.win_hooks,
 				id="win_edge_br",

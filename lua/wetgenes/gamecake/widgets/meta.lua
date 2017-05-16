@@ -187,6 +187,8 @@ function wmeta.setup(def)
 		widget.hx=def.hx or 0 -- absolute pixel size of widget (in parents space)
 		widget.hy=def.hy or 0
 		widget.hz=def.hz or 0 -- used to signal an fbo with a depth buffer
+		
+		widget.outline_size=def.outline_size
 
 		widget.color=def.color
 		
@@ -332,9 +334,10 @@ function wmeta.setup(def)
 		
 		local x,y=widget:mousexy(_x,_y)
 
+		local nudge=widget.outline_size or 0 -- allow clicking outside
 		local tx=x-(widget.pan_px or 0)
 		local ty=y-(widget.pan_py or 0)
-		if widget==widget.master or ( tx>=0 and tx<widget.hx and ty>=0 and ty<widget.hy ) then
+		if widget==widget.master or ( tx>=0-nudge and tx<widget.hx+nudge and ty>=0-nudge and ty<widget.hy+nudge ) then
 
 			if widget.solid then
 				if (not widget.master.dragging()) --[[or widget.master.active==widget]] then
@@ -343,10 +346,7 @@ function wmeta.setup(def)
 			end
 
 			for i,v in ipairs(widget) do -- children must be within parent bounds to catch clicks
-
--- need to call this yourself in the overloaded widget if you want to bubble down?
---				meta.mouse(v,act,_x,_y,keyname)
-				if not v.hidden then v:mouse(act,_x,_y,keyname) end -- maybe the widget need to do special mouse things (probably shouldnt)
+				if not v.hidden then v:mouse(act,_x,_y,keyname) end
 			end
 
 		else

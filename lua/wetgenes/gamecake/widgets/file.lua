@@ -63,6 +63,7 @@ end
 wfile.refresh=function(widget)
 	widget:file_scan()
 	widget:file_refresh()
+	widget:resize()
 	widget:layout()
 	widget:build_m4()
 end
