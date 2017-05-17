@@ -103,7 +103,7 @@ function M.bake(oven,keys)
 			local t=top:add({hx=320,hy=32,class="fill"})
 			for i=1,#ks do
 				local k=ks:sub(i,i)
-				local w=t:add({hx=320/10,hy=32,color=0,text=k,id="key",hooks=hooks})
+				local w=t:add({hx=320/10,hy=32,color=0,text=k,id="key",class="button",hooks=hooks})
 				w.never_set_focus_edit=true
 			end
 		end
