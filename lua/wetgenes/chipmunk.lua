@@ -54,6 +54,7 @@ chipmunk.space=function(...)
 	space.shapes={}
 	space.constraints={}
 	space.callbacks={}
+	space.types={}
 	setmetatable(space,chipmunk.space_metatable)
 	space[0]=core.space_create(space)
 
@@ -64,6 +65,29 @@ chipmunk.space=function(...)
 	
 	return space
 end
+
+------------------------------------------------------------------------
+--[[#wetgenes.chipmunk.space.type
+
+	number = space:type(name)
+	name = space:type(number)
+
+Manage collision types, pass in a string and always get a number out. 
+This number is consistent only for this space.
+
+Alternatively pass in a number and get a string or nil as a result.
+
+]]
+chipmunk.space_functions.type=function(space,name)
+	if not space.types[name] then
+		if type(name)~="string" then return end -- must not manifest if this is not a string
+		local idx=#space.types+1
+		space.types[name]=idx
+		space.types[idx]=name
+	end
+	return space.types[name]
+end
+
 ------------------------------------------------------------------------
 --[[#wetgenes.chipmunk.body
 
@@ -331,8 +355,14 @@ used as an arbiter table in callbacks. So *always* pass in a new one to
 this function. There does not seem to be a way to free handlers so be 
 careful what you add.
 
+id1,id2 can be a string in which case it will be converted to a number 
+via the space:type function.
+
 ]]
 chipmunk.space_functions.add_handler=function(space,arbiter,id1,id2)
+
+	if type(id1)=="string" then id1=space:type() end
+	if type(id2)=="string" then id2=space:type() end
 
 	setmetatable(arbiter,chipmunk.arbiter_metatable)
 	return core.space_add_handler(space[0],arbiter,id1,id2)
@@ -971,8 +1001,12 @@ end
 
 Get and/or Set the collision type for this shape.
 
+The f argument can be a string in which case it will be converted to a 
+number via the space:type function.
+
 ]]
 chipmunk.shape_functions.collision_type=function(shape,f)
+	if type(f)=="string" then f=shape.space:type() end
 	return core.shape_collision_type(shape[0],f)
 end
 ------------------------------------------------------------------------
