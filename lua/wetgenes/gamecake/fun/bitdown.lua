@@ -176,6 +176,59 @@ M.pix_size=function(str,rx,ry)
 end
 
 
+-- write tile into a grid
+M.tile_grd=function(str,map,gout,px,py,hx,hy)
+
+	local ls=wstr.split(str,"\n")
+
+	px=px or 0
+	py=py or 0
+	
+	if not hx and not hy then hx,hy=M.pix_size(str) end
+
+	local getxy=function(x,y)
+		local l=ls[1+y]
+		if l then
+			return l:sub(1+x*2,1+x*2+1)
+		end
+	end
+
+	local getrxy=function(x,y)
+		local s=getxy(x,y)
+		if not s then return 0,0 end -- out of bounds sanity
+		local rx,ry=0,0
+		for tx=x-1,0,-1 do
+			if getxy(tx,y)==s then rx=rx+1 else break end
+		end
+		for ty=y-1,0,-1 do
+			if getxy(x,ty)==s then ry=ry+1 else break end
+		end
+		return rx,ry
+	end
+
+	local gettile=function(s)
+		return map[s] or map[s:sub(1,1)] or map[0]
+	end
+
+	
+	local t={}
+	for y=0,hy-1 do
+		for x=0,hx-1 do
+			local s=getxy(x,y) or ". "
+			local rx,ry=getrxy(x,y)
+			local tile=gettile(s)
+			local l=#t
+			t[l+1]=tile.pxt+(rx%tile.hxt) t[l+2]=tile.pyt+(ry%tile.hyt) t[l+3]=31 t[l+4]=0
+		end
+	end
+	
+	if not gout then gout=wgrd.create("U8_RGBA",hx,hy,1) end
+	
+	gout:pixels(px,py,hx,hy,t)
+
+	return gout
+end
+
 -- write some ascii art into an x,y grd location
 M.pix_grd=function(str,map,gout,px,py,hx,hy,sub)
 

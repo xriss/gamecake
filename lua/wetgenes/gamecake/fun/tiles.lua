@@ -118,8 +118,11 @@ tiles.create=function(it,opts)
 			
 				t.ascii=nil
 
-				t.hx=math.floor(v[3]%256)*it.tile_hx
-				t.hy=math.floor((v[3])/256)*it.tile_hy
+				t.hxt=math.floor(v[3]%256)
+				t.hyt=math.floor((v[3])/256)
+				
+				t.hx=t.hxt*it.tile_hx
+				t.hy=t.hyt*it.tile_hy
 			
 			else
 
@@ -127,16 +130,20 @@ tiles.create=function(it,opts)
 
 				t.hx,t.hy=bitdown.pix_size(t.ascii,it.tile_hx,it.tile_hy)
 				
+				t.hxt=math.floor(t.hx/it.tile_hx)
+				t.hyt=math.floor(t.hy/it.tile_hy)
 			
 			end
 			
 			if t.idx then
 
-				t.px=math.floor(t.idx%256)*it.tile_hx
-				t.py=math.floor((t.idx)/256)*it.tile_hy
+				t.pxt=math.floor(t.idx%256)
+				t.pyt=math.floor((t.idx)/256)
+
+				t.px=t.pxt*it.tile_hx
+				t.py=t.pyt*it.tile_hy
 				
 			else -- find a free spot
-			
 			
 				local tilecheck=function(px,py,hx,hy)
 					for y=py,py+hy-1 do
@@ -153,8 +160,10 @@ tiles.create=function(it,opts)
 				for y=1,it.bitmap_hy do
 					for x=1,it.bitmap_hx do
 						if tilecheck(x,y,hx,hy) then
-							t.px=(x-1)*it.tile_hx
-							t.py=(y-1)*it.tile_hy
+							t.pxt=(x-1)
+							t.pyt=(y-1)
+							t.px=t.pxt*it.tile_hx
+							t.py=t.pyt*it.tile_hy
 							t.idx=(y-1)*256+(x-1)
 							break
 						end
@@ -177,10 +186,8 @@ tiles.create=function(it,opts)
 
 			-- remember allocated zones
 
-			local px,py=t.px/it.tile_hx,t.py/it.tile_hy		
-			local hx,hy=t.hx/it.tile_hx,t.hy/it.tile_hy		
-			for y=py,py+hy-1 do
-				for x=px,px+hx-1 do
+			for y=t.pyt,t.pyt+t.hyt-1 do
+				for x=t.pxt,t.pxt+t.hxt-1 do
 					it.idxnames[ 1 + x + y*256 ]=t.name
 				end
 			end
