@@ -100,16 +100,18 @@ sprites.create=function(it,opts)
 
 		local batch={}
 		for idx,v in pairs(it.list) do
+		
+			local bleed=v.bleed or 0 -- optional pixel bleed, set to 1 if you plan on rotating without glitch
 
-			local ixw=(v.tx*it.tile_hx+v.hx)/(it.tiles.hx)
-			local iyh=(v.ty*it.tile_hy+v.hy)/(it.tiles.hy)
-			local ix= (v.tx*it.tile_hx     )/(it.tiles.hx)
-			local iy= (v.ty*it.tile_hy     )/(it.tiles.hy)
+			local ixw=(v.tx*it.tile_hx+v.hx-bleed)/(it.tiles.hx)
+			local iyh=(v.ty*it.tile_hy+v.hy-bleed)/(it.tiles.hy)
+			local ix= (v.tx*it.tile_hx+bleed     )/(it.tiles.hx)
+			local iy= (v.ty*it.tile_hy+bleed     )/(it.tiles.hy)
 			
-			local ox=(v.ox)*(v.sx)
-			local oy=(v.oy)*(v.sy)
-			local hx=v.hx*(v.sx)
-			local hy=v.hy*(v.sy)
+			local ox=(v.ox-bleed)*(v.sx)
+			local oy=(v.oy-bleed)*(v.sy)
+			local hx=(v.hx-bleed*2)*(v.sx)
+			local hy=(v.hy-bleed*2)*(v.sy)
 			
 			local s=-math.sin(math.pi*(v.rz)/180)
 			local c= math.cos(math.pi*(v.rz)/180)
