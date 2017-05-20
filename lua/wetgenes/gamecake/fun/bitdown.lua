@@ -298,10 +298,10 @@ M.pix_grd_idx=function(str,map,gout,px,py,hx,hy)
 	end
 	
 	local t={}
-	for y=0,hx-1 do
+	for y=0,hy-1 do
 		for x=0,hx-1 do
 			local s=getxy(x,y) or ". "
-			local c=getc(s) or {0,0,0,0}
+			local c=getc(s)
 			local l=#t
 			t[l+1]=c.idx
 		end
