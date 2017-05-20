@@ -46,8 +46,8 @@ wdata.data_value=function(dat,val,force)
 			if val*0~=val*0 then val=0 end -- remove inf or nan values?
 		end 
 		local old=dat.num
-		if dat.min and dat.num<dat.min then dat.num=dat.min end
-		if dat.max and dat.num>dat.max then dat.num=dat.max end
+		if dat.min and val and val<dat.min then val=dat.min end
+		if dat.max and val and val>dat.max then val=dat.max end
 		if ( val and val~=dat.num ) or force then -- change value
 			dat.num=val or dat.num
 		end
