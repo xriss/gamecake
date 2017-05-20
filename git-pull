@@ -4,6 +4,7 @@ git pull --recurse-submodules && git submodule update --recursive --remote
 
 echo " fixing local exe branch to track origin "
 cd exe
+git stash -u
 git reset --hard origin/exe
 git checkout exe
 cd ..
