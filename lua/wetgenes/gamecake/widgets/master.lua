@@ -298,7 +298,9 @@ function wmaster.setup(widget,def)
 
 
 	find_dirty_fbos=function(widget)
-		if widget.fbo and widget.dirty then
+		if widget.fbo and ( widget.dirty or widget.fbo.dirty ) then
+			widget.fbo.dirty=nil
+			widget.dirty=true
 			dirty_fbos[ #dirty_fbos+1 ]=widget
 		end
 		for i,v in ipairs(widget) do
@@ -327,6 +329,7 @@ function wmaster.setup(widget,def)
 		meta.draw(widget)
 		
 		gl.PopMatrix()
+		
 	end
 	
 	function master.msg(widget,m)

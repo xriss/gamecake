@@ -404,14 +404,12 @@ function wskin.setup(def)
 --widget.old_layout
 --widget.layout
 
-if ( not widget.fbo ) or widget.dirty or (widget.fbo and widget.fbo.dirty) then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
+if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
 
 local cache_draw
 local font_cache_draw
 
 		if widget.fbo then
-		
-			widget.fbo.dirty=false
 			
 --print("into fbo"..wstr.dump(widget.fbo))
 
@@ -490,10 +488,12 @@ local font_cache_draw
 -- gl.Flush did not help but this does?
 			
 			widget.fbo:mipmap()
-			widget.fbo:mipmap()
+--			widget.fbo:mipmap()
 		end
 		
 else -- we can only draw once
+
+		widget.dirty=nil
 
 		if widget.fbo then -- we need to draw our cached fbo
 		
