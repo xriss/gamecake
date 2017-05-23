@@ -25,6 +25,7 @@ wmeta.classes={
 
 	["master"]=oven.rebake("wetgenes.gamecake.widgets.master"),
 	["fill"]=oven.rebake("wetgenes.gamecake.widgets.fill"),
+	["center"]=oven.rebake("wetgenes.gamecake.widgets.center"),
 	["split"]=oven.rebake("wetgenes.gamecake.widgets.split"),
 	["panel"]=oven.rebake("wetgenes.gamecake.widgets.panel"),
 	["window"]=oven.rebake("wetgenes.gamecake.widgets.window"),
@@ -189,6 +190,7 @@ function wmeta.setup(def)
 		widget.hz=def.hz or 0 -- used to signal an fbo with a depth buffer
 		
 		widget.outline_size=def.outline_size
+		widget.transparent=def.transparent -- transparent color tint
 
 		widget.color=def.color
 		

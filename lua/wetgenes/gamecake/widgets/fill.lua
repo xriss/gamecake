@@ -13,14 +13,6 @@ local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
 wfill=wfill or {}
 
-function wfill.update(widget)
-	return widget.meta.update(widget)
-end
-
-function wfill.draw(widget)
-	return widget.meta.draw(widget)
-end
-
 -- this is a fixed layout that works kind of like text
 -- we do not adjust the hx,hy size of sub widgets
 -- we just place them left to right top to bottom
@@ -88,8 +80,6 @@ function wfill.setup(widget,def)
 
 	widget.class="fill"
 
-	widget.update=wfill.update
-	widget.draw=wfill.draw
 	widget.layout=wfill.layout
 	
 	return widget

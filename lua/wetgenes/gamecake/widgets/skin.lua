@@ -552,10 +552,19 @@ end
 						
 		local txp,typ=0,0
 		
+
 		if widget.outline_size then -- draw a solid outline / border
 		
 			draw_outline(0,0,widget.hx,widget.hy,widget.outline_size or 2,widget.outline_color or 0xff000000 , widget.outline_fade_color or widget.outline_color or 0xff000000 )
 			
+		end
+
+		if widget.transparent then -- draw a transparent color tint
+			gl.Color( explode_color(widget.transparent) )
+			draw_quad(	0,				0,
+						widget.hx,		0,
+						widget.hx,		widget.hy,
+						0,				widget.hy)
 		end
 
 		if widget.color then -- need a color to draw, so no color, no draw
