@@ -117,7 +117,7 @@ end
 function test_greyscale()
 	local g=assert(grd.create("dat/grd/brokengreyscale.png"))
 	g:convert("U8_RGBA_PREMULT")
-	assert( c:save("dat/grd/brokengreyscale.out.png","png") )
+	assert( g:save("dat/grd/brokengreyscale.out.png","png") )
 end
 
 function do_file_write(f,d)

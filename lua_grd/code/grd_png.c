@@ -149,10 +149,10 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 		grdfmt=GRD_FMT_U8_INDEXED;
 	}
 
-	if (color_type == PNG_COLOR_TYPE_GRAY )
-	{
-		grdfmt=GRD_FMT_U8_LUMINANCE;
-	}
+//	if (color_type == PNG_COLOR_TYPE_GRAY )
+//	{
+//		grdfmt=GRD_FMT_U8_LUMINANCE;
+//	}
 
 
 // cleanup what we are expecting a little
