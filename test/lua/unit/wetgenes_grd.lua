@@ -114,6 +114,12 @@ function test_png_8_attr_redux()
 	do_png_8_attr_redux("t1")
 end
 
+function test_greyscale()
+	local g=assert(grd.create("dat/grd/brokengreyscale.png"))
+	g:convert("U8_RGBA_PREMULT")
+	assert( c:save("dat/grd/brokengreyscale.out.png","png") )
+end
+
 function do_file_write(f,d)
 	local fp=assert(io.open(f,"wb"))
 	local d=assert(fp:write(d))
