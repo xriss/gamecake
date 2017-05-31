@@ -57,7 +57,11 @@ function wdatas.new_datas(datas)
 
 	datas.set_string=function(n,val)
 		local v=datas.get(n)
-		return v and v:value( v:tonumber(val) )
+		if v.class=="list" then
+			return v and v:value( v:tonumber(val) )
+		else
+			return v and v:value(val)
+		end
 	end
 
 	datas.get_number=function(n)
