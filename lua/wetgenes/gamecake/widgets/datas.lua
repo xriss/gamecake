@@ -55,6 +55,11 @@ function wdatas.new_datas(datas)
 		return v and v:tostring()
 	end
 
+	datas.set_string=function(n,val)
+		local v=datas.get(n)
+		return v and v:value( v:tonumber(val) )
+	end
+
 	datas.get_number=function(n)
 		local v=datas.get(n)
 		return v and v:tonumber()
