@@ -116,8 +116,13 @@ sprites.create=function(it,opts)
 			local s=-math.sin(math.pi*(v.rz)/180)
 			local c= math.cos(math.pi*(v.rz)/180)
 			
-			local px=math.floor(v.px+0.5)
-			local py=math.floor(v.py+0.5)
+			local px=v.px
+			local py=v.py
+			
+			if v.rz==0 then -- clamp only if no rotation, this fixes occasional pixel bleed problems
+				px=math.floor(px+0.5)
+				py=math.floor(py+0.5)
+			end
 
 			local v1=gl.apply_modelview( {dl.dx+px-c*(ox)-s*(oy),			dl.dy+py+s*(ox)-c*(oy),			v.pz,1} )
 			local v2=gl.apply_modelview( {dl.dx+px+c*(hx-ox)-s*(oy),		dl.dy+py-s*(hx-ox)-c*(oy),		v.pz,1} )
