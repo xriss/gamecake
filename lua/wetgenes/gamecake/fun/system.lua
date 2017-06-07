@@ -479,6 +479,13 @@ system.configurator=function(opts)
 			},
 			{
 				component="tilemap",
+				name="back",
+				tiles="tiles",
+				tilemap_size={math.ceil(screen.hx/8),math.ceil(screen.hy/8)},
+				layer=1,
+			},
+			{
+				component="tilemap",
 				name="map",
 				tiles="tiles",
 				tilemap_size={math.ceil(screen.hx/8),math.ceil(screen.hy/8)},

@@ -177,7 +177,14 @@ end
 
 
 -- write tile into a grid
-M.tile_grd=function(str,map,gout,px,py,hx,hy)
+M.tile_grd=function(str,map,gout,px,py,hx,hy,tocolor)
+
+	tocolor=tocolor or function(tile,rx,ry)
+		return	tile.pxt+(rx%tile.hxt) ,
+				tile.pyt+(ry%tile.hyt) ,
+				31 ,
+				0
+	end
 
 	local ls=wstr.split(str,"\n")
 
@@ -215,10 +222,11 @@ M.tile_grd=function(str,map,gout,px,py,hx,hy)
 	for y=0,hy-1 do
 		for x=0,hx-1 do
 			local s=getxy(x,y) or ". "
-			local rx,ry=getrxy(x,y)
 			local tile=gettile(s)
+			local rx,ry=x,y
+			if not tile.uvworld then rx,ry=getrxy(x,y) end -- uvworld flag for full screen background wrapping textures
 			local l=#t
-			t[l+1]=tile.pxt+(rx%tile.hxt) t[l+2]=tile.pyt+(ry%tile.hyt) t[l+3]=31 t[l+4]=0
+			t[l+1],t[l+2],t[l+3],t[l+4]=tocolor(tile,rx,ry)
 		end
 	end
 	

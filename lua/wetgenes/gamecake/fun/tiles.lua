@@ -109,7 +109,7 @@ tiles.create=function(it,opts)
 
 -- upload all the given tiles t[1]=idx t[2]=name t[3]=ascii
 	it.upload_tiles=function(graphics)
-		for n,v in pairs(graphics) do
+		for n,v in ipairs(graphics) do
 			local t={}
 			t.idx=v[1]
 			t.name=v[2]
