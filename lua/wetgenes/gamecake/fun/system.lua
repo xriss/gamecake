@@ -523,25 +523,37 @@ system.configurator=function(opts)
 			
 			-- set background
 --			system.copper.
+
+			local reset_draw=function()
+				system.components.text.dirty(true)
+				system.components.text.text_window()
+				system.components.text.text_clear(0x00000000)
+				system.components.sprites.list_reset()
+			end
 			
 			-- after setup we should yield and then perform updates only if requested from a yield
 			local done=false while not done do
 				need=coroutine.yield()
 				if need.update then
 				
-					system.components.text.dirty(true)
-					system.components.text.text_window()
-					system.components.text.text_clear(0x00000000)
-					system.components.sprites.list_reset()
+					if not opts.draw then
+						reset_draw()
+					end
 					
 					if opts.update then opts.update() end
 				end
 				if need.draw then
+					if opts.draw then
+						reset_draw()
+						opts.draw()
+					end
 				end
 				if need.clean then done=true end -- cleanup requested
 			end
 
 		-- perform cleanup here
+
+			if opts.clean then opts.clean() end
 
 		end
 
