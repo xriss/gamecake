@@ -521,8 +521,7 @@ system.configurator=function(opts)
 				system.components.tiles.upload_tiles( graphics )
 			end
 			
-			-- set background
---			system.copper.
+			if opts.update then opts.update() end -- call update at least once
 
 			local reset_draw=function()
 				system.components.text.dirty(true)
