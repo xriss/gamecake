@@ -1,5 +1,7 @@
 #!/usr/local/bin/gamecake
 
+do
+
 local args={...}
 
 local vplus=(tonumber(args[1] or 0) or 0)
@@ -12,3 +14,6 @@ local ss="GAMECAKE_VERSION=\""..version.."\"\n"
 wbake.writefile("../exe_gamecake/version.lua",ss)
 
 print(version)
+
+end
+
