@@ -268,6 +268,7 @@ function glescode.create(gl)
 				if chunk then -- only if we are in a chunk
 					if l:sub(1,8):lower()=="#include" then -- include a previously declared chunk
 						local name=l:match([["([^"]+)"]]) -- get name from inside quotes
+						assert(code.headers[name],"glsl header "..name.." not found")
 						for _,line in ipairs(code.headers[name]) do  -- include lines
 							chunk[#chunk+1]=line
 						end

@@ -55,7 +55,7 @@ Use a lookup material for colors.
 
 */
 
-#header "gamecake_shader"
+#header "gamecake_shader_head"
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -70,7 +70,7 @@ varying vec2  v_texcoord;
 #endif
 
 #ifdef MATIDX
-uniform vec4 colors[2*16]; // 16 materials
+uniform vec4 colors[2*MATIDX]; // MATIDX materials
 varying float v_matidx;
 #endif
 
@@ -87,6 +87,10 @@ uniform vec4 bone_fix; // min,max,0,0 (bone ids stored in bones array)
 uniform vec3  light_normal;
 uniform vec4  light_color;
 #endif
+
+
+
+#header "gamecake_shader_vertex"
 
 #ifdef VERTEX_SHADER
 
@@ -194,11 +198,16 @@ void main()
 }
 
 #endif
+
+
+
+#header "gamecake_shader_fragment"
+
 #ifdef FRAGMENT_SHADER
 
-#if defined(GL_FRAGMENT_PRECISION_HIGH)
-precision highp float; /* really need better numbers if possible */
-#endif
+//#if defined(GL_FRAGMENT_PRECISION_HIGH)
+//precision highp float; /* ask for better numbers if available */
+//#endif
 
 void main(void)
 {
@@ -248,6 +257,10 @@ void main(void)
 
 #endif
 
+#header "gamecake_shader"
+#include "gamecake_shader_head"
+#include "gamecake_shader_vertex"
+#include "gamecake_shader_fragment"
 
 #shader "gamecake_shader"
 #include "gamecake_shader"
@@ -380,14 +393,14 @@ void main(void)
 #shader "xyz_normal_mat"
 #define XYZ 1
 #define NORMAL 1
-#define MATIDX 1
+#define MATIDX 16
 #define PHONG 1
 #include "gamecake_shader"
 
 #shader "xyz_normal_mat_bone"
 #define XYZ 1
 #define NORMAL 1
-#define MATIDX 1
+#define MATIDX 16
 #define BONE 1
 #define PHONG 1
 #include "gamecake_shader"
