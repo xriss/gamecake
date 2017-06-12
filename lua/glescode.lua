@@ -280,7 +280,7 @@ function glescode.create(gl)
 		end		
 
 		for n,v in pairs(shaders) do
-print("PROGRAM",n,#v)
+--print("PROGRAM",n,#v)
 			code.program_source(n,table.concat(v,"\n"),nil,filename)
 		end
 
