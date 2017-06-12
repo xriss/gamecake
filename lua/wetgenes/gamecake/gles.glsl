@@ -6,18 +6,18 @@ This is the default gamecake shader, which is controlled by a bunch of
 defines to enable various features.
 
 First we must describe what to do with xyz vertex attributes, only one 
-of USE_RAW , USE_XYZ and USE_POS should be used at once.
+of RAW , XYZ and POS should be used at once.
 
-	USE_RAW
+	RAW
 
 The raw transform mode, ignores the modelview and only applies the 
 projection. This is for vertexs pre-transformed into world coords.
 
-	USE_XYZ
+	XYZ
 
 The xyz transform mode, using modelview and projection, this is the default mode.
 
-	USE_POS
+	POS
 
 Is a special 2d z mode where the z component is treated as 0 for view 
 transform but added to z in viewspace.
@@ -26,30 +26,31 @@ This allows very simple control over depth buffer sorting of 2d polys,
 perfect for sprites etc.
 
 
-	USE_COLOR
+	COLOR
 
 Each vertex has a color attribute.
 
-	USE_NORMAL
+	NORMAL
 
 Each vertex has a normal attribute.
 
-	USE_TEX
+	TEX
 
 Each vertex has a UV attribute and we have a tex texture to bind to.
 
 
-	USE_PHONG
+	PHONG
 
 Phong style lighting with a shiny spot.
 
-	USE_LIGHT
+	LIGHT
 
-Use a uniform normal to describe where the light is coming from.
+Use a uniform normal to describe where the light is coming from and its 
+color, otherwise we assume white and down the camera.
 
-	USE_MAT
+	MATIDX
 
-Use a lookup material for the phong colors.
+Use a lookup material for colors.
 
 
 */
@@ -63,26 +64,26 @@ uniform vec4 color;
 
 varying vec4  v_color;
 
-#ifdef USE_TEX
+#ifdef TEX
 uniform sampler2D tex;
 varying vec2  v_texcoord;
 #endif
 
-#ifdef USE_MAT
+#ifdef MATIDX
 uniform vec4 colors[2*16]; // 16 materials
 varying float v_matidx;
 #endif
 
-#ifdef USE_NORMAL
+#ifdef NORMAL
 varying vec3  v_normal;
 #endif
 
-#ifdef USE_BONE
+#ifdef BONE
 uniform vec4 bones[64*3]; // 64 bones
 uniform vec4 bone_fix; // min,max,0,0 (bone ids stored in bones array)
 #endif
 
-#ifdef USE_LIGHT
+#ifdef LIGHT
 uniform vec3  light_normal;
 uniform vec4  light_color;
 #endif
@@ -91,50 +92,50 @@ uniform vec4  light_color;
 
 attribute vec3 a_vertex;
 
-#ifdef USE_COLOR
+#ifdef COLOR
 attribute vec4 a_color;
 #endif
 
-#ifdef USE_TEX
+#ifdef TEX
 attribute vec2 a_texcoord;
 #endif
  
-#ifdef USE_MAT
+#ifdef MATIDX
 attribute float a_matidx;
 #endif
 
-#ifdef USE_NORMAL
+#ifdef NORMAL
 attribute vec4  a_normal;
 #endif
 
-#ifdef USE_BONE
+#ifdef BONE
 attribute vec4  a_bone;
 #endif
 
 void main()
 {
 
-#ifdef USE_POINTSIZE
-	gl_PointSize=USE_POINTSIZE;
+#ifdef POINTSIZE
+	gl_PointSize=POINTSIZE;
 #endif
 
 
-#ifdef USE_POS
+#ifdef POS
 	vec4 v=vec4(a_vertex.xy, 0.0, 1.0);
 #endif
-#ifdef USE_RAW
+#ifdef RAW
 	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
-#ifdef USE_XYZ
+#ifdef XYZ
 	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
 
-#ifdef USE_NORMAL
+#ifdef NORMAL
 	vec3 n=vec3(a_normal.xyz);
 #endif
 
 
-#ifdef USE_BONE
+#ifdef BONE
 
 	mat4 m=mat4(0.0);
 
@@ -153,7 +154,7 @@ void main()
 		}
 		v=v*m;
 
-#ifdef USE_NORMAL
+#ifdef NORMAL
 		n=n*mat3(m);
 #endif
 	}
@@ -161,32 +162,32 @@ void main()
 #endif
 
 
-#ifdef USE_POS
+#ifdef POS
 	gl_Position = projection * modelview * v;
 	gl_Position.z+=a_vertex.z;
 #endif
-#ifdef USE_RAW
+#ifdef RAW
 	gl_Position = projection * v;
 #endif
-#ifdef USE_XYZ
+#ifdef XYZ
 	gl_Position = projection * modelview * v;
 #endif
 
-#ifdef USE_NORMAL
+#ifdef NORMAL
 	v_normal = normalize( mat3( modelview ) * n );
 #endif
 
-#ifdef USE_COLOR
+#ifdef COLOR
 	v_color=a_color*color;
 #else
 	v_color=color;
 #endif
 	
-#ifdef USE_TEX
+#ifdef TEX
 	v_texcoord=a_texcoord;
 #endif
 
-#ifdef USE_MAT
+#ifdef MATIDX
 	v_matidx=a_matidx;
 #endif
 
@@ -202,7 +203,7 @@ precision highp float; /* really need better numbers if possible */
 void main(void)
 {
 
-#ifdef USE_TEX
+#ifdef TEX
 	if( v_texcoord[0] <= -1.0 ) // special uv request to ignore the texture (use -2 as flag)
 	{
 		gl_FragColor=v_color ;
@@ -215,7 +216,7 @@ void main(void)
 	gl_FragColor=v_color ;
 #endif
 
-#ifdef USE_MAT
+#ifdef MATIDX
 	int matidx=int(floor(v_matidx+0.5));
 	vec4 c1=colors[0+matidx*2]*gl_FragColor;
 	vec4 c2=colors[1+matidx*2];
@@ -224,7 +225,7 @@ void main(void)
 	vec4 c2=vec4(1.0f,1.0f,1.0f,16.0f);
 #endif
 
-#ifdef USE_LIGHT
+#ifdef LIGHT
 	vec3 n=normalize( v_normal );
 	vec3 l=normalize( mat3( modelview ) * light_normal );
 	
@@ -232,14 +233,14 @@ void main(void)
 						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a )).rgb , c1.a );
 #endif
 
-#ifdef USE_PHONG
+#ifdef PHONG
 	vec3 n=normalize(v_normal);
 	vec3 l=normalize(vec3(0.0,-0.5,1.0));
 	gl_FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
 						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a )).rgb , c1.a );
 #endif
 
-#ifdef USE_DISCARD
+#ifdef DISCARD
 	if((gl_FragColor.a)<0.25) discard;
 #endif
 
@@ -252,143 +253,143 @@ void main(void)
 #include "gamecake_shader"
 
 #shader "pos_normal"
-#define USE_POS 1
-#define USE_NORMAL 1
+#define POS 1
+#define NORMAL 1
 #include "gamecake_shader"
 
 
 #shader "pos_normal_light"
-#define USE_POS 1
-#define USE_NORMAL 1
-#define USE_LIGHT 1
+#define POS 1
+#define NORMAL 1
+#define LIGHT 1
 #include "gamecake_shader"
 
 
 #shader "pos_color"
-#define USE_POS 1
-#define USE_COLOR 1
+#define POS 1
+#define COLOR 1
 #include "gamecake_shader"
 
 
 #shader "pos_color_discard"
-#define USE_POS 1
-#define USE_COLOR 1
-#define USE_DISCARD 1
+#define POS 1
+#define COLOR 1
+#define DISCARD 0.25
 #include "gamecake_shader"
 
 
 #shader "xyz_tex"
-#define USE_XYZ 1
-#define USE_TEX 1
+#define XYZ 1
+#define TEX 1
 #include "gamecake_shader"
 
 
 #shader "xyz_tex_discard"
-#define USE_XYZ 1
-#define USE_TEX 1
-#define USE_DISCARD 1
+#define XYZ 1
+#define TEX 1
+#define DISCARD 0.25
 #include "gamecake_shader"
 
 
 #shader "pos_tex"
-#define USE_POS 1
-#define USE_TEX 1
+#define POS 1
+#define TEX 1
 #include "gamecake_shader"
 
 
 #shader "pos_tex_discard"
-#define USE_POS 1
-#define USE_TEX 1
-#define USE_DISCARD 1
+#define POS 1
+#define TEX 1
+#define DISCARD 0.25
 #include "gamecake_shader"
 
 
 #shader "pos_tex_color"
-#define USE_POS 1
-#define USE_TEX 1
-#define USE_COLOR 1
+#define POS 1
+#define TEX 1
+#define COLOR 1
 #include "gamecake_shader"
 
 
 #shader "pos_tex_color_discard"
-#define USE_POS 1
-#define USE_TEX 1
-#define USE_COLOR 1
-#define USE_DISCARD 1
+#define POS 1
+#define TEX 1
+#define COLOR 1
+#define DISCARD 0.25
 #include "gamecake_shader"
 
 #shader "raw_tex_color"
-#define USE_RAW 1
-#define USE_TEX 1
-#define USE_COLOR 1
+#define RAW 1
+#define TEX 1
+#define COLOR 1
 #include "gamecake_shader"
 
 #shader "raw_tex_color_discard"
-#define USE_RAW 1
-#define USE_TEX 1
-#define USE_COLOR 1
-#define USE_DISCARD 1
+#define RAW 1
+#define TEX 1
+#define COLOR 1
+#define DISCARD 0.25
 #include "gamecake_shader"
 
 #shader "raw_tex"
-#define USE_RAW 1
-#define USE_TEX 1
+#define RAW 1
+#define TEX 1
 #include "gamecake_shader"
 
 #shader "raw_tex_discard"
-#define USE_RAW 1
-#define USE_TEX 1
-#define USE_DISCARD 1
+#define RAW 1
+#define TEX 1
+#define DISCARD 0.25
 #include "gamecake_shader"
 
 #shader "xyz"
-#define USE_XYZ 1
+#define XYZ 1
 #include "gamecake_shader"
 
 #shader "xyz_discard"
-#define USE_XYZ 1
-#define USE_DISCARD 1
+#define XYZ 1
+#define DISCARD 0.25
 #include "gamecake_shader"
 
 #shader "pos"
-#define USE_POS 1
+#define POS 1
 #include "gamecake_shader"
 
 #shader "pos_discard"
-#define USE_POS 1
-#define USE_DISCARD 1
+#define POS 1
+#define DISCARD 0.25
 #include "gamecake_shader"
 
 #shader "xyz_mask"
-#define USE_XYZ 1
-#define USE_MASK 1
-#define USE_DISCARD 1
+#define XYZ 1
+#define MASK 1
+#define DISCARD 0.25
 #include "gamecake_shader"
 
 #shader "xyz_normal"
-#define USE_XYZ 1
-#define USE_NORMAL 1
+#define XYZ 1
+#define NORMAL 1
 #include "gamecake_shader"
 
 #shader "xyz_normal_light"
-#define USE_XYZ 1
-#define USE_NORMAL 1
-#define USE_LIGHT 1
+#define XYZ 1
+#define NORMAL 1
+#define LIGHT 1
 #include "gamecake_shader"
 
 #shader "xyz_normal_mat"
-#define USE_XYZ 1
-#define USE_NORMAL 1
-#define USE_MAT 1
-#define USE_PHONG 1
+#define XYZ 1
+#define NORMAL 1
+#define MATIDX 1
+#define PHONG 1
 #include "gamecake_shader"
 
 #shader "xyz_normal_mat_bone"
-#define USE_XYZ 1
-#define USE_NORMAL 1
-#define USE_MAT 1
-#define USE_BONE 1
-#define USE_PHONG 1
+#define XYZ 1
+#define NORMAL 1
+#define MATIDX 1
+#define BONE 1
+#define PHONG 1
 #include "gamecake_shader"
 
 
