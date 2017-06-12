@@ -11,7 +11,8 @@ of RAW , XYZ and POS should be used at once.
 	RAW
 
 The raw transform mode, ignores the modelview and only applies the 
-projection. This is for vertexs pre-transformed into world coords.
+projection. This is for vertexs pre-transformed into world coords and 
+is kinda just around for legacy reasons at this point.
 
 	XYZ
 
