@@ -234,7 +234,7 @@ void main(void)
 		{
 			c1=colors[0+i*2]*gl_FragColor;
 			c2=colors[1+i*2];
-			break
+			break;
 		}
 	}
 #else
