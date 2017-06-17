@@ -144,10 +144,9 @@ void main()
 
 
 	mat4 m=mat4(0.0);
-	int b;
 	if( a_bone[0] > 0.0 ) // got bones
 	{
-		for(b=0;b<4;b++)
+		for(int b=0;b<4;b++)
 		{
 			int i=int(a_bone[b])*3;
 			if(i>=3)
