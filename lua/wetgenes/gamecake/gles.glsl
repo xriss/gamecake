@@ -142,8 +142,8 @@ void main()
 
 #ifdef BONE
 
+/*
 	mat4 m=mat4(0.0);
-
 	int b;
 	if( a_bone[0] > 0.0 ) // got bones
 	{
@@ -163,6 +163,7 @@ void main()
 		n=n*mat3(m);
 #endif
 	}
+*/
 
 #endif
 
