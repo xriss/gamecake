@@ -454,13 +454,16 @@ chatdown.setup=function(chat_text,changes)
 		local proxies=(chats.get(root) or {}).proxies or {} -- get root proxies or empty table
 
 -- add inc/dec operators here?
-		local t=v:sub(1,1)
+		local t
+		if type(v)=="string" then
+			t=v:sub(1,1)
+		end
 		if t=="-" then
 			local n=tonumber(v:sub(2))
-			proxies[proxy]=(proxies[proxy] or 0 ) - n
+			proxies[proxy]=(tonumber(proxies[proxy]) or 0 ) - n
 		elseif t=="+" then
 			local n=tonumber(v:sub(2))
-			proxies[proxy]=(proxies[proxy] or 0 ) + n
+			proxies[proxy]=(tonumber(proxies[proxy]) or 0 ) + n
 		else
 			proxies[proxy]=v
 		end
