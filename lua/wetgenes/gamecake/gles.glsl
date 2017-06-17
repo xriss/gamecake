@@ -232,7 +232,7 @@ void main(void)
 	vec4 c2=colors[1+matidx*2];
 #else
 	vec4 c1=gl_FragColor;
-	vec4 c2=vec4(1.0f,1.0f,1.0f,16.0f);
+	vec4 c2=vec4(1.0,1.0,1.0,16.0);
 #endif
 
 #ifdef LIGHT
