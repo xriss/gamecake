@@ -268,6 +268,7 @@ function glescode.create(gl)
 				if chunk then -- only if we are in a chunk
 					if l:sub(1,8):lower()=="#include" then -- include a previously declared chunk
 						local name=l:match([["([^"]+)"]]) -- get name from inside quotes
+						assert(code.headers[name],"glsl header "..name.." not found")
 						for _,line in ipairs(code.headers[name]) do  -- include lines
 							chunk[#chunk+1]=line
 						end
@@ -280,7 +281,7 @@ function glescode.create(gl)
 		end		
 
 		for n,v in pairs(shaders) do
-print("PROGRAM",n,#v)
+--print("PROGRAM",n,#v)
 			code.program_source(n,table.concat(v,"\n"),nil,filename)
 		end
 

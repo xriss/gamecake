@@ -6,6 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- this contains mild emulation of the old gl fixed pipeline, such that we can run some code in gles2 and above
 
 local tardis=require("wetgenes.tardis")
+local wzips=require("wetgenes.zips")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -21,6 +22,11 @@ function M.bake(oven,gles)
 	end
 
 	local gl=oven.gl
+	
+	local filename="lua/"..(M.modname):gsub("%.","/")..".glsl"
+	gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
+
+--[==[
 	
 -- these are default simple shaders
 --
@@ -709,6 +715,7 @@ void main()
 	}	
 
 	-- we have mostly squirted extra stuff into oven.gl
+]==]
 
 	return gles
 
