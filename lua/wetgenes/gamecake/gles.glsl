@@ -227,8 +227,16 @@ void main(void)
 
 #ifdef MATIDX
 	int matidx=int(floor(v_matidx+0.5));
-	vec4 c1=colors[0+matidx*2]*gl_FragColor;
-	vec4 c2=colors[1+matidx*2];
+	vec4 c1,c2;
+	for(int i=0;i<MATIDX;i++) // HAX, should switch to colors from texture
+	{
+		if(i==matidx)
+		{
+			c1=colors[0+i*2]*gl_FragColor;
+			c2=colors[1+i*2];
+			break
+		}
+	}
 #else
 	vec4 c1=gl_FragColor;
 	vec4 c2=vec4(1.0,1.0,1.0,16.0);
