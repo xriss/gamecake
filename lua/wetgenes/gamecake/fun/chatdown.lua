@@ -260,18 +260,6 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 	chat.data=chats.data
 	chat.proxies={}
 	chat.viewed={}
-
--- hook, replace to be notified of changes, by default we print debuging information
-	chat.changes=function(change,...)
-		local a,b=...
-
-		if     change=="description" then			print("description",a.name)
-		elseif change=="response"    then			print("response   ",a.name)
-		elseif change=="decision"    then			print("decision   ",a.name)
-		elseif change=="proxy"       then			print("proxy      ",a,b)
-		end
-		
-	end
 	
 	chat.get_proxy=function(text)
 		return chats.get_proxy(text,chat.name)
@@ -287,7 +275,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 
 	chat.set_proxies=function(proxies)
 		for n,v in pairs(proxies or {}) do
-			chat.changes("proxy",n,v)
+			chats.changes(chat,"proxy",n,v)
 			chat.set_proxy(n,v)
 		end
     end
@@ -310,7 +298,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 			end
 		end
 
-		chat.changes("description",chat.description)
+		chats.changes(chat,"description",chat.description)
 
 		chat.set_proxies(chat.description.proxies)
 
@@ -410,60 +398,19 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 
 		end
 		
-		chat.changes("response",chat.response)
+		chats.changes(chat,"response",chat.response)
 
 		chat.set_proxies(merged_proxies)
 
 	end
 
+	chat.get_menu_items=function()
+		return chats.chat_to_menu_items(chat)
+	end
 	
 	chat.set_description(chat_name)
 	chat.set_response(response_name)
 	
-	chat.get_menu_items=function()
-		local items={cursor=1,cursor_max=0}
-		
-		items.title=chat.description_name
-		
-		local ss=chat.response and chat.response.text or {} if type(ss)=="string" then ss={ss} end
-		for i,v in ipairs(ss) do
-			if i>1 then
-				items[#items+1]={text="",chat=chat} -- blank line
-			end
-			items[#items+1]={text=chat.replace_proxies(v)or"",chat=chat}
-		end
-
-		for i,v in ipairs(chat.decisions or {}) do
-
-			items[#items+1]={text="",chat=chat} -- blank line before each decision
-
-			local ss=v and v.text or {} if type(ss)=="string" then ss={ss} end
-
-			local color=30
-			if chat.viewed[v.name] then color=28 end -- we have already seen the response to this decision
-			
-			local f=function(item,menu)
-
-				if item.decision and item.decision.name then
-
-					chat.changes("decision",item.decision)
-
-					chat.set_response(item.decision.name)
-
-					chat.set_proxies(item.decision.proxies)
-
-					menu.show(chat.get_menu_items())
-
-				end
-			end
-			
-			items[#items+1]={text=chat.replace_proxies(ss[1])or"",chat=chat,decision=v,cursor=i,call=f,color=color} -- only show first line
-			items.cursor_max=i
-		end
-
-		return items
-	end
-
 	return chat
 end
 
@@ -477,7 +424,7 @@ parse and initialise state data for every chat chunk
 
 ]]
 -----------------------------------------------------------------------------
-chatdown.setup=function(chat_text)
+chatdown.setup=function(chat_text,changes)
 
 	local chats={}
 
@@ -491,7 +438,7 @@ chatdown.setup=function(chat_text)
 	
 	chats.get_menu_items=function(name)
 	
-		return chats.get(name).get_menu_items()
+		return chats.chat_to_menu_items(chats.get(name))
 	end
 	
 	chats.get_proxy=function(s,default_root)
@@ -538,6 +485,62 @@ chatdown.setup=function(chat_text)
 		return ret
 	end
 
+-- examp[le, replace to build your own menus
+	chats.chat_to_menu_items=function(chat)
+		local items={cursor=1,cursor_max=0}
+		
+		items.title=chat.description_name
+		
+		local ss=chat.response and chat.response.text or {} if type(ss)=="string" then ss={ss} end
+		for i,v in ipairs(ss) do
+			if i>1 then
+				items[#items+1]={text="",chat=chat} -- blank line
+			end
+			items[#items+1]={text=chat.replace_proxies(v)or"",chat=chat}
+		end
+
+		for i,v in ipairs(chat.decisions or {}) do
+
+			items[#items+1]={text="",chat=chat} -- blank line before each decision
+
+			local ss=v and v.text or {} if type(ss)=="string" then ss={ss} end
+
+			local color=30
+			if chat.viewed[v.name] then color=28 end -- we have already seen the response to this decision
+			
+			local f=function(item,menu)
+
+				if item.decision and item.decision.name then
+
+					chats.changes(chat,"decision",item.decision)
+
+					chat.set_response(item.decision.name)
+
+					chat.set_proxies(item.decision.proxies)
+
+					menu.show(chats.chat_to_menu_items(chat))
+
+				end
+			end
+			
+			items[#items+1]={text=chat.replace_proxies(ss[1])or"",chat=chat,decision=v,cursor=i,call=f,color=color} -- only show first line
+			items.cursor_max=i
+		end
+
+		return items
+	end
+
+-- hook, replace to be notified of changes, by default we print debuging information
+	chats.changes=changes or function(chat,change,...)
+		local a,b=...
+
+		if     change=="description" then			print("description",a.name)
+		elseif change=="response"    then			print("response   ",a.name)
+		elseif change=="decision"    then			print("decision   ",a.name)
+		elseif change=="proxy"       then			print("proxy      ",a,b)
+		end
+		
+	end
 
 	for n,v in pairs(chats.data) do -- setup each chat
 	
