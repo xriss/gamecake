@@ -457,10 +457,10 @@ chatdown.setup=function(chat_text,changes)
 		local t=v:sub(1,1)
 		if t=="-" then
 			local n=tonumber(v:sub(2))
-			proxies[proxy]=(proxies[proxy] or 0 ) + n
+			proxies[proxy]=(proxies[proxy] or 0 ) - n
 		elseif t=="+" then
 			local n=tonumber(v:sub(2))
-			proxies[proxy]=(proxies[proxy] or 0 ) - n
+			proxies[proxy]=(proxies[proxy] or 0 ) + n
 		else
 			proxies[proxy]=v
 		end
