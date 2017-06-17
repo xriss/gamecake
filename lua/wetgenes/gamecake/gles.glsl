@@ -142,7 +142,7 @@ void main()
 
 #ifdef BONE
 
-/*
+
 	mat4 m=mat4(0.0);
 	int b;
 	if( a_bone[0] > 0.0 ) // got bones
@@ -163,7 +163,6 @@ void main()
 		n=n*mat3(m);
 #endif
 	}
-*/
 
 #endif
 
@@ -227,15 +226,14 @@ void main(void)
 	gl_FragColor=v_color ;
 #endif
 
-//#ifdef MATIDX
-//	int matidx=int(floor(v_matidx+0.5));
-//	vec4 c1=colors[0+matidx*2]*gl_FragColor;
-//	vec4 c2=colors[1+matidx*2];
-//#else
+#ifdef MATIDX
+	int matidx=int(floor(v_matidx+0.5));
+	vec4 c1=colors[0+matidx*2]*gl_FragColor;
+	vec4 c2=colors[1+matidx*2];
+#else
 	vec4 c1=gl_FragColor;
 	vec4 c2=vec4(1.0,1.0,1.0,16.0);
-//#endif
-//#endif
+#endif
 
 #ifdef LIGHT
 	vec3 n=normalize( v_normal );
@@ -253,7 +251,7 @@ void main(void)
 #endif
 
 #ifdef DISCARD
-	if((gl_FragColor.a)<0.25) discard;
+	if((gl_FragColor.a)<DISCARD) discard;
 #endif
 
 }
