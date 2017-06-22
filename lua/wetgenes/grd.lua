@@ -323,7 +323,7 @@ grd.create=function(...)
 	elseif type(args[2]) == "number" then -- a new blank image of given dimensions
 	
 		local fmt=args[1]
-		local w,h,d=args[2],args[3],args[4]
+		local w,h,d=args[2] or 1,args[3] or 1,args[4] or 1
 		if type(fmt) == "string" then
 			fmt=grd.stringtonum(args[1])
 		end
