@@ -856,7 +856,6 @@ print("merging")
 
 		local it=its.anim_merged
 
-		local bones=tardis.f32.new_v4(#its.anim.bones*3)
 
 --are we using too many uniforms?
 --print(#it.mats,#its.anim.bones,#it.mats*2+#its.anim.bones*3)
@@ -904,6 +903,7 @@ print("merging")
 			end
 		end
 
+		local bones=tardis.f32.new_v4(#its.anim.bones*3)
 		do
 			local t,tl={},0
 			for _,m in ipairs(its.anim.bones) do
