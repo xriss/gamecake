@@ -450,8 +450,11 @@ chatdown.setup=function(chat_text,changes)
 	chats.set_proxy=function(s,v,default_root)
 		local root,proxy=s:match("(.+)/(.+)") -- is a root given?
 		if not root then root,proxy=default_root,s end -- no root use full string as proxy name
-		local chat=chats.get(root) or {}
-		local proxies=chat.proxies or {} -- get root proxies or empty table
+
+		local chat=chats.get(root)
+		if not chat then return end -- unknown chat name
+		
+		chat.proxies=chat.proxies or {} -- make sure we have a proxies table
 
 -- add inc/dec operators here?
 		local t
@@ -460,16 +463,16 @@ chatdown.setup=function(chat_text,changes)
 		end
 		local n=tonumber(v:sub(2))
 		if t=="-" and n then
-			proxies[proxy]=(tonumber(proxies[proxy]) or 0 ) - n
+			chat.proxies[proxy]=(tonumber(chat.proxies[proxy]) or 0 ) - n
 		elseif t=="+" and n then
-			proxies[proxy]=(tonumber(proxies[proxy]) or 0 ) + n
+			chat.proxies[proxy]=(tonumber(chat.proxies[proxy]) or 0 ) + n
 		else
-			proxies[proxy]=v
+			chat.proxies[proxy]=v
 		end
 		
 		chats.changes(chat,"proxy",proxy,v) -- could adjust proxy value in callback
 
-		return proxies[proxy]
+		return chat.proxies[proxy]
 	end
 
 	chats.replace_proxies=function(text,default_root)
