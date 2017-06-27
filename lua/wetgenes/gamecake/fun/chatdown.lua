@@ -538,10 +538,10 @@ chatdown.setup=function(chat_text,changes)
 	chats.changes=changes or function(chat,change,...)
 		local a,b=...
 
-		if     change=="description" then			print("description",a.name)
-		elseif change=="response"    then			print("response   ",a.name)
-		elseif change=="decision"    then			print("decision   ",a.name)
-		elseif change=="proxy"       then			print("proxy      ",a,b)
+		if     change=="description" then			print("description",chat.name,a.name)
+		elseif change=="response"    then			print("response   ",chat.name,a.name)
+		elseif change=="decision"    then			print("decision   ",chat.name,a.name)
+		elseif change=="proxy"       then			print("proxy      ",chat.name,a,b)
 		end
 		
 	end
