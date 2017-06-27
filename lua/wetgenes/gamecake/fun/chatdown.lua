@@ -470,7 +470,7 @@ chatdown.setup=function(chat_text,changes)
 			chat.proxies[proxy]=v
 		end
 		
-		chats.changes(chat,"proxy",proxy,v) -- could adjust proxy value in callback
+		chats.changes(chat,"proxy",proxy,v) -- could adjust value of ( chat.proxies[proxy] ) in callback
 
 		return chat.proxies[proxy]
 	end
