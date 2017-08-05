@@ -91,6 +91,7 @@ print("system setup")
 	system.sprites =oven.rebake("wetgenes.gamecake.fun.sprites").setup()
 	system.tilemap =oven.rebake("wetgenes.gamecake.fun.tilemap").setup()
 	system.autocell=oven.rebake("wetgenes.gamecake.fun.autocell").setup()
+	system.canvas  =oven.rebake("wetgenes.gamecake.fun.canvas").setup()
 	system.screen  =oven.rebake("wetgenes.gamecake.fun.screen").setup()
 	system.copper  =oven.rebake("wetgenes.gamecake.fun.copper").setup()
 	system.sfx     =oven.rebake("wetgenes.gamecake.fun.sfx").setup()
@@ -128,6 +129,10 @@ print("system setup")
 		elseif v.component=="copper" then
 
 			it=system.copper.create({system=system},v)
+
+		elseif v.component=="canvas" then
+
+			it=system.canvas.create({system=system},v)
 
 		elseif v.component=="sfx" then
 
@@ -452,6 +457,9 @@ system.configurator=function(opts)
 
 		hardware={
 			{
+				component="sfx",
+			},
+			{
 				component="screen",
 				size={screen.hx,screen.hy},
 				bloom=fatpix and 0.75 or 0,
@@ -489,6 +497,12 @@ system.configurator=function(opts)
 				name="map",
 				tiles="tiles",
 				tilemap_size={math.ceil(screen.hx/8),math.ceil(screen.hy/8)},
+				layer=2,
+			},
+			{
+				component="canvas",
+				name="canvas",
+				size={screen.hx,screen.hy},
 				layer=2,
 			},
 			{

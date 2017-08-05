@@ -386,9 +386,10 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 -- I dont normaly care for lint but it would *really* make sense here...
 
 --print("Compiling shader "..sname,wstr.dump(s))
-		s[0]=gl.CreateShader(stype)
 
 		repeat local done=false
+
+			s[0]=assert(gl.CreateShader(stype))
 
 			gl.ShaderSource(s[0],wstr.macro_replace(s.source,code.defines))
 			gl.CompileShader(s[0])
@@ -399,6 +400,8 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
 					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
+					
+					gl.DeleteShader(s[0])
 					
 				else -- give up
 
