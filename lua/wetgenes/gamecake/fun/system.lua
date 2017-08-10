@@ -42,6 +42,8 @@ system.resume=function(need)
 end
 
 system.load_and_setup=function(name,path)
+
+	gl.forget() -- force reload of shaders
 	
 	name=assert(name or oven.opts.fun)
 	path=path or ""

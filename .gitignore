@@ -43,7 +43,7 @@ build/depends/SDL2-2.0.4/*
 build/depends/LuaJIT-2.1.0-beta1/*
 build/depends/LuaJIT-2.1.0-beta2/*
 
-sdks/emsdk_portable
+sdks/emsdk-portable
 sdks/nacl-sdk
 
 test/dat/grd/*.out.*

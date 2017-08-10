@@ -191,7 +191,7 @@ function glescode.create(gl)
 -- so only one source is required
 --
 	function code.program_source(name,vsource,fsource,filename)
-		if 	code.programs[name] then return code.programs[name] end -- only do once
+--		if 	code.programs[name] then return code.programs[name] end -- only do once
 
 		local aa=wstr.split(name,"?")
 		local basename=aa[1]
@@ -208,22 +208,31 @@ function glescode.create(gl)
 		local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
 		local vhead=code.defines.shaderprefix.."#define VERTEX_SHADER 1\n"..paramdefs.."#line "..line.."\n"
 		local fhead=code.defines.shaderprefix.."#define FRAGMENT_SHADER 1\n"..paramdefs.."#line "..line.."\n"
+		
+		local copymerge=function(base,name,data)
+			if not base[name] then base[name]={} end
+			for n,v in pairs(data) do
+				base[name][n]=v
+			end
+			return base[name]
+		end
 
-		code.shaders["v_"..name]={ source=vhead..(vsource) }
-		code.shaders["f_"..name]={ source=fhead..(fsource or vsource) } -- single source trick
-		code.programs[name]={
+		local p=copymerge(code.programs,name,{
 			vshaders={"v_"..name},
 			fshaders={"f_"..name},
 			name=name,
 			vsource=vsource,
 			fsource=fsource,
 			filename=filename,
-		}
+		})
+		copymerge(code.shaders,"v_"..name,{ program=p, source=vhead..(vsource) })
+		copymerge(code.shaders,"f_"..name,{ program=p, source=fhead..(fsource or vsource) }) -- single source trick
+
 -- check that the code compiles OK right now?
 		assert(code.shader(gl.VERTEX_SHADER,"v_"..name,filename))
 		assert(code.shader(gl.FRAGMENT_SHADER,"f_"..name,filename))
 
-		return code.programs[name]
+		return p
 	end
 
 -- load multiple shader sources from a single file
@@ -286,40 +295,6 @@ function glescode.create(gl)
 		end
 
 	end
---[[	
-	function code.shader_sources(text,filename)
-	
-		local ss=wstr.split(text,"\n")
-		local chunks={}
-		local cs
-		for i,l in ipairs(ss) do
-			if l:sub(1,7):lower()=="#shader" then -- new chunk must be at start of line
-			
-				local aa=wstr.split(l,"\"")
-				cs={}
-				for idx=2,#aa,2 do -- allow multiple names and they will all be filled with the following text
-					local n=aa[idx]
-					chunks[n]=chunks[n] or {}
-					local c=chunks[n]
-					cs[#cs+1]=c
-					c[#c+1]="#line "..i	-- remember the line number from this file
-				end
-			else
-				for _,c in ipairs(cs or {}) do
-					if c then	-- remember each line for each chunk
-						c[#c+1]=l
-					end
-				end
-			end
-		end
-		for n,v in pairs(chunks) do
-print("PROGRAM",n,#v)
-			code.program_source(n,table.concat(v,"\n"),nil,filename)
-		end
-		
-	end
-]]
-
 
 -- legacy version, obsolete, use the new program_source instead
 -- this will be removed shortly
@@ -356,11 +331,31 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 	
 -- forget cached info when we lose context, it is important to call this
 	function code.forget()
-		for i,v in pairs(code.shaders) do
-			v[0]=nil
+print("FORGETTING ALL SHADERS")
+		for n,v in pairs(code.shaders) do
+			if v[0] then
+				if gl.IsShader(v[0]) then
+					gl.DeleteShader(v[0])
+				end
+				v[0]=nil
+			end
+			if v.program and v.program.base then -- this can be regenerated
+print("DELETING SHADER "..n)
+				code.shaders[n]=nil
+			end
 		end
-		for i,v in pairs(code.programs) do
-			v[0]=nil
+print("FORGETTING ALL PROGRAMS")
+		for n,v in pairs(code.programs) do
+			if v[0] then
+				if gl.IsProgram(v[0]) then
+					gl.DeleteProgram(v[0])
+				end
+				v[0]=nil
+			end
+			if v.base then -- this can be regenerated
+print("DELETING PROGRAM "..n)
+				code.programs[n]=nil
+			end
 		end
 	end
 	
@@ -430,9 +425,10 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			p=code.programs[pname]
 			if not p then -- try basename
 				local basename=wstr.split(pname,"?")[1]
-				p=code.programs[basename]
+				local base=code.programs[basename]
 				if p then -- try to build using the query string and the *original* source from the base shader
-					p=code.program_source(pname,p.vsource,p.fsource,p.filename)
+					p=code.program_source(pname,base.vsource,base.fsource,base.filename)
+					p.base=base
 				end
 			end
 			assert(p)

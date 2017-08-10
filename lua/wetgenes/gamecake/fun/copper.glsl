@@ -133,12 +133,12 @@ void main(void)
 	else
 	if(uv.y<0.5)
 	{
-		c=mix(cy0,cy1,uv.y*4.0);
+		c=mix(cy0,cy1,uv.y*2.0);
 	}
 	else
 	if(uv.y<1.00)
 	{
-		c=mix(cy1,cy2,(uv.y-0.75)*4.0);
+		c=mix(cy1,cy2,(uv.y-0.5)*2.0);
 	}
 	else
 	{
