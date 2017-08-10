@@ -28,14 +28,14 @@ function M.bake(oven,system)
 
 
 system.resume=function(need)
-	if system.co then
-		if coroutine.status(system.co)~="dead" then
+	if system.main then
+		if coroutine.status(system.main)~="dead" then
 
-			local a,b=coroutine.resume(system.co,need)
+			local a,b=coroutine.resume(system.main,need)
 			
 			if a then return a,b end -- no error
 			
-			error( b.."\nin coroutine\n"..debug.traceback(system.co) , 2 ) -- error
+			error( b.."\nin coroutine\n"..debug.traceback(system.main) , 2 ) -- error
 			
 		end
 	end
@@ -81,9 +81,11 @@ print("system setup")
 			gl=oven.gl,
 			require=require,
 			ups=oven.rebake("wetgenes.gamecake.spew.recaps").ups, -- input, for 1up - 6up 
+-- less typing of something we need to use a lot
+			C=system.components,
 		})
-		system.opts=system.code.hardware
-		system.co=coroutine.create(system.code.main)
+		system.hardware=system.code.hardware
+		system.main=coroutine.create(system.code.main)
 	end	
 
 -- possible components and perform global setup, even if they never get used
@@ -99,7 +101,7 @@ print("system setup")
 	system.sfx     =oven.rebake("wetgenes.gamecake.fun.sfx").setup()
 
 
-	for i,v in ipairs(system.opts) do
+	for i,v in ipairs(system.hardware) do
 	
 		local it
 	
@@ -144,7 +146,7 @@ print("system setup")
 		
 		if it then
 
-			print("+",v.component,v.name or v.component)
+			print("hardware : ",v.component,v.name or v.component)
 		
 			system.components[#system.components+1]=it
 			system.components[it.name or it.component]=it	-- link by name
@@ -460,9 +462,11 @@ system.configurator=function(opts)
 		hardware={
 			{
 				component="sfx",
+				name="sfx",
 			},
 			{
 				component="screen",
+				name="screen",
 				size={screen.hx,screen.hy},
 				bloom=fatpix and 0.75 or 0,
 				filter=fatpix and "scanline" or nil,
@@ -473,6 +477,7 @@ system.configurator=function(opts)
 			},
 			{
 				component="colors",
+				name="colors",
 				cmap=cmap, -- swanky32 palette
 			},
 			{
@@ -522,6 +527,7 @@ system.configurator=function(opts)
 				layer=3,
 			},
 		}
+		for i,v in ipairs(hardware) do hardware[v.name]=v end -- for easy tweaking of options
 		
 		main=function(need)
 
