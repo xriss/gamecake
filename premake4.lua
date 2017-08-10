@@ -283,9 +283,10 @@ if EMCC then
 		"-Werror",
 		"-s NO_EXIT_RUNTIME=1",
 		"-s ALLOW_MEMORY_GROWTH=1",
-		"-s ASSERTIONS=1",
-		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
-		"-s WASM=1",
+		"-Wno-almost-asm",
+--		"-s ASSERTIONS=1",
+--		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
+--		"-s WASM=1",
 	}
 
 	linkoptions{
