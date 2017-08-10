@@ -285,8 +285,8 @@ if EMCC then
 		"-s ALLOW_MEMORY_GROWTH=1",
 		"-Wno-almost-asm",
 --		"-s ASSERTIONS=1",
---		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
---		"-s WASM=1",
+		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
+		"-s WASM=1",
 	}
 
 	linkoptions{
