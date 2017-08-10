@@ -331,7 +331,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 	
 -- forget cached info when we lose context, it is important to call this
 	function code.forget()
-print("FORGETTING ALL SHADERS")
+--print("FORGETTING ALL SHADERS")
 		for n,v in pairs(code.shaders) do
 			if v[0] then
 				if gl.IsShader(v[0]) then
@@ -340,11 +340,11 @@ print("FORGETTING ALL SHADERS")
 				v[0]=nil
 			end
 			if v.program and v.program.base then -- this can be regenerated
-print("DELETING SHADER "..n)
+--print("DELETING SHADER "..n)
 				code.shaders[n]=nil
 			end
 		end
-print("FORGETTING ALL PROGRAMS")
+--print("FORGETTING ALL PROGRAMS")
 		for n,v in pairs(code.programs) do
 			if v[0] then
 				if gl.IsProgram(v[0]) then
@@ -353,7 +353,7 @@ print("FORGETTING ALL PROGRAMS")
 				v[0]=nil
 			end
 			if v.base then -- this can be regenerated
-print("DELETING PROGRAM "..n)
+--print("DELETING PROGRAM "..n)
 				code.programs[n]=nil
 			end
 		end
