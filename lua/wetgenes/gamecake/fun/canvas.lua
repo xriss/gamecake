@@ -18,8 +18,7 @@ function M.bake(oven,canvas)
 
 	local gl=oven.gl
 	local cake=oven.cake
-	local canvas=cake.canvas
-	local flat=canvas.flat
+	local flat=cake.canvas.flat
 
 canvas.load=function()
 
