@@ -5,7 +5,7 @@
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
-// 4 colors to blend vertically
+// 5 colors to blend vertically
 uniform	vec4 cy0;
 uniform	vec4 cy1;
 uniform	vec4 cy2;
@@ -88,7 +88,7 @@ void main(void)
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
-// 4 colors to blend vertically
+// 3 colors to blend vertically
 uniform	vec4 cy0;
 uniform	vec4 cy1;
 uniform	vec4 cy2;

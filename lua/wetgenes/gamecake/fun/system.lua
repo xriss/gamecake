@@ -81,8 +81,6 @@ print("system setup")
 			gl=oven.gl,
 			require=require,
 			ups=oven.rebake("wetgenes.gamecake.spew.recaps").ups, -- input, for 1up - 6up 
--- less typing of something we need to use a lot
-			C=system.components,
 		})
 		system.hardware=system.code.hardware
 		system.main=coroutine.create(system.code.main)
@@ -504,12 +502,6 @@ system.configurator=function(opts)
 				name="map",
 				tiles="tiles",
 				tilemap_size={math.ceil(screen.hx/8),math.ceil(screen.hy/8)},
-				layer=2,
-			},
-			{
-				component="canvas",
-				name="canvas",
-				size={screen.hx,screen.hy},
 				layer=2,
 			},
 			{

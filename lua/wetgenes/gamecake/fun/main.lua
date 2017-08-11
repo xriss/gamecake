@@ -94,8 +94,10 @@ end
 
 main.clean=function()
 
-	main.system.clean()
-	
+	if main.system then
+		main.system.clean()
+	end
+
 end
 
 main.msg=function(m)

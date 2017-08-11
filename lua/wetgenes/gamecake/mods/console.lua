@@ -405,7 +405,12 @@ font.vbs_idx=1
 			if console.shift_key then
 				oven.view.stretch=not oven.view.stretch
 			else
-				if win.view and (win.view~="win") then
+				if wwin.flavour=="emcc" then-- emcc should only ever switch to full as the browser will force us back
+					win:show("win")
+					win:show("full")
+					win:show("win")
+					win:show("full")
+				elseif win.view and (win.view~="win") then
 					win:show("win")
 				else
 					win:show("full")

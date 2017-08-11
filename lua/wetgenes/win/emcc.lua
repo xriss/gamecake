@@ -27,7 +27,7 @@ emcc.js_post=function(m,d)
 end
 
 emcc.show=function(it,view)
-	return sdl.show(it) -- ignore fullscreen flag
+	return sdl.show(it,view)
 end
 
 --

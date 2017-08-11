@@ -5,6 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 --local wwin=require("wetgenes.win")
 local tardis=require("wetgenes.tardis")
+local bit=require("bit")
 
 -- widget class master
 -- the master widget

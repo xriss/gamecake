@@ -248,6 +248,17 @@ grdpaint.canvas=function(grd)
 	local canvas={}
 
 	canvas.grd=grd -- what we draw into
+	
+	canvas.clip=function(x,y,z,w,h,d)
+		if type(x)~="number" then -- clear
+			canvas.grd_clipped=nil
+		else
+			if not h then -- 2d
+				h=w w=z z=0 d=1
+			end
+			canvas.grd_clipped=canvas.grd:clip(px,py,pz,hx,hy,hz)
+		end
+	end
 
 	canvas.fill=function(mode)
 		canvas.fill_mode = mode or canvas.fill_mode or "edge" -- "fill" ?
@@ -271,19 +282,27 @@ grdpaint.canvas=function(grd)
 	canvas.brush=function(hx,hy,mode)
 		canvas.brush_hx   = math.floor( (hx or canvas.brush_hx or 1) + 0.5 )
 		canvas.brush_hy   = math.floor( (hy or canvas.brush_hy or 1) + 0.5 )
-		canvas.brush_mode = t or canvas.brush_mode or "box"
+		canvas.brush_mode = mode or canvas.brush_mode or "box"
 
 		canvas.brush_handle()
 	end
 	canvas.brush()
 
 	canvas.clear=function(c)
-		canvas.grd:clear(c or canvas.color_background)
+		local g=canvas.grd_clipped or canvas.grd
+		g:clear(c or canvas.color_background)
 	end
 	
 	canvas.plot=function(x,y)
-		local g=canvas.grd:clip(math.floor(0.5+x-canvas.brush_ox),math.floor(0.5+y-canvas.brush_oy),0,canvas.brush_hx,canvas.brush_hy,1)
-		g:clear(canvas.color_foreground)
+		local px,py,hx,hy=math.floor(0.5+x-canvas.brush_ox),math.floor(0.5+y-canvas.brush_oy),canvas.brush_hx,canvas.brush_hy
+		local g=canvas.grd_clipped or canvas.grd
+		if px<0 then hx=hx+px px=0 end
+		if py<0 then hy=hy+py py=0 end
+		if px+hx>g.width  then hx=g.width -px end
+		if py+hy>g.height then hy=g.height-py end
+		if hx>0 and hy>0 then
+			g:clip(px,py,0,hx,hy,1):clear(canvas.color_foreground)
+		end
 	end
 
 	canvas.line=function(x1,y1,x2,y2)
