@@ -16,6 +16,7 @@ local bitdown=M
 
 -- swanky32 base palette
 M.cmap_swanky32={
+	name="Swanky32",
 	[ 0]={bgra=0x00000000,code=". ",name="transparent"},
 	[ 1]={bgra=0xff336622,code="g ",name="green_dark"},
 	[ 2]={bgra=0xff448822,code="G ",name="green"},
@@ -55,6 +56,7 @@ M.cmap_swanky32={
 
 M.cmap_build=function(cmap_data)
 	local cmap={}
+	cmap.name=cmap_data.name
 	for i=0,255 do
 		cmap[i]={bgra=0x00000000,code=string.format("%02X",i),idx=i}  -- reset color
 		cmap[ string.format("%02X",i)]=cmap[i] -- allow hex ascii maps, that are upper *or* lower case
