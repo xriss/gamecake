@@ -74,6 +74,8 @@ main.setup=function()
 	local screen=main.system.components.screen
 	oven.win:resize(screen.hx*screen.scale,screen.hy*screen.scale)
 	
+	oven.rebake("wetgenes.gamecake.mods.console").data.fun=main.system.code -- use fun.whatever in console to tweak fun globals
+	
 	opts.width=screen.hx*screen.scale
 	opts.height=screen.hy*screen.scale
 	opts.screen_scale=screen.scale
