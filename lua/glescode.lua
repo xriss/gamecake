@@ -206,8 +206,8 @@ function glescode.create(gl)
 		paramdefs=table.concat(paramdefs,"\n").."\n"
 	
 		local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
-		local vhead=code.defines.shaderprefix.."#define VERTEX_SHADER 1\n"..paramdefs.."#line "..line.."\n"
-		local fhead=code.defines.shaderprefix.."#define FRAGMENT_SHADER 1\n"..paramdefs.."#line "..line.."\n"
+		local vhead="#define VERTEX_SHADER 1\n"..paramdefs.."#line "..line.."\n"
+		local fhead="#define FRAGMENT_SHADER 1\n"..paramdefs.."#line "..line.."\n"
 		
 		local copymerge=function(base,name,data)
 			if not base[name] then base[name]={} end
@@ -386,18 +386,20 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 			s[0]=assert(gl.CreateShader(stype))
 
-			gl.ShaderSource(s[0],wstr.macro_replace(s.source,code.defines))
+			local src=code.defines.shaderprefix..wstr.macro_replace(s.source,code.defines)
+			
+			gl.ShaderSource(s[0],src)
 			gl.CompileShader(s[0])
 			
 			if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
 			
 				if code.defines_shaderprefix_idx and code.defines_shaderprefix_idx>1 then -- try and brute force a working version number 
-				
+
 print("Failed to build shader using prefix "..code.defines_shaderprefix_idx.." trying next prefix.")
 
 					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
 					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
-					
+
 					gl.DeleteShader(s[0])
 					
 				else -- give up
