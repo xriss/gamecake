@@ -395,7 +395,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			
 				if code.defines_shaderprefix_idx and code.defines_shaderprefix_idx>1 then -- try and brute force a working version number 
 
-print("Failed to build shader using prefix "..code.defines_shaderprefix_idx.." trying next prefix.")
+--print("Failed to build shader using prefix "..code.defines_shaderprefix_idx.." trying next prefix.")
 
 					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
 					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
