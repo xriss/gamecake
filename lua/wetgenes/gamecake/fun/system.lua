@@ -444,8 +444,10 @@ system.configurator=function(opts)
 
 	local bitdown=require("wetgenes.gamecake.fun.bitdown")
 	local bitdown_font_4x8=require("wetgenes.gamecake.fun.bitdown_font_4x8")
-
-	local fatpix=true
+	
+	local args=opts.args or oven.opts.args -- handle commandline arguments unless replaced
+	
+	local fatpix=not args.pixel -- pass --pixel on command line to turn off fat pixel filters
 
 	local hardware,main
 
@@ -459,10 +461,6 @@ system.configurator=function(opts)
 
 		hardware={
 			{
-				component="sfx",
-				name="sfx",
-			},
-			{
 				component="screen",
 				name="screen",
 				size={screen.hx,screen.hy},
@@ -472,6 +470,10 @@ system.configurator=function(opts)
 				scale=screen.ss,
 				fps=screen.fps,
 				layers=3,
+			},
+			{
+				component="sfx",
+				name="sfx",
 			},
 			{
 				component="colors",
