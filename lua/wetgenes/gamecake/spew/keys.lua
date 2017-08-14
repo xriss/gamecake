@@ -122,6 +122,7 @@ M.bake=function(oven,keys)
 
 -- convert keys or whatever into recaps changes
 	function keys.msg(m)
+
 		if not keys.up then return end -- no key maping
 
 		local used=false
@@ -143,6 +144,8 @@ M.bake=function(oven,keys)
 		key.opts=opts or {}
 		key.idx=idx
 		key.maps={}
+		
+		key.last_pad_value={} -- cached data to help ignore wobbling inputs
 		
 		key.joy={}					
 		key.joy.class="joystick"
@@ -481,16 +484,36 @@ M.bake=function(oven,keys)
 					local zone=32768/4
 
 					local doaxis=function(name1,name2)
-						if     m.value <= -zone then	ups.set_button(name1,true)	ups.set_button(name2,false)
-						elseif m.value >=  zone then	ups.set_button(name1,false)	ups.set_button(name2,true)
-						else							ups.set_button(name1,false)	ups.set_button(name2,false)
+
+						local v=0
+						if     m.value <= -zone then v=-1
+						elseif m.value >=  zone then v= 1
 						end
+
+						if key.last_pad_value[name1]~=v then -- only on change
+							if     v<0 then	ups.set_button(name1,true)	ups.set_button(name2,false)
+							elseif v>0 then	ups.set_button(name1,false)	ups.set_button(name2,true)
+							else			ups.set_button(name1,false)	ups.set_button(name2,false)
+							end
+						end
+
+						key.last_pad_value[name1]=v
 					end
 
 					local dotrig=function(name)
-						if     m.value >= zone then		ups.set_button(name,true)
-						else							ups.set_button(name,false)
+
+						local v=0
+						if m.value >=  zone then v= 1
 						end
+
+						if key.last_pad_value[name]~=v then -- only on change
+
+							if     v>0 then		ups.set_button(name,true)
+							else				ups.set_button(name,false)
+							end
+						end
+
+						key.last_pad_value[name]=v
 					end
 
 					if     m.name=="LeftX"			then		doaxis("left","right")
