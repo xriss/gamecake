@@ -15,11 +15,6 @@ sudo echo
 ./mingw/make clean
 ./mingw/make release gamecake
 
-#build nacl
-
-#./nacl/make clean
-#./nacl/make release gamecake
-
 #build emscipten
 
 ./emcc/make clean
