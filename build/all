@@ -38,10 +38,6 @@ sudo echo
 #a full build would be really darn slow, so dont bother cleaning
 ../vbox_raspi/make
 
-#compress files
-
-upx -9 ../exe/*
-
 
 #show status, this should list new versions of everything we just built
 
