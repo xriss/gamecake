@@ -30,6 +30,7 @@ wmeta.classes={
 	["panel"]=oven.rebake("wetgenes.gamecake.widgets.panel"),
 	["screen"]=oven.rebake("wetgenes.gamecake.widgets.screen"),
 	["window"]=oven.rebake("wetgenes.gamecake.widgets.window"),
+	["windock"]=oven.rebake("wetgenes.gamecake.widgets.windock"),
 	["button"]=oven.rebake("wetgenes.gamecake.widgets.button"),
 	["drag"]=oven.rebake("wetgenes.gamecake.widgets.drag"),
 	["text"]=oven.rebake("wetgenes.gamecake.widgets.text"),
@@ -142,11 +143,16 @@ function wmeta.setup(def)
 -- add a previosuly created widget as a child to this widget
 -- the widget will be forcibly removed...
 --
-	function meta.insert(parent,widget)
+	function meta.insert(parent,widget,top)
 	
 		meta.remove(widget) -- make sure we dont end up in two parents
 		
-		table.insert(parent,widget)
+		if top then
+			table.insert(parent,top,widget)
+		else
+			table.insert(parent,widget)
+		end
+
 		widget.parent=parent
 		widget.master=parent.master
 		

@@ -16,9 +16,24 @@ local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
 wwindow=wwindow or {}
 
-	local winclamp=function(window)
-		if window.hx > window.parent.hx then window.hx = window.parent.hx end
-		if window.hy > window.parent.hy then window.hy = window.parent.hy end
+-- search upwards and return window,screen (so this could be a widget in the window)
+-- screen should always be the widgets parent
+	local window_screen=function(it)
+		local window=it
+		local screen=it.parent
+		while it.parent ~= it do
+			if it.class=="window" then window=it screen=it.parent end -- found window
+			it=it.parent
+			if it.class=="screen" then screen=it break end -- double check screen
+		end
+		return window,screen
+	end
+	
+	local winclamp=function(it)
+		local window,screen=window_screen(it)
+		local lpx,lpy,lhx,lhy=window.px,window.py,window.hx,window.hy
+		if window.hx > screen.windows.hx then window.hx = screen.windows.hx end
+		if window.hy > screen.windows.hy then window.hy = screen.windows.hy end
 		if window.px<0    then window.px=0 end
 		if window.py<0    then window.py=0 end
 		if window.panel_mode=="scale" then -- maintain aspect
@@ -30,25 +45,32 @@ wwindow=wwindow or {}
 		end
 		if window.px<0 then window.px=0 end
 		if window.py<0 then window.py=0 end
-		if window.px+window.hx>window.parent.hx then window.px=window.parent.hx-window.hx end
-		if window.py+window.hy>window.parent.hy then window.py=window.parent.hy-window.hy end
+		if window.px+window.hx>screen.windows.hx then window.px=screen.windows.hx-window.hx end
+		if window.py+window.hy>screen.windows.hy then window.py=screen.windows.hy-window.hy end
+		return window.px-lpx,window.py-lpy,window.hx-lhx,window.hy-lhy
 	end
 
 
 function wwindow.edge_drag(widget,x,y)
 
-	local parent=widget.parent
+	local window,screen=window_screen(widget)
+
 	local master=widget.master
-	local window=parent.parent
 	local active_xy=master.active_xy
 	
+	local windock= (window.parent.class=="windock") and window.parent or nil
+	
+	if windock and windock.windock~="drag" then -- we are docked
+		return
+	end
+
 	master:insert(window) -- move to top
 
 	if not active_xy.edge then -- fill in starting edge on the first call
 
 		active_xy.edge=widget.id
 		
-		active_xy.wx,active_xy.wy=window.parent:mousexy(active_xy.mx,active_xy.my)
+		active_xy.wx,active_xy.wy=screen.windows:mousexy(active_xy.mx,active_xy.my)
 
 		active_xy.px=window.px
 		active_xy.py=window.py
@@ -57,7 +79,7 @@ function wwindow.edge_drag(widget,x,y)
 
 	end
 
-	local mx,my=window.parent:mousexy(x,y)
+	local mx,my=screen.windows:mousexy(x,y)
 
 	if	master.active_xy.edge=="win_edge_br" or 
 		master.active_xy.edge=="win_edge_bl" or 
@@ -93,18 +115,18 @@ function wwindow.edge_drag(widget,x,y)
 
 	end
 	
-	if window.hx > window.parent.hx then window.hx=window.parent.hx end
-	if window.hy > window.parent.hy then window.hy=window.parent.hy end
+	if window.hx > screen.windows.hx then window.hx=screen.windows.hx end
+	if window.hy > screen.windows.hy then window.hy=screen.windows.hy end
 	
 	if window.panel_mode=="scale" then -- keep aspect when scaling
 
 		local sx=window.hx/window.win_fbo.hx
 		local sy=window.hy/window.win_fbo.hy
 
-		if window.win_fbo.hx*sx > window.parent.hx then sx=window.parent.hx/window.win_fbo.hx end
-		if window.win_fbo.hy*sx > window.parent.hy then sx=window.parent.hy/window.win_fbo.hy end
-		if window.win_fbo.hx*sy > window.parent.hx then sy=window.parent.hx/window.win_fbo.hx end
-		if window.win_fbo.hy*sy > window.parent.hy then sy=window.parent.hy/window.win_fbo.hy end
+		if window.win_fbo.hx*sx > screen.windows.hx then sx=screen.windows.hx/window.win_fbo.hx end
+		if window.win_fbo.hy*sx > screen.windows.hy then sx=screen.windows.hy/window.win_fbo.hy end
+		if window.win_fbo.hx*sy > screen.windows.hx then sy=screen.windows.hx/window.win_fbo.hx end
+		if window.win_fbo.hy*sy > screen.windows.hy then sy=screen.windows.hy/window.win_fbo.hy end
 
 		local s=sx<sy and sx or sy
 		if	master.active_xy.edge=="win_edge_t" or master.active_xy.edge=="win_edge_b" then s=sy end
@@ -126,19 +148,28 @@ end
 
 function wwindow.drag(widget,x,y)
 
-	local parent=widget.parent
+	local window,screen=window_screen(widget)
+	local windock= (window.parent.class=="windock") and window.parent or nil
+	
+	if windock and windock.windock~="drag" then -- we are docked so undock us
+		local master=screen.master
+		screen:remove_split(window)
+		wwindow.class_hooks_reset(window)
+		master.active_xy={window.hx/2,window.hy/2,mx=0,my=0}
+		return
+	end
+
 	local master=widget.master
 
-	parent:insert(widget) -- move to top
 
-	local rx,ry=parent:mousexy(x,y)
+	local rx,ry=screen.windows:mousexy(x,y)
 	local x,y=rx-master.active_xy[1],ry-master.active_xy[2]
 
---	local maxx=parent.hx-widget.hx
---	local maxy=parent.hy-widget.hy
+--	local maxx=screen.hx-widget.hx
+--	local maxy=screen.hy-widget.hy
 
-	widget.px=x
-	widget.py=y
+	window.px=x
+	window.py=y
 	
 --[[
 	if widget.px<0    then widget.px=0 end
@@ -146,19 +177,24 @@ function wwindow.drag(widget,x,y)
 	if widget.py<0    then widget.py=0 end
 	if widget.py>maxy then widget.py=maxy end
 	
-	if parent.snap then
-		parent:snap(true)
+	if screen.snap then
+		screen:snap(true)
 	end
 ]]
 
-	winclamp(widget)
+	local cpx,cpy,chx,chy=winclamp(window)
+	if cpx*cpx > cpy*cpy then
+		window.active_push={"x",cpx}
+	else
+		window.active_push={"y",cpy}
+	end
 
-	widget:call_hook_later("slide")
+	window:call_hook_later("slide")
 	
-	widget:set_dirty()
+	window:set_dirty()
 	
-	widget:layout()
-	widget:build_m4()
+	window:layout()
+	window:build_m4()
 end
 
 function wwindow.update(widget)
@@ -176,6 +212,17 @@ function wwindow.layout(widget)
 
 	local v=widget.win_fbo
 	local window=widget
+	local windock= (window.parent.class=="windock") and window.parent or nil
+
+	
+	if windock and windock.windock~="drag" then -- we are docked
+	
+		window.px=0
+		window.py=0
+		window.hx=windock.hx
+		window.hy=windock.hy
+	end
+	
 	
 --	if window.hx > window.parent.hx then window.hx = window.parent.hx end
 --	if window.hy > window.parent.hy then window.hy = window.parent.hy end
@@ -226,11 +273,48 @@ function wwindow.layout(widget)
 
 end
 
-wwindow.win_hooks=function(widget,act,w)
+wwindow.class_hooks_reset=function(widget)
+	widget.hx=widget.win_fbo.hx
+	widget.hy=widget.win_fbo.hy
+	winclamp(widget)
+	widget:layout()
+	widget:build_m4()
+end
+
+wwindow.class_hooks=function(widget,act,w)
 --print(act,w.id)
 
+	if act=="active" then
 
-	if act=="click" then
+		local window,screen=window_screen(widget)
+		window.parent:insert(window) -- move to top
+		
+--		print("ACTIVE",window.id)
+
+	elseif act=="inactive" then
+
+		local window,screen=window_screen(widget)
+		
+		if window.active_push and math.abs(window.active_push[2])>16 then
+
+--			print("PUSH",window.id,window.active_push[1],window.active_push[2])
+
+			if window.parent.windock=="drag" then -- only dock if we are a dragable window
+
+				screen:add_split({
+					window=window,
+					split_axis=window.active_push[1],
+					split_order=(window.active_push[2]>=0) and 1 or 2
+				})
+
+			end
+
+		end
+
+--		print("INACTIVE",window.id)
+
+	elseif act=="click" then
+
 		if w.id=="win_hide" then
 		
 			widget.hidden=true
@@ -250,14 +334,9 @@ wwindow.win_hooks=function(widget,act,w)
 			widget:build_m4()
 
 		elseif w.id=="win_reset" then
-
-			widget.hx=widget.win_fbo.hx
-			widget.hy=widget.win_fbo.hy
-			winclamp(widget)
-			widget:layout()
-			widget:build_m4()
-
+			wwindow.class_hooks_reset(widget)
 		end
+
 	end
 end
 
@@ -274,14 +353,14 @@ function wwindow.setup(widget,def)
 	widget.draw=wwindow.draw
 	widget.layout=wwindow.layout
 	
-	widget.win_hooks = function(act,w) return wwindow.win_hooks(widget,act,w) end
+	widget.class_hooks = function(act,w) return wwindow.class_hooks(widget,act,w) end
 
 	widget.menu_data=widget.menu_data or {
 		{	id="win_hide",		text="Hide Window",		},
 		{	id="win_reset",		text="Reset Window",	},
 		{	id="win_shrink",	text="Shrink Window",	},
 		{	id="win_grow",		text="Grow Window",		},
-		hooks=widget.win_hooks,
+		hooks=widget.class_hooks,
 	}
 	
 	local ss=widget.master.grid_size or 24
@@ -354,7 +433,7 @@ function wwindow.setup(widget,def)
 				text="-",
 				color=color,
 				solid=true,
-				hooks=widget.win_hooks,
+				hooks=widget.class_hooks,
 				id="win_shrink",
 				cursor="hand",
 			},ss1)
@@ -367,7 +446,7 @@ function wwindow.setup(widget,def)
 				text="+",
 				color=color,
 				solid=true,
-				hooks=widget.win_hooks,
+				hooks=widget.class_hooks,
 				id="win_grow",
 				cursor="hand",
 			},ss1)
@@ -378,7 +457,7 @@ function wwindow.setup(widget,def)
 				hx=ss/4,
 				hy=def.hy+ss,
 				solid=true,
-				hooks=widget.win_hooks,
+				hooks=widget.class_hooks,
 				id="win_edge_l",
 				cursor="sizewe",
 				drag=wwindow.edge_drag,
@@ -389,7 +468,7 @@ function wwindow.setup(widget,def)
 				hx=ss/4,
 				hy=def.hy+ss,
 				solid=true,
-				hooks=widget.win_hooks,
+				hooks=widget.class_hooks,
 				id="win_edge_r",
 				cursor="sizewe",
 				drag=wwindow.edge_drag,
@@ -400,7 +479,7 @@ function wwindow.setup(widget,def)
 				hx=def.hx,
 				hy=ss/4,
 				solid=true,
-				hooks=widget.win_hooks,
+				hooks=widget.class_hooks,
 				id="win_edge_t",
 				cursor="sizens",
 				drag=wwindow.edge_drag,
@@ -411,7 +490,7 @@ function wwindow.setup(widget,def)
 				hx=def.hx,
 				hy=ss/4,
 				solid=true,
-				hooks=widget.win_hooks,
+				hooks=widget.class_hooks,
 				id="win_edge_b",
 				cursor="sizens",
 				drag=wwindow.edge_drag,
@@ -423,7 +502,7 @@ function wwindow.setup(widget,def)
 				hx=ss/2,
 				hy=ss/2,
 				solid=true,
-				hooks=widget.win_hooks,
+				hooks=widget.class_hooks,
 				id="win_edge_tl",
 				cursor="sizenwse",
 				drag=wwindow.edge_drag,
@@ -434,7 +513,7 @@ function wwindow.setup(widget,def)
 				hx=ss/2,
 				hy=ss/2,
 				solid=true,
-				hooks=widget.win_hooks,
+				hooks=widget.class_hooks,
 				id="win_edge_tr",
 				cursor="sizenesw",
 				drag=wwindow.edge_drag,
@@ -445,7 +524,7 @@ function wwindow.setup(widget,def)
 				hx=ss/2,
 				hy=ss/2,
 				solid=true,
-				hooks=widget.win_hooks,
+				hooks=widget.class_hooks,
 				id="win_edge_bl",
 				cursor="sizenwse",
 				drag=wwindow.edge_drag,
@@ -456,7 +535,7 @@ function wwindow.setup(widget,def)
 				hx=ss/2,
 				hy=ss/2,
 				solid=true,
-				hooks=widget.win_hooks,
+				hooks=widget.class_hooks,
 				id="win_edge_br",
 				cursor="sizenesw",
 				drag=wwindow.edge_drag,
