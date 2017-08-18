@@ -37,10 +37,22 @@ function wscreen.layout(widget)
 end
 
 -- create a new top level screen split to snap windows into
-function wscreen.get_split(screen)
-	for i,v in ipairs(screen) do
-		if v.class=="split" then return v end
+function wscreen.get_split(screen,axis,order)
+
+	if not axis then
+		for i,v in ipairs(screen) do
+			if v.class=="split" then return v end
+		end
 	end
+	
+	for i,v in ipairs(screen) do
+		if v.class=="split" then
+			if v.split_axis==axis and v.split_order==order then return v end
+			local ret=wscreen.get_split(v,axis,order) -- recurse
+			if ret then return ret end
+		end
+	end
+	
 end
 
 -- create a new top level screen split to snap windows into
@@ -66,19 +78,23 @@ function wscreen.add_split(screen,opts)
 		local idx=screen.windows:parent_index()
 
 		split=screen.windows.parent:add(def)
+		split.screen_split=true
+
 		screen.windows.parent:insert(split,idx) -- move next to windows
 		split:insert(screen.windows)
 			
 	else -- split outside
 
 		split=screen:add(def)
+		split.screen_split=true
+
 		screen:insert(split,1) -- move to first place 
 		split:insert(old_split)
 
 	end
 
 
-	local dock=split:add({class="windock",windock="panel",color=1})
+	local dock=split:add({class="windock",windock="stack",color=1,stack_axis=(split.split_axis=="x")and"y"or"x"})
 	if opts.window then
 		dock:insert(opts.window)
 		if not split.split_max then
@@ -108,15 +124,16 @@ function wscreen.remove_split(screen,window)
 	local split=dock.parent
 
 	local parent=split.parent
+
+	if #dock==1 then -- remove split only when last window is removed from dock
 	
---print("PARENT",parent,parent.class,parent.id)
-	local other=(split[1]==dock) and split[2] or split[1]
---print("S",#split)
-	local num=1
-	for i,v in ipairs(parent) do if v==split then num=i end end
-	parent:insert(other,num) -- put the other half where the split was
-	split:remove() -- and remove the split
---print("P",#parent)
+		local other=(split[1]==dock) and split[2] or split[1]
+		local num=1
+		for i,v in ipairs(parent) do if v==split then num=i end end
+		parent:insert(other,num) -- put the other half where the split was
+		split:remove() -- and remove the split
+
+	end
 	
 	screen.windows:insert(window)
 	

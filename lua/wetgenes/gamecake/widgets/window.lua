@@ -151,11 +151,7 @@ function wwindow.drag(widget,x,y)
 	local window,screen=window_screen(widget)
 	local windock= (window.parent.class=="windock") and window.parent or nil
 	
-	if windock and windock.windock~="drag" then -- we are docked so undock us
-		local master=screen.master
-		screen:remove_split(window)
-		wwindow.class_hooks_reset(window)
-		master.active_xy={window.hx/2,window.hy/2,mx=0,my=0}
+	if windock and windock.windock~="drag" then -- we are docked
 		return
 	end
 
@@ -215,36 +211,30 @@ function wwindow.layout(widget)
 	local windock= (window.parent.class=="windock") and window.parent or nil
 
 	
-	if windock and windock.windock~="drag" then -- we are docked
-	
-		window.px=0
-		window.py=0
-		window.hx=windock.hx
-		window.hy=windock.hy
-	end
-	
-	
---	if window.hx > window.parent.hx then window.hx = window.parent.hx end
---	if window.hy > window.parent.hy then window.hy = window.parent.hy end
+--	if windock and windock.windock=="drag" then -- we are dragable
+			
+	--	if window.hx > window.parent.hx then window.hx = window.parent.hx end
+	--	if window.hy > window.parent.hy then window.hy = window.parent.hy end
 
-	if v then
-		if window.panel_mode=="scale" then -- maintain aspect
+		if v then
+			if window.panel_mode=="scale" then -- maintain aspect
 
-			v.sx=window.hx/v.hx
-			v.sy=window.hy/v.hy
+				v.sx=window.hx/v.hx
+				v.sy=window.hy/v.hy
 
-			if v.sx<v.sy then v.sy=v.sx else v.sx=v.sy end
+				if v.sx<v.sy then v.sy=v.sx else v.sx=v.sy end
 
-			v.px=(window.hx-v.hx*v.sx)/2
-			v.py=(window.hy-v.hy*v.sy)/2
+				v.px=(window.hx-v.hx*v.sx)/2
+				v.py=(window.hy-v.hy*v.sy)/2
 
-		elseif window.panel_mode=="stretch" then -- stretch to fit any area
+			elseif window.panel_mode=="stretch" then -- stretch to fit any area
 
-			v.sx=window.hx/v.hx
-			v.sy=window.hy/v.hy
+				v.sx=window.hx/v.hx
+				v.sy=window.hy/v.hy
 
+			end
 		end
-	end
+--	end	
 
 -- also layout any other children
 	widget.meta.layout(widget)
@@ -269,7 +259,6 @@ function wwindow.layout(widget)
 		widget:build_m4()
 		return wwindow.layout(widget)
 	end
-	
 
 end
 
@@ -288,6 +277,16 @@ wwindow.class_hooks=function(widget,act,w)
 
 		local window,screen=window_screen(widget)
 
+		local windock= (window.parent.class=="windock") and window.parent or nil
+
+		if windock and windock.windock~="drag" then -- we are docked so undock us
+			window.active_nopush=true
+			local master=screen.master
+			screen:remove_split(window)
+			wwindow.class_hooks_reset(window)
+			master.active_xy={window.hx/2,window.hy/2,mx=0,my=0}
+		end
+
 		if window.parent==screen.windows then
 			screen.windows:insert(window) -- move to top
 		end
@@ -302,19 +301,36 @@ wwindow.class_hooks=function(widget,act,w)
 
 --			print("PUSH",window.id,window.active_push[1],window.active_push[2])
 
-			if window.parent.windock=="drag" then -- only dock if we are a dragable window
+			if not window.active_nopush then
+				if window.parent.windock=="drag" then -- only dock if we are a dragable window
+				
+					local axis,order=window.active_push[1],(window.active_push[2]>=0) and 1 or 2
+					local split
+					local v=widget
+					while v~=v.parent do
+						if v.screen_split and v.split_axis==axis and v.split_order==order then split=v break end
+						v=v.parent
+					end
 
-				screen:add_split({
-					internal=true, -- add split inside
-					window=window,
-					split_axis=window.active_push[1],
-					split_order=(window.active_push[2]>=0) and 1 or 2
-				})
-
+					if split then
+						local dock=(split[1].class=="windock" and split[1]~=screen.windows) and split[1] or split[2] -- pick the dock from the screen_split
+						dock:insert(window)
+					else
+						screen:add_split({
+							internal=true, -- add split inside
+							window=window,
+							split_axis=window.active_push[1],
+							split_order=(window.active_push[2]>=0) and 1 or 2
+						})
+					end
+				end
 			end
 
 		end
+		window.active_nopush=nil
 
+		widget.master:layout()
+		
 --		print("INACTIVE",window.id)
 
 	elseif act=="click" then
