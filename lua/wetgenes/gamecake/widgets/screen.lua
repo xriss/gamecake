@@ -46,7 +46,7 @@ end
 -- create a new top level screen split to snap windows into
 function wscreen.add_split(screen,opts)
 
-	local old_split=wscreen.get_split(screen)
+	local old_split=wscreen.get_split(screen) or screen.windows
 
 --print("OLD",old_split,old_split and old_split.class,old_split and old_split.id)
 
@@ -58,14 +58,25 @@ function wscreen.add_split(screen,opts)
 			end
 		end
 	end
-	local split=screen:add(def)
-	screen:insert(split,1) -- move to first place 
+	
+	local split
+	
+	if opts.internal then -- split inside
+	
+		local idx=screen.windows:parent_index()
 
-	if old_split then
-		split:insert(old_split)
-	else
+		split=screen.windows.parent:add(def)
+		screen.windows.parent:insert(split,idx) -- move next to windows
 		split:insert(screen.windows)
+			
+	else -- split outside
+
+		split=screen:add(def)
+		screen:insert(split,1) -- move to first place 
+		split:insert(old_split)
+
 	end
+
 
 	local dock=split:add({class="windock",windock="panel",color=1})
 	if opts.window then
@@ -78,7 +89,7 @@ function wscreen.add_split(screen,opts)
 			end
 		end
 	end
-	if split.split_order~=2 then
+	if split.split_order~=2 then -- move to the other side
 		local t=split[2]
 		split[2]=split[1]
 		split[1]=t
@@ -101,8 +112,10 @@ function wscreen.remove_split(screen,window)
 --print("PARENT",parent,parent.class,parent.id)
 	local other=(split[1]==dock) and split[2] or split[1]
 --print("S",#split)
-	parent:insert(other) -- keep the other half
-	split:remove()
+	local num=1
+	for i,v in ipairs(parent) do if v==split then num=i end end
+	parent:insert(other,num) -- put the other half where the split was
+	split:remove() -- and remove the split
 --print("P",#parent)
 	
 	screen.windows:insert(window)

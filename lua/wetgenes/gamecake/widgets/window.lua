@@ -64,7 +64,7 @@ function wwindow.edge_drag(widget,x,y)
 		return
 	end
 
-	master:insert(window) -- move to top
+	screen.windows:insert(window) -- move to top
 
 	if not active_xy.edge then -- fill in starting edge on the first call
 
@@ -287,7 +287,10 @@ wwindow.class_hooks=function(widget,act,w)
 	if act=="active" then
 
 		local window,screen=window_screen(widget)
-		window.parent:insert(window) -- move to top
+
+		if window.parent==screen.windows then
+			screen.windows:insert(window) -- move to top
+		end
 		
 --		print("ACTIVE",window.id)
 
@@ -302,6 +305,7 @@ wwindow.class_hooks=function(widget,act,w)
 			if window.parent.windock=="drag" then -- only dock if we are a dragable window
 
 				screen:add_split({
+					internal=true, -- add split inside
 					window=window,
 					split_axis=window.active_push[1],
 					split_order=(window.active_push[2]>=0) and 1 or 2

@@ -159,6 +159,10 @@ function wmeta.setup(def)
 		return widget
 	end
 
+	function meta.parent_index(widget)
+		for i,v in ipairs(widget.parent) do if v==widget then return i end end
+	end
+
 --
 -- initial setup
 --def
