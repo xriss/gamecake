@@ -439,12 +439,26 @@ function wwindow.setup(widget,def)
 	widget.win_title=widget.win_fbo:add_indent({
 				px=ss,
 				py=0,
-				hx=def.hx-ss*3,
+				hx=def.hx-ss*2,
 				hy=ss,
 				text=def.title or "...",
 --				color=color,
 			},ss1)
 
+	widget.win_menu=widget.win_fbo:add_indent({
+				class="menuitem",
+				px=def.hx-ss*1,
+				py=0,
+				hx=ss,
+				hy=ss,
+				text=".",
+				color=color,
+				solid=true,
+				menu_data=widget.menu_data,
+				cursor="hand",
+			},ss1)
+
+--[[
 	widget.win_shrink=widget.win_fbo:add_indent({
 				px=def.hx-ss*2,
 				py=0,
@@ -470,7 +484,7 @@ function wwindow.setup(widget,def)
 				id="win_grow",
 				cursor="hand",
 			},ss1)
-
+]]
 	widget.win_edge_l=widget.win_fbo:add({
 				px=-ss/8,
 				py=0,
