@@ -40,8 +40,16 @@ wwindow=wwindow or {}
 			local sx=window.hx/window.win_fbo.hx
 			local sy=window.hy/window.win_fbo.hy
 			local s=sx<sy and sx or sy
+			if s<1/8 then s=1/8 end
 			window.hx=window.win_fbo.hx*s
 			window.hy=window.win_fbo.hy*s
+		else
+			local sx=window.hx/window.win_fbo.hx
+			local sy=window.hy/window.win_fbo.hy
+			if sx<1/8 then sx=1/8 end
+			if sy<1/8 then sy=1/8 end
+			window.hx=window.win_fbo.hx*sx
+			window.hy=window.win_fbo.hy*sy
 		end
 		if window.px<0 then window.px=0 end
 		if window.py<0 then window.py=0 end
