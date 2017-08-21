@@ -150,6 +150,8 @@ function wwindow.drag(widget,x,y)
 
 	local window,screen=window_screen(widget)
 	local windock= (window.parent.class=="windock") and window.parent or nil
+
+	if window.flags.nodrag then return end	
 	
 	if windock and windock.windock~="drag" then -- we are docked
 		return
@@ -240,7 +242,9 @@ function wwindow.layout(widget)
 	widget.meta.layout(widget)
 
 	local ss=(widget.master.grid_size or 24)
-	local hy=widget.win_canvas.hy+ss
+	local bar_height=widget.flags.nobar and 0 or ss
+
+	local hy=widget.win_canvas.hy+bar_height
 	if hy~=widget.win_fbo.hy then -- resize widgets
 		widget.hy=hy
 		widget.win_fbo.hy=hy
@@ -273,9 +277,12 @@ end
 wwindow.class_hooks=function(widget,act,w)
 --print(act,w.id)
 
+	local window,screen=window_screen(widget)
+	
+	if window.flags.nodrag then return end	
+
 	if act=="active" then
 
-		local window,screen=window_screen(widget)
 
 		local windock= (window.parent.class=="windock") and window.parent or nil
 
@@ -362,6 +369,8 @@ end
 
 function wwindow.setup(widget,def)
 
+	widget.flags=def.flags or {}
+
 	widget.class="window"
 
 	widget.panel_mode=def.panel_mode or "scale" 	-- scale the child to fit
@@ -390,8 +399,9 @@ function wwindow.setup(widget,def)
 	local ss_side=ss/8
 	local ss_corner=ss/4
 
+	local bar_height=widget.flags.nobar and 0 or ss
 
-	widget.outline_size=ss_side
+--	widget.outline_size=-ss/16
 --	widget.outline_color=0xcc000000
 
 	widget.win_scale=def.win_scale or 0
@@ -400,7 +410,7 @@ function wwindow.setup(widget,def)
 -- add all the trimmings
 	widget.win_fbo=widget:add({
 				hx=def.hx,
-				hy=def.hy+ss,
+				hy=def.hy+bar_height,
 				px=0,
 				py=0,
 --				class="fill",
@@ -409,13 +419,16 @@ function wwindow.setup(widget,def)
 				style="flat",
 				highlight="none",
 				smode="topleft",
-				outline_size=widget.outline_size -- will not get displayed but is needed to catch edge clicks
+				outline_size=ss/12,
+				outline_color=0x44000000,
+				outline_fade_color=0x00000000,
+--				outline_size=widget.outline_size -- will not get displayed but is needed to catch edge clicks
 			})
 
 	widget.win_canvas=widget.win_fbo:add({
 				class="fill",
 				px=0,
-				py=ss,
+				py=bar_height,
 				hx=def.hx,
 				hy=def.hy,
 				size="fit",
@@ -423,13 +436,14 @@ function wwindow.setup(widget,def)
 				highlight="none",
 			})
 
+if bar_height>0 then
 	widget.win_menu=widget.win_fbo:add_indent({
 				class="menuitem",
 				px=0,
 				py=0,
 				hx=ss,
 				hy=ss,
-				text=".",
+				text=">",
 				color=color,
 				solid=true,
 				menu_data=widget.menu_data,
@@ -439,23 +453,10 @@ function wwindow.setup(widget,def)
 	widget.win_title=widget.win_fbo:add_indent({
 				px=ss,
 				py=0,
-				hx=def.hx-ss*2,
+				hx=def.hx-ss*1,
 				hy=ss,
 				text=def.title or "...",
 --				color=color,
-			},ss1)
-
-	widget.win_menu=widget.win_fbo:add_indent({
-				class="menuitem",
-				px=def.hx-ss*1,
-				py=0,
-				hx=ss,
-				hy=ss,
-				text=".",
-				color=color,
-				solid=true,
-				menu_data=widget.menu_data,
-				cursor="hand",
 			},ss1)
 
 --[[
@@ -485,11 +486,13 @@ function wwindow.setup(widget,def)
 				cursor="hand",
 			},ss1)
 ]]
+end
+
 	widget.win_edge_l=widget.win_fbo:add({
 				px=-ss/8,
 				py=0,
 				hx=ss/4,
-				hy=def.hy+ss,
+				hy=def.hy+bar_height,
 				solid=true,
 				hooks=widget.class_hooks,
 				id="win_edge_l",
@@ -500,7 +503,7 @@ function wwindow.setup(widget,def)
 				px=def.hx-ss/8,
 				py=0,
 				hx=ss/4,
-				hy=def.hy+ss,
+				hy=def.hy+bar_height,
 				solid=true,
 				hooks=widget.class_hooks,
 				id="win_edge_r",
@@ -520,7 +523,7 @@ function wwindow.setup(widget,def)
 			})
 	widget.win_edge_b=widget.win_fbo:add({
 				px=0,
-				py=def.hy+ss-ss/8,
+				py=def.hy+bar_height-ss/8,
 				hx=def.hx,
 				hy=ss/4,
 				solid=true,
@@ -554,7 +557,7 @@ function wwindow.setup(widget,def)
 			})
 	widget.win_edge_bl=widget.win_fbo:add({
 				px=-ss/4,
-				py=def.hy+ss-ss/4,
+				py=def.hy+bar_height-ss/4,
 				hx=ss/2,
 				hy=ss/2,
 				solid=true,
@@ -565,7 +568,7 @@ function wwindow.setup(widget,def)
 			})
 	widget.win_edge_br=widget.win_fbo:add({
 				px=def.hx-ss/4,
-				py=def.hy+ss-ss/4,
+				py=def.hy+bar_height-ss/4,
 				hx=ss/2,
 				hy=ss/2,
 				solid=true,
@@ -577,7 +580,7 @@ function wwindow.setup(widget,def)
 
 
 	widget.hx=def.hx
-	widget.hy=def.hy+ss
+	widget.hy=def.hy+bar_height
 	
 	return widget
 end

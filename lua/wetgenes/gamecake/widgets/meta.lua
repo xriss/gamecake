@@ -201,6 +201,8 @@ function wmeta.setup(def)
 		widget.hz=def.hz or 0 -- used to signal an fbo with a depth buffer
 		
 		widget.outline_size=def.outline_size
+		widget.outline_color=def.outline_color
+		widget.outline_fade_color=def.outline_fade_color
 		widget.transparent=def.transparent -- transparent color tint
 
 		widget.color=def.color

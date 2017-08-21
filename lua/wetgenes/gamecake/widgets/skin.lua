@@ -180,13 +180,13 @@ function wskin.setup(def)
 
 		local v={}
 		v[#v+1]=gl.apply_modelview( {x1  ,y1  ,0,1} )
-		v[#v+1]=gl.apply_modelview( {x1-s,y1-s,0,1} )
+		v[#v+1]=gl.apply_modelview( {x1+s,y1+s,0,1} )
 		v[#v+1]=gl.apply_modelview( {x2  ,y1  ,0,1} )
-		v[#v+1]=gl.apply_modelview( {x2+s,y1-s,0,1} )
+		v[#v+1]=gl.apply_modelview( {x2-s,y1+s,0,1} )
 		v[#v+1]=gl.apply_modelview( {x2  ,y2  ,0,1} )
-		v[#v+1]=gl.apply_modelview( {x2+s,y2+s,0,1} )
+		v[#v+1]=gl.apply_modelview( {x2-s,y2-s,0,1} )
 		v[#v+1]=gl.apply_modelview( {x1  ,y2  ,0,1} )
-		v[#v+1]=gl.apply_modelview( {x1-s,y2+s,0,1} )
+		v[#v+1]=gl.apply_modelview( {x1+s,y2-s,0,1} )
 
 		for i,idx in ipairs{
 			{1,1},
@@ -553,11 +553,6 @@ end
 		local txp,typ=0,0
 		
 
-		if widget.outline_size then -- draw a solid outline / border
-		
-			draw_outline(0,0,widget.hx,widget.hy,widget.outline_size or 2,widget.outline_color or 0xff000000 , widget.outline_fade_color or widget.outline_color or 0xff000000 )
-			
-		end
 
 		if widget.transparent then -- draw a transparent color tint
 			gl.Color( explode_color(widget.transparent) )
@@ -841,6 +836,12 @@ end
 		
 		end)
 		
+		if widget.outline_size and widget.outline_size~=0 then -- draw a solid outline / border
+		
+			draw_outline(0,0,widget.hx*widget.sx,widget.hy*widget.sy,widget.outline_size or 1,widget.outline_color or 0xff000000 , widget.outline_fade_color or widget.outline_color or 0xff000000 )
+			
+		end
+
 		return widget
 	end
 
