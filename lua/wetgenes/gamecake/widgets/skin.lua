@@ -458,6 +458,12 @@ local font_cache_draw
 				if not v.hidden then v:draw() end
 			end
 		end		
+		if widget.outline_size and widget.outline_size~=0 then -- draw a solid outline / border
+		
+			draw_outline(0,0,widget.hx*widget.sx,widget.hy*widget.sy,widget.outline_size or 1,widget.outline_color or 0xff000000 , widget.outline_fade_color or widget.outline_color or 0xff000000 )
+			
+		end
+
 
 		if widget.fbo then -- we have drawn into the fbo
 
@@ -836,12 +842,6 @@ end
 		
 		end)
 		
-		if widget.outline_size and widget.outline_size~=0 then -- draw a solid outline / border
-		
-			draw_outline(0,0,widget.hx*widget.sx,widget.hy*widget.sy,widget.outline_size or 1,widget.outline_color or 0xff000000 , widget.outline_fade_color or widget.outline_color or 0xff000000 )
-			
-		end
-
 		return widget
 	end
 

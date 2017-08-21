@@ -419,10 +419,9 @@ function wwindow.setup(widget,def)
 				style="flat",
 				highlight="none",
 				smode="topleft",
-				outline_size=ss/12,
+				outline_size=ss/8,
 				outline_color=0x44000000,
 				outline_fade_color=0x00000000,
---				outline_size=widget.outline_size -- will not get displayed but is needed to catch edge clicks
 			})
 
 	widget.win_canvas=widget.win_fbo:add({
