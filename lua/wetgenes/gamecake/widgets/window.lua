@@ -458,9 +458,9 @@ if bar_height>0 then
 			},ss1)
 
 	widget.win_title=widget.win_fbo:add_indent({
-				px=ss,
+				px=0,
 				py=0,
-				hx=def.hx-ss*1,
+				hx=def.hx,
 				hy=ss,
 				text=def.title or "...",
 --				color=color,

@@ -27,6 +27,7 @@ wmeta.classes={
 	["fill"]=oven.rebake("wetgenes.gamecake.widgets.fill"),
 	["center"]=oven.rebake("wetgenes.gamecake.widgets.center"),
 	["split"]=oven.rebake("wetgenes.gamecake.widgets.split"),
+	["three"]=oven.rebake("wetgenes.gamecake.widgets.three"),
 	["panel"]=oven.rebake("wetgenes.gamecake.widgets.panel"),
 	["screen"]=oven.rebake("wetgenes.gamecake.widgets.screen"),
 	["window"]=oven.rebake("wetgenes.gamecake.widgets.window"),
@@ -203,6 +204,7 @@ function wmeta.setup(def)
 		widget.outline_size=def.outline_size
 		widget.outline_color=def.outline_color
 		widget.outline_fade_color=def.outline_fade_color
+		
 		widget.transparent=def.transparent -- transparent color tint
 
 		widget.color=def.color
