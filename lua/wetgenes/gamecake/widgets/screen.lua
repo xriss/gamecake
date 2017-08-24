@@ -94,16 +94,26 @@ function wscreen.add_split(screen,opts)
 	end
 
 
-	local dock=split:add({class="windock",windock="stack",color=1,stack_axis=(split.split_axis=="x")and"y"or"x"})
+	local dock=split:add({class="windock",windock="stack",stack_axis=(split.split_axis=="x")and"y"or"x"})
 	if opts.window then
 		dock:insert(opts.window)
-		if not split.split_max then
+		if not split.split_num then
 			if split.split_axis=="x" then
-				split.split_max=opts.window.win_fbo.hx
+				split.split_num=opts.window.win_fbo.hx
+				if opts.window.win_fbo.hy > split.parent.hy then
+					local s=split.parent.hy / opts.window.win_fbo.hy
+					split.split_num=opts.window.win_fbo.hx*s
+				end
 			else
-				split.split_max=opts.window.win_fbo.hy
+				split.split_num=opts.window.win_fbo.hy
+				if opts.window.win_fbo.hx > split.parent.hx then
+					local s=split.parent.hx / opts.window.win_fbo.hx
+					split.split_num=opts.window.win_fbo.hy*s
+				end
 			end
 		end
+		if not split.split_fmax then split.split_fmax = 7/16 end
+		if not split.split_fmin then split.split_fmin = 1/16 end
 	end
 	if split.split_order~=2 then -- move to the other side
 		local t=split[2]

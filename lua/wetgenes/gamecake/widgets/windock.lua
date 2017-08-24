@@ -31,17 +31,27 @@ function wwindock.layout(widget)
 		local px=0
 		local py=0
 		
-		for i,v in ipairs(widget) do
+		for i,window in ipairs(widget) do
 			if widget.stack_axis=="x" then
-				v.py=0
-				v.hy=widget.hy
-				v.px=px
-				px=px+v.hx
+
+				window.py=0
+				window.hy=widget.hy
+				window.px=px
+				if window.panel_mode=="scale" then -- maintain aspect
+					window.hx=window.win_fbo.hx*(window.hy/window.win_fbo.hy)
+				end
+				px=px+window.hx
+				
 			else -- y axis
-				v.px=0
-				v.hx=widget.hx
-				v.py=py
-				py=py+v.hy
+
+				window.px=0
+				window.hx=widget.hx
+				window.py=py
+				if window.panel_mode=="scale" then -- maintain aspect
+					window.hy=window.win_fbo.hy*(window.hx/window.win_fbo.hx)
+				end
+				py=py+window.hy
+
 			end
 		end
 

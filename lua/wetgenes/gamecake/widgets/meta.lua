@@ -193,6 +193,11 @@ function wmeta.setup(def)
 		
 		widget.size=def.size 	-- special layout action flag
 								--	"full" 	==	Expand to fullsize of widget
+								-- "minmax" fit using hx_min hy_max or hy_min hx_max
+		widget.hx_min=def.hx_min
+		widget.hy_min=def.hy_min
+		widget.hx_max=def.hx_max
+		widget.hy_max=def.hy_max
 		
 		widget.px=def.px or 0 -- relative to parent, pixel position
 		widget.py=def.py or 0
@@ -201,6 +206,7 @@ function wmeta.setup(def)
 		widget.hy=def.hy or 0
 		widget.hz=def.hz or 0 -- used to signal an fbo with a depth buffer
 		
+
 		widget.outline_size=def.outline_size
 		widget.outline_color=def.outline_color
 		widget.outline_fade_color=def.outline_fade_color

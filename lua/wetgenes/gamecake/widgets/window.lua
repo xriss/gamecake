@@ -282,11 +282,11 @@ wwindow.class_hooks_reset=function(widget)
 	widget:build_m4()
 end
 
-wwindow.class_hooks=function(widget,act,w)
+wwindow.class_hooks=function(_window,act,widget)
 --print(act,w.id)
 
-	local window,screen=window_screen(widget)
-	
+	local window,screen=window_screen(_window or widget)
+
 	if window.flags.nodrag then return end	
 
 	if act=="active" then
@@ -294,12 +294,18 @@ wwindow.class_hooks=function(widget,act,w)
 
 		local windock= (window.parent.class=="windock") and window.parent or nil
 
-		if windock and windock.windock~="drag" then -- we are docked so undock us
-			window.active_nopush=true
-			local master=screen.master
-			screen:remove_split(window)
-			wwindow.class_hooks_reset(window)
-			master.active_xy={window.hx/2,window.hy/2,mx=0,my=0}
+--print(widget.id,widget.drag,wwindow.edge_drag)
+
+		if widget.drag~=wwindow.edge_drag then -- do not undock when clicking on the drag widgets
+
+			if windock and windock.windock~="drag" then -- we are docked so undock us
+				window.active_nopush=true
+				local master=screen.master
+				screen:remove_split(window)
+				wwindow.class_hooks_reset(window)
+				master.active_xy={window.hx/2,window.hy/2,mx=0,my=0}
+			end
+
 		end
 
 		if window.parent==screen.windows then
@@ -309,8 +315,6 @@ wwindow.class_hooks=function(widget,act,w)
 --		print("ACTIVE",window.id)
 
 	elseif act=="inactive" then
-
-		local window,screen=window_screen(widget)
 		
 		if window.active_push and math.abs(window.active_push[2])>16 then
 
@@ -344,32 +348,36 @@ wwindow.class_hooks=function(widget,act,w)
 		end
 		window.active_nopush=nil
 
-		widget.master:layout()
+		window.master:layout()
 		
 --		print("INACTIVE",window.id)
 
 	elseif act=="click" then
 
-		if w.id=="win_hide" then
+		if widget.id=="win_hide" then
 		
-			widget.hidden=true
+			window.hidden=true
 			
-		elseif w.id=="win_grow" then
-			widget.hx=widget.hx*1.5
-			widget.hy=widget.hy*1.5
-			winclamp(widget)
-			widget:layout()
-			widget:build_m4()
+		elseif widget.id=="win_grow" then
 
-		elseif w.id=="win_shrink" then
-			widget.hx=widget.hx/1.5
-			widget.hy=widget.hy/1.5
-			winclamp(widget)
-			widget:layout()
-			widget:build_m4()
+			window.hx=window.hx*1.5
+			window.hy=window.hy*1.5
+			winclamp(window)
+			window:layout()
+			window:build_m4()
 
-		elseif w.id=="win_reset" then
-			wwindow.class_hooks_reset(widget)
+		elseif widget.id=="win_shrink" then
+
+			window.hx=window.hx/1.5
+			window.hy=window.hy/1.5
+			winclamp(window)
+			window:layout()
+			window:build_m4()
+
+		elseif widget.id=="win_reset" then
+
+			wwindow.class_hooks_reset(window)
+
 		end
 
 	end

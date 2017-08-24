@@ -28,9 +28,9 @@ end
 
 function wthree.layout(widget)
 	
-	local h1,p1,h2,p2
-	if		widget.three_axis=="x"	then	h1="hx" p1="px" h2="hy" p2="py"
-	elseif	widget.three_axis=="y"	then	h1="hy" p1="py" h2="hx" p2="px"
+	local h1,p1,h2,p2,s1,s2
+	if		widget.three_axis=="x"	then	h1="hx" p1="px" h2="hy" p2="py" s1="sx" s2="sy"
+	elseif	widget.three_axis=="y"	then	h1="hy" p1="py" h2="hx" p2="px" s1="sy" s2="sx"
 	end
 
 	local w1=0
@@ -50,7 +50,7 @@ function wthree.layout(widget)
 
 			v.px=0
 			v.py=0
-			v[h2]=widget[h2]
+			v[h2]=widget[h2]/widget[s2]
 		end
 		
 		w1=v[h1]
@@ -74,7 +74,7 @@ function wthree.layout(widget)
 
 			v.px=widget[h1]-w3
 			v.py=0
-			v[h2]=widget[h2]
+			v[h2]=widget[h2]/widget[s2]
 			
 		end
 
@@ -85,7 +85,7 @@ function wthree.layout(widget)
 		
 		v.px=w1
 		v.hx=widget[h1]-(w1+w3)
-		v[h2]=widget[h2]
+		v[h2]=widget[h2]/widget[s2]
 
 	end
 
