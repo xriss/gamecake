@@ -284,6 +284,16 @@ wwindow.class_hooks_reset=function(widget)
 	widget:build_m4()
 end
 
+wwindow.move_to_top=function(window)
+	local window,screen=window_screen(window)
+	screen.windows:insert(window) -- move to top
+end
+
+wwindow.is_top=function(window)
+	local window,screen=window_screen(window)
+	return screen.windows[#screen.windows]==window
+end
+
 wwindow.class_hooks=function(_window,act,widget)
 --print(act,w.id)
 
@@ -401,6 +411,8 @@ function wwindow.setup(widget,def)
 	widget.update=wwindow.update
 	widget.draw=wwindow.draw
 	widget.layout=wwindow.layout
+	widget.move_to_top=wwindow.move_to_top
+	widget.is_top=wwindow.is_top
 	
 	widget.class_hooks = function(act,w) return wwindow.class_hooks(widget,act,w) end
 
