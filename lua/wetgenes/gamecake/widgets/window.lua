@@ -63,6 +63,8 @@ function wwindow.edge_drag(widget,x,y)
 
 	local window,screen=window_screen(widget)
 
+	if window.flags.nodrag then return end	
+
 	local master=widget.master
 	local active_xy=master.active_xy
 	

@@ -173,7 +173,7 @@ function wmeta.setup(def)
 						end
 					end
 				end
-			
+
 			end
 		end end
 	end
