@@ -317,7 +317,8 @@ wwindow.class_hooks=function(_window,act,widget)
 --		print("ACTIVE",window.id)
 
 	elseif act=="inactive" then
-		
+
+--[[		
 		if window.active_push and math.abs(window.active_push[2])>16 then
 
 --			print("PUSH",window.id,window.active_push[1],window.active_push[2])
@@ -353,6 +354,7 @@ wwindow.class_hooks=function(_window,act,widget)
 		window.master:layout()
 		
 --		print("INACTIVE",window.id)
+]]
 
 	elseif act=="click" then
 
