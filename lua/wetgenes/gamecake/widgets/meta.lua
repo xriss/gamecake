@@ -238,6 +238,8 @@ function wmeta.setup(def)
 		widget.text=def.text -- display this text on the button
 		widget.style=def.style -- style the button this way
 		widget.skin=def.skin -- skin the button this way
+		
+		widget.hidden=def.hidden -- start off hidden?
 
 
 -- remove auto solid, need to make sure that all buttons now have a class of button.
@@ -357,9 +359,9 @@ function wmeta.setup(def)
 		
 		local x,y=widget:mousexy(_x,_y)
 
-		local nudge=widget.outline_size or 0 -- allow clicking outside
-		local tx=x-(widget.pan_px or 0)
-		local ty=y-(widget.pan_py or 0)
+		local nudge=0--widget.outline_size or 0 -- allow clicking outside
+		local tx=(x-(widget.pan_px or 0))
+		local ty=(y-(widget.pan_py or 0))
 		if widget==widget.master or ( tx>=0-nudge and tx<widget.hx+nudge and ty>=0-nudge and ty<widget.hy+nudge ) then
 
 			if widget.solid then

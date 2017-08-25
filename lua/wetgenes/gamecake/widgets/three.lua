@@ -50,7 +50,7 @@ function wthree.layout(widget)
 
 			v.px=0
 			v.py=0
-			v[h2]=widget[h2]/widget[s2]
+			v[h2]=widget[h2]
 		end
 		
 		w1=v[h1]
@@ -74,7 +74,7 @@ function wthree.layout(widget)
 
 			v.px=widget[h1]-w3
 			v.py=0
-			v[h2]=widget[h2]/widget[s2]
+			v[h2]=widget[h2]
 			
 		end
 
@@ -85,7 +85,7 @@ function wthree.layout(widget)
 		
 		v.px=w1
 		v.hx=widget[h1]-(w1+w3)
-		v[h2]=widget[h2]/widget[s2]
+		v[h2]=widget[h2]
 
 	end
 

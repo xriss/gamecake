@@ -42,6 +42,7 @@ function wmeta.setup(def)
 
 --		local m4=widget.m4
 
+
 --print("SS",widget.sx,widget.sy)		
 		if widget.sx==1 and widget.sy==1 then
 				m4:translate( tardis.v3.new(-widget.px,-widget.py,0,0) )
@@ -53,7 +54,7 @@ function wmeta.setup(def)
 --print("CCCscale",widget.sx,widget.sy)
 				m4:translate( tardis.v3.new(widget.hx*0.5,widget.hy*0.5,0) )
 				m4:scale_v3(  tardis.v3.new(1/widget.sx,1/widget.sy,1) )
-				m4:translate( tardis.v3.new(-widget.px-widget.hx*0.5,-widget.py-widget.hy*0.5,0,0) )
+				m4:translate( tardis.v3.new(-widget.px-widget.hx*0.5,-widget.py-widget.hy*0.5,0) )
 --				x= ((x-widget.px-widget.hx*0.5)/widget.parent.sx)+widget.hx*0.5
 --				y= ((y-widget.py-widget.hy*0.5)/widget.parent.sy)+widget.hy*0.5
 			else
@@ -122,7 +123,7 @@ function wmeta.setup(def)
 							v.sx=widget.hx/v.hx_min
 							v.sy=v.sx
 							v.hx=v.hx_min
-							v.hy=v.hy_max*v.sy
+							v.hy=v.hy_max--*v.sy
 						else
 							v.sx=1
 							v.sy=1
@@ -136,7 +137,7 @@ function wmeta.setup(def)
 							v.sx=widget.hy/v.hy_min
 							v.sy=v.sx
 							v.hy=v.hy_min
-							v.hx=v.hx_max*v.sx
+							v.hx=v.hx_max--*v.sx
 						else
 							v.sx=1
 							v.sy=1
@@ -158,7 +159,7 @@ function wmeta.setup(def)
 					v.hx=0
 					for i,w in ipairs(v) do
 						if not w.hidden then
-							local x=(w.hx+w.px)
+							local x=(w.hx+w.px)*w.sx
 							if x>v.hx then v.hx=x end
 						end
 					end
@@ -168,7 +169,8 @@ function wmeta.setup(def)
 					v.hy=0
 					for i,w in ipairs(v) do
 						if not w.hidden then
-							local y=(w.hy+w.py)
+--print(w.sy)
+							local y=(w.hy+w.py)*w.sy
 							if y>v.hy then v.hy=y end
 						end
 					end
