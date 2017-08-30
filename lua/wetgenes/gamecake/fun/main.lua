@@ -85,9 +85,9 @@ main.setup=function()
 		win=oven.win,
 --		parent=view.parent,
 --		mode="full",
-		vx=screen.hx*screen.scale,
-		vy=screen.hy*screen.scale,
-		vz=screen.hy*screen.scale*4,
+		vx=screen.hx,
+		vy=screen.hy,
+		vz=screen.hy*4,
 		fov=1/4,
 	})
 	
@@ -210,7 +210,7 @@ main.draw=function()
 	font.set_size(32,0) -- 32 pixels high
 
 	gl.Translate( view.vx/2 , view.vy/2 ,1)
-	gl.Scale(opts.screen_scale,opts.screen_scale,1)
+--	gl.Scale(opts.screen_scale,opts.screen_scale,1)
 	main.system.draw()
 	
 	gl.PopMatrix()

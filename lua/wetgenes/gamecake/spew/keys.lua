@@ -20,13 +20,8 @@ M.bake=function(oven,keys)
 	keys.defaults={}
 -- single player covering entire keyboard (also merge the island1&2 keys in here)
 	keys.defaults["full"]={
-		["1"]			=	"select",
-		["2"]			=	"start",
-		["-"]			=	"l1",
-		["="]			=	"r1",
-		["["]			=	"l2",
-		["]"]			=	"r2",
 	}
+
 -- 1up/2up key islands
 	keys.defaults["island1"]={
 		["up"]			=	"up",
@@ -41,6 +36,12 @@ M.bake=function(oven,keys)
 		["space"]		=	{"fire","x"},
 		["return"]		=	{"fire","a"},
 		["enter"]		=	{"fire","b"},
+		["-"]			=	"l1",
+		["="]			=	"r1",
+		["["]			=	"l2",
+		["]"]			=	"r2",
+		["9"]			=	"select",
+		["0"]			=	"start",
 	}
 	for n,v in pairs(keys.defaults["island1"]) do keys.defaults["full"][n]=v end
 
@@ -57,6 +58,12 @@ M.bake=function(oven,keys)
 		["shift"]		=	{"fire","x"}, -- 1up grabs both the shift
 		["control"]		=	{"fire","a"}, -- control and alt keys
 		["alt"]			=	{"fire","b"}, -- if we cant tell left from right
+		["q"]			=	"l1",
+		["e"]			=	"r1",
+		["tab"]			=	"l2",
+		["r"]			=	"r2",
+		["1"]			=	"select",
+		["2"]			=	"start",
 	}
 	for n,v in pairs(keys.defaults["island2"]) do keys.defaults["full"][n]=v end
 
