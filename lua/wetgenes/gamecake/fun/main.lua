@@ -9,8 +9,6 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local wzips=require("wetgenes.zips")
 
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
-local bitdown_font_4x6=require("wetgenes.gamecake.fun.bitdown_font_4x6")
-local bitdown_font_4x8=require("wetgenes.gamecake.fun.bitdown_font_4x8")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M

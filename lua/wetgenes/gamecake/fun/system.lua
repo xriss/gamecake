@@ -443,7 +443,7 @@ end
 system.configurator=function(opts)
 
 	local bitdown=require("wetgenes.gamecake.fun.bitdown")
-	local bitdown_font_4x8=require("wetgenes.gamecake.fun.bitdown_font_4x8")
+	local bitdown_font=require("wetgenes.gamecake.fun.bitdown_font")
 	
 	local args=opts.args or oven.opts.args -- handle commandline arguments unless replaced
 	
@@ -528,7 +528,7 @@ system.configurator=function(opts)
 			if not need.setup then need=coroutine.yield() end -- wait for setup request (should always be first call)
 
 			-- copy font data tiles into top line
-			system.components.tiles.bitmap_grd:pixels(0,0,128*4,8, bitdown_font_4x8.grd_mask:pixels(0,0,128*4,8,"") )
+			system.components.tiles.bitmap_grd:pixels(0,0,128*4,8, bitdown_font.build_grd(4,8):pixels(0,0,128*4,8,"") )
 
 			-- upload graphics
 			if opts.graphics then
