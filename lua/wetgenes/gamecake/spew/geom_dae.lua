@@ -4,6 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local pack=require("wetgenes.pack")
+local wgrd=require("wetgenes.grd")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
@@ -657,6 +658,8 @@ end
 
 print("merging")
 
+		its.grd_texmat=nil
+
 		local tweaks={}
 		
 		if its.filter.bone_tweaks then -- per character bone tweaks that should be applied to the vertexes
@@ -853,24 +856,54 @@ print("merging")
 
 		local it=its.anim_merged
 
-		local colors=tardis.f32.new_v4(#it.mats*2)
-		local bones=tardis.f32.new_v4(#its.anim.bones*3)
 
 --are we using too many uniforms?
 --print(#it.mats,#its.anim.bones,#it.mats*2+#its.anim.bones*3)
 
 		do
-			local t,tl={},0
-			for _,m in ipairs(it.mats) do
-				local c0=m.shininess
-				local c1=m.diffuse
-				local c2=m.specular
-				t[tl+1]=c1[1] t[tl+2]=c1[2] t[tl+3]=c1[3] t[tl+4]=c1[4] tl=tl+4
-				t[tl+1]=c2[1] t[tl+2]=c2[2] t[tl+3]=c2[3] t[tl+4]=c0[1] tl=tl+4
+			if not its.gl_texmat then
+				its.gl_texmat=assert(gl.GenTexture())
 			end
-			tardis.f32.set(colors,t)
+
+			if not its.grd_texmat then
+
+				local g=assert(wgrd.create(wgrd.FMT_U8_RGBA,64,2,1))
+				its.grd_texmat=g
+				
+				local t,tl={},0
+				for _,m in ipairs(it.mats) do
+					local c1=m.diffuse
+					t[tl+1]=c1[1]*255 t[tl+2]=c1[2]*255 t[tl+3]=c1[3]*255 t[tl+4]=c1[4]*255 tl=tl+4
+				end
+				g:pixels(0,0,tl/4,1,t)
+
+				local t,tl={},0
+				for _,m in ipairs(it.mats) do
+					local c0=m.shininess
+					local c2=m.specular
+					t[tl+1]=c2[1]*255 t[tl+2]=c2[2]*255 t[tl+3]=c2[3]*255 t[tl+4]=c0[1] tl=tl+4
+				end
+				g:pixels(0,1,tl/4,1,t)
+
+				gl.BindTexture( gl.TEXTURE_2D , its.gl_texmat )
+
+				gl.TexImage2D(
+					gl.TEXTURE_2D,
+					0,
+					gl.RGBA,
+					g.width,
+					g.height,
+					0,
+					gl.RGBA,
+					gl.UNSIGNED_BYTE,
+					g.data )
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+			end
 		end
 
+		local bones=tardis.f32.new_v4(#its.anim.bones*3)
 		do
 			local t,tl={},0
 			for _,m in ipairs(its.anim.bones) do
@@ -882,8 +915,13 @@ print("merging")
 		end
 
 		it.draw(it,"xyz_normal_mat_bone",function(p)
-		gl.Uniform4f( p:uniform("colors"), colors )
-		gl.Uniform4f( p:uniform("bones"), bones )
+
+			gl.ActiveTexture(gl.TEXTURE0)
+			gl.Uniform1i( p:uniform("tex_mat"), 0 )
+			gl.BindTexture( gl.TEXTURE_2D , its.gl_texmat )
+			
+			gl.Uniform4f( p:uniform("bones"), bones )
+
 		end)
 	
 	end

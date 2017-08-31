@@ -275,7 +275,6 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 
 	chat.set_proxies=function(proxies)
 		for n,v in pairs(proxies or {}) do
-			chats.changes(chat,"proxy",n,v)
 			chat.set_proxy(n,v)
 		end
     end
@@ -451,24 +450,29 @@ chatdown.setup=function(chat_text,changes)
 	chats.set_proxy=function(s,v,default_root)
 		local root,proxy=s:match("(.+)/(.+)") -- is a root given?
 		if not root then root,proxy=default_root,s end -- no root use full string as proxy name
-		local proxies=(chats.get(root) or {}).proxies or {} -- get root proxies or empty table
+
+		local chat=chats.get(root)
+		if not chat then return end -- unknown chat name
+		
+		chat.proxies=chat.proxies or {} -- make sure we have a proxies table
 
 -- add inc/dec operators here?
 		local t
 		if type(v)=="string" then
 			t=v:sub(1,1)
 		end
-		if t=="-" then
-			local n=tonumber(v:sub(2))
-			proxies[proxy]=(tonumber(proxies[proxy]) or 0 ) - n
-		elseif t=="+" then
-			local n=tonumber(v:sub(2))
-			proxies[proxy]=(tonumber(proxies[proxy]) or 0 ) + n
+		local n=tonumber(v:sub(2))
+		if t=="-" and n then
+			chat.proxies[proxy]=(tonumber(chat.proxies[proxy]) or 0 ) - n
+		elseif t=="+" and n then
+			chat.proxies[proxy]=(tonumber(chat.proxies[proxy]) or 0 ) + n
 		else
-			proxies[proxy]=v
+			chat.proxies[proxy]=v
 		end
 		
-		return proxies[proxy]
+		chats.changes(chat,"proxy",proxy,v) -- could adjust value of ( chat.proxies[proxy] ) in callback
+
+		return chat.proxies[proxy]
 	end
 
 	chats.replace_proxies=function(text,default_root)
@@ -537,10 +541,10 @@ chatdown.setup=function(chat_text,changes)
 	chats.changes=changes or function(chat,change,...)
 		local a,b=...
 
-		if     change=="description" then			print("description",a.name)
-		elseif change=="response"    then			print("response   ",a.name)
-		elseif change=="decision"    then			print("decision   ",a.name)
-		elseif change=="proxy"       then			print("proxy      ",a,b)
+		if     change=="description" then			print("description",chat.name,a.name)
+		elseif change=="response"    then			print("response   ",chat.name,a.name)
+		elseif change=="decision"    then			print("decision   ",chat.name,a.name)
+		elseif change=="proxy"       then			print("proxy      ",chat.name,a,b)
 		end
 		
 	end

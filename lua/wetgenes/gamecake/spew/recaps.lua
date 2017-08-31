@@ -36,6 +36,28 @@ M.bake=function(oven,recaps)
 	
 -- pick one of the up[idx] tables
 	function recaps.ups(idx)
+		if idx==0 then -- merge all buttons and axis of all controllers
+			local up={}
+			
+			up.button=function(name)
+				local b=false
+				for i=1,#recaps.up do
+					b=b or recaps.up[i].button(name)
+				end
+				return b
+			end
+
+			up.axis=function(name)
+				local n=0
+				for i=1,#recaps.up do
+					n=n + recaps.up[i].axis(name)
+				end
+				n=math.floor(n/#recaps.up)
+				return n
+			end		
+
+			return up
+		end
 		return recaps.up and ( recaps.up[idx or 1] or recaps.up[1] )
 	end
 

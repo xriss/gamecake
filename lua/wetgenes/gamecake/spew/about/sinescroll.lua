@@ -73,8 +73,8 @@ Greetz to No1 and No6!
 	
 	about.shaders=function()
 		gl.progsrc("about_sinescroll",
-		[[{shaderprefix}
-
+		[[
+		
 		uniform mat4 modelview;
 		uniform mat4 projection;
 		uniform vec4 color;
@@ -93,7 +93,7 @@ Greetz to No1 and No6!
 			v_texcoord=a_texcoord;
 		}
 
-		]],[[{shaderprefix}
+		]],[[
 
 #if defined(GL_FRAGMENT_PRECISION_HIGH)
 precision highp float; /* really need better numbers if possible */

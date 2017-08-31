@@ -4,6 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local wgrd =require("wetgenes.grd")
+local wgrdpaint=require("wetgenes.grdpaint")
 local wpack=require("wetgenes.pack")
 local wzips=require("wetgenes.zips")
 local wstr=require("wetgenes.string")
@@ -65,6 +66,7 @@ tiles.create=function(it,opts)
 	it.setup=function(opts)
 		
 		it.bitmap_grd  =wgrd.create("U8_RGBA", it.hx , it.hy , 1)
+		it.canvas=wgrdpaint.canvas(it.bitmap_grd) -- drawing functions
 
 		it.bitmap_tex=gl.GenTexture()
 		gl.BindTexture( gl.TEXTURE_2D , it.bitmap_tex )	

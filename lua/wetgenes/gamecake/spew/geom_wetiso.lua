@@ -100,7 +100,7 @@ wetiso.predraw=function()
 	if not gl.programs.geom_wetiso then -- setup our special shaders
 	
 		gl.shaders.v_geom_wetiso={
-		source=[[{shaderprefix}
+		source=[[
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -141,7 +141,7 @@ void main()
 }
 
 		gl.shaders.f_geom_wetiso={
-		source=[[{shaderprefix}
+		source=[[
 
 uniform sampler2D tex;
 

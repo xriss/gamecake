@@ -20,13 +20,8 @@ M.bake=function(oven,keys)
 	keys.defaults={}
 -- single player covering entire keyboard (also merge the island1&2 keys in here)
 	keys.defaults["full"]={
-		["1"]			=	"select",
-		["2"]			=	"start",
-		["-"]			=	"l1",
-		["="]			=	"r1",
-		["["]			=	"l2",
-		["]"]			=	"r2",
 	}
+
 -- 1up/2up key islands
 	keys.defaults["island1"]={
 		["up"]			=	"up",
@@ -41,6 +36,12 @@ M.bake=function(oven,keys)
 		["space"]		=	{"fire","x"},
 		["return"]		=	{"fire","a"},
 		["enter"]		=	{"fire","b"},
+		["-"]			=	"l1",
+		["="]			=	"r1",
+		["["]			=	"l2",
+		["]"]			=	"r2",
+		["9"]			=	"select",
+		["0"]			=	"start",
 	}
 	for n,v in pairs(keys.defaults["island1"]) do keys.defaults["full"][n]=v end
 
@@ -57,6 +58,12 @@ M.bake=function(oven,keys)
 		["shift"]		=	{"fire","x"}, -- 1up grabs both the shift
 		["control"]		=	{"fire","a"}, -- control and alt keys
 		["alt"]			=	{"fire","b"}, -- if we cant tell left from right
+		["q"]			=	"l1",
+		["e"]			=	"r1",
+		["tab"]			=	"l2",
+		["r"]			=	"r2",
+		["1"]			=	"select",
+		["2"]			=	"start",
 	}
 	for n,v in pairs(keys.defaults["island2"]) do keys.defaults["full"][n]=v end
 
@@ -122,6 +129,7 @@ M.bake=function(oven,keys)
 
 -- convert keys or whatever into recaps changes
 	function keys.msg(m)
+
 		if not keys.up then return end -- no key maping
 
 		local used=false
@@ -143,6 +151,8 @@ M.bake=function(oven,keys)
 		key.opts=opts or {}
 		key.idx=idx
 		key.maps={}
+		
+		key.last_pad_value={} -- cached data to help ignore wobbling inputs
 		
 		key.joy={}					
 		key.joy.class="joystick"
@@ -481,16 +491,36 @@ M.bake=function(oven,keys)
 					local zone=32768/4
 
 					local doaxis=function(name1,name2)
-						if     m.value <= -zone then	ups.set_button(name1,true)	ups.set_button(name2,false)
-						elseif m.value >=  zone then	ups.set_button(name1,false)	ups.set_button(name2,true)
-						else							ups.set_button(name1,false)	ups.set_button(name2,false)
+
+						local v=0
+						if     m.value <= -zone then v=-1
+						elseif m.value >=  zone then v= 1
 						end
+
+						if key.last_pad_value[name1]~=v then -- only on change
+							if     v<0 then	ups.set_button(name1,true)	ups.set_button(name2,false)
+							elseif v>0 then	ups.set_button(name1,false)	ups.set_button(name2,true)
+							else			ups.set_button(name1,false)	ups.set_button(name2,false)
+							end
+						end
+
+						key.last_pad_value[name1]=v
 					end
 
 					local dotrig=function(name)
-						if     m.value >= zone then		ups.set_button(name,true)
-						else							ups.set_button(name,false)
+
+						local v=0
+						if m.value >=  zone then v= 1
 						end
+
+						if key.last_pad_value[name]~=v then -- only on change
+
+							if     v>0 then		ups.set_button(name,true)
+							else				ups.set_button(name,false)
+							end
+						end
+
+						key.last_pad_value[name]=v
 					end
 
 					if     m.name=="LeftX"			then		doaxis("left","right")

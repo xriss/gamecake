@@ -5,6 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 --local wwin=require("wetgenes.win")
 local tardis=require("wetgenes.tardis")
+local bit=require("bit")
 
 -- widget class master
 -- the master widget
@@ -156,6 +157,11 @@ function wmaster.setup(widget,def)
 				if master.over then
 
 					if master.active~=master.over then
+					
+						if master.active then
+							master.active:call_hook_later("inactive") -- this widget is no longer active
+						end
+
 						master.active=master.over
 						local axis=ups.axis()
 						local rx,ry=master.over.parent:mousexy(axis.mx,axis.my)
@@ -203,6 +209,10 @@ function wmaster.setup(widget,def)
 					
 				end
 				
+				if master.active then
+					master.active:call_hook_later("inactive") -- this widget is no longer active
+				end
+
 				master.active=nil
 				
 			end

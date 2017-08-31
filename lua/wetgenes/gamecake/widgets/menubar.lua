@@ -78,7 +78,7 @@ function wmenubar.layout(widget)
 		end
 	end
 	
---		widget.hy=hy
+	widget.hx=px
 
 	for i,v in ipairs(widget) do -- set all to tallest
 		v.hy=hy

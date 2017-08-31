@@ -30,8 +30,8 @@ function wsplit.layout(widget)
 	
 -- work out the size we want for this split using a number of limiters
 -- a,b may be x,y or y,x depending on the split axis
-	local gsiz=function(a,b)
-		local r=0
+	local gsiz=function(a,b,c)
+		local r=c or 0
 		
 		local fit=widget.split_fit
 
@@ -90,7 +90,7 @@ function wsplit.layout(widget)
 			v.px=0
 			v.py=0
 			v.hy=widget.hy
-			v.hx=gsiz(widget.hx,widget.hy)
+			v.hx=gsiz(widget.hx,widget.hy,v.hx)
 
 			if widget[s2] then
 				local w=widget[s2]
@@ -105,7 +105,7 @@ function wsplit.layout(widget)
 			v.px=0
 			v.py=0
 			v.hx=widget.hx
-			v.hy=gsiz(widget.hy,widget.hx)
+			v.hy=gsiz(widget.hy,widget.hx,v.hy)
 
 			if widget[s2] then
 				local w=widget[s2]
@@ -139,11 +139,11 @@ function wsplit.setup(widget,def)
 	widget.split_axis =def.split_axis  or "x" 	-- or "y"		split across x or y axis
 	widget.split_order=def.split_order or 1 	-- or 2			control the size of the 1st or 2nd subwidget
 	
--- size (in order of precedence if they exist so only the last has a default value)
+-- size (in order of precedence if they exist otherwise we just use the given size of the child widget
 	widget.split_num  =def.split_num			-- fixed pixel size of split
 	widget.split_fit  =def.split_fit			-- desired aspect ratio of split , width*this == height or height*this=width
-	widget.split_fnum =def.split_fnum or 0.5	-- fixed fractional size of split
-	widget.split_scale=def.split_scale or 1		-- scale the fit by this amount (must be <=1)
+	widget.split_fnum =def.split_fnum			-- fixed fractional size of split
+	widget.split_scale=def.split_scale			-- scale the fit by this amount (must be <=1)
 
 -- limits
 	widget.split_min =def.split_min		-- minimum pixel size of split

@@ -120,6 +120,8 @@ void main_setup()
 
 int main_post(const char *message,const char *data)
 {
+	int ret=0;
+
 	if(!L) { main_setup(); }
 	
 	int slen=strlen("cmd=lua");
@@ -127,20 +129,10 @@ int main_post(const char *message,const char *data)
 	{
 		int top=lua_gettop(L);
 		data=data ? data : (message+slen+1);
-		dostringr(L,data,data);
-		if(lua_isnumber(L,-1))
-		{
-//			var_result = PP_MakeDouble( lua_tonumber(L,-1) );
-		}
-		else
-		if(lua_isstring(L,-1))
-		{
-//			var_result = CStrToVar( lua_tostring(L,-1) );
-		}
-
+		ret=dostringr(L,data,data);
 		lua_settop(L,top);
 	}
-	return 0;
+	return ret;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //

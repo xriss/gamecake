@@ -51,7 +51,7 @@ color, otherwise we assume white and down the camera.
 
 	MATIDX
 
-Use a lookup material for colors.
+Use a lookup material for colors which are stored in a texture
 
 
 */
@@ -71,7 +71,7 @@ varying vec2  v_texcoord;
 #endif
 
 #ifdef MATIDX
-uniform vec4 colors[2*MATIDX]; // MATIDX materials
+uniform sampler2D tex_mat;
 varying float v_matidx;
 #endif
 
@@ -142,12 +142,11 @@ void main()
 
 #ifdef BONE
 
-	mat4 m=mat4(0.0);
 
-	int b;
+	mat4 m=mat4(0.0);
 	if( a_bone[0] > 0.0 ) // got bones
 	{
-		for(b=0;b<4;b++)
+		for(int b=0;b<4;b++)
 		{
 			int i=int(a_bone[b])*3;
 			if(i>=3)
@@ -227,12 +226,12 @@ void main(void)
 #endif
 
 #ifdef MATIDX
-	int matidx=int(floor(v_matidx+0.5));
-	vec4 c1=colors[0+matidx*2]*gl_FragColor;
-	vec4 c2=colors[1+matidx*2];
+	float tex_mat_u=(v_matidx+0.5)/MATIDX;
+	vec4 c1=texture2D(tex_mat, vec2(tex_mat_u,0.25) );
+	vec4 c2=texture2D(tex_mat, vec2(tex_mat_u,0.75) );
 #else
 	vec4 c1=gl_FragColor;
-	vec4 c2=vec4(1.0f,1.0f,1.0f,16.0f);
+	vec4 c2=vec4(1.0,1.0,1.0,16.0/255.0);
 #endif
 
 #ifdef LIGHT
@@ -240,18 +239,18 @@ void main(void)
 	vec3 l=normalize( mat3( modelview ) * light_normal );
 	
 	gl_FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
-						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a )).rgb , c1.a );
+						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif
 
 #ifdef PHONG
 	vec3 n=normalize(v_normal);
 	vec3 l=normalize(vec3(0.0,-0.5,1.0));
 	gl_FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
-						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a )).rgb , c1.a );
+						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif
 
 #ifdef DISCARD
-	if((gl_FragColor.a)<0.25) discard;
+	if((gl_FragColor.a)<DISCARD) discard;
 #endif
 
 }
@@ -394,14 +393,14 @@ void main(void)
 #shader "xyz_normal_mat"
 #define XYZ 1
 #define NORMAL 1
-#define MATIDX 16
+#define MATIDX 64.0
 #define PHONG 1
 #include "gamecake_shader"
 
 #shader "xyz_normal_mat_bone"
 #define XYZ 1
 #define NORMAL 1
-#define MATIDX 16
+#define MATIDX 64.0
 #define BONE 1
 #define PHONG 1
 #include "gamecake_shader"

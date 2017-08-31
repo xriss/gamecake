@@ -27,9 +27,11 @@ wmeta.classes={
 	["fill"]=oven.rebake("wetgenes.gamecake.widgets.fill"),
 	["center"]=oven.rebake("wetgenes.gamecake.widgets.center"),
 	["split"]=oven.rebake("wetgenes.gamecake.widgets.split"),
+	["three"]=oven.rebake("wetgenes.gamecake.widgets.three"),
 	["panel"]=oven.rebake("wetgenes.gamecake.widgets.panel"),
 	["screen"]=oven.rebake("wetgenes.gamecake.widgets.screen"),
 	["window"]=oven.rebake("wetgenes.gamecake.widgets.window"),
+	["windock"]=oven.rebake("wetgenes.gamecake.widgets.windock"),
 	["button"]=oven.rebake("wetgenes.gamecake.widgets.button"),
 	["drag"]=oven.rebake("wetgenes.gamecake.widgets.drag"),
 	["text"]=oven.rebake("wetgenes.gamecake.widgets.text"),
@@ -142,15 +144,24 @@ function wmeta.setup(def)
 -- add a previosuly created widget as a child to this widget
 -- the widget will be forcibly removed...
 --
-	function meta.insert(parent,widget)
+	function meta.insert(parent,widget,top)
 	
 		meta.remove(widget) -- make sure we dont end up in two parents
 		
-		table.insert(parent,widget)
+		if top then
+			table.insert(parent,top,widget)
+		else
+			table.insert(parent,widget)
+		end
+
 		widget.parent=parent
 		widget.master=parent.master
 		
 		return widget
+	end
+
+	function meta.parent_index(widget)
+		for i,v in ipairs(widget.parent) do if v==widget then return i end end
 	end
 
 --
@@ -182,6 +193,11 @@ function wmeta.setup(def)
 		
 		widget.size=def.size 	-- special layout action flag
 								--	"full" 	==	Expand to fullsize of widget
+								-- "minmax" fit using hx_min hy_max or hy_min hx_max
+		widget.hx_min=def.hx_min
+		widget.hy_min=def.hy_min
+		widget.hx_max=def.hx_max
+		widget.hy_max=def.hy_max
 		
 		widget.px=def.px or 0 -- relative to parent, pixel position
 		widget.py=def.py or 0
@@ -190,7 +206,11 @@ function wmeta.setup(def)
 		widget.hy=def.hy or 0
 		widget.hz=def.hz or 0 -- used to signal an fbo with a depth buffer
 		
+
 		widget.outline_size=def.outline_size
+		widget.outline_color=def.outline_color
+		widget.outline_fade_color=def.outline_fade_color
+		
 		widget.transparent=def.transparent -- transparent color tint
 
 		widget.color=def.color
@@ -218,6 +238,8 @@ function wmeta.setup(def)
 		widget.text=def.text -- display this text on the button
 		widget.style=def.style -- style the button this way
 		widget.skin=def.skin -- skin the button this way
+		
+		widget.hidden=def.hidden -- start off hidden?
 
 
 -- remove auto solid, need to make sure that all buttons now have a class of button.
@@ -337,9 +359,9 @@ function wmeta.setup(def)
 		
 		local x,y=widget:mousexy(_x,_y)
 
-		local nudge=widget.outline_size or 0 -- allow clicking outside
-		local tx=x-(widget.pan_px or 0)
-		local ty=y-(widget.pan_py or 0)
+		local nudge=0--widget.outline_size or 0 -- allow clicking outside
+		local tx=(x-(widget.pan_px or 0))
+		local ty=(y-(widget.pan_py or 0))
 		if widget==widget.master or ( tx>=0-nudge and tx<widget.hx+nudge and ty>=0-nudge and ty<widget.hy+nudge ) then
 
 			if widget.solid then

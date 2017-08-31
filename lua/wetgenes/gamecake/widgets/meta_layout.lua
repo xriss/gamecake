@@ -42,6 +42,7 @@ function wmeta.setup(def)
 
 --		local m4=widget.m4
 
+
 --print("SS",widget.sx,widget.sy)		
 		if widget.sx==1 and widget.sy==1 then
 				m4:translate( tardis.v3.new(-widget.px,-widget.py,0,0) )
@@ -53,7 +54,7 @@ function wmeta.setup(def)
 --print("CCCscale",widget.sx,widget.sy)
 				m4:translate( tardis.v3.new(widget.hx*0.5,widget.hy*0.5,0) )
 				m4:scale_v3(  tardis.v3.new(1/widget.sx,1/widget.sy,1) )
-				m4:translate( tardis.v3.new(-widget.px-widget.hx*0.5,-widget.py-widget.hy*0.5,0,0) )
+				m4:translate( tardis.v3.new(-widget.px-widget.hx*0.5,-widget.py-widget.hy*0.5,0) )
 --				x= ((x-widget.px-widget.hx*0.5)/widget.parent.sx)+widget.hx*0.5
 --				y= ((y-widget.py-widget.hy*0.5)/widget.parent.sy)+widget.hy*0.5
 			else
@@ -82,35 +83,101 @@ function wmeta.setup(def)
 -- resize is performed recursively before layout so that layout can position its children
 	function meta.resize(widget,mini)
 		mini=mini or 0
-		for i,v in ipairs(widget) do if i>mini then
+		for i,v in ipairs(widget) do if i>mini and v.size then
 		
-			if v.size=="full" then -- force full size
+			for token in string.gmatch(v.size, "[^%s]+") do -- can contain multiple tokens
+			
+				if token=="full" then -- force full size
 
-				v.px=0
-				v.py=0
-				v.hx=widget.hx
-				v.hy=widget.hy
+					v.px=0
+					v.py=0
+					v.hx=widget.hx/widget.sx
+					v.hy=widget.hy/widget.sy
 
---print("full",v.px,v.py,v.hx,v.hy)
---print("parent class",widget.parent.class)
+	--print("full",v.px,v.py,v.hx,v.hy)
+	--print("parent class",widget.parent.class)
 
-			elseif v.size=="fullx" then -- force full size X only
-				v.px=0
-				v.hx=widget.hx
-			elseif v.size=="fully" then -- force full size Y only
-				v.py=0
-				v.hy=widget.hy
-			elseif v.size=="border" then -- force a fixed border size
+				elseif token=="fullx" then -- force full size X only
 
-				v.hx=widget.hx-(v.px*2)
-				v.hy=widget.hy-(v.py*2)
+					v.px=0
+					v.hx=widget.hx/widget.sx
 
+				elseif token=="fully" then -- force full size Y only
+
+					v.py=0
+					v.hy=widget.hy/widget.sy
+
+				elseif token=="border" then -- force a fixed border size
+
+					v.hx=(widget.hx/widget.sx)-(v.px*2)
+					v.hy=(widget.hy/widget.sy)-(v.py*2)
+
+				elseif token=="minmax" then -- force a minimum width maximum height with scale on parent
+				
+					if     v.hx_min and v.hy_max then
+						v.px=0
+						v.py=0
+						v.hx=widget.hx
+						v.hy=v.hy_max
+						if v.hx < v.hx_min then
+							v.sx=widget.hx/v.hx_min
+							v.sy=v.sx
+							v.hx=v.hx_min
+							v.hy=v.hy_max--*v.sy
+						else
+							v.sx=1
+							v.sy=1
+						end
+					elseif v.hy_min and v.hx_max then
+						v.px=0
+						v.py=0
+						v.hx=v.hx_max
+						v.hy=widget.hy
+						if v.hy < v.hy_min then
+							v.sx=widget.hy/v.hy_min
+							v.sy=v.sx
+							v.hy=v.hy_min
+							v.hx=v.hx_max--*v.sx
+						else
+							v.sx=1
+							v.sy=1
+						end
+					end
+
+				end
 			end
 			
 		end end
 		for i,v in ipairs(widget) do
 			if not v.hidden then v:resize() end
 		end
+		for i,v in ipairs(widget) do if i>mini and v.size then
+			for token in string.gmatch(v.size, "[^%s]+") do -- can contain multiple tokens
+		
+				if token=="fitx" then  -- set hx to maximum of children
+
+					v.hx=0
+					for i,w in ipairs(v) do
+						if not w.hidden then
+							local x=(w.hx+w.px)*w.sx
+							if x>v.hx then v.hx=x end
+						end
+					end
+
+				elseif token=="fity" then -- set hy to maximum of children
+
+					v.hy=0
+					for i,w in ipairs(v) do
+						if not w.hidden then
+--print(w.sy)
+							local y=(w.hy+w.py)*w.sy
+							if y>v.hy then v.hy=y end
+						end
+					end
+				end
+
+			end
+		end end
 	end
 
 	function meta.layout(widget,mini)

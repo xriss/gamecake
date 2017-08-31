@@ -7,7 +7,7 @@ if [ "$1" = "clean" ] ; then
 fi
 
 #do we need to use emcc from sdks ?
-emcc --version >/dev/null || source sdks/emsdk_portable/emsdk_env.sh
+emcc --version >/dev/null || source sdks/emsdk-portable/emsdk_env.sh
 
 btype="exe"
 makeopts="config=release_emcc"

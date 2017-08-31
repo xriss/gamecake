@@ -160,6 +160,9 @@ win.generic_keymap={
 	["left control"]="control_l",
 	["right control"]="control_r",
 
+	["left ctrl"]="control_l",
+	["right ctrl"]="control_r",
+
 	["lmenu"]="alt_l",
 	["rmenu"]="alt_r",
 

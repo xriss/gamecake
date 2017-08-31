@@ -16,6 +16,7 @@ local bitdown=M
 
 -- swanky32 base palette
 M.cmap_swanky32={
+	name="Swanky32",
 	[ 0]={bgra=0x00000000,code=". ",name="transparent"},
 	[ 1]={bgra=0xff336622,code="g ",name="green_dark"},
 	[ 2]={bgra=0xff448822,code="G ",name="green"},
@@ -55,6 +56,7 @@ M.cmap_swanky32={
 
 M.cmap_build=function(cmap_data)
 	local cmap={}
+	cmap.name=cmap_data.name
 	for i=0,255 do
 		cmap[i]={bgra=0x00000000,code=string.format("%02X",i),idx=i}  -- reset color
 		cmap[ string.format("%02X",i)]=cmap[i] -- allow hex ascii maps, that are upper *or* lower case
@@ -102,10 +104,13 @@ M.cmap_build=function(cmap_data)
 	return cmap
 end
 
-M.cmap=M.cmap_build(M.cmap_swanky32) -- set the default palette to swanky32
+M.cmap_swanky32=M.cmap_build(M.cmap_swanky32) -- process
+
+M.cmap=M.cmap_swanky32 -- set the default palette to swanky32
 -- this is the global default but you can pass in a different cmap to functions
 
 
+--[[
 M.font_grd=function(s,g,cx,cy,w)
 
 	-- calling this function repeatedly is inefficient but we do not care
@@ -151,7 +156,7 @@ M.font_grd=function(s,g,cx,cy,w)
 	end
 
 end
-
+]]
 
 -- find the size of some bitdown in pixels, possibly rounded up
 M.pix_size=function(str,rx,ry)
@@ -577,9 +582,10 @@ end
 M.setup_blit_font=function(g,w,h)
 	local it={}
 	
-	if not g then -- build a 4x8 font
-		w=4 h=8
-		g=require("wetgenes.gamecake.fun.bitdown_font_4x8").grd_mask
+	if not g then -- auto cache and use a grd font
+		w=w or 4
+		h=h or 8
+		g=bitdown_font.build_grd(w,h)
 	end
 	
 	it.grd=g

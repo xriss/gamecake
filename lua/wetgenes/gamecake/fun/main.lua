@@ -9,8 +9,6 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local wzips=require("wetgenes.zips")
 
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
-local bitdown_font_4x6=require("wetgenes.gamecake.fun.bitdown_font_4x6")
-local bitdown_font_4x8=require("wetgenes.gamecake.fun.bitdown_font_4x8")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -74,6 +72,8 @@ main.setup=function()
 	local screen=main.system.components.screen
 	oven.win:resize(screen.hx*screen.scale,screen.hy*screen.scale)
 	
+	oven.rebake("wetgenes.gamecake.mods.console").data.fun=main.system.code -- use fun.whatever in console to tweak fun globals
+	
 	opts.width=screen.hx*screen.scale
 	opts.height=screen.hy*screen.scale
 	opts.screen_scale=screen.scale
@@ -83,9 +83,9 @@ main.setup=function()
 		win=oven.win,
 --		parent=view.parent,
 --		mode="full",
-		vx=screen.hx*screen.scale,
-		vy=screen.hy*screen.scale,
-		vz=screen.hy*screen.scale*4,
+		vx=screen.hx,
+		vy=screen.hy,
+		vz=screen.hy*4,
 		fov=1/4,
 	})
 	
@@ -94,8 +94,10 @@ end
 
 main.clean=function()
 
-	main.system.clean()
-	
+	if main.system then
+		main.system.clean()
+	end
+
 end
 
 main.msg=function(m)
@@ -206,7 +208,7 @@ main.draw=function()
 	font.set_size(32,0) -- 32 pixels high
 
 	gl.Translate( view.vx/2 , view.vy/2 ,1)
-	gl.Scale(opts.screen_scale,opts.screen_scale,1)
+--	gl.Scale(opts.screen_scale,opts.screen_scale,1)
 	main.system.draw()
 	
 	gl.PopMatrix()
