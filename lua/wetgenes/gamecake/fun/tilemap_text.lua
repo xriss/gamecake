@@ -36,22 +36,28 @@ tilemap_text.inject=function(it,opts)
 	it.text_bg=0  -- default background color index, transparent in swanky32
 	
 	it.text_tile4x8=function(c,fg,bg)
-		return {(c:byte()),0,fg or it.text_fg,bg or it.text_bg}
+		return {(c:byte()),0,fg or it.text_fg,bg or it.text_bg} -- use the first line of tiles as a font
 	end
 	it.text_tile8x8=function(c,fg,bg)
 		local i=(c:byte())
 		local x=i%64
-		local y=1+((i-x)/64) -- use lines 1 and 2
+		local y=1+((i-x)/64) -- use tile lines 1 and 2
 		return {x,y,fg or it.text_fg,bg or it.text_bg}
 	end
 	it.text_tile8x16=function(c,fg,bg)
 		local i=(c:byte())
 		local x=i%32
-		local y=2+((i-x)/64) -- use lines 4,5,6,7 (assuming 16px high chars)
+		local y=2+((i-x)/64) -- use tile lines 4,5,6,7 (or lines 2,3 in 8x16 tiles)
 		return {x,y,fg or it.text_fg,bg or it.text_bg}
 	end
--- replace this function if your font is somewhere else, or you wish to handle more than 128 tiles (utf8)
-	it.text_tile=it.text_tile4x8
+	
+-- replace the text_tile function if your font is somewhere else,
+-- or you wish to handle more than 128 tiles (eg utf8)
+-- here we pick one of the above functions based on the tile size
+
+	if it.tile_hx==4 and it.tile_hy==8  then it.text_tile=it.text_tile4x8  end
+	if it.tile_hx==8 and it.tile_hy==8  then it.text_tile=it.text_tile8x8  end
+	if it.tile_hx==8 and it.tile_hy==16 then it.text_tile=it.text_tile8x16 end
 
 	it.text_print_tile=function(c,x,y,fg,bg)
 		it.tilemap_grd:pixels( x,y, 1,1, it.text_tile(c,fg,bg) )

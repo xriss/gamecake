@@ -67,54 +67,226 @@ fonts.load=function(filename,id)
 
 	if type(filename)=="number" then -- builtin font id, so far we only have this one
 
---print("Loading font 8x8")
-oven.preloader("font","basefont_8x8") --the preloader expects this font so do not confuse it
 
-		if gl then --gl mode
+		if filename==1 then -- basefont 8x8
 		
-			t={}
-			t.filename=filename
-			fonts.set(id,t)
-			t.size=8
+			local name="basefont_8x8"
 
-			t.chars={}
-			t.images={}
+--print("Loading font 8x8")
+oven.preloader("font",name) --the preloader expects this font so do not confuse it
+
+			if gl then --gl mode
 			
-			local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,16*16,1)
+				t={}
+				t.filename=filename
+				fonts.set(id,t)
+				t.size=8
 
-			for i=32,127 do -- setup base textures for 7bit ascii
+				t.chars={}
+				t.images={}
 				
-				local idx=math.floor((i-32)%16) -- 0-31 are unprintable chars
-				local idy=math.floor((i-32)/16)
-				
-				local c={}
-				t.chars[i]=c
-				
-				c.image=1
-				
-				c.add=8 -- character draw width which may be fractional
+				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,16*16,1)
 
-				c.tx=(idx*16)+4
-				c.ty=(idy*16)+4
+				for i=32,127 do -- setup base textures for 7bit ascii
+					
+					local idx=math.floor((i-32)%16) -- 0-31 are unprintable chars
+					local idy=math.floor((i-32)/16)
+					
+					local c={}
+					t.chars[i]=c
+					
+					c.image=1
+					
+					c.add=8 -- character draw width which may be fractional
 
-				c.x=-1 -- offsets to draw the bitmap at, whole pixels
-				c.y=-1
-				c.w=10 --size to draw, a 1 pixel border is good to have
-				c.h=10
+					c.tx=(idx*16)+4
+					c.ty=(idy*16)+4
+
+					c.x=-1 -- offsets to draw the bitmap at, whole pixels
+					c.y=-1
+					c.w=10 --size to draw, a 1 pixel border is good to have
+					c.h=10
+					
+					c.u1=(c.tx-1)/(16*16)
+					c.u2=(c.tx+9)/(16*16)
+					c.v1=(c.ty-1)/(16*16)
+					c.v2=(c.ty+9)/(16*16)
+
+					g:pixels(c.tx,c.ty,8,8,wwin.glyph_8x8(i)) -- splat into grid
+
+				end
 				
-				c.u1=(c.tx-1)/(16*16)
-				c.u2=(c.tx+9)/(16*16)
-				c.v1=(c.ty-1)/(16*16)
-				c.v2=(c.ty+9)/(16*16)
+				t.g=g
 
-				g:pixels(c.tx,c.ty,8,8,wwin.glyph_8x8(i)) -- splat into grid
+	--			t.images[1]=cake.images.upload_grd(nil,g) -- send to opengl
+				t.images[1]=cake.images.load("fonts/"..name,"fonts/"..name,function() return t.g end)
 
 			end
-			
-			t.g=g
 
---			t.images[1]=cake.images.upload_grd(nil,g) -- send to opengl
-			t.images[1]=cake.images.load("fonts/".."basefont_8x8","fonts/".."basefont_8x8",function() return t.g end)
+		elseif filename==2 then -- fun font 4x8
+
+			local name="funfont_4x8"
+
+oven.preloader("font",name)
+
+			if gl then --gl mode
+			
+				local bfontgrd=require("wetgenes.gamecake.fun.bitdown_font").build_grd(4,8)
+			
+				t={}
+				t.filename=filename
+				fonts.set(id,t)
+				t.size=8
+
+				t.chars={}
+				t.images={}
+				
+				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,16*16,1)
+
+				for i=32,127 do -- setup base textures for 7bit ascii
+					
+					local idx=math.floor((i-32)%16) -- 0-31 are unprintable chars
+					local idy=math.floor((i-32)/16)
+					
+					local c={}
+					t.chars[i]=c
+					
+					c.image=1
+					
+					c.add=4 -- character draw width which may be fractional
+
+					c.tx=(idx*16)+6
+					c.ty=(idy*16)+4
+
+					c.x=-1 -- offsets to draw the bitmap at, whole pixels
+					c.y=-1
+					c.w=6 --size to draw, a 1 pixel border is good to have
+					c.h=10
+					
+					c.u1=(c.tx-1)/(16*16)
+					c.u2=(c.tx+5)/(16*16)
+					c.v1=(c.ty-1)/(16*16)
+					c.v2=(c.ty+9)/(16*16)
+
+					g:pixels(c.tx,c.ty,4,8,bfontgrd:pixels(i*4,0,4,8,"")) -- splat into grid
+
+				end
+				
+				t.g=g
+
+				t.images[1]=cake.images.load("fonts/"..name,"fonts/"..name,function() return t.g end)
+
+			end
+
+		elseif filename==3 then -- fun font 8x8
+
+			local name="funfont_8x8"
+
+oven.preloader("font",name)
+
+			if gl then --gl mode
+			
+				local bfontgrd=require("wetgenes.gamecake.fun.bitdown_font").build_grd(8,8)
+			
+				t={}
+				t.filename=filename
+				fonts.set(id,t)
+				t.size=8
+
+				t.chars={}
+				t.images={}
+				
+				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,16*16,1)
+
+				for i=32,127 do -- setup base textures for 7bit ascii
+					
+					local idx=math.floor((i-32)%16) -- 0-31 are unprintable chars
+					local idy=math.floor((i-32)/16)
+					
+					local c={}
+					t.chars[i]=c
+					
+					c.image=1
+					
+					c.add=8 -- character draw width which may be fractional
+
+					c.tx=(idx*16)+4
+					c.ty=(idy*16)+4
+
+					c.x=-1 -- offsets to draw the bitmap at, whole pixels
+					c.y=-1
+					c.w=10--size to draw, a 1 pixel border is good to have
+					c.h=10
+					
+					c.u1=(c.tx-1)/(16*16)
+					c.u2=(c.tx+9)/(16*16)
+					c.v1=(c.ty-1)/(16*16)
+					c.v2=(c.ty+9)/(16*16)
+
+					g:pixels(c.tx,c.ty,8,8,bfontgrd:pixels(i*8,0,8,8,"")) -- splat into grid
+
+				end
+				
+				t.g=g
+
+				t.images[1]=cake.images.load("fonts/"..name,"fonts/"..name,function() return t.g end)
+
+			end
+
+		elseif filename==4 then -- fun font 8x16
+
+			local name="funfont_8x16"
+
+oven.preloader("font",name)
+
+			if gl then --gl mode
+			
+				local bfontgrd=require("wetgenes.gamecake.fun.bitdown_font").build_grd(8,16)
+			
+				t={}
+				t.filename=filename
+				fonts.set(id,t)
+				t.size=16
+
+				t.chars={}
+				t.images={}
+				
+				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,32*16,1)
+
+				for i=32,127 do -- setup base textures for 7bit ascii
+					
+					local idx=math.floor((i-32)%16) -- 0-31 are unprintable chars
+					local idy=math.floor((i-32)/16)
+					
+					local c={}
+					t.chars[i]=c
+					
+					c.image=1
+					
+					c.add=8 -- character draw width which may be fractional
+
+					c.tx=(idx*16)+4
+					c.ty=(idy*32)+8
+
+					c.x=-1 -- offsets to draw the bitmap at, whole pixels
+					c.y=-1
+					c.w=10 --size to draw, a 1 pixel border is good to have
+					c.h=18
+					
+					c.u1=(c.tx-1)/(16*16)
+					c.u2=(c.tx+9)/(16*16)
+					c.v1=(c.ty-1)/(32*16)
+					c.v2=(c.ty+17)/(32*16)
+
+					g:pixels(c.tx,c.ty,8,16,bfontgrd:pixels(i*8,0,8,16,"")) -- splat into grid
+
+				end
+				
+				t.g=g
+
+				t.images[1]=cake.images.load("fonts/"..name,"fonts/"..name,function() return t.g end)
+
+			end
 
 		end
 		

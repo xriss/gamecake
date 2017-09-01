@@ -41,8 +41,8 @@ function M.bake(oven,escmenu)
 
 	function escmenu.setup()
 	
-		oven.cake.fonts.loads({1}) -- always load builtin font number 1 a basic 8x8 font		
-		opts.font=1
+		oven.cake.fonts.loads({4}) -- always load builtin font number 4 a basic 8x16 font		
+		opts.font=4
 		
 		if wzips.exists("data/fonts/Vera.ttf") then -- we got us better font to use :)
 			oven.cake.fonts.loads({"Vera"})

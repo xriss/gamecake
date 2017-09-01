@@ -528,7 +528,14 @@ system.configurator=function(opts)
 			if not need.setup then need=coroutine.yield() end -- wait for setup request (should always be first call)
 
 			-- copy font data tiles into top line
-			system.components.tiles.bitmap_grd:pixels(0,0,128*4,8, bitdown_font.build_grd(4,8):pixels(0,0,128*4,8,"") )
+			system.components.tiles.bitmap_grd:pixels(0,0 ,128*4,8, bitdown_font.build_grd(4,8):pixels(0,0,128*4,8,"") )
+			-- and 8x8 font 
+			system.components.tiles.bitmap_grd:pixels(0,8 ,64*8,8, bitdown_font.build_grd(8,8):pixels(0,   0,64*8,8,"") )
+			system.components.tiles.bitmap_grd:pixels(0,16,64*8,8, bitdown_font.build_grd(8,8):pixels(64*8,0,64*8,8,"") )
+
+			-- and 8x16 font?
+--			system.components.tiles.bitmap_grd:pixels(0,32,64*8,16, bitdown_font.build_grd(8,16):pixels(0,   0,64*8,16,"") )
+--			system.components.tiles.bitmap_grd:pixels(0,48,64*8,16, bitdown_font.build_grd(8,16):pixels(64*8,0,64*8,16,"") )
 
 			-- upload graphics
 			if opts.graphics then

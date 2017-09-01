@@ -49,7 +49,7 @@ function M.bake(oven,console)
 	function console.setup()
 		console.replace_print(_G)
 	
-		oven.cake.fonts.loads({1}) -- load builtin font number 1 a basic 8x8 font
+		oven.cake.fonts.loads({4}) -- load builtin font number 4 a basic 8x16 font
 
 		console.buff=buffedit.create() -- create buff edit
 		console.buff.enter=function(_,line) console.dump_eval(line) end
@@ -59,7 +59,7 @@ function M.bake(oven,console)
 		console.line_width=80
 		console.x=0
 		console.y=0
-		console.y_show=8*8
+		console.y_show=8*16
 
 		console.fps_updates=0
 		
@@ -296,8 +296,8 @@ font.vbs_idx=1
 		gl.PushMatrix()
 
 
-		font.set(cake.fonts.get(1))
-		font.set_size(8,0)
+		font.set(cake.fonts.get(4))
+		font.set_size(16,0)
 		
 		if console.y > 0 then
 		
@@ -308,21 +308,21 @@ font.vbs_idx=1
 
 
 			local i=#console.lines
-			local y=console.y-16
+			local y=console.y-32
 			while y>-8 and i>0 do
 			
 				font.set_xy(0,y)
 				font.draw(console.lines[i])
 				
-				y=y-8
+				y=y-16
 				i=i-1
 			end
 					
-			font.set_xy(0,console.y-8)
+			font.set_xy(0,console.y-16)
 			font.draw(">"..console.buff.line)
 
 			if console.buff.throb > 128 then
-				font.set_xy((console.buff.line_idx+1)*8,console.y-8)
+				font.set_xy((console.buff.line_idx+1)*8,console.y-16)
 				font.draw("_")
 			end
 
@@ -339,11 +339,11 @@ font.vbs_idx=1
 			end
 			for i,v in ipairs(console.lines_display) do
 			
-				font.set_xy(1,1+console.y+i*8-8)
+				font.set_xy(1,1+console.y+i*16-16)
 				gl.Color(pack.argb4_pmf4(0xf000))
 				font.draw(v)
 
-				font.set_xy(0,console.y+i*8-8)
+				font.set_xy(0,console.y+i*16-16)
 				gl.Color(pack.argb4_pmf4(0xffff))
 				font.draw(v)
 
@@ -453,13 +453,13 @@ font.vbs_idx=1
 		
 			if act==1 or act==0 then
 					
-				if key=="prior" then
+				if key=="pageup" then
 				
-					console.y_show=console.y_show-8
+					console.y_show=console.y_show-16
 				
-				elseif key=="next" then
+				elseif key=="pagedown" then
 				
-					console.y_show=console.y_show+8
+					console.y_show=console.y_show+16
 
 				end
 				
