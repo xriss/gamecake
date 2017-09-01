@@ -85,7 +85,7 @@ oven.preloader("font",name) --the preloader expects this font so do not confuse 
 				t.chars={}
 				t.images={}
 				
-				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,16*16,1)
+				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,16*8,1)
 
 				for i=32,127 do -- setup base textures for 7bit ascii
 					
@@ -109,8 +109,8 @@ oven.preloader("font",name) --the preloader expects this font so do not confuse 
 					
 					c.u1=(c.tx-1)/(16*16)
 					c.u2=(c.tx+9)/(16*16)
-					c.v1=(c.ty-1)/(16*16)
-					c.v2=(c.ty+9)/(16*16)
+					c.v1=(c.ty-1)/(16*8)
+					c.v2=(c.ty+9)/(16*8)
 
 					g:pixels(c.tx,c.ty,8,8,wwin.glyph_8x8(i)) -- splat into grid
 
@@ -141,7 +141,7 @@ oven.preloader("font",name)
 				t.chars={}
 				t.images={}
 				
-				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,16*16,1)
+				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,8*16,16*8,1)
 
 				for i=32,127 do -- setup base textures for 7bit ascii
 					
@@ -155,7 +155,7 @@ oven.preloader("font",name)
 					
 					c.add=4 -- character draw width which may be fractional
 
-					c.tx=(idx*16)+6
+					c.tx=(idx*16)+2
 					c.ty=(idy*16)+4
 
 					c.x=-1 -- offsets to draw the bitmap at, whole pixels
@@ -163,10 +163,10 @@ oven.preloader("font",name)
 					c.w=6 --size to draw, a 1 pixel border is good to have
 					c.h=10
 					
-					c.u1=(c.tx-1)/(16*16)
-					c.u2=(c.tx+5)/(16*16)
-					c.v1=(c.ty-1)/(16*16)
-					c.v2=(c.ty+9)/(16*16)
+					c.u1=(c.tx-1)/(8*16)
+					c.u2=(c.tx+5)/(8*16)
+					c.v1=(c.ty-1)/(16*8)
+					c.v2=(c.ty+9)/(16*8)
 
 					g:pixels(c.tx,c.ty,4,8,bfontgrd:pixels(i*4,0,4,8,"")) -- splat into grid
 
@@ -196,7 +196,7 @@ oven.preloader("font",name)
 				t.chars={}
 				t.images={}
 				
-				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,16*16,1)
+				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,16*8,1)
 
 				for i=32,127 do -- setup base textures for 7bit ascii
 					
@@ -220,8 +220,8 @@ oven.preloader("font",name)
 					
 					c.u1=(c.tx-1)/(16*16)
 					c.u2=(c.tx+9)/(16*16)
-					c.v1=(c.ty-1)/(16*16)
-					c.v2=(c.ty+9)/(16*16)
+					c.v1=(c.ty-1)/(16*8)
+					c.v2=(c.ty+9)/(16*8)
 
 					g:pixels(c.tx,c.ty,8,8,bfontgrd:pixels(i*8,0,8,8,"")) -- splat into grid
 
@@ -251,7 +251,7 @@ oven.preloader("font",name)
 				t.chars={}
 				t.images={}
 				
-				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,32*16,1)
+				local g=grd.create(grd.FMT_U8_RGBA_PREMULT,16*16,32*8,1)
 
 				for i=32,127 do -- setup base textures for 7bit ascii
 					
@@ -275,8 +275,8 @@ oven.preloader("font",name)
 					
 					c.u1=(c.tx-1)/(16*16)
 					c.u2=(c.tx+9)/(16*16)
-					c.v1=(c.ty-1)/(32*16)
-					c.v2=(c.ty+17)/(32*16)
+					c.v1=(c.ty-1)/(32*8)
+					c.v2=(c.ty+17)/(32*8)
 
 					g:pixels(c.tx,c.ty,8,16,bfontgrd:pixels(i*8,0,8,16,"")) -- splat into grid
 
