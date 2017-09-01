@@ -745,17 +745,10 @@ end
 		if widget.text then
 		
 			local fy=widget:bubble("text_size") or 16
-			local f=widget:bubble("font") or 1
---			f=1
---[[
-			if f then
-				if type(f)=="number" then
-				else
-					typ=typ-fy/8 -- reposition font slightly as fonts other than the builtin probably have descenders
-				end
-			end
-]]
+			local f=widget:bubble("font") or 4
 			
+			local fontfix=0.6 -- this fixes the baseline
+			if type(f)=="number" then fontfix=0.4 end -- builtin fonts look better like this
 			font.set(cake.fonts.get(f))
 			font.set_size(fy,0)
 
@@ -782,10 +775,10 @@ end
 					tx=(widget.hx-tx)/2
 				elseif widget.text_align=="left_center" then
 					tx=widget.hy/4
-					ty=(widget.hy/2)-(fy*0.7)+typ
+					ty=(widget.hy/2)-(fy*fontfix)+typ
 				else -- center a single line vertically as well
 					tx=(widget.hx-tx)/2 
-					ty=(widget.hy/2)-(fy*0.7)+typ
+					ty=(widget.hy/2)-(fy*fontfix)+typ
 				end
 				
 				tx=tx+txp
