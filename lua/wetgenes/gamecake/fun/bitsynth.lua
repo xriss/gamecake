@@ -95,6 +95,12 @@ bitsynth.fillnotes(bitsynth) -- we can now use bitsynth.C4 or bitsynth.Cs4 which
 -- put in a value 0-1 and get out a single wave cycle that goes 0 1 0 -1 0 ish depending on wave
 bitsynth.fwav={}
 
+-- create a scaled version of one of the other fwav functions
+bitsynth.fwav.scale=function(f,scale)
+	if type(f)=="string" then f=assert(bitsynth.fwav[f]) end
+	return function(t) return f(t)*scale end
+end
+
 --[[
 
 	   ***
@@ -169,6 +175,17 @@ bitsynth.fwav.whitenoise=function(t)
 	return (math.random()-0.5)*2 -- probably need a better random function?
 end
 
+--[[
+	    *
+	   * *
+	  *   * 
+	 *     * 
+	*       *       *
+			 *     *
+			  *   *
+			   * *
+	            *
+]]
 bitsynth.fwav.triangle=function(t)
 	t=t%1
 	if     t<0.25 then return t*4
@@ -253,6 +270,7 @@ bitsynth.gwav=function(ot)
 	if type(it.fwav)=="string" then it.fwav=bitsynth.fwav[it.fwav] end
 	
 	it.sample=0 -- last sample index ( it.sample/bitsynth.samplerate == time in seconds ), this is expected to only ever increase
+	it.duty=ot.duty or 0.5
 
 -- adjust the frequency but keep the wave at a stable point.
 	it.set_frequency=function(f)
@@ -274,7 +292,15 @@ bitsynth.gwav=function(ot)
 	it.set_frequency( bitsynth.note2freq(ot.frequency) or bitsynth.C4 ) -- start at this frequency
 -- read a sample, and advance the sample counter by one.
 	it.read=function()
-		local v=it.fwav((it.sample/it.wavelength)+it.phase)
+		local t=(it.sample/it.wavelength)+it.phase
+		if it.duty~=0.5 then -- only if not default duty
+			local ta=math.floor(t)
+			local tb=(t-ta)
+			if tb<it.duty then 		tb=      tb *(0.5/   it.duty)	-- i think we are /0 safe here...
+			else					tb=1-((1-tb)*(0.5/(1-it.duty)))	end
+			t=ta+tb
+		end
+		local v=it.fwav(t)
 		it.sample=it.sample+1
 		return v
 	end
