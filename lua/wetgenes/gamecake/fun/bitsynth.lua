@@ -193,7 +193,7 @@ bitsynth.gwav=function(ot)
 
 	it.phase=ot.phase or 0 -- 0 to 1 starting phase of wave, this is auto adjusted as we change the frequency
 
-	it.frequency=bitsynth.C4 -- default frequency of C4
+	it.frequency=bitsynth.note2freq(ot.frequency or bitsynth.C4) -- default frequency of C4
 	it.wavelength=bitsynth.samplerate/it.frequency -- and default wavelength
 
 -- adjust the frequency but keep the wave at a stable point.

@@ -191,7 +191,7 @@ system.clean=function()
 end
 
 system.msg=function(m)
-	system.resume({msg=true})
+	system.resume({msg=m})
 	for _,it in ipairs(system.components) do
 		if it.msg then it.msg(m) end
 	end
@@ -568,6 +568,11 @@ system.configurator=function(opts)
 					if opts.draw then
 						reset_draw()
 						opts.draw()
+					end
+				end
+				if need.msg then
+					if opts.msg then
+						opts.msg(need.msg) -- pass on raw msgs
 					end
 				end
 				if need.clean then done=true end -- cleanup requested
