@@ -95,19 +95,76 @@ bitsynth.fillnotes(bitsynth) -- we can now use bitsynth.C4 or bitsynth.Cs4 which
 -- put in a value 0-1 and get out a single wave cycle that goes 0 1 0 -1 0 ish depending on wave
 bitsynth.fwav={}
 
+--[[
+
+	   ***
+	 **   **
+	*       *
+	*       *       *
+			*       *
+			 **   **
+			   ***
+
+]]
 bitsynth.fwav.sine=function(t)
-	return sin( (t%1) * pi  )
+	return sin( (t%1) * pi*2  )
 end
 
+--[[
+
+	*********
+	*       *
+	*       *
+	*       *       *
+			*       *
+			*       *
+			*********
+
+]]
 bitsynth.fwav.square=function(t)
 	if (t%1)>=0.5 then return -1 end 
 	return 1
 end
 
+--[[
+
+		  ***
+		**  *
+	  **    *
+	**      *      **
+			*    **  
+			*  **    
+			***
+
+]]
 bitsynth.fwav.sawtooth=function(t)
-	return (((t+0.75)%1)*-2)+1
+	return (((t+0.5)%1)*2)-1
 end
 
+--[[
+
+	***
+	*  **
+	*    ** 
+	*      ***      *
+			  **    * 
+				**  * 
+				  ***
+
+]]
+bitsynth.fwav.toothsaw=function(t)
+	return ((t%1)*-2)+1
+end
+
+--[[
+		  *     *
+	  *   *     *
+	  *  *** *  ** *
+	* *  * ***  ** * *
+	 * ***  * **  * *
+	   *    * **  *
+			* *
+]]
 bitsynth.fwav.whitenoise=function(t)
 	return (math.random()-0.5)*2 -- probably need a better random function?
 end
@@ -158,11 +215,16 @@ end
 -- we feed these values into flinear and return the function,length
 bitsynth.fadsr=function(sv,at,dt,st,rt)
 	if type(sv)=="table" then sv,at,dt,st,rt=unpack(sv) end -- maybe unpack inputs from table
-	local t={0,0}
-	if at~=0 then t[#t+1]=at          t[#t+1]=1  end -- deal with 0 amounts of time
-	if dt~=0 then t[#t+1]=at+dt       t[#t+1]=sv end
-	if st~=0 then t[#t+1]=at+dt+st    t[#t+1]=sv end
-	if rt~=0 then t[#t+1]=at+dt+st+rt t[#t+1]=0  end
+	local t={}
+	if at~=0 then		t[#t+1]=0           t[#t+1]=0      -- start at 0
+						t[#t+1]=at          t[#t+1]=1      -- attack
+	elseif dt~=0 then	t[#t+1]=1           t[#t+1]=1  end -- start at 1
+
+	if st~=0 then		t[#t+1]=at+dt       t[#t+1]=sv     -- sustain start
+						t[#t+1]=at+dt+st    t[#t+1]=sv end -- sustain end
+
+	if rt~=0 then		t[#t+1]=at+dt+st+rt t[#t+1]=0  end -- release
+
 	return bitsynth.flinear( unpack(t) ),at+dt+st+rt
 end
 
@@ -210,7 +272,6 @@ bitsynth.gwav=function(ot)
 	end
 	it.set_frequency(0) -- reset
 	it.set_frequency( bitsynth.note2freq(ot.frequency) or bitsynth.C4 ) -- start at this frequency
-
 -- read a sample, and advance the sample counter by one.
 	it.read=function()
 		local v=it.fwav((it.sample/it.wavelength)+it.phase)
