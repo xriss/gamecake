@@ -167,15 +167,16 @@ bitsynth.fadsr=function(sv,at,dt,st,rt)
 end
 
 
--- turn a -1 +1 signal into a frequency signal -1==f1 0==f2 +1==f3
-bitsynth.freq_range=function(f1,f2,f3)
-	if type(f1)=="table" then f1,f2,f3=unpack(f1) end -- maybe unpack inputs from table
+-- turn a -1 +1 signal into a frequency signal -1==f1 0==f2 +1==f3 + t*t1
+bitsynth.freq_range=function(f1,f2,f3,t1)
+	if type(f1)=="table" then f1,f2,f3,t1=unpack(f1) end -- maybe unpack inputs from table
 	f1=bitsynth.note2freq(f1)
 	f2=bitsynth.note2freq(f2)
 	f3=bitsynth.note2freq(f3)
-	local f=function(b)
-		if b<0 then return f2+((f1-f2)*-b) end
-		return f2+((f3-f2)*b)
+	t1=t1 or 0
+	local f=function(m,t)
+		if m<0 then return f2+((f1-f2)*-m)+t*t1 end
+		return f2+((f3-f2)*m)+t*t1
 	end
 	return f
 end
@@ -190,11 +191,6 @@ bitsynth.gwav=function(ot)
 	if type(it.fwav)=="string" then it.fwav=bitsynth.fwav[it.fwav] end
 	
 	it.sample=0 -- last sample index ( it.sample/bitsynth.samplerate == time in seconds ), this is expected to only ever increase
-
-	it.phase=ot.phase or 0 -- 0 to 1 starting phase of wave, this is auto adjusted as we change the frequency
-
-	it.frequency=bitsynth.note2freq(ot.frequency or bitsynth.C4) -- default frequency of C4
-	it.wavelength=bitsynth.samplerate/it.frequency -- and default wavelength
 
 -- adjust the frequency but keep the wave at a stable point.
 	it.set_frequency=function(f)
@@ -212,6 +208,7 @@ bitsynth.gwav=function(ot)
 			while it.phase<0 do it.phase=it.phase+1 end -- make sure phase is not a negative value
 		end
 	end
+	it.set_frequency(0) -- reset
 	it.set_frequency( bitsynth.note2freq(ot.frequency) or bitsynth.C4 ) -- start at this frequency
 
 -- read a sample, and advance the sample counter by one.
@@ -234,18 +231,23 @@ bitsynth.sound.simple=function(ot)
 	
 	it.name=ot.name -- remember our name
 	
-	it.fread=ot.fread or function(it,t) end
+	-- we call a function to return a bound function or use a default empty one
+	it.fread=ot.fread and ot.fread(it) or function(t) end
 
 	it.gwav=bitsynth.gwav(ot)
 
-	it.fadsr,it.time=bitsynth.fadsr(ot.adsr)
-
+	if ot.fadsr then
+		it.fadsr,it.time=ot.fadsr(it)
+	else 
+		it.fadsr,it.time=bitsynth.fadsr(ot.adsr)
+	end
+	
 	it.samples=it.time*bitsynth.samplerate
 	it.sample=0
 	it.read=function()
 		local t=it.sample/bitsynth.samplerate
 
-		it.fread(it,t) -- main callback can change settings by time
+		it.fread(t) -- main callback can change settings by time
 		
 		local e=it.fadsr(t) -- envelope
 		local w=it.gwav.read() -- waveform
@@ -267,17 +269,17 @@ bitsynth.sound.simple_fm=function(ot)
 	local it=bitsynth.sound.simple(ot) -- build on top of the simple code
 
 	it.fm_gwav=bitsynth.gwav(ot.fm) -- another wave
-	it.fm_frange=ot.fm.frange or function(v,s) return v end -- auto warble between given notes
 
-	if ot.fm.range then it.fm_frange=bitsynth.freq_range(ot.fm.range) end
+	-- we call a function to return a bound function or use a default empty one
+	it.fm_ffreq=ot.fm.ffreq and ot.fm.ffreq(it) or function(v,s) return it.gwav.frequency end
 
 	it.read=function()
 		local t=it.sample/bitsynth.samplerate
 		
-		it.fread(it,t) -- main callback can change settings by time
+		it.fread(t) -- main callback can change settings by time
 
 		local m=it.fm_gwav.read() -- get the modulation value
-		it.gwav.set_frequency( it.fm_frange(m,t) ) -- apply it to the main frequency
+		it.gwav.set_frequency( it.fm_ffreq(m,t) ) -- apply it to the main frequency
 
 		local e=it.fadsr(t) -- envelope
 		local w=it.gwav.read() -- waveform
