@@ -82,10 +82,11 @@ sprites.create=function(it,opts)
 
 		v.pz=v.pz or 0
 
-		v.r=v.color and v.color.r or 1
-		v.g=v.color and v.color.g or 1
-		v.b=v.color and v.color.b or 1
-		v.a=v.color and v.color.a or 1
+		if type(v.color)=="number" then v.color={ wpack.argb8_pmf4(v.color) } end -- an 0xff000000 style color
+		v.r=v.color and ( v.color.r or v.color[1] ) or 1
+		v.g=v.color and ( v.color.g or v.color[2] ) or 1
+		v.b=v.color and ( v.color.b or v.color[3] ) or 1
+		v.a=v.color and ( v.color.a or v.color[4] ) or 1
 		
 	end
 
