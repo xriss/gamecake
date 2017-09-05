@@ -80,23 +80,37 @@ end
 bitsynth.fillnotes=function(t)
 	for n=1,12 do
 		for o=1,8 do
-			local s=bitsynth.note_names[n]..o
-			local f=bitsynth.note2freq(s)
-			t[s]=f
-			t[s:gsub("#","s")]=f -- also use s for sharp as # is an operator
+			local s1=bitsynth.note_names[n]..o
+			local s2=s1:gsub("#","s")
+			local s3=s1:gsub("#",""):lower()
+			local f=bitsynth.note2freq(s1)
+			t[s1]=f -- the default -> C#4
+			t[s2]=f -- also use s for sharp as # is an operator -> Cs4
+			if s1~=s2 then -- this is a sharp
+				t[s3]=f -- lowercase means sharp -> c4
+			end
 		end
 	end
 end
 
 bitsynth.fillnotes(bitsynth) -- we can now use bitsynth.C4 or bitsynth.Cs4 which is easier than bitsynth["C#4"]
 
+-- create a rnd function
+local randomise=function(seed)
+	local n=seed -- set the seed
+	return function() -- get the next number as a value between 0 and 1
+		n=(n*75)%65537
+		return (n-1)/65536
+	end
+end
+bitsynth.rnd=randomise(437) -- a global random sequence
 
 -- repeating wave functions
 -- put in a value 0-1 and get out a single wave cycle that goes 0 1 0 -1 0 ish depending on wave
 bitsynth.fwav={}
 
 -- create a scaled version of one of the other fwav functions
-bitsynth.fwav.scale=function(f,scale)
+bitsynth.fwav.fscale=function(f,scale)
 	if type(f)=="string" then f=assert(bitsynth.fwav[f]) end
 	return function(t) return f(t)*scale end
 end
@@ -117,19 +131,23 @@ bitsynth.fwav.sine=function(t)
 end
 
 --[[
-
-	*********
-	*       *
-	*       *
+	    *
+	   * *
+	  *   * 
+	 *     * 
 	*       *       *
-			*       *
-			*       *
-			*********
-
+			 *     *
+			  *   *
+			   * *
+	            *
 ]]
-bitsynth.fwav.square=function(t)
-	if (t%1)>=0.5 then return -1 end 
-	return 1
+bitsynth.fwav.triangle=function(t)
+	t=t%1
+	if     t<0.25 then return t*4
+	elseif t<0.50 then return 1-((t-0.25)*4)
+	elseif t<0.75 then return (t-0.5)*-4
+	else               return ((t-0.75)*4)-1
+	end
 end
 
 --[[
@@ -163,6 +181,22 @@ bitsynth.fwav.toothsaw=function(t)
 end
 
 --[[
+
+	*********
+	*       *
+	*       *
+	*       *       *
+			*       *
+			*       *
+			*********
+
+]]
+bitsynth.fwav.square=function(t)
+	if (t%1)>=0.5 then return -1 end 
+	return 1
+end
+
+--[[
 		  *     *
 	  *   *     *
 	  *  *** *  ** *
@@ -171,30 +205,38 @@ end
 	   *    * **  *
 			* *
 ]]
-bitsynth.fwav.whitenoise=function(t)
-	return (math.random()-0.5)*2 -- probably need a better random function?
-end
-
---[[
-	    *
-	   * *
-	  *   * 
-	 *     * 
-	*       *       *
-			 *     *
-			  *   *
-			   * *
-	            *
-]]
-bitsynth.fwav.triangle=function(t)
-	t=t%1
-	if     t<0.25 then return t*4
-	elseif t<0.50 then return 1-((t-0.25)*4)
-	elseif t<0.75 then return (t-0.5)*-4
-	else               return ((t-0.75)*4)-1
+bitsynth.fwav.fwhitenoise=function(steps,seed) -- steps is the number of values in a white noise wave cycle
+	local seeds={[0]=(seed or 437)} -- remember seed for *each* cycle
+	local getseed=function(t)
+		for i=0,t do
+			if not seeds[i] then
+				local n=seeds[i-1]
+				for j=1,steps do n=(n*75)%65537 end
+				seeds[i]=n
+			end
+		end
+		return seeds[t]
+	end
+	return function(t)
+		local n=getseed(math.floor(t))
+		for j=0,math.floor((t%1)*steps) do n=(n*75)%65537 end
+		return (n-1)/65536
 	end
 end
+bitsynth.fwav.whitenoise=bitsynth.fwav.fwhitenoise(16,437)
 
+-- attempt at pink noise... a tad expensive and not as versatile as white
+--[[
+bitsynth.fwav.fpinknoise=function(steps,layers,seed) -- layers is the number of white noise samples we merge
+	local f=bitsynth.fwav.fwhitenoise(steps,seed)
+	return function(t)
+		local n=0
+		for i=1,layers do n=n+f(t*math.pow(2,i-1)) end
+		return n/layers
+	end
+end
+bitsynth.fwav.pinknoise=bitsynth.fwav.fpinknoise(16,8,437)
+]]
 
 -- create an envelope function, could be used for waves as well if you wish but is rather slow with lots of points
 -- pass in a {t1,v1,t2,v2,t3,v3,...} table of points and we will linear interpolate between the values
@@ -317,6 +359,9 @@ bitsynth.sound.simple=function(ot)
 	local it={}
 	
 	it.name=ot.name -- remember our name
+	it.raw=ot.raw -- remember this raw table
+
+	it.volume=ot.volume or 1 -- render volume
 	
 	-- we call a function to return a bound function or use a default empty one
 	it.fread=ot.fread and ot.fread(it) or function(t) end
@@ -340,7 +385,7 @@ bitsynth.sound.simple=function(ot)
 		local w=it.gwav.read() -- waveform
 
 		it.sample=it.sample+1
-		return e*w
+		return e*w*it.volume
 	end
 
 	it.rewind=function() it.sample=0 end
@@ -372,7 +417,7 @@ bitsynth.sound.simple_fm=function(ot)
 		local w=it.gwav.read() -- waveform
 
 		it.sample=it.sample+1
-		return e*w
+		return e*w*it.volume
 	end
 	
 	return it
