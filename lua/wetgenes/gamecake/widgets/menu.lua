@@ -13,6 +13,8 @@ local cake=oven.cake
 local canvas=cake.canvas
 local font=canvas.font
 
+local wwindow=oven.rebake("wetgenes.gamecake.widgets.window")
+
 function wmenu.update(widget)
 
 	if not widget.hidden then
@@ -69,6 +71,18 @@ function wmenu.layout(widget)
 	end
 	
 	widget.hx=hx
+	
+	local window,screen=wwindow.window_screen(widget)
+
+	if widget.px+widget.hx > screen.hx then widget.px=screen.hx-widget.hx end -- push away from edges
+	if widget.py+widget.hy > screen.hy then widget.py=screen.hy-widget.hy end
+	if widget.px<0 then widget.px=0 end
+	if widget.py<0 then widget.py=0 end
+	
+	if widget.hx>screen.hx then widget.sx=screen.hx/widget.hx else widget.sx=1 end -- scale to fit
+	if widget.hy>screen.hy then widget.sy=screen.hy/widget.hy else widget.sy=1 end
+	
+	if widget.sx<widget.sy then widget.sy=widget.sx else widget.sx=widget.sy end -- pick smallest
 
 	for i,v in ipairs(widget) do -- set all to widest
 		v.hx=hx

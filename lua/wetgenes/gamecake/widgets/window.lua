@@ -28,6 +28,7 @@ wwindow=wwindow or {}
 		end
 		return window,screen
 	end
+	wwindow.window_screen=window_screen -- export
 	
 	local winclamp=function(it)
 		local window,screen=window_screen(it)

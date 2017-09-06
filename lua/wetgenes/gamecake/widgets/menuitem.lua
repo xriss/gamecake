@@ -47,6 +47,7 @@ function wmenuitem.menu_add(widget,opts)
 			solid=true,
 			highlight="none",
 			fbo=true,
+			smode="topleft",
 	
 		})
 
