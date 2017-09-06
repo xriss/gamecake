@@ -275,14 +275,15 @@ end
 bitsynth.fadsr=function(sv,at,dt,st,rt)
 	if type(sv)=="table" then sv,at,dt,st,rt=unpack(sv) end -- maybe unpack inputs from table
 	local t={}
-	if at~=0 then		t[#t+1]=0           t[#t+1]=0      -- start at 0
-						t[#t+1]=at          t[#t+1]=1      -- attack
-	elseif dt~=0 then	t[#t+1]=1           t[#t+1]=1  end -- start at 1
+	if at~=0 then						t[#t+1]=0           t[#t+1]=0      -- start at 0
+										t[#t+1]=at          t[#t+1]=1      -- attack
+	elseif dt~=0 then					t[#t+1]=1           t[#t+1]=1	   -- start at 1
+	elseif st==0 then					t[#t+1]=at+dt       t[#t+1]=sv end -- start at sustain level
 
-	if st~=0 then		t[#t+1]=at+dt       t[#t+1]=sv     -- sustain start
-						t[#t+1]=at+dt+st    t[#t+1]=sv end -- sustain end
-
-	if rt~=0 then		t[#t+1]=at+dt+st+rt t[#t+1]=0  end -- release
+	if st~=0 then						t[#t+1]=at+dt       t[#t+1]=sv     -- sustain start
+										t[#t+1]=at+dt+st    t[#t+1]=sv end -- sustain end
+						
+	if rt~=0 then						t[#t+1]=at+dt+st+rt t[#t+1]=0  end -- release
 
 	return bitsynth.flinear( unpack(t) ),at+dt+st+rt
 end
