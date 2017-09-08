@@ -35,7 +35,6 @@ sfx.create=function(it,opts)
 	it.name=opts.name or it.component
 
 	it.bitsynth=bitsynth
-	it.sound=bitsynth.sound
 
 	it.render=function(ot) -- render a bitsynth sound
 		local t=bitsynth.render(ot)

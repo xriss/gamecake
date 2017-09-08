@@ -352,36 +352,50 @@ bitsynth.gwav=function(ot)
 end
 
 
--- generic sound types with a few options
-bitsynth.sound={}
-
--- most basic sound, nothing clever just a waveform and a volume envelope
-bitsynth.sound.simple=function(ot)
+-- prepare a generator to render from the options table (ot)
+-- most basic sound, nothing clever just a waveform and a volume envelope with optional FM
+bitsynth.prepare=function(ot)
 	local it={}
 	
 	it.name=ot.name -- remember our name
-	it.raw=ot.raw -- remember this raw table
+	it.raw=ot.raw -- remember this raw table of options
 
 	it.volume=ot.volume or 1 -- render volume
 	
 	-- we call a function to return a bound function or use a default empty one
 	it.fread=ot.fread and ot.fread(it) or function(t) end
 
-	it.gwav=bitsynth.gwav(ot)
+	it.gwav=bitsynth.gwav(ot) -- base wave
 
 	if ot.fadsr then
-		it.fadsr,it.time=ot.fadsr(it)
+		it.fadsr,it.time=ot.fadsr(it) -- custom function
 	else 
-		it.fadsr,it.time=bitsynth.fadsr(ot.adsr)
+		it.fadsr,it.time=bitsynth.fadsr(ot.adsr) -- or data table
 	end
 	
+	if ot.fm then -- fm table flags fm actions
+
+		it.fm_gwav=bitsynth.gwav(ot.fm) -- run another wave as fm input
+
+		-- we call a function to return a bound function or use a default empty one
+		it.fm_ffreq=ot.fm.ffreq and ot.fm.ffreq(it) or function(v,s) return it.gwav.frequency end
+
+	end
+
+
 	it.samples=it.time*bitsynth.samplerate
 	it.sample=0
 	it.read=function()
 		local t=it.sample/bitsynth.samplerate
-
-		it.fread(t) -- main callback can change settings by time
 		
+		it.fread(t) -- main callback can change other settings by time
+
+		-- using frequency modulation?
+		if it.fm_gwav then
+			local m=it.fm_gwav.read() -- get the modulation value
+			it.gwav.set_frequency( it.fm_ffreq(m,t) ) -- function decides how it changes the frequency
+		end
+
 		local e=it.fadsr(t) -- envelope
 		local w=it.gwav.read() -- waveform
 
@@ -394,40 +408,12 @@ bitsynth.sound.simple=function(ot)
 	return it
 end
 
--- a simple sound, with its frequency messed with
-bitsynth.sound.simple_fm=function(ot)
-
-	assert(type(ot.fm)=="table") -- this must be a table
-	
-	local it=bitsynth.sound.simple(ot) -- build on top of the simple code
-
-	it.fm_gwav=bitsynth.gwav(ot.fm) -- another wave
-
-	-- we call a function to return a bound function or use a default empty one
-	it.fm_ffreq=ot.fm.ffreq and ot.fm.ffreq(it) or function(v,s) return it.gwav.frequency end
-
-	it.read=function()
-		local t=it.sample/bitsynth.samplerate
-		
-		it.fread(t) -- main callback can change settings by time
-
-		local m=it.fm_gwav.read() -- get the modulation value
-		it.gwav.set_frequency( it.fm_ffreq(m,t) ) -- apply it to the main frequency
-
-		local e=it.fadsr(t) -- envelope
-		local w=it.gwav.read() -- waveform
-
-		it.sample=it.sample+1
-		return e*w*it.volume
-	end
-	
-	return it
-end
-
-
 -- render a sound into a data table, the length is controlled by the sound
 -- m samples are combined and averaged, so you can set the sample rate higher and subsample it down here?
 bitsynth.render=function(it)
+
+	if not it.gwav then it=bitsynth.prepare(it) end -- auto prepare if no wave generator
+
 	local m=bitsynth.oversample
 	it.rewind()
 	local t={}
