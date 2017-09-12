@@ -49,11 +49,15 @@ M.bake=function(oven,recaps)
 
 			up.axis=function(name)
 				local n=0
+				local t=0
 				for i=1,#recaps.up do
-					n=n + recaps.up[i].axis(name)
+					local v=recaps.up[i].axis(name)
+					if v then
+						n=n+v
+						t=t+1
+					end
 				end
-				n=math.floor(n/#recaps.up)
-				return n
+				if t>0 then return math.floor(n/t) end
 			end		
 
 			return up
@@ -106,7 +110,7 @@ M.bake=function(oven,recaps)
 
 		function recap.axis(name) -- return state "valid" frame data not current "volatile" frame data
 			if name then
-				return recap.state_axis[name] or 0
+				return recap.state_axis[name]
 			end
 			return recap.state_axis -- return all axis if no name given
 		end
