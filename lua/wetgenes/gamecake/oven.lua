@@ -698,6 +698,11 @@ end
 						m.yraw=m.y	
 					end
 
+					if m.class=="touch" then	-- need to fix x,y numbers
+						m.xraw=m.x				-- remember in message
+						m.yraw=m.y	
+					end
+
 					if m.class=="close" then -- window has been closed so do a shutdown
 						if oven.enable_close_window then
 							oven.next=true
