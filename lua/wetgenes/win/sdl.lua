@@ -265,7 +265,7 @@ sdl.msg_fetch=function()
 			t.action=(e.type==SDL.event.FingerUp) and -1 or ( (e.type==SDL.event.FingerDown) and 1 or 0 )
 			t.x=e.x
 			t.y=e.y
-			t.id=e.fingerid
+			t.id=e.fingerId
 			t.pressure=e.pressure
 			
 --			dprint(t)
