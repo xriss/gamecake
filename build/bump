@@ -4,7 +4,8 @@ VNUM=`gamecake ./bump.lua`
 
 echo $VNUM
 
-../git-dot
+git add ..
+git commit -m.
 
 git tag -a V$VNUM -m "VERSION $VNUM"
 
