@@ -36,19 +36,19 @@ tilemap_text.inject=function(it,opts)
 	it.text_bg=0  -- default background color index, transparent in swanky32
 	
 	it.text_tile4x8=function(c,fg,bg)
-		return {(c:byte()),0,fg or it.text_fg,bg or it.text_bg} -- use the first line of tiles as a font
+		return (c:byte()),0,fg or it.text_fg,bg or it.text_bg -- use the first line of tiles as a font
 	end
 	it.text_tile8x8=function(c,fg,bg)
 		local i=(c:byte())
 		local x=i%64
 		local y=1+((i-x)/64) -- use tile lines 1 and 2
-		return {x,y,fg or it.text_fg,bg or it.text_bg}
+		return x,y,fg or it.text_fg,bg or it.text_bg
 	end
 	it.text_tile8x16=function(c,fg,bg)
 		local i=(c:byte())
 		local x=i%32
 		local y=2+((i-x)/64) -- use tile lines 4,5,6,7 (or lines 2,3 in 8x16 tiles)
-		return {x,y,fg or it.text_fg,bg or it.text_bg}
+		return x,y,fg or it.text_fg,bg or it.text_bg
 	end
 	
 -- replace the text_tile function if your font is somewhere else,
@@ -60,17 +60,26 @@ tilemap_text.inject=function(it,opts)
 	if it.tile_hx==8 and it.tile_hy==16 then it.text_tile=it.text_tile8x16 end
 
 	it.text_print_tile=function(c,x,y,fg,bg)
-		it.tilemap_grd:pixels( x,y, 1,1, it.text_tile(c,fg,bg) )
+		it.tilemap_grd:pixels( x,y, 1,1, {it.text_tile(c,fg,bg)} )
 	end
 
 	it.text_print=function(s,x,y,fg,bg)
+		local ox=x
+		local bm={}
 		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
 			if x>=it.text_px and y>=it.text_py and x<it.text_px+it.text_hx and y<it.text_py+it.text_hy then
-				it.text_print_tile(c,x,y,fg,bg)
+				local c1,c2,c3,c4=it.text_tile(c,fg,bg)
+				local bl=#bm
+				bm[bl+1]=c1
+				bm[bl+2]=c2
+				bm[bl+3]=c3
+				bm[bl+4]=c4
+				x=x+1
 			end
-			x=x+1
 		end
-
+		if x-ox>0 then
+			it.tilemap_grd:pixels( ox,y, x-ox,1, bm )
+		end
 		return x,y
 	end
 
