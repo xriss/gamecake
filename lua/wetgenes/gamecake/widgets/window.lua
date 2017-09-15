@@ -367,35 +367,42 @@ wwindow.class_hooks=function(_window,act,widget)
 --		print("INACTIVE",window.id)
 ]]
 
-	elseif act=="click" then
-
-		if widget.id=="win_hide" then
-		
-			window.hidden=true
-			
-		elseif widget.id=="win_grow" then
-
-			window.hx=window.hx*1.5
-			window.hy=window.hy*1.5
-			winclamp(window)
-			window:layout()
-			window:build_m4()
-
-		elseif widget.id=="win_shrink" then
-
-			window.hx=window.hx/1.5
-			window.hy=window.hy/1.5
-			winclamp(window)
-			window:layout()
-			window:build_m4()
-
-		elseif widget.id=="win_reset" then
-
-			wwindow.class_hooks_reset(window)
-
-		end
+	elseif act=="click" then -- turn a click into another act
+	
+		act=widget.id
 
 	end
+
+-- these acts can be used by outside code
+-- eg
+-- window:class_hooks("win_hide")
+
+	if act=="win_hide" then
+	
+		window.hidden=true
+		
+	elseif act=="win_grow" then
+
+		window.hx=window.hx*1.5
+		window.hy=window.hy*1.5
+		winclamp(window)
+		window:layout()
+		window:build_m4()
+
+	elseif act=="win_shrink" then
+
+		window.hx=window.hx/1.5
+		window.hy=window.hy/1.5
+		winclamp(window)
+		window:layout()
+		window:build_m4()
+
+	elseif act=="win_reset" then
+
+		wwindow.class_hooks_reset(window)
+
+	end
+
 end
 
 function wwindow.setup(widget,def)

@@ -222,14 +222,12 @@ function wmaster.setup(widget,def)
 -- loop over and call all later function then empty the table
 -- later functions can add more functions as they are called
 		if true then
-			local i=0
-			local f=function(c,...) return c(...) end
+			local call_later=function(c,...) return c(...) end
 			repeat
-				i=i+1
-				local v=master.later[i]
+				local v=table.remove(master.later,1)
 				if v then
 					if type(v[1])~="function" then dprint(tostring(v[1])) end
-					f(unpack(v))
+					call_later(unpack(v))
 				end
 			until not v
 		end
