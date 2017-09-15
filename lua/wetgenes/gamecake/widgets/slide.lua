@@ -78,14 +78,14 @@ end
 
 function wslide.slide_snap(it,useloc)
 
+	it.knob.hx=it.datx:get_size(it.hx)
+	it.knob.hy=it.daty:get_size(it.hy)
+
 	if not useloc then
 		it.knob.px=it.datx:get_pos(it.hx,it.knob.hx)
 		it.knob.py=it.daty:get_pos(it.hy,it.knob.hy)
 	end
 	
-	it.knob.hx=it.datx:get_size(it.hx)
-	it.knob.hy=it.daty:get_size(it.hy)
-
 -- auto snap positions when draged
 	it.knob.px=it.datx:snap( it.hx , it.knob.hx , it.knob.px )
 	

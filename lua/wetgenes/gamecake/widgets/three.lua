@@ -90,7 +90,7 @@ function wthree.layout(widget)
 	end
 
 -- also layout any other children
-	widget.meta.layout(widget,2)
+	widget.meta.layout(widget,4)
 
 end
 

@@ -115,8 +115,8 @@ function wmeta.setup(def)
 				elseif token=="minmax" then -- force a minimum width maximum height with scale on parent
 				
 					if     v.hx_min and v.hy_max then
-						v.px=0
-						v.py=0
+--						v.px=0
+--						v.py=0
 						v.hx=widget.hx
 						v.hy=v.hy_max
 						if v.hx < v.hx_min then
