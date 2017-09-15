@@ -381,6 +381,10 @@ wwindow.class_hooks=function(_window,act,widget)
 	
 		window.hidden=true
 		
+	elseif act=="win_show" then
+	
+		window.hidden=false
+		
 	elseif act=="win_grow" then
 
 		window.hx=window.hx*1.5

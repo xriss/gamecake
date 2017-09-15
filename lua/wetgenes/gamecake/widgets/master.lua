@@ -231,7 +231,7 @@ function wmaster.setup(widget,def)
 				end
 			until not v
 		end
-		master.later={}
+--		master.later={}
 		
 		local tim=os.time()
 		for w,t in pairs(master.timehooks) do
