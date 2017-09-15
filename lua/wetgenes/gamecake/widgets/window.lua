@@ -379,15 +379,29 @@ wwindow.window_hooks=function(_window,act,widget)
 
 	if act=="win_hide" then
 	
-		window.hidden=true
+		window.hidden=true -- hide it
+		window.master:resize_and_layout()
 		
 	elseif act=="win_show" then
 	
 		window.hidden=false
+		window:move_to_top()
+		window.master:resize_and_layout()
 
 	elseif act=="win_toggle" then
 	
-		window.hidden=not window.hidden
+		if window.hidden then -- show it
+		
+			window.hidden=false
+			window:move_to_top()
+			window.master:resize_and_layout()
+
+		else
+
+			window.hidden=true -- hide it
+			window.master:resize_and_layout()
+
+		end
 		
 	elseif act=="win_grow" then
 
