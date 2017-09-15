@@ -277,7 +277,7 @@ function wwindow.layout(widget)
 
 end
 
-wwindow.class_hooks_reset=function(widget)
+wwindow.window_hooks_reset=function(widget)
 	widget.hx=widget.win_fbo.hx
 	widget.hy=widget.win_fbo.hy
 	winclamp(widget)
@@ -295,7 +295,7 @@ wwindow.is_top=function(window)
 	return screen.windows[#screen.windows]==window
 end
 
-wwindow.class_hooks=function(_window,act,widget)
+wwindow.window_hooks=function(_window,act,widget)
 --print(act,w.id)
 
 	local window,screen=window_screen(_window or widget)
@@ -315,7 +315,7 @@ wwindow.class_hooks=function(_window,act,widget)
 				window.active_nopush=true
 				local master=screen.master
 				screen:remove_split(window)
-				wwindow.class_hooks_reset(window)
+				wwindow.window_hooks_reset(window)
 				master.active_xy={window.hx/2,window.hy/2,mx=0,my=0}
 			end
 
@@ -375,7 +375,7 @@ wwindow.class_hooks=function(_window,act,widget)
 
 -- these acts can be used by outside code
 -- eg
--- window:class_hooks("win_hide")
+-- window.window_hooks("win_hide")
 
 	if act=="win_hide" then
 	
@@ -407,7 +407,7 @@ wwindow.class_hooks=function(_window,act,widget)
 
 	elseif act=="win_reset" then
 
-		wwindow.class_hooks_reset(window)
+		wwindow.window_hooks_reset(window)
 
 	end
 
@@ -430,14 +430,14 @@ function wwindow.setup(widget,def)
 	widget.move_to_top=wwindow.move_to_top
 	widget.is_top=wwindow.is_top
 	
-	widget.class_hooks = function(act,w) return wwindow.class_hooks(widget,act,w) end
+	widget.window_hooks = function(act,w) return wwindow.window_hooks(widget,act,w) end
 
 	widget.menu_data=widget.menu_data or {
 		{	id="win_hide",		text="Hide Window",		},
 		{	id="win_reset",		text="Reset Window",	},
 		{	id="win_shrink",	text="Shrink Window",	},
 		{	id="win_grow",		text="Grow Window",		},
-		hooks=widget.class_hooks,
+		hooks=widget.window_hooks,
 	}
 	
 	local ss=widget.master.grid_size or 24
@@ -515,7 +515,7 @@ if bar_height>0 then
 				text="-",
 				color=color,
 				solid=true,
-				hooks=widget.class_hooks,
+				hooks=widget.window_hooks,
 				id="win_shrink",
 				cursor="hand",
 			},ss1)
@@ -528,7 +528,7 @@ if bar_height>0 then
 				text="+",
 				color=color,
 				solid=true,
-				hooks=widget.class_hooks,
+				hooks=widget.window_hooks,
 				id="win_grow",
 				cursor="hand",
 			},ss1)
@@ -541,7 +541,7 @@ end
 				hx=ss/4,
 				hy=def.hy+bar_height,
 				solid=true,
-				hooks=widget.class_hooks,
+				hooks=widget.window_hooks,
 				id="win_edge_l",
 				cursor="sizewe",
 				drag=wwindow.edge_drag,
@@ -552,7 +552,7 @@ end
 				hx=ss/4,
 				hy=def.hy+bar_height,
 				solid=true,
-				hooks=widget.class_hooks,
+				hooks=widget.window_hooks,
 				id="win_edge_r",
 				cursor="sizewe",
 				drag=wwindow.edge_drag,
@@ -563,7 +563,7 @@ end
 				hx=def.hx,
 				hy=ss/4,
 				solid=true,
-				hooks=widget.class_hooks,
+				hooks=widget.window_hooks,
 				id="win_edge_t",
 				cursor="sizens",
 				drag=wwindow.edge_drag,
@@ -574,7 +574,7 @@ end
 				hx=def.hx,
 				hy=ss/4,
 				solid=true,
-				hooks=widget.class_hooks,
+				hooks=widget.window_hooks,
 				id="win_edge_b",
 				cursor="sizens",
 				drag=wwindow.edge_drag,
@@ -586,7 +586,7 @@ end
 				hx=ss/2,
 				hy=ss/2,
 				solid=true,
-				hooks=widget.class_hooks,
+				hooks=widget.window_hooks,
 				id="win_edge_tl",
 				cursor="sizenwse",
 				drag=wwindow.edge_drag,
@@ -597,7 +597,7 @@ end
 				hx=ss/2,
 				hy=ss/2,
 				solid=true,
-				hooks=widget.class_hooks,
+				hooks=widget.window_hooks,
 				id="win_edge_tr",
 				cursor="sizenesw",
 				drag=wwindow.edge_drag,
@@ -608,7 +608,7 @@ end
 				hx=ss/2,
 				hy=ss/2,
 				solid=true,
-				hooks=widget.class_hooks,
+				hooks=widget.window_hooks,
 				id="win_edge_bl",
 				cursor="sizenwse",
 				drag=wwindow.edge_drag,
@@ -619,7 +619,7 @@ end
 				hx=ss/2,
 				hy=ss/2,
 				solid=true,
-				hooks=widget.class_hooks,
+				hooks=widget.window_hooks,
 				id="win_edge_br",
 				cursor="sizenesw",
 				drag=wwindow.edge_drag,
