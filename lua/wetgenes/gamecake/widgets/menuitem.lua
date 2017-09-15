@@ -39,7 +39,10 @@ function wmenuitem.menu_add(widget,opts)
 		end
 
 		local ss=opts.grid_size or widget.master.grid_size
-		widget.menu=widget.master:add({
+		local screen;widget.master:call_descendents(function(it) if it.class=="screen" then screen=it end end)
+		screen=screen or widget.master
+		
+		widget.menu=screen:add({
 			class="menu",
 			grid_size=ss,
 			color=opts.color or 0,
