@@ -38,9 +38,10 @@ function wmenuitem.menu_add(widget,opts)
 			widget.menu=nil
 		end
 
+		local ss=opts.grid_size or widget.master.grid_size
 		widget.menu=widget.master:add({
 			class="menu",
-			grid_size=opts.grid_size or widget.master.grid_size,
+			grid_size=ss,
 			color=opts.color or 0,
 			style=opts.style or "button",
 			skin=opts.skin or 0,
@@ -48,7 +49,9 @@ function wmenuitem.menu_add(widget,opts)
 			highlight="none",
 			fbo=true,
 			smode="topleft",
-	
+			outline_size=ss/8,
+			outline_color=0x44000000,
+			outline_fade_color=0x00000000,	
 		})
 
 	end
