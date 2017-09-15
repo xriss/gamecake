@@ -384,6 +384,10 @@ wwindow.class_hooks=function(_window,act,widget)
 	elseif act=="win_show" then
 	
 		window.hidden=false
+
+	elseif act=="win_toggle" then
+	
+		window.hidden=not window.hidden
 		
 	elseif act=="win_grow" then
 
