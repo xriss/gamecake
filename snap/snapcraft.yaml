@@ -19,15 +19,15 @@ parts:
             ./make gamecake
     install: |
             cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
-            cp exe/pagecake.nix $SNAPCRAFT_PART_INSTALL/pagecake
+#            cp exe/pagecake.nix $SNAPCRAFT_PART_INSTALL/pagecake
 
 apps:
   gamecake:
     command: gamecake
     plugs: [ x11, opengl]
 
-apps:
-  pagecake:
-    command: pagecake
-    plugs: [ x11, opengl]
+#apps:
+#  pagecake:
+#    command: pagecake
+#    plugs: [ x11, opengl]
 
