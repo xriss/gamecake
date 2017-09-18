@@ -22,3 +22,4 @@ parts:
 apps:
   gamecake:
     command: gamecake
+    plugs: [home, x11, opengl]
