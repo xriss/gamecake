@@ -10,3 +10,11 @@ git commit -m.
 git tag -a V$VNUM -m "VERSION $VNUM"
 
 git push origin --tags
+
+git checkout release
+git merge master
+git push
+
+git checkout master
+
+
