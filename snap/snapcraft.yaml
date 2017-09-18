@@ -24,10 +24,10 @@ parts:
 apps:
   gamecake:
     command: gamecake
-    plugs: [ x11, opengl]
+    plugs: [ x11, opengl, pulseaudio, joystick ]
 
 #apps:
 #  pagecake:
 #    command: pagecake
-#    plugs: [ x11, opengl]
+#    plugs: [ opengl ]
 
