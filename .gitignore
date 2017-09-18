@@ -47,3 +47,10 @@ sdks/emsdk-portable
 sdks/nacl-sdk
 
 test/dat/grd/*.out.*
+
+
+parts/
+prime/
+snap/.snapcraft/
+stage/
+
