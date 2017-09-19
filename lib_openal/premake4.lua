@@ -55,11 +55,11 @@ elseif WINDOWS then
 elseif RASPI then
 
 	files { 
-			prefix.."/Alc/backends/alsa.c",
---			prefix.."/Alc/backends/pulseaudio.c",
+--			prefix.."/Alc/backends/alsa.c",
+			prefix.."/Alc/backends/pulseaudio.c",
 	}
-	defines("HAVE_ALSA")
---	defines("HAVE_PULSEAUDIO")
+--	defines("HAVE_ALSA")
+	defines("HAVE_PULSEAUDIO")
 
 	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
 	includedirs { "./raspi/include" } -- need some extraincludes
@@ -75,11 +75,11 @@ elseif OSX then
 else
 
 	files { 
-			prefix.."/Alc/backends/alsa.c",
---			prefix.."/Alc/backends/pulseaudio.c",
+--			prefix.."/Alc/backends/alsa.c",
+			prefix.."/Alc/backends/pulseaudio.c",
 	}
-	defines("HAVE_ALSA")
---	defines("HAVE_PULSEAUDIO")
+--	defines("HAVE_ALSA")
+	defines("HAVE_PULSEAUDIO")
 
 	defines{"HAVE_FENV_H","HAVE_FESETROUND","HAVE_DLFCN_H","HAVE_PTHREAD_SETSCHEDPARAM"}
 
