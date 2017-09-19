@@ -1,0 +1,12 @@
+#please do not use this file this is not a desktop application...
+
+[Desktop Entry]
+
+Version=1.0
+Type=Application
+Name=GameCake
+Comment=GameCake
+TryExec=gamecake
+Exec=gamecake %F
+Icon=gamecake
+
