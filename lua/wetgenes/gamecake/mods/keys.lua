@@ -75,20 +75,8 @@ function M.bake(oven,keys)
 			local mstack=oven.win.msgstack
 			mstack[#mstack+1]={
 				time=os.time(),
-				class="key",
-				action=1,
-				ascii=ascii,
-				keycode=code,
-				keyname=name,
-				softkey=true,
-			}
-			mstack[#mstack+1]={
-				time=os.time(),
-				class="key",
-				action=-1,
-				ascii=ascii,
-				keycode=code,
-				keyname=name,
+				class="text",
+				text=ascii,
 				softkey=true,
 			}
 		end

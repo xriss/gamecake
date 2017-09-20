@@ -201,9 +201,7 @@ sdl.msg_fetch=function()
 			local t={}
 			t.time=sdl.time()
 			t.class="key"
-			t.ascii=""
 			t.action=(e.type==SDL.event.KeyUp) and -1 or ( e["repeat"] and 0 or 1 )
-			t.keycode=1
 			t.keyname=SDL.getKeyName(e.keysym.sym)
 			
 --			dprint(t)
@@ -212,12 +210,13 @@ sdl.msg_fetch=function()
 					
 		elseif     (e.type == SDL.event.TextInput) then
 
-			local t=sdl.queue[#sdl.queue]
-			if t and t.class=="key" and t.ascii=="" and e.text then -- insert ascii into last msg
-				t.ascii=e.text
---				dprint(e)
-			end
-					
+			local t={}
+			t.time=sdl.time()
+			t.class="text"
+			t.text=e.text
+
+			sdl.queue[#sdl.queue+1]=t
+
 		elseif	(e.type == SDL.event.MouseWheel)  then
 		
 --			dprint(e)

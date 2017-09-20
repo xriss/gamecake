@@ -159,7 +159,41 @@ function wtextedit.key(widget,ascii,key,act)
 		
 	end
 	
-	if act==1 or act==0 then
+	if ascii and ascii~="" then -- not a blank string
+
+		local c=string.byte(ascii)
+		
+		if c>=32 and c<128 then
+		
+			clear_selected_chars()
+
+			if widget.data.str_idx >= #widget.data.str then -- put at end
+			
+				widget.data.str=widget.data.str..ascii
+				widget.data.str_idx=#widget.data.str
+				widget.data.str_select=0
+				
+			elseif widget.data.str_idx < 1 then -- put at start
+			
+				widget.data.str=ascii..widget.data.str
+				widget.data.str_idx=1
+				widget.data.str_select=0
+				
+			else -- need to insert into line
+			
+				widget.data.str=widget.data.str:sub(1,widget.data.str_idx) .. ascii .. widget.data.str:sub(widget.data.str_idx+1)
+				widget.data.str_idx=widget.data.str_idx+1
+				widget.data.str_select=0
+				
+			end
+			
+			master.throb=255
+			
+			changed=true
+
+		end
+
+	elseif act==1 or act==0 then
 	
 		if key=="left" then
 
@@ -254,40 +288,8 @@ function wtextedit.key(widget,ascii,key,act)
 						
 --		elseif key=="up" then
 --		elseif key=="down" then
-		
-		elseif ascii and ascii~="" then -- not a blank string
-			local c=string.byte(ascii)
-			
-			if c>=32 and c<128 then
-			
-				clear_selected_chars()
-
-				if widget.data.str_idx >= #widget.data.str then -- put at end
-				
-					widget.data.str=widget.data.str..ascii
-					widget.data.str_idx=#widget.data.str
-					widget.data.str_select=0
-					
-				elseif widget.data.str_idx < 1 then -- put at start
-				
-					widget.data.str=ascii..widget.data.str
-					widget.data.str_idx=1
-					widget.data.str_select=0
-					
-				else -- need to insert into line
-				
-					widget.data.str=widget.data.str:sub(1,widget.data.str_idx) .. ascii .. widget.data.str:sub(widget.data.str_idx+1)
-					widget.data.str_idx=widget.data.str_idx+1
-					widget.data.str_select=0
-					
-				end
-				
-				master.throb=255
-				
-				changed=true
-
-			end
 		end
+		
 	end
 	
 	if changed then

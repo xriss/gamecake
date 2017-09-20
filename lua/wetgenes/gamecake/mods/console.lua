@@ -420,7 +420,11 @@ font.vbs_idx=1
 		end
 
 		if m.class=="key" then
-			if console.keypress(m.ascii,m.keyname,m.action) then return nil end
+			if console.keypress(nil,m.keyname,m.action) then return nil end
+		end
+
+		if m.class=="text" then
+			if console.keypress(m.text) then return nil end
 		end
 		
 		return m
@@ -429,7 +433,7 @@ font.vbs_idx=1
 	function console.keypress(ascii,key,act)
 
 --print("conkey",key)
-		if key=="grave" or ascii=="`" then
+		if key=="grave" then
 		
 			if act==-1 then
 				if console.show then
