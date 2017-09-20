@@ -499,8 +499,11 @@ elseif NIX then
 	
 	elseif CPU=="native" then
 	
-		buildoptions{"-march=native"}
-		linkoptions{"-march=native"}
+		buildoptions{"-mtune=generic"} -- aim for a stable build?
+		linkoptions{"-mtune=generic"}
+
+--		buildoptions{"-march=native"}
+--		linkoptions{"-march=native"}
 				
 	end
 	
