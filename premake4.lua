@@ -472,7 +472,9 @@ elseif NIX then
 	  return s
 	end
 
-	BUILD_CPU = os.capture("getconf LONG_BIT") -- remember the build cpu
+	BUILD_CPU = os.capture("getconf LONG_BIT") -- remember the build cpu "32"/"64"
+
+--	BUILD_ARCH=os.capture("dpkg --print-architecture") -- better guess?
 	
 	defines("LUA_USE_MKSTEMP") -- remove warning
 	defines("LUA_USE_POPEN") -- we want to enable popen
@@ -497,11 +499,10 @@ elseif NIX then
 		buildoptions{"-m64 -mtune=generic"}
 		linkoptions{"-m64 -mtune=generic"}
 	
-	elseif CPU=="native" then
+	elseif CPU=="native" then -- do not mess with build flags?
 	
-		buildoptions{"-mtune=generic"} -- aim for a stable build?
-		linkoptions{"-mtune=generic"}
-
+--		buildoptions{"-mtune=generic"} -- aim for a stable build?
+--		linkoptions{"-mtune=generic"}
 --		buildoptions{"-march=native"}
 --		linkoptions{"-march=native"}
 				
