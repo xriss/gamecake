@@ -26,8 +26,8 @@ parts:
     install: |
       cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
 
-#    stage-packages:
-#      - pulseaudio
+    stage-packages:
+      - pulseaudio
 
 apps:
 
