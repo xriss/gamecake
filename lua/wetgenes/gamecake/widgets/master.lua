@@ -271,8 +271,10 @@ function wmaster.setup(widget,def)
 
 		meta.update(widget)
 		
-		if master.over then
+		if master.over and master.over~=master then
 			master.cursor=master.over.cursor
+		else
+			master.cursor=nil
 		end
 		
 	end
