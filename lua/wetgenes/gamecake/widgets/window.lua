@@ -448,9 +448,9 @@ function wwindow.setup(widget,def)
 
 	widget.menu_data=widget.menu_data or {
 		{	id="win_hide",		text="Hide Window",		},
-		{	id="win_reset",		text="Reset Window",	},
-		{	id="win_shrink",	text="Shrink Window",	},
-		{	id="win_grow",		text="Grow Window",		},
+		{	id="win_reset",		text="Reset Window Size",	},
+		{	id="win_shrink",	text="Shrink Window Size",	},
+		{	id="win_grow",		text="Grow Window Size",		},
 		hooks=widget.window_hooks,
 	}
 	

@@ -34,6 +34,7 @@ function wbutton.setup(widget,def)
 	widget.draw=wbutton.draw
 
 	widget.solid=true
+	widget.cursor=widget.cursor or "hand"
 
 	return widget
 end

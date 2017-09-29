@@ -247,6 +247,7 @@ function wmaster.setup(widget,def)
 			else
 				widget.hx=resize.hx or widget.hx
 				widget.hy=resize.hy or widget.hy
+				widget:set_dirty()
 				widget:resize_and_layout()
 			end
 		end
@@ -268,6 +269,8 @@ function wmaster.setup(widget,def)
 				end
 			end
 		end
+		
+--		if widget.dirty then widget:resize_and_layout() print("dirty master") end -- a dirty master forces a layout
 
 		meta.update(widget)
 		
