@@ -44,3 +44,16 @@ replacement for lua and pagecake is a command line compatible
 replacement for nginx (open resty). The only diference is we have C 
 libraries and Lua libraries from this repository embedded and ready to 
 be required by your lua code.
+
+
+We are now setup to auto build snaps via
+https://code.launchpad.net/~xriss/+snap/gamecake if this is working then the
+following should get you a snap install of gamecake.
+
+	sudo snap install gamecake
+
+Because of the way snaps work you may need to enable some interfaces, best
+you take a look at all the snap documentation for that sort of thing.
+
+We will include a full snap install and use procedure here when we
+work out what that actualy is.
