@@ -288,9 +288,10 @@ bitsynth.fadsr=function(sv,at,dt,st,rt)
 	return bitsynth.flinear( unpack(t) ),at+dt+st+rt
 end
 
+bitsynth.funcs={} -- reference by string and args
 
 -- turn a -1 +1 signal into a frequency signal -1==f1 0==f2 +1==f3 + t*t1
-bitsynth.freq_range=function(f1,f2,f3,t1)
+bitsynth.funcs.freq_range=function(f1,f2,f3,t1)
 	if type(f1)=="table" then f1,f2,f3,t1=unpack(f1) end -- maybe unpack inputs from table
 	f1=bitsynth.note2freq(f1)
 	f2=bitsynth.note2freq(f2)
@@ -357,18 +358,30 @@ end
 bitsynth.prepare=function(ot)
 	local it={}
 	
+-- return a bound custom function or generic one from within bitsynth.funcs
+	local fbind=function(f)
+		local t=type(f)
+		local c=function(n,...)
+			if not bitsynth.funcs[n] then return end -- did not find function
+			return bitsynth.funcs[n](...) -- bind it
+		end
+		if     t=="function" then return f(it)
+		elseif t=="table"    then return c(unpack(f))
+		end
+	end
+	
 	it.name=ot.name -- remember our name
 	it.raw=ot.raw -- remember this raw table of options
 
 	it.volume=ot.volume or 1 -- render volume
 	
 	-- we call a function to return a bound function or use a default empty one
-	it.fread=ot.fread and ot.fread(it) or function(t) end
+	it.fread=fbind(ot.fread) or function(t) end
 
 	it.gwav=bitsynth.gwav(ot) -- base wave
 
 	if ot.fadsr then
-		it.fadsr,it.time=ot.fadsr(it) -- custom function
+		it.fadsr,it.time=fbind(ot.fadsr) -- custom function
 	else 
 		it.fadsr,it.time=bitsynth.fadsr(ot.adsr) -- or data table
 	end
@@ -378,8 +391,8 @@ bitsynth.prepare=function(ot)
 		it.fm_gwav=bitsynth.gwav(ot.fm) -- run another wave as fm input
 
 		-- we call a function to return a bound function or use a default empty one
-		it.fm_ffreq=ot.fm.ffreq and ot.fm.ffreq(it) or function(v,s) return it.gwav.frequency end
-
+		it.fm_ffreq=fbind(ot.fm.ffreq) or function(v,s) return it.gwav.frequency end
+		
 	end
 
 
