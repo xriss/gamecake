@@ -75,6 +75,13 @@ bitsynth.note2freq=function(s,n)
 	return assert(bitsynth.note_freq[s][n]) -- check the range is ok as we return
 end
 
+-- get ratio of two notes, second note defaults to C4
+bitsynth.note2ratio=function(s1,s2)
+	local v1=bitsynth.note2freq(s1)
+	local v2=bitsynth.note2freq(s2 or bitsynth.C4)
+	return v1/v2
+end
+
 -- also add quick lookups of notes to bitsynth globals
 
 bitsynth.fillnotes=function(t)
@@ -93,7 +100,7 @@ bitsynth.fillnotes=function(t)
 	end
 end
 
-bitsynth.fillnotes(bitsynth) -- we can now use bitsynth.C4 or bitsynth.Cs4 which is easier than bitsynth["C#4"]
+bitsynth.fillnotes(bitsynth) -- we can now use bitsynth.C4 or bitsynth.Cs4 or bitsynth.c4 which is easier than bitsynth["C#4"]
 
 -- create a rnd function
 local randomise=function(seed)
@@ -109,10 +116,64 @@ bitsynth.rnd=randomise(437) -- a global random sequence
 -- put in a value 0-1 and get out a single wave cycle that goes 0 1 0 -1 0 ish depending on wave
 bitsynth.fwav={}
 
--- create a scaled version of one of the other fwav functions
-bitsynth.fwav.fscale=function(f,scale)
-	if type(f)=="string" then f=assert(bitsynth.fwav[f]) end
-	return function(t) return f(t)*scale end
+bitsynth.fwav.f=function(f) -- auto lookup f if it is not already a function
+	if type(f)=="string" then f=bitsynth.fwav[f] end -- lookup function
+	if type(f)=="table" then f=bitsynth.fwav[f[1]](select(2,unpack(f))) end -- call wrapper
+	return f
+end
+
+bitsynth.fwav.frez=function(rez,f) -- reduce resolution of f function to 2*rez+1 values
+	f=bitsynth.fwav.f(f)
+	return function(t)
+		return math.floor( (f(t)*rez) + 0.5 )/rez
+	end
+end
+
+bitsynth.fwav.fscale=function(scale,ff) -- scale wave
+	local f=bitsynth.fwav.f(ff)
+	return function(t)
+		return f(t)*scale
+	end
+end
+
+bitsynth.fwav.fadd=function(...) -- add all given waveforms
+	local fs={}
+	for i,v in ipairs({...}) do
+		fs[i]=bitsynth.fwav.f(v)
+	end
+	return function(t)
+		local n=0
+		for i=1,#fs do
+			n=n+(fs[i])(t)
+		end
+		return n
+	end
+end
+
+bitsynth.fwav.fmul=function(...) -- multiply all given waveforms together
+	local fs={}
+	for i,v in ipairs({...}) do
+		fs[i]=bitsynth.fwav.f(v)
+	end
+	return function(t)
+		local n=1
+		for i=1,#fs do
+			n=n*(fs[i])(t)
+		end
+		return n
+	end
+end
+
+bitsynth.fwav.zero=function(t)
+	return 0
+end
+
+bitsynth.fwav.one=function(t)
+	return 1
+end
+
+bitsynth.fwav.minus=function(t)
+	return -1
 end
 
 --[[
@@ -230,23 +291,12 @@ bitsynth.fwav.fwhitenoise=function(steps,seed) -- steps is the number of values 
 	return function(t)
 		local n=getseed(math.floor(t))
 		for j=0,math.floor((t%1)*steps) do n=(n*75)%65537 end
-		return (n-1)/65536
+		return ((n-1)/32768)-1
 	end
 end
 bitsynth.fwav.whitenoise=bitsynth.fwav.fwhitenoise(16,437) -- default whitenoise
 
-bitsynth.fwav.f=function(f) -- auto lookup f if it is not already a function
-	if type(f)=="string" then f=bitsynth.fwav[f] end -- lookup function
-	if type(f)=="table" then f=bitsynth.fwav[f[1]](select(2,unpack(f))) end -- call wrapper
-	return f
-end
 
-bitsynth.fwav.frez=function(rez,f) -- reduce resolution of f function to 2*rez+1 values
-	f=bitsynth.fwav.f(f)
-	return function(t)
-		return math.floor( (f(t)*rez) + 0.5 )/rez
-	end
-end
 
 -- attempt at pink noise... a tad expensive and not as versatile as white
 --[[
@@ -288,6 +338,8 @@ bitsynth.flinear=function(...)
 	
 	return f
 end
+bitsynth.fwav.flinear=bitsynth.flinear -- expose to wave generator
+
 
 -- sv (value)   is sustain value ( 0 to 1 )
 -- at (attack)  is time to reach 1
