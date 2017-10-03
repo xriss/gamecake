@@ -208,11 +208,21 @@ end
 bitsynth.fwav.fwhitenoise=function(steps,seed) -- steps is the number of values in a white noise wave cycle
 	local seeds={[0]=(seed or 437)} -- remember seed for *each* cycle
 	local getseed=function(t)
-		for i=0,t do
-			if not seeds[i] then
-				local n=seeds[i-1]
-				for j=1,steps do n=(n*75)%65537 end
-				seeds[i]=n
+		if not seeds[t] then -- need to work it out
+			local fillfrom=0
+			if seeds[t-1] then
+				fillfrom=t-1 -- have previous seed
+			else
+				for j=t,0,-1 do -- find closest seed we have
+					if seeds[j] then fillfrom=j break end
+				end
+			end
+			for i=fillfrom,t do -- fill in missing seeds
+				if not seeds[i] then
+					local n=seeds[i-1]
+					for j=1,steps do n=(n*75)%65537 end
+					seeds[i]=n
+				end
 			end
 		end
 		return seeds[t]
@@ -223,7 +233,20 @@ bitsynth.fwav.fwhitenoise=function(steps,seed) -- steps is the number of values 
 		return (n-1)/65536
 	end
 end
-bitsynth.fwav.whitenoise=bitsynth.fwav.fwhitenoise(16,437)
+bitsynth.fwav.whitenoise=bitsynth.fwav.fwhitenoise(16,437) -- default whitenoise
+
+bitsynth.fwav.f=function(f) -- auto lookup f if it is not already a function
+	if type(f)=="string" then f=bitsynth.fwav[f] end -- lookup function
+	if type(f)=="table" then f=bitsynth.fwav[f[1]](select(2,unpack(f))) end -- call wrapper
+	return f
+end
+
+bitsynth.fwav.frez=function(rez,f) -- reduce resolution of f function to 2*rez+1 values
+	f=bitsynth.fwav.f(f)
+	return function(t)
+		return math.floor( (f(t)*rez) + 0.5 )/rez
+	end
+end
 
 -- attempt at pink noise... a tad expensive and not as versatile as white
 --[[
@@ -310,8 +333,7 @@ bitsynth.gwav=function(ot)
 
 	local it={}
 	
-	it.fwav=ot.fwav or "sine"
-	if type(it.fwav)=="string" then it.fwav=bitsynth.fwav[it.fwav] end
+	it.fwav=bitsynth.fwav.f(ot.fwav or "sine") -- auto lookup function from string
 	
 	it.sample=0 -- last sample index ( it.sample/bitsynth.samplerate == time in seconds ), this is expected to only ever increase
 	it.duty=ot.duty or 0.5
