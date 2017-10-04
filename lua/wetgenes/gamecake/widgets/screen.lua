@@ -156,6 +156,8 @@ function wscreen.setup(widget,def)
 
 	widget.class="screen"
 	
+	widget.prefab={} -- prefab widget constructors
+	
 	widget.update=wscreen.update
 	widget.draw=wscreen.draw
 	widget.layout=wscreen.layout

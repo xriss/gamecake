@@ -498,7 +498,15 @@ function wwindow.setup(widget,def)
 			})
 
 if bar_height>0 then
-	widget.win_menu=widget.win_fbo:add_indent({
+	widget.win_three=widget.win_fbo:add({
+				px=0,
+				py=0,
+				hx=def.hx,
+				hy=ss,
+				class="three",
+			})
+
+	widget.win_menu=widget.win_three:add({
 				class="menuitem",
 				px=0,
 				py=0,
@@ -509,16 +517,15 @@ if bar_height>0 then
 				solid=true,
 				menu_data=widget.menu_data,
 				cursor="hand",
-			},ss1)
+			})
 
-	widget.win_title=widget.win_fbo:add_indent({
+	widget.win_title=widget.win_three:add({
 				px=0,
 				py=0,
 				hx=def.hx,
 				hy=ss,
 				text=def.title or "...",
---				color=color,
-			},ss1)
+			})
 
 --[[
 	widget.win_shrink=widget.win_fbo:add_indent({
