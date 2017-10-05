@@ -21,6 +21,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wscreen)
 
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+local wwindow=oven.rebake("wetgenes.gamecake.widgets.window")
 
 wscreen=wscreen or {}
 
@@ -35,6 +36,28 @@ end
 function wscreen.layout(widget)
 	return widget.meta.layout(widget)
 end
+
+-- find all windows in this screen
+function wscreen.get_windows(screen)
+	local windows={}
+	screen:call_descendents(function(w)
+		if w.class=="window" then
+			windows[#windows+1]=w
+		end
+	end)
+	return windows
+end
+
+wscreen.window_menu=function(screen)
+	local windows=screen:get_windows()
+	table.sort(windows,function(a,b) return a.win_title.text < b.win_title.text end)
+	local t={hooks=function(act,w) return wwindow.window_hooks(screen,act,w) end}
+	for i,v in ipairs(windows) do
+		t[#t+1]={id="win_toggle_other",user=v.id,text=v.win_title.text}
+	end
+	return t
+end
+
 
 -- create a new top level screen split to snap windows into
 function wscreen.get_split(screen,axis,order)
@@ -161,6 +184,9 @@ function wscreen.setup(widget,def)
 	widget.update=wscreen.update
 	widget.draw=wscreen.draw
 	widget.layout=wscreen.layout
+
+	widget.get_windows=wscreen.get_windows
+	widget.window_menu=wscreen.window_menu
 
 	widget.get_split=wscreen.get_split
 	widget.add_split=wscreen.add_split

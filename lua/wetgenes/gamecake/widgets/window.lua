@@ -300,7 +300,7 @@ wwindow.window_hooks=function(_window,act,widget)
 
 	local window,screen=window_screen(_window or widget)
 
-	if window.flags.nodrag then return end	
+	if window.flags and window.flags.nodrag then return end	
 
 	if act=="active" then
 
@@ -403,6 +403,13 @@ wwindow.window_hooks=function(_window,act,widget)
 
 		end
 		
+	elseif act=="win_toggle_other" then
+	
+		local win=window.master.ids[widget.user]
+		if win then
+			win.window_hooks("win_toggle")
+		end
+		
 	elseif act=="win_grow" then
 
 		window.hx=window.hx*1.5
@@ -427,6 +434,7 @@ wwindow.window_hooks=function(_window,act,widget)
 
 end
 
+
 function wwindow.setup(widget,def)
 
 	widget.flags=def.flags or {}
@@ -446,11 +454,16 @@ function wwindow.setup(widget,def)
 	
 	widget.window_hooks = function(act,w) return wwindow.window_hooks(widget,act,w) end
 
+	widget.window_menu=function()
+		local window,screen=wwindow.window_screen(widget)
+		return screen:window_menu()
+	end
 	widget.menu_data=widget.menu_data or {
 		{	id="win_hide",		text="Hide Window",		},
 		{	id="win_reset",		text="Reset Window Size",	},
 		{	id="win_shrink",	text="Shrink Window Size",	},
 		{	id="win_grow",		text="Grow Window Size",		},
+		{	id="win_windows",	text="Windows...",menu_data=widget.window_menu},
 		hooks=widget.window_hooks,
 	}
 	
