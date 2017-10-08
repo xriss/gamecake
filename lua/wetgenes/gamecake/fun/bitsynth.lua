@@ -517,7 +517,7 @@ bitsynth.render=function(it)
 end
 
 
--- turn a stream of float values into s16 values
+-- turn a stream of float values into s16 values, changes input data and returns it
 -- scale defaults to 0x7fff but you could use a slightly lower value to reduce clipping
 bitsynth.float_to_16bit=function(t,scale)
 	scale=scale or 0x7fff
@@ -531,5 +531,18 @@ bitsynth.float_to_16bit=function(t,scale)
 	return t
 end
 
+-- turn a stream of float values into u8 values, changes input data and returns it
+-- scale defaults to 0x7f but you could use a slightly lower value to reduce clipping
+bitsynth.float_to_8bit=function(t,scale)
+	scale=scale or 0x7f
+	local ht=#t
+	for i=1,ht do
+		local v=t[i]
+		v=math.floor(v*scale)
+		if v>0x7f then v=0x7f elseif v<-0x7f then v=-0x7f end
+		t[i]=v+0x80
+	end
+	return t
+end
 
 

@@ -112,6 +112,7 @@ function wskin.setup(def)
 	local win=def.win
 
 	
+	local cache_functions=nil
 	local cache_arrays=nil
 	local cache_array=nil
 	local cache_binded=nil --images.get("wskins/soapbar")
@@ -407,6 +408,8 @@ function wskin.setup(def)
 if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
 
 local cache_draw
+local cache_draw_custom
+local old_cache_draw_custom
 local font_cache_draw
 
 		if widget.fbo then
@@ -440,6 +443,11 @@ local font_cache_draw
 
 
 			if not widget.fbo_batch_draw_disable then
+
+				old_cache_draw_custom=wskin.cache_draw_custom
+				cache_draw_custom={}
+				wskin.cache_draw_custom=cache_draw_custom
+
 				cache_draw=cache_begin()
 				sheets.batch_start()
 				font_cache_draw=font.cache_begin()
@@ -473,6 +481,10 @@ local font_cache_draw
 				cache_draw()
 				sheets.batch_stop()
 				sheets.batch_draw()
+			end
+			if cache_draw_custom then
+				for i,f in ipairs(cache_draw_custom) do f() end
+				wskin.cache_draw_custom=old_cache_draw_custom
 			end
 			if font_cache_draw then
 				font_cache_draw()
@@ -635,6 +647,10 @@ end
 			if widget.sheet then -- custom graphics
 
 				sheets.get(widget.sheet):draw(widget.sheet_id or 1,widget.sheet_px or 0,widget.sheet_py or 0,0,widget.sheet_hx or hx,widget.sheet_hy or hy)
+			
+			elseif type(skin)=="function" then -- we have a skin drawing function, just call it to draw
+			
+				wskin.cache_draw_custom[#wskin.cache_draw_custom+1]=skin(widget) -- return draw function for cache draw
 			
 			elseif type(skin)=="string" then -- got some images to play with
 			
