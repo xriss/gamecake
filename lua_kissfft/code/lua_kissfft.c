@@ -61,6 +61,28 @@ static u8 * lua_toluserdata (lua_State *L, int idx, size_t *len) {
 	return p;
 }
 
+static u8 * lua_toptr (lua_State *L, int idx, size_t *len) {
+	u8 *p=(u8*)lua_tolstring(L,idx,len);
+	if(!p)
+	{
+		if(lua_islightuserdata(L,idx))
+		{
+			p=lua_toluserdata(L,idx,len);
+			if(len)
+			{
+				if(lua_isnumber(L,idx+1))
+				{
+					*len=(size_t)lua_tonumber(L,idx+1);
+				}
+			}
+		}
+		else
+		{
+			p=lua_toluserdata(L,idx,len);
+		}
+	}
+	return p;
+}
 
 //
 // we can use either these strings as a string identifier
@@ -193,27 +215,8 @@ kissfftdat *dat = lua_kissfft_check_dat (l, 1);
 
 int i,j;
 
-	if(lua_isstring(l,2))
-	{
-		ptr=(const u8*)lua_tolstring(l,2,&len);
-	}
-	else
-	if(lua_islightuserdata(l,2))
-	{
-		ptr=lua_toluserdata(l,2,&len);
-		len=lua_tonumber(l,3);
-		if(len<=0)
-		{
-			lua_pushstring(l,"need a string to load packed data from");
-			lua_error(l);
-		}
-	}
-	else
-	if(lua_isuserdata(l,2)) // must check for light first...
-	{
-		ptr=lua_toluserdata(l,2,&len);
-	}
-	else
+	ptr=lua_toptr(l,2,&len);
+	if(!ptr)
 	{
 		lua_pushstring(l,"need a string to load packed data from");
 		lua_error(l);
@@ -274,6 +277,136 @@ int i;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// allocate, fft , apply a filter, inverse fft and then replace input with result
+//
+// number of samples
+// input sample buffer (s16)[num]
+// input filter buffer (f32)[num/2+1]
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_kissfft_filter (lua_State *l)
+{
+int i;
+
+int len;
+int lenf;
+
+u8 *ptr_io=0;
+size_t len_io;
+
+const u8 *ptr_f=0;
+size_t len_f;
+
+kissfftdat *dat;
+
+float f;
+
+// default of 1024
+	len=(int)lua_tonumber(l,1);
+	if(len<=0) { len=1024; }
+	if(len>KISSFFTDAT_LEN_MAX) { len=KISSFFTDAT_LEN_MAX; }
+	lenf=(len/2)+1;
+	
+	if(lua_istable(l,2)) // table in/out
+	{
+		ptr_io=0;
+	}
+	else // memory in/out
+	{
+		ptr_io=lua_toptr(l,2,&len_io);
+		if(!ptr_io)
+		{
+			lua_pushstring(l,"need s16 input/output buffer");
+			return lua_error(l);
+		}
+		if(len*2!=len_io)
+		{
+			lua_pushstring(l,"s16 input/output buffer size mismatch");
+			return lua_error(l);
+		}
+	}
+
+	ptr_f=lua_toptr(l,3,&len_f);
+	if(!ptr_f)
+	{
+		lua_pushstring(l,"need f32 filter buffer");
+		return lua_error(l);
+	}
+	if(lenf*4!=len_f)
+	{
+		lua_pushstring(l,"f32 filter buffer size mismatch");
+		return lua_error(l);
+	}
+	
+	dat=calloc(sizeof(kissfftdat),1);
+	if(!dat) { return 0; }
+	dat->len=len;
+	dat->nfreqs=lenf;
+	
+	dat->cfg=kiss_fftr_alloc(len,0,0,0);
+	if(!dat->cfg) { return 0; }
+
+	if(ptr_io)
+	{
+		for(i=0;i<dat->len;i++) // input
+		{
+			dat->din[i]=(float)(((const s16*)ptr_io)[i])*(1.0f/32767.0f);
+		}
+	}
+	else
+	{
+		for(i=1;i<=dat->len;i++)
+		{
+			lua_rawgeti(l,2,i);
+			dat->din[i-1]=(float)lua_tonumber(l,-1);
+			lua_pop(l,1);
+		}
+	}
+	kiss_fftr(dat->cfg,dat->din,dat->tmp);
+
+	free(dat->cfg);
+	dat->cfg=kiss_fftr_alloc(len,1,0,0); // setup inverse
+	if(!dat->cfg) { return 0; }
+
+	for (i=0;i<dat->nfreqs;i++)
+	{
+		f=((const float *)ptr_f)[i]/((float)dat->len);
+		dat->tmp[i].r *= f;
+		dat->tmp[i].i *= f;
+	}
+
+	kiss_fftri(dat->cfg,dat->tmp,dat->din);
+
+	if(ptr_io)
+	{
+		for(i=0;i<dat->len;i++) // output
+		{
+			float f=dat->din[i]*(32767.0f);
+			if(f> 32767.0f) { f= 32767.0f; }
+			if(f<-32767.0f) { f=-32767.0f; }
+			((s16*)ptr_io)[i]=(s16)f;
+		}
+	}
+	else
+	{
+		for(i=1;i<=dat->len;i++)
+		{
+			lua_pushnumber(l,dat->din[i-1]);
+			lua_rawseti(l,2,i);
+		}
+	}
+
+	free(dat->cfg);
+	free(dat);
+
+//return the in/out s16 buffer on success or nil on failure
+	lua_pushvalue(l,2);
+	return 1;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -287,6 +420,8 @@ LUALIB_API int luaopen_kissfft_core (lua_State *l)
 
 		{"push",			lua_kissfft_push},
 		{"pull",			lua_kissfft_pull},
+
+		{"filter",			lua_kissfft_filter},
 
 		{0,0}
 	};

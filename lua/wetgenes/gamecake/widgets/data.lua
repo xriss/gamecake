@@ -127,17 +127,25 @@ end
 
 
 -- get display pos, given the size of the parent and our size?
-wdata.data_get_pos=function(dat,psiz,bsiz)
-	if dat.step==0 then -- no snap
-		return ((dat.num-dat.min)/(dat.max-dat.min))*(psiz-bsiz)
+wdata.data_get_pos=function(dat,psiz,bsiz,reverse)
+	if reverse then
+		if dat.step==0 then -- no snap
+			return (1-((dat.num-dat.min)/(dat.max-dat.min)))*(psiz-bsiz)
+		else
+			return (1-((dat.num-dat.min)/(dat.max-dat.min)))*(psiz-bsiz)
+		end
 	else
-		return ((dat.num-dat.min)/(dat.max-dat.min))*(psiz-bsiz)
+		if dat.step==0 then -- no snap
+			return ((dat.num-dat.min)/(dat.max-dat.min))*(psiz-bsiz)
+		else
+			return ((dat.num-dat.min)/(dat.max-dat.min))*(psiz-bsiz)
+		end
 	end
 end
 
 -- given the parents size and our relative position/size within it
 -- update dat.num and return a new position (for snapping)
-wdata.data_snap=function(dat,psiz,bsiz,bpos)
+wdata.data_snap=function(dat,psiz,bsiz,bpos,reverse)
 
 --print("minmax",dat.min,dat.max)
 
@@ -145,6 +153,7 @@ wdata.data_snap=function(dat,psiz,bsiz,bpos)
 		if dat.max==dat.min then dat:value(dat.min) return 0 end -- do not move
 
 		local f=bpos/(psiz-bsiz)
+		if reverse then f=1-f end
 		dat:value(dat.min+((dat.max-dat.min)*f))
 		
 		return bpos
@@ -154,11 +163,16 @@ wdata.data_snap=function(dat,psiz,bsiz,bpos)
 		if dat.max==dat.min then dat:value(dat.min) return 0 end -- do not move
 		
 		local f=bpos/(psiz-bsiz)
+		if reverse then f=1-f end
 		local n=math.floor(0.5+(((dat.max-dat.min)*f)/dat.step))
 
 		dat:value(dat.min+(n*dat.step))
 		
-		return math.floor((psiz-bsiz)*((dat.num-dat.min)/(dat.max-dat.min)))
+		if reverse then
+			return math.floor((psiz-bsiz)*(1-((dat.num-dat.min)/(dat.max-dat.min))))
+		else
+			return math.floor((psiz-bsiz)*((dat.num-dat.min)/(dat.max-dat.min)))
+		end
 	end
 end
 

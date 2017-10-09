@@ -82,15 +82,15 @@ function wslide.slide_snap(it,useloc)
 	it.knob.hy=it.daty:get_size(it.hy)
 
 	if not useloc then
-		it.knob.px=it.datx:get_pos(it.hx,it.knob.hx)
-		it.knob.py=it.daty:get_pos(it.hy,it.knob.hy)
+		it.knob.px=it.datx:get_pos(it.hx,it.knob.hx,it.datxrev)
+		it.knob.py=it.daty:get_pos(it.hy,it.knob.hy,it.datyrev)
 	end
 	
 -- auto snap positions when draged
-	it.knob.px=it.datx:snap( it.hx , it.knob.hx , it.knob.px )
+	it.knob.px=it.datx:snap( it.hx , it.knob.hx , it.knob.px , it.datxrev )
 	
 -- y is now the right way up
-	it.knob.py=it.daty:snap( it.hy , it.knob.hy , it.knob.py )
+	it.knob.py=it.daty:snap( it.hy , it.knob.hy , it.knob.py , it.datyrev )
 	
 end
 	
@@ -111,7 +111,9 @@ function wslide.setup(widget,def)
 	widget.datx=def.datx or widget_data.new_data({max=0,master=widget.master})
 	widget.daty=def.daty or widget_data.new_data({max=0,master=widget.master})
 	widget.data=def.data -- or def.datx or def.daty
-	
+	widget.datxrev=def.datxrev
+	widget.datyrev=def.datyrev
+
 	widget.style=def.style or "indent"
 
 -- auto add the draging button as a child
@@ -121,8 +123,8 @@ function wslide.setup(widget,def)
 -- set size and position of child
 	widget.knob.hx=widget.datx:get_size(widget.hx)
 	widget.knob.hy=widget.daty:get_size(widget.hy)
-	widget.knob.px=widget.datx:get_pos(widget.hx,widget.knob.hx)
-	widget.knob.py=widget.daty:get_pos(widget.hy,widget.knob.hy)
+	widget.knob.px=widget.datx:get_pos(widget.hx,widget.knob.hx,widget.datxrev)
+	widget.knob.py=widget.daty:get_pos(widget.hy,widget.knob.hy,widget.datyrev)
 	widget:snap()
 
 	widget.solid=false

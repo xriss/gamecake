@@ -7,6 +7,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local sin=math.sin
 local pi=math.pi
 
+local kissfft=require("kissfft.core")
+local wpack=require("wetgenes.pack")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local bitsynth=M
@@ -430,7 +433,7 @@ end
 -- prepare a generator to render from the options table (ot)
 -- most basic sound, nothing clever just a waveform and a volume envelope with optional FM
 bitsynth.prepare=function(ot)
-	local it={}
+	local it={ot=ot}
 	
 -- return a bound custom function or generic one from within bitsynth.funcs
 	local fbind=function(f)
@@ -513,6 +516,32 @@ bitsynth.render=function(it)
 			t[i]=v/m
 		end
 	end
+
+-- apply eq to sample data
+	if it.ot.eq and it.ot.eq[1] and it.ot.eq[2] then
+		local oldlen=#t
+		local feq=bitsynth.flinear(unpack(it.ot.eq))
+		local tf={} ; for i=1,1025 do tf[i]=feq( (i-0.5)*48000/2048) end -- filter
+		local ff,fl=wpack.save_array(tf,"f32")
+		local tt={{},{}}
+		local ti=1
+		for i=0,#t-1,1024 do -- fft chunks
+			local ta={}
+			for j=1,2048 do ta[j]=t[i+j] or 0 end
+			assert(kissfft.filter(2048,ta,ff))
+			for j=1,2048 do tt[ti][i+j]=ta[j] end -- save into odd/even buffers
+			ti=(ti%2)+1 -- toggle odd/even buffers
+		end
+		for i=1,#t do
+			local ff=i/1024
+			local fi=math.floor(ff)
+			ff=ff-fi
+			if (fi%2)==1 then ff=1-ff end
+			if i<=1024 then ff=1 end-- special first chunk
+			t[i]= (tt[1][i] or 0)*ff + (tt[2][i] or 0)*(1-ff) -- blend
+		end
+	end
+	
 	return t
 end
 
