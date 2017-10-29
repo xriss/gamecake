@@ -50,6 +50,7 @@ wmeta.classes={
 	["menudrop"]=oven.rebake("wetgenes.gamecake.widgets.menudrop"),
 
 	["file"]=oven.rebake("wetgenes.gamecake.widgets.file"),
+	["texteditor"]=oven.rebake("wetgenes.gamecake.widgets.texteditor"),
 }
 
 --

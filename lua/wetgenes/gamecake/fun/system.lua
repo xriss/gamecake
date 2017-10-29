@@ -88,58 +88,28 @@ print("system setup")
 
 -- possible components and perform global setup, even if they never get used
 
-	system.colors  =oven.rebake("wetgenes.gamecake.fun.colors").setup()
-	system.tiles   =oven.rebake("wetgenes.gamecake.fun.tiles").setup()
-	system.sprites =oven.rebake("wetgenes.gamecake.fun.sprites").setup()
-	system.tilemap =oven.rebake("wetgenes.gamecake.fun.tilemap").setup()
-	system.autocell=oven.rebake("wetgenes.gamecake.fun.autocell").setup()
-	system.canvas  =oven.rebake("wetgenes.gamecake.fun.canvas").setup()
-	system.screen  =oven.rebake("wetgenes.gamecake.fun.screen").setup()
-	system.copper  =oven.rebake("wetgenes.gamecake.fun.copper").setup()
-	system.sfx     =oven.rebake("wetgenes.gamecake.fun.sfx").setup()
-
+	system.creates={} -- all available systems
+	for i,n in ipairs{
+			"sfx",
+			"colors",
+			"screen",
+			"copper",
+			"tiles",
+			"canvas",
+			"tilemap",
+			"sprites",
+			"autocell",
+			"overmap",
+		} do
+		system.creates[n] = oven.rebake( "wetgenes.gamecake.fun."..n).setup()
+	end
 
 	for i,v in ipairs(system.hardware) do
 	
 		local it
 	
-		
-		if     v.component=="screen" then
-
-			it=system.screen.create({system=system},v)
-
-		elseif v.component=="tiles" then
-
-			it=system.tiles.create({system=system},v)
-
-		elseif v.component=="colors" then
-
-			it=system.colors.create({system=system},v)
-
-		elseif v.component=="sprites" then
-
-			it=system.sprites.create({system=system},v)
-
-		elseif v.component=="tilemap" then
-
-			it=system.tilemap.create({system=system},v)
-
-		elseif v.component=="autocell" then
-
-			it=system.autocell.create({system=system},v)
-
-		elseif v.component=="copper" then
-
-			it=system.copper.create({system=system},v)
-
-		elseif v.component=="canvas" then
-
-			it=system.canvas.create({system=system},v)
-
-		elseif v.component=="sfx" then
-
-			it=system.sfx.create({system=system},v)
-
+		if system.creates[ v.component ] then
+			it=system.creates[ v.component ].create({system=system},v)
 		end
 		
 		if it then
