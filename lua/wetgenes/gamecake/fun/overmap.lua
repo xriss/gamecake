@@ -93,13 +93,13 @@ overmap.create=function(it,opts)
 
 				local l=#t ; for i,v in ipairs{
 
-					phx*bx,		phy*by-it.over_hy+thy,	y,	x,		y+1,
-					phx*bx,		phy*by-it.over_hy,		y,	x,		y,
-					phx*bx+thx,	phy*by-it.over_hy,		y,	x+1,	y,
+					phx*bx,		phy*by+thy,	y,	x,		y+1,
+					phx*bx,		phy*by,		y,	x,		y,
+					phx*bx+thx,	phy*by,		y,	x+1,	y,
 
-					phx*bx,		phy*by-it.over_hy+thy,	y,	x,		y+1,
-					phx*bx+thx,	phy*by-it.over_hy,		y,	x+1,	y,
-					phx*bx+thx,	phy*by-it.over_hy+thy,	y,	x+1,	y+1,
+					phx*bx,		phy*by+thy,	y,	x,		y+1,
+					phx*bx+thx,	phy*by,		y,	x+1,	y,
+					phx*bx+thx,	phy*by+thy,	y,	x+1,	y+1,
 
 				} do t[l+i]=v end
 
