@@ -4,6 +4,7 @@
 
 uniform mat4 modelview;
 uniform mat4 projection;
+uniform vec2 projection_zxy;
 uniform vec4 color;
 
 uniform sampler2D tex_cmap;
@@ -24,8 +25,8 @@ varying vec4  v_color;
  
 void main()
 {
-    gl_Position = projection * modelview * vec4(a_vertex.xy, 0.0 , 1.0);
-//    gl_Position.z+=a_vertex.z;
+    gl_Position = projection * modelview * vec4( a_vertex.xy + projection_zxy*a_vertex.z , 0.0 , 1.0);
+    gl_Position.z+=a_vertex.z/65536.0;
 	v_texcoord=a_texcoord;
 	v_color=color;
 }

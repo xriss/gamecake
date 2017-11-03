@@ -53,6 +53,9 @@ screen.create=function(it,opts)
 	it.hx=it.opts.size and it.opts.size[1] or 320
 	it.hy=it.opts.size and it.opts.size[2] or 240
 
+	it.zx=it.opts.zxy and it.opts.zxy[1] or 0 -- fake 3d projection
+	it.zy=it.opts.zxy and it.opts.zxy[2] or 0
+
 	it.fbo=framebuffers.create(it.hx,it.hy,0)
 	it.view=views.create({
 		mode="fbo",
@@ -227,6 +230,9 @@ screen.create=function(it,opts)
 
 		if layer.shadow=="drop" then
 			flat.tristrip("rawuv",t,"fun_screen_dropshadow",function(p)
+
+				gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
+
 				local v=views.get()
 				gl.Uniform4f( p:uniform("siz"), fbo.txw				,	fbo.txh, 
 												fbo.uvw/v.hx*v.sx	,	fbo.uvh/v.hy*v.sy	)
@@ -263,6 +269,7 @@ screen.create=function(it,opts)
 
 		if it.filter=="scanline" then
 			flat.tristrip("rawuv",t,"fun_screen_scanline",function(p)
+				gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
 				local v=views.get()
 				gl.Uniform4f( p:uniform("siz"), it.fbo.txw				,	it.fbo.txh, 
 												it.fbo.uvw/v.hx*v.sx	,	it.fbo.uvh/v.hy*v.sy	)
@@ -311,12 +318,14 @@ screen.create=function(it,opts)
 
 		it.fxbo1:bind_frame()
 		flat.tristrip("rawuv",t,"fun_screen_bloom_pick",function(p)
+			gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
 			it.fbo:bind_texture()
 		end)
 
 
 		it.fxbo2:bind_frame()
 		flat.tristrip("rawuv",t,"fun_screen_bloom_blur",function(p)
+			gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
 			it.fxbo1:bind_texture()
 			gl.Uniform4f( p:uniform("pix_siz"), it.fbo.uvw/it.fbo.w,0,0,1 )
 		end)
@@ -324,6 +333,7 @@ screen.create=function(it,opts)
 
 		it.fxbo1:bind_frame()
 		flat.tristrip("rawuv",t,"fun_screen_bloom_blur",function(p)
+			gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
 			it.fxbo2:bind_texture()
 			gl.Uniform4f( p:uniform("pix_siz"), 0,it.fbo.uvh/it.fbo.h,0,1 )
 		end)

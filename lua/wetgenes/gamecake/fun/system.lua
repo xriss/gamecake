@@ -236,6 +236,8 @@ system.draw_debug=function()
 
 		flat.tristrip("rawuv",t,"fun_draw_tiles_debug",function(p)
 
+			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
+
 			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_tile"), 0 )
 			gl.BindTexture( gl.TEXTURE_2D , tiles.bitmap_tex )
 

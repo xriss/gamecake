@@ -159,6 +159,8 @@ autocell.create=function(it,opts)
 
 			flat.tristrip("rawuv",t,it.shader_step_name,function(p)
 
+				gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
+
 				gl.Uniform4f( p:uniform("map_info"), 	0,0,it.autocell_hx,it.autocell_hy )
 
 				gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_cell"), 0 )
@@ -212,6 +214,8 @@ autocell.create=function(it,opts)
 
 
 			flat.tristrip("rawuv",t,it.shader_draw_name,function(p)
+
+				gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
 
 				gl.ActiveTexture(gl.TEXTURE2) gl.Uniform1i( p:uniform("tex_cmap"), 2 )
 				gl.BindTexture( gl.TEXTURE_2D , it.colors.cmap_tex )

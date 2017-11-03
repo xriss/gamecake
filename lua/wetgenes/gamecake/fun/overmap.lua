@@ -60,12 +60,20 @@ overmap.create=function(it,opts)
 	
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the base tile size,
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
+	it.tile_hz=it.opts.tile_size and it.opts.tile_size[3] or it.tiles.tile_hy
 	
 	it.over_hx=it.opts.over_size and it.opts.over_size[1] or (it.tile_hx/2) -- overlap right ( 50% default )
 	it.over_hy=it.opts.over_size and it.opts.over_size[2] or (it.tile_hy/2) -- overlap up    ( 50% default )
 
-	it.slide_hx=it.opts.slide and it.opts.slide[1] or 0
-	it.slide_hy=it.opts.slide and it.opts.slide[2] or 0
+	it.mode=it.opts.mode or "xy" -- xy for 2d or xz for "fake" 3d
+--[[
+	it.slide_px=it.opts.slide and it.opts.slide[1] or 0
+	it.slide_py=it.opts.slide and it.opts.slide[2] or 0
+	it.slide_sx=it.opts.slide and it.opts.slide[3] or 0
+	it.slide_sy=it.opts.slide and it.opts.slide[4] or 0
+	it.slide_mx=it.opts.slide and it.opts.slide[5] or 0
+	it.slide_my=it.opts.slide and it.opts.slide[6] or 0
+]]
 
 	it.setup=function(opts)
 		
@@ -81,25 +89,30 @@ overmap.create=function(it,opts)
 		local t={}
 		local phx=(it.tile_hx-it.over_hx)
 		local phy=(it.tile_hy-it.over_hy)
+		local phz=(it.tile_hz)
 		local thx=(it.tile_hx)
 		local thy=(it.tile_hy)
 		local xoa,xob,xoc=0,it.tilemap_hx-1,1		if it.sortx==-1 then xoa,xob,xoc=it.tilemap_hx-1,0,-1 end
 		local yoa,yob,yoc=0,it.tilemap_hy-1,1		if it.sorty==-1 then yoa,yob,yoc=it.tilemap_hy-1,0,-1 end
-		for y=yoa,yob,yoc do
+		for yz=yoa,yob,yoc do
+			local y,z=0,0
+			if it.mode=="xy" then y=yz end -- 2d
+			if it.mode=="xz" then z=-yz end -- 3d
 			for x=xoa,xob,xoc do
 			
-				local bx=x+((it.slide_hy*y)%1)
-				local by=y+((it.slide_hx*x)%1)
+				local bx=phx*x --+phz*it.screen.zx*z
+				local by=phy*y --+phz*it.screen.zy*z
+				local bz=phz*z
 
 				local l=#t ; for i,v in ipairs{
 
-					phx*bx,		phy*by+thy,	y,	x,		y+1,
-					phx*bx,		phy*by,		y,	x,		y,
-					phx*bx+thx,	phy*by,		y,	x+1,	y,
+					bx,		by+thy,	bz,		x,		yz+1,
+					bx,		by,		bz,		x,		yz,
+					bx+thx,	by,		bz,		x+1,	yz,
 
-					phx*bx,		phy*by+thy,	y,	x,		y+1,
-					phx*bx+thx,	phy*by,		y,	x+1,	y,
-					phx*bx+thx,	phy*by+thy,	y,	x+1,	y+1,
+					bx,		by+thy,	bz,		x,		yz+1,
+					bx+thx,	by,		bz,		x+1,	yz,
+					bx+thx,	by+thy,	bz,		x+1,	yz+1,
 
 				} do t[l+i]=v end
 
@@ -146,6 +159,8 @@ overmap.create=function(it,opts)
 
 		local dl={ color={1,1,1,1} , dx=0 , dy=0 }
 		it.gl.draw(function(p)
+
+			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
 
 			gl.ActiveTexture(gl.TEXTURE2) gl.Uniform1i( p:uniform("tex_cmap"), 2 )
 			gl.BindTexture( gl.TEXTURE_2D , it.colors.cmap_tex )

@@ -86,6 +86,9 @@ copper.create=function(it,opts)
 		gl.DepthMask(gl.FALSE)
 
 		flat.tristrip("rawuv",t,it.shader_name,function(p)
+
+			gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
+
 			for n,v in pairs(it.shader_uniforms) do
 
 				local id=p:uniform(n)
