@@ -66,14 +66,10 @@ overmap.create=function(it,opts)
 	it.over_hy=it.opts.over_size and it.opts.over_size[2] or (it.tile_hy/2) -- overlap up    ( 50% default )
 
 	it.mode=it.opts.mode or "xy" -- xy for 2d or xz for "fake" 3d
---[[
-	it.slide_px=it.opts.slide and it.opts.slide[1] or 0
-	it.slide_py=it.opts.slide and it.opts.slide[2] or 0
-	it.slide_sx=it.opts.slide and it.opts.slide[3] or 0
-	it.slide_sy=it.opts.slide and it.opts.slide[4] or 0
-	it.slide_mx=it.opts.slide and it.opts.slide[5] or 0
-	it.slide_my=it.opts.slide and it.opts.slide[6] or 0
-]]
+
+	it.ax=it.opts.add and it.opts.add[1] or 0
+	it.ay=it.opts.add and it.opts.add[2] or 0
+	it.az=it.opts.add and it.opts.add[3] or 0
 
 	it.setup=function(opts)
 		
@@ -161,6 +157,7 @@ overmap.create=function(it,opts)
 		it.gl.draw(function(p)
 
 			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
+			gl.Uniform3f( p:uniform("modelview_add"), it.ax,it.ay,it.az)
 
 			gl.ActiveTexture(gl.TEXTURE2) gl.Uniform1i( p:uniform("tex_cmap"), 2 )
 			gl.BindTexture( gl.TEXTURE_2D , it.colors.cmap_tex )

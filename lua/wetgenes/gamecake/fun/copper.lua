@@ -87,7 +87,7 @@ copper.create=function(it,opts)
 
 		flat.tristrip("rawuv",t,it.shader_name,function(p)
 
-			gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
+--			gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
 
 			for n,v in pairs(it.shader_uniforms) do
 

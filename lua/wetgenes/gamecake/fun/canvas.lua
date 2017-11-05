@@ -121,7 +121,7 @@ canvas.create=function(it,opts)
 		gl.DepthMask(gl.FALSE)
 		flat.tristrip("rawuv",t,"fun_draw_canvas",function(p)
 
-			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
+--			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
 
 			gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_cmap"), 2 )
 			gl.BindTexture( gl.TEXTURE_2D , it.colors.cmap_tex )

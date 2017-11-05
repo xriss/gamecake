@@ -42,6 +42,10 @@ sprites.create=function(it,opts)
 
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the tile size, or allow it to change per sprite component
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
+	
+	it.ax=it.opts.add and it.opts.add[1] or 0
+	it.ay=it.opts.add and it.opts.add[2] or 0
+	it.az=it.opts.add and it.opts.add[3] or 0
 
 	it.layer=opts.layer or 1
 
@@ -97,7 +101,7 @@ sprites.create=function(it,opts)
 		
 		gl.Color(1,1,1,1)
 
-		local dl={ color={1,1,1,1} , dx=0 , dy=0 }
+		local dl={ color={1,1,1,1}}
 
 		local batch={}
 		for idx,v in pairs(it.list) do
@@ -124,11 +128,14 @@ sprites.create=function(it,opts)
 				px=math.floor(px+0.5)
 				py=math.floor(py+0.5)
 			end
-
-			local v1=gl.apply_modelview( {dl.dx+px-c*(ox)-s*(oy),			dl.dy+py+s*(ox)-c*(oy),			v.pz,1} )
-			local v2=gl.apply_modelview( {dl.dx+px+c*(hx-ox)-s*(oy),		dl.dy+py-s*(hx-ox)-c*(oy),		v.pz,1} )
-			local v3=gl.apply_modelview( {dl.dx+px-c*(ox)+s*(hy-oy),		dl.dy+py+s*(ox)+c*(hy-oy),		v.pz,1} )
-			local v4=gl.apply_modelview( {dl.dx+px+c*(hx-ox)+s*(hy-oy),		dl.dy+py-s*(hx-ox)+c*(hy-oy),	v.pz,1} )
+			
+			local ax=it.ax+(it.az+v.pz)*it.screen.zx
+			local ay=it.ay+(it.az+v.pz)*it.screen.zy
+			local az=it.az
+			local v1=gl.apply_modelview( {ax+px-c*(ox)-s*(oy),			ay+py+s*(ox)-c*(oy),		(az+v.pz)/65536,1} )
+			local v2=gl.apply_modelview( {ax+px+c*(hx-ox)-s*(oy),		ay+py-s*(hx-ox)-c*(oy),		(az+v.pz)/65536,1} )
+			local v3=gl.apply_modelview( {ax+px-c*(ox)+s*(hy-oy),		ay+py+s*(ox)+c*(hy-oy),		(az+v.pz)/65536,1} )
+			local v4=gl.apply_modelview( {ax+px+c*(hx-ox)+s*(hy-oy),	ay+py-s*(hx-ox)+c*(hy-oy),	(az+v.pz)/65536,1} )
 
 			local t=
 			{
@@ -146,9 +153,6 @@ sprites.create=function(it,opts)
 
 
 		flat.tristrip("rawuvrgba",batch,"fun_draw_sprites",function(p)
-
-			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
-
 			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex"), 0 )
 			gl.BindTexture( gl.TEXTURE_2D , it.tiles.bitmap_tex )
 		end)
