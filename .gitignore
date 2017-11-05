@@ -48,6 +48,8 @@ sdks/nacl-sdk
 
 test/dat/grd/*.out.*
 
+test/swankyquant/go
+
 
 parts/
 prime/
