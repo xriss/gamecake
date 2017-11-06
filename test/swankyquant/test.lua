@@ -5,12 +5,83 @@ local wstr=require("wetgenes.string")
 
 local test=function(fname,colors)
 
--- test neoquant as base
 
+-- compare two rgba colors and return a distance value
+local cdist=function( ar,ag,ab,aa , br,bg,bb,ba )
+	return --[[math.sqrt]]( (ar-br)*(ar-br) + (ag-bg)*(ag-bg) + (ab-bb)*(ab-bb) + (aa-ba)*(aa-ba) )
+end
+
+
+-- sort the palette order
+local sort_pal=function(g,colors)
+	local pc=g:palette(0,colors)	
+	local best_length=math.huge
+	local best_list={}
+	for istart=0,colors-1 do -- try each possible start point
+		local pool={} ; for i=0,colors-1 do pool[i+1]=i end
+		local list={}
+		list[#list+1]=table.remove(pool,istart+1) -- remove/add the start color
+		local list_length=0
+		while #pool>0 do
+			local pi=list[#list] -- color at end of list
+			local best_step=math.huge
+			local best_idx=0
+			for i=1,#pool do -- 
+				local pt=pool[i] -- color to test
+				local d=cdist( pc[pi*4+1] , pc[pi*4+2] , pc[pi*4+3] , pc[pi*4+4] , pc[pt*4+1] , pc[pt*4+2] , pc[pt*4+3] , pc[pt*4+4] )
+				if d<best_step then
+					best_step=d
+					best_idx=i
+				end
+			end
+			list[#list+1]=table.remove(pool,best_idx) -- remove/add the next color
+			list_length=list_length+best_step
+		end
+		if list_length<best_length then
+			best_length=list_length
+			best_list=list
+		end
+	end
+	
+	local po={}
+	local map={}
+	for i=1,#best_list do
+		local c=best_list[i]
+		map[ c ]=i-1
+		po[ (i-1)*4 + 1 ]= pc[ c*4 + 1 ]
+		po[ (i-1)*4 + 2 ]= pc[ c*4 + 2 ]
+		po[ (i-1)*4 + 3 ]= pc[ c*4 + 3 ]
+		po[ (i-1)*4 + 4 ]= pc[ c*4 + 4 ]
+	end
+	g:palette(0,colors,po)
+	local d=g:pixels(0,0,0,g.width,g.height,1)
+	for i=1,g.width*g.height do
+		d[i]=map[ d[i] ] -- remap
+	end
+	g:pixels(0,0,0,g.width,g.height,1,d)
+
+end
+
+-- save an easy to view palette
+local save_pal=function(g,fname)
+	local p=assert( grd.create("U8_INDEXED",16*8,16*8,1) )
+	p:palette(0,16*16,g:palette(0,16*16,""))
+	for i=0,255 do
+		local x=i%16
+		local y=math.floor(i/16)
+		p:pixels(x*8,y*8,0,8,8,1,string.rep(string.char(i),8*8))
+	end
+	assert( p:save(fname) )
+end
+
+
+-- test neoquant as base
+--[[
 local g=assert(grd.create("gi/"..fname..".png"))
 assert( g:quant(colors) )
 assert( g:save("go/"..fname.."."..colors..".nq.png") )
-
+save_pal(g,"go/"..fname.."."..colors..".nq.pal.png")
+]]
 
 local gi=assert(grd.create("gi/"..fname..".png")) -- input
 assert( gi:convert("U8_RGBA") )
@@ -65,17 +136,11 @@ local save=function(colors)
 	end
 	go:palette(0,colors,pal_rgb)
 	go:pixels(0,0,0,go.width,go.height,1,pal_idx)
+	sort_pal(go,colors)
 	assert( go:save("go/"..fname.."."..colors..".sq.png") )
+	save_pal(go,"go/"..fname.."."..colors..".sq.pal.png")
 end
 
--- compare two rgba colors and return a distance value
-local cdist=function( ar,ag,ab,aa , br,bg,bb,ba )
---	ar=255-ar ag=255-ag ab=255-ab aa=255-aa
---	br=255-br bg=255-bg bb=255-bb ba=255-ba
---	return (ar*ar-br*br)*(ar*ar-br*br) + (ag*ag-bg*bg)*(ag*ag-bg*bg) + (ab*ab-bb*bb)*(ab*ab-bb*bb) + (aa*aa-ba*ba)*(aa*aa-ba*ba)
-	return math.sqrt( (ar-br)*(ar-br) + (ag-bg)*(ag-bg) + (ab-bb)*(ab-bb) + (aa-ba)*(aa-ba) )
---	return math.abs(ar-br) + math.abs(ag-bg) + math.abs(ab-bb) + math.abs(aa-ba)
-end
 
 -- perform a single quant pass
 local quant=function(w)
@@ -152,13 +217,13 @@ end
 
 -- loop update and output
 local st=os.time()
-local c=8
+local c=5
 for i=1,c do
-	io.flush()
 --	quant(1)
-	quant(2^(c-i)) -- weight the first passes higher than the last to encourage bucket jumping
+	quant( (go.width*go.height/(colors*2)) / i*i ) -- weight by average colors per bucket given image size
 	local d=diff()
-	print(fname,i,os.time()-st,d)
+	print(fname,go.width*go.height,colors,i,os.time()-st,d)
+	io.flush()
 end
 save(colors)
 
@@ -167,8 +232,8 @@ end
 local i=2
 while i<=256 do
 	test("rgb",i)
-	test("baboon",i)
-	test("monarch",i)
-	test("parrot",i)
+--	test("baboon",i)
+--	test("monarch",i)
+--	test("parrot",i)
 	i=i*2
 end
