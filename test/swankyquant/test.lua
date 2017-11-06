@@ -8,8 +8,8 @@ local test=function(fname,colors)
 -- test neoquant as base
 
 local g=assert(grd.create("gi/"..fname..".png"))
-assert( g:convert("U8_INDEXED") )
-assert( g:save("go/"..fname..".nq.png") )
+assert( g:quant(colors) )
+assert( g:save("go/"..fname.."."..colors..".nq.png") )
 
 
 local gi=assert(grd.create("gi/"..fname..".png")) -- input
@@ -55,7 +55,7 @@ for i=0,go.width*go.height-1 do
 end
 
 -- save current state
-local save=function(idx)
+local save=function(colors)
 	for i=0,colors-1 do
 		local d=pal_dat[ i*5 + 5 ] ; if d==0 then d=1 end
 		pal_rgb[ i*4 + 1 ]=math.floor(pal_dat[ i*5 + 1 ] / d + 0.5)
@@ -65,7 +65,7 @@ local save=function(idx)
 	end
 	go:palette(0,colors,pal_rgb)
 	go:pixels(0,0,0,go.width,go.height,1,pal_idx)
-	assert( go:save("go/"..fname..".sq."..idx..".png") )
+	assert( go:save("go/"..fname.."."..colors..".sq.png") )
 end
 
 -- compare two rgba colors and return a distance value
@@ -151,19 +151,24 @@ local diff=function()
 end
 
 -- loop update and output
-save(0)
 local st=os.time()
 local c=8
 for i=1,c do
 	io.flush()
-	quant(256*((c+1-i)/c))
-	save(i)
+--	quant(1)
+	quant(2^(c-i)) -- weight the first passes higher than the last to encourage bucket jumping
 	local d=diff()
 	print(fname,i,os.time()-st,d)
 end
+save(colors)
 
 end
 
-test("rgb",4)
-test("baboon",4)
-test("monarch",4)
+local i=2
+while i<=256 do
+	test("rgb",i)
+	test("baboon",i)
+	test("monarch",i)
+	test("parrot",i)
+	i=i*2
+end
