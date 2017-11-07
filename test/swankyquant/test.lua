@@ -243,7 +243,7 @@ local colors=2
 while colors<=256 do
 
 	print(colors,os.time()-st)
-	local fname="rgb"
+	local fname="rgba"
 	local g=assert(grd.create("gi/"..fname..".png"))
 	assert( g:quant(colors) )
 	assert( g:save("go/"..fname.."."..colors..".sq.png") )

@@ -1075,6 +1075,14 @@ u8 *pc;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// New swankyquant code.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+#define SWANKYQUANT_C
+#include "swankyquant.h"
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // do a 32bit quantise that includes alpha (png8 suports this) max colors of 256
 // result will be an indexed image with a funky palette
 //
@@ -1511,7 +1519,7 @@ int suc;
 				stbir_resize_uint8(	grdinfo_get_data(gi,0,0,(s32)fz),	gi->w,			gi->h,			gi->yscan,
 									grdinfo_get_data(gb->bmap,0,0,z),	gb->bmap->w,	gb->bmap->h,	gb->bmap->yscan,
 									grd_sizeof_pixel(gi->fmt) )
-			) { return 0; }
+			) { return 0; } // TODO:  should pass in the premult alpha flags
 		}
 	}
 
