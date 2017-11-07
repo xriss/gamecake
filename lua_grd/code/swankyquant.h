@@ -117,13 +117,13 @@ int i,l;
 int best_idx;
 double distance,best_distance,weight;
 
-	double acc[256*5]={0}; // accumulator for color values [r,g,b,a,v]
+	double buckets[256*5]={0}; // buckets for color values [r,g,b,a,v]
 	
-// start by assigning each pixel a "random" index as a starting state
+// start by assigning each pixel a "random" bucket as a starting state
 	for( i=0 , pi=input , po=output ; i<length ; i++ , pi+=4 , po++ )
 	{
 		po[0]=( (colors-1)*(pi[0]+pi[1]+pi[2])/(3*255) )%colors; // a greyscale map
-		pa=acc+(po[0]*5);
+		pa=buckets+(po[0]*5);
 		pa[0]+=(double)pi[0];
 		pa[1]+=(double)pi[1];
 		pa[2]+=(double)pi[2];
@@ -131,16 +131,16 @@ double distance,best_distance,weight;
 		pa[4]+=1.0;
 	}
 
-// loop over image data and swap to another group if we find a better one
-// use a large weight based on average colors in each bucket
-// and reduce it with each pass
+// loop over image data and swap to another bucket if we find a better one
 	for( l=0 , weight=length/colors/4.0 ; (l<quality) ; l++ , weight=weight/4.0 )
 	{
-		if(weight<1.0){weight=1.0;} // never go below a natural weight of 1.0
+// use a large starting weight and reduce it with each pass
+// but never go below a natural weight of 1.0
+		if(weight<1.0){weight=1.0;} 
 		
 		for( pi=input , po=output ; po<output+length ; pi+=4 , po++ )
 		{
-			pa=acc+(po[0]*5); // remove from old acc bucket
+			pa=buckets+(po[0]*5); // remove from old bucket
 			pa[0]-=(double)pi[0];
 			pa[1]-=(double)pi[1];
 			pa[2]-=(double)pi[2];
@@ -149,7 +149,7 @@ double distance,best_distance,weight;
 
 			best_idx=po[0];
 			best_distance=65546.0*65546.0;
-			for( i=0 , pa=acc ; i<colors ; i++ , pa+=5 ) // search for best bucket
+			for( i=0 , pa=buckets ; i<colors ; i++ , pa+=5 ) // search for best bucket
 			{
 				distance=color_distance_weight(pa,pi,weight);
 				if(distance<best_distance)
@@ -161,7 +161,7 @@ double distance,best_distance,weight;
 
 			po[0]=best_idx; // write out
 			
-			pa=acc+(best_idx*5); // add to new acc bucket
+			pa=buckets+(best_idx*5); // add to new bucket
 			pa[0]+=(double)pi[0];
 			pa[1]+=(double)pi[1];
 			pa[2]+=(double)pi[2];
@@ -170,8 +170,8 @@ double distance,best_distance,weight;
 		}
 	}
 
-// build the final output palette from our accumulator buckets
-	for( i=0 , pp=palette , pa=acc ; i<colors ; i++ , pp+=4 , pa+=5 )
+// build the final output palette from our buckets
+	for( i=0 , pp=palette , pa=buckets ; i<colors ; i++ , pp+=4 , pa+=5 )
 	{
 		double d=pa[4]; if(d<=0) { d=1; } d=1.0/d;
 		pp[0]=(unsigned char)floor(0.5+pa[0]*d);
