@@ -1103,7 +1103,14 @@ int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 	gb=grd_create(GRD_FMT_U8_INDEXED | (g->bmap->fmt&GRD_FMT_PREMULT) ,g->bmap->w,g->bmap->h,g->bmap->d);
 	if(!gb) { return 0; }
 	
-	neuquant32_initnet( g->bmap->data , siz*4 , num_colors , 1.0/*1.0/2.2*/ );
+#if 1
+
+	swanky_quant( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , 6 );
+	swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data );
+	
+#else
+
+	neuquant32_initnet( g->bmap->data , siz*4 , num_colors , 1.0 );
 	neuquant32_learn( 1 ); // 1 is the best quality, 30 is worst
 	neuquant32_inxbuild();
 	neuquant32_getcolormap(gb->cmap->data);
@@ -1116,6 +1123,8 @@ int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 		c=*ptr++;
 		*optr++=neuquant32_inxsearch( (c>>24)&0xff , (c)&0xff , (c>>8)&0xff , (c>>16)&0xff );
 	}
+
+#endif
 	
 	return gb;
 }

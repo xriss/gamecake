@@ -231,9 +231,26 @@ end
 
 local i=2
 while i<=256 do
-	test("rgb",i)
+--	test("rgb",i)
 --	test("baboon",i)
 --	test("monarch",i)
 --	test("parrot",i)
 	i=i*2
 end
+
+local st=os.time()
+local colors=2
+while colors<=256 do
+
+	print(colors,os.time()-st)
+	local fname="rgb"
+	local g=assert(grd.create("gi/"..fname..".png"))
+	assert( g:quant(colors) )
+	assert( g:save("go/"..fname.."."..colors..".sq.png") )
+--	save_pal(g,"go/"..fname.."."..colors..".sq.pal.png")
+
+	colors=colors*2
+end
+
+
+

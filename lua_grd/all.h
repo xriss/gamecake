@@ -76,5 +76,6 @@ extern "C" {
 #include "code/grd_gif.h"
 #include "code/lua_grd.h"
 #include "code/neuquant32.h"
+#include "code/swankyquant.h"
 
 
