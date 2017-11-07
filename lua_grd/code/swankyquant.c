@@ -19,6 +19,11 @@ static inline double color_distance(int ar,int ag,int ab,int aa,int br,int bg,in
 	return (double)( (ar-br)*(ar-br) + (ag-bg)*(ag-bg) + (ab-bb)*(ab-bb) + (aa-ba)*(aa-ba) );
 }
 
+/*******************************************************************************
+
+Compare how close a match it would be if we added our color(weighted) to a bucket.
+
+*/
 static inline double color_distance_weight(const double *a,const unsigned char *b,double weight)
 {
 	double d=a[4]+weight; if(d<=0) { d=1; } d=1.0/d;
@@ -121,7 +126,13 @@ double distance,best_distance,weight;
 
 /*******************************************************************************
 
-perform an optional final remap on a swanky_quant
+Perform an optional final remap on a swanky_quant output image, this is 
+really only necessary for for low quality values which may change 
+considerably during the early passes and need this as a final cleanup.
+
+The output image from swanky_quant should be considered just as a 
+thinking buffer and you would want to do a dithering pass instead of 
+this anyway.
 
 */
 void swanky_quant_remap(const unsigned char *input,
