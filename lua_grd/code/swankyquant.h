@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************
 
 (C) Kriss@XIXs.com 2017 released into the public domain or optionally 
 licensed under the http://opensource.org/licenses/MIT license.
@@ -10,9 +10,10 @@ licensed under the http://opensource.org/licenses/MIT license.
 
 
 
-/*******************************************************************************
+/***************************************************************************
 
-External functions, the part of this file that is actually a header.
+External functions, AKA the part of this header file that is actually a 
+header.
 
 */
 #ifndef SWANKYQUANT_H
@@ -41,10 +42,11 @@ SWANKYQUANT_DEF void swanky_quant_remap(const unsigned char *input,
 
 
 
-/*******************************************************************************
+/***************************************************************************
 
 This code will *only* be included if you #define SWANKYQUANT_C before 
-including this file.
+including this file. So do this in one .C file only unless you also define 
+SWANKYQUANT_STATIC which would keep all the functions static.
 
 */
 #ifdef SWANKYQUANT_C
@@ -53,7 +55,7 @@ including this file.
 
 
 
-/*******************************************************************************
+/***************************************************************************
 
 Compare two colors and return a distance value. This is non linear, as we do not 
 need to bother with the sqrt since the numbers are only used for comparison.
@@ -64,7 +66,7 @@ static inline double color_distance(int ar,int ag,int ab,int aa,int br,int bg,in
 	return (double)( (ar-br)*(ar-br) + (ag-bg)*(ag-bg) + (ab-bb)*(ab-bb) + (aa-ba)*(aa-ba) );
 }
 
-/*******************************************************************************
+/***************************************************************************
 
 Compare how close a match it would be if we added our color(weighted) to a bucket.
 
@@ -86,7 +88,7 @@ could/should be optimised more.
 */
 static inline double color_distance_weight(const double *a,const unsigned char *b,double weight)
 {
-	double d=a[4]+weight; if(d<=0) { d=1; } d=1.0/d;
+	double d=a[4]+weight; if(d<=0.0) { d=1.0; } d=1.0/d;
 	return color_distance(
 		(int)(0.5+(a[0]+(double)b[0]*weight)*d),
 		(int)(0.5+(a[1]+(double)b[1]*weight)*d),
@@ -95,7 +97,7 @@ static inline double color_distance_weight(const double *a,const unsigned char *
 		(int)b[0],(int)b[1],(int)b[2],(int)b[3]);
 }
 
-/*******************************************************************************
+/***************************************************************************
 
 Reduce input rgba data to the requested number of index colors(2-256)
 
@@ -183,15 +185,19 @@ double distance,best_distance,weight;
 	}
 }
 
-/*******************************************************************************
+/***************************************************************************
 
 Perform an optional final remap on a swanky_quant output image, this is 
-really only necessary for for low quality values which may change 
-considerably during the early passes and need this as a final cleanup.
+really only necessary for low quality (quality is number of passes) 
+where pixel values may change considerably during these early passes as 
+pixels jump from bucket to bucket so would need a final cleanup.
 
 The output image from swanky_quant should be considered just as a 
 thinking buffer and you would probably want to do a dithering pass 
 instead of this anyway.
+
+So you probably should not call this, instead replacing it with your 
+own remap code with whatever dither you require.
 
 */
 SWANKYQUANT_DEF void swanky_quant_remap(const unsigned char *input,

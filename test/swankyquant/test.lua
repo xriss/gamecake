@@ -238,6 +238,29 @@ while i<=256 do
 	i=i*2
 end
 
+local remap(gi,go)
+
+local dith={
+22,38,26,42,23,39,27,43,
+54, 6,58,10,55, 7,59,11,
+30,46,18,34,31,47,19,35,
+62,14,50, 2,63,15,51, 3,
+24,40,28,44,21,37,25,41,
+56, 8,60,12,53, 5,57, 9,
+32,48,20,36,29,45,17,33,
+64,16,52, 4,61,13,49, 1,
+}
+
+	for y=0,gi.height-1 do
+		for x=0,gi.width-1 do
+			local x8=x%8
+			local y8=y%8
+			local df=dith(x8+8*y8+1) -- dither flip point 0-64
+		end
+	end
+end
+
+
 local st=os.time()
 local colors=2
 while colors<=256 do
