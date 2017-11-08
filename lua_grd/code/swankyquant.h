@@ -1,6 +1,9 @@
 /*******************************************************************************
 
-(C) Kriss@XIXs.com 2017
+(C) Kriss@XIXs.com 2017 released into the public domain or optionally 
+licensed under the http://opensource.org/licenses/MIT license.
+
+
 
 */
 
@@ -108,11 +111,10 @@ SWANKYQUANT_DEF void swanky_quant(const unsigned char *input,
 	unsigned char *output , unsigned char *palette ,
 	int quality)
 {
-const unsigned char *pi;
-const unsigned char *pc;
-unsigned char *po;
-unsigned char *pp;
-double *pa;
+const unsigned char *pi;	// pointer to input
+unsigned char *po;			// pointer to output
+unsigned char *pp;			// pointer to output palette
+double *pb;					// pointer to internal buckets
 int i,l;
 int best_idx;
 double distance,best_distance,weight;
@@ -123,12 +125,12 @@ double distance,best_distance,weight;
 	for( i=0 , pi=input , po=output ; i<length ; i++ , pi+=4 , po++ )
 	{
 		po[0]=( (colors-1)*(pi[0]+pi[1]+pi[2])/(3*255) )%colors; // a greyscale map
-		pa=buckets+(po[0]*5);
-		pa[0]+=(double)pi[0];
-		pa[1]+=(double)pi[1];
-		pa[2]+=(double)pi[2];
-		pa[3]+=(double)pi[3];
-		pa[4]+=1.0;
+		pb=buckets+(po[0]*5);
+		pb[0]+=(double)pi[0];
+		pb[1]+=(double)pi[1];
+		pb[2]+=(double)pi[2];
+		pb[3]+=(double)pi[3];
+		pb[4]+=1.0;
 	}
 
 // loop over image data and swap to another bucket if we find a better one
@@ -140,18 +142,18 @@ double distance,best_distance,weight;
 		
 		for( pi=input , po=output ; po<output+length ; pi+=4 , po++ )
 		{
-			pa=buckets+(po[0]*5); // remove from old bucket
-			pa[0]-=(double)pi[0];
-			pa[1]-=(double)pi[1];
-			pa[2]-=(double)pi[2];
-			pa[3]-=(double)pi[3];
-			pa[4]-=1.0;
+			pb=buckets+(po[0]*5); // remove from old bucket
+			pb[0]-=(double)pi[0];
+			pb[1]-=(double)pi[1];
+			pb[2]-=(double)pi[2];
+			pb[3]-=(double)pi[3];
+			pb[4]-=1.0;
 
 			best_idx=po[0];
 			best_distance=65546.0*65546.0;
-			for( i=0 , pa=buckets ; i<colors ; i++ , pa+=5 ) // search for best bucket
+			for( i=0 , pb=buckets ; i<colors ; i++ , pb+=5 ) // search for best bucket
 			{
-				distance=color_distance_weight(pa,pi,weight);
+				distance=color_distance_weight(pb,pi,weight);
 				if(distance<best_distance)
 				{
 					best_distance=distance;
@@ -161,23 +163,23 @@ double distance,best_distance,weight;
 
 			po[0]=best_idx; // write out
 			
-			pa=buckets+(best_idx*5); // add to new bucket
-			pa[0]+=(double)pi[0];
-			pa[1]+=(double)pi[1];
-			pa[2]+=(double)pi[2];
-			pa[3]+=(double)pi[3];
-			pa[4]+=1.0;
+			pb=buckets+(best_idx*5); // add to new bucket
+			pb[0]+=(double)pi[0];
+			pb[1]+=(double)pi[1];
+			pb[2]+=(double)pi[2];
+			pb[3]+=(double)pi[3];
+			pb[4]+=1.0;
 		}
 	}
 
 // build the final output palette from our buckets
-	for( i=0 , pp=palette , pa=buckets ; i<colors ; i++ , pp+=4 , pa+=5 )
+	for( i=0 , pp=palette , pb=buckets ; i<colors ; i++ , pp+=4 , pb+=5 )
 	{
-		double d=pa[4]; if(d<=0) { d=1; } d=1.0/d;
-		pp[0]=(unsigned char)floor(0.5+pa[0]*d);
-		pp[1]=(unsigned char)floor(0.5+pa[1]*d);
-		pp[2]=(unsigned char)floor(0.5+pa[2]*d);
-		pp[3]=(unsigned char)floor(0.5+pa[3]*d);
+		double d=pb[4]; if(d<=0) { d=1; } d=1.0/d;
+		pp[0]=(unsigned char)floor(0.5+pb[0]*d);
+		pp[1]=(unsigned char)floor(0.5+pb[1]*d);
+		pp[2]=(unsigned char)floor(0.5+pb[2]*d);
+		pp[3]=(unsigned char)floor(0.5+pb[3]*d);
 	}
 }
 
@@ -205,7 +207,7 @@ double distance,best_distance;
 	for( pi=input , po=output ; po<output+length ; pi+=4 , po++ )
 	{
 		best_idx=0;
-		best_distance=65546.0*65546.0;
+		best_distance=65536.0*65536.0;
 		for( i=0 , pp=palette ; i<colors ; i++ , pp+=4 ) // search for best bucket
 		{
 			distance=color_distance(pp[0],pp[1],pp[2],pp[3],pi[0],pi[1],pi[2],pi[3]);
