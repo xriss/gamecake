@@ -295,7 +295,7 @@ local dith={
 			if c1[5] < c2[5] then c1,c2=c2,c1 end -- keep the two colors in the same order
 			local cc={0,0,0,0}
 			local best_df={0,math.huge}
-			for i=0,64,1 do
+			for i=0,64,4 do
 				local a,b=i/64,(64-i)/64
 				cc[1]= c1[1]*a + c2[1]*b
 				cc[2]= c1[2]*a + c2[2]*b
@@ -326,7 +326,7 @@ local colors=2
 while colors<=256 do
 
 	print(colors,os.time()-st)
-	local fname="monarch"
+	local fname="rgb"
 	local gi=assert(grd.create("gi/"..fname..".png"))
 	assert( gi:convert("U8_RGBA") )
 

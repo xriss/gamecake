@@ -46,7 +46,8 @@ SWANKYQUANT_DEF void swanky_quant(const unsigned char *input,
 
 SWANKYQUANT_DEF void swanky_quant_remap(const unsigned char *input,
 	unsigned int length, unsigned int colors, 
-	unsigned char *output , unsigned char *palette );
+	unsigned char *output , unsigned char *palette ,
+	int dither );
 
 #endif // SWANKYQUANT_H
 
@@ -197,43 +198,71 @@ double distance,best_distance,weight;
 
 /***************************************************************************
 
-Perform an optional final remap on a swanky_quant output image, this is 
-really only necessary for low quality (quality is number of passes) 
-where pixel values may change considerably during these early passes as 
-pixels jump from bucket to bucket so would need a final cleanup.
+Perform an optional final remap on a swanky_quant output image with an 
+optional amount of order dithering.
 
-The output image from swanky_quant should be considered just as a 
-thinking buffer and you would probably want to do a dithering pass 
-instead of this anyway.
-
-So you probably should not call this, instead replacing it with your 
-own remap code with whatever dither you require.
+	dither = 0  ==   1 bit pattern  ( no dithering )
+	dither = 1  ==   3 bit patterns ( minimum dithering )
+	dither = 2  ==   5 bit patterns
+	dither = 3  ==   9 bit patterns
+	dither = 4  ==  17 bit patterns ( recommended dithering )
+	dither = 5  ==  33 bit patterns
+	dither = 6  ==  65 bit patterns ( maximum dithering )
 
 */
 SWANKYQUANT_DEF void swanky_quant_remap(const unsigned char *input,
 	unsigned int length, unsigned int colors, 
-	unsigned char *output , unsigned char *palette )
+	unsigned char *output , unsigned char *palette ,
+	int dither )
 {
 const unsigned char *pi;
 unsigned char *po;
 unsigned char *pp;
 int i;
 int best_idx;
-double distance,best_distance;
+int best_idx_2;
+double distance;
+double best_distance;
+double best_distance_2;
+
+const int pattern[64]={
+	22,38,26,42,23,39,27,43,
+	54, 6,58,10,55, 7,59,11,
+	30,46,18,34,31,47,19,35,
+	62,14,50, 2,63,15,51, 3,
+	24,40,28,44,21,37,25,41,
+	56, 8,60,12,53, 5,57, 9,
+	32,48,20,36,29,45,17,33,
+	64,16,52, 4,61,13,49, 1,
+};
+
 	for( pi=input , po=output ; po<output+length ; pi+=4 , po++ )
 	{
 		best_idx=0;
 		best_distance=65536.0*65536.0;
-		for( i=0 , pp=palette ; i<colors ; i++ , pp+=4 ) // search for best bucket
+		best_idx_2=0;
+		best_distance_2=65536.0*65536.0;
+		for( i=0 , pp=palette ; i<colors ; i++ , pp+=4 ) // search for the two best colors
 		{
 			distance=color_distance(pp[0],pp[1],pp[2],pp[3],pi[0],pi[1],pi[2],pi[3]);
 			if(distance<best_distance)
 			{
-				best_distance=distance;
+				best_distance_2=best_distance;
+				best_idx_2=best_idx;
+				best_distance=distance; // push the previous best to the 2nd best
 				best_idx=i;
 			}
+			else
+			if(distance<best_distance_2) // check for second best
+			{
+				best_distance_2=distance;
+				best_idx_2=i;
+			}
 		}
+		
+		
 		po[0]=best_idx; // write out
+		
 	}
 }
 
