@@ -332,7 +332,7 @@ while colors<=256 do
 
 	local go=grd.create(gi)
 	assert( go:quant(colors) )
-	remap(gi,go,colors)
+--	remap(gi,go,colors)
 	assert( go:save("go/"..fname.."."..colors..".sq.png") )
 --	save_pal(go,"go/"..fname.."."..colors..".sq.pal.png")
 

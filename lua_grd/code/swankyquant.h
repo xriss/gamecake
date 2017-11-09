@@ -46,8 +46,8 @@ SWANKYQUANT_DEF void swanky_quant(const unsigned char *input,
 
 SWANKYQUANT_DEF void swanky_quant_remap(const unsigned char *input,
 	unsigned int length, unsigned int colors, 
-	unsigned char *output , unsigned char *palette ,
-	int dither );
+	unsigned char *output , const unsigned char *palette ,
+	int width , int dither );
 
 #endif // SWANKYQUANT_H
 
@@ -198,11 +198,11 @@ double distance,best_distance,weight;
 
 /***************************************************************************
 
-Perform an optional final remap on a swanky_quant output image with an 
-optional amount of order dithering.
+Perform an final remap on a swanky_quant output image with an optional 
+amount of ordered dithering.
 
 	dither = 0  ==   1 bit pattern  ( no dithering )
-	dither = 1  ==   3 bit patterns ( minimum dithering )
+	dither = 1  ==   3 bit patterns
 	dither = 2  ==   5 bit patterns
 	dither = 3  ==   9 bit patterns
 	dither = 4  ==  17 bit patterns ( recommended dithering )
@@ -212,18 +212,27 @@ optional amount of order dithering.
 */
 SWANKYQUANT_DEF void swanky_quant_remap(const unsigned char *input,
 	unsigned int length, unsigned int colors, 
-	unsigned char *output , unsigned char *palette ,
-	int dither )
+	unsigned char *output , const unsigned char *palette ,
+	int width , int dither )
 {
-const unsigned char *pi;
-unsigned char *po;
-unsigned char *pp;
-int i;
-int best_idx;
-int best_idx_2;
-double distance;
+const unsigned char *pi;	// pointer to input
+unsigned char *po;			// pointer to output
+const unsigned char *pp;	// pointer to input palette
+int xy,i,j;
+int step;
+int best1_idx;
+int best2_idx;
+int best_dither;
 double best_distance;
-double best_distance_2;
+double best1_distance;
+double best2_distance;
+double distance;
+
+int cr,cg,cb,ca;
+int c1r,c1g,c1b,c1a;
+int c2r,c2g,c2b,c2a;
+
+int x8,y8;
 
 const int pattern[64]={
 	22,38,26,42,23,39,27,43,
@@ -236,33 +245,91 @@ const int pattern[64]={
 	64,16,52, 4,61,13,49, 1,
 };
 
-	for( pi=input , po=output ; po<output+length ; pi+=4 , po++ )
+	step=64; // default to no dither
+	switch(dither)
 	{
-		best_idx=0;
-		best_distance=65536.0*65536.0;
-		best_idx_2=0;
-		best_distance_2=65536.0*65536.0;
+		case 1: step=32; break;
+		case 2: step=16; break;
+		case 3: step=8;  break;
+		case 4: step=4;  break;
+		case 5: step=2;  break;
+		case 6: step=1;  break;
+	}
+
+	for( xy=0 , pi=input , po=output ; xy<length ; xy++ , pi+=4 , po++ )
+	{
+		x8=(xy%width)%8; // x 0-7 for dither
+		y8=(xy/width)%8; // y 0-7 for dither
+		best1_idx=0;
+		best1_distance=65536.0*65536.0;
+		best2_idx=0;
+		best2_distance=65536.0*65536.0;
 		for( i=0 , pp=palette ; i<colors ; i++ , pp+=4 ) // search for the two best colors
 		{
 			distance=color_distance(pp[0],pp[1],pp[2],pp[3],pi[0],pi[1],pi[2],pi[3]);
-			if(distance<best_distance)
+			if(distance<best1_distance)
 			{
-				best_distance_2=best_distance;
-				best_idx_2=best_idx;
-				best_distance=distance; // push the previous best to the 2nd best
-				best_idx=i;
+				best2_distance=best1_distance;
+				best2_idx=best1_idx;
+				best1_distance=distance; // push the previous best to the 2nd best
+				best1_idx=i;
 			}
 			else
-			if(distance<best_distance_2) // check for second best
+			if(distance<best2_distance) // check for second best
 			{
-				best_distance_2=distance;
-				best_idx_2=i;
+				best2_distance=distance;
+				best2_idx=i;
 			}
 		}
 		
 		
-		po[0]=best_idx; // write out
-		
+		if(step==64) // no dither
+		{
+			po[0]=best1_idx; // write out
+		}
+		else
+		{
+			if(best2_idx < best1_idx) { i=best1_idx; best1_idx=best2_idx; best2_idx=i; } // maintain order
+			
+			c1r=palette[ best1_idx*4 + 0 ];
+			c1g=palette[ best1_idx*4 + 1 ];
+			c1b=palette[ best1_idx*4 + 2 ];
+			c1a=palette[ best1_idx*4 + 3 ];
+
+			c2r=palette[ best2_idx*4 + 0 ];
+			c2g=palette[ best2_idx*4 + 1 ];
+			c2b=palette[ best2_idx*4 + 2 ];
+			c2a=palette[ best2_idx*4 + 3 ];
+
+			best_dither=0;
+			best_distance=65536.0*65536.0;
+			for( i=0 ; i<=64 ; i+=step ) // check each dither option
+			{
+				j=64-i;
+				
+				cr = ( 32 + c1r*i + c2r*j ) / 64 ;
+				cg = ( 32 + c1g*i + c2g*j ) / 64 ;
+				cb = ( 32 + c1b*i + c2b*j ) / 64 ;
+				ca = ( 32 + c1a*i + c2a*j ) / 64 ;
+				
+				distance=color_distance(cr,cg,cb,ca,pi[0],pi[1],pi[2],pi[3]);
+				if(distance<best_distance)
+				{
+					best_distance=distance;
+					best_dither=i;
+				}
+			}
+			
+			if( pattern[ x8 + y8*8 ] <= best_dither )
+			{
+				po[0]=best1_idx; // write out
+			}
+			else
+			{
+				po[0]=best2_idx; // write out
+			}
+			
+		}		
 	}
 }
 

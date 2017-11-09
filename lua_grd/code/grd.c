@@ -1115,7 +1115,7 @@ int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 #if 1
 
 	swanky_quant( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , 6 );
-	swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , 4 );
+	swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , g->bmap->w , 4 );
 	
 #else
 
