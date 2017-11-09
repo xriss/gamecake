@@ -3,9 +3,6 @@ local grd=require("wetgenes.grd")
 local wstr=require("wetgenes.string")
 
 
-local test=function(fname,colors)
-
-
 -- compare two rgba colors and return a distance value
 local cdist=function( ar,ag,ab,aa , br,bg,bb,ba )
 	return --[[math.sqrt]]( (ar-br)*(ar-br) + (ag-bg)*(ag-bg) + (ab-bb)*(ab-bb) + (aa-ba)*(aa-ba) )
@@ -54,13 +51,20 @@ local sort_pal=function(g,colors)
 		po[ (i-1)*4 + 4 ]= pc[ c*4 + 4 ]
 	end
 	g:palette(0,colors,po)
+
+--[[
 	local d=g:pixels(0,0,0,g.width,g.height,1)
 	for i=1,g.width*g.height do
 		d[i]=map[ d[i] ] -- remap
 	end
 	g:pixels(0,0,0,g.width,g.height,1,d)
+]]
 
 end
+
+local test=function(fname,colors)
+
+
 
 -- save an easy to view palette
 local save_pal=function(g,fname)
@@ -238,7 +242,7 @@ while i<=256 do
 	i=i*2
 end
 
-local remap(gi,go)
+local remap=function(gi,go,colors)
 
 local dith={
 22,38,26,42,23,39,27,43,
@@ -250,12 +254,68 @@ local dith={
 32,48,20,36,29,45,17,33,
 64,16,52, 4,61,13,49, 1,
 }
+	sort_pal(go,colors)
 
+	local pc=go:palette(0,colors) -- output will already have a palette
+
+	local e={0,0,0,0}
 	for y=0,gi.height-1 do
 		for x=0,gi.width-1 do
+			local c=gi:pixels(x,y,1,1)
 			local x8=x%8
 			local y8=y%8
-			local df=dith(x8+8*y8+1) -- dither flip point 0-64
+			local df=dith[x8+8*y8+1] -- dither flip point 1-64			
+			local best={0,math.huge,0,math.huge} -- find best 2 indexs
+			for i=0,colors-1 do
+				local d=cdist( pc[i*4+1],pc[i*4+2],pc[i*4+3],pc[i*4+4] , c[1],c[2],c[3],c[4] )
+				if d<best[2] then -- find the best color
+					best[4]=best[2]
+					best[3]=best[1]
+					best[2]=d
+					best[1]=i
+				elseif d<best[4] then -- find the 2nd best color
+					best[4]=d
+					best[3]=i
+				end
+			end
+			
+-- limit to adjacent colors only?
+--[[
+			local b1=(best[1]-1)%colors
+			local b2=(best[1]+2)%colors
+			best[3]=b1
+			best[4]=cdist( pc[b1*4+1],pc[b1*4+2],pc[b1*4+3],pc[b1*4+4] , c[1],c[2],c[3],c[4] )
+			local d=cdist( pc[b2*4+1],pc[b2*4+2],pc[b2*4+3],pc[b2*4+4] , c[1],c[2],c[3],c[4] )
+			if d<best[4] then best[3]=b2 end
+]]
+
+-- work out the mix level
+			local c1={ pc[best[1]*4+1],pc[best[1]*4+2],pc[best[1]*4+3],pc[best[1]*4+4] , best[1] }
+			local c2={ pc[best[3]*4+1],pc[best[3]*4+2],pc[best[3]*4+3],pc[best[3]*4+4] , best[3] }
+			if c1[5] < c2[5] then c1,c2=c2,c1 end -- keep the two colors in the same order
+			local cc={0,0,0,0}
+			local best_df={0,math.huge}
+			for i=0,64,1 do
+				local a,b=i/64,(64-i)/64
+				cc[1]= c1[1]*a + c2[1]*b
+				cc[2]= c1[2]*a + c2[2]*b
+				cc[3]= c1[3]*a + c2[3]*b
+				cc[4]= c1[4]*a + c2[4]*b
+				local d=cdist( cc[1],cc[2],cc[3],cc[4] , c[1],c[2],c[3],c[4] )
+				if d<best_df[2] then -- find the best dither 
+					best_df[1]=i
+					best_df[2]=d
+				end
+			end
+			local flip=best_df[1]
+			
+--			flip=math.floor(0.5+flip/8)*8
+
+			if df<=flip then
+				go:pixels(x,y,1,1,{c1[5]})
+			else
+				go:pixels(x,y,1,1,{c2[5]})
+			end
 		end
 	end
 end
@@ -266,11 +326,15 @@ local colors=2
 while colors<=256 do
 
 	print(colors,os.time()-st)
-	local fname="rgba"
-	local g=assert(grd.create("gi/"..fname..".png"))
-	assert( g:quant(colors) )
-	assert( g:save("go/"..fname.."."..colors..".sq.png") )
---	save_pal(g,"go/"..fname.."."..colors..".sq.pal.png")
+	local fname="monarch"
+	local gi=assert(grd.create("gi/"..fname..".png"))
+	assert( gi:convert("U8_RGBA") )
+
+	local go=grd.create(gi)
+	assert( go:quant(colors) )
+	remap(gi,go,colors)
+	assert( go:save("go/"..fname.."."..colors..".sq.png") )
+--	save_pal(go,"go/"..fname.."."..colors..".sq.pal.png")
 
 	colors=colors*2
 end

@@ -1,9 +1,19 @@
 /***************************************************************************
 
-(C) Kriss@XIXs.com 2017 released into the public domain or optionally 
-licensed under the http://opensource.org/licenses/MIT license.
+(C) Kriss@XIXs.com 2017 + http://opensource.org/licenses/MIT and 
+released into the public domain. If this is not good enough for you 
+then I suggest you do some random reformatting and tell your lawyers 
+that you rewrote it from base algorithms.
 
 
+
+
+REFERENCE LINKS TO OTHER ALGORITHMS
+###################################
+
+1.	http://www.imagemagick.org/script/quantize.php
+2.	https://www.researchgate.net/publication/232079905_Kohonen_neural_networks_for_optimal_colour_quantization
+3.	https://scientificgems.wordpress.com/stuff/neuquant-fast-high-quality-image-quantization/
 
 */
 
@@ -75,7 +85,7 @@ Each bucket is 5 doubles and contains an rgba accumulator in
 rather than floats or we will encounter number overflow for images that 
 are larger than 256x256 pixels. 
 
-(A float version for smaller images might be worthwhile.)
+(A float or int version for smaller images might be worthwhile.)
 
 The weight should be a natural 1.0 but since we want to encourage early 
 bucket jumping we fudge it high at the start and then lower it on later 
