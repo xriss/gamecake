@@ -241,7 +241,7 @@ void grd_clear( struct grd *g , u32 val);
 
 u32* grd_tags_find(u32 *tags,u32 id);
 
-void grd_remap(struct grd *ga, struct grd *gb);
+void grd_remap(struct grd *ga, struct grd *gb, int colors, int dither);
 
 
 

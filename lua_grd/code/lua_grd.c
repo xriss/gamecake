@@ -565,9 +565,13 @@ int lua_grd_remap (lua_State *l)
 {
 part_ptr pa;
 part_ptr pb;
+int colors=256;
+int dither=4;
 
 	pa=lua_grd_check_ptr(l,1);
 	pb=lua_grd_check_ptr(l,2);
+	if(lua_isnumber(l,3)) { colors=lua_tonumber(l,3); }
+	if(lua_isnumber(l,4)) { dither=lua_tonumber(l,4); }
 
 	if((pa->bmap->fmt&~GRD_FMT_PREMULT)!=GRD_FMT_U8_RGBA)
 	{
@@ -603,8 +607,9 @@ part_ptr pb;
 		return 2;
 	}
 	
+
 		
-	grd_remap(pa,pb);
+	grd_remap(pa,pb,colors,dither);
 
 	lua_pushvalue(l,2);
 	return 1;
