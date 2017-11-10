@@ -6,6 +6,17 @@
 #include "all.h"
 
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// better image resize code, static include for use in grd_scale
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#define STB_IMAGE_RESIZE_STATIC
+#include "stb_image_resize.h"
+
+
+
 //
 // GRD Image handling layer, load/save/manipulate
 //
@@ -1103,19 +1114,52 @@ int grd_quant(struct grd *g , s32 num_colors )
 struct grd * grd_duplicate_quant(struct grd *g , s32 num_colors )
 {
 struct grd *gb;
+struct grd *gc;
 int i;
 u8 *optr;
 u32 *ptr;
 u32 c;
 int siz=g->bmap->w*g->bmap->h*g->bmap->d;
+int w,h;
+
+// need to force input format here...
 
 	gb=grd_create(GRD_FMT_U8_INDEXED | (g->bmap->fmt&GRD_FMT_PREMULT) ,g->bmap->w,g->bmap->h,g->bmap->d);
 	if(!gb) { return 0; }
 	
 #if 1
 
-	swanky_quant( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , 6 );
-	swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , g->bmap->w , 4 );
+	w=g->bmap->w;
+	h=g->bmap->h;
+	while( w*h > 256*256 ) { w=w/2; h=h/2; } // maximum number of pixels we want to process (speed hack)
+
+
+	if( (w!=g->bmap->w) || (h!=g->bmap->h) || g->bmap->d!=1 ) // scale down first so we can deal with less pixels
+	{
+//printf("%dx%d -> %dx%d\n",g->bmap->w,g->bmap->h,w,h);
+
+		gc=grd_create(g->bmap->fmt,w,h,1);
+		if(!gc) { grd_free(gb); return 0; } // failure to allocate
+
+		// scale down
+		stbir_resize_uint8(	grdinfo_get_data(g->bmap,0,0,0),	g->bmap->w,		g->bmap->h,		g->bmap->yscan,
+							grdinfo_get_data(gc->bmap,0,0,0),	gc->bmap->w,	gc->bmap->h,	gc->bmap->yscan,
+							grd_sizeof_pixel(gc->bmap->fmt) );
+
+		swanky_quant( gc->bmap->data, w*h, num_colors, gb->bmap->data, gb->cmap->data , 6 ); // use smaller image to build palette
+		
+		swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , g->bmap->w , 4 ); // remap full image
+
+		grd_free(gc); // remember to free
+	}
+	else
+	{
+
+//printf("%dx%d == %dx%d\n",g->bmap->w,g->bmap->h,w,h);
+
+		swanky_quant( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , 6 );
+		swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , g->bmap->w , 4 );
+	}
 	
 #else
 
@@ -1429,15 +1473,6 @@ u8 *pts;
 	return 1;
 }
 
-
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// better image resize code, static include for use in grd_scale
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-#define STB_IMAGE_RESIZE_IMPLEMENTATION
-#define STB_IMAGE_RESIZE_STATIC
-#include "stb_image_resize.h"
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
