@@ -3,16 +3,16 @@
 -- which should have been "gamecake -lcmd --"
 
 if arg[1] and arg[1]=="-lcmd" then 
-  table.remove(arg,1)
-  if arg[1] and arg[1]=="--" then table.remove(arg,1) end
+	table.remove(arg,1)
+	if arg[1] and arg[1]=="--" then table.remove(arg,1) end
 end
 
 require("apps").default_paths()     -- set search paths to smarter defaults
 
 local cmd=table.remove(arg,1)       -- check what cmd is asked for
 if cmd then
-  arg[0]="gamecake."..cmd           -- remember cmd name
-  require("cmd."..cmd)              -- try and run the actual cmd
+	arg[0]="gamecake."..cmd           -- remember cmd name	
+	require("cmd."..cmd)              -- try and run the actual cmd
 end
 
 -- this file has been required as a module on the command line
