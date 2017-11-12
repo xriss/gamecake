@@ -11,7 +11,7 @@ require("apps").default_paths()     -- set search paths to smarter defaults
 
 local cmd=table.remove(arg,1)       -- check what cmd is asked for
 if cmd then
-	arg[0]="gamecake."..cmd           -- remember cmd name	
+	arg[0]="gamecake-"..cmd           -- remember cmd name	
 	require("cmd."..cmd)              -- try and run the actual cmd
 end
 
