@@ -4,7 +4,6 @@
 
 if arg[1] and arg[1]=="-lcmd" then 
 	table.remove(arg,1)
-print("?",arg[1])
 	if arg[1] and arg[1]=="--" then table.remove(arg,1) end
 end
 

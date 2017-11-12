@@ -16,9 +16,8 @@ table.sort(cmds,function(a,b) return a.name<b.name end)
 local cmd=table.remove(arg,1)       -- check what cmd is asked for
 local cmd=cmd and string.lower(cmd) -- force lowercase
 
-print(cmd)
 if cmd=="quant" then
-print("QQQQ")
+
 	local args=require("cmd.args").bake({inputs={
 
 		{	"colors",	0,		"Number of colors between 2 and 256 that we wish to reduce image to, set to 0 for no change.",	},
