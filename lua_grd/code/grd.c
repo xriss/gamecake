@@ -873,7 +873,7 @@ u8 *pc;
 				break;
 
 				case GRD_FMT_U8_INDEXED:
-					gb=grd_duplicate_quant(ga,256);
+					gb=grd_duplicate_quant(ga,256,4);
 				break;
 			}
 		break;
@@ -917,7 +917,7 @@ u8 *pc;
 				break;
 
 				case GRD_FMT_U8_INDEXED_PREMULT:
-					gb=grd_duplicate_quant(ga,256);
+					gb=grd_duplicate_quant(ga,256,4);
 				break;
 			}
 		break;
@@ -1099,9 +1099,9 @@ u8 *pc;
 // result will be an indexed image with a funky palette
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_quant(struct grd *g , s32 num_colors )
+int grd_quant(struct grd *g , s32 num_colors , s32 dither )
 {
-	struct grd *gb=grd_duplicate_quant(g , num_colors );
+	struct grd *gb=grd_duplicate_quant(g , num_colors , dither );
 	
 	if( gb == 0 ) { return 0; }
 	if( gb != g )
@@ -1111,7 +1111,7 @@ int grd_quant(struct grd *g , s32 num_colors )
 	}
 	return 1;
 }
-struct grd * grd_duplicate_quant(struct grd *g , s32 num_colors )
+struct grd * grd_duplicate_quant(struct grd *g , s32 num_colors , s32 dither )
 {
 struct grd *gb;
 struct grd *gc;
@@ -1148,7 +1148,7 @@ int w,h;
 
 		swanky_quant( gc->bmap->data, w*h, num_colors, gb->bmap->data, gb->cmap->data , 6 ); // use smaller image to build palette
 		
-		swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , g->bmap->w , 4 ); // remap full image
+		swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , g->bmap->w , dither ); // remap full image
 
 		grd_free(gc); // remember to free
 	}
@@ -1158,7 +1158,7 @@ int w,h;
 //printf("%dx%d == %dx%d\n",g->bmap->w,g->bmap->h,w,h);
 
 		swanky_quant( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , 6 );
-		swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , g->bmap->w , 4 );
+		swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , g->bmap->w , dither );
 	}
 	
 #else

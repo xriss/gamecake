@@ -595,8 +595,8 @@ Returns nil,error if something goes wrong so can be used with assert
 otherwise returns g so that we can chain the result.
 
 ]]
-base.quant=function(g,num)
-	local r=core.quant(g[0],num)
+base.quant=function(g,num,dither)
+	local r=core.quant(g[0],num,dither)
 	core.info(g[0],g)
 	return r and g
 end

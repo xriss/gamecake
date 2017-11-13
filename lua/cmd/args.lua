@@ -44,12 +44,28 @@ M.doublewrap=function(tab,width,maxleft,append)
 	return lines
 end
 
+-- the parts may be rejoined eg the following is always true
+-- tab.path == tab.dirname..tab.basename..tab.extension == tab.dirname..tab.namename
+-- tab.filename == tab.basename..tab.extension
+-- so dirname will contain a trailing / and extension will begin with a .
+M.splitpath=function(path)
+	local tab={}
+	tab.path=path:gsub("\\","/") -- remove windows \
+	tab.dirname,tab.filename=tab.path:match("^(.-)([^\\/]*)$")
+	tab.basename,tab.extension=tab.filename:match("^(.+)(%.[^%.]+)$")
+	tab.filename=tab.filename or "" -- make sure we have empty strings rather than nil
+	tab.dirname=tab.dirname or ""
+	tab.extension=tab.extension or ""
+	return tab
+end
+
 
 M.bake=function(args)
 
 	args=args or {} -- bound state
 	
 	args.doublewrap=M.doublewrap
+	args.splitpath=M.splitpath
 	
 	args.new_inputs=function(args,_inputs)
 		args.inputs=_inputs or args.inputs
@@ -81,6 +97,8 @@ M.bake=function(args)
 		local data={}
 		args.raw=arg
 		args.data=data
+
+		for i,v in ipairs(args.inputs) do data[v.name]=v.default end
 		
 		-- perform very simple processing of args to be passed into the command
 		local state=false
@@ -103,6 +121,8 @@ M.bake=function(args)
 						state=false -- and we do not wish to grab the next arg
 					else
 						args.data[state]=true
+						local input=args.inputs[state]
+						if input and input.type=="boolean" then state=nil end -- got our bool value already do not grab next arg
 					end
 				end
 --[[

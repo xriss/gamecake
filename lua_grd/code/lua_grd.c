@@ -513,15 +513,17 @@ int lua_grd_quant (lua_State *l)
 {
 part_ptr p;
 s32 num;
+s32 dither;
 
 	p=lua_grd_check_ptr(l,1);
 
 	num=(s32)lua_tonumber(l,2);
+	dither=(s32)lua_tonumber(l,3);
 	
 	if(num<2) { num=2; }
 	if(num>256) { num=256; }
 	
-	grd_quant(p,num);
+	grd_quant(p,num,dither);
 
 	lua_pushvalue(l,1);
 	return 1;

@@ -367,7 +367,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 //	png_set_filler(png_ptr, 0, PNG_FILLER_AFTER);
 //	png_set_bgr(png_ptr);
 
-	if(g->bmap->fmt==GRD_FMT_U8_INDEXED)
+	if( (g->bmap->fmt==GRD_FMT_U8_INDEXED) || (g->bmap->fmt==GRD_FMT_U8_INDEXED_PREMULT) )
 	{
    	png_color palptr[256];
    	u8 tptr[256];
