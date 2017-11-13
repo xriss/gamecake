@@ -85,7 +85,7 @@ M.bake=function(args)
 	args.help=function()
 		local tab={}
 		for i,v in ipairs(args.inputs) do
-			tab[i]={ ("--"..v.name.." ("..tostring(v.type)..")") , v.help.."\n --"..v.name.."="..tostring(v.default).."" }
+			tab[i]={ ("--"..v.name.." ("..tostring(v.type)..")") , v.help:gsub("\n"," ").."\n --"..v.name.."="..tostring(v.default).."" }
 		end
 		local lines=args.doublewrap(tab,78,30," : ")
 		for i,v in ipairs(lines) do lines[i]="  "..v end -- pad

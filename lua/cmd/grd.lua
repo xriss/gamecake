@@ -24,10 +24,17 @@ local default_inputs=function(inputs)
 
 		{	"overwrite",	false,	"Will refuse to overwrite a file unless this flag is set.", },
 
-		{	"output",		"{dirname}{basename}.output{extension}",
-									"Output filename, {dirname}{basename}{extension} are replaced with the input path components, {idx} will be replaced with the file number in three digits, eg 001 and {filename} may be used in place of {basename}{extension}.", },
-
 		{	"help",			false,	"Print help and exit.", },
+
+		{	"output",		"{dirname}{basename}.output{extension}", [[
+		
+Output filename, {dirname}{basename}{extension} are replaced with the 
+input path components, {idx} will be replaced with the file number in 
+three digits, eg 001 and {filename} may be used in place of 
+{basename}{extension}.
+
+]], },
+
 
 	} do
 		inputs[#inputs+1]=v
@@ -75,9 +82,18 @@ if cmd=="quant" then
 
 	local args=require("cmd.args").bake({inputs=default_inputs{
 
-		{	"colors",		256,	"Number of colors between 2 and 256 that we wish to reduce image to.", },
+		{	"colors",		256,	[[
+		
+Number of colors between 2 and 256 that we wish to reduce image to.
 
-		{	"dither",		4,		"Amount of dither between 0 and 6 where 0 is none, defaults to a middle value of 4 which gives pleasant noticeable patterns.", },
+]], },
+
+		{	"dither",		4,		[[
+		
+Amount of dither between 0 and 6 where 0 is none, defaults to a middle 
+value of 4 which gives pleasant noticeable patterns.
+
+]], },
 
 	}}):parse(arg):sanity()
 	
@@ -114,7 +130,25 @@ elseif cmd=="convert" then
 
 	local args=require("cmd.args").bake({inputs=default_inputs{
 
-		{	"fmt",	"U8_RGBA",	"The type of pixel data to convert the image into, many of these are not supported by all file formats. See the grd documentation for details but this is a list of possible values : U8_RGBA, U8_ARGB, U8_RGB, U8_INDEXED, U8_LUMINANCE, U8_ALPHA, U16_RGBA_5551, U16_RGBA_4444, U16_RGBA_5650 and each can have _PREMULT appended to the end for premultiplied alpha.", },
+		{	"fmt",	"U8_RGBA",	[[
+		
+The type of pixel data to convert the image into. Many of these are not 
+supported by all file formats. See the grd documentation for details 
+but this is a list of possible values : U8_RGBA, U8_ARGB, U8_RGB, 
+U8_INDEXED, U8_LUMINANCE, U8_ALPHA, U16_RGBA_5551, U16_RGBA_4444, 
+U16_RGBA_5650 and each can have _PREMULT appended to the end for 
+premultiplied alpha.
+		
+]], },
+
+		{	"resize",	"0x0",	[[
+		
+Resize image, format is 123x456 which would be 123 pixels wide and 456 
+pixels height. If a width or height is 0 then aspect ratio will be 
+maintained in that dimension and if both are 0 then no resize will 
+occur. Hence 0x0 (which is the default) will disable resize.
+		
+]], },
 
 		}}):parse(arg):sanity()
 	
@@ -137,6 +171,28 @@ elseif cmd=="convert" then
 		overwrite_abort(args,output)
 		
 		local g=check_load(input)
+		
+		if args.data.resize~="0x0" then -- resize
+		
+			local width,height=args.data.resize:match("^(.+)x(.+)$")
+			width=tonumber(width  or 0) or 0
+			height=tonumber(height or 0) or 0
+			
+			if width==0 and height==0 then -- do nothing
+			elseif width==0 then 
+				width=math.floor( 0.5 + g.width*(height/g.height) )
+				assert( g:convert( "U8_RGBA" ) )
+				assert( g:scale( width,height,g.depth ) )
+			elseif height==0 then 
+				height=math.floor( 0.5 + g.height*(width/g.width) )
+				assert( g:convert( "U8_RGBA" ) )
+				assert( g:scale( width,height,g.depth ) )
+			else
+				assert( g:convert( "U8_RGBA" ) )
+				assert( g:scale( width,height,g.depth ) )
+			end
+			
+		end
 
 		assert( g:convert( args.data.fmt ) )
 
