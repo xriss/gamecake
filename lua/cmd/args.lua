@@ -54,6 +54,7 @@ M.splitpath=function(path)
 	tab.dirname,tab.filename=tab.path:match("^(.-)([^\\/]*)$")
 	tab.basename,tab.extension=tab.filename:match("^(.+)(%.[^%.]+)$")
 	tab.filename=tab.filename or "" -- make sure we have empty strings rather than nil
+	tab.basename=tab.basename or tab.filename -- fix case of no "." in filename
 	tab.dirname=tab.dirname or ""
 	tab.extension=tab.extension or ""
 	return tab
@@ -84,21 +85,48 @@ M.bake=function(args)
 	args.help=function()
 		local tab={}
 		for i,v in ipairs(args.inputs) do
-			tab[i]={ ("--"..v.name.." ("..tostring(v.type)..")") , v.help.." ("..tostring(v.default)..")" }
+			tab[i]={ ("--"..v.name.." ("..tostring(v.type)..")") , v.help.."\n --"..v.name.."="..tostring(v.default).."" }
 		end
 		local lines=args.doublewrap(tab,78,30," : ")
 		for i,v in ipairs(lines) do lines[i]="  "..v end -- pad
 		return lines
 	end
 	
-	
+
+-- exit if we do not understand all the opts
+	args.sanity=function(args)
+		for n,v in pairs(args.data) do --check for bad args
+			if type(n)=="string" then -- not the numbers
+				local v=args.inputs[n] -- lookup
+				if not v then
+					print("")
+					print("Unknown option --"..n.." , aborting.")
+					print("")
+					os.exit(0)
+				end
+			end
+		end
+		return args
+	end
+
+	args.set=function(n,v)
+		local n=n:lower()
+		local p=args.inputs[n]
+		args.data[n]=v
+		if p and type(v)=="string" then -- convert input strings
+			if     p.type=="number" then	args.data[n]=tonumber(v)
+			elseif p.type=="boolean" then	args.data[n]=((v~="false") and (v~="off") and (v~="no"))
+			end
+		end
+	end
 
 	args.parse=function(args,arg)
 		local data={}
 		args.raw=arg
 		args.data=data
-
-		for i,v in ipairs(args.inputs) do data[v.name]=v.default end
+		args.inputs=args.inputs or {}
+		
+		for i,v in ipairs(args.inputs) do data[v.name:lower()]=v.default end
 		
 		-- perform very simple processing of args to be passed into the command
 		local state=false
@@ -111,31 +139,23 @@ M.bake=function(args)
 				if s then -- found a "=" so split and assign
 					local a=v:sub(3,s-1)
 					local b=v:sub(e+1)
-					args.data[a]=b
+					args.set(a,b)
 					state=false
 				else -- set to true and try to grab the next value
 					state=v:sub(3)
 					if state:sub(1,3)=="no-" then
 						state=state:sub(4) -- remove "no-" from start of string
-						args.data[state]=false -- this is a false flag
+						args.set(state,false) -- this is a false flag
 						state=false -- and we do not wish to grab the next arg
 					else
-						args.data[state]=true
+						args.set(state,true)
 						local input=args.inputs[state]
 						if input and input.type=="boolean" then state=nil end -- got our bool value already do not grab next arg
 					end
 				end
---[[
-			elseif v:sub(1,1)=="+" then -- a non greedy bool, set to true
-				arg[v:sub(2)]=true
-				state=false
-			elseif v:sub(1,1)=="-" then -- a non greedy bool, set to false
-				arg[v:sub(2)]=false
-				state=false
-]]
 			else
 				if state then -- want next value
-					args.data[state]=v
+					args.set(state,v)
 					state=false
 				else
 					data[#data+1]=v
