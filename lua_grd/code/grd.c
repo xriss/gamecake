@@ -1176,6 +1176,10 @@ int w,h;
 
 	gb=grd_create(GRD_FMT_U8_INDEXED | (g->bmap->fmt&GRD_FMT_PREMULT) ,g->bmap->w,g->bmap->h,g->bmap->d);
 	if(!gb) { return 0; }
+
+	if(num_colors>256) { num_colors=256; } // sanity
+	if(num_colors<2  ) { num_colors=2; }
+
 	
 #if 1
 
@@ -1210,6 +1214,8 @@ int w,h;
 		swanky_quant( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , 6 );
 		swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , g->bmap->w , dither );
 	}
+	
+	g->cmap->w=num_colors; // keep track of the number of used colors
 	
 #else
 

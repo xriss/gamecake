@@ -123,6 +123,7 @@ static void grd_gif_load(struct grd * g, struct grd_io_info * inf )
 
 //printf("res %d\n",gif->SColorResolution);
 
+	g->cmap->w=cmp->ColorCount;
 	cmp=gif->SColorMap;
 	if(cmp)
 	{
@@ -418,7 +419,7 @@ if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 	sgif->control[1]=((speed/10)    )&0xff; // speed_lo: speed of animation in 100ths of a second, so 8 is 12.5fps (80ms)
 	sgif->control[2]=((speed/10)>>16)&0xff; // speed_hi: which is near the classic "Shooting on twos" speed of 12fps
 	sgif->control[3]=0; // alpha: find first fully alpha color to use as transparent 
-	for(i=0;i<256;i++)
+	for(i=0;i<g->cmap->w;i++)
 	{
 		if(g->cmap->data[3+i*4]==0)
 		{
@@ -454,7 +455,7 @@ if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 	sgif->gif->SHeight = g->bmap->h;
 	
 	p=grdinfo_get_data(g->cmap,0,0,0);
-	for(i=0;i<256;i++)
+	for(i=0;i<g->cmap->w;i++)
 	{
 		sgif->colors[i].Red=p[0];
 		sgif->colors[i].Green=p[1];
@@ -464,7 +465,7 @@ if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 	
 	sgif->gif->SColorResolution = 8;
 	sgif->gif->SBackGroundColor = sgif->control[3];
-	sgif->gif->SColorMap = GifMakeMapObject(256,sgif->colors);
+	sgif->gif->SColorMap = GifMakeMapObject(g->cmap->w,sgif->colors);
 
 	sgif->i=0;
 

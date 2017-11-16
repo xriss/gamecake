@@ -246,4 +246,5 @@ void grd_remap(struct grd *ga, struct grd *gb, int colors, int dither);
 void grd_adjust_hsv( struct grd *g , f32 fh, f32 fs, f32 fv);
 void grd_adjust_rgb( struct grd *g , f32 fr, f32 fg, f32 fb);
 
+void grd_sort_cmap( struct grd *g );
 

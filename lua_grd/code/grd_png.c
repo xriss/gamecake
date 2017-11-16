@@ -233,6 +233,8 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	png_get_PLTE(png_ptr, info_ptr, &palptr , &num_palette);
 	png_get_tRNS(png_ptr, info_ptr, &trans, &num_trans, &trans_values);   
 	
+	g->cmap->w=num_palette;
+	
     for(x=0;x<num_palette;x++)
     {
 	u32 c;
@@ -376,7 +378,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 		color_type = PNG_COLOR_TYPE_PALETTE;
 		
 
-		for(x=0;x<256;x++)
+		for(x=0;x<g->cmap->w;x++)
 		{
 		u32 c=((u32*)g->cmap->data)[x];
 		
@@ -388,7 +390,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 			if(tptr[x]!=255) { max_trans=x; } // skip some trans values?
 		}
 	
-		png_set_PLTE(png_ptr, info_ptr, palptr, 256);
+		png_set_PLTE(png_ptr, info_ptr, palptr, g->cmap->w);
 		if(max_trans>=0) // do we have any trans values?
 		{
 			png_set_tRNS(png_ptr, info_ptr, tptr, max_trans+1, 0);

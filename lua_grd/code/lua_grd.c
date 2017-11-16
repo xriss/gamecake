@@ -67,6 +67,7 @@ int lua_grd_getinfo (lua_State *l, part_ptr p, int tab)
 		if(p->cmap->data)
 		{
 			lua_pushliteral(l,"cmap");		lua_pushlightuserdata(l,p->cmap->data);		lua_rawset(l,tab);
+			lua_pushliteral(l,"colors");	lua_pushnumber(l,p->cmap->w);				lua_rawset(l,tab);
 		}
 		lua_pushliteral(l,"data");		lua_pushlightuserdata(l,p->bmap->data);		lua_rawset(l,tab);
 
