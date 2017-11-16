@@ -621,6 +621,60 @@ int dither=4;
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_adjust_hsv (lua_State *l)
+{
+part_ptr pa;
+float h,s,v;
+
+	pa=lua_grd_check_ptr(l,1);
+	h=(float)lua_tonumber(l,2);
+	s=(float)lua_tonumber(l,3);
+	v=(float)lua_tonumber(l,4);
+
+	if((pa->bmap->fmt&~GRD_FMT_PREMULT)!=GRD_FMT_U8_RGBA)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"format must be rgba");
+		return 2;
+	}
+		
+	grd_adjust_hsv(pa,h,s,v);
+
+	lua_pushvalue(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_adjust_rgb (lua_State *l)
+{
+part_ptr pa;
+float r,g,b;
+
+	pa=lua_grd_check_ptr(l,1);
+	r=(float)lua_tonumber(l,2);
+	g=(float)lua_tonumber(l,3);
+	b=(float)lua_tonumber(l,4);
+
+	if((pa->bmap->fmt&~GRD_FMT_PREMULT)!=GRD_FMT_U8_RGBA)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"format must be rgba");
+		return 2;
+	}
+		
+	grd_adjust_rgb(pa,r,g,b);
+
+	lua_pushvalue(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_convert (lua_State *l)
 {
 part_ptr p;
@@ -1693,10 +1747,11 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"attr_redux",		lua_grd_attr_redux},
 		{"remap",			lua_grd_remap},
 
+		{"adjust_hsv",		lua_grd_adjust_hsv},
+		{"adjust_rgb",		lua_grd_adjust_rgb},
+
 		{"pixels",			lua_grd_pixels},
 		{"palette",			lua_grd_palette},
-
-//		{"conscale",		lua_grd_conscale},
 
 		{"scale",			lua_grd_scale},
 		{"resize",			lua_grd_resize},

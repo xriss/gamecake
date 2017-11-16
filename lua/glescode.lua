@@ -430,10 +430,8 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			if not p then -- try basename
 				local basename=wstr.split(pname,"?")[1]
 				local base=code.programs[basename]
-				if p then -- try to build using the query string and the *original* source from the base shader
-					p=code.program_source(pname,base.vsource,base.fsource,base.filename)
-					p.base=base
-				end
+				p=code.program_source(pname,base.vsource,base.fsource,base.filename)
+				p.base=base
 			end
 			assert(p)
 		else

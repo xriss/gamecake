@@ -275,3 +275,27 @@ bogus:
 	if(err) {g->err=err;} else {g->err=0; }
 	if(rgb!=g) { grd_free(rgb); } // destroy tmp bgr grid
 }
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// save a grd as a jpg file
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void grd_jpg_save(struct grd *g , struct grd_io_info *inf )
+{
+	const char *err=0;
+	g->err=0;
+	if(inf->file_name)
+	{
+		grd_jpg_save_file(g,inf->file_name,inf->tags);
+	}
+	else
+	{
+		abort_("grd jpg save data fail");
+	}
+bogus:
+	if(err) {g->err=err;}
+}
+
+

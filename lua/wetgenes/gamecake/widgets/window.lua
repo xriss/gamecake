@@ -380,12 +380,14 @@ wwindow.window_hooks=function(_window,act,widget)
 	if act=="win_hide" then
 	
 		window.hidden=true -- hide it
+		window.master:call_descendents(function(w) w:set_dirty() end)
 		window.master:resize_and_layout()
 		
 	elseif act=="win_show" then
 	
 		window.hidden=false
 		window:move_to_top()
+		window.master:call_descendents(function(w) w:set_dirty() end)
 		window.master:resize_and_layout()
 
 	elseif act=="win_toggle" then
@@ -394,11 +396,13 @@ wwindow.window_hooks=function(_window,act,widget)
 		
 			window.hidden=false
 			window:move_to_top()
+			window.master:call_descendents(function(w) w:set_dirty() end)
 			window.master:resize_and_layout()
 
 		else
 
 			window.hidden=true -- hide it
+			window.master:call_descendents(function(w) w:set_dirty() end)
 			window.master:resize_and_layout()
 
 		end

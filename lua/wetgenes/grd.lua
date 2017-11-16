@@ -1050,4 +1050,30 @@ base.remap=function(ga,gb)
 end
 
 
+--[[#wetgenes.grd.adjust_rgb
+
+	ga:adjust_rgb(red,green,blue)
+
+Adjust -1 to +1 in for each RGB component.
+
+]]
+base.adjust_rgb=function(g,ar,ag,ab)
+	assert(core.adjust_rgb(g[0],ar,ag,ab))
+	core.info(g[0],g)
+	return g
+end
+
+--[[#wetgenes.grd.adjust_hsv
+
+	ga:adjust_hsv(hue,saturation,value)
+
+Add hue and adjust -1 to +1 in for saturation and value.
+
+]]
+base.adjust_hsv=function(g,ah,as,av)
+	assert(core.adjust_hsv(g[0],ah,as,av))
+	core.info(g[0],g)
+	return g
+end
+
 return grd

@@ -17,6 +17,56 @@
 
 
 
+void inline static grd_rgb2hsv(int r, int g, int b,
+	unsigned char *h, unsigned char *s, unsigned char *v)
+{
+	int n , x , d , t;
+ 
+	if(r<g){n=r;}else{n=g;}if(b<n){n=b;} // n==min of r,g,b
+	if(r>g){x=r;}else{x=g;}if(b>x){x=b;} // x==max of r,g,b
+	d=x-n;
+
+	*v=x;
+
+	if(x==0) { *s=0; *h=0; return; } // no color
+	
+	*s=(unsigned char)(d*255/x);
+	
+	if(d==0)	{ d=1; } // fudge
+	
+	if(r==x)	{ t=(      ((g-b)*10923/d))/256; }	else
+	if(g==x)	{ t=(21846+((b-r)*10923/d))/256; }	else
+				{ t=(43691+((r-g)*10923/d))/256; }
+	if(t<0) { t+=256; } // handle wrap 
+	*h=(unsigned char)t;
+}
+
+void inline static grd_hsv2rgb(int h, int s, int v,
+	unsigned char *r, unsigned char *g, unsigned char *b)
+{
+	int i , f , p , q , t ;
+	
+	if(s==0) { *r=v; *g=v; *b=v; return; } // grey
+	i=(256*h)/10923;
+	f=(256*h)%10923;
+	
+	p=v*(255-s)/255;
+	q=v*(255-s*f/10923)/255;
+	t=v*(255-s*(10923-f)/10923)/255;
+	
+	switch(i)
+	{
+		case  0: *r=v; *g=t; *b=p; return;
+		case  1: *r=q; *g=v; *b=p; return;
+		case  2: *r=p; *g=v; *b=t; return;
+		case  3: *r=p; *g=q; *b=v; return;
+		case  4: *r=t; *g=p; *b=v; return;
+		default: *r=v; *g=p; *b=q; return;
+	}
+ }
+
+
+
 //
 // GRD Image handling layer, load/save/manipulate
 //
@@ -369,7 +419,7 @@ struct grd * grd_save_data( struct grd *g , struct grd_io_info *filedata , int f
 		{
 			default:
 			case GRD_FMT_HINT_PNG: grd_png_save(g,filedata); break;
-//			case GRD_FMT_HINT_JPG: grd_jpg_save(g,filedata); break;
+			case GRD_FMT_HINT_JPG: grd_jpg_save(g,filedata); break;
 			case GRD_FMT_HINT_GIF: grd_gif_save(g,filedata); break;
 		}
 	}
@@ -1186,18 +1236,78 @@ int w,h;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
-// apply a contrast adjust : subtract base then apply scale and clip value.
-// so 0.5 halves the range 2.0 doubles it
-// and base chooses the center of the scale probably 128
+// apply a hsv adjust to the image, image must be u8 rgba or u8 indexed
+// h is -360 to +360
+// s is -1 to +1
+// v is -1 to +1
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-/*
-bool grd_conscale( struct grd *g , f32 base, f32 scale)
+void grd_adjust_hsv( struct grd *g , f32 fh, f32 fs, f32 fv)
 {
-	return false;
-}
-*/
+int x,y,z; u8 *p;
 
+unsigned char bh,bs,bv;
+int ah,as,av;
+int h,s,v;
+
+	if( ! ( (g->bmap->fmt==GRD_FMT_U8_RGBA) || (g->bmap->fmt==GRD_FMT_U8_RGBA_PREMULT) ) )
+	{
+		g->err="bad adjust hsv format"; // complain
+	}
+
+	ah=(int)(fh*256.0f/360.0f); // squish to a byte
+	as=(int)(fs*255.0f);
+	av=(int)(fv*255.0f);
+
+	for(z=0;z<g->bmap->d;z++) { for(y=0;y<g->bmap->h;y++) {
+	p=grdinfo_get_data(g->bmap,0,y,z);
+	for(x=0;x<g->bmap->w;x++) {
+		grd_rgb2hsv(p[0],p[1],p[2],&bh,&bs,&bv);
+		grd_hsv2rgb(
+			(unsigned char)( (bh+ah)&0xff ),
+			(unsigned char)( as<0 ? bs*(255+as)/255 : 255-(((255-bs)*(255-as))/255) ),
+			(unsigned char)( av<0 ? bv*(255+av)/255 : 255-(((255-bv)*(255-av))/255) ),
+			p+0,p+1,p+2);
+		p+=4;
+	}}}
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// apply a rgb adjust to the image, image must be u8 rgba or u8 indexed
+// r is -1 to +1
+// g is -1 to +1
+// b is -1 to +1
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+void grd_adjust_rgb( struct grd *g , f32 fr, f32 fg, f32 fb)
+{
+int x,y,z; u8 *p;
+
+int ar,ag,ab;
+
+	if( ! ( (g->bmap->fmt==GRD_FMT_U8_RGBA) || (g->bmap->fmt==GRD_FMT_U8_RGBA_PREMULT) ) )
+	{
+		g->err="bad adjust rgb format"; // complain
+	}
+
+	ar=(int)(fr*256.0f); // squish to byte range so we can use integer math
+	ag=(int)(fg*255.0f);
+	ab=(int)(fb*255.0f);
+	
+	ar=ar<-255 ? -255 : ar; ar=ar>255 ? 255 : ar; // clamp
+	ag=ag<-255 ? -255 : ag; ag=ag>255 ? 255 : ag;
+	ab=ab<-255 ? -255 : ab; ab=ab>255 ? 255 : ab;
+
+	for(z=0;z<g->bmap->d;z++) { for(y=0;y<g->bmap->h;y++) {
+	p=grdinfo_get_data(g->bmap,0,y,z);
+	for(x=0;x<g->bmap->w;x++) {
+		p[0]=(unsigned char)( ar<0 ? (int)p[0]*(255+ar)/255 : 255-(((255-(int)p[0])*(255-ar))/255) );
+		p[1]=(unsigned char)( ag<0 ? (int)p[1]*(255+ag)/255 : 255-(((255-(int)p[1])*(255-ag))/255) );
+		p[2]=(unsigned char)( ab<0 ? (int)p[2]*(255+ab)/255 : 255-(((255-(int)p[2])*(255-ab))/255) );
+		p+=4;
+	}}}
+}
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -2310,44 +2420,7 @@ u32 c1,c2;
 }
 
 
-// find the index ( in g->cmap ) that best matches this rgba value.
-/*
-static int grd_remap_find(struct grd *ga, int r, int g, int b, int a)
-{
-	int i;
-	int d;
-	int dd;
-	
-	
-	int best;
-	int bestdd;
-
-	u8 *cc;
-
-	best=0;
-	bestdd=0x7fffffff;
-
-	for(i=0,cc=ga->cmap->data;i<ga->cmap->w;i++,cc+=4)
-	{
-		dd=0;
-		
-		d=r-((int)cc[0]); dd+=d*d;
-		d=g-((int)cc[1]); dd+=d*d;
-		d=b-((int)cc[2]); dd+=d*d;
-		d=a-((int)cc[3]); dd+=4*d*d;
-		
-		if(dd<bestdd)
-		{
-			best=i;
-			bestdd=dd;
-		}
-		
-	}
-
-    return best;
-}
-*/
-
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 
 static inline int grd_remap_color_distance(int ar,int ag,int ab,int aa,int br,int bg,int bb,int ba)
 {
@@ -2396,6 +2469,17 @@ const int pattern[64]={
 	32,48,20,36,29,45,17,33,
 	64,16,52, 4,61,13,49, 1,
 };
+
+	if( ! ( (ga->bmap->fmt==GRD_FMT_U8_RGBA) || (ga->bmap->fmt==GRD_FMT_U8_RGBA_PREMULT) ) )
+	{
+		ga->err="bad remap format"; // complain
+		return;
+	}
+	if( ! ( (gb->bmap->fmt==GRD_FMT_U8_INDEXED) || (gb->bmap->fmt==GRD_FMT_U8_INDEXED_PREMULT) ) )
+	{
+		gb->err="bad remap format"; // complain
+		return;
+	}
 
 	step=64; // default to no dither
 	switch(dither)
@@ -2523,3 +2607,4 @@ u32* grd_tags_find(u32 *tags,u32 id)
 	
 	return 0;
 }
+
