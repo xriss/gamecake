@@ -568,7 +568,7 @@ int lua_grd_remap (lua_State *l)
 {
 part_ptr pa;
 part_ptr pb;
-int colors=256;
+int colors=0; // get number of colors from palette
 int dither=4;
 
 	pa=lua_grd_check_ptr(l,1);
@@ -615,6 +615,29 @@ int dither=4;
 	grd_remap(pa,pb,colors,dither);
 
 	lua_pushvalue(l,2);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_sort_cmap (lua_State *l)
+{
+part_ptr pa;
+
+	pa=lua_grd_check_ptr(l,1);
+
+	if((pa->bmap->fmt&~GRD_FMT_PREMULT)!=GRD_FMT_U8_INDEXED)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"format must be indexed");
+		return 2;
+	}
+		
+	grd_sort_cmap(pa);
+
+	lua_pushvalue(l,1);
 	return 1;
 }
 
@@ -1747,6 +1770,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"quant",			lua_grd_quant},
 		{"attr_redux",		lua_grd_attr_redux},
 		{"remap",			lua_grd_remap},
+		{"sort_cmap",		lua_grd_sort_cmap},
 
 		{"adjust_hsv",		lua_grd_adjust_hsv},
 		{"adjust_rgb",		lua_grd_adjust_rgb},

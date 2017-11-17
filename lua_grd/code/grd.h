@@ -241,10 +241,10 @@ void grd_clear( struct grd *g , u32 val);
 
 u32* grd_tags_find(u32 *tags,u32 id);
 
-void grd_remap(struct grd *ga, struct grd *gb, int colors, int dither);
+int grd_remap(struct grd *ga, struct grd *gb, int colors, int dither);
 
-void grd_adjust_hsv( struct grd *g , f32 fh, f32 fs, f32 fv);
-void grd_adjust_rgb( struct grd *g , f32 fr, f32 fg, f32 fb);
+int grd_adjust_hsv( struct grd *g , f32 fh, f32 fs, f32 fv);
+int grd_adjust_rgb( struct grd *g , f32 fr, f32 fg, f32 fb);
 
-void grd_sort_cmap( struct grd *g );
+int grd_sort_cmap( struct grd *g );
 

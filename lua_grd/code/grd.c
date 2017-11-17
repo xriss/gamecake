@@ -1248,7 +1248,7 @@ int w,h;
 // v is -1 to +1
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_adjust_hsv( struct grd *g , f32 fh, f32 fs, f32 fv)
+int grd_adjust_hsv( struct grd *g , f32 fh, f32 fs, f32 fv)
 {
 int x,y,z; u8 *p;
 
@@ -1259,6 +1259,7 @@ int h,s,v;
 	if( ! ( (g->bmap->fmt==GRD_FMT_U8_RGBA) || (g->bmap->fmt==GRD_FMT_U8_RGBA_PREMULT) ) )
 	{
 		g->err="bad adjust hsv format"; // complain
+		return 0;
 	}
 
 	ah=(int)(fh*256.0f/360.0f); // squish to a byte
@@ -1276,6 +1277,8 @@ int h,s,v;
 			p+0,p+1,p+2);
 		p+=4;
 	}}}
+	
+	return 1;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1286,7 +1289,7 @@ int h,s,v;
 // b is -1 to +1
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_adjust_rgb( struct grd *g , f32 fr, f32 fg, f32 fb)
+int grd_adjust_rgb( struct grd *g , f32 fr, f32 fg, f32 fb)
 {
 int x,y,z; u8 *p;
 
@@ -1295,6 +1298,7 @@ int ar,ag,ab;
 	if( ! ( (g->bmap->fmt==GRD_FMT_U8_RGBA) || (g->bmap->fmt==GRD_FMT_U8_RGBA_PREMULT) ) )
 	{
 		g->err="bad adjust rgb format"; // complain
+		return 0;
 	}
 
 	ar=(int)(fr*256.0f); // squish to byte range so we can use integer math
@@ -1313,6 +1317,8 @@ int ar,ag,ab;
 		p[2]=(unsigned char)( ab<0 ? (int)p[2]*(255+ab)/255 : 255-(((255-(int)p[2])*(255-ab))/255) );
 		p+=4;
 	}}}
+	
+	return 1;
 }
 
 
@@ -2441,7 +2447,7 @@ static inline int grd_remap_color_distance(int ar,int ag,int ab,int aa,int br,in
 // gb must be indexed and of the same size as ga
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_remap(struct grd *ga, struct grd *gb, int colors, int dither)
+int grd_remap(struct grd *ga, struct grd *gb, int colors, int dither)
 {
 int x,y,z;
 u8 *pa,*pb;
@@ -2479,12 +2485,12 @@ const int pattern[64]={
 	if( ! ( (ga->bmap->fmt==GRD_FMT_U8_RGBA) || (ga->bmap->fmt==GRD_FMT_U8_RGBA_PREMULT) ) )
 	{
 		ga->err="bad remap format"; // complain
-		return;
+		return 0;
 	}
 	if( ! ( (gb->bmap->fmt==GRD_FMT_U8_INDEXED) || (gb->bmap->fmt==GRD_FMT_U8_INDEXED_PREMULT) ) )
 	{
 		gb->err="bad remap format"; // complain
-		return;
+		return 0;
 	}
 
 	step=64; // default to no dither
@@ -2499,7 +2505,9 @@ const int pattern[64]={
 	}
 
 	palette=gb->cmap->data;
-
+	if( colors < 2 ) { colors=gb->cmap->w; } // read palette size 
+	else { gb->cmap->w=colors; } // write palette size
+	
 	for(z=0;z<ga->bmap->d;z++) {
 		for(y=0;y<ga->bmap->h;y++) {
 			y8=y%8;
@@ -2581,6 +2589,8 @@ const int pattern[64]={
 			}
 		}
 	}
+	
+	return 1;
 }
 
 
@@ -2613,4 +2623,128 @@ u32* grd_tags_find(u32 *tags,u32 id)
 	
 	return 0;
 }
+
+/*------------------------------------------------------------------------------
+
+Sort the colors in a cmap, will need to be an indexed image for this to 
+work and we will then remap any image data associated with it.
+
+*/
+int grd_sort_cmap( struct grd *ga )
+{
+int x,y,z; u8 *p;
+
+int i,b,bi,d;
+
+u8 avail[256]; // available indexes
+u8 order[256]; // the new palette order
+u8 remap[256]; // remap table
+
+u8 cc[256*4]; // temp cmap store
+
+int avail_max;
+int order_max;
+
+int idx,dist;
+int best_idx,best_dist,last_idx;
+
+int colors;
+
+u8 *cmap;
+
+int thinking;
+
+	if( ! ( (ga->bmap->fmt==GRD_FMT_U8_INDEXED) || (ga->bmap->fmt==GRD_FMT_U8_INDEXED_PREMULT) ) )
+	{
+		ga->err="bad sort cmap format"; // complain
+		return 0; // bad
+	}
+	colors=ga->cmap->w;
+	cmap=ga->cmap->data;
+	
+
+	best_idx=0;
+	best_dist=0x7fffffff;
+
+	idx=0;thinking=colors+1;
+	while(thinking)
+	{
+		// fill in available colors
+		order_max=0;
+		avail_max=colors;
+		for(i=0;i<colors;i++) { avail[i]=i; }
+		avail[idx]=avail[--avail_max];
+		last_idx=idx;
+		order[order_max++]=idx;
+		dist=0;
+		
+		while(avail_max>0)
+		{
+			b=0x7fffffff;
+			bi=0;
+			for(i=0;i<avail_max;i++)
+			{
+				d=grd_remap_color_distance(
+					cmap[last_idx*4+0]	,
+					cmap[last_idx*4+1]	,
+					cmap[last_idx*4+2]	,
+					cmap[last_idx*4+3]	,
+					cmap[avail[i]*4+0]	,
+					cmap[avail[i]*4+1]	,
+					cmap[avail[i]*4+2]	,
+					cmap[avail[i]*4+3]	);
+				if(d<b)
+				{
+					b=d;
+					bi=i;
+				}
+			}
+
+			dist+=b;
+			last_idx=avail[bi];
+			order[order_max++]=last_idx;
+			avail[bi]=avail[--avail_max];
+		}
+		
+		if(dist<best_dist)
+		{
+			best_dist=dist;
+			best_idx=idx;
+		}
+		
+		idx=idx+1;
+		thinking=thinking-1;
+		if(thinking==1) // rethink the winner on this special last pass
+		{
+			idx=best_idx;
+		}
+	}
+	
+// when we get to here order will be the best one we could find
+
+	for(i=0;i<256;i++) { remap[i]=0; } // empty and then
+	for(i=0;i<order_max;i++) {
+		remap[ order[i] ]=i;	// build remap table
+		cc[ i*4 + 0 ]=cmap[ order[i]*4 + 0 ]; // re order pallete
+		cc[ i*4 + 1 ]=cmap[ order[i]*4 + 1 ];
+		cc[ i*4 + 2 ]=cmap[ order[i]*4 + 2 ];
+		cc[ i*4 + 3 ]=cmap[ order[i]*4 + 3 ];
+	}
+	for(i=0;i<order_max;i++) {
+		cmap[ i*4 + 0 ]=cc[ i*4 + 0 ]; // replace colors
+		cmap[ i*4 + 1 ]=cc[ i*4 + 1 ];
+		cmap[ i*4 + 2 ]=cc[ i*4 + 2 ];
+		cmap[ i*4 + 3 ]=cc[ i*4 + 3 ];
+	}
+
+	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
+	p=grdinfo_get_data(ga->bmap,0,y,z);
+	for(x=0;x<ga->bmap->w;x++,p++) {
+		p[0]=remap[ p[0] ]; // perform remap of any pixels we have
+	}}}
+
+
+	return 1; // OK
+}
+
 

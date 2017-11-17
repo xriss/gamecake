@@ -1044,8 +1044,9 @@ end
 Fill gb with a remaped version of ga, each pixel is mapped to the closest palette entry.
 
 ]]
-base.remap=function(ga,gb)
-	local r,m=core.remap(ga[0],gb[0])
+base.remap=function(ga,gb,colors,dither)
+	local r,m=core.remap(ga[0],gb[0],colors,dither)
+	core.info(gb[0],gb)
 	return r and gb,m
 end
 
@@ -1074,6 +1075,19 @@ base.adjust_hsv=function(g,ah,as,av)
 	assert(core.adjust_hsv(g[0],ah,as,av))
 	core.info(g[0],g)
 	return g
+end
+
+--[[#wetgenes.grd.sort_cmap
+
+	ga:sort_cmap()
+
+Sort cmap into a "good" order and remap the image.
+
+]]
+base.sort_cmap=function(ga)
+	assert(core.sort_cmap(ga[0]))
+	core.info(ga[0],ga)
+	return ga
 end
 
 return grd
