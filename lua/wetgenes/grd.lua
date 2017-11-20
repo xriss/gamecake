@@ -1077,6 +1077,22 @@ base.adjust_hsv=function(g,ah,as,av)
 	return g
 end
 
+--[[#wetgenes.grd.adjust_contrast
+
+	ga:adjust_contrast(sub,con)
+
+sub is the middle grey value, probably 127, and con is the amount of 
+contrast.
+
+A con of 0 should have no effect, a con of -1 will be a flat grey and a 
+con of 1 will give a huge contrast increase.
+
+]]
+base.adjust_contrast=function(g,sub,con)
+	assert(core.adjust_contrast(g[0],sub,con))
+	core.info(g[0],g)
+	return g
+end
 --[[#wetgenes.grd.sort_cmap
 
 	ga:sort_cmap()

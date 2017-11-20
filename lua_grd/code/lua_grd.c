@@ -699,6 +699,32 @@ float r,g,b;
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_adjust_contrast (lua_State *l)
+{
+part_ptr pa;
+float sub,con;
+
+	pa=lua_grd_check_ptr(l,1);
+	sub=(float)lua_tonumber(l,2);
+	con=(float)lua_tonumber(l,3);
+
+	if((pa->bmap->fmt&~GRD_FMT_PREMULT)!=GRD_FMT_U8_RGBA)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"format must be rgba");
+		return 2;
+	}
+		
+	grd_adjust_contrast(pa,(int)sub,con);
+
+	lua_pushvalue(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_convert (lua_State *l)
 {
 part_ptr p;
@@ -1774,6 +1800,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 
 		{"adjust_hsv",		lua_grd_adjust_hsv},
 		{"adjust_rgb",		lua_grd_adjust_rgb},
+		{"adjust_contrast",	lua_grd_adjust_contrast},
 
 		{"pixels",			lua_grd_pixels},
 		{"palette",			lua_grd_palette},

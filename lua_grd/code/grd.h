@@ -245,6 +245,8 @@ int grd_remap(struct grd *ga, struct grd *gb, int colors, int dither);
 
 int grd_adjust_hsv( struct grd *g , f32 fh, f32 fs, f32 fv);
 int grd_adjust_rgb( struct grd *g , f32 fr, f32 fg, f32 fb);
+int grd_adjust_contrast( struct grd *g , int sub, f32 con);
+
 
 int grd_sort_cmap( struct grd *g );
 

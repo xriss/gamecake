@@ -5,7 +5,6 @@
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 #include "all.h"
 
-
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // better image resize code, static include for use in grd_scale
@@ -1179,10 +1178,7 @@ int w,h;
 
 	if(num_colors>256) { num_colors=256; } // sanity
 	if(num_colors<2  ) { num_colors=2; }
-
 	
-#if 1
-
 	w=g->bmap->w;
 	h=g->bmap->h;
 	while( w*h > 256*256 ) { w=w/2; h=h/2; } // maximum number of pixels we want to process (speed hack)
@@ -1215,26 +1211,9 @@ int w,h;
 		swanky_quant_remap( g->bmap->data, siz, num_colors, gb->bmap->data, gb->cmap->data , g->bmap->w , dither );
 	}
 	
-	g->cmap->w=num_colors; // keep track of the number of used colors
-	
-#else
+	gb->cmap->w=num_colors; // keep track of the number of used colors
 
-	neuquant32_initnet( g->bmap->data , siz*4 , num_colors , 1.0 );
-	neuquant32_learn( 1 ); // 1 is the best quality, 30 is worst
-	neuquant32_inxbuild();
-	neuquant32_getcolormap(gb->cmap->data);
-	
-	
-	optr=(u8*)gb->bmap->data;
-	ptr=(u32*)g->bmap->data;
-	for( i=0 ; i<siz ; i++ )
-	{
-		c=*ptr++;
-		*optr++=neuquant32_inxsearch( (c>>24)&0xff , (c)&0xff , (c>>8)&0xff , (c>>16)&0xff );
-	}
 
-#endif
-	
 	return gb;
 }
 
@@ -1317,6 +1296,69 @@ int ar,ag,ab;
 		p[2]=(unsigned char)( ab<0 ? (int)p[2]*(255+ab)/255 : 255-(((255-(int)p[2])*(255-ab))/255) );
 		p+=4;
 	}}}
+	
+	return 1;
+}
+
+
+/*#grd_adjust_contrast
+
+perform a contrast adjust
+
+con is a contrast scale where 0 is no change and +1 
+gives full contrast while -1 removes all contrast.
+
+*/
+int grd_adjust_contrast( struct grd *g , int sub, f32 con)
+{
+int x,y,z; u8 *p;
+int i;
+int pos;
+int c;
+int s;
+
+	pos=255-sub; // the other half of the range
+
+	if( ! ( (g->bmap->fmt==GRD_FMT_U8_RGBA) || (g->bmap->fmt==GRD_FMT_U8_RGBA_PREMULT) ) )
+	{
+		g->err="bad adjust contrast format"; // complain
+		return 0;
+	}
+
+	if(con>0.0f) // contrast up
+	{
+		s=(int)(256.0f*(1.0f-con)); // reverse con scale
+		for(z=0;z<g->bmap->d;z++) { for(y=0;y<g->bmap->h;y++) {
+		p=grdinfo_get_data(g->bmap,0,y,z);
+		for(x=0;x<g->bmap->w;x++,p+=4) {
+			for(i=0;i<=3;i++) // RGB
+			{
+				c=((int)p[i])-sub; // convert to int
+				if(c<0)	{ c=((-sub<<8)+((sub+c)*s)+(sub<<8))>>8; }
+				else    { c=(( pos<<8)-((pos-c)*s)+(sub<<8))>>8; }
+				if     ( c<  0 ) { p[i]=0;     } // write out with clamp
+				else if( c>255 ) { p[i]=255;   }
+				else             { p[i]=(u8)c; }
+			}
+		}}}
+	}
+	else
+	if(con<0.0f) // contrast down
+	{
+		s=(int)(256.0f*(1.0f+con)); // reverse con scale
+		for(z=0;z<g->bmap->d;z++) { for(y=0;y<g->bmap->h;y++) {
+		p=grdinfo_get_data(g->bmap,0,y,z);
+		for(x=0;x<g->bmap->w;x++,p+=4) {
+			for(i=0;i<=3;i++) // RGB
+			{
+				c=((int)p[i]); // convert to int
+				c=(((c-sub)*s)+(sub<<8))>>8;
+				if     ( c<  0 ) { p[i]=0;     } // write out with clamp
+				else if( c>255 ) { p[i]=255;   }
+				else             { p[i]=(u8)c; }
+			}
+		}}}
+	}
 	
 	return 1;
 }
