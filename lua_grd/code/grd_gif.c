@@ -123,10 +123,10 @@ static void grd_gif_load(struct grd * g, struct grd_io_info * inf )
 
 //printf("res %d\n",gif->SColorResolution);
 
-	g->cmap->w=cmp->ColorCount;
 	cmp=gif->SColorMap;
 	if(cmp)
 	{
+		g->cmap->w=cmp->ColorCount;
 		for(j=0;j<cmp->ColorCount;j++)
 		{
 			g->cmap->data[j*4+0]=cmp->Colors[j].Red;
