@@ -39,6 +39,7 @@ wmeta.classes={
 	["menu"]=oven.rebake("wetgenes.gamecake.widgets.menu"),
 	["menubar"]=oven.rebake("wetgenes.gamecake.widgets.menubar"),
 	["menuitem"]=oven.rebake("wetgenes.gamecake.widgets.menuitem"),
+	["pages"]=oven.rebake("wetgenes.gamecake.widgets.pages"),
 
 --classes built out of the base classes
 

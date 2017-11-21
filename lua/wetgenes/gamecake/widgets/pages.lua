@@ -1,0 +1,50 @@
+--
+-- (C) 2017 Kriss@XIXs.com
+--
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+function M.bake(oven,wpages)
+
+wpages=wpages or {}
+
+function wpages.update(widget)
+	return widget.meta.update(widget)
+end
+
+function wpages.draw(widget)
+	return widget.meta.draw(widget)
+end
+
+-- assume that only one child is visible at once so we toggle them on and off
+
+function wpages.layout(widget)
+
+	widget.hx=0
+	widget.hy=0
+	for i,v in ipairs(widget) do
+		v.px=0
+		v.py=0
+		if v.hx>widget.hx then widget.hx=v.hx end
+		if v.hy>widget.hy then widget.hy=v.hy end
+		v:layout()
+	end
+	
+end
+
+function wpages.setup(widget,def)
+
+	widget.class="pages"
+	
+	widget.update=wpages.update
+	widget.draw=wpages.draw
+	widget.layout=wpages.layout
+	
+	return widget
+end
+
+return wpages
+end
