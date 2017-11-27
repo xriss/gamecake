@@ -43,4 +43,4 @@ buildoptions{ "-std=c++11" }
 
 links { "lib_lua" }
 
-KIND{kind="lua",name="glslang_core"}
+KIND{kind="lua",name="glslang_core",lua="glslang.core"}
