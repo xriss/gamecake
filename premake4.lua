@@ -858,6 +858,9 @@ all_includes=all_includes or {
 -- link lanes on nix?
 	{"lua_lanes",		NIX		},
 
+-- test glslang?
+	{"lua_glslang",		NIX		},
+
 -- old/broken and no longer supported but will probably still build
 --	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
 --	{"lua_lanes",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
