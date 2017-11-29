@@ -15,13 +15,6 @@ Test...
 */
 static int lua_glslang_test(lua_State *l)
 {
-
-//
-// Read a file's data into a string, and compile it using the old interface ShCompile,
-// for non-linkable results.
-//
-
-	const char* fileName;
 	ShHandle compilers[2];
 	ShHandle linker;
 	TBuiltInResource Resources;
