@@ -22,18 +22,40 @@ static int lua_glslang_test(lua_State *l)
 //
 
 	const char* fileName;
-	ShHandle compiler;
+	ShHandle compilers[2];
+	ShHandle linker;
 	TBuiltInResource Resources;
 
-    int ret = 0;
-    char* shaderString;
+	int ret = 0;
+	const char* shaderString;
 
-    EShMessages messages = EShMsgDefault;
-//    SetMessageOptions(messages);
+	EShMessages messages = EShMsgDefault;
 
-	ret = ShCompile(compiler, &shaderString, 1, nullptr, EShOptNone, &Resources, 0, 110 , false, messages);
+	shaderString=lua_tostring(l,1);
 
-	return 0;
+	ShInitialize();
+
+	compilers[0]=ShConstructCompiler(EShLangVertex,0);
+	compilers[1]=ShConstructCompiler(EShLangFragment,0);
+	linker=ShConstructLinker(EShExVertexFragment,0);
+
+
+	ret = ShCompile(compilers[0], &shaderString, 1, nullptr, EShOptNone, &Resources, 0, 100 , true, messages);
+	lua_pushstring(l,ShGetInfoLog(compilers[0]));
+
+	ret = ShCompile(compilers[1], &shaderString, 1, nullptr, EShOptNone, &Resources, 0, 100 , true, messages);
+	lua_pushstring(l,ShGetInfoLog(compilers[1]));
+
+	ret = ShLinkExt(linker, compilers, 2);
+	lua_pushstring(l,ShGetInfoLog(linker));
+
+	ShDestruct(compilers[0]);
+	ShDestruct(compilers[1]);
+	ShDestruct(linker);
+	
+	ShFinalize();
+
+	return 3;
 }
 
 
