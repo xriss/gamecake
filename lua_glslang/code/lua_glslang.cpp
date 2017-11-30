@@ -26,7 +26,6 @@ wrong.
 static int lua_glslang_lint_gles2(lua_State *l)
 {
 	ShHandle compilers[2];
-//	ShHandle linker;
 	TBuiltInResource Resources;
 
 	int count=0;
@@ -40,7 +39,6 @@ static int lua_glslang_lint_gles2(lua_State *l)
 
 	compilers[0]=ShConstructCompiler(EShLangVertex,0);
 	compilers[1]=ShConstructCompiler(EShLangFragment,0);
-//	linker=ShConstructLinker(EShExVertexFragment,0);
 
 	if(vstr)
 	{
@@ -48,8 +46,8 @@ static int lua_glslang_lint_gles2(lua_State *l)
 		s=ShGetInfoLog(compilers[0]);
 		if(ret)	{	lua_pushnil(l);			}
 		else	{	lua_pushstring(l,s);	}
-		count++;
 	}
+	else	{	lua_pushnil(l);			}
 
 	if(fstr)
 	{
@@ -57,26 +55,15 @@ static int lua_glslang_lint_gles2(lua_State *l)
 		s=ShGetInfoLog(compilers[1]);
 		if(ret)	{	lua_pushnil(l);			}
 		else	{	lua_pushstring(l,s);	}
-		count++;
 	}
-/*
-	if(vstr&&fstr)
-	{
-		ret = ShLinkExt(linker, compilers, 2);
-		s=ShGetInfoLog(linker);
-		if(ret)	{	lua_pushnil(l);			}
-		else	{	lua_pushstring(l,s);	}
-		count++;
-	}
-*/
+	else	{	lua_pushnil(l);			}
 
 	ShDestruct(compilers[0]);
 	ShDestruct(compilers[1]);
-//	ShDestruct(linker);
 	
 	ShFinalize();
 
-	return count;
+	return 2;
 }
 
 
