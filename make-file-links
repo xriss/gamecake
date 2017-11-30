@@ -33,5 +33,5 @@ ln -f lua/raspi/unicornhat.lua     lua_raspi_unicornhat/code/unicornhat.lua
 
 echo "listing all linked files"
 
-find . -xdev ! -type d -links +1 -printf '%20D %20i %p\n' | sort -n | uniq -w 42 --all-repeated=separate
+find . -xdev ! -type d -links +1 -not -path "./parts/*" -printf '%20D %20i %p\n' | sort -n | uniq -w 42 --all-repeated=separate
 
