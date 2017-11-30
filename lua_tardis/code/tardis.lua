@@ -161,7 +161,7 @@ function array.set(it,...)
 			it[n]=v
 			n=n+1
 		else
-			for ii,vv in ipairs(v) do -- allow one depth of tables
+			for ii=1,#v do local vv=v[ii] -- allow one depth of tables
 				it[n]=vv
 				n=n+1
 			end
@@ -192,13 +192,13 @@ function array.compare(it,...)
 			if it[n]~=v then return false end
 			n=n+1
 		else
-			for ii,vv in ipairs(v) do -- allow one depth of tables
+			for ii=1,#v do local vv=v[ii] -- allow one depth of tables
 				if it[n]~=vv then return false end
 				n=n+1
 			end
 		end
 	end
-	if it[n] then return false end -- array has more numbers than provided for test
+	if n<#it then return false end -- array has more numbers than provided for test
 	return true
 end
 
@@ -334,9 +334,11 @@ function m2.cofactor(it,r)
 	local t={}
 	for iy=1,2 do
 		for ix=1,2 do
-			if (ix~=x) and (iy~=y) then
-				t[#t+1]=m2.minor_xy(it,ix,iy)
-				if ((ix+iy)%2)==1 then t[#t]=-t[#t] end
+			local idx=iy*2+ix-2
+			if ((ix+iy)%2)==1 then
+				t[idx]=-m2.minor_xy(it,ix,iy)
+			else
+				t[idx]=m2.minor_xy(it,ix,iy)
 			end
 		end
 	end
@@ -490,9 +492,11 @@ function m3.cofactor(it,r)
 	local t={}
 	for iy=1,3 do
 		for ix=1,3 do
-			if (ix~=x) and (iy~=y) then
-				t[#t+1]=m3.minor_xy(it,ix,iy)
-				if ((ix+iy)%2)==1 then t[#t]=-t[#t] end
+			local idx=iy*3+ix-3
+			if ((ix+iy)%2)==1 then 
+				t[idx]=-m3.minor_xy(it,ix,iy)
+			else
+				t[idx]=m3.minor_xy(it,ix,iy)
 			end
 		end
 	end
@@ -635,7 +639,7 @@ function m4.scale(it,s,r)
 		it[ 1]*s,it[ 2]*s,it[ 3]*s,it[ 4]*s,
 		it[ 5]*s,it[ 6]*s,it[ 7]*s,it[ 8]*s,
 		it[ 9]*s,it[10]*s,it[11]*s,it[12]*s,
-		it[13]  ,it[14]  ,it[15]  ,it[16]  )
+		it[13]*s,it[14]*s,it[15]*s,it[16]*s)
 end
 
 --[[#wetgenes.tardis.m4.add
@@ -714,9 +718,11 @@ function m4.cofactor(it,r)
 	local t={}
 	for iy=1,4 do
 		for ix=1,4 do
-			if (ix~=x) and (iy~=y) then
-				t[#t+1]=m4.minor_xy(it,ix,iy)
-				if ((ix+iy)%2)==1 then t[#t]=-t[#t] end
+			local idx=iy*4+ix-4
+			if ((ix+iy)%2)==1 then
+				t[idx]=-m4.minor_xy(it,ix,iy)
+			else
+				t[idx]=m4.minor_xy(it,ix,iy)
 			end
 		end
 	end
@@ -1672,13 +1678,6 @@ if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first
 	function array.__index(it,n) return array[n] or tcore.read(it,n) end
 	function array.__newindex(it,n,v) tcore.write(it,n,v) end
 
-	-- initialise an array
-	function array.set(it,...) tcore.set(it,...) return it end
-
-	m2.set=array.set
-	m3.set=array.set
-	m4.set=array.set
-
 	function m2.new(...) return tcore.alloc(4* 4,m2):set(...) end
 	function m3.new(...) return tcore.alloc(4* 9,m3):set(...) end
 	function m4.new(...) return tcore.alloc(4*16,m4):set(...) end
@@ -1694,11 +1693,6 @@ if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first
 	m2.__newindex=array.__newindex
 	m3.__newindex=array.__newindex
 	m4.__newindex=array.__newindex
-
-	v2.set=array.set
-	v3.set=array.set
-	v4.set=array.set
-	q4.set=array.set
 
 	function v2.new(...) return tcore.alloc(4* 2,v2):set(...) end
 	function v3.new(...) return tcore.alloc(4* 3,v3):set(...) end
