@@ -6,47 +6,77 @@
 #include "all.h"
 
 
-
-
 /*
 
-Test...
+	lua_glslang_lint_gles2(lua)
+
+	inputs
+		vertex code string
+		fragment code string
+
+	return
+		vertex error string
+		fragment error string
+
+Compile a vertex shader and a fragment shader for GLES2, return nil,nil 
+for no errors or an error string for either phase if something went 
+wrong.
 
 */
-static int lua_glslang_test(lua_State *l)
+static int lua_glslang_lint_gles2(lua_State *l)
 {
 	ShHandle compilers[2];
-	ShHandle linker;
+//	ShHandle linker;
 	TBuiltInResource Resources;
 
-	int ret = 0;
-	const char* shaderString;
+	int count=0;
+	int ret;
+	const char *s;
 
-	shaderString=lua_tostring(l,1);
+	const char *vstr=lua_tostring(l,1);
+	const char *fstr=lua_tostring(l,2);
 
 	ShInitialize();
 
 	compilers[0]=ShConstructCompiler(EShLangVertex,0);
 	compilers[1]=ShConstructCompiler(EShLangFragment,0);
-	linker=ShConstructLinker(EShExVertexFragment,0);
+//	linker=ShConstructLinker(EShExVertexFragment,0);
 
+	if(vstr)
+	{
+		ret = ShCompile(compilers[0], &vstr, 1, nullptr, EShOptNone, &Resources, 0, 100 , true, EShMsgDefault);
+		s=ShGetInfoLog(compilers[0]);
+		if(ret)	{	lua_pushnil(l);			}
+		else	{	lua_pushstring(l,s);	}
+		count++;
+	}
 
-	ret = ShCompile(compilers[0], &shaderString, 1, nullptr, EShOptNone, &Resources, 0, 100 , true, EShMsgDefault);
-	lua_pushstring(l,ShGetInfoLog(compilers[0]));
-
-	ret = ShCompile(compilers[1], &shaderString, 1, nullptr, EShOptNone, &Resources, 0, 100 , true, EShMsgDefault);
-	lua_pushstring(l,ShGetInfoLog(compilers[1]));
-
-	ret = ShLinkExt(linker, compilers, 2);
-	lua_pushstring(l,ShGetInfoLog(linker));
+	if(fstr)
+	{
+		ret = ShCompile(compilers[1], &fstr, 1, nullptr, EShOptNone, &Resources, 0, 100 , true, EShMsgDefault);
+		s=ShGetInfoLog(compilers[1]);
+		if(ret)	{	lua_pushnil(l);			}
+		else	{	lua_pushstring(l,s);	}
+		count++;
+	}
+/*
+	if(vstr&&fstr)
+	{
+		ret = ShLinkExt(linker, compilers, 2);
+		s=ShGetInfoLog(linker);
+		if(ret)	{	lua_pushnil(l);			}
+		else	{	lua_pushstring(l,s);	}
+		count++;
+	}
+*/
 
 	ShDestruct(compilers[0]);
 	ShDestruct(compilers[1]);
-	ShDestruct(linker);
+//	ShDestruct(linker);
 	
 	ShFinalize();
 
-	return 3;
+	return count;
 }
 
 
@@ -59,21 +89,10 @@ extern "C" int luaopen_glslang_core (lua_State *l)
 {
 	const luaL_reg lib[] =
 	{
-		{"test",	lua_glslang_test},
+		{"lint_gles2",	lua_glslang_lint_gles2},
 
 		{0,0}
 	};
-
-	const luaL_reg meta[] =
-	{
-//		{"__gc",			lua_grd_destroy},
-
-		{0,0}
-	};
-
-//	luaL_newmetatable(l, lua_grd_ptr_name);
-//	luaL_openlib(l, NULL, meta, 0);
-//	lua_pop(l,1);
 
 	lua_newtable(l);
 	luaL_openlib(l, NULL, lib, 0);
