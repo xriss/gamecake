@@ -12,6 +12,9 @@ local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")
 --local tcore=require("wetgenes.tardis.core") -- TODO: patch this into the base tardis core...
 
+local glslang=require("glslang")
+
+
 local core=require("gles.core")
 
 
@@ -235,59 +238,11 @@ function glescode.create(gl)
 		return p
 	end
 
--- load multiple shader sources from a single file
---
--- #SHADER "nameofshader"
---
--- is used at the start of a line to say which chunk the following text
--- should go into
---
--- #HEADER "nameofheader"
---
--- can be used to define part of a shader, which can later be included in another shader by using
---
--- #INCLUDE "nameofheader"
---
--- #SHADER or #HEADER
---
--- without a name can be used to ignore the next part of a file, any text at the start of a file before
--- the first #SHADER or #HEADER is also ignored
---
+-- reset headers and load multiple shader sources from a single file
 	code.headers={}
 	function code.shader_sources(text,filename)
 	
-		local ss=wstr.split(text,"\n")
-		local shaders={}
-		local chunk
-		for i,l in ipairs(ss) do
-			local flag=l:sub(1,7):lower()
-			if flag=="#header" or flag=="#shader" then -- new chunk must be at start of line
-				chunk=nil -- forget last chunk
-				local name=l:match([["([^"]+)"]]) -- get name from inside quotes
-				if name then -- from now on all lines go into this chunk
-					chunk={}
-					chunk[#chunk+1]="#line "..i	-- remember the line number from this file
-					if flag=="#header" then
-						code.headers[name]=chunk
-					elseif flag=="#shader" then
-						shaders[name]=chunk
-					end
-				end
-			else
-				if chunk then -- only if we are in a chunk
-					if l:sub(1,8):lower()=="#include" then -- include a previously declared chunk
-						local name=l:match([["([^"]+)"]]) -- get name from inside quotes
-						assert(code.headers[name],"glsl header "..name.." not found")
-						for _,line in ipairs(code.headers[name]) do  -- include lines
-							chunk[#chunk+1]=line
-						end
-						chunk[#chunk+1]="#line "..i	-- reset the line number from this file
-					else
-						chunk[#chunk+1]=l
-					end
-				end
-			end
-		end		
+		local shaders=glslang.parse_chunks(text,filename,code.headers)
 
 		for n,v in pairs(shaders) do
 --print("PROGRAM",n,#v)
