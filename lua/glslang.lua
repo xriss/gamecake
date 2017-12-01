@@ -30,14 +30,19 @@ Try and compile a vertex/fragment shader pair and return any errors.
 returns nil,nil on success or an error string if either shader fails to 
 compile.
 
+Note that the glslang compile step seems rather slow, not sure what it 
+gets up to but do not consider using this if speed is important.
+
 ]]
 
 glslang.lint_gles2=function(vcode,fcode)
 	if not core then return "NOCORE","NOCORE" end
 
-	local verr,ferr=core.lint_gles2(vcode,fcode)
+	local verr,ferr,lerr=core.lint_gles2(vcode,fcode)
+	
+	if lerr=="" then lerr=nil end -- hack bad return value?
 
-	return verr,ferr
+	return verr,ferr,lerr
 end
 
 
