@@ -91,7 +91,7 @@ glslang.parse_chunks=function(text,filename,headers)
 			local name=l:match([["([^"]+)"]]) -- get name from inside quotes
 			if name then -- from now on all lines go into this chunk
 				chunk={}
-				chunk[#chunk+1]="#line "..i	-- remember the line number from this file
+				chunk[#chunk+1]="#line "..(i+1)	-- remember the line number from this file
 				if flag=="#header" then
 					headers[name]=chunk
 				elseif flag=="#shader" then
@@ -106,7 +106,7 @@ glslang.parse_chunks=function(text,filename,headers)
 					for _,line in ipairs(headers[name]) do  -- include lines
 						chunk[#chunk+1]=line
 					end
-					chunk[#chunk+1]="#line "..i	-- reset the line number from this file
+					chunk[#chunk+1]="#line "..(i+1)	-- reset the line number from this file
 				else
 					chunk[#chunk+1]=l
 				end
