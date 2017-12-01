@@ -35,8 +35,6 @@ static int lua_glslang_lint_gles2(lua_State *l)
 	const char *vstr=lua_tostring(l,1);
 	const char *fstr=lua_tostring(l,2);
 
-	ShInitialize();
-
 	compilers[0]=ShConstructCompiler(EShLangVertex,0);
 	compilers[1]=ShConstructCompiler(EShLangFragment,0);
 
@@ -61,8 +59,6 @@ static int lua_glslang_lint_gles2(lua_State *l)
 	ShDestruct(compilers[0]);
 	ShDestruct(compilers[1]);
 	
-	ShFinalize();
-
 	return 2;
 }
 
@@ -80,6 +76,8 @@ extern "C" int luaopen_glslang_core (lua_State *l)
 
 		{0,0}
 	};
+
+	ShInitialize();
 
 	lua_newtable(l);
 	luaL_openlib(l, NULL, lib, 0);
