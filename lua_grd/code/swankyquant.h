@@ -1,11 +1,12 @@
 /***************************************************************************
 
-(C) Kriss@XIXs.com 2017 + http://opensource.org/licenses/MIT and 
-released into the public domain. If this is not good enough for you 
-then I suggest you do some random reformatting and tell your lawyers 
-that you rewrote it from base algorithms.
+(C) Kriss@XIXs.com 2017 and released under the MIT license 
+https://opensource.org/licenses/MIT and into the public domain. If this 
+is not good enough for you then I suggest you do some random 
+reformatting and tell your lawyers that you rewrote it from base 
+algorithms.
 
---[[#code.swanky_quant_algorithm
+--[[#code.swankyquant.algorithm
 
 SwankyQuant
 ===========
@@ -71,7 +72,7 @@ them all in the output palette.
 
 
 REFERENCE LINKS TO OTHER ALGORITHMS
-###################################
+===================================
 
 1.	http://www.imagemagick.org/script/quantize.php
 2.	https://www.researchgate.net/publication/232079905_Kohonen_neural_networks_for_optimal_colour_quantization
@@ -82,7 +83,7 @@ In comparison to the above I would list the following pros and cons.
 
 
 	SWANKYQUANT PROS
-	################
+	================
 	
 		. Is simple to understand and tweak.
 
@@ -94,7 +95,7 @@ In comparison to the above I would list the following pros and cons.
 	
 
 	SWANKYQUANT CONS
-	################
+	================
 	
 		. Uses output memory as a thinking buffer.
 
@@ -148,8 +149,8 @@ SWANKYQUANT_DEF void swanky_quant_remap(const unsigned char *input,
 /***************************************************************************
 
 This code will *only* be included if you #define SWANKYQUANT_C before 
-including this file. So do this in one .C file only unless you also define 
-SWANKYQUANT_STATIC which would keep all the functions static.
+including this file. So do this in one .C file only unless you also 
+define SWANKYQUANT_STATIC which would keep all the functions static.
 
 */
 #ifdef SWANKYQUANT_C
@@ -159,19 +160,23 @@ SWANKYQUANT_STATIC which would keep all the functions static.
 
 
 /***************************************************************************
+--[[#code.swankyquant.color_distance
 
-Compare two colors and return a distance value. This is non linear, as we do not 
-need to bother with the sqrt since the numbers are only used for comparison.
+Compare two colors and return a distance value. This is non linear, as 
+we do not need to bother with the sqrt since the numbers are only used 
+for comparison.
 
-*/
+]]*/
 static inline double color_distance(int ar,int ag,int ab,int aa,int br,int bg,int bb,int ba)
 {
 	return (double)( (ar-br)*(ar-br) + (ag-bg)*(ag-bg) + (ab-bb)*(ab-bb) + (aa-ba)*(aa-ba) );
 }
 
 /***************************************************************************
+--[[#code.swankyquant.color_distance_weight
 
-Compare how close a match it would be if we added our color(weighted) to a bucket.
+Compare how close a match it would be if we added our color(weighted) 
+to a bucket.
 
 Each bucket is 5 doubles and contains an rgba accumulator in 
 [0][1][2][3]  and a number of samples in [5] Doubles must be used 
@@ -188,7 +193,7 @@ reduce the number of passes over the data required to get good results.
 This function also accounts for most of the thinking time so 
 could/should be optimised more.
 
-*/
+]]*/
 static inline double color_distance_weight(const double *a,const unsigned char *b,double weight)
 {
 	double d=a[4]+weight; if(d<=0.0) { d=1.0; } d=1.0/d;
@@ -201,7 +206,7 @@ static inline double color_distance_weight(const double *a,const unsigned char *
 }
 
 /***************************************************************************
---[[#code.swanky_quant
+--[[#code.swankyquant.swanky_quant
 
 Reduce input rgba data to the requested number of index colors(2-256)
 
@@ -211,7 +216,8 @@ writes data to output[length] and palette[4*colors]
 
 Make sure this memory is available.
 
-Quality is the number of passes and 6 or more is recommended for good results.
+Quality is the number of passes and 6 or more is recommended for good 
+results.
 
 ]]*/
 SWANKYQUANT_DEF void swanky_quant(const unsigned char *input,
@@ -292,7 +298,7 @@ double distance,best_distance,weight;
 }
 
 /***************************************************************************
---[[#code.swanky_quant_remap
+--[[#code.swankyquant.swanky_quant_remap
 
 Perform a final remap on a swanky_quant output image with an optional 
 amount of ordered dithering.
@@ -305,9 +311,11 @@ amount of ordered dithering.
 	dither = 5  ==  33 bit patterns
 	dither = 6  ==  65 bit patterns ( maximum dithering )
 	
-width is the width of the image, we need to know this so we can dither nicely.
+width is the width of the image, we need to know this so we can dither 
+nicely.
 
-All other values are the same as used in the swanky_quant function call.
+All other values are the same as used in the swanky_quant function 
+call.
 
 ]]*/
 SWANKYQUANT_DEF void swanky_quant_remap(const unsigned char *input,

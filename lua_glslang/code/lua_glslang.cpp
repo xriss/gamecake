@@ -1,28 +1,32 @@
-/*
+/***************************************************************************
 
-(C) Kriss@XIXs.com 2017 and released under the https://opensource.org/licenses/MIT license.
+(C) Kriss@XIXs.com 2017 and released under the MIT license 
+https://opensource.org/licenses/MIT
 
 */
 #include "all.h"
 
 
-/*
+/***************************************************************************
+--[[#code.glslang.lua_glslang_lint_gles2
 
 	lua_glslang_lint_gles2(lua)
 
 	inputs
 		vertex code string
 		fragment code string
+		linker flag strinf
 
 	return
 		vertex error string
 		fragment error string
+		linker error string
 
-Compile a vertex shader and a fragment shader for GLES2, return nil,nil 
-for no errors or an error string for either phase if something went 
-wrong.
+Compile a vertex shader and a fragment shader for GLES2, return 
+nil,nil,nil for no errors or an error string for either phase if 
+something went wrong.
 
-*/
+]]*/
 static int lua_glslang_lint_gles2(lua_State *l)
 {
 	ShHandle compilers[2];
