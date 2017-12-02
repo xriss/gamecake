@@ -5,7 +5,69 @@ released into the public domain. If this is not good enough for you
 then I suggest you do some random reformatting and tell your lawyers 
 that you rewrote it from base algorithms.
 
+--[[#code.swanky_quant_algorithm
 
+SwankyQuant
+===========
+
+To use this code remember to include it only once with SWANKYQUANT_C 
+defined or no code will be generated. For example.
+
+
+	#define SWANKYQUANT_C
+	#include "swankyquant.h"
+	
+	...
+	
+	swanky_quant( input, length, 256, output, palette, 6 );
+	
+	swanky_quant_remap( input, length, 256, output, palette, width, 6 );
+	
+
+The remap step is unnecessary unless you want your output image 
+dithered.
+
+
+SwankyQuant is a palette selection algorithm made of a combination of 
+simple actions, it requires a weighted compare function between two 
+colours and everything else is brute force selection based on this 
+compare. Since this compare is only used for yes/no logic then a 4d 
+distance squared between two 32bit colours is the default. Unlike the 
+alternatives we fully support alpha in out palettes.
+
+The trick that makes this possible is using a byte per pixel thinking 
+buffer. Since you are presumably intending to remap the original image 
+into a buffer exactly like this I do not consider this an excessive 
+extra resource, especially since this buffer is *also* the output 
+indexed image when we are finished.
+
+This buffer allows us to keep track of which bucket we have assigned to 
+each pixel, this combined with multiple image passes allows pixels to 
+jump from bucket to bucket until the allocation of pixels to available 
+buckets is reasonably optimal. We don't actually pick a palette we just 
+sort pixels into buckets with other pixels of a similar colour. When 
+finished the average colour of each bucket is the resulting palette. 
+
+Essentially we skip the generate a palette step and instead remap the 
+image repeatedly with the output palette automatically effected by 
+every pixels decision. Giving nice simple feedback until we hit a 
+stable optimum solution.
+
+In order to reduce the number of image passes (each one is expensive) 
+we use an adjustable weight on the decision to jump so that early 
+passes have more of an effect and later passes cleanup any mistakes, 
+this combined with a reasonable starting state (map by luminescence) 
+helps to reduce the cost of multiple passes and brute force searches to 
+an acceptable level.
+
+Due to the brute force compares, generating a smaller palette is faster 
+than a larger palette. In Swanky Paint we are much more interested in 
+16/32 colour palettes than 256 colour palettes so this is an additional 
+advantage.
+
+If the input contains only a handful of unique colours then we are very 
+likely to pick these exact colours provided there is enough room for 
+them all in the output palette.
 
 
 REFERENCE LINKS TO OTHER ALGORITHMS
@@ -15,7 +77,37 @@ REFERENCE LINKS TO OTHER ALGORITHMS
 2.	https://www.researchgate.net/publication/232079905_Kohonen_neural_networks_for_optimal_colour_quantization
 3.	https://scientificgems.wordpress.com/stuff/neuquant-fast-high-quality-image-quantization/
 
-*/
+
+In comparison to the above I would list the following pros and cons.
+
+
+	SWANKYQUANT PROS
+	################
+	
+		. Is simple to understand and tweak.
+
+		. Works with 32bit alpha.
+
+		. Works well with a small output palette.
+
+		. Will pick every distinct input if palette size allows.
+	
+
+	SWANKYQUANT CONS
+	################
+	
+		. Uses output memory as a thinking buffer.
+
+		. Is slower for large images and 256 colour palettes.
+
+
+For large images I would recommend scaling the image down in size then 
+using the smaller image to generate the palette. Less precise but a 
+huge performance gain. This is the logic I use in Swanky Paint and the 
+grd library when loading larger images.
+
+
+]]*/
 
 
 
@@ -109,6 +201,7 @@ static inline double color_distance_weight(const double *a,const unsigned char *
 }
 
 /***************************************************************************
+--[[#code.swanky_quant
 
 Reduce input rgba data to the requested number of index colors(2-256)
 
@@ -118,7 +211,9 @@ writes data to output[length] and palette[4*colors]
 
 Make sure this memory is available.
 
-*/
+Quality is the number of passes and 6 or more is recommended for good results.
+
+]]*/
 SWANKYQUANT_DEF void swanky_quant(const unsigned char *input,
 	unsigned int length, unsigned int colors, 
 	unsigned char *output , unsigned char *palette ,
@@ -197,8 +292,9 @@ double distance,best_distance,weight;
 }
 
 /***************************************************************************
+--[[#code.swanky_quant_remap
 
-Perform an final remap on a swanky_quant output image with an optional 
+Perform a final remap on a swanky_quant output image with an optional 
 amount of ordered dithering.
 
 	dither = 0  ==   1 bit pattern  ( no dithering )
@@ -208,8 +304,12 @@ amount of ordered dithering.
 	dither = 4  ==  17 bit patterns ( recommended dithering )
 	dither = 5  ==  33 bit patterns
 	dither = 6  ==  65 bit patterns ( maximum dithering )
+	
+width is the width of the image, we need to know this so we can dither nicely.
 
-*/
+All other values are the same as used in the swanky_quant function call.
+
+]]*/
 SWANKYQUANT_DEF void swanky_quant_remap(const unsigned char *input,
 	unsigned int length, unsigned int colors, 
 	unsigned char *output , const unsigned char *palette ,
