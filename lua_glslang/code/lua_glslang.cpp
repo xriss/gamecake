@@ -35,7 +35,7 @@ static int lua_glslang_lint_gles2(lua_State *l)
 
 	const char *vstr=lua_tostring(l,1);
 	const char *fstr=lua_tostring(l,2);
-	const char *cstr=lua_tostring(l,2);
+	const char *cstr=lua_tostring(l,3);
 
 	compilers[0]=ShConstructCompiler(EShLangVertex,0);
 	compilers[1]=ShConstructCompiler(EShLangFragment,0);
