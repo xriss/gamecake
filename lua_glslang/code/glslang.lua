@@ -80,7 +80,7 @@ end
 
 ]]
 glslang.parse_chunks=function(text,filename,headers)
-
+	headers=headers or {}
 	local ss=wstr.split(text,"\n")
 	local shaders={}
 	local chunk
