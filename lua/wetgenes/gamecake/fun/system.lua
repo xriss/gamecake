@@ -492,8 +492,36 @@ system.configurator=function(opts)
 				tilemap_size={math.ceil(screen.hx/4),math.ceil(screen.hy/8)},
 				layer=3,
 			},
+			graphics={
+				{0x0000,"_font",0x0340}, -- pre-allocate the 4x8 and 8x8 font area
+			}
 		}
 		for i,v in ipairs(hardware) do hardware[v.name]=v end -- for easy tweaking of options
+		
+		-- load a single sprite
+		hardware.graphics.load=function(idx,name,data)
+			local found
+			for i,v in ipairs(hardware.graphics) do
+				if v[2]==name then
+					found=v
+					break
+				end
+			end
+			if not found then -- add new graphics
+				hardware.graphics[#hardware.graphics+1]={idx,name,data}
+			else
+				found[1]=idx
+				found[2]=name
+				found[3]=data
+			end
+		end	
+
+		-- load a list of sprites
+		hardware.graphics.loads=function(tab)
+			for i,v in ipairs(tab) do
+				hardware.graphics.load(v[1],v[2],v[3])
+			end
+		end
 		
 		main=function(need)
 
@@ -510,8 +538,8 @@ system.configurator=function(opts)
 --			system.components.tiles.bitmap_grd:pixels(0,48,64*8,16, bitdown_font.build_grd(8,16):pixels(64*8,0,64*8,16,"") )
 
 			-- upload graphics
-			if opts.graphics then
-				local graphics=opts.graphics
+			local graphics=opts.graphics or hardware.graphics
+			if graphics then
 				if type(graphics)=="function" then graphics=graphics() end -- allow callback to grab value from other environment
 				system.components.tiles.upload_tiles( graphics )
 			end
