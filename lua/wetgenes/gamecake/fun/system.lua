@@ -498,6 +498,29 @@ system.configurator=function(opts)
 		}
 		for i,v in ipairs(hardware) do hardware[v.name]=v end -- for easy tweaking of options
 		
+		hardware.remove=function(name)
+			hardware[name]=nil
+			for i,v in ipairs(hardware) do
+				if v.name==name then
+					return table.remove(hardware,i)
+				end
+			end
+		end
+		
+		hardware.insert=function(it)
+			if it.name then
+				for i,v in ipairs(hardware) do
+					if v.name==it.name then -- replace
+						hardware[i]=it
+						hardware[it.name]=it
+						return
+					end
+				end
+				hardware[it.name]=it
+			end
+			hardware[#hardware+1]=it
+		end
+		
 		-- load a single sprite
 		hardware.graphics.load=function(idx,name,data)
 			local found
