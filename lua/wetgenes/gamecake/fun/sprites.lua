@@ -129,13 +129,10 @@ sprites.create=function(it,opts)
 				py=math.floor(py+0.5)
 			end
 			
-			local ax=it.ax+(it.az+v.pz)*it.screen.zx
-			local ay=it.ay+(it.az+v.pz)*it.screen.zy
-			local az=it.az
-			local v1=gl.apply_modelview( {ax+px-c*(ox)-s*(oy),			ay+py+s*(ox)-c*(oy),		(az+v.pz)/65536,1} )
-			local v2=gl.apply_modelview( {ax+px+c*(hx-ox)-s*(oy),		ay+py-s*(hx-ox)-c*(oy),		(az+v.pz)/65536,1} )
-			local v3=gl.apply_modelview( {ax+px-c*(ox)+s*(hy-oy),		ay+py+s*(ox)+c*(hy-oy),		(az+v.pz)/65536,1} )
-			local v4=gl.apply_modelview( {ax+px+c*(hx-ox)+s*(hy-oy),	ay+py-s*(hx-ox)+c*(hy-oy),	(az+v.pz)/65536,1} )
+			local v1={ px-c*(ox)-s*(oy),		py+s*(ox)-c*(oy),		v.pz , 1 }
+			local v2={ px+c*(hx-ox)-s*(oy),		py-s*(hx-ox)-c*(oy),	v.pz , 1 }
+			local v3={ px-c*(ox)+s*(hy-oy),		py+s*(ox)+c*(hy-oy),	v.pz , 1 }
+			local v4={ px+c*(hx-ox)+s*(hy-oy),	py-s*(hx-ox)+c*(hy-oy),	v.pz , 1 }
 
 			local t=
 			{
@@ -153,6 +150,8 @@ sprites.create=function(it,opts)
 
 
 		flat.tristrip("rawuvrgba",batch,"fun_draw_sprites",function(p)
+			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
+			gl.Uniform3f( p:uniform("modelview_add"), it.ax,it.ay,it.az)
 			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex"), 0 )
 			gl.BindTexture( gl.TEXTURE_2D , it.tiles.bitmap_tex )
 		end)
