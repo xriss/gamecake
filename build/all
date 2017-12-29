@@ -22,11 +22,11 @@ sudo echo
 
 # build 64bit ubuntu 12.04 version
 
-../vbox_1204_64/make full
+../vbox_1604_64/make full
 
 #build 32bit ubuntu 12.04 version 
 
-../vbox_1204_32/make full
+../vbox_1604_32/make full
 
 #build raspi
 

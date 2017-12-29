@@ -42,8 +42,8 @@ cp raspbian.img raspi.img
 
 
 
-echo " resizing to 4gig "
-qemu-img resize -f raw raspi.img 4G
+echo " resizing to 6gig "
+qemu-img resize -f raw raspi.img 6G
 
 echo " checking partition information "
 
