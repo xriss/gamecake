@@ -7,6 +7,8 @@ git submodule update --init --reference .
 
 git pull --recurse-submodules && git submodule update --recursive --remote
 
+plated/upgrade
+
 echo " fixing local exe branch to track origin "
 cd exe
 git stash -u
