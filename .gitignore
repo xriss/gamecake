@@ -56,3 +56,4 @@ prime/
 snap/.snapcraft/
 stage/
 
+plated/node_modules
