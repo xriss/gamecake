@@ -8,7 +8,30 @@ echo
 
 ./build
 
-git add ..
-git commit -m"publish bump"
+cd ../docs
+
+echo "creating new orphan branch"
+
+git checkout --orphan gh-pages-tmp
+
+echo "adding files to new branch"
+
+git add . && git commit -m"docs bump"
+
+echo "renaming/replacing branch"
+
+git branch -D gh-pages
+git branch -m gh-pages
+
+echo "force pushing"
+
+git push --set-upstream origin -f gh-pages
+
+echo "updating reference to new docs"
+
+cd ..
+git commit -a -m"docs bump"
 git pull
 git push
+
+

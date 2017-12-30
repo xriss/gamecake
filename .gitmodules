@@ -2,3 +2,7 @@
 	path = exe
 	url = https://github.com/xriss/gamecake.git
 	branch = exe
+[submodule "docs"]
+	path = docs
+	url = https://github.com/xriss/gamecake.git
+	branch = gh-pages
