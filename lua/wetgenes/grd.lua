@@ -3,7 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---[[#wetgenes.grd
+--[[#lua.wetgenes.grd
 
 	local wgrd=require("wetgenes.grd")
 
@@ -274,7 +274,7 @@ function grd.stringtonum(str)
 	return grd.defs[str] 
 end
 
---[[#wetgenes.grd.create
+--[[#lua.wetgenes.grd.create
 
 	ga=wgrd.create(gb)
 
@@ -352,7 +352,7 @@ grd.create=function(...)
 end
 base.create=grd.create
 
---[[#wetgenes.grd.destroy
+--[[#lua.wetgenes.grd.destroy
 
 	g:destroy()
 
@@ -366,7 +366,7 @@ base.destroy=function(g)
 end
 
 
---[[#wetgenes.grd.reset
+--[[#lua.wetgenes.grd.reset
 
 	g:reset()
 
@@ -382,7 +382,7 @@ base.reset=function(g)
 	return (r and g),g.err
 end
 
---[[#wetgenes.grd.load_file
+--[[#lua.wetgenes.grd.load_file
 
 	g:load_file(filename,format)
 
@@ -396,7 +396,7 @@ base.load_file=function(g,filename,fmt)
 	return base.load(g,{filename=filename,fmt=fmt})
 end
 
---[[#wetgenes.grd.load_data
+--[[#lua.wetgenes.grd.load_data
 
 	g:load_data(datastring,format)
 
@@ -410,7 +410,7 @@ base.load_data=function(g,data,fmt)
 	return base.load(g,{data=data,fmt=fmt})
 end
 
---[[#wetgenes.grd.load
+--[[#lua.wetgenes.grd.load
 
 	g:load(opts)
 
@@ -453,7 +453,7 @@ base.load=function(g,opts)
 	return (r and g),g.err
 end
 
---[[#wetgenes.grd.save
+--[[#lua.wetgenes.grd.save
 
 	g:save(opts)
 
@@ -518,7 +518,7 @@ base.save=function(g,opts)
 	return r,m -- first value may be a datastring if no filename was given or g[0] if it was,
 end
 
---[[#wetgenes.grd.duplicate
+--[[#lua.wetgenes.grd.duplicate
 
 	ga = g:duplicate()
 
@@ -532,7 +532,7 @@ base.duplicate=function(g)
 	return grd.create(g)
 end
 
---[[#wetgenes.grd.convert
+--[[#lua.wetgenes.grd.convert
 
 	g:convert(fmt)
 
@@ -552,7 +552,7 @@ base.convert=function(g,fmt)
 	return (r and g),e
 end
 
---[[#wetgenes.grd.create_convert
+--[[#lua.wetgenes.grd.create_convert
 
 	g:create_convert(fmt)
 
@@ -567,7 +567,7 @@ base.create_convert=function(g,fmt)
 	return (r and grd.create(r)),e
 end
 
---[[#wetgenes.grd.clear
+--[[#lua.wetgenes.grd.clear
 
 	g:clear(color)
 
@@ -585,7 +585,7 @@ base.clear=function(g,color)
 	return r and g
 end
 
---[[#wetgenes.grd.quant
+--[[#lua.wetgenes.grd.quant
 
 	g:quant(num)
 
@@ -601,7 +601,7 @@ base.quant=function(g,num,dither)
 	return r and g
 end
 
---[[#wetgenes.grd.attr_redux
+--[[#lua.wetgenes.grd.attr_redux
 
 	g:attr_redux(cw,ch,num,sub,bak)
 
@@ -632,7 +632,7 @@ base.attr_redux=function(g,cw,ch,num,sub,bak)
 	return r and g
 end
 
---[[#wetgenes.grd.pixels
+--[[#lua.wetgenes.grd.pixels
 
 	g:pixels(x,y,w,h)
 	g:pixels(x,y,z,w,h,d)
@@ -686,7 +686,7 @@ base.pixels=function(g,...)
 	return r
 end
 
---[[#wetgenes.grd.palette
+--[[#lua.wetgenes.grd.palette
 
 	g:palette(x,w)
 	g:palette(x,w,"")
@@ -711,7 +711,7 @@ base.palette=function(g,...)
 	return r
 end
 
---[[#wetgenes.grd.resize
+--[[#lua.wetgenes.grd.resize
 
 	g:resize(w,h,d)
 	
@@ -729,7 +729,7 @@ base.resize=function(g,...)
 	return r and g
 end
 
---[[#wetgenes.grd.scale
+--[[#lua.wetgenes.grd.scale
 
 	g:scale(w,h,d)
 	
@@ -747,7 +747,7 @@ base.scale=function(g,...)
 	return r and g
 end
 
---[[#wetgenes.grd.flipy
+--[[#lua.wetgenes.grd.flipy
 
 	g:flipy()
 	
@@ -763,7 +763,7 @@ base.flipy=function(g,...)
 	return r and g
 end
 
---[[#wetgenes.grd.flipy
+--[[#lua.wetgenes.grd.flipy
 
 	g:flipx()
 	
@@ -776,7 +776,7 @@ base.flipx=function(g,...)
 	return r and g
 end
 
---[[#wetgenes.grd.shrink
+--[[#lua.wetgenes.grd.shrink
 
 	g:shrink(area)
 
@@ -799,7 +799,7 @@ base.shrink=function(g,...)
 	return r and g
 end
 
---[[#wetgenes.grd.info
+--[[#lua.wetgenes.grd.info
 
 	g:info()
 
@@ -814,7 +814,7 @@ base.info=function(g,...)
 	return g
 end
 
---[[#wetgenes.grd.blit
+--[[#lua.wetgenes.grd.blit
 
 	g:blit(gb,x,y,cx,cy,cw,ch)
 
@@ -859,7 +859,7 @@ base.blit=function(ga,gb,x,y,cx,cy,cw,ch)
 	return core.blit(ga[0],gb[0],x,y,cx,cy,cw,ch)
 end
 
---[[#wetgenes.grd.paint
+--[[#lua.wetgenes.grd.paint
 
 	g:paint(gb,x,y,cx,cy,cw,ch,mode,trans,color)
 
@@ -932,7 +932,7 @@ base.paint=function(ga,gb,x,y,cx,cy,cw,ch,mode,trans,color)
 	return core.paint(ga[0],gb[0],x,y,cx,cy,cw,ch,mode,trans,color)
 end
 
---[[#wetgenes.grd.copy_data
+--[[#lua.wetgenes.grd.copy_data
 
 	g:copy_data(gb)
 
@@ -942,7 +942,7 @@ Copy all of the bitmap data from gb into g.
 base.copy_data=function(ga,gb)
 	return core.copy_data(ga[0],gb[0])
 end
---[[#wetgenes.grd.copy_data_layer
+--[[#lua.wetgenes.grd.copy_data_layer
 
 	g:copy_data_layer(gb,z,zb)
 
@@ -955,7 +955,7 @@ base.copy_data_layer=function(ga,gb,za,zb)
 	return core.copy_data_layer(ga[0],gb[0],za,zb)
 end
 
---[[#wetgenes.grd.clip
+--[[#lua.wetgenes.grd.clip
 
 	gr=g:clip(x,y,z,w,h,d)
 
@@ -982,7 +982,7 @@ base.clip=function(ga,x,y,z,w,h,d)
 end
 
 
---[[#wetgenes.grd.create_normal
+--[[#lua.wetgenes.grd.create_normal
 
 	gr=g:create_normal()
 
@@ -995,7 +995,7 @@ base.create_normal=function(ga)
 end
 
 	
---[[#wetgenes.grd.stream
+--[[#lua.wetgenes.grd.stream
 
 	stream=g:stream(filename)
 	stream=g:stream({filename=filename,...})
@@ -1037,7 +1037,7 @@ base.stream=function(ga,opts)
 
 end
 
---[[#wetgenes.grd.remap
+--[[#lua.wetgenes.grd.remap
 
 	ga:remap(gb)
 
@@ -1051,7 +1051,7 @@ base.remap=function(ga,gb,colors,dither)
 end
 
 
---[[#wetgenes.grd.adjust_rgb
+--[[#lua.wetgenes.grd.adjust_rgb
 
 	ga:adjust_rgb(red,green,blue)
 
@@ -1064,7 +1064,7 @@ base.adjust_rgb=function(g,ar,ag,ab)
 	return g
 end
 
---[[#wetgenes.grd.adjust_hsv
+--[[#lua.wetgenes.grd.adjust_hsv
 
 	ga:adjust_hsv(hue,saturation,value)
 
@@ -1077,7 +1077,7 @@ base.adjust_hsv=function(g,ah,as,av)
 	return g
 end
 
---[[#wetgenes.grd.adjust_contrast
+--[[#lua.wetgenes.grd.adjust_contrast
 
 	ga:adjust_contrast(sub,con)
 
@@ -1093,7 +1093,7 @@ base.adjust_contrast=function(g,sub,con)
 	core.info(g[0],g)
 	return g
 end
---[[#wetgenes.grd.sort_cmap
+--[[#lua.wetgenes.grd.sort_cmap
 
 	ga:sort_cmap()
 

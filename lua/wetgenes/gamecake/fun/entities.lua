@@ -4,7 +4,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities
+--[[#lua.wetgenes.gamecake.fun.entities
 
 	fun_entities = require("wetgenes.gamecake.fun.entities")
 
@@ -34,7 +34,7 @@ M.create=function(entities)
 	entities=entities or {} -- a place to store everything that needs to be updated
 	
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.systems
+--[[#lua.wetgenes.gamecake.fun.entities.systems
 
 	entities.systems={name=system,[1]=sytem1}
 
@@ -47,7 +47,7 @@ current item to delete itself.
 	entities.systems=entities.systems or {} -- global objects for each caste
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.systems.remove
+--[[#lua.wetgenes.gamecake.fun.entities.systems.remove
 
 	system = entities.systems.remove(caste)
 
@@ -65,7 +65,7 @@ Remove and return the system of the given caste.
 	end
 	
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.systems.insert
+--[[#lua.wetgenes.gamecake.fun.entities.systems.insert
 
 	entities.systems.insert(system)
 
@@ -96,7 +96,7 @@ As we also keep some functions in this table, the names "insert",
 	end
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.systems.call
+--[[#lua.wetgenes.gamecake.fun.entities.systems.call
 
 	entities.systems.call(fname,...)
 
@@ -125,7 +125,7 @@ that had an fname function to call.
 	entities.sortby=entities.sortby or {} -- custom sort weights for update/draw order of each caste
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.sortby_update
+--[[#lua.wetgenes.gamecake.fun.entities.sortby_update
 
 	entities.sortby_update()
 
@@ -142,7 +142,7 @@ second 2 and so on.
 	entities.sortby_update()
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.reset
+--[[#lua.wetgenes.gamecake.fun.entities.reset
 
 	entities.reset()
 	
@@ -159,7 +159,7 @@ functions.
 	end
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.caste
+--[[#lua.wetgenes.gamecake.fun.entities.caste
 
 	entities.caste(caste)
 
@@ -183,7 +183,7 @@ Get the list of entities of a given caste, eg "bullets" or "enemies"
 	end
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.add
+--[[#lua.wetgenes.gamecake.fun.entities.add
 
 	entities.add(it,caste)
 	entities.add(it)
@@ -202,7 +202,7 @@ Add a new entity of caste or it.caste to the list of things to update.
 	end
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.call
+--[[#lua.wetgenes.gamecake.fun.entities.call
 
 	entities.call(fname,...)
 
@@ -228,7 +228,7 @@ for every entity call the function named fname like so
 	end
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.get
+--[[#lua.wetgenes.gamecake.fun.entities.get
 
 	entities.get(name)
 
@@ -243,7 +243,7 @@ wish not just to bookmark unique entities.
 	end
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.set
+--[[#lua.wetgenes.gamecake.fun.entities.set
 
 	entities.set(name,value)
 
@@ -257,7 +257,7 @@ save a value by a unique name
 	end
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.entities.manifest
+--[[#lua.wetgenes.gamecake.fun.entities.manifest
 
 	entities.manifest(name,value)
 

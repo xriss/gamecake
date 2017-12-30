@@ -12,7 +12,7 @@ local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_en
 -- single line replacement for the module creation function
 local M={} ; package.loaded[(...)]=M ; local wplate=M
 
---[[#wetgenes.plate.table_lookup flag=1
+--[[#lua.wetgenes.plate.table_lookup flag=1
 
 	value=wetgenes.plate.table_lookup(name,data)
 
@@ -72,7 +72,7 @@ wplate.table_lookup=function(a,d) -- look up a in table d
 	
 end
 
---[[#wetgenes.plate.replace_lookup_istable
+--[[#lua.wetgenes.plate.replace_lookup_istable
 
 	bool=wetgenes.plate.replace_lookup_istable(name,data)
 
@@ -88,7 +88,7 @@ wplate.replace_lookup_istable=function(a,d) -- check if this is a special table 
 	return false
 end
 
---[[#wetgenes.plate.replace_lookup
+--[[#lua.wetgenes.plate.replace_lookup
 
 	value=wetgenes.plate.replace_lookup(name,data)
 

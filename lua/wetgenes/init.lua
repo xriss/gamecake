@@ -1,7 +1,7 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---[[#wetgenes
+--[[#lua.wetgenes
 
 	local wetgenes=require("wetgenes")
 
@@ -14,7 +14,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
 -----------------------------------------------------------------------------
---[[#wetgenes.safecall
+--[[#lua.wetgenes.safecall
 
 	... = wetgenes.safecall(func,...)
 
@@ -36,7 +36,7 @@ M.safecall=function(f,...)
 end	
 
 -----------------------------------------------------------------------------
---[[#wetgenes.safewrap
+--[[#lua.wetgenes.safewrap
 
 	savefunc = wetgenes.safecall(func)
 
@@ -52,7 +52,7 @@ M.safewrap=function(f)
 end	
 
 -----------------------------------------------------------------------------
---[[#wetgenes.export
+--[[#lua.wetgenes.export
 
 	... = wetgenes.export(table,...)
 
@@ -77,7 +77,7 @@ M.export=function(env,...)
 end
 
 -----------------------------------------------------------------------------
---[[#wetgenes.lookup
+--[[#lua.wetgenes.lookup
 
 	value = wetgenes.lookup(table,...)
 
@@ -104,7 +104,7 @@ end
 
 
 -----------------------------------------------------------------------------
---[[#wetgenes.set_env
+--[[#lua.wetgenes.set_env
 
 	local _ENV=set_env(new_environment)
 
@@ -131,7 +131,7 @@ end
 
 
 -----------------------------------------------------------------------------
---[[#wetgenes.set_env
+--[[#lua.wetgenes.set_env
 
 	gamecake -e" require('wetgenes').savescripts('./') "
 

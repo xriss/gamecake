@@ -10,7 +10,7 @@ local dprint=function(a) print(wstr.dump(a)) end
 -- handle widgets
 --
 
---[[#wetgenes.gamecake.widgets
+--[[#lua.wetgenes.gamecake.widgets
 
 	local widgets=oven.rebake("wetgenes.gamecake.widgets")
 
@@ -60,7 +60,7 @@ widgets=widgets or {}
 local wmeta=oven.rebake("wetgenes.gamecake.widgets.meta")
 local wskin=oven.rebake("wetgenes.gamecake.widgets.skin")
 
---[[#wetgenes.gamecake.widgets.setup
+--[[#lua.wetgenes.gamecake.widgets.setup
 
 	master=oven.rebake("wetgenes.gamecake.widgets").setup()
 

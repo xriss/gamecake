@@ -5,7 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local wstr=require("wetgenes.string")
 
---[[#wetgenes.grdsvg
+--[[#lua.wetgenes.grdsvg
 
 	wgrdsvg=require("wetgenes.grdsvg")
 
@@ -18,7 +18,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 -- short name
 local wgrdsvg=M
 
---[[#wetgenes.grdsvg.string
+--[[#lua.wetgenes.grdsvg.string
 
 	local svgstring=wgrdsvg.string(grd,opts)
 

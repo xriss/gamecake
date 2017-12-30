@@ -39,7 +39,7 @@ local M={} ; package.loaded[(...)]=M ; M.module_name=(...) ; M.export=export
 
 local wjson=M
 
---[[#wetgenes.json
+--[[#lua.wetgenes.json
 
 	local wjson=require("wetgenes.json")
 
@@ -163,7 +163,7 @@ local function is_array(t)
 end
 
 -----------------------------------------------------------------------------
---[[#wetgenes.json.decode
+--[[#lua.wetgenes.json.decode
 
 	json_table = wjson.decode(json_string,opts)
 
@@ -301,7 +301,7 @@ end
 
 
 -----------------------------------------------------------------------------
---[[#wetgenes.json.encode
+--[[#lua.wetgenes.json.encode
 
 	json_string = wjson.encode(json_table)
 

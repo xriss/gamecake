@@ -9,7 +9,7 @@ local chatdown=M
 
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.chatdown.parse
+--[[#lua.wetgenes.gamecake.fun.chatdown.parse
 
 	chats = chatdown.parse(text)
 
@@ -229,7 +229,7 @@ end
 
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.chatdown.setup_chat
+--[[#lua.wetgenes.gamecake.fun.chatdown.setup_chat
 
 	chat = chatdown.setup_chat(chat,chats,chat_name,response_name)
 
@@ -415,7 +415,7 @@ end
 
 
 -----------------------------------------------------------------------------
---[[#wetgenes.gamecake.fun.chatdown.setup
+--[[#lua.wetgenes.gamecake.fun.chatdown.setup
 
 	chats = chatdown.setup(chat_text)
 
