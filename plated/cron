@@ -1,0 +1,21 @@
+#
+# this script checks for changes on the remote git and then performs a git pull and build
+# the output from the build should be git ignored and this script called via
+# ./cron.lock
+# which simply wraps this script in a flock
+#
+
+cd `dirname $0`
+
+source settings
+
+git fetch --quiet
+
+if [ $(git rev-parse HEAD) != $(git rev-parse @{u}) ] ; then
+
+  echo "CRON PULL AND BUILD"
+  git pull
+  ./upgrade
+  ./build
+
+fi

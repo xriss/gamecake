@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "plated-example",
+  "description": "An example static website generated using plated.",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xriss/plated-example.git"
+  },
+  "dependencies": {
+    "plated": "*",
+    "ecstatic": "*"
+  }
+}

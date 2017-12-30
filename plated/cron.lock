@@ -1,0 +1,3 @@
+# run a flocked version of cron
+cd `dirname $0`
+flock -w0 ./cron.lock bash ./cron $*

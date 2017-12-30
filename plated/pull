@@ -1,0 +1,18 @@
+cd `dirname $0`
+
+source settings
+
+echo
+echo " Pulling latest changes from plated-example and attempting to ignore conflicts"
+echo
+
+
+cd ..
+
+git pull https://github.com/xriss/plated-example.git
+
+git checkout --ours README.md
+git checkout --ours .gitignore
+
+git status
+
