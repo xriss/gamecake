@@ -1,0 +1,76 @@
+
+#^title trim=ends
+
+Plated docs!
+
+#^html
+<html>
+	<head>
+		<title>{title}</title>
+		<link rel='stylesheet' href='{_docs_json.dirname}/docs.css' />
+	</head>
+	<body>{body}</body>
+</html>
+
+#^_docs_json
+
+{
+
+// ignore anything containing this text
+// so we can skip .git and node_modules etc
+
+	ignore:{
+		"node_modules":true,
+	},
+
+// search in these dirs (relative to the root of source)
+// to find files that end with the given value
+
+ 	dirs:{
+		"../lua":".lua",
+	},
+
+// create url links by replacing the beginning of filenames like so
+
+ 	urlprefix:{
+		"lua/":"https://github.com/xriss/gamecake/blob/master/lua/",
+	},
+
+}
+
+#^wrap
+
+<div class="wrap">
+<h1><a href="{_docs_json.dirname}/{_it.name}">{_it.name}</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div>{[[}{_it.body}{]]}</div>
+</div>
+
+#^menuwrap trim=ends
+
+{_it:menuwrap_link}
+
+#^menuwrap_link trim=ends
+
+{_it.count>1&&_it:menuwrap_link2}
+{_it.count==1&&_it:menuwrap_link1}
+
+#^menuwrap_link1 trim=ends
+<a class="sub" href="{_docs_json.dirname}/{_it.name}"><span>/{_it.name}</span></a>
+
+#^menuwrap_link2 trim=ends
+<a class="par" href="{_docs_json.dirname}/{_it.name}"><span>/{_it.name}</span></a>
+
+#^body
+<div class="default">
+	<div class="nav">
+		<div class="topics">
+			<a class="home" href="/">plated^</a>
+			<a class="par" href="{_docs_json.dirname}"><span>/</span></a>
+			{_docs:menuwrap}
+		</div>
+	</div>
+	<div class="main">
+		{_list:wrap}
+	</div>
+</div>

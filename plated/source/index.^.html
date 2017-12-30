@@ -1,16 +1,26 @@
-
-#^------------------------------
 #^title trim=ends
-#^------------------------------
 
-This is the title
+plated^
 
-#^------------------------------
-#^body trim=ends form=markdown
-#^------------------------------
+#^body
 
-Welcome
--------
+<h1>{title}</h1>
 
-Here is a web page rendered from markdown.
+<p>Generate a static website from hierarchical text and data files.</p>
 
+
+{blog_wrap}
+{git_wrap}
+
+
+
+#^blog_wrap
+<div class="line"></div>
+<a href="{_root}blog">Read blog post</a>
+
+<p><a href="{_root}docs">Documentation</a><p>
+
+
+#^git_wrap
+<div class="line"></div>
+<a class="bar" href="https://github.com/xriss/plated">Fork it on Github</a>

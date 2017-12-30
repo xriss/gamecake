@@ -1,8 +1,7 @@
 #^css same=append
 
-/*! minireset.css v0.0.3 | MIT License | github.com/jgthms/minireset.css */html,body,p,ol,ul,li,dl,dt,dd,blockquote,figure,fieldset,legend,textarea,pre,iframe,hr,h1,h2,h3,h4,h5,h6{margin:0;padding:0}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal}ul{list-style:none}button,input,select,textarea{margin:0}html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}img,embed,iframe,object,audio,video{height:auto;max-width:100%}iframe{border:0}table{border-collapse:collapse;border-spacing:0}td,th{padding:0;text-align:left}
-
-body	{background:#f7f4fd; font-family:monospace, sans-serif; font-size:16px; line-height:24px; color:#444; width:100%; padding:50px;}
+*		{box-sizing:border-box;}
+body	{background:#f7f4fd; font-family:mono, sans-serif; font-size:16px; line-height:24px; color:#3a3a3a; width:100%; padding:50px;}
 h1		{font-size:4em; font-weight:normal; color:#1400ff;}
 h2		{font-size:2em; font-weight:normal;}
 
@@ -14,6 +13,7 @@ a.bar:hover	{background-color:#1400ff; border-bottom:none;}
 
 .nav	{display:inline-block; vertical-align:top; width:50%;}
 .nav:nth-of-type(2)	{text-align:right;}
+.nav span	{font-weight:bold;}
 
-.line, .blog_wrap	{border-top:1px dashed #1400ff; margin-top:40px; margin-bottom:40px; position:relative;}
+.line, .blog_wrap, hr	{border-top:1px dashed #1400ff; margin-top:40px; margin-bottom:40px; position:relative;}
 .blog_info	{position:absolute; right:10px; top:10px;}
