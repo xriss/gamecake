@@ -17,3 +17,11 @@ git branch -f --track exe origin/exe
 git checkout exe
 cd ..
 
+echo " fixing local docs branch to track origin "
+cd docs
+git stash -u
+git reset --hard origin/gh-pages
+git branch -f --track gh-pages origin/gh-pages
+git checkout gh-pages
+cd ..
+
