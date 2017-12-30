@@ -1,3 +1,0 @@
-cd `dirname $0`
-rm -rf *.html
-gamecake ./generate.lua
