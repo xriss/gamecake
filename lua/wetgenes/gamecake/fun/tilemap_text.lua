@@ -63,7 +63,7 @@ tilemap_text.inject=function(it,opts)
 		it.tilemap_grd:pixels( x,y, 1,1, {it.text_tile(c,fg,bg)} )
 	end
 
-	it.text_print=function(s,x,y,fg,bg)
+	it.text_print1=function(s,x,y,fg,bg)
 		local ox=x
 		local bm={}
 		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
@@ -82,6 +82,32 @@ tilemap_text.inject=function(it,opts)
 		end
 		return x,y
 	end
+
+	it.text_print2=function(s,x,y,fg,bg)
+		local ox=x
+		local bm={}
+		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
+			if x>=it.text_px and y>=it.text_py and x<it.text_px+it.text_hx and y<it.text_py+it.text_hy then
+				local c1,c2,c3,c4=it.text_tile(c,fg,bg)
+				local bl=#bm
+				bm[bl+1]=c1*2
+				bm[bl+2]=c2
+				bm[bl+3]=c3
+				bm[bl+4]=c4
+				bm[bl+5]=c1*2+1
+				bm[bl+6]=c2
+				bm[bl+7]=c3
+				bm[bl+8]=c4
+				x=x+2
+			end
+		end
+		if x-ox>0 then
+			it.tilemap_grd:pixels( ox,y, x-ox,1, bm )
+		end
+		return x,y
+	end
+	
+	it.text_print=it.text_print1
 
 -- set the text window
 	it.text_window=function(px,py,hx,hy)

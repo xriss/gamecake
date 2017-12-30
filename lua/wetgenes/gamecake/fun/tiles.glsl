@@ -42,6 +42,7 @@ void main(void)
 {
 
 	gl_FragColor=texture2D(tex_tile, v_texcoord).rgba;
+	if((gl_FragColor.a)<0.0625) discard;
 
 }
 

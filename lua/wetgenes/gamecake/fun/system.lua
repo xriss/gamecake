@@ -236,7 +236,7 @@ system.draw_debug=function()
 
 		flat.tristrip("rawuv",t,"fun_draw_tiles_debug",function(p)
 
-			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
+			gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
 
 			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_tile"), 0 )
 			gl.BindTexture( gl.TEXTURE_2D , tiles.bitmap_tex )
@@ -569,7 +569,7 @@ system.configurator=function(opts)
 			
 			if opts.update then opts.update() end -- call update at least once
 
-			local reset_draw=function()
+			local reset_draw=opts.reset_draw or function()
 				system.components.text.dirty(true)
 				system.components.text.text_window()
 				system.components.text.text_clear(0x00000000)
