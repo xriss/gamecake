@@ -44,7 +44,7 @@
   }
  },
  "_output_filename": "blog/2017-12-30-beware-of-the-node/",
- "_root": "/",
+ "_root": "../../",
  "_site": "{_root}",
  "_sourcename": "blog/2017-12-30-beware-of-the-node/.",
  "blog_list": "{_it._body}\n\n",

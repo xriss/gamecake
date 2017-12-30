@@ -26,7 +26,7 @@
   }
  },
  "_output_filename": "blog/",
- "_root": "/",
+ "_root": "../",
  "_site": "{_root}",
  "_sourcename": "blog/.",
  "blog_list": "{_it._body}\n\n",

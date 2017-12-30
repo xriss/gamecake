@@ -72,7 +72,7 @@
      "trim": "ends"
     }
    },
-   "_root": "/",
+   "_root": "../../",
    "_site": "{_root}",
    "_sourcename": "blog/2017-12-30-beware-of-the-node/index.html",
    "blog_list": "{_it._body}\n\n",
@@ -89,7 +89,7 @@
  ],
  "_output_chunkname": "html",
  "_output_filename": "blog/index.html",
- "_root": "/",
+ "_root": "../",
  "_site": "{_root}",
  "_sourcename": "blog/index.html",
  "blog_list": "{_it._body}\n\n",

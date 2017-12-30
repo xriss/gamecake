@@ -4,7 +4,6 @@
 #PLATED_ROOT=/gamecake
 
 
-
 # The directory to write output files into
 
 PLATED_OUTPUT=../docs

@@ -20,7 +20,7 @@
  },
  "_output_chunkname": "html",
  "_output_filename": "index.html",
- "_root": "/",
+ "_root": "./",
  "_site": "{_root}",
  "_sourcename": "index.^.html",
  "blog_wrap": "<div class=\"line\"></div>\n<a href=\"{_root}blog\">Read blog post</a>\n\n<p><a href=\"{_root}docs\">Documentation</a><p>\n\n",
