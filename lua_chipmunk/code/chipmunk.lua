@@ -3,7 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---[[#wetgenes.chipmunk
+--[[#lua.wetgenes.chipmunk
 
 	local chipmunk=require("wetgenes.chipmunk")
 
@@ -41,7 +41,7 @@ local group_categories_mask=function(group,categories,mask)
 end
 
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space
+--[[#lua.wetgenes.chipmunk.space
 
 	space=chipmunk.space()
 
@@ -67,7 +67,7 @@ chipmunk.space=function(...)
 end
 
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.type
+--[[#lua.wetgenes.chipmunk.space.type
 
 	number = space:type(name)
 	name = space:type(number)
@@ -89,7 +89,7 @@ chipmunk.space_functions.type=function(space,name)
 end
 
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body
+--[[#lua.wetgenes.chipmunk.body
 
 	body=chipmunk.body(mass,inertia)
 
@@ -125,7 +125,7 @@ chipmunk.body=function(a,...)
 	return body
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape
+--[[#lua.wetgenes.chipmunk.shape
 
 	shape=chipmunk.shape(body,form...)
 	
@@ -164,7 +164,7 @@ chipmunk.shape=function(body,form,...)
 	return shape
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.constraint
+--[[#lua.wetgenes.chipmunk.constraint
 
 	constraint=chipmunk.constraint(abody,bbody,form,...)
 
@@ -224,7 +224,7 @@ chipmunk.constraint=function(abody,bbody,form,...)
 	return constraint
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.iterations
+--[[#lua.wetgenes.chipmunk.space.iterations
 
 	v=space:iterations()
 	v=space:iterations(v)
@@ -236,7 +236,7 @@ chipmunk.space_functions.iterations=function(space,v)
 	return core.space_iterations(space[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.gravity
+--[[#lua.wetgenes.chipmunk.space.gravity
 
 	vx,vy=space:gravity()
 	vx,vy=space:gravity(vx,vy)
@@ -248,7 +248,7 @@ chipmunk.space_functions.gravity=function(space,vx,vy)
 	return core.space_gravity(space[0],vx,vy)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.damping
+--[[#lua.wetgenes.chipmunk.space.damping
 
 	v=space:damping()
 	v=space:damping(v)
@@ -260,7 +260,7 @@ chipmunk.space_functions.damping=function(space,v)
 	return core.space_damping(space[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.idle_speed_threshold
+--[[#lua.wetgenes.chipmunk.space.idle_speed_threshold
 
 	v=space:idle_speed_threshold()
 	v=space:idle_speed_threshold(v)
@@ -272,7 +272,7 @@ chipmunk.space_functions.idle_speed_threshold=function(space,v)
 	return core.space_idle_speed_threshold(space[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.sleep_time_threshold
+--[[#lua.wetgenes.chipmunk.space.sleep_time_threshold
 
 	v=space:sleep_time_threshold()
 	v=space:sleep_time_threshold(v)
@@ -284,7 +284,7 @@ chipmunk.space_functions.sleep_time_threshold=function(space,v)
 	return core.space_sleep_time_threshold(space[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.collision_slop
+--[[#lua.wetgenes.chipmunk.space.collision_slop
 
 	v=space:collision_slop()
 	v=space:collision_slop(v)
@@ -296,7 +296,7 @@ chipmunk.space_functions.collision_slop=function(space,v)
 	return core.space_collision_slop(space[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.collision_bias
+--[[#lua.wetgenes.chipmunk.space.collision_bias
 
 	v=space:collision_bias()
 	v=space:collision_bias(v)
@@ -308,7 +308,7 @@ chipmunk.space_functions.collision_bias=function(space,v)
 	return core.space_collision_bias(space[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.collision_persistence
+--[[#lua.wetgenes.chipmunk.space.collision_persistence
 
 	v=space:collision_persistence()
 	v=space:collision_persistence(v)
@@ -320,7 +320,7 @@ chipmunk.space_functions.collision_persistence=function(space,v)
 	return core.space_collision_persistence(space[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.current_time_step
+--[[#lua.wetgenes.chipmunk.space.current_time_step
 
 	v=space:current_time_step()
 
@@ -331,7 +331,7 @@ chipmunk.space_functions.current_time_step=function(space)
 	return core.space_current_time_step(space[0])
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.locked
+--[[#lua.wetgenes.chipmunk.space.locked
 
 	v=space:locked()
 
@@ -342,7 +342,7 @@ chipmunk.space_functions.locked=function(space)
 	return core.space_locked(space[0])
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.add_handler
+--[[#lua.wetgenes.chipmunk.space.add_handler
 
 	space:add_handler(handler,id1,id2)
 	space:add_handler(handler,id1)
@@ -369,7 +369,7 @@ chipmunk.space_functions.add_handler=function(space,arbiter,id1,id2)
 
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.add
+--[[#lua.wetgenes.chipmunk.space.add
 
 	space:add(body)
 	space:add(shape)
@@ -402,7 +402,7 @@ chipmunk.space_functions.add=function(space,it)
 	end
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.remove
+--[[#lua.wetgenes.chipmunk.space.remove
 
 	space:remove(body)
 	space:remove(shape)
@@ -435,7 +435,7 @@ chipmunk.space_functions.remove=function(space,it)
 	end
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.contains
+--[[#lua.wetgenes.chipmunk.space.contains
 
 	space:contains(body)
 	space:contains(shape)
@@ -463,7 +463,7 @@ chipmunk.space_functions.contains=function(space,it)
 	end
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.reindex
+--[[#lua.wetgenes.chipmunk.space.reindex
 
 	space:reindex(shape)
 	space:reindex(body)
@@ -491,7 +491,7 @@ chipmunk.space_functions.reindex=function(space,it)
 	end
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.body
+--[[#lua.wetgenes.chipmunk.space.body
 
 	space:body(...)
 
@@ -504,7 +504,7 @@ chipmunk.space_functions.body=function(space,...)
 	return body
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.constraint
+--[[#lua.wetgenes.chipmunk.space.constraint
 
 	space:constraint(...)
 
@@ -517,7 +517,7 @@ chipmunk.space_functions.constraint=function(space,...)
 	return constraint
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.step
+--[[#lua.wetgenes.chipmunk.space.step
 
 	space:step(time)
 
@@ -528,7 +528,7 @@ chipmunk.space_functions.step=function(space,ts)
 	return core.space_step(space[0],ts)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.query_point
+--[[#lua.wetgenes.chipmunk.space.query_point
 
 	array = space:query_point(x,y,d,group,categories,mask)
 
@@ -562,7 +562,7 @@ chipmunk.space_functions.query_point=function(space,x,y,d,group,categories,mask)
 	return tab -- an empty table would be no hits
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.query_point_nearest
+--[[#lua.wetgenes.chipmunk.space.query_point_nearest
 
 	item = space:query_point_nearest(x,y,d,group,categories,mask)
 
@@ -593,7 +593,7 @@ chipmunk.space_functions.query_point_nearest=function(space,x,y,d,group,categori
 	return it
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.query_segment
+--[[#lua.wetgenes.chipmunk.space.query_segment
 
 	array = space:query_segment(sx,sy,ex,ey,r,group,categories,mask)
 
@@ -628,7 +628,7 @@ chipmunk.space_functions.query_segment=function(space,sx,sy,ex,ey,r,group,catego
 	return tab -- an empty table would be no hits
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.query_segment_first
+--[[#lua.wetgenes.chipmunk.space.query_segment_first
 
 	it = space:query_segment_first(sx,sy,ex,ey,r,group,categories,mask)
 
@@ -660,7 +660,7 @@ chipmunk.space_functions.query_segment=function(space,sx,sy,ex,ey,r,group,catego
 	return it
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.query_bounding_box
+--[[#lua.wetgenes.chipmunk.space.query_bounding_box
 
 	array = space:query_bounding_box(lx,ly,hx,hy,group,categories,mask)
 
@@ -679,7 +679,7 @@ chipmunk.space_functions.query_bounding_box=function(space,lx,ly,hx,hy,group,cat
 	return dat -- an empty table would be no hits
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.space.query_shape
+--[[#lua.wetgenes.chipmunk.space.query_shape
 
 	array = space:query_shape(shape)
 
@@ -707,7 +707,7 @@ chipmunk.space_functions.query_shape=function(space,shape)
 	return tab -- an empty table would be no hits
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.type
+--[[#lua.wetgenes.chipmunk.body.type
 
 	t=body:type()
 	t=body:type(t)
@@ -722,7 +722,7 @@ chipmunk.body_functions.type=function(body,t)
 	return rr[r]
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.mass
+--[[#lua.wetgenes.chipmunk.body.mass
 
 	m=body:mass()
 	m=body:mass(m)
@@ -734,7 +734,7 @@ chipmunk.body_functions.mass=function(body,m)
 	return core.body_mass(body[0],m)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.moment
+--[[#lua.wetgenes.chipmunk.body.moment
 
 	m=body:moment()
 	m=body:moment(m)
@@ -746,7 +746,7 @@ chipmunk.body_functions.moment=function(body,m)
 	return core.body_moment(body[0],m)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.position
+--[[#lua.wetgenes.chipmunk.body.position
 
 	vx,vy=body:position()
 	vx,vy=body:position(vx,vy)
@@ -758,7 +758,7 @@ chipmunk.body_functions.position=function(body,vx,vy)
 	return core.body_position(body[0],vx,vy)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.center_of_gravity
+--[[#lua.wetgenes.chipmunk.body.center_of_gravity
 
 	vx,vy=body:center_of_gravity()
 	vx,vy=body:center_of_gravity(vx,vy)
@@ -770,7 +770,7 @@ chipmunk.body_functions.center_of_gravity=function(body,vx,vy)
 	return core.body_center_of_gravity(body[0],vx,vy)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.velocity
+--[[#lua.wetgenes.chipmunk.body.velocity
 
 	vx,vy=body:velocity()
 	vx,vy=body:velocity(vx,vy)
@@ -782,7 +782,7 @@ chipmunk.body_functions.velocity=function(body,vx,vy)
 	return core.body_velocity(body[0],vx,vy)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.force
+--[[#lua.wetgenes.chipmunk.body.force
 
 	vx,vy=body:force()
 	vx,vy=body:force(vx,vy)
@@ -795,7 +795,7 @@ chipmunk.body_functions.force=function(body,vx,vy)
 	return core.body_force(body[0],vx,vy)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.angle
+--[[#lua.wetgenes.chipmunk.body.angle
 
 	a=body:angle()
 	a=body:angle(a)
@@ -807,7 +807,7 @@ chipmunk.body_functions.angle=function(body,a)
 	return core.body_angle(body[0],a)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.angular_velocity
+--[[#lua.wetgenes.chipmunk.body.angular_velocity
 
 	a=body:angular_velocity()
 	a=body:angular_velocity(a)
@@ -819,7 +819,7 @@ chipmunk.body_functions.angular_velocity=function(body,a)
 	return core.body_angular_velocity(body[0],a)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.torque
+--[[#lua.wetgenes.chipmunk.body.torque
 
 	a=body:torque()
 	a=body:torque(a)
@@ -831,7 +831,7 @@ chipmunk.body_functions.torque=function(body,a)
 	return core.body_torque(body[0],a)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.apply_force
+--[[#lua.wetgenes.chipmunk.body.apply_force
 
 	body:apply_force(fx,fy,px,py)
 	body:apply_force(fx,fy,px,py,"world")
@@ -849,7 +849,7 @@ chipmunk.body_functions.apply_force=function(body,fx,fy,px,py,world)
 	end
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.apply_impulse
+--[[#lua.wetgenes.chipmunk.body.apply_impulse
 
 	body:apply_impulse(ix,iy,px,py)
 	body:apply_impulse(ix,iy,px,py,"world")
@@ -867,7 +867,7 @@ chipmunk.body_functions.apply_impulse=function(body,ix,iy,px,py,world)
 	end
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.velocity_func
+--[[#lua.wetgenes.chipmunk.body.velocity_func
 
 	body:velocity_func(velocity_callback)
 	body:velocity_func()
@@ -896,7 +896,7 @@ chipmunk.body_functions.velocity_func=function(body,cb)
 	core.body_velocity_func(body,cb)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.position_func
+--[[#lua.wetgenes.chipmunk.body.position_func
 
 	body:position_func(position_callback)
 	body:position_func()
@@ -919,7 +919,7 @@ chipmunk.body_functions.velocity_func=function(body,cb)
 	core.body_velocity_func(body,cb)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.body.shape
+--[[#lua.wetgenes.chipmunk.body.shape
 
 	shape=body:shape(form,...)
 
@@ -935,7 +935,7 @@ chipmunk.body_functions.shape=function(body,...)
 	return shape
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape.bounding_box
+--[[#lua.wetgenes.chipmunk.shape.bounding_box
 
 	min_x,min_y,max_x,max_y=shape:bounding_box()
 
@@ -946,7 +946,7 @@ chipmunk.shape_functions.bounding_box=function(shape)
 	return core.shape_bounding_box(shape[0])
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape.sensor
+--[[#lua.wetgenes.chipmunk.shape.sensor
 
 	f=shape:sensor()
 	f=shape:sensor(f)
@@ -958,7 +958,7 @@ chipmunk.shape_functions.sensor=function(shape,f)
 	return core.shape_sensor(shape[0],f)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape.elasticity
+--[[#lua.wetgenes.chipmunk.shape.elasticity
 
 	f=shape:elasticity()
 	f=shape:elasticity(f)
@@ -970,7 +970,7 @@ chipmunk.shape_functions.elasticity=function(shape,f)
 	return core.shape_elasticity(shape[0],f)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape.friction
+--[[#lua.wetgenes.chipmunk.shape.friction
 
 	f=shape:friction()
 	f=shape:friction(f)
@@ -982,7 +982,7 @@ chipmunk.shape_functions.friction=function(shape,f)
 	return core.shape_friction(shape[0],f)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape.surface_velocity
+--[[#lua.wetgenes.chipmunk.shape.surface_velocity
 
 	vx,vy=shape:surface_velocity()
 	vx,vy=shape:surface_velocity(vx,vy)
@@ -994,7 +994,7 @@ chipmunk.shape_functions.surface_velocity=function(shape,vx,vy)
 	return core.shape_surface_velocity(shape[0],vx,vy)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape.collision_type
+--[[#lua.wetgenes.chipmunk.shape.collision_type
 
 	f=shape:collision_type()
 	f=shape:collision_type(f)
@@ -1010,7 +1010,7 @@ chipmunk.shape_functions.collision_type=function(shape,f)
 	return core.shape_collision_type(shape[0],f)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape.filter
+--[[#lua.wetgenes.chipmunk.shape.filter
 
 	f=shape:filter()
 	f=shape:filter(f)
@@ -1023,7 +1023,7 @@ chipmunk.shape_functions.filter=function(shape,group,categories,mask)
 	return core.shape_filter(shape[0],group,categories,mask)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape.radius
+--[[#lua.wetgenes.chipmunk.shape.radius
 
 	radius=shape:radius()
 	radius=shape:radius(radius)
@@ -1036,7 +1036,7 @@ chipmunk.shape_functions.radius=function(shape,radius)
 	return core.shape_radius(shape[0],radius)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape.query_point
+--[[#lua.wetgenes.chipmunk.shape.query_point
 
 	item = shape:query_point(x,y)
 
@@ -1065,7 +1065,7 @@ chipmunk.shape_functions.query_point=function(shape,x,y)
 	return it
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.shape.query_segment
+--[[#lua.wetgenes.chipmunk.shape.query_segment
 
 	it = shape:query_segment(sx,sy,ex,ey,r)
 
@@ -1095,7 +1095,7 @@ chipmunk.shape_functions.query_segment=function(shape,sx,sy,ex,ey,r)
 	return it
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.arbiter.points
+--[[#lua.wetgenes.chipmunk.arbiter.points
 
 	points=arbiter:points()
 	points=arbiter:points(points)
@@ -1107,7 +1107,7 @@ chipmunk.arbiter_functions.points=function(arbiter,points)
 	return core.arbiter_points(arbiter[0],points)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.arbiter.surface_velocity
+--[[#lua.wetgenes.chipmunk.arbiter.surface_velocity
 
 	vx,vy=arbiter:surface_velocity()
 	vx,vy=arbiter:surface_velocity(vx,vy)
@@ -1119,7 +1119,7 @@ chipmunk.arbiter_functions.surface_velocity=function(arbiter,vx,vy)
 	return core.arbiter_surface_velocity(arbiter[0],vx,vy)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.arbiter.ignore
+--[[#lua.wetgenes.chipmunk.arbiter.ignore
 
 	return arbiter:ignore()
 
@@ -1131,7 +1131,7 @@ chipmunk.arbiter_functions.ignore=function(arbiter)
 	return false
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.constraint.max_force
+--[[#lua.wetgenes.chipmunk.constraint.max_force
 
 	v=constraint:max_force()
 	v=constraint:max_force(v)
@@ -1143,7 +1143,7 @@ chipmunk.constraint_functions.max_force=function(constraint,v)
 	return core.constraint_max_force(constraint[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.constraint.error_bias
+--[[#lua.wetgenes.chipmunk.constraint.error_bias
 
 	v=constraint:error_bias()
 	v=constraint:error_bias(v)
@@ -1155,7 +1155,7 @@ chipmunk.constraint_functions.error_bias=function(constraint,v)
 	return core.constraint_error_bias(constraint[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.constraint.max_bias
+--[[#lua.wetgenes.chipmunk.constraint.max_bias
 
 	v=constraint:max_bias()
 	v=constraint:max_bias(v)
@@ -1167,7 +1167,7 @@ chipmunk.constraint_functions.max_bias=function(constraint,v)
 	return core.constraint_max_bias(constraint[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.constraint.collide_bodies
+--[[#lua.wetgenes.chipmunk.constraint.collide_bodies
 
 	v=constraint:collide_bodies()
 	v=constraint:collide_bodies(v)
@@ -1179,7 +1179,7 @@ chipmunk.constraint_functions.collide_bodies=function(constraint,v)
 	return core.constraint_collide_bodies(constraint[0],v)
 end
 ------------------------------------------------------------------------
---[[#wetgenes.chipmunk.constraint.impulse
+--[[#lua.wetgenes.chipmunk.constraint.impulse
 
 	v=constraint:impulse()
 

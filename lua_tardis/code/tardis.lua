@@ -23,7 +23,7 @@ local tonumber=tonumber
 local require=require
 local error=error
 
---[[#wetgenes.tardis
+--[[#lua.wetgenes.tardis
 
 Time And Relative Dimensions In Space is of course the perfect name for 
 a library of matrix based math functions.
@@ -70,7 +70,7 @@ http://www.j3d.org/matrix_faq/matrfaq_latest.html
 --module
 local tardis={ modname=(...) } ; package.loaded[tardis.modname]=tardis
 
---[[#wetgenes.tardis.type
+--[[#lua.wetgenes.tardis.type
 
 	name=tardis.type(object)
 
@@ -79,7 +79,7 @@ This will return the type of an object previously registered with class
 ]]
 function tardis.type(it) return it.__type or type(it) end
 
---[[#wetgenes.tardis.class
+--[[#lua.wetgenes.tardis.class
 
 	metatable=tardis.class(name,class,...)
 
@@ -109,7 +109,7 @@ end
 
 
 
---[[#wetgenes.tardis.array
+--[[#lua.wetgenes.tardis.array
 
 
 Array is the base class for all other tardis classes, it is just a 
@@ -119,7 +119,7 @@ values in a userdata.
 ]]
 local array=tardis.class("array")
 
---[[#wetgenes.tardis.array.__tostring
+--[[#lua.wetgenes.tardis.array.__tostring
 
 	string = array.__tostring(it)
 
@@ -138,7 +138,7 @@ function array.__tostring(it) -- these classes are all just 1d arrays of numbers
 	return table.concat(t)
 end
 
---[[#wetgenes.tardis.array.set
+--[[#lua.wetgenes.tardis.array.set
 
 	a=a:set(1,2,3,4)
 	a=a:set({1,2,3,4})
@@ -170,7 +170,7 @@ function array.set(it,...)
 	return it
 end
 
---[[#wetgenes.tardis.array.compare
+--[[#lua.wetgenes.tardis.array.compare
 
 	a=a:compare(b)
 	a=a:compare(1,2,3,4)
@@ -202,7 +202,7 @@ function array.compare(it,...)
 	return true
 end
 
---[[#wetgenes.tardis.array.product
+--[[#lua.wetgenes.tardis.array.product
 
 	ma = ma:product(mb)
 	ma = ma:product(mb,r)
@@ -233,7 +233,7 @@ function array.product(a,b,r)
 end
 
 
---[[#wetgenes.tardis.m2
+--[[#lua.wetgenes.tardis.m2
 
 The metatable for a 2x2 matrix class, use the new function to actually create an object.
 
@@ -242,7 +242,7 @@ We also inherit all the functions from tardis.array
 ]]
 local m2=tardis.class("m2",array)
 
---[[#wetgenes.tardis.m2.new
+--[[#lua.wetgenes.tardis.m2.new
 
 	m2 = tardis.m2.new()
 
@@ -252,7 +252,7 @@ usually return the input m2 for easy function chaining.
 ]]
 function m2.new(...) return setmetatable({0,0,0,0},m2):set(...) end
 
---[[#wetgenes.tardis.m2.identity
+--[[#lua.wetgenes.tardis.m2.identity
 
 	m2 = m2:identity()
 
@@ -261,7 +261,7 @@ Set this m2 to the identity matrix.
 ]]
 function m2.identity(it) return it:set(1,0, 0,1) end 
 
---[[#wetgenes.tardis.m2.determinant
+--[[#lua.wetgenes.tardis.m2.determinant
 
 	value = m2:determinant()
 
@@ -275,7 +275,7 @@ function m2.determinant(it)
 			-( it[ 2 ]*it[ 2+1 ] )
 end
 
---[[#wetgenes.tardis.m2.minor_xy
+--[[#lua.wetgenes.tardis.m2.minor_xy
 
 	value = m2:minor_xy()
 
@@ -286,7 +286,7 @@ function m2.minor_xy(it,x,y)
 	return it[1+(2-(x-1))+((2-(y-1))*2)]
 end
 
---[[#wetgenes.tardis.m2.transpose
+--[[#lua.wetgenes.tardis.m2.transpose
 
 	m2 = m2:transpose()
 	m2 = m2:transpose(r)
@@ -302,7 +302,7 @@ function m2.transpose(it,r)
 	return	 r:set(it[1],it[2+1], it[2],it[2+2])
 end
 
---[[#wetgenes.tardis.m2.scale
+--[[#lua.wetgenes.tardis.m2.scale
 
 	m2 = m2:scale(s)
 	m2 = m2:scale(s,r)
@@ -318,7 +318,7 @@ function m2.scale(it,s,r)
 	return r:set(it[1]*s,it[2]*s, it[2+1]*s,it[2+2]*s)
 end
 
---[[#wetgenes.tardis.m2.cofactor
+--[[#lua.wetgenes.tardis.m2.cofactor
 
 	m2 = m2:cofactor()
 	m2 = m2:cofactor(r)
@@ -345,7 +345,7 @@ function m2.cofactor(it,r)
 	return r
 end
 
---[[#wetgenes.tardis.m2.adjugate
+--[[#lua.wetgenes.tardis.m2.adjugate
 
 	m2 = m2:adjugate()
 	m2 = m2:adjugate(r)
@@ -361,7 +361,7 @@ function m2.adjugate(it,r)
 	return m2.cofactor(m2.transpose(it,m2.new()),r)
 end
 
---[[#wetgenes.tardis.m2.inverse
+--[[#lua.wetgenes.tardis.m2.inverse
 
 	m2 = m2:inverse()
 	m2 = m2:inverse(r)
@@ -380,7 +380,7 @@ end
 
 
 
---[[#wetgenes.tardis.m3
+--[[#lua.wetgenes.tardis.m3
 
 The metatable for a 3x3 matrix class, use the new function to actually 
 create an object.
@@ -390,7 +390,7 @@ We also inherit all the functions from tardis.array
 ]]
 local m3=tardis.class("m3",array)
 
---[[#wetgenes.tardis.m3.new
+--[[#lua.wetgenes.tardis.m3.new
 
 	m3 = tardis.m3.new()
 
@@ -400,7 +400,7 @@ usually return the input m3 for easy function chaining.
 ]]
 function m3.new(...) return setmetatable({0,0,0,0,0,0,0,0,0},m3):set(...) end
 
---[[#wetgenes.tardis.m3.identity
+--[[#lua.wetgenes.tardis.m3.identity
 
 	m3 = m3:identity()
 
@@ -409,7 +409,7 @@ Set this m3 to the identity matrix.
 ]]
 function m3.identity(it) return it:set(1,0,0, 0,1,0, 0,0,1) end 
 
---[[#wetgenes.tardis.m3.determinant
+--[[#lua.wetgenes.tardis.m3.determinant
 
 	value = m3:determinant()
 
@@ -425,7 +425,7 @@ function m3.determinant(it)
 			-( it[ 3 ]*it[ 3+2 ]*it[ 6+1 ] )
 end
 
---[[#wetgenes.tardis.m3.minor_xy
+--[[#lua.wetgenes.tardis.m3.minor_xy
 
 	value = m3:minor_xy()
 
@@ -444,7 +444,7 @@ function m3.minor_xy(it,x,y)
 	return m2.determinant(t)
 end
 
---[[#wetgenes.tardis.m3.transpose
+--[[#lua.wetgenes.tardis.m3.transpose
 
 	m3 = m3:transpose()
 	m3 = m3:transpose(r)
@@ -460,7 +460,7 @@ function m3.transpose(it,r)
 	return	 r:set(it[1],it[3+1],it[6+1], it[2],it[3+2],it[6+2], it[3],it[3+3],it[6+3])
 end
 
---[[#wetgenes.tardis.m3.scale
+--[[#lua.wetgenes.tardis.m3.scale
 
 	m3 = m3:scale(s)
 	m3 = m3:scale(s,r)
@@ -476,7 +476,7 @@ function m3.scale(it,s,r)
 	return r:set(it[1]*s,it[2]*s,it[3]*s, it[3+1]*s,it[3+2]*s,it[3+3]*s, it[6+1]*s,it[6+2]*s,it[6+3]*s)
 end
 
---[[#wetgenes.tardis.m3.cofactor
+--[[#lua.wetgenes.tardis.m3.cofactor
 
 	m3 = m3:cofactor()
 	m3 = m3:cofactor(r)
@@ -503,7 +503,7 @@ function m3.cofactor(it,r)
 	return r:set(t)
 end
 
---[[#wetgenes.tardis.m3.adjugate
+--[[#lua.wetgenes.tardis.m3.adjugate
 
 	m3 = m3:adjugate()
 	m3 = m3:adjugate(r)
@@ -519,7 +519,7 @@ function m3.adjugate(it,r)
 	return m3.cofactor(m3.transpose(it,m3.new()),r)
 end
 
---[[#wetgenes.tardis.m3.inverse
+--[[#lua.wetgenes.tardis.m3.inverse
 
 	m3 = m3:inverse()
 	m3 = m3:inverse(r)
@@ -536,7 +536,7 @@ function m3.inverse(it,r)
 	return m3.scale(m3.cofactor(m3.transpose(it,m3.new())),ood,r)
 end
 
---[[#wetgenes.tardis.m4
+--[[#lua.wetgenes.tardis.m4
 
 The metatable for a 4x4 matrix class, use the new function to actually 
 create an object.
@@ -546,7 +546,7 @@ We also inherit all the functions from tardis.array
 ]]
 local m4=tardis.class("m4",array)
 
---[[#wetgenes.tardis.m4.new
+--[[#lua.wetgenes.tardis.m4.new
 
 	m4 = tardis.m4.new()
 
@@ -556,7 +556,7 @@ usually return the input m4 for easy function chaining.
 ]]
 function m4.new(...) return setmetatable({0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},m4):set(...) end
 
---[[#wetgenes.tardis.m4.identity
+--[[#lua.wetgenes.tardis.m4.identity
 
 	m4 = m4:identity()
 
@@ -565,7 +565,7 @@ Set this m4 to the identity matrix.
 ]]
 function m4.identity(it) return it:set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1) end 
 
---[[#wetgenes.tardis.m4.determinant
+--[[#lua.wetgenes.tardis.m4.determinant
 
 	value = m4:determinant()
 
@@ -587,7 +587,7 @@ return	(it[ 4 ] * it[ 4+3 ] * it[ 8+2 ] * it[ 12+1 ])-(it[ 3 ] * it[ 4+4 ] * it[
 		(it[ 2 ] * it[ 4+1 ] * it[ 8+3 ] * it[ 12+4 ])+(it[ 1 ] * it[ 4+2 ] * it[ 8+3 ] * it[ 12+4 ])	
 end
 
---[[#wetgenes.tardis.m4.minor_xy
+--[[#lua.wetgenes.tardis.m4.minor_xy
 
 	value = m4:minor_xy()
 
@@ -606,7 +606,7 @@ function m4.minor_xy(it,x,y)
 	return m3.determinant(t)
 end
 
---[[#wetgenes.tardis.m4.transpose
+--[[#lua.wetgenes.tardis.m4.transpose
 
 	m4 = m4:transpose()
 	m4 = m4:transpose(r)
@@ -622,7 +622,7 @@ function m4.transpose(it,r)
 	return	 r:set(it[1],it[4+1],it[8+1],it[12+1], it[2],it[4+2],it[8+2],it[12+2], it[3],it[4+3],it[8+3],it[12+3], it[4],it[4+4],it[8+4],it[12+4])
 end
 
---[[#wetgenes.tardis.m4.scale
+--[[#lua.wetgenes.tardis.m4.scale
 
 	m4 = m4:scale(s)
 	m4 = m4:scale(s,r)
@@ -642,7 +642,7 @@ function m4.scale(it,s,r)
 		it[13]*s,it[14]*s,it[15]*s,it[16]*s)
 end
 
---[[#wetgenes.tardis.m4.add
+--[[#lua.wetgenes.tardis.m4.add
 
 	m4 = m4:add(m4b)
 	m4 = m4:add(m4b,r)
@@ -662,7 +662,7 @@ function m4.add(it,m,r)
 		it[13]+m[13],it[14]+m[14],it[15]+m[15],it[16]+m[16])
 end
 
---[[#wetgenes.tardis.m4.sub
+--[[#lua.wetgenes.tardis.m4.sub
 
 	m4 = m4:sub(m4b)
 	m4 = m4:sub(m4b,r)
@@ -682,7 +682,7 @@ function m4.sub(it,m,r)
 		it[13]-m[13],it[14]-m[14],it[15]-m[15],it[16]-m[16])
 end
 
---[[#wetgenes.tardis.m4.lerp
+--[[#lua.wetgenes.tardis.m4.lerp
 
 	m4 = m4:lerp(m4b,s)
 	m4 = m4:lerp(m4b,s,r)
@@ -702,7 +702,7 @@ function m4.lerp(it,m,s,r)
 	return r
 end
 
---[[#wetgenes.tardis.m4.cofactor
+--[[#lua.wetgenes.tardis.m4.cofactor
 
 	m4 = m4:cofactor()
 	m4 = m4:cofactor(r)
@@ -729,7 +729,7 @@ function m4.cofactor(it,r)
 	return r:set(t)
 end
 
---[[#wetgenes.tardis.m4.adjugate
+--[[#lua.wetgenes.tardis.m4.adjugate
 
 	m4 = m4:adjugate()
 	m4 = m4:adjugate(r)
@@ -745,7 +745,7 @@ function m4.adjugate(it,r)
 	return 	m4.cofactor(m4.transpose(it,m4.new()),r)
 end
 
---[[#wetgenes.tardis.m4.inverse
+--[[#lua.wetgenes.tardis.m4.inverse
 
 	m4 = m4:inverse()
 	m4 = m4:inverse(r)
@@ -762,7 +762,7 @@ function m4.inverse(it,r)
 	return m4.scale(m4.cofactor(m4.transpose(it,m4.new())),ood,r)
 end
 
---[[#wetgenes.tardis.m4.translate
+--[[#lua.wetgenes.tardis.m4.translate
 
 	m4 = m4:translate(x,y,z)
 	m4 = m4:translate(x,y,z,r)
@@ -786,7 +786,7 @@ function m4.translate(it,a,b,c,d)
 	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,r4 )
 end
 
---[[#wetgenes.tardis.m4.scale_v3
+--[[#lua.wetgenes.tardis.m4.scale_v3
 
 	m4 = m4:scale_v3(x,y,z)
 	m4 = m4:scale_v3(x,y,z,r)
@@ -812,7 +812,7 @@ function m4.scale_v3(it,a,b,c,d)
 					it[13],		it[14],		it[15],		it[16] )
 end
 
---[[#wetgenes.tardis.m4.scale_v3
+--[[#lua.wetgenes.tardis.m4.scale_v3
 
 	v3 = m4:scale_v3(x,y,z)
 	v3 = m4:scale_v3(x,y,z,r)
@@ -834,7 +834,7 @@ function m4.get_scale_v3(it,r)
 	)
 end
 
---[[#wetgenes.tardis.m4.setrot
+--[[#lua.wetgenes.tardis.m4.setrot
 
 	m4 = m4:setrot(degrees,v3a)
 
@@ -868,7 +868,7 @@ function m4.setrot(it,degrees,v3a)
 
 end
 
---[[#wetgenes.tardis.m4.rotate
+--[[#lua.wetgenes.tardis.m4.rotate
 
 	m4 = m4:rotate(degrees,v3a)
 	m4 = m4:rotate(degrees,v3a,r)
@@ -884,7 +884,7 @@ function m4.rotate(it,degrees,v3a,r)
 	return tardis.m4_product_m4(it,m4a,r)
 end
 
---[[#wetgenes.tardis.v2
+--[[#lua.wetgenes.tardis.v2
 
 The metatable for a 2d vector class, use the new function to actually 
 create an object.
@@ -894,7 +894,7 @@ We also inherit all the functions from tardis.array
 ]]
 local v2=tardis.class("v2",array)
 
---[[#wetgenes.tardis.v2.new
+--[[#lua.wetgenes.tardis.v2.new
 
 	v2 = tardis.v2.new()
 
@@ -904,7 +904,7 @@ usually return the input v2 for easy function chaining.
 ]]
 function v2.new(...) return setmetatable({0,0},v2):set(...) end
 
---[[#wetgenes.tardis.v2.identity
+--[[#lua.wetgenes.tardis.v2.identity
 
 	v2 = v2:identity()
 
@@ -913,7 +913,7 @@ Set this v2 to all zeros.
 ]]
 function v2.identity(it) return it:set(0,0) end 
 
---[[#wetgenes.tardis.v2.lenlen
+--[[#lua.wetgenes.tardis.v2.lenlen
 
 	value = v2:lenlen()
 
@@ -925,7 +925,7 @@ function v2.lenlen(it)
 	return (it[1]*it[1]) + (it[2]*it[2])
 end
 
---[[#wetgenes.tardis.v2.len
+--[[#lua.wetgenes.tardis.v2.len
 
 	value = v2:len()
 
@@ -936,7 +936,7 @@ function v2.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) )
 end
 
---[[#wetgenes.tardis.v2.oo
+--[[#lua.wetgenes.tardis.v2.oo
 
 	v2 = v2:oo()
 	v2 = v2:oo(r)
@@ -952,7 +952,7 @@ function v2.oo(it,r)
 	return r:set( 1/it[1] , 1/it[2] )
 end
 
---[[#wetgenes.tardis.v2.scale
+--[[#lua.wetgenes.tardis.v2.scale
 
 	v2 = v2:scale(s)
 	v2 = v2:scale(s,r)
@@ -968,7 +968,7 @@ function v2.scale(it,s,r)
 	return r:set( it[1]*s , it[2]*s )
 end
 
---[[#wetgenes.tardis.v2.normalize
+--[[#lua.wetgenes.tardis.v2.normalize
 
 	v2 = v2:normalize()
 	v2 = v2:normalize(r)
@@ -983,7 +983,7 @@ function v2.normalize(it,r)
 	return v2.scale(it,1/v2.len(it),r)
 end
 
---[[#wetgenes.tardis.v2.add
+--[[#lua.wetgenes.tardis.v2.add
 
 	v2 = v2:add(v2b)
 	v2 = v2:add(v2b,r)
@@ -999,7 +999,7 @@ function v2.add(va,vb,r)
 	return r:set( va[1]+vb[1] , va[2]+vb[2] )
 end
 
---[[#wetgenes.tardis.v2.sub
+--[[#lua.wetgenes.tardis.v2.sub
 
 	v2 = v2:sub(v2b)
 	v2 = v2:sub(v2b,r)
@@ -1015,7 +1015,7 @@ function v2.sub(va,vb,r)
 	return r:set( va[1]-vb[1] , va[2]-vb[2] )
 end
 
---[[#wetgenes.tardis.v2.mul
+--[[#lua.wetgenes.tardis.v2.mul
 
 	v2 = v2:mul(v2b)
 	v2 = v2:mul(v2b,r)
@@ -1031,7 +1031,7 @@ function v2.mul(va,vb,r)
 	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) )
 end
 
---[[#wetgenes.tardis.v2.dot
+--[[#lua.wetgenes.tardis.v2.dot
 
 	value = v2:dot(v2b)
 
@@ -1042,7 +1042,7 @@ function v2.dot(va,vb)
 	return ( (va[1]*vb[1]) + (va[2]*vb[2]) )
 end
 
---[[#wetgenes.tardis.v2.cross
+--[[#lua.wetgenes.tardis.v2.cross
 
 	value = v2:cross(v2b)
 
@@ -1053,7 +1053,7 @@ function v2.cross(va,vb)
 	return (va[1]*vb[2])-(va[2]*vb[1])
 end
 
---[[#wetgenes.tardis.v3
+--[[#lua.wetgenes.tardis.v3
 
 The metatable for a 3d vector class, use the new function to actually 
 create an object.
@@ -1063,7 +1063,7 @@ We also inherit all the functions from tardis.array
 ]]
 local v3=tardis.class("v3",array)
 
---[[#wetgenes.tardis.v3.new
+--[[#lua.wetgenes.tardis.v3.new
 
 	v3 = tardis.v3.new()
 
@@ -1073,7 +1073,7 @@ usually return the input v3 for easy function chaining.
 ]]
 function v3.new(...) return setmetatable({0,0,0},v3):set(...) end
 
---[[#wetgenes.tardis.v3.identity
+--[[#lua.wetgenes.tardis.v3.identity
 
 	v3 = v3:identity()
 
@@ -1082,7 +1082,7 @@ Set this v3 to all zeros.
 ]]
 function v3.identity(it) return it:set(0,0,0) end 
 
---[[#wetgenes.tardis.v3.lenlen
+--[[#lua.wetgenes.tardis.v3.lenlen
 
 	value = v3:lenlen()
 
@@ -1094,7 +1094,7 @@ function v3.lenlen(it)
 	return (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3])
 end
 
---[[#wetgenes.tardis.v3.len
+--[[#lua.wetgenes.tardis.v3.len
 
 	value = v3:len()
 
@@ -1105,7 +1105,7 @@ function v3.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3]) )
 end
 
---[[#wetgenes.tardis.v3.oo
+--[[#lua.wetgenes.tardis.v3.oo
 
 	v3 = v3:oo()
 	v3 = v3:oo(r)
@@ -1121,7 +1121,7 @@ function v3.oo(it,r)
 	return r:set( 1/it[1] , 1/it[2] , 1/it[3] )
 end
 
---[[#wetgenes.tardis.v3.scale
+--[[#lua.wetgenes.tardis.v3.scale
 
 	v3 = v3:scale(s)
 	v3 = v3:scale(s,r)
@@ -1137,7 +1137,7 @@ function v3.scale(it,s,r)
 	return r:set( it[1]*s , it[2]*s , it[3]*s )
 end
 
---[[#wetgenes.tardis.v3.normalize
+--[[#lua.wetgenes.tardis.v3.normalize
 
 	v3 = v3:normalize()
 	v3 = v3:normalize(r)
@@ -1152,7 +1152,7 @@ function v3.normalize(it,r)
 	return v3.scale(it,1/v3.len(it),r)
 end
 
---[[#wetgenes.tardis.v3.add
+--[[#lua.wetgenes.tardis.v3.add
 
 	v3 = v3:add(v3b)
 	v3 = v3:add(v3b,r)
@@ -1168,7 +1168,7 @@ function v3.add(va,vb,r)
 	return r:set( va[1]+vb[1] , va[2]+vb[2] , va[3]+vb[3] )
 end
 
---[[#wetgenes.tardis.v3.sub
+--[[#lua.wetgenes.tardis.v3.sub
 
 	v3 = v3:sub(v3b)
 	v3 = v3:sub(v3b,r)
@@ -1184,7 +1184,7 @@ function v3.sub(va,vb,r)
 	return r:set( va[1]-vb[1] , va[2]-vb[2] , va[3]-vb[3] )
 end
 
---[[#wetgenes.tardis.v3.mul
+--[[#lua.wetgenes.tardis.v3.mul
 
 	v3 = v3:mul(v3b)
 	v3 = v3:mul(v3b,r)
@@ -1200,7 +1200,7 @@ function v3.mul(va,vb,r)
 	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) , (va[3]*vb[3]) )
 end
 
---[[#wetgenes.tardis.v3.dot
+--[[#lua.wetgenes.tardis.v3.dot
 
 	value = v3:dot(v3b)
 
@@ -1211,7 +1211,7 @@ function v3.dot(va,vb)
 	return ( (va[1]*vb[1]) + (va[2]*vb[2]) + (va[3]*vb[3]) )
 end
 
---[[#wetgenes.tardis.v3.cross
+--[[#lua.wetgenes.tardis.v3.cross
 
 	v2 = v2:dot(v2b)
 	v2 = v2:dot(v2b,r)
@@ -1228,7 +1228,7 @@ function v3.cross(va,vb,r)
 end
 
 
---[[#wetgenes.tardis.v4
+--[[#lua.wetgenes.tardis.v4
 
 The metatable for a 4d vector class, use the new function to actually 
 create an object.
@@ -1238,7 +1238,7 @@ We also inherit all the functions from tardis.array
 ]]
 local v4=tardis.class("v4",array)
 
---[[#wetgenes.tardis.v4.new
+--[[#lua.wetgenes.tardis.v4.new
 
 	v4 = tardis.v4.new()
 
@@ -1248,7 +1248,7 @@ usually return the input v4 for easy function chaining.
 ]]
 function v4.new(...) return setmetatable({0,0,0,0},v4):set(...) end
 
---[[#wetgenes.tardis.v4.identity
+--[[#lua.wetgenes.tardis.v4.identity
 
 	v4 = v4:identity()
 
@@ -1257,7 +1257,7 @@ Set this v4 to all zeros.
 ]]
 function v4.identity(it) return it:set(0,0,0,0) end
 
---[[#wetgenes.tardis.v4.to_v3
+--[[#lua.wetgenes.tardis.v4.to_v3
 
 	v3 = v4:to_v3()
 	v3 = v4:to_v3(r)
@@ -1274,7 +1274,7 @@ function v4.to_v3(it,r)
 	return r:set( it[1]*oow , it[2]*oow , it[3]*oow )
 end
 
---[[#wetgenes.tardis.v4.lenlen
+--[[#lua.wetgenes.tardis.v4.lenlen
 
 	value = v4:lenlen()
 
@@ -1286,7 +1286,7 @@ function v4.lenlen(it)
 	return (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3]) + (it[4]*it[4])
 end
 
---[[#wetgenes.tardis.v4.len
+--[[#lua.wetgenes.tardis.v4.len
 
 	value = v4:len()
 
@@ -1297,7 +1297,7 @@ function v4.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3]) + (it[4]*it[4]) )
 end
 
---[[#wetgenes.tardis.v4.oo
+--[[#lua.wetgenes.tardis.v4.oo
 
 	v4 = v4:oo()
 	v4 = v4:oo(r)
@@ -1313,7 +1313,7 @@ function v4.oo(it,r)
 	return r:set( 1/it[1] , 1/it[2] , 1/it[3] , 1/it[4] )
 end
 
---[[#wetgenes.tardis.v4.scale
+--[[#lua.wetgenes.tardis.v4.scale
 
 	v4 = v4:scale(s)
 	v4 = v4:scale(s,r)
@@ -1329,7 +1329,7 @@ function v4.scale(it,s,r)
 	return r:set( it[1]*s , it[2]*s , it[3]*s , it[4]*s )
 end
 
---[[#wetgenes.tardis.v4.normalize
+--[[#lua.wetgenes.tardis.v4.normalize
 
 	v4 = v4:normalize()
 	v4 = v4:normalize(r)
@@ -1344,7 +1344,7 @@ function v4.normalize(it,r)
 	return v4.scale(it,1/v4.len(it),r)
 end
 
---[[#wetgenes.tardis.v4.add
+--[[#lua.wetgenes.tardis.v4.add
 
 	v4 = v4:add(v4b)
 	v4 = v4:add(v4b,r)
@@ -1360,7 +1360,7 @@ function v4.add(va,vb,r)
 	return r:set( va[1]+vb[1] , va[2]+vb[2] , va[3]+vb[3] , va[4]+vb[4] )
 end
 
---[[#wetgenes.tardis.v4.sub
+--[[#lua.wetgenes.tardis.v4.sub
 
 	v4 = v4:sub(v4b)
 	v4 = v4:sub(v4b,r)
@@ -1376,7 +1376,7 @@ function v4.sub(va,vb,r)
 	return r:set( va[1]-vb[1] , va[2]-vb[2] , va[3]-vb[3] , va[4]-vb[4] )
 end
 
---[[#wetgenes.tardis.v4.mul
+--[[#lua.wetgenes.tardis.v4.mul
 
 	v4 = v4:mul(v4b)
 	v4 = v4:mul(v4b,r)
@@ -1392,7 +1392,7 @@ function v4.mul(va,vb,r)
 	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) , (va[3]*vb[3]) , (va[4]*vb[4]) )
 end
 
---[[#wetgenes.tardis.v4.dot
+--[[#lua.wetgenes.tardis.v4.dot
 
 	value = v4:dot(v4b)
 
@@ -1404,7 +1404,7 @@ function v4.dot(va,vb)
 end
 
 
---[[#wetgenes.tardis.q4
+--[[#lua.wetgenes.tardis.q4
 
 The metatable for a quaternion class, use the new function to actually create an object.
 
@@ -1413,7 +1413,7 @@ We also inherit all the functions from tardis.v4
 ]]
 local q4=tardis.class("q4",v4)
 
---[[#wetgenes.tardis.q4.new
+--[[#lua.wetgenes.tardis.q4.new
 
 	q4 = tardis.q4.new()
 
@@ -1423,7 +1423,7 @@ usually return the input q4 for easy function chaining.
 ]]
 function q4.new(...) return setmetatable({0,0,0,0},q4):set(...) end
 
---[[#wetgenes.tardis.q4.identity
+--[[#lua.wetgenes.tardis.q4.identity
 
 	q4 = q4:identity()
 
@@ -1432,7 +1432,7 @@ Set this q4 to its 0,0,0,1 identity
 ]]
 function q4.identity(it) return it:set(0,0,0,1) end 
 
---[[#wetgenes.tardis.q4.lerp
+--[[#lua.wetgenes.tardis.q4.lerp
 
 	q4 = q4:lerp(q4b,s)
 	q4 = q4:lerp(q4b,s,r)
@@ -1451,7 +1451,7 @@ function q4.nlerp(qa,qb,sa,r)
 	return r:normalize()
 end
 
---[[#wetgenes.tardis.q4.setrot
+--[[#lua.wetgenes.tardis.q4.setrot
 
 	q4 = q4:setrot(degrees,v3a)
 
@@ -1464,7 +1464,7 @@ function q4.setrot(it,degrees,v3a)
 	return it:set( math.cos(ah) , v3a[1]*sh , v3a[2]*sh , v3a[3]*sh )
 end
 
---[[#wetgenes.tardis.q4.rotate
+--[[#lua.wetgenes.tardis.q4.rotate
 
 	q4 = q4:rotate(degrees,v3a)
 	q4 = q4:rotate(degrees,v3a,r)
@@ -1482,7 +1482,7 @@ end
 
 
 
---[[#wetgenes.tardis.line
+--[[#lua.wetgenes.tardis.line
 
 A 3d space line class.
 
@@ -1494,7 +1494,7 @@ We also inherit all the functions from tardis.array
 local line=tardis.class("line",array)
 line.set=nil -- disable
 
---[[#wetgenes.tardis.line.new
+--[[#lua.wetgenes.tardis.line.new
 
 	line = tardis.line.new(p,n)
 
@@ -1503,7 +1503,7 @@ Create a new line and optionally set it to the given values.
 ]]
 function line.new(p,n) return setmetatable({p or v3.new(),n or v3.new()},line) end
 
---[[#wetgenes.tardis.plane
+--[[#lua.wetgenes.tardis.plane
 
 A 3d space plane class.
 
@@ -1515,7 +1515,7 @@ We also inherit all the functions from tardis.array
 local plane=tardis.class("plane",array)
 plane.set=nil -- disable
 
---[[#wetgenes.tardis.plane.new
+--[[#lua.wetgenes.tardis.plane.new
 
 	plane = tardis.plane.new(p,n)
 

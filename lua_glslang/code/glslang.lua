@@ -1,7 +1,7 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---[[#glslang
+--[[#lua.glslang
 
 Manage string embedding and the glsl compiler and language options.
 
@@ -21,7 +21,7 @@ local core ; pcall(function() core=require("glslang.core") end)
 local glslang={}
 
 
---[[#glslang.lint_gles2
+--[[#lua.glslang.lint_gles2
 
 	verr,ferr = glslang.lint_gles2(vcode,fcode)
 
@@ -48,7 +48,7 @@ end
 
 
 
---[[#glslang.parse_chunks
+--[[#lua.glslang.parse_chunks
 
 	shaders=glslang.shader_chunks(text,filename,headers)
 
