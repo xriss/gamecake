@@ -171,7 +171,7 @@ function wmeta.setup(def)
 --def
 	function meta.setup(widget,def)
 	
-		widget.state="none"
+		widget.state=def.state or "none"
 		
 		widget.meta=meta
 		

@@ -1325,40 +1325,20 @@ int s;
 		return 0;
 	}
 
-	if(con>0.0f) // contrast up
-	{
-		s=(int)(256.0f*(1.0f-con)); // reverse con scale
-		for(z=0;z<g->bmap->d;z++) { for(y=0;y<g->bmap->h;y++) {
-		p=grdinfo_get_data(g->bmap,0,y,z);
-		for(x=0;x<g->bmap->w;x++,p+=4) {
-			for(i=0;i<=3;i++) // RGB
-			{
-				c=((int)p[i])-sub; // convert to int
-				if(c<0)	{ c=((-sub<<8)+((sub+c)*s)+(sub<<8))>>8; }
-				else    { c=(( pos<<8)-((pos-c)*s)+(sub<<8))>>8; }
-				if     ( c<  0 ) { p[i]=0;     } // write out with clamp
-				else if( c>255 ) { p[i]=255;   }
-				else             { p[i]=(u8)c; }
-			}
-		}}}
-	}
-	else
-	if(con<0.0f) // contrast down
-	{
-		s=(int)(256.0f*(1.0f+con)); // reverse con scale
-		for(z=0;z<g->bmap->d;z++) { for(y=0;y<g->bmap->h;y++) {
-		p=grdinfo_get_data(g->bmap,0,y,z);
-		for(x=0;x<g->bmap->w;x++,p+=4) {
-			for(i=0;i<=3;i++) // RGB
-			{
-				c=((int)p[i]); // convert to int
-				c=(((c-sub)*s)+(sub<<8))>>8;
-				if     ( c<  0 ) { p[i]=0;     } // write out with clamp
-				else if( c>255 ) { p[i]=255;   }
-				else             { p[i]=(u8)c; }
-			}
-		}}}
-	}
+	s=(int)(1024.0f*( (259.0f * (con*255.0f + 255.0f)) / (255.0f * (259.0f - con*255.0f)) ));
+	
+	for(z=0;z<g->bmap->d;z++) { for(y=0;y<g->bmap->h;y++) {
+	p=grdinfo_get_data(g->bmap,0,y,z);
+	for(x=0;x<g->bmap->w;x++,p+=4) {
+		for(i=0;i<=3;i++) // RGB
+		{
+			c=((int)p[i]); // convert to int
+			c=sub + (((c-sub)*s)>>10) ;
+			if     ( c<  0 ) { p[i]=0;     } // write out with clamp
+			else if( c>255 ) { p[i]=255;   }
+			else             { p[i]=(u8)c; }
+		}
+	}}}
 	
 	return 1;
 }
