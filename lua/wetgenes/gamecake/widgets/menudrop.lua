@@ -70,7 +70,7 @@ end
 
 
 function wmenudrop.class_hooks(hook,widget,dat)
-	if hook=="active" then
+	if hook=="active" or hook=="over" then
 		if widget.master.menu==widget and ( not widget.menu.hidden ) then -- hide
 			widget.menu:remove()
 			widget.menu=nil

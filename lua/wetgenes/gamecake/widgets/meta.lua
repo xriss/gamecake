@@ -453,13 +453,13 @@ function wmeta.setup(def)
 
 	meta.isover=function(widget,mode)
 		local o=widget.master.over
-		if mode=="menu" then o=widget.master.menu end
+--		if mode=="menu" then o=widget.master.menu end
 		if o then
 			while o~=o.parent do -- need to check all parents
 				if o==widget then return true end
 				if widget.also_over then -- these widgets also count as over
 					for i,v in pairs(widget.also_over) do
-						if o==v then return true end
+						if o==v then return true end -- check if any parent is in the also over group
 					end
 				end
 				o=o.parent

@@ -18,7 +18,7 @@ local wwindow=oven.rebake("wetgenes.gamecake.widgets.window")
 function wmenu.update(widget)
 
 	if not widget.hidden then
-		if widget.hide_when_not then -- must stay over widget
+		if widget.hide_when_not and not widget.master.press then -- must stay over widget unless holding button
 			if not widget:isover(widget.hide_when_not) then
 				widget.hidden=true
 				widget.hide_when_not=nil

@@ -12,7 +12,7 @@ wmenuitem=wmenuitem or {}
 function wmenuitem.update(widget)
 
 	if not widget.hidden then
-		if widget.hide_when_not then -- must stay over widget
+		if widget.hide_when_not and not widget.master.press then -- must stay over widget unless holding button
 			if not widget:isover(widget.hide_when_not) then
 				widget.hidden=true
 				widget.hide_when_not=nil
@@ -107,7 +107,7 @@ function wmenuitem.hooks(hook,widget,dat)
 
 local showmenu=function()
 
-	if widget.menu_data and widget.master.menu~=widget then -- add a sub menu using this data
+	if widget.menu_data then -- and widget.master.menu~=widget then -- add a sub menu using this data
 
 		widget.master.menu=widget
 
@@ -147,11 +147,11 @@ local togglemenu=function()
 end
 
 
-	if hook=="over" and widget.master.menu then
+	if hook=="over" then -- and widget.master.menu then
 --		if widget.parent.class~="menubar" then -- menubar needs clicks
-		if widget.parent.class=="menu" or widget.parent.class=="menubar" then -- only the menu?
+--		if widget.parent.class=="menu" or widget.parent.class=="menubar" then -- only the menu?
 			showmenu()
-		end
+--		end
 --		end
 	end
 
