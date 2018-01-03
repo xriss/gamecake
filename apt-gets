@@ -1,7 +1,7 @@
 #build dependencies, run sudo ./apt-gets
 
 
-apt-get install -y build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev
+apt-get install -y build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev libpulse-dev
 
 
 # we might need to build our own versions of these, see the build directory
