@@ -16,7 +16,7 @@ from this create function, not the module itself.
 -----------------------------------------------------------------------------
 M.create=function(items)
 
-	levels={} -- a place to store all levels
+	local levels={} -- a place to store all levels
 	
 	levels.metatable={} -- unique meta table everytime we create
 	levels.metatable.__index=levels.metatable -- metatable is full of functions

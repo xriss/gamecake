@@ -16,7 +16,7 @@ from this create function, not the module itself.
 -----------------------------------------------------------------------------
 M.create=function(items)
 
-	cells={} -- a place to store all cells
+	local cells={} -- a place to store all cells
 
 	cells.metatable={} -- unique meta table everytime we create
 	cells.metatable.__index=cells.metatable -- metatable is full of functions

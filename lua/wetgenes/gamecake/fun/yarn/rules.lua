@@ -16,7 +16,7 @@ from this create function, not the module itself.
 -----------------------------------------------------------------------------
 M.create=function(items)
 
-	rules={} -- a place to store all rules
+	local rules={} -- a place to store all rules
 	
 	rules.metatable={} -- unique meta table everytime we create
 	rules.metatable.__index=rules.metatable -- metatable is full of functions
