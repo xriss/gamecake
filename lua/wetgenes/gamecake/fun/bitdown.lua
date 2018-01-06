@@ -365,7 +365,7 @@ M.grd_pix_idx=function(g,map,px,py,hx,hy)
 end
 
 -- convert some pixel art into 2D tile array
-M.pix_tiles=function(str,map,tout,px,py,hx,hy,tiles)
+M.pix_tiles=function(str,map,tiles,px,py,hx,hy)
 
 	local ls=wstr.split(str,"\n")
 

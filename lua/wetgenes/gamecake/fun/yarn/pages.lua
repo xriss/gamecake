@@ -1,4 +1,6 @@
 
+local bitdown=require("wetgenes.gamecake.fun.bitdown")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -14,7 +16,7 @@ from this create function, not the module itself.
 
 ]]
 -----------------------------------------------------------------------------
-M.create=function(items)
+M.create=function(items,level)
 
 	local pages={} -- a place to store all pages
 	
@@ -22,12 +24,81 @@ M.create=function(items)
 	pages.metatable.__index=pages.metatable -- metatable is full of functions
 	setmetatable(pages.metatable,items.metatable) -- inherit
 
+	pages.level=level
 
 	pages.page_xh=32 -- size of each page in cells
 	pages.page_yh=32
 
 	pages.page_cx=0x8000*pages.page_xh -- centre page location in cells
 	pages.page_cy=0x8000*pages.page_yh
+	
+	pages.default_name="page_zero" -- use this name if pages.names[index] is empty
+	
+	pages.names={} -- index to names, the world map
+
+	pages.map={} -- index to created pages
+	
+	pages.index_to_xy=function(index)
+		return index%0x10000 , math.floor(index/0x10000)
+	end
+	
+	pages.index_from_xy=function(x,y)
+		return y*0x10000 + x
+	end
+	
+	pages.get=function(index)
+		return pages.map[index]
+	end
+	
+	pages.set=function(page)
+		pages[ page.index ]=page
+		return page
+	end
+
+	pages.manifest=function(index)
+	
+		local page=pages.get(index)
+
+		if not page then -- create
+		
+			page=pages.create(index, pages.names[index] or pages.default_name )
+			
+		end
+
+		return page
+	end
+
+	pages.create=function(index,name)
+
+		local page=items.create()
+		setmetatable(page,pages.metatable)
+		page.class="page"
+
+		pages.map[index]=page
+		
+		page.index=index
+		page.name=name
+		
+		page.px , page.py = pages.index_to_xy(index)
+
+		page.cx=page.px*pages.page_xh
+		page.cy=page.py*pages.page_yh
+		
+		page.cells={}
+		
+		local p=prefabs.get(name)
+		if p and p.legend and p.map then
+			for i,v in ipairs( bitdown.pix_tiles(p.map,p.legend) ) do
+				local cell=items.level.cells.create( items.prefabs.get(v.name) )
+				page.cells[i]=cell
+				cell.cx=page.cx+v.x
+				cell.cy=page.cy+v.y
+				cell.page=page
+			end
+		end
+		
+		return page
+	end
 
 	return pages
 

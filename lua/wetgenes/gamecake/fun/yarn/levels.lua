@@ -39,9 +39,10 @@ should always be a new table and will also be returned.
 	
 		level=items.create(level)
 		setmetatable(level,levels.metatable)
+		level.class="level"
 		
-		level.cells=require("wetgenes.gamecake.fun.yarn.cells").create(items)
-		level.pages=require("wetgenes.gamecake.fun.yarn.pages").create(items)
+		level.cells=require("wetgenes.gamecake.fun.yarn.cells").create(items,level)
+		level.pages=require("wetgenes.gamecake.fun.yarn.pages").create(items,level)
 		
 		return level
 	end

@@ -17,7 +17,7 @@ M.create=function(items)
 
 	items=items or {} -- a place to store everything that exists
 
-	items.all={} -- all items that have been created
+	items.dump={} -- all items that have been created
 	
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.yarn.items.metatable
@@ -188,6 +188,18 @@ rules object should be used to define all your custom game rules.
 ]]
 -----------------------------------------------------------------------------
 	items.rules=require("wetgenes.gamecake.fun.yarn.rules").create(items)
+
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.yarn.items.prefabs
+
+	items.prefabs
+
+We automatically create a prefabs object bound to this set of items, this 
+prefabs object should be used to define all your custom game prefabs.
+
+]]
+-----------------------------------------------------------------------------
+	items.prefabs=require("wetgenes.gamecake.fun.yarn.prefabs").create(items)
 
 	return items
 

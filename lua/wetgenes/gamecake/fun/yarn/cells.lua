@@ -14,13 +14,24 @@ from this create function, not the module itself.
 
 ]]
 -----------------------------------------------------------------------------
-M.create=function(items)
+M.create=function(items,level)
 
 	local cells={} -- a place to store all cells
 
 	cells.metatable={} -- unique meta table everytime we create
 	cells.metatable.__index=cells.metatable -- metatable is full of functions
 	setmetatable(cells.metatable,items.metatable) -- inherit
+	
+	cells.level=level
+
+	cells.create=function(cell)
+
+		cell=items.create(cell)
+		setmetatable(cell,cells.metatable)
+		cell.class="cell"
+		
+		return cell
+	end
 
 	return cells
 
