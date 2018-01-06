@@ -86,18 +86,34 @@ M.create=function(items,level)
 		
 		page.cells={}
 		
-		local p=prefabs.get(name)
+		local p=items.prefabs.get(name)
 		if p and p.legend and p.map then
-			for i,v in ipairs( bitdown.pix_tiles(p.map,p.legend) ) do
-				local cell=items.level.cells.create( items.prefabs.get(v.name) )
-				page.cells[i]=cell
-				cell.cx=page.cx+v.x
-				cell.cy=page.cy+v.y
-				cell.page=page
+			local tiles=bitdown.pix_tiles(p.map,p.legend)
+			for y=0,#tiles do local vx=tiles[y]
+				for x=0,#vx do local v=vx[x]
+					local cell=items.level.cells.create()
+					page.cells[1 + x + y*pages.page_xh ]=cell
+					cell.cx=page.cx+v.x
+					cell.cy=page.cy+v.y
+					cell.page=page
+					for ii,iv in ipairs( v.items or {v.item} ) do
+						items.create( items.prefabs.get(iv) ):insert(cell)
+					end
+				end
 			end
 		end
 		
 		return page
+	end
+	
+	pages.metatable.get_cell=function(page,cx,cy)
+		return page.cells[ 1 + cx + cy*pages.page_xh ]
+	end
+
+	pages.get_cell=function(cx,cy)
+		local index=pages.index_from_xy(math.floor(cx/pages.page_xh),math.floor(cy/pages.page_yh))
+		local page=pages.manifest(index)
+		return page:get_cell( cx%pages.page_xh , cy%pages.page_yh )
 	end
 
 	return pages

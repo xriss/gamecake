@@ -47,6 +47,8 @@ should always be a new table and will also be returned.
 		return level
 	end
 
+	levels.metatable.get_cell=function(level,cx,cy)
+	end
 
 
 	return levels

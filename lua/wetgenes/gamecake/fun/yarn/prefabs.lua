@@ -12,7 +12,6 @@ local dotnames=function(name)
 	end
 	return f
 end
---for n in dotnames("one.two.three") do print(n) end
 
 
 -----------------------------------------------------------------------------
@@ -83,7 +82,7 @@ names having priority over the shorter.
 -----------------------------------------------------------------------------
 	prefabs.get=function(name,prefab)
 		
-		for n in dotnames(names) do
+		for n in dotnames(name) do
 			local v=prefabs.names[n]
 			if v then -- got some data
 				prefab=prefab or {} -- manifest return table
@@ -94,7 +93,7 @@ names having priority over the shorter.
 				end
 			end
 		end
-		
+		if prefab then prefab.name=name end -- force the name we asked for
 		return prefab
 	end
 
