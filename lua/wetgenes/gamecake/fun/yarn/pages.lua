@@ -16,15 +16,13 @@ from this create function, not the module itself.
 
 ]]
 -----------------------------------------------------------------------------
-M.create=function(items,level)
+M.create=function(items)
 
 	local pages={} -- a place to store all pages
 	
 	pages.metatable={} -- unique meta table everytime we create
 	pages.metatable.__index=pages.metatable -- metatable is full of functions
 	setmetatable(pages.metatable,items.metatable) -- inherit
-
-	pages.level=level
 
 	pages.page_xh=32 -- size of each page in cells
 	pages.page_yh=32

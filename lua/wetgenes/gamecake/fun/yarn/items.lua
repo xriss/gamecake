@@ -186,18 +186,6 @@ returns nil if no child item is found.
 	end
 
 -----------------------------------------------------------------------------
---[[#lua.wetgenes.gamecake.fun.yarn.items.levels
-
-	items.levels
-
-We automatically create a levels object bound to this set of items, 
-this levels object should be used to create everything else you need.
-
-]]
------------------------------------------------------------------------------
-	items.levels=require("wetgenes.gamecake.fun.yarn.levels").create(items)
-
------------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.yarn.items.rules
 
 	items.rules
@@ -232,6 +220,28 @@ cells object should be used to define all your custom game cells.
 ]]
 -----------------------------------------------------------------------------
 	items.cells=require("wetgenes.gamecake.fun.yarn.cells").create(items)
+
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.yarn.items.create_pages
+
+	items.pages = items.create_pages()
+
+Create a set of pages of cells this is assigned to items.pages and also 
+returned. This can be considered a level and you may need multiple 
+pages which are moved in and out of items.pages
+
+This is something that we need to defer so maps etc can be setup before 
+pages are created.
+
+]]
+-----------------------------------------------------------------------------
+	items.create_pages=function()
+		
+		items.pages=require("wetgenes.gamecake.fun.yarn.pages").create(items)
+		
+		return items.pages
+	end
+
 
 	return items
 
