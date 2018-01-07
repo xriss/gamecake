@@ -36,7 +36,7 @@ M.create=function(items)
 
 	pages.map={} -- index to created pages
 	
-	pages.index_to_xy=function(index)
+	pages.index_into_xy=function(index)
 		return index%0x10000 , math.floor(index/0x10000)
 	end
 	
@@ -67,17 +67,19 @@ M.create=function(items)
 	end
 
 	pages.create=function(index,name)
+--print(("%d"):format(index))
 
 		local page=items.create()
 		setmetatable(page,pages.metatable)
 		page.class="page"
+		page.pages=pages
 
 		pages.map[index]=page
 		
 		page.index=index
 		page.name=name
 		
-		page.px , page.py = pages.index_to_xy(index)
+		page.px , page.py = pages.index_into_xy(index)
 
 		page.cx=page.px*pages.page_xh
 		page.cy=page.py*pages.page_yh
@@ -89,10 +91,10 @@ M.create=function(items)
 				for x=0,#vx do local v=vx[x]
 					local cell=items.cells.create()
 					page[1 + x + y*pages.page_xh ]=cell
-					cell.cx=page.cx+v.x
-					cell.cy=page.cy+v.y
+					cell.cx=page.cx+x
+					cell.cy=page.cy+y
 					cell.page=page
-					for ii,iv in ipairs( v.items or {v.item} ) do
+					for ii,iv in ipairs( v.items ) do
 						items.create( items.prefabs.get(iv) ):insert(cell)
 					end
 				end

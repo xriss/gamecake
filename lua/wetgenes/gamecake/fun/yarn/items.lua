@@ -18,6 +18,7 @@ M.create=function(items)
 	items=items or {} -- a place to store everything that exists
 
 	items.dump={} -- all items that have been created
+	items.ids={} -- id map
 	
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.yarn.items.metatable
@@ -51,6 +52,8 @@ should always be a new table and will also be returned.
 		setmetatable(it,items.metatable)
 		
 		items.dump[it]=true -- a table of *all* items
+
+		if it.id then items.ids[it.id]=it end
 	
 		return it
 	end
@@ -71,6 +74,8 @@ garbage collected.
 		it:remove() -- make sure it has no parent
 		
 		items.dump[it]=nil -- remove from garbage dump
+		
+		if it.id and items.ids[it.id]==it then items.ids[it.id]=nil end
 		
 		return it
 
@@ -224,23 +229,17 @@ cells object should be used to define all your custom game cells.
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.yarn.items.create_pages
 
-	items.pages = items.create_pages()
+	items.pages
 
-Create a set of pages of cells this is assigned to items.pages and also 
-returned. This can be considered a level and you may need multiple 
-pages which are moved in and out of items.pages
+We automatically create a pages object bound to this set of items, this 
+pages object should be used to define all your custom game pages.
 
-This is something that we need to defer so maps etc can be setup before 
-pages are created.
+This can be considered a level and you may need multiple pages which 
+are moved in and out of items.pages
 
 ]]
 -----------------------------------------------------------------------------
-	items.create_pages=function()
-		
-		items.pages=require("wetgenes.gamecake.fun.yarn.pages").create(items)
-		
-		return items.pages
-	end
+	items.pages=require("wetgenes.gamecake.fun.yarn.pages").create(items)
 
 
 	return items

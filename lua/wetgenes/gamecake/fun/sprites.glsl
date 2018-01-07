@@ -5,6 +5,7 @@
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec2 projection_zxy;
+uniform vec3 modelview_add;
 uniform vec4 color;
 uniform sampler2D tex;
 
@@ -19,9 +20,9 @@ varying vec4  v_color;
  
 void main()
 {
-//	gl_Position = projection * vec4( a_vertex , 1.0);
-    gl_Position = projection * modelview * vec4( a_vertex.xy + projection_zxy*a_vertex.z , 0.0 , 1.0);
-    gl_Position.z+=a_vertex.z/65536.0;
+    vec3 pos=a_vertex+modelview_add;
+    gl_Position = projection * modelview * vec4( pos.xy + projection_zxy*pos.z , 0.0 , 1.0);
+    gl_Position.z+=pos.z/65536.0;
 	v_texcoord=a_texcoord;
 	v_color=a_color;
 }
