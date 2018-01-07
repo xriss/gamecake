@@ -221,6 +221,18 @@ prefabs object should be used to define all your custom game prefabs.
 -----------------------------------------------------------------------------
 	items.prefabs=require("wetgenes.gamecake.fun.yarn.prefabs").create(items)
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.yarn.items.cells
+
+	items.cells
+
+We automatically create a cells object bound to this set of items, this 
+cells object should be used to define all your custom game cells.
+
+]]
+-----------------------------------------------------------------------------
+	items.cells=require("wetgenes.gamecake.fun.yarn.cells").create(items)
+
 	return items
 
 end

@@ -84,15 +84,13 @@ M.create=function(items,level)
 		page.cx=page.px*pages.page_xh
 		page.cy=page.py*pages.page_yh
 		
-		page.cells={}
-		
 		local p=items.prefabs.get(name)
 		if p and p.legend and p.map then
 			local tiles=bitdown.pix_tiles(p.map,p.legend)
 			for y=0,#tiles do local vx=tiles[y]
 				for x=0,#vx do local v=vx[x]
-					local cell=items.level.cells.create()
-					page.cells[1 + x + y*pages.page_xh ]=cell
+					local cell=items.cells.create()
+					page[1 + x + y*pages.page_xh ]=cell
 					cell.cx=page.cx+v.x
 					cell.cy=page.cy+v.y
 					cell.page=page
@@ -107,7 +105,7 @@ M.create=function(items,level)
 	end
 	
 	pages.metatable.get_cell=function(page,cx,cy)
-		return page.cells[ 1 + cx + cy*pages.page_xh ]
+		return page[ 1 + cx + cy*pages.page_xh ]
 	end
 
 	pages.get_cell=function(cx,cy)
