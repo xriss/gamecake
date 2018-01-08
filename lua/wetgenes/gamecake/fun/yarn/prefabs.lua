@@ -3,17 +3,6 @@
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
-local dotnames=function(name)
-	local n,r=name,name
-	local f=function(a,b)
-		r=n -- start with the full string
-		n=n and n:match("^(.+)(%..+)$") -- prepare the parent string
-		return r
-	end
-	return f
-end
-
-
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.yarn.prefabs
 
@@ -64,25 +53,13 @@ it returned.
 If name doesn't exist at any level and a table is not passed in then nil 
 will be returned.
 
-Names are hierarchical, separated by dots, for instance if the 
-requested name was
-
-	one.two.three.four
-
-then all values form each of these would be merged with the longer 
-names having priority over the shorter.
-
-	one.two.three.four
-	one.two.three
-	one.two
-	one
-
+Names are hierarchical, separated by dots, see items.iterate_dotnames
 
 ]]
 -----------------------------------------------------------------------------
 	prefabs.get=function(name,prefab)
 		
-		for n in dotnames(name) do
+		for n in items.iterate_dotnames(name) do
 			local v=prefabs.names[n]
 			if v then -- got some data
 				prefab=prefab or {} -- manifest return table

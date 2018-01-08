@@ -21,6 +21,41 @@ M.create=function(items)
 	items.ids={} -- id map
 	
 -----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.yarn.items.iterate_dotnames
+
+	for name,tail in items.iterate_dotnames(names) do ... end
+
+Iterator over a names string, start with the full string and cut off 
+the tail on each iteration. This is used for simple inheritance merging 
+of named prefabs and rules or anything else.
+
+Second return value is the tail of the string or the string if not 
+tail.
+
+for example the following input string
+	
+	"one.two.three.four"
+	
+would get you the following iteration loops, one line per loop
+
+	"one.two.three.four" , "four"
+	"one.two.three"      , "three"
+	"one.two"            , "two"
+	"one"                , "one"
+
+]]
+-----------------------------------------------------------------------------
+	items.iterate_dotnames=function(name)
+		local n,r=name,name
+		local f=function(a,b)
+			r=n -- start with the full string
+			n=n and n:match("^(.+)(%..+)$") -- prepare the parent string
+			return r,n and r:sub(#n+2) or r
+		end
+		return f
+	end
+
+-----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.yarn.items.metatable
 
 	items.metatable
@@ -55,6 +90,8 @@ should always be a new table and will also be returned.
 
 		if it.id then items.ids[it.id]=it end
 	
+		it:apply("setup")
+
 		return it
 	end
 	
@@ -70,6 +107,8 @@ garbage collected.
 ]]
 -----------------------------------------------------------------------------
 	items.destroy=function(it)
+	
+		it:apply("clean")
 
 		it:remove() -- make sure it has no parent
 		
