@@ -61,18 +61,19 @@ Should perform a single time tick update on the item.
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.yarn.rules.apply
 
-	rules.apply(item,method,...)
+	item = rules.apply(item,method,...)
 
 item.rules must be a list of rule names and the order in which they should 
 be applied to this item.
 
 Call the given method in each rule with the item and the remaining arguments.
 
-If the method returns a value then it will be returned from this 
-function and no more methods will be applied even if more rules are 
-listed.
+If the method returns a value then no more methods will be applied even 
+if more rules are listed.
 
-	item:apply(method,...)
+We always return the passed in item so that calls can be chained.
+
+	item = item:apply(method,...)
 
 This function is inserted into the items.metatable so it can be called 
 directly from an item.
@@ -80,17 +81,43 @@ directly from an item.
 ]]
 -----------------------------------------------------------------------------
 	rules.apply=function(item,method,...)
-		if not item.rules then return end
+		if not item.rules then return item end
 		for _,name in ipairs(item.rules) do
 			local rule=rules.names[name]
 			if rule and rule[method] then
-				local ret=rule[method](item,...)
-				if ret then return ret end
+				if rule[method](item,...) then return item end -- stop if method returns true
 			end
 		end
+		return item
 	end
 	items.metatable.apply=rules.apply
 	
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.yarn.rules.can
+
+	yes = rules.can(item,method)
+
+Returns true if any rule in this item has the given method.
+
+	yes = item:can(method)
+
+This function is inserted into the items.metatable so it can be called 
+directly from an item.
+
+]]
+-----------------------------------------------------------------------------
+	rules.can=function(item,method)
+		if not item.rules then return false end
+		for _,name in ipairs(item.rules) do
+			local rule=rules.names[name]
+			if rule and rule[method] then
+				return true
+			end
+		end
+		return false
+	end
+	items.metatable.can=rules.can
+
 	return rules
 
 end

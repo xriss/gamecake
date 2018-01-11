@@ -57,9 +57,12 @@ void main(void)
 	d=texture2D(tex_map, tm).rgba;	
 	c=texture2D(tex_tile, ((d.rg*vec2(255.0,255.0)*tile_info.xy)+tc*over_info.xy)/tile_info.zw ).rgba;
 	fg=texture2D(tex_cmap, vec2( d.b,0.5) ).rgba;
-	bg=texture2D(tex_cmap, vec2( d.a,0.5) ).rgba;
+//	bg=texture2D(tex_cmap, vec2( d.a,0.5) ).rgba;
 
 	c*=fg; // forground tint, can adjust its alpha
+	
+	c.rgb*=d.a; // use alpha as darkness, no alpha change
+
 //	c=((bg*(1.0-c.a))+c)* v_color; // background color mixed with pre-multiplied foreground and then finally tint all of it by the main color
  
 	gl_FragColor=c;

@@ -214,8 +214,8 @@ contain a big item.
 
 	child_item = item:find(keyname)
 
-Get the first child item that has a true [keyname] value in it. All 
-child items are searched, but this is not recursive.
+Get the first child item that has a [keyname] value in it. All child 
+items are searched, but this is not recursive.
 
 returns nil if no child item is found.
 

@@ -94,6 +94,7 @@ M.create=function(items)
 					cell.cx=page.cx+x
 					cell.cy=page.cy+y
 					cell.page=page
+					cell.pages=pages
 					for ii,iv in ipairs( v.items ) do
 						items.create( items.prefabs.get(iv) ):insert(cell)
 					end
@@ -104,14 +105,14 @@ M.create=function(items)
 		return page
 	end
 	
-	pages.metatable.get_cell=function(page,cx,cy)
+	pages.metatable.get_cell_local=function(page,cx,cy)
 		return page[ 1 + cx + cy*pages.page_xh ]
 	end
 
 	pages.get_cell=function(cx,cy)
 		local index=pages.index_from_xy(math.floor(cx/pages.page_xh),math.floor(cy/pages.page_yh))
 		local page=pages.manifest(index)
-		return page:get_cell( cx%pages.page_xh , cy%pages.page_yh )
+		return page:get_cell_local( cx%pages.page_xh , cy%pages.page_yh )
 	end
 
 	return pages

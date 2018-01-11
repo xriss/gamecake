@@ -30,7 +30,47 @@ M.create=function(items)
 		
 		return cell
 	end
+	
+	cells.metatable.get_cell_relative=function(cell,vx,vy)
+		return cell.pages.get_cell(cell.cx+vx,cell.cy+vy)
+	end
+	
+	cells.metatable.iterate_neighbours=function(cell)
+		local n_x_look={  0 , -1 , 1 , 0 }
+		local n_y_look={ -1 ,  0 , 0 , 1 }
+		return function(cell,i)
+			if i>4 then return nil,nil end -- no more edges
+			return i+1 , cell:get_cell_relative( n_x_look[i] , n_y_look[i] )
+		end , cell , 1
+	end
+	
+	cells.metatable.iterate_neighboursplus=function(cell)
+		local n_x_look={ 0,  0 , -1 , 1 , 0 }
+		local n_y_look={ 0, -1 ,  0 , 0 , 1 }
+		return function(cell,i)
+			if i>5 then return nil,nil end -- no more edges
+			return i+1 , cell:get_cell_relative( n_x_look[i] , n_y_look[i] )
+		end , cell , 1
+	end
 
+	cells.metatable.iterate_borders=function(cell)
+		local n_x_look={ -1 ,  0 ,  1 , -1 , 1 , -1 , 0 , 1 }
+		local n_y_look={ -1 , -1 , -1 ,  0 , 0 ,  1 , 1 , 1 }
+		return function(cell,i)
+			if i>8 then return nil,nil end -- no more edges
+			return i+1 , cell:get_cell_relative( n_x_look[i] , n_y_look[i] )
+		end , cell , 1
+	end
+	
+	cells.metatable.iterate_bordersplus=function(cell)
+		local n_x_look={ 0, -1 ,  0 ,  1 , -1 , 1 , -1 , 0 , 1 }
+		local n_y_look={ 0, -1 , -1 , -1 ,  0 , 0 ,  1 , 1 , 1 }
+		return function(cell,i)
+			if i>9 then return nil,nil end -- no more edges
+			return i+1 , cell:get_cell_relative( n_x_look[i] , n_y_look[i] )
+		end , cell , 1
+	end
+		
 	return cells
 
 end
