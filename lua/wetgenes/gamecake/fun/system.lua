@@ -427,20 +427,24 @@ system.configurator=function(opts)
 
 	if opts.mode=="fun64" then -- default settings
 	
-		local cmap=bitdown.cmap -- use default swanky32 colors
+		opts.cmap = opts.cmap or bitdown.cmap -- use default swanky32 colors
 
-		local screen={hx=320,hy=240,ss=3,fps=60}
-
+		local screen={hx=opts.hx or 320,hy=opts.hy or 240,ss=opts.ss or 3,fps=opts.fps or 60}
+		opts.hx  = opts.hx  or 320
+		opts.hy  = opts.hy  or 240
+		opts.ss  = opts.ss  or 3
+		opts.fps = opts.fps or 60
+		
 		hardware={
 			{
 				component="screen",
 				name="screen",
-				size={screen.hx,screen.hy},
+				size={opts.hx,opts.hy},
 				bloom=fatpix and 0.75 or 0,
 				filter=fatpix and "scanline" or nil,
 				shadow=fatpix and "drop" or nil,
-				scale=screen.ss,
-				fps=screen.fps,
+				scale=opts.ss,
+				fps=opts.fps,
 				layers=3,
 			},
 			{
@@ -450,7 +454,7 @@ system.configurator=function(opts)
 			{
 				component="colors",
 				name="colors",
-				cmap=cmap, -- swanky32 palette
+				cmap=opts.cmap, -- swanky32 palette
 			},
 			{
 				component="tiles",
@@ -461,21 +465,21 @@ system.configurator=function(opts)
 			{
 				component="copper",
 				name="copper",
-				size={screen.hx,screen.hy},
+				size={opts.hx,opts.hy},
 				layer=1,
 			},
 			{
 				component="tilemap",
 				name="back",
 				tiles="tiles",
-				tilemap_size={math.ceil(screen.hx/8),math.ceil(screen.hy/8)},
+				tilemap_size={math.ceil(opts.hx/8),math.ceil(opts.hy/8)},
 				layer=1,
 			},
 			{
 				component="tilemap",
 				name="map",
 				tiles="tiles",
-				tilemap_size={math.ceil(screen.hx/8),math.ceil(screen.hy/8)},
+				tilemap_size={math.ceil(opts.hx/8),math.ceil(opts.hy/8)},
 				layer=2,
 			},
 			{
@@ -489,12 +493,13 @@ system.configurator=function(opts)
 				name="text",
 				tiles="tiles",
 				tile_size={4,8}, -- use half width tiles for font
-				tilemap_size={math.ceil(screen.hx/4),math.ceil(screen.hy/8)},
+				tilemap_size={math.ceil(opts.hx/4),math.ceil(opts.hy/8)},
 				layer=3,
 			},
 			graphics={
 				{0x0000,"_font",0x0340}, -- pre-allocate the 4x8 and 8x8 font area
-			}
+			},
+			opts=opts,
 		}
 		for i,v in ipairs(hardware) do hardware[v.name]=v end -- for easy tweaking of options
 		

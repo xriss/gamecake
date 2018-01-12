@@ -164,6 +164,8 @@ M.bake=function(oven,keys)
 		key.joy.ly=0
 		key.joy.ry=0
 		key.joy.dy=0
+		key.joy.lz=0
+		key.joy.rz=0
 		
 		key.posxbox=nil -- assume xbox
 		key.posxbox_set=function(posxbox)
@@ -364,121 +366,7 @@ M.bake=function(oven,keys)
 					end
 				end
 				
-			elseif m.class=="posix_joystick" then
-				if key.idx-1==(m.posix_num+key.opts.pad_map)%key.opts.max_up then -- only take inputs from one joystick for multiplayer
-					if m.type==1 then -- keys
-
-						local docode=function(name)
-							if m.value==1 then -- key set
-								ups.set_button(name,true)
-								used=true
-							elseif m.value==0 then -- key clear
-								ups.set_button(name,false)
-								used=true
-							end
-						end
-
--- check for xbox key codes
-						if     m.code==704 then docode("left")
-						elseif m.code==705 then docode("right")
-						elseif m.code==706 then docode("up")
-						elseif m.code==707 then docode("down")
-						elseif m.code==304 then docode("a") docode("fire")
-						elseif m.code==305 then docode("b") docode("fire")
-						elseif m.code==307 then docode("x") docode("fire")
-						elseif m.code==308 then docode("y") docode("fire")
-						elseif m.code==310 then docode("l1")
-						elseif m.code==311 then docode("r1")
-						elseif m.code==314 then docode("select")
-						elseif m.code==315 then docode("start")
--- check for ps3 key codes
-						elseif m.code==292 then docode("up")
-						elseif m.code==293 then docode("right")
-						elseif m.code==294 then docode("down")
-						elseif m.code==295 then docode("left")
-						elseif m.code==296 then docode("l2")
-						elseif m.code==297 then docode("r2")
-						elseif m.code==298 then docode("l1")
-						elseif m.code==299 then docode("r1")
-						elseif m.code==300 then docode("y") docode("fire")
-						elseif m.code==301 then docode("b") docode("fire")
-						elseif m.code==302 then docode("a") docode("fire")
-						elseif m.code==303 then docode("x") docode("fire")
-						else
---print(wstr.dump(m))
-							docode("fire") -- all other buttons are fire
-						end
-
-					elseif m.type==3 then -- sticks ( assume ps3/xbox config )
-
-
-						local docode=function(name)
-							if m.value==0 then -- key clear
-								ups.set_button(name,false)
-								used=true
-							else -- key set
-								ups.set_button(name,true)
-								used=true
-							end
-						end
-
-						local fixy=function(v)
-							if not key.posxbox then v=v*2-1 end -- ps3 range is 0,+1 xbox is -1,+1
-							return v
-						end
-						
-						local active=false
-						if m.code==59 or m.code==60 or m.code==61 then
--- stupid ps3 controller waving around bullshit
-						elseif m.code==0 then
-							key.joy.lx=fixy(m.value)
-							active=true
-							used=true
-						elseif m.code==1 then
-							key.joy.ly=fixy(m.value)
-							active=true
-							used=true
-						elseif m.code==2 then	if key.posxbox then docode("l2") end
-							key.joy.lt=m.value
-							active=true
-							used=true
-						elseif m.code==5 then	if key.posxbox then docode("r2") end
-							key.joy.rt=m.value
-							active=true
-							used=true
-						elseif m.code==16 then
-							key.joy.dx=m.value
-							active=true
-							used=true
-						elseif m.code==17 then
-							key.joy.dy=m.value
-							active=true
-							used=true
-
-						elseif m.code== 44 then docode("up")
-						elseif m.code== 45 then docode("right")
-						elseif m.code== 46 then docode("down")
--- 47? left seems to be missing?
-						elseif m.code== 48 then docode("l2")
-						elseif m.code== 49 then docode("r2")
-						elseif m.code== 50 then docode("l1")
-						elseif m.code== 51 then docode("r1")
-						elseif m.code== 52 then docode("y") docode("fire")
-						elseif m.code== 53 then docode("b") docode("fire")
-						elseif m.code== 54 then docode("a") docode("fire")
-						elseif m.code== 55 then docode("x") docode("fire")
-
-						else
---print(wstr.dump(m))
-						end
-
-						if active then
-							new_joydir( keys.joystick_msg_to_key(key.joy) )
-							ups.set_axis(key.joy) -- tell recap about the joy positions
-						end
-					end
-				end
-			elseif m.class=="joystick" then
+			elseif m.class=="joystick" then -- android joystick interface, should be "good" data
 
 				new_joydir( keys.joystick_msg_to_key(m) )
 				ups.set_axis(m) -- tell recap about the joy positions
@@ -495,7 +383,7 @@ M.bake=function(oven,keys)
 					used=true
 				end
 
-			elseif m.class=="padaxis" then
+			elseif m.class=="padaxis" then -- SDL axis values
 
 				if key.idx-1 == (m.id+key.opts.pad_map-1)%key.opts.max_up then
 					used=true
@@ -535,17 +423,17 @@ M.bake=function(oven,keys)
 						key.last_pad_value[name]=v
 					end
 
-					if     m.name=="LeftX"			then		doaxis("left","right")
-					elseif m.name=="LeftY"			then		doaxis("up","down")
-					elseif m.name=="RightX"			then		doaxis("left","right")
-					elseif m.name=="RightY"			then		doaxis("up","down")
-					elseif m.name=="TriggerLeft"	then		dotrig("l2")
-					elseif m.name=="TriggerRight"	then		dotrig("r2")
+					if     m.name=="LeftX"			then		doaxis("left","right")	ups.set_axis{lx=m.value}
+					elseif m.name=="LeftY"			then		doaxis("up","down")		ups.set_axis{ly=m.value}
+					elseif m.name=="RightX"			then		doaxis("left","right")	ups.set_axis{rx=m.value}
+					elseif m.name=="RightY"			then		doaxis("up","down")		ups.set_axis{ry=m.value}
+					elseif m.name=="TriggerLeft"	then		dotrig("l2")			ups.set_axis{lz=m.value}
+					elseif m.name=="TriggerRight"	then		dotrig("r2")			ups.set_axis{rz=m.value}
 					end
 
 				end
 
-			elseif m.class=="padkey" then
+			elseif m.class=="padkey" then -- SDL button values
 
 				if key.idx-1 == (m.id+key.opts.pad_map-1)%key.opts.max_up then
 					used=true
@@ -556,18 +444,21 @@ M.bake=function(oven,keys)
 						end
 					end
 
-					if     m.name=="Left"			then docode("left")
-					elseif m.name=="Right"			then docode("right")
-					elseif m.name=="Up"				then docode("up")
-					elseif m.name=="Down"			then docode("down")
-					elseif m.name=="A"				then docode("a") docode("fire")
-					elseif m.name=="B"				then docode("b") docode("fire")
-					elseif m.name=="X"				then docode("x") docode("fire")
-					elseif m.name=="Y"				then docode("y") docode("fire")
+					if     m.name=="Left"			then docode("left")   docode("pad_left")    ups.set_axis{dx=(m.value==1) and -32768 or 0}
+					elseif m.name=="Right"			then docode("right")  docode("pad_right")   ups.set_axis{dx=(m.value==1) and  32767 or 0}
+					elseif m.name=="Up"				then docode("up")     docode("pad_up")      ups.set_axis{dy=(m.value==1) and -32768 or 0}
+					elseif m.name=="Down"			then docode("down")   docode("pad_down")    ups.set_axis{dy=(m.value==1) and  32767 or 0}
+					elseif m.name=="A"				then docode("a")      docode("fire")
+					elseif m.name=="B"				then docode("b")      docode("fire")
+					elseif m.name=="X"				then docode("x")      docode("fire")
+					elseif m.name=="Y"				then docode("y")      docode("fire")
 					elseif m.name=="LeftShoulder"	then docode("l1")
 					elseif m.name=="RightShoulder"	then docode("r1")
+					elseif m.name=="LeftStick"		then docode("l3")
+					elseif m.name=="RightStick"		then docode("r3")
 					elseif m.name=="Back"			then docode("select")
 					elseif m.name=="Start"			then docode("start")
+					elseif m.name=="Guide"			then docode("guide")
 					else docode("fire") -- other buttons are fire
 					end
 					

@@ -976,6 +976,12 @@ base.clip=function(ga,x,y,z,w,h,d)
 	local g={}
 	g.parent=ga -- help make sure this master grd stays alive
 	setmetatable(g,meta)
+
+	if x<0 then w=w+x x=0 end
+	if y<0 then y=h-y y=0 end	
+	if (x+w)>ga.width  then w=ga.width -x end
+	if (y+h)>ga.height then h=ga.height-y end
+
 	g[0]=assert(core.clip(ga[0],x,y,z,w,h,d))
 	core.info(g[0],g)
 	return g

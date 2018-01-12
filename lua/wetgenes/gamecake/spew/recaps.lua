@@ -117,7 +117,7 @@ M.bake=function(oven,recaps)
 		
 -- use this to set a joysticks/mouse axis position
 		function recap.set_axis(m)
-			for _,n in ipairs{"lx","ly","rx","ry","dx","dy","mx","my","tx","ty"} do
+			for _,n in ipairs{"lx","ly","lz","rx","ry","rz","dx","dy","mx","my","tx","ty"} do
 				if m[n] then recap.now_axis[n]=m[n] end
 			end
 		end
