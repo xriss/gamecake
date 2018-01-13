@@ -21,7 +21,7 @@ M.create=function(items)
 	cells.metatable={} -- unique meta table everytime we create
 	cells.metatable.__index=cells.metatable -- metatable is full of functions
 	setmetatable(cells.metatable,items.metatable) -- inherit
-	
+		
 	cells.create=function(cell)
 
 		cell=items.create(cell)
@@ -71,6 +71,69 @@ M.create=function(items)
 		end , cell , 1
 	end
 		
+	cells.metatable.iterate_range=function(cell,lx,hx,ly,hy)
+
+		local n_x_look={}
+		local n_y_look={}
+
+		for y=ly,hy,1 do
+			for x=lx,hx,1 do
+				n_x_look[#n_x_look+1]=x
+				n_y_look[#n_y_look+1]=y
+			end
+		end
+		
+		return function(cell,i)
+			if i>#n_x_look then return nil,nil end -- no more edges
+			return i+1 , cell:get_cell_relative( n_x_look[i] , n_y_look[i] )
+		end , cell , 1
+	end
+
+	cells.metatable.iterate_hashrange=function(cell,lx,hx,ly,hy)
+
+		local n_x_look={}
+		local n_y_look={}
+
+		for y=ly,hy,2 do
+			for x=lx+1,hx,2 do
+				n_x_look[#n_x_look+1]=x
+				n_y_look[#n_y_look+1]=y
+			end
+			if y+1<hy then
+				for x=lx,hx,2 do
+					n_x_look[#n_x_look+1]=x
+					n_y_look[#n_y_look+1]=y+1
+				end
+			end
+		end
+		for y=ly,hy,2 do
+			for x=lx,hx,2 do
+				n_x_look[#n_x_look+1]=x
+				n_y_look[#n_y_look+1]=y
+			end
+			if y+1<hy then
+				for x=lx+1,hx,2 do
+					n_x_look[#n_x_look+1]=x
+					n_y_look[#n_y_look+1]=y+1
+				end
+			end
+		end
+		
+		return function(cell,i)
+			if i>#n_x_look then return nil,nil end -- no more edges
+			return i+1 , cell:get_cell_relative( n_x_look[i] , n_y_look[i] )
+		end , cell , 1
+	end
+
+	cells.metatable.apply_update=function(cell,dx,dy)
+		for i,c in cell:iterate_hashrange(-dx,dx,-dy,dy) do
+			c:apply("update")
+			for i,item in ipairs(c) do
+				item:apply("update")
+			end
+		end
+	end
+
 	return cells
 
 end
