@@ -2,11 +2,11 @@ cd `dirname $0`
 
 vagrant up
 
-if [ "$1" = "full" ] ; then
+if [ "$1" = "quick" ] ; then
 
-	vagrant ssh -c " cd /gamecake ; build/clang/make clean ; build/clang/make "
-else
 	vagrant ssh -c " cd /gamecake ; build/clang/make "
+else
+	vagrant ssh -c " cd /gamecake ; build/clang/make clean ; build/clang/make "
 fi
 
 vagrant halt
