@@ -89,19 +89,31 @@ M.create=function(items)
 		end , cell , 1
 	end
 
-	cells.metatable.iterate_rangetwice=function(cell,lx,hx,ly,hy)
+	cells.metatable.iterate_rangebleed=function(cell,lx,hx,ly,hy)
 
 		local n_x_look={}
 		local n_y_look={}
 
-		for y=ly,hy,1 do -- forwards
+		for y=ly,hy,1 do
 			for x=lx,hx,1 do
 				n_x_look[#n_x_look+1]=x
 				n_y_look[#n_y_look+1]=y
 			end
 		end
-		for y=hy,ly,-1 do -- backwards
+		for y=hy,ly,-1 do
 			for x=hx,lx,-1 do
+				n_x_look[#n_x_look+1]=x
+				n_y_look[#n_y_look+1]=y
+			end
+		end
+		for y=ly,hy,1 do
+			for x=hx,lx,-1 do
+				n_x_look[#n_x_look+1]=x
+				n_y_look[#n_y_look+1]=y
+			end
+		end
+		for y=hy,ly,-1 do
+			for x=lx,hx,1 do
 				n_x_look[#n_x_look+1]=x
 				n_y_look[#n_y_look+1]=y
 			end
