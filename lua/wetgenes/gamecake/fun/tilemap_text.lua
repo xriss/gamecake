@@ -63,6 +63,21 @@ tilemap_text.inject=function(it,opts)
 		it.tilemap_grd:pixels( x,y, 1,1, {it.text_tile(c,fg,bg)} )
 	end
 
+	it.text_print_image=function(image,x,y,fg,bg)
+
+		local bm={}
+		for py=0,image.hyt-1 do
+			for px=0,image.hxt*2-1 do
+				local bl=#bm
+				bm[bl+1]=image.pxt*2+px
+				bm[bl+2]=image.pyt+py
+				bm[bl+3]=fg
+				bm[bl+4]=bg
+			end
+		end
+		it.tilemap_grd:pixels( x,y, image.hxt*2,image.hyt, bm )
+	end
+
 	it.text_print1=function(s,x,y,fg,bg)
 		local ox=x
 		local bm={}
