@@ -345,6 +345,8 @@ elseif RASPI then
 
 	local raspisdk=path.getabsolute("./sdks/raspi")
 
+	includedirs { "/usr/local/include/luajit-2.1" } -- pickup our luajit / SDL2 builds from default install paths
+	includedirs { "/usr/local/include/SDL2" } -- pickup our luajit / SDL2 builds from default install paths
 
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include" }
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vmcs_host/linux" }
@@ -433,6 +435,9 @@ elseif WINDOWS then
 
 elseif OSX then
 	
+	includedirs { "/usr/local/include/luajit-2.1" } -- pickup our luajit / SDL2 builds from default install paths
+	includedirs { "/usr/local/include/SDL2" } -- pickup our luajit / SDL2 builds from default install paths
+
 	defines("LUA_USE_MKSTEMP") -- remove warning
 	defines("LUA_USE_POPEN") -- we want to enable popen
 
@@ -476,6 +481,9 @@ elseif NIX then
 
 --	BUILD_ARCH=os.capture("dpkg --print-architecture") -- better guess?
 	
+	includedirs { "/usr/local/include/luajit-2.1" } -- pickup our luajit / SDL2 builds from default install paths
+	includedirs { "/usr/local/include/SDL2" } -- pickup our luajit / SDL2 builds from default install paths
+
 	defines("LUA_USE_MKSTEMP") -- remove warning
 	defines("LUA_USE_POPEN") -- we want to enable popen
 
@@ -665,26 +673,9 @@ end
 
 
 ------------------------------------------------------------------------
--- which lua version should we usr
+-- which lua version should we use
 ------------------------------------------------------------------------
 
-LIB_LUA="lib_lua" -- default 
-
-if RASPI or ANDROID or NIX or MINGW or OSX then -- luajit is enabled for these builds
-
-	LIB_LUA="lib_luajit"
-	defines( "LIB_LUAJIT" )
-
-end
-
--- make sure we have the right headers
-if LIB_LUA=="lib_lua" then
-
-	includedirs { "lib_lua/src" }
-	LUALINKS= nil
-
-else
-	includedirs { "lib_luajit/src" }
 	
 --
 -- assume we have a prebuilt luajit.so for the target platform
@@ -696,28 +687,41 @@ else
 -- it seems to be OK to link the x32/x64 linux libs on LSB builds
 -- these built binary files are added into the repository.
 --
+-- This is currently only still used for MINGW ...
+--
 
+if EMCC then -- need to build and use our lua
 
-	if RASPI then -- hardfloat for raspbian
+	LIB_LUA="lib_lua" -- default 
+	includedirs { "lib_lua/src" }
+	LUA_LINKS= nil
 
-		LUA_LIBDIRS={ "../lib_luajit/libs/armhf/" }
-		LUA_LINKS= { "luajit" }
+elseif RASPI then -- hardfloat for raspbian
 
-	elseif ANDROID then
+	defines{ "LIB_LUAJIT" }
+	includedirs { "lib_luajit/src" }
+	LUA_LIBDIRS={ "../lib_luajit/libs/armhf/" }
+	LUA_LINKS= { "luajit" }
 
-		LUA_LIBDIRS={ "../lib_luajit/libs/arm/" }
-		LUA_LINKS= { "luajit" }
+elseif ANDROID then
 
-	elseif MINGW then
+	defines{ "LIB_LUAJIT" }
+	includedirs { "lib_luajit/src" }
+	LUA_LIBDIRS={ "../lib_luajit/libs/arm/" }
+	LUA_LINKS= { "luajit" }
 
-		LUA_LIBDIRS={ "../lib_luajit/libs/win32/" }
-		LUA_LINKS= { "luajit" }
+elseif MINGW then
 
-	else
+	defines{ "LIB_LUAJIT" }
+	includedirs { "lib_luajit/src" }
+	LUA_LIBDIRS={ "../lib_luajit/libs/win32/" }
+	LUA_LINKS= { "luajit" }
 
--- expect it to be provided in the system -> /usr/local/lib
+else -- luajit
 
-	end
+-- expect luajit to be provided in the system -> /usr/local/lib
+
+	defines{ "LIB_LUAJIT" }
 
 end
 
@@ -882,7 +886,7 @@ all_includes=all_includes or {
 ------------------------------------------------------------------------
 
 for i,v in ipairs(all_includes) do
-	if v[2] then
+	if v[1] and v[2] then
 		include(v[1])
 	end
 end

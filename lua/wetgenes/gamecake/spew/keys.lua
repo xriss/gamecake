@@ -24,10 +24,10 @@ M.bake=function(oven,keys)
 
 -- 1up/2up key islands
 	keys.defaults["island1"]={
-		["up"]			=	"up",
-		["down"]		=	"down",
-		["left"]		=	"left",
-		["right"]		=	"right",
+		["up"]			=	{"up","pad_up"},
+		["down"]		=	{"down","pad_down"},
+		["left"]		=	{"left","pad_left"},
+		["right"]		=	{"right","pad_right"},
 		["."]			=	{"fire","x"},
 		["/"]			=	{"fire","x"},
 		["shift_r"]		=	{"fire","y"},
@@ -46,10 +46,10 @@ M.bake=function(oven,keys)
 	for n,v in pairs(keys.defaults["island1"]) do keys.defaults["full"][n]=v end
 
 	keys.defaults["island2"]={
-		["w"]			=	"up",
-		["s"]			=	"down",
-		["a"]			=	"left",
-		["d"]			=	"right",
+		["w"]			=	{"up","pad_up"},
+		["s"]			=	{"down","pad_down"},
+		["a"]			=	{"left","pad_left"},
+		["d"]			=	{"right","pad_right"},
 		["<"]			=	{"fire","y"},
 		["z"]			=	{"fire","y"},
 		["shift_l"]		=	{"fire","x"},
@@ -69,10 +69,10 @@ M.bake=function(oven,keys)
 
 -- single player mame/picade style buttons
 	keys.defaults["pimoroni"]={
-		["up"]			=	"up",
-		["down"]		=	"down",
-		["left"]		=	"left",
-		["right"]		=	"right",
+		["up"]			=	{"up","pad_up"},
+		["down"]		=	{"down","pad_down"},
+		["left"]		=	{"left","pad_left"},
+		["right"]		=	{"right","pad_right"},
 		["5"]			=	"select",
 		["return"]		=	"start",
 		["enter"]		=	"start",
@@ -385,7 +385,7 @@ M.bake=function(oven,keys)
 
 			elseif m.class=="padaxis" then -- SDL axis values
 
-				if key.idx-1 == (m.id+key.opts.pad_map-1)%key.opts.max_up then
+				if m.id and key.idx-1 == (m.id+key.opts.pad_map-1)%key.opts.max_up then
 					used=true
 
 					local zone=32768/4
@@ -435,7 +435,7 @@ M.bake=function(oven,keys)
 
 			elseif m.class=="padkey" then -- SDL button values
 
-				if key.idx-1 == (m.id+key.opts.pad_map-1)%key.opts.max_up then
+				if m.id and key.idx-1 == (m.id+key.opts.pad_map-1)%key.opts.max_up then
 					used=true
 
 					local docode=function(name)

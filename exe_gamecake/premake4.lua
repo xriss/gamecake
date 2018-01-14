@@ -105,7 +105,7 @@ elseif WINDOWS then
 
 	files { "./lua.c" }
 
-	libdirs { "../lib_sdl2/win32/i686-w64-mingw32/lib/" } -- we have SDL2 binary for windows, and have deleted the dll, so it has no choice but static
+	libdirs { "../lua_sdl2/windows/i686-w64-mingw32/lib/" } -- we have SDL2 binary for windows, and have deleted the dll, so it has no choice but static
 	links { "SDL2" , "m" , "dinput8" , "dxguid" , "dxerr8" , "user32" , "gdi32" , "winmm" , "imm32" , "ole32" , "oleaut32" , "shell32" , "version" , "uuid" }
 
 -- old hack?

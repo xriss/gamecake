@@ -9,7 +9,7 @@ excludes("git/src/unix.*")
 
 links { "lib_lua" }
 
-defines "LUA_VERSION_NUM=501"
+--defines "LUA_VERSION_NUM=501"
 defines "LUASOCKET_API=extern"
 defines "LUASOCKET_EXPORTS"
 
@@ -42,7 +42,7 @@ files { "git/src/mime.c" ,"git/src/mime.h" , "git/src/compat.c" , "git/src/compa
 
 links { "lib_lua" }
 
-defines "LUA_VERSION_NUM=501"
+--defines "LUA_VERSION_NUM=501"
 defines "MIME_API=extern"
 defines "MIME_EXPORTS"
 
