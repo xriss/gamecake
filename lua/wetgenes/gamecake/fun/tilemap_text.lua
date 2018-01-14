@@ -64,7 +64,8 @@ tilemap_text.inject=function(it,opts)
 	end
 
 	it.text_print_image=function(image,x,y,fg,bg)
-
+		fg=fg or 24
+		bg=bg or 0
 		local bm={}
 		for py=0,image.hyt-1 do
 			for px=0,image.hxt*2-1 do
@@ -76,6 +77,43 @@ tilemap_text.inject=function(it,opts)
 			end
 		end
 		it.tilemap_grd:pixels( x,y, image.hxt*2,image.hyt, bm )
+	end
+
+	it.text_print_border=function(image,x,y,w,h,gc,fg,bg)
+		fg=fg or 31
+		bg=bg or 0
+		gc=gc or 1 -- size of centre repeat relative to edges
+		local rx=math.floor(image.hxt*2/(gc+2)) -- tiles per edge segment
+		local ry=math.floor(image.hyt/(gc+2))
+		local sx=image.hxt*2-rx-rx -- tiles per center repeat
+		local sy=image.hxt-ry-ry
+		local x2=image.hxt*2-rx
+		local y2=image.hyt-ry
+		local bm={}
+		for py=0,h-1 do
+			for px=0,w-1 do
+
+				local tx,ty
+
+				if		py<ry		then	ty=(py)%ry					-- top line
+				elseif	py>=h-ry	then	ty=(py-(h-ry-ry))%ry	+y2	-- bottom line
+									else	ty=(py-ry)%sy			+ry	-- center lines
+				end
+				
+				if		px<rx		then	tx=(px)%rx					-- left line
+				elseif	px>=w-rx	then	tx=(px-(w-rx-rx))%rx	+x2	-- right line
+									else	tx=(px-rx)%sx			+rx	-- center lines
+				end
+
+				local bl=#bm
+				bm[bl+1]=image.pxt*2+tx
+				bm[bl+2]=image.pyt+ty
+				bm[bl+3]=fg
+				bm[bl+4]=bg
+
+			end
+		end
+		it.tilemap_grd:pixels( x,y, w,h, bm )
 	end
 
 	it.text_print1=function(s,x,y,fg,bg)
