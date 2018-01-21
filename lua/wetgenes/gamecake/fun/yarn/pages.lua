@@ -96,8 +96,8 @@ M.create=function(items)
 					cell.cy=page.cy+y
 					cell.page=page
 					cell.pages=pages
-					for ii,iv in ipairs( v.items ) do
-						cell.back=v.back or cell.back
+					cell.back=v.back
+					for ii,iv in ipairs( v.items or {} ) do
 						items.create( items.prefabs.get(iv) ):insert(cell)
 					end
 				end
