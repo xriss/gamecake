@@ -69,8 +69,7 @@ M.create=function(items)
 	pages.create=function(index,name)
 --print(("%d"):format(index))
 
-		local page=items.create()
-		setmetatable(page,pages.metatable)
+		local page={}
 		page.class="page"
 		page.pages=pages
 
@@ -83,6 +82,8 @@ M.create=function(items)
 
 		page.cx=page.px*pages.page_xh
 		page.cy=page.py*pages.page_yh
+
+		page=items.create(page,pages.metatable)
 		
 		local p=items.prefabs.get(name)
 		if p and p.legend and p.map then
@@ -96,6 +97,7 @@ M.create=function(items)
 					cell.page=page
 					cell.pages=pages
 					for ii,iv in ipairs( v.items ) do
+						cell.back=v.back or cell.back
 						items.create( items.prefabs.get(iv) ):insert(cell)
 					end
 				end

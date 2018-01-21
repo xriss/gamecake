@@ -24,9 +24,9 @@ M.create=function(items)
 		
 	cells.create=function(cell)
 
-		cell=items.create(cell)
-		setmetatable(cell,cells.metatable)
+		cell=cell or {}
 		cell.class="cell"
+		cell=items.create(cell,cells.metatable)
 		
 		return cell
 	end

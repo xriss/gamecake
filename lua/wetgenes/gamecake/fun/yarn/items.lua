@@ -74,17 +74,19 @@ Expose the item metatable so more methods can easily be added.
 
 	item = items.create()
 	item = items.create({})
+	item = items.create({},metatable)
 
 Create a single item, optionally pass in a base item table that will be 
 turned into a proper item (using setmetatable to add methods). This 
-should always be a new table and will also be returned.
+should always be a new table and will also be returned. If no 
+metatable is provided then items.metatable will be used.
 
 ]]
 -----------------------------------------------------------------------------
-	items.create=function(it)
+	items.create=function(it,metatable)
 	
 		it=it or {}
-		setmetatable(it,items.metatable)
+		setmetatable(it,metatable or items.metatable)
 		
 		items.dump[it]=true -- a table of *all* items
 
