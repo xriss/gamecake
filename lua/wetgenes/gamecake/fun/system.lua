@@ -133,6 +133,8 @@ print("system setup")
 	end
 
 	system.resume({setup=true})
+
+	oven.mods["wetgenes.gamecake.mods.snaps"].fbo=system.components.screen.fbo
 	
 	return system
 end

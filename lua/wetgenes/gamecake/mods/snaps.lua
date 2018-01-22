@@ -12,7 +12,7 @@ local wzips=require("wetgenes.zips")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
-local win=require("wetgenes.win")
+local wwin=require("wetgenes.win")
 
 local wgrd   =require("wetgenes.grd")
 local lfs ; (function() pcall( function() lfs=require("lfs") end ) end)()
@@ -32,13 +32,35 @@ function M.bake(oven,snaps)
 	function snaps.setup()
 		if not lfs then return end
 
-		lfs.mkdir(win.files_prefix.."snaps")
+		lfs.mkdir(wwin.files_prefix.."snaps")
 	end
 
 	function snaps.clean()
 	end
 	
 	function snaps.update()
+
+		if snaps.auto and snaps.frame_rate and snaps.frame_time then --  a nonskip frame rate limiter for animation capture
+			if wwin.hardcore.sleep then
+				while snaps.frame_time>oven.win:time() do wwin.hardcore.sleep(0.0001) end -- sleep here until we need to update
+			end
+			snaps.frame_time=snaps.frame_time+snaps.frame_rate -- step a frame forward
+		end
+
+	end
+	
+
+
+	function snaps.get_grd()
+		local g
+		if snaps.fbo then -- use this fbo
+			g=snaps.fbo:download()
+		else -- full screen
+			g=wgrd.create( wgrd.FMT_U8_RGBA_PREMULT , oven.win.width , oven.win.height , 1 )
+			gl.ReadPixels(0,0,oven.win.width,oven.win.height,gl.RGBA,gl.UNSIGNED_BYTE,g.data)
+			g:flipy() -- open gl is upside down
+		end
+		return g
 	end
 	
 	function snaps.draw()
@@ -53,25 +75,29 @@ function M.bake(oven,snaps)
 				local name=snaps.auto.."_"..(("%04d"):format(snaps.idx))
 
 if lfs then -- shove files in dir
-		lfs.mkdir(win.files_prefix.."snaps/"..snaps.auto)
+		lfs.mkdir(wwin.files_prefix.."snaps/"..snaps.auto)
 		name=snaps.auto.."/"..(("%04d"):format(snaps.idx))
 end
-				local g=wgrd.create( wgrd.FMT_U8_RGBA_PREMULT , oven.win.width , oven.win.height , 1 )
-				gl.ReadPixels(0,0,oven.win.width,oven.win.height,gl.RGBA,gl.UNSIGNED_BYTE,g.data)
-				g:flipy() -- open gl is upside down
-				local path=win.files_prefix.."snaps/"..name..".png"
+				local g=snaps.get_grd()
+				local path=wwin.files_prefix.."snaps/"..name..".png"
 print("Auto "..path)
---				g:scale(oven.win.width/3 , oven.win.height/3,1)
---				g:remap(gb)
 				assert(g:save(path))
 				snaps.list[#snaps.list+1]=path
 
 				if snaps.frame>=snaps.frame_max then -- finished
 
+				local f=io.open(wwin.files_prefix.."snaps/"..snaps.auto..".sh","w")
+				if f then
+					f:write([[
+cd `dirname $0`
+convert -monitor -delay 3 -loop 0 ]]..snaps.auto..[[/*.png ]]..snaps.auto..[[.gif
+]])
+					f:close()
+				end
 
 if snaps.encode_gif then
 
-	local gb=wgrd.create( wgrd.FMT_U8_INDEXED , oven.win.width , oven.win.height , 1 )
+	local gb=wgrd.create( wgrd.FMT_U8_INDEXED , g.width , g.height , 1 )
 	gb:palette(0,32,{
 -- force swanky32 palette when converting to GIF
 		0x00,0x00,0x00,0x00,
@@ -108,7 +134,7 @@ if snaps.encode_gif then
 		0xff,0xff,0xff,0xff,
 	})
 
-	local stream=gb:stream({filename=win.files_prefix.."snaps/"..snaps.auto..".gif",speed=1000/30})
+	local stream=gb:stream({filename=wwin.files_prefix.."snaps/"..snaps.auto..".gif",speed=1000/30})
 
 		for i,v in ipairs(snaps.list) do
 			
@@ -119,7 +145,7 @@ if snaps.encode_gif then
 
 			stream.write(gb)
 		end
-		print("GIF",win.files_prefix.."snaps/"..snaps.auto..".gif")
+		print("GIF",wwin.files_prefix.."snaps/"..snaps.auto..".gif")
 
 		stream.close(gb)
 end
@@ -142,9 +168,9 @@ end
 	snaps.auto=false
 	snaps.idx=0
 	snaps.frame=0
-	snaps.frame_max=60*12  -- tweleve seconds, at 60fps
+	snaps.frame_max=60*20  -- x seconds, at 60fps
 	snaps.frame_skip=2     -- only record every other frame, so 30 fps output.
-	snaps.encode_gif=false -- encode to gif? nah, best not to.
+	snaps.encode_gif=false -- encode to gif? nah, best not to, just use convert on the png outputs.
 	function snaps.msg(m)
 		if not lfs then return m end
 
@@ -166,19 +192,17 @@ end
 					snaps.idx=0
 					snaps.frame=0
 					snaps.list={}
-					snaps.frame_rate=oven.frame_rate
+					snaps.frame_rate=oven.frame_rate -- time per frame
+					snaps.frame_time=oven.frame_time -- start time
 					oven.frame_rate=nil -- disable limiter
 				end
 				return nil
 			end
 
 			local name=os.date("%Y%m%d_%H%M%S")
-print("Snaps "..win.files_prefix.."snaps/"..name..".png")
-			local g=wgrd.create( wgrd.FMT_U8_RGBA_PREMULT , oven.win.width , oven.win.height , 1 )
-			gl.ReadPixels(0,0,oven.win.width,oven.win.height,gl.RGBA,gl.UNSIGNED_BYTE,g.data)
---			g:convert( wgrd.FMT_U8_RGBA ) -- save code expects this format
-			g:flipy() -- open gl is upside down
-			g:save(win.files_prefix.."snaps/"..name..".png")
+print("Snaps "..wwin.files_prefix.."snaps/"..name..".png")
+			local g=snaps.get_grd()
+			g:save(wwin.files_prefix.."snaps/"..name..".png")
 			return nil
 		end
 		return m
