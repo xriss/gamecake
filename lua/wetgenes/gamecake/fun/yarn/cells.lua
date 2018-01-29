@@ -53,6 +53,15 @@ M.create=function(items)
 		end , cell , 1
 	end
 
+	cells.metatable.iterate_corners=function(cell)
+		local n_x_look={ -1 ,  1 , -1 , 1 }
+		local n_y_look={ -1 , -1 ,  1 , 1 }
+		return function(cell,i)
+			if i>4 then return nil,nil end -- no more edges
+			return i+1 , cell:get_cell_relative( n_x_look[i] , n_y_look[i] )
+		end , cell , 1
+	end
+
 	cells.metatable.iterate_borders=function(cell)
 		local n_x_look={ -1 ,  0 ,  1 , -1 , 1 , -1 , 0 , 1 }
 		local n_y_look={ -1 , -1 , -1 ,  0 , 0 ,  1 , 1 , 1 }
