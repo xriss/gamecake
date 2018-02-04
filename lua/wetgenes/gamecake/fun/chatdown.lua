@@ -63,6 +63,8 @@ chatdown.parse=function(chat_text)
 	local proxies={}
 	local proxy={}
 
+	local ignore=true -- ignore first lines until we see a code
+
 	for i,v in ipairs(lines) do
 
 		local name
@@ -70,6 +72,7 @@ chatdown.parse=function(chat_text)
 		local code=v:sub(1,1)
 
 		if code=="#" then -- #description
+			ignore=false -- end long comments
 
 			local c=v:sub(2,2)
 			
@@ -101,6 +104,7 @@ chatdown.parse=function(chat_text)
 			end
 
 		elseif code=="<" then -- <response
+			ignore=false -- end long comments
 
 			name,v=v:match("%<(%S*)%s*(.*)$")
 			
@@ -121,6 +125,7 @@ chatdown.parse=function(chat_text)
 			end
 
 		elseif code==">" then -- >decision
+			ignore=false -- end long comments
 		
 			name,v=v:match("%>(%S*)%s*(.*)$")
 
@@ -134,6 +139,7 @@ chatdown.parse=function(chat_text)
 			decisions[#decisions+1]=decision
 
 		elseif code=="=" then -- =proxy
+			ignore=false -- end long comments
 		
 			name,v=v:match("%=(%S*)%s*(.*)$")
 
@@ -149,11 +155,14 @@ chatdown.parse=function(chat_text)
 			
 		elseif code=="-" then -- -comment
 		
-			v=nil
-
+			if v:sub(1,2)=="--" then -- a multi-line long comment
+				ignore=true -- ignore many lines until the next code
+			else
+				v=nil	-- just ignore this line
+			end
 		end
 		
-		if v then
+		if v and not ignore then
 
 			text[#text+1]=v
 

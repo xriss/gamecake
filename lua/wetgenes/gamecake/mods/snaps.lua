@@ -90,7 +90,7 @@ print("Auto "..path)
 				if f then
 					f:write([[
 cd `dirname $0`
-convert -monitor -delay 3 -loop 0 ]]..snaps.auto..[[/*.png ]]..snaps.auto..[[.gif
+convert -dither none -layers optimize -monitor -delay 3 -loop 0 ]]..snaps.auto..[[/*.png ]]..snaps.auto..[[.gif
 ]])
 					f:close()
 				end
