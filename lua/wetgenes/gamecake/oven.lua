@@ -202,7 +202,12 @@ os.exit()
 		function oven.preheat()
 
 			if opts.fps then
-				oven.frame_rate=1/opts.fps -- how fast we want to run
+				if opts.fps=="auto" then -- we will auto regulate between 1 and 60 fps
+					oven.frame_rate=1/60
+					oven.frame_rate_auto=1/60
+				else
+					oven.frame_rate=1/opts.fps -- how fast we want to run
+				end
 				oven.frame_time=0
 			end
 
@@ -529,14 +534,17 @@ local gb=oven.gl.counts.buffers
 print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 ]]
 
-
+			
 			if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
 			
 				if oven.frame_time<(oven.win:time()-0.500) then oven.frame_time=oven.win:time() end -- prevent race condition
 				
 				if wwin.hardcore.sleep then
-					while (oven.frame_time-oven.frame_rate)>oven.win:time() do wwin.hardcore.sleep(0.0001) end -- sleep here until we need to update
-				else
+					while (oven.frame_time-oven.frame_rate)>oven.win:time() do
+						oven.msgs() -- keep handling msgs?
+						wwin.hardcore.sleep(0.0001) -- sleep here until we need to update
+					end
+ 				else
 --print("NOSLEEP")
 					if (oven.frame_time-oven.frame_rate)>oven.win:time() then return end -- cant sleep, just skip
 				end
@@ -677,8 +685,22 @@ print(sa.." : "..sb)
 		end
 
 		local old_mouse={x=0,y=0}
+		oven.frame_rate_auto_active=os.time()
 		function oven.msgs() -- read and process any msgs we have from win:msg
 
+			local time_now=os.time()
+			if oven.frame_rate_auto then -- auto pick
+				if time_now-oven.frame_rate_auto_active <= 10 then -- any recent activity in 10 seconds?
+
+					if oven.frame_rate ~= oven.frame_rate_auto then -- wake up
+						oven.frame_time=oven.win:time()				
+						oven.frame_rate=oven.frame_rate_auto
+					end
+				else -- no recent activity , so , sleepy time
+					oven.frame_rate=(time_now-oven.frame_rate_auto_active-10)*oven.frame_rate_auto -- wait longer for next frame
+				end
+			end
+			
 			if oven.win then
 				for m in oven.win:msgs() do
 
@@ -696,11 +718,17 @@ end
 						old_mouse.y=m.y
 						m.xraw=m.x				-- remember in message
 						m.yraw=m.y	
+						oven.frame_rate_auto_active=time_now
 					end
 
 					if m.class=="touch" then	-- need to fix x,y numbers
 						m.xraw=m.x				-- remember in message
 						m.yraw=m.y	
+						oven.frame_rate_auto_active=time_now
+					end
+
+					if m.class=="key" or m.class=="padkey" then -- key or joystick buttons
+						oven.frame_rate_auto_active=time_now
 					end
 
 					if m.class=="close" then -- window has been closed so do a shutdown

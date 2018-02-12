@@ -96,7 +96,7 @@ function wtexteditor.setup(widget,def)
 	widget.texteditor_refresh	=	wtexteditor.texteditor_refresh
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
 
-	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll"})
+	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full"})
 
 
 --	wtexteditor:redo_text(def.text or "") -- set starting text
