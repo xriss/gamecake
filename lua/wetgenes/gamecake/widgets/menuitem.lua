@@ -107,9 +107,7 @@ function wmenuitem.hooks(hook,widget,dat)
 
 local showmenu=function()
 
-	if widget.menu_data then -- and widget.master.menu~=widget then -- add a sub menu using this data
-
-		widget.master.menu=widget
+	if widget.menu_data then -- add a sub menu using this data
 
 		local w=widget:menu_add(widget.menu_data)
 		local map={}
@@ -140,35 +138,25 @@ local togglemenu=function()
 	if widget.menu and ( not widget.menu.hidden ) then -- already visible so hide it
 		widget.menu:remove()
 		widget.menu=nil
-		widget.master.menu=nil
 	else
 		showmenu()
 	end
 end
 
 
-	if hook=="over" then -- and widget.master.menu then
---		if widget.parent.class~="menubar" then -- menubar needs clicks
---		if widget.parent.class=="menu" or widget.parent.class=="menubar" then -- only the menu?
-			showmenu()
---		end
---		end
+	if hook=="over" then
+		showmenu()
 	end
 
 	if hook=="active" then
 		if widget.parent.class=="menubar" then
-			if widget.master.menu then
-				widget.master.menu=nil
-			else
-				showmenu()
-			end
+			showmenu()
 		end
 	end
 	
 	if hook=="click" then
 	
 		if widget.parent.class~="menubar" then
-			widget.master.menu=nil
 	
 			if widget.menu_data then -- add a sub menu using this data
 				
