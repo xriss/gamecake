@@ -758,7 +758,7 @@ end
 			sheets.get(widget.sheet_over):draw(widget.sheet_id or 1,widget.sheet_px or 0,(widget.sheet_py or 0)+typ,0,widget.sheet_hx or hx,widget.sheet_hy or hy)
 		end
 
-		if widget.text then
+		if widget.text or widget.draw_text then
 		
 			local fy=widget:bubble("text_size") or 16
 			local f=widget:bubble("font") or 4
@@ -767,85 +767,92 @@ end
 			if type(f)=="number" then fontfix=0.4 end -- builtin fonts look better like this
 			font.set(cake.fonts.get(f))
 			font.set_size(fy,0)
-
-			local lines
 			
-			if widget.text_align=="wrap" then
-				lines=font.wrap(widget.text,{w=widget.hx}) -- break into lines
-				widget.lines=lines -- remember wraped text
+			if widget.draw_text then -- draw special text using a function
+
+				widget.draw_text(widget,txp,typ) -- use canvas.font to draw the text, font and size will be set already add txp,typ to your draw position for hover text position fixes
+
 			else
-				lines={widget.text}
-			end
 
-			local ty=typ
-
-			for i,line in ipairs(lines) do
-			
-				local tx=font.width(line)
+				local lines
 				
-				if widget.text_align=="left" or widget.text_align=="wrap" then
-					tx=0
-				elseif widget.text_align=="right" then
-					tx=(widget.hx-tx)
-				elseif widget.text_align=="centerx" then
-					tx=(widget.hx-tx)/2
-				elseif widget.text_align=="left_center" then
-					tx=widget.hy/4
-					ty=(widget.hy/2)-(fy*fontfix)+typ
-				else -- center a single line vertically as well
-					tx=(widget.hx-tx)/2 
-					ty=(widget.hy/2)-(fy*fontfix)+typ
-				end
-				
-				tx=tx+txp
---				ty=ty+typ
-				
-				if i==1 then -- remember topleft of text position for first line
-					widget.text_x=tx
-					widget.text_y=ty
+				if widget.text_align=="wrap" then
+					lines=font.wrap(widget.text,{w=widget.hx}) -- break into lines
+					widget.lines=lines -- remember wraped text
+				else
+					lines={widget.text}
 				end
 
-				if widget.text_color_shadow then
-					gl.Color( unpack(master.get_color(nil,widget.text_color_shadow)) )
-					font.set_xy((tx+1)*wsx,(ty+1)*wsy)
-					font.draw(line)
-				end
+				local ty=typ
+
+				for i,line in ipairs(lines) do
 				
-				gl.Color( unpack(master.get_color(nil,widget.text_color)) )
-				font.set_xy((tx)*wsx,(ty)*wsy)
-				font.draw(line)
-				
-				if widget.class=="textedit" then -- hack
-					if widget.master.focus==widget or widget.master.edit==widget then --only draw curser in active widget
-						if widget.master.throb>=128 then
-							local sw=font.width(widget.text:sub(1,widget.data.str_idx))
-
-							font.set_xy((tx+sw)*wsx,(ty)*wsy)
-							font.draw("_")
-						end
-						
-						if widget.data.str_select~=0 then
-							local s1=font.width(widget.text:sub(1,widget.data.str_idx))
-							local s2=font.width(widget.text:sub(1,widget.data.str_idx+widget.data.str_select))
-
-							local x0,x1= (tx+s1)*wsx , (tx+s2)*wsx
-							local y0,y1= (ty)*wsy	, (ty+fy)*wsy
-							
-							local cc=master.get_color(nil,widget.text_color)
-							cc[1]=cc[1]*0.25
-							cc[2]=cc[2]*0.25
-							cc[3]=cc[3]*0.25
-							cc[4]=cc[4]*0.25
-							gl.Color( unpack(cc) )
-
-							draw_quad(x0,y0,x1,y0,x1,y1,x0,y1)
-
-						end
-						
+					local tx=font.width(line)
+					
+					if widget.text_align=="left" or widget.text_align=="wrap" then
+						tx=0
+					elseif widget.text_align=="right" then
+						tx=(widget.hx-tx)
+					elseif widget.text_align=="centerx" then
+						tx=(widget.hx-tx)/2
+					elseif widget.text_align=="left_center" then
+						tx=widget.hy/4
+						ty=(widget.hy/2)-(fy*fontfix)+typ
+					else -- center a single line vertically as well
+						tx=(widget.hx-tx)/2 
+						ty=(widget.hy/2)-(fy*fontfix)+typ
 					end
-				end
+					
+					tx=tx+txp
+	--				ty=ty+typ
+					
+					if i==1 then -- remember topleft of text position for first line
+						widget.text_x=tx
+						widget.text_y=ty
+					end
 
-				ty=ty+fy
+					if widget.text_color_shadow then
+						gl.Color( unpack(master.get_color(nil,widget.text_color_shadow)) )
+						font.set_xy((tx+1)*wsx,(ty+1)*wsy)
+						font.draw(line)
+					end
+					
+					gl.Color( unpack(master.get_color(nil,widget.text_color)) )
+					font.set_xy((tx)*wsx,(ty)*wsy)
+					font.draw(line)
+					
+					if widget.class=="textedit" then -- hack
+						if widget.master.focus==widget or widget.master.edit==widget then --only draw curser in active widget
+							if widget.master.throb>=128 then
+								local sw=font.width(widget.text:sub(1,widget.data.str_idx))
+
+								font.set_xy((tx+sw)*wsx,(ty)*wsy)
+								font.draw("_")
+							end
+							
+							if widget.data.str_select~=0 then
+								local s1=font.width(widget.text:sub(1,widget.data.str_idx))
+								local s2=font.width(widget.text:sub(1,widget.data.str_idx+widget.data.str_select))
+
+								local x0,x1= (tx+s1)*wsx , (tx+s2)*wsx
+								local y0,y1= (ty)*wsy	, (ty+fy)*wsy
+								
+								local cc=master.get_color(nil,widget.text_color)
+								cc[1]=cc[1]*0.25
+								cc[2]=cc[2]*0.25
+								cc[3]=cc[3]*0.25
+								cc[4]=cc[4]*0.25
+								gl.Color( unpack(cc) )
+
+								draw_quad(x0,y0,x1,y0,x1,y1,x0,y1)
+
+							end
+							
+						end
+					end
+
+					ty=ty+fy
+				end
 			end
 		end
 		

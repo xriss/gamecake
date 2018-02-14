@@ -102,7 +102,7 @@ sdl.create=function(t)
 		x       = t.x,
 		y       = t.y,
 	})
-
+	
 	return it
 end
 
@@ -139,6 +139,7 @@ sdl.show=function(it,view)
 	else						 it.win:setFullscreen(0)
 	end
 	
+--	sdl.mousexy_init()
 	
 	return nil
 end
@@ -191,6 +192,28 @@ sdl.wait=function()
 end
 
 sdl.mousexy={0,0}
+
+-- add current mouse position to the queue
+-- this does not help, we still get 0,0 at the start until the mouse moves...
+--[[
+sdl.mousexy_init=function()
+	local b,x,y=SDL.getMouseState()
+	local t={}
+	t.time=sdl.time()
+	t.class="mouse"
+	t.action=0
+	t.x=x
+	t.y=y
+	sdl.queue[#sdl.queue+1]=t
+
+	sdl.mousexy[1]=t.x
+	sdl.mousexy[2]=t.y
+	
+print("MOUSE",t.x,t.y)
+
+end
+]]
+
 sdl.msg_fetch=function()
 
 	for e in SDL.pollEvent() do
