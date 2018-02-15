@@ -776,6 +776,24 @@ base.flipx=function(g,...)
 	return r and g
 end
 
+--[[#lua.wetgenes.grd.xor
+
+	g:xor(ga,gb)
+
+Set our image data to the XOR of the image data from ga and gb.
+
+This is intended to be combined with g:shrink to work out the area of 
+change between two images.
+
+Errors if all three grds are not the same size and format.
+
+]]
+base.xor=function(g,...)
+	local r=core.xor(g[0],ga[0],gb[0])
+	core.info(g[0],g)
+	return r and g
+end
+
 --[[#lua.wetgenes.grd.shrink
 
 	g:shrink(area)
@@ -789,7 +807,7 @@ This function looks at the pixels in that area and shrinks each edge
 inwards if it is fully transparent then return this new area in the 
 same table that was passed in.
 
-You can then use this information to crop this image resulting is a 
+You can then use this information to crop this image resulting in a 
 smaller sized grd containing all the solid pixels.
 
 ]]
