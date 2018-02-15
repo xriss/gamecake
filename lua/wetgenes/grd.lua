@@ -778,18 +778,18 @@ end
 
 --[[#lua.wetgenes.grd.xor
 
-	g:xor(ga,gb)
+	g:xor(ga)
 
-Set our image data to the XOR of the image data from ga and gb.
+Set our image data to the XOR of the image/palette data from ga and g.
 
 This is intended to be combined with g:shrink to work out the area of 
-change between two images.
+change between the two images.
 
-Errors if all three grds are not the same size and format.
+Both grds must be the same size and format.
 
 ]]
-base.xor=function(g,...)
-	local r=core.xor(g[0],ga[0],gb[0])
+base.xor=function(g,ga)
+	local r=core.xor(g[0],ga[0])
 	core.info(g[0],g)
 	return r and g
 end

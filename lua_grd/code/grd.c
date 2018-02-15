@@ -2099,29 +2099,29 @@ s32 h=bb->h;
 // Perform an exclusive or of two images into a third, these must all be the same size and format.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_xor(struct grd *gd,struct grd *ga,struct grd *gb)
+int grd_xor(struct grd *gd,struct grd *ga)
 {
-	if( ! ( (gd->bmap->fmt==ga->bmap->fmt) && (gd->bmap->fmt==gb->bmap->fmt) ) )
+	if( ! ( (gd->bmap->fmt==ga->bmap->fmt) ) )
 	{
 		gd->err="bad format";
 		return 0;
 	}
-	if( ! ( (gd->bmap->w==ga->bmap->w) && (gd->bmap->w==gb->bmap->w) ) )
+	if( ! ( (gd->bmap->w==ga->bmap->w) ) )
 	{
 		gd->err="bad width";
 		return 0;
 	}
-	if( ! ( (gd->bmap->h==ga->bmap->h) && (gd->bmap->h==gb->bmap->h) ) )
+	if( ! ( (gd->bmap->h==ga->bmap->h) ) )
 	{
 		gd->err="bad height";
 		return 0;
 	}
-	if( ! ( (gd->bmap->d==ga->bmap->d) && (gd->bmap->d==gb->bmap->d) ) )
+	if( ! ( (gd->bmap->d==ga->bmap->d) ) )
 	{
 		gd->err="bad depth";
 		return 0;
 	}
-	if( ! ( (gd->cmap->w==ga->cmap->w) && (gd->cmap->w==gb->cmap->w) ) )
+	if( ! ( (gd->cmap->w==ga->cmap->w) ) )
 	{
 		gd->err="bad cmap";
 		return 0;
@@ -2129,9 +2129,9 @@ int grd_xor(struct grd *gd,struct grd *ga,struct grd *gb)
 
 s32 x,y,z;
 s32 w,h,d;
-u8  *p1d,*p1a,*p1b;
-u16 *p2d,*p2a,*p2b;
-u32 *p4d,*p4a,*p4b;
+u8  *p1d,*p1a;
+u16 *p2d,*p2a;
+u32 *p4d,*p4a;
 
 	w=gd->bmap->w;
 	h=gd->bmap->h;
@@ -2145,10 +2145,9 @@ u32 *p4d,*p4a,*p4b;
 			{
 				p4d=(u32*)grdinfo_get_data( gd->bmap, x , y , z );
 				p4a=(u32*)grdinfo_get_data( ga->bmap, x , y , z );
-				p4b=(u32*)grdinfo_get_data( gb->bmap, x , y , z );
 				for( x=0 ; x<w ; x++ )
 				{
-					(*p4d++) = (*p4a++)^(*p4b++);
+					(*p4d++) ^= (*p4a++);
 				}
 			}
 		}
@@ -2162,12 +2161,11 @@ u32 *p4d,*p4a,*p4b;
 			{
 				p1d=grdinfo_get_data( gd->bmap, x , y , z );
 				p1a=grdinfo_get_data( ga->bmap, x , y , z );
-				p1b=grdinfo_get_data( gb->bmap, x , y , z );
 				for( x=0 ; x<w ; x++ )
 				{
-					(*p1d++) = (*p1a++)^(*p1b++);
-					(*p1d++) = (*p1a++)^(*p1b++);
-					(*p1d++) = (*p1a++)^(*p1b++);
+					(*p1d++) ^= (*p1a++);
+					(*p1d++) ^= (*p1a++);
+					(*p1d++) ^= (*p1a++);
 				}
 			}
 		}
@@ -2181,10 +2179,9 @@ u32 *p4d,*p4a,*p4b;
 			{
 				p2d=(u16*)grdinfo_get_data( gd->bmap, x , y , z );
 				p2a=(u16*)grdinfo_get_data( ga->bmap, x , y , z );
-				p2b=(u16*)grdinfo_get_data( gb->bmap, x , y , z );
 				for( x=0 ; x<w ; x++ )
 				{
-					(*p2d++) = (*p2a++)^(*p2b++);
+					(*p2d++) ^= (*p2a++);
 				}
 			}
 		}
@@ -2198,10 +2195,9 @@ u32 *p4d,*p4a,*p4b;
 			{
 				p1d=grdinfo_get_data( gd->bmap, x , y , z );
 				p1a=grdinfo_get_data( ga->bmap, x , y , z );
-				p1b=grdinfo_get_data( gb->bmap, x , y , z );
 				for( x=0 ; x<w ; x++ )
 				{
-					(*p1d++) = (*p1a++)^(*p1b++);
+					(*p1d++) ^= (*p1a++);
 				}
 			}
 		}
@@ -2211,10 +2207,9 @@ u32 *p4d,*p4a,*p4b;
 	{
 		p4d=(u32*)grdinfo_get_data( gd->cmap, 0 , 0 , 0 );
 		p4a=(u32*)grdinfo_get_data( ga->cmap, 0 , 0 , 0 );
-		p4b=(u32*)grdinfo_get_data( gb->cmap, 0 , 0 , 0 );
 		for( x=0 ; x<gd->cmap->w ; x++ )
 		{
-			(*p4d++) = (*p4a++)^(*p4b++);
+			(*p4d++) ^= (*p4a++);
 		}
 	}
 

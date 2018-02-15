@@ -1056,13 +1056,11 @@ int lua_grd_xor (lua_State *l)
 {
 part_ptr pd;
 part_ptr pa;
-part_ptr pb;
 
 	pd=lua_grd_check_ptr(l,1);
 	pa=lua_grd_check_ptr(l,2);
-	pb=lua_grd_check_ptr(l,3);
 
-	if( !grd_xor(pd,pa,pb) )
+	if( !grd_xor(pd,pa) )
 	{
 		lua_pushboolean(l,0);
 		lua_pushstring(l,pd->err);
