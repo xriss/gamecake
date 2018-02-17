@@ -15,18 +15,6 @@ local font=canvas.font
 
 
 function wmenubar.update(widget)
-	if not widget.hidden then
---print(widget.hide_when_not)
---[[
-		if widget.hide_when_not then -- must stay over widget
-			if not widget:isover(widget.hide_when_not) then
-				widget.hidden=true
-				widget.hide_when_not=nil
-				widget.master:layout()
-			end
-		end
-]]
-	end
 	return widget.meta.update(widget)
 end
 

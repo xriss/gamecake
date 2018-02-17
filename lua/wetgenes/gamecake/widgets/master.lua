@@ -184,10 +184,6 @@ function wmaster.setup(widget,def)
 
 				master.press=false
 
-				if master.menu~=master.over then
-					master.menu=nil
-				end
-				
 				if master.over --[[ and master.active==master.over ]] then -- no click if we drag away from button
 				
 					if not master.over.never_set_focus_edit then

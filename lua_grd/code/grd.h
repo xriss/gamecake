@@ -235,6 +235,7 @@ int grd_clip( struct grd *ga , struct grd *gb ,  s32 x, s32 y, s32 z, s32 w, s32
 int grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y);
 int grd_paint( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 mode, u32 trans, u32 color);
 
+int grd_xor(struct grd *gd,struct grd *ga);
 int grd_shrink(struct grd *ga,struct grd_area *gc );
 
 void grd_clear( struct grd *g , u32 val);

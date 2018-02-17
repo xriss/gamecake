@@ -31,6 +31,8 @@ end
 function wmenuitem.menu_add(widget,opts)
 	opts=opts or {}
 	if type(opts)=="function" then opts=opts() end
+	local md=opts.menu_data or widget.menu_data
+	if type(md)=="function" then md=md() end
 	
 	if not opts.top then
 		if widget.menu then
@@ -38,16 +40,16 @@ function wmenuitem.menu_add(widget,opts)
 			widget.menu=nil
 		end
 
-		local ss=opts.grid_size or widget.master.grid_size
+		local ss=opts.grid_size or md.grid_size or widget.master.grid_size
 		local screen;widget.master:call_descendents(function(it) if it.class=="screen" then screen=it end end)
 		screen=screen or widget.master
 		
 		widget.menu=screen:add({
 			class="menu",
 			grid_size=ss,
-			color=opts.color or 0,
-			style=opts.style or "button",
-			skin=opts.skin or 0,
+			color=opts.color or md.color or 0,
+			style=opts.style or md.style or "button",
+			skin= opts.skin  or md.skin  or 0,
 			solid=true,
 			cursor="hand",
 			highlight="none",
@@ -60,36 +62,29 @@ function wmenuitem.menu_add(widget,opts)
 
 	end
 	local top=opts.top or widget.menu
-	local md=opts.menu_data or widget.menu_data
-	if type(md)=="function" then md=md() end
-
 	top.px,top.py=widget:get_master_xy(widget.hx*(widget.menu_px or 0),widget.hy*(widget.menu_py or 0))
 
-	local func_text=opts.func_text or md.func_text or function(a) return tostring(a) end 
 	for i,v in ipairs(md) do
-		if type(v.menu_data)=="table" then -- copy opts down to submenu
-			v.menu_data.func_text=v.menu_data.func_text or md.func_text
-			v.menu_data.hooks    =v.menu_data.hooks     or md.hooks
-		end
-		top:add({
-			class="menuitem",
-			user=v.user,
-			id=v.id,
-			text=v.text or func_text(v),
-			text_align="left_center",
-			hooks     = v.hooks or opts.hooks     or md.hooks,
+	
+		local it={} for a,b in pairs(v) do it[a]=b end
 
-			hide_when_clicked=true,
+		it.class="menuitem"
+		it.draw_text=it.draw_text or opts.draw_text or md.draw_text
+		it.text_align=it.text_align or "left_center"
+		it.hooks=it.hooks or opts.hooks     or md.hooks
+		it.hide_when_clicked=it.hide_when_clicked or true
+		it.color     = it.color       or opts.color     or md.color     or 0
+		it.style     = it.style       or opts.style     or md.style     or "button"
+		it.skin      = it.skin        or opts.skin      or md.skin      or 0
+		it.cursor    = it.cursor      or opts.cursor    or md.cursor    or "hand"
+		it.text_size = it.text_si     or opts.text_size or md.text_size
+		it.menu_px   = it.menu_px     or opts.menu_px   or md.menu_px
+		it.menu_py   = it.menu_py     or opts.menu_py   or md.menu_py
 
-			color     = opts.color     or md.color     or 0,
-			style     = opts.style     or md.style     or "button",
-			skin      = opts.skin      or md.skin      or 0,
-			cursor    = opts.cursor    or md.cursor    or "hand",
-			text_size = opts.text_size or md.text_size,
-			menu_px   = opts.menu_px   or md.menu_px,
-			menu_py   = opts.menu_py   or md.menu_py,
-			menu_data = v.menu_data ,
-		})
+		local fixup=it.fixup or opts.fixup or md.fixup
+		if fixup then fixup(it) end
+
+		top:add(it)
 	end
 	
 	top.also_over={top,widget} -- include these widgets in over test
@@ -107,9 +102,7 @@ function wmenuitem.hooks(hook,widget,dat)
 
 local showmenu=function()
 
-	if widget.menu_data then -- and widget.master.menu~=widget then -- add a sub menu using this data
-
-		widget.master.menu=widget
+	if widget.menu_data then -- add a sub menu using this data
 
 		local w=widget:menu_add(widget.menu_data)
 		local map={}
@@ -140,35 +133,25 @@ local togglemenu=function()
 	if widget.menu and ( not widget.menu.hidden ) then -- already visible so hide it
 		widget.menu:remove()
 		widget.menu=nil
-		widget.master.menu=nil
 	else
 		showmenu()
 	end
 end
 
 
-	if hook=="over" then -- and widget.master.menu then
---		if widget.parent.class~="menubar" then -- menubar needs clicks
---		if widget.parent.class=="menu" or widget.parent.class=="menubar" then -- only the menu?
-			showmenu()
---		end
---		end
+	if hook=="over" then
+		showmenu()
 	end
 
 	if hook=="active" then
 		if widget.parent.class=="menubar" then
-			if widget.master.menu then
-				widget.master.menu=nil
-			else
-				showmenu()
-			end
+			showmenu()
 		end
 	end
 	
 	if hook=="click" then
 	
 		if widget.parent.class~="menubar" then
-			widget.master.menu=nil
 	
 			if widget.menu_data then -- add a sub menu using this data
 				

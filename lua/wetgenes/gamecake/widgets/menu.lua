@@ -54,7 +54,7 @@ function wmenu.layout(widget)
 					v.hy=widget.grid_size or fs*1.5
 					font.set(cake.fonts.get(f))
 					font.set_size(fs,0)
-					v.hx=font.width(v.text)+v.hy/2
+					v.hx=font.width(v.text)+(v.hx_pad or v.hy)
 				end
 			end
 			

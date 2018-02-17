@@ -2096,8 +2096,129 @@ s32 h=bb->h;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// Perform an exclusive or of two images into a third, these must all be the same size and format.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int grd_xor(struct grd *gd,struct grd *ga)
+{
+	if( ! ( (gd->bmap->fmt==ga->bmap->fmt) ) )
+	{
+		gd->err="bad format";
+		return 0;
+	}
+	if( ! ( (gd->bmap->w==ga->bmap->w) ) )
+	{
+		gd->err="bad width";
+		return 0;
+	}
+	if( ! ( (gd->bmap->h==ga->bmap->h) ) )
+	{
+		gd->err="bad height";
+		return 0;
+	}
+	if( ! ( (gd->bmap->d==ga->bmap->d) ) )
+	{
+		gd->err="bad depth";
+		return 0;
+	}
+	if( ! ( (gd->cmap->w==ga->cmap->w) ) )
+	{
+		gd->err="bad cmap";
+		return 0;
+	}
+
+s32 x,y,z;
+s32 w,h,d;
+u8  *p1d,*p1a;
+u16 *p2d,*p2a;
+u32 *p4d,*p4a;
+
+	w=gd->bmap->w;
+	h=gd->bmap->h;
+	d=gd->bmap->d;
+	
+	if( grd_sizeof_pixel(gd->bmap->fmt)==4 )
+	{
+		for( z=0 ; z<d ; z++ )
+		{
+			for( y=0 ; y<h ; y++ )
+			{
+				p4d=(u32*)grdinfo_get_data( gd->bmap, x , y , z );
+				p4a=(u32*)grdinfo_get_data( ga->bmap, x , y , z );
+				for( x=0 ; x<w ; x++ )
+				{
+					(*p4d++) ^= (*p4a++);
+				}
+			}
+		}
+	}
+	else
+	if( grd_sizeof_pixel(gd->bmap->fmt)==3 )
+	{
+		for( z=0 ; z<d ; z++ )
+		{
+			for( y=0 ; y<h ; y++ )
+			{
+				p1d=grdinfo_get_data( gd->bmap, x , y , z );
+				p1a=grdinfo_get_data( ga->bmap, x , y , z );
+				for( x=0 ; x<w ; x++ )
+				{
+					(*p1d++) ^= (*p1a++);
+					(*p1d++) ^= (*p1a++);
+					(*p1d++) ^= (*p1a++);
+				}
+			}
+		}
+	}
+	else
+	if( grd_sizeof_pixel(gd->bmap->fmt)==2 )
+	{
+		for( z=0 ; z<d ; z++ )
+		{
+			for( y=0 ; y<h ; y++ )
+			{
+				p2d=(u16*)grdinfo_get_data( gd->bmap, x , y , z );
+				p2a=(u16*)grdinfo_get_data( ga->bmap, x , y , z );
+				for( x=0 ; x<w ; x++ )
+				{
+					(*p2d++) ^= (*p2a++);
+				}
+			}
+		}
+	}
+	else
+	if( grd_sizeof_pixel(gd->bmap->fmt)==1 )
+	{
+		for( z=0 ; z<d ; z++ )
+		{
+			for( y=0 ; y<h ; y++ )
+			{
+				p1d=grdinfo_get_data( gd->bmap, x , y , z );
+				p1a=grdinfo_get_data( ga->bmap, x , y , z );
+				for( x=0 ; x<w ; x++ )
+				{
+					(*p1d++) ^= (*p1a++);
+				}
+			}
+		}
+	}
+
+	if(gd->cmap->data && gd->cmap->w) // and xor palette data?
+	{
+		p4d=(u32*)grdinfo_get_data( gd->cmap, 0 , 0 , 0 );
+		p4a=(u32*)grdinfo_get_data( ga->cmap, 0 , 0 , 0 );
+		for( x=0 ; x<gd->cmap->w ; x++ )
+		{
+			(*p4d++) ^= (*p4a++);
+		}
+	}
+
+	return 1;
+}
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // shrink the given image clip,
-// just adjust the posiion and size such that only the non transparent potion are within the area
+// just adjust the position and size such that only the non transparent or index 0 portion is within the area
 // return true if done, we may have shrunk to nothing
 //
 // this function is not intending to be overly fast
@@ -2110,8 +2231,10 @@ s32 x,y;
 s32 w,h;
 u8 *p;
 u32 a;
+int mode=grd_sizeof_pixel(gi->fmt);
+int i;
 
-	if( ! ( (gi->fmt==GRD_FMT_U8_RGBA) || (gi->fmt==GRD_FMT_U8_RGBA_PREMULT) ) )
+	if( ! ( ((gi->fmt&~GRD_FMT_PREMULT)==GRD_FMT_U8_RGBA) || ((gi->fmt&~GRD_FMT_PREMULT)==GRD_FMT_U8_INDEXED) ) )
 	{
 		g->err="bad shrink format"; // complain
 		return 0;
@@ -2124,16 +2247,17 @@ u32 a;
 	}
 
 
-
-
 // push down
 	for( y=gc->y ; y<gc->y+gc->h ; y++ )
 	{
+		p=grdinfo_get_data( gi, gc->x , y , gc->z );
 		for( x=gc->x ; x<gc->x+gc->w ; x++ )
 		{
-			p=grdinfo_get_data( gi, x , y , gc->z );
-			a=p[3];
-			if(a!=0) { break; }
+			for(i=0;i<mode;i++)
+			{
+				a=p[i]; if(a!=0) { break; }
+			}
+			p+=mode;
 		}
 		if(a==0) // empty line
 		{
@@ -2150,11 +2274,14 @@ u32 a;
 // push up
 	for( y=gc->y+gc->h-1 ; y>=gc->y ; y-- )
 	{
+		p=grdinfo_get_data( gi, gc->x , y , gc->z );
 		for( x=gc->x ; x<gc->x+gc->w ; x++ )
 		{
-			p=grdinfo_get_data( gi, x , y , gc->z );
-			a=p[3];
-			if(a!=0) { break; }
+			for(i=0;i<mode;i++)
+			{
+				a=p[i]; if(a!=0) { break; }
+			}
+			p+=mode;
 		}
 		if(a==0) // empty line
 		{
@@ -2170,11 +2297,14 @@ u32 a;
 // push right
 	for( x=gc->x ; x<gc->x+gc->w ; x++ )
 	{
+		p=grdinfo_get_data( gi, x , gc->y , gc->z );
 		for( y=gc->y ; y<gc->y+gc->h ; y++ )
 		{
-			p=grdinfo_get_data( gi, x , y , gc->z );
-			a=p[3];
-			if(a!=0) { break; }
+			for(i=0;i<mode;i++)
+			{
+				a=p[i]; if(a!=0) { break; }
+			}
+			p+=gi->yscan-mode;
 		}
 		if(a==0) // empty line
 		{
@@ -2191,11 +2321,14 @@ u32 a;
 // push left
 	for( x=gc->x+gc->w-1 ; x>=gc->x ; x-- )
 	{
+		p=grdinfo_get_data( gi, x , gc->y , gc->z );
 		for( y=gc->y ; y<gc->y+gc->h ; y++ )
 		{
-			p=grdinfo_get_data( gi, x , y , gc->z );
-			a=p[3];
-			if(a!=0) { break; }
+			for(i=0;i<mode;i++)
+			{
+				a=p[i]; if(a!=0) { break; }
+			}
+			p+=gi->yscan;
 		}
 		if(a==0) // empty line
 		{

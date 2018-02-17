@@ -171,82 +171,86 @@ function wmeta.setup(def)
 --def
 	function meta.setup(widget,def)
 	
-		widget.state=def.state or "none"
+		for a,b in pairs(def) do widget[a]=b end -- auto copy everything, then change below
+	
+		widget.state=widget.state or "none"
 		
 		widget.meta=meta
 		
-		widget.draw=def.draw -- custom render, probably best to wrap with a widget:draw_base(function)
+--		widget.draw=def.draw -- custom render, probably best to wrap with a widget:draw_base(function)
 		
-		widget.data=def.data -- this widget is synced with this data
+--		widget.data=def.data -- this widget is synced with this data
 		
-		widget.class=def.class
-		widget.highlight=def.highlight
+--		widget.class=def.class
+--		widget.highlight=def.highlight
 		
-		widget.id=def.id
-		widget.user=def.user -- any user data you wish to associate with this widget (we will ignore it)
-		widget.hooks=def.hooks
+--		widget.id=def.id
+--		widget.user=def.user -- any user data you wish to associate with this widget (we will ignore it)
+--		widget.hooks=def.hooks
 
-		widget.clip=def.clip -- use viewport clipping to prevent drawing outside of the area
+--		widget.clip=def.clip -- use viewport clipping to prevent drawing outside of the area
 
-		widget.smode=def.smode or "center"
-		widget.sx=def.sx or 1 -- display scale (of children)
-		widget.sy=def.sy or 1
-		widget.pa=def.pa or 0 -- display rotation angle (of children)
+		widget.smode=widget.smode or "center"
+		widget.sx=widget.sx or 1 -- display scale (of children)
+		widget.sy=widget.sy or 1
+		widget.pa=widget.pa or 0 -- display rotation angle (of children)
 		
-		widget.size=def.size 	-- special layout action flag
+--		widget.size=def.size 	-- special layout action flag
 								--	"full" 	==	Expand to fullsize of widget
 								-- "minmax" fit using hx_min hy_max or hy_min hx_max
-		widget.hx_min=def.hx_min
-		widget.hy_min=def.hy_min
-		widget.hx_max=def.hx_max
-		widget.hy_max=def.hy_max
+--		widget.hx_min=def.hx_min
+--		widget.hy_min=def.hy_min
+--		widget.hx_max=def.hx_max
+--		widget.hy_max=def.hy_max
 		
-		widget.px=def.px or 0 -- relative to parent, pixel position
-		widget.py=def.py or 0
+		widget.px=widget.px or 0 -- relative to parent, pixel position
+		widget.py=widget.py or 0
 
-		widget.hx=def.hx or 0 -- absolute pixel size of widget (in parents space)
-		widget.hy=def.hy or 0
-		widget.hz=def.hz or 0 -- used to signal an fbo with a depth buffer
+		widget.hx=widget.hx or 0 -- absolute pixel size of widget (in parents space)
+		widget.hy=widget.hy or 0
+		widget.hz=widget.hz or 0 -- used to signal an fbo with a depth buffer
 		
 
-		widget.outline_size=def.outline_size
-		widget.outline_color=def.outline_color
-		widget.outline_fade_color=def.outline_fade_color
+--		widget.outline_size=def.outline_size
+--		widget.outline_color=def.outline_color
+--		widget.outline_fade_color=def.outline_fade_color
 		
-		widget.transparent=def.transparent -- transparent color tint
+--		widget.transparent=def.transparent -- transparent color tint
 
-		widget.color=def.color
+--		widget.color=def.color
 		
-		widget.cursor=def.cursor
-		widget.drag=def.drag
+--		widget.cursor=def.cursor
+--		widget.drag=def.drag
 		
-		widget.font=def.font or widget.parent.font --  use this font if set or inherit value from parent
+		widget.font=widget.font or widget.parent.font --  use this font if set or inherit value from parent
 		
-		widget.text_color=def.text_color or widget.parent.text_color -- black text
-		widget.text_color_over=def.text_color_over -- if set, switch text color on hover
-		widget.text_color_shadow=def.text_color_shadow  -- may need a shadow
-		widget.text_size=def.text_size
-		widget.text_align=def.text_align -- default is "center", and "wrap" will wrap the text
+		widget.text_color=widget.text_color or widget.parent.text_color -- black text
+--		widget.text_color_over=def.text_color_over -- if set, switch text color on hover
+--		widget.text_color_shadow=def.text_color_shadow  -- may need a shadow
+--		widget.text_size=def.text_size
+--		widget.text_align=def.text_align -- default is "center", and "wrap" will wrap the text
 		
-		widget.grid_size=def.grid_size
+--		widget.grid_size=def.grid_size
 
-		widget.sheet=def.sheet -- display this sheet (by name) on the button
-		widget.sheet_id=def.sheet_id
-		widget.sheet_px=def.sheet_px
-		widget.sheet_py=def.sheet_py
-		widget.sheet_hx=def.sheet_hx
-		widget.sheet_hy=def.sheet_hy
+--		widget.sheet=def.sheet -- display this sheet (by name) on the button
+--		widget.sheet_id=def.sheet_id
+--		widget.sheet_px=def.sheet_px
+--		widget.sheet_py=def.sheet_py
+--		widget.sheet_hx=def.sheet_hx
+--		widget.sheet_hy=def.sheet_hy
 
-		widget.text=def.text -- display this text on the button
-		widget.style=def.style -- style the button this way
-		widget.skin=def.skin -- skin the button this way
+--		widget.draw_text=def.draw_text -- special text draw function probably nil
 		
-		widget.hidden=def.hidden -- start off hidden?
+--		widget.text=def.text -- display this text on the button
+--		widget.style=def.style -- style the button this way
+--		widget.skin=def.skin -- skin the button this way
+		
+--		widget.hidden=def.hidden -- start off hidden?
 
 
 -- remove auto solid, need to make sure that all buttons now have a class of button.
 --		if widget.hooks then widget.solid=true end
-		widget.solid=widget.solid or def.solid
+--		widget.solid=widget.solid or def.solid
 		
 		if widget.class and wmeta.classes[widget.class] then -- got a class, call its setup, its setup can override other functions
 			wmeta.classes[widget.class].setup(widget,def)
@@ -256,7 +260,7 @@ function wmeta.setup(def)
 		
 		if def.fbo then -- an fbo buffer has been requested (can speed rendering up)
 			widget.fbo=framebuffers.create(0,0,0)
-			widget.fbo_fov=def.fbo_fov
+--			widget.fbo_fov=def.fbo_fov
 		end
 		
 		widget:set_dirty()
@@ -453,7 +457,6 @@ function wmeta.setup(def)
 
 	meta.isover=function(widget,mode)
 		local o=widget.master.over
---		if mode=="menu" then o=widget.master.menu end
 		if o then
 			while o~=o.parent do -- need to check all parents
 				if o==widget then return true end

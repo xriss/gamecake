@@ -1052,6 +1052,30 @@ s32 w,h,d;
 //
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_xor (lua_State *l)
+{
+part_ptr pd;
+part_ptr pa;
+
+	pd=lua_grd_check_ptr(l,1);
+	pa=lua_grd_check_ptr(l,2);
+
+	if( !grd_xor(pd,pa) )
+	{
+		lua_pushboolean(l,0);
+		lua_pushstring(l,pd->err);
+		return 2;
+	}
+
+	lua_pushvalue(l,1);
+	return 1;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_grd_shrink (lua_State *l)
 {
 part_ptr p;
@@ -1814,6 +1838,7 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		
 		{"paint",			lua_grd_paint},
 
+		{"xor",				lua_grd_xor},
 		{"shrink",			lua_grd_shrink},
 		
 		{"clear",			lua_grd_clear},
