@@ -19,10 +19,10 @@ something that can be output easily as json.
 This gives us a readonly data structure that can be used to control 
 what text is displayed during a chat session.
 
-This is intended to be descriptive and logic less, any goto logic 
+This is intended to be descriptive and logic less, any real logic 
 should be added using a real language that operates on this data and 
-gets triggered by the names used. EG, filter out gotos unless 
-certain conditions are met or change topics to redirect to an 
+gets triggered by the names used. EG, filter out gotos unless certain 
+complicated conditions are met or change topics to redirect to an 
 alternative.
 
 
@@ -290,9 +290,8 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 	
 	chat.set_description=function(name)
 	
-		chat.description_name=name	
-		chat.description={} -- chat.chats[name]
-		chat.topics={} -- chat.description.topics
+		chat.description={}
+		chat.topics={}
 		
 		for n in dotnames(name) do -- inherit chunks data
 			local v=chat.data[n]
@@ -306,7 +305,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 			end
 		end
 
-		chats.changes(chat,"description",chat.description)
+		chats.changes(chat,"chat",chat.description)
 
 		chat.set_sets(chat.description.sets)
 
@@ -317,8 +316,8 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 		chat.viewed[name]=(chat.viewed[name] or 0) + 1 -- keep track of what topics have been viewed
 	
 		chat.topic_name=name
-		chat.topic={} -- chat.topics[name]
-		chat.gotos={} -- chat.topic and chat.topic.gotos
+		chat.topic={}
+		chat.gotos={}
 		
 		local merged_sets={}
 
@@ -436,7 +435,7 @@ chatdown.setup=function(chat_text,changes)
 
 	local chats={}
 
-	chats.data=chatdown.parse(chat_text)
+	chats.data=chatdown.parse(chat_text) -- parse static data
 	
 	chats.names={}
 	
@@ -505,7 +504,7 @@ chatdown.setup=function(chat_text,changes)
 	chats.chat_to_menu_items=function(chat)
 		local items={cursor=1,cursor_max=0}
 		
-		items.title=chat.description_name
+		items.title=chat.name
 		
 		local ss=chat.topic and chat.topic.text or {} if type(ss)=="string" then ss={ss} end
 		for i,v in ipairs(ss) do
@@ -550,10 +549,10 @@ chatdown.setup=function(chat_text,changes)
 	chats.changes=changes or function(chat,change,...)
 		local a,b=...
 
-		if     change=="chat"  then print("chat ",chat.name,a.name)
+		if     change=="chat"  then print("chat", chat.name,a.name)
 		elseif change=="topic" then print("topic",chat.name,a.name)
-		elseif change=="goto"  then print("goto ",chat.name,a.name)
-		elseif change=="set"   then	print("set  ",chat.name,a,b)
+		elseif change=="goto"  then print("goto", chat.name,a.name)
+		elseif change=="set"   then	print("set",  chat.name,a,b)
 		end
 		
 	end
@@ -561,8 +560,8 @@ chatdown.setup=function(chat_text,changes)
 	for n,v in pairs(chats.data) do -- setup each chat
 	
 		local chat={}
-		chats.names[n]=chat
-		chatdown.setup_chat(chat,chats,n,"welcome")
+		chats.names[n]=chat -- lookup by name
+		chatdown.setup_chat(chat,chats,n,"welcome") -- init state
 		
 	end
 
