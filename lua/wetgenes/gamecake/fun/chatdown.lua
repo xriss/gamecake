@@ -19,10 +19,10 @@ something that can be output easily as json.
 This gives us a readonly data structure that can be used to control 
 what text is displayed during a chat session.
 
-This is intended to be descriptive and logic less, any decision logic 
+This is intended to be descriptive and logic less, any goto logic 
 should be added using a real language that operates on this data and 
-gets triggered by the names used. EG, filter out decisions unless 
-certain conditions are met or change responses to redirect to an 
+gets triggered by the names used. EG, filter out gotos unless 
+certain conditions are met or change topics to redirect to an 
 alternative.
 
 
@@ -54,14 +54,14 @@ chatdown.parse=function(chat_text)
 	local chats={}
 	local chat={}
 
-	local decisions={}
-	local decision={}
+	local gotos={}
+	local goto={}
 
-	local responses={}
-	local response={}
+	local topics={}
+	local topic={}
 
-	local proxies={}
-	local proxy={}
+	local sets={}
+	local set={}
 
 	local ignore=true -- ignore first lines until we see a code
 
@@ -71,7 +71,7 @@ chatdown.parse=function(chat_text)
 
 		local code=v:sub(1,1)
 
-		if code=="#" then -- #description
+		if code=="#" then -- #chat set description
 			ignore=false -- end long comments
 
 			local c=v:sub(2,2)
@@ -85,10 +85,10 @@ chatdown.parse=function(chat_text)
 				name,v=v:match("%#(%S*)%s*(.*)$")
 				
 				text={}
-				responses={}
-				decisions={}
-				proxies={}
-				chat={text=text,decisions=decisions,proxies=proxies,responses=responses}
+				topics={}
+				gotos={}
+				sets={}
+				chat={text=text,gotos=gotos,sets=sets,topics=topics}
 				
 				
 				chat.name=name
@@ -96,60 +96,60 @@ chatdown.parse=function(chat_text)
 
 				if name~="" then -- ignore empty names
 				
-					assert( not chats[name] , "description name used twice on line "..i.." : "..name )
+					assert( not chats[name] , "chat name used twice on line "..i.." : "..name )
 					chats[name]=chat
 				
 				end
 				
 			end
 
-		elseif code=="<" then -- <response
+		elseif code=="<" then -- <topic
 			ignore=false -- end long comments
 
 			name,v=v:match("%<(%S*)%s*(.*)$")
 			
-			-- if name is empty then we use an auto reverence to the last noname decision
+			-- if name is empty then we use an auto reverence to the last noname goto
 			if name=="" then name=last_name.."__"..last_count	-- use reference 
 			else last_name=name last_count=1 end -- reset reference
 
 			text={}
-			decisions={}
-			proxies={}
-			response={text=text,name=name,decisions=decisions,proxies=proxies}
+			gotos={}
+			sets={}
+			topic={text=text,name=name,gotos=gotos,sets=sets}
 
 			if name~="" then -- ignore empty names
 			
-				assert( not responses[name] , "response name used twice on line "..i.." : "..name )
-				responses[name]=response
+				assert( not topics[name] , "topic name used twice on line "..i.." : "..name )
+				topics[name]=topic
 			
 			end
 
-		elseif code==">" then -- >decision
+		elseif code==">" then -- >goto
 			ignore=false -- end long comments
 		
 			name,v=v:match("%>(%S*)%s*(.*)$")
 
-			-- if name is empty then we use an auto reverence to the next nonmame response
+			-- if name is empty then we use an auto reverence to the next nonmame topic
 			if name=="" then last_count=last_count+1 name=last_name.."__"..last_count end -- increment reference
 		
 			text={}
-			proxies={}
-			decision={text=text,name=name,proxies=proxies}
+			sets={}
+			goto={text=text,name=name,sets=sets}
 
-			decisions[#decisions+1]=decision
+			gotos[#gotos+1]=goto
 
-		elseif code=="=" then -- =proxy
+		elseif code=="=" then -- =set
 			ignore=false -- end long comments
 		
 			name,v=v:match("%=(%S*)%s*(.*)$")
 
 			text={}
-			proxy=text
+			set=text
 
 			if name~="" then -- ignore empty names
 			
-				assert( not proxies[name] , "proxy name used twice on line "..i.." : "..name )
-				proxies[name]=proxy
+				assert( not sets[name] , "set name used twice on line "..i.." : "..name )
+				sets[name]=set
 			
 			end
 			
@@ -173,16 +173,16 @@ chatdown.parse=function(chat_text)
 
 	-- cleanup output
 
-	local cleanup_proxies=function(proxies)
+	local cleanup_sets=function(sets)
 
 		local empty=true
-		for n,v in pairs(proxies) do
+		for n,v in pairs(sets) do
 			empty=false
-			proxies[n]=table.concat(v,"\n"):match("^%s*(.-)%s*$")
+			sets[n]=table.concat(v,"\n"):match("^%s*(.-)%s*$")
 		end
 		if empty then return end
 
-		return proxies
+		return sets
 	end
 
 	local cleanup_text=function(text)
@@ -209,23 +209,23 @@ chatdown.parse=function(chat_text)
 	for name,chat in pairs(chats) do
 
 		chat.text=cleanup_text(chat.text)
-		chat.proxies=cleanup_proxies(chat.proxies)
+		chat.sets=cleanup_sets(chat.sets)
 
-		for id,decision in pairs(chat.decisions) do
+		for id,goto in pairs(chat.gotos) do
 
-			decision.text=cleanup_text(decision.text)
-			decision.proxies=cleanup_proxies(decision.proxies)
+			goto.text=cleanup_text(goto.text)
+			goto.sets=cleanup_sets(goto.sets)
 		end
 
-		for id,response in pairs(chat.responses) do
+		for id,topic in pairs(chat.topics) do
 
-			response.text=cleanup_text(response.text)
-			response.proxies=cleanup_proxies(response.proxies)
+			topic.text=cleanup_text(topic.text)
+			topic.sets=cleanup_sets(topic.sets)
 
-			for id,decision in pairs(response.decisions) do
+			for id,goto in pairs(topic.gotos) do
 
-				decision.text=cleanup_text(decision.text)
-				decision.proxies=cleanup_proxies(decision.proxies)
+				goto.text=cleanup_text(goto.text)
+				goto.sets=cleanup_sets(goto.sets)
 			end
 		end
 
@@ -240,16 +240,16 @@ end
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.chatdown.setup_chat
 
-	chat = chatdown.setup_chat(chat,chats,chat_name,response_name)
+	chat = chatdown.setup_chat(chat,chats,chat_name,topic_name)
 
 Setup the state for a chat using this array of chats as text data to be 
 displayed.
 
-We manage proxy data and callbacks from decisions here.
+We manage set data and callbacks from gotos here.
 
 ]]
 -----------------------------------------------------------------------------
-chatdown.setup_chat=function(chat,chats,chat_name,response_name)
+chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 
 	local dotnames=function(name)
 		local n,r=name,name
@@ -267,24 +267,24 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 	chat.chats=chats
 	chat.name=chat_name
 	chat.data=chats.data
-	chat.proxies={}
+	chat.sets={}
 	chat.viewed={}
 	
-	chat.get_proxy=function(text)
-		return chats.get_proxy(text,chat.name)
+	chat.get_set=function(text)
+		return chats.get_set(text,chat.name)
 	end
 	
-	chat.set_proxy=function(text,val)
-		return chats.set_proxy(text,val,chat.name)
+	chat.set_set=function(text,val)
+		return chats.set_set(text,val,chat.name)
 	end
 
-	chat.replace_proxies=function(text)
-		return chats.replace_proxies(text,chat.name)
+	chat.replace_sets=function(text)
+		return chats.replace_sets(text,chat.name)
 	end
 
-	chat.set_proxies=function(proxies)
-		for n,v in pairs(proxies or {}) do
-			chat.set_proxy(n,v)
+	chat.set_sets=function(sets)
+		for n,v in pairs(sets or {}) do
+			chat.set_set(n,v)
 		end
     end
 	
@@ -292,7 +292,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 	
 		chat.description_name=name	
 		chat.description={} -- chat.chats[name]
-		chat.responses={} -- chat.description.responses
+		chat.topics={} -- chat.description.topics
 		
 		for n in dotnames(name) do -- inherit chunks data
 			local v=chat.data[n]
@@ -300,45 +300,45 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 				for n2,v2 in pairs(v) do -- merge base settings
 					chat.description[n2]=chat.description[n2] or v2
 				end 
-				for n2,v2 in pairs(v.responses or {}) do -- merge responses
-					chat.responses[n2]=chat.responses[n2] or v2
+				for n2,v2 in pairs(v.topics or {}) do -- merge topics
+					chat.topics[n2]=chat.topics[n2] or v2
 				end
 			end
 		end
 
 		chats.changes(chat,"description",chat.description)
 
-		chat.set_proxies(chat.description.proxies)
+		chat.set_sets(chat.description.sets)
 
 	end
 
-	chat.set_response=function(name)
+	chat.set_topic=function(name)
 	
-		chat.viewed[name]=(chat.viewed[name] or 0) + 1 -- keep track of what responses have been viewed
+		chat.viewed[name]=(chat.viewed[name] or 0) + 1 -- keep track of what topics have been viewed
 	
-		chat.response_name=name
-		chat.response={} -- chat.responses[name]
-		chat.decisions={} -- chat.response and chat.response.decisions
+		chat.topic_name=name
+		chat.topic={} -- chat.topics[name]
+		chat.gotos={} -- chat.topic and chat.topic.gotos
 		
-		local merged_proxies={}
+		local merged_sets={}
 
-		local decision_names={} -- keep track of previously seen exit nodes
+		local goto_names={} -- keep track of previously seen exit nodes
 
-		for n in dotnames(name) do -- inherit responses data
-			local v=chat.responses[n]
+		for n in dotnames(name) do -- inherit topics data
+			local v=chat.topics[n]
 			if v then
 				for n2,v2 in pairs(v) do -- merge base settings
-					chat.response[n2]=chat.response[n2] or v2
+					chat.topic[n2]=chat.topic[n2] or v2
 				end 
-				for np,vp in pairs(v.proxies or {}) do -- merge proxy changes
-					merged_proxies[np]=merged_proxies[np] or vp
+				for np,vp in pairs(v.sets or {}) do -- merge set changes
+					merged_sets[np]=merged_sets[np] or vp
 				end
-				for n2,v2 in ipairs(v.decisions or {}) do -- join all decisions
+				for n2,v2 in ipairs(v.gotos or {}) do -- join all gotos
 					local r={}
 					for n3,v3 in pairs(v2) do r[n3]=v3 end -- copy
 
-					if not r.text then -- use text from description prototype decisions
-						for i,p in ipairs(chat.description.decisions or {} ) do -- search
+					if not r.text then -- use text from description prototype gotos
+						for i,p in ipairs(chat.description.gotos or {} ) do -- search
 							if r.name==p.name then r.text=p.text break end -- found and used
 						end
 					end
@@ -352,7 +352,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 						
 						local do_test=function(a,b,c)
 
-							local a=chat.get_proxy(a)
+							local a=chat.get_set(a)
 
 							if     b=="<" then					return ( tonumber(a) < tonumber(c) )
 							elseif b==">" then					return ( tonumber(a) > tonumber(c) )
@@ -393,22 +393,22 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 
 					end
 					
-					r.name=chat.replace_proxies(r.name) -- can use proxies in name
+					r.name=chat.replace_sets(r.name) -- can use sets in name
 					
-					if not decision_names[r.name] then -- only add unique decisions
+					if not goto_names[r.name] then -- only add unique gotos
 						if result then -- should we show this one?
-							chat.decisions[#chat.decisions+1]=r
+							chat.gotos[#chat.gotos+1]=r
 						end
 					end
-					decision_names[r.name]=true
+					goto_names[r.name]=true
 				end 
 			end
 
 		end
 		
-		chats.changes(chat,"response",chat.response)
+		chats.changes(chat,"topic",chat.topic)
 
-		chat.set_proxies(merged_proxies)
+		chat.set_sets(merged_sets)
 
 	end
 
@@ -417,7 +417,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,response_name)
 	end
 	
 	chat.set_description(chat_name)
-	chat.set_response(response_name)
+	chat.set_topic(topic_name)
 	
 	return chat
 end
@@ -449,21 +449,21 @@ chatdown.setup=function(chat_text,changes)
 		return chats.chat_to_menu_items(chats.get(name))
 	end
 	
-	chats.get_proxy=function(s,default_root)
-		local root,proxy=s:match("(.+)/(.+)") -- is a root given?
-		if not root then root,proxy=default_root,s end -- no root use full string as proxy name
-		local proxies=(chats.get(root) or {}).proxies or {} -- get root proxies or empty table
-		return proxies[proxy]
+	chats.get_set=function(s,default_root)
+		local root,set=s:match("(.+)/(.+)") -- is a root given?
+		if not root then root,set=default_root,s end -- no root use full string as set name
+		local sets=(chats.get(root) or {}).sets or {} -- get root sets or empty table
+		return sets[set]
 	end
 
-	chats.set_proxy=function(s,v,default_root)
-		local root,proxy=s:match("(.+)/(.+)") -- is a root given?
-		if not root then root,proxy=default_root,s end -- no root use full string as proxy name
+	chats.set_set=function(s,v,default_root)
+		local root,set=s:match("(.+)/(.+)") -- is a root given?
+		if not root then root,set=default_root,s end -- no root use full string as set name
 
 		local chat=chats.get(root)
 		if not chat then return end -- unknown chat name
 		
-		chat.proxies=chat.proxies or {} -- make sure we have a proxies table
+		chat.sets=chat.sets or {} -- make sure we have a sets table
 
 -- add inc/dec operators here?
 		local t
@@ -472,28 +472,28 @@ chatdown.setup=function(chat_text,changes)
 		end
 		local n=tonumber(v:sub(2))
 		if t=="-" and n then
-			chat.proxies[proxy]=(tonumber(chat.proxies[proxy]) or 0 ) - n
+			chat.sets[set]=(tonumber(chat.sets[set]) or 0 ) - n
 		elseif t=="+" and n then
-			chat.proxies[proxy]=(tonumber(chat.proxies[proxy]) or 0 ) + n
+			chat.sets[set]=(tonumber(chat.sets[set]) or 0 ) + n
 		else
-			chat.proxies[proxy]=v
+			chat.sets[set]=v
 		end
 		
-		chats.changes(chat,"proxy",proxy,v) -- could adjust value of ( chat.proxies[proxy] ) in callback
+		chats.changes(chat,"set",set,v) -- could adjust value of ( chat.sets[set] ) in callback
 
-		return chat.proxies[proxy]
+		return chat.sets[set]
 	end
 
-	chats.replace_proxies=function(text,default_root)
+	chats.replace_sets=function(text,default_root)
 
 		if not text then return nil end
---		if not proxies then return text end
+--		if not sets then return text end
 
 		local ret=text
 		for sanity=0,100 do
 			local last=ret
 			ret=ret:gsub("{([^}%s]+)}",function(a)
-				return chats.get_proxy(a,default_root) or "{"..a.."}"
+				return chats.get_set(a,default_root) or "{"..a.."}"
 			end)
 			if last==ret then break end -- no change
 		end
@@ -507,39 +507,39 @@ chatdown.setup=function(chat_text,changes)
 		
 		items.title=chat.description_name
 		
-		local ss=chat.response and chat.response.text or {} if type(ss)=="string" then ss={ss} end
+		local ss=chat.topic and chat.topic.text or {} if type(ss)=="string" then ss={ss} end
 		for i,v in ipairs(ss) do
 			if i>1 then
 				items[#items+1]={text="",chat=chat} -- blank line
 			end
-			items[#items+1]={text=chat.replace_proxies(v)or"",chat=chat}
+			items[#items+1]={text=chat.replace_sets(v)or"",chat=chat}
 		end
 
-		for i,v in ipairs(chat.decisions or {}) do
+		for i,v in ipairs(chat.gotos or {}) do
 
-			items[#items+1]={text="",chat=chat} -- blank line before each decision
+			items[#items+1]={text="",chat=chat} -- blank line before each goto
 
 			local ss=v and v.text or {} if type(ss)=="string" then ss={ss} end
 
 			local color=30
-			if chat.viewed[v.name] then color=28 end -- we have already seen the response to this decision
+			if chat.viewed[v.name] then color=28 end -- we have already seen the topic to this goto
 			
 			local f=function(item,menu)
 
-				if item.decision and item.decision.name then
+				if item.goto and item.goto.name then
 
-					chats.changes(chat,"decision",item.decision)
+					chats.changes(chat,"goto",item.goto)
 
-					chat.set_response(item.decision.name)
+					chat.set_topic(item.goto.name)
 
-					chat.set_proxies(item.decision.proxies)
+					chat.set_sets(item.goto.sets)
 
 					menu.show(chats.chat_to_menu_items(chat))
 
 				end
 			end
 			
-			items[#items+1]={text=chat.replace_proxies(ss[1])or"",chat=chat,decision=v,cursor=i,call=f,color=color} -- only show first line
+			items[#items+1]={text=chat.replace_sets(ss[1])or"",chat=chat,goto=v,cursor=i,call=f,color=color} -- only show first line
 			items.cursor_max=i
 		end
 
@@ -550,10 +550,10 @@ chatdown.setup=function(chat_text,changes)
 	chats.changes=changes or function(chat,change,...)
 		local a,b=...
 
-		if     change=="description" then			print("description",chat.name,a.name)
-		elseif change=="response"    then			print("response   ",chat.name,a.name)
-		elseif change=="decision"    then			print("decision   ",chat.name,a.name)
-		elseif change=="proxy"       then			print("proxy      ",chat.name,a,b)
+		if     change=="chat"  then print("chat ",chat.name,a.name)
+		elseif change=="topic" then print("topic",chat.name,a.name)
+		elseif change=="goto"  then print("goto ",chat.name,a.name)
+		elseif change=="set"   then	print("set  ",chat.name,a,b)
 		end
 		
 	end
