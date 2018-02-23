@@ -216,6 +216,8 @@ system.draw=function()
 		system.done_save_fun_png=true
 		if oven.opts.args.savepng then -- pass --savepng on commandline to dump grafix memory after setup
 			system.save_fun_png()
+		elseif oven.opts.args["snaps-save"] then -- pass --snaps-record=1200 to record first 20 seconds
+			oven.snaps.begin_record( tonumber(oven.opts.args["snaps-save"]) or 1 )
 		end
 	end
 

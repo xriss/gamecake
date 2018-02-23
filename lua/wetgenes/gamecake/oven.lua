@@ -540,7 +540,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 				if oven.frame_time<(oven.win:time()-0.500) then oven.frame_time=oven.win:time() end -- prevent race condition
 				
 				if wwin.hardcore.sleep then
-					while (oven.frame_time-oven.frame_rate)>oven.win:time() do
+					while (oven.frame_time-(oven.frame_rate or 0))>oven.win:time() do
 						oven.msgs() -- keep handling msgs?
 						wwin.hardcore.sleep(0.0001) -- sleep here until we need to update
 					end

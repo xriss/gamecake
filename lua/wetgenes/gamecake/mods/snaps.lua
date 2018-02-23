@@ -63,6 +63,20 @@ function M.bake(oven,snaps)
 		return g
 	end
 	
+	function snaps.begin_record(frame_max,frame_skip)
+
+		snaps.frame_max=frame_max or snaps.frame_max
+		snaps.frame_skip=frame_skip or snaps.frame_skip
+
+		snaps.auto=os.date("%Y%m%d_%H%M%S")
+		snaps.idx=0
+		snaps.frame=0
+		snaps.list={}
+		snaps.frame_rate=oven.frame_rate -- time per frame
+		snaps.frame_time=oven.frame_time -- start time
+		oven.frame_rate=nil -- disable limiter
+	end
+
 	function snaps.draw()
 
 
@@ -188,13 +202,7 @@ end
 				if snaps.auto then
 					snaps.auto=nil
 				else
-					snaps.auto=os.date("%Y%m%d_%H%M%S")
-					snaps.idx=0
-					snaps.frame=0
-					snaps.list={}
-					snaps.frame_rate=oven.frame_rate -- time per frame
-					snaps.frame_time=oven.frame_time -- start time
-					oven.frame_rate=nil -- disable limiter
+					snaps.begin_record()
 				end
 				return nil
 			end
