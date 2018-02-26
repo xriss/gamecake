@@ -2143,8 +2143,8 @@ u32 *p4d,*p4a;
 		{
 			for( y=0 ; y<h ; y++ )
 			{
-				p4d=(u32*)grdinfo_get_data( gd->bmap, x , y , z );
-				p4a=(u32*)grdinfo_get_data( ga->bmap, x , y , z );
+				p4d=(u32*)grdinfo_get_data( gd->bmap, 0 , y , z );
+				p4a=(u32*)grdinfo_get_data( ga->bmap, 0 , y , z );
 				for( x=0 ; x<w ; x++ )
 				{
 					(*p4d++) ^= (*p4a++);
@@ -2159,8 +2159,8 @@ u32 *p4d,*p4a;
 		{
 			for( y=0 ; y<h ; y++ )
 			{
-				p1d=grdinfo_get_data( gd->bmap, x , y , z );
-				p1a=grdinfo_get_data( ga->bmap, x , y , z );
+				p1d=grdinfo_get_data( gd->bmap, 0 , y , z );
+				p1a=grdinfo_get_data( ga->bmap, 0 , y , z );
 				for( x=0 ; x<w ; x++ )
 				{
 					(*p1d++) ^= (*p1a++);
@@ -2177,8 +2177,8 @@ u32 *p4d,*p4a;
 		{
 			for( y=0 ; y<h ; y++ )
 			{
-				p2d=(u16*)grdinfo_get_data( gd->bmap, x , y , z );
-				p2a=(u16*)grdinfo_get_data( ga->bmap, x , y , z );
+				p2d=(u16*)grdinfo_get_data( gd->bmap, 0 , y , z );
+				p2a=(u16*)grdinfo_get_data( ga->bmap, 0 , y , z );
 				for( x=0 ; x<w ; x++ )
 				{
 					(*p2d++) ^= (*p2a++);
@@ -2193,8 +2193,8 @@ u32 *p4d,*p4a;
 		{
 			for( y=0 ; y<h ; y++ )
 			{
-				p1d=grdinfo_get_data( gd->bmap, x , y , z );
-				p1a=grdinfo_get_data( ga->bmap, x , y , z );
+				p1d=grdinfo_get_data( gd->bmap, 0 , y , z );
+				p1a=grdinfo_get_data( ga->bmap, 0 , y , z );
 				for( x=0 ; x<w ; x++ )
 				{
 					(*p1d++) ^= (*p1a++);
@@ -2202,7 +2202,7 @@ u32 *p4d,*p4a;
 			}
 		}
 	}
-
+/*
 	if(gd->cmap->data && gd->cmap->w) // and xor palette data?
 	{
 		p4d=(u32*)grdinfo_get_data( gd->cmap, 0 , 0 , 0 );
@@ -2212,7 +2212,7 @@ u32 *p4d,*p4a;
 			(*p4d++) ^= (*p4a++);
 		}
 	}
-
+*/
 	return 1;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -2257,6 +2257,7 @@ int i;
 			{
 				a=p[i]; if(a!=0) { break; }
 			}
+			if(a!=0) { break; }
 			p+=mode;
 		}
 		if(a==0) // empty line
@@ -2281,6 +2282,7 @@ int i;
 			{
 				a=p[i]; if(a!=0) { break; }
 			}
+			if(a!=0) { break; }
 			p+=mode;
 		}
 		if(a==0) // empty line
@@ -2304,7 +2306,8 @@ int i;
 			{
 				a=p[i]; if(a!=0) { break; }
 			}
-			p+=gi->yscan-mode;
+			if(a!=0) { break; }
+			p+=gi->yscan;
 		}
 		if(a==0) // empty line
 		{
@@ -2328,6 +2331,7 @@ int i;
 			{
 				a=p[i]; if(a!=0) { break; }
 			}
+			if(a!=0) { break; }
 			p+=gi->yscan;
 		}
 		if(a==0) // empty line

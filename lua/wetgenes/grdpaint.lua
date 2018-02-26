@@ -252,6 +252,8 @@ grdpaint.canvas=function(grd)
 	canvas.clip=function(x,y,z,w,h,d)
 		if type(x)~="number" then -- clear
 			canvas.grd_clipped=nil
+		elseif type(y)~="number" then -- frame pick
+			canvas.grd_clipped=canvas.grd:clip(0,0,x,canvas.grd.width,canvas.grd.height,1)
 		else
 			if not h then -- 2d
 				h=w w=z z=0 d=1
