@@ -17,6 +17,8 @@ local function dprint(a) print(wstr.dump(a)) end
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local grddiff=M
 
+local palette_nil=("\0\0\0\0"):rep(256) -- an empty all 0 palette
+
 -- create a history state with the given grd as base
 grddiff.history=function(grd)
 
@@ -53,6 +55,8 @@ grddiff.history=function(grd)
 									history.grd.width,	history.grd.height,	1)
 		local it={x=0,y=0,z=0,w=ga.width,h=ga.height,d=1}
 		ga:xor(gb)
+		it.palette=ga:palette(0,256,"")
+		if it.palette==palette_nil then it.palette=nil end -- no colour has changed so do not store diff
 		ga:shrink(it)
 		if it.w>0 and it.h>0 and it.d>0 then -- some pixels have changed
 			it.data=ga:pixels(it.x,it.y,it.z,it.w,it.h,it.d,"") -- get minimal xored data area as a string
@@ -88,6 +92,11 @@ grddiff.history=function(grd)
 			local gb=history.grd:clip(it.x,it.y,it.z,it.w,it.h,it.d)
 			ga:pixels(0,0,0,it.w,it.h,it.d,it.data)
 			gb:xor(ga)
+		end
+		if it.palette then
+			local ga=wgrd.create(history.grd.format,0,0,0)
+			ga:pixels(0,256,it.palette)
+			history.grd:xor(ga)
 		end
 	end
 

@@ -279,9 +279,19 @@ s32 fmt=0;
 
 		lua_pushvalue(l,1);
 
-		if(new_p->data) // also loaded some special json so return that too?
+		if(new_p->data) // also loaded some special json+undo chunks so return that too?
 		{
-			lua_pushstring(l,new_p->data);
+			lua_newtable(l);
+			u32 *td=(u32*)(new_p->data);
+			while( td[0] != 0 ) // null terminated
+			{
+				lua_pushlstring(l,(char*)(td+1),4);
+				lua_pushlstring(l,(char*)(td+2),td[0]-8); // skip header8
+				lua_settable(l,-3);
+				td+=((td[0]+3)>>2); // next tag round size up to 4 bytes
+			}
+
+//			lua_pushstring(l,new_p->data);
 			free(new_p->data);
 			new_p->data=0;
 			new_p->data_sizeof=0;
@@ -1529,8 +1539,10 @@ s32 w;
 	grd=p->cmap;
 //	grd_getpalinfo(p,grd);
 
+	if(!p->cmap->data) { p->err="no palette"; return 0; } // no palette
+
 	x=(s32)lua_tonumber(l,2);
-	w= (s32)lua_tonumber(l,3);
+	w=(s32)lua_tonumber(l,3);
 
 	if(lua_istable(l,4))
 	{

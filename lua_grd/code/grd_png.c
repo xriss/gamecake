@@ -82,8 +82,16 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	u8 *trans;
 	png_color_16 *trans_values;
 	
+	png_unknown_chunkp unknowns;
 	png_textp text_ptr;
+	int num_unknowns;
 	int num_text;
+	
+	char *chunk_json=0;
+	int chunk_json_size=0;
+	char *chunk_undo=0;
+	int chunk_undo_size=0;
+	u32 *chunksptr;
 
     png_uint_32 next_frame_width;
     png_uint_32 next_frame_height;
@@ -248,20 +256,58 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
     {
 		((u8*)g->cmap->data)[(4*x)+3]=trans[x];
 	}
-    
+
+
+	num_unknowns=png_get_unknown_chunks(png_ptr, info_ptr, &unknowns);
+	for (i=0; i<num_unknowns; i++)
+	{
+		if( strcmp((char*)(unknowns[i].name),"UNDO")==0 )
+		{
+			chunk_undo=(char*)(unknowns[i].data);
+			chunk_undo_size=unknowns[i].size;
+		}
+	}
+
 	if (png_get_text(png_ptr, info_ptr, &text_ptr, &num_text) > 0)
 	{
 		for (i=0; i<num_text; i++)
 		{
 			if( strcmp(text_ptr[i].key,"JSON")==0 )
 			{
-				g->data_sizeof=strlen(text_ptr[i].text)+1;
-				g->data=calloc(g->data_sizeof,1);
-				if(!g->data) { abort_("text json alloc fail"); }
-				strncpy(g->data,text_ptr[i].text,g->data_sizeof);
+				chunk_json=text_ptr[i].text;
+				chunk_json_size=strlen(text_ptr[i].text)+1;
 			}
-//		   printf("text[%s]=%s\n",text_ptr[i].key, text_ptr[i].text);
 		}
+	}
+	
+	
+	g->data_sizeof=0;
+	if(chunk_json_size>0) { g->data_sizeof+=( ((chunk_json_size+3)>>2)+2 )<<2; }
+	if(chunk_undo_size>0) { g->data_sizeof+=( ((chunk_undo_size+3)>>2)+2 )<<2; }
+	if(g->data_sizeof>0)
+	{
+		g->data_sizeof+=8+4; // head and tail
+		g->data=calloc(g->data_sizeof,1);
+		if(!g->data) { abort_("png chunks alloc fail"); }
+		chunksptr=(u32*)g->data;
+		chunksptr[0]=8;
+		chunksptr[1]=GRD_TAG_DEF('T','A','G','S');
+		chunksptr+=2;
+		if(chunk_json_size>0)
+		{
+			chunksptr[0]=8+chunk_json_size;
+			chunksptr[1]=GRD_TAG_DEF('J','S','O','N');
+			memcpy(chunksptr+2,chunk_json,chunk_json_size);
+			chunksptr+=2+((chunk_json_size+3)>>2);
+		}
+		if(chunk_undo_size>0)
+		{
+			chunksptr[0]=8+chunk_undo_size;
+			chunksptr[1]=GRD_TAG_DEF('U','N','D','O');
+			memcpy(chunksptr+2,chunk_undo,chunk_undo_size);
+			chunksptr+=2+((chunk_undo_size+3)>>2);
+		}
+		chunksptr[0]=0;
 	}
 
 bogus:
@@ -340,7 +386,9 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 	int num_text;
 
 	png_text  text[1];
-	
+	png_unknown_chunk chunks[1];
+
+	u32 *tag_UNDO=grd_tags_find(inf->tags,GRD_TAG_DEF('U','N','D','O')); // undo chunk data
 	u32 *tag_JSON=grd_tags_find(inf->tags,GRD_TAG_DEF('J','S','O','N'));
 	u32 *tag_SPED=grd_tags_find(inf->tags,GRD_TAG_DEF('S','P','E','D'));
 	u32 speed=80;
@@ -442,7 +490,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 // add a json chunk containing extra info?
 	if(tag_JSON)
 	{
-		if(*((char **)(tag_JSON+2)))
+		if(*((char **)(tag_JSON+2))) // chunk contains a pointer to the text
 		{
 			text[0].compression = PNG_TEXT_COMPRESSION_zTXt; // PNG_TEXT_COMPRESSION_NONE;
 			text[0].key = "JSON";
@@ -451,6 +499,15 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 		}
 	}
 	
+// add an undo data chunk
+	if(tag_UNDO)
+	{
+		strcpy((char*)(chunks[0].name),"UNDO");
+		chunks[0].data=(png_byte*)(tag_UNDO+2);
+		chunks[0].size=(png_size_t)tag_UNDO[0];
+		png_set_unknown_chunks(png_ptr, info_ptr, chunks, 1);
+	}
+
 	if(frames>0)
 	{
 		png_set_acTL(png_ptr, info_ptr, frames, 0);

@@ -2202,7 +2202,6 @@ u32 *p4d,*p4a;
 			}
 		}
 	}
-/*
 	if(gd->cmap->data && gd->cmap->w) // and xor palette data?
 	{
 		p4d=(u32*)grdinfo_get_data( gd->cmap, 0 , 0 , 0 );
@@ -2212,7 +2211,6 @@ u32 *p4d,*p4a;
 			(*p4d++) ^= (*p4a++);
 		}
 	}
-*/
 	return 1;
 }
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -2227,10 +2225,10 @@ u32 *p4d,*p4a;
 int grd_shrink(struct grd *g,struct grd_area *gc )
 {
 struct grd_info *gi=g->bmap;
-s32 x,y;
-s32 w,h;
+s32 x,y,z;
+s32 w,h,d;
 u8 *p;
-u32 a;
+u8 a;
 int mode=grd_sizeof_pixel(gi->fmt);
 int i;
 
@@ -2240,25 +2238,90 @@ int i;
 		return 0;
 	}
 	
+/*
 	if( gc->d != 1 ) // the code does not shrink depth
 	{
 		g->err="bad shrink depth"; // complain
 		return 0;
 	}
+*/
 
+// push in
+	for( z=gc->z ; z<gc->z+gc->d ; z++ )
+	{
+		a=0;
+		for( y=gc->y ; y<gc->y+gc->h ; y++ )
+		{
+			if(a!=0) { break; }
+			p=grdinfo_get_data( gi, gc->x , y , z );
+			for( x=gc->x ; x<gc->x+gc->w ; x++ )
+			{
+				if(a!=0) { break; }
+				for(i=0;i<mode;i++)
+				{
+					a=p[i]; if(a!=0) { break; }
+				}
+				p+=mode;
+			}
+		}
+		if(a==0) // empty frame
+		{
+			gc->z++;
+			gc->d--;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if(gc->d<=0) { gc->x=0; gc->y=0; gc->z=0; gc->w=0; gc->h=0; gc->d=0; return 1; }
+
+// push out
+	for( z=gc->z+gc->d-1 ; z>=gc->z ; z-- )
+	{
+		a=0;
+		for( y=gc->y ; y<gc->y+gc->h ; y++ )
+		{
+			if(a!=0) { break; }
+			p=grdinfo_get_data( gi, gc->x , y , z );
+			for( x=gc->x ; x<gc->x+gc->w ; x++ )
+			{
+				if(a!=0) { break; }
+				for(i=0;i<mode;i++)
+				{
+					a=p[i]; if(a!=0) { break; }
+				}
+				p+=mode;
+			}
+		}
+		if(a==0) // empty frame
+		{
+			gc->d--;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if(gc->d<=0) { gc->x=0; gc->y=0; gc->z=0; gc->w=0; gc->h=0; gc->d=0; return 1; }
 
 // push down
 	for( y=gc->y ; y<gc->y+gc->h ; y++ )
 	{
-		p=grdinfo_get_data( gi, gc->x , y , gc->z );
-		for( x=gc->x ; x<gc->x+gc->w ; x++ )
+		a=0;
+		for( z=gc->z ; z<gc->z+gc->d ; z++ )
 		{
-			for(i=0;i<mode;i++)
-			{
-				a=p[i]; if(a!=0) { break; }
-			}
 			if(a!=0) { break; }
-			p+=mode;
+			p=grdinfo_get_data( gi, gc->x , y , z );
+			for( x=gc->x ; x<gc->x+gc->w ; x++ )
+			{
+				if(a!=0) { break; }
+				for(i=0;i<mode;i++)
+				{
+					a=p[i]; if(a!=0) { break; }
+				}
+				p+=mode;
+			}
 		}
 		if(a==0) // empty line
 		{
@@ -2275,15 +2338,20 @@ int i;
 // push up
 	for( y=gc->y+gc->h-1 ; y>=gc->y ; y-- )
 	{
-		p=grdinfo_get_data( gi, gc->x , y , gc->z );
-		for( x=gc->x ; x<gc->x+gc->w ; x++ )
+		a=0;
+		for( z=gc->z ; z<gc->z+gc->d ; z++ )
 		{
-			for(i=0;i<mode;i++)
-			{
-				a=p[i]; if(a!=0) { break; }
-			}
 			if(a!=0) { break; }
-			p+=mode;
+			p=grdinfo_get_data( gi, gc->x , y , z );
+			for( x=gc->x ; x<gc->x+gc->w ; x++ )
+			{
+				if(a!=0) { break; }
+				for(i=0;i<mode;i++)
+				{
+					a=p[i]; if(a!=0) { break; }
+				}
+				p+=mode;
+			}
 		}
 		if(a==0) // empty line
 		{
@@ -2299,15 +2367,20 @@ int i;
 // push right
 	for( x=gc->x ; x<gc->x+gc->w ; x++ )
 	{
-		p=grdinfo_get_data( gi, x , gc->y , gc->z );
-		for( y=gc->y ; y<gc->y+gc->h ; y++ )
+		a=0;
+		for( z=gc->z ; z<gc->z+gc->d ; z++ )
 		{
-			for(i=0;i<mode;i++)
-			{
-				a=p[i]; if(a!=0) { break; }
-			}
 			if(a!=0) { break; }
-			p+=gi->yscan;
+			p=grdinfo_get_data( gi, x , gc->y , z );
+			for( y=gc->y ; y<gc->y+gc->h ; y++ )
+			{
+				if(a!=0) { break; }
+				for(i=0;i<mode;i++)
+				{
+					a=p[i]; if(a!=0) { break; }
+				}
+				p+=gi->yscan;
+			}
 		}
 		if(a==0) // empty line
 		{
@@ -2324,15 +2397,20 @@ int i;
 // push left
 	for( x=gc->x+gc->w-1 ; x>=gc->x ; x-- )
 	{
-		p=grdinfo_get_data( gi, x , gc->y , gc->z );
-		for( y=gc->y ; y<gc->y+gc->h ; y++ )
+		a=0;
+		for( z=gc->z ; z<gc->z+gc->d ; z++ )
 		{
-			for(i=0;i<mode;i++)
-			{
-				a=p[i]; if(a!=0) { break; }
-			}
 			if(a!=0) { break; }
-			p+=gi->yscan;
+			p=grdinfo_get_data( gi, x , gc->y , z );
+			for( y=gc->y ; y<gc->y+gc->h ; y++ )
+			{
+				if(a!=0) { break; }
+				for(i=0;i<mode;i++)
+				{
+					a=p[i]; if(a!=0) { break; }
+				}
+				p+=gi->yscan;
+			}
 		}
 		if(a==0) // empty line
 		{

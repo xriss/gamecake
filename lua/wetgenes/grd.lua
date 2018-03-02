@@ -96,6 +96,7 @@ These are used to choose a specific file format when loading or saving.
 local grd={}
 
 local wjson=require("wetgenes.json")
+local wstr=require("wetgenes.string")
 
 local core=require("wetgenes.grd.core")
 
@@ -449,7 +450,11 @@ base.load=function(g,opts)
 	local r,j=core.load(g[0],opts)
 	core.info(g[0],g)
 	if not r then g.err=j end -- special error return
-	if r and j then g.json=wjson.decode(j) end -- may have some json as well
+	if r and j then
+--		print(wstr.dump(j))
+		g.json=j.JSON and wjson.decode(j.JSON) -- may have some json as well
+		g.undo=j.UNDO -- maybe some undo state
+	end
 	return (r and g),g.err
 end
 
