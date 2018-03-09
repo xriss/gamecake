@@ -6,6 +6,13 @@ local grd=require("wetgenes.grd")
 local wstr=require("wetgenes.string")
 
 
+function test_png_slide_t1()
+	do_png_slide("t1",16,16,0)
+end
+function test_png_slide_t2()
+	do_png_slide("t3",-16,-16,0)
+end
+
 function test_do_png_bump()
 	do_png_bump("bump")
 end
@@ -400,3 +407,13 @@ function do_png_remap(name)
 end
 
 
+function do_png_slide(name,dx,dy,dz)
+
+	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
+	assert(g:slide(dx,dy,dz))
+	assert(g:save("dat/grd/"..name..".slide.out.png","png") )
+
+	assert_true( do_file_compare("dat/grd/"..name..".slide.out.png","dat/grd/"..name..".slide.chk.png") )
+
+
+end

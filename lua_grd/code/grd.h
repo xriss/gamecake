@@ -219,6 +219,8 @@ int grd_convert( struct grd *g , s32 fmt );
 int grd_quant(struct grd *g , s32 num_colors , s32 dither );
 int grd_attr_redux(struct grd *g, int cw, int ch, int num, int sub, int bak);
 
+int grd_slide( struct grd *ga , int dx , int dy , int dz );
+
 void grd_flipx( struct grd *g );
 void grd_flipy( struct grd *g );
 

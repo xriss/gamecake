@@ -53,7 +53,7 @@ function M.bake(oven,snaps)
 
 	function snaps.get_grd()
 		local g
-		if snaps.fbo then -- use this fbo
+		if snaps.fbo and snaps.auto then -- use this fbo for animations
 			g=snaps.fbo:download()
 		else -- full screen
 			g=wgrd.create( wgrd.FMT_U8_RGBA_PREMULT , oven.win.width , oven.win.height , 1 )

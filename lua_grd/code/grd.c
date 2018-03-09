@@ -2985,3 +2985,46 @@ int thinking;
 }
 
 
+/*------------------------------------------------------------------------------
+
+Slide image along x,y,z , wrapping at the edges so the bitmap 
+ 
+
+*/
+int grd_slide( struct grd *ga , int dx , int dy , int dz )
+{
+int x,y,z,lx,ly,lz;
+u8 *tp,*bp;
+struct grd *gt;
+int ps=grd_sizeof_pixel(ga->bmap->fmt); // size of pixel
+	
+	lx=ga->bmap->w; // cache size
+	ly=ga->bmap->h;
+	lz=ga->bmap->d;
+
+	dx=((dx%lx)+lx)%lx; // remove negativity
+	dy=((dy%ly)+ly)%ly;
+	dz=((dz%lz)+lz)%lz;
+
+	gt=grd_duplicate(ga);
+	if(!gt) { ga->err="out of memory"; return 0; }
+	
+	for( z=0 ; z<lz  ; z++ )
+	{
+		for( y=0 ; y<ly ; y++ )
+		{
+			tp=grdinfo_get_data(gt->bmap,0,y,z);
+			bp=grdinfo_get_data(ga->bmap,0,(y+dy)%ly,(z+dz)%lz);
+			memcpy( bp+(dx*ps) , tp                , (lx-dx)*ps );
+			if(dx>0)
+			{
+				memcpy( bp         , tp + ((lx-dx)*ps) ,     dx *ps );
+			}
+		}
+	}
+
+	grd_free(gt);
+	return 1; // OK
+}
+
+

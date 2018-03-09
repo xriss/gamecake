@@ -752,6 +752,20 @@ base.scale=function(g,...)
 	return r and g
 end
 
+--[[#lua.wetgenes.grd.slide
+
+	g:slide(dx,dy,dz)
+
+Slide the image along the x,y,z axis by the given amounts. The image wraps around the edges 
+so no pixels are lost just moved around.
+
+]]
+base.slide=function(g,...)
+	local r=core.slide(g[0],...)
+	core.info(g[0],g)
+	return r and g
+end
+
 --[[#lua.wetgenes.grd.flipy
 
 	g:flipy()
@@ -768,7 +782,7 @@ base.flipy=function(g,...)
 	return r and g
 end
 
---[[#lua.wetgenes.grd.flipy
+--[[#lua.wetgenes.grd.flipx
 
 	g:flipx()
 	
