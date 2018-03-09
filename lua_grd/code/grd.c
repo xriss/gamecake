@@ -2987,7 +2987,7 @@ int thinking;
 
 /*------------------------------------------------------------------------------
 
-Slide image along x,y,z , wrapping at the edges so the bitmap 
+Slide image along x,y,z , wrapping at the edges so the bitmap never loses any detail.
  
 
 */
