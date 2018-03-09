@@ -6,10 +6,17 @@ local grd=require("wetgenes.grd")
 local wstr=require("wetgenes.string")
 
 
+function test_png_clipdupe_t1()
+	do_png_clipdupe("t1",16,16,0,16,16,1)
+end
+function test_png_clipdupe_t3()
+	do_png_clipdupe("t3",32,32,0,32,32,1)
+end
+
 function test_png_slide_t1()
 	do_png_slide("t1",16,16,0)
 end
-function test_png_slide_t2()
+function test_png_slide_t3()
 	do_png_slide("t3",-16,-16,0)
 end
 
@@ -415,5 +422,14 @@ function do_png_slide(name,dx,dy,dz)
 
 	assert_true( do_file_compare("dat/grd/"..name..".slide.out.png","dat/grd/"..name..".slide.chk.png") )
 
+
+end
+
+function do_png_clipdupe(name,x,y,z,w,h,d)
+
+	local g=assert(grd.create("dat/grd/"..name..".bse.png","png"))
+	local g=g:clip(x,y,z,w,h,d):duplicate()
+	assert(g:save("dat/grd/"..name..".clipdupe.out.png","png") )
+	assert_true( do_file_compare("dat/grd/"..name..".clipdupe.out.png","dat/grd/"..name..".clipdupe.chk.png") )
 
 end

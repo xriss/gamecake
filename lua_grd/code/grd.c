@@ -429,19 +429,31 @@ struct grd * grd_save_data( struct grd *g , struct grd_io_info *filedata , int f
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // duplicate the image and return new duplicate
+// now works ok with grd_clip structures which have strange spans
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 struct grd * grd_duplicate( struct grd *g )
 {
+int x,y,z,lx,ly,lz,ps;
+
 struct grd * g2=grd_create( g->bmap->fmt , g->bmap->w, g->bmap->h, g->bmap->d );
 
 	if(g2)
 	{
 		if(g->bmap->data && g2->bmap->data)
 		{
-			int ps=grd_sizeof_pixel(g->bmap->fmt);
+			ps=grd_sizeof_pixel(g->bmap->fmt); // size of pixel	
+			lx=g->bmap->w; // cache size
+			ly=g->bmap->h;
+			lz=g->bmap->d;
 
-			memcpy(g2->bmap->data,g->bmap->data, ps * g->bmap->w * g->bmap->h * g->bmap->d );
+			for( z=0 ; z<lz  ; z++ ) // deal with strange spans
+			{
+				for( y=0 ; y<ly ; y++ ) // deal with strange spans
+				{
+					memcpy( grdinfo_get_data(g2->bmap,0,y,z) , grdinfo_get_data(g->bmap,0,y,z) , lx*ps );
+				}
+			}
 		}
 		if(g->cmap->data && g2->cmap->data)
 		{
