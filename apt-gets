@@ -11,7 +11,7 @@ apt-get install -y libluajit-5.1-dev libsdl2-dev premake4
 
 # it is ok if this one fails, just need it for nginx
 
-apt-get install -y libssl-dev
+apt-get install -y libssl1.0-dev
 
 
 
