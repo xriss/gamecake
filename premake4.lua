@@ -722,6 +722,7 @@ else -- luajit
 -- expect luajit to be provided in the system -> /usr/local/lib
 
 	defines{ "LIB_LUAJIT" }
+	includedirs { "/usr/include/luajit-2.0" }
 
 end
 
