@@ -1,18 +1,23 @@
+
 package = "gamecake"
+
 version = "18-005"
+
 source = {
-   url = "git@github.com:xriss/gamecake.git",
-   tag = "V18.005"
+   url="src.zip",
 }
+
 description = {
    homepage = "http://wetgenes.com/",
-   license = "MIT"
+   license = "MIT",
 }
+
 dependencies = {}
+
 build = {
    type = "builtin",
    modules = {
-      ["wetgenes.pack"]={
+      ["wetgenes.pack.core"]={
          sources={
             "lua_pack/code/lua_pack.c",
          },
@@ -20,5 +25,6 @@ build = {
             "lua_pack"
          },
       },
+      ["wetgenes.pack"]="lua_pack/code/pack.lua",
    }
 }
