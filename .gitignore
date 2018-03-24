@@ -62,5 +62,6 @@ node_modules
 package-lock.json
 
 rocks/src.zip
+rocks/*.src.rock
 
 
