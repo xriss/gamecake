@@ -54,9 +54,13 @@ int main(int argc, char **argv)
     GifFileOut->SHeight = GifFileIn->SHeight;
     GifFileOut->SColorResolution = GifFileIn->SColorResolution;
     GifFileOut->SBackGroundColor = GifFileIn->SBackGroundColor;
-    GifFileOut->SColorMap = GifMakeMapObject(
-				 GifFileIn->SColorMap->ColorCount,
-				 GifFileIn->SColorMap->Colors);
+    if (GifFileIn->SColorMap) {
+	GifFileOut->SColorMap = GifMakeMapObject(
+				   GifFileIn->SColorMap->ColorCount,
+				   GifFileIn->SColorMap->Colors);
+    } else {
+	GifFileOut->SColorMap = NULL;
+    }
 
     for (i = 0; i < GifFileIn->ImageCount; i++)
 	(void) GifMakeSavedImage(GifFileOut, &GifFileIn->SavedImages[i]);
@@ -71,8 +75,9 @@ int main(int argc, char **argv)
      */
     if (EGifSpew(GifFileOut) == GIF_ERROR)
 	PrintGifError(GifFileOut->Error);
-    else if (DGifCloseFile(GifFileIn) == GIF_ERROR)
-	PrintGifError(GifFileIn->Error);
+
+    if (DGifCloseFile(GifFileIn, &ErrorCode) == GIF_ERROR)
+	PrintGifError(ErrorCode);
 
     return 0;
 }

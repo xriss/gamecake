@@ -13,7 +13,8 @@ cd $srcdir
 
 aclocal
 autoheader
-libtoolize --automake
+case `uname` in Darwin*) glibtoolize --automake ;;
+  *) libtoolize --automake ;; esac
 automake --add-missing
 autoconf
 automake

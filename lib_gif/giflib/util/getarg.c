@@ -76,7 +76,9 @@ following parameters to pass:
    parameters actually matched this sequence, and the second
    one is a pointer to pointer to ? (? **), and will return an
    address to a block of pointers to ? kind, terminated with
-   NULL pointer. NO pre-allocation is required.
+   NULL pointer. NO pre-allocation is required. The caller is
+   responsible for freeing this memory, including the pointed to
+   memory.
 
 Note that these two variables are pretty like the argv/argc pair...
 
@@ -123,29 +125,29 @@ have the same length and format, i.e. sizeof(int *) == sizeof(char *).
 #define ISCTRLCHAR(x) (((x) == '%') || ((x) == '!'))
 
 static char *GAErrorToken;  /* On error, ErrorToken is set to point to it. */
-static int GATestAllSatis(char *CtrlStrCopy, char *CtrlStr, int *argc,
-                          char ***argv, int *Parameters[MAX_PARAM],
+static int GATestAllSatis(char *CtrlStrCopy, char *CtrlStr, char **argv_end,
+                          char ***argv, void *Parameters[MAX_PARAM],
                           int *ParamCount);
-static bool GAUpdateParameters(int *Parameters[], int *ParamCount,
+static bool GAUpdateParameters(void *Parameters[], int *ParamCount,
                               char *Option, char *CtrlStrCopy, char *CtrlStr,
-                              int *argc, char ***argv);
-static int GAGetParmeters(int *Parameters[], int *ParamCount,
-                          char *CtrlStrCopy, char *Option, int *argc,
+                              char **argv_end, char ***argv);
+static int GAGetParmeters(void *Parameters[], int *ParamCount,
+                          char *CtrlStrCopy, char *Option, char **argv_end,
                           char ***argv);
-static int GAGetMultiParmeters(int *Parameters[], int *ParamCount,
-                               char *CtrlStrCopy, int *argc, char ***argv);
+static int GAGetMultiParmeters(void *Parameters[], int *ParamCount,
+                               char *CtrlStrCopy, char **argv_end, char ***argv);
 static void GASetParamCount(char *CtrlStr, int Max, int *ParamCount);
-static bool GAOptionExists(int argc, char **argv);
+static bool GAOptionExists(char **argv_end, char **argv);
 
 /***************************************************************************
  Allocate or die
 ***************************************************************************/
-static char *
+static void *
 xmalloc(unsigned size) {
 
-    char *p;
+    void *p;
 
-    if ((p = (char *)malloc(size)) != NULL)
+    if ((p = malloc(size)) != NULL)
         return p;
 
     fprintf(stderr, "Not enough memory, exit.\n");
@@ -164,30 +166,30 @@ GAGetArgs(int argc,
 
     int i, ParamCount = 0;
     bool Error = false;
-    int *Parameters[MAX_PARAM];     /* Save here parameter addresses. */
+    void *Parameters[MAX_PARAM];     /* Save here parameter addresses. */
     char *Option, CtrlStrCopy[CTRL_STR_MAX_LEN];
+    char **argv_end = argv + argc;
     va_list ap;
 
     strncpy(CtrlStrCopy, CtrlStr, sizeof(CtrlStrCopy)-1);
+    GASetParamCount(CtrlStr, strlen(CtrlStr), &ParamCount);
     va_start(ap, CtrlStr);
-    for (i = 1; i <= MAX_PARAM; i++)
-        Parameters[i - 1] = va_arg(ap, int *);
+    for (i = 1; i <= ParamCount; i++)
+        Parameters[i - 1] = va_arg(ap, void *);
     va_end(ap);
 
-    --argc;
     argv++;    /* Skip the program name (first in argv/c list). */
-    while (argc >= 0) {
-        if (!GAOptionExists(argc, argv))
+    while (argv < argv_end) {
+        if (!GAOptionExists(argv_end, argv))
             break;    /* The loop. */
-        argc--;
         Option = *argv++;
         if ((Error = GAUpdateParameters(Parameters, &ParamCount, Option,
-                                        CtrlStrCopy, CtrlStr, &argc,
+                                        CtrlStrCopy, CtrlStr, argv_end,
                                         &argv)) != false)
             return Error;
     }
     /* Check for results and update trail of command line: */
-    return GATestAllSatis(CtrlStrCopy, CtrlStr, &argc, &argv, Parameters,
+    return GATestAllSatis(CtrlStrCopy, CtrlStr, argv_end, &argv, Parameters,
                           &ParamCount) != ARG_OK;
 }
 
@@ -201,9 +203,9 @@ GAGetArgs(int argc,
 static int
 GATestAllSatis(char *CtrlStrCopy,
                char *CtrlStr,
-               int *argc,
+               char **argv_end,
                char ***argv,
-               int *Parameters[MAX_PARAM],
+               void *Parameters[MAX_PARAM],
                int *ParamCount) {
 
     int i;
@@ -223,9 +225,8 @@ GATestAllSatis(char *CtrlStrCopy,
     for (i = strlen(CtrlStr) - 1; i > 0 && !ISSPACE(CtrlStr[i]); i--) ;
     if (!ISCTRLCHAR(CtrlStr[i + 2])) {
         GASetParamCount(CtrlStr, i, ParamCount); /* Point in correct param. */
-        *Parameters[(*ParamCount)++] = *argc;
-        memcpy((char *)Parameters[(*ParamCount)++], (char *)argv,
-                   sizeof(char *));
+        *(int *)Parameters[(*ParamCount)++] = argv_end - *argv;
+	*(char ***)Parameters[(*ParamCount)++] = *argv;
     }
 
     i = 0;
@@ -243,12 +244,12 @@ GATestAllSatis(char *CtrlStrCopy,
  Routine to update the parameters according to the given Option:
  **************************************************************************/
 static bool
-GAUpdateParameters(int *Parameters[],
+GAUpdateParameters(void *Parameters[],
                    int *ParamCount,
                    char *Option,
                    char *CtrlStrCopy,
                    char *CtrlStr,
-                   int *argc,
+                   char **argv_end,
                    char ***argv) {
 
     int i;
@@ -278,7 +279,7 @@ GAUpdateParameters(int *Parameters[],
                                                 correct prm. */
     i += 3;
     /* Set boolean flag for that option. */
-    *Parameters[(*ParamCount)++] = BooleanTrue;
+    *(bool *)Parameters[(*ParamCount)++] = BooleanTrue;
     if (ISSPACE(CtrlStrCopy[i]))
         return ARG_OK;    /* Only a boolean flag is needed. */
 
@@ -287,18 +288,18 @@ GAUpdateParameters(int *Parameters[],
         i++;
     /* Get the parameters and return the appropriete return code: */
     return GAGetParmeters(Parameters, ParamCount, &CtrlStrCopy[i],
-                          Option, argc, argv);
+                          Option, argv_end, argv);
 }
 
 /***************************************************************************
  Routine to get parameters according to the CtrlStr given from argv/argc
 ***************************************************************************/
 static int
-GAGetParmeters(int *Parameters[],
+GAGetParmeters(void *Parameters[],
                int *ParamCount,
                char *CtrlStrCopy,
                char *Option,
-               int *argc,
+               char **argv_end,
                char ***argv) {
 
     int i = 0, ScanRes;
@@ -349,7 +350,7 @@ GAGetParmeters(int *Parameters[],
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%f",
                                (float *)Parameters[(*ParamCount)++]);
-	      /*@fallthrough@*/
+	      break;
           case 'F':    /* Get double float number. */
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%lf",
@@ -357,12 +358,11 @@ GAGetParmeters(int *Parameters[],
               break;
           case 's':    /* It as a string. */
               ScanRes = 1;    /* Allways O.K. */
-              memcpy((char *)Parameters[(*ParamCount)++],
-                         (char *)((*argv)++), sizeof(char *));
+	      *(char **)Parameters[(*ParamCount)++] = *((*argv)++);
               break;
           case '*':    /* Get few parameters into one: */
               ScanRes = GAGetMultiParmeters(Parameters, ParamCount,
-                                            &CtrlStrCopy[i], argc, argv);
+                                            &CtrlStrCopy[i], argv_end, argv);
               if ((ScanRes == 0) && (CtrlStrCopy[i] == '!')) {
                   GAErrorToken = Option;
                   return CMD_ERR_WildEmpty;
@@ -377,7 +377,6 @@ GAGetParmeters(int *Parameters[],
             return CMD_ERR_NumRead;
         }
         if (CtrlStrCopy[i + 1] != '*') {
-            (*argc)--;    /* Everything is OK - update to next parameter: */
             i += 2;    /* Skip to next parameter (if any). */
         } else
             i += 3;    /* Skip the '*' also! */
@@ -395,15 +394,17 @@ GAGetParmeters(int *Parameters[],
  same size (and the union below is totally ovelapped bteween dif. arrays)
 ***************************************************************************/
 static int
-GAGetMultiParmeters(int *Parameters[],
+GAGetMultiParmeters(void *Parameters[],
                     int *ParamCount,
                     char *CtrlStrCopy,
-                    int *argc,
+                    char **argv_end,
                     char ***argv) {
 
-    int i = 0, ScanRes, NumOfPrm = 0, **Pmain, **Ptemp;
+    int i = 0, ScanRes, NumOfPrm = 0;
+    void **Pmain, **Ptemp;
     union TmpArray {    /* Save here the temporary data before copying it to */
-        int *IntArray[MAX_PARAM];    /* the returned pointer block. */
+        void *VoidArray[MAX_PARAM];    /* the returned pointer block. */
+        int *IntArray[MAX_PARAM];
         long *LngArray[MAX_PARAM];
         float *FltArray[MAX_PARAM];
         double *DblArray[MAX_PARAM];
@@ -413,73 +414,71 @@ GAGetMultiParmeters(int *Parameters[],
     do {
         switch (CtrlStrCopy[2]) { /* CtrlStr == '!*?' or '%*?' where ? is. */
           case 'd':    /* Format to read the parameters: */
-              TmpArray.IntArray[NumOfPrm] = (int *)xmalloc(sizeof(int));
+              TmpArray.IntArray[NumOfPrm] = xmalloc(sizeof(int));
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%d",
                                (int *)TmpArray.IntArray[NumOfPrm++]);
               break;
           case 'u':
-              TmpArray.IntArray[NumOfPrm] = (int *)xmalloc(sizeof(int));
+              TmpArray.IntArray[NumOfPrm] = xmalloc(sizeof(int));
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%u",
                                (unsigned int *)TmpArray.IntArray[NumOfPrm++]);
               break;
           case 'o':
-              TmpArray.IntArray[NumOfPrm] = (int *)xmalloc(sizeof(int));
+              TmpArray.IntArray[NumOfPrm] = xmalloc(sizeof(int));
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%o",
                                (unsigned int *)TmpArray.IntArray[NumOfPrm++]);
               break;
           case 'x':
-              TmpArray.IntArray[NumOfPrm] = (int *)xmalloc(sizeof(int));
+              TmpArray.IntArray[NumOfPrm] = xmalloc(sizeof(int));
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%x",
                                (unsigned int *)TmpArray.IntArray[NumOfPrm++]);
               break;
           case 'D':
-              TmpArray.LngArray[NumOfPrm] = (long *)xmalloc(sizeof(long));
+              TmpArray.LngArray[NumOfPrm] = xmalloc(sizeof(long));
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%ld",
                                (long *)TmpArray.IntArray[NumOfPrm++]);
               break;
           case 'U':
-              TmpArray.LngArray[NumOfPrm] = (long *)xmalloc(sizeof(long));
+              TmpArray.LngArray[NumOfPrm] = xmalloc(sizeof(long));
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%lu",
                                (unsigned long *)TmpArray.
                                IntArray[NumOfPrm++]);
               break;
           case 'O':
-              TmpArray.LngArray[NumOfPrm] = (long *)xmalloc(sizeof(long));
+              TmpArray.LngArray[NumOfPrm] = xmalloc(sizeof(long));
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%lo",
                                (unsigned long *)TmpArray.
                                IntArray[NumOfPrm++]);
               break;
           case 'X':
-              TmpArray.LngArray[NumOfPrm] = (long *)xmalloc(sizeof(long));
+              TmpArray.LngArray[NumOfPrm] = xmalloc(sizeof(long));
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%lx",
                                (unsigned long *)TmpArray.
                                IntArray[NumOfPrm++]);
               break;
           case 'f':
-              TmpArray.FltArray[NumOfPrm] = (float *)xmalloc(sizeof(float));
+              TmpArray.FltArray[NumOfPrm] = xmalloc(sizeof(float));
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%f",
                                (float *)TmpArray.LngArray[NumOfPrm++]);
               break;
           case 'F':
-              TmpArray.DblArray[NumOfPrm] =
-                 (double *)xmalloc(sizeof(double));
+              TmpArray.DblArray[NumOfPrm] = xmalloc(sizeof(double));
 	      // cppcheck-suppress invalidscanf 
               ScanRes = sscanf(*((*argv)++), "%lf",
                                (double *)TmpArray.LngArray[NumOfPrm++]);
               break;
           case 's':
-              while ((*argc) && ((**argv)[0] != '-')) {
+              while ((*argv < argv_end) && ((**argv)[0] != '-')) {
                   TmpArray.ChrArray[NumOfPrm++] = *((*argv)++);
-                  (*argc)--;
               }
               ScanRes = 0;    /* Force quit from do - loop. */
               NumOfPrm++;    /* Updated again immediately after loop! */
@@ -488,27 +487,23 @@ GAGetMultiParmeters(int *Parameters[],
           default:
               ScanRes = 0;    /* Make optimizer warning silent. */
         }
-        (*argc)--;
     }
     while (ScanRes == 1);    /* Exactly one parameter was read. */
     (*argv)--;
     NumOfPrm--;
-    (*argc)++;
 
     /* Now allocate the block with the exact size, and set it: */
-    Ptemp = Pmain =
-       (int **)xmalloc((unsigned)(NumOfPrm + 1) * sizeof(int *));
+    Ptemp = Pmain = xmalloc((unsigned)(NumOfPrm + 1) * sizeof(void *));
     /* And here we use the assumption that all pointers are the same: */
     for (i = 0; i < NumOfPrm; i++)
-        *Ptemp++ = TmpArray.IntArray[i];
+        *Ptemp++ = TmpArray.VoidArray[i];
     *Ptemp = NULL;    /* Close the block with NULL pointer. */
 
     /* That it save the number of parameters read as first parameter to
      * return and the pointer to the block as second, and return: */
-    *Parameters[(*ParamCount)++] = NumOfPrm;
-    memcpy((char *)Parameters[(*ParamCount)++], (char *)&Pmain,
-               sizeof(char *));
-    free(Pmain);
+    *(int *)Parameters[(*ParamCount)++] = NumOfPrm;
+    *(void ***)Parameters[(*ParamCount)++] = Pmain;
+    /* free(Pmain); -- can not free here as caller needs to access memory */
     return NumOfPrm;
 }
 
@@ -542,10 +537,10 @@ GASetParamCount(char *CtrlStr,
  given list argc, argv:
 ***************************************************************************/
 static bool
-GAOptionExists(int argc,
+GAOptionExists(char **argv_end,
                char **argv) {
 
-    while (argc--)
+    while (argv < argv_end)
         if ((*argv++)[0] == '-')
             return true;
     return false;

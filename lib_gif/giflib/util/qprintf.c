@@ -35,7 +35,7 @@ GifQprintf(char *Format, ...) {
 
 void
 PrintGifError(int ErrorCode) {
-    char *Err = GifErrorString(ErrorCode);
+    const char *Err = GifErrorString(ErrorCode);
 
     if (Err != NULL)
         fprintf(stderr, "GIF-LIB error: %s.\n", Err);

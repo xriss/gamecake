@@ -156,8 +156,10 @@ internally only.</para>
 <para>Most of the routines return GIF_ERROR (see gif_lib.h) if something
 went wrong, GIF_OK otherwise.  After an error return, all routines that
 take a pointer-to-GifFileType argument set the Error member with a code that
-can be interpreted into an expolanatory string with the function 
-GifErrorString() in gif_err.c.</para>
+can be interpreted into an explanatory string with the function 
+GifErrorString() in gif_err.c. (The exception to this is the
+DGifClose() and EGifClose() routines, which deallocate that structure
+and must therefore return any error code through a pointer argument.)</para>
 
 </sect1>
 <sect1><title>Decoding (dgif_lib.c)</title>
@@ -834,7 +836,7 @@ example).</para>
 <para>Returns GIF_ERROR if something went wrong, GIF_OK otherwise.</para>
 
 <programlisting id="DGifCloseFile">
-int DGifCloseFile(GifFileType *GifFile)
+int DGifCloseFile(GifFileType *GifFile, int *ErrorCode)
 </programlisting>
 
 <para>Write a termination block to the GIF, close the GIF file and
@@ -842,8 +844,14 @@ free all memory allocated for managing it. GifFile should not be used after
 this routine has been called.</para>
 
 <para>Returns GIF_ERROR if something went wrong, GIF_OK otherwise. When
-GIF_ERROR is returned, the GifFile structure is not freed so that the
-diagnostic error code will remain accessible in GifFile->Error.</para>
+GIF_ERROR is returned, the diagnostic error code is left in ErrorCode.
+The GifFile structure is unconditionally freed.</para>
+
+<para>(Note: In versions before 5.1.0, the ErrorCode argument was
+absent and the GifFile structure was not freed so that the
+diagnostic error code will remain accessible in GifFile->Error.
+This behavior was changed because it caused problems for the
+implementation of library wrappers in dynamic languages.)</para>
 
 </sect2>
 <sect2><title>Sequential writing</title>
@@ -1049,10 +1057,15 @@ int EGifCloseFile(GifFileType *GifFile)
 free all memory allocated for managing it. GifFile should not be used
 after this routine has been called.</para>
 
-<para>Returns GIF_ERROR if something went wrong, GIF_OK otherwise.When
-GIF_ERROR is returned, the GifFile structure is not freed so that the
-diagnostic error code will remain accessible in GifFile->Error.</para>
+<para>Returns GIF_ERROR if something went wrong, GIF_OK otherwise. When
+GIF_ERROR is returned, the diagnostic error code is left in ErrorCode.
+The GifFile structure is unconditionally freed.</para>
 
+<para>(Note: In versions before 5.1.0, the ErrorCode argument was
+absent and the GifFile structure was not freed so that the
+diagnostic error code will remain accessible in GifFile->Error.
+This behavior was changed because it caused problems for the
+implementation of library wrappers in dynamic languages.)</para>
 </sect2>
 
 </sect1>
@@ -1110,11 +1123,11 @@ EGifGetGifVersion().</para></listitem>
 <sect2><title>In documented functions:</title>
 
 <itemizedlist>
-<listitem><para>GIF file openers - DGifOpenFileName(),
-DGifOpenFileHandle(), DGifOpen(), EGifOpenFileName(),
-EGifOpenFileHandle(), and EGifOpen() - all now take a final integer
-address argument.  If non-null, this is used to pass back an error
-code when the function returns NULL.</para></listitem>
+<listitem><para>GIF file openers and closers - DGifOpenFileName(),
+DGifOpenFileHandle(), DGifOpen(), DGifClose(), EGifOpenFileName(),
+EGifOpenFileHandle(), EGifOpen(), and EGifClose() - all now take a
+final integer address argument.  If non-null, this is used to pass
+back an error code when the function returns NULL.</para></listitem>
 <listitem><para>EGifSlurp() and EGifSpew() read and write
 extension blocks trailing after the last image, handle interlaced 
 images properly.</para></listitem>
@@ -1158,7 +1171,7 @@ thread-unsafe.</para></listitem>
 <listitem><para>For functions other than GIF file openers, the Error
 code is now put in an Error member of the GifFileType
 structure.</para></listitem>
-<listitem><para>The GifError() amd
+<listitem><para>The GifError() and
 GifLastError() functions that referenced that static cell are gone,
 and the GifErrorString() function introduced in the 4.2 release now
 takes an explicit error code argument.</para></listitem>

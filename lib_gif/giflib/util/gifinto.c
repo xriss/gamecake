@@ -42,15 +42,38 @@ static char
 static int
     MinFileSize = DEFAULT_MIN_FILE_SIZE;
 
+#ifdef _WIN32
+#include <errno.h>
+#include <sys/stat.h>
+int
+mkstemp(char *tpl)
+{
+  int fd = -1;
+  char *p;
+  int e = errno;
+
+  errno = 0;
+  p = _mktemp(tpl);
+  if (*p && errno == 0)
+    {
+      errno = e;
+      fd = _open(p, _O_RDWR | _O_CREAT | _O_EXCL | _O_BINARY,
+		 _S_IREAD | _S_IWRITE);
+    }
+  return fd;
+}
+#endif
+
 /******************************************************************************
  This is simply: read until EOF, then close the output, test its length, and
  if non zero then rename it.
 ******************************************************************************/
 int main(int argc, char **argv)
 {
+    int FD;
     int	NumFiles;
     bool Error, MinSizeFlag = false, HelpFlag = false;
-    char **FileName = NULL, FoutTmpName[STRLEN], FullPath[STRLEN], *p;
+    char **FileName = NULL, FoutTmpName[STRLEN+1], FullPath[STRLEN+1], *p;
     FILE *Fin, *Fout;
 
     if ((Error = GAGetArgs(argc, argv, CtrlStr, &GifNoisyPrint,
@@ -104,20 +127,31 @@ int main(int argc, char **argv)
     /* then add a name for the tempfile */
     if ( (strlen(FoutTmpName) + strlen(DEFAULT_TMP_NAME))  > STRLEN-1 ) GIF_EXIT("Filename too long.");
     strcat(FoutTmpName, DEFAULT_TMP_NAME);
-    int FD;
+#ifdef _WIN32
+    char *tmpFN = _mktemp(FoutTmpName);
+    if (tmpFN)
+	FD = open(tmpFN, O_CREAT | O_EXCL | O_WRONLY);
+    else
+	FD = -1;
+#else
     FD = mkstemp(FoutTmpName); /* returns filedescriptor */
+#endif
     if (FD == -1 )
     {
 	GIF_EXIT("Failed to open output.");
     }
-    Fout = fdopen(FD, "w"); /* returns a stream with FD */
+    Fout = fdopen(FD, "wb"); /* returns a stream with FD */
     if (Fout == NULL )
     {
 	GIF_EXIT("Failed to open output.");
     }
 
-    while (!feof(Fin)) {
-	if (putc(getc(Fin), Fout) == EOF)
+    while (1) {
+	int c = getc(Fin);
+
+	if (feof(Fin))
+	    break;
+	if (putc(c, Fout) == EOF)
 	    GIF_EXIT("Failed to write output.");
     }
 
@@ -126,7 +160,8 @@ int main(int argc, char **argv)
 	fclose(Fout);
 	unlink(*FileName);
 	if (rename(FoutTmpName, *FileName) != 0) {
-	    char DefaultName[STRLEN];
+	    char DefaultName[STRLEN+1];
+	    memset(DefaultName, '\0', sizeof(DefaultName));
 	    if ( (strlen(FullPath) + strlen(DEFAULT_OUT_NAME)) > STRLEN-1 ) GIF_EXIT("Filename too long.");
 	    strncpy(DefaultName, FullPath, STRLEN);
 	    // cppcheck-suppress uninitstring

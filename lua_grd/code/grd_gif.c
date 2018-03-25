@@ -166,7 +166,7 @@ static void grd_gif_load(struct grd * g, struct grd_io_info * inf )
 bogus:
 	if(gif)
 	{
-		if (DGifCloseFile(gif) == GIF_ERROR)
+		if (DGifCloseFile(gif,0) == GIF_ERROR)
 		{
 			g->err=GifErrorString(ErrorCode);
 			return;

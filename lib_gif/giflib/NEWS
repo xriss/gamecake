@@ -1,8 +1,150 @@
 			GIFLIB NEWS
 
-Short summary of recent news:
-  Set the error return properly when a screen descriptor read fails. 
-Fixes for some minor API documentation bugs.
+
+Version 5.1.4
+=============
+
+Code Fixes
+----------
+
+* Fix SF bug #94: giflib 5 loves to fail to load images... a LOT.
+
+* Fix SF Bug #92: Fix buffer overread in gifbuild.
+
+* Fix SF Bug #93: Add bounds check in gifbuild netscape2.0 path
+
+* Fix SF Bug #89: Fix buffer overread in gifbuild.
+
+Version 5.1.3
+=============
+
+As of this version the library and code has been seriously abused by fuzzers,
+smoking out crash bugs (now fixed) induced by various kinds of severely
+malformed GIF.
+
+Code Fixes
+----------
+
+* Prevent malloc randomess from causing the header output routine to emit
+  a GIF89 version string even when no GIF89 features are present. Only
+  breaks tests, not production code, but it's odd this wasn't caught sooner.
+
+* Prevent malloc randomess from producing sporadic failures by causing
+  sanity checks added in 5.1.2 to misfire.
+
+* Bulletproof gif2rgb against 0-height images. Addressed SF bug #78:
+  Heap overflow in gif2rgb with images of size 0, also SF bug #82.
+
+* Remove unnecessary duplicate EGifClose() in gifcolor.c. Fixes SF bug #83
+  introduced in 5.1.2.
+
+* Fix SF Bug #84: incorrect return of DGifSlurp().
+
+Version 5.1.2
+=============
+
+Code Fixes
+----------
+
+* Code hardening using reallocarray() from OpenBSD.
+
+* Sanity check in giffilter catches files with malformed extension records
+  Fixes SourceForge bug #63: malformed gif causes segfault in giffilter.
+
+* Inexpensive sanity check in DGifSlurp() catches malformed files with
+  no image descriptor. Fixes SourceForge bug #64: malformed gif causes
+  crash in giftool.
+
+* Fix SourceForge bug #66: GifDrawBoxedText8x8() modifying constant input
+  parameter.
+
+* Bail out of GIF read on invalid pixel width. Addresses Savannah bug
+  #67: invalid shift in dgif_lib.c
+
+* Fix SourceForge bug #69: #69 Malformed: Gif file with no extension
+  block after a GRAPHICS_EXT_FUNC_CODE extension causes segfault (in
+  giftext).
+
+* Fix SourceForge bug #71: Buffer overwrite when giffixing a malformed gif.
+
+* Fix SourceForge bug #73: Null pointer deference in gifclrmap (only
+  reachable with malformed GIF).
+
+* Fix SourceForge bug #74: Double free in gifsponge under 5.1.1,
+  for any valid gif image.
+
+* Fix SourceForge bug #75: GAGetArgs overflows due to uncounted use of va_arg.
+
+* Sanity check in giffix catches some malformed files. Addresses
+  SourceForge bug #77: dgif_lib.c: extension processing error
+
+
+Version 5.1.1
+=============
+
+Code Fixes
+----------
+
+* Numerous minor fixes in getarg.c. Affects only the utilities, not the
+  core library.
+
+* Fix SourceForge bug #59: DGifOpen can segfault if DGifGetScreenDesc fails.
+
+* SourceForge patch #20: In gifalloc, fix usage of realloc() in case of failure.
+
+* Fix SourceForge bug #61 Leak in gifsponge.
+
+Build Fixes
+----------
+
+* glibtoolize port fix for OS X.
+
+Version 5.1.0
+=============
+
+Changes to the API require a library major-version bump.
+
+Code Fixes
+----------
+
+* A small change to the API: DGifClose() and EGifClose() now take a
+  pointer-to-int second argument (like the corresponding openers)
+  where a diagnostic code will be deposited when they return
+  GIF_ERROR.  This replaces the old behavior in which the GifFile
+  structure was left unfreed so the Error member in it could be filled
+  and remain available.  The change was was required because it's
+  not always possible to free the struct afterwards. Case in point is
+  a C# wrapper for giflib (or any language/environment where you can't
+  just free objects allocated in a foreign shared library.)
+
+* Minor fix for SF bug #56; BitsPerPixel may be left as uninitialized
+  value when reading (truncated) gif.
+
+* Applied SF patch #17: Use a fallback on Windows where mkstemp is not
+  available.
+
+* Applied SF patch #15: Code hardening, preventing spurious
+  defective-image messages.
+
+Retirements
+-----------
+
+* Removed gif2raw from utils. Its blithe assumption that the EGA16
+  palette is a reliable default is now about 20 years obsolete. Format
+  conversion is better done with convert(1) from the ImageMagick suite,
+  anyway.
+
+Version 5.0.6
+=============
+
+Minor fix for a rare memory leak (SF bug #55).  
+
+MinGW port fixes.
+
+Repair the internal quantization function used in gif2rgb so it's
+less vulnerable to cross-platform skew due to qsort() being unstable.
+This shouldn't affect production use, it's just a cross-platform
+issue for regression testing 
 
 Version 5.0.5
 =============
@@ -44,7 +186,7 @@ Documentation and polish
 
 Retirements
 -----------
-* gifinter is gone.  Use convert -interlace from the ImageMagic suite.
+* gifinter is gone.  Use convert -interlace from the ImageMagick suite.
 
 Code Fixes
 ----------
@@ -80,7 +222,7 @@ The library is now completely re-entrant and thread-safe.
 * Library error handling no longer uses a static cell to store the last
   error code registered; that made the library thread-unsafe.  For functions 
   other than GIF file openers, the code is now put in an Error member of
-  the GifFileType structure.  The GifError() amd GifLastError() functions
+  the GifFileType structure.  The GifError() and GifLastError() functions
   that referenced that static cell are gone, and the GifErrorString()
   function introduced in the 4.2 release now takes an explicit error code
   argument.

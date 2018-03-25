@@ -168,8 +168,11 @@ int main(int argc, char **argv)
     /* We requested suppression of the background count: */
     if (BackGroundFlag) Histogram[GifFileIn->SBackGroundColor] = 0;
 
-    if (DGifCloseFile(GifFileIn) == GIF_ERROR)
-	QuitGifError(GifFileIn, GifFileOut);
+    if (DGifCloseFile(GifFileIn, &ErrorCode) == GIF_ERROR)
+    {
+	PrintGifError(ErrorCode);
+	exit(EXIT_FAILURE);
+    }
 
 
     /* We may required to dump out the histogram as text file: */
@@ -225,8 +228,11 @@ int main(int argc, char **argv)
 	    }
 	}
 
-	if (EGifCloseFile(GifFileOut) == GIF_ERROR)
-	    QuitGifError(GifFileIn, GifFileOut);
+	if (EGifCloseFile(GifFileOut, &ErrorCode) == GIF_ERROR)
+	{
+	    PrintGifError(ErrorCode);
+	    exit(EXIT_FAILURE);
+	}
     }
 
     return 0;
@@ -239,11 +245,11 @@ static void QuitGifError(GifFileType *GifFileIn, GifFileType *GifFileOut)
 {
     if (GifFileIn != NULL) {
 	PrintGifError(GifFileIn->Error);
-	EGifCloseFile(GifFileIn);
+	EGifCloseFile(GifFileIn, NULL);
     }
     if (GifFileOut != NULL) {
 	PrintGifError(GifFileOut->Error);
-	EGifCloseFile(GifFileOut);
+	EGifCloseFile(GifFileOut, NULL);
     }
     exit(EXIT_FAILURE);
 }

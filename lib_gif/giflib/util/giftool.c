@@ -567,8 +567,8 @@ int main(int argc, char **argv)
 
     if (EGifSpew(GifFileOut) == GIF_ERROR)
 	PrintGifError(GifFileOut->Error);
-    else if (DGifCloseFile(GifFileIn) == GIF_ERROR)
-	PrintGifError(GifFileIn->Error);
+    else if (DGifCloseFile(GifFileIn, &ErrorCode) == GIF_ERROR)
+	PrintGifError(ErrorCode);
 
     return 0;
 }

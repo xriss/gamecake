@@ -24,11 +24,6 @@ TESTS=test.sh
 
 # Auditing tools.
 
-# Coverity - avoid making doc as xmlto craps out under cov-build
-coverity:
-	cd lib; make
-	cd util; make
-
 # cppcheck should run clean
 cppcheck:
 	cppcheck -Ilib --inline-suppr --template gcc --enable=all --suppress=unusedStructMember --suppress=unusedFunction --force lib/*.[ch] util/*.[ch]
@@ -41,5 +36,11 @@ splint:
 # release using the shipper tool, if distcheck passes
 release: distcheck
 	cd doc; make website
-	shipper -u -m -t; rm SHIPPER.*; make clean
+	shipper version=@VERSION@ | sh -e -x
+	rm -fr doc/staging
+
+# Refresh the wbsite
+refresh:
+	cd doc; make website
+	shipper -w version=@VERSION@ | sh -e -x
 	rm -fr doc/staging

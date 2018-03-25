@@ -85,12 +85,6 @@ of a local installation of the tools.
 <para>convert images saved as GIF to 24-bit RGB image(s) or vice-versa</para>
 </listitem>
 </varlistentry>
-<varlistentry>
-<term><ulink url="gif2raw.html">gif2raw</ulink></term>
-<listitem>
-<para>convert GIF files into raw 8-bit image data or vice-versa</para>
-</listitem>
-</varlistentry>
 </variablelist>
 
 </sect2>

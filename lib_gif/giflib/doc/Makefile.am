@@ -18,7 +18,6 @@ all: allhtml manpages
 # some pages shouldn't be installed as part of a binary package;
 # they're just for test-pattern generators.
 XMLMAN = \
-	gif2raw.xml \
 	gif2rgb.xml \
 	gifbuild.xml \
 	gifclrmp.xml \

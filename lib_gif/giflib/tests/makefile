@@ -5,8 +5,6 @@
 
 # This is what to do by default
 test: render-regress \
-	gif2raw-regress \
-	gif2rgb-regress \
 	gifbuild-regress \
 	gifclrmp-regress \
 	gifecho-regress \
@@ -50,10 +48,6 @@ render-rebuild:
 		$(UTILS)/gif2rgb -1 -o $${stem}.rgb $${test}; \
 	done
 
-gif2raw-regress:
-	@echo "gif2raw: Checking that it can self-invert."
-	@$(UTILS)/gif2raw <$(PICS)/treescap.gif | $(UTILS)/gif2raw -s 40 40 -p treescap.map | $(UTILS)/gif2rgb | cmp - treescap.rgb
-
 gif2rgb-rebuild:
 	@echo "Rebuilding gif2rgb checkfile."
 	@$(UTILS)/gif2rgb -c 3 -s 100 100 <gifgrid.rgb | $(UTILS)/gifbuild -d >gifgrid.ico
@@ -78,7 +72,7 @@ gifclrmp-regress:
 	    stem=`basename $${test} | sed -e "s/.gif$$//"`; \
 	    if echo "gifclrmap: Checking colormap of $${test}" >&2; \
 	    $(UTILS)/gifclrmp <$${test} >/tmp/regress 2>&1; \
-	    then cmp $${stem}.map /tmp/regress; \
+	    then diff -u $${stem}.map /tmp/regress; \
 	    else echo "*** Nonzero return status on $${test}!"; exit 1; fi; \
 	done
 	@rm -f /tmp/regress

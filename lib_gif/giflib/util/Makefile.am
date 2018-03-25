@@ -6,7 +6,6 @@ noinst_PROGRAMS = gifbg gifcolor giffilter gifhisto gifsponge gifwedge
 noinst_LIBRARIES = libgetarg.a
 
 bin_PROGRAMS = \
-	gif2raw \
 	gif2rgb \
 	gifbuild \
 	gifecho \
@@ -28,7 +27,6 @@ libgetarg_a_SOURCES = getarg.c getarg.h \
 gifclrmp_SOURCES = gifclrmp.c
 gifclrmp_LDADD = $(LDADD) -lm
 
-gif2raw_SOURCES = gif2raw.c
 gif2rgb_SOURCES = gif2rgb.c
 gifbg_SOURCES = gifbg.c
 gifbuild_SOURCES = gifbuild.c

@@ -12,6 +12,7 @@ libgif_la_SOURCES = dgif_lib.c  \
 					gif_hash.c  \
 					gif_hash.h	\
                     gifalloc.c  \
+		    openbsd-reallocarray.c \
                     gif_err.c   \
 					gif_lib_private.h \
 		    quantize.c

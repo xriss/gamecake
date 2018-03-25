@@ -303,10 +303,10 @@ static void Icon2Gif(char *FileName, FILE *txtin, int fdout)
 		PARSE_ERROR("Inclusion read failed.");
 		if (Inclusion != NULL) {
 		    PrintGifError(Inclusion->Error);
-		    DGifCloseFile(Inclusion);
+		    DGifCloseFile(Inclusion, NULL);
 		}
 		if (GifFileOut != NULL) {
-		    EGifCloseFile(GifFileOut);
+		    EGifCloseFile(GifFileOut, NULL);
 		};
 		exit(EXIT_FAILURE);
 	    }
@@ -322,8 +322,8 @@ static void Icon2Gif(char *FileName, FILE *txtin, int fdout)
 		{
 		    PARSE_ERROR("Inclusion failed --- global map conflict.");
 		    PrintGifError(GifFileOut->Error);
-		    if (Inclusion != NULL) DGifCloseFile(Inclusion);
-		    if (GifFileOut != NULL) EGifCloseFile(GifFileOut);
+		    if (Inclusion != NULL) DGifCloseFile(Inclusion, NULL);
+		    if (GifFileOut != NULL) EGifCloseFile(GifFileOut, NULL);
 		    exit(EXIT_FAILURE);
 		}
 
@@ -339,8 +339,8 @@ static void Icon2Gif(char *FileName, FILE *txtin, int fdout)
 		{
 		    PARSE_ERROR("Inclusion failed --- out of memory.");
 		    PrintGifError(GifFileOut->Error);
-		    if (Inclusion != NULL) DGifCloseFile(Inclusion);
-		    if (GifFileOut != NULL) EGifCloseFile(GifFileOut);
+		    if (Inclusion != NULL) DGifCloseFile(Inclusion, NULL);
+		    if (GifFileOut != NULL) EGifCloseFile(GifFileOut, NULL);
 		    exit(EXIT_FAILURE);
 		}
 		else if (DoTranslation)
@@ -354,7 +354,7 @@ static void Icon2Gif(char *FileName, FILE *txtin, int fdout)
 			InclusionFile);
 	    }
 
-	    (void) DGifCloseFile(Inclusion);
+	    (void) DGifCloseFile(Inclusion, NULL);
 	}
 
 	/*
@@ -562,6 +562,7 @@ static void Icon2Gif(char *FileName, FILE *txtin, int fdout)
 	    int c;
 	    bool hex = (strstr(buf, "hex") != NULL);
 
+	    /* coverity[overflow_sink] */
 	    if ((Raster = (GifPixelType *) malloc(sizeof(GifPixelType) * NewImage->ImageDesc.Width * NewImage->ImageDesc.Height))
 		== NULL) {
 		PARSE_ERROR("Failed to allocate raster block, aborted.");
@@ -691,6 +692,7 @@ static void DumpExtensions(GifFileType *GifFileOut,
 	    putchar('\n');
 	    while (!last && ep[1].Function == CONTINUE_EXT_FUNC_CODE) {
 		++ep;
+		last = (ep - ExtensionBlocks == (ExtensionBlockCount - 1));
 		VisibleDumpBuffer(ep->Bytes, ep->ByteCount);
 		putchar('\n');
 	    }
@@ -702,6 +704,7 @@ static void DumpExtensions(GifFileType *GifFileOut,
 	    putchar('\n');
 	    while (!last && ep[1].Function == CONTINUE_EXT_FUNC_CODE) {
 		++ep;
+		last = (ep - ExtensionBlocks == (ExtensionBlockCount - 1));
 		VisibleDumpBuffer(ep->Bytes, ep->ByteCount);
 		putchar('\n');
 	    }
@@ -722,7 +725,10 @@ static void DumpExtensions(GifFileType *GifFileOut,
 	    printf("\ttransparent index %d\n", gcb.TransparentColor);
 	    printf("end\n\n");
 	}
-	else if (ep->Function == APPLICATION_EXT_FUNC_CODE 
+	else if (!last
+		 && ep->Function == APPLICATION_EXT_FUNC_CODE
+		 && ep->ByteCount >= 11
+		 && (ep+1)->ByteCount >= 3
 		 && memcmp(ep->Bytes, "NETSCAPE2.0", 11) == 0) {
 	    unsigned char *params = (++ep)->Bytes;
 	    unsigned int loopcount = params[1] | (params[2] << 8);
@@ -733,6 +739,7 @@ static void DumpExtensions(GifFileType *GifFileOut,
 	    VisibleDumpBuffer(ep->Bytes, ep->ByteCount);
 	    while (!last && ep[1].Function == CONTINUE_EXT_FUNC_CODE) {
 		++ep;
+		last = (ep - ExtensionBlocks == (ExtensionBlockCount - 1));
 		VisibleDumpBuffer(ep->Bytes, ep->ByteCount);
 		putchar('\n');
 	    }
@@ -869,8 +876,8 @@ static void Gif2Icon(char *FileName,
     if (fdin == -1)
 	(void) printf("# End of %s dump\n", FileName);
 
-    if (DGifCloseFile(GifFile) == GIF_ERROR) {
-	PrintGifError(GifFile->Error);
+    if (DGifCloseFile(GifFile, &ErrorCode) == GIF_ERROR) {
+	PrintGifError(ErrorCode);
 	exit(EXIT_FAILURE);
     }
 }

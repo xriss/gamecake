@@ -119,8 +119,11 @@ int main(int argc, char **argv)
 	}
     }
 
-    if (EGifCloseFile(GifFile) == GIF_ERROR)
-	QuitGifError(GifFile);
+    if (EGifCloseFile(GifFile, &ErrorCode) == GIF_ERROR)
+    {
+	PrintGifError(ErrorCode);
+	exit(EXIT_FAILURE);
+    }
 
     return 0;
 }
@@ -156,7 +159,7 @@ static void QuitGifError(GifFileType *GifFile)
 {
     if (GifFile != NULL) {
 	PrintGifError(GifFile->Error);
-	EGifCloseFile(GifFile);
+	EGifCloseFile(GifFile, NULL);
     }
     exit(EXIT_FAILURE);
 }

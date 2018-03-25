@@ -130,8 +130,8 @@ int main(int argc, char **argv)
 	}
     }
 
-    if (EGifCloseFile(GifFile) == GIF_ERROR) {
-	PrintGifError(GifFile->Error);
+    if (EGifCloseFile(GifFile, &ErrorCode) == GIF_ERROR) {
+	PrintGifError(ErrorCode);
 	exit(EXIT_FAILURE);
     }
 

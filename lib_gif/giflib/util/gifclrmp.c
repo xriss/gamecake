@@ -127,10 +127,12 @@ int main(int argc, char **argv)
 
     if (!ImageNFlag) {
 	/* We are supposed to modify the screen color map, so do it: */
+	if (!GifFileIn->SColorMap)
+	    GIF_EXIT("No colormap to modify");
 	GifFileIn->SColorMap = ModifyColorMap(GifFileIn->SColorMap);
 	if (!HasGIFOutput) {
 	    /* We can quit here, as we have the color map: */
-	    DGifCloseFile(GifFileIn);
+	    DGifCloseFile(GifFileIn, NULL);
 	    fclose(ColorFile);
 	    exit(EXIT_SUCCESS);
 	}
@@ -157,7 +159,7 @@ int main(int argc, char **argv)
 		    GifFileIn->SColorMap =ModifyColorMap(GifFileIn->SColorMap);
 		    if (!HasGIFOutput) {
 			/* We can quit here, as we have the color map: */
-			DGifCloseFile(GifFileIn);
+			DGifCloseFile(GifFileIn, NULL);
 			fclose(ColorFile);
 			exit(EXIT_SUCCESS);
 		    }
@@ -246,11 +248,17 @@ int main(int argc, char **argv)
     }
     while (RecordType != TERMINATE_RECORD_TYPE);
 
-    if (DGifCloseFile(GifFileIn) == GIF_ERROR)
-	QuitGifError(GifFileIn, GifFileOut);
+    if (DGifCloseFile(GifFileIn, &ErrorCode) == GIF_ERROR)
+    {
+	PrintGifError(ErrorCode);
+	exit(EXIT_FAILURE);
+    }
     if (HasGIFOutput)
-	if (EGifCloseFile(GifFileOut) == GIF_ERROR)
-	    QuitGifError(GifFileIn, GifFileOut);
+	if (EGifCloseFile(GifFileOut, &ErrorCode) == GIF_ERROR)
+	{
+	    PrintGifError(ErrorCode);
+	    exit(EXIT_FAILURE);
+	}
 
     return 0;
 }
@@ -337,11 +345,11 @@ static void QuitGifError(GifFileType *GifFileIn, GifFileType *GifFileOut)
 {
     if (GifFileIn != NULL) {
 	PrintGifError(GifFileIn->Error);
-	EGifCloseFile(GifFileIn);
+	EGifCloseFile(GifFileIn, NULL);
     }
     if (GifFileOut != NULL) {
 	PrintGifError(GifFileOut->Error);
-	EGifCloseFile(GifFileOut);
+	EGifCloseFile(GifFileOut, NULL);
     }
     exit(EXIT_FAILURE);
 }
