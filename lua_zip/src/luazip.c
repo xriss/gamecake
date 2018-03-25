@@ -114,46 +114,61 @@ static int zip_open (lua_State *L) {
 };
 
 struct zzip_plugin_mem_io_file {
-	char magic[8];
-	unsigned char *data;
-	int size;
-	int curr;
+  int id;
+  unsigned char *data;
+  int size;
+  int curr;
 };
 
-static int zzip_plugin_mem_io_check_magic(struct zzip_plugin_mem_io_file *f)
+// maximum of 16 zip memory files open at once...
+#define ZZIP_MAX_MEM_IO_FILES 16
+struct zzip_plugin_mem_io_file zzip_memfiles[ZZIP_MAX_MEM_IO_FILES];
+
+struct zzip_plugin_mem_io_file * zzip_plugin_mem_io_alloc_memfile()
 {
-	char *cp=f->magic;
-	
-	if(cp[0]!='Z') return 0;
-	if(cp[1]!='I') return 0;
-	if(cp[2]!='P') return 0;
-	if(cp[3]!= 0 ) return 0;
-	if(cp[4]!='D') return 0;
-	if(cp[5]!='A') return 0;
-	if(cp[6]!='T') return 0;
-	if(cp[7]!= 0 ) return 0;
-	
-	return 1;
+  int i;
+  struct zzip_plugin_mem_io_file *fp;
+  for(i=0;i<ZZIP_MAX_MEM_IO_FILES;i++)
+  {
+    fp=zzip_memfiles+i;
+    if(fp->id==0) // free
+    {
+      fp->id=i+1;
+      return fp;
+    }
+  }
+  return 0;
 }
+struct zzip_plugin_mem_io_file * zzip_plugin_mem_io_get_memfile(int fi)
+{
+  if(fi<=0) return 0;
+  if(fi>ZZIP_MAX_MEM_IO_FILES) { return 0; }
+  return zzip_memfiles+fi-1;
+}  
+void zzip_plugin_mem_io_free_memfile(int fi)
+{
+  struct zzip_plugin_mem_io_file *fp;
+  fp=zzip_plugin_mem_io_get_memfile(fi);
+  if(fp)
+  {
+    fp->id=0;
+  }
+}
+
 static int zzip_plugin_mem_io_open(zzip_char_t* name, int flags, ...)
 {
 struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)name; /* reuse the name as the data struct*/
-	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
-	
-	return (int)f;
+	return f->id;
 }
 static int zzip_plugin_mem_io_close(int fd)
 {
-struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
-	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
-
-	free((void*)f);
-	return 0;
+  zzip_plugin_mem_io_free_memfile(fd);
+  return 0;
 }
 static zzip_ssize_t zzip_plugin_mem_io_read(int fd, void* buf, zzip_size_t len)
 {
-struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
-	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
+struct zzip_plugin_mem_io_file *f=zzip_plugin_mem_io_get_memfile(fd);
+	if(!f) { return -1; }
 
 	if(f->curr+len > f->size)
 	{
@@ -166,8 +181,8 @@ struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
 }
 static zzip_off_t   zzip_plugin_mem_io_seaks(int fd, zzip_off_t offset, int whence)
 {
-struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
-	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
+struct zzip_plugin_mem_io_file *f=zzip_plugin_mem_io_get_memfile(fd);
+	if(!f) { return -1; }
 	
 	if(whence==0)
 	{
@@ -190,15 +205,15 @@ struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
 }
 static zzip_off_t   zzip_plugin_mem_io_filesize(int fd)
 {
-struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
-	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
+struct zzip_plugin_mem_io_file *f=zzip_plugin_mem_io_get_memfile(fd);
+	if(!f) { return -1; }
 
 	return f->size;
 }
 static zzip_ssize_t zzip_plugin_mem_io_write(int fd, _zzip_const void* buf, zzip_size_t len)
 {
-struct zzip_plugin_mem_io_file *f=(struct zzip_plugin_mem_io_file *)fd;
-	if(!zzip_plugin_mem_io_check_magic(f)) { return -1; }
+struct zzip_plugin_mem_io_file *f=zzip_plugin_mem_io_get_memfile(fd);
+	if(!f) { return -1; }
 
 	return 0;
 }
@@ -219,18 +234,17 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
 static int zip_open_mem (lua_State *L) {
   ZZIP_FILE** inf;
-  char *cp;
   ZZIP_DIR** pf;
   int i;
 
-	struct zzip_plugin_mem_io_file *f;
-	f=calloc(sizeof(struct zzip_plugin_mem_io_file),1);
-	if(!f) { return 0; } // alloc fail
+	struct zzip_plugin_mem_io_file *f=zzip_plugin_mem_io_alloc_memfile();
+	if(!f)
+	{
+	  lua_pushnil(L);
+	  lua_pushfstring(L, "out of zip memory file handles");
+	  return 2;
+	}
 
-	cp=f->magic;
-	cp[0]='Z';cp[1]='I';cp[2]='P';cp[3]=0;
-	cp[4]='D';cp[5]='A';cp[6]='T';cp[7]=0;
-		
 	if(lua_isstring(L,1))
 	{
 		size_t t;
@@ -638,7 +652,7 @@ static int ff_seek (lua_State *L) {
   }
 }
 
-static const luaL_Reg ziplib[] = {
+static const luaL_reg ziplib[] = {
   {"open_mem", zip_open_mem}, // open a file from memory
   {"open", zip_open},
   {"close", zip_close},
@@ -648,7 +662,7 @@ static const luaL_Reg ziplib[] = {
   {NULL, NULL}
 };
 
-static const luaL_Reg flib[] = {
+static const luaL_reg flib[] = {
   {"open", f_open},
   {"close", zip_close},
   {"files", f_files},
@@ -657,7 +671,7 @@ static const luaL_Reg flib[] = {
   {NULL, NULL}
 };
 
-static const luaL_Reg fflib[] = {
+static const luaL_reg fflib[] = {
   {"read", ff_read},
   {"close", ff_close},
   {"seek", ff_seek},

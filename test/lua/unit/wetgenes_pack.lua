@@ -10,6 +10,7 @@ function test_alloc()
 
 	local d=pack.alloc(64)
 	local siz=pack.sizeof(d)
+--print(siz)
 	assert(siz==64)
 
 end
