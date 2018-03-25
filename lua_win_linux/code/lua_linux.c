@@ -663,7 +663,7 @@ char c;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_win_linux_core(lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"screen",			lua_wetwin_screen},
 		
@@ -693,7 +693,7 @@ LUALIB_API int luaopen_wetgenes_win_linux_core(lua_State *l)
 		{0,0}
 	};
 
- 	const luaL_reg meta[] =
+ 	const luaL_Reg meta[] =
 	{
 		{"__gc",			lua_wetwin_destroy},
 		{0,0}

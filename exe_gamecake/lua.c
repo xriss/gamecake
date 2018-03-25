@@ -89,7 +89,8 @@ static int report (lua_State *L, int status) {
 static int traceback (lua_State *L) {
   if (!lua_isstring(L, 1))  /* 'message' not a string? */
     return 1;  /* keep it intact */
-  lua_getfield(L, LUA_GLOBALSINDEX, "debug");
+	lua_getglobal(L,"debug");
+//  lua_getfield(L, LUA_GLOBALSINDEX, "debug");
   if (!lua_istable(L, -1)) {
     lua_pop(L, 1);
     return 1;
@@ -343,12 +344,7 @@ static int runargs (lua_State *L, char **argv, int n) {
 
 
 static int handle_luainit (lua_State *L) {
-  const char *init = getenv(LUA_INIT);
-  if (init == NULL) return 0;  /* status OK */
-  else if (init[0] == '@')
-    return dofile(L, init+1);
-  else
-    return dostring(L, init, "=" LUA_INIT);
+  return 0;
 }
 
 

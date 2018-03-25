@@ -693,7 +693,7 @@ static int lua_nacl_info (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_win_nacl_core(lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 //		{"create",			lua_nacl_create},
 		

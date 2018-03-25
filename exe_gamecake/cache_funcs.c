@@ -48,7 +48,8 @@ extern void wetgenes_cache_preloader(lua_State *L)
 
 	int numLoaders = 0;
 
-	lua_getfield(L, LUA_GLOBALSINDEX, "package");	// push "package"
+	lua_getglobal(L,"package");
+//	lua_getfield(L, LUA_GLOBALSINDEX, "package");	// push "package"
 	lua_getfield(L, -1, "loaders");					// push "package.loaders"
 	lua_remove(L, -2);								// remove "package"
 

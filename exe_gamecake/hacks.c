@@ -1,17 +1,80 @@
-// hax to be honest, all this to create a lua_toluserdata function
-// if lua or luajit change then this will break
-// it is however still better than not having any bounds checking
 
-#if defined(LIB_LUAJIT)
-#include "../lib_luajit/src/lj_obj.h"
-#else
-#include "../lib_lua/src/lobject.h"
-#endif
 
 #include "lua.h"
 #include "lauxlib.h"
+#include "lualib.h"
 
-#if defined(LIB_LUAJIT)
+
+// hax to be honest, all this to create a lua_pack_toluserdata function
+// if lua or luajit change then this will break
+// it is however still better than not having any bounds checking
+
+#include "../lib_wet/util/wet_types.h"
+
+// we need to keep this in sync with the lua version
+// so we can extract a length from a structure we mostly do not care about
+// this is an evil hack but there is no exposed way to do this apart from building your own lua
+
+#if defined(LUA_JITLIBNAME)
+
+// 32bit luajit hacks
+typedef struct wetgenes_pack_user_data {
+  struct {
+    u32 next; u8 tt; u8 marked;
+    u8 udtype;
+    u8 unused2;
+    u32 env;
+    u32 len;
+    u32 metatable;
+    u32 align1;
+  } uv;
+} wetgenes_pack_user_data;
+
+#else
+
+// lua hacks
+typedef union { double u; void *s; long l; } wetgenes_pack_user_alignment;
+typedef union wetgenes_pack_user_data {
+  wetgenes_pack_user_alignment dummy;
+  struct {
+    void *next; char tt; char marked;
+    void *metatable;
+    void *env;
+    size_t len;
+  } uv;
+} wetgenes_pack_user_data;
+
+#endif
+
+
+
+
+
+
+extern unsigned char * lua_toluserdata (lua_State *l, int idx, size_t *len)
+{
+	wetgenes_pack_user_data *g;
+
+	unsigned char *p=lua_touserdata(l,idx);
+	if(!p) { return 0; }
+	if(len)
+	{
+		if(lua_islightuserdata(l,idx))
+		{
+			*len=0x7fffffff;
+		}
+		else
+		{
+			g=(wetgenes_pack_user_data*)(p-sizeof(wetgenes_pack_user_data));
+			*len=g->uv.len;
+		}	
+	}
+	
+	return p;
+}
+
+
+#if defined(LUA_JITLIBNAME)
 extern void *
 luaL_testudata(lua_State *L, int index, const char *tname)
 {
@@ -35,37 +98,6 @@ luaL_testudata(lua_State *L, int index, const char *tname)
 #endif
 
 
-extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len)
-{
-
-#if defined(LIB_LUAJIT)
-	GCudata *g;
-#else
-	Udata *g;
-#endif
-
-	unsigned char *p=0;
-	
-	if(lua_isuserdata(L,idx))
-	{
-		p=(unsigned char*)lua_touserdata(L,idx);
-	}
-	
-	if(!p) { return 0; }
-		
-	if(len)
-	{
-#if defined(LIB_LUAJIT)
-		g=(GCudata*)(p-sizeof(GCudata));
-		*len=g->len;
-#else
-		g=(Udata*)(p-sizeof(Udata));
-		*len=g->uv.len;
-#endif
-	}
-	
-	return p;
-}
 
 #if defined(NACL)
 

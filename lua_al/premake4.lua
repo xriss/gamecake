@@ -6,7 +6,7 @@ defines( "AL_LIBTYPE_STATIC" )
 
 files { "code/*.c" }
 
-links { "lib_lua" }
+links { "lib_lua" , "lua_pack" }
 
 includedirs { "../lib_openal/asoft/include"}
 
@@ -22,7 +22,7 @@ defines( "AL_LIBTYPE_STATIC" )
 
 files { "code/lua_alc.c" }
 
-links { "lib_lua" }
+links { "lib_lua" , "lua_pack" }
 
 includedirs { "../lib_openal/asoft/include" }
 

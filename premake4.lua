@@ -345,8 +345,8 @@ elseif RASPI then
 
 	local raspisdk=path.getabsolute("./sdks/raspi")
 
-	includedirs { "/usr/local/include/luajit-2.1" } -- pickup our luajit / SDL2 builds from default install paths
-	includedirs { "/usr/local/include/SDL2" } -- pickup our luajit / SDL2 builds from default install paths
+--	includedirs { "/usr/local/include/luajit-2.1" } -- pickup our luajit / SDL2 builds from default install paths
+--	includedirs { "/usr/local/include/SDL2" } -- pickup our luajit / SDL2 builds from default install paths
 
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include" }
 	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vmcs_host/linux" }
@@ -435,8 +435,7 @@ elseif WINDOWS then
 
 elseif OSX then
 	
-	includedirs { "/usr/local/include/luajit-2.1" } -- pickup our luajit / SDL2 builds from default install paths
-	includedirs { "/usr/local/include/SDL2" } -- pickup our luajit / SDL2 builds from default install paths
+--	includedirs { "/usr/local/include/SDL2" } -- pickup our luajit / SDL2 builds from default install paths
 
 	defines("LUA_USE_MKSTEMP") -- remove warning
 	defines("LUA_USE_POPEN") -- we want to enable popen
@@ -481,8 +480,7 @@ elseif NIX then
 
 --	BUILD_ARCH=os.capture("dpkg --print-architecture") -- better guess?
 	
-	includedirs { "/usr/local/include/luajit-2.1" } -- pickup our luajit / SDL2 builds from default install paths
-	includedirs { "/usr/local/include/SDL2" } -- pickup our luajit / SDL2 builds from default install paths
+--	includedirs { "/usr/local/include/SDL2" } -- pickup our luajit / SDL2 builds from default install paths
 
 	defines("LUA_USE_MKSTEMP") -- remove warning
 	defines("LUA_USE_POPEN") -- we want to enable popen
@@ -698,21 +696,21 @@ if EMCC then -- need to build and use our lua
 
 elseif RASPI then -- hardfloat for raspbian
 
-	defines{ "LIB_LUAJIT" }
+--	defines{ "LIB_LUAJIT" }
 	includedirs { "lib_luajit/src" }
 	LUA_LIBDIRS={ "../lib_luajit/libs/armhf/" }
 	LUA_LINKS= { "luajit" }
 
 elseif ANDROID then
 
-	defines{ "LIB_LUAJIT" }
+--	defines{ "LIB_LUAJIT" }
 	includedirs { "lib_luajit/src" }
 	LUA_LIBDIRS={ "../lib_luajit/libs/arm/" }
 	LUA_LINKS= { "luajit" }
 
 elseif MINGW then
 
-	defines{ "LIB_LUAJIT" }
+--	defines{ "LIB_LUAJIT" }
 	includedirs { "lib_luajit/src" }
 	LUA_LIBDIRS={ "../lib_luajit/libs/win32/" }
 	LUA_LINKS= { "luajit" }
@@ -721,8 +719,11 @@ else -- luajit
 
 -- expect luajit to be provided in the system -> /usr/local/lib
 
-	defines{ "LIB_LUAJIT" }
 	includedirs { "/usr/include/luajit-2.0" }
+	LUA_LINKS="luajit-5.1"
+
+--	includedirs { "/usr/include/lua5.2" }
+--	LUA_LINKS="lua5.2"
 
 end
 
@@ -878,7 +879,7 @@ all_includes=all_includes or {
 
 -- the output executables
 	{"exe_gamecake",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"exe_pagecake",	nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+--	{"exe_pagecake",	nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 }
 
 ------------------------------------------------------------------------

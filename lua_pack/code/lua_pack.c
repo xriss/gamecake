@@ -21,59 +21,12 @@
 // or with + to force big endian
 
 
-// hax to be honest, all this to create a lua_pack_toluserdata function
-// if lua or luajit change then this will break
-// it is however still better than not having any bounds checking
-
-#if defined(LIB_LUAJIT)
-#include "../lib_luajit/src/lj_obj.h"
-#else
-#include "../lib_wet/util/pstdint.h"
-#include "../lib_lua/src/lobject.h"
-#endif
-
 #include "../lib_wet/util/wet_types.h"
 
-extern unsigned char * lua_pack_toluserdata (lua_State *l, int idx, size_t *len)
-{
-#if defined(LIB_LUAJIT)
-	GCudata *g;
-#else
-	Udata *g;
-#endif
-
-	unsigned char *p=lua_touserdata(l,idx);
-	if(!p) { return 0; }
-	if(len)
-	{
-		if(lua_islightuserdata(l,idx))
-		{
-			*len=0x7fffffff;
-		}
-		else
-		{
-#if defined(LIB_LUAJIT)
-			g=(GCudata*)(p-sizeof(GCudata));
-			*len=g->len;
-#else
-			g=(Udata*)(p-sizeof(Udata));
-			*len=g->uv.len;
-#endif
-		}	
-	}
-	
-	return p;
-}
-
+extern unsigned char * lua_toluserdata (lua_State *l, int idx, size_t *len);
 
 extern unsigned char * lua_pack_to_buffer (lua_State *l, int idx, size_t *len)
 {
-
-#if defined(LIB_LUAJIT)
-	GCudata *g;
-#else
-	Udata *g;
-#endif
 
 	unsigned char *p;
 
@@ -110,7 +63,7 @@ extern unsigned char * lua_pack_to_buffer (lua_State *l, int idx, size_t *len)
 		return p;
 	}
 	
-	return lua_pack_toluserdata(l,idx,len);
+	return lua_toluserdata(l,idx,len);
 }
 
 // same as lua_pack_to_buffer but also allows strings
@@ -161,7 +114,7 @@ const unsigned char *p;
 			return (const unsigned char *) lua_tostring(l,idx);
 		}
 	}
-	return (const unsigned char *) lua_pack_toluserdata(l,idx,len);
+	return (const unsigned char *) lua_toluserdata(l,idx,len);
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -949,7 +902,7 @@ u8 *newptr=0;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_pack_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"load",			lua_pack_load},
 		{"save",			lua_pack_save},

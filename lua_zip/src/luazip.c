@@ -638,7 +638,7 @@ static int ff_seek (lua_State *L) {
   }
 }
 
-static const luaL_reg ziplib[] = {
+static const luaL_Reg ziplib[] = {
   {"open_mem", zip_open_mem}, // open a file from memory
   {"open", zip_open},
   {"close", zip_close},
@@ -648,7 +648,7 @@ static const luaL_reg ziplib[] = {
   {NULL, NULL}
 };
 
-static const luaL_reg flib[] = {
+static const luaL_Reg flib[] = {
   {"open", f_open},
   {"close", zip_close},
   {"files", f_files},
@@ -657,7 +657,7 @@ static const luaL_reg flib[] = {
   {NULL, NULL}
 };
 
-static const luaL_reg fflib[] = {
+static const luaL_Reg fflib[] = {
   {"read", ff_read},
   {"close", ff_close},
   {"seek", ff_seek},

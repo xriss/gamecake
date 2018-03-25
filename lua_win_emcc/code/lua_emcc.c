@@ -141,7 +141,7 @@ int main_post(const char *message,const char *data)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_win_emcc_core(lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		
 		{	"js_post",						lua_emcc_js_post					},

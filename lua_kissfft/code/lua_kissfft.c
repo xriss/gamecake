@@ -15,51 +15,9 @@
 
 #include "lua_kissfft.h"
 
-// hax to be honest, all this to create a lua_toluserdata function
-// if lua or luajit change then this will break
-// it is however still better than not having any bounds checking
-
-#if defined(LIB_LUAJIT)
-#include "../../lib_luajit/src/lj_obj.h"
-#else
-#include "../../lib_wet/util/pstdint.h"
-#include "../../lib_lua/src/lobject.h"
-#endif
-
 #include "../../lib_wet/util/wet_types.h"
 
-static u8 * lua_toluserdata (lua_State *L, int idx, size_t *len) {
-
-#if defined(LIB_LUAJIT)
-	GCudata *g;
-#else
-	Udata *g;
-#endif
-
-	u8 *p=lua_touserdata(L,idx);
-	
-	if(!p) { return 0; }
-	
-	if(len)
-	{
-		if(lua_islightuserdata(L,idx))
-		{
-			*len=0x7fffffff;
-		}
-		else
-		{
-#if defined(LIB_LUAJIT)
-			g=(GCudata*)(p-sizeof(GCudata));
-			*len=g->len;
-#else
-			g=(Udata*)(p-sizeof(Udata));
-			*len=g->uv.len;
-#endif
-		}	
-	}
-	
-	return p;
-}
+extern u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
 static u8 * lua_toptr (lua_State *L, int idx, size_t *len) {
 	u8 *p=(u8*)lua_tolstring(L,idx,len);
@@ -412,7 +370,7 @@ float f;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_kissfft_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"start",			lua_kissfft_start},
 		{"reset",			lua_kissfft_reset},
@@ -425,7 +383,7 @@ LUALIB_API int luaopen_kissfft_core (lua_State *l)
 
 		{0,0}
 	};
-	const luaL_reg meta[] =
+	const luaL_Reg meta[] =
 	{
 		{"__gc",			lua_kissfft_clean},
 		{0,0}

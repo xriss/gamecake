@@ -730,7 +730,7 @@ struct grd **gg=0;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_v4l2_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"open",			lua_v4l2_open},
 		{"close",			lua_v4l2_close},
@@ -744,7 +744,7 @@ LUALIB_API int luaopen_wetgenes_v4l2_core (lua_State *l)
 		{0,0}
 	};
 		
-	const luaL_reg meta[] =
+	const luaL_Reg meta[] =
 	{
 		{"__gc",			lua_v4l2_close},
 

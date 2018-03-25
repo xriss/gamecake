@@ -30,7 +30,7 @@ if RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 -- use the qemu box if you dont want to deal with it
 	libdirs { "/opt/vc/lib" }
 	libdirs { "/usr/local/lib/" }
-	links { "luajit-5.1" }
+--	links { "luajit-5.1" }
 	links { "SDL2" }
 	
 	
@@ -142,7 +142,7 @@ elseif OSX then
 	end
 	libdirs { "/usr/local/lib/" }
 
-	links { "luajit-5.1" }
+--	links { "luajit-5.1" }
 	links { "SDL2" }	
 
 	links { "ForceFeedback.framework" } -- SDL2 requires these frameworks
@@ -192,7 +192,7 @@ elseif NIX then
 -- luajit and SDL2 dev must be available
 -- use the vagrant boxes if you dont want to deal with it
 	libdirs { "/usr/local/lib/" }
-	links { "luajit-5.1" }
+--	links { "luajit-5.1" }
 	links { "SDL2" }	
 
 	links { "GL" }

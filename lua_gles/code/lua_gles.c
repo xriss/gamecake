@@ -1671,7 +1671,7 @@ static int lua_gles_StencilOpSeparate (lua_State *l)
 LUALIB_API int luaopen_gles_core(lua_State *l)
 {
 	
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"Get",					lua_gles_Get},
 		{"GetError",			lua_gles_GetError},

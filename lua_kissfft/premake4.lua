@@ -12,7 +12,7 @@ files { "code/lua_kissfft.c" }
 includedirs { "code" }
 includedirs { "../lib_luajit/src" }
 
-links { "lib_lua" }
+links { "lib_lua" , "lua_pack" }
 
 KIND{lua="kissfft.core"}
 

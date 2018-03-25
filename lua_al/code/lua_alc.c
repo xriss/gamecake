@@ -57,47 +57,9 @@ alcGetProcAddress
 // if lua or luajit change then this will break
 // it is however still better than not having any bounds checking
 
-#if defined(LIB_LUAJIT)
-#include "../../lib_luajit/src/lj_obj.h"
-#else
-#include "../../lib_wet/util/pstdint.h"
-#include "../../lib_lua/src/lobject.h"
-#endif
-
 #include "../../lib_wet/util/wet_types.h"
 
-static u8 * lua_toluserdata (lua_State *L, int idx, size_t *len) {
-
-#if defined(LIB_LUAJIT)
-	GCudata *g;
-#else
-	Udata *g;
-#endif
-
-	u8 *p=lua_touserdata(L,idx);
-	
-	if(!p) { return 0; }
-	
-	if(len)
-	{
-		if(lua_islightuserdata(L,idx))
-		{
-			*len=0x7fffffff;
-		}
-		else
-		{
-#if defined(LIB_LUAJIT)
-			g=(GCudata*)(p-sizeof(GCudata));
-			*len=g->len;
-#else
-			g=(Udata*)(p-sizeof(Udata));
-			*len=g->uv.len;
-#endif
-		}	
-	}
-	
-	return p;
-}
+extern u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
 
 
@@ -493,7 +455,7 @@ int vi[16]={0};
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_alc_core(lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"GetError",			lua_alc_GetError},
 
@@ -517,16 +479,16 @@ LUALIB_API int luaopen_alc_core(lua_State *l)
 
 		{0,0}
 	};
-	const luaL_reg meta_capture_device[] =
+	const luaL_Reg meta_capture_device[] =
 	{
 		{"__gc",			lua_alc_CaptureCloseDevice},
 		{0,0}
-	};	const luaL_reg meta_device[] =
+	};	const luaL_Reg meta_device[] =
 	{
 		{"__gc",			lua_alc_CloseDevice},
 		{0,0}
 	};
-	const luaL_reg meta_context[] =
+	const luaL_Reg meta_context[] =
 	{
 		{"__gc",			lua_alc_DestroyContext},
 		{0,0}

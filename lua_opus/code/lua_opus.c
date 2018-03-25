@@ -341,7 +341,7 @@ static int lua_opus_echo_cancel (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_opus_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"encoder_create",			lua_opus_encoder_create},
 		{"encoder_destroy",			lua_opus_encoder_destroy},
@@ -364,17 +364,17 @@ LUALIB_API int luaopen_wetgenes_opus_core (lua_State *l)
 
 		{0,0}
 	};
-	const luaL_reg encoder_meta[] =
+	const luaL_Reg encoder_meta[] =
 	{
 		{"__gc",			lua_opus_encoder_destroy},
 		{0,0}
 	};
-	const luaL_reg decoder_meta[] =
+	const luaL_Reg decoder_meta[] =
 	{
 		{"__gc",			lua_opus_decoder_destroy},
 		{0,0}
 	};
-	const luaL_reg echo_meta[] =
+	const luaL_Reg echo_meta[] =
 	{
 		{"__gc",			lua_opus_echo_destroy},
 		{0,0}

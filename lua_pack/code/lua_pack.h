@@ -10,9 +10,6 @@
 extern "C" {
 #endif
 
-// provide the missing toluserdata hack
-extern unsigned char * lua_pack_toluserdata (lua_State *l, int idx, size_t *len);
-
 // these are smarter toluserdata functions that work with more possible input types
 // a buffer has a length, it is either a userdata or a string, only userdata can be written to
 // a table such as {buffer=data,offset=1024,sizeof=1024} can also be used to describe a buffer from a bigger buffer

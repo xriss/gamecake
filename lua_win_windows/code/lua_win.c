@@ -790,7 +790,7 @@ HICON hicon = NULL;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_win_windows_core(lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"screen",			lua_wetwin_screen},
 		
