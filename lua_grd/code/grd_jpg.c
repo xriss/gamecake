@@ -54,7 +54,7 @@ static void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
     }
 }
 static void term_source (j_decompress_ptr cinfo) {}
-static void jpeg_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
+static void jpeg_mymem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
 {
     struct jpeg_source_mgr* src;
 
@@ -115,7 +115,7 @@ static void grd_jpg_load(struct grd * g, struct grd_io_info * inf )
 	}
 	else // reading from memory
 	{
-		jpeg_mem_src(&cinfo, (void*)inf->data ,inf->data_len );
+		jpeg_mymem_src(&cinfo, (void*)inf->data ,inf->data_len );
 	}
 		
 	jpeg_read_header(&cinfo, TRUE);
