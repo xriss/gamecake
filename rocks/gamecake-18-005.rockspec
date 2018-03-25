@@ -18,13 +18,16 @@ dependencies = {
 
 external_dependencies = {
    GIF_LIB = {
-      header = "gif_lib.h"
+      header = "gif_lib.h",
+      library = "libgif.a",
    },
    PNG_LIB = {
       header = "png.h",
+      library = "libpng.a",
    },
    JPEG_LIB = {
       header = "jpeglib.h",
+      library = "libjpeg.a",
    },
 }
 
@@ -78,9 +81,11 @@ build = {
             "$(GIF_LIB_LIBDIR)",
             "$(JPEG_LIB_LIBDIR)",
          },
-         libraries = {"gif_lib","png","jpeg"},
+         libraries = {"gif","png","jpeg"},
       },
 
       ["wetgenes.string"]="lua_src/wetgenes/string.lua",
+      ["wetgenes.json"]="lua_src/wetgenes/json.lua",
+      ["wetgenes"]="lua_src/wetgenes/init.lua",
    }
 }

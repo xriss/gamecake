@@ -341,7 +341,7 @@ struct grd *g=0;
 		fp=fopen(filename,"rb");
 		if(fp)
 		{
-			fread(data,1,16,fp);
+			int fn=fread(data,1,16,fp);
 			fclose(fp);
 			fmt=grd_fileheader_to_format(data);
 		}

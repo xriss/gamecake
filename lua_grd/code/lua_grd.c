@@ -19,7 +19,8 @@ typedef struct grd * part_ptr ;
 
 // pull in a hack
 //extern "C" 
-u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
+extern u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
+extern void * luaL_testudata(lua_State *L, int index, const char *tname);
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/

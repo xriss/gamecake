@@ -145,10 +145,13 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	bit_depth = png_get_bit_depth(png_ptr,info_ptr);
 
 	depth=1;
+
+#if defined(PNG_INFO_acTL)
 	if(png_get_valid(png_ptr, info_ptr, PNG_INFO_acTL))
 	{
 		depth=png_get_num_frames(png_ptr, info_ptr);
 	}
+#endif
 	
 // choose grdfmt
 	grdfmt=GRD_FMT_U8_RGBA;
@@ -203,6 +206,7 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	if (setjmp(png_jmpbuf(png_ptr)))
 		abort_("png read fail");
 		
+#if defined(PNG_INFO_acTL)
 	if(png_get_valid(png_ptr, info_ptr, PNG_INFO_acTL))
 	{
 		for(z=0;z<depth;z++)
@@ -231,6 +235,7 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 		}
 	}
 	else
+#endif
 	{
 		for (y=0; y<height; y++) { row_pointers[y] = grdinfo_get_data(g->bmap,0,y,0); }
 		png_read_image(png_ptr, row_pointers);
@@ -508,10 +513,12 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 		png_set_unknown_chunks(png_ptr, info_ptr, chunks, 1);
 	}
 
+#if defined(PNG_INFO_acTL)
 	if(frames>0)
 	{
 		png_set_acTL(png_ptr, info_ptr, frames, 0);
 	}
+#endif
 	
 	png_write_info(png_ptr, info_ptr);
 
@@ -530,6 +537,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 			row_pointers[y] = grdinfo_get_data(g->bmap,0,y,z);
 		}
 
+#if defined(PNG_INFO_acTL)
 		if(frames>0)
 		{
 			png_write_frame_head(png_ptr, info_ptr, row_pointers, 
@@ -542,13 +550,15 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 				PNG_BLEND_OP_SOURCE		/* blend */
 				);
 		}
-		
+#endif		
 		png_write_image(png_ptr, row_pointers);
 
+#if defined(PNG_INFO_acTL)
 		if(frames>0)
 		{
 			png_write_frame_tail(png_ptr, info_ptr);
 		}
+#endif
 	}
 	
 	/* end write */

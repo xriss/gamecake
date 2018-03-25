@@ -1,6 +1,0 @@
-
-local wpack=require("wetgenes.pack")
-
-print(wpack)
-
-
