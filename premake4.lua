@@ -720,6 +720,8 @@ else -- luajit
 
 -- we expect luajit to be provided in the system
 
+	includedirs { "/usr/local/include/luajit-2.1" } -- assume only one of these exists
+	includedirs { "/usr/include/luajit-2.1" }
 	includedirs { "/usr/include/luajit-2.0" }
 	LUA_LINKS="luajit-5.1"
 
