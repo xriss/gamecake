@@ -68,8 +68,7 @@ extern "C" {
 };
 #endif
 
-#include "../lib_hacks/code/pstdint.h"
-#include "../lib_hacks/code/wet_types.h"
+#include "wet_types.h"
 
 
 #include "code/lua_linux.h"

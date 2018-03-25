@@ -15,8 +15,7 @@
 
 #include "lua_kissfft.h"
 
-#include "../../lib_hacks/code/pstdint.h"
-#include "../../lib_hacks/code/wet_types.h"
+#include "wet_types.h"
 
 extern u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
 

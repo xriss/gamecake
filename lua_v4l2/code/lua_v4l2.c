@@ -29,10 +29,9 @@
 
 #include "code/lua_v4l2.h"
 
-#include "../lib_hacks/code/pstdint.h"
-#include "../lib_hacks/code/wet_types.h"
-#include "../lua_grd/code/grd.h"
-#include "../lua_grd/code/lua_grd.h"
+#include "wet_types.h"
+#include "grd.h"
+#include "lua_grd.h"
 
 /*
  *  V4L2 video capture example

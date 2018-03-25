@@ -690,6 +690,7 @@ end
 
 if EMCC then -- need to build and use our lua
 
+	LUA_BIT="lua_bit"
 	LIB_LUA="lib_lua" -- default 
 	includedirs { "lib_lua/src" }
 	LUA_LINKS= nil
@@ -724,6 +725,7 @@ else -- luajit
 
 -- or expect lua to be provided in the system by swapping with above
 
+--	LUA_BIT="lua_bit"
 --	includedirs { "/usr/include/lua5.2" }
 --	LUA_LINKS="lua5.2"
 
@@ -789,13 +791,15 @@ end
 WEB=NACL or EMCC
 
 
+includedirs { "./lib_hacks/code" }
+includedirs { "./lua_freetype/code" }
+includedirs { "./lua_grd/code" }
 
 	
 all_includes=all_includes or {
 
 -- lua bindings
-	{"lua_bit",		   (WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		)
-																						and		(LIB_LUA=="lib_lua") 	},
+	{LUA_BIT,		    WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_kissfft",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_pack",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 	{"lua_zip",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},

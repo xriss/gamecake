@@ -44,17 +44,16 @@
 
 #endif
 
-#include "../lib_hacks/code/pstdint.h"
-#include "../lib_hacks/code/wet_types.h"
+#include "wet_types.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "../lib_lua/src/lua.h"
-#include "../lib_lua/src/lauxlib.h"
-#include "../lib_lua/src/lualib.h"
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
 
 
 #ifdef __cplusplus

@@ -21,8 +21,7 @@
 // or with + to force big endian
 
 
-#include "../lib_hacks/code/pstdint.h"
-#include "../lib_hacks/code/wet_types.h"
+#include "wet_types.h"
 
 extern unsigned char * lua_toluserdata (lua_State *l, int idx, size_t *len);
 

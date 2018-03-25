@@ -48,9 +48,9 @@
 extern "C" {
 #endif
 
-#include "../lib_lua/src/lua.h"
-#include "../lib_lua/src/lauxlib.h"
-#include "../lib_lua/src/lualib.h"
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
 
 //#include "../_src/liblwo/code/lwo2.h"
 
@@ -62,12 +62,11 @@ extern "C" {
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "../lib_hacks/code/pstdint.h"
-#include "../lib_hacks/code/wet_types.h"
+#include "wet_types.h"
 
 
-#include "../lua_freetype/code/lua_freetype.h"
+#include "lua_freetype.h"
 
-#include "../lua_grd/code/grd.h"
-#include "../lua_grd/code/lua_grd.h"
+#include "grd.h"
+#include "lua_grd.h"
 

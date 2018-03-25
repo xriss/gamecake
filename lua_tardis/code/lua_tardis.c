@@ -15,11 +15,10 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "../lib_hacks/code/pstdint.h"
-#include "../lib_hacks/code/wet_types.h"
-#include "../lib_lua/src/lua.h"
-#include "../lib_lua/src/lauxlib.h"
-#include "../lib_lua/src/lualib.h"
+#include "wet_types.h"
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
 
 #ifndef M_PI
 #    define M_PI 3.14159265358979323846

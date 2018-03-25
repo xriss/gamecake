@@ -1,11 +1,10 @@
 
 
-#include "../lib_hacks/code/pstdint.h"
-#include "../lib_hacks/code/wet_types.h"
+#include "wet_types.h"
 
-#include "../lib_lua/src/lua.h"
-#include "../lib_lua/src/lauxlib.h"
-#include "../lib_lua/src/lualib.h"
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
 
 #include "whereami.h"
 
