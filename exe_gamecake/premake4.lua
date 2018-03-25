@@ -2,8 +2,6 @@
 project "gamecake"
 language "C++"
 
-files { "hacks.c" }
-
 dofile("version.lua")
 
 dofile("cache.lua")

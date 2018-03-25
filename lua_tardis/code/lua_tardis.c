@@ -15,7 +15,8 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "../lib_wet/util/wet_types.h"
+#include "../lib_hacks/code/pstdint.h"
+#include "../lib_hacks/code/wet_types.h"
 #include "../lib_lua/src/lua.h"
 #include "../lib_lua/src/lauxlib.h"
 #include "../lib_lua/src/lualib.h"

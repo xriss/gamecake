@@ -717,10 +717,12 @@ elseif MINGW then
 
 else -- luajit
 
--- expect luajit to be provided in the system -> /usr/local/lib
+-- we expect luajit to be provided in the system
 
 	includedirs { "/usr/include/luajit-2.0" }
 	LUA_LINKS="luajit-5.1"
+
+-- or expect lua to be provided in the system by swapping with above
 
 --	includedirs { "/usr/include/lua5.2" }
 --	LUA_LINKS="lua5.2"
@@ -876,6 +878,8 @@ all_includes=all_includes or {
 -- need to lazy link to .so before we can add these back in otherwise they force unwanted dependencies
 --	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
 --	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+
+	{"lib_hacks",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
 
 -- the output executables
 	{"exe_gamecake",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
