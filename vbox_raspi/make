@@ -14,7 +14,7 @@ fi
 # rename the binaries
 
 scp -P 5522 pi@localhost:gamecake/exe/gamecake.raspi ../exe/gamecake.raspi
-scp -P 5522 pi@localhost:gamecake/exe/pagecake.raspi ../exe/pagecake.raspi
+#scp -P 5522 pi@localhost:gamecake/exe/pagecake.raspi ../exe/pagecake.raspi
 
 ./box-down
 
