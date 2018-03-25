@@ -75,7 +75,7 @@ extern unsigned char * lua_toluserdata (lua_State *l, int idx, size_t *len)
 
 
 //#if defined(LUA_JITLIBNAME)
-extern void * luaL_testudata(lua_State *L, int index, const char *tname)
+extern void * luaL_wetestudata(lua_State *L, int index, const char *tname)
 {
 	void *p = lua_touserdata(L, index);
 

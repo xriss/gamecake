@@ -20,7 +20,7 @@ typedef struct grd * part_ptr ;
 // pull in a hack
 //extern "C" 
 extern u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
-extern void * luaL_testudata(lua_State *L, int index, const char *tname);
+extern void * luaL_wetestudata(lua_State *L, int index, const char *tname);
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -33,7 +33,7 @@ part_ptr *lua_grd_get_ptr (lua_State *l, int idx)
 {
 part_ptr *p=0;
 
-	p = ((part_ptr *)luaL_testudata(l, idx , lua_grd_ptr_name));
+	p = ((part_ptr *)luaL_wetestudata(l, idx , lua_grd_ptr_name));
 
 	return p;
 }

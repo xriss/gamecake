@@ -417,6 +417,8 @@ static const CommonObject UdpSocket = {
  * SDLNet_SocketSet object
  * --------------------------------------------------------- */
 
+extern void * luaL_wetestudata(lua_State *L, int index, const char *tname);
+
 #define SetName	SocketSet.name
 
 static const CommonObject SocketSet;
@@ -428,7 +430,7 @@ l_set_add(lua_State *L)
 	SDLNet_GenericSocket s;
 	int length;
 
-	if (!luaL_testudata(L, 2, TcpName) && !luaL_testudata(L, 2, UdpName))
+	if (!luaL_wetestudata(L, 2, TcpName) && !luaL_wetestudata(L, 2, UdpName))
 		return luaL_error(L, "TcpSocket or UdpSocket expected");
 
 	s = ((CommonUserdata *)lua_touserdata(L, 2))->data;

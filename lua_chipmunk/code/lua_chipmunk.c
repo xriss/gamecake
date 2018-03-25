@@ -152,13 +152,15 @@ cpBody **pp;
 	return pp;
 }
 
+extern void * luaL_wetestudata(lua_State *L, int index, const char *tname);
+
 cpBody *  lua_chipmunk_body_ptr (lua_State *l,int idx)
 {
 cpBody **pp;
 cpSpace **space;
 
 // check if we are given a space, try and return the default static body from it
- 	space=(cpSpace**)luaL_testudata(l, idx , lua_chipmunk_space_meta_name);
+ 	space=(cpSpace**)luaL_wetestudata(l, idx , lua_chipmunk_space_meta_name);
 	if(space&&*space) { return cpSpaceGetStaticBody(*space); }
 
 	pp=lua_chipmunk_body_ptr_ptr(l,idx);
