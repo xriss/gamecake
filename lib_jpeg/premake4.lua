@@ -24,6 +24,9 @@ excludes {
 
 defines { "JPEGSTATIC" , "NO_GETENV" }
 
+-- this fixes the windows build without changing the config.h
+defines { "TRUE=1", "FALSE=0"}
+
 includedirs { jpegroot }
 
 KIND{}
