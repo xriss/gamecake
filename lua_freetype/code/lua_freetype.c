@@ -426,7 +426,7 @@ FT_Vector  delta;
 int luaopen_wetgenes_freetype_core (lua_State *l)
 {
 
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"create",			lua_freetype_create	},
 
@@ -445,7 +445,7 @@ int luaopen_wetgenes_freetype_core (lua_State *l)
 		{0,0}
 	};
 
-	const luaL_reg meta[] =
+	const luaL_Reg meta[] =
 	{
 		{"__gc",			lua_freetype_destroy},
 

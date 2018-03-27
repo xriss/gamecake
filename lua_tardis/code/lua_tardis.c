@@ -639,7 +639,7 @@ float x,y,z;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_tardis_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"alloc",					lua_tardis_alloc},
 		{"ptr",						lua_tardis_ptr},

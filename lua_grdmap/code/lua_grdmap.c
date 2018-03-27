@@ -348,7 +348,7 @@ part_ptr p=lua_grdmap_get(l,1);
 int luaopen_wetgenes_grdmap_core (lua_State *l)
 {
 	
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{	"create",		lua_grdmap_create			},
 		{	"setup",		lua_grdmap_setup			},
@@ -362,7 +362,7 @@ int luaopen_wetgenes_grdmap_core (lua_State *l)
 		{0,0}
 	};
 
-	const luaL_reg meta[] =
+	const luaL_Reg meta[] =
 	{
 		{	"__gc",			lua_grdmap_destroy_ptr		},
 
@@ -898,7 +898,7 @@ const char *str;
 //
 /*----------------------------------------------------------------------------------------------------------------------------*/
 
-static const luaL_reg lua_mmap_lib[] =
+static const luaL_Reg lua_mmap_lib[] =
 {
 	
 	{	"alloc",		lua_mmap_alloc	},
@@ -910,7 +910,7 @@ static const luaL_reg lua_mmap_lib[] =
 
 // suport for one type of object
 
-static const luaL_reg lua_mmap_meta[] =
+static const luaL_Reg lua_mmap_meta[] =
 {
 
 	{"free",			lua_mmap_free_mmap},
@@ -923,7 +923,7 @@ static const luaL_reg lua_mmap_meta[] =
 //
 // all functions expect the self table to be passed in as arg1
 
-static const luaL_reg lua_mmapt_meta[] =
+static const luaL_Reg lua_mmapt_meta[] =
 {
 	{"free",				lua_mmap_free},
 	{"cutup",				lua_mmap_cutup},

@@ -476,7 +476,7 @@ LUALIB_API int luaopen_wetgenes_win_raspi_core(lua_State *l)
 		{0,0}
 	};
 
- 	const luaL_reg meta[] =
+ 	const luaL_Reg meta[] =
 	{
 		{"__gc",			lua_raspi_destroy},
 		{0,0}

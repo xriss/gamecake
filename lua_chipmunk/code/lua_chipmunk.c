@@ -2274,7 +2274,7 @@ cpShape *shape=lua_chipmunk_shape_ptr(l,2);
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"space_create",					lua_chipmunk_space_create},
 		{"space_destroy",					lua_chipmunk_space_destroy},
@@ -2372,25 +2372,25 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{0,0}
 	};
 
-	const luaL_reg meta_space[] =
+	const luaL_Reg meta_space[] =
 	{
 		{"__gc",			lua_chipmunk_space_destroy},
 		{0,0}
 	};
 
-	const luaL_reg meta_body[] =
+	const luaL_Reg meta_body[] =
 	{
 		{"__gc",			lua_chipmunk_body_destroy},
 		{0,0}
 	};
 
-	const luaL_reg meta_shape[] =
+	const luaL_Reg meta_shape[] =
 	{
 		{"__gc",			lua_chipmunk_shape_destroy},
 		{0,0}
 	};
 
-	const luaL_reg meta_constraint[] =
+	const luaL_Reg meta_constraint[] =
 	{
 		{"__gc",			lua_chipmunk_constraint_destroy},
 		{0,0}

@@ -230,7 +230,7 @@ float stretch=1; // 0.74
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_speak_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"setup",			lua_speak_setup},
 		

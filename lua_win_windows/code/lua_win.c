@@ -814,7 +814,7 @@ LUALIB_API int luaopen_wetgenes_win_windows_core(lua_State *l)
 		{0,0}
 	};
 
- 	const luaL_reg meta[] =
+ 	const luaL_Reg meta[] =
 	{
 		{"__gc",			lua_wetwin_destroy},
 		{0,0}

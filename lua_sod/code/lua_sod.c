@@ -214,7 +214,7 @@ float rr;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_sod_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"create",			lua_sod_create},
 		{"destroy",			lua_sod_destroy},
@@ -231,7 +231,7 @@ LUALIB_API int luaopen_wetgenes_sod_core (lua_State *l)
 		
 		{0,0}
 	};
-	const luaL_reg meta_sod[] =
+	const luaL_Reg meta_sod[] =
 	{
 		{"__gc",			lua_sod_destroy},
 		{0,0}

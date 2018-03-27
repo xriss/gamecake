@@ -162,7 +162,7 @@ LUALIB_API int lua_raspi_unicornhat_show(lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_raspi_unicornhat_core(lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 
 		{"create",			lua_raspi_unicornhat_create},
@@ -176,7 +176,7 @@ LUALIB_API int luaopen_raspi_unicornhat_core(lua_State *l)
 	};
 
 /*
- 	const luaL_reg meta[] =
+ 	const luaL_Reg meta[] =
 	{
 		{"__gc",			lua_raspi_unicornhat_destroy},
 		{0,0}

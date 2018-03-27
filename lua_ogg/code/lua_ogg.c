@@ -437,7 +437,7 @@ while(1){
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_ogg_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"create",			lua_dogg_create},
 		{"destroy",			lua_dogg_destroy},
@@ -450,7 +450,7 @@ LUALIB_API int luaopen_wetgenes_ogg_core (lua_State *l)
 
 		{0,0}
 	};
-	const luaL_reg meta_dogg[] =
+	const luaL_Reg meta_dogg[] =
 	{
 		{"__gc",			lua_dogg_destroy},
 		{0,0}

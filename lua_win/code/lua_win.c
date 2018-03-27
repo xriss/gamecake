@@ -197,7 +197,7 @@ char *path=0;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"glyph_8x8",			lua_wetwin_glyph_8x8},
 

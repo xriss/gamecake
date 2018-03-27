@@ -278,7 +278,7 @@ static int lua_gamecake_list_cache_strings(lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_gamecake_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"list_cache_strings",		lua_gamecake_list_cache_strings},
 		{"get_cache_string",		lua_gamecake_get_cache_string},

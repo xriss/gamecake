@@ -440,7 +440,7 @@ char *dat;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_hid_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 
 		{"init",			lua_hid_init},
@@ -467,7 +467,7 @@ LUALIB_API int luaopen_wetgenes_hid_core (lua_State *l)
 		{0,0}
 	};
 
-	const luaL_reg meta[] =
+	const luaL_Reg meta[] =
 	{
 		{"__gc",			lua_hid_close},
 
