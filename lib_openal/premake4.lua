@@ -4,9 +4,7 @@ kind "StaticLib"
 language "C"
 
 files {
-	"mojoal/mojoal.c"
+	"./mojoal/mojoal.c"
 }
-
-includedirs { ".","mojoal" }
 
 KIND{}

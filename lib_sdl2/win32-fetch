@@ -1,0 +1,8 @@
+cd `dirname $0`
+
+cd win32
+
+curl -s https://www.libsdl.org/release/SDL2-devel-2.0.8-mingw.tar.gz | tar xvz --strip-components=1
+
+
+

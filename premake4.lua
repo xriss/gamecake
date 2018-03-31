@@ -796,14 +796,18 @@ if NIX or OSX then
 	includedirs { "/usr/local/include/SDL2" }
 	includedirs { "/usr/include/SDL2" }
 elseif WINDOWS then
-	includedirs {	"../lib_sdl2/win32/i686-w64-mingw32/include/SDL2",	}
-elseif RASPI then
-	includedirs {	"../lib_sdl2/raspi/usr/local/include/SDL2",	}
+	includedirs {	"./lib_sdl2/win32/i686-w64-mingw32/include/SDL2",	}
 elseif EMCC then
 	buildlinkoptions{
 		"-s USE_SDL=2","-Wno-error=format-security",
 	}
 end
+
+-- OpenAL
+
+includedirs { "./lib_openal/mojoal" }
+defines("AL_LIBTYPE_STATIC")
+
 
 
 
