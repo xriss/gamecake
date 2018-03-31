@@ -1,6 +1,6 @@
 cd `dirname $0`
 
-source settings
+. ./settings
 
 echo
 echo " Pulling latest changes from plated-example and attempting to ignore conflicts"

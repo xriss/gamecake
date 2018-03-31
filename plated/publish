@@ -1,6 +1,6 @@
 cd `dirname $0`
 
-source settings
+. ./settings
 
 echo
 echo "building and then publishing all changes to github"

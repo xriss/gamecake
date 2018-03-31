@@ -1,6 +1,6 @@
 cd `dirname $0`
 
-source settings
+. ./settings
 
 echo
 echo You may now view the plated web site locally at:

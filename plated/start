@@ -1,6 +1,6 @@
 cd `dirname $0`
 
-source settings
+. ./settings
 
 ./watch &
 ./serv &

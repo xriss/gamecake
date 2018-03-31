@@ -1,6 +1,6 @@
 cd `dirname $0`
 
-source settings
+. ./settings
 
 ./node_modules/.bin/plated build --dumpjson --output=$PLATED_OUTPUT --source=$PLATED_SOURCE
 

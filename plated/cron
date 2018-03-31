@@ -7,7 +7,7 @@
 
 cd `dirname $0`
 
-source settings
+. ./settings
 
 git fetch --quiet
 
