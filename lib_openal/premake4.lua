@@ -7,6 +7,6 @@ files {
 	"./mojoal/mojoal.c"
 }
 
-defines { "FLT_MAX=3.402823466e+38F"}
+--defines { "FLT_MAX=3.402823466e+38F"}
 
 KIND{}

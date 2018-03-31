@@ -6,6 +6,7 @@
  *  This file written by Ryan C. Gordon.
  */
 
+#include <float.h>
 #include <stdio.h>
 #include "AL/al.h"
 #include "AL/alc.h"
