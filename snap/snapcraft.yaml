@@ -18,7 +18,7 @@ parts:
     source: .
 
     prepare: |
-      ./apt-gets
+      ./build/depends/install
 
     build: |
       ./make gamecake
