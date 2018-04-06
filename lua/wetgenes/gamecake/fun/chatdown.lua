@@ -60,8 +60,8 @@ chatdown.parse=function(chat_text)
 	local topics={}
 	local topic={}
 
-	local sets={}
-	local set={}
+	local tags={}
+	local tag={}
 
 	local ignore=true -- ignore first lines until we see a code
 
@@ -87,8 +87,8 @@ chatdown.parse=function(chat_text)
 				text={}
 				topics={}
 				gotos={}
-				sets={}
-				chat={text=text,gotos=gotos,sets=sets,topics=topics}
+				tags={}
+				chat={text=text,gotos=gotos,tags=tags,topics=topics}
 				
 				
 				chat.name=name
@@ -114,8 +114,8 @@ chatdown.parse=function(chat_text)
 
 			text={}
 			gotos={}
-			sets={}
-			topic={text=text,name=name,gotos=gotos,sets=sets}
+			tags={}
+			topic={text=text,name=name,gotos=gotos,tags=tags}
 
 			if name~="" then -- ignore empty names
 			
@@ -133,23 +133,23 @@ chatdown.parse=function(chat_text)
 			if name=="" then last_count=last_count+1 name=last_name.."__"..last_count end -- increment reference
 		
 			text={}
-			sets={}
-			goto={text=text,name=name,sets=sets}
+			tags={}
+			goto={text=text,name=name,tags=tags}
 
 			gotos[#gotos+1]=goto
 
-		elseif code=="=" then -- =set
+		elseif code=="=" then -- =tag
 			ignore=false -- end long comments
 		
 			name,v=v:match("%=(%S*)%s*(.*)$")
 
 			text={}
-			set=text
+			tag=text
 
 			if name~="" then -- ignore empty names
 			
-				assert( not sets[name] , "set name used twice on line "..i.." : "..name )
-				sets[name]=set
+				assert( not tags[name] , "tag name used twice on line "..i.." : "..name )
+				tags[name]=tag
 			
 			end
 			
@@ -173,16 +173,16 @@ chatdown.parse=function(chat_text)
 
 	-- cleanup output
 
-	local cleanup_sets=function(sets)
+	local cleanup_tags=function(tags)
 
 		local empty=true
-		for n,v in pairs(sets) do
+		for n,v in pairs(tags) do
 			empty=false
-			sets[n]=table.concat(v,"\n"):match("^%s*(.-)%s*$")
+			tags[n]=table.concat(v,"\n"):match("^%s*(.-)%s*$")
 		end
 		if empty then return end
 
-		return sets
+		return tags
 	end
 
 	local cleanup_text=function(text)
@@ -209,23 +209,23 @@ chatdown.parse=function(chat_text)
 	for name,chat in pairs(chats) do
 
 		chat.text=cleanup_text(chat.text)
-		chat.sets=cleanup_sets(chat.sets)
+		chat.tags=cleanup_tags(chat.tags)
 
 		for id,goto in pairs(chat.gotos) do
 
 			goto.text=cleanup_text(goto.text)
-			goto.sets=cleanup_sets(goto.sets)
+			goto.tags=cleanup_tags(goto.tags)
 		end
 
 		for id,topic in pairs(chat.topics) do
 
 			topic.text=cleanup_text(topic.text)
-			topic.sets=cleanup_sets(topic.sets)
+			topic.tags=cleanup_tags(topic.tags)
 
 			for id,goto in pairs(topic.gotos) do
 
 				goto.text=cleanup_text(goto.text)
-				goto.sets=cleanup_sets(goto.sets)
+				goto.tags=cleanup_tags(goto.tags)
 			end
 		end
 
@@ -245,7 +245,7 @@ end
 Setup the state for a chat using this array of chats as text data to be 
 displayed.
 
-We manage set data and callbacks from gotos here.
+We manage tag data and callbacks from gotos here.
 
 ]]
 -----------------------------------------------------------------------------
@@ -267,24 +267,24 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 	chat.chats=chats
 	chat.name=chat_name
 	chat.data=chats.data
-	chat.sets={}
+	chat.tags={}
 	chat.viewed={}
 	
-	chat.get_set=function(text)
-		return chats.get_set(text,chat.name)
+	chat.get_tag=function(text)
+		return chats.get_tag(text,chat.name)
 	end
 	
-	chat.set_set=function(text,val)
-		return chats.set_set(text,val,chat.name)
+	chat.set_tag=function(text,val)
+		return chats.set_tag(text,val,chat.name)
 	end
 
-	chat.replace_sets=function(text)
-		return chats.replace_sets(text,chat.name)
+	chat.replace_tags=function(text)
+		return chats.replace_tags(text,chat.name)
 	end
 
-	chat.set_sets=function(sets)
-		for n,v in pairs(sets or {}) do
-			chat.set_set(n,v)
+	chat.set_tags=function(tags)
+		for n,v in pairs(tags or {}) do
+			chat.set_tag(n,v)
 		end
     end
 	
@@ -307,7 +307,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 
 		chats.changes(chat,"chat",chat.description)
 
-		chat.set_sets(chat.description.sets)
+		chat.set_tags(chat.description.tags)
 
 	end
 
@@ -319,7 +319,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 		chat.topic={}
 		chat.gotos={}
 		
-		local merged_sets={}
+		local merged_tags={}
 
 		local goto_names={} -- keep track of previously seen exit nodes
 
@@ -329,8 +329,8 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 				for n2,v2 in pairs(v) do -- merge base settings
 					chat.topic[n2]=chat.topic[n2] or v2
 				end 
-				for np,vp in pairs(v.sets or {}) do -- merge set changes
-					merged_sets[np]=merged_sets[np] or vp
+				for np,vp in pairs(v.tags or {}) do -- merge set changes
+					merged_tags[np]=merged_tags[np] or vp
 				end
 				for n2,v2 in ipairs(v.gotos or {}) do -- join all gotos
 					local r={}
@@ -351,7 +351,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 						
 						local do_test=function(a,b,c)
 
-							local a=chat.get_set(a)
+							local a=chat.get_tag(a)
 
 							if     b=="<" then					return ( tonumber(a) < tonumber(c) )
 							elseif b==">" then					return ( tonumber(a) > tonumber(c) )
@@ -392,7 +392,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 
 					end
 					
-					r.name=chat.replace_sets(r.name) -- can use sets in name
+					r.name=chat.replace_tags(r.name) -- can use tags in name
 					
 					if not goto_names[r.name] then -- only add unique gotos
 						if result then -- should we show this one?
@@ -407,7 +407,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 		
 		chats.changes(chat,"topic",chat.topic)
 
-		chat.set_sets(merged_sets)
+		chat.set_tags(merged_tags)
 
 	end
 
@@ -448,21 +448,21 @@ chatdown.setup=function(chat_text,changes)
 		return chats.chat_to_menu_items(chats.get(name))
 	end
 	
-	chats.get_set=function(s,default_root)
-		local root,set=s:match("(.+)/(.+)") -- is a root given?
-		if not root then root,set=default_root,s end -- no root use full string as set name
-		local sets=(chats.get(root) or {}).sets or {} -- get root sets or empty table
-		return sets[set]
+	chats.get_tag=function(s,default_root)
+		local root,tag=s:match("(.+)/(.+)") -- is a root given?
+		if not root then root,tag=default_root,s end -- no root use full string as tag name
+		local tags=(chats.get(root) or {}).tags or {} -- get root tags or empty table
+		return tags[tag]
 	end
 
-	chats.set_set=function(s,v,default_root)
-		local root,set=s:match("(.+)/(.+)") -- is a root given?
-		if not root then root,set=default_root,s end -- no root use full string as set name
+	chats.set_tag=function(s,v,default_root)
+		local root,tag=s:match("(.+)/(.+)") -- is a root given?
+		if not root then root,tag=default_root,s end -- no root use full string as tag name
 
 		local chat=chats.get(root)
 		if not chat then return end -- unknown chat name
 		
-		chat.sets=chat.sets or {} -- make sure we have a sets table
+		chat.tags=chat.tags or {} -- make sure we have a tags table
 
 -- add inc/dec operators here?
 		local t
@@ -471,28 +471,28 @@ chatdown.setup=function(chat_text,changes)
 		end
 		local n=tonumber(v:sub(2))
 		if t=="-" and n then
-			chat.sets[set]=(tonumber(chat.sets[set]) or 0 ) - n
+			chat.tags[tag]=(tonumber(chat.tags[tag]) or 0 ) - n
 		elseif t=="+" and n then
-			chat.sets[set]=(tonumber(chat.sets[set]) or 0 ) + n
+			chat.tags[tag]=(tonumber(chat.tags[tag]) or 0 ) + n
 		else
-			chat.sets[set]=v
+			chat.tags[tag]=v
 		end
 		
-		chats.changes(chat,"set",set,v) -- could adjust value of ( chat.sets[set] ) in callback
+		chats.changes(chat,"tag",tag,v) -- could adjust value of ( chat.tags[tag] ) in callback
 
-		return chat.sets[set]
+		return chat.tags[tag]
 	end
 
-	chats.replace_sets=function(text,default_root)
+	chats.replace_tags=function(text,default_root)
 
 		if not text then return nil end
---		if not sets then return text end
+--		if not tags then return text end
 
 		local ret=text
 		for sanity=0,100 do
 			local last=ret
 			ret=ret:gsub("{([^}%s]+)}",function(a)
-				return chats.get_set(a,default_root) or "{"..a.."}"
+				return chats.get_tag(a,default_root) or "{"..a.."}"
 			end)
 			if last==ret then break end -- no change
 		end
@@ -511,7 +511,7 @@ chatdown.setup=function(chat_text,changes)
 			if i>1 then
 				items[#items+1]={text="",chat=chat} -- blank line
 			end
-			items[#items+1]={text=chat.replace_sets(v)or"",chat=chat}
+			items[#items+1]={text=chat.replace_tags(v)or"",chat=chat}
 		end
 
 		for i,v in ipairs(chat.gotos or {}) do
@@ -531,14 +531,14 @@ chatdown.setup=function(chat_text,changes)
 
 					chat.set_topic(item.goto.name)
 
-					chat.set_sets(item.goto.sets)
+					chat.set_tags(item.goto.tags)
 
 					menu.show(chats.chat_to_menu_items(chat))
 
 				end
 			end
 			
-			items[#items+1]={text=chat.replace_sets(ss[1])or"",chat=chat,goto=v,cursor=i,call=f,color=color} -- only show first line
+			items[#items+1]={text=chat.replace_tags(ss[1])or"",chat=chat,goto=v,cursor=i,call=f,color=color} -- only show first line
 			items.cursor_max=i
 		end
 
@@ -552,7 +552,7 @@ chatdown.setup=function(chat_text,changes)
 		if     change=="chat"  then print("chat", chat.name,a.name)
 		elseif change=="topic" then print("topic",chat.name,a.name)
 		elseif change=="goto"  then print("goto", chat.name,a.name)
-		elseif change=="set"   then	print("set",  chat.name,a,b)
+		elseif change=="tag"   then	print("tag",  chat.name,a,b)
 		end
 		
 	end
