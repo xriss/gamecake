@@ -61,7 +61,6 @@ chatdown.parse=function(chat_text)
 	local topic={}
 
 	local tags={}
-	local tag={}
 
 	local ignore=true -- ignore first lines until we see a code
 
@@ -71,7 +70,7 @@ chatdown.parse=function(chat_text)
 
 		local code=v:sub(1,1)
 
-		if code=="#" then -- #chat set description
+		if code=="#" then -- #chat begin new chat
 			ignore=false -- end long comments
 
 			local c=v:sub(2,2)
@@ -83,16 +82,12 @@ chatdown.parse=function(chat_text)
 			else
 
 				name,v=v:match("%#(%S*)%s*(.*)$")
-				
+
 				text={}
 				topics={}
 				gotos={}
 				tags={}
-				chat={text=text,gotos=gotos,tags=tags,topics=topics}
-				
-				
-				chat.name=name
-				chat.text=text
+				chat={text=text,gotos=gotos,tags=tags,topics=topics,name=name}
 
 				if name~="" then -- ignore empty names
 				
@@ -139,17 +134,26 @@ chatdown.parse=function(chat_text)
 			gotos[#gotos+1]=goto
 
 		elseif code=="=" then -- =tag
-			ignore=false -- end long comments
 		
 			name,v=v:match("%=(%S*)%s*(.*)$")
-
-			text={}
-			tag=text
-
-			if name~="" then -- ignore empty names
 			
+			if v and v~="" then -- a single line assignment, no state change
+			
+				ignore=false -- end long comments
+
 				assert( not tags[name] , "tag name used twice on line "..i.." : "..name )
-				tags[name]=tag
+				tags[name]={v}
+				
+				v=nil
+
+			else
+
+				ignore=false -- end long comments
+
+				text={}
+
+				assert( not tags[name] , "tag name used twice on line "..i.." : "..name )
+				tags[name]=text
 			
 			end
 			
@@ -160,9 +164,10 @@ chatdown.parse=function(chat_text)
 			else
 				v=nil	-- just ignore this line
 			end
+			
 		end
 		
-		if v and not ignore then
+		if v and v~="" and not ignore then
 
 			text[#text+1]=v
 
@@ -296,7 +301,7 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 		for n in dotnames(name) do -- inherit chunks data
 			local v=chat.data[n]
 			if v then
-				for n2,v2 in pairs(v) do -- merge base settings
+				for n2,v2 in pairs(v) do -- merge base settings into description table
 					chat.description[n2]=chat.description[n2] or v2
 				end 
 				for n2,v2 in pairs(v.topics or {}) do -- merge topics
@@ -568,3 +573,108 @@ chatdown.setup=function(chat_text,changes)
 	return chats
 end
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.text
+
+Here is some example chatdown formatted text full of useful 
+information, it it is intended to be a self documented example.
+
+```
+
+- This is a single line comment
+-- This is the start of a multi-line comment
+
+All lines are now comment lines until we see a line that begins with a 
+control character leading white space is ignored. If for some reason 
+you need to start a text line with a special character then it can be 
+escaped by preceding it with a #
+
+What follows is a list of these characters and a brief description 
+about the parser state they switch to.
+
+	1. - (text to ignore)
+	
+		A single line comment that does not change parser state and 
+		only this line will be ignored so it can be inserted inside 
+		other chunks without losing our place.
+
+	2. -- (text to ignore)
+	
+		Begin a comment chunk, this line and all lines that follow this 
+		line will be considered comments and ignored until we switch to 
+		a new parser state.
+
+	3. #chat_name
+
+		Begin a new chat chunk, all future chunks will belong to this chat.
+		
+		The text that follows this until the next chunk is the long 
+		description intended for when you examine the character.
+		
+		Although it makes sense for a chat chunk to belong to one 
+		character it could also a group conversation with tags being 
+		set to change the current talker as the conversation flows.
+		
+		Chat names have simple cascading inheritance according to their 
+		name with each level separated by a dot. A chunk named a.b.c 
+		will inherit data from any chunks defined for a.b and a in that 
+		order of priority.
+
+	4. >topic_name
+	
+		Begin a topic chunk, the lines that follow are how the 
+		character responds when questioned about this topic followed by 
+		one or more gotos as possible responses that will lead you onto 
+		another topic.
+		
+		Topics can be broken into parts, to create a pause, by using an 
+		unnamed goto followed by an unnamed topic which will both 
+		automatically be given the same generated name and hence linked 
+		together.
+		
+	5. <goto_topic_name
+	
+		Begin a goto chunk, this is probably best thought of as a 
+		question that will get a reply from the character. This is a 
+		choice made by the player that causes a logical jump to another 
+		topic.
+		
+		Essentially this means GOTO another topic and there can be 
+		multiple GOTO options associated with each topic.
+		
+	6. =set_tag_name to this value
+	
+		If there is any text on the rest of this line then it will be 
+		assigned to the tag without changing the current state so it 
+		can be used in the middle of another chunk without losing our 
+		place.
+		
+		This short tag assignment is usually all you need but be 
+		careful not to wrap the text onto another line.
+		
+		Alternatively, if there is no text on the rest of this first 
+		line, only white space, then the state will change and text on 
+		all following lines will be assigned to the named tag.
+		
+		This assignment can happen at various places, for instance if 
+		it is part of the description then it will be the starting 
+		value for a tag but if it is linked to a topic or goto then the 
+		value will be a change as the conversation happens. In all 
+		cases the tags are set in a single batch as the state changes 
+		so the placement and order makes no difference.
+		
+		Tags can be used inside text chunks or even GOTO labels by 
+		tightly wrapping with {} eg {name} would be replaced with the 
+		value of name.
+				
+
+The hierarchy of these chunks can be expressed by indentation as all 
+white space is ignored and combined into a single space. Each CHAT will 
+have multiple TOPICs associated with it and each TOPIC will have 
+multiple GOTOs as options to jump between TOPICs. TAGs can be 
+associated with any of these 3 levels and will be evaluated as the 
+conversation flows through these points.
+
+```
+]]
+-----------------------------------------------------------------------------
