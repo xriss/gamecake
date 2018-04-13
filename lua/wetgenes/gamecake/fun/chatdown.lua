@@ -11,16 +11,17 @@ local chatdown=M
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.chatdown.parse
 
-	chats = chatdown.parse(text)
+	rawsubjects = chatdown.parse(text)
 
 Parse text from flat text chatdown format into heirachical chat data, 
-something that can be output easily as json.
+which we refer to as rawsubjects, something that can be output easily 
+as json.
 
-This gives us a readonly data structure that can be used to control 
+This gives us a readonly rawsubjects structure that can be used to control 
 what text is displayed during a chat session.
 
 This is intended to be descriptive and logic less, any real logic 
-should be added using a real language that operates on this data and 
+should be added using a real language that operates on this rawsubjects and 
 gets triggered by the names used. EG, filter out gotos unless certain 
 complicated conditions are met or change topics to redirect to an 
 alternative.
@@ -51,8 +52,8 @@ chatdown.parse=function(chat_text)
 
 	local text={}
 
-	local chats={}
-	local chat={}
+	local subjects={}
+	local subject={}
 
 	local gotos={}
 	local goto={}
@@ -70,7 +71,7 @@ chatdown.parse=function(chat_text)
 
 		local code=v:sub(1,1)
 
-		if code=="#" then -- #chat begin new chat
+		if code=="#" then -- #subject begin new subject
 			ignore=false -- end long comments
 
 			local c=v:sub(2,2)
@@ -87,12 +88,12 @@ chatdown.parse=function(chat_text)
 				topics={}
 				gotos={}
 				tags={}
-				chat={text=text,gotos=gotos,tags=tags,topics=topics,name=name}
+				subject={text=text,gotos=gotos,tags=tags,topics=topics,name=name}
 
 				if name~="" then -- ignore empty names
 				
-					assert( not chats[name] , "chat name used twice on line "..i.." : "..name )
-					chats[name]=chat
+					assert( not subjects[name] , "subject name used twice on line "..i.." : "..name )
+					subjects[name]=subject
 				
 				end
 				
@@ -211,18 +212,18 @@ chatdown.parse=function(chat_text)
 	end
 
 
-	for name,chat in pairs(chats) do
+	for name,subject in pairs(subjects) do
 
-		chat.text=cleanup_text(chat.text)
-		chat.tags=cleanup_tags(chat.tags)
+		subject.text=cleanup_text(subject.text)
+		subject.tags=cleanup_tags(subject.tags)
 
-		for id,goto in pairs(chat.gotos) do
+		for id,goto in pairs(subject.gotos) do
 
 			goto.text=cleanup_text(goto.text)
 			goto.tags=cleanup_tags(goto.tags)
 		end
 
-		for id,topic in pairs(chat.topics) do
+		for id,topic in pairs(subject.topics) do
 
 			topic.text=cleanup_text(topic.text)
 			topic.tags=cleanup_tags(topic.tags)
@@ -236,7 +237,7 @@ chatdown.parse=function(chat_text)
 
 	end
 
-	return chats
+	return subjects
 
 end
 
@@ -245,16 +246,18 @@ end
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.chatdown.setup_chat
 
-	chat = chatdown.setup_chat(chat,chats,chat_name,topic_name)
+	chat = chatdown.setup_chat(chat,chats,subject_name,topic_name)
 
-Setup the state for a chat using this array of chats as text data to be 
-displayed.
+Setup the initial state for a subject, should be called once for each 
+subject to initialise starting state and is called automatically by 
+chatdown.setup.
 
-We manage tag data and callbacks from gotos here.
+
+We manage tag and callbacks from gotos here.
 
 ]]
 -----------------------------------------------------------------------------
-chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
+chatdown.setup_chat=function(chat,chats,subject_name)
 
 	local dotnames=function(name)
 		local n,r=name,name
@@ -269,22 +272,20 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 
 	local chat=chat or {}
 	
-	chat.chats=chats
-	chat.name=chat_name
-	chat.data=chats.data
+	chat.subject_name=subject_name
 	chat.tags={}
 	chat.viewed={}
 	
 	chat.get_tag=function(text)
-		return chats.get_tag(text,chat.name)
+		return chats.get_tag(text,chat.subject_name)
 	end
 	
 	chat.set_tag=function(text,val)
-		return chats.set_tag(text,val,chat.name)
+		return chats.set_tag(text,val,chat.subject_name)
 	end
 
 	chat.replace_tags=function(text)
-		return chats.replace_tags(text,chat.name)
+		return chats.replace_tags(text,chat.subject_name)
 	end
 
 	chat.set_tags=function(tags)
@@ -293,16 +294,16 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 		end
     end
 	
-	chat.set_description=function(name)
+	chat.set_subject=function(name)
 	
-		chat.description={}
+		chat.subject={}
 		chat.topics={}
 		
-		for n in dotnames(name) do -- inherit chunks data
-			local v=chat.data[n]
+		for n in dotnames(name) do -- inherit subjects data
+			local v=chats.rawsubjects[n]
 			if v then
-				for n2,v2 in pairs(v) do -- merge base settings into description table
-					chat.description[n2]=chat.description[n2] or v2
+				for n2,v2 in pairs(v) do -- merge base settings into subject table
+					chat.subject[n2]=chat.subject[n2] or v2
 				end 
 				for n2,v2 in pairs(v.topics or {}) do -- merge topics
 					chat.topics[n2]=chat.topics[n2] or v2
@@ -310,9 +311,9 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 			end
 		end
 
-		chats.changes(chat,"chat",chat.description)
+		chats.changes(chat,"subject",chat.subject)
 
-		chat.set_tags(chat.description.tags)
+		chat.set_tags(chat.subject.tags)
 
 	end
 
@@ -341,8 +342,8 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 					local r={}
 					for n3,v3 in pairs(v2) do r[n3]=v3 end -- copy
 
-					if not r.text then -- use text from description prototype gotos
-						for i,p in ipairs(chat.description.gotos or {} ) do -- search
+					if not r.text then -- use text from subject prototype gotos
+						for i,p in ipairs(chat.subject.gotos or {} ) do -- search
 							if r.name==p.name then r.text=p.text break end -- found and used
 						end
 					end
@@ -420,8 +421,8 @@ chatdown.setup_chat=function(chat,chats,chat_name,topic_name)
 		return chats.chat_to_menu_items(chat)
 	end
 	
-	chat.set_description(chat_name)
-	chat.set_topic(topic_name)
+	chat.set_subject(subject_name)
+	chat.set_topic( chat.get_tag("welcome") or "welcome") -- {welcome} or welcome is the first topic of conversation
 	
 	return chat
 end
@@ -430,17 +431,18 @@ end
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.chatdown.setup
 
-	chats = chatdown.setup(chat_text)
+	chats = chatdown.setup_chats(chat_text,changes)
 
-parse and initialise state data for every chat chunk
+parse and initialise state data for every subjects chunk creating a 
+global chats with a chat object for each subject.
 
 ]]
 -----------------------------------------------------------------------------
-chatdown.setup=function(chat_text,changes)
+chatdown.setup_chats=function(chat_text,changes)
 
 	local chats={}
 
-	chats.data=chatdown.parse(chat_text) -- parse static data
+	chats.rawsubjects=chatdown.parse(chat_text) -- parse static data
 	
 	chats.names={}
 	
@@ -554,19 +556,17 @@ chatdown.setup=function(chat_text,changes)
 	chats.changes=changes or function(chat,change,...)
 		local a,b=...
 
-		if     change=="chat"  then print("chat", chat.name,a.name)
-		elseif change=="topic" then print("topic",chat.name,a.name)
-		elseif change=="goto"  then print("goto", chat.name,a.name)
-		elseif change=="tag"   then	print("tag",  chat.name,a,b)
+		if     change=="subject" then print("subject", chat.name,a.name)
+		elseif change=="topic"   then print("topic",   chat.name,a.name)
+		elseif change=="goto"    then print("goto",    chat.name,a.name)
+		elseif change=="tag"     then print("tag",     chat.name,a,b)
 		end
 		
 	end
 
-	for n,v in pairs(chats.data) do -- setup each chat
+	for n,v in pairs(chats.rawsubjects) do -- setup each chat
 	
-		local chat={}
-		chats.names[n]=chat -- lookup by name
-		chatdown.setup_chat(chat,chats,n,"welcome") -- init state
+		chats.names[n]=chatdown.setup_chat(nil,chats,n) -- init state
 		
 	end
 
@@ -604,27 +604,29 @@ about the parser state they switch to.
 		line will be considered comments and ignored until we switch to 
 		a new parser state.
 
-	3. #chat_name
+	3. #subject_name
 
-		Begin a new chat chunk, all future chunks will belong to this chat.
+		Begin a new subject chunk, all future topic,goto or tag chunks will 
+		belong to this subject.
 		
 		The text that follows this until the next chunk is the long 
 		description intended for when you examine the character.
 		
-		Although it makes sense for a chat chunk to belong to one 
+		Although it makes sense for a subject chunk to belong to one 
 		character it could also a group conversation with tags being 
 		set to change the current talker as the conversation flows.
 		
-		Chat names have simple cascading inheritance according to their 
+		subject names have simple cascading inheritance according to their 
 		name with each level separated by a dot. A chunk named a.b.c 
 		will inherit data from any chunks defined for a.b and a in that 
 		order of priority.
 
 	4. >topic_name
 	
-		Begin a topic chunk, the lines that follow are how the 
-		character responds when questioned about this topic followed by 
-		one or more gotos as possible responses that will lead you onto 
+		Begin a topic chunk, all future goto or tag chunks will belong 
+		to this topic, the lines that follow are how the character 
+		responds when questioned about this topic followed by one or 
+		more gotos as possible responses that will lead you onto 
 		another topic.
 		
 		Topics can be broken into parts, to create a pause, by using an 
@@ -634,30 +636,29 @@ about the parser state they switch to.
 		
 	5. <goto_topic_name
 	
-		Begin a goto chunk, this is probably best thought of as a 
-		question that will get a reply from the character. This is a 
-		choice made by the player that causes a logical jump to another 
-		topic.
+		Begin a goto chunk, all future tag chunks will belong to this 
+		goto, this is probably best thought of as a question that will 
+		get a reply from the character. This is a choice made by the 
+		player that causes a logical jump to another topic.
 		
 		Essentially this means GOTO another topic and there can be 
-		multiple GOTO options associated with each topic.
+		multiple GOTO options associated with each topic which the 
+		reader is expected to choose between.
 		
 	6. =set_tag_name to this value
 	
 		If there is any text on the rest of this line then it will be 
-		assigned to the tag without changing the current state so it 
-		can be used in the middle of another chunk without losing our 
-		place.
+		assigned to the tag without changing the current parse state so 
+		it can be used in the middle of another chunk without losing 
+		our place.
 		
-		This short tag assignment is usually all you need but be 
-		careful not to wrap the text onto another line.
-		
+		This single line tag assignment is usually all you need. 
 		Alternatively, if there is no text on the rest of this first 
-		line, only white space, then the state will change and text on 
-		all following lines will be assigned to the named tag.
+		line, only white space, then the parse state will change and 
+		text on all following lines will be assigned to the named tag.
 		
 		This assignment can happen at various places, for instance if 
-		it is part of the description then it will be the starting 
+		it is part of the subject then it will be the starting 
 		value for a tag but if it is linked to a topic or goto then the 
 		value will be a change as the conversation happens. In all 
 		cases the tags are set in a single batch as the state changes 
@@ -665,15 +666,47 @@ about the parser state they switch to.
 		
 		Tags can be used inside text chunks or even GOTO labels by 
 		tightly wrapping with {} eg {name} would be replaced with the 
-		value of name.
+		value of name. Tags from other subjects can be referenced by 
+		prefixing the tag name with the subject name followed by a forward 
+		slash like so {subject/tag}
 				
 
 The hierarchy of these chunks can be expressed by indentation as all 
-white space is ignored and combined into a single space. Each CHAT will 
+white space is ignored and combined into a single space. Each SUBJECT will 
 have multiple TOPICs associated with it and each TOPIC will have 
 multiple GOTOs as options to jump between TOPICs. TAGs can be 
 associated with any of these 3 levels and will be evaluated as the 
 conversation flows through these points.
+
+So the chunk hierarchy expressed using indentation to denote children 
+of.
+
+	SUBJECT
+		TAG
+		GOTO
+			TAG
+		TOPIC
+			TAG
+			GOTO
+				TAG
+
+The GOTO chunks in the root SUBJECT chunk are used as prototypes so if a 
+GOTO is used in multiple topics its text can be placed within a GOTO 
+inside the main SUBJECT chunk rather than repeated constantly. This will 
+then be inherited by a GOTO with no text. An alternative to this 
+shorthand is to assign an oft-used piece of text to a tag and reference 
+that in each topic instead.
+
+SUBJECTs and TOPICs also have simple inheritance based on their names this 
+enables the building of a prototype which is later expanded. Each 
+inheritance level is separated by a dot so aa.bb.cc will inherit from 
+aa.bb and aa with the data in the longer names having precedence. This 
+inheritance is additive only so for instance a TAG can not be unset and 
+would have to be changed to another value by aa.bb.cc if it existed in 
+aa.bb or aa.
+
+In practise this means
+
 
 ```
 ]]
