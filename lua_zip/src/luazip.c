@@ -339,7 +339,7 @@ static int zip_openfile (lua_State *L) {
     int i, m, n;
 
     /* how many extension were specified? */
-    n = luaL_getn(L, 2);
+    n = lua_objlen(L, 2);
 
     if (n > LUAZIP_MAX_EXTENSIONS)
     {

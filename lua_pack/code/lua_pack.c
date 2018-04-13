@@ -593,7 +593,7 @@ size_t sl;
 	{
 		def=arr;
 		def_len=lua_pack_field_size(arr);
-		count=luaL_getn(l,1);
+		count=lua_objlen(l,1);
 		data_len=def_len*count;
 	}
 	else
