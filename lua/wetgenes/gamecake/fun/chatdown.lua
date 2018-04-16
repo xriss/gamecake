@@ -31,6 +31,8 @@ gets triggered by the names used. EG, filter out gotos unless certain
 complicated conditions are met or change topics to redirect to an 
 alternative.
 
+A self documented example of chatdown formated text can be found in 
+lua.wetgenes.gamecake.fun.chatdown.text
 
 ]]
 -----------------------------------------------------------------------------
@@ -270,8 +272,6 @@ chatdown.dotnames=function(name)
 	return f
 end
 
-
-
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.chatdown.chat.get_tag
 
@@ -340,6 +340,64 @@ topic and its gotos are built from and stored in this chat object.
 	chat.topic_name
 	
 Will be set to the given topic name.
+
+We merge all gotos found in this topic and all topic parents by 
+iterating over the dotnames. We only use add each topic once and each 
+topic may have a bit of logic that decides if it should be displayed.
+
+	<topic_name?logic_test
+
+So this would goto the topic_name if the logic_test passes. The logic 
+test is written simmilar to a url query after the question mark comes a 
+number of tests that are then & or | together in left to right order 
+(no operator precedence).
+
+	<topic_name?count<10&seen==false
+
+So this would display the goto option if count is less than 10 and seen 
+is set to false. These variables we are testing are tag_names and 
+default to the current subject chat but could reference other subjects 
+by explicitly including a root.
+
+Available logic tests are
+
+	name==value
+	name=value
+
+True if the tag is set to this value.
+
+	name!=value
+
+True if the tag is not set to this value.
+
+	name<value
+
+True if the tag is less than this value (numeric test).
+
+	name>value
+
+True if the tag is more than this value (numeric test).
+
+	name<=value
+
+True if the tag is less than or equal to this value (numeric test).
+
+	name>=value
+
+True if the tag is more than or equal to  this value (numeric test).
+
+All of these tests can be preceded by a ! to negate them so
+
+	name!=vale
+	!name==value
+
+Are both a test for inequality.
+
+Multiple tests can be joined together by & (and) or | (or) this logic 
+will be applied to a running total moving from left to right as the 
+values are evaluated with the final value deciding if this goto will be 
+displayed.
+
 
 ]]
 -----------------------------------------------------------------------------
