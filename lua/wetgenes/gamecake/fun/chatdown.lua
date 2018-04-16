@@ -7,7 +7,6 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local chatdown=M
 
-
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.chatdown.parse
 
@@ -246,18 +245,15 @@ end
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.chatdown.setup_chat
 
-	chat = chatdown.setup_chat(chat,chats,subject_name,topic_name)
+	chat = chatdown.setup_chat(chats,subject_name)
 
-Setup the initial state for a subject, should be called once for each 
-subject to initialise starting state and is called automatically by 
-chatdown.setup.
-
-
-We manage tag and callbacks from gotos here.
+Setup the initial chat state for a subject. This is called 
+automatically by chatdown.setup and probably should not be used 
+elsewhere.
 
 ]]
 -----------------------------------------------------------------------------
-chatdown.setup_chat=function(chat,chats,subject_name)
+chatdown.setup_chat=function(chats,subject_name)
 
 	local dotnames=function(name)
 		local n,r=name,name
@@ -269,9 +265,10 @@ chatdown.setup_chat=function(chat,chats,subject_name)
 		return f
 	end
 	--for n in dotnames("control.colson.2") do print(n) end
-
-	local chat=chat or {}
 	
+	local chat={}
+	
+	chat.chats=chats -- parent
 	chat.subject_name=subject_name
 	chat.tags={}
 	chat.viewed={}
@@ -294,28 +291,8 @@ chatdown.setup_chat=function(chat,chats,subject_name)
 		end
     end
 	
-	chat.set_subject=function(name)
-	
-		chat.subject={}
-		chat.topics={}
-		
-		for n in dotnames(name) do -- inherit subjects data
-			local v=chats.rawsubjects[n]
-			if v then
-				for n2,v2 in pairs(v) do -- merge base settings into subject table
-					chat.subject[n2]=chat.subject[n2] or v2
-				end 
-				for n2,v2 in pairs(v.topics or {}) do -- merge topics
-					chat.topics[n2]=chat.topics[n2] or v2
-				end
-			end
-		end
-
-		chats.changes(chat,"subject",chat.subject)
-
-		chat.set_tags(chat.subject.tags)
-
-	end
+	chat.subject={}
+	chat.topics={}
 
 	chat.set_topic=function(name)
 	
@@ -417,12 +394,19 @@ chatdown.setup_chat=function(chat,chats,subject_name)
 
 	end
 
-	chat.get_menu_items=function()
-		return chats.chat_to_menu_items(chat)
+	for n in dotnames(subject_name) do -- inherit subjects data
+		local v=chats.rawsubjects[n]
+		if v then
+			for n2,v2 in pairs(v) do -- merge base settings into subject table
+				chat.subject[n2]=chat.subject[n2] or v2
+			end 
+			for n2,v2 in pairs(v.topics or {}) do -- merge topics
+				chat.topics[n2]=chat.topics[n2] or v2
+			end
+		end
 	end
-	
-	chat.set_subject(subject_name)
-	chat.set_topic( chat.get_tag("welcome") or "welcome") -- {welcome} or welcome is the first topic of conversation
+
+--	chat.set_topic( chat.get_tag("welcome") or "welcome") -- {welcome} or welcome is the first topic of conversation?
 	
 	return chat
 end
@@ -444,15 +428,16 @@ chatdown.setup_chats=function(chat_text,changes)
 
 	chats.rawsubjects=chatdown.parse(chat_text) -- parse static data
 	
-	chats.names={}
+	chats.subject_names={}
 	
-	chats.get=function(name)
-		return chats.names[name]
+	chats.set=function(subject_name)
+		chats.subject_name=subject_name
+		chats.changes(chats.get(),"subject")
+		return chats.get()
 	end
-	
-	chats.get_menu_items=function(name)
-	
-		return chats.chat_to_menu_items(chats.get(name))
+
+	chats.get=function(subject_name)
+		return chats.subject_names[subject_name or chats.subject_name]
 	end
 	
 	chats.get_tag=function(s,default_root)
@@ -493,7 +478,6 @@ chatdown.setup_chats=function(chat_text,changes)
 	chats.replace_tags=function(text,default_root)
 
 		if not text then return nil end
---		if not tags then return text end
 
 		local ret=text
 		for sanity=0,100 do
@@ -507,67 +491,26 @@ chatdown.setup_chats=function(chat_text,changes)
 		return ret
 	end
 
--- examp[le, replace to build your own menus
-	chats.chat_to_menu_items=function(chat)
-		local items={cursor=1,cursor_max=0}
-		
-		items.title=chat.name
-		
-		local ss=chat.topic and chat.topic.text or {} if type(ss)=="string" then ss={ss} end
-		for i,v in ipairs(ss) do
-			if i>1 then
-				items[#items+1]={text="",chat=chat} -- blank line
-			end
-			items[#items+1]={text=chat.replace_tags(v)or"",chat=chat}
-		end
-
-		for i,v in ipairs(chat.gotos or {}) do
-
-			items[#items+1]={text="",chat=chat} -- blank line before each goto
-
-			local ss=v and v.text or {} if type(ss)=="string" then ss={ss} end
-
-			local color=30
-			if chat.viewed[v.name] then color=28 end -- we have already seen the topic to this goto
-			
-			local f=function(item,menu)
-
-				if item.goto and item.goto.name then
-
-					chats.changes(chat,"goto",item.goto)
-
-					chat.set_topic(item.goto.name)
-
-					chat.set_tags(item.goto.tags)
-
-					menu.show(chats.chat_to_menu_items(chat))
-
-				end
-			end
-			
-			items[#items+1]={text=chat.replace_tags(ss[1])or"",chat=chat,goto=v,cursor=i,call=f,color=color} -- only show first line
-			items.cursor_max=i
-		end
-
-		return items
-	end
-
 -- hook, replace to be notified of changes, by default we print debuging information
+-- replace with your own empty changes hook to prevent this
 	chats.changes=changes or function(chat,change,...)
 		local a,b=...
-
-		if     change=="subject" then print("subject", chat.name,a.name)
-		elseif change=="topic"   then print("topic",   chat.name,a.name)
-		elseif change=="goto"    then print("goto",    chat.name,a.name)
-		elseif change=="tag"     then print("tag",     chat.name,a,b)
+		
+		if     change=="subject" then print( "subject" , chat.subject_name              )
+		elseif change=="topic"   then print( "topic"   , chat.subject_name , a.name     )
+		elseif change=="goto"    then print( "goto"    , chat.subject_name , a.name     )
+		elseif change=="tag"     then print( "tag"     , chat.subject_name , a      , b )
 		end
 		
 	end
 
 	for n,v in pairs(chats.rawsubjects) do -- setup each chat
-	
-		chats.names[n]=chatdown.setup_chat(nil,chats,n) -- init state
-		
+		chats.subject_names[n]=chatdown.setup_chat(chats,n) -- init state
+		if not chats.subject_name then chats.set(n) end -- default to the first subject
+	end
+
+	for n,chat in pairs(chats.subject_names) do -- set starting tag values
+		chat.set_tags(chat.subject.tags)
 	end
 
 	return chats

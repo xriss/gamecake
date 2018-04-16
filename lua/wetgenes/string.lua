@@ -106,6 +106,7 @@ local fout=opts.fout
 			for i,v in ipairs({...}) do ret[#ret+1]=v end
 		end
 		wstr.serialize(o,opts)		
+		opts.fout(opts.newline)
 		return table.concat(ret)
 	end
 
@@ -129,7 +130,7 @@ local fout=opts.fout
 			return
 		else
 		
-			fout(opts.newline,opts.indent,"{",opts.newline)
+			fout("{",opts.newline)
 
 			if opts.pretty then
 				opts.indent=opts.indent.." "
@@ -159,13 +160,17 @@ local fout=opts.fout
 			if opts.pretty then
 				opts.indent=opts.indent:sub(1,-2)
 			end
-			fout(opts.indent,"}",opts.newline)
+			fout(opts.indent,"}")
 			return
 		end
 	elseif type(o) == "nil" then	
 		return fout("nil")
 	else
-		error("cannot serialize a " .. type(o))
+		if opts.no_errors then
+			return fout("nil--[[",type(o),"]]")
+		else
+			error("cannot serialize a " .. type(o))
+		end
 	end
 	
 end
@@ -178,85 +183,15 @@ end
 --
 -----------------------------------------------------------------------------
 wstr.dump = function(o,opts)
-opts=opts or {}
-opts.done=opts.done or {} -- only do tables once
-opts.names=opts.names or {"this"}
-
-opts.indent=opts.indent or ""
-opts.newline=opts.newline or ( opts.compact and "" or "\n" )
-
-local fout=opts.fout
-
-	if not fout then -- call with a new function to build and return a string
-		local ret={}
-		opts.fout=function(...)
-			for i,v in ipairs({...}) do ret[#ret+1]=v end
-		end
-		wstr.dump(o,opts)		
-		return table.concat(ret)
-	end
-
-	if type(o) == "number" then
+	opts=opts or {}
 	
-		return fout(o)
-		
-	elseif type(o) == "boolean" then
-	
-		if o then return fout("true") else return fout("false") end
-		
-	elseif type(o) == "string" then
-	
-		return fout(string.format("%q", o))
-		
-	elseif type(o) == "table" then
-	
-		
-		if opts.done[o] then
-			fout("(",opts.done[o],")")
-			return
-		else
-		
-			fout(opts.newline,opts.indent,"{",opts.newline)
+	opts.pretty=true
+	opts.no_duplicates=true
+	opts.no_errors=true
 
-			opts.indent=opts.indent.." "
-			
-			opts.done[o]=table.concat(opts.names,".")
-			
-			local maxi=0
-			
-			for k,v in ipairs(o) do -- dump number keys in order
-				table.insert(opts.names,tostring(k))
-				fout(opts.indent)
-				wstr.dump(v,opts)
-				fout(",",opts.newline)
-				maxi=k -- remember top
-				table.remove(opts.names)
-			end
-			
-			for k,v in pairs(o) do
-				if (type(k)~="number") or (k<1) or (k>maxi) or (math.floor(k)~=k) then -- skip what we already dumped
-					table.insert(opts.names,tostring(k))
-					fout(opts.indent,"[")
-					wstr.dump(k,opts)
-					fout("]=")
-					wstr.dump(v,opts)
-					fout(",",opts.newline)
-					table.remove(opts.names)
-				end
-			end
-			
-			opts.indent=opts.indent:sub(1,-2)
-			
-			fout(opts.indent,"}",opts.newline)
-			return
-		end
-	elseif type(o) == "nil" then	
-		return fout("nil")
-	else
-		return fout("function("..type(o)..")end")
-	end
-	
+	return wstr.serialize(o,opts)
 end
+
 
 -----------------------------------------------------------------------------
 --
