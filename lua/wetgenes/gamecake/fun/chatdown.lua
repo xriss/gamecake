@@ -414,20 +414,20 @@ end
 chatdown.chats={}
 chatdown.chats.__index=chatdown.chats
 
-chatdown.chats.set=function(chats,subject_name)
+chatdown.chats.set_subject=function(chats,subject_name)
 	chats.subject_name=subject_name
-	chats.changes(chats:get(),"subject")
-	return chats:get()
+	chats.changes(chats:get_subject(),"subject")
+	return chats:get_subject()
 end
 
-chatdown.chats.get=function(chats,subject_name)
+chatdown.chats.get_subject=function(chats,subject_name)
 	return chats.subject_names[subject_name or chats.subject_name]
 end
 
 chatdown.chats.get_tag=function(chats,s,default_root)
 	local root,tag=s:match("(.+)/(.+)") -- is a root given?
 	if not root then root,tag=default_root,s end -- no root use full string as tag name
-	local tags=(chats:get(root) or {}).tags or {} -- get root tags or empty table
+	local tags=(chats:get_subject(root) or {}).tags or {} -- get root tags or empty table
 	return tags[tag]
 end
 
@@ -435,7 +435,7 @@ chatdown.chats.set_tag=function(chats,s,v,default_root)
 	local root,tag=s:match("(.+)/(.+)") -- is a root given?
 	if not root then root,tag=default_root,s end -- no root use full string as tag name
 
-	local chat=chats:get(root)
+	local chat=chats:get_subject(root)
 	if not chat then return end -- unknown chat name
 	
 	chat.tags=chat.tags or {} -- make sure we have a tags table
@@ -509,7 +509,7 @@ chatdown.setup_chats=function(chat_text,changes)
 	chats.subject_names={}
 	for n,v in pairs(chats.rawsubjects) do -- setup each chat
 		chats.subject_names[n]=chatdown.setup_chat(chats,n) -- init state
-		if not chats.subject_name then chats:set(n) end -- default to the first subject
+		if not chats.subject_name then chats:set_subject(n) end -- default to the first subject
 	end
 
 	for n,chat in pairs(chats.subject_names) do -- set starting tag values
