@@ -7,6 +7,12 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local chatdown=M
 
+chatdown.chats={}
+chatdown.chats.__index=chatdown.chats
+
+chatdown.chat={}
+chatdown.chat.__index=chatdown.chat
+
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.chatdown.parse
 
@@ -241,6 +247,19 @@ chatdown.parse=function(chat_text)
 end
 
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.dotnames
+
+	for part_name in chatdown.dotnames(full_name) do
+		print(part_name)
+	end
+
+Iterate all dotnames so if given "aa.bb.cc" we would iterate through 
+"aa.bb.cc" , "aa.bb" and "aa". This is used to inherit data using just 
+a naming convention.
+
+]]
+-----------------------------------------------------------------------------
 chatdown.dotnames=function(name)
 	local n,r=name,name
 	local f=function(a,b)
@@ -252,27 +271,78 @@ chatdown.dotnames=function(name)
 end
 
 
-chatdown.chat={}
-chatdown.chat.__index=chatdown.chat
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.et_tag
+
+	tag_value = chat:get_tag(tag_name)
+
+The same as chats:get_tag but the subject of this chat is the 
+default root.
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chat.get_tag=function(chat,text)
 	return chat.chats:get_tag(text,chat.subject_name)
 end
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.set_tag
+
+	tag_value = chat:set_tag(tag_name,tag_value)
+
+The same as chats:set_tag but the subject of this chat is the 
+default root.
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chat.set_tag=function(chat,text,val)
 	return chat.chats:set_tag(text,val,chat.subject_name)
 end
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags
+
+	output = chat:replace_tags(input)
+
+The same as chats:replace_tags but the subject of this chat is the 
+default root.
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chat.replace_tags=function(chat,text)
 	return chat.chats:replace_tags(text,chat.subject_name)
 end
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.set_tags
+
+	chat:set_tags(tags)
+
+Set all the values in the given table of {tag_name=tag_value} pairs.
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chat.set_tags=function(chat,tags)
 	for n,v in pairs(tags or {}) do
 		chat:set_tag(n,v)
 	end
 end
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.set_topic
+
+	chat:set_topic(topic_name)
+
+Set the current topic for this chat object, information about this 
+topic and its gotos are built from and stored in this chat object.
+
+	chat.topic_name
+	
+Will be set to the given topic name.
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chat.set_topic=function(chat,name)
 
 	chat.viewed[name]=(chat.viewed[name] or 0) + 1 -- keep track of what topics have been viewed
@@ -411,19 +481,49 @@ chatdown.setup_chat=function(chats,subject_name)
 end
 
 
-chatdown.chats={}
-chatdown.chats.__index=chatdown.chats
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.set_subject
 
+	chat = chats:set_subject(subject_name)
+
+Set the current subject for this chats object, this subject becomes the 
+chat that you will get if you call get_subject with no arguments.
+
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chats.set_subject=function(chats,subject_name)
 	chats.subject_name=subject_name
 	chats.changes(chats:get_subject(),"subject")
 	return chats:get_subject()
 end
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.get_subject
+
+	chat = chats:get_subject(subject_name)
+	chat = chats:get_subject()
+
+Get the chat for the given subject or the chat for the last subject 
+selected with set_subject if no subject_name is given.
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chats.get_subject=function(chats,subject_name)
 	return chats.subject_names[subject_name or chats.subject_name]
 end
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.get_tag
+
+	tag_value = chats:get_tag(tag_name,subject_name)
+
+Get the tag_value for the given tag_name which can either be 
+"tag_root/tag_name" or "tag_name". The subject_name is the default root 
+to use if no tag_root is given in the tag_name.
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chats.get_tag=function(chats,s,default_root)
 	local root,tag=s:match("(.+)/(.+)") -- is a root given?
 	if not root then root,tag=default_root,s end -- no root use full string as tag name
@@ -431,6 +531,21 @@ chatdown.chats.get_tag=function(chats,s,default_root)
 	return tags[tag]
 end
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.set_tag
+
+	tag_value = chats:set_tag(tag_name,tag_value,subject_name)
+
+Alter the value of the given tag_name. If the value string begins with 
+a "+" or a "-" Then the values will be treated as numbers and added or 
+subtracted from the current value. This allows for simple incremental 
+flag values.
+
+Again if the tag name does not contain an explicit  root then 
+subject_name will be used as the default chat subject.
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chats.set_tag=function(chats,s,v,default_root)
 	local root,tag=s:match("(.+)/(.+)") -- is a root given?
 	if not root then root,tag=default_root,s end -- no root use full string as tag name
@@ -459,6 +574,22 @@ chatdown.chats.set_tag=function(chats,s,v,default_root)
 	return chat.tags[tag]
 end
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags
+
+	output = chats:replace_tags(input,subject_name)
+
+Tags in the input text can be wrapped in {tag_name} and will be 
+replaced with the appropriate tag_value. This is done recursively so 
+tag_values can contain references to other tags. If a tag does not 
+exist then it will not expand and {tag_name} will remain in the output 
+text.
+
+Again if any tag name does not contain an explicit root then 
+subject_name will be used as the default chat subject.
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chats.replace_tags=function(chats,text,default_root)
 
 	if not text then return nil end
@@ -475,8 +606,24 @@ chatdown.chats.replace_tags=function(chats,text,default_root)
 	return ret
 end
 
--- hook, replace to be notified of changes, by default we print debuging information
--- replace with your own empty changes hook to prevent this
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.gamecake.fun.chatdown.chats.changes
+
+	chats.changes(chat,change,...)
+
+	chats.changes(chat,"subject")
+	chats.changes(chat,"topic",topic)
+	chats.changes(chat,"goto",goto)
+	chats.changes(chat,"tag",tag_name,tag_value)
+
+This is a callback hook, replace to be notified of changes and possibly 
+alter then, by default we print debuging information. Replace this 
+function with an empty function to prevent this eg
+
+	chats.changes=function()end
+
+]]
+-----------------------------------------------------------------------------
 chatdown.chats.changes=function(chat,change,...)
 	local a,b=...
 	
