@@ -273,7 +273,7 @@ end
 
 
 -----------------------------------------------------------------------------
---[[#lua.wetgenes.gamecake.fun.chatdown.chats.et_tag
+--[[#lua.wetgenes.gamecake.fun.chatdown.chat.get_tag
 
 	tag_value = chat:get_tag(tag_name)
 
@@ -287,7 +287,7 @@ chatdown.chat.get_tag=function(chat,text)
 end
 
 -----------------------------------------------------------------------------
---[[#lua.wetgenes.gamecake.fun.chatdown.chats.set_tag
+--[[#lua.wetgenes.gamecake.fun.chatdown.chat.set_tag
 
 	tag_value = chat:set_tag(tag_name,tag_value)
 
@@ -301,7 +301,7 @@ chatdown.chat.set_tag=function(chat,text,val)
 end
 
 -----------------------------------------------------------------------------
---[[#lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags
+--[[#lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags
 
 	output = chat:replace_tags(input)
 
@@ -315,7 +315,7 @@ chatdown.chat.replace_tags=function(chat,text)
 end
 
 -----------------------------------------------------------------------------
---[[#lua.wetgenes.gamecake.fun.chatdown.chats.set_tags
+--[[#lua.wetgenes.gamecake.fun.chatdown.chat.set_tags
 
 	chat:set_tags(tags)
 
@@ -330,7 +330,7 @@ chatdown.chat.set_tags=function(chat,tags)
 end
 
 -----------------------------------------------------------------------------
---[[#lua.wetgenes.gamecake.fun.chatdown.chats.set_topic
+--[[#lua.wetgenes.gamecake.fun.chatdown.chat.set_topic
 
 	chat:set_topic(topic_name)
 
