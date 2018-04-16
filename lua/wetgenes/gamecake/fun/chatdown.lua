@@ -241,6 +241,137 @@ chatdown.parse=function(chat_text)
 end
 
 
+chatdown.dotnames=function(name)
+	local n,r=name,name
+	local f=function(a,b)
+		r=n -- start with the full string
+		n=n and n:match("^(.+)(%..+)$") -- prepare the parent string
+		return r
+	end
+	return f
+end
+
+
+chatdown.chat={}
+chatdown.chat.__index=chatdown.chat
+
+chatdown.chat.get_tag=function(chat,text)
+	return chat.chats:get_tag(text,chat.subject_name)
+end
+
+chatdown.chat.set_tag=function(chat,text,val)
+	return chat.chats:set_tag(text,val,chat.subject_name)
+end
+
+chatdown.chat.replace_tags=function(chat,text)
+	return chat.chats:replace_tags(text,chat.subject_name)
+end
+
+chatdown.chat.set_tags=function(chat,tags)
+	for n,v in pairs(tags or {}) do
+		chat:set_tag(n,v)
+	end
+end
+
+chatdown.chat.set_topic=function(chat,name)
+
+	chat.viewed[name]=(chat.viewed[name] or 0) + 1 -- keep track of what topics have been viewed
+
+	chat.topic_name=name
+	chat.topic={}
+	chat.gotos={}
+	
+	local merged_tags={}
+
+	local goto_names={} -- keep track of previously seen exit nodes
+
+	for n in chatdown.dotnames(name) do -- inherit topics data
+		local v=chat.topics[n]
+		if v then
+			for n2,v2 in pairs(v) do -- merge base settings
+				chat.topic[n2]=chat.topic[n2] or v2
+			end 
+			for np,vp in pairs(v.tags or {}) do -- merge set changes
+				merged_tags[np]=merged_tags[np] or vp
+			end
+			for n2,v2 in ipairs(v.gotos or {}) do -- join all gotos
+				local r={}
+				for n3,v3 in pairs(v2) do r[n3]=v3 end -- copy
+
+				if not r.text then -- use text from subject prototype gotos
+					for i,p in ipairs(chat.subject.gotos or {} ) do -- search
+						if r.name==p.name then r.text=p.text break end -- found and used
+					end
+				end
+				
+				local result=true
+				if r.name:find("?") then -- query string
+					r.name,r.query=r.name:match("(.+)?(.+)")
+					
+					local t={}
+					r.query:gsub("([^&|!=<>]*)([&|=<>!]*)",function(a,b) if a~="" then t[#t+1]=a end if b~="" then t[#t+1]=b end end)
+					
+					local do_test=function(a,b,c)
+
+						local a=chat:get_tag(a)
+
+						if     b=="<" then					return ( tonumber(a) < tonumber(c) )
+						elseif b==">" then					return ( tonumber(a) > tonumber(c) )
+						elseif b=="<=" then					return ( tonumber(a) <= tonumber(c) )
+						elseif b==">=" then					return ( tonumber(a) >= tonumber(c) )
+						elseif b=="=" or b=="==" then		return ( tostring(a) == c )
+						elseif b=="!=" then					return ( tostring(a) ~= c )
+						elseif not b then					return a and true or false
+						end
+						
+						return false
+					end
+					
+					local test={"|"}
+					local tests={test}
+					for i,v in ipairs(t) do
+						if v=="&" or v=="|" then
+							test={v}
+							tests[#tests+1]=test
+						elseif v=="&!" or v=="|!" then
+							test={v:sub(1,1),v:sub(2,2)}
+							tests[#tests+1]=test
+						else
+							test[#test+1]=v
+						end
+					end
+
+					result=false
+					for i,v in ipairs(tests) do
+					
+						local t
+						if v[2]=="!" then t= not do_test(v[3],v[4],v[5]) else t=do_test(v[2],v[3],v[4]) end
+						
+						if v[1]=="|" then result=result or  t end
+						if v[1]=="&" then result=result and t end
+					
+					end
+
+				end
+				
+				r.name=chat:replace_tags(r.name) -- can use tags in name
+				
+				if not goto_names[r.name] then -- only add unique gotos
+					if result then -- should we show this one?
+						chat.gotos[#chat.gotos+1]=r
+					end
+				end
+				goto_names[r.name]=true
+			end 
+		end
+
+	end
+	
+	chat.chats.changes(chat,"topic",chat.topic)
+
+	chat:set_tags(merged_tags)
+
+end
 
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.chatdown.setup_chat
@@ -254,147 +385,17 @@ elsewhere.
 ]]
 -----------------------------------------------------------------------------
 chatdown.setup_chat=function(chats,subject_name)
-
-	local dotnames=function(name)
-		local n,r=name,name
-		local f=function(a,b)
-			r=n -- start with the full string
-			n=n and n:match("^(.+)(%..+)$") -- prepare the parent string
-			return r
-		end
-		return f
-	end
-	--for n in dotnames("control.colson.2") do print(n) end
 	
-	local chat={}
+	local chat=setmetatable({},chatdown.chat)
 	
 	chat.chats=chats -- parent
 	chat.subject_name=subject_name
 	chat.tags={}
 	chat.viewed={}
-	
-	chat.get_tag=function(text)
-		return chats.get_tag(text,chat.subject_name)
-	end
-	
-	chat.set_tag=function(text,val)
-		return chats.set_tag(text,val,chat.subject_name)
-	end
-
-	chat.replace_tags=function(text)
-		return chats.replace_tags(text,chat.subject_name)
-	end
-
-	chat.set_tags=function(tags)
-		for n,v in pairs(tags or {}) do
-			chat.set_tag(n,v)
-		end
-    end
-	
 	chat.subject={}
 	chat.topics={}
 
-	chat.set_topic=function(name)
-	
-		chat.viewed[name]=(chat.viewed[name] or 0) + 1 -- keep track of what topics have been viewed
-	
-		chat.topic_name=name
-		chat.topic={}
-		chat.gotos={}
-		
-		local merged_tags={}
-
-		local goto_names={} -- keep track of previously seen exit nodes
-
-		for n in dotnames(name) do -- inherit topics data
-			local v=chat.topics[n]
-			if v then
-				for n2,v2 in pairs(v) do -- merge base settings
-					chat.topic[n2]=chat.topic[n2] or v2
-				end 
-				for np,vp in pairs(v.tags or {}) do -- merge set changes
-					merged_tags[np]=merged_tags[np] or vp
-				end
-				for n2,v2 in ipairs(v.gotos or {}) do -- join all gotos
-					local r={}
-					for n3,v3 in pairs(v2) do r[n3]=v3 end -- copy
-
-					if not r.text then -- use text from subject prototype gotos
-						for i,p in ipairs(chat.subject.gotos or {} ) do -- search
-							if r.name==p.name then r.text=p.text break end -- found and used
-						end
-					end
-					
-					local result=true
-					if r.name:find("?") then -- query string
-						r.name,r.query=r.name:match("(.+)?(.+)")
-						
-						local t={}
-						r.query:gsub("([^&|!=<>]*)([&|=<>!]*)",function(a,b) if a~="" then t[#t+1]=a end if b~="" then t[#t+1]=b end end)
-						
-						local do_test=function(a,b,c)
-
-							local a=chat.get_tag(a)
-
-							if     b=="<" then					return ( tonumber(a) < tonumber(c) )
-							elseif b==">" then					return ( tonumber(a) > tonumber(c) )
-							elseif b=="<=" then					return ( tonumber(a) <= tonumber(c) )
-							elseif b==">=" then					return ( tonumber(a) >= tonumber(c) )
-							elseif b=="=" or b=="==" then		return ( tostring(a) == c )
-							elseif b=="!=" then					return ( tostring(a) ~= c )
-							elseif not b then					return a and true or false
-							end
-							
-							return false
-						end
-						
-						local test={"|"}
-						local tests={test}
-						for i,v in ipairs(t) do
-							if v=="&" or v=="|" then
-								test={v}
-								tests[#tests+1]=test
-							elseif v=="&!" or v=="|!" then
-								test={v:sub(1,1),v:sub(2,2)}
-								tests[#tests+1]=test
-							else
-								test[#test+1]=v
-							end
-						end
-
-						result=false
-						for i,v in ipairs(tests) do
-						
-							local t
-							if v[2]=="!" then t= not do_test(v[3],v[4],v[5]) else t=do_test(v[2],v[3],v[4]) end
-							
-							if v[1]=="|" then result=result or  t end
-							if v[1]=="&" then result=result and t end
-						
-						end
-
-					end
-					
-					r.name=chat.replace_tags(r.name) -- can use tags in name
-					
-					if not goto_names[r.name] then -- only add unique gotos
-						if result then -- should we show this one?
-							chat.gotos[#chat.gotos+1]=r
-						end
-					end
-					goto_names[r.name]=true
-				end 
-			end
-
-		end
-		
-		chats.changes(chat,"topic",chat.topic)
-
-		chat.set_tags(merged_tags)
-
-	end
-
-	for n in dotnames(subject_name) do -- inherit subjects data
+	for n in chatdown.dotnames(subject_name) do -- inherit subjects data
 		local v=chats.rawsubjects[n]
 		if v then
 			for n2,v2 in pairs(v) do -- merge base settings into subject table
@@ -405,12 +406,87 @@ chatdown.setup_chat=function(chats,subject_name)
 			end
 		end
 	end
-
---	chat.set_topic( chat.get_tag("welcome") or "welcome") -- {welcome} or welcome is the first topic of conversation?
 	
 	return chat
 end
 
+
+chatdown.chats={}
+chatdown.chats.__index=chatdown.chats
+
+chatdown.chats.set=function(chats,subject_name)
+	chats.subject_name=subject_name
+	chats.changes(chats:get(),"subject")
+	return chats:get()
+end
+
+chatdown.chats.get=function(chats,subject_name)
+	return chats.subject_names[subject_name or chats.subject_name]
+end
+
+chatdown.chats.get_tag=function(chats,s,default_root)
+	local root,tag=s:match("(.+)/(.+)") -- is a root given?
+	if not root then root,tag=default_root,s end -- no root use full string as tag name
+	local tags=(chats:get(root) or {}).tags or {} -- get root tags or empty table
+	return tags[tag]
+end
+
+chatdown.chats.set_tag=function(chats,s,v,default_root)
+	local root,tag=s:match("(.+)/(.+)") -- is a root given?
+	if not root then root,tag=default_root,s end -- no root use full string as tag name
+
+	local chat=chats:get(root)
+	if not chat then return end -- unknown chat name
+	
+	chat.tags=chat.tags or {} -- make sure we have a tags table
+
+-- add inc/dec operators here?
+	local t
+	if type(v)=="string" then
+		t=v:sub(1,1)
+	end
+	local n=tonumber(v:sub(2))
+	if t=="-" and n then
+		chat.tags[tag]=(tonumber(chat.tags[tag]) or 0 ) - n
+	elseif t=="+" and n then
+		chat.tags[tag]=(tonumber(chat.tags[tag]) or 0 ) + n
+	else
+		chat.tags[tag]=v
+	end
+	
+	chats.changes(chat,"tag",tag,v) -- could adjust value of ( chat.tags[tag] ) in callback
+
+	return chat.tags[tag]
+end
+
+chatdown.chats.replace_tags=function(chats,text,default_root)
+
+	if not text then return nil end
+
+	local ret=text
+	for sanity=0,100 do
+		local last=ret
+		ret=ret:gsub("{([^}%s]+)}",function(a)
+			return chats:get_tag(a,default_root) or "{"..a.."}"
+		end)
+		if last==ret then break end -- no change
+	end
+
+	return ret
+end
+
+-- hook, replace to be notified of changes, by default we print debuging information
+-- replace with your own empty changes hook to prevent this
+chatdown.chats.changes=function(chat,change,...)
+	local a,b=...
+	
+	if     change=="subject" then print( "subject" , chat.subject_name              )
+	elseif change=="topic"   then print( "topic"   , chat.subject_name , a.name     )
+	elseif change=="goto"    then print( "goto"    , chat.subject_name , a.name     )
+	elseif change=="tag"     then print( "tag"     , chat.subject_name , a      , b )
+	end
+	
+end
 
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.gamecake.fun.chatdown.setup
@@ -424,93 +500,20 @@ global chats with a chat object for each subject.
 -----------------------------------------------------------------------------
 chatdown.setup_chats=function(chat_text,changes)
 
-	local chats={}
+	local chats=setmetatable({},chatdown.chats)
 
 	chats.rawsubjects=chatdown.parse(chat_text) -- parse static data
 	
+	chats.changes=changes
+
 	chats.subject_names={}
-	
-	chats.set=function(subject_name)
-		chats.subject_name=subject_name
-		chats.changes(chats.get(),"subject")
-		return chats.get()
-	end
-
-	chats.get=function(subject_name)
-		return chats.subject_names[subject_name or chats.subject_name]
-	end
-	
-	chats.get_tag=function(s,default_root)
-		local root,tag=s:match("(.+)/(.+)") -- is a root given?
-		if not root then root,tag=default_root,s end -- no root use full string as tag name
-		local tags=(chats.get(root) or {}).tags or {} -- get root tags or empty table
-		return tags[tag]
-	end
-
-	chats.set_tag=function(s,v,default_root)
-		local root,tag=s:match("(.+)/(.+)") -- is a root given?
-		if not root then root,tag=default_root,s end -- no root use full string as tag name
-
-		local chat=chats.get(root)
-		if not chat then return end -- unknown chat name
-		
-		chat.tags=chat.tags or {} -- make sure we have a tags table
-
--- add inc/dec operators here?
-		local t
-		if type(v)=="string" then
-			t=v:sub(1,1)
-		end
-		local n=tonumber(v:sub(2))
-		if t=="-" and n then
-			chat.tags[tag]=(tonumber(chat.tags[tag]) or 0 ) - n
-		elseif t=="+" and n then
-			chat.tags[tag]=(tonumber(chat.tags[tag]) or 0 ) + n
-		else
-			chat.tags[tag]=v
-		end
-		
-		chats.changes(chat,"tag",tag,v) -- could adjust value of ( chat.tags[tag] ) in callback
-
-		return chat.tags[tag]
-	end
-
-	chats.replace_tags=function(text,default_root)
-
-		if not text then return nil end
-
-		local ret=text
-		for sanity=0,100 do
-			local last=ret
-			ret=ret:gsub("{([^}%s]+)}",function(a)
-				return chats.get_tag(a,default_root) or "{"..a.."}"
-			end)
-			if last==ret then break end -- no change
-		end
-
-		return ret
-	end
-
--- hook, replace to be notified of changes, by default we print debuging information
--- replace with your own empty changes hook to prevent this
-	chats.changes=changes or function(chat,change,...)
-		local a,b=...
-		
-		if     change=="subject" then print( "subject" , chat.subject_name              )
-		elseif change=="topic"   then print( "topic"   , chat.subject_name , a.name     )
-		elseif change=="goto"    then print( "goto"    , chat.subject_name , a.name     )
-		elseif change=="tag"     then print( "tag"     , chat.subject_name , a      , b )
-		end
-		
-	end
-
 	for n,v in pairs(chats.rawsubjects) do -- setup each chat
 		chats.subject_names[n]=chatdown.setup_chat(chats,n) -- init state
-		if not chats.subject_name then chats.set(n) end -- default to the first subject
+		if not chats.subject_name then chats:set(n) end -- default to the first subject
 	end
 
 	for n,chat in pairs(chats.subject_names) do -- set starting tag values
-		chat.set_tags(chat.subject.tags)
+		chat:set_tags(chat.subject.tags)
 	end
 
 	return chats
