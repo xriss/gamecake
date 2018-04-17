@@ -28,7 +28,7 @@ size_t len=0x7fffffff; // fake max length if we have no idea what it is (light u
 
 	if(lua_isnumber(l,idx))
 	{
-		ptr=(const unsigned char*)((uint64_t)lua_tonumber(l,idx));
+		ptr=(const unsigned char*)((intptr_t)lua_tonumber(l,idx));
 	}
 	else
 	if(lua_isstring(l,idx))
@@ -1265,7 +1265,7 @@ void *ret=0;
 	glGetVertexAttribPointerv(		(int)luaL_checknumber(l,1)	,
 									(int)luaL_checknumber(l,2)	,
 									&ret						);
-	lua_pushnumber(l,(double)((uint64_t)ret) );
+	lua_pushnumber(l,(double)((intptr_t)ret) );
 	return 1;
 }
 
