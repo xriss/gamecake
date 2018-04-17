@@ -465,6 +465,11 @@ elseif OSX then
 	
 elseif NIX then
 
+	buildoptions{
+		"-Wno-format-security",
+		"-Wno-deprecated-declarations",
+	}
+
 	function os.capture(cmd, raw)
 	  local f = assert(io.popen(cmd, 'r'))
 	  local s = assert(f:read('*a'))

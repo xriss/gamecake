@@ -1951,7 +1951,7 @@ cleanup:
     int t_ret, i;
     struct stat sb;
     struct dirent entry, *result = NULL;
-    char entry_name[255];
+    char entry_name[256*2];
     DIR *dir = opendir( path );
 
     if( dir == NULL)
@@ -3234,8 +3234,8 @@ static int x509parse_verifycrl(x509_cert *crt, x509_cert *ca,
 
         x509_hash( crl_list->tbs.p, crl_list->tbs.len, hash_id, hash );
 
-        if( !rsa_pkcs1_verify( &ca->rsa, NULL, NULL, RSA_PUBLIC, hash_id,
-                              0, hash, crl_list->sig.p ) == 0 )
+        if( (!rsa_pkcs1_verify( &ca->rsa, NULL, NULL, RSA_PUBLIC, hash_id,
+                              0, hash, crl_list->sig.p )) == 0 )
         {
             /*
              * CRL is not trusted

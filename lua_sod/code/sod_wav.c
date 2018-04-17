@@ -212,17 +212,18 @@ sod * sod_wav_load_file(sod * sd, const char* file_name)
 	int size=0;
 	int freq=22050;
 	int loop=0;
+	int siz=0;
 
 	fp=fopen(file_name,"rb");
 	if(!fp) error("failed to open wav file")
 	
-	fread(&FileHdr,1,sizeof(WAVFileHdr_Struct),fp);
+	siz=fread(&FileHdr,1,sizeof(WAVFileHdr_Struct),fp);
 	FileHdr.Size=((FileHdr.Size+1)&~1)-4;
 	while ((FileHdr.Size!=0)&&(fread(&ChunkHdr,1,sizeof(WAVChunkHdr_Struct),fp)))
 	{
 		if (!memcmp(ChunkHdr.Id,"fmt ",4))
 		{
-			fread(&FmtHdr,1,sizeof(WAVFmtHdr_Struct),fp);
+			siz=fread(&FmtHdr,1,sizeof(WAVFmtHdr_Struct),fp);
 			if (FmtHdr.Format==0x0001)
 			{
 				format=(FmtHdr.Channels==1?
@@ -233,7 +234,7 @@ sod * sod_wav_load_file(sod * sd, const char* file_name)
 			} 
 			else
 			{
-				fread(&FmtExHdr,1,sizeof(WAVFmtExHdr_Struct),fp);
+				siz=fread(&FmtExHdr,1,sizeof(WAVFmtExHdr_Struct),fp);
 				fseek(fp,ChunkHdr.Size-sizeof(WAVFmtHdr_Struct)-sizeof(WAVFmtExHdr_Struct),SEEK_CUR);
 			}
 		}
@@ -246,7 +247,7 @@ sod * sod_wav_load_file(sod * sd, const char* file_name)
 					error("failed to allocate wav data");
 				}
 				sd->freq=freq;
-				fread(sd->data,FmtHdr.BlockAlign,sd->data_sizeof/FmtHdr.BlockAlign,fp);
+				siz=fread(sd->data,FmtHdr.BlockAlign,sd->data_sizeof/FmtHdr.BlockAlign,fp);
 			}
 			else if (FmtHdr.Format==0x0011)
 			{
@@ -263,7 +264,7 @@ sod * sod_wav_load_file(sod * sd, const char* file_name)
 		}
 		else if (!memcmp(ChunkHdr.Id,"smpl",4))
 		{
-			fread(&SmplHdr,1,sizeof(WAVSmplHdr_Struct),fp);
+			siz=fread(&SmplHdr,1,sizeof(WAVSmplHdr_Struct),fp);
 			loop = (SmplHdr.Loops ? 1 : 0);
 			fseek(fp,ChunkHdr.Size-sizeof(WAVSmplHdr_Struct),SEEK_CUR);
 		}

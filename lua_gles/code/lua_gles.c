@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -27,7 +28,7 @@ size_t len=0x7fffffff; // fake max length if we have no idea what it is (light u
 
 	if(lua_isnumber(l,idx))
 	{
-		ptr=(const unsigned char*)((unsigned int)lua_tonumber(l,idx));
+		ptr=(const unsigned char*)((uint64_t)lua_tonumber(l,idx));
 	}
 	else
 	if(lua_isstring(l,idx))
@@ -61,17 +62,17 @@ void lua_gles_get_prop_info (int def, char *v, int *num)
 	{
 //		case GL_:
 // int[1]
-			*num=1; *v='i';
-		break;
+//			*num=1; *v='i';
+//		break;
 // float[1]
-			*num=1; *v='f';
-		break;
+//			*num=1; *v='f';
+//		break;
 // float[3]
-			*num=3; *v='f';
-		break;
+//			*num=3; *v='f';
+//		break;
 // float[6]
-			*num=6; *v='f';
-		break;
+//			*num=6; *v='f';
+//		break;
 
 // const char *
 		case GL_VENDOR:
@@ -779,15 +780,15 @@ int size;
 int type;
 int normalized;
 int stride;
-unsigned int pointer;
+const void *pointer;
 	index=luaL_checknumber(l,1);
 	size=luaL_checknumber(l,2);
 	type=luaL_checknumber(l,3);
 	normalized=luaL_checknumber(l,4);
 	stride=luaL_checknumber(l,5);
-	pointer=(unsigned int)lua_gles_topointer(l,6,0);
+	pointer=lua_gles_topointer(l,6,0);
 
-	glVertexAttribPointer(index,size,type,normalized,stride,(void *)pointer);
+	glVertexAttribPointer(index,size,type,normalized,stride,pointer);
 	return 0;
 }
 
@@ -1264,7 +1265,7 @@ void *ret=0;
 	glGetVertexAttribPointerv(		(int)luaL_checknumber(l,1)	,
 									(int)luaL_checknumber(l,2)	,
 									&ret						);
-	lua_pushnumber(l,(double)((unsigned int)ret) );
+	lua_pushnumber(l,(double)((uint64_t)ret) );
 	return 1;
 }
 
