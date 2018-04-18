@@ -1,3 +1,5 @@
+cd `dirname $0`
+
 rm nacl_sdk -Rf
 wget http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/nacl_sdk/nacl_sdk.zip
 unzip nacl_sdk.zip
