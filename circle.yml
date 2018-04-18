@@ -20,7 +20,6 @@ checkout:
 dependencies:
   pre:
     - sudo apt-get update
-    - sudo apt-get install libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev p7zip-full upx libpulse-dev
     - build/depends/install
 
   override:

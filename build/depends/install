@@ -4,7 +4,7 @@ cd `dirname $0`
 
 if hash apt-get 2>/dev/null; then
 
-   ../../apt-gets
+   sudo ../../apt-gets
 
 	sudo apt-get install -y unzip build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev libssl-dev clang libpulse-dev
 	sudo apt-get install -y libfreeimage-dev libopenal-dev libpango1.0-dev libsndfile-dev libudev-dev libasound2-dev libjpeg8-dev libwebp-dev automake libsndio-dev
