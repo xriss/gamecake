@@ -12,7 +12,7 @@ SDLSRC=SDL2-2.0.8
 
 
 
-# install dependencies
+# install dependencies if apt-get is available
 
 if hash apt-get 2>/dev/null; then
 

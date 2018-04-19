@@ -24,7 +24,7 @@ if [ "$1" = "clean" ] ; then
         exit
 fi
 
-build/premake4.lsb gmake lsb-$cpu
+premake4 gmake lsb-$cpu
 cd build-gmake-lsb-$cpu
 make $makeopts $2 $3 $4
 cd ..

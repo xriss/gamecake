@@ -18,7 +18,7 @@ fi
 
 
 
-build/premake4.osx gmake $mode-$cpu
+premake4 gmake $mode-$cpu
 cd build-gmake-$mode-$cpu
 make $makeopts $2 $3 $4
 cd ..

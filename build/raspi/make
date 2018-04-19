@@ -30,7 +30,7 @@ export PATH=$sdks/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbia
 
 
 
-build/premake4.deb gmake raspi
+premake4 gmake raspi
 
 cd build-gmake-raspi-native
 

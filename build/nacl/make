@@ -16,7 +16,7 @@ makeopts="config=debug_nacl"
 btype="dbg"
 fi
 
-build/premake4 gmake nacl
+premake4 gmake nacl
 
 cd build-gmake-nacl-native
 make $makeopts $2 $3 $4

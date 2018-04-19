@@ -6,7 +6,7 @@ if [ "$1" = "clean" ] ; then
 	exit 0
 fi
 
-build/premake4.exe gmake mingwin
+premake4 gmake mingwin
 
 cd build-gmake-windows-native
 

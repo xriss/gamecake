@@ -7,7 +7,7 @@ if [ "$1" = "debug" ] ; then
 makeopts="config=debug"
 fi
 
-build/premake4.raspi gmake nix-arm
+premake4 gmake nix-arm
 
 if [ "$1" == "clean" ] ; then
 

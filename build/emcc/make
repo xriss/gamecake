@@ -16,7 +16,7 @@ makeopts="config=debug_emcc"
 btype="dbg"
 fi
 
-build/premake4 gmake emcc
+premake4 gmake emcc
 
 cd build-gmake-emcc-native
 make -j4 $makeopts $2 $3 $4

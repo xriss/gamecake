@@ -20,9 +20,9 @@ fi
 
 cd ../..
 
-#build/premake4 gmake android-arm
-build/premake4 gmake android-armv7
-#build/premake4 gmake android-32
+#premake4 gmake android-arm
+premake4 gmake android-armv7
+#premake4 gmake android-32
 
 
 if [ "$1" = "clean" ] ; then
