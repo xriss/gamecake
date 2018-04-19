@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: xriss/gamecake:release
+      - image: xriss/gamecake
     steps:
       - checkout
       - run:
