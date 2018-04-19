@@ -22,7 +22,7 @@ if [ "$1" = "clean" ] ; then
         exit
 fi
 
-build/premake4 gmake nix-$cpu
+premake4 gmake nix-$cpu
 cd build-gmake-nix-$cpu
 make $makeopts $2 $3 $4
 cd ..

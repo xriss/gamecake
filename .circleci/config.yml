@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: buildpack-deps:16.04
+      - image: buildpack-deps:16.04-scm
     steps:
       - checkout
       - run:
