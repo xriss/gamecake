@@ -60,12 +60,12 @@ https://code.launchpad.net/~xriss/+snap/gamecake the following should
 get you a snap install of gamecake.
 
 	sudo snap install gamecake
+	sudo snap connect gamecake:joystick
 
-Because of the way snaps work you may need to enable some interfaces, 
+Because of the way snaps work you may need to enable more interfaces, 
 best you take a look at all the snap documentation for that sort of 
 thing. Run the following to check everything is connected OK if you are 
-having problems, the joystick insterface does not currently connect by 
-default so needs to be connected manually.
+having problems.
 
 	sudo snap interfaces gamecake
 
