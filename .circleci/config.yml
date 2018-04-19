@@ -1,38 +1,17 @@
-#try v2 ?
 version: 2
 
-general:
-  branches:
-    only:
-     - master # list of branches to build
-
-## Customize the test machine
-machine:
-
-  # Add some environment variables
-  environment:
-    CIRCLE_ENV: test
-
-## Customize checkout
-checkout:
-  post:
-    - git submodule sync
-#    - git submodule update --init # use submodules
-
-## Customize dependencies
-dependencies:
-  pre:
-    - sudo apt-get update
-    - build/depends/install
-
-  override:
-    - build/gcc/make
-#    - build/mingw/make
-#    - build/emcc/make
-  
-
-
-## Customize test commands
-test:
-  override:
-    - cd test ; ../exe/gamecake.x64 lua/unit.lua
+jobs:
+  build:
+    docker:
+      - image: circleci/16.04-scm-dind
+    steps:
+      - checkout
+      - run: git submodule sync
+      - update
+      - run: sudo apt-get update
+      - install
+      - run: build/depends/install
+      - build
+      - run: build/gcc/make
+      - test
+      - run cd test ; ../exe/gamecake.x64 lua/unit.lua
