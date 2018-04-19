@@ -7,5 +7,5 @@
 export PATH=/opt/local/bin:/usr/local/bin:$PATH
 
 
-/gamecake/build/depends/install.osx
+/gamecake/build/depends/install
 
