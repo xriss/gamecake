@@ -2,18 +2,12 @@ version: 2
 jobs:
   build:
     docker:
-      - image: buildpack-deps:16.04-scm
+      - image: docker pull xriss/gamecake
     steps:
       - checkout
       - run:
           name: sync git
           command: git submodule sync
-      - run:
-          name: apt update and install
-          command: apt-get update && apt-get -y install sudo
-      - run:
-          name: install dependencies
-          command: build/depends/install
       - run:
           name: make
           command: build/gcc/make
@@ -21,4 +15,4 @@ jobs:
           name: test
           command: cd test ; ../exe/gamecake.x64 lua/unit.lua
       - store_artifacts:
-          path: exe/gamecake.nix
+          path: exe/gamecake.x64
