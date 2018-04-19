@@ -1,17 +1,22 @@
 version: 2
-
 jobs:
   build:
     docker:
       - image: circleci/16.04-scm-dind
     steps:
       - checkout
-      - run: git submodule sync
-      - update
-      - run: sudo apt-get update
-      - install
-      - run: build/depends/install
-      - build
-      - run: build/gcc/make
-      - test
-      - run cd test ; ../exe/gamecake.x64 lua/unit.lua
+      - run:
+          name: sync git
+          command: git submodule sync
+      - run:
+          name: apt update
+          command: sudo apt-get update
+      - run:
+          name: install dependencies
+          command: build/depends/install
+      - run:
+          name: make
+          command: build/gcc/make
+      - run:
+          name: test
+          command: cd test ; ../exe/gamecake.x64 lua/unit.lua
