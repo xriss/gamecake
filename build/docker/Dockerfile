@@ -3,6 +3,9 @@
 # VERSION               0.0.1
 
 FROM      buildpack-deps:16.04-scm
-LABEL Description="Buildenvironment" Vendor="wetgenes" Version="0.0"
-RUN apt-get update && apt-get install -y sudo && /root/apt-gets && /root/install
-
+LABEL Description="A Gamecake build image" Vendor="wetgenes" Version="0.0"
+ADD install /root/install
+RUN apt-get update
+RUN apt-get install -y sudo
+RUN /root/install
+RUN rm -rf /root/*
