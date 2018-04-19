@@ -3,9 +3,6 @@
 | --- | --- | --- |
 | CircleCI | test | [![CircleCI](https://circleci.com/gh/xriss/gamecake.svg?style=svg)](https://circleci.com/gh/xriss/gamecake) |
 
-BTW CircleCI seems to be having issues so check the build logs before 
-you believe its opinion on a broken build.
-
 Be sure to clone repo with submodules as the engine binaries live in a 
 permanently orphaned branch. The following is the optimal way to git 
 clone so that the submodule references master rather than downloading 
