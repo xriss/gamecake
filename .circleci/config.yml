@@ -6,6 +6,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: need git
+          command: sudo apt install -y git
+      - run:
           name: sync git
           command: git submodule sync
       - run:
