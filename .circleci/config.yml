@@ -9,8 +9,8 @@ jobs:
           name: sync git
           command: git submodule sync
       - run:
-          name: apt update
-          command: apt-get update
+          name: apt update and install
+          command: apt-get update && apt-get -y install sudo
       - run:
           name: install dependencies
           command: build/depends/install
