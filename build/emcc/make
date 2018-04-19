@@ -19,6 +19,6 @@ fi
 build/premake4 gmake emcc
 
 cd build-gmake-emcc-native
-make $makeopts $2 $3 $4
+make -j4 $makeopts $2 $3 $4
 cd ..
 
