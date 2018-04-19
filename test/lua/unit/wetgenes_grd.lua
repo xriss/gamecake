@@ -155,7 +155,10 @@ end
 
 local function do_file_assert(g,name,test)
 	assert( g:save("dat/grd/"..name.."."..test..".out.png","png") )	
-	assert_true( do_file_compare("dat/grd/"..name.."."..test..".out.png","dat/grd/"..name.."."..test..".chk.png") )
+	local fnamea,fnameb="dat/grd/"..name.."."..test..".out.png","dat/grd/"..name.."."..test..".chk.png"
+	local diff=do_file_compare(fnamea,fnameb)
+	if not diff then print("\n\nFILES DIFFER : "..fnamea.."   "..fnameb.."\n") end
+	assert_true( diff )
 end
 
 function do_premult(name)
