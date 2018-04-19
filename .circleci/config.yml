@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/buildpack-deps:16.04-scm-dind
+      - image: circleci/buildpack-deps:16.04-dind
     steps:
       - checkout
       - run:
