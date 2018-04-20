@@ -120,6 +120,17 @@ newplatform {
 }
 
 newplatform {
+    name = "gcc",
+    description = "gcc",
+    gcc = {
+        cc = "gcc",
+        cxx = "g++",
+        ar= "ar",
+        cppflags = "-MMD",
+    }
+}
+
+newplatform {
     name = "clang",
     description = "clang",
     gcc = {
@@ -185,8 +196,8 @@ ANDROID=false
 WINDOWS=false
 MINGW=false
 NIX=false
-CPU="32"
-TARGET="NIX"
+CPU="NATIVE"
+TARGET="GCC"
 GCC=false
 CLANG=false
 
@@ -224,19 +235,19 @@ elseif t:sub(1,5)=="mingw" then
 	WINDOWS=true
 	MINGW=true
 	GCC=true
-elseif t:sub(1,3)=="nix" then
-	TARGET="NIX"
+elseif t:sub(1,3)=="gcc" then
+	TARGET="GCC"
 	CPU=t:sub(4)
 	NIX=true
 	GCC=true
 elseif t:sub(1,3)=="lsb" then
-	TARGET="NIX"
+	TARGET="LSB"
 	CPU=t:sub(4)
 	NIX=true
 	GCC=true
 	LSB=true
 elseif t:sub(1,5)=="clang" then
-	TARGET="NIX"
+	TARGET="CLANG"
 	CPU=t:sub(6)
 	NIX=true
 	GCC=true
@@ -255,7 +266,7 @@ else
 	NIX=true
 end
 
-if CPU=="32" then -- done
+if CPU=="native" then -- done
 else
 	if CPU=="-64" then
 		CPU="64"
@@ -465,6 +476,8 @@ elseif OSX then
 	
 elseif NIX then
 
+	platforms { "gcc" } --hax
+
 	buildoptions{
 		"-Wno-format-security",
 		"-Wno-deprecated-declarations",
@@ -531,6 +544,7 @@ if not BUILD_DIR_BASE then
 	local t=TARGET
 	if CLANG and t=="NIX" then t="clang" end
 	if LSB and t=="NIX" then t="lsb" end
+	if t=="NIX" then t="gcc" end
 
 	BUILD_DIR_BASE=("build-"..(_ACTION or "gmake").."-"..t.."-"..CPU):lower()
 	

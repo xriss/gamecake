@@ -3,5 +3,5 @@
 
 sudo apt-get update
 
-/gamecake/build/depends/install
+/gamecake/build/install
 

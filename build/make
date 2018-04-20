@@ -1,0 +1,128 @@
+#!/bin/bash
+cd `dirname $0`
+cd ..
+
+getopt --test > /dev/null
+if [[ $? -ne 4 ]]; then
+    echo "I’m sorry, `getopt --test` failed in this environment."
+    exit 1
+fi
+
+
+# default build settings
+
+
+release=1
+
+# defaults to a release build
+
+
+gcc=gcc
+
+# other options are : gcc clang emcc windows osx 
+
+
+cpu=native
+
+# other options are : native 32 64
+
+
+OPTIONS=
+LONGOPTIONS=debug,release,clean,gcc:,cpu:,win:
+
+
+
+PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
+if [[ $? -ne 0 ]]; then
+    exit 2
+fi
+eval set -- "$PARSED"
+
+while true; do
+case "$1" in
+        --debug)
+                debug=1
+                shift
+        ;;
+        --release)
+                release=1
+                shift
+        ;;
+        --clean)
+                clean=1
+                shift
+        ;;
+        --gcc)
+                gcc="$2"
+                shift 2
+        ;;
+        --cpu)
+                cpu="$2"
+                shift 2
+        ;;
+        --win)
+                win="$2"
+                shift 2
+        ;;
+        --)
+                shift
+                break
+        ;;
+        *)
+                echo "Programming error"
+                exit 3
+        ;;
+esac
+done
+
+echo "debug: $debug, release: $release, clean: $clean, gcc: $gcc, cpu: $cpu, win: $win, makeargs: $*"
+
+
+buildhere=build-gmake-$gcc-$cpu
+
+echo BUILDING INTO $buildhere
+
+
+
+
+#remove all files and perform a clean build
+
+if [ "$clean" = "1" ] ; then
+
+echo cleaning ${buildhere}
+
+rm -rf ${buildhere}
+exit 0
+
+fi
+
+
+
+
+
+
+#default to release and override with debug if selected
+
+makeopts="config=release_$gcc"
+
+if [ "$debug" = "1" ] ; then
+
+makeopts="config=debug_$gcc"
+
+fi
+
+
+
+
+
+# this will make a directory to build into
+
+premake4 gmake $gcc-$cpu
+
+# enter that directory
+cd ${buildhere}
+
+make -j$(nproc) $makeopts $*
+
+
+

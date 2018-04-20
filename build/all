@@ -1,0 +1,44 @@
+cd `dirname $0`
+
+echo "probably need sudo for the mac build so ask for password now"
+sudo echo
+
+echo prepare
+../exe/revert_exe
+
+echo build osx version 64 (dont think anything uses 32 anymore)
+
+../vbox_osx/make
+
+echo build windows
+
+./mingw/make clean
+./mingw/make release gamecake
+
+echo build emscipten
+
+./emcc/make clean
+./emcc/make release gamecake
+
+echo build 64bit ubuntu 12.04 version
+
+../vbox_1604_64/make full
+
+echo build 32bit ubuntu 12.04 version 
+
+../vbox_1604_32/make full
+
+echo build raspi
+
+echo a full build would be really darn slow, so dont bother cleaning
+../vbox_raspi/make
+
+
+echo show status, this should list new versions of everything we just built
+
+cd ../exe
+
+git status
+
+echo add and commit changed files
+./update-files
