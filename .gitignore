@@ -38,9 +38,9 @@ vbox_arm32/*.img
 vbox_arm32/kernel-qemu
 vbox_*/*.log
 
-build/depends/premake-*
-build/depends/SDL2-*
-build/depends/LuaJIT-*
+build/premake-*
+build/SDL2-*
+build/LuaJIT-*
 
 sdks/emsdk-portable
 sdks/nacl-sdk
