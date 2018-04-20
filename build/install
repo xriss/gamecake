@@ -108,7 +108,7 @@ if [ "`uname`" = "Darwin" ] ; then
 
 elif [ "`uname -m`" = "armv6l" ] ; then
 
-	./configure --enable-static --disable-pulseaudio --disable-esd --disable-video-mir --disable-video-wayland --disable-video-x11 --disable-video-opengl --enable-sdl-dlopen --disable-sndio
+	./configure --enable-static --disable-pulseaudio --disable-esd --disable-video-mir --disable-video-wayland --disable-video-x11 --disable-video-opengl --enable-sdl-dlopen --disable-sndio --disable-video-rpi
 
 else
 
