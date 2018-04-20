@@ -95,7 +95,6 @@ if [ "$clean" = "1" ] ; then
 echo cleaning ${buildhere}
 
 rm -rf ${buildhere}
-exit 0
 
 fi
 
