@@ -774,17 +774,7 @@ if GAMECAKE_WIN_TYPE=="none" then GAMECAKE_WIN_TYPE=false end
 
 
 -- many many versions of GL to suport, these make this work -> #include INCLUDE_GLES_GL
-if RASPI or GAMECAKE_WIN_TYPE=="raspi" then
-
-	defines{ "LUA_GLES_GLES2" }
-	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
-	
-elseif ANDROID then
-
-	defines{ "LUA_GLES_GLES2" }
-	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
-	
-elseif NACL or EMCC then
+if NACL or EMCC or ANDROID or RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 
 	defines{ "LUA_GLES_GLES2" }
 	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
