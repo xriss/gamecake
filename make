@@ -1,4 +1,4 @@
 cd `dirname $0`
-build/make --release $*
+build/make $*
 
 

@@ -24,18 +24,10 @@ if RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 
 -- now building in qemu vbox, so must fiddle :/
 
--- luajit and SDL2 dev must be available
--- use the qemu box if you dont want to deal with it
 	libdirs { "/opt/vc/lib" }
 	libdirs { "/usr/local/lib/" }
---	links { "luajit-5.1" }
 	links { "SDL2" }
-	
-	
---	libdirs { "../lib_sdl2/raspi/usr/local/lib/" } -- we have SDL2 binary for raspi
---	linkoptions { " -Wl,-Bstatic,-lSDL2,-Bdynamic " } -- force static SDL2 linking
-
-
+		
 	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
 	links { "crypt" }
 	links { "pthread" }
@@ -68,9 +60,6 @@ elseif NACL then
 
 	else
 
---		links { "SDL2" }	-- expected to be pre-built
-		
---		links { "stdc++" }
 		links { "ppapi"  }
 		links { "ppapi_gles2" }
 		links { "nacl_io" }
@@ -88,8 +77,6 @@ elseif ANDROID then
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	linkoptions { "-u android_main" } -- we really need an android_main as well
 
---	links { "SDL2" }	-- expected to be pre-built
-
 	links { "GLESv2" }
 	
 	links { "EGL" , "android" , "jnigraphics" , "OpenSLES" }
@@ -106,10 +93,6 @@ elseif WINDOWS then
 	libdirs { "../lua_sdl2/windows/i686-w64-mingw32/lib/" } -- we have SDL2 binary for windows, and have deleted the dll, so it has no choice but static
 	links { "SDL2" , "m" , "dinput8" , "dxguid" , "dxerr8" , "user32" , "gdi32" , "winmm" , "imm32" , "ole32" , "oleaut32" , "shell32" , "version" , "uuid" }
 
--- old hack?
---	linkoptions { " -Wl,-Bstatic,-lSDL2,-lm,-ldinput8,-ldxguid,-ldxerr8,-luser32,-lgdi32,-lwinmm,-limm32,-lole32,-loleaut32,-lshell32,-lversion,-luuid,-Bdynamic " }  -- force static SDL2 linking
-
-
 	links { "opengl32" , "glu32" }
 	links {  "ws2_32" , "gdi32"}
 	
@@ -119,13 +102,11 @@ elseif WINDOWS then
 		
 	links { "winmm" }
 
---	linkoptions{ "-mwindows" }
 	linkoptions{ "-mconsole" }
 
 	local exe=".exe"
 	if not GCC then exe="" end -- native builds add .exe automatically	
 
---	KIND{kind="WindowedApp",name="gamecake"..exe}
 	KIND{kind="ConsoleApp",name="gamecake"..exe}
 
 elseif OSX then
@@ -140,7 +121,6 @@ elseif OSX then
 	end
 	libdirs { "/usr/local/lib/" }
 
---	links { "luajit-5.1" }
 	links { "SDL2" }	
 
 	links { "ForceFeedback.framework" } -- SDL2 requires these frameworks
@@ -171,16 +151,6 @@ elseif OSX then
 	
 elseif NIX then
 
--- look around the exe for any dynamic code we might want	
---[[
-	if CPU=="64" or ( CPU~="32" and BUILD_CPU=="64" ) then
-		linkoptions { "-Wl,-R\\$$ORIGIN/x64" } -- so much escape \\$$ -> $
-	elseif CPU=="32" or BUILD_CPU=="32" then
-		linkoptions { "-Wl,-R\\$$ORIGIN/x32" } -- so much escape \\$$ -> $
-	else
-		linkoptions { "-Wl,-R\\$$ORIGIN" } -- so much escape \\$$ -> $
-	end
-]]
 	linkoptions { "-Wl,-R\\$$ORIGIN,-R\\$$ORIGIN/x32,-R\\$$ORIGIN/x64" } -- so much escape \\$$ -> $
 
 	files { "./lua.c" }
@@ -190,10 +160,7 @@ elseif NIX then
 		linkoptions { "--lsb-besteffort" }
 	end
 
--- luajit and SDL2 dev must be available
--- use the vagrant boxes if you dont want to deal with it
 	libdirs { "/usr/local/lib/" }
---	links { "luajit-5.1" }
 	links { "SDL2" }	
 
 	links { "GL" }
