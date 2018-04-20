@@ -5,16 +5,9 @@ cd `dirname $0`
 
 ./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
 
-if [ "$1" = "clean" ] ; then
-	./ssh " gamecake/build/raspi/vbox clean ; gamecake/build/raspi/vbox "
-else
-	./ssh " gamecake/build/raspi/vbox "
-fi
-
-# rename the binaries
+./ssh " gamecake/build/make $* "
 
 scp -P 5522 pi@localhost:gamecake/exe/gamecake.raspi ../exe/gamecake.raspi
-#scp -P 5522 pi@localhost:gamecake/exe/pagecake.raspi ../exe/pagecake.raspi
 
 ./box-down
 

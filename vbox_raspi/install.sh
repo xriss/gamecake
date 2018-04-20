@@ -117,7 +117,7 @@ echo " cloaning the gamecake repo so we can use scripts from inside it"
 ./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
 
 echo " building build dependencies premake, luajit and sdl2"
-./ssh " cd gamecake/build/depends ; ./install "
+./ssh " cd gamecake/build ; ./install "
 
 ./box-down
 
