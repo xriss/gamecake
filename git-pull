@@ -25,4 +25,4 @@ git branch -f --track gh-pages origin/gh-pages
 git checkout gh-pages
 cd ..
 
-./make-file-links
+./create-file-links
