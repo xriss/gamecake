@@ -757,7 +757,7 @@ end
 GAMECAKE_WIN_TYPE=os.getenv("GAMECAKE_WIN_TYPE")
 
 -- or we look at what code we are building
-if not GAMECAKE_WIN_TYPE then
+if (not GAMECAKE_WIN_TYPE) or (GAMECAKE_WIN_TYPE=="") then
 	
 	if     WINDOWS then GAMECAKE_WIN_TYPE="windows"
 	elseif NIX     then GAMECAKE_WIN_TYPE="linux"

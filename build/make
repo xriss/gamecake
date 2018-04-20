@@ -75,13 +75,16 @@ case "$1" in
 esac
 done
 
-echo "debug: $debug, release: $release, clean: $clean, gcc: $gcc, cpu: $cpu, win: $win, makeargs: $*"
+#echo "debug: $debug, release: $release, clean: $clean, gcc: $gcc, cpu: $cpu, win: $win, makeargs: $*"
 
 
 buildhere=build-gmake-$gcc-$cpu
 
 echo BUILDING INTO $buildhere
 
+
+
+export GAMECAKE_WIN_TYPE=$win
 
 
 
@@ -110,7 +113,6 @@ if [ "$debug" = "1" ] ; then
 makeopts="config=debug_$gcc"
 
 fi
-
 
 
 
