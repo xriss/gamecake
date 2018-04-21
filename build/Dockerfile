@@ -7,6 +7,8 @@ LABEL Description="A Gamecake build image" Vendor="wetgenes" Version="0.0"
 ADD install /root/install
 RUN apt-get update
 RUN apt-get install -y sudo
+RUN apt-get install -y clang
+RUN apt-get install -y mingw32
+RUN apt-get install -y mingw-w64
 RUN /root/install
 RUN /root/install-emsdk
-
