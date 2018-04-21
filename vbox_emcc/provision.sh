@@ -3,6 +3,6 @@
 
 sudo apt-get update
 
-/gamecake/build/install-emsdk
-
+#must not be root?
+sudo -u vagrant /gamecake/build/install-emsdk
 
