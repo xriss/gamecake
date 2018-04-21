@@ -139,12 +139,12 @@ elseif OSX then
 	links { "objc" }
 	links { "iconv" }
 
-	if CPU=="64" then
+	if CPU=="32" then
+		KIND{kind="WindowedApp",name="gamecake.osx32"}
+	else
 		linkoptions { "-pagezero_size 10000","-image_base 100000000" }
 	
 		KIND{kind="WindowedApp",name="gamecake.osx"}
-	else
-		KIND{kind="WindowedApp",name="gamecake.osx32"}
 	end
 	
 elseif NIX then
