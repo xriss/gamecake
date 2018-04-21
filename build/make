@@ -92,6 +92,7 @@ echo " ./make --clean      # delete objects and force a full rebuild "
 echo
 echo " ./make --gcc=gcc    # normal nix build using gcc (default) "
 echo " ./make --gcc=clang  # alternative nix build using clang "
+echo " ./make --gcc=emcc   # build using emscripten "
 echo
 echo " ./make --cpu=native # use the host cpu (default) "
 echo " ./make --cpu=32     # force a 32bit build "
@@ -150,6 +151,14 @@ premake4 gmake $gcc-$cpu
 
 # enter that directory
 cd ${buildhere}
+
+
+if [ "$gcc" = "emcc" ] ; then
+
+emcc --version >/dev/null || source build/emsdk-portable/emsdk_env.sh
+
+fi
+
 
 make -j$(nproc) $makeopts $*
 
