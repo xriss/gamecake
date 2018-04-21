@@ -16,7 +16,7 @@ jobs:
           command: build/make --clean --gcc=mingw
       - run:
           name: make gamecake.js
-          command: build/make --clean --gcc=emcc
+          command: source /root/emsdk/emsdk_env.sh && build/make --clean --gcc=emcc
       - run:
           name: test
           command: cd test ; ../exe/gamecake.x64 lua/unit.lua
