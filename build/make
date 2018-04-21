@@ -163,7 +163,7 @@ cd ${buildhere}
 
 
 
-make -j$(nproc) $makeopts $*
+make -j$(nproc||echo 1) $makeopts $*
 
 
 

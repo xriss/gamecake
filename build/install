@@ -45,7 +45,7 @@ fi
 rm -rf ${PREMAKESRC}
 unzip ${PREMAKESRC}.zip
 cd ${PREMAKESRC}/build/gmake.unix
-make -j$(nproc)
+make -j$(nproc||echo 1)
 cd ../../..
 sudo cp ${PREMAKESRC}/bin/release/premake4 /usr/local/bin/
 
@@ -66,14 +66,14 @@ cd ${LUAJITSRC}
 
 if [ "`uname`" = "Darwin" ] ; then
 
-#	make -j$(nproc) CC="gcc -m32" && sudo make install PREFIX=/usr/local
+#	make -j$(nproc||echo 1) CC="gcc -m32" && sudo make install PREFIX=/usr/local
 #	make clean
 	sudo mkdir -p /usr/local/64
-	make -j$(nproc) CC="gcc -m64" && sudo make install PREFIX=/usr/local/64
+	make -j$(nproc||echo 1) CC="gcc -m64" && sudo make install PREFIX=/usr/local/64
 
 else
 
-	make -j$(nproc) && sudo make install
+	make -j$(nproc||echo 1) && sudo make install
 
 fi
 
@@ -116,7 +116,7 @@ else
 
 fi
 
-make -j$(nproc)
+make -j$(nproc||echo 1)
 sudo make install
 cd ..
 
