@@ -8,4 +8,5 @@ ADD install /root/install
 RUN apt-get update
 RUN apt-get install -y sudo
 RUN /root/install
-RUN rm -rf /root/*
+RUN /root/install-emsdk
+
