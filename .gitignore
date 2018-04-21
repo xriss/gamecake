@@ -40,7 +40,8 @@ build/premake-*
 build/SDL2-*
 build/LuaJIT-*
 
-sdks/emsdk-portable
+build/emsdk-portable
+
 sdks/nacl-sdk
 
 test/dat/grd/*.out.*
