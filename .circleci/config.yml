@@ -9,10 +9,14 @@ jobs:
           name: sync git
           command: git submodule sync
       - run:
-          name: make
-          command: build/gcc/make
+          name: make x64
+          command: build/make --clean
+      - run:
+          name: make exe
+          command: build/make --clean --gcc=mingw
       - run:
           name: test
           command: cd test ; ../exe/gamecake.x64 lua/unit.lua
       - store_artifacts:
           path: exe/gamecake.x64
+          path: exe/gamecake.exe
