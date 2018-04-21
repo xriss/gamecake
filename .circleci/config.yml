@@ -9,9 +9,6 @@ jobs:
           name: sync git
           command: git submodule sync
       - run:
-          name: make gamecake.x32
-          command: build/make --clean --cpu=32
-      - run:
           name: make gamecake.x64
           command: build/make --clean --cpu=64
       - run:
