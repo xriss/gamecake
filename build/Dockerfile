@@ -5,7 +5,9 @@
 FROM      buildpack-deps:16.04-scm
 LABEL Description="A Gamecake build image" Vendor="wetgenes" Version="0.0"
 ADD install /root/install
+ADD install /root/install-emsdk
 RUN apt-get update
+RUN apt-get upgrade
 RUN apt-get install -y sudo
 RUN apt-get install -y clang
 RUN apt-get install -y mingw-w64
