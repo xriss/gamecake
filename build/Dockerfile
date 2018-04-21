@@ -11,5 +11,6 @@ RUN apt-get upgrade -y
 RUN apt-get install -y sudo
 RUN apt-get install -y clang
 RUN apt-get install -y mingw-w64
+RUN apt-get install -y default-jdk
 RUN /root/install
 RUN /root/install-emsdk
