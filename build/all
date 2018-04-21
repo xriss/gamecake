@@ -12,17 +12,17 @@ echo build osx version 64 (dont think anything uses 32 anymore)
 
 echo build windows
 
-#./vbox_mingw/make --clean
+../vbox_mingw/make --clean
 
 echo build emscipten
 
-#./vbox_emcc/make --clean
+../vbox_emcc/make --clean
 
-echo build 64bit ubuntu 12.04 version
+echo build 64bit ubuntu 16.04 version
 
 ../vbox_1604_64/make --clean
 
-echo build 32bit ubuntu 12.04 version 
+echo build 32bit ubuntu 16.04 version 
 
 ../vbox_1604_32/make --clean
 

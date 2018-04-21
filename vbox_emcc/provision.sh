@@ -4,5 +4,5 @@
 sudo apt-get update
 
 #must not be root?
-sudo -u vagrant /gamecake/build/install-emsdk
+su vagrant -c /gamecake/build/install-emsdk
 
