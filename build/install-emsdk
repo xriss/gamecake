@@ -1,19 +1,13 @@
 cd `dirname $0`
 
-sudo apt-get install -y cmake python premake4
+sudo apt-get install -y cmake python premake4 git
 
-rm -rf emsdk-portable
+git clone git@github.com:juj/emsdk.git
 
-wget https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz
-tar xvzf emsdk-portable.tar.gz
-rm emsdk-portable.tar.gz
-
-cd emsdk-portable
+cd emsdk
 ./emsdk update
 ./emsdk install latest
 ./emsdk activate latest
 source ./emsdk_env.sh
-
-
 
 

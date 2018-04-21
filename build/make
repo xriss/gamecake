@@ -109,7 +109,7 @@ fi
 
 if [ "$gcc" = "emcc" ] ; then
 
-emcc --version >/dev/null || source build/emsdk-portable/emsdk_env.sh
+emcc --version >/dev/null || source build/emsdk/emsdk_env.sh
 
 fi
 

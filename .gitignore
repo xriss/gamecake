@@ -40,7 +40,7 @@ build/premake-*
 build/SDL2-*
 build/LuaJIT-*
 
-build/emsdk-portable
+build/emsdk
 
 sdks/nacl-sdk
 
