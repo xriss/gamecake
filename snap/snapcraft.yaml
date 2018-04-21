@@ -18,10 +18,10 @@ parts:
     source: .
 
     prepare: |
-      ./build/depends/install
+      ./build/install
 
     build: |
-      ./make gamecake
+      ./make
 
     install: |
       cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
