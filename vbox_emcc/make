@@ -1,0 +1,8 @@
+cd `dirname $0`
+
+vagrant up
+
+vagrant ssh -c " cd /gamecake ; build/make --gcc=emcc $* "
+
+vagrant halt
+

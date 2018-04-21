@@ -1,6 +1,6 @@
 cd `dirname $0`
 
-sudo apt-get install cmake
+sudo apt-get install -y cmake python premake4
 
 rm -rf emsdk-portable
 

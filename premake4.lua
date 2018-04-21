@@ -225,12 +225,11 @@ elseif t:sub(1,7)=="android" then
 elseif t:sub(1,5)=="mingw" then
 	if t:sub(1,7)=="mingw32" then MINGW32=true end -- use old compiler
 	if t:sub(1,7)=="mingwin" then MINGWIN=true end -- use exe compiler
-	TARGET="WINDOWS"
+	TARGET="MINGW"
 	CPU=t:sub(6)
 	WINDOWS=true
 	MINGW=true
 	GCC=true
-	TARGET="WINDOWS"
 	CPU=t:sub(6)
 	WINDOWS=true
 	MINGW=true
