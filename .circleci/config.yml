@@ -9,11 +9,17 @@ jobs:
           name: sync git
           command: git submodule sync
       - run:
-          name: make x64
+          name: make gamecake.x32
+          command: build/make --clean --cpu=32
+      - run:
+          name: make gamecake.x64
           command: build/make --clean --cpu=64
       - run:
-          name: make exe
+          name: make gamecake.exe
           command: build/make --clean --gcc=mingw
+      - run:
+          name: make gamecake.js
+          command: build/make --clean --gcc=emcc
       - run:
           name: test
           command: cd test ; ../exe/gamecake.x64 lua/unit.lua
