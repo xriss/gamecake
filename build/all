@@ -3,7 +3,7 @@ cd `dirname $0`
 echo "probably need sudo for the mac build so ask for password now"
 sudo echo
 
-echo build osx version 64 (dont think anything uses 32 anymore)
+echo build osx version 64 dont think anything uses 32 anymore
 
 ../vbox_osx/make --clean
 
