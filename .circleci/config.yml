@@ -19,4 +19,5 @@ jobs:
           command: cd test ; ../exe/gamecake.x64 lua/unit.lua
       - store_artifacts:
           path: exe/gamecake.x64
+      - store_artifacts:
           path: exe/gamecake.exe
