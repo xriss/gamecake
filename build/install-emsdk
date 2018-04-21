@@ -5,10 +5,10 @@ sudo apt-get install -y cmake python premake4 git
 git clone https://github.com/juj/emsdk.git
 
 cd emsdk
+
 git pull
 ./emsdk update
 ./emsdk install latest
 ./emsdk activate latest
-source ./emsdk_env.sh
-
+. ./emsdk_env.sh
 
