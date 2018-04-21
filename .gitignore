@@ -32,10 +32,8 @@ nginx/proxy_temp/*
 nginx/logs/*
 nginx/static/*.zip
 
-vbox_raspi/*.img
-vbox_raspi/kernel-qemu
-vbox_arm32/*.img
-vbox_arm32/kernel-qemu
+vbox_arm/*.img
+vbox_arm/kernel-qemu
 vbox_*/*.log
 
 build/premake-*
