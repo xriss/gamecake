@@ -8,30 +8,28 @@ echo prepare
 
 echo build osx version 64 (dont think anything uses 32 anymore)
 
-../vbox_osx/make
+../vbox_osx/make --clean
 
 echo build windows
 
-./mingw/make clean
-./mingw/make release gamecake
+#./vbox_mingw/make --clean
 
 echo build emscipten
 
-./emcc/make clean
-./emcc/make release gamecake
+#./vbox_emcc/make --clean
 
 echo build 64bit ubuntu 12.04 version
 
-../vbox_1604_64/make full
+../vbox_1604_64/make --clean
 
 echo build 32bit ubuntu 12.04 version 
 
-../vbox_1604_32/make full
+../vbox_1604_32/make --clean
 
-echo build raspi
+echo build arm/raspi
 
 echo a full build would be really darn slow, so dont bother cleaning
-../vbox_raspi/make
+../vbox_arm/make
 
 
 echo show status, this should list new versions of everything we just built
