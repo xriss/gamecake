@@ -2,10 +2,8 @@ cd `dirname $0`
 
 vagrant up
 
-#vagrant ssh -c " cd /gamecake ; build/osx/make clean ; build/osx/make "
 
-vagrant ssh -c " cd /gamecake ; build/osx/make.x64 clean ; build/osx/make.x64 "
+vagrant ssh -c " /gamecake/make --clean --gcc=osx "
 
-#vagrant ssh -c " cd /gamecake/exe ; lipo gamecake.osx32 gamecake.osx64 -create -output gamecake.osx "
 
 vagrant halt

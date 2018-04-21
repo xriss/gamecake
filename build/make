@@ -4,7 +4,7 @@ cd ..
 
 getopt --test > /dev/null
 if [[ $? -ne 4 ]]; then
-    echo "I’m sorry, `getopt --test` failed in this environment."
+    echo " gamecake make script failed : we need a working version of getopt "
     exit 1
 fi
 

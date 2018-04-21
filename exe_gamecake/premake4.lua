@@ -116,9 +116,7 @@ elseif OSX then
 
 	files { "./lua.c" }
 
-	if CPU=="64" then
-		libdirs { "/usr/local/64/lib/" }
-	end
+	libdirs { "/usr/local/64/lib/" }
 	libdirs { "/usr/local/lib/" }
 
 	links { "SDL2" }	

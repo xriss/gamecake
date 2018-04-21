@@ -131,6 +131,17 @@ newplatform {
 }
 
 newplatform {
+    name = "osx",
+    description = "osx",
+    gcc = {
+        cc = "clang",
+        cxx = "clang++",
+        ar= "ar",
+        cppflags = "-MMD",
+    }
+}
+
+newplatform {
     name = "clang",
     description = "clang",
     gcc = {
@@ -197,7 +208,7 @@ WINDOWS=false
 MINGW=false
 NIX=false
 CPU="NATIVE"
-TARGET="GCC"
+TARGET="NIX"
 GCC=false
 CLANG=false
 
@@ -454,9 +465,7 @@ elseif OSX then
 --	defines	"LUA_USE_DLOPEN"
 --	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
 	
---	if CLANG then
-		platforms { "clang" } --hax
---	end
+	platforms { "osx" } --hax
 
 	buildoptions{"-mmacosx-version-min=10.12"}
 	linkoptions {"-mmacosx-version-min=10.12"}
@@ -541,9 +550,9 @@ end
 if not BUILD_DIR_BASE then
 
 	local t=TARGET
-	if CLANG and t=="NIX" then t="clang" end
-	if LSB and t=="NIX" then t="lsb" end
-	if t=="NIX" then t="gcc" end
+--	if CLANG and t=="NIX" then t="clang" end
+--	if LSB and t=="NIX" then t="lsb" end
+--	if t=="NIX" then t="gcc" end
 
 	BUILD_DIR_BASE=("build-"..(_ACTION or "gmake").."-"..t.."-"..CPU):lower()
 	
@@ -739,6 +748,7 @@ else -- luajit
 -- we expect luajit to be provided in the system
 
 	includedirs { "/usr/local/include/luajit-2.1" } -- assume only one of these exists
+	includedirs { "/usr/local/64/include/luajit-2.1" } -- assume only one of these exists
 	includedirs { "/usr/include/luajit-2.1" }
 	includedirs { "/usr/include/luajit-2.0" }
 	LUA_LINKS="luajit-5.1"

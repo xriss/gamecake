@@ -44,9 +44,22 @@ fi
 
 rm -rf ${PREMAKESRC}
 unzip ${PREMAKESRC}.zip
-cd ${PREMAKESRC}/build/gmake.unix
+
+
+if [ "`uname`" = "Darwin" ] ; then
+
+	cd ${PREMAKESRC}/build/gmake.macosx
+
+else
+
+	cd ${PREMAKESRC}/build/gmake.unix
+
+fi
+
+
 make -j$(nproc||echo 1)
 cd ../../..
+
 sudo cp ${PREMAKESRC}/bin/release/premake4 /usr/local/bin/
 
 
