@@ -24,3 +24,5 @@ jobs:
           path: exe/gamecake.x64
       - store_artifacts:
           path: exe/gamecake.exe
+      - store_artifacts:
+          path: exe/gamecake.js
