@@ -3,7 +3,7 @@
 
 sudo apt-get update
 
-/gamecake/sdks/wget-emscipten
+/gamecake/build/install-emsdk
 
 #/gamecake/build/install
 
