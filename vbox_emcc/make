@@ -2,7 +2,7 @@ cd `dirname $0`
 
 vagrant up
 
-vagrant ssh -c " cd /gamecake ; build/emsdk-portable/ ; build/make --gcc=emcc $* "
+vagrant ssh -c " cd /gamecake ; build/make --gcc=emcc $* "
 
 vagrant halt
 

@@ -107,6 +107,15 @@ fi
 
 
 
+if [ "$gcc" = "emcc" ] ; then
+
+emcc --version >/dev/null || source build/emsdk-portable/emsdk_env.sh
+
+fi
+
+
+
+
 buildhere=build-gmake-$gcc-$cpu
 
 echo BUILDING INTO $buildhere
@@ -152,12 +161,6 @@ premake4 gmake $gcc-$cpu
 # enter that directory
 cd ${buildhere}
 
-
-if [ "$gcc" = "emcc" ] ; then
-
-emcc --version >/dev/null || source build/emsdk-portable/emsdk_env.sh
-
-fi
 
 
 make -j$(nproc) $makeopts $*
