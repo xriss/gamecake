@@ -307,6 +307,8 @@ if EMCC then
 		"-Wno-almost-asm",
 --		"-s ASSERTIONS=1",
 		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
+		"-s \"BINARYEN_METHOD='native-wasm'\"",
+		"-s EXTRA_EXPORTED_RUNTIME_METHODS='[\"cwrap\"]'",
 		"-s WASM=1",
 	}
 

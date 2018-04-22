@@ -48,7 +48,7 @@ elseif EMCC then
 	
 	links { "m" }
 	
-	KIND{kind="WindowedApp",name="gamecake.js"}
+	KIND{kind="WindowedApp",name="gamecake.html"}
 
 elseif NACL then
 
