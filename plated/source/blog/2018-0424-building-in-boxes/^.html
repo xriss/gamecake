@@ -1,0 +1,84 @@
+#^title trim=ends
+{_blog_post_json.title}
+
+#^_blog_post_json
+{
+	"title":"Building in boxes.",
+	"author":"xix",
+}
+
+#^_blog_post_body form=markdown
+
+{_blog_post_json.title}
+-------
+
+I have just spent a few days cleaning up the gamecake build process 
+which has been suffering from bitrot.
+
+Originally, many years ago, I was trying to use cross builds were 
+possible and chroots where that wasn't. This ended up being 
+problematic, it is much easier to set everything up inside virtual 
+machines even if this is slower and more of a resource hog, especially 
+if using qemu for the arm builds.
+
+So this has been a cleanup that hopefully simplifies the builds, 
+removes some complexity left over from old cross compiling attempts and 
+also has made using circleci for automatically build/testing a little bit 
+faster.
+
+Take a look in each vbox_* directory for how this is all working, some 
+of them are still experimental eg getting windows working well under 
+linux so I can try and step out of win32. Apart from these boxes which 
+I use for building releases there has been some major cleanup in the 
+following public builds.
+
+First off we have a docker *build* box, this is ubuntu 16.04 with 
+premake4, SDL2 and LuaJIT built from source, we need to build them from 
+source as the version you will find in apt is often out of date 
+especially when using an older version of Ubuntu. We really do want the 
+older version of Ubuntu as we want to work on older machines with older 
+libraries available and we really do need the newer versions of SDL2 
+and LuaJIT for added features and bug fixes.
+
+16.04 is a compromise here as 12.04 and 14.04 just caused too many 
+build problems and it was easier to bump to 16.04 than keep fighting 
+them, this is still a few years back in time which seems reasonable.
+
+So https://hub.docker.com/r/xriss/gamecake/ is now used as the base box 
+for https://circleci.com/gh/xriss/gamecake builds. Due to the speed 
+increases of not having to build SDL2 and LuaJIT from source every 
+single time we now also build for Windows and Emscripten with every 
+push.
+
+One of the bitrot problems here is that circleci has switched to a new 
+configuration system and we needed to update our config files before 
+they stopped working later this year. It looks like the build artifacts 
+are no longer available to the public so you can not see them but we do 
+save the actual build outputs with every build.
+
+We have dumnped the pagecake build, this was an openresty nginx with 
+extra libs but I did not keep nginx very well uptodated. So instead we 
+now just use a standard openresty. Extra libraries are made available 
+to the nginx lua host as rocks. This keeps us nicely uptodate and gives 
+us a reason to start publishing rocks.
+
+See https://luarocks.org/modules/xriss/gamecake for the rocks, I've 
+decided to keep all of the libraries together in one rock, at the 
+moment. Right now it is just the most essential ones to keep all our 
+websites running but eventually a luarocks install of gamecake will be 
+the same as downloading one of our prebuilt executables.
+
+Finally we even have snap builds which can be found at 
+https://dashboard.snapcraft.io/snaps/gamecake/ this is probably one of 
+the easiest ways of getting a Linux version and even supports arm 
+machines.
+
+Keeping all of this running is an awful amount of annoying work as no 
+matter what I do sooner or later one of the platforms will break 
+something we rely on. Hopefully this update will give us another few 
+years before it all begins to rot again,
+
+
+
+
+
