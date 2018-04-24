@@ -1,16 +1,41 @@
-
 #^html trim=ends
-
 <html>
 <head>{head}</head>
-<body>{body}</body>
+<body>{content}{foot}</body>
 </html>
 
 #^head trim=ends
 <title>{title}</title>
+<meta name="theme-color" content="#2a3133">
+<link href="https://fonts.googleapis.com/css?family=Patua+One" rel="stylesheet">
 <style>
 {css}
 </style>
+
+
+#^content
+<div class="content">{nav}{body}</div>
+
+#^nav
+<div class="nav_wrap">
+	<div class="nav">
+		<a href="{_root}" class="logo">Gamecake</a>
+		<ul>
+			<li><a href="https://github.com/xriss/gamecake">Github</a></li>
+			<li><a href="{_root}blog">Blog</a></li>
+			<li><a href="{_root}docs">Documentation</a></li>
+		</ul>
+	</div>
+</div>
+
+#^foot
+<div class="footer">
+	<ul>
+		<li>Created with <a href="https://xriss.github.io/plated/" class="logo">plated^</a></li>
+		<li><a href="#">^.^</a></li>
+		<li><a href="https://github.com/xriss/gamecake/blob/master/LICENSE">2018 MIT License</a></li>
+	</ul>
+</div>
 
 #^body trim=ends
 

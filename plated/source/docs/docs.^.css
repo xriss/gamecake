@@ -1,0 +1,74 @@
+#^css same=append
+
+/*
+
+	Original theme for Docs!
+	
+*/
+
+
+/*
+
+	Link to source in Github under title
+
+*/
+
+.source a:before	{background-color:var(--base_src); border-radius:6px; color:var(--base_font); content:'source'; display:inline; font-style:italic; margin-right:5px; padding:2px 4px 3px 5px;}
+.source a			{display:block; font-size:14px; margin-bottom:32px; word-wrap:break-word;}
+
+
+/*
+
+	Wrappers:
+	
+	wrap	 		|	Wrapper for each definition
+	contents 		|	Wrapper for table of contents
+	main 			|	Wrapper for main body
+
+*/
+
+.wrap				{margin:0 auto; padding:0 0 4em 0;}
+.wrap:nth-of-type(1){padding-top:4em;}
+.contents			{background-color:var(--base_back_alt); font-size:16px; height:100%; left:0; line-height:24px; overflow-y:auto; position:fixed; padding:0 2em; top:3.5em; width:26.5em;}
+.main				{padding-left:33em; margin-left:3em; margin-right:3em; width:calc(960px + 20em); max-width:calc(960px + 20em);}
+
+
+/*
+
+	Table of contents
+	
+	par		 		|	Parent topic
+	sub	 			|	Subtopic sits under a parent topic
+
+*/
+
+.topics					{counter-reset:parent; padding:2em 0 6em 0; position:relative;}
+.topics:before			{color:var(--base_font); content:"Table Of Contents"; display:block; margin-bottom:15px;}
+.topics a				{display:block; margin-left:1.5em; white-space:nowrap;}
+.topics a.par:before	{content:counter(parent)". "; counter-increment:parent; display:inline-block; margin-left:-1.5em; min-width:30px;}
+.topics a span			{display:inline-block; line-height:1.5em; margin-left:1em;}
+.topics a.par			{counter-reset:sub; font-weight:bold;}
+.topics a.sub			{font-size:93%;}
+.topics a.sub span		{margin-left:2em;}
+.topics a.sub:before	{content:counter(parent)"."counter(sub)" "; counter-increment:sub; display:inline-block; line-height:1.5em; margin-left:-1.5em; min-width:30px;}
+.topics a.par:nth-of-type(n+5){margin-top:0.8em;}
+
+
+/*
+
+	Media queries
+	
+	main			|	Wrapper for documentation page
+	contents		|	Wrapper for documentation table of contents
+	
+*/
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (-o-min-device-pixel-ratio: 3/2),
+only screen and (min--moz-device-pixel-ratio: 1.5),
+only screen and (min-device-pixel-ratio: 1.5) {
+
+	body			{display:block;}
+	.contents		{top:5.5em;}
+
+}
