@@ -499,6 +499,7 @@ chatdown.chat.set_topic=function(chat,name)
 
 	chat:set_tags(merged_tags)
 
+	return chat
 end
 
 -----------------------------------------------------------------------------
