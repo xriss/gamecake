@@ -7,9 +7,10 @@ Gamecake docs!
 <html>
 	<head>
 		<title>{title}</title>
+		<link href="https://fonts.googleapis.com/css?family=Patua+One" rel="stylesheet">
 		<link rel='stylesheet' href='{_docs_json.dirname}/docs.css' />
 	</head>
-	<body>{body}</body>
+	<body>{nav}{body}</body>
 </html>
 
 #^_docs_json
@@ -64,9 +65,8 @@ Gamecake docs!
 
 #^body
 <div class="default">
-	<div class="nav">
+	<div class="contents">
 		<div class="topics">
-			<a class="home" href="/">gamecake^</a>
 			<a class="par" href="{_docs_json.dirname}"><span>/</span></a>
 			{_docs:menuwrap}
 		</div>

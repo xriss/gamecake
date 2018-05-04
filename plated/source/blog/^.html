@@ -1,5 +1,5 @@
 #^title trim=ends
-gamecake updates
+Gamecake updates
 
 
 #^_blog_json
@@ -8,7 +8,6 @@ gamecake updates
 }
 
 #^_blog_page_body
-<div class="nav">You are reading: <span>gamecake dev blog</span></div><div class="nav"><a href="{_root}" class="bar">Home</a></div>
 
 {_list:blog_list}
 
@@ -29,12 +28,11 @@ gamecake updates
 
 #^-This is a single blog post viewed on its own page
 #^_blog_post_body_one
-<div class="nav">You are reading: <a href="{_root}blog">gamecake dev blog</a></div><div class="nav"><a href="{_root}" class="bar">Home</a></div>
-<div class="blog_wrap">{_blog_post_body}</div>
+<div class="blog_wrap">
+	{_blog_post_body}
+	<div class="paging_wrap">{_blog_post_older:link_older_post} {_blog_post_newer:link_newer_post}</div>
+</div>
 
-<div>{_blog_post_older:link_older_post} {_blog_post_newer:link_newer_post}</div>
-
-Some comments belong here
 
 #^-This is for the blog list
 #^_blog_post_body_many
@@ -48,8 +46,3 @@ Some comments belong here
 
 #^link_newer_post
 <a href="{_it}">Newer post</a>
-
-
-#^css same=append
-
-body {max-width: 960px; margin: auto;}
