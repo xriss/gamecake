@@ -1,0 +1,22 @@
+cd `dirname $0`
+
+cd vbox_osx
+vagrant up
+vagrant halt
+cd ..
+
+cd vbox_1604_32
+vagrant up
+vagrant halt
+cd ..
+
+cd vbox_1604_64
+vagrant up
+vagrant halt
+cd ..
+
+cd vbox_emcc
+vagrant up
+vagrant halt
+cd ..
+
