@@ -1,5 +1,7 @@
 cd `dirname $0`
 
+# these will all do very little if vagrant has already provisioned the machines
+
 cd vbox_osx
 vagrant up
 vagrant halt
@@ -19,4 +21,14 @@ cd vbox_emcc
 vagrant up
 vagrant halt
 cd ..
+
+cd vbox_mingw
+vagrant up
+vagrant halt
+cd ..
+
+
+# the arm however is rather slow and this forces a full rebuild so lets not do it in this script
+
+#vbox_arm/install.sh
 
