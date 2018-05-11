@@ -35,6 +35,7 @@ wmeta.classes={
 	["button"]=oven.rebake("wetgenes.gamecake.widgets.button"),
 	["drag"]=oven.rebake("wetgenes.gamecake.widgets.drag"),
 	["text"]=oven.rebake("wetgenes.gamecake.widgets.text"),
+	["text_tiles"]=oven.rebake("wetgenes.gamecake.widgets.text_tiles"),
 	["textedit"]=oven.rebake("wetgenes.gamecake.widgets.textedit"),
 	["menu"]=oven.rebake("wetgenes.gamecake.widgets.menu"),
 	["menubar"]=oven.rebake("wetgenes.gamecake.widgets.menubar"),

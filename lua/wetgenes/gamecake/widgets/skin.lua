@@ -643,13 +643,13 @@ end
 	
 			local skin=widget:bubble("skin") or 0 -- default skin
 
-			
 			if widget.sheet then -- custom graphics
 
 				sheets.get(widget.sheet):draw(widget.sheet_id or 1,widget.sheet_px or 0,widget.sheet_py or 0,0,widget.sheet_hx or hx,widget.sheet_hy or hy)
 			
 			elseif type(skin)=="function" then -- we have a skin drawing function, just call it to draw
-			
+
+print"SK"			
 				wskin.cache_draw_custom[#wskin.cache_draw_custom+1]=skin(widget) -- return draw function for cache draw
 			
 			elseif type(skin)=="string" then -- got some images to play with

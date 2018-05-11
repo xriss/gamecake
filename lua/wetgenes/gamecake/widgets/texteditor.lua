@@ -50,9 +50,9 @@ wtexteditor.texteditor_refresh=function(widget)
 	local pan=widget.scroll_widget.pan
 	pan:remove_all()
 
-	for i,v in ipairs(widget.lines or {}) do
-		pan:add({hx=pan.hx,hy=20,text=v,text_align="left",color=0,})
-	end
+--	for i,v in ipairs(widget.lines or {}) do
+--		pan:add({hx=pan.hx,hy=20,text=v,text_align="left",color=0,})
+--	end
 --[[
 	for i,t in ipairs(widget.texteditors) do
 		if t.mode=="texteditor" then
@@ -96,7 +96,7 @@ function wtexteditor.setup(widget,def)
 	widget.texteditor_refresh	=	wtexteditor.texteditor_refresh
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
 
-	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full"})
+	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="text_tiles"})
 
 
 --	wtexteditor:redo_text(def.text or "") -- set starting text
