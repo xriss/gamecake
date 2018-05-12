@@ -1292,21 +1292,21 @@ int read_tab;
 					{
 					float t;
 
-						lua_pushnumber(l,idx+1);
+						lua_pushnumber(l,idx+0);
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
 						datu8[0]=(u8)t;
 						lua_pop(l,1);
 
-						lua_pushnumber(l,idx+2);
+						lua_pushnumber(l,idx+1);
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
 						datu8[1]=(u8)t;
 						lua_pop(l,1);
 
-						lua_pushnumber(l,idx+3);
+						lua_pushnumber(l,idx+2);
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
@@ -1316,24 +1316,20 @@ int read_tab;
 					else
 					{
 						lua_pushnumber(l,idx+0);
-						lua_pushnumber(l,255);
-						lua_rawset(l,tab_idx);
-
-						lua_pushnumber(l,idx+1);
 						lua_pushnumber(l,datu8[0]);
 						lua_rawset(l,tab_idx);
 
-						lua_pushnumber(l,idx+2);
+						lua_pushnumber(l,idx+1);
 						lua_pushnumber(l,datu8[1]);
 						lua_rawset(l,tab_idx);
 
-						lua_pushnumber(l,idx+3);
+						lua_pushnumber(l,idx+2);
 						lua_pushnumber(l,datu8[2]);
 						lua_rawset(l,tab_idx);
 					}
 
 					datu8+=3;
-					idx+=4;
+					idx+=3;
 				}
 			}
 		}
