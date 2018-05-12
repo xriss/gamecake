@@ -35,7 +35,6 @@ local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
 local wdatas=oven.rebake("wetgenes.gamecake.widgets.datas")
 
 
-
 --
 -- add meta functions
 --
@@ -79,6 +78,8 @@ function wmaster.setup(widget,def)
 
 	master.color_theme=master.color_theme_bright
 	master.color_theme=master.color_theme_dark
+
+
 
 -- get a color from a theme and optionally apply a tint
 	function master.get_color(val,tint)

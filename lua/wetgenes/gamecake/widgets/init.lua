@@ -60,6 +60,22 @@ widgets=widgets or {}
 local wmeta=oven.rebake("wetgenes.gamecake.widgets.meta")
 local wskin=oven.rebake("wetgenes.gamecake.widgets.skin")
 
+	widgets.loaded=false
+	function widgets.loads()
+		if not 	widgets.loaded then
+			widgets.loaded=true
+			
+			for n,v in pairs(wmeta.classes) do
+				if v.loads then
+					v.loads()
+				end
+			end
+
+		end
+	end
+
+
+
 --[[#lua.wetgenes.gamecake.widgets.setup
 
 	master=oven.rebake("wetgenes.gamecake.widgets").setup()

@@ -649,7 +649,6 @@ end
 			
 			elseif type(skin)=="function" then -- we have a skin drawing function, just call it to draw
 
-print"SK"			
 				wskin.cache_draw_custom[#wskin.cache_draw_custom+1]=skin(widget) -- return draw function for cache draw
 			
 			elseif type(skin)=="string" then -- got some images to play with
