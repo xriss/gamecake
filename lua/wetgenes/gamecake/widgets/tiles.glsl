@@ -46,23 +46,21 @@ precision highp float; /* really need better numbers if possible */
 
 varying vec2  v_texcoord;
 
+// we can not use variable array indexs and uniform arrays seem to trigger GLES2 driver bugs
+// so best to work around the limitations and do it like this.
 vec4 get_color(float f)
 {
-	if(f< 1.0) { return colors_0; } else
-	if(f< 2.0) { return colors_1; } else
-	if(f< 3.0) { return colors_2; } else
-	if(f< 4.0) { return colors_3; } else
-	if(f< 5.0) { return colors_4; } else
-	if(f< 6.0) { return colors_5; } else
-	if(f< 7.0) { return colors_6; } else
-	if(f< 8.0) { return colors_7; } else
-//	if(f< 8.0) { return colors[ 8]; } else
-//	if(f<10.0) { return colors[ 9]; } else
-//	if(f<10.0) { return colors[10]; } else
-//	if(f<12.0) { return colors[11]; } else
-//	if(f<12.0) { return colors[12]; } else
-//	if(f<14.0) { return colors[13]; } else
-//	if(f<14.0) { return colors[14]; }
+	switch( int(f) )
+	{
+		case 0: return colors_0;
+		case 1: return colors_1;
+		case 2: return colors_2;
+		case 3: return colors_3;
+		case 4: return colors_4;
+		case 5: return colors_5;
+		case 6: return colors_6;
+		case 7: return colors_7;
+	}
 	return colors_0;
 }
 
@@ -78,7 +76,7 @@ void main(void)
 	d=texture2D(tex_map, tm).rgb;	
 	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba;
 	
-	bg=get_color(       d.b*255.0  / 16.0   ); // high 4 bits are background color
+	bg=get_color(       d.b*255.0  / 16.0   ); // high 4 bits are background color (usually 0)
 	fg=get_color( mod( (d.b*255.0) , 16.0 ) ); //  low 4 bits are foreground color
 
 	c*=fg; // forground tint, can adjust its alpha	

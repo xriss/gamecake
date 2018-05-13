@@ -48,7 +48,23 @@ end
 wtexteditor.texteditor_refresh=function(widget)
 
 	local pan=widget.scroll_widget.pan
-	pan:remove_all()
+	pan.lines={}
+
+	for i,v in ipairs(widget.lines or {}) do
+print(v)
+		local ps={}
+		for i=1,#v do
+			local pl=#ps
+			ps[pl+1]=string.byte(v,i,i)
+			ps[pl+2]=0
+			ps[pl+3]=1
+		end
+		local s=string.char(unpack(ps))
+print(s)
+		pan.lines[i]={text=v,s=s}
+	end
+
+
 
 --	for i,v in ipairs(widget.lines or {}) do
 --		pan:add({hx=pan.hx,hy=20,text=v,text_align="left",color=0,})

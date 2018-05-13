@@ -55,8 +55,24 @@ end
 --	return widget.meta.draw(widget)
 --end
 
+function wtiles.render_lines(widget,lines)
+
+	local g=widget.tilemap_grd
+
+	for i,v in ipairs(lines) do
+		local s=v.s
+		if s then
+			g:pixels(0,i-1,#s/3,1,s)
+		end
+	end
+
+end
+
+
 function wtiles.skin(widget)
 		print("skin1111")
+		
+		wtiles.render_lines(widget,widget.lines or {} )
 				
 		local x,y,hx,hy=widget.px,widget.py,widget.hx,widget.hy -- it.window_px+dl.dx , it.window_py+dl.dy , it.window_hx , it.window_hy
 		local u,v,hu,hv=0,0,hx/8,hy/16 -- it.px/it.tile_hx , it.py/it.tile_hy , hx/it.tile_hx , hy/it.tile_hy
@@ -125,8 +141,8 @@ function wtiles.skin(widget)
 													1*16 )
 			gl.Uniform4f( p:uniform("map_info"), 	0,0,256,256 )
 
-			gl.Uniform4f( p:uniform("colors_0"), 	0,0,0,1 )
-			gl.Uniform4f( p:uniform("colors_1"), 	1,1,1,1 )
+			gl.Uniform4f( p:uniform("colors_0"), 	0.4,0.4,0.4,1 )
+			gl.Uniform4f( p:uniform("colors_1"), 	0.8,0.8,0.8,1 )
 			gl.Uniform4f( p:uniform("colors_2"), 	1,1,1,1 )
 			gl.Uniform4f( p:uniform("colors_3"), 	1,1,1,1 )
 
@@ -171,17 +187,18 @@ function wtiles.setup(widget,def)
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
 
+	widget.lines={}
 
 	widget.tilemap_grd=wgrd.create(wgrd.FMT_U8_RGB,256,256,1)
 
+--[[
 	local g=widget.tilemap_grd
-
 	for y=0,0 do
 		for i=0,255 do
 			g:pixels(i,y,1,1,{(i%96)+32,0,1}) -- splat test chars into grid
 		end
 	end
-
+]]
 	return widget
 end
 
