@@ -51,7 +51,6 @@ wtexteditor.texteditor_refresh=function(widget)
 	pan.lines={}
 
 	for i,v in ipairs(widget.lines or {}) do
-print(v)
 		local ps={}
 		for i=1,#v do
 			local pl=#ps
@@ -60,7 +59,6 @@ print(v)
 			ps[pl+3]=1
 		end
 		local s=string.char(unpack(ps))
-print(s)
 		pan.lines[i]={text=v,s=s}
 	end
 
