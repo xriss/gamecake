@@ -23,6 +23,22 @@ wtiles.loads=function()
 	local filename="lua/"..(M.modname):gsub("%.","/")..".glsl"
 	gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
 
+
+
+	local bfontgrd=require("wetgenes.gamecake.fun.bitdown_font").build_grd(8,16)
+		
+	local g=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,8*256,16*1,1)
+
+	for i=0,127 do -- setup base textures for 7bit ascii
+		
+		local dx=math.floor((i)%256)*8
+		local dy=math.floor((i)/256)*16
+		g:pixels(dx,dy,8,16,bfontgrd:pixels(i*8,0,8,16,"")) -- splat into grid
+
+	end
+	
+	wtiles.grdfont8x16=g
+
 	return wtiles
 end
 
@@ -41,33 +57,56 @@ end
 
 function wtiles.skin(widget)
 		print("skin1111")
+				
+		local x,y,hx,hy=widget.px,widget.py,widget.hx,widget.hy -- it.window_px+dl.dx , it.window_py+dl.dy , it.window_hx , it.window_hy
+		local u,v,hu,hv=0,0,hx/8,hy/16 -- it.px/it.tile_hx , it.py/it.tile_hy , hx/it.tile_hx , hy/it.tile_hy
+
+		local ta=gl.apply_modelview( {x    ,y+hy  ,0,1} )
+		local tb=gl.apply_modelview( {x    ,y     ,0,1} )
+		local tc=gl.apply_modelview( {x+hx ,y+hy  ,0,1} )
+		local td=gl.apply_modelview( {x+hx ,y     ,0,1} )
+
+		local t={
+			ta[1],	ta[2],	ta[3],	u,		v+hv, 			
+			tb[1],	tb[2],	tb[3],	u,		v,
+			tc[1],	tc[2],	tc[3],	u+hu,	v+hv, 			
+			td[1],	td[2],	td[3],	u+hu,	v,
+		}
+
+		
 	return function()
 
-		gl.BindTexture( gl.TEXTURE_2D , widget.tilemap_tex )
+--print("FONt DRAW")
+
+--font
+		gl.BindTexture( gl.TEXTURE_2D , widget.bitmap_tex )
 		gl.TexImage2D(
 			gl.TEXTURE_2D,
 			0,
 			gl.RGBA,
+			wtiles.grdfont8x16.width,
+			wtiles.grdfont8x16.height,
+			0,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			wtiles.grdfont8x16.data )
+
+--display
+		gl.BindTexture( gl.TEXTURE_2D , widget.tilemap_tex )
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			0,
+			gl.RGB,
 			widget.tilemap_grd.width,
 			widget.tilemap_grd.height,
 			0,
-			gl.RGBA,
+			gl.RGB,
 			gl.UNSIGNED_BYTE,
 			widget.tilemap_grd.data )
 
 		gl.Color(1,1,1,1)
 
 --		local dl={ color={1,1,1,1} , dx=0 , dy=0 }
-
-		local x,y,hx,hy=0,0,256,256 -- it.window_px+dl.dx , it.window_py+dl.dy , it.window_hx , it.window_hy
-		local u,v,hu,hv=0,0,256,256 -- it.px/it.tile_hx , it.py/it.tile_hy , hx/it.tile_hx , hy/it.tile_hy
-		local t={
-			x,		y+hy,	0,	u,		v+hv, 			
-			x,		y,		0,	u,		v,
-			x+hx,	y+hy,	0,	u+hu,	v+hv, 			
-			x+hx,	y,		0,	u+hu,	v,
-		}
-
 
 		flat.tristrip("rawuv",t,"widget_draw_texteditor_tilemap",function(p)
 
@@ -82,11 +121,14 @@ function wtiles.skin(widget)
 
 			gl.Uniform4f( p:uniform("tile_info"),	8,
 													16,
-													256,
-													256 )
+													256*8,
+													1*16 )
 			gl.Uniform4f( p:uniform("map_info"), 	0,0,256,256 )
 
---			gl.Uniform4f( p:uniform("color"), 	dl.color[1],dl.color[2],dl.color[3],dl.color[4] )
+			gl.Uniform4f( p:uniform("colors_0"), 	0,0,0,1 )
+			gl.Uniform4f( p:uniform("colors_1"), 	1,1,1,1 )
+			gl.Uniform4f( p:uniform("colors_2"), 	1,1,1,1 )
+			gl.Uniform4f( p:uniform("colors_3"), 	1,1,1,1 )
 
 		end)
 
@@ -117,9 +159,28 @@ function wtiles.setup(widget,def)
 	widget.bitmap_tex=gl.GenTexture()
 	widget.tilemap_tex=gl.GenTexture()
 
-	widget.bitmap_grd=wgrd.create(wgrd.U8_RGBA,256,256,1)
-	widget.tilemap_grd=wgrd.create(wgrd.U8_RGBA,256,256,1)
+	gl.BindTexture( gl.TEXTURE_2D , widget.bitmap_tex )
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
 
+	gl.BindTexture( gl.TEXTURE_2D , widget.tilemap_tex )
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
+
+
+	widget.tilemap_grd=wgrd.create(wgrd.FMT_U8_RGB,256,256,1)
+
+	local g=widget.tilemap_grd
+
+	for y=0,0 do
+		for i=0,255 do
+			g:pixels(i,y,1,1,{(i%96)+32,0,1}) -- splat test chars into grid
+		end
+	end
 
 	return widget
 end
