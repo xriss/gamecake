@@ -164,17 +164,6 @@ newplatform {
 }
 
 newplatform {
-    name = "lsb",
-    description = "lsb",
-    gcc = {
-        cc = "lsbcc",
-        cxx = "lsbc++",
-        ar= "ar",
-        cppflags = "-MMD -D_FORTIFY_SOURCE=0",
-    }
-}
-
-newplatform {
     name = "emcc",
     description = "emcc",
     gcc = {
@@ -250,12 +239,6 @@ elseif t:sub(1,3)=="gcc" then
 	CPU=t:sub(4)
 	NIX=true
 	GCC=true
-elseif t:sub(1,3)=="lsb" then
-	TARGET="LSB"
-	CPU=t:sub(4)
-	NIX=true
-	GCC=true
-	LSB=true
 elseif t:sub(1,5)=="clang" then
 	TARGET="CLANG"
 	CPU=t:sub(6)
@@ -517,9 +500,7 @@ elseif NIX then
 --	defines	"LUA_USE_DLOPEN"
 	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
 
-	if LSB then
-		platforms { "lsb" } --hax
-	elseif CLANG then
+	if CLANG then
 		platforms { "clang" } --hax
 	end
 
@@ -551,12 +532,7 @@ end
 
 if not BUILD_DIR_BASE then
 
-	local t=TARGET
---	if CLANG and t=="NIX" then t="clang" end
---	if LSB and t=="NIX" then t="lsb" end
---	if t=="NIX" then t="gcc" end
-
-	BUILD_DIR_BASE=("build-"..(_ACTION or "gmake").."-"..t.."-"..CPU):lower()
+	BUILD_DIR_BASE=("build-"..(_ACTION or "gmake").."-"..TARGET.."-"..CPU):lower()
 	
 end
 
@@ -703,20 +679,6 @@ end
 -- which lua version should we use
 ------------------------------------------------------------------------
 
-	
---
--- assume we have a prebuilt luajit.so for the target platform
---
--- use asm.sh in lib_luajit to build them all
---
--- this only needs to be done if you change buildflags or luajit code
--- so it should be a very rare action 
--- it seems to be OK to link the x32/x64 linux libs on LSB builds
--- these built binary files are added into the repository.
---
--- This is currently only still used for MINGW ...
---
-
 if EMCC then -- need to build and use our lua
 
 	LUA_BIT="lua_bit"
@@ -755,7 +717,7 @@ else -- luajit
 	includedirs { "/usr/include/luajit-2.0" }
 	LUA_LINKS="luajit-5.1"
 
--- or expect lua to be provided in the system by swapping with above
+-- or expect lua to be provided in the system by swapping this with above
 
 --	LUA_BIT="lua_bit"
 --	includedirs { "/usr/include/lua5.2" }
@@ -866,10 +828,10 @@ all_includes=all_includes or {
 	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
 	{"lua_lash",		WINDOWS		or		NIX		or		EMCC	or		nil			or		nil			or	OSX		},
 	
-	{"lua_win_"..GAMECAKE_WIN_TYPE, GAMECAKE_WIN_TYPE }, -- pick the os interface, see above
+-- we just use SDL2 now
+--	{"lua_win_"..GAMECAKE_WIN_TYPE, GAMECAKE_WIN_TYPE }, -- pick the os interface, see above
 
-	{"lua_sdl2",	   (WINDOWS		or		NIX		or		EMCC	or		nil			or		RASPI		or	OSX		)
-																						and		(not LSB) 				},
+	{"lua_sdl2",	   WINDOWS		or		NIX		or		EMCC	or		nil			or		RASPI		or	OSX		},
 
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
 	{"lua_chipmunk",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},

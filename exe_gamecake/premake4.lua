@@ -153,11 +153,6 @@ elseif NIX then
 
 	files { "./lua.c" }
 
-	if LSB then
-		linkoptions { "--lsb-use-default-linker" }
-		linkoptions { "--lsb-besteffort" }
-	end
-
 	libdirs { "/usr/local/lib/" }
 	links { "SDL2" }	
 

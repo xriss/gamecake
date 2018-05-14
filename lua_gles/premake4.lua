@@ -24,13 +24,6 @@ elseif OSX then
 	links { "GL" }--, "GLU" }
 	defines "HAVE_FCNTL_H=1"
 
-elseif LSB then
-
-	files { "code/gl3w.c" }
-
-	links { "GL" }--, "GLU" }
-	defines "HAVE_FCNTL_H=1"
-
 elseif RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 
 	includedirs { "/opt/vc/include" }
