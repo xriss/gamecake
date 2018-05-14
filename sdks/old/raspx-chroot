@@ -1,9 +1,0 @@
-cd raspi
-sudo mount -t proc proc raspx/proc
-sudo mount -t sysfs sysfs raspx/sys
-sudo mount -o bind /dev raspx/dev
-sudo cp ../raspx-script raspx/
-sudo LC_ALL=C chroot raspx
-
-
-

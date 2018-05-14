@@ -1,4 +1,0 @@
-cd tmp
-
-cd bin
-make CFLAGS="-Os -w" && make install

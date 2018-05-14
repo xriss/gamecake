@@ -1,0 +1,10 @@
+cd `dirname $0`
+
+rm nacl_sdk -Rf
+wget http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/nacl_sdk/nacl_sdk.zip
+unzip nacl_sdk.zip
+rm nacl_sdk.zip
+mv nacl_sdk nacl-sdk
+cd nacl-sdk
+./naclsdk update
+./naclsdk install pepper_41

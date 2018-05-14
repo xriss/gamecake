@@ -1,3 +1,0 @@
-cd tmp
-tar xjf binutils-2.22.tar.bz2
-tar xjf gcc-4.5.1.tar.bz2

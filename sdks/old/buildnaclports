@@ -1,8 +1,0 @@
-
-export PATH=”$PATH”:/home/kriss/hg/sdks/depot_tools
-export NACL_SDK_ROOT=/home/kriss/hg/sdks/nacl-sdk/pepper_41
-
-cd naclports/src
-
-NACL_ARCH=pnacl make openal-soft
-

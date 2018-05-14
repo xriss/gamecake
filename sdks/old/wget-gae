@@ -1,7 +1,0 @@
-rm nacl_sdk -Rf
-wget https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.18.zip
-unzip appengine-java-sdk-1.9.18.zip
-rm appengine-java-sdk-1.9.18.zip
-mv appengine-java-sdk-1.9.18 appengine-java-sdk
-rm appengine-java-sdk/lib/opt/tools/datanucleus -rf
-

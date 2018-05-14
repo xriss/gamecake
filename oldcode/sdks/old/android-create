@@ -1,0 +1,21 @@
+
+rm -Rf android-3-arm
+rm -Rf android-4-arm
+rm -Rf android-5-arm
+rm -Rf android-8-arm
+rm -Rf android-9-arm
+rm -Rf android-9-x86
+rm -Rf android-14-arm
+rm -Rf android-14-x86
+
+
+
+android-ndk/build/tools/make-standalone-toolchain.sh --platform=android-3 --install-dir=android-3-arm --arch=arm
+android-ndk/build/tools/make-standalone-toolchain.sh --platform=android-4 --install-dir=android-4-arm --arch=arm
+android-ndk/build/tools/make-standalone-toolchain.sh --platform=android-5 --install-dir=android-5-arm --arch=arm
+android-ndk/build/tools/make-standalone-toolchain.sh --platform=android-8 --install-dir=android-8-arm --arch=arm
+android-ndk/build/tools/make-standalone-toolchain.sh --platform=android-9 --install-dir=android-9-arm --arch=arm
+android-ndk/build/tools/make-standalone-toolchain.sh --platform=android-9 --install-dir=android-9-x86 --arch=x86
+android-ndk/build/tools/make-standalone-toolchain.sh --platform=android-14 --install-dir=android-14-arm --arch=arm
+android-ndk/build/tools/make-standalone-toolchain.sh --platform=android-14 --install-dir=android-14-x86 --arch=x86
+

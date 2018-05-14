@@ -331,10 +331,8 @@ elseif WINDOWS then
 		else				platforms { "mingw" }	--use new 64 bit compiler
 		end
 		
-		local w32api=path.getabsolute("./sdks/w32api") -- do we still need this?
-		
-		includedirs { w32api.."/include" }
-		libdirs { w32api.."/lib" }
+		includedirs { path.getabsolute("./vbox_mingw/w32api/include") }
+		libdirs { path.getabsolute("./vbox_mingw/w32api/lib") }
 		
 		linkoptions { "-static-libgcc" }
 		
@@ -588,17 +586,14 @@ if EMCC then -- need to build and use our lua
 
 elseif ANDROID then
 
---	defines{ "LIB_LUAJIT" }
-	includedirs { "lib_luajit/src" }
-	LUA_LIBDIRS={ "../lib_luajit/libs/arm/" }
 	LUA_LINKS= { "luajit" }
 
 elseif MINGW then
 
---	defines{ "LIB_LUAJIT" }
-	includedirs { "lib_luajit/src" }
-	LUA_LIBDIRS={ "../lib_luajit/libs/win32/" }
 	LUA_LINKS= { "luajit" }
+
+	includedirs { path.getabsolute("./vbox_mingw/luajit/include") }
+	libdirs { path.getabsolute("./vbox_mingw/luajit/lib") }
 
 else -- luajit
 
@@ -669,7 +664,8 @@ if NIX or OSX then
 	includedirs { "/usr/local/include/SDL2" }
 	includedirs { "/usr/include/SDL2" }
 elseif WINDOWS then
-	includedirs {	"./lib_sdl2/win32/i686-w64-mingw32/include/SDL2",	}
+	includedirs { path.getabsolute("./vbox_mingw/SDL2/include/SDL2") }
+	libdirs { path.getabsolute("./vbox_mingw/SDL2/lib") }
 elseif EMCC then
 	buildlinkoptions{
 		"-s USE_SDL=2","-Wno-error=format-security",

@@ -1,4 +1,0 @@
-cd tmp
-
-cd gcc
-make CFLAGS="-Os -w" && make install

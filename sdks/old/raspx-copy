@@ -1,8 +1,0 @@
-mkdir raspx
-mkdir raspx/include
-mkdir raspx/lib
-
-cp -r raspi/raspx/usr/include/X11 raspx/include/
-cp -r raspi/raspx/usr/include/GL raspx/include/
-
-cp -r raspi/raspx/usr/lib/ raspx/

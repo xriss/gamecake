@@ -68,10 +68,9 @@ elseif WINDOWS then
 
 	files { "./lua.c" }
 
-	libdirs { "../lua_sdl2/windows/i686-w64-mingw32/lib/" } -- we have SDL2 binary for windows, and have deleted the dll, so it has no choice but static
 	links { "SDL2" , "m" , "dinput8" , "dxguid" , "dxerr8" , "user32" , "gdi32" , "winmm" , "imm32" , "ole32" , "oleaut32" , "shell32" , "version" , "uuid" }
 
-	links { "opengl32" , "glu32" }
+--	links { "opengl32" , "glu32" }
 	links {  "ws2_32" , "gdi32"}
 	
 	if GCC then
