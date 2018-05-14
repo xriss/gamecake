@@ -149,7 +149,7 @@ elseif OSX then
 	
 elseif NIX then
 
-	linkoptions { "-Wl,-R\\$$ORIGIN,-R\\$$ORIGIN/x32,-R\\$$ORIGIN/x64" } -- so much escape \\$$ -> $
+	linkoptions { "-Wl,-R\\$$ORIGIN,-R\\$$ORIGIN/arm,-R\\$$ORIGIN/x32,-R\\$$ORIGIN/x64" } -- so much escape \\$$ -> $
 
 	files { "./lua.c" }
 

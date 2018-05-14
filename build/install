@@ -1,14 +1,77 @@
 cd `dirname $0`
 
 
-LUAJITSRC=LuaJIT-2.1.0-beta2
+getopt --test > /dev/null
+if [[ $? -ne 4 ]]; then
+    echo " gamecake make script failed : we need a working version of getopt "
+    exit 1
+fi
 
+
+# default build settings
 
 PREMAKESRC=premake-4.4-beta5
 
 
+LUAJITSRC=LuaJIT-2.1.0-beta2
+
+
 SDLSRC=SDL2-2.0.8
 
+
+
+OPTIONS=
+LONGOPTIONS=help,premake:,luajit:,sdl2:
+
+
+
+PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
+if [[ $? -ne 0 ]]; then
+    exit 2
+fi
+eval set -- "$PARSED"
+
+while true; do
+case "$1" in
+        --help)
+                help=1
+                shift
+        ;;
+        --premake)
+                PREMAKESRC="$2"
+                shift 2
+        ;;
+        --luajit)
+                LUAJITSRC="$2"
+                shift 2
+        ;;
+        --sdl2)
+                SDLSRC="$2"
+                shift 2
+        ;;
+        --)
+                shift
+                break
+        ;;
+        *)
+                echo "Programming error"
+                exit 3
+        ;;
+esac
+done
+
+if [ "$help" = "1" ] ; then
+
+echo " Available options are : "
+echo
+echo " ./make --premake=  # disable premake "
+echo " ./make --luajit=   # disable luajit "
+echo " ./make --sdl2=     # disable sdl2 "
+echo
+
+exit 0
+
+fi
 
 
 
@@ -36,6 +99,8 @@ fi
 
 # make a version of premake4 and install it
 
+if [ ! -z "$PREMAKESRC" ]; then
+
 if [ -f ${PREMAKESRC}.zip ] ; then
 	echo "using ${PREMAKESRC}.zip"
 else
@@ -62,10 +127,12 @@ cd ../../..
 
 sudo cp ${PREMAKESRC}/bin/release/premake4 /usr/local/bin/
 
-
+fi
 
 
 # make a version of luajit and install it
+
+if [ ! -z "$LUAJITSRC" ]; then
 
 if [ -f ${LUAJITSRC}.tar.gz ] ; then
 	echo "using ${LUAJITSRC}.tar.gz"
@@ -92,18 +159,21 @@ fi
 
 cd ..
 
+
 #force static link by deleting the .so or dylib
 
 sudo rm -f /usr/local/lib/libluajit-5.1.so
 sudo rm -f /usr/local/64/lib/libluajit-5.1.dylib
 sudo rm -f /usr/local/lib/libluajit-5.1.dylib
 
-
+fi
 
 
 
 
 # make a version of SDL2 and install it
+
+if [ ! -z "$SDLSRC" ]; then
 
 if [ -f ${SDLSRC}.tar.gz ] ; then
 	echo "using ${SDLSRC}.tar.gz"
@@ -119,9 +189,8 @@ if [ "`uname`" = "Darwin" ] ; then
 
 	./configure --enable-static --disable-esd --disable-arts --disable-video-directfb --disable-rpath --enable-alsa --enable-alsa-shared --enable-pulseaudio --enable-pulseaudio-shared --enable-x11-shared --enable-sdl-dlopen --disable-input-tslib --disable-render-metal
 
-elif [ "`uname -m`" = "armv6l" ] ; then
-
-	./configure --enable-static --disable-pulseaudio --disable-esd --disable-video-mir --disable-video-wayland --disable-video-x11 --disable-video-opengl --enable-sdl-dlopen --disable-sndio --disable-video-rpi
+#elif [ "`uname -m`" = "armv6l" ] ; then # RASPI
+#	./configure --enable-static --disable-esd --disable-arts --disable-video-directfb --disable-rpath --enable-alsa --enable-alsa-shared --enable-pulseaudio --enable-pulseaudio-shared --enable-x11-shared --enable-sdl-dlopen --disable-input-tslib --disable-sndio
 
 else
 
@@ -137,5 +206,5 @@ cd ..
 sudo rm -f /usr/local/lib/libSDL2.so
 sudo rm -f /usr/local/lib/libSDL2.dylib
 
-
+fi
 
