@@ -39,34 +39,6 @@ function newgcctoolchain(toolchain)
     }
 end
 
---	local raspisdk=path.getabsolute("./sdks/raspi")
---	local raspisdk_gcc=raspisdk.."/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/"
-
--- use the cross compiler from ./sdks/raspi/tools
-newplatform {
-    name = "raspi",
-    description = "raspi",
-	gcc = {
-		cc = "arm-linux-gnueabihf-gcc-4.8.3",
-		cxx = "arm-linux-gnueabihf-g++",
-		ar = "arm-linux-gnueabihf-ar",
-		cppflags = "-MMD -mfpu=vfp -mfloat-abi=hard -marm -mcpu=arm1176jzf-s -mtune=arm1176jzf-s",
-	}
-}
-
-newplatform {
-    name = "raspi-clang",
-    description = "raspi",
---    prefix = "arm-bcm2708-linux-gnueabi-",
---    prefix = "arm-raspi-linux-gnueabi-",
---	prefix = "arm-linux-gnueabihf-",
-    gcc = {
-        cc = "clang",
-        cxx = "clang++",
-        ar= "ar",
-		cppflags = "-target armv7-eab -marm -mfpu=vfp -mcpu=arm1176jzf-s -mtune=arm1176jzf-s -mfloat-abi=hard",
-    }
-}
 
 
 
@@ -153,17 +125,6 @@ newplatform {
 }
 
 newplatform {
-    name = "nacl",
-    description = "nacl",
-    gcc = {
-        cc = "pnacl-clang",
-        cxx = "pnacl-clang++",
-        ar= "pnacl-ar",
-        cppflags = "-MMD",
-    }
-}
-
-newplatform {
     name = "emcc",
     description = "emcc",
     gcc = {
@@ -191,7 +152,6 @@ solution("wetgenes")
 
 -- work out build type and set flags
 EMCC=false
-NACL=false
 ANDROID=false
 WINDOWS=false
 MINGW=false
@@ -202,17 +162,7 @@ GCC=false
 CLANG=false
 
 local t= _ARGS[1] or ""
-if t:sub(1,5)=="raspi" then
-	TARGET="RASPI"
-	CPU=t:sub(6)
-	RASPI=true
-	GCC=true
-elseif t:sub(1,4)=="nacl" then
-	TARGET="NACL"
-	CPU=t:sub(5)
-	NACL=true
-	GCC=true
-elseif t:sub(1,4)=="emcc" then
+if t:sub(1,4)=="emcc" then
 	TARGET="EMCC"
 	CPU=t:sub(5)
 	EMCC=true
@@ -322,52 +272,6 @@ if EMCC then
 	configuration {}
 
 
-elseif NACL then
-
-	naclsdk_path=path.getabsolute( os.getenv("NACLPATH") ) -- set by make script as this keeps changing
-	pepperjs_path=path.getabsolute("./lib_pepperjs/pepper.js")
-
-	platforms { "nacl" } --hax
-	
-	defines "NACL"
-	
-	includedirs { naclsdk_path.."/include" }
-	includedirs { naclsdk_path.."/include/newlib" }
-
---	includedirs { naclsdk_path.."/ports/include" }
-
--- libs to link
-	configuration {"Debug"}
-	libdirs { naclsdk_path.."/ports/lib/newlib_pnacl/Debug" }
-	libdirs { naclsdk_path.."/lib/pnacl/Debug" }
-
-	configuration {"Release"}
-	libdirs { naclsdk_path.."/ports/lib/newlib_pnacl/Release" }
-	libdirs { naclsdk_path.."/lib/pnacl/Release" }
-
-	configuration {}
-
-elseif RASPI then
-
-	local raspisdk=path.getabsolute("./sdks/raspi")
-
---	includedirs { "/usr/local/include/luajit-2.1" } -- pickup our luajit / SDL2 builds from default install paths
---	includedirs { "/usr/local/include/SDL2" } -- pickup our luajit / SDL2 builds from default install paths
-
-	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include" }
-	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vmcs_host/linux" }
-	includedirs { raspisdk.."/firmware/hardfp/opt/vc/include/interface/vcos/pthreads"}
-	libdirs { raspisdk.."/firmware/hardfp/opt/vc/lib" }
-
-	platforms { "raspi" } --hax
-
-	defines "RASPI"
-
-	defines("LUA_USE_POSIX")
-
---	buildoptions{ "-mtune=generic" }
-	
-	
 elseif ANDROID then
 
 	local androidsdk=path.getabsolute("./sdks/android-sdk")
@@ -445,10 +349,6 @@ elseif OSX then
 
 	defines("LUA_USE_MKSTEMP") -- remove warning
 	defines("LUA_USE_POPEN") -- we want to enable popen
-
---	defines "X11"
---	defines	"LUA_USE_DLOPEN"
---	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
 	
 	platforms { "osx" } --hax
 
@@ -686,13 +586,6 @@ if EMCC then -- need to build and use our lua
 	includedirs { "lib_lua/src" }
 	LUA_LINKS= nil
 
-elseif RASPI then -- hardfloat for raspbian
-
---	defines{ "LIB_LUAJIT" }
-	includedirs { "lib_luajit/src" }
-	LUA_LIBDIRS={ "../lib_luajit/libs/armhf/" }
-	LUA_LINKS= { "luajit" }
-
 elseif ANDROID then
 
 --	defines{ "LIB_LUAJIT" }
@@ -734,10 +627,8 @@ if (not GAMECAKE_WIN_TYPE) or (GAMECAKE_WIN_TYPE=="") then
 	
 	if     WINDOWS then GAMECAKE_WIN_TYPE="windows"
 	elseif NIX     then GAMECAKE_WIN_TYPE="linux"
-	elseif NACL    then GAMECAKE_WIN_TYPE="nacl"
 	elseif EMCC    then GAMECAKE_WIN_TYPE="emcc"
 	elseif ANDROID then GAMECAKE_WIN_TYPE="android"
-	elseif RASPI   then GAMECAKE_WIN_TYPE="raspi"
 	elseif OSX     then GAMECAKE_WIN_TYPE="osx"
 	end
 
@@ -747,27 +638,27 @@ if GAMECAKE_WIN_TYPE=="none" then GAMECAKE_WIN_TYPE=false end
 
 
 -- many many versions of GL to suport, these make this work -> #include INCLUDE_GLES_GL
-if NACL or EMCC or ANDROID or RASPI or GAMECAKE_WIN_TYPE=="raspi" then
+if EMCC or ANDROID then
 
 	defines{ "LUA_GLES_GLES2" }
 	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
 
 elseif WINDOWS then -- need windows GL hacks
 
-	includedirs { "lua_gles/code" }
+	includedirs { "lua_gles/include" }
 	defines{ "LUA_GLES_GL" }
 	if GCC then
-		defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
+		defines{ "INCLUDE_GLES_GL=\\\"GL/gl3w.h\\\"" }
 	else
-		defines{ "INCLUDE_GLES_GL=\"GL3/gl3w.h\"" }
+		defines{ "INCLUDE_GLES_GL=\"GL/gl3w.h\"" }
 	end
 
 else -- use GL 
 
-	includedirs { "lua_gles/code" }
+	includedirs { "lua_gles/include" }
 	defines{ "LUA_GLES_GL" }
 
-	defines{ "INCLUDE_GLES_GL=\\\"GL3/gl3w.h\\\"" }
+	defines{ "INCLUDE_GLES_GL=\\\"GL/gl3w.h\\\"" }
 
 end
 
@@ -792,11 +683,6 @@ defines("AL_LIBTYPE_STATIC")
 
 
 
-
--- Any web type build these are all kinda similar
-WEB=NACL or EMCC
-
-
 includedirs { "./lib_hacks/code" }
 includedirs { "./lua_freetype/code" }
 includedirs { "./lua_grd/code" }
@@ -805,73 +691,71 @@ includedirs { "./lua_grd/code" }
 all_includes=all_includes or {
 
 -- lua bindings
-	{LUA_BIT,		    WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_kissfft",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_pack",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_zip",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_zlib",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_freetype",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_ogg",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_al",		   (WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		)
-																						and		(not PEPPER) 			},
-	{"lua_tardis",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_gles",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_grd",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_grdmap",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_sod",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_socket",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_gamecake",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_win",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_lfs",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_profiler",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lua_posix",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lua_lash",		WINDOWS		or		NIX		or		EMCC	or		nil			or		nil			or	OSX		},
+	{LUA_BIT,		    WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_kissfft",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_pack",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_zip",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_zlib",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_freetype",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_ogg",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_al",		    WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_tardis",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_gles",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_grd",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_grdmap",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_sod",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_socket",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_gamecake",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_win",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_lfs",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_sqlite",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
+	{"lua_profiler",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
+	{"lua_posix",		nil			or		NIX		or		nil			or		nil			or	OSX		},
+	{"lua_lash",		WINDOWS		or		NIX		or		EMCC		or		nil			or	OSX		},
 	
 -- we just use SDL2 now
 --	{"lua_win_"..GAMECAKE_WIN_TYPE, GAMECAKE_WIN_TYPE }, -- pick the os interface, see above
 
-	{"lua_sdl2",	   WINDOWS		or		NIX		or		EMCC	or		nil			or		RASPI		or	OSX		},
+	{"lua_sdl2",	   WINDOWS		or		NIX		or		EMCC		or		nil			or	OSX		},
 
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
-	{"lua_chipmunk",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_raspi_unicornhat",																	RASPI					},
-	{"lua_utf8",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_cmsgpack",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_periphery",	nil			or		NIX		or		nil		or		nil			or		RASPI		or	nil		},
-	{"lua_v4l2",		nil			or		NIX		or		nil		or		nil			or		RASPI		or	nil		},
-	{"lua_rex",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
-	{"lua_linenoise",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lua_brimworkszip",WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_sys",			WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lua_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lib_polarssl",	WINDOWS		or		NIX		or		nil		or		nil			or		RASPI		or	OSX		},
-	{"lib_zip",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lua_pgsql",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
-	{"lib_pq",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
-	{"lua_opus",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_opus",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_speexdsp",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_utf8",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_cmsgpack",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_periphery",	nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_v4l2",		nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_rex",			nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_linenoise",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
+	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_sys",			WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
+	{"lua_polarssl",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
+	{"lib_polarssl",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
+	{"lib_zip",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_pgsql",		nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_speexdsp",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+
+-- no raspi build anymore, need to add to linux build in a sensible way.
+--	{"lua_raspi_unicornhat",																RASPI	},
 
 -- this may be the main lua or luajit lib depending on build
--- would really like to just use luajit but nacl mkes this a problem...
-	{LIB_LUA,			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+-- would really like to just use luajit but emcc mkes this a problem...
+	{LIB_LUA,			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- static libs used by the lua bindings
-	{"lib_zzip",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_png",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_jpeg",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_gif",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_z",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_freetype",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_vorbis",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_ogg",			WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_openal",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	nil		},
-	{"lib_sqlite",		WINDOWS		or		NIX		or		nil		or		ANDROID		or		RASPI		or	OSX		},
-	{"lib_pcre",		nil			or		NIX		or		nil		or		nil			or		nil			or	OSX		},
-
--- dont think building this is a good idea?
---	{"lib_angle",		nil			or		nil		or		nil		or		nil			or		nil			or	nil		},
+	{"lib_zzip",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_png",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_jpeg",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_gif",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_z",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_freetype",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_vorbis",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_ogg",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_openal",		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
+	{"lib_sqlite",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
+	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 
 -- link lanes on nix?
 	{"lua_lanes",		NIX		},
@@ -879,21 +763,11 @@ all_includes=all_includes or {
 -- test glslang?
 	{"lua_glslang",		NIX		},
 
--- old/broken and no longer supported but will probably still build
---	{"lua_speak",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
---	{"lua_lanes",		WINDOWS		or		NIX		or		NACL	or		ANDROID		or		RASPI		or	OSX		},
---	{"lua_sec",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
---	{"lib_openssl",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
-
--- need to lazy link to .so before we can add these back in otherwise they force unwanted dependencies
---	{"lua_hid",			nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
---	{"lib_hidapi",		nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
-
-	{"lib_hacks",		WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
+	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- the output executables
-	{"exe_gamecake",	WINDOWS		or		NIX		or		WEB		or		ANDROID		or		RASPI		or	OSX		},
---	{"exe_pagecake",	nil			or		NIX		or		nil		or		nil			or		nil			or	nil		},
+	{"exe_gamecake",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+
 }
 
 ------------------------------------------------------------------------

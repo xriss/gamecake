@@ -1,0 +1,6 @@
+cd `dirname $0`
+
+wget https://raw.githubusercontent.com/skaslev/gl3w/master/gl3w_gen.py
+
+python gl3w_gen.py
+

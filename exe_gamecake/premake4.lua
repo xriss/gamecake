@@ -50,28 +50,6 @@ elseif EMCC then
 	
 	KIND{kind="WindowedApp",name="gamecake.html"}
 
-elseif NACL then
-
-	links { "m" }
-	
-	if TARGET=="PEPPER" then
-		
-		KIND{kind="WindowedApp",name="gamecake.js"}
-
-	else
-
-		links { "ppapi"  }
-		links { "ppapi_gles2" }
-		links { "nacl_io" }
-		links { "pthread" }
-		links { "nosys" } -- remove newlib link errors
-		links { "nosys" } -- remove newlib link errors
-
-
-		KIND{kind="WindowedApp",name="gamecake.pexe"}
-	end
-
-
 elseif ANDROID then 
 	
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
@@ -156,10 +134,9 @@ elseif NIX then
 	libdirs { "/usr/local/lib/" }
 	links { "SDL2" }	
 
-	links { "GL" }
+--	links { "GL" }
 	links { "crypt" }
 	links { "pthread" }
---	links { "X11"   }
 	links { "dl" }
 	links { "m" }
 	links { "rt" }
