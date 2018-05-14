@@ -164,7 +164,7 @@ elseif NIX then
 	links { "GL" }
 	links { "crypt" }
 	links { "pthread" }
-	links { "X11"   }
+--	links { "X11"   }
 	links { "dl" }
 	links { "m" }
 	links { "rt" }
