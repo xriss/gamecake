@@ -277,6 +277,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		code.defines_shaderprefix_tab={
 			"#version 120\n", -- seems to work on osx?
 			"#version 130\n", -- fails on osx?
+			"#version 100 ES\n", -- Try ES?
 --			"#version xxx\n", -- test fail case recovery
 		}
 		code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
