@@ -742,8 +742,7 @@ all_includes=all_includes or {
 -- no raspi build anymore, need to add to linux build in a sensible way.
 --	{"lua_raspi_unicornhat",																RASPI	},
 
--- this may be the main lua or luajit lib depending on build
--- would really like to just use luajit but emcc mkes this a problem...
+-- only emcc actually needs this as a vanilla LUA build
 	{LIB_LUA,			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- static libs used by the lua bindings
