@@ -17,7 +17,7 @@
 * Wait for readable/writable/connected socket with timeout
 \*-------------------------------------------------------------------------*/
 #ifdef SOCKET_POLL
-#include <sys/poll.h>
+#include <poll.h>
 
 #define WAITFD_R        POLLIN
 #define WAITFD_W        POLLOUT
