@@ -271,19 +271,19 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 -- default shader prefix to use when building
 
-	if core.GLES2 then -- use GLES2 prefix
-		code.defines.shaderprefix="#version 100\nprecision mediump float;\n"
-	else
+--	if core.GLES2 then -- use GLES2 prefix
+--		code.defines.shaderprefix="#version 100\nprecision mediump float;\n"
+--	else
 		code.defines_shaderprefix_tab={
+			"#version 100\nprecision mediump float;\n", -- Try ES?
 			"#version 120\n", -- seems to work on osx?
 			"#version 130\n", -- fails on osx?
-			"#version 100 ES\n", -- Try ES?
 --			"#version xxx\n", -- test fail case recovery
 		}
 		code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
 		code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
 
-	end
+--	end
 	
 -- forget cached info when we lose context, it is important to call this
 	function code.forget()
