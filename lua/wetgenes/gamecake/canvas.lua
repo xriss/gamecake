@@ -417,6 +417,13 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 			it.vb=buffers.create({
 				start=function(vb)
 					vb:bind()
+print("CRAASGG")
+print(datalen)
+print(canvas.vdat_size)
+
+--canvas.vdat=pack.alloc(canvas.vdat_size)
+
+print(canvas.vdat)
 					pack.save_array(data,"f32",0,datalen,canvas.vdat)
 					gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.STATIC_DRAW)
 				end,

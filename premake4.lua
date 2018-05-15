@@ -586,9 +586,13 @@ if EMCC then -- need to build and use our lua
 
 elseif ANDROID then
 
+	defines{ "LUA_JIT_USED" }
+
 	LUA_LINKS= { "luajit" }
 
 elseif MINGW then
+
+	defines{ "LUA_JIT_USED" }
 
 	LUA_LINKS= { "luajit" }
 
@@ -596,6 +600,8 @@ elseif MINGW then
 	libdirs { path.getabsolute("./vbox_mingw/luajit/lib") }
 
 else -- luajit
+
+	defines{ "LUA_JIT_USED" }
 
 -- we expect luajit to be provided in the system
 

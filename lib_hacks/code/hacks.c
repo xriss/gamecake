@@ -15,7 +15,7 @@
 // so we can extract a length from a structure we mostly do not care about
 // this is an evil hack but there is no exposed way to do this apart from building your own lua
 
-#if defined(LUA_JITLIBNAME)
+#if defined(LUA_JIT_USED)
 
 // 32bit luajit hacks
 typedef struct wetgenes_pack_user_data {
@@ -95,51 +95,4 @@ extern void * luaL_wetestudata(lua_State *L, int index, const char *tname)
 	return NULL;
 }
 //#endif
-
-
-
-#if defined(NACL)
-
-// we should never really call kill but may accidently link to it with some libs
-
-int kill(int pid, int sig)
-{
-//	if(pid == __MYPID)
-	{
-		while(1)
-		{
-		}
-	}
-	return 0;
-}
-
-#endif
-
-// fix openlib library names?
-//void LUA_API luaopen_lanes( lua_State* L)
-//{
-//	luaopen_lanes_embedded(L, 0);
-//}
-
-
-
-#if defined(__LSB_VERSION__) // LSB hacks
-
-#include <stdarg.h>
-extern int __isoc99_sscanf(const char *a, const char *b, va_list args)
-{
-   int i;
-   va_list ap;
-   va_copy(ap,args);
-   i=sscanf(a,b,ap);
-   va_end(ap);
-   return i;
-}
-
-extern char * secure_getenv (char const *name)
-{
-  return getenv (name);
-}
-
-#endif
 
