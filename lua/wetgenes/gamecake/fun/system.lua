@@ -6,6 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- Main Good Luck Have Fun system virtual machine management.
 
 
+local wwin=require("wetgenes.win")
 local wgrd =require("wetgenes.grd")
 local wsandbox=require("wetgenes.sandbox")
 local wzips=require("wetgenes.zips")
@@ -68,6 +69,10 @@ end
 system.setup=function(code)
 
 	system.ticks=0
+	
+	local screensize=wwin.screen() -- make screen size available for autoconfig
+	system.fullscreen_width=screensize.width or 1920
+	system.fullscreen_height=screensize.height or 1080
 
 print("system setup")
 
