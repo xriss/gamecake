@@ -17,13 +17,14 @@ parts:
     source: .
 
     override-build: |
-      ./make --clean
+      ./make --clean --sys-libopenal
       cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
 
     build-packages:
       - premake4
       - libluajit-5.1-dev
       - libsdl2-dev
+      - libopenal-dev
 
 apps:
 

@@ -1,4 +1,16 @@
 
+newoption {
+   trigger     = "openal",
+   value       = "soft",
+   description = "Choose openal",
+   allowed = {
+      { "soft", "build our own" },
+      { "sys",  "System provided" },
+   }
+}
+
+
+
 
 function buildlinkoptions(t) buildoptions(t) linkoptions(t) end
 
@@ -680,16 +692,24 @@ end
 
 -- OpenAL
 
-includedirs { "./lib_openal/mojoal" }
-defines("AL_LIBTYPE_STATIC")
+--print(_OPTIONS)
+--for n,v in pairs(_OPTIONS) do print(n,v) end
 
+if _OPTIONS["openal"]=="sys" then
+	print("USING SYSTEM PROVIDED OPENAL")
+	LIB_OPENAL=nil
+else
+	LIB_OPENAL="lib_openal"
+	includedirs { "./lib_openal/mojoal" }
+	defines("AL_LIBTYPE_STATIC")
+end
 
 
 includedirs { "./lib_hacks/code" }
 includedirs { "./lua_freetype/code" }
 includedirs { "./lua_grd/code" }
 
-	
+
 all_includes=all_includes or {
 
 -- lua bindings
@@ -754,7 +774,7 @@ all_includes=all_includes or {
 	{"lib_freetype",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_vorbis",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_openal",		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
+	{LIB_OPENAL,		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 

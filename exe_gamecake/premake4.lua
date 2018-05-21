@@ -15,28 +15,7 @@ if LUA_LIBDIRS then	libdirs(LUA_LIBDIRS) end
 if LUA_LINKS   then links  (LUA_LINKS)   end
 
 
-if RASPI or GAMECAKE_WIN_TYPE=="raspi" then
-	
--- look around the exe for any dynamic code we might want	
-	linkoptions { "-Wl,-R\\$$ORIGIN/rpi" } -- so much escape \\$$ -> $
-
-	files { "./lua.c" }
-
--- now building in qemu vbox, so must fiddle :/
-
-	libdirs { "/opt/vc/lib" }
-	libdirs { "/usr/local/lib/" }
-	links { "SDL2" }
-		
-	links { "GLESv2" , "EGL" , "vcos" , "bcm_host" , "vchiq_arm"}
-	links { "crypt" }
-	links { "pthread" }
-	
-	links { "dl" , "m" , "pthread" ,"rt"}
-
-	KIND{kind="ConsoleApp",name="gamecake.raspi"}
-
-elseif EMCC then
+if EMCC then
 
 	linkoptions { "-rdynamic" }
 	
@@ -131,7 +110,13 @@ elseif NIX then
 	files { "./lua.c" }
 
 	libdirs { "/usr/local/lib/" }
-	links { "SDL2" }	
+	links { "SDL2" }
+
+	if _OPTIONS["openal"]=="sys" then -- link to system openal
+
+		links { "openal" }
+
+	end
 
 --	links { "GL" }
 	links { "crypt" }
