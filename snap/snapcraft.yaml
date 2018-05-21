@@ -4,7 +4,6 @@ summary: a single exe cross platform game engine # 79 char long summary
 description: |
   GameCake is a single exe cross platform game engine,
   a command line build of Lua(JIT) with embedded bindings to many libraries.
-#  PageCake is a build of Nginx, also with Lua and libraries embedded.
 
 grade: stable # must be 'stable' to release into candidate/stable channels
 confinement: strict # use 'strict' once you have the right plugs and slots
@@ -17,17 +16,14 @@ parts:
 
     source: .
 
-    prepare: |
-      ./build/install
-
-    build: |
+    override-build: |
       ./make
-
-    install: |
       cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
 
-    stage-packages:
-      - pulseaudio
+    build-packages:
+      - premake4
+      - libluajit-5.1-dev
+      - libsdl2-dev
 
 apps:
 

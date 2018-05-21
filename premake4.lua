@@ -46,14 +46,14 @@ newgcctoolchain {
     name = "android",
     description = "android",
     prefix = "arm-linux-androideabi-",
-    cppflags = "",
+    cppflags = "-fPIC",
 }
 
 newgcctoolchain {
     name = "android-x86",
     description = "android-x86",
     prefix = "i686-android-linux-",
-    cppflags = "",
+    cppflags = "-fPIC",
 }
 
 newplatform {
@@ -64,7 +64,7 @@ newplatform {
 		cc ="gcc",
 		cxx="c++",
 		ar ="ar",
-		cppflags = "-MMD",
+		cppflags = "-MMD -fPIC",
 	}
 }
 newplatform {
@@ -75,7 +75,7 @@ newplatform {
 		cc ="i586-mingw32msvc-cc",
 		cxx="i586-mingw32msvc-c++",
 		ar ="i586-mingw32msvc-ar",
-		cppflags = "-MMD",
+		cppflags = "-MMD -fPIC",
 	}
 }
 
@@ -87,7 +87,7 @@ newplatform {
 		cc ="i686-w64-mingw32-gcc",
 		cxx="i686-w64-mingw32-c++",
 		ar ="i686-w64-mingw32-ar",
-		cppflags = "-MMD",
+		cppflags = "-MMD -fPIC",
 	}
 }
 
@@ -98,7 +98,7 @@ newplatform {
         cc = "gcc",
         cxx = "g++",
         ar= "ar",
-        cppflags = "-MMD",
+        cppflags = "-MMD -fPIC",
     }
 }
 
@@ -109,7 +109,7 @@ newplatform {
         cc = "clang",
         cxx = "clang++",
         ar= "ar",
-        cppflags = "-MMD",
+        cppflags = "-MMD -fPIC",
     }
 }
 
@@ -120,7 +120,7 @@ newplatform {
         cc = "clang",
         cxx = "clang++",
         ar= "ar",
-        cppflags = "-MMD",
+        cppflags = "-MMD -fPIC",
     }
 }
 
@@ -131,7 +131,7 @@ newplatform {
         cc = "emcc",
         cxx = "em++",
         ar= "ar",
-        cppflags = "-MMD",
+        cppflags = "-MMD -fPIC",
     }
 }
 
