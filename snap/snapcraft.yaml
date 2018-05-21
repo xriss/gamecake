@@ -17,7 +17,7 @@ parts:
     source: .
 
     override-build: |
-      ./make --clean --sys-libopenal
+      ./make --openal=sys --clean
       cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
 
     build-packages:
