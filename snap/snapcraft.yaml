@@ -37,6 +37,6 @@ apps:
       - x11
       - opengl
       - pulseaudio
-      - joystick
       - network
+      - hidraw
 
