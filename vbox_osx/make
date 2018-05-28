@@ -3,7 +3,7 @@ cd `dirname $0`
 vagrant up
 
 
-vagrant ssh -c " /gamecake/make --clean --gcc=osx "
+vagrant ssh -c " gamecake/make --clean --gcc=osx "
 
 
-vagrant halt
+#vagrant halt

@@ -26,14 +26,10 @@ end
 
 	config.vm.network "private_network", ip: "10.42.23.23"
 
-	config.nfs.map_uid = Process.uid
-	config.nfs.map_gid = Process.gid
+#	config.nfs.map_uid = Process.uid
+#	config.nfs.map_gid = Process.gid
 
-	config.vm.synced_folder "../", "/gamecake",
-		id: "gamecake",
-		:nfs => true,
-		:mount_options => ['nolock','vers=3','udp','noatime','dmode=777','fmode=777'],
-		:linux__nfs_options => ['rw','async','insecure','no_subtree_check','no_acl','all_squash']
+	config.vm.synced_folder "../", "/gamecake", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp,noatime']
 
 # the above works but owners are bad and seemingly hard to fix, so we hack around that
 
