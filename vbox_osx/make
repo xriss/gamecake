@@ -8,4 +8,8 @@ vagrant ssh -c " cd gamecake && ./git-pull && cd .. || git clone --recursive -v 
 vagrant ssh -c " gamecake/make --clean --gcc=osx "
 
 
-#vagrant halt
+vagrant ssh-config > ./.vagrant.ssh.config
+scp -F ./.vagrant.ssh.config default:gamecake/exe/gamecake.osx ../exe/gamecake.osx
+rm .vagrant.ssh.config
+
+vagrant halt
