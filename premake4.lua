@@ -1,4 +1,16 @@
 
+newoption {
+   trigger     = "openal",
+   value       = "soft",
+   description = "Choose openal",
+   allowed = {
+      { "soft", "build our own" },
+      { "sys",  "System provided" },
+   }
+}
+
+
+
 
 function buildlinkoptions(t) buildoptions(t) linkoptions(t) end
 
@@ -46,14 +58,14 @@ newgcctoolchain {
     name = "android",
     description = "android",
     prefix = "arm-linux-androideabi-",
-    cppflags = "",
+    cppflags = "-fPIC",
 }
 
 newgcctoolchain {
     name = "android-x86",
     description = "android-x86",
     prefix = "i686-android-linux-",
-    cppflags = "",
+    cppflags = "-fPIC",
 }
 
 newplatform {
@@ -64,7 +76,7 @@ newplatform {
 		cc ="gcc",
 		cxx="c++",
 		ar ="ar",
-		cppflags = "-MMD",
+		cppflags = "-MMD -fPIC",
 	}
 }
 newplatform {
@@ -75,7 +87,7 @@ newplatform {
 		cc ="i586-mingw32msvc-cc",
 		cxx="i586-mingw32msvc-c++",
 		ar ="i586-mingw32msvc-ar",
-		cppflags = "-MMD",
+		cppflags = "-MMD -fPIC",
 	}
 }
 
@@ -87,7 +99,7 @@ newplatform {
 		cc ="i686-w64-mingw32-gcc",
 		cxx="i686-w64-mingw32-c++",
 		ar ="i686-w64-mingw32-ar",
-		cppflags = "-MMD",
+		cppflags = "-MMD -fPIC",
 	}
 }
 
@@ -98,7 +110,7 @@ newplatform {
         cc = "gcc",
         cxx = "g++",
         ar= "ar",
-        cppflags = "-MMD",
+        cppflags = "-MMD -fPIC",
     }
 }
 
@@ -109,7 +121,7 @@ newplatform {
         cc = "clang",
         cxx = "clang++",
         ar= "ar",
-        cppflags = "-MMD",
+        cppflags = "-MMD -fPIC",
     }
 }
 
@@ -120,7 +132,7 @@ newplatform {
         cc = "clang",
         cxx = "clang++",
         ar= "ar",
-        cppflags = "-MMD",
+        cppflags = "-MMD -fPIC",
     }
 }
 
@@ -131,7 +143,7 @@ newplatform {
         cc = "emcc",
         cxx = "em++",
         ar= "ar",
-        cppflags = "-MMD",
+        cppflags = "-MMD -fPIC",
     }
 }
 
@@ -680,16 +692,24 @@ end
 
 -- OpenAL
 
-includedirs { "./lib_openal/mojoal" }
-defines("AL_LIBTYPE_STATIC")
+--print(_OPTIONS)
+--for n,v in pairs(_OPTIONS) do print(n,v) end
 
+if _OPTIONS["openal"]=="sys" then
+	print("USING SYSTEM PROVIDED OPENAL")
+	LIB_OPENAL=nil
+else
+	LIB_OPENAL="lib_openal"
+	includedirs { "./lib_openal/mojoal" }
+	defines("AL_LIBTYPE_STATIC")
+end
 
 
 includedirs { "./lib_hacks/code" }
 includedirs { "./lua_freetype/code" }
 includedirs { "./lua_grd/code" }
 
-	
+
 all_includes=all_includes or {
 
 -- lua bindings
@@ -754,7 +774,7 @@ all_includes=all_includes or {
 	{"lib_freetype",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_vorbis",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_openal",		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
+	{LIB_OPENAL,		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 

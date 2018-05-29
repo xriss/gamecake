@@ -1,5 +1,7 @@
-
+choco install -y vcbuildtools
 choco install -y premake.portable
+choco install -y nano
 
-choco install -y visualstudio2017community --package-parameters "--allWorkloads --includeRecommended --includeOptional --passive --locale en-US"
-
+#
+# C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe .\wetgenes.sln
+#

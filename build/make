@@ -27,8 +27,13 @@ cpu=native
 # other options are : native 32 64
 
 
+openal=soft
+
+# other options are : soft sys
+
+
 OPTIONS=
-LONGOPTIONS=help,debug,release,clean,gcc:,cpu:,win:
+LONGOPTIONS=help,debug,release,clean,gcc:,cpu:,win:,openal:
 
 
 
@@ -68,6 +73,10 @@ case "$1" in
                 win="$2"
                 shift 2
         ;;
+        --openal)
+                openal="$2"
+                shift 2
+        ;;
         --)
                 shift
                 break
@@ -81,7 +90,7 @@ done
 
 if [ "$help" = "1" ] ; then
 
-#echo "debug: $debug, release: $release, clean: $clean, gcc: $gcc, cpu: $cpu, win: $win, makeargs: $*"
+echo "debug: $debug, release: $release, clean: $clean, gcc: $gcc, cpu: $cpu, win: $win, openal: $openal, makeargs: $*"
 
 echo " Available options are : "
 echo
@@ -99,6 +108,8 @@ echo " ./make --cpu=32     # force a 32bit build "
 echo " ./make --cpu=64     # force a 64bit build "
 echo
 echo " ./make --win=raspi  # force the use of the raspi os interface "
+echo
+echo " ./make --openal=sys  # use system provided openal "
 echo
 
 exit 0
@@ -156,7 +167,7 @@ fi
 
 # this will make a directory to build into
 
-premake4 gmake $gcc-$cpu
+premake4 --openal=$openal gmake $gcc-$cpu
 
 # enter that directory
 cd ${buildhere}

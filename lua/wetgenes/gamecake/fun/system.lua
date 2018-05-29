@@ -6,6 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- Main Good Luck Have Fun system virtual machine management.
 
 
+local wwin=require("wetgenes.win")
 local wgrd =require("wetgenes.grd")
 local wsandbox=require("wetgenes.sandbox")
 local wzips=require("wetgenes.zips")
@@ -51,8 +52,17 @@ system.load_and_setup=function(name,path)
 -- remember source text
 	system.source_filename=path..name
 	system.source={}
-	system.source.glsl=wzips.readfile(system.source_filename..".fun.glsl")
-	system.source.lua=wzips.readfile(system.source_filename..".fun.lua")
+	
+	if system.source_filename=="" then -- read in pipe
+	
+		system.source.lua=io.read("*all")
+
+	else
+	
+		system.source.glsl=wzips.readfile(system.source_filename..".fun.glsl")
+		system.source.lua=wzips.readfile(system.source_filename..".fun.lua")
+	
+	end
 
 	local lua=assert(system.source.lua,"file not found: "..system.source_filename..".fun.lua")
 	
@@ -68,6 +78,10 @@ end
 system.setup=function(code)
 
 	system.ticks=0
+	
+	local screensize=wwin.screen() -- make screen size available for autoconfig
+	system.fullscreen_width=screensize.width or 1920
+	system.fullscreen_height=screensize.height or 1080
 
 print("system setup")
 

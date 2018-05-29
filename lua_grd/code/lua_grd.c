@@ -1168,7 +1168,7 @@ part_ptr p;
 // works with palettes of bitmaps
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void lua_grd_pix(lua_State *l , s32 tab_idx , struct grd_info *grd , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
+int lua_grd_pix(lua_State *l , s32 tab_idx , struct grd_info *dst , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
 {
 s32 xi,yi,zi;
 
@@ -1183,16 +1183,18 @@ int read_tab;
 // snap x,y,z w,h,d to available pixels
 
 
-	if(x<0)			{	x=0;			}
-	if(x>grd->w-1)	{	x=grd->w-1;		}
-	if(y<0)			{	y=0;			}
-	if(y>grd->h-1)	{	y=grd->h-1;		}
-	if(z<0)			{	z=0;			}
-	if(z>grd->d-1)	{	z=grd->d-1;		}
+	if(x<0)			{	w+=x;x=0;		} // clip position in destination
+	if(x>dst->w-1)	{	return 0;		}
+	if(y<0)			{	h+=y;y=0;		}
+	if(y>dst->h-1)	{	return 0;		}
+	if(z<0)			{	d+=z;z=0;		}
+	if(z>dst->d-1)	{	return 0;		}
 
-	if(x+w>grd->w)	{	w=grd->w-x;		}
-	if(y+h>grd->h)	{	h=grd->h-y;		}
-	if(z+d>grd->d)	{	d=grd->d-z;		}
+	if(x+w>dst->w)	{	w=dst->w-x;		} // clip size to destination
+	if(y+h>dst->h)	{	h=dst->h-y;		}
+	if(z+d>dst->d)	{	d=dst->d-z;		}
+	
+	if( (w<=0) || (h<=0) || (d<=0) ) { return 0; } 
 
 
 	if(tab_idx==0) // just fill in, dont read
@@ -1207,13 +1209,13 @@ int read_tab;
 	}
 
 
-	if( (grd->fmt==GRD_FMT_U8_RGBA) || (grd->fmt==GRD_FMT_U8_RGBA_PREMULT) )
+	if( (dst->fmt==GRD_FMT_U8_RGBA) || (dst->fmt==GRD_FMT_U8_RGBA_PREMULT) )
 	{
 		for( zi=z ; zi<z+d ; zi++ )
 		{
 			for( yi=y ; yi<y+h ; yi++ )
 			{
-				datu8=grdinfo_get_data(grd,x,yi,zi);
+				datu8=grdinfo_get_data(dst,x,yi,zi);
 
 				for( xi=x ; xi<x+w ; xi++ )
 				{
@@ -1277,13 +1279,13 @@ int read_tab;
 		}
 	}
 	else
-	if( grd->fmt==GRD_FMT_U8_RGB )
+	if( dst->fmt==GRD_FMT_U8_RGB )
 	{
 		for( zi=z ; zi<z+d ; zi++ )
 		{
 			for( yi=y ; yi<y+h ; yi++ )
 			{
-				datu8=grdinfo_get_data(grd,x,yi,zi);
+				datu8=grdinfo_get_data(dst,x,yi,zi);
 
 				for( xi=x ; xi<x+w ; xi++ )
 				{
@@ -1335,13 +1337,13 @@ int read_tab;
 		}
 	}
 	else
-	if( (grd->fmt==GRD_FMT_U8_INDEXED) ||  (grd->fmt==GRD_FMT_U8_LUMINANCE) )
+	if( (dst->fmt==GRD_FMT_U8_INDEXED) ||  (dst->fmt==GRD_FMT_U8_LUMINANCE) )
 	{
 		for( zi=z ; zi<z+d ; zi++ )
 		{
 			for( yi=y ; yi<y+h ; yi++ )
 			{
-				datu8=grdinfo_get_data(grd,x,yi,zi);
+				datu8=grdinfo_get_data(dst,x,yi,zi);
 
 				for( xi=x ; xi<x+w ; xi++ )
 				{
@@ -1372,7 +1374,7 @@ int read_tab;
 	{
 		luaL_error(l, "unsuported format" );
 	}
-
+	return 0;
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -1380,7 +1382,7 @@ int read_tab;
 // a string version of lua_grd_pix for when you dont want to bit fiddle
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_grd_pix_str(lua_State *l , s32 str_idx , struct grd_info *grd , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
+int lua_grd_pix_str(lua_State *l , s32 str_idx , struct grd_info *dst , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
 {
 int i;
 
@@ -1401,16 +1403,18 @@ struct grd_info gb[1];
 
 // snap x,y,z w,h,d to available pixels
 
-	if(x<0)			{	x=0;			}
-	if(x>grd->w-1)	{	x=grd->w-1;		}
-	if(y<0)			{	y=0;			}
-	if(y>grd->h-1)	{	y=grd->h-1;		}
-	if(z<0)			{	z=0;			}
-	if(z>grd->d-1)	{	z=grd->d-1;		}
+	if(x<0)			{	w+=x;x=0;		} // clip position in destination
+	if(x>dst->w-1)	{	return 0;		}
+	if(y<0)			{	h+=y;y=0;		}
+	if(y>dst->h-1)	{	return 0;		}
+	if(z<0)			{	d+=z;z=0;		}
+	if(z>dst->d-1)	{	return 0;		}
 
-	if(x+w>grd->w)	{	w=grd->w-x;		}
-	if(y+h>grd->h)	{	h=grd->h-y;		}
-	if(z+d>grd->d)	{	d=grd->d-z;		}
+	if(x+w>dst->w)	{	w=dst->w-x;		} // clip size to destination
+	if(y+h>dst->h)	{	h=dst->h-y;		}
+	if(z+d>dst->d)	{	d=dst->d-z;		}
+	
+	if( (w<=0) || (h<=0) || (d<=0) ) { return 0; } 
 
 
 	grdinfo_reset(gb);
@@ -1436,7 +1440,7 @@ struct grd_info gb[1];
 	if(read_tab)
 	{
 		bufu8=(u8*)s; // read from this string
-		if(sl<(grd->xscan*w*h*d))
+		if(sl<(dst->xscan*w*h*d))
 		{
 			luaL_error(l, "data string too short" );
 			return 0;
@@ -1444,7 +1448,7 @@ struct grd_info gb[1];
 	}
 	else // allocate a tempory buffer to write into
 	{
-		if(!grd_info_alloc(gb,grd->fmt,w,h,d))
+		if(!grd_info_alloc(gb,dst->fmt,w,h,d))
 		{
 			luaL_error(l, "grd info alloc fail" );
 			return 0;
@@ -1456,17 +1460,17 @@ struct grd_info gb[1];
 	{
 		for( yi=y ; yi<y+h ; yi++ )
 		{
-			datu8=grdinfo_get_data(grd,x,yi,zi);
+			datu8=grdinfo_get_data(dst,x,yi,zi);
 			if(read_tab) // read
 			{
-				for( i=0 ; i<w*grd->xscan ; i++ )
+				for( i=0 ; i<w*dst->xscan ; i++ )
 				{
 					*datu8++=*bufu8++;
 				}
 			}
 			else // write
 			{
-				for( i=0 ; i<w*grd->xscan ; i++ )
+				for( i=0 ; i<w*dst->xscan ; i++ )
 				{
 					*bufu8++=*datu8++;
 				}
@@ -1500,16 +1504,18 @@ s32 xscan;
 
 // sanity clipping, so we don't trash random memory super easily.
 
-	if(x<0)			{	x=0;			} // clip position in destination
-	if(x>dst->w-1)	{	x=dst->w-1;		}
-	if(y<0)			{	y=0;			}
-	if(y>dst->h-1)	{	y=dst->h-1;		}
-	if(z<0)			{	z=0;			}
-	if(z>dst->d-1)	{	z=dst->d-1;		}
-
+	if(x<0)			{	w+=x;x=0;		} // clip position in destination
+	if(x>dst->w-1)	{	return 0;		}
+	if(y<0)			{	h+=y;y=0;		}
+	if(y>dst->h-1)	{	return 0;		}
+	if(z<0)			{	d+=z;z=0;		}
+	if(z>dst->d-1)	{	return 0;		}
+	
 	if(x+w>dst->w)	{	w=dst->w-x;		} // clip size to destination
 	if(y+h>dst->h)	{	h=dst->h-y;		}
 	if(z+d>dst->d)	{	d=dst->d-z;		}
+	
+	if( (w<=0) || (h<=0) || (d<=0) ) { return 0; } 
 
 	if(w>src->w)	{	w=src->w-x;		} // clip size to source 
 	if(h>src->h)	{	h=src->h-y;		}
