@@ -29,7 +29,7 @@ end
 #	config.nfs.map_uid = Process.uid
 #	config.nfs.map_gid = Process.gid
 
-	config.vm.synced_folder "../", "/gamecake", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp,noatime']
+#	config.vm.synced_folder "../", "/gamecake", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp,noatime']
 
 # the above works but owners are bad and seemingly hard to fix, so we hack around that
 
