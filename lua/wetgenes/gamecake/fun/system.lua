@@ -52,8 +52,17 @@ system.load_and_setup=function(name,path)
 -- remember source text
 	system.source_filename=path..name
 	system.source={}
-	system.source.glsl=wzips.readfile(system.source_filename..".fun.glsl")
-	system.source.lua=wzips.readfile(system.source_filename..".fun.lua")
+	
+	if system.source_filename=="" then -- read in pipe
+	
+		system.source.lua=io.read("*all")
+
+	else
+	
+		system.source.glsl=wzips.readfile(system.source_filename..".fun.glsl")
+		system.source.lua=wzips.readfile(system.source_filename..".fun.lua")
+	
+	end
 
 	local lua=assert(system.source.lua,"file not found: "..system.source_filename..".fun.lua")
 	

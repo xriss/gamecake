@@ -13,7 +13,7 @@ local argx={}
 local done_fun=false -- only remove the first
 local done_zip=false
 
-local filename="test.fun.lua"
+local filename=""
 
 for i=1,#a do
 	local v=tostring(a[i])
