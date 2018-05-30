@@ -38,5 +38,6 @@ apps:
       - opengl
       - pulseaudio
       - network
+      - joystick
       - hidraw
 
