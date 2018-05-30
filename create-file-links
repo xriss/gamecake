@@ -14,13 +14,6 @@ ln -f lua/wetgenes/grd.lua         lua_grd/code/grd.lua
 ln -f lua/wetgenes/grdmap.lua      lua_grd/code/grdmap.lua
 
 ln -f lua/wetgenes/win.lua         lua_win/code/win.lua
-ln -f lua/wetgenes/win/android.lua lua_win_android/code/android.lua
-ln -f lua/wetgenes/win/linux.lua   lua_win_linux/code/linux.lua
-ln -f lua/wetgenes/win/osx.lua     lua_win_osx/code/osx.lua
-ln -f lua/wetgenes/win/nacl.lua    lua_win_nacl/code/nacl.lua
-ln -f lua/wetgenes/win/windows.lua lua_win_windows/code/windows.lua
-ln -f lua/wetgenes/win/raspi.lua   lua_win_raspi/code/raspi.lua
-ln -f lua/wetgenes/win/emcc.lua    lua_win_emcc/code/emcc.lua
 
 ln -f lua/wetgenes/v4l2.lua        lua_v4l2/code/v4l2.lua
 ln -f lua/wetgenes/hid.lua         lua_hid/code/hid.lua
