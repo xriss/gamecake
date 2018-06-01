@@ -740,6 +740,10 @@ all_includes=all_includes or {
 
 	{"lua_sdl2",	   WINDOWS		or		NIX		or		EMCC		or		nil			or	OSX		},
 
+-- emcc wraps the SDL2 with some extra functions.
+
+	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
+
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
 	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_utf8",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
