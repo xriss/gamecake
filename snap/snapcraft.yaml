@@ -26,6 +26,9 @@ parts:
       - libsdl2-dev
       - libopenal-dev
 
+    stage-packages:
+      - libglu1-mesa
+
 apps:
 
   gamecake:
