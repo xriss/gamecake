@@ -83,7 +83,7 @@ system.setup=function(code)
 	system.fullscreen_width=screensize.width or 1920
 	system.fullscreen_height=screensize.height or 1080
 
-print("system setup")
+print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 
 	if code then
 		system.code=wsandbox.ini(code,{ -- we are not really trying to sandbox, just a convenient function

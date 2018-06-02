@@ -160,9 +160,9 @@ sdl.swap=function(it)
 end
 	
 
-sdl.sleep=function(ms)
+sdl.sleep=function(sec)
 --	print("SDL sleep")
-	SDL.delay(ms)
+	SDL.delay(sec*1000) -- convert seconds to milliseconds 
 	return nil
 end
 
