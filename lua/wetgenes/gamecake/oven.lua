@@ -542,10 +542,9 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 				if wwin.hardcore.sleep then
 					while (oven.frame_time-(oven.frame_rate or 0))>oven.win:time() do
 						oven.msgs() -- keep handling msgs?
-						wwin.hardcore.sleep(0.0001) -- sleep here until we need to update
+						wwin.hardcore.sleep(0.001) -- sleep here 1ms until we need to update
 					end
  				else
---print("NOSLEEP")
 					if (oven.frame_time-oven.frame_rate)>oven.win:time() then return end -- cant sleep, just skip
 				end
 							
