@@ -30,6 +30,7 @@ function M.bake(oven,escmenu)
 		width=480,
 		height=480,
 	}
+	
 
 	local gl=oven.gl
 	local cake=oven.cake
@@ -51,6 +52,7 @@ function M.bake(oven,escmenu)
 		end
 ]]
 
+		escmenu.active=true
 		escmenu.show=false
 
 		escmenu.master=oven.rebake("wetgenes.gamecake.widgets").setup({})
@@ -109,7 +111,7 @@ function M.bake(oven,escmenu)
 	
 
 	function escmenu.update()
-
+		if not escmenu.active then return end
 
 		if escmenu.show then
 
@@ -120,6 +122,7 @@ function M.bake(oven,escmenu)
 	end
 	
 	function escmenu.draw()
+		if not escmenu.active then return end
 	
 		local cake=oven.cake
 --		local gl=cake.gl
@@ -151,6 +154,8 @@ function M.bake(oven,escmenu)
 	end
 		
 	function escmenu.msg(m)
+		if not escmenu.active then return m end
+
 --dprint(m)
 		if escmenu.show then
 			if m.class=="key" or m.class=="mouse" or m.class=="joykey" or m.class=="joystick" then

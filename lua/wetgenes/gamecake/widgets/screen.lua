@@ -48,6 +48,39 @@ function wscreen.get_windows(screen)
 	return windows
 end
 
+wscreen.windows_toggle=function(screen)
+
+	local windows=screen:get_windows()
+	local active={}
+	
+	for i,window in ipairs(windows) do -- find all visible windows
+		if not window.hidden then
+			active[#active+1]=window.id
+		end
+	end
+	
+	if #active>0 then -- hide windows
+		for i,id in pairs(active or {}) do
+			local win=screen.master.ids[id]
+			if win then
+				win.window_hooks("win_hide")
+			end
+		end
+		screen.windows_toggle_list=active
+	else -- show windows
+		active=screen.windows_toggle_list -- use remembered list
+		for i,id in pairs(active or {}) do
+			local win=screen.master.ids[id]
+			if win then
+				win.window_hooks("win_show")
+			end
+		end
+		screen.windows_toggle_list=nil
+	end
+	
+
+end
+
 wscreen.window_menu=function(screen)
 	local windows=screen:get_windows()
 	table.sort(windows,function(a,b) return a.win_title.text < b.win_title.text end)
@@ -187,6 +220,7 @@ function wscreen.setup(widget,def)
 
 	widget.get_windows=wscreen.get_windows
 	widget.window_menu=wscreen.window_menu
+	widget.windows_toggle=wscreen.windows_toggle
 
 	widget.get_split=wscreen.get_split
 	widget.add_split=wscreen.add_split
