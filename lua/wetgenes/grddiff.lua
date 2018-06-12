@@ -50,21 +50,21 @@ grddiff.history=function(grd)
 
 -- return a temporray grd of only the frame we can draw into
 	history.draw_get=function()
-		aassert(history.grd_diff) -- sanity
+		assert(history.grd_diff) -- sanity
 		return history.grd:clip(	0,					0,					history.frame,
 									history.grd.width,	history.grd.height,	1)
 	end
 
 -- revert back to begin state
 	history.draw_revert=function()
-		aassert(history.grd_diff) -- sanity
+		assert(history.grd_diff) -- sanity
 		history.grd:pixels(0,0,history.frame,history.grd.width,	history.grd.height,	1,history.grd_diff) -- restore image
 		history.grd:palette(0,256, history.grd_diff:palette(0,256,"") ) -- restore palette
 	end
 	
 -- push any changes we find into the history
 	history.draw_save=function()
-		aassert(history.grd_diff) -- sanity
+		assert(history.grd_diff) -- sanity
 		local ga=history.grd_diff
 		local gb=history.grd:clip(	0,					0,					history.frame,
 									history.grd.width,	history.grd.height,	1)
