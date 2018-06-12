@@ -41,15 +41,30 @@ grddiff.history=function(grd)
 		if index>history.length then history.length=index end
 	end
 	
--- take a snapshot of this frame for latter diffing (started drawing)
-	history.draw_pull_frame=function(frame)
+-- take a snapshot of this frame for latter diffing (started drawing on this frame only)
+	history.draw_begin=function(frame)
 		history.frame=frame
 		history.grd_diff=history.grd:clip(	0,					0,					history.frame,
 											history.grd.width,	history.grd.height,	1):duplicate()
 	end
 
--- push the diff from when we pulled the frame to now (ended drawing)
-	history.draw_push_frame=function()
+-- return a temporray grd of only the frame we can draw into
+	history.draw_get=function()
+		aassert(history.grd_diff) -- sanity
+		return history.grd:clip(	0,					0,					history.frame,
+									history.grd.width,	history.grd.height,	1)
+	end
+
+-- revert back to begin state
+	history.draw_revert=function()
+		aassert(history.grd_diff) -- sanity
+		history.grd:pixels(0,0,history.frame,history.grd.width,	history.grd.height,	1,history.grd_diff) -- restore image
+		history.grd:palette(0,256, history.grd_diff:palette(0,256,"") ) -- restore palette
+	end
+	
+-- push any changes we find into the history
+	history.draw_save=function()
+		aassert(history.grd_diff) -- sanity
 		local ga=history.grd_diff
 		local gb=history.grd:clip(	0,					0,					history.frame,
 									history.grd.width,	history.grd.height,	1)
@@ -77,7 +92,7 @@ grddiff.history=function(grd)
 		if it.prev then -- link from prev
 			local pit=history.get(it.prev)
 			if pit then
-				pit.next=it.id -- link to next
+				pit.next=it.id -- link to *most*recent* next
 				history.set(pit.id,pit)
 			end
 		end
@@ -101,11 +116,14 @@ grddiff.history=function(grd)
 	end
 
 	history.goto=function(index) -- goto this undo index
-		while index>history.index do
+		while index>history.index do 
 			if not history.redo() then break end
 		end
 		while index<history.index do
 			if not history.undo() then break end
+		end
+		if index~=history.index then -- need to find shared ancestor		
+			-- TODO make this work, right now branches can get lost...
 		end
 	end
 
@@ -118,11 +136,12 @@ grddiff.history=function(grd)
 		end
 	end
 
-	history.redo=function() -- go forward a step
+	history.redo=function(id) -- go forward a step
 		local it=history.get(history.index)
-		if it.next then -- somewhere to go
-			history.apply(it.next)
-			history.index=it.next
+		id=id or it.next
+		if id then -- somewhere to go
+			history.apply(id)
+			history.index=id
 			return it
 		end
 	end
