@@ -28,6 +28,7 @@ parts:
 
     stage-packages:
       - libglu1-mesa
+      - libgl1-mesa-dri
 
 apps:
 
