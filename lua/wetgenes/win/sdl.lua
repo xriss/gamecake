@@ -135,8 +135,9 @@ sdl.show=function(it,view)
 	it.win:show()
 	
 	if     view=="full" then	 it.win:setFullscreen(SDL.window.Desktop)
-	elseif view=="max"  then	 it.win:setFullscreen(SDL.window.Maximized)
-	else						 it.win:setFullscreen(0)
+--	if     view=="full" then	 it.win:setFullscreen(SDL.window.Fullscreen)
+	elseif view=="max"  then	 it.win:maximize()
+	else						 it.win:setFullscreen(0) it.win:restore()
 	end
 	
 --	sdl.mousexy_init()
@@ -191,7 +192,7 @@ sdl.wait=function()
 	return nil
 end
 
-sdl.mousexy={0,0}
+sdl.mousexy={-1,-1}
 
 -- add current mouse position to the queue
 -- this does not help, we still get 0,0 at the start until the mouse moves...

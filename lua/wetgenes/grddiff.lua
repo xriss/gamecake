@@ -42,23 +42,28 @@ grddiff.history=function(grd)
 	end
 	
 -- take a snapshot of this frame for latter diffing (started drawing on this frame only)
-	history.draw_begin=function(frame)
-		history.frame=frame
-		history.grd_diff=history.grd:clip(	0,					0,					history.frame,
-											history.grd.width,	history.grd.height,	1):duplicate()
+	history.draw_begin=function(x,y,z,w,h,d)
+		history.area={
+			x or 0 ,
+			y or 0 ,
+			z or 0 ,
+			w or history.grd.width -(x or 0) ,
+			h or history.grd.height-(y or 0) ,
+			d or 1 }
+		history.grd_diff=history.grd:clip(unpack(history.area)):duplicate()
 	end
 
 -- return a temporray grd of only the frame we can draw into
 	history.draw_get=function()
 		assert(history.grd_diff) -- sanity
-		return history.grd:clip(	0,					0,					history.frame,
-									history.grd.width,	history.grd.height,	1)
+		return history.grd:clip(unpack(history.area))
 	end
 
 -- revert back to begin state
 	history.draw_revert=function()
 		assert(history.grd_diff) -- sanity
-		history.grd:pixels(0,0,history.frame,history.grd.width,	history.grd.height,	1,history.grd_diff) -- restore image
+		local c=history.area
+		history.grd:pixels(c[1],c[2],c[3],c[4],c[5],c[6],history.grd_diff) -- restore image
 		history.grd:palette(0,256, history.grd_diff:palette(0,256,"") ) -- restore palette
 	end
 	
@@ -66,9 +71,8 @@ grddiff.history=function(grd)
 	history.draw_save=function()
 		assert(history.grd_diff) -- sanity
 		local ga=history.grd_diff
-		local gb=history.grd:clip(	0,					0,					history.frame,
-									history.grd.width,	history.grd.height,	1)
-		local it={x=0,y=0,z=0,w=ga.width,h=ga.height,d=1}
+		local it={x=0,y=0,z=0,w=ga.width,h=ga.height,d=ga.depth}
+		local gb=history.grd:clip(unpack(history.area))
 		ga:xor(gb)
 		it.palette=ga:palette(0,256,"")
 		if it.palette==palette_nil then it.palette=nil end -- no colour has changed so do not store diff

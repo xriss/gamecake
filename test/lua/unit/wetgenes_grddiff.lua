@@ -50,7 +50,7 @@ function test_grddiff_history()
 	for i=0,15 do
 		local x,y=i*8,i*8
 
-		history.draw_begin(0)
+		history.draw_begin(0,0,0)
 		canvas.color(i)
 		canvas.box(x,y,x+7,y+7)
 		history.draw_save()
