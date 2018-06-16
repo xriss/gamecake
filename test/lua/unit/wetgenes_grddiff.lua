@@ -6,7 +6,6 @@ local wstr=require("wetgenes.string")
 
 local grd=require("wetgenes.grd")
 
-local grddiff=require("wetgenes.grddiff")
 local grdpaint=require("wetgenes.grdpaint")
 
 function do_file_read(f)
@@ -44,7 +43,7 @@ function test_grddiff_history()
 		128,128,128,255,
 	})
 
-	local history=grddiff.history(g)
+	local history=grdpaint.history(g)
 	local canvas=grdpaint.canvas(g)
 	
 	for i=0,15 do
