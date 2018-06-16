@@ -5,6 +5,11 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local wstr=require("wetgenes.string")
 local wgrd=require("wetgenes.grd")
+local cmsgpack=require("cmsgpack")
+
+local zlib=require("zlib")
+local inflate=function(d) return ((zlib.inflate())(d)) end
+local deflate=function(d) return ((zlib.deflate())(d,"finish")) end
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -163,44 +168,16 @@ grdpaint.rotate=function(gr,d)
 end
 
 -- map a 32bit image down to 8bit
-grdpaint.map8=function(g,p)
-
-	local ps=p:palette(0,256)
+grdpaint.map8=function(g,p,colors,dither)
 
 	local r=wgrd.create(wgrd.U8_INDEXED,g.width,g.height,g.depth)
-	r:palette(0,256,ps) -- copy pal
-	
-	local function best(p)
-		local b=0
-		local d=256*256*4*4
-		for i=0,255 do
-			local d1=ps[1+i*4]-p[1]
-			local d2=ps[2+i*4]-p[2]
-			local d3=ps[3+i*4]-p[3]
-			local d4=ps[4+i*4]-p[4]
-			local dd=d1*d1+d2*d2+d3*d3+d4*d4*2
-			if dd<=d then
-				d=dd
-				b=i
-			end
-		end
-		return b
-	end
 
-	for z=0,g.depth-1 do
-		for y=0,g.height-1 do
-			for x=0,g.width-1 do
-				local p=g:pixels(x,y,z,1,1,1)
-				r:pixels(x,y,z,1,1,1,{best(p)})
-			end
-		end
-	end
+	r:palette(0,256,p:palette(0,256)) -- copy pal
 	
+	g:remap(r,colors,dither)
+
 	return r
 end
-
-
-
 
 -- find all pixels connected to the color at x,y and return a grd mask
 grdpaint.fill_mask=function(g,x,y)
@@ -236,8 +213,37 @@ grdpaint.fill_mask=function(g,x,y)
 			ps[p]=nil -- filled
 		end
 	end
-
+	
 	return r
+end
+
+-- a paint that wraps at the edges
+grdpaint.paintwrap=function(ga,gb,x,y,cx,cy,cw,ch,mode,trans,color)
+
+	local w=ga.width
+	local h=ga.height
+
+	x=((x%w)+w)%w
+	y=((y%h)+h)%h
+
+	if not cx then -- full gb
+		cx=0
+		cy=0
+		cw=gb.width
+		ch=gb.height
+	end
+	
+	if x+cw > w then
+		if y+ch > h then
+			ga:paint(gb,x-w,y-h,cx,cy,cw,ch,mode,trans,color)
+		end
+		ga:paint(gb,x-w,y,cx,cy,cw,ch,mode,trans,color)
+	end
+	if y+ch > h then
+		ga:paint(gb,x,y-h,cx,cy,cw,ch,mode,trans,color)
+	end
+	ga:paint(gb,x,y,cx,cy,cw,ch,mode,trans,color)
+
 end
 
 
@@ -363,5 +369,167 @@ grdpaint.canvas=function(grd)
 
 end
 
+
+local palette_nil=("\0\0\0\0"):rep(256) -- an empty all 0 palette
+
+-- create a history state with the given grd as base
+grdpaint.history=function(grd)
+
+	local history={}
+
+	history.length=0
+	history.list={}
+	history.frame=0
+	history.grd=grd -- our current grd
+	
+	history.get=function(index)
+		if not index then return end
+		local it=history.list[index]
+		it=it and cmsgpack.unpack(inflate(it))
+		return it
+	end
+	history.set=function(index,it)
+		it=it and deflate(cmsgpack.pack(it))
+		history.list[index]=it
+		if index>history.length then history.length=index end
+	end
+	
+-- take a snapshot of this frame for latter diffing (started drawing on this frame only)
+	history.draw_begin=function(x,y,z,w,h,d)
+		history.area={
+			x or 0 ,
+			y or 0 ,
+			z or 0 ,
+			w or history.grd.width -(x or 0) ,
+			h or history.grd.height-(y or 0) ,
+			d or 1 }
+		history.grd_diff=history.grd:clip(unpack(history.area)):duplicate()
+	end
+
+-- return a temporray grd of only the frame we can draw into
+	history.draw_get=function()
+		assert(history.grd_diff) -- sanity
+		return history.grd:clip(unpack(history.area))
+	end
+
+-- revert back to begin state
+	history.draw_revert=function()
+		assert(history.grd_diff) -- sanity
+		local c=history.area
+		history.grd:pixels(c[1],c[2],c[3],c[4],c[5],c[6],history.grd_diff) -- restore image
+		history.grd:palette(0,256, history.grd_diff:palette(0,256,"") ) -- restore palette
+	end
+	
+-- push any changes we find into the history
+	history.draw_save=function()
+		assert(history.grd_diff) -- sanity
+		local ga=history.grd_diff
+		local it={x=0,y=0,z=0,w=ga.width,h=ga.height,d=ga.depth}
+		local gb=history.grd:clip(unpack(history.area))
+		ga:xor(gb)
+		it.palette=ga:palette(0,256,"")
+		if it.palette==palette_nil then it.palette=nil end -- no colour has changed so do not store diff
+		ga:shrink(it)
+		if it.w>0 and it.h>0 and it.d>0 then -- some pixels have changed
+			it.data=ga:pixels(it.x,it.y,it.z,it.w,it.h,it.d,"") -- get minimal xored data area as a string
+		else
+			it.x=nil
+			it.y=nil
+			it.z=nil
+			it.w=nil
+			it.h=nil
+			it.d=nil
+		end
+
+		it.prev=history.index -- link to prev
+		it.id=history.length+1
+
+		history.index=it.id
+		history.set(it.id,it)
+		if it.prev then -- link from prev
+			local pit=history.get(it.prev)
+			if pit then
+				pit.next=it.id -- link to *most*recent* next
+				history.set(pit.id,pit)
+			end
+		end
+		
+		history.grd_diff=nil -- throw away thinking grd
+	end
+	
+	history.apply=function(index) -- apply diff at this index
+		local it=history.get(index or history.index) -- default to current index
+		if it and it.w and it.h and it.d and it.data then -- xor
+			local ga=wgrd.create(history.grd.format,it.w,it.h,it.d)
+			local gb=history.grd:clip(it.x,it.y,it.z,it.w,it.h,it.d)
+			ga:pixels(0,0,0,it.w,it.h,it.d,it.data)
+			gb:xor(ga)
+		end
+		if it.palette then
+			local ga=wgrd.create(history.grd.format,0,0,0)
+			ga:pixels(0,256,it.palette)
+			history.grd:xor(ga)
+		end
+	end
+
+	history.goto=function(index) -- goto this undo index
+	
+		-- this will work if we are on the right branch
+		-- and destination is in the future
+		while index>history.index do 
+			if not history.redo() then break end
+		end
+		
+		-- this will work if we are on the right branch
+		-- and destination is in the past
+		while index<history.index do
+			if not history.undo() then break end
+		end
+		
+		-- did not work so we need to find a common point in history
+		if index~=history.index then -- need to find shared ancestor		
+			-- TODO make this work, right now branches can get lost...
+		end
+
+	end
+
+	history.undo=function() -- go back a step
+		local it=history.get(history.index)
+		if it.prev then -- somewhere to go
+			history.apply()
+			history.index=it.prev
+			return it
+		end
+	end
+
+	history.redo=function(id) -- go forward a step
+		local it=history.get(history.index)
+		id=id or it.next
+		if id then -- somewhere to go
+			history.apply(id)
+			history.index=id
+			return it
+		end
+	end
+
+	return history
+
+end
+
+
+
+-- create a layers state with the given opts
+-- layers are just a way of breaking one grd into discreet areas
+-- which can then be, optionally, recombined into a final image
+grdpaint.layers=function(grd)
+
+	local layers={}
+
+	layers.grd=grd
+	
+
+	return layers
+
+end
 
 
