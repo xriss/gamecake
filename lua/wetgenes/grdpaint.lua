@@ -246,14 +246,14 @@ grdpaint.paintwrap=function(ga,gb,x,y,cx,cy,cw,ch,mode,trans,color)
 
 end
 
+-- above are old swankypaint functions that should be moved into the canvas functions below.
+-- and probably shifted into C for speed...
 
-
--- create a canvas state with the given opts
+-- create a canvas state within the given grd
 grdpaint.canvas=function(grd)
 
-	local canvas={}
-
-	canvas.grd=grd -- what we draw into
+	local canvas={grd=grd}
+	grd.canvas=canvas
 	
 	canvas.clip=function(x,y,z,w,h,d)
 		if type(x)~="number" then -- clear
@@ -372,15 +372,20 @@ end
 
 local palette_nil=("\0\0\0\0"):rep(256) -- an empty all 0 palette
 
--- create a history state with the given grd as base
+-- create a history state within the given grd
 grdpaint.history=function(grd)
 
-	local history={}
+	local history={grd=grd}	
+	grd.history=history
+	
+	if not grd.layers then grdpaint.layers(grd) end -- need layers
 
-	history.length=0
-	history.list={}
-	history.frame=0
-	history.grd=grd -- our current grd
+	history.config=function()
+		history.length=0
+		history.list={}
+		history.frame=0
+	end
+	history.config()
 	
 	history.get=function(index)
 		if not index then return end
@@ -518,15 +523,70 @@ end
 
 
 
--- create a layers state with the given opts
--- layers are just a way of breaking one grd into discreet areas
--- which can then be, optionally, recombined into a final image
+-- create a layers state within the given grd
+-- layers are just a way of breaking one grd into discreet 2d areas
+-- which can then be, optionally, recombined into a final image/anim
 grdpaint.layers=function(grd)
 
-	local layers={}
+	local layers={grd=grd}	
+	grd.layers=layers
 
-	layers.grd=grd
-	
+	layers.frame=0
+	layers.layer=0
+
+	-- set layer config, default to entire frame.
+	layers.config=function(x,y,n)
+		if n then
+			if not x and not y then
+				x=math.floor(math.sqrt(n))
+			end
+			if x and not y then
+				y=math.ceil(n/x)
+			end
+			if y and not x then
+				x=math.ceil(n/y)
+			end
+		end
+		x=x or 1
+		y=y or 1
+		n=n or 1
+		layers.x=x -- number of layers wide
+		layers.y=y -- number of layers high
+		layers.count=n or x*y -- total layers is optional
+		layers.idx=1
+	end
+	layers.config() -- defaults
+
+	-- get the size of each layer
+	layers.size=function()
+		return math.floor(layers.grd.width/layers.x),math.floor(layers.grd.height/layers.y)
+	end
+
+	-- return a 3d clip area to get a single layer from the grd
+	layers.area=function(layer,frame)
+		layer=layer or layers.layer
+		frame=frame or layers.frame
+		local lw,lh=layers.size()
+		local lx=lw*math.floor((layer)%layers.x)
+		local ly=lh*math.floor((layer)/layers.x)
+		return  lx,ly,frame, lw,lh,1
+	end
+
+	-- get a new grd of all layers merged for every frame
+	layers.flatten_grd=function()
+		local gw,gh,gd=layers.grd.width,layers.grd.height,layers.grd.depth
+		local lw,lh=layers.size()
+		local g=wgrd.create(wgrd.U8_INDEXED,iw,ih,gd) -- new size same depth
+		g:palette(0,256,grd:palette(0,256))
+		for z=0,gd-1 do
+			for i=layers.count-1,0,-1 do
+				local x=math.floor(i%layers.x)
+				local y=math.floor(i/layers.x)
+				g:clip(0,0,z,iw,ih,1):paint( grd:clip(0,0,z,gw,gh,1) ,0,0,x*iw,y*ih,iw,ih,wgrd.PAINT_MODE_ALPHA,-1,-1)
+			end
+		end
+		return g
+	end
 
 	return layers
 
