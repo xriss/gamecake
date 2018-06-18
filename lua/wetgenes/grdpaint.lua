@@ -549,7 +549,6 @@ grdpaint.layers=function(grd)
 		end
 		x=x or 1
 		y=y or 1
-		n=n or 1
 		layers.x=x -- number of layers wide
 		layers.y=y -- number of layers high
 		layers.count=n or x*y -- total layers is optional
