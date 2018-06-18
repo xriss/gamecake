@@ -335,7 +335,12 @@ u32 tags[16];
 	tags[8]=0; //just a pointer but we
 	tags[9]=0; //need 16 bytes for 64bit build
 
-	tags[10]=0;
+	tags[10]=4<<2;
+	tags[11]=GRD_TAG_DEF('U','N','D','O');
+	tags[12]=0; //just a pointer but we
+	tags[13]=0; //need 16 bytes for 64bit build
+
+	tags[14]=0;
 
 
 	p=lua_grd_check_ptr(l,1);
@@ -366,6 +371,9 @@ u32 tags[16];
 	if(lua_isstring(l,-1)) { *((const char**)(tags+8))=lua_tostring(l,-1); }
 	lua_pop(l,1);
 
+	lua_getfield(l,2,"undo");
+	if(lua_isstring(l,-1)) { *((const char**)(tags+12))=lua_tostring(l,-1); }
+	lua_pop(l,1);
 	
 	if( p->bmap->w<1 )
 	{

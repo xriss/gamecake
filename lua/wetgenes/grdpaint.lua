@@ -516,9 +516,32 @@ grdpaint.history=function(grd)
 			return it
 		end
 	end
+	
+	local saveme={
+		"length",
+		"list",
+		"frame",
+	}
+
+	history.save=function()
+		local it={}
+		
+		for _,n in ipairs(saveme) do
+			it[n]=history[n]
+		end
+
+		return deflate(cmsgpack.pack(it))
+	end
+	
+	history.load=function(it)
+		local it=cmsgpack.unpack(inflate(it))
+
+		for _,n in ipairs(saveme) do
+			history[n]=it[n]
+		end
+	end
 
 	return history
-
 end
 
 
