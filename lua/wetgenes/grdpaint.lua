@@ -384,6 +384,7 @@ grdpaint.history=function(grd)
 		history.length=0
 		history.list={}
 		history.frame=0
+		history.index=0
 	end
 	history.config()
 	
@@ -500,7 +501,7 @@ grdpaint.history=function(grd)
 
 	history.undo=function() -- go back a step
 		local it=history.get(history.index)
-		if it.prev then -- somewhere to go
+		if it and it.prev then -- somewhere to go
 			history.apply()
 			history.index=it.prev
 			return it
@@ -509,7 +510,7 @@ grdpaint.history=function(grd)
 
 	history.redo=function(id) -- go forward a step
 		local it=history.get(history.index)
-		id=id or it.next
+		id=id or it and it.next
 		if id then -- somewhere to go
 			history.apply(id)
 			history.index=id
@@ -521,6 +522,7 @@ grdpaint.history=function(grd)
 		"length",
 		"list",
 		"frame",
+		"index",
 	}
 
 	history.save=function()

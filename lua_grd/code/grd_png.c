@@ -118,6 +118,8 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	if (!png_ptr)
 		abort_("png alloc read fail");
 
+	png_set_keep_unknown_chunks(png_ptr, PNG_HANDLE_CHUNK_ALWAYS, "UNDO", 1);
+
 	info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr)
 		abort_("png alloc info fail");
@@ -264,6 +266,7 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 
 
 	num_unknowns=png_get_unknown_chunks(png_ptr, info_ptr, &unknowns);
+//printf("unknown chunk count %d\n",num_unknowns);
 	for (i=0; i<num_unknowns; i++)
 	{
 		if( strcmp((char*)(unknowns[i].name),"UNDO")==0 )
@@ -391,7 +394,6 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 	int num_text;
 
 	png_text  text[1];
-	png_unknown_chunk chunks[1];
 
 	u32 *tag_UNDO=grd_tags_find(inf->tags,GRD_TAG_DEF('U','N','D','O')); // undo chunk data
 	u32 *tag_JSON=grd_tags_find(inf->tags,GRD_TAG_DEF('J','S','O','N'));
@@ -504,14 +506,6 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 		}
 	}
 	
-// add an undo data chunk
-	if(tag_UNDO)
-	{
-		strcpy((char*)(chunks[0].name),"UNDO");
-		chunks[0].data=(png_byte*)(tag_UNDO+2);
-		chunks[0].size=(png_size_t)tag_UNDO[0];
-		png_set_unknown_chunks(png_ptr, info_ptr, chunks, 1);
-	}
 
 #if defined(PNG_INFO_acTL)
 	if(frames>0)
@@ -521,6 +515,12 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 #endif
 	
 	png_write_info(png_ptr, info_ptr);
+
+// add an undo data chunk
+	if(tag_UNDO)
+	{
+		png_write_chunk(png_ptr, "UNDO", *((png_byte**)(tag_UNDO+3)), (png_size_t)tag_UNDO[2] );
+	}
 
 	row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * height);
 	if (!row_pointers)
