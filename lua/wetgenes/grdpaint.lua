@@ -559,7 +559,7 @@ grdpaint.history=function(grd)
 		if it and it.prev and history.list[it.prev] then -- somewhere to go
 			history.apply(history.index)
 			history.index=it.prev
-			return it
+			return true
 		end
 	end
 
@@ -571,7 +571,7 @@ grdpaint.history=function(grd)
 		if id then -- somewhere to go
 			history.apply(id)
 			history.index=id
-			return it
+			return true
 		end
 	end
 	
