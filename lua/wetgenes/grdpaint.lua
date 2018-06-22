@@ -409,7 +409,15 @@ grdpaint.history=function(grd)
 			w or history.grd.width -(x or 0) ,
 			h or history.grd.height-(y or 0) ,
 			d or 1 }
-		history.grd_diff=history.grd:clip(unpack(history.area)):duplicate()
+		if w==0 and h==0 and d==0 then -- flag palette only with auto merge
+			history.area.pal=true
+			if not history.pal then -- use original
+				history.grd_diff=history.grd:clip(unpack(history.area)):duplicate()
+			end
+		else
+			history.pal=nil -- stop accumulating palette changes
+			history.grd_diff=history.grd:clip(unpack(history.area)):duplicate()
+		end
 	end
 
 -- return a temporray grd of only the frame we can draw into
@@ -426,55 +434,102 @@ grdpaint.history=function(grd)
 		history.grd:palette(0,256, history.grd_diff:palette(0,256,"") ) -- restore palette
 	end
 	
+-- stop any accumulated changes
+	history.draw_end=function()
+		history.grd_diff=nil
+		history.pal=nil
+	end
+	
 -- push any changes we find into the history
 	history.draw_save=function()
 		assert(history.grd_diff) -- sanity
-		local ga=history.grd_diff
-		local it={x=0,y=0,z=0,w=ga.width,h=ga.height,d=ga.depth}
-		local gb=history.grd:clip(unpack(history.area))
-		ga:xor(gb)
-		it.palette=ga:palette(0,256,"")
-		if it.palette==palette_nil then it.palette=nil end -- no colour has changed so do not store diff
-		ga:shrink(it)
-		if it.w>0 and it.h>0 and it.d>0 then -- some pixels have changed
-			it.data=ga:pixels(it.x,it.y,it.z,it.w,it.h,it.d,"") -- get minimal xored data area as a string
+		
+		if history.area.pal then -- palette only with auto merge
+		
+			if history.pal then -- auto merge
+			
+				local ga=history.grd_diff:duplicate()
+				local it=history.pal
+				local gb=history.grd:clip(unpack(history.area))
+				ga:xor(gb)
+				it.palette=ga:palette(0,256,"")
+				history.set(it.id,it)
+
+			else -- new
+				local ga=history.grd_diff:duplicate()
+				local it={}
+				local gb=history.grd:clip(unpack(history.area))
+				ga:xor(gb)
+				it.palette=ga:palette(0,256,"")
+				if it.palette~=palette_nil then -- only remember if any colour has changed
+
+					it.prev=history.index -- link to prev
+					it.id=history.length+1
+
+					history.index=it.id
+					history.set(it.id,it)
+					if it.prev then -- link from prev
+						local pit=history.get(it.prev)
+						if pit then
+							pit.next=it.id -- link to *most*recent* next
+							history.set(pit.id,pit)
+						end
+					end
+
+					history.pal=it
+				end
+			end
+
 		else
-			it.x=nil
-			it.y=nil
-			it.z=nil
-			it.w=nil
-			it.h=nil
-			it.d=nil
-		end
+		
+			local ga=history.grd_diff
+			local it={x=0,y=0,z=0,w=ga.width,h=ga.height,d=ga.depth}
+			local gb=history.grd:clip(unpack(history.area))
+			ga:xor(gb)
+			it.palette=ga:palette(0,256,"")
+			if it.palette==palette_nil then it.palette=nil end -- no colour has changed so do not store diff
+			ga:shrink(it)
+			if it.w>0 and it.h>0 and it.d>0 then -- some pixels have changed
+				it.data=ga:pixels(it.x,it.y,it.z,it.w,it.h,it.d,"") -- get minimal xored data area as a string
+			else
+				it.x=nil
+				it.y=nil
+				it.z=nil
+				it.w=nil
+				it.h=nil
+				it.d=nil
+			end
 
-		it.prev=history.index -- link to prev
-		it.id=history.length+1
+			it.prev=history.index>0 and  history.index -- link to prev
+			it.id=history.length+1
 
-		history.index=it.id
-		history.set(it.id,it)
-		if it.prev then -- link from prev
-			local pit=history.get(it.prev)
-			if pit then
+			history.index=it.id
+			history.set(it.id,it)
+			if it.prev then -- link from prev which must exist
+				local pit=history.get(it.prev)
 				pit.next=it.id -- link to *most*recent* next
 				history.set(pit.id,pit)
 			end
+			
+			history.draw_end()
 		end
-		
-		history.grd_diff=nil -- throw away thinking grd
 	end
 	
 	history.apply=function(index) -- apply diff at this index
+		history.draw_end()
 		local it=history.get(index or history.index) -- default to current index
-		if it and it.w and it.h and it.d and it.data then -- xor
+		if it and it.w and it.h and it.d and it.data then -- xor image
 			local ga=wgrd.create(history.grd.format,it.w,it.h,it.d)
 			local gb=history.grd:clip(it.x,it.y,it.z,it.w,it.h,it.d)
 			ga:pixels(0,0,0,it.w,it.h,it.d,it.data)
+			if it.palette then -- xor pal
+				ga:palette(0,256,it.palette)
+			end
 			gb:xor(ga)
-		end
-		if it.palette then
+		elseif it.palette then -- xor pal only
 			local ga=wgrd.create(history.grd.format,0,0,0)
-			ga:pixels(0,256,it.palette)
-			history.grd:xor(ga)
+			ga:palette(0,256,it.palette)
+			history.grd:clip(0,0,0,0,0,0):xor(ga)
 		end
 	end
 
@@ -501,16 +556,18 @@ grdpaint.history=function(grd)
 
 	history.undo=function() -- go back a step
 		local it=history.get(history.index)
-		if it and it.prev then -- somewhere to go
-			history.apply()
+		if it and it.prev and history.list[it.prev] then -- somewhere to go
+			history.apply(history.index)
 			history.index=it.prev
 			return it
 		end
 	end
 
 	history.redo=function(id) -- go forward a step
-		local it=history.get(history.index)
-		id=id or it and it.next
+		if not id then
+			local it=history.get(history.index)
+			id=it and it.next
+		end
 		if id then -- somewhere to go
 			history.apply(id)
 			history.index=id
@@ -526,6 +583,9 @@ grdpaint.history=function(grd)
 	}
 
 	history.save=function()
+
+		history.draw_end()
+
 		local it={}
 		
 		for _,n in ipairs(saveme) do
@@ -536,6 +596,9 @@ grdpaint.history=function(grd)
 	end
 	
 	history.load=function(it)
+
+		history.draw_end()
+		
 		local it=cmsgpack.unpack(inflate(it))
 
 		for _,n in ipairs(saveme) do
