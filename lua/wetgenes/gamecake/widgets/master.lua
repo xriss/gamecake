@@ -69,9 +69,6 @@ function wmaster.setup(widget,def)
 
 
 
--- global sequence stamp value, use getstamp to inc
-	master.stamp=1
-
 -- built in color themes, 
 
 	master.color_theme_bright={ { 0.00, 0.00, 0.00 },{ 0.60, 0.60, 0.60 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, }
@@ -577,15 +574,6 @@ function wmaster.setup(widget,def)
 		end)		
 	end
 
---
--- a new stamp value, probably larger but only guaranteed to be unique
--- when we adjust values we stamp them and do not readjust if already stamped to
--- the given value
---
-	function master.get_stamp()
-		master.stamp=(master.stamp+1)%0xffffffff -- 32bit wrap
-		return master.stamp
-	end
 
 end
 

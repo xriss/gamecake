@@ -15,63 +15,62 @@ function M.bake(oven,wdata)
 wdata=wdata or {}
 
 
-wdata.call_hook_later=function(dat,hook,stamp)
+wdata.call_hook_later=function(dat,hook)
 	if not dat.master then return wdata.call_hook(dat,hook) end -- can not defer without master
 	local hooks=dat.hooks
 	local type_hooks=type(hooks)
 	if type_hooks=="function" then -- master function
-		return dat.master.later_append( hooks , hook , dat , stamp )
+		return dat.master.later_append( hooks , hook , dat )
 	elseif type_hooks=="table" and hooks[hook] then -- or table of functions
-		return dat.master.later_append( hooks[hook] , dat , stamp )
+		return dat.master.later_append( hooks[hook] , dat )
 	end
 end
 
-wdata.call_hook=function(dat,hook,stamp)
+wdata.call_hook=function(dat,hook)
 	local hooks=dat.hooks
 	local type_hooks=type(hooks)
 	if type_hooks=="function" then -- master function
-		return hooks(hook,dat,stamp)
+		return hooks(hook,dat)
 	elseif type_hooks=="table" and hooks[hook] then -- or table of functions
-		return hooks[hook](dat,stamp)
+		return hooks[hook](dat)
 	end
 end
 
--- set number (may trigger hook)
-wdata.data_value=function(dat,val,stamp)
+-- set number (may trigger hook unless nohook is set)
+wdata.data_value=function(dat,val,nohook)
 
 	local master=dat.master
 	if not master then -- backwards compat
 		master={
-			get_stamp=function()return 0 end,
 			dirty_by_data=function()end
 		}
 	end
 	
 	if dat.class=="number" or dat.class=="list" then
---print(dat,val,stamp)
+--print(dat,val)
 		if val then
 			local old=dat.num
-			stamp=stamp or master.get_stamp() -- make sure we have a stamp value
 			if type(val)=="string" then val=dat:tonumber(val) end -- auto convert from string to number
 			if val*0~=val*0 then val=0 end -- remove inf or nan values?
 			if dat.min and val<dat.min then val=dat.min end
 			if dat.max and val>dat.max then val=dat.max end
 			dat.num=val
-			if old~=dat.num and dat.stamp~=stamp then -- only change value if stamp doesnt match
-				dat.stamp=stamp
+			if old~=dat.num then
 				dat.str=dat:tostring(dat.num) -- cache on change
-				dat:call_hook_later("value",stamp) -- call value hook, which may choose to mod the num some more...
+				if not nohook then -- disable hooks
+					dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
+				end
 				master.dirty_by_data(dat)
 			end
 		end 
 		return dat.num
 	else
 		if val then
-			stamp=stamp or master.get_stamp() -- make sure we have a stamp value
-			if val~=dat.str and dat.stamp~=stamp then -- only change value if stamp doesnt match
-				dat.stamp=stamp
+			if val~=dat.str then
 				dat.str=val or dat.str
-				dat:call_hook_later("value",stamp) -- call value hook, which may choose to mod the num some more...
+				if not nohook then -- disable hooks
+					dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
+				end
 				master.dirty_by_data(dat)
 			end
 		end
@@ -235,8 +234,6 @@ function wdata.new_data(dat)
 	dat.str=dat.str or ""
 	dat.num=dat.num or 0
 	
-	dat.stamp=0
-
 --	if dat.class=="number" then
 --		dat:value(dat.num,true) -- triger value changed/set callbacks?
 --	else
