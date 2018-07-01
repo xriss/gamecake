@@ -619,8 +619,7 @@ grdpaint.layers=function(grd)
 	local layers={grd=grd}	
 	grd.layers=layers
 
-	layers.frame=0
-	layers.layer=0
+	layers.frame=0 -- keep track of frame
 
 	-- set layer config, default to entire frame.
 	layers.config=function(x,y,n)
@@ -650,12 +649,15 @@ grdpaint.layers=function(grd)
 	end
 
 	-- return a 3d clip area to get a single layer from the grd
-	layers.area=function(layer,frame)
-		layer=layer or layers.layer
+	layers.area=function(idx,frame)
+		idx=idx or layers.idx
 		frame=frame or layers.frame
+		if idx==0 then -- layer 0 is special case, full size
+			return 0,0,frame, layers.grd.width,layers.grd.height,1
+		end
 		local lw,lh=layers.size()
-		local lx=lw*math.floor((layer)%layers.x)
-		local ly=lh*math.floor((layer)/layers.x)
+		local lx=lw*math.floor((idx-1)%layers.x)
+		local ly=lh*math.floor((idx-1)/layers.x)
 		return  lx,ly,frame, lw,lh,1
 	end
 
