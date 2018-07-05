@@ -606,6 +606,22 @@ grdpaint.history=function(grd)
 		end
 	end
 
+-- return amount of memory used by undo
+	history.get_memory=function()
+		local total=0
+		local count=0
+		local mini=0
+		for i=history.length,0,-1 do
+			local v=history.list[i]
+			if v then
+				total=total+#v
+				count=count+1
+				mini=i
+			end
+		end
+		return total,count,mini
+	end
+
 	return history
 end
 
@@ -639,7 +655,7 @@ grdpaint.layers=function(grd)
 		layers.x=x -- number of layers wide
 		layers.y=y -- number of layers high
 		layers.count=n or x*y -- total layers is optional
-		layers.idx=1
+		layers.idx=0
 	end
 	layers.config() -- defaults
 

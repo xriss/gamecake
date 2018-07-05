@@ -79,18 +79,24 @@ wdata.data_value=function(dat,val,nohook)
 end
 
 -- adjust number (may trigger hook)
-wdata.data_inc=function(dat,step)
+wdata.data_inc=function(dat,step,nohook)
 	step=step or dat.step
 	if step==0 then step=1 end
-	dat:value(dat.num+step)
+	return dat:value(dat.num+step,nohook)
 end
 -- adjust number (may trigger hook)
-wdata.data_dec=function(dat,step)
+wdata.data_dec=function(dat,step,nohook)
 	step=step or dat.step
 	if step==0 then step=1 end
-	dat:value(dat.num-step)
+	return dat:value(dat.num-step,nohook)
 end
 
+-- set a number value and min/max range probably without any triggers
+wdata.data_set=function(dat,val,vmin,vmax,nohook)
+	dat.min=vmin or dat.min
+	dat.max=vmax or dat.max
+	return dat:value(val,nohook)
+end
 
 
 -- get a string from the number
@@ -224,6 +230,7 @@ function wdata.new_data(dat)
 	dat.value=wdata.data_value
 	dat.inc=wdata.data_inc
 	dat.dec=wdata.data_dec
+	dat.set=wdata.data_set
 
 -- work out snapping for scroll bars	
 	dat.snap=wdata.data_snap
