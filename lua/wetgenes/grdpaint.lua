@@ -385,8 +385,13 @@ grdpaint.history=function(grd)
 		history.list={}
 		history.frame=0
 		history.index=0
+		history.width=0
+		history.height=0
 	end
 	history.config()
+	
+	history.width=grd.width		-- the maximum grd size over time
+	history.height=grd.height
 	
 	history.get=function(index)
 		if not index then return end
@@ -446,7 +451,7 @@ grdpaint.history=function(grd)
 		
 		if history.area.pal then -- palette only with auto merge
 		
-			if history.pal then -- auto merge
+			if history.pal then -- auto merge into last change
 			
 				local ga=history.grd_diff:duplicate()
 				local it=history.pal
@@ -500,15 +505,19 @@ grdpaint.history=function(grd)
 				it.d=nil
 			end
 
-			it.prev=history.index>0 and  history.index -- link to prev
-			it.id=history.length+1
+			if it.data or it.palette then -- only remember if something has actually changed
 
-			history.index=it.id
-			history.set(it.id,it)
-			if it.prev then -- link from prev which must exist
-				local pit=history.get(it.prev)
-				pit.next=it.id -- link to *most*recent* next
-				history.set(pit.id,pit)
+				it.prev=history.index>0 and  history.index -- link to prev
+				it.id=history.length+1
+
+				history.index=it.id
+				history.set(it.id,it)
+				if it.prev then -- link from prev which must exist
+					local pit=history.get(it.prev)
+					pit.next=it.id -- link to *most*recent* next
+					history.set(pit.id,pit)
+				end
+			
 			end
 			
 			history.draw_end()
@@ -549,7 +558,32 @@ grdpaint.history=function(grd)
 		
 		-- did not work so we need to find a common point in history
 		if index~=history.index then -- need to find shared ancestor		
-			-- TODO make this work, right now branches can get lost...
+
+			local path={} -- the path to take to move forwards
+			local check=index
+			local searching=true
+			while searching do
+
+				while check and check>history.index do -- work our way backwards from the destination remembering the path
+					table.insert(path,check)
+					check=history.get_prev(check) -- step back in path
+				end				
+
+				while check and check<history.index do
+					if not history.undo() then searching=false break end -- break if can go no further
+				end
+				
+				if check and check==history.index then -- we can use the path from here
+					searching=false -- we have found the path
+					for i=#path,1,-1 do
+						history.apply(path[i]) -- walk along the path
+						history.index=path[i] -- remembering where we are
+					end
+				end
+				
+				if not check then searching=false end -- no path can be found
+			end
+			
 		end
 
 	end
@@ -580,6 +614,8 @@ grdpaint.history=function(grd)
 		"list",
 		"frame",
 		"index",
+		"width",
+		"height",
 	}
 
 	history.save=function()
@@ -620,6 +656,15 @@ grdpaint.history=function(grd)
 			end
 		end
 		return total,count,mini
+	end
+
+-- get the index of the parent of the given index
+	history.get_prev=function(index)
+		index=index or history.index -- use current if missing
+		local it=history.get(index) -- unpack
+		if it then
+			return it.prev -- return index
+		end		
 	end
 
 	return history
