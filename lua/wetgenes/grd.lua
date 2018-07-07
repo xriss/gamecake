@@ -1049,7 +1049,7 @@ Open a GIF stream, returns a table with the following functions,
 	
 Add a frame to the gif, each frame should be the same size and color map.
 
-	stream:close(ga)
+	stream:close()
 
 Close the stream and finalise the GIF.
 
@@ -1061,18 +1061,15 @@ base.stream=function(ga,opts)
 	end
 
 	local stream=core.stream_open(ga[0],opts)
-	core.info(ga[0],ga)
 	local it={[0]=stream}
 
-	it.write=function(ga)
-		core.stream_write(ga[0],stream)
-		core.info(ga[0],ga)
+	it.write=function(it,ga)
+		core.stream_write(stream,ga[0])
 		return it
 	end
 
-	it.close=function(ga)
-		core.stream_close(ga[0],stream)
-		core.info(ga[0],ga)
+	it.close=function(it)
+		core.stream_close(stream)
 		return it
 	end
 

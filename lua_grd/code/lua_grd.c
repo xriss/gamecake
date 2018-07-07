@@ -1796,7 +1796,7 @@ u32 tags[16];
 	sgif->inf->tags=tags;
 	sgif->inf->file_name=s;
 
-	grd_gif_save_stream_open(p,sgif);
+	grd_gif_save_stream_open(sgif,p);
 
 	return 1;
 }
@@ -1806,10 +1806,10 @@ int lua_grd_stream_write(lua_State *l)
 part_ptr p;
 struct grd_io_gif *sgif;
 
-	p=lua_grd_check_ptr(l,1);
-	sgif=((struct grd_io_gif *)lua_touserdata(l, 2 ));
+	sgif=((struct grd_io_gif *)lua_touserdata(l, 1 ));
+	p=lua_grd_check_ptr(l,2);
 
-	grd_gif_save_stream_write(p,sgif);
+	grd_gif_save_stream_write(sgif,p);
 
 	return 0;
 }
@@ -1819,10 +1819,9 @@ int lua_grd_stream_close(lua_State *l)
 part_ptr p;
 struct grd_io_gif *sgif;
 
-	p=lua_grd_check_ptr(l,1);
-	sgif=((struct grd_io_gif *)lua_touserdata(l, 2 ));
+	sgif=((struct grd_io_gif *)lua_touserdata(l, 1 ));
 
-	grd_gif_save_stream_close(p,sgif);
+	grd_gif_save_stream_close(sgif);
 
 	if(sgif->inf->data)
 	{ 

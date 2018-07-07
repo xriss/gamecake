@@ -236,13 +236,13 @@ void grd_gif_save(struct grd * g, struct grd_io_info * inf )
 	struct grd_io_gif sgif[1]={0};
 	memcpy(sgif->inf,inf,sizeof(sgif->inf));
 	
-	grd_gif_save_stream_open(g,sgif);
+	grd_gif_save_stream_open(sgif,g);
 	for (i = 0; i < g->bmap->d; i++)
 	{
 		sgif->z=i;
-		grd_gif_save_stream_write(g,sgif);
+		grd_gif_save_stream_write(sgif,g);
 	}
-	grd_gif_save_stream_close(g,sgif);
+	grd_gif_save_stream_close(sgif);
 
 	memcpy(inf,sgif->inf,sizeof(sgif->inf)); // may contain return values so copy it back
 	return;
@@ -389,7 +389,7 @@ bogus:
 
 
 
-void grd_gif_save_stream_open(struct grd * g, struct grd_io_gif *sgif)
+void grd_gif_save_stream_open(struct grd_io_gif *sgif,struct grd * g)
 {
 int ErrorCode;
 int i;
@@ -474,14 +474,27 @@ bogus:
 	grd_gif_inf_clean(sgif->inf);
 }
 
-void grd_gif_save_stream_write(struct grd * g, struct grd_io_gif *sgif)
+void grd_gif_save_stream_write(struct grd_io_gif *sgif,struct grd * g)
 {
+int i;
+unsigned char *p;
+
 	sgif->img.ImageDesc.Left=0;
 	sgif->img.ImageDesc.Top=0;
 	sgif->img.ImageDesc.Width=g->bmap->w;
 	sgif->img.ImageDesc.Height=g->bmap->h;
 	sgif->img.ImageDesc.Interlace=0;
-	sgif->img.ImageDesc.ColorMap=0;
+
+	p=grdinfo_get_data(g->cmap,0,0,0);
+	for(i=0;i<g->cmap->w;i++)
+	{
+		sgif->colors[i].Red=p[0];
+		sgif->colors[i].Green=p[1];
+		sgif->colors[i].Blue=p[2];
+		p=p+4;
+	}
+	sgif->img.ImageDesc.ColorMap=GifMakeMapObject(g->cmap->w,sgif->colors);
+
 	
 	sgif->img.RasterBits=grdinfo_get_data(g->bmap,0,0,sgif->z);
 	
@@ -505,12 +518,12 @@ void grd_gif_save_stream_write(struct grd * g, struct grd_io_gif *sgif)
 
 }
 
-void grd_gif_save_stream_close(struct grd * g,struct grd_io_gif *sgif)
+void grd_gif_save_stream_close(struct grd_io_gif *sgif)
 {
 
 	if (EGifSpew(sgif->gif) == GIF_ERROR)
 	{
-		g->err="write fail";
+		sgif->err="write fail";
 		goto bogus;
 	}
 	

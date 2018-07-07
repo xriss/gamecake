@@ -18,12 +18,12 @@ struct grd_io_gif
 	ExtensionBlock ext[4];
 	unsigned char control[4];
 	unsigned char wank[3];
-
+	char *err;
 };
 
-void grd_gif_save_stream_open( struct grd * g, struct grd_io_gif *sgif);
-void grd_gif_save_stream_write(struct grd * g, struct grd_io_gif *sgif);
-void grd_gif_save_stream_close(struct grd * g, struct grd_io_gif *sgif);
+void grd_gif_save_stream_open( struct grd_io_gif *sgif,struct grd * g);
+void grd_gif_save_stream_write(struct grd_io_gif *sgif,struct grd * g);
+void grd_gif_save_stream_close(struct grd_io_gif *sgif);
 
 
 void grd_gif_load_file(struct grd *g, const char* file_name, u32 *tags);

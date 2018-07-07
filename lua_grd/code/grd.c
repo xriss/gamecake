@@ -1677,7 +1677,7 @@ int suc;
 	if( ( g->bmap->fmt==GRD_FMT_U8_INDEXED ) ||
 		( g->bmap->fmt==GRD_FMT_U8_INDEXED_PREMULT ) )
 	{
-		memcpy(g->cmap->data,gb->cmap->data, 4 * 256 ); // copy palette colors
+		memcpy(gb->cmap->data,g->cmap->data, 4 * 256 ); // copy palette colors
 
 		fw=( (f32)gi->w / (f32)w );
 		sw=(s32)ceilf(fw);
