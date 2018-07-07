@@ -501,6 +501,9 @@ grdpaint.history=function(grd)
 	history.draw_save=function(json)
 		assert(history.grd_diff) -- sanity
 		
+		if history.grd.width  > history.width  then history.width =history.grd.width  end
+		if history.grd.height > history.height then history.height=history.grd.height end
+		
 		if history.area.pal then -- palette only with auto merge
 		
 			if history.pal then -- auto merge into last change
