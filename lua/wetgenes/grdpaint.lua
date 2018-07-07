@@ -372,6 +372,57 @@ end
 
 local palette_nil=("\0\0\0\0"):rep(256) -- an empty all 0 palette
 
+-- deep recursive merge copy from it into base
+local deepjson_copy ; deepjson_copy=function(base,it)
+	base=base or {}
+	for n,v in pairs(it or {}) do
+		if type(v)=="table" then -- recurse
+			base[n]=deepjson_copy(base[n],v) -- create new table maybe
+		else
+			base[n]=v
+		end
+	end
+	return base
+end
+
+-- deep recursive diff returns things in it that exist and are different to base
+-- does not work with fields that are set to nil in it
+-- returns nil if all data in it is the same as in base
+local deepjson_diff ; deepjson_diff=function(base,it)
+	local diff
+
+	for n,v in pairs(it or {}) do
+		if type(v)=="table" then -- recurse
+			local d=deepjson_diff(base[n] or {},v)
+			if d then
+				diff=diff or {} -- only create on change
+				diff[n]=d -- set new values
+			end
+		else
+			if base[n] ~= v then
+				diff=diff or {} -- only create on change
+				diff[n]=v -- set new value
+			end
+		end
+	end
+
+	return diff
+end
+
+-- return the values that would be replace by applying diff
+local deepjson_undo ; deepjson_undo=function(base,diff)
+	local undo={}
+	for n,v in pairs(diff) do
+		if type(v)=="table" then -- recurse
+			undo[n]=deepjson_undo(base[n] or {},v)
+		else
+			undo[n]=base[n]
+		end
+		undo[n]=undo[n] or false -- convert nil to false
+	end
+	return undo
+end
+
 -- create a history state within the given grd
 grdpaint.history=function(grd)
 
@@ -387,6 +438,7 @@ grdpaint.history=function(grd)
 		history.index=0
 		history.width=0
 		history.height=0
+		history.json={} -- local cache deep copy that starts empty
 	end
 	history.config()
 	
@@ -445,8 +497,8 @@ grdpaint.history=function(grd)
 		history.pal=nil
 	end
 	
--- push any changes we find into the history
-	history.draw_save=function()
+-- push any changes we find into the history, optionally pass in a new json object to diff and apply
+	history.draw_save=function(json)
 		assert(history.grd_diff) -- sanity
 		
 		if history.area.pal then -- palette only with auto merge
@@ -466,7 +518,9 @@ grdpaint.history=function(grd)
 				local gb=history.grd:clip(unpack(history.area))
 				ga:xor(gb)
 				it.palette=ga:palette(0,256,"")
-				if it.palette~=palette_nil then -- only remember if any colour has changed
+				if it.palette==palette_nil then it.palette=nil end -- no colour has changed so do not store diff
+
+				if it.palette or it.redo then -- only remember if any colour or json has changed
 
 					it.prev=history.index -- link to prev
 					it.id=history.length+1
@@ -505,7 +559,14 @@ grdpaint.history=function(grd)
 				it.d=nil
 			end
 
-			if it.data or it.palette then -- only remember if something has actually changed
+			it.redo=deepjson_diff(history.json,json) -- returns nil if json is nil or contains only the same data
+			if it.redo then
+				it.undo=deepjson_undo(history.json,it.redo)
+				deepjson_copy(history.json,it.redo)
+			end
+
+			if it.data or it.palette or it.redo then -- only remember if something has actually changed
+
 
 				it.prev=history.index>0 and  history.index -- link to prev
 				it.id=history.length+1
@@ -540,6 +601,7 @@ grdpaint.history=function(grd)
 			ga:palette(0,256,it.palette)
 			history.grd:clip(0,0,0,0,0,0):xor(ga)
 		end
+		return it
 	end
 
 	history.goto=function(index) -- goto this undo index
@@ -576,8 +638,7 @@ grdpaint.history=function(grd)
 				if check and check==history.index then -- we can use the path from here
 					searching=false -- we have found the path
 					for i=#path,1,-1 do
-						history.apply(path[i]) -- walk along the path
-						history.index=path[i] -- remembering where we are
+						history.redo(path[i]) -- walk along the path
 					end
 				end
 				
@@ -591,8 +652,9 @@ grdpaint.history=function(grd)
 	history.undo=function() -- go back a step
 		local it=history.get(history.index)
 		if it and it.prev and history.list[it.prev] then -- somewhere to go
-			history.apply(history.index)
+			local p=history.apply(history.index)
 			history.index=it.prev
+			deepjson_copy(history.json,p and p.undo)
 			return true
 		end
 	end
@@ -603,8 +665,9 @@ grdpaint.history=function(grd)
 			id=it and it.next
 		end
 		if id then -- somewhere to go
-			history.apply(id)
+			local p=history.apply(id)
 			history.index=id
+			deepjson_copy(history.json,p and p.redo)
 			return true
 		end
 	end
@@ -616,6 +679,7 @@ grdpaint.history=function(grd)
 		"index",
 		"width",
 		"height",
+		"json",
 	}
 
 	history.save=function()
@@ -666,6 +730,12 @@ grdpaint.history=function(grd)
 			return it.prev -- return index
 		end		
 	end
+
+-- copy current json into a new or the given json table and return it
+	history.get_json=function(it)
+		return deepjson_copy(it,history.json)
+	end
+
 
 	return history
 end
