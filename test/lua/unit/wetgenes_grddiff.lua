@@ -21,6 +21,14 @@ function do_file_compare(f1,f2)
 	return d1==d2
 end
 
+local function do_file_assert(g,name,test)
+	assert( g:save("dat/grd/"..name.."."..test..".out.png","png") )	
+	local fnamea,fnameb="dat/grd/"..name.."."..test..".out.png","dat/grd/"..name.."."..test..".chk.png"
+	local diff=do_file_compare(fnamea,fnameb)
+	if not diff then print("\n\nFILES DIFFER : "..fnamea.."   "..fnameb.."\n") end
+	assert_true( diff )
+end
+
 function test_grddiff_history()
 
 	local g=grd.create("U8_INDEXED",128,128,1)
@@ -54,18 +62,21 @@ function test_grddiff_history()
 		canvas.box(x,y,x+7,y+7)
 		history.draw_save()
 
-		assert( history.grd:save("dat/grd/diff.base."..i..".out.png","png") )
+		assert( history.grd:duplicate():save("dat/grd/diff.undo."..i..".chk.png","png") )
+		assert( history.grd:duplicate():save("dat/grd/diff.redo."..i..".chk.png","png") )
 	end
 
-	for i=14,0,-1 do
+	for i=14,1,-1 do
 		history.undo()
-		assert( history.grd:save("dat/grd/diff.undo."..i..".out.png","png") )
-		assert_true( do_file_compare("dat/grd/diff.base."..i..".out.png","dat/grd/diff.undo."..i..".out.png") )
+		do_file_assert(history.grd:duplicate(),"diff","undo."..i)
+--		assert( history.grd:duplicate():save("dat/grd/diff.undo."..i..".out.png","png") )
+--		assert_true( do_file_compare("dat/grd/diff.base."..i..".out.png","dat/grd/diff.undo."..i..".out.png") )
 	end
-	for i=1,15 do
+	for i=2,15 do
 		history.redo()
-		assert( history.grd:save("dat/grd/diff.redo."..i..".out.png","png") )
-		assert_true( do_file_compare("dat/grd/diff.base."..i..".out.png","dat/grd/diff.redo."..i..".out.png") )
+		do_file_assert(history.grd:duplicate(),"diff","redo."..i)
+--		assert( history.grd:duplicate():save("dat/grd/diff.redo."..i..".out.png","png") )
+--		assert_true( do_file_compare("dat/grd/diff.base."..i..".out.png","dat/grd/diff.redo."..i..".out.png") )
 	end
 
 	io.open("dat/grd/diff.base.lua","w"):write( wstr.dump(history.list) )

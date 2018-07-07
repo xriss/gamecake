@@ -1,1 +1,2 @@
+cd `dirname $0`
 rename -f 's/\.out\.png/\.chk\.png/' *
