@@ -1,1 +1,1 @@
-rename 's\.out.png/\.chk.png/' *
+rename -f 's/\.out\.png/\.chk\.png/' *
