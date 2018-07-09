@@ -796,8 +796,10 @@ grdpaint.layers=function(grd)
 	end
 
 	-- get a new grd of all layers merged for every frame
+	-- or just a single frame if requested
 	layers.flatten_grd=function()
-		local gw,gh,gd=layers.grd.width,layers.grd.height,layers.grd.depth
+		local grd=layers.grd
+		local gd=grd.depth
 		local lw,lh=layers.size()
 		local g=wgrd.create(wgrd.U8_INDEXED,lw,lh,gd) -- new size same depth
 		g:palette(0,256,grd:palette(0,256))
@@ -805,6 +807,17 @@ grdpaint.layers=function(grd)
 			for i=layers.count,1,-1 do
 				g:clip(0,0,z,lw,lh,1):paint( grd:clip(layers.area(i,z)) ,0,0,0,0,lw,lh,wgrd.PAINT_MODE_ALPHA,-1,-1)
 			end
+		end
+		return g
+	end
+
+	layers.flatten_frame=function(frame,grd)
+		grd=grd or layers.grd -- can choose a temp grd or use default
+		local lw,lh=layers.size()
+		local g=wgrd.create(wgrd.U8_INDEXED,lw,lh,1) -- new size one frame
+		g:palette(0,256,grd:palette(0,256))
+		for i=layers.count,1,-1 do
+			g:clip(0,0,0,lw,lh,1):paint( grd:clip(layers.area(i,frame)) ,0,0,0,0,lw,lh,wgrd.PAINT_MODE_ALPHA,-1,-1)
 		end
 		return g
 	end
