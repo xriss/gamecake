@@ -782,6 +782,12 @@ grdpaint.layers=function(grd)
 		return math.floor(layers.grd.width/layers.x),math.floor(layers.grd.height/layers.y)
 	end
 
+-- a grd clip to area
+	layers.clip=function(idx,frame,grd)
+		grd=grd or layers.grd -- optional other grd
+		return grd:clip( layers.area(idx,frame) )
+	end
+	
 	-- return a 3d clip area to get a single layer from the grd
 	layers.area=function(idx,frame)
 		idx=idx or layers.idx
