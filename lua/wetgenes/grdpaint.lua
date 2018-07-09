@@ -799,13 +799,11 @@ grdpaint.layers=function(grd)
 	layers.flatten_grd=function()
 		local gw,gh,gd=layers.grd.width,layers.grd.height,layers.grd.depth
 		local lw,lh=layers.size()
-		local g=wgrd.create(wgrd.U8_INDEXED,iw,ih,gd) -- new size same depth
+		local g=wgrd.create(wgrd.U8_INDEXED,lw,lh,gd) -- new size same depth
 		g:palette(0,256,grd:palette(0,256))
 		for z=0,gd-1 do
-			for i=layers.count-1,0,-1 do
-				local x=math.floor(i%layers.x)
-				local y=math.floor(i/layers.x)
-				g:clip(0,0,z,iw,ih,1):paint( grd:clip(0,0,z,gw,gh,1) ,0,0,x*iw,y*ih,iw,ih,wgrd.PAINT_MODE_ALPHA,-1,-1)
+			for i=layers.count,1,-1 do
+				g:clip(0,0,z,lw,lh,1):paint( grd:clip(layers.area(i,z)) ,0,0,0,0,lw,lh,wgrd.PAINT_MODE_ALPHA,-1,-1)
 			end
 		end
 		return g
