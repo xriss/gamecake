@@ -434,7 +434,6 @@ grdpaint.history=function(grd)
 	history.config=function()
 		history.length=0
 		history.list={}
-		history.frame=0
 		history.index=0
 		history.width=0
 		history.height=0
@@ -553,6 +552,9 @@ grdpaint.history=function(grd)
 			ga:shrink(it)
 			if it.w>0 and it.h>0 and it.d>0 then -- some pixels have changed
 				it.data=ga:pixels(it.x,it.y,it.z,it.w,it.h,it.d,"") -- get minimal xored data area as a string
+				it.x=it.x+history.area[1]
+				it.y=it.y+history.area[2]
+				it.z=it.z+history.area[3]
 			else
 				it.x=nil
 				it.y=nil
@@ -599,6 +601,7 @@ grdpaint.history=function(grd)
 				ga:palette(0,256,it.palette)
 			end
 			gb:xor(ga)
+			history.grd.layers.frame=it.z -- as we apply changes we should switch active frame to the one we changed
 		elseif it.palette then -- xor pal only
 			local ga=wgrd.create(history.grd.format,0,0,0)
 			ga:palette(0,256,it.palette)
@@ -678,7 +681,6 @@ grdpaint.history=function(grd)
 	local saveme={
 		"length",
 		"list",
-		"frame",
 		"index",
 		"width",
 		"height",
