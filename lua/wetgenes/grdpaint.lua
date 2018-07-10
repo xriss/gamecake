@@ -761,7 +761,7 @@ grdpaint.layers=function(grd)
 	layers.config=function(x,y,n)
 		if n then
 			if not x and not y then
-				x=math.floor(math.sqrt(n))
+				y=math.floor(math.sqrt(n))
 			end
 			if x and not y then
 				y=math.ceil(n/x)
