@@ -79,7 +79,7 @@ grdpaint.outline=function(gr,bg,fg)
 	local g=wgrd.create(wgrd.U8_INDEXED,gr.width+2,gr.height+2,1)
 
 	g:clear(bg.i)
-	g:palette(0,256,gr:palette(0,256)) -- copy pal and pixels
+	g:palette(0,256,gr) -- copy pal and pixels
 	g:pixels(1,1,gr.width,gr.height,gr:pixels(0,0,gr.width,gr.height,""))
 
 	local tab=g:pixels(0,0,g.width,g.height)
@@ -111,7 +111,7 @@ grdpaint.inline=function(gr,bg,fg)
 	local g=wgrd.create(wgrd.U8_INDEXED,gr.width-2,gr.height-2,1)
 
 	g:clear(bg.i)
-	g:palette(0,256,gr:palette(0,256)) -- copy pal and pixels
+	g:palette(0,256,gr) -- copy pal and pixels
 	
 	if gr.width<=2 or gr.height<=2 then return g end -- empty result
 	
@@ -143,7 +143,7 @@ grdpaint.rotate=function(gr,d)
 
 	local g=wgrd.create(wgrd.U8_INDEXED,gr.height,gr.width,1)
 
-	g:palette(0,256,gr:palette(0,256)) -- copy pal
+	g:palette(0,256,gr) -- copy pal
 
 	local tab=gr:pixels(0,0,gr.width,gr.height)
 	local rot={}
@@ -172,7 +172,7 @@ grdpaint.map8=function(g,p,colors,dither)
 
 	local r=wgrd.create(wgrd.U8_INDEXED,g.width,g.height,g.depth)
 
-	r:palette(0,256,p:palette(0,256)) -- copy pal
+	r:palette(0,256,p) -- copy pal
 	
 	g:remap(r,colors,dither)
 
@@ -491,7 +491,7 @@ grdpaint.history=function(grd)
 		assert(history.grd_diff) -- sanity
 		local c=history.area
 		history.grd:pixels(c[1],c[2],c[3],c[4],c[5],c[6],history.grd_diff) -- restore image
-		history.grd:palette(0,256, history.grd_diff:palette(0,256,"") ) -- restore palette
+		history.grd:palette(0,256, history.grd_diff ) -- restore palette
 	end
 	
 -- stop any accumulated changes
@@ -568,13 +568,13 @@ grdpaint.history=function(grd)
 				it.d=nil
 			end
 
-			it.redo=deepjson_diff(history.json,json) -- returns nil if json is nil or contains only the same data
-			if it.redo then
-				it.undo=deepjson_undo(history.json,it.redo)
-				deepjson_copy(history.json,it.redo)
+			local redo=deepjson_diff(history.json,json) -- returns nil if json is nil or contains only the same data
+			if redo then
+				it.json={redo,deepjson_undo(history.json,redo)} -- {redo,undo} values
+				deepjson_copy(history.json,it.json[1])
 			end
 
-			if it.data or it.palette or it.redo then -- only remember if something has actually changed
+			if it.data or it.palette or it.json then -- only remember if something has actually changed
 
 
 				it.prev=history.index>0 and  history.index -- link to prev
@@ -593,8 +593,9 @@ grdpaint.history=function(grd)
 			history.draw_end()
 		end
 	end
-	
-	history.apply=function(index) -- apply diff at this index
+
+-- ru 1==redo , 2==undo	
+	history.apply=function(index,ru) -- apply diff at this index
 		history.draw_end()
 		local it=history.get(index or history.index) -- default to current index
 		if it and it.w and it.h and it.d and it.data then -- xor image
@@ -611,9 +612,51 @@ grdpaint.history=function(grd)
 			ga:palette(0,256,it.palette)
 			history.grd:clip(0,0,0,0,0,0):xor(ga)
 		end
+
+		if it.json then -- have some json changes to make
+			deepjson_copy(history.json,it.json[ru])
+		end
+		
+		if it.rearrange then -- rearrange layout of layers
+			history.grd.layers.rearrange(unpack(it.rearrange[ru]))
+		end
+
+		if it.layers then -- add or remove some layers
+			history.grd.layers.adjust_layer_count(unpack(it.layers[ru]))
+		end
+
+		if it.frames then -- add or remove some frames
+			history.grd.layers.adjust_depth(unpack(it.frames[ru]))
+		end
+		
+		if ru==1 then -- redo
+			history.index=it.id
+		elseif ru==2 then -- this was an undo so we are now at prev
+			history.index=it.prev
+		end
+		
 		return it
 	end
 
+	history.undo=function() -- go back a step
+		local it=history.get(history.index)
+		if it and it.prev and history.list[it.prev] then -- somewhere to go
+			history.apply(history.index,2)
+			return true
+		end
+	end
+
+	history.redo=function(id) -- go forward a step
+		if not id then
+			local it=history.get(history.index)
+			id=it and it.next
+		end
+		if id then -- somewhere to go
+			history.apply(id,1)
+			return true
+		end
+	end
+	
 	history.goto=function(index) -- goto this undo index
 	
 		-- this will work if we are on the right branch
@@ -659,29 +702,6 @@ grdpaint.history=function(grd)
 
 	end
 
-	history.undo=function() -- go back a step
-		local it=history.get(history.index)
-		if it and it.prev and history.list[it.prev] then -- somewhere to go
-			local p=history.apply(history.index)
-			history.index=it.prev
-			deepjson_copy(history.json,p and p.undo)
-			return true
-		end
-	end
-
-	history.redo=function(id) -- go forward a step
-		if not id then
-			local it=history.get(history.index)
-			id=it and it.next
-		end
-		if id then -- somewhere to go
-			local p=history.apply(id)
-			history.index=id
-			deepjson_copy(history.json,p and p.redo)
-			return true
-		end
-	end
-	
 	local saveme={
 		"length",
 		"list",
@@ -814,8 +834,10 @@ grdpaint.layers=function(grd)
 		local grd=layers.grd
 		local gd=grd.depth
 		local lw,lh=layers.size()
-		local g=wgrd.create(wgrd.U8_INDEXED,lw,lh,gd) -- new size same depth
-		g:palette(0,256,grd:palette(0,256))
+		local g=wgrd.create(grd.format,lw,lh,gd) -- new size same depth
+		if grd.cmap then -- copy palette
+			g:palette(0,256,grd)
+		end
 		for z=0,gd-1 do
 			for i=layers.count,1,-1 do
 				g:clip(0,0,z,lw,lh,1):paint( grd:clip(layers.area(i,z)) ,0,0,0,0,lw,lh,wgrd.PAINT_MODE_ALPHA,-1,-1)
@@ -827,12 +849,58 @@ grdpaint.layers=function(grd)
 	layers.flatten_frame=function(frame,grd)
 		grd=grd or layers.grd -- can choose a temp grd or use default
 		local lw,lh=layers.size()
-		local g=wgrd.create(wgrd.U8_INDEXED,lw,lh,1) -- new size one frame
-		g:palette(0,256,grd:palette(0,256))
+		local g=wgrd.create(grd.format,lw,lh,1) -- new size one frame
+		if grd.cmap then -- copy palette
+			g:palette(0,256,grd)
+		end
 		for i=layers.count,1,-1 do
 			g:clip(0,0,0,lw,lh,1):paint( grd:clip(layers.area(i,frame)) ,0,0,0,0,lw,lh,wgrd.PAINT_MODE_ALPHA,-1,-1)
 		end
 		return g
+	end
+
+-- rearrange layers, do not pass any values for auto layer layout
+	layers.rearrange=function(x,y,n)
+
+		if not n then
+			n=layers.count
+		end
+		if not x and not y then
+			y=math.floor(math.sqrt(n))
+		end
+		if x and not y then
+			y=math.ceil(n/x)
+		end
+		if y and not x then
+			x=math.ceil(n/y)
+		end
+		if x*y<n then n=x*y end -- not big enough, set n to maximum
+
+		local ga=layers.grd -- from
+		local w,h=layers.size() -- get original layer size
+
+		local gb=wgrd.create(ga.format,w*x,h*y,ga.depth) -- new image size
+		if ga.cmap then -- copy palette
+			gb:palette(0,256,ga)
+		end
+		
+		grdpaint.layers(gb) -- we need to temp layers
+		gb.layers.config(x,y,n) -- so we can now configure it
+
+		for z=0,ga.depth-1 do -- for each frame
+			for l=1,n do
+				if l<=ga.layers.count and l<=gb.layers.count then -- we have a layer to copy
+					gb.layers.clip(l,z):pixels(0,0,0,w,h,1,ga.layers.clip(l,z))
+				end
+			end
+		end
+
+		local i=layers.index -- save idx
+		ga[0]=gb[0] -- transplant the core grd so we can keep the same table
+		ga:info()
+		layers.config(x,y,n) -- apply new configuration (resets idx)
+		layers.index=i -- load idx
+
 	end
 
 -- add or remove a number of layers at the given index
@@ -847,7 +915,9 @@ grdpaint.layers=function(grd)
 		local x=math.ceil(n/y)
 
 		local gb=wgrd.create(ga.format,w*x,h*y,ga.depth) -- new image size
-		gb:palette(0,256,ga) -- copy palette
+		if ga.cmap then -- copy palette
+			gb:palette(0,256,ga)
+		end
 		
 		grdpaint.layers(gb) -- we need to temp layers
 		gb.layers.config(x,y,n) -- so we can now configure it
@@ -907,6 +977,34 @@ grdpaint.layers=function(grd)
 	
 	end
 
+-- swap layers and frames
+	layers.swap_with_frames=function()
+
+		local ga=layers.grd
+		local w,h=layers.size() -- get original layer size
+		local n=ga.depth -- turn frames into layers
+		local y=math.floor(math.sqrt(n)) -- with a simple layout
+		local x=math.ceil(n/y)
+		local gb=wgrd.create(ga.format,w*x,h*y,ga.layers.count) -- to
+		if ga.cmap then -- copy palette
+			gb:palette(0,256,ga)
+		end
+
+		grdpaint.layers(gb) -- we need to temp layers
+		gb.layers.config(x,y,n) -- so we can now configure it
+
+		for l=0,ga.layers.count-1 do
+			for f=0,n-1 do
+				gb.layers.clip(f+1,l):pixels(0,0,0,w,h,1,ga.layers.clip(l+1,f))
+			end
+		end
+
+		ga[0]=gb[0] -- transplant the grd from gb into ga
+		ga:info()
+		layers.config(x,y,n) -- apply new configuration
+
+	end
+	
 -- change the size of each layer
 	layers.adjust_layer_size=function(x,y,anchor_x,anchor_y)
 	end
@@ -914,7 +1012,7 @@ grdpaint.layers=function(grd)
 -- change the size of the entire image, layer 0
 	layers.adjust_size=function(x,y,anchor_x,anchor_y)
 	end
-
+	
 	return layers.config()
 end
 
