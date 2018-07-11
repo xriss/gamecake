@@ -431,18 +431,22 @@ grdpaint.history=function(grd)
 	
 	if not grd.layers then grdpaint.layers(grd) end -- need layers
 
-	history.config=function()
-		history.length=0
-		history.list={}
-		history.index=0
-		history.width=0
-		history.height=0
-		history.json={} -- local cache deep copy that starts empty
-	end
-	history.config()
+	history.reset=function()
 	
-	history.width=grd.width		-- the maximum grd size over time
-	history.height=grd.height
+		history.length=1
+		history.index=1
+		history.list={}
+		history.json={} -- local cache deep copy that starts empty
+
+-- starting maximum size
+		history.width=grd.width		-- the maximum grd size over time
+		history.height=grd.height
+
+-- add a first empty state so we can always undo to this state of the image
+		history.set(1,{id=1})
+		
+		return history
+	end
 	
 	history.get=function(index)
 		if not index then return end
@@ -742,7 +746,7 @@ grdpaint.history=function(grd)
 	end
 
 
-	return history
+	return 	history.reset()
 end
 
 
@@ -775,9 +779,10 @@ grdpaint.layers=function(grd)
 		layers.x=x -- number of layers wide
 		layers.y=y -- number of layers high
 		layers.count=n or x*y -- total layers is optional
-		layers.idx=0
+		layers.index=0 -- layer index starts at 1, 0 is a special index to mean all layers IE the full grd
+		
+		return layers
 	end
-	layers.config() -- defaults
 
 	-- get the size of each layer
 	layers.size=function()
@@ -792,7 +797,7 @@ grdpaint.layers=function(grd)
 	
 	-- return a 3d clip area to get a single layer from the grd
 	layers.area=function(idx,frame)
-		idx=idx or layers.idx
+		idx=idx or layers.index
 		frame=frame or layers.frame
 		if idx==0 then -- layer 0 is special case, full size
 			return 0,0,frame, layers.grd.width,layers.grd.height,1
@@ -830,8 +835,87 @@ grdpaint.layers=function(grd)
 		return g
 	end
 
-	return layers
+-- add or remove a number of layers at the given index
+	layers.adjust_layer_count=function(layeridx,layernum)
 
+
+		local ga=layers.grd -- from
+		local w,h=layers.size() -- get original layer size
+
+		local n=layers.count+layernum -- new number of layers
+		local y=math.floor(math.sqrt(n)) -- with a simple layout
+		local x=math.ceil(n/y)
+
+		local gb=wgrd.create(ga.format,w*x,h*y,ga.depth) -- new image size
+		gb:palette(0,256,ga) -- copy palette
+		
+		grdpaint.layers(gb) -- we need to temp layers
+		gb.layers.config(x,y,n) -- so we can now configure it
+
+		for z=0,ga.depth-1 do -- for each frame
+			for la=1,layers.count do
+				local lb=la
+				if la>=layeridx then
+					lb=la+layernum
+					if lb < layeridx then
+						lb=nil -- do not copy this frame
+					end
+				end
+				if lb then -- copy over layers
+					gb.layers.clip(lb,z):pixels(0,0,0,w,h,1,ga.layers.clip(la,z))
+				end
+			end
+		end
+
+		local i=layers.index -- save idx
+		ga[0]=gb[0] -- transplant the core grd so we can keep the same table
+		ga:info()
+		layers.config(x,y,n) -- apply new configuration (resets idx)
+		layers.index=i -- load idx
+
+		if layers.index>layeridx then layers.index=layers.index+layernum end -- adjust current layer index
+
+	end
+
+-- add or remove a number of frames at the given index
+	layers.adjust_depth=function(frameidx,framenum)
+	
+		local ga=layers.grd
+		local gb=wgrd.create( ga.format , ga.width , ga.height , ga.depth+framenum ) -- the new grd size with adjusted depth
+
+		for za=0,ga.depth-1 do
+			local zb=za
+			if za>=frameidx then
+				zb=za+framenum
+				if zb < frameidx then
+					zb=nil -- do not copy this frame
+				end
+			end
+			if zb then -- copy over frames
+				gb:pixels( 0,0,zb , gb.width,gb.height,1 , ga:clip(0,0,za,ga.width,ga.height,1) )
+			end
+		end
+		
+		if ga.cmap then -- copy palette
+			gb:palette(0,256,ga)
+		end
+
+		ga[0]=gb[0] -- transplant the core grd so we can keep the same table
+		ga:info()
+		
+		if layers.frame>frameidx then layers.frame=layers.frame+framenum end -- adjust current frame
+	
+	end
+
+-- change the size of each layer
+	layers.adjust_layer_size=function(x,y,anchor_x,anchor_y)
+	end
+
+-- change the size of the entire image, layer 0
+	layers.adjust_size=function(x,y,anchor_x,anchor_y)
+	end
+
+	return layers.config()
 end
 
 
