@@ -594,11 +594,117 @@ grdpaint.history=function(grd)
 		end
 	end
 
+-- push this prebuilt history item onto the history stack linking onto index
+	history.push=function(it)
+
+		history.draw_end() -- sanity
+		
+		it.prev=history.index>0 and  history.index -- link to prev
+		it.id=history.length+1
+
+		history.index=it.id
+		history.set(it.id,it)
+
+		if it.prev then -- link from prev which must exist
+			local pit=history.get(it.prev)
+			if pit then
+				pit.next=it.id -- link to *most*recent* next
+				history.set(pit.id,pit)
+			end
+		end
+
+		return it
+	end
+
+-- apply and push a layers rearrange onto the stack
+	history.push_rearrange=function(x,y,n)
+
+		local layers=history.grd.layers
+
+		if not x and not y and not n then -- auto natural order
+			n=layers.count
+			y=math.floor(math.sqrt(n))
+			x=math.ceil(n/y)
+		end
+		
+		if n==layers.count and x==layers.x and y==layers.y then
+			return -- no change
+		end
+		
+		local it={rearrange={}}
+
+		it.rearrange[1]={x,y,n}
+		it.rearrange[2]={layers.x,layers.y,layers.count}
+		
+		layers.rearrange(x,y,n) -- apply
+
+		return history.push(it)
+	end
+
+-- apply and push a layers adjust onto the stack
+	history.push_layers=function(idx,num)
+		history.push_rearrange() -- make sure we have a natural order
+		
+		if num<0 then -- blank the layers we are about to delete first
+			for z=0,history.grd.depth-1 do -- across all frames
+				for i=idx,(idx-num)-1 do
+					history.draw_begin(history.grd.layers.area(i,z))
+					history.draw_get():clear()
+					history.draw_save()
+				end
+			end
+		end
+
+		local it={layers={}}
+
+		it.layers[1]={idx,num}
+		it.layers[2]={idx,-num}
+
+		history.grd.layers.adjust_layer_count(idx,num)
+
+		return history.push(it)
+	end
+
+-- apply and push a frames adjust onto the stack
+	history.push_frames=function(idx,num)
+
+		local g=history.grd
+		if num<0 then -- blank the frames we are about to delete first
+			for z=idx,(idx-num)-1 do
+				history.draw_begin(0,0,z,g.width.g.height,1)
+				history.draw_get():clear()
+				history.draw_save()
+			end
+		end
+
+		local it={frames={}}
+
+		it.frames[1]={idx,num}
+		it.frames[2]={idx,-num}
+
+		history.grd.layers.adjust_depth(idx,num)
+
+		return history.push(it)
+	end
+	
+-- apply and push a swap onto the stack
+	history.push_swap_layers_with_frames=function()
+		history.push_rearrange() -- make sure we have a natural order
+
+		local it={swap_layers_with_frames=true}
+
+		history.grd.layers.swap_with_frames()
+
+		return history.push(it)
+	end
+
 -- ru 1==redo , 2==undo	
 	history.apply=function(index,ru) -- apply diff at this index
 		history.draw_end()
 		local it=history.get(index or history.index) -- default to current index
-		if it and it.w and it.h and it.d and it.data then -- xor image
+		if not it then return end -- nothing to do
+		
+		if it.data then -- xor image
 			local ga=wgrd.create(history.grd.format,it.w,it.h,it.d)
 			local gb=history.grd:clip(it.x,it.y,it.z,it.w,it.h,it.d)
 			ga:pixels(0,0,0,it.w,it.h,it.d,it.data)
@@ -629,6 +735,10 @@ grdpaint.history=function(grd)
 			history.grd.layers.adjust_depth(unpack(it.frames[ru]))
 		end
 		
+		if it.swap_layers_with_frames then -- this is its own reverse
+			history.grd.layers.swap_with_frames()
+		end
+
 		if ru==1 then -- redo
 			history.index=it.id
 		elseif ru==2 then -- this was an undo so we are now at prev
@@ -636,14 +746,6 @@ grdpaint.history=function(grd)
 		end
 		
 		return it
-	end
-
-	history.undo=function() -- go back a step
-		local it=history.get(history.index)
-		if it and it.prev and history.list[it.prev] then -- somewhere to go
-			history.apply(history.index,2)
-			return true
-		end
 	end
 
 	history.redo=function(id) -- go forward a step
@@ -656,6 +758,15 @@ grdpaint.history=function(grd)
 			return true
 		end
 	end
+
+	history.undo=function() -- go back a step
+		local it=history.get(history.index)
+		if it and it.prev and history.list[it.prev] then -- somewhere to go
+			history.apply(history.index,2)
+			return true
+		end
+	end
+
 	
 	history.goto=function(index) -- goto this undo index
 	
