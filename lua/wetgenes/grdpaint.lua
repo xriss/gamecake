@@ -423,6 +423,22 @@ local deepjson_undo ; deepjson_undo=function(base,diff)
 	return undo
 end
 
+-- anchor helper
+local anchor_helper=function(a,b,anchor)
+	if a<b then
+		if     anchor<0 then	return a,0,0
+		elseif anchor>0 then	return a,0,b-a
+		else					return a,0,math.floor((b-a)/2)
+		end
+	else
+		if     anchor<0 then	return b,0,0
+		elseif anchor>0 then	return b,a-b,0
+		else					return b,math.floor((a-b)/2),0
+		end
+	end
+end
+
+
 -- create a history state within the given grd
 grdpaint.history=function(grd)
 
@@ -671,7 +687,7 @@ grdpaint.history=function(grd)
 		local g=history.grd
 		if num<0 then -- blank the frames we are about to delete first
 			for z=idx,(idx-num)-1 do
-				history.draw_begin(0,0,z,g.width.g.height,1)
+				history.draw_begin(0,0,z,g.width,g.height,1)
 				history.draw_get():clear()
 				history.draw_save()
 			end
@@ -698,45 +714,99 @@ grdpaint.history=function(grd)
 		return history.push(it)
 	end
 
+-- apply and push an image size change
+	history.push_size=function(width,height,ax,ay)
+
+		for z=0,history.grd.depth-1 do -- across all frames
+			history.draw_begin(0,0,z,history.grd.width,history.grd.height,1)
+			local g=history.draw_get()
+--			g:clip():clear()
+			history.draw_save()
+		end
+
+		local it={size={}}
+
+		it.size[1]={width,height,ax,ay}
+		it.size[2]={grd.width,grd.height,ax,ay} -- restore old size
+
+		history.grd.layers.adjust_size(width,height,ax,ay)
+
+		return history.push(it)
+	end
+
+-- apply and push an image layer size change
+	history.push_layer_size=function(width,height,ax,ay)
+
+		for z=0,history.grd.depth-1 do -- across all frames
+			history.draw_begin(0,0,z,history.grd.width,history.grd.height,1)
+			local g=history.draw_get()
+--			g:clip():clear()
+			history.draw_save()
+		end
+
+		local it={layer_size={}}
+
+		it.layer_size[1]={width,height,ax,ay}
+		it.layer_size[2]={grd.width,grd.height,ax,ay} -- restore old size
+
+		history.grd.layers.adjust_layer_size(width,height,ax,ay)
+
+		return history.push(it)
+	end
+
 -- ru 1==redo , 2==undo	
 	history.apply=function(index,ru) -- apply diff at this index
 		history.draw_end()
 		local it=history.get(index or history.index) -- default to current index
 		if not it then return end -- nothing to do
 		
-		if it.data then -- xor image
-			local ga=wgrd.create(history.grd.format,it.w,it.h,it.d)
-			local gb=history.grd:clip(it.x,it.y,it.z,it.w,it.h,it.d)
-			ga:pixels(0,0,0,it.w,it.h,it.d,it.data)
-			if it.palette then -- xor pal
-				ga:palette(0,256,it.palette)
+		local a=it[1] and it or {it} -- an array of things to do
+		local fa,fb,fc=1,#a,1 -- process the array forwards
+		if ru==2 then fa,fb,fc=#a,1,-1 end -- or backwards if we are undoing
+		for i=fa,fb,fc do -- loop over things to do
+			local v=a[i] -- and do them
+			if v.data then -- xor image
+				local ga=wgrd.create(history.grd.format,v.w,v.h,v.d)
+				local gb=history.grd:clip(v.x,v.y,v.z,v.w,v.h,v.d)
+				ga:pixels(0,0,0,v.w,v.h,v.d,v.data)
+				if v.palette then -- xor pal
+					ga:palette(0,256,v.palette)
+				end
+				gb:xor(ga)
+				history.grd.layers.frame=v.z -- as we apply changes we should swvch active frame to the one we changed
+			elseif v.palette then -- xor pal only
+				local ga=wgrd.create(history.grd.format,0,0,0)
+				ga:palette(0,256,v.palette)
+				history.grd:clip(0,0,0,0,0,0):xor(ga)
 			end
-			gb:xor(ga)
-			history.grd.layers.frame=it.z -- as we apply changes we should switch active frame to the one we changed
-		elseif it.palette then -- xor pal only
-			local ga=wgrd.create(history.grd.format,0,0,0)
-			ga:palette(0,256,it.palette)
-			history.grd:clip(0,0,0,0,0,0):xor(ga)
-		end
 
-		if it.json then -- have some json changes to make
-			deepjson_copy(history.json,it.json[ru])
-		end
-		
-		if it.rearrange then -- rearrange layout of layers
-			history.grd.layers.rearrange(unpack(it.rearrange[ru]))
-		end
+			if v.json then -- have some json changes to make
+				deepjson_copy(history.json,v.json[ru])
+			end
+			
+			if v.rearrange then -- rearrange layout of layers
+				history.grd.layers.rearrange(unpack(v.rearrange[ru]))
+			end
 
-		if it.layers then -- add or remove some layers
-			history.grd.layers.adjust_layer_count(unpack(it.layers[ru]))
-		end
+			if v.layers then -- add or remove some layers
+				history.grd.layers.adjust_layer_count(unpack(v.layers[ru]))
+			end
 
-		if it.frames then -- add or remove some frames
-			history.grd.layers.adjust_depth(unpack(it.frames[ru]))
-		end
-		
-		if it.swap_layers_with_frames then -- this is its own reverse
-			history.grd.layers.swap_with_frames()
+			if v.frames then -- add or remove some frames
+				history.grd.layers.adjust_depth(unpack(v.frames[ru]))
+			end
+			
+			if v.swap_layers_wvh_frames then -- this is its own reverse
+				history.grd.layers.swap_wvh_frames()
+			end
+			
+			if v.size then -- change size of image
+				history.grd.layers.adjust_size(unpack(v.size[ru]))
+			end
+
+			if v.layer_size then -- 
+				history.grd.layers.adjust_layer_size(unpack(v.layer_size[ru]))
+			end
 		end
 
 		if ru==1 then -- redo
@@ -1115,13 +1185,50 @@ grdpaint.layers=function(grd)
 		layers.config(x,y,n) -- apply new configuration
 
 	end
+
 	
 -- change the size of each layer
-	layers.adjust_layer_size=function(x,y,anchor_x,anchor_y)
+	layers.adjust_layer_size=function(width,height,anchor_x,anchor_y)
+	
+		local ga=layers.grd -- from
+		local gb=wgrd.create(ga.format,width*layers.x,height*layers.y,ga.depth) -- to
+				
+		grdpaint.layers(gb) -- we need to temp layers
+		gb.layers.config(layers.x,layers.y,layers.n) -- so we can now configure it
+
+		local wa,ha=layers.size() -- original size
+		local w,xa,xb=anchor_helper(wa,width, anchor_x)
+		local h,ya,yb=anchor_helper(ha,height,anchor_y)
+		
+		for z=0,ga.depth-1 do
+			for l=1,ga.layers.count do
+				local ca=ga.layers.clip(l,z)
+				local cb=gb.layers.clip(l,z)
+				cb:pixels(xb,yb,0,w,h,1,ca:clip(xa,ya,0,w,h,1))
+			end
+		end
+
+		ga[0]=gb[0] -- transplant the grd from gb into ga
+		ga:info()
+
 	end
 
 -- change the size of the entire image, layer 0
-	layers.adjust_size=function(x,y,anchor_x,anchor_y)
+	layers.adjust_size=function(width,height,anchor_x,anchor_y)
+
+		local ga=layers.grd -- from
+		local gb=wgrd.create(ga.format,width,height,ga.depth) -- to
+				
+		local w,xa,xb=anchor_helper(ga.width, gb.width, anchor_x)
+		local h,ya,yb=anchor_helper(ga.height,gb.height,anchor_y)
+		
+		for z=0,ga.depth-1 do
+			gb:pixels(xb,yb,z,w,h,1,ga:clip(xa,ya,z,w,h,1))		
+		end
+
+		ga[0]=gb[0] -- transplant the grd from gb into ga
+		ga:info()
+		
 	end
 	
 	return layers.config()
