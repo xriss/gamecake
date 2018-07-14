@@ -1192,6 +1192,9 @@ grdpaint.layers=function(grd)
 	
 		local ga=layers.grd -- from
 		local gb=wgrd.create(ga.format,width*layers.x,height*layers.y,ga.depth) -- to
+		if ga.cmap then -- copy palette
+			gb:palette(0,256,ga)
+		end
 				
 		grdpaint.layers(gb) -- we need to temp layers
 		gb.layers.config(layers.x,layers.y,layers.n) -- so we can now configure it
@@ -1218,6 +1221,9 @@ grdpaint.layers=function(grd)
 
 		local ga=layers.grd -- from
 		local gb=wgrd.create(ga.format,width,height,ga.depth) -- to
+		if ga.cmap then -- copy palette
+			gb:palette(0,256,ga)
+		end
 				
 		local w,xa,xb=anchor_helper(ga.width, gb.width, anchor_x)
 		local h,ya,yb=anchor_helper(ga.height,gb.height,anchor_y)

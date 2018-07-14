@@ -17,12 +17,14 @@ local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
 function wmenudrop.mouse(widget,act,_x,_y,keyname)
 
-	if keyname=="wheel_add" and act==-1 then
-		widget.data:inc()
-		return
-	elseif keyname=="wheel_sub" and act==-1  then
-		widget.data:dec()
-		return
+	if widget.master.old_over==widget and widget.data then
+		if keyname=="wheel_add" and act==-1 then
+			widget.data:inc()
+			return
+		elseif keyname=="wheel_sub" and act==-1  then
+			widget.data:dec()
+			return
+		end
 	end
 
 	return widget.meta.mouse(widget,act,_x,_y,keyname)
@@ -45,24 +47,30 @@ function wmenudrop.drop(widget)
 
 	local def=widget.def
 	
-	local hooks=function(hook,w,dat)
-		if hook=="click" then
-			widget.data:value(w.id)
-			widget:update()
-			widget:call_hook_later("menudrop",{value=widget.data:value()}) -- tell the master widget that we dropped and changed
-		end
-	end
-	local d={}
-	for i,v in ipairs(widget.data and widget.data.list or {}) do
-		d[#d+1]={
-			id=i,
-			user=v.user,
-			text=v.str,
-			hooks=hooks
-		}
-	end
-	widget.menu=widgets_menuitem.menu_add(widget,{menu_data=d})
+	if widget.data then -- build a menu for this data
 	
+		local hooks=function(hook,w,dat)
+			if hook=="click" then
+				widget.data:value(w.id)
+				widget:update()
+				widget:call_hook_later("menudrop",{value=widget.data:value()}) -- tell the master widget that we dropped and changed
+			end
+		end
+		local d={}
+		for i,v in ipairs(widget.data and widget.data.list or {}) do
+			d[#d+1]={
+				id=i,
+				user=v.user,
+				text=v.str,
+				hooks=hooks
+			}
+		end
+		widget.menu=widgets_menuitem.menu_add(widget,{menu_data=d})
+	
+	elseif widget.menu_data then -- use this custom menu
+		widget.menu=widgets_menuitem.menu_add(widget,widget.menudata)
+	end
+
 end
 
 
@@ -90,6 +98,8 @@ function wmenudrop.setup(widget,def)
 
 	widget.menu_px=def.menu_px or 1 -- where to drop
 	widget.menu_py=def.menu_py or 0
+
+	widget.menu_data=def.menu_data -- data to display
 
 	widget.class_hooks=wmenudrop.class_hooks
 	

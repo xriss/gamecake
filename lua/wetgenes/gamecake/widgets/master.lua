@@ -500,8 +500,8 @@ function wmaster.setup(widget,def)
 
 		master.last_mouse_position={x,y}
 
-		local old_active=master.active
-		local old_over=master.over
+		master.old_active=master.active
+		master.old_over=master.over
 
 		meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		
@@ -511,14 +511,14 @@ function wmaster.setup(widget,def)
 		end
 		
 --mark as dirty
-		if master.active~=old_active then
-			if master.active then master.active:set_dirty() end
-			if old_active then old_active:set_dirty() end
+		if master.active~=master.old_active then
+			if master.active     then master.active:set_dirty() end
+			if master.old_active then master.old_active:set_dirty() end
 		end
-		if master.over~=old_over then
-			if master.over then master.over:set_dirty() end
-			if old_over then old_over:set_dirty() end
-			if master.over then master.over:call_hook_later("over") end
+		if master.over~=master.old_over then
+			if master.over     then master.over:set_dirty() end
+			if master.old_over then master.old_over:set_dirty() end
+			if master.over     then master.over:call_hook_later("over") end
 		end
 		
 	end
