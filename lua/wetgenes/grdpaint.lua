@@ -717,11 +717,33 @@ grdpaint.history=function(grd)
 -- apply and push an image size change
 	history.push_size=function(width,height,ax,ay)
 
-		for z=0,history.grd.depth-1 do -- across all frames
-			history.draw_begin(0,0,z,history.grd.width,history.grd.height,1)
-			local g=history.draw_get()
---			g:clip():clear()
-			history.draw_save()
+		local layers=history.grd.layers
+		local wa,ha=history.grd.width,history.grd.height
+		local w,xa,xb=anchor_helper(wa,width, ax)
+		local h,ya,yb=anchor_helper(ha,height,ay)
+
+		if width<wa or height<ha then -- if shrinking we need to clear the areas we will lose first
+			for z=0,history.grd.depth-1 do -- across all frames
+				history.draw_begin(0,0,z,history.grd.width,history.grd.height,1)
+				local ga=history.draw_get()
+				if width<wa then
+					if xa>0 then
+						ga:clip(0,0,0,xa,ga.height,1):clear()
+					end
+					if xa+width<ga.width then
+						ga:clip(xa+width,0,0,ga.width-(xa+width),ga.height,1):clear()
+					end
+				end
+				if height<ha then
+					if ya>0 then
+						ga:clip(0,0,0,ga.width,ya,1):clear()
+					end
+					if ya+height<ga.height then
+						ga:clip(0,ya+height,0,ga.width,ga.height-(ya+height),1):clear()
+					end
+				end
+				history.draw_save()
+			end
 		end
 
 		local it={size={}}
@@ -737,11 +759,36 @@ grdpaint.history=function(grd)
 -- apply and push an image layer size change
 	history.push_layer_size=function(width,height,ax,ay)
 
-		for z=0,history.grd.depth-1 do -- across all frames
-			history.draw_begin(0,0,z,history.grd.width,history.grd.height,1)
-			local g=history.draw_get()
---			g:clip():clear()
-			history.draw_save()
+		local layers=history.grd.layers
+		local wa,ha=layers.size() -- original size
+		local w,xa,xb=anchor_helper(wa,width, ax)
+		local h,ya,yb=anchor_helper(ha,height,ay)
+
+		if width<wa or height<ha then -- if shrinking we need to clear the areas we will lose first
+			for z=0,history.grd.depth-1 do -- across all frames
+				history.draw_begin(0,0,z,history.grd.width,history.grd.height,1)
+				local g=history.draw_get()
+				for l=1,layers.count do
+					local ga=g:clip(layers.area(l,0))
+					if width<wa then
+						if xa>0 then
+							ga:clip(0,0,0,xa,ga.height,1):clear()
+						end
+						if xa+width<ga.width then
+							ga:clip(xa+width,0,0,ga.width-(xa+width),ga.height,1):clear()
+						end
+					end
+					if height<ha then
+						if ya>0 then
+							ga:clip(0,0,0,ga.width,ya,1):clear()
+						end
+						if ya+height<ga.height then
+							ga:clip(0,ya+height,0,ga.width,ga.height-(ya+height),1):clear()
+						end
+					end
+				end
+				history.draw_save()
+			end
 		end
 
 		local it={layer_size={}}
