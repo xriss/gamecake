@@ -312,7 +312,7 @@ function wtextedit.timedelay(widget)
 	if widget.data then
 		if widget.data.class=="number" then
 			local num=widget.data:tonumber(widget.data.str)
-			widget.data:value(num)
+			widget.data:value(num or 0)
 		end
 		widget.text=widget.data:tostring(widget.data.num)
 	end
@@ -328,7 +328,7 @@ end
 function wtextedit.unfocus(widget)
 	if widget.data.class=="number" then
 		local num=widget.data:tonumber(widget.data.str)
-		widget.data:value(num)
+		widget.data:value(num or 0)
 	end
 
 	widget.text=widget.data:tostring(widget.data.num)
@@ -349,6 +349,7 @@ function wtextedit.class_hooks(hook,widget,dat)
 
 	if hook=="timedelay" then return wtextedit.timedelay(widget) end
 	if hook=="unfocus" then return wtextedit.unfocus(widget) end
+	if hook=="notover" then return wtextedit.unfocus(widget) end
 	
 end
 

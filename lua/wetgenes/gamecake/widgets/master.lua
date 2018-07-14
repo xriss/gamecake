@@ -519,6 +519,9 @@ function wmaster.setup(widget,def)
 			if master.over     then master.over:set_dirty() end
 			if master.old_over then master.old_over:set_dirty() end
 			if master.over     then master.over:call_hook_later("over") end
+
+			if master.edit and master.edit.class_hooks then master.edit.class_hooks("notover",master.edit) end
+
 		end
 		
 	end
