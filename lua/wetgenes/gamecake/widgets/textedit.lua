@@ -23,6 +23,19 @@ local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
 function wtextedit.mouse(widget,act,_x,_y,key)
 
+--print(widget.master.old_over,widget,widget.data)
+
+	if widget.master.old_over==widget and widget.data and widget.data.class=="number" then
+		if key=="wheel_add" and act==-1 then
+			widget.data:inc()
+			return
+		elseif key=="wheel_sub" and act==-1  then
+			widget.data:dec()
+			return
+		end
+	end
+
+
 	local x,y=widget:mousexy(_x,_y)
 
 --print(act,x,y,key)
