@@ -95,7 +95,10 @@ end
 wdata.data_set=function(dat,val,vmin,vmax,nohook)
 	dat.min=vmin or dat.min
 	dat.max=vmax or dat.max
-	return dat:value(val,nohook)
+	dat.master.dirty_by_data(dat)
+	dat:value(val,nohook)
+	dat.str=dat:tostring(dat.num)
+	return dat.num
 end
 
 

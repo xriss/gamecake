@@ -571,7 +571,7 @@ function wmaster.setup(widget,def)
 --
 	function master.dirty_by_data(data)
 		master:call_descendents(function(w)
-			if w.data==data then
+			if w.data==data or w.daty==data or w.datx==data then
 				w:set_dirty()
 			end
 		end)		
