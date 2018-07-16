@@ -71,7 +71,7 @@ function wmaster.setup(widget,def)
 
 -- built in color themes, 
 
-	master.color_theme_bright={ { 0.00, 0.00, 0.00 },{ 0.60, 0.60, 0.60 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, }
+	master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, }
 	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, }
 
 -- global GUI color theme
