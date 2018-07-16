@@ -38,7 +38,7 @@ function wdatas.new_datas(datas)
 	end
 
 	datas.new=function(v)
-		datas.set( datas.new_data(v) )
+		return datas.set( datas.new_data(v) )
 	end
 
 	datas.get=function(n)
