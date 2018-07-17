@@ -794,9 +794,24 @@ grdpaint.history=function(grd)
 		local it={layer_size={}}
 
 		it.layer_size[1]={width,height,ax,ay}
-		it.layer_size[2]={grd.width,grd.height,ax,ay} -- restore old size
+		it.layer_size[2]={wa,ha,ax,ay} -- restore old size
 
 		history.grd.layers.adjust_layer_size(width,height,ax,ay)
+
+		return history.push(it)
+	end
+
+-- apply and push an image layer size change
+	history.push_rechop=function(x,y,count)
+
+		local layers=history.grd.layers
+
+		local it={rechop={}}
+
+		it.rechop[1]={x,y,count}
+		it.rechop[2]={layers.x,layers.y,layers.count} -- restore old size
+
+		history.grd.layers.config(x,y,count)
 
 		return history.push(it)
 	end
@@ -853,6 +868,10 @@ grdpaint.history=function(grd)
 
 			if v.layer_size then -- 
 				history.grd.layers.adjust_layer_size(unpack(v.layer_size[ru]))
+			end
+
+			if v.rechop then -- adjust layer layout
+				history.grd.layers.config(unpack(v.rechop[ru]))
 			end
 		end
 
