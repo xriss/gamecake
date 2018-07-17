@@ -449,6 +449,7 @@ grdpaint.history=function(grd)
 
 	history.reset=function()
 	
+		history.start=1
 		history.length=1
 		history.index=1
 		history.list={}
@@ -835,7 +836,7 @@ grdpaint.history=function(grd)
 					ga:palette(0,256,v.palette)
 				end
 				gb:xor(ga)
-				history.grd.layers.frame=v.z -- as we apply changes we should swvch active frame to the one we changed
+				history.grd.layers.frame=v.z -- as we apply changes we should switch active frame to the one we changed
 			elseif v.palette then -- xor pal only
 				local ga=wgrd.create(history.grd.format,0,0,0)
 				ga:palette(0,256,v.palette)
@@ -858,8 +859,8 @@ grdpaint.history=function(grd)
 				history.grd.layers.adjust_depth(unpack(v.frames[ru]))
 			end
 			
-			if v.swap_layers_wvh_frames then -- this is its own reverse
-				history.grd.layers.swap_wvh_frames()
+			if v.swap_layers_with_frames then -- this is its own reverse
+				history.grd.layers.swap_with_frames()
 			end
 			
 			if v.size then -- change size of image
@@ -950,6 +951,7 @@ grdpaint.history=function(grd)
 	end
 
 	local saveme={
+		"start",
 		"length",
 		"list",
 		"index",
