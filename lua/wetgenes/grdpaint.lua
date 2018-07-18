@@ -449,6 +449,7 @@ grdpaint.history=function(grd)
 
 	history.reset=function()
 	
+		history.version="Swanky History v1"
 		history.start=1
 		history.length=1
 		history.index=1
@@ -804,6 +805,8 @@ grdpaint.history=function(grd)
 
 -- apply and push an image layer size change
 	history.push_rechop=function(x,y,count)
+	
+		count=count or x*y
 
 		local layers=history.grd.layers
 
@@ -951,6 +954,7 @@ grdpaint.history=function(grd)
 	end
 
 	local saveme={
+		"version",
 		"start",
 		"length",
 		"list",
@@ -1029,6 +1033,7 @@ grdpaint.layers=function(grd)
 	grd.layers=layers
 
 	layers.frame=0 -- keep track of frame
+	layers.index=0 -- layer index starts at 1, 0 is a special index to mean all layers IE the full grd
 
 	-- set layer config, default to entire frame.
 	layers.config=function(x,y,n)
@@ -1048,7 +1053,6 @@ grdpaint.layers=function(grd)
 		layers.x=x -- number of layers wide
 		layers.y=y -- number of layers high
 		layers.count=n or x*y -- total layers is optional
-		layers.index=0 -- layer index starts at 1, 0 is a special index to mean all layers IE the full grd
 		
 		return layers
 	end
