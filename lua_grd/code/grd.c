@@ -314,10 +314,15 @@ static int grd_fileheader_to_format( const unsigned char data[16] )
 		return GRD_FMT_HINT_GIF;
 	}
 	else
-	if( data[6]=='J' && data[7]=='F' && data[8]=='I' && data[9]=='F' )
+	if( data[0]==0xFF && data[1]==0xD8 )
 	{
 		return GRD_FMT_HINT_JPG;
 	}
+//	else
+//	if( data[0]==0x42 && data[1]==0x4D )
+//	{
+//		return GRD_FMT_HINT_BMP;
+//	}
 	
 	return 0; // unknown
 }
