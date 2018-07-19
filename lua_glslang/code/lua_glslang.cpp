@@ -88,7 +88,7 @@ Open the lua library.
 */
 extern "C" int luaopen_glslang_core (lua_State *l)
 {
-	const luaL_reg lib[] =
+	const luaL_Reg lib[] =
 	{
 		{"lint_gles2",	lua_glslang_lint_gles2},
 
