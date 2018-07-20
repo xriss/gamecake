@@ -453,6 +453,7 @@ grdpaint.history=function(grd)
 		history.start=1
 		history.length=1
 		history.index=1
+		history.memory=0
 		history.list={}
 		history.json={} -- local cache deep copy that starts empty
 
@@ -475,7 +476,10 @@ grdpaint.history=function(grd)
 	history.set=function(index,it)
 		it=it and deflate(cmsgpack.pack(it))
 		history.list[index]=it
-		if index>history.length then history.length=index end
+		if index>history.length then -- added a new one
+			history.length=index
+			history.memory=history.memory+#it -- keep running total
+		end
 	end
 	
 -- take a snapshot of this frame for latter diffing (started drawing on this frame only)
@@ -1002,6 +1006,7 @@ grdpaint.history=function(grd)
 				if i>=history.start then history.start=i+1 end
 			end
 		end
+		history.get_memory()
 	end
 
 -- return amount of memory used by undo
@@ -1017,6 +1022,7 @@ grdpaint.history=function(grd)
 				mini=i
 			end
 		end
+		history.memory=total -- keep a running total
 		return total,count,mini
 	end
 
