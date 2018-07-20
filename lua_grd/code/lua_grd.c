@@ -1573,6 +1573,20 @@ s32 w;
 //	grd_getpalinfo(p,grd);
 
 	if(!p->cmap->data) { p->err="no palette"; return 0; } // no palette
+	
+	if(lua_isnil(l,2)) // get palette size
+	{
+		lua_pushnumber(l,p->cmap->w);
+		return 1;
+	}
+
+	if(lua_isnil(l,3)) // set palette size
+	{
+		w=(s32)lua_tonumber(l,2);
+		p->cmap->w=w;
+		lua_pushnumber(l,p->cmap->w);
+		return 1;
+	}
 
 	x=(s32)lua_tonumber(l,2);
 	w=(s32)lua_tonumber(l,3);
