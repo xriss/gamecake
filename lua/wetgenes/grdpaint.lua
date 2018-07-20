@@ -988,12 +988,28 @@ grdpaint.history=function(grd)
 		end
 	end
 
+-- reduce amount of memory used by undo
+	history.reduce_memory=function(n)
+		n=n or 1024*1024*64 -- 64meg default
+		local total=0
+		for i=history.length,history.start,-1 do
+			local v=history.list[i]
+			if v then
+				total=total+#v
+			end
+			if total>=n then 
+				history.list[i]=nil
+				if i>=history.start then history.start=i+1 end
+			end
+		end
+	end
+
 -- return amount of memory used by undo
 	history.get_memory=function()
 		local total=0
 		local count=0
 		local mini=0
-		for i=history.length,0,-1 do
+		for i=history.length,history.start,-1 do
 			local v=history.list[i]
 			if v then
 				total=total+#v
