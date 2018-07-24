@@ -137,7 +137,7 @@ chars.all=all -- merge them all together
 
 
 tongues.loadfilename="data/tongues.tsv"
-tongues.savefilename=wwin.files_prefix.."tongues.new.tsv"
+tongues.savefilename="tongues.new.tsv"
 
 tongues.lang="english"
 
@@ -160,9 +160,9 @@ end
 -- load tsv of translations and store in lookup
 tongues.load=function()
 
-print("Loading "..tongues.lang.." from "..tongues.loadfilename)
+print("Loading "..tongues.lang.." from "..wwin.files_prefix..tongues.loadfilename)
 
-	local str=wzips.readfile(tongues.loadfilename)
+	local str=wzips.readfile(wwin.files_prefix..tongues.loadfilename)
 	
 	local head
 	local lang_idx=0
@@ -208,14 +208,14 @@ end
 tongues.save=function()
 
 		if lfs then
-print("Loading "..tongues.savefilename)
+print("Loading "..wwin.files_prefix..tongues.savefilename)
 			pcall(function() -- file might not exist
-				for line in io.lines(tongues.savefilename) do -- check all these strings as well
+				for line in io.lines(wwin.files_prefix..tongues.savefilename) do -- check all these strings as well
 					tongues.used[line]=true
 				end
 			end)
-print("Saving "..tongues.savefilename)
-			local fp=io.open(tongues.savefilename,"w")
+print("Saving "..wwin.files_prefix..tongues.savefilename)
+			local fp=io.open(wwin.files_prefix..tongues.savefilename,"w")
 			if fp then
 				for s,b in pairs(tongues.used) do
 					if ( not tongues.lookup[s] ) then -- only save if string is not available in lookup
