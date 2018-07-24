@@ -18,10 +18,7 @@ files={} -- zip files for loader to search
 --dirs={} -- dirs to check in file system
 
 -- prefix to use when io.opening 
-ioprefix=""
-
--- bindir for second chance
-binprefix=apps and apps.find_bin()
+paths={"",apps and apps.find_bin()}
 
 
 -- convert a sensible name into something we can store in an apk
@@ -129,11 +126,8 @@ function open(fname)
 	end
 	local ret
 
-	ret=io.open(ioprefix..fname,"rb") -- also try the filesystem
-	if ret then return ret end
-
-	if binprefix then
-		ret=io.open(binprefix..fname,"rb") -- final try of the filesystem
+	for i,ioprefix in ipairs(paths) do
+		ret=io.open(ioprefix..fname,"rb")
 		if ret then return ret end
 	end
 

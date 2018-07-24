@@ -105,7 +105,7 @@ end
 -- find our bin dir and set search for all lua files under there, makes debuging a bit easier
 -- than using the builtin strings. Also lets us pick up any dlls in there.
 --
-function default_paths()
+function default_paths(appdir)
 
 -- we are looking for a dir/lua/name.lua and dir will be our base dir so look in various places
 
@@ -120,13 +120,25 @@ function default_paths()
 	local dll="dll"
 	if osflavour=="nix" then dll="so" end
 
-	local bin_dir=find_bin()
+	local luadir=find_bin()
 	
-	setpaths(dll,{bin_dir,"./"})
+	if appdir and appdir~="" then -- use this as app dir
+
+		appdir=appdir:gsub("\\","/").."../"
+		setpaths(dll,{luadir,appdir,"./"})
+
+	else
 	
-	local dir=get_cd() -- use cd as base dir
+		appdir=get_cd().."../" -- use cd as app dir	
+		setpaths(dll,{luadir,"./"})
+		
+	end
 	
-	return bin_dir
+	local wzips=require("wetgenes.zips") -- and search for data+lua here
+	wzips.paths[#wzips.paths+1]=appdir
+
+	return luadir,appdir
+	
 end
 
 
