@@ -129,7 +129,7 @@ function default_paths(appdir)
 
 	else
 	
-		appdir=get_cd().."../" -- use cd as app dir	
+		appdir=get_cd().."/" -- use cd as app dir	
 		setpaths(dll,{luadir,"./"})
 		
 	end
