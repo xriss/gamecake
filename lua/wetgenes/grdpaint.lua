@@ -1014,7 +1014,7 @@ grdpaint.history=function(grd)
 		local total=0
 		local count=0
 		local mini=0
-		for i=history.length,history.start,-1 do
+		for i=history.length,history.start or 1,-1 do
 			local v=history.list[i]
 			if v then
 				total=total+#v
