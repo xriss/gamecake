@@ -690,7 +690,7 @@ grdpaint.history=function(grd)
 		it.rearrange[1]={x,y,n}
 		it.rearrange[2]={layers.x,layers.y,layers.count}
 		
-		layers.rearrange(x,y,n) -- apply
+		layers:rearrange(x,y,n) -- apply
 
 		return history:push(it)
 	end
@@ -702,7 +702,7 @@ grdpaint.history=function(grd)
 		if num<0 then -- blank the layers we are about to delete first
 			for z=0,history.grd.depth-1 do -- across all frames
 				for i=idx,(idx-num)-1 do
-					history:draw_begin(history.grd.layers.area(i,z))
+					history:draw_begin(history.grd.layers:area(i,z))
 					history:draw_get():clear()
 					history:draw_save()
 				end
@@ -714,7 +714,7 @@ grdpaint.history=function(grd)
 		it.layers[1]={idx,num}
 		it.layers[2]={idx,-num}
 
-		history.grd.layers.adjust_layer_count(idx,num)
+		history.grd.layers:adjust_layer_count(idx,num)
 
 		return history:push(it)
 	end
@@ -736,7 +736,7 @@ grdpaint.history=function(grd)
 		it.frames[1]={idx,num}
 		it.frames[2]={idx,-num}
 
-		history.grd.layers.adjust_depth(idx,num)
+		history.grd.layers:adjust_depth(idx,num)
 
 		return history:push(it)
 	end
@@ -747,7 +747,7 @@ grdpaint.history=function(grd)
 
 		local it={swap_layers_with_frames=true}
 
-		history.grd.layers.swap_with_frames()
+		history.grd.layers:swap_with_frames()
 
 		return history:push(it)
 	end
@@ -789,7 +789,7 @@ grdpaint.history=function(grd)
 		it.size[1]={width,height,ax,ay}
 		it.size[2]={grd.width,grd.height,ax,ay} -- restore old size
 
-		history.grd.layers.adjust_size(width,height,ax,ay)
+		history.grd.layers:adjust_size(width,height,ax,ay)
 
 		return history:push(it)
 	end
@@ -798,7 +798,7 @@ grdpaint.history=function(grd)
 	history.push_layer_size=function(history,width,height,ax,ay)
 
 		local layers=history.grd.layers
-		local wa,ha=layers.size() -- original size
+		local wa,ha=layers:size() -- original size
 		local w,xa,xb=anchor_helper(wa,width, ax)
 		local h,ya,yb=anchor_helper(ha,height,ay)
 
@@ -807,7 +807,7 @@ grdpaint.history=function(grd)
 				history:draw_begin(0,0,z,history.grd.width,history.grd.height,1)
 				local g=history:draw_get()
 				for l=1,layers.count do
-					local ga=g:clip(layers.area(l,0))
+					local ga=g:clip(layers:area(l,0))
 					if width<wa then
 						if xa>0 then
 							ga:clip(0,0,0,xa,ga.height,1):clear()
@@ -834,7 +834,7 @@ grdpaint.history=function(grd)
 		it.layer_size[1]={width,height,ax,ay}
 		it.layer_size[2]={wa,ha,ax,ay} -- restore old size
 
-		history.grd.layers.adjust_layer_size(width,height,ax,ay)
+		history.grd.layers:adjust_layer_size(width,height,ax,ay)
 
 		return history:push(it)
 	end
@@ -851,7 +851,7 @@ grdpaint.history=function(grd)
 		it.rechop[1]={x,y,count}
 		it.rechop[2]={layers.x,layers.y,layers.count} -- restore old size
 
-		history.grd.layers.config(x,y,count)
+		history.grd.layers:config(x,y,count)
 
 		return history:push(it)
 	end
@@ -887,31 +887,31 @@ grdpaint.history=function(grd)
 			end
 			
 			if v.rearrange then -- rearrange layout of layers
-				history.grd.layers.rearrange(unpack(v.rearrange[ru]))
+				history.grd.layers:rearrange(unpack(v.rearrange[ru]))
 			end
 
 			if v.layers then -- add or remove some layers
-				history.grd.layers.adjust_layer_count(unpack(v.layers[ru]))
+				history.grd.layers:adjust_layer_count(unpack(v.layers[ru]))
 			end
 
 			if v.frames then -- add or remove some frames
-				history.grd.layers.adjust_depth(unpack(v.frames[ru]))
+				history.grd.layers:adjust_depth(unpack(v.frames[ru]))
 			end
 			
 			if v.swap_layers_with_frames then -- this is its own reverse
-				history.grd.layers.swap_with_frames()
+				history.grd.layers:swap_with_frames()
 			end
 			
 			if v.size then -- change size of image
-				history.grd.layers.adjust_size(unpack(v.size[ru]))
+				history.grd.layers:adjust_size(unpack(v.size[ru]))
 			end
 
 			if v.layer_size then -- 
-				history.grd.layers.adjust_layer_size(unpack(v.layer_size[ru]))
+				history.grd.layers:adjust_layer_size(unpack(v.layer_size[ru]))
 			end
 
 			if v.rechop then -- adjust layer layout
-				history.grd.layers.config(unpack(v.rechop[ru]))
+				history.grd.layers:config(unpack(v.rechop[ru]))
 			end
 		end
 
@@ -1090,7 +1090,7 @@ grdpaint.layers=function(grd)
 	layers.index=0 -- layer index starts at 1, 0 is a special index to mean all layers IE the full grd
 
 	-- set layer config, default to entire frame.
-	layers.config=function(x,y,n)
+	layers.config=function(layers,x,y,n)
 		if n then
 			if not x and not y then
 				y=math.floor(math.sqrt(n))
@@ -1112,24 +1112,24 @@ grdpaint.layers=function(grd)
 	end
 
 	-- get the size of each layer
-	layers.size=function()
+	layers.size=function(layers)
 		return math.floor(layers.grd.width/layers.x),math.floor(layers.grd.height/layers.y)
 	end
 
 -- a grd clip to area
-	layers.clip=function(idx,frame,grd)
+	layers.clip=function(layers,idx,frame,grd)
 		grd=grd or layers.grd -- optional other grd
-		return grd:clip( layers.area(idx,frame) )
+		return grd:clip( layers:area(idx,frame) )
 	end
 	
 	-- return a 3d clip area to get a single layer from the grd
-	layers.area=function(idx,frame)
+	layers.area=function(layers,idx,frame)
 		idx=idx or layers.index
 		frame=frame or layers.frame
 		if idx==0 then -- layer 0 is special case, full size
 			return 0,0,frame, layers.grd.width,layers.grd.height,1
 		end
-		local lw,lh=layers.size()
+		local lw,lh=layers:size()
 		local lx=lw*math.floor((idx-1)%layers.x)
 		local ly=lh*math.floor((idx-1)/layers.x)
 		return  lx,ly,frame, lw,lh,1
@@ -1137,37 +1137,37 @@ grdpaint.layers=function(grd)
 
 	-- get a new grd of all layers merged for every frame
 	-- or just a single frame if requested
-	layers.flatten_grd=function()
+	layers.flatten_grd=function(layers)
 		local grd=layers.grd
 		local gd=grd.depth
-		local lw,lh=layers.size()
+		local lw,lh=layers:size()
 		local g=wgrd.create(grd.format,lw,lh,gd) -- new size same depth
 		if grd.cmap then -- copy palette
 			g:palette(0,256,grd)
 		end
 		for z=0,gd-1 do
 			for i=layers.count,1,-1 do
-				g:clip(0,0,z,lw,lh,1):paint( grd:clip(layers.area(i,z)) ,0,0,0,0,lw,lh,wgrd.PAINT_MODE_ALPHA,-1,-1)
+				g:clip(0,0,z,lw,lh,1):paint( grd:clip(layers:area(i,z)) ,0,0,0,0,lw,lh,wgrd.PAINT_MODE_ALPHA,-1,-1)
 			end
 		end
 		return g
 	end
 
-	layers.flatten_frame=function(frame,grd)
+	layers.flatten_frame=function(layers,frame,grd)
 		grd=grd or layers.grd -- can choose a temp grd or use default
-		local lw,lh=layers.size()
+		local lw,lh=layers:size()
 		local g=wgrd.create(grd.format,lw,lh,1) -- new size one frame
 		if grd.cmap then -- copy palette
 			g:palette(0,256,grd)
 		end
 		for i=layers.count,1,-1 do
-			g:clip(0,0,0,lw,lh,1):paint( grd:clip(layers.area(i,frame)) ,0,0,0,0,lw,lh,wgrd.PAINT_MODE_ALPHA,-1,-1)
+			g:clip(0,0,0,lw,lh,1):paint( grd:clip(layers:area(i,frame)) ,0,0,0,0,lw,lh,wgrd.PAINT_MODE_ALPHA,-1,-1)
 		end
 		return g
 	end
 
 -- rearrange layers, do not pass any values for auto layer layout
-	layers.rearrange=function(x,y,n)
+	layers.rearrange=function(layers,x,y,n)
 
 		if not n then
 			n=layers.count
@@ -1184,7 +1184,7 @@ grdpaint.layers=function(grd)
 		if x*y<n then n=x*y end -- not big enough, set n to maximum
 
 		local ga=layers.grd -- from
-		local w,h=layers.size() -- get original layer size
+		local w,h=layers:size() -- get original layer size
 
 		local gb=wgrd.create(ga.format,w*x,h*y,ga.depth) -- new image size
 		if ga.cmap then -- copy palette
@@ -1192,12 +1192,12 @@ grdpaint.layers=function(grd)
 		end
 		
 		grdpaint.layers(gb) -- we need to temp layers
-		gb.layers.config(x,y,n) -- so we can now configure it
+		gb.layers:config(x,y,n) -- so we can now configure it
 
 		for z=0,ga.depth-1 do -- for each frame
 			for l=1,n do
 				if l<=ga.layers.count and l<=gb.layers.count then -- we have a layer to copy
-					gb.layers.clip(l,z):pixels(0,0,0,w,h,1,ga.layers.clip(l,z))
+					gb.layers:clip(l,z):pixels(0,0,0,w,h,1,ga.layers:clip(l,z))
 				end
 			end
 		end
@@ -1205,17 +1205,17 @@ grdpaint.layers=function(grd)
 		local i=layers.index -- save idx
 		ga[0]=gb[0] -- transplant the core grd so we can keep the same table
 		ga:info()
-		layers.config(x,y,n) -- apply new configuration (resets idx)
+		layers:config(x,y,n) -- apply new configuration (resets idx)
 		layers.index=i -- load idx
 
 	end
 
 -- add or remove a number of layers at the given index
-	layers.adjust_layer_count=function(layeridx,layernum)
+	layers.adjust_layer_count=function(layers,layeridx,layernum)
 
 
 		local ga=layers.grd -- from
-		local w,h=layers.size() -- get original layer size
+		local w,h=layers:size() -- get original layer size
 
 		local n=layers.count+layernum -- new number of layers
 		local y=math.floor(math.sqrt(n)) -- with a simple layout
@@ -1227,7 +1227,7 @@ grdpaint.layers=function(grd)
 		end
 		
 		grdpaint.layers(gb) -- we need to temp layers
-		gb.layers.config(x,y,n) -- so we can now configure it
+		gb.layers:config(x,y,n) -- so we can now configure it
 
 		for z=0,ga.depth-1 do -- for each frame
 			for la=1,layers.count do
@@ -1239,7 +1239,7 @@ grdpaint.layers=function(grd)
 					end
 				end
 				if lb then -- copy over layers
-					gb.layers.clip(lb,z):pixels(0,0,0,w,h,1,ga.layers.clip(la,z))
+					gb.layers:clip(lb,z):pixels(0,0,0,w,h,1,ga.layers:clip(la,z))
 				end
 			end
 		end
@@ -1247,7 +1247,7 @@ grdpaint.layers=function(grd)
 		local i=layers.index -- save idx
 		ga[0]=gb[0] -- transplant the core grd so we can keep the same table
 		ga:info()
-		layers.config(x,y,n) -- apply new configuration (resets idx)
+		layers:config(x,y,n) -- apply new configuration (resets idx)
 		layers.index=i -- load idx
 
 		if layers.index>layeridx then layers.index=layers.index+layernum end -- adjust current layer index
@@ -1255,7 +1255,7 @@ grdpaint.layers=function(grd)
 	end
 
 -- add or remove a number of frames at the given index
-	layers.adjust_depth=function(frameidx,framenum)
+	layers.adjust_depth=function(layers,frameidx,framenum)
 	
 		local ga=layers.grd
 		local gb=wgrd.create( ga.format , ga.width , ga.height , ga.depth+framenum ) -- the new grd size with adjusted depth
@@ -1285,10 +1285,10 @@ grdpaint.layers=function(grd)
 	end
 
 -- swap layers and frames
-	layers.swap_with_frames=function()
+	layers.swap_with_frames=function(layers)
 
 		local ga=layers.grd
-		local w,h=layers.size() -- get original layer size
+		local w,h=layers:size() -- get original layer size
 		local n=ga.depth -- turn frames into layers
 		local y=math.floor(math.sqrt(n)) -- with a simple layout
 		local x=math.ceil(n/y)
@@ -1298,23 +1298,23 @@ grdpaint.layers=function(grd)
 		end
 
 		grdpaint.layers(gb) -- we need to temp layers
-		gb.layers.config(x,y,n) -- so we can now configure it
+		gb.layers:config(x,y,n) -- so we can now configure it
 
 		for l=0,ga.layers.count-1 do
 			for f=0,n-1 do
-				gb.layers.clip(f+1,l):pixels(0,0,0,w,h,1,ga.layers.clip(l+1,f))
+				gb.layers:clip(f+1,l):pixels(0,0,0,w,h,1,ga.layers:clip(l+1,f))
 			end
 		end
 
 		ga[0]=gb[0] -- transplant the grd from gb into ga
 		ga:info()
-		layers.config(x,y,n) -- apply new configuration
+		layers:config(x,y,n) -- apply new configuration
 
 	end
 
 	
 -- change the size of each layer
-	layers.adjust_layer_size=function(width,height,anchor_x,anchor_y)
+	layers.adjust_layer_size=function(layers,width,height,anchor_x,anchor_y)
 	
 		local ga=layers.grd -- from
 		local gb=wgrd.create(ga.format,width*layers.x,height*layers.y,ga.depth) -- to
@@ -1323,16 +1323,16 @@ grdpaint.layers=function(grd)
 		end
 				
 		grdpaint.layers(gb) -- we need to temp layers
-		gb.layers.config(layers.x,layers.y,layers.n) -- so we can now configure it
+		gb.layers:config(layers.x,layers.y,layers.n) -- so we can now configure it
 
-		local wa,ha=layers.size() -- original size
+		local wa,ha=layers:size() -- original size
 		local w,xa,xb=anchor_helper(wa,width, anchor_x)
 		local h,ya,yb=anchor_helper(ha,height,anchor_y)
 		
 		for z=0,ga.depth-1 do
 			for l=1,ga.layers.count do
-				local ca=ga.layers.clip(l,z)
-				local cb=gb.layers.clip(l,z)
+				local ca=ga.layers:clip(l,z)
+				local cb=gb.layers:clip(l,z)
 				cb:pixels(xb,yb,0,w,h,1,ca:clip(xa,ya,0,w,h,1))
 			end
 		end
@@ -1343,7 +1343,7 @@ grdpaint.layers=function(grd)
 	end
 
 -- change the size of the entire image, layer 0
-	layers.adjust_size=function(width,height,anchor_x,anchor_y)
+	layers.adjust_size=function(layers,width,height,anchor_x,anchor_y)
 
 		local ga=layers.grd -- from
 		local gb=wgrd.create(ga.format,width,height,ga.depth) -- to
@@ -1363,7 +1363,7 @@ grdpaint.layers=function(grd)
 		
 	end
 	
-	return layers.config()
+	return layers:config()
 end
 
 
