@@ -3,6 +3,28 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+--[[#lua.wetgenes.grdpaint
+
+	local wgrdpaint=require("wetgenes.grdpaint")
+
+We use wgrdpaint as the local name of this library.
+
+Add extra functionality to wetgenes.grd primarily these are functions that 
+are used by swanky paint to manage its internal data.
+
+Primarily we add a concept of "layers" and "history" these interfaces 
+are added to a grd via a new object that lives inside the grd table and 
+binds them together.
+
+EG grd.history contains history data and functions.
+
+As these are written first for swankypaint they may only work with 
+indexed images and are currently in state of flux so may take a while 
+to settle down.
+
+]]
+
+
 local wstr=require("wetgenes.string")
 local wgrd=require("wetgenes.grd")
 local cmsgpack=require("cmsgpack")
@@ -439,6 +461,16 @@ local anchor_helper=function(a,b,anchor)
 end
 
 
+--[[#lua.wetgenes.grdpaint
+
+	local history=wgrdpaint.history(grd)
+
+Create and bind a history object to the given grd object. The history 
+lives inside the grd and can be accesd as grd.history just as the grd can 
+be accessed through the history as history.grd
+
+]]
+
 -- create a history state within the given grd
 grdpaint.history=function(grd)
 
@@ -447,7 +479,7 @@ grdpaint.history=function(grd)
 	
 	if not grd.layers then grdpaint.layers(grd) end -- need layers
 
-	history.reset=function()
+	history.reset=function(history)
 	
 		history.version="Swanky History v1"
 		history.start=1
@@ -462,18 +494,18 @@ grdpaint.history=function(grd)
 		history.height=grd.height
 
 -- add a first empty state so we can always undo to this state of the image
-		history.set(1,{id=1})
+		history:set(1,{id=1})
 		
 		return history
 	end
 	
-	history.get=function(index)
+	history.get=function(history,index)
 		if not index then return end
 		local it=history.list[index]
 		it=it and cmsgpack.unpack(inflate(it))
 		return it
 	end
-	history.set=function(index,it)
+	history.set=function(history,index,it)
 		it=it and deflate(cmsgpack.pack(it))
 		history.list[index]=it
 		if index>history.length then -- added a new one
@@ -483,7 +515,7 @@ grdpaint.history=function(grd)
 	end
 	
 -- take a snapshot of this frame for latter diffing (started drawing on this frame only)
-	history.draw_begin=function(x,y,z,w,h,d)
+	history.draw_begin=function(history,x,y,z,w,h,d)
 		history.area={
 			x or 0 ,
 			y or 0 ,
@@ -503,13 +535,13 @@ grdpaint.history=function(grd)
 	end
 
 -- return a temporray grd of only the frame we can draw into
-	history.draw_get=function()
+	history.draw_get=function(history)
 		assert(history.grd_diff) -- sanity
 		return history.grd:clip(unpack(history.area))
 	end
 
 -- revert back to begin state
-	history.draw_revert=function()
+	history.draw_revert=function(history)
 		assert(history.grd_diff) -- sanity
 		local c=history.area
 		history.grd:pixels(c[1],c[2],c[3],c[4],c[5],c[6],history.grd_diff) -- restore image
@@ -517,13 +549,13 @@ grdpaint.history=function(grd)
 	end
 	
 -- stop any accumulated changes
-	history.draw_end=function()
+	history.draw_end=function(history)
 		history.grd_diff=nil
 		history.pal=nil
 	end
 	
 -- push any changes we find into the history, optionally pass in a new json object to diff and apply
-	history.draw_save=function(json)
+	history.draw_save=function(history,json)
 		assert(history.grd_diff) -- sanity
 		
 		if history.grd.width  > history.width  then history.width =history.grd.width  end
@@ -538,7 +570,7 @@ grdpaint.history=function(grd)
 				local gb=history.grd:clip(unpack(history.area))
 				ga:xor(gb)
 				it.palette=ga:palette(0,256,"")
-				history.set(it.id,it)
+				history:set(it.id,it)
 
 			else -- new
 				local ga=history.grd_diff:duplicate()
@@ -554,12 +586,12 @@ grdpaint.history=function(grd)
 					it.id=history.length+1
 
 					history.index=it.id
-					history.set(it.id,it)
+					history:set(it.id,it)
 					if it.prev then -- link from prev
-						local pit=history.get(it.prev)
+						local pit=history:get(it.prev)
 						if pit then
 							pit.next=it.id -- link to *most*recent* next
-							history.set(pit.id,pit)
+							history:set(pit.id,pit)
 						end
 					end
 
@@ -603,35 +635,35 @@ grdpaint.history=function(grd)
 				it.id=history.length+1
 
 				history.index=it.id
-				history.set(it.id,it)
+				history:set(it.id,it)
 				if it.prev then -- link from prev which must exist
-					local pit=history.get(it.prev)
+					local pit=history:get(it.prev)
 					pit.next=it.id -- link to *most*recent* next
-					history.set(pit.id,pit)
+					history:set(pit.id,pit)
 				end
 			
 			end
 			
-			history.draw_end()
+			history:draw_end()
 		end
 	end
 
 -- push this prebuilt history item onto the history stack linking onto index
-	history.push=function(it)
+	history.push=function(history,it)
 
-		history.draw_end() -- sanity
+		history:draw_end() -- sanity
 		
 		it.prev=history.index>0 and  history.index -- link to prev
 		it.id=history.length+1
 
 		history.index=it.id
-		history.set(it.id,it)
+		history:set(it.id,it)
 
 		if it.prev then -- link from prev which must exist
-			local pit=history.get(it.prev)
+			local pit=history:get(it.prev)
 			if pit then
 				pit.next=it.id -- link to *most*recent* next
-				history.set(pit.id,pit)
+				history:set(pit.id,pit)
 			end
 		end
 
@@ -639,7 +671,7 @@ grdpaint.history=function(grd)
 	end
 
 -- apply and push a layers rearrange onto the stack
-	history.push_rearrange=function(x,y,n)
+	history.push_rearrange=function(history,x,y,n)
 
 		local layers=history.grd.layers
 
@@ -660,19 +692,19 @@ grdpaint.history=function(grd)
 		
 		layers.rearrange(x,y,n) -- apply
 
-		return history.push(it)
+		return history:push(it)
 	end
 
 -- apply and push a layers adjust onto the stack
-	history.push_layers=function(idx,num)
-		history.push_rearrange() -- make sure we have a natural order
+	history.push_layers=function(history,idx,num)
+		history:push_rearrange() -- make sure we have a natural order
 		
 		if num<0 then -- blank the layers we are about to delete first
 			for z=0,history.grd.depth-1 do -- across all frames
 				for i=idx,(idx-num)-1 do
-					history.draw_begin(history.grd.layers.area(i,z))
-					history.draw_get():clear()
-					history.draw_save()
+					history:draw_begin(history.grd.layers.area(i,z))
+					history:draw_get():clear()
+					history:draw_save()
 				end
 			end
 		end
@@ -684,18 +716,18 @@ grdpaint.history=function(grd)
 
 		history.grd.layers.adjust_layer_count(idx,num)
 
-		return history.push(it)
+		return history:push(it)
 	end
 
 -- apply and push a frames adjust onto the stack
-	history.push_frames=function(idx,num)
+	history.push_frames=function(history,idx,num)
 
 		local g=history.grd
 		if num<0 then -- blank the frames we are about to delete first
 			for z=idx,(idx-num)-1 do
-				history.draw_begin(0,0,z,g.width,g.height,1)
-				history.draw_get():clear()
-				history.draw_save()
+				history:draw_begin(0,0,z,g.width,g.height,1)
+				history:draw_get():clear()
+				history:draw_save()
 			end
 		end
 
@@ -706,22 +738,22 @@ grdpaint.history=function(grd)
 
 		history.grd.layers.adjust_depth(idx,num)
 
-		return history.push(it)
+		return history:push(it)
 	end
 	
 -- apply and push a swap onto the stack
-	history.push_swap_layers_with_frames=function()
-		history.push_rearrange() -- make sure we have a natural order
+	history.push_swap_layers_with_frames=function(history)
+		history:push_rearrange() -- make sure we have a natural order
 
 		local it={swap_layers_with_frames=true}
 
 		history.grd.layers.swap_with_frames()
 
-		return history.push(it)
+		return history:push(it)
 	end
 
 -- apply and push an image size change
-	history.push_size=function(width,height,ax,ay)
+	history.push_size=function(history,width,height,ax,ay)
 
 		local layers=history.grd.layers
 		local wa,ha=history.grd.width,history.grd.height
@@ -731,7 +763,7 @@ grdpaint.history=function(grd)
 		if width<wa or height<ha then -- if shrinking we need to clear the areas we will lose first
 			for z=0,history.grd.depth-1 do -- across all frames
 				history.draw_begin(0,0,z,history.grd.width,history.grd.height,1)
-				local ga=history.draw_get()
+				local ga=history:draw_get()
 				if width<wa then
 					if xa>0 then
 						ga:clip(0,0,0,xa,ga.height,1):clear()
@@ -748,7 +780,7 @@ grdpaint.history=function(grd)
 						ga:clip(0,ya+height,0,ga.width,ga.height-(ya+height),1):clear()
 					end
 				end
-				history.draw_save()
+				history:draw_save()
 			end
 		end
 
@@ -759,11 +791,11 @@ grdpaint.history=function(grd)
 
 		history.grd.layers.adjust_size(width,height,ax,ay)
 
-		return history.push(it)
+		return history:push(it)
 	end
 
 -- apply and push an image layer size change
-	history.push_layer_size=function(width,height,ax,ay)
+	history.push_layer_size=function(history,width,height,ax,ay)
 
 		local layers=history.grd.layers
 		local wa,ha=layers.size() -- original size
@@ -772,8 +804,8 @@ grdpaint.history=function(grd)
 
 		if width<wa or height<ha then -- if shrinking we need to clear the areas we will lose first
 			for z=0,history.grd.depth-1 do -- across all frames
-				history.draw_begin(0,0,z,history.grd.width,history.grd.height,1)
-				local g=history.draw_get()
+				history:draw_begin(0,0,z,history.grd.width,history.grd.height,1)
+				local g=history:draw_get()
 				for l=1,layers.count do
 					local ga=g:clip(layers.area(l,0))
 					if width<wa then
@@ -793,7 +825,7 @@ grdpaint.history=function(grd)
 						end
 					end
 				end
-				history.draw_save()
+				history:draw_save()
 			end
 		end
 
@@ -804,11 +836,11 @@ grdpaint.history=function(grd)
 
 		history.grd.layers.adjust_layer_size(width,height,ax,ay)
 
-		return history.push(it)
+		return history:push(it)
 	end
 
 -- apply and push an image layer size change
-	history.push_rechop=function(x,y,count)
+	history.push_rechop=function(history,x,y,count)
 	
 		count=count or x*y
 
@@ -821,13 +853,13 @@ grdpaint.history=function(grd)
 
 		history.grd.layers.config(x,y,count)
 
-		return history.push(it)
+		return history:push(it)
 	end
 
 -- ru 1==redo , 2==undo	
-	history.apply=function(index,ru) -- apply diff at this index
-		history.draw_end()
-		local it=history.get(index or history.index) -- default to current index
+	history.apply=function(history,index,ru) -- apply diff at this index
+		history:draw_end()
+		local it=history:get(index or history.index) -- default to current index
 		if not it then return end -- nothing to do
 		
 		local a=it[1] and it or {it} -- an array of things to do
@@ -892,38 +924,38 @@ grdpaint.history=function(grd)
 		return it
 	end
 
-	history.redo=function(id) -- go forward a step
+	history.redo=function(history,id) -- go forward a step
 		if not id then
-			local it=history.get(history.index)
+			local it=history:get(history.index)
 			id=it and it.next
 		end
 		if id then -- somewhere to go
-			history.apply(id,1)
+			history:apply(id,1)
 			return true
 		end
 	end
 
-	history.undo=function() -- go back a step
-		local it=history.get(history.index)
+	history.undo=function(history) -- go back a step
+		local it=history:get(history.index)
 		if it and it.prev and history.list[it.prev] then -- somewhere to go
-			history.apply(history.index,2)
+			history:apply(history.index,2)
 			return true
 		end
 	end
 
 	
-	history.goto=function(index) -- goto this undo index
+	history.goto=function(history,index) -- goto this undo index
 	
 		-- this will work if we are on the right branch
 		-- and destination is in the future
 		while index>history.index do 
-			if not history.redo() then break end
+			if not history:redo() then break end
 		end
 		
 		-- this will work if we are on the right branch
 		-- and destination is in the past
 		while index<history.index do
-			if not history.undo() then break end
+			if not history:undo() then break end
 		end
 		
 		-- did not work so we need to find a common point in history
@@ -936,17 +968,17 @@ grdpaint.history=function(grd)
 
 				while check and check>history.index do -- work our way backwards from the destination remembering the path
 					table.insert(path,check)
-					check=history.get_prev(check) -- step back in path
+					check=history:get_prev(check) -- step back in path
 				end				
 
 				while check and check<history.index do
-					if not history.undo() then searching=false break end -- break if can go no further
+					if not history:undo() then searching=false break end -- break if can go no further
 				end
 				
 				if check and check==history.index then -- we can use the path from here
 					searching=false -- we have found the path
 					for i=#path,1,-1 do
-						history.redo(path[i]) -- walk along the path
+						history:redo(path[i]) -- walk along the path
 					end
 				end
 				
@@ -968,9 +1000,9 @@ grdpaint.history=function(grd)
 		"json",
 	}
 
-	history.save=function()
+	history.save=function(history)
 
-		history.draw_end()
+		history:draw_end()
 
 		local it={}
 		
@@ -981,9 +1013,9 @@ grdpaint.history=function(grd)
 		return deflate(cmsgpack.pack(it))
 	end
 	
-	history.load=function(it)
+	history.load=function(history,it)
 
-		history.draw_end()
+		history:draw_end()
 		
 		local it=cmsgpack.unpack(inflate(it))
 
@@ -993,7 +1025,7 @@ grdpaint.history=function(grd)
 	end
 
 -- reduce amount of memory used by undo
-	history.reduce_memory=function(n)
+	history.reduce_memory=function(history,n)
 		n=n or 1024*1024*64 -- 64meg default
 		local total=0
 		for i=history.length,history.start,-1 do
@@ -1006,11 +1038,11 @@ grdpaint.history=function(grd)
 				if i>=history.start then history.start=i+1 end
 			end
 		end
-		history.get_memory()
+		history:get_memory()
 	end
 
 -- return amount of memory used by undo
-	history.get_memory=function()
+	history.get_memory=function(history)
 		local total=0
 		local count=0
 		local mini=0
@@ -1027,21 +1059,21 @@ grdpaint.history=function(grd)
 	end
 
 -- get the index of the parent of the given index
-	history.get_prev=function(index)
+	history.get_prev=function(history,index)
 		index=index or history.index -- use current if missing
-		local it=history.get(index) -- unpack
+		local it=history:get(index) -- unpack
 		if it then
 			return it.prev -- return index
 		end		
 	end
 
 -- copy current json into a new or the given json table and return it
-	history.get_json=function(it)
+	history.get_json=function(history,it)
 		return deepjson_copy(it,history.json)
 	end
 
 
-	return 	history.reset()
+	return 	history:reset()
 end
 
 
