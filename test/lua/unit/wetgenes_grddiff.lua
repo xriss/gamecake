@@ -57,23 +57,23 @@ function test_grddiff_history()
 	for i=0,15 do
 		local x,y=i*8,i*8
 
-		history.draw_begin(0,0,0)
+		history:draw_begin(0,0,0)
 		canvas.color(i)
 		canvas.box(x,y,x+7,y+7)
-		history.draw_save()
+		history:draw_save()
 
 		assert( history.grd:duplicate():save("dat/grd/diff.undo."..i..".chk.png","png") )
 		assert( history.grd:duplicate():save("dat/grd/diff.redo."..i..".chk.png","png") )
 	end
 
 	for i=14,1,-1 do
-		history.undo()
+		history:undo()
 		do_file_assert(history.grd:duplicate(),"diff","undo."..i)
 --		assert( history.grd:duplicate():save("dat/grd/diff.undo."..i..".out.png","png") )
 --		assert_true( do_file_compare("dat/grd/diff.base."..i..".out.png","dat/grd/diff.undo."..i..".out.png") )
 	end
 	for i=2,15 do
-		history.redo()
+		history:redo()
 		do_file_assert(history.grd:duplicate(),"diff","redo."..i)
 --		assert( history.grd:duplicate():save("dat/grd/diff.redo."..i..".out.png","png") )
 --		assert_true( do_file_compare("dat/grd/diff.base."..i..".out.png","dat/grd/diff.redo."..i..".out.png") )
