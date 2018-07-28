@@ -80,17 +80,56 @@ fi
 if hash apt-get 2>/dev/null; then
 
 	sudo apt-get install -y wget
-	sudo apt-get install -y unzip build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev libssl-dev clang libpulse-dev
-	sudo apt-get install -y libfreeimage-dev libopenal-dev libpango1.0-dev libsndfile-dev libudev-dev libasound2-dev libjpeg8-dev libwebp-dev automake libsndio-dev
+	sudo apt-get install -y unzip
+	sudo apt-get install -y build-essential
+	sudo apt-get install -y libreadline-dev
+	sudo apt-get install -y libgl1-mesa-dev
+	sudo apt-get install -y libx11-dev
+	sudo apt-get install -y libasound2-dev
+	sudo apt-get install -y libudev-dev
+	sudo apt-get install -y libssl-dev clang
+	sudo apt-get install -y libpulse-dev
+	sudo apt-get install -y libfreeimage-dev
+	sudo apt-get install -y libopenal-dev
+	sudo apt-get install -y libpango1.0-dev
+	sudo apt-get install -y libsndfile-dev
+	sudo apt-get install -y libudev-dev
+	sudo apt-get install -y libasound2-dev
+	sudo apt-get install -y libjpeg8-dev
+	sudo apt-get install -y libwebp-dev
+	sudo apt-get install -y automake
+	sudo apt-get install -y libsndio-dev
 
 #full SDL2 depends, so it builds as many drivers as possible
 
-sudo apt-get install -y build-essential mercurial make cmake autoconf \
- automake libtool libasound2-dev libpulse-dev libaudio-dev libx11-dev libxext-dev \
- libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxxf86vm-dev \
- libxss-dev libgl1-mesa-dev libesd0-dev libdbus-1-dev libudev-dev \
- libgles1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev libibus-1.0-dev \
- libwayland-dev libxkbcommon-dev
+	sudo apt-get install -y build-essential
+	sudo apt-get install -y mercurial
+	sudo apt-get install -y make
+	sudo apt-get install -y cmake
+	sudo apt-get install -y autoconf
+	sudo apt-get install -y automake
+	sudo apt-get install -y libtool
+	sudo apt-get install -y libasound2-dev
+	sudo apt-get install -y libpulse-dev
+	sudo apt-get install -y libaudio-dev
+	sudo apt-get install -y libx11-dev
+	sudo apt-get install -y libxext-dev
+	sudo apt-get install -y libxrandr-dev
+	sudo apt-get install -y libxcursor-dev
+	sudo apt-get install -y libxi-dev
+	sudo apt-get install -y libxinerama-dev
+	sudo apt-get install -y libxxf86vm-dev
+	sudo apt-get install -y libxss-dev
+	sudo apt-get install -y libgl1-mesa-dev
+	sudo apt-get install -y libesd0-dev
+	sudo apt-get install -y libdbus-1-dev
+	sudo apt-get install -y libudev-dev
+	sudo apt-get install -y libgles1-mesa-dev
+	sudo apt-get install -y libgles2-mesa-dev
+	sudo apt-get install -y libegl1-mesa-dev
+	sudo apt-get install -y libibus-1.0-dev
+	sudo apt-get install -y libwayland-dev
+	sudo apt-get install -y libxkbcommon-dev
 
 fi
 
