@@ -1,12 +1,20 @@
 #build dependencies, run sudo ./apt-gets
 
 
-apt-get install -y build-essential libreadline-dev libgl1-mesa-dev libx11-dev libasound2-dev libudev-dev libpulse-dev
+apt-get install -y build-essential
+apt-get install -y libreadline-dev
+apt-get install -y libgl1-mesa-dev
+apt-get install -y libx11-dev
+apt-get install -y libasound2-dev
+apt-get install -y libudev-dev
+apt-get install -y libpulse-dev
 
 
 # we might need to build our own versions of these, see the build directory
 
-apt-get install -y libluajit-5.1-dev libsdl2-dev premake4
+apt-get install -y libluajit-5.1-dev
+apt-get install -y libsdl2-dev
+apt-get install -y premake4
 
 
 # it is ok if this one fails, just need it for nginx
