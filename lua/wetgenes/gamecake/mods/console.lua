@@ -20,6 +20,21 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 local buffedit=require("wetgenes.gamecake.mods.console.buffedit")
 
 
+local function assert_resume(co,...)
+
+	local t={coroutine.resume(co,...)}
+
+	if t[1] then
+
+		table.remove(t,1) -- remove status code
+		
+		return unpack(t) -- no error
+	end
+	
+	error( t[2].."\nin coroutine\n"..debug.traceback(co) ) -- error
+
+end
+
 function M.bake(oven,console)
 
 	console=console or {}
@@ -33,6 +48,8 @@ function M.bake(oven,console)
 	console.data_meta={__index=_G}
 	console.call = {} -- name -> function : functions that should be easily to call on the console command line
 	console.help={} -- simple help text for callable functions
+	
+	console.tasks={} -- running tasks
 	
 	setmetatable(console.data,console.data_meta)
 
@@ -189,31 +206,33 @@ function M.bake(oven,console)
 			
 		end
 
-		-- if compiled ok, then evaluate the chunk
-		if not err and chunk then
-		
-			ret = { pcall(chunk,unpack(args)) }
-			
-			if not ret[1] then
-				err=ret[2]
-				ret={}
-			else
-				table.remove(ret,1)
-			end
-			
-		end
-		
-		-- if there was any error, print it out
+		-- if there was a compile error, print it out
 		if err then
+
 			_G.print(err)
-		else
-			if ret[1] then
-				_G.print(unpack(ret))
-			end
+
+		elseif chunk then -- begin to run the chunk, it may end or yield
+		
+			local co=coroutine.create(chunk)
+			console.tasks[#console.tasks+1]=co
+			local ret={assert_resume(co,unpack(args))}
+
+			if #ret>0 then _G.print(unpack(ret)) end
+
 		end
+
 	end
 
 	function console.update()
+
+		for idx=#console.tasks,1,-1 do -- backwards
+			local co=console.tasks[idx]
+			if coroutine.status(co)~="dead" then
+				assert_resume(co) -- keep running
+			else
+				table.remove(console.tasks,idx) -- remove
+			end
+		end
 	
 		console.fps_updates=console.fps_updates+1
 
