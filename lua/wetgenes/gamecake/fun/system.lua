@@ -59,8 +59,8 @@ system.load_and_setup=function(name,path)
 
 	else
 	
-		system.source.glsl=wzips.readfile(system.source_filename..".fun.glsl")
-		system.source.lua=wzips.readfile(system.source_filename..".fun.lua")
+		system.source.glsl=wzips.readfile(system.source_filename..".fun.glsl") or wzips.readfile(system.source_filename..".glsl")
+		system.source.lua=wzips.readfile(system.source_filename..".fun.lua") or wzips.readfile(system.source_filename..".lua") or wzips.readfile(system.source_filename )
 	
 	end
 
@@ -94,6 +94,7 @@ print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 			oven=oven,
 			gl=oven.gl,
 			require=require,
+			package=package, -- to help with module creation
 			ups=oven.rebake("wetgenes.gamecake.spew.recaps").ups, -- input, for 1up - 6up 
 		})
 		system.hardware=system.code.hardware

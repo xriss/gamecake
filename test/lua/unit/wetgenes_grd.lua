@@ -134,6 +134,12 @@ function test_greyscale()
 	assert( g:save("dat/grd/brokengreyscale.out.png","png") )
 end
 
+function test_bw()
+	local g=assert(grd.create("dat/grd/brokenbw.png"))
+	g:convert("U8_RGBA_PREMULT")
+	assert( g:save("dat/grd/brokenbw.out.png","png") )
+end
+
 function do_file_write(f,d)
 	local fp=assert(io.open(f,"wb"))
 	local d=assert(fp:write(d))
