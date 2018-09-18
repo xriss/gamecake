@@ -2469,6 +2469,13 @@ int x,y,z; u8 *pa,*pb;
 					pa+=2;
 				}
 			break;
+			case 3:
+				for(x=0;x<ga->bmap->w;x++) {
+					*((u8*)pa++)=(u8)((val    )&0xff); // assume little endian
+					*((u8*)pa++)=(u8)((val>>8 )&0xff);
+					*((u8*)pa++)=(u8)((val>>16)&0xff);
+				}
+			break;
 			case 4:
 				for(x=0;x<ga->bmap->w;x++) {
 					*((u32*)pa)=(u32)val;
