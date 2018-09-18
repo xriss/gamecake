@@ -385,7 +385,7 @@ function wskin.setup(def)
 -- save draw matrix for later use, probably need to remove master.matrix from this before it is useful?
 		widget.matrix=gl.SaveMatrix()
 
-		if widget.pan_px and widget.pan_py and not widget.fbo  then -- fidle everything
+		if widget.pan_px and widget.pan_py and not ( widget.fbo or widget.pan_refresh ) then -- fidle everything
 --print("draw",widget.pan_px,widget.pan_py)
 			gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
 		end
@@ -435,7 +435,7 @@ local font_cache_draw
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
-			if widget.pan_px and widget.pan_py then -- fidle everything
+			if widget.pan_px and widget.pan_py and not widget.pan_refresh then -- fidle everything
 				gl.Translate(-widget.pan_px*wsx,-widget.pan_py*wsy,0)
 			end
 			

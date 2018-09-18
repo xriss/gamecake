@@ -34,6 +34,7 @@ function wscroll.update(widget)
 		pan.pan_px=pan_px
 		pan.pan_py=pan_py
 		
+		if pan.pan_refresh then pan:pan_refresh() end -- update
 		pan:set_dirty()
 		widget.meta.build_m4(widget)
 	end

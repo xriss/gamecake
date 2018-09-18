@@ -58,7 +58,7 @@ end
 function wtiles.render_lines(widget,lines)
 
 	local g=widget.tilemap_grd
-
+	g:clear(0x000000)
 	for i,v in ipairs(lines) do
 		local s=v.s
 		if s then
@@ -70,7 +70,6 @@ end
 
 
 function wtiles.skin(widget)
-		print("skin1111")
 		
 		wtiles.render_lines(widget,widget.lines or {} )
 				

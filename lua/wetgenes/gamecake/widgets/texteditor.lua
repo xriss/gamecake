@@ -48,18 +48,26 @@ end
 wtexteditor.texteditor_refresh=function(widget)
 
 	local pan=widget.scroll_widget.pan
-	pan.lines={}
 
-	for i,v in ipairs(widget.lines or {}) do
-		local ps={}
-		for i=1,#v do
-			local pl=#ps
-			ps[pl+1]=string.byte(v,i,i)
-			ps[pl+2]=0
-			ps[pl+3]=1
+	pan.lines={}
+	
+	local px=math.floor(pan.pan_px/8)
+	local py=math.floor(pan.pan_py/16)
+
+	for y=py+1,py+256 do
+		local v=widget.lines and widget.lines[y]
+		if v then
+			local ps={}
+			for i=px+1,#v do
+				local pl=#ps
+				if pl>=256*3 then break end -- max width
+				ps[pl+1]=string.byte(v,i,i)
+				ps[pl+2]=0
+				ps[pl+3]=0x01
+			end
+			local s=string.char(unpack(ps))
+			pan.lines[y-py]={text=v,s=s}
 		end
-		local s=string.char(unpack(ps))
-		pan.lines[i]={text=v,s=s}
 	end
 
 
@@ -89,7 +97,18 @@ function wtexteditor.redo_text(widget,text)
 		widget.lines=wstr.split_lines(text)
 		widget:refresh()
 	end
-print(#widget.lines)
+	
+	local max_hx=0
+	local max_hy=#widget.lines
+	for i,v in ipairs(widget.lines) do
+		local lv=#v
+		if lv > max_hx then max_hx=lv end
+	end
+	
+	widget.scroll_widget.pan.hx_max=max_hx*8
+	widget.scroll_widget.pan.hy_max=max_hy*16
+	
+	widget:layout()
 
 	return widget.lines and table.concat(widget.lines) or ""
 end
@@ -111,6 +130,9 @@ function wtexteditor.setup(widget,def)
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles"})
+
+
+	widget.scroll_widget.pan.pan_refresh=function(pan) return widget:texteditor_refresh() end -- we will do the scroll
 
 
 --	wtexteditor:redo_text(def.text or "") -- set starting text

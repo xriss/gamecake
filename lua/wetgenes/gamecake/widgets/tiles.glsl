@@ -15,6 +15,14 @@ uniform vec4 colors_4;
 uniform vec4 colors_5;
 uniform vec4 colors_6;
 uniform vec4 colors_7;
+uniform vec4 colors_8;
+uniform vec4 colors_9;
+uniform vec4 colors_A;
+uniform vec4 colors_B;
+uniform vec4 colors_C;
+uniform vec4 colors_D;
+uniform vec4 colors_E;
+uniform vec4 colors_F;
 
 //uniform sampler2D tex_cmap;
 uniform sampler2D tex_tile;
@@ -52,14 +60,22 @@ vec4 get_color(float f)
 {
 	switch( int(f) )
 	{
-		case 0: return colors_0;
-		case 1: return colors_1;
-		case 2: return colors_2;
-		case 3: return colors_3;
-		case 4: return colors_4;
-		case 5: return colors_5;
-		case 6: return colors_6;
-		case 7: return colors_7;
+		case  0: return colors_0;
+		case  1: return colors_1;
+		case  2: return colors_2;
+		case  3: return colors_3;
+		case  4: return colors_4;
+		case  5: return colors_5;
+		case  6: return colors_6;
+		case  7: return colors_7;
+		case  8: return colors_8;
+		case  9: return colors_9;
+		case 10: return colors_A;
+		case 11: return colors_B;
+		case 12: return colors_C;
+		case 13: return colors_D;
+		case 14: return colors_E;
+		case 15: return colors_F;
 	}
 	return colors_0;
 }
