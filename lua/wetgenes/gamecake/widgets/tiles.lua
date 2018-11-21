@@ -142,8 +142,9 @@ function wtiles.skin(widget)
 
 			gl.Uniform4f( p:uniform("colors_0"), 	0.4,0.4,0.4,1 )
 			gl.Uniform4f( p:uniform("colors_1"), 	0.8,0.8,0.8,1 )
-			gl.Uniform4f( p:uniform("colors_2"), 	1,1,1,1 )
-			gl.Uniform4f( p:uniform("colors_3"), 	1,1,1,1 )
+			gl.Uniform4f( p:uniform("colors_2"), 	0.9,0.9,0.9,1 )
+			gl.Uniform4f( p:uniform("colors_3"), 	0.3,0.3,0.3,1 )
+			gl.Uniform4f( p:uniform("colors_4"), 	0.6,0.6,0.6,1 )
 
 		end)
 

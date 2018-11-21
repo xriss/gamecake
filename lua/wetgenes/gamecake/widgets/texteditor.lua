@@ -47,6 +47,8 @@ end
 
 wtexteditor.texteditor_refresh=function(widget)
 
+	local lines=widget.lines or {}
+
 	local pan=widget.scroll_widget.pan
 
 	pan.lines={}
@@ -54,20 +56,44 @@ wtexteditor.texteditor_refresh=function(widget)
 	local px=math.floor(pan.pan_px/8)
 	local py=math.floor(pan.pan_py/16)
 
+	local gutter_width=#(tostring(#lines))+1
+
 	for y=py+1,py+256 do
-		local v=widget.lines and widget.lines[y]
+		local ps={}
+		local pl=0
+
+		local v=tostring(y)
+		v=string.rep(" ",gutter_width-#v)..v.." "
+		for i=1,#v do
+			if pl>=256*3 then break end -- max width
+			ps[pl+1]=string.byte(v,i,i)
+			ps[pl+2]=0
+			ps[pl+3]=0x34
+			pl=pl+3
+		end
+		
+		ps[pl+1]=32
+		ps[pl+2]=0
+		ps[pl+3]=0x00
+		pl=pl+3
+		
+		ps[pl+1]=32
+		ps[pl+2]=0
+		ps[pl+3]=0x00
+		pl=pl+3
+
+		local v=lines[y]
 		if v then
-			local ps={}
 			for i=px+1,#v do
-				local pl=#ps
 				if pl>=256*3 then break end -- max width
 				ps[pl+1]=string.byte(v,i,i)
 				ps[pl+2]=0
 				ps[pl+3]=0x01
+				pl=pl+3
 			end
-			local s=string.char(unpack(ps))
-			pan.lines[y-py]={text=v,s=s}
 		end
+		local s=string.char(unpack(ps))
+		pan.lines[y-py]={text=v,s=s}
 	end
 
 
