@@ -258,6 +258,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 			if opts.args.maximised  then doshow="max" end
 			if doshow then oven.win:show(doshow) end
 
+
 --			oven.win:show("full")
 --			oven.win:show("max")
 
@@ -273,13 +274,12 @@ require("gles").CheckError() -- uhm this fixes an error?
 				
 			})
 			oven.cake.views.push(oven.view) -- add master view which is the size of the main window
-
 			-- the order these are added is important for priority, top of list is lowest priority, bottom is highest.
 			oven.rebake_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style escape menu
 			oven.rebake_mod("wetgenes.gamecake.mods.console") -- console gives us a quake style tilda console
 			oven.rebake_mod("wetgenes.gamecake.mods.keys") -- touchscreen keys and posix keymaping
-			oven.rebake_mod("wetgenes.gamecake.mods.mouse") -- auto fake mouse on non windows builds
-			oven.rebake_mod("wetgenes.gamecake.mods.layout") -- screen layout options
+--			oven.rebake_mod("wetgenes.gamecake.mods.mouse") -- auto fake mouse on non windows builds
+--			oven.rebake_mod("wetgenes.gamecake.mods.layout") -- screen layout options
 			oven.rebake_mod("wetgenes.gamecake.mods.snaps") -- builtin screen snapshot code
 
 -- handle default win icon if it exists and we need it .06.png will be 64x64 version
