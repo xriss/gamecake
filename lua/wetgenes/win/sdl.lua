@@ -76,13 +76,13 @@ sdl.create=function(t)
 		
 	end
 
---[[
-	SDL.glSetAttribute(SDL.glAttr.RedSize, 1);
-	SDL.glSetAttribute(SDL.glAttr.GreenSize, 1);
-	SDL.glSetAttribute(SDL.glAttr.BlueSize, 1);
-	SDL.glSetAttribute(SDL.glAttr.DepthSize, 1);
-	SDL.glSetAttribute(SDL.glAttr.DoubleBuffer, 1);
-]]
+-- OSX requires some fluffing to get a working GL context
+	if string.find(SDL.getPlatform(),"Mac") then
+		SDL.glSetAttribute(SDL.glAttr.ContextFlags,SDL.glFlags.ForwardCompatible)
+		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask,SDL.glProfile.Core)
+		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
+		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion,2)
+	end
 
 	local it={}
 	sdl.it=it
