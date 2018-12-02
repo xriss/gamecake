@@ -69,7 +69,7 @@ Greetz to No1 and No6!
 
 ]]
 	
-	about.layout=cake.layouts.create{}
+--	about.layout=cake.layouts.create{}
 	
 	about.shaders=function()
 		gl.progsrc("about_sinescroll",
@@ -160,7 +160,7 @@ precision highp float; /* really need better numbers if possible */
 
 	about.draw=function()
 
-		about.layout.apply(opts.width,opts.height,1/4,opts.width*4,"clip")
+--		about.layout.apply(opts.width,opts.height,1/4,opts.width*4,"clip")
 
 		canvas.gl_default() -- reset gl state
 
@@ -190,7 +190,7 @@ precision highp float; /* really need better numbers if possible */
 
 		about.fbo:resize(fsx,fsy,1)
 		fbs.bind_frame(about.fbo)
-		local old_layout=cake.layouts.create{parent={w=fsx,h=fsy,x=0,y=0}}.apply(fsx,fsy,1/4,fsx*8)
+--		local old_layout=cake.layouts.create{parent={w=fsx,h=fsy,x=0,y=0}}.apply(fsx,fsy,1/4,fsx*8)
 		
 		gl.ClearColor(gl.C4(0x0000))
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
@@ -206,7 +206,7 @@ precision highp float; /* really need better numbers if possible */
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.PopMatrix()
 		
-		old_layout.restore()
+--		old_layout.restore()
 		
 	end
 
