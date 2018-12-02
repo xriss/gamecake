@@ -46,7 +46,7 @@ M.bake=function(oven,main)
 	local font=canvas.font
 	local flat=canvas.flat
 	local sheets=oven.cake.sheets
-	local layout=cake.layouts.create{}
+--	local layout=cake.layouts.create{}
 	
 	
 
@@ -222,19 +222,19 @@ end
 -- and we expect it to be called very sporadically
 main.draw=function()
 
-	layout.viewport() -- did our window change?
-	layout.project23d(main.screen_hx,main.screen_hy,1/4,main.screen_hy*4)
+--	layout.viewport() -- did our window change?
+--	layout.project23d(main.screen_hx,main.screen_hy,1/4,main.screen_hy*4)
 	canvas.gl_default() -- reset gl state
 
 	gl.ClearColor(gl.C8(main.screen_argb))
 	gl.Clear(gl.COLOR_BUFFER_BIT)--+gl.DEPTH_BUFFER_BIT)
 
-	gl.MatrixMode(gl.PROJECTION)
-	gl.LoadMatrix( layout.pmtx )
+--	gl.MatrixMode(gl.PROJECTION)
+--	gl.LoadMatrix( layout.pmtx )
 
-	gl.MatrixMode(gl.MODELVIEW)
-	gl.LoadIdentity()
-	gl.Translate(0,0,-main.screen_hy*2) -- z depth fixed
+--	gl.MatrixMode(gl.MODELVIEW)
+--	gl.LoadIdentity()
+--	gl.Translate(0,0,-main.screen_hy*2) -- z depth fixed
 
 
 	if main.img then
