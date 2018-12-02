@@ -274,6 +274,12 @@ flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
 	gl.UseProgram( p[0] )
 	gl.BindTexture( gl.TEXTURE_2D , 0 )
 
+	local vertexarray
+	if gl.GenVertexArray then
+		vertexarray=gl.GenVertexArray()
+		gl.BindVertexArray(vertexarray)
+	end
+
 	gl.BindBuffer(gl.ARRAY_BUFFER,canvas.get_vb())
 	gl.BufferData(gl.ARRAY_BUFFER,5*4*4,canvas.vdat,gl.DYNAMIC_DRAW)
 
@@ -285,6 +291,11 @@ flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
 	gl.EnableVertexAttribArray(p:attrib("a_vertex"))
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP,0,4)
+
+	if gl.GenVertexArray then
+		gl.BindVertexArray(0)
+		gl.DeleteVertexArray(vertexarray)
+	end
 
 end
 
@@ -430,6 +441,12 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		local p=gl.program(progname or it.progname or def_progname)
 		gl.UseProgram( p[0] )
 
+		local vertexarray
+		if gl.GenVertexArray then
+			vertexarray=gl.GenVertexArray()
+			gl.BindVertexArray(vertexarray)
+		end
+
 		if it.vb then -- use a precached buffer
 			it.vb:bind()
 		elseif it.dataraw then -- use prebuilt data
@@ -484,6 +501,12 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		if cc>0 then
 			gl.DrawArrays( it.array or gl.TRIANGLE_STRIP,0,cc)
 		end
+
+		if gl.GenVertexArray then
+			gl.BindVertexArray(0)
+			gl.DeleteVertexArray(vertexarray)
+		end
+
 	end
 
 	return it
