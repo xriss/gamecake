@@ -353,6 +353,8 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 --print("Failed to build shader using prefix "..code.defines_shaderprefix_idx.." trying next prefix.")
 
+					print( "lowering shader version after failure to build shader : " .. ( filename or "" ) .. " : " .. sname .. "\n\n" ..  (gl.GetShaderInfoLog(s[0]) or "") .. "\n\n" )
+
 					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
 					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
 
