@@ -1663,6 +1663,35 @@ static int lua_gles_StencilOpSeparate (lua_State *l)
 #endif
 
 
+#if defined(LUA_GLES_GLES3) || defined(LUA_GLES_GL)
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// textures
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_gles_GenVertexArray (lua_State *l)
+{
+int id;
+	glGenVertexArrays(1,(unsigned int *)&id);
+	lua_pushnumber(l,(double)id);
+	return 1;
+}
+
+static int lua_gles_BindVertexArray (lua_State *l)
+{
+	glBindVertexArray((int)luaL_checknumber(l,1));
+	return 0;
+}
+
+static int lua_gles_DeleteVertexArray (lua_State *l)
+{
+int id=(int)luaL_checknumber(l,1);
+	glDeleteVertexArrays(1,(const unsigned int*)&id);
+	return 0;
+}
+
+#endif
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1853,6 +1882,15 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"StencilFuncSeparate",					lua_gles_StencilFuncSeparate},
 		{"StencilOp",							lua_gles_StencilOp},
 		{"StencilOpSeparate",					lua_gles_StencilOpSeparate},
+#endif
+
+// GLES3 functions we need these for OSX to work
+#if defined(LUA_GLES_GLES3) || defined(LUA_GLES_GL)
+
+		{"GenVertexArray",			lua_gles_GenVertexArray},
+		{"BindVertexArray",			lua_gles_BindVertexArray},
+		{"DeleteVertexArray",		lua_gles_DeleteVertexArray},
+
 #endif
 
 		{0,0}
