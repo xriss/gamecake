@@ -61,6 +61,19 @@ end
 
 
 sdl.create=function(t)
+
+-- OSX requires some fluffing to get a working GL context
+	if string.find(SDL.getPlatform(),"Mac") then
+--	if true then
+
+ 		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask,SDL.glProfile.Core)
+		SDL.glSetAttribute(SDL.glAttr.ContextFlags,SDL.glFlags.ForwardCompatible)
+		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
+		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion,2)
+
+	end
+
+
 --	print("SDL create")
 	sdl.video_init()
 
@@ -74,14 +87,6 @@ sdl.create=function(t)
 
 		end)
 		
-	end
-
--- OSX requires some fluffing to get a working GL context
-	if string.find(SDL.getPlatform(),"Mac") then
-		SDL.glSetAttribute(SDL.glAttr.ContextFlags,SDL.glFlags.ForwardCompatible)
-		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask,SDL.glProfile.Core)
-		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
-		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion,2)
 	end
 
 	local it={}
@@ -155,7 +160,6 @@ sdl.context=function(it)
 end
 
 sdl.swap=function(it)
---	print("SDL swap")
 	it=it or sdl.it
 	SDL.glSwapWindow(it.win)
 end
