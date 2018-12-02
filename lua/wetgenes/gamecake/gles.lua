@@ -19,6 +19,9 @@ function M.bake(oven,gles)
 		
 		oven.gl.GetExtensions()
 		
+		oven.gl.MatrixMode(oven.gl.PROJECTION)
+		oven.gl.MatrixMode(oven.gl.MODELVIEW)
+
 	end
 
 	local gl=oven.gl
