@@ -31,8 +31,31 @@ function M.bake(oven,views)
 	views.push=function(view) views.stack[#views.stack+1]=view end
 	views.pop=function() local view=views.get() views.stack[#views.stack]=nil return view end
 	views.apply=function() views.get().apply() end
-	views.push_and_apply=function(view) views.push(view) views.apply() end
-	views.pop_and_apply=function() views.pop() views.apply() end
+
+	views.push_and_apply=function(view)
+		views.push(view)
+		views.apply()
+		return view
+	end
+
+	views.pop_and_apply=function()
+		views.pop()
+		views.apply()
+	end
+
+	views.push_and_apply_fbo=function(fbo)
+		local view=views.create({
+			mode="fbo",
+			fbo=fbo,
+			vx=fbo.w,
+			vy=fbo.h,
+			vz=fbo.h*4,
+		})
+		views.push(view)
+		views.apply()
+ 		return view
+	end
+
 	
 -- create a view, for main screen or FBO.
 	views.create=function(opts)
@@ -238,6 +261,8 @@ function M.bake(oven,views)
 			end
 
 		end
+		
+		view.update()
 		
 		return view
 	end
