@@ -35,7 +35,7 @@ function M.bake(oven,escmenu)
 	local gl=oven.gl
 	local cake=oven.cake
 	local canvas=cake.canvas
-	local layout=cake.layouts.create{}
+--	local layout=cake.layouts.create{}
 
 	local skeys=oven.rebake("wetgenes.gamecake.spew.keys")
 
@@ -60,13 +60,16 @@ function M.bake(oven,escmenu)
 		local hooks={}
 		function hooks.click(act,widget)
 			local id=widget.id
+--[[
 			if id=="layout" then
 				local mlayout=oven.mods["wetgenes.gamecake.mods.layout"]
 				if mlayout then
 					mlayout.cycle_mode()
 					escmenu.layout_widget.text=XLT"Layout: "..mlayout.mode
 				end
-			elseif id=="continue" then
+			else
+]]
+			if id=="continue" then
 			
 				escmenu.show=false
 				
@@ -85,19 +88,19 @@ function M.bake(oven,escmenu)
 		local top=escmenu.master:add({hx=480,hy=480,class="fill",font=opts.font,text_size=32})
 		top:add({hx=480,hy=80})
 		
-		local mlayout=oven.mods["wetgenes.gamecake.mods.layout"]
-		if mlayout then		
-			escmenu.layout_widget=top:add({hx=480,hy=80,text=XLT"Layout: "..mlayout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
-		else
+--		local mlayout=oven.mods["wetgenes.gamecake.mods.layout"]
+--		if mlayout then		
+--			escmenu.layout_widget=top:add({hx=480,hy=80,text=XLT"Layout: "..mlayout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
+--		else
 			top:add({hx=480,hy=40})
-		end
+--		end
 		
 		top:add({class="button",hx=480,hy=80,text=XLT"Continue",color=0x7f00ff00,id="continue",hooks=hooks})
 		top:add({class="button",hx=480,hy=80,text=XLT"Restart",color=0x7fffff00,id="restart",hooks=hooks})
 		top:add({class="button",hx=480,hy=80,text=XLT"Quit",color=0x7fff0000,id="quit",hooks=hooks})
-		if not mlayout then		
+--		if not mlayout then		
 			top:add({hx=480,hy=40})
-		end
+--		end
 		top:add({hx=480,hy=80})
 		
 		escmenu.master:layout()
@@ -131,22 +134,22 @@ function M.bake(oven,escmenu)
 
 		if escmenu.show then
 
-		layout.viewport() -- did our window change?
-		layout.project23d(opts.width,opts.height,1/4,opts.height*4)
+--		layout.viewport() -- did our window change?
+--		layout.project23d(opts.width,opts.height,1/4,opts.height*4)
 		canvas.gl_default() -- reset gl state
 
 
-		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( layout.pmtx )
+--		gl.MatrixMode(gl.PROJECTION)
+--		gl.LoadMatrix( layout.pmtx )
 
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.LoadIdentity()
-		gl.Translate(-opts.width/2,-opts.height/2,-opts.height*2) -- top left corner is origin
-		gl.PushMatrix()
+--		gl.MatrixMode(gl.MODELVIEW)
+--		gl.LoadIdentity()
+--		gl.Translate(-opts.width/2,-opts.height/2,-opts.height*2) -- top left corner is origin
+--		gl.PushMatrix()
 
 		escmenu.master:draw()
 			
-		gl.PopMatrix()
+--		gl.PopMatrix()
 
 		end
 
@@ -161,12 +164,14 @@ function M.bake(oven,escmenu)
 			if m.class=="key" or m.class=="mouse" or m.class=="joykey" or m.class=="joystick" then
 
 				if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
+				
+				oven.view.msg(m)
 
-				if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
-					m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
-					m.x=m.x+(opts.width/2)
-					m.y=m.y+(opts.height/2)
-				end
+--				if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
+--					m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
+--					m.x=m.x+(opts.width/2)
+--					m.y=m.y+(opts.height/2)
+--				end
 
 				if m.class=="key" and m.action==-1 and m.keyname=="escape" then
 					escmenu.show=not escmenu.show
