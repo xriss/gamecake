@@ -27,7 +27,6 @@ function M.bake(oven,snaps)
 	local gl=oven.gl
 	local cake=oven.cake
 	local canvas=cake.canvas
-	local layout=cake.layouts.create{}
 
 	function snaps.setup()
 		if not lfs then return end
