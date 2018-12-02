@@ -56,7 +56,6 @@ function M.bake(oven,console)
 	local gl=oven.gl
 	local cake=oven.cake
 	local canvas=cake.canvas
-	local layout=cake.layouts.create{} -- fullscreen
 
 	local win=oven.win
 	local font=canvas.font
@@ -256,7 +255,7 @@ function M.bake(oven,console)
 			end
 		end
 		
-		console.line_width=layout.w/8
+		console.line_width=oven.view.hx/8
 		console.data.main=oven.main and oven.main.console or oven.main	-- update best table of app function?
 	end
 	
@@ -310,7 +309,7 @@ font.vbs_idx=1
 			console.fps_count=console.fps_count+1
 		end
 
-		layout.apply()
+		oven.view.apply()
 		
 		gl.PushMatrix()
 
@@ -321,7 +320,7 @@ font.vbs_idx=1
 		if console.y > 0 then
 		
 			gl.Color(pack.argb4_pmf4(0xc040))
-			flat.quad(0,0,layout.w,console.y)
+			flat.quad(0,0,oven.view.hx,console.y)
 
 			gl.Color(pack.argb4_pmf4(0xf4f4))
 
