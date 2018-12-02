@@ -232,8 +232,8 @@ function glescode.create(gl)
 		copymerge(code.shaders,"f_"..name,{ program=p, source=fhead..(fsource or vsource) }) -- single source trick
 
 -- check that the code compiles OK right now?
-		assert(code.shader(gl.VERTEX_SHADER,"v_"..name,filename))
-		assert(code.shader(gl.FRAGMENT_SHADER,"f_"..name,filename))
+--		assert(code.shader(gl.VERTEX_SHADER,"v_"..name,filename))
+--		assert(code.shader(gl.FRAGMENT_SHADER,"f_"..name,filename))
 
 		return p
 	end
@@ -278,8 +278,6 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			"#version 100\nprecision mediump float;\n", -- Try ES?
 			"#version 120\n", -- seems to work on osx?
 			"#version 130\n", -- fails on osx?
---			"#version 330\n", -- try recent GL
---			"#version xxx\n", -- test fail case recovery
 		}
 		code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
 		code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
@@ -350,11 +348,14 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			
 			if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
 			
+			
+				local err=gl.GetShaderInfoLog(s[0]) or "NIL"
+
 				if code.defines_shaderprefix_idx and code.defines_shaderprefix_idx>1 then -- try and brute force a working version number 
 
 --print("Failed to build shader using prefix "..code.defines_shaderprefix_idx.." trying next prefix.")
 
-					print( "lowering shader version after failure to build shader : " .. ( filename or "" ) .. " : " .. sname .. "\n\n" ..  (gl.GetShaderInfoLog(s[0]) or "") .. "\n\n" )
+					print( "lowering shader version after failure to build shader : " .. ( filename or "" ) .. " : " .. sname .. "\n\n" ..  err .. "\n\n" )
 
 					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
 					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
@@ -363,7 +364,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 					
 				else -- give up
 
-					error( "failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. (gl.GetShaderInfoLog(s[0]) or "stoopid droid") .. "\n\n" )
+					error( "failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
 					done=true
 				
 				end
