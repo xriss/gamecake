@@ -50,11 +50,16 @@ end
 
 --[[#lua.glslang.parse_chunks
 
-	shaders=glslang.shader_chunks(text,filename,headers)
+	shaders=glslang.shader_chunks(text,filename,headers,flags)
 
 		load multiple shader chunks from a single file and return a 
 		lookup table of name=code for each shader we just loaded. These 
 		can then be compiled or whatever.
+		
+		set flags.headers_only to true if you only care about parsing 
+		headers for later inclusion and do not want to parse shader 
+		chunks.
+		
 
 	#SHADER "nameofshader"
 
@@ -79,8 +84,9 @@ end
 		inside comments in a lua or whatever file.
 
 ]]
-glslang.parse_chunks=function(text,filename,headers)
+glslang.parse_chunks=function(text,filename,headers,flags)
 	headers=headers or {}
+	flags=flags or {}
 	local ss=wstr.split(text,"\n")
 	local shaders={}
 	local chunk
@@ -95,7 +101,11 @@ glslang.parse_chunks=function(text,filename,headers)
 				if flag=="#header" then
 					headers[name]=chunk
 				elseif flag=="#shader" then
-					shaders[name]=chunk
+					if flags.headers_only then
+						chunk=nil
+					else
+						shaders[name]=chunk
+					end
 				end
 			end
 		else
@@ -116,6 +126,5 @@ glslang.parse_chunks=function(text,filename,headers)
 	
 	return shaders
 end
-	
 	
 return glslang

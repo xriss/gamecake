@@ -58,25 +58,23 @@ varying vec2  v_texcoord;
 // so best to work around the limitations and do it like this.
 vec4 get_color(float f)
 {
-	switch( int(f) )
-	{
-		case  0: return colors_0;
-		case  1: return colors_1;
-		case  2: return colors_2;
-		case  3: return colors_3;
-		case  4: return colors_4;
-		case  5: return colors_5;
-		case  6: return colors_6;
-		case  7: return colors_7;
-		case  8: return colors_8;
-		case  9: return colors_9;
-		case 10: return colors_A;
-		case 11: return colors_B;
-		case 12: return colors_C;
-		case 13: return colors_D;
-		case 14: return colors_E;
-		case 15: return colors_F;
-	}
+	int i=int(f);
+	if(i== 0) return colors_0;
+	if(i== 1) return colors_1;
+	if(i== 2) return colors_2;
+	if(i== 3) return colors_3;
+	if(i== 4) return colors_4;
+	if(i== 5) return colors_5;
+	if(i== 6) return colors_6;
+	if(i== 7) return colors_7;
+	if(i== 8) return colors_8;
+	if(i== 9) return colors_9;
+	if(i==10) return colors_A;
+	if(i==11) return colors_B;
+	if(i==12) return colors_C;
+	if(i==13) return colors_D;
+	if(i==14) return colors_E;
+	if(i==15) return colors_F;
 	return colors_0;
 }
 

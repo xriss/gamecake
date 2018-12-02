@@ -278,7 +278,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			"#version 100\nprecision mediump float;\n", -- Try ES?
 			"#version 120\n", -- seems to work on osx?
 			"#version 130\n", -- fails on osx?
-			"#version 330\n", -- try recent GL
+--			"#version 330\n", -- try recent GL
 --			"#version xxx\n", -- test fail case recovery
 		}
 		code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
