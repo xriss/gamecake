@@ -23,7 +23,7 @@ function M.bake(oven,keys)
 	local win=oven.win
 	local cake=oven.cake
 	local canvas=cake.canvas
-	local layout=oven.rebake("wetgenes.gamecake.mods.layout").keys
+--	local layout=oven.rebake("wetgenes.gamecake.mods.layout").keys
 
 -- push a keyboard widget into a master
 	function keys.setup_keyboard_widgets(master)
