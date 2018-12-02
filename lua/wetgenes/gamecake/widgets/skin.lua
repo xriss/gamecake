@@ -57,7 +57,7 @@ local canvas=cake.canvas
 local font=canvas.font
 local flat=canvas.flat
 
-local layouts=cake.layouts
+local views=cake.views
 
 --local mode=nil
 local texs={}
@@ -417,7 +417,6 @@ local font_cache_draw
 --print("into fbo"..wstr.dump(widget.fbo))
 
 			widget.fbo:bind_frame()
-			widget.lay=layouts.create{parent={x=0,y=0,w=widget.fbo.w,h=widget.fbo.h}}
 
 			gl.Disable(gl.DEPTH_TEST)
 			gl.Disable(gl.CULL_FACE)
@@ -430,7 +429,7 @@ local font_cache_draw
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.PushMatrix()
 
-			widget.old_lay=widget.lay.apply(nil,nil,widget.fbo_fov)
+			views.push_and_apply_fbo(widget.fbo)
 
 			gl.ClearColor(0,0,0,0)
 			gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
@@ -492,21 +491,14 @@ local font_cache_draw
 
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 			
-			widget.old_lay.restore() --restore old viewport
+			views.pop_and_apply()
 			gl.MatrixMode(gl.PROJECTION)
 			gl.PopMatrix()			
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.PopMatrix()
 
 
-			widget.lay=nil
-			widget.old_lay=nil
-
--- call mipmap twice because driver bugs
--- gl.Flush did not help but this does?
-			
 			widget.fbo:mipmap()
---			widget.fbo:mipmap()
 		end
 		
 else -- we can only draw once
