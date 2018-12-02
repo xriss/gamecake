@@ -334,6 +334,12 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy,zf)
 	end
 	
 	gl.BindBuffer(gl.ARRAY_BUFFER,sheet.vbuf)
+	
+	local vertexarray
+	if gl.GenVertexArray then
+		vertexarray=gl.GenVertexArray()
+		gl.BindVertexArray(vertexarray)
+	end
 
 	gl.UseProgram( p[0] )
 	gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
@@ -350,6 +356,11 @@ function base_sheet.draw(sheet,i,px,py,rz,sx,sy,zf)
 
 	gl.Uniform4f(p:uniform("color"), gl.cache.color )
 	gl.core.DrawArrays(gl.TRIANGLE_STRIP,(i-1)*4,4)
+
+	if gl.GenVertexArray then
+		gl.BindVertexArray(0)
+		gl.DeleteVertexArray(vertexarray)
+	end
 
 	if px then
 		gl.PopMatrix()
