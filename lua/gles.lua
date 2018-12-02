@@ -601,7 +601,7 @@ print("Patching GLES ",method)
 			elseif method=="check" then
 			
 --This foces a CheckError after each function which can catch bugs but stalls rendering
-				gles[n]=function(...) local r=f(...) gles.CheckError() return r end
+				gles[n]=function(...) gles.GetError() local r=f(...) gles.CheckError() return r end
 				
 			end
 		end
@@ -616,7 +616,6 @@ print("Patching GLES ",method)
 end
 
 --gles.patch_functions("check")
-
 
 function gles.numtostring(num)
 	return gles.nums[num]
