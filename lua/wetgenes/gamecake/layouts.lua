@@ -283,10 +283,12 @@ function M.bake(oven,layouts)
 
 		canvas.layout=layout -- remember current layout in canvas
 
-		if layout.parent then
-			gl.Viewport( layout.x , (layout.parent.h-(layout.y+layout.h)) , layout.w , layout.h )
-		else
-			gl.Viewport( layout.x , win.height-(layout.y+layout.h) , layout.w , layout.h )
+		if win then
+			if layout.parent then
+				gl.Viewport( layout.x , (layout.parent.h-(layout.y+layout.h)) , layout.w , layout.h )
+			else
+				gl.Viewport( layout.x , win.height-(layout.y+layout.h) , layout.w , layout.h )
+			end
 		end
 
 	end
@@ -337,15 +339,17 @@ function M.bake(oven,layouts)
 		
 		layout.project23d(w,h,fov,d)
 	
-		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( layout.pmtx )
+		if win then
+			gl.MatrixMode(gl.PROJECTION)
+			gl.LoadMatrix( layout.pmtx )
 
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.LoadIdentity()
-		if fov==0 then
-			gl.Translate(-w/2,-h/2,(-d/2)) -- top left corner is origin
-		else
-			gl.Translate(-w/2,-h/2,(-h/2)/fov) -- top left corner is origin
+			gl.MatrixMode(gl.MODELVIEW)
+			gl.LoadIdentity()
+			if fov==0 then
+				gl.Translate(-w/2,-h/2,(-d/2)) -- top left corner is origin
+			else
+				gl.Translate(-w/2,-h/2,(-h/2)/fov) -- top left corner is origin
+			end
 		end
 		
 		return ret
