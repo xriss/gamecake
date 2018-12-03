@@ -105,6 +105,13 @@ function M.bake(oven,escmenu)
 		
 		escmenu.master:layout()
 
+		escmenu.view=cake.views.create({
+			parent=cake.views.get(),
+			mode="full",
+			vx=480,
+			vy=480,
+			fov=0.5,
+		})
 	end
 
 	function escmenu.clean()
@@ -134,22 +141,15 @@ function M.bake(oven,escmenu)
 
 		if escmenu.show then
 
---		layout.viewport() -- did our window change?
---		layout.project23d(opts.width,opts.height,1/4,opts.height*4)
-		canvas.gl_default() -- reset gl state
+			cake.views.push_and_apply(escmenu.view)
+			gl.PushMatrix()
 
+			canvas.gl_default() -- reset gl state
 
---		gl.MatrixMode(gl.PROJECTION)
---		gl.LoadMatrix( layout.pmtx )
+			escmenu.master:draw()
 
---		gl.MatrixMode(gl.MODELVIEW)
---		gl.LoadIdentity()
---		gl.Translate(-opts.width/2,-opts.height/2,-opts.height*2) -- top left corner is origin
---		gl.PushMatrix()
-
-		escmenu.master:draw()
-			
---		gl.PopMatrix()
+			gl.PopMatrix()
+			cake.views.pop_and_apply()
 
 		end
 
@@ -165,7 +165,7 @@ function M.bake(oven,escmenu)
 
 				if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
 				
-				oven.view.msg(m)
+				escmenu.view.msg(m)
 
 --				if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
 --					m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
