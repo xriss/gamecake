@@ -129,6 +129,18 @@ function M.bake(oven,views)
 				view.py=view.parent.py
 				view.hx=view.parent.hx
 				view.hy=view.parent.hy
+				
+				if view.vx and view.vy then
+					if view.hx/view.hy > view.vx/view.vy then -- fit y
+						local hx=view.hy * view.vx/view.vy
+						view.px=view.px+math.floor((view.hx-hx)/2)
+						view.hx=hx
+					else
+						local hy=view.hx * view.vy/view.vx
+						view.py=view.py+math.floor((view.hy-hy)/2)
+						view.hy=hy
+					end
+				end
 
 			elseif view.mode=="raw" then -- use the parents raw size
 

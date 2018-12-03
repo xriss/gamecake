@@ -51,7 +51,7 @@ function M.bake(oven,about)
 		height=480,
 	}
 	
-	about.layout=cake.layouts.create{}
+--	about.layout=cake.layouts.create{}
 	
 	about.setup=function()
 
@@ -76,7 +76,7 @@ function M.bake(oven,about)
 	
 	about.draw=function()
 
-		about.layout.apply(opts.width,opts.height,1/4,opts.width*4,"clip")
+--		about.layout.apply(opts.width,opts.height,1/4,opts.width*4,"clip")
 
 		canvas.gl_default() -- reset gl state
 

@@ -191,8 +191,9 @@ void main(void)
 
 		wetiso.fbo:resize(1024,128,0)		
 		wetiso.fbo:bind_frame()
-		local layout=cake.layouts.create{parent={w=wetiso.fbo.w,h=wetiso.fbo.h,x=0,y=0}}
-		local oldlay=layout.apply(wetiso.fbo.w,wetiso.fbo.h,1/4,wetiso.fbo.h*4)
+--		local layout=cake.layouts.create{parent={w=wetiso.fbo.w,h=wetiso.fbo.h,x=0,y=0}}
+--		local oldlay=layout.apply(wetiso.fbo.w,wetiso.fbo.h,1/4,wetiso.fbo.h*4)
+		cake.views.push_and_apply_fbo(wetiso.fbo)
 		
 		gl.ClearColor(pack.argb4_pmf4(0x0000))
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
@@ -235,8 +236,9 @@ void main(void)
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.PopMatrix()
 		
+		cake.views.pop_and_apply()
 --		main.layout.restore()
-		oldlay.restore()
+--		oldlay.restore()
 
 	end
 
