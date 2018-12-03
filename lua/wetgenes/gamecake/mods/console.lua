@@ -88,6 +88,12 @@ function M.bake(oven,console)
 		
 		console.setup_done=true
 --print("console setup")
+
+		console.view=cake.views.create({
+			parent=cake.views.get(),
+			mode="raw",
+		})
+
 	end
 
 	function console.clean()
@@ -309,8 +315,7 @@ font.vbs_idx=1
 			console.fps_count=console.fps_count+1
 		end
 
-		oven.view.apply()
-		
+		cake.views.push_and_apply(console.view)
 		gl.PushMatrix()
 
 
@@ -371,6 +376,7 @@ font.vbs_idx=1
 		console.lines_display={}
 
 		gl.PopMatrix()
+		cake.views.pop_and_apply()
 
 	end
 	
