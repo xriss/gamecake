@@ -88,6 +88,14 @@ main.img_hy=256
 		oven.cake.images.preload=nil
 	end
 
+	main.view=cake.views.create({
+		parent=cake.views.get(),
+		mode="full",
+		vx=main.screen_hx,
+		vy=main.screen_hy,
+		fov=0.5,
+	})
+
 end
 
 
@@ -171,6 +179,7 @@ main.setup=function()
 
 	if main.setup_done then return end -- warning, this is called repeatedly...
 
+
 --	main.config_as() -- auto config
 
 	main.title=""
@@ -224,6 +233,7 @@ main.draw=function()
 
 --	layout.viewport() -- did our window change?
 --	layout.project23d(main.screen_hx,main.screen_hy,1/4,main.screen_hy*4)
+	cake.views.push_and_apply(main.view)
 	canvas.gl_default() -- reset gl state
 
 	gl.ClearColor(gl.C8(main.screen_argb))
@@ -267,6 +277,7 @@ main.draw=function()
 	end
 
 	gl.PopMatrix()	
+	cake.views.pop_and_apply()
 
 end
 
