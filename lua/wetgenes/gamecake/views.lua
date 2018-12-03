@@ -130,6 +130,16 @@ function M.bake(oven,views)
 				view.hx=view.parent.hx
 				view.hy=view.parent.hy
 
+			elseif view.mode=="raw" then -- use the parents raw size
+
+				view.px=view.parent.px
+				view.py=view.parent.py
+				view.hx=view.parent.hx
+				view.hy=view.parent.hy
+				view.vx=view.parent.hx
+				view.vy=view.parent.hy
+				view.vz=view.parent.hy*4
+
 			end
 
 			return view
