@@ -1154,6 +1154,7 @@ grdpaint.layers=function(grd)
 	end
 
 	layers.flatten_frame=function(layers,frame,grd)
+		frame=frame or layers.frame
 		grd=grd or layers.grd -- can choose a temp grd or use default
 		local lw,lh=layers:size()
 		local g=wgrd.create(grd.format,lw,lh,1) -- new size one frame

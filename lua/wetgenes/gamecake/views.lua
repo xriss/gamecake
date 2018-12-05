@@ -50,6 +50,7 @@ function M.bake(oven,views)
 			vx=fbo.w,
 			vy=fbo.h,
 			vz=fbo.h*4,
+			fov=1/4,
 		})
 		views.push(view)
 		views.apply()
