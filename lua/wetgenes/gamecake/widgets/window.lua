@@ -15,23 +15,9 @@ local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
 wwindow=wwindow or {}
-
--- search upwards and return window,screen (so this could be a widget in the window)
--- screen should always be the widgets parent
-	local window_screen=function(it)
-		local window=it
-		local screen=it.parent
-		while it.parent ~= it do
-			if it.class=="window" then window=it screen=it.parent end -- found window
-			it=it.parent
-			if it.class=="screen" then screen=it break end -- double check screen
-		end
-		return window,screen
-	end
-	wwindow.window_screen=window_screen -- export
 	
 	local winclamp=function(it)
-		local window,screen=window_screen(it)
+		local window,screen=it:window_screen()
 		local lpx,lpy,lhx,lhy=window.px,window.py,window.hx,window.hy
 		if window.hx > screen.windows.hx then window.hx = screen.windows.hx end
 		if window.hy > screen.windows.hy then window.hy = screen.windows.hy end
@@ -44,13 +30,17 @@ wwindow=wwindow or {}
 			if s<1/8 then s=1/8 end
 			window.hx=window.win_fbo.hx*s
 			window.hy=window.win_fbo.hy*s
-		else
+		elseif window.panel_mode=="stretch" then -- stretch aspect
 			local sx=window.hx/window.win_fbo.hx
 			local sy=window.hy/window.win_fbo.hy
 			if sx<1/8 then sx=1/8 end
 			if sy<1/8 then sy=1/8 end
 			window.hx=window.win_fbo.hx*sx
 			window.hy=window.win_fbo.hy*sy
+		elseif window.panel_mode=="fill" then
+			local ss=(it.master.grid_size or 24)
+			if window.hx<ss*2 then window.hx=ss*2 end
+			if window.hy<ss*2 then window.hy=ss*2 end
 		end
 		if window.px<0 then window.px=0 end
 		if window.py<0 then window.py=0 end
@@ -62,7 +52,7 @@ wwindow=wwindow or {}
 
 function wwindow.edge_drag(widget,x,y)
 
-	local window,screen=window_screen(widget)
+	local window,screen=widget:window_screen()
 
 	if window.flags.nodrag then return end	
 
@@ -159,7 +149,7 @@ end
 
 function wwindow.drag(widget,x,y)
 
-	local window,screen=window_screen(widget)
+	local window,screen=widget:window_screen()
 	local windock= (window.parent.class=="windock") and window.parent or nil
 
 	if window.flags.nodrag then return end	
@@ -223,6 +213,8 @@ function wwindow.layout(widget)
 	local window=widget
 	local windock= (window.parent.class=="windock") and window.parent or nil
 
+	local ss=(widget.master.grid_size or 24)
+	local bar_height=widget.flags.nobar and 0 or ss
 	
 --	if windock and windock.windock=="drag" then -- we are dragable
 			
@@ -230,7 +222,7 @@ function wwindow.layout(widget)
 	--	if window.hy > window.parent.hy then window.hy = window.parent.hy end
 
 		if v then
-			if window.panel_mode=="scale" then -- maintain aspect
+			if window.panel_mode=="scale" then -- scale but maintain aspect of content
 
 				v.sx=window.hx/v.hx
 				v.sy=window.hy/v.hy
@@ -245,6 +237,14 @@ function wwindow.layout(widget)
 				v.sx=window.hx/v.hx
 				v.sy=window.hy/v.hy
 
+			elseif window.panel_mode=="fill" then -- fill any area, no scale
+
+				v.sx=1
+				v.sy=1
+				
+				window.win_canvas.hx=window.hx
+				window.win_canvas.hy=window.hy-bar_height
+
 			end
 		end
 --	end	
@@ -252,23 +252,35 @@ function wwindow.layout(widget)
 -- also layout any other children
 	widget.meta.layout(widget)
 
-	local ss=(widget.master.grid_size or 24)
-	local bar_height=widget.flags.nobar and 0 or ss
-
+	local hx=widget.win_canvas.hx
 	local hy=widget.win_canvas.hy+bar_height
-	if hy~=widget.win_fbo.hy then -- resize widgets
+	if hy~=widget.win_fbo.hy or hx~=widget.win_fbo.hx then -- resize widgets
+
+		widget.hx=hx
 		widget.hy=hy
+		widget.win_fbo.hx=hx
 		widget.win_fbo.hy=hy
 
-		widget.win_edge_l.hy=hy+ss
-		widget.win_edge_r.hy=hy+ss
+		widget.win_edge_t.hx=hx
+		widget.win_edge_b.hx=hx
+
+		widget.win_edge_r.px=hx-ss/8
+		widget.win_edge_tr.px=hx-ss/4
+		widget.win_edge_br.px=hx-ss/4
+
+		widget.win_edge_l.hy=hy
+		widget.win_edge_r.hy=hy
 		
 		widget.win_edge_b.py=hy-ss/8
 		widget.win_edge_bl.py=hy-ss/4
 		widget.win_edge_br.py=hy-ss/4
 		
+		if widget.win_three then
+		
+			widget.win_three.hx=hx
+		
+		end
 
-				
 --		print(widget.win_canvas.hy)
 
 		widget:build_m4()
@@ -286,21 +298,27 @@ wwindow.window_hooks_reset=function(widget)
 end
 
 wwindow.move_to_top=function(window)
-	local window,screen=window_screen(window)
+	local window,screen=window:window_screen()
 	screen.windows:insert(window) -- move to top
 end
 
 wwindow.is_top=function(window)
-	local window,screen=window_screen(window)
+	local window,screen=window:window_screen()
 	return screen.windows[#screen.windows]==window
 end
 
 wwindow.window_hooks=function(_window,act,widget)
 --print(act,w.id)
 
-	local window,screen=window_screen(_window or widget)
+	local window,screen=(_window or widget):window_screen()
 
-	if window.flags and window.flags.nodrag then return end	
+	if act=="click" then -- turn a click into another act
+		act=widget.id
+	end
+
+if window then -- only if message is bound to a window
+
+	if window.flags and window.flags.nodrag then return end
 
 	if act=="active" then
 
@@ -367,11 +385,8 @@ wwindow.window_hooks=function(_window,act,widget)
 --		print("INACTIVE",window.id)
 ]]
 
-	elseif act=="click" then -- turn a click into another act
-	
-		act=widget.id
-
 	end
+end
 
 -- these acts can be used by outside code
 -- eg
@@ -409,7 +424,7 @@ wwindow.window_hooks=function(_window,act,widget)
 		
 	elseif act=="win_toggle_other" then
 	
-		local win=window.master.ids[widget.user]
+		local win=widget.master.ids[widget.user]
 		if win then
 			win.window_hooks("win_toggle")
 		end
@@ -459,14 +474,16 @@ function wwindow.setup(widget,def)
 	widget.window_hooks = function(act,w) return wwindow.window_hooks(widget,act,w) end
 
 	widget.window_menu=function()
-		local window,screen=wwindow.window_screen(widget)
+		local window,screen=widget:window_screen()
 		return screen:window_menu()
 	end
 	widget.menu_data=widget.menu_data or {
-		{	id="win_hide",		text="Hide Window",		},
-		{	id="win_reset",		text="Reset Window Size",	},
-		{	id="win_shrink",	text="Shrink Window Size",	},
-		{	id="win_grow",		text="Grow Window Size",		},
+		{	id="win_actions",	text="Actions...",menu_data={hooks=widget.window_hooks,
+			{	id="win_hide",		text="Hide Window",		},
+			{	id="win_reset",		text="Reset Window Size",	},
+			{	id="win_shrink",	text="Shrink Window Size",	},
+			{	id="win_grow",		text="Grow Window Size",		},
+		}},
 		{	id="win_windows",	text="Windows...",menu_data=widget.window_menu},
 		hooks=widget.window_hooks,
 	}
@@ -529,7 +546,7 @@ if bar_height>0 then
 				py=0,
 				hx=ss,
 				hy=ss,
-				text=">",
+				text="~",
 				color=color,
 				solid=true,
 				menu_data=widget.menu_data,

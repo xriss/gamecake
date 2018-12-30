@@ -472,6 +472,24 @@ function wmeta.setup(def)
 		return false
 	end
 
+
+-- search upwards and return window,screen (so this could be a widget in the window)
+-- screen should always be the widgets parent
+	meta.window_screen=function(it)
+		local window=it.window
+		local screen=it.screen or ( window and window.screen )
+		while it.parent ~= it do -- go searching
+			window=it.window or window
+			screen=it.screen or screen
+			if it.class=="window" then window=it end -- found window
+			it=it.parent -- search upwards
+			if it.class=="screen" then screen=it end -- check for screen which should always be the parent of a window
+			if window and screen then return window,screen end -- return the first valid data
+		end
+		return window,screen
+	end
+
+
 -- more setup, moved to other files
 	oven.rebake("wetgenes.gamecake.widgets.meta_layout").setup(def)
 

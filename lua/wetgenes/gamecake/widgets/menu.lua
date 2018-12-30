@@ -72,7 +72,7 @@ function wmenu.layout(widget)
 	
 	widget.hx=hx
 	
-	local window,screen=wwindow.window_screen(widget)
+	local window,screen=widget:window_screen()
 
 	if widget.px+widget.hx > screen.hx then widget.px=screen.hx-widget.hx end -- push away from edges
 	if widget.py+widget.hy > screen.hy then widget.py=screen.hy-widget.hy end

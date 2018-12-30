@@ -34,6 +34,8 @@ function wmenuitem.menu_add(widget,opts)
 	local md=opts.menu_data or widget.menu_data
 	if type(md)=="function" then md=md() end
 	
+	local window,screen=widget:window_screen()
+
 	if not opts.top then
 		if widget.menu then
 			widget.menu:remove()
@@ -41,8 +43,9 @@ function wmenuitem.menu_add(widget,opts)
 		end
 
 		local ss=opts.grid_size or md.grid_size or widget.master.grid_size
-		local screen;widget.master:call_descendents(function(it) if it.class=="screen" then screen=it end end)
-		screen=screen or widget.master
+
+--		local screen;widget.master:call_descendents(function(it) if it.class=="screen" then screen=it end end)
+--		screen=screen or widget.master
 		
 		widget.menu=screen:add({
 			class="menu",
@@ -57,12 +60,16 @@ function wmenuitem.menu_add(widget,opts)
 			smode="topleft",
 			outline_size=ss/8,
 			outline_color=0x44000000,
-			outline_fade_color=0x00000000,	
+			outline_fade_color=0x00000000,
 		})
-
+		
 	end
 	local top=opts.top or widget.menu
 	top.px,top.py=widget:get_master_xy(widget.hx*(widget.menu_px or 0),widget.hy*(widget.menu_py or 0))
+
+	top.window=window
+	top.screen=screen
+
 
 	for i,v in ipairs(md) do
 	
@@ -77,7 +84,7 @@ function wmenuitem.menu_add(widget,opts)
 		it.style     = it.style       or opts.style     or md.style     or "button"
 		it.skin      = it.skin        or opts.skin      or md.skin      or 0
 		it.cursor    = it.cursor      or opts.cursor    or md.cursor    or "hand"
-		it.text_size = it.text_si     or opts.text_size or md.text_size
+		it.text_size = it.text_size   or opts.text_size or md.text_size
 		it.menu_px   = it.menu_px     or opts.menu_px   or md.menu_px
 		it.menu_py   = it.menu_py     or opts.menu_py   or md.menu_py
 

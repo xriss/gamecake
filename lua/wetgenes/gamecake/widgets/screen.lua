@@ -84,13 +84,23 @@ end
 wscreen.window_menu=function(screen)
 	local windows=screen:get_windows()
 	table.sort(windows,function(a,b) return a.win_title.text < b.win_title.text end)
-	local t={hooks=function(act,w) return wwindow.window_hooks(screen,act,w) end}
+	local t={hooks=function(act,w) return wwindow.window_hooks(nil,act,w) end}
 	for i,v in ipairs(windows) do
 		t[#t+1]={id="win_toggle_other",user=v.id,text=v.win_title.text}
 	end
 	return t
 end
 
+wscreen.screen_menu=function(screen)
+	local hooks=function(act,w) return wwindow.window_hooks(nil,act,w) end
+	
+	return {	hooks=hooks,
+		{	id="win_actions",	text="Actions...",menu_data={hooks=hooks,
+			{	id="win_undock",	text="Undock window",		},
+		}},
+		{	id="win_windows",	text="Windows...",menu_data=screen:window_menu()},
+	}
+end
 
 -- create a new top level screen split to snap windows into
 function wscreen.get_split(screen,axis,order)
@@ -220,6 +230,7 @@ function wscreen.setup(widget,def)
 
 	widget.get_windows=wscreen.get_windows
 	widget.window_menu=wscreen.window_menu
+	widget.screen_menu=wscreen.screen_menu
 	widget.windows_toggle=wscreen.windows_toggle
 
 	widget.get_split=wscreen.get_split
