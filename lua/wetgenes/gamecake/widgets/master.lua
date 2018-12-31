@@ -238,15 +238,12 @@ function wmaster.setup(widget,def)
 			end
 		end
 	
-		if resize then
---print("resize",wstr.dump(resize))
-			if widget.hx==resize.hx and widget.hy==resize.hy then
-			else
-				widget.hx=resize.hx or widget.hx
-				widget.hy=resize.hy or widget.hy
-				widget:set_dirty()
-				widget:resize_and_layout()
-			end
+		if ( resize and (widget.hx~=resize.hx or widget.hy~=resize.hy) ) or master.request_layout then
+			master.request_layout=false
+			widget.hx=resize and resize.hx or widget.hx
+			widget.hy=resize and resize.hy or widget.hy
+			widget:set_dirty()
+			widget:resize_and_layout()
 		end
 	
 		local throb=(widget.throb<128)
@@ -267,8 +264,6 @@ function wmaster.setup(widget,def)
 			end
 		end
 		
---		if widget.dirty then widget:resize_and_layout() print("dirty master") end -- a dirty master forces a layout
-
 		meta.update(widget)
 		
 		if master.over and master.over~=master then

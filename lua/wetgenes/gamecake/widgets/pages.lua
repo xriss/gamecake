@@ -30,8 +30,10 @@ function wpages.layout(widget)
 		v.py=0
 		if v.hx>widget.hx then widget.hx=v.hx end
 		if v.hy>widget.hy then widget.hy=v.hy end
-		v:layout()
+--		v:layout()
 	end
+
+	widget.meta.layout(widget)
 	
 end
 

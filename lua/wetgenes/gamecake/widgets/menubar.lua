@@ -72,9 +72,7 @@ function wmenubar.layout(widget)
 		v.hy=hy
 	end
 
-	for i,v in ipairs(widget) do -- descend
-		if not v.hidden then v:layout() end
-	end
+	widget.meta.layout(widget)
 end
 
 function wmenubar.setup(widget,def)

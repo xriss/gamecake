@@ -67,8 +67,8 @@ function wscroll.layout(widget)
 	widget.daty.step= widget:bubble("text_size") or 16 	
 	widget.daty:value() -- clamp
 	
-	widget.meta.layout(widget)
-	widget.meta.build_m4(widget)
+--	widget.meta.layout(widget)
+--	widget.meta.build_m4(widget)
 end
 
 function wscroll.setup(widget,def)

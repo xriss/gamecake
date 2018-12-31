@@ -187,9 +187,10 @@ function wscreen.add_split(screen,opts)
 		split[1]=t
 	end
 	
-	split:set_dirty()	
-	screen.master:layout()
-	screen.master:build_m4()
+	split:set_dirty()
+	screen.master.request_layout=true
+--	screen.master:layout()
+--	screen.master:build_m4()
 
 end
 
@@ -213,8 +214,10 @@ function wscreen.remove_split(screen,window)
 	
 	screen.windows:insert(window)
 	
-	screen.master:layout()
-	screen.master:build_m4()
+	screen.master.request_layout=true
+--	screen.master:layout()
+--	screen.master:build_m4()
+
 end
 
 

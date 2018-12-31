@@ -16,7 +16,8 @@ function wmenuitem.update(widget)
 			if not widget:isover(widget.hide_when_not) then
 				widget.hidden=true
 				widget.hide_when_not=nil
-				widget.master:layout()
+				widget.master.request_layout=true
+--				widget.master:layout()
 			end
 		end
 	end
@@ -98,7 +99,8 @@ function wmenuitem.menu_add(widget,opts)
 	top.hidden=false
 	top.hide_when_not="menu"
 
-	widget.master:layout()
+	widget.master.request_layout=true
+--	widget.master:layout()
 	widget.master.focus=nil
 
 	return top
@@ -170,7 +172,8 @@ end
 				if widget.parent.class=="menu" then -- only the menu?
 					widget.parent.hidden=true
 					widget.parent.hide_when_not=nil
-					widget.master:layout()
+					widget.master.request_layout=true
+--					widget.master:layout()
 				end
 	--		elseif widget.remove_when_clicked then
 	--			if widget.parent.class=="menu" then -- only the menu?

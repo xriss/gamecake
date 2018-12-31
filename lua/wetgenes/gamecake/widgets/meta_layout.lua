@@ -148,6 +148,9 @@ function wmeta.setup(def)
 			end
 			
 		end end
+		if widget.hook_resize then -- let the widget do some magic before we recurse
+			widget.hook_resize(widget)
+		end
 		for i,v in ipairs(widget) do
 			if not v.hidden then v:resize() end
 		end
@@ -178,12 +181,18 @@ function wmeta.setup(def)
 
 			end
 		end end
+
+
 	end
 
 	function meta.layout(widget,mini)
-		mini=mini or 0
+--		mini=mini or 0
 --		for i,v in ipairs(widget) do if i>mini then
 --		end end
+
+		if widget.hook_layout then -- let the widget do some magic before we recurse
+			widget.hook_layout(widget)
+		end
 		for i,v in ipairs(widget) do
 			if not v.hidden then v:layout() end
 		end

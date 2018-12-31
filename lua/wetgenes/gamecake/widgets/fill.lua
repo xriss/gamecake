@@ -70,10 +70,9 @@ function wfill.layout(widget)
 		widget.hy=widget.hy_max
 	end
 	
--- layout sub sub widgets	
-	for i,v in ipairs(widget) do
-		if not v.hidden then v:layout() end
-	end
+-- and finally call the meta for the sub widgets
+	return widget.meta.layout(widget)
+
 end
 
 function wfill.setup(widget,def)

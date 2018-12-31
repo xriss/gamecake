@@ -22,9 +22,8 @@ function wcenter.layout(widget)
 	end
 	
 -- layout sub sub widgets	
-	for i,v in ipairs(widget) do
-		if not v.hidden then v:layout() end
-	end
+	widget.meta.layout(widget)
+
 end
 
 function wcenter.setup(widget,def)

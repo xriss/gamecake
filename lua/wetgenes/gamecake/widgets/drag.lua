@@ -38,9 +38,8 @@ function wdrag.drag(widget,x,y)
 	widget:call_hook_later("slide")
 	
 	widget:set_dirty()
+	widget.master.request_layout=true
 	
-	widget:layout()
-	widget:build_m4()
 end
 
 function wdrag.update(widget)

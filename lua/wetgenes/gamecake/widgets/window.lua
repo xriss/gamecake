@@ -142,8 +142,7 @@ function wwindow.edge_drag(widget,x,y)
 	winclamp(window)
 
 	window:set_dirty()	
-	window:layout()
-	window:build_m4()
+	window.master.request_layout=true
 
 end
 
@@ -191,9 +190,8 @@ function wwindow.drag(widget,x,y)
 	window:call_hook_later("slide")
 	
 	window:set_dirty()
-	
-	window:layout()
-	window:build_m4()
+	window.master.request_layout=true
+
 end
 
 function wwindow.update(widget)
@@ -241,10 +239,12 @@ function wwindow.layout(widget)
 
 				v.sx=1
 				v.sy=1
-				
+--[[				
+				window.win_fbo.hx=window.hx
+				window.win_fbo.hy=window.hy
 				window.win_canvas.hx=window.hx
 				window.win_canvas.hy=window.hy-bar_height
-
+]]
 			end
 		end
 --	end	
@@ -252,6 +252,7 @@ function wwindow.layout(widget)
 -- also layout any other children
 	widget.meta.layout(widget)
 
+--[[
 	local hx=widget.win_canvas.hx
 	local hy=widget.win_canvas.hy+bar_height
 	if hy~=widget.win_fbo.hy or hx~=widget.win_fbo.hx then -- resize widgets
@@ -286,6 +287,7 @@ function wwindow.layout(widget)
 		widget:build_m4()
 		return wwindow.layout(widget)
 	end
+]]
 
 end
 
@@ -396,14 +398,14 @@ end
 	
 		window.hidden=true -- hide it
 		window.master:call_descendents(function(w) w:set_dirty() end)
-		window.master:resize_and_layout()
+		window.master.request_layout=true
 		
 	elseif act=="win_show" then
 	
 		window.hidden=false
 		window:move_to_top()
 		window.master:call_descendents(function(w) w:set_dirty() end)
-		window.master:resize_and_layout()
+		window.master.request_layout=true
 
 	elseif act=="win_toggle" then
 	
@@ -412,13 +414,13 @@ end
 			window.hidden=false
 			window:move_to_top()
 			window.master:call_descendents(function(w) w:set_dirty() end)
-			window.master:resize_and_layout()
+			window.master.request_layout=true
 
 		else
 
 			window.hidden=true -- hide it
 			window.master:call_descendents(function(w) w:set_dirty() end)
-			window.master:resize_and_layout()
+			window.master.request_layout=true
 
 		end
 		
@@ -434,16 +436,14 @@ end
 		window.hx=window.hx*1.5
 		window.hy=window.hy*1.5
 		winclamp(window)
-		window:layout()
-		window:build_m4()
+		window.master.request_layout=true
 
 	elseif act=="win_shrink" then
 
 		window.hx=window.hx/1.5
 		window.hy=window.hy/1.5
 		winclamp(window)
-		window:layout()
-		window:build_m4()
+		window.master.request_layout=true
 
 	elseif act=="win_reset" then
 
@@ -454,237 +454,299 @@ end
 end
 
 
-function wwindow.setup(widget,def)
+function wwindow.setup(window,def)
 
-	widget.flags=def.flags or {}
+	window.flags=def.flags or {}
 
-	widget.class="window"
+	window.class="window"
 
-	widget.panel_mode=def.panel_mode or "scale" 	-- scale the child to fit
+	window.panel_mode=def.panel_mode or "scale" 	-- scale the child to fit
 
---	widget.key=wwindow.key
---	widget.mouse=wwindow.mouse
-	widget.drag=wwindow.drag
-	widget.update=wwindow.update
-	widget.draw=wwindow.draw
-	widget.layout=wwindow.layout
-	widget.move_to_top=wwindow.move_to_top
-	widget.is_top=wwindow.is_top
+--	window.key=wwindow.key
+--	window.mouse=wwindow.mouse
+	window.drag=wwindow.drag
+	window.update=wwindow.update
+	window.draw=wwindow.draw
+	window.layout=wwindow.layout
+	window.move_to_top=wwindow.move_to_top
+	window.is_top=wwindow.is_top
 	
-	widget.window_hooks = function(act,w) return wwindow.window_hooks(widget,act,w) end
+	window.window_hooks = function(act,w) return wwindow.window_hooks(window,act,w) end
 
-	widget.window_menu=function()
-		local window,screen=widget:window_screen()
+	window.window_menu=function()
+		local window,screen=window:window_screen()
 		return screen:window_menu()
 	end
-	widget.menu_data=widget.menu_data or {
-		{	id="win_actions",	text="Actions...",menu_data={hooks=widget.window_hooks,
+	window.menu_data=window.menu_data or {
+		{	id="win_actions",	text="Actions...",menu_data={hooks=window.window_hooks,
 			{	id="win_hide",		text="Hide Window",		},
 			{	id="win_reset",		text="Reset Window Size",	},
 			{	id="win_shrink",	text="Shrink Window Size",	},
 			{	id="win_grow",		text="Grow Window Size",		},
 		}},
-		{	id="win_windows",	text="Windows...",menu_data=widget.window_menu},
-		hooks=widget.window_hooks,
+		{	id="win_windows",	text="Windows...",menu_data=window.window_menu},
+		hooks=window.window_hooks,
 	}
 	
-	local ss=widget.master.grid_size or 24
+	local ss=window.master.grid_size or 24
 	local color=0
 
 	local ss1=ss/24
 	local ss_side=ss/8
 	local ss_corner=ss/4
 
-	local bar_height=widget.flags.nobar and 0 or ss
+	local bar_height=window.flags.nobar and 0 or ss
 
---	widget.outline_size=-ss/16
---	widget.outline_color=0xcc000000
+--	window.outline_size=-ss/16
+--	window.outline_color=0xcc000000
 
-	widget.win_scale=def.win_scale or 0
-
+	window.win_scale=def.win_scale or 0
 
 -- add all the trimmings
-	widget.win_fbo=widget:add({
-				hx=def.hx,
-				hy=def.hy+bar_height,
-				px=0,
-				py=0,
+	window.win_fbo=window:add({
+		hook_resize=function(it)
+			if window.win_canvas.size=="fit" then -- does the window fit the canvas?
+			
+				local bar_height=(window.flags.nobar and 0 or window.master.grid_size or 24)
+				it.hx=window.win_canvas.hx
+				it.hy=window.win_canvas.hy+bar_height
+
+			else -- or does the canvas fit the window
+
+				local bar_height=(window.flags.nobar and 0 or window.master.grid_size or 24)
+				it.hx=it.parent.hx
+				it.hy=it.parent.hy
+
+			end
+		end,
+		hook_layout=function(it)
+			it.px=0
+			it.py=0
+		end,
+--				hx=def.hx,
+--				hy=def.hy+bar_height,
+--				px=0,
+--				py=0,
 --				class="fill",
-				color=color,
-				fbo=true,
-				style="flat",
-				highlight="none",
-				smode="topleft",
-				outline_size=ss/8,
-				outline_color=0x44000000,
-				outline_fade_color=0x00000000,
-			})
+		sx=1,
+		sy=1,
+		color=color,
+		fbo=true,
+		style="flat",
+		highlight="none",
+		smode="topleft",
+		outline_size=ss/8,
+		outline_color=0x44000000,
+		outline_fade_color=0x00000000,
+	})
 
-	widget.win_canvas=widget.win_fbo:add({
-				class="fill",
-				px=0,
-				py=bar_height,
-				hx=def.hx,
-				hy=def.hy,
-				size="fit",
-				color=color,
-				highlight="none",
-			})
+	window.win_canvas=window.win_fbo:add({
+		hook_resize=function(it)
+			if window.win_canvas.size=="fit" then -- does the window fit the canvas?
+			
+			else -- or does the canvas fit the window
 
-if bar_height>0 then
-	widget.win_three=widget.win_fbo:add({
-				px=0,
-				py=0,
-				hx=def.hx,
-				hy=ss,
-				class="three",
-			})
+				local bar_height=(window.flags.nobar and 0 or window.master.grid_size or 24)
+				it.hx=it.parent.hx
+				it.hy=it.parent.hy-bar_height
 
-	widget.win_menu=widget.win_three:add({
-				class="menuitem",
-				px=0,
-				py=0,
-				hx=ss,
-				hy=ss,
-				text="~",
-				color=color,
-				solid=true,
-				menu_data=widget.menu_data,
-				cursor="hand",
-			})
+			end
+		end,
+		hook_layout=function(it)
+			local bar_height=(window.flags.nobar and 0 or window.master.grid_size or 24)
+			it.px=0
+			it.py=bar_height
+		end,
+		class="fill",
+--				px=0,
+--				py=bar_height,
+		hx=def.hx,
+		hy=def.hy,
+		size="fit",
+		color=color,
+		highlight="none",
+	})
 
-	widget.win_title=widget.win_three:add({
-				px=0,
-				py=0,
-				hx=def.hx,
-				hy=ss,
-				text=def.title or "...",
-			})
-
---[[
-	widget.win_shrink=widget.win_fbo:add_indent({
-				px=def.hx-ss*2,
-				py=0,
-				hx=ss,
-				hy=ss,
-				text="-",
-				color=color,
-				solid=true,
-				hooks=widget.window_hooks,
-				id="win_shrink",
-				cursor="hand",
-			},ss1)
-
-	widget.win_grow=widget.win_fbo:add_indent({
-				px=def.hx-ss,
-				py=0,
-				hx=ss,
-				hy=ss,
-				text="+",
-				color=color,
-				solid=true,
-				hooks=widget.window_hooks,
-				id="win_grow",
-				cursor="hand",
-			},ss1)
-]]
-end
-
-	widget.win_edge_l=widget.win_fbo:add({
-				px=-ss/8,
-				py=0,
-				hx=ss/4,
-				hy=def.hy+bar_height,
-				solid=true,
-				hooks=widget.window_hooks,
-				id="win_edge_l",
-				cursor="sizewe",
-				drag=wwindow.edge_drag,
-			})
-	widget.win_edge_r=widget.win_fbo:add({
-				px=def.hx-ss/8,
-				py=0,
-				hx=ss/4,
-				hy=def.hy+bar_height,
-				solid=true,
-				hooks=widget.window_hooks,
-				id="win_edge_r",
-				cursor="sizewe",
-				drag=wwindow.edge_drag,
-			})
-	widget.win_edge_t=widget.win_fbo:add({
-				px=0,
-				py=-ss/8,
-				hx=def.hx,
-				hy=ss/4,
-				solid=true,
-				hooks=widget.window_hooks,
-				id="win_edge_t",
-				cursor="sizens",
-				drag=wwindow.edge_drag,
-			})
-	widget.win_edge_b=widget.win_fbo:add({
-				px=0,
-				py=def.hy+bar_height-ss/8,
-				hx=def.hx,
-				hy=ss/4,
-				solid=true,
-				hooks=widget.window_hooks,
-				id="win_edge_b",
-				cursor="sizens",
-				drag=wwindow.edge_drag,
-			})
-
-	widget.win_edge_tl=widget.win_fbo:add({
-				px=-ss/4,
-				py=-ss/4,
-				hx=ss/2,
-				hy=ss/2,
-				solid=true,
-				hooks=widget.window_hooks,
-				id="win_edge_tl",
-				cursor="sizenwse",
-				drag=wwindow.edge_drag,
-			})
-	widget.win_edge_tr=widget.win_fbo:add({
-				px=def.hx-ss/4,
-				py=-ss/4,
-				hx=ss/2,
-				hy=ss/2,
-				solid=true,
-				hooks=widget.window_hooks,
-				id="win_edge_tr",
-				cursor="sizenesw",
-				drag=wwindow.edge_drag,
-			})
-	widget.win_edge_bl=widget.win_fbo:add({
-				px=-ss/4,
-				py=def.hy+bar_height-ss/4,
-				hx=ss/2,
-				hy=ss/2,
-				solid=true,
-				hooks=widget.window_hooks,
-				id="win_edge_bl",
-				cursor="sizenwse",
-				drag=wwindow.edge_drag,
-			})
-	widget.win_edge_br=widget.win_fbo:add({
-				px=def.hx-ss/4,
-				py=def.hy+bar_height-ss/4,
-				hx=ss/2,
-				hy=ss/2,
-				solid=true,
-				hooks=widget.window_hooks,
-				id="win_edge_br",
-				cursor="sizenesw",
-				drag=wwindow.edge_drag,
-			})
-
-
-	widget.hx=def.hx
-	widget.hy=def.hy+bar_height
+	if bar_height>0 then -- add a bar
 	
-	return widget
+		window.win_three=window.win_fbo:add({
+			hook_resize=function(it)
+				it.hx=it.parent.hx
+			end,
+			px=0,
+			py=0,
+			hx=def.hx,
+			hy=ss,
+			class="three",
+		})
+
+		window.win_menu=window.win_three:add({
+			class="menuitem",
+			px=0,
+			py=0,
+			hx=ss,
+			hy=ss,
+			text="~",
+			color=color,
+			solid=true,
+			menu_data=window.menu_data,
+			cursor="hand",
+		})
+
+		window.win_title=window.win_three:add({
+			px=0,
+			py=0,
+			hx=def.hx,
+			hy=ss,
+			text=def.title or "...",
+		})
+
+	end
+
+	window.win_edge_l=window.win_fbo:add({
+		hook_resize=function(it)
+			it.hx=(ss/4)
+			it.hy=it.parent.hy
+		end,
+		hook_layout=function(it)
+			it.px=-(ss/8)
+			it.py=0
+		end,
+--				px=-ss/8,
+--				py=0,
+--				hx=ss/4,
+--				hy=def.hy+bar_height,
+		solid=true,
+		hooks=window.window_hooks,
+		id="win_edge_l",
+		cursor="sizewe",
+		drag=wwindow.edge_drag,
+	})
+	window.win_edge_r=window.win_fbo:add({
+		hook_resize=function(it)
+			it.hx=(ss/4)
+			it.hy=it.parent.hy
+		end,
+		hook_layout=function(it)
+			it.px=it.parent.hx-(ss/8)
+			it.py=0
+		end,
+--				px=def.hx-ss/8,
+--				py=0,
+--				hx=ss/4,
+--				hy=def.hy+bar_height,
+		solid=true,
+		hooks=window.window_hooks,
+		id="win_edge_r",
+		cursor="sizewe",
+		drag=wwindow.edge_drag,
+	})
+	window.win_edge_t=window.win_fbo:add({
+		hook_resize=function(it)
+			it.hx=it.parent.hx
+			it.hy=(ss/4)
+		end,
+		hook_layout=function(it)
+			it.px=0
+			it.py=-(ss/8)
+		end,
+--				px=0,
+--				py=-ss/8,
+--				hx=def.hx,
+--				hy=ss/4,
+		solid=true,
+		hooks=window.window_hooks,
+		id="win_edge_t",
+		cursor="sizens",
+		drag=wwindow.edge_drag,
+	})
+	window.win_edge_b=window.win_fbo:add({
+		hook_resize=function(it)
+			it.hx=it.parent.hx
+			it.hy=(ss/4)
+		end,
+		hook_layout=function(it)
+			it.px=0
+			it.py=it.parent.hy-(ss/8)
+		end,
+--				px=0,
+--				py=def.hy+bar_height-ss/8,
+--				hx=def.hx,
+--				hy=ss/4,
+		solid=true,
+		hooks=window.window_hooks,
+		id="win_edge_b",
+		cursor="sizens",
+		drag=wwindow.edge_drag,
+	})
+
+	window.win_edge_tl=window.win_fbo:add({
+		hook_layout=function(it)
+			it.px=0-(ss/4)
+			it.py=0-(ss/4)
+		end,
+--				px=-ss/4,
+--				py=-ss/4,
+		hx=ss/2,
+		hy=ss/2,
+		solid=true,
+		hooks=window.window_hooks,
+		id="win_edge_tl",
+		cursor="sizenwse",
+		drag=wwindow.edge_drag,
+	})
+	window.win_edge_tr=window.win_fbo:add({
+		hook_layout=function(it)
+			it.px=it.parent.hx-(ss/4)
+			it.py=0-(ss/4)
+		end,
+--				px=def.hx-ss/4,
+--				py=-ss/4,
+		hx=ss/2,
+		hy=ss/2,
+		solid=true,
+		hooks=window.window_hooks,
+		id="win_edge_tr",
+		cursor="sizenesw",
+		drag=wwindow.edge_drag,
+	})
+	window.win_edge_bl=window.win_fbo:add({
+		hook_layout=function(it)
+			it.px=0-(ss/4)
+			it.py=it.parent.hy-(ss/4)
+		end,
+--				px=-ss/4,
+--				py=def.hy+bar_height-ss/4,
+		hx=ss/2,
+		hy=ss/2,
+		solid=true,
+		hooks=window.window_hooks,
+		id="win_edge_bl",
+		cursor="sizenwse",
+		drag=wwindow.edge_drag,
+	})
+	window.win_edge_br=window.win_fbo:add({
+		hook_layout=function(it)
+			it.px=it.parent.hx-(ss/4)
+			it.py=it.parent.hy-(ss/4)
+		end,
+--				px=def.hx-ss/4,
+--				py=def.hy+bar_height-ss/4,
+		hx=ss/2,
+		hy=ss/2,
+		solid=true,
+		hooks=window.window_hooks,
+		id="win_edge_br",
+		cursor="sizenesw",
+		drag=wwindow.edge_drag,
+	})
+
+
+	window.hx=def.hx
+	window.hy=def.hy+bar_height
+
+	
+	return window
 end
 
 return wwindow

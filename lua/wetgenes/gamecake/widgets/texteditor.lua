@@ -35,9 +35,10 @@ end
 
 wtexteditor.refresh=function(widget)
 	widget:texteditor_refresh()
-	widget:resize()
-	widget:layout()
-	widget:build_m4()
+	widget.master.request_layout=true
+--	widget:resize()
+--	widget:layout()
+--	widget:build_m4()
 end
 
 
@@ -134,7 +135,8 @@ function wtexteditor.redo_text(widget,text)
 	widget.scroll_widget.pan.hx_max=max_hx*8
 	widget.scroll_widget.pan.hy_max=max_hy*16
 	
-	widget:layout()
+	widget.master.request_layout=true
+--	widget:layout()
 
 	return widget.lines and table.concat(widget.lines) or ""
 end

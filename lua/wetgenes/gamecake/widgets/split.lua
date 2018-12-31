@@ -26,7 +26,7 @@ end
 -- one has a controlled size and the other takes up whats left of the space
 -- complicated layouts can be achieved by a split being a child of another split
 
-function wsplit.layout(widget)
+function wsplit.resizelayout(widget)
 	
 -- work out the size we want for this split using a number of limiters
 -- a,b may be x,y or y,x depending on the split axis
@@ -126,9 +126,23 @@ function wsplit.layout(widget)
 		end
 
 	end
+end
+
+function wsplit.resize(widget)
+
+	wsplit.resizelayout(widget)
 
 -- also layout any other children
-	widget.meta.layout(widget,2)
+	widget.meta.resize(widget)
+
+end
+
+function wsplit.layout(widget)
+
+	wsplit.resizelayout(widget)
+
+-- also layout any other children
+	widget.meta.layout(widget)
 
 end
 
@@ -153,6 +167,7 @@ function wsplit.setup(widget,def)
 
 	widget.update=wsplit.update
 	widget.draw=wsplit.draw
+	widget.resize=wsplit.resize
 	widget.layout=wsplit.layout
 	
 	return widget

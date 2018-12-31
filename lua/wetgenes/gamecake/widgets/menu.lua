@@ -22,7 +22,8 @@ function wmenu.update(widget)
 			if not widget:isover(widget.hide_when_not) then
 				widget.hidden=true
 				widget.hide_when_not=nil
-				widget.master:layout()
+				widget.master.request_layout=true
+--				widget.master:layout()
 			end
 		end
 	end
@@ -87,9 +88,7 @@ function wmenu.layout(widget)
 	for i,v in ipairs(widget) do -- set all to widest
 		v.hx=hx
 	end
-	for i,v in ipairs(widget) do -- descend
-		if not v.hidden then v:layout() end
-	end
+	widget.meta.layout(widget)
 end
 
 function wmenu.setup(widget,def)
