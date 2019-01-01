@@ -17,7 +17,18 @@ wfill=wfill or {}
 -- we do not adjust the hx,hy size of sub widgets
 -- we just place them left to right top to bottom
 -- finally we resize this widget to fit its content
+
 function wfill.layout(widget)
+	wfill.layoutresize(widget)
+	return widget.meta.layout(widget)
+end
+
+function wfill.resize(widget)
+	widget.meta.resize(widget)
+	wfill.layoutresize(widget)
+end
+
+function wfill.layoutresize(widget)
 	
 	local hx,hy=0,0
 	local my=0
@@ -70,15 +81,13 @@ function wfill.layout(widget)
 		widget.hy=widget.hy_max
 	end
 	
--- and finally call the meta for the sub widgets
-	return widget.meta.layout(widget)
-
 end
 
 function wfill.setup(widget,def)
 
 	widget.class="fill"
 
+	widget.resize=wfill.resize
 	widget.layout=wfill.layout
 	
 	return widget

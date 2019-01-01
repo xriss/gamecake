@@ -214,84 +214,43 @@ function wwindow.layout(widget)
 	local ss=(widget.master.grid_size or 24)
 	local bar_height=widget.flags.nobar and 0 or ss
 	
---	if windock and windock.windock=="drag" then -- we are dragable
-			
-	--	if window.hx > window.parent.hx then window.hx = window.parent.hx end
-	--	if window.hy > window.parent.hy then window.hy = window.parent.hy end
+	if v then
+		if window.panel_mode=="scale" then -- scale but maintain aspect of content
 
-		if v then
-			if window.panel_mode=="scale" then -- scale but maintain aspect of content
+			v.sx=window.hx/v.hx
+			v.sy=window.hy/v.hy
 
-				v.sx=window.hx/v.hx
-				v.sy=window.hy/v.hy
+--				if v.sx~=v.sy then print(widget.hx,v.hx,"-",widget.hy,v.hy) end
 
-				if v.sx<v.sy then v.sy=v.sx else v.sx=v.sy end
+			if v.sx<v.sy then v.sy=v.sx else v.sx=v.sy end
 
-				v.px=(window.hx-v.hx*v.sx)/2
-				v.py=(window.hy-v.hy*v.sy)/2
+			v.px=(window.hx-v.hx*v.sx)/2
+			v.py=(window.hy-v.hy*v.sy)/2
 
-			elseif window.panel_mode=="stretch" then -- stretch to fit any area
+		elseif window.panel_mode=="stretch" then -- stretch to fit any area
 
-				v.sx=window.hx/v.hx
-				v.sy=window.hy/v.hy
+			v.sx=window.hx/v.hx
+			v.sy=window.hy/v.hy
 
-			elseif window.panel_mode=="fill" then -- fill any area, no scale
+		elseif window.panel_mode=="fill" then -- fill any area, no scale
 
-				v.sx=1
-				v.sy=1
---[[				
-				window.win_fbo.hx=window.hx
-				window.win_fbo.hy=window.hy
-				window.win_canvas.hx=window.hx
-				window.win_canvas.hy=window.hy-bar_height
-]]
-			end
+			v.sx=1
+			v.sy=1
+
 		end
---	end	
+	end
 
 -- also layout any other children
 	widget.meta.layout(widget)
 
---[[
-	local hx=widget.win_canvas.hx
-	local hy=widget.win_canvas.hy+bar_height
-	if hy~=widget.win_fbo.hy or hx~=widget.win_fbo.hx then -- resize widgets
-
-		widget.hx=hx
-		widget.hy=hy
-		widget.win_fbo.hx=hx
-		widget.win_fbo.hy=hy
-
-		widget.win_edge_t.hx=hx
-		widget.win_edge_b.hx=hx
-
-		widget.win_edge_r.px=hx-ss/8
-		widget.win_edge_tr.px=hx-ss/4
-		widget.win_edge_br.px=hx-ss/4
-
-		widget.win_edge_l.hy=hy
-		widget.win_edge_r.hy=hy
-		
-		widget.win_edge_b.py=hy-ss/8
-		widget.win_edge_bl.py=hy-ss/4
-		widget.win_edge_br.py=hy-ss/4
-		
-		if widget.win_three then
-		
-			widget.win_three.hx=hx
-		
-		end
-
---		print(widget.win_canvas.hy)
-
-		widget:build_m4()
-		return wwindow.layout(widget)
-	end
-]]
-
 end
 
 wwindow.window_hooks_reset=function(widget)
+	widget:resize()
+--	widget:layout()
+--	widget:resize()
+--	widget:layout()
+--print("window reset",widget.id,widget.hx,widget.hy,"...",widget.win_fbo.hx,widget.win_fbo.hy)
 	widget.hx=widget.win_fbo.hx
 	widget.hy=widget.win_fbo.hy
 	winclamp(widget)
@@ -478,12 +437,12 @@ function wwindow.setup(window,def)
 		return screen:window_menu()
 	end
 	window.menu_data=window.menu_data or {
-		{	id="win_actions",	text="Actions...",menu_data={hooks=window.window_hooks,
+--		{	id="win_actions",	text="Actions...",menu_data={hooks=window.window_hooks,
 			{	id="win_hide",		text="Hide Window",		},
 			{	id="win_reset",		text="Reset Window Size",	},
 			{	id="win_shrink",	text="Shrink Window Size",	},
 			{	id="win_grow",		text="Grow Window Size",		},
-		}},
+--		}},
 		{	id="win_windows",	text="Windows...",menu_data=window.window_menu},
 		hooks=window.window_hooks,
 	}
@@ -744,7 +703,6 @@ function wwindow.setup(window,def)
 
 	window.hx=def.hx
 	window.hy=def.hy+bar_height
-
 	
 	return window
 end

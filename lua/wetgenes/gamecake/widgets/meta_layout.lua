@@ -152,7 +152,8 @@ function wmeta.setup(def)
 			widget.hook_resize(widget)
 		end
 		for i,v in ipairs(widget) do
-			if not v.hidden then v:resize() end
+--			if not v.hidden then v:resize() end
+			v:resize()
 		end
 		for i,v in ipairs(widget) do if i>mini and v.size then
 			for token in string.gmatch(v.size, "[^%s]+") do -- can contain multiple tokens
@@ -194,7 +195,8 @@ function wmeta.setup(def)
 			widget.hook_layout(widget)
 		end
 		for i,v in ipairs(widget) do
-			if not v.hidden then v:layout() end
+--			if not v.hidden then v:layout() end
+			v:layout()
 		end
 	end
 

@@ -221,6 +221,16 @@ function wscreen.remove_split(screen,window)
 end
 
 
+-- call after adding all your windows to make sure they start out the right size
+wscreen.windows_reset=function(screen)
+
+	screen.master:layout()
+	screen.master:call_descendents(function(w) if w.window_hooks then w.window_hooks("win_reset") end end) -- reset all window sizes
+	screen.master:call_descendents(function(w) w:set_dirty() end)
+	screen.master.request_layout=true
+
+end
+
 function wscreen.setup(widget,def)
 
 	widget.class="screen"
@@ -235,6 +245,7 @@ function wscreen.setup(widget,def)
 	widget.window_menu=wscreen.window_menu
 	widget.screen_menu=wscreen.screen_menu
 	widget.windows_toggle=wscreen.windows_toggle
+	widget.windows_reset=wscreen.windows_reset
 
 	widget.get_split=wscreen.get_split
 	widget.add_split=wscreen.add_split
