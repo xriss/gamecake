@@ -67,6 +67,8 @@ function wdrag.setup(widget,def)
 	widget.draw=wdrag.draw
 	widget.layout=wfill.layout
 
+	widget.cursor=widget.cursor or "hand"
+
 	widget.solid=true
 
 	return widget

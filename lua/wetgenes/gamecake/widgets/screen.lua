@@ -95,9 +95,9 @@ wscreen.screen_menu=function(screen)
 	local hooks=function(act,w) return wwindow.window_hooks(nil,act,w) end
 	
 	return {	hooks=hooks,
-		{	id="win_actions",	text="Actions...",menu_data={hooks=hooks,
+--		{	id="win_actions",	text="Actions...",menu_data={hooks=hooks,
 			{	id="win_undock",	text="Undock window",		},
-		}},
+--		}},
 		{	id="win_windows",	text="Windows...",menu_data=screen:window_menu()},
 	}
 end
