@@ -111,8 +111,8 @@ function wslide.setup(widget,def)
 	widget.datx=def.datx or widget_data.new_data({max=0,master=widget.master})
 	widget.daty=def.daty or widget_data.new_data({max=0,master=widget.master})
 	widget.data=def.data -- or def.datx or def.daty
-	widget.datxrev=def.datxrev
-	widget.datyrev=def.datyrev
+	widget.datxrev=def.datxrev -- mirror the x location
+	widget.datyrev=def.datyrev -- mirror the y location
 
 	widget.style=def.style or "indent"
 

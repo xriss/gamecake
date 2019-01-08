@@ -11,6 +11,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 function M.bake(oven,wwindow)
 
+local font=oven.cake.canvas.font
+
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
@@ -157,6 +159,8 @@ function wwindow.drag(widget,x,y)
 		return
 	end
 
+--	window:move_to_top()
+
 	local master=widget.master
 
 
@@ -269,11 +273,11 @@ wwindow.is_top=function(window)
 end
 
 wwindow.window_hooks=function(_window,act,widget)
---print(act,w.id)
+--print(act)
 
 	local window,screen=(_window or widget):window_screen()
 
-	if act=="click" then -- turn a click into another act
+	if act=="click" and window~=widget then -- turn a click into another act
 		act=widget.id
 	end
 
@@ -284,6 +288,7 @@ if window then -- only if message is bound to a window
 	if act=="active" then
 
 
+--[[
 		local windock= (window.parent.class=="windock") and window.parent or nil
 
 --print(widget.id,widget.drag,wwindow.edge_drag)
@@ -299,6 +304,7 @@ if window then -- only if message is bound to a window
 			end
 
 		end
+]]
 
 		if window.parent==screen.windows then
 			screen.windows:insert(window) -- move to top
@@ -431,6 +437,7 @@ function wwindow.setup(window,def)
 	window.is_top=wwindow.is_top
 	
 	window.window_hooks = function(act,w) return wwindow.window_hooks(window,act,w) end
+	window.hooks=window.window_hooks
 
 	window.window_menu=function()
 		local window,screen=window:window_screen()
@@ -558,6 +565,14 @@ function wwindow.setup(window,def)
 			hx=def.hx,
 			hy=ss,
 			text=def.title or "...",
+			draw_text=function(widget,txp,typ,fx) -- draw the text propperly centered in the entire window
+				local tx=(widget.hx+ss-font.width(widget.text))/2-ss
+				local ty=widget.hy/2
+				if tx<0 then tx=0 end
+				oven.gl.Color( unpack(widget.master.get_color(nil,widget.text_color)) )
+				font.set_xy(tx+txp,ty-fx+typ)
+				font.draw(widget.text)
+			end,
 		})
 
 	end
