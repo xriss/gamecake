@@ -1,0 +1,325 @@
+
+/*
+
+	Variables:
+	
+	------------------------------------------------------------------
+	The bright highlight used for the logo and links on hover
+	------------------------------------------------------------------
+	
+	base 			- Blue				|	Logo
+	base_alt 		- Light blue		|	Link hover
+	
+	------------------------------------------------------------------
+	Basic colours for background and fonts
+	------------------------------------------------------------------
+	
+	base_back		- Off white			|	Main body background
+	base_back_alt 	- Dark white		|	Docs column background
+	base_back_code	- Dark blue grey	|	Code background
+	base_link		- Medium grey		|	Link
+	base_font		- Dark grey			|	Body font
+	base_code		- White				|	Code font
+	base_src		- Light grey		|	Source link background
+	
+	------------------------------------------------------------------
+	Extra bits
+	------------------------------------------------------------------
+	
+	white 			- White				|	Navigation bar
+	hr		 		- Blue				|	Horizontal line
+
+*/
+
+:root {
+  --base:#1400ff;
+  --base_alt:#3F2FFF;
+  --base_back:#f7f4fd;
+  --base_back_alt:#efefef;
+  --base_back_code:#282a36;
+  --base_link:#666;
+  --base_font:#484848;
+  --base_code:#fff;
+  --base_src:#d8d8d8;
+  --white:#fff;
+  --hr:#1400ff;
+}
+
+
+/*
+
+	Reset & base css
+	
+	body	|	100vh - Avoid the IE 10-11 `min-height` bug.
+
+*/
+
+*{box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box; -o-box-sizing:border-box; -ms-box-sizing:border-box;}
+
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{border:0;font-size:100%;font:inherit;vertical-align:top;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}
+
+a,img		{border:0; outline:none;}textarea:focus,input:focus{outline:0;}*:focus{outline:0;}
+body, html	{-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; min-width:100%; min-height:100%; width:100%; height:100%; height:100vh; margin:0 auto;}
+
+
+/*
+
+	Main styles for the entire site
+	
+	a		|	Transition css animations
+
+*/
+
+body 	{background-color:var(--base_back); color:var(--base_font); display:flex; flex-direction:column; font-family:Arial, sans-serif; font-size:13px; line-height:18px; position:relative; padding-top:4em;}
+
+a		{-webkit-transition:all .2s ease-in-out; -moz-transition:all .2s ease-in-out; -o-transition:all .2s ease-in-out; -ms-transition:all .2s ease-in-out; transition:all .2s ease-in-out;}
+
+a 		{color:var(--base_font); text-decoration:none;}
+a:hover {color:var(--base); cursor:pointer;}
+a img 	{border:none;}
+
+h1 		{font-size:30px; margin-bottom:26px;}
+h1 a	{font-weight:bold;}
+h2 		{font-size:24px;}
+h3 		{font-size:18px;}
+h4 		{font-size:16px;}
+h5 		{font-size:14px;}
+h6 		{font-size:13px;}
+
+b		{font-weight:bold;}
+p 		{font-size:19px; line-height:31px; margin-bottom:16px;}
+strong	{font-weight:bold;}
+
+.line, hr			{border-top:1px dashed var(--hr); margin-top:40px; margin-bottom:20px; position:relative;}
+
+blockquote 			{font-family:georgia,serif; font-style:italic; padding:13px 13px 21px 15px; margin-bottom:18px;}
+blockquote:before	{color:#eee; content:"\201C"; font-family:georgia,serif; font-size:40px; margin-left:-10px;}
+blockquote p 		{font-size:14px; font-style:italic; font-weight:300; line-height:18px; margin-bottom:0;}
+
+code, pre 			{color:var(--base_code); font-family:monospace;}
+code				{background:var(--base_back_code);  border-radius:3px; -webkit-border-radius:3px; -moz-border-radius:3px; font-size:12px; padding:1px 3px;}
+pre					{background-color:var(--base_back_code); border-radius:6px; font-size:11px; line-height:16px; margin:32px 0 18px 0; padding:14px; white-space:pre-wrap; word-wrap:break-word; }
+pre:first-of-type	{margin-top:0;}
+pre code 			{background:transparent; font-size:14px; line-height:26px; padding:0;}
+sup 				{font-size:0.83em; line-height:0; vertical-align:super;}
+
+
+/*
+
+	Wrappers:
+	
+	* Prevent Chrome, Opera, and Safari from letting these items shrink 
+	to smaller than their content's default minimum size.
+	
+	content			|	Flex = *
+	default 		|	Clean default div, used only in Docs body
+	nav_wrap 		|	Navigation bar for entire site
+	right 			|	Class for text-align right
+
+*/
+
+.content	{flex:1 0 auto;}
+.default	{margin:0 auto;}
+.nav_wrap	{background-color:var(--white); left:0; padding:1.5em 3em; position:fixed; top:0; width:100%; z-index:100;}
+.right		{text-align:right;}
+
+
+/*
+
+	Navigation bar:
+	
+	The main navigation bar is made up of a wrapper div that holds the
+	main logo link and an unordered list of all the other pages.
+	
+	nav		 		|	Main div for logo and links
+	nav ul	 		|	Listing of links
+	nav a 			|	Links with padding
+
+*/
+
+.nav		{align-items:center; display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; -moz-box-align:center; -ms-box-align:center; -webkit-box-align:center;}
+.nav ul		{display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; justify-content:flex-end; width:100%;}
+.nav a		{color:var(--base_link); font-size:1.5em; margin:0 1rem;}
+.nav a:hover{color:var(--base);}
+
+
+/*	
+
+	Logo:
+	
+	'Patua One' is only used here - @import found in ^.html
+	
+	logo	 		|	Splash page logo
+	logo p	 		|	Splash page about div
+	nav a.logo 		|	Logo in navigation bar
+	
+*/
+
+.logo		{color:var(--base); font-family:'Patua One',georgia,serif;}
+.logo p		{color:var(--base_font); font-size:5em; line-height:0.8em;}
+.nav a.logo {color:var(--base); display:block; font-size:1.8em;}
+
+
+/*
+
+	Install:
+	
+	Installation instructions on the splash page
+	
+	install 		|	Main wrapper
+	install div		|	Wrapper for installation divs
+	install code	|	Bigger fonts for code div
+	
+*/
+
+.install 					{display:flex; justify-content:space-evenly; margin-top:2em; width:100%;}
+.install div				{padding-left:5%; width:60%;}
+.install div:nth-of-type(1) {padding:0; width:40%;}
+.install.full div			{width:100%;}
+.install code 				{font-size:1.6em;}
+
+
+/*
+
+	Blog:
+	
+	blog_info 		|	Blog author & date info
+	blog_wrap 		|	Wrapper for a blog post
+	blog_wrap a		|	Fix long urls with these rules
+	paging_wrap		|	Wrapper for paging links
+	
+*/
+
+
+.blog_info		{font-size:70%; position:absolute; right:10px; top:2.5em; background-color:#e7e1f5; padding:0 20px;}
+
+.blog_wrap		{color:var(--base_font); font-family:sans-serif; font-size:20px; line-height:33px; margin:auto; padding:4em 0; position:relative; width:740px;}
+.blog_wrap h2	{font-family:'Patua One',georgia,serif; font-size:2.5em; line-height:1em; padding-bottom:1em;}
+.blog_wrap a	{overflow-wrap:break-word; word-wrap:break-word; word-break:break-word; -ms-hyphens:auto; -moz-hyphens:auto; -webkit-hyphens:auto; hyphens:auto;}
+.blog_wrap a 	{color:var(--base); text-decoration:none;}
+.blog_wrap a:hover {color:var(--base_alt); cursor:pointer;}
+
+.paging_wrap	{display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; justify-content:space-between; margin-top:5em;}
+.paging_wrap a	{font-size:80%; display:block;}
+
+
+/*
+
+	Footer:
+	
+	Sticky footer with flexbox
+	
+	https://css-tricks.com/couple-takes-sticky-footer/
+	
+	* Prevent Chrome, Opera, and Safari from letting these items shrink 
+	to smaller than their content's default minimum size.
+	
+	footer	 		|	Flex = *
+	footer ul 		|	Footer links
+	
+*/
+
+.footer			{flex-shrink:0; padding:2em 4em;}
+.footer ul		{display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; justify-content:space-between; width:100%;}
+
+
+/*
+
+	Media queries
+	
+	main			|	Wrapper for documentation page
+	contents		|	Wrapper for documentation table of contents
+	
+*/
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (-o-min-device-pixel-ratio: 3/2),
+only screen and (min--moz-device-pixel-ratio: 1.5),
+only screen and (min-device-pixel-ratio: 1.5) {
+
+	body			{padding-top:7em;}
+	.nav_wrap		{padding:3em;}
+	.nav			{font-size:1.5em;}
+	.blog_info		{font-size:1em;}
+	.blog_wrap h2	{font-size:3em;}
+	p 				{font-size:1.5em; line-height:1.5em; margin-bottom:1.5em;}
+	.footer			{font-size:1.5em;}
+	.paging_wrap	{font-size:1.5em;}
+	
+	.main			{max-width:initial;}
+	.contents		{top:5.5em;}
+
+}
+
+/*
+
+	Original theme for Docs!
+	
+*/
+
+
+/*
+
+	Link to source in Github under title
+
+*/
+
+.source a:before	{background-color:var(--base_src); border-radius:6px; color:var(--base_font); content:'source'; display:inline; font-style:italic; margin-right:5px; padding:2px 4px 3px 5px;}
+.source a			{display:block; font-size:14px; margin-bottom:32px; word-wrap:break-word;}
+
+
+/*
+
+	Wrappers:
+	
+	wrap	 		|	Wrapper for each definition
+	contents 		|	Wrapper for table of contents
+	main 			|	Wrapper for main body
+
+*/
+
+.wrap				{margin:0 auto; padding:0 0 4em 0;}
+.wrap:nth-of-type(1){padding-top:4em;}
+.contents			{background-color:var(--base_back_alt); font-size:16px; height:100%; left:0; line-height:24px; overflow-y:auto; position:fixed; padding:0 2em; top:3.5em; width:26.5em;}
+.main				{padding-left:33em; margin-left:3em; margin-right:3em; width:calc(960px + 20em); max-width:calc(960px + 20em);}
+
+
+/*
+
+	Table of contents
+	
+	par		 		|	Parent topic
+	sub	 			|	Subtopic sits under a parent topic
+
+*/
+
+.topics					{counter-reset:parent; padding:2em 0 6em 0; position:relative;}
+.topics:before			{color:var(--base_font); content:"Table Of Contents"; display:block; margin-bottom:15px;}
+.topics a				{display:block; margin-left:1.5em; white-space:nowrap;}
+.topics a.par:before	{content:counter(parent)". "; counter-increment:parent; display:inline-block; margin-left:-1.5em; min-width:30px;}
+.topics a span			{display:inline-block; line-height:1.5em; margin-left:1em;}
+.topics a.par			{counter-reset:sub; font-weight:bold;}
+.topics a.sub			{font-size:93%;}
+.topics a.sub span		{margin-left:2em;}
+.topics a.sub:before	{content:counter(parent)"."counter(sub)" "; counter-increment:sub; display:inline-block; line-height:1.5em; margin-left:-1.5em; min-width:30px;}
+.topics a.par:nth-of-type(n+5){margin-top:0.8em;}
+
+
+/*
+
+	Media queries
+	
+	main			|	Wrapper for documentation page
+	contents		|	Wrapper for documentation table of contents
+	
+*/
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (-o-min-device-pixel-ratio: 3/2),
+only screen and (min--moz-device-pixel-ratio: 1.5),
+only screen and (min-device-pixel-ratio: 1.5) {
+
+	body			{display:block;}
+	.contents		{top:5.5em;}
+
+}

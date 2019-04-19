@@ -7,12 +7,15 @@ echo " Pulling latest changes from plated-example and attempting to ignore confl
 echo
 
 
-cd ..
+#cd ..
 
 git pull https://github.com/xriss/plated-example.git
 
 git checkout --ours README.md
 git checkout --ours .gitignore
+
+git checkout --ours ../README.md
+git checkout --ours ../.gitignore
 
 git status
 

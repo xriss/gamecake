@@ -1,0 +1,1159 @@
+<html>
+	<head>
+		<title>Gamecake docs!</title>
+		<link href="https://fonts.googleapis.com/css?family=Patua+One" rel="stylesheet">
+		<link rel='stylesheet' href='../../docs/docs.css' />
+	</head>
+	<body><div class="nav_wrap">
+	<div class="nav">
+		<a href="../../" class="logo">Gamecake</a>
+		<ul>
+			<li><a href="https://github.com/xriss/gamecake">Github</a></li>
+			<li><a href="../../blog">Blog</a></li>
+			<li><a href="../../docs">Documentation</a></li>
+		</ul>
+	</div>
+</div>
+<div class="default">
+	<div class="contents">
+		<div class="topics">
+			<a class="par" href="../../docs"><span>/</span></a>
+			<a class="par" href="../../docs/code"><span>/code</span></a>
+<a class="par" href="../../docs/code.swankyquant"><span>/code.swankyquant</span></a>
+
+<a class="sub" href="../../docs/code.swankyquant.algorithm"><span>/code.swankyquant.algorithm</span></a>
+<a class="sub" href="../../docs/code.swankyquant.color_distance"><span>/code.swankyquant.color_distance</span></a>
+<a class="sub" href="../../docs/code.swankyquant.color_distance_weight"><span>/code.swankyquant.color_distance_weight</span></a>
+<a class="sub" href="../../docs/code.swankyquant.swanky_quant"><span>/code.swankyquant.swanky_quant</span></a>
+<a class="sub" href="../../docs/code.swankyquant.swanky_quant_remap"><span>/code.swankyquant.swanky_quant_remap</span></a><a class="par" href="../../docs/lua"><span>/lua</span></a>
+<a class="par" href="../../docs/lua.glslang"><span>/lua.glslang</span></a>
+
+<a class="sub" href="../../docs/lua.glslang.lint_gles2"><span>/lua.glslang.lint_gles2</span></a>
+<a class="sub" href="../../docs/lua.glslang.parse_chunks"><span>/lua.glslang.parse_chunks</span></a><a class="par" href="../../docs/lua.wetgenes"><span>/lua.wetgenes</span></a>
+<a class="par" href="../../docs/lua.wetgenes.chipmunk"><span>/lua.wetgenes.chipmunk</span></a>
+<a class="par" href="../../docs/lua.wetgenes.chipmunk.arbiter"><span>/lua.wetgenes.chipmunk.arbiter</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.arbiter.ignore"><span>/lua.wetgenes.chipmunk.arbiter.ignore</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.arbiter.points"><span>/lua.wetgenes.chipmunk.arbiter.points</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.arbiter.surface_velocity"><span>/lua.wetgenes.chipmunk.arbiter.surface_velocity</span></a><a class="par" href="../../docs/lua.wetgenes.chipmunk.body"><span>/lua.wetgenes.chipmunk.body</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.angle"><span>/lua.wetgenes.chipmunk.body.angle</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.angular_velocity"><span>/lua.wetgenes.chipmunk.body.angular_velocity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.apply_force"><span>/lua.wetgenes.chipmunk.body.apply_force</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.apply_impulse"><span>/lua.wetgenes.chipmunk.body.apply_impulse</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.center_of_gravity"><span>/lua.wetgenes.chipmunk.body.center_of_gravity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.force"><span>/lua.wetgenes.chipmunk.body.force</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.mass"><span>/lua.wetgenes.chipmunk.body.mass</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.moment"><span>/lua.wetgenes.chipmunk.body.moment</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.position"><span>/lua.wetgenes.chipmunk.body.position</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.position_func"><span>/lua.wetgenes.chipmunk.body.position_func</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.shape"><span>/lua.wetgenes.chipmunk.body.shape</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.torque"><span>/lua.wetgenes.chipmunk.body.torque</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.type"><span>/lua.wetgenes.chipmunk.body.type</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.velocity"><span>/lua.wetgenes.chipmunk.body.velocity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.body.velocity_func"><span>/lua.wetgenes.chipmunk.body.velocity_func</span></a><a class="par" href="../../docs/lua.wetgenes.chipmunk.constraint"><span>/lua.wetgenes.chipmunk.constraint</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.constraint.collide_bodies"><span>/lua.wetgenes.chipmunk.constraint.collide_bodies</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.constraint.error_bias"><span>/lua.wetgenes.chipmunk.constraint.error_bias</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.constraint.impulse"><span>/lua.wetgenes.chipmunk.constraint.impulse</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.constraint.max_bias"><span>/lua.wetgenes.chipmunk.constraint.max_bias</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.constraint.max_force"><span>/lua.wetgenes.chipmunk.constraint.max_force</span></a><a class="par" href="../../docs/lua.wetgenes.chipmunk.shape"><span>/lua.wetgenes.chipmunk.shape</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.shape.bounding_box"><span>/lua.wetgenes.chipmunk.shape.bounding_box</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.shape.collision_type"><span>/lua.wetgenes.chipmunk.shape.collision_type</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.shape.elasticity"><span>/lua.wetgenes.chipmunk.shape.elasticity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.shape.filter"><span>/lua.wetgenes.chipmunk.shape.filter</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.shape.friction"><span>/lua.wetgenes.chipmunk.shape.friction</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.shape.query_point"><span>/lua.wetgenes.chipmunk.shape.query_point</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.shape.query_segment"><span>/lua.wetgenes.chipmunk.shape.query_segment</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.shape.radius"><span>/lua.wetgenes.chipmunk.shape.radius</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.shape.sensor"><span>/lua.wetgenes.chipmunk.shape.sensor</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.shape.surface_velocity"><span>/lua.wetgenes.chipmunk.shape.surface_velocity</span></a><a class="par" href="../../docs/lua.wetgenes.chipmunk.space"><span>/lua.wetgenes.chipmunk.space</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.add"><span>/lua.wetgenes.chipmunk.space.add</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.add_handler"><span>/lua.wetgenes.chipmunk.space.add_handler</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.body"><span>/lua.wetgenes.chipmunk.space.body</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.collision_bias"><span>/lua.wetgenes.chipmunk.space.collision_bias</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.collision_persistence"><span>/lua.wetgenes.chipmunk.space.collision_persistence</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.collision_slop"><span>/lua.wetgenes.chipmunk.space.collision_slop</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.constraint"><span>/lua.wetgenes.chipmunk.space.constraint</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.contains"><span>/lua.wetgenes.chipmunk.space.contains</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.current_time_step"><span>/lua.wetgenes.chipmunk.space.current_time_step</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.damping"><span>/lua.wetgenes.chipmunk.space.damping</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.gravity"><span>/lua.wetgenes.chipmunk.space.gravity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.idle_speed_threshold"><span>/lua.wetgenes.chipmunk.space.idle_speed_threshold</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.iterations"><span>/lua.wetgenes.chipmunk.space.iterations</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.locked"><span>/lua.wetgenes.chipmunk.space.locked</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.query_bounding_box"><span>/lua.wetgenes.chipmunk.space.query_bounding_box</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.query_point"><span>/lua.wetgenes.chipmunk.space.query_point</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.query_point_nearest"><span>/lua.wetgenes.chipmunk.space.query_point_nearest</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.query_segment"><span>/lua.wetgenes.chipmunk.space.query_segment</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.query_segment_first"><span>/lua.wetgenes.chipmunk.space.query_segment_first</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.query_shape"><span>/lua.wetgenes.chipmunk.space.query_shape</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.reindex"><span>/lua.wetgenes.chipmunk.space.reindex</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.remove"><span>/lua.wetgenes.chipmunk.space.remove</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.sleep_time_threshold"><span>/lua.wetgenes.chipmunk.space.sleep_time_threshold</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.step"><span>/lua.wetgenes.chipmunk.space.step</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.type"><span>/lua.wetgenes.chipmunk.space.type</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.export"><span>/lua.wetgenes.export</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake"><span>/lua.wetgenes.gamecake</span></a>
+<a class="par" href="../../docs/lua.wetgenes.gamecake.fun"><span>/lua.wetgenes.gamecake.fun</span></a>
+<a class="par" href="../../docs/lua.wetgenes.gamecake.fun.chatdown"><span>/lua.wetgenes.gamecake.fun.chatdown</span></a>
+<a class="par" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat"><span>/lua.wetgenes.gamecake.fun.chatdown.chat</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.get_tag"><span>/lua.wetgenes.gamecake.fun.chatdown.chat.get_tag</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags"><span>/lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.set_tag"><span>/lua.wetgenes.gamecake.fun.chatdown.chat.set_tag</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.set_tags"><span>/lua.wetgenes.gamecake.fun.chatdown.chat.set_tags</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.set_topic"><span>/lua.wetgenes.gamecake.fun.chatdown.chat.set_topic</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats"><span>/lua.wetgenes.gamecake.fun.chatdown.chats</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.changes"><span>/lua.wetgenes.gamecake.fun.chatdown.chats.changes</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.get_subject"><span>/lua.wetgenes.gamecake.fun.chatdown.chats.get_subject</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.get_tag"><span>/lua.wetgenes.gamecake.fun.chatdown.chats.get_tag</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags"><span>/lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.set_subject"><span>/lua.wetgenes.gamecake.fun.chatdown.chats.set_subject</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.set_tag"><span>/lua.wetgenes.gamecake.fun.chatdown.chats.set_tag</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.dotnames"><span>/lua.wetgenes.gamecake.fun.chatdown.dotnames</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.parse"><span>/lua.wetgenes.gamecake.fun.chatdown.parse</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.setup"><span>/lua.wetgenes.gamecake.fun.chatdown.setup</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.setup_chat"><span>/lua.wetgenes.gamecake.fun.chatdown.setup_chat</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.text"><span>/lua.wetgenes.gamecake.fun.chatdown.text</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.entities"><span>/lua.wetgenes.gamecake.fun.entities</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.add"><span>/lua.wetgenes.gamecake.fun.entities.add</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.call"><span>/lua.wetgenes.gamecake.fun.entities.call</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.caste"><span>/lua.wetgenes.gamecake.fun.entities.caste</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.get"><span>/lua.wetgenes.gamecake.fun.entities.get</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.manifest"><span>/lua.wetgenes.gamecake.fun.entities.manifest</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.reset"><span>/lua.wetgenes.gamecake.fun.entities.reset</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.set"><span>/lua.wetgenes.gamecake.fun.entities.set</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.sortby_update"><span>/lua.wetgenes.gamecake.fun.entities.sortby_update</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems"><span>/lua.wetgenes.gamecake.fun.entities.systems</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.call"><span>/lua.wetgenes.gamecake.fun.entities.systems.call</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.insert"><span>/lua.wetgenes.gamecake.fun.entities.systems.insert</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.cells"><span>/lua.wetgenes.gamecake.fun.yarn.cells</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items"><span>/lua.wetgenes.gamecake.fun.yarn.items</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.cells"><span>/lua.wetgenes.gamecake.fun.yarn.items.cells</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.create"><span>/lua.wetgenes.gamecake.fun.yarn.items.create</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.create_pages"><span>/lua.wetgenes.gamecake.fun.yarn.items.create_pages</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.destroy"><span>/lua.wetgenes.gamecake.fun.yarn.items.destroy</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.find"><span>/lua.wetgenes.gamecake.fun.yarn.items.find</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.get_big"><span>/lua.wetgenes.gamecake.fun.yarn.items.get_big</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.insert"><span>/lua.wetgenes.gamecake.fun.yarn.items.insert</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.iterate_dotnames"><span>/lua.wetgenes.gamecake.fun.yarn.items.iterate_dotnames</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.iterate_parents"><span>/lua.wetgenes.gamecake.fun.yarn.items.iterate_parents</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.metatable"><span>/lua.wetgenes.gamecake.fun.yarn.items.metatable</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.prefabs"><span>/lua.wetgenes.gamecake.fun.yarn.items.prefabs</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.remove"><span>/lua.wetgenes.gamecake.fun.yarn.items.remove</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.rules"><span>/lua.wetgenes.gamecake.fun.yarn.items.rules</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.pages"><span>/lua.wetgenes.gamecake.fun.yarn.pages</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn.prefabs"><span>/lua.wetgenes.gamecake.fun.yarn.prefabs</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.prefabs.set"><span>/lua.wetgenes.gamecake.fun.yarn.prefabs.set</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules"><span>/lua.wetgenes.gamecake.fun.yarn.rules</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.apply"><span>/lua.wetgenes.gamecake.fun.yarn.rules.apply</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.can"><span>/lua.wetgenes.gamecake.fun.yarn.rules.can</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.set"><span>/lua.wetgenes.gamecake.fun.yarn.rules.set</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.oven"><span>/lua.wetgenes.gamecake.oven</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.oven.bake"><span>/lua.wetgenes.gamecake.oven.bake</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.widgets"><span>/lua.wetgenes.gamecake.widgets</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.widgets.setup"><span>/lua.wetgenes.gamecake.widgets.setup</span></a><a class="par" href="../../docs/lua.wetgenes.grd"><span>/lua.wetgenes.grd</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.grd.adjust_contrast"><span>/lua.wetgenes.grd.adjust_contrast</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.adjust_hsv"><span>/lua.wetgenes.grd.adjust_hsv</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.adjust_rgb"><span>/lua.wetgenes.grd.adjust_rgb</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.attr_redux"><span>/lua.wetgenes.grd.attr_redux</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.blit"><span>/lua.wetgenes.grd.blit</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.clear"><span>/lua.wetgenes.grd.clear</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.clip"><span>/lua.wetgenes.grd.clip</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.convert"><span>/lua.wetgenes.grd.convert</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.copy_data"><span>/lua.wetgenes.grd.copy_data</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.copy_data_layer"><span>/lua.wetgenes.grd.copy_data_layer</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.create"><span>/lua.wetgenes.grd.create</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.create_convert"><span>/lua.wetgenes.grd.create_convert</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.create_normal"><span>/lua.wetgenes.grd.create_normal</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.destroy"><span>/lua.wetgenes.grd.destroy</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.duplicate"><span>/lua.wetgenes.grd.duplicate</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.flipx"><span>/lua.wetgenes.grd.flipx</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.flipy"><span>/lua.wetgenes.grd.flipy</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.info"><span>/lua.wetgenes.grd.info</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.load"><span>/lua.wetgenes.grd.load</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.load_data"><span>/lua.wetgenes.grd.load_data</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.load_file"><span>/lua.wetgenes.grd.load_file</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.paint"><span>/lua.wetgenes.grd.paint</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.palette"><span>/lua.wetgenes.grd.palette</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.pixels"><span>/lua.wetgenes.grd.pixels</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.quant"><span>/lua.wetgenes.grd.quant</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.remap"><span>/lua.wetgenes.grd.remap</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.reset"><span>/lua.wetgenes.grd.reset</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.resize"><span>/lua.wetgenes.grd.resize</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.save"><span>/lua.wetgenes.grd.save</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.scale"><span>/lua.wetgenes.grd.scale</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.shrink"><span>/lua.wetgenes.grd.shrink</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.slide"><span>/lua.wetgenes.grd.slide</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.sort_cmap"><span>/lua.wetgenes.grd.sort_cmap</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.stream"><span>/lua.wetgenes.grd.stream</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.grdsvg.string"><span>/lua.wetgenes.grdsvg.string</span></a><a class="par" href="../../docs/lua.wetgenes.json"><span>/lua.wetgenes.json</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.json.decode"><span>/lua.wetgenes.json.decode</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json.encode"><span>/lua.wetgenes.json.encode</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.lookup"><span>/lua.wetgenes.lookup</span></a><a class="par" href="../../docs/lua.wetgenes.package"><span>/lua.wetgenes.package</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.package.reload"><span>/lua.wetgenes.package.reload</span></a><a class="par" href="../../docs/lua.wetgenes.plate"><span>/lua.wetgenes.plate</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.plate.replace_lookup"><span>/lua.wetgenes.plate.replace_lookup</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.plate.replace_lookup_istable"><span>/lua.wetgenes.plate.replace_lookup_istable</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.plate.table_lookup"><span>/lua.wetgenes.plate.table_lookup</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.safecall"><span>/lua.wetgenes.safecall</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.safewrap"><span>/lua.wetgenes.safewrap</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.set_env"><span>/lua.wetgenes.set_env</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.snippets"><span>/lua.wetgenes.snippets</span></a><a class="par" href="../../docs/lua.wetgenes.tardis"><span>/lua.wetgenes.tardis</span></a>
+<a class="par" href="../../docs/lua.wetgenes.tardis.array"><span>/lua.wetgenes.tardis.array</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.tardis.array.__tostring"><span>/lua.wetgenes.tardis.array.__tostring</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.array.compare"><span>/lua.wetgenes.tardis.array.compare</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.array.product"><span>/lua.wetgenes.tardis.array.product</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.array.set"><span>/lua.wetgenes.tardis.array.set</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.class"><span>/lua.wetgenes.tardis.class</span></a><a class="par" href="../../docs/lua.wetgenes.tardis.line"><span>/lua.wetgenes.tardis.line</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.tardis.line.new"><span>/lua.wetgenes.tardis.line.new</span></a><a class="par" href="../../docs/lua.wetgenes.tardis.m2"><span>/lua.wetgenes.tardis.m2</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m2.adjugate"><span>/lua.wetgenes.tardis.m2.adjugate</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m2.cofactor"><span>/lua.wetgenes.tardis.m2.cofactor</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m2.determinant"><span>/lua.wetgenes.tardis.m2.determinant</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m2.identity"><span>/lua.wetgenes.tardis.m2.identity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m2.inverse"><span>/lua.wetgenes.tardis.m2.inverse</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m2.minor_xy"><span>/lua.wetgenes.tardis.m2.minor_xy</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m2.new"><span>/lua.wetgenes.tardis.m2.new</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m2.scale"><span>/lua.wetgenes.tardis.m2.scale</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m2.transpose"><span>/lua.wetgenes.tardis.m2.transpose</span></a><a class="par" href="../../docs/lua.wetgenes.tardis.m3"><span>/lua.wetgenes.tardis.m3</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m3.adjugate"><span>/lua.wetgenes.tardis.m3.adjugate</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m3.cofactor"><span>/lua.wetgenes.tardis.m3.cofactor</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m3.determinant"><span>/lua.wetgenes.tardis.m3.determinant</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m3.identity"><span>/lua.wetgenes.tardis.m3.identity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m3.inverse"><span>/lua.wetgenes.tardis.m3.inverse</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m3.minor_xy"><span>/lua.wetgenes.tardis.m3.minor_xy</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m3.new"><span>/lua.wetgenes.tardis.m3.new</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m3.scale"><span>/lua.wetgenes.tardis.m3.scale</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m3.transpose"><span>/lua.wetgenes.tardis.m3.transpose</span></a><a class="par" href="../../docs/lua.wetgenes.tardis.m4"><span>/lua.wetgenes.tardis.m4</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.add"><span>/lua.wetgenes.tardis.m4.add</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.adjugate"><span>/lua.wetgenes.tardis.m4.adjugate</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.cofactor"><span>/lua.wetgenes.tardis.m4.cofactor</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.determinant"><span>/lua.wetgenes.tardis.m4.determinant</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.identity"><span>/lua.wetgenes.tardis.m4.identity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.inverse"><span>/lua.wetgenes.tardis.m4.inverse</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.lerp"><span>/lua.wetgenes.tardis.m4.lerp</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.minor_xy"><span>/lua.wetgenes.tardis.m4.minor_xy</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.new"><span>/lua.wetgenes.tardis.m4.new</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.rotate"><span>/lua.wetgenes.tardis.m4.rotate</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.scale"><span>/lua.wetgenes.tardis.m4.scale</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.scale_v3"><span>/lua.wetgenes.tardis.m4.scale_v3</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.setrot"><span>/lua.wetgenes.tardis.m4.setrot</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.sub"><span>/lua.wetgenes.tardis.m4.sub</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.translate"><span>/lua.wetgenes.tardis.m4.translate</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.transpose"><span>/lua.wetgenes.tardis.m4.transpose</span></a><a class="par" href="../../docs/lua.wetgenes.tardis.plane"><span>/lua.wetgenes.tardis.plane</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.tardis.plane.new"><span>/lua.wetgenes.tardis.plane.new</span></a><a class="par" href="../../docs/lua.wetgenes.tardis.q4"><span>/lua.wetgenes.tardis.q4</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.tardis.q4.identity"><span>/lua.wetgenes.tardis.q4.identity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.q4.lerp"><span>/lua.wetgenes.tardis.q4.lerp</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.q4.new"><span>/lua.wetgenes.tardis.q4.new</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.q4.rotate"><span>/lua.wetgenes.tardis.q4.rotate</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.q4.setrot"><span>/lua.wetgenes.tardis.q4.setrot</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.type"><span>/lua.wetgenes.tardis.type</span></a><a class="par" href="../../docs/lua.wetgenes.tardis.v2"><span>/lua.wetgenes.tardis.v2</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.add"><span>/lua.wetgenes.tardis.v2.add</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.cross"><span>/lua.wetgenes.tardis.v2.cross</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.dot"><span>/lua.wetgenes.tardis.v2.dot</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.identity"><span>/lua.wetgenes.tardis.v2.identity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.len"><span>/lua.wetgenes.tardis.v2.len</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.lenlen"><span>/lua.wetgenes.tardis.v2.lenlen</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.mul"><span>/lua.wetgenes.tardis.v2.mul</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.new"><span>/lua.wetgenes.tardis.v2.new</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.normalize"><span>/lua.wetgenes.tardis.v2.normalize</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.oo"><span>/lua.wetgenes.tardis.v2.oo</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.scale"><span>/lua.wetgenes.tardis.v2.scale</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v2.sub"><span>/lua.wetgenes.tardis.v2.sub</span></a><a class="par" href="../../docs/lua.wetgenes.tardis.v3"><span>/lua.wetgenes.tardis.v3</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.add"><span>/lua.wetgenes.tardis.v3.add</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.cross"><span>/lua.wetgenes.tardis.v3.cross</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.dot"><span>/lua.wetgenes.tardis.v3.dot</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.identity"><span>/lua.wetgenes.tardis.v3.identity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.len"><span>/lua.wetgenes.tardis.v3.len</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.lenlen"><span>/lua.wetgenes.tardis.v3.lenlen</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.mul"><span>/lua.wetgenes.tardis.v3.mul</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.new"><span>/lua.wetgenes.tardis.v3.new</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.normalize"><span>/lua.wetgenes.tardis.v3.normalize</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.oo"><span>/lua.wetgenes.tardis.v3.oo</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.scale"><span>/lua.wetgenes.tardis.v3.scale</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v3.sub"><span>/lua.wetgenes.tardis.v3.sub</span></a><a class="par" href="../../docs/lua.wetgenes.tardis.v4"><span>/lua.wetgenes.tardis.v4</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.add"><span>/lua.wetgenes.tardis.v4.add</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.dot"><span>/lua.wetgenes.tardis.v4.dot</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.identity"><span>/lua.wetgenes.tardis.v4.identity</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.len"><span>/lua.wetgenes.tardis.v4.len</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.lenlen"><span>/lua.wetgenes.tardis.v4.lenlen</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.mul"><span>/lua.wetgenes.tardis.v4.mul</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.new"><span>/lua.wetgenes.tardis.v4.new</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.normalize"><span>/lua.wetgenes.tardis.v4.normalize</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.oo"><span>/lua.wetgenes.tardis.v4.oo</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.scale"><span>/lua.wetgenes.tardis.v4.scale</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.sub"><span>/lua.wetgenes.tardis.v4.sub</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.v4.to_v3"><span>/lua.wetgenes.tardis.v4.to_v3</span></a>
+		</div>
+	</div>
+	<div class="main">
+		
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake">lua.wetgenes.gamecake</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun">lua.wetgenes.gamecake.fun</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown">lua.wetgenes.gamecake.fun.chatdown</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat">lua.wetgenes.gamecake.fun.chatdown.chat</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.get_tag">lua.wetgenes.gamecake.fun.chatdown.chat.get_tag</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L276">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>tag_value = chat:get_tag(tag_name)
+</code></pre><p>The same as chats:get_tag but the subject of this chat is the 
+default root.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags">lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L304">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>output = chat:replace_tags(input)
+</code></pre><p>The same as chats:replace_tags but the subject of this chat is the 
+default root.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.set_tag">lua.wetgenes.gamecake.fun.chatdown.chat.set_tag</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L290">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>tag_value = chat:set_tag(tag_name,tag_value)
+</code></pre><p>The same as chats:set_tag but the subject of this chat is the 
+default root.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.set_tags">lua.wetgenes.gamecake.fun.chatdown.chat.set_tags</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L318">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>chat:set_tags(tags)
+</code></pre><p>Set all the values in the given table of {tag_name=tag_value} pairs.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.set_topic">lua.wetgenes.gamecake.fun.chatdown.chat.set_topic</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L333">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>chat:set_topic(topic_name)
+</code></pre><p>Set the current topic for this chat object, information about this 
+topic and its gotos are built from and stored in this chat object.</p>
+<pre><code>chat.topic_name
+</code></pre><p>Will be set to the given topic name.</p>
+<p>We merge all gotos found in this topic and all topic parents by 
+iterating over the dotnames. We only use add each topic once and each 
+topic may have a bit of logic that decides if it should be displayed.</p>
+<pre><code>&lt;topic_name?logic_test
+</code></pre><p>So this would goto the topic_name if the logic_test passes. The logic 
+test is written simmilar to a url query after the question mark comes a 
+number of tests that are then &amp; or | together in left to right order 
+(no operator precedence).</p>
+<pre><code>&lt;topic_name?count&lt;10&amp;seen==false
+</code></pre><p>So this would display the goto option if count is less than 10 and seen 
+is set to false. These variables we are testing are tag_names and 
+default to the current subject chat but could reference other subjects 
+by explicitly including a root.</p>
+<p>Available logic tests are</p>
+<pre><code>name==value
+name=value
+</code></pre><p>True if the tag is set to this value.</p>
+<pre><code>name!=value
+</code></pre><p>True if the tag is not set to this value.</p>
+<pre><code>name&lt;value
+</code></pre><p>True if the tag is less than this value (numeric test).</p>
+<pre><code>name&gt;value
+</code></pre><p>True if the tag is more than this value (numeric test).</p>
+<pre><code>name&lt;=value
+</code></pre><p>True if the tag is less than or equal to this value (numeric test).</p>
+<pre><code>name&gt;=value
+</code></pre><p>True if the tag is more than or equal to  this value (numeric test).</p>
+<p>All of these tests can be preceded by a ! to negate them so</p>
+<pre><code>name!=vale
+!name==value
+</code></pre><p>Are both a test for inequality.</p>
+<p>Multiple tests can be joined together by &amp; (and) or | (or) this logic 
+will be applied to a running total moving from left to right as the 
+values are evaluated with the final value deciding if this goto will be 
+displayed.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats">lua.wetgenes.gamecake.fun.chatdown.chats</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.changes">lua.wetgenes.gamecake.fun.chatdown.chats.changes</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L668">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>chats.changes(chat,change,...)
+
+chats.changes(chat,&quot;subject&quot;)
+chats.changes(chat,&quot;topic&quot;,topic)
+chats.changes(chat,&quot;goto&quot;,goto)
+chats.changes(chat,&quot;tag&quot;,tag_name,tag_value)
+</code></pre><p>This is a callback hook, replace to be notified of changes and possibly 
+alter then, by default we print debuging information. Replace this 
+function with an empty function to prevent this eg</p>
+<pre><code>chats.changes=function()end
+</code></pre></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.get_subject">lua.wetgenes.gamecake.fun.chatdown.chats.get_subject</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L560">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>chat = chats:get_subject(subject_name)
+chat = chats:get_subject()
+</code></pre><p>Get the chat for the given subject or the chat for the last subject 
+selected with set_subject if no subject_name is given.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.get_tag">lua.wetgenes.gamecake.fun.chatdown.chats.get_tag</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L575">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>tag_value = chats:get_tag(tag_name,subject_name)
+</code></pre><p>Get the tag_value for the given tag_name which can either be 
+&quot;tag_root/tag_name&quot; or &quot;tag_name&quot;. The subject_name is the default root 
+to use if no tag_root is given in the tag_name.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags">lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L636">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>output = chats:replace_tags(input,subject_name)
+</code></pre><p>Tags in the input text can be wrapped in {tag_name} and will be 
+replaced with the appropriate tag_value. This is done recursively so 
+tag_values can contain references to other tags. If a tag does not 
+exist then it will not expand and {tag_name} will remain in the output 
+text.</p>
+<p>Again if any tag name does not contain an explicit root then 
+subject_name will be used as the default chat subject.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.set_subject">lua.wetgenes.gamecake.fun.chatdown.chats.set_subject</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L543">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>chat = chats:set_subject(subject_name)
+</code></pre><p>Set the current subject for this chats object, this subject becomes the 
+chat that you will get if you call get_subject with no arguments.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.set_tag">lua.wetgenes.gamecake.fun.chatdown.chats.set_tag</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L593">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>tag_value = chats:set_tag(tag_name,tag_value,subject_name)
+</code></pre><p>Alter the value of the given tag_name. If the value string begins with 
+a &quot;+&quot; or a &quot;-&quot; Then the values will be treated as numbers and added or 
+subtracted from the current value. This allows for simple incremental 
+flag values.</p>
+<p>Again if the tag name does not contain an explicit  root then 
+subject_name will be used as the default chat subject.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.dotnames">lua.wetgenes.gamecake.fun.chatdown.dotnames</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L253">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>for part_name in chatdown.dotnames(full_name) do
+    print(part_name)
+end
+</code></pre><p>Iterate all dotnames so if given &quot;aa.bb.cc&quot; we would iterate through 
+&quot;aa.bb.cc&quot; , &quot;aa.bb&quot; and &quot;aa&quot;. This is used to inherit data using just 
+a naming convention.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.parse">lua.wetgenes.gamecake.fun.chatdown.parse</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L17">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>rawsubjects = chatdown.parse(text)
+</code></pre><p>Parse text from flat text chatdown format into heirachical chat data, 
+which we refer to as rawsubjects, something that can be output easily 
+as json.</p>
+<p>This gives us a readonly rawsubjects structure that can be used to control 
+what text is displayed during a chat session.</p>
+<p>This is intended to be descriptive and logic less, any real logic 
+should be added using a real language that operates on this rawsubjects and 
+gets triggered by the names used. EG, filter out gotos unless certain 
+complicated conditions are met or change topics to redirect to an 
+alternative.</p>
+<p>A self documented example of chatdown formated text can be found in 
+lua.wetgenes.gamecake.fun.chatdown.text</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.setup">lua.wetgenes.gamecake.fun.chatdown.setup</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L697">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>chats = chatdown.setup_chats(chat_text,changes)
+</code></pre><p>parse and initialise state data for every subjects chunk creating a 
+global chats with a chat object for each subject.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.setup_chat">lua.wetgenes.gamecake.fun.chatdown.setup_chat</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L505">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>chat = chatdown.setup_chat(chats,subject_name)
+</code></pre><p>Setup the initial chat state for a subject. This is called 
+automatically by chatdown.setup and probably should not be used 
+elsewhere.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.text">lua.wetgenes.gamecake.fun.chatdown.text</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L728">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><p>Here is some example chatdown formatted text full of useful 
+information, it it is intended to be a self documented example.</p>
+<pre><code>
+- This is a single line comment
+-- This is the start of a multi-line comment
+
+All lines are now comment lines until we see a line that begins with a 
+control character leading white space is ignored. If for some reason 
+you need to start a text line with a special character then it can be 
+escaped by preceding it with a #
+
+What follows is a list of these characters and a brief description 
+about the parser state they switch to.
+
+    1. - (text to ignore)
+
+        A single line comment that does not change parser state and 
+        only this line will be ignored so it can be inserted inside 
+        other chunks without losing our place.
+
+    2. -- (text to ignore)
+
+        Begin a comment chunk, this line and all lines that follow this 
+        line will be considered comments and ignored until we switch to 
+        a new parser state.
+
+    3. #subject_name
+
+        Begin a new subject chunk, all future topic,goto or tag chunks will 
+        belong to this subject.
+
+        The text that follows this until the next chunk is the long 
+        description intended for when you examine the character.
+
+        Although it makes sense for a subject chunk to belong to one 
+        character it could also a group conversation with tags being 
+        set to change the current talker as the conversation flows.
+
+        subject names have simple cascading inheritance according to their 
+        name with each level separated by a dot. A chunk named a.b.c 
+        will inherit data from any chunks defined for a.b and a in that 
+        order of priority.
+
+    4. &gt;topic_name
+
+        Begin a topic chunk, all future goto or tag chunks will belong 
+        to this topic, the lines that follow are how the character 
+        responds when questioned about this topic followed by one or 
+        more gotos as possible responses that will lead you onto 
+        another topic.
+
+        Topics can be broken into parts, to create a pause, by using an 
+        unnamed goto followed by an unnamed topic which will both 
+        automatically be given the same generated name and hence linked 
+        together.
+
+    5. &lt;goto_topic_name
+
+        Begin a goto chunk, all future tag chunks will belong to this 
+        goto, this is probably best thought of as a question that will 
+        get a reply from the character. This is a choice made by the 
+        player that causes a logical jump to another topic.
+
+        Essentially this means GOTO another topic and there can be 
+        multiple GOTO options associated with each topic which the 
+        reader is expected to choose between.
+
+    6. =set_tag_name to this value
+
+        If there is any text on the rest of this line then it will be 
+        assigned to the tag without changing the current parse state so 
+        it can be used in the middle of another chunk without losing 
+        our place.
+
+        This single line tag assignment is usually all you need. 
+        Alternatively, if there is no text on the rest of this first 
+        line, only white space, then the parse state will change and 
+        text on all following lines will be assigned to the named tag.
+
+        This assignment can happen at various places, for instance if 
+        it is part of the subject then it will be the starting 
+        value for a tag but if it is linked to a topic or goto then the 
+        value will be a change as the conversation happens. In all 
+        cases the tags are set in a single batch as the state changes 
+        so the placement and order makes no difference.
+
+        Tags can be used inside text chunks or even GOTO labels by 
+        tightly wrapping with {} eg {name} would be replaced with the 
+        value of name. Tags from other subjects can be referenced by 
+        prefixing the tag name with the subject name followed by a forward 
+        slash like so {subject/tag}
+
+
+The hierarchy of these chunks can be expressed by indentation as all 
+white space is ignored and combined into a single space. Each SUBJECT will 
+have multiple TOPICs associated with it and each TOPIC will have 
+multiple GOTOs as options to jump between TOPICs. TAGs can be 
+associated with any of these 3 levels and will be evaluated as the 
+conversation flows through these points.
+
+So the chunk hierarchy expressed using indentation to denote children 
+of.
+
+    SUBJECT
+        TAG
+        GOTO
+            TAG
+        TOPIC
+            TAG
+            GOTO
+                TAG
+
+The GOTO chunks in the root SUBJECT chunk are used as prototypes so if a 
+GOTO is used in multiple topics its text can be placed within a GOTO 
+inside the main SUBJECT chunk rather than repeated constantly. This will 
+then be inherited by a GOTO with no text. An alternative to this 
+shorthand is to assign an oft-used piece of text to a tag and reference 
+that in each topic instead.
+
+SUBJECTs and TOPICs also have simple inheritance based on their names this 
+enables the building of a prototype which is later expanded. Each 
+inheritance level is separated by a dot so aa.bb.cc will inherit from 
+aa.bb and aa with the data in the longer names having precedence. This 
+inheritance is additive only so for instance a TAG can not be unset and 
+would have to be changed to another value by aa.bb.cc if it existed in 
+aa.bb or aa.
+
+In practise this means
+&lt;br/&gt;
+&lt;br/&gt;
+
+</code></pre></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities">lua.wetgenes.gamecake.fun.entities</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L7">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>fun_entities = require(&quot;wetgenes.gamecake.fun.entities&quot;)
+</code></pre><p>Manage a simple structure to help group, update and draw discrete game 
+objects.</p>
+<p>This module contains only one function which can be used to create an 
+entities instance and the rest of this documentation concerns the 
+return from this create function, not the module</p>
+<pre><code>entities = fun_entities.create()
+entities = fun_entities.create( { sortby={&quot;first&quot;,&quot;second,...} } )
+</code></pre><p>Create and return an entities object. A base object can be passed in 
+and will be filled in and returned. This can used to supply a sortby 
+table to help control the order of updates of different castes.</p>
+<p>If passed in sortby is a table of [caste_name]=weight values to help 
+control the order of updates by caste and make it consistent. For 
+instance you might find it useful to force monsters to update before 
+the player.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.add">lua.wetgenes.gamecake.fun.entities.add</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L186">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.add(it,caste)
+entities.add(it)
+</code></pre><p>Add a new entity of caste or it.caste to the list of things to update.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.call">lua.wetgenes.gamecake.fun.entities.call</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L205">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.call(fname,...)
+</code></pre><p>for every entity call the function named fname like so</p>
+<pre><code>it[fname](it,...)
+</code></pre></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.caste">lua.wetgenes.gamecake.fun.entities.caste</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L162">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.caste(caste)
+</code></pre><p>Get the list of entities of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.get">lua.wetgenes.gamecake.fun.entities.get</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L231">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.get(name)
+</code></pre><p>get a value previously saved, this is an easy way to find a unique 
+entity, eg the global space but it can be used to save any values you 
+wish not just to bookmark unique entities.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.manifest">lua.wetgenes.gamecake.fun.entities.manifest</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L260">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.manifest(name,value)
+</code></pre><p>get a value previously saved, or initalize it to the given value if it 
+does not already exist. The default value is {} as this is intended for 
+lists.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.reset">lua.wetgenes.gamecake.fun.entities.reset</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.reset()
+</code></pre><p>Empty the list of entities to update and draw, this does not reset the 
+systems table that should be modified with the insert and remove 
+functions.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.set">lua.wetgenes.gamecake.fun.entities.set</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L246">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.set(name,value)
+</code></pre><p>save a value by a unique name</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.sortby_update">lua.wetgenes.gamecake.fun.entities.sortby_update</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L128">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.sortby_update()
+</code></pre><p>A function that takes the array part of entities.sortby and reverses 
+the key=value so a simple order list can be provided without any 
+explicit weights. The first caste name in the array gets a weight of 1, 
+second 2 and so on.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.systems">lua.wetgenes.gamecake.fun.entities.systems</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L37">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.systems={name=system,[1]=sytem1}
+</code></pre><p>A sorted table and lookup by caste name of each system. Table is sorted 
+so it will be traversed backwards, backwards traversal allows the 
+current item to delete itself.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.call">lua.wetgenes.gamecake.fun.entities.systems.call</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L99">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.systems.call(fname,...)
+</code></pre><p>For every system call the function called fname like so.</p>
+<pre><code>system[fname](system,...)
+</code></pre><p>Returns the number of calls made, which will be the number of systems 
+that had an fname function to call.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.insert">lua.wetgenes.gamecake.fun.entities.systems.insert</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L68">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.systems.insert(system)
+</code></pre><p>Insert a new system replacing any system of the same caste. 
+system.caste should be set to the caste of the system for this to work. 
+As we also keep some functions in this table, the names &quot;insert&quot;, 
+&quot;remove&quot; and &quot;call&quot; are not available as caste names.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove">lua.wetgenes.gamecake.fun.entities.systems.remove</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L50">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>system = entities.systems.remove(caste)
+</code></pre><p>Remove and return the system of the given caste.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn">lua.wetgenes.gamecake.fun.yarn</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.cells">lua.wetgenes.gamecake.fun.yarn.cells</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/cells.lua#L6">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/cells.lua</a></div>
+<div><pre><code>cells = require(&quot;wetgenes.gamecake.fun.yarn.cells&quot;).create(items)
+</code></pre><p>This module contains only one function which can be used to create an 
+cells instance and the rest of this documentation concerns the return 
+from this create function, not the module itself.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items">lua.wetgenes.gamecake.fun.yarn.items</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L6">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>items = require(&quot;wetgenes.gamecake.fun.yarn.items&quot;).create()
+</code></pre><p>This module contains only one function which can be used to create an 
+items instance and the rest of this documentation concerns the return 
+from this create function, not the module itself.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.cells">lua.wetgenes.gamecake.fun.yarn.items.cells</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L259">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>items.cells
+</code></pre><p>We automatically create a cells object bound to this set of items, this 
+cells object should be used to define all your custom game cells.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.create">lua.wetgenes.gamecake.fun.yarn.items.create</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L73">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>item = items.create()
+item = items.create({})
+item = items.create({},metatable)
+</code></pre><p>Create a single item, optionally pass in a base item table that will be 
+turned into a proper item (using setmetatable to add methods). This 
+should always be a new table and will also be returned. If no 
+metatable is provided then items.metatable will be used.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.create_pages">lua.wetgenes.gamecake.fun.yarn.items.create_pages</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L271">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>items.pages
+</code></pre><p>We automatically create a pages object bound to this set of items, this 
+pages object should be used to define all your custom game pages.</p>
+<p>This can be considered a level and you may need multiple pages which 
+are moved in and out of items.pages</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.destroy">lua.wetgenes.gamecake.fun.yarn.items.destroy</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L101">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>item = items.destroy(item)
+item = item:destroy()
+</code></pre><p>Destroy an item, remove it from the master table dump so it will be 
+garbage collected.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.find">lua.wetgenes.gamecake.fun.yarn.items.find</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L215">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>child_item = item:find(keyname)
+</code></pre><p>Get the first child item that has a [keyname] value in it. All child 
+items are searched, but this is not recursive.</p>
+<p>returns nil if no child item is found.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.get_big">lua.wetgenes.gamecake.fun.yarn.items.get_big</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L199">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>big_item = item:get_big()
+</code></pre><p>Get the first big item from this container, returns nil if we do not 
+contain a big item.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.insert">lua.wetgenes.gamecake.fun.yarn.items.insert</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L173">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>item = item:insert(parent)
+</code></pre><p>Insert this item into the given parent. Item will automatically be 
+removed from its current parent. If the item is_big then it will be 
+inserted into the front of the list otherwise it will go at the end. 
+This is to help with finding big items, since there should only be one 
+per container we only have to check the first child.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.iterate_dotnames">lua.wetgenes.gamecake.fun.yarn.items.iterate_dotnames</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L24">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>for name,tail in items.iterate_dotnames(names) do ... end
+</code></pre><p>Iterator over a names string, start with the full string and cut off 
+the tail on each iteration. This is used for simple inheritance merging 
+of named prefabs and rules or anything else.</p>
+<p>Second return value is the tail of the string or the string if not 
+tail.</p>
+<p>for example the following input string</p>
+<pre><code>&quot;one.two.three.four&quot;
+</code></pre><p>would get you the following iteration loops, one line per loop</p>
+<pre><code>&quot;one.two.three.four&quot; , &quot;four&quot;
+&quot;one.two.three&quot;      , &quot;three&quot;
+&quot;one.two&quot;            , &quot;two&quot;
+&quot;one&quot;                , &quot;one&quot;
+</code></pre></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.iterate_parents">lua.wetgenes.gamecake.fun.yarn.items.iterate_parents</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L128">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>for it in item:iterate_parents() do
+    ...
+end
+</code></pre><p>Iterate over the parent chain going upwards. The first iteration is the 
+parent of this object and so on.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.metatable">lua.wetgenes.gamecake.fun.yarn.items.metatable</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L59">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>items.metatable
+</code></pre><p>Expose the item metatable so more methods can easily be added.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.prefabs">lua.wetgenes.gamecake.fun.yarn.items.prefabs</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L247">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>items.prefabs
+</code></pre><p>We automatically create a prefabs object bound to this set of items, this 
+prefabs object should be used to define all your custom game prefabs.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.remove">lua.wetgenes.gamecake.fun.yarn.items.remove</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L146">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>item = item:remove()
+</code></pre><p>Remove this item from its parents table or do nothing if the item does 
+not have a parent.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.rules">lua.wetgenes.gamecake.fun.yarn.items.rules</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L235">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
+<div><pre><code>items.rules
+</code></pre><p>We automatically create a rules object bound to this set of items, this 
+rules object should be used to define all your custom game rules.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.pages">lua.wetgenes.gamecake.fun.yarn.pages</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/pages.lua#L8">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/pages.lua</a></div>
+<div><pre><code>pages = require(&quot;wetgenes.gamecake.fun.yarn.pages&quot;).create(items)
+</code></pre><p>This module contains only one function which can be used to create an 
+pages instance and the rest of this documentation concerns the return 
+from this create function, not the module itself.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.prefabs">lua.wetgenes.gamecake.fun.yarn.prefabs</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua#L7">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua</a></div>
+<div><pre><code>prefabs = require(&quot;wetgenes.gamecake.fun.yarn.prefabs&quot;).create(items)
+</code></pre><p>This module contains only one function which can be used to create an 
+prefabs instance and the rest of this documentation concerns the return 
+from this create function, not the module itself.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.prefabs.set">lua.wetgenes.gamecake.fun.yarn.prefabs.set</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua#L44">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua</a></div>
+<div><pre><code>prefab = prefabs:get(name)
+prefab = prefabs:get(name,prefab)
+</code></pre><p>Build and return a table with all prefab values inherited from all its 
+parents. Optionally pass in a prefab to override values and also have 
+it returned.</p>
+<p>If name doesn&#39;t exist at any level and a table is not passed in then nil 
+will be returned.</p>
+<p>Names are hierarchical, separated by dots, see items.iterate_dotnames</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules">lua.wetgenes.gamecake.fun.yarn.rules</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua#L6">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua</a></div>
+<div><pre><code>rules = require(&quot;wetgenes.gamecake.fun.yarn.rules&quot;).create(items)
+</code></pre><p>This module contains only one function which can be used to create an 
+rules instance and the rest of this documentation concerns the return 
+from this create function, not the module itself.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.apply">lua.wetgenes.gamecake.fun.yarn.rules.apply</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua#L62">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua</a></div>
+<div><pre><code>item = rules.apply(item,method,...)
+</code></pre><p>item.rules must be a list of rule names and the order in which they should 
+be applied to this item.</p>
+<p>Call the given method in each rule with the item and the remaining arguments.</p>
+<p>If the method returns a value then no more methods will be applied even 
+if more rules are listed.</p>
+<p>We always return the passed in item so that calls can be chained.</p>
+<pre><code>item = item:apply(method,...)
+</code></pre><p>This function is inserted into the items.metatable so it can be called 
+directly from an item.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.can">lua.wetgenes.gamecake.fun.yarn.rules.can</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua#L96">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua</a></div>
+<div><pre><code>yes = rules.can(item,method)
+</code></pre><p>Returns true if any rule in this item has the given method.</p>
+<pre><code>yes = item:can(method)
+</code></pre><p>This function is inserted into the items.metatable so it can be called 
+directly from an item.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.set">lua.wetgenes.gamecake.fun.yarn.rules.set</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua#L28">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua</a></div>
+<div><pre><code>rule = rules.set(rule)
+</code></pre><p>Set this base rule into the name space using rule.name which must 
+be a string.</p>
+<p>Multiple rules can be applied to an item and each rule will be applied 
+in the order listed.</p>
+<p>A rule is a table of named functions that can be applied to an item.</p>
+<pre><code>rule.setup(item)
+</code></pre><p>Must setup the item so that it is safe to call the other rules on it.</p>
+<pre><code>rule.clean(item)
+</code></pre><p>Should cleanup anything that needs cleaning.</p>
+<pre><code>rule.tick(item)
+</code></pre><p>Should perform a single time tick update on the item.
+<br/>
+<br/></p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.oven">lua.wetgenes.gamecake.oven</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L6">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
+<div><pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)
+</code></pre><p>The oven module must be baked so only exposes a bake function.</p>
+<p>All the other functions are returned from within the bake function.</p>
+<p>possible ENV settings</p>
+<pre><code>gamecake_tongue=english
+gamecake_flavour=sdl
+</code></pre></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.oven.bake">lua.wetgenes.gamecake.oven.bake</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L44">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
+<div><pre><code>oven=wetgenes.gamecake.oven.bake(opts)
+</code></pre><p>Bake creates an instance of a lua module bound to a state. Here we 
+are creating the main state that other modules will then bind to.</p>
+<p>We call each state an OVEN to fit into the gamecake naming scheme 
+then we bake a module in this oven to bind them to the common state.</p>
+<p>Think of it as a sub version of require, so require gets the global 
+pointer for a module and bake is used to get the a module bound to 
+an oven.</p>
+<p>By using this bound state we reduce the verbosity of connecting 
+modules and sharing state between them.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.widgets">lua.wetgenes.gamecake.widgets</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/init.lua#L13">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/init.lua</a></div>
+<div><pre><code>local widgets=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;)
+</code></pre><p>A collection of widgets, rendered using gles2 code and controlled 
+using the mouse, keyboard or a joystick. EG click fire and move 
+left/right to adjust a slider value.</p>
+<p>Widgets must be created and bound to an oven, using the 
+oven.rebake function.</p>
+<p>This has undergone a number of rewrites as we try to simplify the 
+widget creation and layout process. Eventually we ended up with a 
+fixed size system of widget placement so every widget must have a 
+known size in advance, however we allow scaling to occur so for 
+instance building a 256x256 widget does not mean that it has to be 
+displayed at 256x256 it just means it will be square.</p>
+<p>The basic layout just lets you place these widgets in other widgets 
+as left to right lines. So as long as you get your sizes right you 
+can easily place things just using a list and without keeping track 
+of the current position.</p>
+<p>Other layout options are available, such as absolute positioning for 
+full control and we have simple custom skin versions of the buttons 
+as well rather than the built in skins.</p>
+<p>All value data is handled by data structures that contain ranges and 
+resolutions for data allowing the same data to be bound to multiple 
+display widgets. For instance the same data can be linked to the 
+position of a slider as well as the content of a text display. I 
+think the kids call this sort of thing an MVC pattern but that&#39;s a 
+terribly dull name.</p>
+<p>Swanky paint is probably the most advanced used of the widgets so far
+but I suspect we will be making a simple text editor in the near 
+future. Designed for advanced in game tweaking of text files.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.widgets.setup">lua.wetgenes.gamecake.widgets.setup</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/init.lua#L63">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/init.lua</a></div>
+<div><pre><code>master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()
+
+master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup(
+    {font=&quot;Vera&quot;,text_size=16,grid_size=32,skin=0} )
+</code></pre><p>Create a master widget, this widget which is considered the root of 
+your GUI. It will be filled with functions/data and should contain all 
+the functions you need to add data and widgets.</p>
+<p>You can pass in these configuration values in a table, the example 
+shown above has soom good defaults.</p>
+<pre><code>font=&quot;Vera&quot;
+</code></pre><p>The default font to use, this must have already been loaded via 
+wetgenes.gamecake.fonts functions.</p>
+<pre><code>text_size=16
+</code></pre><p>The default pixel height to render text at.</p>
+<pre><code>grid_size=32
+</code></pre><p>The size in pixels that we try and create buttons at.</p>
+</div>
+</div>
+
+	</div>
+</div>
+</body>
+</html>

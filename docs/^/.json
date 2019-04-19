@@ -1,0 +1,30 @@
+{
+ "_dirname": "{_root}^",
+ "_filename": "{_root}^",
+ "_flags": {
+  "body": {
+   "trim": "ends"
+  },
+  "css": {
+   "same": "append"
+  },
+  "head": {
+   "trim": "ends"
+  },
+  "html": {
+   "trim": "ends"
+  },
+  "title": {
+   "trim": "ends"
+  }
+ },
+ "_output_filename": "^/",
+ "_root": "../",
+ "_site": "{_root}",
+ "_sourcename": "^/.",
+ "body": "Body is missing.",
+ "css": "\n/*! minireset.css v0.0.3 | MIT License | github.com/jgthms/minireset.css */html,body,p,ol,ul,li,dl,dt,dd,blockquote,figure,fieldset,legend,textarea,pre,iframe,hr,h1,h2,h3,h4,h5,h6{margin:0;padding:0}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal}ul{list-style:none}button,input,select,textarea{margin:0}html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}img,embed,iframe,object,audio,video{height:auto;max-width:100%}iframe{border:0}table{border-collapse:collapse;border-spacing:0}td,th{padding:0;text-align:left}\n\nbody\t{background:#f7f4fd; font-family:monospace, sans-serif; font-size:16px; line-height:24px; color:#444; width:100%; padding:50px;}\nh1\t\t{font-size:4em; font-weight:normal; color:#1400ff;}\nh2\t\t{font-size:2em; font-weight:normal;}\n\na\t\t{color:#1400ff;}\n\na.bar\t{color:#f7f4fd; background-color:#3a3a3a; border-radius:4px; padding:5px; text-decoration:none; border-bottom:none;}\na.bar:hover\t{background-color:#1400ff; border-bottom:none;}\n\n\n.nav\t{display:inline-block; vertical-align:top; width:50%;}\n.nav:nth-of-type(2)\t{text-align:right;}\n\n.line, .blog_wrap\t{border-top:1px dashed #1400ff; margin-top:40px; margin-bottom:40px; position:relative;}\n.blog_info\t{position:absolute; right:10px; top:10px;}\n",
+ "head": "<title>{title}</title>\n<style>\n{css}\n</style>",
+ "html": "<html>\n<head>{head}</head>\n<body>{body}</body>\n</html>",
+ "title": "Title is missing."
+}

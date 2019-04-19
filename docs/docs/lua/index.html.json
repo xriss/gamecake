@@ -1,0 +1,3393 @@
+{
+ "_dirname": "{_root}docs/lua",
+ "_docs": [
+  {
+   "count": 7,
+   "name": "code"
+  },
+  {
+   "count": 6,
+   "name": "code.swankyquant"
+  },
+  {
+   "count": 1,
+   "name": "code.swankyquant.algorithm"
+  },
+  {
+   "count": 1,
+   "name": "code.swankyquant.color_distance"
+  },
+  {
+   "count": 1,
+   "name": "code.swankyquant.color_distance_weight"
+  },
+  {
+   "count": 1,
+   "name": "code.swankyquant.swanky_quant"
+  },
+  {
+   "count": 1,
+   "name": "code.swankyquant.swanky_quant_remap"
+  },
+  {
+   "count": 277,
+   "name": "lua"
+  },
+  {
+   "count": 3,
+   "name": "lua.glslang"
+  },
+  {
+   "count": 1,
+   "name": "lua.glslang.lint_gles2"
+  },
+  {
+   "count": 1,
+   "name": "lua.glslang.parse_chunks"
+  },
+  {
+   "count": 273,
+   "name": "lua.wetgenes"
+  },
+  {
+   "count": 64,
+   "name": "lua.wetgenes.chipmunk"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.chipmunk.arbiter"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.arbiter.ignore"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.arbiter.points"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.arbiter.surface_velocity"
+  },
+  {
+   "count": 16,
+   "name": "lua.wetgenes.chipmunk.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.angle"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.angular_velocity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.apply_force"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.apply_impulse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.center_of_gravity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.force"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.mass"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.moment"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.position"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.position_func"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.torque"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.type"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.velocity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.velocity_func"
+  },
+  {
+   "count": 6,
+   "name": "lua.wetgenes.chipmunk.constraint"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.constraint.collide_bodies"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.constraint.error_bias"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.constraint.impulse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.constraint.max_bias"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.constraint.max_force"
+  },
+  {
+   "count": 11,
+   "name": "lua.wetgenes.chipmunk.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.bounding_box"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.collision_type"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.elasticity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.filter"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.friction"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.query_point"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.query_segment"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.radius"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.sensor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.surface_velocity"
+  },
+  {
+   "count": 26,
+   "name": "lua.wetgenes.chipmunk.space"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.add_handler"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.collision_bias"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.collision_persistence"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.collision_slop"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.constraint"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.contains"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.current_time_step"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.damping"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.gravity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.idle_speed_threshold"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.iterations"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.locked"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_bounding_box"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_point"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_point_nearest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_segment"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_segment_first"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.reindex"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.sleep_time_threshold"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.step"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.type"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.export"
+  },
+  {
+   "count": 61,
+   "name": "lua.wetgenes.gamecake"
+  },
+  {
+   "count": 56,
+   "name": "lua.wetgenes.gamecake.fun"
+  },
+  {
+   "count": 19,
+   "name": "lua.wetgenes.gamecake.fun.chatdown"
+  },
+  {
+   "count": 6,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.get_tag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_tag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_tags"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_topic"
+  },
+  {
+   "count": 7,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.changes"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_subject"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_tag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_subject"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_tag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.dotnames"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.parse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.setup_chat"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.text"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.gamecake.fun.entities"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.call"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.caste"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.reset"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.sortby_update"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems.call"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems.insert"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 23,
+   "name": "lua.wetgenes.gamecake.fun.yarn"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.cells"
+  },
+  {
+   "count": 14,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.cells"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.create_pages"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.find"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.get_big"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.insert"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.iterate_dotnames"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.iterate_parents"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.metatable"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.prefabs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.rules"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.pages"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.fun.yarn.prefabs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.prefabs.set"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules.apply"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules.can"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules.set"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.oven"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.oven.bake"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.widgets"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.setup"
+  },
+  {
+   "count": 36,
+   "name": "lua.wetgenes.grd"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.adjust_contrast"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.adjust_hsv"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.adjust_rgb"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.attr_redux"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.blit"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.clear"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.clip"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.convert"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.copy_data"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.copy_data_layer"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.create_convert"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.create_normal"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.duplicate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.flipx"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.flipy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.info"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.load"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.load_data"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.load_file"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.paint"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.palette"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.pixels"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.quant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.remap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.reset"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.resize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.save"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.shrink"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.slide"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.sort_cmap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.stream"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.grdsvg"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdsvg.string"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.json"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.json.decode"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.json.encode"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.lookup"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.package"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.package.reload"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.plate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.plate.replace_lookup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.plate.replace_lookup_istable"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.plate.table_lookup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.safecall"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.safewrap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.set_env"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.snippets"
+  },
+  {
+   "count": 94,
+   "name": "lua.wetgenes.tardis"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.tardis.array"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__tostring"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.compare"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.product"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.class"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.tardis.line"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.line.new"
+  },
+  {
+   "count": 10,
+   "name": "lua.wetgenes.tardis.m2"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.cofactor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.determinant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.inverse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.minor_xy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.transpose"
+  },
+  {
+   "count": 10,
+   "name": "lua.wetgenes.tardis.m3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.cofactor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.determinant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.inverse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.minor_xy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.transpose"
+  },
+  {
+   "count": 17,
+   "name": "lua.wetgenes.tardis.m4"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.cofactor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.determinant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.inverse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.lerp"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.minor_xy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.rotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.scale_v3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.sub"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.translate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.transpose"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.tardis.plane"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.plane.new"
+  },
+  {
+   "count": 6,
+   "name": "lua.wetgenes.tardis.q4"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.lerp"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.rotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.type"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.tardis.v2"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.dot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.len"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.lenlen"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.oo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.sub"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.tardis.v3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.dot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.len"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.lenlen"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.oo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.sub"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.tardis.v4"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.dot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.len"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.lenlen"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.oo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.sub"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.to_v3"
+  }
+ ],
+ "_docs_json": {
+  "dirname": "{_root}docs",
+  "dirs": {
+   "../../lua": "",
+   "../../lua_grd": ""
+  },
+  "ignore": {
+   "node_modules": true
+  },
+  "urlprefix": {
+   "../": "https://github.com/xriss/gamecake/blob/master/"
+  }
+ },
+ "_filename": "{_root}docs/lua/index.html",
+ "_flags": {
+  "body": {
+   "trim": "ends"
+  },
+  "css": {
+   "same": "append"
+  },
+  "head": {
+   "trim": "ends"
+  },
+  "html": {
+   "trim": "ends"
+  },
+  "menuwrap": {
+   "trim": "ends"
+  },
+  "menuwrap_link": {
+   "trim": "ends"
+  },
+  "menuwrap_link1": {
+   "trim": "ends"
+  },
+  "menuwrap_link2": {
+   "trim": "ends"
+  },
+  "title": {
+   "trim": "ends"
+  }
+ },
+ "_list": [
+  {
+   "body": "",
+   "count": 277,
+   "name": "lua"
+  },
+  {
+   "body": "<p>Manage string embedding and the glsl compiler and language options.</p>\n<p>This is somewhat separate to the main GLES code and can be used without \nlinking to any system dependent GL libs.</p>\n",
+   "count": 3,
+   "file": "../lua/glslang.lua",
+   "line": 4,
+   "name": "lua.glslang",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/glslang.lua"
+  },
+  {
+   "body": "<pre><code>verr,ferr = glslang.lint_gles2(vcode,fcode)\n</code></pre><p>Try and compile a vertex/fragment shader pair and return any errors.</p>\n<p>returns nil,nil on success or an error string if either shader fails to \ncompile.</p>\n<p>Note that the glslang compile step seems rather slow, not sure what it \ngets up to but do not consider using this if speed is important.</p>\n",
+   "count": 1,
+   "file": "../lua/glslang.lua",
+   "line": 24,
+   "name": "lua.glslang.lint_gles2",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/glslang.lua"
+  },
+  {
+   "body": "<pre><code>shaders=glslang.shader_chunks(text,filename,headers)\n\n    load multiple shader chunks from a single file and return a \n    lookup table of name=code for each shader we just loaded. These \n    can then be compiled or whatever.\n\n#SHADER &quot;nameofshader&quot;\n\n    is used at the start of a line to say which chunk the following \n    text should go into.\n\n#HEADER &quot;nameofheader&quot;\n\n    can be used to define part of a shader, which can later be \n    included in another shader by using\n\n#INCLUDE &quot;nameofheader&quot;\n\n    Will insert the chunk of text previously defined as a #SHADER \n    or #HEADER\n\n#SHADER or #HEADER\n\n    without a name can be used to ignore the next part of a file, \n    any text at the start of a file before the first #SHADER or \n    #HEADER is also ignored. This enables these chunks to exist \n    inside comments in a lua or whatever file.\n</code></pre>",
+   "count": 1,
+   "file": "../lua/glslang.lua",
+   "line": 51,
+   "name": "lua.glslang.parse_chunks",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/glslang.lua"
+  },
+  {
+   "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre><p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n",
+   "count": 273,
+   "file": "../lua/wetgenes/init.lua",
+   "line": 4,
+   "name": "lua.wetgenes",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua"
+  },
+  {
+   "body": "<pre><code>local chipmunk=require(&quot;wetgenes.chipmunk&quot;)\n</code></pre><p>We use chipmunk as the local name of this library.</p>\n<p>A lua binding to the Chipmunk2D physics library <a href=\"https://chipmunk-physics.net/\">chipmunk-physics.net</a></p>\n",
+   "count": 64,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 6,
+   "name": "lua.wetgenes.chipmunk",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "",
+   "count": 4,
+   "name": "lua.wetgenes.chipmunk.arbiter"
+  },
+  {
+   "body": "<pre><code>return arbiter:ignore()\n</code></pre><p>Ignore this collision, from now until the shapes separate.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1122,
+   "name": "lua.wetgenes.chipmunk.arbiter.ignore",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>points=arbiter:points()\npoints=arbiter:points(points)\n</code></pre><p>Get and/or Set the points data for this arbiter.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1098,
+   "name": "lua.wetgenes.chipmunk.arbiter.points",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>vx,vy=arbiter:surface_velocity()\nvx,vy=arbiter:surface_velocity(vx,vy)\n</code></pre><p>Get and/or Set the surface velocity for this arbiter.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1110,
+   "name": "lua.wetgenes.chipmunk.arbiter.surface_velocity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>body=chipmunk.body(mass,inertia)\n</code></pre><p>Create a dynamic body, with the given mass and inertia.</p>\n<p>You will need to add the body to a space before it exists so it is \nnormally preferable to use the space:body function which will call this \nfunction and then automatically add the body into the space.</p>\n<pre><code>body=chipmunk.body(&quot;kinematic&quot;)\n</code></pre><p>Create a kinematic body, these are bodies that we can move around, by \nsetting its velocity, but are not effected by collisions with other \nbodies. EG a moving platform.</p>\n<pre><code>body=chipmunk.body(&quot;static&quot;)\n</code></pre><p>Create a static body, mostly you can just use space.static as the \ndefault static body but you may create more if you wish to group your \nstatic shapes into multiple bodies.</p>\n",
+   "count": 16,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 92,
+   "name": "lua.wetgenes.chipmunk.body",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>a=body:angle()\na=body:angle(a)\n</code></pre><p>Get and/or Set the rotation angle in radians for this body.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 798,
+   "name": "lua.wetgenes.chipmunk.body.angle",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>a=body:angular_velocity()\na=body:angular_velocity(a)\n</code></pre><p>Get and/or Set the angular velocity in radians for this body.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 810,
+   "name": "lua.wetgenes.chipmunk.body.angular_velocity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>body:apply_force(fx,fy,px,py)\nbody:apply_force(fx,fy,px,py,&quot;world&quot;)\n</code></pre><p>Apply a force to this body at a specific point, the point can be in \nworld coordinates if you include the &quot;world&quot; flag but defaults to local \nobject coordinates.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 834,
+   "name": "lua.wetgenes.chipmunk.body.apply_force",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>body:apply_impulse(ix,iy,px,py)\nbody:apply_impulse(ix,iy,px,py,&quot;world&quot;)\n</code></pre><p>Apply a force to this body at a specific point, the point can be in \nworld coordinates if you include the &quot;world&quot; flag but defaults to local \nobject coordinates.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 852,
+   "name": "lua.wetgenes.chipmunk.body.apply_impulse",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>vx,vy=body:center_of_gravity()\nvx,vy=body:center_of_gravity(vx,vy)\n</code></pre><p>Get and/or Set the center of gravity for this body.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 761,
+   "name": "lua.wetgenes.chipmunk.body.center_of_gravity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>vx,vy=body:force()\nvx,vy=body:force(vx,vy)\n</code></pre><p>Get and/or Set the force for this body. This is reset back to 0 after \neach step.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 785,
+   "name": "lua.wetgenes.chipmunk.body.force",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>m=body:mass()\nm=body:mass(m)\n</code></pre><p>Get and/or Set the mass for this body.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 725,
+   "name": "lua.wetgenes.chipmunk.body.mass",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>m=body:moment()\nm=body:moment(m)\n</code></pre><p>Get and/or Set the moment for this body.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 737,
+   "name": "lua.wetgenes.chipmunk.body.moment",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>vx,vy=body:position()\nvx,vy=body:position(vx,vy)\n</code></pre><p>Get and/or Set the position for this body.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 749,
+   "name": "lua.wetgenes.chipmunk.body.position",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>body:position_func(position_callback)\nbody:position_func()\n</code></pre><p>Set or clear the position callback update function for this body.</p>\n<pre><code>position_callback(body)\n\nbody.delta_time\n</code></pre><p>This callback will be called with the above values set into body, you \ncan adjust these and return true to perform a normal position update \nbut with these new values.</p>\n<p>Alternatively you can update the bodys position directly and return \nfalse so the normal position update code will not be run.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 899,
+   "name": "lua.wetgenes.chipmunk.body.position_func",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>shape=body:shape(form,...)\n</code></pre><p>Add a new shape to this body, returns the shape for further \nmodification.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 922,
+   "name": "lua.wetgenes.chipmunk.body.shape",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>a=body:torque()\na=body:torque(a)\n</code></pre><p>Get and/or Set the torque for this body.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 822,
+   "name": "lua.wetgenes.chipmunk.body.torque",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>t=body:type()\nt=body:type(t)\n</code></pre><p>Get and/or Set the type for this body.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 710,
+   "name": "lua.wetgenes.chipmunk.body.type",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>vx,vy=body:velocity()\nvx,vy=body:velocity(vx,vy)\n</code></pre><p>Get and/or Set the velocity for this body.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 773,
+   "name": "lua.wetgenes.chipmunk.body.velocity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>body:velocity_func(velocity_callback)\nbody:velocity_func()\n</code></pre><p>Set or clear the velocity callback update function for this body.</p>\n<pre><code>velocity_callback(body)\n\nbody.gravity_x\nbody.gravity_y\nbody.damping\nbody.delta_time\n</code></pre><p>This callback will be called with the above values set into body, you \ncan adjust these and return true to perform a normal velocity update \nbut with these new values.</p>\n<p>IE you can choose a new gravity vector for this body which is the \nsimplest change to make.</p>\n<p>Alternatively you can update the bodys velocity directly and return \nfalse so the normal velocity update code will not be run.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 870,
+   "name": "lua.wetgenes.chipmunk.body.velocity_func",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>constraint=chipmunk.constraint(abody,bbody,form,...)\n</code></pre><p>Create a constraint between two bodies.</p>\n<p>You will need to add the constraint to a space before it has any effect \nso it is normally preferable to use the space:constraint function which \nwill call this function and then automatically add the constraint into \nthe space.</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;pin_join&quot;,ax,ay,bx,by)\n</code></pre><p>form of &quot;pin_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;slide_joint&quot;,ax,ay,bx,by,fl,fh)\n</code></pre><p>form of &quot;slide_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;pivot_joint&quot;,x,y)\nconstraint=chipmunk.constraint(abody,bbody,&quot;pivot_joint&quot;,ax,ay,bx,by)\n</code></pre><p>form of &quot;pivot_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;groove_joint&quot;,ax,ay,bx,by,cx,cy)\n</code></pre><p>form of &quot;groove_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;damped_spring&quot;,ax,ay,bx,by,fl,fs,fd)\n</code></pre><p>form of &quot;damped_spring&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;damped_rotary_spring&quot;,fa,fs,fd)\n</code></pre><p>form or &quot;damped_rotary_spring&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;rotary_limit_joint&quot;,fl,fh)\n</code></pre><p>form of &quot;rotary_limit_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;ratchet_joint&quot;,fp,fr)\n</code></pre><p>form of &quot;ratchet_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;gear_joint&quot;,fp,fr)\n</code></pre><p>form of &quot;gear_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;simple_motor&quot;,fr)\n</code></pre><p>form of &quot;simple_motor&quot; ...</p>\n",
+   "count": 6,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 167,
+   "name": "lua.wetgenes.chipmunk.constraint",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=constraint:collide_bodies()\nv=constraint:collide_bodies(v)\n</code></pre><p>Get and/or Set the max collide bodies flag for this constraint.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1170,
+   "name": "lua.wetgenes.chipmunk.constraint.collide_bodies",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=constraint:error_bias()\nv=constraint:error_bias(v)\n</code></pre><p>Get and/or Set the error bias for this constraint.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1146,
+   "name": "lua.wetgenes.chipmunk.constraint.error_bias",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=constraint:impulse()\n</code></pre><p>Get the last impulse for this constraint.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1182,
+   "name": "lua.wetgenes.chipmunk.constraint.impulse",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=constraint:max_bias()\nv=constraint:max_bias(v)\n</code></pre><p>Get and/or Set the max bias for this constraint.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1158,
+   "name": "lua.wetgenes.chipmunk.constraint.max_bias",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=constraint:max_force()\nv=constraint:max_force(v)\n</code></pre><p>Get and/or Set the max force for this constraint.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1134,
+   "name": "lua.wetgenes.chipmunk.constraint.max_force",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>shape=chipmunk.shape(body,form...)\n</code></pre><p>Create a shape, added to the given body. Shapes are always added to a \nbody but must be added to a space before they have any effect. So it is \nnormally preferable to use the body:shape function which will \nautomatically add the shape into the space that the body belongs to.</p>\n<pre><code>shape=chipmunk.shape(space.static,form...)\n</code></pre><p>Create a static shape in world space. We use space.static as the body. </p>\n<pre><code>shape=chipmunk.shape(body,&quot;circle&quot;,radius,x,y)\n</code></pre><p>Form of &quot;circle&quot; needs a radius and a centre point.</p>\n<pre><code>shape=chipmunk.shape(body,&quot;segment&quot;,ax,ay,bx,by,radius)\n</code></pre><p>Form of &quot;segment&quot; needs two points and a radius.</p>\n<pre><code>shape=chipmunk.shape(body,&quot;poly&quot;,{x1,y1,x2,y2,...},radius)\n</code></pre><p>Form of &quot;poly&quot; is a generic polygon defined by a table of points.</p>\n<pre><code>shape=chipmunk.shape(body,&quot;box&quot;,minx,miny,maxx,maxy,radius)\n</code></pre><p>Form of &quot;box&quot; needs two points for opposite corners, lowest pair \nfollowed by highest pair and a radius. The radius should be 0 unless \nyou want rounded corners</p>\n",
+   "count": 11,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 128,
+   "name": "lua.wetgenes.chipmunk.shape",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>min_x,min_y,max_x,max_y=shape:bounding_box()\n</code></pre><p>Get the current bounding box for this shape.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 938,
+   "name": "lua.wetgenes.chipmunk.shape.bounding_box",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>f=shape:collision_type()\nf=shape:collision_type(f)\n</code></pre><p>Get and/or Set the collision type for this shape.</p>\n<p>The f argument can be a string in which case it will be converted to a \nnumber via the space:type function.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 997,
+   "name": "lua.wetgenes.chipmunk.shape.collision_type",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>f=shape:elasticity()\nf=shape:elasticity(f)\n</code></pre><p>Get and/or Set the elasticity for this shape.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 961,
+   "name": "lua.wetgenes.chipmunk.shape.elasticity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>f=shape:filter()\nf=shape:filter(f)\n</code></pre><p>Get and/or Set the filter for this shape.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1013,
+   "name": "lua.wetgenes.chipmunk.shape.filter",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>f=shape:friction()\nf=shape:friction(f)\n</code></pre><p>Get and/or Set the friction for this shape.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 973,
+   "name": "lua.wetgenes.chipmunk.shape.friction",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>item = shape:query_point(x,y)\n</code></pre><p>Find the nearest point on the shape from the point at x,y.</p>\n<p>returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.distance        -- the distance to the point of contact\nit.gradient_x    -- the normalised vector to collision (x)\nit.gradient_y    -- the normalised vector to collision (y)\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1039,
+   "name": "lua.wetgenes.chipmunk.shape.query_point",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>it = shape:query_segment(sx,sy,ex,ey,r)\n</code></pre><p>Find the hitpoint along this raycast segment, from (sx,sy) to \n(ex,ey) with a radius of r. </p>\n<p>Returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.normal_x        -- the normal at contact (x)\nit.normal_y        -- the normal at contact (y)\nit.alpha        -- how far along the segment the contact happened (0 to 1)\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1068,
+   "name": "lua.wetgenes.chipmunk.shape.query_segment",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>radius=shape:radius()\nradius=shape:radius(radius)\n</code></pre><p>Get and/or Set the radius for this shape. Setting is unsafe and may \nbreak the physics simulation.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1026,
+   "name": "lua.wetgenes.chipmunk.shape.radius",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>f=shape:sensor()\nf=shape:sensor(f)\n</code></pre><p>Get and/or Set the sensor flag for this shape.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 949,
+   "name": "lua.wetgenes.chipmunk.shape.sensor",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>vx,vy=shape:surface_velocity()\nvx,vy=shape:surface_velocity(vx,vy)\n</code></pre><p>Get and/or Set the surface velocity for this shape.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 985,
+   "name": "lua.wetgenes.chipmunk.shape.surface_velocity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>space=chipmunk.space()\n</code></pre><p>Create the space you will be simulating physics in.</p>\n",
+   "count": 26,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 44,
+   "name": "lua.wetgenes.chipmunk.space",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>space:add(body)\nspace:add(shape)\nspace:add(constraint)\n</code></pre><p>Add a body/shape/constraint to the space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 372,
+   "name": "lua.wetgenes.chipmunk.space.add",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>space:add_handler(handler,id1,id2)\nspace:add_handler(handler,id1)\nspace:add_handler(handler)\n</code></pre><p>Add collision callback handler, for the given collision types.</p>\n<p>The handler table will have other values inserted in it and will be \nused as an arbiter table in callbacks. So <em>always</em> pass in a new one to \nthis function. There does not seem to be a way to free handlers so be \ncareful what you add.</p>\n<p>id1,id2 can be a string in which case it will be converted to a number \nvia the space:type function.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 345,
+   "name": "lua.wetgenes.chipmunk.space.add_handler",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>space:body(...)\n</code></pre><p>Create and add this body to the space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 494,
+   "name": "lua.wetgenes.chipmunk.space.body",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=space:collision_bias()\nv=space:collision_bias(v)\n</code></pre><p>Get and/or Set the colision bias for this space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 299,
+   "name": "lua.wetgenes.chipmunk.space.collision_bias",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=space:collision_persistence()\nv=space:collision_persistence(v)\n</code></pre><p>Get and/or Set the collision persistence for this space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 311,
+   "name": "lua.wetgenes.chipmunk.space.collision_persistence",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=space:collision_slop()\nv=space:collision_slop(v)\n</code></pre><p>Get and/or Set the colision slop for this space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 287,
+   "name": "lua.wetgenes.chipmunk.space.collision_slop",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>space:constraint(...)\n</code></pre><p>Create and add this constraint to the space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 507,
+   "name": "lua.wetgenes.chipmunk.space.constraint",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>space:contains(body)\nspace:contains(shape)\nspace:contains(constraint)\n</code></pre><p>Does the space contain this body/shape/constraint, possibly superfluous \nas we can check our own records.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 438,
+   "name": "lua.wetgenes.chipmunk.space.contains",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=space:current_time_step()\n</code></pre><p>Get the current time step for this space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 323,
+   "name": "lua.wetgenes.chipmunk.space.current_time_step",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=space:damping()\nv=space:damping(v)\n</code></pre><p>Get and/or Set the damping for this space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 251,
+   "name": "lua.wetgenes.chipmunk.space.damping",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>vx,vy=space:gravity()\nvx,vy=space:gravity(vx,vy)\n</code></pre><p>Get and/or Set the gravity vector for this space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 239,
+   "name": "lua.wetgenes.chipmunk.space.gravity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=space:idle_speed_threshold()\nv=space:idle_speed_threshold(v)\n</code></pre><p>Get and/or Set the idle speed threshold for this space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 263,
+   "name": "lua.wetgenes.chipmunk.space.idle_speed_threshold",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=space:iterations()\nv=space:iterations(v)\n</code></pre><p>Get and/or Set the iterations for this space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 227,
+   "name": "lua.wetgenes.chipmunk.space.iterations",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=space:locked()\n</code></pre><p>Get the locked state for this space, if true we cannot change shapes.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 334,
+   "name": "lua.wetgenes.chipmunk.space.locked",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>array = space:query_bounding_box(lx,ly,hx,hy,group,categories,mask)\n</code></pre><p>Find the shapes that are within this bounding box (lx,ly) to (hx,hy).\nUse group,categories and mask to filter the results.</p>\n<p>Returns an array of shapes.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 663,
+   "name": "lua.wetgenes.chipmunk.space.query_bounding_box",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>array = space:query_point(x,y,d,group,categories,mask)\n</code></pre><p>Find the shapes that are within d distance from the point at x,y.\nUse group,categories and mask to filter the results.</p>\n<p>Returns an array of hit data, with each item containing the following.</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.distance        -- the distance to the point of contact\nit.gradient_x    -- the normalised vector to collision (x)\nit.gradient_y    -- the normalised vector to collision (y)\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 531,
+   "name": "lua.wetgenes.chipmunk.space.query_point",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>item = space:query_point_nearest(x,y,d,group,categories,mask)\n</code></pre><p>Find the nearest shape that is within d distance from the point at x,y.\nUse group,categories and mask to filter the results.</p>\n<p>returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.distance        -- the distance to the point of contact\nit.gradient_x    -- the normalised vector to collision (x)\nit.gradient_y    -- the normalised vector to collision (y)\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 565,
+   "name": "lua.wetgenes.chipmunk.space.query_point_nearest",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>array = space:query_segment(sx,sy,ex,ey,r,group,categories,mask)\n</code></pre><p>Find the shapes that are along this raycast segment, from (sx,sy) to \n(ex,ey) with a radius of r. Use group,categories and mask to filter the \nresults.</p>\n<p>Returns an array of hit data, with each item containing the following.</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.normal_x        -- the normal at contact (x)\nit.normal_y        -- the normal at contact (y)\nit.alpha        -- how far along the segment the contact happened (0 to 1)\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 596,
+   "name": "lua.wetgenes.chipmunk.space.query_segment",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>it = space:query_segment_first(sx,sy,ex,ey,r,group,categories,mask)\n</code></pre><p>Find the shapes that are along this raycast segment, from (sx,sy) to \n(ex,ey) with a radius of r. Use group,categories and mask to filter the \nresults.</p>\n<p>Returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.normal_x        -- the normal at contact (x)\nit.normal_y        -- the normal at contact (y)\nit.alpha        -- how far along the segment the contact happened (0 to 1)\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 631,
+   "name": "lua.wetgenes.chipmunk.space.query_segment_first",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>array = space:query_shape(shape)\n</code></pre><p>Find the shapes that intersect with the given shape.</p>\n<p>Returns an array of hit data, with each item containing the following.</p>\n<pre><code>it.shape        -- the shape\nit.normal_x        -- the normal at contact (x)\nit.normal_y        -- the normal at contact (y)\nit.contacts        -- array of contact points -&gt; {ax,ay,bx,by,distance,etc...}\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 682,
+   "name": "lua.wetgenes.chipmunk.space.query_shape",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>space:reindex(shape)\nspace:reindex(body)\nspace:reindex()\n</code></pre><p>Reindex the shapes, either a specific shape, all the shapes in a body \nor just all the static shapes.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 466,
+   "name": "lua.wetgenes.chipmunk.space.reindex",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>space:remove(body)\nspace:remove(shape)\nspace:remove(constraint)\n</code></pre><p>Remove a body/shape/constraint from this space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 405,
+   "name": "lua.wetgenes.chipmunk.space.remove",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>v=space:sleep_time_threshold()\nv=space:sleep_time_threshold(v)\n</code></pre><p>Get and/or Set the sleep time threshold for this space.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 275,
+   "name": "lua.wetgenes.chipmunk.space.sleep_time_threshold",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>space:step(time)\n</code></pre><p>Run the simulation for time in seconds. EG 1/60.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 520,
+   "name": "lua.wetgenes.chipmunk.space.step",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>number = space:type(name)\nname = space:type(number)\n</code></pre><p>Manage collision types, pass in a string and always get a number out. \nThis number is consistent only for this space.</p>\n<p>Alternatively pass in a number and get a string or nil as a result.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 70,
+   "name": "lua.wetgenes.chipmunk.space.type",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>... = wetgenes.export(table,...)\n</code></pre><p>Export multiple names from this table as multiple returns, can be \nused to pull functions out of this module and into locals like so</p>\n<pre><code>local export,lookup,set_env=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;set_env&quot;)\n</code></pre><p>Or copy it into other modules to provide them with the same functionality.</p>\n<pre><code>M.lookup=require(&quot;wetgenes&quot;).lookup\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/init.lua",
+   "line": 55,
+   "name": "lua.wetgenes.export",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua"
+  },
+  {
+   "body": "",
+   "count": 61,
+   "name": "lua.wetgenes.gamecake"
+  },
+  {
+   "body": "",
+   "count": 56,
+   "name": "lua.wetgenes.gamecake.fun"
+  },
+  {
+   "body": "",
+   "count": 19,
+   "name": "lua.wetgenes.gamecake.fun.chatdown"
+  },
+  {
+   "body": "",
+   "count": 6,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat"
+  },
+  {
+   "body": "<pre><code>tag_value = chat:get_tag(tag_name)\n</code></pre><p>The same as chats:get_tag but the subject of this chat is the \ndefault root.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 276,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.get_tag",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>output = chat:replace_tags(input)\n</code></pre><p>The same as chats:replace_tags but the subject of this chat is the \ndefault root.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 304,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>tag_value = chat:set_tag(tag_name,tag_value)\n</code></pre><p>The same as chats:set_tag but the subject of this chat is the \ndefault root.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 290,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_tag",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>chat:set_tags(tags)\n</code></pre><p>Set all the values in the given table of {tag_name=tag_value} pairs.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 318,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_tags",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>chat:set_topic(topic_name)\n</code></pre><p>Set the current topic for this chat object, information about this \ntopic and its gotos are built from and stored in this chat object.</p>\n<pre><code>chat.topic_name\n</code></pre><p>Will be set to the given topic name.</p>\n<p>We merge all gotos found in this topic and all topic parents by \niterating over the dotnames. We only use add each topic once and each \ntopic may have a bit of logic that decides if it should be displayed.</p>\n<pre><code>&lt;topic_name?logic_test\n</code></pre><p>So this would goto the topic_name if the logic_test passes. The logic \ntest is written simmilar to a url query after the question mark comes a \nnumber of tests that are then &amp; or | together in left to right order \n(no operator precedence).</p>\n<pre><code>&lt;topic_name?count&lt;10&amp;seen==false\n</code></pre><p>So this would display the goto option if count is less than 10 and seen \nis set to false. These variables we are testing are tag_names and \ndefault to the current subject chat but could reference other subjects \nby explicitly including a root.</p>\n<p>Available logic tests are</p>\n<pre><code>name==value\nname=value\n</code></pre><p>True if the tag is set to this value.</p>\n<pre><code>name!=value\n</code></pre><p>True if the tag is not set to this value.</p>\n<pre><code>name&lt;value\n</code></pre><p>True if the tag is less than this value (numeric test).</p>\n<pre><code>name&gt;value\n</code></pre><p>True if the tag is more than this value (numeric test).</p>\n<pre><code>name&lt;=value\n</code></pre><p>True if the tag is less than or equal to this value (numeric test).</p>\n<pre><code>name&gt;=value\n</code></pre><p>True if the tag is more than or equal to  this value (numeric test).</p>\n<p>All of these tests can be preceded by a ! to negate them so</p>\n<pre><code>name!=vale\n!name==value\n</code></pre><p>Are both a test for inequality.</p>\n<p>Multiple tests can be joined together by &amp; (and) or | (or) this logic \nwill be applied to a running total moving from left to right as the \nvalues are evaluated with the final value deciding if this goto will be \ndisplayed.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 333,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_topic",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "",
+   "count": 7,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats"
+  },
+  {
+   "body": "<pre><code>chats.changes(chat,change,...)\n\nchats.changes(chat,&quot;subject&quot;)\nchats.changes(chat,&quot;topic&quot;,topic)\nchats.changes(chat,&quot;goto&quot;,goto)\nchats.changes(chat,&quot;tag&quot;,tag_name,tag_value)\n</code></pre><p>This is a callback hook, replace to be notified of changes and possibly \nalter then, by default we print debuging information. Replace this \nfunction with an empty function to prevent this eg</p>\n<pre><code>chats.changes=function()end\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 668,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.changes",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>chat = chats:get_subject(subject_name)\nchat = chats:get_subject()\n</code></pre><p>Get the chat for the given subject or the chat for the last subject \nselected with set_subject if no subject_name is given.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 560,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_subject",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>tag_value = chats:get_tag(tag_name,subject_name)\n</code></pre><p>Get the tag_value for the given tag_name which can either be \n&quot;tag_root/tag_name&quot; or &quot;tag_name&quot;. The subject_name is the default root \nto use if no tag_root is given in the tag_name.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 575,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_tag",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>output = chats:replace_tags(input,subject_name)\n</code></pre><p>Tags in the input text can be wrapped in {tag_name} and will be \nreplaced with the appropriate tag_value. This is done recursively so \ntag_values can contain references to other tags. If a tag does not \nexist then it will not expand and {tag_name} will remain in the output \ntext.</p>\n<p>Again if any tag name does not contain an explicit root then \nsubject_name will be used as the default chat subject.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 636,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>chat = chats:set_subject(subject_name)\n</code></pre><p>Set the current subject for this chats object, this subject becomes the \nchat that you will get if you call get_subject with no arguments.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 543,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_subject",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>tag_value = chats:set_tag(tag_name,tag_value,subject_name)\n</code></pre><p>Alter the value of the given tag_name. If the value string begins with \na &quot;+&quot; or a &quot;-&quot; Then the values will be treated as numbers and added or \nsubtracted from the current value. This allows for simple incremental \nflag values.</p>\n<p>Again if the tag name does not contain an explicit  root then \nsubject_name will be used as the default chat subject.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 593,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_tag",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>for part_name in chatdown.dotnames(full_name) do\n    print(part_name)\nend\n</code></pre><p>Iterate all dotnames so if given &quot;aa.bb.cc&quot; we would iterate through \n&quot;aa.bb.cc&quot; , &quot;aa.bb&quot; and &quot;aa&quot;. This is used to inherit data using just \na naming convention.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 253,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.dotnames",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>rawsubjects = chatdown.parse(text)\n</code></pre><p>Parse text from flat text chatdown format into heirachical chat data, \nwhich we refer to as rawsubjects, something that can be output easily \nas json.</p>\n<p>This gives us a readonly rawsubjects structure that can be used to control \nwhat text is displayed during a chat session.</p>\n<p>This is intended to be descriptive and logic less, any real logic \nshould be added using a real language that operates on this rawsubjects and \ngets triggered by the names used. EG, filter out gotos unless certain \ncomplicated conditions are met or change topics to redirect to an \nalternative.</p>\n<p>A self documented example of chatdown formated text can be found in \nlua.wetgenes.gamecake.fun.chatdown.text</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 17,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.parse",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>chats = chatdown.setup_chats(chat_text,changes)\n</code></pre><p>parse and initialise state data for every subjects chunk creating a \nglobal chats with a chat object for each subject.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 697,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.setup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>chat = chatdown.setup_chat(chats,subject_name)\n</code></pre><p>Setup the initial chat state for a subject. This is called \nautomatically by chatdown.setup and probably should not be used \nelsewhere.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 505,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.setup_chat",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<p>Here is some example chatdown formatted text full of useful \ninformation, it it is intended to be a self documented example.</p>\n<pre><code>\n- This is a single line comment\n-- This is the start of a multi-line comment\n\nAll lines are now comment lines until we see a line that begins with a \ncontrol character leading white space is ignored. If for some reason \nyou need to start a text line with a special character then it can be \nescaped by preceding it with a #\n\nWhat follows is a list of these characters and a brief description \nabout the parser state they switch to.\n\n    1. - (text to ignore)\n\n        A single line comment that does not change parser state and \n        only this line will be ignored so it can be inserted inside \n        other chunks without losing our place.\n\n    2. -- (text to ignore)\n\n        Begin a comment chunk, this line and all lines that follow this \n        line will be considered comments and ignored until we switch to \n        a new parser state.\n\n    3. #subject_name\n\n        Begin a new subject chunk, all future topic,goto or tag chunks will \n        belong to this subject.\n\n        The text that follows this until the next chunk is the long \n        description intended for when you examine the character.\n\n        Although it makes sense for a subject chunk to belong to one \n        character it could also a group conversation with tags being \n        set to change the current talker as the conversation flows.\n\n        subject names have simple cascading inheritance according to their \n        name with each level separated by a dot. A chunk named a.b.c \n        will inherit data from any chunks defined for a.b and a in that \n        order of priority.\n\n    4. &gt;topic_name\n\n        Begin a topic chunk, all future goto or tag chunks will belong \n        to this topic, the lines that follow are how the character \n        responds when questioned about this topic followed by one or \n        more gotos as possible responses that will lead you onto \n        another topic.\n\n        Topics can be broken into parts, to create a pause, by using an \n        unnamed goto followed by an unnamed topic which will both \n        automatically be given the same generated name and hence linked \n        together.\n\n    5. &lt;goto_topic_name\n\n        Begin a goto chunk, all future tag chunks will belong to this \n        goto, this is probably best thought of as a question that will \n        get a reply from the character. This is a choice made by the \n        player that causes a logical jump to another topic.\n\n        Essentially this means GOTO another topic and there can be \n        multiple GOTO options associated with each topic which the \n        reader is expected to choose between.\n\n    6. =set_tag_name to this value\n\n        If there is any text on the rest of this line then it will be \n        assigned to the tag without changing the current parse state so \n        it can be used in the middle of another chunk without losing \n        our place.\n\n        This single line tag assignment is usually all you need. \n        Alternatively, if there is no text on the rest of this first \n        line, only white space, then the parse state will change and \n        text on all following lines will be assigned to the named tag.\n\n        This assignment can happen at various places, for instance if \n        it is part of the subject then it will be the starting \n        value for a tag but if it is linked to a topic or goto then the \n        value will be a change as the conversation happens. In all \n        cases the tags are set in a single batch as the state changes \n        so the placement and order makes no difference.\n\n        Tags can be used inside text chunks or even GOTO labels by \n        tightly wrapping with {} eg {name} would be replaced with the \n        value of name. Tags from other subjects can be referenced by \n        prefixing the tag name with the subject name followed by a forward \n        slash like so {subject/tag}\n\n\nThe hierarchy of these chunks can be expressed by indentation as all \nwhite space is ignored and combined into a single space. Each SUBJECT will \nhave multiple TOPICs associated with it and each TOPIC will have \nmultiple GOTOs as options to jump between TOPICs. TAGs can be \nassociated with any of these 3 levels and will be evaluated as the \nconversation flows through these points.\n\nSo the chunk hierarchy expressed using indentation to denote children \nof.\n\n    SUBJECT\n        TAG\n        GOTO\n            TAG\n        TOPIC\n            TAG\n            GOTO\n                TAG\n\nThe GOTO chunks in the root SUBJECT chunk are used as prototypes so if a \nGOTO is used in multiple topics its text can be placed within a GOTO \ninside the main SUBJECT chunk rather than repeated constantly. This will \nthen be inherited by a GOTO with no text. An alternative to this \nshorthand is to assign an oft-used piece of text to a tag and reference \nthat in each topic instead.\n\nSUBJECTs and TOPICs also have simple inheritance based on their names this \nenables the building of a prototype which is later expanded. Each \ninheritance level is separated by a dot so aa.bb.cc will inherit from \naa.bb and aa with the data in the longer names having precedence. This \ninheritance is additive only so for instance a TAG can not be unset and \nwould have to be changed to another value by aa.bb.cc if it existed in \naa.bb or aa.\n\nIn practise this means\n&lt;br/&gt;\n&lt;br/&gt;\n\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
+   "line": 728,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.text",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
+  },
+  {
+   "body": "<pre><code>fun_entities = require(&quot;wetgenes.gamecake.fun.entities&quot;)\n</code></pre><p>Manage a simple structure to help group, update and draw discrete game \nobjects.</p>\n<p>This module contains only one function which can be used to create an \nentities instance and the rest of this documentation concerns the \nreturn from this create function, not the module</p>\n<pre><code>entities = fun_entities.create()\nentities = fun_entities.create( { sortby={&quot;first&quot;,&quot;second,...} } )\n</code></pre><p>Create and return an entities object. A base object can be passed in \nand will be filled in and returned. This can used to supply a sortby \ntable to help control the order of updates of different castes.</p>\n<p>If passed in sortby is a table of [caste_name]=weight values to help \ncontrol the order of updates by caste and make it consistent. For \ninstance you might find it useful to force monsters to update before \nthe player.</p>\n",
+   "count": 13,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.fun.entities",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.add(it,caste)\nentities.add(it)\n</code></pre><p>Add a new entity of caste or it.caste to the list of things to update.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 186,
+   "name": "lua.wetgenes.gamecake.fun.entities.add",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.call(fname,...)\n</code></pre><p>for every entity call the function named fname like so</p>\n<pre><code>it[fname](it,...)\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 205,
+   "name": "lua.wetgenes.gamecake.fun.entities.call",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.caste(caste)\n</code></pre><p>Get the list of entities of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 162,
+   "name": "lua.wetgenes.gamecake.fun.entities.caste",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.get(name)\n</code></pre><p>get a value previously saved, this is an easy way to find a unique \nentity, eg the global space but it can be used to save any values you \nwish not just to bookmark unique entities.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 231,
+   "name": "lua.wetgenes.gamecake.fun.entities.get",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.manifest(name,value)\n</code></pre><p>get a value previously saved, or initalize it to the given value if it \ndoes not already exist. The default value is {} as this is intended for \nlists.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 260,
+   "name": "lua.wetgenes.gamecake.fun.entities.manifest",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.reset()\n</code></pre><p>Empty the list of entities to update and draw, this does not reset the \nsystems table that should be modified with the insert and remove \nfunctions.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 145,
+   "name": "lua.wetgenes.gamecake.fun.entities.reset",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.set(name,value)\n</code></pre><p>save a value by a unique name</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 246,
+   "name": "lua.wetgenes.gamecake.fun.entities.set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.sortby_update()\n</code></pre><p>A function that takes the array part of entities.sortby and reverses \nthe key=value so a simple order list can be provided without any \nexplicit weights. The first caste name in the array gets a weight of 1, \nsecond 2 and so on.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 128,
+   "name": "lua.wetgenes.gamecake.fun.entities.sortby_update",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.systems={name=system,[1]=sytem1}\n</code></pre><p>A sorted table and lookup by caste name of each system. Table is sorted \nso it will be traversed backwards, backwards traversal allows the \ncurrent item to delete itself.</p>\n",
+   "count": 4,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 37,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.systems.call(fname,...)\n</code></pre><p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)\n</code></pre><p>Returns the number of calls made, which will be the number of systems \nthat had an fname function to call.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 99,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems.call",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>entities.systems.insert(system)\n</code></pre><p>Insert a new system replacing any system of the same caste. \nsystem.caste should be set to the caste of the system for this to work. \nAs we also keep some functions in this table, the names &quot;insert&quot;, \n&quot;remove&quot; and &quot;call&quot; are not available as caste names.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 68,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems.insert",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "<pre><code>system = entities.systems.remove(caste)\n</code></pre><p>Remove and return the system of the given caste.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/entities.lua",
+   "line": 50,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems.remove",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
+  },
+  {
+   "body": "",
+   "count": 23,
+   "name": "lua.wetgenes.gamecake.fun.yarn"
+  },
+  {
+   "body": "<pre><code>cells = require(&quot;wetgenes.gamecake.fun.yarn.cells&quot;).create(items)\n</code></pre><p>This module contains only one function which can be used to create an \ncells instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/cells.lua",
+   "line": 6,
+   "name": "lua.wetgenes.gamecake.fun.yarn.cells",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/cells.lua"
+  },
+  {
+   "body": "<pre><code>items = require(&quot;wetgenes.gamecake.fun.yarn.items&quot;).create()\n</code></pre><p>This module contains only one function which can be used to create an \nitems instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "count": 14,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 6,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>items.cells\n</code></pre><p>We automatically create a cells object bound to this set of items, this \ncells object should be used to define all your custom game cells.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 259,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.cells",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>item = items.create()\nitem = items.create({})\nitem = items.create({},metatable)\n</code></pre><p>Create a single item, optionally pass in a base item table that will be \nturned into a proper item (using setmetatable to add methods). This \nshould always be a new table and will also be returned. If no \nmetatable is provided then items.metatable will be used.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 73,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.create",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>items.pages\n</code></pre><p>We automatically create a pages object bound to this set of items, this \npages object should be used to define all your custom game pages.</p>\n<p>This can be considered a level and you may need multiple pages which \nare moved in and out of items.pages</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 271,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.create_pages",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>item = items.destroy(item)\nitem = item:destroy()\n</code></pre><p>Destroy an item, remove it from the master table dump so it will be \ngarbage collected.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 101,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.destroy",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>child_item = item:find(keyname)\n</code></pre><p>Get the first child item that has a [keyname] value in it. All child \nitems are searched, but this is not recursive.</p>\n<p>returns nil if no child item is found.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 215,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.find",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>big_item = item:get_big()\n</code></pre><p>Get the first big item from this container, returns nil if we do not \ncontain a big item.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 199,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.get_big",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>item = item:insert(parent)\n</code></pre><p>Insert this item into the given parent. Item will automatically be \nremoved from its current parent. If the item is_big then it will be \ninserted into the front of the list otherwise it will go at the end. \nThis is to help with finding big items, since there should only be one \nper container we only have to check the first child.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 173,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.insert",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>for name,tail in items.iterate_dotnames(names) do ... end\n</code></pre><p>Iterator over a names string, start with the full string and cut off \nthe tail on each iteration. This is used for simple inheritance merging \nof named prefabs and rules or anything else.</p>\n<p>Second return value is the tail of the string or the string if not \ntail.</p>\n<p>for example the following input string</p>\n<pre><code>&quot;one.two.three.four&quot;\n</code></pre><p>would get you the following iteration loops, one line per loop</p>\n<pre><code>&quot;one.two.three.four&quot; , &quot;four&quot;\n&quot;one.two.three&quot;      , &quot;three&quot;\n&quot;one.two&quot;            , &quot;two&quot;\n&quot;one&quot;                , &quot;one&quot;\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 24,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.iterate_dotnames",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>for it in item:iterate_parents() do\n    ...\nend\n</code></pre><p>Iterate over the parent chain going upwards. The first iteration is the \nparent of this object and so on.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 128,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.iterate_parents",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>items.metatable\n</code></pre><p>Expose the item metatable so more methods can easily be added.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 59,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.metatable",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>items.prefabs\n</code></pre><p>We automatically create a prefabs object bound to this set of items, this \nprefabs object should be used to define all your custom game prefabs.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 247,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.prefabs",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>item = item:remove()\n</code></pre><p>Remove this item from its parents table or do nothing if the item does \nnot have a parent.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 146,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.remove",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>items.rules\n</code></pre><p>We automatically create a rules object bound to this set of items, this \nrules object should be used to define all your custom game rules.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
+   "line": 235,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.rules",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
+  },
+  {
+   "body": "<pre><code>pages = require(&quot;wetgenes.gamecake.fun.yarn.pages&quot;).create(items)\n</code></pre><p>This module contains only one function which can be used to create an \npages instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/pages.lua",
+   "line": 8,
+   "name": "lua.wetgenes.gamecake.fun.yarn.pages",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/pages.lua"
+  },
+  {
+   "body": "<pre><code>prefabs = require(&quot;wetgenes.gamecake.fun.yarn.prefabs&quot;).create(items)\n</code></pre><p>This module contains only one function which can be used to create an \nprefabs instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "count": 2,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/prefabs.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.fun.yarn.prefabs",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua"
+  },
+  {
+   "body": "<pre><code>prefab = prefabs:get(name)\nprefab = prefabs:get(name,prefab)\n</code></pre><p>Build and return a table with all prefab values inherited from all its \nparents. Optionally pass in a prefab to override values and also have \nit returned.</p>\n<p>If name doesn&#39;t exist at any level and a table is not passed in then nil \nwill be returned.</p>\n<p>Names are hierarchical, separated by dots, see items.iterate_dotnames</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/prefabs.lua",
+   "line": 44,
+   "name": "lua.wetgenes.gamecake.fun.yarn.prefabs.set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua"
+  },
+  {
+   "body": "<pre><code>rules = require(&quot;wetgenes.gamecake.fun.yarn.rules&quot;).create(items)\n</code></pre><p>This module contains only one function which can be used to create an \nrules instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "count": 4,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/rules.lua",
+   "line": 6,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua"
+  },
+  {
+   "body": "<pre><code>item = rules.apply(item,method,...)\n</code></pre><p>item.rules must be a list of rule names and the order in which they should \nbe applied to this item.</p>\n<p>Call the given method in each rule with the item and the remaining arguments.</p>\n<p>If the method returns a value then no more methods will be applied even \nif more rules are listed.</p>\n<p>We always return the passed in item so that calls can be chained.</p>\n<pre><code>item = item:apply(method,...)\n</code></pre><p>This function is inserted into the items.metatable so it can be called \ndirectly from an item.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/rules.lua",
+   "line": 62,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules.apply",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua"
+  },
+  {
+   "body": "<pre><code>yes = rules.can(item,method)\n</code></pre><p>Returns true if any rule in this item has the given method.</p>\n<pre><code>yes = item:can(method)\n</code></pre><p>This function is inserted into the items.metatable so it can be called \ndirectly from an item.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/rules.lua",
+   "line": 96,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules.can",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua"
+  },
+  {
+   "body": "<pre><code>rule = rules.set(rule)\n</code></pre><p>Set this base rule into the name space using rule.name which must \nbe a string.</p>\n<p>Multiple rules can be applied to an item and each rule will be applied \nin the order listed.</p>\n<p>A rule is a table of named functions that can be applied to an item.</p>\n<pre><code>rule.setup(item)\n</code></pre><p>Must setup the item so that it is safe to call the other rules on it.</p>\n<pre><code>rule.clean(item)\n</code></pre><p>Should cleanup anything that needs cleaning.</p>\n<pre><code>rule.tick(item)\n</code></pre><p>Should perform a single time tick update on the item.\n<br/>\n<br/></p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/yarn/rules.lua",
+   "line": 28,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules.set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua"
+  },
+  {
+   "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)\n</code></pre><p>The oven module must be baked so only exposes a bake function.</p>\n<p>All the other functions are returned from within the bake function.</p>\n<p>possible ENV settings</p>\n<pre><code>gamecake_tongue=english\ngamecake_flavour=sdl\n</code></pre>",
+   "count": 2,
+   "file": "../lua/wetgenes/gamecake/oven.lua",
+   "line": 6,
+   "name": "lua.wetgenes.gamecake.oven",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
+  },
+  {
+   "body": "<pre><code>oven=wetgenes.gamecake.oven.bake(opts)\n</code></pre><p>Bake creates an instance of a lua module bound to a state. Here we \nare creating the main state that other modules will then bind to.</p>\n<p>We call each state an OVEN to fit into the gamecake naming scheme \nthen we bake a module in this oven to bind them to the common state.</p>\n<p>Think of it as a sub version of require, so require gets the global \npointer for a module and bake is used to get the a module bound to \nan oven.</p>\n<p>By using this bound state we reduce the verbosity of connecting \nmodules and sharing state between them.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/oven.lua",
+   "line": 44,
+   "name": "lua.wetgenes.gamecake.oven.bake",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
+  },
+  {
+   "body": "<pre><code>local widgets=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;)\n</code></pre><p>A collection of widgets, rendered using gles2 code and controlled \nusing the mouse, keyboard or a joystick. EG click fire and move \nleft/right to adjust a slider value.</p>\n<p>Widgets must be created and bound to an oven, using the \noven.rebake function.</p>\n<p>This has undergone a number of rewrites as we try to simplify the \nwidget creation and layout process. Eventually we ended up with a \nfixed size system of widget placement so every widget must have a \nknown size in advance, however we allow scaling to occur so for \ninstance building a 256x256 widget does not mean that it has to be \ndisplayed at 256x256 it just means it will be square.</p>\n<p>The basic layout just lets you place these widgets in other widgets \nas left to right lines. So as long as you get your sizes right you \ncan easily place things just using a list and without keeping track \nof the current position.</p>\n<p>Other layout options are available, such as absolute positioning for \nfull control and we have simple custom skin versions of the buttons \nas well rather than the built in skins.</p>\n<p>All value data is handled by data structures that contain ranges and \nresolutions for data allowing the same data to be bound to multiple \ndisplay widgets. For instance the same data can be linked to the \nposition of a slider as well as the content of a text display. I \nthink the kids call this sort of thing an MVC pattern but that&#39;s a \nterribly dull name.</p>\n<p>Swanky paint is probably the most advanced used of the widgets so far\nbut I suspect we will be making a simple text editor in the near \nfuture. Designed for advanced in game tweaking of text files.</p>\n",
+   "count": 2,
+   "file": "../lua/wetgenes/gamecake/widgets/init.lua",
+   "line": 13,
+   "name": "lua.wetgenes.gamecake.widgets",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/init.lua"
+  },
+  {
+   "body": "<pre><code>master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\n\nmaster=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup(\n    {font=&quot;Vera&quot;,text_size=16,grid_size=32,skin=0} )\n</code></pre><p>Create a master widget, this widget which is considered the root of \nyour GUI. It will be filled with functions/data and should contain all \nthe functions you need to add data and widgets.</p>\n<p>You can pass in these configuration values in a table, the example \nshown above has soom good defaults.</p>\n<pre><code>font=&quot;Vera&quot;\n</code></pre><p>The default font to use, this must have already been loaded via \nwetgenes.gamecake.fonts functions.</p>\n<pre><code>text_size=16\n</code></pre><p>The default pixel height to render text at.</p>\n<pre><code>grid_size=32\n</code></pre><p>The size in pixels that we try and create buttons at.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/init.lua",
+   "line": 63,
+   "name": "lua.wetgenes.gamecake.widgets.setup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/init.lua"
+  },
+  {
+   "body": "<pre><code>local wgrd=require(&quot;wetgenes.grd&quot;)\n</code></pre><p>We use wgrd as the local name of this library.</p>\n<p>Handle bitmap creation, loading, saving and blitting. The bitmap and \nthe colormap for indexed bitmaps are represented by the same data \nstructure which describes a continuous chunk of memory with optional \nability to select an area of a larger chunk using simple byte spans.</p>\n<p>Swanky Paint uses this to manage its bitmaps and its also used to \nconvert art into data at build time for use in the GameCake engine. The \nPageCake engine uses this for image management, creating live thumbnails \nand so on.</p>\n<p>We load and save jpeg, png and gif. The png lib contains extensions for \napng which allows animation chunks. Animations are contained in the Z \n(depth) dimension of the grd.</p>\n<p>The following are possible format options that we support. Most of them \nare OpenGL friendly.</p>\n<pre><code>wgrd.FMT_U8_RGBA\n</code></pre><p>32 bits per pixel with a byte order of red, green, blue, alpha and a \nlittle endian U32 of ABGR. We prefer this byte order because OpenGL.</p>\n<pre><code>wgrd.FMT_U8_ARGB\n</code></pre><p>32 bits per pixel with a byte order of alpha, red, green, blue and a \nlittle endian U32 of BGRA.</p>\n<pre><code>wgrd.FMT_U8_RGB\n</code></pre><p>24 bits per pixel with a byte order of red, green, blue.</p>\n<pre><code>wgrd.FMT_U8_INDEXED\n</code></pre><p>8 bits per pixel which indexes a wgrd.FMT_U8_RGBA palette.</p>\n<pre><code>wgrd.FMT_U8_LUMINANCE\n</code></pre><p>8 bits per pixel, grey scale only.</p>\n<pre><code>wgrd.FMT_U8_ALPHA\n</code></pre><p>8 bits per pixel, alpha only.</p>\n<pre><code>wgrd.FMT_U16_RGBA_5551\n</code></pre><p>16 bits per pixel with 5 bits each of red,green,blue and 1 bit of alpha \npacked into a single U16.</p>\n<pre><code>wgrd.FMT_U16_RGBA_4444\n</code></pre><p>16 bits per pixel with 4 bits each of red,green,blue,alpha packed into \na single U16.</p>\n<pre><code>wgrd.FMT_U16_RGBA_5650\n</code></pre><p>16 bits per pixel with 4 bits of red, 5 bits of green and 4 bits of \nblue packed into a single U16.\n<br/>\n<br/></p>\n<pre><code>wgrd.FMT_U8_RGBA_PREMULT\nwgrd.FMT_U8_ARGB_PREMULT\nwgrd.FMT_U8_INDEXED_PREMULT\nwgrd.FMT_U16_RGBA_5551_PREMULT\nwgrd.FMT_U16_RGBA_4444_PREMULT\nwgrd.FMT_U16_RGBA_5650_PREMULT\n</code></pre><p>Are all just pre-multiplied alpha versions of the base format described \nabove.</p>\n<p>Check this link out for why pre-multiplied alpha is a good idea for any \nimage that will be used as a texture \n<a href=\"http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx\">http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx</a>\n<br/>\n<br/></p>\n<pre><code>wgrd.GRD_FMT_HINT_PNG\nwgrd.GRD_FMT_HINT_JPG\nwgrd.GRD_FMT_HINT_GIF\n</code></pre><p>These are used to choose a specific file format when loading or saving.</p>\n",
+   "count": 36,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 6,
+   "name": "lua.wetgenes.grd",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>ga:adjust_contrast(sub,con)\n</code></pre><p>sub is the middle grey value, probably 127, and con is the amount of \ncontrast.</p>\n<p>A con of 0 should have no effect, a con of -1 will be a flat grey and a \ncon of 1 will give a huge contrast increase.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 1123,
+   "name": "lua.wetgenes.grd.adjust_contrast",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>ga:adjust_hsv(hue,saturation,value)\n</code></pre><p>Add hue and adjust -1 to +1 in for saturation and value.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 1110,
+   "name": "lua.wetgenes.grd.adjust_hsv",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>ga:adjust_rgb(red,green,blue)\n</code></pre><p>Adjust -1 to +1 in for each RGB component.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 1097,
+   "name": "lua.wetgenes.grd.adjust_rgb",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:attr_redux(cw,ch,num,sub,bak)\n</code></pre><p>Perform attribute clash simulation on an indexed image.</p>\n<p>cw,ch are the width and height of each character we are simulating, 8x8 \nis the right size for spectrum attrs but could be 4x8 for c64 multicolor \nmode.</p>\n<p>num is the number of colors allowed within this area, so 2 for spectrum mode.</p>\n<p>sub is the size of sub pallete groups, eg 16 in nes mode or 8 in \nspectrum mode, EG bright simulation in spectrum mode requires all \ncolors in a attr block to be from the bright palette or the dark \npalette no mixing so this forces that grouping. Set to 0 or 256 and \nthis restriction will be disabled.</p>\n<p>bak is the index of the background color that is shared across all \ncharacters, set to -1 if there is no shared background color.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 609,
+   "name": "lua.wetgenes.grd.attr_redux",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:blit(gb,x,y,cx,cy,cw,ch)\n</code></pre><p>Blit a 2D area from one grd into another.</p>\n<p>gb is the grd to blit from.</p>\n<p>x,y is the location to blit too.</p>\n<p>cx,cy,cw,ch is a clip area that should be applied to gb before it is \nblitted. EG to specify an area within gb. If not provided it will \ndefault to the entirety of gb,</p>\n<p>g (destination) must be FMT_U8_RGBA and gb (source) must be \nFMT_U8_RGBA_PREMULT this function will blend the images using normal \nalpha blending.</p>\n<p>This is not overly optimised but should be reasonably fast.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 854,
+   "name": "lua.wetgenes.grd.blit",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:clear(color)\n</code></pre><p>Fill this grd with a single color, the color passed in depends on the \nformat of the grd, it could be an index value for 8bit images or a \n32bit value for rgba images.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 575,
+   "name": "lua.wetgenes.grd.clear",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>gr=g:clip(x,y,z,w,h,d)\n</code></pre><p>create a clipped window into this grd</p>\n<p>the actual data is still stored in the original, so any changes there will effect the newly returned grd</p>\n<p>x,y,z are the staring pixel and w,h,d are the width height and depth in pixels.</p>\n<p>If you intend to use this clipped area for an extended period of time then you should duplicate this grd once you do this.</p>\n<p>This returns a new grd with gr.parent set to g (the original grd)</p>\n<p>This is a very shallow dangerous copy and should only really be used for temporary actions.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 995,
+   "name": "lua.wetgenes.grd.clip",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:convert(fmt)\n</code></pre><p>Convert this grd to a new format, eg start with an 8 bit indexed grd \nand convert it to 32 bit like by passing in wgrd.FMT_U8_RGBA as the fmt.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 540,
+   "name": "lua.wetgenes.grd.convert",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:copy_data(gb)\n</code></pre><p>Copy all of the bitmap data from gb into g.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 972,
+   "name": "lua.wetgenes.grd.copy_data",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:copy_data_layer(gb,z,zb)\n</code></pre><p>Copy one layer (frame) of the bitmap data from gb into g. z is the \ndepth of the layer to copy into zb is the depth of the layer to copy \nfrom.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 982,
+   "name": "lua.wetgenes.grd.copy_data_layer",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>ga=wgrd.create(gb)\n</code></pre><p>Duplicate the grd.</p>\n<pre><code>ga=wgrd.create(format,width,height,depth)\n</code></pre><p>Create a grd in the given format with the given width height and depth. </p>\n<pre><code>ga=wgrd.create(filename,opts)\n</code></pre><p>Load an image from the file system.</p>\n<pre><code>ga=wgrd.create()\n</code></pre><p>Create a blank grd of 0 dimensions.</p>\n<p>This is usually the only wgrd function you would need to call as once you \nhave a grd you can use the : calling convention to modify it. The other \nfunctions will be shown as examples using the : calling convention.</p>\n<pre><code>wgrd.create():load(opts)\n</code></pre><p>For instance could be used if you wish to perform a more esoteric load \nthan from the file system.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns a grd object.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 278,
+   "name": "lua.wetgenes.grd.create",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:create_convert(fmt)\n</code></pre><p>Like convert but returns a new grd rather than converting in place.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 560,
+   "name": "lua.wetgenes.grd.create_convert",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>gr=g:create_normal()\n</code></pre><p>convert a greyscale height map  into an rgb normal map using the sobel filter.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 1028,
+   "name": "lua.wetgenes.grd.create_normal",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:destroy()\n</code></pre><p>Free the grd and associated memory. This will of course be done \nautomatically by garbage collection but you can force it explicitly \nusing this function.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 356,
+   "name": "lua.wetgenes.grd.destroy",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>ga = g:duplicate()\n</code></pre><p>Create a duplicate of this grd and return it.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 526,
+   "name": "lua.wetgenes.grd.duplicate",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:flipx()\n</code></pre><p>This function flips the image reversing the x axis.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 785,
+   "name": "lua.wetgenes.grd.flipx",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:flipy()\n</code></pre><p>This function flips the image reversing the y axis.</p>\n<p>Some image formats and rendering engines like to use upside down images \nso this is rather useful.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 769,
+   "name": "lua.wetgenes.grd.flipy",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:info()\n</code></pre><p>This function looks at the userdata stored in g[0] and fills in the g \ntable with its values. So it refreshes the width height etc values to \nreflect any changes. This should not need to be called explicitly as it \nis called whenever we change anything.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 839,
+   "name": "lua.wetgenes.grd.info",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:load(opts)\n</code></pre><p>Load an image from memory or file system depending on settings in opts.</p>\n<pre><code>opts.fmt\n</code></pre><p>Lets you choose an image format, the strings &quot;jpg&quot;,&quot;png&quot; or &quot;gif&quot; will \nbe converted to the appropriate wgrd.FMT_HINT_* value.</p>\n<pre><code>opts.data\n</code></pre><p>Flags this as a load from memory and provides the data string to load \nfrom.</p>\n<pre><code>opts.filename\n</code></pre><p>Flags this as a load the file system and provides the file name to \nopen.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 414,
+   "name": "lua.wetgenes.grd.load",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:load_data(datastring,format)\n</code></pre><p>Load an image from memory.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 400,
+   "name": "lua.wetgenes.grd.load_data",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:load_file(filename,format)\n</code></pre><p>Load an image from the file system.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 386,
+   "name": "lua.wetgenes.grd.load_file",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:paint(gb,x,y,cx,cy,cw,ch,mode,trans,color)\n</code></pre><p>Blit a 2D area from one grd into another using dpaint style paint modes.</p>\n<p>Both grids must be indexed - FMT_U8_INDEXED</p>\n<p>gb is the grd to blit from.</p>\n<p>x,y is the location to blit too.</p>\n<p>cx,cy,cw,ch is a clip area that should be applied to gb before it is \nblitted. EG to specify an area within gb. If not provided it will \ndefault to the entirety of gb,</p>\n<p>mode is one of the following</p>\n<pre><code>PAINT_MODE_TRANS\n</code></pre><p>Skip the transparent color.</p>\n<pre><code>GRD_PAINT_MODE_COLOR\n</code></pre><p>Skip the transparent color and make every solid pixel the same color.</p>\n<pre><code>GRD_PAINT_MODE_COPY\n</code></pre><p>Copy the entire area.</p>\n<pre><code>GRD_PAINT_MODE_XOR\n</code></pre><p>XOR the values. (Can be used to find differences in an image)</p>\n<pre><code>GRD_PAINT_MODE_ALPHA\n</code></pre><p>Skip the transparent colors as defined in the palette.\n<br/>\n<br/></p>\n<p>trans is the index of the transparent color, bground color, for use in \nthe appropriate modes.</p>\n<p>color is the index of the drawing color, foreground color, for use in \nthe appropriate modes. \n<br/>\n<br/></p>\n<p>This is not overly optimised but should be reasonably fast.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 899,
+   "name": "lua.wetgenes.grd.paint",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:palette(x,w)\ng:palette(x,w,&quot;&quot;)\ng:palette(x,w,tab)\ng:palette(x,w,str)\ng:palette(x,w,grd)\n</code></pre><p>These are the same as g:pixels() but refer to the palette information \nwhich is stored as a 1 pixel high 256 pixel wide rgba image. The use of \n&quot;&quot; to read a string of bytes and passing in either a table of numerical \nvalues or string of bytes to write into the palette is the same system \nas used with pixels.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 694,
+   "name": "lua.wetgenes.grd.palette",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:pixels(x,y,w,h)\ng:pixels(x,y,z,w,h,d)\n</code></pre><p>Read the area of pixels as a table of numerical values, the amount of \nnumbers you get per pixel <em>depends</em> on the format of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,&quot;&quot;)\ng:pixels(x,y,z,w,h,d,&quot;&quot;)\n</code></pre><p>Read the area of pixels as a string of byte values, the amount of bytes \nyou get per pixel <em>depends</em> on the format of the grd. Note the passing \nin of an empty string to indicate that you with to receive a string.</p>\n<pre><code>g:pixels(x,y,w,h,tab)\ng:pixels(x,y,z,w,h,d,tab)\n</code></pre><p>Write the area of pixels from a table of numerical values which is \nprovided in tab, the amount of numbers you need to provide per pixel \n<em>depends</em> on the format of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,str)\ng:pixels(x,y,z,w,h,d,str)\n</code></pre><p>Write the area of pixels from a string of bytes which is provided in \nstr, the amount of bytes you need to provide per pixel <em>depends</em> on the \nformat of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,grd)\ng:pixels(x,y,z,w,h,d,grd)\n</code></pre><p>Write the area of pixels from a grd which is provided in grd. use \nclip/layer functions to select a portion of a larger grd.</p>\n<p>As you can see depending on the arguments given this does one of two \nthings, read some pixels or write some pixels. The area that is to be \nused is provided first, as a 2d(x,y,w,h) or 3d(x,y,z,w,h,d) area. To \nread or write the entire 2d image or the first frame of an animation \nuse (0,0,g.width,g.height)</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns the requested data.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 640,
+   "name": "lua.wetgenes.grd.pixels",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:quant(num)\n</code></pre><p>Convert to an 8bit indexed image containing a palette of the requested size.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 593,
+   "name": "lua.wetgenes.grd.quant",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>ga:remap(gb)\n</code></pre><p>Fill gb with a remaped version of ga, each pixel is mapped to the closest palette entry.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 1083,
+   "name": "lua.wetgenes.grd.remap",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:reset()\n</code></pre><p>Reset the grd which will now be a blank image of 0 dimensions.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 370,
+   "name": "lua.wetgenes.grd.reset",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:resize(w,h,d)\n</code></pre><p>Resize the image to the given dimensions, this does not scale the image \ndata so instead each pixel will be in the same place after the resize. \nThis gives a crop effect when shrinking and extra blank area at the \nbottom right when growing. Useful if for instance you want to upload a \ntexture to OpenGL and need to change the size to be a power of two in \nwidth and height so you can mipmap it.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 719,
+   "name": "lua.wetgenes.grd.resize",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:save(opts)\n</code></pre><p>Save an image to memory or filesytem depending on settings in opts.</p>\n<pre><code>opts.fmt\n</code></pre><p>Lets you choose an image format, the strings &quot;jpg&quot;,&quot;png&quot; or &quot;gif&quot; will \nbe converted to the appropriate wgrd.FMT_HINT_* value.</p>\n<p>We will guess opts.fmt from the file name extension if it is not \nprovided and a file name is.</p>\n<pre><code>opts.filename\n</code></pre><p>Flags this as a load the file system and provides the file name to \nwrite to. If no filename is given then we will be saving into memory \nand be returning that data string as the first return value.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert.</p>\n<p>If no file name is given then we <em>return</em> the data string that we saved.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 461,
+   "name": "lua.wetgenes.grd.save",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:scale(w,h,d)\n</code></pre><p>Scale the image to the given dimensions, this is currently using a \nterrible scale filter that is only any good at halving or doubling the \nsize.</p>\n<p>This should only be used to create mipmaps until it is replaced with a \nbetter scale filter.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 737,
+   "name": "lua.wetgenes.grd.scale",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:shrink(area)\n</code></pre><p>area is an {x=0,y=0,z=0,w=100,h=100,d=100} style table specifying a 3D\narea, set {z=0,d=1} for a 2D area.</p>\n<p>You should set this to the full size of the image.</p>\n<p>This function looks at the pixels in that area and shrinks each edge \ninwards if it is fully transparent then return this new area in the \nsame table that was passed in.</p>\n<p>You can then use this information to crop this image resulting in a \nsmaller sized grd containing all the solid pixels.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 816,
+   "name": "lua.wetgenes.grd.shrink",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:slide(dx,dy,dz)\n</code></pre><p>Slide the image along the x,y,z axis by the given amounts. The image wraps around the edges \nso no pixels are lost just moved around.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 755,
+   "name": "lua.wetgenes.grd.slide",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>ga:sort_cmap()\n</code></pre><p>Sort cmap into a &quot;good&quot; order and remap the image.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 1139,
+   "name": "lua.wetgenes.grd.sort_cmap",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>stream=g:stream(filename)\nstream=g:stream({filename=filename,...})\n</code></pre><p>Open a GIF stream, returns a table with the following functions,</p>\n<pre><code>stream:write(ga)\n</code></pre><p>Add a frame to the gif, each frame should be the same size and color map.</p>\n<pre><code>stream:close(ga)\n</code></pre><p>Close the stream and finalise the GIF.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 1041,
+   "name": "lua.wetgenes.grd.stream",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>g:xor(ga)\n</code></pre><p>Set our image data to the XOR of the image/palette data from ga and g.</p>\n<p>This is intended to be combined with g:shrink to work out the area of \nchange between the two images.</p>\n<p>Both grds must be the same size and format.</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 798,
+   "name": "lua.wetgenes.grd.xor",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>wgrdsvg=require(&quot;wetgenes.grdsvg&quot;)\n</code></pre><p>Build svg files from grd data (bitmaps)</p>\n",
+   "count": 2,
+   "file": "../lua/wetgenes/grdsvg.lua",
+   "line": 8,
+   "name": "lua.wetgenes.grdsvg",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grdsvg.lua"
+  },
+  {
+   "body": "<pre><code>local svgstring=wgrdsvg.string(grd,opts)\n</code></pre><p>Return an svg formated string that represents the input grd which must \nbe an indexed (8bit) format. Each pixel will be converted into a filled \nsvg rectangle element. Opts can contain the following options to \ncontrol the generation of the svg file.</p>\n<pre><code>opts.skip_transparent_pixels=true\n</code></pre><p>Do not export a rectangle for fully transparent pixels.</p>\n<pre><code>opts.scalex=1\n</code></pre><p>Width of each exported pixel.</p>\n<pre><code>opts.scaley=1\n</code></pre><p>Height of each exported pixel.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/grdsvg.lua",
+   "line": 21,
+   "name": "lua.wetgenes.grdsvg.string",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grdsvg.lua"
+  },
+  {
+   "body": "<pre><code>local wjson=require(&quot;wetgenes.json&quot;)\n</code></pre><p>other json encode/decode using pure lua library seemed too slow, \nhere is a fast and loose one lets see if it goes any faster :) \nshould be a direct replacement for JSON4Lua which is what I was \nusing before I profiled where all the time was getting spent...</p>\n<p>I needed it to be pure json as I was running it on googles appengine so\nthe lua was actually running in java, no C available.</p>\n<p>Anyhow I hope it is useful, in order to get it running faster I cut \nacross some corners so you may find some obscure problems.</p>\n",
+   "count": 3,
+   "file": "../lua/wetgenes/json.lua",
+   "line": 42,
+   "name": "lua.wetgenes.json",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua"
+  },
+  {
+   "body": "<pre><code>json_table = wjson.decode(json_string,opts)\n</code></pre><p>Convert a json string into a lua table.</p>\n<p>Set opts.null to wetgenes.json.null (or indeed any othe value) if \nyou would like to have nulls in your results. By default nulls are \nreplaced with nil.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/json.lua",
+   "line": 166,
+   "name": "lua.wetgenes.json.decode",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua"
+  },
+  {
+   "body": "<pre><code>json_string = wjson.encode(json_table)\n</code></pre><p>Convert a lua table into a json string. Note it must be valid json, \nprimarily make sure that the table is either an array or a dictionary \nbut never both.</p>\n<p>Also some of the internal lua types will cause errors, eg functions \nas these can not be converted into json.</p>\n<p>include nulls in the output by using wetgenes.json.null</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/json.lua",
+   "line": 304,
+   "name": "lua.wetgenes.json.encode",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua"
+  },
+  {
+   "body": "<pre><code>value = wetgenes.lookup(table,...)\n</code></pre><p>Safe recursive lookup within a table that returns nil if any part of \nthe lookup is nil so we never cause an error but just return nil. \nThis is intended to replace the following sort of code</p>\n<pre><code>a = b and b.c and b.c.d and b.c.d.e\n</code></pre><p>To get e only if all of its parent bits exist and not to cause any \nerror if they do not. instead use</p>\n<pre><code>a = lookup(b,&quot;c&quot;,&quot;d&quot;,&quot;e&quot;)\n</code></pre>",
+   "count": 1,
+   "file": "../lua/wetgenes/init.lua",
+   "line": 80,
+   "name": "lua.wetgenes.lookup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua"
+  },
+  {
+   "body": "<pre><code>wpackage=require(&quot;wetgenes.package&quot;)\n</code></pre><p>Some generic lowlevel functions for messing about with how lua works, \neg how modules are loaded.</p>\n",
+   "count": 2,
+   "file": "../lua/wetgenes/package.lua",
+   "line": 6,
+   "name": "lua.wetgenes.package",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/package.lua"
+  },
+  {
+   "body": "<pre><code>local module=wpackage.reload(modulename)\n</code></pre><p>A wrapper for require that forces a very dumb module reload by merging \na newly loaded module into the old module table if one already exists \nthis can easily break everything but should mostly work out of dumb \nluck.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/package.lua",
+   "line": 19,
+   "name": "lua.wetgenes.package.reload",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/package.lua"
+  },
+  {
+   "body": "",
+   "count": 4,
+   "name": "lua.wetgenes.plate"
+  },
+  {
+   "body": "<pre><code>value=wetgenes.plate.replace_lookup(name,data)\n</code></pre><p>Calls &quot;wetgenes.plate.table_lookup&quot; then performs special formatting on \ntable returns.</p>\n<p>Always returns a string or nil, so number values will converted to a \nstring.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/plate.lua",
+   "line": 91,
+   "name": "lua.wetgenes.plate.replace_lookup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/plate.lua"
+  },
+  {
+   "body": "<pre><code>bool=wetgenes.plate.replace_lookup_istable(name,data)\n</code></pre><p>Test if the return from &quot;wplate.table_lookup&quot; is a table.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/plate.lua",
+   "line": 75,
+   "name": "lua.wetgenes.plate.replace_lookup_istable",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/plate.lua"
+  },
+  {
+   "body": "<pre><code>value=wetgenes.plate.table_lookup(name,data)\n</code></pre><p>look up name inside data and return the value we found if we don&#39;t \nfind anything then we return nil</p>\n<p>name.name.name syntax may be used to reference tables within tables.</p>\n<p>A name that looks like a number may be converted into a number if it \ndoesnt exist as a string key, so &quot;array.1&quot; can be used to return the \nfirst item from an array.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/plate.lua",
+   "line": 15,
+   "name": "lua.wetgenes.plate.table_lookup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/plate.lua"
+  },
+  {
+   "body": "<pre><code>... = wetgenes.safecall(func,...)\n</code></pre><p>Call a function func(...) wrapped in an xpcall to catch and ignore \nerrors, the errors are printed to stderr with a traceback and the \nfunction returns nil on an error.</p>\n<p>So provided the function returns not nil on success then you can still \ntell if the function completed OK. Best to use for things that are OK \nto fail and the rest of the code will work around it.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/init.lua",
+   "line": 17,
+   "name": "lua.wetgenes.safecall",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua"
+  },
+  {
+   "body": "<pre><code>savefunc = wetgenes.safecall(func)\n</code></pre><p>Wrap a funciton in safecall, so it will never generate errors but can \nbe called as normal.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/init.lua",
+   "line": 39,
+   "name": "lua.wetgenes.safewrap",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua"
+  },
+  {
+   "body": "<pre><code>gamecake -e&quot; require(&#39;wetgenes&#39;).savescripts(&#39;./&#39;) &quot;\n</code></pre><p>Run the above from the command line.</p>\n<p>This will export all the gamecake internal strings into the file system \nit is saved into the current directory so be careful where you run it.</p>\n<p>Game Cake checks the files system first so, these files can be modified \nand they will replace the built in versions.</p>\n<pre><code>gamecake -e&quot; require(&#39;wetgenes&#39;).savescripts(&#39;./internal/&#39;) &quot;\n</code></pre><p>This is a safer version that will save the files to ./internal/lua/<em> \ninstead of just ./lua/</em></p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/init.lua",
+   "line": 134,
+   "name": "lua.wetgenes.set_env",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua"
+  },
+  {
+   "body": "<pre><code>-- copy all globals into locals, some locals are prefixed with a G to reduce name clashes\nlocal coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require\n\n-- grab some util functions\nlocal export,lookup,set_env=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;set_env&quot;)\n\n-- single line replacement for the module creation function\nlocal M={} ; package.loaded[(...)]=M ; M.module_name=(...) ; M.export=export\n</code></pre><p><br/>\n<br/></p>\n<p>A place to keep bits of code that needs to be copypasta into most \nmodules, for instance above is the current boilerplate code to be \nused when starting a new module.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/snipets.lua",
+   "line": 9,
+   "name": "lua.wetgenes.snippets",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/snipets.lua"
+  },
+  {
+   "body": "<p>Time And Relative Dimensions In Space is of course the perfect name for \na library of matrix based math functions.</p>\n<pre><code>local tardis=require(&quot;wetgenes.tardis&quot;)\n</code></pre><p>This tardis is a lua library for manipulating time and space with \nnumbers. Designed to work as pure lua but with a faster, but less \naccurate, f32 core by default.</p>\n<p>Recoil in terror as we use two glyph names for classes whilst typing in \nrandom strings of numbers and operators that may or may not contain \ntyops.</p>\n<pre><code>v# vector [#]\nm# matrix [#][#]\nq4 quaternion\n</code></pre><p>Each class is a table of # values [1] to [#] the 2d number streams are \nformatted the same as opengl (row-major) and metatables are used to \nprovide methods.</p>\n<p>The easy way of remembering the opengl 4x4 matrix layout is that the\ntranslate x,y,z values sit at 13,14,15 and 4,8,12,16 is normally set\nto the constant 0,0,0,1 for most transforms.</p>\n<pre><code>     | 1  5  9  13 |\n     | 2  6  10 14 |\nm4 = | 3  7  11 15 |\n     | 4  8  12 16 |\n</code></pre><p>The Lua code is normally replaced with a hopefully faster f32 based C \nversion, Use DISABLE_WETGENES_TARDIS_CORE before requiring this file to \nturn it off and get a pure lua library.</p>\n<p>This seems to be the simplest (programmer orientated) description of \nmost of the maths used here so go read it if you want to know what the \nfunny words mean.</p>\n<p><a href=\"http://www.j3d.org/matrix_faq/matrfaq_latest.html\">http://www.j3d.org/matrix_faq/matrfaq_latest.html</a></p>\n",
+   "count": 94,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 26,
+   "name": "lua.wetgenes.tardis",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<p>Array is the base class for all other tardis classes, it is just a \nstream of numbers, probably in a table but possibly a chunk of f32 \nvalues in a userdata.</p>\n",
+   "count": 5,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 112,
+   "name": "lua.wetgenes.tardis.array",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>string = array.__tostring(it)\n</code></pre><p>Convert an array to a string this is called by the lua tostring() function,</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 122,
+   "name": "lua.wetgenes.tardis.array.__tostring",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>a=a:compare(b)\na=a:compare(1,2,3,4)\n</code></pre><p>Are the numbers in b the same as the numbers in a, this function will \nreturn true if they are and false if they are not.</p>\n<p>If the arrays are of different lengths then this will return false.</p>\n<p>Numbers to test for can be given explicitly in the arguments and we \nfollow the same one level of tables rule as we do with array.set so any \nclass derived from array can be used.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 173,
+   "name": "lua.wetgenes.tardis.array.compare",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>ma = ma:product(mb)\nma = ma:product(mb,r)\n</code></pre><p>Look at the type and call the appropriate product function, to produce </p>\n<pre><code>mb x ma\n</code></pre><p>Note the right to left application and default returning of the \nleftmost term for chaining. This seems to make the most sense.</p>\n<p>If r is provided then the result is written into r and returned \notherwise ma is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 205,
+   "name": "lua.wetgenes.tardis.array.product",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>a=a:set(1,2,3,4)\na=a:set({1,2,3,4})\na=a:set({1,2},{3,4})\n</code></pre><p>Assign some numbers to an array, all the above examples will assign \n1,2,3,4 to the first four slots in the given array, as you can see we \nallow one level of tables. Any class that is based on this array \nclass can be used instead of an explicit table. So we can use a v2 or v3 or m4 etc etc.</p>\n<p>if more numbers are given than the size of the array then they will be \nignored.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 141,
+   "name": "lua.wetgenes.tardis.array.set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>metatable=tardis.class(name,class,...)\n</code></pre><p>Create a new metatable for an object class, optionally inheriting from other previously \ndeclared classes.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 82,
+   "name": "lua.wetgenes.tardis.class",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<p>A 3d space line class.</p>\n<p>[1]position , [2]normal</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
+   "count": 2,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1485,
+   "name": "lua.wetgenes.tardis.line",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>line = tardis.line.new(p,n)\n</code></pre><p>Create a new line and optionally set it to the given values.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1497,
+   "name": "lua.wetgenes.tardis.line.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<p>The metatable for a 2x2 matrix class, use the new function to actually create an object.</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
+   "count": 10,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 236,
+   "name": "lua.wetgenes.tardis.m2",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m2 = m2:adjugate()\nm2 = m2:adjugate(r)\n</code></pre><p>Adjugate this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 348,
+   "name": "lua.wetgenes.tardis.m2.adjugate",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m2 = m2:cofactor()\nm2 = m2:cofactor(r)\n</code></pre><p>Cofactor this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 321,
+   "name": "lua.wetgenes.tardis.m2.cofactor",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = m2:determinant()\n</code></pre><p>Return the determinant value of this m2.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 264,
+   "name": "lua.wetgenes.tardis.m2.determinant",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m2 = m2:identity()\n</code></pre><p>Set this m2 to the identity matrix.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 255,
+   "name": "lua.wetgenes.tardis.m2.identity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m2 = m2:inverse()\nm2 = m2:inverse(r)\n</code></pre><p>Inverse this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 364,
+   "name": "lua.wetgenes.tardis.m2.inverse",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = m2:minor_xy()\n</code></pre><p>Return the minor_xy value of this m2.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 278,
+   "name": "lua.wetgenes.tardis.m2.minor_xy",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m2 = tardis.m2.new()\n</code></pre><p>Create a new m2 and optionally set it to the given values, m2 methods \nusually return the input m2 for easy function chaining.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 245,
+   "name": "lua.wetgenes.tardis.m2.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m2 = m2:scale(s)\nm2 = m2:scale(s,r)\n</code></pre><p>Scale this m2 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 305,
+   "name": "lua.wetgenes.tardis.m2.scale",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m2 = m2:transpose()\nm2 = m2:transpose(r)\n</code></pre><p>Transpose this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 289,
+   "name": "lua.wetgenes.tardis.m2.transpose",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<p>The metatable for a 3x3 matrix class, use the new function to actually \ncreate an object.</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
+   "count": 10,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 383,
+   "name": "lua.wetgenes.tardis.m3",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m3 = m3:adjugate()\nm3 = m3:adjugate(r)\n</code></pre><p>Adjugate this m3.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 506,
+   "name": "lua.wetgenes.tardis.m3.adjugate",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m3 = m3:cofactor()\nm3 = m3:cofactor(r)\n</code></pre><p>Cofactor this m3.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 479,
+   "name": "lua.wetgenes.tardis.m3.cofactor",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = m3:determinant()\n</code></pre><p>Return the determinant value of this m3.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 412,
+   "name": "lua.wetgenes.tardis.m3.determinant",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m3 = m3:identity()\n</code></pre><p>Set this m3 to the identity matrix.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 403,
+   "name": "lua.wetgenes.tardis.m3.identity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m3 = m3:inverse()\nm3 = m3:inverse(r)\n</code></pre><p>Inverse this m3.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 522,
+   "name": "lua.wetgenes.tardis.m3.inverse",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = m3:minor_xy()\n</code></pre><p>Return the minor_xy value of this m3.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 428,
+   "name": "lua.wetgenes.tardis.m3.minor_xy",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m3 = tardis.m3.new()\n</code></pre><p>Create a new m3 and optionally set it to the given values, m3 methods \nusually return the input m3 for easy function chaining.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 393,
+   "name": "lua.wetgenes.tardis.m3.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m3 = m3:scale(s)\nm3 = m3:scale(s,r)\n</code></pre><p>Scale this m3 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 463,
+   "name": "lua.wetgenes.tardis.m3.scale",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m3 = m3:transpose()\nm3 = m3:transpose(r)\n</code></pre><p>Transpose this m3.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 447,
+   "name": "lua.wetgenes.tardis.m3.transpose",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<p>The metatable for a 4x4 matrix class, use the new function to actually \ncreate an object.</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
+   "count": 17,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 539,
+   "name": "lua.wetgenes.tardis.m4",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:add(m4b)\nm4 = m4:add(m4b,r)\n</code></pre><p>Add m4b this m4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 645,
+   "name": "lua.wetgenes.tardis.m4.add",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:adjugate()\nm4 = m4:adjugate(r)\n</code></pre><p>Adjugate this m4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 732,
+   "name": "lua.wetgenes.tardis.m4.adjugate",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:cofactor()\nm4 = m4:cofactor(r)\n</code></pre><p>Cofactor this m4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 705,
+   "name": "lua.wetgenes.tardis.m4.cofactor",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = m4:determinant()\n</code></pre><p>Return the determinant value of this m4.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 568,
+   "name": "lua.wetgenes.tardis.m4.determinant",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:identity()\n</code></pre><p>Set this m4 to the identity matrix.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 559,
+   "name": "lua.wetgenes.tardis.m4.identity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:inverse()\nm4 = m4:inverse(r)\n</code></pre><p>Inverse this m4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 748,
+   "name": "lua.wetgenes.tardis.m4.inverse",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:lerp(m4b,s)\nm4 = m4:lerp(m4b,s,r)\n</code></pre><p>Lerp from m4 to m4b by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 685,
+   "name": "lua.wetgenes.tardis.m4.lerp",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = m4:minor_xy()\n</code></pre><p>Return the minor_xy value of this m4.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 590,
+   "name": "lua.wetgenes.tardis.m4.minor_xy",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = tardis.m4.new()\n</code></pre><p>Create a new m4 and optionally set it to the given values, m4 methods \nusually return the input m4 for easy function chaining.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 549,
+   "name": "lua.wetgenes.tardis.m4.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:rotate(degrees,v3a)\nm4 = m4:rotate(degrees,v3a,r)\n</code></pre><p>Apply a rotation to this matrix.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 871,
+   "name": "lua.wetgenes.tardis.m4.rotate",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:scale(s)\nm4 = m4:scale(s,r)\n</code></pre><p>Scale this m4 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 625,
+   "name": "lua.wetgenes.tardis.m4.scale",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = m4:scale_v3(x,y,z)\nv3 = m4:scale_v3(x,y,z,r)\nv3 = m4:scale_v3(v3)\nv3 = m4:scale_v3(v3,r)\n</code></pre><p>Get v3 scale from a scale/rot/trans matrix</p>\n<p>If r is provided then the result is written into r and returned \notherwise a new v3 is created and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 815,
+   "name": "lua.wetgenes.tardis.m4.scale_v3",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:setrot(degrees,v3a)\n</code></pre><p>Set this matrix to a rotation matrix around the given normal.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 837,
+   "name": "lua.wetgenes.tardis.m4.setrot",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:sub(m4b)\nm4 = m4:sub(m4b,r)\n</code></pre><p>Subtract m4b this m4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 665,
+   "name": "lua.wetgenes.tardis.m4.sub",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:translate(x,y,z)\nm4 = m4:translate(x,y,z,r)\nm4 = m4:translate(v3)\nm4 = m4:translate(v3,r)\n</code></pre><p>Translate this m4 along its local axis by {x,y,z} or v3.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 765,
+   "name": "lua.wetgenes.tardis.m4.translate",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>m4 = m4:transpose()\nm4 = m4:transpose(r)\n</code></pre><p>Transpose this m4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 609,
+   "name": "lua.wetgenes.tardis.m4.transpose",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<p>A 3d space plane class.</p>\n<p>[1]position , [2]normal</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
+   "count": 2,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1506,
+   "name": "lua.wetgenes.tardis.plane",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>plane = tardis.plane.new(p,n)\n</code></pre><p>Create a new plane and optionally set it to the given values.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1518,
+   "name": "lua.wetgenes.tardis.plane.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<p>The metatable for a quaternion class, use the new function to actually create an object.</p>\n<p>We also inherit all the functions from tardis.v4</p>\n",
+   "count": 6,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1407,
+   "name": "lua.wetgenes.tardis.q4",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>q4 = q4:identity()\n</code></pre><p>Set this q4 to its 0,0,0,1 identity</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1426,
+   "name": "lua.wetgenes.tardis.q4.identity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>q4 = q4:lerp(q4b,s)\nq4 = q4:lerp(q4b,s,r)\n</code></pre><p>Nlerp from q4 to q4b by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise q4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1435,
+   "name": "lua.wetgenes.tardis.q4.lerp",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>q4 = tardis.q4.new()\n</code></pre><p>Create a new q4 and optionally set it to the given values, q4 methods \nusually return the input q4 for easy function chaining.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1416,
+   "name": "lua.wetgenes.tardis.q4.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>q4 = q4:rotate(degrees,v3a)\nq4 = q4:rotate(degrees,v3a,r)\n</code></pre><p>Apply a rotation to this quaternion.</p>\n<p>If r is provided then the result is written into r and returned \notherwise q4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1467,
+   "name": "lua.wetgenes.tardis.q4.rotate",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>q4 = q4:setrot(degrees,v3a)\n</code></pre><p>Set this matrix to a rotation matrix around the given normal.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1454,
+   "name": "lua.wetgenes.tardis.q4.setrot",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>name=tardis.type(object)\n</code></pre><p>This will return the type of an object previously registered with class</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 73,
+   "name": "lua.wetgenes.tardis.type",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<p>The metatable for a 2d vector class, use the new function to actually \ncreate an object.</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
+   "count": 13,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 887,
+   "name": "lua.wetgenes.tardis.v2",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v2 = v2:add(v2b)\nv2 = v2:add(v2b,r)\n</code></pre><p>Add v2b to v2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 986,
+   "name": "lua.wetgenes.tardis.v2.add",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = v2:cross(v2b)\n</code></pre><p>Extend to 3d then only return z value as x and y are always 0</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1045,
+   "name": "lua.wetgenes.tardis.v2.cross",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = v2:dot(v2b)\n</code></pre><p>Return the dot product of these two vectors.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1034,
+   "name": "lua.wetgenes.tardis.v2.dot",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v2 = v2:identity()\n</code></pre><p>Set this v2 to all zeros.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 907,
+   "name": "lua.wetgenes.tardis.v2.identity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = v2:len()\n</code></pre><p>Returns the length of this vector.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 928,
+   "name": "lua.wetgenes.tardis.v2.len",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = v2:lenlen()\n</code></pre><p>Returns the length of this vector, squared, this is often all you need \nfor comparisons so lets us skip the sqrt.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 916,
+   "name": "lua.wetgenes.tardis.v2.lenlen",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v2 = v2:mul(v2b)\nv2 = v2:mul(v2b,r)\n</code></pre><p>Multiply v2 by v2b.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1018,
+   "name": "lua.wetgenes.tardis.v2.mul",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v2 = tardis.v2.new()\n</code></pre><p>Create a new v2 and optionally set it to the given values, v2 methods \nusually return the input v2 for easy function chaining.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 897,
+   "name": "lua.wetgenes.tardis.v2.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v2 = v2:normalize()\nv2 = v2:normalize(r)\n</code></pre><p>Adjust the length of this vector to 1.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 971,
+   "name": "lua.wetgenes.tardis.v2.normalize",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v2 = v2:oo()\nv2 = v2:oo(r)\n</code></pre><p>One Over value. Build the reciprocal of all elements. </p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 939,
+   "name": "lua.wetgenes.tardis.v2.oo",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v2 = v2:scale(s)\nv2 = v2:scale(s,r)\n</code></pre><p>Scale this v2 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 955,
+   "name": "lua.wetgenes.tardis.v2.scale",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v2 = v2:sub(v2b)\nv2 = v2:sub(v2b,r)\n</code></pre><p>Subtract v2b from v2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1002,
+   "name": "lua.wetgenes.tardis.v2.sub",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<p>The metatable for a 3d vector class, use the new function to actually \ncreate an object.</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
+   "count": 13,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1056,
+   "name": "lua.wetgenes.tardis.v3",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = v3:add(v3b)\nv3 = v3:add(v3b,r)\n</code></pre><p>Add v3b to v3.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1155,
+   "name": "lua.wetgenes.tardis.v3.add",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v2 = v2:dot(v2b)\nv2 = v2:dot(v2b,r)\n</code></pre><p>Return the cross product of these two vectors.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1214,
+   "name": "lua.wetgenes.tardis.v3.cross",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = v3:dot(v3b)\n</code></pre><p>Return the dot product of these two vectors.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1203,
+   "name": "lua.wetgenes.tardis.v3.dot",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = v3:identity()\n</code></pre><p>Set this v3 to all zeros.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1076,
+   "name": "lua.wetgenes.tardis.v3.identity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = v3:len()\n</code></pre><p>Returns the length of this vector.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1097,
+   "name": "lua.wetgenes.tardis.v3.len",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = v3:lenlen()\n</code></pre><p>Returns the length of this vector, squared, this is often all you need \nfor comparisons so lets us skip the sqrt.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1085,
+   "name": "lua.wetgenes.tardis.v3.lenlen",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = v3:mul(v3b)\nv3 = v3:mul(v3b,r)\n</code></pre><p>Multiply v3 by v3b.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1187,
+   "name": "lua.wetgenes.tardis.v3.mul",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = tardis.v3.new()\n</code></pre><p>Create a new v3 and optionally set it to the given values, v3 methods \nusually return the input v3 for easy function chaining.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1066,
+   "name": "lua.wetgenes.tardis.v3.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = v3:normalize()\nv3 = v3:normalize(r)\n</code></pre><p>Adjust the length of this vector to 1.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1140,
+   "name": "lua.wetgenes.tardis.v3.normalize",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = v3:oo()\nv3 = v3:oo(r)\n</code></pre><p>One Over value. Build the reciprocal of all elements. </p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1108,
+   "name": "lua.wetgenes.tardis.v3.oo",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = v3:scale(s)\nv3 = v3:scale(s,r)\n</code></pre><p>Scale this v3 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1124,
+   "name": "lua.wetgenes.tardis.v3.scale",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = v3:sub(v3b)\nv3 = v3:sub(v3b,r)\n</code></pre><p>Subtract v3b from v3.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1171,
+   "name": "lua.wetgenes.tardis.v3.sub",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<p>The metatable for a 4d vector class, use the new function to actually \ncreate an object.</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
+   "count": 13,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1231,
+   "name": "lua.wetgenes.tardis.v4",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v4 = v4:add(v4b)\nv4 = v4:add(v4b,r)\n</code></pre><p>Add v4b to v4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1347,
+   "name": "lua.wetgenes.tardis.v4.add",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = v4:dot(v4b)\n</code></pre><p>Return the dot product of these two vectors.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1395,
+   "name": "lua.wetgenes.tardis.v4.dot",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v4 = v4:identity()\n</code></pre><p>Set this v4 to all zeros.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1251,
+   "name": "lua.wetgenes.tardis.v4.identity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = v4:len()\n</code></pre><p>Returns the length of this vector.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1289,
+   "name": "lua.wetgenes.tardis.v4.len",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>value = v4:lenlen()\n</code></pre><p>Returns the length of this vector, squared, this is often all you need \nfor comparisons so lets us skip the sqrt.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1277,
+   "name": "lua.wetgenes.tardis.v4.lenlen",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v4 = v4:mul(v4b)\nv4 = v4:mul(v4b,r)\n</code></pre><p>Multiply v4 by v4b.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1379,
+   "name": "lua.wetgenes.tardis.v4.mul",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v4 = tardis.v4.new()\n</code></pre><p>Create a new v4 and optionally set it to the given values, v4 methods \nusually return the input v4 for easy function chaining.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1241,
+   "name": "lua.wetgenes.tardis.v4.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v4 = v4:normalize()\nv4 = v4:normalize(r)\n</code></pre><p>Adjust the length of this vector to 1.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1332,
+   "name": "lua.wetgenes.tardis.v4.normalize",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v4 = v4:oo()\nv4 = v4:oo(r)\n</code></pre><p>One Over value. Build the reciprocal of all elements. </p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1300,
+   "name": "lua.wetgenes.tardis.v4.oo",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v4 = v4:scale(s)\nv4 = v4:scale(s,r)\n</code></pre><p>Scale this v4 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1316,
+   "name": "lua.wetgenes.tardis.v4.scale",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v4 = v4:sub(v4b)\nv4 = v4:sub(v4b,r)\n</code></pre><p>Subtract v4b from v4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1363,
+   "name": "lua.wetgenes.tardis.v4.sub",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = v4:to_v3()\nv3 = v4:to_v3(r)\n</code></pre><p>scale [4] to 1 then throw it away so we have a v3 xyz</p>\n<p>If r is provided then the result is written into r and returned \notherwise a new v3 is created and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1260,
+   "name": "lua.wetgenes.tardis.v4.to_v3",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  }
+ ],
+ "_output_chunkname": "html",
+ "_output_filename": "docs/lua/index.html",
+ "_root": "../../",
+ "_site": "{_root}",
+ "_sourcename": "docs/lua/index.html",
+ "body": "<div class=\"default\">\n\t<div class=\"contents\">\n\t\t<div class=\"topics\">\n\t\t\t<a class=\"par\" href=\"{_docs_json.dirname}\"><span>/</span></a>\n\t\t\t{_docs:menuwrap}\n\t\t</div>\n\t</div>\n\t<div class=\"main\">\n\t\t{_list:wrap}\n\t</div>\n</div>\n",
+ "content": "<div class=\"content\">{nav}{body}</div>\n",
+ "css": "\n/*\n\n\tVariables:\n\t\n\t------------------------------------------------------------------\n\tThe bright highlight used for the logo and links on hover\n\t------------------------------------------------------------------\n\t\n\tbase \t\t\t- Blue\t\t\t\t|\tLogo\n\tbase_alt \t\t- Light blue\t\t|\tLink hover\n\t\n\t------------------------------------------------------------------\n\tBasic colours for background and fonts\n\t------------------------------------------------------------------\n\t\n\tbase_back\t\t- Off white\t\t\t|\tMain body background\n\tbase_back_alt \t- Dark white\t\t|\tDocs column background\n\tbase_back_code\t- Dark blue grey\t|\tCode background\n\tbase_link\t\t- Medium grey\t\t|\tLink\n\tbase_font\t\t- Dark grey\t\t\t|\tBody font\n\tbase_code\t\t- White\t\t\t\t|\tCode font\n\tbase_src\t\t- Light grey\t\t|\tSource link background\n\t\n\t------------------------------------------------------------------\n\tExtra bits\n\t------------------------------------------------------------------\n\t\n\twhite \t\t\t- White\t\t\t\t|\tNavigation bar\n\thr\t\t \t\t- Blue\t\t\t\t|\tHorizontal line\n\n*/\n\n:root {\n  --base:#1400ff;\n  --base_alt:#3F2FFF;\n  --base_back:#f7f4fd;\n  --base_back_alt:#efefef;\n  --base_back_code:#282a36;\n  --base_link:#666;\n  --base_font:#484848;\n  --base_code:#fff;\n  --base_src:#d8d8d8;\n  --white:#fff;\n  --hr:#1400ff;\n}\n\n\n/*\n\n\tReset & base css\n\t\n\tbody\t|\t100vh - Avoid the IE 10-11 `min-height` bug.\n\n*/\n\n*{box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box; -o-box-sizing:border-box; -ms-box-sizing:border-box;}\n\nhtml,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{border:0;font-size:100%;font:inherit;vertical-align:top;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}\n\na,img\t\t{border:0; outline:none;}textarea:focus,input:focus{outline:0;}*:focus{outline:0;}\nbody, html\t{-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; min-width:100%; min-height:100%; width:100%; height:100%; height:100vh; margin:0 auto;}\n\n\n/*\n\n\tMain styles for the entire site\n\t\n\ta\t\t|\tTransition css animations\n\n*/\n\nbody \t{background-color:var(--base_back); color:var(--base_font); display:flex; flex-direction:column; font-family:Arial, sans-serif; font-size:13px; line-height:18px; position:relative; padding-top:4em;}\n\na\t\t{-webkit-transition:all .2s ease-in-out; -moz-transition:all .2s ease-in-out; -o-transition:all .2s ease-in-out; -ms-transition:all .2s ease-in-out; transition:all .2s ease-in-out;}\n\na \t\t{color:var(--base_font); text-decoration:none;}\na:hover {color:var(--base); cursor:pointer;}\na img \t{border:none;}\n\nh1 \t\t{font-size:30px; margin-bottom:26px;}\nh1 a\t{font-weight:bold;}\nh2 \t\t{font-size:24px;}\nh3 \t\t{font-size:18px;}\nh4 \t\t{font-size:16px;}\nh5 \t\t{font-size:14px;}\nh6 \t\t{font-size:13px;}\n\nb\t\t{font-weight:bold;}\np \t\t{font-size:19px; line-height:31px; margin-bottom:16px;}\nstrong\t{font-weight:bold;}\n\n.line, hr\t\t\t{border-top:1px dashed var(--hr); margin-top:40px; margin-bottom:20px; position:relative;}\n\nblockquote \t\t\t{font-family:georgia,serif; font-style:italic; padding:13px 13px 21px 15px; margin-bottom:18px;}\nblockquote:before\t{color:#eee; content:\"\\201C\"; font-family:georgia,serif; font-size:40px; margin-left:-10px;}\nblockquote p \t\t{font-size:14px; font-style:italic; font-weight:300; line-height:18px; margin-bottom:0;}\n\ncode, pre \t\t\t{color:var(--base_code); font-family:monospace;}\ncode\t\t\t\t{background:var(--base_back_code);  border-radius:3px; -webkit-border-radius:3px; -moz-border-radius:3px; font-size:12px; padding:1px 3px;}\npre\t\t\t\t\t{background-color:var(--base_back_code); border-radius:6px; font-size:11px; line-height:16px; margin:32px 0 18px 0; padding:14px; white-space:pre-wrap; word-wrap:break-word; }\npre:first-of-type\t{margin-top:0;}\npre code \t\t\t{background:transparent; font-size:14px; line-height:26px; padding:0;}\nsup \t\t\t\t{font-size:0.83em; line-height:0; vertical-align:super;}\n\n\n/*\n\n\tWrappers:\n\t\n\t* Prevent Chrome, Opera, and Safari from letting these items shrink \n\tto smaller than their content's default minimum size.\n\t\n\tcontent\t\t\t|\tFlex = *\n\tdefault \t\t|\tClean default div, used only in Docs body\n\tnav_wrap \t\t|\tNavigation bar for entire site\n\tright \t\t\t|\tClass for text-align right\n\n*/\n\n.content\t{flex:1 0 auto;}\n.default\t{margin:0 auto;}\n.nav_wrap\t{background-color:var(--white); left:0; padding:1.5em 3em; position:fixed; top:0; width:100%; z-index:100;}\n.right\t\t{text-align:right;}\n\n\n/*\n\n\tNavigation bar:\n\t\n\tThe main navigation bar is made up of a wrapper div that holds the\n\tmain logo link and an unordered list of all the other pages.\n\t\n\tnav\t\t \t\t|\tMain div for logo and links\n\tnav ul\t \t\t|\tListing of links\n\tnav a \t\t\t|\tLinks with padding\n\n*/\n\n.nav\t\t{align-items:center; display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; -moz-box-align:center; -ms-box-align:center; -webkit-box-align:center;}\n.nav ul\t\t{display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; justify-content:flex-end; width:100%;}\n.nav a\t\t{color:var(--base_link); font-size:1.5em; margin:0 1rem;}\n.nav a:hover{color:var(--base);}\n\n\n/*\t\n\n\tLogo:\n\t\n\t'Patua One' is only used here - @import found in ^.html\n\t\n\tlogo\t \t\t|\tSplash page logo\n\tlogo p\t \t\t|\tSplash page about div\n\tnav a.logo \t\t|\tLogo in navigation bar\n\t\n*/\n\n.logo\t\t{color:var(--base); font-family:'Patua One',georgia,serif;}\n.logo p\t\t{color:var(--base_font); font-size:5em; line-height:0.8em;}\n.nav a.logo {color:var(--base); display:block; font-size:1.8em;}\n\n\n/*\n\n\tInstall:\n\t\n\tInstallation instructions on the splash page\n\t\n\tinstall \t\t|\tMain wrapper\n\tinstall div\t\t|\tWrapper for installation divs\n\tinstall code\t|\tBigger fonts for code div\n\t\n*/\n\n.install \t\t\t\t\t{display:flex; justify-content:space-evenly; margin-top:2em; width:100%;}\n.install div\t\t\t\t{padding-left:5%; width:60%;}\n.install div:nth-of-type(1) {padding:0; width:40%;}\n.install.full div\t\t\t{width:100%;}\n.install code \t\t\t\t{font-size:1.6em;}\n\n\n/*\n\n\tBlog:\n\t\n\tblog_info \t\t|\tBlog author & date info\n\tblog_wrap \t\t|\tWrapper for a blog post\n\tblog_wrap a\t\t|\tFix long urls with these rules\n\tpaging_wrap\t\t|\tWrapper for paging links\n\t\n*/\n\n\n.blog_info\t\t{font-size:70%; position:absolute; right:10px; top:2.5em; background-color:#e7e1f5; padding:0 20px;}\n\n.blog_wrap\t\t{color:var(--base_font); font-family:sans-serif; font-size:20px; line-height:33px; margin:auto; padding:4em 0; position:relative; width:740px;}\n.blog_wrap h2\t{font-family:'Patua One',georgia,serif; font-size:2.5em; line-height:1em; padding-bottom:1em;}\n.blog_wrap a\t{overflow-wrap:break-word; word-wrap:break-word; word-break:break-word; -ms-hyphens:auto; -moz-hyphens:auto; -webkit-hyphens:auto; hyphens:auto;}\n.blog_wrap a \t{color:var(--base); text-decoration:none;}\n.blog_wrap a:hover {color:var(--base_alt); cursor:pointer;}\n\n.paging_wrap\t{display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; justify-content:space-between; margin-top:5em;}\n.paging_wrap a\t{font-size:80%; display:block;}\n\n\n/*\n\n\tFooter:\n\t\n\tSticky footer with flexbox\n\t\n\thttps://css-tricks.com/couple-takes-sticky-footer/\n\t\n\t* Prevent Chrome, Opera, and Safari from letting these items shrink \n\tto smaller than their content's default minimum size.\n\t\n\tfooter\t \t\t|\tFlex = *\n\tfooter ul \t\t|\tFooter links\n\t\n*/\n\n.footer\t\t\t{flex-shrink:0; padding:2em 4em;}\n.footer ul\t\t{display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; justify-content:space-between; width:100%;}\n\n\n/*\n\n\tMedia queries\n\t\n\tmain\t\t\t|\tWrapper for documentation page\n\tcontents\t\t|\tWrapper for documentation table of contents\n\t\n*/\n\n@media only screen and (-webkit-min-device-pixel-ratio: 1.5),\nonly screen and (-o-min-device-pixel-ratio: 3/2),\nonly screen and (min--moz-device-pixel-ratio: 1.5),\nonly screen and (min-device-pixel-ratio: 1.5) {\n\n\tbody\t\t\t{padding-top:7em;}\n\t.nav_wrap\t\t{padding:3em;}\n\t.nav\t\t\t{font-size:1.5em;}\n\t.blog_info\t\t{font-size:1em;}\n\t.blog_wrap h2\t{font-size:3em;}\n\tp \t\t\t\t{font-size:1.5em; line-height:1.5em; margin-bottom:1.5em;}\n\t.footer\t\t\t{font-size:1.5em;}\n\t.paging_wrap\t{font-size:1.5em;}\n\t\n\t.main\t\t\t{max-width:initial;}\n\t.contents\t\t{top:5.5em;}\n\n}\n",
+ "foot": "<div class=\"footer\">\n\t<ul>\n\t\t<li>Created with <a href=\"https://xriss.github.io/plated/\" class=\"logo\">plated^</a></li>\n\t\t<li><a href=\"#\">^.^</a></li>\n\t\t<li><a href=\"https://github.com/xriss/gamecake/blob/master/LICENSE\">2018 MIT License</a></li>\n\t</ul>\n</div>\n",
+ "head": "<title>{title}</title>\n<meta name=\"theme-color\" content=\"#2a3133\">\n<link href=\"https://fonts.googleapis.com/css?family=Patua+One\" rel=\"stylesheet\">\n<style>\n{css}\n</style>",
+ "html": "<html>\n\t<head>\n\t\t<title>{title}</title>\n\t\t<link href=\"https://fonts.googleapis.com/css?family=Patua+One\" rel=\"stylesheet\">\n\t\t<link rel='stylesheet' href='{_docs_json.dirname}/docs.css' />\n\t</head>\n\t<body>{nav}{body}</body>\n</html>\n",
+ "menuwrap": "{_it:menuwrap_link}",
+ "menuwrap_link": "{_it.count>1&&_it:menuwrap_link2}\n{_it.count==1&&_it:menuwrap_link1}",
+ "menuwrap_link1": "<a class=\"sub\" href=\"{_docs_json.dirname}/{_it.name}\"><span>/{_it.name}</span></a>",
+ "menuwrap_link2": "<a class=\"par\" href=\"{_docs_json.dirname}/{_it.name}\"><span>/{_it.name}</span></a>",
+ "nav": "<div class=\"nav_wrap\">\n\t<div class=\"nav\">\n\t\t<a href=\"{_root}\" class=\"logo\">Gamecake</a>\n\t\t<ul>\n\t\t\t<li><a href=\"https://github.com/xriss/gamecake\">Github</a></li>\n\t\t\t<li><a href=\"{_root}blog\">Blog</a></li>\n\t\t\t<li><a href=\"{_root}docs\">Documentation</a></li>\n\t\t</ul>\n\t</div>\n</div>\n",
+ "title": "Gamecake docs!",
+ "wrap": "\n<div class=\"wrap\">\n<h1><a href=\"{_docs_json.dirname}/{_it.name}\">{_it.name}</a></h1>\n<div class=\"source\"><a href=\"{_it.url}#L{_it.line}\">{_it.url}</a></div>\n<div>{[[}{_it.body}{]]}</div>\n</div>\n"
+}

@@ -1,0 +1,1220 @@
+{
+ "_dirname": "{_root}docs/lua.wetgenes.tardis.plane",
+ "_docs": [
+  {
+   "count": 7,
+   "name": "code"
+  },
+  {
+   "count": 6,
+   "name": "code.swankyquant"
+  },
+  {
+   "count": 1,
+   "name": "code.swankyquant.algorithm"
+  },
+  {
+   "count": 1,
+   "name": "code.swankyquant.color_distance"
+  },
+  {
+   "count": 1,
+   "name": "code.swankyquant.color_distance_weight"
+  },
+  {
+   "count": 1,
+   "name": "code.swankyquant.swanky_quant"
+  },
+  {
+   "count": 1,
+   "name": "code.swankyquant.swanky_quant_remap"
+  },
+  {
+   "count": 277,
+   "name": "lua"
+  },
+  {
+   "count": 3,
+   "name": "lua.glslang"
+  },
+  {
+   "count": 1,
+   "name": "lua.glslang.lint_gles2"
+  },
+  {
+   "count": 1,
+   "name": "lua.glslang.parse_chunks"
+  },
+  {
+   "count": 273,
+   "name": "lua.wetgenes"
+  },
+  {
+   "count": 64,
+   "name": "lua.wetgenes.chipmunk"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.chipmunk.arbiter"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.arbiter.ignore"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.arbiter.points"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.arbiter.surface_velocity"
+  },
+  {
+   "count": 16,
+   "name": "lua.wetgenes.chipmunk.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.angle"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.angular_velocity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.apply_force"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.apply_impulse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.center_of_gravity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.force"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.mass"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.moment"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.position"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.position_func"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.torque"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.type"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.velocity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.body.velocity_func"
+  },
+  {
+   "count": 6,
+   "name": "lua.wetgenes.chipmunk.constraint"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.constraint.collide_bodies"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.constraint.error_bias"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.constraint.impulse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.constraint.max_bias"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.constraint.max_force"
+  },
+  {
+   "count": 11,
+   "name": "lua.wetgenes.chipmunk.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.bounding_box"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.collision_type"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.elasticity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.filter"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.friction"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.query_point"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.query_segment"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.radius"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.sensor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.shape.surface_velocity"
+  },
+  {
+   "count": 26,
+   "name": "lua.wetgenes.chipmunk.space"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.add_handler"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.collision_bias"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.collision_persistence"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.collision_slop"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.constraint"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.contains"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.current_time_step"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.damping"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.gravity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.idle_speed_threshold"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.iterations"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.locked"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_bounding_box"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_point"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_point_nearest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_segment"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_segment_first"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.query_shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.reindex"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.sleep_time_threshold"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.step"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.space.type"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.export"
+  },
+  {
+   "count": 61,
+   "name": "lua.wetgenes.gamecake"
+  },
+  {
+   "count": 56,
+   "name": "lua.wetgenes.gamecake.fun"
+  },
+  {
+   "count": 19,
+   "name": "lua.wetgenes.gamecake.fun.chatdown"
+  },
+  {
+   "count": 6,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.get_tag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_tag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_tags"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_topic"
+  },
+  {
+   "count": 7,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.changes"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_subject"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_tag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_subject"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_tag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.dotnames"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.parse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.setup_chat"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.chatdown.text"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.gamecake.fun.entities"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.call"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.caste"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.reset"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.sortby_update"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems.call"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems.insert"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 23,
+   "name": "lua.wetgenes.gamecake.fun.yarn"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.cells"
+  },
+  {
+   "count": 14,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.cells"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.create_pages"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.find"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.get_big"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.insert"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.iterate_dotnames"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.iterate_parents"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.metatable"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.prefabs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.items.rules"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.pages"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.fun.yarn.prefabs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.prefabs.set"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules.apply"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules.can"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.yarn.rules.set"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.oven"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.oven.bake"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.widgets"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.setup"
+  },
+  {
+   "count": 36,
+   "name": "lua.wetgenes.grd"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.adjust_contrast"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.adjust_hsv"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.adjust_rgb"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.attr_redux"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.blit"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.clear"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.clip"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.convert"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.copy_data"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.copy_data_layer"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.create_convert"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.create_normal"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.duplicate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.flipx"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.flipy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.info"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.load"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.load_data"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.load_file"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.paint"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.palette"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.pixels"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.quant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.remap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.reset"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.resize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.save"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.shrink"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.slide"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.sort_cmap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.stream"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.grdsvg"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdsvg.string"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.json"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.json.decode"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.json.encode"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.lookup"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.package"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.package.reload"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.plate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.plate.replace_lookup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.plate.replace_lookup_istable"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.plate.table_lookup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.safecall"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.safewrap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.set_env"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.snippets"
+  },
+  {
+   "count": 94,
+   "name": "lua.wetgenes.tardis"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.tardis.array"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__tostring"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.compare"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.product"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.class"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.tardis.line"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.line.new"
+  },
+  {
+   "count": 10,
+   "name": "lua.wetgenes.tardis.m2"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.cofactor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.determinant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.inverse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.minor_xy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.transpose"
+  },
+  {
+   "count": 10,
+   "name": "lua.wetgenes.tardis.m3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.cofactor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.determinant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.inverse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.minor_xy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.transpose"
+  },
+  {
+   "count": 17,
+   "name": "lua.wetgenes.tardis.m4"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.cofactor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.determinant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.inverse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.lerp"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.minor_xy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.rotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.scale_v3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.sub"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.translate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.transpose"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.tardis.plane"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.plane.new"
+  },
+  {
+   "count": 6,
+   "name": "lua.wetgenes.tardis.q4"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.lerp"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.rotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.type"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.tardis.v2"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.dot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.len"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.lenlen"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.oo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.sub"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.tardis.v3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.dot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.len"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.lenlen"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.oo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.sub"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.tardis.v4"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.dot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.len"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.lenlen"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.oo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.sub"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.to_v3"
+  }
+ ],
+ "_docs_json": {
+  "dirname": "{_root}docs",
+  "dirs": {
+   "../../lua": "",
+   "../../lua_grd": ""
+  },
+  "ignore": {
+   "node_modules": true
+  },
+  "urlprefix": {
+   "../": "https://github.com/xriss/gamecake/blob/master/"
+  }
+ },
+ "_filename": "{_root}docs/lua.wetgenes.tardis.plane/index.html",
+ "_flags": {
+  "body": {
+   "trim": "ends"
+  },
+  "css": {
+   "same": "append"
+  },
+  "head": {
+   "trim": "ends"
+  },
+  "html": {
+   "trim": "ends"
+  },
+  "menuwrap": {
+   "trim": "ends"
+  },
+  "menuwrap_link": {
+   "trim": "ends"
+  },
+  "menuwrap_link1": {
+   "trim": "ends"
+  },
+  "menuwrap_link2": {
+   "trim": "ends"
+  },
+  "title": {
+   "trim": "ends"
+  }
+ },
+ "_list": [
+  {
+   "body": "<p>A 3d space plane class.</p>\n<p>[1]position , [2]normal</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
+   "count": 2,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1506,
+   "name": "lua.wetgenes.tardis.plane",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>plane = tardis.plane.new(p,n)\n</code></pre><p>Create a new plane and optionally set it to the given values.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1518,
+   "name": "lua.wetgenes.tardis.plane.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  }
+ ],
+ "_output_chunkname": "html",
+ "_output_filename": "docs/lua.wetgenes.tardis.plane/index.html",
+ "_root": "../../",
+ "_site": "{_root}",
+ "_sourcename": "docs/lua.wetgenes.tardis.plane/index.html",
+ "body": "<div class=\"default\">\n\t<div class=\"contents\">\n\t\t<div class=\"topics\">\n\t\t\t<a class=\"par\" href=\"{_docs_json.dirname}\"><span>/</span></a>\n\t\t\t{_docs:menuwrap}\n\t\t</div>\n\t</div>\n\t<div class=\"main\">\n\t\t{_list:wrap}\n\t</div>\n</div>\n",
+ "content": "<div class=\"content\">{nav}{body}</div>\n",
+ "css": "\n/*\n\n\tVariables:\n\t\n\t------------------------------------------------------------------\n\tThe bright highlight used for the logo and links on hover\n\t------------------------------------------------------------------\n\t\n\tbase \t\t\t- Blue\t\t\t\t|\tLogo\n\tbase_alt \t\t- Light blue\t\t|\tLink hover\n\t\n\t------------------------------------------------------------------\n\tBasic colours for background and fonts\n\t------------------------------------------------------------------\n\t\n\tbase_back\t\t- Off white\t\t\t|\tMain body background\n\tbase_back_alt \t- Dark white\t\t|\tDocs column background\n\tbase_back_code\t- Dark blue grey\t|\tCode background\n\tbase_link\t\t- Medium grey\t\t|\tLink\n\tbase_font\t\t- Dark grey\t\t\t|\tBody font\n\tbase_code\t\t- White\t\t\t\t|\tCode font\n\tbase_src\t\t- Light grey\t\t|\tSource link background\n\t\n\t------------------------------------------------------------------\n\tExtra bits\n\t------------------------------------------------------------------\n\t\n\twhite \t\t\t- White\t\t\t\t|\tNavigation bar\n\thr\t\t \t\t- Blue\t\t\t\t|\tHorizontal line\n\n*/\n\n:root {\n  --base:#1400ff;\n  --base_alt:#3F2FFF;\n  --base_back:#f7f4fd;\n  --base_back_alt:#efefef;\n  --base_back_code:#282a36;\n  --base_link:#666;\n  --base_font:#484848;\n  --base_code:#fff;\n  --base_src:#d8d8d8;\n  --white:#fff;\n  --hr:#1400ff;\n}\n\n\n/*\n\n\tReset & base css\n\t\n\tbody\t|\t100vh - Avoid the IE 10-11 `min-height` bug.\n\n*/\n\n*{box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box; -o-box-sizing:border-box; -ms-box-sizing:border-box;}\n\nhtml,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{border:0;font-size:100%;font:inherit;vertical-align:top;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}\n\na,img\t\t{border:0; outline:none;}textarea:focus,input:focus{outline:0;}*:focus{outline:0;}\nbody, html\t{-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; min-width:100%; min-height:100%; width:100%; height:100%; height:100vh; margin:0 auto;}\n\n\n/*\n\n\tMain styles for the entire site\n\t\n\ta\t\t|\tTransition css animations\n\n*/\n\nbody \t{background-color:var(--base_back); color:var(--base_font); display:flex; flex-direction:column; font-family:Arial, sans-serif; font-size:13px; line-height:18px; position:relative; padding-top:4em;}\n\na\t\t{-webkit-transition:all .2s ease-in-out; -moz-transition:all .2s ease-in-out; -o-transition:all .2s ease-in-out; -ms-transition:all .2s ease-in-out; transition:all .2s ease-in-out;}\n\na \t\t{color:var(--base_font); text-decoration:none;}\na:hover {color:var(--base); cursor:pointer;}\na img \t{border:none;}\n\nh1 \t\t{font-size:30px; margin-bottom:26px;}\nh1 a\t{font-weight:bold;}\nh2 \t\t{font-size:24px;}\nh3 \t\t{font-size:18px;}\nh4 \t\t{font-size:16px;}\nh5 \t\t{font-size:14px;}\nh6 \t\t{font-size:13px;}\n\nb\t\t{font-weight:bold;}\np \t\t{font-size:19px; line-height:31px; margin-bottom:16px;}\nstrong\t{font-weight:bold;}\n\n.line, hr\t\t\t{border-top:1px dashed var(--hr); margin-top:40px; margin-bottom:20px; position:relative;}\n\nblockquote \t\t\t{font-family:georgia,serif; font-style:italic; padding:13px 13px 21px 15px; margin-bottom:18px;}\nblockquote:before\t{color:#eee; content:\"\\201C\"; font-family:georgia,serif; font-size:40px; margin-left:-10px;}\nblockquote p \t\t{font-size:14px; font-style:italic; font-weight:300; line-height:18px; margin-bottom:0;}\n\ncode, pre \t\t\t{color:var(--base_code); font-family:monospace;}\ncode\t\t\t\t{background:var(--base_back_code);  border-radius:3px; -webkit-border-radius:3px; -moz-border-radius:3px; font-size:12px; padding:1px 3px;}\npre\t\t\t\t\t{background-color:var(--base_back_code); border-radius:6px; font-size:11px; line-height:16px; margin:32px 0 18px 0; padding:14px; white-space:pre-wrap; word-wrap:break-word; }\npre:first-of-type\t{margin-top:0;}\npre code \t\t\t{background:transparent; font-size:14px; line-height:26px; padding:0;}\nsup \t\t\t\t{font-size:0.83em; line-height:0; vertical-align:super;}\n\n\n/*\n\n\tWrappers:\n\t\n\t* Prevent Chrome, Opera, and Safari from letting these items shrink \n\tto smaller than their content's default minimum size.\n\t\n\tcontent\t\t\t|\tFlex = *\n\tdefault \t\t|\tClean default div, used only in Docs body\n\tnav_wrap \t\t|\tNavigation bar for entire site\n\tright \t\t\t|\tClass for text-align right\n\n*/\n\n.content\t{flex:1 0 auto;}\n.default\t{margin:0 auto;}\n.nav_wrap\t{background-color:var(--white); left:0; padding:1.5em 3em; position:fixed; top:0; width:100%; z-index:100;}\n.right\t\t{text-align:right;}\n\n\n/*\n\n\tNavigation bar:\n\t\n\tThe main navigation bar is made up of a wrapper div that holds the\n\tmain logo link and an unordered list of all the other pages.\n\t\n\tnav\t\t \t\t|\tMain div for logo and links\n\tnav ul\t \t\t|\tListing of links\n\tnav a \t\t\t|\tLinks with padding\n\n*/\n\n.nav\t\t{align-items:center; display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; -moz-box-align:center; -ms-box-align:center; -webkit-box-align:center;}\n.nav ul\t\t{display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; justify-content:flex-end; width:100%;}\n.nav a\t\t{color:var(--base_link); font-size:1.5em; margin:0 1rem;}\n.nav a:hover{color:var(--base);}\n\n\n/*\t\n\n\tLogo:\n\t\n\t'Patua One' is only used here - @import found in ^.html\n\t\n\tlogo\t \t\t|\tSplash page logo\n\tlogo p\t \t\t|\tSplash page about div\n\tnav a.logo \t\t|\tLogo in navigation bar\n\t\n*/\n\n.logo\t\t{color:var(--base); font-family:'Patua One',georgia,serif;}\n.logo p\t\t{color:var(--base_font); font-size:5em; line-height:0.8em;}\n.nav a.logo {color:var(--base); display:block; font-size:1.8em;}\n\n\n/*\n\n\tInstall:\n\t\n\tInstallation instructions on the splash page\n\t\n\tinstall \t\t|\tMain wrapper\n\tinstall div\t\t|\tWrapper for installation divs\n\tinstall code\t|\tBigger fonts for code div\n\t\n*/\n\n.install \t\t\t\t\t{display:flex; justify-content:space-evenly; margin-top:2em; width:100%;}\n.install div\t\t\t\t{padding-left:5%; width:60%;}\n.install div:nth-of-type(1) {padding:0; width:40%;}\n.install.full div\t\t\t{width:100%;}\n.install code \t\t\t\t{font-size:1.6em;}\n\n\n/*\n\n\tBlog:\n\t\n\tblog_info \t\t|\tBlog author & date info\n\tblog_wrap \t\t|\tWrapper for a blog post\n\tblog_wrap a\t\t|\tFix long urls with these rules\n\tpaging_wrap\t\t|\tWrapper for paging links\n\t\n*/\n\n\n.blog_info\t\t{font-size:70%; position:absolute; right:10px; top:2.5em; background-color:#e7e1f5; padding:0 20px;}\n\n.blog_wrap\t\t{color:var(--base_font); font-family:sans-serif; font-size:20px; line-height:33px; margin:auto; padding:4em 0; position:relative; width:740px;}\n.blog_wrap h2\t{font-family:'Patua One',georgia,serif; font-size:2.5em; line-height:1em; padding-bottom:1em;}\n.blog_wrap a\t{overflow-wrap:break-word; word-wrap:break-word; word-break:break-word; -ms-hyphens:auto; -moz-hyphens:auto; -webkit-hyphens:auto; hyphens:auto;}\n.blog_wrap a \t{color:var(--base); text-decoration:none;}\n.blog_wrap a:hover {color:var(--base_alt); cursor:pointer;}\n\n.paging_wrap\t{display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; justify-content:space-between; margin-top:5em;}\n.paging_wrap a\t{font-size:80%; display:block;}\n\n\n/*\n\n\tFooter:\n\t\n\tSticky footer with flexbox\n\t\n\thttps://css-tricks.com/couple-takes-sticky-footer/\n\t\n\t* Prevent Chrome, Opera, and Safari from letting these items shrink \n\tto smaller than their content's default minimum size.\n\t\n\tfooter\t \t\t|\tFlex = *\n\tfooter ul \t\t|\tFooter links\n\t\n*/\n\n.footer\t\t\t{flex-shrink:0; padding:2em 4em;}\n.footer ul\t\t{display:flex; display:-webkit-box; display:-moz-box; display:-ms-flexbox; display:-webkit-flex; justify-content:space-between; width:100%;}\n\n\n/*\n\n\tMedia queries\n\t\n\tmain\t\t\t|\tWrapper for documentation page\n\tcontents\t\t|\tWrapper for documentation table of contents\n\t\n*/\n\n@media only screen and (-webkit-min-device-pixel-ratio: 1.5),\nonly screen and (-o-min-device-pixel-ratio: 3/2),\nonly screen and (min--moz-device-pixel-ratio: 1.5),\nonly screen and (min-device-pixel-ratio: 1.5) {\n\n\tbody\t\t\t{padding-top:7em;}\n\t.nav_wrap\t\t{padding:3em;}\n\t.nav\t\t\t{font-size:1.5em;}\n\t.blog_info\t\t{font-size:1em;}\n\t.blog_wrap h2\t{font-size:3em;}\n\tp \t\t\t\t{font-size:1.5em; line-height:1.5em; margin-bottom:1.5em;}\n\t.footer\t\t\t{font-size:1.5em;}\n\t.paging_wrap\t{font-size:1.5em;}\n\t\n\t.main\t\t\t{max-width:initial;}\n\t.contents\t\t{top:5.5em;}\n\n}\n",
+ "foot": "<div class=\"footer\">\n\t<ul>\n\t\t<li>Created with <a href=\"https://xriss.github.io/plated/\" class=\"logo\">plated^</a></li>\n\t\t<li><a href=\"#\">^.^</a></li>\n\t\t<li><a href=\"https://github.com/xriss/gamecake/blob/master/LICENSE\">2018 MIT License</a></li>\n\t</ul>\n</div>\n",
+ "head": "<title>{title}</title>\n<meta name=\"theme-color\" content=\"#2a3133\">\n<link href=\"https://fonts.googleapis.com/css?family=Patua+One\" rel=\"stylesheet\">\n<style>\n{css}\n</style>",
+ "html": "<html>\n\t<head>\n\t\t<title>{title}</title>\n\t\t<link href=\"https://fonts.googleapis.com/css?family=Patua+One\" rel=\"stylesheet\">\n\t\t<link rel='stylesheet' href='{_docs_json.dirname}/docs.css' />\n\t</head>\n\t<body>{nav}{body}</body>\n</html>\n",
+ "menuwrap": "{_it:menuwrap_link}",
+ "menuwrap_link": "{_it.count>1&&_it:menuwrap_link2}\n{_it.count==1&&_it:menuwrap_link1}",
+ "menuwrap_link1": "<a class=\"sub\" href=\"{_docs_json.dirname}/{_it.name}\"><span>/{_it.name}</span></a>",
+ "menuwrap_link2": "<a class=\"par\" href=\"{_docs_json.dirname}/{_it.name}\"><span>/{_it.name}</span></a>",
+ "nav": "<div class=\"nav_wrap\">\n\t<div class=\"nav\">\n\t\t<a href=\"{_root}\" class=\"logo\">Gamecake</a>\n\t\t<ul>\n\t\t\t<li><a href=\"https://github.com/xriss/gamecake\">Github</a></li>\n\t\t\t<li><a href=\"{_root}blog\">Blog</a></li>\n\t\t\t<li><a href=\"{_root}docs\">Documentation</a></li>\n\t\t</ul>\n\t</div>\n</div>\n",
+ "title": "Gamecake docs!",
+ "wrap": "\n<div class=\"wrap\">\n<h1><a href=\"{_docs_json.dirname}/{_it.name}\">{_it.name}</a></h1>\n<div class=\"source\"><a href=\"{_it.url}#L{_it.line}\">{_it.url}</a></div>\n<div>{[[}{_it.body}{]]}</div>\n</div>\n"
+}
