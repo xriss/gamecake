@@ -268,7 +268,7 @@ only screen and (min-device-pixel-ratio: 1.5) {
 	</div>
 </div>
 <div class="blog_wrap">
-	<h2 id="-_blog_post_json-title-">Building in boxes.</h2>
+	<h2 id="_blog_post_jsontitle">Building in boxes.</h2>
 <p>I have just spent a week cleaning up the gamecake build process 
 which has been suffering from bitrot.</p>
 <p>Originally, many years ago, I was trying to use cross builds where 
@@ -285,7 +285,7 @@ of which are still experimental, eg. getting windows working well under
 Linux so I can try and step out of win32. Apart from these boxes which 
 are used for building releases, there has been some major cleanup in the 
 following public builds.</p>
-<p><strong> We have a docker <em>build</em> box. </strong></p>
+<p><em>* We have a docker *build</em> box. **</p>
 <p>This is ubuntu 16.04 with premake4, SDL2 and LuaJIT built from source; 
 we need to build them from source as the version you will find in apt 
 is often out of date especially when using an older version of Ubuntu.</p>
@@ -297,24 +297,25 @@ problems and it was easier to bump to 16.04 which is only a couple of
 years difference in terms of code base and stability.</p>
 <p><a href="https://hub.docker.com/r/xriss/gamecake/">https://hub.docker.com/r/xriss/gamecake/</a> is now used as the base box 
 for <a href="https://circleci.com/gh/xriss/gamecake">https://circleci.com/gh/xriss/gamecake</a> builds.</p>
-<p><strong> Due to significantly improved build time by not including SDL2 and 
+<p>** Due to significantly improved build time by not including SDL2 and 
 LuaJIT from source, we now also build for Windows and Emscripten with 
-every push. </strong></p>
+every push. **</p>
 <p>CircleCI has switched to a new configuration system which meant we 
 needed to update our config files before they stop working later this 
 year. It seems the build artifacts are no longer available to the 
 public. We do, however, save the actual build outputs with every build.</p>
-<p><strong> We have decided to dump the pagecake build. </strong></p>
+<p>** We have decided to dump the pagecake build. **</p>
 <p>This was an OpenResty nginx with extra libs but I did not keep nginx 
 very well up-to-date. So instead we now just use a standard OpenResty. 
 Extra libraries are made available to the nginx lua host as rocks so 
 this keeps us nicely up-to-date and gives us a reason to start 
 publishing rocks.</p>
-<p><strong> I&#39;ve decided to keep all of the libraries together in one rock.</strong><br>See <a href="https://luarocks.org/modules/xriss/gamecake">https://luarocks.org/modules/xriss/gamecake</a> for the rocks.</p>
+<p>** I&#39;ve decided to keep all of the libraries together in one rock.**  
+See <a href="https://luarocks.org/modules/xriss/gamecake">https://luarocks.org/modules/xriss/gamecake</a> for the rocks.</p>
 <p>For now, these are just the most essential ones to keep all our websites 
 running but eventually a luarocks install of gamecake will be the same 
 as downloading one of our prebuilt executables.</p>
-<p><strong> We have snap builds.</strong></p>
+<p>** We have snap builds.**</p>
 <p>These can be found at <a href="https://dashboard.snapcraft.io/snaps/gamecake/">https://dashboard.snapcraft.io/snaps/gamecake/</a> 
 and is probably one of the easiest ways of getting a Linux version 
 which also supports ARM machines.</p>

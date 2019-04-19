@@ -121,15 +121,21 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.add"><span>/lua.wetgenes.gamecake.fun.entities.add</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.call"><span>/lua.wetgenes.gamecake.fun.entities.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.caste"><span>/lua.wetgenes.gamecake.fun.entities.caste</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.find_uid"><span>/lua.wetgenes.gamecake.fun.entities.find_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.forget_uid"><span>/lua.wetgenes.gamecake.fun.entities.forget_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.generate_uid"><span>/lua.wetgenes.gamecake.fun.entities.generate_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.get"><span>/lua.wetgenes.gamecake.fun.entities.get</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.manifest"><span>/lua.wetgenes.gamecake.fun.entities.manifest</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remember_uid"><span>/lua.wetgenes.gamecake.fun.entities.remember_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remove"><span>/lua.wetgenes.gamecake.fun.entities.remove</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.reset"><span>/lua.wetgenes.gamecake.fun.entities.reset</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.set"><span>/lua.wetgenes.gamecake.fun.entities.set</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.sortby_update"><span>/lua.wetgenes.gamecake.fun.entities.sortby_update</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems"><span>/lua.wetgenes.gamecake.fun.entities.systems</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.call"><span>/lua.wetgenes.gamecake.fun.entities.systems.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.insert"><span>/lua.wetgenes.gamecake.fun.entities.systems.insert</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.uids"><span>/lua.wetgenes.gamecake.fun.entities.uids</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.cells"><span>/lua.wetgenes.gamecake.fun.yarn.cells</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items"><span>/lua.wetgenes.gamecake.fun.yarn.items</span></a>
 
@@ -192,7 +198,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.grd.slide"><span>/lua.wetgenes.grd.slide</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.sort_cmap"><span>/lua.wetgenes.grd.sort_cmap</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.stream"><span>/lua.wetgenes.grd.stream</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grdpaint"><span>/lua.wetgenes.grdpaint</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.grdsvg.string"><span>/lua.wetgenes.grdsvg.string</span></a><a class="par" href="../../docs/lua.wetgenes.json"><span>/lua.wetgenes.json</span></a>
 
@@ -309,9 +316,8 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.get">lua.wetgenes.gamecake.fun.entities.get</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L231">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
-<div><pre><code>entities.get(name)
-</code></pre><p>get a value previously saved, this is an easy way to find a unique 
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L381">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.get(name)</code></pre><p>get a value previously saved, this is an easy way to find a unique 
 entity, eg the global space but it can be used to save any values you 
 wish not just to bookmark unique entities.</p>
 </div>

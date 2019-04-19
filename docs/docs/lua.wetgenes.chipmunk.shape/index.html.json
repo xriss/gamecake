@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1183,7 +1211,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>shape=chipmunk.shape(body,form...)\n</code></pre><p>Create a shape, added to the given body. Shapes are always added to a \nbody but must be added to a space before they have any effect. So it is \nnormally preferable to use the body:shape function which will \nautomatically add the shape into the space that the body belongs to.</p>\n<pre><code>shape=chipmunk.shape(space.static,form...)\n</code></pre><p>Create a static shape in world space. We use space.static as the body. </p>\n<pre><code>shape=chipmunk.shape(body,&quot;circle&quot;,radius,x,y)\n</code></pre><p>Form of &quot;circle&quot; needs a radius and a centre point.</p>\n<pre><code>shape=chipmunk.shape(body,&quot;segment&quot;,ax,ay,bx,by,radius)\n</code></pre><p>Form of &quot;segment&quot; needs two points and a radius.</p>\n<pre><code>shape=chipmunk.shape(body,&quot;poly&quot;,{x1,y1,x2,y2,...},radius)\n</code></pre><p>Form of &quot;poly&quot; is a generic polygon defined by a table of points.</p>\n<pre><code>shape=chipmunk.shape(body,&quot;box&quot;,minx,miny,maxx,maxy,radius)\n</code></pre><p>Form of &quot;box&quot; needs two points for opposite corners, lowest pair \nfollowed by highest pair and a radius. The radius should be 0 unless \nyou want rounded corners</p>\n",
+   "body": "<pre><code>shape=chipmunk.shape(body,form...)</code></pre><p>Create a shape, added to the given body. Shapes are always added to a \nbody but must be added to a space before they have any effect. So it is \nnormally preferable to use the body:shape function which will \nautomatically add the shape into the space that the body belongs to.</p>\n<pre><code>shape=chipmunk.shape(space.static,form...)</code></pre><p>Create a static shape in world space. We use space.static as the body. </p>\n<pre><code>shape=chipmunk.shape(body,&quot;circle&quot;,radius,x,y)</code></pre><p>Form of &quot;circle&quot; needs a radius and a centre point.</p>\n<pre><code>shape=chipmunk.shape(body,&quot;segment&quot;,ax,ay,bx,by,radius)</code></pre><p>Form of &quot;segment&quot; needs two points and a radius.</p>\n<pre><code>shape=chipmunk.shape(body,&quot;poly&quot;,{x1,y1,x2,y2,...},radius)</code></pre><p>Form of &quot;poly&quot; is a generic polygon defined by a table of points.</p>\n<pre><code>shape=chipmunk.shape(body,&quot;box&quot;,minx,miny,maxx,maxy,radius)</code></pre><p>Form of &quot;box&quot; needs two points for opposite corners, lowest pair \nfollowed by highest pair and a radius. The radius should be 0 unless \nyou want rounded corners</p>\n",
    "count": 11,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 128,
@@ -1191,7 +1219,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>min_x,min_y,max_x,max_y=shape:bounding_box()\n</code></pre><p>Get the current bounding box for this shape.</p>\n",
+   "body": "<pre><code>min_x,min_y,max_x,max_y=shape:bounding_box()</code></pre><p>Get the current bounding box for this shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 938,
@@ -1199,7 +1227,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>f=shape:collision_type()\nf=shape:collision_type(f)\n</code></pre><p>Get and/or Set the collision type for this shape.</p>\n<p>The f argument can be a string in which case it will be converted to a \nnumber via the space:type function.</p>\n",
+   "body": "<pre><code>f=shape:collision_type()\nf=shape:collision_type(f)</code></pre><p>Get and/or Set the collision type for this shape.</p>\n<p>The f argument can be a string in which case it will be converted to a \nnumber via the space:type function.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 997,
@@ -1207,7 +1235,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>f=shape:elasticity()\nf=shape:elasticity(f)\n</code></pre><p>Get and/or Set the elasticity for this shape.</p>\n",
+   "body": "<pre><code>f=shape:elasticity()\nf=shape:elasticity(f)</code></pre><p>Get and/or Set the elasticity for this shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 961,
@@ -1215,7 +1243,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>f=shape:filter()\nf=shape:filter(f)\n</code></pre><p>Get and/or Set the filter for this shape.</p>\n",
+   "body": "<pre><code>f=shape:filter()\nf=shape:filter(f)</code></pre><p>Get and/or Set the filter for this shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 1013,
@@ -1223,7 +1251,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>f=shape:friction()\nf=shape:friction(f)\n</code></pre><p>Get and/or Set the friction for this shape.</p>\n",
+   "body": "<pre><code>f=shape:friction()\nf=shape:friction(f)</code></pre><p>Get and/or Set the friction for this shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 973,
@@ -1231,7 +1259,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>item = shape:query_point(x,y)\n</code></pre><p>Find the nearest point on the shape from the point at x,y.</p>\n<p>returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.distance        -- the distance to the point of contact\nit.gradient_x    -- the normalised vector to collision (x)\nit.gradient_y    -- the normalised vector to collision (y)\n</code></pre>",
+   "body": "<pre><code>item = shape:query_point(x,y)</code></pre><p>Find the nearest point on the shape from the point at x,y.</p>\n<p>returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.distance        -- the distance to the point of contact\nit.gradient_x    -- the normalised vector to collision (x)\nit.gradient_y    -- the normalised vector to collision (y)</code></pre>",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 1039,
@@ -1239,7 +1267,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>it = shape:query_segment(sx,sy,ex,ey,r)\n</code></pre><p>Find the hitpoint along this raycast segment, from (sx,sy) to \n(ex,ey) with a radius of r. </p>\n<p>Returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.normal_x        -- the normal at contact (x)\nit.normal_y        -- the normal at contact (y)\nit.alpha        -- how far along the segment the contact happened (0 to 1)\n</code></pre>",
+   "body": "<pre><code>it = shape:query_segment(sx,sy,ex,ey,r)</code></pre><p>Find the hitpoint along this raycast segment, from (sx,sy) to \n(ex,ey) with a radius of r. </p>\n<p>Returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.normal_x        -- the normal at contact (x)\nit.normal_y        -- the normal at contact (y)\nit.alpha        -- how far along the segment the contact happened (0 to 1)</code></pre>",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 1068,
@@ -1247,7 +1275,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>radius=shape:radius()\nradius=shape:radius(radius)\n</code></pre><p>Get and/or Set the radius for this shape. Setting is unsafe and may \nbreak the physics simulation.</p>\n",
+   "body": "<pre><code>radius=shape:radius()\nradius=shape:radius(radius)</code></pre><p>Get and/or Set the radius for this shape. Setting is unsafe and may \nbreak the physics simulation.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 1026,
@@ -1255,7 +1283,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>f=shape:sensor()\nf=shape:sensor(f)\n</code></pre><p>Get and/or Set the sensor flag for this shape.</p>\n",
+   "body": "<pre><code>f=shape:sensor()\nf=shape:sensor(f)</code></pre><p>Get and/or Set the sensor flag for this shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 949,
@@ -1263,7 +1291,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>vx,vy=shape:surface_velocity()\nvx,vy=shape:surface_velocity(vx,vy)\n</code></pre><p>Get and/or Set the surface velocity for this shape.</p>\n",
+   "body": "<pre><code>vx,vy=shape:surface_velocity()\nvx,vy=shape:surface_velocity(vx,vy)</code></pre><p>Get and/or Set the surface velocity for this shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 985,

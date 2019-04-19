@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1183,7 +1211,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>constraint=chipmunk.constraint(abody,bbody,form,...)\n</code></pre><p>Create a constraint between two bodies.</p>\n<p>You will need to add the constraint to a space before it has any effect \nso it is normally preferable to use the space:constraint function which \nwill call this function and then automatically add the constraint into \nthe space.</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;pin_join&quot;,ax,ay,bx,by)\n</code></pre><p>form of &quot;pin_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;slide_joint&quot;,ax,ay,bx,by,fl,fh)\n</code></pre><p>form of &quot;slide_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;pivot_joint&quot;,x,y)\nconstraint=chipmunk.constraint(abody,bbody,&quot;pivot_joint&quot;,ax,ay,bx,by)\n</code></pre><p>form of &quot;pivot_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;groove_joint&quot;,ax,ay,bx,by,cx,cy)\n</code></pre><p>form of &quot;groove_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;damped_spring&quot;,ax,ay,bx,by,fl,fs,fd)\n</code></pre><p>form of &quot;damped_spring&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;damped_rotary_spring&quot;,fa,fs,fd)\n</code></pre><p>form or &quot;damped_rotary_spring&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;rotary_limit_joint&quot;,fl,fh)\n</code></pre><p>form of &quot;rotary_limit_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;ratchet_joint&quot;,fp,fr)\n</code></pre><p>form of &quot;ratchet_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;gear_joint&quot;,fp,fr)\n</code></pre><p>form of &quot;gear_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;simple_motor&quot;,fr)\n</code></pre><p>form of &quot;simple_motor&quot; ...</p>\n",
+   "body": "<pre><code>constraint=chipmunk.constraint(abody,bbody,form,...)</code></pre><p>Create a constraint between two bodies.</p>\n<p>You will need to add the constraint to a space before it has any effect \nso it is normally preferable to use the space:constraint function which \nwill call this function and then automatically add the constraint into \nthe space.</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;pin_join&quot;,ax,ay,bx,by)</code></pre><p>form of &quot;pin_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;slide_joint&quot;,ax,ay,bx,by,fl,fh)</code></pre><p>form of &quot;slide_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;pivot_joint&quot;,x,y)\nconstraint=chipmunk.constraint(abody,bbody,&quot;pivot_joint&quot;,ax,ay,bx,by)</code></pre><p>form of &quot;pivot_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;groove_joint&quot;,ax,ay,bx,by,cx,cy)</code></pre><p>form of &quot;groove_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;damped_spring&quot;,ax,ay,bx,by,fl,fs,fd)</code></pre><p>form of &quot;damped_spring&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;damped_rotary_spring&quot;,fa,fs,fd)</code></pre><p>form or &quot;damped_rotary_spring&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;rotary_limit_joint&quot;,fl,fh)</code></pre><p>form of &quot;rotary_limit_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;ratchet_joint&quot;,fp,fr)</code></pre><p>form of &quot;ratchet_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;gear_joint&quot;,fp,fr)</code></pre><p>form of &quot;gear_joint&quot; ...</p>\n<pre><code>constraint=chipmunk.constraint(abody,bbody,&quot;simple_motor&quot;,fr)</code></pre><p>form of &quot;simple_motor&quot; ...</p>\n",
    "count": 6,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 167,
@@ -1191,7 +1219,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=constraint:collide_bodies()\nv=constraint:collide_bodies(v)\n</code></pre><p>Get and/or Set the max collide bodies flag for this constraint.</p>\n",
+   "body": "<pre><code>v=constraint:collide_bodies()\nv=constraint:collide_bodies(v)</code></pre><p>Get and/or Set the max collide bodies flag for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 1170,
@@ -1199,7 +1227,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=constraint:error_bias()\nv=constraint:error_bias(v)\n</code></pre><p>Get and/or Set the error bias for this constraint.</p>\n",
+   "body": "<pre><code>v=constraint:error_bias()\nv=constraint:error_bias(v)</code></pre><p>Get and/or Set the error bias for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 1146,
@@ -1207,7 +1235,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=constraint:impulse()\n</code></pre><p>Get the last impulse for this constraint.</p>\n",
+   "body": "<pre><code>v=constraint:impulse()</code></pre><p>Get the last impulse for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 1182,
@@ -1215,7 +1243,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=constraint:max_bias()\nv=constraint:max_bias(v)\n</code></pre><p>Get and/or Set the max bias for this constraint.</p>\n",
+   "body": "<pre><code>v=constraint:max_bias()\nv=constraint:max_bias(v)</code></pre><p>Get and/or Set the max bias for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 1158,
@@ -1223,7 +1251,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=constraint:max_force()\nv=constraint:max_force(v)\n</code></pre><p>Get and/or Set the max force for this constraint.</p>\n",
+   "body": "<pre><code>v=constraint:max_force()\nv=constraint:max_force(v)</code></pre><p>Get and/or Set the max force for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 1134,

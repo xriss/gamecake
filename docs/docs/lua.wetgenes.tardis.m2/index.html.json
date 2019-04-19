@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1191,7 +1219,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
-   "body": "<pre><code>m2 = m2:adjugate()\nm2 = m2:adjugate(r)\n</code></pre><p>Adjugate this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
+   "body": "<pre><code>m2 = m2:adjugate()\nm2 = m2:adjugate(r)</code></pre><p>Adjugate this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 348,
@@ -1199,7 +1227,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
-   "body": "<pre><code>m2 = m2:cofactor()\nm2 = m2:cofactor(r)\n</code></pre><p>Cofactor this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
+   "body": "<pre><code>m2 = m2:cofactor()\nm2 = m2:cofactor(r)</code></pre><p>Cofactor this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 321,
@@ -1207,7 +1235,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
-   "body": "<pre><code>value = m2:determinant()\n</code></pre><p>Return the determinant value of this m2.</p>\n",
+   "body": "<pre><code>value = m2:determinant()</code></pre><p>Return the determinant value of this m2.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 264,
@@ -1215,7 +1243,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
-   "body": "<pre><code>m2 = m2:identity()\n</code></pre><p>Set this m2 to the identity matrix.</p>\n",
+   "body": "<pre><code>m2 = m2:identity()</code></pre><p>Set this m2 to the identity matrix.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 255,
@@ -1223,7 +1251,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
-   "body": "<pre><code>m2 = m2:inverse()\nm2 = m2:inverse(r)\n</code></pre><p>Inverse this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
+   "body": "<pre><code>m2 = m2:inverse()\nm2 = m2:inverse(r)</code></pre><p>Inverse this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 364,
@@ -1231,7 +1259,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
-   "body": "<pre><code>value = m2:minor_xy()\n</code></pre><p>Return the minor_xy value of this m2.</p>\n",
+   "body": "<pre><code>value = m2:minor_xy()</code></pre><p>Return the minor_xy value of this m2.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 278,
@@ -1239,7 +1267,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
-   "body": "<pre><code>m2 = tardis.m2.new()\n</code></pre><p>Create a new m2 and optionally set it to the given values, m2 methods \nusually return the input m2 for easy function chaining.</p>\n",
+   "body": "<pre><code>m2 = tardis.m2.new()</code></pre><p>Create a new m2 and optionally set it to the given values, m2 methods \nusually return the input m2 for easy function chaining.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 245,
@@ -1247,7 +1275,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
-   "body": "<pre><code>m2 = m2:scale(s)\nm2 = m2:scale(s,r)\n</code></pre><p>Scale this m2 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
+   "body": "<pre><code>m2 = m2:scale(s)\nm2 = m2:scale(s,r)</code></pre><p>Scale this m2 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 305,
@@ -1255,7 +1283,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
-   "body": "<pre><code>m2 = m2:transpose()\nm2 = m2:transpose(r)\n</code></pre><p>Transpose this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
+   "body": "<pre><code>m2 = m2:transpose()\nm2 = m2:transpose(r)</code></pre><p>Transpose this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 289,

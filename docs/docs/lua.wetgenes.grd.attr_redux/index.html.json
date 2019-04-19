@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1183,7 +1211,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>g:attr_redux(cw,ch,num,sub,bak)\n</code></pre><p>Perform attribute clash simulation on an indexed image.</p>\n<p>cw,ch are the width and height of each character we are simulating, 8x8 \nis the right size for spectrum attrs but could be 4x8 for c64 multicolor \nmode.</p>\n<p>num is the number of colors allowed within this area, so 2 for spectrum mode.</p>\n<p>sub is the size of sub pallete groups, eg 16 in nes mode or 8 in \nspectrum mode, EG bright simulation in spectrum mode requires all \ncolors in a attr block to be from the bright palette or the dark \npalette no mixing so this forces that grouping. Set to 0 or 256 and \nthis restriction will be disabled.</p>\n<p>bak is the index of the background color that is shared across all \ncharacters, set to -1 if there is no shared background color.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
+   "body": "<pre><code>g:attr_redux(cw,ch,num,sub,bak)</code></pre><p>Perform attribute clash simulation on an indexed image.</p>\n<p>cw,ch are the width and height of each character we are simulating, 8x8 \nis the right size for spectrum attrs but could be 4x8 for c64 multicolor \nmode.</p>\n<p>num is the number of colors allowed within this area, so 2 for spectrum mode.</p>\n<p>sub is the size of sub pallete groups, eg 16 in nes mode or 8 in \nspectrum mode, EG bright simulation in spectrum mode requires all \ncolors in a attr block to be from the bright palette or the dark \npalette no mixing so this forces that grouping. Set to 0 or 256 and \nthis restriction will be disabled.</p>\n<p>bak is the index of the background color that is shared across all \ncharacters, set to -1 if there is no shared background color.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
    "file": "../lua_grd/code/grd.lua",
    "line": 609,

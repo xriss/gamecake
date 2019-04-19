@@ -121,15 +121,21 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.add"><span>/lua.wetgenes.gamecake.fun.entities.add</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.call"><span>/lua.wetgenes.gamecake.fun.entities.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.caste"><span>/lua.wetgenes.gamecake.fun.entities.caste</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.find_uid"><span>/lua.wetgenes.gamecake.fun.entities.find_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.forget_uid"><span>/lua.wetgenes.gamecake.fun.entities.forget_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.generate_uid"><span>/lua.wetgenes.gamecake.fun.entities.generate_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.get"><span>/lua.wetgenes.gamecake.fun.entities.get</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.manifest"><span>/lua.wetgenes.gamecake.fun.entities.manifest</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remember_uid"><span>/lua.wetgenes.gamecake.fun.entities.remember_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remove"><span>/lua.wetgenes.gamecake.fun.entities.remove</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.reset"><span>/lua.wetgenes.gamecake.fun.entities.reset</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.set"><span>/lua.wetgenes.gamecake.fun.entities.set</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.sortby_update"><span>/lua.wetgenes.gamecake.fun.entities.sortby_update</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems"><span>/lua.wetgenes.gamecake.fun.entities.systems</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.call"><span>/lua.wetgenes.gamecake.fun.entities.systems.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.insert"><span>/lua.wetgenes.gamecake.fun.entities.systems.insert</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.uids"><span>/lua.wetgenes.gamecake.fun.entities.uids</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.cells"><span>/lua.wetgenes.gamecake.fun.yarn.cells</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items"><span>/lua.wetgenes.gamecake.fun.yarn.items</span></a>
 
@@ -192,7 +198,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.grd.slide"><span>/lua.wetgenes.grd.slide</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.sort_cmap"><span>/lua.wetgenes.grd.sort_cmap</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.stream"><span>/lua.wetgenes.grd.stream</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grdpaint"><span>/lua.wetgenes.grdpaint</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.grdsvg.string"><span>/lua.wetgenes.grdsvg.string</span></a><a class="par" href="../../docs/lua.wetgenes.json"><span>/lua.wetgenes.json</span></a>
 
@@ -310,17 +317,14 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body">lua.wetgenes.chipmunk.body</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L92">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
-<div><pre><code>body=chipmunk.body(mass,inertia)
-</code></pre><p>Create a dynamic body, with the given mass and inertia.</p>
+<div><pre><code>body=chipmunk.body(mass,inertia)</code></pre><p>Create a dynamic body, with the given mass and inertia.</p>
 <p>You will need to add the body to a space before it exists so it is 
 normally preferable to use the space:body function which will call this 
 function and then automatically add the body into the space.</p>
-<pre><code>body=chipmunk.body(&quot;kinematic&quot;)
-</code></pre><p>Create a kinematic body, these are bodies that we can move around, by 
+<pre><code>body=chipmunk.body(&quot;kinematic&quot;)</code></pre><p>Create a kinematic body, these are bodies that we can move around, by 
 setting its velocity, but are not effected by collisions with other 
 bodies. EG a moving platform.</p>
-<pre><code>body=chipmunk.body(&quot;static&quot;)
-</code></pre><p>Create a static body, mostly you can just use space.static as the 
+<pre><code>body=chipmunk.body(&quot;static&quot;)</code></pre><p>Create a static body, mostly you can just use space.static as the 
 default static body but you may create more if you wish to group your 
 static shapes into multiple bodies.</p>
 </div>
@@ -330,8 +334,7 @@ static shapes into multiple bodies.</p>
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.angle">lua.wetgenes.chipmunk.body.angle</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L798">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>a=body:angle()
-a=body:angle(a)
-</code></pre><p>Get and/or Set the rotation angle in radians for this body.</p>
+a=body:angle(a)</code></pre><p>Get and/or Set the rotation angle in radians for this body.</p>
 </div>
 </div>
 
@@ -339,8 +342,7 @@ a=body:angle(a)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.angular_velocity">lua.wetgenes.chipmunk.body.angular_velocity</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L810">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>a=body:angular_velocity()
-a=body:angular_velocity(a)
-</code></pre><p>Get and/or Set the angular velocity in radians for this body.</p>
+a=body:angular_velocity(a)</code></pre><p>Get and/or Set the angular velocity in radians for this body.</p>
 </div>
 </div>
 
@@ -348,8 +350,7 @@ a=body:angular_velocity(a)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.apply_force">lua.wetgenes.chipmunk.body.apply_force</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L834">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>body:apply_force(fx,fy,px,py)
-body:apply_force(fx,fy,px,py,&quot;world&quot;)
-</code></pre><p>Apply a force to this body at a specific point, the point can be in 
+body:apply_force(fx,fy,px,py,&quot;world&quot;)</code></pre><p>Apply a force to this body at a specific point, the point can be in 
 world coordinates if you include the &quot;world&quot; flag but defaults to local 
 object coordinates.</p>
 </div>
@@ -359,8 +360,7 @@ object coordinates.</p>
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.apply_impulse">lua.wetgenes.chipmunk.body.apply_impulse</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L852">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>body:apply_impulse(ix,iy,px,py)
-body:apply_impulse(ix,iy,px,py,&quot;world&quot;)
-</code></pre><p>Apply a force to this body at a specific point, the point can be in 
+body:apply_impulse(ix,iy,px,py,&quot;world&quot;)</code></pre><p>Apply a force to this body at a specific point, the point can be in 
 world coordinates if you include the &quot;world&quot; flag but defaults to local 
 object coordinates.</p>
 </div>
@@ -370,8 +370,7 @@ object coordinates.</p>
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.center_of_gravity">lua.wetgenes.chipmunk.body.center_of_gravity</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L761">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>vx,vy=body:center_of_gravity()
-vx,vy=body:center_of_gravity(vx,vy)
-</code></pre><p>Get and/or Set the center of gravity for this body.</p>
+vx,vy=body:center_of_gravity(vx,vy)</code></pre><p>Get and/or Set the center of gravity for this body.</p>
 </div>
 </div>
 
@@ -379,8 +378,7 @@ vx,vy=body:center_of_gravity(vx,vy)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.force">lua.wetgenes.chipmunk.body.force</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L785">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>vx,vy=body:force()
-vx,vy=body:force(vx,vy)
-</code></pre><p>Get and/or Set the force for this body. This is reset back to 0 after 
+vx,vy=body:force(vx,vy)</code></pre><p>Get and/or Set the force for this body. This is reset back to 0 after 
 each step.</p>
 </div>
 </div>
@@ -389,8 +387,7 @@ each step.</p>
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.mass">lua.wetgenes.chipmunk.body.mass</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L725">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>m=body:mass()
-m=body:mass(m)
-</code></pre><p>Get and/or Set the mass for this body.</p>
+m=body:mass(m)</code></pre><p>Get and/or Set the mass for this body.</p>
 </div>
 </div>
 
@@ -398,8 +395,7 @@ m=body:mass(m)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.moment">lua.wetgenes.chipmunk.body.moment</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L737">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>m=body:moment()
-m=body:moment(m)
-</code></pre><p>Get and/or Set the moment for this body.</p>
+m=body:moment(m)</code></pre><p>Get and/or Set the moment for this body.</p>
 </div>
 </div>
 
@@ -407,8 +403,7 @@ m=body:moment(m)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.position">lua.wetgenes.chipmunk.body.position</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L749">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>vx,vy=body:position()
-vx,vy=body:position(vx,vy)
-</code></pre><p>Get and/or Set the position for this body.</p>
+vx,vy=body:position(vx,vy)</code></pre><p>Get and/or Set the position for this body.</p>
 </div>
 </div>
 
@@ -416,12 +411,10 @@ vx,vy=body:position(vx,vy)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.position_func">lua.wetgenes.chipmunk.body.position_func</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L899">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>body:position_func(position_callback)
-body:position_func()
-</code></pre><p>Set or clear the position callback update function for this body.</p>
+body:position_func()</code></pre><p>Set or clear the position callback update function for this body.</p>
 <pre><code>position_callback(body)
 
-body.delta_time
-</code></pre><p>This callback will be called with the above values set into body, you 
+body.delta_time</code></pre><p>This callback will be called with the above values set into body, you 
 can adjust these and return true to perform a normal position update 
 but with these new values.</p>
 <p>Alternatively you can update the bodys position directly and return 
@@ -432,8 +425,7 @@ false so the normal position update code will not be run.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.shape">lua.wetgenes.chipmunk.body.shape</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L922">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
-<div><pre><code>shape=body:shape(form,...)
-</code></pre><p>Add a new shape to this body, returns the shape for further 
+<div><pre><code>shape=body:shape(form,...)</code></pre><p>Add a new shape to this body, returns the shape for further 
 modification.</p>
 </div>
 </div>
@@ -442,8 +434,7 @@ modification.</p>
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.torque">lua.wetgenes.chipmunk.body.torque</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L822">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>a=body:torque()
-a=body:torque(a)
-</code></pre><p>Get and/or Set the torque for this body.</p>
+a=body:torque(a)</code></pre><p>Get and/or Set the torque for this body.</p>
 </div>
 </div>
 
@@ -451,8 +442,7 @@ a=body:torque(a)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.type">lua.wetgenes.chipmunk.body.type</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L710">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>t=body:type()
-t=body:type(t)
-</code></pre><p>Get and/or Set the type for this body.</p>
+t=body:type(t)</code></pre><p>Get and/or Set the type for this body.</p>
 </div>
 </div>
 
@@ -460,8 +450,7 @@ t=body:type(t)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.velocity">lua.wetgenes.chipmunk.body.velocity</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L773">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>vx,vy=body:velocity()
-vx,vy=body:velocity(vx,vy)
-</code></pre><p>Get and/or Set the velocity for this body.</p>
+vx,vy=body:velocity(vx,vy)</code></pre><p>Get and/or Set the velocity for this body.</p>
 </div>
 </div>
 
@@ -469,15 +458,13 @@ vx,vy=body:velocity(vx,vy)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.body.velocity_func">lua.wetgenes.chipmunk.body.velocity_func</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L870">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>body:velocity_func(velocity_callback)
-body:velocity_func()
-</code></pre><p>Set or clear the velocity callback update function for this body.</p>
+body:velocity_func()</code></pre><p>Set or clear the velocity callback update function for this body.</p>
 <pre><code>velocity_callback(body)
 
 body.gravity_x
 body.gravity_y
 body.damping
-body.delta_time
-</code></pre><p>This callback will be called with the above values set into body, you 
+body.delta_time</code></pre><p>This callback will be called with the above values set into body, you 
 can adjust these and return true to perform a normal velocity update 
 but with these new values.</p>
 <p>IE you can choose a new gravity vector for this body which is the 

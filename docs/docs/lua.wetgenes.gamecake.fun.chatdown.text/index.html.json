@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1183,10 +1211,10 @@
  },
  "_list": [
   {
-   "body": "<p>Here is some example chatdown formatted text full of useful \ninformation, it it is intended to be a self documented example.</p>\n<pre><code>\n- This is a single line comment\n-- This is the start of a multi-line comment\n\nAll lines are now comment lines until we see a line that begins with a \ncontrol character leading white space is ignored. If for some reason \nyou need to start a text line with a special character then it can be \nescaped by preceding it with a #\n\nWhat follows is a list of these characters and a brief description \nabout the parser state they switch to.\n\n    1. - (text to ignore)\n\n        A single line comment that does not change parser state and \n        only this line will be ignored so it can be inserted inside \n        other chunks without losing our place.\n\n    2. -- (text to ignore)\n\n        Begin a comment chunk, this line and all lines that follow this \n        line will be considered comments and ignored until we switch to \n        a new parser state.\n\n    3. #subject_name\n\n        Begin a new subject chunk, all future topic,goto or tag chunks will \n        belong to this subject.\n\n        The text that follows this until the next chunk is the long \n        description intended for when you examine the character.\n\n        Although it makes sense for a subject chunk to belong to one \n        character it could also a group conversation with tags being \n        set to change the current talker as the conversation flows.\n\n        subject names have simple cascading inheritance according to their \n        name with each level separated by a dot. A chunk named a.b.c \n        will inherit data from any chunks defined for a.b and a in that \n        order of priority.\n\n    4. &gt;topic_name\n\n        Begin a topic chunk, all future goto or tag chunks will belong \n        to this topic, the lines that follow are how the character \n        responds when questioned about this topic followed by one or \n        more gotos as possible responses that will lead you onto \n        another topic.\n\n        Topics can be broken into parts, to create a pause, by using an \n        unnamed goto followed by an unnamed topic which will both \n        automatically be given the same generated name and hence linked \n        together.\n\n    5. &lt;goto_topic_name\n\n        Begin a goto chunk, all future tag chunks will belong to this \n        goto, this is probably best thought of as a question that will \n        get a reply from the character. This is a choice made by the \n        player that causes a logical jump to another topic.\n\n        Essentially this means GOTO another topic and there can be \n        multiple GOTO options associated with each topic which the \n        reader is expected to choose between.\n\n    6. =set_tag_name to this value\n\n        If there is any text on the rest of this line then it will be \n        assigned to the tag without changing the current parse state so \n        it can be used in the middle of another chunk without losing \n        our place.\n\n        This single line tag assignment is usually all you need. \n        Alternatively, if there is no text on the rest of this first \n        line, only white space, then the parse state will change and \n        text on all following lines will be assigned to the named tag.\n\n        This assignment can happen at various places, for instance if \n        it is part of the subject then it will be the starting \n        value for a tag but if it is linked to a topic or goto then the \n        value will be a change as the conversation happens. In all \n        cases the tags are set in a single batch as the state changes \n        so the placement and order makes no difference.\n\n        Tags can be used inside text chunks or even GOTO labels by \n        tightly wrapping with {} eg {name} would be replaced with the \n        value of name. Tags from other subjects can be referenced by \n        prefixing the tag name with the subject name followed by a forward \n        slash like so {subject/tag}\n\n\nThe hierarchy of these chunks can be expressed by indentation as all \nwhite space is ignored and combined into a single space. Each SUBJECT will \nhave multiple TOPICs associated with it and each TOPIC will have \nmultiple GOTOs as options to jump between TOPICs. TAGs can be \nassociated with any of these 3 levels and will be evaluated as the \nconversation flows through these points.\n\nSo the chunk hierarchy expressed using indentation to denote children \nof.\n\n    SUBJECT\n        TAG\n        GOTO\n            TAG\n        TOPIC\n            TAG\n            GOTO\n                TAG\n\nThe GOTO chunks in the root SUBJECT chunk are used as prototypes so if a \nGOTO is used in multiple topics its text can be placed within a GOTO \ninside the main SUBJECT chunk rather than repeated constantly. This will \nthen be inherited by a GOTO with no text. An alternative to this \nshorthand is to assign an oft-used piece of text to a tag and reference \nthat in each topic instead.\n\nSUBJECTs and TOPICs also have simple inheritance based on their names this \nenables the building of a prototype which is later expanded. Each \ninheritance level is separated by a dot so aa.bb.cc will inherit from \naa.bb and aa with the data in the longer names having precedence. This \ninheritance is additive only so for instance a TAG can not be unset and \nwould have to be changed to another value by aa.bb.cc if it existed in \naa.bb or aa.\n\nIn practise this means\n&lt;br/&gt;\n&lt;br/&gt;\n\n</code></pre>",
+   "body": "<p>Here is some example chatdown formatted text full of useful \ninformation, it it is intended to be a self documented example.</p>\n<pre><code>\n- This is a single line comment\n-- This is the start of a multi-line comment\n\nAll lines are now comment lines until we see a line that begins with a \ncontrol character leading white space is ignored. If for some reason \nyou need to start a text line with a special character then it can be \nescaped by preceding it with a #\n\nWhat follows is a list of these characters and a brief description \nabout the parser state they switch to.\n\n    1. - (text to ignore)\n\n        A single line comment that does not change parser state and \n        only this line will be ignored so it can be inserted inside \n        other chunks without losing our place.\n\n    2. -- (text to ignore)\n\n        Begin a comment chunk, this line and all lines that follow this \n        line will be considered comments and ignored until we switch to \n        a new parser state.\n\n    3. #subject_name\n\n        Begin a new subject chunk, all future topic,goto or tag chunks will \n        belong to this subject.\n\n        The text that follows this until the next chunk is the long \n        description intended for when you examine the character.\n\n        Although it makes sense for a subject chunk to belong to one \n        character it could also a group conversation with tags being \n        set to change the current talker as the conversation flows.\n\n        subject names have simple cascading inheritance according to their \n        name with each level separated by a dot. A chunk named a.b.c \n        will inherit data from any chunks defined for a.b and a in that \n        order of priority.\n\n    4. &gt;topic_name\n\n        Begin a topic chunk, all future goto or tag chunks will belong \n        to this topic, the lines that follow are how the character \n        responds when questioned about this topic followed by one or \n        more gotos as possible responses that will lead you onto \n        another topic.\n\n        Topics can be broken into parts, to create a pause, by using an \n        unnamed goto followed by an unnamed topic which will both \n        automatically be given the same generated name and hence linked \n        together.\n\n    5. &lt;goto_topic_name\n\n        Begin a goto chunk, all future tag chunks will belong to this \n        goto, this is probably best thought of as a question that will \n        get a reply from the character. This is a choice made by the \n        player that causes a logical jump to another topic.\n\n        Essentially this means GOTO another topic and there can be \n        multiple GOTO options associated with each topic which the \n        reader is expected to choose between.\n\n    6. =set_tag_name to this value\n\n        If there is any text on the rest of this line then it will be \n        assigned to the tag without changing the current parse state so \n        it can be used in the middle of another chunk without losing \n        our place.\n\n        This single line tag assignment is usually all you need. \n        Alternatively, if there is no text on the rest of this first \n        line, only white space, then the parse state will change and \n        text on all following lines will be assigned to the named tag.\n\n        This assignment can happen at various places, for instance if \n        it is part of the subject then it will be the starting \n        value for a tag but if it is linked to a topic or goto then the \n        value will be a change as the conversation happens. In all \n        cases the tags are set in a single batch as the state changes \n        so the placement and order makes no difference.\n\n        Tags can be used inside text chunks or even GOTO labels by \n        tightly wrapping with {} eg {name} would be replaced with the \n        value of name. Tags from other subjects can be referenced by \n        prefixing the tag name with the subject name followed by a forward \n        slash like so {subject/tag}\n\n\nThe hierarchy of these chunks can be expressed by indentation as all \nwhite space is ignored and combined into a single space. Each SUBJECT will \nhave multiple TOPICs associated with it and each TOPIC will have \nmultiple GOTOs as options to jump between TOPICs. TAGs can be \nassociated with any of these 3 levels and will be evaluated as the \nconversation flows through these points.\n\nSo the chunk hierarchy expressed using indentation to denote children \nof.\n\n    SUBJECT\n        TAG\n        GOTO\n            TAG\n        TOPIC\n            TAG\n            GOTO\n                TAG\n\nThe GOTO chunks in the root SUBJECT chunk are used as prototypes so if a \nGOTO is used in multiple topics its text can be placed within a GOTO \ninside the main SUBJECT chunk rather than repeated constantly. This will \nthen be inherited by a GOTO with no text. An alternative to this \nshorthand is to assign an oft-used piece of text to a tag and reference \nthat in each topic instead.\n\nSUBJECTs and TOPICs also have simple inheritance based on their names this \nenables the building of a prototype which is later expanded. Each \ninheritance level is separated by a dot so aa.bb.cc will inherit from \naa.bb and aa with the data in the longer names having precedence. This \ninheritance is additive only so for instance a TAG can not be unset and \nwould have to be changed to another value by aa.bb.cc if it existed in \naa.bb or aa.\n\nIn practise this means\n&lt;br/&gt;\n&lt;br/&gt;\n</code></pre>",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 728,
+   "line": 729,
    "name": "lua.wetgenes.gamecake.fun.chatdown.text",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   }

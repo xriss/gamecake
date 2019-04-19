@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1183,7 +1211,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>items = require(&quot;wetgenes.gamecake.fun.yarn.items&quot;).create()\n</code></pre><p>This module contains only one function which can be used to create an \nitems instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "body": "<pre><code>items = require(&quot;wetgenes.gamecake.fun.yarn.items&quot;).create()</code></pre><p>This module contains only one function which can be used to create an \nitems instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
    "count": 14,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 6,
@@ -1191,7 +1219,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>items.cells\n</code></pre><p>We automatically create a cells object bound to this set of items, this \ncells object should be used to define all your custom game cells.</p>\n",
+   "body": "<pre><code>items.cells</code></pre><p>We automatically create a cells object bound to this set of items, this \ncells object should be used to define all your custom game cells.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 259,
@@ -1199,7 +1227,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>item = items.create()\nitem = items.create({})\nitem = items.create({},metatable)\n</code></pre><p>Create a single item, optionally pass in a base item table that will be \nturned into a proper item (using setmetatable to add methods). This \nshould always be a new table and will also be returned. If no \nmetatable is provided then items.metatable will be used.</p>\n",
+   "body": "<pre><code>item = items.create()\nitem = items.create({})\nitem = items.create({},metatable)</code></pre><p>Create a single item, optionally pass in a base item table that will be \nturned into a proper item (using setmetatable to add methods). This \nshould always be a new table and will also be returned. If no \nmetatable is provided then items.metatable will be used.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 73,
@@ -1207,7 +1235,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>items.pages\n</code></pre><p>We automatically create a pages object bound to this set of items, this \npages object should be used to define all your custom game pages.</p>\n<p>This can be considered a level and you may need multiple pages which \nare moved in and out of items.pages</p>\n",
+   "body": "<pre><code>items.pages</code></pre><p>We automatically create a pages object bound to this set of items, this \npages object should be used to define all your custom game pages.</p>\n<p>This can be considered a level and you may need multiple pages which \nare moved in and out of items.pages</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 271,
@@ -1215,7 +1243,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>item = items.destroy(item)\nitem = item:destroy()\n</code></pre><p>Destroy an item, remove it from the master table dump so it will be \ngarbage collected.</p>\n",
+   "body": "<pre><code>item = items.destroy(item)\nitem = item:destroy()</code></pre><p>Destroy an item, remove it from the master table dump so it will be \ngarbage collected.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 101,
@@ -1223,7 +1251,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>child_item = item:find(keyname)\n</code></pre><p>Get the first child item that has a [keyname] value in it. All child \nitems are searched, but this is not recursive.</p>\n<p>returns nil if no child item is found.</p>\n",
+   "body": "<pre><code>child_item = item:find(keyname)</code></pre><p>Get the first child item that has a [keyname] value in it. All child \nitems are searched, but this is not recursive.</p>\n<p>returns nil if no child item is found.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 215,
@@ -1231,7 +1259,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>big_item = item:get_big()\n</code></pre><p>Get the first big item from this container, returns nil if we do not \ncontain a big item.</p>\n",
+   "body": "<pre><code>big_item = item:get_big()</code></pre><p>Get the first big item from this container, returns nil if we do not \ncontain a big item.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 199,
@@ -1239,7 +1267,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>item = item:insert(parent)\n</code></pre><p>Insert this item into the given parent. Item will automatically be \nremoved from its current parent. If the item is_big then it will be \ninserted into the front of the list otherwise it will go at the end. \nThis is to help with finding big items, since there should only be one \nper container we only have to check the first child.</p>\n",
+   "body": "<pre><code>item = item:insert(parent)</code></pre><p>Insert this item into the given parent. Item will automatically be \nremoved from its current parent. If the item is_big then it will be \ninserted into the front of the list otherwise it will go at the end. \nThis is to help with finding big items, since there should only be one \nper container we only have to check the first child.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 173,
@@ -1247,7 +1275,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>for name,tail in items.iterate_dotnames(names) do ... end\n</code></pre><p>Iterator over a names string, start with the full string and cut off \nthe tail on each iteration. This is used for simple inheritance merging \nof named prefabs and rules or anything else.</p>\n<p>Second return value is the tail of the string or the string if not \ntail.</p>\n<p>for example the following input string</p>\n<pre><code>&quot;one.two.three.four&quot;\n</code></pre><p>would get you the following iteration loops, one line per loop</p>\n<pre><code>&quot;one.two.three.four&quot; , &quot;four&quot;\n&quot;one.two.three&quot;      , &quot;three&quot;\n&quot;one.two&quot;            , &quot;two&quot;\n&quot;one&quot;                , &quot;one&quot;\n</code></pre>",
+   "body": "<pre><code>for name,tail in items.iterate_dotnames(names) do ... end</code></pre><p>Iterator over a names string, start with the full string and cut off \nthe tail on each iteration. This is used for simple inheritance merging \nof named prefabs and rules or anything else.</p>\n<p>Second return value is the tail of the string or the string if not \ntail.</p>\n<p>for example the following input string</p>\n<pre><code>&quot;one.two.three.four&quot;</code></pre><p>would get you the following iteration loops, one line per loop</p>\n<pre><code>&quot;one.two.three.four&quot; , &quot;four&quot;\n&quot;one.two.three&quot;      , &quot;three&quot;\n&quot;one.two&quot;            , &quot;two&quot;\n&quot;one&quot;                , &quot;one&quot;</code></pre>",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 24,
@@ -1255,7 +1283,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>for it in item:iterate_parents() do\n    ...\nend\n</code></pre><p>Iterate over the parent chain going upwards. The first iteration is the \nparent of this object and so on.</p>\n",
+   "body": "<pre><code>for it in item:iterate_parents() do\n    ...\nend</code></pre><p>Iterate over the parent chain going upwards. The first iteration is the \nparent of this object and so on.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 128,
@@ -1263,7 +1291,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>items.metatable\n</code></pre><p>Expose the item metatable so more methods can easily be added.</p>\n",
+   "body": "<pre><code>items.metatable</code></pre><p>Expose the item metatable so more methods can easily be added.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 59,
@@ -1271,7 +1299,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>items.prefabs\n</code></pre><p>We automatically create a prefabs object bound to this set of items, this \nprefabs object should be used to define all your custom game prefabs.</p>\n",
+   "body": "<pre><code>items.prefabs</code></pre><p>We automatically create a prefabs object bound to this set of items, this \nprefabs object should be used to define all your custom game prefabs.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 247,
@@ -1279,7 +1307,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>item = item:remove()\n</code></pre><p>Remove this item from its parents table or do nothing if the item does \nnot have a parent.</p>\n",
+   "body": "<pre><code>item = item:remove()</code></pre><p>Remove this item from its parents table or do nothing if the item does \nnot have a parent.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 146,
@@ -1287,7 +1315,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>items.rules\n</code></pre><p>We automatically create a rules object bound to this set of items, this \nrules object should be used to define all your custom game rules.</p>\n",
+   "body": "<pre><code>items.rules</code></pre><p>We automatically create a rules object bound to this set of items, this \nrules object should be used to define all your custom game rules.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 235,

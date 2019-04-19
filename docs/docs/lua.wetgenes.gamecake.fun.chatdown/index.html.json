@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1193,7 +1221,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.chat"
   },
   {
-   "body": "<pre><code>tag_value = chat:get_tag(tag_name)\n</code></pre><p>The same as chats:get_tag but the subject of this chat is the \ndefault root.</p>\n",
+   "body": "<pre><code>tag_value = chat:get_tag(tag_name)</code></pre><p>The same as chats:get_tag but the subject of this chat is the \ndefault root.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 276,
@@ -1201,7 +1229,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>output = chat:replace_tags(input)\n</code></pre><p>The same as chats:replace_tags but the subject of this chat is the \ndefault root.</p>\n",
+   "body": "<pre><code>output = chat:replace_tags(input)</code></pre><p>The same as chats:replace_tags but the subject of this chat is the \ndefault root.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 304,
@@ -1209,7 +1237,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>tag_value = chat:set_tag(tag_name,tag_value)\n</code></pre><p>The same as chats:set_tag but the subject of this chat is the \ndefault root.</p>\n",
+   "body": "<pre><code>tag_value = chat:set_tag(tag_name,tag_value)</code></pre><p>The same as chats:set_tag but the subject of this chat is the \ndefault root.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 290,
@@ -1217,7 +1245,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat:set_tags(tags)\n</code></pre><p>Set all the values in the given table of {tag_name=tag_value} pairs.</p>\n",
+   "body": "<pre><code>chat:set_tags(tags)</code></pre><p>Set all the values in the given table of {tag_name=tag_value} pairs.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 318,
@@ -1225,7 +1253,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat:set_topic(topic_name)\n</code></pre><p>Set the current topic for this chat object, information about this \ntopic and its gotos are built from and stored in this chat object.</p>\n<pre><code>chat.topic_name\n</code></pre><p>Will be set to the given topic name.</p>\n<p>We merge all gotos found in this topic and all topic parents by \niterating over the dotnames. We only use add each topic once and each \ntopic may have a bit of logic that decides if it should be displayed.</p>\n<pre><code>&lt;topic_name?logic_test\n</code></pre><p>So this would goto the topic_name if the logic_test passes. The logic \ntest is written simmilar to a url query after the question mark comes a \nnumber of tests that are then &amp; or | together in left to right order \n(no operator precedence).</p>\n<pre><code>&lt;topic_name?count&lt;10&amp;seen==false\n</code></pre><p>So this would display the goto option if count is less than 10 and seen \nis set to false. These variables we are testing are tag_names and \ndefault to the current subject chat but could reference other subjects \nby explicitly including a root.</p>\n<p>Available logic tests are</p>\n<pre><code>name==value\nname=value\n</code></pre><p>True if the tag is set to this value.</p>\n<pre><code>name!=value\n</code></pre><p>True if the tag is not set to this value.</p>\n<pre><code>name&lt;value\n</code></pre><p>True if the tag is less than this value (numeric test).</p>\n<pre><code>name&gt;value\n</code></pre><p>True if the tag is more than this value (numeric test).</p>\n<pre><code>name&lt;=value\n</code></pre><p>True if the tag is less than or equal to this value (numeric test).</p>\n<pre><code>name&gt;=value\n</code></pre><p>True if the tag is more than or equal to  this value (numeric test).</p>\n<p>All of these tests can be preceded by a ! to negate them so</p>\n<pre><code>name!=vale\n!name==value\n</code></pre><p>Are both a test for inequality.</p>\n<p>Multiple tests can be joined together by &amp; (and) or | (or) this logic \nwill be applied to a running total moving from left to right as the \nvalues are evaluated with the final value deciding if this goto will be \ndisplayed.</p>\n",
+   "body": "<pre><code>chat:set_topic(topic_name)</code></pre><p>Set the current topic for this chat object, information about this \ntopic and its gotos are built from and stored in this chat object.</p>\n<pre><code>chat.topic_name</code></pre><p>Will be set to the given topic name.</p>\n<p>We merge all gotos found in this topic and all topic parents by \niterating over the dotnames. We only use add each topic once and each \ntopic may have a bit of logic that decides if it should be displayed.</p>\n<pre><code>&lt;topic_name?logic_test</code></pre><p>So this would goto the topic_name if the logic_test passes. The logic \ntest is written simmilar to a url query after the question mark comes a \nnumber of tests that are then &amp; or | together in left to right order \n(no operator precedence).</p>\n<pre><code>&lt;topic_name?count&lt;10&amp;seen==false</code></pre><p>So this would display the goto option if count is less than 10 and seen \nis set to false. These variables we are testing are tag_names and \ndefault to the current subject chat but could reference other subjects \nby explicitly including a root.</p>\n<p>Available logic tests are</p>\n<pre><code>name==value\nname=value</code></pre><p>True if the tag is set to this value.</p>\n<pre><code>name!=value</code></pre><p>True if the tag is not set to this value.</p>\n<pre><code>name&lt;value</code></pre><p>True if the tag is less than this value (numeric test).</p>\n<pre><code>name&gt;value</code></pre><p>True if the tag is more than this value (numeric test).</p>\n<pre><code>name&lt;=value</code></pre><p>True if the tag is less than or equal to this value (numeric test).</p>\n<pre><code>name&gt;=value</code></pre><p>True if the tag is more than or equal to  this value (numeric test).</p>\n<p>All of these tests can be preceded by a ! to negate them so</p>\n<pre><code>name!=vale\n!name==value</code></pre><p>Are both a test for inequality.</p>\n<p>Multiple tests can be joined together by &amp; (and) or | (or) this logic \nwill be applied to a running total moving from left to right as the \nvalues are evaluated with the final value deciding if this goto will be \ndisplayed.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 333,
@@ -1238,55 +1266,55 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats"
   },
   {
-   "body": "<pre><code>chats.changes(chat,change,...)\n\nchats.changes(chat,&quot;subject&quot;)\nchats.changes(chat,&quot;topic&quot;,topic)\nchats.changes(chat,&quot;goto&quot;,goto)\nchats.changes(chat,&quot;tag&quot;,tag_name,tag_value)\n</code></pre><p>This is a callback hook, replace to be notified of changes and possibly \nalter then, by default we print debuging information. Replace this \nfunction with an empty function to prevent this eg</p>\n<pre><code>chats.changes=function()end\n</code></pre>",
+   "body": "<pre><code>chats.changes(chat,change,...)\n\nchats.changes(chat,&quot;subject&quot;)\nchats.changes(chat,&quot;topic&quot;,topic)\nchats.changes(chat,&quot;goto&quot;,goto)\nchats.changes(chat,&quot;tag&quot;,tag_name,tag_value)</code></pre><p>This is a callback hook, replace to be notified of changes and possibly \nalter then, by default we print debuging information. Replace this \nfunction with an empty function to prevent this eg</p>\n<pre><code>chats.changes=function()end</code></pre>",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 668,
+   "line": 669,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.changes",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat = chats:get_subject(subject_name)\nchat = chats:get_subject()\n</code></pre><p>Get the chat for the given subject or the chat for the last subject \nselected with set_subject if no subject_name is given.</p>\n",
+   "body": "<pre><code>chat = chats:get_subject(subject_name)\nchat = chats:get_subject()</code></pre><p>Get the chat for the given subject or the chat for the last subject \nselected with set_subject if no subject_name is given.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 560,
+   "line": 561,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_subject",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>tag_value = chats:get_tag(tag_name,subject_name)\n</code></pre><p>Get the tag_value for the given tag_name which can either be \n&quot;tag_root/tag_name&quot; or &quot;tag_name&quot;. The subject_name is the default root \nto use if no tag_root is given in the tag_name.</p>\n",
+   "body": "<pre><code>tag_value = chats:get_tag(tag_name,subject_name)</code></pre><p>Get the tag_value for the given tag_name which can either be \n&quot;tag_root/tag_name&quot; or &quot;tag_name&quot;. The subject_name is the default root \nto use if no tag_root is given in the tag_name.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 575,
+   "line": 576,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_tag",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>output = chats:replace_tags(input,subject_name)\n</code></pre><p>Tags in the input text can be wrapped in {tag_name} and will be \nreplaced with the appropriate tag_value. This is done recursively so \ntag_values can contain references to other tags. If a tag does not \nexist then it will not expand and {tag_name} will remain in the output \ntext.</p>\n<p>Again if any tag name does not contain an explicit root then \nsubject_name will be used as the default chat subject.</p>\n",
+   "body": "<pre><code>output = chats:replace_tags(input,subject_name)</code></pre><p>Tags in the input text can be wrapped in {tag_name} and will be \nreplaced with the appropriate tag_value. This is done recursively so \ntag_values can contain references to other tags. If a tag does not \nexist then it will not expand and {tag_name} will remain in the output \ntext.</p>\n<p>Again if any tag name does not contain an explicit root then \nsubject_name will be used as the default chat subject.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 636,
+   "line": 637,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat = chats:set_subject(subject_name)\n</code></pre><p>Set the current subject for this chats object, this subject becomes the \nchat that you will get if you call get_subject with no arguments.</p>\n",
+   "body": "<pre><code>chat = chats:set_subject(subject_name)</code></pre><p>Set the current subject for this chats object, this subject becomes the \nchat that you will get if you call get_subject with no arguments.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 543,
+   "line": 544,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_subject",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>tag_value = chats:set_tag(tag_name,tag_value,subject_name)\n</code></pre><p>Alter the value of the given tag_name. If the value string begins with \na &quot;+&quot; or a &quot;-&quot; Then the values will be treated as numbers and added or \nsubtracted from the current value. This allows for simple incremental \nflag values.</p>\n<p>Again if the tag name does not contain an explicit  root then \nsubject_name will be used as the default chat subject.</p>\n",
+   "body": "<pre><code>tag_value = chats:set_tag(tag_name,tag_value,subject_name)</code></pre><p>Alter the value of the given tag_name. If the value string begins with \na &quot;+&quot; or a &quot;-&quot; Then the values will be treated as numbers and added or \nsubtracted from the current value. This allows for simple incremental \nflag values.</p>\n<p>Again if the tag name does not contain an explicit  root then \nsubject_name will be used as the default chat subject.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 593,
+   "line": 594,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_tag",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>for part_name in chatdown.dotnames(full_name) do\n    print(part_name)\nend\n</code></pre><p>Iterate all dotnames so if given &quot;aa.bb.cc&quot; we would iterate through \n&quot;aa.bb.cc&quot; , &quot;aa.bb&quot; and &quot;aa&quot;. This is used to inherit data using just \na naming convention.</p>\n",
+   "body": "<pre><code>for part_name in chatdown.dotnames(full_name) do\n    print(part_name)\nend</code></pre><p>Iterate all dotnames so if given &quot;aa.bb.cc&quot; we would iterate through \n&quot;aa.bb.cc&quot; , &quot;aa.bb&quot; and &quot;aa&quot;. This is used to inherit data using just \na naming convention.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 253,
@@ -1294,7 +1322,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>rawsubjects = chatdown.parse(text)\n</code></pre><p>Parse text from flat text chatdown format into heirachical chat data, \nwhich we refer to as rawsubjects, something that can be output easily \nas json.</p>\n<p>This gives us a readonly rawsubjects structure that can be used to control \nwhat text is displayed during a chat session.</p>\n<p>This is intended to be descriptive and logic less, any real logic \nshould be added using a real language that operates on this rawsubjects and \ngets triggered by the names used. EG, filter out gotos unless certain \ncomplicated conditions are met or change topics to redirect to an \nalternative.</p>\n<p>A self documented example of chatdown formated text can be found in \nlua.wetgenes.gamecake.fun.chatdown.text</p>\n",
+   "body": "<pre><code>rawsubjects = chatdown.parse(text)</code></pre><p>Parse text from flat text chatdown format into heirachical chat data, \nwhich we refer to as rawsubjects, something that can be output easily \nas json.</p>\n<p>This gives us a readonly rawsubjects structure that can be used to control \nwhat text is displayed during a chat session.</p>\n<p>This is intended to be descriptive and logic less, any real logic \nshould be added using a real language that operates on this rawsubjects and \ngets triggered by the names used. EG, filter out gotos unless certain \ncomplicated conditions are met or change topics to redirect to an \nalternative.</p>\n<p>A self documented example of chatdown formated text can be found in \nlua.wetgenes.gamecake.fun.chatdown.text</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 17,
@@ -1302,26 +1330,26 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chats = chatdown.setup_chats(chat_text,changes)\n</code></pre><p>parse and initialise state data for every subjects chunk creating a \nglobal chats with a chat object for each subject.</p>\n",
+   "body": "<pre><code>chats = chatdown.setup_chats(chat_text,changes)</code></pre><p>parse and initialise state data for every subjects chunk creating a \nglobal chats with a chat object for each subject.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 697,
+   "line": 698,
    "name": "lua.wetgenes.gamecake.fun.chatdown.setup",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat = chatdown.setup_chat(chats,subject_name)\n</code></pre><p>Setup the initial chat state for a subject. This is called \nautomatically by chatdown.setup and probably should not be used \nelsewhere.</p>\n",
+   "body": "<pre><code>chat = chatdown.setup_chat(chats,subject_name)</code></pre><p>Setup the initial chat state for a subject. This is called \nautomatically by chatdown.setup and probably should not be used \nelsewhere.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 505,
+   "line": 506,
    "name": "lua.wetgenes.gamecake.fun.chatdown.setup_chat",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<p>Here is some example chatdown formatted text full of useful \ninformation, it it is intended to be a self documented example.</p>\n<pre><code>\n- This is a single line comment\n-- This is the start of a multi-line comment\n\nAll lines are now comment lines until we see a line that begins with a \ncontrol character leading white space is ignored. If for some reason \nyou need to start a text line with a special character then it can be \nescaped by preceding it with a #\n\nWhat follows is a list of these characters and a brief description \nabout the parser state they switch to.\n\n    1. - (text to ignore)\n\n        A single line comment that does not change parser state and \n        only this line will be ignored so it can be inserted inside \n        other chunks without losing our place.\n\n    2. -- (text to ignore)\n\n        Begin a comment chunk, this line and all lines that follow this \n        line will be considered comments and ignored until we switch to \n        a new parser state.\n\n    3. #subject_name\n\n        Begin a new subject chunk, all future topic,goto or tag chunks will \n        belong to this subject.\n\n        The text that follows this until the next chunk is the long \n        description intended for when you examine the character.\n\n        Although it makes sense for a subject chunk to belong to one \n        character it could also a group conversation with tags being \n        set to change the current talker as the conversation flows.\n\n        subject names have simple cascading inheritance according to their \n        name with each level separated by a dot. A chunk named a.b.c \n        will inherit data from any chunks defined for a.b and a in that \n        order of priority.\n\n    4. &gt;topic_name\n\n        Begin a topic chunk, all future goto or tag chunks will belong \n        to this topic, the lines that follow are how the character \n        responds when questioned about this topic followed by one or \n        more gotos as possible responses that will lead you onto \n        another topic.\n\n        Topics can be broken into parts, to create a pause, by using an \n        unnamed goto followed by an unnamed topic which will both \n        automatically be given the same generated name and hence linked \n        together.\n\n    5. &lt;goto_topic_name\n\n        Begin a goto chunk, all future tag chunks will belong to this \n        goto, this is probably best thought of as a question that will \n        get a reply from the character. This is a choice made by the \n        player that causes a logical jump to another topic.\n\n        Essentially this means GOTO another topic and there can be \n        multiple GOTO options associated with each topic which the \n        reader is expected to choose between.\n\n    6. =set_tag_name to this value\n\n        If there is any text on the rest of this line then it will be \n        assigned to the tag without changing the current parse state so \n        it can be used in the middle of another chunk without losing \n        our place.\n\n        This single line tag assignment is usually all you need. \n        Alternatively, if there is no text on the rest of this first \n        line, only white space, then the parse state will change and \n        text on all following lines will be assigned to the named tag.\n\n        This assignment can happen at various places, for instance if \n        it is part of the subject then it will be the starting \n        value for a tag but if it is linked to a topic or goto then the \n        value will be a change as the conversation happens. In all \n        cases the tags are set in a single batch as the state changes \n        so the placement and order makes no difference.\n\n        Tags can be used inside text chunks or even GOTO labels by \n        tightly wrapping with {} eg {name} would be replaced with the \n        value of name. Tags from other subjects can be referenced by \n        prefixing the tag name with the subject name followed by a forward \n        slash like so {subject/tag}\n\n\nThe hierarchy of these chunks can be expressed by indentation as all \nwhite space is ignored and combined into a single space. Each SUBJECT will \nhave multiple TOPICs associated with it and each TOPIC will have \nmultiple GOTOs as options to jump between TOPICs. TAGs can be \nassociated with any of these 3 levels and will be evaluated as the \nconversation flows through these points.\n\nSo the chunk hierarchy expressed using indentation to denote children \nof.\n\n    SUBJECT\n        TAG\n        GOTO\n            TAG\n        TOPIC\n            TAG\n            GOTO\n                TAG\n\nThe GOTO chunks in the root SUBJECT chunk are used as prototypes so if a \nGOTO is used in multiple topics its text can be placed within a GOTO \ninside the main SUBJECT chunk rather than repeated constantly. This will \nthen be inherited by a GOTO with no text. An alternative to this \nshorthand is to assign an oft-used piece of text to a tag and reference \nthat in each topic instead.\n\nSUBJECTs and TOPICs also have simple inheritance based on their names this \nenables the building of a prototype which is later expanded. Each \ninheritance level is separated by a dot so aa.bb.cc will inherit from \naa.bb and aa with the data in the longer names having precedence. This \ninheritance is additive only so for instance a TAG can not be unset and \nwould have to be changed to another value by aa.bb.cc if it existed in \naa.bb or aa.\n\nIn practise this means\n&lt;br/&gt;\n&lt;br/&gt;\n\n</code></pre>",
+   "body": "<p>Here is some example chatdown formatted text full of useful \ninformation, it it is intended to be a self documented example.</p>\n<pre><code>\n- This is a single line comment\n-- This is the start of a multi-line comment\n\nAll lines are now comment lines until we see a line that begins with a \ncontrol character leading white space is ignored. If for some reason \nyou need to start a text line with a special character then it can be \nescaped by preceding it with a #\n\nWhat follows is a list of these characters and a brief description \nabout the parser state they switch to.\n\n    1. - (text to ignore)\n\n        A single line comment that does not change parser state and \n        only this line will be ignored so it can be inserted inside \n        other chunks without losing our place.\n\n    2. -- (text to ignore)\n\n        Begin a comment chunk, this line and all lines that follow this \n        line will be considered comments and ignored until we switch to \n        a new parser state.\n\n    3. #subject_name\n\n        Begin a new subject chunk, all future topic,goto or tag chunks will \n        belong to this subject.\n\n        The text that follows this until the next chunk is the long \n        description intended for when you examine the character.\n\n        Although it makes sense for a subject chunk to belong to one \n        character it could also a group conversation with tags being \n        set to change the current talker as the conversation flows.\n\n        subject names have simple cascading inheritance according to their \n        name with each level separated by a dot. A chunk named a.b.c \n        will inherit data from any chunks defined for a.b and a in that \n        order of priority.\n\n    4. &gt;topic_name\n\n        Begin a topic chunk, all future goto or tag chunks will belong \n        to this topic, the lines that follow are how the character \n        responds when questioned about this topic followed by one or \n        more gotos as possible responses that will lead you onto \n        another topic.\n\n        Topics can be broken into parts, to create a pause, by using an \n        unnamed goto followed by an unnamed topic which will both \n        automatically be given the same generated name and hence linked \n        together.\n\n    5. &lt;goto_topic_name\n\n        Begin a goto chunk, all future tag chunks will belong to this \n        goto, this is probably best thought of as a question that will \n        get a reply from the character. This is a choice made by the \n        player that causes a logical jump to another topic.\n\n        Essentially this means GOTO another topic and there can be \n        multiple GOTO options associated with each topic which the \n        reader is expected to choose between.\n\n    6. =set_tag_name to this value\n\n        If there is any text on the rest of this line then it will be \n        assigned to the tag without changing the current parse state so \n        it can be used in the middle of another chunk without losing \n        our place.\n\n        This single line tag assignment is usually all you need. \n        Alternatively, if there is no text on the rest of this first \n        line, only white space, then the parse state will change and \n        text on all following lines will be assigned to the named tag.\n\n        This assignment can happen at various places, for instance if \n        it is part of the subject then it will be the starting \n        value for a tag but if it is linked to a topic or goto then the \n        value will be a change as the conversation happens. In all \n        cases the tags are set in a single batch as the state changes \n        so the placement and order makes no difference.\n\n        Tags can be used inside text chunks or even GOTO labels by \n        tightly wrapping with {} eg {name} would be replaced with the \n        value of name. Tags from other subjects can be referenced by \n        prefixing the tag name with the subject name followed by a forward \n        slash like so {subject/tag}\n\n\nThe hierarchy of these chunks can be expressed by indentation as all \nwhite space is ignored and combined into a single space. Each SUBJECT will \nhave multiple TOPICs associated with it and each TOPIC will have \nmultiple GOTOs as options to jump between TOPICs. TAGs can be \nassociated with any of these 3 levels and will be evaluated as the \nconversation flows through these points.\n\nSo the chunk hierarchy expressed using indentation to denote children \nof.\n\n    SUBJECT\n        TAG\n        GOTO\n            TAG\n        TOPIC\n            TAG\n            GOTO\n                TAG\n\nThe GOTO chunks in the root SUBJECT chunk are used as prototypes so if a \nGOTO is used in multiple topics its text can be placed within a GOTO \ninside the main SUBJECT chunk rather than repeated constantly. This will \nthen be inherited by a GOTO with no text. An alternative to this \nshorthand is to assign an oft-used piece of text to a tag and reference \nthat in each topic instead.\n\nSUBJECTs and TOPICs also have simple inheritance based on their names this \nenables the building of a prototype which is later expanded. Each \ninheritance level is separated by a dot so aa.bb.cc will inherit from \naa.bb and aa with the data in the longer names having precedence. This \ninheritance is additive only so for instance a TAG can not be unset and \nwould have to be changed to another value by aa.bb.cc if it existed in \naa.bb or aa.\n\nIn practise this means\n&lt;br/&gt;\n&lt;br/&gt;\n</code></pre>",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 728,
+   "line": 729,
    "name": "lua.wetgenes.gamecake.fun.chatdown.text",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   }

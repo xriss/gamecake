@@ -121,15 +121,21 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.add"><span>/lua.wetgenes.gamecake.fun.entities.add</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.call"><span>/lua.wetgenes.gamecake.fun.entities.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.caste"><span>/lua.wetgenes.gamecake.fun.entities.caste</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.find_uid"><span>/lua.wetgenes.gamecake.fun.entities.find_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.forget_uid"><span>/lua.wetgenes.gamecake.fun.entities.forget_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.generate_uid"><span>/lua.wetgenes.gamecake.fun.entities.generate_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.get"><span>/lua.wetgenes.gamecake.fun.entities.get</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.manifest"><span>/lua.wetgenes.gamecake.fun.entities.manifest</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remember_uid"><span>/lua.wetgenes.gamecake.fun.entities.remember_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remove"><span>/lua.wetgenes.gamecake.fun.entities.remove</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.reset"><span>/lua.wetgenes.gamecake.fun.entities.reset</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.set"><span>/lua.wetgenes.gamecake.fun.entities.set</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.sortby_update"><span>/lua.wetgenes.gamecake.fun.entities.sortby_update</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems"><span>/lua.wetgenes.gamecake.fun.entities.systems</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.call"><span>/lua.wetgenes.gamecake.fun.entities.systems.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.insert"><span>/lua.wetgenes.gamecake.fun.entities.systems.insert</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.uids"><span>/lua.wetgenes.gamecake.fun.entities.uids</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.cells"><span>/lua.wetgenes.gamecake.fun.yarn.cells</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items"><span>/lua.wetgenes.gamecake.fun.yarn.items</span></a>
 
@@ -192,7 +198,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.grd.slide"><span>/lua.wetgenes.grd.slide</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.sort_cmap"><span>/lua.wetgenes.grd.sort_cmap</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.stream"><span>/lua.wetgenes.grd.stream</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grdpaint"><span>/lua.wetgenes.grdpaint</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.grdsvg.string"><span>/lua.wetgenes.grdsvg.string</span></a><a class="par" href="../../docs/lua.wetgenes.json"><span>/lua.wetgenes.json</span></a>
 
@@ -310,8 +317,7 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.systems">lua.wetgenes.gamecake.fun.entities.systems</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L37">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
-<div><pre><code>entities.systems={name=system,[1]=sytem1}
-</code></pre><p>A sorted table and lookup by caste name of each system. Table is sorted 
+<div><pre><code>entities.systems={name=system,[1]=system}</code></pre><p>A sorted table and lookup by caste name of each system. Table is sorted 
 so it will be traversed backwards, backwards traversal allows the 
 current item to delete itself.</p>
 </div>
@@ -319,20 +325,17 @@ current item to delete itself.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.call">lua.wetgenes.gamecake.fun.entities.systems.call</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L99">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
-<div><pre><code>entities.systems.call(fname,...)
-</code></pre><p>For every system call the function called fname like so.</p>
-<pre><code>system[fname](system,...)
-</code></pre><p>Returns the number of calls made, which will be the number of systems 
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L189">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.systems.call(fname,...)</code></pre><p>For every system call the function called fname like so.</p>
+<pre><code>system[fname](system,...)</code></pre><p>Returns the number of calls made, which will be the number of systems 
 that had an fname function to call.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.insert">lua.wetgenes.gamecake.fun.entities.systems.insert</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L68">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
-<div><pre><code>entities.systems.insert(system)
-</code></pre><p>Insert a new system replacing any system of the same caste. 
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L157">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>entities.systems.insert(system)</code></pre><p>Insert a new system replacing any system of the same caste. 
 system.caste should be set to the caste of the system for this to work. 
 As we also keep some functions in this table, the names &quot;insert&quot;, 
 &quot;remove&quot; and &quot;call&quot; are not available as caste names.</p>
@@ -341,9 +344,8 @@ As we also keep some functions in this table, the names &quot;insert&quot;,
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove">lua.wetgenes.gamecake.fun.entities.systems.remove</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L50">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
-<div><pre><code>system = entities.systems.remove(caste)
-</code></pre><p>Remove and return the system of the given caste.</p>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua#L139">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua</a></div>
+<div><pre><code>system = entities.systems.remove(caste)</code></pre><p>Remove and return the system of the given caste.</p>
 </div>
 </div>
 

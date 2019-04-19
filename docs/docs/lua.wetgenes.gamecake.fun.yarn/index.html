@@ -121,15 +121,21 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.add"><span>/lua.wetgenes.gamecake.fun.entities.add</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.call"><span>/lua.wetgenes.gamecake.fun.entities.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.caste"><span>/lua.wetgenes.gamecake.fun.entities.caste</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.find_uid"><span>/lua.wetgenes.gamecake.fun.entities.find_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.forget_uid"><span>/lua.wetgenes.gamecake.fun.entities.forget_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.generate_uid"><span>/lua.wetgenes.gamecake.fun.entities.generate_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.get"><span>/lua.wetgenes.gamecake.fun.entities.get</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.manifest"><span>/lua.wetgenes.gamecake.fun.entities.manifest</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remember_uid"><span>/lua.wetgenes.gamecake.fun.entities.remember_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remove"><span>/lua.wetgenes.gamecake.fun.entities.remove</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.reset"><span>/lua.wetgenes.gamecake.fun.entities.reset</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.set"><span>/lua.wetgenes.gamecake.fun.entities.set</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.sortby_update"><span>/lua.wetgenes.gamecake.fun.entities.sortby_update</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems"><span>/lua.wetgenes.gamecake.fun.entities.systems</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.call"><span>/lua.wetgenes.gamecake.fun.entities.systems.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.insert"><span>/lua.wetgenes.gamecake.fun.entities.systems.insert</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.uids"><span>/lua.wetgenes.gamecake.fun.entities.uids</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.cells"><span>/lua.wetgenes.gamecake.fun.yarn.cells</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items"><span>/lua.wetgenes.gamecake.fun.yarn.items</span></a>
 
@@ -192,7 +198,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.grd.slide"><span>/lua.wetgenes.grd.slide</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.sort_cmap"><span>/lua.wetgenes.grd.sort_cmap</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.stream"><span>/lua.wetgenes.grd.stream</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grdpaint"><span>/lua.wetgenes.grdpaint</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.grdsvg.string"><span>/lua.wetgenes.grdsvg.string</span></a><a class="par" href="../../docs/lua.wetgenes.json"><span>/lua.wetgenes.json</span></a>
 
@@ -316,8 +323,7 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.cells">lua.wetgenes.gamecake.fun.yarn.cells</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/cells.lua#L6">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/cells.lua</a></div>
-<div><pre><code>cells = require(&quot;wetgenes.gamecake.fun.yarn.cells&quot;).create(items)
-</code></pre><p>This module contains only one function which can be used to create an 
+<div><pre><code>cells = require(&quot;wetgenes.gamecake.fun.yarn.cells&quot;).create(items)</code></pre><p>This module contains only one function which can be used to create an 
 cells instance and the rest of this documentation concerns the return 
 from this create function, not the module itself.</p>
 </div>
@@ -326,8 +332,7 @@ from this create function, not the module itself.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items">lua.wetgenes.gamecake.fun.yarn.items</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L6">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>items = require(&quot;wetgenes.gamecake.fun.yarn.items&quot;).create()
-</code></pre><p>This module contains only one function which can be used to create an 
+<div><pre><code>items = require(&quot;wetgenes.gamecake.fun.yarn.items&quot;).create()</code></pre><p>This module contains only one function which can be used to create an 
 items instance and the rest of this documentation concerns the return 
 from this create function, not the module itself.</p>
 </div>
@@ -336,8 +341,7 @@ from this create function, not the module itself.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.cells">lua.wetgenes.gamecake.fun.yarn.items.cells</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L259">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>items.cells
-</code></pre><p>We automatically create a cells object bound to this set of items, this 
+<div><pre><code>items.cells</code></pre><p>We automatically create a cells object bound to this set of items, this 
 cells object should be used to define all your custom game cells.</p>
 </div>
 </div>
@@ -347,8 +351,7 @@ cells object should be used to define all your custom game cells.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L73">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
 <div><pre><code>item = items.create()
 item = items.create({})
-item = items.create({},metatable)
-</code></pre><p>Create a single item, optionally pass in a base item table that will be 
+item = items.create({},metatable)</code></pre><p>Create a single item, optionally pass in a base item table that will be 
 turned into a proper item (using setmetatable to add methods). This 
 should always be a new table and will also be returned. If no 
 metatable is provided then items.metatable will be used.</p>
@@ -358,8 +361,7 @@ metatable is provided then items.metatable will be used.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.create_pages">lua.wetgenes.gamecake.fun.yarn.items.create_pages</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L271">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>items.pages
-</code></pre><p>We automatically create a pages object bound to this set of items, this 
+<div><pre><code>items.pages</code></pre><p>We automatically create a pages object bound to this set of items, this 
 pages object should be used to define all your custom game pages.</p>
 <p>This can be considered a level and you may need multiple pages which 
 are moved in and out of items.pages</p>
@@ -370,8 +372,7 @@ are moved in and out of items.pages</p>
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.destroy">lua.wetgenes.gamecake.fun.yarn.items.destroy</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L101">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
 <div><pre><code>item = items.destroy(item)
-item = item:destroy()
-</code></pre><p>Destroy an item, remove it from the master table dump so it will be 
+item = item:destroy()</code></pre><p>Destroy an item, remove it from the master table dump so it will be 
 garbage collected.</p>
 </div>
 </div>
@@ -379,8 +380,7 @@ garbage collected.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.find">lua.wetgenes.gamecake.fun.yarn.items.find</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L215">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>child_item = item:find(keyname)
-</code></pre><p>Get the first child item that has a [keyname] value in it. All child 
+<div><pre><code>child_item = item:find(keyname)</code></pre><p>Get the first child item that has a [keyname] value in it. All child 
 items are searched, but this is not recursive.</p>
 <p>returns nil if no child item is found.</p>
 </div>
@@ -389,8 +389,7 @@ items are searched, but this is not recursive.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.get_big">lua.wetgenes.gamecake.fun.yarn.items.get_big</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L199">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>big_item = item:get_big()
-</code></pre><p>Get the first big item from this container, returns nil if we do not 
+<div><pre><code>big_item = item:get_big()</code></pre><p>Get the first big item from this container, returns nil if we do not 
 contain a big item.</p>
 </div>
 </div>
@@ -398,8 +397,7 @@ contain a big item.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.insert">lua.wetgenes.gamecake.fun.yarn.items.insert</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L173">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>item = item:insert(parent)
-</code></pre><p>Insert this item into the given parent. Item will automatically be 
+<div><pre><code>item = item:insert(parent)</code></pre><p>Insert this item into the given parent. Item will automatically be 
 removed from its current parent. If the item is_big then it will be 
 inserted into the front of the list otherwise it will go at the end. 
 This is to help with finding big items, since there should only be one 
@@ -410,20 +408,17 @@ per container we only have to check the first child.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.iterate_dotnames">lua.wetgenes.gamecake.fun.yarn.items.iterate_dotnames</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L24">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>for name,tail in items.iterate_dotnames(names) do ... end
-</code></pre><p>Iterator over a names string, start with the full string and cut off 
+<div><pre><code>for name,tail in items.iterate_dotnames(names) do ... end</code></pre><p>Iterator over a names string, start with the full string and cut off 
 the tail on each iteration. This is used for simple inheritance merging 
 of named prefabs and rules or anything else.</p>
 <p>Second return value is the tail of the string or the string if not 
 tail.</p>
 <p>for example the following input string</p>
-<pre><code>&quot;one.two.three.four&quot;
-</code></pre><p>would get you the following iteration loops, one line per loop</p>
+<pre><code>&quot;one.two.three.four&quot;</code></pre><p>would get you the following iteration loops, one line per loop</p>
 <pre><code>&quot;one.two.three.four&quot; , &quot;four&quot;
 &quot;one.two.three&quot;      , &quot;three&quot;
 &quot;one.two&quot;            , &quot;two&quot;
-&quot;one&quot;                , &quot;one&quot;
-</code></pre></div>
+&quot;one&quot;                , &quot;one&quot;</code></pre></div>
 </div>
 
 <div class="wrap">
@@ -431,8 +426,7 @@ tail.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L128">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
 <div><pre><code>for it in item:iterate_parents() do
     ...
-end
-</code></pre><p>Iterate over the parent chain going upwards. The first iteration is the 
+end</code></pre><p>Iterate over the parent chain going upwards. The first iteration is the 
 parent of this object and so on.</p>
 </div>
 </div>
@@ -440,16 +434,14 @@ parent of this object and so on.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.metatable">lua.wetgenes.gamecake.fun.yarn.items.metatable</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L59">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>items.metatable
-</code></pre><p>Expose the item metatable so more methods can easily be added.</p>
+<div><pre><code>items.metatable</code></pre><p>Expose the item metatable so more methods can easily be added.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.prefabs">lua.wetgenes.gamecake.fun.yarn.items.prefabs</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L247">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>items.prefabs
-</code></pre><p>We automatically create a prefabs object bound to this set of items, this 
+<div><pre><code>items.prefabs</code></pre><p>We automatically create a prefabs object bound to this set of items, this 
 prefabs object should be used to define all your custom game prefabs.</p>
 </div>
 </div>
@@ -457,8 +449,7 @@ prefabs object should be used to define all your custom game prefabs.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.remove">lua.wetgenes.gamecake.fun.yarn.items.remove</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L146">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>item = item:remove()
-</code></pre><p>Remove this item from its parents table or do nothing if the item does 
+<div><pre><code>item = item:remove()</code></pre><p>Remove this item from its parents table or do nothing if the item does 
 not have a parent.</p>
 </div>
 </div>
@@ -466,8 +457,7 @@ not have a parent.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.items.rules">lua.wetgenes.gamecake.fun.yarn.items.rules</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua#L235">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua</a></div>
-<div><pre><code>items.rules
-</code></pre><p>We automatically create a rules object bound to this set of items, this 
+<div><pre><code>items.rules</code></pre><p>We automatically create a rules object bound to this set of items, this 
 rules object should be used to define all your custom game rules.</p>
 </div>
 </div>
@@ -475,8 +465,7 @@ rules object should be used to define all your custom game rules.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.pages">lua.wetgenes.gamecake.fun.yarn.pages</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/pages.lua#L8">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/pages.lua</a></div>
-<div><pre><code>pages = require(&quot;wetgenes.gamecake.fun.yarn.pages&quot;).create(items)
-</code></pre><p>This module contains only one function which can be used to create an 
+<div><pre><code>pages = require(&quot;wetgenes.gamecake.fun.yarn.pages&quot;).create(items)</code></pre><p>This module contains only one function which can be used to create an 
 pages instance and the rest of this documentation concerns the return 
 from this create function, not the module itself.</p>
 </div>
@@ -485,8 +474,7 @@ from this create function, not the module itself.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.prefabs">lua.wetgenes.gamecake.fun.yarn.prefabs</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua#L7">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua</a></div>
-<div><pre><code>prefabs = require(&quot;wetgenes.gamecake.fun.yarn.prefabs&quot;).create(items)
-</code></pre><p>This module contains only one function which can be used to create an 
+<div><pre><code>prefabs = require(&quot;wetgenes.gamecake.fun.yarn.prefabs&quot;).create(items)</code></pre><p>This module contains only one function which can be used to create an 
 prefabs instance and the rest of this documentation concerns the return 
 from this create function, not the module itself.</p>
 </div>
@@ -496,8 +484,7 @@ from this create function, not the module itself.</p>
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.prefabs.set">lua.wetgenes.gamecake.fun.yarn.prefabs.set</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua#L44">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua</a></div>
 <div><pre><code>prefab = prefabs:get(name)
-prefab = prefabs:get(name,prefab)
-</code></pre><p>Build and return a table with all prefab values inherited from all its 
+prefab = prefabs:get(name,prefab)</code></pre><p>Build and return a table with all prefab values inherited from all its 
 parents. Optionally pass in a prefab to override values and also have 
 it returned.</p>
 <p>If name doesn&#39;t exist at any level and a table is not passed in then nil 
@@ -509,8 +496,7 @@ will be returned.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules">lua.wetgenes.gamecake.fun.yarn.rules</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua#L6">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua</a></div>
-<div><pre><code>rules = require(&quot;wetgenes.gamecake.fun.yarn.rules&quot;).create(items)
-</code></pre><p>This module contains only one function which can be used to create an 
+<div><pre><code>rules = require(&quot;wetgenes.gamecake.fun.yarn.rules&quot;).create(items)</code></pre><p>This module contains only one function which can be used to create an 
 rules instance and the rest of this documentation concerns the return 
 from this create function, not the module itself.</p>
 </div>
@@ -519,15 +505,13 @@ from this create function, not the module itself.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.apply">lua.wetgenes.gamecake.fun.yarn.rules.apply</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua#L62">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua</a></div>
-<div><pre><code>item = rules.apply(item,method,...)
-</code></pre><p>item.rules must be a list of rule names and the order in which they should 
+<div><pre><code>item = rules.apply(item,method,...)</code></pre><p>item.rules must be a list of rule names and the order in which they should 
 be applied to this item.</p>
 <p>Call the given method in each rule with the item and the remaining arguments.</p>
 <p>If the method returns a value then no more methods will be applied even 
 if more rules are listed.</p>
 <p>We always return the passed in item so that calls can be chained.</p>
-<pre><code>item = item:apply(method,...)
-</code></pre><p>This function is inserted into the items.metatable so it can be called 
+<pre><code>item = item:apply(method,...)</code></pre><p>This function is inserted into the items.metatable so it can be called 
 directly from an item.</p>
 </div>
 </div>
@@ -535,10 +519,8 @@ directly from an item.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.can">lua.wetgenes.gamecake.fun.yarn.rules.can</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua#L96">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua</a></div>
-<div><pre><code>yes = rules.can(item,method)
-</code></pre><p>Returns true if any rule in this item has the given method.</p>
-<pre><code>yes = item:can(method)
-</code></pre><p>This function is inserted into the items.metatable so it can be called 
+<div><pre><code>yes = rules.can(item,method)</code></pre><p>Returns true if any rule in this item has the given method.</p>
+<pre><code>yes = item:can(method)</code></pre><p>This function is inserted into the items.metatable so it can be called 
 directly from an item.</p>
 </div>
 </div>
@@ -546,18 +528,14 @@ directly from an item.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.set">lua.wetgenes.gamecake.fun.yarn.rules.set</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua#L28">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua</a></div>
-<div><pre><code>rule = rules.set(rule)
-</code></pre><p>Set this base rule into the name space using rule.name which must 
+<div><pre><code>rule = rules.set(rule)</code></pre><p>Set this base rule into the name space using rule.name which must 
 be a string.</p>
 <p>Multiple rules can be applied to an item and each rule will be applied 
 in the order listed.</p>
 <p>A rule is a table of named functions that can be applied to an item.</p>
-<pre><code>rule.setup(item)
-</code></pre><p>Must setup the item so that it is safe to call the other rules on it.</p>
-<pre><code>rule.clean(item)
-</code></pre><p>Should cleanup anything that needs cleaning.</p>
-<pre><code>rule.tick(item)
-</code></pre><p>Should perform a single time tick update on the item.
+<pre><code>rule.setup(item)</code></pre><p>Must setup the item so that it is safe to call the other rules on it.</p>
+<pre><code>rule.clean(item)</code></pre><p>Should cleanup anything that needs cleaning.</p>
+<pre><code>rule.tick(item)</code></pre><p>Should perform a single time tick update on the item.
 <br/>
 <br/></p>
 </div>

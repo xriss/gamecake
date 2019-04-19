@@ -1,10 +1,15 @@
 {
  "_blog_json": {
   "dir": "blog/.",
-  "posts_per_page": 5
+  "feed": {
+   "title": "Title"
+  },
+  "posts_per_feed": 20,
+  "posts_per_page": 5,
+  "url": "/"
  },
  "_blog_page_body": "\n{_list:blog_list}\n\n<div>{_blog_page_older:link_older_page} {_blog_page_newer:link_newer_page}</div>\n",
- "_blog_post_body": "<h2 id=\"-_blog_post_json-title-\">{_blog_post_json.title}</h2>\n<p>This is a test post to go along with the adding of plated, our \nrecursive static site builder written in node to the gamecake \nrepository.</p>\n<p>This is a node app, so be sure to npm install in the plated directory \nif you expect any of the scripts to work.</p>\n",
+ "_blog_post_body": "<h2 id=\"_blog_post_jsontitle\">{_blog_post_json.title}</h2>\n<p>This is a test post to go along with the adding of plated, our \nrecursive static site builder written in node to the gamecake \nrepository.</p>\n<p>This is a node app, so be sure to npm install in the plated directory \nif you expect any of the scripts to work.</p>\n",
  "_blog_post_body_many": "<div class=\"blog_wrap\">\n\t<div class=\"blog_info\"><a href=\"{_dirname}\">{_blog_post_json.title}</a> by {_blog_post_json.author} on {_blog_post_json.datedash}</div>\n\t{_blog_post_body}\n</div>\n",
  "_blog_post_body_one": "<div class=\"blog_wrap\">\n\t{_blog_post_body}\n\t<div class=\"paging_wrap\">{_blog_post_older:link_older_post} {_blog_post_newer:link_newer_post}</div>\n</div>\n\n",
  "_blog_post_json": {

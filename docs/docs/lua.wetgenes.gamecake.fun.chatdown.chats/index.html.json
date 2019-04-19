@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1188,50 +1216,50 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats"
   },
   {
-   "body": "<pre><code>chats.changes(chat,change,...)\n\nchats.changes(chat,&quot;subject&quot;)\nchats.changes(chat,&quot;topic&quot;,topic)\nchats.changes(chat,&quot;goto&quot;,goto)\nchats.changes(chat,&quot;tag&quot;,tag_name,tag_value)\n</code></pre><p>This is a callback hook, replace to be notified of changes and possibly \nalter then, by default we print debuging information. Replace this \nfunction with an empty function to prevent this eg</p>\n<pre><code>chats.changes=function()end\n</code></pre>",
+   "body": "<pre><code>chats.changes(chat,change,...)\n\nchats.changes(chat,&quot;subject&quot;)\nchats.changes(chat,&quot;topic&quot;,topic)\nchats.changes(chat,&quot;goto&quot;,goto)\nchats.changes(chat,&quot;tag&quot;,tag_name,tag_value)</code></pre><p>This is a callback hook, replace to be notified of changes and possibly \nalter then, by default we print debuging information. Replace this \nfunction with an empty function to prevent this eg</p>\n<pre><code>chats.changes=function()end</code></pre>",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 668,
+   "line": 669,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.changes",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat = chats:get_subject(subject_name)\nchat = chats:get_subject()\n</code></pre><p>Get the chat for the given subject or the chat for the last subject \nselected with set_subject if no subject_name is given.</p>\n",
+   "body": "<pre><code>chat = chats:get_subject(subject_name)\nchat = chats:get_subject()</code></pre><p>Get the chat for the given subject or the chat for the last subject \nselected with set_subject if no subject_name is given.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 560,
+   "line": 561,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_subject",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>tag_value = chats:get_tag(tag_name,subject_name)\n</code></pre><p>Get the tag_value for the given tag_name which can either be \n&quot;tag_root/tag_name&quot; or &quot;tag_name&quot;. The subject_name is the default root \nto use if no tag_root is given in the tag_name.</p>\n",
+   "body": "<pre><code>tag_value = chats:get_tag(tag_name,subject_name)</code></pre><p>Get the tag_value for the given tag_name which can either be \n&quot;tag_root/tag_name&quot; or &quot;tag_name&quot;. The subject_name is the default root \nto use if no tag_root is given in the tag_name.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 575,
+   "line": 576,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_tag",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>output = chats:replace_tags(input,subject_name)\n</code></pre><p>Tags in the input text can be wrapped in {tag_name} and will be \nreplaced with the appropriate tag_value. This is done recursively so \ntag_values can contain references to other tags. If a tag does not \nexist then it will not expand and {tag_name} will remain in the output \ntext.</p>\n<p>Again if any tag name does not contain an explicit root then \nsubject_name will be used as the default chat subject.</p>\n",
+   "body": "<pre><code>output = chats:replace_tags(input,subject_name)</code></pre><p>Tags in the input text can be wrapped in {tag_name} and will be \nreplaced with the appropriate tag_value. This is done recursively so \ntag_values can contain references to other tags. If a tag does not \nexist then it will not expand and {tag_name} will remain in the output \ntext.</p>\n<p>Again if any tag name does not contain an explicit root then \nsubject_name will be used as the default chat subject.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 636,
+   "line": 637,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat = chats:set_subject(subject_name)\n</code></pre><p>Set the current subject for this chats object, this subject becomes the \nchat that you will get if you call get_subject with no arguments.</p>\n",
+   "body": "<pre><code>chat = chats:set_subject(subject_name)</code></pre><p>Set the current subject for this chats object, this subject becomes the \nchat that you will get if you call get_subject with no arguments.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 543,
+   "line": 544,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_subject",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>tag_value = chats:set_tag(tag_name,tag_value,subject_name)\n</code></pre><p>Alter the value of the given tag_name. If the value string begins with \na &quot;+&quot; or a &quot;-&quot; Then the values will be treated as numbers and added or \nsubtracted from the current value. This allows for simple incremental \nflag values.</p>\n<p>Again if the tag name does not contain an explicit  root then \nsubject_name will be used as the default chat subject.</p>\n",
+   "body": "<pre><code>tag_value = chats:set_tag(tag_name,tag_value,subject_name)</code></pre><p>Alter the value of the given tag_name. If the value string begins with \na &quot;+&quot; or a &quot;-&quot; Then the values will be treated as numbers and added or \nsubtracted from the current value. This allows for simple incremental \nflag values.</p>\n<p>Again if the tag name does not contain an explicit  root then \nsubject_name will be used as the default chat subject.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 593,
+   "line": 594,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_tag",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   }

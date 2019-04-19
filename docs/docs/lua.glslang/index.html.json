@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1191,7 +1219,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/glslang.lua"
   },
   {
-   "body": "<pre><code>verr,ferr = glslang.lint_gles2(vcode,fcode)\n</code></pre><p>Try and compile a vertex/fragment shader pair and return any errors.</p>\n<p>returns nil,nil on success or an error string if either shader fails to \ncompile.</p>\n<p>Note that the glslang compile step seems rather slow, not sure what it \ngets up to but do not consider using this if speed is important.</p>\n",
+   "body": "<pre><code>verr,ferr = glslang.lint_gles2(vcode,fcode)</code></pre><p>Try and compile a vertex/fragment shader pair and return any errors.</p>\n<p>returns nil,nil on success or an error string if either shader fails to \ncompile.</p>\n<p>Note that the glslang compile step seems rather slow, not sure what it \ngets up to but do not consider using this if speed is important.</p>\n",
    "count": 1,
    "file": "../lua/glslang.lua",
    "line": 24,
@@ -1199,7 +1227,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/glslang.lua"
   },
   {
-   "body": "<pre><code>shaders=glslang.shader_chunks(text,filename,headers)\n\n    load multiple shader chunks from a single file and return a \n    lookup table of name=code for each shader we just loaded. These \n    can then be compiled or whatever.\n\n#SHADER &quot;nameofshader&quot;\n\n    is used at the start of a line to say which chunk the following \n    text should go into.\n\n#HEADER &quot;nameofheader&quot;\n\n    can be used to define part of a shader, which can later be \n    included in another shader by using\n\n#INCLUDE &quot;nameofheader&quot;\n\n    Will insert the chunk of text previously defined as a #SHADER \n    or #HEADER\n\n#SHADER or #HEADER\n\n    without a name can be used to ignore the next part of a file, \n    any text at the start of a file before the first #SHADER or \n    #HEADER is also ignored. This enables these chunks to exist \n    inside comments in a lua or whatever file.\n</code></pre>",
+   "body": "<pre><code>shaders=glslang.shader_chunks(text,filename,headers,flags)\n\n    load multiple shader chunks from a single file and return a \n    lookup table of name=code for each shader we just loaded. These \n    can then be compiled or whatever.\n\n    set flags.headers_only to true if you only care about parsing \n    headers for later inclusion and do not want to parse shader \n    chunks.\n\n\n#SHADER &quot;nameofshader&quot;\n\n    is used at the start of a line to say which chunk the following \n    text should go into.\n\n#HEADER &quot;nameofheader&quot;\n\n    can be used to define part of a shader, which can later be \n    included in another shader by using\n\n#INCLUDE &quot;nameofheader&quot;\n\n    Will insert the chunk of text previously defined as a #SHADER \n    or #HEADER\n\n#SHADER or #HEADER\n\n    without a name can be used to ignore the next part of a file, \n    any text at the start of a file before the first #SHADER or \n    #HEADER is also ignored. This enables these chunks to exist \n    inside comments in a lua or whatever file.</code></pre>",
    "count": 1,
    "file": "../lua/glslang.lua",
    "line": 51,

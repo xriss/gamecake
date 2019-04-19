@@ -121,15 +121,21 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.add"><span>/lua.wetgenes.gamecake.fun.entities.add</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.call"><span>/lua.wetgenes.gamecake.fun.entities.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.caste"><span>/lua.wetgenes.gamecake.fun.entities.caste</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.find_uid"><span>/lua.wetgenes.gamecake.fun.entities.find_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.forget_uid"><span>/lua.wetgenes.gamecake.fun.entities.forget_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.generate_uid"><span>/lua.wetgenes.gamecake.fun.entities.generate_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.get"><span>/lua.wetgenes.gamecake.fun.entities.get</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.manifest"><span>/lua.wetgenes.gamecake.fun.entities.manifest</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remember_uid"><span>/lua.wetgenes.gamecake.fun.entities.remember_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remove"><span>/lua.wetgenes.gamecake.fun.entities.remove</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.reset"><span>/lua.wetgenes.gamecake.fun.entities.reset</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.set"><span>/lua.wetgenes.gamecake.fun.entities.set</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.sortby_update"><span>/lua.wetgenes.gamecake.fun.entities.sortby_update</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems"><span>/lua.wetgenes.gamecake.fun.entities.systems</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.call"><span>/lua.wetgenes.gamecake.fun.entities.systems.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.insert"><span>/lua.wetgenes.gamecake.fun.entities.systems.insert</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.uids"><span>/lua.wetgenes.gamecake.fun.entities.uids</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.cells"><span>/lua.wetgenes.gamecake.fun.yarn.cells</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items"><span>/lua.wetgenes.gamecake.fun.yarn.items</span></a>
 
@@ -192,7 +198,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.grd.slide"><span>/lua.wetgenes.grd.slide</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.sort_cmap"><span>/lua.wetgenes.grd.sort_cmap</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.stream"><span>/lua.wetgenes.grd.stream</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grdpaint"><span>/lua.wetgenes.grdpaint</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.grdsvg.string"><span>/lua.wetgenes.grdsvg.string</span></a><a class="par" href="../../docs/lua.wetgenes.json"><span>/lua.wetgenes.json</span></a>
 
@@ -310,21 +317,15 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape">lua.wetgenes.chipmunk.shape</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L128">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
-<div><pre><code>shape=chipmunk.shape(body,form...)
-</code></pre><p>Create a shape, added to the given body. Shapes are always added to a 
+<div><pre><code>shape=chipmunk.shape(body,form...)</code></pre><p>Create a shape, added to the given body. Shapes are always added to a 
 body but must be added to a space before they have any effect. So it is 
 normally preferable to use the body:shape function which will 
 automatically add the shape into the space that the body belongs to.</p>
-<pre><code>shape=chipmunk.shape(space.static,form...)
-</code></pre><p>Create a static shape in world space. We use space.static as the body. </p>
-<pre><code>shape=chipmunk.shape(body,&quot;circle&quot;,radius,x,y)
-</code></pre><p>Form of &quot;circle&quot; needs a radius and a centre point.</p>
-<pre><code>shape=chipmunk.shape(body,&quot;segment&quot;,ax,ay,bx,by,radius)
-</code></pre><p>Form of &quot;segment&quot; needs two points and a radius.</p>
-<pre><code>shape=chipmunk.shape(body,&quot;poly&quot;,{x1,y1,x2,y2,...},radius)
-</code></pre><p>Form of &quot;poly&quot; is a generic polygon defined by a table of points.</p>
-<pre><code>shape=chipmunk.shape(body,&quot;box&quot;,minx,miny,maxx,maxy,radius)
-</code></pre><p>Form of &quot;box&quot; needs two points for opposite corners, lowest pair 
+<pre><code>shape=chipmunk.shape(space.static,form...)</code></pre><p>Create a static shape in world space. We use space.static as the body. </p>
+<pre><code>shape=chipmunk.shape(body,&quot;circle&quot;,radius,x,y)</code></pre><p>Form of &quot;circle&quot; needs a radius and a centre point.</p>
+<pre><code>shape=chipmunk.shape(body,&quot;segment&quot;,ax,ay,bx,by,radius)</code></pre><p>Form of &quot;segment&quot; needs two points and a radius.</p>
+<pre><code>shape=chipmunk.shape(body,&quot;poly&quot;,{x1,y1,x2,y2,...},radius)</code></pre><p>Form of &quot;poly&quot; is a generic polygon defined by a table of points.</p>
+<pre><code>shape=chipmunk.shape(body,&quot;box&quot;,minx,miny,maxx,maxy,radius)</code></pre><p>Form of &quot;box&quot; needs two points for opposite corners, lowest pair 
 followed by highest pair and a radius. The radius should be 0 unless 
 you want rounded corners</p>
 </div>
@@ -333,8 +334,7 @@ you want rounded corners</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape.bounding_box">lua.wetgenes.chipmunk.shape.bounding_box</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L938">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
-<div><pre><code>min_x,min_y,max_x,max_y=shape:bounding_box()
-</code></pre><p>Get the current bounding box for this shape.</p>
+<div><pre><code>min_x,min_y,max_x,max_y=shape:bounding_box()</code></pre><p>Get the current bounding box for this shape.</p>
 </div>
 </div>
 
@@ -342,8 +342,7 @@ you want rounded corners</p>
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape.collision_type">lua.wetgenes.chipmunk.shape.collision_type</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L997">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>f=shape:collision_type()
-f=shape:collision_type(f)
-</code></pre><p>Get and/or Set the collision type for this shape.</p>
+f=shape:collision_type(f)</code></pre><p>Get and/or Set the collision type for this shape.</p>
 <p>The f argument can be a string in which case it will be converted to a 
 number via the space:type function.</p>
 </div>
@@ -353,8 +352,7 @@ number via the space:type function.</p>
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape.elasticity">lua.wetgenes.chipmunk.shape.elasticity</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L961">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>f=shape:elasticity()
-f=shape:elasticity(f)
-</code></pre><p>Get and/or Set the elasticity for this shape.</p>
+f=shape:elasticity(f)</code></pre><p>Get and/or Set the elasticity for this shape.</p>
 </div>
 </div>
 
@@ -362,8 +360,7 @@ f=shape:elasticity(f)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape.filter">lua.wetgenes.chipmunk.shape.filter</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1013">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>f=shape:filter()
-f=shape:filter(f)
-</code></pre><p>Get and/or Set the filter for this shape.</p>
+f=shape:filter(f)</code></pre><p>Get and/or Set the filter for this shape.</p>
 </div>
 </div>
 
@@ -371,31 +368,27 @@ f=shape:filter(f)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape.friction">lua.wetgenes.chipmunk.shape.friction</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L973">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>f=shape:friction()
-f=shape:friction(f)
-</code></pre><p>Get and/or Set the friction for this shape.</p>
+f=shape:friction(f)</code></pre><p>Get and/or Set the friction for this shape.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape.query_point">lua.wetgenes.chipmunk.shape.query_point</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1039">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
-<div><pre><code>item = shape:query_point(x,y)
-</code></pre><p>Find the nearest point on the shape from the point at x,y.</p>
+<div><pre><code>item = shape:query_point(x,y)</code></pre><p>Find the nearest point on the shape from the point at x,y.</p>
 <p>returns a table with the following info or nil for no hit</p>
 <pre><code>it.shape        -- the shape
 it.point_x        -- the point of contact (x)
 it.point_y        -- the point of contact (y)
 it.distance        -- the distance to the point of contact
 it.gradient_x    -- the normalised vector to collision (x)
-it.gradient_y    -- the normalised vector to collision (y)
-</code></pre></div>
+it.gradient_y    -- the normalised vector to collision (y)</code></pre></div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape.query_segment">lua.wetgenes.chipmunk.shape.query_segment</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1068">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
-<div><pre><code>it = shape:query_segment(sx,sy,ex,ey,r)
-</code></pre><p>Find the hitpoint along this raycast segment, from (sx,sy) to 
+<div><pre><code>it = shape:query_segment(sx,sy,ex,ey,r)</code></pre><p>Find the hitpoint along this raycast segment, from (sx,sy) to 
 (ex,ey) with a radius of r. </p>
 <p>Returns a table with the following info or nil for no hit</p>
 <pre><code>it.shape        -- the shape
@@ -403,16 +396,14 @@ it.point_x        -- the point of contact (x)
 it.point_y        -- the point of contact (y)
 it.normal_x        -- the normal at contact (x)
 it.normal_y        -- the normal at contact (y)
-it.alpha        -- how far along the segment the contact happened (0 to 1)
-</code></pre></div>
+it.alpha        -- how far along the segment the contact happened (0 to 1)</code></pre></div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape.radius">lua.wetgenes.chipmunk.shape.radius</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1026">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>radius=shape:radius()
-radius=shape:radius(radius)
-</code></pre><p>Get and/or Set the radius for this shape. Setting is unsafe and may 
+radius=shape:radius(radius)</code></pre><p>Get and/or Set the radius for this shape. Setting is unsafe and may 
 break the physics simulation.</p>
 </div>
 </div>
@@ -421,8 +412,7 @@ break the physics simulation.</p>
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape.sensor">lua.wetgenes.chipmunk.shape.sensor</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L949">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>f=shape:sensor()
-f=shape:sensor(f)
-</code></pre><p>Get and/or Set the sensor flag for this shape.</p>
+f=shape:sensor(f)</code></pre><p>Get and/or Set the sensor flag for this shape.</p>
 </div>
 </div>
 
@@ -430,8 +420,7 @@ f=shape:sensor(f)
 <h1><a href="../../docs/lua.wetgenes.chipmunk.shape.surface_velocity">lua.wetgenes.chipmunk.shape.surface_velocity</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L985">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>vx,vy=shape:surface_velocity()
-vx,vy=shape:surface_velocity(vx,vy)
-</code></pre><p>Get and/or Set the surface velocity for this shape.</p>
+vx,vy=shape:surface_velocity(vx,vy)</code></pre><p>Get and/or Set the surface velocity for this shape.</p>
 </div>
 </div>
 

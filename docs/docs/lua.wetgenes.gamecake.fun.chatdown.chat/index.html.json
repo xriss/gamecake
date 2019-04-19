@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1188,7 +1216,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.chat"
   },
   {
-   "body": "<pre><code>tag_value = chat:get_tag(tag_name)\n</code></pre><p>The same as chats:get_tag but the subject of this chat is the \ndefault root.</p>\n",
+   "body": "<pre><code>tag_value = chat:get_tag(tag_name)</code></pre><p>The same as chats:get_tag but the subject of this chat is the \ndefault root.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 276,
@@ -1196,7 +1224,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>output = chat:replace_tags(input)\n</code></pre><p>The same as chats:replace_tags but the subject of this chat is the \ndefault root.</p>\n",
+   "body": "<pre><code>output = chat:replace_tags(input)</code></pre><p>The same as chats:replace_tags but the subject of this chat is the \ndefault root.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 304,
@@ -1204,7 +1232,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>tag_value = chat:set_tag(tag_name,tag_value)\n</code></pre><p>The same as chats:set_tag but the subject of this chat is the \ndefault root.</p>\n",
+   "body": "<pre><code>tag_value = chat:set_tag(tag_name,tag_value)</code></pre><p>The same as chats:set_tag but the subject of this chat is the \ndefault root.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 290,
@@ -1212,7 +1240,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat:set_tags(tags)\n</code></pre><p>Set all the values in the given table of {tag_name=tag_value} pairs.</p>\n",
+   "body": "<pre><code>chat:set_tags(tags)</code></pre><p>Set all the values in the given table of {tag_name=tag_value} pairs.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 318,
@@ -1220,7 +1248,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat:set_topic(topic_name)\n</code></pre><p>Set the current topic for this chat object, information about this \ntopic and its gotos are built from and stored in this chat object.</p>\n<pre><code>chat.topic_name\n</code></pre><p>Will be set to the given topic name.</p>\n<p>We merge all gotos found in this topic and all topic parents by \niterating over the dotnames. We only use add each topic once and each \ntopic may have a bit of logic that decides if it should be displayed.</p>\n<pre><code>&lt;topic_name?logic_test\n</code></pre><p>So this would goto the topic_name if the logic_test passes. The logic \ntest is written simmilar to a url query after the question mark comes a \nnumber of tests that are then &amp; or | together in left to right order \n(no operator precedence).</p>\n<pre><code>&lt;topic_name?count&lt;10&amp;seen==false\n</code></pre><p>So this would display the goto option if count is less than 10 and seen \nis set to false. These variables we are testing are tag_names and \ndefault to the current subject chat but could reference other subjects \nby explicitly including a root.</p>\n<p>Available logic tests are</p>\n<pre><code>name==value\nname=value\n</code></pre><p>True if the tag is set to this value.</p>\n<pre><code>name!=value\n</code></pre><p>True if the tag is not set to this value.</p>\n<pre><code>name&lt;value\n</code></pre><p>True if the tag is less than this value (numeric test).</p>\n<pre><code>name&gt;value\n</code></pre><p>True if the tag is more than this value (numeric test).</p>\n<pre><code>name&lt;=value\n</code></pre><p>True if the tag is less than or equal to this value (numeric test).</p>\n<pre><code>name&gt;=value\n</code></pre><p>True if the tag is more than or equal to  this value (numeric test).</p>\n<p>All of these tests can be preceded by a ! to negate them so</p>\n<pre><code>name!=vale\n!name==value\n</code></pre><p>Are both a test for inequality.</p>\n<p>Multiple tests can be joined together by &amp; (and) or | (or) this logic \nwill be applied to a running total moving from left to right as the \nvalues are evaluated with the final value deciding if this goto will be \ndisplayed.</p>\n",
+   "body": "<pre><code>chat:set_topic(topic_name)</code></pre><p>Set the current topic for this chat object, information about this \ntopic and its gotos are built from and stored in this chat object.</p>\n<pre><code>chat.topic_name</code></pre><p>Will be set to the given topic name.</p>\n<p>We merge all gotos found in this topic and all topic parents by \niterating over the dotnames. We only use add each topic once and each \ntopic may have a bit of logic that decides if it should be displayed.</p>\n<pre><code>&lt;topic_name?logic_test</code></pre><p>So this would goto the topic_name if the logic_test passes. The logic \ntest is written simmilar to a url query after the question mark comes a \nnumber of tests that are then &amp; or | together in left to right order \n(no operator precedence).</p>\n<pre><code>&lt;topic_name?count&lt;10&amp;seen==false</code></pre><p>So this would display the goto option if count is less than 10 and seen \nis set to false. These variables we are testing are tag_names and \ndefault to the current subject chat but could reference other subjects \nby explicitly including a root.</p>\n<p>Available logic tests are</p>\n<pre><code>name==value\nname=value</code></pre><p>True if the tag is set to this value.</p>\n<pre><code>name!=value</code></pre><p>True if the tag is not set to this value.</p>\n<pre><code>name&lt;value</code></pre><p>True if the tag is less than this value (numeric test).</p>\n<pre><code>name&gt;value</code></pre><p>True if the tag is more than this value (numeric test).</p>\n<pre><code>name&lt;=value</code></pre><p>True if the tag is less than or equal to this value (numeric test).</p>\n<pre><code>name&gt;=value</code></pre><p>True if the tag is more than or equal to  this value (numeric test).</p>\n<p>All of these tests can be preceded by a ! to negate them so</p>\n<pre><code>name!=vale\n!name==value</code></pre><p>Are both a test for inequality.</p>\n<p>Multiple tests can be joined together by &amp; (and) or | (or) this logic \nwill be applied to a running total moving from left to right as the \nvalues are evaluated with the final value deciding if this goto will be \ndisplayed.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
    "line": 333,

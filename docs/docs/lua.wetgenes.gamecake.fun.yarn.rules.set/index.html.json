@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1183,7 +1211,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>rule = rules.set(rule)\n</code></pre><p>Set this base rule into the name space using rule.name which must \nbe a string.</p>\n<p>Multiple rules can be applied to an item and each rule will be applied \nin the order listed.</p>\n<p>A rule is a table of named functions that can be applied to an item.</p>\n<pre><code>rule.setup(item)\n</code></pre><p>Must setup the item so that it is safe to call the other rules on it.</p>\n<pre><code>rule.clean(item)\n</code></pre><p>Should cleanup anything that needs cleaning.</p>\n<pre><code>rule.tick(item)\n</code></pre><p>Should perform a single time tick update on the item.\n<br/>\n<br/></p>\n",
+   "body": "<pre><code>rule = rules.set(rule)</code></pre><p>Set this base rule into the name space using rule.name which must \nbe a string.</p>\n<p>Multiple rules can be applied to an item and each rule will be applied \nin the order listed.</p>\n<p>A rule is a table of named functions that can be applied to an item.</p>\n<pre><code>rule.setup(item)</code></pre><p>Must setup the item so that it is safe to call the other rules on it.</p>\n<pre><code>rule.clean(item)</code></pre><p>Should cleanup anything that needs cleaning.</p>\n<pre><code>rule.tick(item)</code></pre><p>Should perform a single time tick update on the item.\n<br/>\n<br/></p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/rules.lua",
    "line": 28,

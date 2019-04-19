@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1183,7 +1211,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)\n</code></pre><p>The oven module must be baked so only exposes a bake function.</p>\n<p>All the other functions are returned from within the bake function.</p>\n<p>possible ENV settings</p>\n<pre><code>gamecake_tongue=english\ngamecake_flavour=sdl\n</code></pre>",
+   "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)</code></pre><p>The oven module must be baked so only exposes a bake function.</p>\n<p>All the other functions are returned from within the bake function.</p>\n<p>possible ENV settings</p>\n<pre><code>gamecake_tongue=english\ngamecake_flavour=sdl</code></pre>",
    "count": 2,
    "file": "../lua/wetgenes/gamecake/oven.lua",
    "line": 6,
@@ -1191,7 +1219,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
   },
   {
-   "body": "<pre><code>oven=wetgenes.gamecake.oven.bake(opts)\n</code></pre><p>Bake creates an instance of a lua module bound to a state. Here we \nare creating the main state that other modules will then bind to.</p>\n<p>We call each state an OVEN to fit into the gamecake naming scheme \nthen we bake a module in this oven to bind them to the common state.</p>\n<p>Think of it as a sub version of require, so require gets the global \npointer for a module and bake is used to get the a module bound to \nan oven.</p>\n<p>By using this bound state we reduce the verbosity of connecting \nmodules and sharing state between them.</p>\n",
+   "body": "<pre><code>oven=wetgenes.gamecake.oven.bake(opts)</code></pre><p>Bake creates an instance of a lua module bound to a state. Here we \nare creating the main state that other modules will then bind to.</p>\n<p>We call each state an OVEN to fit into the gamecake naming scheme \nthen we bake a module in this oven to bind them to the common state.</p>\n<p>Think of it as a sub version of require, so require gets the global \npointer for a module and bake is used to get the a module bound to \nan oven.</p>\n<p>By using this bound state we reduce the verbosity of connecting \nmodules and sharing state between them.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/oven.lua",
    "line": 44,

@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 277,
+   "count": 284,
    "name": "lua"
   },
   {
@@ -46,7 +46,7 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 273,
+   "count": 280,
    "name": "lua.wetgenes"
   },
   {
@@ -310,11 +310,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 61,
+   "count": 67,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 56,
+   "count": 62,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -394,7 +394,7 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
   },
   {
-   "count": 13,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.fun.entities"
   },
   {
@@ -411,11 +411,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.get"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.remove"
   },
   {
    "count": 1,
@@ -444,6 +464,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -696,6 +720,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.xor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdpaint"
   },
   {
    "count": 2,
@@ -1183,7 +1211,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>g:pixels(x,y,w,h)\ng:pixels(x,y,z,w,h,d)\n</code></pre><p>Read the area of pixels as a table of numerical values, the amount of \nnumbers you get per pixel <em>depends</em> on the format of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,&quot;&quot;)\ng:pixels(x,y,z,w,h,d,&quot;&quot;)\n</code></pre><p>Read the area of pixels as a string of byte values, the amount of bytes \nyou get per pixel <em>depends</em> on the format of the grd. Note the passing \nin of an empty string to indicate that you with to receive a string.</p>\n<pre><code>g:pixels(x,y,w,h,tab)\ng:pixels(x,y,z,w,h,d,tab)\n</code></pre><p>Write the area of pixels from a table of numerical values which is \nprovided in tab, the amount of numbers you need to provide per pixel \n<em>depends</em> on the format of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,str)\ng:pixels(x,y,z,w,h,d,str)\n</code></pre><p>Write the area of pixels from a string of bytes which is provided in \nstr, the amount of bytes you need to provide per pixel <em>depends</em> on the \nformat of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,grd)\ng:pixels(x,y,z,w,h,d,grd)\n</code></pre><p>Write the area of pixels from a grd which is provided in grd. use \nclip/layer functions to select a portion of a larger grd.</p>\n<p>As you can see depending on the arguments given this does one of two \nthings, read some pixels or write some pixels. The area that is to be \nused is provided first, as a 2d(x,y,w,h) or 3d(x,y,z,w,h,d) area. To \nread or write the entire 2d image or the first frame of an animation \nuse (0,0,g.width,g.height)</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns the requested data.</p>\n",
+   "body": "<pre><code>g:pixels(x,y,w,h)\ng:pixels(x,y,z,w,h,d)</code></pre><p>Read the area of pixels as a table of numerical values, the amount of \nnumbers you get per pixel <em>depends</em> on the format of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,&quot;&quot;)\ng:pixels(x,y,z,w,h,d,&quot;&quot;)</code></pre><p>Read the area of pixels as a string of byte values, the amount of bytes \nyou get per pixel <em>depends</em> on the format of the grd. Note the passing \nin of an empty string to indicate that you with to receive a string.</p>\n<pre><code>g:pixels(x,y,w,h,tab)\ng:pixels(x,y,z,w,h,d,tab)</code></pre><p>Write the area of pixels from a table of numerical values which is \nprovided in tab, the amount of numbers you need to provide per pixel \n<em>depends</em> on the format of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,str)\ng:pixels(x,y,z,w,h,d,str)</code></pre><p>Write the area of pixels from a string of bytes which is provided in \nstr, the amount of bytes you need to provide per pixel <em>depends</em> on the \nformat of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,grd)\ng:pixels(x,y,z,w,h,d,grd)</code></pre><p>Write the area of pixels from a grd which is provided in grd. use \nclip/layer functions to select a portion of a larger grd.</p>\n<p>As you can see depending on the arguments given this does one of two \nthings, read some pixels or write some pixels. The area that is to be \nused is provided first, as a 2d(x,y,w,h) or 3d(x,y,z,w,h,d) area. To \nread or write the entire 2d image or the first frame of an animation \nuse (0,0,g.width,g.height)</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns the requested data.</p>\n",
    "count": 1,
    "file": "../lua_grd/code/grd.lua",
    "line": 640,

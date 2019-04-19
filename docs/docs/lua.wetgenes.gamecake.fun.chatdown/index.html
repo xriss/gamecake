@@ -121,15 +121,21 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.add"><span>/lua.wetgenes.gamecake.fun.entities.add</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.call"><span>/lua.wetgenes.gamecake.fun.entities.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.caste"><span>/lua.wetgenes.gamecake.fun.entities.caste</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.find_uid"><span>/lua.wetgenes.gamecake.fun.entities.find_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.forget_uid"><span>/lua.wetgenes.gamecake.fun.entities.forget_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.generate_uid"><span>/lua.wetgenes.gamecake.fun.entities.generate_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.get"><span>/lua.wetgenes.gamecake.fun.entities.get</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.manifest"><span>/lua.wetgenes.gamecake.fun.entities.manifest</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remember_uid"><span>/lua.wetgenes.gamecake.fun.entities.remember_uid</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.remove"><span>/lua.wetgenes.gamecake.fun.entities.remove</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.reset"><span>/lua.wetgenes.gamecake.fun.entities.reset</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.set"><span>/lua.wetgenes.gamecake.fun.entities.set</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.sortby_update"><span>/lua.wetgenes.gamecake.fun.entities.sortby_update</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems"><span>/lua.wetgenes.gamecake.fun.entities.systems</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.call"><span>/lua.wetgenes.gamecake.fun.entities.systems.call</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.insert"><span>/lua.wetgenes.gamecake.fun.entities.systems.insert</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.systems.remove"><span>/lua.wetgenes.gamecake.fun.entities.systems.remove</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.entities.uids"><span>/lua.wetgenes.gamecake.fun.entities.uids</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn"><span>/lua.wetgenes.gamecake.fun.yarn</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.cells"><span>/lua.wetgenes.gamecake.fun.yarn.cells</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.yarn.items"><span>/lua.wetgenes.gamecake.fun.yarn.items</span></a>
 
@@ -192,7 +198,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.grd.slide"><span>/lua.wetgenes.grd.slide</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.sort_cmap"><span>/lua.wetgenes.grd.sort_cmap</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.stream"><span>/lua.wetgenes.grd.stream</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grd.xor"><span>/lua.wetgenes.grd.xor</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.grdpaint"><span>/lua.wetgenes.grdpaint</span></a><a class="par" href="../../docs/lua.wetgenes.grdsvg"><span>/lua.wetgenes.grdsvg</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.grdsvg.string"><span>/lua.wetgenes.grdsvg.string</span></a><a class="par" href="../../docs/lua.wetgenes.json"><span>/lua.wetgenes.json</span></a>
 
@@ -322,8 +329,7 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.get_tag">lua.wetgenes.gamecake.fun.chatdown.chat.get_tag</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L276">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>tag_value = chat:get_tag(tag_name)
-</code></pre><p>The same as chats:get_tag but the subject of this chat is the 
+<div><pre><code>tag_value = chat:get_tag(tag_name)</code></pre><p>The same as chats:get_tag but the subject of this chat is the 
 default root.</p>
 </div>
 </div>
@@ -331,8 +337,7 @@ default root.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags">lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L304">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>output = chat:replace_tags(input)
-</code></pre><p>The same as chats:replace_tags but the subject of this chat is the 
+<div><pre><code>output = chat:replace_tags(input)</code></pre><p>The same as chats:replace_tags but the subject of this chat is the 
 default root.</p>
 </div>
 </div>
@@ -340,8 +345,7 @@ default root.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.set_tag">lua.wetgenes.gamecake.fun.chatdown.chat.set_tag</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L290">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>tag_value = chat:set_tag(tag_name,tag_value)
-</code></pre><p>The same as chats:set_tag but the subject of this chat is the 
+<div><pre><code>tag_value = chat:set_tag(tag_name,tag_value)</code></pre><p>The same as chats:set_tag but the subject of this chat is the 
 default root.</p>
 </div>
 </div>
@@ -349,50 +353,38 @@ default root.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.set_tags">lua.wetgenes.gamecake.fun.chatdown.chat.set_tags</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L318">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>chat:set_tags(tags)
-</code></pre><p>Set all the values in the given table of {tag_name=tag_value} pairs.</p>
+<div><pre><code>chat:set_tags(tags)</code></pre><p>Set all the values in the given table of {tag_name=tag_value} pairs.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.set_topic">lua.wetgenes.gamecake.fun.chatdown.chat.set_topic</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L333">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>chat:set_topic(topic_name)
-</code></pre><p>Set the current topic for this chat object, information about this 
+<div><pre><code>chat:set_topic(topic_name)</code></pre><p>Set the current topic for this chat object, information about this 
 topic and its gotos are built from and stored in this chat object.</p>
-<pre><code>chat.topic_name
-</code></pre><p>Will be set to the given topic name.</p>
+<pre><code>chat.topic_name</code></pre><p>Will be set to the given topic name.</p>
 <p>We merge all gotos found in this topic and all topic parents by 
 iterating over the dotnames. We only use add each topic once and each 
 topic may have a bit of logic that decides if it should be displayed.</p>
-<pre><code>&lt;topic_name?logic_test
-</code></pre><p>So this would goto the topic_name if the logic_test passes. The logic 
+<pre><code>&lt;topic_name?logic_test</code></pre><p>So this would goto the topic_name if the logic_test passes. The logic 
 test is written simmilar to a url query after the question mark comes a 
 number of tests that are then &amp; or | together in left to right order 
 (no operator precedence).</p>
-<pre><code>&lt;topic_name?count&lt;10&amp;seen==false
-</code></pre><p>So this would display the goto option if count is less than 10 and seen 
+<pre><code>&lt;topic_name?count&lt;10&amp;seen==false</code></pre><p>So this would display the goto option if count is less than 10 and seen 
 is set to false. These variables we are testing are tag_names and 
 default to the current subject chat but could reference other subjects 
 by explicitly including a root.</p>
 <p>Available logic tests are</p>
 <pre><code>name==value
-name=value
-</code></pre><p>True if the tag is set to this value.</p>
-<pre><code>name!=value
-</code></pre><p>True if the tag is not set to this value.</p>
-<pre><code>name&lt;value
-</code></pre><p>True if the tag is less than this value (numeric test).</p>
-<pre><code>name&gt;value
-</code></pre><p>True if the tag is more than this value (numeric test).</p>
-<pre><code>name&lt;=value
-</code></pre><p>True if the tag is less than or equal to this value (numeric test).</p>
-<pre><code>name&gt;=value
-</code></pre><p>True if the tag is more than or equal to  this value (numeric test).</p>
+name=value</code></pre><p>True if the tag is set to this value.</p>
+<pre><code>name!=value</code></pre><p>True if the tag is not set to this value.</p>
+<pre><code>name&lt;value</code></pre><p>True if the tag is less than this value (numeric test).</p>
+<pre><code>name&gt;value</code></pre><p>True if the tag is more than this value (numeric test).</p>
+<pre><code>name&lt;=value</code></pre><p>True if the tag is less than or equal to this value (numeric test).</p>
+<pre><code>name&gt;=value</code></pre><p>True if the tag is more than or equal to  this value (numeric test).</p>
 <p>All of these tests can be preceded by a ! to negate them so</p>
 <pre><code>name!=vale
-!name==value
-</code></pre><p>Are both a test for inequality.</p>
+!name==value</code></pre><p>Are both a test for inequality.</p>
 <p>Multiple tests can be joined together by &amp; (and) or | (or) this logic 
 will be applied to a running total moving from left to right as the 
 values are evaluated with the final value deciding if this goto will be 
@@ -408,35 +400,31 @@ displayed.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.changes">lua.wetgenes.gamecake.fun.chatdown.chats.changes</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L668">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L669">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
 <div><pre><code>chats.changes(chat,change,...)
 
 chats.changes(chat,&quot;subject&quot;)
 chats.changes(chat,&quot;topic&quot;,topic)
 chats.changes(chat,&quot;goto&quot;,goto)
-chats.changes(chat,&quot;tag&quot;,tag_name,tag_value)
-</code></pre><p>This is a callback hook, replace to be notified of changes and possibly 
+chats.changes(chat,&quot;tag&quot;,tag_name,tag_value)</code></pre><p>This is a callback hook, replace to be notified of changes and possibly 
 alter then, by default we print debuging information. Replace this 
 function with an empty function to prevent this eg</p>
-<pre><code>chats.changes=function()end
-</code></pre></div>
+<pre><code>chats.changes=function()end</code></pre></div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.get_subject">lua.wetgenes.gamecake.fun.chatdown.chats.get_subject</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L560">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L561">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
 <div><pre><code>chat = chats:get_subject(subject_name)
-chat = chats:get_subject()
-</code></pre><p>Get the chat for the given subject or the chat for the last subject 
+chat = chats:get_subject()</code></pre><p>Get the chat for the given subject or the chat for the last subject 
 selected with set_subject if no subject_name is given.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.get_tag">lua.wetgenes.gamecake.fun.chatdown.chats.get_tag</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L575">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>tag_value = chats:get_tag(tag_name,subject_name)
-</code></pre><p>Get the tag_value for the given tag_name which can either be 
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L576">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>tag_value = chats:get_tag(tag_name,subject_name)</code></pre><p>Get the tag_value for the given tag_name which can either be 
 &quot;tag_root/tag_name&quot; or &quot;tag_name&quot;. The subject_name is the default root 
 to use if no tag_root is given in the tag_name.</p>
 </div>
@@ -444,9 +432,8 @@ to use if no tag_root is given in the tag_name.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags">lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L636">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>output = chats:replace_tags(input,subject_name)
-</code></pre><p>Tags in the input text can be wrapped in {tag_name} and will be 
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L637">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>output = chats:replace_tags(input,subject_name)</code></pre><p>Tags in the input text can be wrapped in {tag_name} and will be 
 replaced with the appropriate tag_value. This is done recursively so 
 tag_values can contain references to other tags. If a tag does not 
 exist then it will not expand and {tag_name} will remain in the output 
@@ -458,18 +445,16 @@ subject_name will be used as the default chat subject.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.set_subject">lua.wetgenes.gamecake.fun.chatdown.chats.set_subject</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L543">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>chat = chats:set_subject(subject_name)
-</code></pre><p>Set the current subject for this chats object, this subject becomes the 
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L544">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>chat = chats:set_subject(subject_name)</code></pre><p>Set the current subject for this chats object, this subject becomes the 
 chat that you will get if you call get_subject with no arguments.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chats.set_tag">lua.wetgenes.gamecake.fun.chatdown.chats.set_tag</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L593">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>tag_value = chats:set_tag(tag_name,tag_value,subject_name)
-</code></pre><p>Alter the value of the given tag_name. If the value string begins with 
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L594">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>tag_value = chats:set_tag(tag_name,tag_value,subject_name)</code></pre><p>Alter the value of the given tag_name. If the value string begins with 
 a &quot;+&quot; or a &quot;-&quot; Then the values will be treated as numbers and added or 
 subtracted from the current value. This allows for simple incremental 
 flag values.</p>
@@ -483,8 +468,7 @@ subject_name will be used as the default chat subject.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L253">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
 <div><pre><code>for part_name in chatdown.dotnames(full_name) do
     print(part_name)
-end
-</code></pre><p>Iterate all dotnames so if given &quot;aa.bb.cc&quot; we would iterate through 
+end</code></pre><p>Iterate all dotnames so if given &quot;aa.bb.cc&quot; we would iterate through 
 &quot;aa.bb.cc&quot; , &quot;aa.bb&quot; and &quot;aa&quot;. This is used to inherit data using just 
 a naming convention.</p>
 </div>
@@ -493,8 +477,7 @@ a naming convention.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.parse">lua.wetgenes.gamecake.fun.chatdown.parse</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L17">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>rawsubjects = chatdown.parse(text)
-</code></pre><p>Parse text from flat text chatdown format into heirachical chat data, 
+<div><pre><code>rawsubjects = chatdown.parse(text)</code></pre><p>Parse text from flat text chatdown format into heirachical chat data, 
 which we refer to as rawsubjects, something that can be output easily 
 as json.</p>
 <p>This gives us a readonly rawsubjects structure that can be used to control 
@@ -511,18 +494,16 @@ lua.wetgenes.gamecake.fun.chatdown.text</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.setup">lua.wetgenes.gamecake.fun.chatdown.setup</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L697">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>chats = chatdown.setup_chats(chat_text,changes)
-</code></pre><p>parse and initialise state data for every subjects chunk creating a 
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L698">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>chats = chatdown.setup_chats(chat_text,changes)</code></pre><p>parse and initialise state data for every subjects chunk creating a 
 global chats with a chat object for each subject.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.setup_chat">lua.wetgenes.gamecake.fun.chatdown.setup_chat</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L505">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
-<div><pre><code>chat = chatdown.setup_chat(chats,subject_name)
-</code></pre><p>Setup the initial chat state for a subject. This is called 
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L506">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div><pre><code>chat = chatdown.setup_chat(chats,subject_name)</code></pre><p>Setup the initial chat state for a subject. This is called 
 automatically by chatdown.setup and probably should not be used 
 elsewhere.</p>
 </div>
@@ -530,7 +511,7 @@ elsewhere.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun.chatdown.text">lua.wetgenes.gamecake.fun.chatdown.text</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L728">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua#L729">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua</a></div>
 <div><p>Here is some example chatdown formatted text full of useful 
 information, it it is intended to be a self documented example.</p>
 <pre><code>
@@ -661,7 +642,6 @@ aa.bb or aa.
 In practise this means
 &lt;br/&gt;
 &lt;br/&gt;
-
 </code></pre></div>
 </div>
 
