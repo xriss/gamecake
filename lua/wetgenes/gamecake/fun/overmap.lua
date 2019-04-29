@@ -60,7 +60,7 @@ overmap.create=function(it,opts)
 	
 	it.tile_hx=it.opts.tile_size and it.opts.tile_size[1] or it.tiles.tile_hx -- cache the base tile size,
 	it.tile_hy=it.opts.tile_size and it.opts.tile_size[2] or it.tiles.tile_hy
-	it.tile_hz=it.opts.tile_size and it.opts.tile_size[3] or it.tiles.tile_hy
+	it.tile_hz=it.opts.tile_size and it.opts.tile_size[3] or it.tiles.tile_hz
 	
 	it.over_hx=it.opts.over_size and it.opts.over_size[1] or (it.tile_hx/2) -- overlap right ( 50% default )
 	it.over_hy=it.opts.over_size and it.opts.over_size[2] or (it.tile_hy/2) -- overlap up    ( 50% default )
@@ -96,8 +96,8 @@ overmap.create=function(it,opts)
 			if it.mode=="xz" then z=-yz end -- 3d
 			for x=xoa,xob,xoc do
 			
-				local bx=phx*x --+phz*it.screen.zx*z
-				local by=phy*y --+phz*it.screen.zy*z
+				local bx=phx*x
+				local by=phy*y
 				local bz=phz*z
 
 				local l=#t ; for i,v in ipairs{

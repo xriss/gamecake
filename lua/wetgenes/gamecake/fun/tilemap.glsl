@@ -26,7 +26,7 @@ varying vec4  v_color;
 void main()
 {
     vec3 pos=a_vertex+modelview_add;
-    gl_Position = projection * modelview * vec4( pos.xy + projection_zxy*pos.z , 0.0 , 1.0);
+    gl_Position = projection * modelview * vec4( pos.xy + round(projection_zxy*pos.z) , 0.0 , 1.0);
     gl_Position.z+=pos.z/65536.0;
 	v_texcoord=a_texcoord;
 	v_color=color;
