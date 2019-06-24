@@ -93,6 +93,95 @@ end
 
 
 
+grdpaint.skew=function(gr,bg,direction,ratio)
+
+-- we need a new bigger grd depending on skew
+
+	local g
+
+	local slide_x
+	local slide_y
+	local flip_x
+	local flip_y
+	
+	if     direction == 1 then slide_x=ratio flip_x=true flip_y=true
+	elseif direction == 2 then slide_x=ratio flip_y=true
+	elseif direction == 3 then slide_y=ratio flip_y=true
+	elseif direction == 4 then slide_y=ratio
+	elseif direction == 5 then slide_x=ratio flip_x=true
+	elseif direction == 6 then slide_x=ratio
+	elseif direction == 7 then slide_y=ratio flip_x=true flip_y=true
+	elseif direction == 8 then slide_y=ratio flip_x=true
+	end
+	
+	if slide_x then
+		if slide_x<0 then
+			local ir=(-slide_x)+1
+			local ic=math.ceil(gr.height/ir)-1
+
+			g=wgrd.create(wgrd.U8_INDEXED,gr.width+ic,gr.height,1)
+			g:clear(bg)
+			g:palette(0,256,gr) -- copy pal and pixels
+
+			for i=0,ic do
+				local px,py,hx,hy = i , i*ir , gr.width , ir
+				if flip_x then px=g.width-gr.width-px end
+				if flip_y then py=g.height-(py+ir) end
+				g:pixels(px,py,hx,hy,gr:pixels(0,py,hx,hy,""))
+			end
+		else
+			local ir=slide_x+1
+			local ic=math.ceil(gr.height*ir)-1
+
+			g=wgrd.create(wgrd.U8_INDEXED,gr.width+(gr.height-1)*ir,gr.height,1)
+			g:clear(bg)
+			g:palette(0,256,gr) -- copy pal and pixels
+
+			for i=0,gr.height-1 do
+				local px,py,hx,hy = i*ir , i , gr.width , 1
+				if flip_x then px=g.width-gr.width-px end
+				if flip_y then py=g.height-(py+1) end
+				g:pixels(px,py,hx,hy,gr:pixels(0,py,hx,hy,""))
+			end
+		end
+	end
+	if slide_y then
+		if slide_y<0 then
+			local ir=(-slide_y)+1
+			local ic=math.ceil(gr.width/ir)-1
+
+			g=wgrd.create(wgrd.U8_INDEXED,gr.width,gr.height+ic,1)
+			g:clear(bg)
+			g:palette(0,256,gr) -- copy pal and pixels
+
+			for i=0,ic do
+				local px,py,hx,hy = i*ir , i , ir , gr.height
+				if flip_x then px=g.width-(px+ir) end
+				if flip_y then py=g.height-gr.height-py end
+				g:pixels(px,py,hx,hy,gr:pixels(px,0,hx,hy,""))
+			end
+		else
+			local ir=slide_y+1
+			local ic=math.ceil(gr.width*ir)-1
+
+			g=wgrd.create(wgrd.U8_INDEXED,gr.width,gr.height+(gr.width-1)*ir,1)
+			g:clear(bg)
+			g:palette(0,256,gr) -- copy pal and pixels
+
+			for i=0,gr.width-1 do
+				local px,py,hx,hy = i , i*ir , 1 , gr.height
+				if flip_x then px=g.width-(px+1) end
+				if flip_y then py=g.height-gr.height-py end
+				g:pixels(px,py,hx,hy,gr:pixels(px,0,hx,hy,""))
+			end
+		end
+	end
+
+
+
+	return g
+end
+
 
 grdpaint.outline=function(gr,bg,fg)
 

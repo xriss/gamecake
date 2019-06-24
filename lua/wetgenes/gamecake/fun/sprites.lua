@@ -87,10 +87,10 @@ sprites.create=function(it,opts)
 		v.pz=v.pz or 0
 
 		if type(v.color)=="number" then v.color={ wpack.argb8_pmf4(v.color) } end -- an 0xff000000 style color
-		v.r=v.color and ( v.color.r or v.color[1] ) or 1
-		v.g=v.color and ( v.color.g or v.color[2] ) or 1
-		v.b=v.color and ( v.color.b or v.color[3] ) or 1
-		v.a=v.color and ( v.color.a or v.color[4] ) or 1
+		v.r=v.r or v.color and ( v.color.r or v.color[1] ) or 1
+		v.g=v.g or v.color and ( v.color.g or v.color[2] ) or 1
+		v.b=v.b or v.color and ( v.color.b or v.color[3] ) or 1
+		v.a=v.a or v.color and ( v.color.a or v.color[4] ) or 1
 		
 	end
 
@@ -100,8 +100,6 @@ sprites.create=function(it,opts)
 	it.draw=function()
 		
 		gl.Color(1,1,1,1)
-
-		local dl={ color={1,1,1,1}}
 
 		local batch={}
 		for idx,v in pairs(it.list) do
@@ -136,12 +134,12 @@ sprites.create=function(it,opts)
 
 			local t=
 			{
-				v1[1],	v1[2],	v1[3],		ix,		iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-				v1[1],	v1[2],	v1[3],		ix,		iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-				v2[1],	v2[2],	v2[3],		ixw,	iy,			v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-				v3[1],	v3[2],	v3[3],		ix,		iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-				v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
-				v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r*dl.color[1],v.g*dl.color[2],v.b*dl.color[3],v.a*dl.color[4],
+				v1[1],	v1[2],	v1[3],		ix,		iy,			v.r, v.g, v.b, v.a,
+				v1[1],	v1[2],	v1[3],		ix,		iy,			v.r, v.g, v.b, v.a,
+				v2[1],	v2[2],	v2[3],		ixw,	iy,			v.r, v.g, v.b, v.a,
+				v3[1],	v3[2],	v3[3],		ix,		iyh,		v.r, v.g, v.b, v.a,
+				v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r, v.g, v.b, v.a,
+				v4[1],	v4[2],	v4[3],		ixw,	iyh,		v.r, v.g, v.b, v.a,
 			}
 			
 			local l=#batch for i,v in ipairs(t) do batch[ l+i ]=v end
