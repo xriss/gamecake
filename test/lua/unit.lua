@@ -43,6 +43,7 @@ else
 	lunatest.suite("unit.wetgenes_grd")
 	lunatest.suite("unit.wetgenes_grdmap")
 	lunatest.suite("unit.wetgenes_grddiff")
+	lunatest.suite("unit.wetgenes_grdpaint")
 
 	lunatest.suite("unit.wetgenes_win")
 
