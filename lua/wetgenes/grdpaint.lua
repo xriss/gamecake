@@ -358,11 +358,11 @@ grdpaint.paintwrap=function(ga,gb,x,y,cx,cy,cw,ch,mode,trans,color)
 end
 
 -- above are old swankypaint functions that should be moved into the canvas functions below.
--- and probably shifted into C for speed...
+-- and probably shifted into C for speed as they are a tad slow...
 
 
 grdpaint.canvas_fonts_create=function()
-	if grdpaint.canvas_fonts then return grdpaint.canvas_fonts end -- do nothing
+	if grdpaint.canvas_fonts then return grdpaint.canvas_fonts end -- already done
 	grdpaint.canvas_fonts={}
 	local fonts=grdpaint.canvas_fonts
 
@@ -421,7 +421,7 @@ grdpaint.canvas=function(grd)
 	
 -- get available base fonts creating if needed
 	canvas.fonts=function()
-		if grdpaint.canvas_fonts then return grdpaint.canvas_fonts end -- do nothing
+		if grdpaint.canvas_fonts then return grdpaint.canvas_fonts end -- already done
 		return grdpaint.canvas_fonts_create()
 	end
 	
@@ -436,7 +436,7 @@ grdpaint.canvas=function(grd)
 		font=font or canvas.font -- default font
 		
 		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
-			canvas.grd:paint(font.g8,x,y,(c:byte()%128)*font.hx,0,font.hx,font.hy,grd.PAINT_MODE_ALPHA,0,1)
+			canvas.grd:paint(font.g8,x,y,(c:byte()%128)*font.hx,0,font.hx,font.hy,grd.PAINT_MODE_COLOR,0,canvas.color_foreground)
 			x=x+font.hx
 		end
 
