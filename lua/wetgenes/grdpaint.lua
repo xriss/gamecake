@@ -360,11 +360,88 @@ end
 -- above are old swankypaint functions that should be moved into the canvas functions below.
 -- and probably shifted into C for speed...
 
+
+grdpaint.canvas_fonts_create=function()
+	if grdpaint.canvas_fonts then return grdpaint.canvas_fonts end -- do nothing
+	grdpaint.canvas_fonts={}
+	local fonts=grdpaint.canvas_fonts
+
+	local bitdown=require("wetgenes.gamecake.fun.bitdown") -- reuse bitdown code to process strings
+	local funfont64=require("wetgenes.gamecake.fun.funfont64") -- raw data
+	
+	local cmap=bitdown.cmap_build({
+		name="white",
+		[ 0]={bgra=0x00000000,code=". ",name="transparent"},
+		[ 1]={bgra=0xffffffff,code="7 ",name="white"},
+	})
+
+
+	local render=function(hx,hy)
+	
+		local font={}
+	
+		local data=assert(funfont64["data"..hx.."x"..hy]) -- get data and check size is valid
+
+		font.idx=#fonts+1
+		font.name="fun"..hx.."x".."hy"
+		font.hx=hx
+		font.hy=hy
+
+		font.g8=wgrd.create("U8_INDEXED",128*hx,2*hy,1) -- 8bit version
+		font.g8:palette(0,2,{0,0,0,0,255,255,255,255})
+
+		font.g32=wgrd.create("U8_RGBA_PREMULT",128*hx,2*hy,1) -- 32bit version
+
+		for i=0,255 do
+			local s=data[i]
+			if s then
+				bitdown.pix_grd(s,cmap,font.g32,(i%128)*hx,math.floor(i/128)*hy,hx,hy)
+			end
+		end
+		font.g32:remap(font.g8,2,0) -- convert to 2 color indexed version for painting with
+		
+		fonts[font.idx]=font
+		fonts[font.name]=font
+	end
+	
+	render(4,8)
+	render(8,8)
+	render(8,16)
+	
+	
+	return grdpaint.canvas_fonts
+end
+
+
 -- create a canvas state within the given grd
 grdpaint.canvas=function(grd)
 
 	local canvas={grd=grd}
 	grd.canvas=canvas
+	
+-- get available base fonts creating if needed
+	canvas.fonts=function()
+		if grdpaint.canvas_fonts then return grdpaint.canvas_fonts end -- do nothing
+		return grdpaint.canvas_fonts_create()
+	end
+	
+-- set default font
+	canvas.set_font=function(font)
+		if type(font)~="table" then font=(canvas.fonts())[font] end -- auto lookup by name
+		canvas.font=font
+	end
+	
+-- render some text into this canvas (8 bit only)
+	canvas.text=function(s,x,y,font)
+		font=font or canvas.font -- default font
+		
+		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
+			canvas.grd:paint(font.g8,x,y,(c:byte()%128)*font.hx,0,font.hx,font.hy,grd.PAINT_MODE_ALPHA,0,1)
+			x=x+font.hx
+		end
+
+	end
+
 	
 	canvas.clip=function(x,y,z,w,h,d)
 		if type(x)~="number" then -- clear

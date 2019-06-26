@@ -31,7 +31,7 @@ M.build_grd=function(hx,hy)
 	
 		local data=assert(funfont64["data"..hx.."x"..hy]) -- get data and check size is valid
 
-		local g=wgrd.create("U8_RGBA_PREMULT",128*hx,1*hy,1)
+		local g=wgrd.create("U8_RGBA_PREMULT",128*hx,2*hy,1)
 		
 		for i=0,255 do
 			local s=data[i]
