@@ -273,7 +273,7 @@ wwindow.is_top=function(window)
 end
 
 wwindow.window_hooks=function(_window,act,widget)
---print(act)
+--print(act,widget and widget.id)
 
 	local window,screen=(_window or widget):window_screen()
 
@@ -359,7 +359,7 @@ end
 -- eg
 -- window.window_hooks("win_hide")
 
-	if act=="win_hide" then
+	if act=="win_hide" or act=="win_menu" then -- clicking the win_menu button will also close the window
 	
 		window.hidden=true -- hide it
 		window.master:call_descendents(function(w) w:set_dirty() end)
@@ -557,6 +557,8 @@ function wwindow.setup(window,def)
 			solid=true,
 			menu_data=window.menu_data,
 			cursor="hand",
+			id="win_menu",
+			hooks=window.window_hooks,
 		})
 
 		window.win_title=window.win_three:add({
