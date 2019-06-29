@@ -17,11 +17,6 @@ are used by swanky paint to manage its internal data.
 
 local wstr=require("wetgenes.string")
 local wgrd=require("wetgenes.grd")
-local cmsgpack=require("cmsgpack")
-
-local zlib=require("zlib")
-local inflate=function(d) return ((zlib.inflate())(d)) end
-local deflate=function(d) return ((zlib.deflate())(d,"finish")) end
 
 local function dprint(a) print(wstr.dump(a)) end
 
