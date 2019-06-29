@@ -83,33 +83,3 @@ function test_skew_tall8_7_2()		do_skew("tall8",7, -1)	end
 function test_skew_tall8_8_2()		do_skew("tall8",8, -1)	end
 
 
-function test_fonts()
-
-	local fonts=grdpaint.canvas_fonts_create()
-
-	for i,v in ipairs(fonts) do
-		assert( fonts[i].g8:save("dat/grd/font_g8_"..i..".out.png","png") )
-		assert( fonts[i].g32:save("dat/grd/font_g32_"..i..".out.png","png") )
-	end
-
-end
-
-
-function test_text()
-
-	local fonts=grdpaint.canvas_fonts_create()
-
-	for i,v in ipairs(fonts) do
-
-		local g=grd.create("U8_INDEXED",12*v.hx,v.hy,1)
-		g:palette(0,2,{0,0,0,0,255,255,255,255})
-		local c=grdpaint.canvas(g)
-		c.set_font(i)
-		c.text("Hello World!",0,0)
-
-		assert( g:save("dat/grd/text_g8_"..i..".out.png","png") )
-	end
-
-end
-
-
