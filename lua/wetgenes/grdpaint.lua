@@ -207,6 +207,34 @@ grdpaint.outline=function(gr,bg,fg)
 	return g
 end
 
+grdpaint.square_outline=function(gr,bg,fg)
+
+-- we need a new grd 2 pixels bigger
+
+	local g=wgrd.create(wgrd.U8_INDEXED,gr.width+2,gr.height+2,1)
+
+	g:clear(bg.i)
+	g:palette(0,256,gr) -- copy pal and pixels
+	g:pixels(1,1,gr.width,gr.height,gr:pixels(0,0,gr.width,gr.height,""))
+
+	local tab=g:pixels(0,0,g.width,g.height)
+
+		for x=0,g.width-1 do
+			for y=0,g.height-1 do
+				local t=tab[1+x+y*g.width]
+				if t==bg.i then
+					local found,count=countin3x3(gr,x-1,y-1,bg.i)
+					if found~=count and count>0 then -- any non background pixels
+						tab[1+x+y*g.width]=fg.i
+					end
+				end
+			end
+		end
+
+	g:pixels(0,0,g.width,g.height,tab)
+
+	return g
+end
 
 
 
@@ -356,7 +384,7 @@ end
 -- and probably shifted into C for speed as they are a tad slow...
 
 
--- moved canvas , history and layers into seperate files
+-- moved canvas , history and layers into seperate files which means this file will eventually become obsolete
 
 grdpaint.canvas  = require("wetgenes.grdcanvas").canvas
 grdpaint.history = require("wetgenes.grdhistory").history
