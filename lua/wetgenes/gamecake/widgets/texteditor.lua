@@ -29,7 +29,68 @@ function wtexteditor.update(widget)
 	return widget.meta.update(widget)
 end
 
+function wtexteditor.pan_skin( oldskin )
+	return function(widget)
+
+		local x,y,hx,hy=widget.px,widget.py,widget.hx,widget.hy
+
+		x=x+64-2
+		y=y+64
+		hx=4
+		hy=16
+
+		local ta=oven.gl.apply_modelview( {x    ,y+hy  ,0,1} )
+		local tb=oven.gl.apply_modelview( {x    ,y     ,0,1} )
+		local tc=oven.gl.apply_modelview( {x+hx ,y+hy  ,0,1} )
+		local td=oven.gl.apply_modelview( {x+hx ,y     ,0,1} )
+		
+		local r,g,b,a=0.5,0.5,0.5,0.5
+
+		local t={
+			ta[1],	ta[2],	ta[3],	r,g,b,a,
+			tb[1],	tb[2],	tb[3],	r,g,b,a,
+			tc[1],	tc[2],	tc[3],	r,g,b,a,
+			td[1],	td[2],	td[3],	r,g,b,a,
+		}
+
+		local ret=oldskin(widget)
+		return function()
+			ret()
+
+			oven.gl.Color(1,1,1,1)
+			oven.cake.canvas.flat.tristrip("rawrgba",t)
+
+		end
+	end
+end
+
 function wtexteditor.draw(widget)
+
+--[[
+
+	local cc=widget.master.get_color(nil,widget.text_color)
+	cc[1]=cc[1]*0.25
+	cc[2]=cc[2]*0.25
+	cc[3]=cc[3]*0.25
+	cc[4]=cc[4]*0.25
+
+	widget.panoverlay.quad_over={
+		color={1,1,1,1},
+		x0=16,y0=16,
+		x1=64,y1=64,
+	}
+	
+	widget.scroll_widget.pan.skin=nil
+
+		if widget.quad_over then -- custom quad in this widget, for use EG as a cursor
+			local q=widget.quad_over
+			gl.Color( unpack(q.color) )
+			draw_quad(q.x0,q.y0,q.x1,q.y0,q.x1,q.y1,q.x0,q.y1)
+			print(q.x0,q.y0,q.x1,q.x2)
+		end
+
+]]
+
 	return widget.meta.draw(widget)
 end
 
@@ -141,6 +202,20 @@ function wtexteditor.redo_text(widget,text)
 	return widget.lines and table.concat(widget.lines) or ""
 end
 
+function wtexteditor.cursor(widget)
+	local cursor={}
+
+
+	return cursor
+end
+
+function wtexteditor.area(widget)
+	local area={}
+
+
+	return area
+end
+
 function wtexteditor.setup(widget,def)
 
 	widget.class="texteditor"
@@ -158,10 +233,15 @@ function wtexteditor.setup(widget,def)
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles"})
+	
+	widget.cursor=wtexteditor.cursor(widget) -- cursor location and mode
+	widget.area=wtexteditor.area(widget) -- selection area
 
 
 	widget.scroll_widget.pan.pan_refresh=function(pan) return widget:texteditor_refresh() end -- we will do the scroll
 
+
+	widget.scroll_widget.pan.skin=wtexteditor.pan_skin( widget.scroll_widget.pan.skin )
 
 --	wtexteditor:redo_text(def.text or "") -- set starting text
 

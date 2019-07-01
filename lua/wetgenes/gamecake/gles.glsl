@@ -331,6 +331,11 @@ void main(void)
 #define DISCARD 0.25
 #include "gamecake_shader"
 
+#shader "raw_color"
+#define RAW 1
+#define COLOR 1
+#include "gamecake_shader"
+
 #shader "raw_tex_color"
 #define RAW 1
 #define TEX 1

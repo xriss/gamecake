@@ -381,7 +381,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		pstride=20
 		ptex=12
 	
-	elseif fmt=="xyzrgba" or fmt=="posrgba" then -- xyz and color
+	elseif fmt=="xyzrgba" or fmt=="posrgba" or fmt=="rawrgba" then -- xyz and color
 
 		def_progname=fmt:sub(1,3).."_color"
 
