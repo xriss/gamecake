@@ -103,9 +103,9 @@ wtexteditor.texteditor_refresh=function(widget)
 
 	pan.lines={}
 	
-	local px=math.floor(pan.pan_px/8)
+	local px=-math.floor(pan.pan_px/8)
 	local py=math.floor(pan.pan_py/16)
-	
+
 	widget.lines.px=px -- remember the scroll positions in characters
 	widget.lines.py=py
 
@@ -137,7 +137,7 @@ wtexteditor.texteditor_refresh=function(widget)
 		if v then
 			for i=px+1,#v do
 				if pl>=256*3 then break end -- max width
-				ps[pl+1]=string.byte(v,i,i)
+				ps[pl+1]=string.byte(v,i,i) or 32
 				ps[pl+2]=0
 				ps[pl+3]=0x01
 				pl=pl+3
@@ -161,6 +161,27 @@ function wtexteditor.lines(texteditor)
 	
 	lines.gutter=0 -- gutter width
 
+	lines.get_string=function(idx)
+		return lines.strings[idx]
+	end
+
+	lines.set_string=function(idx,str)
+		lines.strings[idx]=str
+	end
+
+	lines.changed_lines=function()
+
+		lines.gutter=#(tostring(lines.hy))+4
+
+		texteditor.scroll_widget.pan.hx_max=lines.hx*8
+		texteditor.scroll_widget.pan.hy_max=lines.hy*16
+		
+		texteditor.master.request_layout=true
+
+		texteditor:refresh()
+
+	end
+
 
 	lines.set=function(text)
 
@@ -175,15 +196,8 @@ function wtexteditor.lines(texteditor)
 			if lv > lines.hx then lines.hx=lv end
 		end
 		
-		lines.gutter=#(tostring(lines.hy))+4
-
-		texteditor.scroll_widget.pan.hx_max=lines.hx*8
-		texteditor.scroll_widget.pan.hy_max=lines.hy*16
+		lines.changed_lines()
 		
-		texteditor.master.request_layout=true
-
-		texteditor:refresh()
-
 	end
 
 	lines.get=function()
@@ -201,20 +215,27 @@ function wtexteditor.cursor(texteditor)
 	
 	cursor.moved=function()
 
-		if cursor.x<1 then cursor.x=1 end
+		local lines=texteditor.lines
+
+		if cursor.y>lines.hy then cursor.y=lines.hy end
 		if cursor.y<1 then cursor.y=1 end
-		if cursor.x>texteditor.lines.hx then cursor.x=texteditor.lines.hx end
-		if cursor.y>texteditor.lines.hy then cursor.y=texteditor.lines.hy end
+
+		local s=lines.get_string(cursor.y)
+		local hx=s and #s or 0
+		if hx > lines.hx then lines.hx=hx end
+
+		if cursor.x>hx+1 then cursor.x=hx+1 end
+		if cursor.x<1 then cursor.x=1 end
 
 		texteditor.master.throb=0
 		texteditor.scroll_widget.pan:set_dirty()
 
-		local cx = texteditor.cursor.x - texteditor.lines.px
-		local cy = texteditor.cursor.y - texteditor.lines.py
+		local cx = cursor.x - lines.px
+		local cy = cursor.y - lines.py
 		
 		local pan=texteditor.scroll_widget.pan
 		
-		local hx=math.floor(pan.hx/8)  - texteditor.lines.gutter
+		local hx=math.floor(pan.hx/8)  - lines.gutter
 		local hy=math.floor(pan.hy/16)
 		local dx=0
 		local dy=0
@@ -231,6 +252,21 @@ print(dx,dy,hx,hy)
 		end
 
 
+	end
+
+	cursor.insert=function(s)
+	
+		local sa=texteditor.lines.get_string(cursor.y) or ""
+		local sb=sa:sub(0,cursor.x-1)
+		local sc=sa:sub(cursor.x)
+		
+		texteditor.lines.set_string(cursor.y,sb..s..sc)
+	
+		cursor.x=cursor.x+1
+		cursor.moved()
+	
+		texteditor:refresh()
+		texteditor:set_dirty()
 	end
 
 
@@ -264,12 +300,24 @@ end
 
 
 function wtexteditor.key(pan,ascii,key,act)
-print("gotkey",ascii,act)
+--print("gotkey",ascii,act)
 
 	local texteditor=pan.texteditor
 	local cursor=texteditor.cursor
 
-	if act==1 or act==0 then
+
+
+	if ascii and ascii~="" then -- not a blank string
+
+		local c=string.byte(ascii)
+		
+		if c>=32 and c<128 then
+		
+			cursor.insert(ascii)
+
+		end
+		
+	elseif act==1 or act==0 then
 	
 		if key=="left" then
 
