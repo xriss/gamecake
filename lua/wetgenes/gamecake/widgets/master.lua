@@ -247,7 +247,7 @@ function wmaster.setup(widget,def)
 --			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
 		end
 	
-		local throb=(widget.throb<128)
+		local throb=(widget.throb>=128)
 		
 		widget.throb=widget.throb-4
 		if widget.throb<0 then widget.throb=255 end
