@@ -169,6 +169,11 @@ function wtexteditor.lines(texteditor)
 		lines.strings[idx]=str
 	end
 
+	lines.add_string=function(idx,str)
+		table.insert( lines.strings , idx , str)
+		lines.hy=lines.hy+1
+	end
+
 	lines.changed_lines=function()
 
 		lines.gutter=#(tostring(lines.hy))+4
@@ -222,6 +227,11 @@ function wtexteditor.cursor(texteditor)
 
 		local s=lines.get_string(cursor.y)
 		local hx=s and #s or 0
+		while hx>0 do
+			local endswith=s:byte(hx)
+			if endswith==10 or endswith==13 then hx=hx-1
+			else break end -- ignore any combination of CR or LF at end of line
+		end
 		if hx > lines.hx then lines.hx=hx end
 
 		if cursor.x>hx+1 then cursor.x=hx+1 end
@@ -243,8 +253,6 @@ function wtexteditor.cursor(texteditor)
 		if cy<1 then dy=cy-1 elseif cy>hy then dy=cy-hy end
 		
 		if dx~=0 or dy~=0 then -- scroll
-
-print(dx,dy,hx,hy)
 		
 			if dx~=0 then texteditor.scroll_widget.datx:inc(dx*8) end
 			if dy~=0 then texteditor.scroll_widget.daty:inc(dy*16) end
@@ -267,6 +275,24 @@ print(dx,dy,hx,hy)
 	
 		texteditor:refresh()
 		texteditor:set_dirty()
+	end
+
+	cursor.newline=function()
+	
+		local sa=texteditor.lines.get_string(cursor.y) or ""
+		local sb=sa:sub(0,cursor.x-1) or ""
+		local sc=sa:sub(cursor.x) or ""
+		
+		texteditor.lines.set_string(cursor.y,sb.."\n")
+
+		cursor.y=cursor.y+1
+		cursor.x=1
+
+		texteditor.lines.add_string(cursor.y,sc)
+		
+		texteditor.lines.changed_lines()
+		cursor.moved()
+	
 	end
 
 
@@ -338,6 +364,10 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			cursor.y=cursor.y+1
 			cursor.moved()
+
+		elseif key=="enter" or key=="return" then
+
+			cursor.newline()
 
 		end
 		
