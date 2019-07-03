@@ -375,12 +375,28 @@ end
 
 function wtexteditor.mouse(pan,act,_x,_y,key)
 
+	local wheel_acc=function()
+
+		pan.wheel_speed=pan.wheel_speed or 1
+		pan.wheel_stamp=pan.wheel_stamp or 0
+
+		local t=os.time()
+		if pan.wheel_stamp+1 > t then
+			pan.wheel_speed=pan.wheel_speed+1
+		else
+			pan.wheel_speed=1
+		end
+		pan.wheel_stamp=t
+	end
+	
 	if pan.master.old_over==pan and pan.parent.daty and pan.parent.daty.class=="number" then
 		if key=="wheel_add" and act==-1 then
-			pan.parent.daty:dec()
+--			wheel_acc()
+			pan.parent.daty:dec(16*4)
 			return
 		elseif key=="wheel_sub" and act==-1  then
-			pan.parent.daty:inc()
+--			wheel_acc()
+			pan.parent.daty:inc(16*4)
 			return
 		end
 	end
