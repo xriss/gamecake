@@ -149,8 +149,7 @@ wtexteditor.texteditor_refresh=function(widget)
 
 end
 
-function wtexteditor.lines(texteditor)
-	local lines={}
+function wtexteditor.lines(texteditor,lines)
 
 	lines.strings={}
 	lines.hx=0 -- widest string
@@ -172,6 +171,11 @@ function wtexteditor.lines(texteditor)
 	lines.add_string=function(idx,str)
 		table.insert( lines.strings , idx , str)
 		lines.hy=lines.hy+1
+	end
+
+	lines.del_string=function(idx)
+		table.remove( lines.strings , idx )
+		lines.hy=lines.hy-1
 	end
 
 	lines.changed_lines=function()
@@ -212,19 +216,14 @@ function wtexteditor.lines(texteditor)
 	return lines
 end
 
-function wtexteditor.cursor(texteditor)
-	local cursor={}
+function wtexteditor.cursor(texteditor,cursor)
 	
+	local lines=texteditor.lines
+
 	cursor.x=1
 	cursor.y=1
 	
-	cursor.moved=function()
-
-		local lines=texteditor.lines
-
-		if cursor.y>lines.hy then cursor.y=lines.hy end
-		if cursor.y<1 then cursor.y=1 end
-
+	cursor.get_hx=function()
 		local s=lines.get_string(cursor.y)
 		local hx=s and #s or 0
 		while hx>0 do
@@ -233,6 +232,15 @@ function wtexteditor.cursor(texteditor)
 			else break end -- ignore any combination of CR or LF at end of line
 		end
 		if hx > lines.hx then lines.hx=hx end
+		return hx
+	end
+
+	cursor.moved=function()
+
+		if cursor.y>lines.hy then cursor.y=lines.hy end
+		if cursor.y<1 then cursor.y=1 end
+
+		local hx=cursor.get_hx()
 
 		if cursor.x>hx+1 then cursor.x=hx+1 end
 		if cursor.x<1 then cursor.x=1 end
@@ -264,11 +272,11 @@ function wtexteditor.cursor(texteditor)
 
 	cursor.insert=function(s)
 	
-		local sa=texteditor.lines.get_string(cursor.y) or ""
+		local sa=lines.get_string(cursor.y) or ""
 		local sb=sa:sub(0,cursor.x-1)
 		local sc=sa:sub(cursor.x)
 		
-		texteditor.lines.set_string(cursor.y,sb..s..sc)
+		lines.set_string(cursor.y,sb..s..sc)
 	
 		cursor.x=cursor.x+1
 		cursor.moved()
@@ -279,28 +287,86 @@ function wtexteditor.cursor(texteditor)
 
 	cursor.newline=function()
 	
-		local sa=texteditor.lines.get_string(cursor.y) or ""
+		local sa=lines.get_string(cursor.y) or ""
 		local sb=sa:sub(0,cursor.x-1) or ""
 		local sc=sa:sub(cursor.x) or ""
 		
-		texteditor.lines.set_string(cursor.y,sb.."\n")
+		lines.set_string(cursor.y,sb.."\n")
 
 		cursor.y=cursor.y+1
 		cursor.x=1
 
-		texteditor.lines.add_string(cursor.y,sc)
+		lines.add_string(cursor.y,sc)
 		
-		texteditor.lines.changed_lines()
+		lines.changed_lines()
 		cursor.moved()
+	
+		texteditor:refresh()
+		texteditor:set_dirty()
 	
 	end
 
+	cursor.merge_lines=function()
+
+		local sa=lines.get_string(cursor.y) or ""
+		cursor.y=cursor.y-1
+		local hx=cursor.get_hx()
+		local sb=lines.get_string(cursor.y) or ""
+		cursor.x=hx+1
+		lines.set_string(cursor.y,sb:sub(1,hx)..sa)
+		lines.del_string(cursor.y+1)
+		lines.changed_lines()
+		cursor.moved()
+	
+		texteditor:refresh()
+		texteditor:set_dirty()
+		
+	end
+
+	cursor.backspace=function()
+		if cursor.x==1 and cursor.y>1 then
+			cursor.merge_lines()
+			return
+		end
+
+		local sa=lines.get_string(cursor.y) or ""
+		local sb=sa:sub(0,cursor.x-2)
+		local sc=sa:sub(cursor.x)
+		
+		lines.set_string(cursor.y,sb..sc)
+	
+		cursor.x=cursor.x-1
+		cursor.moved()
+	
+		texteditor:refresh()
+		texteditor:set_dirty()
+
+	end
+
+	cursor.delete=function()
+		local hx=cursor.get_hx()
+		if cursor.x==hx+1 and cursor.y<lines.hy then
+			cursor.y=cursor.y+1
+			cursor.merge_lines()
+			return
+		end
+
+		local sa=lines.get_string(cursor.y) or ""
+		local sb=sa:sub(0,cursor.x-1)
+		local sc=sa:sub(cursor.x+1)
+		
+		lines.set_string(cursor.y,sb..sc)
+	
+		cursor.moved()
+	
+		texteditor:refresh()
+		texteditor:set_dirty()
+	end
 
 	return cursor
 end
 
-function wtexteditor.area(widget)
-	local area={}
+function wtexteditor.area(widget,area)
 
 
 	return area
@@ -344,7 +410,9 @@ function wtexteditor.key(pan,ascii,key,act)
 		end
 		
 	elseif act==1 or act==0 then
-	
+
+--print(key)
+
 		if key=="left" then
 
 			cursor.x=cursor.x-1
@@ -369,6 +437,24 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			cursor.newline()
 
+		elseif key=="home" then
+
+			cursor.x=1
+			cursor.moved()
+		
+		elseif key=="end" then
+				
+			cursor.x=cursor.get_hx()+1
+			cursor.moved()
+
+		elseif key=="back" then
+
+			cursor.backspace()
+
+		elseif key=="delete" then
+
+			cursor.delete()
+
 		end
 		
 	end
@@ -392,9 +478,13 @@ function wtexteditor.setup(widget,def)
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles"})
 	
-	widget.lines  = wtexteditor.lines(widget)  -- lines of text
-	widget.cursor = wtexteditor.cursor(widget) -- cursor location and mode
-	widget.area   = wtexteditor.area(widget)   -- selection area
+	widget.lines  = {} -- pre init so we can reference each other in the setup functions
+	widget.area   = {}
+	widget.cursor = {}
+
+	wtexteditor.lines(widget,widget.lines) -- lines of text
+	wtexteditor.cursor(widget,widget.cursor) -- cursor location and mode
+	wtexteditor.area(widget,widget.area) -- selection area
 
 
 	widget.scroll_widget.pan.pan_refresh=function(pan) return widget:texteditor_refresh() end -- we will do the scroll
