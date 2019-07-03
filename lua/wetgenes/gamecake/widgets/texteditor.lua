@@ -396,6 +396,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 	local texteditor=pan.texteditor
 	local cursor=texteditor.cursor
+	local lines=texteditor.lines
 
 
 
@@ -415,13 +416,26 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		if key=="left" then
 
-			cursor.x=cursor.x-1
-			cursor.moved()
+			if cursor.x<=1 and cursor.y>1 then
+				cursor.y=cursor.y-1
+				cursor.x=cursor.get_hx()+1
+				cursor.moved()
+			else
+				cursor.x=cursor.x-1
+				cursor.moved()
+			end
 						
 		elseif key=="right" then
-				
-			cursor.x=cursor.x+1
-			cursor.moved()
+			
+			local hx=cursor.get_hx()+1
+			if cursor.x>=hx and cursor.y<lines.hy then
+				cursor.y=cursor.y+1
+				cursor.x=1
+				cursor.moved()
+			else
+				cursor.x=cursor.x+1
+				cursor.moved()
+			end
 
 		elseif key=="up" then
 
