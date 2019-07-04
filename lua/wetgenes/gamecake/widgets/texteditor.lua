@@ -100,6 +100,7 @@ wtexteditor.texteditor_refresh=function(widget)
 	local strings=widget.lines.strings or {}
 
 	local pan=widget.scroll_widget.pan
+	local area=widget.area
 
 	pan.lines={}
 	
@@ -140,6 +141,14 @@ wtexteditor.texteditor_refresh=function(widget)
 				ps[pl+1]=string.byte(v,i,i) or 32
 				ps[pl+2]=0
 				ps[pl+3]=0x01
+				if area.fx and area.fy and area.tx and area.ty then
+					local flip=false
+					if     y==area.fy and y==area.ty then  if i>=area.fx and i< area.tx then flip=true end -- single line
+					elseif y==area.fy                then  if i>=area.fx                then flip=true end -- first line
+					elseif y==area.ty                then  if i< area.tx                then flip=true end -- last line
+					elseif y>area.fy  and y<area.ty  then                                    flip=true end -- middle line
+					if flip then ps[pl+3] = math.floor(ps[pl+3]/16) + (ps[pl+3]%16)*16 end
+				end
 				pl=pl+3
 			end
 		end
@@ -223,27 +232,35 @@ function wtexteditor.cursor(texteditor,cursor)
 	cursor.x=1
 	cursor.y=1
 	
-	cursor.get_hx=function()
-		local s=lines.get_string(cursor.y)
+	cursor.get_hx=function(y)
+		y=y or cursor.y
+		local s=lines.get_string(y)
 		local hx=s and #s or 0
 		while hx>0 do
 			local endswith=s:byte(hx)
 			if endswith==10 or endswith==13 then hx=hx-1
 			else break end -- ignore any combination of CR or LF at end of line
 		end
-		if hx > lines.hx then lines.hx=hx end
+		if hx > lines.hx then lines.hx=hx end -- fix max
 		return hx
 	end
 
+	cursor.clip=function(x,y)
+
+		if y>lines.hy then y=lines.hy end
+		if y<1 then y=1 end
+
+		local hx=cursor.get_hx(y)
+
+		if x>hx+1 then x=hx+1 end
+		if x<1 then x=1 end
+
+		return x,y
+	end
+
 	cursor.moved=function()
-
-		if cursor.y>lines.hy then cursor.y=lines.hy end
-		if cursor.y<1 then cursor.y=1 end
-
-		local hx=cursor.get_hx()
-
-		if cursor.x>hx+1 then cursor.x=hx+1 end
-		if cursor.x<1 then cursor.x=1 end
+	
+		cursor.x,cursor.y=cursor.clip(cursor.x,cursor.y)
 
 		texteditor.master.throb=0
 		texteditor.scroll_widget.pan:set_dirty()
@@ -366,8 +383,32 @@ function wtexteditor.cursor(texteditor,cursor)
 	return cursor
 end
 
-function wtexteditor.area(widget,area)
+function wtexteditor.area(texteditor,area)
 
+	local cursor=texteditor.cursor
+
+	area.mark=function(fx,fy,tx,ty)
+		if not fx then -- unmark
+			area.fx=nil
+			area.fy=nil
+			area.tx=nil
+			area.ty=nil
+			return
+		end
+		area.fx,area.fy=cursor.clip(fx,fy)
+		area.tx,area.ty=cursor.clip(tx,ty)
+		
+		local flip=false
+		if area.fy==area.ty and area.fx>area.tx then flip=true
+		elseif                  area.fy>area.ty then flip=true end
+		if flip then
+			area.fx,area.tx=area.tx,area.fx
+			area.fy,area.ty=area.ty,area.fy
+		end
+
+-- print( area.fx , area.fy , area.tx , area.ty )
+
+	end
 
 	return area
 end
@@ -402,6 +443,48 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 	end
 
 --print(pan,key)
+
+
+	local texteditor=pan.texteditor
+	local area=texteditor.area
+	local px=-math.floor(pan.pan_px/8)
+	local py=math.floor(pan.pan_py/16)
+	
+	local x,y=pan:mousexy(_x,_y)
+	local dx,dy=math.floor(x/8),math.floor(y/16)
+	
+	dx=dx-texteditor.lines.gutter+1
+	dy=dy+1
+
+	if texteditor.master.over==pan.parent or act==-1 then
+
+		if act==1 then
+
+			pan.area_click={dx,dy,dx,dy}
+
+			texteditor:refresh()
+			texteditor:set_dirty()
+
+		elseif act==0 then -- drag
+
+			if pan.area_click then
+				pan.area_click[3],pan.area_click[4]=dx,dy
+				
+				area.mark(unpack(pan.area_click))
+
+				texteditor:refresh()
+				texteditor:set_dirty()
+			end
+		
+		elseif act==-1 and pan.area_click then -- final
+		
+			area.mark(unpack(pan.area_click))
+			pan.area_click=false
+
+			texteditor:refresh()
+			texteditor:set_dirty()
+		end
+	end
 
 	return pan.meta.mouse(pan,act,_x,_y,keyname)
 end
