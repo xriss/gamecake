@@ -79,6 +79,8 @@ M.construct=function(txt)
 		txt.fx,txt.fy=txt.clip(fx,fy)
 		txt.tx,txt.ty=txt.clip(tx,ty)
 		
+		txt.cx,txt.cy=txt.tx,txt.ty
+		
 		local flip=false
 		if txt.fy==txt.ty and txt.fx>txt.tx then flip=true
 		elseif                  txt.fy>txt.ty then flip=true end
@@ -103,6 +105,9 @@ M.construct=function(txt)
 			
 			txt.cx=txt.fx
 			txt.cy=txt.fy
+			
+			
+			txt.mark()
 
 			return s
 		end

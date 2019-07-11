@@ -27,6 +27,14 @@ M.bake=function(oven,wtexteditor)
 
 function wtexteditor.update(widget)
 
+	if widget.txt_dirty then
+		widget.master.throb=255
+		widget.txt_dirty=false
+		widget:texteditor_refresh()
+		widget.master.request_layout=true
+		widget.scroll_widget.pan:set_dirty()
+	end
+
 	local throb=(widget.master.throb>=128)
 	if throb ~= widget.throb then -- dirty throb...
 		widget.throb=throb
@@ -92,12 +100,20 @@ end
 
 
 wtexteditor.texteditor_hooks=function(widget,act,w)
-print(act,w.id)
+
+	if act=="txt_changed" then
+	
+		widget.gutter=#string.format(" %d  ",widget.hy)
+
+		widget.txt_dirty=true
+	end
+
+--print(act,w and w.id)
 end
 
 wtexteditor.texteditor_refresh=function(widget)
 
-	local strings=widget.lines.strings or {}
+	local strings=widget.txt.strings or {}
 
 	local pan=widget.scroll_widget.pan
 	local txt=widget.txt
@@ -158,265 +174,6 @@ wtexteditor.texteditor_refresh=function(widget)
 
 end
 
-function wtexteditor.lines(texteditor,lines)
---[[
-	lines.strings={}
-	lines.hx=0 -- widest string
-	lines.hy=0 -- number of strings
-
-	lines.px=0 -- scroll position
-	lines.py=0
-	
-	lines.gutter=0 -- gutter width
-
-	lines.get_string=function(idx)
-		return lines.strings[idx]
-	end
-
-	lines.set_string=function(idx,str)
-		lines.strings[idx]=str
-	end
-
-	lines.add_string=function(idx,str)
-		table.insert( lines.strings , idx , str)
-		lines.hy=lines.hy+1
-	end
-
-	lines.del_string=function(idx)
-		table.remove( lines.strings , idx )
-		lines.hy=lines.hy-1
-	end
-
-	lines.changed_lines=function()
-
-		lines.gutter=#(tostring(lines.hy))+4
-
-		texteditor.scroll_widget.pan.hx_max=lines.hx*8
-		texteditor.scroll_widget.pan.hy_max=lines.hy*16
-		
-		texteditor.master.request_layout=true
-
-		texteditor:refresh()
-
-	end
-
-
-	lines.set=function(text)
-
-		if text then -- set new text
-			lines.strings=wstr.split_lines(text)
-		end
-		
-		lines.hx=0
-		lines.hy=#lines.strings
-		for i,v in ipairs(lines.strings) do
-			local lv=#v
-			if lv > lines.hx then lines.hx=lv end
-		end
-		
-		lines.changed_lines()
-		
-	end
-
-	lines.get=function()
-		return table.concat(lines.strings) or ""
-	end
-
-	return lines
-]]
-end
-
-function wtexteditor.cursor(texteditor,cursor)
---[[	
-	local lines=texteditor.lines
-
-	cursor.x=1
-	cursor.y=1
-	
-	cursor.get_hx=function(y)
-		y=y or cursor.y
-		local s=lines.get_string(y)
-		local hx=s and #s or 0
-		while hx>0 do
-			local endswith=s:byte(hx)
-			if endswith==10 or endswith==13 then hx=hx-1
-			else break end -- ignore any combination of CR or LF at end of line
-		end
-		if hx > lines.hx then lines.hx=hx end -- fix max
-		return hx
-	end
-
-	cursor.clip=function(x,y)
-
-		if y>lines.hy then y=lines.hy end
-		if y<1 then y=1 end
-
-		local hx=cursor.get_hx(y)
-
-		if x>hx+1 then x=hx+1 end
-		if x<1 then x=1 end
-
-		return x,y
-	end
-
-	cursor.moved=function()
-	
-		cursor.x,cursor.y=cursor.clip(cursor.x,cursor.y)
-
-		texteditor.master.throb=0
-		texteditor.scroll_widget.pan:set_dirty()
-
-		local cx = cursor.x - lines.px
-		local cy = cursor.y - lines.py
-		
-		local pan=texteditor.scroll_widget.pan
-		
-		local hx=math.floor(pan.hx/8)  - lines.gutter
-		local hy=math.floor(pan.hy/16)
-		local dx=0
-		local dy=0
-		if cx<1 then dx=cx-1 elseif cx>hx then dx=cx-hx end
-		if cy<1 then dy=cy-1 elseif cy>hy then dy=cy-hy end
-		
-		if dx~=0 or dy~=0 then -- scroll
-		
-			if dx~=0 then texteditor.scroll_widget.datx:inc(dx*8) end
-			if dy~=0 then texteditor.scroll_widget.daty:inc(dy*16) end
-
-		end
-
-
-	end
-
-	cursor.insert=function(s)
-	
-		local sa=lines.get_string(cursor.y) or ""
-		local sb=sa:sub(0,cursor.x-1)
-		local sc=sa:sub(cursor.x)
-		
-		lines.set_string(cursor.y,sb..s..sc)
-	
-		cursor.x=cursor.x+1
-		cursor.moved()
-	
-		texteditor:refresh()
-		texteditor:set_dirty()
-	end
-
-	cursor.newline=function()
-	
-		local sa=lines.get_string(cursor.y) or ""
-		local sb=sa:sub(0,cursor.x-1) or ""
-		local sc=sa:sub(cursor.x) or ""
-		
-		lines.set_string(cursor.y,sb.."\n")
-
-		cursor.y=cursor.y+1
-		cursor.x=1
-
-		lines.add_string(cursor.y,sc)
-		
-		lines.changed_lines()
-		cursor.moved()
-	
-		texteditor:refresh()
-		texteditor:set_dirty()
-	
-	end
-
-	cursor.merge_lines=function()
-
-		local sa=lines.get_string(cursor.y) or ""
-		cursor.y=cursor.y-1
-		local hx=cursor.get_hx()
-		local sb=lines.get_string(cursor.y) or ""
-		cursor.x=hx+1
-		lines.set_string(cursor.y,sb:sub(1,hx)..sa)
-		lines.del_string(cursor.y+1)
-		lines.changed_lines()
-		cursor.moved()
-	
-		texteditor:refresh()
-		texteditor:set_dirty()
-		
-	end
-
-	cursor.backspace=function()
-		if cursor.x==1 and cursor.y>1 then
-			cursor.merge_lines()
-			return
-		end
-
-		local sa=lines.get_string(cursor.y) or ""
-		local sb=sa:sub(0,cursor.x-2)
-		local sc=sa:sub(cursor.x)
-		
-		lines.set_string(cursor.y,sb..sc)
-	
-		cursor.x=cursor.x-1
-		cursor.moved()
-	
-		texteditor:refresh()
-		texteditor:set_dirty()
-
-	end
-
-	cursor.delete=function()
-		local hx=cursor.get_hx()
-		if cursor.x==hx+1 and cursor.y<lines.hy then
-			cursor.y=cursor.y+1
-			cursor.merge_lines()
-			return
-		end
-
-		local sa=lines.get_string(cursor.y) or ""
-		local sb=sa:sub(0,cursor.x-1)
-		local sc=sa:sub(cursor.x+1)
-		
-		lines.set_string(cursor.y,sb..sc)
-	
-		cursor.moved()
-	
-		texteditor:refresh()
-		texteditor:set_dirty()
-	end
-
-	return cursor
-]]
-end
-
-function wtexteditor.area(texteditor,area)
---[[
-	local cursor=texteditor.cursor
-
-	area.mark=function(fx,fy,tx,ty)
-		if not fx then -- unmark
-			area.fx=nil
-			area.fy=nil
-			area.tx=nil
-			area.ty=nil
-			return
-		end
-		area.fx,area.fy=cursor.clip(fx,fy)
-		area.tx,area.ty=cursor.clip(tx,ty)
-		
-		local flip=false
-		if area.fy==area.ty and area.fx>area.tx then flip=true
-		elseif                  area.fy>area.ty then flip=true end
-		if flip then
-			area.fx,area.tx=area.tx,area.fx
-			area.fy,area.ty=area.ty,area.fy
-		end
-
--- print( area.fx , area.fy , area.tx , area.ty )
-
-	end
-
-	return area
-]]
-end
-
-
 function wtexteditor.mouse(pan,act,_x,_y,key)
 
 	local wheel_acc=function()
@@ -450,7 +207,6 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 
 	local texteditor=pan.texteditor
 	local txt=texteditor.txt
---	local area=texteditor.area
 	local px=-math.floor(pan.pan_px/8)
 	local py=math.floor(pan.pan_py/16)
 	
@@ -499,71 +255,69 @@ function wtexteditor.key(pan,ascii,key,act)
 
 	local texteditor=pan.texteditor
 	local txt=texteditor.txt
---	local cursor=texteditor.cursor
---	local lines=texteditor.lines
-
-
 
 	if ascii and ascii~="" then -- not a blank string
+
+		texteditor.txt_dirty=true
 
 		local c=string.byte(ascii)
 		
 		if c>=32 and c<128 then
 		
-			txt.insert(ascii)
+			txt.insert_char(ascii)
 
 		end
 		
 	elseif act==1 or act==0 then
 
---print(key)
+		texteditor.txt_dirty=true
 
 		if key=="left" then
 
 			if txt.cx<=1 and txt.cy>1 then
 				txt.cy=txt.cy-1
 				txt.cx=txt.get_hx()+1
-				txt.moved()
+				txt.clip()
 			else
 				txt.cx=txt.cx-1
-				txt.moved()
+				txt.clip()
 			end
 						
 		elseif key=="right" then
 			
 			local hx=txt.get_hx()+1
-			if txt.cx>=hx and txt.cy<lines.hy then
+			if txt.cx>=hx and txt.cy<txt.hy then
 				txt.cy=txt.cy+1
 				txt.cx=1
-				txt.moved()
+				txt.clip()
 			else
 				txt.cx=txt.cx+1
-				txt.moved()
+				txt.clip()
 			end
 
 		elseif key=="up" then
 
 			txt.cy=txt.cy-1
-			txt.moved()
+			txt.clip()
 
 		elseif key=="down" then
 
 			txt.cy=txt.cy+1
-			txt.moved()
+			txt.clip()
 
 		elseif key=="enter" or key=="return" then
 
-			txt.newline()
+			txt.insert_newline()
 
 		elseif key=="home" then
 
 			txt.cx=1
-			txt.moved()
+			txt.clip()
 		
 		elseif key=="end" then
 				
 			txt.cx=txt.get_hx()+1
-			txt.moved()
+			txt.clip()
 
 		elseif key=="back" then
 
@@ -597,10 +351,8 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles"})
 	
 	widget.txt=require("wetgenes.txt").construct()
-
-	widget.lines  = {} -- pre init so we can reference each other in the setup functions
-	widget.area   = {}
-	widget.cursor = {}
+	
+	widget.txt.hooks.changed=function(txt) return wtexteditor.texteditor_hooks(widget,"txt_changed") end
 
 	widget.gutter=0
 	widget.ducts=0
