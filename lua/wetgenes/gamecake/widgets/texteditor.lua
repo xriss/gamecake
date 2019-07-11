@@ -1,5 +1,5 @@
 --
--- (C) 2017 Kriss@XIXs.com
+-- (C) 2019 Kriss@XIXs.com
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
@@ -45,8 +45,8 @@ function wtexteditor.pan_skin( oldskin )
 
 			if pan.texteditor.throb then -- draw the blinking cursor
 			
-				local cx = pan.texteditor.cursor.x - pan.texteditor.lines.px
-				local cy = pan.texteditor.cursor.y - pan.texteditor.lines.py
+				local cx = pan.texteditor.txt.cx - pan.texteditor.px
+				local cy = pan.texteditor.txt.cy - pan.texteditor.py
 				
 
 				oven.gl.PushMatrix()
@@ -56,7 +56,7 @@ function wtexteditor.pan_skin( oldskin )
 
 					local x,y,hx,hy=pan.px,pan.py,pan.hx,pan.hy
 
-					x=x+(cx-1+pan.texteditor.lines.gutter)*8-2
+					x=x+(cx-1+pan.texteditor.gutter)*8-2
 					y=y+(cy-1)*16
 					hx=4
 					hy=16
@@ -100,22 +100,22 @@ wtexteditor.texteditor_refresh=function(widget)
 	local strings=widget.lines.strings or {}
 
 	local pan=widget.scroll_widget.pan
-	local area=widget.area
+	local txt=widget.txt
 
 	pan.lines={}
 	
 	local px=-math.floor(pan.pan_px/8)
 	local py=math.floor(pan.pan_py/16)
 
-	widget.lines.px=px -- remember the scroll positions in characters
-	widget.lines.py=py
+	widget.px=px -- remember the scroll positions in characters
+	widget.py=py
 
 	for y=py+1,py+256 do
 		local ps={}
 		local pl=0
 
 		local v=tostring(y)
-		v=string.rep(" ",widget.lines.gutter-3-#v)..v.." "
+		v=string.rep(" ",widget.gutter-3-#v)..v.." "
 		for i=1,#v do
 			if pl>=256*3 then break end -- max width
 			ps[pl+1]=string.byte(v,i,i)
@@ -141,12 +141,12 @@ wtexteditor.texteditor_refresh=function(widget)
 				ps[pl+1]=string.byte(v,i,i) or 32
 				ps[pl+2]=0
 				ps[pl+3]=0x01
-				if area.fx and area.fy and area.tx and area.ty then
+				if txt.fx and txt.fy and txt.tx and txt.ty then
 					local flip=false
-					if     y==area.fy and y==area.ty then  if i>=area.fx and i< area.tx then flip=true end -- single line
-					elseif y==area.fy                then  if i>=area.fx                then flip=true end -- first line
-					elseif y==area.ty                then  if i< area.tx                then flip=true end -- last line
-					elseif y>area.fy  and y<area.ty  then                                    flip=true end -- middle line
+					if     y==txt.fy and y==txt.ty then if i>=txt.fx and i< txt.tx then flip=true end -- single line
+					elseif y==txt.fy               then if i>=txt.fx               then flip=true end -- first line
+					elseif y==txt.ty               then if i< txt.tx               then flip=true end -- last line
+					elseif y>txt.fy  and y<txt.ty  then                                 flip=true end -- middle line
 					if flip then ps[pl+3] = math.floor(ps[pl+3]/16) + (ps[pl+3]%16)*16 end
 				end
 				pl=pl+3
@@ -159,7 +159,7 @@ wtexteditor.texteditor_refresh=function(widget)
 end
 
 function wtexteditor.lines(texteditor,lines)
-
+--[[
 	lines.strings={}
 	lines.hx=0 -- widest string
 	lines.hy=0 -- number of strings
@@ -223,10 +223,11 @@ function wtexteditor.lines(texteditor,lines)
 	end
 
 	return lines
+]]
 end
 
 function wtexteditor.cursor(texteditor,cursor)
-	
+--[[	
 	local lines=texteditor.lines
 
 	cursor.x=1
@@ -381,10 +382,11 @@ function wtexteditor.cursor(texteditor,cursor)
 	end
 
 	return cursor
+]]
 end
 
 function wtexteditor.area(texteditor,area)
-
+--[[
 	local cursor=texteditor.cursor
 
 	area.mark=function(fx,fy,tx,ty)
@@ -411,6 +413,7 @@ function wtexteditor.area(texteditor,area)
 	end
 
 	return area
+]]
 end
 
 
@@ -446,14 +449,15 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 
 
 	local texteditor=pan.texteditor
-	local area=texteditor.area
+	local txt=texteditor.txt
+--	local area=texteditor.area
 	local px=-math.floor(pan.pan_px/8)
 	local py=math.floor(pan.pan_py/16)
 	
 	local x,y=pan:mousexy(_x,_y)
 	local dx,dy=math.floor(x/8),math.floor(y/16)
 	
-	dx=dx-texteditor.lines.gutter+1
+	dx=dx-texteditor.gutter+1
 	dy=dy+1
 
 	if texteditor.master.over==pan.parent or act==-1 then
@@ -470,7 +474,7 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 			if pan.area_click then
 				pan.area_click[3],pan.area_click[4]=dx,dy
 				
-				area.mark(unpack(pan.area_click))
+				txt.mark(unpack(pan.area_click))
 
 				texteditor:refresh()
 				texteditor:set_dirty()
@@ -478,7 +482,7 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 		
 		elseif act==-1 and pan.area_click then -- final
 		
-			area.mark(unpack(pan.area_click))
+			txt.mark(unpack(pan.area_click))
 			pan.area_click=false
 
 			texteditor:refresh()
@@ -494,8 +498,9 @@ function wtexteditor.key(pan,ascii,key,act)
 --print("gotkey",ascii,act)
 
 	local texteditor=pan.texteditor
-	local cursor=texteditor.cursor
-	local lines=texteditor.lines
+	local txt=texteditor.txt
+--	local cursor=texteditor.cursor
+--	local lines=texteditor.lines
 
 
 
@@ -505,7 +510,7 @@ function wtexteditor.key(pan,ascii,key,act)
 		
 		if c>=32 and c<128 then
 		
-			cursor.insert(ascii)
+			txt.insert(ascii)
 
 		end
 		
@@ -515,58 +520,58 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		if key=="left" then
 
-			if cursor.x<=1 and cursor.y>1 then
-				cursor.y=cursor.y-1
-				cursor.x=cursor.get_hx()+1
-				cursor.moved()
+			if txt.cx<=1 and txt.cy>1 then
+				txt.cy=txt.cy-1
+				txt.cx=txt.get_hx()+1
+				txt.moved()
 			else
-				cursor.x=cursor.x-1
-				cursor.moved()
+				txt.cx=txt.cx-1
+				txt.moved()
 			end
 						
 		elseif key=="right" then
 			
-			local hx=cursor.get_hx()+1
-			if cursor.x>=hx and cursor.y<lines.hy then
-				cursor.y=cursor.y+1
-				cursor.x=1
-				cursor.moved()
+			local hx=txt.get_hx()+1
+			if txt.cx>=hx and txt.cy<lines.hy then
+				txt.cy=txt.cy+1
+				txt.cx=1
+				txt.moved()
 			else
-				cursor.x=cursor.x+1
-				cursor.moved()
+				txt.cx=txt.cx+1
+				txt.moved()
 			end
 
 		elseif key=="up" then
 
-			cursor.y=cursor.y-1
-			cursor.moved()
+			txt.cy=txt.cy-1
+			txt.moved()
 
 		elseif key=="down" then
 
-			cursor.y=cursor.y+1
-			cursor.moved()
+			txt.cy=txt.cy+1
+			txt.moved()
 
 		elseif key=="enter" or key=="return" then
 
-			cursor.newline()
+			txt.newline()
 
 		elseif key=="home" then
 
-			cursor.x=1
-			cursor.moved()
+			txt.cx=1
+			txt.moved()
 		
 		elseif key=="end" then
 				
-			cursor.x=cursor.get_hx()+1
-			cursor.moved()
+			txt.cx=txt.get_hx()+1
+			txt.moved()
 
 		elseif key=="back" then
 
-			cursor.backspace()
+			txt.backspace()
 
 		elseif key=="delete" then
 
-			cursor.delete()
+			txt.delete()
 
 		end
 		
@@ -591,13 +596,24 @@ function wtexteditor.setup(widget,def)
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles"})
 	
+	widget.txt=require("wetgenes.txt").construct()
+
 	widget.lines  = {} -- pre init so we can reference each other in the setup functions
 	widget.area   = {}
 	widget.cursor = {}
 
+	widget.gutter=0
+	widget.ducts=0
+
+	widget.px=0
+	widget.py=0
+
+--[[
 	wtexteditor.lines(widget,widget.lines) -- lines of text
 	wtexteditor.cursor(widget,widget.cursor) -- cursor location and mode
 	wtexteditor.area(widget,widget.area) -- selection area
+]]
+
 
 
 	widget.scroll_widget.pan.pan_refresh=function(pan) return widget:texteditor_refresh() end -- we will do the scroll
