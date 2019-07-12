@@ -146,6 +146,36 @@ M.construct=function(txt)
 		return x,y
 	end
 
+-- move a cursor one character left/right/up/down and clip it
+	txt.clip_left=function(x,y)
+		if x<=1 and x>1 then
+			y=y-1
+			x=txt.get_hx(y)+1
+		else
+			x=x-1
+		end
+		return txt.clip(x,y)
+	end
+
+	txt.clip_right=function(x,y)
+		local hx=txt.get_hx(y)+1
+		if x>=hx and y<txt.hy then
+			y=y+1
+			x=1
+		else
+			x=x+1
+		end
+		return txt.clip(x,y)
+	end
+
+	txt.clip_up=function(x,y)
+		return txt.clip(x,y-1)
+	end
+
+	txt.clip_down=function(x,y)
+		return txt.clip(x,y+1)
+	end
+
 	txt.insert_char=function(s)
 	
 		txt.cut()

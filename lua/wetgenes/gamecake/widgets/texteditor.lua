@@ -102,6 +102,10 @@ end
 wtexteditor.texteditor_hooks=function(widget,act,w)
 
 	if act=="txt_changed" then
+
+		local pan=widget.scroll_widget.pan
+		pan.hx_max=widget.txt.hx*8
+		pan.hy_max=widget.txt.hy*16
 	
 		widget.gutter=#string.format(" %d  ",widget.hy)
 
@@ -120,13 +124,13 @@ wtexteditor.texteditor_refresh=function(widget)
 
 	pan.lines={}
 	
-	local px=-math.floor(pan.pan_px/8)
-	local py=math.floor(pan.pan_py/16)
+	local cx=-math.floor(pan.pan_px/8)
+	local cy=math.floor(pan.pan_py/16)
 
-	widget.px=px -- remember the scroll positions in characters
-	widget.py=py
+	widget.cx=cx -- remember the scroll positions in characters
+	widget.cy=cy
 
-	for y=py+1,py+256 do
+	for y=cy+1,cy+256 do
 		local ps={}
 		local pl=0
 
@@ -152,7 +156,7 @@ wtexteditor.texteditor_refresh=function(widget)
 
 		local v=strings[y]
 		if v then
-			for i=px+1,#v do
+			for i=cx+1,#v do
 				if pl>=256*3 then break end -- max width
 				ps[pl+1]=string.byte(v,i,i) or 32
 				ps[pl+2]=0
@@ -169,7 +173,7 @@ wtexteditor.texteditor_refresh=function(widget)
 			end
 		end
 		local s=string.char(unpack(ps))
-		pan.lines[y-py]={text=v,s=s}
+		pan.lines[y-cy]={text=v,s=s}
 	end
 
 end
@@ -251,7 +255,7 @@ end
 
 
 function wtexteditor.key(pan,ascii,key,act)
---print("gotkey",ascii,act)
+print("gotkey",ascii,act,key)
 
 	local texteditor=pan.texteditor
 	local txt=texteditor.txt
@@ -272,38 +276,28 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		texteditor.txt_dirty=true
 
-		if key=="left" then
+		if     key=="shift_l"   or key=="shift_r"   then	texteditor.key_shift=true
+		elseif key=="control_l" or key=="control_r" then	texteditor.key_control=true
+		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=true
+		elseif key=="left" then
 
-			if txt.cx<=1 and txt.cy>1 then
-				txt.cy=txt.cy-1
-				txt.cx=txt.get_hx()+1
-				txt.clip()
-			else
-				txt.cx=txt.cx-1
-				txt.clip()
-			end
+			txt.mark()
+			txt.cx,txt.cy=txt.clip_left(txt.cx,txt.cy)
 						
 		elseif key=="right" then
 			
-			local hx=txt.get_hx()+1
-			if txt.cx>=hx and txt.cy<txt.hy then
-				txt.cy=txt.cy+1
-				txt.cx=1
-				txt.clip()
-			else
-				txt.cx=txt.cx+1
-				txt.clip()
-			end
+			txt.mark()
+			txt.cx,txt.cy=txt.clip_right(txt.cx,txt.cy)
 
 		elseif key=="up" then
 
-			txt.cy=txt.cy-1
-			txt.clip()
+			txt.mark()
+			txt.cx,txt.cy=txt.clip_up(txt.cx,txt.cy)
 
 		elseif key=="down" then
 
-			txt.cy=txt.cy+1
-			txt.clip()
+			txt.mark()
+			txt.cx,txt.cy=txt.clip_down(txt.cx,txt.cy)
 
 		elseif key=="enter" or key=="return" then
 
@@ -327,6 +321,13 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			txt.delete()
 
+		end
+		
+	elseif act==-1 then
+
+		if     key=="shift_l"   or key=="shift_r"   then	texteditor.key_shift=false
+		elseif key=="control_l" or key=="control_r" then	texteditor.key_control=false
+		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=false
 		end
 		
 	end
@@ -360,16 +361,7 @@ function wtexteditor.setup(widget,def)
 	widget.px=0
 	widget.py=0
 
---[[
-	wtexteditor.lines(widget,widget.lines) -- lines of text
-	wtexteditor.cursor(widget,widget.cursor) -- cursor location and mode
-	wtexteditor.area(widget,widget.area) -- selection area
-]]
-
-
-
 	widget.scroll_widget.pan.pan_refresh=function(pan) return widget:texteditor_refresh() end -- we will do the scroll
-
 
 	widget.scroll_widget.pan.skin=wtexteditor.pan_skin( widget.scroll_widget.pan.skin )
 	widget.scroll_widget.pan.texteditor=widget
