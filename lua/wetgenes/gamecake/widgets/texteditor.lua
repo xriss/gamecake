@@ -53,8 +53,8 @@ function wtexteditor.pan_skin( oldskin )
 
 			if pan.texteditor.throb then -- draw the blinking cursor
 			
-				local cx = pan.texteditor.txt.cx - pan.texteditor.px
-				local cy = pan.texteditor.txt.cy - pan.texteditor.py
+				local cx = pan.texteditor.txt.cx - pan.texteditor.cx
+				local cy = pan.texteditor.txt.cy - pan.texteditor.cy
 				
 
 				oven.gl.PushMatrix()
@@ -223,28 +223,35 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 	if texteditor.master.over==pan.parent or act==-1 then
 
 		if act==1 then
+		
+			texteditor.key_mouse=true
 
-			pan.area_click={dx,dy,dx,dy}
+			texteditor.mark_area={dx,dy,dx,dy}
 
+			texteditor:scroll_to_view()
 			texteditor:refresh()
 			texteditor:set_dirty()
 
 		elseif act==0 then -- drag
 
-			if pan.area_click then
-				pan.area_click[3],pan.area_click[4]=dx,dy
+			if texteditor.key_mouse and texteditor.mark_area then
+				texteditor.mark_area[3],texteditor.mark_area[4]=dx,dy
 				
-				txt.mark(unpack(pan.area_click))
+				txt.mark(unpack(texteditor.mark_area))
 
+				texteditor:scroll_to_view()
 				texteditor:refresh()
 				texteditor:set_dirty()
 			end
 		
-		elseif act==-1 and pan.area_click then -- final
+		elseif act==-1 and texteditor.mark_area then -- final
 		
-			txt.mark(unpack(pan.area_click))
-			pan.area_click=false
+			texteditor.key_mouse=false
 
+			txt.mark(unpack(texteditor.mark_area))
+--			texteditor.mark_area=false
+
+			texteditor:scroll_to_view()
 			texteditor:refresh()
 			texteditor:set_dirty()
 		end
@@ -253,12 +260,63 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 	return pan.meta.mouse(pan,act,_x,_y,keyname)
 end
 
+function wtexteditor.scroll_to_view(texteditor,cx,cy)
+	local txt=texteditor.txt
+	local pan=texteditor.scroll_widget.pan
+	
+	cx=cx or txt.cx
+	cy=cy or txt.cy
+	
+	local dx=cx-texteditor.cx
+	local dy=cy-texteditor.cy
+	
+	local hx=math.floor(texteditor.scroll_widget.pan.hx/8)
+	local hy=math.floor(texteditor.scroll_widget.pan.hy/16)
+	
+	if dy<4 then
+
+		local d=-(dy-4)
+--		print("dec",d)
+		pan.parent.daty:dec(16*d)
+
+	elseif dy>hy-4 then
+
+		local d=(dy-hy+4)
+--		print("inc",d)
+		pan.parent.daty:inc(16*d)
+
+	end
+	
+	
+end
 
 function wtexteditor.key(pan,ascii,key,act)
-print("gotkey",ascii,act,key)
+--print("gotkey",ascii,act,key)
 
 	local texteditor=pan.texteditor
 	local txt=texteditor.txt
+
+
+	local cpre=function()
+		if texteditor.key_shift then
+			if not texteditor.mark_area then
+				texteditor.mark_area={txt.cx,txt.cy,txt.cx,txt.cy}
+			end
+		else
+			texteditor.mark_area=false
+			txt.mark()
+		end
+	end
+	local cpost=function()
+		if texteditor.key_shift then
+				texteditor.mark_area[3]=txt.cx
+				texteditor.mark_area[4]=txt.cy
+				txt.mark(unpack(texteditor.mark_area))
+		end
+		
+		texteditor:scroll_to_view()
+	end
+
 
 	if ascii and ascii~="" then -- not a blank string
 
@@ -269,6 +327,7 @@ print("gotkey",ascii,act,key)
 		if c>=32 and c<128 then
 		
 			txt.insert_char(ascii)
+			texteditor:scroll_to_view()
 
 		end
 		
@@ -281,45 +340,54 @@ print("gotkey",ascii,act,key)
 		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=true
 		elseif key=="left" then
 
-			txt.mark()
+			cpre()
 			txt.cx,txt.cy=txt.clip_left(txt.cx,txt.cy)
-						
+			cpost()
+
 		elseif key=="right" then
 			
-			txt.mark()
+			cpre()
 			txt.cx,txt.cy=txt.clip_right(txt.cx,txt.cy)
+			cpost()
 
 		elseif key=="up" then
 
-			txt.mark()
+			cpre()
 			txt.cx,txt.cy=txt.clip_up(txt.cx,txt.cy)
+			cpost()
 
 		elseif key=="down" then
 
-			txt.mark()
+			cpre()
 			txt.cx,txt.cy=txt.clip_down(txt.cx,txt.cy)
+			cpost()
 
 		elseif key=="enter" or key=="return" then
 
 			txt.insert_newline()
+			texteditor:scroll_to_view()
 
 		elseif key=="home" then
 
 			txt.cx=1
 			txt.clip()
+			texteditor:scroll_to_view()
 		
 		elseif key=="end" then
 				
 			txt.cx=txt.get_hx()+1
 			txt.clip()
+			texteditor:scroll_to_view()
 
 		elseif key=="back" then
 
 			txt.backspace()
+			texteditor:scroll_to_view()
 
 		elseif key=="delete" then
 
 			txt.delete()
+			texteditor:scroll_to_view()
 
 		end
 		
@@ -348,6 +416,8 @@ function wtexteditor.setup(widget,def)
 -- internal functions
 	widget.texteditor_refresh	=	wtexteditor.texteditor_refresh
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
+	widget.scroll_to_view		=	wtexteditor.scroll_to_view
+
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles"})
 	
