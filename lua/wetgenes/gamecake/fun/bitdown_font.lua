@@ -23,13 +23,14 @@ M.grds={} -- cache
 -- build a bitmap which is a 128x2 array of characters using above fontdata
 -- might grow to 128x3 or more in the future as we add more unicode characters
 -- chances are you just need the first 128x1 ascii chunk
-M.build_grd=function(hx,hy)
+M.build_grd=function(hx,hy,style)
+	style=style or ""
 
-	local name=hx.."x"..hy
+	local name=hx.."x"..hy..style
 	
 	if not M.grds[name] then -- render
 	
-		local data=assert(funfont64["data"..hx.."x"..hy]) -- get data and check size is valid
+		local data=assert(funfont64["data"..hx.."x"..hy..style]) -- get data and check size is valid
 
 		local g=wgrd.create("U8_RGBA_PREMULT",128*hx,2*hy,1)
 		

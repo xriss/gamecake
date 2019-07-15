@@ -25,7 +25,7 @@ wtiles.loads=function()
 
 
 
-	local bfontgrd=require("wetgenes.gamecake.fun.bitdown_font").build_grd(8,16)
+	local bfontgrd=require("wetgenes.gamecake.fun.bitdown_font").build_grd(8,16,"r")
 		
 	local g=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,8*256,16*1,1)
 
