@@ -224,6 +224,8 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 
 		if act==1 then
 		
+			texteditor.float_cx=nil
+
 			texteditor.key_mouse=true
 
 			texteditor.mark_area={dx,dy,dx,dy}
@@ -235,6 +237,9 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 		elseif act==0 then -- drag
 
 			if texteditor.key_mouse and texteditor.mark_area then
+
+				texteditor.float_cx=nil
+
 				texteditor.mark_area[3],texteditor.mark_area[4]=dx,dy
 				
 				txt.mark(unpack(texteditor.mark_area))
@@ -246,6 +251,8 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 		
 		elseif act==-1 and texteditor.mark_area then -- final
 		
+			texteditor.float_cx=nil
+
 			texteditor.key_mouse=false
 
 			txt.mark(unpack(texteditor.mark_area))
@@ -326,6 +333,8 @@ function wtexteditor.key(pan,ascii,key,act)
 		
 		if c>=32 and c<128 then
 		
+			texteditor.float_cx=nil
+
 			txt.insert_char(ascii)
 			texteditor:scroll_to_view()
 
@@ -340,34 +349,46 @@ function wtexteditor.key(pan,ascii,key,act)
 		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=true
 		elseif key=="left" then
 
+			texteditor.float_cx=nil
+
 			cpre()
 			txt.cx,txt.cy=txt.clip_left(txt.cx,txt.cy)
 			cpost()
 
 		elseif key=="right" then
 			
+			texteditor.float_cx=nil
+
 			cpre()
 			txt.cx,txt.cy=txt.clip_right(txt.cx,txt.cy)
 			cpost()
 
 		elseif key=="up" then
+		
+			texteditor.float_cx=texteditor.float_cx or txt.cx
 
 			cpre()
-			txt.cx,txt.cy=txt.clip_up(txt.cx,txt.cy)
+			txt.cx,txt.cy=txt.clip_up(texteditor.float_cx,txt.cy)
 			cpost()
 
 		elseif key=="down" then
 
+			texteditor.float_cx=texteditor.float_cx or txt.cx
+
 			cpre()
-			txt.cx,txt.cy=txt.clip_down(txt.cx,txt.cy)
+			txt.cx,txt.cy=txt.clip_down(texteditor.float_cx,txt.cy)
 			cpost()
 
 		elseif key=="enter" or key=="return" then
+
+			texteditor.float_cx=nil
 
 			txt.insert_newline()
 			texteditor:scroll_to_view()
 
 		elseif key=="home" then
+
+			texteditor.float_cx=nil
 
 			txt.cx=1
 			txt.clip()
@@ -375,16 +396,22 @@ function wtexteditor.key(pan,ascii,key,act)
 		
 		elseif key=="end" then
 				
+			texteditor.float_cx=nil
+
 			txt.cx=txt.get_hx()+1
 			txt.clip()
 			texteditor:scroll_to_view()
 
 		elseif key=="back" then
 
+			texteditor.float_cx=nil
+
 			txt.backspace()
 			texteditor:scroll_to_view()
 
 		elseif key=="delete" then
+
+			texteditor.float_cx=nil
 
 			txt.delete()
 			texteditor:scroll_to_view()

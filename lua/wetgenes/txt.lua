@@ -148,7 +148,7 @@ M.construct=function(txt)
 
 -- move a cursor one character left/right/up/down and clip it
 	txt.clip_left=function(x,y)
-		if x<=1 and x>1 then
+		if x<=1 and y>1 then
 			y=y-1
 			x=txt.get_hx(y)+1
 		else
