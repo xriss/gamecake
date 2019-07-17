@@ -30,7 +30,7 @@ M.build_grd=function(hx,hy,style)
 	
 	if not M.grds[name] then -- render
 	
-		local data=assert(funfont64["data"..hx.."x"..hy..style]) -- get data and check size is valid
+		local data=assert( funfont64["data"..hx.."x"..hy..style] or funfont64["data"..hx.."x"..hy] ) -- get data and check size is valid
 
 		local g=wgrd.create("U8_RGBA_PREMULT",128*hx,2*hy,1)
 		
