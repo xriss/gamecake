@@ -58,7 +58,7 @@ end
 function wtiles.render_lines(widget,lines)
 
 	local g=widget.tilemap_grd
-	g:clear(0x000000)
+	g:clear(widget.background_tile or 0x000000)
 	for i,v in ipairs(lines) do
 		local s=v.s
 		if s then
@@ -140,11 +140,15 @@ function wtiles.skin(widget)
 													1*16 )
 			gl.Uniform4f( p:uniform("map_info"), 	0,0,256,256 )
 
-			gl.Uniform4f( p:uniform("colors_0"), 	0.4,0.4,0.4,1 )
-			gl.Uniform4f( p:uniform("colors_1"), 	0.8,0.8,0.8,1 )
-			gl.Uniform4f( p:uniform("colors_2"), 	0.9,0.9,0.9,1 )
-			gl.Uniform4f( p:uniform("colors_3"), 	0.3,0.3,0.3,1 )
-			gl.Uniform4f( p:uniform("colors_4"), 	0.6,0.6,0.6,1 )
+			for i,v in ipairs{
+				0xff336622, 0xff66aa33, 0xff66cccc, 0xff5577cc,
+				0xff333366, 0xff442233, 0xff884433, 0xffeeaa99,
+				0xffcc3333, 0xffdd7733, 0xffdddd44, 0xff000000,
+				0xff444444, 0xff666666, 0xffaaaaaa, 0xffffffff,
+			} do
+				local n=("0123456789ABCDEF"):sub(i,i)
+				gl.Uniform4f( p:uniform("colors_"..n), 	gl.C8(v) )
+			end
 
 		end)
 

@@ -865,7 +865,7 @@ u8 *pc;
 
 	if(ga->bmap->fmt==fmt) // nothing to change
 	{
-		return ga;
+		return grd_duplicate(ga);
 	}
 	
 	switch( ga->bmap->fmt )
