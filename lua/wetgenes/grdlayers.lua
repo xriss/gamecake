@@ -25,6 +25,21 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 local grdlayers=M
 
 
+-- anchor helper
+local anchor_helper=function(a,b,anchor)
+	if a<b then
+		if     anchor<0 then	return a,0,0
+		elseif anchor>0 then	return a,0,b-a
+		else					return a,0,math.floor((b-a)/2)
+		end
+	else
+		if     anchor<0 then	return b,0,0
+		elseif anchor>0 then	return b,a-b,0
+		else					return b,math.floor((a-b)/2),0
+		end
+	end
+end
+
 
 -- create a layers state within the given grd
 -- layers are just a way of breaking one grd into discreet 2d areas
