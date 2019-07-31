@@ -182,6 +182,8 @@ end
 
 function wtexteditor.mouse(pan,act,_x,_y,key)
 
+	if pan.meta.mouse(pan,act,_x,_y,keyname) then return end -- let children have precidence
+
 	local wheel_acc=function()
 
 		pan.wheel_speed=pan.wheel_speed or 1
@@ -207,6 +209,8 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 			return
 		end
 	end
+--print(pan,act,pan.master.over==pan)
+--	if key=="wheel_add" or key=="wheel_sub" then return end
 
 --print(pan,key)
 
@@ -222,9 +226,9 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 	dx=dx-texteditor.gutter+1
 	dy=dy+1
 
-	if texteditor.master.over==pan.parent or act==-1 then
+	if texteditor.master.over==pan or texteditor.key_mouse then
 
-		if act==1 then
+		if act==1 and texteditor.master.over==pan then -- click active
 		
 			texteditor.float_cx=nil
 
@@ -232,11 +236,13 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 
 			texteditor.mark_area={dx,dy,dx,dy}
 
+			txt.mark(unpack(texteditor.mark_area))
+
 			texteditor:scroll_to_view()
 			texteditor:refresh()
 			texteditor:set_dirty()
 
-		elseif act==0 then -- drag
+		elseif act==0 and texteditor.master.over==pan then -- drag
 
 			if texteditor.key_mouse and texteditor.mark_area then
 
@@ -251,14 +257,13 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 				texteditor:set_dirty()
 			end
 		
-		elseif act==-1 and texteditor.mark_area then -- final
+		elseif act==-1 and texteditor.key_mouse then -- final
 		
 			texteditor.float_cx=nil
 
 			texteditor.key_mouse=false
 
 			txt.mark(unpack(texteditor.mark_area))
---			texteditor.mark_area=false
 
 			texteditor:scroll_to_view()
 			texteditor:refresh()
@@ -266,7 +271,6 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 		end
 	end
 
-	return pan.meta.mouse(pan,act,_x,_y,keyname)
 end
 
 function wtexteditor.scroll_to_view(texteditor,cx,cy)
