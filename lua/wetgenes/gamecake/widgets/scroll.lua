@@ -24,7 +24,7 @@ function wscroll.update(widget)
 
 	local pan=widget.pan
 	
-	local pan_px=-widget.datx.num
+	local pan_px=widget.datx.num
 	local pan_py=widget.daty.num
 	
 	if pan_px~=pan.pan_px or pan_py~=pan.pan_py then

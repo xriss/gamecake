@@ -124,7 +124,7 @@ wtexteditor.texteditor_refresh=function(widget)
 
 	pan.lines={}
 	
-	local cx=-math.floor(pan.pan_px/8)
+	local cx=math.floor(pan.pan_px/8)
 	local cy=math.floor(pan.pan_py/16)
 
 	widget.cx=cx -- remember the scroll positions in characters
@@ -225,7 +225,7 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 	
 	dx=dx-texteditor.gutter+1
 	dy=dy+1
-
+	
 	if texteditor.master.over==pan or texteditor.key_mouse then
 
 		if act==1 and texteditor.master.over==pan then -- click active
