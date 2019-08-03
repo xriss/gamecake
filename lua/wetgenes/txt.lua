@@ -98,16 +98,69 @@ M.construct=function(txt)
 		
 		if txt.fx and txt.fy then
 		
-			local s
+			local s=""
 
 			if txt.tx and txt.ty then
+			
+				for idx=txt.fy,txt.ty do
+				
+					if idx==txt.fy then -- first line
+					
+						if txt.ty==txt.fy then -- single line
+
+							local sa=txt.get_string(txt.fy) or ""
+							local sb=sa:sub(0,txt.fx-1)
+							local sc=sa:sub(txt.fx,txt.tx-1)
+							local sd=sa:sub(txt.tx)
+							
+							s=s..sc
+							txt.set_string(txt.fy,sb..sd)
+
+						else -- multiple lines
+
+							local sa=txt.get_string(txt.fy) or ""
+							local sb=sa:sub(0,txt.fx-1)
+							local sc=sa:sub(txt.fx)
+							
+							s=s..sc
+							txt.set_string(txt.fy,sb)
+
+						end
+
+					elseif idx==txt.ty then -- last line
+
+						local sa=txt.get_string(txt.fy+1) or ""
+						local sb=sa:sub(0,txt.tx-1)
+						local sc=sa:sub(txt.tx)
+						
+						s=s..sb
+						txt.set_string(txt.fy+1,sc)
+
+						local sa=txt.get_string(txt.fy) or ""
+						local sb=txt.get_string(txt.fy+1) or ""
+						txt.set_string(txt.fy,sa..sb)
+						txt.del_string(txt.fy+1)
+
+					else -- middle line
+					
+						local sa=txt.get_string(txt.fy+1) or ""
+						s=s..sa
+						txt.del_string(txt.fy+1)
+
+					end
+
+				end
+			
 			end
 			
 			txt.cx=txt.fx
 			txt.cy=txt.fy
-			
+			txt.tx=txt.fx
+			txt.ty=txt.fy
 			
 			txt.mark()
+			
+			if s=="" then s=nil end
 
 			return s
 		end
@@ -186,7 +239,7 @@ M.construct=function(txt)
 		
 		txt.set_string(txt.cy,sb..s..sc)
 	
-		txt.cx=txt.cx+1
+		txt.cx=txt.cx+#s
 		txt.clip()
 	
 		hook("changed")
@@ -212,6 +265,63 @@ M.construct=function(txt)
 		hook("changed")
 	end
 
+	txt.insert=function(s)
+
+		txt.cut()
+	
+		local lines=wstring.split_lines(s,"\n")
+		
+		for idx,line in ipairs(lines) do
+
+			if idx==1 then -- first line
+			
+				if #lines>1 then -- inserting multiple lines
+
+					local sa=txt.get_string(txt.cy) or ""
+					local sb=sa:sub(0,txt.cx-1)
+					local sc=sa:sub(txt.cx)
+					
+					txt.set_string(txt.cy,sb..line)
+				
+					txt.cy=txt.cy+1
+					txt.cx=1
+
+					txt.add_string(txt.cy,sc) -- put remainder on new line
+
+
+				else -- inserting a single line
+
+					local sa=txt.get_string(txt.cy) or ""
+					local sb=sa:sub(0,txt.cx-1)
+					local sc=sa:sub(txt.cx)
+					
+					txt.set_string(txt.cy,sb..line..sc)
+				
+					txt.cx=txt.cx+#line
+
+				end
+
+
+			elseif idx==#lines then -- last line
+
+				txt.set_string(txt.cy,line..(txt.get_string(txt.cy) or ""))
+				txt.cx=#line
+
+			else -- middle
+
+				txt.add_string(txt.cy,s)
+				txt.cy=txt.cy+1
+				txt.cx=1
+
+			end
+		end
+
+		txt.clip()
+	
+		hook("changed")
+
+	end
+
 	local merge_lines=function()
 
 		local sa=txt.get_string(txt.cy) or ""
@@ -227,7 +337,7 @@ M.construct=function(txt)
 
 	txt.backspace=function()
 
-		txt.cut()
+		if txt.cut() then return end -- just delete selection
 
 		if txt.cx==1 and txt.cy>1 then
 			merge_lines()
@@ -248,7 +358,7 @@ M.construct=function(txt)
 
 	txt.delete=function()
 	
-		txt.cut()
+		if txt.cut() then return end -- just delete selection
 	
 		local hx=txt.get_hx()
 		if txt.cx==hx+1 and txt.cy<txt.hy then

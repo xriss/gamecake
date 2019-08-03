@@ -494,6 +494,13 @@ function wmaster.setup(widget,def)
 --	
 	function master.mouse(widget,act,x,y,keyname)
 
+-- keep mouse state in master	
+		if act==1 and keyname then
+			master["mouse_"..keyname]=true
+		elseif act==-1 and keyname then
+			master["mouse_"..keyname]=false
+		end
+
 		master.last_mouse_position={x,y}
 
 		master.old_active=master.active

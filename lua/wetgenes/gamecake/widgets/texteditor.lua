@@ -25,23 +25,39 @@ M.bake=function(oven,wtexteditor)
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
 	local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
 
-function wtexteditor.update(widget)
+function wtexteditor.update(texteditor)
 
-	if widget.txt_dirty then
-		widget.master.throb=255
-		widget.txt_dirty=false
-		widget:texteditor_refresh()
-		widget.master.request_layout=true
-		widget.scroll_widget.pan:set_dirty()
+	local txt=texteditor.txt
+
+	if texteditor.txt_dirty then
+		texteditor.master.throb=255
+		texteditor.txt_dirty=false
+		texteditor:texteditor_refresh()
+		texteditor.master.request_layout=true
+		texteditor.scroll_widget.pan:set_dirty()
 	end
 
-	local throb=(widget.master.throb>=128)
-	if throb ~= widget.throb then -- dirty throb...
-		widget.throb=throb
-		widget.scroll_widget.pan:set_dirty()
+	local throb=(texteditor.master.throb>=128)
+	if throb ~= texteditor.throb then -- dirty throb...
+		texteditor.throb=throb
+		texteditor.scroll_widget.pan:set_dirty()
+	end
+	
+	if texteditor.key_mouse and not texteditor.master.mouse_left then -- catch mouse up nomatter where it was
+	
+		texteditor.float_cx=nil
+
+		texteditor.key_mouse=false
+
+		txt.mark(unpack(texteditor.mark_area))
+
+		texteditor:scroll_to_view()
+		texteditor:refresh()
+		texteditor:set_dirty()
+
 	end
 
-	return widget.meta.update(widget)
+	return texteditor.meta.update(texteditor)
 end
 
 function wtexteditor.pan_skin( oldskin )
@@ -180,7 +196,7 @@ wtexteditor.texteditor_refresh=function(widget)
 
 end
 
-function wtexteditor.mouse(pan,act,_x,_y,key)
+function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 	if pan.meta.mouse(pan,act,_x,_y,keyname) then return end -- let children have precidence
 
@@ -226,49 +242,35 @@ function wtexteditor.mouse(pan,act,_x,_y,key)
 	dx=dx-texteditor.gutter+1
 	dy=dy+1
 	
-	if texteditor.master.over==pan or texteditor.key_mouse then
+	if act==1 and texteditor.master.over==pan and keyname=="left" then -- click to activate
+	
+		texteditor.float_cx=nil
 
-		if act==1 and texteditor.master.over==pan then -- click active
-		
+		texteditor.key_mouse=true
+
+		texteditor.mark_area={dx,dy,dx,dy}
+
+		txt.mark(unpack(texteditor.mark_area))
+
+		texteditor:scroll_to_view()
+		texteditor:refresh()
+		texteditor:set_dirty()
+
+	elseif act==0 and texteditor.key_mouse then -- drag, but only while over widget
+
+		if texteditor.key_mouse and texteditor.mark_area then
+
 			texteditor.float_cx=nil
 
-			texteditor.key_mouse=true
-
-			texteditor.mark_area={dx,dy,dx,dy}
-
-			txt.mark(unpack(texteditor.mark_area))
-
-			texteditor:scroll_to_view()
-			texteditor:refresh()
-			texteditor:set_dirty()
-
-		elseif act==0 and texteditor.master.over==pan then -- drag
-
-			if texteditor.key_mouse and texteditor.mark_area then
-
-				texteditor.float_cx=nil
-
-				texteditor.mark_area[3],texteditor.mark_area[4]=dx,dy
-				
-				txt.mark(unpack(texteditor.mark_area))
-
-				texteditor:scroll_to_view()
-				texteditor:refresh()
-				texteditor:set_dirty()
-			end
-		
-		elseif act==-1 and texteditor.key_mouse then -- final
-		
-			texteditor.float_cx=nil
-
-			texteditor.key_mouse=false
-
+			texteditor.mark_area[3],texteditor.mark_area[4]=dx,dy
+			
 			txt.mark(unpack(texteditor.mark_area))
 
 			texteditor:scroll_to_view()
 			texteditor:refresh()
 			texteditor:set_dirty()
 		end
+	
 	end
 
 end

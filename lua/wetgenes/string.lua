@@ -338,8 +338,8 @@ end
 -- split on \n, each line also includes its own \n
 --
 -----------------------------------------------------------------------------
-wstr.split_lines = function(text)
-	local separator = "\n"
+wstr.split_lines = function(text,separator)
+	separator = separator or "\n"
 	
 	local parts = {}  
 	local start = 1
