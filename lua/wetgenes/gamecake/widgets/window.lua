@@ -478,7 +478,6 @@ function wwindow.setup(window,def)
 				it.hy=window.win_canvas.hy+bar_height
 
 			else -- or does the canvas fit the window
-
 				local bar_height=(window.flags.nobar and 0 or window.master.grid_size or 24)
 				it.hx=it.parent.hx
 				it.hy=it.parent.hy
@@ -528,7 +527,7 @@ function wwindow.setup(window,def)
 --				py=bar_height,
 		hx=def.hx,
 		hy=def.hy,
-		size="fit",
+		size= (def.panel_mode=="fill") and "full" or "fit",
 		color=color,
 		highlight="none",
 	})

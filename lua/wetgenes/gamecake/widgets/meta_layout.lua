@@ -167,6 +167,7 @@ function wmeta.setup(def)
 							if x>v.hx then v.hx=x end
 						end
 					end
+					v.hx=math.floor(v.hx)
 
 				elseif token=="fity" then -- set hy to maximum of children
 
@@ -178,6 +179,7 @@ function wmeta.setup(def)
 							if y>v.hy then v.hy=y end
 						end
 					end
+					v.hy=math.floor(v.hy)
 				end
 
 			end

@@ -439,12 +439,21 @@ function wtexteditor.key(pan,ascii,key,act)
 
 end
 
+function wtexteditor.layout(widget)
+
+	widget.scroll_widget.hx=widget.hx
+	widget.scroll_widget.hy=widget.hy
+
+	return widget.meta.layout(widget)
+end
+
+
 function wtexteditor.setup(widget,def)
 
 	widget.class="texteditor"
 	
 	widget.update=wtexteditor.update
-	widget.layout=wfill.layout
+	widget.layout=wtexteditor.layout
 	widget.draw=wtexteditor.draw
 	widget.refresh=wtexteditor.refresh
 

@@ -51,6 +51,28 @@ end
 
 function wscroll.layout(widget)
 
+-- fix child locations
+
+	local ss=16
+	if widget.hx<ss*2 then ss=widget.hx/2 end
+	if widget.hy<ss*2 then ss=widget.hy/2 end
+	
+	widget.pan.hx=widget.hx-ss
+	widget.pan.hy=widget.hy-ss
+	widget.pan.px=0
+	widget.pan.py=0
+
+	widget.slidey.hx=ss
+	widget.slidey.hy=widget.hy-ss
+	widget.slidey.px=widget.hx-ss
+	widget.slidey.py=0
+
+	widget.slidex.hx=widget.hx-ss
+	widget.slidex.hy=ss
+	widget.slidex.px=0
+	widget.slidex.py=widget.hy-ss
+
+
 --	local it=widget.scroll
 	
 	widget.pan:layout() -- creates hx_max,hy_max
