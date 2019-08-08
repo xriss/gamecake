@@ -40,11 +40,11 @@ grdcanvas.canvas_fonts_create=function()
 	})
 
 
-	local render=function(hx,hy)
-	
+	local render=function(hx,hy,style)
+		style=style or ""
 		local font={}
 	
-		local data=assert(funfont64["data"..hx.."x"..hy]) -- get data and check size is valid
+		local data=assert(funfont64["data"..hx.."x"..hy..style]) -- get data and check size is valid
 
 		font.idx=#fonts+1
 		font.name="fun"..hx.."x".."hy"
@@ -70,7 +70,9 @@ grdcanvas.canvas_fonts_create=function()
 	
 	render(4,8)
 	render(8,8)
-	render(8,16)
+	render(8,16,"")
+	render(8,16,"r")
+	render(8,16,"i")
 	
 	
 	return grdcanvas.canvas_fonts

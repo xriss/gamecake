@@ -49,8 +49,10 @@ function wtexteditor.update(texteditor)
 
 		texteditor.key_mouse=false
 
-		txt.mark(unpack(texteditor.mark_area))
-
+		if texteditor.mark_area then
+			txt.mark(unpack(texteditor.mark_area))
+		end
+		
 		texteditor:scroll_to_view()
 		texteditor:refresh()
 		texteditor:set_dirty()
@@ -119,11 +121,19 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 
 	if act=="txt_changed" then
 
+		widget.gutter=#string.format(" %d   ",widget.hy)
+
 		local pan=widget.scroll_widget.pan
-		pan.hx_max=widget.txt.hx*8
+		pan.hx_max=(widget.txt.hx+widget.gutter+1)*8
 		pan.hy_max=widget.txt.hy*16
 	
-		widget.gutter=#string.format(" %d  ",widget.hy)
+	
+		if widget.data then -- auto set data if txt changes
+			local sa=widget.txt.get_text()
+			if sa ~= widget.data:value() then
+				widget.data:value(sa)
+			end
+		end
 
 		widget.txt_dirty=true
 	end
@@ -215,11 +225,11 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	end
 	
 	if pan.master.old_over==pan and pan.parent.daty and pan.parent.daty.class=="number" then
-		if key=="wheel_add" and act==-1 then
+		if keyname=="wheel_add" and act==-1 then
 --			wheel_acc()
 			pan.parent.daty:dec(16*4)
 			return
-		elseif key=="wheel_sub" and act==-1  then
+		elseif keyname=="wheel_sub" and act==-1  then
 --			wheel_acc()
 			pan.parent.daty:inc(16*4)
 			return
@@ -323,7 +333,7 @@ function wtexteditor.key(pan,ascii,key,act)
 		end
 	end
 	local cpost=function()
-		if texteditor.key_shift then
+		if texteditor.key_shift and texteditor.mark_area then
 				texteditor.mark_area[3]=txt.cx
 				texteditor.mark_area[4]=txt.cy
 				txt.mark(unpack(texteditor.mark_area))
@@ -463,7 +473,7 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_to_view		=	wtexteditor.scroll_to_view
 
 
-	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles"})
+	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles",color=widget.color})
 	
 	widget.txt=require("wetgenes.txt").construct()
 	
@@ -490,7 +500,12 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_widget.pan.key=wtexteditor.key
 	widget.scroll_widget.pan.mouse=wtexteditor.mouse
 
-
+	widget.gutter=#(" 01   ")
+	
+	if def.data then -- set starting text
+		widget.txt.set_text( def.data:value() )
+	end
+	
 	return widget
 end
 

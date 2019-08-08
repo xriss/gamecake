@@ -226,7 +226,10 @@ function wskin.setup(def)
 	--	if cache_array then t=cache_array else t={} end
 		local function draw()
 			if cache_array then return end
+			local r,g,b,a=gl.Color() -- remember
+			gl.Color(1,1,1,1) -- we cached the set color and need this to be white
 			flat.tristrip("rawuvrgba",t)
+			gl.Color(r,g,b,a) -- restore
 		end
 		local ht=#t
 
@@ -613,7 +616,7 @@ end
 			local color_level=1
 
 			if style=="indent" then
-				color_level=color_level-(2/16)
+				color_level=color_level-(1/16)
 			elseif style=="button"  then
 				color_level=color_level+(2/16)
 			end
@@ -641,8 +644,12 @@ end
 			
 			elseif type(skin)=="function" then -- we have a skin drawing function, just call it to draw
 
-				wskin.cache_draw_custom[#wskin.cache_draw_custom+1]=skin(widget) -- return draw function for cache draw
-			
+				if wskin.cache_draw_custom then
+					wskin.cache_draw_custom[#wskin.cache_draw_custom+1]=skin(widget) -- return draw function for cache draw
+				else
+					(skin(widget))() -- draw now
+				end
+
 			elseif type(skin)=="string" then -- got some images to play with
 			
 				if style=="flat" then
