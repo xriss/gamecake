@@ -162,28 +162,29 @@ wtexteditor.texteditor_refresh=function(widget)
 		local ps={}
 		local pl=0
 
-		local v=tostring(y)
-		v=string.rep(" ",widget.gutter-3-#v)..v.." "
-		for i=1,#v do
-			if pl>=256*3 then break end -- max width
-			ps[pl+1]=string.byte(v,i,i)
-			ps[pl+2]=0
-			ps[pl+3]=0xde
-			pl=pl+3
-		end
-		
-		ps[pl+1]=32
-		ps[pl+2]=0
-		ps[pl+3]=0xce -- (y%16)*16
-		pl=pl+3
-		
-		ps[pl+1]=32
-		ps[pl+2]=0
-		ps[pl+3]=0xce
-		pl=pl+3
-
 		local v=strings[y]
 		if v then
+
+			local vn=tostring(y)
+			vn=string.rep(" ",widget.gutter-3-#vn)..vn.." "
+			for i=1,#vn do
+				if pl>=256*3 then break end -- max width
+				ps[pl+1]=string.byte(vn,i,i)
+				ps[pl+2]=0
+				ps[pl+3]=0xde
+				pl=pl+3
+			end
+			
+			ps[pl+1]=32
+			ps[pl+2]=0
+			ps[pl+3]=0xce -- (y%16)*16
+			pl=pl+3
+			
+			ps[pl+1]=32
+			ps[pl+2]=0
+			ps[pl+3]=0xce
+			pl=pl+3
+
 			for i=cx+1,#v do
 				if pl>=256*3 then break end -- max width
 				ps[pl+1]=string.byte(v,i,i) or 32
