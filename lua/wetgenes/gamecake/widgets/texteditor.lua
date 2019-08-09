@@ -143,8 +143,6 @@ end
 
 wtexteditor.texteditor_refresh=function(widget)
 
-	local strings=widget.txt.strings or {}
-
 	local pan=widget.scroll_widget.pan
 	local txt=widget.txt
 
@@ -162,8 +160,8 @@ wtexteditor.texteditor_refresh=function(widget)
 		local ps={}
 		local pl=0
 
-		local v=strings[y]
-		if v then
+		local cache=widget.txt.get_cache(y)
+		if cache then
 
 			local vn=tostring(y)
 			vn=string.rep(" ",widget.gutter-3-#vn)..vn.." "
@@ -185,9 +183,12 @@ wtexteditor.texteditor_refresh=function(widget)
 			ps[pl+3]=0xce
 			pl=pl+3
 
-			for i=cx+1,#v do
+			for x=cx,cx+256 do
 				if pl>=256*3 then break end -- max width
-				ps[pl+1]=string.byte(v,i,i) or 32
+				local i=cache.xc[x]
+				if not i then break end -- max width
+				local code=cache.codes[i]
+				ps[pl+1]=code or 32
 				ps[pl+2]=0
 				ps[pl+3]=0xce
 				if txt.fx and txt.fy and txt.tx and txt.ty then
@@ -433,6 +434,13 @@ function wtexteditor.key(pan,ascii,key,act)
 			texteditor.float_cx=nil
 
 			txt.delete()
+			texteditor:scroll_to_view()
+
+		elseif key=="tab" then
+
+			texteditor.float_cx=nil
+
+			txt.insert_char("\t")
 			texteditor:scroll_to_view()
 
 		end

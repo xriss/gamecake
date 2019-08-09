@@ -5,6 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 local wstring=require("wetgenes.string")
+local wtxtutf=require("wetgenes.txtutf")
 
 
 -- manage the text data part of a text editor
@@ -16,6 +17,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.construct=function(txt)
 	txt = txt or {}
+	
+	txt.tabsize=8
 
 	txt.hooks={} -- user call backs	
 	local hook=function(name) local f=txt.hooks[name] if f then return f(txt) end end
@@ -34,33 +37,60 @@ M.construct=function(txt)
 
 	txt.set_string=function(idx,str)
 		txt.strings[idx]=str
+		txt.clear_caches()
 	end
 
 	txt.add_string=function(idx,str)
 		table.insert( txt.strings , idx , str)
 		txt.hy=txt.hy+1
+		txt.clear_caches()
 	end
 
 	txt.del_string=function(idx)
 		table.remove( txt.strings , idx )
 		txt.hy=txt.hy-1
+		txt.clear_caches()
 	end
 
+	txt.del_cache=function(idx)
+		txt.caches[idx]=nil
+	end
+
+	txt.get_cache=function(idx)
+		local cache=txt.caches[idx]
+		if cache then return cache end
+		cache=txt.build_cache(idx)
+		txt.caches[idx]=cache
+		return cache
+	end
+
+-- just one meta for the caches
+	txt.caches_meta={}
+	txt.caches_meta.__mode="v"
+
+	txt.clear_caches=function()
+		txt.caches={}
+		setmetatable(txt.caches, txt.caches_meta)
+	end
+	txt.clear_caches()
+	
 	txt.set_text=function(text)
 
 		if text then -- set new text
 			txt.strings=wstring.split_lines(text)
+			txt.clear_caches()
+		
+			txt.hx=0
+			txt.hy=#txt.strings
+			for i,v in ipairs(txt.strings) do
+				local lv=#v
+				if lv > txt.hx then txt.hx=lv end
+			end
+			
+			hook("changed")
+		
 		end
-		
-		txt.hx=0
-		txt.hy=#txt.strings
-		for i,v in ipairs(txt.strings) do
-			local lv=#v
-			if lv > txt.hx then txt.hx=lv end
-		end
-		
-		hook("changed")
-		
+
 	end
 
 	txt.get_text=function()
@@ -68,6 +98,61 @@ M.construct=function(txt)
 	end
 
 
+-- mostly this deals with the visible width of a character, eg tab,
+-- compared to its byte width, but it is also necesary for utf8 encoding
+-- or japanese double glyphs. Its a complicated mapping so it is precalculated
+
+	txt.build_cache=function(idx)
+		
+		local s=txt.get_string(idx)
+		if not s then return nil end
+
+		local cache={}
+		
+		cache.codes={}
+
+		cache.bx={} -- map byte to xpos
+		cache.xb={} -- map xpos to byte
+		cache.xc={} -- map xpos to code
+
+		cache.bc={} -- map byte to code
+		cache.cb={} -- map code to byte
+
+		local b=1
+		local x=0
+		local c=1
+		
+		for char in s:gmatch(wtxtutf.charpattern) do
+			local code=wtxtutf.code(char)
+			local size=#char
+			local width=1
+			
+			cache.codes[c]=code
+			
+			if code==9 then --tab
+				width=math.ceil((x+1)/txt.tabsize)*txt.tabsize-x
+			end
+
+			cache.cb[c]=b
+
+			for i=0,width-1 do
+				cache.xb[x+i]=b
+				cache.xc[x+i]=c
+			end
+
+			for i=0,size-1 do
+				cache.bx[b+i]=x
+				cache.bc[b+i]=c
+			end
+
+			c=c+1
+			x=x+width
+			b=b+size
+		end
+
+		return cache
+	end
+	
 	txt.mark=function(fx,fy,tx,ty)
 		if not fx then -- unmark
 			txt.fx=nil
