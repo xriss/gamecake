@@ -45,30 +45,28 @@ end
 
 -- convert a single unicode value to a utf8 string of 1-4 bytes
 M.char=function(code)
-	if code <=     0x7F then return string.char(
-		                  code                 )
-	end
-	if code <=    0x7FF then return string.char(
-		0xC0 + math.floor(code/0x40)           ,
-		0x80 +           (code     )%0x40      )
-	end
-	if code <=   0xFFFF then return string.char(
-		0xE0 + math.floor(code/0x1000)         ,
-		0x80 + math.floor(code/0x40  )%0x40    ,
-		0x80 +           (code       )%0x40    )
-	end
-	if code <= 0x10FFFF then return string.char(
-		0xF0 + math.floor(code/0x40000)        ,
-		0x80 + math.floor(code/0x1000 )%0x40   ,
-		0x80 + math.floor(code/0x40   )%0x40   ,
-		0x80 +           (code        )%0x40   )
+	if     code <=     0x7F then return string.char(
+		                  code                     )
+	elseif code <=    0x7FF then return string.char(
+		0xC0 + math.floor(code/0x40)               ,
+		0x80 +           (code     )%0x40          )
+	elseif code <=   0xFFFF then return string.char(
+		0xE0 + math.floor(code/0x1000)             ,
+		0x80 + math.floor(code/0x40  )%0x40        ,
+		0x80 +           (code       )%0x40        )
+	elseif code <= 0x10FFFF then return string.char(
+		0xF0 + math.floor(code/0x40000)            ,
+		0x80 + math.floor(code/0x1000 )%0x40       ,
+		0x80 + math.floor(code/0x40   )%0x40       ,
+		0x80 +           (code        )%0x40       )
 	end
 	return ""
 end
 
 -- convert one or more unicode values into a utf8 string
 M.chars=function(...)
-	local t={...}
+	local t={...} -- multiargs
+	if type(t[1])=="table" then t=t[1] end -- or single table
 	for i=1,#t do t[i]=M.char(t[i]) end
 	return table.concat(t)
 end

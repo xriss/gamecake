@@ -71,7 +71,9 @@ function wtexteditor.pan_skin( oldskin )
 
 			if pan.texteditor.throb then -- draw the blinking cursor
 			
-				local cx = pan.texteditor.txt.cx - pan.texteditor.cx
+				local cache=pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
+
+				local cx = 1 + ( cache.cx[pan.texteditor.txt.cx] or 0 ) - pan.texteditor.cx
 				local cy = pan.texteditor.txt.cy - pan.texteditor.cy
 				
 
@@ -254,6 +256,9 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	dx=dx-texteditor.gutter+1
 	dy=dy+1
 	
+	local cache=txt.get_cache( dy )
+	dx=cache and cache.xc[dx] or 0
+	
 	if act==1 and texteditor.master.over==pan and keyname=="left" then -- click to activate
 	
 		texteditor.float_cx=nil
@@ -385,7 +390,10 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		elseif key=="up" then
 		
-			texteditor.float_cx=texteditor.float_cx or txt.cx
+			local cache=txt.get_cache(txt.cy)
+			if not texteditor.float_cx then
+				texteditor.float_cx = cache.cx[txt.cx]
+			end
 
 			cpre()
 			txt.cx,txt.cy=txt.clip_up(texteditor.float_cx,txt.cy)
@@ -393,7 +401,10 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		elseif key=="down" then
 
-			texteditor.float_cx=texteditor.float_cx or txt.cx
+			local cache=txt.get_cache(txt.cy)
+			if not texteditor.float_cx then
+				texteditor.float_cx = cache.cx[txt.cx]
+			end
 
 			cpre()
 			txt.cx,txt.cy=txt.clip_down(texteditor.float_cx,txt.cy)

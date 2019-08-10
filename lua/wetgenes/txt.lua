@@ -109,11 +109,14 @@ M.construct=function(txt)
 
 		local cache={}
 		
+		cache.string=s
+		
 		cache.codes={}
 
 		cache.bx={} -- map byte to xpos
 		cache.xb={} -- map xpos to byte
 		cache.xc={} -- map xpos to code
+		cache.cx={} -- map code to xpos
 
 		cache.bc={} -- map byte to code
 		cache.cb={} -- map code to byte
@@ -134,6 +137,7 @@ M.construct=function(txt)
 			end
 
 			cache.cb[c]=b
+			cache.cx[c]=x
 
 			for i=0,width-1 do
 				cache.xb[x+i]=b
@@ -306,11 +310,17 @@ M.construct=function(txt)
 		return txt.clip(x,y)
 	end
 
+-- x is in screen space
 	txt.clip_up=function(x,y)
+		local cache=txt.get_cache(y-1)
+		x=cache and cache.xc[x] or x
 		return txt.clip(x,y-1)
 	end
 
+-- x is in screen space
 	txt.clip_down=function(x,y)
+		local cache=txt.get_cache(y+1)
+		x=cache and cache.xc[x] or x
 		return txt.clip(x,y+1)
 	end
 
