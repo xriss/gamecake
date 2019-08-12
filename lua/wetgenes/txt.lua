@@ -310,17 +310,11 @@ M.construct=function(txt)
 		return txt.clip(x,y)
 	end
 
--- x is in screen space
 	txt.clip_up=function(x,y)
-		local cache=txt.get_cache(y-1)
-		x=cache and cache.xc[x] or x
 		return txt.clip(x,y-1)
 	end
 
--- x is in screen space
 	txt.clip_down=function(x,y)
-		local cache=txt.get_cache(y+1)
-		x=cache and cache.xc[x] or x
 		return txt.clip(x,y+1)
 	end
 

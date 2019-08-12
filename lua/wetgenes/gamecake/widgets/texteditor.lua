@@ -392,22 +392,24 @@ function wtexteditor.key(pan,ascii,key,act)
 		
 			local cache=txt.get_cache(txt.cy)
 			if not texteditor.float_cx then
-				texteditor.float_cx = cache.cx[txt.cx]
+				texteditor.float_cx = cache and cache.cx[txt.cx] or txt.cx
 			end
 
 			cpre()
-			txt.cx,txt.cy=txt.clip_up(texteditor.float_cx,txt.cy)
+			local cache=txt.get_cache(txt.cy-1)
+			txt.cx,txt.cy=txt.clip(cache and cache.xc[texteditor.float_cx] or texteditor.float_cx,txt.cy-1)
 			cpost()
 
 		elseif key=="down" then
 
 			local cache=txt.get_cache(txt.cy)
 			if not texteditor.float_cx then
-				texteditor.float_cx = cache.cx[txt.cx]
+				texteditor.float_cx = cache and cache.cx[txt.cx] or txt.cx
 			end
 
 			cpre()
-			txt.cx,txt.cy=txt.clip_down(texteditor.float_cx,txt.cy)
+			local cache=txt.get_cache(txt.cy+1)
+			txt.cx,txt.cy=txt.clip(cache and cache.xc[texteditor.float_cx] or texteditor.float_cx,txt.cy+1)
 			cpost()
 
 		elseif key=="enter" or key=="return" then
