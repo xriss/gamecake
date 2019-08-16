@@ -43,14 +43,14 @@ M.construct=function(txt)
 		j=j or -1
 		local l=#cache.codes -- length of codes
 		if i<0 then i=l+i end -- deal with negative values
-		if j<0 then j=l+j end
+		if j<0 then j=l+1+j end
 		if i<1 then i=1 end -- clamp values
 		if j<0 then j=0 end
 		if i>l then i=l end
 		if j>l then j=l end
 		if j==0 then return "" end
 		i=cache.cb[i] or 0 -- convert to byte offset
-		j=(cache.cb[j+1] or 1) - 1
+		j=(cache.cb[j+1] or 1)-1
 		return cache.string:sub(i,j) -- finally return string
 	end
 
@@ -178,6 +178,9 @@ M.construct=function(txt)
 			c=c+1
 			x=x+width
 			b=b+size
+
+			cache.cb[c]=b
+			cache.cx[c]=x
 		end
 
 		return cache

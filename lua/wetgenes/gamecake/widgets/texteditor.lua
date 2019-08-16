@@ -357,8 +357,6 @@ function wtexteditor.key(pan,ascii,key,act)
 		local c=string.byte(ascii)
 		
 		if c>=32 --[[and c<128]] then
-
-print(c)
 		
 			texteditor.float_cx=nil
 
