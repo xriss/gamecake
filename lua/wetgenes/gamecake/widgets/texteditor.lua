@@ -86,7 +86,7 @@ function wtexteditor.pan_skin( oldskin )
 
 					x=x+(cx-1+pan.texteditor.gutter)*8-2
 					y=y+(cy-1)*16
-					hx=4
+					hx=2
 					hy=16
 
 					oven.gl.Color(0.5,0.5,0.5,0.5)
@@ -190,7 +190,7 @@ wtexteditor.texteditor_refresh=function(widget)
 				local i=cache.xc[x]
 				if not i then break end -- max width
 				local code=cache.codes[i]
-				ps[pl+1]=code or 32
+				ps[pl+1]=(code or 32)%256
 				ps[pl+2]=0
 				ps[pl+3]=0xce
 				if txt.fx and txt.fy and txt.tx and txt.ty then
@@ -356,7 +356,9 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		local c=string.byte(ascii)
 		
-		if c>=32 and c<128 then
+		if c>=32 --[[and c<128]] then
+
+print(c)
 		
 			texteditor.float_cx=nil
 

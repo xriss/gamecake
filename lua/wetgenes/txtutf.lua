@@ -9,6 +9,17 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 -- patern to match each utf8 character in a string
 M.charpattern="([%z\1-\127\194-\244][\128-\191]*)"
 
+-- I prefer the coverage of latin0 (ISO/IEC 8859-15) for font layout
+-- it is just these differences for western european languages
+M.map_unicode_to_latin0={
+	[0x20AC]=0xa4,	[0x0160]=0xa6,	[0x0161]=0xa8,	[0x017d]=0xb4,
+	[0x017e]=0xb8,	[0x0152]=0xbc,	[0x0153]=0xbd,	[0x0178]=0xbe,
+}
+M.map_latin0_to_unicode={
+	[0xa4]=0x20AC,	[0xa6]=0x0160,	[0xa8]=0x0161,	[0xb4]=0x017d,
+	[0xb8]=0x017e,	[0xbc]=0x0152,	[0xbd]=0x0153,	[0xbe]=0x0178,
+}
+
 -- get the value at the given byte offset
 M.code=function(s,idx)
 	idx=idx or 1 -- default to start of string
@@ -69,4 +80,11 @@ M.chars=function(...)
 	if type(t[1])=="table" then t=t[1] end -- or single table
 	for i=1,#t do t[i]=M.char(t[i]) end
 	return table.concat(t)
+end
+
+-- get the length in codes of this string
+M.length=function(s)
+	local l=0
+	for char in s:gmatch(M.charpattern) do l=l+1 end
+	return l
 end

@@ -29,7 +29,7 @@ wtiles.loads=function()
 		
 	local g=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,8*256,16*1,1)
 
-	for i=0,127 do -- setup base textures for 7bit ascii
+	for i=0,255 do -- setup base textures for 7bit ascii
 		
 		local dx=math.floor((i)%256)*8
 		local dy=math.floor((i)/256)*16

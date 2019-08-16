@@ -35,6 +35,25 @@ M.construct=function(txt)
 		return txt.strings[idx]
 	end
 
+-- code based string sub
+	txt.get_string_sub=function(idx,i,j)
+		local cache=txt.get_cache(idx)
+		if not cache then return "" end
+		i=i or  1
+		j=j or -1
+		local l=#cache.codes -- length of codes
+		if i<0 then i=l+i end -- deal with negative values
+		if j<0 then j=l+j end
+		if i<1 then i=1 end -- clamp values
+		if j<0 then j=0 end
+		if i>l then i=l end
+		if j>l then j=l end
+		if j==0 then return "" end
+		i=cache.cb[i] or 0 -- convert to byte offset
+		j=(cache.cb[j+1] or 1) - 1
+		return cache.string:sub(i,j) -- finally return string
+	end
+
 	txt.set_string=function(idx,str)
 		txt.strings[idx]=str
 		txt.clear_caches()
@@ -83,7 +102,7 @@ M.construct=function(txt)
 			txt.hx=0
 			txt.hy=#txt.strings
 			for i,v in ipairs(txt.strings) do
-				local lv=#v
+				local lv=wtxtutf.length(v)
 				if lv > txt.hx then txt.hx=lv end
 			end
 			
@@ -113,12 +132,19 @@ M.construct=function(txt)
 		
 		cache.codes={}
 
+-- x xpos is the screen space offset, so a tab would be 8 and a space 1.
+-- b byte is the byte offset into the string
+-- c code is the code offset into the string (unicode character)
+
+-- these arrays map one space to another
+
 		cache.bx={} -- map byte to xpos
+		cache.bc={} -- map byte to code
+
 		cache.xb={} -- map xpos to byte
 		cache.xc={} -- map xpos to code
-		cache.cx={} -- map code to xpos
 
-		cache.bc={} -- map byte to code
+		cache.cx={} -- map code to xpos
 		cache.cb={} -- map code to byte
 
 		local b=1
@@ -197,19 +223,19 @@ M.construct=function(txt)
 					
 						if txt.ty==txt.fy then -- single line
 
-							local sa=txt.get_string(txt.fy) or ""
-							local sb=sa:sub(0,txt.fx-1)
-							local sc=sa:sub(txt.fx,txt.tx-1)
-							local sd=sa:sub(txt.tx)
+--							local sa=txt.get_string(txt.fy) or ""
+							local sb=txt.get_string_sub(txt.fy,1,txt.fx-1)
+							local sc=txt.get_string_sub(txt.fy,txt.fx,txt.tx-1)
+							local sd=txt.get_string_sub(txt.fy,txt.tx)
 							
 							s=s..sc
 							txt.set_string(txt.fy,sb..sd)
 
 						else -- multiple lines
 
-							local sa=txt.get_string(txt.fy) or ""
-							local sb=sa:sub(0,txt.fx-1)
-							local sc=sa:sub(txt.fx)
+--							local sa=txt.get_string(txt.fy) or ""
+							local sb=txt.get_string_sub(txt.fy,1,txt.fx-1)
+							local sc=txt.get_string_sub(txt.fy,txt.fx)
 							
 							s=s..sc
 							txt.set_string(txt.fy,sb)
@@ -218,9 +244,9 @@ M.construct=function(txt)
 
 					elseif idx==txt.ty then -- last line
 
-						local sa=txt.get_string(txt.fy+1) or ""
-						local sb=sa:sub(0,txt.tx-1)
-						local sc=sa:sub(txt.tx)
+--						local sa=txt.get_string(txt.fy+1) or ""
+						local sb=txt.get_string_sub(txt.fy+1,1,txt.tx-1)
+						local sc=txt.get_string_sub(txt.fy+1,txt.tx)
 						
 						s=s..sb
 						txt.set_string(txt.fy+1,sc)
@@ -259,10 +285,12 @@ M.construct=function(txt)
 	
 	txt.get_hx=function(y)
 		y=y or txt.cy
-		local s=txt.get_string(y)
-		local hx=s and #s or 0
+--		local s=txt.get_string(y)
+		local cache=txt.get_cache(y)
+		if not cache then return 0 end
+		local hx=#cache.codes
 		while hx>0 do
-			local endswith=s:byte(hx)
+			local endswith=cache.codes[hx]
 			if endswith==10 or endswith==13 then hx=hx-1
 			else break end -- ignore any combination of CR or LF at end of line
 		end
@@ -322,13 +350,13 @@ M.construct=function(txt)
 	
 		txt.cut()
 
-		local sa=txt.get_string(txt.cy) or ""
-		local sb=sa:sub(0,txt.cx-1)
-		local sc=sa:sub(txt.cx)
+--		local sa=txt.get_string(txt.cy) or ""
+		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
+		local sc=txt.get_string_sub(txt.cy,txt.cx)
 		
 		txt.set_string(txt.cy,sb..s..sc)
 	
-		txt.cx=txt.cx+#s
+		txt.cx=txt.cx+1
 		txt.clip()
 	
 		hook("changed")
@@ -338,9 +366,9 @@ M.construct=function(txt)
 	
 		txt.cut()
 
-		local sa=txt.get_string(txt.cy) or ""
-		local sb=sa:sub(0,txt.cx-1) or ""
-		local sc=sa:sub(txt.cx) or ""
+--		local sa=txt.get_string(txt.cy) or ""
+		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
+		local sc=txt.get_string_sub(txt.cy,txt.cx)
 		
 		txt.set_string(txt.cy,sb.."\n")
 
@@ -366,9 +394,9 @@ M.construct=function(txt)
 			
 				if #lines>1 then -- inserting multiple lines
 
-					local sa=txt.get_string(txt.cy) or ""
-					local sb=sa:sub(0,txt.cx-1)
-					local sc=sa:sub(txt.cx)
+--					local sa=txt.get_string(txt.cy) or ""
+					local sb=txt.get_string_sub(txt.cy,0,txt.cx-1)
+					local sc=txt.get_string_sub(txt.cy,txt.cx)
 					
 					txt.set_string(txt.cy,sb..line)
 				
@@ -380,13 +408,13 @@ M.construct=function(txt)
 
 				else -- inserting a single line
 
-					local sa=txt.get_string(txt.cy) or ""
-					local sb=sa:sub(0,txt.cx-1)
-					local sc=sa:sub(txt.cx)
+--					local sa=txt.get_string(txt.cy) or ""
+					local sb=txt.get_string_sub(txt.cy,0,txt.cx-1)
+					local sc=txt.get_string_sub(txt.cy,txt.cx)
 					
 					txt.set_string(txt.cy,sb..line..sc)
 				
-					txt.cx=txt.cx+#line
+					txt.cx=txt.cx+wtxtutf.length(line)
 
 				end
 
@@ -394,7 +422,7 @@ M.construct=function(txt)
 			elseif idx==#lines then -- last line
 
 				txt.set_string(txt.cy,line..(txt.get_string(txt.cy) or ""))
-				txt.cx=#line
+				txt.cx=wtxtutf.length(line)
 
 			else -- middle
 
@@ -416,9 +444,9 @@ M.construct=function(txt)
 		local sa=txt.get_string(txt.cy) or ""
 		txt.cy=txt.cy-1
 		local hx=txt.get_hx()
-		local sb=txt.get_string(txt.cy) or ""
+--		local sb=txt.get_string(txt.cy) or ""
 		txt.cx=hx+1
-		txt.set_string(txt.cy,sb:sub(1,hx)..sa)
+		txt.set_string(txt.cy,txt.get_string_sub(txt.cy,1,hx)..sa)
 		txt.del_string(txt.cy+1)
 		txt.clip()
 
@@ -433,9 +461,9 @@ M.construct=function(txt)
 			return
 		end
 
-		local sa=txt.get_string(txt.cy) or ""
-		local sb=sa:sub(0,txt.cx-2)
-		local sc=sa:sub(txt.cx)
+--		local sa=txt.get_string(txt.cy) or ""
+		local sb=txt.get_string_sub(txt.cy,1,txt.cx-2)
+		local sc=txt.get_string_sub(txt.cy,txt.cx)
 		
 		txt.set_string(txt.cy,sb..sc)
 	
@@ -456,9 +484,9 @@ M.construct=function(txt)
 			return
 		end
 
-		local sa=txt.get_string(txt.cy) or ""
-		local sb=sa:sub(0,txt.cx-1)
-		local sc=sa:sub(txt.cx+1)
+--		local sa=txt.get_string(txt.cy) or ""
+		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
+		local sc=txt.get_string_sub(txt.cy,txt.cx+1)
 		
 		txt.set_string(txt.cy,sb..sc)
 	
