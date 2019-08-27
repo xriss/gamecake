@@ -22,6 +22,8 @@ if arg[1] then
 else
 
 	lunatest.suite("unit.test_require")
+
+	lunatest.suite("unit.wetgenes_txt")
 	
 	lunatest.suite("unit.test_zip")
 
@@ -49,6 +51,7 @@ else
 	lunatest.suite("unit.wetgenes_win")
 
 	lunatest.suite("unit.wetgenes_chipmunk")
+
 end
 
 lunatest.run()
