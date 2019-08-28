@@ -788,6 +788,9 @@ all_includes=all_includes or {
 -- test glslang?
 	{"lua_glslang",		NIX		},
 
+-- test midi alsa?
+	{"lua_midialsa",	NIX		},
+
 	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- the output executables

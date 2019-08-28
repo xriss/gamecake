@@ -1,0 +1,776 @@
+<HTML><HEAD><TITLE>midialsa.lua</TITLE>
+<LINK rel=stylesheet type="text/css"
+href="../styles.css" title="PJB Computing Styles">
+<META HTTP-EQUIV="Keywords"
+CONTENT="MIDI, ALSA, Lua, module, luarock, score, opus">
+</HEAD>
+<BODY LINK="#000066" VLINK="#000066" ALINK="#000066">
+<DIV>
+<H1><IMG SRC="../logo.jpg" ALT=" " WIDTH=126 HEIGHT=52>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<FONT COLOR="#800000"><I>midialsa.lua</I></FONT>
+</H1>
+
+<!-- INDEX BEGIN -->
+
+<TABLE ALIGN="center" WIDTH="85%" BORDER=0 CELLSPACING=0>
+<TR><TD ALIGN="left">
+<ul>
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+</ul>
+</TD><TD ALIGN="left">
+<ul>
+	<li><a href="#functions">FUNCTIONS</a></li>
+	<li><a href="#constants">CONSTANTS</a></li>
+	<li><a href="#download">DOWNLOAD</a></li>
+</ul>
+</TD><TD ALIGN="left">
+<ul>
+	<li><a href="#changes">CHANGES</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+</ul>
+</TD></TR>
+</TABLE>
+
+<hr />
+<p></p>
+<!-- INDEX END -->
+
+<h3><a name="name">NAME</a></h3>
+<p>midialsa.lua - the ALSA library, plus some interface functions</p>
+<p>
+</p>
+<hr />
+<h3><a name="synopsis">SYNOPSIS</a></h3>
+<pre>
+ local ALSA = require 'midialsa'
+ <A HREF="#client">ALSA.client</A>( 'Lua client', 1, 1, false )
+ <A HREF="#connectfrom">ALSA.connectfrom</A>( 0, 14, 0 )    --  input port is lower (0)
+ <A HREF="#connectto">ALSA.connectto</A>( 1, 'TiMidity' ) -- output port is higher (1)
+ while true do
+     local alsaevent = <A HREF="#input">ALSA.input</A>()
+     if alsaevent[1] == <A HREF="#constants">ALSA.SND_SEQ_EVENT_PORT_UNSUBSCRIBED</A> then break end
+     if alsaevent[1] == <A HREF="#constants">ALSA.SND_SEQ_EVENT_NOTEON</A> then
+         local channel  = alsaevent[8][1]
+         local pitch    = alsaevent[8][2]
+         local velocity = alsaevent[8][3]
+     elseif alsaevent[1] == <A HREF="#constants">ALSA.SND_SEQ_EVENT_CONTROLLER</A> then
+         local channel    = alsaevent[8][1]
+         local controller = alsaevent[8][5]
+         local value      = alsaevent[8][6]
+     end
+     <A HREF="#output">ALSA.output</A>( alsaevent )
+ end</pre>
+<p>
+</p>
+<hr />
+<h3><a name="description">DESCRIPTION</a></h3>
+<p>This module offers a Lua interface to the <em>ALSA</em> library.
+It translates into Lua the Python modules
+<em>alsaseq.py</em> and <em>alsamidi.py</em> by Patricio Paez;
+it also offers some functions to translate events from and to
+the format used in Peter Billam's
+<A HREF="MIDI.html">MIDI.lua Lua module</A>
+and Sean Burke's MIDI-Perl CPAN module.</p>
+<p>
+This module is in turn translated also into a
+call-compatible Perl CPAN module:
+<I><A HREF="http://search.cpan.org/perldoc?MIDI::ALSA">MIDI::ALSA</A></I>
+</p><p>
+As from version 1.15,
+<A HREF="#input">note durations are in seconds</A>
+rather than milliseconds, for consistency with the timestamps.
+This introduces a backward incompatibility which only affects you
+if are putting together your own alsaevents without using
+<A HREF="#noteevent">the noteevent() function</A>.
+In the worst case you have to detect versions:<PRE>
+ if tonumber(ALSA.Version) &lt; 1.145 then
+    alsaevent[8][5] = 1000*alsaevent[8][5]
+ end
+</PRE></p><p>
+</p>
+<hr />
+<h3><a name="functions">FUNCTIONS</a></h3>
+<p>Functions based on those in <em>alsaseq.py</em>:
+<a href="#client"><B>client()</B></a>,
+<a href="#connectfrom"><B>connectfrom()</B></a>,
+<a href="#connectto"><B>connectto()</B></a>,
+<a href="#disconnectfrom"><B>disconnectfrom()</B></a>,
+<a href="#disconnectto"><B>disconnectto()</B></a>,
+<a href="#fd"><B>fd()</B></a>,
+<a href="#id"><B>id()</B></a>,
+<a href="#input"><B>input()</B></a>,
+<a href="#inputpending"><B>inputpending()</B></a>,
+<a href="#output"><B>output()</B></a>,
+<a href="#start"><B>start()</B></a>,
+<a href="#status"><B>status()</B></a>,
+<a href="#stop"><B>stop()</B></a> and
+<a href="#syncoutput"><B>syncoutput()</B></a></p>
+<p>Functions based on those in <em>alsamidi.py</em>:
+<a href="#noteevent"><B>noteevent()</B></a>,
+<a href="#noteonevent"><B>noteonevent()</B></a>,
+<a href="#noteoffevent"><B>noteoffevent()</B></a>,
+<a href="#pgmchangeevent"><B>pgmchangeevent()</B></a>,
+<a href="#pitchbendevent"><B>pitchbendevent()</B></a>,
+<a href="#controllerevent"><B>controllerevent()</B></a>,
+<a href="#chanpress"><B>chanpress()</B></a> and
+<a href="#sysex"><B>sysex()</B></a></p>
+<p>Functions to interface with <em><A HREF="MIDI.html">MIDI.lua</A></em>:
+<a href="#alsa2scoreevent"><B>alsa2scoreevent()</B></A> and
+<a href="#scoreevent2alsa"><B>scoreevent2alsa()</B></A>
+<p>Functions to to get the current ALSA status:
+<a href="#listclients"><B>listclients()</B></A>,
+<a href="#listnumports"><B>listnumports()</B></A>,
+<a href="#listconnectedto"><B>listconnectedto()</B></A>,
+<a href="#listconnectedfrom"><B>listconnectedfrom()</B></A> and
+<a href="#parse_address"><B>parse_address()</B></A>
+</p>
+<dl>
+
+<dt><strong><a name="client" class="item">
+<em>client</em>( name, ninputports, noutputports, createqueue )</a></strong></dt>
+<dd>
+<p>Create an ALSA sequencer client with zero or more input or output ports,
+and optionally a timing queue.  <I>ninputports</I> and <I>noutputports</I>
+are created if the quantity requested is between 1 and 64 for each.
+If <I>createqueue = true</I>, it creates a queue for stamping the arrival time
+of incoming events and scheduling future start times of outgoing events.<BR>
+For full ALSA functionality, the <I>name</I>
+should contain only letters, digits, underscores, equal-signs or spaces,
+and should contain at least one letter.<BR>
+Unlike in the <em>alsaseq.py</em> Python module,
+it returns success or failure.</p>
+</dd>
+
+<dt><strong><a name="connectfrom" class="item">
+<em>connectfrom</em>( inputport, src_client, src_port )</a></strong></dt>
+<dd>
+<p>Connect from <I>src_client:src_port</I> to my <I>inputport</I>.
+Each input port can connect from more than one client.
+The <a href="#input"><code>input()</code></a> function will receive events
+from any intput port and any of the clients connected to each of them.
+Events from each client can be distinguished by their source field.<BR>
+Unlike in the <em>alsaseq.py</em> Python module,
+it returns success or failure.<BR>
+Unlike in the <I>alsaseq.py</I> Python module,
+if <I>src_client</I> is a string and <I>src_port</I> is undefined,
+then
+<I><A HREF="#parse_address">parse_address(src_client)</A></I>
+automatically gets invoked.
+This allows you to refer to the <I>src_client</I> by name, for example
+<I>connectfrom(inputport,'Virtual:1')</I> will connect from
+port 1 of the 'Virtual Raw MIDI' client.
+</p>
+</dd>
+
+<dt><strong><a name="connectto" class="item">
+<em>connectto</em>( outputport, dest_client, dest_port )</a></strong></dt>
+<dd>
+<p>Connect my <I>outputport</I> to <I>dest_client:dest_port</I>.
+Each outputport can connect to more than one client.
+Events sent to an output port using the
+<a href="#output"><code>output()</code></a>  funtion will be sent
+to all clients that are connected to it using this function.<BR>
+Unlike in the <em>alsaseq.py</em> Python module,
+it returns success or failure.<BR>
+Unlike in the <I>alsaseq.py</I> Python module,
+if <I>dest_client</I> is a string and <I>dest_port</I> is undefined,
+then
+<I><A HREF="#parse_address">parse_address(dest_client)</A></I>
+automatically gets invoked.
+This allows you to refer to the <I>dest_client</I> by name, for example
+<I>connectto(outputport,'Roland XV-2020')</I> will connect to
+port 0 of the 'Roland XV-2020' client.
+</p>
+</dd>
+
+<dt><strong><a name="disconnectfrom" class="item">
+<em>disconnectfrom</em>( inputport, src_client, src_port )</a></strong></dt>
+<dd>
+<p>Disconnect the connection
+from the remote <I>src_client:src_port</I> to my <I>inputport</I>.
+<BR>Returns success or failure.<BR>
+Unlike in the <I>alsaseq.py</I> Python module,
+if <I>src_client</I> is a string and <I>src_port</I> is undefined,
+then
+<I><A HREF="#parse_address">parse_address(src_client)</A></I>
+automatically gets invoked.
+This allows you to refer to the <I>src_client</I> by name, for example
+<I>disconnectfrom(inputport,'Virtual:1')</I> will disconnect from
+port 1 of the 'Virtual Raw MIDI' client.</p>
+</dd>
+
+<dt><strong><a name="disconnectto" class="item">
+<em>disconnectto</em>( outputport, dest_client, dest_port )</a></strong></dt>
+<dd>
+<p>Disconnect the connection
+from my <I>outputport</I> to the remote <I>dest_client:dest_port</I>.
+<BR>Returns success or failure.<BR>
+Unlike in the <I>alsaseq.py</I> Python module,
+if <I>dest_client</I> is a string and <I>dest_port</I> is undefined,
+then
+<I><A HREF="#parse_address">parse_address(dest_client)</A></I>
+automatically gets invoked.
+This allows you to refer to the <I>dest_client</I> by name, for example
+<I>disconnectto(outputport,'Virtual:2')</I> will disconnect to
+port 2 of the 'Virtual Raw MIDI' client.</p>
+</dd>
+
+<dt><strong><a name="fd" class="item"><em>fd</em>()</a></strong></dt>
+<dd>
+<p>Return fileno of sequencer.</p>
+</dd>
+
+<dt><strong><a name="id" class="item"><em>id</em>()</a></strong></dt>
+<dd>
+<p>Return the client number, or 0 if the client is not yet created.</p>
+</dd>
+
+<dt><strong><a name="input" class="item"><em>input</em>()</a></strong></dt>
+<dd>
+<p>Wait for an ALSA event in any of the input ports and return it.
+ALSA events are returned as an array with 8 elements:</p>
+<pre>
+ {type, flags, tag, queue, time, source, destination, data}</pre>
+<p>Unlike in the <em>alsaseq.py</em> Python module,
+the time element is in floating-point seconds.
+The last three elements are also arrays:</p>
+<pre>
+ source = { src_client,  src_port }
+ destination = { dest_client,  dest_port }
+ data = { varies depending on type }</pre>
+<p>The <em>source</em> and <em>destination</em> arrays may be useful within an application
+for handling events differently according to their source or destination.
+<A HREF="#constants">The event-type constants, beginning with SND_SEQ_,
+are available as module variables</A>.
+</p><p>
+Note that if the event is of type SND_SEQ_EVENT_PORT_SUBSCRIBED
+or SND_SEQ_EVENT_PORT_UNSUBSCRIBED,
+then that message has come from the System,
+and its <I>dest_port</I> tells you which of your ports is involved.
+But its <I>src_client</I> and <I>src_port</I> do not tell you
+which other client connected or disconnected; you'll need to use
+<A HREF="#listconnectedfrom">listconnectedfrom()</A>
+or
+<A HREF="#listconnectedto">listconnectedto()</A>
+to see what's happened.
+</p><p>
+The data array is mostly as documented in
+<a href="http://alsa-project.org/alsa-doc/alsa-lib/seq.html">
+http://alsa-project.org/alsa-doc/alsa-lib/seq.html</a><BR>
+For NOTE events,  the elements are
+<CODE>{&nbsp;channel,&nbsp;pitch,&nbsp;velocity,&nbsp;unused,&nbsp;duration&nbsp;}
+</CODE><BR>
+where the <I>duration</I> is in floating-point seconds (unlike in
+the <I>alsaseq.py</I> Python module where it is in milliseconds).<BR>
+For SYSEX, the data array has just one element:
+the byte-string, including any F0 and F7 bytes.<BR>
+For most other events,  the elements are
+<CODE>{&nbsp;channel,&nbsp;unused,unused,unused,&nbsp;param,&nbsp;value&nbsp;}</CODE>
+</p><p>
+The <I>channel</I> element is always 0..15<BR>
+In the SND_SEQ_EVENT_PITCHBEND event
+the <I>value</I> element is from -8192..+8191;
+logical, but not the more usual 0..16383
+</p>
+</dd>
+
+<dt><strong><a name="inputpending" class="item">
+<em>inputpending</em>()</a></strong></dt>
+<dd>
+<p>Return the number of bytes available in input buffer.
+Use before <a href="#input"><code>input()</code></a>  to wait till an event is ready to be read. 
+If a connection terminates, then <a href="#inputpending"><code>inputpending()</code></a> returns,
+and the next event will be of type SND_SEQ_EVENT_PORT_UNSUBSCRIBED</p>
+</dd>
+
+<dt><strong><a name="output" class="item"> <em>output</em>(
+{ type, flags, tag, queue, time, source, destination, data } )</a></strong></dt>
+<dd>
+<p>Send an ALSA-event to an output port.
+The format of the event is as discussed in
+<a href="#input"><code>input()</code></a> above.
+The event will be output immediately
+either if no queue was created in the client
+or if the <em>queue</em> parameter is set to ALSA.SND_SEQ_QUEUE_DIRECT,
+and otherwise it will be queued and scheduled.
+</p><p>
+The <I>source</I> is an array with two elements:
+&nbsp; <I>{src_client,&nbsp;src_port}</I>, &nbsp;
+specifying the local output-port from which the event will be sent.
+If only one output-port exists, all events are sent from it.
+If two or more exist, the <I>src_port</I> determines which to use.
+The smallest available port-number (as created by
+<a href="#client"><code>client()</code></a>)
+will be used if <I>src_port</I> is less than it,
+and the largest available will be used if <I>src_port</I> is greater than it.
+</p><p>
+The <I>destination</I> is an array with two elements:
+&nbsp; <I>{dest_client,&nbsp;dest_port}</I>, &nbsp;
+specifying the remote client/port to which the event will be sent.
+If <I>dest_client</I> is zero,
+(as generated by
+<a href="#scoreevent2alsa"><code>scoreevent2alsa()</code></a>
+or
+<a href="#noteevent"><code>noteevent()</code></a>),
+or is the same as the local client
+(as generated by
+<a href="#input"><code>input()</code></a>),
+then the event will be sent to all clients
+that the local port is connected to
+(see&nbsp;<a href="#connectto"><code>connectto()</code></a>
+and
+<a href="#listconnectedto"><code>listconnectedto()</code></a>).
+But if you set <I>dest_client</I> to a remote client,
+then the event will be sent to that
+<I>dest_client:dest_port</I> and nowhere else.
+</p><p>
+It is possible to send an event to a destination to which there
+is no connection, but it's not usually the right thing to do.
+Normally, you should set up a connection,
+to allow the underlying RawMIDI ports to remain open while playing;
+otherwise, ALSA will reset the port after every event.
+</p><p>
+If the queue buffer is full, <a href="#output"><code>output()</code></a>
+will wait until space is available to output the event.
+Use <a href="#status"><code>status()</code></a>
+to know how many events are scheduled in the queue.</p>
+</p><p>
+If no <A HREF="#start">queue has been started</A>, a SND_SEQ_EVENT_NOTE
+event can only emerge as a SND_SEQ_EVENT_NOTEON, since a queue
+is necessary in order to schedule the corresponding NOTEOFF.
+</p></dd>
+
+<dt><strong><a name="start" class="item"><em>start</em>()</a></strong></dt>
+<dd>
+<p>Start the queue. It is ignored if the client does not have a queue.</p>
+</dd>
+
+<dt><strong><a name="status" class="item"><em>status</em>()</a></strong></dt>
+<dd>
+<p>Return { status, time, events } of the queue.</p>
+<pre>
+ Status: 0 if stopped, 1 if running.
+ Time: current time in seconds.
+ Events: number of output events scheduled in the queue.</pre>
+<p>If the client does not have a queue the value {0,0,0} is returned.
+Unlike in the <em>alsaseq.py</em> Python module,
+the <em>time</em> element is in floating-point seconds.</p>
+</dd>
+
+<dt><strong><a name="stop" class="item"><em>stop</em>()</a></strong></dt>
+<dd>
+<p>Stop the queue. It is ignored if the client does not have a queue.</p>
+</dd>
+
+<dt><strong><a name="syncoutput" class="item">
+<em>syncoutput</em>()</a></strong></dt>
+<dd>
+<p>Wait until output events are processed.</p>
+</dd>
+
+<dt><strong><a name="noteevent" class="item">
+<em>noteevent</em>( ch, key, vel, start, duration )</a></strong></dt>
+<dd>
+<p>Returns an ALSA-event-array, ready to be scheduled by
+<a href="#output"><code>output()</code></a>.
+Unlike in the <em>alsaseq.py</em> Python module,
+the <em>start</em> and <em>duration</em> elements are in floating-point seconds.</p>
+</dd>
+
+<dt><strong><a name="noteonevent" class="item">
+<em>noteonevent</em>( ch, key, vel, start )</a></strong></dt>
+<dd><p>
+<p>Returns an ALSA-event-array, ready to be scheduled by
+<a href="#output"><code>output()</code></a>.
+If <I>start</I> is not used, the event will be sent directly.
+Unlike in the <I>alsaseq.py</I> Python module,
+if <I>start</I> is provided, the event will be scheduled in a queue. 
+The <I>start</I> element, when provided, is in floating-point seconds.
+</p></dd>
+
+<dt><strong><a name="noteoffevent" class="item">
+<em>noteoffevent</em>( ch, key, vel, start )</a></strong></dt>
+<dd><p>
+<p>Returns an ALSA-event-array, ready to be scheduled by
+<a href="#output"><code>output()</code></a>.
+If <I>start</I> is not used, the event will be sent directly.
+Unlike in the <I>alsaseq.py</I> Python module,
+if <I>start</I> is provided, the event will be scheduled in a queue. 
+The <I>start</I> element, when provided, is in floating-point seconds.
+</dd>
+
+<dt><strong><a name="pgmchangeevent" class="item">
+<em>pgmchangeevent</em>( ch, value, start )</a></strong></dt>
+<dd>
+<p>Returns an ALSA-event-array for a <I>patch_change</I>
+to be sent by <a href="#output"><code>output()</code></a>.
+If <em>start</em> is not used, the event will be sent directly;
+if <em>start</em> is provided, the event will be scheduled in a queue. 
+Unlike in the <em>alsaseq.py</em> Python module,
+the <em>start</em> element, when provided, is in floating-point seconds.</p>
+</dd>
+
+<dt><strong><a name="pitchbendevent" class="item">
+<em>pitchbendevent</em>( ch, value, start )</a></strong></dt>
+<dd>
+<p>Returns an ALSA-event-array to be sent by <a href="#output"><code>output()</code></a>.
+The <I>value</I> is from -8192 to 8191.
+If <em>start</em> is not used, the event will be sent directly;
+if <em>start</em> is provided, the event will be scheduled in a queue. 
+Unlike in the <em>alsaseq.py</em> Python module,
+the <em>start</em> element, when provided, is in floating-point seconds.
+</p><p>
+(Note that
+<I><A HREF="fluidsynth.html#pitch_bend">fluidsynth</A></I>
+uses a different convention, in which the value is from 0 to 16383
+and 8192 represents the central position.) 
+</p></dd>
+
+<dt><strong><a name="controllerevent" class="item">
+<em>controllerevent</em>( ch, controllernum, value, start )</a></strong></dt>
+<dd>
+<p>Returns an ALSA-event-array to be sent by <a href="#output"><code>output()</code></a>.
+If <em>start</em> is not used, the event will be sent directly;
+if <em>start</em> is provided, the event will be scheduled in a queue. 
+Unlike in the <em>alsaseq.py</em> Python module,
+the <em>start</em> element, when provided, is in floating-point seconds.</p>
+</dd>
+
+<dt><strong><a name="chanpress" class="item">
+<em>chanpress</em>( ch, value, start )</a></strong></dt>
+<dd>
+<p>Returns an ALSA-event-array to be sent by <a href="#output"><code>output()</code></a>.
+If <em>start</em> is not used, the event will be sent directly;
+if <em>start</em> is provided, the event will be scheduled in a queue. 
+Unlike in the <em>alsaseq.py</em> Python module,
+the <em>start</em> element, when provided, is in floating-point seconds.</p>
+</dd>
+
+<dt><strong><a name="sysex" class="item">
+<em>sysex</em>( ch, string, start )</a></strong></dt>
+<dd>
+<p>Returns an ALSA-event-array to be sent by <a href="#output"><code>output()</code></a>.
+If <em>start</em> is not used, the event will be sent directly;
+if <em>start</em> is provided, the event will be scheduled in a queue. 
+The string should start with your Manufacturer ID,
+but should not contain any of the F0 or F7 bytes,
+they will be added automatically;
+indeed the string must not contain <I>any</I> bytes with the top-bit set.
+</p>
+</dd>
+
+<dt><strong><a name="alsa2scoreevent" class="item">
+<em>alsa2scoreevent</em>( alsaevent )</a></strong></dt>
+<dd>
+<p>Returns an event in the millisecond-tick score-format used by the
+<A HREF="./MIDI.html">MIDI.lua</A> and
+<A HREF="../../midi/MIDI.html">MIDI.py</A> modules,
+based on the score-format in Sean Burke's MIDI-Perl CPAN module.
+See: <a href="./MIDI.html#events">MIDI.html#events</a></p>
+<p>Since it combines a <em>note_on</em> and a <em>note_off</em> event
+into one note event, it will return <em>nil</em> when called with the
+<em>note_on</em> event; the calling loop must therefore detect <em>nil</em>
+and not, for example, try to index it.</p>
+</dd>
+
+<dt><strong><a name="scoreevent2alsa" class="item">
+<em>scoreevent2alsa</em>( scoreevent )</a></strong></dt>
+<dd><p>
+Returns an ALSA-event-array to be scheduled in a queue by
+<a href="#output"><code>output()</code></a>.
+The input is an event in the millisecond-tick score-format used by the
+<A HREF="./MIDI.html">MIDI.lua</A> and
+<A HREF="../../midi/MIDI.html">MIDI.py</A> modules,
+based on the score-format in Sean Burke's MIDI-Perl CPAN module. &nbsp;
+See: <a href="./MIDI.html#events">MIDI.html#events</a>. &nbsp;
+For example:<BR>
+ <CODE>ALSA.output(ALSA.scoreevent2alsa{'note',4000,1000,0,62,110})</CODE>
+<BR>
+Some events in a .mid file have no equivalent
+real-time-midi event, which is the sort that ALSA deals in;
+these events will cause <CODE>scoreevent2alsa()</CODE> to return <I>nil</I>.
+Therefore if you are going through the events in a midi score
+converting them with <CODE>scoreevent2alsa()</CODE>,
+you should check that the result is not <I>nil</I>
+before doing anything further.
+</p></dd>
+
+<dt><strong><a name="listclients" class="item">
+<em>listclients</em>()</a></strong></dt>
+<dd>
+<p>Returns a table with the client-numbers as key
+and the descriptive strings of the ALSA client as value :<BR>
+ <CODE>local clientnumber2clientname = ALSA.listclients()</CODE>
+</p></dd>
+
+<dt><strong><a name="listnumports" class="item">
+<em>listnumports</em>()</a></strong></dt>
+<dd><p>
+Returns a table with the client-numbers as key
+and how many ports they are running as value,
+so if a client is running 4 ports they will be numbered 0..3<BR>
+ <CODE>local clientnumber2howmanyports = ALSA.listnumports()</CODE>
+</p></dd>
+
+<dt><strong><a name="listconnectedto" class="item">
+<em>listconnectedto</em>()</a></strong></dt>
+<dd><p>
+Returns an array of three-element arrays
+<CODE>{&nbsp;{outputport,&nbsp;dest_client,&nbsp;dest_port},&nbsp;}</CODE>
+with the same data as might have been passed to
+<CODE><A HREF="#connectto">connectto()</A></CODE>,
+or which could be passed to
+<CODE><A HREF="#disconnectto">disconnectto()</A></CODE>.
+</p></dd>
+
+<dt><strong><a name="listconnectedfrom" class="item">
+<em>listconnectedfrom</em>()</a></strong></dt>
+<dd><p>
+Returns an array of three-element arrays
+<CODE>{&nbsp;{inputport,&nbsp;src_client,&nbsp;src_port},&nbsp;}</CODE>
+with the same data as might have been passed to
+<CODE><A HREF="#connectfrom">connectfrom()</A></CODE>,
+or which could be passed to
+<CODE><A HREF="#disconnectfrom">disconnectfrom()</A></CODE>.
+</p></dd>
+
+<dt><strong><a name="parse_address" class="item">
+<em>parse_address</em>( client_name )</a></strong></dt>
+<dd><p>
+Given a string, this function returns two integers,
+client_number and port_number,
+as might be needed by
+<CODE><A HREF="#connectto">connectto()</A></CODE>
+or
+<CODE><A HREF="#connectfrom">connectfrom()</A></CODE>.
+For example, even if
+<CODE><A HREF="#client">client()</A></CODE>
+has not been called,
+"24" will return 24,0 and "25:1" will return 25,1
+</p><p>
+If the local client is running, then <I>parse_address</I>() 
+also looks up names. For example, if <CODE>aconnect&nbsp;-oil</CODE>
+reveals a <I>timidity</I> client:<BR>
+
+&nbsp; &nbsp; <CODE>client 128: 'TiMidity' [type=user]</CODE><BR>
+then <CODE>parse_address("TiM")</CODE> will return 128,0
+and <CODE>parse_address("TiMi:1")</CODE> will return 128,1
+because it finds the first client with a start-of-string
+case-sensitive match to the given name.<BR>
+<I>parse_address</I>() is called automatically by
+<CODE><A HREF="#connectto">connectto()</A></CODE>,
+<CODE><A HREF="#connectfrom">connectfrom()</A></CODE>,
+<CODE><A HREF="#disconnectto">disconnectto()</A></CODE>
+and
+<CODE><A HREF="#disconnectfrom">disconnectfrom()</A></CODE>
+if they are called with the second argument a string
+and the third argument undefined.<BR>
+<I>parse_address</I>() was introduced in version 1.11
+and is not present in the <I>alsaseq.py</I> Python module.
+</p></dd>
+
+</dl>
+
+<hr />
+<h3><a name="constants">CONSTANTS</a></h3>
+<P>
+SND_SEQ_EVENT_BOUNCE
+&nbsp; &nbsp; SND_SEQ_EVENT_CHANPRESS
+&nbsp; &nbsp; SND_SEQ_EVENT_CLIENT_CHANGE
+&nbsp; &nbsp; SND_SEQ_EVENT_CLIENT_EXIT
+&nbsp; &nbsp; SND_SEQ_EVENT_CLIENT_START
+&nbsp; &nbsp; SND_SEQ_EVENT_CLOCK
+&nbsp; &nbsp; SND_SEQ_EVENT_CONTINUE
+&nbsp; &nbsp; SND_SEQ_EVENT_CONTROL14
+&nbsp; &nbsp; SND_SEQ_EVENT_CONTROLLER
+&nbsp; &nbsp; SND_SEQ_EVENT_ECHO
+&nbsp; &nbsp; SND_SEQ_EVENT_KEYPRESS
+&nbsp; &nbsp; SND_SEQ_EVENT_KEYSIGN
+&nbsp; &nbsp; SND_SEQ_EVENT_NONE
+&nbsp; &nbsp; SND_SEQ_EVENT_NONREGPARAM
+&nbsp; &nbsp; SND_SEQ_EVENT_NOTE
+&nbsp; &nbsp; SND_SEQ_EVENT_NOTEOFF
+&nbsp; &nbsp; SND_SEQ_EVENT_NOTEON
+&nbsp; &nbsp; SND_SEQ_EVENT_OSS
+&nbsp; &nbsp; SND_SEQ_EVENT_PGMCHANGE
+&nbsp; &nbsp; SND_SEQ_EVENT_PITCHBEND
+&nbsp; &nbsp; SND_SEQ_EVENT_PORT_CHANGE
+&nbsp; &nbsp; SND_SEQ_EVENT_PORT_EXIT
+&nbsp; &nbsp; SND_SEQ_EVENT_PORT_START
+&nbsp; &nbsp; SND_SEQ_EVENT_PORT_SUBSCRIBED
+&nbsp; &nbsp; SND_SEQ_EVENT_PORT_UNSUBSCRIBED
+&nbsp; &nbsp; SND_SEQ_EVENT_QFRAME
+&nbsp; &nbsp; SND_SEQ_EVENT_QUEUE_SKEW
+&nbsp; &nbsp; SND_SEQ_EVENT_REGPARAM
+&nbsp; &nbsp; SND_SEQ_EVENT_RESET
+&nbsp; &nbsp; SND_SEQ_EVENT_RESULT
+&nbsp; &nbsp; SND_SEQ_EVENT_SENSING
+&nbsp; &nbsp; SND_SEQ_EVENT_SETPOS_TICK
+&nbsp; &nbsp; SND_SEQ_EVENT_SETPOS_TIME
+&nbsp; &nbsp; SND_SEQ_EVENT_SONGPOS
+&nbsp; &nbsp; SND_SEQ_EVENT_SONGSEL
+&nbsp; &nbsp; SND_SEQ_EVENT_START
+&nbsp; &nbsp; SND_SEQ_EVENT_STOP
+&nbsp; &nbsp; SND_SEQ_EVENT_SYNC_POS
+&nbsp; &nbsp; SND_SEQ_EVENT_SYSEX
+&nbsp; &nbsp; SND_SEQ_EVENT_SYSTEM
+&nbsp; &nbsp; SND_SEQ_EVENT_TEMPO
+&nbsp; &nbsp; SND_SEQ_EVENT_TICK
+&nbsp; &nbsp; SND_SEQ_EVENT_TIMESIGN
+&nbsp; &nbsp; SND_SEQ_EVENT_TUNE_REQUEST
+&nbsp; &nbsp; SND_SEQ_EVENT_USR0
+&nbsp; &nbsp; SND_SEQ_EVENT_USR1
+&nbsp; &nbsp; SND_SEQ_EVENT_USR2
+&nbsp; &nbsp; SND_SEQ_EVENT_USR3
+&nbsp; &nbsp; SND_SEQ_EVENT_USR4
+&nbsp; &nbsp; SND_SEQ_EVENT_USR5
+&nbsp; &nbsp; SND_SEQ_EVENT_USR6
+&nbsp; &nbsp; SND_SEQ_EVENT_USR7
+&nbsp; &nbsp; SND_SEQ_EVENT_USR8
+&nbsp; &nbsp; SND_SEQ_EVENT_USR9
+&nbsp; &nbsp; SND_SEQ_EVENT_USR_VAR0
+&nbsp; &nbsp; SND_SEQ_EVENT_USR_VAR1
+&nbsp; &nbsp; SND_SEQ_EVENT_USR_VAR2
+&nbsp; &nbsp; SND_SEQ_EVENT_USR_VAR3
+&nbsp; &nbsp; SND_SEQ_EVENT_USR_VAR4
+&nbsp; &nbsp; SND_SEQ_QUEUE_DIRECT
+&nbsp; &nbsp; SND_SEQ_TIME_STAMP_REAL
+&nbsp; &nbsp; Version
+&nbsp; &nbsp; VersionDate
+</P><P>
+The MIDI standard specifies that a NOTEON event with velocity=0
+means the same as a NOTEOFF event; so you may find a little function
+like this convenient:<PRE>
+ local function is_noteoff(alsaevent)
+    if alsaevent[1] == ALSA.SND_SEQ_EVENT_NOTEOFF then return true end
+    if alsaevent[1] == ALSA.SND_SEQ_EVENT_NOTEON and alsaevent[8][3] == 0 then
+       return true
+    end
+    return false
+ end
+</PRE>
+Since Version 1.20, the output-ports are marked as WRITE,
+so they can receive
+SND_SEQ_EVENT_PORT_SUBSCRIBED or SND_SEQ_EVENT_PORT_UNSUBSCRIBED
+events from <I>System&nbsp;Announce</I>.<BR>
+Up until Version 1.19, and in the original Python module,
+output-ports created by
+<A HREF="#client">client()</A> were not so marked;
+in those days, if knowing about connections and disconnections to the
+output-port was important, you had to listen to all notifications from
+<I>System&nbsp;Announce</I>:
+<CODE>ALSA.connectfrom(0,'System:1')</CODE>
+This alerted you unnecessarily to events which didn't involve your client,
+and the connection showed up confusingly
+in the output of <CODE>aconnect&nbsp;-oil</CODE>
+</P>
+
+<hr />
+<h3><a name="download">DOWNLOAD</a></h3>
+<P>This module is available as a LuaRock in
+<A HREF="http://luarocks.org/modules/peterbillam">
+luarocks.org/modules/peterbillam</A>
+so you should be able to install it with the command:<BR>
+<CODE>
+ &nbsp; $ su<BR>
+ &nbsp; Password:<BR>
+ &nbsp; # luarocks install midialsa</CODE><BR>
+or:<BR><CODE>
+ &nbsp; # luarocks install http://www.pjb.com.au/comp/lua/midialsa-1.23-0.rockspec</CODE>
+</P><p>
+If this results in an error message such as:<BR>
+<CODE>
+ &nbsp; Error: Could not find expected file libasound.a, or libasound.so,<BR>
+ &nbsp; or libasound.so.* for ALSA -- you may have to install ALSA in your<BR>
+ &nbsp; system and/or pass ALSA_DIR or ALSA_LIBDIR to the luarocks command.<BR>
+ &nbsp; Example: luarocks install midialsa ALSA_DIR=/usr/local</CODE><BR>
+then you need to find the appropriate directory with:<BR><CODE>
+ &nbsp; find /usr/lib -name 'libasound.*' -print</CODE><BR>
+and then invoke:<BR><CODE>
+ &nbsp; luarocks install \<BR>
+ &nbsp; http://www.pjb.com.au/comp/lua/midialsa-1.23-0.rockspec \<BR>
+ &nbsp; ALSA_LIBDIR=/usr/lib/i386-linux-gnu/   # or wherever</CODE><BR>
+accordingly.
+</p>
+
+<hr />
+<h3><a name="changes">CHANGES</a></h3>
+<p>
+<BR>20150421 1.23 include lua5.3, and move pod and doc back to luarocks.org
+<BR>20150416 1.22 asound and asoundlib.h specified as external dependencies
+<BR>20140609 1.21 switch pod and doc over to using moonrocks
+<BR>20140416 1.20 outputports marked WRITE to get UNSUBSCRIBED
+messages from <I>System</I>
+<BR>20140404 1.19 (dis)connect(to,from) use the new
+<A HREF="#parse_address">parse_address</A>;
+some doc fixes
+<BR>20130514 1.18
+<A HREF="#parse_address">parse_address</A>
+matches startofstring to hide an alsa-lib 1.0.24 bug
+<BR>20130211 1.18
+<A HREF="#noteonevent">noteonevent</A> and
+<A HREF="#noteoffevent">noteoffevent</A> accept a start parameter
+<BR>20121208 1.17 test script handles alsa_1.0.16 quirk
+<BR>20121206 1.16 queue_id; test prints better diagnostics; 5.2-compatible
+<BR>20120930 1.15 output() timestamp and duration in floating-point seconds
+<BR>20111112 1.14 but output() does broadcast if destination is self
+<BR>20111108 1.12 output() does not broadcast if destination is set
+<BR>20111101 1.11
+ add parse_address() and call automatically from connectto() etc
+<BR>20110624 1.09 maximum_nports increased from 4 to 64
+<BR>20110428 1.06 fix bug in status() in the time return-value
+<BR>20110323 1.05 controllerevent() 
+<BR>20110303 1.04 output, input, *2alsa and alsa2* now handle sysex events
+<BR>20110228 1.03 add listclients, listconnectedto and listconnectedfrom
+<BR>20110213 1.02 add disconnectto and disconnectfrom
+<BR>20110210 1.01 output() no longer floors the time to the nearest second
+<BR>20110209 1.01 pitchbendevent() and chanpress() return correct data
+<BR>20110129 1.00 first working version
+
+</p><hr />
+<h3><a name="to_do">TO DO</a></h3>
+<p>
+Perhaps there should be a general <code>connect_between()</code> mechanism,
+allowing the interconnection of two other clients,
+a bit like <em>aconnect 32 20</em>
+</p><p>
+ALSA does not transmit Meta-Events like <I>text_event</I>,
+and there's not much can be done about that.
+<p>
+</p>
+<hr />
+<h3><a name="author">AUTHOR</a></h3>
+<p>Peter J Billam, <a href="http://www.pjb.com.au/comp/contact.html">http://www.pjb.com.au/comp/contact.html</a></p>
+<p>
+</p>
+<hr />
+<h3><a name="see_also">SEE ALSO</a></h3>
+<pre>
+ aconnect -oil
+ <a href="http://pp.com.mx/python/alsaseq">http://pp.com.mx/python/alsaseq</a>
+ <a href="http://search.cpan.org/perldoc?MIDI::ALSA">http://search.cpan.org/perldoc?MIDI::ALSA</A></I>
+ <a href="http://www.pjb.com.au/comp/lua/midialsa.html">http://www.pjb.com.au/comp/lua/midialsa.html</a>
+ <A HREF="http://luarocks.org/modules/peterbillam/midialsa">http://luarocks.org/modules/peterbillam/midialsa</A>
+ <a href="http://www.pjb.com.au/comp/lua/fluidsynth.html">http://www.pjb.com.au/comp/lua/fluidsynth.html</a>
+ <a href="http://www.pjb.com.au/comp/lua/MIDI.html">http://www.pjb.com.au/comp/lua/MIDI.html</a>
+ <a href="http://www.pjb.com.au/comp/lua/MIDI.html#events">http://www.pjb.com.au/comp/lua/MIDI.html#events</a>
+ <a href="http://alsa-project.org/alsa-doc/alsa-lib/seq.html">http://alsa-project.org/alsa-doc/alsa-lib/seq.html</a>
+ <a href="http://alsa-project.org/alsa-doc/alsa-lib/group___seq_events.html">http://alsa-project.org/alsa-doc/alsa-lib/group___seq_events.html</a>
+ <a href="http://alsa-project.org/alsa-doc/alsa-lib/structsnd__seq__ev__note.html">http://alsa-project.org/alsa-doc/alsa-lib/structsnd__seq__ev__note.html</a>
+ <a href="http://alsa-project.org/alsa-doc/alsa-lib/structsnd__seq__ev__ctrl.html">http://alsa-project.org/alsa-doc/alsa-lib/structsnd__seq__ev__ctrl.html</a>
+ <a href="http://alsa-project.org/alsa-doc/alsa-lib/structsnd__seq__ev__queue__control.html">http://alsa-project.org/alsa-doc/alsa-lib/structsnd__seq__ev__queue__control.html</a>
+ <a href="http://alsa-project.org/alsa-doc/alsa-lib/group___seq_client.html">http://alsa-project.org/alsa-doc/alsa-lib/group___seq_client.html</a>
+ <a href="http://alsa-utils.sourcearchive.com/documentation/1.0.20/aconnect_8c-source.html">http://alsa-utils.sourcearchive.com/documentation/1.0.20/aconnect_8c-source.html</a>
+ <a href="http://alsa-utils.sourcearchive.com/documentation/1.0.8/aplaymidi_8c-source.html">http://alsa-utils.sourcearchive.com/documentation/1.0.8/aplaymidi_8c-source.html</a>
+ snd_seq_client_info_event_filter_clear
+ snd_seq_get_any_client_info
+ snd_seq_get_client_info
+ snd_seq_client_info_t</pre>
+
+</body>
+
+</html>

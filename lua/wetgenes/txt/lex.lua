@@ -11,3 +11,13 @@ M.list={}
 
 M.list.lua=require(M.modname.."_lua")
 
+
+
+local deepcopy ; deepcopy=function(orig)
+	if type(orig) ~= 'table' then return orig end
+	local copy={}
+	for k,v in next,orig,nil do
+		copy[ deepcopy(k) ] = deepcopy(v)
+	end
+	return copy
+end

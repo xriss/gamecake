@@ -118,6 +118,8 @@ elseif NIX then
 
 	end
 
+	links { "asound" }
+
 --	links { "GL" }
 	links { "crypt" }
 	links { "pthread" }
