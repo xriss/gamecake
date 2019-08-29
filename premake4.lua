@@ -789,7 +789,7 @@ all_includes=all_includes or {
 	{"lua_glslang",		NIX		},
 
 -- test midi alsa?
-	{"lua_midialsa",	NIX		},
+	{"lua_midi",		NIX		},
 
 	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 

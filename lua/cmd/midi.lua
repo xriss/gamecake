@@ -53,7 +53,7 @@ if cmd=="list" then
 		os.exit(0)
 	end
 	
-	midialsa.client("gamecake-midi",1,1)
+	midialsa.client("gamecake-midi",0,0)
 --	midialsa.start()
 	
 	ls( midialsa.listclients() )

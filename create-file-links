@@ -3,13 +3,13 @@ cd `dirname $0`
 echo "linking all .lua fles from the main lua dir so we dont accidently edit multiple copies"
 
 
-ln -f lua/midialsa.lua             lua_midialsa/midialsa.lua
 ln -f lua/glslang.lua              lua_glslang/code/glslang.lua
 ln -f lua/gles.lua                 lua_gles/code/gles.lua
 ln -f lua/glescode.lua             lua_gles/code/glescode.lua
 ln -f lua/al.lua                   lua_al/code/al.lua
 ln -f lua/alc.lua                  lua_al/code/alc.lua
 
+ln -f lua/wetgenes/midi.lua        lua_midi/code/midi.lua
 ln -f lua/wetgenes/tardis.lua      lua_tardis/code/tardis.lua
 ln -f lua/wetgenes/grd.lua         lua_grd/code/grd.lua
 ln -f lua/wetgenes/grdmap.lua      lua_grd/code/grdmap.lua

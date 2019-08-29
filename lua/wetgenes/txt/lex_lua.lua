@@ -201,9 +201,9 @@ M.parse=function(state,input,output)
 		local s=istoken(input,i)
 		if s then
 			if f<i then
-				pump(string.sub(input,f,i-1))
+				pump(string.sub(input,f,i-1)) -- unmatched segment
 			end
-			pump(s)
+			pump(s) -- matched segment
 			i=i+#s
 			f=i
 		else
@@ -211,7 +211,7 @@ M.parse=function(state,input,output)
 		end
 	end
 	if f<l then
-		pump(string.sub(input,f,l))
+		pump(string.sub(input,f,l)) -- unmatched segment
 	end
 
 	return output
