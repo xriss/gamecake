@@ -7,7 +7,7 @@ local wgrd=require("wetgenes.grd")
 local doublewrap=require("cmd.args").doublewrap
 local splitpath=require("cmd.args").splitpath
 
-local midialsa=require("midialsa")
+local wmidi=require("wetgenes.midi")
 
 local cmds={
 	{ "list",		"List available midi connections."},
@@ -53,9 +53,13 @@ if cmd=="list" then
 		os.exit(0)
 	end
 	
-	midialsa.client("gamecake-midi",0,0)
+	local m=wmidi.create()
+
+	ls( m:clients() )
+
 --	midialsa.start()
 	
+--[[
 	ls( midialsa.listclients() )
 
 	ls( midialsa.listnumports() )
@@ -71,6 +75,7 @@ if cmd=="list" then
 		ls(m)
 
 	until false
+]]
 	
 
 else -- print help
