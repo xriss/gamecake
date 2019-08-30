@@ -58,8 +58,9 @@ if cmd=="list" then
 	local pi=m:port_create("test1",{"READ","SUBS_READ"},{"MIDI_GENERIC","SOFTWARE","PORT"})
 	local po=m:port_create("test1",{"WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"})
 
-	ls( m )
-	ls( m:clients() )
+--ls(wmidi.notes)
+
+	ls( m:scan() )
 	
 	repeat
 		local done=false

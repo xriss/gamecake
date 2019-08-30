@@ -47,65 +47,65 @@ midi.SND_SEQ_PORT_TYPE.PORT=(2^19)
 midi.SND_SEQ_PORT_TYPE.APPLICATION=(2^20)
 
 midi.SND_SEQ_EVENT={}
-midi.SND_SEQ_EVENT_SYSTEM = 0
-midi.SND_SEQ_EVENT_RESULT = 1
-midi.SND_SEQ_EVENT_NOTE = 5
-midi.SND_SEQ_EVENT_NOTEON = 6
-midi.SND_SEQ_EVENT_NOTEOFF = 7
-midi.SND_SEQ_EVENT_KEYPRESS = 8
-midi.SND_SEQ_EVENT_CONTROLLER = 10
-midi.SND_SEQ_EVENT_PGMCHANGE = 11
-midi.SND_SEQ_EVENT_CHANPRESS = 12
-midi.SND_SEQ_EVENT_PITCHBEND = 13
-midi.SND_SEQ_EVENT_CONTROL14 = 14
-midi.SND_SEQ_EVENT_NONREGPARAM = 15
-midi.SND_SEQ_EVENT_REGPARAM = 16
-midi.SND_SEQ_EVENT_SONGPOS = 20
-midi.SND_SEQ_EVENT_SONGSEL = 21
-midi.SND_SEQ_EVENT_QFRAME = 22
-midi.SND_SEQ_EVENT_TIMESIGN = 23
-midi.SND_SEQ_EVENT_KEYSIGN = 24
-midi.SND_SEQ_EVENT_START = 30
-midi.SND_SEQ_EVENT_CONTINUE = 31
-midi.SND_SEQ_EVENT_STOP = 32
-midi.SND_SEQ_EVENT_SETPOS_TICK = 33
-midi.SND_SEQ_EVENT_SETPOS_TIME = 34
-midi.SND_SEQ_EVENT_TEMPO = 35
-midi.SND_SEQ_EVENT_CLOCK = 36
-midi.SND_SEQ_EVENT_TICK = 37
-midi.SND_SEQ_EVENT_QUEUE_SKEW = 38
-midi.SND_SEQ_EVENT_SYNC_POS = 39
-midi.SND_SEQ_EVENT_TUNE_REQUEST = 40
-midi.SND_SEQ_EVENT_RESET = 41
-midi.SND_SEQ_EVENT_SENSING = 42
-midi.SND_SEQ_EVENT_ECHO = 50
-midi.SND_SEQ_EVENT_OSS = 51
-midi.SND_SEQ_EVENT_CLIENT_START = 60
-midi.SND_SEQ_EVENT_CLIENT_EXIT = 61
-midi.SND_SEQ_EVENT_CLIENT_CHANGE = 62
-midi.SND_SEQ_EVENT_PORT_START = 63
-midi.SND_SEQ_EVENT_PORT_EXIT = 64
-midi.SND_SEQ_EVENT_PORT_CHANGE = 65
-midi.SND_SEQ_EVENT_PORT_SUBSCRIBED = 66
-midi.SND_SEQ_EVENT_PORT_UNSUBSCRIBED = 67
-midi.SND_SEQ_EVENT_USR0 = 90
-midi.SND_SEQ_EVENT_USR1 = 91
-midi.SND_SEQ_EVENT_USR2 = 92
-midi.SND_SEQ_EVENT_USR3 = 93
-midi.SND_SEQ_EVENT_USR4 = 94
-midi.SND_SEQ_EVENT_USR5 = 95
-midi.SND_SEQ_EVENT_USR6 = 96
-midi.SND_SEQ_EVENT_USR7 = 97
-midi.SND_SEQ_EVENT_USR8 = 98
-midi.SND_SEQ_EVENT_USR9 = 99
-midi.SND_SEQ_EVENT_SYSEX = 130
-midi.SND_SEQ_EVENT_BOUNCE = 131
-midi.SND_SEQ_EVENT_USR_VAR0 = 135
-midi.SND_SEQ_EVENT_USR_VAR1 = 136
-midi.SND_SEQ_EVENT_USR_VAR2 = 137
-midi.SND_SEQ_EVENT_USR_VAR3 = 138
-midi.SND_SEQ_EVENT_USR_VAR4 = 139
-midi.SND_SEQ_EVENT_NONE = 255
+midi.SND_SEQ_EVENT.SYSTEM = 0
+midi.SND_SEQ_EVENT.RESULT = 1
+midi.SND_SEQ_EVENT.NOTE = 5
+midi.SND_SEQ_EVENT.NOTEON = 6
+midi.SND_SEQ_EVENT.NOTEOFF = 7
+midi.SND_SEQ_EVENT.KEYPRESS = 8
+midi.SND_SEQ_EVENT.CONTROLLER = 10
+midi.SND_SEQ_EVENT.PGMCHANGE = 11
+midi.SND_SEQ_EVENT.CHANPRESS = 12
+midi.SND_SEQ_EVENT.PITCHBEND = 13
+midi.SND_SEQ_EVENT.CONTROL14 = 14
+midi.SND_SEQ_EVENT.NONREGPARAM = 15
+midi.SND_SEQ_EVENT.REGPARAM = 16
+midi.SND_SEQ_EVENT.SONGPOS = 20
+midi.SND_SEQ_EVENT.SONGSEL = 21
+midi.SND_SEQ_EVENT.QFRAME = 22
+midi.SND_SEQ_EVENT.TIMESIGN = 23
+midi.SND_SEQ_EVENT.KEYSIGN = 24
+midi.SND_SEQ_EVENT.START = 30
+midi.SND_SEQ_EVENT.CONTINUE = 31
+midi.SND_SEQ_EVENT.STOP = 32
+midi.SND_SEQ_EVENT.SETPOS_TICK = 33
+midi.SND_SEQ_EVENT.SETPOS_TIME = 34
+midi.SND_SEQ_EVENT.TEMPO = 35
+midi.SND_SEQ_EVENT.CLOCK = 36
+midi.SND_SEQ_EVENT.TICK = 37
+midi.SND_SEQ_EVENT.QUEUE_SKEW = 38
+midi.SND_SEQ_EVENT.SYNC_POS = 39
+midi.SND_SEQ_EVENT.TUNE_REQUEST = 40
+midi.SND_SEQ_EVENT.RESET = 41
+midi.SND_SEQ_EVENT.SENSING = 42
+midi.SND_SEQ_EVENT.ECHO = 50
+midi.SND_SEQ_EVENT.OSS = 51
+midi.SND_SEQ_EVENT.CLIENT_START = 60
+midi.SND_SEQ_EVENT.CLIENT_EXIT = 61
+midi.SND_SEQ_EVENT.CLIENT_CHANGE = 62
+midi.SND_SEQ_EVENT.PORT_START = 63
+midi.SND_SEQ_EVENT.PORT_EXIT = 64
+midi.SND_SEQ_EVENT.PORT_CHANGE = 65
+midi.SND_SEQ_EVENT.PORT_SUBSCRIBED = 66
+midi.SND_SEQ_EVENT.PORT_UNSUBSCRIBED = 67
+midi.SND_SEQ_EVENT.USR0 = 90
+midi.SND_SEQ_EVENT.USR1 = 91
+midi.SND_SEQ_EVENT.USR2 = 92
+midi.SND_SEQ_EVENT.USR3 = 93
+midi.SND_SEQ_EVENT.USR4 = 94
+midi.SND_SEQ_EVENT.USR5 = 95
+midi.SND_SEQ_EVENT.USR6 = 96
+midi.SND_SEQ_EVENT.USR7 = 97
+midi.SND_SEQ_EVENT.USR8 = 98
+midi.SND_SEQ_EVENT.USR9 = 99
+midi.SND_SEQ_EVENT.SYSEX = 130
+midi.SND_SEQ_EVENT.BOUNCE = 131
+midi.SND_SEQ_EVENT.USR_VAR0 = 135
+midi.SND_SEQ_EVENT.USR_VAR1 = 136
+midi.SND_SEQ_EVENT.USR_VAR2 = 137
+midi.SND_SEQ_EVENT.USR_VAR3 = 138
+midi.SND_SEQ_EVENT.USR_VAR4 = 139
+midi.SND_SEQ_EVENT.NONE = 255
   
   
 
@@ -115,12 +115,35 @@ for _,t in ipairs{
 		midi.SND_SEQ_PORT_TYPE ,
 		midi.SND_SEQ_EVENT ,
 	} do
+	local tmp={}
 	for n,v in pairs(t) do
 		if type(n)=="string" and type(v)=="number" then
-			t[v]=n
+			tmp[n]=v
 		end
 	end
+	for n,v in pairs(tmp) do
+print(n,v)
+		t[v]=n
+	end
 end
+
+
+-- possible ascii notations for each octave
+midi.note_names_hash= { "C" ,"C#","D" ,"D#","E" ,"F" ,"F#","G" ,"G#","A" ,"A#","B" }
+midi.note_names_dash= { "C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"}
+midi.note_names_s=    { "C" ,"Cs","D" ,"Ds","E" ,"F" ,"Fs","G" ,"Gs","A" ,"As","B" }
+midi.note_names_lower={ "C" ,"c" ,"D" ,"d" ,"E" ,"F" ,"f" ,"G" ,"g" ,"A" ,"a" ,"B" }
+
+midi.notes={}
+for i=0,127 do
+	midi.notes[i]=midi.note_names_hash[(i%12)+1]..(math.floor(i/12)-1)
+	midi.notes[ midi.note_names_hash[(i%12)+1]..(math.floor(i/12)-1) ]=i
+	midi.notes[ midi.note_names_dash[(i%12)+1]..(math.floor(i/12)-1) ]=i
+	midi.notes[ midi.note_names_s[(i%12)+1]..(math.floor(i/12)-1) ]=i
+	midi.notes[ midi.note_names_lower[(i%12)+1]..(math.floor(i/12)-1) ]=i
+end
+
+
 
 --[[#lua.wetgenes.midi.create
 
@@ -160,11 +183,14 @@ fetch table of clients
 
 
 ]]
-base.clients=function(m)
-	local t=core.clients(m[0])
-	
-	for _,c in ipairs(t) do
+base.scan=function(m,t)
+	t=t or m
+	core.scan(m[0],t)
+	t.ports={}	
+	for _,c in ipairs(t.clients) do
 		for _,p in ipairs(c.ports) do
+
+			t.ports[p.client..":"..p.port]=p
 
 			for n,v in pairs(midi.SND_SEQ_PORT_TYPE) do
 				if type(n)=="string" and type(v)=="number" then
@@ -187,7 +213,7 @@ base.clients=function(m)
 		end
 	end
 
-	return t
+	return m
 end
 
 --[[#lua.wetgenes.midi.get
@@ -252,40 +278,127 @@ base.port_destroy=function(m,p)
 	return core.port_destroy(m[0],p)
 end
 
+-- do the reverse of ravel
+local unravel=function(e)
+
+	local o={}
+
+	return e
+end
+
+-- make the events a little bit more suscinct
+local ravel=function(e)
+
+	local event_type=midi.SND_SEQ_EVENT[e.type]
+	
+	local o={}
+	o.type=event_type
+	o.source=e.source_client..":"..e.source_port
+	o.dest=e.dest_client..":"..e.dest_port
+	
+	local fill_note=function()
+		local channel=e[1]
+		local note=e[2]
+		local velocity=e[3]
+		o.channel=channel
+		o.note=note
+		o.velocity=velocity
+	end
+	
+
+	if     event_type == "PORT_SUBSCRIBED"   then
+
+		return o
+
+	elseif event_type == "PORT_UNSUBSCRIBED" then
+
+		return o
+
+	elseif event_type == "NOTE" then
+
+		fill_note()
+		return o
+
+	elseif event_type == "NOTEON" then
+
+		fill_note()
+		return o
+
+	elseif event_type == "NOTEOFF" then
+
+		fill_note()
+		return o
+		
+	elseif event_type == "PITCHBEND" then
+
+		o.channel=e[13]
+		local v=e[15]
+		if v>=0x80000000 then v=v-0x100000000 end
+		o.value=v
+		
+		return o
+
+	elseif event_type == "CONTROLLER" then
+
+		o.channel=e[13]
+		o.control=e[14]
+		o.value=e[15]
+
+		return o
+
+	elseif event_type == "PGMCHANGE" then
+
+		o.channel=e[13]
+		o.program=e[15]
+
+		return o
+		
+	end
+	
+	return e
+end
+
 
 
 --[[#lua.wetgenes.midi.push
 
 	m:push(it)
 
-Send an output midi message.
+Send an output midi event.
 
 ]]
 base.push=function(m,it)
+	it=unravel(it)
 	return core.push(m[0],it)
 end
+
+
 
 --[[#lua.wetgenes.midi.pull
 
 	m:pull(it)
 
-Receive an input midi message, blocking until there is one.
+Receive an input midi event, blocking until there is one.
 
 ]]
 base.pull=function(m)
-	return core.pull(m[0])
+	local e=core.pull(m[0])
+	if e then e=ravel(e) end
+	return e
 end
 
 --[[#lua.wetgenes.midi.peek
 
 	m:peek(it)
 
-Returns a message if there is one or null if none are currently 
+Returns a event if there is one or null if none are currently 
 available.
 
 ]]
 base.peek=function(m)
-	return core.peek(m[0])
+	local e=core.peek(m[0])
+	if e then e=ravel(e) end
+	return e
 end
 
 

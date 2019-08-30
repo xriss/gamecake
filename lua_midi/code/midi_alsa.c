@@ -158,10 +158,10 @@ part_ptr p = lua_midi_alsa_check_ptr(l,1);
 
 /*+-----------------------------------------------------------------------------------------------------------------+**
 
-get list of all clients and ports
+get list of all clients and ports and connections
 
 **+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_midi_alsa_clients (lua_State *l)
+int lua_midi_alsa_scan (lua_State *l)
 {
 int cidx=0;
 int pidx=0;
@@ -174,6 +174,16 @@ int pidx=0;
 	snd_seq_port_info_t *p;
 	snd_seq_port_info_alloca( &p );
 
+	if(lua_istable(l,2)) // input table?
+	{
+		lua_pushvalue(l,2); // input table is output
+	}
+	else
+	{
+		lua_newtable(l); // new table is output
+	}
+	
+	lua_pushstring(l,"clients");
 	lua_newtable(l);
 
 	snd_seq_client_info_set_client( c , -1 );
@@ -228,7 +238,7 @@ int pidx=0;
 
 		lua_rawset(l,-3);
 	}
-
+	lua_rawset(l,-3);
 
 	return 1;
 }
@@ -496,7 +506,7 @@ int luaopen_midi_alsa_core (lua_State *l)
 		{"port_get",		lua_midi_alsa_port_get		},
 		{"port_set",		lua_midi_alsa_port_set		},
 
-		{"clients",			lua_midi_alsa_clients		},
+		{"scan",			lua_midi_alsa_scan			},
 
 		{"peek",			lua_midi_alsa_peek			},
 		{"pull",			lua_midi_alsa_pull			},
