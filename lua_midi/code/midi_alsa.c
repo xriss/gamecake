@@ -165,8 +165,23 @@ int lua_midi_alsa_scan (lua_State *l)
 {
 int cidx=0;
 int pidx=0;
+int sidx=0;
+
+	int flag=0;
+	int port=0;
+	int client=0;
+	
+	const snd_seq_addr_t *addr;
+
+	snd_seq_query_subscribe_t *subs; // we have to malloc this?
+	if(0!=snd_seq_query_subscribe_malloc(&subs))
+	{
+//		return 0; // error
+	}
 
 	part_ptr m = lua_midi_alsa_check_ptr(l,1);
+
+	
 
 	snd_seq_client_info_t *c;
 	snd_seq_client_info_alloca( &c );
@@ -211,8 +226,9 @@ int pidx=0;
 			lua_pushnumber(l,++pidx);
 			lua_newtable(l);
 
+			port=snd_seq_port_info_get_port(p);
 			lua_pushstring(l,"port");
-			lua_pushnumber(l,(double)snd_seq_port_info_get_port(p));
+			lua_pushnumber(l,(double)port);
 			lua_rawset(l,-3);
 
 			lua_pushstring(l,"type");
@@ -227,9 +243,65 @@ int pidx=0;
 			lua_pushstring(l,snd_seq_port_info_get_name(p));
 			lua_rawset(l,-3);
 			
+			client=snd_seq_client_info_get_client(c);
 			lua_pushstring(l,"client");
-			lua_pushnumber(l,snd_seq_client_info_get_client(c));
+			lua_pushnumber(l,client);
 			lua_rawset(l,-3);
+
+
+			lua_pushstring(l,"subscriptions");
+			lua_newtable(l);
+
+			sidx=0;
+			for(flag=0;flag<=1;flag++)
+			{
+				snd_seq_query_subscribe_set_client(subs, client);
+				snd_seq_query_subscribe_set_port(subs, port);
+				snd_seq_query_subscribe_set_type(subs, flag ? SND_SEQ_QUERY_SUBS_READ : SND_SEQ_QUERY_SUBS_WRITE );
+				snd_seq_query_subscribe_set_index(subs, 0);
+				while(snd_seq_query_port_subscribers(m, subs) >= 0)
+				{
+
+					lua_pushnumber(l,++sidx);
+					lua_newtable(l);
+					
+					lua_pushstring(l,"type");
+					lua_pushstring(l,flag ? "READ" : "WRITE" );
+					lua_rawset(l,-3);
+
+
+					addr=snd_seq_query_subscribe_get_addr(subs);
+					lua_pushstring(l,"client");
+					lua_pushnumber(l,addr->client);
+					lua_rawset(l,-3);
+					lua_pushstring(l,"port");
+					lua_pushnumber(l,addr->port);
+					lua_rawset(l,-3);
+
+					lua_pushstring(l,"queue");
+					lua_pushnumber(l,snd_seq_query_subscribe_get_queue(subs));
+					lua_rawset(l,-3);
+
+					lua_pushstring(l,"exclusive");
+					lua_pushboolean(l,snd_seq_query_subscribe_get_exclusive(subs));
+					lua_rawset(l,-3);
+
+					lua_pushstring(l,"time_update");
+					lua_pushboolean(l,snd_seq_query_subscribe_get_time_update(subs));
+					lua_rawset(l,-3);
+
+					lua_pushstring(l,"time_real");
+					lua_pushboolean(l,snd_seq_query_subscribe_get_time_real(subs));
+					lua_rawset(l,-3);
+
+					lua_rawset(l,-3);
+
+					snd_seq_query_subscribe_set_index(subs, sidx);
+				}
+			}
+
+			lua_rawset(l,-3);
+			
 
 			lua_rawset(l,-3);
 		}
@@ -238,7 +310,11 @@ int pidx=0;
 
 		lua_rawset(l,-3);
 	}
+
+
 	lua_rawset(l,-3);
+
+	snd_seq_query_subscribe_free(subs);
 
 	return 1;
 }
@@ -333,7 +409,6 @@ part_ptr p = lua_midi_alsa_check_ptr(l,1);
 	lua_pushnumber(l,(double)e->type);
 	lua_rawset(l,-3);
 
-/*
 	lua_pushstring(l,"flags");
 	lua_pushnumber(l,(double)e->flags);
 	lua_rawset(l,-3);
@@ -349,7 +424,6 @@ part_ptr p = lua_midi_alsa_check_ptr(l,1);
 	lua_pushstring(l,"time_tick");
 	lua_pushnumber(l,(double)e->time.tick);
 	lua_rawset(l,-3);
-*/
 
 	lua_pushstring(l,"source_client");
 	lua_pushnumber(l,(double)(e->source.client));
@@ -364,34 +438,6 @@ part_ptr p = lua_midi_alsa_check_ptr(l,1);
 	lua_pushstring(l,"dest_port");
 	lua_pushnumber(l,(double)(e->dest.port));
 	lua_rawset(l,-3);
-
-/*
-	lua_pushstring(l,"note_channel");
-	lua_pushnumber(l,(double)e->data.note.channel);
-	lua_rawset(l,-3);
-	lua_pushstring(l,"note_note");
-	lua_pushnumber(l,(double)e->data.note.note);
-	lua_rawset(l,-3);
-	lua_pushstring(l,"note_velocity");
-	lua_pushnumber(l,(double)e->data.note.velocity);
-	lua_rawset(l,-3);
-	lua_pushstring(l,"note_off_velocity");
-	lua_pushnumber(l,(double)e->data.note.off_velocity);
-	lua_rawset(l,-3);
-	lua_pushstring(l,"note_duration");
-	lua_pushnumber(l,(double)e->data.note.duration);
-	lua_rawset(l,-3);
-
-	lua_pushstring(l,"control_channel");
-	lua_pushnumber(l,(double)e->data.control.channel);
-	lua_rawset(l,-3);
-	lua_pushstring(l,"control_param");
-	lua_pushnumber(l,(double)e->data.control.param);
-	lua_rawset(l,-3);
-	lua_pushstring(l,"control_value");
-	lua_pushnumber(l,(double)e->data.control.value);
-	lua_rawset(l,-3);
-*/
 
 	for(b=0;b<12;b++)
 	{

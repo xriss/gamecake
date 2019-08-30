@@ -7,6 +7,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+local wstr=require("wetgenes.string")
+local ls=function(s) print(wstr.dump(s)) end
 
 
 local core=require("midi_alsa_core")
@@ -122,7 +124,6 @@ for _,t in ipairs{
 		end
 	end
 	for n,v in pairs(tmp) do
-print(n,v)
 		t[v]=n
 	end
 end
@@ -186,7 +187,8 @@ fetch table of clients
 base.scan=function(m,t)
 	t=t or m
 	core.scan(m[0],t)
-	t.ports={}	
+ls(t)
+	t.ports={}
 	for _,c in ipairs(t.clients) do
 		for _,p in ipairs(c.ports) do
 
