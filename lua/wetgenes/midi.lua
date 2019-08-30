@@ -19,6 +19,109 @@ meta.__index=base
 
 setmetatable(midi,meta)
 
+midi.SND_SEQ_PORT_CAP={}
+midi.SND_SEQ_PORT_CAP.READ=(2^0)
+midi.SND_SEQ_PORT_CAP.WRITE=(2^1)
+midi.SND_SEQ_PORT_CAP.SYNC_READ=(2^2)
+midi.SND_SEQ_PORT_CAP.SYNC_WRITE=(2^3)
+midi.SND_SEQ_PORT_CAP.DUPLEX=(2^4)
+midi.SND_SEQ_PORT_CAP.SUBS_READ=(2^5)
+midi.SND_SEQ_PORT_CAP.SUBS_WRITE=(2^6)
+midi.SND_SEQ_PORT_CAP.NO_EXPORT=(2^7)
+ 
+midi.SND_SEQ_PORT_TYPE={}
+midi.SND_SEQ_PORT_TYPE.SPECIFIC=(2^0)
+midi.SND_SEQ_PORT_TYPE.MIDI_GENERIC=(2^1)
+midi.SND_SEQ_PORT_TYPE.MIDI_GM=(2^2)
+midi.SND_SEQ_PORT_TYPE.MIDI_GS=(2^3)
+midi.SND_SEQ_PORT_TYPE.MIDI_XG=(2^4)
+midi.SND_SEQ_PORT_TYPE.MIDI_MT32=(2^5)
+midi.SND_SEQ_PORT_TYPE.MIDI_GM2=(2^6)
+midi.SND_SEQ_PORT_TYPE.SYNTH=(2^10)
+midi.SND_SEQ_PORT_TYPE.DIRECT_SAMPLE=(2^11)
+midi.SND_SEQ_PORT_TYPE.SAMPLE=(2^12)
+midi.SND_SEQ_PORT_TYPE.HARDWARE=(2^16)
+midi.SND_SEQ_PORT_TYPE.SOFTWARE=(2^17)
+midi.SND_SEQ_PORT_TYPE.SYNTHESIZER=(2^18)
+midi.SND_SEQ_PORT_TYPE.PORT=(2^19)
+midi.SND_SEQ_PORT_TYPE.APPLICATION=(2^20)
+
+midi.SND_SEQ_EVENT={}
+midi.SND_SEQ_EVENT_SYSTEM = 0
+midi.SND_SEQ_EVENT_RESULT = 1
+midi.SND_SEQ_EVENT_NOTE = 5
+midi.SND_SEQ_EVENT_NOTEON = 6
+midi.SND_SEQ_EVENT_NOTEOFF = 7
+midi.SND_SEQ_EVENT_KEYPRESS = 8
+midi.SND_SEQ_EVENT_CONTROLLER = 10
+midi.SND_SEQ_EVENT_PGMCHANGE = 11
+midi.SND_SEQ_EVENT_CHANPRESS = 12
+midi.SND_SEQ_EVENT_PITCHBEND = 13
+midi.SND_SEQ_EVENT_CONTROL14 = 14
+midi.SND_SEQ_EVENT_NONREGPARAM = 15
+midi.SND_SEQ_EVENT_REGPARAM = 16
+midi.SND_SEQ_EVENT_SONGPOS = 20
+midi.SND_SEQ_EVENT_SONGSEL = 21
+midi.SND_SEQ_EVENT_QFRAME = 22
+midi.SND_SEQ_EVENT_TIMESIGN = 23
+midi.SND_SEQ_EVENT_KEYSIGN = 24
+midi.SND_SEQ_EVENT_START = 30
+midi.SND_SEQ_EVENT_CONTINUE = 31
+midi.SND_SEQ_EVENT_STOP = 32
+midi.SND_SEQ_EVENT_SETPOS_TICK = 33
+midi.SND_SEQ_EVENT_SETPOS_TIME = 34
+midi.SND_SEQ_EVENT_TEMPO = 35
+midi.SND_SEQ_EVENT_CLOCK = 36
+midi.SND_SEQ_EVENT_TICK = 37
+midi.SND_SEQ_EVENT_QUEUE_SKEW = 38
+midi.SND_SEQ_EVENT_SYNC_POS = 39
+midi.SND_SEQ_EVENT_TUNE_REQUEST = 40
+midi.SND_SEQ_EVENT_RESET = 41
+midi.SND_SEQ_EVENT_SENSING = 42
+midi.SND_SEQ_EVENT_ECHO = 50
+midi.SND_SEQ_EVENT_OSS = 51
+midi.SND_SEQ_EVENT_CLIENT_START = 60
+midi.SND_SEQ_EVENT_CLIENT_EXIT = 61
+midi.SND_SEQ_EVENT_CLIENT_CHANGE = 62
+midi.SND_SEQ_EVENT_PORT_START = 63
+midi.SND_SEQ_EVENT_PORT_EXIT = 64
+midi.SND_SEQ_EVENT_PORT_CHANGE = 65
+midi.SND_SEQ_EVENT_PORT_SUBSCRIBED = 66
+midi.SND_SEQ_EVENT_PORT_UNSUBSCRIBED = 67
+midi.SND_SEQ_EVENT_USR0 = 90
+midi.SND_SEQ_EVENT_USR1 = 91
+midi.SND_SEQ_EVENT_USR2 = 92
+midi.SND_SEQ_EVENT_USR3 = 93
+midi.SND_SEQ_EVENT_USR4 = 94
+midi.SND_SEQ_EVENT_USR5 = 95
+midi.SND_SEQ_EVENT_USR6 = 96
+midi.SND_SEQ_EVENT_USR7 = 97
+midi.SND_SEQ_EVENT_USR8 = 98
+midi.SND_SEQ_EVENT_USR9 = 99
+midi.SND_SEQ_EVENT_SYSEX = 130
+midi.SND_SEQ_EVENT_BOUNCE = 131
+midi.SND_SEQ_EVENT_USR_VAR0 = 135
+midi.SND_SEQ_EVENT_USR_VAR1 = 136
+midi.SND_SEQ_EVENT_USR_VAR2 = 137
+midi.SND_SEQ_EVENT_USR_VAR3 = 138
+midi.SND_SEQ_EVENT_USR_VAR4 = 139
+midi.SND_SEQ_EVENT_NONE = 255
+  
+  
+
+-- setup number to string and string to number
+for _,t in ipairs{
+		midi.SND_SEQ_PORT_CAP ,
+		midi.SND_SEQ_PORT_TYPE ,
+		midi.SND_SEQ_EVENT ,
+	} do
+	for n,v in pairs(t) do
+		if type(n)=="string" and type(v)=="number" then
+			t[v]=n
+		end
+	end
+end
+
 --[[#lua.wetgenes.midi.create
 
 	m=wmidi.create()
@@ -32,6 +135,7 @@ midi.create=function(...)
 	local m={}
 	setmetatable(m,meta)
 	m[0]=core.create()
+	m:get() -- default values
 	return m
 end
 
@@ -44,8 +148,8 @@ automatically by garbage collection but you can force it explicitly
 using this function.
 
 ]]
-base.destroy=function(g)
-	return core.destroy(g[0])
+base.destroy=function(m)
+	return core.destroy(m[0])
 end
 
 --[[#lua.wetgenes.midi.clients
@@ -56,6 +160,133 @@ fetch table of clients
 
 
 ]]
-base.clients=function(g)
-	return core.clients(g[0])
+base.clients=function(m)
+	local t=core.clients(m[0])
+	
+	for _,c in ipairs(t) do
+		for _,p in ipairs(c.ports) do
+
+			for n,v in pairs(midi.SND_SEQ_PORT_TYPE) do
+				if type(n)=="string" and type(v)=="number" then
+					p[n]=nil
+					if (math.floor(p.type/v)%2)==1 then
+						p[n]=true
+					end
+				end
+			end
+
+			for n,v in pairs(midi.SND_SEQ_PORT_CAP) do
+				if type(n)=="string" and type(v)=="number" then
+					p[n]=nil
+					if (math.floor(p.capability/v)%2)==1 then
+						p[n]=true
+					end
+				end
+			end
+
+		end
+	end
+
+	return t
 end
+
+--[[#lua.wetgenes.midi.get
+
+	m:get()
+
+get all values for this connection and store thme in m
+
+
+]]
+base.get=function(m)
+	return core.get(m[0],m)
+end
+
+--[[#lua.wetgenes.midi.set
+
+	m:set()
+
+set all values for this connection from values found in m
+
+
+]]
+base.set=function(m)
+	return core.set(m[0],m)
+end
+
+--[[#lua.wetgenes.midi.port_create
+
+	p = m:port_create(name,caps,type)
+
+Create a port with the given name and capability bits and type.
+
+bits and type are either a number or a table of bitnames.
+
+Returns the number of the port created which should be used in 
+port_destroy or nil if something went wrong.
+
+]]
+base.port_create=function(m,n,c,t)
+	if type(c)=="table" then
+		local b=0
+		for i,v in ipairs(c) do b=b+midi.SND_SEQ_PORT_CAP[v] end
+		c=b
+	end
+	if type(t)=="table" then
+		local b=0
+		for i,v in ipairs(t) do b=b+midi.SND_SEQ_PORT_TYPE[v] end
+		t=b
+	end
+	return core.port_create(m[0],n,c,t)
+end
+
+--[[#lua.wetgenes.midi.port_destroy
+
+	m:port_destroy(num)
+
+Destroy a previously created port. Returns nil on failure, true on 
+sucess.
+
+]]
+base.port_destroy=function(m,p)
+	return core.port_destroy(m[0],p)
+end
+
+
+
+--[[#lua.wetgenes.midi.push
+
+	m:push(it)
+
+Send an output midi message.
+
+]]
+base.push=function(m,it)
+	return core.push(m[0],it)
+end
+
+--[[#lua.wetgenes.midi.pull
+
+	m:pull(it)
+
+Receive an input midi message, blocking until there is one.
+
+]]
+base.pull=function(m)
+	return core.pull(m[0])
+end
+
+--[[#lua.wetgenes.midi.peek
+
+	m:peek(it)
+
+Returns a message if there is one or null if none are currently 
+available.
+
+]]
+base.peek=function(m)
+	return core.peek(m[0])
+end
+
+
+
