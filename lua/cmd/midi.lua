@@ -109,6 +109,7 @@ if cmd=="list" then
 	local slist={}
 	local slines={}
 	local slinesort={}
+	local soutput={}
 	for n,v in pairs(m.subscriptions) do
 		slist[#slist+1]=n
 		local source=v.source_client..":"..v.source_port
@@ -116,6 +117,7 @@ if cmd=="list" then
 		slines[ source ]=slines[ source ] or {}
 		slines[ dest ]=slines[ dest ] or {}
 		slines[ source ][ dest ]=true
+		soutput[dest]=true
 	end
 	for n,v in pairs(slines) do slinesort[#slinesort+1]=n end
 	table.sort(slinesort,function(a,b)
@@ -139,6 +141,7 @@ if cmd=="list" then
 	end)
 
 -- graphical display
+	local uplink={}
 	for _,sn in ipairs(slinesort) do local sv=slines[sn]
 		local sc,sp=sn:match("(%d+):(%d+)")
 		local name=string.format("%3d:%-2d",sc,sp)
@@ -146,49 +149,61 @@ if cmd=="list" then
 
 		local count=0
 		for _,c in pairs(sv) do count=count+1 end
-		local s="  "..name.."  ->"
-		local em="--"
-		local di=0
-		for _,dn in ipairs(slinesort) do
-			if di>=count then em=" |" end
-			if sv[dn] then
-			s=s.."-+"
-			di=di+1
-			else
-			s=s..em
+		if count>0 then
+			local s="  "..name.."  ->"
+			local em="-|"
+			local di=0
+			for _,dn in ipairs(slinesort) do
+				if soutput[dn] then
+					if di>=count then em=" |" end
+					if sv[dn] then
+						s=s.."-+"
+						di=di+1
+						uplink[dn]=true
+					else
+						if uplink[dn] then
+							s=s..em
+						else
+							s=s.."  "
+						end
+					end
+				end
 			end
+			s=s.."    "..blank.."  "
+			print( s )
 		end
-		s=s.."    "..blank.."  "
-		print( s )
+	end
+	
+	for si=#slinesort,1,-1 do local sn=slinesort[si] local sv=slines[sn]
+		if soutput[sn] then
+			local sc,sp=sn:match("(%d+):(%d+)")
+			local name=string.format("%3d:%-2d",sc,sp)
+			local blank="      "
 
-		local s="  "..blank.."    "
-		local em=" |"
-		for _,dn in ipairs(slinesort) do
-			s=s.." |"
-		end
-		s=s.."    "..blank.."  "
---		print( s )
-
-		local s="  "..blank.."    "
-		local em=" |"
-		for _,dn in ipairs(slinesort) do
-			if dn==sn then
-			s=s.." +"
-			em="--"
-			else
-			s=s..em
+			local s="  "..blank.."    "
+			local em=" |"
+			for _,dn in ipairs(slinesort) do
+				if soutput[dn] then
+					if dn==sn then
+					s=s.." +"
+					em="--"
+					else
+					s=s..em
+					end
+				end
 			end
+			s=s.."->  "..name.."  "
+			print( s )
 		end
-		s=s.."->  "..name.."  "
-		print( s )
-
 	end
 -- explicit list of connections
+--[[
 	print()
 	for _,n in ipairs(slist) do local v=m.subscriptions[n]
 		local s=string.format("  %3d:%-2d ->  %3d:%-2d ",v.source_client,v.source_port,v.dest_client,v.dest_port)
 		print( s )
 	end
+]]
 	print()
 
 elseif cmd=="dump" then
