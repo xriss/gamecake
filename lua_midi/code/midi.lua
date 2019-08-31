@@ -191,10 +191,12 @@ fetch table of clients
 ]]
 base.scan=function(m,t)
 	t=t or m
-	core.scan(m[0],t)
+	local it=core.scan(m[0],{})
+	t.clients={}
 	t.ports={}
 	t.subscriptions={}
-	for _,c in ipairs(t.clients) do
+	for _,c in ipairs(it.clients) do
+		t.clients[c.client]=c
 		for _,p in ipairs(c.ports) do
 
 			for _,s in ipairs(p.subscriptions) do
@@ -327,6 +329,25 @@ local ravel=function(e)
 
 		return o
 
+	elseif event_type == "PORT_START" then
+
+		o.client=e[13]
+		o.dat2=e[14]
+		o.dat3=e[15]
+		return o
+
+	elseif event_type == "START" then
+
+		o.dat1=e[13]
+		o.dat2=e[14]
+		o.dat3=e[15]
+		return o
+
+	elseif event_type == "TEMPO" then
+
+		o.tempo=e[14]
+		return o
+
 	elseif event_type == "NOTE" then
 
 		fill_note()
@@ -426,5 +447,31 @@ base.peek=function(m)
 	return e
 end
 
+--[[#lua.wetgenes.midi.subscribe
 
+	m:subscribe{
+		source_client=0,	source_port=0,
+		dest_client=1,		dest_port=0,
+	}
+
+Creates a persistant subscription between two ports.
+
+]]
+base.subscribe=function(m,it)
+	return core.subscribe(m[0],it)
+end
+
+--[[#lua.wetgenes.midi.unsubscribe
+
+	m:unsubscribe{
+		source_client=0,	source_port=0,
+		dest_client=1,		dest_port=0,
+	}
+
+Removes a persistant subscription from between two ports.
+
+]]
+base.unsubscribe=function(m,it)
+	return core.unsubscribe(m[0],it)
+end
 

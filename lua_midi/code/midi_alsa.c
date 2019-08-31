@@ -346,17 +346,17 @@ int sidx=0;
 static void fill_subs( lua_State *l , snd_seq_port_subscribe_t *sub , int idx )
 {
 	int i;
-	snd_seq_addr_t seq_addr[1];
+	snd_seq_addr_t addr[1];
 
 	lua_getfield(l,idx,"source_client");
 	if( lua_isnumber(l,-1) )
 	{
-		seq_addr->client = lua_tonumber(l,-1);
+		addr->client = lua_tonumber(l,-1);
 		lua_getfield(l,idx,"source_port");
 		if( lua_isnumber(l,-1) )
 		{
-			seq_addr->port = lua_tonumber(l,-1);
-			snd_seq_port_subscribe_set_sender(sub, seq_addr);
+			addr->port = lua_tonumber(l,-1);
+			snd_seq_port_subscribe_set_sender(sub, addr);
 		}
 		lua_pop(l,1);
 	}
@@ -365,12 +365,12 @@ static void fill_subs( lua_State *l , snd_seq_port_subscribe_t *sub , int idx )
 	lua_getfield(l,idx,"dest_client");
 	if( lua_isnumber(l,-1) )
 	{
-		seq_addr->client = lua_tonumber(l,-1);
+		addr->client = lua_tonumber(l,-1);
 		lua_getfield(l,idx,"dest_port");
 		if( lua_isnumber(l,-1) )
 		{
-			seq_addr->port = lua_tonumber(l,-1);
-			snd_seq_port_subscribe_set_dest(sub, seq_addr);
+			addr->port = lua_tonumber(l,-1);
+			snd_seq_port_subscribe_set_dest(sub, addr);
 		}
 		lua_pop(l,1);
 	}
@@ -428,11 +428,9 @@ part_ptr m = lua_midi_alsa_check_ptr(l,1);
 
 	if((err=snd_seq_subscribe_port(m, sub)))
 	{
-		snd_seq_port_subscribe_free(sub);
 		return 0;
 	}
 
-	snd_seq_port_subscribe_free(sub);
 	lua_pushboolean(l,1);
 	return 1;
 }
@@ -455,11 +453,9 @@ part_ptr m = lua_midi_alsa_check_ptr(l,1);
 
 	if((err=snd_seq_unsubscribe_port(m, sub)))
 	{
-		snd_seq_port_subscribe_free(sub);
 		return 0;
 	}
 
-	snd_seq_port_subscribe_free(sub);
 	lua_pushboolean(l,1);
 	return 1;
 }
