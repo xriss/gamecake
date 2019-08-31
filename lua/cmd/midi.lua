@@ -147,55 +147,82 @@ if cmd=="list" then
 		local name=string.format("%3d:%-2d",sc,sp)
 		local blank="      "
 
+
+		local pname=string.format("%"..maxn.."s:%-"..maxn.."s",
+			m.clients[tonumber(sc)].name:sub(-maxn),
+			m.ports[sc..":"..sp].name:sub(-maxn))
+
 		local count=0
 		for _,c in pairs(sv) do count=count+1 end
 		if count>0 then
-			local s="  "..name.."  ->"
-			local em="-|"
+			local s="  "..name.."  >-"
+			local em="--"
 			local di=0
 			for _,dn in ipairs(slinesort) do
 				if soutput[dn] then
-					if di>=count then em=" |" end
-					if sv[dn] then
-						s=s.."-+"
+					if di>=count then
+						s=s.."  "
+					elseif sv[dn] then
+						s=s.."-|"
 						di=di+1
 						uplink[dn]=true
 					else
 						if uplink[dn] then
 							s=s..em
 						else
-							s=s.."  "
+							s=s.."--"
 						end
 					end
 				end
 			end
 			s=s.."    "..blank.."  "
+			s=s.." "..pname
 			print( s )
+
+			local s="  "..blank.."    "
+			for _,dn in ipairs(slinesort) do
+				if soutput[dn] then
+					if uplink[dn] then
+						s=s.." |"
+					else
+						s=s.."  "
+					end
+				end
+			end
+			s=s.."     "..blank.."  "
+--			print( s )
+
 		end
 	end
-	
+	print()
 	for si=#slinesort,1,-1 do local sn=slinesort[si] local sv=slines[sn]
 		if soutput[sn] then
 			local sc,sp=sn:match("(%d+):(%d+)")
 			local name=string.format("%3d:%-2d",sc,sp)
 			local blank="      "
 
+			local pname=string.format("%"..maxn.."s:%-"..maxn.."s",
+				m.clients[tonumber(sc)].name:sub(-maxn),
+				m.ports[sc..":"..sp].name:sub(-maxn))
+
 			local s="  "..blank.."    "
-			local em=" |"
+			local em="  "
 			for _,dn in ipairs(slinesort) do
 				if soutput[dn] then
 					if dn==sn then
-					s=s.." +"
+					s=s.." |"
 					em="--"
 					else
 					s=s..em
 					end
 				end
 			end
-			s=s.."->  "..name.."  "
+			s=s.."-->  "..name.."  "
+			s=s.." "..pname
 			print( s )
 		end
 	end
+	
 -- explicit list of connections
 --[[
 	print()
