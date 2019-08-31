@@ -257,7 +257,6 @@ elseif cmd=="dump" then
 	pi=m.ports[ m.client..":"..pi ]
 	
 
-ls(m.subscriptions)
 -- reset any subscriptions
 	for n,v in pairs(m.subscriptions) do
 		if v.source_client==pi.client or v.dest_client==pi.client then
@@ -298,7 +297,100 @@ print()
 		local done=false
 
 		local it=m:pull()
-		ls(it)
+		
+		local render_bar=function(w,nl,nh,n)
+			local s=""
+			local f=math.ceil(((n-nl)/(nh-nl))*w)
+			for i=1,w do
+				if i<=f then
+					s=s.."|"
+				else
+					s=s.."-"
+				end
+			end
+			return s
+		end
+		
+		local get_d32=function()
+			return string.format("%08x %08x %08x",it.dat1 or 0,it.dat2 or 0,it.dat3 or 0)
+		end
+		
+		local get_type=function()
+			return string.format("%17s",it.type)
+		end
+
+		local get_path=function()
+			local sc,sp=it.source:match("(%d+):(%d+)")
+			local dc,dp=it.dest:match("(%d+):(%d+)")
+			return string.format("%3d:%-2d > %3d:%-2d",sc,sp,dc,dp)
+		end
+
+		local get_subpath=function()
+			local sc,sp=it.sub_source:match("(%d+):(%d+)")
+			local dc,dp=it.sub_dest:match("(%d+):(%d+)")
+			return string.format("%3d:%-2d > %3d:%-2d",sc,sp,dc,dp)
+		end
+
+		local get_note=function()
+			return string.format("%2d %3d %4s %s %3d",it.channel,it.note,wmidi.notes[it.note],render_bar(32,0,127,it.velocity),it.velocity)
+		end
+
+		local get_control=function()
+			return string.format("%3d %s %3d",it.control,render_bar(32,0,127,it.value),it.value)
+		end
+
+		local get_bend=function()
+			return string.format("%2d %s %5d",it.channel,render_bar(64,-8192,8912,it.value),it.value)
+		end
+
+		local get_program=function()
+			return string.format("%2d %3d",it.channel,it.program)
+		end
+		
+
+		if it then
+
+			local s=get_path().." "..get_type().." "
+
+			if it.type=="PORT_SUBSCRIBED" then
+
+				print(s..get_subpath())
+
+			elseif it.type=="PORT_UNSUBSCRIBED" then
+
+				print(s..get_subpath())
+
+			elseif it.type=="NOTE" then
+
+				print(s..get_note())
+
+			elseif it.type=="NOTEON" then
+
+				print(s..get_note())
+
+			elseif it.type=="NOTEOFF" then
+
+				print(s..get_note())
+
+			elseif it.type == "PITCHBEND" then
+
+				print(s..get_bend())
+
+			elseif it.type == "CONTROLLER" then
+
+				print(s..get_control())
+
+			elseif it.type == "PGMCHANGE" then
+
+				print(s..get_program())
+
+			else
+
+				print(s..get_d32())
+
+			end
+
+		end
 	
 	until done
 

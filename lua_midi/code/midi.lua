@@ -323,9 +323,15 @@ local ravel=function(e)
 
 	if     event_type == "PORT_SUBSCRIBED"   then
 
+		o.sub_source=e[1]..":"..e[2]
+		o.sub_dest=e[3]..":"..e[4]
+
 		return o
 
 	elseif event_type == "PORT_UNSUBSCRIBED" then
+
+		o.sub_source=e[1]..":"..e[2]
+		o.sub_dest=e[3]..":"..e[4]
 
 		return o
 
@@ -396,6 +402,14 @@ local ravel=function(e)
 	elseif event_type == "CLIENT_EXIT" then
 
 		o.client=e[13]
+
+		return o
+		
+	else
+
+		o.dat1=e[13]
+		o.dat2=e[14]
+		o.dat3=e[15]
 
 		return o
 		
