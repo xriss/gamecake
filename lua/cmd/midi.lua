@@ -53,10 +53,9 @@ if cmd=="list" then
 		os.exit(0)
 	end
 	
-	local m=wmidi.create()
+	local m=wmidi.create("gamecake-midi")
 
-	local pi=m:port_create("test1",{"READ","SUBS_READ"},{"MIDI_GENERIC","SOFTWARE","PORT"})
-	local po=m:port_create("test1",{"WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"})
+	local pi=m:port_create("scan",{"READ","SUBS_READ","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"})
 
 --ls(wmidi.notes)
 

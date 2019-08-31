@@ -125,8 +125,17 @@ int lua_midi_alsa_get (lua_State *l)
 {
 part_ptr m = lua_midi_alsa_check_ptr(l,1);
 
+const char *s;
+
+snd_seq_client_info_t *info;
+
+	snd_seq_client_info_malloc(&info);
+	snd_seq_get_client_info(m,info);
+
+
+	s=snd_seq_client_info_get_name(info);
 	lua_pushstring(l,"name");
-	lua_pushstring(l,snd_seq_name(m));
+	lua_pushstring(l,s);
 	lua_rawset(l,2);
 	
 	lua_pushstring(l,"type");
@@ -137,9 +146,7 @@ part_ptr m = lua_midi_alsa_check_ptr(l,1);
 	lua_pushnumber(l,(double)snd_seq_client_id(m));
 	lua_rawset(l,2);
 
-
-
-
+	snd_seq_client_info_free(info);
 	return 0;
 }
 
@@ -150,9 +157,25 @@ set all values associated with this created client
 **+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_midi_alsa_set (lua_State *l)
 {
-part_ptr p = lua_midi_alsa_check_ptr(l,1);
+part_ptr m = lua_midi_alsa_check_ptr(l,1);
 
+const char *s;
 
+snd_seq_client_info_t *info;
+
+	snd_seq_client_info_malloc(&info);
+	snd_seq_get_client_info(m,info);
+
+	lua_getfield(l,2,"name");
+	if( lua_isstring(l,-1) )
+	{
+		s = lua_tostring(l,-1);
+		snd_seq_client_info_set_name(info, s);
+	}
+	lua_pop(l,1);
+
+	snd_seq_set_client_info(m,info);
+	snd_seq_client_info_free(info);
 	return 0;
 }
 
@@ -176,7 +199,7 @@ int sidx=0;
 	snd_seq_query_subscribe_t *subs; // we have to malloc this?
 	if(0!=snd_seq_query_subscribe_malloc(&subs))
 	{
-//		return 0; // error
+		return 0; // error
 	}
 
 	part_ptr m = lua_midi_alsa_check_ptr(l,1);
@@ -212,13 +235,14 @@ int sidx=0;
 		lua_pushstring(l,snd_seq_client_info_get_name(c));
 		lua_rawset(l,-3);
 
+		client=snd_seq_client_info_get_client(c);
 		lua_pushstring(l,"client");
-		lua_pushnumber(l,snd_seq_client_info_get_client(c));
+		lua_pushnumber(l,client);
 		lua_rawset(l,-3);
 
 		lua_pushstring(l,"ports");
 		lua_newtable(l);
-        snd_seq_port_info_set_client(p, snd_seq_client_info_get_client(c) );
+        snd_seq_port_info_set_client(p, client );
         snd_seq_port_info_set_port(p, -1);
 		pidx=0;
         while (snd_seq_query_next_port(m, p) == 0)
@@ -243,7 +267,6 @@ int sidx=0;
 			lua_pushstring(l,snd_seq_port_info_get_name(p));
 			lua_rawset(l,-3);
 			
-			client=snd_seq_client_info_get_client(c);
 			lua_pushstring(l,"client");
 			lua_pushnumber(l,client);
 			lua_rawset(l,-3);
@@ -253,51 +276,50 @@ int sidx=0;
 			lua_newtable(l);
 
 			sidx=0;
-			for(flag=0;flag<=1;flag++)
+			snd_seq_query_subscribe_set_client(subs, client);
+			snd_seq_query_subscribe_set_port(subs, port);
+			snd_seq_query_subscribe_set_type(subs, SND_SEQ_QUERY_SUBS_READ );
+			snd_seq_query_subscribe_set_index(subs, 0);
+			while(snd_seq_query_port_subscribers(m, subs) >= 0)
 			{
-				snd_seq_query_subscribe_set_client(subs, client);
-				snd_seq_query_subscribe_set_port(subs, port);
-				snd_seq_query_subscribe_set_type(subs, flag ? SND_SEQ_QUERY_SUBS_READ : SND_SEQ_QUERY_SUBS_WRITE );
-				snd_seq_query_subscribe_set_index(subs, 0);
-				while(snd_seq_query_port_subscribers(m, subs) >= 0)
-				{
 
-					lua_pushnumber(l,++sidx);
-					lua_newtable(l);
-					
-					lua_pushstring(l,"type");
-					lua_pushstring(l,flag ? "READ" : "WRITE" );
-					lua_rawset(l,-3);
+				lua_pushnumber(l,++sidx);
+				lua_newtable(l);
+				
+				lua_pushstring(l,"source_client");
+				lua_pushnumber(l,client);
+				lua_rawset(l,-3);
+				lua_pushstring(l,"source_port");
+				lua_pushnumber(l,port);
+				lua_rawset(l,-3);
 
+				addr=snd_seq_query_subscribe_get_addr(subs);
+				lua_pushstring(l,"dest_client");
+				lua_pushnumber(l,addr->client);
+				lua_rawset(l,-3);
+				lua_pushstring(l,"dest_port");
+				lua_pushnumber(l,addr->port);
+				lua_rawset(l,-3);
 
-					addr=snd_seq_query_subscribe_get_addr(subs);
-					lua_pushstring(l,"client");
-					lua_pushnumber(l,addr->client);
-					lua_rawset(l,-3);
-					lua_pushstring(l,"port");
-					lua_pushnumber(l,addr->port);
-					lua_rawset(l,-3);
+				lua_pushstring(l,"queue");
+				lua_pushnumber(l,snd_seq_query_subscribe_get_queue(subs));
+				lua_rawset(l,-3);
 
-					lua_pushstring(l,"queue");
-					lua_pushnumber(l,snd_seq_query_subscribe_get_queue(subs));
-					lua_rawset(l,-3);
+				lua_pushstring(l,"exclusive");
+				lua_pushboolean(l,snd_seq_query_subscribe_get_exclusive(subs));
+				lua_rawset(l,-3);
 
-					lua_pushstring(l,"exclusive");
-					lua_pushboolean(l,snd_seq_query_subscribe_get_exclusive(subs));
-					lua_rawset(l,-3);
+				lua_pushstring(l,"time_update");
+				lua_pushboolean(l,snd_seq_query_subscribe_get_time_update(subs));
+				lua_rawset(l,-3);
 
-					lua_pushstring(l,"time_update");
-					lua_pushboolean(l,snd_seq_query_subscribe_get_time_update(subs));
-					lua_rawset(l,-3);
+				lua_pushstring(l,"time_real");
+				lua_pushboolean(l,snd_seq_query_subscribe_get_time_real(subs));
+				lua_rawset(l,-3);
 
-					lua_pushstring(l,"time_real");
-					lua_pushboolean(l,snd_seq_query_subscribe_get_time_real(subs));
-					lua_rawset(l,-3);
+				lua_rawset(l,-3);
 
-					lua_rawset(l,-3);
-
-					snd_seq_query_subscribe_set_index(subs, sidx);
-				}
+				snd_seq_query_subscribe_set_index(subs, sidx);
 			}
 
 			lua_rawset(l,-3);
@@ -321,6 +343,126 @@ int sidx=0;
 
 
 
+static void fill_subs( lua_State *l , snd_seq_port_subscribe_t *sub , int idx )
+{
+	int i;
+	snd_seq_addr_t seq_addr[1];
+
+	lua_getfield(l,idx,"source_client");
+	if( lua_isnumber(l,-1) )
+	{
+		seq_addr->client = lua_tonumber(l,-1);
+		lua_getfield(l,idx,"source_port");
+		if( lua_isnumber(l,-1) )
+		{
+			seq_addr->port = lua_tonumber(l,-1);
+			snd_seq_port_subscribe_set_sender(sub, seq_addr);
+		}
+		lua_pop(l,1);
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,idx,"dest_client");
+	if( lua_isnumber(l,-1) )
+	{
+		seq_addr->client = lua_tonumber(l,-1);
+		lua_getfield(l,idx,"dest_port");
+		if( lua_isnumber(l,-1) )
+		{
+			seq_addr->port = lua_tonumber(l,-1);
+			snd_seq_port_subscribe_set_dest(sub, seq_addr);
+		}
+		lua_pop(l,1);
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,idx,"time_update");
+	if( lua_isnumber(l,-1) )
+	{
+		i = lua_tonumber(l,-1);
+		snd_seq_port_subscribe_set_time_update(sub, i);
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,idx,"time_real");
+	if( lua_isnumber(l,-1) )
+	{
+		i = lua_tonumber(l,-1);
+		snd_seq_port_subscribe_set_time_real(sub, i);
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,idx,"queue");
+	if( lua_isnumber(l,-1) )
+	{
+		i = lua_tonumber(l,-1);
+		snd_seq_port_subscribe_set_queue(sub, i);
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,idx,"exclusive");
+	if( lua_isnumber(l,-1) )
+	{
+		i = lua_tonumber(l,-1);
+		snd_seq_port_subscribe_set_exclusive(sub, i);
+	}
+	lua_pop(l,1);
+
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+**
+
+subscribe ports
+
+**+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_midi_alsa_subscribe (lua_State *l)
+{
+part_ptr m = lua_midi_alsa_check_ptr(l,1);
+
+	snd_seq_port_subscribe_t* sub;
+	int err;
+
+	snd_seq_port_subscribe_alloca(&sub);
+	
+	fill_subs(l,sub,2);
+
+	if((err=snd_seq_subscribe_port(m, sub)))
+	{
+		snd_seq_port_subscribe_free(sub);
+		return 0;
+	}
+
+	snd_seq_port_subscribe_free(sub);
+	lua_pushboolean(l,1);
+	return 1;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+**
+
+subscribe ports
+
+**+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_midi_alsa_unsubscribe (lua_State *l)
+{
+part_ptr m = lua_midi_alsa_check_ptr(l,1);
+
+	snd_seq_port_subscribe_t* sub;
+	int err;
+
+	snd_seq_port_subscribe_alloca(&sub);
+	
+	fill_subs(l,sub,2);
+
+	if((err=snd_seq_unsubscribe_port(m, sub)))
+	{
+		snd_seq_port_subscribe_free(sub);
+		return 0;
+	}
+
+	snd_seq_port_subscribe_free(sub);
+	lua_pushboolean(l,1);
+	return 1;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+**
 
@@ -329,9 +471,9 @@ port create
 **+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_midi_alsa_port_create (lua_State *l)
 {
-part_ptr p = lua_midi_alsa_check_ptr(l,1);
+part_ptr m = lua_midi_alsa_check_ptr(l,1);
 
-	int port = snd_seq_create_simple_port(p,
+	int port = snd_seq_create_simple_port(m,
 		luaL_checkstring(l,2),  // name
 		luaL_checknumber(l,3),  // caps
 		luaL_checknumber(l,4)); // type
@@ -348,11 +490,11 @@ port destroy
 **+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_midi_alsa_port_destroy (lua_State *l)
 {
-part_ptr p = lua_midi_alsa_check_ptr(l,1);
+part_ptr m = lua_midi_alsa_check_ptr(l,1);
 
 	int port = luaL_checknumber(l,2);
 
-	if( snd_seq_delete_simple_port(p,port) < 0 )
+	if( snd_seq_delete_simple_port(m,port) < 0 )
 	{
 		return 0;
 	}
@@ -368,7 +510,17 @@ port set
 **+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_midi_alsa_port_set (lua_State *l)
 {
-part_ptr p = lua_midi_alsa_check_ptr(l,1);
+part_ptr m = lua_midi_alsa_check_ptr(l,1);
+const char *s;
+
+	lua_getfield(l,2,"name");
+	if( lua_isstring(l,-1) )
+	{
+		s = lua_tostring(l,-1);
+//		snd_seq_client_info_set_name(sub, s);
+	}
+	lua_pop(l,1);
+
 
 	return 0;
 }
@@ -379,7 +531,7 @@ port get
 **+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_midi_alsa_port_get (lua_State *l)
 {
-part_ptr p = lua_midi_alsa_check_ptr(l,1);
+part_ptr m = lua_midi_alsa_check_ptr(l,1);
 
 	return 0;
 }
@@ -393,11 +545,11 @@ pull an event ( or an error )
 **+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_midi_alsa_pull (lua_State *l)
 {
-part_ptr p = lua_midi_alsa_check_ptr(l,1);
+part_ptr m = lua_midi_alsa_check_ptr(l,1);
 
 	snd_seq_event_t *e;
 
-	snd_seq_event_input(p, &e); // get event
+	snd_seq_event_input(m, &e); // get event
 	if(!e) { return 0; }
 
 	lua_newtable(l);
@@ -464,9 +616,9 @@ peek an event, non blocking and may return nil
 **+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_midi_alsa_peek (lua_State *l)
 {
-part_ptr p = lua_midi_alsa_check_ptr(l,1);
+part_ptr m = lua_midi_alsa_check_ptr(l,1);
 
-	if( snd_seq_event_input_pending(p, 0) > 0)
+	if( snd_seq_event_input_pending(m, 0) > 0)
 	{
 		return lua_midi_alsa_pull(l);
 	}
@@ -481,7 +633,7 @@ push an event
 **+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_midi_alsa_push (lua_State *l)
 {
-part_ptr p = lua_midi_alsa_check_ptr(l,1);
+part_ptr m = lua_midi_alsa_check_ptr(l,1);
 int b=0;
 
 	snd_seq_event_t e[1]={0};
@@ -527,7 +679,7 @@ int b=0;
 	}
 
 
-	snd_seq_event_output_direct(p,e);
+	snd_seq_event_output_direct(m,e);
 
 	return 0;
 }
@@ -553,6 +705,9 @@ int luaopen_midi_alsa_core (lua_State *l)
 		{"port_set",		lua_midi_alsa_port_set		},
 
 		{"scan",			lua_midi_alsa_scan			},
+
+		{"subscribe",		lua_midi_alsa_subscribe		},
+		{"unsubscribe",		lua_midi_alsa_unsubscribe	},
 
 		{"peek",			lua_midi_alsa_peek			},
 		{"pull",			lua_midi_alsa_pull			},
