@@ -75,20 +75,49 @@ M.bake=function(args)
 			v.default=v[2]
 			v.type=type(v[2])
 			v.help=v[3]
-			args.inputs[v.name]=v
+			if type(v.name)=="string" then
+				args.inputs[v.name]=v
+			end
 		end
-		table.sort(args.inputs,function(a,b) return a.name<b.name end)
+		table.sort(args.inputs,function(a,b)
+			local ta,tb=type(a),type(b)
+			if ta=="string" and tb=="string" then
+				return a.name<b.name
+			elseif ta=="number" and tb=="number" then
+				return a.name<b.name
+			elseif ta=="number" and tb=="string" then
+				return true
+			else
+				return false
+			end
+		end)
 		return args
 	end
 	args:new_inputs()
 
 	args.help=function()
+		local lines={}
+		lines[#lines+1] = ""
 		local tab={}
 		for i,v in ipairs(args.inputs) do
-			tab[i]={ ("--"..v.name.." ("..tostring(v.type)..")") , v.help:gsub("\n"," ").."\n --"..v.name.."="..tostring(v.default).."" }
+			if type(v.name)=="number" then -- example
+				lines[#lines+1] = v.default
+				lines[#lines+1] = ""
+				for _,l in ipairs( wstr.smart_wrap( v.help:gsub("\n"," ") , 60 ) ) do
+					lines[#lines+1] = "                "..l
+				end
+				lines[#lines+1] = ""
+			end
 		end
-		local lines=args.doublewrap(tab,78,30," : ")
-		for i,v in ipairs(lines) do lines[i]="  "..v end -- pad
+		
+		for i,v in ipairs(args.inputs) do
+			if type(v.name)=="string" then -- option
+				tab[#tab+1]={ ("--"..v.name.." ("..tostring(v.type)..")") , v.help:gsub("\n"," ").."\n --"..v.name.."="..tostring(v.default).."" }
+			end
+		end
+		for i,v in ipairs( args.doublewrap(tab,78,30," : ") ) do lines[#lines+1]=" "..v end
+		
+		lines[#lines+1] = ""
 		return lines
 	end
 	
@@ -126,7 +155,9 @@ M.bake=function(args)
 		args.data=data
 		args.inputs=args.inputs or {}
 		
-		for i,v in ipairs(args.inputs) do data[v.name:lower()]=v.default end
+		for i,v in ipairs(args.inputs) do
+			if type(v.name)=="string" then data[v.name:lower()]=v.default end
+		end
 		
 		-- perform very simple processing of args to be passed into the command
 		local state=false

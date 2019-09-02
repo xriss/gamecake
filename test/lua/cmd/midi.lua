@@ -7,9 +7,9 @@ local ls=function(s) print(wstr.dump(s)) end
 
 local wmidi=require("wetgenes.midi")
 
-local m=wmidi.create("gamecake-midi")
+local m=wmidi.create("tweaker")
 
-local pi=m:port_create("dump",{"READ","SUBS_READ","DUPLEX","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"})
+local pi=m:port_create("tweak",{"READ","SUBS_READ","DUPLEX","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"})
 
 repeat
 	local done=false

@@ -10,6 +10,8 @@ local wmidi=require("wetgenes.midi")
 local cmds={
 	{ "list",		"List available midi connections."},
 	{ "dump",		"Listen for and print events."},
+	{ "join",		"Connect the output of one port into the input of another."},
+	{ "break",		"Break the connection between two ports."},
 }
 for i,v in ipairs(cmds) do
 	v.name=v[1]
@@ -35,20 +37,176 @@ end
 local cmd=table.remove(arg,1)       -- check what cmd is asked for
 local cmd=cmd and string.lower(cmd) -- force lowercase
 
-if cmd=="list" then
+if cmd=="join" then
 
 	local args=require("cmd.args").bake({inputs=default_inputs{
 
---		{	"in",		false,	"Input chanels only.", },
---		{	"out",		false,	"Output chanels only.", },
+		{	1,			arg[0].." "..cmd.." client:port client:port",	[[
+
+Connect from the first client:port into the second client:port If no 
+port is given than port 0 is assumed.
+
+		]], },
+
+	}}):parse(arg):sanity()
+		
+	if not ( arg[1] or arg[2] ) then args.data.help=true end 
+	
+	if args.data.help then
+		print(table.concat(args:help(),"\n"))
+		os.exit(0)
+	end
+	
+	local from_client,from_port=arg[1]:match("(%d+):(%d+)")
+	from_client=arg[1]:match("(%d+)")
+	local into_client,into_port=arg[2]:match("(%d+):(%d+)")
+	into_client=arg[2]:match("(%d+)")
+	
+	from_client=assert( tonumber(from_client) )
+	from_port=tonumber(from_port) or 0
+	into_client=assert( tonumber(into_client) )
+	into_port=tonumber(into_port) or 0
+
+	print(" Creating connection from "..from_client..":"..from_port.." into "..into_client..":"..into_port)
+
+	local m=wmidi.create("gamecake-midi")
+
+	m:subscribe{
+		source_client=from_client,
+		source_port=from_port,
+		dest_client=into_client,
+		dest_port=into_port,
+	}
+
+elseif cmd=="break" then
+
+	local args=require("cmd.args").bake({inputs=default_inputs{
+
+		{	1,			arg[0].." "..cmd.." client[:port] client[:port]",	[[
+
+Disconnect the connection between the first client:port and the second client:port If no 
+port is given than port 0 is assumed.
+
+		]], },
+
+		{	2,			arg[0].." "..cmd.." client[:port]",	[[
+
+Disconnect all connection into or from this client:port If no 
+port is given than all ports will be disconnected.
+
+		]], },
+
+
+	}}):parse(arg):sanity()
+		
+	if not ( arg[1] ) then args.data.help=true end 
+	
+	if args.data.help then
+		print(table.concat(args:help(),"\n"))
+		os.exit(0)
+	end
+
+	if not arg[2] then
+	
+		local client,port=arg[1]:match("(%d+):(%d+)")
+		client=arg[1]:match("(%d+)")
+
+		client=assert( tonumber(client) )
+		port=tonumber(port)
+		
+		if not port then
+
+			print(" Breaking all connections on all ports, into or from "..client)
+		
+			local m=wmidi.create("gamecake-midi")
+			m:scan()
+
+			for n,v in pairs(m.subscriptions) do
+			
+				if v.source_client == client or v.dest_client == client then
+
+					print((" Disconnecting %3d:%-2d %3d:%-2d"):format(
+						v.source_client,	v.source_port,
+						v.dest_client,		v.dest_port))
+
+					m:unsubscribe{
+						source_client=v.source_client,
+						source_port=v.source_port,
+						dest_client=v.dest_client,
+						dest_port=v.dest_port,
+					}
+
+				end
+			end
+
+		else
+
+			print(" Breaking all connections, into or from "..client..":"..port)
+
+			local m=wmidi.create("gamecake-midi")
+			m:scan()
+		
+			for n,v in pairs(m.subscriptions) do
+			
+				if	( v.source_client == client and v.source_port == port ) or
+					( v.dest_client == client and v.dest_port == port ) then
+
+					print((" Disconnecting %3d:%-2d %3d:%-2d"):format(
+						v.source_client,	v.source_port,
+						v.dest_client,		v.dest_port))
+
+					m:unsubscribe{
+						source_client=v.source_client,
+						source_port=v.source_port,
+						dest_client=v.dest_client,
+						dest_port=v.dest_port,
+					}
+
+				end
+			end
+
+		end
+
+	else
+
+		local from_client,from_port=arg[1]:match("(%d+):(%d+)")
+		from_client=arg[1]:match("(%d+)")
+		local into_client,into_port=arg[2]:match("(%d+):(%d+)")
+		into_client=arg[2]:match("(%d+)")
+
+		from_client=assert( tonumber(from_client) )
+		from_port=tonumber(from_port) or 0
+		into_client=assert( tonumber(into_client) )
+		into_port=tonumber(into_port) or 0
+
+
+		print(" Breaking connection from "..from_client..":"..from_port.." into "..into_client..":"..into_port)
+		
+		local m=wmidi.create("gamecake-midi")
+
+		m:unsubscribe{
+			source_client=from_client,
+			source_port=from_port,
+			dest_client=into_client,
+			dest_port=into_port,
+		}
+		
+	end
+
+elseif cmd=="list" then
+
+	local args=require("cmd.args").bake({inputs=default_inputs{
+
+		{	1,			arg[0].." "..cmd,	[[
+
+List all clients and ports and connections between ports.
+
+		]], },
 
 	}}):parse(arg):sanity()
 	
 	if args.data.help then
-		print("\n"..arg[0].." list --OPTIONS \n")
-		print( "where --OPTIONS is any combination of the following :\n")
 		print(table.concat(args:help(),"\n"))
-		print("")
 		os.exit(0)
 	end
 	
@@ -235,16 +393,19 @@ elseif cmd=="dump" then
 
 	local args=require("cmd.args").bake({inputs=default_inputs{
 
---		{	"in",		false,	"Input chanels only.", },
---		{	"out",		false,	"Output chanels only.", },
+		{	"all",			true,	"Attempt to connect to all ports so we will receive any public event broadcast on this system", },
+
+
+		{	1,			arg[0].." "..cmd,	[[
+
+Open a port and dump any events we receive on it to the console, press CTRL+C to exit.
+
+		]], },
 
 	}}):parse(arg):sanity()
 	
 	if args.data.help then
-		print("\n"..arg[0].." dump --OPTIONS \n")
-		print( "where --OPTIONS is any combination of the following :\n")
 		print(table.concat(args:help(),"\n"))
-		print("")
 		os.exit(0)
 	end
 	
@@ -288,7 +449,7 @@ print("subscribing to "..n)
 	end
 
 print()
-print("Waiting for events CTRL+C to exit")
+print("Waiting for events on "..pi.client..":"..pi.port.." press CTRL+C to exit.")
 print()
 
 	repeat
