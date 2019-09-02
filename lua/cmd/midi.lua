@@ -393,12 +393,16 @@ elseif cmd=="dump" then
 
 	local args=require("cmd.args").bake({inputs=default_inputs{
 
-		{	"all",			true,	"Attempt to connect to all ports so we will receive any public event broadcast on this system", },
+		{	"all",			true,	"Attempt to connect to all ports so we will receive any public event broadcast on this system.", },
 
+		{	"from",			"",		"Connect from this input client:port into our dump port, this overrides the --all flag.", },
+		{	"into",			"",		"Connect from our dump port into this output client:port.", },
 
 		{	1,			arg[0].." "..cmd,	[[
 
-Open a port and dump any events we receive on it to the console, press CTRL+C to exit.
+Open a port and dump any events we receive to the console, one line per 
+event, then send the even out of our port. We can be used as a debug 
+shim to see what events are travelling between two ports.
 
 		]], },
 
@@ -411,43 +415,92 @@ Open a port and dump any events we receive on it to the console, press CTRL+C to
 	
 	local m=wmidi.create("gamecake-midi")
 
-	local pi=m:port_create("dump",{"WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"})
+	local pi=m:port_create("dump",{"READ","SUBS_READ","DUPLEX","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"})
 	m:scan()
 	pi=m.ports[ m.client..":"..pi ]
 	
+	if args.data.into and args.data.into~="" then
+
+		local client,port=args.data.into:match("(%d+):(%d+)")
+		client=args.data.into:match("(%d+)")
+
+		client=assert( tonumber(client) )
+		port=tonumber(port) or 0
+
+		local v={
+			source_client=pi.client,
+			source_port=pi.port,
+			dest_client=client,
+			dest_port=port,
+		}
+		print((" Connecting %3d:%-2d %3d:%-2d"):format(
+			v.source_client,	v.source_port,
+			v.dest_client,		v.dest_port))
+		m:subscribe(v)
+	end
+	
+	
+	if args.data.from and args.data.from~="" then
+
+		local client,port=args.data.from:match("(%d+):(%d+)")
+		client=args.data.from:match("(%d+)")
+
+		client=assert( tonumber(client) )
+		port=tonumber(port) or 0
+
+		local v={
+			source_client=client,
+			source_port=port,
+			dest_client=pi.client,
+			dest_port=pi.port,
+		}
+		print((" Connecting %3d:%-2d %3d:%-2d"):format(
+			v.source_client,	v.source_port,
+			v.dest_client,		v.dest_port))
+		m:subscribe(v)
+
+	elseif args.data.all then
 
 -- reset any subscriptions
-	for n,v in pairs(m.subscriptions) do
-		if v.source_client==pi.client or v.dest_client==pi.client then
+		for n,v in pairs(m.subscriptions) do
+			if v.source_client==pi.client or v.dest_client==pi.client then
 
-print("unsubscribing from "..n)
+				print((" Disconnecting %3d:%-2d %3d:%-2d"):format(
+					v.source_client,	v.source_port,
+					v.dest_client,		v.dest_port))
 
-			m:unsubscribe{
-				source_client=v.source_client,
-				source_port=v.source_port,
-				dest_client=v.dest_client,
-				dest_port=v.dest_port,
-			}
+				m:unsubscribe{
+					source_client=v.source_client,
+					source_port=v.source_port,
+					dest_client=v.dest_client,
+					dest_port=v.dest_port,
+				}
+			end
 		end
-	end
 
--- subscribe to eveything	
-	for n,v in pairs(m.ports) do
-	
-		if v.READ and v.SUBS_READ and v.client~=pi.client then
+	-- subscribe to eveything	
+		for n,v in pairs(m.ports) do
+		
+			if v.READ and v.SUBS_READ and v.client~=pi.client then
 
-print("subscribing to "..n)
+				local it={
+					source_client=v.client,
+					source_port=v.port,
+					dest_client=pi.client,
+					dest_port=pi.port,
+				}
+					print((" Connecting %3d:%-2d %3d:%-2d"):format(
+					it.source_client,	it.source_port,
+					it.dest_client,		it.dest_port))
 
-			m:subscribe{
-				source_client=v.client,
-				source_port=v.port,
-				dest_client=pi.client,
-				dest_port=pi.port,
-			}
+				m:subscribe(it)
+			end
+		
 		end
-	
-	end
 
+	end
+	
+	
 print()
 print("Waiting for events on "..pi.client..":"..pi.port.." press CTRL+C to exit.")
 print()
@@ -548,6 +601,13 @@ print()
 				print(s..get_d32())
 
 			end
+
+-- and output the event
+
+			it.source="0:"..pi.port
+			it.dest=nil
+
+			m:push(it)
 
 		end
 	
