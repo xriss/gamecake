@@ -235,7 +235,7 @@ end
 
 	m:get()
 
-get all values for this connection and store thme in m
+get all values for this connection and store them in m
 
 
 ]]
@@ -286,7 +286,7 @@ end
 	m:port_destroy(num)
 
 Destroy a previously created port. Returns nil on failure, true on 
-sucess.
+success.
 
 ]]
 base.port_destroy=function(m,p)
@@ -418,7 +418,7 @@ local unravel=function(o)
 	return o
 end
 
--- make the events a little bit more suscinct
+-- make the events a little bit more succinct
 local ravel=function(e)
 
 	local event_type=midi.SND_SEQ_EVENT[e.type]
@@ -546,6 +546,8 @@ end
 
 Receive an input midi event, blocking until there is one.
 
+Occasionally, for "reasons" this may return nil.
+
 ]]
 base.pull=function(m)
 	local e=core.pull(m[0])
@@ -574,10 +576,25 @@ end
 		dest_client=1,		dest_port=0,
 	}
 
-Creates a persistant subscription between two ports.
+	m:subscribe{
+		source="0:0",
+		dest="1:0",
+	}
+
+Creates a persistent subscription between two ports.
 
 ]]
 base.subscribe=function(m,it)
+	if it.source then
+		it.source_client,it.source_port=it.source:match("(%d+):(%d+)")
+		it.source_client=tonumber(it.source_client)
+		it.source_port=tonumber(it.source_port)
+	end
+	if it.dest then
+		it.dest_client,it.dest_port=it.dest:match("(%d+):(%d+)")
+		it.dest_client=tonumber(it.dest_client)
+		it.dest_port=tonumber(it.dest_port)
+	end
 	return core.subscribe(m[0],it)
 end
 
@@ -588,10 +605,20 @@ end
 		dest_client=1,		dest_port=0,
 	}
 
-Removes a persistant subscription from between two ports.
+Removes a persistent subscription from between two ports.
 
 ]]
 base.unsubscribe=function(m,it)
+	if it.source then
+		it.source_client,it.source_port=it.source:match("(%d+):(%d+)")
+		it.source_client=tonumber(it.source_client)
+		it.source_port=tonumber(it.source_port)
+	end
+	if it.dest then
+		it.dest_client,it.dest_port=it.dest:match("(%d+):(%d+)")
+		it.dest_client=tonumber(it.dest_client)
+		it.dest_port=tonumber(it.dest_port)
+	end
 	return core.unsubscribe(m[0],it)
 end
 
