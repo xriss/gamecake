@@ -336,7 +336,7 @@ print()
 		end
 
 		local get_control=function()
-			return string.format("%3d %s %3d",it.control,render_bar(32,0,127,it.value),it.value)
+			return string.format("%2d %3d %s %3d",it.channel,it.control,render_bar(32,0,127,it.value),it.value)
 		end
 
 		local get_bend=function()

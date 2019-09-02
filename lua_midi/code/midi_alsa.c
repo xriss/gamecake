@@ -658,11 +658,25 @@ int b=0;
 	lua_rawgeti(l,2,13);
 	if( lua_isnumber(l,-1) ) // test for 32bit data
 	{
-		e->data.raw32.d[0]=luaL_checknumber(l,-1); lua_pop(l,1);
+		if(lua_isnumber(l,-1))
+		{
+			e->data.raw32.d[0]=lua_tonumber(l,-1);
+		}
+		lua_pop(l,1);
+		
 		lua_rawgeti(l,2,14);
-		e->data.raw32.d[1]=luaL_checknumber(l,-1); lua_pop(l,1);
+		if(lua_isnumber(l,-1))
+		{
+			e->data.raw32.d[1]=lua_tonumber(l,-1);
+		}
+		lua_pop(l,1);
+
 		lua_rawgeti(l,2,15);
-		e->data.raw32.d[2]=luaL_checknumber(l,-1); lua_pop(l,1);
+		if(lua_isnumber(l,-1))
+		{
+			e->data.raw32.d[2]=lua_tonumber(l,-1);
+		}
+		lua_pop(l,1);
 	}
 	else // if no 32bit data then use 8bit data
 	{
@@ -670,7 +684,11 @@ int b=0;
 		for(b=0;b<12;b++)
 		{
 			lua_rawgeti(l,2,b+1);
-			e->data.raw8.d[b]=luaL_checknumber(l,-1); lua_pop(l,1);
+			if(lua_isnumber(l,-1))
+			{
+				e->data.raw8.d[b]=lua_tonumber(l,-1);
+			}
+			lua_pop(l,1);
 		}
 	}
 

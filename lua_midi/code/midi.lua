@@ -294,11 +294,128 @@ base.port_destroy=function(m,p)
 end
 
 -- do the reverse of ravel
-local unravel=function(e)
+local unravel=function(o)
 
-	local o={}
+	local e={}
+	
+	e.type=o.type
+	if type(e.type)=="string" then
+		e.type=midi.SND_SEQ_EVENT[e.type] -- convert to number
+	end
+	
+	if o.source then
+		e.source_client,e.source_port=o.source:match("(%d+):(%d+)")
+	else
+		e.source_client=o.source_client or -1 -- this will get changed to our client id
+		e.source_port=o.source_port
+	end
+	
+	if o.dest then
+		e.dest_client,e.dest_port=o.dest:match("(%d+):(%d+)")
+	elseif not o.dest_client and not o.dest_port then -- default
+		e.dest_client=254 -- broadcast to subscribers
+		e.dest_port=0 -- this port is ignored
+	else
+		e.dest_client=o.dest_client
+		e.dest_port=o.dest_port
+	end
 
-	return e
+	local fill_note=function()
+		e[1]=o.channel
+		e[2]=o.note
+		e[3]=o.velocity
+	end
+
+	if     event_type == "PORT_SUBSCRIBED"   then
+
+		e[1],e[2]=o.sub_source:match("(%d+):(%d+)")
+		e[3],e[4]=o.sub_dest:match("(%d+):(%d+)")
+		e[1]=tonumber(e[1]) e[2]=tonumber(e[2])
+		e[3]=tonumber(e[3]) e[4]=tonumber(e[4])
+		return e
+
+	elseif event_type == "PORT_UNSUBSCRIBED" then
+
+		e[1],e[2]=o.sub_source:match("(%d+):(%d+)")
+		e[3],e[4]=o.sub_dest:match("(%d+):(%d+)")
+		e[1]=tonumber(e[1]) e[2]=tonumber(e[2])
+		e[3]=tonumber(e[3]) e[4]=tonumber(e[4])
+		return e
+
+	elseif event_type == "PORT_START" then
+
+		e[13]=o.client
+		e[14]=o.dat2
+		e[15]=o.dat3
+		return e
+
+	elseif event_type == "START" then
+
+		e[13]=o.dat1
+		e[14]=o.dat2
+		e[15]=o.dat3
+		return e
+
+	elseif event_type == "TEMPO" then
+
+		e[14]=o.tempo
+		return e
+
+	elseif event_type == "NOTE" then
+
+		fill_note()
+		return e
+
+	elseif event_type == "NOTEON" then
+
+		fill_note()
+		return e
+
+	elseif event_type == "NOTEOFF" then
+
+		fill_note()
+		return e
+		
+	elseif event_type == "PITCHBEND" then
+
+		e[13]=o.channel
+		e[15]=o.value
+		if e[15]<0 then e[15]=e[15]+0x100000000 end
+		return e
+
+	elseif event_type == "CONTROLLER" then
+
+		e[13]=o.channel
+		e[14]=o.control
+		e[15]=o.value
+		return e
+
+	elseif event_type == "PGMCHANGE" then
+
+		e[13]=o.channel
+		e[15]=o.program
+		return e
+		
+	elseif event_type == "CLIENT_START" then
+
+		e[13]=o.client
+		return e
+		
+	elseif event_type == "CLIENT_EXIT" then
+
+		e[13]=o.client
+		return e
+		
+	else
+
+		e[13]=o.dat1
+		e[14]=o.dat2
+		e[15]=o.dat3
+		return e
+		
+	end
+
+	return o
 end
 
 -- make the events a little bit more suscinct
@@ -312,12 +429,9 @@ local ravel=function(e)
 	o.dest=e.dest_client..":"..e.dest_port
 	
 	local fill_note=function()
-		local channel=e[1]
-		local note=e[2]
-		local velocity=e[3]
-		o.channel=channel
-		o.note=note
-		o.velocity=velocity
+		o.channel=e[1]
+		o.note=e[2]
+		o.velocity=e[3]
 	end
 	
 
@@ -325,14 +439,12 @@ local ravel=function(e)
 
 		o.sub_source=e[1]..":"..e[2]
 		o.sub_dest=e[3]..":"..e[4]
-
 		return o
 
 	elseif event_type == "PORT_UNSUBSCRIBED" then
 
 		o.sub_source=e[1]..":"..e[2]
 		o.sub_dest=e[3]..":"..e[4]
-
 		return o
 
 	elseif event_type == "PORT_START" then
@@ -375,7 +487,6 @@ local ravel=function(e)
 		local v=e[15]
 		if v>=0x80000000 then v=v-0x100000000 end
 		o.value=v
-		
 		return o
 
 	elseif event_type == "CONTROLLER" then
@@ -383,26 +494,22 @@ local ravel=function(e)
 		o.channel=e[13]
 		o.control=e[14]
 		o.value=e[15]
-
 		return o
 
 	elseif event_type == "PGMCHANGE" then
 
 		o.channel=e[13]
 		o.program=e[15]
-
 		return o
 		
 	elseif event_type == "CLIENT_START" then
 
 		o.client=e[13]
-
 		return o
 		
 	elseif event_type == "CLIENT_EXIT" then
 
 		o.client=e[13]
-
 		return o
 		
 	else
@@ -410,7 +517,6 @@ local ravel=function(e)
 		o.dat1=e[13]
 		o.dat2=e[14]
 		o.dat3=e[15]
-
 		return o
 		
 	end
