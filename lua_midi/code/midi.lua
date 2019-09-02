@@ -298,9 +298,13 @@ local unravel=function(o)
 
 	local e={}
 	
+	local event_type=o.type
+	
 	e.type=o.type
 	if type(e.type)=="string" then
 		e.type=midi.SND_SEQ_EVENT[e.type] -- convert to number
+	else
+		event_type=midi.SND_SEQ_EVENT[e.type] -- convert from number
 	end
 	
 	if o.source then
@@ -603,6 +607,11 @@ end
 	m:unsubscribe{
 		source_client=0,	source_port=0,
 		dest_client=1,		dest_port=0,
+	}
+
+	m:unsubscribe{
+		source="0:0",
+		dest="1:0",
 	}
 
 Removes a persistent subscription from between two ports.

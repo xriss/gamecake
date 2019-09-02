@@ -2,8 +2,6 @@
 local wstr=require("wetgenes.string")
 local ls=function(s) print(wstr.dump(s)) end
 
-local wgrd=require("wetgenes.grd")
-
 local doublewrap=require("cmd.args").doublewrap
 local splitpath=require("cmd.args").splitpath
 

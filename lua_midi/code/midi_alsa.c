@@ -693,6 +693,8 @@ int b=0;
 	}
 
 
+	snd_seq_ev_set_direct(e);
+
 	snd_seq_event_output_direct(m,e);
 
 	return 0;
