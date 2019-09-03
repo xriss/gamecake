@@ -631,3 +631,69 @@ base.unsubscribe=function(m,it)
 	return core.unsubscribe(m[0],it)
 end
 
+--[[#lua.wetgenes.midi.toclientport
+
+	client,port = m:toclientport(str)
+
+Convert a "client:port" string to two numbers client,port this can 
+either be two decimal numbers or, if a m:scan() has been performed, 
+then a partial case insensitive matching to the name of existing 
+clients and ports may get a port number.
+
+Will return a nil if we can not work out which client or port you mean.
+
+]]
+base.toclientport=function(m,str)
+
+	local client,port
+
+	if str:find(":",1,true) then -- string contains a port
+		client,port=str:match("(.*):(.*)")
+	else -- string is just a client
+		client=str
+	end
+
+-- check for explicit numbers
+	if client and client~="" and ( tostring(tonumber(client) or 0) == client ) then
+		client=tonumber(client)
+	end
+
+	if port and port~="" and ( tostring(tonumber(port) or 0) == port ) then
+		port=tonumber(port)
+	end
+	
+	if m.clients and m.ports then -- we can check for partial string matches
+
+-- partial name match for a client
+		
+		for n,v in pairs( m.clients ) do
+			if type(client)=="string" and client~="" then
+				if v.name:lower():find(client:lower(),1,true) then
+					client=v.client
+				end
+			end
+		end
+
+-- if we have a client then we can also search for a port
+		
+		for n,v in pairs( m.ports ) do
+			if type(port)=="string" and ( type(client)=="number" or client=="" ) and port~="" then
+				if v.client==client or client=="" then
+					if v.name:lower():find(port:lower(),1,true) then
+						client=v.client
+						port=v.port
+					end
+				end
+			end
+		end
+
+	end
+
+-- if still a string then we failed to match a name
+
+	if type(client)=="string" then client=nil end
+	if type(port)=="string" then port=nil end
+
+	return client,port
+end
+
