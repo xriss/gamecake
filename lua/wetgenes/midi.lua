@@ -744,7 +744,7 @@ base.event_to_string=function(m,it)
 	end
 
 	local get_note=function()
-		return string.format("%2d %3d %4s %s %3d",it.channel,it.note,wmidi.notes[it.note],render_bar(32,0,127,it.velocity),it.velocity)
+		return string.format("%2d %3d %4s %s %3d",it.channel,it.note,midi.notes[it.note],render_bar(32,0,127,it.velocity),it.velocity)
 	end
 
 	local get_control=function()
