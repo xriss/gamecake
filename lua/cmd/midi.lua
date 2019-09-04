@@ -12,6 +12,7 @@ local cmds={
 	{ "dump",		"Listen for and print events."},
 	{ "join",		"Connect the output of one port into the input of another."},
 	{ "break",		"Break the connection between two ports."},
+	{ "tweak",		"Create a tweak port to automatically adjust events from a device."},
 }
 for i,v in ipairs(cmds) do
 	v.name=v[1]
@@ -57,7 +58,7 @@ port is given than port 0 is assumed.
 		os.exit(0)
 	end
 	
-	local m=wmidi.create("gamecake-midi")
+	local m=wmidi.create("gamecake-midi-scan")
 	m:scan()
 
 	local from_client,from_port=m:string_to_clientport(arg[1])
@@ -104,7 +105,7 @@ port is given than all ports will be disconnected.
 
 	if not arg[2] then
 	
-		local m=wmidi.create("gamecake-midi")
+		local m=wmidi.create("gamecake-midi-break")
 		m:scan()
 
 		local client,port=m:string_to_clientport(arg[1])
@@ -159,7 +160,7 @@ port is given than all ports will be disconnected.
 
 	else
 
-		local m=wmidi.create("gamecake-midi")
+		local m=wmidi.create("gamecake-midi-break")
 		m:scan()
 
 		local from_client,from_port=m:string_to_clientport(arg[1])
@@ -197,7 +198,7 @@ List all clients and ports and connections between ports.
 		os.exit(0)
 	end
 	
-	local m=wmidi.create("gamecake-midi")
+	local m=wmidi.create("gamecake-midi-list")
 	m:scan()
 
 	local maxn=8
@@ -395,7 +396,7 @@ shim to see what events are travelling between two ports.
 		os.exit(0)
 	end
 	
-	local m=wmidi.create("gamecake-midi")
+	local m=wmidi.create("gamecake-midi-dump")
 
 	local pi=m:port_create("dump",{"READ","SUBS_READ","DUPLEX","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"})
 	m:scan()
@@ -479,6 +480,53 @@ shim to see what events are travelling between two ports.
 	end
 	
 	
+print()
+print("Waiting for events on "..pi.client..":"..pi.port.." press CTRL+C to exit.")
+print()
+
+	repeat
+		local done=false
+
+		local it=m:pull()
+		
+		if it then
+
+			print( m:event_to_string(it) )
+
+-- and output the event
+
+			it.source="0:"..pi.port
+			it.dest=nil
+
+			m:push(it)
+
+		end
+	
+	until done
+
+elseif cmd=="tweak" then
+
+	local args=require("cmd.args").bake({inputs=default_inputs{
+
+		{	1,			arg[0].." "..cmd.." SCRIPT",	[[
+
+Create a tweak port using the given script.
+
+		]], },
+
+	}}):parse(arg):sanity()
+	
+	if args.data.help then
+		print(table.concat(args:help(),"\n"))
+		os.exit(0)
+	end
+	
+	local m=wmidi.create("gamecake-midi-tweak")
+
+	local pi=m:port_create("dump",{"READ","SUBS_READ","DUPLEX","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"})
+	m:scan()
+	pi=m.ports[ m.client..":"..pi ]
+		
 print()
 print("Waiting for events on "..pi.client..":"..pi.port.." press CTRL+C to exit.")
 print()
