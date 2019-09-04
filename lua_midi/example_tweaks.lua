@@ -1,4 +1,11 @@
 
+--[[
+
+This should be run as tweak script, something like this.
+
+	gamecake-midi tweak lua_midi/example_tweaks.lua
+
+]]
 
 tweaks={
 
