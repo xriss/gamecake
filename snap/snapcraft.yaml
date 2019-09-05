@@ -31,6 +31,28 @@ parts:
     stage-packages:
       - libglu1-mesa
       - libgl1-mesa-dri
+      - libasound2
+      - libasyncns0
+      - libflac8
+      - libluajit-5.1-2
+      - libogg0
+      - libopenal1
+      - libpulse0
+      - libsdl2-2.0-0
+      - libsndfile1
+      - libsndio6.1
+      - libvorbis0a
+      - libvorbisenc2
+      - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-egl1
+      - libxcursor1
+      - libxi6
+      - libxinerama1
+      - libxkbcommon0
+      - libxrandr2
+      - libxrender1
+      - libxss1
 
 apps:
 
