@@ -77,7 +77,8 @@ https://code.launchpad.net/~xriss/+snap/gamecake the following should
 get you a snap install of gamecake.
 
 	sudo snap install gamecake
-	sudo snap connect gamecake:joystick
+	sudo snap connect gamecake:joystick :joystick
+	sudo snap connect gamecake:alsa :alsa
 
 
 Gamecake is now slowly becoming fully available as a luarock, all our 

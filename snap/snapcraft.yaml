@@ -8,6 +8,8 @@ description: |
 grade: stable # must be 'stable' to release into candidate/stable channels
 confinement: strict # use 'strict' once you have the right plugs and slots
 
+base: core18
+
 parts:
 
   gamecake:
@@ -19,6 +21,8 @@ parts:
     override-build: |
       ./make --openal=sys --clean
       cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
+      cp exe/gamecake-midi $SNAPCRAFT_PART_INSTALL/gamecake-midi
+      cp exe/gamecake-grd $SNAPCRAFT_PART_INSTALL/gamecake-grd
 
     build-packages:
       - premake4
@@ -29,6 +33,28 @@ parts:
     stage-packages:
       - libglu1-mesa
       - libgl1-mesa-dri
+      - libasound2
+      - libasyncns0
+      - libflac8
+      - libluajit-5.1-2
+      - libogg0
+      - libopenal1
+      - libpulse0
+      - libsdl2-2.0-0
+      - libsndfile1
+      - libsndio6.1
+      - libvorbis0a
+      - libvorbisenc2
+      - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-egl1
+      - libxcursor1
+      - libxi6
+      - libxinerama1
+      - libxkbcommon0
+      - libxrandr2
+      - libxrender1
+      - libxss1
 
 apps:
 
@@ -40,8 +66,18 @@ apps:
       - home
       - x11
       - opengl
+      - alsa
       - pulseaudio
       - network
       - joystick
       - hidraw
+
+  gamecake-grd:
+
+    command: gamecake-grd
+
+  gamecake-midi:
+
+    command: gamecake-midi
+
 
