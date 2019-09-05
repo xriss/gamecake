@@ -53,7 +53,6 @@ parts:
       - libxrandr2
       - libxrender1
       - libxss1
-      - libpulsecommon-11.1.so
 
     organize:
       usr/lib/*/pulseaudio/libpulsecommon-11.1.so: usr/lib/libpulsecommon-11.1.so
