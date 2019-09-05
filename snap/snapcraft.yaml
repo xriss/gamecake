@@ -8,7 +8,15 @@ description: |
 grade: stable # must be 'stable' to release into candidate/stable channels
 confinement: strict # use 'strict' once you have the right plugs and slots
 
-base: core18
+#base: core18
+
+architectures:
+  - build-on: i386
+  - build-on: amd64
+  - build-on: armhf
+  - build-on: arm64
+  - build-on: ppc64el
+
 
 parts:
 
@@ -57,12 +65,14 @@ parts:
     organize:
       usr/lib/*/pulseaudio/libpulsecommon-11.1.so: usr/lib/libpulsecommon-11.1.so
 
+    after:
+      - desktop-glib-only
 
 apps:
 
   gamecake:
 
-    command: gamecake
+    command: desktop-launch gamecake
 
     plugs:
       - home
@@ -76,10 +86,10 @@ apps:
 
   grd:
 
-    command: gamecake -lcmd -- grd
+    command: desktop-launch gamecake -lcmd -- grd
 
   midi:
 
-    command: gamecake -lcmd -- midi
+    command: desktop-launch gamecake -lcmd -- midi
 
 
