@@ -21,8 +21,6 @@ parts:
     override-build: |
       ./make --openal=sys --clean
       cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
-      cp exe/gamecake-midi $SNAPCRAFT_PART_INSTALL/gamecake-midi
-      cp exe/gamecake-grd $SNAPCRAFT_PART_INSTALL/gamecake-grd
 
     build-packages:
       - premake4
@@ -52,10 +50,10 @@ apps:
 
   gamecake-grd:
 
-    command: gamecake-grd
+    command: gamecake -lcmd -- grd
 
   gamecake-midi:
 
-    command: gamecake-midi
+    command: gamecake -lcmd -- midi
 
 
