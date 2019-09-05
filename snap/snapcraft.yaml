@@ -54,8 +54,9 @@ parts:
       - libxrender1
       - libxss1
 
-    after:
-      - desktop-glib-only
+    organize:
+      usr/lib/*/pulseaudio/libpulsecommon-11.1.so: usr/lib/libpulsecommon-11.1.so
+
 
 apps:
 
