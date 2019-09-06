@@ -27,6 +27,37 @@ parts:
       - libglib2.0-bin
 
 
+  alsa:
+    plugin: nil
+
+    source: https://github.com/diddledan/snapcraft-alsa.git
+
+    override-pull: |
+      cat > alsa.conf <<EOF
+      pcm.!default {
+        type pulse
+        fallback "sysdefault"
+        hint {
+          show on
+          description "Default ALSA Output (currently PulseAudio Sound Server)"
+        }
+      }
+      ctl.!default {
+        type pulse
+        fallback "sysdefault"
+      }
+      EOF
+
+    override-build: |
+      install -m644 -D -t $SNAPCRAFT_PART_INSTALL/etc alsa.conf
+
+    build-packages:
+      - libasound2-dev
+
+    stage-packages:
+      - libasound2
+      - libasound2-plugins
+
   gamecake:
 
     plugin: make
@@ -75,6 +106,7 @@ parts:
 
     after:
       - desktop-glib-only
+      - alsa
 
 apps:
 
@@ -96,6 +128,8 @@ apps:
       - wayland
       - unity7
 
+    environment:
+      ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
 
   grd:
 
