@@ -1,6 +1,6 @@
 cd `dirname $0`
 
-VNUM=`gamecake ./bump.lua`
+VNUM=`../exe/gamecake ./bump.lua`
 
 echo $VNUM
 
