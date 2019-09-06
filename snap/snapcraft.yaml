@@ -8,9 +8,24 @@ description: |
 grade: stable # must be 'stable' to release into candidate/stable channels
 confinement: strict # use 'strict' once you have the right plugs and slots
 
-#base: core18
+base: core18
 
 parts:
+
+  desktop-glib-only:
+  
+    build-packages:
+      - libglib2.0-dev
+    
+    plugin: make
+    
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    
+    source-subdir: glib-only
+    
+    stage-packages:
+      - libglib2.0-bin
+
 
   gamecake:
 
