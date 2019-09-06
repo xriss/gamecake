@@ -135,7 +135,12 @@ apps:
 
     command: gamecake -lcmd -- grd
 
+    environment:
+      ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
+
   midi:
 
     command: gamecake -lcmd -- midi
 
+    environment:
+      ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
