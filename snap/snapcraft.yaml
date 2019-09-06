@@ -65,7 +65,7 @@ apps:
 
   gamecake:
 
-    command: gamecake
+    command: desktop-launch gamecake
 
     plugs:
       - home
@@ -81,9 +81,6 @@ apps:
       - wayland
       - unity7
 
-  gui:
-
-    command: desktop-launch gamecake
 
   grd:
 
