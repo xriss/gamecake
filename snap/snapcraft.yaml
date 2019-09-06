@@ -20,7 +20,7 @@ parts:
 
     override-build: |
       ./make --openal=sys --clean
-      cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
+      cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/bin/gamecake
 
     build-packages:
       - premake4
@@ -55,7 +55,7 @@ parts:
       - libxss1
 
     organize:
-      usr/lib/*/pulseaudio/libpulsecommon-11.1.so: usr/lib/libpulsecommon-11.1.so
+      usr/lib/*/pulseaudio/*: usr/lib/
 
     after:
       - desktop-glib-only
