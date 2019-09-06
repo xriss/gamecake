@@ -10,13 +10,6 @@ confinement: strict # use 'strict' once you have the right plugs and slots
 
 #base: core18
 
-architectures:
-  - build-on: i386
-  - build-on: amd64
-  - build-on: armhf
-  - build-on: arm64
-  - build-on: ppc64el
-
 parts:
 
   gamecake:
@@ -71,7 +64,7 @@ apps:
 
   gamecake:
 
-    command: desktop-launch gamecake
+    command: gamecake
 
     plugs:
       - home
@@ -82,12 +75,20 @@ apps:
       - network
       - joystick
       - hidraw
+      - desktop
+      - desktop-legacy
+      - wayland
+      - unity7
+
+  gui:
+
+    command: desktop-launch gamecake
 
   grd:
 
-    command: desktop-launch gamecake -lcmd -- grd
+    command: gamecake -lcmd -- grd
 
   midi:
 
-    command: desktop-launch gamecake -lcmd -- midi
+    command: gamecake -lcmd -- midi
 
