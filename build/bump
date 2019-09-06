@@ -3,7 +3,6 @@ cd `dirname $0`
 VNUM=`../exe/gamecake ./bump.lua`
 
 echo $VNUM
-echo $VNUM
 
 git add ..
 git commit -m.
