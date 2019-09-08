@@ -525,7 +525,6 @@ Create a tweak port using the given script.
 	end
 	
 	local tweaks={}
-	
 
 -- load all supplied scripts
 	for i=1,#arg do
@@ -533,10 +532,11 @@ Create a tweak port using the given script.
 		local s=assert(fp:read("*a"))
 		fp:close()
 		
-		local it=wsandbox.ini(s,{print=print})
+		local it=wsandbox.ini(s,{print=print,ls=ls})
 		if it and it.tweaks then
-			for i,v in ipairs(it.tweaks) do
+			for _,v in ipairs(it.tweaks) do
 				tweaks[#tweaks+1]=v
+				print( "Loaded "..tostring(v.name).." from "..arg[i])
 			end
 			print( "Loaded "..(#it.tweaks).." tweaks from "..arg[i])
 		else
@@ -545,62 +545,21 @@ Create a tweak port using the given script.
 	end
 --ls(tweaks)
 
-	
 	local m=wmidi.create("gamecake-midi-tweak")
-	m:scan()
-
--- build list of ports we should subscribe to
-	local from_ports={}
-
-	for n,port in pairs(m.ports) do
 	
-		local client=m.clients[port.client]
-
-		if port.SUBS_READ then -- possible port we can subscribe to
-		
-			local clientportname=client.name..":"..port.name
-		
-			for i,tweak in ipairs(tweaks) do
-			
-				if tweak.from == clientportname then
-					from_ports[n]={}
-				end
-				
-			end
-		
-		end
-	
+	local tweakports={}
+	for i,v in ipairs(tweaks) do
+		local id=assert( m:port_create(v.name or "tweak"..i,{"READ","SUBS_READ","DUPLEX","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"}) )
+		tweakports[id]=v
 	end
-	
-	local subscribe_count=0
-	for n,v in pairs(from_ports) do subscribe_count=subscribe_count+1 end
-	if subscribe_count>16 then
-		print("Attempting to subscribe to more than 16 ports at once, this will not work :)")
-	end
+	m:scan() -- update info about these new ports
 
-	for n,v in pairs(from_ports) do
-		v.port=m.ports[n]
-		v.client=m.clients[v.port.client]
-		v.name=v.client.name.."("..v.port.port..")"
-		v.id=assert( m:port_create(v.name,{"READ","SUBS_READ","DUPLEX","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"}) )
-
-		local c={
-			source_client=v.client.client,
-			source_port=v.port.port,
-			dest_client=m.client,
-			dest_port=v.id,
-		}
-		print((" Connecting %3d:%-2d %3d:%-2d"):format(
-			c.source_client,	c.source_port,
-			c.dest_client,		c.dest_port))
-		m:subscribe(c)
-	end
-	m:scan() -- get info about these new ports
-			
 print()
-print("Waiting for events")
-for n,v in pairs(from_ports) do
-	print( "\tFrom "..v.client.client..":"..v.port.port.." \""..v.client.name..":"..v.port.name.."\" into "..m.client..":"..v.id)
+print("Waiting for events on ")
+for n,v in pairs(tweakports) do
+	local p=m.client..":"..n
+	local port=m.ports[p]
+	print( "\t"..m.client..":"..n.."\tgamecake-midi-tweak:"..port.name)
 end
 print("press CTRL+C to exit.")
 print()
@@ -612,25 +571,23 @@ print()
 		
 		if it then
 		
-			local client,port=it.source:match("(%d+):(%d+)")
-			client=m.clients[ tonumber(client) ]
-			if client then
-				port=m.ports[ client.client..":"..tonumber(port) ]
-			end
-			if client and port then
+			local client,port=it.dest:match("(%d+):(%d+)")
+			local tweak=tweakports[ tonumber(port) ]
+
+			if tweak then
 			
-				local clientportname=client.name..":"..port.name
+				local dest=it.dest -- remember dest as that is where we will send it later
+			
+-- return the same event or a new event or nil to block this event
+-- we will sort out the source and dest so it re broadcasts
+				it=tweak.event(m,it)
+-- you could alsp spit out multiple events inside the function with m:push() and just return a nil here
+-- to say it has been deal with
 
-				for i,tweak in ipairs(tweaks) do
-					if tweak.from == clientportname and it then
-						it=tweak.event(m,it) -- return the same event or a new event or nil to block this event
-					end
-				end
-
-	-- and output the event if it still exists
+-- and output the event if it still exists
 				if it then
-					it.source=it.dest
-					it.dest=nil
+					it.source=dest
+					it.dest=nil -- broadcast
 					m:push(it)
 				end
 

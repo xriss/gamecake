@@ -3,15 +3,20 @@
 
 This should be run as tweak script, something like this.
 
-	gamecake-midi tweak lua_midi/example_tweaks.lua
+	gamecake.midi tweak lua_midi/example_tweaks.lua
 
 ]]
 
 tweaks={
 
 	{
+		name="testing1",
+	},
+
+	{
+-- name of tweak
 		name="testing",
-		from="Midi Through:Midi Through Port-0", -- explicit device and port name
+		
 		event=function(m,e)
 		
 			if e.type=="NOTE" or e.type=="NOTEON" or e.type=="NOTEOFF" then
