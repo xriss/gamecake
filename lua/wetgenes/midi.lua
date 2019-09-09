@@ -200,7 +200,7 @@ base.scan=function(m,t)
 		for _,p in ipairs(c.ports) do
 
 			for _,s in ipairs(p.subscriptions) do
-				t.subscriptions[ s.source_client..":"..s.source_port.." -> "..s.dest_client..":"..s.dest_port]=s
+				t.subscriptions[ s.source_client..":"..s.source_port.." > "..s.dest_client..":"..s.dest_port]=s
 			end
 --			p.subscriptions=nil -- remove from inside port
 			
@@ -227,6 +227,12 @@ base.scan=function(m,t)
 		end
 --		c.ports=nil -- remove from inside client
 	end
+	
+	for n,p in pairs(t.ports) do
+		local c=t.clients[p.client]
+		p.path=c.name..":"..p.name
+	end
+	
 
 	return m
 end

@@ -3,17 +3,28 @@
 
 This should be run as tweak script, something like this.
 
-	gamecake-midi tweak lua_midi/example_tweaks.lua
+	gamecake.midi tweak lua_midi/example_tweaks.lua
 
 ]]
+
+-- after setting up the tweaks we want to try and join these ports
+-- our clientname is tweakcake and the portname is the name used in the tweak
+joins={
+	{"Midi Through:Midi Through Port-0","tweakcake:testing"},
+}
+
 
 tweaks={
 
 	{
+-- name of tweak
 		name="testing",
-		from="Midi Through:Midi Through Port-0", -- explicit device and port name
-		event=function(m,e)
 		
+		event=function(m,e)
+
+-- if you want to see what each event looks like then uncomment the next line
+-- ls(e)
+
 			if e.type=="NOTE" or e.type=="NOTEON" or e.type=="NOTEOFF" then
 
 -- only deal with non zero velocity
@@ -40,10 +51,21 @@ tweaks={
 			
 			end
 
--- print it (this might slow down event processing)
+-- print it (this might slow down event processing so if you notice latency then stop doing this)
 			print( m:event_to_string(e) )
 
+-- return event to be broadcast
 			return e
+--[[
+
+Alternatively rather than returning an event to be broadcast we could 
+broadcast it ourselves and return nil, this way we can easily turn one 
+event into many.
+
+			e.source=e.dest		-- move the dest to source
+			e.dest=nil			-- and set the dest to nil
+			m:push(e)			-- will broadcast to any listeners
+]]
 		end
 	},
 	

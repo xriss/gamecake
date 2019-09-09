@@ -41,6 +41,10 @@ end
 local cmd=table.remove(arg,1)       -- check what cmd is asked for
 local cmd=cmd and string.lower(cmd) -- force lowercase
 
+local process_command
+
+process_command=function( cmd , arg )
+
 if cmd=="join" then
 
 	local args=require("cmd.args").bake({inputs=default_inputs{
@@ -58,18 +62,32 @@ port is given than port 0 is assumed.
 	
 	if args.data.help then
 		print(table.concat(args:help(),"\n"))
-		os.exit(0)
+		return
 	end
 	
-	local m=wmidi.create("gamecake-midi-scan")
+	local m=wmidi.create("scancake")
 	m:scan()
 
 	local from_client,from_port=m:string_to_clientport(arg[1])
 	local into_client,into_port=m:string_to_clientport(arg[2])
 	from_port=from_port or 0
 	into_port=into_port or 0
+	
+	if not from_client then
+		print("unknown client "..arg[1])
+		return
+	end
+	if not into_client then
+		print("unknown client "..arg[2])
+		return
+	end
+	
+	local from=from_client..":"..from_port
+	local into=into_client..":"..into_port
+	local frompath=m.ports[from].path
+	local intopath=m.ports[into].path
 
-	print(" Creating connection from "..from_client..":"..from_port.." into "..into_client..":"..into_port)
+	print(" Creating connection from "..from.." into "..into.." ( "..frompath.." > "..intopath.." )")
 
 	m:subscribe{
 		source_client=from_client,
@@ -103,12 +121,12 @@ port is given than all ports will be disconnected.
 	
 	if args.data.help then
 		print(table.concat(args:help(),"\n"))
-		os.exit(0)
+		return
 	end
 
 	if not arg[2] then
 	
-		local m=wmidi.create("gamecake-midi-break")
+		local m=wmidi.create("breakcake")
 		m:scan()
 
 		local client,port=m:string_to_clientport(arg[1])
@@ -163,7 +181,7 @@ port is given than all ports will be disconnected.
 
 	else
 
-		local m=wmidi.create("gamecake-midi-break")
+		local m=wmidi.create("breakcake")
 		m:scan()
 
 		local from_client,from_port=m:string_to_clientport(arg[1])
@@ -198,10 +216,10 @@ List all clients and ports and connections between ports.
 	
 	if args.data.help then
 		print(table.concat(args:help(),"\n"))
-		os.exit(0)
+		return
 	end
 	
-	local m=wmidi.create("gamecake-midi-list")
+	local m=wmidi.create("listcake")
 	m:scan()
 
 	local maxn=8
@@ -220,8 +238,10 @@ List all clients and ports and connections between ports.
 	for n,v in pairs(m.clients) do clist[#clist+1]=n end
 	table.sort(clist)
 	for _,n in ipairs(clist) do local v=m.clients[n]
-		local s=string.format("%"..maxn.."s %3d",v.name:sub(-maxn),v.client)
-		print( s )
+		if v.client ~= m.client then -- do not list ourselves
+			local s=string.format("%"..maxn.."s %3d",v.name:sub(-maxn),v.client)
+			print( s )
+		end
 	end
 	print()
 	
@@ -396,10 +416,10 @@ shim to see what events are travelling between two ports.
 	
 	if args.data.help then
 		print(table.concat(args:help(),"\n"))
-		os.exit(0)
+		return
 	end
 	
-	local m=wmidi.create("gamecake-midi-dump")
+	local m=wmidi.create("dumpcake")
 
 	local pi=m:port_create("dump",{"READ","SUBS_READ","DUPLEX","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"})
 	m:scan()
@@ -521,11 +541,11 @@ Create a tweak port using the given script.
 	
 	if args.data.help then
 		print(table.concat(args:help(),"\n"))
-		os.exit(0)
+		return
 	end
 	
 	local tweaks={}
-	
+	local joins={}
 
 -- load all supplied scripts
 	for i=1,#arg do
@@ -533,10 +553,14 @@ Create a tweak port using the given script.
 		local s=assert(fp:read("*a"))
 		fp:close()
 		
-		local it=wsandbox.ini(s,{print=print})
+		local it=wsandbox.ini(s,{print=print,ls=ls})
 		if it and it.tweaks then
-			for i,v in ipairs(it.tweaks) do
+			for _,v in ipairs(it.joins or {}) do
+				joins[#joins+1]=v
+			end
+			for _,v in ipairs(it.tweaks or {}) do
 				tweaks[#tweaks+1]=v
+				print( "Loaded "..tostring(v.name).." from "..arg[i])
 			end
 			print( "Loaded "..(#it.tweaks).." tweaks from "..arg[i])
 		else
@@ -545,62 +569,29 @@ Create a tweak port using the given script.
 	end
 --ls(tweaks)
 
+	local m=wmidi.create("tweakcake")
 	
-	local m=wmidi.create("gamecake-midi-tweak")
-	m:scan()
-
--- build list of ports we should subscribe to
-	local from_ports={}
-
-	for n,port in pairs(m.ports) do
-	
-		local client=m.clients[port.client]
-
-		if port.SUBS_READ then -- possible port we can subscribe to
-		
-			local clientportname=client.name..":"..port.name
-		
-			for i,tweak in ipairs(tweaks) do
-			
-				if tweak.from == clientportname then
-					from_ports[n]={}
-				end
-				
-			end
-		
-		end
-	
+	local tweakports={}
+	for i,v in ipairs(tweaks) do
+		local id=assert( m:port_create(v.name or "tweak"..i,{"READ","SUBS_READ","DUPLEX","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"}) )
+		tweakports[id]=v
 	end
-	
-	local subscribe_count=0
-	for n,v in pairs(from_ports) do subscribe_count=subscribe_count+1 end
-	if subscribe_count>16 then
-		print("Attempting to subscribe to more than 16 ports at once, this will not work :)")
-	end
+	m:scan() -- update info about these new ports
 
-	for n,v in pairs(from_ports) do
-		v.port=m.ports[n]
-		v.client=m.clients[v.port.client]
-		v.name=v.client.name.."("..v.port.port..")"
-		v.id=assert( m:port_create(v.name,{"READ","SUBS_READ","DUPLEX","WRITE","SUBS_WRITE"},{"MIDI_GENERIC","SOFTWARE","PORT"}) )
-
-		local c={
-			source_client=v.client.client,
-			source_port=v.port.port,
-			dest_client=m.client,
-			dest_port=v.id,
-		}
-		print((" Connecting %3d:%-2d %3d:%-2d"):format(
-			c.source_client,	c.source_port,
-			c.dest_client,		c.dest_port))
-		m:subscribe(c)
-	end
-	m:scan() -- get info about these new ports
-			
 print()
-print("Waiting for events")
-for n,v in pairs(from_ports) do
-	print( "\tFrom "..v.client.client..":"..v.port.port.." \""..v.client.name..":"..v.port.name.."\" into "..m.client..":"..v.id)
+print("Performing port joins")
+print()
+for i,arg in ipairs(joins) do
+	arg[0]=""
+	process_command("join",arg)
+end
+
+print()
+print("Waiting for events on ")
+for n,v in pairs(tweakports) do
+	local p=m.client..":"..n
+	local port=m.ports[p]
+	print( "\t"..m.client..":"..n.."\t"..port.path)
 end
 print("press CTRL+C to exit.")
 print()
@@ -612,25 +603,23 @@ print()
 		
 		if it then
 		
-			local client,port=it.source:match("(%d+):(%d+)")
-			client=m.clients[ tonumber(client) ]
-			if client then
-				port=m.ports[ client.client..":"..tonumber(port) ]
-			end
-			if client and port then
+			local client,port=it.dest:match("(%d+):(%d+)")
+			local tweak=tweakports[ tonumber(port) ]
+
+			if tweak then
 			
-				local clientportname=client.name..":"..port.name
+				local dest=it.dest -- remember dest as that is where we will broadcast from later
+			
+-- return the same event or a new event or nil to block this event
+-- we will sort out the source and dest so it re broadcasts
+				it=tweak.event(m,it)
+-- you could alsp spit out multiple events inside the function with m:push() and just return a nil here
+-- to say it has been deal with
 
-				for i,tweak in ipairs(tweaks) do
-					if tweak.from == clientportname and it then
-						it=tweak.event(m,it) -- return the same event or a new event or nil to block this event
-					end
-				end
-
-	-- and output the event if it still exists
+-- and output the event if it still exists
 				if it then
-					it.source=it.dest
-					it.dest=nil
+					it.source=dest
+					it.dest=nil -- broadcast
 					m:push(it)
 				end
 
@@ -645,6 +634,9 @@ else -- print help
 	print("\n"..arg[0].." COMMAND ".."...\n")
 	print("Where COMMAND is one of the following :\n")
 	print("  "..table.concat(doublewrap(cmds,78,30," : "),"\n  ").."\n")
-	os.exit(0)
+	return
 
 end
+
+end
+process_command(cmd,arg)
