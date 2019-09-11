@@ -58,11 +58,11 @@ end
 function wtiles.render_lines(widget,lines)
 
 	local g=widget.tilemap_grd
-	g:clear(widget.background_tile or 0x000000)
+	g:clear(widget.background_tile or 0x00000000)
 	for i,v in ipairs(lines) do
 		local s=v.s
 		if s then
-			g:pixels(0,i-1,#s/3,1,s)
+			g:pixels(0,i-1,#s/4,1,s)
 		end
 	end
 
@@ -111,11 +111,11 @@ function wtiles.skin(widget)
 		gl.TexImage2D(
 			gl.TEXTURE_2D,
 			0,
-			gl.RGB,
+			gl.RGBA,
 			widget.tilemap_grd.width,
 			widget.tilemap_grd.height,
 			0,
-			gl.RGB,
+			gl.RGBA,
 			gl.UNSIGNED_BYTE,
 			widget.tilemap_grd.data )
 
@@ -193,16 +193,8 @@ function wtiles.setup(widget,def)
 
 	widget.lines={}
 
-	widget.tilemap_grd=wgrd.create(wgrd.FMT_U8_RGB,256,256,1)
+	widget.tilemap_grd=wgrd.create(wgrd.FMT_U8_RGBA,256,256,1)
 
---[[
-	local g=widget.tilemap_grd
-	for y=0,0 do
-		for i=0,255 do
-			g:pixels(i,y,1,1,{(i%96)+32,0,1}) -- splat test chars into grid
-		end
-	end
-]]
 	return widget
 end
 

@@ -82,16 +82,16 @@ void main(void)
 {
 	vec4 bg,fg; // colors
 	vec4 c;
-	vec3 d;
+	vec4 d;
 	vec2 uv=v_texcoord.xy+map_info.xy;		// base uv
 	vec2 tc=fract(uv);						// tile uv
 	vec2 tm=(floor(mod(uv,map_info.zw))+vec2(0.5,0.5))/map_info.zw;			// map uv
 	
-	d=texture2D(tex_map, tm).rgb;	
+	d=texture2D(tex_map, tm).rgba;	
 	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba;
 	
-	bg=get_color(       d.b*255.0  / 16.0   ); // high 4 bits are background color (usually 0)
-	fg=get_color( mod( (d.b*255.0) , 16.0 ) ); //  low 4 bits are foreground color
+	bg=get_color( d.b*255.0 ); // background color
+	fg=get_color( d.a*255.0 ); // foreground color
 
 	c*=fg; // forground tint, can adjust its alpha	
 	c=((bg*(1.0-c.a))+c); // background color mixed with pre-multiplied foreground
