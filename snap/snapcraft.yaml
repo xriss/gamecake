@@ -149,6 +149,5 @@ apps:
 slots:
   gamecake:
     interface: content
-    content: executables
     read: 
-      - $SNAP/bin
+      - $SNAP/
