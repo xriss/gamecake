@@ -157,7 +157,7 @@ wtexteditor.texteditor_refresh=function(widget)
 	widget.cx=cx -- remember the scroll positions in characters
 	widget.cy=cy
 
-	pan.background_tile=0x0c0c0000 -- default tile
+	pan.background_tile=0x1a1a0000 -- default tile
 
 	for y=cy+1,cy+256 do
 		local ps={}
@@ -172,21 +172,21 @@ wtexteditor.texteditor_refresh=function(widget)
 				if pl>=256*3 then break end -- max width
 				ps[pl+1]=string.byte(vn,i,i)
 				ps[pl+2]=0
-				ps[pl+3]=0xd
-				ps[pl+4]=0xe
+				ps[pl+3]=0x1d
+				ps[pl+4]=0x1b
 				pl=pl+4
 			end
 			
 			ps[pl+1]=32
 			ps[pl+2]=0
-			ps[pl+3]=0xc -- (y%16)*16
-			ps[pl+4]=0xe -- (y%16)*16
+			ps[pl+3]=0x1d
+			ps[pl+4]=0x1a
 			pl=pl+4
 			
 			ps[pl+1]=32
 			ps[pl+2]=0
-			ps[pl+3]=0xc
-			ps[pl+4]=0xe
+			ps[pl+3]=0x1d
+			ps[pl+4]=0x1a
 			pl=pl+4
 
 			for x=cx,cx+256 do
@@ -201,8 +201,8 @@ wtexteditor.texteditor_refresh=function(widget)
 
 				ps[pl+1]=code
 				ps[pl+2]=0
-				ps[pl+3]=0xc
-				ps[pl+4]=0xe
+				ps[pl+3]=0x1d
+				ps[pl+4]=0x1a
 				if txt.fx and txt.fy and txt.tx and txt.ty then
 					local flip=false
 					if     y==txt.fy and y==txt.ty then if i>=txt.fx and i< txt.tx then flip=true end -- single line

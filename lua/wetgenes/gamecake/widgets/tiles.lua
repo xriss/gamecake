@@ -119,6 +119,19 @@ function wtiles.skin(widget)
 			gl.UNSIGNED_BYTE,
 			widget.tilemap_grd.data )
 
+--colors
+		gl.BindTexture( gl.TEXTURE_2D , widget.colormap_tex )
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			0,
+			gl.RGBA,
+			256,
+			1,
+			0,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			widget.colormap_grd.data )
+
 		gl.Color(1,1,1,1)
 
 --		local dl={ color={1,1,1,1} , dx=0 , dy=0 }
@@ -127,12 +140,14 @@ function wtiles.skin(widget)
 
 --			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
 
-			gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_tile"), 1 )
+			gl.ActiveTexture(gl.TEXTURE2) gl.Uniform1i( p:uniform("tex_tile"), 2 )
 			gl.BindTexture( gl.TEXTURE_2D , widget.bitmap_tex )
 
-			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_map"), 0 )
+			gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_map"), 1 )
 			gl.BindTexture( gl.TEXTURE_2D , widget.tilemap_tex )
 
+			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_cmap"), 0 )
+			gl.BindTexture( gl.TEXTURE_2D , widget.colormap_tex )
 
 			gl.Uniform4f( p:uniform("tile_info"),	8,
 													16,
@@ -140,6 +155,7 @@ function wtiles.skin(widget)
 													1*16 )
 			gl.Uniform4f( p:uniform("map_info"), 	0,0,256,256 )
 
+--[[
 			for i,v in ipairs{
 				0xff336622, 0xff66aa33, 0xff66cccc, 0xff5577cc,
 				0xff333366, 0xff442233, 0xff884433, 0xffeeaa99,
@@ -149,6 +165,7 @@ function wtiles.skin(widget)
 				local n=("0123456789ABCDEF"):sub(i,i)
 				gl.Uniform4f( p:uniform("colors_"..n), 	gl.C8(v) )
 			end
+]]
 
 		end)
 
@@ -178,6 +195,7 @@ function wtiles.setup(widget,def)
 	
 	widget.bitmap_tex=gl.GenTexture()
 	widget.tilemap_tex=gl.GenTexture()
+	widget.colormap_tex=gl.GenTexture()
 
 	gl.BindTexture( gl.TEXTURE_2D , widget.bitmap_tex )
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
@@ -191,9 +209,18 @@ function wtiles.setup(widget,def)
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
 	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
 
+	gl.BindTexture( gl.TEXTURE_2D , widget.colormap_tex )
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	gl.CLAMP_TO_EDGE)
+	gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	gl.CLAMP_TO_EDGE)
+
 	widget.lines={}
 
 	widget.tilemap_grd=wgrd.create(wgrd.FMT_U8_RGBA,256,256,1)
+	widget.colormap_grd=wgrd.create(wgrd.FMT_U8_RGBA,256,1,1)
+	
+	widget.colormap_grd:pixels(0,0,256,1,require("wetgenes.gamecake.fun.bitdown").cmap_swanky32.grd) -- copy swanky32
 
 	return widget
 end
