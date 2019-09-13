@@ -67,6 +67,7 @@ parts:
     override-build: |
       ./make --openal=sys --clean
       cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
+      cp gamecakejam $SNAPCRAFT_PART_INSTALL/gamecakejam
 
     build-packages:
       - premake4
@@ -141,6 +142,14 @@ apps:
   midi:
 
     command: gamecake -lcmd -- midi
+
+    environment:
+      ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
+
+
+  jam:
+
+    command: gamecakejam
 
     environment:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf

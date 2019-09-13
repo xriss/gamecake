@@ -341,11 +341,11 @@ function wmaster.setup(widget,def)
 	function master.msg(widget,m)
 	
 		if m.class=="text" then
-			if skeys.opts.typing or m.softkey then -- fake keyboard only
+			if (skeys.opts and skeys.opts.typing) or m.softkey then -- fake keyboard only
 				widget:key(m.text)
 			end
 		elseif m.class=="key" then
-			if skeys.opts.typing or m.softkey then -- fake keyboard only
+			if (skeys.opts and skeys.opts.typing) or m.softkey then -- fake keyboard only
 				widget:key(nil,m.keyname,m.action)
 			end
 		elseif m.class=="mouse" then

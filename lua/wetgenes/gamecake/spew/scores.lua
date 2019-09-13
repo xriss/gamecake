@@ -136,9 +136,12 @@ print("Saving "..scores.filename)
 -- display 1up Hi (2up) at top of screen in 8 bit font
 -- with the scores on the line bellow
 		if mode=="arcade2" then
+		
+		
+			local view=cake.views.get()
 
-			local xh=canvas.layout.view_width
-			local yh=canvas.layout.view_height		
+			local xh=view.hx
+			local yh=view.hy
 			local fy=math.floor(yh/32)
 
 			canvas.font.set(cake.fonts.get(1))

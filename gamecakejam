@@ -1,0 +1,31 @@
+cd "`dirname $0`"
+
+DIRCAKES=/snap/gamecakejam/current/cakes
+
+if [ -d "$DIRCAKES" ]; then
+
+	$DIRCAKES/gamecakejam
+
+else
+
+DIRCAKES="`dirname $0`/../gamecakejam/cakes"
+
+echo $DIRCAKES
+
+	if [ -d "$DIRCAKES" ]; then
+
+		$DIRCAKES/gamecakejam
+
+	else
+
+		echo " "
+		echo " you must have the gamecakejam snap installed to run this script"
+		echo " install with "
+		echo " "
+		echo " snap install gamecakejam"
+		echo " "
+
+	fi
+
+fi
+
