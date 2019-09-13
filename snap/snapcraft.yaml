@@ -66,6 +66,7 @@ parts:
 
     override-build: |
       ./make --openal=sys --clean
+      mkdir $SNAPCRAFT_PART_INSTALL/bin
       cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/bin/gamecake
       cp gamecakejam $SNAPCRAFT_PART_INSTALL/bin/gamecakejam
 
@@ -103,7 +104,6 @@ parts:
 
     organize:
       usr/lib/*/pulseaudio/*: usr/lib/
-      gamecake: bin/gamecake
 
     after:
       - desktop-glib-only
