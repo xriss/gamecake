@@ -66,8 +66,8 @@ parts:
 
     override-build: |
       ./make --openal=sys --clean
-      cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
-      cp gamecakejam $SNAPCRAFT_PART_INSTALL/gamecakejam
+      cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/bin/gamecake
+      cp gamecakejam $SNAPCRAFT_PART_INSTALL/bin/gamecakejam
 
     build-packages:
       - premake4
