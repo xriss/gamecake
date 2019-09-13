@@ -4,7 +4,7 @@ DIRCAKES=/snap/gamecakejam/current/cakes
 
 if [ -d "$DIRCAKES" ]; then
 
-	$DIRCAKES/gamecakejam
+	bash $DIRCAKES/gamecakejam
 
 else
 
@@ -14,7 +14,7 @@ echo $DIRCAKES
 
 	if [ -d "$DIRCAKES" ]; then
 
-		$DIRCAKES/gamecakejam
+		bash $DIRCAKES/gamecakejam
 
 	else
 
