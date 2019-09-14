@@ -69,6 +69,8 @@ parts:
       mkdir $SNAPCRAFT_PART_INSTALL/bin
       cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/bin/gamecake
       cp gamecakejam $SNAPCRAFT_PART_INSTALL/bin/gamecakejam
+      mkdir $SNAPCRAFT_PART_INSTALL/gamecakejam
+      mkdir $SNAPCRAFT_PART_INSTALL/gamecakejam/cakes
 
     build-packages:
       - premake4
@@ -155,8 +157,8 @@ apps:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
 
 
-slots:
-  gamecake:
+plugs:
+  cakes:
     interface: content
-    read: 
-      - bin
+    target: $SNAP/gamecakejam/cakes
+    default-provider: gamecakejam:cakes
