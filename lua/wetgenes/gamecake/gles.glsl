@@ -291,6 +291,17 @@ void main(void)
 #include "gamecake_shader"
 
 
+#shader "xyz_color"
+#define XYZ 1
+#define COLOR 1
+#include "gamecake_shader"
+
+#shader "xyz_color_discard"
+#define XYZ 1
+#define COLOR 1
+#define DISCARD 0.25
+#include "gamecake_shader"
+
 #shader "xyz_tex"
 #define XYZ 1
 #define TEX 1
