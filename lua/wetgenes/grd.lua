@@ -1146,4 +1146,18 @@ base.sort_cmap=function(ga)
 	return ga
 end
 
+--[[#lua.wetgenes.grd.fillmask
+
+	ga:fillmask(gb,seedx,seedy)
+
+Fill gb with a fillmask version of ga that starts the floodfill at 
+seedx,seedy
+
+]]
+base.fillmask=function(ga,gb,seedx,seedy)
+	local r,m=core.fillmask(ga[0],gb[0],seedx,seedy)
+	core.info(gb[0],gb)
+	return r and gb,m
+end
+
 return grd

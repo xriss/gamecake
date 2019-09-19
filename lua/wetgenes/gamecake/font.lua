@@ -109,8 +109,8 @@ function font.wrap(text,opts)
 	for i,v in ipairs(ls) do
 	
 		if v:find("%s") then -- just white space
-		
-			for i,v in string.gfind(v,"\n") do -- keep newlines
+
+			for i,v in string.gmatch(v,"\n") do -- keep newlines
 				newline()
 			end
 		

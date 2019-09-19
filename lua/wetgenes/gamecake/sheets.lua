@@ -100,7 +100,6 @@ end
 sheets.loads_and_chops=function(tab)
 
 	for i,v in ipairs(tab) do
-
 		images.load(v[1],v[1])
 		local img=sheets.createimg(v[1])
 		img:chop(v[2],v[3],v[4],v[5],v[6],v[7])

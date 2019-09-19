@@ -1,0 +1,18 @@
+cd "`dirname $0`"
+
+
+if [ -f "../gamecakejam/cakes/gamecakejam" ]; then
+
+	bash ../gamecakejam/cakes/gamecakejam
+
+else
+
+	echo " "
+	echo " you must have the gamecakejam snap installed to run this script"
+	echo " install with "
+	echo " "
+	echo " snap install gamecakejam"
+	echo " "
+
+fi
+

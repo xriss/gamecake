@@ -31,7 +31,7 @@ M.bake=function(oven,gui)
 	local cake=oven.cake
 	local sounds=cake.sounds
 	local canvas=cake.canvas
-	local layout=cake.layouts.create{}
+--	local layout=cake.layouts.create{}
 	local flat=canvas.flat
 	
 	local gl=oven.gl
@@ -734,11 +734,11 @@ print("click",id)
 	
 	function gui.msg(m)
 
-		if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
-			m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is now center of screen
-			m.x=m.x+(320/2)
-			m.y=m.y+(480/2)
-		end
+--		if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
+--			m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is now center of screen
+--			m.x=m.x+(320/2)
+--			m.y=m.y+(480/2)
+--		end
 		
 
 		if gui.msg_smell_hook then
@@ -754,11 +754,11 @@ print("click",id)
 
 	function gui.draw()
 
-		layout.viewport() -- set clip area
-		layout.project23d(320,480,1/4,480*4) -- build projection
+--		layout.viewport() -- set clip area
+--		layout.project23d(320,480,1/4,480*4) -- build projection
 
-		gl.MatrixMode(gl.PROJECTION)
-		gl.LoadMatrix( layout.pmtx )
+--		gl.MatrixMode(gl.PROJECTION)
+--		gl.LoadMatrix( layout.pmtx )
 
 		gl.MatrixMode(gl.MODELVIEW)
 		gl.LoadIdentity()

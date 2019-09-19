@@ -161,13 +161,13 @@ opts.ret=opts.ret or {} -- return value is in opts.ret
 		for v in lfs.dir(d) do
 			local a=lfs.attributes(d.."/"..v)
 	--print("test",v,a.mode)
-			if a.mode=="file" then
+			if a and a.mode=="file" then
 				if string.find(v,opts.filter) then
 	--print("found",v)
 					opts.ret[#opts.ret+1]=opts.dir.."/"..v
 				end
 			end
-			if a.mode=="directory" then
+			if a and a.mode=="directory" then
 				if v:sub(1,1)~="." then
 					subdirs[#subdirs+1]=v
 				end

@@ -66,7 +66,11 @@ parts:
 
     override-build: |
       ./make --openal=sys --clean
-      cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/gamecake
+      mkdir $SNAPCRAFT_PART_INSTALL/bin
+      cp exe/gamecake.nix $SNAPCRAFT_PART_INSTALL/bin/gamecake
+      cp gamecakejam $SNAPCRAFT_PART_INSTALL/bin/gamecakejam
+      mkdir $SNAPCRAFT_PART_INSTALL/gamecakejam
+      mkdir $SNAPCRAFT_PART_INSTALL/gamecakejam/cakes
 
     build-packages:
       - premake4
@@ -102,7 +106,6 @@ parts:
 
     organize:
       usr/lib/*/pulseaudio/*: usr/lib/
-      gamecake: bin/gamecake
 
     after:
       - desktop-glib-only
@@ -146,8 +149,16 @@ apps:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
 
 
-slots:
-  gamecake:
+  jam:
+
+    command: desktop-launch gamecakejam
+
+    environment:
+      ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
+
+
+plugs:
+  cakes:
     interface: content
-    read: 
-      - bin
+    target: $SNAP/gamecakejam/cakes
+    default-provider: gamecakejam:cakes

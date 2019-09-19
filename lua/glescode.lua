@@ -389,7 +389,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			p=code.programs[pname]
 			if not p then -- try basename
 				local basename=wstr.split(pname,"?")[1]
-				local base=code.programs[basename]
+				local base=assert(code.programs[basename],basename)
 				p=code.program_source(pname,base.vsource,base.fsource,base.filename)
 				p.base=base
 			end

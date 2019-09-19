@@ -291,8 +291,8 @@ List all clients and ports and connections between ports.
 		return false
 	end)
 	table.sort(slist,function(a,b)
-		local asc,asp,adc,adp=a:match("(%d+):(%d+) %-> (%d+):(%d+)")
-		local bsc,bsp,adc,adp=b:match("(%d+):(%d+) %-> (%d+):(%d+)")
+		local asc,asp,adc,adp=a:match("(%d+):(%d+) > (%d+):(%d+)")
+		local bsc,bsp,adc,adp=b:match("(%d+):(%d+) > (%d+):(%d+)")
 		asc=tonumber(asc) asp=tonumber(asp) bsc=tonumber(bsc) bsp=tonumber(bsp)
 		adc=tonumber(adc) adp=tonumber(adp) bdc=tonumber(bdc) bdp=tonumber(bdp)
 		if asc<bsc then return true end

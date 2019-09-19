@@ -30,7 +30,7 @@ function M.bake(oven,views)
 	views.get=function() return assert(views.stack[#views.stack]) end
 	views.push=function(view) views.stack[#views.stack+1]=view end
 	views.pop=function() local view=views.get() views.stack[#views.stack]=nil return view end
-	views.apply=function() views.get().apply() end
+	views.apply=function() local view=views.get() if view then view.apply() end end
 
 	views.push_and_apply=function(view)
 		views.push(view)

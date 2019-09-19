@@ -1847,6 +1847,64 @@ struct grd_io_gif *sgif;
 	return 0;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_grd_fillmask (lua_State *l)
+{
+part_ptr pa;
+part_ptr pb;
+int seedx=0;
+int seedy=0;
+
+	pa=lua_grd_check_ptr(l,1);
+	pb=lua_grd_check_ptr(l,2);
+	if(lua_isnumber(l,3)) { seedx=lua_tonumber(l,3); }
+	if(lua_isnumber(l,4)) { seedy=lua_tonumber(l,4); }
+
+	if((pa->bmap->fmt&~GRD_FMT_PREMULT)!=GRD_FMT_U8_INDEXED)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"from format must be indexed");
+		return 2;
+	}
+
+	if( ! (pb->bmap->xscan==1) )
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"to format must be alpha");
+		return 2;
+	}
+
+	if(pa->bmap->w!=pb->bmap->w)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"fillmask failed on width");
+		return 2;
+	}
+
+	if(pa->bmap->h!=pb->bmap->h)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"fillmask failed on height");
+		return 2;
+	}
+	if(pa->bmap->d!=pb->bmap->d)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,"fillmask failed on depth");
+		return 2;
+	}
+	
+
+		
+	grd_fillmask(pa,pb,seedx,seedy,0);
+
+	lua_pushvalue(l,2);
+	return 1;
+}
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1896,6 +1954,8 @@ int luaopen_wetgenes_grd_core (lua_State *l)
 		{"blit",			lua_grd_blit},
 		
 		{"paint",			lua_grd_paint},
+
+		{"fillmask",		lua_grd_fillmask},
 
 		{"xor",				lua_grd_xor},
 		{"shrink",			lua_grd_shrink},

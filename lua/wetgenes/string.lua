@@ -192,6 +192,8 @@ wstr.dump = function(o,opts)
 	return wstr.serialize(o,opts)
 end
 
+-- since we keep using this...
+wstr.ls=function(o) print(wstr.dump(o)) end
 
 -----------------------------------------------------------------------------
 --

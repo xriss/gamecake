@@ -3053,3 +3053,168 @@ int ps=grd_sizeof_pixel(ga->bmap->fmt); // size of pixel
 }
 
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// Create an alpha mask in gb using a floodfill at a specific xy point.
+// ga must be indexed (this code is for swanky paint)
+// gb must be GRD_FMT_U8_ALPHA and the same size as ga
+// x,y is the pixel location of the start of the flood fill (topleft is 0,0)
+// threshold is how close we have to be to the starting color, 0 means exact color only.
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int grd_fillmask(struct grd *ga, struct grd *gb, int seedx, int seedy, int threshold)
+{
+	u8 *pa;
+	u8 *pb;
+	int x,y;
+	int xh,yh;
+	int ya,yb;
+	
+	int flooded;
+	int color;
+
+	int ca,cb,cl;
+	
+	
+
+	if( (ga->bmap->w!=gb->bmap->w) || (ga->bmap->h!=gb->bmap->h) )
+	{
+		gb->err="bad fillmask size"; // complain
+		return 0;
+	}
+
+	if( ! ( (ga->bmap->fmt==GRD_FMT_U8_INDEXED) || (ga->bmap->fmt==GRD_FMT_U8_INDEXED_PREMULT) ) )
+	{
+		ga->err="bad fillmask format"; // complain
+		return 0;
+	}
+
+	if( ! ( (gb->bmap->xscan==1) ) )
+	{
+		gb->err="bad fillmask format"; // complain
+		return 0;
+	}
+	
+	grd_clear(gb,0x00); // clear output to 0
+	
+
+	xh=ga->bmap->w; // cache the max x,y 
+	yh=ga->bmap->h;
+	
+	ya=ga->bmap->yscan; // cache y scan
+	yb=gb->bmap->yscan;
+
+	*( grdinfo_get_data(gb->bmap,seedx,seedy,0) )=0xff; // seed the start pixel with 0xff
+
+	color=*( grdinfo_get_data(ga->bmap,seedx,seedy,0) ); // the starting color
+	
+
+
+	flooded=1;
+	while(flooded) // repeat until a pass finds no more pixels
+	{
+		flooded=0;
+
+		for(y=0;y<yh;y++)
+		{
+			pa=grdinfo_get_data(ga->bmap,0,y,0);
+			pb=grdinfo_get_data(gb->bmap,0,y,0);
+			cl=*pb; // last
+			pa++;pb++;
+			for(x=1;x<xh;x++) // left to right
+			{
+				ca=*pa;
+				cb=*pb;
+				
+				if( (cl==0xff)&&(cb==0x00) ) // test for flood
+				{
+					if(ca==color)
+					{
+						flooded=1;
+						cb=0xff;
+						*pb=cb;
+					}
+				}
+				
+				cl=cb; // last 
+				pa++;pb++;
+			}
+
+			pa=grdinfo_get_data(ga->bmap,xh-1,y,0);
+			pb=grdinfo_get_data(gb->bmap,xh-1,y,0);
+			cl=*pb; // last
+			pa--;pb--;
+			for(x=xh-2;x>=0;x--) // right to left
+			{
+				ca=*pa;
+				cb=*pb;
+
+				if( (cl==0xff)&&(cb==0x00) ) // test for flood
+				{
+					if(ca==color)
+					{
+						flooded=1;
+						cb=0xff;
+						*pb=cb;
+					}
+				}
+
+				cl=cb; // last
+				pa--;pb--;
+			}
+		}
+
+		for(x=0;x<xh;x++)
+		{
+			pa=grdinfo_get_data(ga->bmap,x,0,0);
+			pb=grdinfo_get_data(gb->bmap,x,0,0);
+			cl=*pb; // last
+			pa+=ya;pb+=yb;
+			for(y=1;y<yh;y++) // top to bottom
+			{
+				ca=*pa;
+				cb=*pb;
+				
+				if( (cl==0xff)&&(cb==0x00) ) // test for flood
+				{
+					if(ca==color)
+					{
+						flooded=1;
+						cb=0xff;
+						*pb=cb;
+					}
+				}
+				
+				cl=cb; // last 
+				pa+=ya;pb+=yb;
+			}
+			
+			pa=grdinfo_get_data(ga->bmap,x,yh-1,0);
+			pb=grdinfo_get_data(gb->bmap,x,yh-1,0);
+			cl=*pb; // last
+			pa-=ya;pb-=yb;
+			for(y=yh-2;y>=0;y--) // bottom to top
+			{
+				ca=*pa;
+				cb=*pb;
+
+				if( (cl==0xff)&&(cb==0x00) ) // test for flood
+				{
+					if(ca==color)
+					{
+						flooded=1;
+						cb=0xff;
+						*pb=cb;
+					}
+				}
+
+				cl=cb; // last
+				pa-=ya;pb-=yb;
+			}
+		}
+
+	}
+
+	return 1; // OK
+}

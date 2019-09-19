@@ -317,6 +317,10 @@ end
 grdpaint.fill_mask=function(g,x,y)
 	if x<0 or y<0 or x>=g.width or y>=g.height then return end -- out of range
 	local r=wgrd.create(wgrd.U8_INDEXED,g.width,g.height,1)
+
+	assert( g:fillmask(r,x,y) )
+
+--[[
 	local idx=g:pixels(x,y,1,1)
 	idx=idx[1]
 	
@@ -347,6 +351,7 @@ grdpaint.fill_mask=function(g,x,y)
 			ps[p]=nil -- filled
 		end
 	end
+]]
 	
 	return r
 end
