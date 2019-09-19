@@ -253,3 +253,5 @@ int grd_adjust_contrast( struct grd *g , int sub, f32 con);
 
 int grd_sort_cmap( struct grd *g );
 
+int grd_fillmask(struct grd *ga, struct grd *gb, int seedx, int seedy, int threshold);
+
