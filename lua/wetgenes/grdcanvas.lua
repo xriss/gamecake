@@ -47,7 +47,7 @@ grdcanvas.canvas_fonts_create=function()
 		local data=assert(funfont64["data"..hx.."x"..hy..style]) -- get data and check size is valid
 
 		font.idx=#fonts+1
-		font.name="fun"..hx.."x".."hy"
+		font.name="fun"..hx.."x"..hy..style
 		font.hx=hx
 		font.hy=hy
 
@@ -95,11 +95,13 @@ grdcanvas.canvas=function(grd)
 	canvas.set_font=function(font)
 		if type(font)~="table" then font=(canvas.fonts())[font] end -- auto lookup by name
 		canvas.font=font
+		return font
 	end
 	
 -- render some text into this canvas (8 bit only)
 	canvas.text=function(s,x,y,font)
 		font=font or canvas.font -- default font
+		if not font then font=canvas.set_font("fun4x8") end -- use 4x8 if font is missing
 		
 		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
 			canvas.grd:paint(font.g8,x,y,(c:byte()%128)*font.hx,0,font.hx,font.hy,grd.PAINT_MODE_COLOR,0,canvas.color_foreground)
