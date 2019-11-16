@@ -175,6 +175,7 @@ geom.idxs=	{
 		local v1=it.verts[ p[1] ]
 		local v2=it.verts[ p[2] ]
 		local v3=it.verts[ p[3] ]
+--		if not v1 or not v2 or not v3 then return {0,0,0} end
 		local va={}
 		local vb={}
 		va[1]=v1[1]-v2[1]

@@ -509,7 +509,7 @@ end
 							xyz=ps.p[ off+(ps.stride*(i-1))+inp.offset ]
 							xyzs=inp.source
 						end
-						
+--if xyz then
 						local inp=ps.inputs["NORMAL"]
 						local nrm,nrms
 						if inp then
@@ -582,6 +582,7 @@ end
 
 						poly[#poly+1]=idx
 						
+--end
 					end
 					off=off+ps.stride*pc
 
