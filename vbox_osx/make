@@ -2,8 +2,7 @@ cd `dirname $0`
 
 vagrant up
 
-
-vagrant ssh -c " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
+vagrant ssh -c " rm -rf gamecake && git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
 
 vagrant ssh -c " gamecake/make --clean --gcc=osx "
 
