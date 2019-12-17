@@ -88,14 +88,6 @@ main.img_hy=256
 		oven.cake.images.preload=nil
 	end
 
-	main.view=cake.views.create({
-		parent=cake.views.get(),
-		mode="full",
-		vx=main.screen_hx,
-		vy=main.screen_hy,
-		fov=0.5,
-	})
-
 end
 
 
@@ -230,6 +222,14 @@ end
 -- this is the only function we expect to be called
 -- and we expect it to be called very sporadically
 main.draw=function()
+
+	main.view=cake.views.create({
+		parent=cake.views.get(),
+		mode="full",
+		vx=main.screen_hx,
+		vy=main.screen_hy,
+		fov=0.5,
+	})
 
 --	layout.viewport() -- did our window change?
 --	layout.project23d(main.screen_hx,main.screen_hy,1/4,main.screen_hy*4)
