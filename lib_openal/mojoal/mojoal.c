@@ -4072,10 +4072,8 @@ static void _alSourceQueueBuffers(const ALuint name, const ALsizei nb, const ALu
             SDL_assert(src->queue_channels);
             SDL_assert(queue_channels);
             if ((src->queue_channels != queue_channels) || (src->queue_frequency != queue_frequency)) {
-
-//printf("WTF %d %d %d %d\n",src->queue_channels , queue_channels , src->queue_frequency , queue_frequency);
-//                set_al_error(ctx, AL_INVALID_VALUE+0x100);
-//                failed = AL_TRUE;
+                set_al_error(ctx, AL_INVALID_VALUE);
+                failed = AL_TRUE;
             }
         }
     }

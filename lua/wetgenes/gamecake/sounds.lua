@@ -582,6 +582,12 @@ local qq=sounds.queues[str.idx]
 		table.remove(str.full,idx)
 		table.insert(str.empty,b)
 	end
+	
+	if processed>0 and #str.full==0 then -- we have removed all buffers
+--		print("refresh source")		-- this fixes the a mojoal bug if we try and stream different format buffers in one source
+		al.DeleteSource(str.source)
+		str.source=al.GenSource()
+	end
 
 	while str.empty[1] do -- fill the empty queue
 		local b=str.empty[1]
