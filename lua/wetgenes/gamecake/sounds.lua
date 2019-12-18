@@ -511,12 +511,12 @@ local qq=sounds.queues[str.idx]
 					if qq.BufferData then -- special munge callback function
 						qq.BufferData(b,fmt,qq.rr,#qq.rr,rate) -- C4 hopefully?
 					else
-						if fmt==al.FORMAT_STEREO16 then -- force to mono
-							local ud=sod.dynap_st16(qq.rr,0.5,0.5,0.5,0.5,1/65536)
-							al.BufferData(b,al.FORMAT_MONO16,ud,#qq.rr/2,rate)
-						else
+--						if fmt==al.FORMAT_STEREO16 then -- force to mono
+--							local ud=sod.dynap_st16(qq.rr,0.5,0.5,0.5,0.5,1/65536)
+--							al.BufferData(b,al.FORMAT_MONO16,ud,#qq.rr/2,rate)
+--						else
 							al.BufferData(b,fmt,qq.rr,#qq.rr,rate) -- C4 hopefully?
-						end
+--						end
 					end
 --print("PST "..b)
 					qq.rr=nil
