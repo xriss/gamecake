@@ -385,8 +385,9 @@ font.vbs_idx=1
 		if not console.lines then return end -- not setup yet
 		
 		local ts={...}
-		for i,s in ipairs(ts) do	
-			if type(s)~="string" then ts[i]=wstr.dump(s) end
+		for i=1,#ts do -- deal with nils
+			local s=ts[i]
+			if type(s)~="string" then ts[i]=tostring(wstr.dump(s)) end
 		end
 
 		for _,l in ipairs( wstr.smart_wrap( table.concat(ts,"\t") , console.line_width) ) do

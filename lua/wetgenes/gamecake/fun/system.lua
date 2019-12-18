@@ -86,7 +86,9 @@ system.setup=function(code)
 print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 
 	if code then
-		system.code=wsandbox.ini(code,{ -- we are not really trying to sandbox, just a convenient function
+
+		local env=wsandbox.make_env()
+		for n,v in pairs({
 			args=oven.opts.args, -- commandline settings
 			debug=debug,
 			print=print,
@@ -96,9 +98,41 @@ print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 			require=require,
 			package=package, -- to help with module creation
 			ups=oven.rebake("wetgenes.gamecake.spew.recaps").ups, -- input, for 1up - 6up 
-		})
-		system.hardware=system.code.hardware
-		system.main=coroutine.create(system.code.main)
+		}) do env[n]=v end
+		
+		local tab={}
+		local meta={__index=env}
+		env._G=tab
+		setmetatable(tab, meta)
+
+		local f
+		if setfenv and loadstring then
+			f=assert(loadstring(code))
+			setfenv(f,tab)
+		else
+			f=assert(load(code, nil,"t",tab))
+		end
+
+		local co=coroutine.create(f)
+		
+		local a,b=coroutine.resume(co,{})
+		if not a then error( b.."\nin coroutine\n"..debug.traceback(co) , 2 ) end
+
+		system.code=tab
+		
+		if system.code.hardware and system.code.main then -- hardware and main
+			system.hardware=system.code.hardware
+			system.main=coroutine.create(system.code.main)
+		elseif system.code.hardware then -- hardware only
+			system.hardware=system.code.hardware
+		else -- no hardware , choose picish
+			system.hardware=(system.configurator({mode="picish"})) -- tiny mode
+		end
+		
+		if not system.main then -- the whole file is the coroutine
+			system.main=co
+		end
+		
 	end	
 
 -- possible components and perform global setup, even if they never get used
@@ -444,11 +478,78 @@ system.configurator=function(opts)
 
 	local done=false
 
-	if opts.mode=="fun64" then -- default settings
+	if opts.mode=="picish" then -- tiny settings
+
+		opts.cmap = opts.cmap or bitdown.cmap -- use default swanky32 colors
+		opts.hx  = opts.hx  or 128
+		opts.hy  = opts.hy  or 128
+		opts.ss  = opts.ss  or 6
+		opts.fps = opts.fps or 60
+
+		hardware={
+			{
+				component="screen",
+				name="screen",
+				size={opts.hx,opts.hy},
+				bloom=fatpix and 0.75 or 0,
+				filter=fatpix and "scanline" or nil,
+				shadow=fatpix and "drop" or nil,
+				scale=opts.ss,
+				fps=opts.fps,
+				layers=3,
+			},
+			{
+				component="sfx",
+				name="sfx",
+			},
+			{
+				component="colors",
+				name="colors",
+				cmap=opts.cmap, -- swanky32 palette
+			},
+			{
+				component="tiles",
+				name="tiles",
+				tile_size={8,8},
+				bitmap_size={64,64},
+			},
+			{
+				component="canvas",
+				name="canvas",
+				size={opts.hx,opts.hy},
+				layer=1,
+			},
+			{
+				component="tilemap",
+				name="map",
+				tiles="tiles",
+				tile_size={8,8},
+				tilemap_size={math.ceil(opts.hx/8),math.ceil(opts.hy/8)},
+				layer=2,
+			},
+			{
+				component="sprites",
+				name="sprites",
+				tiles="tiles",
+				layer=2,
+			},
+			{
+				component="tilemap",
+				name="text",
+				tiles="tiles",
+				tile_size={4,8}, -- use half width tiles for font
+				tilemap_size={math.ceil(opts.hx/4),math.ceil(opts.hy/8)},
+				layer=3,
+			},
+			graphics={
+				{0x0000,"_font",0x0340}, -- pre-allocate the 4x8 and 8x8 font area
+			},
+			opts=opts,
+		}
+
+	elseif opts.mode=="fun64" then -- default settings
 	
 		opts.cmap = opts.cmap or bitdown.cmap -- use default swanky32 colors
-
-		local screen={hx=opts.hx or 320,hy=opts.hy or 240,ss=opts.ss or 3,fps=opts.fps or 60}
 		opts.hx  = opts.hx  or 320
 		opts.hy  = opts.hy  or 240
 		opts.ss  = opts.ss  or 3
@@ -491,6 +592,7 @@ system.configurator=function(opts)
 				component="tilemap",
 				name="back",
 				tiles="tiles",
+				tile_size={8,8},
 				tilemap_size={math.ceil(opts.hx/8),math.ceil(opts.hy/8)},
 				layer=1,
 			},
@@ -498,6 +600,7 @@ system.configurator=function(opts)
 				component="tilemap",
 				name="map",
 				tiles="tiles",
+				tile_size={8,8},
 				tilemap_size={math.ceil(opts.hx/8),math.ceil(opts.hy/8)},
 				layer=2,
 			},
@@ -520,116 +623,117 @@ system.configurator=function(opts)
 			},
 			opts=opts,
 		}
-		for i,v in ipairs(hardware) do hardware[v.name]=v end -- for easy tweaking of options
-		
-		hardware.remove=function(name)
-			hardware[name]=nil
+	
+	end
+	
+	for i,v in ipairs(hardware) do hardware[v.name]=v end -- for easy tweaking of options
+	
+	hardware.remove=function(name)
+		hardware[name]=nil
+		for i,v in ipairs(hardware) do
+			if v.name==name then
+				return table.remove(hardware,i)
+			end
+		end
+	end
+	
+	hardware.insert=function(it)
+		if it.name then
 			for i,v in ipairs(hardware) do
-				if v.name==name then
-					return table.remove(hardware,i)
+				if v.name==it.name then -- replace
+					hardware[i]=it
+					hardware[it.name]=it
+					return
 				end
 			end
+			hardware[it.name]=it
 		end
-		
-		hardware.insert=function(it)
-			if it.name then
-				for i,v in ipairs(hardware) do
-					if v.name==it.name then -- replace
-						hardware[i]=it
-						hardware[it.name]=it
-						return
-					end
-				end
-				hardware[it.name]=it
-			end
-			hardware[#hardware+1]=it
-		end
-		
-		-- load a single sprite
-		hardware.graphics.load=function(idx,name,data)
-			local found
-			for i,v in ipairs(hardware.graphics) do
-				if v[2]==name then
-					found=v
-					break
-				end
-			end
-			if not found then -- add new graphics
-				hardware.graphics[#hardware.graphics+1]={idx,name,data}
-			else
-				found[1]=idx
-				found[2]=name
-				found[3]=data
-			end
-		end	
-
-		-- load a list of sprites
-		hardware.graphics.loads=function(tab)
-			for i,v in ipairs(tab) do
-				hardware.graphics.load(v[1],v[2],v[3])
+		hardware[#hardware+1]=it
+	end
+	
+	-- load a single sprite
+	hardware.graphics.load=function(idx,name,data)
+		local found
+		for i,v in ipairs(hardware.graphics) do
+			if v[2]==name then
+				found=v
+				break
 			end
 		end
-		
-		main=function(need)
+		if not found then -- add new graphics
+			hardware.graphics[#hardware.graphics+1]={idx,name,data}
+		else
+			found[1]=idx
+			found[2]=name
+			found[3]=data
+		end
+	end	
 
-			if not need.setup then need=coroutine.yield() end -- wait for setup request (should always be first call)
+	-- load a list of sprites
+	hardware.graphics.loads=function(tab)
+		for i,v in ipairs(tab) do
+			hardware.graphics.load(v[1],v[2],v[3])
+		end
+	end
+	
+	main=function(need)
 
-			-- copy font data tiles into top line
-			system.components.tiles.bitmap_grd:pixels(0,0 ,128*4,8, bitdown_font.build_grd(4,8):pixels(0,0,128*4,8,"") )
-			-- and 8x8 font 
-			system.components.tiles.bitmap_grd:pixels(0,8 ,64*8,8, bitdown_font.build_grd(8,8):pixels(0,   0,64*8,8,"") )
-			system.components.tiles.bitmap_grd:pixels(0,16,64*8,8, bitdown_font.build_grd(8,8):pixels(64*8,0,64*8,8,"") )
+		if not need.setup then need=coroutine.yield() end -- wait for setup request (should always be first call)
 
-			-- and 8x16 font?
+		-- copy font data tiles into top line
+		system.components.tiles.bitmap_grd:pixels(0,0 ,128*4,8, bitdown_font.build_grd(4,8):pixels(0,0,128*4,8,"") )
+		-- and 8x8 font 
+		system.components.tiles.bitmap_grd:pixels(0,8 ,64*8,8, bitdown_font.build_grd(8,8):pixels(0,   0,64*8,8,"") )
+		system.components.tiles.bitmap_grd:pixels(0,16,64*8,8, bitdown_font.build_grd(8,8):pixels(64*8,0,64*8,8,"") )
+
+		-- and 8x16 font?
 --			system.components.tiles.bitmap_grd:pixels(0,32,64*8,16, bitdown_font.build_grd(8,16):pixels(0,   0,64*8,16,"") )
 --			system.components.tiles.bitmap_grd:pixels(0,48,64*8,16, bitdown_font.build_grd(8,16):pixels(64*8,0,64*8,16,"") )
 
-			-- upload graphics
-			local graphics=opts.graphics or hardware.graphics
-			if graphics then
-				if type(graphics)=="function" then graphics=graphics() end -- allow callback to grab value from other environment
-				system.components.tiles.upload_tiles( graphics )
-			end
-			
-			if opts.update then opts.update() end -- call update at least once
-
-			local reset_draw=opts.reset_draw or function()
-				system.components.text.dirty(true)
-				system.components.text.text_window()
-				system.components.text.text_clear(0x00000000)
-				system.components.sprites.list_reset()
-			end
-			
-			-- after setup we should yield and then perform updates only if requested from a yield
-			local done=false while not done do
-				need=coroutine.yield()
-				if need.update then
-				
-					if not opts.draw then
-						reset_draw()
-					end
-					
-					if opts.update then opts.update() end
-				end
-				if need.draw then
-					if opts.draw then
-						reset_draw()
-						opts.draw()
-					end
-				end
-				if need.msg then
-					if opts.msg then
-						opts.msg(need.msg) -- pass on raw msgs
-					end
-				end
-				if need.clean then done=true end -- cleanup requested
-			end
-
-		-- perform cleanup here
-
-			if opts.clean then opts.clean() end
-
+		-- upload graphics
+		local graphics=opts.graphics or hardware.graphics
+		if graphics then
+			if type(graphics)=="function" then graphics=graphics() end -- allow callback to grab value from other environment
+			system.components.tiles.upload_tiles( graphics )
 		end
+		
+		if opts.update then opts.update() end -- call update at least once
+
+		local reset_draw=opts.reset_draw or function()
+			system.components.text.dirty(true)
+			system.components.text.text_window()
+			system.components.text.text_clear(0x00000000)
+			system.components.sprites.list_reset()
+		end
+		
+		-- after setup we should yield and then perform updates only if requested from a yield
+		local done=false ; while not done do
+			need=coroutine.yield()
+			if need.update then
+			
+				if not opts.draw then
+					reset_draw()
+				end
+				
+				if opts.update then opts.update() end
+			end
+			if need.draw then
+				if opts.draw then
+					reset_draw()
+					opts.draw()
+				end
+			end
+			if need.msg then
+				if opts.msg then
+					opts.msg(need.msg) -- pass on raw msgs
+				end
+			end
+			if need.clean then done=true end -- cleanup requested
+		end
+
+	-- perform cleanup here
+
+		if opts.clean then opts.clean() end
 
 	end
 

@@ -226,7 +226,7 @@ int buf=luaL_checknumber(l,2);
 static int lua_al_SourceUnqueueBuffer (lua_State *l)
 {
 int src=luaL_checknumber(l,1);
-int buf=-1;
+int buf=luaL_checknumber(l,2);
 	alSourceUnqueueBuffers(src,1,(unsigned int *)&buf);
 	lua_pushnumber(l,buf);
 	return 1;

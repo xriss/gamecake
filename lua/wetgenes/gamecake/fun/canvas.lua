@@ -154,6 +154,8 @@ canvas.create=function(it,opts)
 	it.line         = function(...) return it.grdcanvas.line(...)         end
 	it.box          = function(...) return it.grdcanvas.box(...)          end
 	it.circle       = function(...) return it.grdcanvas.circle(...)       end
+	it.set_font     = function(...) return it.grdcanvas.set_font(...)     end
+	it.text         = function(...) return it.grdcanvas.text(...)         end
 
 	return it
 end

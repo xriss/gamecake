@@ -501,28 +501,37 @@ local qq=sounds.queues[str.idx]
 		
 		if qq.og then
 --			local rr
-			local function save(f)
+			local function save()
 				if qq.rr then
 --print("buff",#qq.rr)
 					local fmt=al.FORMAT_MONO16
 					if qq.og.channels==2 then fmt=al.FORMAT_STEREO16 end
 					local rate=qq.og.rate
+--print("PRE "..b.." : "..fmt)
 					if qq.BufferData then -- special munge callback function
 						qq.BufferData(b,fmt,qq.rr,#qq.rr,rate) -- C4 hopefully?
 					else
-						al.BufferData(b,fmt,qq.rr,#qq.rr,rate) -- C4 hopefully?
+--						if fmt==al.FORMAT_STEREO16 then -- force to mono
+--							local ud=sod.dynap_st16(qq.rr,0.5,0.5,0.5,0.5,1/65536)
+--							al.BufferData(b,al.FORMAT_MONO16,ud,#qq.rr/2,rate)
+--						else
+							al.BufferData(b,fmt,qq.rr,#qq.rr,rate) -- C4 hopefully?
+--						end
 					end
+--print("PST "..b)
 					qq.rr=nil
+					return true
 				end
+				return false
 			end
-			local function done(f)
---				save() -- save what we have
+			local function done()
+				local s=save() -- save what we have
 				if qq.ogg_loop then
 					qq.oggs[#qq.oggs+1]=qq.fname -- insert ogg back into the end of the list
 				end
 				qq.og:close()
 				qq.og=nil -- flag end of file
-				return f
+				return s
 			end
 			for i=1,128 do -- may take a few loops before we can return any data
 				local r=qq.og:pull()
@@ -534,7 +543,7 @@ local qq=sounds.queues[str.idx]
 							qq.fpidx=qq.fpidx+4096
 							qq.og:push(dat)
 						elseif qq.og.err=="end" then -- really really the end
-							return done(false)
+							return done()
 						end
 					elseif qq.og.err then error( qq.og.err ) end
 				else
@@ -542,9 +551,9 @@ local qq=sounds.queues[str.idx]
 					if not qq.rr then qq.rr=r else qq.rr=qq.rr..r end
 
 					if #qq.rr>=4096*8 then -- prefer a reasonable chunk of data
-						save()
+						local s=save()
 						if qq.og.err then error( qq.og.err ) end
-						return true
+						return s
 					end
 					
 				end
@@ -561,22 +570,32 @@ local qq=sounds.queues[str.idx]
 -- remove finished buffers
 	local processed=al.GetSource(str.source,al.BUFFERS_PROCESSED)
 	for i=1,processed do
-		local b=al.SourceUnqueueBuffer(str.source)
+--	if processed>0 then
+		local b=al.SourceUnqueueBuffer(str.source,0)
 		local idx
 		for i,v in ipairs(str.full) do -- find and remove, it should be the first one.
 			if v==b then idx=i break end
 		end
+--print("unque ",str.source,b,idx)
+--al.CheckError()
 		assert(idx)
 		table.remove(str.full,idx)
 		table.insert(str.empty,b)
---print("unqueue ",b,idx)
+	end
+	
+	if processed>0 and #str.full==0 then -- we have removed all buffers
+--		print("refresh source")		-- this fixes the a mojoal bug if we try and stream different format buffers in one source
+		al.DeleteSource(str.source)
+		str.source=al.GenSource()
 	end
 
 	while str.empty[1] do -- fill the empty queue
 		local b=str.empty[1]
 		if str:fill(b) then
-			al.SourceQueueBuffer(str.source,b)	
---print("queue ",b)
+--al.CheckError()
+			al.SourceQueueBuffer(str.source,b)
+--print("queue ",str.source,b)
+--al.CheckError()
 --al.CheckError()
 			table.remove(str.empty,1)
 			table.insert(str.full,b)
