@@ -19,7 +19,7 @@
 #ifndef _VARIANT_H_
 #define _VARIANT_H_
 
-#include "extern/queue/sys/queue.h"
+#include <sys/queue.h>
 
 #include <common/common.h>
 

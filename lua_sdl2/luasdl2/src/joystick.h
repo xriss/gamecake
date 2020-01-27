@@ -2,6 +2,7 @@
  * joystick.h -- joystick event management
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2016 Webster Sheets <webster@web-eworks.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,5 +29,9 @@ extern const luaL_Reg JoystickFunctions[];
 extern const CommonObject Joystick;
 
 extern const CommonEnum EventJoyHat[];
+
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+extern const CommonEnum JoystickPowerLevels[];
+#endif
 
 #endif /* !_JOYSTICK_H_ */

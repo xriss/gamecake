@@ -2,6 +2,7 @@
  * window.c -- window management
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2016-2017 Webster Sheets <webster@web-eworks.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -79,14 +80,58 @@ l_createWindow(lua_State *L)
 	return commonPush(L, "p", WindowName, win);
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+/*
+ * SDL.getGrabbedWindow()
+ *
+ * Returns:
+ *	the window that currently has an input grab, or nil if no window is grabbed.
+ */
+static int
+l_getGrabbedWindow(lua_State *L)
+{
+	SDL_Window *win = SDL_GetGrabbedWindow();
+
+	if (win == NULL)
+		return commonPush(L, "n");
+
+	return commonPush(L, "p", WindowName, win);
+}
+#endif
+
 const struct luaL_Reg WindowFunctions[] = {
 	{ "createWindow",	l_createWindow		},
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+	{ "getGrabbedWindow",	l_getGrabbedWindow	},
+#endif
 	{ NULL,			NULL			}
 };
 
 /* --------------------------------------------------------
  * Window object methods
  * -------------------------------------------------------- */
+
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+/*
+ * Window:getBordersSize()
+ *
+ * Returns:
+ *	The widths of the top, left, bottom, and right window
+ *	  borders, or nil on failure
+ *	The error message
+ */
+static int
+l_window_getBordersSize(lua_State *L)
+{
+	SDL_Window *w	= commonGetAs(L, 1, WindowName, SDL_Window *);
+	int top, left, bottom, right;
+
+	if (SDL_GetWindowBordersSize(w, &top, &left, &bottom, &right) < 0)
+		return commonPushSDLError(L, 1);
+
+	return commonPush(L, "iiii", top, left, bottom, right);
+}
+#endif
 
 /*
  * Window:getBrightness()
@@ -257,6 +302,27 @@ l_window_getMinimumSize(lua_State *L)
 
 	return commonPush(L, "ii", w, h);
 }
+
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+/*
+ * Window:getOpacity()
+ *
+ * Returns:
+ *	The opacity of the window or nil on failure
+ *	The error message
+ */
+static int
+l_window_getOpacity(lua_State *L)
+{
+	SDL_Window *w = commonGetAs(L, 1, WindowName, SDL_Window *);
+	float opacity;
+
+	if (SDL_GetWindowOpacity(w, &opacity) < 0)
+		return commonPushSDLError(L, 1);
+
+	return commonPush(L, "d", opacity);
+}
+#endif
 
 /*
  * Window:getPixelFormat()
@@ -568,6 +634,32 @@ l_window_setIcon(lua_State *L)
 	return 0;
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+/*
+ * Window:setInputFocus()
+ *
+ * Explicitly set input focus to the window, even if hidden or minimized.
+ * You should probably use Window:raise() instead, as it will make the
+ * window visible before focusing.
+ *
+ * Only supported on X11.
+ *
+ * Returns:
+ *	true on success, nil otherwise
+ *	the specific error message
+ */
+static int
+l_window_setInputFocus(lua_State *L)
+{
+	SDL_Window *w	= commonGetAs(L, 1, WindowName, SDL_Window *);
+
+	if (SDL_SetWindowInputFocus(w))
+		return commonPushSDLError(L, 1);
+
+	return commonPush(L, "b", 1);
+}
+#endif
+
 /*
  * Window:setMaximumSize(w, h)
  *
@@ -606,6 +698,29 @@ l_window_setMinimumSize(lua_State *L)
 	return 0;
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+/*
+ * Window:setOpacity(opacity)
+ *
+ * Arguments:
+ *	opacity the opacity to set the window
+ *
+ * Returns:
+ *	true on success or nil otherwise
+ *	The error message
+ */
+static int l_window_setOpacity(lua_State *L)
+{
+	SDL_Window *w	= commonGetAs(L, 1, WindowName, SDL_Window *);
+	float opacity	= luaL_checknumber(L, 2);
+
+	if (SDL_SetWindowOpacity(w, opacity) < 0)
+		return commonPushSDLError(L, 1);
+
+	return commonPush(L, "b", 1);
+}
+#endif
+
 /*
  * Window:setPosition(x, y)
  *
@@ -624,6 +739,25 @@ l_window_setPosition(lua_State *L)
 
 	return 0;
 }
+
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+/*
+ * Window:setResizeable(resizeable)
+ *
+ * Arguments:
+ *	resizable the state to set the resizable flag to
+ *
+ */
+static int l_window_setResizable(lua_State *L)
+{
+	SDL_Window *w	= commonGetAs(L, 1, WindowName, SDL_Window *);
+	int resizable	= lua_toboolean(L, 2);
+
+	SDL_SetWindowResizable(w, resizable);
+
+	return 0;
+}
+#endif
 
 /*
  * Window:setSize(w, h)
@@ -660,6 +794,29 @@ l_window_setTitle(lua_State *L)
 
 	return 0;
 }
+
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+/*
+ * Window:setModalFor(window)
+ *
+ * Arguments:
+ *	window the parent window
+ *
+ * Returns:
+ *	true on success or nil otherwise
+ *	The error message
+ */
+static int l_window_setModalFor(lua_State *L)
+{
+	SDL_Window *w	= commonGetAs(L, 1, WindowName, SDL_Window *);
+	SDL_Window *pw	= commonGetAs(L, 2, WindowName, SDL_Window *);
+
+	if (SDL_SetWindowModalFor(w, pw) < 0)
+		return commonPushSDLError(L, 1);
+
+	return commonPush(L, "b", 1);
+}
+#endif
 
 /*
  * Window:show()
@@ -742,6 +899,93 @@ l_window_warpMouse(lua_State *L)
 	return 0;
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 4) && LUA_VERSION_NUM >= 502
+
+typedef struct {
+	lua_State *L;	// The Lua state the callback is in
+	int ref;	// The registry index of the function to call
+} CallbackData;
+
+static SDL_HitTestResult
+hitTestCallback(SDL_Window *win, const SDL_Point *area, CallbackData *cd)
+{
+	SDL_HitTestResult ht;
+	int st = lua_gettop(cd->L);
+
+	lua_geti(cd->L, LUA_REGISTRYINDEX, cd->ref);
+	commonPush(cd->L, "p", WindowName, win);
+	videoPushPoint(cd->L, area);
+	lua_pcall(cd->L, 2, 1, 0);
+
+	/* If the callback errored or didn't return a value, we get HITTEST_NORMAL */
+	ht = luaL_optinteger(cd->L, -1, SDL_HITTEST_NORMAL);
+
+	lua_settop(cd->L, st);
+
+	return ht;
+}
+
+/*
+ * Window:setHitTest(func)
+ *
+ * Sets the HitTest callback for a window.
+ * It is highly recommended that this is called in the same thread that
+ * initialized video and calls SDL.pollEvent().
+ *
+ * Arguments:
+ *	func a callback function or nil to clear the hit-test callback.
+ *
+ * Returns:
+ *	true or nil on failure
+ *	the error message on failure
+ */
+static int
+l_window_setHitTest(lua_State *L)
+{
+	SDL_Window *w 	= commonGetAs(L, 1, WindowName, SDL_Window *);
+	int t		= lua_type(L, 2);
+	int ut;
+
+	/* Clear a window's existing callback */
+	if ((ut = lua_getuservalue(L, 1)) == LUA_TUSERDATA) {
+		CallbackData *cd = *(CallbackData **)lua_touserdata(L, -1);
+		luaL_unref(cd->L, LUA_REGISTRYINDEX, cd->ref);
+		free(cd);
+		lua_pop(L, 1);
+		lua_pushnil(L);
+		lua_setuservalue(L, 1);
+	}
+	else {
+		lua_pop(L, 1);
+	}
+
+	if (t == LUA_TFUNCTION) {
+		CallbackData *cd;
+		if ((cd = malloc(sizeof (CallbackData))) == NULL)
+			return commonPushErrno(L, 1);
+
+		cd->L = L;
+		cd->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+		/* Set a window's callback */
+		CallbackData **cdp = lua_newuserdata(L, sizeof(CallbackData *));
+		*cdp = cd;
+
+		lua_setuservalue(L, 1);
+
+		if (SDL_SetWindowHitTest(w, (SDL_HitTest)hitTestCallback, cd) < 0)
+			return commonPushSDLError(L, 1);
+	}
+	else {
+		if (SDL_SetWindowHitTest(w, NULL, NULL) < 0)
+			return commonPushSDLError(L, 1);
+	}
+
+	return commonPush(L, "b", 1);
+}
+
+#endif
+
 /* --------------------------------------------------------
  * Window object metamethods
  * -------------------------------------------------------- */
@@ -783,6 +1027,9 @@ l_window_tostring(lua_State *L)
  * -------------------------------------------------------- */
 
 static const luaL_Reg WindowMethods[] = {
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "getBordersSize",	l_window_getBordersSize		},
+#endif
 	{ "getBrightness",	l_window_getBrightness		},
 	{ "getDisplayIndex",	l_window_getDisplayIndex	},
 	{ "getDisplayMode",	l_window_getDisplayMode		},
@@ -793,6 +1040,9 @@ static const luaL_Reg WindowMethods[] = {
 	{ "getMaximumSize",	l_window_getMaximumSize		},
 	{ "getMinimumSize",	l_window_getMinimumSize		},
 	{ "getPixelFormat",	l_window_getPixelFormat		},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "getOpacity",		l_window_getOpacity		},
+#endif
 	{ "getPosition",	l_window_getPosition		},
 	{ "getSurface",		l_window_getSurface		},
 	{ "getSize",		l_window_getSize		},
@@ -808,15 +1058,30 @@ static const luaL_Reg WindowMethods[] = {
 	{ "setGammaRamp",	l_window_setGammaRamp		},
 	{ "setGrab",		l_window_setGrab		},
 	{ "setIcon",		l_window_setIcon		},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "setInputFocus",	l_window_setInputFocus		},
+#endif
 	{ "setMaximumSize",	l_window_setMaximumSize		},
 	{ "setMinimumSize",	l_window_setMinimumSize		},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "setOpacity",		l_window_setOpacity		},
+#endif
 	{ "setPosition",	l_window_setPosition		},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "setResizeable",	l_window_setResizable		},
+#endif
 	{ "setSize",		l_window_setSize		},
 	{ "setTitle",		l_window_setTitle		},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "setModalFor",	l_window_setModalFor		},
+#endif
 	{ "show",		l_window_show			},
 	{ "updateSurface",	l_window_updateSurface		},
 	{ "updateSurfaceRects",	l_window_updateSurfaceRects	},
 	{ "warpMouse",		l_window_warpMouse		},
+#if SDL_VERSION_ATLEAST(2, 0, 4) && LUA_VERSION_NUM >= 502
+	{ "setHitTest",		l_window_setHitTest		},
+#endif
 	{ NULL,			NULL				}
 };
 
@@ -849,5 +1114,36 @@ const CommonEnum WindowFlags[] = {
 	{ "InputFocused",		SDL_WINDOW_INPUT_FOCUS		},
 	{ "MouseFocused",		SDL_WINDOW_MOUSE_FOCUS		},
 	{ "Foreign",			SDL_WINDOW_FOREIGN		},
+#if SDL_VERSION_ATLEAST(2, 0, 1)
+	{ "AllowHiDPI",			SDL_WINDOW_ALLOW_HIGHDPI	},
+#endif
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+	{ "MouseCapture",		SDL_WINDOW_MOUSE_CAPTURE	},
+#endif
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "AlwaysOnTop",		SDL_WINDOW_ALWAYS_ON_TOP	},
+	{ "SkipTaskbar",		SDL_WINDOW_SKIP_TASKBAR		},
+	{ "Utility",			SDL_WINDOW_UTILITY		},
+	{ "Tooltip",			SDL_WINDOW_TOOLTIP		},
+	{ "PopupMenu",			SDL_WINDOW_POPUP_MENU		},
+#endif
 	{ NULL,				-1				}
 };
+
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+
+const CommonEnum HitTestResults[] = {
+	{ "Normal",			SDL_HITTEST_NORMAL		},
+	{ "Draggable",			SDL_HITTEST_DRAGGABLE		},
+	{ "ResizeTopLeft",		SDL_HITTEST_RESIZE_TOPLEFT	},
+	{ "ResizeTop",			SDL_HITTEST_RESIZE_TOP		},
+	{ "ResizeTopRight",		SDL_HITTEST_RESIZE_TOPRIGHT	},
+	{ "ResizeRight",		SDL_HITTEST_RESIZE_RIGHT	},
+	{ "ResizeBottomLeft",		SDL_HITTEST_RESIZE_BOTTOMLEFT	},
+	{ "ResizeBottom",		SDL_HITTEST_RESIZE_BOTTOM	},
+	{ "ResizeBottomRight",		SDL_HITTEST_RESIZE_BOTTOMRIGHT	},
+	{ "ResizeLeft",			SDL_HITTEST_RESIZE_LEFT		},
+	{ NULL,				-1				}
+};
+
+#endif

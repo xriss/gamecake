@@ -2,6 +2,7 @@
  * mouse.h -- mouse event management
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2016 Webster Sheets <webster@web-eworks.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,10 +28,14 @@ extern const luaL_Reg MouseFunctions[];
 
 extern const CommonObject MouseCursor;
 
+extern const CommonEnum SystemCursor[];
+
 extern const CommonEnum MouseButtons[];
 
 extern const CommonEnum MouseMask[];
 
-extern const CommonEnum SystemCursor[];
+#if SDL_VERSION_ATLEAST(2, 0, 2)
+extern const CommonEnum MouseClick[];
+#endif
 
 #endif /* !_MOUSE_H_ */

@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  * Copyright (c) 2014, 2015 Joseph Wallace <tangent128@gmail.com>
+ * Copyright (c) 2016 Webster Sheets <webster@web-eworks.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -64,19 +65,6 @@ static const CommonEnum InitFlags[] = {
 	{ "Video",		SDL_INIT_VIDEO		},
 	{ NULL,			-1			}
 };
-
-/*
- * SDL.enums
- */
-const CommonEnum GeneralEnums[] = {
-	{ "Enable",			SDL_ENABLE		},
-	{ "Ignore",			SDL_IGNORE		},
-	{ "Query",			SDL_QUERY		},
-	{ "True",			SDL_TRUE		},
-	{ "False",			SDL_FALSE		},
-	{ NULL,				-1			}
-};
-
 
 typedef int (*InitFunc)(Uint32 flags);
 
@@ -215,7 +203,7 @@ l_getError(lua_State *L)
 static int
 l_setError(lua_State *L)
 {
-	SDL_SetError(luaL_checkstring(L, 1));
+	SDL_SetError("%s", luaL_checkstring(L, 1));
 
 	return 0;
 }
@@ -245,8 +233,8 @@ l_clearHints(lua_State *L)
 static int
 l_getHint(lua_State *L)
 {
-	const char *name = luaL_checkstring(L, 1);
-	const char *value = SDL_GetHint(name);
+	const char *name	= luaL_checkstring(L, 1);
+	const char *value	= SDL_GetHint(name);
 
 	if (value == NULL)
 		lua_pushnil(L);
@@ -256,12 +244,38 @@ l_getHint(lua_State *L)
 	return 1;
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 5)
 /*
- * SDL.setHint(name, value)
+ * SDL.getHintBoolean(name[, default])
+ *
+ * Get a hint as a boolean value.
+ * If the hint does not exist, returns the 'truthyness'
+ * of the 'default' argument.
+ *
+ * Arguments:
+ *	The name of the hint to query.
+ *	The default value to return if the hint does not exist.
+ *
+ * Returns:
+ *	The hint value as a boolean.
+ */
+static int
+l_getHintBoolean(lua_State *L)
+{
+	const char *name	= luaL_checkstring(L, 1);
+	int val			= lua_toboolean(L, 2);
+
+	return commonPush(L, "b", SDL_GetHintBoolean(name, val));
+}
+#endif
+
+/*
+ * SDL.setHint(name, value, priority)
  *
  * Arguments:
  *	name the hint name
  *	value the hint value
+ *	priority the hint priority - defaults to SDL.hintPriority.Normal.
  *
  * Returns:
  *	True on success or false
@@ -270,10 +284,11 @@ l_getHint(lua_State *L)
 static int
 l_setHint(lua_State *L)
 {
-	const char *name	= luaL_checkstring(L, 1);
-	const char *value	= luaL_checkstring(L, 2);
+	const char *name		= luaL_checkstring(L, 1);
+	const char *value		= luaL_checkstring(L, 2);
+	const SDL_HintPriority priority	= luaL_optinteger(L, 3, SDL_HINT_DEFAULT);
 
-	return commonPush(L, "b", SDL_SetHint(name, value));
+	return commonPush(L, "b", SDL_SetHintWithPriority(name, value, priority));
 }
 
 /*
@@ -297,6 +312,9 @@ static const luaL_Reg functions[] = {
 	{ "setError",		l_setError		},
 	{ "clearHints",		l_clearHints		},
 	{ "getHint",		l_getHint		},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "getHintBoolean",	l_getHintBoolean	},
+#endif
 	{ "setHint",		l_setHint		},
 	{ NULL,			NULL			}
 };
@@ -364,6 +382,9 @@ static const struct {
 
 	/* Joystick values */
 	{ "joyHat",		EventJoyHat			},
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+	{ "joystickPowerLevel",	JoystickPowerLevels		},
+#endif
 
 	/* Game Controller values */
 	{ "controllerAxis",	GameCtlAxis			},
@@ -376,16 +397,19 @@ static const struct {
 
 	/* Window */
 	{ "window",		WindowFlags			},
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+	{ "hitTestResult",	HitTestResults			},
+#endif
 
 	/* General */
 	{ "flags",		InitFlags			},
-	{ "enums",		GeneralEnums			},
-
-	{ "mouseButton",	MouseButtons			},
-	{ "mouseMask",		MouseMask			},
 
 	{ "systemCursor",	SystemCursor			},
-
+	{ "mouseButton",	MouseButtons			},
+	{ "mouseMask",		MouseMask			},
+#if SDL_VERSION_ATLEAST(2, 0, 2)
+	{ "mouseClick",		MouseClick			},
+#endif
 	{ "event",		EventType			},
 	{ "eventAction",	EventAction			},
 	{ "eventWindow",	EventWindow			},
@@ -434,7 +458,7 @@ static const struct {
 	{ &Haptic						},
 	{ &TimerObject						},
 	{ &GlObject						},
-	{ &MouseCursor					},
+	{ &MouseCursor						},
 	{ NULL							}
 };
 
@@ -466,14 +490,22 @@ luaopen_SDL(lua_State *L)
 	tableSetInt(L, -1, "VERSION_MINOR", ver.minor);
 	tableSetInt(L, -1, "VERSION_PATCH", ver.patch);
 
-	tableSetInt(L, -1, "VERSION_BINDING", VERSION_BINDING);
-	tableSetInt(L, -1, "VERSION_BINDING_PATCH", VERSION_BINDING_PATCH);
+	tableSetInt(L, -1, "VERSION_BINDING", 4);
+	tableSetInt(L, -1, "VERSION_BINDING_PATCH", 1);
+
+	lua_newtable(L);
+	tableSetInt(L, -1, "major", ver.major);
+	tableSetInt(L, -1, "minor", ver.minor);
+	tableSetInt(L, -1, "patch", ver.patch);
+	lua_setfield(L, -2, "version");
+
+	lua_newtable(L);
+	tableSetInt(L, -1, "major", VERSION_BINDING_MAJOR);
+	tableSetInt(L, -1, "minor", VERSION_BINDING_MINOR);
+	lua_setfield(L, -2, "binding");
 
 	if (ChannelMutex == NULL && (ChannelMutex = SDL_CreateMutex()) == NULL)
-	{
-// emscripten will fail, here, so ignore
-//		return luaL_error(L, SDL_GetError());
-	}
+		return luaL_error(L, SDL_GetError());
 
 	return 1;
 }

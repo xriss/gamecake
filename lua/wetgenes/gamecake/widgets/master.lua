@@ -506,11 +506,11 @@ function wmaster.setup(widget,def)
 		master.old_active=master.active
 		master.old_over=master.over
 
-		meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		
 		if master.dragging() then -- handle mouse drag logic
 			master.active:drag(x,y)
-
+		else
+			meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		end
 		
 --mark as dirty
