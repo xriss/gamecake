@@ -892,7 +892,7 @@ l_surface_getRawPixel(lua_State *L)
 	int y = luaL_checkinteger(L, 3);
 	int size = surf->format->BytesPerPixel;
 	Uint8 *ptr = (Uint8 *)surf->pixels + y * surf->pitch + x * size;
-	lua_pushlstring(L, ptr, size);
+	lua_pushlstring(L, (const char *) ptr, size);
 	return 1;
 }
 
