@@ -222,7 +222,11 @@ end
 
 function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
-	if pan.meta.mouse(pan,act,_x,_y,keyname) then return end -- let children have precidence
+	if pan.meta.mouse(pan,act,_x,_y,keyname) then -- let children have precedence
+		if pan.master.over ~= pan then
+			return true
+		end
+	end
 
 	local wheel_acc=function()
 

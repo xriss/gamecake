@@ -67,7 +67,7 @@ function wscroll.layout(widget)
 	widget.slidey.px=widget.hx-ss
 	widget.slidey.py=0
 
-	widget.slidex.hx=widget.hx-ss
+	widget.slidex.hx=widget.hx
 	widget.slidex.hy=ss
 	widget.slidex.px=0
 	widget.slidex.py=widget.hy-ss
@@ -116,7 +116,7 @@ function wscroll.setup(widget,def)
 	widget.pan=		widget:add({class=def.scroll_pan or "pan",	hx=widget.hx-ss,	hy=widget.hy-ss	,color=widget.color})
 	widget.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
 		daty=widget.daty,color=widget.color})
-	widget.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	px=0,           	py=widget.hy-ss,
+	widget.slidex=	widget:add({class="slide",	hx=widget.hx,	hy=ss,           	px=0,           	py=widget.hy-ss,
 		datx=widget.datx,color=widget.color})
 
 	return widget
