@@ -281,10 +281,11 @@ sdl.msg_fetch=function()
 			sdl.mousexy[1]=e.x
 			sdl.mousexy[2]=e.y
 			
-			if     e.type == SDL.event.MouseButtonDown then SDL.captureMouse(true)
-			elseif e.type == SDL.event.MouseButtonUp   then SDL.captureMouse(false)
+			if SDL.captureMouse then -- sanity test
+				if     e.type == SDL.event.MouseButtonDown then SDL.captureMouse(true)
+				elseif e.type == SDL.event.MouseButtonUp   then SDL.captureMouse(false)
+				end
 			end
-	
 		
 		elseif	(e.type == SDL.event.FingerDown) or 
 				(e.type == SDL.event.FingerUp) or 
