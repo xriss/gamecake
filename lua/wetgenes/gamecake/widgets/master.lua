@@ -216,6 +216,7 @@ function wmaster.setup(widget,def)
 
 		end
 
+
 -- loop over and call all later function then empty the table
 -- later functions can add more functions as they are called
 		if true then
@@ -509,6 +510,9 @@ function wmaster.setup(widget,def)
 		
 		if master.dragging() then -- handle mouse drag logic
 			master.active:drag(x,y)
+			if master.active.mouse then
+				master.active.mouse(master.active,act,x,y,keyname) -- cascade down into all widgets
+			end
 		else
 			meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		end

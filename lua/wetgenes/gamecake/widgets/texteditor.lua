@@ -227,6 +227,14 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 			return true
 		end
 	end
+	
+	if keyname=="right" and act==1 then
+		print("righty clicky")
+		pan.master.later_append(function()
+			print("righty clicky later")
+		end)
+		return true
+	end
 
 	local wheel_acc=function()
 
@@ -525,6 +533,7 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_widget.pan.skin=wtexteditor.pan_skin( widget.scroll_widget.pan.skin )
 	widget.scroll_widget.pan.texteditor=widget
 
+
 --	wtexteditor:redo_text(def.text or "") -- set starting text
 
 	widget:texteditor_refresh()
@@ -534,6 +543,8 @@ function wtexteditor.setup(widget,def)
 
 	widget.scroll_widget.pan.key=wtexteditor.key
 	widget.scroll_widget.pan.mouse=wtexteditor.mouse
+
+	widget.scroll_widget.pan.drag=function()end -- fake drag so we are treated as drag able
 
 	widget.gutter=#(" 01   ")
 	
