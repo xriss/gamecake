@@ -4,29 +4,29 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
--- handle a collection of windocks that all live in the same place
+-- handle a collection of windows that all live in the same place
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-function M.bake(oven,wwindock)
+function M.bake(oven,wwindows)
 
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
-wwindock=wwindock or {}
+wwindows=wwindows or {}
 
-function wwindock.update(widget)
+function wwindows.update(widget)
 	return widget.meta.update(widget)
 end
 
-function wwindock.draw(widget)
+function wwindows.draw(widget)
 	return widget.meta.draw(widget)
 end
 
-function wwindock.layout(widget)
+function wwindows.layout(widget)
 
-	if widget.windock=="stack" then
+	if widget.winmode=="stack" then
 	
 		local px=0
 		local py=0
@@ -55,7 +55,7 @@ function wwindock.layout(widget)
 			end
 		end
 
-	elseif widget.windock=="drag" then
+	elseif widget.winmode=="drag" then
 	
 		local px=0
 		local py=0
@@ -83,10 +83,10 @@ function wwindock.layout(widget)
 	return widget.meta.layout(widget)
 end
 
-function wwindock.setup(widget,def)
+function wwindows.setup(widget,def)
 
-	widget.class="windock"
-	widget.windock=def.windock or "drag" -- type of dock
+	widget.class="windows"
+	widget.winmode=def.winmode or "drag" -- type of dock
 -- "drag" is a collection of dragable windows
 -- "stack" is a stack of side by side windows
 
@@ -95,12 +95,12 @@ function wwindock.setup(widget,def)
 	
 	widget.smode=def.smode or "topleft"
 
-	widget.update=wwindock.update
-	widget.draw=wwindock.draw
-	widget.layout=wwindock.layout
+	widget.update=wwindows.update
+	widget.draw=wwindows.draw
+	widget.layout=wwindows.layout
 
 	return widget
 end
 
-return wwindock
+return wwindows
 end

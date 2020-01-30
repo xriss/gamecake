@@ -61,9 +61,9 @@ function wwindow.edge_drag(widget,x,y)
 	local master=widget.master
 	local active_xy=master.active_xy
 	
-	local windock= (window.parent.class=="windock") and window.parent or nil
+	local windows= (window.parent.class=="windows") and window.parent or nil
 	
-	if windock and windock.windock~="drag" then -- we are docked
+	if windows and windows.winmode~="drag" then -- we are docked
 		return
 	end
 
@@ -151,11 +151,11 @@ end
 function wwindow.drag(widget,x,y)
 
 	local window,screen=widget:window_screen()
-	local windock= (window.parent.class=="windock") and window.parent or nil
+	local windows= (window.parent.class=="windows") and window.parent or nil
 
 	if window.flags.nodrag then return end	
 	
-	if windock and windock.windock~="drag" then -- we are docked
+	if windows and windows.winmode~="drag" then -- we are docked
 		return
 	end
 
@@ -213,7 +213,7 @@ function wwindow.layout(widget)
 
 	local v=widget.win_fbo
 	local window=widget
-	local windock= (window.parent.class=="windock") and window.parent or nil
+	local windows= (window.parent.class=="windows") and window.parent or nil
 
 	local ss=(widget.master.grid_size or 24)
 	local bar_height=widget.flags.nobar and 0 or ss
@@ -289,13 +289,13 @@ if window then -- only if message is bound to a window
 
 
 --[[
-		local windock= (window.parent.class=="windock") and window.parent or nil
+		local windows= (window.parent.class=="windows") and window.parent or nil
 
 --print(widget.id,widget.drag,wwindow.edge_drag)
 
 		if widget.drag~=wwindow.edge_drag then -- do not undock when clicking on the drag widgets
 
-			if windock and windock.windock~="drag" then -- we are docked so undock us
+			if windows and windows.windows~="drag" then -- we are docked so undock us
 				window.active_nopush=true
 				local master=screen.master
 				screen:remove_split(window)
@@ -320,7 +320,7 @@ if window then -- only if message is bound to a window
 --			print("PUSH",window.id,window.active_push[1],window.active_push[2])
 
 			if not window.active_nopush then
-				if window.parent.windock=="drag" then -- only dock if we are a dragable window
+				if window.parent.windows=="drag" then -- only dock if we are a dragable window
 				
 					local axis,order=window.active_push[1],(window.active_push[2]>=0) and 1 or 2
 					local split
@@ -331,7 +331,7 @@ if window then -- only if message is bound to a window
 					end
 
 					if split then
-						local dock=(split[1].class=="windock" and split[1]~=screen.windows) and split[1] or split[2] -- pick the dock from the screen_split
+						local dock=(split[1].class=="windows" and split[1]~=screen.windows) and split[1] or split[2] -- pick the dock from the screen_split
 						dock:insert(window)
 					else
 						screen:add_split({

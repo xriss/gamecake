@@ -459,7 +459,8 @@ M.construct=function(txt)
 
 		if txt.cut() then return end -- just delete selection
 
-		if txt.cx==1 and txt.cy>1 then
+		if txt.cx==1 then
+			if txt.cy==1 then return end
 			merge_lines()
 			return
 		end
