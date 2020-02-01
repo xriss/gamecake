@@ -252,7 +252,7 @@ function wscreen.setup(widget,def)
 	widget.remove_split=wscreen.remove_split
 
 	widget.windows=widget:add(def.windows or {class="windows",winmode="drag",size="full"})
---	widget.dialogs=widget:add(def.dialogs or {class="dialogs"})
+	widget.dialogs=widget:add(def.dialogs or {class="dialogs"})
 	
 	return widget
 end

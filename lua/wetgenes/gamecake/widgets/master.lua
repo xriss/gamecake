@@ -217,19 +217,20 @@ function wmaster.setup(widget,def)
 		end
 
 
--- loop over and call all later function then empty the table
--- later functions can add more functions as they are called
+-- loop over and call all later function
+-- later functions can add more functions *as* they are called
+-- but these will be called next time
 		if true then
+			local later=master.later
+			master.later={}
 			local call_later=function(c,...) return c(...) end
-			repeat
-				local v=table.remove(master.later,1)
+			for i,v in ipairs(later) do
 				if v then
 					if type(v[1])~="function" then dprint(tostring(v[1])) end
 					call_later(unpack(v))
 				end
-			until not v
+			end
 		end
---		master.later={}
 		
 		local tim=os.time()
 		for w,t in pairs(master.timehooks) do
