@@ -219,7 +219,7 @@ function wmaster.setup(widget,def)
 
 -- loop over and call all later function
 -- later functions can add more functions *as* they are called
--- but these will be called next time
+-- but these will be called next time around
 		if true then
 			local later=master.later
 			master.later={}

@@ -547,6 +547,7 @@ function wwindow.setup(window,def)
 
 		window.win_menu=window.win_three:add({
 			class="menuitem",
+			top_only=true,
 			px=0,
 			py=0,
 			hx=ss,

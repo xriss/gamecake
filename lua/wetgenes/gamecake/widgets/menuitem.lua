@@ -44,7 +44,9 @@ function wmenuitem.menu_add(widget,opts)
 				if type(v.menu_data)=="table" then -- copy string values down into sub menu tables
 					for n,m in pairs(md) do
 						if type(n)=="string" then
-							v.menu_data[n]=v.menu_data[n] or m
+							if "top_"~=string.sub(1,4) then
+								v.menu_data[n]=v.menu_data[n] or m
+							end
 						end
 					end
 					bubble_menudata(v.menu_data)
@@ -132,6 +134,15 @@ local showmenu=function()
 
 	if widget.menu_data then -- add a sub menu using this data
 
+		if widget.top_only then -- hide all other menus first
+			widget.master:call_descendents(function(w)
+				if w.menu then
+					w.menu:remove()
+					w.menu=nil
+				end
+			end)
+		end
+		
 		local w=widget:menu_add(widget.menu_data)
 		local map={}
 		local bubble
@@ -186,7 +197,11 @@ end
 
 
 	if hook=="over" then
-		showmenu_delay()
+		if widget.master.press then
+			showmenu()
+		else
+			showmenu_delay()
+		end
 	end
 
 	if hook=="active" then
