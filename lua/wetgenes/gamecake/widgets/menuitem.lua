@@ -137,8 +137,7 @@ local showmenu=function()
 		if widget.top_only then -- hide all other menus first
 			widget.master:call_descendents(function(w)
 				if w.menu then
-					w.menu:remove()
-					w.menu=nil
+					w.menu.hidden=true
 				end
 			end)
 		end
