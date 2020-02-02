@@ -95,6 +95,8 @@ function wtextedit.mouse(widget,act,_x,_y,key)
 		elseif act==-1 then
 			widget.mouse_down=false
 		end
+
+		return true
 	end
 
 --print("","OVER",widget.data.str_select,widget.data.str_idx,widget.data.str_select_click)

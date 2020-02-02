@@ -67,7 +67,7 @@ function wwindow.edge_drag(widget,x,y)
 		return
 	end
 
-	screen.windows:insert(window) -- move to top
+	window:move_to_top() -- move to top
 
 	if not active_xy.edge then -- fill in starting edge on the first call
 
@@ -264,7 +264,11 @@ end
 
 wwindow.move_to_top=function(window)
 	local window,screen=window:window_screen()
-	screen.windows:insert(window) -- move to top
+	if window.parent==screen.windows then -- must be in windows list
+		if not window.flags.nosort then
+			screen.windows:insert(window) -- move to top
+		end
+	end
 end
 
 wwindow.is_top=function(window)
@@ -306,9 +310,7 @@ if window then -- only if message is bound to a window
 		end
 ]]
 
-		if window.parent==screen.windows then
-			screen.windows:insert(window) -- move to top
-		end
+		window:move_to_top()
 		
 --		print("ACTIVE",window.id)
 

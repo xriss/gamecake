@@ -112,6 +112,8 @@ function wscroll.setup(widget,def)
 	widget.datx=widget_data.new_data{max=1,master=widget.master}
 	widget.daty=widget_data.new_data{max=1,master=widget.master}
 	widget.solid=true
+	
+	widget.color=widget.color or 0
 
 	widget.pan=		widget:add({class=def.scroll_pan or "pan",	hx=widget.hx-ss,	hy=widget.hy-ss	,color=widget.color})
 	widget.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,

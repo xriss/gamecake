@@ -30,7 +30,7 @@ end
 
 wdialogs.show_overlay=function(dialogs)
 	local screen=dialogs.parent
-	dialogs.overlay=screen:add{class="center",solid=true,transparent=0xcc000000}
+	dialogs.overlay=screen:add{size="full",solid=true,transparent=0xcc000000,class="center"}
 	return dialogs.overlay
 end
 
@@ -42,19 +42,21 @@ end
 
 wdialogs.show=function(dialogs,opts)
 
-	local hz=master.grid_size or 24
 	local master=dialogs.master
 	local screen=dialogs.parent
+
+	local hz=master.grid_size or 24
+
 
 	local def_window=function(parent,it)
 		for n,v in pairs{
 			class="window",
-			hx=hz*10,
-			hy=hz*10,
+			hx=hz*16,
+			hy=hz*16,
 			px=0,
 			py=0,
 			solid=true,
-			flags={nodrag=true,nobar=true},
+			flags={nobar=true,nosort=true},
 		} do it[n]=it[n] or v end
 		
 		return parent:add(it)
@@ -62,7 +64,7 @@ wdialogs.show=function(dialogs,opts)
 
 	local def_button=function(parent,it)
 		for n,v in pairs{
-			hx=hz*5,
+			hx=hz*8,
 			hy=hz,
 			px=2,
 			py=2,
@@ -73,10 +75,9 @@ wdialogs.show=function(dialogs,opts)
 		return parent:add_border(it)
 	end
 
-	
 	dialogs:show_overlay() -- dim screen with an overlay
 
-	local window=def_window(dialogs.overlay,{px=screen.hx/2,py=screen.hy/2,hx=hz*10,size="fit",id="request",title=""})
+	local window=def_window(dialogs.overlay,{px=screen.hx/2,py=screen.hy/2,hx=hz*16.5,size="fity",id="request",title=""})
 	local canvas=window.win_canvas
 	
 	window.close_request=function(id)
@@ -85,19 +86,6 @@ wdialogs.show=function(dialogs,opts)
 		if opts[id] then (opts[id])() end
 	end
 
-	for i,v in ipairs(opts.lines or {} ) do
-
-		local it={
-		
-			hx=hz*10,
-			hy=hz,
-			px=2,
-			py=2,
-			text=v
-		}
-		canvas:add_border(it)
-	end
-	
 	local hooks=function(act,w,dat)
 	
 		if act=="click" then
@@ -107,20 +95,47 @@ wdialogs.show=function(dialogs,opts)
 		end
 	
 	end
+
+	canvas:add({hx=hz*16.5,hy=hz*0.25})
+
+	canvas:add({hx=hz*0.25,hy=hz*0.25})
+	local inside=canvas:add({hx=hz*16,size="fity",class="fill"})
+	canvas:add({hx=hz*0.25,hy=hz*0.25})
+
+	for i,v in ipairs(opts.lines or {} ) do
+
+		local it={
+		
+			hx=hz*16,
+			hy=hz,
+			px=2,
+			py=2,
+			text=v
+		}
+		inside:add_border(it)
+	end
 	
+	
+	if opts.file then
+		inside:add({hx=hz*16,hy=hz*16,class="file",id="file",hooks=hooks})
+	end
+
+
 	if opts.sorry then
-		def_button(canvas,{hooks=hooks,class="button",id="sorry",text="Sorry",hx=hz*10})
+		def_button(inside,{hooks=hooks,class="button",id="sorry",text="Sorry",hx=hz*16})
 	end
 
 	if opts.yes then
-		def_button(canvas,{hooks=hooks,class="button",id="yes",text="Yes"})
+		def_button(inside,{hooks=hooks,class="button",id="yes",text="Yes"})
 	end
 	if opts.ok then
-		def_button(canvas,{hooks=hooks,class="button",id="ok",text="OK"})
+		def_button(inside,{hooks=hooks,class="button",id="ok",text="OK"})
 	end
 	if opts.no then
-		def_button(canvas,{hooks=hooks,class="button",id="no",text="No"})
+		def_button(inside,{hooks=hooks,class="button",id="no",text="No"})
 	end
+
+	canvas:add({hx=hz*16.5,hy=hz*0.25})
 
 	master:resize_and_layout() -- need to layout at least once to get everything in the right place
 
