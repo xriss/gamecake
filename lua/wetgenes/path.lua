@@ -3,22 +3,37 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
--- i think we are going to need lfs.currentdir()
+-- I think we are going to need lfs.currentdir()
 local _,lfs=pcall( function() return require("lfs") end )
 
+--[[#lua.wetgenes.path
+
+Manage file paths under linux or windows, so we need to deal with \ or 
+/ and know the root difference between / and C:\
+
+	local wpath=require("wetgenes.path")
+
+]]
+
 -- single line replacement for the module creation function
-local M={} ; package.loaded[(...)]=M ; local wplate=M
+local M={} ; package.loaded[(...)]=M ; local wpath=M
 
-local wpath=M
 
---[[
+--[[#lua.wetgenes.path.setup
 
 setup for windows or linux style paths, to force one or the other use
 
 	wpath.setup("win")
 	wpath.setup("nix")
 
-this is a global setting, so be careful.
+We automatically call this at startup and make a best guess, you can 
+revert to this best guess with
+
+	wpath.setup()
+
+This is a global setting, so be careful with changes. Mostly its 
+probably best to stick with the best guess unless we are mistakenly 
+guessing windows.
 
 ]]
 wpath.setup=function(flavour)
@@ -53,7 +68,11 @@ wpath.setup()
 
 
 
--- split a path into numbered parts
+--[[#lua.wetgenes.path.split
+
+split a path into numbered components
+
+]]
 wpath.split=function(p)
 	local ps={}
 	local fi=1
@@ -72,7 +91,11 @@ wpath.split=function(p)
 	return ps
 end
 
--- join a split path, tables are auto expanded
+--[[#lua.wetgenes.path.join
+
+join a split path, tables are auto expanded
+
+]]
 wpath.join=function(...)
 	local ps={}
 	for i,v in ipairs({...}) do
@@ -92,7 +115,7 @@ wpath.join=function(...)
 	return table.concat(ps,wpath.separator)
 end
 
---[[
+--[[#lua.wetgenes.path.parse
 
 split a path into named parts like so
 
@@ -154,7 +177,7 @@ wpath.parse=function(p)
 	return r
 end
 
---[[
+--[[#lua.wetgenes.path.normalize
 
 remove ".." and "." components from the path string
 
@@ -183,7 +206,7 @@ wpath.normalize=function(p)
 	return wpath.join(ps)
 end
 
---[[
+--[[#lua.wetgenes.path.currentdir
 
 Get the current working directory, this requires lfs and if lfs is not 
 available then it will return wpath.root this path will have a trailing 
@@ -209,7 +232,7 @@ wpath.currentdir=function()
 end
 
 
---[[
+--[[#lua.wetgenes.path.resolve
 
 Join all path segments and resolve them to absolute using wpath.join 
 and wpath.normalize with a prepended wpath.currentdir as necessary.
@@ -227,7 +250,7 @@ wpath.resolve=function(...)
 end
 
 
---[[
+--[[#lua.wetgenes.path.relative
 
 Build a relative path from point a to point b
 
