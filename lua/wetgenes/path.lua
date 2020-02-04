@@ -1,0 +1,258 @@
+--
+-- (C) 2020 Kriss@XIXs.com
+--
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+-- i think we are going to need lfs.currentdir()
+local _,lfs=pcall( function() return require("lfs") end )
+
+-- single line replacement for the module creation function
+local M={} ; package.loaded[(...)]=M ; local wplate=M
+
+local wpath=M
+
+--[[
+
+setup for windows or linux style paths, to force one or the other use
+
+	wpath.setup("win")
+	wpath.setup("nix")
+
+this is a global setting, so be careful.
+
+]]
+wpath.setup=function(flavour)
+
+-- try and guess if we are dealing with linux or windows style paths
+	if not flavour then
+		if package.config:sub(1,1) ==  "/" then -- paths begin with /
+			flavour="nix"
+		else
+			flavour="win"
+		end
+	end
+
+	if flavour == "win" then
+	
+		wpath.root="C:\\"
+		wpath.separator="\\"
+		wpath.delimiter=":"
+		wpath.winhax=true
+
+	elseif flavour == "nix" then
+
+		wpath.root="/"
+		wpath.separator="/"
+		wpath.delimiter=";"
+		wpath.winhax=false
+	
+	end
+
+end
+wpath.setup()
+
+
+
+-- split a path into numbered parts
+wpath.split=function(p)
+	local ps={}
+	local fi=1
+	local fnext=function() return string.find(p,wpath.winhax and "[\\/]" or "[/]",fi) end
+	local fa,fb=fnext()
+	while fa do
+		local s=string.sub(p,fi,fa-1)
+		if s~="" or ps[#ps]~="" then -- ignore multiple separators
+			ps[#ps+1]=s
+		end
+		fi=fb+1
+		fa,fb=fnext()
+	end
+	ps[#ps+1]=string.sub(p,fi)
+
+	return ps
+end
+
+-- join a split path, tables are auto expanded
+wpath.join=function(...)
+	local ps={}
+	for i,v in ipairs({...}) do
+		local t=type(v)
+		if t=="table" then
+			for j,s in ipairs(v) do
+				if type(s)=="string" then
+					ps[#ps+1]=s
+				end
+			end
+		else
+			if type(v)=="string" then
+				ps[#ps+1]=v
+			end
+		end
+	end
+	return table.concat(ps,wpath.separator)
+end
+
+--[[
+
+split a path into named parts like so
+
+	-------------------------------------
+	|           dir        |    base    |
+	|----------------------|------------|
+	| root |               | name  ext  |
+	|----------------------|------------|
+	|  /    home/user/dir/ | file  .txt |
+	-------------------------------------
+	
+this can be reversed with simple joins and checks for nil
+
+	(dir or "")..(base or "")
+	
+if root is set then it implies an absolute path and will be something 
+like C:\ under windows.
+
+]]
+wpath.parse=function(p)
+	local ps=wpath.split(p)
+	local r={}
+
+	if ps[1] then
+		if ps[1]=="" and ps[2] then -- unix root
+			r.root=wpath.separator
+			table.remove(ps,1)
+		elseif #(ps[1])==2 and string.sub(ps[1],2,2)==":" and wpath.winhax then -- windows root
+			r.root=ps[1]..wpath.separator
+			table.remove(ps,1)
+		end
+	end
+
+	if ps[1] then
+		r.base=ps[#ps]
+		table.remove(ps,#ps)
+
+		local da,db=string.find(r.base, ".[^.]*$")
+		if da and da>1 then -- ignore if at the start of name
+			r.name=string.sub(r.base,1,da-1)
+			r.ext=string.sub(r.base,da,db)
+		else
+			r.name=r.base
+		end
+
+	end
+
+	if ps[1] then
+		if ps[#ps] ~= "" then
+			ps[#ps+1]="" -- force a trailing /
+		end
+		r.dir=table.concat(ps,wpath.separator)
+	end
+
+	if r.root then -- root is part of dir
+		r.dir=r.root..(r.dir or "")
+	end
+
+	return r
+end
+
+--[[
+
+remove ".." and "." components from the path string
+
+]]
+wpath.normalize=function(p)
+	local pp=wpath.parse(p) -- we need to know if path contains a root
+	local ps=wpath.split(p)
+	
+	local idx=1
+	while idx <= #ps do
+		if ps[idx]=="." then -- just remove this one, no need to advance
+			table.remove(ps,idx)
+		elseif ps[idx]==".." then -- remove this and the previous one if we can
+			if idx>(pp.root and 2 or 1) then -- can we remove previous part
+				idx=idx-1
+				table.remove(ps,idx)
+				table.remove(ps,idx)
+			else -- we can not remove so must ignore
+				idx=idx+1
+			end
+		else -- just advance
+			idx=idx+1
+		end
+	end
+
+	return wpath.join(ps)
+end
+
+--[[
+
+Get the current working directory, this requires lfs and if lfs is not 
+available then it will return wpath.root this path will have a trailing 
+separator so can easily be used
+
+	wpath.currentdir().."filename.ext"
+
+]]
+wpath.currentdir=function()
+
+	local d
+	if lfs then d=lfs.currentdir() end
+	
+	if d then -- make sure we end in a separator
+		local ds=wpath.split(d)
+		if ds[#ds] ~= "" then
+			ds[#ds+1]="" -- force a trailing /
+		end
+		return wpath.join(ds)
+	end
+
+	return wpath.root -- default root
+end
+
+
+--[[
+
+Join all path segments and resolve them to absolute using wpath.join 
+and wpath.normalize with a prepended wpath.currentdir as necessary.
+
+]]
+wpath.resolve=function(...)
+
+	local p=wpath.join(...)
+
+	if wpath.parse(p).root then -- already absolute
+		return wpath.normalize(p) -- just normalize
+	end
+	
+	return wpath.normalize( wpath.currentdir()..p ) -- prepend currentdir
+end
+
+
+--[[
+
+Build a relative path from point a to point b
+
+]]
+wpath.relative=function(pa,pb)
+
+	local a=wpath.split(wpath.resolve(pa))
+	local b=wpath.split(wpath.resolve(pb))
+	
+	if a[#a] == "" then -- remove trailing slash
+		table.remove(a,#a)
+	end
+
+	local r={}
+	local match=#a+1 -- if the test below falls through then it is all of #a
+	for i=1,#a do
+		if a[i] ~= b[i] then -- start of differences
+			match=i
+			break
+		end
+	end
+	for i=match,#a do r[#r+1]=".." end -- step back
+	if #r==0 then r[#r+1]="." end -- start at current
+	for i=match,#b do r[#r+1]=b[i] end -- step forward
+
+	return wpath.join(r)
+end
+

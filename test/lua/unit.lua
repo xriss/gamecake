@@ -27,6 +27,8 @@ else
 	
 	lunatest.suite("unit.test_zip")
 
+	lunatest.suite("unit.test_path")
+
 --	lunatest.suite("unit.test_lanes")
 
 	lunatest.suite("unit.test_lua_al")
