@@ -1,10 +1,8 @@
 --
--- (C) 2020 Kriss@XIXs.com
+-- (C) 2020 Kriss@XIXs.com and released under the MIT license,
+-- see http://opensource.org/licenses/MIT for full license text.
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-
--- I think we are going to need lfs.currentdir()
-local _,lfs=pcall( function() return require("lfs") end )
 
 --[[#lua.wetgenes.path
 
@@ -14,6 +12,9 @@ Manage file paths under linux or windows, so we need to deal with \ or
 	local wpath=require("wetgenes.path")
 
 ]]
+
+-- I think we are going to need lfs.currentdir()
+local lfs=select(2,pcall( function() return require("lfs") end ))
 
 -- single line replacement for the module creation function
 local M={} ; package.loaded[(...)]=M ; local wpath=M
@@ -76,15 +77,17 @@ split a path into numbered components
 wpath.split=function(p)
 	local ps={}
 	local fi=1
-	local fnext=function() return string.find(p,wpath.winhax and "[\\/]" or "[/]",fi) end
-	local fa,fb=fnext()
-	while fa do
-		local s=string.sub(p,fi,fa-1)
-		if s~="" or ps[#ps]~="" then -- ignore multiple separators
-			ps[#ps+1]=s
+	while true do
+		local fa,fb=string.find(p,wpath.winhax and "[\\/]" or "[/]",fi)
+		if fa then
+			local s=string.sub(p,fi,fa-1)
+			if s~="" or ps[#ps]~="" then -- ignore multiple separators
+				ps[#ps+1]=s
+			end
+			fi=fb+1
+		else
+			break
 		end
-		fi=fb+1
-		fa,fb=fnext()
 	end
 	ps[#ps+1]=string.sub(p,fi)
 
@@ -210,7 +213,7 @@ end
 
 Get the current working directory, this requires lfs and if lfs is not 
 available then it will return wpath.root this path will have a trailing 
-separator so can easily be used
+separator so can be joined directly to a filename.
 
 	wpath.currentdir().."filename.ext"
 
@@ -252,7 +255,9 @@ end
 
 --[[#lua.wetgenes.path.relative
 
-Build a relative path from point a to point b
+Build a relative path from point a to point b this will probably be a 
+bunch of ../../../ followed by some of the ending of the second 
+argument.
 
 ]]
 wpath.relative=function(pa,pb)
@@ -265,9 +270,9 @@ wpath.relative=function(pa,pb)
 	end
 
 	local r={}
-	local match=#a+1 -- if the test below falls through then it is all of #a
+	local match=#a+1 -- if the test below falls through then the match is all of a
 	for i=1,#a do
-		if a[i] ~= b[i] then -- start of differences
+		if a[i] ~= b[i] then -- start of difference
 			match=i
 			break
 		end
@@ -279,3 +284,21 @@ wpath.relative=function(pa,pb)
 	return wpath.join(r)
 end
 
+--[[#lua.wetgenes.path.parent
+
+Resolve input and go up a single directory level, ideally you should 
+pass in a directory, IE a string that ends in / or \ and we will return 
+the parent of this directory.
+
+If called repeatedly, then eventually we will return wpath.root
+
+]]
+wpath.parent=function(...)
+
+	ps=wpath.split(wpath.resolve(...))
+	if ps[#ps]~="" then ps[#ps+1]="" end -- force trailing /
+	if ps>=3 then -- not just root
+		table.remove(ps,#ps-1)
+	end
+	return wpath.join(ps)
+end
