@@ -12,12 +12,10 @@ Manage file paths under linux or windows, so we need to deal with \ or
 	local wpath=require("wetgenes.path")
 
 ]]
-
--- I think we are going to need lfs.currentdir()
-local lfs=select(2,pcall( function() return require("lfs") end ))
-
--- single line replacement for the module creation function
 local M={} ; package.loaded[(...)]=M ; local wpath=M
+
+-- a soft require of lfs so lfs can be nil
+local lfs=select(2,pcall( function() return require("lfs") end ))
 
 
 --[[#lua.wetgenes.path.setup
@@ -186,10 +184,21 @@ remove ".." and "." components from the path string
 
 ]]
 wpath.normalize=function(p)
+
 	local pp=wpath.parse(p) -- we need to know if path contains a root
 	local ps=wpath.split(p)
 	
-	local idx=1
+	local idx=2
+
+	while idx <= #ps-1 do
+		if ps[idx]=="" then -- remove double //
+			table.remove(ps,idx)
+		else -- just advance
+			idx=idx+1
+		end
+	end
+			
+	idx=1
 	while idx <= #ps do
 		if ps[idx]=="." then -- just remove this one, no need to advance
 			table.remove(ps,idx)
@@ -199,7 +208,7 @@ wpath.normalize=function(p)
 				table.remove(ps,idx)
 				table.remove(ps,idx)
 			else -- we can not remove so must ignore
-				idx=idx+1
+				table.remove(ps,idx)
 			end
 		else -- just advance
 			idx=idx+1
