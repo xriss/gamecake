@@ -303,11 +303,5 @@ If called repeatedly, then eventually we will return wpath.root
 
 ]]
 wpath.parent=function(...)
-
-	ps=wpath.split(wpath.resolve(...))
-	if ps[#ps]~="" then ps[#ps+1]="" end -- force trailing /
-	if ps>=3 then -- not just root
-		table.remove(ps,#ps-1)
-	end
-	return wpath.join(ps)
+	return wpath.resolve(...,"..","")
 end

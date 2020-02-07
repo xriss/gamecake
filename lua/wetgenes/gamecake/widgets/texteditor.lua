@@ -279,7 +279,12 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	dy=dy+1
 	
 	local cache=txt.get_cache( dy )
-	dx=cache and cache.xc[dx] or 0
+	if cache then
+		if dx > #cache.xc then dx=#cache.xc end
+		dx=cache and cache.xc[dx] or 0
+	else
+		dx=0
+	end
 	
 	if act==1 and texteditor.master.over==pan and keyname=="left" then -- click to activate
 	
