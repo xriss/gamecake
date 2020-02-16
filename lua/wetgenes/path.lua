@@ -123,7 +123,7 @@ split a path into named parts like so
 	-------------------------------------
 	|               path                |
 	-------------------------------------
-	|           dir        |    base    |
+	|           dir        |    file    |
 	|----------------------|------------|
 	| root |    folder     | name  ext  |
 	|----------------------|------------|
@@ -133,8 +133,8 @@ split a path into named parts like so
 this can be reversed with simple joins and checks for nil
 
 	dir = (root or "")..(folder or "")
-	base = (name or "")..(ext or "")
-	path = (dir or "")..(base or "")
+	file = (name or "")..(ext or "")
+	path = (dir or "")..(file or "")
 	
 if root is set then it implies an absolute path and will be something 
 like C:\ under windows.
@@ -155,15 +155,15 @@ wpath.parse=function(p)
 	end
 
 	if ps[1] then
-		r.base=ps[#ps]
+		r.file=ps[#ps]
 		table.remove(ps,#ps)
 
-		local da,db=string.find(r.base, ".[^.]*$")
+		local da,db=string.find(r.file, ".[^.]*$")
 		if da and da>1 then -- ignore if at the start of name
-			r.name=string.sub(r.base,1,da-1)
-			r.ext=string.sub(r.base,da,db)
+			r.name=string.sub(r.file,1,da-1)
+			r.ext=string.sub(r.file,da,db)
 		else
-			r.name=r.base
+			r.name=r.file
 		end
 
 	end
@@ -181,7 +181,7 @@ wpath.parse=function(p)
 		r.dir=r.folder -- may be nil
 	end
 	
-	r.path = (r.dir or "")..(r.base or "")
+	r.path = (r.dir or "")..(r.file or "")
 
 	return r
 end

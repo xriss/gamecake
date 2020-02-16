@@ -26,7 +26,7 @@ function test_path4()
 end
 function test_path5()
 	local pp=wpath.parse(pb)
-	assert( pp.base == "file.ext" )
+	assert( pp.file == "file.ext" )
 end
 function test_path6()
 	local pp=wpath.parse(pb)

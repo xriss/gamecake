@@ -44,13 +44,13 @@ wfile.path=function(widget,s)
 	if s then -- set
 		local p=wpath.parse(wpath.resolve(s))
 		widget.data_dir:value(p.dir)
-		widget.data_name:value(p.base)
+		widget.data_name:value(p.file)
 	end
 	if widget.refresh then widget:refresh() end
 	return wpath.resolve( widget.data_dir:value() , widget.data_name:value() )
 end
 
--- get or set dir
+-- get or set dirname
 wfile.dir=function(widget,s)
 	if s then -- set
 		local p=wpath.parse(wpath.resolve(s))
@@ -58,6 +58,16 @@ wfile.dir=function(widget,s)
 	end
 	if widget.refresh then widget:refresh() end
 	return wpath.parse(wpath.resolve( widget.data_dir:value() , widget.data_name:value() )).dir
+end
+
+-- get or set filename
+wfile.file=function(widget,s)
+	if s then -- set
+		local p=wpath.parse(wpath.resolve(s))
+		widget.data_name:value(p.file)
+	end
+	if widget.refresh then widget:refresh() end
+	return wpath.parse(wpath.resolve( widget.data_dir:value() , widget.data_name:value() )).file
 end
 
 
@@ -233,6 +243,7 @@ function wfile.setup(widget,def)
 -- external functions, use can be expected to call these
 	widget.path				=	wfile.path
 	widget.dir				=	wfile.dir
+	widget.file				=	wfile.file
 	widget.refresh			=	wfile.refresh
 
 
