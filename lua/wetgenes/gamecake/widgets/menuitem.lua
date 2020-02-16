@@ -174,7 +174,7 @@ local showmenu_delay=function()
 	local f
 	f=function()
 		if widget.master.over==widget then -- must hover
-			if wwin.time() >= t+0.5 then
+			if wwin.time() >= t+0.25 then
 					showmenu()
 			else
 				widget.master.later_append(f) -- check again later

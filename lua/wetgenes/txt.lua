@@ -186,6 +186,42 @@ M.construct=function(txt)
 		return cache
 	end
 	
+	txt.markauto=function(fx,fy,click)
+
+		txt.mark(fx,fy,fx,fy)
+
+		local s=txt.get_string(txt.cy) or ""
+
+		if click==2 then -- select word
+		
+			local sl=wtxtutf.length(s)
+			local lx=txt.cx-1
+			local hx=txt.cx-1
+
+			local c = wtxtutf.ncode( s , lx )
+
+			if c and c > 32 then -- solid
+				
+				while ( (wtxtutf.ncode( s , lx-1 ) or 0) > 32 ) do lx=lx-1 end
+				while ( (wtxtutf.ncode( s , hx+1 ) or 0) > 32 ) do hx=hx+1 end
+
+				txt.mark(lx,fy,hx+1,fy)
+			
+			elseif c and c <= 32 then -- White
+
+				while ( (wtxtutf.ncode( s , lx-1 ) or 33) <= 32 ) do lx=lx-1 end
+				while ( (wtxtutf.ncode( s , hx+1 ) or 33) <= 32 ) do hx=hx+1 end
+
+				txt.mark(lx,fy,hx+1,fy)
+
+			end
+
+		elseif click>=3 then -- select line
+			txt.mark(0,fy,#s,fy)
+		end
+
+	end
+	
 	txt.mark=function(fx,fy,tx,ty)
 		if not fx then -- unmark
 			txt.fx=nil

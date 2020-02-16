@@ -23,7 +23,7 @@ M.doublewrap=function(tab,width,maxleft,append)
 		local idx=1
 		while ls1[idx] or ls2[idx] do -- merge
 			
-			line=(ls1[idx] or "")
+			local line=(ls1[idx] or "")
 			if #line<w1 then -- pad
 				line=line..string.rep(" ",w1-#line)
 			end

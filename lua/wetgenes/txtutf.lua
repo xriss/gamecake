@@ -88,3 +88,13 @@ M.length=function(s)
 	for char in s:gmatch(M.charpattern) do l=l+1 end
 	return l
 end
+
+-- get the nth code from the string (slow)
+M.ncode=function(s,n)
+	local l=0
+	for char in s:gmatch(M.charpattern) do
+		l=l+1
+		if l==n then return M.code(char) end
+	end
+end
+

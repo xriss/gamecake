@@ -3,7 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---local wwin=require("wetgenes.win")
+local wwin=require("wetgenes.win")
 local tardis=require("wetgenes.tardis")
 local bit=require("bit")
 
@@ -232,7 +232,7 @@ function wmaster.setup(widget,def)
 			end
 		end
 		
-		local tim=os.time()
+		local tim=wwin.time()
 		for w,t in pairs(master.timehooks) do
 			if t<=tim then
 				w:call_hook("timedelay",t)
@@ -502,7 +502,22 @@ function wmaster.setup(widget,def)
 		elseif act==-1 and keyname then
 			master["mouse_"..keyname]=false
 		end
-
+		
+		if act==1 then
+			if master.last_mouse_click then
+				if master.last_mouse_click[1]+0.4 > wwin.time() then -- double click
+					if keyname == master.last_mouse_click[2] then -- same key
+						local dx=master.last_mouse_click[3] - x
+						local dy=master.last_mouse_click[4] - y
+						local dd=( dx*dx + dy*dy )
+						if dd < 32*32 then -- same place
+							act=master.last_mouse_click[5]+1 -- act 2 is double click 3 is triple etc...
+						end
+					end
+				end
+			end
+			master.last_mouse_click={wwin.time(),keyname,x,y,act}
+		end
 		master.last_mouse_position={x,y}
 
 		master.old_active=master.active

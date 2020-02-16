@@ -309,7 +309,7 @@ function wtextedit.key(widget,ascii,key,act)
 	
 	if changed then
 	
-		widget.master.timehooks[widget]=os.time()+2
+		widget.master.timehooks[widget]=wwin.time()+1
 
 --		widget.text=widget.data.str
 		

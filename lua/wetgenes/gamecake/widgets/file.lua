@@ -68,7 +68,7 @@ wfile.file_scan=function(widget,cd)
 	widget.files={}
 	pcall( function()
 		for n in lfs.dir(cd) do
-			if n~="." and n~=".." then
+			if n~="." then
 				local t=lfs.attributes(cd.."/"..n)
 				if t then
 					t.name=n

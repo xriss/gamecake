@@ -241,7 +241,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		pan.wheel_speed=pan.wheel_speed or 1
 		pan.wheel_stamp=pan.wheel_stamp or 0
 
-		local t=os.time()
+		local t=wwin.time()
 		if pan.wheel_stamp+1 > t then
 			pan.wheel_speed=pan.wheel_speed+1
 		else
@@ -295,6 +295,16 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		texteditor.mark_area={dx,dy,dx,dy}
 
 		txt.mark(unpack(texteditor.mark_area))
+
+		texteditor:scroll_to_view()
+		texteditor:refresh()
+		texteditor:set_dirty()
+
+	elseif (act and act>1) and texteditor.master.over==pan and keyname=="left" then -- double click
+	
+		texteditor.float_cx=nil
+
+		txt.markauto(dx,dy,act) -- select word
 
 		texteditor:scroll_to_view()
 		texteditor:refresh()
