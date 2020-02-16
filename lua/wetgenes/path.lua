@@ -121,16 +121,20 @@ end
 split a path into named parts like so
 
 	-------------------------------------
+	|               path                |
+	-------------------------------------
 	|           dir        |    base    |
 	|----------------------|------------|
-	| root |               | name  ext  |
+	| root |    folder     | name  ext  |
 	|----------------------|------------|
-	|  /    home/user/dir/ | file  .txt |
+	|  /   |  home/user/   | file  .txt |
 	-------------------------------------
 	
 this can be reversed with simple joins and checks for nil
 
-	(dir or "")..(base or "")
+	dir = (root or "")..(folder or "")
+	base = (name or "")..(ext or "")
+	path = (dir or "")..(base or "")
 	
 if root is set then it implies an absolute path and will be something 
 like C:\ under windows.
@@ -168,12 +172,16 @@ wpath.parse=function(p)
 		if ps[#ps] ~= "" then
 			ps[#ps+1]="" -- force a trailing /
 		end
-		r.dir=table.concat(ps,wpath.separator)
+		r.folder=table.concat(ps,wpath.separator)
 	end
 
 	if r.root then -- root is part of dir
-		r.dir=r.root..(r.dir or "")
+		r.dir=r.root..(r.folder or "")
+	else
+		r.dir=r.folder -- may be nil
 	end
+	
+	r.path = (r.dir or "")..(r.base or "")
 
 	return r
 end
