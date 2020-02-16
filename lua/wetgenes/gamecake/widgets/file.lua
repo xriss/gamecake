@@ -47,7 +47,7 @@ wfile.path=function(widget,s)
 		widget.data_name:value(p.base)
 	end
 	if widget.refresh then widget:refresh() end
-	return wpath.parse(wpath.resolve( widget.data_dir:value() , widget.data_name:value() ))
+	return wpath.resolve( widget.data_dir:value() , widget.data_name:value() )
 end
 
 
@@ -114,7 +114,6 @@ end
 
 
 wfile.file_hooks=function(widget,act,w)
---print(act,w.id)
 	if act=="unfocus_edit" or act=="timedelay" then
 		if w.id=="dir" then
 			widget:file_dir({name="."})
@@ -147,6 +146,15 @@ wfile.file_hooks=function(widget,act,w)
 					widget:file_dir(u)
 					widget:call_hook_later("file_dir_click")
 				end
+			end
+		end
+	end
+	if act=="confirm" then
+		if w.id then
+			if w.id=="file" then
+				widget:call_hook_later("file_name_click")
+			elseif w.id=="dir" then
+				widget:call_hook_later("file_dir_click")
 			end
 		end
 	end
@@ -205,9 +213,10 @@ function wfile.setup(widget,def)
 	widget.files={}
 	widget.view="file"
 
+	widget.file_hooks		=	function(act,w) return wfile.file_hooks(widget,act,w) end
 
-	widget.data_dir  = def.data_dir  or wdata.new_data({class="string",str=wpath.currentdir(),master=widget.master})
-	widget.data_name = def.data_name or wdata.new_data({class="string",str="",master=widget.master})
+	widget.data_dir  = def.data_dir  or wdata.new_data({class="string",str=wpath.currentdir(),master=widget.master,hooks=widget.file_hooks})
+	widget.data_name = def.data_name or wdata.new_data({class="string",str="",master=widget.master,hooks=widget.file_hooks})
 
 	widget.history[ widget.data_dir:value() ]=true
 
@@ -220,14 +229,13 @@ function wfile.setup(widget,def)
 	widget.file_scan		=	wfile.file_scan
 	widget.file_dir			=	wfile.file_dir
 	widget.file_refresh		=	wfile.file_refresh
-	widget.file_hooks		=	function(act,w) return wfile.file_hooks(widget,act,w) end
 
 	local ss=widget.master.grid_size or 24
 	local ss1=ss/24
 	local ss2=ss/12
 
 
-	widget:add_indent({hx=widget.hx,hy=ss,class="textedit",color=0,data=widget.data_name,clip2=true},ss1)
+	widget:add_indent({hx=widget.hx,hy=ss,class="textedit",color=0,data=widget.data_name,clip2=true,hooks=widget.file_hooks,id="file"},ss1)
 
 --	widget:add({hx=widget.hx,hy=5})
 

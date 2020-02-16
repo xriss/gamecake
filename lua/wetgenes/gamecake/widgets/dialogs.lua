@@ -70,7 +70,7 @@ wdialogs.show=function(dialogs,opts)
 			py=2,
 			color=0,
 			solid=true,
-			hooks=dialogs.hooks,
+			hooks=opts.hooks,
 		} do it[n]=it[n] or v end
 		return parent:add_border(it)
 	end
@@ -83,17 +83,7 @@ wdialogs.show=function(dialogs,opts)
 	window.close_request=function(id)
 		dialogs:hide_overlay()
 		master:layout() -- need to layout at least once to get everything in the right place
-		if opts[id] then (opts[id])() end
-	end
-
-	local hooks=function(act,w,dat)
-	
-		if act=="click" then
-
-			window.close_request(w.id)
-
-		end
-	
+		if id and opts[id] then (opts[id])() end
 	end
 
 	canvas:add({hx=hz*16.5,hy=hz*0.25})
@@ -117,22 +107,26 @@ wdialogs.show=function(dialogs,opts)
 	
 	
 	if opts.file then
-		inside:add({hx=hz*16,hy=hz*16,class="file",id="file",hooks=hooks})
+		window.file = inside:add({hx=hz*16,hy=hz*16,class="file",id="file",hooks=opts.hooks})
 	end
 
 
+	local clickhooks=function(act,w,dat)
+		if act=="click" then
+			window.close_request(w.id)
+		end
+	end
 	if opts.sorry then
-		def_button(inside,{hooks=hooks,class="button",id="sorry",text="Sorry",hx=hz*16})
+		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="sorry",text="Sorry",hx=hz*16})
 	end
-
 	if opts.yes then
-		def_button(inside,{hooks=hooks,class="button",id="yes",text="Yes"})
+		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="yes",text="Yes"})
 	end
 	if opts.ok then
-		def_button(inside,{hooks=hooks,class="button",id="ok",text="OK"})
+		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="ok",text="OK"})
 	end
 	if opts.no then
-		def_button(inside,{hooks=hooks,class="button",id="no",text="No"})
+		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="no",text="No"})
 	end
 
 	canvas:add({hx=hz*16.5,hy=hz*0.25})

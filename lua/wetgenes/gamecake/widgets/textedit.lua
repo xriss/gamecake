@@ -7,6 +7,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- a one line string buffer that can be edited
 
 
+local wwin=require("wetgenes.win")
 
 
 --module
@@ -134,9 +135,11 @@ function wtextedit.key(widget,ascii,key,act)
 	
 		if key=="enter" or key=="return" or key=="tab" then
 		
-			if widget.data.str and widget.onenter then -- callback?
-			
-				widget:call_hook_later("click")
+			if widget.data.str then -- callback?
+
+				widget:call_hook_later("confirm")
+
+				widget.data:call_hook_later("value")
 				
 			end
 			
@@ -315,6 +318,9 @@ function wtextedit.key(widget,ascii,key,act)
 		
 		widget:call_hook_later("changed")
 		widget:set_dirty()
+
+		widget.data:call_hook_later("changed")
+
 	end
 	
 	return true
@@ -325,6 +331,7 @@ end
 function wtextedit.timedelay(widget)
 --print("timedelay")
 	if widget.data then
+		widget.data:call_hook_later("value")
 		if widget.data.class=="number" then
 			local num=widget.data:tonumber(widget.data.str)
 			widget.data:value(num or 0)
@@ -341,13 +348,18 @@ function wtextedit.select_all(widget)
 end
 
 function wtextedit.unfocus(widget)
-	if widget.data.class=="number" then
-		local num=widget.data:tonumber(widget.data.str)
-		widget.data:value(num or 0)
-	end
 
+	if widget.data then
+		widget.data:call_hook_later("value")
+		if widget.data.class=="number" then
+			local num=widget.data:tonumber(widget.data.str)
+			widget.data:value(num or 0)
+		end
+	end
+	
 	widget.text=widget.data:tostring(widget.data.num)
 	widget:set_dirty()
+
 end
 
 function wtextedit.update(widget)
