@@ -11,6 +11,16 @@ M.list={}
 
 M.list.lua=require(M.modname.."_lua")
 
+local keyval=function(t) for i=1,#t do t[ t[i] ]=i end return t end
+
+M.token_numeric      = keyval{	"0","1","2","3","4","5","6","7","8","9"}
+
+M.token_alpha        = keyval{	"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+								"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"}
+
+M.token_alphanumeric = keyval{	"0","1","2","3","4","5","6","7","8","9",
+								"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+								"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"}
 
 
 local deepcopy ; deepcopy=function(orig)

@@ -70,9 +70,8 @@ function wtexteditor.pan_skin( oldskin )
 		return function()
 			panskin()
 
-			if pan.texteditor.throb then -- draw the blinking cursor
-			
-				local cache=pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
+			local cache=pan.texteditor.txt and pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
+			if pan.texteditor.throb and cache then -- draw the blinking cursor
 
 				local cx = 1 + ( cache.cx[pan.texteditor.txt.cx] or 0 ) - pan.texteditor.cx
 				local cy = pan.texteditor.txt.cy - pan.texteditor.cy

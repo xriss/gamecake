@@ -16,7 +16,7 @@ M.token_max=0
 for i,v in ipairs(M.token_all) do if #v>M.token_max then M.token_max=#v end end
 
 M.token_keyword=keyval{"and","break","do","else","elseif","end","false","for","function","if","in","local","nil","not","or","repeat","return","then","true","until","while"}
-M.token_punctuation=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",":",",",".","..","...","(",")","[","]","{","}"}
+M.token_symbol=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",":",",",".","..","...","(",")","[","]","{","}"}
 M.token_white=keyval{" ","\t","\n","\r"}
 
 --[[
@@ -82,8 +82,8 @@ M.parse=function(state,input,output)
 		end
 		
 		local check_punctuation=function()
-			if M.token_punctuation[token] then
-				poke(state.stack,"punctuation")
+			if M.token_symbol[token] then
+				poke(state.stack,"symbol")
 				return true
 			end
 		end
