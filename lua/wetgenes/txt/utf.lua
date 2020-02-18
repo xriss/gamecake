@@ -1,27 +1,65 @@
---
--- (C) 2019 Kriss@XIXs.com
---
+--[[#lua.wetgenes.txt.utf
+
+(C) 2020 Kriss Blank under the https://opensource.org/licenses/MIT
+
+	local wutf = require("wetgenes.txt.utf")
+
+helper functions to help manage a string as a stream of utf8 tokens.
+
+]]
+
+-- locals
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 --module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
+local M={ modname=(...) } ; package.loaded[wutf.modname]=M
+local wutf=M
 
--- patern to match each utf8 character in a string
-M.charpattern="([%z\1-\127\194-\244][\128-\191]*)"
+--[[#lua.wetgenes.txt.utf.charpattern
 
--- I prefer the coverage of latin0 (ISO/IEC 8859-15) for font layout
--- it is just these differences for western european languages
-M.map_unicode_to_latin0={
+	string:gmatch(wutf.charpattern)
+
+lua pattern to match each utf8 character in a string
+
+]]
+wutf.charpattern="([%z\1-\127\194-\244][\128-\191]*)"
+
+--[[#lua.wetgenes.txt.utf.map_unicode_to_latin0
+
+	latin0 = wutf.map_unicode_to_latin0[unicode] or unicode
+
+I prefer the coverage of latin0 (ISO/IEC 8859-15) for font layout as it 
+is just a few small differences for western european languages to get 
+most needed glyphs into the first 256 codes.
+
+]]
+wutf.map_unicode_to_latin0={
 	[0x20AC]=0xa4,	[0x0160]=0xa6,	[0x0161]=0xa8,	[0x017d]=0xb4,
 	[0x017e]=0xb8,	[0x0152]=0xbc,	[0x0153]=0xbd,	[0x0178]=0xbe,
 }
-M.map_latin0_to_unicode={
+--[[#lua.wetgenes.txt.utf.map_latin0_to_unicode
+
+	unicode = wutf.map_latin0_to_unicode[latin0] or latin0
+
+]]
+wutf.map_latin0_to_unicode={
 	[0xa4]=0x20AC,	[0xa6]=0x0160,	[0xa8]=0x0161,	[0xb4]=0x017d,
 	[0xb8]=0x017e,	[0xbc]=0x0152,	[0xbd]=0x0153,	[0xbe]=0x0178,
 }
 
--- get the value at the given byte offset
-M.code=function(s,idx)
+--[[#lua.wetgenes.txt.utf.string
+
+	unicode = wutf.code(string,index)
+
+get the utf8 value at the given byte index.
+
+
+	unicode = wutf.code(string)
+
+get the utf8 value at the start of this string
+
+]]
+wutf.code=function(s,idx)
 	idx=idx or 1 -- default to start of string
 
 	local code=nil -- invalid code if nothing below matches
@@ -43,8 +81,20 @@ M.code=function(s,idx)
 	return code -- this may be nil
 end
 
--- get the size in bytes of the utf8 value at the given byte offset
-M.size=function(s,idx)
+--[[#lua.wetgenes.txt.utf.size
+
+	size = wutf.size(string,index)
+
+get the size in bytes of the utf8 value at the given byte index.
+
+	size = wutf.size(string)
+
+get the size in bytes of the utf8 value at the start of this string
+
+The return value will be 1-4 as 4 is the biggest utf8 code size.
+
+]]
+wutf.size=function(s,idx)
 	idx=idx or 1 -- default to start of string
 	local b=s:byte( idx )
 	if     b< 0x80 then return 1 -- 1 byte
@@ -54,8 +104,14 @@ M.size=function(s,idx)
 	end
 end
 
--- convert a single unicode value to a utf8 string of 1-4 bytes
-M.char=function(code)
+--[[#lua.wetgenes.txt.utf.char
+
+	string = wutf.char(number)
+
+convert a single unicode value to a utf8 string of 1-4 bytes
+
+]]
+wutf.char=function(code)
 	if     code <=     0x7F then return string.char(
 		                  code                     )
 	elseif code <=    0x7FF then return string.char(
@@ -74,27 +130,50 @@ M.char=function(code)
 	return ""
 end
 
--- convert one or more unicode values into a utf8 string
-M.chars=function(...)
+--[[#lua.wetgenes.txt.utf.chars
+
+	string = wutf.chars(number,number,...)
+	string = wutf.chars({number,number,...})
+
+convert one or more unicode values into a utf8 string
+
+]]
+wutf.chars=function(...)
 	local t={...} -- multiargs
 	if type(t[1])=="table" then t=t[1] end -- or single table
-	for i=1,#t do t[i]=M.char(t[i]) end
+	for i=1,#t do t[i]=wutf.char(t[i]) end
 	return table.concat(t)
 end
 
--- get the length in codes of this string
-M.length=function(s)
+--[[#lua.wetgenes.txt.utf.length
+
+	length = wutf.length(string)
+
+get the length in codes of this string
+
+]]
+wutf.length=function(s)
 	local l=0
-	for char in s:gmatch(M.charpattern) do l=l+1 end
+	for char in s:gmatch(wutf.charpattern) do l=l+1 end
 	return l
 end
 
+--[[#lua.wetgenes.txt.utf.length
+
+	unicode = wutf.ncode(string,index)
+
+get the utf8 value at the given code index.
+
+Note that this is slower than wutf.code as we must search the string to 
+find the byte index of the code. 
+
+]]
 -- get the nth code from the string (slow)
-M.ncode=function(s,n)
+wutf.ncode=function(s,n)
 	local l=0
-	for char in s:gmatch(M.charpattern) do
+	for char in s:gmatch(wutf.charpattern) do
 		l=l+1
-		if l==n then return M.code(char) end
+		if l==n then return wutf.code(char) end
 	end
 end
 
