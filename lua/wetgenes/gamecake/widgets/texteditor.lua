@@ -9,7 +9,7 @@ local function dprint(a) print(require("wetgenes.string").dump(a)) end
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
-local wtxtutf=require("wetgenes.txtutf")
+local wutf=require("wetgenes.txt.utf")
 
 local _,lfs=pcall( function() return require("lfs") end )
 
@@ -194,7 +194,7 @@ wtexteditor.texteditor_refresh=function(widget)
 				if not i then break end -- max width
 				local code=cache.codes[i]
 
-				code=wtxtutf.map_unicode_to_latin0[code] or code
+				code=wutf.map_unicode_to_latin0[code] or code
 				if code<32 then code=32 end -- control codes are space
 				if  (code>127 and code<128+32) or code>255 then code=127 end -- missing glyphs are 127
 
@@ -390,7 +390,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		texteditor.txt_dirty=true
 
-		local c=wtxtutf.code(ascii)
+		local c=wutf.code(ascii)
 		if c>=32 then
 		
 			texteditor.float_cx=nil

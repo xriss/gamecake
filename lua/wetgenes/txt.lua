@@ -5,7 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 local wstring=require("wetgenes.string")
-local wtxtutf=require("wetgenes.txtutf")
+local wutf=require("wetgenes.txt.utf")
 
 
 -- manage the text data part of a text editor
@@ -102,7 +102,7 @@ M.construct=function(txt)
 			txt.hx=0
 			txt.hy=#txt.strings
 			for i,v in ipairs(txt.strings) do
-				local lv=wtxtutf.length(v)
+				local lv=wutf.length(v)
 				if lv > txt.hx then txt.hx=lv end
 			end
 			
@@ -151,8 +151,8 @@ M.construct=function(txt)
 		local x=0
 		local c=1
 		
-		for char in s:gmatch(wtxtutf.charpattern) do
-			local code=wtxtutf.code(char)
+		for char in s:gmatch(wutf.charpattern) do
+			local code=wutf.code(char)
 			local size=#char
 			local width=1
 			
@@ -194,23 +194,23 @@ M.construct=function(txt)
 
 		if click==2 then -- select word
 		
-			local sl=wtxtutf.length(s)
+			local sl=wutf.length(s)
 			local lx=txt.cx-1
 			local hx=txt.cx-1
 
-			local c = wtxtutf.ncode( s , lx )
+			local c = wutf.ncode( s , lx )
 
 			if c and c > 32 then -- solid
 				
-				while ( (wtxtutf.ncode( s , lx-1 ) or 0) > 32 ) do lx=lx-1 end
-				while ( (wtxtutf.ncode( s , hx+1 ) or 0) > 32 ) do hx=hx+1 end
+				while ( (wutf.ncode( s , lx-1 ) or 0) > 32 ) do lx=lx-1 end
+				while ( (wutf.ncode( s , hx+1 ) or 0) > 32 ) do hx=hx+1 end
 
 				txt.mark(lx,fy,hx+1,fy)
 			
 			elseif c and c <= 32 then -- White
 
-				while ( (wtxtutf.ncode( s , lx-1 ) or 33) <= 32 ) do lx=lx-1 end
-				while ( (wtxtutf.ncode( s , hx+1 ) or 33) <= 32 ) do hx=hx+1 end
+				while ( (wutf.ncode( s , lx-1 ) or 33) <= 32 ) do lx=lx-1 end
+				while ( (wutf.ncode( s , hx+1 ) or 33) <= 32 ) do hx=hx+1 end
 
 				txt.mark(lx,fy,hx+1,fy)
 
@@ -453,7 +453,7 @@ M.construct=function(txt)
 					
 					txt.set_string(txt.cy,sb..line..sc)
 				
-					txt.cx=txt.cx+wtxtutf.length(line)
+					txt.cx=txt.cx+wutf.length(line)
 
 				end
 
@@ -461,7 +461,7 @@ M.construct=function(txt)
 			elseif idx==#lines then -- last line
 
 				txt.set_string(txt.cy,line..(txt.get_string(txt.cy) or ""))
-				txt.cx=wtxtutf.length(line)
+				txt.cx=wutf.length(line)
 
 			else -- middle
 
