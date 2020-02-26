@@ -167,7 +167,20 @@ fi
 
 # this will make a directory to build into
 
-build/puremake.lua --openal=$openal gmake $gcc-$cpu
+if [ -z "$PUREMAKE_LUA" ]; then 
+ if command -v luajit >/dev/null 2>&1; then
+  PUREMAKE_LUA=luajit
+ elif command -v lua >/dev/null 2>&1; then 
+  PUREMAKE_LUA=lua
+ elif command -v gamecake >/dev/null 2>&1; then 
+  PUREMAKE_LUA=gamecake
+ else
+  printf "puremake requires luajit or lua or gamecake to be installed\n" 1>&2
+  exit 1
+ fi
+fi
+
+$PUREMAKE_LUA build/puremake.lua --openal=$openal gmake $gcc-$cpu
 
 # enter that directory
 cd ${buildhere}
