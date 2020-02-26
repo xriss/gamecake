@@ -14,7 +14,8 @@ apt-get install -y libpulse-dev
 
 apt-get install -y libluajit-5.1-dev
 apt-get install -y libsdl2-dev
-apt-get install -y premake4
+apt-get install -y luajit
+apt-get install -y lua-filesystem
 
 
 # it is ok if this one fails, just need it for nginx

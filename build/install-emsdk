@@ -1,6 +1,10 @@
 cd `dirname $0`
 
-sudo apt-get install -y cmake python premake4 git
+sudo apt-get install -y luajit
+sudo apt-get install -y lua-filesystem
+sudo apt-get install -y cmake
+sudo apt-get install -y python
+sudo apt-get install -y git
 
 git clone https://github.com/juj/emsdk.git
 

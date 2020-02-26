@@ -168,7 +168,6 @@ Note that this is slower than wutf.code as we must search the string to
 find the byte index of the code. 
 
 ]]
--- get the nth code from the string (slow)
 wutf.ncode=function(s,n)
 	local l=0
 	for char in s:gmatch(wutf.charpattern) do

@@ -167,7 +167,7 @@ fi
 
 # this will make a directory to build into
 
-premake4 --openal=$openal gmake $gcc-$cpu
+build/puremake.lua --openal=$openal gmake $gcc-$cpu
 
 # enter that directory
 cd ${buildhere}

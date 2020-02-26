@@ -1,5 +1,7 @@
 --[[#lua.wetgenes.tsv
 
+(C) 2020 Kriss Blank under the https://opensource.org/licenses/MIT
+
 	local wtsv = require("wetgenes.tsv")
 
 Load and save tsv files https://pypi.org/project/linear-tsv/1.0.0/
@@ -11,8 +13,8 @@ The following need to be escaped with a \ when used in each column.
 	\r for carriage return,
 	\\ for backslash.
 	
-When loading we read the entire file and keep all the text in one chunk 
-with function lookups to cut out sections of string as needed.
+When loading we read the entire file and keep all the text in one string 
+with function lookups to cut out sections of that string as needed.
 
 ]]
 
@@ -185,6 +187,8 @@ get or set a line of data as a table of strings
 ]]
 wtsv.line=function(tsv,idx,value)
 
+	if not idx then idx=tsv.numoflines+1 end -- auto append
+
 	if value then -- set
 		tsv.lines[idx]=value
 		if idx > tsv.numoflines then tsv.numoflines = idx end
@@ -194,7 +198,7 @@ wtsv.line=function(tsv,idx,value)
 
 	if it then return it end -- found it
 	
-	if idx <= tsv.baselines then -- build it
+	if idx >=1 and idx <= tsv.baselines then -- build it from basedata
 		local bidx=(idx*2)-1
 		local line=tsv.basedata:sub( tsv.baseidxs[bidx] , tsv.baseidxs[bidx+1] )
 		local it={}

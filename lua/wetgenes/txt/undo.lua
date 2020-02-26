@@ -1,6 +1,8 @@
 --[[#lua.wetgenes.txt.undo
 
- undo / redo code for a text editor with persistence to disk
+(C) 2020 Kriss Blank under the https://opensource.org/licenses/MIT
+
+undo / redo code for a text editor with persistence to disk
 
 persistance to disk is in tsv format filename.txt.undo files where a 
 .undo is added to the end of the file.
@@ -37,7 +39,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local wstring=require("wetgenes.string")
 
-
+local wtsv = require("wetgenes.tsv")
 
 
 

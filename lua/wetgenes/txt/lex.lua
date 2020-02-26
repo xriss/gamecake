@@ -1,8 +1,21 @@
+--[[#lua.wetgenes.txt.lex
 
---
--- (C) 2019 Kriss@XIXs.com
---
+(C) 2020 Kriss Blank under the https://opensource.org/licenses/MIT
+
+
+
+Some useful lex files for other editors to be used as starting points 
+and checking we did not miss anything.
+
+	https://github.com/vim/vim/tree/master/runtime/syntax
+	https://github.com/sublimehq/Packages
+
+
+]]
+
+
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M

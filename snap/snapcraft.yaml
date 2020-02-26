@@ -73,10 +73,11 @@ parts:
       mkdir $SNAPCRAFT_PART_INSTALL/gamecakejam/cakes
 
     build-packages:
-      - premake4
       - libluajit-5.1-dev
       - libsdl2-dev
       - libopenal-dev
+      - luajit
+      - lua-filesystem
 
     stage-packages:
       - libglu1-mesa
