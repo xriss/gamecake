@@ -67,7 +67,7 @@ function wscroll.layout(widget)
 	widget.slidey.px=widget.hx-ss
 	widget.slidey.py=0
 
-	widget.slidex.hx=widget.hx-ss
+	widget.slidex.hx=widget.hx
 	widget.slidex.hy=ss
 	widget.slidex.px=0
 	widget.slidex.py=widget.hy-ss
@@ -81,12 +81,14 @@ function wscroll.layout(widget)
 	if widget.datx.max<0 then widget.datx.max=0 end
 	widget.datx.size=widget.pan.hx/widget.pan.hx_max
 	widget.datx.step= widget:bubble("text_size") or 16 
+	widget.datx.max=widget.datx.max+widget.datx.step
 	widget.datx:value() -- clamp
 	
-	widget.daty.max=widget.pan.hy_max-widget.pan.hy
+	widget.daty.max=1+widget.pan.hy_max-widget.pan.hy
 	if widget.daty.max<0 then widget.daty.max=0 end
 	widget.daty.size=widget.pan.hy/widget.pan.hy_max
 	widget.daty.step= widget:bubble("text_size") or 16 	
+	widget.daty.max=widget.daty.max+widget.daty.step
 	widget.daty:value() -- clamp
 	
 --	widget.meta.layout(widget)
@@ -112,11 +114,13 @@ function wscroll.setup(widget,def)
 	widget.datx=widget_data.new_data{max=1,master=widget.master}
 	widget.daty=widget_data.new_data{max=1,master=widget.master}
 	widget.solid=true
+	
+	widget.color=widget.color or 0
 
 	widget.pan=		widget:add({class=def.scroll_pan or "pan",	hx=widget.hx-ss,	hy=widget.hy-ss	,color=widget.color})
 	widget.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
 		daty=widget.daty,color=widget.color})
-	widget.slidex=	widget:add({class="slide",	hx=widget.hx-ss,	hy=ss,           	px=0,           	py=widget.hy-ss,
+	widget.slidex=	widget:add({class="slide",	hx=widget.hx,	hy=ss,           	px=0,           	py=widget.hy-ss,
 		datx=widget.datx,color=widget.color})
 
 	return widget

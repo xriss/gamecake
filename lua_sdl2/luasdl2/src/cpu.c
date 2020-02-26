@@ -2,6 +2,7 @@
  * cpu.c -- CPU feature detection
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2016 Webster Sheets <webster@web-eworks.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -66,6 +67,34 @@ l_cpu_hasAltiVec(lua_State *L)
 {
 	return commonPush(L, "b", SDL_HasAltiVec());
 }
+
+#if SDL_VERSION_ATLEAST(2, 0, 2)
+/*
+ * SDL.hasAVX()
+ *
+ * Returns:
+ *	True if the CPU has support for AVX
+ */
+static int
+l_cpu_hasAVX(lua_State *L)
+{
+	return commonPush(L, "b", SDL_HasAVX());
+}
+#endif
+
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+/*
+ * SDL.hasAVX2()
+ *
+ * Returns:
+ *	True if the CPU has support for AVX2
+ */
+static int
+l_cpu_hasAVX2(lua_State *L)
+{
+	return commonPush(L, "b", SDL_HasAVX2());
+}
+#endif
 
 /*
  * SDL.hasMMX()
@@ -144,6 +173,12 @@ const luaL_Reg CpuFunctions[] = {
 	{ "getCPUCount",			l_cpu_getCount			},
 	{ "has3DNow",				l_cpu_has3DNow			},
 	{ "hasAltiVec",				l_cpu_hasAltiVec		},
+#if SDL_VERSION_ATLEAST(2, 0, 2)
+	{ "hasAVX",				l_cpu_hasAVX			},
+#endif
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+	{ "hasAVX2",				l_cpu_hasAVX2			},
+#endif
 	{ "hasMMX",				l_cpu_hasMMX			},
 	{ "hasRDTSC",				l_cpu_hasRDTSC			},
 	{ "hasSSE",				l_cpu_hasSSE			},

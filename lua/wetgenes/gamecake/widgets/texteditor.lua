@@ -9,7 +9,7 @@ local function dprint(a) print(require("wetgenes.string").dump(a)) end
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
-local wtxtutf=require("wetgenes.txtutf")
+local wutf=require("wetgenes.txt.utf")
 
 local _,lfs=pcall( function() return require("lfs") end )
 
@@ -70,9 +70,8 @@ function wtexteditor.pan_skin( oldskin )
 		return function()
 			panskin()
 
-			if pan.texteditor.throb then -- draw the blinking cursor
-			
-				local cache=pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
+			local cache=pan.texteditor.txt and pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
+			if pan.texteditor.throb and cache then -- draw the blinking cursor
 
 				local cx = 1 + ( cache.cx[pan.texteditor.txt.cx] or 0 ) - pan.texteditor.cx
 				local cy = pan.texteditor.txt.cy - pan.texteditor.cy
@@ -195,7 +194,7 @@ wtexteditor.texteditor_refresh=function(widget)
 				if not i then break end -- max width
 				local code=cache.codes[i]
 
-				code=wtxtutf.map_unicode_to_latin0[code] or code
+				code=wutf.map_unicode_to_latin0[code] or code
 				if code<32 then code=32 end -- control codes are space
 				if  (code>127 and code<128+32) or code>255 then code=127 end -- missing glyphs are 127
 
@@ -222,14 +221,26 @@ end
 
 function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
-	if pan.meta.mouse(pan,act,_x,_y,keyname) then return end -- let children have precidence
+	if pan.meta.mouse(pan,act,_x,_y,keyname) then -- let children have precedence
+		if pan.master.over ~= pan then
+			return true
+		end
+	end
+	
+	if keyname=="right" and act==1 then
+		print("righty clicky")
+		pan.master.later_append(function()
+			print("righty clicky later")
+		end)
+		return true
+	end
 
 	local wheel_acc=function()
 
 		pan.wheel_speed=pan.wheel_speed or 1
 		pan.wheel_stamp=pan.wheel_stamp or 0
 
-		local t=os.time()
+		local t=wwin.time()
 		if pan.wheel_stamp+1 > t then
 			pan.wheel_speed=pan.wheel_speed+1
 		else
@@ -267,7 +278,12 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	dy=dy+1
 	
 	local cache=txt.get_cache( dy )
-	dx=cache and cache.xc[dx] or 0
+	if cache then
+		if dx > #cache.xc then dx=#cache.xc end
+		dx=cache and cache.xc[dx] or 0
+	else
+		dx=0
+	end
 	
 	if act==1 and texteditor.master.over==pan and keyname=="left" then -- click to activate
 	
@@ -278,6 +294,16 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		texteditor.mark_area={dx,dy,dx,dy}
 
 		txt.mark(unpack(texteditor.mark_area))
+
+		texteditor:scroll_to_view()
+		texteditor:refresh()
+		texteditor:set_dirty()
+
+	elseif (act and act>1) and texteditor.master.over==pan and keyname=="left" then -- double click
+	
+		texteditor.float_cx=nil
+
+		txt.markauto(dx,dy,act) -- select word
 
 		texteditor:scroll_to_view()
 		texteditor:refresh()
@@ -364,7 +390,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		texteditor.txt_dirty=true
 
-		local c=wtxtutf.code(ascii)
+		local c=wutf.code(ascii)
 		if c>=32 then
 		
 			texteditor.float_cx=nil
@@ -521,6 +547,7 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_widget.pan.skin=wtexteditor.pan_skin( widget.scroll_widget.pan.skin )
 	widget.scroll_widget.pan.texteditor=widget
 
+
 --	wtexteditor:redo_text(def.text or "") -- set starting text
 
 	widget:texteditor_refresh()
@@ -530,6 +557,8 @@ function wtexteditor.setup(widget,def)
 
 	widget.scroll_widget.pan.key=wtexteditor.key
 	widget.scroll_widget.pan.mouse=wtexteditor.mouse
+
+	widget.scroll_widget.pan.drag=function()end -- fake drag so we are treated as drag able
 
 	widget.gutter=#(" 01   ")
 	

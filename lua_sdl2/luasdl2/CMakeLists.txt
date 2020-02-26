@@ -3,6 +3,7 @@
 #
 # Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 # Copyright (c) 2014, 2015 Joseph Wallace <tangent128@gmail.com>
+# Copyright (c) 2017 Webster Sheets <webster@web-eworks.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -20,15 +21,22 @@
 cmake_minimum_required(VERSION 2.8)
 project(Lua-SDL2 C)
 
-# Project information
+include(CheckStructHasMember)
+
+# Project information.  Follows the [SEMVER](semver.org) standard
+set(BINDING_MAJOR "2")
+set(BINDING_MINOR "1")
+
+# Latest implemented SDL2 version.  Only increment when a new SDL2 version is
+# completely implemented.
 set(MAJOR "2")
 set(MINOR "0")
-set(PATCH "3")
-set(BINDING "3")
-set(BINDING_PATCH "1")
-set(VERSION "${MAJOR}.${MINOR}.${PATCH}-${BINDING}.${BINDING_PATCH}")
+set(PATCH "5")
+set(VERSION "${BINDING_MAJOR}.${BINDING_MINOR} for SDL ${MAJOR}.${MINOR}.${PATCH}")
 
 set(CMAKE_MODULE_PATH "${Lua-SDL2_SOURCE_DIR}/cmake")
+
+find_package(SDL2 REQUIRED)
 
 # Path where to install docs
 set(WITH_DOCSDIR "share/docs/Lua-SDL2"
@@ -36,6 +44,11 @@ set(WITH_DOCSDIR "share/docs/Lua-SDL2"
 # Lua version: JIT, 51, 52, and 53, default: 5.2
 set(WITH_LUAVER "52"
     CACHE STRING "Version of Lua to use")
+
+# Check for SDL_DropEvent.windowID (See GH-#61)
+set(CMAKE_REQUIRED_INCLUDES ${SDL2_INCLUDE_DIR})
+set(CMAKE_REQUIRED_DEFINITIONS -DSDL_MAIN_HANDLED)
+check_struct_has_member(SDL_DropEvent windowID SDL.h HAVE_DROPEVENT_WINDOW_ID)
 
 set(
 	SOURCES
@@ -92,8 +105,6 @@ configure_file(
 )
 
 include_directories(${Lua-SDL2_BINARY_DIR})
-
-find_package(SDL2 REQUIRED)
 
 if (WITH_LUAVER MATCHES "53")
 	find_package(Lua53 REQUIRED)
@@ -211,7 +222,7 @@ if (WIN32)
 	else ()
 		set(WINARCH "x86")
 	endif ()
-	
+
 	if (MINGW)
 		set(GENERATOR "MinGW")
 	else ()

@@ -9,6 +9,7 @@ local function dprint(a) print(require("wetgenes.string").dump(a)) end
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
+local wpath=require("wetgenes.path")
 
 local _,lfs=pcall( function() return require("lfs") end )
 
@@ -41,22 +42,32 @@ end
 -- get or set path
 wfile.path=function(widget,s)
 	if s then -- set
-		local t=wstr.split(s,"/")
-		for i=#t,1,-1 do local v=t[i]
-			if t[i]=="" and t[i-1]=="" then -- remove double dash
-				table.remove(t,i)
-			end
-		end
-		if #t>1 then
-			widget.data_name:value(t[#t])
-			t[#t]=nil
-			widget.data_dir:value(table.concat(t,"/"))
-		elseif #t==1 then
-			widget.data_name:value(t[1])
-		end
+		local p=wpath.parse(wpath.resolve(s))
+		widget.data_dir:value(p.dir)
+		widget.data_name:value(p.file)
 	end
 	if widget.refresh then widget:refresh() end
-	return widget.data_dir:value() .."/".. widget.data_name:value()
+	return wpath.resolve( widget.data_dir:value() , widget.data_name:value() )
+end
+
+-- get or set dirname
+wfile.dir=function(widget,s)
+	if s then -- set
+		local p=wpath.parse(wpath.resolve(s))
+		widget.data_dir:value(p.dir)
+	end
+	if widget.refresh then widget:refresh() end
+	return wpath.parse(wpath.resolve( widget.data_dir:value() , widget.data_name:value() )).dir
+end
+
+-- get or set filename
+wfile.file=function(widget,s)
+	if s then -- set
+		local p=wpath.parse(wpath.resolve(s))
+		widget.data_name:value(p.file)
+	end
+	if widget.refresh then widget:refresh() end
+	return wpath.parse(wpath.resolve( widget.data_dir:value() , widget.data_name:value() )).file
 end
 
 
@@ -77,7 +88,7 @@ wfile.file_scan=function(widget,cd)
 	widget.files={}
 	pcall( function()
 		for n in lfs.dir(cd) do
-			if n~="." and n~=".." then
+			if n~="." then
 				local t=lfs.attributes(cd.."/"..n)
 				if t then
 					t.name=n
@@ -102,27 +113,18 @@ wfile.file_dir=function(widget,u)
 
 	widget.scroll_widget.daty:value(0) -- reset scroll on click
 
-	local t=wstr.split(widget.data_dir:value(),"/")
-	for i=#t,1,-1 do local v=t[i]
-		if t[i]=="" and t[i-1]=="" then
-			table.remove(t,i)
-		end
-	end
+	local ps=wpath.split( widget.data_dir:value() )
 
 	if type(u)=="string" then
-		widget.data_dir:value( u )
+		widget.data_dir:value( wpath.resolve(u) )
 		widget.history[ u ]=true
 	else
 		if u.name=="." then
 		elseif u.name==".." then
-			t[#t]=nil
-			widget.data_dir:value( table.concat(t,"/") )
+			widget.data_dir:value( wpath.resolve(ps,"..","") )
 		else
-			t[#t+1]=u.name
-			widget.data_dir:value(  table.concat(t,"/") )
+			widget.data_dir:value( wpath.resolve(ps,u.name,"") )
 		end
---dprint(t)				
-		if widget.data_dir:value()=="" then widget.data_dir:value( "/" ) end
 
 		widget.history[ widget.data_dir:value() ]=true
 	end
@@ -132,7 +134,6 @@ end
 
 
 wfile.file_hooks=function(widget,act,w)
---print(act,w.id)
 	if act=="unfocus_edit" or act=="timedelay" then
 		if w.id=="dir" then
 			widget:file_dir({name="."})
@@ -165,6 +166,15 @@ wfile.file_hooks=function(widget,act,w)
 					widget:file_dir(u)
 					widget:call_hook_later("file_dir_click")
 				end
+			end
+		end
+	end
+	if act=="confirm" then
+		if w.id then
+			if w.id=="file" then
+				widget:call_hook_later("file_name_click")
+			elseif w.id=="dir" then
+				widget:call_hook_later("file_dir_click")
 			end
 		end
 	end
@@ -223,14 +233,17 @@ function wfile.setup(widget,def)
 	widget.files={}
 	widget.view="file"
 
+	widget.file_hooks		=	function(act,w) return wfile.file_hooks(widget,act,w) end
 
-	widget.data_dir  = def.data_dir  or wdata.new_data({class="string",str=".",master=widget.master})
-	widget.data_name = def.data_name or wdata.new_data({class="string",str="",master=widget.master})
+	widget.data_dir  = def.data_dir  or wdata.new_data({class="string",str=wpath.currentdir(),master=widget.master,hooks=widget.file_hooks})
+	widget.data_name = def.data_name or wdata.new_data({class="string",str="",master=widget.master,hooks=widget.file_hooks})
 
 	widget.history[ widget.data_dir:value() ]=true
 
 -- external functions, use can be expected to call these
 	widget.path				=	wfile.path
+	widget.dir				=	wfile.dir
+	widget.file				=	wfile.file
 	widget.refresh			=	wfile.refresh
 
 
@@ -238,14 +251,13 @@ function wfile.setup(widget,def)
 	widget.file_scan		=	wfile.file_scan
 	widget.file_dir			=	wfile.file_dir
 	widget.file_refresh		=	wfile.file_refresh
-	widget.file_hooks		=	function(act,w) return wfile.file_hooks(widget,act,w) end
 
 	local ss=widget.master.grid_size or 24
 	local ss1=ss/24
 	local ss2=ss/12
 
 
-	widget:add_indent({hx=widget.hx,hy=ss,class="textedit",color=0,data=widget.data_name,clip2=true},ss1)
+	widget:add_indent({hx=widget.hx,hy=ss,class="textedit",color=0,data=widget.data_name,clip2=true,hooks=widget.file_hooks,id="file"},ss1)
 
 --	widget:add({hx=widget.hx,hy=5})
 

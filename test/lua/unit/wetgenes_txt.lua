@@ -17,8 +17,8 @@ function test_lex_lua()
 	
 	lex.parse(state,i,o)
 	
-	print(i)
-	print(table.concat(o))
+--	print(i)
+--	print(table.concat(o))
 
 end
 

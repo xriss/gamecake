@@ -10,8 +10,6 @@ fi
 
 # default build settings
 
-PREMAKESRC=premake-4.4-beta5
-
 
 LUAJITSRC=LuaJIT-2.1.0-beta2
 
@@ -21,7 +19,7 @@ SDLSRC=SDL2-2.0.8
 
 
 OPTIONS=
-LONGOPTIONS=help,premake:,luajit:,sdl2:
+LONGOPTIONS=help,,luajit:,sdl2:
 
 
 
@@ -36,10 +34,6 @@ case "$1" in
         --help)
                 help=1
                 shift
-        ;;
-        --premake)
-                PREMAKESRC="$2"
-                shift 2
         ;;
         --luajit)
                 LUAJITSRC="$2"
@@ -64,7 +58,6 @@ if [ "$help" = "1" ] ; then
 
 echo " Available options are : "
 echo
-echo " ./make --premake=  # disable premake "
 echo " ./make --luajit=   # disable luajit "
 echo " ./make --sdl2=     # disable sdl2 "
 echo
@@ -78,6 +71,9 @@ fi
 # install dependencies if apt-get is available
 
 if hash apt-get 2>/dev/null; then
+
+	sudo apt-get install -y luajit
+	sudo apt-get install -y lua-filesystem
 
 	sudo apt-get install -y wget
 	sudo apt-get install -y unzip
@@ -133,40 +129,6 @@ if hash apt-get 2>/dev/null; then
 
 fi
 
-
-
-
-# make a version of premake4 and install it
-
-if [ ! -z "$PREMAKESRC" ]; then
-
-if [ -f ${PREMAKESRC}.zip ] ; then
-	echo "using ${PREMAKESRC}.zip"
-else
-	wget -O ${PREMAKESRC}.zip https://sourceforge.net/projects/premake/files/Premake/4.4/${PREMAKESRC}-src.zip
-fi
-
-rm -rf ${PREMAKESRC}
-unzip ${PREMAKESRC}.zip
-
-
-if [ "`uname`" = "Darwin" ] ; then
-
-	cd ${PREMAKESRC}/build/gmake.macosx
-
-else
-
-	cd ${PREMAKESRC}/build/gmake.unix
-
-fi
-
-
-make -j$(nproc||echo 1)
-cd ../../..
-
-sudo cp ${PREMAKESRC}/bin/release/premake4 /usr/local/bin/
-
-fi
 
 
 # make a version of luajit and install it

@@ -32,7 +32,8 @@ wmeta.classes={
 	["panel"]=oven.rebake("wetgenes.gamecake.widgets.panel"),
 	["screen"]=oven.rebake("wetgenes.gamecake.widgets.screen"),
 	["window"]=oven.rebake("wetgenes.gamecake.widgets.window"),
-	["windock"]=oven.rebake("wetgenes.gamecake.widgets.windock"),
+	["windows"]=oven.rebake("wetgenes.gamecake.widgets.windows"),
+	["dialogs"]=oven.rebake("wetgenes.gamecake.widgets.dialogs"),
 	["button"]=oven.rebake("wetgenes.gamecake.widgets.button"),
 	["drag"]=oven.rebake("wetgenes.gamecake.widgets.drag"),
 	["text"]=oven.rebake("wetgenes.gamecake.widgets.text"),
@@ -378,9 +379,14 @@ function wmeta.setup(def)
 				end
 			end
 
-			for i,v in ipairs(widget) do -- children must be within parent bounds to catch clicks
-				if not v.hidden then v:mouse(act,_x,_y,keyname) end
+			if widget.master.active==widget then return true end -- *we* are getting dragged do not check children
+
+			for i=#widget,1,-1 do -- children must be within parent bounds to catch clicks
+				local v=widget[i] -- backwards so front has priority
+				if not v.hidden then if v:mouse(act,_x,_y,keyname) then return true end end
 			end
+			
+			if widget.master.over==widget then return true end
 
 		else
 		

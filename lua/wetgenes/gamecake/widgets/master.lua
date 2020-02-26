@@ -3,7 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---local wwin=require("wetgenes.win")
+local wwin=require("wetgenes.win")
 local tardis=require("wetgenes.tardis")
 local bit=require("bit")
 
@@ -216,21 +216,23 @@ function wmaster.setup(widget,def)
 
 		end
 
--- loop over and call all later function then empty the table
--- later functions can add more functions as they are called
+
+-- loop over and call all later function
+-- later functions can add more functions *as* they are called
+-- but these will be called next time around
 		if true then
+			local later=master.later
+			master.later={}
 			local call_later=function(c,...) return c(...) end
-			repeat
-				local v=table.remove(master.later,1)
+			for i,v in ipairs(later) do
 				if v then
 					if type(v[1])~="function" then dprint(tostring(v[1])) end
 					call_later(unpack(v))
 				end
-			until not v
+			end
 		end
---		master.later={}
 		
-		local tim=os.time()
+		local tim=wwin.time()
 		for w,t in pairs(master.timehooks) do
 			if t<=tim then
 				w:call_hook("timedelay",t)
@@ -500,17 +502,35 @@ function wmaster.setup(widget,def)
 		elseif act==-1 and keyname then
 			master["mouse_"..keyname]=false
 		end
-
+		
+		if act==1 then
+			if master.last_mouse_click then
+				if master.last_mouse_click[1]+0.4 > wwin.time() then -- double click
+					if keyname == master.last_mouse_click[2] then -- same key
+						local dx=master.last_mouse_click[3] - x
+						local dy=master.last_mouse_click[4] - y
+						local dd=( dx*dx + dy*dy )
+						if dd < 32*32 then -- same place
+							act=master.last_mouse_click[5]+1 -- act 2 is double click 3 is triple etc...
+						end
+					end
+				end
+			end
+			master.last_mouse_click={wwin.time(),keyname,x,y,act}
+		end
 		master.last_mouse_position={x,y}
 
 		master.old_active=master.active
 		master.old_over=master.over
 
-		meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		
 		if master.dragging() then -- handle mouse drag logic
 			master.active:drag(x,y)
-
+			if master.active.mouse then
+				master.active.mouse(master.active,act,x,y,keyname) -- cascade down into all widgets
+			end
+		else
+			meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		end
 		
 --mark as dirty

@@ -2,6 +2,7 @@
  * renderer.c -- 2D accelerated drawing
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2016 Webster Sheets <webster@web-eworks.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -193,10 +194,10 @@ rendererDrawOrFillRect(lua_State *L, int draw)
 	SDL_Renderer *rd = commonGetAs(L, 1, RendererName, SDL_Renderer *);
 	SDL_Rect r;
 
-	videoGetRect(L, 2, &r);
-
 	/* Draw or fill? */
 	UseFunc func = (draw) ? SDL_RenderDrawRect : SDL_RenderFillRect;
+
+	videoGetRect(L, 2, &r);
 
 	if (func(rd, &r) < 0)
 		return commonPushSDLError(L, 1);
@@ -277,7 +278,7 @@ l_renderer_createTextureFromSuface(lua_State *L)
 {
 	SDL_Renderer *rd	= commonGetAs(L, 1, RendererName, SDL_Renderer *);
 	SDL_Surface *surf	= commonGetAs(L, 2, SurfaceName, SDL_Surface *);
-	
+
 	SDL_Texture *tex = SDL_CreateTextureFromSurface(rd, surf);
 	if (tex == NULL)
 		return commonPushSDLError(L, 1);
@@ -396,7 +397,7 @@ l_renderer_copyEx(lua_State *L)
 		pointptr = &point;
 	}
 	lua_pop(L, 1);
-		
+
 	/* Optional flip */
 	flip = tableGetInt(L, 2, "flip");
 
@@ -626,18 +627,31 @@ l_renderer_getDrawColor(lua_State *L)
 {
 	SDL_Renderer *rd = commonGetAs(L, 1, RendererName, SDL_Renderer *);
 	SDL_Color c;
-	Uint32 value;
 
 	if (SDL_GetRenderDrawColor(rd, &c.r, &c.g, &c.b, &c.a) < 0)
 		return commonPushSDLError(L, 2);
 
-	value = (c.r << 16) | (c.g << 8) | c.b;
-
-	commonPush(L, "i", value);
+	videoPushColorHex(L, &c);
 	videoPushColorRGB(L, &c);
 
 	return 2;
 }
+
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+/*
+ * Renderer:getIntegerScale(enabled)
+ *
+ * Returns:
+ *	true if enabled, false otherwise
+ */
+static int
+l_renderer_getIntegerScale(lua_State *L)
+{
+	SDL_Renderer *rd = commonGetAs(L, 1, RendererName, SDL_Renderer *);
+
+	return commonPush(L, "b", SDL_RenderGetIntegerScale(rd));
+}
+#endif
 
 /*
  * Renderer:getRendererInfo()
@@ -735,6 +749,22 @@ l_renderer_setClipRect(lua_State *L)
 	return commonPush(L, "b", 1);
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+/*
+ * Renderer:isClipEnabled()
+ *
+ * Returns:
+ *	True if enabled or false otherwise.
+ */
+static int
+l_renderer_isClipEnabled(lua_State *L)
+{
+	SDL_Renderer *rd = commonGetAs(L, 1, RendererName, SDL_Renderer *);
+
+	return commonPush(L, "b", SDL_RenderIsClipEnabled(rd));
+}
+#endif
+
 /*
  * Renderer:setDrawBlendMode(mode)
  *
@@ -782,6 +812,30 @@ l_renderer_setDrawColor(lua_State *L)
 
 	return commonPush(L, "b", 1);
 }
+
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+/*
+ * Renderer:setIntegerScale(enabled)
+ *
+ * Arguments:
+ *	enable enable integer scaling for this renderer
+ *
+ * Returns:
+ *	true on success, nil otherwise
+ *	the error message
+ */
+static int
+l_renderer_setIntegerScale(lua_State *L)
+{
+	SDL_Renderer *rd = commonGetAs(L, 1, RendererName, SDL_Renderer *);
+	int enabled = lua_toboolean(L, 2);
+
+	if (SDL_RenderSetIntegerScale(rd, enabled) < 0)
+		return commonPushSDLError(L, 1);
+
+	return commonPush(L, "b", 1);
+}
+#endif
 
 /*
  * Renderer:setTarget(texture)
@@ -930,6 +984,9 @@ static const luaL_Reg RendererMethods[] = {
 	{ "getClipRect",		l_renderer_getClipRect			},
 	{ "getDrawBlendMode",		l_renderer_getDrawBlendMode		},
 	{ "getDrawColor",		l_renderer_getDrawColor			},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "getIntegerScale",		l_renderer_getIntegerScale		},
+#endif
 	{ "getInfo",			l_renderer_getInfo			},
 	{ "getViewport",		l_renderer_getViewport			},
 	{ "getLogicalSize",		l_renderer_getLogicalSize		},
@@ -937,9 +994,15 @@ static const luaL_Reg RendererMethods[] = {
 	{ "setClipRect",		l_renderer_setClipRect			},
 	{ "setDrawBlendMode",		l_renderer_setDrawBlendMode		},
 	{ "setDrawColor",		l_renderer_setDrawColor			},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "setIntegerScale",		l_renderer_setIntegerScale		},
+#endif
 	{ "setTarget",			l_renderer_setTarget			},
 	{ "setViewport",		l_renderer_setViewport			},
 	{ "setLogicalSize",		l_renderer_setLogicalSize		},
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+	{ "isClipEnabled",		l_renderer_isClipEnabled		},
+#endif
 	{ NULL,				NULL					}
 };
 

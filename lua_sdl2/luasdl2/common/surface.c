@@ -117,7 +117,7 @@ static int l_surface_createRGBFrom(lua_State *L)
 	 * TODO: we need to store the pixels into the metatable and free
 	 * them after the surface.
 	 */
-	
+
 	SDL_Surface *s = SDL_CreateRGBSurfaceFrom(pixels, width, height, depth,
 	    pitch, rmask, gmask, bmask, amask);
 
@@ -127,6 +127,36 @@ static int l_surface_createRGBFrom(lua_State *L)
 	return commonPush(L, "p", SurfaceName, s);
 }
 
+#endif
+
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+/*
+ * SDL.createRGBSurfaceWithFormat(
+ *	width,
+ * 	height,
+ * 	depth = 32,
+ *	format = SDL.pixelFormat.RGBA32)
+ *
+ * Create a surface object with the specified format and return it.
+ *
+ * Returns:
+ *	The surface or nil
+ *	The error message
+ */
+static int l_surface_createRGBWithFormat(lua_State *L)
+{
+	int width	= luaL_checkinteger(L, 1);
+	int height	= luaL_checkinteger(L, 2);
+	int depth	= luaL_optinteger(L, 3, 32);
+	int format	= luaL_optinteger(L, 4, SDL_PIXELFORMAT_RGBA32);
+	SDL_Surface *s;
+
+	s = SDL_CreateRGBSurfaceWithFormat(0, width, height, depth, format);
+	if (s == NULL)
+		return commonPushSDLError(L, 1);
+
+	return commonPush(L, "p", SurfaceName, s);
+}
 #endif
 
 /*
@@ -149,7 +179,7 @@ static int l_surface_loadBMP(lua_State *L)
 	s = SDL_LoadBMP(path);
 	if (s == NULL)
 		return commonPushSDLError(L, 1);
-	
+
 	return commonPush(L, "p", SurfaceName, s);
 }
 
@@ -178,11 +208,18 @@ static int l_surface_loadBMP_RW(lua_State *L)
 }
 
 const luaL_Reg SurfaceFunctions[] = {
-	{ "createRGBSurface",		l_surface_createRGB	},
-	{ "loadBMP",			l_surface_loadBMP	},
-	{ "loadBMP_RW",			l_surface_loadBMP_RW	},
+	{ "createRGBSurface",			l_surface_createRGB		},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "createRGBSurfaceWithFormat",		l_surface_createRGBWithFormat	},
+#endif
+	{ "loadBMP",				l_surface_loadBMP		},
+	{ "loadBMP_RW",				l_surface_loadBMP_RW		},
 #if 0
-	{ "createRGBSurfaceFrom",	l_surface_createRGBFrom	},
+	{ "createRGBSurfaceFrom",		l_surface_createRGBFrom		},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "createRGBSurfaceFromWithFormat",
+		l_surface_createRGBFromWithFormat				},
+#endif
 #endif
 	{ NULL,				NULL			}
 };
@@ -202,12 +239,12 @@ surfaceBlit(lua_State *L, int scaled, int lower)
 	SDL_Rect srcrect, dstrect;
 	SDL_Rect *srcptr = &srcrect, *dstptr = &dstrect;
 
- 	if (lua_type(L, 3) == LUA_TNIL) 
+	if (lua_type(L, 3) == LUA_TTABLE)
 		videoGetRect(L, 3, &srcrect);
 	else
 		SDL_GetClipRect(src, &srcrect);
 
-	if (lua_type(L, 4) == LUA_TNIL)
+	if (lua_type(L, 4) == LUA_TTABLE)
 		videoGetRect(L, 4, &dstrect);
 	else
 		SDL_GetClipRect(dst, &dstrect);
@@ -223,7 +260,7 @@ surfaceBlit(lua_State *L, int scaled, int lower)
 		if (func(src, srcptr, dst, dstptr) < 0)
 			return commonPushSDLError(L, 2);
 	}
-	
+
 	/* Push true + the modified rectangle */
 	lua_pushboolean(L, 1);
 	videoPushRect(L, &dstrect);
@@ -328,8 +365,10 @@ l_surface_fillRect(lua_State *L)
 	}
 
 	/* Default color is black */
-	if (lua_gettop(L) >= 3)
-		color = videoGetColorHex(L, 3);
+	if (lua_gettop(L) >= 3) {
+		SDL_Color c = videoGetColorRGB(L, 3);
+		color = SDL_MapRGBA(surf->format, c.r, c.g, c.b, c.a);
+	}
 
 	if (SDL_FillRect(surf, rectptr, color) < 0)
 		return commonPushSDLError(L, 1);
@@ -352,7 +391,8 @@ static int
 l_surface_fillRects(lua_State *L)
 {
 	SDL_Surface *surf	= commonGetAs(L, 1, SurfaceName, SDL_Surface *);
-	Uint32 color		= videoGetColorHex(L, 3);
+	SDL_Color c		= videoGetColorRGB(L, 3);
+	Uint32 color		= SDL_MapRGBA(surf->format, c.r, c.g, c.b, c.a);
 	Array rects;
 	int ret;
 
@@ -369,6 +409,40 @@ l_surface_fillRects(lua_State *L)
 		return commonPushSDLError(L, 1);
 
 	return commonPush(L, "b", ret);
+}
+
+/*
+ * Surface:mapRGB()
+ *
+ * Returns:
+ * 	A Uint32 filled with the correct pixel value
+ */
+static int
+l_surface_mapRGB(lua_State *L)
+{
+	SDL_Surface *surf = commonGetAs(L, 1, SurfaceName, SDL_Surface *);
+	SDL_Color c = videoGetColorRGB(L, 2);
+
+	lua_pushinteger(L, SDL_MapRGB(surf->format, c.r, c.g, c.b));
+
+	return 1;
+}
+
+/*
+ * Surface:mapRGBA()
+ *
+ * Returns:
+ * 	A Uint32 filled with the correct pixel value.
+ */
+static int
+l_surface_mapRGBA(lua_State *L)
+{
+	SDL_Surface *surf = commonGetAs(L, 1, SurfaceName, SDL_Surface *);
+	SDL_Color c = videoGetColorRGB(L, 2);
+
+	lua_pushinteger(L, SDL_MapRGBA(surf->format, c.r, c.g, c.b, c.a));
+
+	return 1;
 }
 
 /*
@@ -786,6 +860,42 @@ l_surface_gc(lua_State *L)
 	return 0;
 }
 
+
+
+/*
+ * Surface:getSize()
+ *
+ * Returns:
+ *	The width
+ *	The height
+ */
+static int
+l_surface_getSize(lua_State *L)
+{
+	SDL_Surface *surf = commonGetAs(L, 1, SurfaceName, SDL_Surface *);
+
+	return commonPush(L, "ii", surf->w, surf->h);
+}
+
+
+/*
+ * Surface:getRawPixel(x,y)
+ *
+ * Returns:
+ *	(raw) byte string of pixel data (pixel format dependent)
+ */
+static int
+l_surface_getRawPixel(lua_State *L)
+{
+	SDL_Surface *surf = commonGetAs(L, 1, SurfaceName, SDL_Surface *);
+	int x = luaL_checkinteger(L, 2);
+	int y = luaL_checkinteger(L, 3);
+	int size = surf->format->BytesPerPixel;
+	Uint8 *ptr = (Uint8 *)surf->pixels + y * surf->pitch + x * size;
+	lua_pushlstring(L, (const char *) ptr, size);
+	return 1;
+}
+
 static const luaL_Reg methods[] = {
 	{ "blit",		l_surface_blit			},
 	{ "blitScaled",		l_surface_blitScaled		},
@@ -793,11 +903,15 @@ static const luaL_Reg methods[] = {
 	{ "convertFormat",	l_surface_convertFormat		},
 	{ "fillRect",		l_surface_fillRect		},
 	{ "fillRects",		l_surface_fillRects		},
+	{ "mapRGB", 		l_surface_mapRGB		},
+	{ "mapRGBA",		l_surface_mapRGBA		},
 	{ "getClipRect",	l_surface_getClipRect,		},
 	{ "getColorKey",	l_surface_getColorKey		},
 	{ "getAlphaMod",	l_surface_getAlphaMod		},
 	{ "getBlendMode",	l_surface_getBlendMode		},
 	{ "getColorMod",	l_surface_getColorMod		},
+	{ "getSize",		l_surface_getSize		},
+	{ "getRawPixel",        l_surface_getRawPixel		},
 	{ "lock",		l_surface_lock			},
 	{ "lowerBlit",		l_surface_lowerBlit		},
 	{ "lowerBlitScaled",	l_surface_lowerBlitScaled	},

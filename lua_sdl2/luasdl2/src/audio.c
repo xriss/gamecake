@@ -2,6 +2,7 @@
  * audio.c -- audio playback and recording
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2016 Webster Sheets <webster@web-eworks.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +18,7 @@
  */
 
 #include <string.h>
+#include <errno.h>
 
 #include <common/rwops.h>
 #include <common/table.h>
@@ -272,7 +274,7 @@ audioGetCVT(lua_State *L, int index, SDL_AudioCVT *cvt)
 	size_t length;
 	const char *str;
 
-	luaL_checktype(L, index, LUA_TTABLE);	
+	luaL_checktype(L, index, LUA_TTABLE);
 
 	srcformat	= tableGetInt(L, index, "sourceFormat");
 	srcchannels	= tableGetInt(L, index, "sourceChannels");
@@ -282,7 +284,7 @@ audioGetCVT(lua_State *L, int index, SDL_AudioCVT *cvt)
 	dstrate		= tableGetInt(L, index, "destRate");
 
 	ret = SDL_BuildAudioCVT(cvt, srcformat, srcchannels, srcrate,
-	    dstformat, dstchannels, dstrate);	
+	    dstformat, dstchannels, dstrate);
 
 	if (ret < 0)
 		return commonPushSDLError(L, 1);
@@ -426,7 +428,7 @@ l_getAudioDriver(lua_State *L)
 {
 	int index = luaL_checkinteger(L, 1);
 	const char *name;
- 
+
 	if ((name = SDL_GetAudioDriver(index)) == NULL)
 		return commonPushSDLError(L, 1);
 
@@ -732,6 +734,106 @@ l_audiodev_pause(lua_State *L)
 	return 0;
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+
+/*
+ * AudioDevice:queue(data)
+ */
+static int
+l_audiodev_queue(lua_State *L)
+{
+	AudioDevice *dev	= commonGetAs(L, 1, AudioDeviceName, AudioDevice *);
+	size_t len;
+	const char *data	= luaL_checklstring(L, 2, &len);
+
+	if (dev->isdevice) {
+		if (SDL_QueueAudio(dev->id, (void *)data, len) < 0)
+			return commonPushSDLError(L, 1);
+		else
+			return commonPush(L, "b", 1);
+	}
+	else {
+		return commonPush(L, "ns", "Must be an AudioDevice (opened with SDL.openAudioDevice).");
+	}
+}
+
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+/*
+ * AudioDevice:dequeue(len)
+ *
+ * Pull (dequeue) audio data from capture devices.
+ * NOTE: This function DOES NOT operate on playback devices. This
+ * is audio INPUT, not output.
+ *
+ * Arguments:
+ *	The number of bytes of audio data to retrieve.
+ *
+ * Returns:
+ *	The dequeued audio data, as a string.
+ *	The number of bytes actually queued.
+ *
+ */
+static int
+l_audiodev_dequeue(lua_State *L)
+{
+	AudioDevice *dev	= commonGetAs(L, 1, AudioDeviceName, AudioDevice *);
+	size_t len		= luaL_checkinteger(L, 2);
+
+	if (dev->isdevice && dev->iscapture) {
+		void *data;
+		if ((data = malloc(len)) == NULL)
+			return commonPushErrno(L, 1);
+
+		len = SDL_DequeueAudio(dev->id, data, len);
+
+		lua_pushlstring(L, (const char *)data, len);
+		lua_pushinteger(L, len);
+
+		free(data);
+
+		return 2;
+	}
+	else {
+		return commonPush(L, "ns", "Must be a capture AudioDevice (opened with SDL.openAudioDevice).");
+	}
+}
+#endif
+
+/*
+ * AudioDevice:clearQueued()
+ */
+static int
+l_audiodev_clearQueued(lua_State *L)
+{
+	AudioDevice *dev	= commonGetAs(L, 1, AudioDeviceName, AudioDevice *);
+
+	if (dev->isdevice) {
+		SDL_ClearQueuedAudio(dev->id);
+		return commonPush(L, "b", 1);
+	}
+	else{
+		return commonPush(L, "ns", "No Audio Device ID present.");
+	}
+}
+
+/*
+ * AudioDevice:getQueuedSize()
+ */
+static int
+l_audiodev_getQueuedSize(lua_State *L)
+{
+	AudioDevice *dev	= commonGetAs(L, 1, AudioDeviceName, AudioDevice *);
+
+	if (dev->isdevice) {
+		return commonPush(L, "i", SDL_GetQueuedAudioSize(dev->id));
+	}
+	else{
+		return commonPush(L, "ns", "No Audio Device ID present.");
+	}
+}
+
+#endif
+
 /* --------------------------------------------------------
  * Audio device object metamethods
  * -------------------------------------------------------- */
@@ -789,7 +891,7 @@ l_audiodev_tostring(lua_State *L)
 		}
 
 	lua_pushfstring(L, "audio device %d: status: %s", dev->id, status);
-	
+
 	return 1;
 }
 
@@ -803,6 +905,14 @@ static const luaL_Reg AudiodevMethods[] = {
 	{ "lock",			l_audiodev_lock		},
 	{ "status",			l_audiodev_status	},
 	{ "unlock",			l_audiodev_unlock	},
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+	{ "queue",			l_audiodev_queue	},
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+	{ "dequeue",			l_audiodev_dequeue	},
+#endif
+	{ "clearQueued",		l_audiodev_clearQueued	},
+	{ "getQueuedSize",		l_audiodev_getQueuedSize},
+#endif
 	{ NULL,				NULL			}
 };
 

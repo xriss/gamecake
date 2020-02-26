@@ -11,6 +11,7 @@ files {
 includedirs {
 	"luasdl2",
 	"luasdl2/src",
+	"luasdl2/extern/queue",
 }
 
 KIND{kind="lua",name="SDL"}

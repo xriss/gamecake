@@ -1,0 +1,19 @@
+cd `dirname $0`
+
+rm -rf master.zip
+rm -rf luasdl2-master
+
+wget https://github.com/Tangent128/luasdl2/archive/master.zip
+unzip master.zip
+rm -rf luasdl2
+mv luasdl2-master luasdl2
+
+git checkout luasdl2/config.h
+rm -rf luasdl2/windows/
+
+
+rm -rf master.zip
+rm -rf luasdl2-master
+
+git status
+

@@ -160,7 +160,7 @@ function wscreen.add_split(screen,opts)
 	end
 
 
-	local dock=split:add({class="windock",windock="stack",stack_axis=(split.split_axis=="x")and"y"or"x"})
+	local dock=split:add({class="windows",windows="stack",stack_axis=(split.split_axis=="x")and"y"or"x"})
 	if opts.window then
 		dock:insert(opts.window)
 		if not split.split_num then
@@ -251,7 +251,8 @@ function wscreen.setup(widget,def)
 	widget.add_split=wscreen.add_split
 	widget.remove_split=wscreen.remove_split
 
-	widget.windows=widget:add(def.windows or {class="windock",windock="drag",size="full"})
+	widget.windows=widget:add(def.windows or {class="windows",winmode="drag",size="full"})
+	widget.dialogs=widget:add(def.dialogs or {class="dialogs"})
 	
 	return widget
 end

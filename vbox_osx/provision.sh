@@ -16,6 +16,9 @@ su vagrant -c " echo 'export PATH=\"/usr/local/opt/gnu-getopt/bin:$PATH\"' >> ~/
 
 su vagrant -c " brew install wget "
 
+su vagrant -c " brew install luarocks "
+su vagrant -c " luarocks install luafilesystem "
+
 
 su vagrant -c " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
 

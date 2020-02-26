@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local wwin=require("wetgenes.win")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -34,6 +36,25 @@ function wmenuitem.menu_add(widget,opts)
 	if type(opts)=="function" then opts=opts() end
 	local md=opts.menu_data or widget.menu_data
 	if type(md)=="function" then md=md() end
+	
+	if md.inherit then -- perform inheritence copies
+		local bubble_menudata
+		bubble_menudata=function(md)
+			for i,v in ipairs(md) do
+				if type(v.menu_data)=="table" then -- copy string values down into sub menu tables
+					for n,m in pairs(md) do
+						if type(n)=="string" then
+							if "top_"~=string.sub(1,4) then
+								v.menu_data[n]=v.menu_data[n] or m
+							end
+						end
+					end
+					bubble_menudata(v.menu_data)
+				end
+			end
+		end
+		bubble_menudata(md)
+	end
 	
 	local window,screen=widget:window_screen()
 
@@ -113,6 +134,14 @@ local showmenu=function()
 
 	if widget.menu_data then -- add a sub menu using this data
 
+		if widget.top_only then -- hide all other menus first
+			widget.master:call_descendents(function(w)
+				if w.menu then
+					w.menu.hidden=true
+				end
+			end)
+		end
+		
 		local w=widget:menu_add(widget.menu_data)
 		local map={}
 		local bubble
@@ -138,6 +167,24 @@ local showmenu=function()
 	end
 end
 
+local showmenu_delay=function()
+
+	local t=wwin.time()
+
+	local f
+	f=function()
+		if widget.master.over==widget then -- must hover
+			if wwin.time() >= t+0.25 then
+					showmenu()
+			else
+				widget.master.later_append(f) -- check again later
+			end
+		end
+	end
+	widget.master.later_append(f)
+
+end
+
 local togglemenu=function()
 	if widget.menu and ( not widget.menu.hidden ) then -- already visible so hide it
 		widget.menu:remove()
@@ -149,7 +196,11 @@ end
 
 
 	if hook=="over" then
-		showmenu()
+		if widget.master.press then
+			showmenu()
+		else
+			showmenu_delay()
+		end
 	end
 
 	if hook=="active" then
