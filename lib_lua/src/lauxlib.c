@@ -121,31 +121,19 @@ LUALIB_API int luaL_newmetatable (lua_State *L, const char *tname) {
 }
 
 
-LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname) {
+LUALIB_API void *luaL_checkudata (lua_State *L, int ud, const char *tname) {
   void *p = lua_touserdata(L, ud);
   if (p != NULL) {  /* value is a userdata? */
     if (lua_getmetatable(L, ud)) {  /* does it have a metatable? */
-      luaL_getmetatable(L, tname);  /* get correct metatable */
-      if (!lua_rawequal(L, -1, -2))  /* not the same? */
-        p = NULL;  /* value is a userdata with wrong metatable */
-      lua_pop(L, 2);  /* remove both metatables */
-      return p;
+      lua_getfield(L, LUA_REGISTRYINDEX, tname);  /* get correct metatable */
+      if (lua_rawequal(L, -1, -2)) {  /* does it have the correct mt? */
+        lua_pop(L, 2);  /* remove both metatables */
+        return p;
+      }
     }
   }
-  return NULL;  /* value is not a userdata with a metatable */
-}
-
-
-static int typeerror (lua_State *L, int narg, const char *tname) {
-  const char *msg = lua_pushfstring(L, "%s expected, got %s",
-                                    tname, luaL_typename(L, narg));
-  return luaL_argerror(L, narg, msg);
-}
-
-LUALIB_API void *luaL_checkudata (lua_State *L, int ud, const char *tname) {
-  void *p = luaL_testudata(L, ud, tname);
-  if (p == NULL) typeerror(L, ud, tname);
-  return p;
+  luaL_typerror(L, ud, tname);  /* else error */
+  return NULL;  /* to avoid warnings */
 }
 
 
@@ -586,7 +574,8 @@ LUALIB_API int luaL_loadfile (lua_State *L, const char *filename) {
     lf.f = freopen(filename, "rb", lf.f);  /* reopen in binary mode */
     if (lf.f == NULL) return errfile(L, "reopen", fnameindex);
     /* skip eventual `#!...' */
-   while ((c = getc(lf.f)) != EOF && c != LUA_SIGNATURE[0]) {}
+   while ((c = getc(lf.f)) != EOF && c != LUA_SIGNATURE[0])
+   ;
     lf.extraline = 0;
   }
   ungetc(c, lf.f);

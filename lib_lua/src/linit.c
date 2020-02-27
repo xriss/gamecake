@@ -27,7 +27,6 @@ static const luaL_Reg lualibs[] = {
 };
 
 
-
 LUALIB_API void luaL_openlibs (lua_State *L) {
   const luaL_Reg *lib = lualibs;
   for (; lib->func; lib++) {

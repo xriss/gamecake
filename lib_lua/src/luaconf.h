@@ -36,7 +36,7 @@
 #if defined(LUA_USE_LINUX)
 #define LUA_USE_POSIX
 #define LUA_USE_DLOPEN		/* needs an extra library: -ldl */
-//#define LUA_USE_READLINE	/* needs some extra libraries */
+#define LUA_USE_READLINE	/* needs some extra libraries */
 #endif
 
 #if defined(LUA_USE_MACOSX)
@@ -89,10 +89,9 @@
 #define LUA_CDIR	"!\\"
 #define LUA_PATH_DEFAULT  \
 		".\\?.lua;"  LUA_LDIR"?.lua;"  LUA_LDIR"?\\init.lua;" \
-		             LUA_CDIR"?.lua;"  LUA_CDIR"?\\init.lua;" ".\\lua\\?.lua;.\\lua\\?\\init.lua;"
+		             LUA_CDIR"?.lua;"  LUA_CDIR"?\\init.lua"
 #define LUA_CPATH_DEFAULT \
-	".\\?.dll;"       LUA_CDIR"?.dll;" LUA_CDIR"loadall.dll;"	\
-	".\\lua\\?.dll;"  LUA_LDIR"?.dll;"
+	".\\?.dll;"  LUA_CDIR"?.dll;" LUA_CDIR"loadall.dll"
 
 #else
 #define LUA_ROOT	"/usr/local/"
@@ -100,9 +99,9 @@
 #define LUA_CDIR	LUA_ROOT "lib/lua/5.1/"
 #define LUA_PATH_DEFAULT  \
 		"./?.lua;"  LUA_LDIR"?.lua;"  LUA_LDIR"?/init.lua;" \
-		            LUA_CDIR"?.lua;"  LUA_CDIR"?/init.lua;" "./lua/?.lua;./lua/?/init.lua;"
+		            LUA_CDIR"?.lua;"  LUA_CDIR"?/init.lua"
 #define LUA_CPATH_DEFAULT \
-	"./?.so;" LUA_CDIR"?.so;" LUA_CDIR"loadall.so;" "./lua/?.so;"
+	"./?.so;"  LUA_CDIR"?.so;" LUA_CDIR"loadall.so"
 #endif
 
 
