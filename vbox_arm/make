@@ -3,6 +3,10 @@ cd `dirname $0`
 
 ./box-up-wait
 
+if [ "$1" -eq  "clean" ] ;  then
+ ./ssh " rm -rf gamecake "
+fi
+
 ./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
 
 ./ssh " gamecake/build/make $* "
