@@ -478,14 +478,21 @@ lua_lib_loads={}
 
 -- deadsimple single char string spliter, c must be a single char possibly escaped with %
 -- this is a simple path or modulename spliting function
-local function csplit(str,c)
-	local ret={}
-	local n=1
-	for w in str:gmatch("([^"..c.."]*)") do
-			ret[n]=ret[n] or w -- only set once (so the blank after a string is ignored)
-			if w=="" then n=n+1 end -- step forwards on a blank but not a string
+local function csplit(p,c)
+	local ps={}
+	local fi=1
+	while true do
+		local fa,fb=string.find(p,c,fi)
+		if fa then
+			local s=string.sub(p,fi,fa-1)
+			ps[#ps+1]=s
+			fi=fb+1
+		else
+			break
+		end
 	end
-	return ret
+	ps[#ps+1]=string.sub(p,fi)
+	return ps
 end
 
 function KIND(opts)
@@ -520,6 +527,7 @@ function KIND(opts)
 		lua_lib_names[#lua_lib_names+1]=project().name
 		lua_lib_loads[#lua_lib_loads+1]={opts.luaname or opts.name,opts.luaopen or opts.luaname or opts.name}
 
+--print( "LIB" , lua_lib_loads[#lua_lib_loads][1] , lua_lib_loads[#lua_lib_loads][2] )
 	end
 	
 	
