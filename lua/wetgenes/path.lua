@@ -15,7 +15,7 @@ Manage file paths under linux or windows, so we need to deal with \ or
 local M={} ; package.loaded[(...)]=M ; local wpath=M
 
 -- a soft require of lfs so lfs can be nil
-local lfs=select(2,pcall( function() return require("lfs") end ))
+local lfs=select(2,pcall( function() return require("lfs_any") end ))
 
 
 --[[#lua.wetgenes.path.setup
@@ -219,7 +219,8 @@ wpath.normalize=function(p)
 				table.remove(ps,idx)
 				table.remove(ps,idx)
 			else -- we can not remove so must ignore
-				table.remove(ps,idx)
+--				table.remove(ps,idx)
+				idx=idx+1
 			end
 		else -- just advance
 			idx=idx+1
@@ -297,6 +298,11 @@ wpath.relative=function(pa,pb)
 			break
 		end
 	end
+
+	if match==1 or ( match==2 and a[1]=="" )  then -- no match
+		return pb -- just return full path
+	end
+
 	for i=match,#a do r[#r+1]=".." end -- step back
 	if #r==0 then r[#r+1]="." end -- start at current
 	for i=match,#b do r[#r+1]=b[i] end -- step forward
