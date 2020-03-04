@@ -58,8 +58,11 @@ wpath.setup=function(flavour)
 		wpath.root="/"
 		wpath.separator="/"
 		wpath.delimiter=";"
-		wpath.winhax=false
-	
+		wpath.winhax=true
+		
+-- always enable winhax by default, so we can hack around with windows style paths
+-- we should make sure that we are always windows safe
+
 	end
 
 end
