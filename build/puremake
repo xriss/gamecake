@@ -2953,7 +2953,7 @@ end
 
 local pmstring=require("puremake.string")
 
-for n,v in pairs(pmstring) do string[n]=string[n] or v end
+for n,v in pairs(pmstring) do string[n]=v end
 -- AMALGAMATE FILE TAIL : /src/host/string.lua
 -- AMALGAMATE FILE HEAD : /src/host/path.lua
 
@@ -2963,7 +2963,7 @@ path=require("puremake.path")
 
 local pmos=require("puremake.os")
 
-for n,v in pairs(pmos) do os[n]=os[n] or v end
+for n,v in pairs(pmos) do os[n]=v end
 -- AMALGAMATE FILE TAIL : /src/host/os.lua
 -- AMALGAMATE FILE HEAD : /src/host/premake.lua
 
@@ -3002,14 +3002,14 @@ _WORKING_DIR		=lfs.currentdir()
 
 local pmtable=require("puremake.table")
 
-for n,v in pairs(pmtable) do table[n]=table[n] or v end
+for n,v in pairs(pmtable) do table[n]=v end
 
 -- AMALGAMATE FILE TAIL : /src/base/table.lua
 -- AMALGAMATE FILE HEAD : /src/base/io.lua
 
 local pmio = require("puremake.io")
 
-for n,v in pairs(pmio) do io[n]=io[n] or v end
+for n,v in pairs(pmio) do io[n]=v end
 -- AMALGAMATE FILE TAIL : /src/base/io.lua
 -- AMALGAMATE FILE HEAD : /src/base/globals.lua
 --

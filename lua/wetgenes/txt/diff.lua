@@ -1,7 +1,9 @@
 --[[#lua.wetgenes.txt.diff
 
-(C) 2020 Kriss Blank under the https://opensource.org/licenses/MIT
+(C) 2020 Kriss Blank and released under the MIT license, see 
+http://opensource.org/licenses/MIT for full license text.
 
+	local wtxtdiff=require("wetgenes.txt.diff")
   
 ]]
 
@@ -9,6 +11,47 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+
+
+--[[#lua.wetgenes.txt.diff.split
+
+Use the delimiter to split a string into a table of strings such that 
+each string ends in the delimiter (except for possibly the final string) and a 
+table.concat on the result will recreate the input string exactly.
+
+	table = wtxtdiff.split(string,delimiter)
+
+String is the string to split and delimiter is a lua pattern so any 
+special chars should be escaped.
+
+for example
+
+	st = wtxtdiff.split(s) -- split on newline (default)
+	st = wtxtdiff.split(s,"\n") -- split on newline (explicit)
+
+	st - wtxtdiff.split(s,"%s+") -- split on white space
+
+]]
+wpath.split=function(s,d)
+	d=d or "\n"
+	local ss={} -- output table
+	local ti=1  -- table index
+	local si=1  -- string index
+	while true do
+		local fa,fb=string.find(s,d,si) -- find delimiter
+		if fa then
+			ss[ti]=string.sub(s,si,fb) -- add string to table
+			ti=ti+1
+			si=fb+1
+		else break end -- no more delimiters
+	end
+	if string.sub(s,si) ~= "" then -- is there some string remaining?
+		ss[ti]=string.sub(s,si)
+	end
+	return ss
+end
+
 
 
 --[[#lua.wetgenes.txt.diff.find
