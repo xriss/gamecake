@@ -33,7 +33,7 @@ for example
 	st - wtxtdiff.split(s,"%s+") -- split on white space
 
 ]]
-wpath.split=function(s,d)
+M.split=function(s,d)
 	d=d or "\n"
 	local ss={} -- output table
 	local ti=1  -- table index

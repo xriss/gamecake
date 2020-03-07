@@ -8,66 +8,75 @@ local wstr=require("wetgenes.string")
 
 local wtxtdiff=require("wetgenes.txt.diff")
 
-local txta = {
-    "This part of the document has stayed","\n",
-    "the same from version to version.","\n",
-    "","\n",
-    "This paragraph contains text that is","\n",
-    "outdated - it will be deprecated '''and'''","\n",
-    "deleted '''in''' the near future.","\n",
-    "","\n",
-    "It is important to spell check this","\n",
-    "dokument. On the other hand, a misspelled","\n",
-    "word isn't the end of the world.","\n",
-}
+local txta = [[
+This part of the document has stayed
+the same from version to version.
 
-local txtb = {
-    "This is an important notice! It should","\n",
-    "therefore be located at the beginning of","\n",
-    "this document!","\n",
-    "","\n",
-    "This part of the document has stayed","\n",
-    "the same from version to version.","\n",
-    "","\n",
-    "It is important to spell check this","\n",
-    "document. On the other hand, a misspelled","\n",
-    "word isn't the end of the world. This","\n",
-    "paragraph contains important new","\n",
-    "additions to this document.","\n",
-}
+This paragraph contains text that is
+outdated - it will be deprecated '''and'''
+deleted '''in''' the near future.
+
+It is important to spell check this
+dokument. On the other hand, a misspelled
+word isn't the end of the world.
+]]
+
+local txtb = [[
+This is an important notice! It should
+therefore be located at the beginning of
+this document!
+
+This part of the document has stayed
+the same from version to version.
+
+It is important to spell check this
+document. On the other hand, a misspelled
+word isn't the end of the world. This
+paragraph contains important new
+additions to this document.
+]]
 
 
 
 function test_find()
 
-	local l,a,b = wtxtdiff.find(txta,txtb)
-	
-	assert_true(l==6)
+	local taba=wtxtdiff.split(txta,"\n")
+	local tabb=wtxtdiff.split(txtb,"\n")
+
+	local l,a,b = wtxtdiff.find(taba,tabb)
+
+	assert_true(l==3)
 	assert_true(a==1)
-	assert_true(b==9)
+	assert_true(b==5)
 
 end
 
 
 function test_trim()
 
-	local a,b = wtxtdiff.trim(txta,txtb)
+	local taba=wtxtdiff.split(txta,"\n")
+	local tabb=wtxtdiff.split(txtb,"\n")
+
+	local a,b = wtxtdiff.trim(taba,tabb)
 
 	assert_true(a==0)
-	assert_true(b==1)
+	assert_true(b==0)
 
 end
 
 
 function test_match()
 
-	local a,b = wtxtdiff.match(txta,txtb)
+	local taba=wtxtdiff.split(txta,"\n")
+	local tabb=wtxtdiff.split(txtb,"\n")
+
+	local a,b = wtxtdiff.match(taba,tabb)
 	
 	assert_equal(#a,#b)
 
-	assert_equal(table.concat(a),table.concat(txta))
+	assert_equal(table.concat(a),txta)
 	
-	assert_equal(table.concat(b),table.concat(txtb))
+	assert_equal(table.concat(b),txtb)
 	
 	local d=""
 
@@ -94,7 +103,7 @@ function test_match()
 	
 	end
 
-	assert_equal( d , "-+=-+=-+=-+=" )
+	assert_equal( d , "-+=-+=-+" )
 
 end
 
