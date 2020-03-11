@@ -96,12 +96,13 @@ for i,v in ipairs{
 
 } do
 
-	local M=select(2,pcall( function() return require(v) end ))
+	local _,M=pcall( function() return require(v) end ) ; M=_ and M
 
 	if M then return M end
 
 end
 
+error("lfs not found")
 end
 package.preload["lfs_ffi"] = function (...)
 
@@ -1475,7 +1476,7 @@ Manage file paths under linux or windows, so we need to deal with \ or
 local M={} ; package.loaded[(...)]=M ; local wpath=M
 
 -- a soft require of lfs so lfs can be nil
-local lfs=select(2,pcall( function() return require("lfs_any") end ))
+local _,lfs=pcall( function() return require("lfs_any") end ) ; lfs=_ and lfs
 
 
 --[[#lua.wetgenes.path.setup

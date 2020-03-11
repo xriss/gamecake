@@ -11,7 +11,7 @@ local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local wutf=require("wetgenes.txt.utf")
 
-local _,lfs=pcall( function() return require("lfs") end )
+local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
 
 --module

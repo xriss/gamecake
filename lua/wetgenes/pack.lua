@@ -11,7 +11,7 @@ pack.core=core
 
 local wstr=require("wetgenes.string")
 
-local _,bit=pcall(function() return require("bit") end) ; bit=bit or require("bit32")
+local _,bit=pcall(function() return require("bit") end) ; bit=(_ and bit) or require("bit32")
 
 --
 -- Read a single member and return it

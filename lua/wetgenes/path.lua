@@ -15,7 +15,7 @@ Manage file paths under linux or windows, so we need to deal with \ or
 local M={} ; package.loaded[(...)]=M ; local wpath=M
 
 -- a soft require of lfs so lfs can be nil
-local lfs=select(2,pcall( function() return require("lfs_any") end ))
+local _,lfs=pcall( function() return require("lfs_any") end ) ; lfs=_ and lfs
 
 
 --[[#lua.wetgenes.path.setup
