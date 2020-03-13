@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "bluebird": "~2.6.4",
-    "minimist": "~1.1.0",
+    "minimist": "~1.2.5",
     "express": "~4.10.1",
     "body-parser": "~1.9.3",
     "socket.io": "~1.2.1",
