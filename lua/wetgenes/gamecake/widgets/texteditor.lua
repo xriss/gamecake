@@ -53,6 +53,7 @@ function wtexteditor.update(texteditor)
 		if texteditor.mark_area then
 			txt.mark(unpack(texteditor.mark_area))
 		end
+		texteditor.mark_area=nil
 		
 		texteditor:scroll_to_view()
 		texteditor:refresh()
@@ -308,6 +309,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		txt.markauto(dx,dy,act) -- select word
 
 		texteditor.mark_area={txt.markget()}
+		texteditor.mark_area_auto={txt.markget()}
 
 		texteditor:scroll_to_view()
 		texteditor:refresh()
@@ -321,11 +323,10 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 			if texteditor.key_mouse > 1 then -- special select
 			
-				local t={txt.markget()}
-			
 				txt.markauto(dx,dy,texteditor.key_mouse) -- select word
 
-				txt.markmerge(unpack(t))
+				txt.markmerge(texteditor.mark_area_auto[1],texteditor.mark_area_auto[2],
+				texteditor.mark_area_auto[3],texteditor.mark_area_auto[4],txt.markget())
 
 				texteditor.mark_area={txt.markget()}
 			else

@@ -226,17 +226,13 @@ M.construct=function(txt)
 		return txt.fx,txt.fy,txt.tx,txt.ty
 	end
 
-	txt.markmerge=function(fx,fy,tx,ty)
+	txt.markmerge=function( fxa,fya,txa,tya, fxb,fyb,txb,tyb )
 
-		if not fx then return end -- nothing to merge
+		if not fxa and fxb then return txt.mark(fxb,fyb,txb,tyb) end -- nothing to merge
+		if not fxb and fxa then return txt.mark(fxa,fya,txa,tya) end -- nothing to merge
+		if not fxb and not fxa then return end -- nothing to do
 
-		local fxa,fya,txa,tya = txt.markget()
-
-		txt.mark(fx,fy,tx,ty)
-
-		if not fxa then return end -- nothing to merge
-
-		local fxb,fyb,txb,tyb = txt.markget()
+		local fx,fy,tx,ty
 
 		if     fya < fyb then fy=fya fx=fxa
 		elseif fya > fyb then fy=fyb fx=fxb
