@@ -4,10 +4,10 @@
 for i,v in ipairs{
 
 	"lfs_ffi",
-	"lfs2",
+	"lfs",
 
 } do
-	local _M,M=pcall( function() return require(v) end ) ; M=_M and M
+	local _,M=pcall( function() return require(v) end ) ; M=_ and M
 
 	if M then return M end
 
