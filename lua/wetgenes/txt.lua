@@ -222,6 +222,42 @@ M.construct=function(txt)
 
 	end
 	
+	txt.markget=function()
+		return txt.fx,txt.fy,txt.tx,txt.ty
+	end
+
+	txt.markmerge=function(fx,fy,tx,ty)
+
+		if not fx then return end -- nothing to merge
+
+		local fxa,fya,txa,tya = txt.markget()
+
+		txt.mark(fx,fy,tx,ty)
+
+		if not fxa then return end -- nothing to merge
+
+		local fxb,fyb,txb,tyb = txt.markget()
+
+		if     fya < fyb then fy=fya fx=fxa
+		elseif fya > fyb then fy=fyb fx=fxb
+		else
+			if fxa < fxb then fy=fya fx=fxa
+			else              fy=fyb fx=fxb
+			end
+		end
+
+		if     tya > tyb then ty=tya tx=txa
+		elseif tya < tyb then ty=tyb tx=txb
+		else
+			if txa > txb then ty=tya tx=txa
+			else              ty=tyb tx=txb
+			end
+		end
+		
+		txt.mark(fx,fy,tx,ty)
+
+	end
+	
 	txt.mark=function(fx,fy,tx,ty)
 		if not fx then -- unmark
 			txt.fx=nil
@@ -237,7 +273,7 @@ M.construct=function(txt)
 		
 		local flip=false
 		if txt.fy==txt.ty and txt.fx>txt.tx then flip=true
-		elseif                  txt.fy>txt.ty then flip=true end
+		elseif                txt.fy>txt.ty then flip=true end
 		if flip then
 			txt.fx,txt.tx=txt.tx,txt.fx
 			txt.fy,txt.ty=txt.ty,txt.fy

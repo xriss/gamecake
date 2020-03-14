@@ -289,7 +289,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	
 		texteditor.float_cx=nil
 
-		texteditor.key_mouse=true
+		texteditor.key_mouse=1
 
 		texteditor.mark_area={dx,dy,dx,dy}
 
@@ -301,9 +301,13 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 	elseif (act and act>1) and texteditor.master.over==pan and keyname=="left" then -- double click
 	
+		texteditor.key_mouse=act
+
 		texteditor.float_cx=nil
 
 		txt.markauto(dx,dy,act) -- select word
+
+		texteditor.mark_area={txt.markget()}
 
 		texteditor:scroll_to_view()
 		texteditor:refresh()
@@ -312,12 +316,25 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	elseif act==0 and texteditor.key_mouse then -- drag, but only while over widget
 
 		if texteditor.key_mouse and texteditor.mark_area then
-
+		
 			texteditor.float_cx=nil
 
-			texteditor.mark_area[3],texteditor.mark_area[4]=dx,dy
+			if texteditor.key_mouse > 1 then -- special select
 			
-			txt.mark(unpack(texteditor.mark_area))
+				local t={txt.markget()}
+			
+				txt.markauto(dx,dy,texteditor.key_mouse) -- select word
+
+				txt.markmerge(unpack(t))
+
+				texteditor.mark_area={txt.markget()}
+			else
+
+				texteditor.mark_area[3],texteditor.mark_area[4]=dx,dy
+				
+				txt.mark(unpack(texteditor.mark_area))
+				
+			end
 
 			texteditor:scroll_to_view()
 			texteditor:refresh()
