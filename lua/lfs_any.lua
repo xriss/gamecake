@@ -3,13 +3,11 @@
 
 for i,v in ipairs{
 
-	"lfs_ffi2",
+	"lfs_ffi",
 	"lfs2",
 
 } do
 	local _M,M=pcall( function() return require(v) end ) ; M=_M and M
-
-print(v,M)
 
 	if M then return M end
 
