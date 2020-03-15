@@ -413,7 +413,9 @@ function wtexteditor.key(pan,ascii,key,act)
 		
 			texteditor.float_cx=nil
 
-			txt.insert_char(ascii)
+			txt.undo.cut()
+			txt.undo.insert_char(ascii)
+
 			texteditor:scroll_to_view()
 
 		end
@@ -469,7 +471,8 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			texteditor.float_cx=nil
 
-			txt.insert_newline()
+			txt.undo.cut()
+			txt.undo.insert_newline()
 			texteditor:scroll_to_view()
 
 		elseif key=="home" then
@@ -492,21 +495,28 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			texteditor.float_cx=nil
 
-			txt.backspace()
+			if not txt.undo.cut() then -- just delete selection?
+				txt.undo.backspace()
+			end
+			
 			texteditor:scroll_to_view()
 
 		elseif key=="delete" then
 
 			texteditor.float_cx=nil
 
-			txt.delete()
+			if not txt.undo.cut() then -- just delete selection?
+				txt.undo.delete()
+			end
+			
 			texteditor:scroll_to_view()
 
 		elseif key=="tab" then
 
 			texteditor.float_cx=nil
 
-			txt.insert_char("\t")
+			txt.undo.cut()
+			txt.undo.insert_char("\t")
 			texteditor:scroll_to_view()
 
 		end

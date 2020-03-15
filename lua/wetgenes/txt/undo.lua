@@ -69,9 +69,39 @@ end
 M.hash=hash
 M.hashnext=hashnext
 
-M.construct=function(txtundo)
-	txtundo = txtundo or {}
+-- bind an undo state to a txt state
+M.construct=function(undo,txt)
+	undo = undo or {}
+	
+	undo.txt=txt
+	txt.undo=undo
 
+
+-- these functions add to the undo stack and call the txt.* functions
+
+	undo.cut=function()
+		return txt.cut()
+	end
+
+	undo.delete=function()
+		return txt.delete()
+	end
+	
+	undo.backspace=function()
+		return txt.backspace()
+	end
+	
+	undo.insert=function(s)
+		return txt.insert(s)
+	end
+	
+	undo.insert_newline=function()
+		return txt.insert_newline()
+	end
+
+	undo.insert_char=function(s)
+		return txt.insert_char(s)
+	end
 
 	return txtundo
 end

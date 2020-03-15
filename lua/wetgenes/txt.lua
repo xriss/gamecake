@@ -7,6 +7,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local wstring=require("wetgenes.string")
 local wutf=require("wetgenes.txt.utf")
 
+local wtxtundo=require("wetgenes.txt.undo")
 
 -- manage the text data part of a text editor
 
@@ -419,9 +420,6 @@ M.construct=function(txt)
 
 	txt.insert_char=function(s)
 	
-		txt.cut()
-
---		local sa=txt.get_string(txt.cy) or ""
 		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
 		local sc=txt.get_string_sub(txt.cy,txt.cx)
 		
@@ -435,9 +433,6 @@ M.construct=function(txt)
 
 	txt.insert_newline=function()
 	
-		txt.cut()
-
---		local sa=txt.get_string(txt.cy) or ""
 		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
 		local sc=txt.get_string_sub(txt.cy,txt.cx)
 		
@@ -455,8 +450,6 @@ M.construct=function(txt)
 
 	txt.insert=function(s)
 
-		txt.cut()
-	
 		local lines=wstring.split_lines(s,"\n")
 		
 		for idx,line in ipairs(lines) do
@@ -525,8 +518,6 @@ M.construct=function(txt)
 
 	txt.backspace=function()
 
-		if txt.cut() then return end -- just delete selection
-
 		if txt.cx==1 then
 			if txt.cy==1 then return end
 			merge_lines()
@@ -547,8 +538,6 @@ M.construct=function(txt)
 
 	txt.delete=function()
 	
-		if txt.cut() then return end -- just delete selection
-	
 		local hx=txt.get_hx()
 		if txt.cx==hx+1 and txt.cy<txt.hy then
 			txt.cy=txt.cy+1
@@ -566,6 +555,8 @@ M.construct=function(txt)
 	
 		hook("changed")
 	end
+	
+	wtxtundo.construct({},txt)
 
 	return txt
 end
