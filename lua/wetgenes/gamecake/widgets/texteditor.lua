@@ -407,7 +407,7 @@ function wtexteditor.key(pan,ascii,key,act)
 	if ascii and ascii~="" then -- not a blank string
 
 		texteditor.txt_dirty=true
-
+		
 		local c=wutf.code(ascii)
 		if c>=32 then
 		
@@ -427,6 +427,36 @@ function wtexteditor.key(pan,ascii,key,act)
 		if     key=="shift_l"   or key=="shift_r"   then	texteditor.key_shift=true
 		elseif key=="control_l" or key=="control_r" then	texteditor.key_control=true
 		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=true
+		end
+
+		if texteditor.key_control then
+		
+--print(key)		
+			if     key=="x" then	-- cut
+
+				local s=txt.undo.cut()
+				
+				wwin.set_clipboard(s)
+			
+			elseif key=="c" then	-- copy
+			
+				local s=txt.undo.copy()
+
+				wwin.set_clipboard(s)
+
+			elseif key=="v" then	-- paste
+			
+				local s=""
+
+				if wwin.has_clipboard() then
+					s=wwin.get_clipboard()
+				end
+				
+				txt.undo.cut()
+				txt.undo.insert(s)
+
+			end
+		
 		elseif key=="left" then
 
 			texteditor.float_cx=nil

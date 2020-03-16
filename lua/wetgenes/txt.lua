@@ -354,7 +354,50 @@ M.construct=function(txt)
 
 	end
 
-	
+	-- copy text from the marked area (if marked) or return nil
+	txt.copy=function()
+		
+		if txt.fx and txt.fy then
+		
+			local s=""
+
+			if txt.tx and txt.ty then
+			
+				for idx=txt.fy,txt.ty do
+				
+					if idx==txt.fy then -- first line
+					
+						if txt.ty==txt.fy then -- single line
+
+							s=s..txt.get_string_sub(txt.fy,txt.fx,txt.tx-1)
+
+						else -- multiple lines
+
+							s=s..txt.get_string_sub(txt.fy,txt.fx)
+
+						end
+
+					elseif idx==txt.ty then -- last line
+
+						s=s..txt.get_string_sub(txt.fy+1,1,txt.tx-1)
+
+					else -- middle line
+					
+						s=s..txt.get_string(txt.fy+1) or ""
+
+					end
+
+				end
+			
+			end
+			
+			if s=="" then s=nil end
+
+			return s
+		end
+
+	end
+		
 	txt.get_hx=function(y)
 		y=y or txt.cy
 --		local s=txt.get_string(y)

@@ -38,6 +38,13 @@ local wstring=require("wetgenes.string")
 
 local wtsv = require("wetgenes.tsv")
 
+local cmsgpack=require("cmsgpack")
+
+local zlib=require("zlib")
+local inflate=function(d) return ((zlib.inflate())(d)) end
+local deflate=function(d) return ((zlib.deflate())(d,"finish")) end
+
+
 
 
 --module
@@ -76,11 +83,49 @@ M.construct=function(undo,txt)
 	undo.txt=txt
 	txt.undo=undo
 
+	undo.list={}
+	undo.length=0
+	undo.memory=0
+	
+	undo.list_get=function(index)
+		if not index then return end
+		local it=undo.list[index]
+		it=it and cmsgpack.unpack(inflate(it))
+		return it
+	end
+	
+	undo.list_set=function(index,it)
+		it=it and deflate(cmsgpack.pack(it))
+		undo.list[index]=it
+		if index>undo.length then -- added a new one
+			undo.length=index
+			undo.memory=undo.memory+#it -- keep running total
+		end
+	end
 
+
+-- ru 1==redo , 2==undo	
+	undo.apply=function(index,ru)
+		local it=undo.list_get(index)
+	end
+
+	undo.redo=function() -- go forward a step
+	end
+
+	undo.undo=function() -- go back a step
+	end
+
+	undo.goto=function(index) -- goto a specific index
+	end
+	
 -- these functions add to the undo stack and call the txt.* functions
 
 	undo.cut=function()
 		return txt.cut()
+	end
+
+	undo.copy=function()
+		return txt.copy()
 	end
 
 	undo.delete=function()
