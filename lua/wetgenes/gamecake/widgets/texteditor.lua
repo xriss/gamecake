@@ -437,6 +437,8 @@ function wtexteditor.key(pan,ascii,key,act)
 				local s=txt.undo.cut()
 				
 				wwin.set_clipboard(s)
+
+				texteditor:scroll_to_view()
 			
 			elseif key=="c" then	-- copy
 			
@@ -446,14 +448,16 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			elseif key=="v" then	-- paste
 			
-				local s=""
-
-				if wwin.has_clipboard() then
-					s=wwin.get_clipboard()
+				if wwin.has_clipboard() then -- only if something to paste
+					local s=wwin.get_clipboard()
+					txt.undo.cut()
+					txt.undo.insert(s)
+					texteditor:scroll_to_view()
 				end
-				
-				txt.undo.cut()
-				txt.undo.insert(s)
+
+			elseif key=="z" then	-- undo
+
+			elseif key=="y" then	-- redo
 
 			end
 		

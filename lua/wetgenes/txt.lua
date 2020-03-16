@@ -8,6 +8,7 @@ local wstring=require("wetgenes.string")
 local wutf=require("wetgenes.txt.utf")
 
 local wtxtundo=require("wetgenes.txt.undo")
+local wtxtdiff=require("wetgenes.txt.diff")
 
 -- manage the text data part of a text editor
 
@@ -218,7 +219,7 @@ M.construct=function(txt)
 			end
 
 		elseif click>=3 then -- select line
-			txt.mark(0,fy,#s,fy)
+			txt.mark(0,fy,0,fy+1)
 		end
 
 	end
@@ -493,7 +494,24 @@ M.construct=function(txt)
 
 	txt.insert=function(s)
 
-		local lines=wstring.split_lines(s,"\n")
+		local split=function(s,d)
+			d=d or "\n"
+			local ss={} -- output table
+			local ti=1  -- table index
+			local si=1  -- string index
+			while true do
+				local fa,fb=string.find(s,d,si) -- find delimiter
+				if fa then
+					ss[ti]=string.sub(s,si,fb) -- add string to table, including delimiter
+					ti=ti+1
+					si=fb+1
+				else break end -- no more delimiters
+			end
+			ss[ti]=string.sub(s,si) -- we want empty string after a final new line
+			return ss
+		end
+
+		local lines=split(s,"\n")
 		
 		for idx,line in ipairs(lines) do
 
@@ -529,11 +547,11 @@ M.construct=function(txt)
 			elseif idx==#lines then -- last line
 
 				txt.set_string(txt.cy,line..(txt.get_string(txt.cy) or ""))
-				txt.cx=wutf.length(line)
+				txt.cx=wutf.length(line)+1
 
 			else -- middle
 
-				txt.add_string(txt.cy,s)
+				txt.add_string(txt.cy,line)
 				txt.cy=txt.cy+1
 				txt.cx=1
 
