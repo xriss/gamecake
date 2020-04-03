@@ -82,6 +82,9 @@ M.construct=function(txt)
 		if cache then return cache end
 		cache=txt.build_cache(idx)
 		txt.caches[idx]=cache
+		if (idx-1)%txt.permacache_ratio == 0 then
+			txt.permacaches[1+math.floor((idx-1)/txt.permacache_ratio)]=cache -- do not forget every X caches
+		end
 		return cache
 	end
 
@@ -89,9 +92,19 @@ M.construct=function(txt)
 	txt.caches_meta={}
 	txt.caches_meta.__mode="v"
 
+	txt.permacache_ratio=128
 	txt.clear_caches=function()
+		txt.permacaches={}
 		txt.caches={}
 		setmetatable(txt.caches, txt.caches_meta)
+		txt.permastart={} -- recalculate start indexs of each perma string
+		local start=0
+		for i,v in ipairs(txt.strings or {} ) do
+			if (i-1)%txt.permacache_ratio == 0 then -- a perma string so remember start
+				txt.permastart[1+math.floor((i-1)/txt.permacache_ratio)]=start
+			end
+			start=start+#v -- next index
+		end
 	end
 	txt.clear_caches()
 	
@@ -104,7 +117,8 @@ M.construct=function(txt)
 			txt.hx=0
 			txt.hy=#txt.strings
 			for i,v in ipairs(txt.strings) do
-				local lv=wutf.length(v)
+				local cache=txt.get_cache(i)
+				local lv=#cache.codes -- wutf.length(v)
 				if lv > txt.hx then txt.hx=lv end
 			end
 			
@@ -120,7 +134,7 @@ M.construct=function(txt)
 
 
 -- mostly this deals with the visible width of a character, eg tab,
--- compared to its byte width, but it is also necesary for utf8 encoding
+-- compared to its byte width, but it is also necessary for utf8 encoding
 -- or japanese double glyphs. Its a complicated mapping so it is precalculated
 
 	txt.build_cache=function(idx)
@@ -131,6 +145,16 @@ M.construct=function(txt)
 		local cache={}
 		
 		cache.string=s
+		
+		local perma=math.floor((idx-1)/txt.permacache_ratio)
+		cache.start=txt.permastart[1+perma] -- get start from sparse array
+		perma=1+(perma*txt.permacache_ratio) -- find start for this chunk
+		while perma<idx do -- find precise start
+			cache.start=cache.start+#txt.strings[perma]
+			perma=perma+1
+		end
+		
+
 		
 		cache.codes={}
 
@@ -224,6 +248,7 @@ M.construct=function(txt)
 
 	end
 	
+
 	txt.markget=function()
 		return txt.fx,txt.fy,txt.tx,txt.ty
 	end
@@ -281,59 +306,120 @@ M.construct=function(txt)
 
 	end
 
-	-- cut out the text in the marked area (if marked) and set the cursor to this location
-	txt.cut=function()
+-- get fx,fy,tx,ty range given a start and a glyph offset ( probably +1 or -1 ) 
+	txt.rangeget=function(fx,fy,length)
+
+		local tx=fx
+		local ty=fy
+
+		if length<0 then -- backward search
 		
-		if txt.fx and txt.fy then
+			local cache=txt.get_cache(fy)
+			
+			while length<0 do
+				
+				if fx <= -length then -- full line
+
+					length=length+fx
+					fy=fy-1
+					cache=txt.get_cache(fy)
+					fx=#cache.codes -- end of line
+				
+				else -- partial line
+				
+					fx=fx+length
+					length=0
+				end
+				
+			end
+
+		elseif length>0 then -- forward search
+
+			local cache=txt.get_cache(ty)
+			
+			while length>0 do
+				
+				if ( #cache.codes - tx ) <= length then -- full line
+
+					length=length-( #cache.codes - tx )
+					ty=ty+1
+					cache=txt.get_cache(ty)
+					tx=0 -- start of line
+				
+				else -- partial line
+				
+					tx=tx+length
+					length=0
+				end
+				
+			end
+
+		end
+
+		return fx,fy,tx,ty
+	end
+
+
+	-- cut out the text in the marked area (if marked) and set the cursor to this location
+	txt.cut=function(fx,fy,tx,ty)
+	
+		local setcursor=not fx
+	
+		fx=fx or txt.fx
+		fy=fy or txt.fy
+		tx=tx or txt.tx
+		ty=ty or txt.ty
+		
+		if fx and fy then
 		
 			local s=""
 
-			if txt.tx and txt.ty then
+			if tx and ty then
 			
-				for idx=txt.fy,txt.ty do
+				for idx=fy,ty do
 				
-					if idx==txt.fy then -- first line
+					if idx==fy then -- first line
 					
-						if txt.ty==txt.fy then -- single line
+						if ty==fy then -- single line
 
---							local sa=txt.get_string(txt.fy) or ""
-							local sb=txt.get_string_sub(txt.fy,1,txt.fx-1)
-							local sc=txt.get_string_sub(txt.fy,txt.fx,txt.tx-1)
-							local sd=txt.get_string_sub(txt.fy,txt.tx)
+--							local sa=txt.get_string(fy) or ""
+							local sb=txt.get_string_sub(fy,1,fx-1)
+							local sc=txt.get_string_sub(fy,fx,tx-1)
+							local sd=txt.get_string_sub(fy,tx)
 							
 							s=s..sc
-							txt.set_string(txt.fy,sb..sd)
+							txt.set_string(fy,sb..sd)
 
 						else -- multiple lines
 
---							local sa=txt.get_string(txt.fy) or ""
-							local sb=txt.get_string_sub(txt.fy,1,txt.fx-1)
-							local sc=txt.get_string_sub(txt.fy,txt.fx)
+--							local sa=txt.get_string(fy) or ""
+							local sb=txt.get_string_sub(fy,1,fx-1)
+							local sc=txt.get_string_sub(fy,fx)
 							
 							s=s..sc
-							txt.set_string(txt.fy,sb)
+							txt.set_string(fy,sb)
 
 						end
 
-					elseif idx==txt.ty then -- last line
+					elseif idx==ty then -- last line
 
---						local sa=txt.get_string(txt.fy+1) or ""
-						local sb=txt.get_string_sub(txt.fy+1,1,txt.tx-1)
-						local sc=txt.get_string_sub(txt.fy+1,txt.tx)
+--						local sa=txt.get_string(fy+1) or ""
+						local sb=txt.get_string_sub(fy+1,1,tx-1)
+						local sc=txt.get_string_sub(fy+1,tx)
 						
 						s=s..sb
-						txt.set_string(txt.fy+1,sc)
+						txt.set_string(fy+1,sc)
 
-						local sa=txt.get_string(txt.fy) or ""
-						local sb=txt.get_string(txt.fy+1) or ""
-						txt.set_string(txt.fy,sa..sb)
-						txt.del_string(txt.fy+1)
+						local sa=txt.get_string(fy) or ""
+						local sb=txt.get_string(fy+1) or ""
+						txt.set_string(fy,sa..sb)
+						txt.del_string(fy+1)
 
 					else -- middle line
 					
-						local sa=txt.get_string(txt.fy+1) or ""
+						local sa=txt.get_string(fy+1) or ""
 						s=s..sa
-						txt.del_string(txt.fy+1)
+						txt.del_string(fy+1)
 
 					end
 
@@ -341,12 +427,16 @@ M.construct=function(txt)
 			
 			end
 			
-			txt.cx=txt.fx
-			txt.cy=txt.fy
-			txt.tx=txt.fx
-			txt.ty=txt.fy
-			
-			txt.mark()
+			if setcursor then
+
+				txt.cx=txt.fx
+				txt.cy=txt.fy
+				txt.tx=txt.fx
+				txt.ty=txt.fy
+				
+				txt.mark()
+
+			end
 			
 			if s=="" then s=nil end
 
@@ -356,35 +446,40 @@ M.construct=function(txt)
 	end
 
 	-- copy text from the marked area (if marked) or return nil
-	txt.copy=function()
+	txt.copy=function(fx,fy,tx,ty)
 		
-		if txt.fx and txt.fy then
+		fx=fx or txt.fx
+		fy=fy or txt.fy
+		tx=tx or txt.tx
+		ty=ty or txt.ty
+
+		if fx and fy then
 		
 			local s=""
 
-			if txt.tx and txt.ty then
+			if tx and ty then
 			
-				for idx=txt.fy,txt.ty do
+				for idx=fy,ty do
 				
-					if idx==txt.fy then -- first line
+					if idx==fy then -- first line
 					
-						if txt.ty==txt.fy then -- single line
+						if ty==fy then -- single line
 
-							s=s..txt.get_string_sub(txt.fy,txt.fx,txt.tx-1)
+							s=s..txt.get_string_sub(idx,fx,tx-1)
 
 						else -- multiple lines
 
-							s=s..txt.get_string_sub(txt.fy,txt.fx)
+							s=s..txt.get_string_sub(idx,fx)
 
 						end
 
-					elseif idx==txt.ty then -- last line
+					elseif idx==ty then -- last line
 
-						s=s..txt.get_string_sub(txt.fy+1,1,txt.tx-1)
+						s=s..txt.get_string_sub(idx,1,tx-1)
 
 					else -- middle line
 					
-						s=s..txt.get_string(txt.fy+1) or ""
+						s=s..txt.get_string(idx) or ""
 
 					end
 
@@ -399,6 +494,13 @@ M.construct=function(txt)
 
 	end
 		
+	-- get length of selected text (we can make this smarter later)
+	txt.copy_length=function(fx,fy,tx,ty)
+		local s=txt.copy() -- expensive hax, we should not bother building a string
+		if s then return #s end
+		return 0
+	end
+
 	txt.get_hx=function(y)
 		y=y or txt.cy
 --		local s=txt.get_string(y)

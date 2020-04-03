@@ -118,33 +118,62 @@ M.construct=function(undo,txt)
 	undo.goto=function(index) -- goto a specific index
 	end
 	
--- these functions add to the undo stack and call the txt.* functions
+-- remember to insert or delete text at a given (byte) location
+	undo.remember=function( insert_string , delete_count , line_idx , char_idx )
+		if not line_idx then line_idx=txt.cy end
+		local cache=txt.get_cache(line_idx)
+		if not char_idx then char_idx=txt.cx end
+		if not delete_count then delete_count=0 end
+		if not insert_string then insert_string="" end
 
-	undo.cut=function()
-		return txt.cut()
+		local idx=cache.cb[char_idx] or 0 -- convert to byte offset
+		
+		local fx,fy,tx,ty=txt.rangeget(char_idx,line_idx,delete_count)
+		
+		local delete_string=txt.copy(fx,fy,tx,ty) or ""
+		local idx=txt.get_cache(fy).start+fx-1
+
+		print(line_idx,char_idx,delete_count,"D",idx,fy,fx,(delete_string:gsub('%c','')),(insert_string:gsub('%c','')))
+
 	end
+
+
+-- these functions add to the undo stack and call the txt.* functions
 
 	undo.copy=function()
 		return txt.copy()
 	end
 
+	undo.cut=function()
+		local s=txt.copy()
+		if s and #s > 0 then
+			undo.remember("",#s,txt.fy,txt.fx)
+		end
+		return txt.cut()
+	end
+
 	undo.delete=function()
+		undo.remember("",1)
 		return txt.delete()
 	end
 	
 	undo.backspace=function()
+		undo.remember("",-1)
 		return txt.backspace()
 	end
 	
 	undo.insert=function(s)
+		undo.remember(s)
 		return txt.insert(s)
 	end
 	
 	undo.insert_newline=function()
+		undo.remember("\n")
 		return txt.insert_newline()
 	end
 
 	undo.insert_char=function(s)
+		undo.remember(s)
 		return txt.insert_char(s)
 	end
 
