@@ -105,8 +105,55 @@ M.construct=function(txt)
 			end
 			start=start+#v -- next index
 		end
+		txt.permastart[#txt.permastart+1]=start -- end of text
 	end
 	txt.clear_caches()
+--[[
+
+Find the line number of the given byte offset into the text.
+
+]]
+	txt.find_line=function(ptr)
+
+		local mh=#txt.permastart
+		local c=math.ceil(mh/2)
+		local y=1
+		
+		repeat
+
+			local a=txt.permastart[y]
+			local b=txt.permastart[y+1] or a
+			
+			if not a or not b then y=nil break end -- failed
+			
+			if     a>ptr then y=y-c
+			elseif b<ptr then y=y+c end
+			
+			if y<1    then y=1    end -- clamp
+			if y>mh-1 then y=mh-1 end
+			
+			c=math.ceil(c/2) -- half the jump
+			
+		until a<=ptr and b>ptr -- in range
+		
+		if not y then return end -- failed to find line
+		
+		local a=txt.permastart[y]
+
+		y=1+(y-1)*txt.permacache_ratio -- y back into full range
+
+		local b=a+#txt.strings[y]
+
+		while b<ptr do -- step forward
+			y=y+1
+			local s=txt.strings[y]
+			if not s then break end -- fail
+			a=b
+			b=a+#s
+		end
+
+		if a<=ptr and b>ptr then return y,1+ptr-a end -- found line
+	end
 	
 	txt.set_text=function(text)
 
@@ -337,7 +384,7 @@ M.construct=function(txt)
 
 			local cache=txt.get_cache(ty)
 			
-			while length>0 do
+			while length>0 and cache do
 				
 				if ( #cache.codes - tx ) <= length then -- full line
 

@@ -126,14 +126,18 @@ M.construct=function(undo,txt)
 		if not delete_count then delete_count=0 end
 		if not insert_string then insert_string="" end
 
-		local idx=cache.cb[char_idx] or 0 -- convert to byte offset
+		local ptr=cache.cb[char_idx] or 0 -- convert to byte offset
 		
 		local fx,fy,tx,ty=txt.rangeget(char_idx,line_idx,delete_count)
 		
 		local delete_string=txt.copy(fx,fy,tx,ty) or ""
-		local idx=txt.get_cache(fy).start+fx-1
+		ptr=txt.get_cache(fy).start+ptr-1
+		
+		local py,px=txt.find_line(ptr)
 
-		print(line_idx,char_idx,delete_count,"D",idx,fy,fx,(delete_string:gsub('%c','')),(insert_string:gsub('%c','')))
+--		print(line_idx,char_idx,delete_count,"ptr",ptr,py,px,"from",fy,fx,(delete_string:gsub('%c','')),(insert_string:gsub('%c','')))
+
+		print(ptr,(delete_string:gsub('%c','')),(insert_string:gsub('%c','')))
 
 	end
 
