@@ -83,9 +83,13 @@ M.construct=function(undo,txt)
 	undo.txt=txt
 	txt.undo=undo
 
-	undo.list={}
-	undo.length=0
-	undo.memory=0
+	undo.list_reset=function()
+		undo.list={}
+		undo.index=0
+		undo.length=0
+		undo.memory=0
+	end
+	undo.list_reset()
 	
 	undo.list_get=function(index)
 		if not index then return end
@@ -103,16 +107,64 @@ M.construct=function(undo,txt)
 		end
 	end
 
+	undo.list_push=function(it)
+		undo.index=undo.index+1
+		undo.list_set(undo.index,it)
+		undo.list_trim(undo.index)
+	end
+
+	undo.list_trim=function(index)
+		if index < undo.length then -- need to trim some fat
+			for i=undo.length,index+1,-1 do -- remove these
+				local it=undo.list[i]
+				undo.memory=undo.memory-#it -- keep running total
+				undo.list[i]=nil
+			end
+			undo.length=index
+		end
+	end
 
 -- ru 1==redo , 2==undo	
 	undo.apply=function(index,ru)
 		local it=undo.list_get(index)
+		
+		if     ru==1 then -- redo
+		
+			local fy,fx=txt.ptr_to_location(it[1])
+			local ty,tx=txt.ptr_to_location(it[1]+#it[2])
+			
+			local sa=txt.cut(fx,fy,tx,ty)
+			txt.mark(fx,fy,fx,fy)
+			txt.insert(it[3])
+
+--			print("redo",sa and #sa or 0,#it[2],#it[3])
+
+		elseif ru==2 then -- undo
+
+			local fy,fx=txt.ptr_to_location(it[1])
+			local ty,tx=txt.ptr_to_location(it[1]+#it[3])
+			
+			local sa=txt.cut(fx,fy,tx,ty)
+			txt.mark(fx,fy,fx,fy)
+			txt.insert(it[2])
+			
+--			print("undo",sa and #sa or 0,#it[2],#it[3])
+
+		end
 	end
 
 	undo.redo=function() -- go forward a step
+		if undo.index<undo.length then
+			undo.index=undo.index+1
+			undo.apply(undo.index,1)
+		end
 	end
 
 	undo.undo=function() -- go back a step
+		if undo.index>0 then
+			undo.apply(undo.index,2)
+			undo.index=undo.index-1
+		end
 	end
 
 	undo.goto=function(index) -- goto a specific index
@@ -133,11 +185,13 @@ M.construct=function(undo,txt)
 		local delete_string=txt.copy(fx,fy,tx,ty) or ""
 		ptr=txt.get_cache(fy).start+ptr-1
 		
-		local py,px=txt.find_line(ptr)
+		local py,px=txt.ptr_to_location(ptr)
 
 --		print(line_idx,char_idx,delete_count,"ptr",ptr,py,px,"from",fy,fx,(delete_string:gsub('%c','')),(insert_string:gsub('%c','')))
 
-		print(ptr,(delete_string:gsub('%c','')),(insert_string:gsub('%c','')))
+--		print(ptr,(delete_string:gsub('%c','')),(insert_string:gsub('%c','')))
+		
+		undo.list_push({ptr,delete_string,insert_string})
 
 	end
 

@@ -457,7 +457,11 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			elseif key=="z" then	-- undo
 
+					txt.undo.undo()
+
 			elseif key=="y" then	-- redo
+
+					txt.undo.redo()
 
 			end
 		

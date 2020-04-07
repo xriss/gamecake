@@ -110,10 +110,10 @@ M.construct=function(txt)
 	txt.clear_caches()
 --[[
 
-Find the line number of the given byte offset into the text.
+Find the line number and column number of the given byte offset into the text.
 
 ]]
-	txt.find_line=function(ptr)
+	txt.ptr_to_location=function(ptr)
 
 		local mh=#txt.permastart
 		local c=math.ceil(mh/2)
@@ -144,7 +144,7 @@ Find the line number of the given byte offset into the text.
 
 		local b=a+#txt.strings[y]
 
-		while b<ptr do -- step forward
+		while b<=ptr do -- step forward
 			y=y+1
 			local s=txt.strings[y]
 			if not s then break end -- fail
@@ -341,7 +341,7 @@ Find the line number of the given byte offset into the text.
 		
 		txt.cx,txt.cy=txt.tx,txt.ty
 		
-		local flip=false
+		local flip=falseptr_to_location
 		if txt.fy==txt.ty and txt.fx>txt.tx then flip=true
 		elseif                txt.fy>txt.ty then flip=true end
 		if flip then
