@@ -191,6 +191,44 @@ M.construct=function(undo,txt)
 
 --		print(ptr,(delete_string:gsub('%c','')),(insert_string:gsub('%c','')))
 		
+		if delete_string == "" then -- possible append
+			local it = undo.list_get(undo.index)
+			if it and ( type(it[1]) == "number" ) then -- an insert packet
+				if ( it[1] + #it[3] ) == ptr then -- and we can append to it
+				
+					-- is it a good idea to append?
+					local good_idea=true
+					
+					if it[3]:find("\n") then -- do not join line
+						good_idea=false
+					end
+					if insert_string:find("\n") then -- do not join lines
+						good_idea=false
+					end
+					if it[3]:find("%s") then -- if old string contains space then only append space
+						if insert_string:find("[^%s]") then
+							good_idea=false
+						end
+					end
+					if it[3]:find("%w") then -- if old string contains alphanumeric then only append alphanumeric
+						if insert_string:find("[^%w]") then
+							good_idea=false
+						end
+					end
+					if it[3]:find("%p") then -- if old string contains punctuation then only append punctuation
+						if insert_string:find("[^%p]") then
+							good_idea=false
+						end
+					end
+					if good_idea then
+						it[3]=it[3]..insert_string
+						undo.list_set(undo.index,it)
+						return
+					end
+				end
+			end
+		end
+
 		undo.list_push({ptr,delete_string,insert_string})
 
 	end
