@@ -37,6 +37,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local wstring=require("wetgenes.string")
 
 local wtsv = require("wetgenes.tsv")
+local wutf=require("wetgenes.txt.utf")
 
 local cmsgpack=require("cmsgpack")
 
@@ -243,7 +244,7 @@ M.construct=function(undo,txt)
 	undo.cut=function()
 		local s=txt.copy()
 		if s and #s > 0 then
-			undo.remember("",#s,txt.fy,txt.fx)
+			undo.remember("",wutf.length(s),txt.fy,txt.fx)
 		end
 		return txt.cut()
 	end

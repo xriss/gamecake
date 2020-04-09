@@ -152,7 +152,11 @@ Find the line number and column number of the given byte offset into the text.
 			b=a+#s
 		end
 
-		if a<=ptr and b>ptr then return y,1+ptr-a end -- found line
+		if a<=ptr and b>ptr then
+			local cache=txt.get_cache(y)
+			local x=cache.bc[1+ptr-a]
+			return y,x	-- found line
+		end
 	end
 	
 	txt.set_text=function(text)
@@ -341,7 +345,7 @@ Find the line number and column number of the given byte offset into the text.
 		
 		txt.cx,txt.cy=txt.tx,txt.ty
 		
-		local flip=falseptr_to_location
+		local flip=false
 		if txt.fy==txt.ty and txt.fx>txt.tx then flip=true
 		elseif                txt.fy>txt.ty then flip=true end
 		if flip then
