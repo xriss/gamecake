@@ -194,6 +194,7 @@ wtexteditor.texteditor_refresh=function(widget)
 				local i=cache.xc[x]
 				if not i then break end -- max width
 				local code=cache.codes[i]
+				local toke=cache.tokens and string.sub(cache.tokens,i,i)
 
 				code=wutf.map_unicode_to_latin0[code] or code
 				if code<32 then code=32 end -- control codes are space
@@ -203,6 +204,15 @@ wtexteditor.texteditor_refresh=function(widget)
 				ps[pl+2]=0
 				ps[pl+3]=0x1d
 				ps[pl+4]=0x1a
+				
+				if     toke=="k" then	ps[pl+3]=0x14	-- keyword
+--				elseif toke=="p" then	ps[pl+3]=0x05	-- punctuation
+				elseif toke=="s" then	ps[pl+3]=0x03	-- string
+				elseif toke=="c" then	ps[pl+3]=0x1c	-- comment
+				elseif toke=="g" then	ps[pl+3]=0x15	-- global
+				end
+
+				
 				if txt.fx and txt.fy and txt.tx and txt.ty then
 					local flip=false
 					if     y==txt.fy and y==txt.ty then if i>=txt.fx and i< txt.tx then flip=true end -- single line

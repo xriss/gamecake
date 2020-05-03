@@ -382,6 +382,7 @@ Find the line number and column number of the given byte offset into the text.
 					length=length+fx
 					fy=fy-1
 					cache=txt.get_cache(fy)
+					if not cache then return fx,fy+1,tx,ty end -- start of file
 					fx=#cache.codes -- end of line
 				
 				else -- partial line
@@ -403,6 +404,7 @@ Find the line number and column number of the given byte offset into the text.
 					length=length-( #cache.codes - tx )
 					ty=ty+1
 					cache=txt.get_cache(ty)
+					if not cache then return fx,fy,tx,ty-1 end -- end of file
 					tx=0 -- start of line
 				
 				else -- partial line
