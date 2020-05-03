@@ -9,6 +9,9 @@ local wutf=require("wetgenes.txt.utf")
 
 local wtxtundo=require("wetgenes.txt.undo")
 local wtxtdiff=require("wetgenes.txt.diff")
+local wtxtlex =require("wetgenes.txt.lex")
+
+local wpath=require("wetgenes.path")
 
 -- manage the text data part of a text editor
 
@@ -20,7 +23,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.construct=function(txt)
 	txt = txt or {}
 	
-	txt.tabsize=8
+	txt.lexer="text"
+	txt.tabsize=4
 
 	txt.hooks={} -- user call backs	
 	local hook=function(name) local f=txt.hooks[name] if f then return f(txt) end end
@@ -159,7 +163,7 @@ Find the line number and column number of the given byte offset into the text.
 		end
 	end
 	
-	txt.set_text=function(text)
+	txt.set_text=function(text,filename)
 
 		if text then -- set new text
 			txt.strings=wstring.split_lines(text)
@@ -171,6 +175,10 @@ Find the line number and column number of the given byte offset into the text.
 				local cache=txt.get_cache(i)
 				local lv=#cache.codes -- wutf.length(v)
 				if lv > txt.hx then txt.hx=lv end
+			end
+			
+			if filename then -- set new filename ( can help us guess the format )
+				txt.filename=filename
 			end
 			
 			hook("changed")
@@ -770,6 +778,73 @@ Find the line number and column number of the given byte offset into the text.
 		hook("changed")
 	end
 	
+	txt.set_lexer=function(lexer)
+
+		if lexer then -- force
+
+			txt.lexer=lexer
+
+		else -- guess
+		
+			txt.lexer="text" -- generic
+			
+			if txt.filename then
+				local p=wpath.parse(txt.filename)
+				
+				if p.ext then
+					txt.lexer=string.lower( string.sub(p.ext,2) )-- skip the . at the start
+				end
+			end
+
+		end
+		
+		txt.lex=wtxtlex.list[txt.lexer] -- the lex to use (if any)
+		
+		txt.clear_caches()
+		
+	end
+
+	txt.get_cache_lex=function(idx)
+	
+		if not txt.lex then return txt.get_cache(idx) end -- no lex available
+
+		local cache=txt.get_cache(idx)
+		if not cache then return cache end -- no cache
+
+		if cache.lex then -- already done
+			return cache
+		end
+	
+--print("newlex",idx)
+
+		local state
+		
+		if idx>1 then -- get last
+			local last_cache=txt.get_cache(idx-1)
+			if not last_cache.lex then -- build
+				for i=1,idx-1 do -- dumb auto loop from start, should be moved
+--print("lex",i)
+					txt.get_cache_lex(i)
+				end
+			end
+			if last_cache.lex then
+				state=wtxtlex.load(last_cache.lex)
+			end
+		end
+		
+		if not state then
+			state=txt.lex.create()
+		end
+
+--print("tokens",cache.string)
+		local tokens=txt.lex.parse(state,cache.string,{})
+		cache.lex=wtxtlex.save(state)
+		cache.tokens=table.concat(tokens)
+--print("tokens",cache.tokens)
+
+		return cache
+	end
+
 	wtxtundo.construct({},txt)
 
 	return txt

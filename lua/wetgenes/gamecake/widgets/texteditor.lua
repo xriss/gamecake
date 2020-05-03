@@ -163,7 +163,7 @@ wtexteditor.texteditor_refresh=function(widget)
 		local ps={}
 		local pl=0
 
-		local cache=widget.txt.get_cache(y)
+		local cache=widget.txt.get_cache_lex(y)
 		if cache then
 
 			local vn=tostring(y)

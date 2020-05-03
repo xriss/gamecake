@@ -21,6 +21,18 @@ M.token_keyword=keyval{"and","break","do","else","elseif","end","false","for","f
 M.token_symbol=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",":",",",".","..","...","(",")","[","]","{","}"}
 M.token_white=keyval{" ","\t","\n","\r"}
 
+-- single char state map for output array
+M.MAP={
+		["white"]="w",
+		["keyword"]="k",
+		["punctuation"]="p",
+		["string"]="s",
+		["comment"]="c",
+		["none"]="n",
+		["symbol"]="y",
+	}
+local MAP=M.MAP
+
 --[[
 
 generate a starting valid state that can be given to parse
@@ -30,7 +42,7 @@ M.create=function(state)
 	state=state or {}
 
 	state.terminator=state.terminator or {} -- the string we are looking for to terminate the current state (if it is that sort of state)
-	state.stack=state.stack or {"white"} -- start from a whitespace state
+	state.stack=state.stack or {MAP.white} -- start from a whitespace state
 
 	return state
 end
@@ -78,80 +90,80 @@ M.parse=function(state,input,output)
 
 		local check_keyword=function()
 			if M.token_keyword[token] then
-				poke(state.stack,"keyword")
+				poke(state.stack,MAP.keyword)
 				return true
 			end
 		end
 		
 		local check_punctuation=function()
 			if M.token_symbol[token] then
-				poke(state.stack,"symbol")
+				poke(state.stack,MAP.symbol)
 				return true
 			end
 		end
 		
 		local check_white=function()
 			if M.token_white[token] then
-				poke(state.stack,"white")
+				poke(state.stack,MAP.white)
 				return true
 			end
 		end
 		
 		local check_last=function()
 			if token~="" then -- if empty string then no change
-				poke(state.stack,"none")
+				poke(state.stack,MAP.none)
 			end
 			return true -- but always return true
 		end
 		
 		local check_string=function()
-			if last=="string" then
+			if last==MAP.string then
 				if token==peek(state.terminator) then 
 					pull(state.terminator)
-					push_output("string")
-					poke(state.stack,"punctuation")
+					push_output(MAP.string)
+					poke(state.stack,MAP.punctuation)
 					return true
 				end
 				return true -- we are trapped in a string
 			elseif token=="\"" then 
 				push(state.terminator,"\"")
-				poke(state.stack,"string")
+				poke(state.stack,MAP.string)
 				return true
 			elseif token=="'" then 
 				push(state.terminator,"'")
-				poke(state.stack,"string")
+				poke(state.stack,MAP.string)
 				return true
 			elseif token=="[[" then 
 				push(state.terminator,"]]")
-				poke(state.stack,"string")
+				poke(state.stack,MAP.string)
 				return true
 			else -- check for [==[ style strings
 			end
 		end
 
 		local check_comment=function()
-			if last=="comment" then
+			if last==MAP.comment then
 				if token==peek(state.terminator) then 
 					pull(state.terminator)
-					push_output("comment")
-					poke(state.stack,"white")
+					push_output(MAP.comment)
+					poke(state.stack,MAP.white)
 					return true
 				end
 				return true -- we are trapped in a string
 			elseif token=="--" then 
 				push(state.terminator,"\n")
-				poke(state.stack,"comment")
+				poke(state.stack,MAP.comment)
 				return true
 			elseif token=="--[[" then 
 				push(state.terminator,"]]")
-				poke(state.stack,"comment")
+				poke(state.stack,MAP.comment)
 				return true
 			else -- check for --[==[ style comments
 			end
 		end
 
 		local check_list={
-			["white"]={
+			[MAP.white]={
 				check_comment,
 				check_string,
 				check_white,
@@ -159,14 +171,14 @@ M.parse=function(state,input,output)
 				check_punctuation,
 				check_last,
 			},
-			["keyword"]={
+			[MAP.keyword]={
 				check_comment,
 				check_string,
 				check_white,
 				check_punctuation,
 				check_last,
 			},
-			["punctuation"]={
+			[MAP.punctuation]={
 				check_comment,
 				check_string,
 				check_white,
@@ -174,13 +186,13 @@ M.parse=function(state,input,output)
 				check_punctuation,
 				check_last,
 			},
-			["string"]={
+			[MAP.string]={
 				check_string,
 			},
-			["comment"]={
+			[MAP.comment]={
 				check_comment,
 			},
-			["none"]={
+			[MAP.none]={
 				check_comment,
 				check_white,
 				check_punctuation,
