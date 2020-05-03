@@ -10,6 +10,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
+local wtxtlex=require("wetgenes.txt.lex")
+
+
 local keyval=function(t) for i=1,#t do t[ t[i] ]=i end return t end
 
 
@@ -289,13 +292,16 @@ M.parse=function(state,input,output)
 	local istoken=function(str,b)
 		for i=M.token_max,1,-1 do -- longest string has priority
 			local s=string.sub(str,b,b+i-1)
-			if M.token_all[s] then return s end -- found a match
+			if M.token_all[s] then -- found a match
+				local sa=string.sub(str,b+i,b+i) -- byte after
+				return s,sa
+			end
 		end
 	end
 
 	local idx=0
 
-	local pump=function(token)
+	local pump=function(token,after)
 
 		local last=peek(state.stack)
 
@@ -307,15 +313,19 @@ M.parse=function(state,input,output)
 
 		local check_keyword=function()
 			if M.token_keyword[token] then
-				poke(state.stack,MAP.keyword)
-				return true
+				if not wtxtlex.token_alphanumeric[after] then
+					poke(state.stack,MAP.keyword)
+					return true
+				end
 			end
 		end
 		
 		local check_global=function()
 			if M.token_global[token] then
-				poke(state.stack,MAP.global)
-				return true
+				if not wtxtlex.token_alphanumeric[after] then
+					poke(state.stack,MAP.global)
+					return true
+				end
 			end
 		end
 
@@ -444,12 +454,12 @@ M.parse=function(state,input,output)
 	local i=1
 	local l=#input
 	while i<=l do
-		local s=istoken(input,i)
+		local s,sa=istoken(input,i)
 		if s then
 			if f<i then
 				pump(string.sub(input,f,i-1)) -- unmatched segment
 			end
-			pump(s) -- matched segment
+			pump(s,sa) -- matched segment
 			i=i+#s
 			f=i
 		else
@@ -457,7 +467,7 @@ M.parse=function(state,input,output)
 		end
 	end
 	if f<l then
-		pump(string.sub(input,f,l)) -- unmatched segment
+		pump(string.sub(input,f,l),string.sub(input,l+1,l+1)) -- unmatched segment
 	end
 
 	return output
