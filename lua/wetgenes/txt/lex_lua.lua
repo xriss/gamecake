@@ -16,7 +16,12 @@ local wtxtlex=require("wetgenes.txt.lex")
 local keyval=function(t) for i=1,#t do t[ t[i] ]=i end return t end
 
 
-M.token_symbol=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",":",",",".","..","...","(",")","[","]","{","}"}
+M.token_punctuation=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",",","..","...","(",")","[","]","{","}"}
+
+-- the . and : is usually considered part of a function name rather than as a punctuation break
+M.token_name=keyval{".",":"}
+
+M.token_number=keyval{"0","1","2","3","4","5","6","7","8","9","."}
 
 M.token_white=keyval{" ","\t","\n","\r"}
 
@@ -255,7 +260,9 @@ M.token_all={}
 M.token_max=0
 for _,t in ipairs({
 		M.token_keyword,
-		M.token_symbol,
+		M.token_punctuation,
+		M.token_name,
+		M.token_number,
 		M.token_white,
 		M.token_comment,
 		M.token_string,
@@ -268,6 +275,7 @@ end
 M.MAP={
 		["white"]="w",
 		["keyword"]="k",
+		["number"]="0",
 		["punctuation"]="p",
 		["string"]="s",
 		["comment"]="c",
@@ -353,12 +361,19 @@ M.parse=function(state,input,output)
 		end
 
 		local check_punctuation=function()
-			if M.token_symbol[token] then
+			if M.token_punctuation[token] then
 				poke(state.stack,MAP.punctuation)
 				return true
 			end
 		end
 		
+		local check_number=function()
+			if M.token_number[token] then
+				poke(state.stack,MAP.number)
+				return true
+			end
+		end
+
 		local check_white=function()
 			if M.token_white[token] then
 				poke(state.stack,MAP.white)
@@ -421,6 +436,7 @@ M.parse=function(state,input,output)
 
 		local check_list={
 			[MAP.white]={
+				check_number,
 				check_global,
 				check_comment,
 				check_string,
@@ -437,6 +453,7 @@ M.parse=function(state,input,output)
 				check_last,
 			},
 			[MAP.punctuation]={
+				check_number,
 				check_global,
 				check_comment,
 				check_string,
@@ -446,6 +463,13 @@ M.parse=function(state,input,output)
 				check_last,
 			},
 			[MAP.global]={
+				check_comment,
+				check_white,
+				check_punctuation,
+				check_last,
+			},
+			[MAP.number]={
+				check_number,
 				check_comment,
 				check_white,
 				check_punctuation,

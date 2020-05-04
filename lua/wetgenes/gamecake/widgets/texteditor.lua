@@ -169,10 +169,10 @@ wtexteditor.texteditor_refresh=function(widget)
 			local vn=tostring(y)
 			vn=string.rep(" ",widget.gutter-3-#vn)..vn.." "
 			for i=1,#vn do
-				if pl>=256*3 then break end -- max width
+				if pl>=512*3 then break end -- max width
 				ps[pl+1]=string.byte(vn,i,i)
 				ps[pl+2]=0
-				ps[pl+3]=0x1d
+				ps[pl+3]=0x1a
 				ps[pl+4]=0x1b
 				pl=pl+4
 			end
@@ -189,8 +189,8 @@ wtexteditor.texteditor_refresh=function(widget)
 			ps[pl+4]=0x1a
 			pl=pl+4
 
-			for x=cx,cx+256 do
-				if pl>=256*3 then break end -- max width
+			for x=cx,cx+512 do
+				if pl>=512*3 then break end -- max width
 				local i=cache.xc[x]
 				if not i then break end -- max width
 				local code=cache.codes[i]
@@ -206,10 +206,11 @@ wtexteditor.texteditor_refresh=function(widget)
 				ps[pl+4]=0x1a
 				
 				if     toke=="k" then	ps[pl+3]=0x14	-- keyword
---				elseif toke=="p" then	ps[pl+3]=0x05	-- punctuation
-				elseif toke=="s" then	ps[pl+3]=0x03	-- string
-				elseif toke=="c" then	ps[pl+3]=0x1c	-- comment
 				elseif toke=="g" then	ps[pl+3]=0x15	-- global
+				elseif toke=="c" then	ps[pl+3]=0x1c	-- comment
+				elseif toke=="s" then	ps[pl+3]=0x03	-- string
+				elseif toke=="0" then	ps[pl+3]=0x06	-- number
+--				elseif toke=="p" then	ps[pl+3]=0x05	-- punctuation
 				end
 
 				
