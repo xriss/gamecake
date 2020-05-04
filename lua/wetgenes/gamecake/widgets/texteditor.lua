@@ -56,8 +56,7 @@ function wtexteditor.update(texteditor)
 		texteditor.mark_area=nil
 		
 		texteditor:scroll_to_view()
-		texteditor:refresh()
-		texteditor:set_dirty()
+		texteditor.txt_dirty=true
 
 	end
 
@@ -308,8 +307,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		txt.mark(unpack(texteditor.mark_area))
 
 		texteditor:scroll_to_view()
-		texteditor:refresh()
-		texteditor:set_dirty()
+		texteditor.txt_dirty=true
 
 	elseif (act and act>1) and texteditor.master.over==pan and keyname=="left" then -- double click
 	
@@ -323,8 +321,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		texteditor.mark_area_auto={txt.markget()}
 
 		texteditor:scroll_to_view()
-		texteditor:refresh()
-		texteditor:set_dirty()
+		texteditor.txt_dirty=true
 
 	elseif act==0 and texteditor.key_mouse then -- drag, but only while over widget
 
@@ -349,8 +346,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 			end
 
 			texteditor:scroll_to_view()
-			texteditor:refresh()
-			texteditor:set_dirty()
+			texteditor.txt_dirty=true
 		end
 	
 	end
