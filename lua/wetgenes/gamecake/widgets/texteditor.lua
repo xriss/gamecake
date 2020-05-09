@@ -156,7 +156,7 @@ wtexteditor.texteditor_refresh=function(widget)
 	widget.cx=cx -- remember the scroll positions in characters
 	widget.cy=cy
 
-	pan.background_tile=0x1a1a0000 -- default tile
+	pan.background_tile=0x00010000 -- default tile, remember it is abgr so backwards
 
 	for y=cy+1,cy+256 do
 		local ps={}
@@ -171,21 +171,21 @@ wtexteditor.texteditor_refresh=function(widget)
 				if pl>=512*3 then break end -- max width
 				ps[pl+1]=string.byte(vn,i,i)
 				ps[pl+2]=0
-				ps[pl+3]=0x1a
-				ps[pl+4]=0x1b
+				ps[pl+3]=3
+				ps[pl+4]=2
 				pl=pl+4
 			end
 			
 			ps[pl+1]=32
 			ps[pl+2]=0
-			ps[pl+3]=0x1d
-			ps[pl+4]=0x1a
+			ps[pl+3]=1
+			ps[pl+4]=0
 			pl=pl+4
 			
 			ps[pl+1]=32
 			ps[pl+2]=0
-			ps[pl+3]=0x1d
-			ps[pl+4]=0x1a
+			ps[pl+3]=1
+			ps[pl+4]=0
 			pl=pl+4
 
 			for x=cx,cx+512 do
@@ -201,14 +201,14 @@ wtexteditor.texteditor_refresh=function(widget)
 
 				ps[pl+1]=code
 				ps[pl+2]=0
-				ps[pl+3]=0x1d
-				ps[pl+4]=0x1a
+				ps[pl+3]=1
+				ps[pl+4]=0
 				
-				if     toke=="k" then	ps[pl+3]=0x14	-- keyword
-				elseif toke=="g" then	ps[pl+3]=0x15	-- global
-				elseif toke=="c" then	ps[pl+3]=0x1c	-- comment
-				elseif toke=="s" then	ps[pl+3]=0x03	-- string
-				elseif toke=="0" then	ps[pl+3]=0x06	-- number
+				if     toke=="k" then	ps[pl+3]=5  ps[pl+4]=4	-- keyword
+				elseif toke=="g" then	ps[pl+3]=7  ps[pl+4]=6	-- global
+				elseif toke=="c" then	ps[pl+3]=9  ps[pl+4]=8	-- comment
+				elseif toke=="s" then	ps[pl+3]=11	ps[pl+4]=10	-- string
+				elseif toke=="0" then	ps[pl+3]=13	ps[pl+4]=12 -- number
 --				elseif toke=="p" then	ps[pl+3]=0x05	-- punctuation
 				end
 
@@ -638,7 +638,36 @@ function wtexteditor.setup(widget,def)
 	if def.data then -- set starting text
 		widget.txt.set_text( def.data:value() )
 	end
-	
+
+-- background foreground colour pairs
+	local theme={
+		dark={
+			0xff444444,0xffaaaaaa,	-- text			0,1
+			0xff555555,0xff333333,	-- gutter		2,3
+			0xff444444,0xffdd7733,	-- keyword		4,5
+			0xff444444,0xffddaa33,	-- global		6,7
+			0xff444444,0xff888888,	-- comment		8,9
+			0xff444444,0xff66aa33,	-- string		10,11
+			0xff444444,0xff5599cc,	-- number		12,13
+		},
+		lite={
+			0xffaaaaaa,0xff444444,	-- text			0,1
+			0xff777777,0xff999999,	-- gutter		2,3
+			0xffaaaaaa,0xffaa6622,	-- keyword		4,5
+			0xffaaaaaa,0xffcc9922,	-- global		6,7
+			0xffaaaaaa,0xff777777,	-- comment		8,9
+			0xffaaaaaa,0xff559922,	-- string		10,11
+			0xffaaaaaa,0xff4488bb,	-- number		12,13
+		},
+	}
+
+	local p={}
+	for i,v in ipairs(theme.dark) do
+		local l=#p
+		p[l+1],p[l+2],p[l+3],p[l+4]=pack.argb_pmb4(v)
+	end
+	widget.scroll_widget.pan.colormap_grd:pixels(0,0,#p/4,1,p)
+
 	return widget
 end
 
