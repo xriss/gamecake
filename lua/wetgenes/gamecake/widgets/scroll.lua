@@ -55,22 +55,23 @@ function wscroll.layout(widget)
 
 	local ss=16
 	if widget.hx<ss*2 then ss=widget.hx/2 end
-	if widget.hy<ss*2 then ss=widget.hy/2 end
-	
-	widget.pan.hx=widget.hx-ss
-	widget.pan.hy=widget.hy-ss
+	if widget.hy<ss*2 then ss=widget.hy/2 end	
+	local s2=math.ceil(ss/2)
+
+	widget.pan.hx=widget.hx-s2
+	widget.pan.hy=widget.hy-s2
 	widget.pan.px=0
 	widget.pan.py=0
 
-	widget.slidey.hx=ss
-	widget.slidey.hy=widget.hy-ss
-	widget.slidey.px=widget.hx-ss
+	widget.slidey.hx=s2
+	widget.slidey.hy=widget.hy-s2
+	widget.slidey.px=widget.hx-s2
 	widget.slidey.py=0
 
 	widget.slidex.hx=widget.hx
-	widget.slidex.hy=ss
+	widget.slidex.hy=s2
 	widget.slidex.px=0
-	widget.slidex.py=widget.hy-ss
+	widget.slidex.py=widget.hy-s2
 
 
 --	local it=widget.scroll
@@ -110,17 +111,18 @@ function wscroll.setup(widget,def)
 	local ss=16
 	if widget.hx<ss*2 then ss=widget.hx/2 end
 	if widget.hy<ss*2 then ss=widget.hy/2 end
-	
+	local s2=math.ceil(ss/2)
+
 	widget.datx=widget_data.new_data{max=1,master=widget.master}
 	widget.daty=widget_data.new_data{max=1,master=widget.master}
 	widget.solid=true
 	
 	widget.color=widget.color or 0
-
-	widget.pan=		widget:add({class=def.scroll_pan or "pan",	hx=widget.hx-ss,	hy=widget.hy-ss	,color=widget.color})
-	widget.slidey=	widget:add({class="slide",	hx=ss,				hy=widget.hy-ss,	px=widget.hx-ss,	py=0,
+	
+	widget.pan=		widget:add({class=def.scroll_pan or "pan",	hx=widget.hx-s2,	hy=widget.hy-s2	,color=widget.color})
+	widget.slidey=	widget:add({class="slide",	hx=s2,				hy=widget.hy-s2,	px=widget.hx-s2,	py=0,
 		daty=widget.daty,color=widget.color})
-	widget.slidex=	widget:add({class="slide",	hx=widget.hx,	hy=ss,           	px=0,           	py=widget.hy-ss,
+	widget.slidex=	widget:add({class="slide",	hx=widget.hx,	hy=s2,           	px=0,           	py=widget.hy-s2,
 		datx=widget.datx,color=widget.color})
 
 	return widget
