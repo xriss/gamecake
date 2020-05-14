@@ -51,6 +51,8 @@ wmeta.classes={
 
 	["scroll"]=oven.rebake("wetgenes.gamecake.widgets.scroll"),
 
+	["tree"]=oven.rebake("wetgenes.gamecake.widgets.tree"),
+
 	["menudrop"]=oven.rebake("wetgenes.gamecake.widgets.menudrop"),
 
 	["file"]=oven.rebake("wetgenes.gamecake.widgets.file"),
