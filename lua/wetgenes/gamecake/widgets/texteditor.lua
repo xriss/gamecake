@@ -195,7 +195,7 @@ wtexteditor.texteditor_refresh=function(widget)
 				local code=cache.codes[i]
 				local toke=cache.tokens and string.sub(cache.tokens,i,i)
 
-				code=wutf.map_unicode_to_latin0[code] or code
+				code=wutf.map_unicode_to_latin0[code] or code or 127
 				if code<32 then code=32 end -- control codes are space
 				if  (code>127 and code<128+32) or code>255 then code=127 end -- missing glyphs are 127
 

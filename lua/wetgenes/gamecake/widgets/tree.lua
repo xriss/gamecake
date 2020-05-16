@@ -11,7 +11,6 @@ local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local wpath=require("wetgenes.path")
 
-local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -22,17 +21,6 @@ M.bake=function(oven,wtree)
 	wtree=wtree or {} 
 	wtree.modname=M.modname
 	
-	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
-	local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
-
-function wtree.update(widget)
-	return widget.meta.update(widget)
-end
-
-function wtree.draw(widget)
-	return widget.meta.draw(widget)
-end
-
 
 wtree.refresh=function(widget,items)
 
@@ -49,8 +37,8 @@ wtree.refresh=function(widget,items)
 		
 			local opts={
 				class="button",
-				id=widget.id,
-				hooks=widget.hooks,
+				id=it.id or widget.id,
+				hooks=it.hooks or widget.hooks,
 				hx=ss,
 				hy=ss,
 				size="fullx",
@@ -60,7 +48,7 @@ wtree.refresh=function(widget,items)
 				color=0,
 			}
 			
-			opts.text=string.rep(" ",depth+1)..it.text
+			opts.text=string.rep("    ",depth+1)..it.text
 		
 			pan:add(opts)
 
@@ -80,10 +68,6 @@ end
 function wtree.setup(widget,def)
 
 	widget.class="tree"
-	
-	widget.update=wtree.update
-	widget.layout=wfill.layout
-	widget.draw=wtree.draw
 
 	widget.items={} -- items to display
 	widget.refresh=wtree.refresh -- rebuild display from items
