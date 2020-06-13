@@ -15,6 +15,12 @@ local wtxtlex=require("wetgenes.txt.lex")
 
 local keyval=function(t) for i=1,#t do t[ t[i] ]=i end return t end
 
+-- these wild card tests for non explicit tokens should all be anchored at start of string by beginning with a ^
+M.wild_tokens={
+		"^%-%-%[=*%[",
+		"^%[=*%[",
+		"^%]=*%]",
+	}
 
 M.token_punctuation=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",",","..","...","(",")","[","]","{","}"}
 
@@ -25,9 +31,9 @@ M.token_number=keyval{"0","1","2","3","4","5","6","7","8","9","."}
 
 M.token_white=keyval{" ","\t","\n","\r"}
 
-M.token_comment=keyval{"--","--[[","--[","[[","]]","]"}
+M.token_comment=keyval{"--","#!"}
 
-M.token_string=keyval{"\\\"","\"","'"}
+M.token_string=keyval{"\\\"","\"","'","[[","]]"}
 
 M.token_keyword=keyval{
 
@@ -271,7 +277,7 @@ for _,t in ipairs({
 	for i,v in ipairs(t) do M.token_all[v]=true if #v>M.token_max then M.token_max=#v end end
 end
 
--- single char state map for output array
+-- single char state map for output array ( must be unique chars per state )
 M.MAP={
 		["white"]="w",
 		["keyword"]="k",
@@ -281,6 +287,7 @@ M.MAP={
 		["comment"]="c",
 		["global"]="g",
 		["none"]="n",
+		["first"]="f",
 	}
 local MAP=M.MAP
 
@@ -293,7 +300,7 @@ M.create=function(state)
 	state=state or {}
 
 	state.terminator=state.terminator or {} -- the string we are looking for to terminate the current state (if it is that sort of state)
-	state.stack=state.stack or {MAP.white} -- start from a whitespace state
+	state.stack=state.stack or {MAP.first} -- first line is special
 
 	return state
 end
@@ -320,26 +327,50 @@ M.parse=function(state,input,output)
 
 --	print(input)
 
-	local istoken=function(str,b)
+	local istoken=function(str,start)
+		local len=0
 		for i=M.token_max,1,-1 do -- longest string has priority
-			local s=string.sub(str,b,b+i-1)
+			local s=string.sub(str,start,start+i-1)
 			if M.token_all[s] then -- found a match
-				local sa=string.sub(str,b+i,b+i) -- byte after
-				return s,sa
+				len=i
+				break
 			end
 		end
+		for _,search in ipairs( M.wild_tokens ) do
+			local fs,fe = string.find(str,search,start)
+			if fs==start then
+				if 1+fe-fs > len then -- only replace if longest match
+					len=1+fe-fs
+				end
+			end
+		end
+		if len==0 then return end
+		return string.sub(str,start,start+len-1) , string.sub(str,start+len,start+len)
 	end
 
-	local idx=0
 
+	local outidx=0
 	local pump=function(token,after)
-
+		
+		local tokenidx=0
 		local last=peek(state.stack)
 
 		local push_output=function(value)
-			idx=idx+#token
-			while #output < idx do push(output,value) end
+			tokenidx=tokenidx+#token
+			outidx=outidx+#token
+			while #output < outidx do push(output,value) end
 			token=""
+		end
+
+		local check_hashbang=function()
+			if token=="#!" then -- this is a special comment at start of file
+				push(state.terminator,"\n")
+				poke(state.stack,MAP.comment)
+				return true
+			end
+			token="" -- do not advance
+			poke(state.stack,MAP.white) -- switch to white space
+			return true
 		end
 
 		local check_keyword=function()
@@ -405,12 +436,14 @@ M.parse=function(state,input,output)
 				push(state.terminator,"'")
 				poke(state.stack,MAP.string)
 				return true
-			elseif token=="[[" then 
-				push(state.terminator,"]]")
+			end			
+			local fs,fe,ee=string.find(token,"^%[(=*)%[")
+			if fs then
+				push(state.terminator,"]"..ee.."]")
 				poke(state.stack,MAP.string)
 				return true
-			else -- check for [==[ style strings
 			end
+
 		end
 
 		local check_comment=function()
@@ -426,11 +459,12 @@ M.parse=function(state,input,output)
 				push(state.terminator,"\n")
 				poke(state.stack,MAP.comment)
 				return true
-			elseif token=="--[[" then 
-				push(state.terminator,"]]")
+			end
+			local fs,fe,ee=string.find(token,"^%-%-%[(=*)%[")
+			if fs then
+				push(state.terminator,"]"..ee.."]")
 				poke(state.stack,MAP.comment)
 				return true
-			else -- check for --[==[ style comments
 			end
 		end
 
@@ -487,34 +521,30 @@ M.parse=function(state,input,output)
 				check_punctuation,
 				check_last,
 			},
+			[MAP.first]={
+				check_hashbang,
+			},
 		}
 
 		local check=check_list[last] or { check_last }
 		local done=false
-		local idx=1
-		while not done do done=(check[idx])() ; idx=idx+1 end
+		local checkidx=1
+		while not done do done=(check[checkidx])() ; checkidx=checkidx+1 end
 
 		push_output( peek(state.stack) )
+
+		return tokenidx
 	end
 	
-	local f=1
 	local i=1
 	local l=#input
 	while i<=l do
 		local s,sa=istoken(input,i)
 		if s then
-			if f<i then
-				pump(string.sub(input,f,i-1)) -- unmatched segment
-			end
-			pump(s,sa) -- matched segment
-			i=i+#s
-			f=i
+			i=i+pump(s,sa) -- advance or change state
 		else
-			i=i+1
+			i=i+pump(string.sub(input,i,i),string.sub(input,i+1,i+1)) -- pump single character
 		end
-	end
-	if f<l then
-		pump(string.sub(input,f,l),string.sub(input,l+1,l+1)) -- unmatched segment
 	end
 
 	return output
