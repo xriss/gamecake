@@ -54,13 +54,6 @@ M.token={}
 
 M.token.punctuation=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",",","..","...","(",")","[","]","{","}"}
 
--- the . and : is usually considered part of a function name rather than as a punctuation break
-M.token.name=keyval{".",":"}
-
-M.token.number=keyval{"0","1","2","3","4","5","6","7","8","9","."}
-
-M.token.white=keyval{" ","\t","\n","\r"}
-
 M.token.comment=keyval{"--","#!"}
 
 M.token.string=keyval{"\\\\","\\\"","\"","'","[[","]]"}
