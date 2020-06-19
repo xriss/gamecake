@@ -15,12 +15,34 @@ local wtxtlex=require("wetgenes.txt.lex")
 
 local keyval=function(t) for i=1,#t do t[ t[i] ]=i end return t end
 
+
+-- single char state map for output array ( be careful, this must be unique per state )
+M.MAP={
+	["white"]="w",
+	["keyword"]="k",
+	["number"]="0",
+	["punctuation"]="p",
+	["string"]="s",
+	["comment"]="c",
+	["global"]="g",
+	["none"]="n",
+	["first"]="f",
+}
+local MAP=M.MAP
+
+
 -- these wild card tests for non explicit tokens should all be anchored at start of string by beginning with a ^
 M.wild_tokens={
-		"^%-%-%[=*%[",
-		"^%[=*%[",
-		"^%]=*%]",
-	}
+	"^[0-9a-zA-Z_]+",						-- a variable or function name
+	"^[0-9a-zA-Z_]+[%.%:][0-9a-zA-Z_]+",	-- a variable or function name containing a single . or :
+	"^%s+",									-- multiple white space
+	"^%d+%.?%d*[eE%+%-]*%d*",				-- floating point number
+	"^0x[0-9a-fA-F]+",						-- hex number
+	"^%-%-%[=*%[",							-- comment start
+	"^%[=*%[",								-- string start
+	"^%]=*%]",								-- comment or string end
+}
+
 
 M.token_punctuation=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",",","..","...","(",")","[","]","{","}"}
 
@@ -33,7 +55,7 @@ M.token_white=keyval{" ","\t","\n","\r"}
 
 M.token_comment=keyval{"--","#!"}
 
-M.token_string=keyval{"\\\"","\"","'","[[","]]"}
+M.token_string=keyval{"\\\\","\\\"","\"","'","[[","]]"}
 
 M.token_keyword=keyval{
 
@@ -261,8 +283,8 @@ M.token_global=keyval{
 
 }
 
-
-M.token_all={}
+-- we only need to find lengths of 2 or more that are not matched by the wildcards
+M.token_search={}
 M.token_max=0
 for _,t in ipairs({
 		M.token_keyword,
@@ -274,22 +296,23 @@ for _,t in ipairs({
 		M.token_string,
 		M.token_global
 	}) do
-	for i,v in ipairs(t) do M.token_all[v]=true if #v>M.token_max then M.token_max=#v end end
+	for i,v in ipairs(t) do
+		local found=false
+		for _,search in ipairs( M.wild_tokens ) do
+			local fs,fe = string.find(v,search)
+			if fs==1 and fe==#v then -- full match
+				found=true
+				break
+			end
+		end
+		if not found then -- no need to include if found by wild_tokens search
+--print(v)
+			M.token_search[v]=true
+			if #v>M.token_max then M.token_max=#v end
+		end
+	end
 end
 
--- single char state map for output array ( must be unique chars per state )
-M.MAP={
-		["white"]="w",
-		["keyword"]="k",
-		["number"]="0",
-		["punctuation"]="p",
-		["string"]="s",
-		["comment"]="c",
-		["global"]="g",
-		["none"]="n",
-		["first"]="f",
-	}
-local MAP=M.MAP
 
 --[[
 
@@ -308,7 +331,7 @@ end
 --[[
 
 given an input string write an output table of states for each byte any 
-chnages made to state will be cached and passed back into this function 
+changes made to state will be cached and passed back into this function 
 again to handle the next line of input
 
 input may be a full line or a partial to generate the state at a given 
@@ -327,11 +350,11 @@ M.parse=function(state,input,output)
 
 --	print(input)
 
-	local istoken=function(str,start)
-		local len=0
-		for i=M.token_max,1,-1 do -- longest string has priority
+	local nexttoken=function(str,start)
+		local len=1
+		for i=M.token_max,2,-1 do -- longest string has priority
 			local s=string.sub(str,start,start+i-1)
-			if M.token_all[s] then -- found a match
+			if M.token_search[s] then -- found a match
 				len=i
 				break
 			end
@@ -339,18 +362,17 @@ M.parse=function(state,input,output)
 		for _,search in ipairs( M.wild_tokens ) do
 			local fs,fe = string.find(str,search,start)
 			if fs==start then
-				if 1+fe-fs > len then -- only replace if longest match
+				if 1+fe-fs > len then -- only replace if longer match
 					len=1+fe-fs
 				end
 			end
 		end
-		if len==0 then return end
-		return string.sub(str,start,start+len-1) , string.sub(str,start+len,start+len)
+		return string.sub(str,start,start+len-1)
 	end
 
 
 	local outidx=0
-	local pump=function(token,after)
+	local pump=function(token)
 		
 		local tokenidx=0
 		local last=peek(state.stack)
@@ -375,19 +397,15 @@ M.parse=function(state,input,output)
 
 		local check_keyword=function()
 			if M.token_keyword[token] then
-				if not wtxtlex.token_alphanumeric[after] then
-					poke(state.stack,MAP.keyword)
-					return true
-				end
+				poke(state.stack,MAP.keyword)
+				return true
 			end
 		end
 		
 		local check_global=function()
 			if M.token_global[token] then
-				if not wtxtlex.token_alphanumeric[after] then
-					poke(state.stack,MAP.global)
-					return true
-				end
+				poke(state.stack,MAP.global)
+				return true
 			end
 		end
 
@@ -399,24 +417,24 @@ M.parse=function(state,input,output)
 		end
 		
 		local check_number=function()
-			if M.token_number[token] then
+			local fs,fe = string.find(token,"^%d+%.?%d*[eE%+%-]*%d*") -- float or int
+			if fs==1 and fe==#token then -- full match
+				poke(state.stack,MAP.number)
+				return true
+			end
+			local fs,fe = string.find(token,"^0x[0-9a-fA-F]+") -- hex
+			if fs==1 and fe==#token then -- full match
 				poke(state.stack,MAP.number)
 				return true
 			end
 		end
 
 		local check_white=function()
-			if M.token_white[token] then
+			local fs,fe = string.find(token,"^%s+")
+			if fs==1 and fe==#token then -- full match
 				poke(state.stack,MAP.white)
 				return true
 			end
-		end
-		
-		local check_last=function()
-			if token~="" then -- if empty string then no change
-				poke(state.stack,MAP.none)
-			end
-			return true -- but always return true
 		end
 		
 		local check_string=function()
@@ -438,7 +456,7 @@ M.parse=function(state,input,output)
 				return true
 			end			
 			local fs,fe,ee=string.find(token,"^%[(=*)%[")
-			if fs then
+			if fs==1 and fe==#token then -- full match
 				push(state.terminator,"]"..ee.."]")
 				poke(state.stack,MAP.string)
 				return true
@@ -461,12 +479,20 @@ M.parse=function(state,input,output)
 				return true
 			end
 			local fs,fe,ee=string.find(token,"^%-%-%[(=*)%[")
-			if fs then
+			if fs==1 and fe==#token then -- full match
 				push(state.terminator,"]"..ee.."]")
 				poke(state.stack,MAP.comment)
 				return true
 			end
 		end
+
+		local goto_none=function()
+			if token~="" then -- if empty string then no change
+				poke(state.stack,MAP.none)
+			end
+			return true -- but always return true
+		end
+		
 
 		local check_list={
 			[MAP.white]={
@@ -477,14 +503,14 @@ M.parse=function(state,input,output)
 				check_white,
 				check_keyword,
 				check_punctuation,
-				check_last,
+				goto_none,
 			},
 			[MAP.keyword]={
 				check_comment,
 				check_string,
 				check_white,
 				check_punctuation,
-				check_last,
+				goto_none,
 			},
 			[MAP.punctuation]={
 				check_number,
@@ -494,20 +520,20 @@ M.parse=function(state,input,output)
 				check_white,
 				check_keyword,
 				check_punctuation,
-				check_last,
+				goto_none,
 			},
 			[MAP.global]={
 				check_comment,
 				check_white,
 				check_punctuation,
-				check_last,
+				goto_none,
 			},
 			[MAP.number]={
 				check_number,
 				check_comment,
 				check_white,
 				check_punctuation,
-				check_last,
+				goto_none,
 			},
 			[MAP.string]={
 				check_string,
@@ -519,14 +545,14 @@ M.parse=function(state,input,output)
 				check_comment,
 				check_white,
 				check_punctuation,
-				check_last,
+				goto_none,
 			},
 			[MAP.first]={
 				check_hashbang,
 			},
 		}
 
-		local check=check_list[last] or { check_last }
+		local check=check_list[last] or { goto_none }
 		local done=false
 		local checkidx=1
 		while not done do done=(check[checkidx])() ; checkidx=checkidx+1 end
@@ -537,14 +563,9 @@ M.parse=function(state,input,output)
 	end
 	
 	local i=1
-	local l=#input
-	while i<=l do
-		local s,sa=istoken(input,i)
-		if s then
-			i=i+pump(s,sa) -- advance or change state
-		else
-			i=i+pump(string.sub(input,i,i),string.sub(input,i+1,i+1)) -- pump single character
-		end
+	local len=#input
+	while i<=len do
+		i=i+pump( nexttoken(input,i) ) -- advance a number of characters
 	end
 
 	return output
