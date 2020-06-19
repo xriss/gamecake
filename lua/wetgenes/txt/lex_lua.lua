@@ -42,22 +42,29 @@ M.wild_tokens={
 	"^%[=*%[",								-- string start
 	"^%]=*%]",								-- comment or string end
 }
+-- test if a pattern matches entire string
+local fullmatch=function(s,p)
+	local fs,fe = string.find(s,p)
+	if fs==1 and fe==#s then return true end
+	return false
+end
 
+M.token={}
 
-M.token_punctuation=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",",","..","...","(",")","[","]","{","}"}
+M.token.punctuation=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",",","..","...","(",")","[","]","{","}"}
 
 -- the . and : is usually considered part of a function name rather than as a punctuation break
-M.token_name=keyval{".",":"}
+M.token.name=keyval{".",":"}
 
-M.token_number=keyval{"0","1","2","3","4","5","6","7","8","9","."}
+M.token.number=keyval{"0","1","2","3","4","5","6","7","8","9","."}
 
-M.token_white=keyval{" ","\t","\n","\r"}
+M.token.white=keyval{" ","\t","\n","\r"}
 
-M.token_comment=keyval{"--","#!"}
+M.token.comment=keyval{"--","#!"}
 
-M.token_string=keyval{"\\\\","\\\"","\"","'","[[","]]"}
+M.token.string=keyval{"\\\\","\\\"","\"","'","[[","]]"}
 
-M.token_keyword=keyval{
+M.token.keyword=keyval{
 
 	"and",
 	"break",
@@ -83,7 +90,7 @@ M.token_keyword=keyval{
 
 }
 
-M.token_global=keyval{
+M.token.global=keyval{
 
 	"assert",
 	"dofile",
@@ -286,21 +293,11 @@ M.token_global=keyval{
 -- we only need to find lengths of 2 or more that are not matched by the wildcards
 M.token_search={}
 M.token_max=0
-for _,t in ipairs({
-		M.token_keyword,
-		M.token_punctuation,
-		M.token_name,
-		M.token_number,
-		M.token_white,
-		M.token_comment,
-		M.token_string,
-		M.token_global
-	}) do
+for _,t in ipairs(M.token) do
 	for i,v in ipairs(t) do
 		local found=false
 		for _,search in ipairs( M.wild_tokens ) do
-			local fs,fe = string.find(v,search)
-			if fs==1 and fe==#v then -- full match
+			if fullmatch(v,search) then
 				found=true
 				break
 			end
@@ -395,43 +392,37 @@ M.parse=function(state,input,output)
 			return true
 		end
 
-		local check_keyword=function()
-			if M.token_keyword[token] then
+		local check_token=function()
+			if M.token.keyword[token] then
 				poke(state.stack,MAP.keyword)
 				return true
 			end
-		end
-		
-		local check_global=function()
-			if M.token_global[token] then
+			if M.token.global[token] then
 				poke(state.stack,MAP.global)
 				return true
 			end
 		end
 
 		local check_punctuation=function()
-			if M.token_punctuation[token] then
+			if M.token.punctuation[token] then
 				poke(state.stack,MAP.punctuation)
 				return true
 			end
 		end
 		
 		local check_number=function()
-			local fs,fe = string.find(token,"^%d+%.?%d*[eE%+%-]*%d*") -- float or int
-			if fs==1 and fe==#token then -- full match
+			if fullmatch(token,"^%d+%.?%d*[eE%+%-]*%d*") then-- float or int
 				poke(state.stack,MAP.number)
 				return true
 			end
-			local fs,fe = string.find(token,"^0x[0-9a-fA-F]+") -- hex
-			if fs==1 and fe==#token then -- full match
+			if fullmatch(token,"^0x[0-9a-fA-F]+") then -- hex
 				poke(state.stack,MAP.number)
 				return true
 			end
 		end
 
 		local check_white=function()
-			local fs,fe = string.find(token,"^%s+")
-			if fs==1 and fe==#token then -- full match
+			if fullmatch(token,"^%s+") then
 				poke(state.stack,MAP.white)
 				return true
 			end
@@ -455,8 +446,7 @@ M.parse=function(state,input,output)
 				poke(state.stack,MAP.string)
 				return true
 			end			
-			local fs,fe,ee=string.find(token,"^%[(=*)%[")
-			if fs==1 and fe==#token then -- full match
+			if fullmatch(token,"^%[(=*)%[") then
 				push(state.terminator,"]"..ee.."]")
 				poke(state.stack,MAP.string)
 				return true
@@ -497,11 +487,10 @@ M.parse=function(state,input,output)
 		local check_list={
 			[MAP.white]={
 				check_number,
-				check_global,
+				check_token,
 				check_comment,
 				check_string,
 				check_white,
-				check_keyword,
 				check_punctuation,
 				goto_none,
 			},
@@ -514,11 +503,10 @@ M.parse=function(state,input,output)
 			},
 			[MAP.punctuation]={
 				check_number,
-				check_global,
+				check_token,
 				check_comment,
 				check_string,
 				check_white,
-				check_keyword,
 				check_punctuation,
 				goto_none,
 			},
