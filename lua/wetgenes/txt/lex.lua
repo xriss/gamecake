@@ -29,10 +29,6 @@ local deflate=function(d) return ((zlib.deflate())(d,"finish")) end
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-M.list={}
-
-M.list.lua=require(M.modname.."_lua")
-
 local keyval=function(t) for i=1,#t do t[ t[i] ]=i end return t end
 
 M.token_numeric      = keyval{	"0","1","2","3","4","5","6","7","8","9"}
@@ -67,3 +63,8 @@ end
 M.load=function(str)
 	return cmsgpack.unpack(inflate(str))
 end
+
+
+M.list={}
+M.list.lua = require(M.modname.."_lua")
+M.list.js  = require(M.modname.."_js" )
