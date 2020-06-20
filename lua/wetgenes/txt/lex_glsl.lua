@@ -35,7 +35,6 @@ local MAP=M.MAP
 -- these wild card tests for non explicit tokens should all be anchored at start of string by beginning with a ^
 M.wild_tokens={
 	"^[0-9a-zA-Z_]+",						-- a variable or function name
-	"^[0-9a-zA-Z_]+%.[0-9a-zA-Z_]+",		-- a variable or function name containing a single .
 	"^%s+",									-- multiple white space
 	"^%d+%.?%d*[eE%+%-]*%d*",				-- floating point number
 	"^0x[0-9a-fA-F]+",						-- hex number
@@ -57,6 +56,7 @@ M.token.string=keyval{"\\\\","\\\"","\"","'","`"}
 
 M.token.keyword=keyval{
 
+	"precision",
 	"attribute",
 	"bool",
 	"true",
