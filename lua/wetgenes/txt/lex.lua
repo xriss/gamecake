@@ -66,5 +66,7 @@ end
 
 
 M.list={}
-M.list.lua = require(M.modname.."_lua")
-M.list.js  = require(M.modname.."_js" )
+M.list.lua  = require(M.modname.."_lua"  )
+M.list.js   = require(M.modname.."_js"   )
+M.list.glsl = require(M.modname.."_glsl" )
+
