@@ -123,21 +123,27 @@ end
 
 split a path into named parts like so
 
-	-------------------------------------
-	|               path                |
-	-------------------------------------
-	|           dir        |    file    |
-	|----------------------|------------|
-	| root |    folder     | name  ext  |
-	|----------------------|------------|
-	|  /   |  home/user/   | file  .txt |
-	-------------------------------------
-	
-this can be reversed with simple joins and checks for nil
+	|--------------------------------------------|
+	|                     path                   |
+	|-----------------------|--------------------|
+	|         dir           |        file        |
+	|----------|------------|----------|---------|
+	| root [1] | folder [2] | name [3] | ext [4] |
+	|----------|------------|----------|---------|
+	| /        | home/user/ | file     | .txt    |
+	|----------|------------|----------|---------|
+
+this can be reversed with simple joins and checks for nil, note that 
+[1][2][3][4] are forced strings so will be "" rather than nil unlike 
+their named counterparts. This means you may use wpath.join to reverse 
+this parsing.
 
 	dir = (root or "")..(folder or "")
 	file = (name or "")..(ext or "")
 	path = (dir or "")..(file or "")
+	path = (root or "")..(folder or "")..(name or "")..(ext or "")
+	path = [1]..[2]..[3]..[4]
+	path = wpath.join(it)
 	
 if root is set then it implies an absolute path and will be something 
 like C:\ under windows.
@@ -185,6 +191,11 @@ wpath.parse=function(p)
 	end
 	
 	r.path = (r.dir or "")..(r.file or "")
+	
+	r[1]=r.root   or ""
+	r[2]=r.folder or ""
+	r[3]=r.name   or ""
+	r[4]=r.ext    or ""
 
 	return r
 end

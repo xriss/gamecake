@@ -3,7 +3,7 @@ local wpath=require("wetgenes.path")
 local wstr=require("wetgenes.string")
 local ls=function(s) print(wstr.dump(s)) end
 
-local wgrd=require("wetgenes.grd")
+local geom_gltf=require("wetgenes.gamecake.spew.geom_gltf")
 
 local doublewrap=require("cmd.args").doublewrap
 local splitpath=require("cmd.args").splitpath
@@ -49,11 +49,43 @@ if cmd=="info" then
 	
 	for i,v in ipairs(args.data) do
 
-		local path=splitpath( args.data[i] )
+		local path=wpath.parse( args.data[i] )
 		path.idx=string.format("%03d",i)
-		local input=path.path
+		
+		local input=path[1]..path[2]..path[3]..path[4]
 
-		print( input.." -> "..output )
+		print( "Loading gltf "..input )
+		local gltf
+		do
+			local fp=io.open(input,"rb")
+			gltf=fp:read("*a")
+			fp:close()
+		end
+		gltf=geom_gltf.parse(gltf)
+		
+		for i=1,#gltf.buffers do
+			local v=gltf.buffers[i]
+			if type(v)=="table" then -- try and convert data to strings
+				if v.uri then -- try and load
+					local scary=false
+					if string.find(v.uri,"..",1,true) then scary=true end
+					if string.find(v.uri,":",1,true)  then scary=true end
+					if string.find(v.uri,"/",1,true)  then scary=true end
+					if string.find(v.uri,"\\",1,true) then scary=true end
+					if not scary then
+						local bname=path[1]..path[2]..v.uri
+						print("Loading buffer "..bname)
+						local fp=io.open(bname,"rb")
+						gltf.buffers[i]=fp:read("*a")
+						fp:close()
+					else
+						print("Ignoring scary buffer "..v.uri)
+					end
+				end
+			end
+		end
+
+		geom_gltf.info(gltf)
 
 	end
 
