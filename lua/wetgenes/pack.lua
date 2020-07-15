@@ -24,8 +24,8 @@ end
 --
 -- Read an array of the same type
 --
-pack.load_array=function(dats,fmt,off,count)
-	return core.load(dats,fmt,off,count)
+pack.load_array=function(dats,fmt,off,size)
+	return core.load(dats,fmt,off,size and size+(off or 0))
 end
 
 --

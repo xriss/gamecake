@@ -33,6 +33,48 @@ end
 local cmd=table.remove(arg,1)       -- check what cmd is asked for
 local cmd=cmd and string.lower(cmd) -- force lowercase
 
+
+local load_gltf=function(fname)
+
+	local path=wpath.parse( fname )
+	
+	local input=path[1]..path[2]..path[3]..path[4]
+
+	print( "Loading gltf "..input )
+	local gltf
+	do
+		local fp=io.open(input,"rb")
+		gltf=fp:read("*a")
+		fp:close()
+	end
+	gltf=geom_gltf.parse(gltf)
+	
+	for i=1,#gltf.buffers do
+		local v=gltf.buffers[i]
+		if type(v)=="table" then -- try and convert data to strings
+			if v.uri then -- try and load
+				local scary=false
+				if string.find(v.uri,"..",1,true) then scary=true end
+				if string.find(v.uri,":",1,true)  then scary=true end
+				if string.find(v.uri,"/",1,true)  then scary=true end
+				if string.find(v.uri,"\\",1,true) then scary=true end
+				if not scary then
+					local bname=path[1]..path[2]..v.uri
+					print("Loading buffer "..bname)
+					local fp=io.open(bname,"rb")
+					gltf.buffers[i]=fp:read("*a")
+					fp:close()
+				else
+					print("Ignoring scary buffer "..v.uri)
+				end
+			end
+		end
+	end
+
+	return gltf
+end
+
+
 if cmd=="info" then
 
 	local args=require("cmd.args").bake({inputs=default_inputs{
@@ -47,47 +89,33 @@ if cmd=="info" then
 		os.exit(0)
 	end
 	
-	for i,v in ipairs(args.data) do
+	for i=1,#args.data do
 
-		local path=wpath.parse( args.data[i] )
-		path.idx=string.format("%03d",i)
-		
-		local input=path[1]..path[2]..path[3]..path[4]
-
-		print( "Loading gltf "..input )
-		local gltf
-		do
-			local fp=io.open(input,"rb")
-			gltf=fp:read("*a")
-			fp:close()
-		end
-		gltf=geom_gltf.parse(gltf)
-		
-		for i=1,#gltf.buffers do
-			local v=gltf.buffers[i]
-			if type(v)=="table" then -- try and convert data to strings
-				if v.uri then -- try and load
-					local scary=false
-					if string.find(v.uri,"..",1,true) then scary=true end
-					if string.find(v.uri,":",1,true)  then scary=true end
-					if string.find(v.uri,"/",1,true)  then scary=true end
-					if string.find(v.uri,"\\",1,true) then scary=true end
-					if not scary then
-						local bname=path[1]..path[2]..v.uri
-						print("Loading buffer "..bname)
-						local fp=io.open(bname,"rb")
-						gltf.buffers[i]=fp:read("*a")
-						fp:close()
-					else
-						print("Ignoring scary buffer "..v.uri)
-					end
-				end
-			end
-		end
+		local gltf=load_gltf( args.data[i] )
 
 		geom_gltf.info(gltf)
 
 	end
+
+elseif cmd=="view" then
+
+	local args=require("cmd.args").bake({inputs=default_inputs{
+
+	}}):parse(arg):sanity()
+	
+	if args.data.help or not args.data[1] then
+		print("\n"..arg[0].." info --OPTIONS input.gltf \n")
+		print( "where --OPTIONS is any combination of the following :\n")
+		print(table.concat(args:help(),"\n"))
+		print("")
+		os.exit(0)
+	end
+
+
+	local gltf=load_gltf( args.data[1] )
+
+	geom_gltf.view(gltf)
+
 
 else -- print help
 
