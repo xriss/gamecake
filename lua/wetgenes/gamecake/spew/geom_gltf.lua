@@ -180,8 +180,8 @@ M.to_geoms=function(gltf)
 			for i=1,#tpos,3 do
 				local j=(((i-1)/3)*2)+1
 				obj.verts[#obj.verts+1]={
-					tpos and tpos[i] or 0,tpos and tpos[i+1] or 0,tpos and tpos[i+2] or 0,
-					tnrm and tnrm[i] or 0,tnrm and tnrm[i+1] or 0,tnrm and tnrm[i+2] or 0,
+					tpos and tpos[i] or 0,tpos and -tpos[i+1] or 0,tpos and tpos[i+2] or 0,
+					tnrm and tnrm[i] or 0,tnrm and -tnrm[i+1] or 0,tnrm and tnrm[i+2] or 0,
 					tuv and tuv[j] or 0,tuv and tuv[j+1] or 0
 				}
 			end
@@ -192,6 +192,7 @@ M.to_geoms=function(gltf)
 			
 		end
 
+--		obj:flip()
 	end
 
 	return objs
@@ -220,88 +221,58 @@ M.view=function(gltf,oven)
 	local gl=oven.gl
 	local pack=require("wetgenes.pack")
 
-	if not gl.programs.geom_gltf then -- setup our special shaders
-	
-		gl.shaders.v_geom_gltf={
-		source=[[
+	gl.program_source("geom_gltf",[[
 
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
 
-attribute vec3 a_vertex;
-attribute vec3 a_normal;
-attribute vec2 a_texcoord;
-
 varying vec4  v_color;
 varying vec3  v_normal;
 varying vec3  v_pos;
 varying vec2  v_texcoord;
-varying float v_face;
+
+
+#ifdef VERTEX_SHADER
+
  
+attribute vec4  a_color;
+attribute vec3  a_vertex;
+attribute vec3  a_normal;
+attribute vec2  a_texcoord;
+attribute float a_matidx;
+
 void main()
 {
-
-	v_face=a_texcoord.x-1.0;
-
-	float vx=mod(v_face,8.0);
-//	float vy=floor(v_face/8.0);
-
     gl_Position = projection * modelview * vec4(a_vertex, 1.0);
     v_normal = normalize( mat3( modelview ) * a_normal );
-	v_color=color;
-
-	int a=int(clamp(a_texcoord.y-1.0,0.0,2.0));
-	
-	if(a==2) {			v_texcoord=vec2(	 (vx+1.0)/8.0	,	 0.0	);
-	} else if(a==1) {	v_texcoord=vec2(	 (vx+0.5)/8.0	,	 1.0	);
-	} else {			v_texcoord=vec2(	 (vx    )/8.0	,	 0.0	);
-	}
-
+	v_color=a_color;
+	v_texcoord=a_texcoord;
 }
 
-	]]
-}
 
-		gl.shaders.f_geom_gltf={
-		source=[[
+#endif //VERTEX_SHADER
+
+#ifdef FRAGMENT_SHADER
+
 
 uniform sampler2D tex;
-
-varying vec4  v_color;
-varying vec4  v_color2;
-varying vec3  v_normal;
-varying vec3  v_pos;
-varying vec2  v_texcoord;
-varying float v_face;
-
-
 vec3 d=vec3(0.0,0.0,-1.0);
 
 void main(void)
 {
-	vec4 tc=vec4(0.0,1.0,0.0,0.0);
-/*
-	if( floor(v_face+(1.0/4096.0)) == ceil(v_face-(1.0/4096.0)) )
-	{
-		tc=texture2D(tex, v_texcoord);
-	}
-*/
-
-	vec3 n=normalize(v_normal);
-	gl_FragColor= tc + (v_color*max( n.z, 0.25 ))*(1.0-tc.a) ;
-	gl_FragColor.a=1.0;
-}
-
-	]]
-}
-
-		gl.programs.geom_gltf={
-			vshaders={"v_geom_gltf"},
-			fshaders={"f_geom_gltf"},
-		}
+	vec4 tc=vec4(0.0,0.0,0.0,1.0);
 	
-	end
+	vec3 n=normalize(v_normal);
+
+	gl_FragColor= tc + (vec4(1.0,1.0,1.0,1.0)*pow( n.z, 4.0 )) ;
+
+}
+
+
+#endif //FRAGMENT_SHADER
+
+]])
 
 
 	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
@@ -327,16 +298,6 @@ main.update=function()
 end
 
 main.draw=function()
-
-
---  we want the main view to track the window size
---	oven.win:info()
---	view.vx=oven.win.width
---	view.vy=oven.win.height
---	view.vz=oven.win.height*4
-	
---	views.push_and_apply(view)
---	canvas.gl_default() -- reset gl state
 		
 	gl.ClearColor(pack.argb4_pmf4(0xf008))
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
@@ -345,21 +306,17 @@ main.draw=function()
 	gl.Translate(400,300,0)
 	gl.Rotate(rot,1,1,1)
 	
-	
---	font.set(cake.fonts.get("Vera")) -- default font
---	font.set_size(16,0)
-	
---	gui.draw()
-		
+			
+	gl.Enable(gl.DEPTH_TEST)
 	for i,obj in ipairs(objs) do
 		geom.draw_polys(obj,"geom_gltf")
 	end
+	gl.Disable(gl.DEPTH_TEST)
 
 
 	gl.PopMatrix()
 
---	views.pop_and_apply()
-	
+
 end
 
 

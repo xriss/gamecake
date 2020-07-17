@@ -207,8 +207,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 	end
 
 	M.flip=function(it)
-		for i,p in pairs(it.polys) do geom.poly_flip(it,p) end
-		for i,v in pairs(it.verts) do geom.vert_flip(it,v) end
+		for i,p in pairs(it.polys) do M.poly_flip(it,p) end
+		for i,v in pairs(it.verts) do M.vert_flip(it,v) end
 		return it
 	end
 		
@@ -296,7 +296,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		
 -- add each face to normals
 		for ip,vp in ipairs(it.polys) do
-			local n=geom.normalize( geom.get_poly_normal(it,vp) )
+			local n=M.normalize( M.get_poly_normal(it,vp) )
 			for i=1,#vp do
 				local v=it.verts[ vp[i] ]
 				v[4]=v[4]+n[1]
@@ -457,7 +457,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			return #vs -- new vertex id
 		end
 		for ip,vp in ipairs(it.polys) do
-			local n=geom.normalize( geom.get_poly_normal(it,vp) )
+			local n=M.normalize( M.get_poly_normal(it,vp) )
 			for i=1,#vp do
 				vp[i]=vcopy(vp[i])
 				local v=vs[ vp[i] ]
