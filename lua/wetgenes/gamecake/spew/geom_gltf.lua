@@ -4,6 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
+local wgeom=require("wetgenes.gamecake.spew.geom")
 local wstr=require("wetgenes.string")
 local wpack=require("wetgenes.pack")
 local wjson=require("wetgenes.json")
@@ -151,7 +152,7 @@ M.to_geoms=function(gltf)
 	
 		local mesh=gltf.meshes[midx]
 
-		local obj={}
+		local obj=wgeom.new()
 		objs[#objs+1]=obj
 
 		obj.verts={}
@@ -196,20 +197,21 @@ M.to_geoms=function(gltf)
 	return objs
 end
 
-M.view=function(gltf)
+M.view=function(gltf,oven)
 
-	local opts={
-		disable_sounds=true,
-		times=true, -- request simple time keeping samples
-		width=800,	-- display basics
-		height=600,
-		name="gltf",
-		title="gltf",
-		fps=60,
-	}
-
-	-- setup oven with vanilla cake setup and save as a global value
-	local oven=require("wetgenes.gamecake.oven").bake(opts).preheat()
+	if not oven then
+		local opts={
+			disable_sounds=true,
+			times=true, -- request simple time keeping samples
+			width=800,	-- display basics
+			height=600,
+			name="gltf",
+			title="gltf",
+			fps=60,
+		}
+		-- setup oven with vanilla cake setup and save as a global value
+		oven=require("wetgenes.gamecake.oven").bake(opts).preheat()
+	end
 	
 	local main={}
 	
@@ -264,13 +266,13 @@ void main()
 		gl.shaders.f_geom_gltf={
 		source=[[
 
-//uniform sampler2D tex;
+uniform sampler2D tex;
 
 varying vec4  v_color;
 varying vec4  v_color2;
 varying vec3  v_normal;
 varying vec3  v_pos;
-//varying vec2  v_texcoord;
+varying vec2  v_texcoord;
 varying float v_face;
 
 

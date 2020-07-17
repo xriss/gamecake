@@ -29,18 +29,25 @@ local function dprint(a) print(wstr.dump(a)) end
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-M.bake=function(oven,geom)
-	geom=geom or {}
-	geom.modname=M.modname
+-- vertex data
+	M.idxs=	{
+				POS_X= 1, POS_Y= 2, POS_Z= 3,
+				NRM_X= 4, NRM_Y= 5, NRM_Z= 6,
+				TEX_U= 7, TEX_V= 8,
+				TAN_X= 9, TAN_Y=10, TAN_Z=11, TAN_W=12,
+				BNE_A=13, BNE_B=14, BNE_C=15, BNE_D=16
+	}
 
-	geom.meta={__index=geom}
-	geom.new=function(it) it=it or {} setmetatable(it,geom.meta) return it end
 
-	geom.duplicate=function(it)
-		return geom.copy(it,geom.new())
+-- we DO NOT have OpenGL access here
+	M.meta={__index=M}
+	M.new=function(it) it=it or {} setmetatable(it,M.meta) return it end
+
+	M.duplicate=function(it)
+		return M.copy(it,M.new())
 	end
 
-	geom.copy=function(src,dst)
+	M.copy=function(src,dst)
 -- reset
 		dst.verts={}
 		dst.mats={}
@@ -70,29 +77,8 @@ M.bake=function(oven,geom)
 		return dst
 	end
 
-
-geom.idxs=	{
-				POS_X= 1, POS_Y= 2, POS_Z= 3,
-				NRM_X= 4, NRM_Y= 5, NRM_Z= 6,
-				TEX_U= 7, TEX_V= 8,
-				TAN_X= 9, TAN_Y=10, TAN_Z=11, TAN_W=12,
-				BNE_A=13, BNE_B=14, BNE_C=15, BNE_D=16
-			}
-
-
-	local gl=oven.gl
-	local cake=oven.cake
-	local canvas=cake.canvas
-	local font=canvas.font
-	local flat=canvas.flat
-	
-	require("wetgenes.gamecake.spew.geom_draw").fill(oven,geom)
-	require("wetgenes.gamecake.spew.geom_solids").fill(oven,geom)
-	require("wetgenes.gamecake.spew.geom_mask").fill(oven,geom)
-
-		
 	-- scale the geom
-	geom.adjust_scale=function(it,s)
+	M.adjust_scale=function(it,s)
 		s=s or 1
 		local vs=it.verts
 		for i=1,#vs do local v=vs[i]
@@ -104,7 +90,7 @@ geom.idxs=	{
 	end
 	
 	-- position the geom
-	geom.adjust_position=function(it,dx,dy,dz)
+	M.adjust_position=function(it,dx,dy,dz)
 		local vs=it.verts
 		for i=1,#vs do local v=vs[i]
 			v[1]=v[1]+dx
@@ -115,7 +101,7 @@ geom.idxs=	{
 	end
 
 	-- build lines from polys
-	geom.build_lines=function(it)
+	M.build_lines=function(it)
 
 		local ld={}
 		local addline
@@ -143,7 +129,7 @@ geom.idxs=	{
 	end
 
 	-- build the edges
-	geom.build_edges=function(it)
+	M.build_edges=function(it)
 		local es={}
 		it.edges_map=es
 		for ip,vp in ipairs(it.polys) do
@@ -170,7 +156,7 @@ geom.idxs=	{
 	end
 	
 -- uses first 3 verts, does not fix the length
-	geom.get_poly_normal=function(it,p)
+	M.get_poly_normal=function(it,p)
 	
 		local v1=it.verts[ p[1] ]
 		local v2=it.verts[ p[2] ]
@@ -194,7 +180,7 @@ geom.idxs=	{
 		return vn
 	end
 
-	geom.normalize=function(v)
+	M.normalize=function(v)
 		local dd=v[1]*v[1] + v[2]*v[2] + v[3]*v[3]
 		local d=math.sqrt(dd)
 		if d<(1/65536) then d=1 end
@@ -205,7 +191,7 @@ geom.idxs=	{
 	end
 
 
-	geom.face_square_uvs=function(it)
+	M.face_square_uvs=function(it)
 		local t={
 			{0,0},
 			{1,0},
@@ -220,13 +206,13 @@ geom.idxs=	{
 		return it
 	end
 
-	geom.flip=function(it)
+	M.flip=function(it)
 		for i,p in pairs(it.polys) do geom.poly_flip(it,p) end
 		for i,v in pairs(it.verts) do geom.vert_flip(it,v) end
 		return it
 	end
 		
-	geom.vert_flip=function(it,v)
+	M.vert_flip=function(it,v)
 		if v[4] then
 			v[4]=-v[4]
 			v[5]=-v[5]
@@ -235,7 +221,7 @@ geom.idxs=	{
 		return it
 	end
 
-	geom.poly_flip=function(it,p)
+	M.poly_flip=function(it,p)
 	
 		local n={}
 		for i=#p,1,-1 do
@@ -249,7 +235,7 @@ geom.idxs=	{
 	end
 
 
-	geom.flipaxis=function(it,axis)
+	M.flipaxis=function(it,axis)
 		local mv=#it.verts
 		for iv=1,mv do local vv=it.verts[iv]
 			vv[axis]=-vv[axis]
@@ -259,7 +245,7 @@ geom.idxs=	{
 	end
 	
 -- dupe+mirror point and polygons around the origin on the given axis 1=x 2=y 3=z
-	geom.mirror=function(it,axis,cb)
+	M.mirror=function(it,axis,cb)
 	
 		local vmap={} -- map vertexes to their mirrored one
 		
@@ -293,12 +279,12 @@ geom.idxs=	{
 				for i,v in ipairs(vd) do
 					vd[i]=vmap[v] or v
 				end
-				geom.poly_flip(it,vd)
+				M.poly_flip(it,vd)
 		end
 	
 	end
 
-	geom.build_normals=function(it)
+	M.build_normals=function(it)
 
 -- reset normals
 		for iv,vv in ipairs(it.verts) do
@@ -333,7 +319,7 @@ geom.idxs=	{
 		return it
 	end
 
-	geom.build_tangents=function(it)
+	M.build_tangents=function(it)
 
 -- reset tangents
 		for iv,vv in ipairs(it.verts) do
@@ -445,24 +431,24 @@ geom.idxs=	{
 	end
 
 -- face polys away from the origin
-	geom.fix_poly_order=function(it,p)
+	M.fix_poly_order=function(it,p)
 	
 		local v2=it.verts[ p[2] ]
-		local vn=geom.get_poly_normal(it,p)
+		local vn=M.get_poly_normal(it,p)
 		
 		local d = vn[1]*v2[1] + vn[2]*v2[2] + vn[3]*v2[3]
 		
 		if d>0 then -- invert poly order
-			geom.poly_flip(it,p)
+			M.poly_flip(it,p)
 		end
 
 		return it
 	end
 
 	-- bevil a base object, s is how much each face is scaled, so 7/8 is a nice bevel
-	geom.apply_bevel=function(it,s)
+	M.apply_bevel=function(it,s)
 	
-		geom.build_edges(it)
+		M.build_edges(it)
 
 		local vs={}
 		local function vcopy(i)
@@ -525,7 +511,7 @@ geom.idxs=	{
 			js[#js+1]={p[1],p[4]}
 			js[#js+1]={p[2],p[3]}
 
-			geom.fix_poly_order(it,p)
+			M.fix_poly_order(it,p)
 			it.polys[#it.polys+1]=p -- add join poly
 		end
 		
@@ -580,11 +566,11 @@ geom.idxs=	{
 		for i,v in pairs(js) do -- add pollys
 			v[#v]=nil
 			it.polys[#it.polys+1]=v
-			geom.fix_poly_order(it,v)
+			M.fix_poly_order(it,v)
 		end
 			
 		for i,p in pairs(it.polys) do
-			geom.fix_poly_order(it,p)
+			M.fix_poly_order(it,p)
 		end
 			
 		return it
@@ -592,7 +578,7 @@ geom.idxs=	{
 
 -- find the radius of this object from 0,0,0
 
-	geom.max_radius=function(it)
+	M.max_radius=function(it)
 
 		local maxdd=0
 		
@@ -603,6 +589,22 @@ geom.idxs=	{
 
 		return math.sqrt(maxdd)
 	end
+
+	require("wetgenes.gamecake.spew.geom_mask").fill(M)
+	require("wetgenes.gamecake.spew.geom_solids").fill(M)
+
+
+M.bake=function(oven,geom)
+	geom=geom or {}
+	for n,v in pairs(M) do geom[n]=v end
+	geom.modname=M.modname
+
+-- we have OpenGL access here
+	geom.meta={__index=geom}
+	geom.new=function(it) it=it or {} setmetatable(it,geom.meta) return it end
+
+	
+	require("wetgenes.gamecake.spew.geom_draw").fill(oven,geom)
 
 	return geom
 end
