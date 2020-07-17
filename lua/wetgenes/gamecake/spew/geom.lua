@@ -58,13 +58,13 @@ M.bake=function(oven,geom)
 		end
 -- copy verts
 		for iv = 1 , #src.verts do local vert=src.verts[iv]
-			localv={unpack(vert)}
+			local v={unpack(vert)}
 			dst.verts[ iv ]=v
 		end
 --copy polys		
 		for iv = 1 , #src.polys do local poly=src.polys[iv]
 			local p={unpack(poly)}
-			p.mat=mats_map_idx[poly.mat]
+			p.mat=poly.mat
 			dst.polys[ iv ]=p
 		end
 		return dst

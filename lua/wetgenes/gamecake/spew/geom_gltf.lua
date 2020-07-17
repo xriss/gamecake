@@ -81,7 +81,7 @@ M.accessor_to_table=function(gltf,id,scale)
 	local accessor=gltf.accessors[id+1]
 	local view=gltf.bufferViews[accessor.bufferView+1]
 	local buffer=gltf.buffers[view.buffer+1]
-	local offset=accessor.byteOffset+view.byteOffset
+	local offset=(accessor.byteOffset or 0) + (view.byteOffset or 0)
 	
 	local bfmt=M.lookup_fmt[accessor.componentType]
 	local bsize=M.lookup_size[accessor.componentType]
@@ -143,6 +143,58 @@ M.parse=function(gltf)
 	return gltf
 end
 
+M.to_geoms=function(gltf)
+
+	local objs={}
+
+	for midx=1,#gltf.meshes do
+	
+		local mesh=gltf.meshes[midx]
+
+		local obj={}
+		objs[#objs+1]=obj
+
+		obj.verts={}
+		obj.mats={}
+		obj.polys={}
+		
+		for midx=1,#gltf.materials do
+			local material=gltf.materials[midx]
+			obj.mats[midx]={
+				name=material.name,
+				diffuse=	material.pbrMetallicRoughness and 
+							material.pbrMetallicRoughness.baseColorFactor  and
+							{unpack(material.pbrMetallicRoughness.baseColorFactor)},
+			}
+		end
+
+		for pidx=1,#mesh.primitives do
+		
+			local primitive=mesh.primitives[pidx]
+
+			local tpos=primitive.attributes.POSITION  and M.accessor_to_table(gltf,primitive.attributes.POSITION)
+			local tnrm=primitive.attributes.NORMAL    and M.accessor_to_table(gltf,primitive.attributes.NORMAL)
+			local tuv=primitive.attributes.TEXCOORD_0 and M.accessor_to_table(gltf,primitive.attributes.TEXCOORD_0)
+
+			for i=1,#tpos,3 do
+				local j=(((i-1)/3)*2)+1
+				obj.verts[#obj.verts+1]={
+					tpos and tpos[i] or 0,tpos and tpos[i+1] or 0,tpos and tpos[i+2] or 0,
+					tnrm and tnrm[i] or 0,tnrm and tnrm[i+1] or 0,tnrm and tnrm[i+2] or 0,
+					tuv and tuv[j] or 0,tuv and tuv[j+1] or 0
+				}
+			end
+			local t=M.accessor_to_table(gltf,primitive.indices)
+			for i=1,#t,3 do
+				obj.polys[#obj.polys+1]={t[i]+1,t[i+1]+1,t[i+2]+1,mat=primitive.material+1}
+			end
+			
+		end
+
+	end
+
+	return objs
+end
 
 M.view=function(gltf)
 
@@ -253,22 +305,18 @@ void main(void)
 	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
 
 
-	local obj=geom.new()
-	obj.verts={}
-	obj.polys={}
-	local t=M.accessor_to_table(gltf,gltf.meshes[1].primitives[1].attributes.POSITION)
-	for i=1,#t,3 do
-		obj.verts[#obj.verts+1]={t[i],t[i+1],t[i+2]}
-	end
-	local t=M.accessor_to_table(gltf,gltf.meshes[1].primitives[1].indices)
-	for i=1,#t,3 do
-		obj.polys[#obj.polys+1]={t[i]+1,t[i+1]+1,t[i+2]+1}
-	end
+	local objs=M.to_geoms(gltf)
 
-
---	local obj=geom.icosahedron()
---	print(obj:max_radius())
-	obj:adjust_scale( 256 / obj:max_radius() )
+	local m=0
+	for i,obj in ipairs(objs) do
+		local r=geom.max_radius(obj)
+		if r>m then m=r end
+	end
+	if m>0 then
+		for i,obj in ipairs(objs) do
+			geom.adjust_scale( obj , 256 / m )
+		end
+	end
 	
 	local rot=0
 
@@ -301,7 +349,9 @@ main.draw=function()
 	
 --	gui.draw()
 		
-	geom.draw_polys(obj,"geom_gltf")
+	for i,obj in ipairs(objs) do
+		geom.draw_polys(obj,"geom_gltf")
+	end
 
 
 	gl.PopMatrix()
