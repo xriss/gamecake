@@ -590,6 +590,39 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		return math.sqrt(maxdd)
 	end
 
+	M.find_bounds=function(it)
+
+		local dd={0,0,0,0,0,0}
+		
+		local v=it.verts[1]
+		if v then
+
+			dd[1]=v[1]
+			dd[2]=v[1]
+			dd[3]=v[2]
+			dd[4]=v[2]
+			dd[5]=v[3]
+			dd[6]=v[3]
+		
+			for iv,vv in ipairs(it.verts) do
+				if vv[1]<dd[1] then dd[1]=vv[1] end
+				if vv[1]>dd[2] then dd[2]=vv[1] end
+				if vv[2]<dd[3] then dd[3]=vv[2] end
+				if vv[2]>dd[4] then dd[4]=vv[2] end
+				if vv[3]<dd[5] then dd[5]=vv[3] end
+				if vv[3]>dd[6] then dd[6]=vv[3] end
+			end
+
+		end
+		
+		return dd
+	end
+
+	M.find_center=function(it)
+		local dd=M.find_bounds(it)
+		return (dd[1]+dd[2])/2 , (dd[3]+dd[4])/2 , (dd[5]+dd[6])/2
+	end
+
 	require("wetgenes.gamecake.spew.geom_mask").fill(M)
 	require("wetgenes.gamecake.spew.geom_solids").fill(M)
 

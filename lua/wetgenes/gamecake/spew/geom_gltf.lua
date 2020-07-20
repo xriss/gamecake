@@ -177,22 +177,29 @@ M.to_geoms=function(gltf)
 			local tnrm=primitive.attributes.NORMAL    and M.accessor_to_table(gltf,primitive.attributes.NORMAL)
 			local tuv=primitive.attributes.TEXCOORD_0 and M.accessor_to_table(gltf,primitive.attributes.TEXCOORD_0)
 
-			for i=1,#tpos,3 do
-				local j=(((i-1)/3)*2)+1
-				obj.verts[#obj.verts+1]={
-					tpos and tpos[i] or 0,tpos and -tpos[i+1] or 0,tpos and tpos[i+2] or 0,
-					tnrm and tnrm[i] or 0,tnrm and -tnrm[i+1] or 0,tnrm and tnrm[i+2] or 0,
-					tuv and tuv[j] or 0,tuv and tuv[j+1] or 0
-				}
+			if tpos then -- must have a position
+				for i=1,#tpos,3 do
+					local j=(((i-1)/3)*2)+1
+					obj.verts[#obj.verts+1]={
+						tpos and tpos[i] or 0,tpos and -tpos[i+1] or 0,tpos and tpos[i+2] or 0,
+						tnrm and tnrm[i] or 0,tnrm and -tnrm[i+1] or 0,tnrm and tnrm[i+2] or 0,
+						tuv and tuv[j] or 0,tuv and tuv[j+1] or 0
+					}
+				end
+				
+				if primitive.indices then
+					local t=M.accessor_to_table(gltf,primitive.indices)
+					for i=1,#t,3 do
+						obj.polys[#obj.polys+1]={t[i]+1,t[i+1]+1,t[i+2]+1,mat=primitive.material+1}
+					end
+				else
+					for i=1,#obj.verts,3 do
+						obj.polys[#obj.polys+1]={i,i+1,i+2,mat=primitive.material+1}
+					end
+				end
 			end
-			local t=M.accessor_to_table(gltf,primitive.indices)
-			for i=1,#t,3 do
-				obj.polys[#obj.polys+1]={t[i]+1,t[i+1]+1,t[i+2]+1,mat=primitive.material+1}
-			end
-			
 		end
 
---		obj:flip()
 	end
 
 	return objs
@@ -279,6 +286,24 @@ void main(void)
 
 
 	local objs=M.to_geoms(gltf)
+
+
+	local dx,dy,dz,dw=0,0,0,0
+	for i,obj in ipairs(objs) do
+		local x,y,z=geom.find_center(obj)
+		dx=dx+x
+		dy=dy+y
+		dz=dz+z
+		dw=dw+1
+	end
+	if dw>0 then
+		dx=dx/dw
+		dy=dy/dw
+		dz=dz/dw
+		for i,obj in ipairs(objs) do
+			geom.adjust_position(obj,-dx,-dy,-dz)
+		end
+	end
 
 	local m=0
 	for i,obj in ipairs(objs) do
