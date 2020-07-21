@@ -4,6 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
+local wgrd=require("wetgenes.grd")
 local wgeom=require("wetgenes.gamecake.spew.geom")
 local wstr=require("wetgenes.string")
 local wpack=require("wetgenes.pack")
@@ -200,6 +201,8 @@ M.to_geoms=function(gltf)
 			end
 		end
 
+		obj:build_normals()
+		obj:build_tangents()
 	end
 
 	return objs
@@ -236,25 +239,80 @@ uniform vec4 color;
 
 varying vec4  v_color;
 varying vec3  v_normal;
+varying vec3  v_tangent;
+varying vec3  v_bitangent;
 varying vec3  v_pos;
 varying vec2  v_texcoord;
+varying float v_matidx;
 
 
 #ifdef VERTEX_SHADER
+
+void get_mat(float idx)
+{
+//	idx=idx%8;
+	
+	if(idx==0)
+	{
+		v_color=vec4( 1.0 , 1.0 , 1.0 , 1.0 );
+	}
+	else
+	if(idx==1)
+	{
+		v_color=vec4( 1.0 , 0.0 , 0.0 , 1.0 );
+	}
+	else
+	if(idx==2)
+	{
+		v_color=vec4( 0.0 , 1.0 , 0.0 , 1.0 );
+	}
+	else
+	if(idx==3)
+	{
+		v_color=vec4( 0.0 , 0.0 , 1.0 , 1.0 );
+	}
+	else
+	if(idx==4)
+	{
+		v_color=vec4( 1.0 , 1.0 , 0.0 , 1.0 );
+	}
+	else
+	if(idx==5)
+	{
+		v_color=vec4( 0.0 , 1.0 , 1.0 , 1.0 );
+	}
+	else
+	if(idx==6)
+	{
+		v_color=vec4( 1.0 , 0.0 , 1.0 , 1.0 );
+	}
+	else
+//	if(idx==7)
+	{
+		v_color=vec4( 0.5 , 0.5 , 0.5 , 1.0 );
+	}
+}
 
  
 attribute vec4  a_color;
 attribute vec3  a_vertex;
 attribute vec3  a_normal;
+attribute vec4  a_tangent;
 attribute vec2  a_texcoord;
 attribute float a_matidx;
+
 
 void main()
 {
     gl_Position = projection * modelview * vec4(a_vertex, 1.0);
-    v_normal = normalize( mat3( modelview ) * a_normal );
+	v_normal		=	normalize( mat3( modelview ) * a_normal );
+	v_tangent		=	normalize( mat3( modelview ) * a_tangent.xyz );
+	v_bitangent		=	normalize( cross( v_normal , v_tangent ) * ((a_tangent.w<0.0)?-1.0:1.0) );
 	v_color=a_color;
 	v_texcoord=a_texcoord;
+	v_matidx=a_matidx;
+	
+	get_mat( a_matidx );
 }
 
 
@@ -262,18 +320,29 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 
+precision highp float;
 
-uniform sampler2D tex;
-vec3 d=vec3(0.0,0.0,-1.0);
+uniform sampler2D tex0;
+uniform sampler2D tex1;
+uniform sampler2D tex2;
+
 
 void main(void)
 {
-	vec4 tc=vec4(0.0,0.0,0.0,1.0);
+	vec4 t0=texture2D(tex0, v_texcoord ).rgba;
+	vec4 t1=texture2D(tex1, v_texcoord ).rgba;
+//	vec3 t2=vec3(0.5,0.5,1.0);
+	vec3 t2=texture2D(tex2, v_texcoord ).rgb;
 	
-	vec3 n=normalize(v_normal);
+	t2=(t2-vec3(0.5,0.5,0.5))*2.0;
 
-	gl_FragColor= tc + (vec4(1.0,1.0,1.0,1.0)*pow( n.z, 4.0 )) ;
+	vec3 n = normalize( (t2.x*v_bitangent) + (t2.y*v_tangent) + (t2.z*v_normal) );
 
+//	vec3 n=normalize( mat3( modelview ) * t2.xyz ); // v_normal+
+	gl_FragColor= ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ) ;
+	gl_FragColor.a=1.0;
+
+//	gl_FragColor= vec4(n,1.0);
 }
 
 
@@ -284,6 +353,41 @@ void main(void)
 
 	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
 
+	local gg={}
+	
+	for i,v in ipairs{
+			{ gltf.images[1] },
+			{ gltf.images[2] },
+			{ gltf.images[3] },
+		} do
+
+		local g=v[1]
+		gg[i]=assert(gl.GenTexture())
+
+dprint(g)
+		if g then
+		
+			g=g:convert(wgrd.FMT_U8_RGBA)
+
+			gl.BindTexture(gl.TEXTURE_2D, gg[i])
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.REPEAT)
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.REPEAT)
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+			gl.TexImage2D(
+				gl.TEXTURE_2D,
+				0,
+				gl.RGBA,
+				g.width,
+				g.height,
+				0,
+				gl.RGBA,
+				gl.UNSIGNED_BYTE,
+				g.data)
+		end
+
+	end
 
 	local objs=M.to_geoms(gltf)
 
@@ -334,7 +438,14 @@ main.draw=function()
 			
 	gl.Enable(gl.DEPTH_TEST)
 	for i,obj in ipairs(objs) do
-		geom.draw_polys(obj,"geom_gltf")
+		geom.draw_polys(obj,"geom_gltf",function()
+			gl.ActiveTexture(gl.TEXTURE0)
+			gl.BindTexture(gl.TEXTURE_2D, gg[1])
+			gl.ActiveTexture(gl.TEXTURE1)
+			gl.BindTexture(gl.TEXTURE_2D, gg[2])
+			gl.ActiveTexture(gl.TEXTURE2)
+			gl.BindTexture(gl.TEXTURE_2D, gg[3])
+		end)
 	end
 	gl.Disable(gl.DEPTH_TEST)
 
