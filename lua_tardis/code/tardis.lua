@@ -259,7 +259,7 @@ function m2.new(...) return setmetatable({0,0,0,0},m2):set(...) end
 Set this m2 to the identity matrix.
 
 ]]
-function m2.identity(it) return it:set(1,0, 0,1) end 
+function m2.identity(it) return array.set(it,1,0, 0,1) end 
 
 --[[#lua.wetgenes.tardis.m2.determinant
 
@@ -299,7 +299,7 @@ otherwise m2 is modified and returned.
 ]]
 function m2.transpose(it,r)
 	r=r or it
-	return	 r:set(it[1],it[2+1], it[2],it[2+2])
+	return	 array.set(r,it[1],it[2+1], it[2],it[2+2])
 end
 
 --[[#lua.wetgenes.tardis.m2.scale
@@ -315,7 +315,7 @@ otherwise m2 is modified and returned.
 ]]
 function m2.scale(it,s,r)
 	r=r or it
-	return r:set(it[1]*s,it[2]*s, it[2+1]*s,it[2+2]*s)
+	return array.set(r,it[1]*s,it[2]*s, it[2+1]*s,it[2+2]*s)
 end
 
 --[[#lua.wetgenes.tardis.m2.cofactor
@@ -407,7 +407,7 @@ function m3.new(...) return setmetatable({0,0,0,0,0,0,0,0,0},m3):set(...) end
 Set this m3 to the identity matrix.
 
 ]]
-function m3.identity(it) return it:set(1,0,0, 0,1,0, 0,0,1) end 
+function m3.identity(it) return array.set(it,1,0,0, 0,1,0, 0,0,1) end 
 
 --[[#lua.wetgenes.tardis.m3.determinant
 
@@ -457,7 +457,7 @@ otherwise m3 is modified and returned.
 ]]
 function m3.transpose(it,r)
 	r=r or r
-	return	 r:set(it[1],it[3+1],it[6+1], it[2],it[3+2],it[6+2], it[3],it[3+3],it[6+3])
+	return	 array.set(r,it[1],it[3+1],it[6+1], it[2],it[3+2],it[6+2], it[3],it[3+3],it[6+3])
 end
 
 --[[#lua.wetgenes.tardis.m3.scale
@@ -473,7 +473,7 @@ otherwise m3 is modified and returned.
 ]]
 function m3.scale(it,s,r)
 	r=r or it
-	return r:set(it[1]*s,it[2]*s,it[3]*s, it[3+1]*s,it[3+2]*s,it[3+3]*s, it[6+1]*s,it[6+2]*s,it[6+3]*s)
+	return array.set(r,it[1]*s,it[2]*s,it[3]*s, it[3+1]*s,it[3+2]*s,it[3+3]*s, it[6+1]*s,it[6+2]*s,it[6+3]*s)
 end
 
 --[[#lua.wetgenes.tardis.m3.cofactor
@@ -500,7 +500,7 @@ function m3.cofactor(it,r)
 			end
 		end
 	end
-	return r:set(t)
+	return array.set(r,t)
 end
 
 --[[#lua.wetgenes.tardis.m3.adjugate
@@ -563,7 +563,7 @@ function m4.new(...) return setmetatable({0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},m4):s
 Set this m4 to the identity matrix.
 
 ]]
-function m4.identity(it) return it:set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1) end 
+function m4.identity(it) return array.set(it,1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1) end 
 
 --[[#lua.wetgenes.tardis.m4.determinant
 
@@ -619,7 +619,7 @@ otherwise m4 is modified and returned.
 ]]
 function m4.transpose(it,r)
 	r=r or it
-	return	 r:set(it[1],it[4+1],it[8+1],it[12+1], it[2],it[4+2],it[8+2],it[12+2], it[3],it[4+3],it[8+3],it[12+3], it[4],it[4+4],it[8+4],it[12+4])
+	return	 array.set(r,it[1],it[4+1],it[8+1],it[12+1], it[2],it[4+2],it[8+2],it[12+2], it[3],it[4+3],it[8+3],it[12+3], it[4],it[4+4],it[8+4],it[12+4])
 end
 
 --[[#lua.wetgenes.tardis.m4.scale
@@ -635,7 +635,7 @@ otherwise m4 is modified and returned.
 ]]
 function m4.scale(it,s,r)
 	r=r or it
-	return r:set(
+	return array.set(r,
 		it[ 1]*s,it[ 2]*s,it[ 3]*s,it[ 4]*s,
 		it[ 5]*s,it[ 6]*s,it[ 7]*s,it[ 8]*s,
 		it[ 9]*s,it[10]*s,it[11]*s,it[12]*s,
@@ -655,7 +655,7 @@ otherwise m4 is modified and returned.
 ]]
 function m4.add(it,m,r)
 	r=r or it
-	return r:set(
+	return array.set(r,
 		it[ 1]+m[ 1],it[ 2]+m[ 2],it[ 3]+m[ 3],it[ 4]+m[ 4],
 		it[ 5]+m[ 5],it[ 6]+m[ 6],it[ 7]+m[ 7],it[ 8]+m[ 8],
 		it[ 9]+m[ 9],it[10]+m[10],it[11]+m[11],it[12]+m[12],
@@ -675,7 +675,7 @@ otherwise m4 is modified and returned.
 ]]
 function m4.sub(it,m,r)
 	r=r or it
-	return r:set(
+	return array.set(r,
 		it[ 1]-m[ 1],it[ 2]-m[ 2],it[ 3]-m[ 3],it[ 4]-m[ 4],
 		it[ 5]-m[ 5],it[ 6]-m[ 6],it[ 7]-m[ 7],it[ 8]-m[ 8],
 		it[ 9]-m[ 9],it[10]-m[10],it[11]-m[11],it[12]-m[12],
@@ -726,7 +726,7 @@ function m4.cofactor(it,r)
 			end
 		end
 	end
-	return r:set(t)
+	return array.set(r,t)
 end
 
 --[[#lua.wetgenes.tardis.m4.adjugate
@@ -783,7 +783,7 @@ function m4.translate(it,a,b,c,d)
 	local r2=it[12+2]+v3a[1]*it[2]+v3a[2]*it[6]+v3a[3]*it[10]
 	local r3=it[12+3]+v3a[1]*it[3]+v3a[2]*it[7]+v3a[3]*it[11]
 	local r4=it[12+4]+v3a[1]*it[4]+v3a[2]*it[8]+v3a[3]*it[12]
-	return r:set(it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,r4 )
+	return array.set(r,it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,r4 )
 end
 
 --[[#lua.wetgenes.tardis.m4.scale_v3
@@ -806,10 +806,12 @@ function m4.scale_v3(it,a,b,c,d)
 	local s1=v3a[1]
 	local s2=v3a[2]
 	local s3=v3a[3]
-	return r:set(	s1*it[1],	s1*it[2],	s1*it[3],	s1*it[4],
-					s2*it[5],	s2*it[6],	s2*it[7],	s2*it[8],
-					s3*it[9],	s3*it[10],	s3*it[11],	s3*it[12],
-					it[13],		it[14],		it[15],		it[16] )
+	return array.set(r,
+		s1*it[1],	s1*it[2],	s1*it[3],	s1*it[4],
+		s2*it[5],	s2*it[6],	s2*it[7],	s2*it[8],
+		s3*it[9],	s3*it[10],	s3*it[11],	s3*it[12],
+		it[13],		it[14],		it[15],		it[16]
+	)
 end
 
 --[[#lua.wetgenes.tardis.m4.scale_v3
@@ -827,7 +829,7 @@ otherwise a new v3 is created and returned.
 ]]
 function m4.get_scale_v3(it,r)
 	r=r or tardis.v3.new()
-	return r:set(
+	return array.set(r,
 		math.sqrt(it[1]*it[1]+it[5]*it[5]+it[ 9]*it[ 9]),
 		math.sqrt(it[2]*it[2]+it[6]*it[6]+it[10]*it[10]),
 		math.sqrt(it[3]*it[3]+it[7]*it[7]+it[11]*it[11])
@@ -860,7 +862,7 @@ function m4.setrot(it,degrees,v3a)
 		z=z/d
 	end
 
-	return it:set(
+	return array.set(it,
 		x*x*cc+c	,	x*y*cc-z*s	,	x*z*cc+y*s	, 	0	,
 		x*y*cc+z*s	,	y*y*cc+c	,	y*z*cc-x*s	,	0	,
         x*z*cc-y*s	,	y*z*cc+x*s	,	z*z*cc+c	,	0	,
@@ -911,7 +913,7 @@ function v2.new(...) return setmetatable({0,0},v2):set(...) end
 Set this v2 to all zeros.
 
 ]]
-function v2.identity(it) return it:set(0,0) end 
+function v2.identity(it) return array.set(it,0,0) end 
 
 --[[#lua.wetgenes.tardis.v2.lenlen
 
@@ -949,7 +951,7 @@ otherwise v2 is modified and returned.
 ]]
 function v2.oo(it,r)
 	r=r or it
-	return r:set( 1/it[1] , 1/it[2] )
+	return array.set(r, 1/it[1] , 1/it[2] )
 end
 
 --[[#lua.wetgenes.tardis.v2.scale
@@ -965,7 +967,7 @@ otherwise v2 is modified and returned.
 ]]
 function v2.scale(it,s,r)
 	r=r or it
-	return r:set( it[1]*s , it[2]*s )
+	return array.set(r, it[1]*s , it[2]*s )
 end
 
 --[[#lua.wetgenes.tardis.v2.normalize
@@ -996,7 +998,7 @@ otherwise v2 is modified and returned.
 ]]
 function v2.add(va,vb,r)
 	r=r or va
-	return r:set( va[1]+vb[1] , va[2]+vb[2] )
+	return array.set(r, va[1]+vb[1] , va[2]+vb[2] )
 end
 
 --[[#lua.wetgenes.tardis.v2.sub
@@ -1012,7 +1014,7 @@ otherwise v2 is modified and returned.
 ]]
 function v2.sub(va,vb,r)
 	r=r or va
-	return r:set( va[1]-vb[1] , va[2]-vb[2] )
+	return array.set(r, va[1]-vb[1] , va[2]-vb[2] )
 end
 
 --[[#lua.wetgenes.tardis.v2.mul
@@ -1028,7 +1030,7 @@ otherwise v2 is modified and returned.
 ]]
 function v2.mul(va,vb,r)
 	r=r or va
-	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) )
+	return array.set(r, (va[1]*vb[1]) , (va[2]*vb[2]) )
 end
 
 --[[#lua.wetgenes.tardis.v2.dot
@@ -1080,7 +1082,7 @@ function v3.new(...) return setmetatable({0,0,0},v3):set(...) end
 Set this v3 to all zeros.
 
 ]]
-function v3.identity(it) return it:set(0,0,0) end 
+function v3.identity(it) return array.set(it,0,0,0) end 
 
 --[[#lua.wetgenes.tardis.v3.lenlen
 
@@ -1118,7 +1120,7 @@ otherwise v3 is modified and returned.
 ]]
 function v3.oo(it,r)
 	r=r or it
-	return r:set( 1/it[1] , 1/it[2] , 1/it[3] )
+	return array.set(r, 1/it[1] , 1/it[2] , 1/it[3] )
 end
 
 --[[#lua.wetgenes.tardis.v3.scale
@@ -1134,7 +1136,7 @@ otherwise v3 is modified and returned.
 ]]
 function v3.scale(it,s,r)
 	r=r or it
-	return r:set( it[1]*s , it[2]*s , it[3]*s )
+	return array.set(r, it[1]*s , it[2]*s , it[3]*s )
 end
 
 --[[#lua.wetgenes.tardis.v3.normalize
@@ -1165,7 +1167,7 @@ otherwise v3 is modified and returned.
 ]]
 function v3.add(va,vb,r)
 	r=r or va
-	return r:set( va[1]+vb[1] , va[2]+vb[2] , va[3]+vb[3] )
+	return array.set(r, va[1]+vb[1] , va[2]+vb[2] , va[3]+vb[3] )
 end
 
 --[[#lua.wetgenes.tardis.v3.sub
@@ -1181,7 +1183,7 @@ otherwise v3 is modified and returned.
 ]]
 function v3.sub(va,vb,r)
 	r=r or va
-	return r:set( va[1]-vb[1] , va[2]-vb[2] , va[3]-vb[3] )
+	return array.set(r, va[1]-vb[1] , va[2]-vb[2] , va[3]-vb[3] )
 end
 
 --[[#lua.wetgenes.tardis.v3.mul
@@ -1197,7 +1199,7 @@ otherwise v3 is modified and returned.
 ]]
 function v3.mul(va,vb,r)
 	r=r or va
-	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) , (va[3]*vb[3]) )
+	return array.set(r, (va[1]*vb[1]) , (va[2]*vb[2]) , (va[3]*vb[3]) )
 end
 
 --[[#lua.wetgenes.tardis.v3.dot
@@ -1224,7 +1226,7 @@ otherwise v3 is modified and returned.
 ]]
 function v3.cross(va,vb,r)
 	r=r or va
-	return r:set( (va[2]*vb[3])-(va[3]*vb[2]) , (va[3]*vb[1])-(va[1]*vb[3]) , (va[1]*vb[2])-(va[2]*vb[1]) )
+	return array.set(r, (va[2]*vb[3])-(va[3]*vb[2]) , (va[3]*vb[1])-(va[1]*vb[3]) , (va[1]*vb[2])-(va[2]*vb[1]) )
 end
 
 
@@ -1255,7 +1257,7 @@ function v4.new(...) return setmetatable({0,0,0,0},v4):set(...) end
 Set this v4 to all zeros.
 
 ]]
-function v4.identity(it) return it:set(0,0,0,0) end
+function v4.identity(it) return array.set(it,0,0,0,0) end
 
 --[[#lua.wetgenes.tardis.v4.to_v3
 
@@ -1271,7 +1273,7 @@ otherwise a new v3 is created and returned.
 function v4.to_v3(it,r)
 	r=r or v3.new()
 	local oow=1/it[4]
-	return r:set( it[1]*oow , it[2]*oow , it[3]*oow )
+	return array.set(r, it[1]*oow , it[2]*oow , it[3]*oow )
 end
 
 --[[#lua.wetgenes.tardis.v4.lenlen
@@ -1310,7 +1312,7 @@ otherwise v4 is modified and returned.
 ]]
 function v4.oo(it,r)
 	r=r or it
-	return r:set( 1/it[1] , 1/it[2] , 1/it[3] , 1/it[4] )
+	return array.set(r, 1/it[1] , 1/it[2] , 1/it[3] , 1/it[4] )
 end
 
 --[[#lua.wetgenes.tardis.v4.scale
@@ -1326,7 +1328,7 @@ otherwise v4 is modified and returned.
 ]]
 function v4.scale(it,s,r)
 	r=r or it
-	return r:set( it[1]*s , it[2]*s , it[3]*s , it[4]*s )
+	return array.set(r, it[1]*s , it[2]*s , it[3]*s , it[4]*s )
 end
 
 --[[#lua.wetgenes.tardis.v4.normalize
@@ -1357,7 +1359,7 @@ otherwise v4 is modified and returned.
 ]]
 function v4.add(va,vb,r)
 	r=r or va
-	return r:set( va[1]+vb[1] , va[2]+vb[2] , va[3]+vb[3] , va[4]+vb[4] )
+	return array.set(r, va[1]+vb[1] , va[2]+vb[2] , va[3]+vb[3] , va[4]+vb[4] )
 end
 
 --[[#lua.wetgenes.tardis.v4.sub
@@ -1373,7 +1375,7 @@ otherwise v4 is modified and returned.
 ]]
 function v4.sub(va,vb,r)
 	r=r or va
-	return r:set( va[1]-vb[1] , va[2]-vb[2] , va[3]-vb[3] , va[4]-vb[4] )
+	return array.set(r, va[1]-vb[1] , va[2]-vb[2] , va[3]-vb[3] , va[4]-vb[4] )
 end
 
 --[[#lua.wetgenes.tardis.v4.mul
@@ -1389,7 +1391,7 @@ otherwise v4 is modified and returned.
 ]]
 function v4.mul(va,vb,r)
 	r=r or va
-	return r:set( (va[1]*vb[1]) , (va[2]*vb[2]) , (va[3]*vb[3]) , (va[4]*vb[4]) )
+	return array.set(r, (va[1]*vb[1]) , (va[2]*vb[2]) , (va[3]*vb[3]) , (va[4]*vb[4]) )
 end
 
 --[[#lua.wetgenes.tardis.v4.dot
@@ -1421,7 +1423,7 @@ Create a new q4 and optionally set it to the given values, q4 methods
 usually return the input q4 for easy function chaining.
 
 ]]
-function q4.new(...) return setmetatable({0,0,0,0},q4):set(...) end
+function q4.new(...) return setmetatable({0,0,0,1},q4):set(...) end
 
 --[[#lua.wetgenes.tardis.q4.identity
 
@@ -1430,7 +1432,7 @@ function q4.new(...) return setmetatable({0,0,0,0},q4):set(...) end
 Set this q4 to its 0,0,0,1 identity
 
 ]]
-function q4.identity(it) return it:set(0,0,0,1) end 
+function q4.identity(it) return array.set(it,0,0,0,1) end 
 
 --[[#lua.wetgenes.tardis.q4.lerp
 
@@ -1447,7 +1449,7 @@ function q4.nlerp(qa,qb,sa,r)
 	local sb=1-sa
 	if qa.dot(qb) < 0 then sa=-sa end -- shortest fix
 	r=r or va
-	r:set( va[1]*sa+vb[1]*sb , va[2]*sa+vb[2]*sb , va[3]*sa+vb[3]*sb , va[4]*sa+vb[4]*sb )
+	array.set(r, va[1]*sa+vb[1]*sb , va[2]*sa+vb[2]*sb , va[3]*sa+vb[3]*sb , va[4]*sa+vb[4]*sb )
 	return r:normalize()
 end
 
@@ -1459,9 +1461,9 @@ Set this matrix to a rotation matrix around the given normal.
 
 ]]
 function q4.setrot(it,degrees,v3a)
-	local ah=degrees * (math.PI/360)
+	local ah=degrees * (math.pi/180)
 	local sh=math.sin(ah)
-	return it:set( math.cos(ah) , v3a[1]*sh , v3a[2]*sh , v3a[3]*sh )
+	return array.set(it , v3a[3]*sh , v3a[2]*sh , v3a[1]*sh , math.cos(ah) )
 end
 
 --[[#lua.wetgenes.tardis.q4.rotate
@@ -1532,7 +1534,7 @@ function tardis.line_intersect_plane(l,p,r)
 	if d~=0 then -- less errors please
 		d=t:dot(p[2])/d
 	end
-	return r:set( l[1][1]+(l[2][1]*d) , l[1][2]+(l[2][2]*d) , l[1][3]+(l[2][3]*d) ) -- the point of intersection
+	return array.set(r, l[1][1]+(l[2][1]*d) , l[1][2]+(l[2][2]*d) , l[1][3]+(l[2][3]*d) ) -- the point of intersection
 end
 
 function tardis.q4_to_m4(q,m)
@@ -1542,7 +1544,7 @@ function tardis.q4_to_m4(q,m)
     local    yy,yz,yw=    y*y,y*z,y*w
     local       zz,zw=        z*z,z*w
 
-	return m:set(
+	return array.set(m,
 					1 - 2 * ( yy + zz ),
 						2 * ( xy - zw ),
 						2 * ( xz + yw ),0,
@@ -1561,7 +1563,7 @@ function tardis.q4_product_q4(q4a,q4b,r)
     local r2 = -q4b[1] * q4a[3] + q4b[2] * q4a[4] + q4b[3] * q4a[1] + q4b[4] * q4a[2];
     local r3 =  q4b[1] * q4a[2] - q4b[2] * q4a[1] + q4b[3] * q4a[4] + q4b[4] * q4a[3];
     local r4 = -q4b[1] * q4a[1] - q4b[2] * q4a[2] - q4b[3] * q4a[3] + q4b[4] * q4a[4];
-	return r:set(r1,r2,r3,r4)
+	return array.set(r,r1,r2,r3,r4)
 end
 
 function tardis.v3_product_q4(v3,q4,r)
@@ -1569,7 +1571,7 @@ function tardis.v3_product_q4(v3,q4,r)
     local r1 =                  q4[2] * v3[3] - q4[3] * v3[2] + q4[4] * v3[1];
     local r2 = -q4[1] * v3[3]                 + q4[3] * v3[1] + q4[4] * v3[2];
     local r3 =  q4[1] * v3[2] - q4[2] * v3[1]                 + q4[4] * v3[3];
-	return r:set(r1,r2,r3)
+	return array.set(r,r1,r2,r3)
 end
 
 function tardis.v3_product_m4(v3,m4,r)
@@ -1578,7 +1580,7 @@ function tardis.v3_product_m4(v3,m4,r)
 	local r1= oow * ( (m4[   1]*v3[1]) + (m4[ 4+1]*v3[2]) + (m4[ 8+1]*v3[3]) + (m4[12+1] ) )
 	local r2= oow * ( (m4[   2]*v3[1]) + (m4[ 4+2]*v3[2]) + (m4[ 8+2]*v3[3]) + (m4[12+2] ) )
 	local r3= oow * ( (m4[   3]*v3[1]) + (m4[ 4+3]*v3[2]) + (m4[ 8+3]*v3[3]) + (m4[12+3] ) )
-	return r:set(r1,r2,r3)
+	return array.set(r,r1,r2,r3)
 end
 
 function tardis.v4_product_m4(v4,m4,r)
@@ -1587,7 +1589,7 @@ function tardis.v4_product_m4(v4,m4,r)
 	local r2= ( (m4[   2]*v4[1]) + (m4[ 4+2]*v4[2]) + (m4[ 8+2]*v4[3]) + (m4[12+2]*v4[4]) )
 	local r3= ( (m4[   3]*v4[1]) + (m4[ 4+3]*v4[2]) + (m4[ 8+3]*v4[3]) + (m4[12+3]*v4[4]) )
 	local r4= ( (m4[   4]*v4[1]) + (m4[ 4+4]*v4[2]) + (m4[ 8+4]*v4[3]) + (m4[12+4]*v4[4]) )
-	return r:set(r1,r2,r3,r4)
+	return array.set(r,r1,r2,r3,r4)
 end
 
 function tardis.m4_product_m4(m4a,m4b,r)
@@ -1608,7 +1610,7 @@ function tardis.m4_product_m4(m4a,m4b,r)
 	local r14= (m4b[12+1]*m4a[   2]) + (m4b[12+2]*m4a[ 4+2]) + (m4b[12+3]*m4a[ 8+2]) + (m4b[12+4]*m4a[12+2])
 	local r15= (m4b[12+1]*m4a[   3]) + (m4b[12+2]*m4a[ 4+3]) + (m4b[12+3]*m4a[ 8+3]) + (m4b[12+4]*m4a[12+3])
 	local r16= (m4b[12+1]*m4a[   4]) + (m4b[12+2]*m4a[ 4+4]) + (m4b[12+3]*m4a[ 8+4]) + (m4b[12+4]*m4a[12+4])
-	return r:set(r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16)
+	return array.set(r,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16)
 end
 
 

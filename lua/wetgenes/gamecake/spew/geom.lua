@@ -326,7 +326,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			vv[9]=0
 			vv[10]=0
 			vv[11]=0
-			vv[12]=0
+			vv[12]={0,0,0}
 		end
 		
 -- check each poly edge and add a weighted version of its normal to the tangent
@@ -350,15 +350,23 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				v1[10]=v1[10]+(n[2]*n[5])
 				v1[11]=v1[11]+(n[3]*n[5])
 
+				v1[12][1]=v1[12][1]+(n[1]*n[4])
+				v1[12][2]=v1[12][2]+(n[2]*n[4])
+				v1[12][3]=v1[12][3]+(n[3]*n[4])
+
 				v2[ 9]=v2[ 9]+(n[1]*n[5])
 				v2[10]=v2[10]+(n[2]*n[5])
 				v2[11]=v2[11]+(n[3]*n[5])
 
+				v2[12][1]=v2[12][1]+(n[1]*n[4])
+				v2[12][2]=v2[12][2]+(n[2]*n[4])
+				v2[12][3]=v2[12][3]+(n[3]*n[4])
 
 			end
 		end
 		
 -- merge tangents of vertexs that are in same 3d location
+--[[
 		local merge={}
 		for iv,vv in ipairs(it.verts) do
 			local s=vv[1]..","..vv[2]..","..vv[3]
@@ -372,12 +380,19 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 					vv[1][ 9]=vv[1][ 9]+vv[i][ 9]
 					vv[1][10]=vv[1][10]+vv[i][10]
 					vv[1][11]=vv[1][11]+vv[i][11]
+					vv[1][12][1]=vv[1][12][1]+vv[i][12][1]
+					vv[1][12][2]=vv[1][12][2]+vv[i][12][2]
+					vv[1][12][3]=vv[1][12][3]+vv[i][12][3]
 					vv[i][ 9]=vv[1][ 9]
 					vv[i][10]=vv[1][10]
 					vv[i][11]=vv[1][11]
+					vv[i][12][1]=vv[1][12][1]
+					vv[i][12][2]=vv[1][12][2]
+					vv[i][12][3]=vv[1][12][3]
 				end
 			end
 		end
+]]
 
 -- remove normal to place tangent on surface and then fix its length
 		for iv,vv in ipairs(it.verts) do
@@ -386,44 +401,34 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			vv[10]=vv[10]-(n*vv[5])
 			vv[11]=vv[11]-(n*vv[6])
 
+			local n=( (vv[12][1]*vv[4]) + (vv[12][2]*vv[5]) + (vv[12][3]*vv[6]) ) -- dot
+			vv[12][1]=vv[12][1]-(n*vv[4])
+			vv[12][2]=vv[12][2]-(n*vv[5])
+			vv[12][3]=vv[12][3]-(n*vv[6])
+
 			local dd=math.sqrt(vv[9]*vv[9] + vv[10]*vv[10] + vv[11]*vv[11])
 			if dd==0 then dd=1 end
 			vv[ 9]=vv[ 9]/dd
 			vv[10]=vv[10]/dd
 			vv[11]=vv[11]/dd
+
+			local dd=math.sqrt(vv[12][1]*vv[12][1] + vv[12][2]*vv[12][2] + vv[12][3]*vv[12][3])
+			if dd==0 then dd=1 end
+			vv[12][1]=vv[12][1]/dd
+			vv[12][2]=vv[12][2]/dd
+			vv[12][3]=vv[12][3]/dd
 		end
 
 -- work out the sign for the bitangent
-		for ip,vp in ipairs(it.polys) do
-			for i=1,#vp do
-				local v1=it.verts[ vp[i] ]
-				local v2=it.verts[ vp[(i%#vp)+1] ]
-				local n={ v2[1]-v1[1] , v2[2]-v1[2] , v2[3]-v1[3] , v2[7]-v1[7] , v2[8]-v1[8] }
-
-				local dd=math.sqrt(n[1]*n[1] + n[2]*n[2] + n[3]*n[3]) -- unit length
-				if dd==0 then dd=1 end
-				n[1]=n[1]/dd
-				n[2]=n[2]/dd
-				n[3]=n[3]/dd
-				local dd=math.sqrt(n[4]*n[4] + n[5]*n[5] ) -- unit length
-				if dd==0 then dd=1 end
-				n[4]=n[4]/dd
-				n[5]=n[5]/dd
-
-				n[1]=(n[1]*n[4])
-				n[2]=(n[2]*n[4])
-				n[3]=(n[3]*n[4])
-
-				local b={ -- bitangent is cross product of normal and tangent
-							(v1[2]*v1[11])-(v1[3]*v1[10]) ,
-							(v1[3]*v1[9] )-(v1[1]*v1[11]) ,
-							(v1[1]*v1[10])-(v1[2]*v1[9] )
-						}
-
-				v1[12]=v1[12]+( (b[1]*n[1]) + (b[2]*n[2]) + (b[3]*n[3]) )
-			end
-		end
 		for iv,vv in ipairs(it.verts) do
+
+-- test
+			vv[13]=vv[12][1]
+			vv[14]=vv[12][2]
+			vv[15]=vv[12][3]
+
+			local b={ (vv[5]*vv[11])-(vv[6]*vv[10]) , (vv[6]*vv[9])-(vv[4]*vv[11]) , (vv[4]*vv[10])-(vv[5]*vv[9]) }
+			vv[12] = vv[12][1]*b[1] + vv[12][2]*b[2] + vv[12][3]*b[3] 
 			if vv[12]>=0 then vv[12]=1 else vv[12]=-1 end
 		end
 

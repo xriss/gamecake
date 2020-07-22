@@ -9,6 +9,7 @@ local wgeom=require("wetgenes.gamecake.spew.geom")
 local wstr=require("wetgenes.string")
 local wpack=require("wetgenes.pack")
 local wjson=require("wetgenes.json")
+local tardis=require("wetgenes.tardis")
 
 
 local function dprint(a) print(wstr.dump(a)) end
@@ -201,7 +202,7 @@ M.to_geoms=function(gltf)
 			end
 		end
 
-		obj:build_normals()
+--		obj:build_normals()
 		obj:build_tangents()
 	end
 
@@ -223,6 +224,16 @@ M.view=function(gltf,oven)
 		-- setup oven with vanilla cake setup and save as a global value
 		oven=require("wetgenes.gamecake.oven").bake(opts).preheat()
 	end
+
+	local view=oven.cake.views.create({
+		parent=oven.cake.views.get(),
+		mode="full",
+		vx=oven.win.width,
+		vy=oven.win.height,
+		vz=oven.win.height*4,
+		fov=0,
+	})
+
 	
 	local main={}
 	
@@ -244,9 +255,12 @@ varying vec3  v_bitangent;
 varying vec3  v_pos;
 varying vec2  v_texcoord;
 varying float v_matidx;
+varying vec4  v_bone;
 
 
 #ifdef VERTEX_SHADER
+
+precision highp float;
 
 void get_mat(float idx)
 {
@@ -300,6 +314,7 @@ attribute vec3  a_normal;
 attribute vec4  a_tangent;
 attribute vec2  a_texcoord;
 attribute float a_matidx;
+attribute vec4  a_bone;
 
 
 void main()
@@ -307,7 +322,8 @@ void main()
     gl_Position = projection * modelview * vec4(a_vertex, 1.0);
 	v_normal		=	normalize( mat3( modelview ) * a_normal );
 	v_tangent		=	normalize( mat3( modelview ) * a_tangent.xyz );
-	v_bitangent		=	normalize( cross( v_normal , v_tangent ) * ((a_tangent.w<0.0)?-1.0:1.0) );
+	v_bitangent		=	normalize( cross( v_normal , v_tangent ) );//* a_tangent.w );
+	v_bone= vec4( normalize( mat3( modelview ) * a_bone.xyz ) , 0.0 ) ;
 	v_color=a_color;
 	v_texcoord=a_texcoord;
 	v_matidx=a_matidx;
@@ -315,6 +331,12 @@ void main()
 	get_mat( a_matidx );
 }
 
+/*
+vec3 normalW = normalize(vec3(u_NormalMatrix * vec4(getNormal(), 0.0)));
+vec3 tangentW = normalize(vec3(u_ModelMatrix * vec4(tangent, 0.0)));
+vec3 bitangentW = cross(normalW, tangentW) * a_Tangent.w;
+v_TBN = mat3(tangentW, bitangentW, normalW);
+*/  
 
 #endif //VERTEX_SHADER
 
@@ -331,18 +353,21 @@ void main(void)
 {
 	vec4 t0=texture2D(tex0, v_texcoord ).rgba;
 	vec4 t1=texture2D(tex1, v_texcoord ).rgba;
+	vec3 t2=vec3(1.0,0.5,0.5);
+//	vec3 t2=vec3(0.5,1.0,0.5);
 //	vec3 t2=vec3(0.5,0.5,1.0);
-	vec3 t2=texture2D(tex2, v_texcoord ).rgb;
+//	vec3 t2=texture2D(tex2, v_texcoord ).rgb;
 	
 	t2=(t2-vec3(0.5,0.5,0.5))*2.0;
 
 	vec3 n = normalize( (t2.x*v_bitangent) + (t2.y*v_tangent) + (t2.z*v_normal) );
 
-//	vec3 n=normalize( mat3( modelview ) * t2.xyz ); // v_normal+
 	gl_FragColor= ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ) ;
 	gl_FragColor.a=1.0;
 
-//	gl_FragColor= vec4(n,1.0);
+	n=v_bone.xyz;
+	n=v_bitangent.xyz;
+	gl_FragColor= vec4((n*0.5)+vec3(0.5,0.5,0.5),1.0);
 }
 
 
@@ -364,7 +389,6 @@ void main(void)
 		local g=v[1]
 		gg[i]=assert(gl.GenTexture())
 
-dprint(g)
 		if g then
 		
 			g=g:convert(wgrd.FMT_U8_RGBA)
@@ -420,20 +444,78 @@ dprint(g)
 		end
 	end
 	
-	local rot=0
+	local pos=tardis.v3.new()
+	local rot=tardis.q4.new():identity()
 
 main.update=function()
-	rot=rot+1
 end
+
+	local mstate={}
+
+main.msg=function(m)
+	view.msg(m) -- fix mouse coords
+	
+--[[
+	rot:rotate(0.1,{0,1,0})
+	rot:normalize()
+]]
+
+	if m.class=="mouse" then
+	
+		if m.keyname=="left" then -- click
+		
+			if m.action==1 then		mstate={"left",m.x,m.y}
+			elseif m.action==-1 then	mstate={}
+			end
+			
+		elseif m.keyname=="right" then -- click
+
+			if m.action==1 then		mstate={"right",m.x,m.y}
+			elseif m.action==-1 then	mstate={}
+			end
+
+		else
+
+			if m.action==0 then -- drag
+				if mstate[1]=="left" then
+					rot:rotate( (m.x-mstate[2]) /4 ,{0,1,0})
+					rot:rotate( (m.y-mstate[3]) /4 ,{1,0,0})
+					rot:normalize()
+					mstate[2]=m.x
+					mstate[3]=m.y
+				end
+			end
+		
+		end
+		
+	
+	end
+
+--	dprint(m)
+
+end
+
 
 main.draw=function()
 		
+--  we want the main view to track the window size
+	oven.win:info()
+	
+	view.vx=oven.win.width
+	view.vy=oven.win.height
+	view.vz=oven.win.height*4
+	
+	oven.cake.views.push_and_apply(view)
+	oven.cake.canvas.gl_default() -- reset gl state
+	
 	gl.ClearColor(pack.argb4_pmf4(0xf008))
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
 	gl.PushMatrix()
-	gl.Translate(400,300,0)
-	gl.Rotate(rot,1,1,1)
+	gl.Translate(view.vx/2,view.vy/2,0)
+--	gl.Translate(pos)
+	gl.MultMatrix( tardis.q4_to_m4(rot) )
+--	gl.Rotate(rot,1,1,1)
 	
 			
 	gl.Enable(gl.DEPTH_TEST)
@@ -452,6 +534,7 @@ main.draw=function()
 
 	gl.PopMatrix()
 
+	oven.cake.views.pop_and_apply()
 
 end
 
