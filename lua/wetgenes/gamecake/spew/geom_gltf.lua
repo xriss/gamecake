@@ -322,8 +322,8 @@ void main()
     gl_Position = projection * modelview * vec4(a_vertex, 1.0);
 	v_normal		=	normalize( mat3( modelview ) * a_normal );
 	v_tangent		=	normalize( mat3( modelview ) * a_tangent.xyz );
-	v_bitangent		=	normalize( cross( v_normal , v_tangent ) );//* a_tangent.w );
-	v_bone= vec4( normalize( mat3( modelview ) * a_bone.xyz ) , 0.0 ) ;
+	v_bitangent		=	normalize( cross( v_normal , v_tangent ) * a_tangent.w );
+	v_bone			=	a_bone;
 	v_color=a_color;
 	v_texcoord=a_texcoord;
 	v_matidx=a_matidx;
@@ -331,12 +331,6 @@ void main()
 	get_mat( a_matidx );
 }
 
-/*
-vec3 normalW = normalize(vec3(u_NormalMatrix * vec4(getNormal(), 0.0)));
-vec3 tangentW = normalize(vec3(u_ModelMatrix * vec4(tangent, 0.0)));
-vec3 bitangentW = cross(normalW, tangentW) * a_Tangent.w;
-v_TBN = mat3(tangentW, bitangentW, normalW);
-*/  
 
 #endif //VERTEX_SHADER
 
@@ -351,12 +345,15 @@ uniform sampler2D tex2;
 
 void main(void)
 {
-	vec4 t0=texture2D(tex0, v_texcoord ).rgba;
-	vec4 t1=texture2D(tex1, v_texcoord ).rgba;
-	vec3 t2=vec3(1.0,0.5,0.5);
+//	vec4 t0=vec4(1.0,0.5,0.5,1.0);
+//	vec4 t1=vec4(1.0,0.5,0.5,1.0);
+//	vec3 t2=vec3(1.0,0.5,0.5);
 //	vec3 t2=vec3(0.5,1.0,0.5);
 //	vec3 t2=vec3(0.5,0.5,1.0);
-//	vec3 t2=texture2D(tex2, v_texcoord ).rgb;
+
+	vec4 t0=texture2D(tex0, v_texcoord ).rgba;
+	vec4 t1=texture2D(tex1, v_texcoord ).rgba;
+	vec3 t2=texture2D(tex2, v_texcoord ).rgb;
 	
 	t2=(t2-vec3(0.5,0.5,0.5))*2.0;
 
@@ -365,9 +362,8 @@ void main(void)
 	gl_FragColor= ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ) ;
 	gl_FragColor.a=1.0;
 
-	n=v_bone.xyz;
-	n=v_bitangent.xyz;
 	gl_FragColor= vec4((n*0.5)+vec3(0.5,0.5,0.5),1.0);
+
 }
 
 

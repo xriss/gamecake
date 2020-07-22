@@ -419,6 +419,46 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			vv[12][3]=vv[12][3]/dd
 		end
 
+-- force tangent and bitangent to be at right angles of each other
+
+		for iv,vv in ipairs(it.verts) do
+		
+			local n={vv[4],vv[5],vv[6]}
+			local t={vv[9],vv[10],vv[11]}
+			local b={vv[12][1],vv[12][2],vv[12][3]}
+			
+			local h=tardis.v3.new(t):add(b):normalize() -- halfway vector
+			
+			local c=tardis.v3.new(h):cross(n):normalize()
+			
+			local t2=tardis.v3.new(h):add(c):normalize() -- new vector at right angles
+			local b2=tardis.v3.new(h):sub(c):normalize() -- new vector at right angles
+			
+			if tardis.v3.dot(t,t2) > tardis.v3.dot(t,b2) then -- right way around
+			
+				vv[9]=t2[1]
+				vv[10]=t2[2]
+				vv[11]=t2[3]
+
+				vv[12][1]=b2[1]
+				vv[12][2]=b2[2]
+				vv[12][3]=b2[3]
+			
+			else
+			
+				vv[9]=b2[1]
+				vv[10]=b2[2]
+				vv[11]=b2[3]
+
+				vv[12][1]=t2[1]
+				vv[12][2]=t2[2]
+				vv[12][3]=t2[3]
+
+			end
+
+		end
+
+
 -- work out the sign for the bitangent
 		for iv,vv in ipairs(it.verts) do
 
@@ -430,6 +470,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			local b={ (vv[5]*vv[11])-(vv[6]*vv[10]) , (vv[6]*vv[9])-(vv[4]*vv[11]) , (vv[4]*vv[10])-(vv[5]*vv[9]) }
 			vv[12] = vv[12][1]*b[1] + vv[12][2]*b[2] + vv[12][3]*b[3] 
 			if vv[12]>=0 then vv[12]=1 else vv[12]=-1 end
+--print(vv[12])
 		end
 
 		return it

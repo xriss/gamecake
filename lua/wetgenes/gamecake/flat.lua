@@ -255,7 +255,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		end
 		
 		if ptans then
-			gl.VertexAttribPointer(p:attrib("a_tangent"),4,gl.FLOAT,gl.FALSE,pstride,ptangent)
+			gl.VertexAttribPointer(p:attrib("a_tangent"),4,gl.FLOAT,gl.FALSE,pstride,ptans)
 			gl.EnableVertexAttribArray(p:attrib("a_tangent"))
 		end
 
