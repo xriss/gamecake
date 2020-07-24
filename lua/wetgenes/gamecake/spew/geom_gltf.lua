@@ -248,6 +248,9 @@ uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
 
+uniform vec4  material_colors[8];
+uniform vec4  material_values[8];
+
 varying vec4  v_color;
 varying vec3  v_normal;
 varying vec3  v_tangent;
@@ -262,50 +265,6 @@ varying vec4  v_bone;
 
 precision highp float;
 
-void get_mat(float idx)
-{
-//	idx=idx%8;
-	
-	if(idx==0)
-	{
-		v_color=vec4( 1.0 , 1.0 , 1.0 , 1.0 );
-	}
-	else
-	if(idx==1)
-	{
-		v_color=vec4( 1.0 , 0.0 , 0.0 , 1.0 );
-	}
-	else
-	if(idx==2)
-	{
-		v_color=vec4( 0.0 , 1.0 , 0.0 , 1.0 );
-	}
-	else
-	if(idx==3)
-	{
-		v_color=vec4( 0.0 , 0.0 , 1.0 , 1.0 );
-	}
-	else
-	if(idx==4)
-	{
-		v_color=vec4( 1.0 , 1.0 , 0.0 , 1.0 );
-	}
-	else
-	if(idx==5)
-	{
-		v_color=vec4( 0.0 , 1.0 , 1.0 , 1.0 );
-	}
-	else
-	if(idx==6)
-	{
-		v_color=vec4( 1.0 , 0.0 , 1.0 , 1.0 );
-	}
-	else
-//	if(idx==7)
-	{
-		v_color=vec4( 0.5 , 0.5 , 0.5 , 1.0 );
-	}
-}
 
  
 attribute vec4  a_color;
@@ -328,7 +287,6 @@ void main()
 	v_texcoord=a_texcoord;
 	v_matidx=a_matidx;
 	
-	get_mat( a_matidx );
 }
 
 
@@ -460,13 +418,13 @@ main.msg=function(m)
 	
 		if m.keyname=="left" then -- click
 		
-			if m.action==1 then		mstate={"left",m.x,m.y}
+			if m.action==1 then		mstate={"left",m.x,m.y,tardis.q4.new(rot)}
 			elseif m.action==-1 then	mstate={}
 			end
 			
 		elseif m.keyname=="right" then -- click
 
-			if m.action==1 then		mstate={"right",m.x,m.y}
+			if m.action==1 then		mstate={"right",m.x,m.y,tardis.q4.new(rot)}
 			elseif m.action==-1 then	mstate={}
 			end
 
@@ -474,11 +432,10 @@ main.msg=function(m)
 
 			if m.action==0 then -- drag
 				if mstate[1]=="left" then
+					rot=tardis.q4.new(mstate[4])
 					rot:rotate( (m.x-mstate[2]) /4 ,{0,1,0})
 					rot:rotate( (m.y-mstate[3]) /4 ,{1,0,0})
 					rot:normalize()
-					mstate[2]=m.x
-					mstate[3]=m.y
 				end
 			end
 		
