@@ -160,15 +160,92 @@ M.to_geoms=function(gltf)
 		obj.verts={}
 		obj.mats={}
 		obj.polys={}
+		obj.textures={}
 		
-		for midx=1,#gltf.materials do
-			local material=gltf.materials[midx]
-			obj.mats[midx]={
-				name=material.name,
-				diffuse=	material.pbrMetallicRoughness and 
-							material.pbrMetallicRoughness.baseColorFactor  and
-							{unpack(material.pbrMetallicRoughness.baseColorFactor)},
-			}
+		for midx=1,#gltf.materials do -- copy gltf materials mostly as is
+			local o=gltf.materials[midx]
+			local m={}
+			obj.mats[midx]=m
+		
+			m.name					=	o.name
+			m.extensions			=	o.extensions
+			m.extras				=	o.extras
+			m.normalTexture			=	o.normalTexture
+			m.occlusionTexture		=	o.occlusionTexture
+			m.emissiveTexture		=	o.emissiveTexture
+			m.emissiveFactor		=	o.emissiveFactor
+			m.alphaMode				=	o.alphaMode
+			m.alphaCutoff			=	o.alphaCutoff
+			m.doubleSided			=	o.doubleSided
+
+			if o.pbrMetallicRoughness then
+				local p=o.pbrMetallicRoughness
+				
+				m.baseColorFactor			=	p.baseColorFactor
+				m.baseColorTexture			=	p.baseColorTexture
+				m.metallicFactor			=	p.metallicFactor
+				m.roughnessFactor			=	p.roughnessFactor
+				m.metallicRoughnessTexture	=	p.metallicRoughnessTexture
+				m.pbr_extensions			=	p.extensions
+				m.pbr_extras				=	p.extras
+
+			end
+
+-- build shader values
+
+			local tex=function(opts)
+				local it={}
+				
+				if opts.index then
+					local t=gltf.textures[opts.index+1]
+					local s=t.sampler and gltf.samplers[t.sampler+1] or {}
+					local g=t.source and gltf.images[t.source+1] or {}
+					
+					it.grd=g
+
+					it.magFilter=s.magFilter
+					it.minFilter=s.minFilter
+					it.wrapS=s.wrapS
+					it.wrapT=s.wrapT
+				end
+			
+				return it
+			end
+
+			m[1]={}	-- color texture
+			m[2]={} -- pbr texture
+			m[3]={} -- normal texture
+			
+			if m.baseColorTexture then
+				m[1][1]=1 -- enable
+				m[1].texture=tex(m.baseColorTexture)
+			else
+				m[1][1]=0 -- disable
+			end
+			
+			if m.metallicRoughnessTexture or m.occlusionTexture then -- these *should* be the same texture
+				m[2][1]=m.occlusionTexture and ( m.occlusionTexture.strength or 1 ) -- enable
+				m[2][2]=m.metallicFactor or 1-- enable
+				m[2][3]=m.roughnessFactor or 1 -- enable
+				m[2].texture=tex( m.metallicRoughnessTexture or m.occlusionTexture )
+			else
+				m[2][1]=0 -- disable
+				m[2][2]=0 -- disable
+				m[2][3]=0 -- disable
+			end
+
+			if m.normalTexture then
+				m[3][1]=m.normalTexture.scale or 1 -- enable
+				m[3].texture=tex( m.normalTexture )
+			else
+				m[3][1]=0 -- disable
+			end
+
+
+			if not obj.textures[1] then obj.textures[1]=m[1].texture end
+			if not obj.textures[2] then obj.textures[2]=m[2].texture end
+			if not obj.textures[3] then obj.textures[3]=m[3].texture end
+
 		end
 
 		for pidx=1,#mesh.primitives do
@@ -259,6 +336,7 @@ varying vec3  v_pos;
 varying vec2  v_texcoord;
 varying float v_matidx;
 varying vec4  v_bone;
+varying vec4  v_value;
 
 
 #ifdef VERTEX_SHADER
@@ -278,14 +356,17 @@ attribute vec4  a_bone;
 
 void main()
 {
-    gl_Position = projection * modelview * vec4(a_vertex, 1.0);
+    gl_Position		=	projection * modelview * vec4(a_vertex, 1.0);
 	v_normal		=	normalize( mat3( modelview ) * a_normal );
 	v_tangent		=	normalize( mat3( modelview ) * a_tangent.xyz );
 	v_bitangent		=	normalize( cross( v_normal , v_tangent ) * a_tangent.w );
 	v_bone			=	a_bone;
-	v_color=a_color;
-	v_texcoord=a_texcoord;
-	v_matidx=a_matidx;
+	v_color			=	a_color;
+	v_texcoord		=	a_texcoord;
+	v_matidx		=	a_matidx;
+	
+	
+	v_value = material_values[ int( a_matidx ) ];
 	
 }
 
@@ -303,15 +384,25 @@ uniform sampler2D tex2;
 
 void main(void)
 {
-//	vec4 t0=vec4(1.0,0.5,0.5,1.0);
-//	vec4 t1=vec4(1.0,0.5,0.5,1.0);
-//	vec3 t2=vec3(1.0,0.5,0.5);
-//	vec3 t2=vec3(0.5,1.0,0.5);
-//	vec3 t2=vec3(0.5,0.5,1.0);
 
-	vec4 t0=texture2D(tex0, v_texcoord ).rgba;
-	vec4 t1=texture2D(tex1, v_texcoord ).rgba;
-	vec3 t2=texture2D(tex2, v_texcoord ).rgb;
+	vec4 t0=vec4(1.0,1.0,1.0,1.0);
+	vec4 t1=vec4(0.5,0.5,0.5,0.5);
+	vec3 t2=vec3(0.5,0.5,1.0);
+
+	if( v_value.r > 0.0 )
+	{
+		t0 = v_value.r * texture2D(tex0, v_texcoord ).rgba;
+	}
+
+	if( v_value.g > 0.0 || v_value.b > 0.0 )
+	{
+		t1 = texture2D(tex1, v_texcoord ).rgba;
+	}
+
+	if( v_value.a > 0.0 )
+	{
+		t2 = v_value.a * texture2D(tex2, v_texcoord ).rgb;
+	}
 	
 	t2=(t2-vec3(0.5,0.5,0.5))*2.0;
 
@@ -320,7 +411,7 @@ void main(void)
 	gl_FragColor= ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ) ;
 	gl_FragColor.a=1.0;
 
-	gl_FragColor= vec4((n*0.5)+vec3(0.5,0.5,0.5),1.0);
+//	gl_FragColor= vec4((n*0.5)+vec3(0.5,0.5,0.5),1.0);
 
 }
 
@@ -334,20 +425,27 @@ void main(void)
 
 	local gg={}
 	
-	for i,v in ipairs{
-			{ gltf.images[1] },
-			{ gltf.images[2] },
-			{ gltf.images[3] },
-		} do
+	local objs=M.to_geoms(gltf)
+	
+	local textures={}
+	for i,obj in ipairs(objs) do
+		if not textures[1] then textures[1]=obj.textures[1] end
+		if not textures[2] then textures[2]=obj.textures[2] end
+		if not textures[3] then textures[3]=obj.textures[3] end
+	end
 
-		local g=v[1]
-		gg[i]=assert(gl.GenTexture())
+
+	for i,texture in ipairs(textures) do
+	
+		local g=texture.grd
+
+		texture.gl=assert(gl.GenTexture())
 
 		if g then
 		
 			g=g:convert(wgrd.FMT_U8_RGBA)
 
-			gl.BindTexture(gl.TEXTURE_2D, gg[i])
+			gl.BindTexture(gl.TEXTURE_2D, texture.gl)
 			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.REPEAT)
 			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.REPEAT)
 			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
@@ -366,8 +464,6 @@ void main(void)
 		end
 
 	end
-
-	local objs=M.to_geoms(gltf)
 
 
 	local dx,dy,dz,dw=0,0,0,0
@@ -469,17 +565,48 @@ main.draw=function()
 --	gl.Translate(pos)
 	gl.MultMatrix( tardis.q4_to_m4(rot) )
 --	gl.Rotate(rot,1,1,1)
-	
-			
+		
 	gl.Enable(gl.DEPTH_TEST)
 	for i,obj in ipairs(objs) do
-		geom.draw_polys(obj,"geom_gltf",function()
-			gl.ActiveTexture(gl.TEXTURE0)
-			gl.BindTexture(gl.TEXTURE_2D, gg[1])
-			gl.ActiveTexture(gl.TEXTURE1)
-			gl.BindTexture(gl.TEXTURE_2D, gg[2])
-			gl.ActiveTexture(gl.TEXTURE2)
-			gl.BindTexture(gl.TEXTURE_2D, gg[3])
+		geom.draw_polys(obj,"geom_gltf",function(p)
+		
+			if textures[1] then
+				gl.ActiveTexture(gl.TEXTURE0)
+				gl.BindTexture(gl.TEXTURE_2D, textures[1].gl)
+			end
+			
+			if textures[2] then
+				gl.ActiveTexture(gl.TEXTURE1)
+				gl.BindTexture(gl.TEXTURE_2D, textures[2].gl)
+			end
+			
+			if textures[3] then
+				gl.ActiveTexture(gl.TEXTURE2)
+				gl.BindTexture(gl.TEXTURE_2D, textures[3].gl)
+			end
+			
+			material_colors={}
+			material_values={}
+
+			local b=0
+			for i=1,#obj.mats do
+				local mat = obj.mats[i]
+				
+				if i <= 8 then -- shader only supports a maximum of 8 mats
+				
+					material_values[b+1]=mat[1][1] or 0
+					material_values[b+2]=mat[2][1] or 0
+					material_values[b+3]=mat[2][2] or 0
+					material_values[b+4]=mat[3][1] or 0
+				
+				end
+			
+				b=b+4
+			end
+
+			gl.Uniform4f( p:uniform("material_colors"), material_colors )
+			gl.Uniform4f( p:uniform("material_values"), material_values )
+
 		end)
 	end
 	gl.Disable(gl.DEPTH_TEST)
