@@ -406,7 +406,7 @@ void main(void)
 	
 	t2=(t2-vec3(0.5,0.5,0.5))*2.0;
 
-	vec3 n = normalize( (t2.x*v_bitangent) + (t2.y*v_tangent) + (t2.z*v_normal) );
+	vec3 n = normalize( (t2.x*v_bitangent) + (-t2.y*v_tangent) + (t2.z*v_normal) );
 
 	gl_FragColor= ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ) ;
 	gl_FragColor.a=1.0;
@@ -599,6 +599,8 @@ main.draw=function()
 					material_values[b+3]=mat[2][2] or 0
 					material_values[b+4]=mat[3][1] or 0
 				
+--material_values[b+4]=0
+
 				end
 			
 				b=b+4
@@ -606,6 +608,10 @@ main.draw=function()
 
 			gl.Uniform4f( p:uniform("material_colors"), material_colors )
 			gl.Uniform4f( p:uniform("material_values"), material_values )
+
+			gl.Uniform1i( p:uniform("tex0"), 0 )
+			gl.Uniform1i( p:uniform("tex1"), 1 )
+			gl.Uniform1i( p:uniform("tex2"), 2 )
 
 		end)
 	end
