@@ -354,7 +354,14 @@ M.fill=function(oven,geom)
 	end
 
 -- default draw is polys
-	geom.draw=geom.draw_polys
+	geom.draw=function(it,progname,cb,modes)
+		if not modes then
+			return geom.draw_polys(it,progname,cb)
+		end
+		for i,n in ipairs( modes ) do
+			geom[n](it,progname,cb)
+		end
+	end
 
 
 	return geom

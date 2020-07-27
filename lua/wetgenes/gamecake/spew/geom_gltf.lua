@@ -6,6 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local wgrd=require("wetgenes.grd")
 local wgeom=require("wetgenes.gamecake.spew.geom")
+local wgeoms=require("wetgenes.gamecake.spew.geoms")
 local wstr=require("wetgenes.string")
 local wpack=require("wetgenes.pack")
 local wjson=require("wetgenes.json")
@@ -31,7 +32,7 @@ end
 
 M.info=function(gltf)
 
-	dprint(gltf)
+--	dprint(gltf)
 
 	for n in pairs(gltf) do
 		print(n, type(gltf[n])=="table" and "#"..#gltf[n] or gltf[n] )
@@ -148,7 +149,97 @@ end
 
 M.to_geoms=function(gltf)
 
-	local objs={}
+	local objs=wgeoms.new()
+	objs:reset()
+	
+	objs.mats={}
+	objs.textures={}
+
+	for midx=1,#gltf.materials do -- copy gltf materials mostly as is
+		local o=gltf.materials[midx]
+		local m={}
+		objs.mats[midx]=m
+	
+		m.name					=	o.name
+		m.extensions			=	o.extensions
+		m.extras				=	o.extras
+		m.normalTexture			=	o.normalTexture
+		m.occlusionTexture		=	o.occlusionTexture
+		m.emissiveTexture		=	o.emissiveTexture
+		m.emissiveFactor		=	o.emissiveFactor
+		m.alphaMode				=	o.alphaMode
+		m.alphaCutoff			=	o.alphaCutoff
+		m.doubleSided			=	o.doubleSided
+
+		if o.pbrMetallicRoughness then
+			local p=o.pbrMetallicRoughness
+			
+			m.baseColorFactor			=	p.baseColorFactor
+			m.baseColorTexture			=	p.baseColorTexture
+			m.metallicFactor			=	p.metallicFactor
+			m.roughnessFactor			=	p.roughnessFactor
+			m.metallicRoughnessTexture	=	p.metallicRoughnessTexture
+			m.pbr_extensions			=	p.extensions
+			m.pbr_extras				=	p.extras
+
+		end
+
+-- build shader values
+
+		local tex=function(opts)
+			local it={}
+			
+			if opts.index then
+				local t=gltf.textures[opts.index+1]
+				local s=t.sampler and gltf.samplers[t.sampler+1] or {}
+				local g=t.source and gltf.images[t.source+1] or {}
+				
+				it.grd=g
+
+				it.magFilter=s.magFilter
+				it.minFilter=s.minFilter
+				it.wrapS=s.wrapS
+				it.wrapT=s.wrapT
+			end
+		
+			return it
+		end
+
+		m[1]={}	-- color texture
+		m[2]={} -- pbr texture
+		m[3]={} -- normal texture
+		
+		if m.baseColorTexture then
+			m[1][1]=1 -- enable
+			m[1].texture=tex(m.baseColorTexture)
+		else
+			m[1][1]=0 -- disable
+		end
+		
+		if m.metallicRoughnessTexture or m.occlusionTexture then -- these *should* be the same texture
+			m[2][1]=m.occlusionTexture and ( m.occlusionTexture.strength or 1 ) -- enable
+			m[2][2]=m.metallicFactor or 1-- enable
+			m[2][3]=m.roughnessFactor or 1 -- enable
+			m[2].texture=tex( m.metallicRoughnessTexture or m.occlusionTexture )
+		else
+			m[2][1]=0 -- disable
+			m[2][2]=0 -- disable
+			m[2][3]=0 -- disable
+		end
+
+		if m.normalTexture then
+			m[3][1]=m.normalTexture.scale or 1 -- enable
+			m[3].texture=tex( m.normalTexture )
+		else
+			m[3][1]=0 -- disable
+		end
+
+
+		if not objs.textures[1] then objs.textures[1]=m[1].texture end
+		if not objs.textures[2] then objs.textures[2]=m[2].texture end
+		if not objs.textures[3] then objs.textures[3]=m[3].texture end
+
+	end
 
 	for midx=1,#gltf.meshes do
 	
@@ -158,96 +249,10 @@ M.to_geoms=function(gltf)
 		objs[#objs+1]=obj
 
 		obj.verts={}
-		obj.mats={}
 		obj.polys={}
-		obj.textures={}
+		obj.mats=objs.mats
+		obj.textures=objs.textures
 		
-		for midx=1,#gltf.materials do -- copy gltf materials mostly as is
-			local o=gltf.materials[midx]
-			local m={}
-			obj.mats[midx]=m
-		
-			m.name					=	o.name
-			m.extensions			=	o.extensions
-			m.extras				=	o.extras
-			m.normalTexture			=	o.normalTexture
-			m.occlusionTexture		=	o.occlusionTexture
-			m.emissiveTexture		=	o.emissiveTexture
-			m.emissiveFactor		=	o.emissiveFactor
-			m.alphaMode				=	o.alphaMode
-			m.alphaCutoff			=	o.alphaCutoff
-			m.doubleSided			=	o.doubleSided
-
-			if o.pbrMetallicRoughness then
-				local p=o.pbrMetallicRoughness
-				
-				m.baseColorFactor			=	p.baseColorFactor
-				m.baseColorTexture			=	p.baseColorTexture
-				m.metallicFactor			=	p.metallicFactor
-				m.roughnessFactor			=	p.roughnessFactor
-				m.metallicRoughnessTexture	=	p.metallicRoughnessTexture
-				m.pbr_extensions			=	p.extensions
-				m.pbr_extras				=	p.extras
-
-			end
-
--- build shader values
-
-			local tex=function(opts)
-				local it={}
-				
-				if opts.index then
-					local t=gltf.textures[opts.index+1]
-					local s=t.sampler and gltf.samplers[t.sampler+1] or {}
-					local g=t.source and gltf.images[t.source+1] or {}
-					
-					it.grd=g
-
-					it.magFilter=s.magFilter
-					it.minFilter=s.minFilter
-					it.wrapS=s.wrapS
-					it.wrapT=s.wrapT
-				end
-			
-				return it
-			end
-
-			m[1]={}	-- color texture
-			m[2]={} -- pbr texture
-			m[3]={} -- normal texture
-			
-			if m.baseColorTexture then
-				m[1][1]=1 -- enable
-				m[1].texture=tex(m.baseColorTexture)
-			else
-				m[1][1]=0 -- disable
-			end
-			
-			if m.metallicRoughnessTexture or m.occlusionTexture then -- these *should* be the same texture
-				m[2][1]=m.occlusionTexture and ( m.occlusionTexture.strength or 1 ) -- enable
-				m[2][2]=m.metallicFactor or 1-- enable
-				m[2][3]=m.roughnessFactor or 1 -- enable
-				m[2].texture=tex( m.metallicRoughnessTexture or m.occlusionTexture )
-			else
-				m[2][1]=0 -- disable
-				m[2][2]=0 -- disable
-				m[2][3]=0 -- disable
-			end
-
-			if m.normalTexture then
-				m[3][1]=m.normalTexture.scale or 1 -- enable
-				m[3].texture=tex( m.normalTexture )
-			else
-				m[3][1]=0 -- disable
-			end
-
-
-			if not obj.textures[1] then obj.textures[1]=m[1].texture end
-			if not obj.textures[2] then obj.textures[2]=m[2].texture end
-			if not obj.textures[3] then obj.textures[3]=m[3].texture end
-
-		end
-
 		for pidx=1,#mesh.primitives do
 		
 			local primitive=mesh.primitives[pidx]
@@ -283,6 +288,38 @@ M.to_geoms=function(gltf)
 		obj:build_tangents()
 	end
 
+
+	for sidx=1,#gltf.scenes or {} do
+		
+		local scene={}
+		objs.scenes[sidx]=scene
+		
+		local add_children
+		add_children=function(parent,nodes)
+			for i,n in ipairs(nodes) do
+				local node=gltf.nodes[n+1]
+				local it={}
+				parent[#parent+1]=it
+				it.name=node.name
+				
+				if node.mesh then
+					it.mesh=objs[node.mesh+1]
+				end
+
+				it.matrix=node.matrix and {unpack(node.matrix)}
+				if not it.matrix then
+					local t=node.translation and {unpack(node.translation)} or {0,0,0}
+					local r=node.rotation and {unpack(node.rotation)} or {0,0,0,1}
+					local s=node.scale and {unpack(node.scale)} or {1,1,1}
+					it.trs={ t[1],-t[2],t[3] , r[1],r[2],r[3],r[4] , s[1],s[2],s[3] }
+				end
+				add_children( it , node.children or {} )
+			end
+		end
+		add_children( scene , gltf.scenes[sidx].nodes or {} )
+	end
+	objs.scene=objs.scenes[ (gltf.scene or 0) +1 ]
+	
 	return objs
 end
 
@@ -422,20 +459,13 @@ void main(void)
 
 
 	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
+	local geoms=oven.rebake("wetgenes.gamecake.spew.geoms")
 
 	local gg={}
 	
 	local objs=M.to_geoms(gltf)
-	
-	local textures={}
-	for i,obj in ipairs(objs) do
-		if not textures[1] then textures[1]=obj.textures[1] end
-		if not textures[2] then textures[2]=obj.textures[2] end
-		if not textures[3] then textures[3]=obj.textures[3] end
-	end
 
-
-	for i,texture in ipairs(textures) do
+	for i,texture in ipairs(objs.textures) do
 	
 		local g=texture.grd
 
@@ -466,6 +496,10 @@ void main(void)
 	end
 
 
+	local obj_position={0,0,0}
+	local obj_scale={1,1,1}
+
+--[[
 	local dx,dy,dz,dw=0,0,0,0
 	for i,obj in ipairs(objs) do
 		local x,y,z=geom.find_center(obj)
@@ -478,10 +512,9 @@ void main(void)
 		dx=dx/dw
 		dy=dy/dw
 		dz=dz/dw
-		for i,obj in ipairs(objs) do
-			geom.adjust_position(obj,-dx,-dy,-dz)
-		end
+		obj_position={-dx,-dy,-dz}
 	end
+]]
 
 	local m=0
 	for i,obj in ipairs(objs) do
@@ -489,9 +522,8 @@ void main(void)
 		if r>m then m=r end
 	end
 	if m>0 then
-		for i,obj in ipairs(objs) do
-			geom.adjust_scale( obj , 256 / m )
-		end
+		local s=256/m
+		obj_scale={s,s,s}
 	end
 	
 	local pos=tardis.v3.new()
@@ -559,6 +591,7 @@ main.draw=function()
 	
 	gl.ClearColor(pack.argb4_pmf4(0xf008))
 	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
+	
 
 	gl.PushMatrix()
 	gl.Translate(view.vx/2,view.vy/2,0)
@@ -566,57 +599,61 @@ main.draw=function()
 	gl.MultMatrix( tardis.q4_to_m4(rot) )
 --	gl.Rotate(rot,1,1,1)
 		
-	gl.Enable(gl.DEPTH_TEST)
-	for i,obj in ipairs(objs) do
-		geom.draw_polys(obj,"geom_gltf",function(p)
-		
-			if textures[1] then
-				gl.ActiveTexture(gl.TEXTURE0)
-				gl.BindTexture(gl.TEXTURE_2D, textures[1].gl)
-			end
-			
-			if textures[2] then
-				gl.ActiveTexture(gl.TEXTURE1)
-				gl.BindTexture(gl.TEXTURE_2D, textures[2].gl)
-			end
-			
-			if textures[3] then
-				gl.ActiveTexture(gl.TEXTURE2)
-				gl.BindTexture(gl.TEXTURE_2D, textures[3].gl)
-			end
-			
-			material_colors={}
-			material_values={}
+	gl.PushMatrix()
+	gl.Translate( obj_position[1] , obj_position[2] , obj_position[3] )
+	gl.Scale( obj_scale[1] , obj_scale[2] , obj_scale[3] )
 
-			local b=0
-			for i=1,#obj.mats do
-				local mat = obj.mats[i]
-				
-				if i <= 8 then -- shader only supports a maximum of 8 mats
-				
-					material_values[b+1]=mat[1][1] or 0
-					material_values[b+2]=mat[2][1] or 0
-					material_values[b+3]=mat[2][2] or 0
-					material_values[b+4]=mat[3][1] or 0
-				
+	gl.Enable(gl.DEPTH_TEST)
+	geoms.draw(objs,"geom_gltf",function(p)
+	
+		if objs.textures[1] then
+			gl.ActiveTexture(gl.TEXTURE0)
+			gl.BindTexture(gl.TEXTURE_2D, objs.textures[1].gl)
+		end
+		
+		if objs.textures[2] then
+			gl.ActiveTexture(gl.TEXTURE1)
+			gl.BindTexture(gl.TEXTURE_2D, objs.textures[2].gl)
+		end
+		
+		if objs.textures[3] then
+			gl.ActiveTexture(gl.TEXTURE2)
+			gl.BindTexture(gl.TEXTURE_2D, objs.textures[3].gl)
+		end
+		
+		material_colors={}
+		material_values={}
+
+		local b=0
+		for i=1,#objs.mats do
+			local mat = objs.mats[i]
+			
+			if i <= 8 then -- shader only supports a maximum of 8 mats
+			
+				material_values[b+1]=mat[1][1] or 0
+				material_values[b+2]=mat[2][1] or 0
+				material_values[b+3]=mat[2][2] or 0
+				material_values[b+4]=mat[3][1] or 0
+			
 --material_values[b+4]=0
 
-				end
-			
-				b=b+4
 			end
+		
+			b=b+4
+		end
 
-			gl.Uniform4f( p:uniform("material_colors"), material_colors )
-			gl.Uniform4f( p:uniform("material_values"), material_values )
+		gl.Uniform4f( p:uniform("material_colors"), material_colors )
+		gl.Uniform4f( p:uniform("material_values"), material_values )
 
-			gl.Uniform1i( p:uniform("tex0"), 0 )
-			gl.Uniform1i( p:uniform("tex1"), 1 )
-			gl.Uniform1i( p:uniform("tex2"), 2 )
+		gl.Uniform1i( p:uniform("tex0"), 0 )
+		gl.Uniform1i( p:uniform("tex1"), 1 )
+		gl.Uniform1i( p:uniform("tex2"), 2 )
 
-		end)
-	end
+	end)
 	gl.Disable(gl.DEPTH_TEST)
 
+
+	gl.PopMatrix()
 
 	gl.PopMatrix()
 

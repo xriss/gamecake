@@ -42,16 +42,20 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 -- we DO NOT have OpenGL access here
 	M.meta={__index=M}
 	M.new=function(it) it=it or {} setmetatable(it,M.meta) return it end
-
+	
+	M.reset=function(it)
+		it.verts={}
+		it.mats={}
+		it.polys={}
+	end
+	
 	M.duplicate=function(it)
 		return M.copy(it,M.new())
 	end
 
 	M.copy=function(src,dst)
 -- reset
-		dst.verts={}
-		dst.mats={}
-		dst.polys={}
+		dst:reset()
 		dst.name=src.name
 		dst:clear_predraw()
 -- copy mats
