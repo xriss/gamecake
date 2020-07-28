@@ -296,35 +296,47 @@ M.to_geoms=function(gltf)
 		obj:build_tangents()
 	end
 
+	objs.nodes={}
+	for nidx=1,#gltf.nodes or {} do
+		local node=gltf.nodes[nidx]
+		local it={}
+		objs.nodes[nidx]=it
 
-	for sidx=1,#gltf.scenes or {} do
+		it.name=node.name
 		
-		local scene={}
-		objs.scenes[sidx]=scene
-		
-		local add_children
-		add_children=function(parent,nodes)
-			for i,n in ipairs(nodes) do
-				local node=gltf.nodes[n+1]
-				local it={}
-				parent[#parent+1]=it
-				it.name=node.name
-				
-				if node.mesh then
-					it.mesh=objs[node.mesh+1]
-				end
+		if node.children then
+			it.children={unpack(node.children)}
+		end
+		if node.mesh then
+			it.mesh=objs[node.mesh+1]
+		end
 
-				it.matrix=node.matrix and {unpack(node.matrix)}
-				if not it.matrix then
-					local t=node.translation and {unpack(node.translation)} or {0,0,0}
-					local r=node.rotation and {unpack(node.rotation)} or {0,0,0,1}
-					local s=node.scale and {unpack(node.scale)} or {1,1,1}
-					it.trs={ t[1],t[2],t[3] , r[1],r[2],r[3],r[4] , s[1],s[2],s[3] }
-				end
-				add_children( it , node.children or {} )
+		it.matrix=node.matrix and {unpack(node.matrix)}
+
+		if not it.matrix then
+			local t=node.translation and {unpack(node.translation)} or {0,0,0}
+			local r=node.rotation and {unpack(node.rotation)} or {0,0,0,1}
+			local s=node.scale and {unpack(node.scale)} or {1,1,1}
+			it.trs={ t[1],t[2],t[3] , r[1],r[2],r[3],r[4] , s[1],s[2],s[3] }
+		end
+
+	end
+	for nidx=1,#objs.nodes or {} do
+		local node=objs.nodes[nidx]
+		if node.children then
+			for i=1,#node.children do
+				node[i]=objs.nodes[ node.children[i]+1 ]
 			end
 		end
-		add_children( scene , gltf.scenes[sidx].nodes or {} )
+		node.children=nil
+	end
+	
+	for sidx=1,#gltf.scenes or {} do
+		local scene={}
+		objs.scenes[sidx]=scene
+		for i,n in ipairs( gltf.scenes[sidx].nodes ) do
+			scene[i]=objs.nodes[n+1]
+		end
 	end
 	objs.scene=objs.scenes[ (gltf.scene or 0) +1 ]
 
@@ -366,6 +378,7 @@ M.to_geoms=function(gltf)
 		end
 
 	end
+	objs.anim=objs.anims[ (gltf.animation or 0) +1 ]
 	
 --	dprint(objs.anims)
 	
@@ -577,6 +590,9 @@ void main(void)
 	end
 	
 main.update=function()
+	if objs.anim then
+		objs.anim.time=(objs.anim.time or 0)+(1/60)
+	end
 end
 
 	local mstate={}
@@ -656,6 +672,79 @@ main.draw=function()
 	gl.Translate(unpack(view_position))
 	gl.Scale(unpack(view_scale))
 	gl.MultMatrix( tardis.q4_to_m4(view_rotation) )
+	
+	if objs.anim then -- run animation
+		local anim=objs.anim
+
+		anim.length=anim.max-anim.min
+		if anim.length>0 then
+			anim.time=(anim.time or 0)%anim.length
+		end
+		
+		local key_idx=0
+		local key_blend=0
+		
+		for idx=2,#anim.keys do
+			local tb=anim.keys[idx-1]
+			local ta=anim.keys[idx]
+			if tb<=anim.time and ta>=anim.time then -- found
+				key_idx=idx-1
+				local d=ta-tb
+				if d<=0 then d=1 end
+				key_blend=( anim.time-tb / d )
+				if key_blend>1 then key_blend=1 end
+				if key_blend<0 then key_blend=0 end
+			end
+		end
+
+
+		for vidx=1,#anim.values do
+			local value=anim.values[vidx]
+			local node=objs.nodes[value.node]
+			
+			if value.path=="translation" then
+
+				local i=key_idx*3-2
+				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] }
+				local va={ value.data[i+3] , value.data[i+4] , value.data[i+5] }
+				local xb=1-key_blend
+				node.trs[1]=vb[1]*xb + va[1]*key_blend
+				node.trs[2]=vb[2]*xb + va[2]*key_blend
+				node.trs[3]=vb[3]*xb + va[3]*key_blend
+
+			elseif value.path=="rotation" then
+
+				local i=key_idx*4-3
+				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] , value.data[i+3] }
+				local va={ value.data[i+4] , value.data[i+5] , value.data[i+6] , value.data[i+7] }
+				local xb=1-key_blend
+				local q=tardis.q4.new(
+					vb[1]*xb + va[1]*key_blend ,
+					vb[2]*xb + va[2]*key_blend ,
+					vb[3]*xb + va[3]*key_blend ,
+					vb[4]*xb + va[4]*key_blend ):normalize()
+				node.trs[4]=q[1]
+				node.trs[5]=q[2]
+				node.trs[6]=q[3]
+				node.trs[7]=q[4]
+
+--print( anim.time , q[1] , q[2] , q[3] , q[4] )
+
+			elseif value.path=="scale" then
+
+				local i=key_idx*3-2
+				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] }
+				local va={ value.data[i+3] , value.data[i+4] , value.data[i+5] }
+				local xb=1-key_blend
+				node.trs[ 8]=vb[1]*xb + va[1]*key_blend
+				node.trs[ 9]=vb[2]*xb + va[2]*key_blend
+				node.trs[10]=vb[3]*xb + va[3]*key_blend
+
+			end
+
+		end
+
+	end
 
 	gl.Enable(gl.DEPTH_TEST)
 	geoms.draw(objs,"geom_gltf",function(p)
