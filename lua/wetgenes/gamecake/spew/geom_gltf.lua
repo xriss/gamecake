@@ -80,6 +80,8 @@ M.lookup_count={
 
 M.accessor_to_table=function(gltf,id,scale)
 
+	if not id then return nil end
+
 	local tab={}
 
 	local accessor=gltf.accessors[id+1]
@@ -155,6 +157,7 @@ M.to_geoms=function(gltf)
 	objs.mats={}
 	objs.textures={}
 
+	if gltf.materials then
 	for midx=1,#gltf.materials do -- copy gltf materials mostly as is
 		local o=gltf.materials[midx]
 		local m={}
@@ -240,7 +243,8 @@ M.to_geoms=function(gltf)
 		if not objs.textures[3] then objs.textures[3]=m[3].texture end
 
 	end
-
+	end
+	
 	for midx=1,#gltf.meshes do
 	
 		local mesh=gltf.meshes[midx]
@@ -257,24 +261,28 @@ M.to_geoms=function(gltf)
 		
 			local primitive=mesh.primitives[pidx]
 
-			local tpos=primitive.attributes.POSITION  and M.accessor_to_table(gltf,primitive.attributes.POSITION)
-			local tnrm=primitive.attributes.NORMAL    and M.accessor_to_table(gltf,primitive.attributes.NORMAL)
-			local tuv=primitive.attributes.TEXCOORD_0 and M.accessor_to_table(gltf,primitive.attributes.TEXCOORD_0)
+			local tpos = M.accessor_to_table(gltf,primitive.attributes.POSITION)
+			local tnrm = M.accessor_to_table(gltf,primitive.attributes.NORMAL)
+			local tuv  = M.accessor_to_table(gltf,primitive.attributes.TEXCOORD_0)
+
+			local tj   = M.accessor_to_table(gltf,primitive.attributes.JOINTS_0)
+			local tw   = M.accessor_to_table(gltf,primitive.attributes.WEIGHTS_0)
 
 			if tpos then -- must have a position
-				for i=1,#tpos,3 do
-					local j=(((i-1)/3)*2)+1
-					obj.verts[#obj.verts+1]={
-						tpos and tpos[i] or 0,tpos and -tpos[i+1] or 0,tpos and tpos[i+2] or 0,
-						tnrm and tnrm[i] or 0,tnrm and -tnrm[i+1] or 0,tnrm and tnrm[i+2] or 0,
-						tuv and tuv[j] or 0,tuv and tuv[j+1] or 0
+				for c=0,(#tpos/3)-1 do
+					obj.verts[c+1]={
+						tpos and tpos[c*3+1] or 0,tpos and tpos[c*3+2] or 0,tpos and tpos[c*3+3] or 0,
+						tnrm and tnrm[c*3+1] or 0,tnrm and tnrm[c*3+2] or 0,tnrm and tnrm[c*3+3] or 0,
+						tuv and tuv[c*2+1] or 0,tuv and tuv[c*2+2] or 0,
+						0,0,0,0,
+						tj and tw and tj[c*4+1]+tw[c*4+1] , tj and tw and tj[c*4+2]+tw[c*4+2] , tj and tw and tj[c*4+3]+tw[c*4+3] , tj and tw and tj[c*4+4]+tw[c*4+4]
 					}
 				end
 				
 				if primitive.indices then
 					local t=M.accessor_to_table(gltf,primitive.indices)
 					for i=1,#t,3 do
-						obj.polys[#obj.polys+1]={t[i]+1,t[i+1]+1,t[i+2]+1,mat=primitive.material+1}
+						obj.polys[#obj.polys+1]={t[i]+1,t[i+1]+1,t[i+2]+1,mat=primitive.material and primitive.material+1}
 					end
 				else
 					for i=1,#obj.verts,3 do
@@ -311,7 +319,7 @@ M.to_geoms=function(gltf)
 					local t=node.translation and {unpack(node.translation)} or {0,0,0}
 					local r=node.rotation and {unpack(node.rotation)} or {0,0,0,1}
 					local s=node.scale and {unpack(node.scale)} or {1,1,1}
-					it.trs={ t[1],-t[2],t[3] , r[1],r[2],r[3],r[4] , s[1],s[2],s[3] }
+					it.trs={ t[1],t[2],t[3] , r[1],r[2],r[3],r[4] , s[1],s[2],s[3] }
 				end
 				add_children( it , node.children or {} )
 			end
@@ -319,6 +327,47 @@ M.to_geoms=function(gltf)
 		add_children( scene , gltf.scenes[sidx].nodes or {} )
 	end
 	objs.scene=objs.scenes[ (gltf.scene or 0) +1 ]
+
+
+	objs.anims={}
+	for aidx=1,#gltf.animations or {} do
+	
+		local anim={}
+		objs.anims[aidx]=anim
+		
+		local animation=gltf.animations[aidx]
+		
+		local input=animation.samplers[1].input
+		
+		anim.name=animation.name
+		anim.keys=M.accessor_to_table(gltf,input)
+		
+		if input then
+			local accessor=gltf.accessors[input+1]
+			anim.min=accessor.min[1]
+			anim.max=accessor.max[1]
+
+			anim.values={}
+
+			for cidx=1,#animation.channels do
+				local channel=animation.channels[cidx]
+				local sampler=animation.samplers[channel.sampler+1]
+			
+				if sampler.input==input then -- only animate shared input
+					local value={}
+					anim.values[#anim.values+1]=value
+					value.node=channel.target.node+1
+					value.path=channel.target.path
+					value.data=M.accessor_to_table(gltf,sampler.output)
+				end
+
+			end
+
+		end
+
+	end
+	
+--	dprint(objs.anims)
 	
 	return objs
 end
@@ -496,8 +545,9 @@ void main(void)
 	end
 
 
-	local obj_position={0,0,0}
-	local obj_scale={1,1,1}
+	local view_position={0,0,0}
+	local view_scale={1,1,1}
+	local view_rotation={0,0,0,1}
 
 --[[
 	local dx,dy,dz,dw=0,0,0,0
@@ -512,7 +562,7 @@ void main(void)
 		dx=dx/dw
 		dy=dy/dw
 		dz=dz/dw
-		obj_position={-dx,-dy,-dz}
+		view_position={-dx,-dy,-dz}
 	end
 ]]
 
@@ -523,12 +573,9 @@ void main(void)
 	end
 	if m>0 then
 		local s=256/m
-		obj_scale={s,s,s}
+		view_scale={s,s,s}
 	end
 	
-	local pos=tardis.v3.new()
-	local rot=tardis.q4.new():identity()
-
 main.update=function()
 end
 
@@ -544,15 +591,25 @@ main.msg=function(m)
 
 	if m.class=="mouse" then
 	
-		if m.keyname=="left" then -- click
+		if m.keyname=="wheel_add" then
+			if m.action==-1 then
+				local s=view_scale[1]*1.10
+				view_scale={s,s,s}
+			end
+		elseif m.keyname=="wheel_sub" then
+			if m.action==-1 then
+				local s=view_scale[1]*0.90
+				view_scale={s,s,s}
+			end
+		elseif m.keyname=="left" then -- click
 		
-			if m.action==1 then		mstate={"left",m.x,m.y,tardis.q4.new(rot)}
+			if m.action==1 then		mstate={"left",m.x,m.y,tardis.q4.new(view_rotation)}
 			elseif m.action==-1 then	mstate={}
 			end
 			
 		elseif m.keyname=="right" then -- click
 
-			if m.action==1 then		mstate={"right",m.x,m.y,tardis.q4.new(rot)}
+			if m.action==1 then		mstate={"right",m.x,m.y,tardis.q4.new(view_rotation)}
 			elseif m.action==-1 then	mstate={}
 			end
 
@@ -560,10 +617,10 @@ main.msg=function(m)
 
 			if m.action==0 then -- drag
 				if mstate[1]=="left" then
-					rot=tardis.q4.new(mstate[4])
-					rot:rotate( (m.x-mstate[2]) /4 ,{0,1,0})
-					rot:rotate( (m.y-mstate[3]) /4 ,{1,0,0})
-					rot:normalize()
+					view_rotation=tardis.q4.new(mstate[4])
+					view_rotation:rotate( (m.x-mstate[2]) /4 ,{0,1,0})
+					view_rotation:rotate( (m.y-mstate[3]) /4 ,{1,0,0})
+					view_rotation:normalize()
 				end
 			end
 		
@@ -595,13 +652,10 @@ main.draw=function()
 
 	gl.PushMatrix()
 	gl.Translate(view.vx/2,view.vy/2,0)
---	gl.Translate(pos)
-	gl.MultMatrix( tardis.q4_to_m4(rot) )
---	gl.Rotate(rot,1,1,1)
-		
-	gl.PushMatrix()
-	gl.Translate( obj_position[1] , obj_position[2] , obj_position[3] )
-	gl.Scale( obj_scale[1] , obj_scale[2] , obj_scale[3] )
+
+	gl.Translate(unpack(view_position))
+	gl.Scale(unpack(view_scale))
+	gl.MultMatrix( tardis.q4_to_m4(view_rotation) )
 
 	gl.Enable(gl.DEPTH_TEST)
 	geoms.draw(objs,"geom_gltf",function(p)
@@ -652,8 +706,6 @@ main.draw=function()
 	end)
 	gl.Disable(gl.DEPTH_TEST)
 
-
-	gl.PopMatrix()
 
 	gl.PopMatrix()
 
