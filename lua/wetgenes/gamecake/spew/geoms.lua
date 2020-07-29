@@ -56,6 +56,126 @@ M.bake=function(oven,geoms)
 	geoms.meta={__index=geoms}
 	geoms.new=function(it) it=it or {} setmetatable(it,geoms.meta) return it end
 	
+	geoms.animate=function(objs)
+	
+		if not objs.anim then return end
+
+		local anim=objs.anim
+
+		anim.length=anim.max-anim.min
+		if anim.length>0 then
+			anim.time=(anim.time or 0)%anim.length
+		end
+		
+		local key_idx=0
+		local key_blend=0
+		
+		for idx=2,#anim.keys do
+			local tb=anim.keys[idx-1]
+			local ta=anim.keys[idx]
+			if tb<=anim.time and ta>=anim.time then -- found
+				key_idx=idx-1
+				local d=ta-tb
+				if d<=0 then d=1 end
+				key_blend=( anim.time-tb / d )
+				if key_blend>1 then key_blend=1 end
+				if key_blend<0 then key_blend=0 end
+			end
+		end
+
+
+		for vidx=1,#anim.values do
+			local value=anim.values[vidx]
+			local node=objs.nodes[value.node]
+			
+			if value.path=="translation" then
+
+				local i=key_idx*3-2
+				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] }
+				local va={ value.data[i+3] , value.data[i+4] , value.data[i+5] }
+				local xb=1-key_blend
+				node.trs[1]=vb[1]*xb + va[1]*key_blend
+				node.trs[2]=vb[2]*xb + va[2]*key_blend
+				node.trs[3]=vb[3]*xb + va[3]*key_blend
+
+			elseif value.path=="rotation" then
+
+				local i=key_idx*4-3
+				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] , value.data[i+3] }
+				local va={ value.data[i+4] , value.data[i+5] , value.data[i+6] , value.data[i+7] }
+				local xb=1-key_blend
+				local q=tardis.q4.new(
+					vb[1]*xb + va[1]*key_blend ,
+					vb[2]*xb + va[2]*key_blend ,
+					vb[3]*xb + va[3]*key_blend ,
+					vb[4]*xb + va[4]*key_blend ):normalize()
+				node.trs[4]=q[1]
+				node.trs[5]=q[2]
+				node.trs[6]=q[3]
+				node.trs[7]=q[4]
+
+--print( anim.time , q[1] , q[2] , q[3] , q[4] )
+
+			elseif value.path=="scale" then
+
+				local i=key_idx*3-2
+				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] }
+				local va={ value.data[i+3] , value.data[i+4] , value.data[i+5] }
+				local xb=1-key_blend
+				node.trs[ 8]=vb[1]*xb + va[1]*key_blend
+				node.trs[ 9]=vb[2]*xb + va[2]*key_blend
+				node.trs[10]=vb[3]*xb + va[3]*key_blend
+
+			end
+
+		end
+
+	end
+
+	geoms.prepare=function(its)
+	
+		local stack=tardis.m4_stack()
+	
+		local prepare
+		prepare=function(its)
+
+			stack.push()
+
+			if its.trs then
+				local trs=its.trs
+				stack.scale( trs[8] , trs[9] , trs[10] )
+				stack.qrotate( { trs[4] , trs[5] , trs[6] , trs[7] } )
+				stack.translate( trs[1] , trs[2] , trs[3])
+
+			elseif its.matrix then
+
+				stack.product( its.matrix )
+
+			end
+			
+			its.world=stack.save()
+			
+			if its.inverse then
+				its.bone=its.world:product(its.inverse,tardis.m4.new())
+			end
+			
+			for i,v in ipairs(its) do
+				prepare(v)
+			end
+			
+			stack.pop()
+
+		end
+
+		prepare(its.scene)
+
+	end
+
+	geoms.update=function(its)
+		geoms.animate(its)
+		geoms.prepare(its)
+	end
+
 	geoms.draw=function(its,progname,cb,modes)
 	
 		local draw
@@ -64,20 +184,7 @@ M.bake=function(oven,geoms)
 
 			gl.PushMatrix()
 
-			if its.trs then
-				local trs=its.trs
-			
---				print(trs[1],trs[2],trs[3])
-
-				gl.Scale( trs[8] , trs[9] , trs[10] )
-				gl.MultMatrix( tardis.q4_to_m4( { trs[4] , trs[5] , trs[6] , trs[7] } ) )
-				gl.Translate( trs[1] , trs[2] , trs[3])
-
-			elseif its.matrix then
-
---				gl.MultMatrix( its.matrix )
-
-			end
+			gl.MultMatrix( its.world )
 
 			if its.mesh then
 				geom.draw(its.mesh,progname,cb,modes)

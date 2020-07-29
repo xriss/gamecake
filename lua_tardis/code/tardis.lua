@@ -886,6 +886,22 @@ function m4.rotate(it,degrees,v3a,r)
 	return tardis.m4_product_m4(it,m4a,r)
 end
 
+--[[#lua.wetgenes.tardis.m4.qrotate
+
+	m4 = m4:qrotate(q)
+	m4 = m4:qrotate(q,r)
+
+Apply a quaternion rotation to this matrix.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.qrotate(it,q,r)
+	local m=tardis.q4_to_m4(q)
+	return tardis.m4_product_m4(it,m,r)
+end
+
 --[[#lua.wetgenes.tardis.v2
 
 The metatable for a 2d vector class, use the new function to actually 
@@ -1666,6 +1682,81 @@ function tardis.m4_project23d(view_width,view_height,width,height,fov,depth)
 	
 	return m
 end
+
+
+--
+-- create an m4 stack
+--
+function tardis.m4_stack()
+	local stack={}
+	
+	stack[1]=tardis.m4.new():identity()
+	
+	stack.save=function()
+		return tardis.m4.new(stack[#stack])
+	end
+
+	stack.load=function(...)
+		stack[#stack]:set(...)
+	end
+
+	stack.product=function(a)
+		stack[#stack]:product(a,stack[#stack])
+	end
+
+	stack.premult=function(a)
+		a:product(stack[#stack],stack[#stack])
+	end
+
+	stack.identity=function()
+		stack[#stack]:identity()
+	end
+
+	stack.translate=function(vx,vy,vz)
+		if type(vx)=="table" then
+			stack[#stack]:translate(vx)
+		else
+			stack[#stack]:translate({vx,vy,vz})
+		end
+	end
+
+	stack.rotate=function(d,vx,vy,vz)
+		if type(vx)=="table" then
+			stack[#stack]:rotate(d,vx)
+		else
+			stack[#stack]:rotate(d,{vx,vy,vz})
+		end
+	end
+
+	stack.qrotate=function(qx,qy,qz,qw)
+		if type(qx)=="table" then
+			stack[#stack]:qrotate(qx)
+		else
+			stack[#stack]:qrotate({qx,qy,qz,qw})
+		end
+	end
+
+	stack.scale=function(vx,vy,vz)
+		if type(vx)=="table" then
+			stack[#stack]:scale_v3(vx)
+		else
+			stack[#stack]:scale_v3({vx,vy,vz})
+		end
+	end
+
+	stack.push=function()
+		local m4=tardis.m4.new(stack[#stack])
+		stack[#stack+1]=m4
+	end
+
+	stack.pop=function()
+		stack[#stack]=nil -- remove topmost
+	end
+	
+	return stack
+end
+
+
 
 
 tardis.f32=require("wetgenes.tardis.core") -- use a "faster?" f32 C core

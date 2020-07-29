@@ -297,7 +297,7 @@ M.to_geoms=function(gltf)
 	end
 
 	objs.nodes={}
-	for nidx=1,#gltf.nodes or {} do
+	for nidx=1,#(gltf.nodes or {}) do
 		local node=gltf.nodes[nidx]
 		local it={}
 		objs.nodes[nidx]=it
@@ -321,7 +321,7 @@ M.to_geoms=function(gltf)
 		end
 
 	end
-	for nidx=1,#objs.nodes or {} do
+	for nidx=1,#(objs.nodes or {}) do
 		local node=objs.nodes[nidx]
 		if node.children then
 			for i=1,#node.children do
@@ -331,7 +331,7 @@ M.to_geoms=function(gltf)
 		node.children=nil
 	end
 	
-	for sidx=1,#gltf.scenes or {} do
+	for sidx=1,#(gltf.scenes or {}) do
 		local scene={}
 		objs.scenes[sidx]=scene
 		for i,n in ipairs( gltf.scenes[sidx].nodes ) do
@@ -341,8 +341,29 @@ M.to_geoms=function(gltf)
 	objs.scene=objs.scenes[ (gltf.scene or 0) +1 ]
 
 
+	objs.skins={}
+	for sidx=1,#(gltf.skins or {}) do
+		local skin=gltf.skins[sidx]
+		local it={}
+		objs.skins[sidx]=it
+		it.inverse={}
+		it.nodes={}
+		local d=M.accessor_to_table(gltf,skin.inverseBindMatrices)
+		for i,v in ipairs(skin.joints) do
+			local b=((i-1)*16)
+			it.nodes[i]=objs.nodes[v+1]
+			it.inverse[i]=tardis.m4.new({
+				d[b+ 1],d[b+ 2],d[b+ 3],d[b+ 4],
+				d[b+ 5],d[b+ 6],d[b+ 7],d[b+ 8],
+				d[b+ 9],d[b+10],d[b+11],d[b+12],
+				d[b+13],d[b+14],d[b+15],d[b+16],
+				})
+			it.nodes[i].inverse=it.inverse[i]
+		end
+	end
+	
 	objs.anims={}
-	for aidx=1,#gltf.animations or {} do
+	for aidx=1,#(gltf.animations or {}) do
 	
 		local anim={}
 		objs.anims[aidx]=anim
@@ -590,9 +611,13 @@ void main(void)
 	end
 	
 main.update=function()
+
 	if objs.anim then
 		objs.anim.time=(objs.anim.time or 0)+(1/60)
 	end
+
+	geoms.update(objs)
+
 end
 
 	local mstate={}
@@ -673,79 +698,6 @@ main.draw=function()
 	gl.Scale(unpack(view_scale))
 	gl.MultMatrix( tardis.q4_to_m4(view_rotation) )
 	
-	if objs.anim then -- run animation
-		local anim=objs.anim
-
-		anim.length=anim.max-anim.min
-		if anim.length>0 then
-			anim.time=(anim.time or 0)%anim.length
-		end
-		
-		local key_idx=0
-		local key_blend=0
-		
-		for idx=2,#anim.keys do
-			local tb=anim.keys[idx-1]
-			local ta=anim.keys[idx]
-			if tb<=anim.time and ta>=anim.time then -- found
-				key_idx=idx-1
-				local d=ta-tb
-				if d<=0 then d=1 end
-				key_blend=( anim.time-tb / d )
-				if key_blend>1 then key_blend=1 end
-				if key_blend<0 then key_blend=0 end
-			end
-		end
-
-
-		for vidx=1,#anim.values do
-			local value=anim.values[vidx]
-			local node=objs.nodes[value.node]
-			
-			if value.path=="translation" then
-
-				local i=key_idx*3-2
-				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] }
-				local va={ value.data[i+3] , value.data[i+4] , value.data[i+5] }
-				local xb=1-key_blend
-				node.trs[1]=vb[1]*xb + va[1]*key_blend
-				node.trs[2]=vb[2]*xb + va[2]*key_blend
-				node.trs[3]=vb[3]*xb + va[3]*key_blend
-
-			elseif value.path=="rotation" then
-
-				local i=key_idx*4-3
-				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] , value.data[i+3] }
-				local va={ value.data[i+4] , value.data[i+5] , value.data[i+6] , value.data[i+7] }
-				local xb=1-key_blend
-				local q=tardis.q4.new(
-					vb[1]*xb + va[1]*key_blend ,
-					vb[2]*xb + va[2]*key_blend ,
-					vb[3]*xb + va[3]*key_blend ,
-					vb[4]*xb + va[4]*key_blend ):normalize()
-				node.trs[4]=q[1]
-				node.trs[5]=q[2]
-				node.trs[6]=q[3]
-				node.trs[7]=q[4]
-
---print( anim.time , q[1] , q[2] , q[3] , q[4] )
-
-			elseif value.path=="scale" then
-
-				local i=key_idx*3-2
-				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] }
-				local va={ value.data[i+3] , value.data[i+4] , value.data[i+5] }
-				local xb=1-key_blend
-				node.trs[ 8]=vb[1]*xb + va[1]*key_blend
-				node.trs[ 9]=vb[2]*xb + va[2]*key_blend
-				node.trs[10]=vb[3]*xb + va[3]*key_blend
-
-			end
-
-		end
-
-	end
-
 	gl.Enable(gl.DEPTH_TEST)
 	geoms.draw(objs,"geom_gltf",function(p)
 	
