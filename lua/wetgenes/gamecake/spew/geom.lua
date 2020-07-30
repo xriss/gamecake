@@ -465,16 +465,9 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 -- work out the sign for the bitangent
 		for iv,vv in ipairs(it.verts) do
-
--- test
-			vv[13]=vv[12][1]
-			vv[14]=vv[12][2]
-			vv[15]=vv[12][3]
-
 			local b={ (vv[5]*vv[11])-(vv[6]*vv[10]) , (vv[6]*vv[9])-(vv[4]*vv[11]) , (vv[4]*vv[10])-(vv[5]*vv[9]) }
 			vv[12] = vv[12][1]*b[1] + vv[12][2]*b[2] + vv[12][3]*b[3] 
 			if vv[12]>=0 then vv[12]=1 else vv[12]=-1 end
---print(vv[12])
 		end
 
 		return it

@@ -53,6 +53,7 @@ M.fill=function(oven,geom)
 					t[#t+1]=v[14] or 0
 					t[#t+1]=v[15] or 0
 					t[#t+1]=v[16] or 0
+
 				end
 			end
 		end

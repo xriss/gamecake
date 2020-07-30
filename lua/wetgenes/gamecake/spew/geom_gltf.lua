@@ -154,6 +154,11 @@ M.to_geoms=function(gltf)
 	local objs=wgeoms.new()
 	objs:reset()
 	
+	for midx=1,#gltf.meshes do
+		local obj=wgeom.new()
+		objs[#objs+1]=obj
+	end
+
 	objs.mats={}
 	objs.textures={}
 
@@ -245,57 +250,6 @@ M.to_geoms=function(gltf)
 	end
 	end
 	
-	for midx=1,#gltf.meshes do
-	
-		local mesh=gltf.meshes[midx]
-
-		local obj=wgeom.new()
-		objs[#objs+1]=obj
-
-		obj.verts={}
-		obj.polys={}
-		obj.mats=objs.mats
-		obj.textures=objs.textures
-		
-		for pidx=1,#mesh.primitives do
-		
-			local primitive=mesh.primitives[pidx]
-
-			local tpos = M.accessor_to_table(gltf,primitive.attributes.POSITION)
-			local tnrm = M.accessor_to_table(gltf,primitive.attributes.NORMAL)
-			local tuv  = M.accessor_to_table(gltf,primitive.attributes.TEXCOORD_0)
-
-			local tj   = M.accessor_to_table(gltf,primitive.attributes.JOINTS_0)
-			local tw   = M.accessor_to_table(gltf,primitive.attributes.WEIGHTS_0)
-
-			if tpos then -- must have a position
-				for c=0,(#tpos/3)-1 do
-					obj.verts[c+1]={
-						tpos and tpos[c*3+1] or 0,tpos and tpos[c*3+2] or 0,tpos and tpos[c*3+3] or 0,
-						tnrm and tnrm[c*3+1] or 0,tnrm and tnrm[c*3+2] or 0,tnrm and tnrm[c*3+3] or 0,
-						tuv and tuv[c*2+1] or 0,tuv and tuv[c*2+2] or 0,
-						0,0,0,0,
-						tj and tw and tj[c*4+1]+tw[c*4+1] , tj and tw and tj[c*4+2]+tw[c*4+2] , tj and tw and tj[c*4+3]+tw[c*4+3] , tj and tw and tj[c*4+4]+tw[c*4+4]
-					}
-				end
-				
-				if primitive.indices then
-					local t=M.accessor_to_table(gltf,primitive.indices)
-					for i=1,#t,3 do
-						obj.polys[#obj.polys+1]={t[i]+1,t[i+1]+1,t[i+2]+1,mat=primitive.material and primitive.material+1}
-					end
-				else
-					for i=1,#obj.verts,3 do
-						obj.polys[#obj.polys+1]={i,i+1,i+2,mat=primitive.material+1}
-					end
-				end
-			end
-		end
-
---		obj:build_normals()
-		obj:build_tangents()
-	end
-
 	objs.nodes={}
 	for nidx=1,#(gltf.nodes or {}) do
 		local node=gltf.nodes[nidx]
@@ -351,14 +305,15 @@ M.to_geoms=function(gltf)
 		local d=M.accessor_to_table(gltf,skin.inverseBindMatrices)
 		for i,v in ipairs(skin.joints) do
 			local b=((i-1)*16)
-			it.nodes[i]=objs.nodes[v+1]
 			it.inverse[i]=tardis.m4.new({
 				d[b+ 1],d[b+ 2],d[b+ 3],d[b+ 4],
 				d[b+ 5],d[b+ 6],d[b+ 7],d[b+ 8],
 				d[b+ 9],d[b+10],d[b+11],d[b+12],
 				d[b+13],d[b+14],d[b+15],d[b+16],
 				})
+			it.nodes[i]=objs.nodes[v+1]
 			it.nodes[i].inverse=it.inverse[i]
+			it.nodes[i].boneidx=i
 		end
 	end
 	
@@ -401,6 +356,71 @@ M.to_geoms=function(gltf)
 	end
 	objs.anim=objs.anims[ (gltf.animation or 0) +1 ]
 	
+	for midx=1,#gltf.meshes do
+	
+		local mesh=gltf.meshes[midx]
+		local obj=objs[midx] -- previously created
+
+		obj.verts={}
+		obj.polys={}
+		obj.mats=objs.mats
+		obj.textures=objs.textures
+		
+		for pidx=1,#mesh.primitives do
+		
+			local primitive=mesh.primitives[pidx]
+
+			local tpos = M.accessor_to_table(gltf,primitive.attributes.POSITION)
+			local tnrm = M.accessor_to_table(gltf,primitive.attributes.NORMAL)
+			local tuv  = M.accessor_to_table(gltf,primitive.attributes.TEXCOORD_0)
+
+			local tj   = M.accessor_to_table(gltf,primitive.attributes.JOINTS_0)
+			local tw   = M.accessor_to_table(gltf,primitive.attributes.WEIGHTS_0)
+
+			if tpos then -- must have a position
+				for c=0,(#tpos/3)-1 do
+					local bw={0,0,0,0} -- bone+(1-weight) combined
+					for i=1,4 do
+						if tj and tw then
+							local j=tj[c*4+i]
+							local w=tw[c*4+i]
+							if w<0 then w=0 end
+							if w>1 then w=1 end
+							if w>0 then
+								local b=objs.nodes[j+1].boneidx -- convert joint to bone
+								if b then
+									bw[i]=b+(1-w)
+								end
+							end
+						end
+					end
+					obj.verts[c+1]={
+						tpos and tpos[c*3+1] or 0,tpos and tpos[c*3+2] or 0,tpos and tpos[c*3+3] or 0,
+						tnrm and tnrm[c*3+1] or 0,tnrm and tnrm[c*3+2] or 0,tnrm and tnrm[c*3+3] or 0,
+						tuv and tuv[c*2+1] or 0,tuv and tuv[c*2+2] or 0,
+						0,0,0,0,
+						bw[1],bw[2],bw[3],bw[4],
+					}
+--print(bw[1],bw[2],bw[3],bw[4])
+				end
+				
+				if primitive.indices then
+					local t=M.accessor_to_table(gltf,primitive.indices)
+					for i=1,#t,3 do
+						obj.polys[#obj.polys+1]={t[i]+1,t[i+1]+1,t[i+2]+1,mat=primitive.material and primitive.material+1}
+					end
+				else
+					for i=1,#obj.verts,3 do
+						obj.polys[#obj.polys+1]={i,i+1,i+2,mat=primitive.material+1}
+					end
+				end
+			end
+		end
+
+--		obj:build_normals()
+		obj:build_tangents()
+	end
+
 --	dprint(objs.anims)
 	
 	return objs
@@ -448,6 +468,8 @@ uniform vec4 color;
 uniform vec4  material_colors[8];
 uniform vec4  material_values[8];
 
+uniform mat4  bones[64];
+
 varying vec4  v_color;
 varying vec3  v_normal;
 varying vec3  v_tangent;
@@ -476,11 +498,44 @@ attribute vec4  a_bone;
 
 void main()
 {
-    gl_Position		=	projection * modelview * vec4(a_vertex, 1.0);
-	v_normal		=	normalize( mat3( modelview ) * a_normal );
-	v_tangent		=	normalize( mat3( modelview ) * a_tangent.xyz );
+
+	mat4 v=modelview;
+	
+	if(a_bone.x>0.0) //  some bone data
+	{
+		mat4 bv=mat4(0.0);
+		mat4 bm;
+
+		bm=bones[ int(a_bone.x-1.0) ];
+		bv+=(1.0-fract(a_bone.x))*(bm);
+
+		if(a_bone.y>0.0)
+		{
+			bm=bones[ int(a_bone.y-1.0) ];
+			bv+=(1.0-fract(a_bone.y))*(bm);
+
+			if(a_bone.z>0.0)
+			{
+				bm=bones[ int(a_bone.z-1.0) ];
+				bv+=(1.0-fract(a_bone.z))*(bm);
+				
+				if(a_bone.w>0.0)
+				{
+					bm=bones[ int(a_bone.w-1.0) ];
+					bv+=(1.0-fract(a_bone.w))*(bm);
+				}
+			}
+		}
+
+		v=v*bv;
+	}
+
+
+    gl_Position		=	projection * v * vec4(a_vertex,1.0);
+	v_normal		=	normalize( mat3( v ) * a_normal );
+	v_tangent		=	normalize( mat3( v ) * a_tangent.xyz );
 	v_bitangent		=	normalize( cross( v_normal , v_tangent ) * a_tangent.w );
-	v_bone			=	a_bone;
+	v_bone			=	fract(a_bone);
 	v_color			=	a_color;
 	v_texcoord		=	a_texcoord;
 	v_matidx		=	a_matidx;
@@ -530,6 +585,7 @@ void main(void)
 
 	gl_FragColor= ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ) ;
 	gl_FragColor.a=1.0;
+	gl_FragColor.rgb=fract(v_bone).rgb;
 
 //	gl_FragColor= vec4((n*0.5)+vec3(0.5,0.5,0.5),1.0);
 
@@ -701,9 +757,9 @@ main.draw=function()
 	gl.Enable(gl.DEPTH_TEST)
 	geoms.draw(objs,"geom_gltf",function(p)
 	
-		if objs.textures[1] then
-			gl.ActiveTexture(gl.TEXTURE0)
-			gl.BindTexture(gl.TEXTURE_2D, objs.textures[1].gl)
+		if objs.textures[3] then
+			gl.ActiveTexture(gl.TEXTURE2)
+			gl.BindTexture(gl.TEXTURE_2D, objs.textures[3].gl)
 		end
 		
 		if objs.textures[2] then
@@ -711,10 +767,22 @@ main.draw=function()
 			gl.BindTexture(gl.TEXTURE_2D, objs.textures[2].gl)
 		end
 		
-		if objs.textures[3] then
-			gl.ActiveTexture(gl.TEXTURE2)
-			gl.BindTexture(gl.TEXTURE_2D, objs.textures[3].gl)
+		if objs.textures[1] then
+			gl.ActiveTexture(gl.TEXTURE0)
+			gl.BindTexture(gl.TEXTURE_2D, objs.textures[1].gl)
 		end
+		
+		local bones={}
+		local skin=objs.skins[1] -- assume only one boned character
+		if skin then
+			local b=0
+			for i,v in ipairs(skin.nodes) do
+				local bone=v.bone or tardis.m4.new():identity()
+				for i=1,16 do bones[b+i]=bone[i] end
+				b=b+16
+			end
+		end
+--dprint(bones)
 		
 		material_colors={}
 		material_values={}
@@ -736,6 +804,8 @@ main.draw=function()
 		
 			b=b+4
 		end
+
+		gl.UniformMatrix4f( p:uniform("bones"), bones )
 
 		gl.Uniform4f( p:uniform("material_colors"), material_colors )
 		gl.Uniform4f( p:uniform("material_values"), material_values )

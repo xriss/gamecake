@@ -157,6 +157,7 @@ M.bake=function(oven,geoms)
 			
 			if its.inverse then
 				its.bone=its.world:product(its.inverse,tardis.m4.new())
+--				its.bone=its.inverse:product(its.world,tardis.m4.new())
 			end
 			
 			for i,v in ipairs(its) do
