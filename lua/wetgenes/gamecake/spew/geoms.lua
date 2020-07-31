@@ -67,7 +67,7 @@ M.bake=function(oven,geoms)
 			anim.time=(anim.time or 0)%anim.length
 		end
 		
-		local key_idx=0
+		local key_idx=1
 		local key_blend=0
 		
 		for idx=2,#anim.keys do
@@ -141,11 +141,19 @@ M.bake=function(oven,geoms)
 
 			stack.push()
 
-			if its.trs then
-				local trs=its.trs
+			local trs=its.trs
+
+			if trs then
 				stack.scale( trs[8] , trs[9] , trs[10] )
-				stack.qrotate( { trs[4] , trs[5] , trs[6] , trs[7] } )
+				stack.qrotate( trs[4] , trs[5] , trs[6] , trs[7] )
 				stack.translate( trs[1] , trs[2] , trs[3])
+
+--				local mt=tardis.m4.new():identity():translate( { trs[1] , trs[2] , trs[3] } )
+				local mr=tardis.q4_to_m4( { trs[4] , trs[5] , trs[6] , trs[7] } )
+
+--print(mt)
+--print( tardis.q4.new( trs[4] , trs[5] , trs[6] , trs[7] ) )
+--print( mr)
 
 			elseif its.matrix then
 
@@ -156,8 +164,13 @@ M.bake=function(oven,geoms)
 			its.world=stack.save()
 			
 			if its.inverse then
+
+--if trs then
+--print( trs[4] , trs[5] , trs[6] , trs[7] )
+--end
 				its.bone=its.world:product(its.inverse,tardis.m4.new())
 --				its.bone=its.inverse:product(its.world,tardis.m4.new())
+--				its.bone=its.world
 			end
 			
 			for i,v in ipairs(its) do
@@ -169,10 +182,12 @@ M.bake=function(oven,geoms)
 		end
 
 		prepare(its.scene)
+--os.exit()
 
 	end
 
 	geoms.update=function(its)
+	
 		geoms.animate(its)
 		geoms.prepare(its)
 	end
@@ -183,19 +198,41 @@ M.bake=function(oven,geoms)
 		
 		draw=function(its)
 
-			gl.PushMatrix()
-
-			gl.MultMatrix( its.world )
-
 			if its.mesh then
+				gl.PushMatrix()
+				gl.MultMatrix( its.world )
 				geom.draw(its.mesh,progname,cb,modes)
+				gl.PopMatrix()
 			end
-			
+
 			for i,v in ipairs(its) do
 				draw(v)
 			end
-			
-			gl.PopMatrix()
+
+		end
+
+		draw(its.scene)
+	
+	end
+
+	geoms.draw_bones=function(its,progname,cb,modes)
+	
+		local mesh=geom.hexahedron():adjust_scale(1/4)
+	
+		local draw
+		
+		draw=function(its)
+
+			if its.bone then
+				gl.PushMatrix()
+				gl.MultMatrix( its.world )
+				geom.draw(mesh,progname,cb,modes)
+				gl.PopMatrix()
+			end
+
+			for i,v in ipairs(its) do
+				draw(v)
+			end
 
 		end
 

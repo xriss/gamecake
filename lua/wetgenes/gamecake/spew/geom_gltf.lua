@@ -585,7 +585,8 @@ void main(void)
 
 	gl_FragColor= ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ) ;
 	gl_FragColor.a=1.0;
-	gl_FragColor.rgb=fract(v_bone).rgb;
+
+//	gl_FragColor.rgb=fract(v_bone).rgb;
 
 //	gl_FragColor= vec4((n*0.5)+vec3(0.5,0.5,0.5),1.0);
 
@@ -755,7 +756,9 @@ main.draw=function()
 	gl.MultMatrix( tardis.q4_to_m4(view_rotation) )
 	
 	gl.Enable(gl.DEPTH_TEST)
-	geoms.draw(objs,"geom_gltf",function(p)
+--	geoms.draw_bones(objs,"geom_gltf",function(p)
+
+	local pp=function(p)
 	
 		if objs.textures[3] then
 			gl.ActiveTexture(gl.TEXTURE2)
@@ -814,7 +817,12 @@ main.draw=function()
 		gl.Uniform1i( p:uniform("tex1"), 1 )
 		gl.Uniform1i( p:uniform("tex2"), 2 )
 
-	end)
+	end
+
+
+	geoms.draw(objs,"geom_gltf",pp)
+	geoms.draw_bones(objs,"geom_gltf",pp)
+
 	gl.Disable(gl.DEPTH_TEST)
 
 

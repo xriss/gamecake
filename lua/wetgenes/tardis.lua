@@ -131,7 +131,7 @@ function array.__tostring(it) -- these classes are all just 1d arrays of numbers
 	t[#t+1]=tardis.type(it)
 	t[#t+1]="={"
 	for i=1,#it do
-		t[#t+1]=tostring(it[i])
+		t[#t+1]=string.format("%.5f",it[i]) -- dumps are unreadable unless we disable exponents
 		if i~=#it then t[#t+1]=", " end
 	end
 	t[#t+1]="}"
@@ -1555,7 +1555,7 @@ end
 
 function tardis.q4_to_m4(q,m)
 	if not m then m=m4.new() end
-	local w,x,y,z=q[1],q[2],q[3],q[4]
+	local x,y,z,w=q[1],q[2],q[3],q[4]
     local xx,xy,xz,xw=x*x,x*y,x*z,x*w
     local    yy,yz,yw=    y*y,y*z,y*w
     local       zz,zw=        z*z,z*w
