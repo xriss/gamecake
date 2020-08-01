@@ -1560,17 +1560,21 @@ function tardis.q4_to_m4(q,m)
     local    yy,yz,yw=    y*y,y*z,y*w
     local       zz,zw=        z*z,z*w
 
-	return array.set(m,
+	array.set(m,
 					1 - 2 * ( yy + zz ),
-						2 * ( xy - zw ),
-						2 * ( xz + yw ),0,
 						2 * ( xy + zw ),
-					1 - 2 * ( xx + zz ),
-						2 * ( yz - xw ),0,
 						2 * ( xz - yw ),
+						0,
+						2 * ( xy - zw ),
+					1 - 2 * ( xx + zz ),
 						2 * ( yz + xw ),
+						0,
+						2 * ( xz + yw ),
+						2 * ( yz - xw ),
 					1 - 2 * ( xx + yy ),0,
 						0,0,0,1				)
+						
+	return m
 end
 
 function tardis.q4_product_q4(q4a,q4b,r)

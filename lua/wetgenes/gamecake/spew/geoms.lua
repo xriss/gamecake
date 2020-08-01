@@ -144,16 +144,10 @@ M.bake=function(oven,geoms)
 			local trs=its.trs
 
 			if trs then
-				stack.scale( trs[8] , trs[9] , trs[10] )
-				stack.qrotate( trs[4] , trs[5] , trs[6] , trs[7] )
+
 				stack.translate( trs[1] , trs[2] , trs[3])
-
---				local mt=tardis.m4.new():identity():translate( { trs[1] , trs[2] , trs[3] } )
-				local mr=tardis.q4_to_m4( { trs[4] , trs[5] , trs[6] , trs[7] } )
-
---print(mt)
---print( tardis.q4.new( trs[4] , trs[5] , trs[6] , trs[7] ) )
---print( mr)
+				stack.qrotate( trs[4] , trs[5] , trs[6] , trs[7] )
+				stack.scale( trs[8] , trs[9] , trs[10] )
 
 			elseif its.matrix then
 
@@ -164,13 +158,7 @@ M.bake=function(oven,geoms)
 			its.world=stack.save()
 			
 			if its.inverse then
-
---if trs then
---print( trs[4] , trs[5] , trs[6] , trs[7] )
---end
-				its.bone=its.world:product(its.inverse,tardis.m4.new())
---				its.bone=its.inverse:product(its.world,tardis.m4.new())
---				its.bone=its.world
+				its.bone=its.inverse:product(its.world,tardis.m4.new())
 			end
 			
 			for i,v in ipairs(its) do
@@ -182,12 +170,10 @@ M.bake=function(oven,geoms)
 		end
 
 		prepare(its.scene)
---os.exit()
 
 	end
 
 	geoms.update=function(its)
-	
 		geoms.animate(its)
 		geoms.prepare(its)
 	end

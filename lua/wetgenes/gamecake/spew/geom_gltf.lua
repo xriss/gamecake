@@ -500,7 +500,7 @@ void main()
 {
 
 	mat4 v=modelview;
-	
+
 	if(a_bone.x>0.0) //  some bone data
 	{
 		mat4 bv=mat4(0.0);
@@ -756,7 +756,6 @@ main.draw=function()
 	gl.MultMatrix( tardis.q4_to_m4(view_rotation) )
 	
 	gl.Enable(gl.DEPTH_TEST)
---	geoms.draw_bones(objs,"geom_gltf",function(p)
 
 	local pp=function(p)
 	
@@ -780,10 +779,16 @@ main.draw=function()
 		if skin then
 			local b=0
 			for i,v in ipairs(skin.nodes) do
+print(v.world)
+print(v.inverse)
+print(v.bone)
+print()
 				local bone=v.bone or tardis.m4.new():identity()
 				for i=1,16 do bones[b+i]=bone[i] end
+
 				b=b+16
 			end
+print()
 		end
 --dprint(bones)
 		
