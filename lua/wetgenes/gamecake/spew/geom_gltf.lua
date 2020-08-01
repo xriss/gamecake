@@ -255,7 +255,8 @@ M.to_geoms=function(gltf)
 		local node=gltf.nodes[nidx]
 		local it={}
 		objs.nodes[nidx]=it
-
+		it.nodeidx=nidx
+		
 		it.name=node.name
 		
 		if node.children then
@@ -387,10 +388,7 @@ M.to_geoms=function(gltf)
 							if w<0 then w=0 end
 							if w>1 then w=1 end
 							if w>0 then
-								local b=objs.nodes[j+1].boneidx -- convert joint to bone
-								if b then
-									bw[i]=b+(1-w)
-								end
+								bw[i]=j+1+(1-w)
 							end
 						end
 					end
@@ -399,7 +397,7 @@ M.to_geoms=function(gltf)
 						tnrm and tnrm[c*3+1] or 0,tnrm and tnrm[c*3+2] or 0,tnrm and tnrm[c*3+3] or 0,
 						tuv and tuv[c*2+1] or 0,tuv and tuv[c*2+2] or 0,
 						0,0,0,0,
-						bw[1],bw[2],bw[3],bw[4],
+						bw[1],bw[2],bw[3],bw[4]
 					}
 --print(bw[1],bw[2],bw[3],bw[4])
 				end
@@ -461,6 +459,8 @@ M.view=function(gltf,oven)
 
 	gl.program_source("geom_gltf",[[
 
+precision highp float;
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -483,7 +483,6 @@ varying vec4  v_value;
 
 #ifdef VERTEX_SHADER
 
-precision highp float;
 
 
  
@@ -501,41 +500,44 @@ void main()
 
 	mat4 v=modelview;
 
-	if(a_bone.x>0.0) //  some bone data
+	if(a_bone[0]>0.0) //  some bone data
 	{
-		mat4 bv=mat4(0.0);
 		mat4 bm;
+		mat4 bv;
 
-		bm=bones[ int(a_bone.x-1.0) ];
-		bv+=(1.0-fract(a_bone.x))*(bm);
+		bm=bones[ int(a_bone[0]-1.0) ];
+		bv=(1.0-fract(a_bone[0]))*(bm);
 
-		if(a_bone.y>0.0)
+		if(a_bone[1]>0.0)
 		{
-			bm=bones[ int(a_bone.y-1.0) ];
-			bv+=(1.0-fract(a_bone.y))*(bm);
+			bm=bones[ int(a_bone[1]-1.0) ];
+			bv+=(1.0-fract(a_bone[1]))*(bm);
 
-			if(a_bone.z>0.0)
+			if(a_bone[2]>0.0)
 			{
-				bm=bones[ int(a_bone.z-1.0) ];
-				bv+=(1.0-fract(a_bone.z))*(bm);
+				bm=bones[ int(a_bone[2]-1.0) ];
+				bv+=(1.0-fract(a_bone[2]))*(bm);
 				
-				if(a_bone.w>0.0)
+				if(a_bone[3]>0.0)
 				{
-					bm=bones[ int(a_bone.w-1.0) ];
-					bv+=(1.0-fract(a_bone.w))*(bm);
+					bm=bones[ int(a_bone[3]-1.0) ];
+					bv+=(1.0-fract(a_bone[3]))*(bm);
 				}
 			}
 		}
 
-		v=v*bv;
+		
+		v=modelview*bv;
 	}
+	
+//	v=modelview*(0.5*bones[1]+0.5*bones[0]);
 
 
     gl_Position		=	projection * v * vec4(a_vertex,1.0);
 	v_normal		=	normalize( mat3( v ) * a_normal );
 	v_tangent		=	normalize( mat3( v ) * a_tangent.xyz );
 	v_bitangent		=	normalize( cross( v_normal , v_tangent ) * a_tangent.w );
-	v_bone			=	fract(a_bone);
+	v_bone			=	(a_bone);
 	v_color			=	a_color;
 	v_texcoord		=	a_texcoord;
 	v_matidx		=	a_matidx;
@@ -550,7 +552,6 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 
-precision highp float;
 
 uniform sampler2D tex0;
 uniform sampler2D tex1;
@@ -586,7 +587,8 @@ void main(void)
 	gl_FragColor= ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ) ;
 	gl_FragColor.a=1.0;
 
-//	gl_FragColor.rgb=fract(v_bone).rgb;
+	gl_FragColor.rgb=fract(v_bone).rgb;
+//	gl_FragColor.rgb=floor(v_bone).rgb*0.125;
 
 //	gl_FragColor= vec4((n*0.5)+vec3(0.5,0.5,0.5),1.0);
 
@@ -779,16 +781,16 @@ main.draw=function()
 		if skin then
 			local b=0
 			for i,v in ipairs(skin.nodes) do
-print(v.world)
-print(v.inverse)
-print(v.bone)
-print()
+--print(v.world)
+--print(v.boneidx,v.nodeidx,v.inverse)
+--print(v.bone)
+--print()
 				local bone=v.bone or tardis.m4.new():identity()
 				for i=1,16 do bones[b+i]=bone[i] end
 
 				b=b+16
 			end
-print()
+--print()
 		end
 --dprint(bones)
 		
