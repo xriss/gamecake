@@ -415,7 +415,7 @@ M.to_geoms=function(gltf)
 			end
 		end
 
---		obj:build_normals()
+		obj:build_normals()
 		obj:build_tangents()
 	end
 
@@ -465,8 +465,8 @@ uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
 
-uniform vec4  material_colors[8];
 uniform vec4  material_values[8];
+uniform vec4  material_colors[8];
 
 uniform mat4  bones[64];
 
@@ -497,7 +497,6 @@ attribute vec4  a_bone;
 
 void main()
 {
-
 	mat4 v=modelview;
 
 	if(a_bone[0]>0.0) //  some bone data
@@ -541,8 +540,7 @@ void main()
 	v_color			=	a_color;
 	v_texcoord		=	a_texcoord;
 	v_matidx		=	a_matidx;
-	
-	
+
 	v_value = material_values[ int( a_matidx ) ];
 	
 }
@@ -584,13 +582,7 @@ void main(void)
 
 	vec3 n = normalize( (t2.x*v_bitangent) + (-t2.y*v_tangent) + (t2.z*v_normal) );
 
-	gl_FragColor= ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ) ;
-	gl_FragColor.a=1.0;
-
-	gl_FragColor.rgb=fract(v_bone).rgb;
-//	gl_FragColor.rgb=floor(v_bone).rgb*0.125;
-
-//	gl_FragColor= vec4((n*0.5)+vec3(0.5,0.5,0.5),1.0);
+	gl_FragColor=vec4( ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ).rgb , 1.0 ) ;
 
 }
 
@@ -640,7 +632,7 @@ void main(void)
 
 	local view_position=tardis.v3.new{0,0,0}
 	local view_scale=tardis.v3.new{1,1,1}
-	local view_rotation=(tardis.q4.new({0,0,0,1})):rotate(180,{1,1,0})
+	local view_rotation=tardis.q4.new({0,0,0,1}):rotate(180,{0,0,1})
 	local view_orbit=tardis.v3.new{0,0,0}
 
 --[[
@@ -685,11 +677,6 @@ end
 main.msg=function(m)
 	view.msg(m) -- fix mouse coords
 	
---[[
-	rot:rotate(0.1,{0,1,0})
-	rot:normalize()
-]]
-
 	if m.class=="mouse" then
 	
 		if m.keyname=="wheel_add" then
@@ -730,12 +717,6 @@ main.msg=function(m)
 					
 					mstate[2]=m.x
 					mstate[3]=m.y
---[[
-					view_rotation=tardis.q4.new(mstate[4])
-					view_rotation:rotate( (m.x-mstate[2]) /4 ,{0,1,0})
-					view_rotation:rotate( (m.y-mstate[3]) /4 ,{1,0,0})
-					view_rotation:normalize()
-]]
 				end
 			end
 		
@@ -770,9 +751,8 @@ main.draw=function()
 
 	gl.Translate(view_position[1],view_position[2],view_position[3])
 	gl.Scale(view_scale[1],view_scale[2],view_scale[3])
---	gl.MultMatrix( tardis.q4_to_m4(view_rotation) )
+	gl.MultMatrix( tardis.q4_to_m4(view_rotation) )
 
-	gl.Rotate( 180 , 0,0,-1 )
 	gl.Rotate( view_orbit[1] ,  0,-1, 0 )
 	gl.Rotate( view_orbit[2] ,  1, 0, 0 )
 	
@@ -783,16 +763,19 @@ main.draw=function()
 		if objs.textures[3] then
 			gl.ActiveTexture(gl.TEXTURE2)
 			gl.BindTexture(gl.TEXTURE_2D, objs.textures[3].gl)
+			gl.Uniform1i( p:uniform("tex2"), 2 )
 		end
 		
 		if objs.textures[2] then
 			gl.ActiveTexture(gl.TEXTURE1)
 			gl.BindTexture(gl.TEXTURE_2D, objs.textures[2].gl)
+			gl.Uniform1i( p:uniform("tex1"), 1 )
 		end
 		
 		if objs.textures[1] then
 			gl.ActiveTexture(gl.TEXTURE0)
 			gl.BindTexture(gl.TEXTURE_2D, objs.textures[1].gl)
+			gl.Uniform1i( p:uniform("tex0"), 0 )
 		end
 		
 		local bones={}
@@ -800,18 +783,12 @@ main.draw=function()
 		if skin then
 			local b=0
 			for i,v in ipairs(skin.nodes) do
---print(v.world)
---print(v.boneidx,v.nodeidx,v.inverse)
---print(v.bone)
---print()
 				local bone=v.bone or tardis.m4.new():identity()
 				for i=1,16 do bones[b+i]=bone[i] end
 
 				b=b+16
 			end
---print()
 		end
---dprint(bones)
 		
 		material_colors={}
 		material_values={}
@@ -826,11 +803,8 @@ main.draw=function()
 				material_values[b+2]=mat[2][1] or 0
 				material_values[b+3]=mat[2][2] or 0
 				material_values[b+4]=mat[3][1] or 0
-			
---material_values[b+4]=0
-
 			end
-		
+
 			b=b+4
 		end
 
@@ -838,11 +812,7 @@ main.draw=function()
 
 		gl.Uniform4f( p:uniform("material_colors"), material_colors )
 		gl.Uniform4f( p:uniform("material_values"), material_values )
-
-		gl.Uniform1i( p:uniform("tex0"), 0 )
-		gl.Uniform1i( p:uniform("tex1"), 1 )
-		gl.Uniform1i( p:uniform("tex2"), 2 )
-
+		
 	end
 
 

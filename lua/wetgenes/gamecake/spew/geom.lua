@@ -318,6 +318,16 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				vv[6]=vv[6]/vv.count
 			end
 			vv.count=nil
+			
+			if vv[4]~=vv[4] then vv[4]=1 end	-- if nan
+			if vv[5]~=vv[5] then vv[5]=1 end
+			if vv[6]~=vv[6] then vv[6]=1 end
+			
+			if vv[4]==0 and vv[5]==0 and vv[6]==0 then -- if zero length
+				vv[4]=1
+				vv[5]=1
+				vv[6]=1
+			end
 		end
 
 		return it
@@ -463,11 +473,14 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		end
 
 
--- work out the sign for the bitangent
+-- work out the sign for the bitangent and force remove any nan values
 		for iv,vv in ipairs(it.verts) do
 			local b={ (vv[5]*vv[11])-(vv[6]*vv[10]) , (vv[6]*vv[9])-(vv[4]*vv[11]) , (vv[4]*vv[10])-(vv[5]*vv[9]) }
 			vv[12] = vv[12][1]*b[1] + vv[12][2]*b[2] + vv[12][3]*b[3] 
 			if vv[12]>=0 then vv[12]=1 else vv[12]=-1 end
+			if vv[ 9]~=vv[ 9] then vv[ 9]=1 end
+			if vv[10]~=vv[10] then vv[10]=1 end
+			if vv[11]~=vv[11] then vv[11]=1 end
 		end
 
 		return it
