@@ -638,9 +638,10 @@ void main(void)
 	end
 
 
-	local view_position={0,0,0}
-	local view_scale={1,1,1}
-	local view_rotation={0,0,0,1}
+	local view_position=tardis.v3.new{0,0,0}
+	local view_scale=tardis.v3.new{1,1,1}
+	local view_rotation=(tardis.q4.new({0,0,0,1})):rotate(180,{1,1,0})
+	local view_orbit=tardis.v3.new{0,0,0}
 
 --[[
 	local dx,dy,dz,dw=0,0,0,0
@@ -703,13 +704,13 @@ main.msg=function(m)
 			end
 		elseif m.keyname=="left" then -- click
 		
-			if m.action==1 then		mstate={"left",m.x,m.y,tardis.q4.new(view_rotation)}
+			if m.action==1 then		mstate={"left",m.x,m.y}
 			elseif m.action==-1 then	mstate={}
 			end
 			
 		elseif m.keyname=="right" then -- click
 
-			if m.action==1 then		mstate={"right",m.x,m.y,tardis.q4.new(view_rotation)}
+			if m.action==1 then		mstate={"right",m.x,m.y}
 			elseif m.action==-1 then	mstate={}
 			end
 
@@ -717,10 +718,24 @@ main.msg=function(m)
 
 			if m.action==0 then -- drag
 				if mstate[1]=="left" then
+					local rs=1/2
+					view_orbit[1]=view_orbit[1]+(m.x-mstate[2])*rs
+					view_orbit[2]=view_orbit[2]+(m.y-mstate[3])*rs
+					
+					while view_orbit[1] >  180 do view_orbit[1]=view_orbit[1]-360 end
+					while view_orbit[1] < -180 do view_orbit[1]=view_orbit[1]+360 end
+
+					while view_orbit[2] >  180 do view_orbit[2]= 180 end
+					while view_orbit[2] < -180 do view_orbit[2]=-180 end
+					
+					mstate[2]=m.x
+					mstate[3]=m.y
+--[[
 					view_rotation=tardis.q4.new(mstate[4])
 					view_rotation:rotate( (m.x-mstate[2]) /4 ,{0,1,0})
 					view_rotation:rotate( (m.y-mstate[3]) /4 ,{1,0,0})
 					view_rotation:normalize()
+]]
 				end
 			end
 		
@@ -753,9 +768,13 @@ main.draw=function()
 	gl.PushMatrix()
 	gl.Translate(view.vx/2,view.vy/2,0)
 
-	gl.Translate(unpack(view_position))
-	gl.Scale(unpack(view_scale))
-	gl.MultMatrix( tardis.q4_to_m4(view_rotation) )
+	gl.Translate(view_position[1],view_position[2],view_position[3])
+	gl.Scale(view_scale[1],view_scale[2],view_scale[3])
+--	gl.MultMatrix( tardis.q4_to_m4(view_rotation) )
+
+	gl.Rotate( 180 , 0,0,-1 )
+	gl.Rotate( view_orbit[1] ,  0,-1, 0 )
+	gl.Rotate( view_orbit[2] ,  1, 0, 0 )
 	
 	gl.Enable(gl.DEPTH_TEST)
 
@@ -828,7 +847,7 @@ main.draw=function()
 
 
 	geoms.draw(objs,"geom_gltf",pp)
-	geoms.draw_bones(objs,"geom_gltf",pp)
+--	geoms.draw_bones(objs,"geom_gltf",pp)
 
 	gl.Disable(gl.DEPTH_TEST)
 

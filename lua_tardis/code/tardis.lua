@@ -1479,7 +1479,7 @@ Set this matrix to a rotation matrix around the given normal.
 function q4.setrot(it,degrees,v3a)
 	local ah=degrees * (math.pi/180)
 	local sh=math.sin(ah)
-	return array.set(it , v3a[3]*sh , v3a[2]*sh , v3a[1]*sh , math.cos(ah) )
+	return array.set(it , v3a[1]*sh , v3a[2]*sh , v3a[3]*sh , math.cos(ah) )
 end
 
 --[[#lua.wetgenes.tardis.q4.rotate
