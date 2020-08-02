@@ -224,6 +224,8 @@ M.to_geoms=function(gltf)
 			m[1][1]=0 -- disable
 		end
 		
+		m[1].color=m.baseColorFactor or {1,1,1,1}
+		
 		if m.metallicRoughnessTexture or m.occlusionTexture then -- these *should* be the same texture
 			m[2][1]=m.occlusionTexture and ( m.occlusionTexture.strength or 1 ) -- enable
 			m[2][2]=m.metallicFactor or 1-- enable
@@ -537,11 +539,13 @@ void main()
 	v_tangent		=	normalize( mat3( v ) * a_tangent.xyz );
 	v_bitangent		=	normalize( cross( v_normal , v_tangent ) * a_tangent.w );
 	v_bone			=	(a_bone);
-	v_color			=	a_color;
 	v_texcoord		=	a_texcoord;
 	v_matidx		=	a_matidx;
 
-	v_value = material_values[ int( a_matidx ) ];
+	int idx=int( a_matidx );
+	
+	v_value  = material_values[ idx ];
+	v_color = material_colors[ idx ];
 	
 }
 
@@ -582,7 +586,7 @@ void main(void)
 
 	vec3 n = normalize( (t2.x*v_bitangent) + (-t2.y*v_tangent) + (t2.z*v_normal) );
 
-	gl_FragColor=vec4( ( t0 * (0.5+0.5*pow( n.z, 4.0 )) ).rgb , 1.0 ) ;
+	gl_FragColor=vec4( ( t0 * v_color * (0.5+0.5*pow( n.z, 4.0 )) ).rgb , 1.0 ) ;
 
 }
 
@@ -598,6 +602,22 @@ void main(void)
 	local gg={}
 	
 	local objs=M.to_geoms(gltf)
+
+	local hash={
+		hair	={ 0.5 , 0.0 , 0.0 , 1.0 },
+		skin	={ 1.0 , 0.5 , 0.0 , 1.0 },
+		black	={ 0.0 , 0.0 , 0.0 , 1.0 },
+		color1	={ 1.0 , 0.0 , 0.0 , 1.0 },
+		color2	={ 0.0 , 0.0 , 1.0 , 1.0 },
+		eye		={ 1.0 , 1.0 , 1.0 , 1.0 },
+		iris	={ 0.0 , 0.0 , 0.5 , 1.0 },
+		lips	={ 1.0 , 0.0 , 0.0 , 1.0 },
+	}
+	for i,mat in ipairs(objs.mats) do
+		local c=hash[mat.name]
+		if c then mat[1].color=c end
+	end
+
 
 	for i,texture in ipairs(objs.textures) do
 	
@@ -803,6 +823,11 @@ main.draw=function()
 				material_values[b+2]=mat[2][1] or 0
 				material_values[b+3]=mat[2][2] or 0
 				material_values[b+4]=mat[3][1] or 0
+				
+				material_colors[b+1]=mat[1].color[1] or 1
+				material_colors[b+2]=mat[1].color[2] or 1
+				material_colors[b+3]=mat[1].color[3] or 0
+				material_colors[b+4]=mat[1].color[4] or 1
 			end
 
 			b=b+4
