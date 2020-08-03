@@ -11,7 +11,7 @@ local wstr=require("wetgenes.string")
 local wpack=require("wetgenes.pack")
 local wjson=require("wetgenes.json")
 local tardis=require("wetgenes.tardis")
-
+local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -308,12 +308,12 @@ M.to_geoms=function(gltf)
 		local d=M.accessor_to_table(gltf,skin.inverseBindMatrices)
 		for i,v in ipairs(skin.joints) do
 			local b=((i-1)*16)
-			it.inverse[i]=tardis.m4.new({
+			it.inverse[i]=M4{
 				d[b+ 1],d[b+ 2],d[b+ 3],d[b+ 4],
 				d[b+ 5],d[b+ 6],d[b+ 7],d[b+ 8],
 				d[b+ 9],d[b+10],d[b+11],d[b+12],
 				d[b+13],d[b+14],d[b+15],d[b+16],
-				})
+				}
 			it.nodes[i]=objs.nodes[v+1]
 			it.nodes[i].inverse=it.inverse[i]
 			it.nodes[i].boneidx=i
@@ -485,8 +485,6 @@ varying vec4  v_value;
 
 #ifdef VERTEX_SHADER
 
-
-
  
 attribute vec4  a_color;
 attribute vec3  a_vertex;
@@ -530,9 +528,6 @@ void main()
 		
 		v=modelview*bv;
 	}
-	
-//	v=modelview*(0.5*bones[1]+0.5*bones[0]);
-
 
     gl_Position		=	projection * v * vec4(a_vertex,1.0);
 	v_normal		=	normalize( mat3( v ) * a_normal );
@@ -543,8 +538,7 @@ void main()
 	v_matidx		=	a_matidx;
 
 	int idx=int( a_matidx );
-	
-	v_value  = material_values[ idx ];
+	v_value = material_values[ idx ];
 	v_color = material_colors[ idx ];
 	
 }
@@ -650,10 +644,10 @@ void main(void)
 	end
 
 
-	local view_position=tardis.v3.new{0,0,0}
-	local view_scale=tardis.v3.new{1,1,1}
-	local view_rotation=tardis.q4.new({0,0,0,1}):rotate(180,{0,0,1})
-	local view_orbit=tardis.v3.new{0,0,0}
+	local view_position=V3{0,0,0}
+	local view_scale=V3{1,1,1}
+	local view_rotation=Q4{0,0,0,1}:rotate(180,{0,0,1})
+	local view_orbit=V3{0,0,0}
 
 --[[
 	local dx,dy,dz,dw=0,0,0,0
@@ -679,7 +673,7 @@ void main(void)
 	end
 	if m>0 then
 		local s=256/m
-		view_scale={s,s,s}
+		view_scale=V3{s,s,s}
 	end
 	
 main.update=function()
@@ -803,7 +797,7 @@ main.draw=function()
 		if skin then
 			local b=0
 			for i,v in ipairs(skin.nodes) do
-				local bone=v.bone or tardis.m4.new():identity()
+				local bone=v.bone or M4():identity()
 				for i=1,16 do bones[b+i]=bone[i] end
 
 				b=b+16

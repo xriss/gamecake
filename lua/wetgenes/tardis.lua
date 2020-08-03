@@ -70,6 +70,14 @@ http://www.j3d.org/matrix_faq/matrfaq_latest.html
 --module
 local tardis={ modname=(...) } ; package.loaded[tardis.modname]=tardis
 
+
+tardis.export=function(env,...)
+	local tab={...} ; for i=1,#tab do tab[i]=env[ tab[i] ] end
+	return unpack(tab)
+end
+
+
+
 --[[#lua.wetgenes.tardis.type
 
 	name=tardis.type(object)
@@ -1823,3 +1831,18 @@ if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first
 	m4.translate		=	tcore.m4_translate
 
 end
+
+
+tardis.V2=tardis.v2.new
+tardis.V3=tardis.v3.new
+tardis.V4=tardis.v4.new
+
+tardis.M2=tardis.m2.new
+tardis.M3=tardis.m3.new
+tardis.M4=tardis.m4.new
+
+tardis.Q4=tardis.q4.new
+
+tardis.LINE=tardis.line.new
+tardis.PLANE=tardis.plane.new
+
