@@ -121,8 +121,8 @@ function glescode.create(gl)
 		code.stack.rotate(...)
 	end
 
-	function code.Scale(x,y,z)
-		code.stack.scale({x,y,z})
+	function code.Scale(...)
+		code.stack.scale(...)
 	end
 
 	function code.PushMatrix()		
