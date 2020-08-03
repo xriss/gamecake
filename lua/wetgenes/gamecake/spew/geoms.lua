@@ -146,7 +146,7 @@ M.bake=function(oven,geoms)
 			if trs then
 
 				stack.translate( trs[1] , trs[2] , trs[3])
-				stack.qrotate( trs[4] , trs[5] , trs[6] , trs[7] )
+				stack.rotate( { trs[4] , trs[5] , trs[6] , trs[7] } )
 				stack.scale( trs[8] , trs[9] , trs[10] )
 
 			elseif its.matrix then

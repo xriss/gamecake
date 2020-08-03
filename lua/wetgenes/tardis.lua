@@ -642,26 +642,6 @@ function m4.transpose(it,r)
 	return	 array.set(r,it[1],it[4+1],it[8+1],it[12+1], it[2],it[4+2],it[8+2],it[12+2], it[3],it[4+3],it[8+3],it[12+3], it[4],it[4+4],it[8+4],it[12+4])
 end
 
---[[#lua.wetgenes.tardis.m4.scale
-
-	m4 = m4:scale(s)
-	m4 = m4:scale(s,r)
-
-Scale this m4 by s.
-
-If r is provided then the result is written into r and returned 
-otherwise m4 is modified and returned.
-
-]]
-function m4.scale(it,s,r)
-	r=r or it
-	return array.set(r,
-		it[ 1]*s,it[ 2]*s,it[ 3]*s,it[ 4]*s,
-		it[ 5]*s,it[ 6]*s,it[ 7]*s,it[ 8]*s,
-		it[ 9]*s,it[10]*s,it[11]*s,it[12]*s,
-		it[13]*s,it[14]*s,it[15]*s,it[16]*s)
-end
-
 --[[#lua.wetgenes.tardis.m4.add
 
 	m4 = m4:add(m4b)
@@ -782,22 +762,18 @@ function m4.inverse(it,r)
 	return m4.scale(m4.cofactor(m4.transpose(it,m4.new())),ood,r)
 end
 
---[[#lua.wetgenes.tardis.m4.translate
+--[[#lua.wetgenes.tardis.m4.translate_v3
 
-	m4 = m4:translate(x,y,z)
-	m4 = m4:translate(x,y,z,r)
-	m4 = m4:translate(v3)
-	m4 = m4:translate(v3,r)
+	m4 = m4:translate_v3(v3a)
+	m4 = m4:translate_v3(v3a,r)
 
-Translate this m4 along its local axis by {x,y,z} or v3.
+Translate this m4 along its local axis by v3a.
 
 If r is provided then the result is written into r and returned 
 otherwise m4 is modified and returned.
 
 ]]
-function m4.translate(it,a,b,c,d)
-	local v3a,r
-	if type(a)=="number" then v3a=tardis.v3.new(a,b,c) r=d else v3a=a r=b end
+function m4.translate_v3(it,v3a,r)
 	r=r or it
 	local r1=it[12+1]+v3a[1]*it[1]+v3a[2]*it[5]+v3a[3]*it[9]
 	local r2=it[12+2]+v3a[1]*it[2]+v3a[2]*it[6]+v3a[3]*it[10]
@@ -806,10 +782,29 @@ function m4.translate(it,a,b,c,d)
 	return array.set(r,it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,r4 )
 end
 
+--[[#lua.wetgenes.tardis.m4.translate
+
+	m4 = m4:translate(x,y,z)
+	m4 = m4:translate(x,y,z,r)
+	m4 = m4:translate(v3a)
+	m4 = m4:translate(v3a,r)
+
+Translate this m4 along its local axis by {x,y,z} or v3a.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.translate(it,a,b,c,d)
+	if type(a)=="table" then
+		return m4.translate_v3(it,a,b)
+	else
+		return m4.translate_v3(it,{a,b,c},d)
+	end
+end
+
 --[[#lua.wetgenes.tardis.m4.scale_v3
 
-	m4 = m4:scale_v3(x,y,z)
-	m4 = m4:scale_v3(x,y,z,r)
 	m4 = m4:scale_v3(v3)
 	m4 = m4:scale_v3(v3,r)
 
@@ -819,9 +814,7 @@ If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
-function m4.scale_v3(it,a,b,c,d)
-	local v3a,r
-	if type(a)~="number" then v3a=tardis.v3.new(a,b,c) r=d else v3a=a r=b end
+function m4.scale_v3(it,v3a,r)
 	r=r or it
 	local s1=v3a[1]
 	local s2=v3a[2]
@@ -834,12 +827,34 @@ function m4.scale_v3(it,a,b,c,d)
 	)
 end
 
---[[#lua.wetgenes.tardis.m4.scale_v3
+--[[#lua.wetgenes.tardis.m4.scale
 
-	v3 = m4:scale_v3(x,y,z)
-	v3 = m4:scale_v3(x,y,z,r)
-	v3 = m4:scale_v3(v3)
-	v3 = m4:scale_v3(v3,r)
+	m4 = m4:scale(s)
+	m4 = m4:scale(s,r)
+	m4 = m4:scale(x,y,z)
+	m4 = m4:scale(x,y,z,r)
+	m4 = m4:scale(v3)
+	m4 = m4:scale(v3,r)
+
+Scale this m4 by {s,s,s} or {x,y,z} or v3.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.scale(it,a,b,c,d)
+	if type(a)=="table" then
+		return m4.scale_v3(it,a,b)
+	elseif c then
+		return m4.scale_v3(it,{a,b,c},d)
+	else
+		return m4.scale_v3(it,{a,a,a},b)
+	end
+end
+
+--[[#lua.wetgenes.tardis.m4.get_scale_v3
+
+	v3 = m4:get_scale_v3(r)
 
 Get v3 scale from a scale/rot/trans matrix
 
@@ -861,6 +876,8 @@ end
 	m4 = m4:setrot(degrees,v3a)
 
 Set this matrix to a rotation matrix around the given normal.
+
+we will automatically normalise v3a if necessary.
 
 ]]
 function m4.setrot(it,degrees,v3a)
@@ -890,20 +907,20 @@ function m4.setrot(it,degrees,v3a)
 
 end
 
---[[#lua.wetgenes.tardis.m4.rotate
+--[[#lua.wetgenes.tardis.m4.arotate
 
-	m4 = m4:rotate(degrees,v3a)
-	m4 = m4:rotate(degrees,v3a,r)
+	m4 = m4:arotate(degrees,v3a)
+	m4 = m4:arotate(degrees,v3a,r)
 
-Apply a rotation to this matrix.
+Apply a rotation in degres around the given axis to this matrix.
 
 If r is provided then the result is written into r and returned 
 otherwise m4 is modified and returned.
 
 ]]
-function m4.rotate(it,degrees,v3a,r)
-	local m4a=m4.new():setrot(degrees,v3a)
-	return tardis.m4_product_m4(it,m4a,r)
+function m4.arotate(it,degrees,v3a,r)
+	local m=m4.new():setrot(degrees,v3a)
+	return tardis.m4_product_m4(it,m,r)
 end
 
 --[[#lua.wetgenes.tardis.m4.qrotate
@@ -921,6 +938,33 @@ function m4.qrotate(it,q,r)
 	local m=tardis.q4_to_m4(q)
 	return tardis.m4_product_m4(it,m,r)
 end
+
+--[[#lua.wetgenes.tardis.m4.rotate
+
+	m4 = m4:rotate(degrees,v3a)
+	m4 = m4:rotate(degrees,v3a,r)
+	m4 = m4:rotate(degrees,x,y,z)
+	m4 = m4:rotate(degrees,x,y,z,r)
+	m4 = m4:rotate(q)
+	m4 = m4:rotate(q,r)
+
+Apply quaternion or angle rotation to this matrix depending on 
+arguments provided.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.rotate(it,a,b,c,d,e)
+	if type(a)=="table" then -- q4
+		return m4.qrotate(it,a,b)
+	elseif type(b)=="table" then -- v3
+		return m4.arotate(it,a,b,c)
+	else
+		return m4.arotate(it,a,{b,c,d},e)
+	end
+end
+
 
 --[[#lua.wetgenes.tardis.v2
 
@@ -1722,59 +1766,48 @@ function tardis.m4_stack()
 
 	stack.load=function(...)
 		stack[#stack]:set(...)
+		return stack
 	end
 
 	stack.product=function(a)
 		stack[#stack]:product(a,stack[#stack])
+		return stack
 	end
 
 	stack.premult=function(a)
 		a:product(stack[#stack],stack[#stack])
+		return stack
 	end
 
 	stack.identity=function()
 		stack[#stack]:identity()
+		return stack
 	end
 
-	stack.translate=function(vx,vy,vz)
-		if type(vx)=="table" then
-			stack[#stack]:translate(vx)
-		else
-			stack[#stack]:translate({vx,vy,vz})
-		end
+	stack.translate=function(...)
+		stack[#stack]:translate(...)
+		return stack
 	end
 
-	stack.rotate=function(d,vx,vy,vz)
-		if type(vx)=="table" then
-			stack[#stack]:rotate(d,vx)
-		else
-			stack[#stack]:rotate(d,{vx,vy,vz})
-		end
+	stack.rotate=function(...)
+		stack[#stack]:rotate(...)
+		return stack
 	end
 
-	stack.qrotate=function(qx,qy,qz,qw)
-		if type(qx)=="table" then
-			stack[#stack]:qrotate(qx)
-		else
-			stack[#stack]:qrotate({qx,qy,qz,qw})
-		end
-	end
-
-	stack.scale=function(vx,vy,vz)
-		if type(vx)=="table" then
-			stack[#stack]:scale_v3(vx)
-		else
-			stack[#stack]:scale_v3({vx,vy,vz})
-		end
+	stack.scale=function(...)
+		stack[#stack]:scale(...)
+		return stack
 	end
 
 	stack.push=function()
 		local m4=tardis.m4.new(stack[#stack])
-		stack[#stack+1]=m4
+		stack[#stack+1]=m4 -- new topmost
+		return stack
 	end
 
 	stack.pop=function()
 		stack[#stack]=nil -- remove topmost
+		return stack
 	end
 	
 	return stack
@@ -1837,9 +1870,8 @@ if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first
 	tardis.v4_product_m4		=	tcore.v4_product_m4
 
 	m4.identity			=	tcore.m4_identity
-	m4.rotate			=	tcore.m4_rotate
+	m4.arotate			=	tcore.m4_rotate
 	m4.scale_v3			=	tcore.m4_scale_v3
-	m4.scale			=	tcore.m4_scale
 	m4.translate		=	tcore.m4_translate
 
 end

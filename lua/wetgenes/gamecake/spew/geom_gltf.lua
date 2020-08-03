@@ -648,27 +648,10 @@ void main(void)
 	end
 
 
-	local view_position=V3{0,0,0}
+	local view_position=V3{0,200,0}
 	local view_scale=V3{1,1,1}
 	local view_rotation=Q4{0,0,0,1}:rotate(180,{0,0,1})
 	local view_orbit=V3{0,0,0}
-
---[[
-	local dx,dy,dz,dw=0,0,0,0
-	for i,obj in ipairs(objs) do
-		local x,y,z=geom.find_center(obj)
-		dx=dx+x
-		dy=dy+y
-		dz=dz+z
-		dw=dw+1
-	end
-	if dw>0 then
-		dx=dx/dw
-		dy=dy/dw
-		dz=dz/dw
-		view_position={-dx,-dy,-dz}
-	end
-]]
 
 	local m=0
 	for i,obj in ipairs(objs) do
@@ -737,10 +720,7 @@ main.msg=function(m)
 					mstate[3]=m.y
 				elseif mstate[1]=="right" then
 
-					view_position:add( V3{m.x-mstate[2],m.y-mstate[3],0 }:product(
-							M4():identity()
-						))
-
+					view_position:add( V3{m.x-mstate[2],m.y-mstate[3],0 } )
 					mstate[2]=m.x
 					mstate[3]=m.y
 				end
@@ -809,10 +789,11 @@ main.draw=function()
 		if skin then
 			local b=0
 			for i,v in ipairs(skin.nodes) do
-				local bone=v.bone or M4():identity()
-				for i=1,16 do bones[b+i]=bone[i] end
-
-				b=b+16
+				if i <= 64 then -- shader only supports a maximum of 64 bones
+					local bone=v.bone or M4()
+					for i=1,16 do bones[b+i]=bone[i] end
+					b=b+16
+				end
 			end
 		end
 		
