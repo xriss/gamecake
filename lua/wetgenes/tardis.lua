@@ -178,6 +178,18 @@ function array.set(it,...)
 	return it
 end
 
+--[[#lua.wetgenes.tardis.array.zero
+
+	a=a:zero()
+
+Set all values in this array to zero.
+
+]]
+function array.zero(it)
+	for i=1,#it do it[i]=0 end
+	return it
+end
+
 --[[#lua.wetgenes.tardis.array.compare
 
 	a=a:compare(b)
@@ -258,7 +270,7 @@ Create a new m2 and optionally set it to the given values, m2 methods
 usually return the input m2 for easy function chaining.
 
 ]]
-function m2.new(...) return setmetatable({0,0,0,0},m2):set(...) end
+function m2.new(...) return setmetatable({1,0, 0,1},m2):set(...) end
 
 --[[#lua.wetgenes.tardis.m2.identity
 
@@ -406,7 +418,7 @@ Create a new m3 and optionally set it to the given values, m3 methods
 usually return the input m3 for easy function chaining.
 
 ]]
-function m3.new(...) return setmetatable({0,0,0,0,0,0,0,0,0},m3):set(...) end
+function m3.new(...) return setmetatable({1,0,0, 0,1,0, 0,0,1},m3):set(...) end
 
 --[[#lua.wetgenes.tardis.m3.identity
 
@@ -562,7 +574,7 @@ Create a new m4 and optionally set it to the given values, m4 methods
 usually return the input m4 for easy function chaining.
 
 ]]
-function m4.new(...) return setmetatable({0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},m4):set(...) end
+function m4.new(...) return setmetatable({1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1},m4):set(...) end
 
 --[[#lua.wetgenes.tardis.m4.identity
 

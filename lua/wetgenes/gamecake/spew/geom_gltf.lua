@@ -268,7 +268,7 @@ M.to_geoms=function(gltf)
 			it.mesh=objs[node.mesh+1]
 		end
 
-		it.matrix=node.matrix and {unpack(node.matrix)}
+		it.matrix=node.matrix and M4{unpack(node.matrix)}
 
 		if not it.matrix then
 			local t=node.translation and {unpack(node.translation)} or {0,0,0}
@@ -371,6 +371,8 @@ M.to_geoms=function(gltf)
 		
 		for pidx=1,#mesh.primitives do
 		
+			local vbase=#obj.verts
+		
 			local primitive=mesh.primitives[pidx]
 
 			local tpos = M.accessor_to_table(gltf,primitive.attributes.POSITION)
@@ -394,7 +396,7 @@ M.to_geoms=function(gltf)
 							end
 						end
 					end
-					obj.verts[c+1]={
+					obj.verts[c+1+vbase]={
 						tpos and tpos[c*3+1] or 0,tpos and tpos[c*3+2] or 0,tpos and tpos[c*3+3] or 0,
 						tnrm and tnrm[c*3+1] or 0,tnrm and tnrm[c*3+2] or 0,tnrm and tnrm[c*3+3] or 0,
 						tuv and tuv[c*2+1] or 0,tuv and tuv[c*2+2] or 0,
@@ -403,15 +405,17 @@ M.to_geoms=function(gltf)
 					}
 --print(bw[1],bw[2],bw[3],bw[4])
 				end
-				
-				if primitive.indices then
-					local t=M.accessor_to_table(gltf,primitive.indices)
-					for i=1,#t,3 do
-						obj.polys[#obj.polys+1]={t[i]+1,t[i+1]+1,t[i+2]+1,mat=primitive.material and primitive.material+1}
-					end
-				else
-					for i=1,#obj.verts,3 do
-						obj.polys[#obj.polys+1]={i,i+1,i+2,mat=primitive.material+1}
+
+				if (not primitive.mode) or (primitive.mode==4) then -- triangles
+					if primitive.indices then
+						local t=M.accessor_to_table(gltf,primitive.indices)
+						for i=1,#t,3 do
+							obj.polys[#obj.polys+1]={t[i]+1+vbase,t[i+1]+1+vbase,t[i+2]+1+vbase,mat=primitive.material and primitive.material+1}
+						end
+					else
+						for i=vbase+1,#obj.verts,3 do
+							obj.polys[#obj.polys+1]={i,i+1,i+2,mat=primitive.material and primitive.material+1}
+						end
 					end
 				end
 			end
@@ -729,6 +733,14 @@ main.msg=function(m)
 					while view_orbit[2] >  180 do view_orbit[2]= 180 end
 					while view_orbit[2] < -180 do view_orbit[2]=-180 end
 					
+					mstate[2]=m.x
+					mstate[3]=m.y
+				elseif mstate[1]=="right" then
+
+					view_position:add( V3{m.x-mstate[2],m.y-mstate[3],0 }:product(
+							M4():identity()
+						))
+
 					mstate[2]=m.x
 					mstate[3]=m.y
 				end
