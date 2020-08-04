@@ -126,25 +126,28 @@ M.parse=function(gltf)
 	if type(gltf)=="string" then -- need to parse
 
 		if string.sub(gltf,1,4) == "glTF" then -- split glb file
-		end
 
-		gltf=wjson.decode(gltf)
+			local head=wpack.load_array(gltf,"u32",0,4*3)
+			local base0=12
+			local head0=wpack.load_array(gltf,"u32",base0,4*2)
+			local base1=20+(math.ceil(head0[1]/4)*4)
+			local head1=wpack.load_array(gltf,"u32",base1,4*2)
+
+			local data=string.sub(gltf,base1+9,base1+9+head1[1])
+			local json=string.sub(gltf,base0+9,base0+9+head0[1])
+
+			gltf=wjson.decode(json)
+
+			gltf.buffers=gltf.buffers or {}
+			gltf.buffers[1]=data
+
+		else
+		
+			gltf=wjson.decode(gltf)
+
+		end
 		
 	end
-
---[[
-	for n in pairs(gltf) do
-		local it=gltf[n]
-		if type(it)=="table" and it[1] then -- if array
-			for i=1,#it do
-				local v=it[i]
-				if type(v)=="table" then
-					if v.name then it[v.name]=v end -- allow lookup by name or index
-				end
-			end
-		end
-	end
-]]
 
 	return gltf
 end

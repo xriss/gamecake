@@ -93,10 +93,10 @@ local load_gltf=function(fname)
 					end
 
 				elseif v.bufferView then -- try and load data
-				
-					local view=gltf.bufferViews[v.bufferView]
-					local buffer=gltf.buffers[view.buffer]
-					local data=string.sub(buffer,view.byteOffset+1,view.byteOffset+byteLength+1)
+
+					local view=gltf.bufferViews[v.bufferView+1]
+					local buffer=gltf.buffers[view.buffer+1]
+					local data=string.sub(buffer,(view.byteOffset or 0)+1,(view.byteOffset or 0)+view.byteLength+1)
 					gltf.images[i]=wgrd.create():load_data(data)
 
 				end
