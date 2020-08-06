@@ -4,6 +4,9 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
+local wpath=require("wetgenes.path")
+local wgrd=require("wetgenes.grd")
+local wzips=require("wetgenes.zips")
 local wgrd=require("wetgenes.grd")
 local wgeom=require("wetgenes.gamecake.spew.geom")
 local wgeoms=require("wetgenes.gamecake.spew.geoms")
@@ -27,6 +30,64 @@ M.export=function(env,...)
 end
 
 
+
+
+M.load=function(fname)
+
+	local it_is_scary=function(uri)
+		local scary=false
+		if string.find(uri,"..",1,true) then scary=true end
+		if string.find(uri,":",1,true)  then scary=true end
+		if string.find(uri,"/",1,true)  then scary=true end
+		if string.find(uri,"\\",1,true) then scary=true end
+		return scary
+	end
+
+	local path=wpath.parse( fname )
+	
+	local input=path[1]..path[2]..path[3]..path[4]
+
+	local gltf=M.parse( wzips.readfile(fname) )
+	
+	for i=1,#gltf.buffers do
+		local v=gltf.buffers[i]
+		if type(v)=="table" then -- try and convert data to strings
+			if v.uri then -- try and load file
+				if not it_is_scary(v.uri) then
+
+					local bname=path[1]..path[2]..v.uri
+					gltf.buffers[i]=wzips.readfile(bname)
+
+				end
+			end
+		end
+	end
+
+	if gltf.images then
+		for i=1,#gltf.images do
+			local v=gltf.images[i]
+			if type(v)=="table" then -- try and convert data to strings
+				if v.uri then -- try and load file
+
+					if not it_is_scary(v.uri) then
+						local iname=path[1]..path[2]..v.uri
+						gltf.images[i]=wgrd.create():load_data(wzips.readfile(iname))
+					end
+
+				elseif v.bufferView then -- try and load data
+
+					local view=gltf.bufferViews[v.bufferView+1]
+					local buffer=gltf.buffers[view.buffer+1]
+					local data=string.sub(buffer,(view.byteOffset or 0)+1,(view.byteOffset or 0)+view.byteLength+1)
+					gltf.images[i]=wgrd.create():load_data(data)
+
+				end
+			end
+		end
+	end
+
+	return gltf
+end
 
 
 
