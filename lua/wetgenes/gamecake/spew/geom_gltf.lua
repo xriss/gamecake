@@ -427,6 +427,8 @@ M.to_geoms=function(gltf)
 	
 		local mesh=gltf.meshes[midx]
 		local obj=objs[midx] -- previously created
+		
+		obj.name=mesh.name
 
 		obj.verts={}
 		obj.polys={}

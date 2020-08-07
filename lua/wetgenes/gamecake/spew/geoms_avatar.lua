@@ -241,29 +241,62 @@ void main(void)
 		end
 
 		gl.Rotate( 90 ,  1, 0, 0 )
-		wgeoms.draw(geoms_avatar.objs,"avatar_gltf",pp)
+--		wgeoms.draw(geoms_avatar.objs,"avatar_gltf",pp)
 
+		wgeom.draw(geoms_avatar.obj,"avatar_gltf",pp)
+		
 	end
 	
 
 	function geoms_avatar.rebuild(soul,name)
 
-		for n,v in pairs(soul.materials) do
-	
-			for i,m in ipairs(geoms_avatar.objs.mats) do
+		for i,m in ipairs(geoms_avatar.objs.mats) do
+		
+			local v=soul.materials[m.name or ""]
+			if v then
 			
-				if m.name == n then
-				
-					m[1].color[1]=v.diffuse[1]
-					m[1].color[2]=v.diffuse[2]
-					m[1].color[3]=v.diffuse[3]
-					m[1].color[4]=v.diffuse[4]
-				
-				end
+				m[1].color[1]=v.diffuse[1]
+				m[1].color[2]=v.diffuse[2]
+				m[1].color[3]=v.diffuse[3]
+				m[1].color[4]=v.diffuse[4]
+			
 			end
 
 		end
+
+		local obj=wgeom.new()
+		obj:reset()
+		obj.mats=geoms_avatar.objs.mats
+		geoms_avatar.obj=obj
 		
+		local bv=0
+		local bp=0
+		local show={}		
+		for n,v in pairs(soul.parts) do
+			show[v]=true
+		end
+		
+		for _,o in ipairs(geoms_avatar.objs) do
+
+			if o.name and show[o.name] then
+			
+				for iv,vv in ipairs(o.verts) do
+					obj.verts[bv+iv]={ unpack(vv) }
+				end
+
+				for ip,vp in ipairs(o.polys) do
+					local pp={}
+					obj.polys[bp+ip]=pp
+					for i,v in ipairs(vp) do pp[i]=v+bv end
+					pp.mat=vp.mat
+				end
+				
+				bv=bv+#o.verts
+				bp=bp+#o.polys
+
+			end
+		end
+
 	end
 
 
