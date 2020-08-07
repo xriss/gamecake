@@ -178,7 +178,7 @@ void main(void)
 	end
 	
 
-	function geoms_avatar.update()
+	function geoms_avatar.update(soul)
 
 		local objs=geoms_avatar.objs
 
@@ -226,6 +226,8 @@ void main(void)
 			objs.anim.time=(objs.anim.time or 0)+(1/24)
 		end
 		wgeoms.update(objs)
+		
+--		geoms_avatar.rebuild(soul)
 
 	end
 
@@ -250,6 +252,7 @@ void main(void)
 
 	function geoms_avatar.rebuild(soul,name)
 
+
 		for i,m in ipairs(geoms_avatar.objs.mats) do
 		
 			local v=soul.materials[m.name or ""]
@@ -264,39 +267,26 @@ void main(void)
 
 		end
 
+
 		local obj=wgeom.new()
-		obj:reset()
-		obj.mats=geoms_avatar.objs.mats
-		geoms_avatar.obj=obj
-		
-		local bv=0
-		local bp=0
 		local show={}		
 		for n,v in pairs(soul.parts) do
 			show[v]=true
 		end
 		
 		for _,o in ipairs(geoms_avatar.objs) do
-
-			if o.name and show[o.name] then
-			
-				for iv,vv in ipairs(o.verts) do
-					obj.verts[bv+iv]={ unpack(vv) }
-				end
-
-				for ip,vp in ipairs(o.polys) do
-					local pp={}
-					obj.polys[bp+ip]=pp
-					for i,v in ipairs(vp) do pp[i]=v+bv end
-					pp.mat=vp.mat
-				end
-				
-				bv=bv+#o.verts
-				bp=bp+#o.polys
-
+			if show[ o.name ] then
+				obj:merge_from(o)
 			end
 		end
+		geoms_avatar.obj=obj
 
+-- tweak base positions of bones
+--[[
+		if geoms_avatar.bones then
+			obj:adjust_by_bones(geoms_avatar.bones)
+		end
+]]
 	end
 
 

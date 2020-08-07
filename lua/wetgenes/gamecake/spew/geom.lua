@@ -7,6 +7,7 @@ local pack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
+local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -41,12 +42,14 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 -- we DO NOT have OpenGL access here
 	M.meta={__index=M}
-	M.new=function(it) it=it or {} setmetatable(it,M.meta) return it end
+	M.new=function(it) it=it or {} setmetatable(it,M.meta) return it:reset() end
 	
 	M.reset=function(it)
 		it.verts={}
 		it.mats={}
 		it.polys={}
+		it.mats={}
+		return it
 	end
 	
 	M.duplicate=function(it)
@@ -79,6 +82,120 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			dst.polys[ iv ]=p
 		end
 		return dst
+	end
+
+	M.merge_from=function(dst,src)
+-- reset cache
+		dst:clear_predraw()
+		
+		local remat={}
+-- copy mats
+		for im = 1 , #src.mats do local mat=src.mats[im]
+			local m
+			for om = 1 , #dst.mats do local dm=dst.mats[om]
+				if not dm.idx then dm.idx=om end -- make sure we have dst idx
+				if mat.name and dm.name==mat.name then
+					m=dm -- merge into this mat
+				end
+			end
+			if not m then
+				m={} -- new material
+				m.idx=#dst.mats+1
+				dst.mats[ m.idx ]=m
+			end
+			remat[im]=m.idx
+			
+			for n,v in pairs(mat) do
+				if n~="idx" then
+					m[n]=v
+				end
+			end
+		end
+-- copy verts
+		local bv=#dst.verts
+		for iv = 1 , #src.verts do local vert=src.verts[iv]
+			local v={unpack(vert)}
+			dst.verts[ bv+iv ]=v
+		end
+--copy polys		
+		local bp=#dst.polys
+		for iv = 1 , #src.polys do local poly=src.polys[iv]
+			local p={unpack(poly)}
+			for i,v in ipairs(p) do p[i]=v+bv end
+			p.mat=poly.mat and remat[poly.mat] or poly.mat
+			dst.polys[ bp+iv ]=p
+		end
+		return dst
+	end
+
+	M.adjust_vertex_by_m4_and_m3=function(v,m4,m3)
+		local t=V4(v[1],v[2],v[3],1)
+		t:product(m4)
+		v[1]=t[1]
+		v[2]=t[2]
+		v[3]=t[3]
+		if v[4] then -- normals
+			local t=V4(v[4],v[5],v[6],1)
+			t:product(m3)
+			v[4]=t[1]
+			v[5]=t[2]
+			v[6]=t[3]
+		end
+		if v[9] then -- tangents
+			local t=V4(v[9],v[10],v[11],1)
+			t:product(m3)
+			v[9]=t[1]
+			v[10]=t[2]
+			v[11]=t[3]
+		end
+	end
+
+	-- apply an m4 transform to all vertexs and normals/tangents
+	M.adjust_by_m4=function(it,m4)
+		local m3=M4(m4):m3() -- get rotation/scale only
+		local vs=it.verts
+		for i=1,#vs do local v=vs[i]
+			M.adjust_vertex_by_m4_and_m3(v,m4,m3)
+		end
+		return it
+	end
+
+
+	-- apply an array of m4 bones transform to all vertexs and normals/tangents
+	M.adjust_by_bones=function(it,bones)
+
+		local vs=it.verts
+		for i=1,#vs do local v=vs[i]
+
+			local m4
+			for bi=1,4 do
+				local b=v[12+bi] or 0
+--				print(b)
+				local bidx=math.floor(b)
+				local bwgt=1-(b-bidx)
+				local bb=(bidx-1)*16
+				local bone=M4(
+					bones[bb+1],bones[bb+2],bones[bb+3],bones[bb+4] ,
+					bones[bb+5],bones[bb+6],bones[bb+7],bones[bb+8] ,
+					bones[bb+9],bones[bb+10],bones[bb+11],bones[bb+12] ,
+					bones[bb+13],bones[bb+14],bones[bb+15],bones[bb+16] )
+				if bidx>0 and bwgt>0 and bwgt<=1 then
+					if not m4 then
+						m4=M4(bone):scalar(bwgt)
+					else
+						m4:add( M4(bone):scalar(bwgt) )
+					end
+				else
+					break
+				end
+			end
+			if not m4 then m4=M4() end
+			local m3=M4(m4):m3() -- get rotation/scale only
+			
+
+			M.adjust_vertex_by_m4_and_m3(v,m4,m3)
+		end
+		return it
 	end
 
 	-- scale the geom
@@ -690,7 +807,7 @@ M.bake=function(oven,geom)
 
 -- we have OpenGL access here
 	geom.meta={__index=geom}
-	geom.new=function(it) it=it or {} setmetatable(it,geom.meta) return it end
+	geom.new=function(it) it=it or {} setmetatable(it,geom.meta) return it:reset() end
 
 	
 	require("wetgenes.gamecake.spew.geom_draw").fill(oven,geom)

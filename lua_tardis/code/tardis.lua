@@ -190,6 +190,18 @@ function array.zero(it)
 	return it
 end
 
+--[[#lua.wetgenes.tardis.array.scalar
+
+	a=a:scalar(s)
+
+Multiply all value in array by number.
+
+]]
+function array.scalar(it,s)
+	for i=1,#it do it[i]=it[i]*s end
+	return it
+end
+
 --[[#lua.wetgenes.tardis.array.compare
 
 	a=a:compare(b)
@@ -584,6 +596,27 @@ Set this m4 to the identity matrix.
 
 ]]
 function m4.identity(it) return array.set(it,1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1) end 
+
+--[[#lua.wetgenes.tardis.m4.m3
+
+	m4 = m4:m3()
+
+Clear the 4th row and column to identity values. This will remove 
+translation and perspective transforms. Hopefully just leaving rotation 
+and scale in the M3 part of the M4 matrix.
+
+]]
+function m4.m3(it)
+	it[4]=0
+	it[8]=0
+	it[12]=0
+	it[13]=0
+	it[14]=0
+	it[15]=0
+	it[16]=1
+	return it
+end 
+
 
 --[[#lua.wetgenes.tardis.m4.determinant
 
