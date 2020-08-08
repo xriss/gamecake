@@ -336,7 +336,9 @@ local indent_sub=function()
 end
 
 local put_indent=function(s)
-	if opts.pretty then
+	if type(opts.pretty)=="string" then
+		put(string.rep(opts.pretty,indent))
+	elseif opts.pretty then
 		put(string.rep(" ",indent))
 	end
 	if s then put(s) end
@@ -396,7 +398,8 @@ local encode_tab
 				end
 			end
 			indent_sub()
-			put("]")
+			put_newline()
+			put_indent("]")
 		else
 			put("{")
 			indent_add()
@@ -413,7 +416,8 @@ local encode_tab
 				end
 			end
 			indent_sub()
-			put("}")
+			put_newline()
+			put_indent("}")
 		end
 	end
 
