@@ -792,7 +792,8 @@ otherwise m4 is modified and returned.
 function m4.inverse(it,r)
 	r=r or it
 	local ood=1/m4.determinant(it)	
-	return m4.scale(m4.cofactor(m4.transpose(it,m4.new())),ood,r)
+	local d=m4.scalar(m4.cofactor(m4.transpose(it,m4.new())),ood)
+	return array.set(r,d)
 end
 
 --[[#lua.wetgenes.tardis.m4.translate_v3
