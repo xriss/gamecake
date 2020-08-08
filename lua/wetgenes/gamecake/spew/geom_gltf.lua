@@ -435,6 +435,9 @@ M.to_geoms=function(gltf)
 		obj.mats=objs.mats
 		obj.textures=objs.textures
 		
+		local got_normals=false
+		local got_tangents=false
+		
 		for pidx=1,#mesh.primitives do
 		
 			local vbase=#obj.verts
@@ -443,10 +446,13 @@ M.to_geoms=function(gltf)
 
 			local tpos = M.accessor_to_table(gltf,primitive.attributes.POSITION)
 			local tnrm = M.accessor_to_table(gltf,primitive.attributes.NORMAL)
+			local ttan = M.accessor_to_table(gltf,primitive.attributes.TANGENT)
 			local tuv  = M.accessor_to_table(gltf,primitive.attributes.TEXCOORD_0)
 
 			local tj   = M.accessor_to_table(gltf,primitive.attributes.JOINTS_0)
 			local tw   = M.accessor_to_table(gltf,primitive.attributes.WEIGHTS_0)
+			
+			if tnrm then got_normals=true end
 
 			if tpos then -- must have a position
 				for c=0,(#tpos/3)-1 do
@@ -466,7 +472,7 @@ M.to_geoms=function(gltf)
 						tpos and tpos[c*3+1] or 0,tpos and tpos[c*3+2] or 0,tpos and tpos[c*3+3] or 0,
 						tnrm and tnrm[c*3+1] or 0,tnrm and tnrm[c*3+2] or 0,tnrm and tnrm[c*3+3] or 0,
 						tuv and tuv[c*2+1] or 0,tuv and tuv[c*2+2] or 0,
-						0,0,0,0,
+						ttan and ttan[c*4+1] or 0,ttan and ttan[c*4+2] or 0,ttan and ttan[c*4+3] or 0,ttan and ttan[c*4+4] or 0,
 						bw[1],bw[2],bw[3],bw[4]
 					}
 --print(bw[1],bw[2],bw[3],bw[4])
@@ -487,8 +493,14 @@ M.to_geoms=function(gltf)
 			end
 		end
 
-		obj:build_normals()
-		obj:build_tangents()
+		if not got_normals then
+			obj:build_normals()
+		end
+		
+		if not got_tangents then
+			obj:build_tangents()
+		end
+		
 	end
 
 --	dprint(objs.anims)
