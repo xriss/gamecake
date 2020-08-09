@@ -342,6 +342,11 @@ function wmaster.setup(widget,def)
 	
 	function master.msg(widget,m)
 	
+		local fo=master.focus and master.focus.msg and master.focus
+		if fo and fo~=master then
+			fo:msg(m) -- this will catch mouse ups as we lose focus
+		end
+	
 		if m.class=="text" then
 			if (skeys.opts and skeys.opts.typing) or m.softkey then -- fake keyboard only
 				widget:key(m.text)
@@ -352,6 +357,11 @@ function wmaster.setup(widget,def)
 			end
 		elseif m.class=="mouse" then
 			widget:mouse(m.action,m.x,m.y,m.keyname)
+		end
+
+		local oo=master.over and master.over.msg and master.over
+		if oo and fo~=oo and oo~=master then
+			oo:msg(m) -- this will catch most messages and not double send if we are also the focus
 		end
 
 	end
