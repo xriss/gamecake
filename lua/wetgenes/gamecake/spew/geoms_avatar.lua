@@ -8,6 +8,7 @@ local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
+local wgrd=require("wetgenes.grd")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -44,6 +45,14 @@ M.bake=function(oven,geoms_avatar)
 		geoms_avatar.objs=wgeom_gltf.to_geoms(geoms_avatar.gltf)
 
 --dprint(avatar.gs)
+
+		geoms_avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,64,8,1)
+		
+		geoms_avatar.map:clear(0xffffffff)
+		
+		geoms_avatar.image=oven.cake.images.load("avatar/edit","avatar/edit",function() return geoms_avatar.map end)
+--		oven.cake.images.bind(geoms_avatar.image)
+
 
 	gl.program_source("avatar_gltf",[[
 
@@ -204,10 +213,10 @@ void main(void)
 			
 			if i <= 8 then -- shader only supports a maximum of 8 mats
 			
-				material_values[b+1]=mat[1][1] or 0
-				material_values[b+2]=mat[2][1] or 0
-				material_values[b+3]=mat[2][2] or 0
-				material_values[b+4]=mat[3][1] or 0
+				material_values[b+1]=1--mat[1][1] or 0
+				material_values[b+2]=0--mat[2][1] or 0
+				material_values[b+3]=0--mat[2][2] or 0
+				material_values[b+4]=0--mat[3][1] or 0
 				
 				material_colors[b+1]=mat[1].color[1] or 1
 				material_colors[b+2]=mat[1].color[2] or 1
@@ -235,6 +244,11 @@ void main(void)
 
 		local pp=function(p)
 
+			gl.ActiveTexture(gl.TEXTURE0)
+			oven.cake.images.bind(geoms_avatar.image)
+			gl.Uniform1i( p:uniform("tex0"), 0 )
+
+
 			gl.UniformMatrix4f( p:uniform("bones"), geoms_avatar.bones )
 
 			gl.Uniform4f( p:uniform("material_colors"), geoms_avatar.material_colors )
@@ -253,8 +267,9 @@ void main(void)
 	function geoms_avatar.rebuild(soul,name)
 
 
+--[[
 		for i,m in ipairs(geoms_avatar.objs.mats) do
-		
+
 			local v=soul.materials[m.name or ""]
 			if v then
 			
@@ -266,6 +281,40 @@ void main(void)
 			end
 
 		end
+]]
+
+		geoms_avatar.map:clear(0xffffffff)
+		for idx,name in ipairs({
+			"black",
+			"skin",
+			"lips",
+			"hair",
+			"iris",
+			"eye",
+			"color1",
+			"color2",
+		}) do
+			local v=soul.materials[name]
+			if v then
+				local d={}
+				local c={}
+				c[1]=math.floor(v.diffuse[1]*255)
+				c[2]=math.floor(v.diffuse[2]*255)
+				c[3]=math.floor(v.diffuse[3]*255)
+				c[4]=255
+
+
+				for i=0,63*4,4 do
+					d[i+1]=c[1]
+					d[i+2]=c[2]
+					d[i+3]=c[3]
+					d[i+4]=0xff
+				end
+				geoms_avatar.map:pixels(0,idx-1,64,1,d)
+			end
+		end
+		oven.cake.images.unload(geoms_avatar.image) -- force a reload
+
 
 
 		local obj=wgeom.new()
