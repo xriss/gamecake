@@ -24,6 +24,76 @@ local grdcanvas=M
 
 
 
+-- create a blended ramp of colors left to right in this single pixel high bitmap ( a cmap )
+grdcanvas.cmap_ramp=function(g,keys,opts)
+
+	opts=opts or {}
+
+	local idx=1
+	local lastkey=keys[idx]
+	local nextkey=keys[idx]
+	
+	local cs={}
+	local ci=0
+
+	local blend=function(x,f)
+	
+		if f<=0 then f=0 end
+		if f>=1 then f=1 end
+		local l=1-f
+		
+		local clamp=function(a) if a<0 then a=0 elseif a>255 then a=255 end return math.floor(a) end
+
+		local a1=bit.band(bit.rshift(lastkey.argb,24),0xff)
+		local r1=bit.band(bit.rshift(lastkey.argb,16),0xff)
+		local g1=bit.band(bit.rshift(lastkey.argb, 8),0xff)
+		local b1=bit.band(lastkey.argb,0xff)
+
+		local a2=bit.band(bit.rshift(nextkey.argb,24),0xff)
+		local r2=bit.band(bit.rshift(nextkey.argb,16),0xff)
+		local g2=bit.band(bit.rshift(nextkey.argb, 8),0xff)
+		local b2=bit.band(nextkey.argb,0xff)
+
+		local a=a1*l + a2*f
+		local r=r1*l + r2*f
+		local g=g1*l + g2*f
+		local b=b1*l + b2*f
+		
+		cs[x*4+1]=clamp(r)
+		cs[x*4+2]=clamp(g)
+		cs[x*4+3]=clamp(b)
+		cs[x*4+4]=clamp(a)
+
+	end
+
+	local f=0
+	local m=(g.width-1) ; if m==0 then m=1 end
+	for x=0,(g.width-1) do
+		f=x/m	-- fractional location
+		if f>=nextkey.value then
+			idx=idx+1
+			lastkey=nextkey
+			nextkey=keys[idx]
+			if not nextkey then nextkey=lastkey end -- run out of keys
+		end
+		
+		if f<=lastkey.value then -- before
+			blend(x,0)
+		elseif f>=nextkey.value then --after
+			blend(x,1)
+		else -- middle
+			local d=nextkey.value-lastkey.value
+			if d<=0 then d=1 end
+			blend(x, (f-lastkey.value)/d )
+		end
+		
+	end
+	
+	g:pixels(0,0,0,g.width,1,1,cs)
+	
+	return g
+end
+
 
 grdcanvas.canvas_fonts_create=function()
 	if grdcanvas.canvas_fonts then return grdcanvas.canvas_fonts end -- already done

@@ -9,6 +9,7 @@ local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 local wgrd=require("wetgenes.grd")
+local wgrdcanvas=require("wetgenes.grdcanvas")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -51,6 +52,12 @@ M.bake=function(oven,geoms_avatar)
 		geoms_avatar.map:clear(0xffffffff)
 		
 		geoms_avatar.image=oven.cake.images.load("avatar/edit","avatar/edit",function() return geoms_avatar.map end)
+		geoms_avatar.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
+		geoms_avatar.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
+		geoms_avatar.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
+		geoms_avatar.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
+
+
 --		oven.cake.images.bind(geoms_avatar.image)
 
 
@@ -155,12 +162,10 @@ void main(void)
 	vec4 t0=vec4(1.0,1.0,1.0,1.0);
 	vec4 t1=vec4(0.5,0.5,0.5,0.5);
 	vec3 t2=vec3(0.5,0.5,1.0);
+	
 
-	if( v_value.r > 0.0 )
-	{
-		t0 = v_value.r * texture2D(tex0, v_texcoord ).rgba;
-	}
-
+	
+	
 	if( v_value.g > 0.0 || v_value.b > 0.0 )
 	{
 		t1 = texture2D(tex1, v_texcoord ).rgba;
@@ -175,7 +180,14 @@ void main(void)
 
 	vec3 n = normalize( (t2.x*v_bitangent) + (-t2.y*v_tangent) + (t2.z*v_normal) );
 
-	gl_FragColor=vec4( ( t0 * v_color * (0.5+0.5*pow( n.z, 4.0 )) ).rgb , 1.0 ) ;
+	if( v_value.r > 0.0 )
+	{
+		vec2 uv=clamp( v_texcoord + vec2( pow( n.z, 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
+
+		t0 = v_value.r * texture2D(tex0, uv ).rgba;
+	}
+
+	gl_FragColor=vec4( ( t0 * v_color ).rgb , 1.0 ) ;
 
 }
 
@@ -283,6 +295,14 @@ void main(void)
 		end
 ]]
 
+		local clamp=function(a) if a<0 then a=0 elseif a>255 then a=255 end return math.floor(a) end
+		local rgb=function(r,g,b)
+			return          255  * 256*256*256 + 
+					clamp(r*255) * 256*256 + 
+					clamp(g*255) * 256 + 
+					clamp(b*255)
+
+		end
 		geoms_avatar.map:clear(0xffffffff)
 		for idx,name in ipairs({
 			"black",
@@ -298,12 +318,20 @@ void main(void)
 			if v then
 				local d={}
 				local c={}
-				c[1]=math.floor(v.diffuse[1]*255)
-				c[2]=math.floor(v.diffuse[2]*255)
-				c[3]=math.floor(v.diffuse[3]*255)
-				c[4]=255
 
+				local c1=rgb(v.diffuse[1]*0.50,v.diffuse[2]*0.50,v.diffuse[3]*0.50)
+				local c2=rgb(v.diffuse[1]*1.00,v.diffuse[2]*1.00,v.diffuse[3]*1.00)
+				local c3=rgb(v.diffuse[1]*1.50,v.diffuse[2]*1.50,v.diffuse[3]*1.50)
+				
+				local keys={}
+				keys[1]={argb=c1,value=0/2}
+				keys[2]={argb=c2,value=1/2}
+				keys[3]={argb=c3,value=2/2}
 
+				local g=geoms_avatar.map:clip( 0,idx-1,0, 64,1,1 )
+				wgrdcanvas.cmap_ramp(g,keys)
+
+--[[
 				for i=0,63*4,4 do
 					d[i+1]=c[1]
 					d[i+2]=c[2]
@@ -311,6 +339,8 @@ void main(void)
 					d[i+4]=0xff
 				end
 				geoms_avatar.map:pixels(0,idx-1,64,1,d)
+]]
+
 			end
 		end
 		oven.cake.images.unload(geoms_avatar.image) -- force a reload
