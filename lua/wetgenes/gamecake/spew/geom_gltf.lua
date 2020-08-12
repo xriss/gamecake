@@ -333,12 +333,16 @@ M.to_geoms=function(gltf)
 		end
 
 		it.matrix=node.matrix and M4{unpack(node.matrix)}
+		if it.matrix then
+			it.reset_matrix=M4{unpack(node.matrix)}
+		end
 
 		if not it.matrix then
 			local t=node.translation and {unpack(node.translation)} or {0,0,0}
 			local r=node.rotation and {unpack(node.rotation)} or {0,0,0,1}
 			local s=node.scale and {unpack(node.scale)} or {1,1,1}
 			it.trs={ t[1],t[2],t[3] , r[1],r[2],r[3],r[4] , s[1],s[2],s[3] }
+			it.reset_trs={ t[1],t[2],t[3] , r[1],r[2],r[3],r[4] , s[1],s[2],s[3] }
 		end
 
 	end
@@ -395,6 +399,7 @@ M.to_geoms=function(gltf)
 		local input=animation.samplers[1].input
 		
 		anim.name=animation.name
+		if anim.name then objs.anims[anim.name]=anim end
 		anim.keys=M.accessor_to_table(gltf,input)
 		
 		if input then

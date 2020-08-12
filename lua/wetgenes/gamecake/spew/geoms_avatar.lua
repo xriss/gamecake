@@ -44,6 +44,13 @@ M.bake=function(oven,geoms_avatar)
 
 		geoms_avatar.gltf=wgeom_gltf.load(geoms_avatar.filename)
 		geoms_avatar.objs=wgeom_gltf.to_geoms(geoms_avatar.gltf)
+		
+		print(#geoms_avatar.objs.anims)
+		for i,v in ipairs(geoms_avatar.objs.anims) do
+			print("avatar anim :",i,math.floor(v.min*24),math.floor(v.max*24),v.name)
+		end
+		geoms_avatar.objs.anim=geoms_avatar.objs.anims[1]
+		
 
 --dprint(avatar.gs)
 
@@ -243,6 +250,8 @@ void main(void)
 		geoms_avatar.material_colors=material_colors
 		geoms_avatar.material_values=material_values
 
+
+		objs.anim=objs.anims[soul.pose] or objs.anims[1]
 		if objs.anim then
 			objs.anim.time=(objs.anim.time or 0)+(1/24)
 		end
@@ -278,30 +287,12 @@ void main(void)
 
 	function geoms_avatar.rebuild(soul,name)
 
-
---[[
-		for i,m in ipairs(geoms_avatar.objs.mats) do
-
-			local v=soul.materials[m.name or ""]
-			if v then
-			
-				m[1].color[1]=v.diffuse[1]
-				m[1].color[2]=v.diffuse[2]
-				m[1].color[3]=v.diffuse[3]
-				m[1].color[4]=v.diffuse[4]
-			
-			end
-
-		end
-]]
-
 		local clamp=function(a) if a<0 then a=0 elseif a>255 then a=255 end return math.floor(a) end
 		local rgb=function(r,g,b)
 			return          255  * 256*256*256 + 
 					clamp(r*255) * 256*256 + 
 					clamp(g*255) * 256 + 
 					clamp(b*255)
-
 		end
 		geoms_avatar.map:clear(0xffffffff)
 		for idx,name in ipairs({
@@ -330,17 +321,6 @@ void main(void)
 
 				local g=geoms_avatar.map:clip( 0,idx-1,0, 64,1,1 )
 				wgrdcanvas.cmap_ramp(g,keys)
-
---[[
-				for i=0,63*4,4 do
-					d[i+1]=c[1]
-					d[i+2]=c[2]
-					d[i+3]=c[3]
-					d[i+4]=0xff
-				end
-				geoms_avatar.map:pixels(0,idx-1,64,1,d)
-]]
-
 			end
 		end
 		oven.cake.images.unload(geoms_avatar.image) -- force a reload
@@ -361,11 +341,64 @@ void main(void)
 		geoms_avatar.obj=obj
 
 -- tweak base positions of bones
---[[
-		if geoms_avatar.bones then
-			obj:adjust_by_bones(geoms_avatar.bones)
+
+		wgeoms.reset_anim( geoms_avatar.objs )
+		for i,node in ipairs( geoms_avatar.objs.nodes ) do
+			if node.name then
+				local tweak
+				local sx=1
+				if node.name:sub(-2,-1)==".L" then
+					sx=1
+					tweak=soul.tweaks[node.name:sub(1,-3)]
+				elseif node.name:sub(-2,-1)==".R" then
+					sx=-1
+					tweak=soul.tweaks[node.name:sub(1,-3)]
+				else
+					tweak=soul.tweaks[node.name]
+				end
+				if tweak then
+					if node.trs then
+						node.trs[ 1]=node.trs[ 1]+tweak.translate[ 1]*sx
+						node.trs[ 2]=node.trs[ 2]+tweak.translate[ 2]
+						node.trs[ 3]=node.trs[ 3]+tweak.translate[ 3]
+
+						local qa=Q4( node.trs[4] , node.trs[5] , node.trs[6] , node.trs[7] )
+						local qb=Q4(0,0,0,1)
+						
+						qb:rotate(tweak.rotate[1],{1,0,0})
+						qb:rotate(tweak.rotate[2],{0,sx,0})
+						qb:rotate(tweak.rotate[3],{0,0,sx})
+						
+						tardis.q4_product_q4(qa,qb)
+
+						node.trs[ 4]=qa[1]
+						node.trs[ 5]=qa[2]
+						node.trs[ 6]=qa[3]
+						node.trs[ 7]=qa[4]
+
+						node.trs[ 8]=node.trs[ 8]*tweak.scale[1]
+						node.trs[ 9]=node.trs[ 9]*tweak.scale[2]
+						node.trs[10]=node.trs[10]*tweak.scale[3]
+					end
+				end
+			end
 		end
-]]
+		wgeoms.prepare( geoms_avatar.objs )
+
+		local bones={}
+		local skin=geoms_avatar.objs.skins[1] -- assume only one boned character
+		if skin then
+			local b=0
+			for i,v in ipairs(skin.nodes) do
+				if i <= 64 then -- shader only supports a maximum of 64 bones
+					local bone=v.bone or M4()
+					for i=1,16 do bones[b+i]=bone[i] end
+					b=b+16
+				end
+			end
+		end
+		obj:adjust_by_bones(bones)
+
 	end
 
 

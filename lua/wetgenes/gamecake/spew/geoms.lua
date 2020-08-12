@@ -56,6 +56,23 @@ M.bake=function(oven,geoms)
 	geoms.meta={__index=geoms}
 	geoms.new=function(it) it=it or {} setmetatable(it,geoms.meta) return it end
 	
+	geoms.reset_anim=function(objs)
+
+		for nidx=1,#objs.nodes do
+			local node=objs.nodes[nidx]
+			if node.reset_matrix then
+				for i,v in ipairs(node.reset_matrix) do
+					node.matrix[i]=v
+				end
+			elseif node.reset_trs then
+				for i,v in ipairs(node.reset_trs) do
+					node.trs[i]=v
+				end
+			end
+		end
+
+	end
+
 	geoms.animate=function(objs)
 	
 		if not objs.anim then return end
@@ -91,8 +108,8 @@ M.bake=function(oven,geoms)
 			if value.path=="translation" then
 
 				local i=key_idx*3-2
-				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] }
-				local va={ value.data[i+3] , value.data[i+4] , value.data[i+5] }
+				local vb={ value.data[i  ] or 0, value.data[i+1] or 0, value.data[i+2] or 0}
+				local va={ value.data[i+3] or 0, value.data[i+4] or 0, value.data[i+5] or 0}
 				local xb=1-key_blend
 				node.trs[1]=vb[1]*xb + va[1]*key_blend
 				node.trs[2]=vb[2]*xb + va[2]*key_blend
@@ -101,8 +118,8 @@ M.bake=function(oven,geoms)
 			elseif value.path=="rotation" then
 
 				local i=key_idx*4-3
-				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] , value.data[i+3] }
-				local va={ value.data[i+4] , value.data[i+5] , value.data[i+6] , value.data[i+7] }
+				local vb={ value.data[i  ] or 0, value.data[i+1] or 0, value.data[i+2] or 0, value.data[i+3] or 0}
+				local va={ value.data[i+4] or 0, value.data[i+5] or 0, value.data[i+6] or 0, value.data[i+7] or 0}
 				local xb=1-key_blend
 				local q=tardis.q4.new(
 					vb[1]*xb + va[1]*key_blend ,
@@ -119,8 +136,8 @@ M.bake=function(oven,geoms)
 			elseif value.path=="scale" then
 
 				local i=key_idx*3-2
-				local vb={ value.data[i  ] , value.data[i+1] , value.data[i+2] }
-				local va={ value.data[i+3] , value.data[i+4] , value.data[i+5] }
+				local vb={ value.data[i  ] or 0, value.data[i+1] or 0, value.data[i+2] or 0}
+				local va={ value.data[i+3] or 0, value.data[i+4] or 0, value.data[i+5] or 0}
 				local xb=1-key_blend
 				node.trs[ 8]=vb[1]*xb + va[1]*key_blend
 				node.trs[ 9]=vb[2]*xb + va[2]*key_blend
