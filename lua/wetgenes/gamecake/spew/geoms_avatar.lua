@@ -341,7 +341,7 @@ void main(void)
 		geoms_avatar.obj=obj
 
 -- tweak base positions of bones
-
+--[[
 		wgeoms.reset_anim( geoms_avatar.objs )
 		for i,node in ipairs( geoms_avatar.objs.nodes ) do
 			if node.name then
@@ -398,6 +398,46 @@ void main(void)
 			end
 		end
 		obj:adjust_by_bones(bones)
+]]
+
+-- prepare tweak values
+		for i,node in ipairs( geoms_avatar.objs.nodes ) do
+			if node.name then
+				local tweak
+				local sx=1
+				if node.name:sub(-2,-1)==".L" then
+					sx=1
+					tweak=soul.tweaks[node.name:sub(1,-3)]
+				elseif node.name:sub(-2,-1)==".R" then
+					sx=-1
+					tweak=soul.tweaks[node.name:sub(1,-3)]
+				else
+					tweak=soul.tweaks[node.name]
+				end
+				if tweak then
+						node.tweak={}
+						node.tweak[ 1]=tweak.translate[ 1]*sx
+						node.tweak[ 2]=tweak.translate[ 2]
+						node.tweak[ 3]=tweak.translate[ 3]
+
+						local qa=Q4(0,0,0,1)
+						
+						qa:rotate(tweak.rotate[1],{1,0,0})
+						qa:rotate(tweak.rotate[2],{0,sx,0})
+						qa:rotate(tweak.rotate[3],{0,0,sx})
+
+						node.tweak[ 4]=qa[1]
+						node.tweak[ 5]=qa[2]
+						node.tweak[ 6]=qa[3]
+						node.tweak[ 7]=qa[4]
+
+						node.tweak[ 8]=tweak.scale[1]
+						node.tweak[ 9]=tweak.scale[2]
+						node.tweak[10]=tweak.scale[3]
+				end
+			end
+		end
+
 
 	end
 

@@ -7,6 +7,7 @@ local pack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
+local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -147,6 +148,26 @@ M.bake=function(oven,geoms)
 
 		end
 
+		for i,node in ipairs( objs.nodes ) do
+			if node.trs and node.tweak then
+				node.trs[ 1]=node.trs[ 1]+node.tweak[ 1]
+				node.trs[ 2]=node.trs[ 2]+node.tweak[ 2]
+				node.trs[ 3]=node.trs[ 3]+node.tweak[ 3]
+
+				local qa=Q4( node.trs[4] , node.trs[5] , node.trs[6] , node.trs[7] )
+				local qb=Q4( node.tweak[4] , node.tweak[5] , node.tweak[6] , node.tweak[7] )				
+				tardis.q4_product_q4(qa,qb)
+
+				node.trs[ 4]=qa[1]
+				node.trs[ 5]=qa[2]
+				node.trs[ 6]=qa[3]
+				node.trs[ 7]=qa[4]
+
+				node.trs[ 8]=node.trs[ 8]*node.tweak[8]
+				node.trs[ 9]=node.trs[ 9]*node.tweak[9]
+				node.trs[10]=node.trs[10]*node.tweak[10]
+			end
+		end
 	end
 
 	geoms.prepare=function(its)
