@@ -54,7 +54,7 @@ M.bake=function(oven,geoms_avatar)
 
 --dprint(avatar.gs)
 
-		geoms_avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,64,8,1)
+		geoms_avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,256,8,1)
 		
 		geoms_avatar.map:clear(0xffffffff)
 		
@@ -305,21 +305,18 @@ void main(void)
 			"color1",
 			"color2",
 		}) do
-			local v=soul.materials[name]
-			if v then
-				local d={}
-				local c={}
+			local material=soul.materials[name]
+			if material and material.ramp then
 
-				local c1=rgb(v.diffuse[1]*0.50,v.diffuse[2]*0.50,v.diffuse[3]*0.50)
-				local c2=rgb(v.diffuse[1]*1.00,v.diffuse[2]*1.00,v.diffuse[3]*1.00)
-				local c3=rgb(v.diffuse[1]*1.50,v.diffuse[2]*1.50,v.diffuse[3]*1.50)
-				
 				local keys={}
-				keys[1]={argb=c1,value=0/2}
-				keys[2]={argb=c2,value=1/2}
-				keys[3]={argb=c3,value=2/2}
-
-				local g=geoms_avatar.map:clip( 0,idx-1,0, 64,1,1 )
+				for i,v in ipairs(material.ramp) do
+					local cr,cg,cb,ca=pack.argb8_b4(v)
+					keys[i]={
+						argb=pack.b4_argb8(cr,cg,cb,0xff),
+						value=ca/255,
+					}
+				end
+				local g=geoms_avatar.map:clip( 0,idx-1,0, 256,1,1 )
 				wgrdcanvas.cmap_ramp(g,keys)
 			end
 		end
@@ -330,7 +327,13 @@ void main(void)
 		local obj=wgeom.new()
 		local show={}		
 		for n,v in pairs(soul.parts) do
-			show[v]=true
+			if type(v)=="table" then
+				for i,n in ipairs(v) do
+					show[n]=true
+				end
+			else
+				show[v]=true
+			end
 		end
 		
 		for _,o in ipairs(geoms_avatar.objs) do
