@@ -79,7 +79,7 @@ local lua_block_insert
 		table.insert(chunk,"local _out_tt=pp_output_table\n")
 		table.insert(chunk,"local _out_do=function(s)\n")
 		table.insert(chunk,"	_out_ti(_out_tt,s)\n")
-		table.insert(chunk,"	for i in string.gfind(s,'\\n') do -- count outputlines\n")
+		table.insert(chunk,"	for i in string.gmatch(s,'\\n') do -- count outputlines\n")
 		table.insert(chunk,"		_lo=_lo+1\n")
 		table.insert(chunk,"		if _lo_break then -- so we can break on line\n")
 		table.insert(chunk,"			assert(_lo<_lo_break,'user line break')\n")
@@ -158,7 +158,7 @@ local lua_block_insert
 
 			local last = 1
 
-				for text, expr, index in string.gfind(line, "(.-)#(%b())()") do 
+				for text, expr, index in string.gmatch(line, "(.-)#(%b())()") do 
 
 					last = index
 

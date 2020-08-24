@@ -859,13 +859,158 @@ float ff[4];
 	return 0;
 }
 
+
+
+static int lua_gles_Uniform1i (lua_State *l)
+{
+int idx;
+int *ip;
+int ii[256*1];
+int len=1;
+int i;
+	idx=(int)luaL_checknumber(l,1);
+	ip=(int*)lua_tardis_uda(l,2);
+	if(ip)
+	{
+		len=lua_tardis_uda_count(l,2)/1;
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		ip=ii;
+		len=lua_objlen(l,2)/1;
+		if(len>256) {len=256;}
+		for(i=0;i<len*1;i++)
+		{
+			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
+	}
+	else
+	{
+		ip=ii;
+		for(i=0;i<len*1;i++)
+		{
+			ii[i]=(int)luaL_checknumber(l,i+2);
+		}
+	}
+	glUniform1iv(idx,len,ip);
+	return 0;
+}
+static int lua_gles_Uniform2i (lua_State *l)
+{
+int idx;
+int *ip;
+int ii[256*2];
+int len=1;
+int i;
+	idx=(int)luaL_checknumber(l,1);
+	ip=(int*)lua_tardis_uda(l,2);
+	if(ip)
+	{
+		len=lua_tardis_uda_count(l,2)/2;
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		ip=ii;
+		len=lua_objlen(l,2)/2;
+		if(len>256) {len=256;}
+		for(i=0;i<len*2;i++)
+		{
+			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
+	}
+	else
+	{
+		ip=ii;
+		for(i=0;i<len*2;i++)
+		{
+			ii[i]=(int)luaL_checknumber(l,i+2);
+		}
+	}
+	glUniform2iv(idx,len,ip);
+	return 0;
+}
+static int lua_gles_Uniform3i (lua_State *l)
+{
+int idx;
+int *ip;
+int ii[256*3];
+int len=1;
+int i;
+	idx=(int)luaL_checknumber(l,1);
+	ip=(int*)lua_tardis_uda(l,2);
+	if(ip)
+	{
+		len=lua_tardis_uda_count(l,2)/3;
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		ip=ii;
+		len=lua_objlen(l,2)/3;
+		if(len>256) {len=256;}
+		for(i=0;i<len*3;i++)
+		{
+			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
+	}
+	else
+	{
+		ip=ii;
+		for(i=0;i<len*3;i++)
+		{
+			ii[i]=(int)luaL_checknumber(l,i+2);
+		}
+	}
+	glUniform3iv(idx,len,ip);
+	return 0;
+}
+static int lua_gles_Uniform4i (lua_State *l)
+{
+int idx;
+int *ip;
+int ii[256*4];
+int len=1;
+int i;
+	idx=(int)luaL_checknumber(l,1);
+	ip=(int*)lua_tardis_uda(l,2);
+	if(ip)
+	{
+		len=lua_tardis_uda_count(l,2)/4;
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		ip=ii;
+		len=lua_objlen(l,2)/4;
+		if(len>256) {len=256;}
+		for(i=0;i<len*4;i++)
+		{
+			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
+	}
+	else
+	{
+		ip=ii;
+		for(i=0;i<len*4;i++)
+		{
+			ii[i]=(int)luaL_checknumber(l,i+2);
+		}
+	}
+	glUniform4iv(idx,len,ip);
+	return 0;
+}
+
+
 static int lua_gles_Uniform1f (lua_State *l)
 {
-int i;
+int idx;
 float *fp;
-float ff[1];
+float ff[256*1];
 int len=1;
-	i=(int)luaL_checknumber(l,1);
+int i;
+	idx=(int)luaL_checknumber(l,1);
 	fp=(float*)lua_tardis_uda(l,2);
 	if(fp)
 	{
@@ -875,23 +1020,32 @@ int len=1;
 	if( lua_istable(l,2))
 	{
 		fp=ff;
-		lua_rawgeti(l,2,1); ff[0]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		len=lua_objlen(l,2)/1;
+		if(len>256) {len=256;}
+		for(i=0;i<len*1;i++)
+		{
+			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
 	}
 	else
 	{
 		fp=ff;
-		ff[0]=(float)luaL_checknumber(l,2);
+		for(i=0;i<len*1;i++)
+		{
+			ff[i]=(float)luaL_checknumber(l,i+2);
+		}
 	}
-	glUniform1fv(i,len,fp);
+	glUniform1fv(idx,len,fp);
 	return 0;
 }
 static int lua_gles_Uniform2f (lua_State *l)
 {
-int i;
+int idx;
 float *fp;
-float ff[2];
+float ff[256*2];
 int len=1;
-	i=(int)luaL_checknumber(l,1);
+int i;
+	idx=(int)luaL_checknumber(l,1);
 	fp=(float*)lua_tardis_uda(l,2);
 	if(fp)
 	{
@@ -901,25 +1055,32 @@ int len=1;
 	if( lua_istable(l,2))
 	{
 		fp=ff;
-		lua_rawgeti(l,2,1); ff[0]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		lua_rawgeti(l,2,2); ff[1]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		len=lua_objlen(l,2)/2;
+		if(len>256) {len=256;}
+		for(i=0;i<len*2;i++)
+		{
+			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
 	}
 	else
 	{
 		fp=ff;
-		ff[0]=(float)luaL_checknumber(l,2);
-		ff[1]=(float)luaL_checknumber(l,3);
+		for(i=0;i<len*2;i++)
+		{
+			ff[i]=(float)luaL_checknumber(l,i+2);
+		}
 	}
-	glUniform2fv(i,len,fp);
+	glUniform2fv(idx,len,fp);
 	return 0;
 }
 static int lua_gles_Uniform3f (lua_State *l)
 {
-int i;
+int idx;
 float *fp;
-float ff[3];
+float ff[256*3];
 int len=1;
-	i=(int)luaL_checknumber(l,1);
+int i;
+	idx=(int)luaL_checknumber(l,1);
 	fp=(float*)lua_tardis_uda(l,2);
 	if(fp)
 	{
@@ -929,27 +1090,32 @@ int len=1;
 	if( lua_istable(l,2))
 	{
 		fp=ff;
-		lua_rawgeti(l,2,1); ff[0]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		lua_rawgeti(l,2,2); ff[1]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		lua_rawgeti(l,2,3); ff[2]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		len=lua_objlen(l,2)/3;
+		if(len>256) {len=256;}
+		for(i=0;i<len*3;i++)
+		{
+			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
 	}
 	else
 	{
 		fp=ff;
-		ff[0]=(float)luaL_checknumber(l,2);
-		ff[1]=(float)luaL_checknumber(l,3);
-		ff[2]=(float)luaL_checknumber(l,4);
+		for(i=0;i<len*3;i++)
+		{
+			ff[i]=(float)luaL_checknumber(l,i+2);
+		}
 	}
-	glUniform3fv(i,len,fp);
+	glUniform3fv(idx,len,fp);
 	return 0;
 }
 static int lua_gles_Uniform4f (lua_State *l)
 {
-int i;
+int idx;
 float *fp;
-float ff[4];
+float ff[256*4];
 int len=1;
-	i=(int)luaL_checknumber(l,1);
+int i;
+	idx=(int)luaL_checknumber(l,1);
 	
 	fp=(float*)lua_tardis_uda(l,2);
 	if(fp)
@@ -960,133 +1126,132 @@ int len=1;
 	if( lua_istable(l,2))
 	{
 		fp=ff;
-		lua_rawgeti(l,2,1); ff[0]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		lua_rawgeti(l,2,2); ff[1]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		lua_rawgeti(l,2,3); ff[2]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		lua_rawgeti(l,2,4); ff[3]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		len=lua_objlen(l,2)/4;
+		if(len>256) {len=256;}
+		for(i=0;i<len*4;i++)
+		{
+			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
 	}
 	else
 	{
 		fp=ff;
-		ff[0]=(float)luaL_checknumber(l,2);
-		ff[1]=(float)luaL_checknumber(l,3);
-		ff[2]=(float)luaL_checknumber(l,4);
-		ff[3]=(float)luaL_checknumber(l,5);
+		for(i=0;i<len*4;i++)
+		{
+			ff[i]=(float)luaL_checknumber(l,i+2);
+		}
 	}
-	glUniform4fv(i,len,fp);
+	glUniform4fv(idx,len,fp);
 	return 0;
 }
 
-static int lua_gles_Uniform1i (lua_State *l)
-{
-int i;
-int ii[1];
-	i=(int)luaL_checknumber(l,1);
-	ii[0]=(int)luaL_checknumber(l,2);
-	glUniform1iv(i,1,ii);
-	return 0;
-}
-static int lua_gles_Uniform2i (lua_State *l)
-{
-int i;
-int ii[2];
-	i=(int)luaL_checknumber(l,1);
-	ii[0]=(int)luaL_checknumber(l,2);
-	ii[1]=(int)luaL_checknumber(l,3);
-	glUniform2iv(i,1,ii);
-	return 0;
-}
-static int lua_gles_Uniform3i (lua_State *l)
-{
-int i;
-int ii[3];
-	i=(int)luaL_checknumber(l,1);
-	ii[0]=(int)luaL_checknumber(l,2);
-	ii[1]=(int)luaL_checknumber(l,3);
-	ii[2]=(int)luaL_checknumber(l,4);
-	glUniform3iv(i,1,ii);
-	return 0;
-}
-static int lua_gles_Uniform4i (lua_State *l)
-{
-int i;
-int ii[4];
-	i=(int)luaL_checknumber(l,1);
-	ii[0]=(int)luaL_checknumber(l,2);
-	ii[1]=(int)luaL_checknumber(l,3);
-	ii[2]=(int)luaL_checknumber(l,4);
-	ii[3]=(int)luaL_checknumber(l,5);
-	glUniform4iv(i,1,ii);
-	return 0;
-}
 
 static int lua_gles_UniformMatrix2f (lua_State *l)
 {
+int idx;
+float *fp;
+float ff[256*4];
+int len=1;
 int i;
-float ff[4];
-float *m;
-	if(lua_isuserdata(l,2))
+	idx=(int)luaL_checknumber(l,1);
+	
+	fp=(float*)lua_tardis_uda(l,2);
+	if(fp)
 	{
-		m=(float*)lua_tardis_uda(l,2);
+		len=lua_tardis_uda_count(l,2)/4;
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		fp=ff;
+		len=lua_objlen(l,2)/4;
+		if(len>256) {len=256;}
+		for(i=0;i<len*4;i++)
+		{
+			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
 	}
 	else
 	{
-		for(i=0;i<4;i++)
+		fp=ff;
+		for(i=0;i<len*4;i++)
 		{
-			lua_pushnumber(l,(double)(i+1));
-			lua_gettable(l,2);
-			ff[i]=(float)lua_tonumber(l,-1);
-			lua_pop(l,1);
+			ff[i]=(float)luaL_checknumber(l,i+2);
 		}
-		m=ff;
 	}
-	glUniformMatrix2fv((int)luaL_checknumber(l,1), 1, 0, m );
+	glUniformMatrix2fv(idx, len, 0, fp );
 	return 0;
 }
 static int lua_gles_UniformMatrix3f (lua_State *l)
 {
+int idx;
+float *fp;
+float ff[128*9];
+int len=1;
 int i;
-float ff[9];
-float *m;
-	if(lua_isuserdata(l,2))
+	idx=(int)luaL_checknumber(l,1);
+	
+	fp=(float*)lua_tardis_uda(l,2);
+	if(fp)
 	{
-		m=(float*)lua_tardis_uda(l,2);
+		len=lua_tardis_uda_count(l,2)/9;
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		fp=ff;
+		len=lua_objlen(l,2)/9;
+		if(len>128) {len=128;}
+		for(i=0;i<len*9;i++)
+		{
+			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
 	}
 	else
 	{
-		for(i=0;i<9;i++)
+		fp=ff;
+		for(i=0;i<len*9;i++)
 		{
-			lua_pushnumber(l,(double)(i+1));
-			lua_gettable(l,2);
-			ff[i]=(float)lua_tonumber(l,-1);
-			lua_pop(l,1);
+			ff[i]=(float)luaL_checknumber(l,i+2);
 		}
-		m=ff;
 	}
-	glUniformMatrix3fv((int)luaL_checknumber(l,1), 1, 0, m );
+	glUniformMatrix3fv(idx, len, 0, fp );
 	return 0;
 }
 static int lua_gles_UniformMatrix4f (lua_State *l)
 {
+int idx;
+float *fp;
+float ff[64*16];
+int len=1;
 int i;
-float ff[16];
-float *m;
-	if(lua_isuserdata(l,2))
+	idx=(int)luaL_checknumber(l,1);
+	
+	fp=(float*)lua_tardis_uda(l,2);
+	if(fp)
 	{
-		m=(float*)lua_tardis_uda(l,2);
+		len=lua_tardis_uda_count(l,2)/16;
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		fp=ff;
+		len=lua_objlen(l,2)/16;
+		if(len>64) {len=64;}
+		for(i=0;i<len*16;i++)
+		{
+			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
 	}
 	else
 	{
-		luaL_checktype(l, 2, LUA_TTABLE);
-		for(i=0;i<16;i++)
+		fp=ff;
+		for(i=0;i<len*16;i++)
 		{
-			lua_rawgeti(l,2,i+1);
-			ff[i]=(float)lua_tonumber(l,-1);
-			lua_pop(l,1);
+			ff[i]=(float)luaL_checknumber(l,i+2);
 		}
-		m=ff;
 	}
-	glUniformMatrix4fv((int)luaL_checknumber(l,1), 1, 0, m );
+	glUniformMatrix4fv(idx, len, 0, fp );
 	return 0;
 }
 

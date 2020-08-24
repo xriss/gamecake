@@ -441,7 +441,7 @@ int count;
 		def=arr;
 		def_len=lua_pack_field_size(arr);
 		count=( len - off )/def_len;
-		data_len=len;
+		data_len=count*def_len;
 		
 	}
 	else

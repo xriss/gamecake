@@ -13,13 +13,7 @@ local function dprint(a) print(wstr.dump(a)) end
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-M.fill=function(oven,geom)
-
-	local gl=oven.gl
-	local cake=oven.cake
-	local canvas=cake.canvas
-	local font=canvas.font
-	local flat=canvas.flat
+M.fill=function(geom)
 
 	geom.tetrahedron=function(it)
 		it=geom.new(it)

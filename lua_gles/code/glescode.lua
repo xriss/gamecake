@@ -60,100 +60,84 @@ function glescode.create(gl)
 		return a*r/0xff,a*g/0xff,a*b/0xff,a
 	end
 
+-- use generic tardis based stack code
 
--- matrix functions
-
+-- reset all stacks
 	function code.reset_stacks()
 		code.stacks={}		
 		code.stack_mode=nil
 		code.stack=nil
-		code.stack_matrix=nil
 	end
 	code.reset_stacks() -- setup
 
+-- get the current matrix for the given mode
 	function code.matrix(mode)
 		local v=code.stacks[mode]
 		return v[#v]
 	end
-	
+
+-- switch to the given mode
 	function code.MatrixMode(mode)
 		code.stack_mode=mode
 		code.stack=code.stacks[code.stack_mode]
 		if not code.stack then -- create on use
---			local m4=tcore.new_m4() tcore.m4_identity(m4)
-			local m4=tardis.m4.new():identity()
-			code.stack={ m4 }
+			code.stack=tardis.m4_stack()
 			code.stacks[code.stack_mode]=code.stack
 		end
-		code.stack_matrix=assert(code.stack[#code.stack])
 	end
+
 
 -- returns a matrix that can later be used in LoadMatrix
-	function code.SaveMatrix(...)
---		local m4=tcore.new_m4() tcore.set(m4,code.stack_matrix,16)
-		local m4=tardis.m4.new(code.stack_matrix)
-		return m4
+	function code.SaveMatrix()
+		return code.stack.save()
 	end
 
--- create a new matrix to mult by
+-- create a new matrix to be used in code.MultMatrix
 	function code.CreateMatrix(a)
---		local m4=tcore.new_m4() tcore.set(m4,a,16)
-		local m4=tardis.m4.new(a)
-		return m4
+		return tardis.m4.new(a)
 	end
 
 	function code.LoadMatrix(...)
---		tcore.set(code.stack_matrix,...)
-		code.stack_matrix:set(...)
+		code.stack.load(...)
+	end
+
+	function code.LoadIdentity()
+		code.stack.identity()
 	end
 
 	function code.MultMatrix(a)
---		tcore.m4_product_m4(code.stack_matrix,a,code.stack_matrix)
-		code.stack_matrix:product(a,code.stack_matrix)
+		code.stack.product(a)
 	end
 
 	function code.PreMultMatrix(a)
---		tcore.m4_product_m4(a,code.stack_matrix,code.stack_matrix)
-		a:product(code.stack_matrix,code.stack_matrix)
+		code.stack.premult(a)
+	end
+
+	function code.Translate(...)
+		code.stack.translate(...)
+	end
+
+	function code.Rotate(...)
+		code.stack.rotate(...)
+	end
+
+	function code.Scale(...)
+		code.stack.scale(...)
+	end
+
+	function code.PushMatrix()		
+		code.stack.push()
+	end
+
+	function code.PopMatrix()
+		code.stack.pop()
 	end
 
 -- we have our own majick code for this sort of thing
 	function code.Frustum(...)
 		error("frustrum not suported")
 	end
-
-	function code.LoadIdentity()
---		tcore.m4_identity(code.stack_matrix)
-		code.stack_matrix:identity()
-	end
-
-	function code.Translate(vx,vy,vz)
---		tcore.m4_translate(code.stack_matrix,vx,vy,vz)
-		code.stack_matrix:translate({vx,vy,vz})
-	end
-
-	function code.Rotate(d,vx,vy,vz)
---		tcore.m4_rotate(code.stack_matrix,d,vx,vy,vz)
-		code.stack_matrix:rotate(d,{vx,vy,vz})
-	end
-
-	function code.Scale(vx,vy,vz)
---		tcore.m4_scale_v3(code.stack_matrix,vx,vy,vz)
-		code.stack_matrix:scale_v3({vx,vy,vz})
-	end
-
-	function code.PushMatrix()		
---		local m4=tcore.new_m4() tcore.set(m4,code.stack_matrix,16)
-		local m4=tardis.m4.new(code.stack_matrix)
-		code.stack[#code.stack+1]=m4
-		code.stack_matrix=assert(code.stack[#code.stack])
-	end
-
-	function code.PopMatrix()
-		code.stack[#code.stack]=nil -- remove topmost
-		code.stack_matrix=assert(code.stack[#code.stack]) -- this will assert on too many pops
-	end
-
+	
 
 	function code.color_get_rgba()
 --		return tcore.read(code.cache.color,1),tcore.read(code.cache.color,2),tcore.read(code.cache.color,3),tcore.read(code.cache.color,4)

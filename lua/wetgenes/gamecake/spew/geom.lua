@@ -7,6 +7,7 @@ local pack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
+local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -29,22 +30,35 @@ local function dprint(a) print(wstr.dump(a)) end
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-M.bake=function(oven,geom)
-	geom=geom or {}
-	geom.modname=M.modname
+-- vertex data
+	M.idxs=	{
+				POS_X= 1, POS_Y= 2, POS_Z= 3,
+				NRM_X= 4, NRM_Y= 5, NRM_Z= 6,
+				TEX_U= 7, TEX_V= 8,
+				TAN_X= 9, TAN_Y=10, TAN_Z=11, TAN_W=12,
+				BNE_A=13, BNE_B=14, BNE_C=15, BNE_D=16
+	}
 
-	geom.meta={__index=geom}
-	geom.new=function(it) it=it or {} setmetatable(it,geom.meta) return it end
 
-	geom.duplicate=function(it)
-		return geom.copy(it,geom.new())
+-- we DO NOT have OpenGL access here
+	M.meta={__index=M}
+	M.new=function(it) it=it or {} setmetatable(it,M.meta) return it:reset() end
+	
+	M.reset=function(it)
+		it.verts={}
+		it.mats={}
+		it.polys={}
+		it.mats={}
+		return it
+	end
+	
+	M.duplicate=function(it)
+		return M.copy(it,M.new())
 	end
 
-	geom.copy=function(src,dst)
+	M.copy=function(src,dst)
 -- reset
-		dst.verts={}
-		dst.mats={}
-		dst.polys={}
+		dst:reset()
 		dst.name=src.name
 		dst:clear_predraw()
 -- copy mats
@@ -58,41 +72,134 @@ M.bake=function(oven,geom)
 		end
 -- copy verts
 		for iv = 1 , #src.verts do local vert=src.verts[iv]
-			localv={unpack(vert)}
+			local v={unpack(vert)}
 			dst.verts[ iv ]=v
 		end
 --copy polys		
 		for iv = 1 , #src.polys do local poly=src.polys[iv]
 			local p={unpack(poly)}
-			p.mat=mats_map_idx[poly.mat]
+			p.mat=poly.mat
 			dst.polys[ iv ]=p
 		end
 		return dst
 	end
 
-
-geom.idxs=	{
-				POS_X= 1, POS_Y= 2, POS_Z= 3,
-				NRM_X= 4, NRM_Y= 5, NRM_Z= 6,
-				TEX_U= 7, TEX_V= 8,
-				TAN_X= 9, TAN_Y=10, TAN_Z=11, TAN_W=12,
-				BNE_A=13, BNE_B=14, BNE_C=15, BNE_D=16
-			}
-
-
-	local gl=oven.gl
-	local cake=oven.cake
-	local canvas=cake.canvas
-	local font=canvas.font
-	local flat=canvas.flat
-	
-	require("wetgenes.gamecake.spew.geom_draw").fill(oven,geom)
-	require("wetgenes.gamecake.spew.geom_solids").fill(oven,geom)
-	require("wetgenes.gamecake.spew.geom_mask").fill(oven,geom)
-
+	M.merge_from=function(dst,src)
+-- reset cache
+		dst:clear_predraw()
 		
+		local remat={}
+-- copy mats
+		for im = 1 , #src.mats do local mat=src.mats[im]
+			local m
+			for om = 1 , #dst.mats do local dm=dst.mats[om]
+				if not dm.idx then dm.idx=om end -- make sure we have dst idx
+				if mat.name and dm.name==mat.name then
+					m=dm -- merge into this mat
+				end
+			end
+			if not m then
+				m={} -- new material
+				m.idx=#dst.mats+1
+				dst.mats[ m.idx ]=m
+			end
+			remat[im]=m.idx
+			
+			for n,v in pairs(mat) do
+				if n~="idx" then
+					m[n]=v
+				end
+			end
+		end
+-- copy verts
+		local bv=#dst.verts
+		for iv = 1 , #src.verts do local vert=src.verts[iv]
+			local v={unpack(vert)}
+			dst.verts[ bv+iv ]=v
+		end
+--copy polys		
+		local bp=#dst.polys
+		for iv = 1 , #src.polys do local poly=src.polys[iv]
+			local p={unpack(poly)}
+			for i,v in ipairs(p) do p[i]=v+bv end
+			p.mat=poly.mat and remat[poly.mat] or poly.mat
+			dst.polys[ bp+iv ]=p
+		end
+		return dst
+	end
+
+	M.adjust_vertex_by_m4_and_m3=function(v,m4,m3)
+		local t=V4(v[1],v[2],v[3],1)
+		t:product(m4)
+		v[1]=t[1]
+		v[2]=t[2]
+		v[3]=t[3]
+		if v[4] then -- normals
+			local t=V4(v[4],v[5],v[6],1)
+			t:product(m3)
+			v[4]=t[1]
+			v[5]=t[2]
+			v[6]=t[3]
+		end
+		if v[9] then -- tangents
+			local t=V4(v[9],v[10],v[11],1)
+			t:product(m3)
+			v[9]=t[1]
+			v[10]=t[2]
+			v[11]=t[3]
+		end
+	end
+
+	-- apply an m4 transform to all vertexs and normals/tangents
+	M.adjust_by_m4=function(it,m4)
+		local m3=M4(m4):m3() -- get rotation/scale only
+		local vs=it.verts
+		for i=1,#vs do local v=vs[i]
+			M.adjust_vertex_by_m4_and_m3(v,m4,m3)
+		end
+		return it
+	end
+
+
+	-- apply an array of m4 bones transform to all vertexs and normals/tangents
+	M.adjust_by_bones=function(it,bones)
+
+		local vs=it.verts
+		for i=1,#vs do local v=vs[i]
+
+			local m4
+			for bi=1,4 do
+				local b=v[12+bi] or 0
+--				print(b)
+				local bidx=math.floor(b)
+				local bwgt=1-(b-bidx)
+				local bb=(bidx-1)*16
+				local bone=M4(
+					bones[bb+1],bones[bb+2],bones[bb+3],bones[bb+4] ,
+					bones[bb+5],bones[bb+6],bones[bb+7],bones[bb+8] ,
+					bones[bb+9],bones[bb+10],bones[bb+11],bones[bb+12] ,
+					bones[bb+13],bones[bb+14],bones[bb+15],bones[bb+16] )
+				if bidx>0 and bwgt>0 and bwgt<=1 then
+					if not m4 then
+						m4=M4(bone):scalar(bwgt)
+					else
+						m4:add( M4(bone):scalar(bwgt) )
+					end
+				else
+					break
+				end
+			end
+			if not m4 then m4=M4() end
+			local m3=M4(m4):m3() -- get rotation/scale only
+			
+
+			M.adjust_vertex_by_m4_and_m3(v,m4,m3)
+		end
+		return it
+	end
+
 	-- scale the geom
-	geom.adjust_scale=function(it,s)
+	M.adjust_scale=function(it,s)
 		s=s or 1
 		local vs=it.verts
 		for i=1,#vs do local v=vs[i]
@@ -104,7 +211,7 @@ geom.idxs=	{
 	end
 	
 	-- position the geom
-	geom.adjust_position=function(it,dx,dy,dz)
+	M.adjust_position=function(it,dx,dy,dz)
 		local vs=it.verts
 		for i=1,#vs do local v=vs[i]
 			v[1]=v[1]+dx
@@ -115,7 +222,7 @@ geom.idxs=	{
 	end
 
 	-- build lines from polys
-	geom.build_lines=function(it)
+	M.build_lines=function(it)
 
 		local ld={}
 		local addline
@@ -143,7 +250,7 @@ geom.idxs=	{
 	end
 
 	-- build the edges
-	geom.build_edges=function(it)
+	M.build_edges=function(it)
 		local es={}
 		it.edges_map=es
 		for ip,vp in ipairs(it.polys) do
@@ -170,7 +277,7 @@ geom.idxs=	{
 	end
 	
 -- uses first 3 verts, does not fix the length
-	geom.get_poly_normal=function(it,p)
+	M.get_poly_normal=function(it,p)
 	
 		local v1=it.verts[ p[1] ]
 		local v2=it.verts[ p[2] ]
@@ -194,7 +301,7 @@ geom.idxs=	{
 		return vn
 	end
 
-	geom.normalize=function(v)
+	M.normalize=function(v)
 		local dd=v[1]*v[1] + v[2]*v[2] + v[3]*v[3]
 		local d=math.sqrt(dd)
 		if d<(1/65536) then d=1 end
@@ -205,7 +312,7 @@ geom.idxs=	{
 	end
 
 
-	geom.face_square_uvs=function(it)
+	M.face_square_uvs=function(it)
 		local t={
 			{0,0},
 			{1,0},
@@ -220,13 +327,13 @@ geom.idxs=	{
 		return it
 	end
 
-	geom.flip=function(it)
-		for i,p in pairs(it.polys) do geom.poly_flip(it,p) end
-		for i,v in pairs(it.verts) do geom.vert_flip(it,v) end
+	M.flip=function(it)
+		for i,p in pairs(it.polys) do M.poly_flip(it,p) end
+		for i,v in pairs(it.verts) do M.vert_flip(it,v) end
 		return it
 	end
 		
-	geom.vert_flip=function(it,v)
+	M.vert_flip=function(it,v)
 		if v[4] then
 			v[4]=-v[4]
 			v[5]=-v[5]
@@ -235,7 +342,7 @@ geom.idxs=	{
 		return it
 	end
 
-	geom.poly_flip=function(it,p)
+	M.poly_flip=function(it,p)
 	
 		local n={}
 		for i=#p,1,-1 do
@@ -249,7 +356,7 @@ geom.idxs=	{
 	end
 
 
-	geom.flipaxis=function(it,axis)
+	M.flipaxis=function(it,axis)
 		local mv=#it.verts
 		for iv=1,mv do local vv=it.verts[iv]
 			vv[axis]=-vv[axis]
@@ -259,7 +366,7 @@ geom.idxs=	{
 	end
 	
 -- dupe+mirror point and polygons around the origin on the given axis 1=x 2=y 3=z
-	geom.mirror=function(it,axis,cb)
+	M.mirror=function(it,axis,cb)
 	
 		local vmap={} -- map vertexes to their mirrored one
 		
@@ -293,12 +400,12 @@ geom.idxs=	{
 				for i,v in ipairs(vd) do
 					vd[i]=vmap[v] or v
 				end
-				geom.poly_flip(it,vd)
+				M.poly_flip(it,vd)
 		end
 	
 	end
 
-	geom.build_normals=function(it)
+	M.build_normals=function(it)
 
 -- reset normals
 		for iv,vv in ipairs(it.verts) do
@@ -310,7 +417,7 @@ geom.idxs=	{
 		
 -- add each face to normals
 		for ip,vp in ipairs(it.polys) do
-			local n=geom.normalize( geom.get_poly_normal(it,vp) )
+			local n=M.normalize( M.get_poly_normal(it,vp) )
 			for i=1,#vp do
 				local v=it.verts[ vp[i] ]
 				v[4]=v[4]+n[1]
@@ -328,19 +435,29 @@ geom.idxs=	{
 				vv[6]=vv[6]/vv.count
 			end
 			vv.count=nil
+			
+			if vv[4]~=vv[4] then vv[4]=1 end	-- if nan
+			if vv[5]~=vv[5] then vv[5]=1 end
+			if vv[6]~=vv[6] then vv[6]=1 end
+			
+			if vv[4]==0 and vv[5]==0 and vv[6]==0 then -- if zero length
+				vv[4]=1
+				vv[5]=1
+				vv[6]=1
+			end
 		end
 
 		return it
 	end
 
-	geom.build_tangents=function(it)
+	M.build_tangents=function(it)
 
 -- reset tangents
 		for iv,vv in ipairs(it.verts) do
 			vv[9]=0
 			vv[10]=0
 			vv[11]=0
-			vv[12]=0
+			vv[12]={0,0,0}
 		end
 		
 -- check each poly edge and add a weighted version of its normal to the tangent
@@ -364,15 +481,23 @@ geom.idxs=	{
 				v1[10]=v1[10]+(n[2]*n[5])
 				v1[11]=v1[11]+(n[3]*n[5])
 
+				v1[12][1]=v1[12][1]+(n[1]*n[4])
+				v1[12][2]=v1[12][2]+(n[2]*n[4])
+				v1[12][3]=v1[12][3]+(n[3]*n[4])
+
 				v2[ 9]=v2[ 9]+(n[1]*n[5])
 				v2[10]=v2[10]+(n[2]*n[5])
 				v2[11]=v2[11]+(n[3]*n[5])
 
+				v2[12][1]=v2[12][1]+(n[1]*n[4])
+				v2[12][2]=v2[12][2]+(n[2]*n[4])
+				v2[12][3]=v2[12][3]+(n[3]*n[4])
 
 			end
 		end
 		
 -- merge tangents of vertexs that are in same 3d location
+--[[
 		local merge={}
 		for iv,vv in ipairs(it.verts) do
 			local s=vv[1]..","..vv[2]..","..vv[3]
@@ -386,12 +511,19 @@ geom.idxs=	{
 					vv[1][ 9]=vv[1][ 9]+vv[i][ 9]
 					vv[1][10]=vv[1][10]+vv[i][10]
 					vv[1][11]=vv[1][11]+vv[i][11]
+					vv[1][12][1]=vv[1][12][1]+vv[i][12][1]
+					vv[1][12][2]=vv[1][12][2]+vv[i][12][2]
+					vv[1][12][3]=vv[1][12][3]+vv[i][12][3]
 					vv[i][ 9]=vv[1][ 9]
 					vv[i][10]=vv[1][10]
 					vv[i][11]=vv[1][11]
+					vv[i][12][1]=vv[1][12][1]
+					vv[i][12][2]=vv[1][12][2]
+					vv[i][12][3]=vv[1][12][3]
 				end
 			end
 		end
+]]
 
 -- remove normal to place tangent on surface and then fix its length
 		for iv,vv in ipairs(it.verts) do
@@ -400,69 +532,96 @@ geom.idxs=	{
 			vv[10]=vv[10]-(n*vv[5])
 			vv[11]=vv[11]-(n*vv[6])
 
+			local n=( (vv[12][1]*vv[4]) + (vv[12][2]*vv[5]) + (vv[12][3]*vv[6]) ) -- dot
+			vv[12][1]=vv[12][1]-(n*vv[4])
+			vv[12][2]=vv[12][2]-(n*vv[5])
+			vv[12][3]=vv[12][3]-(n*vv[6])
+
 			local dd=math.sqrt(vv[9]*vv[9] + vv[10]*vv[10] + vv[11]*vv[11])
 			if dd==0 then dd=1 end
 			vv[ 9]=vv[ 9]/dd
 			vv[10]=vv[10]/dd
 			vv[11]=vv[11]/dd
+
+			local dd=math.sqrt(vv[12][1]*vv[12][1] + vv[12][2]*vv[12][2] + vv[12][3]*vv[12][3])
+			if dd==0 then dd=1 end
+			vv[12][1]=vv[12][1]/dd
+			vv[12][2]=vv[12][2]/dd
+			vv[12][3]=vv[12][3]/dd
 		end
 
--- work out the sign for the bitangent
-		for ip,vp in ipairs(it.polys) do
-			for i=1,#vp do
-				local v1=it.verts[ vp[i] ]
-				local v2=it.verts[ vp[(i%#vp)+1] ]
-				local n={ v2[1]-v1[1] , v2[2]-v1[2] , v2[3]-v1[3] , v2[7]-v1[7] , v2[8]-v1[8] }
+-- force tangent and bitangent to be at right angles of each other
 
-				local dd=math.sqrt(n[1]*n[1] + n[2]*n[2] + n[3]*n[3]) -- unit length
-				if dd==0 then dd=1 end
-				n[1]=n[1]/dd
-				n[2]=n[2]/dd
-				n[3]=n[3]/dd
-				local dd=math.sqrt(n[4]*n[4] + n[5]*n[5] ) -- unit length
-				if dd==0 then dd=1 end
-				n[4]=n[4]/dd
-				n[5]=n[5]/dd
-
-				n[1]=(n[1]*n[4])
-				n[2]=(n[2]*n[4])
-				n[3]=(n[3]*n[4])
-
-				local b={ -- bitangent is cross product of normal and tangent
-							(v1[2]*v1[11])-(v1[3]*v1[10]) ,
-							(v1[3]*v1[9] )-(v1[1]*v1[11]) ,
-							(v1[1]*v1[10])-(v1[2]*v1[9] )
-						}
-
-				v1[12]=v1[12]+( (b[1]*n[1]) + (b[2]*n[2]) + (b[3]*n[3]) )
-			end
-		end
 		for iv,vv in ipairs(it.verts) do
+		
+			local n={vv[4],vv[5],vv[6]}
+			local t={vv[9],vv[10],vv[11]}
+			local b={vv[12][1],vv[12][2],vv[12][3]}
+			
+			local h=tardis.v3.new(t):add(b):normalize() -- halfway vector
+			
+			local c=tardis.v3.new(h):cross(n):normalize()
+			
+			local t2=tardis.v3.new(h):add(c):normalize() -- new vector at right angles
+			local b2=tardis.v3.new(h):sub(c):normalize() -- new vector at right angles
+			
+			if tardis.v3.dot(t,t2) > tardis.v3.dot(t,b2) then -- right way around
+			
+				vv[9]=t2[1]
+				vv[10]=t2[2]
+				vv[11]=t2[3]
+
+				vv[12][1]=b2[1]
+				vv[12][2]=b2[2]
+				vv[12][3]=b2[3]
+			
+			else
+			
+				vv[9]=b2[1]
+				vv[10]=b2[2]
+				vv[11]=b2[3]
+
+				vv[12][1]=t2[1]
+				vv[12][2]=t2[2]
+				vv[12][3]=t2[3]
+
+			end
+
+		end
+
+
+-- work out the sign for the bitangent and force remove any nan values
+		for iv,vv in ipairs(it.verts) do
+			local b={ (vv[5]*vv[11])-(vv[6]*vv[10]) , (vv[6]*vv[9])-(vv[4]*vv[11]) , (vv[4]*vv[10])-(vv[5]*vv[9]) }
+			vv[12] = vv[12][1]*b[1] + vv[12][2]*b[2] + vv[12][3]*b[3] 
 			if vv[12]>=0 then vv[12]=1 else vv[12]=-1 end
+			if vv[ 9]~=vv[ 9] then vv[ 9]=1 end
+			if vv[10]~=vv[10] then vv[10]=1 end
+			if vv[11]~=vv[11] then vv[11]=1 end
 		end
 
 		return it
 	end
 
 -- face polys away from the origin
-	geom.fix_poly_order=function(it,p)
+	M.fix_poly_order=function(it,p)
 	
 		local v2=it.verts[ p[2] ]
-		local vn=geom.get_poly_normal(it,p)
+		local vn=M.get_poly_normal(it,p)
 		
 		local d = vn[1]*v2[1] + vn[2]*v2[2] + vn[3]*v2[3]
 		
 		if d>0 then -- invert poly order
-			geom.poly_flip(it,p)
+			M.poly_flip(it,p)
 		end
 
 		return it
 	end
 
 	-- bevil a base object, s is how much each face is scaled, so 7/8 is a nice bevel
-	geom.apply_bevel=function(it,s)
+	M.apply_bevel=function(it,s)
 	
-		geom.build_edges(it)
+		M.build_edges(it)
 
 		local vs={}
 		local function vcopy(i)
@@ -471,7 +630,7 @@ geom.idxs=	{
 			return #vs -- new vertex id
 		end
 		for ip,vp in ipairs(it.polys) do
-			local n=geom.normalize( geom.get_poly_normal(it,vp) )
+			local n=M.normalize( M.get_poly_normal(it,vp) )
 			for i=1,#vp do
 				vp[i]=vcopy(vp[i])
 				local v=vs[ vp[i] ]
@@ -525,7 +684,7 @@ geom.idxs=	{
 			js[#js+1]={p[1],p[4]}
 			js[#js+1]={p[2],p[3]}
 
-			geom.fix_poly_order(it,p)
+			M.fix_poly_order(it,p)
 			it.polys[#it.polys+1]=p -- add join poly
 		end
 		
@@ -580,11 +739,11 @@ geom.idxs=	{
 		for i,v in pairs(js) do -- add pollys
 			v[#v]=nil
 			it.polys[#it.polys+1]=v
-			geom.fix_poly_order(it,v)
+			M.fix_poly_order(it,v)
 		end
 			
 		for i,p in pairs(it.polys) do
-			geom.fix_poly_order(it,p)
+			M.fix_poly_order(it,p)
 		end
 			
 		return it
@@ -592,7 +751,7 @@ geom.idxs=	{
 
 -- find the radius of this object from 0,0,0
 
-	geom.max_radius=function(it)
+	M.max_radius=function(it)
 
 		local maxdd=0
 		
@@ -603,6 +762,55 @@ geom.idxs=	{
 
 		return math.sqrt(maxdd)
 	end
+
+	M.find_bounds=function(it)
+
+		local dd={0,0,0,0,0,0}
+		
+		local v=it.verts[1]
+		if v then
+
+			dd[1]=v[1]
+			dd[2]=v[1]
+			dd[3]=v[2]
+			dd[4]=v[2]
+			dd[5]=v[3]
+			dd[6]=v[3]
+		
+			for iv,vv in ipairs(it.verts) do
+				if vv[1]<dd[1] then dd[1]=vv[1] end
+				if vv[1]>dd[2] then dd[2]=vv[1] end
+				if vv[2]<dd[3] then dd[3]=vv[2] end
+				if vv[2]>dd[4] then dd[4]=vv[2] end
+				if vv[3]<dd[5] then dd[5]=vv[3] end
+				if vv[3]>dd[6] then dd[6]=vv[3] end
+			end
+
+		end
+		
+		return dd
+	end
+
+	M.find_center=function(it)
+		local dd=M.find_bounds(it)
+		return (dd[1]+dd[2])/2 , (dd[3]+dd[4])/2 , (dd[5]+dd[6])/2
+	end
+
+	require("wetgenes.gamecake.spew.geom_mask").fill(M)
+	require("wetgenes.gamecake.spew.geom_solids").fill(M)
+
+
+M.bake=function(oven,geom)
+	geom=geom or {}
+	for n,v in pairs(M) do geom[n]=v end
+	geom.modname=M.modname
+
+-- we have OpenGL access here
+	geom.meta={__index=geom}
+	geom.new=function(it) it=it or {} setmetatable(it,geom.meta) return it:reset() end
+
+	
+	require("wetgenes.gamecake.spew.geom_draw").fill(oven,geom)
 
 	return geom
 end

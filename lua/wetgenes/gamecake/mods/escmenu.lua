@@ -193,11 +193,18 @@ function M.bake(oven,escmenu)
 				return nil
 			end
 		end
-		if ( m.class=="key" and m.keyname=="escape" ) then
-			if m.action==-1 then
-				escmenu.show=not escmenu.show
+		if m.class=="key" then
+			if m.keyname=="escape" then
+				if m.action==-1 then
+					escmenu.show=not escmenu.show
+				end
+				return nil
+			elseif  m.keyname=="f5" and oven.opts.args.quickexit then -- quick shutdown when debugging ( F5 runs and F5 quits )
+				if m.action==-1 then
+					oven.next=true
+				end
+				return nil
 			end
-			return nil
 		end
 		return m
 	end

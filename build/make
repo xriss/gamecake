@@ -180,7 +180,7 @@ if [ -z "$PUREMAKE_LUA" ]; then
  fi
 fi
 
-$PUREMAKE_LUA build/puremake.lua --openal=$openal gmake $gcc-$cpu
+$PUREMAKE_LUA build/puremake --openal=$openal gmake $gcc-$cpu
 
 # enter that directory
 cd ${buildhere}

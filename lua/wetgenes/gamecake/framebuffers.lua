@@ -231,6 +231,14 @@ function M.bake(oven,framebuffers)
 		funcs[n]=framebuffers[n]
 	end
 
+-- render from one or more fbos into another using a fullscreen shader
+
+	framebuffers.pingpong = function(fbin,fbout,shadername,callback)
+	
+		if not fbin[1] then fbin={fbin} end -- upgrade input to array
+
+	end
+
 	return framebuffers
 end
 

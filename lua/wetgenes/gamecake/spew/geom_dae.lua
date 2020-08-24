@@ -84,7 +84,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 
 	local function scan_nums(s)
 		local a={}
-		for w in string.gfind(s, "([^%s]+)") do
+		for w in string.gmatch(s, "([^%s]+)") do
 			local n=tonumber(w)
 			if n then
 				a[#a+1]=n

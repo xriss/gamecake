@@ -12,7 +12,7 @@ helper functions to help manage a string as a stream of utf8 tokens.
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 --module
-local M={ modname=(...) } ; package.loaded[wutf.modname]=M
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 local wutf=M
 
 --[[#lua.wetgenes.txt.utf.charpattern

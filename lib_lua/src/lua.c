@@ -107,10 +107,9 @@ static int docall (lua_State *L, int narg, int clear) {
   return status;
 }
 
-const char *wetgenes_wetmods_version();
+
 static void print_version (void) {
-  l_message(NULL, LUA_RELEASE "  " LUA_COPYRIGHT );
-  l_message(NULL, wetgenes_wetmods_version()); // add some extra version info
+  l_message(NULL, LUA_RELEASE "  " LUA_COPYRIGHT);
 }
 
 
@@ -294,12 +293,6 @@ static int collectargs (char **argv, int *pi, int *pv, int *pe) {
 
 static int runargs (lua_State *L, char **argv, int n) {
   int i;
-
-// set the global arg to *all* arguments, before doing anything else
-  int narg = getargs(L, argv, 0);  /* collect arguments */
-  lua_setglobal(L, "arg");
-  lua_pop(L,narg);
-
   for (i = 1; i < n; i++) {
     if (argv[i] == NULL) continue;
     lua_assert(argv[i][0] == '-');
@@ -345,9 +338,6 @@ struct Smain {
 
 
 static int pmain (lua_State *L) {
-FILE *ft=0;
-int l=0;
-int has_z=0;
   struct Smain *s = (struct Smain *)lua_touserdata(L, 1);
   char **argv = s->argv;
   int script;
@@ -369,42 +359,11 @@ int has_z=0;
   s->status = runargs(L, argv, (script > 0) ? script : s->argc);
   if (s->status != 0) return 0;
   if (script)
-  {
-	l=strlen(argv[script]);
-	if(l>4)
-	{
-		if(strncmp((argv[script]+(l-4)),".zip",4)==0)
-		{
-			has_z=1;
-		}
-	}
-	if(l>5)
-	{
-		if(strncmp((argv[script]+(l-5)),".cake",5)==0)
-		{
-			has_z=1;
-		}
-	}
-	if(has_z)
-	{
-		dolibrary(L,"start"); // mount and run code from that zip
-	}
-	else
-	{
-		s->status = handle_script(L, argv, script);
-	}
-  }
+    s->status = handle_script(L, argv, script);
   if (s->status != 0) return 0;
   if (has_i)
     dotty(L);
   else if (script == 0 && !has_e && !has_v) {
-	ft=fopen("lua/init.lua","r"); // autostart?
-	if(ft)
-	{
-		fclose(ft);
-		dolibrary(L,"start");
-	}
-	else
     if (lua_stdin_is_tty()) {
       print_version();
       dotty(L);

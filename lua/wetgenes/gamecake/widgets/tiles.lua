@@ -153,7 +153,7 @@ function wtiles.skin(widget)
 													16,
 													256*8,
 													1*16 )
-			gl.Uniform4f( p:uniform("map_info"), 	0,0,256,256 )
+			gl.Uniform4f( p:uniform("map_info"), 	0,0,512,256 )
 
 --[[
 			for i,v in ipairs{
@@ -217,7 +217,7 @@ function wtiles.setup(widget,def)
 
 	widget.lines={}
 
-	widget.tilemap_grd=wgrd.create(wgrd.FMT_U8_RGBA,256,256,1)
+	widget.tilemap_grd=wgrd.create(wgrd.FMT_U8_RGBA,512,256,1)
 	widget.colormap_grd=wgrd.create(wgrd.FMT_U8_RGBA,256,1,1)
 	
 	widget.colormap_grd:pixels(0,0,256,1,require("wetgenes.gamecake.fun.bitdown").cmap_swanky32.grd) -- copy swanky32

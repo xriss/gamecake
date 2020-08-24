@@ -11,7 +11,7 @@ pack.core=core
 
 local wstr=require("wetgenes.string")
 
-local _,bit=pcall(function() return require("bit") end) ; bit=bit or require("bit32")
+local _,bit=pcall(function() return require("bit") end) ; bit=(_ and bit) or require("bit32")
 
 --
 -- Read a single member and return it
@@ -24,8 +24,8 @@ end
 --
 -- Read an array of the same type
 --
-pack.load_array=function(dats,fmt,off,count)
-	return core.load(dats,fmt,off,count)
+pack.load_array=function(dats,fmt,off,size)
+	return core.load(dats,fmt,off,size and size+(off or 0))
 end
 
 --
@@ -169,6 +169,8 @@ pack.argb8_pmf4=function(c)
 end
 pack.argb_pmf4=pack.argb8_pmf4
 
+
+
 -- and without the multiply
 pack.argb8_f4=function(c)
 	local r,g,b,a
@@ -193,6 +195,8 @@ pack.f4_argb=function(r,g,b,a)
 	return  (a*0x01000000 + r*0x00010000 + g*0x00000100 + b*0x00000001)
 end
 
+
+
 -- pull 4 premultiplied byte values out of a single 32bit color
 pack.argb8_pmb4=function(c)
 	local r,g,b,a,af
@@ -207,6 +211,9 @@ pack.argb8_pmb4=function(c)
 end
 pack.argb_pmb4=pack.argb8_pmb4
 
+
+
+
 -- pull 4 byte values out of a single 32bit color
 pack.argb8_b4=function(c)
 	local r,g,b,a
@@ -219,6 +226,21 @@ pack.argb8_b4=function(c)
 	return r,g,b,a
 end
 pack.argb_b4=pack.argb8_b4
+
+-- pack 4 bytes into 1 32bit color
+pack.b4_argb8=function(r,g,b,a)
+	
+	a=bit.band(a,0xff)
+	r=bit.band(r,0xff)
+	g=bit.band(g,0xff)
+	b=bit.band(b,0xff)
+	
+	return  (a*0x01000000 + r*0x00010000 + g*0x00000100 + b*0x00000001)
+end
+pack.b4_argb=pack.b4_argb8
+
+
+
 
 pack.stream={}
 

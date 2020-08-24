@@ -1,4 +1,4 @@
---[[#lua.wetgenes.txt.lex_lua
+--[[#lua.wetgenes.txt.lex_js
 
 (C) 2020 Kriss Blank under the https://opensource.org/licenses/MIT
 
@@ -35,13 +35,9 @@ local MAP=M.MAP
 -- these wild card tests for non explicit tokens should all be anchored at start of string by beginning with a ^
 M.wild_tokens={
 	"^[0-9a-zA-Z_]+",						-- a variable or function name
-	"^[0-9a-zA-Z_]+[%.%:][0-9a-zA-Z_]+",	-- a variable or function name containing a single . or :
 	"^%s+",									-- multiple white space
 	"^%d+%.?%d*[eE%+%-]*%d*",				-- floating point number
 	"^0x[0-9a-fA-F]+",						-- hex number
-	"^%-%-%[=*%[",							-- comment start
-	"^%[=*%[",								-- string start
-	"^%]=*%]",								-- comment or string end
 }
 -- test if a pattern matches entire string
 local fullmatch=function(s,p)
@@ -52,235 +48,254 @@ end
 
 M.token={}
 
-M.token.punctuation=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",",","..","...","(",")","[","]","{","}"}
+M.token.punctuation=keyval{"<",">","==","<=",">=","!=","===","!==","=>","-","+","*","/","%","^","=",";",",","(",")","[","]","{","}",":","&","|","&&","||","!"}
 
-M.token.comment=keyval{"--","#!"}
+M.token.comment=keyval{"//","/*","*/"}
 
-M.token.string=keyval{"\\\\","\\\"","\"","'","[[","]]"}
+M.token.string=keyval{"\\\\","\\\"","\"","'","`"}
 
 M.token.keyword=keyval{
 
-	"and",
+	"precision",
+	"attribute",
+	"bool",
+	"true",
+	"false",
 	"break",
+	"bvec2",
+	"bvec3",
+	"bvec4",
+	"const",
+	"continue",
+	"discard",
 	"do",
 	"else",
-	"elseif",
-	"end",
-	"false",
+	"float",
 	"for",
-	"function",
-	"if",
-	"in",
-	"local",
-	"nil",
-	"not",
-	"or",
-	"repeat",
+	"inout",
+	"int",
+	"ivec2",
+	"ivec3",
+	"ivec4",
+	"mat2",
+	"mat3",
+	"mat4",
+	"out",
 	"return",
-	"then",
-	"true",
-	"until",
+	"sampler1D",
+	"sampler1DShadow",
+	"sampler2D",
+	"sampler2DShadow",
+	"sampler3D",
+	"samplerCube",
+	"struct",
+	"uniform",
+	"varying",
+	"vec2",
+	"vec3",
+	"vec4",
+	"void",
 	"while",
+	"highp",
+	"mediump",
+	"lowp",
 
 }
 
 M.token.global=keyval{
 
-	"assert",
-	"dofile",
-	"error",
-	"getfenv",
-	"getmetatable",
-	"ipairs",
-	"load",
-	"loadfile",
-	"loadstring",
-	"next",
-	"pairs",
-	"pcall",
-	"print",
-	"rawequal",
-	"rawget",
-	"rawset",
-	"select",
-	"setfenv",
-	"setmetatable",
-	"tonumber",
-	"tostring",
-	"type",
-	"unpack",
-	"xpcall",
-	"module",
-	"require",
-	"_G",
-	"_VERSION",
+	"texture2D",
+	"gl_FragColor",
 
-	"coroutine",
-	"coroutine.create",
-	"coroutine.isyieldable",
-	"coroutine.resume",
-	"coroutine.running",
-	"coroutine.status",
-	"coroutine.wrap",
-	"coroutine.yield",
 
-	"debug",
-	"debug.debug",
-	"debug.gethook",
-	"debug.getinfo",
-	"debug.getlocal",
-	"debug.getmetatable",
-	"debug.getregistry",
-	"debug.getupvalue",
-	"debug.getuservalue",
-	"debug.sethook",
-	"debug.setlocal",
-	"debug.setmetatable",
-	"debug.setupvalue",
-	"debug.setuservalue",
-	"debug.traceback",
-	"debug.upvalueid",
-	"debug.upvaluejoin",
+	"acos",
+	"acosh",
+	"asin",
+	"asinh",
+	"atan",
+	"atanh",
+	"cos",
+	"cosh",
+	"degrees",
+	"radians",
+	"sin",
+	"sinh",
+	"tan",
+	"tanh",
 
-	"io",
-	"io.close",
-	"io.flush",
-	"io.input",
-	"io.lines",
-	"io.open",
-	"io.output",
-	"io.popen",
-	"io.read",
-	"io.stderr",
-	"io.stdin",
-	"io.stdout",
-	"io.tmpfile",
-	"io.type",
-	"io.write",
+	"abs",
+	"ceil",
+	"clamp",
+	"dFdx",
+	"dFdy",
+	"exp",
+	"exp2",
+	"floor",
+	"floor",
+	"fma",
+	"fract",
+	"fwidth",
+	"inversesqrt",
+	"isinf",
+	"isnan",
+	"log",
+	"log2",
+	"max",
+	"min",
+	"mix",
+	"mod",
+	"modf",
+	"noise",
+	"pow",
+	"round",
+	"roundEven",
+	"sign",
+	"smoothstep",
+	"sqrt",
+	"step",
+	"trunc",
 
-	"math",
-	"math.abs",
-	"math.acos",
-	"math.asin",
-	"math.atan",
-	"math.ceil",
-	"math.cos",
-	"math.deg",
-	"math.exp",
-	"math.floor",
-	"math.fmod",
-	"math.huge",
-	"math.log",
-	"math.max",
-	"math.maxinteger",
-	"math.min",
-	"math.mininteger",
-	"math.modf",
-	"math.pi",
-	"math.rad",
-	"math.random",
-	"math.randomseed",
-	"math.sin",
-	"math.sqrt",
-	"math.tan",
-	"math.tointeger",
-	"math.type",
-	"math.ult",
+	"floatBitsToInt",
+	"frexp",
+	"intBitsToFloat",
+	"ldexp",
+	"packDouble2x32",
+	"packHalf2x16",
+	"packUnorm",
+	"unpackDouble2x32",
+	"unpackHalf2x16",
+	"unpackUnorm",
 
-	"os",
-	"os.clock",
-	"os.date",
-	"os.difftime",
-	"os.execute",
-	"os.exit",
-	"os.getenv",
-	"os.remove",
-	"os.rename",
-	"os.setlocale",
-	"os.time",
-	"os.tmpname",
+	"gl_ClipDistance",
+	"gl_CullDistance",
+	"gl_FragCoord",
+	"gl_FragDepth",
+	"gl_FrontFacing",
+	"gl_GlobalInvocationID",
+	"gl_HelperInvocation",
+	"gl_InstanceID",
+	"gl_InvocationID",
+	"gl_Layer",
+	"gl_LocalInvocationID",
+	"gl_LocalInvocationIndex",
+	"gl_NumSamples",
+	"gl_NumWorkGroups",
+	"gl_PatchVerticesIn",
+	"gl_PointCoord",
+	"gl_PointSize",
+	"gl_Position",
+	"gl_PrimitiveID",
+	"gl_PrimitiveIDIn",
+	"gl_SampleID",
+	"gl_SampleMask",
+	"gl_SampleMaskIn",
+	"gl_SamplePosition",
+	"gl_TessCoord",
+	"gl_TessLevelInner",
+	"gl_TessLevelOuter",
+	"gl_VertexID",
+	"gl_ViewportIndex",
+	"gl_WorkGroupID",
+	"gl_WorkGroupSize",
 
-	"package",
-	"package.config",
-	"package.cpath",
-	"package.loaded",
-	"package.loadlib",
-	"package.path",
-	"package.preload",
-	"package.searchers",
-	"package.searchpath",
+	"cross",
+	"distance",
+	"dot",
+	"equal",
+	"faceforward",
+	"length",
+	"normalize",
+	"notEqual",
+	"reflect",
+	"refract",
 
-	"string",
-	"string.byte",
-	"string.char",
-	"string.dump",
-	"string.find",
-	"string.format",
-	"string.gmatch",
-	"string.gsub",
-	"string.len",
-	"string.lower",
-	"string.match",
-	"string.pack",
-	"string.packsize",
-	"string.rep",
-	"string.reverse",
-	"string.sub",
-	"string.unpack",
-	"string.upper",
+	"all",
+	"any",
+	"greaterThan",
+	"greaterThanEqual",
+	"lessThan",
+	"lessThanEqual",
+	"not",
 
-	"table",
-	"table.concat",
-	"table.insert",
-	"table.move",
-	"table.pack",
-	"table.remove",
-	"table.sort",
-	"table.unpack",
+	"EmitStreamVertex",
+	"EmitVertex",
+	"EndPrimitive",
+	"EndStreamPrimitive",
 
-	"utf8",
-	"utf8.char",
-	"utf8.charpattern",
-	"utf8.codepoint",
-	"utf8.codes",
-	"utf8.len",
-	"utf8.offset",
-	
-	"jit",
-	"jit.on",
-	"jit.off",
-	"jit.flush",
-	"jit.status",
-	"jit.version",
-	"jit.version_num",
-	"jit.os",
-	"jit.arch",
-	"jit.opt",
-	"jit.opt.start",
-	"jit.util",
-	
-	"ffi",
-	"ffi.cdef",
-	"ffi.load",
-	"ffi.new",
-	"ctype",
-	"ffi.typeof",
-	"ffi.cast",
-	"ffi.metatype",
-	"ffi.gc",
-	"ffi.C",
-	"ffi.C.free",
-	"ffi.sizeof",
-	"ffi.alignof",
-	"ffi.offsetof",
-	"ffi.istype",
-	"ffi.errno",
-	"ffi.string",
-	"ffi.copy",
-	"ffi.fill",
-	"ffi.abi",
-	"ffi.os",
-	"ffi.arch",
+	"interpolateAtCentroid",
+	"interpolateAtOffset",
+	"interpolateAtSample",
+	"texelFetch",
+	"texelFetchOffset",
+	"texture",
+	"textureGather",
+	"textureGatherOffset",
+	"textureGatherOffsets",
+	"textureGrad",
+	"textureGradOffset",
+	"textureLod",
+	"textureLodOffset",
+	"textureOffset",
+	"textureProj",
+	"textureProjGrad",
+	"textureProjGradOffset",
+	"textureProjLod",
+	"textureProjLodOffset",
+	"textureProjOffset",
+	"textureQueryLevels",
+	"textureQueryLod",
+	"textureSamples",
+	"textureSize",
+
+	"determinant",
+	"groupMemoryBarrier",
+	"inverse",
+	"matrixCompMult",
+	"outerProduct",
+	"transpose",
+
+	"bitCount",
+	"bitfieldExtract",
+	"bitfieldInsert",
+	"bitfieldReverse",
+	"findLSB",
+	"findMSB",
+	"uaddCarry",
+	"umulExtended",
+	"usubBorrow",
+
+	"imageAtomicAdd",
+	"imageAtomicAnd",
+	"imageAtomicCompSwap",
+	"imageAtomicExchange",
+	"imageAtomicMax",
+	"imageAtomicMin",
+	"imageAtomicOr",
+	"imageAtomicXor",
+	"imageLoad",
+	"imageSamples",
+	"imageSize",
+	"imageStore",
+
+	"atomicAdd",
+	"atomicAnd",
+	"atomicCompSwap",
+	"atomicCounter",
+	"atomicCounterDecrement",
+	"atomicCounterIncrement",
+	"atomicExchange",
+	"atomicMax",
+	"atomicMin",
+	"atomicOr",
+	"atomicXor",
+
+	"barrier",
+	"groupMemoryBarrier",
+	"memoryBarrier",
+	"memoryBarrierAtomicCounter",
+	"memoryBarrierBuffer",
+	"memoryBarrierImage",
+	"memoryBarrierShared",
 
 }
 
@@ -297,13 +312,11 @@ for _,t in pairs(M.token) do
 			end
 		end
 		if not found then -- no need to include if found by wild_tokens search
---print(v)
 			M.token_search[v]=true
 			if #v>M.token_max then M.token_max=#v end
 		end
 	end
 end
-
 
 --[[
 
@@ -363,6 +376,8 @@ M.parse=function(state,input,output)
 
 	local outidx=0
 	local pump=function(token)
+
+--print(token)
 		
 		local tokenidx=0
 		local last=peek(state.stack)
@@ -372,17 +387,6 @@ M.parse=function(state,input,output)
 			outidx=outidx+#token
 			while #output < outidx do push(output,value) end
 			token=""
-		end
-
-		local check_hashbang=function()
-			if token=="#!" then -- this is a special comment at start of file
-				push(state.terminator,"\n")
-				poke(state.stack,MAP.comment)
-				return true
-			end
-			token="" -- do not advance
-			poke(state.stack,MAP.white) -- switch to white space
-			return true
 		end
 
 		local check_token=function()
@@ -438,12 +442,11 @@ M.parse=function(state,input,output)
 				push(state.terminator,"'")
 				poke(state.stack,MAP.string)
 				return true
-			end			
-			if fullmatch(token,"^%[(=*)%[") then
-				push(state.terminator,"]"..ee.."]")
+			elseif token=="`" then 
+				push(state.terminator,"`")
 				poke(state.stack,MAP.string)
 				return true
-			end
+			end			
 
 		end
 
@@ -456,14 +459,12 @@ M.parse=function(state,input,output)
 					return true
 				end
 				return true -- we are trapped in a string
-			elseif token=="--" then 
+			elseif token=="//" then 
 				push(state.terminator,"\n")
 				poke(state.stack,MAP.comment)
 				return true
-			end
-			local fs,fe,ee=string.find(token,"^%-%-%[(=*)%[")
-			if fs==1 and fe==#token then -- full match
-				push(state.terminator,"]"..ee.."]")
+			elseif token=="/*" then 
+				push(state.terminator,"*/")
 				poke(state.stack,MAP.comment)
 				return true
 			end
@@ -529,7 +530,7 @@ M.parse=function(state,input,output)
 				goto_none,
 			},
 			[MAP.first]={
-				check_hashbang,
+				goto_none,
 			},
 		}
 

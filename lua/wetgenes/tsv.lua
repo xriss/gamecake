@@ -149,7 +149,7 @@ wtsv.save=function(tsv)
 	for i=1,tsv.numoflines do
 		local line=tsv:line(i) or {""}
 		for i=1,#line do
-			fp:write(doesc(line[i])
+			fp:write(doesc(line[i]))
 			if i==#line then fp:write("\n")
 			else             fp:write("\t")
 			end

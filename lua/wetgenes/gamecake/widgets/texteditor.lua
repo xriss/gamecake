@@ -11,7 +11,7 @@ local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local wutf=require("wetgenes.txt.utf")
 
-local _,lfs=pcall( function() return require("lfs") end )
+local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
 
 --module
@@ -53,10 +53,10 @@ function wtexteditor.update(texteditor)
 		if texteditor.mark_area then
 			txt.mark(unpack(texteditor.mark_area))
 		end
+		texteditor.mark_area=nil
 		
 		texteditor:scroll_to_view()
-		texteditor:refresh()
-		texteditor:set_dirty()
+		texteditor.txt_dirty=true
 
 	end
 
@@ -156,52 +156,63 @@ wtexteditor.texteditor_refresh=function(widget)
 	widget.cx=cx -- remember the scroll positions in characters
 	widget.cy=cy
 
-	pan.background_tile=0x1a1a0000 -- default tile
+	pan.background_tile=0x00010000 -- default tile, remember it is abgr so backwards
 
 	for y=cy+1,cy+256 do
 		local ps={}
 		local pl=0
 
-		local cache=widget.txt.get_cache(y)
+		local cache=widget.txt.get_cache_lex(y)
 		if cache then
 
 			local vn=tostring(y)
 			vn=string.rep(" ",widget.gutter-3-#vn)..vn.." "
 			for i=1,#vn do
-				if pl>=256*3 then break end -- max width
+				if pl>=512*3 then break end -- max width
 				ps[pl+1]=string.byte(vn,i,i)
 				ps[pl+2]=0
-				ps[pl+3]=0x1d
-				ps[pl+4]=0x1b
+				ps[pl+3]=3
+				ps[pl+4]=2
 				pl=pl+4
 			end
 			
 			ps[pl+1]=32
 			ps[pl+2]=0
-			ps[pl+3]=0x1d
-			ps[pl+4]=0x1a
+			ps[pl+3]=1
+			ps[pl+4]=0
 			pl=pl+4
 			
 			ps[pl+1]=32
 			ps[pl+2]=0
-			ps[pl+3]=0x1d
-			ps[pl+4]=0x1a
+			ps[pl+3]=1
+			ps[pl+4]=0
 			pl=pl+4
 
-			for x=cx,cx+256 do
-				if pl>=256*3 then break end -- max width
+			for x=cx,cx+512 do
+				if pl>=512*3 then break end -- max width
 				local i=cache.xc[x]
 				if not i then break end -- max width
 				local code=cache.codes[i]
+				local toke=cache.tokens and string.sub(cache.tokens,i,i)
 
-				code=wutf.map_unicode_to_latin0[code] or code
+				code=wutf.map_unicode_to_latin0[code] or code or 127
 				if code<32 then code=32 end -- control codes are space
 				if  (code>127 and code<128+32) or code>255 then code=127 end -- missing glyphs are 127
 
 				ps[pl+1]=code
 				ps[pl+2]=0
-				ps[pl+3]=0x1d
-				ps[pl+4]=0x1a
+				ps[pl+3]=1
+				ps[pl+4]=0
+				
+				if     toke=="k" then	ps[pl+3]=5  ps[pl+4]=4	-- keyword
+				elseif toke=="g" then	ps[pl+3]=7  ps[pl+4]=6	-- global
+				elseif toke=="c" then	ps[pl+3]=9  ps[pl+4]=8	-- comment
+				elseif toke=="s" then	ps[pl+3]=11	ps[pl+4]=10	-- string
+				elseif toke=="0" then	ps[pl+3]=13	ps[pl+4]=12 -- number
+--				elseif toke=="p" then	ps[pl+3]=0x05	-- punctuation
+				end
+
+				
 				if txt.fx and txt.fy and txt.tx and txt.ty then
 					local flip=false
 					if     y==txt.fy and y==txt.ty then if i>=txt.fx and i< txt.tx then flip=true end -- single line
@@ -289,39 +300,53 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	
 		texteditor.float_cx=nil
 
-		texteditor.key_mouse=true
+		texteditor.key_mouse=1
 
 		texteditor.mark_area={dx,dy,dx,dy}
 
 		txt.mark(unpack(texteditor.mark_area))
 
 		texteditor:scroll_to_view()
-		texteditor:refresh()
-		texteditor:set_dirty()
+		texteditor.txt_dirty=true
 
 	elseif (act and act>1) and texteditor.master.over==pan and keyname=="left" then -- double click
 	
+		texteditor.key_mouse=act
+
 		texteditor.float_cx=nil
 
 		txt.markauto(dx,dy,act) -- select word
 
+		texteditor.mark_area={txt.markget()}
+		texteditor.mark_area_auto={txt.markget()}
+
 		texteditor:scroll_to_view()
-		texteditor:refresh()
-		texteditor:set_dirty()
+		texteditor.txt_dirty=true
 
 	elseif act==0 and texteditor.key_mouse then -- drag, but only while over widget
 
 		if texteditor.key_mouse and texteditor.mark_area then
-
+		
 			texteditor.float_cx=nil
 
-			texteditor.mark_area[3],texteditor.mark_area[4]=dx,dy
+			if texteditor.key_mouse > 1 then -- special select
 			
-			txt.mark(unpack(texteditor.mark_area))
+				txt.markauto(dx,dy,texteditor.key_mouse) -- select word
+
+				txt.markmerge(texteditor.mark_area_auto[1],texteditor.mark_area_auto[2],
+				texteditor.mark_area_auto[3],texteditor.mark_area_auto[4],txt.markget())
+
+				texteditor.mark_area={txt.markget()}
+			else
+
+				texteditor.mark_area[3],texteditor.mark_area[4]=dx,dy
+				
+				txt.mark(unpack(texteditor.mark_area))
+				
+			end
 
 			texteditor:scroll_to_view()
-			texteditor:refresh()
-			texteditor:set_dirty()
+			texteditor.txt_dirty=true
 		end
 	
 	end
@@ -389,13 +414,15 @@ function wtexteditor.key(pan,ascii,key,act)
 	if ascii and ascii~="" then -- not a blank string
 
 		texteditor.txt_dirty=true
-
+		
 		local c=wutf.code(ascii)
 		if c>=32 then
 		
 			texteditor.float_cx=nil
 
-			txt.insert_char(ascii)
+			txt.undo.cut()
+			txt.undo.insert_char(ascii)
+
 			texteditor:scroll_to_view()
 
 		end
@@ -407,6 +434,44 @@ function wtexteditor.key(pan,ascii,key,act)
 		if     key=="shift_l"   or key=="shift_r"   then	texteditor.key_shift=true
 		elseif key=="control_l" or key=="control_r" then	texteditor.key_control=true
 		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=true
+		end
+
+		if texteditor.key_control then
+		
+--print(key)		
+			if     key=="x" then	-- cut
+
+				local s=txt.undo.cut()
+				
+				if s then wwin.set_clipboard(s) end
+
+				texteditor:scroll_to_view()
+			
+			elseif key=="c" then	-- copy
+			
+				local s=txt.undo.copy()
+
+				if s then wwin.set_clipboard(s) end
+
+			elseif key=="v" then	-- paste
+			
+				if wwin.has_clipboard() then -- only if something to paste
+					local s=wwin.get_clipboard()
+					txt.undo.cut()
+					txt.undo.insert(s)
+					texteditor:scroll_to_view()
+				end
+
+			elseif key=="z" then	-- undo
+
+					txt.undo.undo()
+
+			elseif key=="y" then	-- redo
+
+					txt.undo.redo()
+
+			end
+		
 		elseif key=="left" then
 
 			texteditor.float_cx=nil
@@ -451,7 +516,8 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			texteditor.float_cx=nil
 
-			txt.insert_newline()
+			txt.undo.cut()
+			txt.undo.insert_newline()
 			texteditor:scroll_to_view()
 
 		elseif key=="home" then
@@ -474,21 +540,28 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			texteditor.float_cx=nil
 
-			txt.backspace()
+			if not txt.undo.cut() then -- just delete selection?
+				txt.undo.backspace()
+			end
+			
 			texteditor:scroll_to_view()
 
 		elseif key=="delete" then
 
 			texteditor.float_cx=nil
 
-			txt.delete()
+			if not txt.undo.cut() then -- just delete selection?
+				txt.undo.delete()
+			end
+			
 			texteditor:scroll_to_view()
 
 		elseif key=="tab" then
 
 			texteditor.float_cx=nil
 
-			txt.insert_char("\t")
+			txt.undo.cut()
+			txt.undo.insert_char("\t")
 			texteditor:scroll_to_view()
 
 		end
@@ -565,7 +638,36 @@ function wtexteditor.setup(widget,def)
 	if def.data then -- set starting text
 		widget.txt.set_text( def.data:value() )
 	end
-	
+
+-- background foreground colour pairs
+	local theme={
+		dark={
+			0xff444444,0xffaaaaaa,	-- text			0,1
+			0xff555555,0xff333333,	-- gutter		2,3
+			0xff444444,0xffdd7733,	-- keyword		4,5
+			0xff444444,0xffddaa33,	-- global		6,7
+			0xff444444,0xff888888,	-- comment		8,9
+			0xff444444,0xff66aa33,	-- string		10,11
+			0xff444444,0xff5599cc,	-- number		12,13
+		},
+		lite={
+			0xffaaaaaa,0xff444444,	-- text			0,1
+			0xff777777,0xff999999,	-- gutter		2,3
+			0xffaaaaaa,0xffaa6622,	-- keyword		4,5
+			0xffaaaaaa,0xffcc9922,	-- global		6,7
+			0xffaaaaaa,0xff777777,	-- comment		8,9
+			0xffaaaaaa,0xff559922,	-- string		10,11
+			0xffaaaaaa,0xff4488bb,	-- number		12,13
+		},
+	}
+
+	local p={}
+	for i,v in ipairs(theme.dark) do
+		local l=#p
+		p[l+1],p[l+2],p[l+3],p[l+4]=pack.argb_pmb4(v)
+	end
+	widget.scroll_widget.pan.colormap_grd:pixels(0,0,#p/4,1,p)
+
 	return widget
 end
 

@@ -1,4 +1,4 @@
---[[#lua.wetgenes.txt.lex_lua
+--[[#lua.wetgenes.txt.lex_js
 
 (C) 2020 Kriss Blank under the https://opensource.org/licenses/MIT
 
@@ -35,13 +35,10 @@ local MAP=M.MAP
 -- these wild card tests for non explicit tokens should all be anchored at start of string by beginning with a ^
 M.wild_tokens={
 	"^[0-9a-zA-Z_]+",						-- a variable or function name
-	"^[0-9a-zA-Z_]+[%.%:][0-9a-zA-Z_]+",	-- a variable or function name containing a single . or :
+	"^[0-9a-zA-Z_]+%.[0-9a-zA-Z_]+",		-- a variable or function name containing a single .
 	"^%s+",									-- multiple white space
 	"^%d+%.?%d*[eE%+%-]*%d*",				-- floating point number
 	"^0x[0-9a-fA-F]+",						-- hex number
-	"^%-%-%[=*%[",							-- comment start
-	"^%[=*%[",								-- string start
-	"^%]=*%]",								-- comment or string end
 }
 -- test if a pattern matches entire string
 local fullmatch=function(s,p)
@@ -52,235 +49,166 @@ end
 
 M.token={}
 
-M.token.punctuation=keyval{"<",">","==","<=",">=","~=","-","+","*","/","%","^","=","#",";",",","..","...","(",")","[","]","{","}"}
+M.token.punctuation=keyval{"<",">","==","<=",">=","!=","===","!==","=>","-","+","*","/","%","^","=",";",",","(",")","[","]","{","}",":","&","|","&&","||","!"}
 
-M.token.comment=keyval{"--","#!"}
+M.token.comment=keyval{"//","#!","/*","*/"}
 
-M.token.string=keyval{"\\\\","\\\"","\"","'","[[","]]"}
+M.token.string=keyval{"\\\\","\\\"","\"","'","`"}
 
 M.token.keyword=keyval{
 
-	"and",
-	"break",
-	"do",
-	"else",
-	"elseif",
-	"end",
-	"false",
-	"for",
-	"function",
 	"if",
-	"in",
-	"local",
-	"nil",
-	"not",
-	"or",
-	"repeat",
-	"return",
-	"then",
-	"true",
-	"until",
+	"else",
+	"switch",
+	"case",
+	"default",
+	
 	"while",
+	"for",
+	"do",
+	"in",
+	"of",
+
+	"break",
+	"continue",
+
+	"try",
+	"catch",
+	"finally",
+	"throw",
+
+	"new",
+	"delete",
+	"instanceof",
+	"typeof",
+
+	"return",
+	"with",
+	"await",
+
+	"true",
+	"false",
+	"null",
+	"undefined",
+
+	"function",
+	"this",
+	"var",
+	"let",
 
 }
 
 M.token.global=keyval{
 
-	"assert",
-	"dofile",
-	"error",
-	"getfenv",
-	"getmetatable",
-	"ipairs",
-	"load",
-	"loadfile",
-	"loadstring",
-	"next",
-	"pairs",
-	"pcall",
-	"print",
-	"rawequal",
-	"rawget",
-	"rawset",
-	"select",
-	"setfenv",
-	"setmetatable",
-	"tonumber",
-	"tostring",
-	"type",
-	"unpack",
-	"xpcall",
-	"module",
-	"require",
-	"_G",
-	"_VERSION",
+	"Infinity",
+	"NaN",
+	"undefined",
+	"globalThis",
 
-	"coroutine",
-	"coroutine.create",
-	"coroutine.isyieldable",
-	"coroutine.resume",
-	"coroutine.running",
-	"coroutine.status",
-	"coroutine.wrap",
-	"coroutine.yield",
+	"eval",
+	"uneval",
+	"isFinite",
+	"isNaN",
+	"parseFloat",
+	"parseInt",
+	"decodeURI",
+	"decodeURIComponent",
+	"encodeURI",
+	"encodeURIComponent",
+	"escape",
+	"unescape",
 
-	"debug",
-	"debug.debug",
-	"debug.gethook",
-	"debug.getinfo",
-	"debug.getlocal",
-	"debug.getmetatable",
-	"debug.getregistry",
-	"debug.getupvalue",
-	"debug.getuservalue",
-	"debug.sethook",
-	"debug.setlocal",
-	"debug.setmetatable",
-	"debug.setupvalue",
-	"debug.setuservalue",
-	"debug.traceback",
-	"debug.upvalueid",
-	"debug.upvaluejoin",
+	"Promise",
+	"Generator",
+	"GeneratorFunction",
+	"AsyncFunction",
 
-	"io",
-	"io.close",
-	"io.flush",
-	"io.input",
-	"io.lines",
-	"io.open",
-	"io.output",
-	"io.popen",
-	"io.read",
-	"io.stderr",
-	"io.stdin",
-	"io.stdout",
-	"io.tmpfile",
-	"io.type",
-	"io.write",
+	"Boolean",
 
-	"math",
-	"math.abs",
-	"math.acos",
-	"math.asin",
-	"math.atan",
-	"math.ceil",
-	"math.cos",
-	"math.deg",
-	"math.exp",
-	"math.floor",
-	"math.fmod",
-	"math.huge",
-	"math.log",
-	"math.max",
-	"math.maxinteger",
-	"math.min",
-	"math.mininteger",
-	"math.modf",
-	"math.pi",
-	"math.rad",
-	"math.random",
-	"math.randomseed",
-	"math.sin",
-	"math.sqrt",
-	"math.tan",
-	"math.tointeger",
-	"math.type",
-	"math.ult",
+	"Number",
+	"Number.EPSILON",
+	"Number.MAX_SAFE_INTEGER",
+	"Number.MAX_VALUE",
+	"Number.MIN_SAFE_INTEGER",
+	"Number.MIN_VALUE",
+	"Number.NaN",
+	"Number.NEGATIVE_INFINITY",
+	"Number.POSITIVE_INFINITY",
+	"Number.isNaN",
+	"Number.isFinite",
+	"Number.isInteger",
+	"Number.isSafeInteger",
+	"Number.parseFloat",
+	"Number.parseInt",
 
-	"os",
-	"os.clock",
-	"os.date",
-	"os.difftime",
-	"os.execute",
-	"os.exit",
-	"os.getenv",
-	"os.remove",
-	"os.rename",
-	"os.setlocale",
-	"os.time",
-	"os.tmpname",
+	"Function",
+	"Function.arguments",
+	"Function.caller",
+	"Function.displayName",
+	"Function.length",
+	"Function.name",
 
-	"package",
-	"package.config",
-	"package.cpath",
-	"package.loaded",
-	"package.loadlib",
-	"package.path",
-	"package.preload",
-	"package.searchers",
-	"package.searchpath",
+	"Array",
+	"Array.from",
+	"Array.isArray",
+	"Array.of",
 
-	"string",
-	"string.byte",
-	"string.char",
-	"string.dump",
-	"string.find",
-	"string.format",
-	"string.gmatch",
-	"string.gsub",
-	"string.len",
-	"string.lower",
-	"string.match",
-	"string.pack",
-	"string.packsize",
-	"string.rep",
-	"string.reverse",
-	"string.sub",
-	"string.unpack",
-	"string.upper",
+	"Date",
+	"Date.now",
+	"Date.parse",
+	"Date.UTC",
 
-	"table",
-	"table.concat",
-	"table.insert",
-	"table.move",
-	"table.pack",
-	"table.remove",
-	"table.sort",
-	"table.unpack",
+	"Object",
+	"Object.assign",
+	"Object.create",
+	"Object.defineProperty",
+	"Object.defineProperties",
+	"Object.entries",
+	"Object.freeze",
+	"Object.fromEntries",
+	"Object.getOwnPropertyDescriptor",
+	"Object.getOwnPropertyDescriptors",
+	"Object.getOwnPropertyNames",
+	"Object.getOwnPropertySymbols",
+	"Object.getPrototypeOf",
+	"Object.is",
+	"Object.isExtensible",
+	"Object.isFrozen",
+	"Object.isSealed",
+	"Object.keys",
+	"Object.preventExtensions",
+	"Object.seal",
+	"Object.setPrototypeOf",
+	"Object.values",
 
-	"utf8",
-	"utf8.char",
-	"utf8.charpattern",
-	"utf8.codepoint",
-	"utf8.codes",
-	"utf8.len",
-	"utf8.offset",
+	"String",
+	"String.fromCharCode",
+	"String.fromCodePoint",
+	"String.raw",
+
+	"RegExp",
+	"RegExp.lastIndex",
 	
-	"jit",
-	"jit.on",
-	"jit.off",
-	"jit.flush",
-	"jit.status",
-	"jit.version",
-	"jit.version_num",
-	"jit.os",
-	"jit.arch",
-	"jit.opt",
-	"jit.opt.start",
-	"jit.util",
+	"Symbol",
+	"Symbol.asyncIterator",
+	"Symbol.hasInstance",
+	"Symbol.isConcatSpreadable",
+	"Symbol.iterator",
+	"Symbol.match",
+	"Symbol.matchAll",
+	"Symbol.replace",
+	"Symbol.search",
+	"Symbol.split",
+	"Symbol.species",
+	"Symbol.toPrimitive",
+	"Symbol.toStringTag",
+	"Symbol.unscopables",
+	"Symbol.for",
+	"Symbol.keyFor",
 	
-	"ffi",
-	"ffi.cdef",
-	"ffi.load",
-	"ffi.new",
-	"ctype",
-	"ffi.typeof",
-	"ffi.cast",
-	"ffi.metatype",
-	"ffi.gc",
-	"ffi.C",
-	"ffi.C.free",
-	"ffi.sizeof",
-	"ffi.alignof",
-	"ffi.offsetof",
-	"ffi.istype",
-	"ffi.errno",
-	"ffi.string",
-	"ffi.copy",
-	"ffi.fill",
-	"ffi.abi",
-	"ffi.os",
-	"ffi.arch",
+	"JSON",
+	"JSON.parse",
+	"JSON.stringify",
 
 }
 
@@ -297,13 +225,11 @@ for _,t in pairs(M.token) do
 			end
 		end
 		if not found then -- no need to include if found by wild_tokens search
---print(v)
 			M.token_search[v]=true
 			if #v>M.token_max then M.token_max=#v end
 		end
 	end
 end
-
 
 --[[
 
@@ -363,6 +289,8 @@ M.parse=function(state,input,output)
 
 	local outidx=0
 	local pump=function(token)
+
+--print(token)
 		
 		local tokenidx=0
 		local last=peek(state.stack)
@@ -438,12 +366,11 @@ M.parse=function(state,input,output)
 				push(state.terminator,"'")
 				poke(state.stack,MAP.string)
 				return true
-			end			
-			if fullmatch(token,"^%[(=*)%[") then
-				push(state.terminator,"]"..ee.."]")
+			elseif token=="`" then 
+				push(state.terminator,"`")
 				poke(state.stack,MAP.string)
 				return true
-			end
+			end			
 
 		end
 
@@ -456,14 +383,12 @@ M.parse=function(state,input,output)
 					return true
 				end
 				return true -- we are trapped in a string
-			elseif token=="--" then 
+			elseif token=="//" then 
 				push(state.terminator,"\n")
 				poke(state.stack,MAP.comment)
 				return true
-			end
-			local fs,fe,ee=string.find(token,"^%-%-%[(=*)%[")
-			if fs==1 and fe==#token then -- full match
-				push(state.terminator,"]"..ee.."]")
+			elseif token=="/*" then 
+				push(state.terminator,"*/")
 				poke(state.stack,MAP.comment)
 				return true
 			end

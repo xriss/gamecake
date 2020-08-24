@@ -44,9 +44,9 @@ function wsplit.resizelayout(widget)
 
 			if it and it.hx>0 and it.hy>0 then -- sanity checks
 				if widget.split_axis=="x" then
-					fit=fit*it.hx/it.hy
+					fit=math.ceil(fit*it.hx/it.hy)
 				elseif widget.split_axis=="y" then
-					fit=fit*it.hy/it.hx
+					fit=math.ceil(fit*it.hy/it.hx)
 				end
 			end
 		end

@@ -120,6 +120,7 @@ echo " installing packages we will need for building etc"
 ./ssh " sudo apt-get install -y gcc "
 ./ssh " sudo apt-get install -y build-essential "
 ./ssh " sudo apt-get install -y cmake "
+./ssh " sudo apt-get install -y npm "
 
 echo " installing build dependencies"
 ./ssh " sudo apt-get install -y libssl-dev "

@@ -15,7 +15,7 @@ Manage file paths under linux or windows, so we need to deal with \ or
 local M={} ; package.loaded[(...)]=M ; local wpath=M
 
 -- a soft require of lfs so lfs can be nil
-local lfs=select(2,pcall( function() return require("lfs") end ))
+local _,lfs=pcall( function() return require("lfs_any") end ) ; lfs=_ and lfs
 
 
 --[[#lua.wetgenes.path.setup
@@ -58,8 +58,11 @@ wpath.setup=function(flavour)
 		wpath.root="/"
 		wpath.separator="/"
 		wpath.delimiter=";"
-		wpath.winhax=false
-	
+		wpath.winhax=true
+		
+-- always enable winhax by default, so we can hack around with windows style paths
+-- we should make sure that we are always windows safe
+
 	end
 
 end
@@ -120,21 +123,27 @@ end
 
 split a path into named parts like so
 
-	-------------------------------------
-	|               path                |
-	-------------------------------------
-	|           dir        |    file    |
-	|----------------------|------------|
-	| root |    folder     | name  ext  |
-	|----------------------|------------|
-	|  /   |  home/user/   | file  .txt |
-	-------------------------------------
-	
-this can be reversed with simple joins and checks for nil
+	|--------------------------------------------|
+	|                     path                   |
+	|-----------------------|--------------------|
+	|         dir           |        file        |
+	|----------|------------|----------|---------|
+	| root [1] | folder [2] | name [3] | ext [4] |
+	|----------|------------|----------|---------|
+	| /        | home/user/ | file     | .txt    |
+	|----------|------------|----------|---------|
+
+this can be reversed with simple joins and checks for nil, note that 
+[1][2][3][4] are forced strings so will be "" rather than nil unlike 
+their named counterparts. This means you may use wpath.join to reverse 
+this parsing.
 
 	dir = (root or "")..(folder or "")
 	file = (name or "")..(ext or "")
 	path = (dir or "")..(file or "")
+	path = (root or "")..(folder or "")..(name or "")..(ext or "")
+	path = [1]..[2]..[3]..[4]
+	path = wpath.join(it)
 	
 if root is set then it implies an absolute path and will be something 
 like C:\ under windows.
@@ -182,6 +191,11 @@ wpath.parse=function(p)
 	end
 	
 	r.path = (r.dir or "")..(r.file or "")
+	
+	r[1]=r.root   or ""
+	r[2]=r.folder or ""
+	r[3]=r.name   or ""
+	r[4]=r.ext    or ""
 
 	return r
 end
@@ -216,7 +230,8 @@ wpath.normalize=function(p)
 				table.remove(ps,idx)
 				table.remove(ps,idx)
 			else -- we can not remove so must ignore
-				table.remove(ps,idx)
+--				table.remove(ps,idx)
+				idx=idx+1
 			end
 		else -- just advance
 			idx=idx+1
@@ -294,6 +309,11 @@ wpath.relative=function(pa,pb)
 			break
 		end
 	end
+
+	if match==1 or ( match==2 and a[1]=="" )  then -- no match
+		return pb -- just return full path
+	end
+
 	for i=match,#a do r[#r+1]=".." end -- step back
 	if #r==0 then r[#r+1]="." end -- start at current
 	for i=match,#b do r[#r+1]=b[i] end -- step forward

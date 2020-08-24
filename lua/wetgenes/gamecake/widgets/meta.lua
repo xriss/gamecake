@@ -51,6 +51,9 @@ wmeta.classes={
 
 	["scroll"]=oven.rebake("wetgenes.gamecake.widgets.scroll"),
 
+	["tree"]=oven.rebake("wetgenes.gamecake.widgets.tree"),
+	["treefile"]=oven.rebake("wetgenes.gamecake.widgets.treefile"),
+
 	["menudrop"]=oven.rebake("wetgenes.gamecake.widgets.menudrop"),
 
 	["file"]=oven.rebake("wetgenes.gamecake.widgets.file"),
@@ -357,8 +360,8 @@ function wmeta.setup(def)
 -- get master xy from local coordinates
 	function meta.get_master_xy(w,x,y)
 		if not w.m4 then return -1,-1 end
-		local m=tardis.m4.new()
-		w.m4:inverse(m)
+		local m=tardis.m4.new(w.m4):inverse()
+--		w.m4:inverse(m)
 		local v=tardis.v4.new(x or 0,y or 0,0,1)
 		v:product(m)
 		return v[1],v[2]

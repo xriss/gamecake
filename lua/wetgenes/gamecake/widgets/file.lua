@@ -11,8 +11,7 @@ local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local wpath=require("wetgenes.path")
 
-local _,lfs=pcall( function() return require("lfs") end )
-
+local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -185,6 +184,8 @@ wfile.file_refresh=function(widget)
 	local pan=widget.scroll_widget.pan
 	pan:remove_all()
 	
+	local ss=widget.master.grid_size or 24
+
 	if widget.view=="history" then
 	
 		local t={}
@@ -194,7 +195,7 @@ wfile.file_refresh=function(widget)
 --				print(wstr.dump(t))
 		table.sort(t)
 		for i,v in ipairs(t) do
-				pan:add({class="button",hx=pan.hx,hy=20,text=v,text_align="left",hooks=widget.file_hooks,user=v,id="goto",
+				pan:add({class="button",hx=pan.hx,hy=ss,text=v,text_align="left_center",hooks=widget.file_hooks,user=v,id="goto",
 				color=0x1f000000,
 				})
 		end
@@ -203,11 +204,11 @@ wfile.file_refresh=function(widget)
 	
 		for i,t in ipairs(widget.files) do
 			if t.mode=="file" then
-				pan:add({class="button",hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
+				pan:add({class="button",hx=pan.hx,hy=ss,text=t.name,text_align="left_center",hooks=widget.file_hooks,user=t,
 				color=0,
 				})
 			elseif t.mode=="directory" then
-				pan:add({class="button",hx=pan.hx,hy=20,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
+				pan:add({class="button",hx=pan.hx,hy=ss,text=t.name,text_align="left_center",hooks=widget.file_hooks,user=t,
 				color=0x1f000000,
 				})
 			end
