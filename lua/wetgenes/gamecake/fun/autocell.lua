@@ -182,7 +182,10 @@ autocell.create=function(it,opts)
 			
 			it.frame=it.frame%2+1 -- advance frame
 
-			gl.Enable(gl.BLEND)
+--			gl.Enable(gl.BLEND)
+			gl.state.set({
+				[gl.BLEND]					=	gl.TRUE,
+			})
 
 		end
 	end

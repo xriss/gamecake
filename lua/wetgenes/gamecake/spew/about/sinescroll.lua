@@ -358,9 +358,15 @@ precision highp float; /* really need better numbers if possible */
 				gl.Scale(v.ss,v.ss,v.ss)
 				gl.Rotate(v.t,0,-1,0)
 				gl.Rotate(v.t/8,1,0,0)
-				gl.Enable(gl.CULL_FACE)
+--				gl.Enable(gl.CULL_FACE)
+				gl.state.set({
+					[gl.CULL_FACE]					=	gl.TRUE,
+				})
 				wetiso.draw()
-				gl.Disable(gl.CULL_FACE)
+--				gl.Disable(gl.CULL_FACE)
+				gl.state.set({
+					[gl.CULL_FACE]					=	gl.FALSE,
+				})
 				gl.PopMatrix()
 			end
 				

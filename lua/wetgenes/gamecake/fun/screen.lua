@@ -126,9 +126,13 @@ screen.create=function(it,opts)
 		views.push_and_apply(it.layers[idx].view)
 
 		gl.ClearColor(0,0,0,0)
-		gl.DepthMask(gl.TRUE)
+		gl.state.set({
+			[gl.DEPTH_WRITEMASK]			=	gl.TRUE,
+			[gl.DEPTH_TEST]					=	gl.TRUE,
+		})
+--		gl.DepthMask(gl.TRUE)
+--		gl.Enable(gl.DEPTH_TEST)
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
-		gl.Enable(gl.DEPTH_TEST)
 	end
 
 

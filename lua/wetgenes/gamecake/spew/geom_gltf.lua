@@ -845,7 +845,10 @@ main.draw=function()
 	gl.Rotate( view_orbit[1] ,  0,-1, 0 )
 	gl.Rotate( view_orbit[2] ,  1, 0, 0 )
 	
-	gl.Enable(gl.DEPTH_TEST)
+--	gl.Enable(gl.DEPTH_TEST)
+	gl.state.set({
+		[gl.DEPTH_TEST]					=	gl.TRUE,
+	})
 
 	local pp=function(p)
 	

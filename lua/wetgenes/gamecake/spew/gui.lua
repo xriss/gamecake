@@ -626,9 +626,15 @@ print("click",id)
 				gl.Scale(w.hy,w.hy,w.hy)
 				gl.Rotate(gui.time,0,-1,0)
 				gl.Rotate(gui.time/8,1,0,0)
-				gl.Enable(gl.CULL_FACE)
+--				gl.Enable(gl.CULL_FACE)
+				gl.state.set({
+					[gl.CULL_FACE]					=	gl.TRUE,
+				})
 				wetiso.draw()
-				gl.Disable(gl.CULL_FACE)
+--				gl.Disable(gl.CULL_FACE)
+				gl.state.set({
+					[gl.CULL_FACE]					=	gl.FALSE,
+				})
 				gl.PopMatrix()
 			end)
 		end

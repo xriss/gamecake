@@ -37,13 +37,10 @@ canvas.gl_default=function()
 	gl.PixelStore(gl.PACK_ALIGNMENT,1)
 	gl.PixelStore(gl.UNPACK_ALIGNMENT,1) -- the grd code expects fully packed bitmaps
 
-	gl.Disable(gl.DEPTH_TEST)
-	gl.Disable(gl.CULL_FACE)
-	
+	gl.state.set(gl.state_defaults)
+
 	gl.Color(1,1,1,1)	
 
-	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-	gl.Enable(gl.BLEND)
 	
 	if not canvas.NO_GL_PROGRAM_POINT_SIZE then
 		gl.Enable(0x8642) -- #define GL_PROGRAM_POINT_SIZE 0x8642
