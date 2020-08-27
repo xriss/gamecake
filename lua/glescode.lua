@@ -36,65 +36,82 @@ function glescode.create(gl)
 		return code.state[code.state.index][name]
 	end
 
+-- mainly deal with the GL enable/disable state and associated values
+-- possibly more should be added here?
+
 	code.state.set=function(name,value)
 	
+		local top=code.state[code.state.index]
+
 		if type(name)=="table" then -- multiple settings at once
-		
 			local it=name
-			local top=code.state[code.state.index]
 			
 			if it[gl.BLEND_SRC_RGB] and it[gl.BLEND_DST_RGB] and it[gl.BLEND_SRC_ALPHA] and it[gl.BLEND_DST_ALPHA] then
-
-				gl.BlendFuncSeparate(
-					it[gl.BLEND_SRC_RGB] ,
-					it[gl.BLEND_DST_RGB] ,
-					it[gl.BLEND_SRC_ALPHA] ,
-					it[gl.BLEND_DST_ALPHA] )
-					
-				top[gl.BLEND_SRC_RGB]=it[gl.BLEND_SRC_RGB]
-				top[gl.BLEND_DST_RGB]=it[gl.BLEND_DST_RGB]
-				top[gl.BLEND_SRC_ALPHA]=it[gl.BLEND_SRC_ALPHA]
-				top[gl.BLEND_DST_ALPHA]=it[gl.BLEND_DST_ALPHA]
+				if	top[gl.BLEND_SRC_RGB]~=it[gl.BLEND_SRC_RGB] or
+					top[gl.BLEND_DST_RGB]~=it[gl.BLEND_DST_RGB] or
+					top[gl.BLEND_SRC_ALPHA]~=it[gl.BLEND_SRC_ALPHA] or
+					top[gl.BLEND_DST_ALPHA]~=it[gl.BLEND_DST_ALPHA] then
+			
+					gl.BlendFuncSeparate(
+						it[gl.BLEND_SRC_RGB] ,
+						it[gl.BLEND_DST_RGB] ,
+						it[gl.BLEND_SRC_ALPHA] ,
+						it[gl.BLEND_DST_ALPHA] )
+						
+					top[gl.BLEND_SRC_RGB]=it[gl.BLEND_SRC_RGB]
+					top[gl.BLEND_DST_RGB]=it[gl.BLEND_DST_RGB]
+					top[gl.BLEND_SRC_ALPHA]=it[gl.BLEND_SRC_ALPHA]
+					top[gl.BLEND_DST_ALPHA]=it[gl.BLEND_DST_ALPHA]
+				end
 			end
 
 			if it[gl.BLEND_EQUATION_RGB] and it[gl.BLEND_EQUATION_ALPHA] then
+				if	top[gl.BLEND_EQUATION_RGB]~=it[gl.BLEND_EQUATION_RGB] or
+					top[gl.BLEND_EQUATION_ALPHA]~=it[gl.BLEND_EQUATION_ALPHA] then
 
-				gl.BlendEquationSeparate(
-					it[gl.BLEND_EQUATION_RGB] ,
-					it[gl.BLEND_EQUATION_ALPHA] )
-			
-				top[gl.BLEND_EQUATION_RGB]=it[gl.BLEND_EQUATION_RGB]
-				top[gl.BLEND_EQUATION_ALPHA]=it[gl.BLEND_EQUATION_ALPHA]
+					gl.BlendEquationSeparate(
+						it[gl.BLEND_EQUATION_RGB] ,
+						it[gl.BLEND_EQUATION_ALPHA] )
+				
+					top[gl.BLEND_EQUATION_RGB]=it[gl.BLEND_EQUATION_RGB]
+					top[gl.BLEND_EQUATION_ALPHA]=it[gl.BLEND_EQUATION_ALPHA]
+				end
 			end
 
 			if it[gl.POLYGON_OFFSET_FACTOR] and it[gl.POLYGON_OFFSET_UNITS] then
+				if	top[gl.POLYGON_OFFSET_FACTOR]~=it[gl.POLYGON_OFFSET_FACTOR] or
+					top[gl.POLYGON_OFFSET_UNITS]~=it[gl.POLYGON_OFFSET_UNITS] then
 
-				gl.PolygonOffset(
-					it[gl.POLYGON_OFFSET_FACTOR] ,
-					it[gl.POLYGON_OFFSET_UNITS] )
+					gl.PolygonOffset(
+						it[gl.POLYGON_OFFSET_FACTOR] ,
+						it[gl.POLYGON_OFFSET_UNITS] )
 
-				top[gl.POLYGON_OFFSET_FACTOR]=it[gl.POLYGON_OFFSET_FACTOR]
-				top[gl.POLYGON_OFFSET_UNITS]=it[gl.POLYGON_OFFSET_UNITS]
+					top[gl.POLYGON_OFFSET_FACTOR]=it[gl.POLYGON_OFFSET_FACTOR]
+					top[gl.POLYGON_OFFSET_UNITS]=it[gl.POLYGON_OFFSET_UNITS]
+				end
 			end
 
 			if it[gl.SAMPLE_COVERAGE_VALUE] and it[gl.SAMPLE_COVERAGE_INVERT] then
+				if	top[gl.SAMPLE_COVERAGE_VALUE]~=it[gl.SAMPLE_COVERAGE_VALUE] or
+					top[gl.SAMPLE_COVERAGE_INVERT]~=it[gl.SAMPLE_COVERAGE_INVERT] then
 
-				gl.SampleCoverage(
-					it[gl.SAMPLE_COVERAGE_VALUE] ,
-					it[gl.SAMPLE_COVERAGE_INVERT] )
-					
-				top[gl.SAMPLE_COVERAGE_VALUE]=it[gl.SAMPLE_COVERAGE_VALUE]
-				top[gl.SAMPLE_COVERAGE_INVERT]=it[gl.SAMPLE_COVERAGE_INVERT]
+					gl.SampleCoverage(
+						it[gl.SAMPLE_COVERAGE_VALUE] ,
+						it[gl.SAMPLE_COVERAGE_INVERT] )
+						
+					top[gl.SAMPLE_COVERAGE_VALUE]=it[gl.SAMPLE_COVERAGE_VALUE]
+					top[gl.SAMPLE_COVERAGE_INVERT]=it[gl.SAMPLE_COVERAGE_INVERT]
+				end
 			end
 					
-			for n,v in pairs(it) do -- final settings pass, multiple values set above should do nothing
+			for n,v in pairs(it) do -- final settings recursive pass to pick up all other differences
 				code.state.set(n,v)
 			end
 
 			return
 		end
 	
-		if code.state.get(name)~=value then -- only hit the GL functions if value has *actually* changed
+		if top[name]~=value then -- only hit the GL functions if a value has *actually* changed
 
 			if name==gl.BLEND_COLOR then
 				gl.BlendColor(value)
@@ -102,39 +119,39 @@ function glescode.create(gl)
 			elseif name==gl.BLEND_SRC_RGB then
 				g.lBlendFuncSeparate(
 					value,
-					code.state.get(gl.BLEND_DST_RGB),
-					code.state.get(gl.BLEND_SRC_ALPHA),
-					code.state.get(gl.BLEND_DST_ALPHA))
+					top[gl.BLEND_DST_RGB],
+					top[gl.BLEND_SRC_ALPHA],
+					top[gl.BLEND_DST_ALPHA])
 					
 			elseif name==gl.BLEND_SRC_ALPHA then
 				g.lBlendFuncSeparate(
-					code.state.get(gl.BLEND_SRC_RGB),
+					top[gl.BLEND_SRC_RGB],
 					value,
-					code.state.get(gl.BLEND_SRC_ALPHA),
-					code.state.get(gl.BLEND_DST_ALPHA))
+					top[gl.BLEND_SRC_ALPHA],
+					top[gl.BLEND_DST_ALPHA])
 
 			elseif name==gl.BLEND_DST_RGB then
 				g.lBlendFuncSeparate(
-					code.state.get(gl.BLEND_SRC_RGB),
-					code.state.get(gl.BLEND_DST_RGB),
+					top[gl.BLEND_SRC_RGB],
+					top[gl.BLEND_DST_RGB],
 					value,
-					code.state.get(gl.BLEND_DST_ALPHA))
+					top[gl.BLEND_DST_ALPHA])
 
 			elseif name==gl.BLEND_DST_ALPHA then
 				g.lBlendFuncSeparate(
-					code.state.get(gl.BLEND_SRC_RGB),
-					code.state.get(gl.BLEND_DST_RGB),
-					code.state.get(gl.BLEND_SRC_ALPHA),
+					top[gl.BLEND_SRC_RGB],
+					top[gl.BLEND_DST_RGB],
+					top[gl.BLEND_SRC_ALPHA],
 					value)
 
 			elseif name==gl.BLEND_EQUATION_RGB then
 				gl.BlendEquationSeparate(
 					value,
-					code.state.get(gl.BLEND_EQUATION_ALPHA))
+					top[gl.BLEND_EQUATION_ALPHA])
 
 			elseif name==gl.BLEND_EQUATION_ALPHA then
 				gl.BlendEquationSeparate(
-					code.state.get(gl.BLEND_EQUATION_RGB),
+					top[gl.BLEND_EQUATION_RGB],
 					value)
 			
 			elseif name==gl.CULL_FACE_MODE then
@@ -155,21 +172,21 @@ function glescode.create(gl)
 			elseif name==gl.POLYGON_OFFSET_FACTOR then
 				gl.PolygonOffset(
 					value,
-					code.state.get(gl.POLYGON_OFFSET_UNITS))
+					top[gl.POLYGON_OFFSET_UNITS])
 					
 			elseif name==gl.POLYGON_OFFSET_UNITS then
 				gl.PolygonOffset(
-					code.state.get(gl.POLYGON_OFFSET_FACTOR),
+					top[gl.POLYGON_OFFSET_FACTOR],
 					value)
 
 			elseif name==gl.SAMPLE_COVERAGE_VALUE then
 				gl.SampleCoverage(
 					value,
-					code.state.get(gl.SAMPLE_COVERAGE_INVERT))
+					top[gl.SAMPLE_COVERAGE_INVERT])
 
 			elseif name==gl.SAMPLE_COVERAGE_INVERT then
 				gl.SampleCoverage(
-					code.state.get(gl.SAMPLE_COVERAGE_VALUE),
+					top[gl.SAMPLE_COVERAGE_VALUE],
 					value)
 
 			elseif name==gl.SCISSOR_BOX then
