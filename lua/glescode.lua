@@ -204,13 +204,14 @@ function glescode.create(gl)
 		code.state[code.state.index][name]=value
 	end
 
-	code.state.push=function()
+	code.state.push=function(it)
 		local state={}
 		for n,v in pairs( code.state[code.state.index] ) do
 			state[n]=v
 		end
 		code.state.index=code.state.index+1
 		code.state[code.state.index]=state -- new state is just a copy
+		if it then code.state.set(it) end -- and make these state changes
 	end
 	
 	code.state.pop=function()
@@ -218,7 +219,7 @@ function glescode.create(gl)
 			code.state.set(n,v) -- make any needed changes
 		end
 		code.state[code.state.index]=nil
-		code.state.index=code.state.index+1
+		code.state.index=code.state.index-1
 	end
 	
 	

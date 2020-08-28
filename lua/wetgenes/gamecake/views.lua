@@ -28,8 +28,22 @@ function M.bake(oven,views)
 
 	views.stack={}
 	views.get=function() return assert(views.stack[#views.stack]) end
-	views.push=function(view) views.stack[#views.stack+1]=view end
-	views.pop=function() local view=views.get() views.stack[#views.stack]=nil return view end
+	views.push=function(view)
+		views.stack[#views.stack+1]=view
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PushMatrix()
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PushMatrix()
+	end
+	views.pop=function()
+		local view=views.get()
+		views.stack[#views.stack]=nil
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PopMatrix()
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PopMatrix()
+		return view
+	end
 	views.apply=function() local view=views.get() if view then view.apply() end end
 
 	views.push_and_apply=function(view)

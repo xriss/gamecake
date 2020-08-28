@@ -236,23 +236,24 @@ function M.bake(oven,framebuffers)
 	framebuffers.pingpong = function(fbin,fbout,shadername,callback)
 	
 		if not fbin[1] then fbin={fbin} end -- upgrade input to array
+		
+		local view=views.create({
+			mode="fbo",
+			fbo=fbout,
+		})
 
---[[
+		views.push_and_apply(view)
+		gl.state.push(gl.state_defaults)
+		gl.state.set({
+			[gl.BLEND]=gl.FALSE,
+		})
 
-		gl.Disable(gl.BLEND)
+		fbout:bind_frame()
 
-		gl.MatrixMode(gl.PROJECTION)
-		gl.PushMatrix()		
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.PushMatrix()
-
-		views.push_and_apply(it.view)
---		it.lay_orig=it.lay.apply(nil,nil,0)
-
-		local v3=gl.apply_modelview( {it.fbo.w*-0,	it.fbo.h* 1,	0,1} )
-		local v1=gl.apply_modelview( {it.fbo.w*-0,	it.fbo.h*-0,	0,1} )
-		local v4=gl.apply_modelview( {it.fbo.w* 1,	it.fbo.h* 1,	0,1} )
-		local v2=gl.apply_modelview( {it.fbo.w* 1,	it.fbo.h*-0,	0,1} )
+		local v3=gl.apply_modelview( {fbout.w*-0,	fbout.h* 1,	0,1} )
+		local v1=gl.apply_modelview( {fbout.w*-0,	fbout.h*-0,	0,1} )
+		local v4=gl.apply_modelview( {fbout.w* 1,	fbout.h* 1,	0,1} )
+		local v2=gl.apply_modelview( {fbout.w* 1,	fbout.h*-0,	0,1} )
 		local t={
 			v3[1],	v3[2],	v3[3],	0,			0, 			
 			v1[1],	v1[2],	v1[3],	0,			it.fbo.uvh,
@@ -260,40 +261,16 @@ function M.bake(oven,framebuffers)
 			v2[1],	v2[2],	v2[3],	it.fbo.uvw,	it.fbo.uvh,
 		}
 
-
-		it.fxbo1:bind_frame()
-		flat.tristrip("rawuv",t,"fun_screen_bloom_pick",function(p)
-			gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
-			it.fbo:bind_texture()
+		flat.tristrip("rawuv",t,shadername,function(p)
+			fbin:bind_texture()
+			callback(p)
 		end)
-
-
-		it.fxbo2:bind_frame()
-		flat.tristrip("rawuv",t,"fun_screen_bloom_blur",function(p)
-			gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
-			it.fxbo1:bind_texture()
-			gl.Uniform4f( p:uniform("pix_siz"), it.fbo.uvw/it.fbo.w,0,0,1 )
-		end)
-
-
-		it.fxbo1:bind_frame()
-		flat.tristrip("rawuv",t,"fun_screen_bloom_blur",function(p)
-			gl.Uniform2f( p:uniform("projection_zxy"), 0,0)
-			it.fxbo2:bind_texture()
-			gl.Uniform4f( p:uniform("pix_siz"), 0,it.fbo.uvh/it.fbo.h,0,1 )
-		end)
-
 
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0.0)
+
+		gl.state.pop()
 		views.pop_and_apply()
-		gl.MatrixMode(gl.PROJECTION)
-		gl.PopMatrix()			
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.PopMatrix()
 
-		gl.Enable(gl.BLEND)
-
-]]
 
 	end
 
