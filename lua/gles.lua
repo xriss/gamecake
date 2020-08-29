@@ -27,6 +27,9 @@ local import=
 
 #define GL_LIGHTING                       0x0B50
 
+#define GL_MIN                            0x8007
+#define GL_MAX                            0x8008
+
 /*************************************************************/
 /*
  *
