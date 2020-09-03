@@ -302,8 +302,16 @@ void main(void)
 			"hair",
 			"iris",
 			"eye",
-			"color1",
-			"color2",
+			"red",
+			"orange",
+			"yellow",
+			"green",
+			"blue",
+			"cyan",
+			"pink",
+			"brown",
+			"grey",
+			"white",
 		}) do
 			local material=soul.materials[name]
 			if material and material.ramp then
