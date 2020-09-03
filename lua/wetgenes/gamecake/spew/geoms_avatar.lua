@@ -54,7 +54,7 @@ M.bake=function(oven,geoms_avatar)
 
 --dprint(avatar.gs)
 
-		geoms_avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,256,8,1)
+		geoms_avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,64,8,1)
 		
 		geoms_avatar.map:clear(0xffffffff)
 		
@@ -324,7 +324,7 @@ void main(void)
 						value=ca/255,
 					}
 				end
-				local g=geoms_avatar.map:clip( 0,idx-1,0, 256,1,1 )
+				local g=geoms_avatar.map:clip( 0,idx-1,0, 64,1,1 )
 				wgrdcanvas.cmap_ramp(g,keys)
 			end
 		end
