@@ -54,7 +54,7 @@ M.bake=function(oven,geoms_avatar)
 
 --dprint(avatar.gs)
 
-		geoms_avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,64,8,1)
+		geoms_avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,64,16,1)
 		
 		geoms_avatar.map:clear(0xffffffff)
 		
