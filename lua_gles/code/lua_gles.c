@@ -14,7 +14,8 @@
 // link with lua/hacks.c plz
 extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
-
+// 512 vec4 is 128 mat4
+#define MAX_UNIFORM_V4_LEN 512
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -865,7 +866,7 @@ static int lua_gles_Uniform1i (lua_State *l)
 {
 int idx;
 int *ip;
-int ii[256*1];
+int ii[MAX_UNIFORM_V4_LEN*1];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -879,7 +880,7 @@ int i;
 	{
 		ip=ii;
 		len=lua_objlen(l,2)/1;
-		if(len>256) {len=256;}
+		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
 		for(i=0;i<len*1;i++)
 		{
 			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
@@ -900,7 +901,7 @@ static int lua_gles_Uniform2i (lua_State *l)
 {
 int idx;
 int *ip;
-int ii[256*2];
+int ii[MAX_UNIFORM_V4_LEN*2];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -914,7 +915,7 @@ int i;
 	{
 		ip=ii;
 		len=lua_objlen(l,2)/2;
-		if(len>256) {len=256;}
+		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
 		for(i=0;i<len*2;i++)
 		{
 			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
@@ -935,7 +936,7 @@ static int lua_gles_Uniform3i (lua_State *l)
 {
 int idx;
 int *ip;
-int ii[256*3];
+int ii[MAX_UNIFORM_V4_LEN*3];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -949,7 +950,7 @@ int i;
 	{
 		ip=ii;
 		len=lua_objlen(l,2)/3;
-		if(len>256) {len=256;}
+		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
 		for(i=0;i<len*3;i++)
 		{
 			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
@@ -970,7 +971,7 @@ static int lua_gles_Uniform4i (lua_State *l)
 {
 int idx;
 int *ip;
-int ii[256*4];
+int ii[MAX_UNIFORM_V4_LEN*4];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -984,7 +985,7 @@ int i;
 	{
 		ip=ii;
 		len=lua_objlen(l,2)/4;
-		if(len>256) {len=256;}
+		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
 		for(i=0;i<len*4;i++)
 		{
 			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
@@ -1007,7 +1008,7 @@ static int lua_gles_Uniform1f (lua_State *l)
 {
 int idx;
 float *fp;
-float ff[256*1];
+float ff[MAX_UNIFORM_V4_LEN*1];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -1021,7 +1022,7 @@ int i;
 	{
 		fp=ff;
 		len=lua_objlen(l,2)/1;
-		if(len>256) {len=256;}
+		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
 		for(i=0;i<len*1;i++)
 		{
 			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
@@ -1042,7 +1043,7 @@ static int lua_gles_Uniform2f (lua_State *l)
 {
 int idx;
 float *fp;
-float ff[256*2];
+float ff[MAX_UNIFORM_V4_LEN*2];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -1056,7 +1057,7 @@ int i;
 	{
 		fp=ff;
 		len=lua_objlen(l,2)/2;
-		if(len>256) {len=256;}
+		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
 		for(i=0;i<len*2;i++)
 		{
 			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
@@ -1077,7 +1078,7 @@ static int lua_gles_Uniform3f (lua_State *l)
 {
 int idx;
 float *fp;
-float ff[256*3];
+float ff[MAX_UNIFORM_V4_LEN*3];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -1091,7 +1092,7 @@ int i;
 	{
 		fp=ff;
 		len=lua_objlen(l,2)/3;
-		if(len>256) {len=256;}
+		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
 		for(i=0;i<len*3;i++)
 		{
 			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
@@ -1112,7 +1113,7 @@ static int lua_gles_Uniform4f (lua_State *l)
 {
 int idx;
 float *fp;
-float ff[256*4];
+float ff[MAX_UNIFORM_V4_LEN*4];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -1127,7 +1128,7 @@ int i;
 	{
 		fp=ff;
 		len=lua_objlen(l,2)/4;
-		if(len>256) {len=256;}
+		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
 		for(i=0;i<len*4;i++)
 		{
 			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
@@ -1150,7 +1151,7 @@ static int lua_gles_UniformMatrix2f (lua_State *l)
 {
 int idx;
 float *fp;
-float ff[256*4];
+float ff[MAX_UNIFORM_V4_LEN*4];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -1165,7 +1166,7 @@ int i;
 	{
 		fp=ff;
 		len=lua_objlen(l,2)/4;
-		if(len>256) {len=256;}
+		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
 		for(i=0;i<len*4;i++)
 		{
 			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
@@ -1186,7 +1187,7 @@ static int lua_gles_UniformMatrix3f (lua_State *l)
 {
 int idx;
 float *fp;
-float ff[128*9];
+float ff[(MAX_UNIFORM_V4_LEN/4)*9];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -1201,7 +1202,7 @@ int i;
 	{
 		fp=ff;
 		len=lua_objlen(l,2)/9;
-		if(len>128) {len=128;}
+		if(len>(MAX_UNIFORM_V4_LEN/4)) {len=(MAX_UNIFORM_V4_LEN/4);}
 		for(i=0;i<len*9;i++)
 		{
 			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
@@ -1222,7 +1223,7 @@ static int lua_gles_UniformMatrix4f (lua_State *l)
 {
 int idx;
 float *fp;
-float ff[64*16];
+float ff[(MAX_UNIFORM_V4_LEN/4)*16];
 int len=1;
 int i;
 	idx=(int)luaL_checknumber(l,1);
@@ -1237,7 +1238,7 @@ int i;
 	{
 		fp=ff;
 		len=lua_objlen(l,2)/16;
-		if(len>64) {len=64;}
+		if(len>(MAX_UNIFORM_V4_LEN/4)) {len=(MAX_UNIFORM_V4_LEN/4);}
 		for(i=0;i<len*16;i++)
 		{
 			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);

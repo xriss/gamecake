@@ -557,7 +557,7 @@ uniform vec4 color;
 uniform vec4  material_values[8];
 uniform vec4  material_colors[8];
 
-uniform mat4  bones[64];
+uniform mat4  bones[128];
 
 varying vec4  v_color;
 varying vec3  v_normal;
@@ -684,6 +684,7 @@ void main(void)
 	
 	local objs=M.to_geoms(gltf)
 
+--[[
 	local hash={
 		hair	={ 0.5 , 0.0 , 0.0 , 1.0 },
 		skin	={ 1.0 , 0.5 , 0.0 , 1.0 },
@@ -698,7 +699,7 @@ void main(void)
 		local c=hash[mat.name]
 		if c then mat[1].color=c end
 	end
-
+]]
 
 	for i,texture in ipairs(objs.textures) do
 	
@@ -875,7 +876,7 @@ main.draw=function()
 		if skin then
 			local b=0
 			for i,v in ipairs(skin.nodes) do
-				if i <= 64 then -- shader only supports a maximum of 64 bones
+				if i <= 128 then -- shader only supports a maximum of 128 bones
 					local bone=v.bone or M4()
 					for i=1,16 do bones[b+i]=bone[i] end
 					b=b+16
