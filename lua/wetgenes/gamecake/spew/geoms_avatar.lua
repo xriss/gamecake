@@ -277,8 +277,10 @@ void main(void)
 			
 		end
 
+		gl.Scale( -1, 1, 1 )		
 		gl.Rotate( 90 ,  1, 0, 0 )
---		wgeoms.draw(geoms_avatar.objs,"avatar_gltf",pp)
+	
+--	wgeoms.draw(geoms_avatar.objs,"avatar_gltf",pp)
 
 		wgeom.draw(geoms_avatar.obj,"avatar_gltf",pp)
 		
