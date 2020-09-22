@@ -142,7 +142,7 @@ newplatform {
     gcc = {
         cc = "emcc",
         cxx = "em++",
-        ar= "ar",
+        ar= "emar",
         cppflags = "-MMD -fPIC",
     }
 }
@@ -251,7 +251,7 @@ if EMCC then
 		"-s ALLOW_MEMORY_GROWTH=1",
 		"-Wno-almost-asm",
 --		"-s ASSERTIONS=1",
-		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
+--		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
 		"-s EXTRA_EXPORTED_RUNTIME_METHODS='[\"cwrap\"]'",
 		"-s WASM=1",
