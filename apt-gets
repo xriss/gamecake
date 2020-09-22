@@ -34,6 +34,11 @@ if [ "$1" = "xtra" ]; then
 	apt-get install -y mingw32
 	apt-get install -y mingw-w64
 
+	#vagrant and virtualbox for building in controlled environments
+	apt-get install -y virtualbox
+	apt-get install -y virtualbox-ext-pack
+	apt-get install -y vagrant
+
 else
 
 	echo ""
