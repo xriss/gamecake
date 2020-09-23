@@ -26,6 +26,9 @@ apt-get install -y libssl-dev
 
 if [ "$1" = "xtra" ]; then
 
+	#we compress the final binaries
+	apt-get install -y upx-ucl
+
 	#clang if you want to build using clang (recomended)
 	apt-get install -y clang
 
