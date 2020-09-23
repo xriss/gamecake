@@ -15,6 +15,7 @@ We use wgrdcanvas as the local name of this library.
 
 local wstr=require("wetgenes.string")
 local wgrd=require("wetgenes.grd")
+local bit=require("bit")
 
 local function dprint(a) print(wstr.dump(a)) end
 
