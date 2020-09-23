@@ -126,8 +126,7 @@ setmetatable(win,meta)
 
 function win.screen()
 	local it={}
-	if hardcore.screen then
---		print("SCREEN",hardcore.screen())
+	if hardcore and hardcore.screen then
 		it.width,it.height=hardcore.screen()
 	else
 		it.width,it.height=0,0
