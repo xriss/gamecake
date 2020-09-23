@@ -562,8 +562,6 @@ sdl.cursor=function(s,dat,px,py)
 end
 
 
-
 sdl.platform=SDL.getPlatform() -- remember platform
-
 
 return sdl

@@ -504,8 +504,8 @@ luaopen_SDL(lua_State *L)
 	tableSetInt(L, -1, "minor", VERSION_BINDING_MINOR);
 	lua_setfield(L, -2, "binding");
 
-	if (ChannelMutex == NULL && (ChannelMutex = SDL_CreateMutex()) == NULL)
-		return luaL_error(L, SDL_GetError());
+//	if (ChannelMutex == NULL && (ChannelMutex = SDL_CreateMutex()) == NULL)
+//		return luaL_error(L, SDL_GetError());
 
 	return 1;
 }
