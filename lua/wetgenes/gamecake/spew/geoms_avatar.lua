@@ -253,7 +253,7 @@ void main(void)
 
 		objs.anim=objs.anims[soul.pose] or objs.anims[1]
 		if objs.anim then
-			objs.anim.time=(objs.anim.time or 0)+(1/24)
+			objs.anim.time=(objs.anim.time or 0)+(1/60)
 		end
 		wgeoms.update(objs)
 		
