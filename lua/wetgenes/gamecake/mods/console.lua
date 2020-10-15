@@ -31,7 +31,7 @@ local function assert_resume(co,...)
 		return unpack(t) -- no error
 	end
 	
-	error( t[2].."\nin coroutine\n"..debug.traceback(co) ) -- error
+	print( t[2].."\nin coroutine\n"..debug.traceback(co) ) -- error
 
 end
 

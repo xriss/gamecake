@@ -203,8 +203,33 @@ void main(void)
 
 ]])
 
+		geoms_avatar.build_texture_anims()
+
 	end
 	
+	function geoms_avatar.build_texture_anims()
+	
+		local objs=geoms_avatar.objs
+		
+		for aidx,anim in ipairs(objs.anims) do
+			objs.anim=anim
+
+			local fs={}
+			for kidx=1,#anim.keys do
+			
+				local ts=wgeoms.set_anim_frame(objs,kidx)
+				local b=#fs
+				for i=1,#ts do -- copy
+					fs[b+i]=ts[i]
+				end
+
+			end
+			
+			print(anim.name,#fs)
+
+		end
+		
+	end
 
 	function geoms_avatar.update(soul)
 

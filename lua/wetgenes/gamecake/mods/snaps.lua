@@ -62,6 +62,13 @@ function M.bake(oven,snaps)
 		return g
 	end
 	
+	function snaps.save()
+		local name=os.date("%Y%m%d_%H%M%S")
+print("Snaps "..wwin.files_prefix.."snaps/"..name..".png")
+		local g=snaps.get_grd()
+		g:save(wwin.files_prefix.."snaps/"..name..".png")
+	end
+
 	function snaps.begin_record(frame_max,frame_skip)
 
 		snaps.frame_max=frame_max or snaps.frame_max
@@ -206,10 +213,8 @@ end
 				return nil
 			end
 
-			local name=os.date("%Y%m%d_%H%M%S")
-print("Snaps "..wwin.files_prefix.."snaps/"..name..".png")
-			local g=snaps.get_grd()
-			g:save(wwin.files_prefix.."snaps/"..name..".png")
+			snaps.save()
+
 			return nil
 		end
 		return m
