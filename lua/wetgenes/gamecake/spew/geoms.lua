@@ -169,6 +169,122 @@ GL matrix order is transposed and the final v4 should be assumed to be
 
 	end
 	
+--[[
+
+get the tweak and reset matrix of the bones
+
+]]
+	geoms.get_anim_tweaks=function(objs,bones)
+
+		bones=bones or {}
+		local skin=objs.skins[1] -- assume only one boned character
+		if skin then
+			local b=0
+			for i,v in ipairs(skin.nodes) do
+				local bone=v.inverse or M4()
+
+				bones[b+1]=bone[1]
+				bones[b+2]=bone[5]
+				bones[b+3]=bone[9]
+				bones[b+4]=bone[13]
+
+				bones[b+5]=bone[2]
+				bones[b+6]=bone[6]
+				bones[b+7]=bone[10]
+				bones[b+8]=bone[14]
+
+				bones[b+9]=bone[3]
+				bones[b+10]=bone[7]
+				bones[b+11]=bone[11]
+				bones[b+12]=bone[15]
+
+				b=b+12
+			end
+
+			for i,v in ipairs(skin.nodes) do
+				local bone=v.inverse or M4()
+
+				bones[b+1]=bone[1]
+				bones[b+2]=bone[5]
+				bones[b+3]=bone[9]
+				bones[b+4]=bone[13]
+
+				bones[b+5]=bone[2]
+				bones[b+6]=bone[6]
+				bones[b+7]=bone[10]
+				bones[b+8]=bone[14]
+
+				bones[b+9]=bone[3]
+				bones[b+10]=bone[7]
+				bones[b+11]=bone[11]
+				bones[b+12]=bone[15]
+
+				b=b+12
+			end
+
+		end
+		
+		return bones
+
+	end
+
+--[[
+
+get skeleton glsl code
+
+]]
+	geoms.get_skeleton_glsl=function(objs)
+		local ss={}
+		local p=function(s) ss[#ss+1]=s end
+		
+		local skin=objs.skins[1] -- assume only one boned character
+
+		local r ; r=function(idx)
+			local node=skin.nodes[idx]
+			if node.pidx and skin.nodes[node.pidx] then
+				return r(node.pidx).."*texbone("..(idx-1)..",frame)"
+			else
+				return "texbone("..(idx-1)..",frame)"
+			end
+		end
+
+p([[
+mat4 skeleton(int bidx,int frame)
+{
+	switch(bidx)
+	{
+]])
+
+		for i,v in ipairs(skin.nodes) do
+			v.sidx=i
+		end
+		local prepare ; prepare=function(its,pidx)
+			its.pidx=pidx
+			for i,v in ipairs(its) do
+				prepare(v,its.sidx)
+			end
+		end
+
+		prepare(objs.scene)
+		
+		for i,v in ipairs(skin.nodes) do
+
+p([[
+		case ]]..(i-1)..[[: return ]]..r(i)..[[;
+]])
+		end
+
+p([[
+		default: return texbone(bidx,frame);
+	}
+}
+]])
+
+	
+		return table.concat(ss)
+	end
+
+
 	geoms.animate=function(objs)
 	
 		if not objs.anim then return end
@@ -195,6 +311,8 @@ GL matrix order is transposed and the final v4 should be assumed to be
 				if key_blend<0 then key_blend=0 end
 			end
 		end
+		
+		anim.frame=key_idx
 
 
 		for vidx=1,#anim.values do
@@ -269,8 +387,7 @@ GL matrix order is transposed and the final v4 should be assumed to be
 	
 		local stack=tardis.m4_stack()
 	
-		local prepare
-		prepare=function(its)
+		local prepare ; prepare=function(its)
 
 			stack.push()
 

@@ -3,7 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local pack=require("wetgenes.pack")
+local wpack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
@@ -29,6 +29,11 @@ M.bake=function(oven,geoms_avatar)
 	local wgeoms=oven.rebake("wetgenes.gamecake.spew.geoms")
 
 	local gl=oven.gl
+
+	local textures=oven.cake.textures
+	
+	geoms_avatar.bonetexs={} -- animation converted into a shader texture
+	
 
 	geoms_avatar=geoms_avatar or {}
 	for n,v in pairs(M) do geoms_avatar[n]=v end
@@ -68,6 +73,9 @@ M.bake=function(oven,geoms_avatar)
 --		oven.cake.images.bind(geoms_avatar.image)
 
 
+		local sl=wgeoms.get_skeleton_glsl(geoms_avatar.objs)
+print(sl)
+
 	gl.program_source("avatar_gltf",[[
 
 precision highp float;
@@ -78,6 +86,11 @@ uniform vec4 color;
 
 uniform vec4  material_values[8];
 uniform vec4  material_colors[8];
+
+uniform sampler2D fixbones;
+uniform sampler2D texbones;
+
+uniform float animframe;
 
 uniform mat4  bones[128];
 
@@ -103,6 +116,32 @@ attribute vec2  a_texcoord;
 attribute float a_matidx;
 attribute vec4  a_bone;
 
+mat4 fixbone(int bidx,int frame)
+{
+	return transpose( mat4(
+		texelFetch(fixbones,ivec2(bidx*3+0,frame),0),
+		texelFetch(fixbones,ivec2(bidx*3+1,frame),0),
+		texelFetch(fixbones,ivec2(bidx*3+2,frame),0),
+		vec4(0.0,0.0,0.0,1.0)) );
+}
+
+mat4 texbone(int bidx,int frame)
+{
+	return transpose( mat4(
+		texelFetch(texbones,ivec2(bidx*3+0,frame),0),
+		texelFetch(texbones,ivec2(bidx*3+1,frame),0),
+		texelFetch(texbones,ivec2(bidx*3+2,frame),0),
+		vec4(0.0,0.0,0.0,1.0)) );
+}
+
+]]..sl..[[
+
+mat4 getbone(int bidx)
+{
+	return skeleton( bidx , int(animframe) )*fixbone(bidx, 0 );
+//	return bones[ bidx ];
+}
+
 
 void main()
 {
@@ -113,22 +152,22 @@ void main()
 		mat4 bm;
 		mat4 bv;
 
-		bm=bones[ int(a_bone[0]-1.0) ];
+		bm=getbone( int(a_bone[0]-1.0) );
 		bv=(1.0-fract(a_bone[0]))*(bm);
 
 		if(a_bone[1]>0.0)
 		{
-			bm=bones[ int(a_bone[1]-1.0) ];
+			bm=getbone( int(a_bone[1]-1.0) );
 			bv+=(1.0-fract(a_bone[1]))*(bm);
 
 			if(a_bone[2]>0.0)
 			{
-				bm=bones[ int(a_bone[2]-1.0) ];
+				bm=getbone( int(a_bone[2]-1.0) );
 				bv+=(1.0-fract(a_bone[2]))*(bm);
 				
 				if(a_bone[3]>0.0)
 				{
-					bm=bones[ int(a_bone[3]-1.0) ];
+					bm=getbone( int(a_bone[3]-1.0) );
 					bv+=(1.0-fract(a_bone[3]))*(bm);
 				}
 			}
@@ -204,6 +243,30 @@ void main(void)
 ]])
 
 		geoms_avatar.build_texture_anims()
+		
+		
+		local width=0
+		local height=2
+		
+		local fs={}
+		
+		local ts=wgeoms.get_anim_tweaks(geoms_avatar.objs)
+		width=(#ts/8)
+		
+		local b=#fs
+		for i=1,#ts do -- copy
+			fs[b+i]=ts[i]
+		end
+
+		geoms_avatar.fixtex=textures.create({
+--			id="avatar/bonetexs/"..anim.name,
+			gl_data=wpack.save_array(fs,"f32"),
+			gl_width=width,
+			gl_height=height,
+			gl_internal=gl.RGBA32F,
+			gl_format=gl.RGBA,
+			gl_type=gl.FLOAT,
+		})
 
 	end
 	
@@ -214,10 +277,16 @@ void main(void)
 		for aidx,anim in ipairs(objs.anims) do
 			objs.anim=anim
 
+
+			local width=0
+			local height=#anim.keys
+			
 			local fs={}
 			for kidx=1,#anim.keys do
 			
 				local ts=wgeoms.set_anim_frame(objs,kidx)
+				width=(#ts/4)
+				
 				local b=#fs
 				for i=1,#ts do -- copy
 					fs[b+i]=ts[i]
@@ -226,6 +295,16 @@ void main(void)
 			end
 			
 			print(anim.name,#fs)
+			
+			geoms_avatar.bonetexs[anim.name]=textures.create({
+				id="avatar/bonetexs/"..anim.name,
+				gl_data=wpack.save_array(fs,"f32"),
+				gl_width=width,
+				gl_height=height,
+				gl_internal=gl.RGBA32F,
+				gl_format=gl.RGBA,
+				gl_type=gl.FLOAT,
+			})
 
 		end
 		
@@ -289,11 +368,21 @@ void main(void)
 	function geoms_avatar.draw()
 
 		local pp=function(p)
+		
+			gl.ActiveTexture(gl.TEXTURE2)
+			geoms_avatar.fixtex:bind()
+			gl.Uniform1i( p:uniform("fixbones"), 2 )
+
+			gl.ActiveTexture(gl.TEXTURE1)
+			geoms_avatar.bonetexs[geoms_avatar.objs.anim.name]:bind()
+			gl.Uniform1i( p:uniform("texbones"), 1 )
 
 			gl.ActiveTexture(gl.TEXTURE0)
 			oven.cake.images.bind(geoms_avatar.image)
 			gl.Uniform1i( p:uniform("tex0"), 0 )
 
+
+			gl.Uniform1f( p:uniform("animframe"), geoms_avatar.objs.anim.frame )
 
 			gl.UniformMatrix4f( p:uniform("bones"), geoms_avatar.bones )
 
@@ -345,9 +434,9 @@ void main(void)
 
 				local keys={}
 				for i,v in ipairs(material.ramp) do
-					local cr,cg,cb,ca=pack.argb8_b4(v)
+					local cr,cg,cb,ca=wpack.argb8_b4(v)
 					keys[i]={
-						argb=pack.b4_argb8(cr,cg,cb,0xff),
+						argb=wpack.b4_argb8(cr,cg,cb,0xff),
 						value=ca/255,
 					}
 				end

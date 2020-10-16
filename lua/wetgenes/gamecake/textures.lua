@@ -1,34 +1,35 @@
 --
 -- (C) 2020 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
-local grd=require("wetgenes.grd")
-local zips=require("wetgenes.zips")
-local wsbox=require("wetgenes.sandbox")
-
-local wwin=require("wetgenes.win")
-local wtongues=require("wetgenes.tongues")
 
 -- slightly more generic texture handling than images which is just for images
 -- maybe we should wrap the images interface over this more generic one
 
+
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
+
 
 function M.bake(oven,textures)
 	
 	local opts=oven.opts
 	local cake=oven.cake
 	local gl=oven.gl
+
+	local funcs={}
+	local metatable={__index=textures}
 			
 	textures.data={}
 
 --[[
 
-get a texture from an id and return it, if it is a table then it is 
-assumed to be the texture and is returned.
+get a texture from an id and return it, if it is a table rather than an 
+id then the id is assumed to be the texture and is returned.
 
 ]]
 textures.get = function(id)
@@ -164,19 +165,26 @@ end
 
 --[[
 
-create a new texture from initial values and return it
+create a new texture and return it
+
+we do a shallow copy from init into the returned table so you can put 
+any data you like in there for later use
 
 ]]
 textures.create = function(init)
 
 	local it={}
+	setmetatable(it,metatable)
 	for n,v in pairs(init or {}) do it[n]=v end
 	
 	it.id = it.id or #textures.data+1 -- auto generate an id
 	
+	textures.set(it) -- remember
+	
 	
 	return it
 end
+
 
 	
 	return textures

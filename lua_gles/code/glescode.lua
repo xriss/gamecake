@@ -510,18 +510,21 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 -- default shader prefix to use when building
 
---	if core.GLES2 then -- use GLES2 prefix
---		code.defines.shaderprefix="#version 100\nprecision mediump float;\n"
---	else
-		code.defines_shaderprefix_tab={
-			"#version 100\nprecision mediump float;\n", -- Try ES?
-			"#version 120\n", -- seems to work on osx?
-			"#version 130\n", -- fails on osx?
-		}
-		code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
-		code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
+	code.defines_shaderprefix_tab={
+	
+		-- and this is our last chance to work
 
---	end
+		"#version 100\nprecision mediump float;\n", -- Try ES 2.0
+		"#version 120\n", -- the GL equivalent of ES 2.0
+
+		"#version 300 es\nprecision mediump float;\n", -- Try ES 3.0
+		"#version 330\n", -- the GL equivalent of ES 3.0
+
+		-- we start trying to compile at this end of the table
+
+	}
+	code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
+	code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
 	
 -- forget cached info when we lose context, it is important to call this
 	function code.forget()
@@ -592,9 +595,9 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 				if code.defines_shaderprefix_idx and code.defines_shaderprefix_idx>1 then -- try and brute force a working version number 
 
---print("Failed to build shader using prefix "..code.defines_shaderprefix_idx.." trying next prefix.")
-
-					print( "lowering shader version after failure to build shader : " .. ( filename or "" ) .. " : " .. sname .. "\n\n" ..  err .. "\n\n" )
+					print("Warning we failed to build shader using prefix "..code.defines_shaderprefix_tab[code.defines_shaderprefix_idx])
+					print( ( filename or "" ) .. " : " .. sname .. "\n\n" ..  err .. "\n\n" )
+					print("Lowering shader version in attempt to autofix this problem ")
 
 					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
 					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
@@ -603,7 +606,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 					
 				else -- give up
 
-					error( "failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
+					error( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
 					done=true
 				
 				end

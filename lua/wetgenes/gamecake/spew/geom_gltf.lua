@@ -351,6 +351,7 @@ M.to_geoms=function(gltf)
 		if node.children then
 			for i=1,#node.children do
 				node[i]=objs.nodes[ node.children[i]+1 ]
+				node[i].parentidx=node.nodeidx
 			end
 		end
 		node.children=nil
