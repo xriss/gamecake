@@ -131,14 +131,14 @@ mat4 texbone(int bidx,int frame)
 		texelFetch(texbones,ivec2(bidx*3+0,frame),0),
 		texelFetch(texbones,ivec2(bidx*3+1,frame),0),
 		texelFetch(texbones,ivec2(bidx*3+2,frame),0),
-		vec4(0.0,0.0,0.0,1.0)) );
+		vec4(0.0,0.0,0.0,1.0)) )*fixbone(bidx, 0 );
 }
 
 ]]..sl..[[
 
 mat4 getbone(int bidx)
 {
-	return skeleton( bidx , int(animframe) )*fixbone(bidx, 0 );
+	return skeleton( bidx , int(animframe) )*fixbone(bidx, 1 );
 //	return bones[ bidx ];
 }
 
@@ -243,8 +243,12 @@ void main(void)
 ]])
 
 		geoms_avatar.build_texture_anims()
-		
-		
+		geoms_avatar.build_texture_tweak()
+
+	end
+	
+	function geoms_avatar.build_texture_tweak()
+	
 		local width=0
 		local height=2
 		
@@ -257,19 +261,27 @@ void main(void)
 		for i=1,#ts do -- copy
 			fs[b+i]=ts[i]
 		end
+		
+		local d=wpack.save_array(fs,"f32")
 
-		geoms_avatar.fixtex=textures.create({
---			id="avatar/bonetexs/"..anim.name,
-			gl_data=wpack.save_array(fs,"f32"),
-			gl_width=width,
-			gl_height=height,
-			gl_internal=gl.RGBA32F,
-			gl_format=gl.RGBA,
-			gl_type=gl.FLOAT,
-		})
+		if geoms_avatar.fixtex then
+		
+			geoms_avatar.fixtex.gl_data=d
+			geoms_avatar.fixtex:upload()
+
+		else
+			geoms_avatar.fixtex=textures.create({
+				gl_data=d,
+				gl_width=width,
+				gl_height=height,
+				gl_internal=gl.RGBA32F,
+				gl_format=gl.RGBA,
+				gl_type=gl.FLOAT,
+			})
+		end
 
 	end
-	
+
 	function geoms_avatar.build_texture_anims()
 	
 		local objs=geoms_avatar.objs
@@ -565,6 +577,7 @@ void main(void)
 			end
 		end
 
+		geoms_avatar.build_texture_tweak()
 
 	end
 

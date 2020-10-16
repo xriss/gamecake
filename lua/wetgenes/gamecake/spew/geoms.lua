@@ -181,22 +181,29 @@ get the tweak and reset matrix of the bones
 		if skin then
 			local b=0
 			for i,v in ipairs(skin.nodes) do
-				local bone=v.inverse or M4()
+				local m=M4():identity()
 
-				bones[b+1]=bone[1]
-				bones[b+2]=bone[5]
-				bones[b+3]=bone[9]
-				bones[b+4]=bone[13]
+				if v.tweak then
+					local trs=v.tweak
+					m:translate( trs[1] , trs[2] , trs[3] )
+					m:rotate( { trs[4] , trs[5] , trs[6] , trs[7] } )
+					m:scale( trs[8] , trs[9] , trs[10] )
+				end
 
-				bones[b+5]=bone[2]
-				bones[b+6]=bone[6]
-				bones[b+7]=bone[10]
-				bones[b+8]=bone[14]
+				bones[b+1]=m[1]
+				bones[b+2]=m[5]
+				bones[b+3]=m[9]
+				bones[b+4]=m[13]
 
-				bones[b+9]=bone[3]
-				bones[b+10]=bone[7]
-				bones[b+11]=bone[11]
-				bones[b+12]=bone[15]
+				bones[b+5]=m[2]
+				bones[b+6]=m[6]
+				bones[b+7]=m[10]
+				bones[b+8]=m[14]
+
+				bones[b+9]=m[3]
+				bones[b+10]=m[7]
+				bones[b+11]=m[11]
+				bones[b+12]=m[15]
 
 				b=b+12
 			end
