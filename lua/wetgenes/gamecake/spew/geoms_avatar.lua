@@ -69,12 +69,7 @@ M.bake=function(oven,geoms_avatar)
 		geoms_avatar.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
 		geoms_avatar.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
 
-
 --		oven.cake.images.bind(geoms_avatar.image)
-
-
-		local sl=wgeoms.get_skeleton_glsl(geoms_avatar.objs)
-print(sl)
 
 	gl.program_source("avatar_gltf",[[
 
@@ -131,15 +126,17 @@ mat4 texbone(int bidx,int frame)
 		texelFetch(texbones,ivec2(bidx*3+0,frame),0),
 		texelFetch(texbones,ivec2(bidx*3+1,frame),0),
 		texelFetch(texbones,ivec2(bidx*3+2,frame),0),
-		vec4(0.0,0.0,0.0,1.0)) )*fixbone(bidx, 0 );
+		vec4(0.0,0.0,0.0,1.0)) );
 }
-
-]]..sl..[[
 
 mat4 getbone(int bidx)
 {
-	return skeleton( bidx , int(animframe) )*fixbone(bidx, 1 );
-//	return bones[ bidx ];
+	float fb=fract(animframe);
+	float fa=1.0-fb;
+
+	mat4 ma=texbone( bidx , int(animframe+0) );
+	mat4 mb=texbone( bidx , int(animframe+1) );
+	return fixbone(bidx, 0 )*((fa*ma)+(fb*mb));
 }
 
 
@@ -250,12 +247,12 @@ void main(void)
 	function geoms_avatar.build_texture_tweak()
 	
 		local width=0
-		local height=2
+		local height=1
 		
 		local fs={}
 		
 		local ts=wgeoms.get_anim_tweaks(geoms_avatar.objs)
-		width=(#ts/8)
+		width=(#ts/4)
 		
 		local b=#fs
 		for i=1,#ts do -- copy
@@ -393,8 +390,21 @@ void main(void)
 			oven.cake.images.bind(geoms_avatar.image)
 			gl.Uniform1i( p:uniform("tex0"), 0 )
 
-
-			gl.Uniform1f( p:uniform("animframe"), geoms_avatar.objs.anim.frame )
+			local objs=geoms_avatar.objs
+			if objs.anim then
+				local anim=objs.anim
+				anim.length=anim.max-anim.min
+				if anim.length>0 then
+					anim.time=(anim.time or 0)%anim.length
+				end
+				if anim.keys[2] then
+					local rate=anim.keys[2]-anim.keys[1]
+					anim.frame=math.floor(anim.time/rate)
+				else
+					anim.frame=0
+				end
+				gl.Uniform1f( p:uniform("animframe"), anim.frame )
+			end
 
 			gl.UniformMatrix4f( p:uniform("bones"), geoms_avatar.bones )
 
