@@ -89,27 +89,30 @@ uniform float animframe;
 
 uniform mat4  bones[128];
 
-varying vec4  v_color;
-varying vec3  v_normal;
-varying vec3  v_tangent;
-varying vec3  v_bitangent;
-varying vec3  v_pos;
-varying vec2  v_texcoord;
-varying float v_matidx;
-varying vec4  v_bone;
-varying vec4  v_value;
 
 
 #ifdef VERTEX_SHADER
 
  
-attribute vec4  a_color;
-attribute vec3  a_vertex;
-attribute vec3  a_normal;
-attribute vec4  a_tangent;
-attribute vec2  a_texcoord;
-attribute float a_matidx;
-attribute vec4  a_bone;
+in vec4  a_color;
+in vec3  a_vertex;
+in vec3  a_normal;
+in vec4  a_tangent;
+in vec2  a_texcoord;
+in float a_matidx;
+in vec4  a_bone;
+
+
+out vec4  v_color;
+out vec3  v_normal;
+out vec3  v_tangent;
+out vec3  v_bitangent;
+out vec3  v_pos;
+out vec2  v_texcoord;
+out float v_matidx;
+out vec4  v_bone;
+out vec4  v_value;
+
 
 mat4 fixbone(int bidx,int frame)
 {
@@ -134,8 +137,8 @@ mat4 getbone(int bidx)
 	float fb=fract(animframe);
 	float fa=1.0-fb;
 
-	mat4 ma=texbone( bidx , int(animframe+0) );
-	mat4 mb=texbone( bidx , int(animframe+1) );
+	mat4 ma=texbone( bidx , int(animframe    ) );
+	mat4 mb=texbone( bidx , int(animframe+1.0) );
 	return fixbone(bidx, 0 )*((fa*ma)+(fb*mb));
 }
 
@@ -193,6 +196,17 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 
+in vec4  v_color;
+in vec3  v_normal;
+in vec3  v_tangent;
+in vec3  v_bitangent;
+in vec3  v_pos;
+in vec2  v_texcoord;
+in float v_matidx;
+in vec4  v_bone;
+in vec4  v_value;
+
+out vec4 FragColor;
 
 uniform sampler2D tex0;
 uniform sampler2D tex1;
@@ -211,12 +225,12 @@ void main(void)
 	
 	if( v_value.g > 0.0 || v_value.b > 0.0 )
 	{
-		t1 = texture2D(tex1, v_texcoord ).rgba;
+		t1 = texture(tex1, v_texcoord ).rgba;
 	}
 
 	if( v_value.a > 0.0 )
 	{
-		t2 = v_value.a * texture2D(tex2, v_texcoord ).rgb;
+		t2 = v_value.a * texture(tex2, v_texcoord ).rgb;
 	}
 	
 	t2=(t2-vec3(0.5,0.5,0.5))*2.0;
@@ -227,10 +241,10 @@ void main(void)
 	{
 		vec2 uv=clamp( v_texcoord + vec2( pow( n.z, 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
 
-		t0 = v_value.r * texture2D(tex0, uv ).rgba;
+		t0 = v_value.r * texture(tex0, uv ).rgba;
 	}
 
-	gl_FragColor=vec4( ( t0 * v_color ).rgb , 1.0 ) ;
+	FragColor=vec4( ( t0 * v_color ).rgb , 1.0 ) ;
 
 }
 

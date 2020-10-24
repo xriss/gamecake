@@ -1,13 +1,15 @@
 cd `dirname $0`
 
+cd $1
+
 sudo apt-get install -y luajit
 sudo apt-get install -y lua-filesystem
 sudo apt-get install -y cmake
 sudo apt-get install -y python
 sudo apt-get install -y git
 
+rm -rf emsdk
 git clone https://github.com/juj/emsdk.git
-
 cd emsdk
 
 git pull

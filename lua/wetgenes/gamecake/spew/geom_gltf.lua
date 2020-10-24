@@ -47,7 +47,7 @@ M.load=function(fname)
 	
 	local input=path[1]..path[2]..path[3]..path[4]
 
-	local gltf=M.parse( wzips.readfile(fname) )
+	local gltf=M.parse( assert(wzips.readfile(fname),"failed to load "..fname) )
 	
 	for i=1,#gltf.buffers do
 		local v=gltf.buffers[i]

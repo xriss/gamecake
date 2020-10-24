@@ -510,14 +510,20 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 -- default shader prefix to use when building
 
+	local hax_mediump=[[
+
+precision mediump float;
+
+]]
+
 	code.defines_shaderprefix_tab={
 	
 		-- and this is our last chance to work
 
-		"#version 100\nprecision mediump float;\n", -- Try ES 2.0
+		"#version 100\n"..hax_mediump, -- Try ES 2.0
 		"#version 120\n", -- the GL equivalent of ES 2.0
 
-		"#version 300 es\nprecision mediump float;\n", -- Try ES 3.0
+		"#version 300 es\n"..hax_mediump, -- Try ES 3.0
 		"#version 330\n", -- the GL equivalent of ES 3.0
 
 		-- we start trying to compile at this end of the table
@@ -595,12 +601,13 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 				if code.defines_shaderprefix_idx and code.defines_shaderprefix_idx>1 then -- try and brute force a working version number 
 
-					print("Warning we failed to build shader using prefix "..code.defines_shaderprefix_tab[code.defines_shaderprefix_idx])
+					print("Warning failed to build shader using prefix "..code.defines_shaderprefix_tab[code.defines_shaderprefix_idx])
 					print( ( filename or "" ) .. " : " .. sname .. "\n\n" ..  err .. "\n\n" )
-					print("Lowering shader version in attempt to autofix this problem ")
 
 					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
 					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
+
+					print("Lowering shader prefix to "..code.defines_shaderprefix_tab[code.defines_shaderprefix_idx])
 
 					gl.DeleteShader(s[0])
 					
