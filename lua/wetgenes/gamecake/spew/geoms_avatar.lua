@@ -139,7 +139,7 @@ mat4 getbone(int bidx)
 
 	mat4 ma=texbone( bidx , int(animframe    ) );
 	mat4 mb=texbone( bidx , int(animframe+1.0) );
-	return fixbone(bidx, 0 )*((fa*ma)+(fb*mb));
+	return ((fa*ma)+(fb*mb))*fixbone(bidx, 0 );
 }
 
 
