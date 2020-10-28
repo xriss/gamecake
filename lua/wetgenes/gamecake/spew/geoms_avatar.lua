@@ -139,7 +139,11 @@ mat4 getbone(int bidx)
 
 	mat4 ma=texbone( bidx , int(animframe    ) );
 	mat4 mb=texbone( bidx , int(animframe+1.0) );
-	return ((fa*ma)+(fb*mb))*fixbone(bidx, 0 );
+	mat4 mf=fixbone(bidx, 0 );
+
+// applying the tweak matrix before AND after slightly unfuxors child animation, slightly...
+
+	return mf*((fa*ma)+(fb*mb))*mf;
 }
 
 

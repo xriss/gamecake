@@ -62,27 +62,6 @@ end
 
 sdl.create=function(t)
 
-	if string.find(SDL.getPlatform(),"Mac") then
-
--- OSX requires some fluffing to get a working GL context
-
-print("SDL detected OSX : "..SDL.getPlatform())
-
- 		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask,SDL.glProfile.Core)
-		SDL.glSetAttribute(SDL.glAttr.ContextFlags,SDL.glFlags.ForwardCompatible)
-		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
-		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion,2)
-
-	elseif string.find(SDL.getPlatform(),"Emscripten") then
-
-print("SDL detected EMCC : "..SDL.getPlatform())
---ask emscripten for a webgl 2.0 / es 3.0 context
-
-		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
-
-	end
-
-
 --	print("SDL create")
 	sdl.video_init()
 
@@ -161,9 +140,61 @@ end
 
 
 sdl.context=function(it)
+
 --	print("SDL context")
 	it=it or sdl.it
-	it.ctx=assert(SDL.glCreateContext(it.win))
+
+
+--[[
+
+	if string.find(SDL.getPlatform(),"Mac") then
+
+-- OSX requires some fluffing to get a working GL context
+
+print("SDL detected OSX : "..SDL.getPlatform())
+
+		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask,SDL.glProfile.Core)
+		SDL.glSetAttribute(SDL.glAttr.ContextFlags,SDL.glFlags.ForwardCompatible)
+		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
+		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion,2)
+
+	elseif string.find(SDL.getPlatform(),"Emscripten") then
+
+print("SDL detected EMCC : "..SDL.getPlatform())
+--ask emscripten for a webgl 2.0 / es 3.0 context
+
+		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
+
+	end
+
+]]
+
+
+	if not it.ctx then -- request an opengl es 3.0 context
+
+		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask, SDL.glProfile.ES)
+		SDL.glSetAttribute(SDL.glAttr.ContextFlags,0)
+		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion, 3)
+		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion, 0)
+
+		it.ctx=SDL.glCreateContext(it.win)
+
+	end
+
+	if not it.ctx then -- request an opengl core context
+
+		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask,SDL.glProfile.Core)
+		SDL.glSetAttribute(SDL.glAttr.ContextFlags,SDL.glFlags.ForwardCompatible)
+		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
+		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion,2)
+
+		it.ctx=SDL.glCreateContext(it.win)
+
+	end
+
+
+	assert(it.ctx)
+
 	SDL.glMakeCurrent(it.win, it.ctx)
 	SDL.glSetSwapInterval(1) -- enable vsync by default
 	

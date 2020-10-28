@@ -520,11 +520,11 @@ precision mediump float;
 	
 		-- and this is our last chance to work
 
-		"#version 100\n"..hax_mediump, -- Try ES 2.0
-		"#version 120\n", -- the GL equivalent of ES 2.0
+--		"#version 100\n"..hax_mediump, -- Try ES 2.0
+--		"#version 120\n", -- the GL equivalent of ES 2.0
 
-		"#version 300 es\n"..hax_mediump, -- Try ES 3.0
 		"#version 330\n", -- the GL equivalent of ES 3.0
+		"#version 300 es\n"..hax_mediump, -- Try ES 3.0
 
 		-- we start trying to compile at this end of the table
 
