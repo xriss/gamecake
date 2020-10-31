@@ -35,6 +35,7 @@ wmeta.classes={
 	["windows"]=oven.rebake("wetgenes.gamecake.widgets.windows"),
 	["dialogs"]=oven.rebake("wetgenes.gamecake.widgets.dialogs"),
 	["button"]=oven.rebake("wetgenes.gamecake.widgets.button"),
+	["checkbox"]=oven.rebake("wetgenes.gamecake.widgets.checkbox"),
 	["drag"]=oven.rebake("wetgenes.gamecake.widgets.drag"),
 	["text"]=oven.rebake("wetgenes.gamecake.widgets.text"),
 	["tiles"]=oven.rebake("wetgenes.gamecake.widgets.tiles"),
