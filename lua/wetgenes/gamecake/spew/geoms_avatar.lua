@@ -259,9 +259,67 @@ void main(void)
 
 		geoms_avatar.build_texture_anims()
 		geoms_avatar.build_texture_tweak()
+		geoms_avatar.build_bone_masks()
 
 	end
 	
+	function geoms_avatar.build_bone_masks()
+	
+		local masks={}
+		geoms_avatar.bone_masks=masks
+		
+		masks[0]={} -- empty
+		masks[1]={} -- left
+		masks[2]={} -- right
+		masks[3]={} -- left+right
+	
+		local objs=geoms_avatar.objs
+		local skin=objs.skins[1] -- assume only one boned character
+		if skin then
+			local b=0
+			for i,v in ipairs(skin.nodes) do
+				local bb,bl,br=false,false,false
+				if v.name:sub(-2,-1)==".L" then bl=true bb=true end
+				if v.name:sub(-2,-1)==".R" then br=true bb=true end
+				
+				if bb then -- a left/right bone
+					if bl then
+						if br then
+							masks[0][i]=false
+							masks[1][i]=true
+							masks[2][i]=true
+							masks[3][i]=true
+						else
+							masks[0][i]=false
+							masks[1][i]=true
+							masks[2][i]=false
+							masks[3][i]=true
+						end
+					else
+						if br then
+							masks[0][i]=false
+							masks[1][i]=false
+							masks[2][i]=true
+							masks[3][i]=true
+						else
+							masks[0][i]=false
+							masks[1][i]=false
+							masks[2][i]=false
+							masks[3][i]=false
+						end
+					end
+				else
+					masks[0][i]=true
+					masks[1][i]=true
+					masks[2][i]=true
+					masks[3][i]=true
+				end
+			end
+		end
+
+	end
+
+
 	function geoms_avatar.build_texture_tweak()
 	
 		local width=0
@@ -490,19 +548,16 @@ void main(void)
 
 		local obj=wgeom.new()
 		local show={}		
-		for n,v in pairs(soul.parts) do
-			if type(v)=="table" then
-				for i,n in ipairs(v) do
-					show[n]=true
-				end
-			else
-				show[v]=true
+		for i,v in pairs(soul.parts) do
+			for i,p in ipairs(v) do
+				show[p.name]=p.flags
 			end
 		end
 		
 		for _,o in ipairs(geoms_avatar.objs) do
 			if show[ o.name ] then
-				obj:merge_from(o)
+				local t=o:duplicate():filter_by_bones( geoms_avatar.bone_masks[ show[ o.name ] ] or geoms_avatar.bone_masks[0] )
+				obj:merge_from(t)
 			end
 		end
 		geoms_avatar.obj=obj

@@ -60,14 +60,14 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 -- reset
 		dst:reset()
 		dst.name=src.name
-		dst:clear_predraw()
+		if dst.clear_predraw then dst:clear_predraw() end
 -- copy mats
 		for im = 1 , #src.mats do local mat=src.mats[im]
 			local m={}
 			m.name=mat.name
-			m.diffuse={unpack(mat.diffuse)}
-			m.specular={unpack(mat.specular)}
-			m.shininess={unpack(mat.shininess)}
+			m.diffuse={unpack(mat.diffuse or {})}
+			m.specular={unpack(mat.specular or {})}
+			m.shininess={unpack(mat.shininess or {})}
 			dst.mats[ im ]=m
 		end
 -- copy verts
@@ -89,7 +89,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 -- work out which vertexes we will remove
 		local vmap={}
-		for i=1,#vs do local v=vs[i]
+		for i=1,#it.verts do local v=it.verts[i]
 			vmap[i]=true
 			for bi=1,4 do
 				local b=v[12+bi] or 0
