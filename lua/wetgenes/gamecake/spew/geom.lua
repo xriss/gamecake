@@ -84,6 +84,58 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		return dst
 	end
 
+	-- remove vertexes and polygons that match these bones ( array of booleans where false will remove this bone )
+	M.filter_by_bones=function(it,bones)
+
+-- work out which vertexes we will remove
+		local vmap={}
+		for i=1,#vs do local v=vs[i]
+			vmap[i]=true
+			for bi=1,4 do
+				local b=v[12+bi] or 0
+				local bidx=math.floor(b)
+				if bidx>0 then
+					if not bones[bidx] then vmap[i]=false end -- we will remove this vertex
+				end
+			end
+		end
+
+-- work out new vertex indexes
+		local idx=1
+		for i=1,#vmap do
+			if vmap[i] then
+				vmap[i]=idx
+				idx=idx+1
+			end
+		end
+
+-- copy good verts
+		local vs={}
+		for iv = 1 , #it.verts do local vert=it.verts[iv]
+			if vmap[iv] then
+				local v={unpack(vert)}
+				vs[ vmap[iv] ]=v
+			end
+		end
+		it.verts=vs
+		
+--copy good polys
+		local ps={}
+		for iv = 1 , #it.polys do local poly=it.polys[iv]
+			local ok=true
+			for i=1,#poly do if not vmap[ poly[i] ] then ok=false end end
+			if ok then
+				local p={}
+				for i=1,#poly do p[ i ]=vmap[ poly[i] ] end
+				p.mat=poly.mat
+				ps[#ps+1]=p
+			end
+		end
+		it.polys=ps
+
+		return it
+	end
+
 	M.merge_from=function(dst,src)
 -- reset cache
 		dst:clear_predraw()
@@ -159,7 +211,6 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		end
 		return it
 	end
-
 
 	-- apply an array of m4 bones transform to all vertexs and normals/tangents
 	M.adjust_by_bones=function(it,bones)
