@@ -421,17 +421,17 @@ local font_cache_draw
 
 			widget.fbo:bind_frame()
 
-			gl.Disable(gl.DEPTH_TEST)
-			gl.Disable(gl.CULL_FACE)
+--			gl.Disable(gl.DEPTH_TEST)
+--			gl.Disable(gl.CULL_FACE)
 			gl.Color(1,1,1,1)
 --			canvas.gl_default()
 			
-			gl.MatrixMode(gl.PROJECTION)
-			gl.PushMatrix()
-			
-			gl.MatrixMode(gl.MODELVIEW)
-			gl.PushMatrix()
-
+			gl.state.push(gl.state_defaults)
+			gl.state.set({
+				[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
+				[gl.DEPTH_TEST]					=	gl.FALSE,
+				[gl.CULL_FACE]					=	gl.FALSE,
+			})
 			views.push_and_apply_fbo(widget.fbo)
 
 			gl.ClearColor(0,0,0,0)
@@ -495,11 +495,7 @@ local font_cache_draw
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 			
 			views.pop_and_apply()
-			gl.MatrixMode(gl.PROJECTION)
-			gl.PopMatrix()			
-			gl.MatrixMode(gl.MODELVIEW)
-			gl.PopMatrix()
-
+			gl.state.pop()
 
 			widget.fbo:mipmap()
 		end
@@ -510,9 +506,13 @@ else -- we can only draw once
 
 		if widget.fbo then -- we need to draw our cached fbo
 		
-			gl.Disable(gl.DEPTH_TEST)
-			gl.Disable(gl.CULL_FACE)
 			gl.Color(1,1,1,1)
+			gl.state.push(gl.state_defaults)
+			gl.state.set({
+				[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
+				[gl.DEPTH_TEST]					=	gl.FALSE,
+				[gl.CULL_FACE]					=	gl.FALSE,
+			})
 
 			local old=cache_bind({widget.fbo.texture})
 
@@ -541,6 +541,7 @@ else -- we can only draw once
 				flat.tristrip("rawuvrgba",t)
 			end
 			
+			gl.state.pop()
 			cache_bind(old)
 
 		end

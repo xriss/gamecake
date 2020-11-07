@@ -63,20 +63,12 @@ uniform mat4 projection;
 
 uniform vec4 color;
 
-varying vec4  v_color;
-
 #ifdef TEX
 uniform sampler2D tex;
-varying vec2  v_texcoord;
 #endif
 
 #ifdef MATIDX
 uniform sampler2D tex_mat;
-varying float v_matidx;
-#endif
-
-#ifdef NORMAL
-varying vec3  v_normal;
 #endif
 
 #ifdef BONE
@@ -95,26 +87,41 @@ uniform vec4  light_color;
 
 #ifdef VERTEX_SHADER
 
-attribute vec3 a_vertex;
-
-#ifdef COLOR
-attribute vec4 a_color;
-#endif
+out vec4  v_color;
 
 #ifdef TEX
-attribute vec2 a_texcoord;
+out vec2  v_texcoord;
 #endif
- 
+
 #ifdef MATIDX
-attribute float a_matidx;
+out float v_matidx;
 #endif
 
 #ifdef NORMAL
-attribute vec4  a_normal;
+out vec3  v_normal;
+#endif
+
+
+in vec3 a_vertex;
+
+#ifdef COLOR
+in vec4 a_color;
+#endif
+
+#ifdef TEX
+in vec2 a_texcoord;
+#endif
+ 
+#ifdef MATIDX
+in float a_matidx;
+#endif
+
+#ifdef NORMAL
+in vec4  a_normal;
 #endif
 
 #ifdef BONE
-attribute vec4  a_bone;
+in vec4  a_bone;
 #endif
 
 void main()
@@ -205,6 +212,21 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 
+in vec4  v_color;
+out vec4 FragColor;
+
+#ifdef TEX
+in vec2  v_texcoord;
+#endif
+
+#ifdef MATIDX
+in float v_matidx;
+#endif
+
+#ifdef NORMAL
+in vec3  v_normal;
+#endif
+
 //#if defined(GL_FRAGMENT_PRECISION_HIGH)
 //precision highp float; /* ask for better numbers if available */
 //#endif
@@ -215,22 +237,22 @@ void main(void)
 #ifdef TEX
 	if( v_texcoord[0] <= -1.0 ) // special uv request to ignore the texture (use -2 as flag)
 	{
-		gl_FragColor=v_color ;
+		FragColor=v_color ;
 	}
 	else
 	{
-		gl_FragColor=texture2D(tex, v_texcoord) * v_color ;
+		FragColor=texture(tex, v_texcoord) * v_color ;
 	}
 #else
-	gl_FragColor=v_color ;
+	FragColor=v_color ;
 #endif
 
 #ifdef MATIDX
 	float tex_mat_u=(v_matidx+0.5)/MATIDX;
-	vec4 c1=texture2D(tex_mat, vec2(tex_mat_u,0.25) );
-	vec4 c2=texture2D(tex_mat, vec2(tex_mat_u,0.75) );
+	vec4 c1=texture(tex_mat, vec2(tex_mat_u,0.25) );
+	vec4 c2=texture(tex_mat, vec2(tex_mat_u,0.75) );
 #else
-	vec4 c1=gl_FragColor;
+	vec4 c1=FragColor;
 	vec4 c2=vec4(1.0,1.0,1.0,16.0/255.0);
 #endif
 
@@ -238,19 +260,19 @@ void main(void)
 	vec3 n=normalize( v_normal );
 	vec3 l=normalize( mat3( modelview ) * light_normal );
 	
-	gl_FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
+	FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
 						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif
 
 #ifdef PHONG
 	vec3 n=normalize(v_normal);
 	vec3 l=normalize(vec3(0.0,-0.5,1.0));
-	gl_FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
+	FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
 						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif
 
 #ifdef DISCARD
-	if((gl_FragColor.a)<DISCARD) discard;
+	if((FragColor.a)<DISCARD) discard;
 #endif
 
 }

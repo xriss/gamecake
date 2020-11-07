@@ -579,7 +579,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 
 				if oven.times then oven.times.update.stop() end
 				
-				if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
+				if oven.frame_rate and oven.frame_time and (not oven.frame_rate_auto) then --  forced updaterate enabled
 					if (oven.frame_time-oven.frame_rate)<time then -- repeat until we are a frame ahead of real time
 						return f() -- tailcall
 					end

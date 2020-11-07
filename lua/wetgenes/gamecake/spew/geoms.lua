@@ -74,6 +74,145 @@ M.bake=function(oven,geoms)
 
 	end
 
+--[[
+
+set the node TRS from the anim data for a given key index and then 
+build the local transform matrix for each node.
+
+Then build array of floats that represent a local transform matrix of 
+each bone and can be stored in a texture. 12 floats per matrix so the 
+GL matrix order is transposed and the final v4 should be assumed to be 
+{0,0,0,1}
+
+]]
+	geoms.set_anim_frame=function(objs,key_idx,bones)
+
+		local anim=objs.anim
+
+		for vidx=1,#anim.values do
+			local value=anim.values[vidx]
+			local node=objs.nodes[value.node]
+			
+			if value.path=="translation" then
+
+				local i=key_idx*3-2
+				node.trs[1]=value.data[i  ] or 0
+				node.trs[2]=value.data[i+1] or 0
+				node.trs[3]=value.data[i+2] or 0
+
+			elseif value.path=="rotation" then
+
+				local i=key_idx*4-3
+				node.trs[4]=value.data[i  ] or 0
+				node.trs[5]=value.data[i+1] or 0
+				node.trs[6]=value.data[i+2] or 0
+				node.trs[7]=value.data[i+3] or 0
+
+			elseif value.path=="scale" then
+
+				local i=key_idx*3-2
+				node.trs[ 8]=value.data[i  ] or 0
+				node.trs[ 9]=value.data[i+1] or 0
+				node.trs[10]=value.data[i+2] or 0
+
+			end
+
+		end
+		
+		geoms.prepare(objs)
+
+		bones=bones or {}
+		local skin=objs.skins[1] -- assume only one boned character
+		if skin then
+			local b=0
+			for i,v in ipairs(skin.nodes) do
+				local bone=v.bone or M4()
+
+				bones[b+1]=bone[1]
+				bones[b+2]=bone[5]
+				bones[b+3]=bone[9]
+				bones[b+4]=bone[13]
+
+				bones[b+5]=bone[2]
+				bones[b+6]=bone[6]
+				bones[b+7]=bone[10]
+				bones[b+8]=bone[14]
+
+				bones[b+9]=bone[3]
+				bones[b+10]=bone[7]
+				bones[b+11]=bone[11]
+				bones[b+12]=bone[15]
+
+				b=b+12
+			end
+		end
+		
+		return bones
+
+	end
+	
+--[[
+
+get the tweak and reset matrix of the bones
+
+]]
+	geoms.get_anim_tweaks=function(objs,bones)
+
+		geoms.reset_anim(objs)
+		
+		for i,node in ipairs( objs.nodes ) do
+			if node.trs and node.tweak then
+				node.trs[ 1]=node.trs[ 1]+node.tweak[ 1]
+				node.trs[ 2]=node.trs[ 2]+node.tweak[ 2]
+				node.trs[ 3]=node.trs[ 3]+node.tweak[ 3]
+
+				local qa=Q4( node.trs[4] , node.trs[5] , node.trs[6] , node.trs[7] )
+				local qb=Q4( node.tweak[4] , node.tweak[5] , node.tweak[6] , node.tweak[7] )
+				tardis.q4_product_q4(qa,qb)
+
+				node.trs[ 4]=qa[1]
+				node.trs[ 5]=qa[2]
+				node.trs[ 6]=qa[3]
+				node.trs[ 7]=qa[4]
+
+				node.trs[ 8]=node.trs[ 8]*node.tweak[8]
+				node.trs[ 9]=node.trs[ 9]*node.tweak[9]
+				node.trs[10]=node.trs[10]*node.tweak[10]
+			end
+		end
+
+		geoms.prepare(objs)
+
+		bones=bones or {}
+		local skin=objs.skins[1] -- assume only one boned character
+		if skin then
+			local b=0
+			for i,v in ipairs(skin.nodes) do
+				local bone=v.bone or M4()
+
+				bones[b+1]=bone[1]
+				bones[b+2]=bone[5]
+				bones[b+3]=bone[9]
+				bones[b+4]=bone[13]
+
+				bones[b+5]=bone[2]
+				bones[b+6]=bone[6]
+				bones[b+7]=bone[10]
+				bones[b+8]=bone[14]
+
+				bones[b+9]=bone[3]
+				bones[b+10]=bone[7]
+				bones[b+11]=bone[11]
+				bones[b+12]=bone[15]
+
+				b=b+12
+			end
+		end
+		
+		return bones
+
+	end
+
 	geoms.animate=function(objs)
 	
 		if not objs.anim then return end
@@ -100,6 +239,8 @@ M.bake=function(oven,geoms)
 				if key_blend<0 then key_blend=0 end
 			end
 		end
+		
+		anim.frame=key_idx
 
 
 		for vidx=1,#anim.values do
@@ -170,12 +311,11 @@ M.bake=function(oven,geoms)
 		end
 	end
 
-	geoms.prepare=function(its)
+	geoms.prepare=function(objs)
 	
 		local stack=tardis.m4_stack()
 	
-		local prepare
-		prepare=function(its)
+		local prepare ; prepare=function(its)
 
 			stack.push()
 
@@ -196,7 +336,6 @@ M.bake=function(oven,geoms)
 			its.world=stack.save()
 			
 			if its.inverse then
---				its.bone=its.inverse:product(its.world,tardis.m4.new())
 				its.bone=its.world:product(its.inverse,tardis.m4.new())
 			end
 			
@@ -208,16 +347,19 @@ M.bake=function(oven,geoms)
 
 		end
 
-		prepare(its.scene)
+		prepare(objs.scene)
 
 	end
 
-	geoms.update=function(its)
-		geoms.animate(its)
-		geoms.prepare(its)
+	geoms.update=function(objs)
+
+-- do all the heavy lifting inside glsl
+
+--		geoms.animate(objs)
+--		geoms.prepare(objs)
 	end
 
-	geoms.draw=function(its,progname,cb,modes)
+	geoms.draw=function(objs,progname,cb,modes)
 	
 		local draw
 		
@@ -236,11 +378,11 @@ M.bake=function(oven,geoms)
 
 		end
 
-		draw(its.scene)
+		draw(objs.scene)
 	
 	end
 
-	geoms.draw_bones=function(its,progname,cb,modes)
+	geoms.draw_bones=function(objs,progname,cb,modes)
 	
 		local mesh=geom.hexahedron():adjust_scale(1/4)
 	
@@ -261,7 +403,7 @@ M.bake=function(oven,geoms)
 
 		end
 
-		draw(its.scene)
+		draw(objs.scene)
 	
 	end
 

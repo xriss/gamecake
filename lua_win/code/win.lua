@@ -126,8 +126,7 @@ setmetatable(win,meta)
 
 function win.screen()
 	local it={}
-	if hardcore.screen then
---		print("SCREEN",hardcore.screen())
+	if hardcore and hardcore.screen then
 		it.width,it.height=hardcore.screen()
 	else
 		it.width,it.height=0,0
@@ -354,7 +353,7 @@ function win.create(opts)
 	local w={}
 	setmetatable(w,meta)
 	
-	if hardcore.create then
+	if hardcore and hardcore.create then
 		w[0]=assert( hardcore.create(opts) )
 	end
 	w.msgstack={} -- can feed "fake" msgs into here (fifo stack) with table.push
@@ -373,70 +372,70 @@ end
 
 
 function win.js_post(m,d)
-	if hardcore.js_post then
+	if hardcore and hardcore.js_post then
 		hardcore.js_post(m,d)
 	end
 end
 
 
 function base.destroy(w)
-	if hardcore.destroy then
+	if hardcore and hardcore.destroy then
 		hardcore.destroy(w[0],w)
 	end
 end
 
 function base.show(w,s)
 	w.view=s
-	if hardcore.show then
+	if hardcore and hardcore.show then
 		hardcore.show(w[0],s)
 	end
 end
 
 function base.info(w)
-	if hardcore.info then
+	if hardcore and hardcore.info then
 		hardcore.info(w[0],w)
 --		print("WH",w.width,w.height)
 	end
 end
 
 function base.resize(w,width,height)
-	if hardcore.resize then
+	if hardcore and hardcore.resize then
 		hardcore.resize(w[0],width,height)
 	end
 end
 
 function base.context(w,opts)
-	if hardcore.context then
+	if hardcore and hardcore.context then
 		hardcore.context(w[0],opts)
 	end
 end
 
 function base.start(w)
-	if hardcore.start then
+	if hardcore and hardcore.start then
 		hardcore.start(w[0])
 	end
 end
 
 function base.stop(w)
-	if hardcore.stop then
+	if hardcore and hardcore.stop then
 		hardcore.stop(w[0])
 	end
 end
 
 function base.swap(w)
-	if hardcore.swap then
+	if hardcore and hardcore.swap then
 		hardcore.swap(w[0])
 	end
 end
 
 function base.peek(w)
-	if hardcore.peek then
+	if hardcore and hardcore.peek then
 		return hardcore.peek(w[0])
 	end
 end
 
 function base.wait(w,t)
-	if hardcore.wait then
+	if hardcore and hardcore.wait then
 		hardcore.wait(w[0],t)
 	end
 end
@@ -459,13 +458,13 @@ function base.msg(w)
 	if not m and w.msgstack[1] then
 		m=table.remove(w.msgstack,1)
 	end
-	if not m and hardcore.msg then
+	if not m and hardcore and hardcore.msg then
 		m=hardcore.msg(w[0])
 	end
 	if not m and posix then
 		m=base.posix_msg(w)
 	end
-	if not m and hardcore.smell_msg then
+	if not m and hardcore and hardcore.smell_msg then
 		m=hardcore.smell_msg() --hardcoded stuff
 		if m then
 			m=wsbox.lson(m)
@@ -497,7 +496,7 @@ function base.msg(w)
 end
 
 function base.jread(w,n)
-	if hardcore.jread then
+	if hardcore and hardcore.jread then
 --print("jread")	
 		local pkt=hardcore.jread(w[0],n)
 		local tab
@@ -511,7 +510,7 @@ end
 
 
 function base.sleep(...)
-	if hardcore.sleep then
+	if hardcore and hardcore.sleep then
 		for i,v in ipairs({...}) do	-- ignore first arg if it is a table so we can call with :
 			if type(v)=="number" then
 				hardcore.sleep(v)
@@ -522,7 +521,7 @@ end
 win.sleep=base.sleep
 
 function base.time()
-	if hardcore.time then
+	if hardcore and hardcore.time then
 		return hardcore.time()
 	else
 		return os.time()
@@ -531,7 +530,7 @@ end
 win.time=base.time
 
 function base.smell_check()
-	if hardcore.smell_check then
+	if hardcore and hardcore.smell_check then
 		return hardcore.smell_check()
 	end
 end
@@ -582,22 +581,22 @@ end
 -- clipboard (only SDL2 and only text)
 
 function base.get_clipboard()
-	if hardcore.get_clipboard then
+	if hardcore and hardcore.get_clipboard then
 		return hardcore.get_clipboard()
 	end
 end
 
 function base.set_clipboard(w,s)
 	s=s or w -- first arg may be window for : calling
-	if hardcore.set_clipboard then
+	if hardcore and hardcore.set_clipboard then
 		return hardcore.set_clipboard(s)
 	end
 end
 
 function base.has_clipboard()
-	if     hardcore.has_clipboard then
+	if     hardcore and hardcore.has_clipboard then
 		return hardcore.has_clipboard()
-	elseif hardcore.get_clipboard then
+	elseif hardcore and hardcore.get_clipboard then
 		return hardcore.get_clipboard() and true or false
 	end
 end
@@ -607,14 +606,14 @@ end
 -- x and y are windows coords, as if from an input mouse position
 
 function base.warp_mouse(w,x,y)
-	if     hardcore.warp_mouse then
+	if     hardcore and hardcore.warp_mouse then
 		return hardcore.warp_mouse(w[0],x,y)
 	end
 end
 
 -- set the mouse cursor to one from the available theme
 function base.cursor(...)
-	if     hardcore.cursor then
+	if     hardcore and hardcore.cursor then
 		return hardcore.cursor(...)
 	end
 end

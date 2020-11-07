@@ -235,7 +235,52 @@ function M.bake(oven,framebuffers)
 
 	framebuffers.pingpong = function(fbin,fbout,shadername,callback)
 	
+		local views=oven.cake.views
+	
 		if not fbin[1] then fbin={fbin} end -- upgrade input to array
+		
+		local view=views.create({
+			mode="fbo",
+			fbo=fbout,
+		})
+
+		gl.PushMatrix()
+		views.push_and_apply(view)
+		gl.state.push(gl.state_defaults)
+		gl.state.set({
+			[gl.BLEND]						=	gl.FALSE,
+			[gl.CULL_FACE]					=	gl.FALSE,
+			[gl.DEPTH_TEST]					=	gl.FALSE,
+			[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
+		})
+
+		fbout:bind_frame()
+
+		local v1=gl.apply_modelview( {fbout.w*-0,	fbout.h* 1,	0,1} )
+		local v2=gl.apply_modelview( {fbout.w*-0,	fbout.h*-0,	0,1} )
+		local v3=gl.apply_modelview( {fbout.w* 1,	fbout.h* 1,	0,1} )
+		local v4=gl.apply_modelview( {fbout.w* 1,	fbout.h*-0,	0,1} )
+		local t={
+			v1[1],	v1[2],	v1[3],	0,				0, 			
+			v2[1],	v2[2],	v2[3],	0,				fbin[1].uvh,
+			v3[1],	v3[2],	v3[3],	fbin[1].uvw,	0, 			
+			v4[1],	v4[2],	v4[3],	fbin[1].uvw,	fbin[1].uvh,
+		}
+
+		oven.cake.canvas.flat.tristrip("rawuv",t,shadername,function(p)
+			for i=#fbin,1,-1 do -- bind all textures in reverse order so we always end with texture0 as active
+				gl.ActiveTexture(gl.TEXTURE0+(i-1))
+				fbin[i]:bind_texture()
+			end
+			if callback then callback(p) end
+		end)
+
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+		gl.state.pop()
+		views.pop_and_apply()
+		gl.PopMatrix()
+
 
 	end
 

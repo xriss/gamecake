@@ -47,7 +47,7 @@ M.load=function(fname)
 	
 	local input=path[1]..path[2]..path[3]..path[4]
 
-	local gltf=M.parse( wzips.readfile(fname) )
+	local gltf=M.parse( assert(wzips.readfile(fname),"failed to load "..fname) )
 	
 	for i=1,#gltf.buffers do
 		local v=gltf.buffers[i]
@@ -351,6 +351,7 @@ M.to_geoms=function(gltf)
 		if node.children then
 			for i=1,#node.children do
 				node[i]=objs.nodes[ node.children[i]+1 ]
+				node[i].parentidx=node.nodeidx
 			end
 		end
 		node.children=nil
@@ -557,7 +558,7 @@ uniform vec4 color;
 uniform vec4  material_values[8];
 uniform vec4  material_colors[8];
 
-uniform mat4  bones[64];
+uniform mat4  bones[128];
 
 varying vec4  v_color;
 varying vec3  v_normal;
@@ -684,6 +685,7 @@ void main(void)
 	
 	local objs=M.to_geoms(gltf)
 
+--[[
 	local hash={
 		hair	={ 0.5 , 0.0 , 0.0 , 1.0 },
 		skin	={ 1.0 , 0.5 , 0.0 , 1.0 },
@@ -698,7 +700,7 @@ void main(void)
 		local c=hash[mat.name]
 		if c then mat[1].color=c end
 	end
-
+]]
 
 	for i,texture in ipairs(objs.textures) do
 	
@@ -845,7 +847,10 @@ main.draw=function()
 	gl.Rotate( view_orbit[1] ,  0,-1, 0 )
 	gl.Rotate( view_orbit[2] ,  1, 0, 0 )
 	
-	gl.Enable(gl.DEPTH_TEST)
+--	gl.Enable(gl.DEPTH_TEST)
+	gl.state.set({
+		[gl.DEPTH_TEST]					=	gl.TRUE,
+	})
 
 	local pp=function(p)
 	
@@ -872,7 +877,7 @@ main.draw=function()
 		if skin then
 			local b=0
 			for i,v in ipairs(skin.nodes) do
-				if i <= 64 then -- shader only supports a maximum of 64 bones
+				if i <= 128 then -- shader only supports a maximum of 128 bones
 					local bone=v.bone or M4()
 					for i=1,16 do bones[b+i]=bone[i] end
 					b=b+16

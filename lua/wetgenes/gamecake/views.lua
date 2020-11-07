@@ -28,8 +28,14 @@ function M.bake(oven,views)
 
 	views.stack={}
 	views.get=function() return assert(views.stack[#views.stack]) end
-	views.push=function(view) views.stack[#views.stack+1]=view end
-	views.pop=function() local view=views.get() views.stack[#views.stack]=nil return view end
+	views.push=function(view)
+		views.stack[#views.stack+1]=view
+	end
+	views.pop=function()
+		local view=views.get()
+		views.stack[#views.stack]=nil
+		return view
+	end
 	views.apply=function() local view=views.get() if view then view.apply() end end
 
 	views.push_and_apply=function(view)
@@ -76,8 +82,16 @@ function M.bake(oven,views)
 		view.hy=opts.hy
 
 -- the projection view size, mostly aspect, that we will be aiming for
-		view.vx=opts.vx -- width
-		view.vy=opts.vy -- height
+		if view.win then
+			view.vx=opts.vx or view.win.width
+			view.vy=opts.vy or view.win.height
+		elseif view.fbo then
+			view.vx=opts.vx or view.fbo.w
+			view.vy=opts.vy or view.fbo.h
+		else
+			view.vx=opts.vx -- width
+			view.vy=opts.vy -- height
+		end
 
 		view.vz=opts.vz or (view.vy and view.vy*4)-- depth range of the zbuffer
 

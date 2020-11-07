@@ -142,7 +142,7 @@ newplatform {
     gcc = {
         cc = "emcc",
         cxx = "em++",
-        ar= "ar",
+        ar= "emar",
         cppflags = "-MMD -fPIC",
     }
 }
@@ -251,7 +251,7 @@ if EMCC then
 		"-s ALLOW_MEMORY_GROWTH=1",
 		"-Wno-almost-asm",
 --		"-s ASSERTIONS=1",
-		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
+--		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
 		"-s EXTRA_EXPORTED_RUNTIME_METHODS='[\"cwrap\"]'",
 		"-s WASM=1",
@@ -694,7 +694,12 @@ elseif WINDOWS then
 	libdirs { path.getabsolute("./vbox_mingw/SDL2/lib") }
 elseif EMCC then
 	buildlinkoptions{
-		"-s USE_SDL=2","-Wno-error=format-security",
+		"-Wno-error=format-security",
+		"-s USE_SDL=2",
+		"-s FULL_ES3=1",
+		"-s USE_WEBGL2=1",
+		"-s MIN_WEBGL_VERSION=2",
+		"-s MAX_WEBGL_VERSION=2",
 	}
 end
 

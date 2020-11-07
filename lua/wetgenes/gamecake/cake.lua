@@ -27,6 +27,7 @@ function M.bake(oven,cake)
 		cake.images.start() -- also need to prioritise image for preloader in here
 		cake.sheets.start()
 		cake.sounds.start()
+		cake.textures.start()
 	end
 
 	cake.stop = function()
@@ -36,6 +37,7 @@ function M.bake(oven,cake)
 		cake.buffers.stop()
 		cake.framebuffers.stop()
 		cake.sounds.stop()
+		cake.textures.stop()
 		if oven.gl.forget then -- any programs will need to be recompiled
 			oven.gl.forget()
 		end
@@ -52,6 +54,7 @@ function M.bake(oven,cake)
 
 	cake.gles 	 = oven.rebake("wetgenes.gamecake.gles") -- initalise gles and manage our shaders
 	cake.buffers = oven.rebake("wetgenes.gamecake.buffers") -- generic buffer memory is now complex thanks to retardroid
+	cake.textures= oven.rebake("wetgenes.gamecake.textures") -- some textures that may not be images
 	cake.images  = oven.rebake("wetgenes.gamecake.images") -- we will need to load some images
 	cake.sheets  = oven.rebake("wetgenes.gamecake.sheets") -- we will need to manage some sprite sheets
 	cake.fonts   = oven.rebake("wetgenes.gamecake.fonts") -- we will need to load some fonts

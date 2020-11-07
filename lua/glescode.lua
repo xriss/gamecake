@@ -10,7 +10,7 @@ local bit=require("bit")
 local wstr=require("wetgenes.string")
 
 local tardis=require("wetgenes.tardis")
---local tcore=require("wetgenes.tardis.core") -- TODO: patch this into the base tardis core...
+local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
 local glslang=require("glslang")
 
@@ -29,9 +29,264 @@ function glescode.create(gl)
 	local code={}
 	for n,v in pairs(gl) do code[n]=v end
 	
+-- manage cached and stacked version of 			elseif name==gl.enable and related state
+	code.state={}
+
+	code.state.get=function(name)
+		return code.state[code.state.index][name]
+	end
+
+-- mainly deal with the GL enable/disable state and associated values
+-- possibly more should be added here?
+
+	code.state.set=function(name,value)
+	
+		local top=code.state[code.state.index]
+
+		if type(name)=="table" then -- multiple settings at once
+			local it=name
+			
+			if it[gl.BLEND_SRC_RGB] and it[gl.BLEND_DST_RGB] and it[gl.BLEND_SRC_ALPHA] and it[gl.BLEND_DST_ALPHA] then
+				if	top[gl.BLEND_SRC_RGB]~=it[gl.BLEND_SRC_RGB] or
+					top[gl.BLEND_DST_RGB]~=it[gl.BLEND_DST_RGB] or
+					top[gl.BLEND_SRC_ALPHA]~=it[gl.BLEND_SRC_ALPHA] or
+					top[gl.BLEND_DST_ALPHA]~=it[gl.BLEND_DST_ALPHA] then
+			
+					gl.BlendFuncSeparate(
+						it[gl.BLEND_SRC_RGB] ,
+						it[gl.BLEND_DST_RGB] ,
+						it[gl.BLEND_SRC_ALPHA] ,
+						it[gl.BLEND_DST_ALPHA] )
+						
+					top[gl.BLEND_SRC_RGB]=it[gl.BLEND_SRC_RGB]
+					top[gl.BLEND_DST_RGB]=it[gl.BLEND_DST_RGB]
+					top[gl.BLEND_SRC_ALPHA]=it[gl.BLEND_SRC_ALPHA]
+					top[gl.BLEND_DST_ALPHA]=it[gl.BLEND_DST_ALPHA]
+				end
+			end
+
+			if it[gl.BLEND_EQUATION_RGB] and it[gl.BLEND_EQUATION_ALPHA] then
+				if	top[gl.BLEND_EQUATION_RGB]~=it[gl.BLEND_EQUATION_RGB] or
+					top[gl.BLEND_EQUATION_ALPHA]~=it[gl.BLEND_EQUATION_ALPHA] then
+
+					gl.BlendEquationSeparate(
+						it[gl.BLEND_EQUATION_RGB] ,
+						it[gl.BLEND_EQUATION_ALPHA] )
+				
+					top[gl.BLEND_EQUATION_RGB]=it[gl.BLEND_EQUATION_RGB]
+					top[gl.BLEND_EQUATION_ALPHA]=it[gl.BLEND_EQUATION_ALPHA]
+				end
+			end
+
+			if it[gl.POLYGON_OFFSET_FACTOR] and it[gl.POLYGON_OFFSET_UNITS] then
+				if	top[gl.POLYGON_OFFSET_FACTOR]~=it[gl.POLYGON_OFFSET_FACTOR] or
+					top[gl.POLYGON_OFFSET_UNITS]~=it[gl.POLYGON_OFFSET_UNITS] then
+
+					gl.PolygonOffset(
+						it[gl.POLYGON_OFFSET_FACTOR] ,
+						it[gl.POLYGON_OFFSET_UNITS] )
+
+					top[gl.POLYGON_OFFSET_FACTOR]=it[gl.POLYGON_OFFSET_FACTOR]
+					top[gl.POLYGON_OFFSET_UNITS]=it[gl.POLYGON_OFFSET_UNITS]
+				end
+			end
+
+			if it[gl.SAMPLE_COVERAGE_VALUE] and it[gl.SAMPLE_COVERAGE_INVERT] then
+				if	top[gl.SAMPLE_COVERAGE_VALUE]~=it[gl.SAMPLE_COVERAGE_VALUE] or
+					top[gl.SAMPLE_COVERAGE_INVERT]~=it[gl.SAMPLE_COVERAGE_INVERT] then
+
+					gl.SampleCoverage(
+						it[gl.SAMPLE_COVERAGE_VALUE] ,
+						it[gl.SAMPLE_COVERAGE_INVERT] )
+						
+					top[gl.SAMPLE_COVERAGE_VALUE]=it[gl.SAMPLE_COVERAGE_VALUE]
+					top[gl.SAMPLE_COVERAGE_INVERT]=it[gl.SAMPLE_COVERAGE_INVERT]
+				end
+			end
+					
+			for n,v in pairs(it) do -- final settings recursive pass to pick up all other differences
+				code.state.set(n,v)
+			end
+
+			return
+		end
+	
+		if top[name]~=value then -- only hit the GL functions if a value has *actually* changed
+
+			if name==gl.BLEND_COLOR then
+				gl.BlendColor(value)
+
+			elseif name==gl.BLEND_SRC_RGB then
+				g.lBlendFuncSeparate(
+					value,
+					top[gl.BLEND_DST_RGB],
+					top[gl.BLEND_SRC_ALPHA],
+					top[gl.BLEND_DST_ALPHA])
+					
+			elseif name==gl.BLEND_SRC_ALPHA then
+				g.lBlendFuncSeparate(
+					top[gl.BLEND_SRC_RGB],
+					value,
+					top[gl.BLEND_SRC_ALPHA],
+					top[gl.BLEND_DST_ALPHA])
+
+			elseif name==gl.BLEND_DST_RGB then
+				g.lBlendFuncSeparate(
+					top[gl.BLEND_SRC_RGB],
+					top[gl.BLEND_DST_RGB],
+					value,
+					top[gl.BLEND_DST_ALPHA])
+
+			elseif name==gl.BLEND_DST_ALPHA then
+				g.lBlendFuncSeparate(
+					top[gl.BLEND_SRC_RGB],
+					top[gl.BLEND_DST_RGB],
+					top[gl.BLEND_SRC_ALPHA],
+					value)
+
+			elseif name==gl.BLEND_EQUATION_RGB then
+				gl.BlendEquationSeparate(
+					value,
+					top[gl.BLEND_EQUATION_ALPHA])
+
+			elseif name==gl.BLEND_EQUATION_ALPHA then
+				gl.BlendEquationSeparate(
+					top[gl.BLEND_EQUATION_RGB],
+					value)
+			
+			elseif name==gl.CULL_FACE_MODE then
+				gl.CullFace(value)
+
+			elseif name==gl.COLOR_WRITEMASK then
+				gl.ColorMask(value)
+
+			elseif name==gl.DEPTH_WRITEMASK then
+				gl.DepthMask(value)
+
+			elseif name==gl.DEPTH_FUNC then
+				gl.DepthFunc(value)
+				
+			elseif name==gl.DEPTH_RANGE then
+				gl.DepthRange(value)
+
+			elseif name==gl.POLYGON_OFFSET_FACTOR then
+				gl.PolygonOffset(
+					value,
+					top[gl.POLYGON_OFFSET_UNITS])
+					
+			elseif name==gl.POLYGON_OFFSET_UNITS then
+				gl.PolygonOffset(
+					top[gl.POLYGON_OFFSET_FACTOR],
+					value)
+
+			elseif name==gl.SAMPLE_COVERAGE_VALUE then
+				gl.SampleCoverage(
+					value,
+					top[gl.SAMPLE_COVERAGE_INVERT])
+
+			elseif name==gl.SAMPLE_COVERAGE_INVERT then
+				gl.SampleCoverage(
+					top[gl.SAMPLE_COVERAGE_VALUE],
+					value)
+
+			elseif name==gl.SCISSOR_BOX then
+				gl.Scissor(value)
+
+			else -- default enable or disable
+				if value then
+					gl.Enable(name)
+				else
+					gl.Disable(name)
+				end
+			end
+
+		end
+		code.state[code.state.index][name]=value
+	end
+
+	code.state.push=function(it)
+		local state={}
+		for n,v in pairs( code.state[code.state.index] ) do
+			state[n]=v
+		end
+		code.state.index=code.state.index+1
+		code.state[code.state.index]=state -- new state is just a copy
+		if it then code.state.set(it) end -- and make these state changes
+	end
+	
+	code.state.pop=function()
+		for n,v in pairs( code.state[code.state.index-1] ) do
+			code.state.set(n,v) -- make any needed changes
+		end
+		code.state[code.state.index]=nil
+		code.state.index=code.state.index-1
+	end
+	
+	
+	code.state_defaults=
+	{
+		[gl.CULL_FACE]					=	gl.FALSE,
+		[gl.BLEND]						=	gl.TRUE,
+		[gl.DITHER]						=	gl.TRUE,
+		[gl.STENCIL_TEST]				=	gl.FALSE,
+		[gl.DEPTH_TEST]					=	gl.FALSE,
+		[gl.SCISSOR_TEST]				=	gl.FALSE,
+		[gl.POLYGON_OFFSET_FILL]		=	gl.FALSE,
+		[gl.SAMPLE_ALPHA_TO_COVERAGE]	=	gl.FALSE,
+		[gl.SAMPLE_COVERAGE]			=	gl.FALSE,
+		
+		[gl.BLEND_COLOR]				=	V4(0,0,0,0),
+		
+		[gl.BLEND_SRC_RGB]				=	gl.ONE,
+		[gl.BLEND_DST_RGB]				=	gl.ONE_MINUS_SRC_ALPHA,
+		[gl.BLEND_SRC_ALPHA]			=	gl.ONE,
+		[gl.BLEND_DST_ALPHA]			=	gl.ONE_MINUS_SRC_ALPHA,
+		
+		[gl.BLEND_EQUATION_RGB]			=	gl.FUNC_ADD,
+		[gl.BLEND_EQUATION_ALPHA]		=	gl.FUNC_ADD,
+		
+		[gl.CULL_FACE_MODE]				=	gl.BACK,
+		
+		[gl.COLOR_WRITEMASK]			=	V4(gl.TRUE,gl.TRUE,gl.TRUE,gl.TRUE),
+
+		[gl.DEPTH_WRITEMASK]			=	gl.TRUE,
+		[gl.DEPTH_FUNC]					=	gl.LESS,
+		[gl.DEPTH_RANGE]				=	V2(0,1),
+		
+		[gl.POLYGON_OFFSET_FACTOR]		=	0,
+		[gl.POLYGON_OFFSET_UNITS]		=	0,
+		
+		[gl.SAMPLE_COVERAGE_VALUE]		=	1,
+		[gl.SAMPLE_COVERAGE_INVERT]		=	gl.FALSE,
+		
+		[gl.SCISSOR_BOX]				=	V4(0,0,0,0),
+
+-- ignore stencil for now as i cannot be bothered to type it all in, let alone test it...
+--[[
+		[gl.STENCIL_FUNC]				=	gl.ALWAYS,
+		[gl.STENCIL_REF]				=	0,
+		[gl.STENCIL_VALUE_MASK]			=	0xffffffff,
+		[gl.STENCIL_BACK_FUNC]			=	gl.ALWAYS,
+		[gl.STENCIL_BACK_REF]			=	0,
+		[gl.STENCIL_BACK_VALUE_MASK]	=	0xffffffff,
+]]
+
+	}
+
+	code.state.index=1
+	code.state[1]={}
+	for n,v in pairs(code.state_defaults) do
+		code.state[code.state.index][n]=v
+	end
+
+	-- fix initial values that deviate from opengl defaults
+	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+	gl.Enable(gl.BLEND)
+	-- from this point on you must only use code.state.set function not gl.Enable / etc
+	-- or we will get out of sync
+
 	code.cache={}
---	code.cache.color=tcore.new_v4()
-	code.cache.color=tardis.v4.new()
+	code.cache.color=V4()
 	
 	function code.Color(...)
 --		tcore.set(code.cache.color,...) -- may not set anything if no arguments are given
@@ -255,18 +510,27 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 -- default shader prefix to use when building
 
---	if core.GLES2 then -- use GLES2 prefix
---		code.defines.shaderprefix="#version 100\nprecision mediump float;\n"
---	else
-		code.defines_shaderprefix_tab={
-			"#version 100\nprecision mediump float;\n", -- Try ES?
-			"#version 120\n", -- seems to work on osx?
-			"#version 130\n", -- fails on osx?
-		}
-		code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
-		code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
+	local hax_mediump=[[
 
---	end
+precision mediump float;
+
+]]
+
+	code.defines_shaderprefix_tab={
+	
+		-- and this is our last chance to work
+
+--		"#version 100\n"..hax_mediump, -- Try ES 2.0
+--		"#version 120\n", -- the GL equivalent of ES 2.0
+
+		"#version 330\n", -- the GL equivalent of ES 3.0
+		"#version 300 es\n"..hax_mediump, -- Try ES 3.0
+
+		-- we start trying to compile at this end of the table
+
+	}
+	code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
+	code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
 	
 -- forget cached info when we lose context, it is important to call this
 	function code.forget()
@@ -337,18 +601,19 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 				if code.defines_shaderprefix_idx and code.defines_shaderprefix_idx>1 then -- try and brute force a working version number 
 
---print("Failed to build shader using prefix "..code.defines_shaderprefix_idx.." trying next prefix.")
-
-					print( "lowering shader version after failure to build shader : " .. ( filename or "" ) .. " : " .. sname .. "\n\n" ..  err .. "\n\n" )
+					print("Warning failed to build shader using prefix "..code.defines_shaderprefix_tab[code.defines_shaderprefix_idx])
+					print( ( filename or "" ) .. " : " .. sname .. "\n\n" ..  err .. "\n\n" )
 
 					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
 					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
+
+					print("Lowering shader prefix to "..code.defines_shaderprefix_tab[code.defines_shaderprefix_idx])
 
 					gl.DeleteShader(s[0])
 					
 				else -- give up
 
-					error( "failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
+					error( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
 					done=true
 				
 				end

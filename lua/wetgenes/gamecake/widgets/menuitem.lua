@@ -90,8 +90,8 @@ function wmenuitem.menu_add(widget,opts)
 	top.px,top.py=widget:get_master_xy(widget.hx*(widget.menu_px or 0),widget.hy*(widget.menu_py or 0))
 
 -- slight nudge to prevent dropdown gap
-	top.px=math.floor(top.px-1)
-	top.py=math.floor(top.py-1)
+	top.px=math.floor(top.px-2)
+	top.py=math.floor(top.py-2)
 
 	top.window=window
 	top.screen=screen

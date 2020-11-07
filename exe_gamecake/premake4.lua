@@ -19,10 +19,6 @@ if EMCC then
 
 	linkoptions { "-rdynamic" }
 	
-	buildlinkoptions{
-		"-s USE_SDL=2",
-	}
-	
 	linkoptions { "-v" }
 	
 	links { "m" }
