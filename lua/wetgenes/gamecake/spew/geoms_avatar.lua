@@ -21,6 +21,24 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.filename="/sync/kriss/blender/avatar/avatar.glb" -- try and use latest version
 
+M.material_names={
+		"white",
+		"grey",
+		"black",
+		"skin",
+		"lips",
+		"hair",
+		"iris",
+		"eye",
+		"head1",
+		"head2",
+		"body1",
+		"body2",
+		"foot1",
+		"foot2",
+		"hand1",
+		"hand2",
+	}
 
 M.bake=function(oven,geoms_avatar)
 
@@ -509,24 +527,7 @@ void main(void)
 					clamp(b*255)
 		end
 		geoms_avatar.map:clear(0xffffffff)
-		for idx,name in ipairs({
-			"black",
-			"skin",
-			"lips",
-			"hair",
-			"iris",
-			"eye",
-			"head1",
-			"head2",
-			"body1",
-			"body2",
-			"foot1",
-			"foot2",
-			"hand1",
-			"hand2",
-			"grey",
-			"white",
-		}) do
+		for idx,name in ipairs(geoms_avatar.material_names) do
 			local material=soul.materials[name]
 			if material and material.ramp then
 
