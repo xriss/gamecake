@@ -105,10 +105,6 @@ uniform sampler2D texbones;
 
 uniform float animframe;
 
-uniform mat4  bones[128];
-
-
-
 #ifdef VERTEX_SHADER
 
  
@@ -157,11 +153,9 @@ mat4 getbone(int bidx)
 
 	mat4 ma=texbone( bidx , int(animframe    ) );
 	mat4 mb=texbone( bidx , int(animframe+1.0) );
-	mat4 mf=fixbone(bidx, 0 );
+	mat4 mc=fixbone( bidx , 0 );
 
-// applying the tweak matrix before AND after slightly unfuxors child animation, slightly...
-
-	return mf*((fa*ma)+(fb*mb))*mf;
+	return mc*(((fa*ma)+(fb*mb)));
 }
 
 
@@ -346,14 +340,9 @@ void main(void)
 		local fs={}
 		
 		local ts=wgeoms.get_anim_tweaks(geoms_avatar.objs)
-		width=(#ts/4)
+		width=(#ts/(4*height))
 		
-		local b=#fs
-		for i=1,#ts do -- copy
-			fs[b+i]=ts[i]
-		end
-		
-		local d=wpack.save_array(fs,"f32")
+		local d=wpack.save_array(ts,"f32")
 
 		if geoms_avatar.fixtex then
 		
@@ -643,24 +632,24 @@ void main(void)
 -- half the tweak as we will apply it twice in the shader
 
 						node.tweak={}
-						node.tweak[ 1]=tweak.translate[ 1]*sx/2
-						node.tweak[ 2]=tweak.translate[ 2]/2
-						node.tweak[ 3]=tweak.translate[ 3]/2
+						node.tweak[ 1]=tweak.translate[ 1]*sx
+						node.tweak[ 2]=tweak.translate[ 2]
+						node.tweak[ 3]=tweak.translate[ 3]
 
 						local qa=Q4(0,0,0,1)
 						
-						qa:rotate(tweak.rotate[1]/2,{1,0,0})
-						qa:rotate(tweak.rotate[2]/2,{0,sx,0})
-						qa:rotate(tweak.rotate[3]/2,{0,0,sx})
+						qa:rotate(tweak.rotate[1],{1,0,0})
+						qa:rotate(tweak.rotate[2],{0,sx,0})
+						qa:rotate(tweak.rotate[3],{0,0,sx})
 
 						node.tweak[ 4]=qa[1]
 						node.tweak[ 5]=qa[2]
 						node.tweak[ 6]=qa[3]
 						node.tweak[ 7]=qa[4]
 
-						node.tweak[ 8]=((tweak.scale[1]-1)/2)+1
-						node.tweak[ 9]=((tweak.scale[2]-1)/2)+1
-						node.tweak[10]=((tweak.scale[3]-1)/2)+1
+						node.tweak[ 8]=((tweak.scale[1]-1))+1
+						node.tweak[ 9]=((tweak.scale[2]-1))+1
+						node.tweak[10]=((tweak.scale[3]-1))+1
 				end
 			end
 		end

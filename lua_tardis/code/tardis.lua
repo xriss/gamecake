@@ -1862,9 +1862,9 @@ if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first
 	function array.__index(it,n) return array[n] or tcore.read(it,n) end
 	function array.__newindex(it,n,v) tcore.write(it,n,v) end
 
-	function m2.new(...) return tcore.alloc(4* 4,m2):set(...) end
-	function m3.new(...) return tcore.alloc(4* 9,m3):set(...) end
-	function m4.new(...) return tcore.alloc(4*16,m4):set(...) end
+	function m2.new(...) return tcore.alloc(4* 4,m2):identity():set(...) end
+	function m3.new(...) return tcore.alloc(4* 9,m3):identity():set(...) end
+	function m4.new(...) return tcore.alloc(4*16,m4):identity():set(...) end
 
 	function m2.__len(it) return 4 end
 	function m3.__len(it) return 9 end

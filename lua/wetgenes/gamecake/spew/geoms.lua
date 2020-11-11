@@ -160,35 +160,58 @@ get the tweak and reset matrix of the bones
 
 		geoms.reset_anim(objs)
 		
-		for i,node in ipairs( objs.nodes ) do
-			if node.trs and node.tweak then
-				node.trs[ 1]=node.trs[ 1]+node.tweak[ 1]
-				node.trs[ 2]=node.trs[ 2]+node.tweak[ 2]
-				node.trs[ 3]=node.trs[ 3]+node.tweak[ 3]
+		local stack=tardis.m4_stack()
+		local prepare ; prepare=function(its)
 
-				local qa=Q4( node.trs[4] , node.trs[5] , node.trs[6] , node.trs[7] )
-				local qb=Q4( node.tweak[4] , node.tweak[5] , node.tweak[6] , node.tweak[7] )
-				tardis.q4_product_q4(qa,qb)
+			stack.push()
 
-				node.trs[ 4]=qa[1]
-				node.trs[ 5]=qa[2]
-				node.trs[ 6]=qa[3]
-				node.trs[ 7]=qa[4]
+			local trs=its.trs
+			local tweak=its.tweak
 
-				node.trs[ 8]=node.trs[ 8]*node.tweak[8]
-				node.trs[ 9]=node.trs[ 9]*node.tweak[9]
-				node.trs[10]=node.trs[10]*node.tweak[10]
+
+			if trs then
+
+				stack.translate( trs[1] , trs[2] , trs[3])
+				stack.rotate( { trs[4] , trs[5] , trs[6] , trs[7] } )
+				stack.scale( trs[8] , trs[9] , trs[10] )
+
+			elseif its.matrix then
+
+				stack.product( its.matrix )
+
 			end
-		end
 
-		geoms.prepare(objs)
+			if tweak then
+				stack.translate( tweak[1] , tweak[2] , tweak[3] )
+				stack.rotate( { tweak[4] , tweak[5] , tweak[6] , tweak[7] } )
+				stack.scale( tweak[8] , tweak[9] , tweak[10] )
+			end
+
+			its.world=stack.save() -- apply world tweak to children only
+
+			if its.inverse then
+				its.bone=its.world:product(its.inverse,tardis.m4.new())
+			end
+			
+			for i,v in ipairs(its) do
+				prepare(v)
+			end
+			
+			stack.pop()
+
+		end
+		prepare(objs.scene)
 
 		bones=bones or {}
 		local skin=objs.skins[1] -- assume only one boned character
 		if skin then
-			local b=0
+
+			local bs=#skin.nodes
 			for i,v in ipairs(skin.nodes) do
+
 				local bone=v.bone or M4()
+
+				local b=(i-1)*12
 
 				bones[b+1]=bone[1]
 				bones[b+2]=bone[5]
@@ -204,11 +227,11 @@ get the tweak and reset matrix of the bones
 				bones[b+10]=bone[7]
 				bones[b+11]=bone[11]
 				bones[b+12]=bone[15]
-
-				b=b+12
+				
 			end
+
 		end
-		
+
 		return bones
 
 	end
