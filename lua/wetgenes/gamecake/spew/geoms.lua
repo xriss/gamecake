@@ -126,7 +126,7 @@ GL matrix order is transposed and the final v4 should be assumed to be
 		if skin then
 			local b=0
 			for i,v in ipairs(skin.nodes) do
-				local bone=v.bone or M4()
+				local bone=v.world or M4()
 
 				bones[b+1]=bone[1]
 				bones[b+2]=bone[5]
@@ -207,11 +207,7 @@ get the tweak and reset matrix of the bones
 		if skin then
 
 			local bs=#skin.nodes
-			for i,v in ipairs(skin.nodes) do
-
-				local bone=v.bone or M4()
-
-				local b=(i-1)*12
+			local save=function(bone,b)
 
 				bones[b+1]=bone[1]
 				bones[b+2]=bone[5]
@@ -227,7 +223,30 @@ get the tweak and reset matrix of the bones
 				bones[b+10]=bone[7]
 				bones[b+11]=bone[11]
 				bones[b+12]=bone[15]
-				
+			end
+			
+			for i,v in ipairs(skin.nodes) do
+
+				local bone=v.inverse or M4()
+				local b=((bs*0)+i-1)*12
+				save(bone,b)
+
+			end
+
+			for i,v in ipairs(skin.nodes) do
+
+				local bone=v.world or M4()
+				local b=((bs*1)+i-1)*12
+				save(bone,b)
+
+			end
+
+			for i,v in ipairs(skin.nodes) do
+
+				local bone=M4()
+				local b=((bs*2)+i-1)*12
+				save(bone,b)
+
 			end
 
 		end

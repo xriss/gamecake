@@ -153,9 +153,20 @@ mat4 getbone(int bidx)
 
 	mat4 ma=texbone( bidx , int(animframe    ) );
 	mat4 mb=texbone( bidx , int(animframe+1.0) );
-	mat4 mc=fixbone( bidx , 0 );
+	mat4 mab=(((fa*ma)+(fb*mb)));
 
-	return mc*(((fa*ma)+(fb*mb)));
+	mat4 mc=fixbone( bidx , 0 );
+	mat4 md=fixbone( bidx , 1 );
+	mat4 me=fixbone( bidx , 2 );
+
+	mat4 mf=mat4( mat3(me)*mat3(mab) );
+	mf[3]=mab[3];
+	
+	mat4 mr=md*mc*mf;
+
+	
+	return mr*mc;
+
 }
 
 
@@ -335,23 +346,23 @@ void main(void)
 	function geoms_avatar.build_texture_tweak()
 	
 		local width=0
-		local height=1
+		local height=3
 		
 		local fs={}
 		
 		local ts=wgeoms.get_anim_tweaks(geoms_avatar.objs)
 		width=(#ts/(4*height))
 		
-		local d=wpack.save_array(ts,"f32")
-
 		if geoms_avatar.fixtex then
 		
-			geoms_avatar.fixtex.gl_data=d
+			geoms_avatar.fixtex.gl_table=ts
+			geoms_avatar.fixtex.gl_data=wpack.save_array(geoms_avatar.fixtex.gl_table,"f32")
 			geoms_avatar.fixtex:upload()
 
 		else
 			geoms_avatar.fixtex=textures.create({
-				gl_data=d,
+				gl_data=wpack.save_array(ts,"f32"),
+				gl_table=ts,
 				gl_width=width,
 				gl_height=height,
 				gl_internal=gl.RGBA32F,
@@ -362,6 +373,49 @@ void main(void)
 
 	end
 
+	function geoms_avatar.adjust_texture_tweak(name,mat)
+
+		local skin=geoms_avatar.objs.skins[1] -- assume only one boned character
+		if not skin then return end
+		if not geoms_avatar.fixtex then return end
+		
+		local bones=geoms_avatar.fixtex.gl_table
+	
+
+		local bs=#skin.nodes
+		local save=function(bone,b)
+
+			bones[b+1]=bone[1]
+			bones[b+2]=bone[5]
+			bones[b+3]=bone[9]
+			bones[b+4]=bone[13]
+
+			bones[b+5]=bone[2]
+			bones[b+6]=bone[6]
+			bones[b+7]=bone[10]
+			bones[b+8]=bone[14]
+
+			bones[b+9]=bone[3]
+			bones[b+10]=bone[7]
+			bones[b+11]=bone[11]
+			bones[b+12]=bone[15]
+		end
+
+		for i,v in ipairs(skin.nodes) do
+		
+			if v.name==name then
+				save( mat , ((bs*2)+i-1)*12 )
+			end
+
+		end
+
+		geoms_avatar.fixtex.gl_table=bones
+		geoms_avatar.fixtex.gl_data=wpack.save_array(geoms_avatar.fixtex.gl_table,"f32")
+		geoms_avatar.fixtex:upload()
+
+	end
+	
+	
 	function geoms_avatar.build_texture_anims()
 	
 		local objs=geoms_avatar.objs
