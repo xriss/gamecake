@@ -1,93 +1,87 @@
 
-local ipa_ascii_map={
+local ipa_arpabet={
 
---	IPA				ASCII-IPA				ARPABET					INTERNAL
+--	IPA				ARPABET
 
-	["ɑ"]	=	{	{	"a:",		},	{	"a",	"AA",	},	{	"a0",	"a",	},	},	--		arm			father		balm		bot
-	["æ"]	=	{	{	"@",		},	{	"@",	"AE",	},	{	"a1",	"A",	},	},	--		cat			black		bat
-	["ə"]	=	{	{	"..",		},	{	"x",	"AX",	},	{	"a2",			},	},	--		away		cinema		comma
-	["aɪ"]	=	{	{	"ai",		},	{	"Y",	"AY",	},	{	"a3",			},	},	--		five		eye			bite
-	["ɚ"]	=	{	{				},	{	"",		"AXR"	},	{	"a4",			},	},	--		letter
-	["eɪ"]	=	{	{	"ei",		},	{					},	{	"a5",			},	},	--		say			eight
-		                                                    
-	["b"]	=	{	{	"b",		},	{	"b",	"B",	},	{	"b0",	"b",	},	},	--		bad			lab			buy
-		                                                    
-	["tʃ"]	=	{	{	"tS",		},	{	"C",	"CH",	},	{	"c0",	"c",	},	},	--		check		church		china
-		                                                    
-	["d"]	=	{	{	"d",		},	{	"d",	"D",	},	{	"d0",	"d",	},	},	--		did			lady		die
-	["ð"]	=	{	{	"TH",		},	{	"D",	"DH",	},	{	"d1",	"D",	},	},	--		this		mother		thy
-		                                                    
-	["eɪ"]	=	{	{				},	{	"e",	"EY",	},	{	"e0",	"e",	},	},	--		bait
-	["ɛ"]	=	{	{				},	{	"E",	"EH",	},	{	"e1",	"E",	},	},	--		met			bed			bet
-	["ɝ"]	=	{	{				},	{	"R",	"ER",	},	{	"e2",			},	},	--		bird
-	["eəʳ"]	=	{	{	"e..(r)",	},	{					},	{	"e3",			},	},	--		where		air
-	["ɪəʳ"]	=	{	{	"i..(r)",	},	{					},	{	"e4",			},	},	--		near		here
-		                                                    
-	["f"]	=	{	{	"f",		},	{	"f",	"F",	},	{	"f0",	"f",	},	},	--		find		if			fight
-	["θ"]	=	{	{	"th",		},	{	"T",	"TH",	},	{	"f1",	"F",	},	},	--		think		both		thigh
-		                                                    
-	["g"]	=	{	{	"g",		},	{	"g",	"G",	},	{	"g0",	"g",	},	},	--		give		flag		guy
-	["ŋ"]	=	{	{				},	{	"G",	"NG",	},	{	"g1",	"G",	},	},	--		sing
+	["ɑ"]	=	{	"a",	"AA",	},	--		arm			father		balm		bot
+	["æ"]	=	{	"@",	"AE",	},	--		cat			black		bat
+	["ə"]	=	{	"x",	"AX",	},	--		away		cinema		comma
+	["aɪ"]	=	{	"Y",	"AY",	},	--		five		eye			bite
+	["ɚ"]	=	{	"",		"AXR"	},	--		letter
+		                            
+	["b"]	=	{	"b",	"B",	},	--		bad			lab			buy
+		                            
+	["tʃ"]	=	{	"C",	"CH",	},	--		check		church		china
+		                            
+	["d"]	=	{	"d",	"D",	},	--		did			lady		die
+	["ð"]	=	{	"D",	"DH",	},	--		this		mother		thy
+		                            
+	["eɪ"]	=	{	"e",	"EY",	},	--		bait
+	["ɛ"]	=	{	"E",	"EH",	},	--		met			bed			bet
+	["ɝ"]	=	{	"R",	"ER",	},	--		bird
+		                            
+	["f"]	=	{	"f",	"F",	},	--		find		if			fight
+	["θ"]	=	{	"T",	"TH",	},	--		think		both		thigh
+		                            
+	["g"]	=	{	"g",	"G",	},	--		give		flag		guy
+	["ŋ"]	=	{	"G",	"NG",	},	--		sing
 
-	["h"]	=	{	{	"h",		},	{	"h",	"H",	},	{	"h0",	"h",	},	},	--		how			hello		high
-		                                                    
-	["i"]	=	{	{	"i:",		},	{	"i",	"IY",	},	{	"i0",	"i",	},	},	--		see			heat		beat
-	["ɪ"]	=	{	{	"i",		},	{	"I",	"IH",	},	{	"i1",	"I",	},	},	--		hit			sitting		bit
-	["ɨ"]	=	{	{				},	{	"X",	"IX",	},	{	"i2",			},	},	--		roses		rabbit
-		                                                    
-	["dʒ"]	=	{	{	"dZ",		},	{	"J",	"JH",	},	{	"j0",	"j",	},	},	--		just		large		jive
-									                        
-	["k"]	=	{	{	"k",		},	{	"k",	"K",	},	{	"k0",	"k",	},	},	--		cat			back		kite
-		                                                    
-	["l"]	=	{	{	"l",		},	{	"l",	"L",	},	{	"l0",	"l",	},	},	--		leg			little		lie
-	["l̩"]	=	{	{				},	{	"L",	"EL",	},	{	"l1",	"L",	},	},	--		bottle
-		                                                    
-	["m"]	=	{	{	"m",		},	{	"m",	"M",	},	{	"m0",	"m",	},	},	--		man			lemon		my
-	["m̩"]	=	{	{				},	{	"M",	"EM",	},	{	"m1",	"M",	},	},	--		rhythm
-		                                                    
-	["n"]	=	{	{	"n",		},	{	"n",	"N",	},	{	"n0",	"n",	},	},	--		no			ten			nigh
-	["ŋ"]	=	{	{	"N",		},	{	"N",	"EN",	},	{	"n1",	"N",	},	},	--		sing		finger		button
-	["ɾ̃"]	=	{	{				},	{	"",		"NX",	},	{	"n2",			},	},	--		winner
-		                                                    
-	["oʊ"]	=	{	{	"Ou",		},	{	"o",	"OW",	},	{	"o0",	"o",	},	},	--		go			home		boat
-	["ɔɪ"]	=	{	{	"oi",		},	{	"O",	"OY",	},	{	"o1",	"O",	},	},	--		boy			join
-	["ɔ"]	=	{	{	"o:",		},	{	"c",	"AO",	},	{	"o2",			},	},	--		four		story
-	["aʊ"]	=	{	{	"au",		},	{	"W",	"AW",	},	{	"o3",			},	},	--		now			out			bout
-	["ɒ"]	=	{	{	"o",		},	{					},	{	"o4",			},	},	--		hot			rock
-		                                                    
-	["p"]	=	{	{	"p",		},	{	"p",	"P",	},	{	"p0",	"p",	},	},	--		pet			map			pie
-		                                                    
-	["ʔ"]	=	{	{				},	{	"Q",	"Q",	},	{	"q0",	"q",	},	},	--		uh-oh
-		                                                    
-	["r"]	=	{	{	"r",		},	{	"r",	"R",	},	{	"r0",	"r",	},	},	--		red			try			rye
-		                                                    
-	["s"]	=	{	{	"s",		},	{	"s",	"S",	},	{	"s0",	"s",	},	},	--		sun			miss		sigh
-	["ʃ"]	=	{	{	"S",		},	{	"S",	"SH",	},	{	"s1",	"S",	},	},	--		she			crash		shy
-		                                                    
-	["t"]	=	{	{	"t",		},	{	"t",	"T",	},	{	"t0",	"t",	},	},	--		tea			getting		tie
-	["ɾ"]	=	{	{				},	{	"F",	"DX",	},	{	"t1",	"T",	},	},	--		butter
+	["h"]	=	{	"h",	"H",	},	--		how			hello		high
+		                            
+	["i"]	=	{	"i",	"IY",	},	--		see			heat		beat
+	["ɪ"]	=	{	"I",	"IH",	},	--		hit			sitting		bit
+	["ɨ"]	=	{	"X",	"IX",	},	--		roses		rabbit
+		                            
+	["dʒ"]	=	{	"J",	"JH",	},	--		just		large		jive
+				                    
+	["k"]	=	{	"k",	"K",	},	--		cat			back		kite
+		                            
+	["l"]	=	{	"l",	"L",	},	--		leg			little		lie
+	["l̩"]	=	{	"L",	"EL",	},	--		bottle
+		                            
+	["m"]	=	{	"m",	"M",	},	--		man			lemon		my
+	["m̩"]	=	{	"M",	"EM",	},	--		rhythm
+		                            
+	["n"]	=	{	"n",	"N",	},	--		no			ten			nigh
+	["ŋ"]	=	{	"N",	"EN",	},	--		sing		finger		button
+	["ɾ̃"]	=	{	"",		"NX",	},	--		winner
+		                            
+	["oʊ"]	=	{	"o",	"OW",	},	--		go			home		boat
+	["ɔɪ"]	=	{	"O",	"OY",	},	--		boy			join
+	["ɔ"]	=	{	"c",	"AO",	},	--		four		story
+	["aʊ"]	=	{	"W",	"AW",	},	--		now			out			bout
+		                            
+	["p"]	=	{	"p",	"P",	},	--		pet			map			pie
+		                            
+	["ʔ"]	=	{	"Q",	"Q",	},	--		uh-oh
+		                            
+	["r"]	=	{	"r",	"R",	},	--		red			try			rye
+		                            
+	["s"]	=	{	"s",	"S",	},	--		sun			miss		sigh
+	["ʃ"]	=	{	"S",	"SH",	},	--		she			crash		shy
+		                            
+	["t"]	=	{	"t",	"T",	},	--		tea			getting		tie
+	["ɾ"]	=	{	"F",	"DX",	},	--		butter
 
-	["u"]	=	{	{	"u:",		},	{	"u",	"UW",	},	{	"u0",	"u",	},	},	--		blue		food		boot
-	["ʊ"]	=	{	{	"u",		},	{	"U",	"UH",	},	{	"u1",	"U",	},	},	--		put			could		book
-	["ʌ"]	=	{	{	"^",		},	{	"A",	"AH"	},	{	"u2",			},	},	--		cup			luck		butt
-	["ʉ"]	=	{	{				},	{	"",		"UX",	},	{	"u3",			},	},	--		dude
-	["ʊəʳ"]	=	{	{	"u..(r)",	},	{					},	{	"u4",			},	},	--		pure		tourist
-	["ɜʳ"]	=	{	{	"e:(r)",	},	{					},	{	"u5",			},	},	--		turn		learn
-		                                                    
-	["v"]	=	{	{	"v",		},	{	"v",	"V",	},	{	"v0",	"v",	},	},	--		voice		five		vie
-		                                                    
-	["w"]	=	{	{	"w",		},	{	"w",	"W",	},	{	"w0",	"w",	},	},	--		wet			window		wise
-	["ʍ"]	=	{	{				},	{	"H",	"WH",	},	{	"w1",	"W",	},	},	--		why
+	["u"]	=	{	"u",	"UW",	},	--		blue		food		boot
+	["ʊ"]	=	{	"U",	"UH",	},	--		put			could		book
+	["ʌ"]	=	{	"A",	"AH"	},	--		cup			luck		butt
+	["ʉ"]	=	{	"",		"UX",	},	--		dude
+		                            
+	["v"]	=	{	"v",	"V",	},	--		voice		five		vie
+		                            
+	["w"]	=	{	"w",	"W",	},	--		wet			window		wise
+	["ʍ"]	=	{	"H",	"WH",	},	--		why
 
-	["j"]	=	{	{	"j",		},	{	"y",	"Y",	},	{	"y0",	"y",	},	},	--		yes			yellow		yacht
-									                        
-	["z"]	=	{	{	"z",		},	{	"z",	"Z",	},	{	"z0",	"z",	},	},	--		zoo			lazy
-	["ʒ"]	=	{	{	"Z",		},	{	"Z",	"ZH",	},	{	"z1",	"Z",	},	},	--		pleasure	vision
+	["j"]	=	{	"y",	"Y",	},	--		yes			yellow		yacht
+				                    
+	["z"]	=	{	"z",	"Z",	},	--		zoo			lazy
+	["ʒ"]	=	{	"Z",	"ZH",	},	--		pleasure	vision
 
 }
 
 
-local ipa_id_map={
+local ipa_id={
 
 --	[#]	=	"IPA",	"Branner",	"M&O",	"PHONASCII","Praat",	"UPSID",	"Usenet",	"Worldbet",	"X-SAMPA",	"Value"
 
