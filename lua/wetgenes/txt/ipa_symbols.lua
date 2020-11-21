@@ -1,82 +1,82 @@
 
 local ipa_arpabet={
 
---	IPA				ARPABET
+--	IPA				ARPABET			CMUDICT
 
-	["ɑ"]	=	{	"a",	"AA",	},	--		arm			father		balm		bot
-	["æ"]	=	{	"@",	"AE",	},	--		cat			black		bat
-	["ə"]	=	{	"x",	"AX",	},	--		away		cinema		comma
-	["aɪ"]	=	{	"Y",	"AY",	},	--		five		eye			bite
-	["ɚ"]	=	{	"",		"AXR"	},	--		letter
+	["ɑ"]	=	{	"a",	"AA",	"vowel",		},	--		arm			father		balm		bot
+	["æ"]	=	{	"@",	"AE",	"vowel",		},	--		cat			black		bat
+	["aɪ"]	=	{	"Y",	"AY",	"vowel",		},	--		five		eye			bite
+	["ə"]	=	{	"x",	"AX",	false,			},	--		away		cinema		comma
+	["ɚ"]	=	{	"",		"AXR"	false,			},	--		letter
 		                            
-	["b"]	=	{	"b",	"B",	},	--		bad			lab			buy
+	["b"]	=	{	"b",	"B",	"stop",			},	--		bad			lab			buy
 		                            
-	["tʃ"]	=	{	"C",	"CH",	},	--		check		church		china
+	["tʃ"]	=	{	"C",	"CH",	"affricate",	},	--		check		church		china
 		                            
-	["d"]	=	{	"d",	"D",	},	--		did			lady		die
-	["ð"]	=	{	"D",	"DH",	},	--		this		mother		thy
+	["d"]	=	{	"d",	"D",	"stop",			},	--		did			lady		die
+	["ð"]	=	{	"D",	"DH",	"fricative",	},	--		this		mother		thy
 		                            
-	["eɪ"]	=	{	"e",	"EY",	},	--		bait
-	["ɛ"]	=	{	"E",	"EH",	},	--		met			bed			bet
-	["ɝ"]	=	{	"R",	"ER",	},	--		bird
+	["eɪ"]	=	{	"e",	"EY",	"vowel",		},	--		bait
+	["ɛ"]	=	{	"E",	"EH",	"vowel",		},	--		met			bed			bet
+	["ɝ"]	=	{	"R",	"ER",	"vowel",		},	--		bird
 		                            
-	["f"]	=	{	"f",	"F",	},	--		find		if			fight
-	["θ"]	=	{	"T",	"TH",	},	--		think		both		thigh
+	["f"]	=	{	"f",	"F",	"fricative",	},	--		find		if			fight
+	["θ"]	=	{	"T",	"TH",	"fricative",	},	--		think		both		thigh
 		                            
-	["g"]	=	{	"g",	"G",	},	--		give		flag		guy
-	["ŋ"]	=	{	"G",	"NG",	},	--		sing
+	["g"]	=	{	"g",	"G",	"stop",			},	--		give		flag		guy
+	["ŋ"]	=	{	"G",	"NG",	"nasal",		},	--		sing
 
-	["h"]	=	{	"h",	"H",	},	--		how			hello		high
+	["h"]	=	{	"h",	"HH",	"aspirate",		},	--		how			hello		high
 		                            
-	["i"]	=	{	"i",	"IY",	},	--		see			heat		beat
-	["ɪ"]	=	{	"I",	"IH",	},	--		hit			sitting		bit
-	["ɨ"]	=	{	"X",	"IX",	},	--		roses		rabbit
+	["i"]	=	{	"i",	"IY",	"vowel",		},	--		see			heat		beat
+	["ɪ"]	=	{	"I",	"IH",	"vowel",		},	--		hit			sitting		bit
+	["ɨ"]	=	{	"X",	"IX",	false,			},	--		roses		rabbit
 		                            
-	["dʒ"]	=	{	"J",	"JH",	},	--		just		large		jive
+	["dʒ"]	=	{	"J",	"JH",	"affricate",	},	--		just		large		jive
 				                    
-	["k"]	=	{	"k",	"K",	},	--		cat			back		kite
+	["k"]	=	{	"k",	"K",	"stop",			},	--		cat			back		kite
 		                            
-	["l"]	=	{	"l",	"L",	},	--		leg			little		lie
-	["l̩"]	=	{	"L",	"EL",	},	--		bottle
+	["l"]	=	{	"l",	"L",	"liquid",		},	--		leg			little		lie
+	["l̩"]	=	{	"L",	"EL",	false,			},	--		bottle
 		                            
-	["m"]	=	{	"m",	"M",	},	--		man			lemon		my
-	["m̩"]	=	{	"M",	"EM",	},	--		rhythm
+	["m"]	=	{	"m",	"M",	"nasal",		},	--		man			lemon		my
+	["m̩"]	=	{	"M",	"EM",	"",				},	--		rhythm
 		                            
-	["n"]	=	{	"n",	"N",	},	--		no			ten			nigh
-	["ŋ"]	=	{	"N",	"EN",	},	--		sing		finger		button
-	["ɾ̃"]	=	{	"",		"NX",	},	--		winner
+	["n"]	=	{	"n",	"N",	"nasal",		},	--		no			ten			nigh
+	["ŋ"]	=	{	"N",	"EN",	false,			},	--		sing		finger		button
+	["ɾ̃"]	=	{	"",		"NX",	false,			},	--		winner
 		                            
-	["oʊ"]	=	{	"o",	"OW",	},	--		go			home		boat
-	["ɔɪ"]	=	{	"O",	"OY",	},	--		boy			join
-	["ɔ"]	=	{	"c",	"AO",	},	--		four		story
-	["aʊ"]	=	{	"W",	"AW",	},	--		now			out			bout
+	["oʊ"]	=	{	"o",	"OW",	"vowel",		},	--		go			home		boat
+	["ɔɪ"]	=	{	"O",	"OY",	"vowel",		},	--		boy			join
+	["ɔ"]	=	{	"c",	"AO",	"vowel",		},	--		four		story
+	["aʊ"]	=	{	"W",	"AW",	"vowel",		},	--		now			out			bout
 		                            
-	["p"]	=	{	"p",	"P",	},	--		pet			map			pie
+	["p"]	=	{	"p",	"P",	"stop",			},	--		pet			map			pie
 		                            
-	["ʔ"]	=	{	"Q",	"Q",	},	--		uh-oh
+	["ʔ"]	=	{	"Q",	"Q",	false,			},	--		uh-oh
 		                            
-	["r"]	=	{	"r",	"R",	},	--		red			try			rye
+	["r"]	=	{	"r",	"R",	"liquid",		},	--		red			try			rye
 		                            
-	["s"]	=	{	"s",	"S",	},	--		sun			miss		sigh
-	["ʃ"]	=	{	"S",	"SH",	},	--		she			crash		shy
+	["s"]	=	{	"s",	"S",	"fricative",	},	--		sun			miss		sigh
+	["ʃ"]	=	{	"S",	"SH",	"fricative",	},	--		she			crash		shy
 		                            
-	["t"]	=	{	"t",	"T",	},	--		tea			getting		tie
-	["ɾ"]	=	{	"F",	"DX",	},	--		butter
+	["t"]	=	{	"t",	"T",	"stop",			},	--		tea			getting		tie
+	["ɾ"]	=	{	"F",	"DX",	false,			},	--		butter
 
-	["u"]	=	{	"u",	"UW",	},	--		blue		food		boot
-	["ʊ"]	=	{	"U",	"UH",	},	--		put			could		book
-	["ʌ"]	=	{	"A",	"AH"	},	--		cup			luck		butt
-	["ʉ"]	=	{	"",		"UX",	},	--		dude
+	["u"]	=	{	"u",	"UW",	"vowel",		},	--		blue		food		boot
+	["ʊ"]	=	{	"U",	"UH",	"vowel",		},	--		put			could		book
+	["ʌ"]	=	{	"A",	"AH"	"vowel",		},	--		cup			luck		butt
+	["ʉ"]	=	{	"",		"UX",	false,			},	--		dude
 		                            
-	["v"]	=	{	"v",	"V",	},	--		voice		five		vie
+	["v"]	=	{	"v",	"V",	"fricative",	},	--		voice		five		vie
 		                            
-	["w"]	=	{	"w",	"W",	},	--		wet			window		wise
-	["ʍ"]	=	{	"H",	"WH",	},	--		why
+	["w"]	=	{	"w",	"W",	"semivowel",	},	--		wet			window		wise
+	["ʍ"]	=	{	"H",	"WH",	false,			},	--		why
 
-	["j"]	=	{	"y",	"Y",	},	--		yes			yellow		yacht
+	["j"]	=	{	"y",	"Y",	"semivowel",	},	--		yes			yellow		yacht
 				                    
-	["z"]	=	{	"z",	"Z",	},	--		zoo			lazy
-	["ʒ"]	=	{	"Z",	"ZH",	},	--		pleasure	vision
+	["z"]	=	{	"z",	"Z",	"fricative",	},	--		zoo			lazy
+	["ʒ"]	=	{	"Z",	"ZH",	"fricative",	},	--		pleasure	vision
 
 }
 
