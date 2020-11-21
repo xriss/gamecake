@@ -19,20 +19,20 @@ local ipa_ascii_map={
 		                                                    
 	["eɪ"]	=	{	{				},	{	"e",	"EY",	},	{	"e0",	"e",	},	},	--		bait
 	["ɛ"]	=	{	{				},	{	"E",	"EH",	},	{	"e1",	"E",	},	},	--		met			bed			bet
-	["ɝ"]	=	{	{				},	{	"R",	"ER",	},	{	"e3",			},	},	--		bird
-	["eəʳ"]	=	{	{	"e..(r)",	},	{					},	{	"e4",			},	},	--		where		air
-	["ɪəʳ"]	=	{	{	"i..(r)",	},	{					},	{	"e5",			},	},	--		near		here
+	["ɝ"]	=	{	{				},	{	"R",	"ER",	},	{	"e2",			},	},	--		bird
+	["eəʳ"]	=	{	{	"e..(r)",	},	{					},	{	"e3",			},	},	--		where		air
+	["ɪəʳ"]	=	{	{	"i..(r)",	},	{					},	{	"e4",			},	},	--		near		here
 		                                                    
 	["f"]	=	{	{	"f",		},	{	"f",	"F",	},	{	"f0",	"f",	},	},	--		find		if			fight
 	["θ"]	=	{	{	"th",		},	{	"T",	"TH",	},	{	"f1",	"F",	},	},	--		think		both		thigh
 		                                                    
 	["g"]	=	{	{	"g",		},	{	"g",	"G",	},	{	"g0",	"g",	},	},	--		give		flag		guy
-	["ŋ"]	=	{	{				},	{	"G",	"NG",	},	{					},	},	--		sing
+	["ŋ"]	=	{	{				},	{	"G",	"NG",	},	{	"g1",	"G",	},	},	--		sing
 
 	["h"]	=	{	{	"h",		},	{	"h",	"H",	},	{	"h0",	"h",	},	},	--		how			hello		high
 		                                                    
-	["i"]	=	{	{	"i:",		},	{	"i",	"IY",	},	{	"i0",	"I",	},	},	--		see			heat		beat
-	["ɪ"]	=	{	{	"i",		},	{	"I",	"IH",	},	{	"i1",	"i",	},	},	--		hit			sitting		bit
+	["i"]	=	{	{	"i:",		},	{	"i",	"IY",	},	{	"i0",	"i",	},	},	--		see			heat		beat
+	["ɪ"]	=	{	{	"i",		},	{	"I",	"IH",	},	{	"i1",	"I",	},	},	--		hit			sitting		bit
 	["ɨ"]	=	{	{				},	{	"X",	"IX",	},	{	"i2",			},	},	--		roses		rabbit
 		                                                    
 	["dʒ"]	=	{	{	"dZ",		},	{	"J",	"JH",	},	{	"j0",	"j",	},	},	--		just		large		jive
@@ -89,7 +89,7 @@ local ipa_ascii_map={
 
 local ipa_id_map={
 
---	"#",	"IPA",	"Branner",	"M&O",	"PHONASCII","Praat",	"UPSID",	"Usenet",	"Worldbet",	"X-SAMPA",	"Value"},
+--	[#]	=	"IPA",	"Branner",	"M&O",	"PHONASCII","Praat",	"UPSID",	"Usenet",	"Worldbet",	"X-SAMPA",	"Value"
 
 	[101]={	"p",	"p",		"p",	"p",		"p",		"p",		"p",		"p",		"p",		"Voiceless bilabial stop"},
 	[102]={	"b",	"b",		"b",	"b",		"b",		"b",		"b",		"b",		"b",		"Voiced bilabial stop"},
