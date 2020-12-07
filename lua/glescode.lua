@@ -193,7 +193,7 @@ function glescode.create(gl)
 				gl.Scissor(value)
 
 			else -- default enable or disable
-				if value then
+				if value and value~=0 then
 					gl.Enable(name)
 				else
 					gl.Disable(name)
