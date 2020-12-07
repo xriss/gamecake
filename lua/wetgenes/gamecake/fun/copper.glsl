@@ -2,6 +2,12 @@
 
 #shader "fun_copper_back_y5"
 
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -84,6 +90,12 @@ void main(void)
 
 
 #shader "fun_copper_back_y3"
+
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
 
 uniform mat4 modelview;
 uniform mat4 projection;

@@ -280,6 +280,13 @@ void main(void)
 #endif
 
 #header "gamecake_shader"
+
+#version 300 es
+#version 330
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+
 #include "gamecake_shader_head"
 #include "gamecake_shader_vertex"
 #include "gamecake_shader_fragment"

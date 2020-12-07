@@ -477,8 +477,10 @@ function glescode.create(gl)
 		return p
 	end
 
--- reset headers and load multiple shader sources from a single file
+-- reset headers at startup
 	code.headers={}
+
+-- load multiple shader sources from a single file
 	function code.shader_sources(text,filename)
 	
 		local shaders=glslang.parse_chunks(text,filename,code.headers)
@@ -508,29 +510,6 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 	code.programs={}
 	code.defines={}
 
--- default shader prefix to use when building
-
-	local hax_mediump=[[
-
-precision mediump float;
-
-]]
-
-	code.defines_shaderprefix_tab={
-	
-		-- and this is our last chance to work
-
---		"#version 100\n"..hax_mediump, -- Try ES 2.0
---		"#version 120\n", -- the GL equivalent of ES 2.0
-
-		"#version 330\n", -- the GL equivalent of ES 3.0
-		"#version 300 es\n"..hax_mediump, -- Try ES 3.0
-
-		-- we start trying to compile at this end of the table
-
-	}
-	code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
-	code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
 	
 -- forget cached info when we lose context, it is important to call this
 	function code.forget()
@@ -562,6 +541,40 @@ precision mediump float;
 		end
 	end
 	
+-- parse a shader source and yank any #version out of the source and into a table
+-- this allows multiple attempts at compiling the same source using different #versions
+	function code.yank_shader_versions(src,default_version)
+		local versions={}
+		
+		local lines=wstr.split_lines(src)
+		
+		for i,line in ipairs(lines) do
+			if line:sub(1,8):lower()=="#version" then
+				local duplicate=false
+				for i,v in ipairs(versions) do if v==line then duplicate=true end end -- ignore duplicates
+				if not duplicate then versions[#versions+1]=line end
+				lines[i]="\n" -- remove
+			end
+		end
+	if not versions[1] then -- force a default if no version is found in source
+		versions[1]=default_version or "#version 100\n"
+	end
+-- parse possible versions and add #defines so we can slightly tweak shader code
+	for i,line in ipairs(versions) do
+		local words=wstr.split_words(line)
+		if words[3]=="es" or words[2]=="100" then
+			line=line.."#define VERSION_ES 1\n"	-- es flag
+		end
+		line=line.."#define VERSION_"..words[2].." 1\n"	-- boolean number
+		line=line.."#define VERSION "..words[2].."\n"	-- version number
+		versions[i]=line -- and replace
+	end
+	
+ -- return list of possible version lines , source with all #version lines removed
+ 		return versions,table.concat(lines)
+	end
+	
+	
 	function code.shader(stype,sname,filename)
 
 		local s
@@ -579,51 +592,31 @@ precision mediump float;
 		end
 		
 		if s[0] then return s[0] end
-
--- Uhm, we could really use a shader lint or precompiler at this point, why does such a thing not exist?
--- I dont normaly care for lint but it would *really* make sense here...
-
---print("Compiling shader "..sname,wstr.dump(s))
-
-		repeat local done=false
-
-			s[0]=assert(gl.CreateShader(stype))
-
-			local src=code.defines.shaderprefix..wstr.macro_replace(s.source,code.defines)
-			
-			gl.ShaderSource(s[0],src)
-			gl.CompileShader(s[0])
-			
-			if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
-			
-			
-				local err=gl.GetShaderInfoLog(s[0]) or "NIL"
-
-				if code.defines_shaderprefix_idx and code.defines_shaderprefix_idx>1 then -- try and brute force a working version number 
-
-					print("Warning failed to build shader using prefix "..code.defines_shaderprefix_tab[code.defines_shaderprefix_idx])
-					print( ( filename or "" ) .. " : " .. sname .. "\n\n" ..  err .. "\n\n" )
-
-					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
-					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
-
-					print("Lowering shader prefix to "..code.defines_shaderprefix_tab[code.defines_shaderprefix_idx])
-
-					gl.DeleteShader(s[0])
-					
-				else -- give up
-
-					error( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
-					done=true
-				
+		
+		local versions,src=code.yank_shader_versions( wstr.macro_replace(s.source,code.defines) )
+		local errors={}
+		local done=false
+		for vi,version in ipairs(versions) do
+			if not done then
+				s[0]=assert(gl.CreateShader(stype))
+				gl.ShaderSource(s[0],version..src)
+				gl.CompileShader(s[0])
+				if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
+					local err=gl.GetShaderInfoLog(s[0]) or "NIL"
+					errors[#errors+1]="ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n"
+					if vi<#versions then -- try again
+						gl.DeleteShader(s[0])
+						s[0]=nil
+					end
+				else
+					done=true -- success
 				end
-
-			else
-				done=true
 			end
-			
-		until done
-	
+		end
+		if not done then -- report all errors
+			for i,e in ipairs(errors) do error(e) end
+		end
+
 		return s[0]
 	end
 	

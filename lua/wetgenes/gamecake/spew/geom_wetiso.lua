@@ -102,6 +102,12 @@ wetiso.predraw=function()
 		gl.shaders.v_geom_wetiso={
 		source=[[
 
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -142,6 +148,12 @@ void main()
 
 		gl.shaders.f_geom_wetiso={
 		source=[[
+
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
 
 uniform sampler2D tex;
 

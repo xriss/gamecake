@@ -2,6 +2,13 @@
 
 #shader "fun_step_autocell"
 
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform sampler2D tex_cell;
@@ -51,6 +58,13 @@ void main(void)
 #endif
 
 #shader "fun_draw_autocell"
+
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+
 
 uniform mat4 modelview;
 uniform mat4 projection;

@@ -82,6 +82,12 @@ Greetz to No1 and No6!
 		gl.progsrc("about_sinescroll",
 		[[
 		
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+		
 		uniform mat4 modelview;
 		uniform mat4 projection;
 		uniform vec4 color;
