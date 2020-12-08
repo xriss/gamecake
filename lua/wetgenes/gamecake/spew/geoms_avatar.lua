@@ -91,6 +91,12 @@ M.bake=function(oven,geoms_avatar)
 
 	gl.program_source("avatar_gltf",[[
 
+#version 300 es
+#version 330
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+
 precision highp float;
 
 uniform mat4 modelview;

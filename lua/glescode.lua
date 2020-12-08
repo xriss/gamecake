@@ -604,6 +604,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 				if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
 					local err=gl.GetShaderInfoLog(s[0]) or "NIL"
 					errors[#errors+1]="ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n"
+--					..version..src.."\n\n"
 					if vi<#versions then -- try again
 						gl.DeleteShader(s[0])
 						s[0]=nil
@@ -614,7 +615,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			end
 		end
 		if not done then -- report all errors
-			for i,e in ipairs(errors) do error(e) end
+			for i,e in ipairs(errors) do print(e) end
 		end
 
 		return s[0]

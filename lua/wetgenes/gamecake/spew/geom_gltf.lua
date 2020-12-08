@@ -549,6 +549,12 @@ M.view=function(gltf,oven)
 
 	gl.program_source("geom_gltf",[[
 
+#version 300 es
+#version 330
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+
 precision highp float;
 
 uniform mat4 modelview;
