@@ -81,7 +81,7 @@ void foo()
     a[0] = s.m[1].z;     // 7.0
     b % 0;  // int
     b / 0;
-    e / 0;
+    e / 0;  -e / 0;  0.0 / 0.0;
     const uint ua = 5;
     const uvec2 ub = uvec2(6, 7);
     const uint uc = 8;
@@ -122,6 +122,9 @@ void foo2()
 
 const mat2 mm2 = mat2(1.0, 2.0, 3.0, 4.0);
 const mat3x2 mm32 = mat3x2(10.0, 11.0, 12.0, 13.0, 14.0, 15.0);
+const mat2 m22 = mat2(vec4(1.0, 2.0, 3.0, 4.0));
+const mat3x4 mm34 = mat3x4(7.0);
+const vec4 mv4 = vec4(m22);
 
 void foo3()
 {

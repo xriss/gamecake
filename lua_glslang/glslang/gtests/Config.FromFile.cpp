@@ -51,6 +51,7 @@ TEST_P(ConfigTest, FromFile)
 {
     TestCaseSpec testCase = GetParam();
     GlslangResult result;
+    result.validationResult = true;
 
     // Get the contents for input shader and limit configurations.
     std::string shaderContents, configContents;
@@ -94,12 +95,12 @@ TEST_P(ConfigTest, FromFile)
 }
 
 // clang-format off
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     Glsl, ConfigTest,
     ::testing::ValuesIn(std::vector<TestCaseSpec>({
-        {"specExamples.vert", "baseResults/test.conf", "specExamples.vert.out", (EShMessages)(EShMsgAST | EShMsgCascadingErrors)},
+        {"specExamples.vert", "baseResults/test.conf", "specExamplesConf.vert.out", (EShMessages)(EShMsgAST | EShMsgCascadingErrors)},
         {"100Limits.vert", "100.conf", "100LimitsConf.vert.out", EShMsgCascadingErrors},
-    })),
+    }))
 );
 // clang-format on
 
