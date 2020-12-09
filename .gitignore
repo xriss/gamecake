@@ -18,6 +18,8 @@ exe_gamecake/cache.c
 build/*.nix
 lib_luajit/*/native/*
 
+lua_bullet/bullet3
+
 #postgres junk that we do not need...
 lib_pq/src/test/*
 lib_pq/src/bin/*

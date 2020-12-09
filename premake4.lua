@@ -758,6 +758,7 @@ all_includes=all_includes or {
 	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
 
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
+	{"lua_bullet",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_utf8",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_cmsgpack",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},

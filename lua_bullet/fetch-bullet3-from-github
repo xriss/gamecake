@@ -7,5 +7,5 @@ rm -rf src
 mv bullet3/src src
 mv bullet3/LICENSE.txt .
 
-rm -rf bullet3
+#rm -rf bullet3
 
