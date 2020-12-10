@@ -20,6 +20,11 @@ files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 includedirs { "." , "./src" }
 
 
+
+defines {"BT_USE_DOUBLE_PRECISION"}
+
+
+
 links { "lib_lua" }
 
 KIND{lua="wetgenes.bullet.core"}
