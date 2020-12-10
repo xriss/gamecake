@@ -8,30 +8,114 @@ See https://github.com/xriss/gamecake for full notice.
 
 #include "all.h"
 
+//
+// we can use either this string as a string identifier
+// or its address as a light userdata identifier, both unique
+//
+const char *lua_bullet_body_meta_name ="bullet_body*ptr";
+const char *lua_bullet_shape_meta_name="bullet_shape*ptr";
 
-// gamecake -e"require('wetgenes.bullet.core').test()"
+
+
+/*+------------------------------------------------------------------+**
+
+A world plus all the other parts that a world needs allocated in one 
+struct.
+
+**+------------------------------------------------------------------+*/
+
+const char *lua_bullet_world_meta_name="bullet_world*ptr";
+
+typedef struct {
+	btDefaultCollisionConfiguration     * config ;
+	btCollisionDispatcher               * dispatcher ;
+	btBroadphaseInterface               * phase ;
+	btSequentialImpulseConstraintSolver * solver ;
+	btDiscreteDynamicsWorld             * world ;
+} bullet_world ;
+
+
+bullet_world * lua_bullet_world_ptr (lua_State *l,int idx)
+{
+bullet_world *pp;
+	pp=(bullet_world*)luaL_checkudata(l, idx , lua_bullet_world_meta_name);
+	if(!pp->world) { luaL_error(l,"bullet world is null"); }
+	return pp;
+}
+
+static int lua_bullet_world_create (lua_State *l)
+{	
+bullet_world *pp;
+
+	// create userdata
+	pp=(bullet_world*)lua_newuserdata(l, sizeof(bullet_world));
+	memset(pp,0,sizeof(bullet_world));
+	luaL_getmetatable(l, lua_bullet_world_meta_name);
+	lua_setmetatable(l, -2);
+
+	try	// allocate all the parts we need for a bullet_world
+	{
+		pp->config     = new btDefaultCollisionConfiguration();
+		pp->dispatcher = new btCollisionDispatcher( pp->config );
+		pp->phase      = new btDbvtBroadphase();
+		pp->solver     = new btSequentialImpulseConstraintSolver;
+		pp->world      = new btDiscreteDynamicsWorld( pp->dispatcher, pp->phase, pp->solver, pp->config );
+	}
+	catch (std::exception const& e)
+	{
+		if(pp->config)     { delete pp->config;     pp->config=0;     }
+		if(pp->dispatcher) { delete pp->dispatcher; pp->dispatcher=0; }
+		if(pp->phase)      { delete pp->phase;      pp->phase=0;      }
+		if(pp->solver)     { delete pp->solver;     pp->solver=0;     }
+		if(pp->world)      { delete pp->world;      pp->world=0;      }
+		return 0;
+	}
+	
+	// use registry so we can find the lua table from ptr,
+	// this has the side effect that this MUST be destroyed,
+	// it will not be GCd as this reference will keep it alive.
+	lua_pushlightuserdata(l,pp);
+	lua_pushvalue(l,1); // this will be the lua world table
+	lua_settable(l,LUA_REGISTRYINDEX);
+
+	return 1;
+}
+
+static int lua_bullet_world_destroy (lua_State *l)
+{	
+bullet_world *pp=(bullet_world*)luaL_checkudata(l, 1 , lua_bullet_world_meta_name);
+
+	// remove registry link
+	lua_pushlightuserdata(l,pp);
+	lua_pushnil(l);
+	lua_settable(l,LUA_REGISTRYINDEX);
+
+	if(pp->config)     { delete pp->config;     pp->config=0;     }
+	if(pp->dispatcher) { delete pp->dispatcher; pp->dispatcher=0; }
+	if(pp->phase)      { delete pp->phase;      pp->phase=0;      }
+	if(pp->solver)     { delete pp->solver;     pp->solver=0;     }
+	if(pp->world)      { delete pp->world;      pp->world=0;      }
+
+	return 0;
+}
+
+
+
+/*+------------------------------------------------------------------+**
+
+test
+
+gamecake -e" local wbc=require('wetgenes.bullet.core') ; wbc.test( wbc.world_create({}) ) "
+
+**+------------------------------------------------------------------+*/
 
 static int lua_bullet_test (lua_State *l)
 {
+bullet_world *pp=lua_bullet_world_ptr (l,1);
 
 	int i;
-	///-----initialization_start-----
 
-	///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
-	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
-
-	///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
-	btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
-
-	///btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
-	btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
-
-	///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
-	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
-
-	btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-
-	dynamicsWorld->setGravity(btVector3(0, -10, 0));
+	pp->world->setGravity(btVector3(0, -10, 0));
 
 	///-----initialization_end-----
 
@@ -67,7 +151,7 @@ static int lua_bullet_test (lua_State *l)
 		btRigidBody* body = new btRigidBody(rbInfo);
 
 		//add the body to the dynamics world
-		dynamicsWorld->addRigidBody(body);
+		pp->world->addRigidBody(body);
 	}
 
 	{
@@ -97,7 +181,7 @@ static int lua_bullet_test (lua_State *l)
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
 		btRigidBody* body = new btRigidBody(rbInfo);
 
-		dynamicsWorld->addRigidBody(body);
+		pp->world->addRigidBody(body);
 	}
 
 	/// Do some simulation
@@ -105,12 +189,12 @@ static int lua_bullet_test (lua_State *l)
 	///-----stepsimulation_start-----
 	for (i = 0; i < 150; i++)
 	{
-		dynamicsWorld->stepSimulation(1.f / 60.f, 10);
+		pp->world->stepSimulation(1.f / 60.f, 10);
 
 		//print positions of all objects
-		for (int j = dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
+		for (int j = pp->world->getNumCollisionObjects() - 1; j >= 0; j--)
 		{
-			btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[j];
+			btCollisionObject* obj = pp->world->getCollisionObjectArray()[j];
 			btRigidBody* body = btRigidBody::upcast(obj);
 			btTransform trans;
 			if (body && body->getMotionState())
@@ -132,15 +216,15 @@ static int lua_bullet_test (lua_State *l)
 	///-----cleanup_start-----
 
 	//remove the rigidbodies from the dynamics world and delete them
-	for (i = dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
+	for (i = pp->world->getNumCollisionObjects() - 1; i >= 0; i--)
 	{
-		btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
+		btCollisionObject* obj = pp->world->getCollisionObjectArray()[i];
 		btRigidBody* body = btRigidBody::upcast(obj);
 		if (body && body->getMotionState())
 		{
 			delete body->getMotionState();
 		}
-		dynamicsWorld->removeCollisionObject(obj);
+		pp->world->removeCollisionObject(obj);
 		delete obj;
 	}
 
@@ -151,20 +235,6 @@ static int lua_bullet_test (lua_State *l)
 		collisionShapes[j] = 0;
 		delete shape;
 	}
-
-	//delete dynamics world
-	delete dynamicsWorld;
-
-	//delete solver
-	delete solver;
-
-	//delete broadphase
-	delete overlappingPairCache;
-
-	//delete dispatcher
-	delete dispatcher;
-
-	delete collisionConfiguration;
 
 	//next line is optional: it will be cleared by the destructor when the array goes out of scope
 	collisionShapes.clear();
@@ -180,8 +250,22 @@ static int lua_bullet_test (lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 {
+	const luaL_Reg meta_world[] =
+	{
+		{"__gc",			lua_bullet_world_destroy},
+		{0,0}
+	};
+
+	luaL_newmetatable(l, lua_bullet_world_meta_name);
+	luaL_openlib(l, NULL, meta_world, 0);
+	lua_pop(l,1);
+
 	const luaL_Reg lib[] =
 	{
+		{"world_create",					lua_bullet_world_create},
+		{"world_destroy",					lua_bullet_world_destroy},
+
+
 		{"test",				lua_bullet_test},
 
 		{0,0}
