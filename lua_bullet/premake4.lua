@@ -22,4 +22,4 @@ includedirs { "." , "./src" }
 
 links { "lib_lua" }
 
-KIND{kind="lua",name="glslang_core",lua="glslang.core"}
+KIND{lua="wetgenes.bullet.core"}
