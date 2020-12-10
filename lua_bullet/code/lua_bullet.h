@@ -1,10 +1,10 @@
-/*
--- Copyright (C) 2020 Kriss Blank < Kriss@XIXs.com >
--- This file is distributed under the terms of the MIT license.
--- http://en.wikipedia.org/wiki/MIT_License
--- Please ping me if you use it for anything cool...
-*/
+/*+------------------------------------------------------------------+**
 
+(C) Kriss@XIXs.com 2020 and released under the MIT license.
+
+See https://github.com/xriss/gamecake for full notice.
+
+**+------------------------------------------------------------------+*/
 
 #ifdef __cplusplus
 extern "C" {
