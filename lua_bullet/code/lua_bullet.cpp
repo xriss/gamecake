@@ -234,9 +234,9 @@ btTransform trans;
 		{
 			shape=lua_bullet_shape_ptr(l, 2 );
 
-			trans.setOrigin(btVector3( lua_tonumber(l,3) ,  lua_tonumber(l,4) , lua_tonumber(l,5) ));
+			mass=lua_tonumber(l,3);
 
-			if( lua_isnumber(l,6) ) { mass=lua_tonumber(l,6); } // optional mass
+			trans.setOrigin(btVector3( lua_tonumber(l,4) ,  lua_tonumber(l,5) , lua_tonumber(l,6) ));
 
 			btVector3 localInertia(0, 0, 0);
 			if(mass != 0.f)
@@ -399,8 +399,7 @@ test
 
 gamecake -e" local wbc=require('wetgenes.bullet.core') ; wbc.test( wbc.world_create({}) ) "
 
-
-gamecake -e" require("apps").default_paths() ; require('wetgenes.bullet').test() "
+gamecake -e" require('apps').default_paths() ; require('wetgenes.bullet').test() "
 
 **+------------------------------------------------------------------+*/
 

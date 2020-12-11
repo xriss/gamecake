@@ -30,6 +30,8 @@ bullet.core=core
 bullet.test=function()
 
 	local world=core.world_create( {} )
+	
+	core.world_gravity(world,0,-10,0)
 
 --	core.test( world )
 
@@ -37,9 +39,26 @@ bullet.test=function()
 	local shapes={}
 	local bodys={}
 	
-	shapes[1]=core.shapre.create("")
+	shapes[1]=core.shape_create("box",100,50,100)
+	shapes[2]=core.shape_create("sphere",10)
 
+	bodys[1]=core.body_create("rigid",shapes[1],0,0,-50,0)
+	bodys[2]=core.body_create("rigid",shapes[2],1,0,20,0)
 
+	core.world_add_body(world,bodys[1])
+	core.world_add_body(world,bodys[2])
+
+	for i = 1,150 do
+		core.world_step(world,1/60,10)
+		print(1," : ",core.body_transform(bodys[1]))
+		print(2," : ",core.body_transform(bodys[2]))
+	end
+
+	print("done")
+	
+	for i,v in ipairs(shapes) do core.shape_destroy( v ) end
+	for i,v in ipairs(bodys)  do core.body_destroy( v )  end
+	core.world_destroy( world )
 
 end
 
