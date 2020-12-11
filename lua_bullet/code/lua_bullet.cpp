@@ -102,7 +102,6 @@ shape
 
 const char *lua_bullet_shape_meta_name="bullet_shape*ptr";
 
-
 btCollisionShape ** lua_bullet_shape_ptr_ptr (lua_State *l,int idx)
 {
 btCollisionShape **pp;
@@ -198,7 +197,6 @@ body
 
 const char *lua_bullet_body_meta_name="bullet_body*ptr";
 
-
 btRigidBody ** lua_bullet_body_ptr_ptr (lua_State *l,int idx)
 {
 btRigidBody **pp;
@@ -222,6 +220,11 @@ btCollisionShape *shape;
 double hx,hy,hz;
 int count;
 int i;
+btScalar mass( 0.0f );
+btTransform trans;
+
+	trans.setIdentity();
+
 // create ptr ptr userdata
 	pp=(btRigidBody**)lua_newuserdata(l, sizeof(btRigidBody*));
 	(*pp)=0;
@@ -234,8 +237,9 @@ int i;
 		{
 			shape=lua_bullet_shape_ptr(l, 2 );
 
-			btTransform startTransform; startTransform.setIdentity();
-			btScalar mass(1.f);
+			trans.setOrigin(btVector3( lua_tonumber(l,3) ,  lua_tonumber(l,4) , lua_tonumber(l,5) ));
+
+			if( lua_isnumber(l,6) ) { mass=lua_tonumber(l,6); } // optional mass
 
 			btVector3 localInertia(0, 0, 0);
 			if(mass != 0.f)
@@ -243,10 +247,7 @@ int i;
 				shape->calculateLocalInertia(mass, localInertia);
 			}
 
-			startTransform.setOrigin(btVector3(2, 80, 0));
-
-
-			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			btDefaultMotionState* myMotionState = new btDefaultMotionState(trans);
 			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, shape, localInertia);
 			*pp = new btRigidBody(rbInfo);
 
@@ -264,6 +265,8 @@ static int lua_bullet_body_destroy (lua_State *l)
 btRigidBody **pp=lua_bullet_body_ptr_ptr(l, 1 );
 	if(*pp)
 	{
+		btMotionState * motion = (*pp)->getMotionState();
+		if( motion ) { delete motion; }
 		delete *pp;
 		(*pp)=0;
 	}	
@@ -271,7 +274,7 @@ btRigidBody **pp=lua_bullet_body_ptr_ptr(l, 1 );
 }
 
 static int lua_bullet_body_lookup (lua_State *l)
-{	
+{
 btRigidBody *p=lua_bullet_body_ptr(l, 1 );
 	if( lua_isboolean(l,3) ) // forget
 	{
@@ -292,6 +295,76 @@ btRigidBody *p=lua_bullet_body_ptr(l, 1 );
 
 	return 1;
 }
+
+
+
+/*+------------------------------------------------------------------+**
+
+get/set world gravity
+
+**+------------------------------------------------------------------+*/
+static int lua_bullet_world_gravity (lua_State *l)
+{
+btDiscreteDynamicsWorld *world=lua_bullet_world_ptr(l,1)->world;
+
+	if( lua_isnumber(l,2) )
+	{
+		world->setGravity(btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) ));
+	}
+
+	btVector3 v=world->getGravity();
+
+	lua_pushnumber(l,v.getX());
+	lua_pushnumber(l,v.getY());
+	lua_pushnumber(l,v.getZ());
+
+	return 3;
+}
+
+/*+------------------------------------------------------------------+**
+
+world step
+
+**+------------------------------------------------------------------+*/
+static int lua_bullet_world_step (lua_State *l)
+{
+btDiscreteDynamicsWorld *world=lua_bullet_world_ptr(l,1)->world;
+
+	world->stepSimulation( lua_tonumber(l,2) ,  lua_tonumber(l,3) );
+
+	return 0;
+}
+
+/*+------------------------------------------------------------------+**
+
+add body to world
+
+**+------------------------------------------------------------------+*/
+static int lua_bullet_world_add_body (lua_State *l)
+{
+btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
+btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
+
+	world->addRigidBody(body);
+
+	return 0;
+}
+
+/*+------------------------------------------------------------------+**
+
+remove body from world
+
+**+------------------------------------------------------------------+*/
+static int lua_bullet_world_remove_body (lua_State *l)
+{
+btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
+btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
+
+	world->removeRigidBody(body);
+
+	return 0;
+}
+
 
 
 /*+------------------------------------------------------------------+**
@@ -436,11 +509,11 @@ bullet_world *pp=lua_bullet_world_ptr (l,1);
 }
 
 
-/*+-----------------------------------------------------------------------------------------------------------------+*/
-//
-// open library.
-//
-/*+-----------------------------------------------------------------------------------------------------------------+*/
+/*+------------------------------------------------------------------+**
+
+open library.
+
+**+------------------------------------------------------------------+*/
 LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 {
 
@@ -486,6 +559,15 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 
 		{"body_create",						lua_bullet_body_create},
 		{"body_destroy",					lua_bullet_body_destroy},
+
+
+		{"world_gravity",					lua_bullet_world_gravity},
+
+		{"world_step",						lua_bullet_world_step},
+
+		{"world_add_body",					lua_bullet_world_add_body},
+		{"world_remove_body",				lua_bullet_world_remove_body},
+
 
 		{"test",				lua_bullet_test},
 
