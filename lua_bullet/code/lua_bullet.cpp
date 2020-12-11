@@ -399,6 +399,9 @@ test
 
 gamecake -e" local wbc=require('wetgenes.bullet.core') ; wbc.test( wbc.world_create({}) ) "
 
+
+gamecake -e" require("apps").default_paths() ; require('wetgenes.bullet').test() "
+
 **+------------------------------------------------------------------+*/
 
 static int lua_bullet_test (lua_State *l)

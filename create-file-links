@@ -20,6 +20,7 @@ ln -f lua/wetgenes/win/emcc.lua    lua_win_emcc/code/emcc.lua
 ln -f lua/wetgenes/v4l2.lua        lua_v4l2/code/v4l2.lua
 ln -f lua/wetgenes/hid.lua         lua_hid/code/hid.lua
 ln -f lua/wetgenes/chipmunk.lua    lua_chipmunk/code/chipmunk.lua
+ln -f lua/wetgenes/bullet.lua      lua_bullet/code/bullet.lua
 ln -f lua/wetgenes/pack.lua        lua_pack/code/pack.lua
 ln -f lua/wetgenes/ogg.lua         lua_ogg/code/ogg.lua
 ln -f lua/wetgenes/speak.lua       lua_speak/code/speak.lua

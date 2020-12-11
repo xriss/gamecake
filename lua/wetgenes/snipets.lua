@@ -1,6 +1,10 @@
---
--- (C) 2013 Kriss@XIXs.com
---
+--[[--------------------------------------------------------------------
+
+(C) Kriss@XIXs.com 2020 and released under the MIT license.
+
+See https://github.com/xriss/gamecake for full notice.
+
+----------------------------------------------------------------------]]
 
 error([[
 -- just snippets of code for copypasta do not run as it should do nothing
