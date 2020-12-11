@@ -26,7 +26,6 @@ typedef struct {
 	btDiscreteDynamicsWorld             * world ;
 } bullet_world ;
 
-
 bullet_world * lua_bullet_world_ptr (lua_State *l,int idx)
 {
 bullet_world *pp;
@@ -44,8 +43,22 @@ static void lua_bullet_world_delete (bullet_world *pp)
 	if(pp->world)      { delete pp->world;      pp->world=0;      }
 }
 
-static int lua_bullet_world_create (lua_State *l)
+static int lua_bullet_world_destroy (lua_State *l)
 {	
+bullet_world *pp=(bullet_world*)luaL_checkudata(l, 1 , lua_bullet_world_meta_name);
+
+	// remove registry link
+	lua_pushlightuserdata(l,pp);
+	lua_pushnil(l);
+	lua_settable(l,LUA_REGISTRYINDEX);
+
+	lua_bullet_world_delete(pp);
+
+	return 0;
+}
+
+static int lua_bullet_world_create (lua_State *l)
+{
 bullet_world *pp;
 
 	// create userdata
@@ -77,21 +90,6 @@ bullet_world *pp;
 	return 1;
 }
 
-static int lua_bullet_world_destroy (lua_State *l)
-{	
-bullet_world *pp=(bullet_world*)luaL_checkudata(l, 1 , lua_bullet_world_meta_name);
-
-	// remove registry link
-	lua_pushlightuserdata(l,pp);
-	lua_pushnil(l);
-	lua_settable(l,LUA_REGISTRYINDEX);
-
-	lua_bullet_world_delete(pp);
-
-	return 0;
-}
-
-
 
 
 /*+------------------------------------------------------------------+**
@@ -102,23 +100,28 @@ shape
 
 const char *lua_bullet_shape_meta_name="bullet_shape*ptr";
 
-btCollisionShape ** lua_bullet_shape_ptr_ptr (lua_State *l,int idx)
-{
-btCollisionShape **pp;
-	pp=(btCollisionShape**)luaL_checkudata(l, idx , lua_bullet_shape_meta_name);
-	return pp;
-}
 
 btCollisionShape *  lua_bullet_shape_ptr (lua_State *l,int idx)
 {
 btCollisionShape **pp;
-	pp=lua_bullet_shape_ptr_ptr(l,idx);
+	pp=(btCollisionShape**)luaL_checkudata(l, idx , lua_bullet_shape_meta_name);
 	if(!*pp) { luaL_error(l,"bullet shape is null"); }
 	return *pp;
 }
 
+static int lua_bullet_shape_destroy (lua_State *l)
+{
+btCollisionShape **pp=(btCollisionShape**)luaL_checkudata(l, 1 , lua_bullet_shape_meta_name);
+	if(*pp)
+	{
+		delete *pp;
+		(*pp)=0;
+	}	
+	return 0;
+}
+
 static int lua_bullet_shape_create (lua_State *l)
-{	
+{
 const char *tp;
 btCollisionShape **pp;
 double hx,hy,hz;
@@ -154,17 +157,6 @@ int i;
 	return 1;
 }
 
-static int lua_bullet_shape_destroy (lua_State *l)
-{	
-btCollisionShape **pp=lua_bullet_shape_ptr_ptr(l, 1 );
-	if(*pp)
-	{
-		delete *pp;
-		(*pp)=0;
-	}	
-	return 0;
-}
-
 static int lua_bullet_shape_lookup (lua_State *l)
 {	
 btCollisionShape *p=lua_bullet_shape_ptr(l, 1 );
@@ -197,19 +189,24 @@ body
 
 const char *lua_bullet_body_meta_name="bullet_body*ptr";
 
-btRigidBody ** lua_bullet_body_ptr_ptr (lua_State *l,int idx)
-{
-btRigidBody **pp;
-	pp=(btRigidBody**)luaL_checkudata(l, idx , lua_bullet_body_meta_name);
-	return pp;
-}
-
 btRigidBody *  lua_bullet_body_ptr (lua_State *l,int idx)
 {
-btRigidBody **pp;
-	pp=lua_bullet_body_ptr_ptr(l,idx);
+btRigidBody **pp=(btRigidBody**)luaL_checkudata(l, idx , lua_bullet_body_meta_name);
 	if(!*pp) { luaL_error(l,"bullet body is null"); }
 	return *pp;
+}
+
+static int lua_bullet_body_destroy (lua_State *l)
+{	
+btRigidBody **pp=(btRigidBody**)luaL_checkudata(l, 1 , lua_bullet_body_meta_name);
+	if(*pp)
+	{
+		btMotionState * motion = (*pp)->getMotionState();
+		if( motion ) { delete motion; }
+		delete *pp;
+		(*pp)=0;
+	}	
+	return 0;
 }
 
 static int lua_bullet_body_create (lua_State *l)
@@ -258,19 +255,6 @@ btTransform trans;
 		}
 
 	return 1;
-}
-
-static int lua_bullet_body_destroy (lua_State *l)
-{	
-btRigidBody **pp=lua_bullet_body_ptr_ptr(l, 1 );
-	if(*pp)
-	{
-		btMotionState * motion = (*pp)->getMotionState();
-		if( motion ) { delete motion; }
-		delete *pp;
-		(*pp)=0;
-	}	
-	return 0;
 }
 
 static int lua_bullet_body_lookup (lua_State *l)
@@ -363,6 +347,48 @@ btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
 	world->removeRigidBody(body);
 
 	return 0;
+}
+
+
+
+/*+------------------------------------------------------------------+**
+
+get body position and rotation ( 7 numbers )
+
+**+------------------------------------------------------------------+*/
+static int lua_bullet_body_transform (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btTransform trans;
+
+	if( lua_isnumber(l,2) )
+	{
+		trans.setIdentity();
+		trans.setOrigin(btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) ));
+		if( lua_isnumber(l,5) )
+		{
+			trans.setRotation(btQuaternion( lua_tonumber(l,5) ,  lua_tonumber(l,6) , lua_tonumber(l,7) , lua_tonumber(l,8) ));
+		}
+		body->setWorldTransform(trans);
+	}
+
+	btMotionState *motion=body->getMotionState();
+	if( motion ) { motion->getWorldTransform(trans); }
+	else { trans = body->getWorldTransform(); }
+
+	btVector3 v=trans.getOrigin();
+	btQuaternion q=trans.getRotation();
+
+	lua_pushnumber(l,v.getX());
+	lua_pushnumber(l,v.getY());
+	lua_pushnumber(l,v.getZ());
+
+	lua_pushnumber(l,q.getX());
+	lua_pushnumber(l,q.getY());
+	lua_pushnumber(l,q.getZ());
+	lua_pushnumber(l,q.getW());
+
+	return 7;
 }
 
 
@@ -560,13 +586,12 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_create",						lua_bullet_body_create},
 		{"body_destroy",					lua_bullet_body_destroy},
 
-
 		{"world_gravity",					lua_bullet_world_gravity},
-
 		{"world_step",						lua_bullet_world_step},
-
 		{"world_add_body",					lua_bullet_world_add_body},
 		{"world_remove_body",				lua_bullet_world_remove_body},
+
+		{"body_transform",					lua_bullet_body_transform},
 
 
 		{"test",				lua_bullet_test},
