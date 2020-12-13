@@ -44,20 +44,24 @@ bullet.test=function()
 
 	bodys[1]=core.body_create("rigid",shapes[1],0,0,-50,0)
 	bodys[2]=core.body_create("rigid",shapes[2],1,0,20,0)
+	bodys[3]=core.body_create("rigid",shapes[2],1,0,40,0)
 
-	core.world_add_body(world,bodys[1])
-	core.world_add_body(world,bodys[2])
+	for i,v in ipairs(bodys) do
+		core.world_add_body(world,v)
+	end
 
 	for i = 1,150 do
 		core.world_step(world,1/60,10)
-		print(1," : ",core.body_transform(bodys[1]))
-		print(2," : ",core.body_transform(bodys[2]))
+		for i,v in ipairs(bodys) do
+			print(i," : ",core.body_transform(v))
+		end
 	end
 
 	print("done")
 	
-	for i,v in ipairs(shapes) do core.shape_destroy( v ) end
-	for i,v in ipairs(bodys)  do core.body_destroy( v )  end
+	for i,v in ipairs(bodys)  do print("B",i) core.world_remove_body(world,v) core.body_destroy( v )  end
+	for i,v in ipairs(shapes) do print("S",i) core.shape_destroy( v ) end
+	print("W",1)
 	core.world_destroy( world )
 
 end

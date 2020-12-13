@@ -36,11 +36,11 @@ bullet_world *pp;
 
 static void lua_bullet_world_delete (bullet_world *pp)
 {
+	if(pp->world)      { delete pp->world;      pp->world=0;      }
 	if(pp->config)     { delete pp->config;     pp->config=0;     }
 	if(pp->dispatcher) { delete pp->dispatcher; pp->dispatcher=0; }
 	if(pp->phase)      { delete pp->phase;      pp->phase=0;      }
 	if(pp->solver)     { delete pp->solver;     pp->solver=0;     }
-	if(pp->world)      { delete pp->world;      pp->world=0;      }
 }
 
 static int lua_bullet_world_destroy (lua_State *l)
