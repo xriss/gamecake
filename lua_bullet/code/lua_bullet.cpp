@@ -47,7 +47,7 @@ static int lua_bullet_world_destroy (lua_State *l)
 {	
 bullet_world *pp=(bullet_world*)luaL_checkudata(l, 1 , lua_bullet_world_meta_name);
 
-	// remove registry link
+	// remove any registry link
 	lua_pushlightuserdata(l,pp);
 	lua_pushnil(l);
 	lua_settable(l,LUA_REGISTRYINDEX);
@@ -81,16 +81,16 @@ bullet_world *pp;
 		return 0;
 	}
 	
-	// use registry so we can find the lua table from ptr,
-	// this has the side effect that this MUST be explicitly destroyed
-	lua_pushlightuserdata(l,pp);
-	lua_pushvalue(l,1); // this will be the lua world table
-	lua_settable(l,LUA_REGISTRYINDEX);
-
 	return 1;
 }
 
-
+static int lua_bullet_world_register (lua_State *l)
+{
+	lua_pushvalue(l,1); // this will be the userdata
+	lua_pushvalue(l,2); // this will be the table
+	lua_settable(l,LUA_REGISTRYINDEX);
+	return 0;
+}
 
 /*+------------------------------------------------------------------+**
 
@@ -153,29 +153,6 @@ int i;
 		{
 			lua_pushstring(l,"unknown shape type"); lua_error(l);
 		}
-
-	return 1;
-}
-
-static int lua_bullet_shape_lookup (lua_State *l)
-{	
-btCollisionShape *p=lua_bullet_shape_ptr(l, 1 );
-	if( lua_isboolean(l,3) ) // forget
-	{
-		lua_pushlightuserdata(l,p);
-		lua_pushnil(l);
-		lua_settable(l,2);		
-	}
-	else
-	if( lua_istable(l,3) ) // remember
-	{
-		lua_pushlightuserdata(l,p);
-		lua_pushvalue(l,3);
-		lua_settable(l,2);
-	}
-
-	lua_pushlightuserdata(l,p);
-	lua_gettable(l,2);
 
 	return 1;
 }
@@ -253,29 +230,6 @@ btTransform trans;
 		{
 			lua_pushstring(l,"unknown body type"); lua_error(l);
 		}
-
-	return 1;
-}
-
-static int lua_bullet_body_lookup (lua_State *l)
-{
-btRigidBody *p=lua_bullet_body_ptr(l, 1 );
-	if( lua_isboolean(l,3) ) // forget
-	{
-		lua_pushlightuserdata(l,p);
-		lua_pushnil(l);
-		lua_settable(l,2);		
-	}
-	else
-	if( lua_istable(l,3) ) // remember
-	{
-		lua_pushlightuserdata(l,p);
-		lua_pushvalue(l,3);
-		lua_settable(l,2);
-	}
-
-	lua_pushlightuserdata(l,p);
-	lua_gettable(l,2);
 
 	return 1;
 }
@@ -581,6 +535,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 	{
 		{"world_create",					lua_bullet_world_create},
 		{"world_destroy",					lua_bullet_world_destroy},
+		{"world_register",					lua_bullet_world_register},
 
 		{"shape_create",					lua_bullet_shape_create},
 		{"shape_destroy",					lua_bullet_shape_destroy},

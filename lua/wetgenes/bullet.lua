@@ -25,11 +25,153 @@ local bullet={}
 local core=require("wetgenes.bullet.core")
 bullet.core=core
 
+-- meta methods bound to the various objects
+
+bullet.world_functions={is="world"}
+bullet.world_metatable={__index=bullet.world_functions}
+
+bullet.shape_functions={is="shape"}
+bullet.shape_metatable={__index=bullet.shape_functions}
+
+bullet.body_functions={is="body"}
+bullet.body_metatable={__index=bullet.body_functions}
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world
+
+	world=bullet.world()
+
+Create the world you will be simulating physics in.
+
+]]
+bullet.world=function(...)
+	local world={}
+	world.bodies={}
+	world.shapes={}
+	setmetatable(world,bullet.world_metatable)
+	world[0]=core.world_create(...)
+	
+--	core.world_register(world[0],world)
+	
+	return world
+end
 
 
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.destroy
+
+	world:destroy()
+
+Destroy the world and all associated data.
+
+]]
+bullet.world_functions.destroy=function(world)
+
+	for i,body  in pairs(world.bodys)   do body:destroy() end
+	for i,shape in pairs(world.shapes)  do shape:destroy() end
+
+	core.world_destroy( world[0] )
+
+end
+
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.gravity
+
+	world:gravity(x,y,z)
+	
+	x,y,z = world:gravity()
+
+Set or get world gravity vector. Recommended gravity is 0,-10,0
+
+]]
+bullet.world_functions.gravity=function(world,vx,vy,vz)
+
+	local rx,ry,rz = core.world_gravity( world[0] , vx , vy , vz )
+
+	return rx,ry,rz
+
+end
+
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.shape
+
+	shape = world:shape()
+
+Create a shape.
+
+]]
+bullet.world_functions.shape=function(world,...)
+	local shape={}
+	setmetatable(shape,bullet.shape_metatable)
+	shape[0]=core.shape_create(...)
+	shape.world=world
+	
+	world.shapes[ shape[0] ]=shape
+
+	return shape
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.shape.destroy
+
+	shape:destroy()
+
+Destroy shape.
+
+]]
+bullet.shape_functions.destroy=function(shape)
+	local world=shape.world
+	core.shape_destroy( shape[0] )
+	world.shapes[ shape[0] ]=nil
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body
+
+	body = world:body()
+
+Create a body.
+
+]]
+bullet.world_functions.shape=function(world,...)
+	local body={}
+	setmetatable(body,bullet.body_metatable)
+	body[0]=core.body_create(...)
+	body.world=world
+	
+	world.bodies[ body[0] ]=body
+
+	return body
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.destroy
+
+	body:destroy()
+
+Destroy body.
+
+]]
+bullet.body_functions.destroy=function(body)
+	local world=body.world
+	core.body_destroy( body[0] )
+	world.bodies[ body[0] ]=nil
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.test
+
+	bullet.test()
+
+Create a simple world and simulate some physics printing positions out 
+to the console. Hopefully without crashing :)
+
+]]
 bullet.test=function()
 
-	local world=core.world_create( {} )
+	local world=core.world_create( )
 	
 	core.world_gravity(world,0,-10,0)
 
