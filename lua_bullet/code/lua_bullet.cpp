@@ -96,6 +96,18 @@ static int lua_bullet_world_register (lua_State *l)
 
 shape
 
+	btBoxShape : "box" , x/2 , y/2 , z/2
+	
+	btSphereShape : "sphere" , radius
+	
+	btCapsuleShape : "capsule" , height , radius , axis
+
+	btCylinderShape : "cylinder" , x/2 , y/2 , z/2 , axis
+
+	btConeShape : "cone" , height , radius , axis
+	
+	btMultiSphereShape : "spheres" , { {radius,x,y,z} , ... }
+
 **+------------------------------------------------------------------+*/
 
 const char *lua_bullet_shape_meta_name="bullet_shape*ptr";
@@ -122,10 +134,15 @@ btCollisionShape **pp=(btCollisionShape**)luaL_checkudata(l, 1 , lua_bullet_shap
 
 static int lua_bullet_shape_create (lua_State *l)
 {
+btVector3 *positions;
+btScalar *sizes;
+
+const char *ap;
 const char *tp;
 btCollisionShape **pp;
 double hx,hy,hz;
 double radius;
+double qx,qy,qz,qw;
 int count;
 int i;
 // create ptr ptr userdata
@@ -148,6 +165,126 @@ int i;
 		{
 			radius=luaL_checknumber(l,2);
 			*pp = new btSphereShape( btScalar(radius) );
+		}
+		else
+		if(0==strcmp(tp,"capsule"))
+		{
+			radius=luaL_checknumber(l,2);
+			hy=luaL_checknumber(l,3);
+			ap="y"; // default to y axis orientation
+			if( lua_isstring(l,4) )
+			{
+				ap=luaL_checkstring(l,4);			// x,y,z axis string
+			}
+			if(0==strcmp(ap,"x"))
+			{
+				*pp = new btCapsuleShapeX( btScalar(radius) , btScalar(hy) );
+			}
+			else
+			if(0==strcmp(ap,"y"))
+			{
+				*pp = new btCapsuleShape( btScalar(radius) , btScalar(hy) );
+			}
+			else
+			if(0==strcmp(ap,"z"))
+			{
+				*pp = new btCapsuleShapeZ( btScalar(radius) , btScalar(hy) );
+			}
+			else
+			{
+				lua_pushstring(l,"unknown shape axis"); lua_error(l);
+			}
+		}
+		else
+		if(0==strcmp(tp,"cylinder"))
+		{
+			hx=luaL_checknumber(l,2);
+			hy=luaL_checknumber(l,3);
+			hz=luaL_checknumber(l,4);
+			ap="y"; // default to y axis orientation
+			if( lua_isstring(l,5) )
+			{
+				ap=luaL_checkstring(l,5);			// x,y,z axis string
+			}
+			if(0==strcmp(ap,"x"))
+			{
+				*pp = new btCylinderShapeX( btVector3(hx,hy,hz) );
+			}
+			else
+			if(0==strcmp(ap,"y"))
+			{
+				*pp = new btCylinderShape( btVector3(hx,hy,hz) );
+			}
+			else
+			if(0==strcmp(ap,"z"))
+			{
+				*pp = new btCylinderShapeZ( btVector3(hx,hy,hz) );
+			}
+			else
+			{
+				lua_pushstring(l,"unknown shape axis"); lua_error(l);
+			}
+		}
+		else
+		if(0==strcmp(tp,"cone"))
+		{
+			radius=luaL_checknumber(l,2);
+			hy=luaL_checknumber(l,3);
+			ap="y"; // default to y axis orientation
+			if( lua_isstring(l,4) )
+			{
+				ap=luaL_checkstring(l,4);			// x,y,z axis string
+			}
+			if(0==strcmp(ap,"x"))
+			{
+				*pp = new btConeShapeX( btScalar(radius) , btScalar(hy) );
+			}
+			else
+			if(0==strcmp(ap,"y"))
+			{
+				*pp = new btConeShape( btScalar(radius) , btScalar(hy) );
+			}
+			else
+			if(0==strcmp(ap,"z"))
+			{
+				*pp = new btConeShapeZ( btScalar(radius) , btScalar(hy) );
+			}
+			else
+			{
+				lua_pushstring(l,"unknown shape axis"); lua_error(l);
+			}
+		}
+		else
+		if(0==strcmp(tp,"spheres"))
+		{
+			count=lua_objlen(l,2); // must be table
+			if( count>0 )
+			{
+				positions=new btVector3[count] ;
+				sizes=new btScalar[count] ;
+
+				for(i=0;i<count;i++)
+				{
+					lua_rawgeti(l,2,i+1); // get single sphere data
+					
+					lua_rawgeti(l,-1,1); radius=luaL_checknumber(l,-1); lua_pop(l,1);
+					lua_rawgeti(l,-1,2); hx=luaL_checknumber(l,-1); lua_pop(l,1);
+					lua_rawgeti(l,-1,3); hy=luaL_checknumber(l,-1); lua_pop(l,1);
+					lua_rawgeti(l,-1,4); hz=luaL_checknumber(l,-1); lua_pop(l,1);
+
+					lua_pop(l,1);
+					positions[i]=btVector3(hx,hy,hz);
+					sizes[i]=btScalar(radius);
+				}
+				*pp = new btMultiSphereShape( positions , sizes , count );
+
+				delete[] positions;
+				delete[] sizes;
+			}
+			else
+			{
+				lua_pushstring(l,"missing table"); lua_error(l);
+			}
 		}
 		else
 		{
