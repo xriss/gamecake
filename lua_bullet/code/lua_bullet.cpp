@@ -96,6 +96,21 @@ static int lua_bullet_world_register (lua_State *l)
 
 mesh
 
+btTriangleIndexVertexMaterialArray::btTriangleIndexVertexMaterialArray 	(
+		int  	numTriangles,
+		int *  	triangleIndexBase,
+		int  	triangleIndexStride,
+		int  	numVertices,
+		btScalar *  	vertexBase,
+		int  	vertexStride,
+		int  	numMaterials,
+		unsigned char *  	materialBase,
+		int  	materialStride,
+		int *  	triangleMaterialsBase,
+		int  	materialIndexStride 
+	)
+	
+	
 **+------------------------------------------------------------------+*/
 
 const char *lua_bullet_mesh_meta_name="bullet_mesh*ptr";
@@ -122,11 +137,61 @@ static int lua_bullet_mesh_create (lua_State *l)
 {	
 btStridingMeshInterface **pp;
 
+int    tnum; // triangles
+int   *tptr;
+size_t tlen;
+int    tsiz;
+
+int       vnum; // vertexs
+btScalar *vptr;
+size_t    vlen;
+int       vsiz;
+
+int            mnum; // material data
+unsigned char *mptr;
+size_t         mlen;
+int            msiz;
+
+int   *iptr; // material indexs
+size_t ilen;
+int    isiz;
+
 // create ptr ptr userdata
 	pp=(btStridingMeshInterface**)lua_newuserdata(l, sizeof(btStridingMeshInterface*));
 	(*pp)=0;
 	luaL_getmetatable(l, lua_bullet_mesh_meta_name);
 	lua_setmetatable(l, -2);
+
+// check inputs
+
+	tnum=luaL_checknumber(l,1);
+	tptr=(int *)lua_pack_to_const_buffer(l,2,&tlen);
+	tsiz=luaL_checknumber(l,3);
+
+	vnum=luaL_checknumber(l,4);
+	vptr=(btScalar *)lua_pack_to_const_buffer(l,5,&vlen);
+	vsiz=luaL_checknumber(l,6);
+
+	mptr=0; // do we have materials?
+	iptr=0;
+	if( lua_isnumber(l,7) )
+	{
+		mnum=luaL_checknumber(l,7);
+		mptr=(unsigned char *)lua_pack_to_const_buffer(l,8,&mlen);
+		msiz=luaL_checknumber(l,9);
+
+		iptr=(int *)lua_pack_to_const_buffer(l,10,&ilen);
+		isiz=luaL_checknumber(l,11);
+	}
+	
+	if(mptr)
+	{
+		*pp=new btTriangleIndexVertexMaterialArray( tnum,tptr,tsiz, vnum,vptr,vsiz, mnum,mptr,msiz, iptr,isiz );
+	}
+	else
+	{
+		*pp=new btTriangleIndexVertexArray( tnum,tptr,tsiz, vnum,vptr,vsiz );
+	}
 
 	return 1;
 }
