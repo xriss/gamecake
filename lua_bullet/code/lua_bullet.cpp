@@ -94,6 +94,46 @@ static int lua_bullet_world_register (lua_State *l)
 
 /*+------------------------------------------------------------------+**
 
+mesh
+
+**+------------------------------------------------------------------+*/
+
+const char *lua_bullet_mesh_meta_name="bullet_mesh*ptr";
+
+btStridingMeshInterface * lua_bullet_mesh_ptr (lua_State *l,int idx)
+{
+btStridingMeshInterface **pp=(btStridingMeshInterface**)luaL_checkudata(l, idx , lua_bullet_mesh_meta_name);
+	if(!*pp) { luaL_error(l,"bullet mesh is null"); }
+	return *pp;
+}
+
+static int lua_bullet_mesh_destroy (lua_State *l)
+{	
+btStridingMeshInterface **pp=(btStridingMeshInterface**)luaL_checkudata(l, 1 , lua_bullet_mesh_meta_name);
+	if(*pp)
+	{
+		delete *pp;
+		(*pp)=0;
+	}	
+	return 0;
+}
+
+static int lua_bullet_mesh_create (lua_State *l)
+{	
+btStridingMeshInterface **pp;
+
+// create ptr ptr userdata
+	pp=(btStridingMeshInterface**)lua_newuserdata(l, sizeof(btStridingMeshInterface*));
+	(*pp)=0;
+	luaL_getmetatable(l, lua_bullet_mesh_meta_name);
+	lua_setmetatable(l, -2);
+
+	return 1;
+}
+
+
+/*+------------------------------------------------------------------+**
+
 shape
 
 	btBoxShape : "box" , x/2 , y/2 , z/2
@@ -106,7 +146,13 @@ shape
 
 	btConeShape : "cone" , height , radius , axis
 	
-	btMultiSphereShape : "spheres" , { {radius,x,y,z} , ... }
+	btMultiSphereShape : "spheres" , { radius,x,y,z, ... }
+
+	btConvexHullShape : "points" , { x,y,z, ... }
+
+	btHeightfieldTerrainShape : "heights" , width , length , ptr , scale , min , max , axis , type , flip
+
+	btBvhTriangleMeshShape : "mesh" , mesh
 
 **+------------------------------------------------------------------+*/
 
@@ -144,7 +190,15 @@ double hx,hy,hz;
 double radius;
 double qx,qy,qz,qw;
 int count;
+int width,length;
+const unsigned char *dptr;
+size_t dlen;
+double scale;
+double hmin,hmax;
+int axis,dtype,flip;
 int i;
+btStridingMeshInterface *mesh;
+
 // create ptr ptr userdata
 	pp=(btCollisionShape**)lua_newuserdata(l, sizeof(btCollisionShape*));
 	(*pp)=0;
@@ -171,28 +225,19 @@ int i;
 		{
 			radius=luaL_checknumber(l,2);
 			hy=luaL_checknumber(l,3);
-			ap="y"; // default to y axis orientation
-			if( lua_isstring(l,4) )
-			{
-				ap=luaL_checkstring(l,4);			// x,y,z axis string
-			}
-			if(0==strcmp(ap,"x"))
+			axis=1; if( lua_isnumber(l,4) ) { axis=luaL_checknumber(l,4); }
+			if(axis==0)
 			{
 				*pp = new btCapsuleShapeX( btScalar(radius) , btScalar(hy) );
 			}
 			else
-			if(0==strcmp(ap,"y"))
-			{
-				*pp = new btCapsuleShape( btScalar(radius) , btScalar(hy) );
-			}
-			else
-			if(0==strcmp(ap,"z"))
+			if(axis==2)
 			{
 				*pp = new btCapsuleShapeZ( btScalar(radius) , btScalar(hy) );
 			}
 			else
 			{
-				lua_pushstring(l,"unknown shape axis"); lua_error(l);
+				*pp = new btCapsuleShape( btScalar(radius) , btScalar(hy) );
 			}
 		}
 		else
@@ -201,28 +246,19 @@ int i;
 			hx=luaL_checknumber(l,2);
 			hy=luaL_checknumber(l,3);
 			hz=luaL_checknumber(l,4);
-			ap="y"; // default to y axis orientation
-			if( lua_isstring(l,5) )
-			{
-				ap=luaL_checkstring(l,5);			// x,y,z axis string
-			}
-			if(0==strcmp(ap,"x"))
+			axis=1; if( lua_isnumber(l,5) ) { axis=luaL_checknumber(l,5); }
+			if(axis==0)
 			{
 				*pp = new btCylinderShapeX( btVector3(hx,hy,hz) );
 			}
 			else
-			if(0==strcmp(ap,"y"))
-			{
-				*pp = new btCylinderShape( btVector3(hx,hy,hz) );
-			}
-			else
-			if(0==strcmp(ap,"z"))
+			if(axis==2)
 			{
 				*pp = new btCylinderShapeZ( btVector3(hx,hy,hz) );
 			}
 			else
 			{
-				lua_pushstring(l,"unknown shape axis"); lua_error(l);
+				*pp = new btCylinderShape( btVector3(hx,hy,hz) );
 			}
 		}
 		else
@@ -230,28 +266,19 @@ int i;
 		{
 			radius=luaL_checknumber(l,2);
 			hy=luaL_checknumber(l,3);
-			ap="y"; // default to y axis orientation
-			if( lua_isstring(l,4) )
-			{
-				ap=luaL_checkstring(l,4);			// x,y,z axis string
-			}
-			if(0==strcmp(ap,"x"))
+			axis=1; if( lua_isnumber(l,4) ) { axis=luaL_checknumber(l,4); }
+			if(axis==0)
 			{
 				*pp = new btConeShapeX( btScalar(radius) , btScalar(hy) );
 			}
 			else
-			if(0==strcmp(ap,"y"))
-			{
-				*pp = new btConeShape( btScalar(radius) , btScalar(hy) );
-			}
-			else
-			if(0==strcmp(ap,"z"))
+			if(axis==2)
 			{
 				*pp = new btConeShapeZ( btScalar(radius) , btScalar(hy) );
 			}
 			else
 			{
-				lua_pushstring(l,"unknown shape axis"); lua_error(l);
+				*pp = new btConeShape( btScalar(radius) , btScalar(hy) );
 			}
 		}
 		else
@@ -260,21 +287,18 @@ int i;
 			count=lua_objlen(l,2); // must be table
 			if( count>0 )
 			{
-				positions=new btVector3[count] ;
-				sizes=new btScalar[count] ;
+				positions=new btVector3[count/4] ;
+				sizes=new btScalar[count/4] ;
 
-				for(i=0;i<count;i++)
+				for(i=0;i<count;i+=4)
 				{
-					lua_rawgeti(l,2,i+1); // get single sphere data
-					
-					lua_rawgeti(l,-1,1); radius=luaL_checknumber(l,-1); lua_pop(l,1);
-					lua_rawgeti(l,-1,2); hx=luaL_checknumber(l,-1); lua_pop(l,1);
-					lua_rawgeti(l,-1,3); hy=luaL_checknumber(l,-1); lua_pop(l,1);
-					lua_rawgeti(l,-1,4); hz=luaL_checknumber(l,-1); lua_pop(l,1);
+					lua_rawgeti(l,2,i+1); radius=luaL_checknumber(l,-1); lua_pop(l,1);
+					lua_rawgeti(l,2,i+2); hx=luaL_checknumber(l,-1); lua_pop(l,1);
+					lua_rawgeti(l,2,i+3); hy=luaL_checknumber(l,-1); lua_pop(l,1);
+					lua_rawgeti(l,2,i+4); hz=luaL_checknumber(l,-1); lua_pop(l,1);
 
-					lua_pop(l,1);
-					positions[i]=btVector3(hx,hy,hz);
 					sizes[i]=btScalar(radius);
+					positions[i]=btVector3(hx,hy,hz);
 				}
 				*pp = new btMultiSphereShape( positions , sizes , count );
 
@@ -287,8 +311,51 @@ int i;
 			}
 		}
 		else
+		if(0==strcmp(tp,"points"))
 		{
-			lua_pushstring(l,"unknown shape type"); lua_error(l);
+			count=lua_objlen(l,2); // must be table
+			if( count>0 )
+			{
+				*pp = new btConvexHullShape();
+				for(i=0;i<count;i+=3)
+				{
+					lua_rawgeti(l,2,i+1); hx=luaL_checknumber(l,-1); lua_pop(l,1);
+					lua_rawgeti(l,2,i+2); hy=luaL_checknumber(l,-1); lua_pop(l,1);
+					lua_rawgeti(l,2,i+3); hz=luaL_checknumber(l,-1); lua_pop(l,1);
+					
+					((btConvexHullShape*)(*pp))->addPoint( btVector3(hx,hy,hz) );
+				}
+			}
+			else
+			{
+				lua_pushstring(l,"missing table"); lua_error(l);
+			}
+		}
+		else
+		if(0==strcmp(tp,"heights"))
+		{
+			width=luaL_checknumber(l,2);
+			length=luaL_checknumber(l,3);
+			dptr=lua_pack_to_const_buffer(l,4,&dlen);
+			scale=luaL_checknumber(l,5);
+			hmin=luaL_checknumber(l,6);
+			hmax=luaL_checknumber(l,7);
+			axis=luaL_checknumber(l,8);
+			dtype=luaL_checknumber(l,9);
+			flip=lua_toboolean(l,10);
+			
+			*pp = new btHeightfieldTerrainShape( width , length , (const void *)dptr , btScalar(scale) , btScalar(hmin) , btScalar(hmax) , axis , (PHY_ScalarType)dtype , (bool)flip );
+
+		}
+		else
+		if(0==strcmp(tp,"mesh"))
+		{
+				mesh=lua_bullet_mesh_ptr(l,2);
+				*pp = new btBvhTriangleMeshShape(mesh,true,true);
+		}
+		else
+		{
+			lua_pushstring(l,"unknown shape"); lua_error(l);
 		}
 
 	return 1;
@@ -370,7 +437,6 @@ btTransform trans;
 
 	return 1;
 }
-
 
 
 /*+------------------------------------------------------------------+**
@@ -676,6 +742,9 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 
 		{"shape_create",					lua_bullet_shape_create},
 		{"shape_destroy",					lua_bullet_shape_destroy},
+
+		{"mesh_create",						lua_bullet_mesh_create},
+		{"mesh_destroy",					lua_bullet_mesh_destroy},
 
 		{"body_create",						lua_bullet_body_create},
 		{"body_destroy",					lua_bullet_body_destroy},

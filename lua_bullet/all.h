@@ -66,6 +66,11 @@ extern "C" {
 
 #include "src/btBulletDynamicsCommon.h"
 
+#include "src/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
+
+#include "../lua_pack/code/lua_pack.h"
+
+
 #include "code/lua_bullet.h"
 
 
