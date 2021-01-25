@@ -225,6 +225,7 @@ local vert_flipy=function(v)
 	return v
 end
 
+-- this does not work, I guess it is going to be more complicated...
 local m4_flipy=function(m,name)
 	if flipy then
 
