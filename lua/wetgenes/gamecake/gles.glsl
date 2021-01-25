@@ -336,6 +336,12 @@ precision mediump float;
 #define TEX 1
 #include "gamecake_shader"
 
+#shader "xyz_normal_tex_phong"
+#define XYZ 1
+#define NORMAL 1
+#define TEX 1
+#define PHONG 1
+#include "gamecake_shader"
 
 #shader "xyz_tex_discard"
 #define XYZ 1

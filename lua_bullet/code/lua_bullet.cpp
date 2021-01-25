@@ -110,7 +110,21 @@ btTriangleIndexVertexMaterialArray::btTriangleIndexVertexMaterialArray 	(
 		int  	materialIndexStride 
 	)
 	
-	
+
+		btTriangleIndexVertexArray* meshInterface = new btTriangleIndexVertexArray();
+		btIndexedMesh part;
+
+		part.m_vertexBase = (const unsigned char*)LandscapeVtx[i];
+		part.m_vertexStride = sizeof(btScalar) * 3;
+		part.m_numVertices = LandscapeVtxCount[i];
+		part.m_triangleIndexBase = (const unsigned char*)LandscapeIdx[i];
+		part.m_triangleIndexStride = sizeof(short) * 3;
+		part.m_numTriangles = LandscapeIdxCount[i] / 3;
+		part.m_indexType = PHY_SHORT;
+
+		meshInterface->addIndexedMesh(part, PHY_SHORT);
+		
+			
 **+------------------------------------------------------------------+*/
 
 const char *lua_bullet_mesh_meta_name="bullet_mesh*ptr";

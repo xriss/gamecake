@@ -410,11 +410,11 @@ static double lua_pack_get_field (u32 def,const u8*p)
 		case '+f64' : return (double) lua_pack_read_f64 ( p, 0 );
 
 		case 's64' :
-		case '-s64' : return (double) lua_pack_read_s64 ( p, 1 );
+		case '-s64' : return (double) lua_pack_read_s64 ( p, 1 ); // note that a double does not have enough precision for s64
 		case '+s64' : return (double) lua_pack_read_s64 ( p, 0 );
 
 		case 'u64' :
-		case '-u64' : return (double) lua_pack_read_u64 ( p, 1 );
+		case '-u64' : return (double) lua_pack_read_u64 ( p, 1 ); // note that a double does not have enough precision for u64
 		case '+u64' : return (double) lua_pack_read_u64 ( p, 0 );
 	}
 		
@@ -463,11 +463,11 @@ static void lua_pack_set_field (double d,u32 def,u8*p)
 		case '+f64' : lua_pack_write_f64 ( (f64)d,p, 0 ); break;
 
 		case 's64' :
-		case '-s64' : lua_pack_write_s64 ( (s64)d,p, 1 ); break;
+		case '-s64' : lua_pack_write_s64 ( (s64)d,p, 1 ); break; // note that a double does not have enough precision for s64
 		case '+s64' : lua_pack_write_s64 ( (s64)d,p, 0 ); break;
 
 		case 'u64' :
-		case '-u64' : lua_pack_write_u64 ( (u64)d,p, 1 ); break;
+		case '-u64' : lua_pack_write_u64 ( (u64)d,p, 1 ); break; // note that a double does not have enough precision for u64
 		case '+u64' : lua_pack_write_u64 ( (u64)d,p, 0 ); break;
 	}
 	
