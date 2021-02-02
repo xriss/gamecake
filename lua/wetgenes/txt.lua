@@ -114,6 +114,20 @@ M.construct=function(txt)
 	txt.clear_caches()
 --[[
 
+Find byte offset into the text from a given line and character.
+
+]]
+	txt.location_to_ptr=function(y,x)
+
+		local cache=txt.get_cache(y)
+		local ptr=cache.cb[x] or 0 -- convert to byte offset
+		ptr=cache.start+ptr-1
+
+		return ptr
+	end
+
+--[[
+
 Find the line number and column number of the given byte offset into the text.
 
 ]]
@@ -158,7 +172,7 @@ Find the line number and column number of the given byte offset into the text.
 
 		if a<=ptr and b>ptr then
 			local cache=txt.get_cache(y)
-			local x=cache.bc[1+ptr-a]
+			local x=cache.bc[1+ptr-a] or #cache.string+1
 			return y,x	-- found line
 		end
 	end
@@ -376,10 +390,10 @@ Find the line number and column number of the given byte offset into the text.
 			local cache=txt.get_cache(fy)
 			
 			while length<0 do
-				
+
 				if fx <= -length then -- full line
 
-					length=length+fx
+					length=length+1+fx
 					fy=fy-1
 					cache=txt.get_cache(fy)
 					if not cache then return fx,fy+1,tx,ty end -- start of file
@@ -399,13 +413,13 @@ Find the line number and column number of the given byte offset into the text.
 			
 			while length>0 and cache do
 				
-				if ( #cache.codes - tx ) <= length then -- full line
+				if ( #cache.codes - tx ) < length then -- full line
 
-					length=length-( #cache.codes - tx )
+					length=length-( #cache.codes + 1 - tx ) -- include line end
 					ty=ty+1
 					cache=txt.get_cache(ty)
 					if not cache then return fx,fy,tx,ty-1 end -- end of file
-					tx=0 -- start of line
+					tx=1 -- start of line
 				
 				else -- partial line
 				

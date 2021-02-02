@@ -133,23 +133,19 @@ M.construct=function(undo,txt)
 		
 			local fy,fx=txt.ptr_to_location(it[1])
 			local ty,tx=txt.ptr_to_location(it[1]+#it[2])
-			
+
 			local sa=txt.cut(fx,fy,tx,ty)
 			txt.mark(fx,fy,fx,fy)
 			txt.insert(it[3])
-
---			print("redo",sa and #sa or 0,#it[2],#it[3])
 
 		elseif ru==2 then -- undo
 
 			local fy,fx=txt.ptr_to_location(it[1])
 			local ty,tx=txt.ptr_to_location(it[1]+#it[3])
-			
+
 			local sa=txt.cut(fx,fy,tx,ty)
 			txt.mark(fx,fy,fx,fy)
 			txt.insert(it[2])
-			
---			print("undo",sa and #sa or 0,#it[2],#it[3])
 
 		end
 	end
@@ -173,25 +169,22 @@ M.construct=function(undo,txt)
 	
 -- remember to insert or delete text at a given (byte) location
 	undo.remember=function( insert_string , delete_count , line_idx , char_idx )
+
 		if not line_idx then line_idx=txt.cy end
-		local cache=txt.get_cache(line_idx)
 		if not char_idx then char_idx=txt.cx end
 		if not delete_count then delete_count=0 end
 		if not insert_string then insert_string="" end
 
-		local ptr=cache.cb[char_idx] or 0 -- convert to byte offset
-		
 		local fx,fy,tx,ty=txt.rangeget(char_idx,line_idx,delete_count)
+
 		
 		local delete_string=txt.copy(fx,fy,tx,ty) or ""
-		ptr=txt.get_cache(fy).start+ptr-1
-		
-		local py,px=txt.ptr_to_location(ptr)
 
---		print(line_idx,char_idx,delete_count,"ptr",ptr,py,px,"from",fy,fx,(delete_string:gsub('%c','')),(insert_string:gsub('%c','')))
-
---		print(ptr,(delete_string:gsub('%c','')),(insert_string:gsub('%c','')))
+		local ptr=txt.location_to_ptr(fy,fx)
 		
+--		local py,px=txt.ptr_to_location(ptr)
+--print( "PTR" , ptr,py,px )
+
 		if delete_string == "" then -- possible append
 			local it = undo.list_get(undo.index)
 			if it and ( type(it[1]) == "number" ) then -- an insert packet

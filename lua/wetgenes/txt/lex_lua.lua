@@ -439,8 +439,9 @@ M.parse=function(state,input,output)
 				poke(state.stack,MAP.string)
 				return true
 			end			
-			if fullmatch(token,"^%[(=*)%[") then
-				push(state.terminator,"]"..ee.."]")
+			local fs,fe,ee=string.find(token,"^%[(=*)%[")
+			if fs==1 and fe==#token then -- full match
+				push(state.terminator,"]"..(ee or "").."]")
 				poke(state.stack,MAP.string)
 				return true
 			end
@@ -463,7 +464,7 @@ M.parse=function(state,input,output)
 			end
 			local fs,fe,ee=string.find(token,"^%-%-%[(=*)%[")
 			if fs==1 and fe==#token then -- full match
-				push(state.terminator,"]"..ee.."]")
+				push(state.terminator,"]"..(ee or "").."]")
 				poke(state.stack,MAP.comment)
 				return true
 			end
