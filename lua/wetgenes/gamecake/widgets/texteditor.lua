@@ -113,9 +113,6 @@ end
 wtexteditor.refresh=function(widget)
 	widget:texteditor_refresh()
 	widget.master.request_layout=true
---	widget:resize()
---	widget:layout()
---	widget:build_m4()
 end
 
 
@@ -302,7 +299,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		texteditor.key_mouse=1
 
-		texteditor.mark_area={dx,dy,dx,dy}
+		texteditor.mark_area={dy,dx,dy,dx}
 
 		txt.mark(unpack(texteditor.mark_area))
 
@@ -315,7 +312,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		texteditor.float_cx=nil
 
-		txt.markauto(dx,dy,act) -- select word
+		txt.markauto(dy,dx,act) -- select word
 
 		texteditor.mark_area={txt.markget()}
 		texteditor.mark_area_auto={txt.markget()}
@@ -331,7 +328,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 			if texteditor.key_mouse > 1 then -- special select
 			
-				txt.markauto(dx,dy,texteditor.key_mouse) -- select word
+				txt.markauto(dy,dx,texteditor.key_mouse) -- select word
 
 				txt.markmerge(texteditor.mark_area_auto[1],texteditor.mark_area_auto[2],
 				texteditor.mark_area_auto[3],texteditor.mark_area_auto[4],txt.markget())
@@ -339,7 +336,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 				texteditor.mark_area={txt.markget()}
 			else
 
-				texteditor.mark_area[3],texteditor.mark_area[4]=dx,dy
+				texteditor.mark_area[3],texteditor.mark_area[4]=dy,dx
 				
 				txt.mark(unpack(texteditor.mark_area))
 				
@@ -353,7 +350,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 end
 
-function wtexteditor.scroll_to_view(texteditor,cx,cy)
+function wtexteditor.scroll_to_view(texteditor,cy,cx)
 	local txt=texteditor.txt
 	local pan=texteditor.scroll_widget.pan
 	
@@ -393,7 +390,7 @@ function wtexteditor.key(pan,ascii,key,act)
 	local cpre=function()
 		if texteditor.key_shift then
 			if not texteditor.mark_area then
-				texteditor.mark_area={txt.cx,txt.cy,txt.cx,txt.cy}
+				texteditor.mark_area={txt.cy,txt.cx,txt.cy,txt.cx}
 			end
 		else
 			texteditor.mark_area=false
@@ -402,8 +399,8 @@ function wtexteditor.key(pan,ascii,key,act)
 	end
 	local cpost=function()
 		if texteditor.key_shift and texteditor.mark_area then
-				texteditor.mark_area[3]=txt.cx
-				texteditor.mark_area[4]=txt.cy
+				texteditor.mark_area[3]=txt.cy
+				texteditor.mark_area[4]=txt.cx
 				txt.mark(unpack(texteditor.mark_area))
 		end
 		
@@ -477,7 +474,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			texteditor.float_cx=nil
 
 			cpre()
-			txt.cx,txt.cy=txt.clip_left(txt.cx,txt.cy)
+			txt.cy,txt.cx=txt.clip_left(txt.cy,txt.cx)
 			cpost()
 
 		elseif key=="right" then
@@ -485,7 +482,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			texteditor.float_cx=nil
 
 			cpre()
-			txt.cx,txt.cy=txt.clip_right(txt.cx,txt.cy)
+			txt.cy,txt.cx=txt.clip_right(txt.cy,txt.cx)
 			cpost()
 
 		elseif key=="up" then
@@ -497,7 +494,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			cpre()
 			local cache=txt.get_cache(txt.cy-1)
-			txt.cx,txt.cy=txt.clip(cache and cache.xc[texteditor.float_cx] or texteditor.float_cx,txt.cy-1)
+			txt.cy,txt.cx=txt.clip( txt.cy-1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
 			cpost()
 
 		elseif key=="down" then
@@ -509,7 +506,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			cpre()
 			local cache=txt.get_cache(txt.cy+1)
-			txt.cx,txt.cy=txt.clip(cache and cache.xc[texteditor.float_cx] or texteditor.float_cx,txt.cy+1)
+			txt.cx,txt.cy=txt.clip( txt.cy+1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
 			cpost()
 
 		elseif key=="enter" or key=="return" then

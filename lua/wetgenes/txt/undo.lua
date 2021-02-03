@@ -134,8 +134,8 @@ M.construct=function(undo,txt)
 			local fy,fx=txt.ptr_to_location(it[1])
 			local ty,tx=txt.ptr_to_location(it[1]+#it[2])
 
-			local sa=txt.cut(fx,fy,tx,ty)
-			txt.mark(fx,fy,fx,fy)
+			local sa=txt.cut(fy,fx,ty,tx)
+			txt.mark(fy,fx,fy,fx)
 			txt.insert(it[3])
 
 		elseif ru==2 then -- undo
@@ -143,8 +143,8 @@ M.construct=function(undo,txt)
 			local fy,fx=txt.ptr_to_location(it[1])
 			local ty,tx=txt.ptr_to_location(it[1]+#it[3])
 
-			local sa=txt.cut(fx,fy,tx,ty)
-			txt.mark(fx,fy,fx,fy)
+			local sa=txt.cut(fy,fx,ty,tx)
+			txt.mark(fy,fx,fy,fx)
 			txt.insert(it[2])
 
 		end
@@ -175,10 +175,10 @@ M.construct=function(undo,txt)
 		if not delete_count then delete_count=0 end
 		if not insert_string then insert_string="" end
 
-		local fx,fy,tx,ty=txt.rangeget(char_idx,line_idx,delete_count)
+		local fy,fx,ty,tx=txt.rangeget(line_idx,char_idx,delete_count)
 
 		
-		local delete_string=txt.copy(fx,fy,tx,ty) or ""
+		local delete_string=txt.copy(fy,fx,ty,tx) or ""
 
 		local ptr=txt.location_to_ptr(fy,fx)
 		
