@@ -22,6 +22,8 @@ files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 includedirs { "." }
 
 
+buildoptions{"-std=c++11"}
+
 
 links { "lib_lua" }
 
