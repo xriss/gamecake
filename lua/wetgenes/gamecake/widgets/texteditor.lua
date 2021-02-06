@@ -506,7 +506,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			cpre()
 			local cache=txt.get_cache(txt.cy+1)
-			txt.cx,txt.cy=txt.clip( txt.cy+1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
+			txt.cy,txt.cx=txt.clip( txt.cy+1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
 			cpost()
 
 		elseif key=="enter" or key=="return" then
