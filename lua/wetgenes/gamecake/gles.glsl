@@ -260,15 +260,15 @@ void main(void)
 	vec3 n=normalize( v_normal );
 	vec3 l=normalize( mat3( modelview ) * light_normal );
 	
-	FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
+	FragColor= vec4(  c1.rgb *         max( dot(n,l) , 0.25 ) + 
 						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif
 
 #ifdef PHONG
 	vec3 n=normalize(v_normal);
-	vec3 l=normalize(vec3(0.0,-0.5,1.0));
-	FragColor= vec4(  c1.rgb *      max( n.z      , 0.25 ) + 
-						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
+	float l=max( max( n.z, -n.y ) , 0.25 );
+	FragColor= vec4(  c1.rgb *         l + 
+						(c2.rgb * pow( l , c2.a*255.0 )).rgb , c1.a );
 #endif
 
 #ifdef DISCARD
