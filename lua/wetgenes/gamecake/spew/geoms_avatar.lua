@@ -272,7 +272,7 @@ void main(void)
 
 	if( v_value.r > 0.0 )
 	{
-		vec2 uv=clamp( v_texcoord + vec2( pow( n.z, 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
+		vec2 uv=clamp( v_texcoord + vec2( pow( max( max( n.z, -n.y ) , 0.0 ) , 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
 
 		t0 = v_value.r * texture(tex0, uv ).rgba;
 	}
