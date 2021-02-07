@@ -1,7 +1,4 @@
-
-CircleCI : [![CircleCI](https://circleci.com/gh/xriss/gamecake.svg?style=svg)](https://circleci.com/gh/xriss/gamecake) , CodeFresh : [![Codefresh build status]( https://g.codefresh.io/api/badges/pipeline/wetgenes/gamecake%2Fbuild?type=cf-2)]( https://g.codefresh.io/public/accounts/wetgenes/pipelines/new/601e4172aa20d91143f50d90)
-
-We are a bit on the heavy side for the free builds at CircleCI so failures above are usually just resource timeouts...
+CodeFresh : [![Codefresh build status]( https://g.codefresh.io/api/badges/pipeline/wetgenes/gamecake%2Fbuild?type=cf-2)]( https://g.codefresh.io/public/accounts/wetgenes/pipelines/new/601e4172aa20d91143f50d90)
 
 SnapCraft : [![Snap Status](https://build.snapcraft.io/badge/xriss/gamecake.svg)](https://build.snapcraft.io/user/xriss/gamecake)
 
