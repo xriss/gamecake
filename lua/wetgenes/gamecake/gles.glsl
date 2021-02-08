@@ -266,9 +266,9 @@ void main(void)
 
 #ifdef PHONG
 	vec3 n=normalize(v_normal);
-	float l=max( max( n.z, -n.y ) , 0.25 );
-	FragColor= vec4(  c1.rgb *         l + 
-						(c2.rgb * pow( l , c2.a*255.0 )).rgb , c1.a );
+	float l=max( n.z, -n.y );
+	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) + 
+						(c2.rgb * pow( max( l , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif
 
 #ifdef DISCARD
