@@ -21,6 +21,44 @@ local core ; pcall(function() core=require("glslang.core") end)
 local glslang={}
 
 
+--[[#lua.glslang.yank_shader_versions
+
+parse a shader source and yank any #version out of the source and into a table
+this allows multiple attempts at compiling the same source using different #versions
+
+]]
+function glslang.yank_shader_versions(src,default_version)
+	local versions={}
+	
+	local lines=wstr.split_lines(src)
+	
+	for i,line in ipairs(lines) do
+		if line:sub(1,8):lower()=="#version" then
+			local duplicate=false
+			for i,v in ipairs(versions) do if v==line then duplicate=true end end -- ignore duplicates
+			if not duplicate then versions[#versions+1]=line end
+			lines[i]="\n" -- remove
+		end
+	end
+	if not versions[1] then -- force a default if no version is found in source
+		versions[1]=default_version or "#version 100\n"
+	end
+	-- parse possible versions and add #defines so we can slightly tweak shader code
+	for i,line in ipairs(versions) do
+		local words=wstr.split_words(line)
+		if words[3]=="es" or words[2]=="100" then
+			line=line.."#define VERSION_ES 1\n"	-- es flag
+		end
+		line=line.."#define VERSION_"..words[2].." 1\n"	-- boolean number
+		line=line.."#define VERSION "..words[2].."\n"	-- version number
+		versions[i]=line -- and replace
+	end
+
+	-- return list of possible version lines , source with all #version lines removed
+	return versions,table.concat(lines)
+end
+
+
 --[[#lua.glslang.lint_gles2
 
 	verr,ferr = glslang.lint_gles2(vcode,fcode)
