@@ -31,6 +31,8 @@ used when starting a new module.
 -- copy functions into locals
 local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 -- copy libs into locals
 local coroutine,package,string,table,math,io,os,debug=coroutine,package,string,table,math,io,os,debug
@@ -48,7 +50,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 
 -- grab some util functions
-local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_env")
+local export,lookup,deepcopy=require("wetgenes"):export("export","lookup","deepcopy")
 
 
 -- single line replacement for the module creation function

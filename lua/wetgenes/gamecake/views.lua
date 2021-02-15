@@ -165,7 +165,7 @@ function M.bake(oven,views)
 				view.hy=view.parent.hy
 				view.vx=view.parent.hx
 				view.vy=view.parent.hy
-				view.vz=view.parent.hy*4
+				view.vz=view.vz or view.parent.hy*4
 
 			end
 

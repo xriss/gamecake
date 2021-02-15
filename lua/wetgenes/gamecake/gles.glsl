@@ -256,6 +256,14 @@ void main(void)
 	vec4 c2=vec4(1.0,1.0,1.0,16.0/255.0);
 #endif
 
+#ifdef NTOON
+
+	vec3 n=normalize(v_normal);
+	float l=max( max( n.z, -n.y ) , 0.0 );
+	FragColor= vec4(  c1.rgb*(NTOON+(l*(1.0-NTOON))) , c1.a ); 
+
+#endif
+
 #ifdef LIGHT
 	vec3 n=normalize( v_normal );
 	vec3 l=normalize( mat3( modelview ) * light_normal );
@@ -456,4 +464,16 @@ precision mediump float;
 #define PHONG 1
 #include "gamecake_shader"
 
+#shader "xyz_normal_tex"
+#define XYZ 1
+#define NORMAL 1
+#define TEX 1
+#include "gamecake_shader"
+
+#shader "xyz_normal_tex_ntoon"
+#define XYZ 1
+#define NORMAL 1
+#define TEX 1
+#define NTOON 0.75
+#include "gamecake_shader"
 
