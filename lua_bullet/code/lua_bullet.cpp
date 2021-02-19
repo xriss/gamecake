@@ -550,7 +550,7 @@ static int lua_bullet_world_step (lua_State *l)
 {
 btDiscreteDynamicsWorld *world=lua_bullet_world_ptr(l,1)->world;
 
-	world->stepSimulation( lua_tonumber(l,2) ,  lua_tonumber(l,3) );
+	world->stepSimulation( lua_tonumber(l,2) ,  lua_tonumber(l,3) ,  lua_tonumber(l,4) );
 
 	return 0;
 }

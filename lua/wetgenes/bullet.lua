@@ -50,6 +50,9 @@ bullet.world=function(...)
 	world.shapes={}
 	setmetatable(world,bullet.world_metatable)
 	world[0]=core.world_create(...)
+
+	world.maxsteps=1
+	world.fixedstep=1/60
 	
 --	core.world_register(world[0],world)
 	
@@ -93,6 +96,32 @@ bullet.world_functions.gravity=function(world,vx,vy,vz)
 
 end
 
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.step
+
+	world:step(seconds,maxsteps,fixedstep)
+
+	world:step(seconds,0,seconds)
+
+world.maxsteps and world.fixedstep will be used as defaults if the second and
+third values are not provided.
+
+Move the physics forward in time by the given amount in seconds.
+
+maxsteps is maximum amount of steps to take during this call and defaults to 1.
+
+fixedstep is how many seconds to step forward at a time for stable simulation
+and defaults to 1/60
+
+To force a step forward of a given amount of time use a maxsteps of 0.
+
+
+]]
+bullet.world_functions.step=function(world,seconds,maxsteps,fixedstep)
+
+	core.world_step( world[0] , seconds , maxsteps or world.maxsteps , fixedstep or world.fixedstep )
+
+end
 
 ------------------------------------------------------------------------
 --[[#lua.wetgenes.bullet.world.shape
