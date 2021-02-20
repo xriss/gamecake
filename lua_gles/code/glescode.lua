@@ -380,6 +380,10 @@ function glescode.create(gl)
 		code.stack.rotate(...)
 	end
 
+	function code.PreRotate(...)
+		code.stack.prerotate(...)
+	end
+
 	function code.Scale(...)
 		code.stack.scale(...)
 	end

@@ -1040,6 +1040,65 @@ function m4.rotate(it,a,b,c,d,e)
 end
 
 
+--[[#lua.wetgenes.tardis.m4.prearotate
+
+	m4 = m4:prearotate(degrees,v3a)
+	m4 = m4:prearotate(degrees,v3a,r)
+
+Pre apply a rotation in degres around the given axis to this matrix.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.prearotate(it,degrees,v3a,r)
+	local m=m4.new():setrot(degrees,v3a)
+	return tardis.m4_product_m4(m,it,r or it)
+end
+
+--[[#lua.wetgenes.tardis.m4.preqrotate
+
+	m4 = m4:preqrotate(q)
+	m4 = m4:preqrotate(q,r)
+
+Pre apply a quaternion rotation to this matrix.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.preqrotate(it,q,r)
+	local m=tardis.q4_to_m4(q)
+	return tardis.m4_product_m4(m,it,r or it)
+end
+
+--[[#lua.wetgenes.tardis.m4.prerotate
+
+	m4 = m4:prerotate(degrees,v3a)
+	m4 = m4:prerotate(degrees,v3a,r)
+	m4 = m4:prerotate(degrees,x,y,z)
+	m4 = m4:prerotate(degrees,x,y,z,r)
+	m4 = m4:prerotate(q)
+	m4 = m4:prerotate(q,r)
+
+Pre apply quaternion or angle rotation to this matrix depending on 
+arguments provided.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.prerotate(it,a,b,c,d,e)
+	if type(a)=="table" then -- q4
+		return m4.preqrotate(it,a,b)
+	elseif type(b)=="table" then -- v3
+		return m4.prearotate(it,a,b,c)
+	else
+		return m4.prearotate(it,a,{b,c,d},e)
+	end
+end
+
+
 --[[#lua.wetgenes.tardis.v2
 
 The metatable for a 2d vector class, use the new function to actually 
@@ -1870,6 +1929,11 @@ function tardis.m4_stack()
 
 	stack.rotate=function(...)
 		stack[#stack]:rotate(...)
+		return stack
+	end
+
+	stack.prerotate=function(...)
+		stack[#stack]:prerotate(...)
 		return stack
 	end
 
