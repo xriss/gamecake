@@ -816,6 +816,25 @@ function m4.translate_v3(it,v3a,r)
 	return array.set(r,it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,r4 )
 end
 
+--[[#lua.wetgenes.tardis.m4.pretranslate_v3
+
+	m4 = m4:pretranslate_v3(v3a)
+	m4 = m4:pretranslate_v3(v3a,r)
+
+Translate this m4 along its global axis by v3a.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.pretranslate_v3(it,v3a,r)
+	r=r or it
+	local r1=it[12+1]+v3a[1]
+	local r2=it[12+2]+v3a[2]
+	local r3=it[12+3]+v3a[3]
+	return array.set(r,it[1],it[2],it[3],it[4], it[5],it[6],it[7],it[8], it[9],it[10],it[11],it[12], r1,r2,r3,it[16] )
+end
+
 --[[#lua.wetgenes.tardis.m4.translate
 
 	m4 = m4:translate(x,y,z)
@@ -834,6 +853,27 @@ function m4.translate(it,a,b,c,d)
 		return m4.translate_v3(it,a,b)
 	else
 		return m4.translate_v3(it,{a,b,c},d)
+	end
+end
+
+--[[#lua.wetgenes.tardis.m4.pretranslate
+
+	m4 = m4:pretranslate(x,y,z)
+	m4 = m4:pretranslate(x,y,z,r)
+	m4 = m4:pretranslate(v3a)
+	m4 = m4:pretranslate(v3a,r)
+
+Translate this m4 along its global axis by {x,y,z} or v3a.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.pretranslate(it,a,b,c,d)
+	if type(a)=="table" then
+		return m4.pretranslate_v3(it,a,b)
+	else
+		return m4.pretranslate_v3(it,{a,b,c},d)
 	end
 end
 
@@ -1820,6 +1860,11 @@ function tardis.m4_stack()
 
 	stack.translate=function(...)
 		stack[#stack]:translate(...)
+		return stack
+	end
+
+	stack.pretranslate=function(...)
+		stack[#stack]:pretranslate(...)
 		return stack
 	end
 

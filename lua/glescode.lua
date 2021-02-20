@@ -372,6 +372,10 @@ function glescode.create(gl)
 		code.stack.translate(...)
 	end
 
+	function code.PreTranslate(...)
+		code.stack.pretranslate(...)
+	end
+
 	function code.Rotate(...)
 		code.stack.rotate(...)
 	end
