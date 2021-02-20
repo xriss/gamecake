@@ -7,6 +7,8 @@ local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 local core=require("wetgenes.gamecake.core")
 
+local tardis=require("wetgenes.tardis")
+local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
 -- Layout replacement...
 -- Maintain a hierarchical system of views so we can render into sub parts of the main screen.
@@ -102,8 +104,8 @@ function M.bake(oven,views)
 --		view.aspect=opts.aspect or 1 -- pixel aspect fix, normally 1/1 can also set to 0 for scale to total available area
 
 -- these values are updated when you call update()
-		view.pmtx={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 	-- projection matrix
-		view.port={0,0,0,0}								-- view port x,y,w,h
+		view.pmtx=M4{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 	-- projection matrix
+		view.port=V4{0,0,0,0}								-- view port x,y,w,h
 
 		view.sx=1	-- view scale
 		view.sy=1
@@ -169,6 +171,8 @@ function M.bake(oven,views)
 
 			end
 
+			view.pz=view.pz or -view.vz/2
+
 			return view
 		end
 		
@@ -185,7 +189,7 @@ function M.bake(oven,views)
 
 --	layout.project23d = function(width,height,fov,depth)
 		
-			local m=view.pmtx
+			local m=view.pmtx:identity()
 			
 			local f=view.vz
 			local n=1
@@ -260,6 +264,8 @@ function M.bake(oven,views)
 
 			end
 
+			view.pmtx:translate(-view.vx/2,-view.vy/2,view.pz) -- top left corner is origin
+
 			return view
 		end
 
@@ -275,13 +281,6 @@ function M.bake(oven,views)
 
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.LoadIdentity()
-			
-			if view.fov==0 then
-				gl.Translate(-view.vx/2,-view.vy/2,(-view.vz/2)) -- top left corner is origin
-			else
-				gl.Translate(-view.vx/2,-view.vy/2,(-view.vy/2)/view.fov) -- top left corner is origin
-			end
-
 
 			return view
 		end
