@@ -658,7 +658,6 @@ get/set body restitution
 static int lua_bullet_body_restitution (lua_State *l)
 {
 btRigidBody *body = lua_bullet_body_ptr(l, 1 );
-btTransform trans;
 
 	if( lua_isnumber(l,2) )
 	{
@@ -670,6 +669,28 @@ btTransform trans;
 	return 1;
 }
 
+/*+------------------------------------------------------------------+**
+
+get/set ccd values radius,threshold
+
+set both to 0 to disable CCD which is the starting default
+
+**+------------------------------------------------------------------+*/
+static int lua_bullet_body_ccd (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setCcdSweptSphereRadius( lua_tonumber(l,2) );
+		body->setCcdMotionThreshold( lua_tonumber(l,2) );
+	}
+
+	lua_pushnumber(l,body->getCcdSweptSphereRadius());
+	lua_pushnumber(l,body->getCcdMotionThreshold());
+
+	return 2;
+}
 
 /*+------------------------------------------------------------------+**
 
@@ -888,6 +909,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_transform",					lua_bullet_body_transform},
 		{"body_velocity",					lua_bullet_body_velocity},
 		{"body_restitution",				lua_bullet_body_restitution},
+		{"body_ccd",						lua_bullet_body_ccd},
 
 
 		{"test",				lua_bullet_test},

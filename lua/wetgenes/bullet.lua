@@ -54,6 +54,7 @@ bullet.world=function(...)
 	world.meshes={}
 	world.shapes={}
 	world.bodies={}
+	world.names={}
 	setmetatable(world,bullet.world_metatable)
 	world[0]=core.world_create(...)
 
@@ -83,6 +84,40 @@ bullet.world_functions.destroy=function(world)
 
 end
 
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.get
+
+	world:get(name)
+	
+Get a named mesh/body/shape
+
+]]
+bullet.world_functions.get=function(world,name)
+
+	return world.names[name]
+
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.set
+
+	world:set(name,it)
+	
+Set a named mesh/body/shape
+
+]]
+bullet.world_functions.set=function(world,name,it)
+
+	if it then
+		it.name=name
+		world.names[name]=it
+		return it
+	else
+		world.names[name]=nil
+	end
+
+end
 
 ------------------------------------------------------------------------
 --[[#lua.wetgenes.bullet.world.gravity
@@ -162,6 +197,7 @@ Destroy mesh.
 ]]
 bullet.mesh_functions.destroy=function(mesh)
 	local world=mesh.world
+	if mesh.name then world:set(mesh.name) end
 	core.mesh_destroy( mesh[0] )
 	world.meshes[ mesh[0] ]=nil
 end
@@ -198,6 +234,7 @@ Destroy shape.
 ]]
 bullet.shape_functions.destroy=function(shape)
 	local world=shape.world
+	if shape.name then world:set(shape.name) end
 	core.shape_destroy( shape[0] )
 	world.shapes[ shape[0] ]=nil
 end
@@ -233,6 +270,7 @@ Destroy body.
 ]]
 bullet.body_functions.destroy=function(body)
 	local world=body.world
+	if body.name then world:set(body.name) end
 	core.body_destroy( body[0] )
 	world.bodies[ body[0] ]=nil
 end
@@ -275,6 +313,19 @@ get/set the body velocity
 ]]
 bullet.body_functions.velocity=function(body,x,y,z)
 	return core.body_velocity( body[0] , x,y,z )
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.ccd
+
+	radius,threshold = body:ccd( radius,threshold )
+	radius,threshold = body:ccd()
+
+get/set the continuos collision detection radius,threshold values
+
+]]
+bullet.body_functions.ccd=function(body,radius,threshold)
+	return core.body_ccd( body[0] , radius,threshold )
 end
 
 ------------------------------------------------------------------------
