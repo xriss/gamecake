@@ -9,6 +9,8 @@ See https://github.com/xriss/gamecake for full notice.
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local pack=require("wetgenes.pack")
+
 --[[#lua.wetgenes.bullet
 
 	local bullet=require("wetgenes.bullet")
@@ -30,6 +32,9 @@ bullet.core=core
 bullet.world_functions={is="world"}
 bullet.world_metatable={__index=bullet.world_functions}
 
+bullet.mesh_functions={is="mesh"}
+bullet.mesh_metatable={__index=bullet.mesh_functions}
+
 bullet.shape_functions={is="shape"}
 bullet.shape_metatable={__index=bullet.shape_functions}
 
@@ -46,8 +51,9 @@ Create the world you will be simulating physics in.
 ]]
 bullet.world=function(...)
 	local world={}
-	world.bodies={}
+	world.meshes={}
 	world.shapes={}
+	world.bodies={}
 	setmetatable(world,bullet.world_metatable)
 	world[0]=core.world_create(...)
 
@@ -124,6 +130,43 @@ bullet.world_functions.step=function(world,seconds,maxsteps,fixedstep)
 end
 
 ------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.mesh
+
+	mesh = world:mesh()
+
+Create a mesh.
+
+]]
+bullet.world_functions.mesh=function(world,cp,cv)
+	local mesh={}
+	setmetatable(mesh,bullet.mesh_metatable)
+
+	mesh.sp=pack.save_array(cp,"s32")
+	mesh.sv=pack.save_array(cv,"f64")
+
+	mesh[0]=core.mesh_create( #cp/3,mesh.sp,4*3 , #cv/3,mesh.sv,8*3 )
+	mesh.world=world
+
+	world.meshes[ mesh[0] ]=mesh
+
+	return mesh
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.mesh.destroy
+
+	mesh:destroy()
+
+Destroy mesh.
+
+]]
+bullet.mesh_functions.destroy=function(mesh)
+	local world=mesh.world
+	core.mesh_destroy( mesh[0] )
+	world.meshes[ mesh[0] ]=nil
+end
+
+------------------------------------------------------------------------
 --[[#lua.wetgenes.bullet.world.shape
 
 	shape = world:shape()
@@ -131,10 +174,13 @@ end
 Create a shape.
 
 ]]
-bullet.world_functions.shape=function(world,...)
+bullet.world_functions.shape=function(world,name,a,...)
 	local shape={}
 	setmetatable(shape,bullet.shape_metatable)
-	shape[0]=core.shape_create(...)
+
+	if name=="mesh" then a=a[0] end
+
+	shape[0]=core.shape_create(name,a,...)
 	shape.world=world
 	
 	world.shapes[ shape[0] ]=shape
@@ -164,13 +210,15 @@ end
 Create a body.
 
 ]]
-bullet.world_functions.shape=function(world,...)
+bullet.world_functions.body=function(world,name,shape,...)
 	local body={}
 	setmetatable(body,bullet.body_metatable)
-	body[0]=core.body_create(...)
+	body[0]=core.body_create(name,shape[0],...)
 	body.world=world
 	
 	world.bodies[ body[0] ]=body
+
+	core.world_add_body( world[0] , body[0] )
 
 	return body
 end
@@ -187,6 +235,46 @@ bullet.body_functions.destroy=function(body)
 	local world=body.world
 	core.body_destroy( body[0] )
 	world.bodies[ body[0] ]=nil
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.transform
+
+	px,py,pz,qx,qy,qz,qw = body:transform()
+	px,py,pz,qx,qy,qz,qw = body:transform(px,py,pz)
+	px,py,pz,qx,qy,qz,qw = body:transform(px,py,pz,qx,qy,qz,qw)
+
+get/set the body transform. Position and Rotation Quaternion.
+
+]]
+bullet.body_functions.transform=function(body,...)
+	return core.body_transform( body[0] , ... )
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.restitution
+
+	r = body:transform( r )
+	r = body:transform()
+
+get/set the body restitution
+
+]]
+bullet.body_functions.restitution=function(body,r)
+	return core.body_restitution( body[0] , r )
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.velocity
+
+	x,y,z = body:velocity( x,y,z )
+	x,y,z = body:velocity()
+
+get/set the body velocity
+
+]]
+bullet.body_functions.velocity=function(body,x,y,z)
+	return core.body_velocity( body[0] , x,y,z )
 end
 
 ------------------------------------------------------------------------

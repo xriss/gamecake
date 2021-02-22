@@ -627,6 +627,48 @@ btTransform trans;
 	return 7;
 }
 
+/*+------------------------------------------------------------------+**
+
+get body velocity
+
+**+------------------------------------------------------------------+*/
+static int lua_bullet_body_velocity (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setLinearVelocity( btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) ) );
+	}
+
+	btVector3 v=body->getLinearVelocity();
+
+	lua_pushnumber(l,v.getX());
+	lua_pushnumber(l,v.getY());
+	lua_pushnumber(l,v.getZ());
+
+	return 3;
+}
+
+/*+------------------------------------------------------------------+**
+
+get/set body restitution
+
+**+------------------------------------------------------------------+*/
+static int lua_bullet_body_restitution (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btTransform trans;
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setRestitution( lua_tonumber(l,2) );
+	}
+
+	lua_pushnumber(l,body->getRestitution());
+
+	return 1;
+}
 
 
 /*+------------------------------------------------------------------+**
@@ -792,6 +834,16 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 	lua_pop(l,1);
 
 
+	const luaL_Reg meta_mesh[] =
+	{
+		{"__gc",			lua_bullet_mesh_destroy},
+		{0,0}
+	};
+
+	luaL_newmetatable(l, lua_bullet_mesh_meta_name);
+	luaL_openlib(l, NULL, meta_mesh, 0);
+	lua_pop(l,1);
+
 	const luaL_Reg meta_shape[] =
 	{
 		{"__gc",			lua_bullet_shape_destroy},
@@ -834,6 +886,8 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"world_remove_body",				lua_bullet_world_remove_body},
 
 		{"body_transform",					lua_bullet_body_transform},
+		{"body_velocity",					lua_bullet_body_velocity},
+		{"body_restitution",				lua_bullet_body_restitution},
 
 
 		{"test",				lua_bullet_test},

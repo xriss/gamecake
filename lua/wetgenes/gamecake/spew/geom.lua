@@ -847,6 +847,32 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		return (dd[1]+dd[2])/2 , (dd[3]+dd[4])/2 , (dd[5]+dd[6])/2
 	end
 
+	-- get collision triangle,vertex collision tables
+	M.get_colision_tables=function(it,m4)
+
+		local tp={}
+		local tv={}
+		for i,v in ipairs(it.verts) do
+			local l=#tv
+			local v=V4{v[1],v[2],v[3],1}
+			if m4 then v:product(m4) end -- adjust position
+			tv[l+1]=v[1]
+			tv[l+2]=v[2]
+			tv[l+3]=v[3]
+		end
+		for i,p in ipairs(it.polys) do
+			for ti=0,(#p-3) do
+				for i=2,0,-1 do
+					local tv=1+ti+i if i==0 then tv=1 end
+					tp[#tp+1]=p[tv]
+				end
+			end
+		end
+
+		return tp,tv
+
+	end
+
 	require("wetgenes.gamecake.spew.geom_mask").fill(M)
 	require("wetgenes.gamecake.spew.geom_solids").fill(M)
 
