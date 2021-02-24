@@ -671,6 +671,47 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 
 /*+------------------------------------------------------------------+**
 
+get/set friction values linear,angular
+
+**+------------------------------------------------------------------+*/
+static int lua_bullet_body_friction (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setFriction( lua_tonumber(l,2) );
+		body->setRollingFriction( lua_tonumber(l,2) );
+	}
+
+	lua_pushnumber(l,body->getFriction());
+	lua_pushnumber(l,body->getRollingFriction());
+
+	return 2;
+}
+
+/*+------------------------------------------------------------------+**
+
+get/set damping values linear,angular
+
+**+------------------------------------------------------------------+*/
+static int lua_bullet_body_damping (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setDamping( lua_tonumber(l,2) , lua_tonumber(l,2) );
+	}
+
+	lua_pushnumber(l,body->getLinearDamping());
+	lua_pushnumber(l,body->getAngularDamping());
+
+	return 2;
+}
+
+/*+------------------------------------------------------------------+**
+
 get/set ccd values radius,threshold
 
 set both to 0 to disable CCD which is the starting default
@@ -691,150 +732,6 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 
 	return 2;
 }
-
-/*+------------------------------------------------------------------+**
-
-test
-
-gamecake -e" local wbc=require('wetgenes.bullet.core') ; wbc.test( wbc.world_create({}) ) "
-
-gamecake -e" require('apps').default_paths() ; require('wetgenes.bullet').test() "
-
-**+------------------------------------------------------------------+*/
-
-static int lua_bullet_test (lua_State *l)
-{
-bullet_world *pp=lua_bullet_world_ptr (l,1);
-
-	int i;
-
-	pp->world->setGravity(btVector3(0, -10, 0));
-
-	///-----initialization_end-----
-
-	//keep track of the shapes, we release memory at exit.
-	//make sure to re-use collision shapes among rigid bodies whenever possible!
-	btAlignedObjectArray<btCollisionShape*> collisionShapes;
-
-	///create a few basic rigid bodies
-
-	//the ground is a cube of side 100 at position y = -56.
-	//the sphere will hit it at y = -6, with center at -5
-	{
-		btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(50.), btScalar(50.), btScalar(50.)));
-
-		collisionShapes.push_back(groundShape);
-
-		btTransform groundTransform;
-		groundTransform.setIdentity();
-		groundTransform.setOrigin(btVector3(0, 0, 0));
-
-		btScalar mass(0.);
-
-		//rigidbody is dynamic if and only if mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic)
-			groundShape->calculateLocalInertia(mass, localInertia);
-
-		//using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-
-		//add the body to the dynamics world
-		pp->world->addRigidBody(body);
-	}
-
-	{
-		//create a dynamic rigidbody
-
-		//btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
-		btCollisionShape* colShape = new btSphereShape(btScalar(1.));
-		collisionShapes.push_back(colShape);
-
-		/// Create Dynamic Objects
-		btTransform startTransform;
-		startTransform.setIdentity();
-
-		btScalar mass(1.f);
-
-		//rigidbody is dynamic if and only if mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic)
-			colShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(btVector3(2, 80, 0));
-
-		//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-
-		pp->world->addRigidBody(body);
-	}
-
-	/// Do some simulation
-
-	///-----stepsimulation_start-----
-	for (i = 0; i < 150; i++)
-	{
-		pp->world->stepSimulation(1.f / 60.f, 10);
-
-		//print positions of all objects
-		for (int j = pp->world->getNumCollisionObjects() - 1; j >= 0; j--)
-		{
-			btCollisionObject* obj = pp->world->getCollisionObjectArray()[j];
-			btRigidBody* body = btRigidBody::upcast(obj);
-			btTransform trans;
-			if (body && body->getMotionState())
-			{
-				body->getMotionState()->getWorldTransform(trans);
-			}
-			else
-			{
-				trans = obj->getWorldTransform();
-			}
-			printf("world pos object %d = %f,%f,%f\n", j, float(trans.getOrigin().getX()), float(trans.getOrigin().getY()), float(trans.getOrigin().getZ()));
-		}
-	}
-
-	///-----stepsimulation_end-----
-
-	//cleanup in the reverse order of creation/initialization
-
-	///-----cleanup_start-----
-
-	//remove the rigidbodies from the dynamics world and delete them
-	for (i = pp->world->getNumCollisionObjects() - 1; i >= 0; i--)
-	{
-		btCollisionObject* obj = pp->world->getCollisionObjectArray()[i];
-		btRigidBody* body = btRigidBody::upcast(obj);
-		if (body && body->getMotionState())
-		{
-			delete body->getMotionState();
-		}
-		pp->world->removeCollisionObject(obj);
-		delete obj;
-	}
-
-	//delete collision shapes
-	for (int j = 0; j < collisionShapes.size(); j++)
-	{
-		btCollisionShape* shape = collisionShapes[j];
-		collisionShapes[j] = 0;
-		delete shape;
-	}
-
-	//next line is optional: it will be cleared by the destructor when the array goes out of scope
-	collisionShapes.clear();
-	
-	return 0;
-}
-
 
 /*+------------------------------------------------------------------+**
 
@@ -909,10 +806,9 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_transform",					lua_bullet_body_transform},
 		{"body_velocity",					lua_bullet_body_velocity},
 		{"body_restitution",				lua_bullet_body_restitution},
+		{"body_friction",					lua_bullet_body_friction},
+		{"body_damping",					lua_bullet_body_damping},
 		{"body_ccd",						lua_bullet_body_ccd},
-
-
-		{"test",				lua_bullet_test},
 
 		{0,0}
 	};

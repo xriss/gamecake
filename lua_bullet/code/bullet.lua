@@ -1,6 +1,6 @@
 --[[--------------------------------------------------------------------
 
-(C) Kriss@XIXs.com 2020 and released under the MIT license.
+(C) Kriss@XIXs.com 2021 and released under the MIT license.
 
 See https://github.com/xriss/gamecake for full notice.
 
@@ -303,6 +303,32 @@ bullet.body_functions.restitution=function(body,r)
 end
 
 ------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.friction
+
+	l,a = body:friction( linear , angular )
+	l,a = body:friction()
+
+get/set the body friction
+
+]]
+bullet.body_functions.friction=function(body,l,a)
+	return core.body_friction( body[0] , l , a  )
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.damping
+
+	l,a = body:damping( linear , angular )
+	l,a = body:damping()
+
+get/set the body damping
+
+]]
+bullet.body_functions.damping=function(body,l,a)
+	return core.body_damping( body[0] , l , a  )
+end
+
+------------------------------------------------------------------------
 --[[#lua.wetgenes.bullet.world.body.velocity
 
 	x,y,z = body:velocity( x,y,z )
@@ -318,8 +344,8 @@ end
 ------------------------------------------------------------------------
 --[[#lua.wetgenes.bullet.world.body.ccd
 
-	radius,threshold = body:ccd( radius,threshold )
-	radius,threshold = body:ccd()
+	r,t = body:ccd( radius,threshold )
+	r,t = body:ccd()
 
 get/set the continuos collision detection radius,threshold values
 
@@ -327,55 +353,6 @@ get/set the continuos collision detection radius,threshold values
 bullet.body_functions.ccd=function(body,radius,threshold)
 	return core.body_ccd( body[0] , radius,threshold )
 end
-
-------------------------------------------------------------------------
---[[#lua.wetgenes.bullet.test
-
-	bullet.test()
-
-Create a simple world and simulate some physics printing positions out 
-to the console. Hopefully without crashing :)
-
-]]
-bullet.test=function()
-
-	local world=core.world_create( )
-	
-	core.world_gravity(world,0,-10,0)
-
---	core.test( world )
-
-
-	local shapes={}
-	local bodys={}
-	
-	shapes[1]=core.shape_create("box",100,50,100)
-	shapes[2]=core.shape_create("sphere",10)
-
-	bodys[1]=core.body_create("rigid",shapes[1],0,0,-50,0)
-	bodys[2]=core.body_create("rigid",shapes[2],1,0,20,0)
-	bodys[3]=core.body_create("rigid",shapes[2],1,0,40,0)
-
-	for i,v in ipairs(bodys) do
-		core.world_add_body(world,v)
-	end
-
-	for i = 1,150 do
-		core.world_step(world,1/60,10)
-		for i,v in ipairs(bodys) do
-			print(i," : ",core.body_transform(v))
-		end
-	end
-
-	print("done")
-	
-	for i,v in ipairs(bodys)  do print("B",i) core.world_remove_body(world,v) core.body_destroy( v )  end
-	for i,v in ipairs(shapes) do print("S",i) core.shape_destroy( v ) end
-	print("W",1)
-	core.world_destroy( world )
-
-end
-
 
 
 return bullet
