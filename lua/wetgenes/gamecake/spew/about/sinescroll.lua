@@ -75,7 +75,7 @@ Greetz to No1 and No6!
 		mode="clip",
 		vx=640,
 		vy=480,
-		fov=0.5,
+		fov=0.25,
 	})
 	
 	about.shaders=function()

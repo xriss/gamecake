@@ -10,6 +10,8 @@ local core=require("wetgenes.gamecake.core")
 local tardis=require("wetgenes.tardis")
 local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
+local ls=function(t) print( require("wetgenes.string").dump(t) ) end
+
 -- Layout replacement...
 -- Maintain a hierarchical system of views so we can render into sub parts of the main screen.
 -- Handle with switching to and from FBO as render targets.

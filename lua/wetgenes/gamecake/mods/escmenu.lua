@@ -110,7 +110,7 @@ function M.bake(oven,escmenu)
 			mode="full",
 			vx=480,
 			vy=480,
-			fov=0.5,
+			fov=0.25,
 		})
 	end
 
@@ -163,9 +163,9 @@ function M.bake(oven,escmenu)
 		if escmenu.show then
 			if m.class=="key" or m.class=="mouse" or m.class=="joykey" or m.class=="joystick" then
 
-				if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
-				
 				escmenu.view.msg(m)
+
+				if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
 
 --				if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
 --					m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen
