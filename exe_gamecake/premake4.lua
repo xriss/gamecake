@@ -114,6 +114,8 @@ elseif NIX then
 
 	end
 
+	links { "udev" }
+	
 	links { "asound" }
 
 --	links { "GL" }

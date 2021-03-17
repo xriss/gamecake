@@ -805,6 +805,10 @@ all_includes=all_includes or {
 -- test midi alsa?
 	{"lua_midi",		NIX		},
 
+-- test hid?
+	{"lua_hid",			NIX		},
+	{"lib_hidapi",		NIX		},
+
 	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- the output executables
