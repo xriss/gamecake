@@ -22,97 +22,48 @@ end
 
 
 
-
+--[[
 print(wstr.dump(hid))
 
 print(wstr.dump(hid.enumerate()))
-
-local dev = hid.open_path("/dev/hidraw1") -- first dev
-print(dev)
-if dev then
-
-print( "manufacturer" , hid.get_string(dev,"manufacturer") )
-print( "product" , hid.get_string(dev,"product") )
-print( "serial_number" , hid.get_string(dev,"serial_number") )
+]]
 
 
-	hid.close(dev)
-
-end
-
-local dev = hid.open_id(0x2434,0x5303, nil)	-- the oculus rift
-print(dev)
+local dev = hid.open_id(0x14b7,0x0982, nil)	-- Game-Trak V1.3
 
 
 print( "manufacturer" , hid.get_string(dev,"manufacturer") )
 print( "product" , hid.get_string(dev,"product") )
 print( "serial_number" , hid.get_string(dev,"serial_number") )
 
-print( "error" , hid.error(dev) )
+
+--print( "error" , hid.error(dev) )
 
 --if dev then hid.close(dev) end
 
 hid.set_nonblocking(dev,1)
-assert(hid.send_feature_report(dev, string.char(0x2,0xa0, 0x0a)..string.rep("\0", 14)))
-local buf = assert(hid.get_feature_report(dev,0x6, 16))
-bdump(buf)
 
+--assert(hid.write(dev, string.char(0x02, 0x08, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00)))
+
+
+--[[
+for i=0,255 do
+	print(i)
+--	hid.send_feature_report(dev, string.char(i,0,0,0,0,0,0,0))
+
+	local buf = hid.get_feature_report(dev,i, 16)
+	if buf then bdump(buf) end
+end
+print("NEXT")
+]]
 
 -- Read a data
 while true do
-	local buf = hid.read(dev,62)
---	printf("Data\n   ");
-
+	local buf = hid.read(dev,16)
 	if buf then
-
---		bdump(buf)
-		
-		local head=pack.load(buf,{
-			"u8","count",
-			"u16","time",
-			"u16","last",
-			"u16","temp",
-		},0)
-
-		local tail=pack.load(buf,{
-			"u16","magx",
-			"u16","magy",
-			"u16","magz",
-		},56)
-		
-		local function sign31(n)
-			if n>0x0fffff then return n-0x200000 end
-			return n
-		end
-
-		local function debit(base)
-			local b={} for i=1,8 do b[i]=pack.read(buf,"u8",base+i-1) end
-			
-			local t1=sign31( lshift(b[1],13) + lshift(b[2],5) + rshift(band(b[3],0xf8),3) )
-			local t2=sign31( lshift(band(b[3],0x07),18) + lshift(b[4],10) + lshift(b[5],2) + rshift(band(b[6],0xc0),6) )
-			local t3=sign31( lshift(band(b[6],0x3f),15) + lshift(b[7],7) + rshift(band(b[8],0xfe),1) )
---[[			
-    t[1] = (buffer[0] << 13) | (buffer[1] << 5) | ((buffer[2] & 0xF8) >> 3);
-    t[2] = ((buffer[2] & 0x07) << 18) | (buffer[3] << 10) | (buffer[4] << 2) | ((buffer[5] & 0xC0) >> 6);
-    t[3] = ((buffer[5] & 0x3F) << 15) | (buffer[6] << 7) | (buffer[7] >> 1);
-]]
-			return t1,t2,t3
-		end
-		
-		local data={}
-		if head.count>2 then head.count=3 end
-		for i=1,head.count do
-			local d={}
-			data[i]=d
-			d.accx , d.accy , d.accz = debit( 8 +     16*(i-1) )
-			d.gyrx , d.gyry , d.gyrz = debit( 8 + 8 + 16*(i-1) )
-		end
-		
-		print( data[1].accx , data[1].accy , data[1].accz , ".", data[1].gyrx , data[1].gyry , data[1].gyrz , ".", 
-		tail.magx, tail.magy, tail.magz , "-" ,  head.last*65536 + head.time, head.temp )
-	
+		print( buf and #buf or 0 )
+		bdump(buf)
 	end
-	
 end
 
 os.exit(0)

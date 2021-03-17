@@ -13,6 +13,4 @@ local core=require("wetgenes.hid.core")
 
 for n,f in pairs(core) do hid[n]=f end
 
-print("HID UP")
-
 return hid
