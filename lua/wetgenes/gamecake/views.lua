@@ -85,6 +85,10 @@ function M.bake(oven,views)
 		view.hx=opts.hx
 		view.hy=opts.hy
 
+		view.cx=opts.cx or 0	-- set starting point on screen 0,0,0 topleft 0.5,0.5,0.0 center of screen and 1.0,1.0,0.0 is bottom right
+		view.cy=opts.cy or 0
+		view.cz=opts.cz or 0
+
 -- the projection view size, mostly aspect, that we will be aiming for
 		if view.win then
 			view.vx=opts.vx or view.win.width
@@ -266,7 +270,7 @@ function M.bake(oven,views)
 
 			end
 
-			view.pmtx:translate(-view.vx/2,-view.vy/2,view.pz) -- top left corner is origin
+			view.pmtx:translate(view.vx*(view.cx-0.5),view.vy*(view.cy-0.5),view.pz+view.vz*view.cz) -- choose draw origin from top left to center of screen
 
 			return view
 		end
@@ -292,8 +296,8 @@ function M.bake(oven,views)
 
 			if msg.xraw and msg.yraw then	-- we need to fix raw x,y mouse numbers
 			
-				msg.x=( view.vx * ( (msg.xraw-(view.hx*0.5+view.px)) * view.sx ) / view.hx ) + view.vx*0.5
-				msg.y=( view.vy * ( (msg.yraw-(view.hy*0.5+view.py)) * view.sy ) / view.hy ) + view.vy*0.5
+				msg.x=( view.vx * ( (msg.xraw-(view.hx*0.5+view.px)) * view.sx ) / view.hx ) + view.vx*(0.5-view.cx)
+				msg.y=( view.vy * ( (msg.yraw-(view.hy*0.5+view.py)) * view.sy ) / view.hy ) + view.vy*(0.5-view.cy)
 
 				return true
 			end
