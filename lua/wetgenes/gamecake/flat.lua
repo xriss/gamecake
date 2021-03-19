@@ -206,8 +206,9 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 
 	it.draw=function(cb,progname)
-	
-		local p=gl.program(progname or it.progname or def_progname)
+
+		progname=progname or it.progname or def_progname
+		local p=gl.program(progname)
 		gl.UseProgram( p[0] )
 
 		local vertexarray
@@ -234,35 +235,57 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,pstride,0)
 		gl.EnableVertexAttribArray(p:attrib("a_vertex"))
 		
+--print( progname , fmt , p:attrib("a_texcoord") )
+
 		if pnrm then
-			gl.VertexAttribPointer(p:attrib("a_normal"),3,gl.FLOAT,gl.FALSE,pstride,pnrm)
-			gl.EnableVertexAttribArray(p:attrib("a_normal"))
+			local a=p:attrib("a_normal")
+			if a>=0 then
+				gl.VertexAttribPointer(a,3,gl.FLOAT,gl.FALSE,pstride,pnrm)
+				gl.EnableVertexAttribArray(a)
+			end
 		end
 
 		if ptex then
-			gl.VertexAttribPointer(p:attrib("a_texcoord"),2,gl.FLOAT,gl.FALSE,pstride,ptex)
-			gl.EnableVertexAttribArray(p:attrib("a_texcoord"))
+			local a=p:attrib("a_texcoord")
+			if a>=0 then
+				gl.VertexAttribPointer(a,2,gl.FLOAT,gl.FALSE,pstride,ptex)
+				gl.EnableVertexAttribArray(a)
+			end
 		end
 
 		if pcolor then
-			gl.VertexAttribPointer(p:attrib("a_color"),4,gl.FLOAT,gl.FALSE,pstride,pcolor)
-			gl.EnableVertexAttribArray(p:attrib("a_color"))
+			local a=p:attrib("a_color")
+			if a>=0 then
+				gl.VertexAttribPointer(a,4,gl.FLOAT,gl.FALSE,pstride,pcolor)
+				gl.EnableVertexAttribArray(a)
+			end
 		end
 
 		if pmat then
-			gl.VertexAttribPointer(p:attrib("a_matidx"),1,gl.FLOAT,gl.FALSE,pstride,pmat)
-			gl.EnableVertexAttribArray(p:attrib("a_matidx"))
+			local a=p:attrib("a_matidx")
+			if a>=0 then
+				gl.VertexAttribPointer(a,1,gl.FLOAT,gl.FALSE,pstride,pmat)
+				gl.EnableVertexAttribArray(a)
+			end
 		end
 		
 		if ptans then
-			gl.VertexAttribPointer(p:attrib("a_tangent"),4,gl.FLOAT,gl.FALSE,pstride,ptans)
-			gl.EnableVertexAttribArray(p:attrib("a_tangent"))
+			local a=p:attrib("a_tangent")
+			if a>=0 then
+				gl.VertexAttribPointer(a,4,gl.FLOAT,gl.FALSE,pstride,ptans)
+				gl.EnableVertexAttribArray(a)
+			end
 		end
 
 		if pbone then
-			gl.VertexAttribPointer(p:attrib("a_bone"),4,gl.FLOAT,gl.FALSE,pstride,pbone)
-			gl.EnableVertexAttribArray(p:attrib("a_bone"))
+			local a=p:attrib("a_bone")
+			if a>=0 then
+				gl.VertexAttribPointer(a,4,gl.FLOAT,gl.FALSE,pstride,pbone)
+				gl.EnableVertexAttribArray(a)
+			end
 		end
+
+	local err=gl.GetError() ; assert( err==0 , gl.numtostring(err) ) -- well that went wrong
 
 		if cb then cb(p) end -- callback to fill in more uniforms before drawing
 

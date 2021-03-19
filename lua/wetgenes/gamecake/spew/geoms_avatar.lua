@@ -71,23 +71,9 @@ M.bake=function(oven,geoms_avatar)
 		print(#geoms_avatar.objs.anims)
 		for i,v in ipairs(geoms_avatar.objs.anims) do
 			print("avatar anim :",i,math.floor(v.min*24),math.floor(v.max*24),v.name)
-		end
-		geoms_avatar.objs.anim=geoms_avatar.objs.anims[1]
-		
+		end		
 
---dprint(avatar.gs)
-
-		geoms_avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,64,16,1)
-		
-		geoms_avatar.map:clear(0xffffffff)
-		
-		geoms_avatar.image=oven.cake.images.load("avatar/edit","avatar/edit",function() return geoms_avatar.map end)
-		geoms_avatar.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
-		geoms_avatar.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
-		geoms_avatar.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
-		geoms_avatar.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
-
---		oven.cake.images.bind(geoms_avatar.image)
+		geoms_avatar.build_texture_anims()
 
 	gl.program_source("avatar_gltf",[[
 
@@ -286,16 +272,12 @@ void main(void)
 
 ]])
 
-		geoms_avatar.build_texture_anims()
-		geoms_avatar.build_texture_tweak()
-		geoms_avatar.build_bone_masks()
-
 	end
 	
-	function geoms_avatar.build_bone_masks()
+	function geoms_avatar.build_bone_masks(avatar)
 	
 		local masks={}
-		geoms_avatar.bone_masks=masks
+		avatar.bone_masks=masks
 		
 		masks[0]={} -- empty
 		masks[1]={} -- left
@@ -349,7 +331,7 @@ void main(void)
 	end
 
 
-	function geoms_avatar.build_texture_tweak()
+	function geoms_avatar.build_texture_tweak(avatar)
 	
 		local width=0
 		local height=3
@@ -359,14 +341,14 @@ void main(void)
 		local ts=wgeoms.get_anim_tweaks(geoms_avatar.objs)
 		width=(#ts/(4*height))
 		
-		if geoms_avatar.fixtex then
+		if avatar.fixtex then
 		
-			geoms_avatar.fixtex.gl_table=ts
-			geoms_avatar.fixtex.gl_data=wpack.save_array(geoms_avatar.fixtex.gl_table,"f32")
-			geoms_avatar.fixtex:upload()
+			avatar.fixtex.gl_table=ts
+			avatar.fixtex.gl_data=wpack.save_array(avatar.fixtex.gl_table,"f32")
+			avatar.fixtex:upload()
 
 		else
-			geoms_avatar.fixtex=textures.create({
+			avatar.fixtex=textures.create({
 				gl_data=wpack.save_array(ts,"f32"),
 				gl_table=ts,
 				gl_width=width,
@@ -379,13 +361,13 @@ void main(void)
 
 	end
 
-	function geoms_avatar.adjust_texture_tweak(name,mat)
+	function geoms_avatar.adjust_texture_tweak(avatar,name,mat)
 
 		local skin=geoms_avatar.objs.skins[1] -- assume only one boned character
 		if not skin then return end
-		if not geoms_avatar.fixtex then return end
+		if not avatar.fixtex then return end
 		
-		local bones=geoms_avatar.fixtex.gl_table
+		local bones=avatar.fixtex.gl_table
 	
 
 		local bs=#skin.nodes
@@ -415,9 +397,9 @@ void main(void)
 
 		end
 
-		geoms_avatar.fixtex.gl_table=bones
-		geoms_avatar.fixtex.gl_data=wpack.save_array(geoms_avatar.fixtex.gl_table,"f32")
-		geoms_avatar.fixtex:upload()
+		avatar.fixtex.gl_table=bones
+		avatar.fixtex.gl_data=wpack.save_array(avatar.fixtex.gl_table,"f32")
+		avatar.fixtex:upload()
 
 	end
 	
@@ -428,7 +410,6 @@ void main(void)
 		
 		for aidx,anim in ipairs(objs.anims) do
 			objs.anim=anim
-
 
 			local width=0
 			local height=#anim.keys
@@ -462,7 +443,7 @@ void main(void)
 		
 	end
 
-	function geoms_avatar.update(soul)
+	function geoms_avatar.update(avatar)
 
 		local objs=geoms_avatar.objs
 
@@ -502,61 +483,59 @@ void main(void)
 			b=b+4
 		end
 
-		geoms_avatar.bones=bones
-		geoms_avatar.material_colors=material_colors
-		geoms_avatar.material_values=material_values
+		avatar.bones=bones
+		avatar.material_colors=material_colors
+		avatar.material_values=material_values
 
 
-		objs.anim=objs.anims[soul.pose] or objs.anims[1]
-		if objs.anim then
-			objs.anim.time=(objs.anim.time or 0)+(1/60)
+		avatar.anim=objs.anims[avatar.pose] or objs.anims[1]
+		if avatar.anim then
+			avatar.time=(avatar.time or 0)+(1/60)
 		end
 		wgeoms.update(objs)
-		
---		geoms_avatar.rebuild(soul)
 
 	end
 
-	function geoms_avatar.draw()
+	function geoms_avatar.draw(avatar)
 
 		local pp=function(p)
 		
 			gl.ActiveTexture(gl.TEXTURE2)
-			geoms_avatar.fixtex:bind()
+			avatar.fixtex:bind()
 			gl.Uniform1i( p:uniform("fixbones"), 2 )
 
 			gl.ActiveTexture(gl.TEXTURE1)
-			geoms_avatar.bonetexs[geoms_avatar.objs.anim.name]:bind()
+			geoms_avatar.bonetexs[avatar.anim.name]:bind()
 			gl.Uniform1i( p:uniform("texbones"), 1 )
 
 			gl.ActiveTexture(gl.TEXTURE0)
-			oven.cake.images.bind(geoms_avatar.image)
+			oven.cake.images.bind(avatar.image)
 			gl.Uniform1i( p:uniform("tex0"), 0 )
 
 			local objs=geoms_avatar.objs
-			if objs.anim then
-				local anim=objs.anim
+			if avatar.anim then
+				local anim=avatar.anim
 				anim.length=anim.max-anim.min
 				if anim.length>0 then
-					anim.time=(anim.time or 0)%anim.length
+					avatar.time=(avatar.time or 0)%anim.length
 				end
 				if anim.keys[2] then
 					local rate=anim.keys[2]-anim.keys[1]
-					anim.frame=math.floor(anim.time/rate)
+					avatar.frame=math.floor(avatar.time/rate)
 				else
-					anim.frame=0
+					avatar.frame=0
 				end
-				gl.Uniform1f( p:uniform("animframe"), anim.frame )
+				gl.Uniform1f( p:uniform("animframe"), avatar.frame )
 			end
 
-			gl.UniformMatrix4f( p:uniform("bones"), geoms_avatar.bones )
+			gl.UniformMatrix4f( p:uniform("bones"), avatar.bones )
 
-			gl.Uniform4f( p:uniform("material_colors"), geoms_avatar.material_colors )
-			gl.Uniform4f( p:uniform("material_values"), geoms_avatar.material_values )
+			gl.Uniform4f( p:uniform("material_colors"), avatar.material_colors )
+			gl.Uniform4f( p:uniform("material_values"), avatar.material_values )
 			
 		end
 
-		wgeom.draw(geoms_avatar.obj,"avatar_gltf",pp)
+		wgeom.draw(avatar.obj,"avatar_gltf",pp)
 
 -- draw debug bones	
 --		wgeoms.draw_bones(geoms_avatar.objs,"avatar_gltf",pp)
@@ -564,7 +543,7 @@ void main(void)
 	end
 	
 
-	function geoms_avatar.rebuild(soul,name)
+	function geoms_avatar.rebuild(avatar,soul)
 
 		local clamp=function(a) if a<0 then a=0 elseif a>255 then a=255 end return math.floor(a) end
 		local rgb=function(r,g,b)
@@ -573,7 +552,7 @@ void main(void)
 					clamp(g*255) * 256 + 
 					clamp(b*255)
 		end
-		geoms_avatar.map:clear(0xffffffff)
+		avatar.map:clear(0xffffffff)
 		for idx,name in ipairs(geoms_avatar.material_names) do
 			local material=soul.materials[name]
 			if material and material.ramp then
@@ -586,11 +565,11 @@ void main(void)
 						value=ca/255,
 					}
 				end
-				local g=geoms_avatar.map:clip( 0,idx-1,0, 64,1,1 )
+				local g=avatar.map:clip( 0,idx-1,0, 64,1,1 )
 				wgrdcanvas.cmap_ramp(g,keys)
 			end
 		end
-		oven.cake.images.unload(geoms_avatar.image) -- force a reload
+		oven.cake.images.unload(avatar.image) -- force a reload
 
 
 
@@ -604,11 +583,11 @@ void main(void)
 		
 		for _,o in ipairs(geoms_avatar.objs) do
 			if show[ o.name ] then
-				local t=o:duplicate():filter_by_bones( geoms_avatar.bone_masks[ show[ o.name ] ] or geoms_avatar.bone_masks[0] )
+				local t=o:duplicate():filter_by_bones( avatar.bone_masks[ show[ o.name ] ] or avatar.bone_masks[0] )
 				obj:merge_from(t)
 			end
 		end
-		geoms_avatar.obj=obj
+		avatar.obj=obj
 
 -- tweak base positions of bones
 --[[
@@ -712,20 +691,48 @@ void main(void)
 			end
 		end
 
-		geoms_avatar.build_texture_tweak()
+		geoms_avatar.build_texture_tweak(avatar)
 
 	end
 
 
-	function geoms_avatar.avatar(avatar)
+	function geoms_avatar.avatar(avatar,soul)
 	
 		avatar=avatar or {}
-		
+
+		avatar.rebuild=function( soul )
+			geoms_avatar.rebuild( avatar , soul )
+		end
+
+		avatar.setup=function( soul )
+
+			avatar.anim=geoms_avatar.objs.anims[1]
+
+			avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,64,16,1)
+			avatar.map:clear(0xffffffff)
+			
+			avatar.image=oven.cake.images.load("avatar/"..tostring(avatar),"avatar/"..tostring(avatar),function() return avatar.map end)
+			avatar.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
+			avatar.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
+			avatar.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
+			avatar.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
+
+			geoms_avatar.build_texture_tweak(avatar)
+			geoms_avatar.build_bone_masks(avatar)
+
+			avatar.rebuild( soul )
+
+		end
+				
 		avatar.update=function()
+			geoms_avatar.update(avatar)
 		end
 	
 		avatar.draw=function()
+			geoms_avatar.draw(avatar)
 		end
+
+		if soul then avatar.setup(soul) end
 	
 		return avatar
 	end
