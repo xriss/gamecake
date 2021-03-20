@@ -700,6 +700,10 @@ void main(void)
 	
 		avatar=avatar or {}
 
+		avatar.adjust_texture_tweak=function(name,mat)
+			geoms_avatar.adjust_texture_tweak(avatar,name,mat)
+		end
+
 		avatar.rebuild=function( soul )
 			geoms_avatar.rebuild( avatar , soul )
 		end
@@ -721,7 +725,6 @@ void main(void)
 			geoms_avatar.build_bone_masks(avatar)
 
 			avatar.rebuild( soul )
-
 		end
 				
 		avatar.update=function()
