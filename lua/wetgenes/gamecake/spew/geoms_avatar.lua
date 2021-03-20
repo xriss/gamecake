@@ -21,24 +21,187 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.filename="/sync/kriss/blender/avatar/avatar.glb" -- try and use latest version
 
+-- the material names of an avatar in texture order
 M.material_names={
-		"white",
-		"grey",
-		"black",
-		"skin",
-		"lips",
-		"hair",
-		"iris",
-		"eye",
-		"head1",
-		"head2",
-		"body1",
-		"body2",
-		"foot1",
-		"foot2",
-		"hand1",
-		"hand2",
-	}
+	"white",
+	"grey",
+	"black",
+	"skin",
+	"lips",
+	"hair",
+	"iris",
+	"eye",
+	"head1",
+	"head2",
+	"body1",
+	"body2",
+	"foot1",
+	"foot2",
+	"hand1",
+	"hand2",
+}
+
+-- the available mesh names of an avatar
+M.mesh_names={
+
+	{"hat_baseball",		group=1,									},
+	{"hat_kerchief",		group=1,									},
+	{"hat_pirate",			group=1,									},
+	{"hat_greek_helmet",	group=1,									},
+
+	{"hair_base",			group=0,									},
+	{"hair_basic",			group=1,									},
+	{"hair_spiky",			group=1,									},
+	{"hair_back",			group=1,									},
+	{"hair_bob",			group=1,									},
+	{"hair_flattop",		group=1,									},
+	{"hair_shoulder",		group=1,									},
+	{"hair_afro",			group=1,									},
+	{"hair_quiff",			group=1,									},
+	{"hair_hedgehog",		group=1,									},
+	{"hair_top_spiked",		group=1,									},
+	{"hair_moflop_left",	group=1,									},
+	{"hair_goth",			group=1,									},
+	{"hair_mess",			group=1,									},
+
+	{"hair_fringe",			group=2,									},
+	{"hair_bunches",		group=2,									},
+	{"hair_pigtails",		group=2,									},
+
+	{"head_base",			group=1,									},
+	{"head_skull",			group=0,									},
+
+	{"eyebrow_base",		group=1,									},
+	{"eyebrow_block",		group=1,									},
+
+	{"eye_base",			group=1,									},
+	{"eye_lash",			group=1,									},
+
+	{"eyeball_base",		group=1,									},
+	{"eyeball_cat",			group=1,									},
+
+	{"eyewear_glasses",		group=1,									},
+
+	{"mouth_base",			group=1,									},
+	{"mouth_jaw",			group=0,									},
+
+	{"beard_goatbraid",		group=1,									},
+	{"beard_goatee",		group=1,									},
+	{"beard_tash",			group=1,									},
+	{"beard_whiskers",		group=1,									},
+
+	{"ear_base",			group=1,									},
+	{"ear_bunny",			group=0,									},
+
+	{"nose_base",			group=1,									},
+	{"nose_piggy",			group=0,									},
+	{"nose_clown",			group=0,									},
+
+	{"body_belly",			group=1,									},
+	{"body_belly_boob",		group=1,									},
+	{"body_bone",			group=0,									},
+	{"body_boob",			group=1,									},
+	{"body_chest",			group=1,									},
+	{"body_tshirt",			group=1,									},
+	{"body_tshirt_boob",	group=1,									},
+	{"body_bodice",			group=1,									},
+	{"body_vest",			group=1,									},
+
+	{"body_printer_support",group=0,									},
+	{"body_tie",			group=0,									},
+	{"body_tie_belly",		group=0,									},
+	{"body_tie_boob",		group=0,									},
+	{"body_coat",			group=0,									},
+	{"body_coat_boob",		group=0,									},
+
+	{"hand_base",			group=1,									},
+	{"hand_bone",			group=0,									},
+
+	{"tail_bunny",			group=0,									},
+	{"tail_devil",			group=0,									},
+
+	{"foot_bare",			group=1,									},
+	{"foot_bone",			group=0,									},
+	{"foot_slipper",		group=1,									},
+	{"foot_flipflop",		group=1,									},
+	{"foot_shoe",			group=1,									},
+	{"foot_boot",			group=1,									},
+	{"foot_heel",			group=1,									},
+
+	{"item_hammer",			group=1,									},
+	{"item_shield",			group=1,									},
+	{"item_shortsword",		group=1,									},
+}
+
+-- the base part names of an avatar
+M.part_names={
+	"hat",
+	"hair",
+	"head",
+	"eye",
+	"eyeball",
+	"eyebrow",
+	"eyewear",
+	"ear",
+	"nose",
+	"mouth",
+	"beard",
+	"body",
+	"hand",
+	"tail",
+	"foot",
+	"item",
+}
+
+-- the base part names of an avatar and current number of dropdowns for each
+M.part_counts={
+	hat=1,
+	hair=3,
+	head=1,
+	eye=1,
+	eyeball=1,
+	eyebrow=1,
+	eyewear=1,
+	ear=1,
+	nose=1,
+	mouth=1,
+	beard=1,
+	body=2,
+	hand=1,
+	tail=1,
+	foot=1,
+	item=1,
+}
+
+-- the tweak part names of an avatar
+M.tweak_names={
+	"hat",
+	"hair",
+	"head",
+	"eyebrow",
+	"eye",
+	"eyeball",
+	"ear",
+	"nose",
+	"cheek",
+	"mouth",
+	"body",
+	"boob",
+	"hand",
+	"tail",
+	"foot",
+	"item",
+}
+
+-- the animation names
+M.pose_names={
+	"breath",
+	"walk",
+	"relax",
+	"fist",
+	"reset",
+}
+
 
 M.bake=function(oven,geoms_avatar)
 
