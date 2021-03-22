@@ -21,9 +21,59 @@ M.fill=function(oven,geom)
 	local font=canvas.font
 	local flat=canvas.flat
 
+	local getfmt=function(it,m)
+
+		local fmt={"xyz"}
+		if it.verts[1][4]  then fmt.nrm=true  fmt[#fmt+1]="nrm" end
+		if it.verts[1][7]  then fmt.uv=true   fmt[#fmt+1]="uv" end
+		if m               then fmt.m=true    fmt[#fmt+1]="m" end
+		if it.verts[1][9]  then fmt.tans=true fmt[#fmt+1]="tans" end
+		if it.verts[1][13] then fmt.bone=true fmt[#fmt+1]="bone" end
+
+		return fmt
+	end
+
+	local pushvtx=function(t,fmt,m,v)
+
+		t[#t+1]=v[1]
+		t[#t+1]=v[2]
+		t[#t+1]=v[3]
+
+		if fmt.nrm then
+			t[#t+1]=v[4] or 0
+			t[#t+1]=v[5] or 0
+			t[#t+1]=v[6] or 0
+		end
+
+		if fmt.uv then
+			t[#t+1]=v[7] or 0
+			t[#t+1]=v[8] or 0
+		end
+
+		if fmt.m then
+			t[#t+1]=m
+		end
+
+		if fmt.tans then
+			t[#t+1]=v[9] or 0
+			t[#t+1]=v[10] or 0
+			t[#t+1]=v[11] or 0
+			t[#t+1]=v[12] or 0
+		end
+
+		if fmt.bone then
+			t[#t+1]=v[13] or 0
+			t[#t+1]=v[14] or 0
+			t[#t+1]=v[15] or 0
+			t[#t+1]=v[16] or 0
+		end
+		
+	end
+	
 -- make a predraw buffer to draw triangles
 	geom.predraw_polys=function(it)
 
+		local fmt=getfmt(it,it.polys[1].mat)
 		local t={}
 		for i,p in ipairs(it.polys) do
 			for ti=0,(#p-3) do
@@ -31,38 +81,17 @@ M.fill=function(oven,geom)
 					local tv=1+ti+i if i==0 then tv=1 end
 					local idx=p[tv]
 					local v=it.verts[idx]
-					
-					t[#t+1]=v[1]
-					t[#t+1]=v[2]
-					t[#t+1]=v[3]
-
-					t[#t+1]=v[4] or 0
-					t[#t+1]=v[5] or 0
-					t[#t+1]=v[6] or 0
-
-					t[#t+1]=v[7] or 0
-					t[#t+1]=v[8] or 0
-					t[#t+1]=(p.mat or 1)-1
-
-					t[#t+1]=v[9] or 0
-					t[#t+1]=v[10] or 0
-					t[#t+1]=v[11] or 0
-					t[#t+1]=v[12] or 0
-
-					t[#t+1]=v[13] or 0
-					t[#t+1]=v[14] or 0
-					t[#t+1]=v[15] or 0
-					t[#t+1]=v[16] or 0
-
+					pushvtx(t,fmt,(p.mat or 1)-1,v)
 				end
 			end
 		end
-		return flat.array_predraw({fmt="xyznrmuvmtansbone",data=t,array=gl.TRIANGLES,vb=true})
+		return flat.array_predraw({fmt=table.concat(fmt),data=t,array=gl.TRIANGLES,vb=true})
 	end
 
 -- make a predraw buffer to draw triangles
 	geom.predraw_flatpolys=function(it)
 
+		local fmt=getfmt(it,it.polys[1].mat)
 		local t={}
 		for i,p in ipairs(it.polys) do
 			local n=geom.get_poly_normal(it,p)
@@ -71,31 +100,17 @@ M.fill=function(oven,geom)
 					local tv=1+ti+i if i==0 then tv=1 end
 					local idx=p[tv]
 					local v=it.verts[idx]
-					t[#t+1]=v[1]
-					t[#t+1]=v[2]
-					t[#t+1]=v[3]
-
-					t[#t+1]=n[1] or 0
-					t[#t+1]=n[2] or 0
-					t[#t+1]=n[3] or 0
-
-					t[#t+1]=v[7] or 0
-					t[#t+1]=v[8] or 0
-					t[#t+1]=(p.mat or 1)-1
-
-					t[#t+1]=v[13] or 0
-					t[#t+1]=v[14] or 0
-					t[#t+1]=v[15] or 0
-					t[#t+1]=v[16] or 0
+					pushvtx(t,fmt,(p.mat or 1)-1,v)
 				end
 			end
 		end
-		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.TRIANGLES,vb=true})
+		return flat.array_predraw({fmt=table.concat(fmt),data=t,array=gl.TRIANGLES,vb=true})
 	end
 
 -- make a predraw buffer to draw triangles but with mask instead of material
 	geom.predraw_polys_mask=function(it)
 	
+		local fmt=getfmt(it,true)
 		local t={}
 		local mask=it.mask and it.mask.polys or {}
 		for i,p in ipairs(it.polys) do
@@ -105,117 +120,54 @@ M.fill=function(oven,geom)
 					local idx=p[tv]
 					local v=it.verts[idx]
 					local v=it.verts[idx]
-					t[#t+1]=v[1]
-					t[#t+1]=v[2]
-					t[#t+1]=v[3]
-
-					t[#t+1]=v[4] or 0
-					t[#t+1]=v[5] or 0
-					t[#t+1]=v[6] or 0
-
-					t[#t+1]=v[7] or 0
-					t[#t+1]=v[8] or 0
-					t[#t+1]=mask[v] or 0
-
-					t[#t+1]=v[13] or 0
-					t[#t+1]=v[14] or 0
-					t[#t+1]=v[15] or 0
-					t[#t+1]=v[16] or 0
+					pushvtx(t,fmt,mask[p],v)
 				end
 			end
 		end
-		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.TRIANGLES,vb=true})
+		return flat.array_predraw({fmt=table.concat(fmt),data=t,array=gl.TRIANGLES,vb=true})
 	end
 
 -- make a predraw buffer to draw lines not triangles
 	geom.predraw_lines=function(it)
+
+		local fmt=getfmt(it,it.polys[1].mat)
 		local t={}
-		local f=1
 		for i,p in ipairs(it.lines) do
 			for i=1,2 do
 				local idx=p[i]
 				local v=it.verts[idx]
-				t[#t+1]=v[1]
-				t[#t+1]=v[2]
-				t[#t+1]=v[3]
-
-				t[#t+1]=v[4] or 0
-				t[#t+1]=v[5] or 0
-				t[#t+1]=v[6] or 0
-
-				t[#t+1]=v[7] or 0
-				t[#t+1]=v[8] or 0
-				t[#t+1]=(p.mat or 1)-1
-
-				t[#t+1]=v[13] or 0
-				t[#t+1]=v[14] or 0
-				t[#t+1]=v[15] or 0
-				t[#t+1]=v[16] or 0
-
-				f=f+1
+				pushvtx(t,fmt,(p.mat or 1)-1,v)
 			end
 		end
-		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.LINES,vb=true})
+		return flat.array_predraw({fmt=table.concat(fmt),data=t,array=gl.LINES,vb=true})
 	end
 
 -- make a predraw buffer to draw lines not triangles and use ask rather than materials
 	geom.predraw_lines_mask=function(it)
+
+		local fmt=getfmt(it,true)
 		local t={}
-		local f=1
 		local mask=it.mask and it.mask.lines or {}
 		for i,p in ipairs(it.lines) do
 			for i=1,2 do
 				local idx=p[i]
 				local v=it.verts[idx]
-				t[#t+1]=v[1]
-				t[#t+1]=v[2]
-				t[#t+1]=v[3]
-
-				t[#t+1]=v[4] or 0
-				t[#t+1]=v[5] or 0
-				t[#t+1]=v[6] or 0
-
-				t[#t+1]=v[7] or 0
-				t[#t+1]=v[8] or 0
-				t[#t+1]=mask[v] or 0
-
-				t[#t+1]=v[13] or 0
-				t[#t+1]=v[14] or 0
-				t[#t+1]=v[15] or 0
-				t[#t+1]=v[16] or 0
-
-				f=f+1
+				pushvtx(t,fmt,mask[v],v)
 			end
 		end
-		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.LINES,vb=true})
+		return flat.array_predraw({fmt=table.concat(fmt),data=t,array=gl.LINES,vb=true})
 	end
 
 -- make a predraw buffer to draw points not triangles and use mask rather than materials
 	geom.predraw_verts_mask=function(it)
+
+		local fmt=getfmt(it,true)
 		local t={}
-		local f=1
 		local mask=it.mask and it.mask.verts or {}
 		for i,v in ipairs(it.verts) do
-			t[#t+1]=v[1]
-			t[#t+1]=v[2]
-			t[#t+1]=v[3]
-
-			t[#t+1]=v[4] or 0
-			t[#t+1]=v[5] or 0
-			t[#t+1]=v[6] or 0
-
-			t[#t+1]=v[7] or 0
-			t[#t+1]=v[8] or 0
-			t[#t+1]=mask[v] or 0
-
-			t[#t+1]=v[13] or 0
-			t[#t+1]=v[14] or 0
-			t[#t+1]=v[15] or 0
-			t[#t+1]=v[16] or 0
-
-			f=f+1
+			pushvtx(t,fmt,mask[v],v)
 		end
-		return flat.array_predraw({fmt="xyznrmuvmbone",data=t,array=gl.POINTS,vb=true})
+		return flat.array_predraw({fmt=table.concat(fmt),data=t,array=gl.POINTS,vb=true})
 	end
 
 -- make a predraw line buffer containing normals for each vertex, scale controls its length.
