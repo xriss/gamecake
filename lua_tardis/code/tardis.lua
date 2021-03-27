@@ -1958,6 +1958,7 @@ end
 
 
 
+if false then -- this is not faster than luajit :)
 
 tardis.f32=require("wetgenes.tardis.core") -- use a "faster?" f32 C core
 
@@ -2019,6 +2020,7 @@ if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first
 
 end
 
+end
 
 tardis.V2=tardis.v2.new
 tardis.V3=tardis.v3.new
