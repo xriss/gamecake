@@ -4,7 +4,7 @@
 
 See https://github.com/xriss/gamecake for full notice.
 
-----------------------------------------------------------------------]]
+]]
 
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
@@ -352,6 +352,20 @@ get/set the continuos collision detection radius,threshold values
 ]]
 bullet.body_functions.ccd=function(body,radius,threshold)
 	return core.body_ccd( body[0] , radius,threshold )
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.active
+
+	b = body:active( true )
+	b = body:active( false )
+	b = body:active()
+
+get/set the active state of an object
+
+]]
+bullet.body_functions.active=function(body,b)
+	return core.body_active( body[0] , b )
 end
 
 

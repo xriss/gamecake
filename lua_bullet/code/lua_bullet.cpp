@@ -4,7 +4,7 @@
 
 See https://github.com/xriss/gamecake for full notice.
 
-**+------------------------------------------------------------------+*/
+*/
 
 #include "all.h"
 
@@ -14,7 +14,7 @@ See https://github.com/xriss/gamecake for full notice.
 A world plus all the other parts that a world needs allocated in one 
 struct.
 
-**+------------------------------------------------------------------+*/
+*/
 
 const char *lua_bullet_world_meta_name="bullet_world*ptr";
 
@@ -125,7 +125,7 @@ btTriangleIndexVertexMaterialArray::btTriangleIndexVertexMaterialArray 	(
 		meshInterface->addIndexedMesh(part, PHY_SHORT);
 		
 			
-**+------------------------------------------------------------------+*/
+*/
 
 const char *lua_bullet_mesh_meta_name="bullet_mesh*ptr";
 
@@ -233,7 +233,7 @@ shape
 
 	btBvhTriangleMeshShape : "mesh" , mesh
 
-**+------------------------------------------------------------------+*/
+*/
 
 const char *lua_bullet_shape_meta_name="bullet_shape*ptr";
 
@@ -445,7 +445,7 @@ btStridingMeshInterface *mesh;
 
 body
 
-**+------------------------------------------------------------------+*/
+*/
 
 const char *lua_bullet_body_meta_name="bullet_body*ptr";
 
@@ -522,7 +522,7 @@ btTransform trans;
 
 get/set world gravity
 
-**+------------------------------------------------------------------+*/
+*/
 static int lua_bullet_world_gravity (lua_State *l)
 {
 btDiscreteDynamicsWorld *world=lua_bullet_world_ptr(l,1)->world;
@@ -545,7 +545,7 @@ btDiscreteDynamicsWorld *world=lua_bullet_world_ptr(l,1)->world;
 
 world step
 
-**+------------------------------------------------------------------+*/
+*/
 static int lua_bullet_world_step (lua_State *l)
 {
 btDiscreteDynamicsWorld *world=lua_bullet_world_ptr(l,1)->world;
@@ -559,7 +559,7 @@ btDiscreteDynamicsWorld *world=lua_bullet_world_ptr(l,1)->world;
 
 add body to world
 
-**+------------------------------------------------------------------+*/
+*/
 static int lua_bullet_world_add_body (lua_State *l)
 {
 btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
@@ -574,7 +574,7 @@ btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
 
 remove body from world
 
-**+------------------------------------------------------------------+*/
+*/
 static int lua_bullet_world_remove_body (lua_State *l)
 {
 btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
@@ -591,7 +591,7 @@ btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
 
 get body position and rotation ( 7 numbers )
 
-**+------------------------------------------------------------------+*/
+*/
 static int lua_bullet_body_transform (lua_State *l)
 {
 btRigidBody *body = lua_bullet_body_ptr(l, 1 );
@@ -631,7 +631,7 @@ btTransform trans;
 
 get body velocity
 
-**+------------------------------------------------------------------+*/
+*/
 static int lua_bullet_body_velocity (lua_State *l)
 {
 btRigidBody *body = lua_bullet_body_ptr(l, 1 );
@@ -654,7 +654,7 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 
 get/set body restitution
 
-**+------------------------------------------------------------------+*/
+*/
 static int lua_bullet_body_restitution (lua_State *l)
 {
 btRigidBody *body = lua_bullet_body_ptr(l, 1 );
@@ -673,7 +673,7 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 
 get/set friction values linear,angular
 
-**+------------------------------------------------------------------+*/
+*/
 static int lua_bullet_body_friction (lua_State *l)
 {
 btRigidBody *body = lua_bullet_body_ptr(l, 1 );
@@ -694,7 +694,7 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 
 get/set damping values linear,angular
 
-**+------------------------------------------------------------------+*/
+*/
 static int lua_bullet_body_damping (lua_State *l)
 {
 btRigidBody *body = lua_bullet_body_ptr(l, 1 );
@@ -716,7 +716,7 @@ get/set ccd values radius,threshold
 
 set both to 0 to disable CCD which is the starting default
 
-**+------------------------------------------------------------------+*/
+*/
 static int lua_bullet_body_ccd (lua_State *l)
 {
 btRigidBody *body = lua_bullet_body_ptr(l, 1 );
@@ -735,9 +735,37 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 
 /*+------------------------------------------------------------------+**
 
+get/set active state
+
+set both to 0 to disable CCD which is the starting default
+
+*/
+static int lua_bullet_body_active (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isboolean(l,2) )
+	{
+		if( lua_toboolean(l,2) )
+		{
+			body->activate();
+		}
+		else
+		{
+			body->forceActivationState(WANTS_DEACTIVATION);
+		}
+	}
+
+	lua_pushboolean(l, body->isActive() ? 1 : 0 );
+
+	return 1;
+}
+
+/*+------------------------------------------------------------------+**
+
 open library.
 
-**+------------------------------------------------------------------+*/
+*/
 LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 {
 
@@ -809,7 +837,8 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_friction",					lua_bullet_body_friction},
 		{"body_damping",					lua_bullet_body_damping},
 		{"body_ccd",						lua_bullet_body_ccd},
-
+		{"body_active",						lua_bullet_body_active},
+		
 		{0,0}
 	};
 
