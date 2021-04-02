@@ -152,28 +152,38 @@ end
 	a=a:set({1,2,3,4})
 	a=a:set({1,2},{3,4})
 
-Assign some numbers to an array, all the above examples will assign 
-1,2,3,4 to the first four slots in the given array, as you can see we 
-allow one level of tables. Any class that is based on this array 
-class can be used instead of an explicit table. So we can use a v2 or v3 or m4 etc etc.
+Assign some numbers to an array, all the above examples will assign 1,2,3,4 to
+the first four slots in the given array, as you can see we allow one level of
+tables. Any class that is based on this array class can be used instead of an
+explicit table. So we can use a v2 or v3 or m4 etc etc.
 
 if more numbers are given than the size of the array then they will be 
 ignored.
 
+if less numbers are given than the size of the array then the last number will
+be repeated.
+
+if no numbers are given then nothing will be done
 ]]
 function array.set(it,...)
+	local last
 	local n=1
 	for i,v in ipairs{...} do
 		if not it[n] then return it end -- got all the data we need (#it)
 		if type(v)=="number" then
+			last=v
 			it[n]=v
 			n=n+1
 		else
 			for ii=1,#v do local vv=v[ii] -- allow one depth of tables
+				last=vv
 				it[n]=vv
 				n=n+1
 			end
 		end
+	end
+	if last then
+		for i=n,#it do it[i]=last end -- repeat last number
 	end
 	return it
 end

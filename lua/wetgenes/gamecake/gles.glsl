@@ -477,3 +477,9 @@ precision mediump float;
 #define NTOON 0.75
 #include "gamecake_shader"
 
+#shader "xyz_normal_ntoon"
+#define XYZ 1
+#define NORMAL 1
+#define NTOON 0.75
+#include "gamecake_shader"
+
