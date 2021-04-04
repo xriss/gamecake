@@ -30,11 +30,11 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 284,
+   "count": 385,
    "name": "lua"
   },
   {
-   "count": 3,
+   "count": 4,
    "name": "lua.glslang"
   },
   {
@@ -46,8 +46,92 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 280,
+   "count": 1,
+   "name": "lua.glslang.yank_shader_versions"
+  },
+  {
+   "count": 380,
    "name": "lua.wetgenes"
+  },
+  {
+   "count": 20,
+   "name": "lua.wetgenes.bullet"
+  },
+  {
+   "count": 19,
+   "name": "lua.wetgenes.bullet.world"
+  },
+  {
+   "count": 9,
+   "name": "lua.wetgenes.bullet.world.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.active"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.ccd"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.damping"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.friction"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.restitution"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.transform"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.velocity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.gravity"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.bullet.world.mesh"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.mesh.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.set"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.bullet.world.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.shape.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.step"
   },
   {
    "count": 64,
@@ -304,6 +388,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.chipmunk.space.type"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.deepcopy"
   },
   {
    "count": 1,
@@ -578,7 +666,7 @@
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 36,
+   "count": 37,
    "name": "lua.wetgenes.grd"
   },
   {
@@ -640,6 +728,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.duplicate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.fillmask"
   },
   {
    "count": 1,
@@ -723,6 +815,22 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.grdcanvas"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.grdhistory"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdhistory.history"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdlayers"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.grdpaint"
   },
   {
@@ -750,12 +858,112 @@
    "name": "lua.wetgenes.lookup"
   },
   {
+   "count": 15,
+   "name": "lua.wetgenes.midi"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.clients"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.event_to_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.peek"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.port_create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.port_destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.pull"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.push"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.string_to_clientport"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.subscribe"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.unsubscribe"
+  },
+  {
    "count": 2,
    "name": "lua.wetgenes.package"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.package.reload"
+  },
+  {
+   "count": 10,
+   "name": "lua.wetgenes.path"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.currentdir"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.join"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.parent"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.parse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.relative"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.resolve"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.split"
   },
   {
    "count": 4,
@@ -790,12 +998,32 @@
    "name": "lua.wetgenes.snippets"
   },
   {
-   "count": 94,
+   "count": 119,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 5,
+   "count": 14,
    "name": "lua.wetgenes.tardis.array"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__div"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__eq"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__sub"
   },
   {
    "count": 1,
@@ -803,7 +1031,15 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.array.__unm"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.array.compare"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.mix"
   },
   {
    "count": 1,
@@ -811,7 +1047,15 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.array.scalar"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.array.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.zero"
   },
   {
    "count": 1,
@@ -906,7 +1150,7 @@
    "name": "lua.wetgenes.tardis.m3.transpose"
   },
   {
-   "count": 17,
+   "count": 27,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -919,11 +1163,19 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.arotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.cofactor"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.determinant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.get_scale_v3"
   },
   {
    "count": 1,
@@ -939,11 +1191,39 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.m3"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.minor_xy"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prearotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.preqrotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prerotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.pretranslate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.pretranslate_v3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.qrotate"
   },
   {
    "count": 1,
@@ -971,7 +1251,15 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.translate_v3"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.transpose"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4_stack"
   },
   {
    "count": 2,
@@ -1007,10 +1295,18 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.smoothstep"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.step"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.type"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.v2"
   },
   {
@@ -1020,6 +1316,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v2.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.distance"
   },
   {
    "count": 1,
@@ -1062,7 +1362,7 @@
    "name": "lua.wetgenes.tardis.v2.sub"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.v3"
   },
   {
@@ -1072,6 +1372,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v3.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.distance"
   },
   {
    "count": 1,
@@ -1114,12 +1418,16 @@
    "name": "lua.wetgenes.tardis.v3.sub"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.v4"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.distance"
   },
   {
    "count": 1,
@@ -1164,6 +1472,102 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.to_v3"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.tsv"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.close"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.flush"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.load"
+  },
+  {
+   "count": 19,
+   "name": "lua.wetgenes.txt"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.txt.diff"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.find"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.match"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.split"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.trim"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.lex"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.lex_js"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.lex_lua"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.undo"
+  },
+  {
+   "count": 9,
+   "name": "lua.wetgenes.txt.utf"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.char"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.charpattern"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.chars"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.length"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.map_latin0_to_unicode"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.map_unicode_to_latin0"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.size"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.string"
   }
  ],
  "_docs_json": {
@@ -1359,10 +1763,10 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>fun_entities = require(&quot;wetgenes.gamecake.fun.entities&quot;)</code></pre><p>Manage a simple structure to help group, update and draw discrete game \nobjects.</p>\n<p>This module contains only one function which can be used to create an \nentities instance and the rest of this documentation concerns the \nreturn from this create function, not the module</p>\n<pre><code>entities = fun_entities.create()\nentities = fun_entities.create( { sortby={&quot;first&quot;,&quot;second&quot;,...} } )</code></pre><p>Create and return an entities object. A base object can be passed in \nand will be filled in and returned. This can used to supply a sortby \ntable to help control the order of updates of different castes.</p>\n<p>If passed in sortby is a table of [caste_name]=weight values to help \ncontrol the order of updates by caste and make it consistent. For \ninstance you might find it useful to force monsters to update before \nthe player.</p>\n",
+   "body": "<pre><code>fun_entities = require(&quot;wetgenes.gamecake.fun.entities&quot;)</code></pre><p>Manage a simple structure to help group, update and draw discrete game objects.</p>\n<p>This module contains only one function which can be used to create an entities\ninstance and the rest of this documentation concerns the return from this\ncreate function, not the module</p>\n<pre><code>entities = fun_entities.create()\nentities = fun_entities.create( { sortby={&quot;first&quot;,&quot;second&quot;,...} } )</code></pre><p>Create and return an entities object. A base object can be passed in and will\nbe filled in and returned. This can used to supply a sortby table to help\ncontrol the order of updates of different castes.</p>\n<p>If passed in sortby is a table of [caste_name]=weight values to help control\nthe order of updates by caste and make it consistent. For instance you might\nfind it useful to force monsters to update before the player.</p>\n",
    "count": 19,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 7,
+   "line": 6,
    "name": "lua.wetgenes.gamecake.fun.entities",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
@@ -1370,15 +1774,15 @@
    "body": "<pre><code>entities.add(it,caste)\nentities.add(it)</code></pre><p>Add a new entity of caste or it.caste to the list of things to update.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 281,
+   "line": 258,
    "name": "lua.wetgenes.gamecake.fun.entities.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>entities.call(fname,...)</code></pre><p>If fname is a string then that method will be invoked for every item \nwhere it exists like so.</p>\n<pre><code>if it[fname] then it[fname](it,...) end</code></pre><p>if fname is a function then it will result in every item geting \ncalled with that function like so.</p>\n<pre><code>fname(it,...)</code></pre><p>The calls are always made backwards through the table so that an item \ncan choose to delete itself.</p>\n<p>Finally we return the number of calls we made so you can keep track of \ncurrently active items.</p>\n",
+   "body": "<pre><code>entities.call(fname,...)</code></pre><p>If fname is a string then that method will be invoked for every item where it\nexists like so.</p>\n<pre><code>if it[fname] then it[fname](it,...) end</code></pre><p>if fname is a function then it will result in every item geting called with\nthat function like so.</p>\n<pre><code>fname(it,...)</code></pre><p>The calls are always made backwards through the table so that an item can\nchoose to delete itself.</p>\n<p>Finally we return the number of calls we made so you can keep track of\ncurrently active items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 332,
+   "line": 306,
    "name": "lua.wetgenes.gamecake.fun.entities.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
@@ -1386,71 +1790,71 @@
    "body": "<pre><code>entities.caste(caste)</code></pre><p>Get the list of entities of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>\n<p>This list will be created if it does not already exist.</p>\n<p>entities.sortby is used to keep this list in order.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 253,
+   "line": 231,
    "name": "lua.wetgenes.gamecake.fun.entities.caste",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>local it = entities.find_uid( uid )</code></pre><p>Return the item with the given uid or nil if no such item has been \nremembered.</p>\n",
+   "body": "<pre><code>local it = entities.find_uid( uid )</code></pre><p>Return the item with the given uid or nil if no such item has been remembered.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 125,
+   "line": 112,
    "name": "lua.wetgenes.gamecake.fun.entities.find_uid",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>local it = entities.forget_uid( {uid=uid} )</code></pre><p>Remove the item from the map of uids. Returns the item or nil if uid \nwas invalid unset or our map was not pointing to the correct item.</p>\n<pre><code>local it = entities.forget_uid( entities.find_uid( uid ) )</code></pre><p>Chain with find_uid to forget an item by uid and this is safe even if the \nitem does not exist.</p>\n",
+   "body": "<pre><code>local it = entities.forget_uid( {uid=uid} )</code></pre><p>Remove the item from the map of uids. Returns the item or nil if uid was\ninvalid unset or our map was not pointing to the correct item.</p>\n<pre><code>local it = entities.forget_uid( entities.find_uid( uid ) )</code></pre><p>Chain with find_uid to forget an item by uid and this is safe even if the item\ndoes not exist.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 103,
+   "line": 91,
    "name": "lua.wetgenes.gamecake.fun.entities.forget_uid",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>local uid = entities.generate_uid()</code></pre><p>Create a &quot;reasonably&quot; unique id number and return it. we are only \nexpecting uniqueness within this program but we will probably be OK \nwith other ids provided they are not generated by a program starting at \nexactly the same time. These are very simple time based uids that offer \nno security.</p>\n<p>The point of uids is so we can refer to and lazy link items as weak \nvalues making it easy to delete an item without worrying too much about \nwhere it has been used. So instead of putting the item table inside \nanother item table we can use a uid reference instead.</p>\n<p>Good for serialising data as well.</p>\n",
+   "body": "<pre><code>local uid = entities.generate_uid()</code></pre><p>Create a &quot;reasonably&quot; unique id number and return it. we are only expecting\nuniqueness within this program but we will probably be OK with other ids\nprovided they are not generated by a program starting at exactly the same time.\nThese are very simple time based uids that offer no security.</p>\n<p>The point of uids is so we can refer to and lazy link items as weak values\nmaking it easy to delete an item without worrying too much about where it has\nbeen used. So instead of putting the item table inside another item table we\ncan use a uid reference instead.</p>\n<p>Good for serialising data as well.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 62,
+   "line": 53,
    "name": "lua.wetgenes.gamecake.fun.entities.generate_uid",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>entities.get(name)</code></pre><p>get a value previously saved, this is an easy way to find a unique \nentity, eg the global space but it can be used to save any values you \nwish not just to bookmark unique entities.</p>\n",
+   "body": "<pre><code>entities.get(name)</code></pre><p>get a value previously saved, this is an easy way to find a unique entity, eg\nthe global space but it can be used to save any values you wish not just to\nbookmark unique entities.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 381,
+   "line": 354,
    "name": "lua.wetgenes.gamecake.fun.entities.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>entities.manifest(name,value)</code></pre><p>get a value previously saved, or initalize it to the given value if it \ndoes not already exist. The default value is {} as this is intended for \nlists.</p>\n",
+   "body": "<pre><code>entities.manifest(name,value)</code></pre><p>get a value previously saved, or initalize it to the given value if it does not\nalready exist. The default value is {} as this is intended for lists.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 410,
+   "line": 381,
    "name": "lua.wetgenes.gamecake.fun.entities.manifest",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>local it = entities.remember_uid( {} )</code></pre><p>Remember an item in the uids table, generating a uid and setting it.uid \nto this value if one does not already exist.</p>\n",
+   "body": "<pre><code>local it = entities.remember_uid( {} )</code></pre><p>Remember an item in the uids table, generating a uid and setting it.uid to this\nvalue if one does not already exist.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 87,
+   "line": 76,
    "name": "lua.wetgenes.gamecake.fun.entities.remember_uid",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>entities.remove(it)</code></pre><p>Remove this entity, this is slightly expensive as we need to search in \na table to find it before calling table.remove which then has to \nshuffle the table to fill in the hole.</p>\n<p>With very dynamic items it can be faster to allocate all the items you \nneed at the start and then flag them on/off rather than add and remove \ndynamically.</p>\n<p>It may make more sense to create an entity which handles its own list \nof objects, such as particles. Then only use the entity system to keep \ntrack of a master particles item that contains many particles and can \nadd/remove/recycle as it sees fit.</p>\n",
+   "body": "<pre><code>entities.remove(it)</code></pre><p>Remove this entity, this is slightly expensive as we need to search in a table\nto find it before calling table.remove which then has to shuffle the table to\nfill in the hole.</p>\n<p>With very dynamic items it can be faster to allocate all the items you need at\nthe start and then flag them on/off rather than add and remove dynamically.</p>\n<p>It may make more sense to create an entity which handles its own list of\nobjects, such as particles. Then only use the entity system to keep track of a\nmaster particles item that contains many particles and can add/remove/recycle\nas it sees fit.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 301,
+   "line": 277,
    "name": "lua.wetgenes.gamecake.fun.entities.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>entities.reset()</code></pre><p>Empty the list of entities to update and draw, this does not reset the \nsystems table that should be modified with the insert and remove \nfunctions.</p>\n",
+   "body": "<pre><code>entities.reset()</code></pre><p>Empty the list of entities to update and draw, this does not reset the systems\ntable that should be modified with the insert and remove functions.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 235,
+   "line": 215,
    "name": "lua.wetgenes.gamecake.fun.entities.reset",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
@@ -1458,39 +1862,39 @@
    "body": "<pre><code>entities.set(name,value)</code></pre><p>save a value by a unique name</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 396,
+   "line": 368,
    "name": "lua.wetgenes.gamecake.fun.entities.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>entities.sortby_update()</code></pre><p>A function that takes the array part of entities.sortby and reverses \nthe key=value so a simple order list can be provided without any \nexplicit weights. The first caste name in the array gets a weight of 1, \nsecond 2 and so on.</p>\n",
+   "body": "<pre><code>entities.sortby_update()</code></pre><p>A function that takes the array part of entities.sortby and reverses the\nkey=value so a simple order list can be provided without any explicit weights.\nThe first caste name in the array gets a weight of 1, second 2 and so on.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 218,
+   "line": 200,
    "name": "lua.wetgenes.gamecake.fun.entities.sortby_update",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>entities.systems={name=system,[1]=system}</code></pre><p>A sorted table and lookup by caste name of each system. Table is sorted \nso it will be traversed backwards, backwards traversal allows the \ncurrent item to delete itself.</p>\n",
+   "body": "<pre><code>entities.systems={name=system,[1]=system}</code></pre><p>A sorted table and lookup by caste name of each system. Table is sorted so it\nwill be traversed backwards, backwards traversal allows the current item to\ndelete itself.</p>\n",
    "count": 4,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 37,
+   "line": 32,
    "name": "lua.wetgenes.gamecake.fun.entities.systems",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>entities.systems.call(fname,...)</code></pre><p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)</code></pre><p>Returns the number of calls made, which will be the number of systems \nthat had an fname function to call.</p>\n",
+   "body": "<pre><code>entities.systems.call(fname,...)</code></pre><p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)</code></pre><p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 189,
+   "line": 172,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
   {
-   "body": "<pre><code>entities.systems.insert(system)</code></pre><p>Insert a new system replacing any system of the same caste. \nsystem.caste should be set to the caste of the system for this to work. \nAs we also keep some functions in this table, the names &quot;insert&quot;, \n&quot;remove&quot; and &quot;call&quot; are not available as caste names.</p>\n",
+   "body": "<pre><code>entities.systems.insert(system)</code></pre><p>Insert a new system replacing any system of the same caste. system.caste should\nbe set to the caste of the system for this to work. As we also keep some\nfunctions in this table, the names &quot;insert&quot;, &quot;remove&quot; and &quot;call&quot; are not\navailable as caste names.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 157,
+   "line": 141,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.insert",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
@@ -1498,7 +1902,7 @@
    "body": "<pre><code>system = entities.systems.remove(caste)</code></pre><p>Remove and return the system of the given caste.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 139,
+   "line": 124,
    "name": "lua.wetgenes.gamecake.fun.entities.systems.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },
@@ -1506,7 +1910,7 @@
    "body": "<pre><code>entities.uids={[uid]=item,...}</code></pre><p>A map of currently remembered uids to items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/entities.lua",
-   "line": 50,
+   "line": 43,
    "name": "lua.wetgenes.gamecake.fun.entities.uids",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/entities.lua"
   },

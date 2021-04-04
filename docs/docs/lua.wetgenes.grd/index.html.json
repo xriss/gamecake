@@ -30,11 +30,11 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 284,
+   "count": 385,
    "name": "lua"
   },
   {
-   "count": 3,
+   "count": 4,
    "name": "lua.glslang"
   },
   {
@@ -46,8 +46,92 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 280,
+   "count": 1,
+   "name": "lua.glslang.yank_shader_versions"
+  },
+  {
+   "count": 380,
    "name": "lua.wetgenes"
+  },
+  {
+   "count": 20,
+   "name": "lua.wetgenes.bullet"
+  },
+  {
+   "count": 19,
+   "name": "lua.wetgenes.bullet.world"
+  },
+  {
+   "count": 9,
+   "name": "lua.wetgenes.bullet.world.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.active"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.ccd"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.damping"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.friction"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.restitution"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.transform"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.velocity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.gravity"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.bullet.world.mesh"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.mesh.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.set"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.bullet.world.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.shape.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.step"
   },
   {
    "count": 64,
@@ -304,6 +388,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.chipmunk.space.type"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.deepcopy"
   },
   {
    "count": 1,
@@ -578,7 +666,7 @@
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 36,
+   "count": 37,
    "name": "lua.wetgenes.grd"
   },
   {
@@ -640,6 +728,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.duplicate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.fillmask"
   },
   {
    "count": 1,
@@ -723,6 +815,22 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.grdcanvas"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.grdhistory"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdhistory.history"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdlayers"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.grdpaint"
   },
   {
@@ -750,12 +858,112 @@
    "name": "lua.wetgenes.lookup"
   },
   {
+   "count": 15,
+   "name": "lua.wetgenes.midi"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.clients"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.event_to_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.peek"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.port_create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.port_destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.pull"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.push"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.string_to_clientport"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.subscribe"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.unsubscribe"
+  },
+  {
    "count": 2,
    "name": "lua.wetgenes.package"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.package.reload"
+  },
+  {
+   "count": 10,
+   "name": "lua.wetgenes.path"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.currentdir"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.join"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.parent"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.parse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.relative"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.resolve"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.split"
   },
   {
    "count": 4,
@@ -790,12 +998,32 @@
    "name": "lua.wetgenes.snippets"
   },
   {
-   "count": 94,
+   "count": 119,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 5,
+   "count": 14,
    "name": "lua.wetgenes.tardis.array"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__div"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__eq"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__sub"
   },
   {
    "count": 1,
@@ -803,7 +1031,15 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.array.__unm"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.array.compare"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.mix"
   },
   {
    "count": 1,
@@ -811,7 +1047,15 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.array.scalar"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.array.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.zero"
   },
   {
    "count": 1,
@@ -906,7 +1150,7 @@
    "name": "lua.wetgenes.tardis.m3.transpose"
   },
   {
-   "count": 17,
+   "count": 27,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -919,11 +1163,19 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.arotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.cofactor"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.determinant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.get_scale_v3"
   },
   {
    "count": 1,
@@ -939,11 +1191,39 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.m3"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.minor_xy"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prearotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.preqrotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prerotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.pretranslate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.pretranslate_v3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.qrotate"
   },
   {
    "count": 1,
@@ -971,7 +1251,15 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.translate_v3"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.transpose"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4_stack"
   },
   {
    "count": 2,
@@ -1007,10 +1295,18 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.smoothstep"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.step"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.type"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.v2"
   },
   {
@@ -1020,6 +1316,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v2.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.distance"
   },
   {
    "count": 1,
@@ -1062,7 +1362,7 @@
    "name": "lua.wetgenes.tardis.v2.sub"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.v3"
   },
   {
@@ -1072,6 +1372,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v3.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.distance"
   },
   {
    "count": 1,
@@ -1114,12 +1418,16 @@
    "name": "lua.wetgenes.tardis.v3.sub"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.v4"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.distance"
   },
   {
    "count": 1,
@@ -1164,6 +1472,102 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.to_v3"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.tsv"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.close"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.flush"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.load"
+  },
+  {
+   "count": 19,
+   "name": "lua.wetgenes.txt"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.txt.diff"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.find"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.match"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.split"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.trim"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.lex"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.lex_js"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.lex_lua"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.undo"
+  },
+  {
+   "count": 9,
+   "name": "lua.wetgenes.txt.utf"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.char"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.charpattern"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.chars"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.length"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.map_latin0_to_unicode"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.map_unicode_to_latin0"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.size"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.string"
   }
  ],
  "_docs_json": {
@@ -1212,7 +1616,7 @@
  "_list": [
   {
    "body": "<pre><code>local wgrd=require(&quot;wetgenes.grd&quot;)</code></pre><p>We use wgrd as the local name of this library.</p>\n<p>Handle bitmap creation, loading, saving and blitting. The bitmap and \nthe colormap for indexed bitmaps are represented by the same data \nstructure which describes a continuous chunk of memory with optional \nability to select an area of a larger chunk using simple byte spans.</p>\n<p>Swanky Paint uses this to manage its bitmaps and its also used to \nconvert art into data at build time for use in the GameCake engine. The \nPageCake engine uses this for image management, creating live thumbnails \nand so on.</p>\n<p>We load and save jpeg, png and gif. The png lib contains extensions for \napng which allows animation chunks. Animations are contained in the Z \n(depth) dimension of the grd.</p>\n<p>The following are possible format options that we support. Most of them \nare OpenGL friendly.</p>\n<pre><code>wgrd.FMT_U8_RGBA</code></pre><p>32 bits per pixel with a byte order of red, green, blue, alpha and a \nlittle endian U32 of ABGR. We prefer this byte order because OpenGL.</p>\n<pre><code>wgrd.FMT_U8_ARGB</code></pre><p>32 bits per pixel with a byte order of alpha, red, green, blue and a \nlittle endian U32 of BGRA.</p>\n<pre><code>wgrd.FMT_U8_RGB</code></pre><p>24 bits per pixel with a byte order of red, green, blue.</p>\n<pre><code>wgrd.FMT_U8_INDEXED</code></pre><p>8 bits per pixel which indexes a wgrd.FMT_U8_RGBA palette.</p>\n<pre><code>wgrd.FMT_U8_LUMINANCE</code></pre><p>8 bits per pixel, grey scale only.</p>\n<pre><code>wgrd.FMT_U8_ALPHA</code></pre><p>8 bits per pixel, alpha only.</p>\n<pre><code>wgrd.FMT_U16_RGBA_5551</code></pre><p>16 bits per pixel with 5 bits each of red,green,blue and 1 bit of alpha \npacked into a single U16.</p>\n<pre><code>wgrd.FMT_U16_RGBA_4444</code></pre><p>16 bits per pixel with 4 bits each of red,green,blue,alpha packed into \na single U16.</p>\n<pre><code>wgrd.FMT_U16_RGBA_5650</code></pre><p>16 bits per pixel with 4 bits of red, 5 bits of green and 4 bits of \nblue packed into a single U16.\n<br/>\n<br/></p>\n<pre><code>wgrd.FMT_U8_RGBA_PREMULT\nwgrd.FMT_U8_ARGB_PREMULT\nwgrd.FMT_U8_INDEXED_PREMULT\nwgrd.FMT_U16_RGBA_5551_PREMULT\nwgrd.FMT_U16_RGBA_4444_PREMULT\nwgrd.FMT_U16_RGBA_5650_PREMULT</code></pre><p>Are all just pre-multiplied alpha versions of the base format described \nabove.</p>\n<p>Check this link out for why pre-multiplied alpha is a good idea for any \nimage that will be used as a texture \n<a href=\"http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx\">http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx</a>\n<br/>\n<br/></p>\n<pre><code>wgrd.GRD_FMT_HINT_PNG\nwgrd.GRD_FMT_HINT_JPG\nwgrd.GRD_FMT_HINT_GIF</code></pre><p>These are used to choose a specific file format when loading or saving.</p>\n",
-   "count": 36,
+   "count": 37,
    "file": "../lua_grd/code/grd.lua",
    "line": 6,
    "name": "lua.wetgenes.grd",
@@ -1336,6 +1740,14 @@
    "file": "../lua_grd/code/grd.lua",
    "line": 526,
    "name": "lua.wetgenes.grd.duplicate",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+  },
+  {
+   "body": "<pre><code>ga:fillmask(gb,seedx,seedy)</code></pre><p>Fill gb with a fillmask version of ga that starts the floodfill at \nseedx,seedy</p>\n",
+   "count": 1,
+   "file": "../lua_grd/code/grd.lua",
+   "line": 1149,
+   "name": "lua.wetgenes.grd.fillmask",
    "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
   },
   {
