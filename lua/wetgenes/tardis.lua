@@ -287,6 +287,24 @@ function array.scalar(it,s,r)
 	return r
 end
 
+--[[#lua.wetgenes.tardis.array.mix
+
+	r=a:mix(b,s,r)
+
+Mix values between a and b where a is returned if s<=0 and b is returned if s>=1
+
+If r is provided then the result is written into r and returned otherwise a is
+modified and returned.
+
+]]
+function array.mix(a,b,s,r)
+	r=r or a
+	s=( s<=0 and 0 ) or (s>=1 and 1) or s
+	local t=1-s
+	for i=1,#a do r[i]=a[i]*t + b[i]*s end
+	return r
+end
+
 --[[#lua.wetgenes.tardis.array.compare
 
 	a=a:compare(b)
@@ -1240,6 +1258,20 @@ function v2.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) )
 end
 
+
+--[[#lua.wetgenes.tardis.v2.distance
+
+	value = a:distance(b)
+
+Returns the length of the vector between a and b.
+
+]]
+function v2.distance(a,b)
+	local d1=a[1]-b[1]
+	local d2=a[2]-b[2]
+	return math.sqrt( d1*d1 + d2*d2 )
+end
+
 --[[#lua.wetgenes.tardis.v2.oo
 
 	v2 = v2:oo()
@@ -1407,6 +1439,20 @@ Returns the length of this vector.
 ]]
 function v3.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3]) )
+end
+
+--[[#lua.wetgenes.tardis.v3.distance
+
+	value = a:distance(b)
+
+Returns the length of the vector between a and b.
+
+]]
+function v3.distance(a,b)
+	local d1=a[1]-b[1]
+	local d2=a[2]-b[2]
+	local d3=a[3]-b[3]
+	return math.sqrt( d1*d1 + d2*d2 + d3*d3 )
 end
 
 --[[#lua.wetgenes.tardis.v3.oo
@@ -1599,6 +1645,21 @@ Returns the length of this vector.
 ]]
 function v4.len(it)
 	return math.sqrt( (it[1]*it[1]) + (it[2]*it[2]) + (it[3]*it[3]) + (it[4]*it[4]) )
+end
+
+--[[#lua.wetgenes.tardis.v4.distance
+
+	value = a:distance(b)
+
+Returns the length of the vector between a and b.
+
+]]
+function v4.distance(a,b)
+	local d1=a[1]-b[1]
+	local d2=a[2]-b[2]
+	local d3=a[3]-b[3]
+	local d4=a[3]-b[4]
+	return math.sqrt( d1*d1 + d2*d2 + d3*d3 + d4*d4 )
 end
 
 --[[#lua.wetgenes.tardis.v4.oo
@@ -1827,6 +1888,34 @@ Create a new plane and optionally set it to the given values.
 
 ]]
 function plane.new(p,n) return setmetatable({p or v3.new(),n or v3.new()},plane) end
+
+
+
+--[[#lua.wetgenes.tardis.step
+
+	i = tardis.step(edge,num)
+
+return 0 if num is bellow edge or 1 if num is the same or higher
+
+]]
+function tardis.step(edge,num)
+	return (num<edge) and 0 or 1
+end
+
+--[[#lua.wetgenes.tardis.smoothstep
+
+	f = tardis.step(edge1,edge2,num)
+
+return 0 if num is bellow or equal to edge1, 1 if num is the same or higher as
+edge 2 and smoothly interpellate between 0 and 1 for all other values.
+
+]]
+function tardis.smoothstep(e1,e2,num)
+	if num<=e1 then return 0 end
+	if num>=e2 then return 1 end
+	return (num-e1)/(e2-e1)
+end
+
 
 
 function tardis.line_intersect_plane(l,p,r)
