@@ -146,6 +146,77 @@ function array.__tostring(it) -- these classes are all just 1d arrays of numbers
 	return table.concat(t)
 end
 
+--[[#lua.wetgenes.tardis.array.__add
+
+	r = array.__add(a,b)
+
+Add a to b and return a a.new(result) so the class returned will match the
+input class of a and neither a or b will be modified.
+
+]]
+function array.__add(a,b)
+	return a.new(a):add(b)
+end
+
+--[[#lua.wetgenes.tardis.array.__sub
+
+	r = array.__sub(a,b)
+
+Subtract b from a and return a a.new(result) so the class returned will match the
+input class of a and neither a or b will be modified.
+
+]]
+function array.__sub(a,b)
+	return a.new(a):sub(b)
+end
+
+--[[#lua.wetgenes.tardis.array.__unm
+
+	r = array.__unm(a)
+
+Subtract b from 0 and return a a.new(result) so the class returned will match the
+input class of a but a will not be modified
+
+]]
+function array.__unm(a)
+	return a.new(0):sub(a)
+end
+
+--[[#lua.wetgenes.tardis.array.__eq
+
+	r = array.__eq(a,b)
+
+meta to call a:compare(b) and return the result
+
+]]
+function array.__eq(a,b)
+	return a:compare(b)
+end
+
+--[[#lua.wetgenes.tardis.array.__mul
+
+	r = array.__mul(a,b)
+
+Call the appropriate product function depending on the argument classes. Always
+creates and returns a.new() value.
+
+]]
+function array.__mul(a,b)
+	return a:product(b,a.new())
+end
+
+--[[#lua.wetgenes.tardis.array.__div
+
+	r = array.__div(a,b)
+
+Replace b with 1/b and then call the appropriate product function depending on
+the argument classes. Always creates and returns a.new() value.
+
+]]
+function array.__div(a,b)
+	return a:product(1/b,a.new())
+end
+
 --[[#lua.wetgenes.tardis.array.set
 
 	a=a:set(1,2,3,4)
@@ -202,14 +273,18 @@ end
 
 --[[#lua.wetgenes.tardis.array.scalar
 
-	a=a:scalar(s)
+	r=a:scalar(s,r)
 
 Multiply all value in array by number.
 
+If r is provided then the result is written into r and returned otherwise a is
+modified and returned.
+
 ]]
-function array.scalar(it,s)
-	for i=1,#it do it[i]=it[i]*s end
-	return it
+function array.scalar(it,s,r)
+	r=r or it
+	for i=1,#it do r[i]=it[i]*s end
+	return r
 end
 
 --[[#lua.wetgenes.tardis.array.compare
@@ -269,6 +344,10 @@ function array.product(a,b,r)
 	elseif mta=="v4" and mtb=="m4" then return tardis.v4_product_m4(a,b,r)
 	elseif mta=="m4" and mtb=="m4" then return tardis.m4_product_m4(a,b,r)
 	elseif mta=="q4" and mtb=="q4" then return tardis.q4_product_q4(a,b,r)
+	elseif mta=="v4" and mtb=="v4" then return tardis.v4_product_v4(a,b,r)
+	elseif mta=="v3" and mtb=="v3" then return tardis.v3_product_v3(a,b,r)
+	elseif mta=="v2" and mtb=="v2" then return tardis.v2_product_v2(a,b,r)
+	elseif mtb=="number"           then return a:scalar(s,r)
 	end
 
 	error("tardis : "..mta.." product "..mtb.." not supported",2)
@@ -1784,20 +1863,35 @@ function tardis.q4_to_m4(q,m)
 	return m
 end
 
+function tardis.v4_product_v4(va,vb,r)
+	r=r or va
+	return array.set(r, va[1]*vb[1] , va[2]*vb[2] , va[3]*vb[3] , va[4]*vb[4] )
+end
+
+function tardis.v3_product_v3(va,vb,r)
+	r=r or va
+	return array.set(r, va[1]*vb[1] , va[2]*vb[2] , va[3]*vb[3] )
+end
+
+function tardis.v2_product_v2(va,vb,r)
+	r=r or va
+	return array.set(r, va[1]*vb[1] , va[2]*vb[2] )
+end
+
 function tardis.q4_product_q4(q4a,q4b,r)
 	r=r or q4a
-    local r1 =  q4b[1] * q4a[4] + q4b[2] * q4a[3] - q4b[3] * q4a[2] + q4b[4] * q4a[1];
-    local r2 = -q4b[1] * q4a[3] + q4b[2] * q4a[4] + q4b[3] * q4a[1] + q4b[4] * q4a[2];
-    local r3 =  q4b[1] * q4a[2] - q4b[2] * q4a[1] + q4b[3] * q4a[4] + q4b[4] * q4a[3];
-    local r4 = -q4b[1] * q4a[1] - q4b[2] * q4a[2] - q4b[3] * q4a[3] + q4b[4] * q4a[4];
+    local r1 =  q4b[1] * q4a[4] + q4b[2] * q4a[3] - q4b[3] * q4a[2] + q4b[4] * q4a[1]
+    local r2 = -q4b[1] * q4a[3] + q4b[2] * q4a[4] + q4b[3] * q4a[1] + q4b[4] * q4a[2]
+    local r3 =  q4b[1] * q4a[2] - q4b[2] * q4a[1] + q4b[3] * q4a[4] + q4b[4] * q4a[3]
+    local r4 = -q4b[1] * q4a[1] - q4b[2] * q4a[2] - q4b[3] * q4a[3] + q4b[4] * q4a[4]
 	return array.set(r,r1,r2,r3,r4)
 end
 
 function tardis.v3_product_q4(v3,q4,r)
 	r=r or v3
-    local r1 =                  q4[2] * v3[3] - q4[3] * v3[2] + q4[4] * v3[1];
-    local r2 = -q4[1] * v3[3]                 + q4[3] * v3[1] + q4[4] * v3[2];
-    local r3 =  q4[1] * v3[2] - q4[2] * v3[1]                 + q4[4] * v3[3];
+    local r1 =                  q4[2] * v3[3] - q4[3] * v3[2] + q4[4] * v3[1]
+    local r2 = -q4[1] * v3[3]                 + q4[3] * v3[1] + q4[4] * v3[2]
+    local r3 =  q4[1] * v3[2] - q4[2] * v3[1]                 + q4[4] * v3[3]
 	return array.set(r,r1,r2,r3)
 end
 
@@ -1895,9 +1989,14 @@ function tardis.m4_project23d(view_width,view_height,width,height,fov,depth)
 end
 
 
---
--- create an m4 stack
---
+--[[#lua.wetgenes.tardis.m4_stack
+
+	stack = tardis.m4_stack()
+
+create an m4 stack that is very similar to an old school opengl transform
+stack.
+
+]]
 function tardis.m4_stack()
 	local stack={}
 	
