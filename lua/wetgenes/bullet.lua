@@ -240,17 +240,30 @@ bullet.shape_functions.destroy=function(shape)
 end
 
 ------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.shape.margin
+
+	r = body:margin( radius )
+
+get/set the shapes margin size
+
+]]
+bullet.shape_functions.margin=function(shape,n)
+	return core.shape_margin( shape[0] , n )
+end
+
+
+------------------------------------------------------------------------
 --[[#lua.wetgenes.bullet.world.body
 
-	body = world:body()
+	body = world:body("rigid",shape,mass,x,y,z)
 
 Create a body.
 
 ]]
-bullet.world_functions.body=function(world,name,shape,...)
+bullet.world_functions.body=function(world,name,shape,mass,x,y,z)
 	local body={}
 	setmetatable(body,bullet.body_metatable)
-	body[0]=core.body_create(name,shape[0],...)
+	body[0]=core.body_create(name,shape[0],mass,x,y,z)
 	body.world=world
 	
 	world.bodies[ body[0] ]=body
@@ -305,14 +318,14 @@ end
 ------------------------------------------------------------------------
 --[[#lua.wetgenes.bullet.world.body.friction
 
-	l,a = body:friction( linear , angular )
-	l,a = body:friction()
+	l,a,s = body:friction( linear , angular , spinning )
+	l,a,s = body:friction()
 
 get/set the body friction
 
 ]]
-bullet.body_functions.friction=function(body,l,a)
-	return core.body_friction( body[0] , l , a  )
+bullet.body_functions.friction=function(body,l,a,s)
+	return core.body_friction( body[0] , l , a , s )
 end
 
 ------------------------------------------------------------------------
@@ -368,6 +381,46 @@ bullet.body_functions.active=function(body,b)
 	return core.body_active( body[0] , b )
 end
 
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.factor
+
+	x,y,z = body:factor( x , y , z )
+	x,y,z = body:factor( r )
+	r = ( body:factor( r ) )
+
+get/set the linear factor of an object (which disables movement when zero)
+
+]]
+bullet.body_functions.factor=function(body,x,y,z)
+	return core.body_factor( body[0] , x , y or x , z or x)
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.angular_velocity
+
+	x,y,z = body:angular_velocity( x,y,z )
+	x,y,z = body:angular_velocity()
+
+get/set the body angular velocity
+
+]]
+bullet.body_functions.angular_velocity=function(body,x,y,z)
+	return core.body_angular_velocity( body[0] , x,y,z )
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.angular_factor
+
+	x,y,z = body:angular_factor( x , y , z )
+	x,y,z = body:angular_factor( r )
+	r = ( body:angular_factor( r ) )
+
+get/set the angular factor of an object (which disables rotation when zero)
+
+]]
+bullet.body_functions.angular_factor=function(body,x,y,z)
+	return core.body_angular_factor( body[0] , x , y or x , z or x)
+end
 
 return bullet
 

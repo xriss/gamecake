@@ -30,9 +30,10 @@ a library of matrix based math functions.
 
 	local tardis=require("wetgenes.tardis")
 
-This tardis is a lua library for manipulating time and space with 
-numbers. Designed to work as pure lua but with a faster, but less 
-accurate, f32 core by default.
+This tardis is a lua library for manipulating time and space with numbers.
+Designed to work as pure lua but with a faster, but less accurate, f32 core by
+default. ( this core seems to be slightly faster/same speed as vanilla lua but
+slower than luajit , so is currently disabled )
 
 Recoil in terror as we use two glyph names for classes whilst typing in 
 random strings of numbers and operators that may or may not contain 
@@ -54,10 +55,6 @@ to the constant 0,0,0,1 for most transforms.
 		 | 2  6  10 14 |
 	m4 = | 3  7  11 15 |
 		 | 4  8  12 16 |
-
-The Lua code is normally replaced with a hopefully faster f32 based C 
-version, Use DISABLE_WETGENES_TARDIS_CORE before requiring this file to 
-turn it off and get a pure lua library.
 
 This seems to be the simplest (programmer orientated) description of 
 most of the maths used here so go read it if you want to know what the 
@@ -1906,8 +1903,8 @@ end
 
 	f = tardis.step(edge1,edge2,num)
 
-return 0 if num is bellow or equal to edge1, 1 if num is the same or higher as
-edge 2 and smoothly interpellate between 0 and 1 for all other values.
+return 0 if num is bellow or equal to edge1. Return 1 if num is the same or
+higher as edge2 and smoothly interpolate between 0 and 1 for all other values.
 
 ]]
 function tardis.smoothstep(e1,e2,num)

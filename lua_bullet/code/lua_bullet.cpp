@@ -589,6 +589,27 @@ btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
 
 /*+------------------------------------------------------------------+**
 
+get/set shape margin values
+
+*/
+static int lua_bullet_shape_margin (lua_State *l)
+{
+btCollisionShape *shape = lua_bullet_shape_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		shape->setMargin( lua_tonumber(l,2) );
+	}
+
+	lua_pushnumber(l,shape->getMargin());
+
+	return 1;
+}
+
+
+
+/*+------------------------------------------------------------------+**
+
 get body position and rotation ( 7 numbers )
 
 */
@@ -629,7 +650,7 @@ btTransform trans;
 
 /*+------------------------------------------------------------------+**
 
-get body velocity
+get/set body velocity
 
 */
 static int lua_bullet_body_velocity (lua_State *l)
@@ -642,6 +663,29 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 	}
 
 	btVector3 v=body->getLinearVelocity();
+
+	lua_pushnumber(l,v.getX());
+	lua_pushnumber(l,v.getY());
+	lua_pushnumber(l,v.getZ());
+
+	return 3;
+}
+
+/*+------------------------------------------------------------------+**
+
+get/set body angular velocity
+
+*/
+static int lua_bullet_body_angular_velocity (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setAngularVelocity( btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) ) );
+	}
+
+	btVector3 v=body->getAngularVelocity();
 
 	lua_pushnumber(l,v.getX());
 	lua_pushnumber(l,v.getY());
@@ -681,13 +725,21 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 	if( lua_isnumber(l,2) )
 	{
 		body->setFriction( lua_tonumber(l,2) );
-		body->setRollingFriction( lua_tonumber(l,2) );
+		if( lua_isnumber(l,3) )
+		{
+			body->setRollingFriction( lua_tonumber(l,3) );
+			if( lua_isnumber(l,4) )
+			{
+				body->setSpinningFriction( lua_tonumber(l,4) );
+			}
+		}
 	}
 
 	lua_pushnumber(l,body->getFriction());
 	lua_pushnumber(l,body->getRollingFriction());
+	lua_pushnumber(l,body->getSpinningFriction());
 
-	return 2;
+	return 3;
 }
 
 /*+------------------------------------------------------------------+**
@@ -724,7 +776,7 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 	if( lua_isnumber(l,2) )
 	{
 		body->setCcdSweptSphereRadius( lua_tonumber(l,2) );
-		body->setCcdMotionThreshold( lua_tonumber(l,2) );
+		body->setCcdMotionThreshold( lua_tonumber(l,3) );
 	}
 
 	lua_pushnumber(l,body->getCcdSweptSphereRadius());
@@ -736,8 +788,6 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 /*+------------------------------------------------------------------+**
 
 get/set active state
-
-set both to 0 to disable CCD which is the starting default
 
 */
 static int lua_bullet_body_active (lua_State *l)
@@ -759,6 +809,56 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 	lua_pushboolean(l, body->isActive() ? 1 : 0 );
 
 	return 1;
+}
+
+/*+------------------------------------------------------------------+**
+
+get/set linear factor
+
+*/
+static int lua_bullet_body_factor (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setLinearFactor( btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) ) );
+	}
+
+	btVector3 v=body->getLinearFactor();
+
+	lua_pushnumber(l,v.getX());
+	lua_pushnumber(l,v.getY());
+	lua_pushnumber(l,v.getZ());
+
+	return 3;
+}
+
+
+/*+------------------------------------------------------------------+**
+
+get/set angular factor
+
+set to non zero to enable rolling of an object when it tries to slide across a
+surface.
+
+*/
+static int lua_bullet_body_angular_factor (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setAngularFactor( btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) ) );
+	}
+
+	btVector3 v=body->getAngularFactor();
+
+	lua_pushnumber(l,v.getX());
+	lua_pushnumber(l,v.getY());
+	lua_pushnumber(l,v.getZ());
+
+	return 3;
 }
 
 /*+------------------------------------------------------------------+**
@@ -831,6 +931,8 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"world_add_body",					lua_bullet_world_add_body},
 		{"world_remove_body",				lua_bullet_world_remove_body},
 
+		{"shape_margin",					lua_bullet_shape_margin},
+
 		{"body_transform",					lua_bullet_body_transform},
 		{"body_velocity",					lua_bullet_body_velocity},
 		{"body_restitution",				lua_bullet_body_restitution},
@@ -838,6 +940,10 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_damping",					lua_bullet_body_damping},
 		{"body_ccd",						lua_bullet_body_ccd},
 		{"body_active",						lua_bullet_body_active},
+		{"body_factor",						lua_bullet_body_factor},
+
+		{"body_angular_velocity",			lua_bullet_body_angular_velocity},
+		{"body_angular_factor",				lua_bullet_body_angular_factor},
 		
 		{0,0}
 	};
