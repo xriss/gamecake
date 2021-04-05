@@ -862,7 +862,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		end
 		for i,p in ipairs(it.polys) do
 			for ti=0,(#p-3) do
-				for i=2,0,-1 do
+				for i=0,2,1 do
 					local tv=1+ti+i if i==0 then tv=1 end
 					tp[#tp+1]=p[tv]-1
 				end

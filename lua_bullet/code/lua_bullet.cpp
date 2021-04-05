@@ -725,14 +725,14 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 	if( lua_isnumber(l,2) )
 	{
 		body->setFriction( lua_tonumber(l,2) );
-		if( lua_isnumber(l,3) )
-		{
-			body->setRollingFriction( lua_tonumber(l,3) );
-			if( lua_isnumber(l,4) )
-			{
-				body->setSpinningFriction( lua_tonumber(l,4) );
-			}
-		}
+	}
+	if( lua_isnumber(l,3) )
+	{
+		body->setRollingFriction( lua_tonumber(l,3) );
+	}
+	if( lua_isnumber(l,4) )
+	{
+		body->setSpinningFriction( lua_tonumber(l,4) );
 	}
 
 	lua_pushnumber(l,body->getFriction());

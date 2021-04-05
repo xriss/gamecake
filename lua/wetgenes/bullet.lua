@@ -325,7 +325,7 @@ get/set the body friction
 
 ]]
 bullet.body_functions.friction=function(body,l,a,s)
-	return core.body_friction( body[0] , l , a , s )
+	return core.body_friction( body[0] , l , a , s or a)
 end
 
 ------------------------------------------------------------------------
