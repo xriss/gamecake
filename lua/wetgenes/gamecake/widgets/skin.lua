@@ -134,7 +134,7 @@ function wskin.setup(def)
 		cache_binded=img
 		if cache_arrays then
 			cache_array=cache_arrays[img]
-			if not cache_array then
+			if not cache_array and img then
 				cache_array={}
 				cache_arrays[img]=cache_array
 				cache_arrays[#cache_arrays+1]=img
