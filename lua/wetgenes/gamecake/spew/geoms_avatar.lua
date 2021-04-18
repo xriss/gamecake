@@ -447,13 +447,30 @@ void main(void)
 	FragColor=vec4( ( t0 * v_color ).rgb , 1.0 ) ;
 
 #ifdef SHADOW
+
+	const vec4 shadow=vec4(SHADOW);
+
 	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) )
 	{
-		float sd= texture(shadow_map,shadow_uv.xy ).r ;
-		float sf=  ( 1.0 - max( 0.0 , -shadow_uv.w ) ) *0.01;
-		float sdd=smoothstep( -0.004-sf , 0.001-sf , sd - shadow_uv.z )*0.25+0.75;
-		FragColor=FragColor*vec4(sdd,sdd,sdd,1.0);
+
+
+		float shadow_value = 0.0;
+		vec2 shadow_texel_size = 1.0 / vec2( textureSize(shadow_map,0) );
+		for(int x = -1; x <= 1; ++x)
+		{
+			for(int y = -1; y <= 1; ++y)
+			{
+				shadow_value +=smoothstep(
+					-(( 1.0 - abs( shadow_uv.w ) )*shadow[3]+shadow[2]) ,
+					-shadow[1] ,
+					texture(shadow_map, shadow_uv.xy + vec2(x,y)*shadow_texel_size ).r - shadow_uv.z );
+			}    
+		}
+		shadow_value /= 9.0;
+
+		FragColor=vec4( FragColor.rgb*( shadow_value*shadow[0] + (1.0-shadow[0]) ) , FragColor.a );
 	}
+
 #endif
 
 }
@@ -741,7 +758,7 @@ void main(void)
 
 		if opts.shadow then
 
-			wgeom.draw(avatar.obj,"avatar_gltf?SHADOW=1",pp)
+			wgeom.draw(avatar.obj,"avatar_gltf?SHADOW="..opts.shadow ,pp)
 
 		else
 
