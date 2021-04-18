@@ -124,6 +124,12 @@ in vec4  a_normal;
 in vec4  a_bone;
 #endif
 
+#ifdef SHADOW
+uniform mat4 camera;
+uniform mat4 shadow_mtx;
+out vec4  shadow_uv;
+#endif
+
 void main()
 {
 
@@ -139,6 +145,9 @@ void main()
 	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
 #ifdef XYZ
+	vec4 v=vec4(a_vertex.xyz, 1.0);
+#endif
+#ifdef SCR
 	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
 
@@ -183,6 +192,15 @@ void main()
 #ifdef XYZ
 	gl_Position = projection * modelview * v;
 #endif
+#ifdef SCR
+	gl_Position = v;
+#endif
+
+#ifdef SHADOW
+	shadow_uv = ( shadow_mtx * camera * modelview * v ) ;
+	shadow_uv = vec4( ( shadow_uv.xyz / shadow_uv.w ) * 0.5 + 0.5 ,
+		normalize( mat3( shadow_mtx * camera * modelview ) * n ).z );
+#endif
 
 #ifdef NORMAL
 	v_normal = normalize( mat3( modelview ) * n );
@@ -226,6 +244,12 @@ in float v_matidx;
 #ifdef NORMAL
 in vec3  v_normal;
 #endif
+
+#ifdef SHADOW
+uniform sampler2D shadow_map;
+in vec4  shadow_uv;
+#endif
+
 
 //#if defined(GL_FRAGMENT_PRECISION_HIGH)
 //precision highp float; /* ask for better numbers if available */
@@ -281,6 +305,16 @@ void main(void)
 
 #ifdef DISCARD
 	if((FragColor.a)<DISCARD) discard;
+#endif
+
+#ifdef SHADOW
+	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) )
+	{
+		float sd= texture(shadow_map,shadow_uv.xy ).r ;
+		float sf=  ( 1.0 - max( 0.0 , -shadow_uv.w ) ) *0.01;
+		float sdd=smoothstep( -0.004-sf , 0.001-sf , sd - shadow_uv.z )*0.25+0.75;
+		FragColor=FragColor*vec4(sdd,sdd,sdd,1.0);
+	}
 #endif
 
 }

@@ -283,6 +283,12 @@ out vec4  v_bone;
 out vec4  v_value;
 
 
+#ifdef SHADOW
+uniform mat4 camera;
+uniform mat4 shadow_mtx;
+out vec4  shadow_uv;
+#endif
+
 mat4 fixbone(int bidx,int frame)
 {
 	return transpose( mat4(
@@ -371,6 +377,14 @@ void main()
 	v_value = material_values[ idx ];
 	v_color = material_colors[ idx ];
 	
+
+#ifdef SHADOW
+	shadow_uv = ( shadow_mtx * camera * v * vec4(a_vertex,1.0) ) ;
+	shadow_uv = vec4( ( shadow_uv.xyz / shadow_uv.w ) * 0.5 + 0.5 ,
+		normalize( mat3( shadow_mtx * camera * v ) * a_normal ).z );
+#endif
+
+
 }
 
 
@@ -394,6 +408,10 @@ uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 
+#ifdef SHADOW
+uniform sampler2D shadow_map;
+in vec4  shadow_uv;
+#endif
 
 void main(void)
 {
@@ -427,6 +445,16 @@ void main(void)
 	}
 
 	FragColor=vec4( ( t0 * v_color ).rgb , 1.0 ) ;
+
+#ifdef SHADOW
+	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) )
+	{
+		float sd= texture(shadow_map,shadow_uv.xy ).r ;
+		float sf=  ( 1.0 - max( 0.0 , -shadow_uv.w ) ) *0.01;
+		float sdd=smoothstep( -0.004-sf , 0.001-sf , sd - shadow_uv.z )*0.25+0.75;
+		FragColor=FragColor*vec4(sdd,sdd,sdd,1.0);
+	}
+#endif
 
 }
 
@@ -659,10 +687,23 @@ void main(void)
 
 	end
 
-	function geoms_avatar.draw(avatar)
+	function geoms_avatar.draw(avatar,opts)
+
+		opts=opts or {}
 
 		local pp=function(p)
 		
+			if opts.shadow then
+
+				gl.ActiveTexture(gl.TEXTURE3)
+				opts.shadow_map()
+				gl.Uniform1i( p:uniform("shadow_map"), 3 )
+				
+				gl.UniformMatrix4f(p:uniform("shadow_mtx"),  opts.shadow_mtx )
+				gl.UniformMatrix4f(p:uniform("camera"), opts.camera_mtx )
+
+			end
+
 			gl.ActiveTexture(gl.TEXTURE2)
 			avatar.fixtex:bind()
 			gl.Uniform1i( p:uniform("fixbones"), 2 )
@@ -698,8 +739,16 @@ void main(void)
 			
 		end
 
-		wgeom.draw(avatar.obj,"avatar_gltf",pp)
+		if opts.shadow then
 
+			wgeom.draw(avatar.obj,"avatar_gltf?SHADOW=1",pp)
+
+		else
+
+			wgeom.draw(avatar.obj,"avatar_gltf",pp)
+
+		end
+		
 -- draw debug bones	
 --		wgeoms.draw_bones(geoms_avatar.objs,"avatar_gltf",pp)
 
@@ -1100,8 +1149,8 @@ void main(void)
 			geoms_avatar.update(avatar)
 		end
 	
-		avatar.draw=function()
-			geoms_avatar.draw(avatar)
+		avatar.draw=function(opts)
+			geoms_avatar.draw(avatar,opts)
 		end
 
 		avatar.setup(soul)
