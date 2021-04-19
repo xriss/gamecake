@@ -228,9 +228,11 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 			gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.DYNAMIC_DRAW)
 		end
 
-		gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
-		gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
-		gl.Uniform4f( p:uniform("color"), gl.cache.color )
+		gl.uniforms_apply(p)
+
+--		gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
+--		gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
+--		gl.Uniform4f( p:uniform("color"), gl.cache.color )
 
 		gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,pstride,0)
 		gl.EnableVertexAttribArray(p:attrib("a_vertex"))

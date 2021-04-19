@@ -517,6 +517,17 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 	code.shaders={}
 	code.programs={}
 	code.defines={}
+	code.uniforms={}
+
+	function code.uniforms_apply(p)
+		for name,func in pairs(code.uniforms) do
+			local u=p:uniform(name)
+			if u then -- uniform exists in program
+				func(u)
+			end
+		end
+	end
+
 
 	
 -- forget cached info when we lose context, it is important to call this
