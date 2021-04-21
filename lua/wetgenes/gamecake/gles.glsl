@@ -72,7 +72,7 @@ uniform sampler2D tex_mat;
 #endif
 
 #ifdef BONE
-uniform vec4 bones[64*3]; // 64 bones
+uniform vec4 bones[BONE*3]; // 64 bones
 uniform vec4 bone_fix; // min,max,0,0 (bone ids stored in bones array)
 #endif
 
@@ -130,7 +130,60 @@ uniform mat4 shadow_mtx;
 out vec4  shadow_uv;
 #endif
 
-void main()
+
+#ifdef TEXBONE
+
+in vec4  a_bone;
+uniform sampler2D fixbones;
+uniform sampler2D texbones;
+uniform float animframe;
+
+mat4 fixbone(int bidx,int frame)
+{
+	return transpose( mat4(
+		texelFetch(fixbones,ivec2(bidx*3+0,frame),0),
+		texelFetch(fixbones,ivec2(bidx*3+1,frame),0),
+		texelFetch(fixbones,ivec2(bidx*3+2,frame),0),
+		vec4(0.0,0.0,0.0,1.0)) );
+}
+
+mat4 texbone(int bidx,int frame)
+{
+	return transpose( mat4(
+		texelFetch(texbones,ivec2(bidx*3+0,frame),0),
+		texelFetch(texbones,ivec2(bidx*3+1,frame),0),
+		texelFetch(texbones,ivec2(bidx*3+2,frame),0),
+		vec4(0.0,0.0,0.0,1.0)) );
+}
+
+mat4 getbone(int bidx)
+{
+	float fb=fract(animframe);
+	float fa=1.0-fb;
+
+	mat4 ma=texbone( bidx , int(animframe    ) );
+	mat4 mb=texbone( bidx , int(animframe+1.0) );
+	mat4 mab=(((fa*ma)+(fb*mb)));
+
+	mat4 mc=fixbone( bidx , 0 );
+	mat4 md=fixbone( bidx , 1 );
+	mat4 me=fixbone( bidx , 2 );
+
+	mat4 mf=mat4( mat3(me)*mat3(mab) );
+	mf[3]=mab[3];
+	
+	mat4 mr=md*mc*mf;
+
+	return mr*mc;
+}
+
+#endif
+
+#ifdef MAIN
+void MAIN(void)
+#else
+void main(void)
+#endif
 {
 
 #ifdef POINTSIZE
@@ -158,7 +211,6 @@ void main()
 
 #ifdef BONE
 
-
 	mat4 m=mat4(0.0);
 	if( a_bone[0] > 0.0 ) // got bones
 	{
@@ -172,11 +224,52 @@ void main()
 			}
 			else { break; }
 		}
+
 		v=v*m;
 
 #ifdef NORMAL
 		n=n*mat3(m);
 #endif
+	}
+
+#endif
+
+
+#ifdef TEXBONE
+
+	if(a_bone[0]>0.0) //  some bone data
+	{
+		mat4 bm;
+		mat4 bv;
+
+		bm=getbone( int(a_bone[0]-1.0) );
+		bv=(1.0-fract(a_bone[0]))*(bm);
+
+		if(a_bone[1]>0.0)
+		{
+			bm=getbone( int(a_bone[1]-1.0) );
+			bv+=(1.0-fract(a_bone[1]))*(bm);
+
+			if(a_bone[2]>0.0)
+			{
+				bm=getbone( int(a_bone[2]-1.0) );
+				bv+=(1.0-fract(a_bone[2]))*(bm);
+				
+				if(a_bone[3]>0.0)
+				{
+					bm=getbone( int(a_bone[3]-1.0) );
+					bv+=(1.0-fract(a_bone[3]))*(bm);
+				}
+			}
+		}
+
+
+		v=bv*v;
+
+#ifdef NORMAL
+		n=mat3(bv)*n;
+#endif
+
 	}
 
 #endif
@@ -255,8 +348,21 @@ in vec4  shadow_uv;
 //precision highp float; /* ask for better numbers if available */
 //#endif
 
+#ifdef MAIN
+void MAIN(void)
+#else
 void main(void)
+#endif
 {
+
+#ifdef TEXNTOON
+
+	vec3 n=normalize(v_normal);
+	vec2 uv=clamp( v_texcoord + vec2( pow( max( max( n.z, -n.y ) , 0.0 ) , 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
+
+	FragColor = texture(tex, uv ).rgba;
+
+#else
 
 #ifdef TEX
 	if( v_texcoord[0] <= -1.0 ) // special uv request to ignore the texture (use -2 as flag)
@@ -269,6 +375,8 @@ void main(void)
 	}
 #else
 	FragColor=v_color ;
+#endif
+
 #endif
 
 #ifdef MATIDX
@@ -311,26 +419,25 @@ void main(void)
 
 	const vec4 shadow=vec4(SHADOW);
 
-	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) && (shadow_uv.z<1.0) )
+	float shadow_value = max( 0.0 , shadow_uv.w ) ;
+
+	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) && (shadow_uv.z > 0.0) && (shadow_uv.z < 1.0) )
 	{
-
-
-		float shadow_value = 0.0;
+		float shadow_acc=0.0;
 		vec2 shadow_texel_size = 1.0 / vec2( textureSize(shadow_map,0) );
 		for(int x = -1; x <= 1; ++x)
 		{
 			for(int y = -1; y <= 1; ++y)
 			{
-				shadow_value +=smoothstep(
-					-(( 1.0 - abs( shadow_uv.w ) )*shadow[3]+shadow[2]) ,
-					-shadow[1] ,
-					texture(shadow_map, shadow_uv.xy + vec2(x,y)*shadow_texel_size ).r - shadow_uv.z );
+				shadow_acc +=smoothstep(
+					shadow[1] ,
+					shadow[1] + ( 1.0 - abs( shadow_uv.w ) )*shadow[2] ,
+					shadow_uv.z - texture(shadow_map, shadow_uv.xy + vec2(x,y)*shadow_texel_size ).r );
 			}    
 		}
-		shadow_value /= 9.0;
-
-		FragColor=vec4( FragColor.rgb*( shadow_value*shadow[0] + (1.0-shadow[0]) ) , FragColor.a );
+		shadow_value = max( shadow_value , ( shadow_acc/9.0 ) );
 	}
+	FragColor=vec4( FragColor.rgb*( (1.0-shadow_value)*shadow[0] + (1.0-shadow[0]) ) , FragColor.a );
 
 #endif
 
@@ -511,7 +618,7 @@ precision mediump float;
 #define XYZ 1
 #define NORMAL 1
 #define MATIDX 64.0
-#define BONE 1
+#define BONE 64
 #define PHONG 1
 #include "gamecake_shader"
 

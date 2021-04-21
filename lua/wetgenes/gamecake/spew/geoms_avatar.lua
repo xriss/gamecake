@@ -731,7 +731,7 @@ void main(void)
 
 			gl.ActiveTexture(gl.TEXTURE0)
 			oven.cake.images.bind(avatar.image)
-			gl.Uniform1i( p:uniform("tex0"), 0 )
+			gl.Uniform1i( p:uniform("tex"), 0 )
 
 			local objs=geoms_avatar.objs
 			if avatar.anim then
@@ -756,13 +756,16 @@ void main(void)
 			
 		end
 
+
+		local shadername="gamecake_shader?XYZ&NORMAL&TEX&TEXBONE=80&TEXNTOON=1"
+
 		if opts.shadow then
 
-			wgeom.draw(avatar.obj,"avatar_gltf?SHADOW="..opts.shadow ,pp)
+			wgeom.draw(avatar.obj,shadername.."&SHADOW="..opts.shadow ,pp)
 
 		else
 
-			wgeom.draw(avatar.obj,"avatar_gltf",pp)
+			wgeom.draw(avatar.obj,shadername,pp)
 
 		end
 		
