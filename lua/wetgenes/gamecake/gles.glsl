@@ -433,8 +433,8 @@ void main(void)
 			}
 		}
 		shadow_dep =smoothstep(
-			shadow[1]  ,
-			shadow[2] + ( 1.0 - abs( shadow_uv.w ) )*shadow[3] ,
+			shadow[1] , // * ( 1.0 + shadow[3]*( 1.0 - abs( shadow_uv.w ) ) ) ,
+			shadow[2] , // * ( 1.0 + shadow[3]*( 1.0 - abs( shadow_uv.w ) ) ) ,
 			shadow_uv.z - ( shadow_dep/9.0 ) );
 		shadow_value = max( shadow_value , shadow_dep );
 	}
