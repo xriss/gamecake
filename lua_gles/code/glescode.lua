@@ -518,8 +518,13 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 	code.programs={}
 	code.defines={}
 	code.uniforms={}
-
+	
+	code.NEXT_UNIFORM_TEXTURE=0	-- simple global counter to auto assign texture units during uniforms_apply
+	
 	function code.uniforms_apply(p)
+
+		code.NEXT_UNIFORM_TEXTURE=0
+		
 		for name,func in pairs(code.uniforms) do
 			local u=p:uniform(name)
 			if u then -- uniform exists in program
