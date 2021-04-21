@@ -419,23 +419,24 @@ void main(void)
 
 	const vec4 shadow=vec4(SHADOW);
 
-	float shadow_value = max( 0.0 , shadow_uv.w ) ;
+	float shadow_value = max( 0.0 , shadow_uv.w );
 
 	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) && (shadow_uv.z > 0.0) && (shadow_uv.z < 1.0) )
 	{
-		float shadow_acc=0.0;
+		float shadow_dep=0.0;
 		vec2 shadow_texel_size = 1.0 / vec2( textureSize(shadow_map,0) );
-		for(int x = -1; x <= 1; ++x)
+		for(int x = -1; x <= 1; x++)
 		{
-			for(int y = -1; y <= 1; ++y)
+			for(int y = -1; y <= 1; y++)
 			{
-				shadow_acc +=smoothstep(
-					shadow[1] ,
-					shadow[1] + ( 1.0 - abs( shadow_uv.w ) )*shadow[2] ,
-					shadow_uv.z - texture(shadow_map, shadow_uv.xy + vec2(x,y)*shadow_texel_size ).r );
-			}    
+				shadow_dep += texture(shadow_map, shadow_uv.xy + vec2(x,y)*shadow_texel_size ).r ;
+			}
 		}
-		shadow_value = max( shadow_value , ( shadow_acc/9.0 ) );
+		shadow_dep =smoothstep(
+			shadow[1]  ,
+			shadow[2] + ( 1.0 - abs( shadow_uv.w ) )*shadow[3] ,
+			shadow_uv.z - ( shadow_dep/9.0 ) );
+		shadow_value = max( shadow_value , shadow_dep );
 	}
 	FragColor=vec4( FragColor.rgb*( (1.0-shadow_value)*shadow[0] + (1.0-shadow[0]) ) , FragColor.a );
 

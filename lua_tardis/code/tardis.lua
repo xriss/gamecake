@@ -1030,6 +1030,55 @@ function m4.scale(it,a,b,c,d)
 	end
 end
 
+--[[#lua.wetgenes.tardis.m4.scale_v3
+
+	m4 = m4:scale_v3(v3)
+	m4 = m4:scale_v3(v3,r)
+
+Scale this m4 by {x,y,z} or v3.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.prescale_v3(it,v3a,r)
+	r=r or it
+	local s1=v3a[1]
+	local s2=v3a[2]
+	local s3=v3a[3]
+	return array.set(r,
+		s1*it[1],	s2*it[2],	s3*it[3],	it[4],
+		s1*it[5],	s2*it[6],	s3*it[7],	it[8],
+		s1*it[9],	s2*it[10],	s3*it[11],	it[12],
+		s1*it[13],	s2*it[14],	s3*it[15],	it[16]
+	)
+end
+
+--[[#lua.wetgenes.tardis.m4.prescale
+
+	m4 = m4:scale(s)
+	m4 = m4:scale(s,r)
+	m4 = m4:scale(x,y,z)
+	m4 = m4:scale(x,y,z,r)
+	m4 = m4:scale(v3)
+	m4 = m4:scale(v3,r)
+
+Pre Scale this m4 by {s,s,s} or {x,y,z} or v3.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.prescale(it,a,b,c,d)
+	if type(a)=="table" then
+		return m4.prescale_v3(it,a,b)
+	elseif c then
+		return m4.prescale_v3(it,{a,b,c},d)
+	else
+		return m4.prescale_v3(it,{a,a,a},b)
+	end
+end
+
 --[[#lua.wetgenes.tardis.m4.get_scale_v3
 
 	v3 = m4:get_scale_v3(r)

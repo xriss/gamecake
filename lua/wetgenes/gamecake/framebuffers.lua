@@ -147,10 +147,12 @@ function M.bake(oven,framebuffers)
 				end
 
 				gl.BindTexture(gl.TEXTURE_2D, fbo.depth)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     fbo.TEXTURE_WRAP_S     or framebuffers.TEXTURE_WRAP_S     or gl.CLAMP_TO_EDGE)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     fbo.TEXTURE_WRAP_T     or framebuffers.TEXTURE_WRAP_T     or gl.CLAMP_TO_EDGE)
+
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
+
 				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.FLOAT,
 					string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver so safest to provide it.
 
