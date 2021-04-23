@@ -356,13 +356,16 @@ function array.product(a,b,r)
 
 	if     mta=="v3" and mtb=="m4" then return tardis.v3_product_m4(a,b,r)
 	elseif mta=="v3" and mtb=="q4" then return tardis.v3_product_q4(a,b,r)
+	elseif mtb=="number"           then return a:scalar(s,r)
 	elseif mta=="v4" and mtb=="m4" then return tardis.v4_product_m4(a,b,r)
 	elseif mta=="m4" and mtb=="m4" then return tardis.m4_product_m4(a,b,r)
 	elseif mta=="q4" and mtb=="q4" then return tardis.q4_product_q4(a,b,r)
 	elseif mta=="v4" and mtb=="v4" then return tardis.v4_product_v4(a,b,r)
 	elseif mta=="v3" and mtb=="v3" then return tardis.v3_product_v3(a,b,r)
 	elseif mta=="v2" and mtb=="v2" then return tardis.v2_product_v2(a,b,r)
-	elseif mtb=="number"           then return a:scalar(s,r)
+	elseif mta=="v3" and mtb=="m3" then return tardis.v3_product_m4(a,b:m4(),r)
+	elseif mta=="v4" and mtb=="m3" then return tardis.v4_product_m4(a,b:m4(),r)
+	elseif mta=="m4" and mtb=="m3" then return tardis.m4_product_m4(a,b:m4(),r)
 	end
 
 	error("tardis : "..mta.." product "..mtb.." not supported",2)
@@ -545,6 +548,36 @@ Set this m3 to the identity matrix.
 ]]
 function m3.identity(it) return array.set(it,1,0,0, 0,1,0, 0,0,1) end 
 
+--[[#lua.wetgenes.tardis.m3.m4
+
+	m4 = m3:m4()
+
+Expand an m3 matrix into an m4 matrix.
+
+]]
+function m3.m4(it)
+	return tardis.M4( it[1],it[2],it[3],0 , it[4],it[5],it[6],0 , it[7],it[8],it[9],0 , 0,0,0,1 )
+end 
+
+--[[#lua.wetgenes.tardis.m3.v3
+
+	v3 = m3:v3(n)
+
+Extract and return a "useful" v3 from an m3 matrix. The first vector is the x
+axis, then y axis , then z axis.
+
+
+]]
+function m3.v3(it,n)
+	if     n==1 then
+		return tardis.V3(it[1],it[2],it[3])
+	elseif n==2 then
+		return tardis.V3(it[4],it[5],it[6])
+	elseif n==3 then
+		return tardis.V3(it[7],it[8],it[9])
+	end
+end 
+
 --[[#lua.wetgenes.tardis.m3.determinant
 
 	value = m3:determinant()
@@ -705,22 +738,35 @@ function m4.identity(it) return array.set(it,1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1)
 
 	m4 = m4:m3()
 
-Clear the 4th row and column to identity values. This will remove 
-translation and perspective transforms. Hopefully just leaving rotation 
-and scale in the M3 part of the M4 matrix.
+Grab tthe top,left parts of the m4 matrix as an m3 matrix.
 
 ]]
 function m4.m3(it)
-	it[4]=0
-	it[8]=0
-	it[12]=0
-	it[13]=0
-	it[14]=0
-	it[15]=0
-	it[16]=1
-	return it
+	return tardis.M3( it[1],it[2],it[3] , it[5],it[6],it[7] , it[9],it[10],it[11] )
 end 
 
+--[[#lua.wetgenes.tardis.m4.v3
+
+	v3 = m4:v3(n)
+
+Extract and return a "useful" v3 from an m4 matrix. The first vector is the x
+axis, then y axis , then z axis and finally transform.
+
+If n is not given or not a known value then we return the 4th vector which is
+the "opengl" transform as that is the most useful v3 part of an m4.
+
+]]
+function m4.v3(it,n)
+	if     n==1 then
+		return tardis.V3(it[1],it[2],it[3])
+	elseif n==2 then
+		return tardis.V3(it[5],it[6],it[7])
+	elseif n==3 then
+		return tardis.V3(it[9],it[10],it[11])
+	else
+		return tardis.V3(it[13],it[14],it[15])
+	end
+end 
 
 --[[#lua.wetgenes.tardis.m4.determinant
 
