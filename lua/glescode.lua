@@ -527,7 +527,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		
 		for name,func in pairs(code.uniforms) do
 			local u=p:uniform(name)
-			if u then -- uniform exists in program
+			if u>=0 then -- uniform exists in program
 				func(u)
 			end
 		end

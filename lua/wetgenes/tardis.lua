@@ -82,7 +82,7 @@ end
 This will return the type of an object previously registered with class
 
 ]]
-function tardis.type(it) return it.__type or type(it) end
+function tardis.type(it) local t=type(it) return t=="table" and it.__type or t end
 
 --[[#lua.wetgenes.tardis.class
 
@@ -356,7 +356,7 @@ function array.product(a,b,r)
 
 	if     mta=="v3" and mtb=="m4" then return tardis.v3_product_m4(a,b,r)
 	elseif mta=="v3" and mtb=="q4" then return tardis.v3_product_q4(a,b,r)
-	elseif mtb=="number"           then return a:scalar(s,r)
+	elseif mtb=="number"           then return a:scalar(b,r)
 	elseif mta=="v4" and mtb=="m4" then return tardis.v4_product_m4(a,b,r)
 	elseif mta=="m4" and mtb=="m4" then return tardis.m4_product_m4(a,b,r)
 	elseif mta=="q4" and mtb=="q4" then return tardis.q4_product_q4(a,b,r)

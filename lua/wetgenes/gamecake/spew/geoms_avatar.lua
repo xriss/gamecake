@@ -710,28 +710,20 @@ void main(void)
 
 		local pp=function(p)
 		
-			if opts.shadow then
-
-				gl.ActiveTexture(gl.TEXTURE3)
-				opts.shadow_map()
-				gl.Uniform1i( p:uniform("shadow_map"), 3 )
-				
-				gl.UniformMatrix4f(p:uniform("shadow_mtx"),  opts.shadow_mtx )
-				gl.UniformMatrix4f(p:uniform("camera"), opts.camera_mtx )
-
-			end
-
-			gl.ActiveTexture(gl.TEXTURE2)
+			gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 			avatar.fixtex:bind()
-			gl.Uniform1i( p:uniform("fixbones"), 2 )
+			gl.Uniform1i( p:uniform("fixbones"), gl.NEXT_UNIFORM_TEXTURE )
+			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
-			gl.ActiveTexture(gl.TEXTURE1)
+			gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 			geoms_avatar.bonetexs[avatar.anim.name]:bind()
-			gl.Uniform1i( p:uniform("texbones"), 1 )
+			gl.Uniform1i( p:uniform("texbones"), gl.NEXT_UNIFORM_TEXTURE )
+			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
-			gl.ActiveTexture(gl.TEXTURE0)
+			gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 			oven.cake.images.bind(avatar.image)
-			gl.Uniform1i( p:uniform("tex"), 0 )
+			gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
+			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
 			local objs=geoms_avatar.objs
 			if avatar.anim then
