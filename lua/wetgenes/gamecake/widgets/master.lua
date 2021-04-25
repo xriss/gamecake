@@ -318,6 +318,8 @@ function wmaster.setup(widget,def)
 
 	function master.draw(widget)
 
+		gl.ActiveTexture( gl.TEXTURE0 )
+
 		dirty_fbos={}
 		mark_dirty_fbos(widget)
 		find_dirty_fbos(widget)
