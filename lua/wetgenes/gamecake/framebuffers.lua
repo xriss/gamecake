@@ -126,6 +126,9 @@ function M.bake(oven,framebuffers)
 	framebuffers.resize = function(fbo,w,h,d)
 --print("fbo resize",w,h,d)
 
+		if w<1 then w=0 end
+		if h<1 then h=0 end
+
 		if w==0 then h=0 d=0 end
 		if h==0 then d=0 w=0 end
 	
@@ -198,7 +201,7 @@ function M.bake(oven,framebuffers)
 			end
 
 			if( gl.CheckFramebufferStatus(gl.FRAMEBUFFER) ~= gl.FRAMEBUFFER_COMPLETE) then
-				error("FBO error".." DEPTH="..fbo.depth.." STATUS="..gl.CheckFramebufferStatus(gl.FRAMEBUFFER).." ERROR="..gl.GetError())
+				error("FBO error".." DEPTH="..d.." STATUS="..gl.CheckFramebufferStatus(gl.FRAMEBUFFER).." ERROR="..gl.GetError())
 			end
 			
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
