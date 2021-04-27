@@ -612,13 +612,13 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 				gl.CompileShader(s[0])
 				if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
 					local err=gl.GetShaderInfoLog(s[0]) or "NIL"
-					print( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
+					error( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .."\n".. version .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
 				else
 					return s[0]
 				end
 			end
 		end
-		print( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nNO SUPPORTED SHADER LANGUAGE VERSION\n\n" )
+		error( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .."\n".. version .. "\nNO SUPPORTED SHADER LANGUAGE VERSION\n\n" )
 	end
 	
 	local pbase={}

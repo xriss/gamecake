@@ -58,6 +58,25 @@ Use a lookup material for colors which are stored in a texture
 
 #header "gamecake_shader_head"
 
+#if VERSION>120
+
+#define IN in
+#define OUT out
+
+#else
+
+#ifdef VERTEX_SHADER
+#define IN attribute
+#else
+#define IN varying
+#endif
+
+#define OUT varying
+#define texture texture2D
+#define FragColor gl_FragColor
+
+#endif
+
 uniform mat4 modelview;
 uniform mat4 projection;
 
@@ -81,62 +100,62 @@ uniform vec3  light_normal;
 uniform vec4  light_color;
 #endif
 
-
-
 #header "gamecake_shader_vertex"
 
 #ifdef VERTEX_SHADER
 
-out vec4  v_color;
+OUT vec4  v_color;
 
 #ifdef TEX
-out vec2  v_texcoord;
+OUT vec2  v_texcoord;
 #endif
 
 #ifdef MATIDX
-out float v_matidx;
+OUT float v_matidx;
 #endif
 
 #ifdef NORMAL
-out vec3  v_normal;
+OUT vec3  v_normal;
 #endif
 
 
-in vec3 a_vertex;
+IN vec3 a_vertex;
 
 #ifdef COLOR
-in vec4 a_color;
+IN vec4 a_color;
 #endif
 
 #ifdef TEX
-in vec2 a_texcoord;
+IN vec2 a_texcoord;
 #endif
  
 #ifdef MATIDX
-in float a_matidx;
+IN float a_matidx;
 #endif
 
 #ifdef NORMAL
-in vec4  a_normal;
+IN vec4  a_normal;
 #endif
 
 #ifdef BONE
-in vec4  a_bone;
+IN vec4  a_bone;
 #endif
 
 #ifdef SHADOW
 uniform mat4 camera;
 uniform mat4 shadow_mtx;
-out vec4  shadow_uv;
+OUT vec4  shadow_uv;
 #endif
 
 
 #ifdef TEXBONE
 
-in vec4  a_bone;
+IN vec4  a_bone;
 uniform sampler2D fixbones;
 uniform sampler2D texbones;
 uniform float animframe;
+
+#if VERSION>120
 
 mat4 fixbone(int bidx,int frame)
 {
@@ -155,6 +174,29 @@ mat4 texbone(int bidx,int frame)
 		texelFetch(texbones,ivec2(bidx*3+2,frame),0),
 		vec4(0.0,0.0,0.0,1.0)) );
 }
+
+
+#else
+
+mat4 fixbone(int bidx,int frame)
+{
+	return ( mat4(
+		texture(fixbones,vec2(bidx*3+0,frame)),
+		texture(fixbones,vec2(bidx*3+1,frame)),
+		texture(fixbones,vec2(bidx*3+2,frame)),
+		vec4(0.0,0.0,0.0,1.0)) );
+}
+
+mat4 texbone(int bidx,int frame)
+{
+	return ( mat4(
+		texture(texbones,vec2(bidx*3+0,frame)),
+		texture(texbones,vec2(bidx*3+1,frame)),
+		texture(texbones,vec2(bidx*3+2,frame)),
+		vec4(0.0,0.0,0.0,1.0)) );
+}
+
+#endif
 
 mat4 getbone(int bidx)
 {
@@ -323,24 +365,27 @@ void main(void)
 
 #ifdef FRAGMENT_SHADER
 
-in vec4  v_color;
-out vec4 FragColor;
+IN vec4  v_color;
+
+#if VERSION>120
+OUT vec4 FragColor;
+#endif
 
 #ifdef TEX
-in vec2  v_texcoord;
+IN vec2  v_texcoord;
 #endif
 
 #ifdef MATIDX
-in float v_matidx;
+IN float v_matidx;
 #endif
 
 #ifdef NORMAL
-in vec3  v_normal;
+IN vec3  v_normal;
 #endif
 
 #ifdef SHADOW
 uniform sampler2D shadow_map;
-in vec4  shadow_uv;
+IN vec4  shadow_uv;
 #endif
 
 
@@ -426,7 +471,11 @@ void main(void)
 		float shadow_tmp=0.0;
 		float shadow_add=0.0;
 		float shadow_min=1.0;
+#if VERSION>120
 		vec2 shadow_texel_size = 1.0 / vec2( textureSize(shadow_map,0) );
+#else
+		vec2 shadow_texel_size = 1.0 / vec2( 2048.0 );
+#endif
 		for(int x = -1; x <= 1; x++)
 		{
 			for(int y = -1; y <= 1; y++)
@@ -451,6 +500,8 @@ void main(void)
 
 #version 300 es
 #version 330
+#version 100
+#version 120
 #ifdef VERSION_ES
 precision mediump float;
 #endif

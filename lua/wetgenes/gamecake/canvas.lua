@@ -43,7 +43,7 @@ canvas.gl_default=function()
 
 	
 	if not canvas.NO_GL_PROGRAM_POINT_SIZE then
-		gl.Enable(0x8642) -- #define GL_PROGRAM_POINT_SIZE 0x8642
+		pcall( function() gl.Enable(0x8642) end )-- #define GL_PROGRAM_POINT_SIZE 0x8642
 		if gl.GetError() == gl.INVALID_ENUM then    -- do not repeat error
 			canvas.NO_GL_PROGRAM_POINT_SIZE=true
 		end
