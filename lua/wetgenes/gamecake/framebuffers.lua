@@ -153,8 +153,9 @@ function M.bake(oven,framebuffers)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
 
-				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.FLOAT,
-					string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver so safest to provide it.
+
+				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT,nil)
+--					string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver so safest to provide it.
 
 				gl.BindTexture(gl.TEXTURE_2D, 0)
 
@@ -170,17 +171,20 @@ function M.bake(oven,framebuffers)
 				end
 
 				gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
+				
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     fbo.TEXTURE_WRAP_S     or framebuffers.TEXTURE_WRAP_S     or gl.CLAMP_TO_EDGE)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     fbo.TEXTURE_WRAP_T     or framebuffers.TEXTURE_WRAP_T     or gl.CLAMP_TO_EDGE)
-				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-					string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver so safest to provide it.
+				
+				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,nil)
+--					string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver so safest to provide it.
 
 				gl.BindTexture(gl.TEXTURE_2D, 0)
 
 			end
 			
+
 			if not fbo.frame then
 				fbo.frame=gl.GenFramebuffer()
 			end
@@ -192,9 +196,9 @@ function M.bake(oven,framebuffers)
 			if fbo.texture then
 				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
 			end
-			
+
 			if( gl.CheckFramebufferStatus(gl.FRAMEBUFFER) ~= gl.FRAMEBUFFER_COMPLETE) then
-				print("FBO error",fbo.depth,gl.CheckFramebufferStatus(gl.FRAMEBUFFER),gl.GetError())
+				error("FBO error".." DEPTH="..fbo.depth.." STATUS="..gl.CheckFramebufferStatus(gl.FRAMEBUFFER).." ERROR="..gl.GetError())
 			end
 			
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
