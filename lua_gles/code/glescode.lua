@@ -565,7 +565,26 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		end
 	end
 	
-	
+
+	code.version_test_cache={}
+	function code.version_test(version)
+		if type( code.version_test_cache[version] ) == "nil" then -- need to check
+			local s=assert(gl.CreateShader(gl.VERTEX_SHADER))
+			gl.ShaderSource(s,version..[[
+				void main(void)
+				{
+				}
+			]])
+			gl.CompileShader(s)
+			if gl.GetShader(s, gl.COMPILE_STATUS) == gl.FALSE then -- error
+				code.version_test_cache[version]=false
+			else
+				code.version_test_cache[version]=true
+			end
+			gl.DeleteShader(s)
+		end
+		return code.version_test_cache[version]
+	end
 	
 	function code.shader(stype,sname,filename)
 
@@ -586,31 +605,20 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		if s[0] then return s[0] end
 		
 		local versions,src=glslang.yank_shader_versions( wstr.macro_replace(s.source,code.defines) )
-		local errors={}
-		local done=false
 		for vi,version in ipairs(versions) do
-			if not done then
+			if code.version_test(version) then -- find a version that 
 				s[0]=assert(gl.CreateShader(stype))
 				gl.ShaderSource(s[0],version..src)
 				gl.CompileShader(s[0])
 				if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
 					local err=gl.GetShaderInfoLog(s[0]) or "NIL"
-					errors[#errors+1]="ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n"
---					..version..src.."\n\n"
-					if vi<#versions then -- try again
-						gl.DeleteShader(s[0])
-						s[0]=nil
-					end
+					print( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
 				else
-					done=true -- success
+					return s[0]
 				end
 			end
 		end
-		if not done then -- report all errors
-			for i,e in ipairs(errors) do print(e) end
-		end
-
-		return s[0]
+		print( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nNO SUPPORTED SHADER LANGUAGE VERSION\n\n" )
 	end
 	
 	local pbase={}
