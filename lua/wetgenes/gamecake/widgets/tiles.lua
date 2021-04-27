@@ -155,6 +155,8 @@ function wtiles.skin(widget)
 			gl.BindTexture( gl.TEXTURE_2D , widget.colormap_tex )
 			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
+			gl.ActiveTexture( gl.TEXTURE0 )
+
 			gl.Uniform4f( p:uniform("tile_info"),	8,
 													16,
 													256*8,

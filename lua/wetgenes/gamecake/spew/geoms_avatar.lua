@@ -725,6 +725,8 @@ void main(void)
 			gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
 			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
+			gl.ActiveTexture( gl.TEXTURE0 )
+
 			local objs=geoms_avatar.objs
 			if avatar.anim then
 				local anim=avatar.anim

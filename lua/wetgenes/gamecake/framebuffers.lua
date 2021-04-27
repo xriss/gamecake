@@ -29,9 +29,15 @@ function M.bake(oven,framebuffers)
 
 -- the d is one of these three
 
+	framebuffers.NEED_DEPTH32=-32
+	framebuffers.NEED_DEPTH24=-24
+	framebuffers.NEED_DEPTH16=-16
 	framebuffers.NEED_DEPTH=-1
 	framebuffers.NEED_TEXTURE=0
 	framebuffers.NEED_TEXTURE_AND_DEPTH=1
+	framebuffers.NEED_TEXTURE_AND_DEPTH16=16
+	framebuffers.NEED_TEXTURE_AND_DEPTH24=24
+	framebuffers.NEED_TEXTURE_AND_DEPTH32=32
 
 	framebuffers.create = function(w,h,d,def)
 
@@ -157,9 +163,15 @@ function M.bake(oven,framebuffers)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
 
 
-				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT,nil)
+				if math.abs(d)>=32 then
+					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT32F, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.FLOAT,nil)
+				elseif math.abs(d)>=24 then
+					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT,nil)
+				else
+					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT,nil)
 --					string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver so safest to provide it.
-
+				end
+				
 				gl.BindTexture(gl.TEXTURE_2D, 0)
 
 			end
@@ -312,6 +324,16 @@ function M.bake(oven,framebuffers)
 		oven.cake.canvas.flat.tristrip("rawuv",t,shadername,function(p)
 			for i=#fbin,1,-1 do -- bind all textures in reverse order so we always end with texture0 as active
 				gl.ActiveTexture(gl.TEXTURE0+(i-1))
+				local u=p:uniform("tex"..i)
+				if u>=0 then 
+					gl.Uniform1i( u , i-1 )
+				end
+				if i==0 then
+					local u=p:uniform("tex")
+					if u>=0 then 
+						gl.Uniform1i( u , 0 )
+					end
+				end
 				fbin[i]:bind_texture()
 			end
 			if callback then callback(p) end
