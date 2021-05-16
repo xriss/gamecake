@@ -101,6 +101,9 @@ function M.bake(oven,views)
 			view.vy=opts.vy -- height
 		end
 
+		view.vx_auto=not opts.vx
+		view.vy_auto=not opts.vy
+
 		view.vz=opts.vz or (view.vy and view.vy*4)-- depth range of the zbuffer
 
 		view.fov=opts.fov or 0 -- field of view, a tan like value, so 1 would be 90deg, 0.5 would be 45deg and so on
@@ -132,12 +135,18 @@ function M.bake(oven,views)
 				view.hx=view.win.width
 				view.hy=view.win.height
 
+				if view.vx_auto then view.vx=view.hx end
+				if view.vy_auto then view.vy=view.hy end
+
 			elseif view.mode=="fbo" then
 
 				view.px=0
 				view.py=0
 				view.hx=view.fbo.w
 				view.hy=view.fbo.h
+
+				if view.vx_auto then view.vx=view.hx end
+				if view.vy_auto then view.vy=view.hy end
 
 			elseif view.mode=="full" then
 
@@ -146,6 +155,9 @@ function M.bake(oven,views)
 				view.hx=view.parent.hx
 				view.hy=view.parent.hy
 
+				if view.vx_auto then view.vx=view.hx end
+				if view.vy_auto then view.vy=view.hy end
+
 			elseif view.mode=="clip" then
 
 				view.px=view.parent.px
@@ -153,6 +165,9 @@ function M.bake(oven,views)
 				view.hx=view.parent.hx
 				view.hy=view.parent.hy
 				
+				if view.vx_auto then view.vx=view.hx end
+				if view.vy_auto then view.vy=view.hy end
+
 				if view.vx and view.vy then
 					if view.hx/view.hy > view.vx/view.vy then -- fit y
 						local hx=view.hy * view.vx/view.vy
@@ -174,6 +189,9 @@ function M.bake(oven,views)
 				view.vx=view.parent.hx
 				view.vy=view.parent.hy
 				view.vz=view.vz or view.parent.hy*4
+
+				if view.vx_auto then view.vx=view.hx end
+				if view.vy_auto then view.vy=view.hy end
 
 			end
 
