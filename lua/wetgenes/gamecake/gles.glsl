@@ -496,7 +496,7 @@ void main(void)
 
 #endif
 
-#header "gamecake_shader"
+#shader "gamecake_shader"
 
 #version 300 es
 #version 330
@@ -509,9 +509,6 @@ precision mediump float;
 #include "gamecake_shader_head"
 #include "gamecake_shader_vertex"
 #include "gamecake_shader_fragment"
-
-#shader "gamecake_shader"
-#include "gamecake_shader"
 
 #shader "pos_normal"
 #define POS 1

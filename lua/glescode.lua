@@ -491,12 +491,12 @@ function glescode.create(gl)
 -- load multiple shader sources from a single file
 	function code.shader_sources(text,filename)
 	
-		local shaders=glslang.parse_chunks(text,filename,code.headers)
+		glslang.parse_chunks(text,filename,code.headers)
 
-		for n,v in pairs(shaders) do
+--		for n,v in pairs(shaders) do
 --print("PROGRAM",n,#v)
-			code.program_source(n,table.concat(v,"\n"),nil,filename)
-		end
+--			code.program_source(n,v,nil,filename)
+--		end
 
 	end
 
@@ -514,6 +514,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		end
 	end
 
+	code.includes={}
 	code.shaders={}
 	code.programs={}
 	code.defines={}
@@ -604,7 +605,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		
 		if s[0] then return s[0] end
 		
-		local versions,src=glslang.yank_shader_versions( wstr.macro_replace(s.source,code.defines) )
+		local versions,src=glslang.yank_shader_versions( wstr.macro_replace( glslang.replace_includes(s.source,code.headers) , code.defines ) )
 		for vi,version in ipairs(versions) do
 			if code.version_test(version) then -- find a version that 
 				s[0]=assert(gl.CreateShader(stype))
@@ -630,13 +631,13 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		if type(pname)=="string" then
 		
 			p=code.programs[pname]
-			if not p then -- try basename
+			if not p then -- try and create from headers
 				local basename=wstr.split(pname,"?")[1]
-				local base=assert(code.programs[basename],basename)
-				p=code.program_source(pname,base.vsource,base.fsource,base.filename)
-				p.base=base
+				local base=assert(code.headers[basename],basename)
+				p=code.program_source(pname,base,nil,basename)
 			end
 			assert(p)
+
 		else
 			p=pname
 			if not code.programs[p] then
