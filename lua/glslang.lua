@@ -138,7 +138,11 @@ glslang.parse_chunks=function(text,filename,headers,flags)
 
 -- shaders and headers chunks all live in the same name space
 				if flag=="#header" then
-					headers[name]=chunk
+					if flags.shaders_only then
+						chunk=nil
+					else
+						headers[name]=chunk
+					end
 				elseif flag=="#shader" then
 					if flags.headers_only then
 						chunk=nil
@@ -179,11 +183,11 @@ function glslang.replace_includes(src,headers)
 			if line:sub(1,8):lower()=="#include" then -- include a previously declared chunk
 				local name=line:match([["([^"]+)"]]) -- get name from inside quotes
 				assert(headers[name],"glslang header "..name.." not found")
-				lines[i]=headers[name].."#line "..(i+1)	-- reset the line number from this file
+				lines[i]=headers[name].."#line "..(i+1).."\n"	-- reset the line number from this file
 				count=count+1
 			end
 		end
-		src=table.concat(lines,"\n")
+		src=table.concat(lines)
 		return count
 	end
 

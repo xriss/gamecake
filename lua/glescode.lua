@@ -453,11 +453,11 @@ function glescode.create(gl)
 				paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
 			end
 		end
-		paramdefs=table.concat(paramdefs,"\n").."\n"
-	
 		local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
-		local vhead="#define VERTEX_SHADER 1\n"..paramdefs.."#line "..line.."\n"
-		local fhead="#define FRAGMENT_SHADER 1\n"..paramdefs.."#line "..line.."\n"
+		paramdefs=table.concat(paramdefs,"\n").."\n".."#line "..line.." //?\n"
+	
+		local vhead="#define VERTEX_SHADER 1\n"
+		local fhead="#define FRAGMENT_SHADER 1\n"
 		
 		local copymerge=function(base,name,data)
 			if not base[name] then base[name]={} end
@@ -475,8 +475,8 @@ function glescode.create(gl)
 			fsource=fsource,
 			filename=filename,
 		})
-		copymerge(code.shaders,"v_"..name,{ program=p, source=vhead..(vsource) })
-		copymerge(code.shaders,"f_"..name,{ program=p, source=fhead..(fsource or vsource) }) -- single source trick
+		copymerge(code.shaders,"v_"..name,{ program=p, source=vhead..paramdefs..(vsource) })
+		copymerge(code.shaders,"f_"..name,{ program=p, source=fhead..paramdefs..(fsource or vsource) }) -- single source trick
 
 -- check that the code compiles OK right now?
 --		assert(code.shader(gl.VERTEX_SHADER,"v_"..name,filename))
@@ -492,11 +492,6 @@ function glescode.create(gl)
 	function code.shader_sources(text,filename)
 	
 		glslang.parse_chunks(text,filename,code.headers)
-
---		for n,v in pairs(shaders) do
---print("PROGRAM",n,#v)
---			code.program_source(n,v,nil,filename)
---		end
 
 	end
 
@@ -517,7 +512,6 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 	code.includes={}
 	code.shaders={}
 	code.programs={}
-	code.defines={}
 	code.uniforms={}
 	
 	code.NEXT_UNIFORM_TEXTURE=0	-- simple global counter to auto assign texture units during uniforms_apply
@@ -605,7 +599,8 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		
 		if s[0] then return s[0] end
 		
-		local versions,src=glslang.yank_shader_versions( wstr.macro_replace( glslang.replace_includes(s.source,code.headers) , code.defines ) )
+		local versions,src=glslang.yank_shader_versions( glslang.replace_includes(s.source,code.headers) )
+--print(src)
 		for vi,version in ipairs(versions) do
 			if code.version_test(version) then -- find a version that 
 				s[0]=assert(gl.CreateShader(stype))
