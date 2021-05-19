@@ -29,15 +29,9 @@ function M.bake(oven,framebuffers)
 
 -- the d is one of these three
 
-	framebuffers.NEED_DEPTH32=-32
-	framebuffers.NEED_DEPTH24=-24
-	framebuffers.NEED_DEPTH16=-16
 	framebuffers.NEED_DEPTH=-1
 	framebuffers.NEED_TEXTURE=0
 	framebuffers.NEED_TEXTURE_AND_DEPTH=1
-	framebuffers.NEED_TEXTURE_AND_DEPTH16=16
-	framebuffers.NEED_TEXTURE_AND_DEPTH24=24
-	framebuffers.NEED_TEXTURE_AND_DEPTH32=32
 
 	framebuffers.create = function(w,h,d,def)
 
