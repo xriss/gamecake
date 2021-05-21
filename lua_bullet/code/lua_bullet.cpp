@@ -9,6 +9,22 @@ See https://github.com/xriss/gamecake for full notice.
 #include "all.h"
 
 
+
+bool gContactAddedCallback_smooth_mesh(
+	btManifoldPoint& cp,
+	const btCollisionObjectWrapper* colObj0Wrap,
+	int partId0,
+	int index0,
+	const btCollisionObjectWrapper* colObj1Wrap,
+	int partId1,
+	int index1)
+{
+	btAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1, 1);
+	return true;
+}
+
+
+
 /*+------------------------------------------------------------------+**
 
 A world plus all the other parts that a world needs allocated in one 
@@ -251,6 +267,25 @@ static int lua_bullet_shape_destroy (lua_State *l)
 btCollisionShape **pp=(btCollisionShape**)luaL_checkudata(l, 1 , lua_bullet_shape_meta_name);
 	if(*pp)
 	{
+		// auto delete infomaps thet would have been generated from btGenerateInternalEdgeInfo
+		if( (*pp)->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE )
+		{
+			btBvhTriangleMeshShape* trimesh = (btBvhTriangleMeshShape*)(*pp);
+			if( trimesh->getTriangleInfoMap() )
+			{
+				delete trimesh->getTriangleInfoMap();
+			}
+		}
+		else
+		if( (*pp)->getShapeType() == TERRAIN_SHAPE_PROXYTYPE )
+		{
+			btHeightfieldTerrainShape* terrain = (btHeightfieldTerrainShape*)(*pp);
+			if( terrain->getTriangleInfoMap() )
+			{
+				delete terrain->getTriangleInfoMap();
+			}
+		}
+
 		delete *pp;
 		(*pp)=0;
 	}	
@@ -430,7 +465,15 @@ btStridingMeshInterface *mesh;
 		if(0==strcmp(tp,"mesh"))
 		{
 				mesh=lua_bullet_mesh_ptr(l,2);
-				*pp = new btBvhTriangleMeshShape(mesh,true,true);
+				btBvhTriangleMeshShape *tmesh=new btBvhTriangleMeshShape(mesh,true,true);
+				*pp = tmesh;
+				if( lua_toboolean(l,3) ) // smooth internal edge collisions
+				{
+					btTriangleInfoMap* triangleInfoMap = new btTriangleInfoMap();
+					btGenerateInternalEdgeInfo( tmesh, triangleInfoMap);
+
+					gContactAddedCallback = gContactAddedCallback_smooth_mesh;
+				}
 		}
 		else
 		{
@@ -599,6 +642,16 @@ btCollisionShape *shape = lua_bullet_shape_ptr(l, 1 );
 	if( lua_isnumber(l,2) )
 	{
 		shape->setMargin( lua_tonumber(l,2) );
+
+/*
+		switch( shape->getShapeType() )
+		{
+			case TRIANGLE_MESH_SHAPE_PROXYTYPE :
+				((btBvhTriangleMeshShape*)shape)->recalcLocalAabb();
+			break;
+		}
+*/
+
 	}
 
 	lua_pushnumber(l,shape->getMargin());
@@ -863,6 +916,35 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 
 /*+------------------------------------------------------------------+**
 
+get/set custom material callback flag
+
+If set this enables the trimesh smoothing for this object.
+
+*/
+static int lua_bullet_body_custom_material_callback (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isboolean(l,2) )
+	{
+		if( lua_toboolean(l,2) )
+		{
+			body->setCollisionFlags( body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK );
+		}
+		else
+		{
+			body->setCollisionFlags( body->getCollisionFlags() & ~btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK );
+		}
+	}
+
+	lua_pushboolean(l, body->getCollisionFlags() & btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK );
+
+	return 1;
+}
+
+
+/*+------------------------------------------------------------------+**
+
 open library.
 
 */
@@ -944,6 +1026,8 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 
 		{"body_angular_velocity",			lua_bullet_body_angular_velocity},
 		{"body_angular_factor",				lua_bullet_body_angular_factor},
+
+		{"body_custom_material_callback",	lua_bullet_body_custom_material_callback},
 		
 		{0,0}
 	};

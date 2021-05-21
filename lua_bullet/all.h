@@ -70,6 +70,8 @@ extern "C" {
 #include "src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h"
 #include "src/BulletCollision/CollisionShapes/btTriangleIndexVertexMaterialArray.h"
 
+#include "src/BulletCollision/CollisionDispatch/btInternalEdgeUtility.h"
+
 #include "../lua_pack/code/lua_pack.h"
 
 

@@ -453,11 +453,11 @@ function glescode.create(gl)
 				paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
 			end
 		end
-		paramdefs=table.concat(paramdefs,"\n").."\n"
-	
 		local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
-		local vhead="#define VERTEX_SHADER 1\n"..paramdefs.."#line "..line.."\n"
-		local fhead="#define FRAGMENT_SHADER 1\n"..paramdefs.."#line "..line.."\n"
+		paramdefs=table.concat(paramdefs,"\n").."\n".."#line "..line.." //?\n"
+	
+		local vhead="#define VERTEX_SHADER 1\n"
+		local fhead="#define FRAGMENT_SHADER 1\n"
 		
 		local copymerge=function(base,name,data)
 			if not base[name] then base[name]={} end
@@ -475,8 +475,8 @@ function glescode.create(gl)
 			fsource=fsource,
 			filename=filename,
 		})
-		copymerge(code.shaders,"v_"..name,{ program=p, source=vhead..(vsource) })
-		copymerge(code.shaders,"f_"..name,{ program=p, source=fhead..(fsource or vsource) }) -- single source trick
+		copymerge(code.shaders,"v_"..name,{ program=p, source=vhead..paramdefs..(vsource) })
+		copymerge(code.shaders,"f_"..name,{ program=p, source=fhead..paramdefs..(fsource or vsource) }) -- single source trick
 
 -- check that the code compiles OK right now?
 --		assert(code.shader(gl.VERTEX_SHADER,"v_"..name,filename))
@@ -491,12 +491,7 @@ function glescode.create(gl)
 -- load multiple shader sources from a single file
 	function code.shader_sources(text,filename)
 	
-		local shaders=glslang.parse_chunks(text,filename,code.headers)
-
-		for n,v in pairs(shaders) do
---print("PROGRAM",n,#v)
-			code.program_source(n,table.concat(v,"\n"),nil,filename)
-		end
+		glslang.parse_chunks(text,filename,code.headers)
 
 	end
 
@@ -514,9 +509,9 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		end
 	end
 
+	code.includes={}
 	code.shaders={}
 	code.programs={}
-	code.defines={}
 	code.uniforms={}
 	
 	code.NEXT_UNIFORM_TEXTURE=0	-- simple global counter to auto assign texture units during uniforms_apply
@@ -604,7 +599,8 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		
 		if s[0] then return s[0] end
 		
-		local versions,src=glslang.yank_shader_versions( wstr.macro_replace(s.source,code.defines) )
+		local versions,src=glslang.yank_shader_versions( glslang.replace_includes(s.source,code.headers) )
+--print(src)
 		for vi,version in ipairs(versions) do
 			if code.version_test(version) then -- find a version that 
 				s[0]=assert(gl.CreateShader(stype))
@@ -612,13 +608,13 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 				gl.CompileShader(s[0])
 				if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
 					local err=gl.GetShaderInfoLog(s[0]) or "NIL"
-					print( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
+					error( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .."\n".. version .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
 				else
 					return s[0]
 				end
 			end
 		end
-		print( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nNO SUPPORTED SHADER LANGUAGE VERSION\n\n" )
+		error( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .."\n".. version .. "\nNO SUPPORTED SHADER LANGUAGE VERSION\n\n" )
 	end
 	
 	local pbase={}
@@ -630,13 +626,13 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		if type(pname)=="string" then
 		
 			p=code.programs[pname]
-			if not p then -- try basename
+			if not p then -- try and create from headers
 				local basename=wstr.split(pname,"?")[1]
-				local base=assert(code.programs[basename],basename)
-				p=code.program_source(pname,base.vsource,base.fsource,base.filename)
-				p.base=base
+				local base=assert(code.headers[basename],basename)
+				p=code.program_source(pname,base,nil,basename)
 			end
 			assert(p)
+
 		else
 			p=pname
 			if not code.programs[p] then

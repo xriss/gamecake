@@ -422,5 +422,20 @@ bullet.body_functions.angular_factor=function(body,x,y,z)
 	return core.body_angular_factor( body[0] , x , y or x , z or x)
 end
 
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.body.custom_material_callback
+
+	b = body:custom_material_callback( b )
+	b = body:custom_material_callback()
+
+get/set the body custom_material_callback flag
+
+When set we run a custom callback to try and smooth mesh collisions.
+
+]]
+bullet.body_functions.custom_material_callback=function(body,b)
+	return core.body_custom_material_callback( body[0] , b )
+end
+
 return bullet
 
