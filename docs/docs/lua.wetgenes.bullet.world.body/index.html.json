@@ -30,11 +30,11 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 385,
+   "count": 395,
    "name": "lua"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.glslang"
   },
   {
@@ -47,22 +47,26 @@
   },
   {
    "count": 1,
+   "name": "lua.glslang.replace_include"
+  },
+  {
+   "count": 1,
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 380,
+   "count": 389,
    "name": "lua.wetgenes"
   },
   {
-   "count": 20,
+   "count": 25,
    "name": "lua.wetgenes.bullet"
   },
   {
-   "count": 19,
+   "count": 24,
    "name": "lua.wetgenes.bullet.world"
   },
   {
-   "count": 9,
+   "count": 13,
    "name": "lua.wetgenes.bullet.world.body"
   },
   {
@@ -71,7 +75,19 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.angular_factor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.angular_velocity"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.bullet.world.body.ccd"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.custom_material_callback"
   },
   {
    "count": 1,
@@ -80,6 +96,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.body.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.factor"
   },
   {
    "count": 1,
@@ -122,12 +142,16 @@
    "name": "lua.wetgenes.bullet.world.set"
   },
   {
-   "count": 2,
+   "count": 3,
    "name": "lua.wetgenes.bullet.world.shape"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.shape.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.shape.margin"
   },
   {
    "count": 1,
@@ -998,7 +1022,7 @@
    "name": "lua.wetgenes.snippets"
   },
   {
-   "count": 119,
+   "count": 123,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -1110,7 +1134,7 @@
    "name": "lua.wetgenes.tardis.m2.transpose"
   },
   {
-   "count": 10,
+   "count": 12,
    "name": "lua.wetgenes.tardis.m3"
   },
   {
@@ -1135,6 +1159,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m3.m4"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m3.minor_xy"
   },
   {
@@ -1150,7 +1178,11 @@
    "name": "lua.wetgenes.tardis.m3.transpose"
   },
   {
-   "count": 27,
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.v3"
+  },
+  {
+   "count": 29,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -1215,6 +1247,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prescale"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.pretranslate"
   },
   {
@@ -1256,6 +1292,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.transpose"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.v3"
   },
   {
    "count": 1,
@@ -1615,10 +1655,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>body = world:body()</code></pre><p>Create a body.</p>\n",
-   "count": 9,
+   "body": "<pre><code>body = world:body(&quot;rigid&quot;,shape,mass,x,y,z)</code></pre><p>Create a body.</p>\n",
+   "count": 13,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 243,
+   "line": 256,
    "name": "lua.wetgenes.bullet.world.body",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -1626,23 +1666,47 @@
    "body": "<pre><code>b = body:active( true )\nb = body:active( false )\nb = body:active()</code></pre><p>get/set the active state of an object</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 358,
+   "line": 371,
    "name": "lua.wetgenes.bullet.world.body.active",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "<pre><code>x,y,z = body:angular_factor( x , y , z )\nx,y,z = body:angular_factor( r )\nr = ( body:angular_factor( r ) )</code></pre><p>get/set the angular factor of an object (which disables rotation when zero)</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 412,
+   "name": "lua.wetgenes.bullet.world.body.angular_factor",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "<pre><code>x,y,z = body:angular_velocity( x,y,z )\nx,y,z = body:angular_velocity()</code></pre><p>get/set the body angular velocity</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 399,
+   "name": "lua.wetgenes.bullet.world.body.angular_velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
    "body": "<pre><code>r,t = body:ccd( radius,threshold )\nr,t = body:ccd()</code></pre><p>get/set the continuos collision detection radius,threshold values</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 345,
+   "line": 358,
    "name": "lua.wetgenes.bullet.world.body.ccd",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "<pre><code>b = body:custom_material_callback( b )\nb = body:custom_material_callback()</code></pre><p>get/set the body custom_material_callback flag</p>\n<p>When set we run a custom callback to try and smooth mesh collisions.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 426,
+   "name": "lua.wetgenes.bullet.world.body.custom_material_callback",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
    "body": "<pre><code>l,a = body:damping( linear , angular )\nl,a = body:damping()</code></pre><p>get/set the body damping</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 319,
+   "line": 332,
    "name": "lua.wetgenes.bullet.world.body.damping",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -1650,15 +1714,23 @@
    "body": "<pre><code>body:destroy()</code></pre><p>Destroy body.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 264,
+   "line": 277,
    "name": "lua.wetgenes.bullet.world.body.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>l,a = body:friction( linear , angular )\nl,a = body:friction()</code></pre><p>get/set the body friction</p>\n",
+   "body": "<pre><code>x,y,z = body:factor( x , y , z )\nx,y,z = body:factor( r )\nr = ( body:factor( r ) )</code></pre><p>get/set the linear factor of an object (which disables movement when zero)</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 306,
+   "line": 385,
+   "name": "lua.wetgenes.bullet.world.body.factor",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "<pre><code>l,a,s = body:friction( linear , angular , spinning )\nl,a,s = body:friction()</code></pre><p>get/set the body friction</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 319,
    "name": "lua.wetgenes.bullet.world.body.friction",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -1666,7 +1738,7 @@
    "body": "<pre><code>r = body:transform( r )\nr = body:transform()</code></pre><p>get/set the body restitution</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 293,
+   "line": 306,
    "name": "lua.wetgenes.bullet.world.body.restitution",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -1674,7 +1746,7 @@
    "body": "<pre><code>px,py,pz,qx,qy,qz,qw = body:transform()\npx,py,pz,qx,qy,qz,qw = body:transform(px,py,pz)\npx,py,pz,qx,qy,qz,qw = body:transform(px,py,pz,qx,qy,qz,qw)</code></pre><p>get/set the body transform. Position and Rotation Quaternion.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 279,
+   "line": 292,
    "name": "lua.wetgenes.bullet.world.body.transform",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -1682,7 +1754,7 @@
    "body": "<pre><code>x,y,z = body:velocity( x,y,z )\nx,y,z = body:velocity()</code></pre><p>get/set the body velocity</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 332,
+   "line": 345,
    "name": "lua.wetgenes.bullet.world.body.velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

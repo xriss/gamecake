@@ -30,11 +30,11 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 385,
+   "count": 395,
    "name": "lua"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.glslang"
   },
   {
@@ -47,22 +47,26 @@
   },
   {
    "count": 1,
+   "name": "lua.glslang.replace_include"
+  },
+  {
+   "count": 1,
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 380,
+   "count": 389,
    "name": "lua.wetgenes"
   },
   {
-   "count": 20,
+   "count": 25,
    "name": "lua.wetgenes.bullet"
   },
   {
-   "count": 19,
+   "count": 24,
    "name": "lua.wetgenes.bullet.world"
   },
   {
-   "count": 9,
+   "count": 13,
    "name": "lua.wetgenes.bullet.world.body"
   },
   {
@@ -71,7 +75,19 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.angular_factor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.angular_velocity"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.bullet.world.body.ccd"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.custom_material_callback"
   },
   {
    "count": 1,
@@ -80,6 +96,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.body.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.factor"
   },
   {
    "count": 1,
@@ -122,12 +142,16 @@
    "name": "lua.wetgenes.bullet.world.set"
   },
   {
-   "count": 2,
+   "count": 3,
    "name": "lua.wetgenes.bullet.world.shape"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.shape.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.shape.margin"
   },
   {
    "count": 1,
@@ -998,7 +1022,7 @@
    "name": "lua.wetgenes.snippets"
   },
   {
-   "count": 119,
+   "count": 123,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -1110,7 +1134,7 @@
    "name": "lua.wetgenes.tardis.m2.transpose"
   },
   {
-   "count": 10,
+   "count": 12,
    "name": "lua.wetgenes.tardis.m3"
   },
   {
@@ -1135,6 +1159,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m3.m4"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m3.minor_xy"
   },
   {
@@ -1150,7 +1178,11 @@
    "name": "lua.wetgenes.tardis.m3.transpose"
   },
   {
-   "count": 27,
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.v3"
+  },
+  {
+   "count": 29,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -1215,6 +1247,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prescale"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.pretranslate"
   },
   {
@@ -1256,6 +1292,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.transpose"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.v3"
   },
   {
    "count": 1,
@@ -1618,7 +1658,7 @@
    "body": "<pre><code>m4 = m4:translate_v3(v3a)\nm4 = m4:translate_v3(v3a,r)</code></pre><p>Translate this m4 along its local axis by v3a.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 906,
+   "line": 949,
    "name": "lua.wetgenes.tardis.m4.translate_v3",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
