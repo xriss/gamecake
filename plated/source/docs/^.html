@@ -54,8 +54,8 @@ Gamecake docs!
 
 #^menuwrap_link trim=ends
 
-{_it.count>1&&_it:menuwrap_link2}
-{_it.count==1&&_it:menuwrap_link1}
+{_it.count>1&&_it:menuwrap_link2||}
+{_it.count==1&&_it:menuwrap_link1||}
 
 #^menuwrap_link1 trim=ends
 <a class="sub" href="{_docs_json.dirname}/{_it.name}"><span>/{_it.name}</span></a>

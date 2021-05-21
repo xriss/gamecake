@@ -1720,7 +1720,7 @@
  "head": "<title>{title}</title>\n<meta name=\"theme-color\" content=\"#2a3133\">\n<link href=\"https://fonts.googleapis.com/css?family=Patua+One\" rel=\"stylesheet\">\n<style>\n{css}\n</style>",
  "html": "<html>\n\t<head>\n\t\t<title>{title}</title>\n\t\t<link href=\"https://fonts.googleapis.com/css?family=Patua+One\" rel=\"stylesheet\">\n\t\t<link rel='stylesheet' href='{_docs_json.dirname}/docs.css' />\n\t</head>\n\t<body>{nav}{body}</body>\n</html>\n",
  "menuwrap": "{_it:menuwrap_link}",
- "menuwrap_link": "{_it.count>1&&_it:menuwrap_link2}\n{_it.count==1&&_it:menuwrap_link1}",
+ "menuwrap_link": "{_it.count>1&&_it:menuwrap_link2||}\n{_it.count==1&&_it:menuwrap_link1||}",
  "menuwrap_link1": "<a class=\"sub\" href=\"{_docs_json.dirname}/{_it.name}\"><span>/{_it.name}</span></a>",
  "menuwrap_link2": "<a class=\"par\" href=\"{_docs_json.dirname}/{_it.name}\"><span>/{_it.name}</span></a>",
  "nav": "<div class=\"nav_wrap\">\n\t<div class=\"nav\">\n\t\t<a href=\"{_root}\" class=\"logo\">Gamecake</a>\n\t\t<ul>\n\t\t\t<li><a href=\"https://github.com/xriss/gamecake\">Github</a></li>\n\t\t\t<li><a href=\"{_root}blog\">Blog</a></li>\n\t\t\t<li><a href=\"{_root}docs\">Documentation</a></li>\n\t\t</ul>\n\t</div>\n</div>\n",
