@@ -33,8 +33,8 @@
 
 namespace
 {
-const btScalar SLEEP_EPSILON = btScalar(0.05);  // this is a squared velocity (m^2 s^-2)
-const btScalar SLEEP_TIMEOUT = btScalar(2);     // in seconds
+const btScalar INITIAL_SLEEP_EPSILON = btScalar(0.05);  // this is a squared velocity (m^2 s^-2)
+const btScalar INITIAL_SLEEP_TIMEOUT = btScalar(2);     // in seconds
 }  // namespace
 
 void btMultiBody::spatialTransform(const btMatrix3x3 &rotation_matrix,  // rotates vectors in 'from' frame to vectors in 'to' frame
@@ -110,6 +110,9 @@ btMultiBody::btMultiBody(int n_links,
 	  m_canSleep(canSleep),
 	  m_canWakeup(true),
 	  m_sleepTimer(0),
+      m_sleepEpsilon(INITIAL_SLEEP_EPSILON),
+	  m_sleepTimeout(INITIAL_SLEEP_TIMEOUT),
+
 	  m_userObjectPointer(0),
 	  m_userIndex2(-1),
 	  m_userIndex(-1),
@@ -125,7 +128,8 @@ btMultiBody::btMultiBody(int n_links,
 	  m_posVarCnt(0),
 	  m_useRK4(false),
 	  m_useGlobalVelocities(false),
-	  m_internalNeedsJointFeedback(false)
+	  m_internalNeedsJointFeedback(false),
+		m_kinematic_calculate_velocity(false)
 {
 	m_cachedInertiaTopLeft.setValue(0, 0, 0, 0, 0, 0, 0, 0, 0);
 	m_cachedInertiaTopRight.setValue(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -1410,7 +1414,7 @@ void btMultiBody::solveImatrix(const btSpatialForceVector &rhs, btSpatialMotionV
 	}
 }
 
-void btMultiBody::mulMatrix(btScalar *pA, btScalar *pB, int rowsA, int colsA, int rowsB, int colsB, btScalar *pC) const
+void btMultiBody::mulMatrix(const btScalar *pA, const btScalar *pB, int rowsA, int colsA, int rowsB, int colsB, btScalar *pC) const
 {
 	for (int row = 0; row < rowsA; row++)
 	{
@@ -2103,10 +2107,10 @@ void btMultiBody::checkMotionAndSleepIfRequired(btScalar timestep)
 			motion += m_realBuf[i] * m_realBuf[i];
 	}
 
-	if (motion < SLEEP_EPSILON)
+	if (motion < m_sleepEpsilon)
 	{
 		m_sleepTimer += timestep;
-		if (m_sleepTimer > SLEEP_TIMEOUT)
+		if (m_sleepTimer > m_sleepTimeout)
 		{
 			goToSleep();
 		}
@@ -2381,7 +2385,7 @@ const char *btMultiBody::serialize(void *dataBuffer, class btSerializer *seriali
 void btMultiBody::saveKinematicState(btScalar timeStep)
 {
 	//todo: clamp to some (user definable) safe minimum timestep, to limit maximum angular/linear velocities
-	if (timeStep != btScalar(0.))
+	if (m_kinematic_calculate_velocity && timeStep != btScalar(0.))
 	{
 		btVector3 linearVelocity, angularVelocity;
 		btTransformUtil::calculateVelocity(getInterpolateBaseWorldTransform(), getBaseWorldTransform(), timeStep, linearVelocity, angularVelocity);
