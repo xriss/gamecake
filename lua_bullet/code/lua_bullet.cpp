@@ -96,6 +96,9 @@ bullet_world *pp;
 		lua_bullet_world_delete(pp);
 		return 0;
 	}
+
+// this does not really help
+//	pp->world->setApplySpeculativeContactRestitution(true);
 	
 	return 1;
 }
@@ -682,9 +685,11 @@ btTransform trans;
 		body->setWorldTransform(trans);
 	}
 
-	btMotionState *motion=body->getMotionState();
-	if( motion ) { motion->getWorldTransform(trans); }
-	else { trans = body->getWorldTransform(); }
+//	btMotionState *motion=body->getMotionState();
+//	if( motion ) { motion->getWorldTransform(trans); }
+//	else { trans = body->getWorldTransform(); }
+
+	trans = body->getWorldTransform(); // I'm not sure about what we get from the motionstate...
 
 	btVector3 v=trans.getOrigin();
 	btQuaternion q=trans.getRotation();
