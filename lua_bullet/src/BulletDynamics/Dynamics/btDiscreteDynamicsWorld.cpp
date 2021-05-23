@@ -467,7 +467,8 @@ void btDiscreteDynamicsWorld::internalSingleStepSimulation(btScalar timeStep)
 	dispatchInfo.m_stepCount = 0;
 	dispatchInfo.m_debugDraw = getDebugDrawer();
 
-	createPredictiveContacts(timeStep);
+// This seems to make things worse?
+//	createPredictiveContacts(timeStep);
 
 	///perform collision detection
 	performDiscreteCollisionDetection();
