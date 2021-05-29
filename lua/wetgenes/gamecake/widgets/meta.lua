@@ -47,6 +47,8 @@ wmeta.classes={
 
 --classes built out of the base classes
 
+	["split_drag"]=oven.rebake("wetgenes.gamecake.widgets.split_drag"),
+
 	["pan"]=oven.rebake("wetgenes.gamecake.widgets.pan"),
 	["slide"]=oven.rebake("wetgenes.gamecake.widgets.slide"),
 

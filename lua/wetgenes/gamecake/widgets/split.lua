@@ -54,6 +54,7 @@ function wsplit.resizelayout(widget)
 		if		widget.split_num	then	r=widget.split_num
 		elseif	fit					then	r=fit*b
 		elseif	widget.split_fnum	then	r=widget.split_fnum*a
+		elseif	widget.split_aspect	then	r=widget.split_aspect*b
 		end
 		
 		if widget.split_fmin then local n=widget.split_fmin*a if r<n then r=n end end
@@ -158,6 +159,7 @@ function wsplit.setup(widget,def)
 	widget.split_fit  =def.split_fit			-- desired aspect ratio of split , width*this == height or height*this=width
 	widget.split_fnum =def.split_fnum			-- fixed fractional size of split
 	widget.split_scale=def.split_scale			-- scale the fit by this amount (must be <=1)
+	widget.split_aspect=def.split_aspect		-- keep the height relative to the width or visa versa
 
 -- limits
 	widget.split_min =def.split_min		-- minimum pixel size of split
