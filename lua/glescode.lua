@@ -289,7 +289,6 @@ function glescode.create(gl)
 	code.cache.color=V4()
 	
 	function code.Color(...)
---		tcore.set(code.cache.color,...) -- may not set anything if no arguments are given
 		code.cache.color:set(...) -- may not set anything if no arguments are given
 		return code.cache.color -- safe way of getting this value (a 4 float userdata)
 	end
@@ -403,7 +402,6 @@ function glescode.create(gl)
 	
 
 	function code.color_get_rgba()
---		return tcore.read(code.cache.color,1),tcore.read(code.cache.color,2),tcore.read(code.cache.color,3),tcore.read(code.cache.color,4)
 		return code.cache.color[1],code.cache.color[2],code.cache.color[3],code.cache.color[4]
 	end
 	
@@ -411,30 +409,30 @@ function glescode.create(gl)
 	function code.apply_modelview(va,vb,vc,vd)
 		local t=type(va)
 		if t=="number" then -- numbers
---			local v4=tcore.new_v4() tcore.set(v4,va,vb,vc,vd)
 			local v4=tardis.v4.new(va,vb,vc,vd)
---			tcore.v4_product_m4(v4,code.matrix(gl.MODELVIEW))
 			v4:product(code.matrix(gl.MODELVIEW))
---			return tcore.read(v4,1),tcore.read(v4,2),tcore.read(v4,3),tcore.read(v4,4)
 			return v4[1],v4[2],v4[3],v4[4]
 		elseif t=="table" then -- need to convert from a table
---			local v4=tcore.new_v4() tcore.set(v4,va,4)
 			local v4=tardis.v4.new(va)
---			tcore.v4_product_m4(v4,code.matrix(gl.MODELVIEW))
 			v4:product(code.matrix(gl.MODELVIEW))
---			va[1]=tcore.read(v4,1) va[2]=tcore.read(v4,2) va[3]=tcore.read(v4,3) va[4]=tcore.read(v4,4)
 			va[1]=v4[1] va[2]=v4[2] va[3]=v4[3] va[4]=v4[4]
 			return va
 		else
---			tcore.v4_product_m4(va,code.matrix(gl.MODELVIEW))
 			va:product(code.matrix(gl.MODELVIEW))
 			return va
 		end
 	end
 
-
 -- compiler functions
 --
+
+
+
+	local pbase={}
+	local pmeta={__index=pbase}	
+
+
+
 -- function to provide source for a named shader program
 -- this adds any needed GLSL version header and defines
 -- VERTEX_SHADER or FRAGMENT_SHADER appropriately
@@ -480,20 +478,26 @@ function glescode.create(gl)
 
 -- keep shaders inside programs don't bother trying to reuse anything
 
-		code.programs[name]={
+		local p={
 			name=name,
 			filename=filename,
 			sources={
 				 [ gl.VERTEX_SHADER   ] = vhead..paramdefs..vsource ,
 				 [ gl.FRAGMENT_SHADER ] = fhead..paramdefs..fsource ,
 			},
+			cache={},
+			vars={},
 		}
+		setmetatable(p,pmeta)
 
-		return code.programs[name]
+		if code.programs[name] then -- forget old program
+			code.forget_program( code.programs[name] )
+		end
+		code.programs[name]=p -- remember new program
+
+		return p
 	end
 
--- reset headers at startup
-	code.headers={}
 
 -- load multiple shader sources from a single file
 	function code.shader_sources(text,filename)
@@ -502,22 +506,8 @@ function glescode.create(gl)
 
 	end
 
--- legacy version, obsolete, use the new program_source instead
--- this will be removed shortly
-	function code.progsrc(name,vsource,fsource)
-		if not code.programs[name] then -- only do once
-			code.shaders["v_"..name]={ source=(vsource) }
-			code.shaders["f_"..name]={ source=(fsource) }
-			code.programs[name]={
-				vshaders={"v_"..name},
-				fshaders={"f_"..name},
-			}
-print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
-		end
-	end
-
-	code.includes={}
-	code.shaders={}
+-- reset headers at startup
+	code.headers={}
 	code.programs={}
 	code.uniforms={}
 	
@@ -536,42 +526,35 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 	end
 
 
+	function code.forget_program(p)
+
+		for _,it in pairs( p.shaders or {} ) do -- shaders contained in this program
+			if gl.IsShader(it) then
+				gl.DeleteShader(it)
+			end
+		end
+		p.shaders=nil
+
+		if p[0] then
+			if gl.IsProgram(p[0]) then
+				gl.DeleteProgram(p[0])
+			end
+			p[0]=nil
+		end
+	end
+
 	
 -- forget cached info when we lose context, it is important to call this
 	function code.forget()
---print("FORGETTING ALL SHADERS")
-		for n,v in pairs(code.shaders) do
-			if v[0] then
-				if gl.IsShader(v[0]) then
-					gl.DeleteShader(v[0])
-				end
-				v[0]=nil
-			end
-			if v.program and v.program.base then -- this can be regenerated
---print("DELETING SHADER "..n)
-				code.shaders[n]=nil
-			end
-		end
+
 --print("FORGETTING ALL PROGRAMS")
-		for n,v in pairs(code.programs) do
-
-			for _,it in pairs(v.shaders) do -- shaders contained in this program
-				if gl.IsShader(it) then
-					gl.DeleteShader(it)
-				end
-			end
-			v.shaders={}
-
-			if v[0] then
-				if gl.IsProgram(v[0]) then
-					gl.DeleteProgram(v[0])
-				end
-				v[0]=nil
-			end
-			if v.base then -- this can be regenerated
+		for n,p in pairs(code.programs) do
+			code.forget_program(p)
+			if p.base then -- this can be regenerated
 				code.programs[n]=nil
 			end
 		end
+
 	end
 	
 
@@ -594,32 +577,6 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		end
 		return code.version_test_cache[version]
 	end
-
-	
-	
-	function code.shader(stype,sname,filename)
-
-		local s
-		
-		if type(sname)=="string" then
-			s=assert(code.shaders[sname])
-		else
-			s=sname
-			if not code.shaders[s] then
-				local idx=#code.shaders+1
-				code.shaders[s.name or idx]=s
-				code.shaders[s]=s.name or idx
-			end
-			sname=s.name or ("__inline__shader__"..code.shaders[s])
-		end
-
-		if s[0] then return s[0] end
-		
-		s[0]=code.shader_compile(stype,s.source,filename)
-
-		return s[0]
-	end
-
 
 
 	function code.shader_compile(stype,source,filename)
@@ -645,38 +602,19 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		return ret
 	end
 	
-	local pbase={}
-	local pmeta={__index=pbase}
-	
 	function code.program(pname)
 		local p
 		
-		if type(pname)=="string" then
-		
-			p=code.programs[pname]
-			if not p then -- try and create from headers
-				local basename=wstr.split(pname,"?")[1]
-				local base=assert(code.headers[basename],basename)
-				p=code.program_source(pname,{source=base,filename=basename})
-			end
-			assert(p)
-
-		else
-			p=pname
-			if not code.programs[p] then
-				local idx=#code.programs+1
-				code.programs[p.name or idx]=p
-				code.programs[p]=p.name or idx
-			end
-			pname=p.name or ("__inline__program__"..code.programs[p])
+		p=code.programs[pname]
+		if not p then -- try and create from headers
+			local basename=wstr.split(pname,"?")[1]
+			local base=assert(code.headers[basename],basename)
+			p=code.program_source(pname,{source=base,filename=basename})
 		end
-		
+		assert(p)
+
 		if not p[0] then -- need to compile and link
 
-			setmetatable(p,pmeta)
-
-			p.cache={}
-			p.vars={}
 			p[0]=gl.CreateProgram()
 			
 			p.shaders=p.shaders or {}
@@ -718,31 +656,25 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 
 	local function cache_set_v4(p,n,v)
 		if not p.cache[n] then
---			p.cache[n]=tcore.new_v4()
 			p.cache[n]=tardis.v4.new()
 		end
---		tcore.set(p.cache[n],v)
 		p.cache[n]:set(v)
 		return p.cache[n]
 	end
 	local function cache_set_m4(p,n,v)
 		if not p.cache[n] then
---			p.cache[n]=tcore.new_m4()
 			p.cache[n]=tardis.m4.new()
 		end
---		tcore.set(p.cache[n],v)
 		p.cache[n]:set(v)
 		return p.cache[n]
 	end
 
 	local function cache_check_v4(p,n,v)
 		if not p.cache[n] then return false end
---		return tcore.compare(p.cache[n],v)
 		return p.cache[n]:compare(v)
 	end
 	local function cache_check_m4(p,n,v)
 		if not p.cache[n] then return false end
---		return tcore.compare(p.cache[n],v)
 		return p.cache[n]:compare(v)
 	end
 
