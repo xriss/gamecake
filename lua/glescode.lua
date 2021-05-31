@@ -440,9 +440,28 @@ function glescode.create(gl)
 -- VERTEX_SHADER or FRAGMENT_SHADER appropriately
 -- so only one source is required
 --
-	function code.program_source(name,vsource,fsource,filename)
---		if 	code.programs[name] then return code.programs[name] end -- only do once
+	function code.program_source(name,opts)
 
+		local gsource
+		local vsource
+		local fsource
+		local filename
+
+		if type(opts)=="string" then
+
+			vsource=opts
+			fsource=opts
+
+		elseif type(opts)=="table" then
+
+			vsource=opts.vsource or opts.source
+			fsource=opts.fsource or opts.source
+			filename=opts.filename
+
+			gsource=opts.gsource -- geometry shader?
+
+		end
+		
 		local aa=wstr.split(name,"?")
 		local basename=aa[1]
 		local params=aa[2]
@@ -458,31 +477,19 @@ function glescode.create(gl)
 	
 		local vhead="#define VERTEX_SHADER 1\n"
 		local fhead="#define FRAGMENT_SHADER 1\n"
-		
-		local copymerge=function(base,name,data)
-			if not base[name] then base[name]={} end
-			for n,v in pairs(data) do
-				base[name][n]=v
-			end
-			return base[name]
-		end
 
-		local p=copymerge(code.programs,name,{
-			vshaders={"v_"..name},
-			fshaders={"f_"..name},
+-- keep shaders inside programs don't bother trying to reuse anything
+
+		code.programs[name]={
 			name=name,
-			vsource=vsource,
-			fsource=fsource,
 			filename=filename,
-		})
-		copymerge(code.shaders,"v_"..name,{ program=p, source=vhead..paramdefs..(vsource) })
-		copymerge(code.shaders,"f_"..name,{ program=p, source=fhead..paramdefs..(fsource or vsource) }) -- single source trick
+			sources={
+				 [ gl.VERTEX_SHADER   ] = vhead..paramdefs..vsource ,
+				 [ gl.FRAGMENT_SHADER ] = fhead..paramdefs..fsource ,
+			},
+		}
 
--- check that the code compiles OK right now?
---		assert(code.shader(gl.VERTEX_SHADER,"v_"..name,filename))
---		assert(code.shader(gl.FRAGMENT_SHADER,"f_"..name,filename))
-
-		return p
+		return code.programs[name]
 	end
 
 -- reset headers at startup
@@ -547,6 +554,14 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		end
 --print("FORGETTING ALL PROGRAMS")
 		for n,v in pairs(code.programs) do
+
+			for _,it in pairs(v.shaders) do -- shaders contained in this program
+				if gl.IsShader(it) then
+					gl.DeleteShader(it)
+				end
+			end
+			v.shaders={}
+
 			if v[0] then
 				if gl.IsProgram(v[0]) then
 					gl.DeleteProgram(v[0])
@@ -554,7 +569,6 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 				v[0]=nil
 			end
 			if v.base then -- this can be regenerated
---print("DELETING PROGRAM "..n)
 				code.programs[n]=nil
 			end
 		end
@@ -580,6 +594,8 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		end
 		return code.version_test_cache[version]
 	end
+
+	
 	
 	function code.shader(stype,sname,filename)
 
@@ -596,25 +612,37 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			end
 			sname=s.name or ("__inline__shader__"..code.shaders[s])
 		end
-		
+
 		if s[0] then return s[0] end
 		
-		local versions,src=glslang.yank_shader_versions( glslang.replace_includes(s.source,code.headers) )
---print(src)
+		s[0]=code.shader_compile(stype,s.source,filename)
+
+		return s[0]
+	end
+
+
+
+	function code.shader_compile(stype,source,filename)
+
+		local ret
+		
+		local versions,src=glslang.yank_shader_versions( glslang.replace_includes(source,code.headers) )
 		for vi,version in ipairs(versions) do
-			if code.version_test(version) then -- find a version that 
-				s[0]=assert(gl.CreateShader(stype))
-				gl.ShaderSource(s[0],version..src)
-				gl.CompileShader(s[0])
-				if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
-					local err=gl.GetShaderInfoLog(s[0]) or "NIL"
-					error( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .."\n".. version .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
+			if code.version_test(version) then -- find a version that we can use
+				ret=assert(gl.CreateShader(stype))
+				gl.ShaderSource(ret,version..src)
+				gl.CompileShader(ret)
+				if gl.GetShader(ret, gl.COMPILE_STATUS) == gl.FALSE then -- error
+					local err=gl.GetShaderInfoLog(ret) or "NIL"
+					error( "ERROR failed to build shader " .. " (" .. stype .. ") " .. ( filename or "" ) .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
 				else
-					return s[0]
+					return ret
 				end
 			end
 		end
-		error( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .."\n".. version .. "\nNO SUPPORTED SHADER LANGUAGE VERSION\n\n" )
+		error( "ERROR failed to build shader " .. " (" .. stype .. ") " .. ( filename or "" ) .. "\nNO SUPPORTED SHADER LANGUAGE VERSION\n\n" )
+
+		return ret
 	end
 	
 	local pbase={}
@@ -629,7 +657,7 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			if not p then -- try and create from headers
 				local basename=wstr.split(pname,"?")[1]
 				local base=assert(code.headers[basename],basename)
-				p=code.program_source(pname,base,nil,basename)
+				p=code.program_source(pname,{source=base,filename=basename})
 			end
 			assert(p)
 
@@ -643,18 +671,18 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 			pname=p.name or ("__inline__program__"..code.programs[p])
 		end
 		
-		if not p[0] then
+		if not p[0] then -- need to compile and link
+
 			setmetatable(p,pmeta)
 
 			p.cache={}
 			p.vars={}
 			p[0]=gl.CreateProgram()
 			
-			for i,v in ipairs(p.vshaders) do
-				gl.AttachShader( p[0] , code.shader(gl.VERTEX_SHADER,v) )
-			end
-			for i,v in ipairs(p.fshaders) do
-				gl.AttachShader( p[0] , code.shader(gl.FRAGMENT_SHADER,v) )
+			p.shaders=p.shaders or {}
+			for stype,source in pairs(p.sources) do
+				p.shaders[stype]=code.shader_compile(stype,source,p.filename)
+				gl.AttachShader( p[0] , p.shaders[stype] )
 			end
 			
 --print("Linking program "..pname)
@@ -662,9 +690,8 @@ print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
 		
 			if gl.GetProgram(p[0], gl.LINK_STATUS) == gl.FALSE then -- error
 
-				print( gl.GetProgramInfoLog(p[0]) , "\n" )
-
-				error( "failed to build program "..pname )
+				error( gl.GetProgramInfoLog(p[0]) .. "\n" ..
+				 "failed to build program "..pname )
 			end
 			
 		end
