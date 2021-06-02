@@ -120,8 +120,12 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 
 	if act=="txt_changed" then
 
-		widget.gutter=#string.format(" %d   ",widget.hy)
-
+		if widget.gutter_disable then
+			widget.gutter=0
+		else
+			widget.gutter=#string.format(" %d   ",widget.hy)
+		end
+		
 		local pan=widget.scroll_widget.pan
 		pan.hx_max=(widget.txt.hx+widget.gutter+1)*8
 		pan.hy_max=widget.txt.hy*16
@@ -162,28 +166,32 @@ wtexteditor.texteditor_refresh=function(widget)
 		local cache=widget.txt.get_cache_lex(y)
 		if cache then
 
-			local vn=tostring(y)
-			vn=string.rep(" ",widget.gutter-3-#vn)..vn.." "
-			for i=1,#vn do
-				if pl>=512*3 then break end -- max width
-				ps[pl+1]=string.byte(vn,i,i)
+			if not widget.gutter_disable then
+
+				local vn=tostring(y)
+				vn=string.rep(" ",widget.gutter-3-#vn)..vn.." "
+				for i=1,#vn do
+					if pl>=512*3 then break end -- max width
+					ps[pl+1]=string.byte(vn,i,i)
+					ps[pl+2]=0
+					ps[pl+3]=3
+					ps[pl+4]=2
+					pl=pl+4
+				end
+				
+				ps[pl+1]=32
 				ps[pl+2]=0
-				ps[pl+3]=3
-				ps[pl+4]=2
+				ps[pl+3]=1
+				ps[pl+4]=0
 				pl=pl+4
+				
+				ps[pl+1]=32
+				ps[pl+2]=0
+				ps[pl+3]=1
+				ps[pl+4]=0
+				pl=pl+4
+
 			end
-			
-			ps[pl+1]=32
-			ps[pl+2]=0
-			ps[pl+3]=1
-			ps[pl+4]=0
-			pl=pl+4
-			
-			ps[pl+1]=32
-			ps[pl+2]=0
-			ps[pl+3]=1
-			ps[pl+4]=0
-			pl=pl+4
 
 			for x=cx,cx+512 do
 				if pl>=512*3 then break end -- max width
@@ -408,67 +416,20 @@ function wtexteditor.key(pan,ascii,key,act)
 	end
 
 
-	if ascii and ascii~="" then -- not a blank string
 
-		texteditor.txt_dirty=true
-		
-		local c=wutf.code(ascii)
-		if c>=32 then
-		
-			texteditor.float_cx=nil
-
-			txt.undo.cut()
-			txt.undo.insert_char(ascii)
-
-			texteditor:scroll_to_view()
-
-		end
-		
-	elseif act==1 or act==0 then
-
-		texteditor.txt_dirty=true
+	if (act==1 or act==0) and ( not ascii or ascii=="" ) then
 
 		if     key=="shift_l"   or key=="shift_r"   then	texteditor.key_shift=true
 		elseif key=="control_l" or key=="control_r" then	texteditor.key_control=true
 		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=true
 		end
 
-		if texteditor.key_control then
+		if key=="c" then	-- copy
 		
---print(key)		
-			if     key=="x" then	-- cut
+			local s=txt.undo.copy()
 
-				local s=txt.undo.cut()
-				
-				if s then wwin.set_clipboard(s) end
+			if s then wwin.set_clipboard(s) end
 
-				texteditor:scroll_to_view()
-			
-			elseif key=="c" then	-- copy
-			
-				local s=txt.undo.copy()
-
-				if s then wwin.set_clipboard(s) end
-
-			elseif key=="v" then	-- paste
-			
-				if wwin.has_clipboard() then -- only if something to paste
-					local s=wwin.get_clipboard()
-					txt.undo.cut()
-					txt.undo.insert(s)
-					texteditor:scroll_to_view()
-				end
-
-			elseif key=="z" then	-- undo
-
-					txt.undo.undo()
-
-			elseif key=="y" then	-- redo
-
-					txt.undo.redo()
-
-			end
-		
 		elseif key=="left" then
 
 			texteditor.float_cx=nil
@@ -509,14 +470,6 @@ function wtexteditor.key(pan,ascii,key,act)
 			txt.cy,txt.cx=txt.clip( txt.cy+1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
 			cpost()
 
-		elseif key=="enter" or key=="return" then
-
-			texteditor.float_cx=nil
-
-			txt.undo.cut()
-			txt.undo.insert_newline()
-			texteditor:scroll_to_view()
-
 		elseif key=="home" then
 
 			texteditor.float_cx=nil
@@ -533,34 +486,6 @@ function wtexteditor.key(pan,ascii,key,act)
 			txt.clip()
 			texteditor:scroll_to_view()
 
-		elseif key=="back" then
-
-			texteditor.float_cx=nil
-
-			if not txt.undo.cut() then -- just delete selection?
-				txt.undo.backspace()
-			end
-			
-			texteditor:scroll_to_view()
-
-		elseif key=="delete" then
-
-			texteditor.float_cx=nil
-
-			if not txt.undo.cut() then -- just delete selection?
-				txt.undo.delete()
-			end
-			
-			texteditor:scroll_to_view()
-
-		elseif key=="tab" then
-
-			texteditor.float_cx=nil
-
-			txt.undo.cut()
-			txt.undo.insert_char("\t")
-			texteditor:scroll_to_view()
-
 		end
 		
 	elseif act==-1 then
@@ -570,6 +495,101 @@ function wtexteditor.key(pan,ascii,key,act)
 		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=false
 		end
 		
+	end
+
+
+
+	if not texteditor.readonly then -- allow changes
+
+		if ascii and ascii~="" then -- not a blank string
+
+			texteditor.txt_dirty=true
+			
+			local c=wutf.code(ascii)
+			if c>=32 then
+			
+				texteditor.float_cx=nil
+
+				txt.undo.cut()
+				txt.undo.insert_char(ascii)
+
+				texteditor:scroll_to_view()
+
+			end
+			
+		elseif act==1 or act==0 then
+
+			texteditor.txt_dirty=true
+
+			if texteditor.key_control then
+			
+	--print(key)		
+				if     key=="x" then	-- cut
+
+					local s=txt.undo.cut()
+					
+					if s then wwin.set_clipboard(s) end
+
+					texteditor:scroll_to_view()
+				
+				elseif key=="v" then	-- paste
+				
+					if wwin.has_clipboard() then -- only if something to paste
+						local s=wwin.get_clipboard()
+						txt.undo.cut()
+						txt.undo.insert(s)
+						texteditor:scroll_to_view()
+					end
+
+				elseif key=="z" then	-- undo
+
+						txt.undo.undo()
+
+				elseif key=="y" then	-- redo
+
+						txt.undo.redo()
+
+				end
+			
+			elseif key=="enter" or key=="return" then
+
+				texteditor.float_cx=nil
+
+				txt.undo.cut()
+				txt.undo.insert_newline()
+				texteditor:scroll_to_view()
+
+			elseif key=="back" then
+
+				texteditor.float_cx=nil
+
+				if not txt.undo.cut() then -- just delete selection?
+					txt.undo.backspace()
+				end
+				
+				texteditor:scroll_to_view()
+
+			elseif key=="delete" then
+
+				texteditor.float_cx=nil
+
+				if not txt.undo.cut() then -- just delete selection?
+					txt.undo.delete()
+				end
+				
+				texteditor:scroll_to_view()
+
+			elseif key=="tab" then
+
+				texteditor.float_cx=nil
+
+				txt.undo.cut()
+				txt.undo.insert_char("\t")
+				texteditor:scroll_to_view()
+
+			end
+
+		end
 	end
 
 	return true
@@ -630,8 +650,10 @@ function wtexteditor.setup(widget,def)
 
 	widget.scroll_widget.pan.drag=function()end -- fake drag so we are treated as drag able
 
-	widget.gutter=#(" 01   ")
-	
+--	if not widget.gutter_disable then
+--		widget.gutter=#(" 01   ")
+--	end
+
 	if def.data then -- set starting text
 		widget.txt.set_text( def.data:value() )
 	end

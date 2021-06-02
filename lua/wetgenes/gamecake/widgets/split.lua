@@ -56,13 +56,16 @@ function wsplit.resizelayout(widget)
 		elseif	widget.split_fnum	then	r=widget.split_fnum*a
 		elseif	widget.split_aspect	then	r=widget.split_aspect*b
 		end
-		r=math.ceil(r) -- snap to ints
 		
 		if widget.split_fmin then local n=math.ceil(widget.split_fmin*a) if r<n then r=n end end
 		if widget.split_min then if r<widget.split_min then r=widget.split_min end end
 
 		if widget.split_fmax then local n=math.ceil(widget.split_fmax*a) if r>n then r=n end end
 		if widget.split_max then if r>widget.split_max then r=widget.split_max end end
+
+		if r<0 then r=0 end -- sanity
+		if r>a then r=a end -- never bigger than container
+		r=math.ceil(r) -- snap to ints
 		
 		return r
 	end

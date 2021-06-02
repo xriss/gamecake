@@ -27,6 +27,18 @@ function wsplit_drag.setup(widget,def)
 
 		widget.drag=widget:add({style="button",class="drag",px=0,hx=8,size="fully",solid=true,cursor="sizewe",color=def.slide_color}) -- probably invisible
 
+		local snapit=function(ws)
+			widget.drag.px=math.floor(widget.drag.px)
+			widget.drag.py=math.floor(widget.drag.py)
+		
+			ws.px=math.floor(ws.px)
+			ws.py=math.floor(ws.py)
+			ws.hx=math.ceil(ws.hx)
+			ws.hy=math.ceil(ws.hy)
+
+--			print(ws.px,ws.py,ws.hx,ws.hy,widget.drag.px,widget.drag.py)
+		end
+
 		local clampit=function()
 			local ws=widget.split[ widget.split.split_order ]
 			if not ws then return end
@@ -40,6 +52,7 @@ function wsplit_drag.setup(widget,def)
 				end
 				widget.master.request_layout=true -- need layout
 			end
+			snapit(ws)
 		end
 
 		widget.drag.class_hooks=function(h,w)
@@ -86,6 +99,7 @@ function wsplit_drag.setup(widget,def)
 				end
 				widget.master.request_layout=true -- need layout
 			end
+			snapit(ws)
 		end
 
 		widget.drag.class_hooks=function(h,w)
