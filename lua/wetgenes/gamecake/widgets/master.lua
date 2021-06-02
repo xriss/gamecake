@@ -244,9 +244,10 @@ function wmaster.setup(widget,def)
 			master.request_layout=false
 			widget.hx=resize and resize.hx or widget.hx
 			widget.hy=resize and resize.hy or widget.hy
-			widget:set_dirty()
 			widget:resize_and_layout()
+--			widget:set_dirty()
 --			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
+			
 		end
 	
 		local throb=(widget.throb>=128)

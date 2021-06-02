@@ -730,6 +730,10 @@ end
 						oven.frame_rate_auto_active=time_now
 					end
 
+					if m.class=="resize" then -- window resize
+						oven.frame_rate_auto_active=time_now
+					end
+
 					if m.class=="close" then -- window has been closed so do a shutdown
 						if oven.enable_close_window then
 							oven.next=true

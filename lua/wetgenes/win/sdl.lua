@@ -356,7 +356,17 @@ sdl.msg_fetch=function()
 --			sdl.mousexy[2]=e.y
 	
 		
-		elseif	(e.type == SDL.event.WindowEvent) then -- ignore
+		elseif	(e.type == SDL.event.WindowEvent) then -- window related, eg focus resize etc
+
+			if ( e.event == SDL.eventWindow.SizeChanged ) then
+			
+				local t={}
+				t.time=sdl.time()
+				t.class="resize"
+
+				sdl.queue[#sdl.queue+1]=t
+
+			end
 
 		elseif	(e.type == SDL.event.Quit) then -- window close button, or alt f4
 
