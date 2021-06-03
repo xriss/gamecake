@@ -13,6 +13,7 @@ local wutf=require("wetgenes.txt.utf")
 
 local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
+local ls=function(...) print(wstr.dump({...})) end
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -29,6 +30,8 @@ M.bake=function(oven,wtexteditor)
 function wtexteditor.update(texteditor)
 
 	local txt=texteditor.txt
+
+	if texteditor.last_refresh_pan_hx ~= texteditor.scroll_widget.pan.hx then texteditor.txt_dirty=true end
 
 	if texteditor.txt_dirty then
 		texteditor.master.throb=255
@@ -60,6 +63,7 @@ function wtexteditor.update(texteditor)
 
 	end
 
+
 	return texteditor.meta.update(texteditor)
 end
 
@@ -73,14 +77,14 @@ function wtexteditor.pan_skin( oldskin )
 			local cache=pan.texteditor.txt and pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
 			if pan.texteditor.throb and cache then -- draw the blinking cursor
 
-				local cx = 1 + ( cache.cx[pan.texteditor.txt.cx] or 0 ) - pan.texteditor.cx
-				local cy = pan.texteditor.txt.cy - pan.texteditor.cy
-				
 
 				oven.gl.PushMatrix()
 				oven.gl.LoadMatrix(panmtx)
 
-				if cx>=1 and cx<=pan.hx/8 and cy>=1 and cy<=pan.hy/16 then -- visible cursor
+
+				local cx=pan.texteditor.cursor_cx
+				local cy=pan.texteditor.cursor_cy
+				if cx and cy and cx>=1 and cx<=pan.hx/8 and cy>=1 and cy<=pan.hy/16 then -- visible cursor
 
 					local x,y,hx,hy=pan.px,pan.py,pan.hx,pan.hy
 
@@ -120,7 +124,7 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 
 	if act=="txt_changed" then
 
-		if widget.gutter_disable then
+		if widget.opts.gutter_disable then
 			widget.gutter=0
 		else
 			widget.gutter=#string.format(" %d   ",widget.hy)
@@ -146,8 +150,11 @@ end
 
 wtexteditor.texteditor_refresh=function(widget)
 
+
 	local pan=widget.scroll_widget.pan
 	local txt=widget.txt
+
+	widget.last_refresh_pan_hx=pan.hx
 
 	pan.lines={}
 	
@@ -157,16 +164,26 @@ wtexteditor.texteditor_refresh=function(widget)
 	widget.cx=cx -- remember the scroll positions in characters
 	widget.cy=cy
 
+	local cursor_x = 0
+	local cursor_y = 0
+	local cache=pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
+	if cache then
+		cursor_x = 1 + ( cache.cx[pan.texteditor.txt.cx] or 0 )
+		cursor_y = pan.texteditor.txt.cy
+	end
+
 	pan.background_tile=0x00010000 -- default tile, remember it is abgr so backwards
 
+	local wy=1
 	for y=cy+1,cy+256 do
 		local ps={}
 		local pl=0
+		local sx=cx
 
 		local cache=widget.txt.get_cache_lex(y)
 		if cache then
 
-			if not widget.gutter_disable then
+			if not widget.opts.gutter_disable then
 
 				local vn=tostring(y)
 				vn=string.rep(" ",widget.gutter-3-#vn)..vn.." "
@@ -194,6 +211,12 @@ wtexteditor.texteditor_refresh=function(widget)
 			end
 
 			for x=cx,cx+512 do
+
+				if cursor_x-1 == x and cursor_y == y then
+					widget.cursor_cx=x-sx+1
+					widget.cursor_cy=wy
+				end
+
 				if pl>=512*3 then break end -- max width
 				local i=cache.xc[x]
 				if not i then break end -- max width
@@ -227,10 +250,37 @@ wtexteditor.texteditor_refresh=function(widget)
 					if flip then ps[pl+3],ps[pl+4] = ps[pl+4],ps[pl+3] end
 				end
 				pl=pl+4
+
+				if widget.opts.word_wrap then
+					local pmax=(math.floor(pan.hx/8)-1)*4
+					if pmax > (widget.gutter*4) and pl > pmax then -- wrap
+					
+						local s=string.char(unpack(ps))
+						pan.lines[wy]={text=v,s=s,y=y,x=sx}
+						wy=wy+1
+
+						ps={}
+						pl=0
+						sx=x+1
+
+						if not widget.opts.gutter_disable then
+							for i=1,widget.gutter do
+								ps[pl+1]=32
+								ps[pl+2]=0
+								ps[pl+3]=1
+								ps[pl+4]=0
+								pl=pl+4
+							end
+						end
+
+					end
+				end
+
 			end
 		end
 		local s=string.char(unpack(ps))
-		pan.lines[y-cy]={text=v,s=s}
+		pan.lines[wy]={text=v,s=s,y=y,x=sx}
+		wy=wy+1
 	end
 
 end
@@ -288,10 +338,18 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	local py=math.floor(pan.pan_py/16)
 	
 	local x,y=pan:mousexy(_x,_y)
+
+
 	local dx,dy=math.floor(x/8),math.floor(y/16)
 	
 	dx=dx-texteditor.gutter+1
 	dy=dy+1
+
+	local line=pan.lines[ dy - texteditor.cy]
+	if line then
+		dy=line.y
+		dx=line.x+dx
+	end
 	
 	local cache=txt.get_cache( dy )
 	if cache then
@@ -499,7 +557,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 
 
-	if not texteditor.readonly then -- allow changes
+	if not texteditor.opts.readonly then -- allow changes
 
 		if ascii and ascii~="" then -- not a blank string
 
@@ -606,6 +664,15 @@ end
 
 
 function wtexteditor.setup(widget,def)
+
+
+-- options about how we behave
+
+	local opts=def.opts or {}
+	widget.opts={}
+	widget.opts.readonly		=	opts.readonly
+	widget.opts.gutter_disable	=	opts.gutter_disable
+	widget.opts.word_wrap		=	opts.word_wrap
 
 	widget.class="texteditor"
 	
