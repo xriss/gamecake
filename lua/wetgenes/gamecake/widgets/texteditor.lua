@@ -150,6 +150,8 @@ end
 
 wtexteditor.texteditor_refresh=function(widget)
 
+	widget.cursor_cx=nil
+	widget.cursor_cy=nil
 
 	local pan=widget.scroll_widget.pan
 	local txt=widget.txt
