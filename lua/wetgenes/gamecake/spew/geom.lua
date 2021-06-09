@@ -501,6 +501,35 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		return it
 	end
 
+
+	M.merge_points_by_pos=function(it,snap)
+
+		local hash={} -- map string to
+		local map={} -- map old points to new points
+		local verts={}
+		local idx=1
+		for iv,vv in ipairs(it.verts) do
+			if snap then
+				vv[1]=math.floor(0.5+(vv[1]/snap))*snap
+				vv[2]=math.floor(0.5+(vv[2]/snap))*snap
+				vv[3]=math.floor(0.5+(vv[3]/snap))*snap
+			end
+			local s=vv[1]..","..vv[2]..","..vv[3]
+			if not hash[s] then
+				hash[s]=idx
+				verts[idx]=vv
+				idx=idx+1
+			end
+			map[iv]=hash[s]
+		end
+		it.verts=verts -- new verts
+		for ip,vp in ipairs(it.polys) do
+			for i=1,#vp do
+				vp[i] = map[ vp[i] ] -- change vert indexs
+			end
+		end
+	end
+
 	M.build_tangents=function(it)
 
 -- reset tangents

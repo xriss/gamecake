@@ -268,6 +268,295 @@ function array.zero(it)
 	return it
 end
 
+--[[#lua.wetgenes.tardis.array.min
+
+	r=it:min()
+
+Return a single number value that is the minimum of all values in this array.
+
+]]
+function array.min(it)
+	return math.min(unpack(it))
+end
+
+--[[#lua.wetgenes.tardis.array.max
+
+	r=it:max()
+
+Return a single number value that is the maximum of all values in this array.
+
+]]
+function array.max(it)
+	return math.max(unpack(it))
+end
+
+
+--[[#lua.wetgenes.tardis.array.add
+
+	r=it:add(b,r)
+	r=it:add(b,it.new())
+
+Add b to it. b may be a number or another array of the same size as this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.add(it,b,r)
+	r=r or it
+	if type(p=="number") then
+		for i=1,#it do r[i]= it[i] + b end
+	else
+		for i=1,#it do r[i]= it[i] + b[i] end
+	end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.sub
+
+	r=it:sub(b,r)
+	r=it:sub(b,it.new())
+
+Subtract b from it. b may be a number or another array of the same size as this
+array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.sub(it,b,r)
+	r=r or it
+	if type(p=="number") then
+		for i=1,#it do r[i]= it[i] - b end
+	else
+		for i=1,#it do r[i]= it[i] - b[i] end
+	end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.fract
+
+	r=it:fract(r)
+	r=it:fract(it.new())
+
+Return the fractional part of each value using math.modf.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.fract(it,r)
+	r=r or it
+	for i=1,#it do local a,b=math.modf( it[i] ) ; r[i]=b end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.pow
+
+	r=it:pow(p,r)
+	r=it:pow(p,it.new())
+
+Perform math.pow(it,p) on all values of this array. p may be a number or
+another array of the same size as this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.pow(it,p,r)
+	r=r or it
+	if type(p=="number") then
+		for i=1,#it do r[i]= it[i] ^ p end
+	else
+		for i=1,#it do r[i]= it[i] ^ p[i] end
+	end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.log
+
+	r=it:log(r)
+	r=it:log(it.new())
+
+Perform math.log on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.log(it,p,r)
+	r=r or it
+	for i=1,#it do r[i]=math.log(it[i]) end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.exp
+
+	r=it:exp(r)
+	r=it:exp(it.new())
+
+Perform math.exp on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.exp(it,p,r)
+	r=r or it
+	for i=1,#it do r[i]=math.exp(it[i]) end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.abs
+
+	r=it:abs(r)
+	r=it:abs(it.new())
+
+Perform math.abs on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.abs(it,r)
+	r=r or it
+	for i=1,#it do r[i]=math.abs(it[i]) end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.floor
+
+	r=it:floor(r)
+	r=it:floor(it.new())
+
+Perform math.floor on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.floor(it,r)
+	r=r or it
+	for i=1,#it do r[i]=math.floor(it[i]) end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.ceil
+
+	r=it:ceil(r)
+	r=it:ceil(it.new())
+
+Perform math.ceil on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.ceil(it,r)
+	r=r or it
+	for i=1,#it do r[i]=math.ceil(it[i]) end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.sin
+
+	r=it:sin(r)
+	r=it:sin(it.new())
+
+Perform math.sin on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.sin(it,r)
+	r=r or it
+	for i=1,#it do r[i]=math.sin(it[i]) end
+	return r
+end
+--[[#lua.wetgenes.tardis.array.asin
+
+	r=it:asin(r)
+	r=it:asin(it.new())
+
+Perform math.asin on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.asin(it,r)
+	r=r or it
+	for i=1,#it do r[i]=math.asin(it[i]) end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.cos
+
+	r=it:cos(r)
+	r=it:cos(it.new())
+
+Perform math.cos on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.cos(it,r)
+	r=r or it
+	for i=1,#it do r[i]=math.cos(it[i]) end
+	return r
+end
+--[[#lua.wetgenes.tardis.array.acos
+
+	r=it:acos(r)
+	r=it:acos(it.new())
+
+Perform math.acos on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.acos(it,r)
+	r=r or it
+	for i=1,#it do r[i]=math.acos(it[i]) end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.tan
+
+	r=it:tan(r)
+	r=it:tan(it.new())
+
+Perform math.tan on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.tan(it,r)
+	r=r or it
+	for i=1,#it do r[i]=math.tan(it[i]) end
+	return r
+end
+--[[#lua.wetgenes.tardis.array.atan
+
+	r=it:atan(r)
+	r=it:atan(it.new())
+
+Perform math.atan on all values of this array.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.atan(it,r)
+	r=r or it
+	for i=1,#it do r[i]=math.atan(it[i]) end
+	return r
+end
+
 --[[#lua.wetgenes.tardis.array.scalar
 
 	r=a:scalar(s,r)
