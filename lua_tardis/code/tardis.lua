@@ -1692,12 +1692,16 @@ end
 
 Adjust the length of this vector to 1.
 
+An input length of 0 will remain at 0.
+
 If r is provided then the result is written into r and returned 
 otherwise v2 is modified and returned.
 
 ]]
 function v2.normalize(it,r)
-	return v2.scale(it,1/v2.len(it),r)
+	local l=v2.len(it)
+	if l>0 then l=1/l end 
+	return v2.scale(it,l,r)
 end
 
 --[[#lua.wetgenes.tardis.v2.add
@@ -1875,12 +1879,16 @@ end
 
 Adjust the length of this vector to 1.
 
+An input length of 0 will remain at 0.
+
 If r is provided then the result is written into r and returned 
 otherwise v3 is modified and returned.
 
 ]]
 function v3.normalize(it,r)
-	return v3.scale(it,1/v3.len(it),r)
+	local l=v3.len(it)
+	if l>0 then l=1/l end 
+	return v3.scale(it,l,r)
 end
 
 --[[#lua.wetgenes.tardis.v3.add
@@ -2082,12 +2090,16 @@ end
 
 Adjust the length of this vector to 1.
 
+An input length of 0 will remain at 0.
+
 If r is provided then the result is written into r and returned 
 otherwise v4 is modified and returned.
 
 ]]
 function v4.normalize(it,r)
-	return v4.scale(it,1/v4.len(it),r)
+	local l=v4.len(it)
+	if l>0 then l=1/l end 
+	return v4.scale(it,l,r)
 end
 
 --[[#lua.wetgenes.tardis.v4.add
