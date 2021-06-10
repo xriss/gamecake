@@ -141,7 +141,6 @@ M.sdf_to_geom=function(_sdf,siz,rez)
 	print(#obj.verts,#obj.polys)
 
 	local tiny=1/256
-	local tinytiny=tiny*tiny
 	local shrink_wrap=function()
 		for iv,vv in ipairs(obj.verts) do
 			local va=V3(vv[1],vv[2],vv[3])
@@ -150,13 +149,11 @@ M.sdf_to_geom=function(_sdf,siz,rez)
 			n[1]=n[1]-sdf(V3(vv[1]-tiny,vv[2],vv[3]))
 			n[2]=n[2]-sdf(V3(vv[1],vv[2]-tiny,vv[3]))
 			n[3]=n[3]-sdf(V3(vv[1],vv[2],vv[3]-tiny))
-			if n:lenlen()>tinytiny then
-				n:normalize()
-				local s=-1*b
-				vv[1]=vv[1]+(n[1]*s)
-				vv[2]=vv[2]+(n[2]*s)
-				vv[3]=vv[3]+(n[3]*s)
-			end
+			n:normalize()
+			local s=-1*b
+			vv[1]=vv[1]+(n[1]*s)
+			vv[2]=vv[2]+(n[2]*s)
+			vv[3]=vv[3]+(n[3]*s)
 		end
 	end
 
@@ -254,13 +251,13 @@ M.sdf_to_geom=function(_sdf,siz,rez)
 	obj:build_normals()
 	shrink_wrap()
 
-	for i=1,4 do
+	for i=1,2 do
 		measure_springs()
 		apply_springs()
+		obj:build_normals()
+		shrink_wrap()
 	end
 
-	obj:build_normals()
-	shrink_wrap()
 
 	split_quads()
 
