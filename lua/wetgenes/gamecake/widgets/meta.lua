@@ -104,7 +104,7 @@ function wmeta.setup(def)
 --
 -- add a new widget as a child to this one
 --
-	function meta.add(parent,...)		
+	function meta.add(parent,...) -- could supply multiple, but probably just one at a time
 		local ret
 		for i,def in pairs{...} do
 			local widget={}
@@ -115,6 +115,9 @@ function wmeta.setup(def)
 			widget:setup(def)
 			widget.meta=meta
 			ret=ret or widget
+			for i,v in ipairs(def) do -- sub add
+				(ret.children or ret):add(v)
+			end
 		end
 		return ret -- return the first widget added
 	end
@@ -180,7 +183,8 @@ function wmeta.setup(def)
 --def
 	function meta.setup(widget,def)
 	
-		for a,b in pairs(def) do widget[a]=b end -- auto copy everything, then change below
+		for a,b in pairs(def) do if type(a)=="string" then widget[a]=b end end -- shallow copy every string value
+		if type(widget.class)=="function" then widget.class(widget) end -- allow callback to fill in more values
 	
 		widget.state=widget.state or "none"
 		

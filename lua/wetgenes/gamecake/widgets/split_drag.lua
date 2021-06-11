@@ -16,9 +16,13 @@ function wsplit_drag.setup(widget,def)
 
 	widget.class="split_drag"
 
-	def.class="split"
-	def.size="full"
-	widget.split=widget:add(def)
+	local sub={}
+	for a,b in pairs(def) do if type(a)=="string" then sub[a]=b end end -- shallow copy every string value
+	sub.class="split"
+	sub.size="full"
+
+	widget.split=widget:add(sub)
+	widget.children=widget.split -- a generic name for subwidget trees to continue down
 
 
 -- build an invisible dragbar so we can drag to resize left and right
