@@ -17,6 +17,8 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 
 if EMCC then
 
+	buildlinkoptions { "-pthread" , "-s PROXY_TO_PTHREAD" , "-Wno-pthreads-mem-growth" }
+
 	linkoptions { "-rdynamic" }
 	
 	linkoptions { "-v" }

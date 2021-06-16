@@ -243,6 +243,7 @@ if EMCC then
 	defines "EMCC"
 
 	buildlinkoptions{
+		"-Wno-pthreads-mem-growth",
 --		"-Wno-warn-absolute-paths",
 --		"-Wno-error-shift-negative-value",
 		"-Wno-long-long",
@@ -255,6 +256,7 @@ if EMCC then
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
 		"-s EXTRA_EXPORTED_RUNTIME_METHODS='[\"cwrap\"]'",
 		"-s WASM=1",
+		"-pthread",
 	}
 
 	linkoptions{
@@ -796,8 +798,8 @@ all_includes=all_includes or {
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 
--- link lanes on nix?
-	{"lua_lanes",		NIX		},
+-- going to need some multithreading
+	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- test glslang?
 	{"lua_glslang",		NIX		},

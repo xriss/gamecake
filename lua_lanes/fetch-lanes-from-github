@@ -1,0 +1,7 @@
+cd `dirname $0`
+
+rm -rf lanes
+git clone --depth 1 https://github.com/LuaLanes/lanes.git
+rm -rf lanes/.git
+
+
