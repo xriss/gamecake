@@ -979,5 +979,7 @@ get the lexxer cache for the given line
 	wtxtundo.construct({},txt)
 
 
+	txt.set_text("\n","")
+	txt.set_lexer()
 	return txt
 end

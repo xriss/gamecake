@@ -27,21 +27,21 @@ function wsplit_drag.setup(widget,def)
 
 -- build an invisible dragbar so we can drag to resize left and right
 
+	local snapit=function(ws)
+		widget.drag.px=math.floor(widget.drag.px)
+		widget.drag.py=math.floor(widget.drag.py)
+	
+		ws.px=math.floor(ws.px)
+		ws.py=math.floor(ws.py)
+		ws.hx=math.ceil(ws.hx)
+		ws.hy=math.ceil(ws.hy)
+
+--			print(ws.px,ws.py,ws.hx,ws.hy,widget.drag.px,widget.drag.py)
+	end
+
 	if widget.split.split_axis=="x" then
 
 		widget.drag=widget:add({style="button",class="drag",px=0,hx=8,size="fully",solid=true,cursor="sizewe",color=def.slide_color}) -- probably invisible
-
-		local snapit=function(ws)
-			widget.drag.px=math.floor(widget.drag.px)
-			widget.drag.py=math.floor(widget.drag.py)
-		
-			ws.px=math.floor(ws.px)
-			ws.py=math.floor(ws.py)
-			ws.hx=math.ceil(ws.hx)
-			ws.hy=math.ceil(ws.hy)
-
---			print(ws.px,ws.py,ws.hx,ws.hy,widget.drag.px,widget.drag.py)
-		end
 
 		local clampit=function()
 			local ws=widget.split[ widget.split.split_order ]

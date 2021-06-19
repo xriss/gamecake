@@ -690,10 +690,22 @@ function wtexteditor.setup(widget,def)
 
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles",color=widget.color})
+
+
+	widget.set_txt=function(txt)
+		if widget.txt then -- remove old hooks
+			widget.txt.hooks.changed=nil
+		end
+		
+		widget.txt=txt
+		widget.txt.hooks.changed=function(txt) return wtexteditor.texteditor_hooks(widget,"txt_changed") end
+
+		wtexteditor.texteditor_hooks(widget,"txt_changed")
+	end
+
+	widget.set_txt( require("wetgenes.txt").construct() )
+
 	
-	widget.txt=require("wetgenes.txt").construct()
-	
-	widget.txt.hooks.changed=function(txt) return wtexteditor.texteditor_hooks(widget,"txt_changed") end
 
 	widget.gutter=0
 	widget.ducts=0
