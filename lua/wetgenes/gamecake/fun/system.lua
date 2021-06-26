@@ -185,6 +185,7 @@ print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 
 	oven.mods["wetgenes.gamecake.mods.snaps"].fbo=system.components.screen.fbo
 	
+	system.is_setup=true
 	return system
 end
 
@@ -209,6 +210,7 @@ system.clean=function()
 	for _,it in ipairs(system.components) do
 		if it.clean then it.clean() end
 	end
+	system.is_setup=false
 end
 
 system.msg=function(m)
