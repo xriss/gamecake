@@ -382,12 +382,14 @@ font.vbs_idx=1
 	
 	function console.print(...)
 
+		if console.linehook then console.linehook(...) end -- send print data here
+
 		if not console.lines then return end -- not setup yet
 		
 		local ts={...}
 		for i=1,#ts do -- deal with nils
 			local s=ts[i]
-			if type(s)~="string" then ts[i]=tostring(wstr.dump(s)) end
+			if type(s)~="string" then ts[i]=tostring(s) end
 		end
 
 		for _,l in ipairs( wstr.smart_wrap( table.concat(ts,"\t") , console.line_width) ) do
