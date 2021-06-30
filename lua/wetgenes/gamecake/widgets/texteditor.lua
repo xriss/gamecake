@@ -7,13 +7,13 @@ local function print(...) _G.print(...) end
 local function dprint(a) print(require("wetgenes.string").dump(a)) end
 
 local wwin=require("wetgenes.win")
-local wstr=require("wetgenes.string")
+local wstring=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local wutf=require("wetgenes.txt.utf")
 
 local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
-local ls=function(...) print(wstr.dump({...})) end
+local ls=function(...) print(wstring.dump({...})) end
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -234,11 +234,11 @@ wtexteditor.texteditor_refresh=function(widget)
 				ps[pl+3]=1
 				ps[pl+4]=0
 				
-				if     toke=="k" then	ps[pl+3]=5  ps[pl+4]=4	-- keyword
-				elseif toke=="g" then	ps[pl+3]=7  ps[pl+4]=6	-- global
-				elseif toke=="c" then	ps[pl+3]=9  ps[pl+4]=8	-- comment
-				elseif toke=="s" then	ps[pl+3]=11	ps[pl+4]=10	-- string
-				elseif toke=="0" then	ps[pl+3]=13	ps[pl+4]=12 -- number
+				if     toke=="k" then	ps[pl+3]=7  ps[pl+4]=6	-- keyword
+				elseif toke=="g" then	ps[pl+3]=9  ps[pl+4]=8	-- global
+				elseif toke=="c" then	ps[pl+3]=11 ps[pl+4]=10	-- comment
+				elseif toke=="s" then	ps[pl+3]=13	ps[pl+4]=12	-- string
+				elseif toke=="0" then	ps[pl+3]=15	ps[pl+4]=14 -- number
 --				elseif toke=="p" then	ps[pl+3]=0x05	-- punctuation
 				end
 
@@ -596,8 +596,7 @@ function wtexteditor.key(pan,ascii,key,act)
 				
 					if wwin.has_clipboard() then -- only if something to paste
 						local s=wwin.get_clipboard()
-						txt.undo.cut()
-						txt.undo.insert(s)
+						txt.undo.replace(s)
 						texteditor:scroll_to_view()
 					end
 
@@ -643,9 +642,52 @@ function wtexteditor.key(pan,ascii,key,act)
 
 				texteditor.float_cx=nil
 
-				txt.undo.cut()
-				txt.undo.insert_char("\t")
-				texteditor:scroll_to_view()
+				if txt.marked() then -- select full lines
+
+					local fy,fx,ty,tx=txt.markget()
+					if tx>1 then ty=ty+1 end
+					txt.mark(fy,0,ty,0)
+
+					if texteditor.key_shift then
+
+						local s=txt.undo.copy()
+						local ls=wstring.split_lines(s)
+						for i=1,#ls do
+							if string.sub(ls[i],1,1)=="\t" then
+								ls[i]=string.sub(ls[i],2)
+							end
+						end
+						s=table.concat(ls)
+
+						txt.undo.replace(s)
+
+						txt.mark(fy,0,ty,0)
+
+						texteditor:scroll_to_view()
+
+					else
+
+						local s=txt.undo.copy()
+						local ls=wstring.split_lines(s)
+						for i=1,#ls do
+							ls[i]="\t"..ls[i]
+						end
+						s=table.concat(ls)
+
+						txt.undo.replace(s)
+
+						txt.mark(fy,0,ty,0)
+
+						texteditor:scroll_to_view()
+
+					end
+
+				else
+
+					txt.undo.insert_char("\t")
+					texteditor:scroll_to_view()
+
+				end
 
 			end
 
@@ -744,20 +786,22 @@ function wtexteditor.setup(widget,def)
 		dark={
 			0xff444444,0xffaaaaaa,	-- text			0,1
 			0xff555555,0xff333333,	-- gutter		2,3
-			0xff444444,0xffdd7733,	-- keyword		4,5
-			0xff444444,0xffddaa33,	-- global		6,7
-			0xff444444,0xff888888,	-- comment		8,9
-			0xff444444,0xff66aa33,	-- string		10,11
-			0xff444444,0xff5599cc,	-- number		12,13
+			0xff333333,0xffbbbbbb,	-- hilite		4,5
+			0xff444444,0xffdd7733,	-- keyword		6,7
+			0xff444444,0xffddaa33,	-- global		8,9
+			0xff444444,0xff888888,	-- comment		10,11
+			0xff444444,0xff66aa33,	-- string		12,13
+			0xff444444,0xff5599cc,	-- number		14,15
 		},
 		lite={
 			0xffaaaaaa,0xff444444,	-- text			0,1
 			0xff777777,0xff999999,	-- gutter		2,3
-			0xffaaaaaa,0xffaa6622,	-- keyword		4,5
-			0xffaaaaaa,0xffcc9922,	-- global		6,7
-			0xffaaaaaa,0xff777777,	-- comment		8,9
-			0xffaaaaaa,0xff559922,	-- string		10,11
-			0xffaaaaaa,0xff4488bb,	-- number		12,13
+			0xffbbbbbb,0xff333333,	-- hilite		4,5
+			0xffaaaaaa,0xffaa6622,	-- keyword		6,7
+			0xffaaaaaa,0xffcc9922,	-- global		8,9
+			0xffaaaaaa,0xff777777,	-- comment		10,11
+			0xffaaaaaa,0xff559922,	-- string		12,13
+			0xffaaaaaa,0xff4488bb,	-- number		14,15
 		},
 	}
 

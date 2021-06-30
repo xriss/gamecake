@@ -257,6 +257,18 @@ M.construct=function(undo,txt)
 		return txt.insert(s)
 	end
 	
+	undo.replace=function(s)
+		local o=txt.copy()
+		if o and #o > 0 then
+			undo.remember(s,wutf.length(o),txt.fy,txt.fx)
+			txt.cut()
+			return txt.insert(s)
+		else
+			undo.remember(s)
+			return txt.insert(s)
+		end
+	end
+
 	undo.insert_newline=function()
 		undo.remember("\n")
 		return txt.insert_newline()

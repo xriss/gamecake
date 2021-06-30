@@ -345,6 +345,22 @@ get current selected area / cursor position
 
 --[[
 
+is 1 or more glyphs currently selected, returns true or false
+
+]]
+	txt.marked=function()
+		if txt.fy and txt.fx and txt.ty and txt.tx then
+			if txt.fy==txt.ty and txt.fx==txt.tx then
+				return false
+			end
+			return true
+		end
+		return false
+	end
+
+
+--[[
+
 merge two marked areas into one
 
 ]]
