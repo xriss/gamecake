@@ -248,19 +248,19 @@ if EMCC then
 --		"-Wno-error-shift-negative-value",
 		"-Wno-long-long",
 		"-Werror",
-		"-s NO_EXIT_RUNTIME=1",
-		"-s ALLOW_MEMORY_GROWTH=1",
 		"-Wno-almost-asm",
 --		"-s ASSERTIONS=1",
 --		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
-		"-s \"BINARYEN_METHOD='native-wasm'\"",
-		"-s EXTRA_EXPORTED_RUNTIME_METHODS='[\"cwrap\"]'",
-		"-s WASM=1",
 		"-pthread",
 	}
 
 	linkoptions{
 		"-as-needed",
+		"-s NO_EXIT_RUNTIME=1",
+		"-s ALLOW_MEMORY_GROWTH=1",
+		"-s \"BINARYEN_METHOD='native-wasm'\"",
+		"-s EXPORTED_RUNTIME_METHODS='[\"cwrap\"]'",
+		"-s WASM=1",
 --		"-s RESERVED_FUNCTION_POINTERS=256",
 --		"-s TOTAL_MEMORY=134217728",			-- 128meg
 		"-s EXPORTED_FUNCTIONS=\"['_main_post']\"",
@@ -698,6 +698,8 @@ elseif EMCC then
 	buildlinkoptions{
 		"-Wno-error=format-security",
 		"-s USE_SDL=2",
+	}
+	linkoptions{
 		"-s FULL_ES3=1",
 		"-s USE_WEBGL2=1",
 		"-s MIN_WEBGL_VERSION=2",
