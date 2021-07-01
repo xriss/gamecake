@@ -256,6 +256,7 @@ if EMCC then
 
 	linkoptions{
 		"-as-needed",
+		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 ",
 		"-s NO_EXIT_RUNTIME=1",
 		"-s ALLOW_MEMORY_GROWTH=1",
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
