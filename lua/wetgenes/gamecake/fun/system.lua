@@ -83,7 +83,7 @@ system.setup=function(code)
 	system.fullscreen_width=screensize.width or 1920
 	system.fullscreen_height=screensize.height or 1080
 
-print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
+--print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 
 	if code then
 
@@ -125,11 +125,10 @@ print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 			system.main=coroutine.create(system.code.main)
 		elseif system.code.hardware then -- hardware only
 			system.hardware=system.code.hardware
-		else -- no hardware , choose picish
-			system.hardware=(system.configurator({mode="picish"})) -- tiny mode
 		end
 		
 		if not system.main then -- the whole file is the coroutine
+			system.hardware={}
 			system.main=co
 		end
 		
@@ -172,7 +171,7 @@ print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 		
 	end
 	
-	assert(system.components.screen,"need a screen component")
+--	assert(system.components.screen,"need a screen component")
 
 -- perform specific setup of used components
 	local opts={
@@ -183,7 +182,9 @@ print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 
 	system.resume({setup=true})
 
-	oven.mods["wetgenes.gamecake.mods.snaps"].fbo=system.components.screen.fbo
+	if system.components.screen then
+		oven.mods["wetgenes.gamecake.mods.snaps"].fbo=system.components.screen.fbo
+	end
 	
 	system.is_setup=true
 	return system
