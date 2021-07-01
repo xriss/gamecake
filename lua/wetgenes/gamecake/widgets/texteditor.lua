@@ -418,6 +418,11 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 end
 
+function wtexteditor.scroll_to_bottom(texteditor)
+	local d=texteditor.scroll_widget.daty
+	d:set(d.max or 1)
+end
+
 function wtexteditor.scroll_to_view(texteditor,cy,cx)
 	local txt=texteditor.txt
 	local pan=texteditor.scroll_widget.pan
@@ -729,6 +734,7 @@ function wtexteditor.setup(widget,def)
 	widget.texteditor_refresh	=	wtexteditor.texteditor_refresh
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
 	widget.scroll_to_view		=	wtexteditor.scroll_to_view
+	widget.scroll_to_bottom		=	wtexteditor.scroll_to_bottom
 
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles",color=widget.color})

@@ -206,6 +206,11 @@ Fill the editor up with text, the filename is used to set the lexer used for hig
 
 	end
 
+	txt.append_text=function(text)
+		txt.clip(txt.hy+1,0)
+		txt.insert(text)
+	end
+
 	txt.get_text=function()
 		return table.concat(txt.strings) or ""
 	end
@@ -345,7 +350,7 @@ get current selected area / cursor position
 
 --[[
 
-is 1 or more glyphs currently selected, returns true or false
+are one or more glyphs currently selected, returns true or false
 
 ]]
 	txt.marked=function()
