@@ -30,11 +30,11 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 284,
+   "count": 413,
    "name": "lua"
   },
   {
-   "count": 3,
+   "count": 5,
    "name": "lua.glslang"
   },
   {
@@ -46,8 +46,116 @@
    "name": "lua.glslang.parse_chunks"
   },
   {
-   "count": 280,
+   "count": 1,
+   "name": "lua.glslang.replace_include"
+  },
+  {
+   "count": 1,
+   "name": "lua.glslang.yank_shader_versions"
+  },
+  {
+   "count": 407,
    "name": "lua.wetgenes"
+  },
+  {
+   "count": 25,
+   "name": "lua.wetgenes.bullet"
+  },
+  {
+   "count": 24,
+   "name": "lua.wetgenes.bullet.world"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.bullet.world.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.active"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.angular_factor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.angular_velocity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.ccd"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.custom_material_callback"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.damping"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.factor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.friction"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.restitution"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.transform"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.velocity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.gravity"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.bullet.world.mesh"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.mesh.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.set"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.bullet.world.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.shape.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.shape.margin"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.step"
   },
   {
    "count": 64,
@@ -307,14 +415,18 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.deepcopy"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 67,
+   "count": 68,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 62,
+   "count": 43,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
@@ -392,82 +504,6 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.fun.chatdown.text"
-  },
-  {
-   "count": 19,
-   "name": "lua.wetgenes.gamecake.fun.entities"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.add"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.call"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.caste"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.find_uid"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.forget_uid"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.generate_uid"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.get"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.manifest"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.remember_uid"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.remove"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.reset"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.set"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.sortby_update"
-  },
-  {
-   "count": 4,
-   "name": "lua.wetgenes.gamecake.fun.entities.systems"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.systems.call"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.systems.insert"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.systems.remove"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.entities.uids"
   },
   {
    "count": 23,
@@ -578,7 +614,87 @@
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 36,
+   "count": 20,
+   "name": "lua.wetgenes.gamecake.zone"
+  },
+  {
+   "count": 19,
+   "name": "lua.wetgenes.gamecake.zone.scene"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.call"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.caste"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.find_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.forget_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.generate_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.remember_uid"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.reset"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.sortby_update"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.zone.scene.systems"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.systems.call"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.systems.insert"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.systems.remove"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.uids"
+  },
+  {
+   "count": 37,
    "name": "lua.wetgenes.grd"
   },
   {
@@ -640,6 +756,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.grd.duplicate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grd.fillmask"
   },
   {
    "count": 1,
@@ -723,6 +843,22 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.grdcanvas"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.grdhistory"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdhistory.history"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.grdlayers"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.grdpaint"
   },
   {
@@ -750,12 +886,112 @@
    "name": "lua.wetgenes.lookup"
   },
   {
+   "count": 15,
+   "name": "lua.wetgenes.midi"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.clients"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.event_to_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.peek"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.port_create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.port_destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.pull"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.push"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.string_to_clientport"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.subscribe"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.midi.unsubscribe"
+  },
+  {
    "count": 2,
    "name": "lua.wetgenes.package"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.package.reload"
+  },
+  {
+   "count": 10,
+   "name": "lua.wetgenes.path"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.currentdir"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.join"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.parent"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.parse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.relative"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.resolve"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.split"
   },
   {
    "count": 4,
@@ -790,12 +1026,32 @@
    "name": "lua.wetgenes.snippets"
   },
   {
-   "count": 94,
+   "count": 140,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 5,
+   "count": 31,
    "name": "lua.wetgenes.tardis.array"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__div"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__eq"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.__sub"
   },
   {
    "count": 1,
@@ -803,7 +1059,71 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.array.__unm"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.abs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.acos"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.asin"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.atan"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.ceil"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.array.compare"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.cos"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.exp"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.floor"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.fract"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.log"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.max"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.min"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.mix"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.pow"
   },
   {
    "count": 1,
@@ -811,7 +1131,27 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.array.scalar"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.array.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.sin"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.sub"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.tan"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.zero"
   },
   {
    "count": 1,
@@ -866,7 +1206,7 @@
    "name": "lua.wetgenes.tardis.m2.transpose"
   },
   {
-   "count": 10,
+   "count": 12,
    "name": "lua.wetgenes.tardis.m3"
   },
   {
@@ -891,6 +1231,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m3.m4"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m3.minor_xy"
   },
   {
@@ -906,7 +1250,11 @@
    "name": "lua.wetgenes.tardis.m3.transpose"
   },
   {
-   "count": 17,
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.v3"
+  },
+  {
+   "count": 29,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -919,11 +1267,19 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.arotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.cofactor"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.determinant"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.get_scale_v3"
   },
   {
    "count": 1,
@@ -939,11 +1295,43 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.m3"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.minor_xy"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prearotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.preqrotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prerotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prescale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.pretranslate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.pretranslate_v3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.qrotate"
   },
   {
    "count": 1,
@@ -971,7 +1359,19 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.translate_v3"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.transpose"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.v3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4_stack"
   },
   {
    "count": 2,
@@ -1007,10 +1407,18 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.smoothstep"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.step"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.type"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.v2"
   },
   {
@@ -1020,6 +1428,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v2.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.distance"
   },
   {
    "count": 1,
@@ -1062,7 +1474,7 @@
    "name": "lua.wetgenes.tardis.v2.sub"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.v3"
   },
   {
@@ -1072,6 +1484,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v3.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.distance"
   },
   {
    "count": 1,
@@ -1114,12 +1530,16 @@
    "name": "lua.wetgenes.tardis.v3.sub"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.v4"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.distance"
   },
   {
    "count": 1,
@@ -1164,6 +1584,102 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.to_v3"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.tsv"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.close"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.flush"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tsv.load"
+  },
+  {
+   "count": 19,
+   "name": "lua.wetgenes.txt"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.txt.diff"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.find"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.match"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.split"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.diff.trim"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.lex"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.lex_js"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.lex_lua"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.undo"
+  },
+  {
+   "count": 9,
+   "name": "lua.wetgenes.txt.utf"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.char"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.charpattern"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.chars"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.length"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.map_latin0_to_unicode"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.map_unicode_to_latin0"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.size"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.utf.string"
   }
  ],
  "_docs_json": {
@@ -1212,42 +1728,250 @@
  "_list": [
   {
    "body": "<p>Array is the base class for all other tardis classes, it is just a \nstream of numbers, probably in a table but possibly a chunk of f32 \nvalues in a userdata.</p>\n",
-   "count": 5,
+   "count": 31,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 112,
+   "line": 117,
    "name": "lua.wetgenes.tardis.array",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r = array.__add(a,b)</code></pre><p>Add a to b and return a a.new(result) so the class returned will match the\ninput class of a and neither a or b will be modified.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 146,
+   "name": "lua.wetgenes.tardis.array.__add",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r = array.__div(a,b)</code></pre><p>Replace b with 1/b and then call the appropriate product function depending on\nthe argument classes. Always creates and returns a.new() value.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 205,
+   "name": "lua.wetgenes.tardis.array.__div",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r = array.__eq(a,b)</code></pre><p>meta to call a:compare(b) and return the result</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 182,
+   "name": "lua.wetgenes.tardis.array.__eq",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r = array.__mul(a,b)</code></pre><p>Call the appropriate product function depending on the argument classes. Always\ncreates and returns a.new() value.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 193,
+   "name": "lua.wetgenes.tardis.array.__mul",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r = array.__sub(a,b)</code></pre><p>Subtract b from a and return a a.new(result) so the class returned will match the\ninput class of a and neither a or b will be modified.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 158,
+   "name": "lua.wetgenes.tardis.array.__sub",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
    "body": "<pre><code>string = array.__tostring(it)</code></pre><p>Convert an array to a string this is called by the lua tostring() function,</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 122,
+   "line": 127,
    "name": "lua.wetgenes.tardis.array.__tostring",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r = array.__unm(a)</code></pre><p>Subtract b from 0 and return a a.new(result) so the class returned will match the\ninput class of a but a will not be modified</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 170,
+   "name": "lua.wetgenes.tardis.array.__unm",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:abs(r)\nr=it:abs(it.new())</code></pre><p>Perform math.abs on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 410,
+   "name": "lua.wetgenes.tardis.array.abs",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:acos(r)\nr=it:acos(it.new())</code></pre><p>Perform math.acos on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 510,
+   "name": "lua.wetgenes.tardis.array.acos",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:add(b,r)\nr=it:add(b,it.new())</code></pre><p>Add b to it. b may be a number or another array of the same size as this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 294,
+   "name": "lua.wetgenes.tardis.array.add",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:asin(r)\nr=it:asin(it.new())</code></pre><p>Perform math.asin on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 477,
+   "name": "lua.wetgenes.tardis.array.asin",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:atan(r)\nr=it:atan(it.new())</code></pre><p>Perform math.atan on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 543,
+   "name": "lua.wetgenes.tardis.array.atan",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:ceil(r)\nr=it:ceil(it.new())</code></pre><p>Perform math.ceil on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 444,
+   "name": "lua.wetgenes.tardis.array.ceil",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
    "body": "<pre><code>a=a:compare(b)\na=a:compare(1,2,3,4)</code></pre><p>Are the numbers in b the same as the numbers in a, this function will \nreturn true if they are and false if they are not.</p>\n<p>If the arrays are of different lengths then this will return false.</p>\n<p>Numbers to test for can be given explicitly in the arguments and we \nfollow the same one level of tables rule as we do with array.set so any \nclass derived from array can be used.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 173,
+   "line": 594,
    "name": "lua.wetgenes.tardis.array.compare",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:cos(r)\nr=it:cos(it.new())</code></pre><p>Perform math.cos on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 494,
+   "name": "lua.wetgenes.tardis.array.cos",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:exp(r)\nr=it:exp(it.new())</code></pre><p>Perform math.exp on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 393,
+   "name": "lua.wetgenes.tardis.array.exp",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:floor(r)\nr=it:floor(it.new())</code></pre><p>Perform math.floor on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 427,
+   "name": "lua.wetgenes.tardis.array.floor",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:fract(r)\nr=it:fract(it.new())</code></pre><p>Return the fractional part of each value using math.modf.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 337,
+   "name": "lua.wetgenes.tardis.array.fract",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:log(r)\nr=it:log(it.new())</code></pre><p>Perform math.log on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 376,
+   "name": "lua.wetgenes.tardis.array.log",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:max()</code></pre><p>Return a single number value that is the maximum of all values in this array.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 282,
+   "name": "lua.wetgenes.tardis.array.max",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:min()</code></pre><p>Return a single number value that is the minimum of all values in this array.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 271,
+   "name": "lua.wetgenes.tardis.array.min",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=a:mix(b,s,r)</code></pre><p>Mix values between a and b where a is returned if s&lt;=0 and b is returned if s&gt;=1</p>\n<p>If r is provided then the result is written into r and returned otherwise a is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 576,
+   "name": "lua.wetgenes.tardis.array.mix",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:pow(p,r)\nr=it:pow(p,it.new())</code></pre><p>Perform math.pow(it,p) on all values of this array. p may be a number or\nanother array of the same size as this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 354,
+   "name": "lua.wetgenes.tardis.array.pow",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
    "body": "<pre><code>ma = ma:product(mb)\nma = ma:product(mb,r)</code></pre><p>Look at the type and call the appropriate product function, to produce </p>\n<pre><code>mb x ma</code></pre><p>Note the right to left application and default returning of the \nleftmost term for chaining. This seems to make the most sense.</p>\n<p>If r is provided then the result is written into r and returned \notherwise ma is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 205,
+   "line": 626,
    "name": "lua.wetgenes.tardis.array.product",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
-   "body": "<pre><code>a=a:set(1,2,3,4)\na=a:set({1,2,3,4})\na=a:set({1,2},{3,4})</code></pre><p>Assign some numbers to an array, all the above examples will assign \n1,2,3,4 to the first four slots in the given array, as you can see we \nallow one level of tables. Any class that is based on this array \nclass can be used instead of an explicit table. So we can use a v2 or v3 or m4 etc etc.</p>\n<p>if more numbers are given than the size of the array then they will be \nignored.</p>\n",
+   "body": "<pre><code>r=a:scalar(s,r)</code></pre><p>Multiply all value in array by number.</p>\n<p>If r is provided then the result is written into r and returned otherwise a is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 141,
+   "line": 560,
+   "name": "lua.wetgenes.tardis.array.scalar",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>a=a:set(1,2,3,4)\na=a:set({1,2,3,4})\na=a:set({1,2},{3,4})</code></pre><p>Assign some numbers to an array, all the above examples will assign 1,2,3,4 to\nthe first four slots in the given array, as you can see we allow one level of\ntables. Any class that is based on this array class can be used instead of an\nexplicit table. So we can use a v2 or v3 or m4 etc etc.</p>\n<p>if more numbers are given than the size of the array then they will be \nignored.</p>\n<p>if less numbers are given than the size of the array then the last number will\nbe repeated.</p>\n<p>if no numbers are given then nothing will be done</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 217,
    "name": "lua.wetgenes.tardis.array.set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:sin(r)\nr=it:sin(it.new())</code></pre><p>Perform math.sin on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 461,
+   "name": "lua.wetgenes.tardis.array.sin",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:sub(b,r)\nr=it:sub(b,it.new())</code></pre><p>Subtract b from it. b may be a number or another array of the same size as this\narray.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 315,
+   "name": "lua.wetgenes.tardis.array.sub",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>r=it:tan(r)\nr=it:tan(it.new())</code></pre><p>Perform math.tan on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 527,
+   "name": "lua.wetgenes.tardis.array.tan",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>a=a:zero()</code></pre><p>Set all values in this array to zero.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 259,
+   "name": "lua.wetgenes.tardis.array.zero",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
  ],
@@ -1263,7 +1987,7 @@
  "head": "<title>{title}</title>\n<meta name=\"theme-color\" content=\"#2a3133\">\n<link href=\"https://fonts.googleapis.com/css?family=Patua+One\" rel=\"stylesheet\">\n<style>\n{css}\n</style>",
  "html": "<html>\n\t<head>\n\t\t<title>{title}</title>\n\t\t<link href=\"https://fonts.googleapis.com/css?family=Patua+One\" rel=\"stylesheet\">\n\t\t<link rel='stylesheet' href='{_docs_json.dirname}/docs.css' />\n\t</head>\n\t<body>{nav}{body}</body>\n</html>\n",
  "menuwrap": "{_it:menuwrap_link}",
- "menuwrap_link": "{_it.count>1&&_it:menuwrap_link2}\n{_it.count==1&&_it:menuwrap_link1}",
+ "menuwrap_link": "{_it.count>1&&_it:menuwrap_link2||}\n{_it.count==1&&_it:menuwrap_link1||}",
  "menuwrap_link1": "<a class=\"sub\" href=\"{_docs_json.dirname}/{_it.name}\"><span>/{_it.name}</span></a>",
  "menuwrap_link2": "<a class=\"par\" href=\"{_docs_json.dirname}/{_it.name}\"><span>/{_it.name}</span></a>",
  "nav": "<div class=\"nav_wrap\">\n\t<div class=\"nav\">\n\t\t<a href=\"{_root}\" class=\"logo\">Gamecake</a>\n\t\t<ul>\n\t\t\t<li><a href=\"https://github.com/xriss/gamecake\">Github</a></li>\n\t\t\t<li><a href=\"{_root}blog\">Blog</a></li>\n\t\t\t<li><a href=\"{_root}docs\">Documentation</a></li>\n\t\t</ul>\n\t</div>\n</div>\n",
