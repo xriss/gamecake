@@ -3,26 +3,17 @@ cd `dirname $0`
 git pull origin master
 git checkout master
 
-git submodule update --init --reference .
-
-git pull --recurse-submodules && git submodule update --recursive --remote
-
 plated/upgrade
 
-echo " fixing local exe branch to track origin "
-cd exe
-git stash -u
-git reset --hard origin/exe
-git branch -f --track exe origin/exe
-git checkout exe
-cd ..
 
-echo " fixing local docs branch to track origin "
-cd docs
-git stash -u
-git reset --hard origin/gh-pages
+echo " exe worktree to track exe branch "
+git branch -f --track exe origin/exe
+git worktree add exe exe
+
+
+echo " docs worktree to track gh-pages branch "
 git branch -f --track gh-pages origin/gh-pages
-git checkout gh-pages
-cd ..
+git worktree add docs gh-pages
+
 
 ./create-file-links

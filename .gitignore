@@ -1,6 +1,6 @@
 
-docs/*
-exe/*
+docs
+exe
 dbg/*
 
 *.vagrant
