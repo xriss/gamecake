@@ -17,9 +17,11 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 
 if EMCC then
 
+	files { "./lua.c" }
+
 	buildlinkoptions { "-pthread" , "-Wno-pthreads-mem-growth" }
 
---	linkoptions { "-s PROXY_TO_PTHREAD" }
+	linkoptions { "-s PROXY_TO_PTHREAD" }
 
 	linkoptions { "-rdynamic" }
 	

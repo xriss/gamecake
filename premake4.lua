@@ -256,15 +256,16 @@ if EMCC then
 
 	linkoptions{
 		"-as-needed",
+		"--emrun",
 		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 ",
-		"-s NO_EXIT_RUNTIME=1",
+--		"-s NO_EXIT_RUNTIME=1",
 		"-s ALLOW_MEMORY_GROWTH=1",
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
-		"-s EXPORTED_RUNTIME_METHODS='[\"cwrap\"]'",
+		"-s EXPORTED_RUNTIME_METHODS=\"['cwrap']\"",
 		"-s WASM=1",
 --		"-s RESERVED_FUNCTION_POINTERS=256",
 --		"-s TOTAL_MEMORY=134217728",			-- 128meg
-		"-s EXPORTED_FUNCTIONS=\"['_main_post']\"",
+		"-s EXPORTED_FUNCTIONS=\"['_main_post','_main']\"",
 	}
 	
 	platforms { "emcc" }
