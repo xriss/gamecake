@@ -242,18 +242,25 @@ if EMCC then
 
 	defines "EMCC"
 
-	buildlinkoptions{
+--[[
+	buildlinkoptions {
+		"-pthread",
 		"-Wno-pthreads-mem-growth",
+	}
+	linkoptions{
+		"-s PROXY_TO_PTHREAD",
+	}
+]]
+
+	buildlinkoptions{
 		"-Wno-long-long",
 		"-Werror",
 		"-Wno-almost-asm",
-		"-pthread",
 	}
 
 	linkoptions{
 		"-as-needed",
 		"--emrun",
-		"-s PROXY_TO_PTHREAD",
 		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 ",
 		"-s ALLOW_MEMORY_GROWTH=1",
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
@@ -797,7 +804,7 @@ all_includes=all_includes or {
 	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 
 -- going to need some multithreading
-	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_lanes",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
 
 -- test glslang?
 	{"lua_glslang",		NIX		},

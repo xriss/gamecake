@@ -19,8 +19,6 @@ if EMCC then
 
 	files { "./lua.c" }
 
-	buildlinkoptions { "-pthread" }
-
 	linkoptions { "-rdynamic" }
 	
 	linkoptions { "-v" }
