@@ -244,27 +244,21 @@ if EMCC then
 
 	buildlinkoptions{
 		"-Wno-pthreads-mem-growth",
---		"-Wno-warn-absolute-paths",
---		"-Wno-error-shift-negative-value",
 		"-Wno-long-long",
 		"-Werror",
 		"-Wno-almost-asm",
---		"-s ASSERTIONS=1",
---		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
 		"-pthread",
 	}
 
 	linkoptions{
 		"-as-needed",
 		"--emrun",
+		"-s PROXY_TO_PTHREAD",
 		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 ",
---		"-s NO_EXIT_RUNTIME=1",
 		"-s ALLOW_MEMORY_GROWTH=1",
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
 		"-s EXPORTED_RUNTIME_METHODS=\"['cwrap']\"",
 		"-s WASM=1",
---		"-s RESERVED_FUNCTION_POINTERS=256",
---		"-s TOTAL_MEMORY=134217728",			-- 128meg
 		"-s EXPORTED_FUNCTIONS=\"['_main_post','_main']\"",
 	}
 	
