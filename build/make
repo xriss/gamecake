@@ -196,7 +196,15 @@ cd ${buildhere}
 
 
 
+if [ "$*" = "clean" ] ; then
+
+make -j$jobs $makeopts clean
+make -j$jobs $makeopts
+
+else
+
 make -j$jobs $makeopts $*
 
+fi
 
 
