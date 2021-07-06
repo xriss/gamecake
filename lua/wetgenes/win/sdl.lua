@@ -81,6 +81,11 @@ sdl.create=function(t)
 	sdl.it=it
 	
 	local flags={ SDL.window.Resizable , SDL.window.OpenGL }
+
+	if not t.border then
+		flags[#flags+1]=SDL.window.Borderless
+	end
+	
 --[[
 	if     view=="full" then	 flags={SDL.window.Desktop,SDL.window.OpenGL}
 	elseif view=="max"  then	 flags={SDL.window.Maximized,SDL.window.OpenGL}
@@ -95,6 +100,20 @@ sdl.create=function(t)
 		x       = t.x,
 		y       = t.y,
 	})
+
+	if not t.border then
+
+		require("wetgenes.win.core").sdl_attach_resize_hax(it.win)
+
+--[[
+		it.win:setHitTest(function(...)
+
+			print(...)
+
+		end)
+]]
+
+	end
 	
 	return it
 end

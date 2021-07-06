@@ -212,7 +212,8 @@ os.exit()
 			end
 
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
-				console=opts.args.console} -- add --console to commandline to keep console open
+				console=opts.args.console,		-- use --console on commandline to keep console open
+				border=opts.args.border}		-- use --border  on commandline to keep window borders
 			local screen=wwin.screen()
 
 			inf.name=opts.class_name or opts.title
@@ -254,6 +255,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 	
 			local doshow=opts.show or "win" -- default window display
 			if opts.args.windowed   then doshow="win" end
+			if opts.args.borderless then doshow="less" end
 			if opts.args.fullscreen then doshow="full" end
 			if opts.args.maximised  then doshow="max" end
 			if doshow then oven.win:show(doshow) end
