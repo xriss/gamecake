@@ -2,6 +2,8 @@
 -- (C) 2013 Kriss@XIXs.com
 --
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local wsutil=require("wetgenes.spew.util")
 local wstr=require("wetgenes.string")
 
@@ -62,9 +64,9 @@ function M.create(client)
 	function client.setup()
 		client.con=packets.setup( socket.connect(client.host,client.port) , {format="spew"} ) -- connect
 		if not client.con then
-			print( "failed to connect to "..client.host )
+			log("spew", "failed to connect to "..client.host )
 		else
-			if client.con.error then print(client.con.error) end
+			if client.con.error then log("spew",client.con.error) end
 		end
 		return client
 	end

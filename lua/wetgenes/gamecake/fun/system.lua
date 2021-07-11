@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 -- Main Good Luck Have Fun system virtual machine management.
 
 
@@ -162,7 +164,7 @@ system.setup=function(code)
 		
 		if it then
 
-			print("hardware : ",v.component,v.name or v.component)
+			log("fun","hardware : ",v.component,v.name or v.component)
 		
 			system.components[#system.components+1]=it
 			system.components[it.name or it.component]=it	-- link by name
@@ -408,8 +410,8 @@ system.save_fun_png=function(name,path)
 	local dsize=#dstr+12 -- header size is 12
 	local dh=math.ceil(dsize/(hx*4))
 	
-	print(0,0,0,hx,hy,"BITMAP")
-	print(0,0,0,hx,dh,"DATA",dsize)
+	log("fun",0,0,0,hx,hy,"BITMAP")
+	log("fun",0,0,0,hx,dh,"DATA",dsize)
 	
 	local g=wgrd.create("U8_RGBA", hx , hy+dh , 1)
 	g:clear(0xff000000) -- start with a solid black
@@ -443,7 +445,7 @@ system.save_fun_png=function(name,path)
 	-- add each component ( some pixels will now be transparent
 	for i,it in ipairs(its) do
 		g:pixels(it.px,it.py,it.hx,it.hy, it.grd )
-		print(i,it.px,it.py,it.hx,it.hy,it.component.name)
+		log("fun",i,it.px,it.py,it.hx,it.hy,it.component.name)
 	end
 
 	-- draw box around area

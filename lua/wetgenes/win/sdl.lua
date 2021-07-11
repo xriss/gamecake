@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 -- do a reverse enum lookup, get a name from a value
 local lookup=function(tab,num)
 	for n,v in pairs(tab) do
@@ -219,9 +221,9 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 	
 	
 	local gles=require("gles")
-	print( "GL_VENDOR   = "..(gles.Get(gles.VENDOR) or ""))
-	print( "GL_RENDERER = "..(gles.Get(gles.RENDERER) or ""))
-	print( "GL_VERSION  = "..(gles.Get(gles.VERSION) or ""))
+	log( "oven","vendor",(gles.Get(gles.VENDOR) or ""))
+	log( "oven","render",(gles.Get(gles.RENDERER) or ""))
+	log( "oven","version",(gles.Get(gles.VERSION) or ""))
 	
 	return it.ctx
 end
@@ -259,7 +261,7 @@ sdl.peek=function()
 end
 
 sdl.wait=function()
-	print("SDL wait")
+	log("sdl","wait")
 	return nil
 end
 

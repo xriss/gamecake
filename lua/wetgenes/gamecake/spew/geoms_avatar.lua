@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local wpack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
@@ -231,9 +233,9 @@ M.bake=function(oven,geoms_avatar)
 		geoms_avatar.gltf=wgeom_gltf.load(geoms_avatar.filename)
 		geoms_avatar.objs=wgeom_gltf.to_geoms(geoms_avatar.gltf)
 		
-		print(#geoms_avatar.objs.anims)
+		log("avatar",#geoms_avatar.objs.anims)
 		for i,v in ipairs(geoms_avatar.objs.anims) do
-			print("avatar anim :",i,math.floor(v.min*24),math.floor(v.max*24),v.name)
+			log("avatar","anim",i,math.floor(v.min*24),math.floor(v.max*24),v.name)
 		end		
 
 		geoms_avatar.build_texture_anims()
@@ -635,7 +637,7 @@ void main(void)
 
 			end
 			
-			print(anim.name,#fs)
+			log("avatar",anim.name,#fs)
 			
 			geoms_avatar.bonetexs[anim.name]=textures.create({
 				id="avatar/bonetexs/"..anim.name,

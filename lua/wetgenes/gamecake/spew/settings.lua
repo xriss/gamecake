@@ -43,7 +43,7 @@ M.bake=function(oven,settings)
 -- load all profile data
 	function settings.load()
 		if lfs then
-print("Loading "..settings.filename)
+log("oven","Loading "..settings.filename)
 			local fp=io.open(settings.filename,"r")
 			if fp then
 				local s=fp:read("*all")
@@ -62,7 +62,7 @@ print("Loading "..settings.filename)
 -- save all profile data
 	function settings.save()
 		if lfs then
-print("Saving "..settings.filename)
+log("oven","Saving "..settings.filename)
 			local fp=io.open(settings.filename,"w")
 			fp:write(wstr.serialize(ss))
 			fp:close()

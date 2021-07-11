@@ -3,6 +3,9 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
+
 local wwin=require("wetgenes.win") -- system independent helpers
 local wstr=require("wetgenes.string")
 local wsbox=require("wetgenes.sandbox")
@@ -40,7 +43,7 @@ M.bake=function(oven,scores)
 -- load all scores data
 	function scores.load()
 		if lfs then
-print("Loading "..scores.filename)
+log("oven","Loading "..scores.filename)
 			local fp=io.open(scores.filename,"r")
 			if fp then
 				local s=fp:read("*all")
@@ -56,7 +59,7 @@ print("Loading "..scores.filename)
 -- save all scores data
 	function scores.save()
 		if lfs then
-print("Saving "..scores.filename)
+log("oven","Saving "..scores.filename)
 			local fp=io.open(scores.filename,"w")
 			fp:write(wstr.serialize(ss))
 			fp:close()

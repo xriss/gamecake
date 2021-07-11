@@ -4,6 +4,8 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 local gcinfo=gcinfo
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local hex=function(str) return tonumber(str,16) end
 
 local pack=require("wetgenes.pack")
@@ -64,7 +66,7 @@ function M.bake(oven,snaps)
 	
 	function snaps.save()
 		local name=os.date("%Y%m%d_%H%M%S")
-print("Snaps "..wwin.files_prefix.."snaps/"..name..".png")
+log("snap",wwin.files_prefix.."snaps/"..name..".png")
 		local g=snaps.get_grd()
 		g:save(wwin.files_prefix.."snaps/"..name..".png")
 	end
@@ -100,7 +102,7 @@ if lfs then -- shove files in dir
 end
 				local g=snaps.get_grd()
 				local path=wwin.files_prefix.."snaps/"..name..".png"
-print("Auto "..path)
+log("snap","Auto "..path)
 				assert(g:save(path))
 				snaps.list[#snaps.list+1]=path
 
@@ -158,14 +160,14 @@ if snaps.encode_gif then
 
 		for i,v in ipairs(snaps.list) do
 			
-			print("frame",v)
+			log("snap","frame",v)
 
 			local g=wgrd.create(v)
 			g:remap(gb)
 
 			stream.write(gb)
 		end
-		print("GIF",wwin.files_prefix.."snaps/"..snaps.auto..".gif")
+		log("snap","GIF",wwin.files_prefix.."snaps/"..snaps.auto..".gif")
 
 		stream.close(gb)
 end

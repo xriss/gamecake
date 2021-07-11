@@ -1,0 +1,120 @@
+--
+-- (C) 2021 Kriss@XIXs.com
+--
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+local wtsv=require("wetgenes.tsv")
+
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+local logs = M
+
+logs.export=function(env,...)
+	local tab={...} ; for i=1,#tab do tab[i]=env[ tab[i] ] end
+	return unpack(tab)
+end
+
+logs.allow=nil -- put a table here to enable whitelist
+
+logs.deny={
+	oven=true,
+}
+
+logs.log = function(mode,...)
+
+	if type(mode)~="string" then return end
+	if logs.allow and ( not M.allow[ mode ] ) then return end
+	if logs.deny[ mode ] then return end
+
+	print( mode , ... )
+
+end
+
+-- show full table contents
+
+logs.dump = function(...)
+	logs.log( "dump" , logs.tostring(...) )
+end
+
+local logstring
+
+logs.tostring = function(...)
+	local tab={...} ; for i=1,#tab do tab[i]=logstring( tab[i] ) end
+	return unpack(tab)
+end
+
+logstring= function(o,opts)
+
+	opts=opts or {}
+	opts.done=opts.done or {} -- only do tables once
+
+	opts.indent=opts.indent or ""
+
+	local fout=opts.fout
+
+	if not fout then -- self call with a new function to build and return a string
+		local ret={}
+		opts.fout=function(...)
+			for i,v in ipairs({...}) do ret[#ret+1]=v end
+		end
+		logstring(o,opts)		
+		opts.fout("\n")
+		return table.concat(ret)
+	end
+
+	if type(o) == "number" then
+	
+		return fout(o)
+		
+	elseif type(o) == "boolean" then
+	
+		if o then return fout("true") else return fout("false") end
+		
+	elseif type(o) == "string" then
+	
+		return fout(string.format("%q", o))
+		
+	elseif type(o) == "table" then
+			
+		if opts.done[o] and opts.no_duplicates then
+			fout(opts.indent,"\n",opts.indent,"{--[[DUPLICATE]]}\n")
+			return
+		else
+		
+			fout("{\n")
+
+			opts.indent=opts.indent.." "
+			
+			opts.done[o]=true
+			
+			local maxi=0
+			
+			for k,v in ipairs(o) do -- dump number keys in order
+				fout(opts.indent)
+				logstring(v,opts)
+				fout(",\n")
+				maxi=k -- remember top
+			end
+			
+			for k,v in pairs(o) do
+				if (type(k)~="number") or (k<1) or (k>maxi) or (math.floor(k)~=k) then -- skip what we already dumped
+					fout(opts.indent,"[")
+					logstring(k,opts)
+					fout("]=")
+					logstring(v,opts)
+					fout(",\n")
+				end
+			end
+			
+			opts.indent=opts.indent:sub(1,-2)
+			fout(opts.indent,"}")
+			return
+		end
+	elseif type(o) == "nil" then	
+		return fout("nil")
+	else
+		return fout("nil--[[",type(o),"]]")
+	end
+	
+end

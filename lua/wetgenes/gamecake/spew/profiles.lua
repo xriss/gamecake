@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local wwin=require("wetgenes.win") -- system independent helpers
 local wstr=require("wetgenes.string")
 local wsbox=require("wetgenes.sandbox")
@@ -60,7 +62,7 @@ M.bake=function(oven,profiles)
 -- load all profile data
 	function profiles.load()
 		if lfs then
-print("Loading "..profiles.filename)
+log("oven","Loading "..profiles.filename)
 			local fp=io.open(profiles.filename,"r")
 			if fp then
 				local s=fp:read("*all")
@@ -77,7 +79,7 @@ print("Loading "..profiles.filename)
 -- save all profile data
 	function profiles.save()
 		if lfs then
-print("Saving "..profiles.filename)
+log("oven","Saving "..profiles.filename)
 			local fp=io.open(profiles.filename,"w")
 			fp:write(wstr.serialize(ps))
 			fp:close()

@@ -3,6 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
 
 local grd=require("wetgenes.grd")
 local zips=require("wetgenes.zips")
@@ -177,7 +178,7 @@ images.prep_image=function(t)
 			if max_size and ( g.width > max_size or g.height>max_size ) then
 				local hx=g.width>max_size and max_size or g.width
 				local hy=g.height>max_size and max_size or g.height
-print("Max texture size converting ",g.width,g.height," to ",hx,hy)
+log("image","Max texture size converting ",g.width,g.height," to ",hx,hy)
 				g:scale( hx , hy ,1)
 			end
 
@@ -540,7 +541,7 @@ print("setting GL fake memory limit to ",images.gl_mem_fake_limit/(1024*1024))
 
 	if images.gl_mem_fake_limit and not images.flag_panic then
 		if images.gl_mem>images.gl_mem_fake_limit then
-print("GL FAKE PANIC mem=",images.gl_mem/(1024*1024))	
+log("image","GL FAKE PANIC mem=",images.gl_mem/(1024*1024))	
 			images.flag_panic=true
 		end
 	end
@@ -556,7 +557,7 @@ images.cando_panic=function()
 end
 images.panic = function(args)
 
-print("GL PANIC old memory mem=",images.gl_mem/(1024*1024))	
+log("image","GL PANIC old memory mem=",images.gl_mem/(1024*1024))	
 
 	images.flag_panic=false
 	
@@ -571,7 +572,7 @@ mild=false
 
 	if mild then -- mild panic
 
-print("GL MILD MEMORY PANIC")
+log("image","GL MILD MEMORY PANIC")
 
 		for n,t in pairs(images.data) do -- unload inactive textures
 			if not t.gl_active then
@@ -597,7 +598,7 @@ print("GL MILD MEMORY PANIC")
 		if images.max_mips>1 then -- lower overall quality
 			images.max_mips=images.max_mips-1
 		end
-print("GL SEVERE MEMORY PANIC "..images.max_mips.."mips" )
+log("image","GL SEVERE MEMORY PANIC "..images.max_mips.."mips" )
 
 		for n,t in pairs(images.data) do -- unload all textures
 			if t.max_mips>images.max_mips then t.max_mips=images.max_mips end
@@ -620,7 +621,7 @@ print("GL SEVERE MEMORY PANIC "..images.max_mips.."mips" )
 		end
 	end
 	
-print("GL PANIC new memory mem=",images.gl_mem/(1024*1024))	
+log("image","GL PANIC new memory mem=",images.gl_mem/(1024*1024))	
 	
 	images.check_panic()
 	return images.cando_panic()

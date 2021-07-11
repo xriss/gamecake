@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 -- we handle the lua side loading and manipulation of 3d vertex/polygon buffers
 -- this can be used for file/data processing but needs you to pass in contexts
 -- for basic opengl drawing funcs
@@ -11,6 +13,7 @@ local wstr=require("wetgenes.string")
 local dprint=function(...) print(wstr.dump(...)) end
 local wxml=require("wetgenes.simpxml")
 local wzips=require("wetgenes.zips")
+
 
 local wxox={}
 wxox.name="wetgenes.xox"
@@ -98,7 +101,7 @@ end
 
 local s=wzips.readfile(opts.filename)
 
-print("loaded ",#s,"bytes")
+log("xox","loaded ",#s,"bytes")
 
 local x=wxml.parse(s)
 

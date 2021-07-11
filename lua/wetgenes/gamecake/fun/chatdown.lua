@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local chatdown=M
@@ -686,10 +688,10 @@ function with an empty function to prevent this eg
 chatdown.chats.changes=function(chat,change,...)
 	local a,b=...
 	
-	if     change=="subject" then print( "subject" , chat.subject_name              )
-	elseif change=="topic"   then print( "topic"   , chat.subject_name , a.name     )
-	elseif change=="goto"    then print( "goto"    , chat.subject_name , a.name     )
-	elseif change=="tag"     then print( "tag"     , chat.subject_name , a      , b )
+	if     change=="subject" then log("chat", "subject" , chat.subject_name              )
+	elseif change=="topic"   then log("chat", "topic"   , chat.subject_name , a.name     )
+	elseif change=="goto"    then log("chat", "goto"    , chat.subject_name , a.name     )
+	elseif change=="tag"     then log("chat", "tag"     , chat.subject_name , a      , b )
 	end
 	
 end

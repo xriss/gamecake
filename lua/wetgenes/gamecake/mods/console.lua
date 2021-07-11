@@ -4,6 +4,8 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 local gcinfo=gcinfo
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local hex=function(str) return tonumber(str,16) end
 
 local pack=require("wetgenes.pack")
@@ -31,7 +33,7 @@ local function assert_resume(co,...)
 		return unpack(t) -- no error
 	end
 	
-	print( t[2].."\nin coroutine\n"..debug.traceback(co) ) -- error
+	log("console" , t[2].."\nin coroutine\n"..debug.traceback(co) ) -- error
 
 end
 

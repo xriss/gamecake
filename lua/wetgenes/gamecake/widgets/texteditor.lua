@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local function print(...) _G.print(...) end
 local function dprint(a) print(require("wetgenes.string").dump(a)) end
 
@@ -296,9 +298,9 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	end
 	
 	if keyname=="right" and act==1 then
-		print("righty clicky")
+		log("texteditor","righty clicky")
 		pan.master.later_append(function()
-			print("righty clicky later")
+			log("texteditor","righty clicky later")
 		end)
 		return true
 	end

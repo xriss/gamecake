@@ -122,7 +122,7 @@ local beep_play=function() end
 
 		if act=="click" then
 		
-print("click",id)
+--print("click",id)
 
 			if gui.clicks[id] then
 				return gui.clicks[id](act,widget)

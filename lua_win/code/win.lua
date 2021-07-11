@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local jit=jit
 
 local wsbox=require("wetgenes.sandbox")
@@ -105,7 +107,7 @@ if info then -- finish setup
 end
 
 
-print("The flavour of win is "..base.flavour)
+log("oven","The flavour of win is "..base.flavour)
 --print(hardcores)
 
 win.hardcore=hardcore
@@ -221,14 +223,14 @@ function win.android_start(apk)
 
 
 	if jit then -- start by tring to force a jit memory allocation
-		print(jit.status())
+		log("oven",jit.status())
 		require("jit.opt").start("sizemcode=256","maxmcode=256")
 		for i=1,1000 do end
-		print(jit.status())
+		log("oven",jit.status())
   	end
 
 	if hardcore.get_memory_class then
-		print("memory class "..hardcore.get_memory_class().." meg")
+		log("oven","memory class "..hardcore.get_memory_class().." meg")
 	end
 
 --	if jit and jit.off then

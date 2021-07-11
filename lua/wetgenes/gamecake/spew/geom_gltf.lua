@@ -3,6 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
 
 local wpath=require("wetgenes.path")
 local wgrd=require("wetgenes.grd")
@@ -96,7 +97,7 @@ M.info=function(gltf)
 --	dprint(gltf)
 
 	for n in pairs(gltf) do
-		print(n, type(gltf[n])=="table" and "#"..#gltf[n] or gltf[n] )
+		log("gltf", n, type(gltf[n])=="table" and "#"..#gltf[n] or gltf[n] )
 	end
 	
 
@@ -229,11 +230,11 @@ end
 local m4_flipy=function(m,name)
 	if flipy then
 
-print(name)
-print(string.format( "%8.4f %8.4f %8.4f %8.4f", m[1],m[2],m[3],m[4]))
-print(string.format( "%8.4f %8.4f %8.4f %8.4f", m[5],m[6],m[7],m[8]))
-print(string.format( "%8.4f %8.4f %8.4f %8.4f", m[9],m[10],m[11],m[12]))
-print(string.format( "%8.4f %8.4f %8.4f %8.4f", m[13],m[14],m[15],m[16]))
+log("gltf",name)
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[1],m[2],m[3],m[4]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[5],m[6],m[7],m[8]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[9],m[10],m[11],m[12]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[13],m[14],m[15],m[16]))
 
 
 --		m:inverse()
@@ -290,12 +291,12 @@ m[16]=1
 
 --		m:inverse()
 
-print("=")
-print(string.format( "%8.4f %8.4f %8.4f %8.4f", m[1],m[2],m[3],m[4]))
-print(string.format( "%8.4f %8.4f %8.4f %8.4f", m[5],m[6],m[7],m[8]))
-print(string.format( "%8.4f %8.4f %8.4f %8.4f", m[9],m[10],m[11],m[12]))
-print(string.format( "%8.4f %8.4f %8.4f %8.4f", m[13],m[14],m[15],m[16]))
-print()
+log("gltf","=")
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[1],m[2],m[3],m[4]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[5],m[6],m[7],m[8]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[9],m[10],m[11],m[12]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[13],m[14],m[15],m[16]))
+log("gltf")
 
 	end
 	return m

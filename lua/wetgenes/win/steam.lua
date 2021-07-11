@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local wstr=require("wetgenes.string")
 local dprint=function(a) print(wstr.dump(a)) end
 
@@ -34,7 +36,7 @@ if not lib then	pcall(function() libpath=libname					lib=ffi.load(libpath) end) 
 -- no steam lib found
 if not lib then return steam end
 
-print("STEAM API -> "..libpath.." pack("..pragma_pack_size..")")
+log("steam", libpath.." pack("..pragma_pack_size..")")
 
 
 ffi.cdef( [[
@@ -117,13 +119,13 @@ a=a and ffi.string(a) ; if a=="" then a=nil end									-- maybe ""?
 
 steam.language=a or "english"
 
-print("STEAM language ",tostring(steam.language))
+log("steam","language",tostring(steam.language))
 
 local a=lib.SteamAPI_ISteamUser_GetSteamID(lib_SteamUser)
 if a then
 	steam.userid=tostring(a):gsub("[^%d]*","") -- remove ULL from the end of the unsigned long long number string
 end
-print("STEAM userid",steam.userid)
+log("steam","userid",steam.userid)
 
 -- table of [functions]=true to call until they return true
 steam.results={}

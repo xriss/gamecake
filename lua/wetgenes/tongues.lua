@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local lfs ; pcall( function() lfs=require("lfs") end ) -- may not have a filesystem
 
 
@@ -160,7 +162,7 @@ end
 -- load tsv of translations and store in lookup
 tongues.load=function()
 
-print("Loading "..tongues.lang.." from "..wwin.files_prefix..tongues.loadfilename)
+log("oven","Loading "..tongues.lang.." from "..wwin.files_prefix..tongues.loadfilename)
 
 	local str=wzips.readfile(wwin.files_prefix..tongues.loadfilename)
 	
@@ -196,7 +198,7 @@ print("Loading "..tongues.lang.." from "..wwin.files_prefix..tongues.loadfilenam
 		end
 	end
 
-print("Loaded "..count.." translation strings")
+log("oven","Loaded "..count.." translation strings")
 
 end
 
@@ -208,13 +210,13 @@ end
 tongues.save=function()
 
 		if lfs then
-print("Loading "..wwin.files_prefix..tongues.savefilename)
+log("oven","Loading "..wwin.files_prefix..tongues.savefilename)
 			pcall(function() -- file might not exist
 				for line in io.lines(wwin.files_prefix..tongues.savefilename) do -- check all these strings as well
 					tongues.used[line]=true
 				end
 			end)
-print("Saving "..wwin.files_prefix..tongues.savefilename)
+log("oven","Saving "..wwin.files_prefix..tongues.savefilename)
 			local fp=io.open(wwin.files_prefix..tongues.savefilename,"w")
 			if fp then
 				for s,b in pairs(tongues.used) do

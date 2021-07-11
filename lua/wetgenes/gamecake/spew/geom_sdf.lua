@@ -4,6 +4,8 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 -- Signed Distance Function or Field ( well technically bounds )
 
 local wstr=require("wetgenes.string")
@@ -136,9 +138,9 @@ M.sdf_to_geom=function(_sdf,siz,rez)
 		end
 	end
 
-	print(#obj.verts,#obj.polys)
+	log("sdf",#obj.verts,#obj.polys)
 	obj:merge_points_by_pos()
-	print(#obj.verts,#obj.polys)
+	log("sdf",#obj.verts,#obj.polys)
 
 	local tiny=1/256
 	local shrink_wrap=function()

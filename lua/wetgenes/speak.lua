@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local wzips=require("wetgenes.zips")
 
 local speak={}
@@ -17,7 +19,7 @@ speak.setup=function()
 	speak.slt_data=assert(wzips.readfile("data/wvoices/cmu_us_slt/model_data.bin"))
 	speak.slt_idxs=assert(wzips.readfile("data/wvoices/cmu_us_slt/model_data.idx"))
 
-print("speak loaded ",#speak.slt_data,#speak.slt_idxs)
+log("speak","loaded",#speak.slt_data,#speak.slt_idxs)
 
 	core.setup(speak.slt_data,speak.slt_idxs)
 end
