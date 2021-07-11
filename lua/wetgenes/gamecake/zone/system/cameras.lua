@@ -40,6 +40,9 @@ B.system=function(cameras)
 end
 
 
+B.cameras.camera=function(cameras)
+	return cameras.scene.caste("camera")[1]
+end
 
 B.cameras.draw_head=function(cameras)
 
@@ -51,7 +54,7 @@ B.cameras.draw_head=function(cameras)
 
 	gl.PushMatrix()
 
-	local camera=cameras.scene.caste("camera")[1]
+	local camera=cameras:camera()
 
 	if camera then
 

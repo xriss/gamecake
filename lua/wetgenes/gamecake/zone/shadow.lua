@@ -74,7 +74,7 @@ M.bake=function(oven,shadow)
 		})
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
-		local camera=scene.caste("camera")[1]
+		local camera=scene.systems.cameras and scene.systems.cameras:camera()
 		local sky=scene.systems.sky
 
 		if camera then
