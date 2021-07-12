@@ -65,7 +65,7 @@ end
 B.light.save=function(light,data)
 	data=data or {}
 
-	data.caste=light.caste
+	data[1]=light.caste
 
 	data.rot={ light.rot[1] , light.rot[2] , light.rot[3] ,  light.rot[4] }
 	data.pos={ light.pos[1] , light.pos[2] , light.pos[3] }

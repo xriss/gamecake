@@ -74,9 +74,8 @@ M.bake=function(oven,shadow)
 		})
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
-		local camera=scene.systems.cameras and scene.systems.cameras:camera()
+		local camera=scene.systems.camera:camera()
 		local sky=scene.systems.sky
-
 		if camera then
 
 	--		print( M4(gl.matrix(gl.MODELVIEW)) )
