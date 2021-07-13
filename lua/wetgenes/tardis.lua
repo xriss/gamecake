@@ -2171,6 +2171,71 @@ We also inherit all the functions from tardis.v4
 ]]
 local q4=tardis.class("q4",v4)
 
+--[[#lua.wetgenes.tardis.q4.set
+
+	q4 = tardis.q4.set(q4,{0,0,0,1})
+	q4 = tardis.q4.set(q4,0,0,0,1)
+	q4 = tardis.q4.set(q4,{"xyz",0,90,0})
+	q4 = tardis.q4.set(q4,"xyz",0,90,0)
+	q4 = tardis.q4.set(q4,"xyz",{0,90,0})
+
+If the first item in the stream is not a string then this is just a normal
+array.set style.
+
+If first parameter of the stream is a string then initialise the quaternion
+using a simple axis rotation notation Where the string is a list of axis. This
+string is lower case letters. x y or z and then the following numbers are
+amount of rotation to apply around that axis in degrees. You should provide as
+many numbers as letters.
+
+Essentially this gives you a way of initialising quaternion rotations in an
+easily readable way.
+
+]]
+function q4.set(it,...)
+	local data={...}
+	local key
+
+-- check for key or fall back to array.set
+
+	if type(data[1])=="table" and type(data[1][1])=="string" then
+		key=data[1][1]
+	elseif type(data[1])=="string" then
+		key=data[1]
+	else
+		return array.set(it,...)
+	end
+
+-- use the key to perform rotations
+
+	array.set(it,0,0,0,1)
+
+	local n=1
+	local dorot=function(angle)
+		local axis=key:sub(n,n)
+		n=n+1
+		if     axis=="x" then	it:rotate(angle,{1,0,0})
+		elseif axis=="y" then	it:rotate(angle,{0,1,0})
+		else					it:rotate(angle,{0,0,1})
+		end
+	end
+
+	for i,v in ipairs(data) do
+		if type(v)=="number" then
+			dorot(v)
+		elseif type(v)=="table" then
+			for ii=1,#v do
+				local vv=v[ii] -- allow one depth of tables
+				if type(vv)=="number" then
+					dorot(vv)
+				end
+			end
+		end
+	end
+
+	return it
+end
+
 --[[#lua.wetgenes.tardis.q4.new
 
 	q4 = tardis.q4.new()
