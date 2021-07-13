@@ -84,8 +84,6 @@ M.bake=function(oven,screen)
 	
 	screen.draw_head=function(scene)
 
-		local input=scene.systems.input
-
 		local w=math.floor((oven.win.width * (10-0) )/10)
 		local h=math.floor((oven.win.height * (10-0) )/10)
 
@@ -129,8 +127,6 @@ M.bake=function(oven,screen)
 
 	screen.draw=function(scene)
 
-		local input=scene.systems.input
-
 		gl.PushMatrix()
 
 		local t={
@@ -140,7 +136,7 @@ M.bake=function(oven,screen)
 			 1,	-1,	0,	1,	0,
 		}
 
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_draw?GAMMA=1.5&TWEAK="..input.tweak_number,function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_draw?GAMMA=1.5&TWEAK="..scene.systems.input.tweak_number,function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo:bind_texture()
@@ -199,14 +195,12 @@ M.bake=function(oven,screen)
 			 1,	-1,	0,	1,	0,
 		}
 
-		local input=scene.systems.input
-
 		gl.PushMatrix()
 		oven.cake.views.push_and_apply(screen.view_occlusion)
 		gl.state.push(gl.state_defaults)
 
 		screen.fbo_occlusion:bind_frame()
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_occlusion?TWEAK="..input.tweak_number.."&SHADOW="..shadow.default,function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_occlusion?TWEAK="..scene.systems.input.tweak_number.."&SHADOW="..shadow.default,function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo:bind_depth()
@@ -258,8 +252,6 @@ M.bake=function(oven,screen)
 			 1,	 1,	0,	1,	1,
 			 1,	-1,	0,	1,	0,
 		}
-
-		local input=scene.systems.input
 
 		gl.PushMatrix()
 		oven.cake.views.push_and_apply(screen.view_bloom)

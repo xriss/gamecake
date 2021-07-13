@@ -35,15 +35,9 @@ B.system=function(cameras)
 
 	cameras.caste="camera"
 
-	cameras.mouse={dx=0,dy=0,dz=10,ox=0,oy=0,sx=0,sy=0,action=0}
-
 	return cameras
 end
 
-
-B.cameras.camera=function(cameras)
-	return cameras.scene.caste("camera")[1]
-end
 
 B.cameras.draw_head=function(cameras)
 
@@ -55,7 +49,7 @@ B.cameras.draw_head=function(cameras)
 
 	gl.PushMatrix()
 
-	local camera=cameras:camera()
+	local camera=cameras.scene.get("camera")
 
 	if camera then
 
@@ -83,49 +77,6 @@ B.cameras.draw_tail=function(cameras)
 end
 
 
-B.cameras.msg=function(cameras,msg)
-	if msg.class=="mouse" then
-
-		local m=cameras.mouse
-		m.ox=msg.ox
-		m.oy=msg.oy
-
-		if msg.keyname=="wheel_add" then
-			m.dz=m.dz-1
-		elseif msg.keyname=="wheel_sub" then
-			m.dz=m.dz+1
-		end
-
-		if m.dz<0 then m.dz=0 end
-
-		if msg.action==1 then -- mouse down, remember where
-			m.action=1
-			m.sx=m.ox
-			m.sy=m.oy
-		end
-		if msg.action==-1 then -- mouse up
-			m.action=-1
-		end
-
-		if m.action==1 then -- mouse is held down now so adjust output value
-			m.dx=m.dx+(m.ox-m.sx)
-			m.dy=m.dy+(m.oy-m.sy)
-			m.sx=m.ox
-			m.sy=m.oy
-		end
-
-		if m.action==-1 then -- set rotation on mouse up
-
-			local camera=cameras.scene.get("camera")
-			gui.datas.get("angle"):value( -camera.rot[2] )
-
-		end
-
-	end
---		print(cameras.mouse.dx,cameras.mouse.dy)
-end
-
-
 B.cameras.create=function(cameras,boot)
 	local camera={}
 	camera.boot=boot
@@ -148,23 +99,7 @@ B.cameras.create=function(cameras,boot)
 	return camera
 end
 
-B.camera.setroty=function(camera,n)
-
-	camera.base.rot[2]=n
-
-	camera.cameras.mouse.dx=0
-
-end
-
 B.camera.update=function(camera)
-
-	local oldrot=V3( camera.rot )
-
-	local rotfix=function(n)
-		local d=(n+180)/360
-		d=d-math.floor(d)
-		return (math.floor(d*3600)-1800)/10
-	end
 
 	if camera.focus then
 
@@ -180,12 +115,6 @@ B.camera.update=function(camera)
 		end
 
 	end
-
-	camera.dolly=camera.base.dolly + camera.cameras.mouse.dz
-
-	camera.rot[1]=rotfix( camera.base.rot[1]+( (camera.cameras.mouse.dy)* 180 ) )
-	camera.rot[2]=rotfix( camera.base.rot[2]+( (camera.cameras.mouse.dx)*-180 ) )
-	camera.rot[3]=rotfix( camera.base.rot[3] )
 
 -- This is a camera so we are applying reverse transforms...
 	camera.mtx:identity()

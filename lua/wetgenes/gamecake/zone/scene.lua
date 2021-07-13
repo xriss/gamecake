@@ -154,11 +154,15 @@ available as caste names.
 			for i,v in ipairs(scene.systems) do
 				if v.caste==it.caste then -- replace
 					scene.systems[i]=it
-					scene.systems[it.caste]=it
+					if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then
+						scene.systems[it.caste]=it
+					end
 					return
 				end
 			end
-			scene.systems[it.caste]=it
+			if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then
+				scene.systems[it.caste]=it
+			end
 		end
 		scene.systems[#scene.systems+1]=it
 		table.sort(scene.systems,function(a,b)

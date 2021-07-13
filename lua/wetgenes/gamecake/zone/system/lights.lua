@@ -35,11 +35,6 @@ B.system=function(lights)
 end
 
 
-B.lights.light=function(lights)
-	return lights.scene.caste("light")[1]
-end
-
-
 
 B.lights.create=function(lights,boot)
 	local light={}
