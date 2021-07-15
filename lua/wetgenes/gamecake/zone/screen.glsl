@@ -118,7 +118,11 @@ void main(void)
 #version 300 es
 #version 330
 #ifdef VERSION_ES
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 #endif
   
 uniform mat4 modelview;
@@ -147,9 +151,6 @@ void main()
 #endif
 #ifdef FRAGMENT_SHADER
 
-#if defined(GL_FRAGMENT_PRECISION_HIGH) && defined(VERSION_ES)
-precision highp float;
-#endif
 
 in vec2 v_texcoord;
 
@@ -159,14 +160,27 @@ out vec4 FragColor;
 vec3 depth_to_view(vec2 cc)
 {
 	vec4 p=inverse_projection * ( vec4( cc , texture(tex,cc).r , 1.0 )*2.0 - 1.0 );
-	return (p/p.w).xyz;
+	return p.xyz/p.w;
+/*
+	vec4 t=inverse_projection * ( vec4( cc ,  0.0  , 1.0 )*2.0 - 1.0 );
+	t=t/t.w;
+
+	vec3 n=t.xyz/t.z;
+
+	float z=texture(tex,cc).r*2.0 - 1.0;
+
+	float d =  - ( ( z*projection[3][3] - projection[3][2] ) / ( z*projection[2][3] - projection[2][2] ) );
+
+	return n*d;
+*/
+
 }
 
 // convert view space into depth space
 vec3 view_to_depth(vec3 vv)
 {
 	vec4 p=projection * vec4( vv , 1.0);
-	return vec3((p.xy/p.w),1.0/p.w)*0.5 + 0.5;
+	return (p.xyz/p.w)*0.5 + 0.5;
 }
 
 float random2d(vec2 st) {
@@ -212,10 +226,10 @@ float shadow_occlusion( vec2 vv )
 {
 	vec3 v=depth_to_view( vv );
 
-	vec4 shadow_uv = ( shadow_mtx * camera * vec4(v,1.0) ) ;
-	shadow_uv = vec4( ( shadow_uv.xyz / shadow_uv.w ) * 0.5 + 0.5 ,
-		-1.0 );
-
+	vec4 shadow_uv = shadow_mtx * camera * vec4(v,1.0) ;
+	shadow_uv = (shadow_uv/shadow_uv.w) * 0.5 + 0.5;
+	shadow_uv.w=0.0; // this should be normal into the light so we can adjust type of shadow
+	
 	const vec4 shadow=vec4(SHADOW);
 
 	float shadow_value = 0.0; // max( 0.0 , shadow_uv.w );

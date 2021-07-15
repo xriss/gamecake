@@ -19,7 +19,7 @@ end
 logs.allow=nil -- put a table here to enable whitelist
 
 logs.deny={
-	oven=true,
+	oven=true,	-- reduce oven spam by default
 }
 
 local wwin

@@ -44,7 +44,7 @@ M.bake=function(oven,screen)
 
 		screen.loads()
 
-		screen.fbo=framebuffers.create(0,0,1,{ no_uptwopow=true , depth_format={gl.DEPTH_COMPONENT32F,gl.DEPTH_COMPONENT, gl.FLOAT} } )
+		screen.fbo=framebuffers.create(0,0,32,{ no_uptwopow=true , depth_format={gl.DEPTH_COMPONENT32F,gl.DEPTH_COMPONENT, gl.FLOAT} } )
 
 		screen.view=oven.cake.views.create({
 			mode="fbo",
@@ -84,14 +84,19 @@ M.bake=function(oven,screen)
 	
 	screen.draw_head=function(scene)
 
-		local w=math.floor((oven.win.width * (10-0) )/10)
-		local h=math.floor((oven.win.height * (10-0) )/10)
+		local w=math.floor((oven.win.width * (1-0) )/1)
+		local h=math.floor((oven.win.height * (1-0) )/1)
 
-		screen.fbo:resize( w , h , 1 )
+		if screen.fbo.w ~= w or screen.fbo.h ~= h then
 
-		screen.fbo_occlusion:resize( math.ceil(w/1) , math.ceil(h/1) , 0 )
+			screen.fbo:resize( w , h , 1 )
 
-		screen.fbo_bloom:resize( math.ceil(w/4) , math.ceil(h/4) , 0 )
+			screen.fbo_occlusion:resize( math.ceil(w/1) , math.ceil(h/1) , 0 )
+
+			screen.fbo_bloom:resize( math.ceil(w/4) , math.ceil(h/4) , 0 )
+
+		end
+		
 
 		screen.view.vz=8192
 		screen.view.pz=0
