@@ -71,33 +71,35 @@ function M.bake(opts)
 
 	oven.enable_close_window=true -- let the close button, close the window (otherwise you should catch close messages in app)
 
-		oven.opts=opts or {}
-		
-		if type(opts[1])=="table" then -- probably passed in from nacl
-			for n,v in pairs(opts[1]) do -- copy it all into opts
-				opts[n]=v
-			end
+	oven.opts=opts or {}
+	
+	if type(opts[1])=="table" then -- probably passed in from nacl
+		for n,v in pairs(opts[1]) do -- copy it all into opts
+			opts[n]=v
 		end
+	end
 
 -- handle commandline options, copy --flags into opts.args and put other args into number keys
-		opts.args=opts.args or {}
-		for i=0,#opts do local v=opts[i]
-			if type(v)=="string" then
-				if v:sub(1,2)=="--" then -- strip --from-start-of-flags
-					local s,e = v:find("=")
-					if s then -- its a setting so set it
-						local n=v:sub(3,s-1)
-						local s=v:sub(e+1)
-						opts.args[ n ]=s -- simple setting, strings only
-					else
-						opts.args[ v:sub(3) ]=true -- just a flag
-					end
+	opts.args=opts.args or {}
+	for i=0,#opts do local v=opts[i]
+		if type(v)=="string" then
+			if v:sub(1,2)=="--" then -- strip --from-start-of-flags
+				local s,e = v:find("=")
+				if s then -- its a setting so set it
+					local n=v:sub(3,s-1)
+					local s=v:sub(e+1)
+					opts.args[ n ]=s -- simple setting, strings only
 				else
-					opts.args[#opts.args+1]=v -- normal arg
+					opts.args[ v:sub(3) ]=true -- just a flag
 				end
+			else
+				opts.args[#opts.args+1]=v -- normal arg
 			end
 		end
+	end
 --dprint(opts)
+
+	require("wetgenes.logs").setup(opts.args)
 
 --print(wwin.flavour)
 

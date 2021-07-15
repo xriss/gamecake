@@ -16,9 +16,38 @@ logs.export=function(env,...)
 	return unpack(tab)
 end
 
-logs.allow=nil -- put a table here to enable whitelist
+-- setup from command line args
 
-logs.deny={
+logs.setup=function(args)
+
+	if args.logs then -- change allow and block lists
+		logs.allow=nil
+		logs.block=nil
+		if type(args.logs)=="string" then
+			local mode="allow"
+			for word in string.gmatch(args.logs, "[%+%-]*[^%+%-]*") do
+				local sign=word:sub(1,1)
+				if sign=="+" then
+					mode="allow"
+					word=word:sub(2)
+				elseif sign=="-" then
+					mode="block"
+					word=word:sub(2)
+				end
+				logs[mode]=logs[mode] or {}
+				if word~="" then
+					logs[mode][word]=true
+				end
+			end
+		end
+	end
+
+end
+
+
+logs.allow=nil -- put a table here to enable
+
+logs.block={
 	oven=true,	-- reduce oven spam by default
 }
 
@@ -38,8 +67,8 @@ logs.log = function(mode,...)
 	end
 ]]
 
-	if logs.allow and ( not M.allow[ mode ] ) then return end
-	if logs.deny[ mode ] then return end
+	if logs.allow and ( not logs.allow[ mode ] ) then return end
+	if logs.block and (     logs.block[ mode ] ) then return end
 
 	print( mode , ... )
 
