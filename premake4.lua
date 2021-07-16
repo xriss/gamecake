@@ -348,11 +348,6 @@ elseif WINDOWS then
 		else				platforms { "mingw" }	--use new 64 bit compiler
 		end
 		
-		includedirs { path.getabsolute("./vbox_mingw/w32api/include") }
-		libdirs { path.getabsolute("./vbox_mingw/w32api/lib") }
-		
-		linkoptions { "-static-libgcc" }
-		
 		buildoptions{"-mtune=generic"}
 		linkoptions {"-mtune=generic"}
 
