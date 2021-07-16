@@ -41,6 +41,8 @@ elseif ANDROID then
 
 elseif WINDOWS then
 
+	linkoptions { "-static" }
+
 	linkoptions { "-Wl,--export-all-symbols" }
 
 	files { "./lua.c" }
