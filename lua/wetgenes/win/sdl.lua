@@ -68,12 +68,15 @@ sdl.create=function(t)
 	sdl.video_init()
 
 	if not t.console then -- try and free the windows console unless asked not to
-		
+
 		pcall( function() -- we dont care if this fails, just means we are not running on windows
 		
 			local ffi=require("ffi")
 			ffi.cdef(" void FreeConsole(void); ")
-			ffi.C.FreeConsole()
+			if ffi.C.FreeConsole then
+				log( "oven","detaching from windows console")
+				ffi.C.FreeConsole()
+			end
 
 		end)
 		
