@@ -193,6 +193,16 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 
 ]]
 
+	if not it.ctx then -- request an opengl 3.2 core context
+
+		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask,SDL.glProfile.Core)
+		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
+		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion,2)
+
+		it.ctx=SDL.glCreateContext(it.win)
+
+	end
+
 	if not it.ctx then -- request an opengl es 3.0 context
 
 		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask, SDL.glProfile.ES)
@@ -203,15 +213,6 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 
 	end
 
-	if not it.ctx then -- request an opengl 3.2 core context
-
-		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask,SDL.glProfile.Core)
-		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
-		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion,2)
-
-		it.ctx=SDL.glCreateContext(it.win)
-
-	end
 
 
 	assert(it.ctx)

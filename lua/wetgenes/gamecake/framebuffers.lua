@@ -156,7 +156,6 @@ function M.bake(oven,framebuffers)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
 
-
 				if fbo.depth_format then
 					gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.depth_format[1], fbo.txw, fbo.txh, 0, fbo.depth_format[2], fbo.depth_format[3],nil)
 				elseif math.abs(d)>=32 then
@@ -166,7 +165,7 @@ function M.bake(oven,framebuffers)
 				else
 					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT,nil)
 				end
-				
+
 				gl.BindTexture(gl.TEXTURE_2D, 0)
 
 			end
