@@ -227,7 +227,7 @@ M.bake=function(oven,geoms_avatar)
 	function geoms_avatar.loads()
 
 		if not io.open(geoms_avatar.filename,"r") then
-			geoms_avatar.filename="data/gltf/avatar.glb"
+			geoms_avatar.filename="data/glb/avatar.glb"
 		end -- the gc will close the file...
 
 		geoms_avatar.gltf=wgeom_gltf.load(geoms_avatar.filename)
