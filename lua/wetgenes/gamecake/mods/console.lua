@@ -437,9 +437,17 @@ font.vbs_idx=1
 					win:show("full")
 					win:show("win")
 					win:show("full")
-				elseif win.view and (win.view~="win") then
-					win:show("win")
-				else
+				elseif win.view then -- we can do smart toggles but this does not read the real state from the system so may be out of sync
+					if     win.view=="win" then
+						win:show("max")
+					elseif win.view=="max" then
+						win:show("full")
+					elseif win.view=="full" then
+						win:show("win")
+					else
+						win:show("full")
+					end
+				else -- just try full
 					win:show("full")
 				end
 			end
