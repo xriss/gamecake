@@ -36,7 +36,7 @@ if not lib then	pcall(function() libpath=libname					lib=ffi.load(libpath) end) 
 -- no steam lib found
 if not lib then return steam end
 
-log("steam", libpath.." pack("..pragma_pack_size..")")
+log("oven","steam",libpath,"pack("..pragma_pack_size..")")
 
 
 ffi.cdef( [[
@@ -119,13 +119,13 @@ a=a and ffi.string(a) ; if a=="" then a=nil end									-- maybe ""?
 
 steam.language=a or "english"
 
-log("steam","language",tostring(steam.language))
+log("oven","steam","language",tostring(steam.language))
 
 local a=lib.SteamAPI_ISteamUser_GetSteamID(lib_SteamUser)
 if a then
 	steam.userid=tostring(a):gsub("[^%d]*","") -- remove ULL from the end of the unsigned long long number string
 end
-log("steam","userid",steam.userid)
+log("oven","steam","userid",steam.userid)
 
 -- table of [functions]=true to call until they return true
 steam.results={}
