@@ -57,8 +57,7 @@ For some more options when building (eg use clang) see the output of
 Alternatively any vbox_* directory can build a specific executable. For
 instance vbox_1604_64 can be used to build a 64bit executable inside an ubuntu
 16.04 vagrant box. See readme files inside these directories for more
-information, usually if there is a readme then it is an attempt that did not
-work.
+information.
 
 
 Once built the engine lives in one single fat binary that includes many 
