@@ -87,10 +87,14 @@ sdl.create=function(t)
 	
 	local flags={ SDL.window.Resizable , SDL.window.OpenGL }
 
-	if not t.border then
-		flags[#flags+1]=SDL.window.Borderless
+	if jit and jit.os=="Windows" then -- windows does not do borderless resize, so, meh
+
+	else
+		if not t.border then
+			flags[#flags+1]=SDL.window.Borderless
+		end
 	end
-	
+
 --[[
 	if     view=="full" then	 flags={SDL.window.Desktop,SDL.window.OpenGL}
 	elseif view=="max"  then	 flags={SDL.window.Maximized,SDL.window.OpenGL}
