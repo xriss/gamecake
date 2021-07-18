@@ -2,11 +2,6 @@ cd `dirname $0`
 
 # these will all do very little if vagrant has already provisioned the machines
 
-cd vbox_osx
-vagrant up
-vagrant halt
-cd ..
-
 cd vbox_1604_32
 vagrant up
 vagrant halt
@@ -32,3 +27,4 @@ cd ..
 
 #vbox_arm/install.sh
 
+echo " you should also run vbox_arm/install.sh if you want to reset the arm qemu box "
