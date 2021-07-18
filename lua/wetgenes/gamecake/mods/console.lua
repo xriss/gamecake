@@ -4,6 +4,8 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 local gcinfo=gcinfo
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local hex=function(str) return tonumber(str,16) end
 
 local pack=require("wetgenes.pack")
@@ -31,7 +33,7 @@ local function assert_resume(co,...)
 		return unpack(t) -- no error
 	end
 	
-	print( t[2].."\nin coroutine\n"..debug.traceback(co) ) -- error
+	log("console" , t[2].."\nin coroutine\n"..debug.traceback(co) ) -- error
 
 end
 
@@ -382,15 +384,15 @@ font.vbs_idx=1
 	
 	function console.print(...)
 
+		local t={...}
+		for i,v in ipairs(t) do t[i]=tostring(v) end
+		local s=table.concat(t,"\t").."\n"
+
+		if console.linehook then console.linehook(s) end -- send print data here
+
 		if not console.lines then return end -- not setup yet
 		
-		local ts={...}
-		for i=1,#ts do -- deal with nils
-			local s=ts[i]
-			if type(s)~="string" then ts[i]=tostring(wstr.dump(s)) end
-		end
-
-		for _,l in ipairs( wstr.smart_wrap( table.concat(ts,"\t") , console.line_width) ) do
+		for _,l in ipairs( wstr.smart_wrap( s , console.line_width) ) do
 			table.insert(console.lines,l)
 			
 			while #console.lines > 64 do
@@ -435,9 +437,17 @@ font.vbs_idx=1
 					win:show("full")
 					win:show("win")
 					win:show("full")
-				elseif win.view and (win.view~="win") then
-					win:show("win")
-				else
+				elseif win.view then -- we can do smart toggles but this does not read the real state from the system so may be out of sync
+					if     win.view=="win" then
+						win:show("max")
+					elseif win.view=="max" then
+						win:show("full")
+					elseif win.view=="full" then
+						win:show("win")
+					else
+						win:show("full")
+					end
+				else -- just try full
 					win:show("full")
 				end
 			end

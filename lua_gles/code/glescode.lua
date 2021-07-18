@@ -193,7 +193,7 @@ function glescode.create(gl)
 				gl.Scissor(value)
 
 			else -- default enable or disable
-				if value then
+				if value and value~=0 then
 					gl.Enable(name)
 				else
 					gl.Disable(name)
@@ -289,7 +289,6 @@ function glescode.create(gl)
 	code.cache.color=V4()
 	
 	function code.Color(...)
---		tcore.set(code.cache.color,...) -- may not set anything if no arguments are given
 		code.cache.color:set(...) -- may not set anything if no arguments are given
 		return code.cache.color -- safe way of getting this value (a 4 float userdata)
 	end
@@ -372,8 +371,16 @@ function glescode.create(gl)
 		code.stack.translate(...)
 	end
 
+	function code.PreTranslate(...)
+		code.stack.pretranslate(...)
+	end
+
 	function code.Rotate(...)
 		code.stack.rotate(...)
+	end
+
+	function code.PreRotate(...)
+		code.stack.prerotate(...)
 	end
 
 	function code.Scale(...)
@@ -395,7 +402,6 @@ function glescode.create(gl)
 	
 
 	function code.color_get_rgba()
---		return tcore.read(code.cache.color,1),tcore.read(code.cache.color,2),tcore.read(code.cache.color,3),tcore.read(code.cache.color,4)
 		return code.cache.color[1],code.cache.color[2],code.cache.color[3],code.cache.color[4]
 	end
 	
@@ -403,38 +409,57 @@ function glescode.create(gl)
 	function code.apply_modelview(va,vb,vc,vd)
 		local t=type(va)
 		if t=="number" then -- numbers
---			local v4=tcore.new_v4() tcore.set(v4,va,vb,vc,vd)
 			local v4=tardis.v4.new(va,vb,vc,vd)
---			tcore.v4_product_m4(v4,code.matrix(gl.MODELVIEW))
 			v4:product(code.matrix(gl.MODELVIEW))
---			return tcore.read(v4,1),tcore.read(v4,2),tcore.read(v4,3),tcore.read(v4,4)
 			return v4[1],v4[2],v4[3],v4[4]
 		elseif t=="table" then -- need to convert from a table
---			local v4=tcore.new_v4() tcore.set(v4,va,4)
 			local v4=tardis.v4.new(va)
---			tcore.v4_product_m4(v4,code.matrix(gl.MODELVIEW))
 			v4:product(code.matrix(gl.MODELVIEW))
---			va[1]=tcore.read(v4,1) va[2]=tcore.read(v4,2) va[3]=tcore.read(v4,3) va[4]=tcore.read(v4,4)
 			va[1]=v4[1] va[2]=v4[2] va[3]=v4[3] va[4]=v4[4]
 			return va
 		else
---			tcore.v4_product_m4(va,code.matrix(gl.MODELVIEW))
 			va:product(code.matrix(gl.MODELVIEW))
 			return va
 		end
 	end
 
-
 -- compiler functions
 --
+
+
+
+	local pbase={}
+	local pmeta={__index=pbase}	
+
+
+
 -- function to provide source for a named shader program
 -- this adds any needed GLSL version header and defines
 -- VERTEX_SHADER or FRAGMENT_SHADER appropriately
 -- so only one source is required
 --
-	function code.program_source(name,vsource,fsource,filename)
---		if 	code.programs[name] then return code.programs[name] end -- only do once
+	function code.program_source(name,opts)
 
+		local gsource
+		local vsource
+		local fsource
+		local filename
+
+		if type(opts)=="string" then
+
+			vsource=opts
+			fsource=opts
+
+		elseif type(opts)=="table" then
+
+			vsource=opts.vsource or opts.source
+			fsource=opts.fsource or opts.source
+			filename=opts.filename
+
+			gsource=opts.gsource -- geometry shader?
+
+		end
+		
 		local aa=wstr.split(name,"?")
 		local basename=aa[1]
 		local params=aa[2]
@@ -445,226 +470,157 @@ function glescode.create(gl)
 				paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
 			end
 		end
-		paramdefs=table.concat(paramdefs,"\n").."\n"
-	
 		local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
-		local vhead="#define VERTEX_SHADER 1\n"..paramdefs.."#line "..line.."\n"
-		local fhead="#define FRAGMENT_SHADER 1\n"..paramdefs.."#line "..line.."\n"
-		
-		local copymerge=function(base,name,data)
-			if not base[name] then base[name]={} end
-			for n,v in pairs(data) do
-				base[name][n]=v
-			end
-			return base[name]
-		end
+		paramdefs=table.concat(paramdefs,"\n").."\n".."#line "..line.." //?\n"
+	
+		local vhead="#define VERTEX_SHADER 1\n"
+		local fhead="#define FRAGMENT_SHADER 1\n"
 
-		local p=copymerge(code.programs,name,{
-			vshaders={"v_"..name},
-			fshaders={"f_"..name},
+-- keep shaders inside programs don't bother trying to reuse anything
+
+		local p={
 			name=name,
-			vsource=vsource,
-			fsource=fsource,
 			filename=filename,
-		})
-		copymerge(code.shaders,"v_"..name,{ program=p, source=vhead..(vsource) })
-		copymerge(code.shaders,"f_"..name,{ program=p, source=fhead..(fsource or vsource) }) -- single source trick
+			sources={
+				 [ gl.VERTEX_SHADER   ] = vhead..paramdefs..vsource ,
+				 [ gl.FRAGMENT_SHADER ] = fhead..paramdefs..fsource ,
+			},
+			cache={},
+			vars={},
+		}
+		setmetatable(p,pmeta)
 
--- check that the code compiles OK right now?
---		assert(code.shader(gl.VERTEX_SHADER,"v_"..name,filename))
---		assert(code.shader(gl.FRAGMENT_SHADER,"f_"..name,filename))
+		if code.programs[name] then -- forget old program
+			code.forget_program( code.programs[name] )
+		end
+		code.programs[name]=p -- remember new program
 
 		return p
 	end
 
--- reset headers and load multiple shader sources from a single file
-	code.headers={}
+
+-- load multiple shader sources from a single file
 	function code.shader_sources(text,filename)
 	
-		local shaders=glslang.parse_chunks(text,filename,code.headers)
-
-		for n,v in pairs(shaders) do
---print("PROGRAM",n,#v)
-			code.program_source(n,table.concat(v,"\n"),nil,filename)
-		end
+		glslang.parse_chunks(text,filename,code.headers)
 
 	end
 
--- legacy version, obsolete, use the new program_source instead
--- this will be removed shortly
-	function code.progsrc(name,vsource,fsource)
-		if not code.programs[name] then -- only do once
-			code.shaders["v_"..name]={ source=(vsource) }
-			code.shaders["f_"..name]={ source=(fsource) }
-			code.programs[name]={
-				vshaders={"v_"..name},
-				fshaders={"f_"..name},
-			}
-print("OBSOLETE","glescode.progsrc",name,#vsource,#fsource)
-		end
-	end
-
-	code.shaders={}
+-- reset headers at startup
+	code.headers={}
 	code.programs={}
-	code.defines={}
-
--- default shader prefix to use when building
-
-	local hax_mediump=[[
-
-precision mediump float;
-
-]]
-
-	code.defines_shaderprefix_tab={
+	code.uniforms={}
 	
-		-- and this is our last chance to work
+	code.NEXT_UNIFORM_TEXTURE=0	-- simple global counter to auto assign texture units during uniforms_apply
+	
+	function code.uniforms_apply(p)
 
-		"#version 100\n"..hax_mediump, -- Try ES 2.0
-		"#version 120\n", -- the GL equivalent of ES 2.0
+		code.NEXT_UNIFORM_TEXTURE=0
+		
+		for name,func in pairs(code.uniforms) do
+			local u=p:uniform(name)
+			if u>=0 then -- uniform exists in program
+				func(u)
+			end
+		end
+	end
 
-		"#version 300 es\n"..hax_mediump, -- Try ES 3.0
-		"#version 330\n", -- the GL equivalent of ES 3.0
 
-		-- we start trying to compile at this end of the table
+	function code.forget_program(p)
 
-	}
-	code.defines_shaderprefix_idx=#code.defines_shaderprefix_tab		
-	code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
+		for _,it in pairs( p.shaders or {} ) do -- shaders contained in this program
+			if gl.IsShader(it) then
+				gl.DeleteShader(it)
+			end
+		end
+		p.shaders=nil
+
+		if p[0] then
+			if gl.IsProgram(p[0]) then
+				gl.DeleteProgram(p[0])
+			end
+			p[0]=nil
+		end
+	end
+
 	
 -- forget cached info when we lose context, it is important to call this
 	function code.forget()
---print("FORGETTING ALL SHADERS")
-		for n,v in pairs(code.shaders) do
-			if v[0] then
-				if gl.IsShader(v[0]) then
-					gl.DeleteShader(v[0])
-				end
-				v[0]=nil
-			end
-			if v.program and v.program.base then -- this can be regenerated
---print("DELETING SHADER "..n)
-				code.shaders[n]=nil
-			end
-		end
+
 --print("FORGETTING ALL PROGRAMS")
-		for n,v in pairs(code.programs) do
-			if v[0] then
-				if gl.IsProgram(v[0]) then
-					gl.DeleteProgram(v[0])
-				end
-				v[0]=nil
-			end
-			if v.base then -- this can be regenerated
---print("DELETING PROGRAM "..n)
+		for n,p in pairs(code.programs) do
+			code.forget_program(p)
+			if p.base then -- this can be regenerated
 				code.programs[n]=nil
 			end
 		end
+
 	end
 	
-	function code.shader(stype,sname,filename)
 
-		local s
-		
-		if type(sname)=="string" then
-			s=assert(code.shaders[sname])
-		else
-			s=sname
-			if not code.shaders[s] then
-				local idx=#code.shaders+1
-				code.shaders[s.name or idx]=s
-				code.shaders[s]=s.name or idx
-			end
-			sname=s.name or ("__inline__shader__"..code.shaders[s])
-		end
-		
-		if s[0] then return s[0] end
-
--- Uhm, we could really use a shader lint or precompiler at this point, why does such a thing not exist?
--- I dont normaly care for lint but it would *really* make sense here...
-
---print("Compiling shader "..sname,wstr.dump(s))
-
-		repeat local done=false
-
-			s[0]=assert(gl.CreateShader(stype))
-
-			local src=code.defines.shaderprefix..wstr.macro_replace(s.source,code.defines)
-			
-			gl.ShaderSource(s[0],src)
-			gl.CompileShader(s[0])
-			
-			if gl.GetShader(s[0], gl.COMPILE_STATUS) == gl.FALSE then -- error
-			
-			
-				local err=gl.GetShaderInfoLog(s[0]) or "NIL"
-
-				if code.defines_shaderprefix_idx and code.defines_shaderprefix_idx>1 then -- try and brute force a working version number 
-
-					print("Warning failed to build shader using prefix "..code.defines_shaderprefix_tab[code.defines_shaderprefix_idx])
-					print( ( filename or "" ) .. " : " .. sname .. "\n\n" ..  err .. "\n\n" )
-
-					code.defines_shaderprefix_idx=code.defines_shaderprefix_idx-1
-					code.defines.shaderprefix=code.defines_shaderprefix_tab[code.defines_shaderprefix_idx]
-
-					print("Lowering shader prefix to "..code.defines_shaderprefix_tab[code.defines_shaderprefix_idx])
-
-					gl.DeleteShader(s[0])
-					
-				else -- give up
-
-					error( "ERROR failed to build shader " .. ( filename or "" ) .. " : " .. sname .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
-					done=true
-				
-				end
-
+	code.version_test_cache={}
+	function code.version_test(version)
+		if type( code.version_test_cache[version] ) == "nil" then -- need to check
+			local s=assert(gl.CreateShader(gl.VERTEX_SHADER))
+			gl.ShaderSource(s,version..[[
+				void main(void)
+				{
+				}
+			]])
+			gl.CompileShader(s)
+			if gl.GetShader(s, gl.COMPILE_STATUS) == gl.FALSE then -- error
+				code.version_test_cache[version]=false
 			else
-				done=true
+				code.version_test_cache[version]=true
 			end
-			
-		until done
-	
-		return s[0]
+			gl.DeleteShader(s)
+		end
+		return code.version_test_cache[version]
 	end
-	
-	local pbase={}
-	local pmeta={__index=pbase}
+
+
+	function code.shader_compile(stype,source,filename)
+
+		local ret
+		
+		local versions,src=glslang.yank_shader_versions( glslang.replace_includes(source,code.headers) )
+		for vi,version in ipairs(versions) do
+			if code.version_test(version) then -- find a version that we can use
+				ret=assert(gl.CreateShader(stype))
+				gl.ShaderSource(ret,version..src)
+				gl.CompileShader(ret)
+				if gl.GetShader(ret, gl.COMPILE_STATUS) == gl.FALSE then -- error
+					local err=gl.GetShaderInfoLog(ret) or "NIL"
+					error( "ERROR failed to build shader " .. " (" .. stype .. ") " .. ( filename or "" ) .. "\nSHADER COMPILER ERRORS\n\n" .. err .. "\n\n" )
+				else
+					return ret
+				end
+			end
+		end
+		error( "ERROR failed to build shader " .. " (" .. stype .. ") " .. ( filename or "" ) .. "\nNO SUPPORTED SHADER LANGUAGE VERSION\n\n" )
+
+		return ret
+	end
 	
 	function code.program(pname)
 		local p
 		
-		if type(pname)=="string" then
-		
-			p=code.programs[pname]
-			if not p then -- try basename
-				local basename=wstr.split(pname,"?")[1]
-				local base=assert(code.programs[basename],basename)
-				p=code.program_source(pname,base.vsource,base.fsource,base.filename)
-				p.base=base
-			end
-			assert(p)
-		else
-			p=pname
-			if not code.programs[p] then
-				local idx=#code.programs+1
-				code.programs[p.name or idx]=p
-				code.programs[p]=p.name or idx
-			end
-			pname=p.name or ("__inline__program__"..code.programs[p])
+		p=code.programs[pname]
+		if not p then -- try and create from headers
+			local basename=wstr.split(pname,"?")[1]
+			local base=assert(code.headers[basename],basename)
+			p=code.program_source(pname,{source=base,filename=basename})
 		end
-		
-		if not p[0] then
-			setmetatable(p,pmeta)
+		assert(p)
 
-			p.cache={}
-			p.vars={}
+		if not p[0] then -- need to compile and link
+
 			p[0]=gl.CreateProgram()
 			
-			for i,v in ipairs(p.vshaders) do
-				gl.AttachShader( p[0] , code.shader(gl.VERTEX_SHADER,v) )
-			end
-			for i,v in ipairs(p.fshaders) do
-				gl.AttachShader( p[0] , code.shader(gl.FRAGMENT_SHADER,v) )
+			p.shaders=p.shaders or {}
+			for stype,source in pairs(p.sources) do
+				p.shaders[stype]=code.shader_compile(stype,source,p.filename)
+				gl.AttachShader( p[0] , p.shaders[stype] )
 			end
 			
 --print("Linking program "..pname)
@@ -672,9 +628,8 @@ precision mediump float;
 		
 			if gl.GetProgram(p[0], gl.LINK_STATUS) == gl.FALSE then -- error
 
-				print( gl.GetProgramInfoLog(p[0]) , "\n" )
-
-				error( "failed to build program "..pname )
+				error( gl.GetProgramInfoLog(p[0]) .. "\n" ..
+				 "failed to build program "..pname )
 			end
 			
 		end
@@ -701,31 +656,25 @@ precision mediump float;
 
 	local function cache_set_v4(p,n,v)
 		if not p.cache[n] then
---			p.cache[n]=tcore.new_v4()
 			p.cache[n]=tardis.v4.new()
 		end
---		tcore.set(p.cache[n],v)
 		p.cache[n]:set(v)
 		return p.cache[n]
 	end
 	local function cache_set_m4(p,n,v)
 		if not p.cache[n] then
---			p.cache[n]=tcore.new_m4()
 			p.cache[n]=tardis.m4.new()
 		end
---		tcore.set(p.cache[n],v)
 		p.cache[n]:set(v)
 		return p.cache[n]
 	end
 
 	local function cache_check_v4(p,n,v)
 		if not p.cache[n] then return false end
---		return tcore.compare(p.cache[n],v)
 		return p.cache[n]:compare(v)
 	end
 	local function cache_check_m4(p,n,v)
 		if not p.cache[n] then return false end
---		return tcore.compare(p.cache[n],v)
 		return p.cache[n]:compare(v)
 	end
 

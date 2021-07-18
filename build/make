@@ -26,6 +26,9 @@ cpu=native
 
 # other options are : native 32 64
 
+jobs=$(nproc||echo 1)
+
+# use --jobs=1 to prevent parallel builds
 
 openal=soft
 
@@ -33,7 +36,7 @@ openal=soft
 
 
 OPTIONS=
-LONGOPTIONS=help,debug,release,clean,gcc:,cpu:,win:,openal:
+LONGOPTIONS=help,debug,release,clean,gcc:,cpu:,win:,openal:,jobs:
 
 
 
@@ -63,6 +66,10 @@ case "$1" in
         ;;
         --gcc)
                 gcc="$2"
+                shift 2
+        ;;
+        --jobs)
+                jobs="$2"
                 shift 2
         ;;
         --cpu)
@@ -98,6 +105,8 @@ echo " ./make --release    # perform a release build (default) "
 echo " ./make --debug      # or perform a debug build "
 echo
 echo " ./make --clean      # delete objects and force a full rebuild "
+echo
+echo " ./make --jobs=1     # build one thing at a time "
 echo
 echo " ./make --gcc=gcc    # normal nix build using gcc (default) "
 echo " ./make --gcc=clang  # alternative nix build using clang "
@@ -187,7 +196,15 @@ cd ${buildhere}
 
 
 
-make -j$(nproc||echo 1) $makeopts $*
+if [ "$*" = "clean" ] ; then
 
+make -j$jobs $makeopts clean
+make -j$jobs $makeopts
+
+else
+
+make -j$jobs $makeopts $*
+
+fi
 
 

@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local pack=require("wetgenes.pack")
 local wgrd=require("wetgenes.grd")
 local wwin=require("wetgenes.win")
@@ -44,7 +46,7 @@ M.bake=function(oven,geom_dae)
 		opts={filename=opts}
 	end
 	local s=wzips.readfile(opts.filename)
-print("loaded ",#s,"bytes from "..opts.filename)
+log("geom","loaded ",#s,"bytes from "..opts.filename)
 	local x=wxml.parse(s)
 
 	--print("loaded ",wxml.unparse(x))
@@ -183,7 +185,7 @@ print("loaded ",#s,"bytes from "..opts.filename)
 		if va[0]=="animation_clip" then
 			local anim={name=va["name"],time_start=math.floor(tonumber(va["start"])*geom_dae.fps+0.5),time_end=math.floor(tonumber(va["end"])*geom_dae.fps+0.5)}
 			anims[va.name]=anim
-print(anim.name,anim.time_start,anim.time_end)
+log("geom",anim.name,anim.time_start,anim.time_end)
 			for i,v in ipairs(va or {}) do -- just check the top level for anims 
 				if v.url then v=get_by_id(v.url) end -- reference
 				local d=wxml.descendent(v,"channel")
@@ -657,7 +659,7 @@ end
 -- merge all objects into one
 	its.anim_merge=function()
 
-print("merging")
+log("geom","merging")
 
 		its.grd_texmat=nil
 

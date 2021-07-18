@@ -33,8 +33,7 @@ if [ "$1" = "xtra" ]; then
 	apt-get install -y clang
 
 
-	#mingw32 if you want to build for windows, one of these will probably work
-	apt-get install -y mingw32
+	#mingw64 if you want to build for windows
 	apt-get install -y mingw-w64
 
 	#vagrant and virtualbox for building in controlled environments

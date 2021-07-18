@@ -7,6 +7,10 @@ local wgrd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 local core=require("wetgenes.gamecake.core")
 
+local tardis=require("wetgenes.tardis")
+local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
+
+local ls=function(t) print( require("wetgenes.string").dump(t) ) end
 
 -- Layout replacement...
 -- Maintain a hierarchical system of views so we can render into sub parts of the main screen.
@@ -81,6 +85,10 @@ function M.bake(oven,views)
 		view.hx=opts.hx
 		view.hy=opts.hy
 
+		view.cx=opts.cx or 0	-- set starting point on screen 0,0,0 topleft 0.5,0.5,0.0 center of screen and 1.0,1.0,0.0 is bottom right
+		view.cy=opts.cy or 0
+		view.cz=opts.cz or 0
+
 -- the projection view size, mostly aspect, that we will be aiming for
 		if view.win then
 			view.vx=opts.vx or view.win.width
@@ -93,6 +101,9 @@ function M.bake(oven,views)
 			view.vy=opts.vy -- height
 		end
 
+		view.vx_auto=not opts.vx
+		view.vy_auto=not opts.vy
+
 		view.vz=opts.vz or (view.vy and view.vy*4)-- depth range of the zbuffer
 
 		view.fov=opts.fov or 0 -- field of view, a tan like value, so 1 would be 90deg, 0.5 would be 45deg and so on
@@ -102,8 +113,8 @@ function M.bake(oven,views)
 --		view.aspect=opts.aspect or 1 -- pixel aspect fix, normally 1/1 can also set to 0 for scale to total available area
 
 -- these values are updated when you call update()
-		view.pmtx={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 	-- projection matrix
-		view.port={0,0,0,0}								-- view port x,y,w,h
+		view.pmtx=M4{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 	-- projection matrix
+		view.port=V4{0,0,0,0}								-- view port x,y,w,h
 
 		view.sx=1	-- view scale
 		view.sy=1
@@ -124,12 +135,18 @@ function M.bake(oven,views)
 				view.hx=view.win.width
 				view.hy=view.win.height
 
+				if view.vx_auto then view.vx=view.hx end
+				if view.vy_auto then view.vy=view.hy end
+
 			elseif view.mode=="fbo" then
 
 				view.px=0
 				view.py=0
 				view.hx=view.fbo.w
 				view.hy=view.fbo.h
+
+				if view.vx_auto then view.vx=view.hx end
+				if view.vy_auto then view.vy=view.hy end
 
 			elseif view.mode=="full" then
 
@@ -138,6 +155,9 @@ function M.bake(oven,views)
 				view.hx=view.parent.hx
 				view.hy=view.parent.hy
 
+				if view.vx_auto then view.vx=view.hx end
+				if view.vy_auto then view.vy=view.hy end
+
 			elseif view.mode=="clip" then
 
 				view.px=view.parent.px
@@ -145,6 +165,9 @@ function M.bake(oven,views)
 				view.hx=view.parent.hx
 				view.hy=view.parent.hy
 				
+				if view.vx_auto then view.vx=view.hx end
+				if view.vy_auto then view.vy=view.hy end
+
 				if view.vx and view.vy then
 					if view.hx/view.hy > view.vx/view.vy then -- fit y
 						local hx=view.hy * view.vx/view.vy
@@ -165,9 +188,14 @@ function M.bake(oven,views)
 				view.hy=view.parent.hy
 				view.vx=view.parent.hx
 				view.vy=view.parent.hy
-				view.vz=view.parent.hy*4
+				view.vz=view.vz or view.parent.hy*4
+
+				if view.vx_auto then view.vx=view.hx end
+				if view.vy_auto then view.vy=view.hy end
 
 			end
+
+			view.pz=view.pz or -view.vz/2
 
 			return view
 		end
@@ -185,7 +213,7 @@ function M.bake(oven,views)
 
 --	layout.project23d = function(width,height,fov,depth)
 		
-			local m=view.pmtx
+			local m=view.pmtx:identity()
 			
 			local f=view.vz
 			local n=1
@@ -260,6 +288,8 @@ function M.bake(oven,views)
 
 			end
 
+			view.pmtx:translate(view.vx*(view.cx-0.5),view.vy*(view.cy-0.5),view.pz+view.vz*view.cz) -- choose draw origin from top left to center of screen
+
 			return view
 		end
 
@@ -275,13 +305,6 @@ function M.bake(oven,views)
 
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.LoadIdentity()
-			
-			if view.fov==0 then
-				gl.Translate(-view.vx/2,-view.vy/2,(-view.vz/2)) -- top left corner is origin
-			else
-				gl.Translate(-view.vx/2,-view.vy/2,(-view.vy/2)/view.fov) -- top left corner is origin
-			end
-
 
 			return view
 		end
@@ -291,8 +314,8 @@ function M.bake(oven,views)
 
 			if msg.xraw and msg.yraw then	-- we need to fix raw x,y mouse numbers
 			
-				msg.x=( view.vx * ( (msg.xraw-(view.hx*0.5+view.px)) * view.sx ) / view.hx ) + view.vx*0.5
-				msg.y=( view.vy * ( (msg.yraw-(view.hy*0.5+view.py)) * view.sy ) / view.hy ) + view.vy*0.5
+				msg.x=( view.vx * ( (msg.xraw-(view.hx*0.5+view.px)) * view.sx ) / view.hx ) + view.vx*(0.5-view.cx)
+				msg.y=( view.vy * ( (msg.yraw-(view.hy*0.5+view.py)) * view.sy ) / view.hy ) + view.vy*(0.5-view.cy)
 
 				return true
 			end

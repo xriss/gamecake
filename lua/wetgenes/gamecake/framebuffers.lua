@@ -16,8 +16,8 @@ function M.bake(oven,framebuffers)
 	local images=cake.images
 	
 	local funcs={}
-	local metatable={__index=funcs}
-	
+	local metatable={__index=funcs}	
+
 	framebuffers.data=setmetatable({}, { __mode = 'vk' })
 
 	framebuffers.dirty = function()
@@ -25,6 +25,13 @@ function M.bake(oven,framebuffers)
 			v.dirty=true
 		end
 	end
+
+
+-- the d is one of these three
+
+	framebuffers.NEED_DEPTH=-1
+	framebuffers.NEED_TEXTURE=0
+	framebuffers.NEED_TEXTURE_AND_DEPTH=1
 
 	framebuffers.create = function(w,h,d,def)
 
@@ -60,7 +67,7 @@ function M.bake(oven,framebuffers)
 
 	framebuffers.free_depth = function(fbo)
 		if fbo.depth then
-			gl.DeleteRenderbuffer(fbo.depth)
+			gl.DeleteTexture(fbo.depth)
 			fbo.depth=nil
 		end
 	end
@@ -89,13 +96,21 @@ function M.bake(oven,framebuffers)
 	end
 
 	framebuffers.bind_texture = function(fbo)
-		if fbo then
+		if fbo and fbo.texture then
 			gl.BindTexture(gl.TEXTURE_2D, fbo.texture or 0)
 		else
 			gl.BindTexture(gl.TEXTURE_2D, 0)
 		end
 	end
 	
+	framebuffers.bind_depth = function(fbo)
+		if fbo and fbo.depth then
+			gl.BindTexture(gl.TEXTURE_2D, fbo.depth or 0)
+		else
+			gl.BindTexture(gl.TEXTURE_2D, 0)
+		end
+	end
+
 	framebuffers.bind_frame = function(fbo)
 		if fbo then
 			gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.frame or 0)
@@ -110,6 +125,9 @@ function M.bake(oven,framebuffers)
 
 	framebuffers.resize = function(fbo,w,h,d)
 --print("fbo resize",w,h,d)
+
+		if w<1 then w=0 end
+		if h<1 then h=0 end
 
 		if w==0 then h=0 d=0 end
 		if h==0 then d=0 w=0 end
@@ -128,39 +146,71 @@ function M.bake(oven,framebuffers)
 			end
 			if d~=0 then
 				if not fbo.depth then
-					fbo.depth=gl.GenRenderbuffer()
+					fbo.depth=gl.GenTexture()
 				end
-				gl.BindRenderbuffer(gl.RENDERBUFFER, fbo.depth)
-				gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh)
+
+				gl.BindTexture(gl.TEXTURE_2D, fbo.depth)
+
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
+
+				if fbo.depth_format then
+					gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.depth_format[1], fbo.txw, fbo.txh, 0, fbo.depth_format[2], fbo.depth_format[3],nil)
+				elseif math.abs(d)>=32 then
+					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT32F, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.FLOAT,nil)
+				elseif math.abs(d)>=24 then
+					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT,nil)
+				else
+					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT,nil)
+				end
+
+				gl.BindTexture(gl.TEXTURE_2D, 0)
+
 			end
-			if not fbo.texture then
-				fbo.texture=gl.GenTexture()
-			end
+
 			fbo.uvw=w/fbo.txw -- need to use these max uv coords when drawing with texture instead of 1
 			fbo.uvh=h/fbo.txh 
 
-			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
-			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
-			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
-			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     fbo.TEXTURE_WRAP_S     or framebuffers.TEXTURE_WRAP_S     or gl.CLAMP_TO_EDGE)
-			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     fbo.TEXTURE_WRAP_T     or framebuffers.TEXTURE_WRAP_T     or gl.CLAMP_TO_EDGE)
-			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-				string.rep("\0\0\0\0",fbo.txw*fbo.txh)) -- might need some zero data, depends on driver so safest to provide it.
-
-			gl.BindTexture(gl.TEXTURE_2D, 0)
+			if d>=0 then -- negative depth to disable color buffer
 			
+				if not fbo.texture then
+					fbo.texture=gl.GenTexture()
+				end
+
+				gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
+				
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     fbo.TEXTURE_WRAP_S     or framebuffers.TEXTURE_WRAP_S     or gl.CLAMP_TO_EDGE)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     fbo.TEXTURE_WRAP_T     or framebuffers.TEXTURE_WRAP_T     or gl.CLAMP_TO_EDGE)
+
+				if fbo.texture_format then
+					gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.texture_format[1], fbo.txw, fbo.txh, 0, fbo.texture_format[2], fbo.texture_format[3],nil)
+				else
+					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,nil)
+				end
+				
+				gl.BindTexture(gl.TEXTURE_2D, 0)
+
+			end
+			
+
 			if not fbo.frame then
 				fbo.frame=gl.GenFramebuffer()
 			end
 			gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.frame)
 
 			if fbo.depth then -- optional depth
-				gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, fbo.depth)
+				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, fbo.depth, 0)
 			end
-			gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
+			if fbo.texture then
+				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
+			end
 
 			if( gl.CheckFramebufferStatus(gl.FRAMEBUFFER) ~= gl.FRAMEBUFFER_COMPLETE) then
-				print("FBO error",fbo.depth,gl.CheckFramebufferStatus(gl.FRAMEBUFFER),gl.GetError())
+				error("FBO error".." DEPTH="..d.." STATUS="..gl.CheckFramebufferStatus(gl.FRAMEBUFFER).." ERROR="..gl.GetError())
 			end
 			
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -221,6 +271,7 @@ function M.bake(oven,framebuffers)
 		"check",
 		"bind_frame",
 		"bind_texture",
+		"bind_depth",
 		"resize",
 		"download",
 		"mipmap",
@@ -270,6 +321,16 @@ function M.bake(oven,framebuffers)
 		oven.cake.canvas.flat.tristrip("rawuv",t,shadername,function(p)
 			for i=#fbin,1,-1 do -- bind all textures in reverse order so we always end with texture0 as active
 				gl.ActiveTexture(gl.TEXTURE0+(i-1))
+				local u=p:uniform("tex"..i)
+				if u>=0 then 
+					gl.Uniform1i( u , i-1 )
+				end
+				if i==0 then
+					local u=p:uniform("tex")
+					if u>=0 then 
+						gl.Uniform1i( u , 0 )
+					end
+				end
 				fbin[i]:bind_texture()
 			end
 			if callback then callback(p) end

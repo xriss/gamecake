@@ -1,6 +1,10 @@
 cd `dirname $0`
 THISDIR=`dirname $0`
 
+echo " installing qemu "
+
+./install-apt.sh
+
 
 #update these to get a newer version
 RASPBIAN_FILE=2015-11-21-raspbian-jessie-lite
@@ -33,9 +37,6 @@ else
 
 fi
 
-echo " installing qemu "
-
-sudo apt-get install qemu-system sshpass
 
 echo " copying raspbian "
 cp raspbian.img raspi.img

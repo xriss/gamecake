@@ -13,7 +13,7 @@
 #ifndef __native_client__
 #include <sys/ioctl.h>
 #ifndef __ANDROID__
-#include <sys/sysctl.h>
+//#include <sys/sysctl.h>
 #endif
 #endif
 

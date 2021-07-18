@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 -- do a reverse enum lookup, get a name from a value
 local lookup=function(tab,num)
 	for n,v in pairs(tab) do
@@ -66,12 +68,15 @@ sdl.create=function(t)
 	sdl.video_init()
 
 	if not t.console then -- try and free the windows console unless asked not to
-		
+
 		pcall( function() -- we dont care if this fails, just means we are not running on windows
 		
 			local ffi=require("ffi")
 			ffi.cdef(" void FreeConsole(void); ")
-			ffi.C.FreeConsole()
+			if ffi.C.FreeConsole then
+				log( "oven","detaching from windows console")
+				ffi.C.FreeConsole()
+			end
 
 		end)
 		
@@ -81,6 +86,11 @@ sdl.create=function(t)
 	sdl.it=it
 	
 	local flags={ SDL.window.Resizable , SDL.window.OpenGL }
+
+	if not t.border then
+		flags[#flags+1]=SDL.window.Borderless
+	end
+	
 --[[
 	if     view=="full" then	 flags={SDL.window.Desktop,SDL.window.OpenGL}
 	elseif view=="max"  then	 flags={SDL.window.Maximized,SDL.window.OpenGL}
@@ -95,6 +105,20 @@ sdl.create=function(t)
 		x       = t.x,
 		y       = t.y,
 	})
+
+	if not t.border then
+
+		require("wetgenes.win.core").sdl_attach_resize_hax(it.win)
+
+--[[
+		it.win:setHitTest(function(...)
+
+			print(...)
+
+		end)
+]]
+
+	end
 	
 	return it
 end
@@ -169,11 +193,19 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 
 ]]
 
+	if not it.ctx then -- request an opengl 3.2 core context
+
+		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask,SDL.glProfile.Core)
+		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
+		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion,2)
+
+		it.ctx=SDL.glCreateContext(it.win)
+
+	end
 
 	if not it.ctx then -- request an opengl es 3.0 context
 
 		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask, SDL.glProfile.ES)
-		SDL.glSetAttribute(SDL.glAttr.ContextFlags,0)
 		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion, 3)
 		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion, 0)
 
@@ -181,16 +213,6 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 
 	end
 
-	if not it.ctx then -- request an opengl core context
-
-		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask,SDL.glProfile.Core)
-		SDL.glSetAttribute(SDL.glAttr.ContextFlags,SDL.glFlags.ForwardCompatible)
-		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion,3)
-		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion,2)
-
-		it.ctx=SDL.glCreateContext(it.win)
-
-	end
 
 
 	assert(it.ctx)
@@ -200,9 +222,9 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 	
 	
 	local gles=require("gles")
-	print( "GL_VENDOR   = "..(gles.Get(gles.VENDOR) or ""))
-	print( "GL_RENDERER = "..(gles.Get(gles.RENDERER) or ""))
-	print( "GL_VERSION  = "..(gles.Get(gles.VERSION) or ""))
+	log( "oven","vendor",(gles.Get(gles.VENDOR) or ""))
+	log( "oven","render",(gles.Get(gles.RENDERER) or ""))
+	log( "oven","version",(gles.Get(gles.VERSION) or ""))
 	
 	return it.ctx
 end
@@ -240,7 +262,7 @@ sdl.peek=function()
 end
 
 sdl.wait=function()
-	print("SDL wait")
+	log("sdl","wait")
 	return nil
 end
 
@@ -356,7 +378,17 @@ sdl.msg_fetch=function()
 --			sdl.mousexy[2]=e.y
 	
 		
-		elseif	(e.type == SDL.event.WindowEvent) then -- ignore
+		elseif	(e.type == SDL.event.WindowEvent) then -- window related, eg focus resize etc
+
+			if ( e.event == SDL.eventWindow.SizeChanged ) then
+			
+				local t={}
+				t.time=sdl.time()
+				t.class="resize"
+
+				sdl.queue[#sdl.queue+1]=t
+
+			end
 
 		elseif	(e.type == SDL.event.Quit) then -- window close button, or alt f4
 

@@ -26,7 +26,7 @@ M.bake=function(oven,wtreefile)
 	local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
 	
 
-function wtreefile.refresh_items(items)
+function wtreefile.refresh_items(widget,items)
 
 	local files={}
 	pcall( function()
@@ -35,6 +35,8 @@ function wtreefile.refresh_items(items)
 				local t=lfs.attributes(wpath.resolve(items.path,n))
 				if t then
 					t.name=n
+					t.path=wpath.resolve(items.path,t.name)
+					t.prefix=""
 					files[#files+1]=t
 				end
 			end
@@ -53,9 +55,10 @@ function wtreefile.refresh_items(items)
 		local it={}
 
 		it.mode=v.mode
-		it.path=wpath.resolve(items.path,v.name)
+		it.path=v.path
+		it.name=v.name
 
-		if v.mode=="directory" then
+		if it.mode=="directory" then
 			it.text=v.name.."/"
 		else
 			it.text=v.name
@@ -67,17 +70,21 @@ function wtreefile.refresh_items(items)
 
 end
 
-function wtreefile.refresh(widget)
+function wtreefile.refresh(treefile)
 
+	if not treefile.tree_widget.items.path then
 
-	local items={}
+		local items={}
 
-	items.path=wpath.resolve(".")
-	items.mode="directory"
-	wtreefile.refresh_items(items)
+		items.path=wpath.resolve(".")
+		items.mode="directory"
+		wtreefile.refresh_items(treefile,items)
 
-	widget.tree_widget:refresh(items)
+		treefile.tree_widget:refresh(items)
 
+	end
+
+	treefile.tree_widget:refresh()
 end
 
 function wtreefile.class_hooks(hook,widget,dat)
@@ -94,7 +101,7 @@ function wtreefile.class_hooks(hook,widget,dat)
 						it[i]=nil
 					end
 				else
-					wtreefile.refresh_items(it)
+					wtreefile.refresh_items(treefile,it)
 				end
 
 				tree:refresh()

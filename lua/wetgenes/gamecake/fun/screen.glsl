@@ -1,6 +1,12 @@
 
 #shader "fun_screen_bloom_pick"
 
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -47,6 +53,12 @@ void main(void)
 
 
 #shader "fun_screen_bloom_blur"
+
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -98,6 +110,12 @@ void main(void)
 
 
 #shader "fun_screen_scanline"
+
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -186,6 +204,12 @@ void main(void)
 #endif
 
 #shader "fun_screen_dropshadow"
+
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
 
 uniform mat4 modelview;
 uniform mat4 projection;

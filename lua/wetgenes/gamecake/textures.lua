@@ -135,8 +135,7 @@ textures.upload = function(id)
 		gl_data )
 
 	local err=gl.GetError()
-	
-	assert( err==0 ) -- well that went wrong
+	assert( err==0 , gl.numtostring(err) ) -- well that went wrong
 
 	it.gl_dirty=false
 

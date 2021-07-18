@@ -11,7 +11,7 @@ Gamecake updates
 
 {_list:blog_list}
 
-<div>{_blog_page_older:link_older_page} {_blog_page_newer:link_newer_page}</div>
+<div>{_blog_page_older:link_older_page||} {_blog_page_newer:link_newer_page||}</div>
 
 #^-Paging for main blog list page
 #^link_older_page
@@ -30,7 +30,7 @@ Gamecake updates
 #^_blog_post_body_one
 <div class="blog_wrap">
 	{_blog_post_body}
-	<div class="paging_wrap">{_blog_post_older:link_older_post} {_blog_post_newer:link_newer_post}</div>
+	<div class="paging_wrap">{_blog_post_older:link_older_post||} {_blog_post_newer:link_newer_post||}</div>
 </div>
 
 

@@ -43,6 +43,47 @@ M.reset=function(its)
 end
 
 
+M.prepare=function(objs)
+
+	local stack=tardis.m4_stack()
+
+	local prepare ; prepare=function(its)
+
+		stack.push()
+
+		local trs=its.trs
+
+		if trs then
+
+			stack.translate( trs[1] , trs[2] , trs[3])
+			stack.rotate( { trs[4] , trs[5] , trs[6] , trs[7] } )
+			stack.scale( trs[8] , trs[9] , trs[10] )
+
+		elseif its.matrix then
+
+			stack.product( its.matrix )
+
+		end
+		
+		its.world=stack.save()
+		
+		if its.inverse then
+			its.bone=its.world:product(its.inverse,tardis.m4.new())
+		end
+		
+		for i,v in ipairs(its) do
+			prepare(v)
+		end
+		
+		stack.pop()
+
+	end
+
+	prepare(objs.scene)
+
+end
+
+
 M.bake=function(oven,geoms)
 
 	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
@@ -353,45 +394,6 @@ get the tweak and reset matrix of the bones
 		end
 	end
 
-	geoms.prepare=function(objs)
-	
-		local stack=tardis.m4_stack()
-	
-		local prepare ; prepare=function(its)
-
-			stack.push()
-
-			local trs=its.trs
-
-			if trs then
-
-				stack.translate( trs[1] , trs[2] , trs[3])
-				stack.rotate( { trs[4] , trs[5] , trs[6] , trs[7] } )
-				stack.scale( trs[8] , trs[9] , trs[10] )
-
-			elseif its.matrix then
-
-				stack.product( its.matrix )
-
-			end
-			
-			its.world=stack.save()
-			
-			if its.inverse then
-				its.bone=its.world:product(its.inverse,tardis.m4.new())
-			end
-			
-			for i,v in ipairs(its) do
-				prepare(v)
-			end
-			
-			stack.pop()
-
-		end
-
-		prepare(objs.scene)
-
-	end
 
 	geoms.update=function(objs)
 
@@ -399,6 +401,7 @@ get the tweak and reset matrix of the bones
 
 --		geoms.animate(objs)
 --		geoms.prepare(objs)
+
 	end
 
 	geoms.draw=function(objs,progname,cb,modes)
@@ -409,7 +412,7 @@ get the tweak and reset matrix of the bones
 
 			if its.mesh then
 				gl.PushMatrix()
-				gl.MultMatrix( its.world )
+				if its.world then gl.MultMatrix( its.world ) end
 				geom.draw(its.mesh,progname,cb,modes)
 				gl.PopMatrix()
 			end
@@ -426,6 +429,9 @@ get the tweak and reset matrix of the bones
 
 	geoms.draw_bones=function(objs,progname,cb,modes)
 	
+		geoms.animate(objs)
+		geoms.prepare(objs)
+
 		local mesh=geom.hexahedron():adjust_scale(1/4)
 	
 		local draw

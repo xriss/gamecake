@@ -292,6 +292,61 @@ M.fill=function(geom)
 		return it
 	end
 
+	geom.hexafloor=function(it,radius,triangles)
+		it=geom.new(it)
+
+		radius=radius or 100
+		triangles=triangles or 10
+
+		local t=math.floor(triangles)
+		local r=radius
+		local d=r/t
+
+		local sqrt75=math.sqrt(0.75)
+		
+		it.verts={}
+		it.polys={}
+
+		-- first z line of points no polys
+		for z=-t,t do
+			it.verts[#it.verts+1]={0,0,z*d}
+		end
+
+		local ya=1
+		local yb=1
+		local yc=#it.verts+1
+
+		for x=1,t do -- next line of points also makes triangles
+			local first=true
+			for z=-t+(x/2),t-(x/2) do
+				it.verts[#it.verts+1]={-x*sqrt75*d,0,z*d}
+				it.polys[#it.polys+1]={ya,#it.verts,ya+1}
+				if not first then
+					it.polys[#it.polys+1]={#it.verts-1,ya,#it.verts}
+				end
+				ya=ya+1
+				first=false
+			end
+			ya=yc
+			yc=#it.verts+1
+			local first=true
+			for z=-t+(x/2),t-(x/2) do
+				it.verts[#it.verts+1]={ x*sqrt75*d,0,z*d}
+				it.polys[#it.polys+1]={yb,#it.verts,yb+1}
+				if not first then
+					it.polys[#it.polys+1]={#it.verts-1,yb,#it.verts}
+				end
+				yb=yb+1
+				first=false
+			end
+			yb=yc
+			yc=#it.verts+1
+		end
+		
+		return it
+	end
+
+
 			
 	return geom
 end

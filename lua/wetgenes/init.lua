@@ -1,5 +1,6 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 --[[#lua.wetgenes
 
@@ -7,6 +8,10 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 Simple generic functions that are intended to be useful for all 
 wetgenes.* modules.
+
+Probably best to cherry pick a few functions you need and export then like so.
+
+	local export,lookup,deepcopy=require("wetgenes"):export("export","lookup","deepcopy")
 
 ]]
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -59,7 +64,7 @@ end
 Export multiple names from this table as multiple returns, can be 
 used to pull functions out of this module and into locals like so
 
-	local export,lookup,set_env=require("wetgenes"):export("export","lookup","set_env")
+	local export,lookup,deepcopy=require("wetgenes"):export("export","lookup","deepcopy")
 
 Or copy it into other modules to provide them with the same functionality.
 
@@ -131,6 +136,31 @@ end
 
 
 -----------------------------------------------------------------------------
+--[[#lua.wetgenes.deepcopy
+
+	deepcopy(tab)
+
+Create and return a new table containing the same data as the input. If any of
+the table values (not keys) are tables then these are also duplicated,
+recursively.
+
+If this is called with a value that is not a table then that value is just
+returned so it's safe to call on values without checking them.
+
+]]
+-----------------------------------------------------------------------------
+local deepcopy ; deepcopy=function(orig)
+	if type(orig) ~= 'table' then return orig end
+	local copy={}
+	for k,v in next,orig,nil do
+		copy[ deepcopy(k) ] = deepcopy(v)
+	end
+	return copy
+end
+M.deepcopy=deepcopy
+
+
+-----------------------------------------------------------------------------
 --[[#lua.wetgenes.set_env
 
 	gamecake -e" require('wetgenes').savescripts('./') "
@@ -177,3 +207,5 @@ M.savescripts=function(basedir)
 	end
 
 end
+
+

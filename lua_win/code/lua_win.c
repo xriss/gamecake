@@ -10,6 +10,14 @@
 
 #include <stdlib.h>
 
+
+
+#include "SDL.h"
+
+#include "../../lua_sdl2/luasdl2/src/window.h"
+
+
+
 static const u8 font_bits[16*48]={
 
 0x00,0x18,0x66,0x6c,0x18,0x00,0x70,0x18,0x0c,0x30,0x00,0x00,0x00,0x00,0x00,0x06,
@@ -189,6 +197,53 @@ char *path=0;
 }
 
 
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// attach resize hacks to an sdl window
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+
+#define RESIZE_BORDER 8
+
+static SDL_HitTestResult SDLCALL
+	hitTest(SDL_Window *window, const SDL_Point *pt, void *data)
+{
+	int w, h;
+
+//	bool IsFullscreen = SDL_GetWindowFlags(win) & FullscreenFlag;
+//	if( IsFullscreen ) { return SDL_HITTEST_NORMAL; }
+    
+	SDL_GetWindowSize(window, &w, &h);
+
+	if( pt->x <     RESIZE_BORDER  &&  pt->y <     RESIZE_BORDER ) { return SDL_HITTEST_RESIZE_TOPLEFT;     } else
+	if( pt->x > w - RESIZE_BORDER  &&  pt->y <     RESIZE_BORDER ) { return SDL_HITTEST_RESIZE_TOPRIGHT;    } else
+	if( pt->x > w - RESIZE_BORDER  &&  pt->y > h - RESIZE_BORDER ) { return SDL_HITTEST_RESIZE_BOTTOMRIGHT; } else
+	if( pt->x <     RESIZE_BORDER  &&  pt->y > h - RESIZE_BORDER ) { return SDL_HITTEST_RESIZE_BOTTOMLEFT;  } else
+//	if( pt->y <     RESIZE_BORDER                                ) { return SDL_HITTEST_RESIZE_TOP;         } else
+	if( pt->y > h - RESIZE_BORDER                                ) { return SDL_HITTEST_RESIZE_BOTTOM;      } else
+	if( pt->x <     RESIZE_BORDER                                ) { return SDL_HITTEST_RESIZE_LEFT;        } else
+	if( pt->x > w - RESIZE_BORDER                                ) { return SDL_HITTEST_RESIZE_RIGHT;       } else
+	if( pt->y <     RESIZE_BORDER                                ) { return SDL_HITTEST_DRAGGABLE;          }
+
+	return SDL_HITTEST_NORMAL;
+}
+
+
+
+int lua_wetwin_sdl_attach_resize_hax(lua_State *l)
+{
+	SDL_Window *win = commonGetAs(l, 1, WindowName, SDL_Window *);
+	
+	SDL_SetWindowHitTest(win, hitTest, NULL);
+
+	return 0;
+}
+
+
+
+
+
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -205,6 +260,10 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 
 		{"get_exe_path",		lua_wetwin_get_exe_path},
 		{"get_mod_path",		lua_wetwin_get_mod_path},
+
+// sdl hax
+
+		{"sdl_attach_resize_hax",		lua_wetwin_sdl_attach_resize_hax},
 		
 		{0,0}
 	};

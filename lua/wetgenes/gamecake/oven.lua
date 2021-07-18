@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 --[[#lua.wetgenes.gamecake.oven
 
 	oven=require("wetgenes.gamecake.oven").bake(opts)
@@ -69,33 +71,35 @@ function M.bake(opts)
 
 	oven.enable_close_window=true -- let the close button, close the window (otherwise you should catch close messages in app)
 
-		oven.opts=opts or {}
-		
-		if type(opts[1])=="table" then -- probably passed in from nacl
-			for n,v in pairs(opts[1]) do -- copy it all into opts
-				opts[n]=v
-			end
+	oven.opts=opts or {}
+	
+	if type(opts[1])=="table" then -- probably passed in from nacl
+		for n,v in pairs(opts[1]) do -- copy it all into opts
+			opts[n]=v
 		end
+	end
 
 -- handle commandline options, copy --flags into opts.args and put other args into number keys
-		opts.args=opts.args or {}
-		for i=0,#opts do local v=opts[i]
-			if type(v)=="string" then
-				if v:sub(1,2)=="--" then -- strip --from-start-of-flags
-					local s,e = v:find("=")
-					if s then -- its a setting so set it
-						local n=v:sub(3,s-1)
-						local s=v:sub(e+1)
-						opts.args[ n ]=s -- simple setting, strings only
-					else
-						opts.args[ v:sub(3) ]=true -- just a flag
-					end
+	opts.args=opts.args or {}
+	for i=0,#opts do local v=opts[i]
+		if type(v)=="string" then
+			if v:sub(1,2)=="--" then -- strip --from-start-of-flags
+				local s,e = v:find("=")
+				if s then -- its a setting so set it
+					local n=v:sub(3,s-1)
+					local s=v:sub(e+1)
+					opts.args[ n ]=s -- simple setting, strings only
 				else
-					opts.args[#opts.args+1]=v -- normal arg
+					opts.args[ v:sub(3) ]=true -- just a flag
 				end
+			else
+				opts.args[#opts.args+1]=v -- normal arg
 			end
 		end
+	end
 --dprint(opts)
+
+	require("wetgenes.logs").setup(opts.args)
 
 --print(wwin.flavour)
 
@@ -212,7 +216,8 @@ os.exit()
 			end
 
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
-				console=opts.args.console} -- add --console to commandline to keep console open
+				console=opts.args.console,		-- use --console on commandline to keep console open
+				border=opts.args.border}		-- use --border  on commandline to keep window borders
 			local screen=wwin.screen()
 
 			inf.name=opts.class_name or opts.title
@@ -254,6 +259,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 	
 			local doshow=opts.show or "win" -- default window display
 			if opts.args.windowed   then doshow="win" end
+			if opts.args.borderless then doshow="less" end
 			if opts.args.fullscreen then doshow="full" end
 			if opts.args.maximised  then doshow="max" end
 			if doshow then oven.win:show(doshow) end
@@ -338,11 +344,11 @@ require("gles").CheckError() -- uhm this fixes an error?
 			if name=="*" then
 			
 				for n,v in pairs(oven.baked) do -- reload all baked modules
-					print("rebake",n)
+					log("rebake",n)
 					local suc,err=pcall(function()
 						oven.reload(n)
 					end)
-					if not suc then print("IGNORE",err) end
+					if not suc then log("rebake","IGNORE",err) end
 				end
 			
 			else
@@ -512,9 +518,9 @@ require("gles").CheckError() -- uhm this fixes an error?
 			if oven.do_backtrace then
 				oven.do_backtrace=false
 				if oven.update_co then
-					print( debug.traceback(oven.update_co) ) -- debug where we are?
+					log( "oven" , debug.traceback(oven.update_co) ) -- debug where we are?
 				else
-					print( debug.traceback() ) -- debug where we are?
+					log( "oven" , debug.traceback() ) -- debug where we are?
 				end
 			end
 
@@ -604,8 +610,10 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 		function oven.preloader(sa,sb)
 			sa=sa or ""
 			sb=sb or ""
-print(sa.." : "..sb)
 
+log("oven",sa.." : "..sb)
+
+--[[
 			if wwin.flavour=="nacl" then
 				wwin.hardcore.print(sa.." : "..sb)
 				if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
@@ -613,7 +621,7 @@ print(sa.." : "..sb)
 				end
 				return
 			end
-
+]]
 			if not oven.preloader_enabled then return end
 
 			local t=oven.rebake("wetgenes.gamecake.images").get("fonts/basefont_8x8") -- font loaded test?
@@ -730,6 +738,10 @@ end
 						oven.frame_rate_auto_active=time_now
 					end
 
+					if m.class=="resize" then -- window resize
+						oven.frame_rate_auto_active=time_now
+					end
+
 					if m.class=="close" then -- window has been closed so do a shutdown
 						if oven.enable_close_window then
 							oven.next=true
@@ -737,7 +749,7 @@ end
 					end
 
 					if m.class=="app" then -- androidy
-print("caught : ",m.class,m.cmd)
+log("oven","caught : ",m.class,m.cmd)
 						if		m.cmd=="init_window" then
 							oven.do_start=true
 						elseif	m.cmd=="gained_focus"  then

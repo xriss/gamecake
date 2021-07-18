@@ -140,14 +140,22 @@ function wtiles.skin(widget)
 
 --			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
 
-			gl.ActiveTexture(gl.TEXTURE2) gl.Uniform1i( p:uniform("tex_tile"), 2 )
+			gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+			gl.Uniform1i( p:uniform("tex_tile"), gl.NEXT_UNIFORM_TEXTURE )
 			gl.BindTexture( gl.TEXTURE_2D , widget.bitmap_tex )
+			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
-			gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_map"), 1 )
+			gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+			gl.Uniform1i( p:uniform("tex_map"), gl.NEXT_UNIFORM_TEXTURE )
 			gl.BindTexture( gl.TEXTURE_2D , widget.tilemap_tex )
+			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
-			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_cmap"), 0 )
+			gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+			gl.Uniform1i( p:uniform("tex_cmap"), gl.NEXT_UNIFORM_TEXTURE )
 			gl.BindTexture( gl.TEXTURE_2D , widget.colormap_tex )
+			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
+			gl.ActiveTexture( gl.TEXTURE0 )
 
 			gl.Uniform4f( p:uniform("tile_info"),	8,
 													16,

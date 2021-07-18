@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 -- Main Good Luck Have Fun system virtual machine management.
 
 
@@ -83,7 +85,7 @@ system.setup=function(code)
 	system.fullscreen_width=screensize.width or 1920
 	system.fullscreen_height=screensize.height or 1080
 
-print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
+--print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 
 	if code then
 
@@ -125,11 +127,10 @@ print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 			system.main=coroutine.create(system.code.main)
 		elseif system.code.hardware then -- hardware only
 			system.hardware=system.code.hardware
-		else -- no hardware , choose picish
-			system.hardware=(system.configurator({mode="picish"})) -- tiny mode
 		end
 		
 		if not system.main then -- the whole file is the coroutine
+			system.hardware={}
 			system.main=co
 		end
 		
@@ -163,7 +164,7 @@ print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 		
 		if it then
 
-			print("hardware : ",v.component,v.name or v.component)
+			log("fun","hardware : ",v.component,v.name or v.component)
 		
 			system.components[#system.components+1]=it
 			system.components[it.name or it.component]=it	-- link by name
@@ -172,7 +173,7 @@ print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 		
 	end
 	
-	assert(system.components.screen,"need a screen component")
+--	assert(system.components.screen,"need a screen component")
 
 -- perform specific setup of used components
 	local opts={
@@ -183,8 +184,11 @@ print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 
 	system.resume({setup=true})
 
-	oven.mods["wetgenes.gamecake.mods.snaps"].fbo=system.components.screen.fbo
+	if system.components.screen then
+		oven.mods["wetgenes.gamecake.mods.snaps"].fbo=system.components.screen.fbo
+	end
 	
+	system.is_setup=true
 	return system
 end
 
@@ -209,6 +213,7 @@ system.clean=function()
 	for _,it in ipairs(system.components) do
 		if it.clean then it.clean() end
 	end
+	system.is_setup=false
 end
 
 system.msg=function(m)
@@ -405,8 +410,8 @@ system.save_fun_png=function(name,path)
 	local dsize=#dstr+12 -- header size is 12
 	local dh=math.ceil(dsize/(hx*4))
 	
-	print(0,0,0,hx,hy,"BITMAP")
-	print(0,0,0,hx,dh,"DATA",dsize)
+	log("fun",0,0,0,hx,hy,"BITMAP")
+	log("fun",0,0,0,hx,dh,"DATA",dsize)
 	
 	local g=wgrd.create("U8_RGBA", hx , hy+dh , 1)
 	g:clear(0xff000000) -- start with a solid black
@@ -440,7 +445,7 @@ system.save_fun_png=function(name,path)
 	-- add each component ( some pixels will now be transparent
 	for i,it in ipairs(its) do
 		g:pixels(it.px,it.py,it.hx,it.hy, it.grd )
-		print(i,it.px,it.py,it.hx,it.hy,it.component.name)
+		log("fun",i,it.px,it.py,it.hx,it.hy,it.component.name)
 	end
 
 	-- draw box around area

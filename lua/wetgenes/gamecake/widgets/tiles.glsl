@@ -2,6 +2,12 @@
 
 #shader "widget_draw_texteditor_tilemap"
 
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+
 uniform mat4 modelview;
 uniform mat4 projection;
 //uniform vec2 projection_zxy;

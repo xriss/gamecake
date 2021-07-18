@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 --[[#lua.wetgenes.package
 
 	wpackage=require("wetgenes.package")
@@ -31,11 +33,11 @@ M.reload=function(name)
 	if name=="*" then
 	
 		for n,v in pairs(package.loaded) do -- reload all baked modules
-			print("reload",n)
+			log("package","reload",n)
 			local suc,err=pcall(function()
 				M.reload(n)
 			end)
-			if not suc then print("IGNORE",err) end
+			if not suc then log("package","IGNORE",err) end
 		end
 	
 	else

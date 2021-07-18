@@ -501,6 +501,35 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		return it
 	end
 
+
+	M.merge_points_by_pos=function(it,snap)
+
+		local hash={} -- map string to
+		local map={} -- map old points to new points
+		local verts={}
+		local idx=1
+		for iv,vv in ipairs(it.verts) do
+			if snap then
+				vv[1]=math.floor(0.5+(vv[1]/snap))*snap
+				vv[2]=math.floor(0.5+(vv[2]/snap))*snap
+				vv[3]=math.floor(0.5+(vv[3]/snap))*snap
+			end
+			local s=vv[1]..","..vv[2]..","..vv[3]
+			if not hash[s] then
+				hash[s]=idx
+				verts[idx]=vv
+				idx=idx+1
+			end
+			map[iv]=hash[s]
+		end
+		it.verts=verts -- new verts
+		for ip,vp in ipairs(it.polys) do
+			for i=1,#vp do
+				vp[i] = map[ vp[i] ] -- change vert indexs
+			end
+		end
+	end
+
 	M.build_tangents=function(it)
 
 -- reset tangents
@@ -845,6 +874,155 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 	M.find_center=function(it)
 		local dd=M.find_bounds(it)
 		return (dd[1]+dd[2])/2 , (dd[3]+dd[4])/2 , (dd[5]+dd[6])/2
+	end
+
+	-- get collision triangle,vertex collision tables
+	M.get_colision_tables=function(it,m4)
+
+		local tp={}
+		local tv={}
+		for i,v in ipairs(it.verts) do
+			local l=#tv
+			local v=V4{v[1],v[2],v[3],1}
+			if m4 then v:product(m4) end -- adjust position
+			tv[l+1]=v[1]
+			tv[l+2]=v[2]
+			tv[l+3]=v[3]
+		end
+		for i,p in ipairs(it.polys) do
+			for ti=0,(#p-3) do
+				for i=0,2,1 do
+					local tv=1+ti+i if i==0 then tv=1 end
+					tp[#tp+1]=p[tv]-1
+				end
+			end
+		end
+
+		return tp,tv
+
+	end
+
+-- build a center vertex between all the given vertices
+	M.make_center_vertex=function(it,...)
+
+		local p={...}
+		local c={}
+
+		local vm=0 -- find max (sanity)
+		for iv=1,#p do
+			local v=it.verts[ p[iv] ]
+			vm=math.max(vm,#v)
+		end
+		for iv=1,#p do
+			local v=it.verts[ p[iv] ]
+			for i=1,vm do
+			c[i]=(c[i] or 0)+(v[i] or 0)
+			end
+		end
+		for i=1,vm do -- average
+			c[i]=c[i]/#p
+		end
+
+		return c
+	end
+
+
+-- only subdivide polys *within* the given radius from the origin
+	M.subdivide_radius=function(it,radius)
+
+		local ps={}
+		local np=#it.polys
+		for ip=1,np do
+			local p=it.polys[ip]
+
+			local mask=0
+			local vb=#it.verts
+			for i=1,#p do
+				local ib=i-1
+				if ib==0 then ib=#p end -- wrap
+				local c=M.make_center_vertex(it,p[ib],p[i])
+				local dd=c[1]*c[1]+c[2]*c[2]+c[3]*c[3]
+				local d=math.sqrt(dd)
+				if d<=radius then
+					mask=mask+math.pow(2,i-1)
+					it.verts[ #it.verts+1 ]=c
+				end
+			end
+
+			local vl=#it.verts
+			if #p==3 then
+				if mask==1+2+4 then -- all 3 sides are split
+					ps[#ps+1]={ p[1] , vl-3+2 , vl-3+1 , mat=p.mat }
+					ps[#ps+1]={ p[2] , vl-3+3 , vl-3+2 , mat=p.mat }
+					ps[#ps+1]={ p[3] , vl-3+1 , vl-3+3 , mat=p.mat }
+					ps[#ps+1]={ vl-2 , vl-1   , vl-0   , mat=p.mat }
+				elseif mask==1 then -- single 3-1 split
+					ps[#ps+1]={ p[3] , vl     , p[2]   , mat=p.mat }
+					ps[#ps+1]={ vl   , p[1]   , p[2]   , mat=p.mat }
+				elseif mask==2 then -- single 1-2 split
+					ps[#ps+1]={ p[1] , vl     , p[3]   , mat=p.mat }
+					ps[#ps+1]={ vl   , p[2]   , p[3]   , mat=p.mat }
+				elseif mask==4 then -- single 2-3 split
+					ps[#ps+1]={ p[2] , vl     , p[1]   , mat=p.mat }
+					ps[#ps+1]={ vl   , p[3]   , p[1]   , mat=p.mat }
+				elseif mask==1+2 then -- double 3-1 1-2 split
+					ps[#ps+1]={ vl-1 , p[1]   , vl     , mat=p.mat }
+					ps[#ps+1]={ p[3] , vl-1   , vl     , mat=p.mat }
+					ps[#ps+1]={ p[3] , vl     , p[2]   , mat=p.mat }
+				elseif mask==1+4 then -- double 3-1 2-3 split
+					ps[#ps+1]={ vl-1 , p[1]   , p[2]   , mat=p.mat }
+					ps[#ps+1]={ p[2] , vl     , vl-1   , mat=p.mat }
+					ps[#ps+1]={ vl   , p[3]   , vl-1   , mat=p.mat }
+				elseif mask==2+4 then -- double 1-2 2-3 split
+					ps[#ps+1]={ p[1] , vl-1   , vl     , mat=p.mat }
+					ps[#ps+1]={ vl-1 , p[2]   , vl     , mat=p.mat }
+					ps[#ps+1]={ vl   , p[3]   , p[1]   , mat=p.mat }
+				elseif mask==0 then -- no split
+					ps[#ps+1]={ p[1] , p[2] , p[3] , mat=p.mat }
+				end
+			else
+				ps[#ps+1]=p
+			end
+
+			
+		end
+
+		it.polys=ps -- new polygons
+
+		return it
+	end
+
+-- subdivide polys
+	M.subdivide=function(it,radius)
+
+		if radius then return M.subdivide_radius(it,radius) end
+
+		local ps={}
+		local np=#it.polys
+		for ip=1,np do
+			local p=it.polys[ip]
+
+			for i=1,#p do
+				local ib=i-1
+				if ib==0 then ib=#p end -- wrap
+				it.verts[ #it.verts+1 ]=M.make_center_vertex(it,p[ib],p[i])
+			end
+
+			if #p==3 then 
+				ps[#ps+1]={p[1],#it.verts-3+2,#it.verts-3+1,mat=p.mat}
+				ps[#ps+1]={p[2],#it.verts-3+3,#it.verts-3+2,mat=p.mat}
+				ps[#ps+1]={p[3],#it.verts-3+1,#it.verts-3+3,mat=p.mat}
+				ps[#ps+1]={#it.verts-2,#it.verts-1,#it.verts-0,mat=p.mat}
+			else
+				ps[#ps+1]=p
+			end
+
+			
+		end
+
+		it.polys=ps -- new polygons
+
+		return it
 	end
 
 	require("wetgenes.gamecake.spew.geom_mask").fill(M)

@@ -5,11 +5,12 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 -- wetgenes.hid is a higher level interface to the lowlevel core binding to hidapi
 
-local hid={}
+local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-local core={}--require("wetgenes.hid.core")
+local hid=M
+
+local core=require("wetgenes.hid.core")
 
 for n,f in pairs(core) do hid[n]=f end
-
 
 return hid

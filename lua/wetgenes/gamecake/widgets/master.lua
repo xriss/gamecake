@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local wwin=require("wetgenes.win")
 local tardis=require("wetgenes.tardis")
 local bit=require("bit")
@@ -226,7 +228,7 @@ function wmaster.setup(widget,def)
 			local call_later=function(c,...) return c(...) end
 			for i,v in ipairs(later) do
 				if v then
-					if type(v[1])~="function" then dprint(tostring(v[1])) end
+					if type(v[1])~="function" then log("widgets",tostring(v[1])) end
 					call_later(unpack(v))
 				end
 			end
@@ -244,9 +246,10 @@ function wmaster.setup(widget,def)
 			master.request_layout=false
 			widget.hx=resize and resize.hx or widget.hx
 			widget.hy=resize and resize.hy or widget.hy
-			widget:set_dirty()
 			widget:resize_and_layout()
+--			widget:set_dirty()
 --			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
+			
 		end
 	
 		local throb=(widget.throb>=128)
@@ -317,6 +320,8 @@ function wmaster.setup(widget,def)
 	end
 
 	function master.draw(widget)
+
+		gl.ActiveTexture( gl.TEXTURE0 )
 
 		dirty_fbos={}
 		mark_dirty_fbos(widget)

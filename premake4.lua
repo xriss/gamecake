@@ -242,26 +242,31 @@ if EMCC then
 
 	defines "EMCC"
 
+	buildlinkoptions {
+		"-pthread",
+		"-Wno-pthreads-mem-growth",
+		"-s USE_PTHREADS",
+	}
+	linkoptions{
+		"-s PROXY_TO_PTHREAD",
+	}
+
+
 	buildlinkoptions{
---		"-Wno-warn-absolute-paths",
---		"-Wno-error-shift-negative-value",
 		"-Wno-long-long",
 		"-Werror",
-		"-s NO_EXIT_RUNTIME=1",
-		"-s ALLOW_MEMORY_GROWTH=1",
 		"-Wno-almost-asm",
---		"-s ASSERTIONS=1",
---		"-s \"BINARYEN_TRAP_MODE='clamp'\"",
-		"-s \"BINARYEN_METHOD='native-wasm'\"",
-		"-s EXTRA_EXPORTED_RUNTIME_METHODS='[\"cwrap\"]'",
-		"-s WASM=1",
 	}
 
 	linkoptions{
 		"-as-needed",
---		"-s RESERVED_FUNCTION_POINTERS=256",
---		"-s TOTAL_MEMORY=134217728",			-- 128meg
-		"-s EXPORTED_FUNCTIONS=\"['_main_post']\"",
+		"--emrun",
+		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 ",
+		"-s ALLOW_MEMORY_GROWTH=1",
+		"-s \"BINARYEN_METHOD='native-wasm'\"",
+		"-s EXPORTED_RUNTIME_METHODS=\"['cwrap']\"",
+		"-s WASM=1",
+		"-s EXPORTED_FUNCTIONS=\"['_main_post','_main']\"",
 	}
 	
 	platforms { "emcc" }
@@ -342,11 +347,6 @@ elseif WINDOWS then
 		elseif MINGWIN then	platforms { "mingwin" } --use exe compiler
 		else				platforms { "mingw" }	--use new 64 bit compiler
 		end
-		
-		includedirs { path.getabsolute("./vbox_mingw/w32api/include") }
-		libdirs { path.getabsolute("./vbox_mingw/w32api/lib") }
-		
-		linkoptions { "-static-libgcc" }
 		
 		buildoptions{"-mtune=generic"}
 		linkoptions {"-mtune=generic"}
@@ -696,6 +696,8 @@ elseif EMCC then
 	buildlinkoptions{
 		"-Wno-error=format-security",
 		"-s USE_SDL=2",
+	}
+	linkoptions{
 		"-s FULL_ES3=1",
 		"-s USE_WEBGL2=1",
 		"-s MIN_WEBGL_VERSION=2",
@@ -758,6 +760,7 @@ all_includes=all_includes or {
 	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
 
 --new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
+	{"lua_bullet",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_utf8",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_cmsgpack",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
@@ -795,14 +798,18 @@ all_includes=all_includes or {
 	{"lib_sqlite",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 
--- link lanes on nix?
-	{"lua_lanes",		NIX		},
+-- going to need some multithreading
+	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- test glslang?
 	{"lua_glslang",		NIX		},
 
 -- test midi alsa?
 	{"lua_midi",		NIX		},
+
+-- test hid?
+	{"lua_hid",			NIX		},
+	{"lib_hidapi",		NIX		},
 
 	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 

@@ -3,6 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
 
 local wpath=require("wetgenes.path")
 local wgrd=require("wetgenes.grd")
@@ -96,7 +97,7 @@ M.info=function(gltf)
 --	dprint(gltf)
 
 	for n in pairs(gltf) do
-		print(n, type(gltf[n])=="table" and "#"..#gltf[n] or gltf[n] )
+		log("gltf", n, type(gltf[n])=="table" and "#"..#gltf[n] or gltf[n] )
 	end
 	
 
@@ -213,6 +214,130 @@ M.parse=function(gltf)
 	return gltf
 end
 
+
+local flipy=true
+
+local vert_flipy=function(v)
+	if flipy then
+		v[2]=-v[2]
+		v[5]=-v[5]
+		v[10]=-v[10]
+	end
+	return v
+end
+
+-- this does not work, I guess it is going to be more complicated and at this point I am just typing in random junk :)
+local m4_flipy=function(m,name)
+	if flipy then
+
+log("gltf",name)
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[1],m[2],m[3],m[4]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[5],m[6],m[7],m[8]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[9],m[10],m[11],m[12]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[13],m[14],m[15],m[16]))
+
+
+--		m:inverse()
+
+local x=m[13]*m[1] + m[14]*m[2] + m[15]*m[3]
+local y=m[13]*m[5] + m[14]*m[6] + m[15]*m[7]
+local z=m[13]*m[9] + m[14]*m[10] + m[15]*m[11]
+
+print(string.format( "%8.4f %8.4f %8.4f", x,y,z))
+
+m[1]=1
+m[2]=0
+m[3]=0
+m[4]=0
+
+m[5]=0
+m[6]=1
+m[7]=0
+m[8]=0
+
+m[9]=0
+m[10]=0
+m[11]=1
+m[12]=0
+
+m[13]=x
+m[14]=-y
+m[15]=z
+m[16]=1
+
+--		m:inverse()
+
+		local a=m[2]
+		local b=m[3]
+		local c=m[7]
+
+--		m[2]=m[5]
+--		m[3]=m[9]
+--		m[7]=m[10]
+
+--		m[5]=a
+--		m[9]=b
+--		m[10]=c
+
+--		m[2]=-m[2]
+--		m[6]=-m[6]
+--		m[10]=-m[10]
+--		m[14]=-m[14]
+
+--		m[5]=-m[5]
+--		m[6]=-m[6]
+--		m[7]=-m[7]
+--		m[8]=-m[8]
+
+--		m:inverse()
+
+log("gltf","=")
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[1],m[2],m[3],m[4]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[5],m[6],m[7],m[8]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[9],m[10],m[11],m[12]))
+log("gltf",string.format( "%8.4f %8.4f %8.4f %8.4f", m[13],m[14],m[15],m[16]))
+log("gltf")
+
+	end
+	return m
+end
+
+local node_flipy=function(node)
+	if flipy then
+		if node.matrix then
+			m4_flipy(node.matrix)
+		end
+		
+		if node.translation then
+			node.translation[2]=-node.translation[2]
+		end
+
+		if node.rotation then
+			node.rotation[2]=-node.rotation[2]
+			node.rotation[4]=-node.rotation[4]
+		end
+	end
+	return node
+end
+
+local function value_flipy(value)
+	if flipy then
+		if value.path=="translation" then
+			for i=0,#value.data-1,3 do
+				value.data[i+2]=-value.data[i+2]
+			end
+		elseif value.path=="rotation" then
+			for i=0,#value.data-1,4 do
+				value.data[i+2]=-value.data[i+2]
+				value.data[i+4]=-value.data[i+4]
+			end
+		end
+	end
+	return value
+end
+
+
+
 M.to_geoms=function(gltf)
 
 	local objs=wgeoms.new()
@@ -325,6 +450,8 @@ M.to_geoms=function(gltf)
 		
 		it.name=node.name
 		
+		node_flipy(node)
+		
 		if node.children then
 			it.children={unpack(node.children)}
 		end
@@ -367,28 +494,6 @@ M.to_geoms=function(gltf)
 	objs.scene=objs.scenes[ (gltf.scene or 0) +1 ]
 
 
-	objs.skins={}
-	for sidx=1,#(gltf.skins or {}) do
-		local skin=gltf.skins[sidx]
-		local it={}
-		objs.skins[sidx]=it
-		it.inverse={}
-		it.nodes={}
-		local d=M.accessor_to_table(gltf,skin.inverseBindMatrices)
-		for i,v in ipairs(skin.joints) do
-			local b=((i-1)*16)
-			it.inverse[i]=M4{
-				d[b+ 1],d[b+ 2],d[b+ 3],d[b+ 4],
-				d[b+ 5],d[b+ 6],d[b+ 7],d[b+ 8],
-				d[b+ 9],d[b+10],d[b+11],d[b+12],
-				d[b+13],d[b+14],d[b+15],d[b+16],
-				}
-			it.nodes[i]=objs.nodes[v+1]
-			it.nodes[i].inverse=it.inverse[i]
-			it.nodes[i].boneidx=i
-		end
-	end
-	
 	objs.anims={}
 	for aidx=1,#(gltf.animations or {}) do
 	
@@ -420,6 +525,7 @@ M.to_geoms=function(gltf)
 					value.node=channel.target.node+1
 					value.path=channel.target.path
 					value.data=M.accessor_to_table(gltf,sampler.output)
+					value_flipy(value)
 				end
 
 			end
@@ -428,6 +534,37 @@ M.to_geoms=function(gltf)
 
 	end
 	objs.anim=objs.anims[ (gltf.animation or 0) +1 ]
+	
+-- assume file is exported with reset transform as current transform
+	wgeoms.prepare(objs) -- so build world transform and we can then build our own inverse bone matrix
+
+	objs.skins={}
+	for sidx=1,#(gltf.skins or {}) do
+		local skin=gltf.skins[sidx]
+		local it={}
+		objs.skins[sidx]=it
+		it.inverse={}
+		it.nodes={}
+--		local d=M.accessor_to_table(gltf,skin.inverseBindMatrices) -- do nut trust these bones
+		for i,v in ipairs(skin.joints) do
+--[[
+			local b=((i-1)*16)
+			it.inverse[i]=m4_flipy( M4{
+				d[b+ 1],d[b+ 2],d[b+ 3],d[b+ 4],
+				d[b+ 5],d[b+ 6],d[b+ 7],d[b+ 8],
+				d[b+ 9],d[b+10],d[b+11],d[b+12],
+				d[b+13],d[b+14],d[b+15],d[b+16],
+				} , objs.nodes[v+1].name )
+]]				
+			it.nodes[i]=objs.nodes[v+1]
+			it.nodes[i].boneidx=i
+
+			it.nodes[i].inverse=it.nodes[i].world:inverse() -- use world matrix
+			it.inverse[i]=it.nodes[i].inverse -- as inverse bone
+
+		end
+	end
+	
 	
 	for midx=1,#gltf.meshes do
 	
@@ -474,13 +611,13 @@ M.to_geoms=function(gltf)
 							end
 						end
 					end
-					obj.verts[c+1+vbase]={
+					obj.verts[c+1+vbase]=vert_flipy( {
 						tpos and tpos[c*3+1] or 0,tpos and tpos[c*3+2] or 0,tpos and tpos[c*3+3] or 0,
 						tnrm and tnrm[c*3+1] or 0,tnrm and tnrm[c*3+2] or 0,tnrm and tnrm[c*3+3] or 0,
 						tuv and tuv[c*2+1] or 0,tuv and tuv[c*2+2] or 0,
 						ttan and ttan[c*4+1] or 0,ttan and ttan[c*4+2] or 0,ttan and ttan[c*4+3] or 0,ttan and ttan[c*4+4] or 0,
 						bw[1],bw[2],bw[3],bw[4]
-					}
+					} )
 --print(bw[1],bw[2],bw[3],bw[4])
 				end
 
@@ -548,6 +685,12 @@ M.view=function(gltf,oven)
 	local pack=require("wetgenes.pack")
 
 	gl.program_source("geom_gltf",[[
+
+#version 300 es
+#version 330
+#ifdef VERSION_ES
+precision mediump float;
+#endif
 
 precision highp float;
 

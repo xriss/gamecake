@@ -23,8 +23,8 @@ function wdrag.drag(widget,x,y)
 	local maxx=parent.hx-widget.hx
 	local maxy=parent.hy-widget.hy
 	
-	widget.px=x
-	widget.py=y
+	widget.px=math.floor(x)
+	widget.py=math.floor(y)
 	
 	if widget.px<0    then widget.px=0 end
 	if widget.px>maxx then widget.px=maxx end

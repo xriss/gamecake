@@ -160,7 +160,60 @@ static u32 string_to_id(const char *s)
 	return 0; // if we get here then the string was probably ""
 }
 
-
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// read/write a u64 or s64 or f64
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static u64 lua_pack_read_u64 (const u8 *p, int inyourendo)
+{
+	if(inyourendo) { 
+	return ((u64)p[0]) | ((u64)p[1]<<8) | ((u64)p[2]<<16) | ((u64)p[3]<<24) | ((u64)p[4]<<32) | ((u64)p[5]<<40) | ((u64)p[6]<<48) | ((u64)p[7]<<56); }
+	return ((u64)p[7]) | ((u64)p[6]<<8) | ((u64)p[5]<<16) | ((u64)p[4]<<24) | ((u64)p[3]<<32) | ((u64)p[2]<<40) | ((u64)p[1]<<48) | ((u64)p[0]<<56);
+}
+static s64 lua_pack_read_s64 (const u8 *p, int inyourendo)
+{
+	u64 r=lua_pack_read_u64 ( p , inyourendo );
+	return *((s64*)(&r));
+}
+static f64 lua_pack_read_f64 (const u8 *p, int inyourendo)
+{
+	u64 r=lua_pack_read_u64 ( p , inyourendo );
+	return *((f64*)(&r));
+}
+static void lua_pack_write_u64 (u64 d,u8 *p, int inyourendo )
+{
+	if(inyourendo)
+	{
+		p[0]=((d)&0xff);
+		p[1]=((d>>8)&0xff);
+		p[2]=((d>>16)&0xff);
+		p[3]=((d>>24)&0xff);
+		p[4]=((d>>32)&0xff);
+		p[5]=((d>>40)&0xff);
+		p[6]=((d>>48)&0xff);
+		p[7]=((d>>56)&0xff);
+	}
+	else
+	{
+		p[7]=((d)&0xff);
+		p[6]=((d>>8)&0xff);
+		p[5]=((d>>16)&0xff);
+		p[4]=((d>>24)&0xff);
+		p[3]=((d>>32)&0xff);
+		p[2]=((d>>40)&0xff);
+		p[1]=((d>>48)&0xff);
+		p[0]=((d>>56)&0xff);
+	}
+}
+static void lua_pack_write_s64 (s64 d,u8 *p, int inyourendo )
+{
+	lua_pack_write_u64 ( *((u64*)(&d)) ,p,inyourendo );
+}
+static void lua_pack_write_f64 (f64 d,u8 *p, int inyourendo )
+{
+	lua_pack_write_u64 ( *((u64*)(&d)) ,p,inyourendo );
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -299,6 +352,17 @@ static int lua_pack_field_size (u32 def)
 		case '-u32' :
 		case '+u32' :
 			return 4;
+
+		case 'f64' :
+		case '-f64' :
+		case '+f64' :
+		case 's64' :
+		case '-s64' :
+		case '+s64' :
+		case 'u64' :
+		case '-u64' :
+		case '+u64' :
+			return 8;
 	}
 	
 	return 0;
@@ -340,6 +404,18 @@ static double lua_pack_get_field (u32 def,const u8*p)
 		case 'u32' :
 		case '-u32' : return (double) lua_pack_read_u32 ( p, 1 );
 		case '+u32' : return (double) lua_pack_read_u32 ( p, 0 );
+
+		case 'f64' :
+		case '-f64' : return (double) lua_pack_read_f64 ( p, 1 );
+		case '+f64' : return (double) lua_pack_read_f64 ( p, 0 );
+
+		case 's64' :
+		case '-s64' : return (double) lua_pack_read_s64 ( p, 1 ); // note that a double does not have enough precision for s64
+		case '+s64' : return (double) lua_pack_read_s64 ( p, 0 );
+
+		case 'u64' :
+		case '-u64' : return (double) lua_pack_read_u64 ( p, 1 ); // note that a double does not have enough precision for u64
+		case '+u64' : return (double) lua_pack_read_u64 ( p, 0 );
 	}
 		
 	return 0.0;
@@ -381,6 +457,18 @@ static void lua_pack_set_field (double d,u32 def,u8*p)
 		case 'u32' :
 		case '-u32' : lua_pack_write_u32 ( (u32)d,p, 1 ); break;
 		case '+u32' : lua_pack_write_u32 ( (u32)d,p, 0 ); break;
+
+		case 'f64' :
+		case '-f64' : lua_pack_write_f64 ( (f64)d,p, 1 ); break;
+		case '+f64' : lua_pack_write_f64 ( (f64)d,p, 0 ); break;
+
+		case 's64' :
+		case '-s64' : lua_pack_write_s64 ( (s64)d,p, 1 ); break; // note that a double does not have enough precision for s64
+		case '+s64' : lua_pack_write_s64 ( (s64)d,p, 0 ); break;
+
+		case 'u64' :
+		case '-u64' : lua_pack_write_u64 ( (u64)d,p, 1 ); break; // note that a double does not have enough precision for u64
+		case '+u64' : lua_pack_write_u64 ( (u64)d,p, 0 ); break;
 	}
 	
 }

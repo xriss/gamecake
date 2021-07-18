@@ -114,6 +114,20 @@ M.construct=function(txt)
 	txt.clear_caches()
 --[[
 
+Find byte offset into the text from a given line and character.
+
+]]
+	txt.location_to_ptr=function(y,x)
+
+		local cache=txt.get_cache(y)
+		local ptr=cache.cb[x] or 0 -- convert to byte offset
+		ptr=cache.start+ptr-1
+
+		return ptr
+	end
+
+--[[
+
 Find the line number and column number of the given byte offset into the text.
 
 ]]
@@ -158,11 +172,16 @@ Find the line number and column number of the given byte offset into the text.
 
 		if a<=ptr and b>ptr then
 			local cache=txt.get_cache(y)
-			local x=cache.bc[1+ptr-a]
+			local x=cache.bc[1+ptr-a] or #cache.string+1
 			return y,x	-- found line
 		end
 	end
 	
+--[[
+
+Fill the editor up with text, the filename is used to set the lexer used for highlighting
+
+]]
 	txt.set_text=function(text,filename)
 
 		if text then -- set new text
@@ -187,15 +206,22 @@ Find the line number and column number of the given byte offset into the text.
 
 	end
 
+	txt.append_text=function(text)
+		txt.clip(txt.hy+1,0)
+		txt.insert(text)
+	end
+
 	txt.get_text=function()
 		return table.concat(txt.strings) or ""
 	end
 
+--[[
 
--- mostly this deals with the visible width of a character, eg tab,
--- compared to its byte width, but it is also necessary for utf8 encoding
--- or japanese double glyphs. Its a complicated mapping so it is precalculated
+mostly this deals with the visible width of a character, eg tab,
+compared to its byte width, but it is also necessary for utf8 encoding
+or japanese double glyphs. Its a complicated mapping so it is precalculated
 
+]]
 	txt.build_cache=function(idx)
 		
 		local s=txt.get_string(idx)
@@ -271,13 +297,18 @@ Find the line number and column number of the given byte offset into the text.
 		return cache
 	end
 	
-	txt.markauto=function(fx,fy,click)
+--[[
 
-		txt.mark(fx,fy,fx,fy)
+auto select an entire word or line depending on number of clicks
+
+]]
+	txt.markauto=function(fy,fx,clicks)
+
+		txt.mark(fy,fx,fy,fx)
 
 		local s=txt.get_string(txt.cy) or ""
 
-		if click==2 then -- select word
+		if clicks==2 then -- select word
 		
 			local sl=wutf.length(s)
 			local lx=txt.cx-1
@@ -290,32 +321,58 @@ Find the line number and column number of the given byte offset into the text.
 				while ( (wutf.ncode( s , lx-1 ) or 0) > 32 ) do lx=lx-1 end
 				while ( (wutf.ncode( s , hx+1 ) or 0) > 32 ) do hx=hx+1 end
 
-				txt.mark(lx,fy,hx+1,fy)
+				txt.mark(fy,lx,fy,hx+1)
 			
 			elseif c and c <= 32 then -- White
 
 				while ( (wutf.ncode( s , lx-1 ) or 33) <= 32 ) do lx=lx-1 end
 				while ( (wutf.ncode( s , hx+1 ) or 33) <= 32 ) do hx=hx+1 end
 
-				txt.mark(lx,fy,hx+1,fy)
+				txt.mark(fy,lx,fy,hx+1)
 
 			end
 
-		elseif click>=3 then -- select line
-			txt.mark(0,fy,0,fy+1)
+		elseif clicks>=3 then -- select line
+			txt.mark(fy,0,fy+1,0)
 		end
 
 	end
 	
 
+--[[
+
+get current selected area / cursor position
+
+]]
 	txt.markget=function()
-		return txt.fx,txt.fy,txt.tx,txt.ty
+		return txt.fy,txt.fx,txt.ty,txt.tx
 	end
 
-	txt.markmerge=function( fxa,fya,txa,tya, fxb,fyb,txb,tyb )
+--[[
 
-		if not fxa and fxb then return txt.mark(fxb,fyb,txb,tyb) end -- nothing to merge
-		if not fxb and fxa then return txt.mark(fxa,fya,txa,tya) end -- nothing to merge
+are one or more glyphs currently selected, returns true or false
+
+]]
+	txt.marked=function()
+		if txt.fy and txt.fx and txt.ty and txt.tx then
+			if txt.fy==txt.ty and txt.fx==txt.tx then
+				return false
+			end
+			return true
+		end
+		return false
+	end
+
+
+--[[
+
+merge two marked areas into one
+
+]]
+	txt.markmerge=function( fya,fxa,tya,txa, fyb,fxb,tyb,txb )
+
+		if not fxa and fxb then return txt.mark(fyb,fxb,tyb,txb) end -- nothing to merge
+		if not fxb and fxa then return txt.mark(fya,fxa,tya,txa) end -- nothing to merge
 		if not fxb and not fxa then return end -- nothing to do
 
 		local fx,fy,tx,ty
@@ -336,11 +393,16 @@ Find the line number and column number of the given byte offset into the text.
 			end
 		end
 		
-		txt.mark(fx,fy,tx,ty)
+		txt.mark(fy,fx,ty,tx)
 
 	end
 	
-	txt.mark=function(fx,fy,tx,ty)
+--[[
+
+mark or unmark an area
+
+]]
+	txt.mark=function(fy,fx,ty,tx)
 		if not fx then -- unmark
 			txt.fx=nil
 			txt.fy=nil
@@ -348,10 +410,10 @@ Find the line number and column number of the given byte offset into the text.
 			txt.ty=nil
 			return
 		end
-		txt.fx,txt.fy=txt.clip(fx,fy)
-		txt.tx,txt.ty=txt.clip(tx,ty)
+		txt.fy,txt.fx=txt.clip(fy,fx)
+		txt.ty,txt.tx=txt.clip(ty,tx)
 		
-		txt.cx,txt.cy=txt.tx,txt.ty
+		txt.cy,txt.cx=txt.ty,txt.tx
 		
 		local flip=false
 		if txt.fy==txt.ty and txt.fx>txt.tx then flip=true
@@ -361,12 +423,14 @@ Find the line number and column number of the given byte offset into the text.
 			txt.fy,txt.ty=txt.ty,txt.fy
 		end
 
--- print( txt.fx , txt.fy , txt.tx , txt.ty )
-
 	end
 
--- get fx,fy,tx,ty range given a start and a glyph offset ( probably +1 or -1 ) 
-	txt.rangeget=function(fx,fy,length)
+--[[
+
+get fy,fx,ty,tx range given a start and a glyph offset ( probably +1 or -1 ) 
+
+]]
+	txt.rangeget=function(fy,fx,length)
 
 		local tx=fx
 		local ty=fy
@@ -376,13 +440,13 @@ Find the line number and column number of the given byte offset into the text.
 			local cache=txt.get_cache(fy)
 			
 			while length<0 do
-				
+
 				if fx <= -length then -- full line
 
-					length=length+fx
+					length=length+1+fx
 					fy=fy-1
 					cache=txt.get_cache(fy)
-					if not cache then return fx,fy+1,tx,ty end -- start of file
+					if not cache then return fy+1,fx,ty,tx end -- start of file
 					fx=#cache.codes -- end of line
 				
 				else -- partial line
@@ -399,13 +463,13 @@ Find the line number and column number of the given byte offset into the text.
 			
 			while length>0 and cache do
 				
-				if ( #cache.codes - tx ) <= length then -- full line
+				if ( #cache.codes - tx ) < length then -- full line
 
-					length=length-( #cache.codes - tx )
+					length=length-( #cache.codes + 1 - tx ) -- include line end
 					ty=ty+1
 					cache=txt.get_cache(ty)
-					if not cache then return fx,fy,tx,ty-1 end -- end of file
-					tx=0 -- start of line
+					if not cache then return fy,fx,ty-1,tx end -- end of file
+					tx=1 -- start of line
 				
 				else -- partial line
 				
@@ -417,12 +481,15 @@ Find the line number and column number of the given byte offset into the text.
 
 		end
 
-		return fx,fy,tx,ty
+		return fy,fx,ty,tx
 	end
 
+--[[
 
-	-- cut out the text in the marked area (if marked) and set the cursor to this location
-	txt.cut=function(fx,fy,tx,ty)
+cut out the text in the marked area (if marked) and set the cursor to this location
+
+]]
+	txt.cut=function(fy,fx,ty,tx)
 	
 		local setcursor=not fx
 	
@@ -505,9 +572,12 @@ Find the line number and column number of the given byte offset into the text.
 		end
 
 	end
+--[[
 
-	-- copy text from the marked area (if marked) or return nil
-	txt.copy=function(fx,fy,tx,ty)
+copy text from the marked area (if marked) or return nil
+
+]]
+	txt.copy=function(fy,fx,ty,tx)
 		
 		fx=fx or txt.fx
 		fy=fy or txt.fy
@@ -555,13 +625,23 @@ Find the line number and column number of the given byte offset into the text.
 
 	end
 		
-	-- get length of selected text (we can make this smarter later)
-	txt.copy_length=function(fx,fy,tx,ty)
+--[[
+
+get length of currently selected text in bytes
+
+	txt.copy_length=function()
 		local s=txt.copy() -- expensive hax, we should not bother building a string
 		if s then return #s end
 		return 0
 	end
+]]
 
+
+--[[
+
+get length of line in glyphs
+
+]]
 	txt.get_hx=function(y)
 		y=y or txt.cy
 --		local s=txt.get_string(y)
@@ -577,10 +657,17 @@ Find the line number and column number of the given byte offset into the text.
 		return hx
 	end
 
-	txt.clip=function(x,y)
+--[[
+
+clip this location so it is within the text.
+
+eg too the end of a line
+
+]]
+	txt.clip=function(y,x)
 	
 		if not x then
-			txt.cx,txt.cy=txt.clip(txt.cx,txt.cy)
+			txt.cy,txt.cx=txt.clip(txt.cy,txt.cx)
 			return
 		end
 
@@ -592,21 +679,30 @@ Find the line number and column number of the given byte offset into the text.
 		if x>hx+1 then x=hx+1 end
 		if x<1 then x=1 end
 
-		return x,y
+		return y,x
 	end
 
--- move a cursor one character left/right/up/down and clip it
-	txt.clip_left=function(x,y)
+--[[
+
+move a cursor one character left and clip it
+
+]]
+	txt.clip_left=function(y,x)
 		if x<=1 and y>1 then
 			y=y-1
 			x=txt.get_hx(y)+1
 		else
 			x=x-1
 		end
-		return txt.clip(x,y)
+		return txt.clip(y,x)
 	end
 
-	txt.clip_right=function(x,y)
+--[[
+
+move a cursor one character right and clip it
+
+]]
+	txt.clip_right=function(y,x)
 		local hx=txt.get_hx(y)+1
 		if x>=hx and y<txt.hy then
 			y=y+1
@@ -614,17 +710,32 @@ Find the line number and column number of the given byte offset into the text.
 		else
 			x=x+1
 		end
-		return txt.clip(x,y)
+		return txt.clip(y,x)
 	end
 
-	txt.clip_up=function(x,y)
-		return txt.clip(x,y-1)
+--[[
+
+move a cursor one character up and clip it
+
+]]
+	txt.clip_up=function(y,x)
+		return txt.clip(y-1,x)
 	end
 
-	txt.clip_down=function(x,y)
-		return txt.clip(x,y+1)
+--[[
+
+move a cursor one character down and clip it
+
+]]
+	txt.clip_down=function(y,x)
+		return txt.clip(y+1,x)
 	end
 
+--[[
+
+insert a character, eg user typing
+
+]]
 	txt.insert_char=function(s)
 	
 		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
@@ -638,6 +749,11 @@ Find the line number and column number of the given byte offset into the text.
 		hook("changed")
 	end
 
+--[[
+
+insert a new line
+
+]]
 	txt.insert_newline=function()
 	
 		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
@@ -655,6 +771,11 @@ Find the line number and column number of the given byte offset into the text.
 		hook("changed")
 	end
 
+--[[
+
+insert any string, which will be broken down by newlines
+
+]]
 	txt.insert=function(s)
 
 		local split=function(s,d)
@@ -727,6 +848,13 @@ Find the line number and column number of the given byte offset into the text.
 
 	end
 
+--[[
+
+remove the new line delimiter between this line and the next
+
+eg delete the \n at the end of the line
+
+]]
 	local merge_lines=function()
 
 		local sa=txt.get_string(txt.cy) or ""
@@ -740,6 +868,11 @@ Find the line number and column number of the given byte offset into the text.
 
 	end
 
+--[[
+
+delete one glyph from the left of the cursor
+
+]]
 	txt.backspace=function()
 
 		if txt.cx==1 then
@@ -760,6 +893,11 @@ Find the line number and column number of the given byte offset into the text.
 		hook("changed")
 	end
 
+--[[
+
+delete one glyph from the right of the cursor
+
+]]
 	txt.delete=function()
 	
 		local hx=txt.get_hx()
@@ -780,6 +918,11 @@ Find the line number and column number of the given byte offset into the text.
 		hook("changed")
 	end
 	
+--[[
+
+assign the lexxer code in charge of highlights
+
+]]
 	txt.set_lexer=function(lexer)
 
 		if lexer then -- force
@@ -806,6 +949,11 @@ Find the line number and column number of the given byte offset into the text.
 		
 	end
 
+--[[
+
+get the lexxer cache for the given line
+
+]]
 	txt.get_cache_lex=function(idx)
 	
 		if not txt.lex then return txt.get_cache(idx) end -- no lex available
@@ -847,7 +995,12 @@ Find the line number and column number of the given byte offset into the text.
 		return cache
 	end
 
+
+-- bind to an undo state
 	wtxtundo.construct({},txt)
 
+
+	txt.set_text("\n","")
+	txt.set_lexer()
 	return txt
 end

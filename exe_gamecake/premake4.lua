@@ -17,6 +17,8 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 
 if EMCC then
 
+	files { "./lua.c" }
+
 	linkoptions { "-rdynamic" }
 	
 	linkoptions { "-v" }
@@ -39,11 +41,13 @@ elseif ANDROID then
 
 elseif WINDOWS then
 
+	linkoptions { "-static" }
+
 	linkoptions { "-Wl,--export-all-symbols" }
 
 	files { "./lua.c" }
 
-	links { "SDL2" , "m" , "dinput8" , "dxguid" , "dxerr8" , "user32" , "gdi32" , "winmm" , "imm32" , "ole32" , "oleaut32" , "shell32" , "version" , "uuid" }
+	links { "SDL2" , "m" , "dinput8" , "dxguid" , "dxerr8" , "user32" , "gdi32" , "winmm" , "imm32" , "ole32" , "oleaut32" , "shell32" , "version" , "uuid" , "setupapi" }
 
 --	links { "opengl32" , "glu32" }
 	links {  "ws2_32" , "gdi32"}
@@ -114,6 +118,8 @@ elseif NIX then
 
 	end
 
+	links { "udev" }
+	
 	links { "asound" }
 
 --	links { "GL" }

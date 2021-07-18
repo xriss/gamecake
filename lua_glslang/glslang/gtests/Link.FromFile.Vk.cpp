@@ -50,8 +50,10 @@ TEST_P(LinkTestVulkan, FromFile)
     const size_t fileCount = fileNames.size();
     const EShMessages controls = DeriveOptions(Source::GLSL, Semantics::Vulkan, Target::AST);
     GlslangResult result;
+    result.validationResult = false;
 
     // Compile each input shader file.
+    bool success = true;
     std::vector<std::unique_ptr<glslang::TShader>> shaders;
     for (size_t i = 0; i < fileCount; ++i) {
         std::string contents;
@@ -61,7 +63,7 @@ TEST_P(LinkTestVulkan, FromFile)
                 new glslang::TShader(GetShaderStage(GetSuffix(fileNames[i]))));
         auto* shader = shaders.back().get();
         shader->setAutoMapLocations(true);
-        compile(shader, contents, "", controls);
+        success &= compile(shader, contents, "", controls);
         result.shaderResults.push_back(
             {fileNames[i], shader->getInfoLog(), shader->getInfoDebugLog()});
     }
@@ -69,9 +71,29 @@ TEST_P(LinkTestVulkan, FromFile)
     // Link all of them.
     glslang::TProgram program;
     for (const auto& shader : shaders) program.addShader(shader.get());
-    program.link(controls);
+    success &= program.link(controls);
     result.linkingOutput = program.getInfoLog();
     result.linkingError = program.getInfoDebugLog();
+
+#if !defined(GLSLANG_WEB) && !defined(GLSLANG_ANGLE)
+        if (success)
+            program.mapIO();
+#endif
+
+    if (success && (controls & EShMsgSpvRules)) {
+        spv::SpvBuildLogger logger;
+        std::vector<uint32_t> spirv_binary;
+        options().disableOptimizer = true;
+        glslang::GlslangToSpv(*program.getIntermediate(shaders.front()->getStage()),
+                                spirv_binary, &logger, &options());
+
+        std::ostringstream disassembly_stream;
+        spv::Parameterize();
+        spv::Disassemble(disassembly_stream, spirv_binary);
+        result.spirvWarningsErrors = logger.getAllMessages();
+        result.spirv = disassembly_stream.str();
+        result.validationResult = !options().validate || logger.getAllMessages().empty();
+    }
 
     std::ostringstream stream;
     outputResultToStream(&stream, result, controls);
@@ -82,15 +104,27 @@ TEST_P(LinkTestVulkan, FromFile)
     std::string expectedOutput;
     tryLoadFile(expectedOutputFname, "expected output", &expectedOutput);
 
-    checkEqAndUpdateIfRequested(expectedOutput, stream.str(), expectedOutputFname);
+    checkEqAndUpdateIfRequested(expectedOutput, stream.str(), expectedOutputFname,
+                                result.spirvWarningsErrors);
 }
 
 // clang-format off
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     Glsl, LinkTestVulkan,
     ::testing::ValuesIn(std::vector<std::vector<std::string>>({
         {"link1.vk.frag", "link2.vk.frag"},
-    })),
+        {"spv.unit1.frag", "spv.unit2.frag", "spv.unit3.frag"},
+		{"link.vk.matchingPC.0.0.frag", "link.vk.matchingPC.0.1.frag",
+			"link.vk.matchingPC.0.2.frag"},
+		{"link.vk.differentPC.0.0.frag", "link.vk.differentPC.0.1.frag",
+			"link.vk.differentPC.0.2.frag"},
+		{"link.vk.differentPC.1.0.frag", "link.vk.differentPC.1.1.frag",
+			"link.vk.differentPC.1.2.frag"},
+        {"link.vk.pcNamingValid.0.0.vert", "link.vk.pcNamingValid.0.1.vert"},
+        {"link.vk.pcNamingInvalid.0.0.vert", "link.vk.pcNamingInvalid.0.1.vert"},
+        {"link.vk.multiBlocksValid.0.0.vert", "link.vk.multiBlocksValid.0.1.vert"},
+        {"link.vk.multiBlocksValid.1.0.geom", "link.vk.multiBlocksValid.1.1.geom"},
+    }))
 );
 // clang-format on
 

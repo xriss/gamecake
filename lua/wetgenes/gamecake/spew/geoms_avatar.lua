@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local wpack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
@@ -21,24 +23,187 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.filename="/sync/kriss/blender/avatar/avatar.glb" -- try and use latest version
 
+-- the material names of an avatar in texture order
 M.material_names={
-		"white",
-		"grey",
-		"black",
-		"skin",
-		"lips",
-		"hair",
-		"iris",
-		"eye",
-		"head1",
-		"head2",
-		"body1",
-		"body2",
-		"foot1",
-		"foot2",
-		"hand1",
-		"hand2",
-	}
+	"white",
+	"grey",
+	"black",
+	"skin",
+	"lips",
+	"hair",
+	"iris",
+	"eye",
+	"head1",
+	"head2",
+	"body1",
+	"body2",
+	"foot1",
+	"foot2",
+	"hand1",
+	"hand2",
+}
+
+-- the available mesh names of an avatar
+M.mesh_names={
+
+	{"hat_baseball",		group=1,									},
+	{"hat_kerchief",		group=1,									},
+	{"hat_pirate",			group=1,									},
+	{"hat_greek_helmet",	group=1,									},
+
+	{"hair_base",			group=0,									},
+	{"hair_basic",			group=1,									},
+	{"hair_spiky",			group=1,									},
+	{"hair_back",			group=1,									},
+	{"hair_bob",			group=1,									},
+	{"hair_flattop",		group=1,									},
+	{"hair_shoulder",		group=1,									},
+	{"hair_afro",			group=1,									},
+	{"hair_quiff",			group=1,									},
+	{"hair_hedgehog",		group=1,									},
+	{"hair_top_spiked",		group=1,									},
+	{"hair_moflop_left",	group=1,									},
+	{"hair_goth",			group=1,									},
+	{"hair_mess",			group=1,									},
+
+	{"hair_fringe",			group=2,									},
+	{"hair_bunches",		group=2,									},
+	{"hair_pigtails",		group=2,									},
+
+	{"head_base",			group=1,									},
+	{"head_skull",			group=0,									},
+
+	{"eyebrow_base",		group=1,									},
+	{"eyebrow_block",		group=1,									},
+
+	{"eye_base",			group=1,									},
+	{"eye_lash",			group=1,									},
+
+	{"eyeball_base",		group=1,									},
+	{"eyeball_cat",			group=1,									},
+
+	{"eyewear_glasses",		group=1,									},
+
+	{"mouth_base",			group=1,									},
+	{"mouth_jaw",			group=0,									},
+
+	{"beard_goatbraid",		group=1,									},
+	{"beard_goatee",		group=1,									},
+	{"beard_tash",			group=1,									},
+	{"beard_whiskers",		group=1,									},
+
+	{"ear_base",			group=1,									},
+	{"ear_bunny",			group=0,									},
+
+	{"nose_base",			group=1,									},
+	{"nose_piggy",			group=0,									},
+	{"nose_clown",			group=0,									},
+
+	{"body_belly",			group=1,									},
+	{"body_belly_boob",		group=1,									},
+	{"body_bone",			group=0,									},
+	{"body_boob",			group=1,									},
+	{"body_chest",			group=1,									},
+	{"body_tshirt",			group=1,									},
+	{"body_tshirt_boob",	group=1,									},
+	{"body_bodice",			group=1,									},
+	{"body_vest",			group=1,									},
+
+	{"body_printer_support",group=0,									},
+	{"body_tie",			group=0,									},
+	{"body_tie_belly",		group=0,									},
+	{"body_tie_boob",		group=0,									},
+	{"body_coat",			group=0,									},
+	{"body_coat_boob",		group=0,									},
+
+	{"hand_base",			group=1,									},
+	{"hand_bone",			group=0,									},
+
+	{"tail_bunny",			group=0,									},
+	{"tail_devil",			group=0,									},
+
+	{"foot_bare",			group=1,									},
+	{"foot_bone",			group=0,									},
+	{"foot_slipper",		group=1,									},
+	{"foot_flipflop",		group=1,									},
+	{"foot_shoe",			group=1,									},
+	{"foot_boot",			group=1,									},
+	{"foot_heel",			group=1,									},
+
+	{"item_hammer",			group=1,									},
+	{"item_shield",			group=1,									},
+	{"item_shortsword",		group=1,									},
+}
+
+-- the base part names of an avatar
+M.part_names={
+	"hat",
+	"hair",
+	"head",
+	"eye",
+	"eyeball",
+	"eyebrow",
+	"eyewear",
+	"ear",
+	"nose",
+	"mouth",
+	"beard",
+	"body",
+	"hand",
+	"tail",
+	"foot",
+	"item",
+}
+
+-- the base part names of an avatar and current number of dropdowns for each
+M.part_counts={
+	hat=1,
+	hair=3,
+	head=1,
+	eye=1,
+	eyeball=1,
+	eyebrow=1,
+	eyewear=1,
+	ear=1,
+	nose=1,
+	mouth=1,
+	beard=1,
+	body=2,
+	hand=1,
+	tail=1,
+	foot=1,
+	item=1,
+}
+
+-- the tweak part names of an avatar
+M.tweak_names={
+	"hat",
+	"hair",
+	"head",
+	"eyebrow",
+	"eye",
+	"eyeball",
+	"ear",
+	"nose",
+	"cheek",
+	"mouth",
+	"body",
+	"boob",
+	"hand",
+	"tail",
+	"foot",
+	"item",
+}
+
+-- the animation names
+M.pose_names={
+	"breath",
+	"walk",
+	"relax",
+	"fist",
+	"reset",
+}
+
 
 M.bake=function(oven,geoms_avatar)
 
@@ -62,34 +227,26 @@ M.bake=function(oven,geoms_avatar)
 	function geoms_avatar.loads()
 
 		if not io.open(geoms_avatar.filename,"r") then
-			geoms_avatar.filename="data/gltf/avatar.glb"
+			geoms_avatar.filename="data/glb/avatar.glb"
 		end -- the gc will close the file...
 
 		geoms_avatar.gltf=wgeom_gltf.load(geoms_avatar.filename)
 		geoms_avatar.objs=wgeom_gltf.to_geoms(geoms_avatar.gltf)
 		
-		print(#geoms_avatar.objs.anims)
+		log("avatar",#geoms_avatar.objs.anims)
 		for i,v in ipairs(geoms_avatar.objs.anims) do
-			print("avatar anim :",i,math.floor(v.min*24),math.floor(v.max*24),v.name)
-		end
-		geoms_avatar.objs.anim=geoms_avatar.objs.anims[1]
-		
+			log("avatar","anim",i,math.floor(v.min*24),math.floor(v.max*24),v.name)
+		end		
 
---dprint(avatar.gs)
-
-		geoms_avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,64,16,1)
-		
-		geoms_avatar.map:clear(0xffffffff)
-		
-		geoms_avatar.image=oven.cake.images.load("avatar/edit","avatar/edit",function() return geoms_avatar.map end)
-		geoms_avatar.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
-		geoms_avatar.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
-		geoms_avatar.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
-		geoms_avatar.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
-
---		oven.cake.images.bind(geoms_avatar.image)
+		geoms_avatar.build_texture_anims()
 
 	gl.program_source("avatar_gltf",[[
+
+#version 300 es
+#version 330
+#ifdef VERSION_ES
+precision mediump float;
+#endif
 
 precision highp float;
 
@@ -127,6 +284,12 @@ out float v_matidx;
 out vec4  v_bone;
 out vec4  v_value;
 
+
+#ifdef SHADOW
+uniform mat4 camera;
+uniform mat4 shadow_mtx;
+out vec4  shadow_uv;
+#endif
 
 mat4 fixbone(int bidx,int frame)
 {
@@ -216,6 +379,14 @@ void main()
 	v_value = material_values[ idx ];
 	v_color = material_colors[ idx ];
 	
+
+#ifdef SHADOW
+	shadow_uv = ( shadow_mtx * camera * v * vec4(a_vertex,1.0) ) ;
+	shadow_uv = vec4( ( shadow_uv.xyz / shadow_uv.w ) * 0.5 + 0.5 ,
+		normalize( mat3( shadow_mtx * camera * v ) * a_normal ).z );
+#endif
+
+
 }
 
 
@@ -239,6 +410,10 @@ uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 
+#ifdef SHADOW
+uniform sampler2D shadow_map;
+in vec4  shadow_uv;
+#endif
 
 void main(void)
 {
@@ -266,12 +441,39 @@ void main(void)
 
 	if( v_value.r > 0.0 )
 	{
-		vec2 uv=clamp( v_texcoord + vec2( pow( n.z, 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
+		vec2 uv=clamp( v_texcoord + vec2( pow( max( max( n.z, -n.y ) , 0.0 ) , 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
 
 		t0 = v_value.r * texture(tex0, uv ).rgba;
 	}
 
 	FragColor=vec4( ( t0 * v_color ).rgb , 1.0 ) ;
+
+#ifdef SHADOW
+
+	const vec4 shadow=vec4(SHADOW);
+
+	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) )
+	{
+
+
+		float shadow_value = 0.0;
+		vec2 shadow_texel_size = 1.0 / vec2( textureSize(shadow_map,0) );
+		for(int x = -1; x <= 1; ++x)
+		{
+			for(int y = -1; y <= 1; ++y)
+			{
+				shadow_value +=smoothstep(
+					-(( 1.0 - abs( shadow_uv.w ) )*shadow[3]+shadow[2]) ,
+					-shadow[1] ,
+					texture(shadow_map, shadow_uv.xy + vec2(x,y)*shadow_texel_size ).r - shadow_uv.z );
+			}    
+		}
+		shadow_value /= 9.0;
+
+		FragColor=vec4( FragColor.rgb*( shadow_value*shadow[0] + (1.0-shadow[0]) ) , FragColor.a );
+	}
+
+#endif
 
 }
 
@@ -280,16 +482,12 @@ void main(void)
 
 ]])
 
-		geoms_avatar.build_texture_anims()
-		geoms_avatar.build_texture_tweak()
-		geoms_avatar.build_bone_masks()
-
 	end
 	
-	function geoms_avatar.build_bone_masks()
+	function geoms_avatar.build_bone_masks(avatar)
 	
 		local masks={}
-		geoms_avatar.bone_masks=masks
+		avatar.bone_masks=masks
 		
 		masks[0]={} -- empty
 		masks[1]={} -- left
@@ -343,7 +541,7 @@ void main(void)
 	end
 
 
-	function geoms_avatar.build_texture_tweak()
+	function geoms_avatar.build_texture_tweak(avatar)
 	
 		local width=0
 		local height=3
@@ -353,14 +551,14 @@ void main(void)
 		local ts=wgeoms.get_anim_tweaks(geoms_avatar.objs)
 		width=(#ts/(4*height))
 		
-		if geoms_avatar.fixtex then
+		if avatar.fixtex then
 		
-			geoms_avatar.fixtex.gl_table=ts
-			geoms_avatar.fixtex.gl_data=wpack.save_array(geoms_avatar.fixtex.gl_table,"f32")
-			geoms_avatar.fixtex:upload()
+			avatar.fixtex.gl_table=ts
+			avatar.fixtex.gl_data=wpack.save_array(avatar.fixtex.gl_table,"f32")
+			avatar.fixtex:upload()
 
 		else
-			geoms_avatar.fixtex=textures.create({
+			avatar.fixtex=textures.create({
 				gl_data=wpack.save_array(ts,"f32"),
 				gl_table=ts,
 				gl_width=width,
@@ -373,13 +571,13 @@ void main(void)
 
 	end
 
-	function geoms_avatar.adjust_texture_tweak(name,mat)
+	function geoms_avatar.adjust_texture_tweak(avatar,name,mat)
 
 		local skin=geoms_avatar.objs.skins[1] -- assume only one boned character
 		if not skin then return end
-		if not geoms_avatar.fixtex then return end
+		if not avatar.fixtex then return end
 		
-		local bones=geoms_avatar.fixtex.gl_table
+		local bones=avatar.fixtex.gl_table
 	
 
 		local bs=#skin.nodes
@@ -409,9 +607,9 @@ void main(void)
 
 		end
 
-		geoms_avatar.fixtex.gl_table=bones
-		geoms_avatar.fixtex.gl_data=wpack.save_array(geoms_avatar.fixtex.gl_table,"f32")
-		geoms_avatar.fixtex:upload()
+		avatar.fixtex.gl_table=bones
+		avatar.fixtex.gl_data=wpack.save_array(avatar.fixtex.gl_table,"f32")
+		avatar.fixtex:upload()
 
 	end
 	
@@ -422,7 +620,6 @@ void main(void)
 		
 		for aidx,anim in ipairs(objs.anims) do
 			objs.anim=anim
-
 
 			local width=0
 			local height=#anim.keys
@@ -440,7 +637,7 @@ void main(void)
 
 			end
 			
-			print(anim.name,#fs)
+			log("avatar",anim.name,#fs)
 			
 			geoms_avatar.bonetexs[anim.name]=textures.create({
 				id="avatar/bonetexs/"..anim.name,
@@ -456,7 +653,7 @@ void main(void)
 		
 	end
 
-	function geoms_avatar.update(soul)
+	function geoms_avatar.update(avatar)
 
 		local objs=geoms_avatar.objs
 
@@ -496,71 +693,85 @@ void main(void)
 			b=b+4
 		end
 
-		geoms_avatar.bones=bones
-		geoms_avatar.material_colors=material_colors
-		geoms_avatar.material_values=material_values
+		avatar.bones=bones
+		avatar.material_colors=material_colors
+		avatar.material_values=material_values
 
 
-		objs.anim=objs.anims[soul.pose] or objs.anims[1]
-		if objs.anim then
-			objs.anim.time=(objs.anim.time or 0)+(1/60)
+		avatar.anim=objs.anims[avatar.pose] or objs.anims[1]
+		if avatar.anim then
+			avatar.time=(avatar.time or 0)+(1/60)
 		end
 		wgeoms.update(objs)
-		
---		geoms_avatar.rebuild(soul)
 
 	end
 
-	function geoms_avatar.draw()
+	function geoms_avatar.draw(avatar,opts)
+
+		opts=opts or {}
 
 		local pp=function(p)
 		
-			gl.ActiveTexture(gl.TEXTURE2)
-			geoms_avatar.fixtex:bind()
-			gl.Uniform1i( p:uniform("fixbones"), 2 )
+			gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+			avatar.fixtex:bind()
+			gl.Uniform1i( p:uniform("fixbones"), gl.NEXT_UNIFORM_TEXTURE )
+			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
-			gl.ActiveTexture(gl.TEXTURE1)
-			geoms_avatar.bonetexs[geoms_avatar.objs.anim.name]:bind()
-			gl.Uniform1i( p:uniform("texbones"), 1 )
+			gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+			geoms_avatar.bonetexs[avatar.anim.name]:bind()
+			gl.Uniform1i( p:uniform("texbones"), gl.NEXT_UNIFORM_TEXTURE )
+			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
-			gl.ActiveTexture(gl.TEXTURE0)
-			oven.cake.images.bind(geoms_avatar.image)
-			gl.Uniform1i( p:uniform("tex0"), 0 )
+			gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+			oven.cake.images.bind(avatar.image)
+			gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
+			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
+			gl.ActiveTexture( gl.TEXTURE0 )
 
 			local objs=geoms_avatar.objs
-			if objs.anim then
-				local anim=objs.anim
+			if avatar.anim then
+				local anim=avatar.anim
 				anim.length=anim.max-anim.min
 				if anim.length>0 then
-					anim.time=(anim.time or 0)%anim.length
+					avatar.time=(avatar.time or 0)%anim.length
 				end
 				if anim.keys[2] then
 					local rate=anim.keys[2]-anim.keys[1]
-					anim.frame=math.floor(anim.time/rate)
+					avatar.frame=math.floor(avatar.time/rate)
 				else
-					anim.frame=0
+					avatar.frame=0
 				end
-				gl.Uniform1f( p:uniform("animframe"), anim.frame )
+				gl.Uniform1f( p:uniform("animframe"), avatar.frame )
 			end
 
-			gl.UniformMatrix4f( p:uniform("bones"), geoms_avatar.bones )
+			gl.UniformMatrix4f( p:uniform("bones"), avatar.bones )
 
-			gl.Uniform4f( p:uniform("material_colors"), geoms_avatar.material_colors )
-			gl.Uniform4f( p:uniform("material_values"), geoms_avatar.material_values )
+			gl.Uniform4f( p:uniform("material_colors"), avatar.material_colors )
+			gl.Uniform4f( p:uniform("material_values"), avatar.material_values )
 			
 		end
 
-		gl.Scale( -1, 1, 1 )		
-		gl.Rotate( 90 ,  1, 0, 0 )
-	
---	wgeoms.draw(geoms_avatar.objs,"avatar_gltf",pp)
 
-		wgeom.draw(geoms_avatar.obj,"avatar_gltf",pp)
+		local shadername="gamecake_shader?XYZ&NORMAL&TEX&TEXBONE=80&TEXNTOON=1"
+
+		if opts.shadow then
+
+			wgeom.draw(avatar.obj,shadername.."&SHADOW="..opts.shadow ,pp)
+
+		else
+
+			wgeom.draw(avatar.obj,shadername,pp)
+
+		end
 		
+-- draw debug bones	
+--		wgeoms.draw_bones(geoms_avatar.objs,"avatar_gltf",pp)
+
 	end
 	
 
-	function geoms_avatar.rebuild(soul,name)
+	function geoms_avatar.rebuild(avatar,soul)
 
 		local clamp=function(a) if a<0 then a=0 elseif a>255 then a=255 end return math.floor(a) end
 		local rgb=function(r,g,b)
@@ -569,7 +780,7 @@ void main(void)
 					clamp(g*255) * 256 + 
 					clamp(b*255)
 		end
-		geoms_avatar.map:clear(0xffffffff)
+		avatar.map:clear(0xffffffff)
 		for idx,name in ipairs(geoms_avatar.material_names) do
 			local material=soul.materials[name]
 			if material and material.ramp then
@@ -582,11 +793,11 @@ void main(void)
 						value=ca/255,
 					}
 				end
-				local g=geoms_avatar.map:clip( 0,idx-1,0, 64,1,1 )
+				local g=avatar.map:clip( 0,idx-1,0, 64,1,1 )
 				wgrdcanvas.cmap_ramp(g,keys)
 			end
 		end
-		oven.cake.images.unload(geoms_avatar.image) -- force a reload
+		oven.cake.images.unload(avatar.image) -- force a reload
 
 
 
@@ -600,11 +811,11 @@ void main(void)
 		
 		for _,o in ipairs(geoms_avatar.objs) do
 			if show[ o.name ] then
-				local t=o:duplicate():filter_by_bones( geoms_avatar.bone_masks[ show[ o.name ] ] or geoms_avatar.bone_masks[0] )
+				local t=o:duplicate():filter_by_bones( avatar.bone_masks[ show[ o.name ] ] or avatar.bone_masks[0] )
 				obj:merge_from(t)
 			end
 		end
-		geoms_avatar.obj=obj
+		avatar.obj=obj
 
 -- tweak base positions of bones
 --[[
@@ -708,20 +919,257 @@ void main(void)
 			end
 		end
 
-		geoms_avatar.build_texture_tweak()
+		geoms_avatar.build_texture_tweak(avatar)
 
 	end
 
 
-	function geoms_avatar.avatar(avatar)
+	geoms_avatar.simp_to_ramp=function(cr,cg,cb,ca)
+		
+		if cr<0   then cr=0   end
+		if cr>255 then cr=255 end
+		if cg<0   then cg=0   end
+		if cg>255 then cg=255 end
+		if cb<0   then cb=0   end
+		if cb>255 then cb=255 end
+		if ca<0   then ca=0   end
+		if ca>255 then ca=255 end
+
+		local crl=cr-ca
+		local cgl=cg-ca
+		local cbl=cb-ca
+		
+		if crl<0   then crl=0   end
+		if crl>255 then crl=255 end
+		if cgl<0   then cgl=0   end
+		if cgl>255 then cgl=255 end
+		if cbl<0   then cbl=0   end
+		if cbl>255 then cbl=255 end
+		
+		local crh=cr+ca
+		local cgh=cg+ca
+		local cbh=cb+ca
+		
+		if crh<0   then crh=0   end
+		if crh>255 then crh=255 end
+		if cgh<0   then cgh=0   end
+		if cgh>255 then cgh=255 end
+		if cbh<0   then cbh=0   end
+		if cbh>255 then cbh=255 end
+		
+		local ramp={}
+		ramp[1]=wpack.b4_argb8(crl,cgl,cbl,0x00)
+		ramp[2]=wpack.b4_argb8(cr,cg,cb,0x80)
+		ramp[3]=wpack.b4_argb8(crh,cgh,cbh,0xff)
+
+		return ramp
+	end
+
+
+	geoms_avatar.ramp_to_simp=function(ramp)
+
+		local crl,cgl,cbl,cal=wpack.argb8_b4( ramp[1] or 0x00000000 )
+		local cr,cg,cb,ca=wpack.argb8_b4( ramp[2] or 0x00000000 )
+		local crh,cgh,cbh,cah=wpack.argb8_b4( ramp[3] or 0x00000000 )
+
+		ca=0
+
+		if cr-crl > ca then ca=cr-crl end
+		if cg-cgl > ca then ca=cg-cgl end
+		if cb-cbl > ca then ca=cb-cbl end
+
+		if crh-cr > ca then ca=crh-cr end
+		if cgh-cg > ca then ca=cgh-cg end
+		if cbh-cb > ca then ca=cbh-cb end
+
+		return cr,cg,cb,ca
+	end
+
+	geoms_avatar.ramp_is_simp=function(ramp)
+	
+		if #ramp ~= 3 then return false end
+	
+		local cr,cg,cb,ca = geoms_avatar.ramp_to_simp(ramp)
+		
+		local temp = geoms_avatar.simp_to_ramp(cr,cg,cb,ca)
+		
+		if temp[1] ~= ramp[1] then return false end
+		if temp[2] ~= ramp[2] then return false end
+		if temp[3] ~= ramp[3] then return false end
+		
+		return true
+	end
+
+
+	geoms_avatar.random_soul=function(opts)
+	
+		local rnd=function(a,b)
+			local r=math.random()
+			return a + ((b-a)*r)
+		end
+	
+		local soul={}
+		
+		soul.tweaks={}
+		soul.parts={}
+		soul.materials={}
+
+		for i,name in ipairs( geoms_avatar.part_names ) do
+		
+			local chance=1.0
+			if name=="hat" or name=="eyewear" or name=="beard" or name=="tail" or name=="item" then
+				chance=0.1
+			end
+			
+			local r=math.random()
+
+--print( name, r , chance , r < chance )
+
+			if r < chance then -- object
+			
+				local poss={}
+				
+				for _,v in ipairs( geoms_avatar.mesh_names ) do
+				
+					local s=v[1]
+					if s:sub(1,#name+1)==name.."_" then
+						if v.group==1 then
+							poss[#poss+1]=v[1]
+						end
+					end
+				end
+				
+				if #poss>0 then
+					local i=math.random(1,#poss)
+					soul.parts[name]={{name=poss[i],flags=3}}
+				else
+					soul.parts[name]={}
+				end
+
+			else
+				soul.parts[name]={}
+			end
+
+		end
+		
+		if soul.parts.hat[1] then soul.parts.hair[1]={name="hair_base",flags=3} end -- smaller hair if we have a hat
+		if soul.parts.item[1] then soul.parts.item[1].flags=math.random(1,2) end -- only 1 item in a random hand
+
+		local cmap={
+			0x11cccccc,
+			0x11888888,
+			0x11000000,
+			0x11ee9988,
+			0x11dd8888,
+			0x11884444,
+			0x11444488,
+			0x11cccccc,
+			0x11cc4444,
+			0x11cc8844,
+			0x11cccc44,
+			0x1144cc44,
+			0x114444cc,
+			0x1144cccc,
+			0x11cc8888,
+			0x11884444,
+		}
+		for i,name in ipairs( geoms_avatar.material_names ) do
+		
+			local r,g,b,a=wpack.argb8_b4(cmap[i])
+						
+			r=r+rnd(-64,64)
+			g=g+rnd(-64,64)
+			b=b+rnd(-64,64)
+			a=a+rnd(-16,64)
+			
+			local ramp=geoms_avatar.simp_to_ramp(r,g,b,a)
+
+			soul.materials[name]={ ramp=ramp }
+		
+		end
+		
+		for i,name in ipairs( geoms_avatar.tweak_names ) do
+			local tweak={}
+			soul.tweaks[name]=tweak
+			tweak.scale={}
+			tweak.scale[1]    =rnd(0.95,1.05)
+			tweak.scale[2]    =rnd(0.95,1.05)
+			tweak.scale[3]    =rnd(0.95,1.05)
+			tweak.rotate={}
+			tweak.rotate[1]   =rnd(-3,3)
+			tweak.rotate[2]   =rnd(-3,3)
+			tweak.rotate[3]   =rnd(-3,3)
+			tweak.translate={}
+			tweak.translate[1]=rnd(-0.003,0.003)
+			tweak.translate[2]=rnd(-0.003,0.003)
+			tweak.translate[3]=rnd(-0.003,0.003)
+
+			if name=="eye" or name=="ear" or name=="mouth" or name=="cheek" or name=="boob" then
+				tweak.scale[1]    =rnd(0.75,1.25)
+				tweak.scale[2]    =rnd(0.75,1.25)
+				tweak.scale[3]    =rnd(0.75,1.25)
+			end
+
+			if name=="body" or name=="item" or name=="hat" or name=="hair" or name=="eyeball" then
+				tweak.scale[1]    =1
+				tweak.scale[2]    =1
+				tweak.scale[3]    =1
+				tweak.rotate[1]   =0
+				tweak.rotate[2]   =0
+				tweak.rotate[3]   =0
+				tweak.translate[1]=0
+				tweak.translate[2]=0
+				tweak.translate[3]=0
+			end
+		end
+		
+		return soul
+	end
+
+
+	function geoms_avatar.avatar(avatar,soul)
 	
 		avatar=avatar or {}
-		
+
+		avatar.adjust_texture_tweak=function(name,mat)
+			geoms_avatar.adjust_texture_tweak(avatar,name,mat)
+		end
+
+		avatar.rebuild=function( soul )
+			geoms_avatar.rebuild( avatar , soul )
+			avatar.soul=soul
+		end
+
+		avatar.setup=function( soul )
+
+			soul=soul or geoms_avatar.random_soul({})
+
+			avatar.anim=geoms_avatar.objs.anims[1]
+
+			avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,64,16,1)
+			avatar.map:clear(0xffffffff)
+			
+			avatar.image=oven.cake.images.load("avatar/"..tostring(avatar),"avatar/"..tostring(avatar),function() return avatar.map end)
+			avatar.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
+			avatar.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
+			avatar.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
+			avatar.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
+
+			geoms_avatar.build_texture_tweak(avatar)
+			geoms_avatar.build_bone_masks(avatar)
+
+			avatar.rebuild( soul )
+		end
+				
 		avatar.update=function()
+			geoms_avatar.update(avatar)
 		end
 	
-		avatar.draw=function()
+		avatar.draw=function(opts)
+			geoms_avatar.draw(avatar,opts)
 		end
+
+		avatar.setup(soul)
 	
 		return avatar
 	end

@@ -75,12 +75,18 @@ Greetz to No1 and No6!
 		mode="clip",
 		vx=640,
 		vy=480,
-		fov=0.5,
+		fov=0.25,
 	})
 	
 	about.shaders=function()
 		gl.progsrc("about_sinescroll",
 		[[
+		
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
 		
 		uniform mat4 modelview;
 		uniform mat4 projection;
@@ -101,6 +107,12 @@ Greetz to No1 and No6!
 		}
 
 		]],[[
+
+#version 100
+#version 120
+#ifdef VERSION_ES
+precision mediump float;
+#endif
 
 #if defined(GL_FRAGMENT_PRECISION_HIGH)
 precision highp float; /* really need better numbers if possible */

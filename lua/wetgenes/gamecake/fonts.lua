@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local zips=require("wetgenes.zips")
 
 local ft=require("wetgenes.freetype")
@@ -294,7 +296,6 @@ oven.preloader("font",name)
 
 		local fname=fonts.prefix..filename..fonts.postfix
 		
-print("Loading font ",fname)		
 		local d=assert(zips.readfile(fname))
 
 --print("Loading font ",fname,#d)		

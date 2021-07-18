@@ -3,16 +3,19 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local function print(...) _G.print(...) end
 local function dprint(a) print(require("wetgenes.string").dump(a)) end
 
 local wwin=require("wetgenes.win")
-local wstr=require("wetgenes.string")
+local wstring=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local wutf=require("wetgenes.txt.utf")
 
 local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
+local ls=function(...) print(wstring.dump({...})) end
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -29,6 +32,8 @@ M.bake=function(oven,wtexteditor)
 function wtexteditor.update(texteditor)
 
 	local txt=texteditor.txt
+
+	if texteditor.last_refresh_pan_hx ~= texteditor.scroll_widget.pan.hx then texteditor.txt_dirty=true end
 
 	if texteditor.txt_dirty then
 		texteditor.master.throb=255
@@ -60,6 +65,7 @@ function wtexteditor.update(texteditor)
 
 	end
 
+
 	return texteditor.meta.update(texteditor)
 end
 
@@ -73,14 +79,14 @@ function wtexteditor.pan_skin( oldskin )
 			local cache=pan.texteditor.txt and pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
 			if pan.texteditor.throb and cache then -- draw the blinking cursor
 
-				local cx = 1 + ( cache.cx[pan.texteditor.txt.cx] or 0 ) - pan.texteditor.cx
-				local cy = pan.texteditor.txt.cy - pan.texteditor.cy
-				
 
 				oven.gl.PushMatrix()
 				oven.gl.LoadMatrix(panmtx)
 
-				if cx>=1 and cx<=pan.hx/8 and cy>=1 and cy<=pan.hy/16 then -- visible cursor
+
+				local cx=pan.texteditor.cursor_cx
+				local cy=pan.texteditor.cursor_cy
+				if cx and cy and cx>=1 and cx<=pan.hx/8 and cy>=1 and cy<=pan.hy/16 then -- visible cursor
 
 					local x,y,hx,hy=pan.px,pan.py,pan.hx,pan.hy
 
@@ -113,9 +119,6 @@ end
 wtexteditor.refresh=function(widget)
 	widget:texteditor_refresh()
 	widget.master.request_layout=true
---	widget:resize()
---	widget:layout()
---	widget:build_m4()
 end
 
 
@@ -123,8 +126,12 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 
 	if act=="txt_changed" then
 
-		widget.gutter=#string.format(" %d   ",widget.hy)
-
+		if widget.opts.gutter_disable then
+			widget.gutter=0
+		else
+			widget.gutter=#string.format(" %d   ",widget.hy)
+		end
+		
 		local pan=widget.scroll_widget.pan
 		pan.hx_max=(widget.txt.hx+widget.gutter+1)*8
 		pan.hy_max=widget.txt.hy*16
@@ -145,8 +152,13 @@ end
 
 wtexteditor.texteditor_refresh=function(widget)
 
+	widget.cursor_cx=nil
+	widget.cursor_cy=nil
+
 	local pan=widget.scroll_widget.pan
 	local txt=widget.txt
+
+	widget.last_refresh_pan_hx=pan.hx
 
 	pan.lines={}
 	
@@ -156,39 +168,59 @@ wtexteditor.texteditor_refresh=function(widget)
 	widget.cx=cx -- remember the scroll positions in characters
 	widget.cy=cy
 
+	local cursor_x = 0
+	local cursor_y = 0
+	local cache=pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
+	if cache then
+		cursor_x = 1 + ( cache.cx[pan.texteditor.txt.cx] or 0 )
+		cursor_y = pan.texteditor.txt.cy
+	end
+
 	pan.background_tile=0x00010000 -- default tile, remember it is abgr so backwards
 
+	local wy=1
 	for y=cy+1,cy+256 do
 		local ps={}
 		local pl=0
+		local sx=cx
 
 		local cache=widget.txt.get_cache_lex(y)
 		if cache then
 
-			local vn=tostring(y)
-			vn=string.rep(" ",widget.gutter-3-#vn)..vn.." "
-			for i=1,#vn do
-				if pl>=512*3 then break end -- max width
-				ps[pl+1]=string.byte(vn,i,i)
+			if not widget.opts.gutter_disable then
+
+				local vn=tostring(y)
+				vn=string.rep(" ",widget.gutter-3-#vn)..vn.." "
+				for i=1,#vn do
+					if pl>=512*3 then break end -- max width
+					ps[pl+1]=string.byte(vn,i,i)
+					ps[pl+2]=0
+					ps[pl+3]=3
+					ps[pl+4]=2
+					pl=pl+4
+				end
+				
+				ps[pl+1]=32
 				ps[pl+2]=0
-				ps[pl+3]=3
-				ps[pl+4]=2
+				ps[pl+3]=1
+				ps[pl+4]=0
 				pl=pl+4
+				
+				ps[pl+1]=32
+				ps[pl+2]=0
+				ps[pl+3]=1
+				ps[pl+4]=0
+				pl=pl+4
+
 			end
-			
-			ps[pl+1]=32
-			ps[pl+2]=0
-			ps[pl+3]=1
-			ps[pl+4]=0
-			pl=pl+4
-			
-			ps[pl+1]=32
-			ps[pl+2]=0
-			ps[pl+3]=1
-			ps[pl+4]=0
-			pl=pl+4
 
 			for x=cx,cx+512 do
+
+				if cursor_x-1 == x and cursor_y == y then
+					widget.cursor_cx=x-sx+1
+					widget.cursor_cy=wy
+				end
+
 				if pl>=512*3 then break end -- max width
 				local i=cache.xc[x]
 				if not i then break end -- max width
@@ -204,11 +236,11 @@ wtexteditor.texteditor_refresh=function(widget)
 				ps[pl+3]=1
 				ps[pl+4]=0
 				
-				if     toke=="k" then	ps[pl+3]=5  ps[pl+4]=4	-- keyword
-				elseif toke=="g" then	ps[pl+3]=7  ps[pl+4]=6	-- global
-				elseif toke=="c" then	ps[pl+3]=9  ps[pl+4]=8	-- comment
-				elseif toke=="s" then	ps[pl+3]=11	ps[pl+4]=10	-- string
-				elseif toke=="0" then	ps[pl+3]=13	ps[pl+4]=12 -- number
+				if     toke=="k" then	ps[pl+3]=7  ps[pl+4]=6	-- keyword
+				elseif toke=="g" then	ps[pl+3]=9  ps[pl+4]=8	-- global
+				elseif toke=="c" then	ps[pl+3]=11 ps[pl+4]=10	-- comment
+				elseif toke=="s" then	ps[pl+3]=13	ps[pl+4]=12	-- string
+				elseif toke=="0" then	ps[pl+3]=15	ps[pl+4]=14 -- number
 --				elseif toke=="p" then	ps[pl+3]=0x05	-- punctuation
 				end
 
@@ -222,10 +254,37 @@ wtexteditor.texteditor_refresh=function(widget)
 					if flip then ps[pl+3],ps[pl+4] = ps[pl+4],ps[pl+3] end
 				end
 				pl=pl+4
+
+				if widget.opts.word_wrap then
+					local pmax=(math.floor(pan.hx/8)-1)*4
+					if pmax > (widget.gutter*4) and pl > pmax then -- wrap
+					
+						local s=string.char(unpack(ps))
+						pan.lines[wy]={text=v,s=s,y=y,x=sx}
+						wy=wy+1
+
+						ps={}
+						pl=0
+						sx=x+1
+
+						if not widget.opts.gutter_disable then
+							for i=1,widget.gutter do
+								ps[pl+1]=32
+								ps[pl+2]=0
+								ps[pl+3]=1
+								ps[pl+4]=0
+								pl=pl+4
+							end
+						end
+
+					end
+				end
+
 			end
 		end
 		local s=string.char(unpack(ps))
-		pan.lines[y-cy]={text=v,s=s}
+		pan.lines[wy]={text=v,s=s,y=y,x=sx}
+		wy=wy+1
 	end
 
 end
@@ -239,9 +298,9 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	end
 	
 	if keyname=="right" and act==1 then
-		print("righty clicky")
+		log("texteditor","righty clicky")
 		pan.master.later_append(function()
-			print("righty clicky later")
+			log("texteditor","righty clicky later")
 		end)
 		return true
 	end
@@ -283,10 +342,18 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	local py=math.floor(pan.pan_py/16)
 	
 	local x,y=pan:mousexy(_x,_y)
+
+
 	local dx,dy=math.floor(x/8),math.floor(y/16)
 	
 	dx=dx-texteditor.gutter+1
 	dy=dy+1
+
+	local line=pan.lines[ dy - texteditor.cy]
+	if line then
+		dy=line.y
+		dx=line.x+dx
+	end
 	
 	local cache=txt.get_cache( dy )
 	if cache then
@@ -302,7 +369,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		texteditor.key_mouse=1
 
-		texteditor.mark_area={dx,dy,dx,dy}
+		texteditor.mark_area={dy,dx,dy,dx}
 
 		txt.mark(unpack(texteditor.mark_area))
 
@@ -315,7 +382,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		texteditor.float_cx=nil
 
-		txt.markauto(dx,dy,act) -- select word
+		txt.markauto(dy,dx,act) -- select word
 
 		texteditor.mark_area={txt.markget()}
 		texteditor.mark_area_auto={txt.markget()}
@@ -331,7 +398,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 			if texteditor.key_mouse > 1 then -- special select
 			
-				txt.markauto(dx,dy,texteditor.key_mouse) -- select word
+				txt.markauto(dy,dx,texteditor.key_mouse) -- select word
 
 				txt.markmerge(texteditor.mark_area_auto[1],texteditor.mark_area_auto[2],
 				texteditor.mark_area_auto[3],texteditor.mark_area_auto[4],txt.markget())
@@ -339,7 +406,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 				texteditor.mark_area={txt.markget()}
 			else
 
-				texteditor.mark_area[3],texteditor.mark_area[4]=dx,dy
+				texteditor.mark_area[3],texteditor.mark_area[4]=dy,dx
 				
 				txt.mark(unpack(texteditor.mark_area))
 				
@@ -353,7 +420,12 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 end
 
-function wtexteditor.scroll_to_view(texteditor,cx,cy)
+function wtexteditor.scroll_to_bottom(texteditor)
+	local d=texteditor.scroll_widget.daty
+	d:set(d.max or 1)
+end
+
+function wtexteditor.scroll_to_view(texteditor,cy,cx)
 	local txt=texteditor.txt
 	local pan=texteditor.scroll_widget.pan
 	
@@ -393,7 +465,7 @@ function wtexteditor.key(pan,ascii,key,act)
 	local cpre=function()
 		if texteditor.key_shift then
 			if not texteditor.mark_area then
-				texteditor.mark_area={txt.cx,txt.cy,txt.cx,txt.cy}
+				texteditor.mark_area={txt.cy,txt.cx,txt.cy,txt.cx}
 			end
 		else
 			texteditor.mark_area=false
@@ -402,8 +474,8 @@ function wtexteditor.key(pan,ascii,key,act)
 	end
 	local cpost=function()
 		if texteditor.key_shift and texteditor.mark_area then
-				texteditor.mark_area[3]=txt.cx
-				texteditor.mark_area[4]=txt.cy
+				texteditor.mark_area[3]=txt.cy
+				texteditor.mark_area[4]=txt.cx
 				txt.mark(unpack(texteditor.mark_area))
 		end
 		
@@ -411,73 +483,26 @@ function wtexteditor.key(pan,ascii,key,act)
 	end
 
 
-	if ascii and ascii~="" then -- not a blank string
 
-		texteditor.txt_dirty=true
-		
-		local c=wutf.code(ascii)
-		if c>=32 then
-		
-			texteditor.float_cx=nil
-
-			txt.undo.cut()
-			txt.undo.insert_char(ascii)
-
-			texteditor:scroll_to_view()
-
-		end
-		
-	elseif act==1 or act==0 then
-
-		texteditor.txt_dirty=true
+	if (act==1 or act==0) and ( not ascii or ascii=="" ) then
 
 		if     key=="shift_l"   or key=="shift_r"   then	texteditor.key_shift=true
 		elseif key=="control_l" or key=="control_r" then	texteditor.key_control=true
 		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=true
 		end
 
-		if texteditor.key_control then
+		if key=="c" then	-- copy
 		
---print(key)		
-			if     key=="x" then	-- cut
+			local s=txt.undo.copy()
 
-				local s=txt.undo.cut()
-				
-				if s then wwin.set_clipboard(s) end
+			if s then wwin.set_clipboard(s) end
 
-				texteditor:scroll_to_view()
-			
-			elseif key=="c" then	-- copy
-			
-				local s=txt.undo.copy()
-
-				if s then wwin.set_clipboard(s) end
-
-			elseif key=="v" then	-- paste
-			
-				if wwin.has_clipboard() then -- only if something to paste
-					local s=wwin.get_clipboard()
-					txt.undo.cut()
-					txt.undo.insert(s)
-					texteditor:scroll_to_view()
-				end
-
-			elseif key=="z" then	-- undo
-
-					txt.undo.undo()
-
-			elseif key=="y" then	-- redo
-
-					txt.undo.redo()
-
-			end
-		
 		elseif key=="left" then
 
 			texteditor.float_cx=nil
 
 			cpre()
-			txt.cx,txt.cy=txt.clip_left(txt.cx,txt.cy)
+			txt.cy,txt.cx=txt.clip_left(txt.cy,txt.cx)
 			cpost()
 
 		elseif key=="right" then
@@ -485,7 +510,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			texteditor.float_cx=nil
 
 			cpre()
-			txt.cx,txt.cy=txt.clip_right(txt.cx,txt.cy)
+			txt.cy,txt.cx=txt.clip_right(txt.cy,txt.cx)
 			cpost()
 
 		elseif key=="up" then
@@ -497,7 +522,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			cpre()
 			local cache=txt.get_cache(txt.cy-1)
-			txt.cx,txt.cy=txt.clip(cache and cache.xc[texteditor.float_cx] or texteditor.float_cx,txt.cy-1)
+			txt.cy,txt.cx=txt.clip( txt.cy-1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
 			cpost()
 
 		elseif key=="down" then
@@ -509,16 +534,8 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			cpre()
 			local cache=txt.get_cache(txt.cy+1)
-			txt.cx,txt.cy=txt.clip(cache and cache.xc[texteditor.float_cx] or texteditor.float_cx,txt.cy+1)
+			txt.cy,txt.cx=txt.clip( txt.cy+1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
 			cpost()
-
-		elseif key=="enter" or key=="return" then
-
-			texteditor.float_cx=nil
-
-			txt.undo.cut()
-			txt.undo.insert_newline()
-			texteditor:scroll_to_view()
 
 		elseif key=="home" then
 
@@ -536,34 +553,6 @@ function wtexteditor.key(pan,ascii,key,act)
 			txt.clip()
 			texteditor:scroll_to_view()
 
-		elseif key=="back" then
-
-			texteditor.float_cx=nil
-
-			if not txt.undo.cut() then -- just delete selection?
-				txt.undo.backspace()
-			end
-			
-			texteditor:scroll_to_view()
-
-		elseif key=="delete" then
-
-			texteditor.float_cx=nil
-
-			if not txt.undo.cut() then -- just delete selection?
-				txt.undo.delete()
-			end
-			
-			texteditor:scroll_to_view()
-
-		elseif key=="tab" then
-
-			texteditor.float_cx=nil
-
-			txt.undo.cut()
-			txt.undo.insert_char("\t")
-			texteditor:scroll_to_view()
-
 		end
 		
 	elseif act==-1 then
@@ -573,6 +562,143 @@ function wtexteditor.key(pan,ascii,key,act)
 		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=false
 		end
 		
+	end
+
+
+
+	if not texteditor.opts.readonly then -- allow changes
+
+		if ascii and ascii~="" then -- not a blank string
+
+			texteditor.txt_dirty=true
+			
+			local c=wutf.code(ascii)
+			if c>=32 then
+			
+				texteditor.float_cx=nil
+
+				txt.undo.cut()
+				txt.undo.insert_char(ascii)
+
+				texteditor:scroll_to_view()
+
+			end
+			
+		elseif act==1 or act==0 then
+
+			texteditor.txt_dirty=true
+
+			if texteditor.key_control then
+			
+	--print(key)		
+				if     key=="x" then	-- cut
+
+					local s=txt.undo.cut()
+					
+					if s then wwin.set_clipboard(s) end
+
+					texteditor:scroll_to_view()
+				
+				elseif key=="v" then	-- paste
+				
+					if wwin.has_clipboard() then -- only if something to paste
+						local s=wwin.get_clipboard()
+						txt.undo.replace(s)
+						texteditor:scroll_to_view()
+					end
+
+				elseif key=="z" then	-- undo
+
+						txt.undo.undo()
+
+				elseif key=="y" then	-- redo
+
+						txt.undo.redo()
+
+				end
+			
+			elseif key=="enter" or key=="return" then
+
+				texteditor.float_cx=nil
+
+				txt.undo.cut()
+				txt.undo.insert_newline()
+				texteditor:scroll_to_view()
+
+			elseif key=="back" then
+
+				texteditor.float_cx=nil
+
+				if not txt.undo.cut() then -- just delete selection?
+					txt.undo.backspace()
+				end
+				
+				texteditor:scroll_to_view()
+
+			elseif key=="delete" then
+
+				texteditor.float_cx=nil
+
+				if not txt.undo.cut() then -- just delete selection?
+					txt.undo.delete()
+				end
+				
+				texteditor:scroll_to_view()
+
+			elseif key=="tab" then
+
+				texteditor.float_cx=nil
+
+				if txt.marked() then -- select full lines
+
+					local fy,fx,ty,tx=txt.markget()
+					if tx>1 then ty=ty+1 end
+					txt.mark(fy,0,ty,0)
+
+					if texteditor.key_shift then
+
+						local s=txt.undo.copy()
+						local ls=wstring.split_lines(s)
+						for i=1,#ls do
+							if string.sub(ls[i],1,1)=="\t" then
+								ls[i]=string.sub(ls[i],2)
+							end
+						end
+						s=table.concat(ls)
+
+						txt.undo.replace(s)
+
+						txt.mark(fy,0,ty,0)
+
+						texteditor:scroll_to_view()
+
+					else
+
+						local s=txt.undo.copy()
+						local ls=wstring.split_lines(s)
+						for i=1,#ls do
+							ls[i]="\t"..ls[i]
+						end
+						s=table.concat(ls)
+
+						txt.undo.replace(s)
+
+						txt.mark(fy,0,ty,0)
+
+						texteditor:scroll_to_view()
+
+					end
+
+				else
+
+					txt.undo.insert_char("\t")
+					texteditor:scroll_to_view()
+
+				end
+
+			end
+
+		end
 	end
 
 	return true
@@ -590,6 +716,15 @@ end
 
 function wtexteditor.setup(widget,def)
 
+
+-- options about how we behave
+
+	local opts=def.opts or {}
+	widget.opts={}
+	widget.opts.readonly		=	opts.readonly
+	widget.opts.gutter_disable	=	opts.gutter_disable
+	widget.opts.word_wrap		=	opts.word_wrap
+
 	widget.class="texteditor"
 	
 	widget.update=wtexteditor.update
@@ -601,13 +736,26 @@ function wtexteditor.setup(widget,def)
 	widget.texteditor_refresh	=	wtexteditor.texteditor_refresh
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
 	widget.scroll_to_view		=	wtexteditor.scroll_to_view
+	widget.scroll_to_bottom		=	wtexteditor.scroll_to_bottom
 
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles",color=widget.color})
+
+
+	widget.set_txt=function(txt)
+		if widget.txt then -- remove old hooks
+			widget.txt.hooks.changed=nil
+		end
+		
+		widget.txt=txt
+		widget.txt.hooks.changed=function(txt) return wtexteditor.texteditor_hooks(widget,"txt_changed") end
+
+		wtexteditor.texteditor_hooks(widget,"txt_changed")
+	end
+
+	widget.set_txt( require("wetgenes.txt").construct() )
+
 	
-	widget.txt=require("wetgenes.txt").construct()
-	
-	widget.txt.hooks.changed=function(txt) return wtexteditor.texteditor_hooks(widget,"txt_changed") end
 
 	widget.gutter=0
 	widget.ducts=0
@@ -633,8 +781,10 @@ function wtexteditor.setup(widget,def)
 
 	widget.scroll_widget.pan.drag=function()end -- fake drag so we are treated as drag able
 
-	widget.gutter=#(" 01   ")
-	
+--	if not widget.gutter_disable then
+--		widget.gutter=#(" 01   ")
+--	end
+
 	if def.data then -- set starting text
 		widget.txt.set_text( def.data:value() )
 	end
@@ -644,20 +794,22 @@ function wtexteditor.setup(widget,def)
 		dark={
 			0xff444444,0xffaaaaaa,	-- text			0,1
 			0xff555555,0xff333333,	-- gutter		2,3
-			0xff444444,0xffdd7733,	-- keyword		4,5
-			0xff444444,0xffddaa33,	-- global		6,7
-			0xff444444,0xff888888,	-- comment		8,9
-			0xff444444,0xff66aa33,	-- string		10,11
-			0xff444444,0xff5599cc,	-- number		12,13
+			0xff333333,0xffbbbbbb,	-- hilite		4,5
+			0xff444444,0xffdd7733,	-- keyword		6,7
+			0xff444444,0xffddaa33,	-- global		8,9
+			0xff444444,0xff888888,	-- comment		10,11
+			0xff444444,0xff66aa33,	-- string		12,13
+			0xff444444,0xff5599cc,	-- number		14,15
 		},
 		lite={
 			0xffaaaaaa,0xff444444,	-- text			0,1
 			0xff777777,0xff999999,	-- gutter		2,3
-			0xffaaaaaa,0xffaa6622,	-- keyword		4,5
-			0xffaaaaaa,0xffcc9922,	-- global		6,7
-			0xffaaaaaa,0xff777777,	-- comment		8,9
-			0xffaaaaaa,0xff559922,	-- string		10,11
-			0xffaaaaaa,0xff4488bb,	-- number		12,13
+			0xffbbbbbb,0xff333333,	-- hilite		4,5
+			0xffaaaaaa,0xffaa6622,	-- keyword		6,7
+			0xffaaaaaa,0xffcc9922,	-- global		8,9
+			0xffaaaaaa,0xff777777,	-- comment		10,11
+			0xffaaaaaa,0xff559922,	-- string		12,13
+			0xffaaaaaa,0xff4488bb,	-- number		14,15
 		},
 	}
 
