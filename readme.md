@@ -9,14 +9,13 @@ interested in, the rest of this readme concerns the process of building
 gamecake from source.
 
 
-Be sure to clone this repo with submodules as the engine binaries live 
-in a permanently orphaned branch. The following is the optimal way to 
-git clone so that the submodule references master rather than 
-(slowly) downloading the repo twice.
+If you want to build then you should clone and then run the git-pull script to
+make sure everything is up to date.
 
 	git clone https://github.com/xriss/gamecake.git
 	cd gamecake
 	./git-pull
+
 
 It is best to always use this script to git pull the latest everything 
 so that git is less likely to get its knickers in a twist.
@@ -25,17 +24,16 @@ so that git is less likely to get its knickers in a twist.
 
 
 
-Releases are compiled inside the vbox_* directories 
-(linux32/linux64/osx64/raspi/etc) which contain vagrant or qemu boxes 
-setup to build the code in a controlled environment via a ./make 
-script. The latest code built this way can be found in the exe branch 
-and a zip of them all can be downloaded from 
-https://github.com/xriss/gamecake/archive/exe.zip
+Releases are compiled inside the vbox_* directories
+(linux32/linux64/raspi/emscipten/windows) which contain vagrant or qemu boxes
+setup to build the code in a controlled environment via a ./make script. The
+latest code built this way can be found in the exe branch and a zip of them all
+can be downloaded from https://github.com/xriss/gamecake/archive/exe.zip
 
 
 
 For a linuxy build, the big required build/lib dependencies are 
-premake4, luajit and SDL2. You have two choices either install via a 
+luajit, luafilesystem and SDL2. You have two choices either install via a 
 package manager, the following script should do that using apt.
 
 	./apt-gets
@@ -56,10 +54,11 @@ For some more options when building (eg use clang) see the output of
 	./make --help
 
 
-Alternatively any vbox_* directory can build a specific executable. For 
-instance vbox_1604_64 can be used to build a 64bit executable inside an 
-ubuntu 16.04 vagrant box. See readme files inside these directories for 
-more information.
+Alternatively any vbox_* directory can build a specific executable. For
+instance vbox_1604_64 can be used to build a 64bit executable inside an ubuntu
+16.04 vagrant box. See readme files inside these directories for more
+information, usually if there is a readme then it is an attempt that did not
+work.
 
 
 Once built the engine lives in one single fat binary that includes many 
