@@ -385,7 +385,7 @@ font.vbs_idx=1
 	function console.print(...)
 
 		local t={...}
-		for i,v in ipairs(t) do t[i]=tostring(v) end
+		for i=1,#t do t[i]=tostring(t[i]) end
 		local s=table.concat(t,"\t").."\n"
 
 		if console.linehook then console.linehook(s) end -- send print data here

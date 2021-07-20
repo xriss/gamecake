@@ -877,25 +877,49 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 	end
 
 	-- get collision triangle,vertex collision tables
-	M.get_colision_tables=function(it,m4)
+	-- optional m4 transform and material allow/block filtering table maps
+	M.get_colision_tables=function(it,m4,allows,blocks)
+
+		local allow
+		local block
+		if allows then allow={} for i,v in ipairs(allows) do allow[v]=true end end
+		if blocks then block={} for i,v in ipairs(blocks) do block[v]=true end end
+
+		local need={}
+		local map={}
 
 		local tp={}
 		local tv={}
-		for i,v in ipairs(it.verts) do
-			local l=#tv
-			local v=V4{v[1],v[2],v[3],1}
-			if m4 then v:product(m4) end -- adjust position
-			tv[l+1]=v[1]
-			tv[l+2]=v[2]
-			tv[l+3]=v[3]
-		end
-		for i,p in ipairs(it.polys) do
-			for ti=0,(#p-3) do
-				for i=0,2,1 do
-					local tv=1+ti+i if i==0 then tv=1 end
-					tp[#tp+1]=p[tv]-1
+		for i,p in ipairs(it.polys) do -- scan and filter polys
+			local ok=true
+			if allow and ( not allow[ p.mat or 0 ] ) then ok=false end
+			if block and (     block[ p.mat or 0 ] ) then ok=false end
+			if ok then
+				for ti=0,(#p-3) do
+					for i=0,2,1 do
+						local tv=1+ti+i if i==0 then tv=1 end
+						tp[#tp+1]=p[tv]-1
+						need[ p[tv]-1 ]=true
+					end
 				end
 			end
+		end
+		local idx=0 -- actual verts used
+		for i,v in ipairs(it.verts) do
+			map[i-1]=idx
+			if need[ i-1 ] then
+				local l=#tv
+				local v=V4{v[1],v[2],v[3],1}
+				if m4 then v:product(m4) end -- adjust position
+				tv[l+1]=v[1]
+				tv[l+2]=v[2]
+				tv[l+3]=v[3]
+				idx=idx+1
+			end
+		end
+
+		for i=1,#tp do -- remap
+			tp[i] = map[ tp[i] ]
 		end
 
 		return tp,tv
