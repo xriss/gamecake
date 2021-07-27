@@ -74,6 +74,14 @@ logs.log = function(mode,...)
 
 end
 
+-- print to the main display
+logs.display = function(...)
+	if oven and oven.console and oven.console.display then
+		oven.console.display( ... )
+	end
+end
+
+
 -- show full table contents
 
 logs.dump = function(...)

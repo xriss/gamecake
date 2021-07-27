@@ -381,7 +381,8 @@ font.vbs_idx=1
 		cake.views.pop_and_apply()
 
 	end
-	
+
+-- print to the console	
 	function console.print(...)
 
 		local t={...}
@@ -401,17 +402,17 @@ font.vbs_idx=1
 		end
 			
 	end
-	
+
+-- print to the display overlay, this must be done *every* frame draw cycle
 	function console.display(...)
 	
 		if not console.lines then return end -- not setup yet
 		
-		local ts={...}
-		for i,s in ipairs(ts) do	
-			if type(s)~="string" then ts[i]=wstr.dump(s) end
-		end
+		local t={...}
+		for i=1,#t do t[i]=tostring(t[i]) end
+		local s=table.concat(t,"\t").."\n"
 
-		for _,l in ipairs( wstr.smart_wrap( table.concat(ts,"\t") , console.line_width) ) do
+		for _,l in ipairs( wstr.smart_wrap( s , console.line_width) ) do
 			table.insert(console.lines_display,l)
 		end
 
