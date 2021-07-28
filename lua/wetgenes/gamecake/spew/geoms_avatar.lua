@@ -550,14 +550,19 @@ void main(void)
 		
 		local ts=wgeoms.get_anim_tweaks(geoms_avatar.objs)
 		width=(#ts/(4*height))
-		
-		if avatar.fixtex then
-		
-			avatar.fixtex.gl_table=ts
-			avatar.fixtex.gl_data=wpack.save_array(avatar.fixtex.gl_table,"f32")
-			avatar.fixtex:upload()
 
-		else
+-- upload breaks?
+		if avatar.fixtex then
+			textures.delete(avatar.fixtex)
+			avatar.fixtex=nil
+		end
+
+		
+--			avatar.fixtex.gl_table=ts
+--			avatar.fixtex.gl_data=wpack.save_array(avatar.fixtex.gl_table,"f32")
+--			avatar.fixtex:upload()
+
+--		else
 			avatar.fixtex=textures.create({
 				gl_data=wpack.save_array(ts,"f32"),
 				gl_table=ts,
@@ -567,7 +572,7 @@ void main(void)
 				gl_format=gl.RGBA,
 				gl_type=gl.FLOAT,
 			})
-		end
+--		end
 
 	end
 

@@ -184,6 +184,16 @@ textures.create = function(init)
 	return it
 end
 
+--[[
+
+delete a texture
+
+]]
+textures.delete = function(id)
+	local it=textures.get(id)
+	textures.unload(it)
+	textures.set(nil,it.id) -- forget
+end
 
 	
 	return textures

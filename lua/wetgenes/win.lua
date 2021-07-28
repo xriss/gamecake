@@ -346,9 +346,13 @@ function win.nacl_pulse() -- called 60ish times a second depending upon how reta
 end
 
 function win.emcc_start(args)
+
 	local zips=require("wetgenes.zips")
 	assert(zips.add_zip_file(args.zip or "gamecake.zip"))
 	local main=win.load_run_init(args)
+	if oven then
+		oven.preloader_enabled=false -- disable preloader
+	end
 	require("global").gamecake_pulse=function() main:serv_pulse() end
 end
 

@@ -55,7 +55,7 @@ M.bake=function(oven,screen)
 			cx=0.5,cy=0.5,
 		})
 
-		screen.fbo_occlusion=framebuffers.create(0,0,0,{ no_uptwopow=true , texture_format={gl.RED, gl.RED, gl.UNSIGNED_BYTE} })
+		screen.fbo_occlusion=framebuffers.create(0,0,0,{ no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
 
 		screen.view_occlusion=oven.cake.views.create({
 			mode="fbo",

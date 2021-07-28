@@ -260,8 +260,8 @@ if EMCC then
 
 	linkoptions{
 		"-as-needed",
-		"--emrun",
-		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 ",
+--		"--emrun",
+		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 ",
 		"-s ALLOW_MEMORY_GROWTH=1",
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
 		"-s EXPORTED_RUNTIME_METHODS=\"['cwrap']\"",
@@ -276,15 +276,15 @@ if EMCC then
 		buildlinkoptions{
 			"-O0",
 			"-g3",
-			"-s ASSERTIONS=1",
+--			"-s ASSERTIONS=1",
 --			"-s SAFE_HEAP=3",
 --			"-s ALIASING_FUNCTION_POINTERS=0",
 --			"--minify 0",
 		}
 	configuration {"Release"}
 		buildlinkoptions{
-			"-O3",
 			"-g0",
+			"-O3",
 		}
 	configuration {}
 
