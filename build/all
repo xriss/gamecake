@@ -35,4 +35,4 @@ cd ../exe
 git status
 
 echo add and commit changed files
-./update-files
+./git-publish
