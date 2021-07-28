@@ -1,6 +1,6 @@
 cd `dirname $0`
 
-git pull --all origin master
+git pull --all
 git checkout master
 
 plated/upgrade
