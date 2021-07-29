@@ -551,7 +551,8 @@ void main(void)
 		local ts=wgeoms.get_anim_tweaks(geoms_avatar.objs)
 		width=(#ts/(4*height))
 
--- upload breaks?
+-- upload breaks on webgl?
+-- so we just delete if it already exists
 		if avatar.fixtex then
 			textures.delete(avatar.fixtex)
 			avatar.fixtex=nil
