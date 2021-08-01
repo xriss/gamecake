@@ -769,17 +769,17 @@ end
 -- add optional debuggery to every function defined *above*
 local gles_old_functions
 gles.patch_functions_method="none"
-function gles.patch_functions(method)
+function gles.patch_functions(gl,method)
 
-	if gles_old_functions then assert(method=="none") end -- can only restore
+	if gl.old_functions then assert(method=="none") end -- can only restore
 
 	if method~="none" then
-		gles_old_functions={}
+		gl.old_functions={}
 	end
 
-print("Patching GLES ",method)
+print("Patching GL ",method)
 
-	for n,f in pairs(gles) do
+	for n,f in pairs(gl) do
 		if type(f)=="function" and not ( 
 											n=="CheckError" or 
 											n=="GetError" or 
@@ -791,31 +791,31 @@ print("Patching GLES ",method)
 		
 			if     method=="none" then
 			
-				gles[n]=gles_old_functions[n] or gles[n]
+				gl[n]=gl.old_functions[n] or gl[n]
 				
 			elseif method=="disable" then
 			
 --This disables all gles functions so we can profile with no GL calls
-				gles[n]=function() return "" end
+				gl[n]=function() return "" end
 				
 			elseif method=="check" then
 			
 --This foces a CheckError after each function which can catch bugs but stalls rendering
-				gles[n]=function(...) gles.GetError() local r=f(...) gles.CheckError() return r end
+				gl[n]=function(...) gl.GetError() local r={f(...)} gl.CheckError() return unpack(r) end
 				
 			end
 		end
 	end
 	
 	if method=="none" then
-		gles_old_functions=nil
+		gl.old_functions=nil
 	end
 
-	gles.patch_functions_method=method
+	gl.patch_functions_method=method
 	
 end
 
---gles.patch_functions("check")
+--gles.patch_functions(gles,"check")
 
 function gles.numtostring(num)
 	return gles.nums[num]

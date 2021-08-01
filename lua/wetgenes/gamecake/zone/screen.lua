@@ -55,6 +55,8 @@ M.bake=function(oven,screen)
 			cx=0.5,cy=0.5,
 		})
 
+--	we only need RED but dodgy drivers will bork if this is not at least rgb
+
 		screen.fbo_occlusion=framebuffers.create(0,0,0,{ no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
 
 		screen.view_occlusion=oven.cake.views.create({

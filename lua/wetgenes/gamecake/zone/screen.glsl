@@ -183,11 +183,19 @@ vec3 view_to_depth(vec3 vv)
 	return (p.xyz/p.w)*0.5 + 0.5;
 }
 
-float random2d(vec2 st) {
-    return fract(sin(dot(st.xy,
-                         vec2(12.9898,78.233)))*
-        43758.5453123);
+// a noise that works on lower precision hardware (tested, but...)
+float goldienoise(vec3 p)
+{
+	p=abs(p)+23.0; // move away from origin to reduce obvious patern
+	float r=fract(tan(distance(p.xy*1.61803398874989484820459,p.xy)*p.z)*p.x);
+    return r!=r ? 0.0 : r; // replace nan with 0
 }
+
+
+float random2d(vec2 st) {
+    return goldienoise(vec3(st,1.0));
+}
+
 
 float ambient_occlusion( vec2 vv )
 {

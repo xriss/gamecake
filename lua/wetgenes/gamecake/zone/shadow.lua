@@ -42,9 +42,6 @@ M.bake=function(oven,shadow)
 			fov=0,
 			cx=0.5,cy=0.5,
 		})
-		shadow.fbo:bind_texture()
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
 
 		gl.uniforms.shadow_map=function(u)
 			gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
