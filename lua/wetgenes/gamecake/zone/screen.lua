@@ -40,6 +40,9 @@ M.bake=function(oven,screen)
 
 	end
 
+	screen.base_scale=1
+	screen.occlusion_scale=0.25
+
 	screen.setup=function()
 
 		screen.loads()
@@ -86,14 +89,14 @@ M.bake=function(oven,screen)
 	
 	screen.draw_head=function(scene)
 
-		local w=math.floor((oven.win.width * (1-0) )/1)
-		local h=math.floor((oven.win.height * (1-0) )/1)
+		local w=math.ceil(oven.win.width  * screen.base_scale )
+		local h=math.ceil(oven.win.height * screen.base_scale )
 
 		if screen.fbo.w ~= w or screen.fbo.h ~= h then
 
 			screen.fbo:resize( w , h , 1 )
 
-			screen.fbo_occlusion:resize( math.ceil(w/1) , math.ceil(h/1) , 0 )
+			screen.fbo_occlusion:resize( math.ceil(w*screen.occlusion_scale) , math.ceil(h*screen.occlusion_scale) , 0 )
 
 			screen.fbo_bloom:resize( math.ceil(w/4) , math.ceil(h/4) , 0 )
 
@@ -182,8 +185,6 @@ M.bake=function(oven,screen)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo_occlusion:bind_texture()
---				screen.fbo:bind_texture()
---				screen.fbo:bind_depth()
 				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 

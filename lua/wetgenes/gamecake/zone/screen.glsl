@@ -202,9 +202,9 @@ float ambient_occlusion( vec2 vv )
 #define AO_STEPS 3
 #define AO_ANGLES 8
 #define AO_SAMPLES AO_ANGLES*AO_STEPS
-	float slen=0.2;
 	
 	vec2 texel_size = 1.0 / vec2( textureSize(tex,0) );
+	float slen=128.0*texel_size.x;
 
 	vec3 p1=depth_to_view( vv );
 	vec3 p2=view_to_depth( p1+vec3(slen,slen,0.0) );
@@ -248,11 +248,12 @@ float shadow_occlusion( vec2 vv )
 		float shadow_add=0.0;
 		float shadow_min=1.0;
 		vec2 shadow_texel_size = 1.0 / vec2( textureSize(shadow_map,0) );
+		vec2 rr = vec2( random2d(vv.xy)-0.5 , random2d(vv.yx)-0.5 );
 		for(int x = -1; x <= 1; x++)
 		{
 			for(int y = -1; y <= 1; y++)
 			{
-				shadow_tmp = texture(shadow_map, shadow_uv.xy + vec2(float(x)-0.5+random2d(vv.xy),float(y)-0.5+random2d(vv.yx))*shadow_texel_size ).r ;
+				shadow_tmp = texture(shadow_map, shadow_uv.xy + ((vec2(float(x),float(y))+rr)*shadow_texel_size) ).r ;
 				shadow_add += shadow_tmp;
 				shadow_min = min( shadow_min ,  shadow_tmp );
 			}
@@ -268,10 +269,10 @@ void main(void)
 {
 	float s=shadow_occlusion(v_texcoord);
 	float t=ambient_occlusion(v_texcoord);
-	float d=pow( 1.0-smoothstep(0.0 , 0.5 , t ) , 1.0 );
-	float l=pow( smoothstep(0.5 , 1.0 , t ) , 2.0 );
+//	float d=pow( 1.0-smoothstep(0.0 , 0.5 , t ) , 1.0 );
+//	float l=pow( smoothstep(0.5 , 1.0 , t ) , 2.0 );
 //	d=pow( smoothstep(0.0 , 1.0 , d ) , 1.0/1.0 )*0.4+0.6;
-	FragColor=vec4( s*t, l , d , 1.0 );
+	FragColor=vec4( s*t, 1.0 , 1.0 , 1.0 );
 
 }
 
@@ -288,7 +289,11 @@ void main(void)
 #version 300 es
 #version 330
 #ifdef VERSION_ES
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 #endif
   
 uniform mat4 modelview;
@@ -317,10 +322,6 @@ void main()
 
 #endif
 #ifdef FRAGMENT_SHADER
-
-#if defined(GL_FRAGMENT_PRECISION_HIGH) && defined(VERSION_ES)
-precision highp float;
-#endif
 
 in vec2 v_texcoord;
 
@@ -354,7 +355,11 @@ void main(void)
 #version 300 es
 #version 330
 #ifdef VERSION_ES
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 #endif
   
 uniform mat4 modelview;
@@ -383,9 +388,6 @@ void main()
 #endif
 #ifdef FRAGMENT_SHADER
 
-#if defined(GL_FRAGMENT_PRECISION_HIGH) && defined(VERSION_ES)
-precision highp float;
-#endif
 
 in vec2 v_texcoord;
 
@@ -497,7 +499,11 @@ void main(void)
 #version 300 es
 #version 330
 #ifdef VERSION_ES
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 #endif
   
 uniform mat4 modelview;
@@ -525,10 +531,6 @@ void main()
 
 #endif
 #ifdef FRAGMENT_SHADER
-
-#if defined(GL_FRAGMENT_PRECISION_HIGH) && defined(VERSION_ES)
-precision highp float;
-#endif
 
 in vec2 v_texcoord;
 
