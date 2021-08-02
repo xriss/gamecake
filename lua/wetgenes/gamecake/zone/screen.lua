@@ -41,7 +41,7 @@ M.bake=function(oven,screen)
 	end
 
 	screen.base_scale=1
-	screen.occlusion_scale=0.25
+	screen.occlusion_scale=1
 
 	screen.setup=function()
 
