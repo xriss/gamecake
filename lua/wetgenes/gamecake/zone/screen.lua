@@ -92,13 +92,22 @@ M.bake=function(oven,screen)
 		local w=math.ceil(oven.win.width  * screen.base_scale )
 		local h=math.ceil(oven.win.height * screen.base_scale )
 
-		if screen.fbo.w ~= w or screen.fbo.h ~= h then
+		local ow=math.ceil(w * screen.occlusion_scale )
+		local oh=math.ceil(h * screen.occlusion_scale )
+
+		if screen.fbo.w ~= w or screen.fbo.h ~= h or screen.fbo_occlusion.w ~= ow or screen.fbo_occlusion.h ~= oh then
 
 			screen.fbo:resize( w , h , 1 )
 
-			screen.fbo_occlusion:resize( math.ceil(w*screen.occlusion_scale) , math.ceil(h*screen.occlusion_scale) , 0 )
+			screen.fbo_occlusion:resize( ow , oh , 0 )
 
-			screen.fbo_bloom:resize( math.ceil(w/4) , math.ceil(h/4) , 0 )
+			local bw=math.ceil(oven.win.width  * 0.25 ) -- should be relative to original size but should also depend on dpi?
+			local bh=math.ceil(oven.win.height * 0.25 )
+
+			if bw>w then bw=w end -- need to cap the maximum
+			if bh>h then bh=h end
+
+			screen.fbo_bloom:resize( bw , bh , 0 )
 
 		end
 		
