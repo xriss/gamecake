@@ -4,6 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
+local rnd64k=require("wetgenes"):export("rnd64k")
 
 local wpack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
@@ -1008,10 +1009,13 @@ void main(void)
 
 
 	geoms_avatar.random_soul=function(opts)
-	
-		local rnd=function(a,b)
-			local r=math.random()
-			return a + ((b-a)*r)
+		opts=opts or {}
+		
+		local rnd
+		if opts.seed then
+			rnd=rnd64k(opts.seed)
+		else
+			rnd=rnd64k(math.random()*65535)
 		end
 	
 		local soul={}
@@ -1027,7 +1031,7 @@ void main(void)
 				chance=0.1
 			end
 			
-			local r=math.random()
+			local r=rnd()
 
 --print( name, r , chance , r < chance )
 
@@ -1046,7 +1050,7 @@ void main(void)
 				end
 				
 				if #poss>0 then
-					local i=math.random(1,#poss)
+					local i=rnd(1,#poss)
 					soul.parts[name]={{name=poss[i],flags=3}}
 				else
 					soul.parts[name]={}
@@ -1059,7 +1063,7 @@ void main(void)
 		end
 		
 		if soul.parts.hat[1] then soul.parts.hair[1]={name="hair_base",flags=3} end -- smaller hair if we have a hat
-		if soul.parts.item[1] then soul.parts.item[1].flags=math.random(1,2) end -- only 1 item in a random hand
+		if soul.parts.item[1] then soul.parts.item[1].flags=rnd(1,2) end -- only 1 item in a random hand
 
 		local cmap={
 			0x11cccccc,
@@ -1142,8 +1146,11 @@ void main(void)
 		end
 
 		avatar.rebuild=function( soul )
-			geoms_avatar.rebuild( avatar , soul )
+			if type(soul)=="string" then
+				soul=geoms_avatar.random_soul({seed=soul})
+			end
 			avatar.soul=soul
+			geoms_avatar.rebuild( avatar , soul )
 		end
 
 		avatar.setup=function( soul )
