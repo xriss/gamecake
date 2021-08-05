@@ -220,7 +220,7 @@ The first caste name in the array gets a weight of 1, second 2 and so on.
 
 	scene.reset()
 	
-Empty the list of scene to update and draw, this does not reset the systems
+Empty the list of items to update and draw, this does not reset the systems
 table that should be modified with the insert and remove functions.
 
 ]]
@@ -236,7 +236,7 @@ table that should be modified with the insert and remove functions.
 
 	scene.caste(caste)
 
-Get the list of scene of a given caste, eg "bullets" or "enemies"
+Get the list of items of a given caste, eg "bullets" or "enemies"
 
 This list will be created if it does not already exist.
 
@@ -246,7 +246,7 @@ scene.sortby is used to keep this list in order.
 	scene.caste=function(caste)
 		caste=caste or "generic"
 		if not scene.data[caste] then -- create on use
-			local items={}
+			local items={caste=caste}
 			scene.data[caste]=items
 			scene.data[#scene.data+1]=items
 			table.sort(scene.data,function(a,b)
@@ -264,7 +264,7 @@ scene.sortby is used to keep this list in order.
 	scene.add(it,caste)
 	scene.add(it)
 
-Add a new entity of caste or it.caste to the list of things to update.
+Add a new item of caste or it.caste to the list of things to update.
 
 ]]
 	scene.add=function(it,caste)
@@ -282,15 +282,15 @@ Add a new entity of caste or it.caste to the list of things to update.
 
 	scene.remove(it)
 
-Remove this entity, this is slightly expensive as we need to search in a table
+Remove this item, this is slightly expensive as we need to search in a table
 to find it before calling table.remove which then has to shuffle the table to
 fill in the hole.
 
 With very dynamic items it can be faster to allocate all the items you need at
 the start and then flag them on/off rather than add and remove dynamically.
 
-It may make more sense to create an entity which handles its own list of
-objects, such as particles. Then only use the entity system to keep track of a
+It may make more sense to create a system which handles its own list of
+objects, such as particles. Then only use the items to keep track of a
 master particles item that contains many particles and can add/remove/recycle
 as it sees fit.
 
@@ -361,7 +361,7 @@ currently active items.
 
 get a value previously saved, this is an easy way to find a unique entity, eg
 the global space but it can be used to save any values you wish not just to
-bookmark unique scene.
+bookmark unique items.
 
 ]]
 	scene.get=function(name)
@@ -397,6 +397,33 @@ already exist. The default value is {} as this is intended for lists.
 		return scene.info[name]
 	end
 
+--[[#lua.wetgenes.gamecake.zone.scene.status
+
+	print( scene.status() )
+
+Return a debug string giving details about the system order and current number
+of items of each caste.
+
+]]
+	scene.status=function()
+		local lines={}
+		for i=#scene.systems,1,-1 do
+			local items=scene.systems[i]
+			local datas=scene.data[ items.caste ]
+			local count=datas and #datas or 0
+			lines[#lines+1]=(items.caste or "").." : "..count
+		end
+		for i=#scene.data,1,-1 do
+			local items=scene.data[i]
+			if not scene.systems[ items.caste ] then -- not already done
+				lines[#lines+1]="item "..(items.caste or "").." : "..#items
+			end
+		end
+		for n,v in ipairs(scene.info) do
+			lines[#lines+1]=tostring(n).." = "..tostring(v)
+		end
+		return table.concat(lines,"\n")
+	end
 
 -- reset and return the scene, creating the initial data and info tables
 	return scene.reset()
