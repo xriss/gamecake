@@ -120,6 +120,7 @@ M.bake=function(oven,recaps)
 			for _,n in ipairs{"lx","ly","lz","rx","ry","rz","dx","dy","mx","my","tx","ty"} do
 				if m[n] then recap.now_axis[n]=m[n] end
 			end
+			if m.mz then recap.now_axis.mz=( (recap.state_axis.mz or 0) + m.mz ) %65536 end
 		end
 
 -- use this to set button flags, that may trigger a set/clr extra pulse state

@@ -299,8 +299,19 @@ M.bake=function(oven,keys)
 			elseif m.class=="mouse" then -- swipe to move
 			
 				if key.idx==1 then -- only for player 1
-			
-					ups.set_axis({mx=m.x,my=m.y}) -- tell recap about the mouse positions, mx,my
+
+
+					local mz
+					if m.action==-1 then -- we only get button ups
+						if m.keyname=="wheel_add" then
+							mz=1
+						elseif m.keyname=="wheel_sub" then
+							mz=-1
+						end
+					end
+
+
+					ups.set_axis({mx=m.x,my=m.y,mz=mz}) -- tell recap about the mouse positions, mx,my
 
 					if m.action==1 then -- key set
 						if m.keyname then ups.set_button("mouse_"..m.keyname,true) end
@@ -309,6 +320,9 @@ M.bake=function(oven,keys)
 						end
 						used=true
 					elseif m.action==-1 then -- key clear
+						if m.keyname=="wheel_add" or m.keyname=="wheel_sub" then -- we do not get key downs just ups
+							ups.set_button("mouse_"..m.keyname,true)
+						end
 						if m.keyname then ups.set_button("mouse_"..m.keyname,false) end
 						if m.keyname=="left" or m.keyname=="right" or m.keyname=="middle" then
 							ups.set_button("fire",false)
