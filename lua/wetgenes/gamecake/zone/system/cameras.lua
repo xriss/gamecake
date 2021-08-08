@@ -100,7 +100,7 @@ B.cameras.create=function(cameras,boot)
 end
 
 B.camera.update=function(camera)
-
+	
 	if camera.focus then
 
 		if camera.focus.focus_camera then
@@ -114,6 +114,10 @@ B.camera.update=function(camera)
 
 		end
 
+	end
+
+	if camera.up then -- key/mouse input
+		local up=camera.up
 	end
 
 -- This is a camera so we are applying reverse transforms...

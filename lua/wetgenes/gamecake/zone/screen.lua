@@ -40,6 +40,7 @@ M.bake=function(oven,screen)
 
 	end
 
+	screen.camera_fov=0.5
 	screen.base_scale=1
 	screen.occlusion_scale=1
 
@@ -54,7 +55,7 @@ M.bake=function(oven,screen)
 			fbo=screen.fbo,
 			vz=8192,
 			pz=0,
-			fov=1/2,
+			fov=screen.camera_fov,
 			cx=0.5,cy=0.5,
 		})
 
@@ -95,6 +96,7 @@ M.bake=function(oven,screen)
 		local ow=math.ceil(w * screen.occlusion_scale )
 		local oh=math.ceil(h * screen.occlusion_scale )
 
+
 		if screen.fbo.w ~= w or screen.fbo.h ~= h or screen.fbo_occlusion.w ~= ow or screen.fbo_occlusion.h ~= oh then
 
 			screen.fbo:resize( w , h , 1 )
@@ -112,9 +114,11 @@ M.bake=function(oven,screen)
 		end
 		
 
+		screen.view.fov=screen.camera_fov
 		screen.view.vz=8192
 		screen.view.pz=0
 
+		screen.view_occlusion.fov=screen.camera_fov
 		screen.view_occlusion.vz=8192
 		screen.view_occlusion.pz=0
 
