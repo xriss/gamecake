@@ -51,6 +51,8 @@ B.cameras.draw_head=function(cameras)
 
 	local camera=cameras.scene.get("camera")
 
+	cameras.active=camera
+
 	if camera then
 
 --		print( M4(gl.matrix(gl.MODELVIEW)) )
@@ -84,6 +86,8 @@ B.cameras.create=function(cameras,boot)
 	camera.cameras=cameras
 	setmetatable(camera,B.camera_metatable)
 
+	camera.mode="orbit"
+
 	camera.rot=V3( boot.rot or {20,0,0} )
 	camera.pos=V3( boot.pos or {0,-5,0} )
 
@@ -116,8 +120,8 @@ B.camera.update=function(camera)
 
 	end
 
-	if camera.up then -- key/mouse input
-		local up=camera.up
+	if camera.cameras.active=camera then
+
 	end
 
 -- This is a camera so we are applying reverse transforms...
