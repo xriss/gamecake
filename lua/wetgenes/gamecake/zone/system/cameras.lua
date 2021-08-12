@@ -147,6 +147,17 @@ B.camera.update=function(camera)
 			local mz=up.axis("mz") or 0
 			if mz>32768 then mz=mz-65536 end
 
+			if gui.master.hidden then -- no gui displayed
+
+				mouse_right=true
+
+			elseif gui.master.over ~=  gui.master then -- ignore clicks on gui
+
+				mouse_right=false
+
+			end
+
+
 			orbit.dz=-(mz-orbit.oz) -- need to reverse the mousewheel
 			if orbit.dz < orbit.mz_min then orbit.oz=mz+orbit.mz_min orbit.dz=orbit.mz_min end -- limits
 			if orbit.dz > orbit.mz_max then orbit.oz=mz+orbit.mz_max orbit.dz=orbit.mz_max end

@@ -619,6 +619,12 @@ function base.warp_mouse(w,x,y)
 	end
 end
 
+function base.relative_mouse(b)
+	if     hardcore and hardcore.relative_mouse then
+		return hardcore.relative_mouse(b)
+	end
+end
+
 -- set the mouse cursor to one from the available theme
 function base.cursor(...)
 	if     hardcore and hardcore.cursor then
