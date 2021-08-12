@@ -137,17 +137,19 @@ B.camera.update=function(camera)
 				mode="none",
 				ox=0,oy=0,oz=0,
 				dx=0,dy=0,dz=0,
+				mz_min=4,mz_max=40,
 			}
 			local orbit=camera.orbit
 			
-			local mouse_right=up.button("mouse_right") or false
+			local mouse_right=up.button("mouse_right") or up.button("mouse_middle") or up.button("mouse_left") or false
 			local mx=up.axis("mx") or 0
 			local my=up.axis("my") or 0
 			local mz=up.axis("mz") or 0
 			if mz>32768 then mz=mz-65536 end
 
-			orbit.dz=mz-orbit.oz			
-			if orbit.dz < 0 then orbit.oz=mz orbit.dz=0 end
+			orbit.dz=-(mz-orbit.oz) -- need to reverse the mousewheel
+			if orbit.dz < orbit.mz_min then orbit.oz=mz+orbit.mz_min orbit.dz=orbit.mz_min end -- limits
+			if orbit.dz > orbit.mz_max then orbit.oz=mz+orbit.mz_max orbit.dz=orbit.mz_max end
 
 			if orbit.mode=="mouse_right" then
 			
@@ -156,13 +158,13 @@ B.camera.update=function(camera)
 					orbit.dy=(my-orbit.oy)
 				else
 					orbit.mode="none"
-
+--[[
 					local d=gui.datas.get("camangle")
 					if d.num~=0 then
 						gui.datas.get("angle"):value( -camera.rot[2] )
 						orbit.dx=0
 					end
-
+]]
 				end
 			
 			else			
@@ -186,8 +188,8 @@ B.camera.update=function(camera)
 
 			camera.dolly=camera.base.dolly + orbit.dz
 
-			camera.rot[1]=rotfix( camera.base.rot[1]+( (orbit.dy/1024)*-180 ) )
-			camera.rot[2]=rotfix( camera.base.rot[2]+( (orbit.dx/1024)* 180 ) )
+			camera.rot[1]=rotfix( camera.base.rot[1]+( (orbit.dy/1024)* 180 ) )
+			camera.rot[2]=rotfix( camera.base.rot[2]+( (orbit.dx/1024)*-180 ) )
 			camera.rot[3]=rotfix( camera.base.rot[3] )
 
 
