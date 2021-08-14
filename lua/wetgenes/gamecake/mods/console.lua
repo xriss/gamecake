@@ -421,6 +421,36 @@ font.vbs_idx=1
 	function console.mouse(act,x,y,key)
 	end
 	
+	function console.screen_mode(mode)
+
+		if type(mode)=="boolean" and mode==true then
+
+			if wwin.flavour=="emcc" then-- emcc should only ever switch to full as the browser will force us back
+				win:show("win")
+				win:show("full")
+				win:show("win")
+				win:show("full")
+			elseif win.view then -- we can do smart toggles but this does not read the real state from the system so may be out of sync
+				if     win.view=="win" then
+					win:show("max")
+				elseif win.view=="max" then
+					win:show("full")
+				elseif win.view=="full" then
+					win:show("win")
+				else
+					win:show("full")
+				end
+			else -- just try full
+				win:show("full")
+			end
+
+		end
+		if console.screen_mode_data then
+			console.screen_mode_data:value(win.view)
+		end
+		return win.view
+	end
+
 	function console.msg(m)
 
 		if     m.class=="key" and ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) and m.action==1 then
@@ -433,24 +463,7 @@ font.vbs_idx=1
 			if console.shift_key then
 				oven.view.stretch=not oven.view.stretch
 			else
-				if wwin.flavour=="emcc" then-- emcc should only ever switch to full as the browser will force us back
-					win:show("win")
-					win:show("full")
-					win:show("win")
-					win:show("full")
-				elseif win.view then -- we can do smart toggles but this does not read the real state from the system so may be out of sync
-					if     win.view=="win" then
-						win:show("max")
-					elseif win.view=="max" then
-						win:show("full")
-					elseif win.view=="full" then
-						win:show("win")
-					else
-						win:show("full")
-					end
-				else -- just try full
-					win:show("full")
-				end
+				console.screen_mode(true)
 			end
 			return nil
 		end
