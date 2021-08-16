@@ -127,7 +127,7 @@ B.camera.update=function(camera)
 	local up=camera.up and srecaps.ups(camera.up)
 	if up then
 		
---		display(wstr.dump(up.axis()))
+		display(wstr.dump(up.axis()))
 --		display(wstr.dump(up.button()))
 		
 		if camera.mode=="orbit" then
@@ -140,16 +140,42 @@ B.camera.update=function(camera)
 			local orbit=camera.orbit
 						
 			local mouse_button=up.button("mouse_right") or up.button("mouse_middle") or up.button("mouse_left") or false
+			local lx=up.axis("lx") or 0
+			local ly=up.axis("ly") or 0
+			local rx=up.axis("rx") or 0
+			local ry=up.axis("ry") or 0
 			local mx=up.axis("mx") or 0
 			local my=up.axis("my") or 0
 			local mz=up.axis("mz") or 0
 			if mz>32768 then mz=mz-65536 end
+			
+			local deadzone=4096
+			local sensitivity=1/16384
+			
+			if rx<deadzone and rx>-deadzone then rx=0 end
+			if ry<deadzone and ry>-deadzone then ry=0 end
+			if lx<deadzone and lx>-deadzone then lx=0 end
+			if ly<deadzone and ly>-deadzone then ly=0 end
 
 			local rotfix=function(n)
 				local d=(n+180)/360
 				d=d-math.floor(d)
-				return (math.floor(d*3600)-1800)/10
+--				return (math.floor(d*3600)-1800)/10
+				return (d*360)-180
 			end
+			
+			if ( lx*lx + ly*ly ) > 8192*8192 then -- slowly rotate camera in direction of movement
+				local r = 180*math.atan2(lx,-ly)/math.pi
+				if r> 90 then r= 180-r end
+				if r<-90 then r=-180-r end
+--				print(math.floor(r))
+				orbit.mx=rotfix( orbit.mx - (r/256) )
+			end
+			
+
+			orbit.my=rotfix( orbit.my + (ry*sensitivity) )
+			orbit.mx=rotfix( orbit.mx - (rx*sensitivity) )
+
 
 			local do_orbit=mouse_button
 			local do_zoom=true
@@ -214,6 +240,7 @@ B.camera.update=function(camera)
 ]]
 						
 			display(orbit.mode,mouse_right)
+			display(orbit.rx,orbit.ry)
 			display(orbit.mx,orbit.my,orbit.mz)
 
 			camera.dolly=camera.base.dolly + orbit.mz
