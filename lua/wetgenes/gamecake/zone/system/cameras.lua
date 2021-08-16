@@ -119,7 +119,6 @@ B.camera.update=function(camera)
 		else
 
 			camera.pos:set( camera.focus.pos )
-			camera.pos[2]=camera.pos[2]-5
 
 		end
 
@@ -135,29 +134,59 @@ B.camera.update=function(camera)
 		
 			camera.orbit=camera.orbit or {
 				mode="none",
-				ox=0,oy=0,oz=0,
-				dx=0,dy=0,dz=0,
+				mx=0,my=0,mz=20,
 				mz_min=4,mz_max=40,
 			}
 			local orbit=camera.orbit
-			
-			local mouse_right=up.button("mouse_right") or up.button("mouse_middle") or up.button("mouse_left") or false
+						
+			local mouse_button=up.button("mouse_right") or up.button("mouse_middle") or up.button("mouse_left") or false
 			local mx=up.axis("mx") or 0
 			local my=up.axis("my") or 0
 			local mz=up.axis("mz") or 0
 			if mz>32768 then mz=mz-65536 end
 
+			local rotfix=function(n)
+				local d=(n+180)/360
+				d=d-math.floor(d)
+				return (math.floor(d*3600)-1800)/10
+			end
+
+			local do_orbit=mouse_button
+			local do_zoom=true
+
 			if gui.master.hidden then -- no gui displayed
 
-				mouse_right=true
+				do_orbit=true
 
 			elseif gui.master.over ~=  gui.master then -- ignore clicks on gui
 
-				mouse_right=false
+				do_orbit=false
+				do_zoom=false
+
+				orbit.lx=mx -- ignore movement
+				orbit.ly=my
+				orbit.lz=mz
 
 			end
+			
+			if do_zoom and orbit.lz then -- perform zoom
 
+				orbit.mz=orbit.mz-((mz-orbit.lz)*1.0) -- need to reverse the mousewheel
 
+				if orbit.mz < orbit.mz_min then orbit.mz=orbit.mz_min end -- limits
+				if orbit.mz > orbit.mz_max then orbit.mz=orbit.mz_max end
+
+			end
+			
+			if do_orbit and orbit.lx and orbit.ly then -- perform orbits
+			
+				orbit.my=rotfix( orbit.my+(((my-orbit.ly)/1024)* 180 ) )
+				orbit.mx=rotfix( orbit.mx+(((mx-orbit.lx)/1024)*-180 ) )
+
+			end
+			
+
+--[[
 			orbit.dz=-(mz-orbit.oz) -- need to reverse the mousewheel
 			if orbit.dz < orbit.mz_min then orbit.oz=mz+orbit.mz_min orbit.dz=orbit.mz_min end -- limits
 			if orbit.dz > orbit.mz_max then orbit.oz=mz+orbit.mz_max orbit.dz=orbit.mz_max end
@@ -165,17 +194,12 @@ B.camera.update=function(camera)
 			if orbit.mode=="mouse_right" then
 			
 				if mouse_right then
+
 					orbit.dx=(mx-orbit.ox)
 					orbit.dy=(my-orbit.oy)
+					
 				else
 					orbit.mode="none"
---[[
-					local d=gui.datas.get("camangle")
-					if d.num~=0 then
-						gui.datas.get("angle"):value( -camera.rot[2] )
-						orbit.dx=0
-					end
-]]
 				end
 			
 			else			
@@ -187,73 +211,22 @@ B.camera.update=function(camera)
 				end
 
 			end
-			
-			local rotfix=function(n)
-				local d=(n+180)/360
-				d=d-math.floor(d)
-				return (math.floor(d*3600)-1800)/10
-			end
-			
-			display(orbit.mode,mouse_right)
-			display(orbit.dx,orbit.dy,orbit.dz)
-
-			camera.dolly=camera.base.dolly + orbit.dz
-
-			camera.rot[1]=rotfix( camera.base.rot[1]+( (orbit.dy/1024)* 180 ) )
-			camera.rot[2]=rotfix( camera.base.rot[2]+( (orbit.dx/1024)*-180 ) )
-			camera.rot[3]=rotfix( camera.base.rot[3] )
-
-
-		end
-
-
---[[
-	if msg.class=="mouse" then
-
-		local m=input.mouse
-		m.ox=msg.ox
-		m.oy=msg.oy
-
-		if msg.keyname=="wheel_add" then
-			m.dz=m.dz-1
-		elseif msg.keyname=="wheel_sub" then
-			m.dz=m.dz+1
-		end
-
-		if m.dz<0 then m.dz=0 end
-
-		if msg.action==1 then -- mouse down, remember where
-			m.action=1
-			m.sx=m.ox
-			m.sy=m.oy
-		end
-		if msg.action==-1 then -- mouse up
-			m.action=-1
-		end
-
-		if m.action==1 then -- mouse is held down now so adjust output value
-			m.dx=m.dx+(m.ox-m.sx)
-			m.dy=m.dy+(m.oy-m.sy)
-			m.sx=m.ox
-			m.sy=m.oy
-		end
-
-		if m.action==-1 then -- set rotation on mouse up
-		
-			local d=gui.datas.get("camangle")
-
-			if d.num~=0 then
-				local camera=input.scene.get("camera")
-				gui.datas.get("angle"):value( -camera.rot[2] )
-			end
-
-		end
-
-	end
---		print(cameras.mouse.dx,cameras.mouse.dy)
 ]]
+						
+			display(orbit.mode,mouse_right)
+			display(orbit.mx,orbit.my,orbit.mz)
+
+			camera.dolly=camera.base.dolly + orbit.mz
+
+			camera.rot[1]=rotfix( camera.base.rot[1] + orbit.my )
+			camera.rot[2]=rotfix( camera.base.rot[2] + orbit.mx )
+			camera.rot[3]=rotfix( camera.base.rot[3]            )
 
 
+			orbit.lx=mx -- we have applied this movement
+			orbit.ly=my
+			orbit.lz=mz
+		end
 
 	end
 
