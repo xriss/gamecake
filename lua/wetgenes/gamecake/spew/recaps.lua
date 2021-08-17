@@ -127,7 +127,15 @@ M.bake=function(oven,recaps)
 		function recap.set_button(nam,v)
 --print(nam,v)
 			if type(nam)=="table" then
-				for _,n in ipairs(nam) do recap.set_button(n,v) end -- multi
+				if type(nam[2])=="number" then -- axis
+					if v then
+						recap.set_axis({[ nam[1] ]=nam[2]})	-- set
+					else
+						recap.set_axis({[ nam[1] ]=0}) -- clr
+					end
+				else
+					for _,n in ipairs(nam) do recap.set_button(n,v) end -- multi
+				end
 			else
 				local l=recap.now[nam]
 				if type(l)=="nil" then l=recap.state[nam] end -- now probably only contains recent changes

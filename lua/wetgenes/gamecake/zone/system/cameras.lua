@@ -139,23 +139,34 @@ B.camera.update=function(camera)
 			}
 			local orbit=camera.orbit
 						
+			local minzone=4095
+			local maxzone=32767
+			local fixaxis=function(n)
+				local fix=function(n)
+					local n=(n-minzone)/(maxzone-minzone)
+					if n<0 then return 0 end
+					if n>1 then return 1 end
+					return n
+				end
+				n=n or 0
+				if n < 0 then
+					return -fix(-n)
+				else
+					return fix(n)
+				end
+			end
+			
+			local sensitivity=2
+
+
 			local mouse_button=up.button("mouse_right") or up.button("mouse_middle") or up.button("mouse_left") or false
-			local lx=up.axis("lx") or 0
-			local ly=up.axis("ly") or 0
-			local rx=up.axis("rx") or 0
-			local ry=up.axis("ry") or 0
+			local lx=fixaxis( up.axis("lx") )
+			local ly=fixaxis( up.axis("ly") )
+			local rx=fixaxis( up.axis("rx") )
+			local ry=fixaxis( up.axis("ry") )
 			local mx=up.axis("mx") or 0
 			local my=up.axis("my") or 0
-			local mz=up.axis("mz") or 0
-			if mz>32768 then mz=mz-65536 end
-			
-			local deadzone=4096
-			local sensitivity=1/16384
-			
-			if rx<deadzone and rx>-deadzone then rx=0 end
-			if ry<deadzone and ry>-deadzone then ry=0 end
-			if lx<deadzone and lx>-deadzone then lx=0 end
-			if ly<deadzone and ly>-deadzone then ly=0 end
+			local mz=up.axis("mz") or 0 ; if mz>32768 then mz=mz-65536 end
 
 			local rotfix=function(n)
 				local d=(n+180)/360
@@ -164,7 +175,7 @@ B.camera.update=function(camera)
 				return (d*360)-180
 			end
 			
-			if ( lx*lx + ly*ly ) > 8192*8192 then -- slowly rotate camera in direction of movement
+			if ( lx*lx + ly*ly ) > 0.25*0.25 then -- slowly rotate camera in direction of movement
 				local r = 180*math.atan2(lx,-ly)/math.pi
 				if r> 90 then r= 180-r end
 				if r<-90 then r=-180-r end
