@@ -105,6 +105,11 @@ B.cameras.create=function(cameras,boot)
 	camera.mtx=M4()
 	camera.inv=M4()
 
+-- world movement vectors for player in camera space
+	camera.playerz=V3( { 0 , -1 , 0 } )
+	camera.playery=V3( { 0 ,  0 , 1 } ) -- player xy are in stick axis space so +z is jump
+	camera.playerx=V3( { 1 ,  0 , 0 } )
+
 	return camera
 end
 
@@ -127,9 +132,6 @@ B.camera.update=function(camera)
 	local up=camera.up and srecaps.ups(camera.up)
 	if up then
 		
-		display(wstr.dump(up.axis()))
---		display(wstr.dump(up.button()))
-		
 		if camera.mode=="orbit" then
 		
 			camera.orbit=camera.orbit or {
@@ -138,32 +140,14 @@ B.camera.update=function(camera)
 				mz_min=4,mz_max=40,
 			}
 			local orbit=camera.orbit
-						
-			local minzone=4095
-			local maxzone=32767
-			local fixaxis=function(n)
-				local fix=function(n)
-					local n=(n-minzone)/(maxzone-minzone)
-					if n<0 then return 0 end
-					if n>1 then return 1 end
-					return n
-				end
-				n=n or 0
-				if n < 0 then
-					return -fix(-n)
-				else
-					return fix(n)
-				end
-			end
 			
 			local sensitivity=2
 
-
 			local mouse_button=up.button("mouse_right") or up.button("mouse_middle") or up.button("mouse_left") or false
-			local lx=fixaxis( up.axis("lx") )
-			local ly=fixaxis( up.axis("ly") )
-			local rx=fixaxis( up.axis("rx") )
-			local ry=fixaxis( up.axis("ry") )
+			local lx=up.axisfixed("lx")
+--			local ly=up.axisfixed("ly")
+			local rx=up.axisfixed("rx")
+			local ry=up.axisfixed("ry")
 			local mx=up.axis("mx") or 0
 			local my=up.axis("my") or 0
 			local mz=up.axis("mz") or 0 ; if mz>32768 then mz=mz-65536 end
@@ -171,22 +155,11 @@ B.camera.update=function(camera)
 			local rotfix=function(n)
 				local d=(n+180)/360
 				d=d-math.floor(d)
---				return (math.floor(d*3600)-1800)/10
 				return (d*360)-180
 			end
-			
-			if ( lx*lx + ly*ly ) > 0.25*0.25 then -- slowly rotate camera in direction of movement
-				local r = 180*math.atan2(lx,-ly)/math.pi
-				if r> 90 then r= 180-r end
-				if r<-90 then r=-180-r end
---				print(math.floor(r))
-				orbit.mx=rotfix( orbit.mx - (r/256) )
-			end
-			
 
-			orbit.my=rotfix( orbit.my + (ry*sensitivity) )
-			orbit.mx=rotfix( orbit.mx - (rx*sensitivity) )
-
+			orbit.my=rotfix( orbit.my + (     ry  * sensitivity ) )
+			orbit.mx=rotfix( orbit.mx - ( (lx+rx) * sensitivity ) )		-- left + right stick gives auto camera rotate
 
 			local do_orbit=mouse_button
 			local do_zoom=true
@@ -221,38 +194,6 @@ B.camera.update=function(camera)
 				orbit.mx=rotfix( orbit.mx+(((mx-orbit.lx)/1024)*-180 ) )
 
 			end
-			
-
---[[
-			orbit.dz=-(mz-orbit.oz) -- need to reverse the mousewheel
-			if orbit.dz < orbit.mz_min then orbit.oz=mz+orbit.mz_min orbit.dz=orbit.mz_min end -- limits
-			if orbit.dz > orbit.mz_max then orbit.oz=mz+orbit.mz_max orbit.dz=orbit.mz_max end
-
-			if orbit.mode=="mouse_right" then
-			
-				if mouse_right then
-
-					orbit.dx=(mx-orbit.ox)
-					orbit.dy=(my-orbit.oy)
-					
-				else
-					orbit.mode="none"
-				end
-			
-			else			
-
-				if mouse_right then
-					orbit.mode="mouse_right"
-					orbit.ox=mx-orbit.dx
-					orbit.oy=my-orbit.dy
-				end
-
-			end
-]]
-						
-			display(orbit.mode,mouse_right)
-			display(orbit.rx,orbit.ry)
-			display(orbit.mx,orbit.my,orbit.mz)
 
 			camera.dolly=camera.base.dolly + orbit.mz
 
@@ -277,6 +218,12 @@ B.camera.update=function(camera)
 	camera.mtx:translate( 0,0, camera.dolly )
 
 	if camera.mtx[14] > camera.floor then camera.mtx[14]=camera.floor end -- keep above ground
+
+	local c=math.cos(math.pi*camera.rot[2]/180)
+	local s=math.sin(math.pi*camera.rot[2]/180)
+	camera.playerz=V3( { 0 , -1 , 0 } )
+	camera.playery=V3( { s ,  0 , c } ) -- player xy are in stick axis space so +z is jump
+	camera.playerx=V3( { c ,  0 ,-s } )
 
 -- build inverse camera transform to
 	camera.mtx:inverse( camera.inv )
