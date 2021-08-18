@@ -199,6 +199,7 @@ creates and returns a.new() value.
 
 ]]
 function array.__mul(a,b)
+	if type(a)=="number" then a,b=b,a end -- deal with number first product
 	return a:product(b,a.new())
 end
 
@@ -2282,7 +2283,7 @@ Set this matrix to a rotation matrix around the given normal.
 
 ]]
 function q4.setrot(it,degrees,v3a)
-	local ah=degrees * (math.pi/360)
+	local ah=degrees * (math.pi/360) -- ah = half the angle in radians
 	local sh=math.sin(ah)
 	return array.set(it , v3a[1]*sh , v3a[2]*sh , v3a[3]*sh , math.cos(ah) )
 end
@@ -2404,8 +2405,9 @@ function tardis.q4_to_m4(q,m)
 						0,
 						2 * ( xz + yw ),
 						2 * ( yz - xw ),
-					1 - 2 * ( xx + yy ),0,
-						0,0,0,1				)
+					1 - 2 * ( xx + yy ),
+						0,
+						0,0,0,1)
 						
 	return m
 end
@@ -2434,11 +2436,25 @@ function tardis.q4_product_q4(q4a,q4b,r)
 	return array.set(r,r1,r2,r3,r4)
 end
 
-function tardis.v3_product_q4(v3,q4,r)
-	r=r or v3
-    local r1 =                  q4[2] * v3[3] - q4[3] * v3[2] + q4[4] * v3[1]
-    local r2 = -q4[1] * v3[3]                 + q4[3] * v3[1] + q4[4] * v3[2]
-    local r3 =  q4[1] * v3[2] - q4[2] * v3[1]                 + q4[4] * v3[3]
+function tardis.v3_product_q4(v,q,r)
+	r=r or v
+
+	local rx  = q[1] + q[1]
+	local ry  = q[2] + q[2]
+	local rz  = q[3] + q[3]
+	local rwx = q[4] * rx
+	local rwy = q[4] * ry
+	local rwz = q[4] * rz
+	local rxx = q[1] * rx
+	local rxy = q[1] * ry
+	local rxz = q[1] * rz
+	local ryy = q[2] * ry
+	local ryz = q[2] * rz
+	local rzz = q[3] * rz
+	local r1  = ((v[1] * ((1 - ryy) - rzz)) + (v[2] * (rxy - rwz))) + (v[3] * (rxz + rwy))
+	local r2  = ((v[1] * (rxy + rwz)) + (v[2] * ((1 - rxx) - rzz))) + (v[3] * (ryz - rwx))
+	local r3  = ((v[1] * (rxz - rwy)) + (v[2] * (ryz + rwx))) + (v[3] * ((1 - rxx) - ryy))
+
 	return array.set(r,r1,r2,r3)
 end
 
