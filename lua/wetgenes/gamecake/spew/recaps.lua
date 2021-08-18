@@ -114,6 +114,27 @@ M.bake=function(oven,recaps)
 			end
 			return recap.state_axis -- return all axis if no name given
 		end
+
+		local minzone=4095
+		local maxzone=32767
+		local fixaxis=function(n)
+			local fix=function(n)
+				local n=(n-minzone)/(maxzone-minzone)
+				if n<0 then return 0 end
+				if n>1 then return 1 end
+				return n
+			end
+			n=n or 0
+			if n < 0 then
+				return -fix(-n)
+			else
+				return fix(n)
+			end
+		end
+		recap.axisfixed=function(name)
+			return fixaxis( recap.axis(name) )
+		end
+
 		
 -- use this to set a joysticks/mouse axis position
 		function recap.set_axis(m)
