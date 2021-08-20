@@ -642,21 +642,59 @@ static int lua_bullet_world_ray_test (lua_State *l)
 {
 btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
 
-/*
-	btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
-	closestResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
+btVector3 from;
+btVector3 to;
 
-	m_dynamicsWorld->rayTest(from, to, closestResults);
+double x,y,z;
+
+	lua_pushstring(l,"ray"); lua_gettable(l,2);
+
+	lua_pushnumber(l,1); lua_gettable(l,-2);
+	lua_pushnumber(l,1); lua_gettable(l,-2); x=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pushnumber(l,2); lua_gettable(l,-2); y=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pushnumber(l,3); lua_gettable(l,-2); z=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pop(l,1);
+	from=btVector3(x,y,z);
+
+	lua_pushnumber(l,2); lua_gettable(l,-2);
+	lua_pushnumber(l,1); lua_gettable(l,-2); x=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pushnumber(l,2); lua_gettable(l,-2); y=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pushnumber(l,3); lua_gettable(l,-2); z=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pop(l,1);
+	to=btVector3(x,y,z);
+
+	lua_pop(l,1);
+
+
+	btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
+//	closestResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
+
+	world->rayTest(from, to, closestResults);
 
 	if (closestResults.hasHit())
 	{
-		btVector3 p = from.lerp(to, closestResults.m_closestHitFraction);
-		m_dynamicsWorld->getDebugDrawer()->drawSphere(p, 0.1, blue);
-		m_dynamicsWorld->getDebugDrawer()->drawLine(p, p + closestResults.m_hitNormalWorld, blue);
-	}
-*/
+		lua_newtable(l);
+		lua_pushstring(l,"hit"); lua_pushvalue(l, -2 ); lua_settable(l,2);
 
-	return 0;
+		lua_pushstring(l,"fraction"); lua_pushnumber(l, closestResults.m_closestHitFraction ); lua_settable(l,-2);
+
+		lua_newtable(l);
+		lua_pushstring(l,"normalt"); lua_pushvalue(l, -2 ); lua_settable(l,-2);
+		lua_pushnumber(l,1); lua_pushnumber(l, closestResults.m_hitNormalWorld.getX() ); lua_settable(l,-2);
+		lua_pushnumber(l,2); lua_pushnumber(l, closestResults.m_hitNormalWorld.getY() ); lua_settable(l,-2);
+		lua_pushnumber(l,3); lua_pushnumber(l, closestResults.m_hitNormalWorld.getZ() ); lua_settable(l,-2);
+		lua_pop(l,1);
+		
+		lua_pop(l,1);
+	}
+	else
+	{
+		lua_pushstring(l,"hit"); lua_pushnil(l); lua_settable(l,2);
+	}
+
+	lua_pushvalue(l,2);
+
+	return 1;
 }
 
 			
