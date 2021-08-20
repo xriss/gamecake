@@ -635,6 +635,34 @@ btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
 
 /*+------------------------------------------------------------------+**
 
+Perform a raytest
+
+*/
+static int lua_bullet_world_ray_test (lua_State *l)
+{
+btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
+
+/*
+	btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
+	closestResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
+
+	m_dynamicsWorld->rayTest(from, to, closestResults);
+
+	if (closestResults.hasHit())
+	{
+		btVector3 p = from.lerp(to, closestResults.m_closestHitFraction);
+		m_dynamicsWorld->getDebugDrawer()->drawSphere(p, 0.1, blue);
+		m_dynamicsWorld->getDebugDrawer()->drawLine(p, p + closestResults.m_hitNormalWorld, blue);
+	}
+*/
+
+	return 0;
+}
+
+			
+
+/*+------------------------------------------------------------------+**
+
 get/set shape margin values
 
 */
@@ -1017,6 +1045,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"world_step",						lua_bullet_world_step},
 		{"world_add_body",					lua_bullet_world_add_body},
 		{"world_remove_body",				lua_bullet_world_remove_body},
+		{"world_ray_test",					lua_bullet_world_ray_test},
 
 		{"shape_margin",					lua_bullet_shape_margin},
 
