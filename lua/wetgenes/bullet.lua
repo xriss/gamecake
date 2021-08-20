@@ -165,6 +165,34 @@ bullet.world_functions.step=function(world,seconds,maxsteps,fixedstep)
 end
 
 ------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.ray_test
+
+	local test={
+		mode="closest",
+		ray={{0,0,0},{1,1,1}},
+	}
+	test=world:ray_test(test)
+	
+	if world:ray_test(opts).hit then ... end
+
+Perform a ray test between the two ray vectors provided in the test table. 
+fills in hit={...} if we hit something with details of the hit.
+
+Always returns the test table that was passed in, with modifications that 
+provide the result. Be carefull about reusing this table it is safest to create 
+a new one for each ray_test call.
+
+]]
+bullet.world_functions.ray_test=function(world,test)
+
+	core.world_ray_test( world[0] , test )
+
+	return test
+end
+
+
+
+------------------------------------------------------------------------
 --[[#lua.wetgenes.bullet.world.mesh
 
 	mesh = world:mesh()

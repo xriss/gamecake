@@ -671,18 +671,18 @@ double x,y,z;
 
 	world->rayTest(from, to, closestResults);
 
-	if (closestResults.hasHit())
+	if(closestResults.hasHit())
 	{
 		lua_newtable(l);
 		lua_pushstring(l,"hit"); lua_pushvalue(l, -2 ); lua_settable(l,2);
 
-		lua_pushstring(l,"fraction"); lua_pushnumber(l, closestResults.m_closestHitFraction ); lua_settable(l,-2);
+		lua_pushstring(l,"fraction"); lua_pushnumber(l, closestResults.m_closestHitFraction ); lua_settable(l,-3);
 
 		lua_newtable(l);
-		lua_pushstring(l,"normalt"); lua_pushvalue(l, -2 ); lua_settable(l,-2);
-		lua_pushnumber(l,1); lua_pushnumber(l, closestResults.m_hitNormalWorld.getX() ); lua_settable(l,-2);
-		lua_pushnumber(l,2); lua_pushnumber(l, closestResults.m_hitNormalWorld.getY() ); lua_settable(l,-2);
-		lua_pushnumber(l,3); lua_pushnumber(l, closestResults.m_hitNormalWorld.getZ() ); lua_settable(l,-2);
+		lua_pushstring(l,"normalt"); lua_pushvalue(l, -2 ); lua_settable(l,-3);
+		lua_pushnumber(l,1); lua_pushnumber(l, closestResults.m_hitNormalWorld.getX() ); lua_settable(l,-3);
+		lua_pushnumber(l,2); lua_pushnumber(l, closestResults.m_hitNormalWorld.getY() ); lua_settable(l,-3);
+		lua_pushnumber(l,3); lua_pushnumber(l, closestResults.m_hitNormalWorld.getZ() ); lua_settable(l,-3);
 		lua_pop(l,1);
 		
 		lua_pop(l,1);
