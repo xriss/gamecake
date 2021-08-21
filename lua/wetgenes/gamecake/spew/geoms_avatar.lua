@@ -707,7 +707,7 @@ void main(void)
 
 		avatar.anim=objs.anims[avatar.pose] or objs.anims[1]
 		if avatar.anim then
-			avatar.time=(avatar.time or 0)+(1/60)
+			avatar.time=(avatar.time or 0)+avatar.speed
 		end
 		wgeoms.update(objs)
 
@@ -1140,7 +1140,7 @@ void main(void)
 	function geoms_avatar.avatar(avatar,soul)
 	
 		avatar=avatar or {}
-
+		
 		avatar.adjust_texture_tweak=function(name,mat)
 			geoms_avatar.adjust_texture_tweak(avatar,name,mat)
 		end
@@ -1154,6 +1154,8 @@ void main(void)
 		end
 
 		avatar.setup=function( soul )
+
+			avatar.speed=1/60
 
 			soul=soul or geoms_avatar.random_soul({})
 
