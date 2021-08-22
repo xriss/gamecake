@@ -93,14 +93,14 @@ B.cameras.create=function(cameras,boot)
 
 	camera.mode="orbit"
 
-	camera.rot=V3( boot.rot or {20,0,0} )
+	camera.rot=V3( boot.rot or {0,0,0} )
 	camera.pos=V3( boot.pos or {0,-5,0} )
 
 	camera.dolly=5 -- minimum dolly value
 
 	camera.floor=0 -- keep camera above this
 
-	camera.base={ rot=deepcopy(camera.rot) ,  pos=deepcopy(camera.pos) , dolly=camera.dolly }
+--	camera.base={ rot=deepcopy(camera.rot) ,  pos=deepcopy(camera.pos) , dolly=camera.dolly }
 
 	camera.mtx=M4()
 	camera.inv=M4()
@@ -136,7 +136,8 @@ B.camera.update=function(camera)
 		
 			camera.orbit=camera.orbit or {
 				mode="none",
-				mx=0,my=0,mz=20,
+				mx=0,my=20,mz=20,
+				my_min=-90,my_max=90,
 				mz_min=4,mz_max=40,
 			}
 			local orbit=camera.orbit
@@ -148,6 +149,7 @@ B.camera.update=function(camera)
 --			local ly=up.axisfixed("ly")
 			local rx=up.axisfixed("rx")
 			local ry=up.axisfixed("ry")
+			local r3=up.button("r3") or false
 			local mx=up.axis("mx") or 0
 			local my=up.axis("my") or 0
 			local mz=up.axis("mz") or 0 ; if mz>32768 then mz=mz-65536 end
@@ -158,9 +160,13 @@ B.camera.update=function(camera)
 				return (d*360)-180
 			end
 
-			orbit.my=rotfix( orbit.my + (     ry  * sensitivity ) )
-			orbit.mx=rotfix( orbit.mx - ( (lx+rx) * sensitivity ) )		-- left + right stick gives auto camera rotate
-
+			if r3 then -- hold r3 in to dolly camera
+				orbit.mz=  orbit.mz + ( 0.25 * ry  * sensitivity )
+			else
+				orbit.my=rotfix( orbit.my + (     ry  * sensitivity ) )
+				orbit.mx=rotfix( orbit.mx - ( (lx+rx) * sensitivity ) )		-- left + right stick gives auto camera rotate
+			end
+			
 			local do_orbit=mouse_button
 			local do_zoom=true
 
@@ -183,9 +189,6 @@ B.camera.update=function(camera)
 
 				orbit.mz=orbit.mz-((mz-orbit.lz)*1.0) -- need to reverse the mousewheel
 
-				if orbit.mz < orbit.mz_min then orbit.mz=orbit.mz_min end -- limits
-				if orbit.mz > orbit.mz_max then orbit.mz=orbit.mz_max end
-
 			end
 			
 			if do_orbit and orbit.lx and orbit.ly then -- perform orbits
@@ -195,11 +198,17 @@ B.camera.update=function(camera)
 
 			end
 
-			camera.dolly=camera.base.dolly + orbit.mz
+			if orbit.my < orbit.my_min then orbit.my=orbit.my_min end -- limits
+			if orbit.my > orbit.my_max then orbit.my=orbit.my_max end
 
-			camera.rot[1]=rotfix( camera.base.rot[1] + orbit.my )
-			camera.rot[2]=rotfix( camera.base.rot[2] + orbit.mx )
-			camera.rot[3]=rotfix( camera.base.rot[3]            )
+			if orbit.mz < orbit.mz_min then orbit.mz=orbit.mz_min end -- limits
+			if orbit.mz > orbit.mz_max then orbit.mz=orbit.mz_max end
+
+			camera.dolly=orbit.mz
+
+			camera.rot[1]=rotfix( orbit.my )
+			camera.rot[2]=rotfix( orbit.mx )
+			camera.rot[3]=rotfix( 0 )
 
 
 			orbit.lx=mx -- we have applied this movement
