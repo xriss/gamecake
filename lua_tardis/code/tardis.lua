@@ -1438,7 +1438,7 @@ end
 
 	m4 = m4:setrot(degrees,v3a)
 
-Set this matrix to a rotation matrix around the given normal.
+Set this matrix to a rotation matrix around the given normal by the given degrees.
 
 we will automatically normalise v3a if necessary.
 
@@ -1448,6 +1448,42 @@ function m4.setrot(it,degrees,v3a)
 	local c=math.cos(-math.pi*degrees/180)
 	local cc=1-c
 	local s=math.sin(-math.pi*degrees/180)
+	
+	local x=v3a[1]
+	local y=v3a[2]
+	local z=v3a[3]
+	
+	local delta=0.001 -- a smallish number
+	local dd=( (x*x) + (y*y) + (z*z) )
+	if ( dd < (1-delta) ) or ( dd > (1+delta) ) then -- not even close to a unit vector
+		local d=math.sqrt(dd)
+		x=x/d
+		y=y/d
+		z=z/d
+	end
+
+	return array.set(it,
+		x*x*cc+c	,	x*y*cc-z*s	,	x*z*cc+y*s	, 	0	,
+		x*y*cc+z*s	,	y*y*cc+c	,	y*z*cc-x*s	,	0	,
+        x*z*cc-y*s	,	y*z*cc+x*s	,	z*z*cc+c	,	0	,
+        0			,	0			,	0			,	1	)
+
+end
+
+--[[#lua.wetgenes.tardis.m4.setrrot
+
+	m4 = m4:setrrot(radians,v3a)
+
+Set this matrix to a rotation matrix around the given normal by the given radians.
+
+we will automatically normalise v3a if necessary.
+
+]]
+function m4.setrrot(it,radians,v3a)
+
+	local c=math.cos(-radians)
+	local cc=1-c
+	local s=math.sin(-radians)
 	
 	local x=v3a[1]
 	local y=v3a[2]
@@ -1483,6 +1519,22 @@ otherwise m4 is modified and returned.
 ]]
 function m4.arotate(it,degrees,v3a,r)
 	local m=m4.new():setrot(degrees,v3a)
+	return tardis.m4_product_m4(it,m,r)
+end
+
+--[[#lua.wetgenes.tardis.m4.rrotate
+
+	m4 = m4:rrotate(radians,v3a)
+	m4 = m4:rrotate(radians,v3a,r)
+
+Apply a rotation in radians around the given axis to this matrix.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.rrotate(it,radians,v3a,r)
+	local m=m4.new():setrrot(radians,v3a)
 	return tardis.m4_product_m4(it,m,r)
 end
 
@@ -1534,7 +1586,7 @@ end
 	m4 = m4:prearotate(degrees,v3a)
 	m4 = m4:prearotate(degrees,v3a,r)
 
-Pre apply a rotation in degres around the given axis to this matrix.
+Pre apply a rotation in degrees around the given axis to this matrix.
 
 If r is provided then the result is written into r and returned 
 otherwise m4 is modified and returned.
@@ -1542,6 +1594,22 @@ otherwise m4 is modified and returned.
 ]]
 function m4.prearotate(it,degrees,v3a,r)
 	local m=m4.new():setrot(degrees,v3a)
+	return tardis.m4_product_m4(m,it,r or it)
+end
+
+--[[#lua.wetgenes.tardis.m4.prerrotate
+
+	m4 = m4:prerrotate(radians,v3a)
+	m4 = m4:prerrotate(radians,v3a,r)
+
+Pre apply a rotation in radians around the given axis to this matrix.
+
+If r is provided then the result is written into r and returned 
+otherwise m4 is modified and returned.
+
+]]
+function m4.prerrotate(it,radians,v3a,r)
+	local m=m4.new():setrrot(radians,v3a)
 	return tardis.m4_product_m4(m,it,r or it)
 end
 
@@ -2279,11 +2347,24 @@ end
 
 	q4 = q4:setrot(degrees,v3a)
 
-Set this matrix to a rotation matrix around the given normal.
+Set this quaternion to a rotation around the given normal by the given degrees.
 
 ]]
 function q4.setrot(it,degrees,v3a)
 	local ah=degrees * (math.pi/360) -- ah = half the angle in radians
+	local sh=math.sin(ah)
+	return array.set(it , v3a[1]*sh , v3a[2]*sh , v3a[3]*sh , math.cos(ah) )
+end
+
+--[[#lua.wetgenes.tardis.q4.setrrot
+
+	q4 = q4:setrrot(radians,v3a)
+
+Set this quaternion to a rotation around the given normal by the given radians.
+
+]]
+function q4.setrrot(it,radians,v3a)
+	local ah=radians*0.5 -- ah = half the angle in radians
 	local sh=math.sin(ah)
 	return array.set(it , v3a[1]*sh , v3a[2]*sh , v3a[3]*sh , math.cos(ah) )
 end
@@ -2293,7 +2374,7 @@ end
 	q4 = q4:rotate(degrees,v3a)
 	q4 = q4:rotate(degrees,v3a,r)
 
-Apply a rotation to this quaternion.
+Apply a degree rotation to this quaternion.
 
 If r is provided then the result is written into r and returned 
 otherwise q4 is modified and returned.
@@ -2304,6 +2385,21 @@ function q4.rotate(it,degrees,v3a,r)
 	return tardis.q4_product_q4(it,q4a,r)
 end
 
+--[[#lua.wetgenes.tardis.q4.rrotate
+
+	q4 = q4:rrotate(radians,v3a)
+	q4 = q4:rrotate(radians,v3a,r)
+
+Apply a radian rotation to this quaternion.
+
+If r is provided then the result is written into r and returned 
+otherwise q4 is modified and returned.
+
+]]
+function q4.rrotate(it,radians,v3a,r)
+	local q4a=q4.new():setrrot(radians,v3a)
+	return tardis.q4_product_q4(it,q4a,r)
+end
 
 
 --[[#lua.wetgenes.tardis.line
@@ -2601,6 +2697,11 @@ function tardis.m4_stack()
 
 	stack.rotate=function(...)
 		stack[#stack]:rotate(...)
+		return stack
+	end
+
+	stack.rrotate=function(...)
+		stack[#stack]:rrotate(...)
 		return stack
 	end
 
