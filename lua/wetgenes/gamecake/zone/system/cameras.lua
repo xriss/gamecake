@@ -146,7 +146,7 @@ B.camera.update=function(camera)
 
 			local mouse_button=up.button("mouse_right") or up.button("mouse_middle") or up.button("mouse_left") or false
 			local lx=up.axisfixed("lx")
---			local ly=up.axisfixed("ly")
+			local ly=up.axisfixed("ly")
 			local rx=up.axisfixed("rx")
 			local ry=up.axisfixed("ry")
 			local r3=up.button("r3") or false
@@ -160,11 +160,12 @@ B.camera.update=function(camera)
 				return (d*360)-180
 			end
 
-			if r3 then -- hold r3 in to dolly camera
-				orbit.mz=  orbit.mz + ( 0.25 * ry  * sensitivity )
+			if r3 then -- hold r3 in to dolly camera and allow parallel to camera movement
+				orbit.mz=  orbit.mz + ( 0.25 * (ry-ly) * sensitivity )
+				orbit.mx=rotfix( orbit.mx - (  (rx   ) * sensitivity ) )		-- right stick only gives no auto camera rotate
 			else
-				orbit.my=rotfix( orbit.my + (     ry  * sensitivity ) )
-				orbit.mx=rotfix( orbit.mx - ( (lx+rx) * sensitivity ) )		-- left + right stick gives auto camera rotate
+				orbit.my=rotfix( orbit.my + (      ry  * sensitivity ) )
+				orbit.mx=rotfix( orbit.mx - (  (rx+lx) * sensitivity ) )		-- left + right stick gives auto camera rotate
 			end
 			
 			local do_orbit=mouse_button
