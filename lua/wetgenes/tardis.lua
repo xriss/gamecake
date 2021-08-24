@@ -2021,8 +2021,8 @@ end
 
 --[[#lua.wetgenes.tardis.v3.cross
 
-	v2 = v2:dot(v2b)
-	v2 = v2:dot(v2b,r)
+	v3 = v3:cross(v3b)
+	v3 = v3:cross(v3b,r)
 
 Return the cross product of these two vectors.
 
@@ -2035,6 +2035,49 @@ function v3.cross(va,vb,r)
 	return array.set(r, (va[2]*vb[3])-(va[3]*vb[2]) , (va[3]*vb[1])-(va[1]*vb[3]) , (va[1]*vb[2])-(va[2]*vb[1]) )
 end
 
+
+--[[#lua.wetgenes.tardis.v3.angle
+
+	radians,axis = v3a:dot(v3b)
+	radians,axis = v3a:dot(v3b,axis)
+
+Return radians and axis of rotation between these two vectors. If axis is given 
+then it must represent a positive world aligned axis normal. So V3(1,0,0) or 
+V3(0,1,0) or V3(0,0,1) only. The point of providing an axis allows the returned 
+angle to be over a 360 degree range rather than flipping the axis after 180 
+degrees this means the second axis returned value can be ignored as it will 
+always be the axis that is passed in.
+
+]]
+function v3.angle(va,vb,axis)
+
+	local na
+	local nb
+
+	if axis then
+		local nc=tardis.v3.new( 1-axis[1] , 1-axis[2] , 1-axis[3] )
+		na=(va*nc):normalize(tardis.v3.new())
+		nb=(vb*nc):normalize(tardis.v3.new())
+	else
+		na=va:normalize(tardis.v3.new())
+		nb=vb:normalize(tardis.v3.new())
+	end
+
+	local d=na:dot(nb)
+	local r=math.acos( d>1 and 1 or  d<-1 and -1 or d ) -- clamp to avoid nan
+	
+	local x=na:cross( nb , tardis.v3.new() ):normalize()
+	
+	if axis then
+		if x:dot(axis) < 0 then -- flip negative axis so we can ignore it
+			r=-r
+			x:set(axis)
+		end
+	end
+
+	return r,x
+	
+end
 
 --[[#lua.wetgenes.tardis.v4
 

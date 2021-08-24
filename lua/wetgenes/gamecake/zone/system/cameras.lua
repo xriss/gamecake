@@ -84,6 +84,7 @@ end
 
 B.cameras.create=function(cameras,boot)
 	local camera={}
+	camera.scene=cameras.scene
 	camera.boot=boot
 	camera.caste=cameras.caste
 	camera.cameras=cameras
@@ -110,6 +111,15 @@ B.cameras.create=function(cameras,boot)
 	camera.playery=V3( { 0 ,  0 , 1 } ) -- player xy are in stick axis space so +z is jump
 	camera.playerx=V3( { 1 ,  0 , 0 } )
 
+	camera.orbit=camera.orbit or {
+		mode="none",
+		mx=0,my=20,mz=20,
+		my_min=-90,my_max=90,
+		mz_min=8,mz_max=50,
+		dolly=1,
+	}
+
+
 	return camera
 end
 
@@ -134,17 +144,12 @@ B.camera.update=function(camera)
 		
 		if camera.mode=="orbit" then
 		
-			camera.orbit=camera.orbit or {
-				mode="none",
-				mx=0,my=20,mz=20,
-				my_min=-90,my_max=90,
-				mz_min=4,mz_max=40,
-			}
 			local orbit=camera.orbit
 			
 			local sensitivity=2
 
-			local mouse_button=up.button("mouse_right") or up.button("mouse_middle") or up.button("mouse_left") or false
+			local mouse_middle=up.button("mouse_middle") or false
+			local mouse_button=up.button("mouse_right") or up.button("mouse_left") or false
 			local lx=up.axisfixed("lx")
 			local ly=up.axisfixed("ly")
 			local rx=up.axisfixed("rx")
@@ -160,7 +165,7 @@ B.camera.update=function(camera)
 				return (d*360)-180
 			end
 
-			if r3 then -- hold r3 in to dolly camera and allow parallel to camera movement
+			if r3 or mouse_middle then -- hold r3 or middle_mouse in to dolly camera and allow parallel to camera movement
 				orbit.mz=  orbit.mz + ( 0.25 * (ry-ly) * sensitivity )
 				orbit.mx=rotfix( orbit.mx - (  (rx   ) * sensitivity ) )		-- right stick only gives no auto camera rotate
 			else
@@ -219,15 +224,41 @@ B.camera.update=function(camera)
 
 	end
 
+
+-- ray cast the camera distance to control the dolly
+	local physics=camera.scene.systems.physics
+	if physics then
+		local q=Q4()
+		q:rotate( camera.rot[1] ,  {1,0,0} )
+		q:rotate( camera.rot[2] ,  {0,1,0} )
+		q:rotate( camera.rot[3] ,  {0,0,1} )
+		local d=V3(0,0,1):product(q)
+
+		local test=physics.world:ray_test({
+			ray={
+				camera.pos+V3(0,1,0),
+				camera.pos+(d*camera.dolly)+V3(0,1,0),
+			},
+		})
+		if test.hit then
+			camera.orbit.dolly = ( camera.orbit.dolly*3 + test.hit.fraction ) /4
+		else
+			camera.orbit.dolly = ( camera.orbit.dolly*3 + 1 ) /4
+		end
+	end
+
+
+
+
 -- This is a camera so we are applying reverse transforms...
 	camera.mtx:identity()
 	camera.mtx:translate( camera.pos[1] , camera.pos[2] , camera.pos[3] )
 	camera.mtx:rotate( camera.rot[3] ,  0, 0, 1 )
 	camera.mtx:rotate( camera.rot[2] ,  0, 1, 0 )
 	camera.mtx:rotate( camera.rot[1] ,  1, 0, 0 )
-	camera.mtx:translate( 0,0, camera.dolly )
+	camera.mtx:translate( 0,0, 0.0 + camera.dolly*camera.orbit.dolly )
 
-	if camera.mtx[14] > camera.floor then camera.mtx[14]=camera.floor end -- keep above ground
+--	if camera.mtx[14] > camera.floor then camera.mtx[14]=camera.floor end -- keep above ground
 
 	local c=math.cos(math.pi*camera.rot[2]/180)
 	local s=math.sin(math.pi*camera.rot[2]/180)
