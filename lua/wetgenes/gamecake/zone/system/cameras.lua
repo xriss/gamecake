@@ -44,12 +44,6 @@ end
 
 B.cameras.draw_head=function(cameras)
 
-	gl.state.push(gl.state_defaults)
-	gl.state.set({
-		[gl.CULL_FACE]					=	gl.FALSE,
-		[gl.DEPTH_TEST]					=	gl.TRUE,
-	})
-
 	gl.PushMatrix()
 
 	local camera=cameras.scene.get("camera")
@@ -57,8 +51,6 @@ B.cameras.draw_head=function(cameras)
 	cameras.active=camera
 
 	if camera then
-
---		print( M4(gl.matrix(gl.MODELVIEW)) )
 
 		gl.MultMatrix(camera.inv)
 
@@ -76,8 +68,6 @@ end
 B.cameras.draw_tail=function(cameras)
 
 	gl.PopMatrix()
-
-	gl.state.pop()
 
 end
 

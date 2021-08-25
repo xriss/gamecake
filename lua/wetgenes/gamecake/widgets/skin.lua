@@ -421,10 +421,7 @@ local font_cache_draw
 
 			widget.fbo:bind_frame()
 
---			gl.Disable(gl.DEPTH_TEST)
---			gl.Disable(gl.CULL_FACE)
 			gl.Color(1,1,1,1)
---			canvas.gl_default()
 			
 			gl.state.push(gl.state_defaults)
 			gl.state.set({

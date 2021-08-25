@@ -90,15 +90,11 @@ function M.bake(oven,about)
 			gl.Rotate(about.t,0,-1,0)
 			gl.Rotate(about.t/8,1,0,0)
 			gl.Color(0,0.25,0.75,1)
---			gl.Enable(gl.CULL_FACE)
-			gl.state.set({
+			gl.state.push({
 				[gl.CULL_FACE]					=	gl.TRUE,
 			})
 			wetiso.draw()
---			gl.Disable(gl.CULL_FACE)
-			gl.state.set({
-				[gl.CULL_FACE]					=	gl.FALSE,
-			})
+			gl.state.pop()
 		
 		gl.PopMatrix()
 

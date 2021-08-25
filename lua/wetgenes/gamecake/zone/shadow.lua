@@ -68,7 +68,10 @@ M.bake=function(oven,shadow)
 		gl.state.set({
 			[gl.BLEND]						=	gl.FALSE,
 			[gl.DEPTH_TEST]					=	gl.TRUE,
+			[gl.CULL_FACE]					=	gl.TRUE,
+			[gl.FRONT_FACE]					=	gl.CW,	-- shadows are drawn upside down?
 		})
+
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
 		local camera=scene.get("camera")

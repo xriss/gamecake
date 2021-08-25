@@ -331,12 +331,8 @@ function wmaster.setup(widget,def)
 		mark_dirty_fbos(widget)
 		find_dirty_fbos(widget)
 
-		gl.Disable(gl.CULL_FACE)
-		gl.Disable(gl.DEPTH_TEST)
-
 		gl.PushMatrix()
-		
-		
+				
 		if #dirty_fbos>0 then
 			for i=#dirty_fbos,1,-1 do -- call in reverse so sub fbos can use their child fbo data
 				dirty_fbos[i]:draw() -- dirty, so this only draws into the fbo

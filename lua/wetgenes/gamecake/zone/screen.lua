@@ -131,10 +131,11 @@ M.bake=function(oven,screen)
 		oven.cake.views.push_and_apply(screen.view)
 		gl.state.push(gl.state_defaults)
 
---		gl.state.set({
---			[gl.BLEND]						=	gl.FALSE,
---			[gl.DEPTH_TEST]					=	gl.TRUE,
---		})
+		gl.state.set({
+			[gl.DEPTH_TEST]					=	gl.TRUE,
+			[gl.CULL_FACE]					=	gl.TRUE,
+		})
+
 		gl.Clear(gl.DEPTH_BUFFER_BIT) -- we promise to draw to the entire screen
 
 	end
