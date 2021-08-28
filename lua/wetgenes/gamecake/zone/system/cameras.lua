@@ -226,8 +226,8 @@ B.camera.update=function(camera)
 
 		local test=physics.world:ray_test({
 			ray={
-				camera.pos+V3(0,1,0),
-				camera.pos+(d*camera.dolly)+V3(0,1,0),
+				camera.pos+V3(0,0,0),
+				camera.pos+(d*camera.dolly)+V3(0,0,0),
 			},
 		})
 		if test.hit then

@@ -691,7 +691,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		
 		local d = vn[1]*v2[1] + vn[2]*v2[2] + vn[3]*v2[3]
 		
-		if d>0 then -- invert poly order
+		if d<0 then -- invert poly order
 			M.poly_flip(it,p)
 		end
 
