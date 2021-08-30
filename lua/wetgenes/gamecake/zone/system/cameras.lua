@@ -200,12 +200,16 @@ B.camera.update=function(camera)
 
 			end
 
+			if orbit.mx_set then orbit.mx=rotfix(orbit.mx_set) end
+			if orbit.my_set then orbit.my=rotfix(orbit.my_set) end
+			if orbit.mz_set then orbit.mz=rotfix(orbit.mz_set) end
+
 			if orbit.my < orbit.my_min then orbit.my=orbit.my_min end -- limits
 			if orbit.my > orbit.my_max then orbit.my=orbit.my_max end
 
 			if orbit.mz < orbit.mz_min then orbit.mz=orbit.mz_min end -- limits
 			if orbit.mz > orbit.mz_max then orbit.mz=orbit.mz_max end
-
+			
 			camera.dolly=orbit.mz
 
 			camera.rot[1]=rotfix( orbit.my )
