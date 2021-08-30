@@ -108,6 +108,8 @@ B.cameras.create=function(cameras,boot)
 		mz_min=8,mz_max=50,
 		dolly=1,
 	}
+	
+	camera.move_and_rotate=true
 
 
 	return camera
@@ -160,7 +162,11 @@ B.camera.update=function(camera)
 				orbit.mx=rotfix( orbit.mx - (  (rx   ) * sensitivity ) )		-- right stick only gives no auto camera rotate
 			else
 				orbit.my=rotfix( orbit.my + (      ry  * sensitivity ) )
-				orbit.mx=rotfix( orbit.mx - (  (rx+lx) * sensitivity ) )		-- left + right stick gives auto camera rotate
+				if camera.move_and_rotate then
+					orbit.mx=rotfix( orbit.mx - (  (rx+lx) * sensitivity ) )		-- left + right stick gives auto camera rotate
+				else
+					orbit.mx=rotfix( orbit.mx - (  (rx   ) * sensitivity ) )		-- right stick only gives no auto camera rotate
+				end
 			end
 			
 			local do_orbit=mouse_button
