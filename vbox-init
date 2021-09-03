@@ -1,5 +1,8 @@
 cd `dirname $0`
 
+echo " make me a vbox "
+sudo echo " sudo make me a vbox "
+
 # this will destroy and rebuild everything
 
 cd vbox_1604_32
