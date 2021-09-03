@@ -7,9 +7,8 @@ echo " installing qemu "
 
 
 #update these to get a newer version
-RASPBIAN_FILE=2015-11-21-raspbian-jessie-lite
-RASPBIAN_URL=https://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2015-11-24/$RASPBIAN_FILE.zip
-
+RASPBIAN_FILE=2021-05-07-raspios-buster-armhf-lite
+RASPBIAN_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/$RASPBIAN_FILE.zip
 
 if [ -f raspbian.img ] ; then
 
@@ -85,6 +84,10 @@ proc       /proc           proc    defaults          0       0
 
 EOF
 
+sudo tee root/boot/ssh.txt <<EOF
+ENABLE SSH
+EOF
+
 ./box-umount
 
 
@@ -94,7 +97,7 @@ echo "starting qemu but detaching it from this shell, wait until we can login be
 
 echo " copying your id_rsa.pub to the PIs authorised keys for auto login "
 ssh-keygen -f "$HOME/.ssh/known_hosts" -R [localhost]:5522
-while ! cat ~/.ssh/id_rsa.pub | sshpass -p raspberry ssh -oStrictHostKeyChecking=no -p 5522 pi@localhost " mkdir -p .ssh ; cat >> .ssh/authorized_keys "
+while ! cat ~/.ssh/id_rsa.pub | sshpass -p raspberry ssh -oStrictHostKeyChecking=no -p 5522 pi@localhost " mkdir -p .ssh ; cat >> .ssh/authorized_keys ; sudo systemctl enable ssh "
 do
 	sleep 10
     echo "Trying ssh login again..."
@@ -129,9 +132,11 @@ echo " installing build dependencies"
 #./ssh " sudo apt-get install -y libluajit-5.1-dev "
 #./ssh " sudo apt-get install -y libsdl2-dev "
 
+./box-down
+./box-up-wait
 
 echo " cloaning the gamecake repo so we can use scripts from inside it"
-./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
+./ssh " cd gamecake && ./git-pull && cd .. || git clone -v --progress https://github.com/xriss/gamecake.git && gamecake/git-pull"
 
 echo " building build dependencies luajit and sdl2"
 ./ssh " cd gamecake/build ; ./install "

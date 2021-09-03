@@ -79,17 +79,6 @@ newplatform {
 		cppflags = "-MMD -fPIC",
 	}
 }
-newplatform {
-    name = "mingw32",
-    description = "mingw32",
-	gcc=
-	{
-		cc ="i586-mingw32msvc-cc",
-		cxx="i586-mingw32msvc-c++",
-		ar ="i586-mingw32msvc-ar",
-		cppflags = "-MMD -fPIC",
-	}
-}
 
 newplatform {
     name = "mingw",
@@ -185,7 +174,6 @@ elseif t:sub(1,7)=="android" then
 	ANDROID=true
 	GCC=true
 elseif t:sub(1,5)=="mingw" then
-	if t:sub(1,7)=="mingw32" then MINGW32=true end -- use old compiler
 	if t:sub(1,7)=="mingwin" then MINGWIN=true end -- use exe compiler
 	TARGET="MINGW"
 	CPU=t:sub(6)
@@ -343,9 +331,8 @@ elseif WINDOWS then
 
 	if MINGW then
 	
-		if MINGW32 then		platforms { "mingw32" } --use old 32 bit compiler
-		elseif MINGWIN then	platforms { "mingwin" } --use exe compiler
-		else				platforms { "mingw" }	--use new 64 bit compiler
+		if MINGWIN then	platforms { "mingwin" } --use exe compiler
+		else			platforms { "mingw" }	--use new 64 bit compiler
 		end
 		
 		buildoptions{"-mtune=generic"}
@@ -616,8 +603,12 @@ elseif MINGW then
 
 	LUA_LINKS= { "luajit" }
 
-	includedirs { path.getabsolute("./vbox_mingw/luajit/include") }
-	libdirs { path.getabsolute("./vbox_mingw/luajit/lib") }
+-- build these files using build/install --mingw
+	includedirs { "/usr/i686-w64-mingw32/include/luajit" }
+--	libdirs { "/usr/i686-w64-mingw32/lib/luajit" }
+
+--	includedirs { path.getabsolute("./vbox_mingw/luajit/include") }
+--	libdirs { path.getabsolute("./vbox_mingw/luajit/lib") }
 
 else -- luajit
 
@@ -685,14 +676,17 @@ end
 
 -- add get SDL2 include files
 
-if NIX or OSX then
--- use system includes
-	includedirs { "/usr/local/include/SDL2" }
-	includedirs { "/usr/include/SDL2" }
-elseif WINDOWS then
-	includedirs { path.getabsolute("./vbox_mingw/SDL2/include/SDL2") }
-	libdirs { path.getabsolute("./vbox_mingw/SDL2/lib") }
+if MINGW then
+
+-- build these files using build/install --mingw
+	includedirs { "/usr/i686-w64-mingw32/include/SDL2" }
+--	libdirs { "/usr/i686-w64-mingw32/lib/SDL2" }
+
+--	includedirs { path.getabsolute("./vbox_mingw/SDL2/include/SDL2") }
+--	libdirs { path.getabsolute("./vbox_mingw/SDL2/lib") }
+
 elseif EMCC then
+
 	buildlinkoptions{
 		"-Wno-error=format-security",
 		"-s USE_SDL=2",
@@ -703,6 +697,13 @@ elseif EMCC then
 		"-s MIN_WEBGL_VERSION=2",
 		"-s MAX_WEBGL_VERSION=2",
 	}
+
+else
+
+-- use system includes
+	includedirs { "/usr/local/include/SDL2" }
+	includedirs { "/usr/include/SDL2" }
+
 end
 
 -- OpenAL

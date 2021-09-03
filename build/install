@@ -11,15 +11,15 @@ fi
 # default build settings
 
 
-LUAJITSRC=LuaJIT-2.1.0-beta3
+LUAJITSRC=git
 
 
-SDLSRC=SDL2-2.0.14
+SDLSRC=2.0.16
 
 
 
 OPTIONS=
-LONGOPTIONS=help,,luajit:,sdl2:
+LONGOPTIONS=help,mingw,luajit:,sdl2:
 
 
 
@@ -34,6 +34,10 @@ case "$1" in
         --help)
                 help=1
                 shift
+        ;;
+        --mingw)
+                MINGW="1"
+                shift 1
         ;;
         --luajit)
                 LUAJITSRC="$2"
@@ -58,6 +62,7 @@ if [ "$help" = "1" ] ; then
 
 echo " Available options are : "
 echo
+echo " ./make --mingw     # enable mingw crosscompile "
 echo " ./make --luajit=   # disable luajit "
 echo " ./make --sdl2=     # disable sdl2 "
 echo
@@ -72,9 +77,16 @@ fi
 
 if hash apt-get 2>/dev/null; then
 
+	if [ ! -z "$MINGW" ]; then
+		sudo apt-get install -y mingw-w64
+		sudo apt-get install -y gcc-multilib
+		sudo apt-get install -y g++-multilib
+	fi
+	
 	sudo apt-get install -y luajit
 	sudo apt-get install -y lua-filesystem
 
+	sudo apt-get install -y git
 	sudo apt-get install -y wget
 	sudo apt-get install -y unzip
 	sudo apt-get install -y build-essential
@@ -135,67 +147,112 @@ fi
 
 if [ ! -z "$LUAJITSRC" ]; then
 
-if [ -f ${LUAJITSRC}.tar.gz ] ; then
-	echo "using ${LUAJITSRC}.tar.gz"
-else
-	wget -O ${LUAJITSRC}.tar.gz https://luajit.org/download/${LUAJITSRC}.tar.gz
+	if [ "$LUAJITSRC" = "git" ]; then
+
+		echo "using latest git"
+
+		git clone https://luajit.org/git/luajit.git
+		cd luajit
+		git pull
+
+	else
+
+		if [ -f ${LUAJITSRC}.tar.gz ] ; then
+			echo "using ${LUAJITSRC}.tar.gz"
+		else
+			wget -O ${LUAJITSRC}.tar.gz https://luajit.org/download/${LUAJITSRC}.tar.gz
+		fi
+
+		rm -rf ${LUAJITSRC}
+		tar zxvf ${LUAJITSRC}.tar.gz
+		cd ${LUAJITSRC}
+
+	fi
+
+	if [ "`uname`" = "Darwin" ] ; then
+
+		sudo mkdir -p /usr/local/64
+		make clean
+		make -j$(nproc||echo 1) CC="gcc -m64" && sudo make install PREFIX=/usr/local/64
+
+	elif [ ! -z "$MINGW" ]; then
+	
+		make clean
+		make HOST_CC="gcc -m32" CROSS=i686-w64-mingw32- TARGET_SYS=Windows BUILDMODE=static
+
+		sudo mkdir -p /usr/i686-w64-mingw32/include/luajit
+		sudo cp src/lua*.h /usr/i686-w64-mingw32/include/luajit
+		sudo cp src/lauxlib.h /usr/i686-w64-mingw32/include/luajit
+		
+		sudo cp src/libluajit.a /usr/i686-w64-mingw32/lib
+		
+	else
+
+		make clean
+		make -j$(nproc||echo 1) && sudo make install
+
+	fi
+
+	cd ..
+
+
+	#force static link by deleting the .so or dylib
+
+	sudo rm -f /usr/local/lib/libluajit-5.1.so
+	sudo rm -f /usr/local/64/lib/libluajit-5.1.dylib
+	sudo rm -f /usr/local/lib/libluajit-5.1.dylib
+
 fi
-
-rm -rf ${LUAJITSRC}
-tar zxvf ${LUAJITSRC}.tar.gz
-cd ${LUAJITSRC}
-
-if [ "`uname`" = "Darwin" ] ; then
-
-#	make -j$(nproc||echo 1) CC="gcc -m32" && sudo make install PREFIX=/usr/local
-#	make clean
-	sudo mkdir -p /usr/local/64
-	make -j$(nproc||echo 1) CC="gcc -m64" && sudo make install PREFIX=/usr/local/64
-
-else
-
-	make -j$(nproc||echo 1) && sudo make install
-
-fi
-
-cd ..
-
-
-#force static link by deleting the .so or dylib
-
-sudo rm -f /usr/local/lib/libluajit-5.1.so
-sudo rm -f /usr/local/64/lib/libluajit-5.1.dylib
-sudo rm -f /usr/local/lib/libluajit-5.1.dylib
-
-fi
-
-
 
 
 # make a version of SDL2 and install it
 
 if [ ! -z "$SDLSRC" ]; then
 
-if [ -f ${SDLSRC}.tar.gz ] ; then
-	echo "using ${SDLSRC}.tar.gz"
-else
-	wget -O ${SDLSRC}.tar.gz https://www.libsdl.org/release/${SDLSRC}.tar.gz
-fi
+	if [ ! -z "$MINGW" ]; then
 
-rm -rf ${SDLSRC}
-tar zxvf ${SDLSRC}.tar.gz
-cd ${SDLSRC}
+		if [ -f SDL2-devel-${SDLSRC}.tar.gz ] ; then
+			echo "using SDL2-devel-${SDLSRC}.tar.gz"
+		else
+			wget -O SDL2-devel-${SDLSRC}.tar.gz https://www.libsdl.org/release/SDL2-devel-${SDLSRC}-mingw.tar.gz
+		fi
+	
+		rm -rf SDL2-${SDLSRC}
+		tar zxvf SDL2-devel-${SDLSRC}.tar.gz
+		cd SDL2-${SDLSRC}
+		
+		sudo cp -r i686-w64-mingw32/ /usr/
+
+		# force static link by deleting any dynamic versions
+		sudo rm -f /usr/i686-w64-mingw32/lib/libSDL2.so
+		sudo rm -f /usr/i686-w64-mingw32/lib/libSDL2.dylib
+		sudo rm -f /usr/i686-w64-mingw32/lib/libSDL2.dll.a
+
+		cd ..
+	else
+
+		if [ -f SDL2-${SDLSRC}.tar.gz ] ; then
+			echo "using SDL2-${SDLSRC}.tar.gz"
+		else
+			wget -O SDL2-${SDLSRC}.tar.gz https://www.libsdl.org/release/SDL2-${SDLSRC}.tar.gz
+		fi
+
+		rm -rf SDL2-${SDLSRC}
+		tar zxvf SDL2-${SDLSRC}.tar.gz
+		cd SDL2-${SDLSRC}
 
 
-./configure --enable-static --disable-esd --disable-arts --disable-video-directfb --disable-rpath --enable-alsa --enable-alsa-shared --enable-pulseaudio --enable-pulseaudio-shared --enable-x11-shared --enable-sdl-dlopen --disable-input-tslib --disable-render-metal --disable-sndio --disable-video-rpi
+		./configure --enable-static --disable-esd --disable-arts --disable-video-directfb --disable-rpath --enable-alsa --enable-alsa-shared --enable-pulseaudio --enable-pulseaudio-shared --enable-x11-shared --enable-sdl-dlopen --disable-input-tslib --disable-render-metal --disable-sndio --disable-video-rpi
 
-make -j$(nproc||echo 1)
-sudo make install
-cd ..
+		make -j$(nproc||echo 1)
+		sudo make install
+		cd ..
 
-#force static link by deleting the .so
-sudo rm -f /usr/local/lib/libSDL2.so
-sudo rm -f /usr/local/lib/libSDL2.dylib
+		# force static link by deleting any dynamic versions
+		sudo rm -f /usr/local/lib/libSDL2.so
+		sudo rm -f /usr/local/lib/libSDL2.dylib
 
+		cd ..
+	fi
 fi
 

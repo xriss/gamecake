@@ -1,30 +1,35 @@
 cd `dirname $0`
 
-# these will all do very little if vagrant has already provisioned the machines
+echo " make me a vbox "
+sudo echo " sudo make me a vbox "
+
+# this will destroy and rebuild everything
 
 cd vbox_1604_32
+vagrant destroy -f
 vagrant up
 vagrant halt
 cd ..
 
 cd vbox_1604_64
+vagrant destroy -f
 vagrant up
 vagrant halt
 cd ..
 
 cd vbox_emcc
+vagrant destroy -f
 vagrant up
 vagrant halt
 cd ..
 
 cd vbox_mingw
+vagrant destroy -f
 vagrant up
 vagrant halt
 cd ..
 
 
-# the arm however is rather slow and this forces a full rebuild so lets not do it in this script
+# the arm box is rather slow and this forces a full rebuild...
 
-#vbox_arm/install.sh
-
-echo " you should also run vbox_arm/install.sh if you want to reset the arm qemu box "
+vbox_arm/install.sh

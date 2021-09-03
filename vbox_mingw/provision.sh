@@ -4,9 +4,5 @@
 sudo apt-get -y update
 sudo apt-get -y upgrade
 
-/gamecake/apt-gets xtra
-
-#/gamecake/sdks/wget-emscipten
-
-#/gamecake/build/install
+/gamecake/build/install --mingw
 
