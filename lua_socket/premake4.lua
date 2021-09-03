@@ -3,7 +3,7 @@ if not WEB then -- just grab mime under nacl
 
 project "lua_socket"
 language "C"
-files { "git/src/**.c" , "git/src/**.cpp" , "git/src/**.h" }
+files { "git/src/*.c" , "git/src/*.cpp" , "git/src/*.h" }
 excludes("git/src/mime.*")
 excludes("git/src/unix.*")
 

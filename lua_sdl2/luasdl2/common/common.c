@@ -26,7 +26,7 @@
 #if LUA_VERSION_NUM == 501
 
 void *
-luaL_testudata(lua_State *L, int index, const char *tname)
+luaL_testudata_sdl2(lua_State *L, int index, const char *tname)
 {
 	void *p = lua_touserdata(L, index);
 

@@ -47,7 +47,8 @@
 #  define lua_load(l, r, d, c, m)		lua_load(l, r, d, c)
 
 void *
-luaL_testudata(lua_State *L, int index, const char *tname);
+luaL_testudata_sdl2(lua_State *L, int index, const char *tname);
+#define luaL_testudata luaL_testudata_sdl2
 
 void
 lua_rawsetp(lua_State *L, int index, void *key);
