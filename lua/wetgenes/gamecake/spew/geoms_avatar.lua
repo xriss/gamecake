@@ -4,6 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
+local rnd64k=require("wetgenes"):export("rnd64k")
 
 local wpack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
@@ -550,14 +551,20 @@ void main(void)
 		
 		local ts=wgeoms.get_anim_tweaks(geoms_avatar.objs)
 		width=(#ts/(4*height))
-		
-		if avatar.fixtex then
-		
-			avatar.fixtex.gl_table=ts
-			avatar.fixtex.gl_data=wpack.save_array(avatar.fixtex.gl_table,"f32")
-			avatar.fixtex:upload()
 
-		else
+-- upload breaks on webgl?
+-- so we just delete if it already exists
+		if avatar.fixtex then
+			textures.delete(avatar.fixtex)
+			avatar.fixtex=nil
+		end
+
+		
+--			avatar.fixtex.gl_table=ts
+--			avatar.fixtex.gl_data=wpack.save_array(avatar.fixtex.gl_table,"f32")
+--			avatar.fixtex:upload()
+
+--		else
 			avatar.fixtex=textures.create({
 				gl_data=wpack.save_array(ts,"f32"),
 				gl_table=ts,
@@ -567,7 +574,7 @@ void main(void)
 				gl_format=gl.RGBA,
 				gl_type=gl.FLOAT,
 			})
-		end
+--		end
 
 	end
 
@@ -700,7 +707,7 @@ void main(void)
 
 		avatar.anim=objs.anims[avatar.pose] or objs.anims[1]
 		if avatar.anim then
-			avatar.time=(avatar.time or 0)+(1/60)
+			avatar.time=(avatar.time or 0)+avatar.speed
 		end
 		wgeoms.update(objs)
 
@@ -1002,10 +1009,13 @@ void main(void)
 
 
 	geoms_avatar.random_soul=function(opts)
-	
-		local rnd=function(a,b)
-			local r=math.random()
-			return a + ((b-a)*r)
+		opts=opts or {}
+		
+		local rnd
+		if opts.seed then
+			rnd=rnd64k(opts.seed)
+		else
+			rnd=rnd64k(math.random()*65535)
 		end
 	
 		local soul={}
@@ -1021,7 +1031,7 @@ void main(void)
 				chance=0.1
 			end
 			
-			local r=math.random()
+			local r=rnd()
 
 --print( name, r , chance , r < chance )
 
@@ -1040,7 +1050,7 @@ void main(void)
 				end
 				
 				if #poss>0 then
-					local i=math.random(1,#poss)
+					local i=rnd(1,#poss)
 					soul.parts[name]={{name=poss[i],flags=3}}
 				else
 					soul.parts[name]={}
@@ -1053,7 +1063,7 @@ void main(void)
 		end
 		
 		if soul.parts.hat[1] then soul.parts.hair[1]={name="hair_base",flags=3} end -- smaller hair if we have a hat
-		if soul.parts.item[1] then soul.parts.item[1].flags=math.random(1,2) end -- only 1 item in a random hand
+		if soul.parts.item[1] then soul.parts.item[1].flags=rnd(1,2) end -- only 1 item in a random hand
 
 		local cmap={
 			0x11cccccc,
@@ -1130,17 +1140,22 @@ void main(void)
 	function geoms_avatar.avatar(avatar,soul)
 	
 		avatar=avatar or {}
-
+		
 		avatar.adjust_texture_tweak=function(name,mat)
 			geoms_avatar.adjust_texture_tweak(avatar,name,mat)
 		end
 
 		avatar.rebuild=function( soul )
-			geoms_avatar.rebuild( avatar , soul )
+			if type(soul)=="string" then
+				soul=geoms_avatar.random_soul({seed=soul})
+			end
 			avatar.soul=soul
+			geoms_avatar.rebuild( avatar , soul )
 		end
 
 		avatar.setup=function( soul )
+
+			avatar.speed=1/60
 
 			soul=soul or geoms_avatar.random_soul({})
 

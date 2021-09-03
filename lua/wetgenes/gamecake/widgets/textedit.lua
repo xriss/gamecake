@@ -81,6 +81,14 @@ function wtextedit.mouse(widget,act,_x,_y,key)
 			widget.master.throb=255
 			widget:set_dirty()
 
+		elseif act==2 then
+		
+			widget.data.str_select=#widget.data.str
+			widget.data.str_idx=0
+
+			widget.master.throb=255
+			widget:set_dirty()
+
 		elseif act==0 then -- drag
 
 			if widget.mouse_down and widget.data.str_select_click then

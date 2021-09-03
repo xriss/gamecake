@@ -11,10 +11,10 @@ fi
 # default build settings
 
 
-LUAJITSRC=LuaJIT-2.1.0-beta2
+LUAJITSRC=LuaJIT-2.1.0-beta3
 
 
-SDLSRC=SDL2-2.0.8
+SDLSRC=SDL2-2.0.14
 
 
 

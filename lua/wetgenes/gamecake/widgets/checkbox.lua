@@ -14,7 +14,7 @@ wcheckbox=wcheckbox or {}
 
 function wcheckbox.update(widget)
 
-	if widget.data then
+	if widget.data and widget.text_false and widget.text_true then
 		local num=widget.data.num or 0
 		widget.text= ( band(num,widget.data_mask) == 0 ) and widget.text_false or widget.text_true
 	end
@@ -49,8 +49,8 @@ function wcheckbox.setup(widget,def)
 	widget.cursor=widget.cursor or "hand"
 
 	widget.data_mask=def.data_mask or 1
-	widget.text_false=def.text_false or " "
-	widget.text_true=def.text_true or "X"
+	widget.text_false=(type(def.text_false)=="nil") and " " or def.text_false
+	widget.text_true=(type(def.text_true)=="nil") and "X" or def.text_true
 
 	widget.class_hooks=wcheckbox.class_hooks
 

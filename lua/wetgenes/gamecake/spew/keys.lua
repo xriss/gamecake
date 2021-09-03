@@ -18,8 +18,43 @@ M.bake=function(oven,keys)
 	local recaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 	
 	keys.defaults={}
--- single player covering entire keyboard (also merge the island1&2 keys in here)
+
+-- single player covering entire keyboard controller style
 	keys.defaults["full"]={
+		["w"]			=	{ "ly0" , "up"    },
+		["a"]			=	{ "lx0" , "left"  },
+		["s"]			=	{ "ly1" , "down"  },
+		["d"]			=	{ "lx1" , "right" },
+		["up"]			=	{ "ry0" },
+		["left"]		=	{ "rx0" },
+		["down"]		=	{ "ry1" },
+		["right"]		=	{ "rx1" },
+		["1"]			=	{ "pad_up"    },
+		["2"]			=	{ "pad_left"  },
+		["3"]			=	{ "pad_down"  },
+		["4"]			=	{ "pad_right" },
+		["5"]			=	{ "y" , "fire"},
+		["6"]			=	{ "x" , "fire"},
+		["7"]			=	{ "a" , "fire"},
+		["8"]			=	{ "b" , "fire"},
+		["9"]			=	"select",
+		["0"]			=	"start",
+		["q"]			=	"l2",
+		["e"]			=	"r2",
+		["z"]			=	"l1",
+		["c"]			=	"r1",
+		["["]			=	"lz1",
+		["]"]			=	"rz1",
+		["shift_l"]		=	"l3",
+		["shift_r"]		=	"r3",
+		["enter"]		=	{ "y" , "fire"},
+		["ctrl_l"]		=	{ "x" , "fire"},
+		["space"]		=	{ "a" , "fire"},
+		["ctrl_r"]		=	{ "b" , "fire" },
+	}
+
+-- merge the island1&2 keys in here
+	keys.defaults["islands"]={
 	}
 
 -- 1up/2up key islands
@@ -43,7 +78,7 @@ M.bake=function(oven,keys)
 		["9"]			=	"select",
 		["0"]			=	"start",
 	}
-	for n,v in pairs(keys.defaults["island1"]) do keys.defaults["full"][n]=v end
+	for n,v in pairs(keys.defaults["island1"]) do keys.defaults["islands"][n]=v end
 
 	keys.defaults["island2"]={
 		["w"]			=	{"up","pad_up"},
@@ -65,7 +100,7 @@ M.bake=function(oven,keys)
 		["1"]			=	"select",
 		["2"]			=	"start",
 	}
-	for n,v in pairs(keys.defaults["island2"]) do keys.defaults["full"][n]=v end
+	for n,v in pairs(keys.defaults["island2"]) do keys.defaults["islands"][n]=v end
 
 -- single player mame/picade style buttons
 	keys.defaults["pimoroni"]={
@@ -154,6 +189,7 @@ M.bake=function(oven,keys)
 		
 		key.last_pad_value={} -- cached data to help ignore wobbling inputs
 		
+--[[
 		key.joy={}					
 		key.joy.class="joystick"
 		key.joy.lt=0
@@ -179,6 +215,7 @@ M.bake=function(oven,keys)
 				end
 			end
 		end
+]]
 		
 		function key.clear()
 			key.maps={}
@@ -189,6 +226,7 @@ M.bake=function(oven,keys)
 
 		function key.msg(m)
 		
+--[[
 			if type(key.posxbox)=="nil" then
 				if m.posix_name then
 					local s=string.lower(m.posix_name)
@@ -196,7 +234,7 @@ M.bake=function(oven,keys)
 					if string.find(s,"ps3") then key.posxbox_set(false) end
 				end
 			end
-
+]]
 
 			local used=false
 			local ups=recaps.ups(key.idx)
@@ -238,18 +276,27 @@ M.bake=function(oven,keys)
 			if m.class=="key" then
 
 				if not key.opts.typing then -- sometimes we need the keyboard for typing
---print( m.keyname)
---print(m.keyname)
 					for n,v in pairs(key.maps) do
 						if m.keyname==n or m.ascii==n then
 							if m.action==1 then -- key set
---print("->"..table.concat( (type(v)=="table") and v or {v},",") )
 								ups.set_button(v,true)
 								used=true
 							elseif m.action==-1 then -- key clear
 								ups.set_button(v,false)
 								used=true
 							end
+						end
+					end
+					
+					for n,a in ipairs{"lx","ly","lz","rx","ry","rz"} do -- check axis buttons and convert to axis movement
+						if ups.now[a.."0_set"] or ups.now[a.."0_clr"] or ups.now[a.."1_set"] or ups.now[a.."1_clr"] then
+							local v=0
+							if     ups.now[a.."0_set"] then v=-32767
+							elseif ups.now[a.."1_set"] then v= 32767
+							elseif (not ups.now[a.."0_clr"]) and ups.state[a.."0"] then v=-32767
+							elseif (not ups.now[a.."1_clr"]) and ups.state[a.."1"] then v= 32767
+							end
+							ups.set_axis({[a]=v})
 						end
 					end
 				end
@@ -269,11 +316,11 @@ M.bake=function(oven,keys)
 					
 						local x=m.xraw/oven.win.width
 						if m.action>0 then
-							if x<=1/2 then			ups.set_button("left",true)
+							if x<=1/2 then				ups.set_button("left",true)
 							else						ups.set_button("right",true)
 							end
 						elseif m.action<0 then
-							if x<=1/2 then			ups.set_button("left",false)
+							if x<=1/2 then				ups.set_button("left",false)
 							else						ups.set_button("right",false)
 							end
 						end
@@ -282,13 +329,13 @@ M.bake=function(oven,keys)
 					
 						local x=m.xraw/oven.win.width
 						if m.action>0 then
-							if x<=1/3 then			ups.set_button("left",true)
-							elseif x<=2/3 then		ups.set_button("fire",true)
+							if x<=1/3 then				ups.set_button("left",true)
+							elseif x<=2/3 then			ups.set_button("fire",true)
 							else						ups.set_button("right",true)
 							end
 						elseif m.action<0 then
-							if x<=1/3 then			ups.set_button("left",false)
-							elseif x<=2/3 then		ups.set_button("fire",false)
+							if x<=1/3 then				ups.set_button("left",false)
+							elseif x<=2/3 then			ups.set_button("fire",false)
 							else						ups.set_button("right",false)
 							end
 						end
@@ -299,8 +346,19 @@ M.bake=function(oven,keys)
 			elseif m.class=="mouse" then -- swipe to move
 			
 				if key.idx==1 then -- only for player 1
-			
-					ups.set_axis({mx=m.x,my=m.y}) -- tell recap about the mouse positions, mx,my
+
+
+					local mz
+					if m.action==-1 then -- we only get button ups
+						if m.keyname=="wheel_add" then
+							mz=1
+						elseif m.keyname=="wheel_sub" then
+							mz=-1
+						end
+					end
+
+
+					ups.set_axis({mx=m.x,my=m.y,mz=mz}) -- tell recap about the mouse positions, mx,my
 
 					if m.action==1 then -- key set
 						if m.keyname then ups.set_button("mouse_"..m.keyname,true) end
@@ -309,6 +367,9 @@ M.bake=function(oven,keys)
 						end
 						used=true
 					elseif m.action==-1 then -- key clear
+						if m.keyname=="wheel_add" or m.keyname=="wheel_sub" then -- we do not get key downs just ups
+							ups.set_button("mouse_"..m.keyname,true)
+						end
 						if m.keyname then ups.set_button("mouse_"..m.keyname,false) end
 						if m.keyname=="left" or m.keyname=="right" or m.keyname=="middle" then
 							ups.set_button("fire",false)
@@ -366,6 +427,7 @@ M.bake=function(oven,keys)
 					end
 				end
 				
+--[[
 			elseif m.class=="joystick" then -- android joystick interface, should be "good" data
 
 				new_joydir( keys.joystick_msg_to_key(m) )
@@ -382,7 +444,7 @@ M.bake=function(oven,keys)
 					ups.set_button("fire",false)
 					used=true
 				end
-
+]]
 			elseif m.class=="padaxis" then -- SDL axis values
 
 				if m.id and key.idx-1 == (m.id+key.opts.pad_map-1)%key.opts.max_up then
@@ -422,7 +484,6 @@ M.bake=function(oven,keys)
 
 						key.last_pad_value[name]=v
 					end
-
 					if     m.name=="LeftX"			then		doaxis("left","right")	ups.set_axis{lx=m.value}
 					elseif m.name=="LeftY"			then		doaxis("up","down")		ups.set_axis{ly=m.value}
 					elseif m.name=="RightX"			then		doaxis("left","right")	ups.set_axis{rx=m.value}

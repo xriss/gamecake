@@ -87,10 +87,14 @@ sdl.create=function(t)
 	
 	local flags={ SDL.window.Resizable , SDL.window.OpenGL }
 
-	if not t.border then
-		flags[#flags+1]=SDL.window.Borderless
+	if jit and jit.os=="Windows" then -- windows does not do borderless resize, so, meh
+
+	else
+		if not t.border then
+			flags[#flags+1]=SDL.window.Borderless
+		end
 	end
-	
+
 --[[
 	if     view=="full" then	 flags={SDL.window.Desktop,SDL.window.OpenGL}
 	elseif view=="max"  then	 flags={SDL.window.Maximized,SDL.window.OpenGL}
@@ -350,10 +354,12 @@ sdl.msg_fetch=function()
 
 			sdl.mousexy[1]=e.x
 			sdl.mousexy[2]=e.y
-			
-			if SDL.captureMouse then -- sanity test
-				if     e.type == SDL.event.MouseButtonDown then SDL.captureMouse(true)
-				elseif e.type == SDL.event.MouseButtonUp   then SDL.captureMouse(false)
+
+			if not sdl.relative_mouse_mode then
+				if SDL.captureMouse then -- sanity test
+					if     e.type == SDL.event.MouseButtonDown then SDL.captureMouse(true)
+					elseif e.type == SDL.event.MouseButtonUp   then SDL.captureMouse(false)
+					end
 				end
 			end
 		
@@ -455,7 +461,7 @@ sdl.msg_fetch=function()
 -- handle JoyHatMotion ?
 
 
-			local s=lookup(SDL.event,e.type)
+--			local s=lookup(SDL.event,e.type)
 --			print(s.." : "..e.type)
 --			dprint(e)
 
@@ -464,6 +470,13 @@ sdl.msg_fetch=function()
 
 end
 
+
+sdl.relative_mouse=function(mode)
+	sdl.relative_mouse_mode=mode
+	SDL.setRelativeMouseMode(mode)
+	SDL.captureMouse(mode)
+	return true
+end
 
 sdl.warp_mouse=function(it,x,y)
 	it=it or sdl.it

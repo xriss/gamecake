@@ -16,7 +16,10 @@ function M.bake(oven,framebuffers)
 	local images=cake.images
 	
 	local funcs={}
-	local metatable={__index=funcs}	
+	local metatable={__index=funcs}
+
+	local vendor=string.lower((oven.gl.Get(oven.gl.VENDOR) or ""))
+	framebuffers.webkithax=(vendor=="webkit") -- enable webkit hax (TODO: turn this into a benchmark test)
 
 	framebuffers.data=setmetatable({}, { __mode = 'vk' })
 
@@ -151,8 +154,15 @@ function M.bake(oven,framebuffers)
 
 				gl.BindTexture(gl.TEXTURE_2D, fbo.depth)
 
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+--	chrome webgl3 hax
+				if framebuffers.webkithax then
+					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+				else
+					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+				end
+				
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
 

@@ -157,6 +157,9 @@ function glescode.create(gl)
 			elseif name==gl.CULL_FACE_MODE then
 				gl.CullFace(value)
 
+			elseif name==gl.FRONT_FACE then
+				gl.FrontFace(value)
+
 			elseif name==gl.COLOR_WRITEMASK then
 				gl.ColorMask(value)
 
@@ -226,6 +229,9 @@ function glescode.create(gl)
 	code.state_defaults=
 	{
 		[gl.CULL_FACE]					=	gl.FALSE,
+		[gl.CULL_FACE_MODE]				=	gl.BACK,
+		[gl.FRONT_FACE]					=	gl.CCW,
+
 		[gl.BLEND]						=	gl.TRUE,
 		[gl.DITHER]						=	gl.TRUE,
 		[gl.STENCIL_TEST]				=	gl.FALSE,
@@ -244,9 +250,7 @@ function glescode.create(gl)
 		
 		[gl.BLEND_EQUATION_RGB]			=	gl.FUNC_ADD,
 		[gl.BLEND_EQUATION_ALPHA]		=	gl.FUNC_ADD,
-		
-		[gl.CULL_FACE_MODE]				=	gl.BACK,
-		
+				
 		[gl.COLOR_WRITEMASK]			=	V4(gl.TRUE,gl.TRUE,gl.TRUE,gl.TRUE),
 
 		[gl.DEPTH_WRITEMASK]			=	gl.TRUE,

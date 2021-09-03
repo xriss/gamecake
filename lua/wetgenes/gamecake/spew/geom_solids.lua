@@ -320,9 +320,11 @@ M.fill=function(geom)
 			local first=true
 			for z=-t+(x/2),t-(x/2) do
 				it.verts[#it.verts+1]={-x*sqrt75*d,0,z*d}
-				it.polys[#it.polys+1]={ya,#it.verts,ya+1}
+				it.polys[#it.polys+1]={ya+1,#it.verts,ya}
 				if not first then
-					it.polys[#it.polys+1]={#it.verts-1,ya,#it.verts}
+					local da,dc=-1,0
+					if (#it.polys%2)==1 then da,dc=dc,da end
+					it.polys[#it.polys+1]={#it.verts+da,ya,#it.verts+dc}
 				end
 				ya=ya+1
 				first=false
@@ -334,7 +336,9 @@ M.fill=function(geom)
 				it.verts[#it.verts+1]={ x*sqrt75*d,0,z*d}
 				it.polys[#it.polys+1]={yb,#it.verts,yb+1}
 				if not first then
-					it.polys[#it.polys+1]={#it.verts-1,yb,#it.verts}
+					local da,dc=-1,0
+					if (#it.polys%2)==1 then da,dc=dc,da end
+					it.polys[#it.polys+1]={#it.verts+da,yb,#it.verts+dc}
 				end
 				yb=yb+1
 				first=false

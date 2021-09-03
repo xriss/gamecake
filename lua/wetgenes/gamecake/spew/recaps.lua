@@ -114,19 +114,49 @@ M.bake=function(oven,recaps)
 			end
 			return recap.state_axis -- return all axis if no name given
 		end
+
+		local minzone=4095
+		local maxzone=32767
+		local fixaxis=function(n)
+			local fix=function(n)
+				local n=(n-minzone)/(maxzone-minzone)
+				if n<0 then return 0 end
+				if n>1 then return 1 end
+				return n
+			end
+			n=n or 0
+			if n < 0 then
+				return -fix(-n)
+			else
+				return fix(n)
+			end
+		end
+		recap.axisfixed=function(name)
+			return fixaxis( recap.axis(name) )
+		end
+
 		
 -- use this to set a joysticks/mouse axis position
 		function recap.set_axis(m)
 			for _,n in ipairs{"lx","ly","lz","rx","ry","rz","dx","dy","mx","my","tx","ty"} do
 				if m[n] then recap.now_axis[n]=m[n] end
 			end
+			if m.mz then recap.now_axis.mz=( (recap.state_axis.mz or 0) + m.mz ) %65536 end
 		end
 
 -- use this to set button flags, that may trigger a set/clr extra pulse state
 		function recap.set_button(nam,v)
 --print(nam,v)
 			if type(nam)=="table" then
-				for _,n in ipairs(nam) do recap.set_button(n,v) end -- multi
+				if type(nam[2])=="number" then -- axis
+					if v then
+						recap.set_axis({[ nam[1] ]=nam[2]})	-- set
+					else
+						recap.set_axis({[ nam[1] ]=0}) -- clr
+					end
+				else
+					for _,n in ipairs(nam) do recap.set_button(n,v) end -- multi
+				end
 			else
 				local l=recap.now[nam]
 				if type(l)=="nil" then l=recap.state[nam] end -- now probably only contains recent changes

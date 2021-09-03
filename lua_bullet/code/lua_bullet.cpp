@@ -635,6 +635,72 @@ btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
 
 /*+------------------------------------------------------------------+**
 
+Perform a raytest
+
+*/
+static int lua_bullet_world_ray_test (lua_State *l)
+{
+btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
+
+btVector3 from;
+btVector3 to;
+
+double x,y,z;
+
+	lua_pushstring(l,"ray"); lua_gettable(l,2);
+
+	lua_pushnumber(l,1); lua_gettable(l,-2);
+	lua_pushnumber(l,1); lua_gettable(l,-2); x=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pushnumber(l,2); lua_gettable(l,-2); y=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pushnumber(l,3); lua_gettable(l,-2); z=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pop(l,1);
+	from=btVector3(x,y,z);
+
+	lua_pushnumber(l,2); lua_gettable(l,-2);
+	lua_pushnumber(l,1); lua_gettable(l,-2); x=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pushnumber(l,2); lua_gettable(l,-2); y=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pushnumber(l,3); lua_gettable(l,-2); z=luaL_checknumber(l,-1); lua_pop(l,1);
+	lua_pop(l,1);
+	to=btVector3(x,y,z);
+
+	lua_pop(l,1);
+
+
+	btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
+//	closestResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
+
+	world->rayTest(from, to, closestResults);
+
+	if(closestResults.hasHit())
+	{
+		lua_newtable(l);
+		lua_pushstring(l,"hit"); lua_pushvalue(l, -2 ); lua_settable(l,2);
+
+		lua_pushstring(l,"fraction"); lua_pushnumber(l, closestResults.m_closestHitFraction ); lua_settable(l,-3);
+
+		lua_newtable(l);
+		lua_pushstring(l,"normal"); lua_pushvalue(l, -2 ); lua_settable(l,-3);
+		lua_pushnumber(l,1); lua_pushnumber(l, closestResults.m_hitNormalWorld.getX() ); lua_settable(l,-3);
+		lua_pushnumber(l,2); lua_pushnumber(l, closestResults.m_hitNormalWorld.getY() ); lua_settable(l,-3);
+		lua_pushnumber(l,3); lua_pushnumber(l, closestResults.m_hitNormalWorld.getZ() ); lua_settable(l,-3);
+		lua_pop(l,1);
+		
+		lua_pop(l,1);
+	}
+	else
+	{
+		lua_pushstring(l,"hit"); lua_pushnil(l); lua_settable(l,2);
+	}
+
+	lua_pushvalue(l,2);
+
+	return 1;
+}
+
+			
+
+/*+------------------------------------------------------------------+**
+
 get/set shape margin values
 
 */
@@ -1017,6 +1083,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"world_step",						lua_bullet_world_step},
 		{"world_add_body",					lua_bullet_world_add_body},
 		{"world_remove_body",				lua_bullet_world_remove_body},
+		{"world_ray_test",					lua_bullet_world_ray_test},
 
 		{"shape_margin",					lua_bullet_shape_margin},
 

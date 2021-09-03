@@ -40,6 +40,10 @@ M.bake=function(oven,screen)
 
 	end
 
+	screen.camera_fov=0.5
+	screen.base_scale=1
+	screen.occlusion_scale=1
+
 	screen.setup=function()
 
 		screen.loads()
@@ -51,11 +55,13 @@ M.bake=function(oven,screen)
 			fbo=screen.fbo,
 			vz=8192,
 			pz=0,
-			fov=1/2,
+			fov=screen.camera_fov,
 			cx=0.5,cy=0.5,
 		})
 
-		screen.fbo_occlusion=framebuffers.create(0,0,0,{ no_uptwopow=true , texture_format={gl.RED, gl.RED, gl.UNSIGNED_BYTE} })
+--	we only need RED but dodgy drivers will bork if this is not at least rgb
+
+		screen.fbo_occlusion=framebuffers.create(0,0,0,{ no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
 
 		screen.view_occlusion=oven.cake.views.create({
 			mode="fbo",
@@ -84,23 +90,35 @@ M.bake=function(oven,screen)
 	
 	screen.draw_head=function(scene)
 
-		local w=math.floor((oven.win.width * (1-0) )/1)
-		local h=math.floor((oven.win.height * (1-0) )/1)
+		local w=math.ceil(oven.win.width  * screen.base_scale )
+		local h=math.ceil(oven.win.height * screen.base_scale )
 
-		if screen.fbo.w ~= w or screen.fbo.h ~= h then
+		local ow=math.ceil(w * screen.occlusion_scale )
+		local oh=math.ceil(h * screen.occlusion_scale )
+
+
+		if screen.fbo.w ~= w or screen.fbo.h ~= h or screen.fbo_occlusion.w ~= ow or screen.fbo_occlusion.h ~= oh then
 
 			screen.fbo:resize( w , h , 1 )
 
-			screen.fbo_occlusion:resize( math.ceil(w/1) , math.ceil(h/1) , 0 )
+			screen.fbo_occlusion:resize( ow , oh , 0 )
 
-			screen.fbo_bloom:resize( math.ceil(w/4) , math.ceil(h/4) , 0 )
+			local bw=math.ceil(oven.win.width  * 0.25 ) -- should be relative to original size but should also depend on dpi?
+			local bh=math.ceil(oven.win.height * 0.25 )
+
+			if bw>w then bw=w end -- need to cap the maximum
+			if bh>h then bh=h end
+
+			screen.fbo_bloom:resize( bw , bh , 0 )
 
 		end
 		
 
+		screen.view.fov=screen.camera_fov
 		screen.view.vz=8192
 		screen.view.pz=0
 
+		screen.view_occlusion.fov=screen.camera_fov
 		screen.view_occlusion.vz=8192
 		screen.view_occlusion.pz=0
 
@@ -113,10 +131,11 @@ M.bake=function(oven,screen)
 		oven.cake.views.push_and_apply(screen.view)
 		gl.state.push(gl.state_defaults)
 
---		gl.state.set({
---			[gl.BLEND]						=	gl.FALSE,
---			[gl.DEPTH_TEST]					=	gl.TRUE,
---		})
+		gl.state.set({
+			[gl.DEPTH_TEST]					=	gl.TRUE,
+			[gl.CULL_FACE]					=	gl.TRUE,
+		})
+
 		gl.Clear(gl.DEPTH_BUFFER_BIT) -- we promise to draw to the entire screen
 
 	end
@@ -180,8 +199,6 @@ M.bake=function(oven,screen)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo_occlusion:bind_texture()
---				screen.fbo:bind_texture()
---				screen.fbo:bind_depth()
 				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 

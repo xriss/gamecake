@@ -41,7 +41,12 @@ canvas.gl_default=function()
 
 	gl.Color(1,1,1,1)	
 
-	
+	repeat
+		local err=gl.GetError()
+		if err~=0 then
+			print( "GLERROR" , gl.numtostring(err) )
+		end
+	until err==0
 	if not canvas.NO_GL_PROGRAM_POINT_SIZE then
 		pcall( function() gl.Enable(0x8642) end )-- #define GL_PROGRAM_POINT_SIZE 0x8642
 		if gl.GetError() == gl.INVALID_ENUM then    -- do not repeat error

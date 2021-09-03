@@ -85,25 +85,6 @@ code to build.
 
 ]]
 
-package.preload["lfs_any"] = function (...)
-
--- the first successful require is returned as this module
-
-for i,v in ipairs{
-
-	"lfs_ffi",
-	"lfs",
-
-} do
-
-	local _,M=pcall( function() return require(v) end ) ; M=_ and M
-
-	if M then return M end
-
-end
-
-error("lfs not found")
-end
 package.preload["lfs_ffi"] = function (...)
 
 --[[
@@ -1458,331 +1439,197 @@ _M.unicode_errors = false
 
 return _M
 end
-package.preload["wetgenes.path"] = function (...)
+package.preload["puremake.table"] = function (...)
+
+
+
+local M={} ; package.loaded[(...)]=M ; M.module_name=(...)
+setmetatable(M,{__index=table}) -- use table as prototype
+local pmtable=M
+
+
+
 --
--- (C) 2020 Kriss@XIXs.com and released under the MIT license,
--- see http://opensource.org/licenses/MIT for full license text.
+-- pmtable.lua
+-- Additions to Lua's built-in pmtable functions.
+-- Copyright (c) 2002-2008 Jason Perkins and the Premake project
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-
---[[#lua.wetgenes.path
-
-Manage file paths under linux or windows, so we need to deal with \ or 
-/ and know the root difference between / and C:\
-
-	local wpath=require("wetgenes.path")
-
-]]
-local M={} ; package.loaded[(...)]=M ; local wpath=M
-
--- a soft require of lfs so lfs can be nil
-local _,lfs=pcall( function() return require("lfs_any") end ) ; lfs=_ and lfs
-
-
---[[#lua.wetgenes.path.setup
-
-setup for windows or linux style paths, to force one or the other use
-
-	wpath.setup("win")
-	wpath.setup("nix")
-
-We automatically call this at startup and make a best guess, you can 
-revert to this best guess with
-
-	wpath.setup()
-
-This is a global setting, so be careful with changes. Mostly its 
-probably best to stick with the best guess unless we are mistakenly 
-guessing windows.
-
-]]
-wpath.setup=function(flavour)
-
--- try and guess if we are dealing with linux or windows style paths
-	if not flavour then
-		if package.config:sub(1,1) ==  "/" then -- paths begin with /
-			flavour="nix"
-		else
-			flavour="win"
-		end
-	end
-
-	if flavour == "win" then
 	
-		wpath.root="C:\\"
-		wpath.separator="\\"
-		wpath.delimiter=":"
-		wpath.winhax=true
 
-	elseif flavour == "nix" then
+--
+-- Returns true if the pmtable contains the specified value.
+--
 
-		wpath.root="/"
-		wpath.separator="/"
-		wpath.delimiter=";"
-		wpath.winhax=true
-		
--- always enable winhax by default, so we can hack around with windows style paths
--- we should make sure that we are always windows safe
-
-	end
-
-end
-wpath.setup()
-
-
-
---[[#lua.wetgenes.path.split
-
-split a path into numbered components
-
-]]
-wpath.split=function(p)
-	local ps={}
-	local fi=1
-	while true do
-		local fa,fb=string.find(p,wpath.winhax and "[\\/]" or "[/]",fi)
-		if fa then
-			local s=string.sub(p,fi,fa-1)
-			if s~="" or ps[#ps]~="" then -- ignore multiple separators
-				ps[#ps+1]=s
+	function pmtable.contains(t, value)
+		for _,v in pairs(t) do
+			if (v == value) then
+				return true
 			end
-			fi=fb+1
-		else
-			break
 		end
+		return false
 	end
-	ps[#ps+1]=string.sub(p,fi)
+	
+		
+--
+-- Enumerates an array of objects and returns a new pmtable containing
+-- only the value of one particular field.
+--
 
-	return ps
-end
+	function pmtable.extract(arr, fname)
+		local result = { }
+		for _,v in ipairs(arr) do
+			table.insert(result, v[fname])
+		end
+		return result
+	end
+	
+	
 
---[[#lua.wetgenes.path.join
+--
+-- Flattens a hierarchy of pmtables into a single array containing all
+-- of the values.
+--
 
-join a split path, tables are auto expanded
-
-]]
-wpath.join=function(...)
-	local ps={}
-	for i,v in ipairs({...}) do
-		local t=type(v)
-		if t=="table" then
-			for j,s in ipairs(v) do
-				if type(s)=="string" then
-					ps[#ps+1]=s
+	function pmtable.flatten(arr)
+		local result = { }
+		
+		local function flatten(arr)
+			for _, v in ipairs(arr) do
+				if type(v) == "table" then
+					flatten(v)
+				else
+					table.insert(result, v)
 				end
 			end
+		end
+		
+		flatten(arr)
+		return result
+	end
+
+
+--
+-- Merges an array of items into a string.
+--
+
+	function pmtable.implode(arr, before, after, between)
+		local result = ""
+		for _,v in ipairs(arr) do
+			if (result ~= "" and between) then
+				result = result .. between
+			end
+			result = result .. before .. v .. after
+		end
+		return result
+	end
+
+
+--
+-- Inserts a value of array of values into a pmtable. If the value is
+-- itself a pmtable, its contents are enumerated and added instead. So 
+-- these inputs give these outputs:
+--
+--   "x" -> { "x" }
+--   { "x", "y" } -> { "x", "y" }
+--   { "x", { "y" }} -> { "x", "y" }
+--
+
+	function pmtable.insertflat(tbl, values)
+		if type(values) == "table" then
+			for _, value in ipairs(values) do
+				pmtable.insertflat(tbl, value)
+			end
 		else
-			if type(v)=="string" then
-				ps[#ps+1]=v
+			table.insert(tbl, values)
+		end
+	end
+
+
+--
+-- Returns true if the pmtable is empty, and contains no indexed or keyed values.
+--
+
+	function pmtable.isempty(t)
+		return next(t) == nil
+	end
+
+
+--
+-- Adds the values from one array to the end of another and
+-- returns the result.
+--
+
+	function pmtable.join(...)
+		local result = { }
+		for _,t in ipairs({...}) do
+			if type(t) == "table" then
+				for _,v in ipairs(t) do
+					table.insert(result, v)
+				end
+			else
+				table.insert(result, t)
 			end
 		end
+		return result
 	end
-	return table.concat(ps,wpath.separator)
-end
 
---[[#lua.wetgenes.path.parse
 
-split a path into named parts like so
+--
+-- Return a list of all keys used in a pmtable.
+--
 
-	-------------------------------------
-	|               path                |
-	-------------------------------------
-	|           dir        |    file    |
-	|----------------------|------------|
-	| root |    folder     | name  ext  |
-	|----------------------|------------|
-	|  /   |  home/user/   | file  .txt |
-	-------------------------------------
-	
-this can be reversed with simple joins and checks for nil
-
-	dir = (root or "")..(folder or "")
-	file = (name or "")..(ext or "")
-	path = (dir or "")..(file or "")
-	
-if root is set then it implies an absolute path and will be something 
-like C:\ under windows.
-
-]]
-wpath.parse=function(p)
-	local ps=wpath.split(p)
-	local r={}
-
-	if ps[1] then
-		if ps[1]=="" and ps[2] then -- unix root
-			r.root=wpath.separator
-			table.remove(ps,1)
-		elseif #(ps[1])==2 and string.sub(ps[1],2,2)==":" and wpath.winhax then -- windows root
-			r.root=ps[1]..wpath.separator
-			table.remove(ps,1)
+	function pmtable.keys(tbl)
+		local keys = {}
+		for k, _ in pairs(tbl) do
+			table.insert(keys, k)
 		end
+		return keys
 	end
 
-	if ps[1] then
-		r.file=ps[#ps]
-		table.remove(ps,#ps)
 
-		local da,db=string.find(r.file, ".[^.]*$")
-		if da and da>1 then -- ignore if at the start of name
-			r.name=string.sub(r.file,1,da-1)
-			r.ext=string.sub(r.file,da,db)
-		else
-			r.name=r.file
-		end
+--
+-- Adds the key-value associations from one pmtable into another
+-- and returns the resulting merged pmtable.
+--
 
-	end
-
-	if ps[1] then
-		if ps[#ps] ~= "" then
-			ps[#ps+1]="" -- force a trailing /
-		end
-		r.folder=table.concat(ps,wpath.separator)
-	end
-
-	if r.root then -- root is part of dir
-		r.dir=r.root..(r.folder or "")
-	else
-		r.dir=r.folder -- may be nil
-	end
-	
-	r.path = (r.dir or "")..(r.file or "")
-
-	return r
-end
-
---[[#lua.wetgenes.path.normalize
-
-remove ".." and "." components from the path string
-
-]]
-wpath.normalize=function(p)
-
-	local pp=wpath.parse(p) -- we need to know if path contains a root
-	local ps=wpath.split(p)
-	
-	local idx=2
-
-	while idx <= #ps-1 do
-		if ps[idx]=="" then -- remove double //
-			table.remove(ps,idx)
-		else -- just advance
-			idx=idx+1
-		end
-	end
-			
-	idx=1
-	while idx <= #ps do
-		if ps[idx]=="." then -- just remove this one, no need to advance
-			table.remove(ps,idx)
-		elseif ps[idx]==".." then -- remove this and the previous one if we can
-			if idx>(pp.root and 2 or 1) then -- can we remove previous part
-				idx=idx-1
-				table.remove(ps,idx)
-				table.remove(ps,idx)
-			else -- we can not remove so must ignore
---				table.remove(ps,idx)
-				idx=idx+1
+	function pmtable.merge(...)
+		local result = { }
+		for _,t in ipairs({arg}) do
+			if type(t) == "table" then
+				for k,v in pairs(t) do
+					result[k] = v
+				end
+			else
+				error("invalid value")
 			end
-		else -- just advance
-			idx=idx+1
 		end
-	end
-
-	return wpath.join(ps)
-end
-
---[[#lua.wetgenes.path.currentdir
-
-Get the current working directory, this requires lfs and if lfs is not 
-available then it will return wpath.root this path will have a trailing 
-separator so can be joined directly to a filename.
-
-	wpath.currentdir().."filename.ext"
-
-]]
-wpath.currentdir=function()
-
-	local d
-	if lfs then d=lfs.currentdir() end
-	
-	if d then -- make sure we end in a separator
-		local ds=wpath.split(d)
-		if ds[#ds] ~= "" then
-			ds[#ds+1]="" -- force a trailing /
-		end
-		return wpath.join(ds)
-	end
-
-	return wpath.root -- default root
-end
-
-
---[[#lua.wetgenes.path.resolve
-
-Join all path segments and resolve them to absolute using wpath.join 
-and wpath.normalize with a prepended wpath.currentdir as necessary.
-
-]]
-wpath.resolve=function(...)
-
-	local p=wpath.join(...)
-
-	if wpath.parse(p).root then -- already absolute
-		return wpath.normalize(p) -- just normalize
+		return result
 	end
 	
-	return wpath.normalize( wpath.currentdir()..p ) -- prepend currentdir
-end
 
 
---[[#lua.wetgenes.path.relative
+--
+-- Translates the values contained in array, using the specified
+-- translation pmtable, and returns the results in a new array.
+--
 
-Build a relative path from point a to point b this will probably be a 
-bunch of ../../../ followed by some of the ending of the second 
-argument.
-
-]]
-wpath.relative=function(pa,pb)
-
-	local a=wpath.split(wpath.resolve(pa))
-	local b=wpath.split(wpath.resolve(pb))
-	
-	if a[#a] == "" then -- remove trailing slash
-		table.remove(a,#a)
-	end
-
-	local r={}
-	local match=#a+1 -- if the test below falls through then the match is all of a
-	for i=1,#a do
-		if a[i] ~= b[i] then -- start of difference
-			match=i
-			break
+	function pmtable.translate(arr, translation)
+		local result = { }
+		for _, value in ipairs(arr) do
+			local tvalue
+			if type(translation) == "function" then
+				tvalue = translation(value)
+			else
+				tvalue = translation[value]
+			end
+			if (tvalue) then
+				table.insert(result, tvalue)
+			end
 		end
+		return result
 	end
-
-	if match==1 or ( match==2 and a[1]=="" )  then -- no match
-		return pb -- just return full path
-	end
-
-	for i=match,#a do r[#r+1]=".." end -- step back
-	if #r==0 then r[#r+1]="." end -- start at current
-	for i=match,#b do r[#r+1]=b[i] end -- step forward
-
-	return wpath.join(r)
-end
-
---[[#lua.wetgenes.path.parent
-
-Resolve input and go up a single directory level, ideally you should 
-pass in a directory, IE a string that ends in / or \ and we will return 
-the parent of this directory.
-
-If called repeatedly, then eventually we will return wpath.root
-
-]]
-wpath.parent=function(...)
-	return wpath.resolve(...,"..","")
-end
+	
+		
 end
 package.preload["puremake.io"] = function (...)
 
@@ -1877,6 +1724,84 @@ local pmio=M
 --
 
 	_p = pmio.printf
+end
+package.preload["puremake.string"] = function (...)
+
+local M={} ; package.loaded[(...)]=M ; M.module_name=(...)
+setmetatable(M,{__index=string}) -- use string as prototype
+local pmstring=M
+
+pmstring.startswith=function(a,b)
+
+--	os.print("FUNCTION","string."..debug.getinfo(1).name,a,b,b==a:sub(1,#b))
+	
+	if a and b then
+		return b==a:sub(1,#b)
+	end
+	
+end
+
+pmstring.endswith=function(a,b)
+
+--	os.print("FUNCTION","string."..debug.getinfo(1).name,a,b,b==a:sub(-#b))
+
+	if a and b then
+		return b==a:sub(-#b)
+	end
+end
+
+
+
+--
+-- pmstring.lua
+-- Additions to Lua's built-in pmstring functions.
+-- Copyright (c) 2002-2008 Jason Perkins and the Premake project
+--
+
+
+--
+-- Returns an array of pmstrings, each of which is a subpmstring of s
+-- formed by splitting on boundaries formed by `pattern`.
+-- 
+
+	function pmstring.explode(s, pattern, plain)
+		if (pattern == '') then return false end
+		local pos = 0
+		local arr = { }
+		for st,sp in function() return s:find(pattern, pos, plain) end do
+			table.insert(arr, s:sub(pos, st-1))
+			pos = sp + 1
+		end
+		table.insert(arr, s:sub(pos))
+		return arr
+	end
+	
+
+
+--
+-- Find the last instance of a pattern in a pmstring.
+--
+
+	function pmstring.findlast(s, pattern, plain)
+		local curr = 0
+		repeat
+			local next = s:find(pattern, curr + 1, plain)
+			if (next) then curr = next end
+		until (not next)
+		if (curr > 0) then
+			return curr
+		end	
+	end
+
+
+
+--
+-- Returns true if `haystack` starts with the sequence `needle`.
+--
+
+	function pmstring.startswith(haystack, needle)
+		return (haystack:find(needle, 1, true) == 1)
+	end
 end
 package.preload["puremake.path"] = function (...)
 
@@ -2679,275 +2604,361 @@ end
 	
 
 end
-package.preload["puremake.table"] = function (...)
-
-
-
-local M={} ; package.loaded[(...)]=M ; M.module_name=(...)
-setmetatable(M,{__index=table}) -- use table as prototype
-local pmtable=M
-
-
-
+package.preload["wetgenes.path"] = function (...)
 --
--- pmtable.lua
--- Additions to Lua's built-in pmtable functions.
--- Copyright (c) 2002-2008 Jason Perkins and the Premake project
+-- (C) 2020 Kriss@XIXs.com and released under the MIT license,
+-- see http://opensource.org/licenses/MIT for full license text.
 --
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+--[[#lua.wetgenes.path
+
+Manage file paths under linux or windows, so we need to deal with \ or 
+/ and know the root difference between / and C:\
+
+	local wpath=require("wetgenes.path")
+
+]]
+local M={} ; package.loaded[(...)]=M ; local wpath=M
+
+-- a soft require of lfs so lfs can be nil
+local _,lfs=pcall( function() return require("lfs_any") end ) ; lfs=_ and lfs
+
+
+--[[#lua.wetgenes.path.setup
+
+setup for windows or linux style paths, to force one or the other use
+
+	wpath.setup("win")
+	wpath.setup("nix")
+
+We automatically call this at startup and make a best guess, you can 
+revert to this best guess with
+
+	wpath.setup()
+
+This is a global setting, so be careful with changes. Mostly its 
+probably best to stick with the best guess unless we are mistakenly 
+guessing windows.
+
+]]
+wpath.setup=function(flavour)
+
+-- try and guess if we are dealing with linux or windows style paths
+	if not flavour then
+		if package.config:sub(1,1) ==  "/" then -- paths begin with /
+			flavour="nix"
+		else
+			flavour="win"
+		end
+	end
+
+	if flavour == "win" then
 	
+		wpath.root="C:\\"
+		wpath.separator="\\"
+		wpath.delimiter=":"
+		wpath.winhax=true
 
---
--- Returns true if the pmtable contains the specified value.
---
+	elseif flavour == "nix" then
 
-	function pmtable.contains(t, value)
-		for _,v in pairs(t) do
-			if (v == value) then
-				return true
+		wpath.root="/"
+		wpath.separator="/"
+		wpath.delimiter=";"
+		wpath.winhax=true
+		
+-- always enable winhax by default, so we can hack around with windows style paths
+-- we should make sure that we are always windows safe
+
+	end
+
+end
+wpath.setup()
+
+
+
+--[[#lua.wetgenes.path.split
+
+split a path into numbered components
+
+]]
+wpath.split=function(p)
+	local ps={}
+	local fi=1
+	while true do
+		local fa,fb=string.find(p,wpath.winhax and "[\\/]" or "[/]",fi)
+		if fa then
+			local s=string.sub(p,fi,fa-1)
+			if s~="" or ps[#ps]~="" then -- ignore multiple separators
+				ps[#ps+1]=s
 			end
+			fi=fb+1
+		else
+			break
 		end
-		return false
 	end
-	
-		
---
--- Enumerates an array of objects and returns a new pmtable containing
--- only the value of one particular field.
---
+	ps[#ps+1]=string.sub(p,fi)
 
-	function pmtable.extract(arr, fname)
-		local result = { }
-		for _,v in ipairs(arr) do
-			table.insert(result, v[fname])
-		end
-		return result
-	end
-	
-	
+	return ps
+end
 
---
--- Flattens a hierarchy of pmtables into a single array containing all
--- of the values.
---
+--[[#lua.wetgenes.path.join
 
-	function pmtable.flatten(arr)
-		local result = { }
-		
-		local function flatten(arr)
-			for _, v in ipairs(arr) do
-				if type(v) == "table" then
-					flatten(v)
-				else
-					table.insert(result, v)
+join a split path, tables are auto expanded
+
+]]
+wpath.join=function(...)
+	local ps={}
+	for i,v in ipairs({...}) do
+		local t=type(v)
+		if t=="table" then
+			for j,s in ipairs(v) do
+				if type(s)=="string" then
+					ps[#ps+1]=s
 				end
-			end
-		end
-		
-		flatten(arr)
-		return result
-	end
-
-
---
--- Merges an array of items into a string.
---
-
-	function pmtable.implode(arr, before, after, between)
-		local result = ""
-		for _,v in ipairs(arr) do
-			if (result ~= "" and between) then
-				result = result .. between
-			end
-			result = result .. before .. v .. after
-		end
-		return result
-	end
-
-
---
--- Inserts a value of array of values into a pmtable. If the value is
--- itself a pmtable, its contents are enumerated and added instead. So 
--- these inputs give these outputs:
---
---   "x" -> { "x" }
---   { "x", "y" } -> { "x", "y" }
---   { "x", { "y" }} -> { "x", "y" }
---
-
-	function pmtable.insertflat(tbl, values)
-		if type(values) == "table" then
-			for _, value in ipairs(values) do
-				pmtable.insertflat(tbl, value)
 			end
 		else
-			table.insert(tbl, values)
-		end
-	end
-
-
---
--- Returns true if the pmtable is empty, and contains no indexed or keyed values.
---
-
-	function pmtable.isempty(t)
-		return next(t) == nil
-	end
-
-
---
--- Adds the values from one array to the end of another and
--- returns the result.
---
-
-	function pmtable.join(...)
-		local result = { }
-		for _,t in ipairs({...}) do
-			if type(t) == "table" then
-				for _,v in ipairs(t) do
-					table.insert(result, v)
-				end
-			else
-				table.insert(result, t)
+			if type(v)=="string" then
+				ps[#ps+1]=v
 			end
 		end
-		return result
 	end
-
-
---
--- Return a list of all keys used in a pmtable.
---
-
-	function pmtable.keys(tbl)
-		local keys = {}
-		for k, _ in pairs(tbl) do
-			table.insert(keys, k)
-		end
-		return keys
-	end
-
-
---
--- Adds the key-value associations from one pmtable into another
--- and returns the resulting merged pmtable.
---
-
-	function pmtable.merge(...)
-		local result = { }
-		for _,t in ipairs({arg}) do
-			if type(t) == "table" then
-				for k,v in pairs(t) do
-					result[k] = v
-				end
-			else
-				error("invalid value")
-			end
-		end
-		return result
-	end
-	
-
-
---
--- Translates the values contained in array, using the specified
--- translation pmtable, and returns the results in a new array.
---
-
-	function pmtable.translate(arr, translation)
-		local result = { }
-		for _, value in ipairs(arr) do
-			local tvalue
-			if type(translation) == "function" then
-				tvalue = translation(value)
-			else
-				tvalue = translation[value]
-			end
-			if (tvalue) then
-				table.insert(result, tvalue)
-			end
-		end
-		return result
-	end
-	
-		
-end
-package.preload["puremake.string"] = function (...)
-
-local M={} ; package.loaded[(...)]=M ; M.module_name=(...)
-setmetatable(M,{__index=string}) -- use string as prototype
-local pmstring=M
-
-pmstring.startswith=function(a,b)
-
---	os.print("FUNCTION","string."..debug.getinfo(1).name,a,b,b==a:sub(1,#b))
-	
-	if a and b then
-		return b==a:sub(1,#b)
-	end
-	
+	return table.concat(ps,wpath.separator)
 end
 
-pmstring.endswith=function(a,b)
+--[[#lua.wetgenes.path.parse
 
---	os.print("FUNCTION","string."..debug.getinfo(1).name,a,b,b==a:sub(-#b))
+split a path into named parts like so
 
-	if a and b then
-		return b==a:sub(-#b)
+	|--------------------------------------------|
+	|                     path                   |
+	|-----------------------|--------------------|
+	|         dir           |        file        |
+	|----------|------------|----------|---------|
+	| root [1] | folder [2] | name [3] | ext [4] |
+	|----------|------------|----------|---------|
+	| /        | home/user/ | file     | .txt    |
+	|----------|------------|----------|---------|
+
+this can be reversed with simple joins and checks for nil, note that 
+[1][2][3][4] are forced strings so will be "" rather than nil unlike 
+their named counterparts. This means you may use wpath.join to reverse 
+this parsing.
+
+	dir = (root or "")..(folder or "")
+	file = (name or "")..(ext or "")
+	path = (dir or "")..(file or "")
+	path = (root or "")..(folder or "")..(name or "")..(ext or "")
+	path = [1]..[2]..[3]..[4]
+	path = wpath.join(it)
+	
+if root is set then it implies an absolute path and will be something 
+like C:\ under windows.
+
+]]
+wpath.parse=function(p)
+	local ps=wpath.split(p)
+	local r={}
+
+	if ps[1] then
+		if ps[1]=="" and ps[2] then -- unix root
+			r.root=wpath.separator
+			table.remove(ps,1)
+		elseif #(ps[1])==2 and string.sub(ps[1],2,2)==":" and wpath.winhax then -- windows root
+			r.root=ps[1]..wpath.separator
+			table.remove(ps,1)
+		end
 	end
+
+	if ps[1] then
+		r.file=ps[#ps]
+		table.remove(ps,#ps)
+
+		local da,db=string.find(r.file, ".[^.]*$")
+		if da and da>1 then -- ignore if at the start of name
+			r.name=string.sub(r.file,1,da-1)
+			r.ext=string.sub(r.file,da,db)
+		else
+			r.name=r.file
+		end
+
+	end
+
+	if ps[1] then
+		if ps[#ps] ~= "" then
+			ps[#ps+1]="" -- force a trailing /
+		end
+		r.folder=table.concat(ps,wpath.separator)
+	end
+
+	if r.root then -- root is part of dir
+		r.dir=r.root..(r.folder or "")
+	else
+		r.dir=r.folder -- may be nil
+	end
+	
+	r.path = (r.dir or "")..(r.file or "")
+	
+	r[1]=r.root   or ""
+	r[2]=r.folder or ""
+	r[3]=r.name   or ""
+	r[4]=r.ext    or ""
+
+	return r
+end
+
+--[[#lua.wetgenes.path.normalize
+
+remove ".." and "." components from the path string
+
+]]
+wpath.normalize=function(p)
+
+	local pp=wpath.parse(p) -- we need to know if path contains a root
+	local ps=wpath.split(p)
+	
+	local idx=2
+
+	while idx <= #ps-1 do
+		if ps[idx]=="" then -- remove double //
+			table.remove(ps,idx)
+		else -- just advance
+			idx=idx+1
+		end
+	end
+			
+	idx=1
+	while idx <= #ps do
+		if ps[idx]=="." then -- just remove this one, no need to advance
+			table.remove(ps,idx)
+		elseif ps[idx]==".." then -- remove this and the previous one if we can
+			if idx>(pp.root and 2 or 1) then -- can we remove previous part
+				idx=idx-1
+				table.remove(ps,idx)
+				table.remove(ps,idx)
+			else -- we can not remove so must ignore
+--				table.remove(ps,idx)
+				idx=idx+1
+			end
+		else -- just advance
+			idx=idx+1
+		end
+	end
+
+	return wpath.join(ps)
+end
+
+--[[#lua.wetgenes.path.currentdir
+
+Get the current working directory, this requires lfs and if lfs is not 
+available then it will return wpath.root this path will have a trailing 
+separator so can be joined directly to a filename.
+
+	wpath.currentdir().."filename.ext"
+
+]]
+wpath.currentdir=function()
+
+	local d
+	if lfs then d=lfs.currentdir() end
+	
+	if d then -- make sure we end in a separator
+		local ds=wpath.split(d)
+		if ds[#ds] ~= "" then
+			ds[#ds+1]="" -- force a trailing /
+		end
+		return wpath.join(ds)
+	end
+
+	return wpath.root -- default root
 end
 
 
+--[[#lua.wetgenes.path.resolve
 
---
--- pmstring.lua
--- Additions to Lua's built-in pmstring functions.
--- Copyright (c) 2002-2008 Jason Perkins and the Premake project
---
+Join all path segments and resolve them to absolute using wpath.join 
+and wpath.normalize with a prepended wpath.currentdir as necessary.
 
+]]
+wpath.resolve=function(...)
 
---
--- Returns an array of pmstrings, each of which is a subpmstring of s
--- formed by splitting on boundaries formed by `pattern`.
--- 
+	local p=wpath.join(...)
 
-	function pmstring.explode(s, pattern, plain)
-		if (pattern == '') then return false end
-		local pos = 0
-		local arr = { }
-		for st,sp in function() return s:find(pattern, pos, plain) end do
-			table.insert(arr, s:sub(pos, st-1))
-			pos = sp + 1
-		end
-		table.insert(arr, s:sub(pos))
-		return arr
+	if wpath.parse(p).root then -- already absolute
+		return wpath.normalize(p) -- just normalize
 	end
 	
+	return wpath.normalize( wpath.currentdir()..p ) -- prepend currentdir
+end
 
 
---
--- Find the last instance of a pattern in a pmstring.
---
+--[[#lua.wetgenes.path.relative
 
-	function pmstring.findlast(s, pattern, plain)
-		local curr = 0
-		repeat
-			local next = s:find(pattern, curr + 1, plain)
-			if (next) then curr = next end
-		until (not next)
-		if (curr > 0) then
-			return curr
-		end	
+Build a relative path from point a to point b this will probably be a 
+bunch of ../../../ followed by some of the ending of the second 
+argument.
+
+]]
+wpath.relative=function(pa,pb)
+
+	local a=wpath.split(wpath.resolve(pa))
+	local b=wpath.split(wpath.resolve(pb))
+	
+	if a[#a] == "" then -- remove trailing slash
+		table.remove(a,#a)
 	end
 
-
-
---
--- Returns true if `haystack` starts with the sequence `needle`.
---
-
-	function pmstring.startswith(haystack, needle)
-		return (haystack:find(needle, 1, true) == 1)
+	local r={}
+	local match=#a+1 -- if the test below falls through then the match is all of a
+	for i=1,#a do
+		if a[i] ~= b[i] then -- start of difference
+			match=i
+			break
+		end
 	end
+
+	if match==1 or ( match==2 and a[1]=="" )  then -- no match
+		return pb -- just return full path
+	end
+
+	for i=match,#a do r[#r+1]=".." end -- step back
+	if #r==0 then r[#r+1]="." end -- start at current
+	for i=match,#b do r[#r+1]=b[i] end -- step forward
+
+	return wpath.join(r)
+end
+
+--[[#lua.wetgenes.path.parent
+
+Resolve input and go up a single directory level, ideally you should 
+pass in a directory, IE a string that ends in / or \ and we will return 
+the parent of this directory.
+
+If called repeatedly, then eventually we will return wpath.root
+
+]]
+wpath.parent=function(...)
+	return wpath.resolve(...,"..","")
+end
+end
+package.preload["lfs_any"] = function (...)
+
+-- the first successful require is returned as this module
+
+for i,v in ipairs{
+
+	"lfs_ffi",
+	"lfs",
+
+} do
+
+	local _,M=pcall( function() return require(v) end ) ; M=_ and M
+
+	if M then return M end
+
+end
+
+error("lfs not found")
 end
 -- AMALGAMATE FILE HEAD : /src/host/string.lua
 
@@ -12888,7 +12899,7 @@ end
 -- Copyright (c) 2002-2011 Jason Perkins and the Premake project
 --
 
-	local lfs = require("lfs")
+	local lfs = require("lfs_any")
 
 	local scriptfile    = "premake4.lua"
 	local shorthelp     = "Type 'puremake --help' for help"

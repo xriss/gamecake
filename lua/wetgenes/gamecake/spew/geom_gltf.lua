@@ -625,11 +625,11 @@ M.to_geoms=function(gltf)
 					if primitive.indices then
 						local t=M.accessor_to_table(gltf,primitive.indices)
 						for i=1,#t,3 do
-							obj.polys[#obj.polys+1]={t[i]+1+vbase,t[i+1]+1+vbase,t[i+2]+1+vbase,mat=primitive.material and primitive.material+1}
+							obj.polys[#obj.polys+1]={ t[i+2]+1+vbase , t[i+1]+1+vbase , t[i]+1+vbase , mat=primitive.material and primitive.material+1 }
 						end
 					else
 						for i=vbase+1,#obj.verts,3 do
-							obj.polys[#obj.polys+1]={i,i+1,i+2,mat=primitive.material and primitive.material+1}
+							obj.polys[#obj.polys+1]={ i+2 , i+1 , i , mat=primitive.material and primitive.material+1 }
 						end
 					end
 				end

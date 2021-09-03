@@ -381,11 +381,12 @@ font.vbs_idx=1
 		cake.views.pop_and_apply()
 
 	end
-	
+
+-- print to the console	
 	function console.print(...)
 
 		local t={...}
-		for i,v in ipairs(t) do t[i]=tostring(v) end
+		for i=1,#t do t[i]=tostring(t[i]) end
 		local s=table.concat(t,"\t").."\n"
 
 		if console.linehook then console.linehook(s) end -- send print data here
@@ -401,17 +402,17 @@ font.vbs_idx=1
 		end
 			
 	end
-	
+
+-- print to the display overlay, this must be done *every* frame draw cycle
 	function console.display(...)
 	
 		if not console.lines then return end -- not setup yet
 		
-		local ts={...}
-		for i,s in ipairs(ts) do	
-			if type(s)~="string" then ts[i]=wstr.dump(s) end
-		end
+		local t={...}
+		for i=1,#t do t[i]=tostring(t[i]) end
+		local s=table.concat(t,"\t").."\n"
 
-		for _,l in ipairs( wstr.smart_wrap( table.concat(ts,"\t") , console.line_width) ) do
+		for _,l in ipairs( wstr.smart_wrap( s , console.line_width) ) do
 			table.insert(console.lines_display,l)
 		end
 
@@ -420,6 +421,36 @@ font.vbs_idx=1
 	function console.mouse(act,x,y,key)
 	end
 	
+	function console.screen_mode(mode)
+
+		if type(mode)=="boolean" and mode==true then
+
+			if wwin.flavour=="emcc" then-- emcc should only ever switch to full as the browser will force us back
+				win:show("win")
+				win:show("full")
+				win:show("win")
+				win:show("full")
+			elseif win.view then -- we can do smart toggles but this does not read the real state from the system so may be out of sync
+				if     win.view=="win" then
+					win:show("max")
+				elseif win.view=="max" then
+					win:show("full")
+				elseif win.view=="full" then
+					win:show("win")
+				else
+					win:show("full")
+				end
+			else -- just try full
+				win:show("full")
+			end
+
+		end
+		if console.screen_mode_data then
+			console.screen_mode_data:value(win.view)
+		end
+		return win.view
+	end
+
 	function console.msg(m)
 
 		if     m.class=="key" and ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) and m.action==1 then
@@ -432,24 +463,7 @@ font.vbs_idx=1
 			if console.shift_key then
 				oven.view.stretch=not oven.view.stretch
 			else
-				if wwin.flavour=="emcc" then-- emcc should only ever switch to full as the browser will force us back
-					win:show("win")
-					win:show("full")
-					win:show("win")
-					win:show("full")
-				elseif win.view then -- we can do smart toggles but this does not read the real state from the system so may be out of sync
-					if     win.view=="win" then
-						win:show("max")
-					elseif win.view=="max" then
-						win:show("full")
-					elseif win.view=="full" then
-						win:show("win")
-					else
-						win:show("full")
-					end
-				else -- just try full
-					win:show("full")
-				end
+				console.screen_mode(true)
 			end
 			return nil
 		end

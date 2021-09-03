@@ -427,6 +427,8 @@ function wwindow.setup(window,def)
 
 	window.class="window"
 
+	if type(def.solid=="nil") then window.solid=true end -- default to clickable and dragable
+
 	window.panel_mode=def.panel_mode or "scale" 	-- scale the child to fit
 
 --	window.key=wwindow.key

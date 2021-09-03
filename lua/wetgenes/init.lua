@@ -17,6 +17,49 @@ Probably best to cherry pick a few functions you need and export then like so.
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.rnd64k
+
+	rnd = wetgenes.rnd64k(seed)
+	
+	r	= rnd()		-- a fraction between 0 and 1 inclusive
+	r	= rnd(a)	-- an integer between 1 and a inclusive
+	r	= rnd(a,b)	-- an integer between a and b inclusive
+
+a sequence of 65536 numbers starting at seed which should be an integer 
+between 0 and 65535 or a string which will be used to generate this 
+number.
+
+]]
+-----------------------------------------------------------------------------
+M.rnd64k=function(seed)
+	local bit=bit or require("bit")
+	local num=0
+	if type(seed)=="number" then num=math.floor(seed)%65536 end
+	if type(seed)=="string" then
+		for i=1,#seed do
+			local n=string.byte(seed,i)	-- ascii code
+			local p=2^(((i-1)*3)%16)	-- shift left 3 bits per character
+			num=bit.bxor(num,(n*p))		-- overflow upto 7 bits
+		end
+		num=bit.bxor(num,math.floor(num/65536))%65536	-- xor top and bottom 16 bits
+	end
+	local roll=function()
+		num=(75*(num+1)-1)%65536
+		return num
+	end
+	local rnd=function(a,b)
+		if a then
+			if not b then b=a a=1 end
+			return a+math.floor(0.5+((roll()/65535)*(b-a)))
+		end
+		return roll()/65535
+	end
+	return rnd
+end	
+
+
+
 
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.safecall

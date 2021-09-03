@@ -143,14 +143,18 @@ function wmaster.setup(widget,def)
 				skeys.set_opts("typing",false)
 			end
 			
-			if not master.press then -- do not move when button is held down
-				local vx=0
-				local vy=0
-				if ups.button("left_set")  then vx=-1 end
-				if ups.button("right_set") then vx= 1 end
-				if ups.button("up_set")    then vy=-1 end
-				if ups.button("down_set")  then vy= 1 end
-				master.keymove(vx,vy)
+			if not master.no_keymove then
+
+				if not master.press then -- do not move when button is held down
+					local vx=0
+					local vy=0
+					if ups.button("left_set")  then vx=-1 end
+					if ups.button("right_set") then vx= 1 end
+					if ups.button("up_set")    then vy=-1 end
+					if ups.button("down_set")  then vy= 1 end
+					master.keymove(vx,vy)
+				end
+
 			end
 
 			if ups.button("fire_set")  then
@@ -327,12 +331,8 @@ function wmaster.setup(widget,def)
 		mark_dirty_fbos(widget)
 		find_dirty_fbos(widget)
 
-		gl.Disable(gl.CULL_FACE)
-		gl.Disable(gl.DEPTH_TEST)
-
 		gl.PushMatrix()
-		
-		
+				
 		if #dirty_fbos>0 then
 			for i=#dirty_fbos,1,-1 do -- call in reverse so sub fbos can use their child fbo data
 				dirty_fbos[i]:draw() -- dirty, so this only draws into the fbo

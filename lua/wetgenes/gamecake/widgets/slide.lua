@@ -114,6 +114,9 @@ function wslide.setup(widget,def)
 	widget.datxrev=def.datxrev -- mirror the x location
 	widget.datyrev=def.datyrev -- mirror the y location
 
+	-- shorthand "datx" or "daty" rather than repeating
+	if type(widget.data)=="string" then widget.data=widget[widget.data] end
+
 	widget.style=def.style or "indent"
 
 -- auto add the draging button as a child
