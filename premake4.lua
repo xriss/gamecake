@@ -676,13 +676,7 @@ end
 
 -- add get SDL2 include files
 
-if NIX or OSX then
-
--- use system includes
-	includedirs { "/usr/local/include/SDL2" }
-	includedirs { "/usr/include/SDL2" }
-
-elseif MINGW then
+if MINGW then
 
 -- build these files using build/install --mingw
 	includedirs { "/usr/i686-w64-mingw32/include/SDL2" }
@@ -703,6 +697,12 @@ elseif EMCC then
 		"-s MIN_WEBGL_VERSION=2",
 		"-s MAX_WEBGL_VERSION=2",
 	}
+
+else
+
+-- use system includes
+	includedirs { "/usr/local/include/SDL2" }
+	includedirs { "/usr/include/SDL2" }
 
 end
 
