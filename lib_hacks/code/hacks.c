@@ -17,15 +17,17 @@
 
 #if defined(LUA_JIT_USED)
 
-// 32bit luajit hacks
+// luajit has 64bit pointers now so use void*
 typedef struct wetgenes_pack_user_data {
   struct {
-    u32 next; u8 tt; u8 marked;
+    void *next;
+    u8 tt;
+    u8 marked;
     u8 udtype;
     u8 unused2;
-    u32 env;
+    void *env;
     u32 len;
-    u32 metatable;
+    void *metatable;
     u32 align1;
   } uv;
 } wetgenes_pack_user_data;
