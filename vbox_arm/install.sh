@@ -132,6 +132,9 @@ echo " installing build dependencies"
 #./ssh " sudo apt-get install -y libluajit-5.1-dev "
 #./ssh " sudo apt-get install -y libsdl2-dev "
 
+./ssh " sudo apt-get install -y lua5.1 "
+./ssh " sudo apt-get install -y lua-filesystem "
+
 ./box-down
 ./box-up-wait
 

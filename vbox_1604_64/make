@@ -2,7 +2,7 @@ cd `dirname $0`
 
 vagrant up
 
-vagrant ssh -c " cd /gamecake ; build/make --cpu=64 $* "
+vagrant ssh -c " cd /gamecake ; export PUREMAKE_LUA=lua ; build/make --cpu=64 $* "
 
 vagrant halt
 
