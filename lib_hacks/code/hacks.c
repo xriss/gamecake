@@ -11,54 +11,51 @@
 
 #include "wet_types.h"
 
-// we need to keep this in sync with the lua version
-// so we can extract a length from a structure we mostly do not care about
-// this is an evil hack but there is no exposed way to do this apart from building your own lua
-
-#if defined(LUA_JIT_USED)
-
-// luajit has 64bit pointers now so use void*
-typedef struct wetgenes_pack_user_data {
-  struct {
-    void *next;
-    u8 tt;
-    u8 marked;
-    u8 udtype;
-    u8 unused2;
-    void *env;
-    u32 len;
-    void *metatable;
-    u32 align1;
-  } uv;
-} wetgenes_pack_user_data;
-
-#else
-
-// lua hacks
-typedef union { double u; void *s; long l; } wetgenes_pack_user_alignment;
-typedef union wetgenes_pack_user_data {
-  wetgenes_pack_user_alignment dummy;
-  struct {
-    void *next; char tt; char marked;
-    void *metatable;
-    void *env;
-    size_t len;
-  } uv;
-} wetgenes_pack_user_data;
-
-#endif
-
-
-
+// even more evil hack
+// we create some userdata of various sizes and find where lua or luajit is keeping the size value.
+// then we remember that location
+static int userdata_size_offset=0;
+static int get_userdata_size_offset( lua_State *l )
+{
+	int i;
+	u32 *p;
+	u32 t;
+	if(userdata_size_offset==0) // go fish
+	{
+		for(i=-1;i>-16;i--)
+		{
+			p=(u32*)lua_newuserdata(l,42);
+			t=*(p+i);
+			lua_pop(l,1);
+			if( t == 42 )
+			{
+				p=(u32*)lua_newuserdata(l,23);
+				t=*(p+i);
+				lua_pop(l,1);
+				if( t == 23 )
+				{
+					p=(u32*)lua_newuserdata(l,19);
+					t=*(p+i);
+					lua_pop(l,1);
+					if( t == 19 )
+					{
+						userdata_size_offset=i;
+						break;
+					}
+				}
+			}
+		}
+	}
+	return userdata_size_offset;
+}
 
 
 
 extern unsigned char * lua_toluserdata (lua_State *l, int idx, size_t *len)
 {
-	wetgenes_pack_user_data *g;
-
-	unsigned char *p=lua_touserdata(l,idx);
-	if(!p) { return 0; }
+	int hax=get_userdata_size_offset(l);
+	u32 *t=(u32*)lua_touserdata(l,idx);
+	if(!t) { return 0; }
 	if(len)
 	{
 		if(lua_islightuserdata(l,idx))
@@ -67,12 +64,11 @@ extern unsigned char * lua_toluserdata (lua_State *l, int idx, size_t *len)
 		}
 		else
 		{
-			g=(wetgenes_pack_user_data*)(p-sizeof(wetgenes_pack_user_data));
-			*len=g->uv.len;
-		}	
+			*len=(size_t)(*(t+hax));
+		}
 	}
 	
-	return p;
+	return (unsigned char *)t;
 }
 
 
