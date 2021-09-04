@@ -9,7 +9,7 @@ fi
 
 ./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
 
-./ssh " gamecake/build/make $* "
+./ssh " export PUREMAKE_LUA=lua ; gamecake/build/make $* "
 
 scp -P 5522 pi@localhost:gamecake/exe/gamecake.nix ../exe/gamecake.arm
 
