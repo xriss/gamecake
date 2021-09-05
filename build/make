@@ -177,14 +177,14 @@ fi
 # this will make a directory to build into
 
 if [ -z "$PUREMAKE_LUA" ]; then 
- if command -v luajit >/dev/null 2>&1; then
-  PUREMAKE_LUA=luajit
- elif command -v lua >/dev/null 2>&1; then 
+ if lua -e "require('lfs')" >/dev/null 2>&1; then
   PUREMAKE_LUA=lua
- elif command -v gamecake >/dev/null 2>&1; then 
+ elif gamecake -e "require('lfs')" >/dev/null 2>&1; then 
   PUREMAKE_LUA=gamecake
+ elif command -v luajit >/dev/null 2>&1; then
+  PUREMAKE_LUA=luajit
  else
-  printf "puremake requires luajit or lua or gamecake to be installed\n" 1>&2
+  printf "puremake requires lua+lfs or gamecake or luajit to be installed\n" 1>&2
   exit 1
  fi
 fi

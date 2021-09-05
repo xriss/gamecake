@@ -3,11 +3,10 @@
 
 local args={...}
 
-local vplus=(tonumber(args[1] or 0) or 0)
-
 local wbake=require("wetgenes.bake")
 
-local version=wbake.version_from_time(os.time(),vplus)
+local version=	string.format([[ return { version="%02.04f" } ]],
+		( ( os.time() / ( 365.25*24*60*60 ) ) - 30 ) )
 
 local ss="GAMECAKE_VERSION=\""..version.."\"\n"
 
