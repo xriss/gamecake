@@ -1,1 +1,1 @@
-GAMECAKE_VERSION=" return { version="21.6772" } "
+GAMECAKE_VERSION="21.6783"
