@@ -9,7 +9,7 @@ local splitpath=require("cmd.args").splitpath
 
 local cmds={
 	{ "quant",		"Quantize to an automatically generated 256 colors or less palette based image."},
-	{ "convert",	"Convert image to a new graphics file format."},
+	{ "convert",	"Convert image to a new graphics pixel and/or file format."},
 }
 for i,v in ipairs(cmds) do
 	v.name=v[1]
@@ -28,10 +28,11 @@ local default_inputs=function(inputs)
 
 		{	"output",		"{dirname}{basename}.output{extension}", [[
 		
-Output filename, {dirname}{basename}{extension} are replaced with the 
-input path components, {idx} will be replaced with the file number in 
-three digits, eg 001 and {filename} may be used in place of 
-{basename}{extension}.
+Output filename, {dirname}{basename}{extension} are replaced with the input 
+path components, {idx} will be replaced with the file number in three digits, 
+eg 001 and {filename} may be used in place of {basename}{extension}. The 
+extension is used to select the file format so {dirname}{basename}.jpg would 
+convert to jpg but keep the same file location and name.
 
 ]], },
 
@@ -130,24 +131,32 @@ elseif cmd=="convert" then
 
 	local args=require("cmd.args").bake({inputs=default_inputs{
 
-		{	"fmt",	"U8_RGBA",	[[
+		{	"fmt",	"0",	[[
 		
 The type of pixel data to convert the image into. Many of these are not 
-supported by all file formats. See the grd documentation for details 
-but this is a list of possible values : U8_RGBA, U8_ARGB, U8_RGB, 
-U8_INDEXED, U8_LUMINANCE, U8_ALPHA, U16_RGBA_5551, U16_RGBA_4444, 
-U16_RGBA_5650 and each can have _PREMULT appended to the end for 
-premultiplied alpha.
+supported by all file formats. See the grd documentation for details but this 
+is a list of possible values : U8_RGBA, U8_ARGB, U8_RGB, U8_INDEXED, 
+U8_LUMINANCE, U8_ALPHA, U16_RGBA_5551, U16_RGBA_4444, U16_RGBA_5650 and each 
+can have _PREMULT appended to the end for premultiplied alpha. An empty format 
+or a format of 0 will disable format conversions.
 		
 ]], },
 
 		{	"resize",	"0x0",	[[
 		
-Resize image, format is 123x456 which would be 123 pixels wide and 456 
-pixels height. If a width or height is 0 then aspect ratio will be 
-maintained in that dimension and if both are 0 then no resize will 
-occur. Hence 0x0 (which is the default) will disable resize.
+Resize image, format is 123x456 which would be 123 pixels wide and 456 pixels 
+height. If a width or height is 0 then aspect ratio will be maintained in that 
+dimension and if both are 0 then no resize will occur. Hence 0x0 (which is the 
+default) will disable resize. Percentages can be used to scale relatively, so 
+200% would double the size and 200%x300% would double the width and triple the 
+height.
 		
+]], },
+
+		{	"smooth",	false,	[[
+		
+Enable auto conversion to 32bit before transforms for smoother looking scales.
+
 ]], },
 
 		}}):parse(arg):sanity()
@@ -159,7 +168,7 @@ occur. Hence 0x0 (which is the default) will disable resize.
 		print("")
 		os.exit(0)
 	end
-	
+
 	for i,v in ipairs(args.data) do
 
 		local path=splitpath( args.data[i] )
@@ -174,28 +183,49 @@ occur. Hence 0x0 (which is the default) will disable resize.
 		
 		if args.data.resize~="0x0" then -- resize
 		
-			local width,height=args.data.resize:match("^(.+)x(.+)$")
-			width=tonumber(width  or 0) or 0
-			height=tonumber(height or 0) or 0
+			local percent=args.data.resize:match("^(.+)%%") -- a percentage resize?
 			
-			if width==0 and height==0 then -- do nothing
-			elseif width==0 then 
-				width=math.floor( 0.5 + g.width*(height/g.height) )
-				assert( g:convert( "U8_RGBA" ) )
-				assert( g:scale( width,height,g.depth ) )
-			elseif height==0 then 
-				height=math.floor( 0.5 + g.height*(width/g.width) )
-				assert( g:convert( "U8_RGBA" ) )
-				assert( g:scale( width,height,g.depth ) )
-			else
-				assert( g:convert( "U8_RGBA" ) )
-				assert( g:scale( width,height,g.depth ) )
+			if percent then
+
+				local width,height=args.data.resize:match("^(.+)%%x(.+)%%$")
+				
+				width=tonumber(width or percent) or 0
+				height=tonumber(height) or width
+			
+				if width==0 and height==0 then -- do nothing
+				else
+					if args.data.smooth then assert( g:convert( "U8_RGBA" ) ) end
+					assert( g:scale( math.ceil(width*g.width/100),math.ceil(height*g.height/100),g.depth ) )
+				end
+
+			else -- forced resize
+			
+				local width,height=args.data.resize:match("^(.+)x(.+)$")
+				width=tonumber(width) or 0
+				height=tonumber(height) or width
+				
+				if width==0 and height==0 then -- do nothing
+				elseif width==0 then 
+					width=math.floor( 0.5 + g.width*(height/g.height) )
+					if args.data.smooth then assert( g:convert( "U8_RGBA" ) ) end
+					assert( g:scale( width,height,g.depth ) )
+				elseif height==0 then 
+					height=math.floor( 0.5 + g.height*(width/g.width) )
+					if args.data.smooth then assert( g:convert( "U8_RGBA" ) ) end
+					assert( g:scale( width,height,g.depth ) )
+				else
+					if args.data.smooth then assert( g:convert( "U8_RGBA" ) ) end
+					assert( g:scale( width,height,g.depth ) )
+				end
+				
 			end
 			
 		end
 
-		assert( g:convert( args.data.fmt ) )
-
+		if args.data.fmt~="" and args.data.fmt~=0 and args.data.fmt~="0" then
+			assert( g:convert( args.data.fmt ) )
+		end
+		
 		local g=check_save(g,output)
 
 	end

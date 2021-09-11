@@ -470,12 +470,14 @@ sdl.msg_fetch=function()
 
 end
 
-
-sdl.relative_mouse=function(mode)
+sdl.relative_mouse_mode=false
+sdl.relative_mouse=function(it,mode)
+	local oldmode=sdl.relative_mouse_mode
 	sdl.relative_mouse_mode=mode
 	SDL.setRelativeMouseMode(mode)
+	it.win:setGrab(mode and 1 or 0)
 	SDL.captureMouse(mode)
-	return true
+	return oldmode
 end
 
 sdl.warp_mouse=function(it,x,y)

@@ -317,6 +317,8 @@ font.vbs_idx=1
 			console.fps_count=console.fps_count+1
 		end
 
+		gl.ActiveTexture( gl.TEXTURE0 )
+
 		cake.views.push_and_apply(console.view)
 		gl.PushMatrix()
 
