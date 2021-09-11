@@ -14,7 +14,7 @@ local wstr=require("wetgenes.string")
 
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
-local win=require("wetgenes.win")
+local wwin=require("wetgenes.win")
 
 local XLT=require("wetgenes.tongues").translate
 
@@ -156,6 +156,16 @@ function M.bake(oven,escmenu)
 		
 	end
 		
+	function escmenu.doshow(b)
+		if type(b)=="nil" then b=not escmenu.show end -- auto toggle
+		escmenu.show=b
+		if escmenu.show then
+			escmenu.old_relative_mouse=oven.win:relative_mouse(false) -- make sure we have mouse
+		else
+			escmenu.old_relative_mouse=oven.win:relative_mouse(escmenu.old_relative_mouse) -- try and restore
+		end
+	end
+
 	function escmenu.msg(m)
 		if not escmenu.active then return m end
 
@@ -174,7 +184,7 @@ function M.bake(oven,escmenu)
 --				end
 
 				if m.class=="key" and m.action==-1 and m.keyname=="escape" then
-					escmenu.show=not escmenu.show
+					escmenu.doshow()
 					return nil
 				end
 				
@@ -196,7 +206,7 @@ function M.bake(oven,escmenu)
 		if m.class=="key" then
 			if m.keyname=="escape" then
 				if m.action==-1 then
-					escmenu.show=not escmenu.show
+					escmenu.doshow()
 				end
 				return nil
 			elseif  m.keyname=="f5" and oven.opts.args.quickexit then -- quick shutdown when debugging ( F5 runs and F5 quits )

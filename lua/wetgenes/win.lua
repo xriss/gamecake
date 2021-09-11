@@ -619,9 +619,9 @@ function base.warp_mouse(w,x,y)
 	end
 end
 
-function base.relative_mouse(b)
+function base.relative_mouse(w,b)
 	if     hardcore and hardcore.relative_mouse then
-		return hardcore.relative_mouse(b)
+		return hardcore.relative_mouse(w[0],b)
 	end
 end
 
