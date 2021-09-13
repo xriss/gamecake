@@ -732,6 +732,7 @@ all_includes=all_includes or {
 	{LUA_BIT,		    WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_kissfft",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_pack",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_fats",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_zip",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_zlib",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_freetype",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
