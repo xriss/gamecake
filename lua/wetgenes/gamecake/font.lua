@@ -211,6 +211,7 @@ font.draw = function(text)
 
 	local dataraw,datalen=core.canvas_font_draw(font,text)
 	if datalen/5>=1 then -- need something to draw
+		gl.ActiveTexture( gl.TEXTURE0 )
 		images.bind(font.dat.images[1])
 		local it=flat.array_predraw({fmt="posuv",dataraw=dataraw,datalen=datalen,array=gl.TRIANGLES})
 		it.draw(cb)
