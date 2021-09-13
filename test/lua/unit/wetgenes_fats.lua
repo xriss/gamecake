@@ -54,3 +54,69 @@ function test_doubles_sub()
 	assert_tables_equal(dat3,dat4)
 	
 end
+
+
+function test_uint32s()
+
+	local dat1={123,456,789,312,654,789}
+	local str1=fats.table_to_uint32s(dat1)
+	local dat2=fats.uint32s_to_table(str1)
+
+	assert_tables_equal(dat1,dat2)
+
+end
+
+function test_int32s()
+
+	local dat1={123,456,789,312,654,789}
+	local str1=fats.table_to_int32s(dat1)
+	local dat2=fats.int32s_to_table(str1)
+
+	assert_tables_equal(dat1,dat2)
+
+end
+
+
+function test_uint16s()
+
+	local dat1={123,456,789,312,654,789}
+	local str1=fats.table_to_uint16s(dat1)
+	local dat2=fats.uint16s_to_table(str1)
+
+	assert_tables_equal(dat1,dat2)
+
+end
+
+function test_int16s()
+
+	local dat1={123,456,789,312,654,789}
+	local str1=fats.table_to_int16s(dat1)
+	local dat2=fats.int16s_to_table(str1)
+
+	assert_tables_equal(dat1,dat2)
+
+end
+
+
+function test_uint8s()
+
+	local dat1={123,156,189,112,154,189}
+	local str1=fats.table_to_uint8s(dat1)
+	local dat2=fats.uint8s_to_table(str1)
+
+	assert_tables_equal(dat1,dat2)
+
+end
+
+function test_int8s()
+
+	local dat1={23,56,89,12,54,89}
+	local str1=fats.table_to_int8s(dat1)
+	local dat2=fats.int8s_to_table(str1)
+
+	assert_tables_equal(dat1,dat2)
+
+end
+
+
+
