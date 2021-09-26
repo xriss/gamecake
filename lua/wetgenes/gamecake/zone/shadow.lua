@@ -40,7 +40,7 @@ M.bake=function(oven,shadow)
 			mode="fbo",
 			fbo=shadow.fbo,
 			fov=0,
-			cx=0.5,cy=0.5,
+			cx=0.5,cy=0.5,cz=0.5,
 		})
 
 		gl.uniforms.shadow_map=function(u)

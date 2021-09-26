@@ -155,6 +155,9 @@ M.bake=function(oven,keys)
 				
 		return keys -- so setup is chainable with a bake
 	end
+	function keys.update()
+		recaps.step()
+	end
 
 	function keys.set_opts(n,v)
 		if n=="typing" and keys.opts.notyping then v=false end -- disable typing../
@@ -176,6 +179,7 @@ M.bake=function(oven,keys)
 				used=used or t
 --			end
 		end
+		if used then m.skeys=true end -- flag as used by skeys
 		return used
 	end
 	

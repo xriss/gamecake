@@ -85,9 +85,9 @@ function M.bake(oven,views)
 		view.hx=opts.hx
 		view.hy=opts.hy
 
-		view.cx=opts.cx or 0	-- set starting point on screen 0,0,0 topleft 0.5,0.5,0.0 center of screen and 1.0,1.0,0.0 is bottom right
-		view.cy=opts.cy or 0
-		view.cz=opts.cz or 0
+		view.cx=opts.cx or 0.0	-- set starting point on screen 0,0,0 topleft 0.5,0.5,0.0 center of screen and 1.0,1.0,0.0 is bottom right
+		view.cy=opts.cy or 0.0
+		view.cz=opts.cz or 0.5
 
 -- the projection view size, mostly aspect, that we will be aiming for
 		if view.win then
@@ -107,6 +107,7 @@ function M.bake(oven,views)
 		view.vz=opts.vz or (view.vy and view.vy*4)-- depth range of the zbuffer
 
 		view.fov=opts.fov or 0 -- field of view, a tan like value, so 1 would be 90deg, 0.5 would be 45deg and so on
+		view.fov_scale2d=opts.fov_scale2d	-- 2d scale fix, should probably be 1/fov
 
 --		view.ss=opts.overscan or 1 -- scale vx,vy by this value, to allow simple overscan
 		
@@ -195,8 +196,6 @@ function M.bake(oven,views)
 
 			end
 
-			view.pz=view.pz or -view.vz/2
-
 			return view
 		end
 		
@@ -219,77 +218,72 @@ function M.bake(oven,views)
 			local n=1
 
 			local va=view.vy/view.vx
-			local pa=view.hy/view.hx
+			local ha=view.hy/view.hx
 			
 			if view.fov==0 then
 			
-				if (pa > (va) ) 	then 	-- fit width to screen
+				if ha > va then 	-- fit width to screen
 				
-					view.pmtx[1] = 2/view.hx
-					view.pmtx[6] = -2/view.hy
-					
 					view.sx=1
-					view.sy=pa/va
+					view.sy=ha/va
 
+					view.pmtx[1] =                    2/view.vx	-- X = X mul
+					view.pmtx[6] = (view.hx/view.hy)*-2/view.vx	-- Y = Y mul
+					
 				else									-- fit height to screen
 				
-					view.pmtx[1] = 2/view.hx
-					view.pmtx[6] = -2/view.hy
-					
-					view.sx=va/pa
+					view.sx=va/ha
 					view.sy=1
 
+					view.pmtx[1] = (view.hy/view.hx)* 2/view.vy	-- X = X mul
+					view.pmtx[6] =                   -2/view.vy	-- Y = Y mul
+					
 				end
 
 			else
 				
 				if view.master.stretch then
 
-					view.pmtx[1] = va/view.fov
-					view.pmtx[6] = -1/view.fov
-					
 					view.sx=1
 					view.sy=1
 
+					view.pmtx[1] = va			-- X = X mul
+					view.pmtx[6] = -1			-- Y = Y mul
+									
+				elseif ha > va then 	-- fit width to screen
 				
-				elseif (pa > (va) ) 	then 	-- fit width to screen
-				
-					view.pmtx[1] = ((va)*1)/view.fov
-					view.pmtx[6] = -((va)/pa)/view.fov
-					
 					view.sx=1
-					view.sy=pa/va
+					view.sy=ha/va
 
+					view.pmtx[1] =   va    	-- X = X mul
+					view.pmtx[6] = -(va/ha)	-- Y = Y mul
+					
 				else									-- fit height to screen
 				
-					view.pmtx[1] = pa/view.fov
-					view.pmtx[6] = -1/view.fov
-					
-					view.sx=va/pa
+					view.sx=va/ha
 					view.sy=1
 
+					view.pmtx[1] = ha			-- X = X mul
+					view.pmtx[6] = -1			-- Y = Y mul
+					
 				end
 			end
 
--- depth buffer fix an fov of 0 is a uniform projection
-			if view.fov==0 then
 
-				view.pmtx[11] = -2/(f+n)
-				view.pmtx[12] = 0
-				view.pmtx[15] = -(f+n)/(f-n)
-				view.pmtx[16] = 1
+			view.pmtx[11] = -1				-- Z = Z mul
+			view.pmtx[15] = -1				-- Z = Z add
 
-			else
+-- an fov of 0 is a uniform projection
 
-				view.pmtx[11] = -(f+n)/(f-n)
-				view.pmtx[12] = -1
-				view.pmtx[15] = -2*f*n/(f-n)
-				view.pmtx[16] = 0
+			view.pmtx[16] = 1				-- W = W mul
+			view.pmtx[12] = -view.fov*2		-- W = Z mul
 
+
+			if view.fov_scale2d then
+				view.pmtx:scale( view.fov_scale2d , view.fov_scale2d , 1 )
 			end
-
-			view.pmtx:translate(view.vx*(view.cx-0.5),view.vy*(view.cy-0.5),view.pz+view.vz*view.cz) -- choose draw origin from top left to center of screen
-
+			
+			view.pmtx:translate(view.vx*(view.cx-0.5),view.vy*(view.cy-0.5),view.vz*(view.cz-0.5)) -- choose draw origin from top left to center of screen
 			return view
 		end
 

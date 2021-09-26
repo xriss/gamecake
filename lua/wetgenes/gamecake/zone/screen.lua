@@ -54,9 +54,8 @@ M.bake=function(oven,screen)
 			mode="fbo",
 			fbo=screen.fbo,
 			vz=8192,
-			pz=0,
 			fov=screen.camera_fov,
-			cx=0.5,cy=0.5,
+			cx=0.5,cy=0.5,cz=0.5,
 		})
 
 --	we only need RED but dodgy drivers will bork if this is not at least rgb
@@ -67,9 +66,8 @@ M.bake=function(oven,screen)
 			mode="fbo",
 			fbo=screen.fbo_occlusion,
 			vz=8192,
-			pz=0,
 			fov=1/2,
-			cx=0.5,cy=0.5,
+			cx=0.5,cy=0.5,cz=0.5,
 		})
 
 		screen.fbo_bloom=framebuffers.create(0,0,0,{no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
@@ -78,9 +76,8 @@ M.bake=function(oven,screen)
 			mode="fbo",
 			fbo=screen.fbo_bloom,
 			vz=8192,
-			pz=0,
 			fov=1/2,
-			cx=0.5,cy=0.5,
+			cx=0.5,cy=0.5,cz=0.5,
 		})
 
 		screen.fbo_blur=framebuffers.create(0,0,0,{no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
