@@ -247,37 +247,60 @@ function M.bake(oven,views)
 					view.sx=1
 					view.sy=1
 
-					view.pmtx[1] = va			-- X = X mul
-					view.pmtx[6] = -1			-- Y = Y mul
+					view.pmtx[1] = va/view.fov			-- X = X mul
+					view.pmtx[6] = -1/view.fov			-- Y = Y mul
 									
 				elseif ha > va then 	-- fit width to screen
 				
 					view.sx=1
 					view.sy=ha/va
 
-					view.pmtx[1] =   va    	-- X = X mul
-					view.pmtx[6] = -(va/ha)	-- Y = Y mul
+					view.pmtx[1] =   va    /view.fov	-- X = X mul
+					view.pmtx[6] = -(va/ha)/view.fov	-- Y = Y mul
 					
 				else									-- fit height to screen
 				
 					view.sx=va/ha
 					view.sy=1
 
-					view.pmtx[1] = ha			-- X = X mul
-					view.pmtx[6] = -1			-- Y = Y mul
+					view.pmtx[1] = ha/view.fov			-- X = X mul
+					view.pmtx[6] = -1/view.fov			-- Y = Y mul
 					
 				end
 			end
 
+-- depth buffer fix an fov of 0 is a uniform projection
+			view.pmtx[16] = 1					-- W = W mul
 
-			view.pmtx[11] = -1				-- Z = Z mul
-			view.pmtx[15] = -1				-- Z = Z add
+			if view.fov==0 then
 
--- an fov of 0 is a uniform projection
 
-			view.pmtx[16] = 1				-- W = W mul
-			view.pmtx[12] = -view.fov*2		-- W = Z mul
+--				view.pmtx[11] = -2/(f+n)		-- Z
+--				view.pmtx[12] = 0
 
+--				view.pmtx[15] = -(f+n)/(f-n)	-- W
+--				view.pmtx[16] = 1
+
+				view.pmtx[11] = -1				-- Z = Z mul
+				view.pmtx[15] = -1				-- Z = Z add
+				
+				view.pmtx[12] = 0				-- W = Z mul
+
+			else
+
+--				view.pmtx[11] = -(f+n)/(f-n)	-- Z
+--				view.pmtx[12] = -1
+				
+--				view.pmtx[15] = -2*f*n/(f-n)	-- W
+--				view.pmtx[16] = 1
+
+				view.pmtx[11] = -1				-- Z = Z mul
+				view.pmtx[15] = -1				-- Z = Z add
+
+				view.pmtx[12] = -1				-- W = Z mul
+				
+
+			end
 
 			if view.fov_scale2d then
 				view.pmtx:scale( view.fov_scale2d , view.fov_scale2d , 1 )
