@@ -274,13 +274,6 @@ function M.bake(oven,views)
 
 			if view.fov==0 then
 
-
---				view.pmtx[11] = -2/(f+n)		-- Z
---				view.pmtx[12] = 0
-
---				view.pmtx[15] = -(f+n)/(f-n)	-- W
---				view.pmtx[16] = 1
-
 				view.pmtx[11] = -1				-- Z = Z mul
 				view.pmtx[15] = -1				-- Z = Z add
 				
@@ -288,18 +281,11 @@ function M.bake(oven,views)
 
 			else
 
---				view.pmtx[11] = -(f+n)/(f-n)	-- Z
---				view.pmtx[12] = -1
-				
---				view.pmtx[15] = -2*f*n/(f-n)	-- W
---				view.pmtx[16] = 1
-
 				view.pmtx[11] = -1				-- Z = Z mul
 				view.pmtx[15] = -1				-- Z = Z add
 
 				view.pmtx[12] = -1				-- W = Z mul
 				
-
 			end
 
 			if view.fov_scale2d then
