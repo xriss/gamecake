@@ -228,7 +228,7 @@ main.draw=function()
 		mode="full",
 		vx=main.screen_hx,
 		vy=main.screen_hy,
-		fov=0.25,
+		fov=0,
 	})
 
 --	layout.viewport() -- did our window change?

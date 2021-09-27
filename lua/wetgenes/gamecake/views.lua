@@ -60,7 +60,7 @@ function M.bake(oven,views)
 			vx=fbo.w,
 			vy=fbo.h,
 			vz=fbo.h*4,
-			fov=1/4,
+			fov=0,
 		})
 		views.push(view)
 		views.apply()
@@ -274,14 +274,14 @@ function M.bake(oven,views)
 
 			if view.fov==0 then
 
-				view.pmtx[11] = -1				-- Z = Z mul
+				view.pmtx[11] = -2/view.vz		-- Z = Z mul
 				view.pmtx[15] = -1				-- Z = Z add
 				
 				view.pmtx[12] = 0				-- W = Z mul
 
 			else
 
-				view.pmtx[11] = -1				-- Z = Z mul
+				view.pmtx[11] = -2/view.vz		-- Z = Z mul
 				view.pmtx[15] = -1				-- Z = Z add
 
 				view.pmtx[12] = -1				-- W = Z mul
