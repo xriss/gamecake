@@ -1,8 +1,6 @@
 cd `dirname $0`
 
-cd mojoal
-
-curl -s https://hg.icculus.org/icculus/mojoAL/archive/tip.tar.bz2 | tar xvj --strip-components=1
-
+rm -rf mojoal
+git clone https://github.com/icculus/mojoAL.git mojoal
 
 
