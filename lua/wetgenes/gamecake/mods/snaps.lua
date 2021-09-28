@@ -100,78 +100,48 @@ if lfs then -- shove files in dir
 		lfs.mkdir(wwin.files_prefix.."snaps/"..snaps.auto)
 		name=snaps.auto.."/"..(("%04d"):format(snaps.idx))
 end
+
+
+
 				local g=snaps.get_grd()
-				local path=wwin.files_prefix.."snaps/"..name..".png"
+
+--				assert(g:save(path)) -- this is slow, so lets hack in a simple PAM output
+
+				g:convert("FMT_U8_RGB") -- drop the alpha
+				
+				local path=wwin.files_prefix.."snaps/"..name..".pam"
 log("snap","Auto "..path)
-				assert(g:save(path))
+
+				local fp=assert(io.open(path,"wb"))
+				fp:write(string.format([[
+P7
+WIDTH %.f
+HEIGHT %.f
+DEPTH 3
+MAXVAL 255
+TUPLTYPE RGB
+ENDHDR
+]],g.width,g.height))
+				fp:write(g:pixels(0,0,g.width,g.height,""))
+				fp:close()
+
 				snaps.list[#snaps.list+1]=path
 
 				if snaps.frame>=snaps.frame_max then -- finished
 
-				local f=io.open(wwin.files_prefix.."snaps/"..snaps.auto..".sh","w")
+				local fname=wwin.files_prefix.."snaps/"..snaps.auto..".sh"
+
+log("snap","run this script "..fname)
+log("snap","to create this "..wwin.files_prefix.."snaps/"..snaps.auto..".mp4")
+
+				local f=io.open(fname,"w")
 				if f then
 					f:write([[
 cd `dirname $0`
-convert -dither none -layers optimize -monitor -delay 3 -loop 0 ]]..snaps.auto..[[/*.png ]]..snaps.auto..[[.gif
+ffmpeg -framerate 30 -i "]]..snaps.auto..[[/%04d.pam" -pix_fmt yuv420p -y ]]..snaps.auto..[[.mp4
 ]])
 					f:close()
 				end
-
-if snaps.encode_gif then
-
-	local gb=wgrd.create( wgrd.FMT_U8_INDEXED , g.width , g.height , 1 )
-	gb:palette(0,32,{
--- force swanky32 palette when converting to GIF
-		0x00,0x00,0x00,0x00,
-		0x33,0x66,0x22,0xff,
-		0x44,0x88,0x22,0xff,
-		0x66,0xaa,0x33,0xff,
-		0x66,0xbb,0x77,0xff,
-		0x66,0xcc,0xcc,0xff,
-		0x55,0x99,0xcc,0xff,
-		0x55,0x77,0xcc,0xff,
-		0x44,0x55,0x99,0xff,
-		0x33,0x33,0x66,0xff,
-		0x33,0x22,0x44,0xff,
-		0x44,0x22,0x33,0xff,
-		0x66,0x33,0x33,0xff,
-		0x88,0x44,0x33,0xff,
-		0xbb,0x77,0x66,0xff,
-		0xee,0xaa,0x99,0xff,
-		0xee,0x88,0xbb,0xff,
-		0xdd,0x66,0x66,0xff,
-		0xcc,0x33,0x33,0xff,
-		0xdd,0x55,0x33,0xff,
-		0xdd,0x77,0x33,0xff,
-		0xdd,0xaa,0x33,0xff,
-		0xdd,0xdd,0x44,0xff,
-		0x88,0x88,0x33,0xff,
-		0x00,0x00,0x00,0xff,
-		0x22,0x22,0x22,0xff,
-		0x44,0x44,0x44,0xff,
-		0x66,0x66,0x66,0xff,
-		0x88,0x88,0x88,0xff,
-		0xaa,0xaa,0xaa,0xff,
-		0xcc,0xcc,0xcc,0xff,
-		0xff,0xff,0xff,0xff,
-	})
-
-	local stream=gb:stream({filename=wwin.files_prefix.."snaps/"..snaps.auto..".gif",speed=1000/30})
-
-		for i,v in ipairs(snaps.list) do
-			
-			log("snap","frame",v)
-
-			local g=wgrd.create(v)
-			g:remap(gb)
-
-			stream.write(gb)
-		end
-		log("snap","GIF",wwin.files_prefix.."snaps/"..snaps.auto..".gif")
-
-		stream.close(gb)
-end
-
 
 					snaps.auto=false
 					oven.frame_rate=snaps.frame_rate
@@ -192,7 +162,6 @@ end
 	snaps.frame=0
 	snaps.frame_max=60*20  -- x seconds, at 60fps
 	snaps.frame_skip=2     -- only record every other frame, so 30 fps output.
-	snaps.encode_gif=false -- encode to gif? nah, best not to, just use convert on the png outputs.
 	function snaps.msg(m)
 		if not lfs then return m end
 

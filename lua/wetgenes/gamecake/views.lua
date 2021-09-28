@@ -270,7 +270,7 @@ function M.bake(oven,views)
 			end
 
 -- depth buffer fix an fov of 0 is a uniform projection
-			view.pmtx[16] = 1					-- W = W mul
+			view.pmtx[16] = 1					-- W = W add
 
 			if view.fov==0 then
 

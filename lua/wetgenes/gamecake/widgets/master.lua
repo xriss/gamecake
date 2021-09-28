@@ -29,7 +29,6 @@ local canvas=oven.canvas
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
 	local skeys=oven.rebake("wetgenes.gamecake.spew.keys")
-	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 
 local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
 
@@ -133,7 +132,7 @@ function wmaster.setup(widget,def)
 	function master.update(widget,resize)
 
 		
-		local ups=srecaps.ups()
+		local ups=skeys.ups()
 		if ups then -- use skeys / srecaps code 
 
 
