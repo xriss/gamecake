@@ -802,7 +802,6 @@ print("Patching GL ",method)
 			
 --This foces a CheckError after each function which can catch bugs but stalls rendering
 				gl[n]=function(...) gl.GetError() local r={f(...)} gl.CheckError() return unpack(r) end
-				
 			end
 		end
 	end
@@ -833,6 +832,7 @@ end
 gles.extensions={}
 function gles.GetExtensions()
 	local s=gles.Get(gles.EXTENSIONS) or ""
+	gles.GetError() -- ignore any errors here
 	local t={}
 	for w in s:gmatch("([^%s]+)") do
 		if w:sub(1,3)=="GL_" then
