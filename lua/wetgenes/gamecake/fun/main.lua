@@ -47,8 +47,8 @@ M.bake=function(oven,main)
 		fov=0,
 	})
 
-	local skeys=oven.rebake("wetgenes.gamecake.spew.keys").setup{max_up=6,pad_map=2} -- upto 6 players, two on keyboard 4-6 on controllers
-	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps").setup(6)
+--	local skeys=oven.rebake("wetgenes.gamecake.spew.keys").setup{max_up=6,pad_map=2} -- upto 6 players, two on keyboard 4-6 on controllers
+--	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps").setup(6)
 	local sscores=oven.rebake("wetgenes.gamecake.spew.scores").setup(6)
 
 
@@ -105,7 +105,7 @@ main.msg=function(m)
 
 	view.msg(m) -- fix mouse coords
 
-	if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
+--	if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
 	
 	main.system.msg(m)
 	
@@ -123,7 +123,7 @@ end
 
 main.update=function()
 
-	srecaps.step()
+--	srecaps.step()
 
 	main.system.update()
 	
