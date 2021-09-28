@@ -517,6 +517,7 @@ oven.gl.CheckError()
 
 		oven.ticks=0
 		function oven.update()
+--print(oven.ticks)
 			oven.ticks=(oven.ticks+1)%0x100000000	-- 32bit update tick counter
 
 			if oven.do_backtrace then
@@ -606,7 +607,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 
 		end
 
-		oven.preloader_enabled=true
+		oven.preloader_enabled=false -- do we need this? we is fast and it is broken
 --		if wwin.flavour=="raspi" then -- do fullscreen on raspi
 --			oven.preloader_enabled=false
 --		end
