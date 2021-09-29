@@ -626,11 +626,11 @@ local beep_play=function() end
 				gl.Scale(w.hy,w.hy,w.hy)
 				gl.Rotate(gui.time,0,-1,0)
 				gl.Rotate(gui.time/8,1,0,0)
-				gl.state.push({
-					[gl.CULL_FACE]					=	gl.TRUE,
-				})
+--				gl.state.push({
+--					[gl.CULL_FACE]					=	gl.TRUE,
+--				})
 				wetiso.draw()
-				gl.state.pop()
+--				gl.state.pop()
 				gl.PopMatrix()
 			end)
 		end
@@ -762,9 +762,9 @@ local beep_play=function() end
 --		gl.MatrixMode(gl.PROJECTION)
 --		gl.LoadMatrix( layout.pmtx )
 
-		gl.MatrixMode(gl.MODELVIEW)
-		gl.LoadIdentity()
-		gl.Translate(-320/2,-480/2,-480*2) -- top left corner is origin
+--		gl.MatrixMode(gl.MODELVIEW)
+--		gl.LoadIdentity()
+--		gl.Translate(-320/2,-480/2,-480*2) -- top left corner is origin
 
 		gl.PushMatrix()
 		

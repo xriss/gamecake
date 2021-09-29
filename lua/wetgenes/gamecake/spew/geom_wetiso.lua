@@ -97,13 +97,13 @@ end
 
 wetiso.predraw=function()
 
-	if not gl.programs.geom_wetiso then -- setup our special shaders
-	
-		gl.shaders.v_geom_wetiso={
-		source=[[
+	gl.program_source("geom_wetiso",[[
 
 #version 100
 #version 120
+
+#ifdef VERTEX_SHADER
+
 #ifdef VERSION_ES
 precision mediump float;
 #endif
@@ -136,21 +136,17 @@ void main()
 
 	int a=int(clamp(a_texcoord.y-1.0,0.0,2.0));
 	
-	if(a==2) {			v_texcoord=vec2(	 (vx+1.0)/8.0	,	 0.0	);
+	if(a==2) {			v_texcoord=vec2(	 (vx+0.0)/8.0	,	 0.0	);
 	} else if(a==1) {	v_texcoord=vec2(	 (vx+0.5)/8.0	,	 1.0	);
-	} else {			v_texcoord=vec2(	 (vx    )/8.0	,	 0.0	);
+	} else {			v_texcoord=vec2(	 (vx+1.0)/8.0	,	 0.0	);
 	}
 
 }
 
-	]]
-}
+#endif //VERTEX_SHADER
 
-		gl.shaders.f_geom_wetiso={
-		source=[[
+#ifdef FRAGMENT_SHADER
 
-#version 100
-#version 120
 #ifdef VERSION_ES
 precision mediump float;
 #endif
@@ -170,25 +166,19 @@ vec3 d=vec3(0.0,0.0,-1.0);
 void main(void)
 {
 	vec4 tc=vec4(0.0,0.0,0.0,0.0);
-	if( floor(v_face+(1.0/4096.0)) == ceil(v_face-(1.0/4096.0)) )
-	{
+//	if( floor(v_face+(1.0/64.0)) == ceil(v_face-(1.0/64.0)) )
+//	{
 		tc=texture2D(tex, v_texcoord);
-	}
+//	}
 
 	vec3 n=normalize(v_normal);
-	gl_FragColor= tc + (v_color*max( n.z, 0.25 ))*(1.0-tc.a) ;
+	gl_FragColor= tc + (v_color*max( -n.z, 0.25 ))*(1.0-tc.a) ;
 	gl_FragColor.a=1.0;
 }
 
-	]]
-}
+#endif //FRAGMENT_SHADER
 
-		gl.programs.geom_wetiso={
-			vshaders={"v_geom_wetiso"},
-			fshaders={"f_geom_wetiso"},
-		}
-	
-	end
+]])
 
 	local f1=cake.fonts.get("Vera")
 	local f2=f1.images[1]
@@ -226,12 +216,17 @@ void main(void)
 			end
 --			font.draw("abcdefghijklmnopqrstuvwxyz")
 
-			local a="e" -- need an upside down E
-			local w=font.width(a)
-			gl.Translate(128 + 64 ,64)
-			gl.Rotate(180 ,0,0,1 )
-			font.set_xy( -(w/2)  , -32 -32 )
-			font.draw(a)
+			do
+				local i=2
+				local a="e" -- need an upside down E
+				local w=font.width(a)
+				gl.PushMatrix()
+				gl.Translate((i-1)*128 + 64 ,64,0)
+				gl.Rotate(180 ,0,0,1 )
+				font.set_xy( -(w/2)  , -32 -32 )
+				font.draw(a)
+				gl.PopMatrix()
+			end
 			
 		font_cache_draw()
 
