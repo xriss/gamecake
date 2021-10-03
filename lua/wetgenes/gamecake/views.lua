@@ -87,7 +87,7 @@ function M.bake(oven,views)
 
 		view.cx=opts.cx or 0.0	-- set starting point on screen 0,0,0 topleft 0.5,0.5,0.0 center of screen and 1.0,1.0,0.0 is bottom right
 		view.cy=opts.cy or 0.0
-		view.cz=opts.cz or 0.5
+		view.cz=opts.cz or 0.0
 
 -- the projection view size, mostly aspect, that we will be aiming for
 		if view.win then
