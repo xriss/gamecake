@@ -278,7 +278,7 @@ function M.bake(oven,views)
 
 			if view.fov==0 then
 
-				view.pmtx[11] = -2/view.vz		-- Z = Z mul
+				view.pmtx[11] = -1/view.vz		-- Z = Z mul
 				view.pmtx[15] = 0				-- Z = Z add
 				
 				view.pmtx[12] = 0				-- W = Z mul
