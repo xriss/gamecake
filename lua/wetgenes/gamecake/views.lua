@@ -272,17 +272,21 @@ function M.bake(oven,views)
 -- depth buffer fix an fov of 0 is a uniform projection
 			view.pmtx[16] = 1					-- W = W add
 
+
+-- only use half the Z buffer in perspective mode.
+-- z/w is in the 1.0 to 0.0 clip range sp the depth buffer is in 0.0 to 0,5
+
 			if view.fov==0 then
 
 				view.pmtx[11] = -2/view.vz		-- Z = Z mul
-				view.pmtx[15] = -1				-- Z = Z add
+				view.pmtx[15] = 0				-- Z = Z add
 				
 				view.pmtx[12] = 0				-- W = Z mul
 
 			else
 
-				view.pmtx[11] = -2/view.vz		-- Z = Z mul
-				view.pmtx[15] = -1				-- Z = Z add
+				view.pmtx[11] = -1				-- Z = Z mul
+				view.pmtx[15] = 0				-- Z = Z add
 
 				view.pmtx[12] = -1				-- W = Z mul
 				
