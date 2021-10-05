@@ -270,7 +270,6 @@ function M.bake(oven,views)
 			end
 
 -- depth buffer fix an fov of 0 is a uniform projection
-			view.pmtx[16] = 1					-- W = W add
 
 --[[
 
@@ -286,12 +285,14 @@ we should reverse the depth map but again only ES3 lets you do that... so we
 compromise.
 
 ]]
+
 			if view.fov==0 then
 
 				view.pmtx[11] = -1/view.vz		-- Z = Z mul
 				view.pmtx[15] = 0				-- Z = Z add
 				
 				view.pmtx[12] = 0				-- W = Z mul
+				view.pmtx[16] = 1				-- W = W add
 
 			else
 
@@ -299,6 +300,7 @@ compromise.
 				view.pmtx[15] = 0				-- Z = Z add
 
 				view.pmtx[12] = -1				-- W = Z mul
+				view.pmtx[16] = 1				-- W = W add
 				
 			end
 
