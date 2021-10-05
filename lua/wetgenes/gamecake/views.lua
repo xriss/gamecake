@@ -272,10 +272,20 @@ function M.bake(oven,views)
 -- depth buffer fix an fov of 0 is a uniform projection
 			view.pmtx[16] = 1					-- W = W add
 
+--[[
 
--- only use half the Z buffer in perspective mode.
--- z/w is in the 1.0 to 0.0 clip range sp the depth buffer is in 0.0 to 0,5
+only use half the Z buffer and infinite perspective depth (no clip far and 
+virtually no clip near) orthogonal uses the view.z as max depth and -view.z as 
+min depth to behave like perspective
 
+z/w is in the 1.0 to 0.0 range so the depth buffer is in 0.0 to 0.5 we actually 
+bleed out of this range since we cant clip at 0.
+
+We could also use glClipControl for that but we do not have that in ES... and 
+we should reverse the depth map but again only ES3 lets you do that... so we 
+compromise.
+
+]]
 			if view.fov==0 then
 
 				view.pmtx[11] = -1/view.vz		-- Z = Z mul
