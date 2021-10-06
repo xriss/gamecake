@@ -40,11 +40,15 @@ M.bake=function(oven,screen)
 
 	end
 
+	screen.shader_args=""
+
 	screen.camera_fov=0.5
 	screen.base_scale=1
 	screen.occlusion_scale=1
 
 	screen.setup=function()
+	
+		screen.shader_args=""
 
 		screen.loads()
 
@@ -157,7 +161,7 @@ M.bake=function(oven,screen)
 			 1,	-1,	0,	1,	0,
 		}
 
-		local opts=""
+		local opts=screen.shader_args
 		if scene and scene.systems and scene.systems.input and scene.systems.input.tweak_number then opts=opts.."&TWEAK="..scene.systems.input.tweak_number end
 
 		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_draw?GAMMA=1.5"..opts,function(p)
@@ -208,6 +212,7 @@ M.bake=function(oven,screen)
 
 	end
 
+
 	screen.build_occlusion=function(scene)
 
 		local t={
@@ -221,7 +226,7 @@ M.bake=function(oven,screen)
 		oven.cake.views.push_and_apply(screen.view_occlusion)
 		gl.state.push(gl.state_defaults)
 
-		local opts=""
+		local opts=screen.shader_args
 		if shadow.default then opts=opts.."&SHADOW="..shadow.default end
 		if scene and scene.systems and scene.systems.input and scene.systems.input.tweak_number then opts=opts.."&TWEAK="..scene.systems.input.tweak_number end
 

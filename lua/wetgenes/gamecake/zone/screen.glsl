@@ -52,19 +52,25 @@ out vec4 FragColor;
 
 void main(void)
 {
-//	FragColor=vec4( texture(tex0, v_texcoord).rgb * texture(tex1, v_texcoord).rgb , 1.0 );
-//	FragColor=vec4( texture(tex1, v_texcoord).rgb , 1.0 );
-//	FragColor=vec4( texture(tex0, v_texcoord).rgb * (1.0-texture(tex1, v_texcoord).b) + texture(tex1, v_texcoord).g*0.25 , 1.0 );
-//	FragColor=vec4( texture(tex0, v_texcoord).rgb * (1.0-texture(tex1, v_texcoord).b) + texture(tex1, v_texcoord).g*0.25 , 1.0 );
-
 	vec3 m = texture(tex0, v_texcoord).rgb ;
 	float s = texture(tex1, v_texcoord).r ;
 	vec3 b = texture(tex2, v_texcoord).rgb ;
 
-//	s = ( smoothstep( 0.0 , 0.5 , s )*2.0 + (1.0 - pow( (1.0-s) , 3.0 ) )*1.0 ) / 3.0;
-//	s = smoothstep( 0.0 , 1.0 , s ) ;
+	
+#ifdef COLOR_FIX
+	m=COLOR_FIX;
+#endif
 
+#ifdef SHADOW_FIX
+	s=SHADOW_FIX;
+#else
 	s = pow( s , 1.0/2.0 );
+#endif
+
+#ifdef BLOOM_FIX
+	b=BLOOM_FIX;
+#endif
+
 
 	vec3 c;
 	
@@ -203,7 +209,6 @@ float goldienoise(vec3 p)
 float random2d(vec2 st) {
     return goldienoise(vec3(st,1.0));
 }
-
 
 float ambient_occlusion( vec2 vv )
 {
