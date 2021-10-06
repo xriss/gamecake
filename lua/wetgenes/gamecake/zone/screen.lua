@@ -157,7 +157,10 @@ M.bake=function(oven,screen)
 			 1,	-1,	0,	1,	0,
 		}
 
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_draw?GAMMA=1.5&TWEAK="..scene.systems.input.tweak_number,function(p)
+		local opts=""
+		if scene and scene.systems and scene.systems.input and scene.systems.input.tweak_number then opts=opts.."&TWEAK="..scene.systems.input.tweak_number end
+
+		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_draw?GAMMA=1.5"..opts,function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo:bind_texture()
@@ -218,8 +221,12 @@ M.bake=function(oven,screen)
 		oven.cake.views.push_and_apply(screen.view_occlusion)
 		gl.state.push(gl.state_defaults)
 
+		local opts=""
+		if shadow.default then opts=opts.."&SHADOW="..shadow.default end
+		if scene and scene.systems and scene.systems.input and scene.systems.input.tweak_number then opts=opts.."&TWEAK="..scene.systems.input.tweak_number end
+
 		screen.fbo_occlusion:bind_frame()
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_occlusion?TWEAK="..scene.systems.input.tweak_number.."&SHADOW="..shadow.default,function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_occlusion?TMP=1"..opts,function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo:bind_depth()

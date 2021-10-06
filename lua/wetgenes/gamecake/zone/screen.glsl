@@ -68,6 +68,8 @@ void main(void)
 
 	vec3 c;
 	
+#ifdef TWEAK
+
 #if TWEAK==0
 
 	c= m * s + b;
@@ -91,6 +93,12 @@ void main(void)
 #elif TWEAK==5
 
 	c= m + b ;
+
+#endif
+
+#else
+
+	c= m * s + b;
 
 #endif
 
