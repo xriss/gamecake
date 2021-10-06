@@ -226,6 +226,8 @@ float ambient_occlusion( vec2 vv )
 	return (ac/float(AO_SAMPLES));
 }
 
+#ifdef SHADOW
+
 uniform mat4 camera;
 uniform mat4 shadow_mtx;
 uniform sampler2D shadow_map;
@@ -264,14 +266,16 @@ float shadow_occlusion( vec2 vv )
 //	return	1.0-shadow_value;
 	return ( (1.0-shadow_value)*shadow[0] + (1.0-shadow[0]) ) ;
 }
+#endif
 
 void main(void)
 {
+#ifdef SHADOW
 	float s=shadow_occlusion(v_texcoord);
+#else
+	float s=1.0;
+#endif
 	float t=ambient_occlusion(v_texcoord);
-//	float d=pow( 1.0-smoothstep(0.0 , 0.5 , t ) , 1.0 );
-//	float l=pow( smoothstep(0.5 , 1.0 , t ) , 2.0 );
-//	d=pow( smoothstep(0.0 , 1.0 , d ) , 1.0/1.0 )*0.4+0.6;
 	FragColor=vec4( s*t, 1.0 , 1.0 , 1.0 );
 
 }
