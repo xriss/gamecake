@@ -329,4 +329,3 @@ end
 
  -- use ffi if we have it (luajit test) or fall back on the c library
 fats:functions(jit)
-fats:functions(false)
