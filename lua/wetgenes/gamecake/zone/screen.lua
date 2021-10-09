@@ -9,6 +9,9 @@ local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
 local wzips=require("wetgenes.zips")
 
+local wques=require("wetgenes.ques")
+
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -39,6 +42,56 @@ M.bake=function(oven,screen)
 		gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
 
 	end
+
+	screen.shader_qs={
+	
+-- all shaders
+
+		zone_screen={
+		},
+
+-- named shaders
+
+		zone_screen_draw={
+			GAMMA=1.5,
+		},
+		
+		zone_screen_build_occlusion={
+		},
+		
+		zone_screen_build_dark={
+		},
+		
+		zone_screen_build_bloom_pick={
+		},
+		
+		zone_screen_build_blur={
+			BLUR=22,
+		},
+	}
+	
+	screen.get_shader_qs=function(name,opts)
+
+		local q={}
+		
+		for n,v in pairs( screen.shader_qs.zone_screen or {} ) do
+			q[n]=v
+		end
+		
+		for n,v in pairs( screen.shader_qs[name] or {} ) do
+			q[n]=v
+		end
+
+		for n,v in pairs( opts or {} ) do
+			q[n]=v
+		end
+		
+		q[0]=name
+	
+		return wques.build(q)
+
+	end
+
 
 	screen.shader_args=""
 
@@ -161,10 +214,11 @@ M.bake=function(oven,screen)
 			 1,	-1,	0,	1,	0,
 		}
 
-		local opts=screen.shader_args
-		if scene and scene.systems and scene.systems.input and scene.systems.input.tweak_number then opts=opts.."&TWEAK="..scene.systems.input.tweak_number end
-
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_draw?GAMMA=1.5"..opts,function(p)
+--		local opts=screen.shader_args
+--		if scene and scene.systems and scene.systems.input and scene.systems.input.tweak_number then opts=opts.."&TWEAK="..scene.systems.input.tweak_number end
+--		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_draw?GAMMA=1.5"..opts,function(p)
+		
+		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_draw"),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo:bind_texture()
@@ -226,12 +280,13 @@ M.bake=function(oven,screen)
 		oven.cake.views.push_and_apply(screen.view_occlusion)
 		gl.state.push(gl.state_defaults)
 
-		local opts=screen.shader_args
-		if shadow.default then opts=opts.."&SHADOW="..shadow.default end
-		if scene and scene.systems and scene.systems.input and scene.systems.input.tweak_number then opts=opts.."&TWEAK="..scene.systems.input.tweak_number end
+--		local opts=screen.shader_args
+--		if shadow.default then opts=opts.."&SHADOW="..shadow.default end
+--		if scene and scene.systems and scene.systems.input and scene.systems.input.tweak_number then opts=opts.."&TWEAK="..scene.systems.input.tweak_number end
 
 		screen.fbo_occlusion:bind_frame()
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_occlusion?TMP=1"..opts,function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_occlusion?TMP=1"..opts,function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_occlusion"),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo:bind_depth()
@@ -249,7 +304,8 @@ M.bake=function(oven,screen)
 		screen.fbo_blur:resize( screen.fbo_occlusion.w , screen.fbo_occlusion.h , 0 )
 
 		screen.fbo_blur:bind_frame()
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_dark?DARK=1",function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_dark?DARK=1",function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_dark",{DARK=1}),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo_occlusion:bind_texture()
@@ -259,7 +315,8 @@ M.bake=function(oven,screen)
 		end)
 
 		screen.fbo_occlusion:bind_frame()
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_dark?DARK=2",function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_dark?DARK=2",function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_dark",{DARK=2}),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo_blur:bind_texture()
@@ -289,7 +346,8 @@ M.bake=function(oven,screen)
 		gl.state.push(gl.state_defaults)
 
 		screen.fbo_bloom:bind_frame()
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_bloom_pick",function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_bloom_pick",function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_bloom_pick"),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo:bind_texture()
@@ -308,7 +366,8 @@ M.bake=function(oven,screen)
 		screen.fbo_blur:resize( screen.fbo_bloom.w , screen.fbo_bloom.h , 0 )
 
 		screen.fbo_blur:bind_frame()
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=0&BLUR=22",function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=0&BLUR=22",function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{BLUR_AXIS=0}),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo_bloom:bind_texture()
@@ -318,7 +377,8 @@ M.bake=function(oven,screen)
 		end)
 
 		screen.fbo_bloom:bind_frame()
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=1&BLUR=22",function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=1&BLUR=22",function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{BLUR_AXIS=1}),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo_blur:bind_texture()
