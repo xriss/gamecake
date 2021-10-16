@@ -5,8 +5,8 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
-#include "deep.h"
-#include "compat.h"
+#include "lanes/src/deep.h"
+#include "lanes/src/compat.h"
 
 #if (defined PLATFORM_WIN32) || (defined PLATFORM_POCKETPC)
 #define LANES_API __declspec(dllexport)
@@ -16,6 +16,7 @@
 
 // ################################################################################################
 
+// a lanes-deep userdata. needs DeepPrelude and luaG_newdeepuserdata from Lanes code.
 struct s_MyDeepUserdata
 {
 	DeepPrelude prelude; // Deep userdata MUST start with this header
@@ -35,10 +36,33 @@ static int deep_set( lua_State* L)
 
 // ################################################################################################
 
+// won't actually do anything as deep userdata don't have uservalue slots
+static int deep_setuv( lua_State* L)
+{
+	struct s_MyDeepUserdata* self = luaG_todeep( L, deep_test_id, 1);
+	int uv = (int) luaL_optinteger( L, 2, 1);
+	lua_settop( L, 3);
+	lua_pushboolean( L, lua_setiuservalue( L, 1, uv) != 0);
+	return 1;
+}
+
+// ################################################################################################
+
+// won't actually do anything as deep userdata don't have uservalue slots
+static int deep_getuv( lua_State* L)
+{
+	struct s_MyDeepUserdata* self = luaG_todeep( L, deep_test_id, 1);
+	int uv = (int) luaL_optinteger( L, 2, 1);
+	lua_getiuservalue( L, 1, uv);
+	return 1;
+}
+
+// ################################################################################################
+
 static int deep_tostring( lua_State* L)
 {
 	struct s_MyDeepUserdata* self = luaG_todeep( L, deep_test_id, 1);
-	lua_pushfstring( L, "deep(%d)", self->val);
+	lua_pushfstring( L, "%p:deep(%d)", lua_topointer( L, 1), self->val);
 	return 1;
 }
 
@@ -57,6 +81,8 @@ static luaL_Reg const deep_mt[] =
 	{ "__tostring", deep_tostring},
 	{ "__gc", deep_gc},
 	{ "set", deep_set},
+	{ "setuv", deep_setuv},
+	{ "getuv", deep_getuv},
 	{ NULL, NULL }
 };
 
@@ -101,7 +127,10 @@ static void* deep_test_id( lua_State* L, enum eDeepOp op_)
 
 int luaD_new_deep( lua_State* L)
 {
-	return luaG_newdeepuserdata( L, deep_test_id);
+	int nuv = (int) luaL_optinteger( L, 1, 0);
+	// no additional parameter to luaG_newdeepuserdata!
+	lua_settop( L, 0);
+	return luaG_newdeepuserdata( L, deep_test_id, nuv);
 }
 
 // ################################################################################################
@@ -148,7 +177,7 @@ static int clonable_getuv( lua_State* L)
 static int clonable_tostring(lua_State* L)
 {
 	struct s_MyClonableUserdata* self = (struct s_MyClonableUserdata*) lua_touserdata( L, 1);
-	lua_pushfstring( L, "clonable(%d)", self->val);
+	lua_pushfstring( L, "%p:clonable(%d)", lua_topointer( L, 1), self->val);
 	return 1;
 }
 
@@ -162,12 +191,17 @@ static int clonable_gc( lua_State* L)
 
 // ################################################################################################
 
+// this is all we need to make a userdata lanes-clonable. no dependency on Lanes code.
 static int clonable_lanesclone( lua_State* L)
 {
 	switch( lua_gettop( L))
 	{
-		case 0:
-		lua_pushinteger( L, sizeof( struct s_MyClonableUserdata));
+		case 1:
+		{
+			// in case we need it to compute the amount of memory we need
+			struct s_MyClonableUserdata* self = lua_touserdata( L, 1);
+			lua_pushinteger( L, sizeof( struct s_MyClonableUserdata));
+		}
 		return 1;
 
 		case 2:
@@ -175,8 +209,8 @@ static int clonable_lanesclone( lua_State* L)
 			struct s_MyClonableUserdata* self = lua_touserdata( L, 1);
 			struct s_MyClonableUserdata* from = lua_touserdata( L, 2);
 			*self = *from;
-			return 0;
 		}
+		return 0;
 
 		default:
 		(void) luaL_error( L, "Lanes called clonable_lanesclone with unexpected parameters");
@@ -223,7 +257,7 @@ extern int __declspec(dllexport) luaopen_deep_test(lua_State* L)
 {
 	luaL_newlib( L, deep_module);                           // M
 
-	// preregister the metatables for the types we can instanciate so that Lanes can know about them
+	// preregister the metatables for the types we can instantiate so that Lanes can know about them
 	if( luaL_newmetatable( L, "clonable"))                  // M mt
 	{
 		luaL_setfuncs( L, clonable_mt, 0);

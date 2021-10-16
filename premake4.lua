@@ -368,6 +368,10 @@ elseif NIX then
 
 	platforms { "gcc" } --hax
 
+	buildlinkoptions {
+		"-pthread",
+	}
+
 	buildoptions{
 		"-Wno-format-security",
 		"-Wno-deprecated-declarations",

@@ -20,8 +20,18 @@ typedef struct s_Universe Universe;
 void luaG_dump( lua_State* L);
 #endif // _DEBUG
 
-lua_State* create_state( Universe* U, lua_State* from_);
-lua_State* luaG_newstate( Universe* U, lua_State* _from, char const* libs);
+// ################################################################################################
+
+void push_registry_subtable_mode( lua_State* L, UniqueKey key_, const char* mode_);
+void push_registry_subtable( lua_State* L, UniqueKey key_);
+
+enum e_vt
+{
+	VT_NORMAL,
+	VT_KEY,
+	VT_METATABLE
+};
+bool_t inter_copy_one( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_State* L, uint_t i, enum e_vt vt, LookupMode mode_, char const* upName_);
 
 // ################################################################################################
 
@@ -31,15 +41,10 @@ int luaG_inter_copy( Universe* U, lua_State* L, lua_State* L2, uint_t n, LookupM
 int luaG_inter_move( Universe* U, lua_State* L, lua_State* L2, uint_t n, LookupMode mode_);
 
 int luaG_nameof( lua_State* L);
-int luaG_new_require( lua_State* L);
 
 void populate_func_lookup_table( lua_State* L, int _i, char const* _name);
-void serialize_require( DEBUGSPEW_PARAM_COMMA( Universe* U) lua_State *L);
 void initialize_allocator_function( Universe* U, lua_State* L);
 void cleanup_allocator_function( Universe* U, lua_State* L);
-
-void initialize_on_state_create( Universe* U, lua_State* L);
-void call_on_state_create( Universe* U, lua_State* L, lua_State* from_, LookupMode mode_);
 
 // ################################################################################################
 
