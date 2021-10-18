@@ -34,7 +34,6 @@ M.bake=function(oven,screen)
 
 	local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
-	local shadow=oven.rebake("wetgenes.gamecake.zone.shadow")
 
 	screen.loads=function()
 
@@ -57,6 +56,7 @@ M.bake=function(oven,screen)
 		},
 		
 		zone_screen_build_occlusion={
+--			SHADOW=" 0.0 , 0.0 , 0.0 , 0.0 ",
 		},
 		
 		zone_screen_build_dark={

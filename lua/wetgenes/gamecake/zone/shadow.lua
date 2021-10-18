@@ -20,6 +20,8 @@ M.bake=function(oven,shadow)
 
 	local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
+	local screen=oven.rebake("wetgenes.gamecake.zone.screen")
+
 	shadow.mtx=M4()
 
 	shadow.mapsize=2048*2
@@ -57,7 +59,7 @@ M.bake=function(oven,shadow)
 
 	end
 	
-	shadow.default="0.0,0.0,0.0,0.0"
+--	shadow.default="0.0,0.0,0.0,0.0"
 	shadow.draw_head=function(scene)
 
 		gl.PushMatrix()
@@ -102,8 +104,9 @@ M.bake=function(oven,shadow)
 			x=math.floor(0.5+x*snap)/snap
 			y=math.floor(0.5+y*snap)/snap
 			z=math.floor(0.5+z*snap)/snap
-
-			shadow.default="0.6,"..0.000000*s/sd..","..0.000008*s/sd..",0.0"
+			
+			
+			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..0.000000*s/sd..","..0.000008*s/sd..",0.0"
 
 --			x=0
 --			y=0
