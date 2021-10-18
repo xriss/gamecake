@@ -54,11 +54,16 @@ end
 
 
 
-newgcctoolchain {
+newplatform {
     name = "android",
     description = "android",
-    prefix = "arm-linux-androideabi-",
-    cppflags = "-fPIC",
+	gcc=
+	{
+		cc ="armv7a-linux-androideabi23-clang",
+		cxx="armv7a-linux-androideabi23-clang++",
+		ar ="armv7a-linux-androideabi23-ar",
+		cppflags = "-MMD -fPIC",
+	}
 }
 
 newgcctoolchain {

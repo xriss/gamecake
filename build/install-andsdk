@@ -2,14 +2,28 @@ cd `dirname $0`
 
 cd $1
 
-#sudo apt-get install -y luajit
-#sudo apt-get install -y lua-filesystem
+sudo apt-get install -y luajit
+sudo apt-get install -y lua-filesystem
 #sudo apt-get install -y cmake
 #sudo apt-get install -y python
-#sudo apt-get install -y git
+sudo apt-get install -y git
+
+sudo apt-get install -y unzip
+sudo apt-get install -y default-jdk
 
 
-wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -o andsdk.zip
-rm -rf andsdk
+wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O andsdk.zip
 unzip andsdk.zip
+rm andsdk.zip
+
+
+rm -rf andsdk
+mkdir andsdk
+echo -e "Y\nY\nY\nY\nY\nY\nY\nY\nY" | cmdline-tools/bin/sdkmanager --sdk_root=/home/vagrant/andsdk --licenses
+cmdline-tools/bin/sdkmanager --sdk_root=/home/vagrant/andsdk --install "cmdline-tools;latest"
+rm -rf cmdline-tools
+
+
+andsdk/cmdline-tools/latest/bin/sdkmanager --install "ndk-bundle"
+andsdk/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-23"
 
