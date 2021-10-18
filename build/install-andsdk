@@ -1,0 +1,15 @@
+cd `dirname $0`
+
+cd $1
+
+#sudo apt-get install -y luajit
+#sudo apt-get install -y lua-filesystem
+#sudo apt-get install -y cmake
+#sudo apt-get install -y python
+#sudo apt-get install -y git
+
+
+wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -o andsdk.zip
+rm -rf andsdk
+unzip andsdk.zip
+
