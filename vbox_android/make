@@ -8,3 +8,5 @@ vagrant up
 
 #vagrant halt
 
+vagrant ssh -c " /gamecake/android/make $* "
+
