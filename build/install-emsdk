@@ -1,6 +1,12 @@
-cd `dirname $0`
+#cd `dirname $0`
 
-cd $1
+if [ -z "$1" ] ; then
+	cd ~
+else
+	cd $1
+fi
+echo "echo installing emscipten sdk into $(pwd) / emsdk "
+
 
 sudo apt-get install -y luajit
 sudo apt-get install -y lua-filesystem

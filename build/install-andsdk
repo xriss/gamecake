@@ -1,11 +1,26 @@
-cd `dirname $0`
+#cd `dirname $0`
 
-cd $1
+if [ -z "$1" ] ; then
+        cd ~
+else
+        cd $1
+fi
+echo "echo installing android sdk into $(pwd) / andsdk "
+
+ANDSDK=$(pwd)/andsdk
+
+cat >"andsdk-env.sh" <<EOF
+
+export ANDSDK=$ANDSDK
+export PATH=$ANDSDK/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin:\$PATH
+
+EOF
+chmod +x andsdk-env.sh
 
 sudo apt-get install -y luajit
 sudo apt-get install -y lua-filesystem
-#sudo apt-get install -y cmake
-#sudo apt-get install -y python
+sudo apt-get install -y cmake
+sudo apt-get install -y python
 sudo apt-get install -y git
 
 sudo apt-get install -y unzip
@@ -19,7 +34,7 @@ rm andsdk.zip
 
 rm -rf andsdk
 mkdir andsdk
-echo -e "Y\nY\nY\nY\nY\nY\nY\nY\nY" | cmdline-tools/bin/sdkmanager --sdk_root=/home/vagrant/andsdk --licenses
+yes | cmdline-tools/bin/sdkmanager --sdk_root=/home/vagrant/andsdk --licenses
 cmdline-tools/bin/sdkmanager --sdk_root=/home/vagrant/andsdk --install "cmdline-tools;latest"
 rm -rf cmdline-tools
 

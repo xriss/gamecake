@@ -1,8 +1,10 @@
 cd `dirname $0`
 
-export PATH=~/andsdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+source ~/andsdk-env.sh
 
-../build/make --gcc=android --cpu=armv7
+
+
+../build/make --gcc=android --cpu=armv7 $*
 
 
 
