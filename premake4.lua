@@ -9,68 +9,70 @@ newoption {
    }
 }
 
-
-
-
 function buildlinkoptions(t) buildoptions(t) linkoptions(t) end
 
-------------------------------------------------------------------------
--- hacky premake functions
-------------------------------------------------------------------------
 
 function newplatform(plf)
-    local name = plf.name
-    local description = plf.description
  
-    -- Register new platform
-    premake.platforms[name] = {
-        cfgsuffix = "_"..name,
+    premake.gcc.platforms[plf.name] = plf.gcc
+
+    premake.platforms[plf.name] = {
+        cfgsuffix = "_"..plf.name,
         iscrosscompiler = true
     }
+
+    table.insert(premake.option.list["platform"].allowed, { plf.name, plf.description })
+    table.insert(premake.fields.platforms.allowed, plf.name)
  
-    -- Allow use of new platform in --platfroms
-    table.insert(premake.option.list["platform"].allowed, { name, description })
-    table.insert(premake.fields.platforms.allowed, name)
- 
-    -- Add compiler support
-    -- gcc
-    premake.gcc.platforms[name] = plf.gcc
-    --other compilers (?)
-end
- 
-function newgcctoolchain(toolchain)
-    newplatform {
-        name = toolchain.name,
-        description = toolchain.description,
-        gcc = {
-            cc = toolchain.prefix .. "gcc",
-            cxx = toolchain.prefix .. "g++",
-            ar = toolchain.prefix .. "ar",
-            cppflags = "-MMD " .. toolchain.cppflags,
-        }
-    }
 end
 
 
-
+ANDROID_VERSION="23"
 
 newplatform {
-    name = "android",
-    description = "android",
+    name = "android-a32",
+    description = "android 32 bit arm",
 	gcc=
 	{
-		cc ="armv7a-linux-androideabi23-clang",
-		cxx="armv7a-linux-androideabi23-clang++",
-		ar ="armv7a-linux-androideabi23-ar",
+		cc ="armv7a-linux-androideabi"..ANDROID_VERSION.."-clang",
+		cxx="armv7a-linux-androideabi"..ANDROID_VERSION.."-clang++",
+		ar ="arm-linux-androideabi-ar",
+		cppflags = "-MMD -fPIC",
+	}
+}
+newplatform {
+    name = "android-a64",
+    description = "android 64 bit arm",
+	gcc=
+	{
+		cc ="aarch64-linux-android"..ANDROID_VERSION.."-clang",
+		cxx="aarch64-linux-android"..ANDROID_VERSION.."-clang++",
+		ar ="aarch64-linux-android-ar",
 		cppflags = "-MMD -fPIC",
 	}
 }
 
-newgcctoolchain {
-    name = "android-x86",
-    description = "android-x86",
-    prefix = "i686-android-linux-",
-    cppflags = "-fPIC",
+newplatform {
+    name = "android-x32",
+    description = "android 32 bit intel",
+	gcc=
+	{
+		cc ="i686-linux-android"..ANDROID_VERSION.."-clang",
+		cxx="i686-linux-android"..ANDROID_VERSION.."-clang++",
+		ar ="i686-linux-android-ar",
+		cppflags = "-MMD -fPIC",
+	}
+}
+newplatform {
+    name = "android-x64",
+    description = "android 64 bit intel",
+	gcc=
+	{
+		cc ="x86_64-linux-android"..ANDROID_VERSION.."-clang",
+		cxx="x86_64-linux-android"..ANDROID_VERSION.."-clang++",
+		ar ="x86_64-linux-android-ar",
+		cppflags = "-MMD -fPIC",
+	}
 }
 
 newplatform {
@@ -141,14 +143,6 @@ newplatform {
     }
 }
 
---[[ ios notez, something like this makefile but platforms are in /Applications
-
-/Applications/Xcode.app/Contents/Developer/Platforms/
-
-https://gitorious.org/mac-app-from-scratch/ios-app-from-scratch/source/ccb29c96bce7ee72aaa9bc222415f4393d008b9f:Makefile#L77
-
-]]
-
 
 ------------------------------------------------------------------------
 -- work out what we should be building for
@@ -216,16 +210,13 @@ end
 
 if CPU=="native" then -- done
 else
-	if CPU=="-64" then
-		CPU="64"
-	elseif CPU=="-32" then
-		CPU="32"
-	elseif CPU=="-arm" then
-		CPU="arm"
-	elseif CPU=="-armv7" then
-		CPU="armv7"
-	else
-		CPU="native"
+	if 			CPU=="-64" 		then		CPU="x64"
+	elseif 		CPU=="-32" 		then		CPU="x32"
+	elseif 		CPU=="-x64" 	then		CPU="x64"
+	elseif 		CPU=="-x32" 	then		CPU="x32"
+	elseif 		CPU=="-a32" 	then		CPU="a32"
+	elseif 		CPU=="-a64" 	then		CPU="a64"
+	else									CPU="native"
 	end
 end
 
@@ -284,48 +275,63 @@ if EMCC then
 
 elseif ANDROID then
 
-	local androidsdk=path.getabsolute("./sdks/android-sdk")
-	local androidsys=path.getabsolute("./sdks/android-9-arm/sysroot/usr")
+--	local androidsdk=path.getabsolute("./sdks/android-sdk")
+--	local androidsys=path.getabsolute("./sdks/android-9-arm/sysroot/usr")
 
 
 	defines "ANDROID"
 
 	defines("LUA_USE_POSIX")
 	
--- these are application specific and need proper paths so will get overidden
-AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
+	includedirs { "exe/android/include" }
 
-	if CPU=="32" then
+	if CPU=="x32" then
 
-		platforms { "android-x86" } --hax
+		platforms { "android-x32" } --hax
 	
-		androidsys=path.getabsolute("./sdks/android-9-x86/sysroot/usr")
+		local lib=path.getabsolute("exe/android/lib/x86")
+		libdirs { lib }
+		AND_OUT_DIR=AND_OUT_DIR or lib
 		
-		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/x86")
-
 		buildoptions{ "-mtune=generic" }
---		linkoptions{ "-m32" }
-		
-	elseif CPU=="arm" then
+
+	elseif CPU=="x64" then
+
+		platforms { "android-x64" } --hax
 	
-		platforms { "android" } --hax
+		local lib=path.getabsolute("exe/android/lib/x86_64")
+		libdirs { lib }
+		AND_OUT_DIR=AND_OUT_DIR or lib
+		
+		buildoptions{ "-mtune=generic" }
+
+	elseif CPU=="a32" then
+	
+		platforms { "android-a32" } --hax
 		
 		buildoptions{ "-mthumb"  }
+
+		local lib=path.getabsolute("exe/android/lib/armeabi-v7a")
+		libdirs { lib }
+		AND_OUT_DIR=AND_OUT_DIR or lib
 		
-		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi")
-		
-	elseif CPU=="armv7" then
+		buildoptions{ "-mtune=generic" }
+
+	elseif CPU=="a64" then
 	
-		platforms { "android" } --hax
+		platforms { "android-a64" } --hax
 
-		buildoptions{ "-march=armv7-a" , "-mfloat-abi=softfp" , "-mfpu=vfpv3" }
-		linkoptions{ "--fix-cortex-a8" }
+		local lib=path.getabsolute("exe/android/lib/arm64-v8a")
+		libdirs { lib }
+		AND_OUT_DIR=AND_OUT_DIR or lib
 
-		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi-v7a")
+		buildoptions{ "-mtune=generic" }
+
 	end
 
-	includedirs { androidsys.."/include" }
-	libdirs { androidsys.."/lib" }
+--		buildoptions{ "-march=armv7-a" , "-mfloat-abi=softfp" , "-mfpu=vfpv3" }
+--		linkoptions{ "--fix-cortex-a8" }
+
 
 elseif WINDOWS then
 
@@ -357,12 +363,12 @@ elseif OSX then
 	buildoptions{"-mmacosx-version-min=10.12"}
 	linkoptions {"-mmacosx-version-min=10.12"}
 
-	if CPU=="32" then
+	if CPU=="x32" then
 	
 		buildoptions{"-m32 -msse -msse2 -mtune=generic"}
 		linkoptions {"-m32 -msse -msse2 -mtune=generic"}
 		
-	elseif CPU=="64" then
+	elseif CPU=="x64" then
 	
 		buildoptions{"-m64 -mtune=generic"}
 		linkoptions {"-m64 -mtune=generic"}
@@ -410,12 +416,12 @@ elseif NIX then
 		platforms { "clang" } --hax
 	end
 
-	if CPU=="32" then
+	if CPU=="x32" then
 	
 		buildoptions{"-m32 -msse -msse2 -mtune=generic"}
 		linkoptions{"-m32 -msse -msse2 -mtune=generic"}
 		
-	elseif CPU=="64" then
+	elseif CPU=="x64" then
 	
 		buildoptions{"-m64 -mtune=generic"}
 		linkoptions{"-m64 -mtune=generic"}

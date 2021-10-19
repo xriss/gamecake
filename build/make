@@ -101,22 +101,25 @@ echo "debug: $debug, release: $release, clean: $clean, gcc: $gcc, cpu: $cpu, win
 
 echo " Available options are : "
 echo
-echo " ./make --release    # perform a release build (default) "
-echo " ./make --debug      # or perform a debug build "
+echo " ./make --release     # perform a release build (default) "
+echo " ./make --debug       # or perform a debug build "
 echo
-echo " ./make --clean      # delete objects and force a full rebuild "
+echo " ./make --clean       # delete objects and force a full rebuild "
 echo
-echo " ./make --jobs=1     # build one thing at a time "
+echo " ./make --jobs=1      # build one thing at a time "
 echo
-echo " ./make --gcc=gcc    # normal nix build using gcc (default) "
-echo " ./make --gcc=clang  # alternative nix build using clang "
-echo " ./make --gcc=emcc   # build using emscripten "
+echo " ./make --gcc=gcc     # normal nix build using gcc (default) "
+echo " ./make --gcc=clang   # alternative nix build using clang "
+echo " ./make --gcc=emcc    # build using emscripten "
+echo " ./make --gcc=android # build using android "
 echo
-echo " ./make --cpu=native # use the host cpu (default) "
-echo " ./make --cpu=32     # force a 32bit build "
-echo " ./make --cpu=64     # force a 64bit build "
+echo " ./make --cpu=native  # use the host cpu (default) "
+echo " ./make --cpu=32      # force a 32bit build "
+echo " ./make --cpu=64      # force a 64bit build "
+echo " ./make --cpu=arm     # force a 32bit arm build "
+echo " ./make --cpu=a64     # force a 64bit arm build "
 echo
-echo " ./make --win=raspi  # force the use of the raspi os interface "
+echo " ./make --win=raspi   # force the use of the raspi os interface "
 echo
 echo " ./make --openal=sys  # use system provided openal "
 echo
@@ -171,6 +174,12 @@ makeopts="config=debug_$gcc"
 
 fi
 
+# need to include cpu in android builds
+if [ "$gcc" = "android" ] ; then
+
+makeopts="$makeopts-$cpu"
+
+fi
 
 
 
@@ -198,12 +207,15 @@ cd ${buildhere}
 
 if [ "$*" = "clean" ] ; then
 
+echo " make -j$jobs $makeopts "
+
 make -j$jobs $makeopts clean
 make -j$jobs $makeopts
 
 else
 
-make -j$jobs $makeopts $*
+echo " make -j$jobs $makeopts "
+make -j$jobs $makeopts
 
 fi
 
