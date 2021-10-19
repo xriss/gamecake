@@ -12,7 +12,7 @@ ANDSDK=$(pwd)/andsdk
 cat >"andsdk-env.sh" <<EOF
 
 export ANDSDK=$ANDSDK
-export PATH=$ANDSDK/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin:\$PATH
+export PATH=$ANDSDK/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDSDK/ndk-bundle:\$PATH
 
 EOF
 chmod +x andsdk-env.sh
