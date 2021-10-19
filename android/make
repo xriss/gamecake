@@ -1,12 +1,10 @@
 cd `dirname $0`
 
-source ~/andsdk-env.sh
+#source ~/andsdk-env.sh
 
+#../build/make --gcc=android --cpu=armv7 $*
 
-
-../build/make --gcc=android --cpu=armv7 $*
-
-
+#ant 
 
 #if [ "$1" = "apk" ] ; then
 #	cd android
