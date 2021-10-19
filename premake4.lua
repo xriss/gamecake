@@ -12,37 +12,39 @@ newoption {
 function buildlinkoptions(t) buildoptions(t) linkoptions(t) end
 
 
-function newplatform(plf)
+function newplatform(platform)
  
-    premake.gcc.platforms[plf.name] = plf.gcc
+    platform.cfgsuffix = "_"..platform.name
+    platform.iscrosscompiler = true
 
-    premake.platforms[plf.name] = {
-        cfgsuffix = "_"..plf.name,
-        iscrosscompiler = true
-    }
+    premake.gcc.platforms[platform.name] = platform.gcc
+    premake.platforms[platform.name] = platform
 
-    table.insert(premake.option.list["platform"].allowed, { plf.name, plf.description })
-    table.insert(premake.fields.platforms.allowed, plf.name)
+    table.insert(premake.option.list["platform"].allowed, { platform.name, platform.description })
+    table.insert(premake.fields.platforms.allowed, platform.name)
  
 end
-
 
 ANDROID_VERSION="23"
 
 newplatform {
     name = "android-a32",
     description = "android 32 bit arm",
+    cpu_id = "a32",
+    cpu_name = "armeabi-v7a",
 	gcc=
 	{
 		cc ="armv7a-linux-androideabi"..ANDROID_VERSION.."-clang",
 		cxx="armv7a-linux-androideabi"..ANDROID_VERSION.."-clang++",
 		ar ="arm-linux-androideabi-ar",
-		cppflags = "-MMD -fPIC",
+		cppflags = "-MMD -fPIC",	-- should we build in thumb mode?  "-mthumb"
 	}
 }
 newplatform {
     name = "android-a64",
     description = "android 64 bit arm",
+    cpu_id = "a64",
+    cpu_name = "arm64-v8a",
 	gcc=
 	{
 		cc ="aarch64-linux-android"..ANDROID_VERSION.."-clang",
@@ -55,6 +57,8 @@ newplatform {
 newplatform {
     name = "android-x32",
     description = "android 32 bit intel",
+    cpu_id = "x32",
+    cpu_name = "x86",
 	gcc=
 	{
 		cc ="i686-linux-android"..ANDROID_VERSION.."-clang",
@@ -66,6 +70,8 @@ newplatform {
 newplatform {
     name = "android-x64",
     description = "android 64 bit intel",
+    cpu_id = "x64",
+    cpu_name = "x86_64",
 	gcc=
 	{
 		cc ="x86_64-linux-android"..ANDROID_VERSION.."-clang",
@@ -279,58 +285,18 @@ elseif ANDROID then
 --	local androidsys=path.getabsolute("./sdks/android-9-arm/sysroot/usr")
 
 
+	local platform=premake.platforms[ "android-"..CPU ]
+
+	platforms { "android-"..CPU } --hax
+
 	defines "ANDROID"
 
 	defines("LUA_USE_POSIX")
 	
 	includedirs { "exe/android/include" }
+	libdirs { path.getabsolute("exe/android/lib/"..platform.cpu_name) }
 
-	if CPU=="x32" then
-
-		platforms { "android-x32" } --hax
-	
-		local lib=path.getabsolute("exe/android/lib/x86")
-		libdirs { lib }
-		AND_OUT_DIR=AND_OUT_DIR or lib
-		
-		buildoptions{ "-mtune=generic" }
-
-	elseif CPU=="x64" then
-
-		platforms { "android-x64" } --hax
-	
-		local lib=path.getabsolute("exe/android/lib/x86_64")
-		libdirs { lib }
-		AND_OUT_DIR=AND_OUT_DIR or lib
-		
-		buildoptions{ "-mtune=generic" }
-
-	elseif CPU=="a32" then
-	
-		platforms { "android-a32" } --hax
-		
-		buildoptions{ "-mthumb"  }
-
-		local lib=path.getabsolute("exe/android/lib/armeabi-v7a")
-		libdirs { lib }
-		AND_OUT_DIR=AND_OUT_DIR or lib
-		
-		buildoptions{ "-mtune=generic" }
-
-	elseif CPU=="a64" then
-	
-		platforms { "android-a64" } --hax
-
-		local lib=path.getabsolute("exe/android/lib/arm64-v8a")
-		libdirs { lib }
-		AND_OUT_DIR=AND_OUT_DIR or lib
-
-		buildoptions{ "-mtune=generic" }
-
-	end
-
---		buildoptions{ "-march=armv7-a" , "-mfloat-abi=softfp" , "-mfpu=vfpv3" }
---		linkoptions{ "--fix-cortex-a8" }
+	buildoptions{ "-mtune=generic" }
 
 
 elseif WINDOWS then
@@ -347,7 +313,6 @@ elseif WINDOWS then
 		end
 		
 		buildoptions{"-mtune=generic"}
-		linkoptions {"-mtune=generic"}
 
 	end
 
@@ -564,12 +529,16 @@ function KIND(opts)
 		
 		if ANDROID then
 		
+			local platform=premake.platforms[ "android-"..CPU ]
+
 			configuration {"Debug"}
-			targetdir(AND_OUT_DIR..d)
+			targetdir(DBG_OUT_DIR.."/android/lib/"..platform.cpu_name..d)
 
 			configuration {"Release"}
-			targetdir(AND_OUT_DIR..d)
-			
+			targetdir(EXE_OUT_DIR.."/android/lib/"..platform.cpu_name..d)
+
+print(EXE_OUT_DIR.."/android/lib/"..platform.cpu_name..d)
+
 		else
 
 			configuration {"Debug"}

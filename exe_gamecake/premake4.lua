@@ -37,7 +37,7 @@ elseif ANDROID then
 	links { "EGL" , "android" , "jnigraphics" , "OpenSLES" }
 	links { "dl", "log", "c", "m", "gcc" }
 
-	KIND{kind="SharedLib",name="liblua"}
+	KIND{kind="SharedLib",name="libgamecake"}
 
 elseif WINDOWS then
 
