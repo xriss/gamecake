@@ -175,10 +175,6 @@ if [ ! -z "$LUAJITSRC" ]; then
 
 	fi
 
-
-arm64-v8a  armeabi-v7a  x86  x86_64
-
-
 	if [ ! -z "$ANDROID" ]; then
 
 		mkdir -p ../../exe/android/include
