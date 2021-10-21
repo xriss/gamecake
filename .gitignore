@@ -10,11 +10,11 @@ dbg/*
 *.orig
 build-*
 *.dbg
-android/AndroidManifest.xml
-android/build.xml
+
 android/build
-android/app/build
-android/res/*
+android/*/build
+android/gamecake/src/main/res/*
+
 exe_gamecake/preloadlibs.c
 exe_gamecake/cache.c
 */log.txt

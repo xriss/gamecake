@@ -7,19 +7,19 @@ import android.content.Intent;
 import android.content.Context;
 import java.io.File;
 import android.view.InputDevice;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
+//import android.location.Location;
+//import android.location.LocationListener;
+//import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.Environment;
 
-public class FeralActivity extends NativeActivity implements LocationListener
+public class FeralActivity extends NativeActivity //implements LocationListener
 {
 	
 	public String smell="base";
 	
-	public GameStick gamestick;
+//	public GameStick gamestick;
 
 	private static String FA = "FeralActivity";
 	public static void Log(String s)
@@ -74,6 +74,7 @@ public class FeralActivity extends NativeActivity implements LocationListener
 	
 	public String SmellCheck()
 	{
+/*
 		if(smell=="gamestick")
 		{
 			if(gamestick==null)
@@ -81,34 +82,39 @@ public class FeralActivity extends NativeActivity implements LocationListener
 				gamestick=new GameStick(this);
 			}
 		}
-		
+*/		
 		return smell;
 	}
 
 	public String SmellMsg()
 	{
+/*
 		if(smell=="gamestick")
 		{
 			return gamestick.poll();
 		}
-		
+*/		
 		return null;
 	}
 
 	public void SmellSendScore(int n)
 	{
+/*
 		if(smell=="gamestick")
 		{
 			gamestick.SendScore(n);
 		}
+*/
 	}
 
 	public void SmellRangeScore(int na,int nb)
 	{
+/*
 		if(smell=="gamestick")
 		{
 			gamestick.RangeScore(na,nb);
 		}
+*/
 	}
 
 // tell app to quit
@@ -128,12 +134,15 @@ public class FeralActivity extends NativeActivity implements LocationListener
 
 //where are we?
 
-	private LocationManager lm;
+//	private LocationManager lm;
 	private PowerManager.WakeLock wl;
 		
+/*
+
 @Override
 public void onLocationChanged(Location location) {
 }
+
 @Override
 public void onProviderDisabled(String provider) {
 }
@@ -145,8 +154,9 @@ public void onProviderEnabled(String provider) {
 @Override
 public void onStatusChanged(String provider, int status, Bundle extras) {
 }
+*/
 
-
+/*
  	private Location location()
 	{
 		if(lm==null)
@@ -168,6 +178,7 @@ public void onStatusChanged(String provider, int status, Bundle extras) {
 		Location l = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 		if(l==null) { l = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER); }
 		return l;
+
 	}
 
 	private Location loc;
@@ -196,6 +207,6 @@ public void onStatusChanged(String provider, int status, Bundle extras) {
 		}
 		return 999.0;
 	}
-
+*/
 
 }

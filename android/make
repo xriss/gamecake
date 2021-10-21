@@ -3,7 +3,9 @@ cd `dirname $0`
 source ~/andsdk-env.sh
 
 
-./gradlew
+./gradlew build
+
+
 
 #../build/make --gcc=android --cpu=armv7 $*
 

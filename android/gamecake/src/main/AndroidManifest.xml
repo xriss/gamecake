@@ -1,0 +1,43 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.wetgenes.dike"
+      android:versionCode="21798"
+      android:versionName="21.798"
+>
+    <!-- Tell the system that you need ES 2.0. -->
+    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+
+<uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
+<supports-screens
+                  android:smallScreens="true"
+                  android:normalScreens="true"
+                  android:largeScreens="true"
+                  android:xlargeScreens="true"
+                  android:anyDensity="true" />
+
+
+    
+
+    <application android:label="WetDike" android:icon="@drawable/icon"
+		android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+    >
+
+
+        <!-- Our activity is the built-in NativeActivity framework class.
+             This will take care of integrating with our NDK code. -->
+        <activity android:name="com.wetgenes.FeralActivity"
+                android:label="WetDike"
+                android:configChanges="orientation|keyboardHidden"
+		android:screenOrientation="unspecified"
+	>
+            <!-- Tell NativeActivity the name of our .so -->
+            <meta-data android:name="android.app.lib_name"
+                    android:value="gamecake" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest> 
