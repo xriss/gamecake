@@ -4,6 +4,7 @@ exe
 dbg/*
 
 *.gradle
+*.cxx
 *.vagrant
 *.git
 *.orig
@@ -11,9 +12,8 @@ build-*
 *.dbg
 android/AndroidManifest.xml
 android/build.xml
-android/bin/*
-android/libs/*
-android/gen/*
+android/build
+android/app/build
 android/res/*
 exe_gamecake/preloadlibs.c
 exe_gamecake/cache.c
