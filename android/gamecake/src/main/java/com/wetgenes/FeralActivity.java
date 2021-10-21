@@ -17,6 +17,14 @@ import android.os.Environment;
 public class FeralActivity extends NativeActivity //implements LocationListener
 {
 	
+static {
+//    System.loadLibrary("SDL2");
+    System.loadLibrary("luajit");
+//    System.loadLibrary("gamecake");
+}
+
+
+
 	public String smell="base";
 	
 //	public GameStick gamestick;

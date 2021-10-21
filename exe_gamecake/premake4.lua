@@ -29,13 +29,16 @@ if EMCC then
 
 elseif ANDROID then 
 	
+	linkoptions { "-static-libstdc++" }
+	linkoptions { "-static-libgcc" }
+
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	linkoptions { "-u android_main" } -- we really need an android_main as well
 
-	links { "GLESv2" }
-	
-	links { "EGL" , "android" , "jnigraphics" , "OpenSLES" }
-	links { "dl", "log", "c", "m", "gcc" }
+-- these must be dynamic
+	links { "GLESv2" , "EGL" , "android" , "jnigraphics" , "OpenSLES" , "log"  }
+
+	links { "dl",  "c", "m", "gcc" }
 
 	KIND{kind="SharedLib",name="libgamecake"}
 
@@ -105,6 +108,10 @@ elseif OSX then
 	
 elseif NIX then
 
+--	linkoptions { "-static" }
+	linkoptions { "-static-libstdc++" }
+	linkoptions { "-static-libgcc" }
+
 	linkoptions { "-Wl,-R\\$$ORIGIN,-R\\$$ORIGIN/arm,-R\\$$ORIGIN/x32,-R\\$$ORIGIN/x64" } -- so much escape \\$$ -> $
 
 	files { "./lua.c" }
@@ -118,8 +125,8 @@ elseif NIX then
 
 	end
 
+-- these two need to be dynamic
 	links { "udev" }
-	
 	links { "asound" }
 
 --	links { "GL" }

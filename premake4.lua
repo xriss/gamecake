@@ -25,7 +25,7 @@ function newplatform(platform)
  
 end
 
-ANDROID_VERSION="23"
+ANDROID_VERSION="29"
 
 newplatform {
     name = "android-a32",
@@ -738,6 +738,8 @@ all_includes=all_includes or {
 	
 -- we just use SDL2 now
 --	{"lua_win_"..GAMECAKE_WIN_TYPE, GAMECAKE_WIN_TYPE }, -- pick the os interface, see above
+
+	{"lua_win_android", ANDROID },
 
 	{"lua_sdl2",	   WINDOWS		or		NIX		or		EMCC		or		nil			or	OSX		},
 

@@ -46,8 +46,8 @@ $ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
 $ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "cmake;3.18.1"
 $ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "emulator"
 $ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-29"
-$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-29;default;x86"
-$ANDSDK/cmdline-tools/latest/bin/avdmanager create avd -n default29 -k "system-images;android-29;default;x86"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-29;google_apis;x86"
+$ANDSDK/cmdline-tools/latest/bin/avdmanager create avd -n google29 -k "system-images;android-29;google_apis;x86"
 
 #start an emulator like so
-#$ANDSDK/emulator/emulator -avd default29 -netdelay none -netspeed full
+#$ANDSDK/emulator/emulator -avd google29 -netdelay none -netspeed full
