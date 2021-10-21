@@ -14,6 +14,8 @@ cat >"andsdk-env.sh" <<EOF
 export ANDSDK=$ANDSDK
 export PATH=$ANDSDK/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDSDK/ndk-bundle:\$PATH
 
+export ANDROID_SDK_ROOT=$ANDSDK
+
 EOF
 chmod +x andsdk-env.sh
 
@@ -34,11 +36,19 @@ rm andsdk.zip
 
 rm -rf andsdk
 mkdir andsdk
-yes | cmdline-tools/bin/sdkmanager --sdk_root=/home/vagrant/andsdk --licenses
-cmdline-tools/bin/sdkmanager --sdk_root=/home/vagrant/andsdk --install "cmdline-tools;latest"
+yes | cmdline-tools/bin/sdkmanager --sdk_root=$ANDSDK --licenses
+cmdline-tools/bin/sdkmanager --sdk_root=$ANDSDK --install "cmdline-tools;latest"
 rm -rf cmdline-tools
 
 
-andsdk/cmdline-tools/latest/bin/sdkmanager --install "ndk-bundle"
-andsdk/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-23"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "ndk-bundle"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "build-tools;23.0.3"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "cmake;3.18.1"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "emulator"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-23"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-23;default;x86"
+$ANDSDK/cmdline-tools/latest/bin/avdmanager create avd -n default23 -k "system-images;android-23;default;x86"
 
+#start an emulator like so
+#$ANDSDK/emulator/emulator -avd default23 -netdelay none -netspeed full

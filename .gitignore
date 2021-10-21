@@ -3,6 +3,7 @@ docs
 exe
 dbg/*
 
+*.gradle
 *.vagrant
 *.git
 *.orig
