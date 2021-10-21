@@ -2,5 +2,5 @@ cd `dirname $0`
 
 source ~/andsdk-env.sh
 
-$ANDSDK/emulator/emulator -avd default23 -netdelay none -netspeed full
+$ANDSDK/emulator/emulator -avd default29 -netdelay none -netspeed full
 
