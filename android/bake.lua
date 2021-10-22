@@ -42,7 +42,7 @@ local opts={
 }
 
 bake.replacefile("AndroidManifest.xml.base","AndroidManifest.xml",opts)
-bake.replacefile("build.xml.base","build.xml",opts)
+--bake.replacefile("build.xml.base","build.xml",opts)
 
 -- remove all files in res
 
