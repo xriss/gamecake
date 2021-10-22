@@ -185,53 +185,53 @@ if [ ! -z "$LUAJITSRC" ]; then
 		make amalg \
 			HOST_CC="gcc -m32" \
 			     CROSS="arm-linux-androideabi-" \
-			 STATIC_CC="armv7a-linux-androideabi29-clang" \
+			 STATIC_CC="armv7a-linux-androideabi29-clang -fPIC" \
 			DYNAMIC_CC="armv7a-linux-androideabi29-clang -fPIC" \
 			 TARGET_LD="armv7a-linux-androideabi29-clang" \
 			 TARGET_AR="arm-linux-androideabi-ar rcus" \
 		  TARGET_STRIP="arm-linux-androideabi-strip" \
 			TARGET_SYS=Linux BUILDMODE=static
 		mkdir -p ../../exe/android/lib/armeabi-v7a
-		cp src/libluajit.* ../../exe/android/lib/armeabi-v7a
+		cp src/libluajit.a ../../exe/android/lib/armeabi-v7a/
 			
 		make clean
 		make amalg \
 			HOST_CC="gcc -m64" \
 			     CROSS="aarch64-linux-android29-" \
-			 STATIC_CC="aarch64-linux-android29-clang" \
+			 STATIC_CC="aarch64-linux-android29-clang -fPIC" \
 			DYNAMIC_CC="aarch64-linux-android29-clang -fPIC" \
 			 TARGET_LD="aarch64-linux-android29-clang" \
 			 TARGET_AR="aarch64-linux-android-ar rcus" \
 		  TARGET_STRIP="aarch64-linux-android-strip" \
 			TARGET_SYS=Linux BUILDMODE=static
 		mkdir -p ../../exe/android/lib/arm64-v8a
-		cp src/libluajit.* ../../exe/android/lib/arm64-v8a
+		cp src/libluajit.a ../../exe/android/lib/arm64-v8a/
 
 		make clean
 		make amalg \
 			HOST_CC="gcc -m32" \
 			     CROSS="i686-linux-android29-" \
-			 STATIC_CC="i686-linux-android29-clang" \
+			 STATIC_CC="i686-linux-android29-clang -fPIC" \
 			DYNAMIC_CC="i686-linux-android29-clang -fPIC" \
 			 TARGET_LD="i686-linux-android29-clang" \
 			 TARGET_AR="i686-linux-android-ar rcus" \
 		  TARGET_STRIP="i686-linux-android-strip" \
 			TARGET_SYS=Linux BUILDMODE=static
 		mkdir -p ../../exe/android/lib/x86
-		cp src/libluajit.* ../../exe/android/lib/x86
+		cp src/libluajit.a ../../exe/android/lib/x86/
 
 		make clean
 		make amalg \
 			HOST_CC="gcc -m64" \
 			     CROSS="x86_64-linux-android29-" \
-			 STATIC_CC="x86_64-linux-android29-clang" \
+			 STATIC_CC="x86_64-linux-android29-clang -fPIC" \
 			DYNAMIC_CC="x86_64-linux-android29-clang -fPIC" \
 			 TARGET_LD="x86_64-linux-android29-clang" \
 			 TARGET_AR="x86_64-linux-android-ar rcus" \
 		  TARGET_STRIP="x86_64-linux-android-strip" \
 			TARGET_SYS=Linux BUILDMODE=static
 		mkdir -p ../../exe/android/lib/x86_64
-		cp src/libluajit.* ../../exe/android/lib/x86_64
+		cp src/libluajit.a ../../exe/android/lib/x86_64/
 
 
 	elif [ ! -z "$MINGW" ]; then

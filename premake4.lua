@@ -739,9 +739,9 @@ all_includes=all_includes or {
 -- we just use SDL2 now
 --	{"lua_win_"..GAMECAKE_WIN_TYPE, GAMECAKE_WIN_TYPE }, -- pick the os interface, see above
 
-	{"lua_win_android", ANDROID },
+--	{"lua_win_android", ANDROID },
 
-	{"lua_sdl2",	   WINDOWS		or		NIX		or		EMCC		or		nil			or	OSX		},
+	{"lua_sdl2",	   WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- emcc wraps the SDL2 with some extra functions.
 

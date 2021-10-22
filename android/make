@@ -3,15 +3,17 @@ cd `dirname $0`
 source ~/andsdk-env.sh
 
 
-./gradlew build
+#./gradlew build
 
-jarsigner -keystore ~/android.keystore -storepass xxxxxx gamecake/build/outputs/apk/release/gamecake-release-unsigned.apk android
-zipalign -p -f -v 4 gamecake/build/outputs/apk/release/gamecake-release-unsigned.apk gamecake/build/outputs/apk/release/gamecake-release.apk
+./gradlew build installDebug
 
+#zipinfo app/build/outputs/apk/debug/app-debug.apk
 
-./adb install gamecake/build/outputs/apk/release/gamecake-release.apk
+#jarsigner -keystore ~/android.keystore -storepass xxxxxx gamecake/build/outputs/apk/release/gamecake-release-unsigned.apk android
+#zipalign -p -f -v 4 gamecake/build/outputs/apk/release/gamecake-release-unsigned.apk gamecake/build/outputs/apk/release/gamecake-release.apk
 
-./adb shell am start -a android.intent.action.MAIN -n com.wetgenes/.FeralActivity
+#./adb install gamecake/build/outputs/apk/release/gamecake-release.apk
+#./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake/.CakeAct
 
 
 

@@ -31,6 +31,9 @@ elseif ANDROID then
 	
 	linkoptions { "-static-libstdc++" }
 	linkoptions { "-static-libgcc" }
+	linkoptions { "-Wl,-soname,libgamecake.so" }
+
+--	linkoptions { "-Wl,-z,defs" }
 
 	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
 	linkoptions { "-u android_main" } -- we really need an android_main as well
