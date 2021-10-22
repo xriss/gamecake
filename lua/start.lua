@@ -21,7 +21,7 @@ if platform=="Android" then
 		SDL.log( table.concat(t) )
 	end
 	
-	os.exit=function()print("os.exit() IN ANDROID IS DISABLED")end
+	os.exit=function()print("os.exit() IN ANDROID IS DISABLED") return 1/0 end
 
 end
 
