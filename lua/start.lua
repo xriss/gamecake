@@ -16,12 +16,19 @@ if platform=="Android" then
 
 -- replace print so we send print output to SDL.log	
 	print=function(...)
-		local t={}
+		local t={...}
 		for i=1,#t do t[i]=tostring(t[i]) end
-		SDL.log( table.concat(t) )
+		SDL.log( table.concat(t,"\t") )
 	end
 	
 	os.exit=function()print("os.exit() IN ANDROID IS DISABLED") return 1/0 end
+
+	if jit then -- start by trying to force a jit memory allocation
+		print("LUAJIT",jit.status())
+		require("jit.opt").start("sizemcode=256","maxmcode=256")
+		for i=1,1000 do end
+		print("LUAJIT",jit.status())
+  	end
 
 end
 
