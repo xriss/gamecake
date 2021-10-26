@@ -170,6 +170,9 @@ in vec2 v_texcoord;
 
 out vec4 FragColor;
 
+
+
+
 // convert a uv into view space by sampling z buffer
 vec3 depth_to_view(vec2 cc)
 {
@@ -205,13 +208,43 @@ float goldienoise(vec3 p)
     return r!=r ? 0.0 : r; // replace nan with 0
 }
 
-
 float random2d(vec2 st) {
     return goldienoise(vec3(st,1.0));
 }
 
 float ambient_occlusion( vec2 vv )
 {
+    float r=random2d(vv*64.0)*PI2; // random rotation for this pixel
+
+	float d=textureLod(tex,vv,0.0).r; // the depth of the test pixel
+	
+    float m= pow( 2.0 , 4.0-((d-0.5)*8.0) ) ; // the test area mip level
+
+    m=max(min(m,5.0),0.5); // clamp the mip level
+
+#define FUZ 8.0
+    float s=pow(2.0,2.0+FUZ-min(m,FUZ)); // turn mip level into a scale
+
+	float t=textureLod(tex,vv,m).r; // the average depth of the test area (very swuare artifacts)
+
+/*
+    vec2 r1=vec2(sin(r+PI*1.0/2.0),cos(r+PI*1.0/2.0))/s;
+    vec2 r2=vec2(sin(r+PI*2.0/2.0),cos(r+PI*2.0/2.0))/s;
+    vec2 r3=vec2(sin(r+PI*3.0/2.0),cos(r+PI*3.0/2.0))/s;
+    vec2 r4=vec2(sin(r+PI*4.0/2.0),cos(r+PI*4.0/2.0))/s;
+
+	float t=(
+				textureLod(tex,vv,m).r +
+				textureLod(tex,vv+r1,m).r +
+				textureLod(tex,vv+r2,m).r +
+				textureLod(tex,vv+r3,m).r +
+				textureLod(tex,vv+r4,m).r ) / 5.0;
+*/
+
+//return t-0.5;
+#define DEP 16.0
+	return smoothstep( -1.0/DEP , 1.0/DEP ,  ((t-d)*s) );
+	
 /*
 #define AO_STEPS 3
 #define AO_ANGLES 8
@@ -239,7 +272,7 @@ float ambient_occlusion( vec2 vv )
 	}
 	return (ac/float(AO_SAMPLES));
 */	
-	return 0.5;
+//	return 0.5;
 }
 
 #ifdef SHADOW
@@ -291,6 +324,7 @@ void main(void)
 #else
 	float s=1.0;
 #endif
+
 	float t=ambient_occlusion(v_texcoord);
 	FragColor=vec4( s*t, 1.0 , 1.0 , 1.0 );
 

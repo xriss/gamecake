@@ -269,14 +269,15 @@ M.bake=function(oven,screen)
 
 	screen.build_occlusion=function(scene)
 
-    
+-- generate mipmaps, this fails on android so I guess we will have to do it manually.
+
 		gl.GetError()
 		gl.BindTexture(gl.TEXTURE_2D, screen.fbo.texture)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 		local err=gl.GetError()
-		print(err,gl.numtostring(err))
+--		print(err,gl.numtostring(err))
 
 
 		gl.GetError()
@@ -285,7 +286,7 @@ M.bake=function(oven,screen)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 		local err=gl.GetError()
-		print(err,gl.numtostring(err))
+--		print(err,gl.numtostring(err))
 
 
 		local t={
