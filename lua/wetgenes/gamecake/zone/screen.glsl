@@ -214,13 +214,12 @@ float random2d(vec2 st) {
 
 float ambient_occlusion( vec2 vv )
 {
+#if 1
     float r=random2d(vv*64.0)*PI2; // random rotation for this pixel
 
 	float d=textureLod(tex,vv,0.0).r; // the depth of the test pixel
 	
-    float m= pow( 2.0 , 4.0-((d-0.5)*8.0) ) ; // the test area mip level
-
-    m=max(min(m,5.0),0.5); // clamp the mip level
+    float m=max( 0.25-(log2((d-0.5)*2.0)*2.0) , 0.0 ); // the test area mip level
 
 #define FUZ 8.0
     float s=pow(2.0,2.0+FUZ-min(m,FUZ)); // turn mip level into a scale
@@ -241,11 +240,13 @@ float ambient_occlusion( vec2 vv )
 				textureLod(tex,vv+r4,m).r ) / 5.0;
 */
 
-//return t-0.5;
-#define DEP 16.0
-	return smoothstep( -1.0/DEP , 1.0/DEP ,  ((t-d)*s) );
-	
-/*
+	float ss=( (t-d)*s )/1.0; // scale to +- 1.0
+	float sss=pow( abs(ss) , 0.4 ); // squiff
+	if(ss<0.0) { sss=-sss; } // keep sign
+	return smoothstep( -1.0 , 1.0 ,  sss );
+
+#else
+
 #define AO_STEPS 3
 #define AO_ANGLES 8
 #define AO_SAMPLES AO_ANGLES*AO_STEPS
@@ -271,8 +272,7 @@ float ambient_occlusion( vec2 vv )
 		}
 	}
 	return (ac/float(AO_SAMPLES));
-*/	
-//	return 0.5;
+#endif
 }
 
 #ifdef SHADOW
