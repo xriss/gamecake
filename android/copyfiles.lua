@@ -8,13 +8,13 @@ local wgrd=require("wetgenes.grd")
 
 local args={...}
 
-local basedir=assert(args[1],"Must specify basedir, eg \"./bake.lua ../../apps/dike\"")
+local basedir=assert(args[1],"Must specify basedir, eg \"./copyfiles.lua ../../apps/dike\"")
 
 local smell=args[2] -- optional smell
 
 local fdat=assert(zips.readfile(basedir.."/opts.lua"),"opts.lua must exist in the given basedir")
 
-os.execute( "cd "..basedir.." ; ../bake "..(smell or "") ) --make sure it is baked
+-- os.execute( "cd "..basedir.." ; ../bake "..(smell or "") ) --make sure it is baked
 
 local preopts=sbox.ini(fdat)
 
@@ -55,7 +55,6 @@ for _,dir in ipairs{"lua","data"} do
 	local files=bake.findfiles{basedir=basedir,dir=dir}.ret
 
 	for i,v in ipairs(files) do
-print(v)
 		local n=zips.apk_munge_filename(v) -- this includes the res/raw prefix
 		bake.create_dir_for_file(n)
 		bake.copyfile(basedir.."/"..v,n)
@@ -63,6 +62,18 @@ print(v)
 	end
 
 end
+
+-- include cache of lua/wetgenes
+	local files=bake.findfiles{basedir="..",dir="lua/wetgenes"}.ret
+
+	for i,v in ipairs(files) do
+		local n=zips.apk_munge_filename(v) -- this includes the res/raw prefix
+		bake.create_dir_for_file(n)
+		bake.copyfile("../"..v,n)
+		print(n)
+	end
+
+
 
 -- patch init.lua
 bake.replacefile(basedir.."/lua/init.lua",zips.apk_munge_filename("lua/init.lua"),opts)

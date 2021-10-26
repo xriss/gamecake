@@ -28,6 +28,12 @@ if platform=="Android" then
 		require("jit.opt").start("sizemcode=256","maxmcode=256")
 		for i=1,1000 do end
 		print("LUAJIT",jit.status())
+
+--		if jit and jit.off then
+--			jit.off()
+--			print("LUAJIT","OFF")
+--		end -- sometimes jit causes problems
+
   	end
 
 end

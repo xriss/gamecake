@@ -100,7 +100,7 @@ M.bake=function(oven,screen)
 	screen.occlusion_scale=1
 
 	screen.setup=function()
-	
+
 		screen.shader_args=""
 
 		screen.loads()
@@ -268,6 +268,25 @@ M.bake=function(oven,screen)
 
 
 	screen.build_occlusion=function(scene)
+
+    
+		gl.GetError()
+		gl.BindTexture(gl.TEXTURE_2D, screen.fbo.texture)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+		local err=gl.GetError()
+		print(err,gl.numtostring(err))
+
+
+		gl.GetError()
+		gl.BindTexture(gl.TEXTURE_2D, screen.fbo.depth)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+		local err=gl.GetError()
+		print(err,gl.numtostring(err))
+
 
 		local t={
 			-1,	 1,	0,	0,	1,

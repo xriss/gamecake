@@ -81,8 +81,10 @@ log("oven","Loading "..profiles.filename)
 		if lfs then
 log("oven","Saving "..profiles.filename)
 			local fp=io.open(profiles.filename,"w")
-			fp:write(wstr.serialize(ps))
-			fp:close()
+			if fp then
+				fp:write(wstr.serialize(ps))
+				fp:close()
+			end
 		end
 	end
 

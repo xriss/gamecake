@@ -212,6 +212,7 @@ float random2d(vec2 st) {
 
 float ambient_occlusion( vec2 vv )
 {
+/*
 #define AO_STEPS 3
 #define AO_ANGLES 8
 #define AO_SAMPLES AO_ANGLES*AO_STEPS
@@ -237,6 +238,8 @@ float ambient_occlusion( vec2 vv )
 		}
 	}
 	return (ac/float(AO_SAMPLES));
+*/	
+	return 0.5;
 }
 
 #ifdef SHADOW
