@@ -268,26 +268,8 @@ M.bake=function(oven,screen)
 
 
 	screen.build_occlusion=function(scene)
-
--- generate mipmaps, this fails on android so I guess we will have to do it manually.
-
-		gl.GetError()
-		gl.BindTexture(gl.TEXTURE_2D, screen.fbo.texture)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
-		gl.GenerateMipmap(gl.TEXTURE_2D)
-		local err=gl.GetError()
---		print(err,gl.numtostring(err))
-
-
-		gl.GetError()
-		gl.BindTexture(gl.TEXTURE_2D, screen.fbo.depth)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR)
-		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
-		gl.GenerateMipmap(gl.TEXTURE_2D)
-		local err=gl.GetError()
---		print(err,gl.numtostring(err))
-
+	
+		screen.fbo:mipmap() -- generate mipmaps for depth and texture
 
 		local t={
 			-1,	 1,	0,	0,	1,
@@ -300,12 +282,7 @@ M.bake=function(oven,screen)
 		oven.cake.views.push_and_apply(screen.view_occlusion)
 		gl.state.push(gl.state_defaults)
 
---		local opts=screen.shader_args
---		if shadow.default then opts=opts.."&SHADOW="..shadow.default end
---		if scene and scene.systems and scene.systems.input and scene.systems.input.tweak_number then opts=opts.."&TWEAK="..scene.systems.input.tweak_number end
-
 		screen.fbo_occlusion:bind_frame()
---		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_occlusion?TMP=1"..opts,function(p)
 		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_occlusion"),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
@@ -324,7 +301,6 @@ M.bake=function(oven,screen)
 		screen.fbo_blur:resize( screen.fbo_occlusion.w , screen.fbo_occlusion.h , 0 )
 
 		screen.fbo_blur:bind_frame()
---		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_dark?DARK=1",function(p)
 		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_dark",{DARK=1}),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
@@ -335,7 +311,6 @@ M.bake=function(oven,screen)
 		end)
 
 		screen.fbo_occlusion:bind_frame()
---		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_dark?DARK=2",function(p)
 		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_dark",{DARK=2}),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
