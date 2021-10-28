@@ -42,6 +42,7 @@ M.bake=function(oven,screen)
 
 	end
 
+
 	screen.shader_qs={
 	
 -- all shaders
@@ -105,7 +106,7 @@ M.bake=function(oven,screen)
 
 		screen.loads()
 
-		screen.fbo=framebuffers.create(0,0,32,{ no_uptwopow=true , depth_format={gl.DEPTH_COMPONENT32F,gl.DEPTH_COMPONENT, gl.FLOAT} } )
+		screen.fbo=framebuffers.create(0,0,1,{ no_uptwopow=true , depth_format={gl.DEPTH_COMPONENT32F,gl.DEPTH_COMPONENT, gl.FLOAT} } )
 
 		screen.view=oven.cake.views.create({
 			mode="fbo",
@@ -253,11 +254,16 @@ M.bake=function(oven,screen)
 			1,	0,	0,	1,	0,
 		}
 
-		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_draw",function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_draw_test",function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
-				screen.fbo_occlusion:bind_texture()
-				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
+				screen.fbo:bind_depth()
+				gl.Uniform1i( p:uniform("tex0"), gl.NEXT_UNIFORM_TEXTURE )
+				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
+				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+				screen.fbo:bind_texture()
+				gl.Uniform1i( p:uniform("tex1"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
 		end)
@@ -269,7 +275,7 @@ M.bake=function(oven,screen)
 
 	screen.build_occlusion=function(scene)
 	
-		screen.fbo:mipmap() -- generate mipmaps for depth and texture
+--		screen.fbo:mipmap() -- generate mipmaps for depth and texture
 
 		local t={
 			-1,	 1,	0,	0,	1,
@@ -298,6 +304,7 @@ M.bake=function(oven,screen)
 
 		end)
 
+--[[
 		screen.fbo_blur:resize( screen.fbo_occlusion.w , screen.fbo_occlusion.h , 0 )
 
 		screen.fbo_blur:bind_frame()
@@ -319,7 +326,7 @@ M.bake=function(oven,screen)
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
 		end)
-
+]]
 		gl.state.pop()
 		oven.cake.views.pop_and_apply()
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)

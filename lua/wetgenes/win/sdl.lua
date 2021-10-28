@@ -229,6 +229,9 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 	log( "oven","vendor",(gles.Get(gles.VENDOR) or ""))
 	log( "oven","render",(gles.Get(gles.RENDERER) or ""))
 	log( "oven","version",(gles.Get(gles.VERSION) or ""))
+	for w in (gles.Get(gles.EXTENSIONS) or ""):gmatch("([^%s]+)") do
+		log( "oven","glext",w)
+	end
 	
 	return it.ctx
 end

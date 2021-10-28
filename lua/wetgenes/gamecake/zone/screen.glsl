@@ -1,4 +1,57 @@
 
+#shader "zone_screen_draw_test"
+
+#version 300 es
+#version 330
+#ifdef VERSION_ES
+precision mediump float;
+#endif
+  
+uniform mat4 modelview;
+uniform mat4 projection;
+uniform vec4 color;
+
+uniform sampler2D tex0;
+uniform sampler2D tex1;
+
+#ifdef VERTEX_SHADER
+
+in vec3 a_vertex;
+in vec2 a_texcoord;
+
+out vec2 v_texcoord;
+
+void main()
+{
+	v_texcoord=a_texcoord;
+
+	gl_Position = vec4( a_vertex.xyz, 1.0 );
+}
+
+#endif
+#ifdef FRAGMENT_SHADER
+
+#if defined(GL_FRAGMENT_PRECISION_HIGH) && defined(VERSION_ES)
+precision highp float;
+#endif
+
+in vec2 v_texcoord;
+
+out vec4 FragColor;
+
+void main(void)
+{
+	float d = float( textureLod(tex0, v_texcoord, 0.0) ) ;
+
+	vec3 c=vec3( fract(d*256.0) );
+
+	c=clamp(c,0.0,1.0);
+	FragColor=vec4( c , 1.0 );
+}
+
+#endif
+
+
 #shader "zone_screen_bloom_draw"
 
 #version 300 es
@@ -176,21 +229,8 @@ out vec4 FragColor;
 // convert a uv into view space by sampling z buffer
 vec3 depth_to_view(vec2 cc)
 {
-	vec4 p=inverse_projection * ( vec4( cc , texture(tex,cc).r , 1.0 )*2.0 - 1.0 );
+	vec4 p=inverse_projection * ( vec4( cc , float(texture(tex,cc)) , 1.0 )*2.0 - 1.0 );
 	return p.xyz/p.w;
-/*
-	vec4 t=inverse_projection * ( vec4( cc ,  0.0  , 1.0 )*2.0 - 1.0 );
-	t=t/t.w;
-
-	vec3 n=t.xyz/t.z;
-
-	float z=texture(tex,cc).r*2.0 - 1.0;
-
-	float d =  - ( ( z*projection[3][3] - projection[3][2] ) / ( z*projection[2][3] - projection[2][2] ) );
-
-	return n*d;
-*/
-
 }
 
 // convert view space into depth space
@@ -220,37 +260,38 @@ float pows(float s,float p)
 float ambient_occlusion( vec2 vv )
 {
 
-#if 1
-
-#if 1
-// something simpler like this?
-	float d=(float(textureLod(tex,vv,0.0).r)-0.5)*2.0; // the depth of the test pixel ( range 0 to 1 w=d/(1+d) )
-    float m=max( 0.5+(-log2(d)*4.0) , 0.0 ); // the test area mip level
-	float t=(float(textureLod(tex,vv,m  ).r)-0.5)*2.0; // the average depth of the test area (very square artefacts)
-
-#define MPOW 10.0
-    float s=pow(2.0,2.0+MPOW-min(m,MPOW)); // turn mip level into a pixel size scale
-
-#define UND(a) 1.0/(1.0001-(a))
-	return smoothstep( -1.0 , 1.0 ,  pows( (UND(t)-UND(d)) , 0.4 ) );
-
-#else
-	float d=textureLod(tex,vv,0.0).r; // the depth of the test pixel	
-    float m=max( 0.25-(log2((d-0.5)*2.0)*2.0) , 0.0 ); // the test area mip level
-	float t=textureLod(tex,vv,m).r; // the average depth of the test area (very square artefacts)
-
-#define MPOW 10.0
-    float s=pow(2.0,2.0+MPOW-min(m,MPOW)); // turn mip level into a pixel size scale
-	
-	float ss= (t-d)*s ; // scale to +- 1.0
-	return smoothstep( -1.0 , 1.0 ,  pows(ss,0.4) );
-#endif
-
-#else
-
-#define AO_STEPS 3
-#define AO_ANGLES 8
+#define AO_STEPS 1
+#define AO_ANGLES 6
 #define AO_SAMPLES AO_ANGLES*AO_STEPS
+
+#if 0
+
+#define UND(a) (1.0/(1.00001-(a)))
+
+	float d=(float(textureLod(tex,vv,0.0))-0.5)*2.0; // the depth of the test pixel ( range 0 to 1 w=d/(1+d) )
+
+	float s=UND(d);
+	s=(s/(s+1.0))/256.0;
+	s=(1.0/256.0)/d;
+
+	float ac=0.0;
+	for(int i=1;i<=AO_STEPS;i++)
+	{
+		float l=(float(i)-random2d(vv.yx)) /float(AO_STEPS);
+		for(int ia=1;ia<=AO_ANGLES;ia++)
+		{
+			float r=( (float(ia)/float(AO_ANGLES)) + random2d(vv.xy) )*PI2;
+			vec2 cc=vec2(sin(r),cos(r))*s*l;
+			ac+=float(textureLod(tex,(cc+vv),0.0));
+		}
+	}
+	float t=((ac/float(AO_SAMPLES))-0.5)*2.0;
+
+
+	return smoothstep( -1.0 , 1.0 ,  pows( ( UND(t) - UND(d) ) , 0.4 ) );
+
+
+#else
 	
 	vec2 texel_size = 1.0 / vec2( textureSize(tex,0) );
 	float slen=128.0*texel_size.x;
@@ -273,6 +314,8 @@ float ambient_occlusion( vec2 vv )
 		}
 	}
 	return (ac/float(AO_SAMPLES));
+
+
 #endif
 }
 
@@ -325,8 +368,6 @@ void main(void)
 #else
 	float s=1.0;
 #endif
-s=1.0;
-
 	float t=ambient_occlusion(v_texcoord);
 	FragColor=vec4( s*t, 1.0 , 1.0 , 1.0 );
 
