@@ -82,7 +82,7 @@ function M.bake(oven,console)
 		console.fps_updates=0
 		
 		console.show=false
-		console.show_hud=true
+--		console.show_hud=true
 --		console.show_hud=false
 
 --		console.show=true
