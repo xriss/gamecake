@@ -64,10 +64,13 @@ modules and sharing state between them.
 
 ]]
 function M.bake(opts)
-
+	
 	local oven={}
 	wwin.oven=wwin.oven or oven -- store a global oven on first use
 
+	if opts.hints then -- pass hints from opts to sdl
+		wwin.hints(opts.hints)
+	end
 
 	oven.enable_close_window=true -- let the close button, close the window (otherwise you should catch close messages in app)
 
