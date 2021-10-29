@@ -40,9 +40,7 @@ local dprint=function(a) print(wstr.dump(a)) end
 sdl.hints=function(it)
 	for n,v in pairs(it) do
 		if string.sub(n,1,4)=="SDL_" then -- only SDL_ hints
-print(n,v)
---			SDL.setHint(n,v,SDL.hintPriority.Normal)
-			SDL.setHint(n,v,SDL.hintPriority.Overide)
+			SDL.setHint(n,v,SDL.hintPriority.Normal)
 		end
 	end
 end
