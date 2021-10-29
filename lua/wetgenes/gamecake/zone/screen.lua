@@ -57,6 +57,9 @@ M.bake=function(oven,screen)
 		},
 		
 		zone_screen_build_occlusion={
+			AO_SIZE="128.0",
+			AO_STEPS="1",
+			AO_ANGLES="6",
 --			SHADOW=" 0.0 , 0.0 , 0.0 , 0.0 ",
 		},
 		

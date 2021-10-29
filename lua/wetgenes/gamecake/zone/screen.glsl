@@ -260,9 +260,7 @@ float pows(float s,float p)
 float ambient_occlusion( vec2 vv )
 {
 
-#define AO_STEPS 1
-#define AO_ANGLES 6
-#define AO_SAMPLES AO_ANGLES*AO_STEPS
+#define AO_SAMPLES (AO_ANGLES*AO_STEPS)
 
 #if 0
 
@@ -294,7 +292,7 @@ float ambient_occlusion( vec2 vv )
 #else
 	
 	vec2 texel_size = 1.0 / vec2( textureSize(tex,0) );
-	float slen=128.0*texel_size.x;
+	float slen=(AO_SIZE)*texel_size.x;
 
 	vec3 p1=depth_to_view( vv );
 	vec3 p2=view_to_depth( p1+vec3(slen,slen,0.0) );
