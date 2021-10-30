@@ -72,8 +72,8 @@ function wmaster.setup(widget,def)
 
 -- built in color themes, 
 
-	master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, }
-	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, }
+	master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, alpha=1, }
+	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, alpha=1, }
 
 -- global GUI color theme
 
@@ -122,7 +122,10 @@ function wmaster.setup(widget,def)
 
 		for i=1,3 do if c[i]<0 then c[i]=0 end if c[i]>1 then c[i]=1 end end -- clamp result
 		
-		c[4]=1 -- full alpha only
+		c[1]=c[1]*t.alpha
+		c[2]=c[2]*t.alpha
+		c[3]=c[3]*t.alpha
+		c[4]=t.alpha -- full alpha only
 	
 		return c
 	end
