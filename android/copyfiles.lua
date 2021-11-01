@@ -99,6 +99,8 @@ if bake.file_exists(ficon) then
 
 
 	for i,v in ipairs{
+		{s=192,o="xxxhdpi"},
+		{s=144,o="xxhdpi"},
 		{s=96,o="xhdpi"},
 		{s=72,o="hdpi"},
 		{s=48,o="mdpi"},
