@@ -3,7 +3,7 @@ cd `dirname $0`
 source ~/andsdk-env.sh
 
 
-#./gradlew build
+./copyfiles
 
 ./gradlew build installDebug
 
@@ -18,21 +18,4 @@ source ~/andsdk-env.sh
 
 #./adb install gamecake/build/outputs/apk/release/gamecake-release.apk
 #./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake/.CakeAct
-
-
-
-
-#../build/make --gcc=android --cpu=armv7 $*
-
-#ant 
-
-#if [ "$1" = "apk" ] ; then
-#	cd android
-#	ant $build
-#	exit
-#fi
-#cd android
-#rm bin/*.apk
-#ant $build install
-
 

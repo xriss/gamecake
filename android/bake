@@ -1,0 +1,26 @@
+
+source `dirname $0`/config.sh
+
+if [ -z "$1" ] ; then
+
+BASENAME=$ANDROID_APP_BASEDIR
+
+else
+
+BASENAME=`realpath "$1"`
+
+fi
+
+
+
+cat >`dirname $0`/config.sh <<EOF
+
+export ANDROID_APP_BASEDIR=$BASENAME
+
+EOF
+
+
+
+cd $BASENAME
+../bake
+

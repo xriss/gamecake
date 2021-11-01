@@ -8,9 +8,9 @@ local wgrd=require("wetgenes.grd")
 
 local args={...}
 
-local basedir=assert(args[1],"Must specify basedir, eg \"./copyfiles.lua ../../apps/dike\"")
+local basedir=assert( args[1] or os.getenv("ANDROID_APP_BASEDIR") ,"Must specify basedir, eg \"./copyfiles.lua ../../apps/dike\"")
 
-local smell=args[2] -- optional smell
+local smell=args[2] or os.getenv("ANDROID_APP_SMELL") -- optional smell
 
 local fdat=assert(zips.readfile(basedir.."/opts.lua"),"opts.lua must exist in the given basedir")
 
@@ -36,12 +36,12 @@ local opts={
         version_int=math.floor(version*1000),
 	orientation=preopts.orientation or "unspecified",
 	
-	package=preopts.android_package or "com.wetgenes."..preopts.name,
-	activity=preopts.android_activity or "com.wetgenes.FeralActivity",
+	package=preopts.android_package or "com.wetgenes.gamecake"..preopts.name,
+	activity=preopts.android_activity or "com.wetgenes.gamecake.CakeAct",
 	permissions=preopts.android_permissions or "",
 }
 
-bake.replacefile("AndroidManifest.xml.base","AndroidManifest.xml",opts)
+bake.replacefile("input/AndroidManifest.xml","gamecake/src/main/AndroidManifest.xml",opts)
 --bake.replacefile("build.xml.base","build.xml",opts)
 
 -- remove all files in res

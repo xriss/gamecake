@@ -11,6 +11,7 @@ dbg/*
 build-*
 *.dbg
 
+android/config.sh
 android/build
 android/*/build
 android/gamecake/src/main/res/*
