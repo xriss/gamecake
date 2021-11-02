@@ -24,6 +24,15 @@ if smell and preopts.smells and preopts.smells[smell] then -- override preopts w
 	end
 end
 
+-- remove all files in res
+
+os.execute("rm -rf res")
+os.execute("mkdir res")
+os.execute("mkdir res/values")
+
+
+
+
 --print(wstr.dump(opts))
 
 local version=args[3] or preopts.version or bake.version_from_time()
@@ -36,17 +45,13 @@ local opts={
         version_int=math.floor(version*1000),
 	orientation=preopts.orientation or "unspecified",
 	
-	package=preopts.android_package or "com.wetgenes.gamecake"..preopts.name,
+	package=preopts.android_package or "com.wetgenes.gamecake."..preopts.name,
 	activity=preopts.android_activity or "com.wetgenes.gamecake.CakeAct",
 	permissions=preopts.android_permissions or "",
 }
 
 bake.replacefile("input/AndroidManifest.xml","gamecake/src/main/AndroidManifest.xml",opts)
---bake.replacefile("build.xml.base","build.xml",opts)
-
--- remove all files in res
-
-os.execute("rm -rf res")
+bake.replacefile("input/strings.xml","res/values/strings.xml",opts)
 
 -- copy all data and code from root into res/raw
 
@@ -109,7 +114,7 @@ if bake.file_exists(ficon) then
 		local gd=assert(wgrd.create(ficon))
 		assert(gd:convert(wgrd.FMT_U8_RGBA))
 		gd:scale(v.s,v.s,1)
-		local n="res/drawable-"..v.o.."/icon.png"
+		local n="res/mipmap-"..v.o.."/ic_launcher.png"
 		bake.create_dir_for_file(n)
 		gd:save(n)
 		print(n)

@@ -16,6 +16,7 @@ android/build
 android/*/build
 android/gamecake/src/main/res/*
 android/res/*
+android/gamecake/src/main/AndroidManifest.xml
 
 exe_gamecake/preloadlibs.c
 exe_gamecake/cache.c
