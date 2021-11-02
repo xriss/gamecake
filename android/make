@@ -2,13 +2,16 @@ cd `dirname $0`
 
 source ~/andsdk-env.sh
 
+source ./config.sh
+
+BASENAME=` basename $ANDROID_APP_BASEDIR `
 
 ./copyfiles
 
 ./gradlew build installDebug
 
 ./adb logcat -c
-./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake/.CakeAct | ./adb logcat "SDL/APP:*" "*:S"
+./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake.$BASENAME/.CakeAct | ./adb logcat "SDL/APP:*" "*:S"
 
 
 #zipinfo app/build/outputs/apk/debug/app-debug.apk

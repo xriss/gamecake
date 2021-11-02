@@ -1,4 +1,4 @@
-package com.wetgenes.gamecake;
+package {package};
 
 import org.libsdl.app.SDLActivity;
 

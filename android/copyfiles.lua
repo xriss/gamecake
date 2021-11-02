@@ -24,12 +24,6 @@ if smell and preopts.smells and preopts.smells[smell] then -- override preopts w
 	end
 end
 
--- remove all files in res
-
-os.execute("rm -rf res")
-os.execute("mkdir res")
-os.execute("mkdir res/values")
-
 
 
 
@@ -46,12 +40,26 @@ local opts={
 	orientation=preopts.orientation or "unspecified",
 	
 	package=preopts.android_package or "com.wetgenes.gamecake."..preopts.name,
-	activity=preopts.android_activity or "com.wetgenes.gamecake.CakeAct",
+	activity=preopts.android_activity or "com.wetgenes.gamecake."..preopts.name..".CakeAct",
 	permissions=preopts.android_permissions or "",
 }
 
+
+-- remove all files in res
+
+os.execute("rm -rf gamecake/src/main/java/com/wetgenes/gamecake")
+os.execute("rm -rf res")
+os.execute("mkdir res")
+os.execute("mkdir res/values")
+os.execute("mkdir gamecake/src/main/java/com/wetgenes/gamecake")
+os.execute("mkdir gamecake/src/main/java/com/wetgenes/gamecake/"..opts.name)
+
+
 bake.replacefile("input/AndroidManifest.xml","gamecake/src/main/AndroidManifest.xml",opts)
 bake.replacefile("input/strings.xml","res/values/strings.xml",opts)
+bake.replacefile("input/CakeAct.java","gamecake/src/main/java/com/wetgenes/gamecake/"..opts.name.."/CakeAct.java",opts)
+bake.replacefile("input/build.gradle","gamecake/build.gradle",opts)
+
 
 -- copy all data and code from root into res/raw
 
@@ -108,14 +116,16 @@ if bake.file_exists(ficon) then
 		{s=144,o="xxhdpi"},
 		{s=96,o="xhdpi"},
 		{s=72,o="hdpi"},
-		{s=48,o="mdpi"},
-		{s=36,o="ldpi"},
+--		{s=48,o="mdpi"},
+--		{s=36,o="ldpi"},
 	} do
 		local gd=assert(wgrd.create(ficon))
 		assert(gd:convert(wgrd.FMT_U8_RGBA))
 		gd:scale(v.s,v.s,1)
-		local n="res/mipmap-"..v.o.."/ic_launcher.png"
+		local n="res/drawable-"..v.o.."/ic_launcher_background.png"
 		bake.create_dir_for_file(n)
+		gd:save(n)
+		local n="res/drawable-"..v.o.."/ic_launcher_foreground.png"
 		gd:save(n)
 		print(n)
 	end
