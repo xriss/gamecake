@@ -51,8 +51,7 @@ os.execute("rm -rf gamecake/src/main/java/com/wetgenes/gamecake")
 os.execute("rm -rf res")
 os.execute("mkdir res")
 os.execute("mkdir res/values")
-os.execute("mkdir gamecake/src/main/java/com/wetgenes/gamecake")
-os.execute("mkdir gamecake/src/main/java/com/wetgenes/gamecake/"..opts.name)
+os.execute("mkdir -p gamecake/src/main/java/com/wetgenes/gamecake/"..opts.name)
 
 
 bake.replacefile("input/AndroidManifest.xml","gamecake/src/main/AndroidManifest.xml",opts)
