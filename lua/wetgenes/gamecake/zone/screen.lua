@@ -196,6 +196,8 @@ M.bake=function(oven,screen)
 
 		gl.Clear(gl.DEPTH_BUFFER_BIT) -- we promise to draw to the entire screen
 
+		gl.LoadIdentity() -- throw away the 2d view camera matrix as we will be building our own camera
+
 	end
 
 	screen.draw_tail=function()

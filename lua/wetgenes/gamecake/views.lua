@@ -59,7 +59,7 @@ function M.bake(oven,views)
 			fbo=fbo,
 			vx=fbo.w,
 			vy=fbo.h,
-			vz=fbo.h*4,
+			vz=fbo.h*2,
 			fov=0,
 		})
 		views.push(view)
@@ -103,19 +103,27 @@ function M.bake(oven,views)
 
 		view.vx_auto=not opts.vx
 		view.vy_auto=not opts.vy
+		view.vz_auto=not opts.vz
+		view.scale_auto=not opts.scale
 
-		view.vz=opts.vz or (view.vy and view.vy*4)-- depth range of the zbuffer
+		view.vz=opts.vz or (view.vy and view.vy*2)-- depth range of the zbuffer
 
-		view.fov=opts.fov or 0 -- field of view, a tan like value, so 1 would be 90deg, 0.5 would be 45deg and so on
-		view.fov_scale2d=opts.fov_scale2d	-- 2d scale fix, should probably be 1/fov
+		view.fov=opts.fov or 0	-- field of view, a tan like value, so 1 would be 90deg, 0.5 would be 45deg and so on
+								-- with 0 triggering a no perspective mode
+								-- this is used directly as the Z multiplier in the matrix for Z and W
+								
+		view.fov_lock=opts.fov_lock or 0	-- set to 1 to lock to X or 2 to lock to Y otherwise we auto pick to fit
 
---		view.ss=opts.overscan or 1 -- scale vx,vy by this value, to allow simple overscan
-		
---		view.aspect=opts.aspect or 1 -- pixel aspect fix, normally 1/1 can also set to 0 for scale to total available area
+		view.scale=opts.scale or ( view.vy and 2/view.vy ) -- camera scale fix, should probably be 2/vy for 2d screens
 
 -- these values are updated when you call update()
-		view.pmtx=M4{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} 	-- projection matrix
-		view.port=V4{0,0,0,0}								-- view port x,y,w,h
+		view.pmtx=M4() 	-- projection matrix
+		view.pinv=M4() 	-- inverse projection matrix
+
+		view.cmtx=M4() 	-- 2D camera matrix 
+		view.cinv=M4() 	-- 2D inverse camera matrix
+
+		view.port=V4()	-- view port x,y,w,h
 
 		view.sx=1	-- view scale
 		view.sy=1
@@ -138,6 +146,8 @@ function M.bake(oven,views)
 
 				if view.vx_auto then view.vx=view.hx end
 				if view.vy_auto then view.vy=view.hy end
+				if view.vz_auto then view.vz=2*view.vy end
+				if view.scale_auto then view.scale=2/view.vy end
 
 			elseif view.mode=="fbo" then
 
@@ -148,6 +158,8 @@ function M.bake(oven,views)
 
 				if view.vx_auto then view.vx=view.hx end
 				if view.vy_auto then view.vy=view.hy end
+				if view.vz_auto then view.vz=2*view.vy end
+				if view.scale_auto then view.scale=2/view.vy end
 
 			elseif view.mode=="full" then
 
@@ -158,6 +170,8 @@ function M.bake(oven,views)
 
 				if view.vx_auto then view.vx=view.hx end
 				if view.vy_auto then view.vy=view.hy end
+				if view.vz_auto then view.vz=2*view.vy end
+				if view.scale_auto then view.scale=2/view.vy end
 
 			elseif view.mode=="clip" then
 
@@ -168,6 +182,8 @@ function M.bake(oven,views)
 				
 				if view.vx_auto then view.vx=view.hx end
 				if view.vy_auto then view.vy=view.hy end
+				if view.vz_auto then view.vz=2*view.vy end
+				if view.scale_auto then view.scale=2/view.vy end
 
 				if view.vx and view.vy then
 					if view.hx/view.hy > view.vx/view.vy then -- fit y
@@ -189,10 +205,11 @@ function M.bake(oven,views)
 				view.hy=view.parent.hy
 				view.vx=view.parent.hx
 				view.vy=view.parent.hy
-				view.vz=view.vz or view.parent.hy*4
 
 				if view.vx_auto then view.vx=view.hx end
 				if view.vy_auto then view.vy=view.hy end
+				if view.vz_auto then view.vz=2*view.vy end
+				if view.scale_auto then view.scale=2/view.vy end
 
 			end
 
@@ -212,31 +229,39 @@ function M.bake(oven,views)
 
 --	layout.project23d = function(width,height,fov,depth)
 		
-			local m=view.pmtx:identity()
+			view.pmtx:identity()
 			
-			local f=view.vz
-			local n=1
-
 			local va=view.vy/view.vx
 			local ha=view.hy/view.hx
 			
+
+-- after dealing with fov here you can assume a y of +-1 will get you to the edge of your view space (fited to the real screen)
+-- and x will depend on your aspect so +-1.7777... for a standard 1920x1080 screen to give square pixels
+
+-- sadly we can not reliably use a reversed Z buffer or even a 0-1 Z buffer as glClipControl is missing in GLES so we waste a lot of precision.
+-- could possibly still reverse using glDepthRangef but that seems a bad idea without glClipControl
+
 			if view.fov==0 then
 			
-				if ha > va then 	-- fit width to screen
+				if ( view.fov_lock==1 ) or ( ( view.fov_lock~=2 ) and ( ha > va ) ) then 	-- fit width to screen
 				
+					view.fov_axis=1
+
 					view.sx=1
 					view.sy=ha/va
 
-					view.pmtx[1] =                    2/view.vx	-- X = X mul
-					view.pmtx[6] = (view.hx/view.hy)*-2/view.vx	-- Y = Y mul
+					view.pmtx[1] =                    1	-- X = X mul
+					view.pmtx[6] = (view.hx/view.hy)*-1	-- Y = Y mul
 					
 				else									-- fit height to screen
 				
+					view.fov_axis=2
+
 					view.sx=va/ha
 					view.sy=1
 
-					view.pmtx[1] = (view.hy/view.hx)* 2/view.vy	-- X = X mul
-					view.pmtx[6] =                   -2/view.vy	-- Y = Y mul
+					view.pmtx[1] = (view.hy/view.hx)* 1	-- X = X mul
+					view.pmtx[6] =                   -1	-- Y = Y mul
 					
 				end
 
@@ -244,27 +269,33 @@ function M.bake(oven,views)
 				
 				if view.master.stretch then
 
+					view.fov_axis=0 -- we are not keeping an aspect ratio
+
 					view.sx=1
 					view.sy=1
 
-					view.pmtx[1] = va/view.fov			-- X = X mul
-					view.pmtx[6] = -1/view.fov			-- Y = Y mul
+					view.pmtx[1] = va			-- X = X mul
+					view.pmtx[6] = -1			-- Y = Y mul
 									
-				elseif ha > va then 	-- fit width to screen
+				elseif ( view.fov_lock==1 ) or ( ( view.fov_lock~=2 ) and ( ha > va ) ) then 	-- fit width to screen
 				
+					view.fov_axis=1
+					
 					view.sx=1
 					view.sy=ha/va
 
-					view.pmtx[1] =   va    /view.fov	-- X = X mul
-					view.pmtx[6] = -(va/ha)/view.fov	-- Y = Y mul
+					view.pmtx[1] =   va    		-- X = X mul
+					view.pmtx[6] = -(va/ha)		-- Y = Y mul
 					
 				else									-- fit height to screen
 				
+					view.fov_axis=2
+
 					view.sx=va/ha
 					view.sy=1
 
-					view.pmtx[1] = ha/view.fov			-- X = X mul
-					view.pmtx[6] = -1/view.fov			-- Y = Y mul
+					view.pmtx[1] = ha			-- X = X mul
+					view.pmtx[6] = -1			-- Y = Y mul
 					
 				end
 			end
@@ -288,7 +319,7 @@ compromise.
 
 			if view.fov==0 then
 
-				view.pmtx[11] = -1/view.vz		-- Z = Z mul
+				view.pmtx[11] = -1/view.vz		-- Z = Z mul  -- clip to a max of +-vz
 				view.pmtx[15] = 0				-- Z = Z add
 				
 				view.pmtx[12] = 0				-- W = Z mul
@@ -296,19 +327,28 @@ compromise.
 
 			else
 
-				view.pmtx[11] = -1				-- Z = Z mul
+				view.pmtx[11] = -view.fov		-- Z = Z mul
 				view.pmtx[15] = 0				-- Z = Z add
 
-				view.pmtx[12] = -1				-- W = Z mul
+				view.pmtx[12] = -view.fov		-- W = Z mul
 				view.pmtx[16] = 1				-- W = W add
 				
 			end
 
-			if view.fov_scale2d then
-				view.pmtx:scale( view.fov_scale2d , view.fov_scale2d , 1 )
+
+			view.pmtx:inverse( view.pinv )
+
+
+			view.cmtx:identity() -- a default camera matrix for 2d views
+
+			if view.scale then
+				view.cmtx:scale( view.scale )
 			end
 			
-			view.pmtx:translate(view.vx*(view.cx-0.5),view.vy*(view.cy-0.5),view.vz*(view.cz-0.5)) -- choose draw origin from top left to center of screen
+			view.cmtx:translate( view.vx*(view.cx-0.5) , view.vy*(view.cy-0.5) , 0 )
+
+			view.cmtx:inverse( view.cinv )
+
 			return view
 		end
 
@@ -323,7 +363,7 @@ compromise.
 			gl.LoadMatrix( view.pmtx )
 
 			gl.MatrixMode(gl.MODELVIEW)
-			gl.LoadIdentity()
+			gl.LoadMatrix( view.cmtx )
 
 			return view
 		end
@@ -333,8 +373,16 @@ compromise.
 
 			if msg.xraw and msg.yraw then	-- we need to fix raw x,y mouse numbers
 			
-				msg.x=( view.vx * ( (msg.xraw-(view.hx*0.5+view.px)) * view.sx ) / view.hx ) + view.vx*(0.5-view.cx)
-				msg.y=( view.vy * ( (msg.yraw-(view.hy*0.5+view.py)) * view.sy ) / view.hy ) + view.vy*(0.5-view.cy)
+				local va=V4( 2*(msg.xraw-view.hx*0.5)/view.hx , -2*(msg.yraw-view.hy*0.5)/view.hy , 0 , 1 ) -- convert to -1 +1 range
+				local vb=va*view.pinv
+				local vc=vb*view.cinv
+
+				msg.x=vc[1]
+				msg.y=vc[2]
+
+--	print( msg.xraw , msg.yraw , va , vb , vc )
+--				msg.x=( view.vx * ( (msg.xraw-(view.hx*0.5+view.px)) * view.sx ) / view.hx ) + view.vx*(0.5-view.cx)
+--				msg.y=( view.vy * ( (msg.yraw-(view.hy*0.5+view.py)) * view.sy ) / view.hy ) + view.vy*(0.5-view.cy)
 
 				return true
 			end
