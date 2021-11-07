@@ -153,8 +153,8 @@ function M.bake(oven,views)
 
 				view.px=0
 				view.py=0
-				view.hx=view.fbo.w
-				view.hy=view.fbo.h
+				view.hx=view.fbo and view.fbo.w or 1
+				view.hy=view.fbo and view.fbo.h or 1
 
 				if view.vx_auto then view.vx=view.hx end
 				if view.vy_auto then view.vy=view.hy end
@@ -241,63 +241,36 @@ function M.bake(oven,views)
 -- sadly we can not reliably use a reversed Z buffer or even a 0-1 Z buffer as glClipControl is missing in GLES so we waste a lot of precision.
 -- could possibly still reverse using glDepthRangef but that seems a bad idea without glClipControl
 
-			if view.fov==0 then
+			if view.master.stretch then
+
+				view.fov_axis=0 -- we are not keeping an aspect ratio
+
+				view.sx=1
+				view.sy=1
+
+				view.pmtx[1] = va			-- X = X mul
+				view.pmtx[6] = -1			-- Y = Y mul
+								
+			elseif ( view.fov_lock==1 ) or ( ( view.fov_lock~=2 ) and ( ha > va ) ) then 	-- fit width to screen
 			
-				if ( view.fov_lock==1 ) or ( ( view.fov_lock~=2 ) and ( ha > va ) ) then 	-- fit width to screen
+				view.fov_axis=1
 				
-					view.fov_axis=1
+				view.sx=1
+				view.sy=ha/va
 
-					view.sx=1
-					view.sy=ha/va
-
-					view.pmtx[1] =                    1	-- X = X mul
-					view.pmtx[6] = (view.hx/view.hy)*-1	-- Y = Y mul
-					
-				else									-- fit height to screen
+				view.pmtx[1] =   va    		-- X = X mul
+				view.pmtx[6] = -(va/ha)		-- Y = Y mul
 				
-					view.fov_axis=2
+			else									-- fit height to screen
+			
+				view.fov_axis=2
 
-					view.sx=va/ha
-					view.sy=1
+				view.sx=va/ha
+				view.sy=1
 
-					view.pmtx[1] = (view.hy/view.hx)* 1	-- X = X mul
-					view.pmtx[6] =                   -1	-- Y = Y mul
-					
-				end
-
-			else
+				view.pmtx[1] = ha			-- X = X mul
+				view.pmtx[6] = -1			-- Y = Y mul
 				
-				if view.master.stretch then
-
-					view.fov_axis=0 -- we are not keeping an aspect ratio
-
-					view.sx=1
-					view.sy=1
-
-					view.pmtx[1] = va			-- X = X mul
-					view.pmtx[6] = -1			-- Y = Y mul
-									
-				elseif ( view.fov_lock==1 ) or ( ( view.fov_lock~=2 ) and ( ha > va ) ) then 	-- fit width to screen
-				
-					view.fov_axis=1
-					
-					view.sx=1
-					view.sy=ha/va
-
-					view.pmtx[1] =   va    		-- X = X mul
-					view.pmtx[6] = -(va/ha)		-- Y = Y mul
-					
-				else									-- fit height to screen
-				
-					view.fov_axis=2
-
-					view.sx=va/ha
-					view.sy=1
-
-					view.pmtx[1] = ha			-- X = X mul
-					view.pmtx[6] = -1			-- Y = Y mul
-					
-				end
 			end
 
 -- depth buffer fix an fov of 0 is a uniform projection
