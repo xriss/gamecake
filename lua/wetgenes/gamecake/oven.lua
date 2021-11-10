@@ -220,7 +220,7 @@ os.exit()
 
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
 				console=opts.args.console,		-- use --console on commandline to keep console open
-				border=true
+				borderless=opts.args.borderless,
 				}
 --				border=opts.args.border}		-- use --border  on commandline to keep window borders
 			local screen=wwin.screen()

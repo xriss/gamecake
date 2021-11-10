@@ -100,7 +100,7 @@ sdl.create=function(t)
 	if jit and jit.os=="Windows" then -- windows does not do borderless resize, so, meh
 
 	else
-		if not t.border then
+		if t.borderless then
 			flags[#flags+1]=SDL.window.Borderless
 		end
 	end
@@ -120,18 +120,11 @@ sdl.create=function(t)
 		y       = t.y,
 	})
 
-	if not t.border then
-
-		require("wetgenes.win.core").sdl_attach_resize_hax(it.win)
-
---[[
-		it.win:setHitTest(function(...)
-
-			print(...)
-
-		end)
-]]
-
+	if jit and jit.os=="Windows" then -- windows does not do borderless resize, so, meh
+	else
+		if t.borderless then
+			require("wetgenes.win.core").sdl_attach_resize_hax(it.win)
+		end
 	end
 	
 	return it
