@@ -54,6 +54,13 @@ For some more options when building (eg use clang) see the output of
 	./make --help
 
 
+EG I have successfully built an exe under WSL in Windows 10 using the 
+following to install tools/libs and then build using mingw. 
+
+	build/install --mingw
+	build/make --gcc=mingw
+
+
 Alternatively any vbox_* directory can build a specific executable. For
 instance vbox_1604_64 can be used to build a 64bit executable inside an ubuntu
 16.04 vagrant box. See readme files inside these directories for more
