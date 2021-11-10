@@ -164,11 +164,12 @@ sdl.show=function(it,view)
 --	print("SDL show")
 	it=it or sdl.it
 	it.win:show()
-	
-	if     view=="full" then	 it.win:setResizeable(true) it.win:setBordered(true)  it.win:setFullscreen(SDL.window.Desktop) it.win:setResizeable(false) it.win:setBordered(false)
---	if     view=="full" then	 it.win:setFullscreen(SDL.window.Fullscreen)
-	elseif view=="max"  then	 it.win:setResizeable(true) it.win:setBordered(true)  it.win:maximize() it.win:setResizeable(false) it.win:setBordered(false)
-	else						 it.win:setResizeable(true) it.win:setBordered(true)  it.win:setFullscreen(0) it.win:restore() it.win:setResizeable(true) it.win:setBordered(true)
+
+--  it.win:setResizeable(false) it.win:setBordered(false)
+
+	if     view=="full" then	 it.win:setFullscreen(SDL.window.Desktop)
+	elseif view=="max"  then	 it.win:maximize()
+	else						 it.win:setFullscreen(0) it.win:restore()
 	end
 	
 --	sdl.mousexy_init()
