@@ -247,9 +247,10 @@ function M.bake(oven,framebuffers)
 		if fbo.depth then
 			if not framebuffers.mipmap_depth_broken then
 				gl.BindTexture(gl.TEXTURE_2D, fbo.depth)
-				gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
 				gl.GenerateMipmap(gl.TEXTURE_2D)
 				if gl.GetError()==gl.INVALID_OPERATION then -- bad driver, we fucked
+					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 					framebuffers.mipmap_depth_broken=true
 				end
 			end
