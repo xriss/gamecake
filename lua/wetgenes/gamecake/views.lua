@@ -346,7 +346,10 @@ compromise.
 
 			if msg.xraw and msg.yraw then	-- we need to fix raw x,y mouse numbers
 			
-				local va=V4( 2*(msg.xraw-view.hx*0.5)/view.hx , -2*(msg.yraw-view.hy*0.5)/view.hy , 0 , 1 ) -- convert to -1 +1 range
+				local hx=view.win and view.win.width  or view.hx -- we should use win size if we are allowed
+				local hy=view.win and view.win.height or view.hy
+			
+				local va=V4( 2*(msg.xraw-hx*0.5)/hx , -2*(msg.yraw-hy*0.5)/hy , 0 , 1 ) -- convert to -1 +1 range
 				local vb=va*view.pinv
 				local vc=vb*view.cinv
 
