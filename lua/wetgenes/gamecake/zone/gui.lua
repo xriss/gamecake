@@ -30,12 +30,12 @@ gui.data_setup=function()
 	
 	local datas=gui.master.datas
 	
-	datas.new({id="screen_gamma",class="number",hooks=gui.hooks,num=1.5,min=0,max=4,step=0.01})
+	datas.new({id="screen_gamma",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.GAMMA,min=0,max=4,step=0.01})
 	gui.value["screen_gamma"]=function(it)
 		screen.shader_qs.zone_screen_draw.GAMMA=it:value()
 	end
 
-	datas.new({id="camera_fov",class="number",hooks=gui.hooks,num=0.5,min=0,max=8,step=0.01})
+	datas.new({id="camera_fov",class="number",hooks=gui.hooks,num=screen.camera_fov,min=0,max=8,step=0.01})
 	gui.value["camera_fov"]=function(it)
 		screen.camera_fov=it:value()
 	end
@@ -46,22 +46,22 @@ gui.data_setup=function()
 		screen.base_scale=math.pow(2.0,it:value())
 	end
 
-	datas.new({id="ao_size",class="number",hooks=gui.hooks,num=128,min=0,max=1024,step=1})
+	datas.new({id="ao_size",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_SIZE,min=0,max=1024,step=1})
 	gui.value["ao_size"]=function(it)
 		screen.shader_qs.zone_screen_build_occlusion.AO_SIZE=it:value()
 	end
 
-	datas.new({id="ao_width",class="number",hooks=gui.hooks,num=1,min=0,max=8,step=0.1})
+	datas.new({id="ao_width",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_WIDTH,min=0,max=8,step=0.1})
 	gui.value["ao_width"]=function(it)
 		screen.shader_qs.zone_screen_build_occlusion.AO_WIDTH=it:value()
 	end
 
-	datas.new({id="ao_steps",class="number",hooks=gui.hooks,num=1,min=1,max=8,step=1})
+	datas.new({id="ao_steps",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_STEPS,min=1,max=8,step=1})
 	gui.value["ao_steps"]=function(it)
 		screen.shader_qs.zone_screen_build_occlusion.AO_STEPS=it:value()
 	end
 
-	datas.new({id="ao_angles",class="number",hooks=gui.hooks,num=6,min=1,max=32,step=1})
+	datas.new({id="ao_angles",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_ANGLES,min=1,max=32,step=1})
 	gui.value["ao_angles"]=function(it)
 		screen.shader_qs.zone_screen_build_occlusion.AO_ANGLES=it:value()
 	end
