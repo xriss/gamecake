@@ -30,6 +30,11 @@ gui.data_setup=function()
 	
 	local datas=gui.master.datas
 	
+	datas.new({id="screen_gamma",class="number",hooks=gui.hooks,num=1.5,min=0,max=4,step=0.01})
+	gui.value["screen_gamma"]=function(it)
+		screen.shader_qs.zone_screen_draw.GAMMA=it:value()
+	end
+
 	datas.new({id="camera_fov",class="number",hooks=gui.hooks,num=0.5,min=0,max=8,step=0.01})
 	gui.value["camera_fov"]=function(it)
 		screen.camera_fov=it:value()
@@ -41,6 +46,27 @@ gui.data_setup=function()
 		screen.base_scale=math.pow(2.0,it:value())
 	end
 
+	datas.new({id="ao_size",class="number",hooks=gui.hooks,num=128,min=0,max=1024,step=1})
+	gui.value["ao_size"]=function(it)
+		screen.shader_qs.zone_screen_build_occlusion.AO_SIZE=it:value()
+	end
+
+	datas.new({id="ao_width",class="number",hooks=gui.hooks,num=1,min=0,max=8,step=0.1})
+	gui.value["ao_width"]=function(it)
+		screen.shader_qs.zone_screen_build_occlusion.AO_WIDTH=it:value()
+	end
+
+	datas.new({id="ao_steps",class="number",hooks=gui.hooks,num=1,min=1,max=8,step=1})
+	gui.value["ao_steps"]=function(it)
+		screen.shader_qs.zone_screen_build_occlusion.AO_STEPS=it:value()
+	end
+
+	datas.new({id="ao_angles",class="number",hooks=gui.hooks,num=6,min=1,max=32,step=1})
+	gui.value["ao_angles"]=function(it)
+		screen.shader_qs.zone_screen_build_occlusion.AO_ANGLES=it:value()
+	end
+			
+			
 	datas.new({id="screen_mode",class="string",hooks=gui.hooks,str=oven.console.screen_mode()})
 	oven.console.screen_mode_data=datas.get("screen_mode")
 	gui.click["screen_mode_change"]=function(it)
@@ -173,7 +199,17 @@ gui.plan_windows=function()
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("camera_fov"),color=0})
 	def.add(canvas,{text="Screen Scale"})
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_scale"),color=0})
+	def.add(canvas,{text="Screen Gamma"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_gamma"),color=0})
 
+	def.add(canvas,{text="AO Size"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_size"),color=0})
+	def.add(canvas,{text="AO Width"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_width"),color=0})
+	def.add(canvas,{text="AO Steps"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_steps"),color=0})
+	def.add(canvas,{text="AO Angles"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_angles"),color=0})
 
 	gui.screen:windows_reset()
 

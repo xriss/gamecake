@@ -295,7 +295,7 @@ float ambient_occlusion( vec2 vv )
 	float slen=float(AO_SIZE_SCREEN)*texel_size.x;
 
 	vec3 p1=depth_to_view( vv );
-	vec3 p2=view_to_depth( p1+(vec3(slen,slen,0.0)*float(AO_SIZE_WIDTH)) );
+	vec3 p2=view_to_depth( p1+(vec3(slen,slen,0.0)*float(AO_WIDTH)) );
 
 	float dlen=length(p2.xy-vv.xy);
 
