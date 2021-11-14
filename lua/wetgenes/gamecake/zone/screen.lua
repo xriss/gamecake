@@ -57,7 +57,7 @@ M.bake=function(oven,screen)
 		},
 		
 		zone_screen_build_occlusion={
-			AO_SIZE=128,
+			AO_SIZE=1/8,
 			AO_WIDTH=1,
 			AO_STEPS=1,
 			AO_ANGLES=6,
@@ -149,8 +149,6 @@ M.bake=function(oven,screen)
 	
 	screen.draw_head=function(scene)
 	
-		screen.shader_qs.zone_screen_build_occlusion.AO_SIZE_SCREEN = screen.shader_qs.zone_screen_build_occlusion.AO_SIZE*screen.base_scale
-
 		local w=math.ceil(oven.win.width  * screen.base_scale )
 		local h=math.ceil(oven.win.height * screen.base_scale )
 

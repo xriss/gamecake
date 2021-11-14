@@ -261,60 +261,33 @@ float ambient_occlusion( vec2 vv )
 {
 
 #define AO_SAMPLES (AO_ANGLES*AO_STEPS)
-
-#if 0
-
-#define UND(a) (1.0/(1.00001-(a)))
-
-	float d=(float(textureLod(tex,vv,0.0))-0.5)*2.0; // the depth of the test pixel ( range 0 to 1 w=d/(1+d) )
-
-	float s=UND(d);
-	s=(s/(s+1.0))/256.0;
-	s=(1.0/256.0)/d;
-
-	float ac=0.0;
-	for(int i=1;i<=AO_STEPS;i++)
-	{
-		float l=(float(i)-random2d(vv.yx)) /float(AO_STEPS);
-		for(int ia=1;ia<=AO_ANGLES;ia++)
-		{
-			float r=( (float(ia)/float(AO_ANGLES)) + random2d(vv.xy) )*PI2;
-			vec2 cc=vec2(sin(r),cos(r))*s*l;
-			ac+=float(textureLod(tex,(cc+vv),0.0));
-		}
-	}
-	float t=((ac/float(AO_SAMPLES))-0.5)*2.0;
-
-
-	return smoothstep( -1.0 , 1.0 ,  pows( ( UND(t) - UND(d) ) , 0.4 ) );
-
-
-#else
 	
-	vec2 texel_size = 1.0 / vec2( textureSize(tex,0) );
-	float slen=float(AO_SIZE_SCREEN)*texel_size.x;
+	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
+	vec2 vp=vv*texel_size; // each unit is a pixel
+	vec2 hp=normalize((fract(vp/2.0)-0.5)*2.0); // a hash unit start vector
+	float ha=atan(hp.y,hp.x);
+
+	float slen=float(AO_SIZE);
+	
 
 	vec3 p1=depth_to_view( vv );
 	vec3 p2=view_to_depth( p1+(vec3(slen,slen,0.0)*float(AO_WIDTH)) );
 
-	float dlen=length(p2.xy-vv.xy);
+	float dlen=length(p2.xy-vv.xy); // scale needed to adjust to depth
 
+	float rots=PI2*float(AO_STEPS)/float(AO_ANGLES);
+	float dims=0.5/float(AO_ANGLES);
 	float ac=0.0;
-	for(int i=1;i<=AO_STEPS;i++)
+	for(int ia=0;ia<int(AO_ANGLES);ia++)
 	{
-		float l=(float(i)-random2d(vv.yx)) /float(AO_STEPS);
-		for(int ia=1;ia<=AO_ANGLES;ia++)
-		{
-			float r=( (float(ia)/float(AO_ANGLES)) + random2d(vv.xy) )*PI2;
-			vec2 cc=vec2(sin(r),cos(r))*dlen*l;
-			vec3 ss=depth_to_view(cc+vv);
-			ac+=1.0-smoothstep( p1.z - slen , p1.z + slen , ss.z );
-		}
+		float fa=float(ia);
+		float r=ha+fa*rots;
+		vec2 cc=vec2(sin(r),cos(r))*dlen*(1.0-fa*dims);
+		vec3 ss=depth_to_view(cc+vv);
+		ac+=1.0-smoothstep( p1.z - slen , p1.z + slen , ss.z );
 	}
-	return (ac/float(AO_SAMPLES));
+	return (ac/float(AO_ANGLES));
 
-
-#endif
 }
 
 #ifdef SHADOW
@@ -325,6 +298,12 @@ uniform sampler2D shadow_map;
 
 float shadow_occlusion( vec2 vv )
 {
+
+	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
+	vec2 vp=vv*texel_size; // each unit is a pixel
+	vec2 hp=((fract(vp/4.0)-0.5)*4.0); // a hash unit start vector
+//	float ha=atan(hp.y,hp.x);
+
 	vec3 v=depth_to_view( vv );
 
 	vec4 shadow_uv = shadow_mtx * camera * vec4(v,1.0) ;
@@ -341,11 +320,16 @@ float shadow_occlusion( vec2 vv )
 		float shadow_add=0.0;
 		float shadow_min=1.0;
 		vec2 shadow_texel_size = 1.0 / vec2( textureSize(shadow_map,0) );
-		vec2 rr = vec2( random2d(vv.xy)-0.5 , random2d(vv.yx)-0.5 );
-		for(int x = -1; x <= 1; x++)
+float x=0.0;
+//		for(int x = -1; x <= 1; x++)
 		{
-			for(int y = -1; y <= 1; y++)
+float y=0.0;
+//			for(int y = -1; y <= 1; y++)
 			{
+//				ha+=PI2/9.0; // 9 steps
+//				vec2 rr=vec2(sin(ha),cos(ha))*0.5;
+//				vec2 rr = vec2( random2d(vv.xy)-0.5 , random2d(vv.yx)-0.5 );
+vec2 rr=hp;
 				shadow_tmp = texture(shadow_map, shadow_uv.xy + ((vec2(float(x),float(y))+rr)*shadow_texel_size) ).r ;
 				shadow_add += shadow_tmp;
 				shadow_min = min( shadow_min ,  shadow_tmp );
