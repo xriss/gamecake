@@ -115,15 +115,28 @@ void main(void)
 #endif
 
 #ifdef SHADOW_FIX
-	s=SHADOW_FIX;
-#else
-	s = pow( s , 1.0/2.0 );
+//	s=SHADOW_FIX;
 #endif
 
 #ifdef BLOOM_FIX
 	b=BLOOM_FIX;
 #endif
 
+
+
+#ifdef COLOR_POW
+	m=pow(m,vec3(float(COLOR_POW)));
+#endif
+#ifdef SHADOW_POW
+
+	float ss=(clamp(s,0.0,1.0)-0.5)*2.0; // shadow is encoded such that 0.5 is neutral
+	float sp=ss<0.0 ? float(SHADOW_POW) : float(LIGHT_POW) ;
+	s=((1.0-pow(1.0-abs(ss),sp))*0.5*sign(ss))+0.5 ;
+
+#endif
+#ifdef BLOOM_MUL
+	b*=float(BLOOM_MUL);
+#endif
 
 	vec3 c;
 	
@@ -263,6 +276,7 @@ float ambient_occlusion( vec2 vv )
 #define AO_SAMPLES (AO_ANGLES*AO_STEPS)
 	
 	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
+	vec2 aspect=vec2( texel_size.y/texel_size.x , 1.0 );
 	vec2 vp=vv*texel_size; // each unit is a pixel
 	vec2 hp=normalize((fract(vp/2.0)-0.5)*2.0); // a hash unit start vector
 	float ha=atan(hp.y,hp.x);
@@ -282,7 +296,7 @@ float ambient_occlusion( vec2 vv )
 	{
 		float fa=float(ia);
 		float r=ha+fa*rots;
-		vec2 cc=vec2(sin(r),cos(r))*dlen*(1.0-fa*dims);
+		vec2 cc=vec2(sin(r),cos(r))*aspect*dlen*(1.0-fa*dims);
 		vec3 ss=depth_to_view(cc+vv);
 		ac+=1.0-smoothstep( p1.z - slen , p1.z + slen , ss.z );
 	}
@@ -300,6 +314,7 @@ float shadow_occlusion( vec2 vv )
 {
 
 	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
+//	vec2 aspect=vec2( texel_size.y/texel_size.x , 1.0 );
 	vec2 vp=vv*texel_size; // each unit is a pixel
 	vec2 hp=((fract(vp/4.0)-0.5)*4.0); // a hash unit start vector
 //	float ha=atan(hp.y,hp.x);

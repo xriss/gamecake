@@ -54,6 +54,10 @@ M.bake=function(oven,screen)
 
 		zone_screen_draw={
 			GAMMA=1.5,
+			COLOR_POW=1,
+			SHADOW_POW=1/2,
+			LIGHT_POW=1/4,
+			BLOOM_MUL=1,
 		},
 		
 		zone_screen_build_occlusion={

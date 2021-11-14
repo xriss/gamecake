@@ -35,6 +35,27 @@ gui.data_setup=function()
 		screen.shader_qs.zone_screen_draw.GAMMA=it:value()
 	end
 
+	datas.new({id="screen_color",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.COLOR_POW,min=0,max=4,step=0.01})
+	gui.value["screen_color"]=function(it)
+		screen.shader_qs.zone_screen_draw.COLOR_POW=it:value()
+	end
+
+	datas.new({id="screen_shadow",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.SHADOW_POW,min=0.01,max=8,step=0.01})
+	gui.value["screen_shadow"]=function(it)
+		screen.shader_qs.zone_screen_draw.SHADOW_POW=it:value()
+	end
+
+	datas.new({id="screen_light",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.LIGHT_POW,min=0.01,max=8,step=0.01})
+	gui.value["screen_light"]=function(it)
+		screen.shader_qs.zone_screen_draw.LIGHT_POW=it:value()
+	end
+
+	datas.new({id="screen_bloom",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.BLOOM_MUL,min=0,max=4,step=0.01})
+	gui.value["screen_bloom"]=function(it)
+		screen.shader_qs.zone_screen_draw.BLOOM_MUL=it:value()
+	end
+
+
 	datas.new({id="camera_fov",class="number",hooks=gui.hooks,num=screen.camera_fov,min=0,max=8,step=0.01})
 	gui.value["camera_fov"]=function(it)
 		screen.camera_fov=it:value()
@@ -201,6 +222,14 @@ gui.plan_windows=function()
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_scale"),color=0})
 	def.add(canvas,{text="Screen Gamma"})
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_gamma"),color=0})
+	def.add(canvas,{text="Screen Color"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_color"),color=0})
+	def.add(canvas,{text="Screen Shadow"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_shadow"),color=0})
+	def.add(canvas,{text="Screen Light"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_light"),color=0})
+	def.add(canvas,{text="Screen Bloom"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_bloom"),color=0})
 
 	def.add(canvas,{text="AO Size"})
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_size"),color=0})
