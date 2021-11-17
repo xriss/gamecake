@@ -1,0 +1,63 @@
+#build dependencies, run sudo ./apt-gets
+
+
+# first install a require script
+if ! [[ -x "$(command -v require)" ]] ; then
+
+	sudo wget -O /usr/local/bin/require https://raw.githubusercontent.com/xriss/require.sh/main/require.sh
+	sudo chmod +x /usr/local/bin/require
+
+fi
+
+
+
+require build-essential
+require libreadline-dev
+require libgl1-mesa-dev
+require libx11-dev
+require libasound2-dev
+require libudev-dev
+require libpulse-dev
+
+
+# we might need to build our own versions of these, see the build directory
+
+require libluajit-5.1-dev
+require libsdl2-dev
+require luajit
+require lua-filesystem
+
+
+# it is ok if this one fails, just need it for nginx
+
+require libssl-dev
+
+
+
+if [ "$1" = "--extra" ]; then
+
+	#we compress the final binaries
+	require upx
+
+	#clang if you want to build using clang (recomended)
+	require clang
+
+
+	#mingw64 if you want to build for windows
+	require mingw
+
+	#vagrant and virtualbox for building in controlled environments
+	require virtualbox
+	require virtualbox-ext-pack
+	require vagrant
+
+else
+
+	echo ""
+	echo " installed base dependencies only "
+	echo ""
+	echo " Run with --extra, eg ./require --extra to install extra dependencies "
+	echo ""
+
+fi
+
