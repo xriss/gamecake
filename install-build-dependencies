@@ -1,5 +1,3 @@
-#build dependencies, run sudo ./apt-gets
-
 
 # first install a require script
 if ! [[ -x "$(command -v require)" ]] ; then
