@@ -2,6 +2,7 @@
 # first install a require script
 if ! [[ -x "$(command -v require)" ]] ; then
 
+	echo " we need sudo to install require.sh to /usr/local/bin "
 	sudo wget -O /usr/local/bin/require https://raw.githubusercontent.com/xriss/require.sh/main/require.sh
 	sudo chmod +x /usr/local/bin/require
 
@@ -42,7 +43,7 @@ if [ "$1" = "--extra" ]; then
 
 
 	#mingw64 if you want to build for windows
-	require mingw
+	require i686-w64-mingw32-gcc
 
 	#vagrant and virtualbox for building in controlled environments
 	require virtualbox
@@ -54,7 +55,7 @@ else
 	echo ""
 	echo " installed base dependencies only "
 	echo ""
-	echo " Run with --extra, eg ./require --extra to install extra dependencies "
+	echo " Run with --extra, eg ./install-build-dependencies --extra to install extra dependencies "
 	echo ""
 
 fi
