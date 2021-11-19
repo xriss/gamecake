@@ -1,6 +1,0 @@
-#build dependencies, run sudo ./yum-gets
-
-yum groupinstall 'Development Tools'
-
-yum install libX11-devel mesa-libGL-devel alsa-lib-devel openssl-devel
-
