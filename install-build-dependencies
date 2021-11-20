@@ -8,47 +8,47 @@ if ! [[ -x "$(command -v require)" ]] ; then
 
 fi
 
+# commands
 
-
-require build-essential
-require libreadline-dev
-require libgl1-mesa-dev
-require libx11-dev
-require libasound2-dev
-require libudev-dev
-require libpulse-dev
-
-
-# we might need to build our own versions of these, see the build directory
-
-require libluajit-5.1-dev
-require libsdl2-dev
+require gcc
+require make
 require luajit
-require lua-filesystem
 
+# libs
 
-# it is ok if this one fails, just need it for nginx
+require lfs.so                  # lua-filesystem
 
-require libssl-dev
+# devs
+
+require /usr/include/readline   # libreadline-dev
+require /usr/include/GL         # libgl1-mesa-dev
+require /usr/include/X11        # libx11-dev
+require /usr/include/alsa       # libasound2-dev
+require /usr/include/libudev.h  # libudev-dev
+require /usr/include/pulse      # libpulse-dev
+require /usr/include/luajit-2.1 # libluajit-5.1-dev
+require /usr/include/SDL2       # libsdl2-dev
+require /usr/include/openssl    # libssl-dev
+
 
 
 
 if [ "$1" = "--extra" ]; then
 
-	#we compress the final binaries
+# commands
+
 	require upx
-
-	#clang if you want to build using clang (recomended)
 	require clang
-
-
-	#mingw64 if you want to build for windows
 	require i686-w64-mingw32-gcc
 
-	#vagrant and virtualbox for building in controlled environments
+#vagrant and virtualbox for building in controlled environments
+
+	require vagrant
+
+# these are not commands ...
+	
 	require virtualbox
 	require virtualbox-ext-pack
-	require vagrant
 
 else
 
