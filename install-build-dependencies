@@ -16,19 +16,20 @@ require luajit
 
 # libs
 
-require lfs.so                  # lua-filesystem
+require lfs.so
 
 # devs
 
-require /usr/include/readline   # libreadline-dev
-require /usr/include/GL         # libgl1-mesa-dev
-require /usr/include/X11        # libx11-dev
-require /usr/include/alsa       # libasound2-dev
-require /usr/include/libudev.h  # libudev-dev
-require /usr/include/pulse      # libpulse-dev
-require /usr/include/luajit-2.1 # libluajit-5.1-dev
-require /usr/include/SDL2       # libsdl2-dev
-require /usr/include/openssl    # libssl-dev
+require /usr/include/readline/readline.h
+require /usr/include/GL/gl.h
+require /usr/include/X11/X.h
+require /usr/include/alsa/asoundlib.h
+require /usr/include/libudev.h
+require /usr/include/pulse/pulseaudio.h
+require /usr/include/luajit-2.0/lua.h
+require /usr/include/luajit-2.1/lua.h
+require /usr/include/SDL2/SDL.h
+require /usr/include/openssl/ssl.h
 
 
 
