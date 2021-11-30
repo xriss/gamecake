@@ -1,35 +1,35 @@
 
 # first install a require script
-if ! [[ -x "$(command -v require)" ]] ; then
+if ! [[ -x "$(command -v require.sh)" ]] ; then
 
 	echo " we need sudo to install require.sh to /usr/local/bin "
-	sudo wget -O /usr/local/bin/require https://raw.githubusercontent.com/xriss/require.sh/main/require.sh
-	sudo chmod +x /usr/local/bin/require
+	sudo wget -O /usr/local/bin/require.sh https://raw.githubusercontent.com/xriss/require.sh/main/require.sh
+	sudo chmod +x /usr/local/bin/require.sh
 
 fi
 
 # commands
 
-require gcc
-require make
-require luajit
+require.sh gcc
+require.sh make
+require.sh luajit
 
 # libs
 
-require lfs.so
+require lua-filesystem
 
 # devs
 
-require /usr/include/readline/readline.h
-require /usr/include/GL/gl.h
-require /usr/include/X11/X.h
-require /usr/include/alsa/asoundlib.h
-require /usr/include/libudev.h
-require /usr/include/pulse/pulseaudio.h
-require /usr/include/luajit-2.0/lua.h
-require /usr/include/luajit-2.1/lua.h
-require /usr/include/SDL2/SDL.h
-require /usr/include/openssl/ssl.h
+require.sh /usr/include/readline/readline.h
+require.sh /usr/include/GL/gl.h
+require.sh /usr/include/X11/X.h
+require.sh /usr/include/alsa/asoundlib.h
+require.sh /usr/include/libudev.h
+require.sh /usr/include/pulse/pulseaudio.h
+require.sh /usr/include/luajit-2.0/lua.h
+require.sh /usr/include/luajit-2.1/lua.h
+require.sh /usr/include/SDL2/SDL.h
+require.sh /usr/include/openssl/ssl.h
 
 
 
@@ -38,18 +38,18 @@ if [ "$1" = "--extra" ]; then
 
 # commands
 
-	require upx
-	require clang
-	require i686-w64-mingw32-gcc
+	require.sh upx
+	require.sh clang
+	require.sh i686-w64-mingw32-gcc
 
 #vagrant and virtualbox for building in controlled environments
 
-	require vagrant
+	require.sh vagrant
 
 # these are not commands ...
 	
-	require virtualbox
-	require virtualbox-ext-pack
+	require.sh virtualbox
+	require.sh virtualbox-ext-pack
 
 else
 
