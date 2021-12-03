@@ -16,7 +16,7 @@ require.sh luajit
 
 # libs
 
-require lua-filesystem
+require.sh lua-filesystem
 
 # devs
 
@@ -40,7 +40,7 @@ if [ "$1" = "--extra" ]; then
 
 	require.sh upx
 	require.sh clang
-	require.sh i686-w64-mingw32-gcc
+	require.sh /usr/bin/i686-w64-mingw32-gcc
 
 #vagrant and virtualbox for building in controlled environments
 
@@ -49,7 +49,7 @@ if [ "$1" = "--extra" ]; then
 # these are not commands ...
 	
 	require.sh virtualbox
-	require.sh virtualbox-ext-pack
+#	require.sh virtualbox-ext-pack
 
 else
 
