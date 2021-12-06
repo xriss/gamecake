@@ -50,6 +50,8 @@ if [ "$1" = "--extra" ]; then
 	
 	require.sh virtualbox
 #	require.sh virtualbox-ext-pack
+	require.sh virtualbox-guest-utils
+#	require.sh linux54-virtualbox-guest-modules
 
 else
 

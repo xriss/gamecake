@@ -3,7 +3,7 @@ THISDIR=`dirname $0`
 
 echo " installing qemu "
 
-./install-apt.sh
+./install-host-dependencies.sh
 
 
 #update these to get a newer version

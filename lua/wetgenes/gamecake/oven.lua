@@ -485,9 +485,9 @@ require("gles").CheckError() -- uhm this fixes an error?
 			if oven.started then return end -- already started
 			oven.started=true
 
-oven.gl.CheckError()
+--oven.gl.CheckError()
 			oven.win:start()
-oven.gl.CheckError()
+--oven.gl.CheckError()
 			oven.cake.start()
 			oven.cake.canvas.start()
 			if oven.now and oven.now.start then
