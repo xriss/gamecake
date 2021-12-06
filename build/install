@@ -123,6 +123,7 @@ Available options are :
 
 	./make --mingw     # enable mingw crosscompile
 	./make --android   # enable android crosscompile
+
 	./make --luajit=   # disable luajit
 	./make --sdl2=     # disable sdl2
 
