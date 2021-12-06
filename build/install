@@ -12,37 +12,49 @@ if ! [[ -x "$(command -v require.sh)" ]] ; then
 
 fi
 
+arg_flags=("luajit=git sdl2=2.0.16 help mingw android")
 
+arg_get() {
+key="$1"
+	envkey=${key//-/_}
+	if printenv BUILDINSTALL_${envkey^^} ; then
+		return 0
+	fi
+	return 20
+}
 
-# default build settings
+arg_set() {
+key="$1"
+val="$2"
+	envkey=${key//-/_}
+	export BUILDINSTALL_${envkey^^}="$val"
+}
 
-if [[ -z "$BUILDINSTALL_LUAJIT" ]] ; then
-
-export BUILDINSTALL_LUAJIT="git"
-
-fi
-
-if [[ -z "$BUILDINSTALL_SDL2" ]] ; then
-
-export BUILDINSTALL_SDL2="2.0.16"
-
-fi
-
-
-
-# these are flags expect a value after them so will steal the next token
-value_flags=("luajit sdl2")
-
-# these flags do not expect values so they will not steal the next token
-boolean_flags=("help mingw android")
-
-
+#parse arg_flags
 declare -A all_flaga
 declare -A value_flaga
 declare -A boolean_flaga
-
-for flag in $boolean_flags ; do boolean_flaga[$flag]="1" ; all_flaga[$flag]="1" ; done
-for flag in $value_flags   ; do value_flaga[$flag]="1"   ; all_flaga[$flag]="1" ; done
+for flag in $arg_flags ; do
+	if [[ "${flag}" == *"="* ]]; then
+		fs=(${flag//=/ })
+		boolean_flaga[${fs[0]}]="1"
+		all_flaga[${fs[0]}]="1"
+		if arg_get ${fs[0]} >/dev/null ; then
+			:
+		else
+			arg_set "${fs[0]}" "${fs[1]}"
+		fi
+	else
+		fs=(${flag//:/ })
+		boolean_flaga[${fs[0]}]="1"
+		all_flaga[${fs[0]}]="1"
+		if arg_get ${fs[0]} >/dev/null ; then
+			:
+		else
+			arg_set "${fs[0]}" "${fs[1]}"
+		fi
+	fi
+done
 
 # fill in these arrays as output
 declare -A args
@@ -97,17 +109,13 @@ done
 # process flags we found here and probably overwrite env vars
 
 #if [[ -z "${args[0]}"  ]] ; then # print help if no names
-#	BUILDINSTALL_HELP=1
+#	arg_set HELP 1
 #fi
 
 for key in "${!flags[@]}" ; do
 	val=${flags[$key]}
-
-	echo $key $val
-
 	if [[ ${all_flaga[$key]} ]] ; then
-		envkey=${key//-/_}
-		export BUILDINSTALL_${envkey^^}="$val"
+		arg_set $key "$val"
 	else
 		echo "unknown flag $key=$val"
 		exit 20
@@ -116,7 +124,7 @@ for key in "${!flags[@]}" ; do
 done
 
 
-if [[ -n "$BUILDINSTALL_HELP" ]] ; then
+if [[ -n "$( arg_get help )" ]] ; then
 	cat <<EOF
 
 Available options are :
@@ -133,10 +141,9 @@ exit 0
 
 fi
 
-
 # install build dependencies using require.sh
 
-if [[ -n "$BUILDINSTALL_MINGW" ]] ; then
+if [[ -n "$( arg_get mingw )" ]] ; then
 	require.sh mingw-w64
 fi
 
@@ -151,7 +158,7 @@ require.sh gcc-libs
 require.sh gcc-multilib
 require.sh g++-multilib
 
-if [[ -z "$BUILDINSTALL_ANDROID" ]] ; then
+if [[ -z "$( arg_get android )" ]] ; then
 
 	require.sh automake
 	require.sh clang
@@ -200,9 +207,9 @@ fi
 
 # make a version of luajit and install it
 
-if [ ! -z "$BUILDINSTALL_LUAJIT" ]; then
+if [ ! -z "$( arg_get luajit )" ]; then
 
-	if [ "$BUILDINSTALL_LUAJIT" = "git" ]; then
+	if [ "$( arg_get luajit )" = "git" ]; then
 
 		echo "using latest git"
 
@@ -210,19 +217,19 @@ if [ ! -z "$BUILDINSTALL_LUAJIT" ]; then
 
 	else
 
-		if [ -f ${BUILDINSTALL_LUAJIT}.tar.gz ] ; then
-			echo "using ${BUILDINSTALL_LUAJIT}.tar.gz"
+		if [ -f $( arg_get luajit ).tar.gz ] ; then
+			echo "using $( arg_get luajit ).tar.gz"
 		else
-			wget -O ${BUILDINSTALL_LUAJIT}.tar.gz https://luajit.org/download/${BUILDINSTALL_LUAJIT}.tar.gz
+			wget -O $( arg_get luajit ).tar.gz https://luajit.org/download/$( arg_get luajit ).tar.gz
 		fi
 
-		rm -rf ${BUILDINSTALL_LUAJIT}
-		tar zxvf ${BUILDINSTALL_LUAJIT}.tar.gz
-		cd ${BUILDINSTALL_LUAJIT}
+		rm -rf $( arg_get luajit )
+		tar zxvf $( arg_get luajit ).tar.gz
+		cd $( arg_get luajit )
 
 	fi
 
-	if [ ! -z "$BUILDINSTALL_ANDROID" ]; then
+	if [ ! -z "$( arg_get android )" ]; then
 
 		mkdir -p ../../exe/android/include
 		cp src/lua*.h ../../exe/android/include
@@ -281,7 +288,7 @@ if [ ! -z "$BUILDINSTALL_LUAJIT" ]; then
 		cp src/libluajit.a ../../exe/android/lib/x86_64/
 
 
-	elif [ ! -z "$BUILDINSTALL_MINGW" ]; then
+	elif [ ! -z "$( arg_get mingw )" ]; then
 	
 		make clean
 		make amalg HOST_CC="gcc -m32" CROSS=i686-w64-mingw32- TARGET_SYS=Windows BUILDMODE=static
@@ -319,20 +326,20 @@ fi
 
 # make a version of SDL2 and install it
 
-if [ ! -z "$BUILDINSTALL_SDL2" ]; then
+if [ ! -z "$( arg_get sdl2 )" ]; then
 
-	if [ ! -z "$BUILDINSTALL_ANDROID" ]; then
+	if [ ! -z "$( arg_get android )" ]; then
 
 
-		if [ -f SDL2-${BUILDINSTALL_SDL2}.tar.gz ] ; then
-			echo "using SDL2-${BUILDINSTALL_SDL2}.tar.gz"
+		if [ -f SDL2-$( arg_get sdl2 ).tar.gz ] ; then
+			echo "using SDL2-$( arg_get sdl2 ).tar.gz"
 		else
-			wget -O SDL2-${BUILDINSTALL_SDL2}.tar.gz https://www.libsdl.org/release/SDL2-${BUILDINSTALL_SDL2}.tar.gz
+			wget -O SDL2-$( arg_get sdl2 ).tar.gz https://www.libsdl.org/release/SDL2-$( arg_get sdl2 ).tar.gz
 		fi
 
-		rm -rf SDL2-${BUILDINSTALL_SDL2}
-		tar zxvf SDL2-${BUILDINSTALL_SDL2}.tar.gz
-		cd SDL2-${BUILDINSTALL_SDL2}
+		rm -rf SDL2-$( arg_get sdl2 )
+		tar zxvf SDL2-$( arg_get sdl2 ).tar.gz
+		cd SDL2-$( arg_get sdl2 )
 
 
 		ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk APP_PLATFORM=android-29
@@ -346,17 +353,17 @@ if [ ! -z "$BUILDINSTALL_SDL2" ]; then
 		cd ..
 
 
-	elif [ ! -z "$BUILDINSTALL_MINGW" ]; then
+	elif [ ! -z "$( arg_get mingw )" ]; then
 
-		if [ -f SDL2-devel-${BUILDINSTALL_SDL2}.tar.gz ] ; then
-			echo "using SDL2-devel-${BUILDINSTALL_SDL2}.tar.gz"
+		if [ -f SDL2-devel-$( arg_get sdl2 ).tar.gz ] ; then
+			echo "using SDL2-devel-$( arg_get sdl2 ).tar.gz"
 		else
-			wget -O SDL2-devel-${BUILDINSTALL_SDL2}.tar.gz https://www.libsdl.org/release/SDL2-devel-${BUILDINSTALL_SDL2}-mingw.tar.gz
+			wget -O SDL2-devel-$( arg_get sdl2 ).tar.gz https://www.libsdl.org/release/SDL2-devel-$( arg_get sdl2 )-mingw.tar.gz
 		fi
 	
-		rm -rf SDL2-${BUILDINSTALL_SDL2}
-		tar zxvf SDL2-devel-${BUILDINSTALL_SDL2}.tar.gz
-		cd SDL2-${BUILDINSTALL_SDL2}
+		rm -rf SDL2-$( arg_get sdl2 )
+		tar zxvf SDL2-devel-$( arg_get sdl2 ).tar.gz
+		cd SDL2-$( arg_get sdl2 )
 		
 		sudo cp -r i686-w64-mingw32/ /usr/
 
@@ -369,15 +376,15 @@ if [ ! -z "$BUILDINSTALL_SDL2" ]; then
 		
 	else
 
-		if [ -f SDL2-${BUILDINSTALL_SDL2}.tar.gz ] ; then
-			echo "using SDL2-${BUILDINSTALL_SDL2}.tar.gz"
+		if [ -f SDL2-$( arg_get sdl2 ).tar.gz ] ; then
+			echo "using SDL2-$( arg_get sdl2 ).tar.gz"
 		else
-			wget -O SDL2-${BUILDINSTALL_SDL2}.tar.gz https://www.libsdl.org/release/SDL2-${BUILDINSTALL_SDL2}.tar.gz
+			wget -O SDL2-$( arg_get sdl2 ).tar.gz https://www.libsdl.org/release/SDL2-$( arg_get sdl2 ).tar.gz
 		fi
 
-		rm -rf SDL2-${BUILDINSTALL_SDL2}
-		tar zxvf SDL2-${BUILDINSTALL_SDL2}.tar.gz
-		cd SDL2-${BUILDINSTALL_SDL2}
+		rm -rf SDL2-$( arg_get sdl2 )
+		tar zxvf SDL2-$( arg_get sdl2 ).tar.gz
+		cd SDL2-$( arg_get sdl2 )
 
 
 		./configure --enable-static --disable-esd --disable-arts --disable-video-directfb --disable-rpath --enable-alsa --enable-alsa-shared --enable-pulseaudio --enable-pulseaudio-shared --enable-x11-shared --enable-sdl-dlopen --disable-input-tslib --disable-render-metal --disable-sndio --disable-video-rpi
