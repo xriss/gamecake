@@ -1,161 +1,207 @@
 cd `dirname $0`
 
+trap ' trap - INT ;  kill -s INT "$$" ' INT
 
-getopt --test > /dev/null
-if [[ $? -ne 4 ]]; then
-    echo " gamecake make script failed : we need a working version of getopt "
-    exit 1
+
+# first install a require script
+if ! [[ -x "$(command -v require.sh)" ]] ; then
+
+	echo " we need sudo to install require.sh to /usr/local/bin "
+	sudo wget -O /usr/local/bin/require.sh https://raw.githubusercontent.com/xriss/require.sh/main/require.sh
+	sudo chmod +x /usr/local/bin/require.sh
+
 fi
+
 
 
 # default build settings
 
+if [[ -z "$BUILDINSTALL_LUAJIT" ]] ; then
 
-LUAJITSRC=git
+export BUILDINSTALL_LUAJIT="git"
 
-
-SDLSRC=2.0.16
-
-
-
-OPTIONS=
-LONGOPTIONS=help,mingw,android,luajit:,sdl2:
-
-
-
-PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
-if [[ $? -ne 0 ]]; then
-    exit 2
 fi
-eval set -- "$PARSED"
 
-while true; do
-case "$1" in
-        --help)
-                help=1
-                shift
-        ;;
-        --mingw)
-                MINGW="1"
-                shift 1
-        ;;
-        --android)
-                ANDROID="1"
-                shift 1
-        ;;
-        --luajit)
-                LUAJITSRC="$2"
-                shift 2
-        ;;
-        --sdl2)
-                SDLSRC="$2"
-                shift 2
-        ;;
-        --)
-                shift
-                break
-        ;;
-        *)
-                echo "Programming error"
-                exit 3
-        ;;
-esac
+if [[ -z "$BUILDINSTALL_SDL2" ]] ; then
+
+export BUILDINSTALL_SDL2="2.0.16"
+
+fi
+
+
+
+# these are flags expect a value after them so will steal the next token
+value_flags=("luajit sdl2")
+
+# these flags do not expect values so they will not steal the next token
+boolean_flags=("help mingw android")
+
+
+declare -A all_flaga
+declare -A value_flaga
+declare -A boolean_flaga
+
+for flag in $boolean_flags ; do boolean_flaga[$flag]="1" ; all_flaga[$flag]="1" ; done
+for flag in $value_flags   ; do value_flaga[$flag]="1"   ; all_flaga[$flag]="1" ; done
+
+# fill in these arrays as output
+declare -A args
+declare -A flags
+mode="names"
+for arg in "$@" ; do
+
+	case $mode in
+
+		"set")
+			val="$arg"
+			flags["$set"]="$val"
+			mode="names"
+		;;
+
+		"done")
+			args[${#args[@]}]="$arg"
+		;;
+
+		*)
+			if [[ "$arg" = "--" ]] ; then # just a -- so stop parsing
+				mode="done"
+			elif [[ "${arg:0:5}" = "--no-" ]] ; then # unset a flag
+				set="${arg:5}"
+				flags["$set"]=""
+			elif [[ "${arg:0:2}" = "--" ]] ; then # begins with --
+			
+				set="${arg:2}"
+				if [[ "$set" == *"="* ]] ; then # --var=val
+					a=(${set//=/ })
+					set="${a[0]}"
+					val="${a[1]}"
+					flags["$set"]="$val"
+				else # --var val
+					if [[ ${boolean_flaga[$set]} ]] ; then # no val expected
+						flags["$set"]="1"
+					else
+						flags["$set"]="1" # temporary value
+						mode="set"
+					fi
+				fi
+			else
+				args[${#args[@]}]="$arg"
+			fi
+		;;
+
+	esac
+
 done
 
-if [ "$help" = "1" ] ; then
 
-echo " Available options are : "
-echo
-echo " ./make --mingw     # enable mingw crosscompile "
-echo " ./make --luajit=   # disable luajit "
-echo " ./make --sdl2=     # disable sdl2 "
-echo
+# process flags we found here and probably overwrite env vars
+
+#if [[ -z "${args[0]}"  ]] ; then # print help if no names
+#	BUILDINSTALL_HELP=1
+#fi
+
+for key in "${!flags[@]}" ; do
+	val=${flags[$key]}
+
+	echo $key $val
+
+	if [[ ${all_flaga[$key]} ]] ; then
+		envkey=${key//-/_}
+		export BUILDINSTALL_${envkey^^}="$val"
+	else
+		echo "unknown flag $key=$val"
+		exit 20
+	fi
+
+done
+
+
+if [[ -n "$BUILDINSTALL_HELP" ]] ; then
+	cat <<EOF
+
+Available options are :
+
+	./make --mingw     # enable mingw crosscompile
+	./make --android   # enable android crosscompile
+	./make --luajit=   # disable luajit
+	./make --sdl2=     # disable sdl2
+
+EOF
 
 exit 0
 
 fi
 
 
+# install build dependencies using require.sh
 
-# install dependencies if apt-get is available
-
-if hash apt-get 2>/dev/null; then
-
-	if [ ! -z "$MINGW" ]; then
-		sudo apt-get install -y mingw-w64
-		sudo apt-get install -y gcc-multilib
-		sudo apt-get install -y g++-multilib
-	fi
-	
-	sudo apt-get install -y luajit
-	sudo apt-get install -y lua-filesystem
-
-	sudo apt-get install -y git
-	sudo apt-get install -y wget
-	sudo apt-get install -y unzip
-	sudo apt-get install -y build-essential
-	sudo apt-get install -y make
-	sudo apt-get install -y gcc-multilib
-
-	if [ -z "$ANDROID" ]; then
-		sudo apt-get install -y build-essential
-		sudo apt-get install -y libreadline-dev
-		sudo apt-get install -y libgl1-mesa-dev
-		sudo apt-get install -y libx11-dev
-		sudo apt-get install -y libasound2-dev
-		sudo apt-get install -y libudev-dev
-		sudo apt-get install -y libssl-dev clang
-		sudo apt-get install -y libpulse-dev
-		sudo apt-get install -y libfreeimage-dev
-		sudo apt-get install -y libopenal-dev
-		sudo apt-get install -y libpango1.0-dev
-		sudo apt-get install -y libsndfile-dev
-		sudo apt-get install -y libudev-dev
-		sudo apt-get install -y libasound2-dev
-		sudo apt-get install -y libjpeg8-dev
-		sudo apt-get install -y libwebp-dev
-		sudo apt-get install -y automake
-		sudo apt-get install -y libsndio-dev
-
-#full SDL2 depends, so it builds as many drivers as possible
-
-		sudo apt-get install -y mercurial
-		sudo apt-get install -y cmake
-		sudo apt-get install -y autoconf
-		sudo apt-get install -y automake
-		sudo apt-get install -y libtool
-		sudo apt-get install -y libasound2-dev
-		sudo apt-get install -y libpulse-dev
-		sudo apt-get install -y libaudio-dev
-		sudo apt-get install -y libx11-dev
-		sudo apt-get install -y libxext-dev
-		sudo apt-get install -y libxrandr-dev
-		sudo apt-get install -y libxcursor-dev
-		sudo apt-get install -y libxi-dev
-		sudo apt-get install -y libxinerama-dev
-		sudo apt-get install -y libxxf86vm-dev
-		sudo apt-get install -y libxss-dev
-		sudo apt-get install -y libgl1-mesa-dev
-		sudo apt-get install -y libesd0-dev
-		sudo apt-get install -y libdbus-1-dev
-		sudo apt-get install -y libudev-dev
-		sudo apt-get install -y libgles1-mesa-dev
-		sudo apt-get install -y libgles2-mesa-dev
-		sudo apt-get install -y libegl1-mesa-dev
-		sudo apt-get install -y libibus-1.0-dev
-		sudo apt-get install -y libwayland-dev
-		sudo apt-get install -y libxkbcommon-dev
-
-	fi
+if [[ -n "$BUILDINSTALL_MINGW" ]] ; then
+	require.sh mingw-w64
 fi
 
+require.sh luajit
+require.sh lua-filesystem
 
+require.sh git
+require.sh wget
+require.sh unzip
+require.sh make
+require.sh gcc-libs
+require.sh gcc-multilib
+require.sh g++-multilib
+
+if [[ -z "$BUILDINSTALL_ANDROID" ]] ; then
+
+	require.sh automake
+	require.sh clang
+	require.sh mercurial
+	require.sh cmake
+	require.sh autoconf
+	require.sh automake
+	require.sh libtool
+
+	require.sh /usr/include/readline/readline.h
+	require.sh /usr/include/GL/gl.h
+	require.sh /usr/include/X11/X.h
+	require.sh /usr/include/alsa/asoundlib.h
+	require.sh /usr/include/libudev.h
+	require.sh /usr/include/pulse/pulseaudio.h
+	require.sh /usr/include/luajit-2.0/lua.h
+	require.sh /usr/include/luajit-2.1/lua.h
+	require.sh /usr/include/SDL2/SDL.h
+	require.sh /usr/include/openssl/ssl.h
+
+	require.sh /usr/include/FreeImage.h
+	require.sh /usr/include/AL/al.h
+	require.sh /usr/include/pango-1.0/pango/pango.h
+	require.sh /usr/include/sndfile.h
+	require.sh /usr/include/jpeglib.h
+	require.sh /usr/include/webp/decode.h
+	require.sh /usr/include/sndio.h
+
+	require.sh /usr/include/X11/extensions/extutil.h
+	require.sh /usr/include/X11/extensions/Xrandr.h
+	require.sh /usr/include/X11/Xcursor/Xcursor.h
+	require.sh /usr/include/X11/extensions/XInput.h
+	require.sh /usr/include/X11/extensions/Xinerama.h
+	require.sh /usr/include/X11/extensions/xf86vmode.h
+	require.sh /usr/include/X11/extensions/scrnsaver.h
+	require.sh /usr/include/dbus-1.0/dbus/dbus.h
+	require.sh /usr/include/GLES/gl.h
+	require.sh /usr/include/GLES2/gl2.h
+	require.sh /usr/include/GLES3/gl3.h
+	require.sh /usr/include/EGL/egl.h
+	require.sh /usr/include/ibus-1.0/ibus.h
+	require.sh /usr/include/wayland-client.h
+	require.sh /usr/include/xkbcommon/xkbcommon.h
+
+fi
 
 # make a version of luajit and install it
 
-if [ ! -z "$LUAJITSRC" ]; then
+if [ ! -z "$BUILDINSTALL_LUAJIT" ]; then
 
-	if [ "$LUAJITSRC" = "git" ]; then
+	if [ "$BUILDINSTALL_LUAJIT" = "git" ]; then
 
 		echo "using latest git"
 
@@ -163,19 +209,19 @@ if [ ! -z "$LUAJITSRC" ]; then
 
 	else
 
-		if [ -f ${LUAJITSRC}.tar.gz ] ; then
-			echo "using ${LUAJITSRC}.tar.gz"
+		if [ -f ${BUILDINSTALL_LUAJIT}.tar.gz ] ; then
+			echo "using ${BUILDINSTALL_LUAJIT}.tar.gz"
 		else
-			wget -O ${LUAJITSRC}.tar.gz https://luajit.org/download/${LUAJITSRC}.tar.gz
+			wget -O ${BUILDINSTALL_LUAJIT}.tar.gz https://luajit.org/download/${BUILDINSTALL_LUAJIT}.tar.gz
 		fi
 
-		rm -rf ${LUAJITSRC}
-		tar zxvf ${LUAJITSRC}.tar.gz
-		cd ${LUAJITSRC}
+		rm -rf ${BUILDINSTALL_LUAJIT}
+		tar zxvf ${BUILDINSTALL_LUAJIT}.tar.gz
+		cd ${BUILDINSTALL_LUAJIT}
 
 	fi
 
-	if [ ! -z "$ANDROID" ]; then
+	if [ ! -z "$BUILDINSTALL_ANDROID" ]; then
 
 		mkdir -p ../../exe/android/include
 		cp src/lua*.h ../../exe/android/include
@@ -234,7 +280,7 @@ if [ ! -z "$LUAJITSRC" ]; then
 		cp src/libluajit.a ../../exe/android/lib/x86_64/
 
 
-	elif [ ! -z "$MINGW" ]; then
+	elif [ ! -z "$BUILDINSTALL_MINGW" ]; then
 	
 		make clean
 		make amalg HOST_CC="gcc -m32" CROSS=i686-w64-mingw32- TARGET_SYS=Windows BUILDMODE=static
@@ -272,20 +318,20 @@ fi
 
 # make a version of SDL2 and install it
 
-if [ ! -z "$SDLSRC" ]; then
+if [ ! -z "$BUILDINSTALL_SDL2" ]; then
 
-	if [ ! -z "$ANDROID" ]; then
+	if [ ! -z "$BUILDINSTALL_ANDROID" ]; then
 
 
-		if [ -f SDL2-${SDLSRC}.tar.gz ] ; then
-			echo "using SDL2-${SDLSRC}.tar.gz"
+		if [ -f SDL2-${BUILDINSTALL_SDL2}.tar.gz ] ; then
+			echo "using SDL2-${BUILDINSTALL_SDL2}.tar.gz"
 		else
-			wget -O SDL2-${SDLSRC}.tar.gz https://www.libsdl.org/release/SDL2-${SDLSRC}.tar.gz
+			wget -O SDL2-${BUILDINSTALL_SDL2}.tar.gz https://www.libsdl.org/release/SDL2-${BUILDINSTALL_SDL2}.tar.gz
 		fi
 
-		rm -rf SDL2-${SDLSRC}
-		tar zxvf SDL2-${SDLSRC}.tar.gz
-		cd SDL2-${SDLSRC}
+		rm -rf SDL2-${BUILDINSTALL_SDL2}
+		tar zxvf SDL2-${BUILDINSTALL_SDL2}.tar.gz
+		cd SDL2-${BUILDINSTALL_SDL2}
 
 
 		ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk APP_PLATFORM=android-29
@@ -299,17 +345,17 @@ if [ ! -z "$SDLSRC" ]; then
 		cd ..
 
 
-	elif [ ! -z "$MINGW" ]; then
+	elif [ ! -z "$BUILDINSTALL_MINGW" ]; then
 
-		if [ -f SDL2-devel-${SDLSRC}.tar.gz ] ; then
-			echo "using SDL2-devel-${SDLSRC}.tar.gz"
+		if [ -f SDL2-devel-${BUILDINSTALL_SDL2}.tar.gz ] ; then
+			echo "using SDL2-devel-${BUILDINSTALL_SDL2}.tar.gz"
 		else
-			wget -O SDL2-devel-${SDLSRC}.tar.gz https://www.libsdl.org/release/SDL2-devel-${SDLSRC}-mingw.tar.gz
+			wget -O SDL2-devel-${BUILDINSTALL_SDL2}.tar.gz https://www.libsdl.org/release/SDL2-devel-${BUILDINSTALL_SDL2}-mingw.tar.gz
 		fi
 	
-		rm -rf SDL2-${SDLSRC}
-		tar zxvf SDL2-devel-${SDLSRC}.tar.gz
-		cd SDL2-${SDLSRC}
+		rm -rf SDL2-${BUILDINSTALL_SDL2}
+		tar zxvf SDL2-devel-${BUILDINSTALL_SDL2}.tar.gz
+		cd SDL2-${BUILDINSTALL_SDL2}
 		
 		sudo cp -r i686-w64-mingw32/ /usr/
 
@@ -322,15 +368,15 @@ if [ ! -z "$SDLSRC" ]; then
 		
 	else
 
-		if [ -f SDL2-${SDLSRC}.tar.gz ] ; then
-			echo "using SDL2-${SDLSRC}.tar.gz"
+		if [ -f SDL2-${BUILDINSTALL_SDL2}.tar.gz ] ; then
+			echo "using SDL2-${BUILDINSTALL_SDL2}.tar.gz"
 		else
-			wget -O SDL2-${SDLSRC}.tar.gz https://www.libsdl.org/release/SDL2-${SDLSRC}.tar.gz
+			wget -O SDL2-${BUILDINSTALL_SDL2}.tar.gz https://www.libsdl.org/release/SDL2-${BUILDINSTALL_SDL2}.tar.gz
 		fi
 
-		rm -rf SDL2-${SDLSRC}
-		tar zxvf SDL2-${SDLSRC}.tar.gz
-		cd SDL2-${SDLSRC}
+		rm -rf SDL2-${BUILDINSTALL_SDL2}
+		tar zxvf SDL2-${BUILDINSTALL_SDL2}.tar.gz
+		cd SDL2-${BUILDINSTALL_SDL2}
 
 
 		./configure --enable-static --disable-esd --disable-arts --disable-video-directfb --disable-rpath --enable-alsa --enable-alsa-shared --enable-pulseaudio --enable-pulseaudio-shared --enable-x11-shared --enable-sdl-dlopen --disable-input-tslib --disable-render-metal --disable-sndio --disable-video-rpi
