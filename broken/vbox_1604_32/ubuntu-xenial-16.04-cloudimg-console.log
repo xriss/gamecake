@@ -1,0 +1,630 @@
+[    0.000000] Initializing cgroup subsys cpuset
+[    0.000000] Initializing cgroup subsys cpu
+[    0.000000] Initializing cgroup subsys cpuacct
+[    0.000000] Linux version 4.4.0-210-generic (buildd@lgw01-amd64-037) (gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.12) ) #242-Ubuntu SMP Fri Apr 16 09:57:00 UTC 2021 (Ubuntu 4.4.0-210.242-generic 4.4.262)
+[    0.000000] KERNEL supported cpus:
+[    0.000000]   Intel GenuineIntel
+[    0.000000]   AMD AuthenticAMD
+[    0.000000]   NSC Geode by NSC
+[    0.000000]   Cyrix CyrixInstead
+[    0.000000]   Centaur CentaurHauls
+[    0.000000]   Transmeta GenuineTMx86
+[    0.000000]   Transmeta TransmetaCPU
+[    0.000000]   UMC UMC UMC UMC
+[    0.000000] [Firmware Bug]: TSC doesn't count with P0 frequency!
+[    0.000000] x86/fpu: xstate_offset[2]:  576, xstate_sizes[2]:  256
+[    0.000000] x86/fpu: Supporting XSAVE feature 0x01: 'x87 floating point registers'
+[    0.000000] x86/fpu: Supporting XSAVE feature 0x02: 'SSE registers'
+[    0.000000] x86/fpu: Supporting XSAVE feature 0x04: 'AVX registers'
+[    0.000000] x86/fpu: Enabled xstate features 0x7, context size is 832 bytes, using 'standard' format.
+[    0.000000] e820: BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x00000000dffeffff] usable
+[    0.000000] BIOS-e820: [mem 0x00000000dfff0000-0x00000000dfffffff] ACPI data
+[    0.000000] BIOS-e820: [mem 0x00000000fec00000-0x00000000fec00fff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000fee00000-0x00000000fee00fff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000100000000-0x000000018e7fffff] usable
+[    0.000000] NX (Execute Disable) protection: active
+[    0.000000] SMBIOS 2.5 present.
+[    0.000000] Hypervisor detected: KVM
+[    0.000000] e820: last_pfn = 0x18e800 max_arch_pfn = 0x1000000
+[    0.000000] MTRR: Disabled
+[    0.000000] x86/PAT: MTRRs disabled, skipping PAT initialization too.
+[    0.000000] CPU MTRRs all blank - virtualized system.
+[    0.000000] x86/PAT: Configuration [0-7]: WB  WT  UC- UC  WB  WT  UC- UC  
+[    0.000000] found SMP MP-table at [mem 0x0009fff0-0x0009ffff] mapped at [c009fff0]
+[    0.000000] Scanning 1 areas for low memory corruption
+[    0.000000] RAMDISK: [mem 0x363a4000-0x371c9fff]
+[    0.000000] ACPI: Early table checksum verification disabled
+[    0.000000] ACPI: RSDP 0x00000000000E0000 000024 (v02 VBOX  )
+[    0.000000] ACPI: XSDT 0x00000000DFFF0030 00003C (v01 VBOX   VBOXXSDT 00000001 ASL  00000061)
+[    0.000000] ACPI: FACP 0x00000000DFFF00F0 0000F4 (v04 VBOX   VBOXFACP 00000001 ASL  00000061)
+[    0.000000] ACPI: DSDT 0x00000000DFFF04C0 002325 (v02 VBOX   VBOXBIOS 00000002 INTL 20210930)
+[    0.000000] ACPI: FACS 0x00000000DFFF0200 000040
+[    0.000000] ACPI: FACS 0x00000000DFFF0200 000040
+[    0.000000] ACPI: APIC 0x00000000DFFF0240 0000AC (v02 VBOX   VBOXAPIC 00000001 ASL  00000061)
+[    0.000000] ACPI: SSDT 0x00000000DFFF02F0 0001CC (v01 VBOX   VBOXCPUT 00000002 INTL 20210930)
+[    0.000000] 5484MB HIGHMEM available.
+[    0.000000] 891MB LOWMEM available.
+[    0.000000]   mapped low ram: 0 - 37bfe000
+[    0.000000]   low ram: 0 - 37bfe000
+[    0.000000] kvm-clock: Using msrs 4b564d01 and 4b564d00
+[    0.000000] kvm-clock: cpu 0, msr 0:37bfd001, primary cpu clock
+[    0.000000] kvm-clock: using sched offset of 3091894458 cycles
+[    0.000000] clocksource: kvm-clock: mask: 0xffffffffffffffff max_cycles: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
+[    0.000000]   Normal   [mem 0x0000000001000000-0x0000000037bfdfff]
+[    0.000000]   HighMem  [mem 0x0000000037bfe000-0x000000018e7fffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000000001000-0x000000000009efff]
+[    0.000000]   node   0: [mem 0x0000000000100000-0x00000000dffeffff]
+[    0.000000]   node   0: [mem 0x0000000100000000-0x000000018e7fffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000000001000-0x000000018e7fffff]
+[    0.000000] Using APIC driver default
+[    0.000000] ACPI: PM-Timer IO Port: 0x4008
+[    0.000000] ACPI: NR_CPUS/possible_cpus limit of 8 reached.  Processor 8/0x8 ignored.
+[    0.000000] ACPI: NR_CPUS/possible_cpus limit of 8 reached.  Processor 9/0x9 ignored.
+[    0.000000] ACPI: NR_CPUS/possible_cpus limit of 8 reached.  Processor 10/0xa ignored.
+[    0.000000] ACPI: NR_CPUS/possible_cpus limit of 8 reached.  Processor 11/0xb ignored.
+[    0.000000] IOAPIC[0]: apic_id 12, version 32, address 0xfec00000, GSI 0-23
+[    0.000000] ACPI: INT_SRC_OVR (bus 0 bus_irq 0 global_irq 2 dfl dfl)
+[    0.000000] ACPI: INT_SRC_OVR (bus 0 bus_irq 9 global_irq 9 low level)
+[    0.000000] Using ACPI (MADT) for SMP configuration information
+[    0.000000] smpboot: 12 Processors exceeds NR_CPUS limit of 8
+[    0.000000] smpboot: Allowing 8 CPUs, 0 hotplug CPUs
+[    0.000000] PM: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[    0.000000] PM: Registered nosave memory: [mem 0x0009f000-0x0009ffff]
+[    0.000000] PM: Registered nosave memory: [mem 0x000a0000-0x000effff]
+[    0.000000] PM: Registered nosave memory: [mem 0x000f0000-0x000fffff]
+[    0.000000] e820: [mem 0xe0000000-0xfebfffff] available for PCI devices
+[    0.000000] Booting paravirtualized kernel on KVM
+[    0.000000] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645519600211568 ns
+[    0.000000] setup_percpu: NR_CPUS:8 nr_cpumask_bits:8 nr_cpu_ids:8 nr_node_ids:1
+[    0.000000] PERCPU: Embedded 18 pages/cpu @f3114000 s42956 r0 d30772 u73728
+[    0.000000] Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 1498840
+[    0.000000] Kernel command line: BOOT_IMAGE=/boot/vmlinuz-4.4.0-210-generic root=LABEL=cloudimg-rootfs ro console=tty1 console=ttyS0
+[    0.000000] PID hash table entries: 4096 (order: 2, 16384 bytes)
+[    0.000000] Dentry cache hash table entries: 131072 (order: 7, 524288 bytes)
+[    0.000000] Inode-cache hash table entries: 65536 (order: 6, 262144 bytes)
+[    0.000000] Initializing CPU#0
+[    0.000000] Initializing HighMem for node 0 (00037bfe:0018e800)
+[    0.000000] Initializing Movable for node 0 (00000000:00000000)
+[    0.000000] Memory: 5912792K/6004280K available (8151K kernel code, 787K rwdata, 3216K rodata, 944K init, 724K bss, 91488K reserved, 0K cma-reserved, 5091272K highmem)
+[    0.000000] virtual kernel memory layout:
+[    0.000000]     fixmap  : 0xfff15000 - 0xfffff000   ( 936 kB)
+[    0.000000]     pkmap   : 0xffc00000 - 0xffe00000   (2048 kB)
+[    0.000000]     vmalloc : 0xf83fe000 - 0xffbfe000   ( 120 MB)
+[    0.000000]     lowmem  : 0xc0000000 - 0xf7bfe000   ( 891 MB)
+[    0.000000]       .init : 0xc1be2000 - 0xc1cce000   ( 944 kB)
+[    0.000000]       .data : 0xc17f61b8 - 0xc1be0d40   (4010 kB)
+[    0.000000]       .text : 0xc1000000 - 0xc17f61b8   (8152 kB)
+[    0.000000] Checking if this processor honours the WP bit even in supervisor mode...Ok.
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=8, Nodes=1
+[    0.000000] Hierarchical RCU implementation.
+[    0.000000] 	Build-time adjustment of leaf fanout to 32.
+[    0.000000] NR_IRQS:2304 nr_irqs:488 16
+[    0.000000] Console: colour VGA+ 80x25
+[    0.000000] console [tty1] enabled
+[    0.000000] console [ttyS0] enabled
+[    0.000000] allocated 6291456 bytes of page_ext
+[    0.000000] tsc: Detected 2994.374 MHz processor
+[    0.200082] Calibrating delay loop (skipped) preset value.. 5988.74 BogoMIPS (lpj=11977496)
+[    0.201046] pid_max: default: 32768 minimum: 301
+[    0.201652] ACPI: Core revision 20150930
+[    0.203019] ACPI: 2 ACPI AML tables successfully acquired and loaded
+[    0.203976] Security Framework initialized
+[    0.204443] Yama: becoming mindful.
+[    0.204945] AppArmor: AppArmor initialized
+[    0.205515] Mount-cache hash table entries: 2048 (order: 1, 8192 bytes)
+[    0.206233] Mountpoint-cache hash table entries: 2048 (order: 1, 8192 bytes)
+[    0.207083] Initializing cgroup subsys io
+[    0.207618] Initializing cgroup subsys memory
+[    0.208223] Initializing cgroup subsys devices
+[    0.208796] Initializing cgroup subsys freezer
+[    0.209368] Initializing cgroup subsys net_cls
+[    0.209912] Initializing cgroup subsys perf_event
+[    0.210502] Initializing cgroup subsys net_prio
+[    0.211015] Initializing cgroup subsys hugetlb
+[    0.211550] Initializing cgroup subsys pids
+[    0.218954] mce: CPU supports 0 MCE banks
+[    0.220181] Last level iTLB entries: 4KB 1024, 2MB 1024, 4MB 512
+[    0.220862] Last level dTLB entries: 4KB 2048, 2MB 2048, 4MB 1024, 1GB 0
+[    0.221865] Spectre V1 : Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+[    0.222890] Spectre V2 : Spectre mitigation: LFENCE not serializing, switching to generic retpoline
+[    0.223867] Spectre V2 : Mitigation: Full generic retpoline
+[    0.224557] Spectre V2 : Spectre v2 / SpectreRSB mitigation: Filling RSB on context switch
+[    0.225506] Speculative Store Bypass: Mitigation: Speculative Store Bypass disabled via prctl and seccomp
+[    0.228339] Freeing SMP alternatives memory: 36K
+[    0.231887] ftrace: allocating 31668 entries in 62 pages
+[    0.272857] smpboot: APIC(0) Converting physical 0 to logical package 0
+[    0.273575] smpboot: Max logical packages: 1
+[    0.274011] Enabling APIC mode:  Flat.  Using 1 I/O APICs
+[    0.275538] ..TIMER: vector=0x30 apic1=0 pin1=2 apic2=-1 pin2=-1
+[    0.384314] smpboot: CPU0: AMD Ryzen 5 4600H with Radeon Graphics (family: 0x17, model: 0x60, stepping: 0x1)
+[    0.385846] Performance Events: Broken PMU hardware detected, using software events only.
+[    0.386805] Failed to access perfctr msr (MSR c0010007 is 0)
+[    0.392838] KVM setup paravirtual spinlock
+[    0.394164] x86: Booting SMP configuration:
+[    0.395387] .... node  #0, CPUs:      #1
+[1266874886.617657] Initializing CPU#1
+[    0.396792] kvm-clock: cpu 1, msr 0:37bfd041, secondary cpu clock
+[    0.405323] mce: CPU supports 0 MCE banks
+[    0.409337]  #2
+[1266874886.617657] Initializing CPU#2
+[    0.410150] kvm-clock: cpu 2, msr 0:37bfd081, secondary cpu clock
+[    0.417816] mce: CPU supports 0 MCE banks
+[    0.420478]  #3
+[1266874886.617657] Initializing CPU#3
+[    0.422276] kvm-clock: cpu 3, msr 0:37bfd0c1, secondary cpu clock
+[    0.430895] mce: CPU supports 0 MCE banks
+[    0.434072]  #4
+[1266874886.617657] Initializing CPU#4
+[    0.435264] kvm-clock: cpu 4, msr 0:37bfd101, secondary cpu clock
+[    0.443552] mce: CPU supports 0 MCE banks
+[    0.447173]  #5
+[1266874886.617657] Initializing CPU#5
+[    0.448340] kvm-clock: cpu 5, msr 0:37bfd141, secondary cpu clock
+[    0.456630] mce: CPU supports 0 MCE banks
+[    0.459695]  #6
+[1266874886.617657] Initializing CPU#6
+[    0.460728] kvm-clock: cpu 6, msr 0:37bfd181, secondary cpu clock
+[    0.469074] mce: CPU supports 0 MCE banks
+[    0.471928]  #7
+[1266874886.617657] Initializing CPU#7
+[    0.473074] kvm-clock: cpu 7, msr 0:37bfd1c1, secondary cpu clock
+[    0.481466] mce: CPU supports 0 MCE banks
+[    0.484240] x86: Booted up 1 node, 8 CPUs
+[    0.485125] smpboot: Total of 8 processors activated (47909.98 BogoMIPS)
+[    0.487006] devtmpfs: initialized
+[    0.487799] evm: security.selinux
+[    0.488423] evm: security.SMACK64
+[    0.488995] evm: security.SMACK64EXEC
+[    0.489624] evm: security.SMACK64TRANSMUTE
+[    0.490340] evm: security.SMACK64MMAP
+[    0.490937] evm: security.ima
+[    0.491423] evm: security.capability
+[    0.492276] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    0.493680] futex hash table entries: 2048 (order: 5, 131072 bytes)
+[    0.494815] pinctrl core: initialized pinctrl subsystem
+[    0.495742] RTC time:  1:48:00, date: 12/06/21
+[    0.496915] NET: Registered protocol family 16
+[    0.497812] EISA bus registered
+[    0.506911] cpuidle: using governor ladder
+[    0.519478] cpuidle: using governor menu
+[    0.520715] PCCT header not found.
+[    0.523030] ACPI: bus type PCI registered
+[    0.537273] acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
+[    0.540195] PCI : PCI BIOS area is rw and x. Use pci=nobios if you want it NX.
+[    0.542407] PCI: PCI BIOS revision 2.10 entry at 0xfda26, last bus=0
+[    0.544031] PCI: Using configuration type 1 for base access
+[    0.546066] PCI: Using configuration type 1 for extended access
+[    0.559312] ACPI: Added _OSI(Module Device)
+[    0.560464] ACPI: Added _OSI(Processor Device)
+[    0.562034] ACPI: Added _OSI(3.0 _SCP Extensions)
+[    0.563397] ACPI: Added _OSI(Processor Aggregator Device)
+[    0.566922] ACPI: Executed 1 blocks of module-level executable AML code
+[    0.572913] ACPI: Interpreter enabled
+[    0.574189] ACPI: (supports S0 S5)
+[    0.575377] ACPI: Using IOAPIC for interrupt routing
+[    0.576894] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    0.585387] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    0.587304] acpi PNP0A03:00: _OSC: OS supports [ExtendedConfig ASPM ClockPM Segments MSI]
+[    0.590706] acpi PNP0A03:00: _OSC: platform does not support [PCIeCapability]
+[    0.593213] acpi PNP0A03:00: _OSC: not requesting control; platform does not support [PCIeCapability]
+[    0.595883] acpi PNP0A03:00: _OSC: OS requested [PCIeHotplug PME AER PCIeCapability]
+[    0.597981] acpi PNP0A03:00: _OSC: platform willing to grant [PCIeHotplug PME AER]
+[    0.600280] acpi PNP0A03:00: _OSC failed (AE_SUPPORT); disabling ASPM
+[    0.602583] PCI host bridge to bus 0000:00
+[    0.604118] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    0.605918] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    0.607708] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    0.610061] pci_bus 0000:00: root bus resource [mem 0xe0000000-0xfdffffff window]
+[    0.612310] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.615920] pci 0000:00:01.1: legacy IDE quirk: reg 0x10: [io  0x01f0-0x01f7]
+[    0.617951] pci 0000:00:01.1: legacy IDE quirk: reg 0x14: [io  0x03f6]
+[    0.619742] pci 0000:00:01.1: legacy IDE quirk: reg 0x18: [io  0x0170-0x0177]
+[    0.621745] pci 0000:00:01.1: legacy IDE quirk: reg 0x1c: [io  0x0376]
+[    0.716554] pci 0000:00:07.0: quirk: [io  0x4000-0x403f] claimed by PIIX4 ACPI
+[    0.717451] pci 0000:00:07.0: quirk: [io  0x4100-0x410f] claimed by PIIX4 SMB
+[    0.750030] ACPI: PCI Interrupt Link [LNKA] (IRQs 5 9 10 *11)
+[    0.751335] ACPI: PCI Interrupt Link [LNKB] (IRQs 5 9 *10 11)
+[    0.752462] ACPI: PCI Interrupt Link [LNKC] (IRQs 5 *9 10 11)
+[    0.753663] ACPI: PCI Interrupt Link [LNKD] (IRQs 5 9 10 *11)
+[    0.754851] ACPI: Enabled 2 GPEs in block 00 to 07
+[    0.756043] vgaarb: setting as boot device: PCI:0000:00:02.0
+[    0.756961] vgaarb: device added: PCI:0000:00:02.0,decodes=io+mem,owns=io+mem,locks=none
+[    0.758360] vgaarb: loaded
+[    0.758913] vgaarb: bridge control possible 0000:00:02.0
+[    0.759999] SCSI subsystem initialized
+[    0.760817] ACPI: bus type USB registered
+[    0.761496] usbcore: registered new interface driver usbfs
+[    0.762350] usbcore: registered new interface driver hub
+[    0.763233] usbcore: registered new device driver usb
+[    0.764342] PCI: Using ACPI for IRQ routing
+[    0.765257] NetLabel: Initializing
+[    0.765848] NetLabel:  domain hash size = 128
+[    0.766600] NetLabel:  protocols = UNLABELED CIPSOv4
+[    0.767424] NetLabel:  unlabeled traffic allowed by default
+[    0.768502] amd_nb: Cannot enumerate AMD northbridges
+[    0.769462] clocksource: Switched to clocksource kvm-clock
+[    0.782289] AppArmor: AppArmor Filesystem Enabled
+[    0.783813] pnp: PnP ACPI init
+[    0.785900] pnp: PnP ACPI: found 3 devices
+[    0.787066] PnPBIOS: Disabled by ACPI PNP
+[    0.833491] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    0.835034] NET: Registered protocol family 2
+[    0.835934] TCP established hash table entries: 8192 (order: 3, 32768 bytes)
+[    0.836949] TCP bind hash table entries: 8192 (order: 4, 65536 bytes)
+[    0.837944] TCP: Hash tables configured (established 8192 bind 8192)
+[    0.838935] UDP hash table entries: 512 (order: 2, 16384 bytes)
+[    0.839851] UDP-Lite hash table entries: 512 (order: 2, 16384 bytes)
+[    0.840894] NET: Registered protocol family 1
+[    0.841664] pci 0000:00:00.0: Limiting direct PCI/PCI transfers
+[    0.842612] pci 0000:00:01.0: Activating ISA DMA hang workarounds
+[    0.843662] Unpacking initramfs...
+[    1.047679] Freeing initrd memory: 14488K
+[    1.049079] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x2b29828a32c, max_idle_ns: 440795270613 ns
+[    1.050953] platform rtc_cmos: registered platform RTC device (no PNP device found)
+[    1.052502] Scanning for low memory corruption every 60 seconds
+[    1.054653] audit: initializing netlink subsys (disabled)
+[    1.055626] audit: type=2000 audit(1638755285.962:1): initialized
+[    1.056735] Initialise system trusted keyring
+[    1.057855] HugeTLB registered 2 MB page size, pre-allocated 0 pages
+[    1.061232] zbud: loaded
+[    1.062522] VFS: Disk quotas dquot_6.6.0
+[    1.063597] VFS: Dquot-cache hash table entries: 1024 (order 0, 4096 bytes)
+[    1.065471] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    1.067449] fuse init (API version 7.23)
+[    1.068804] Key type big_key registered
+[    1.069847] Allocating IMA MOK and blacklist keyrings.
+[    1.073944] Key type asymmetric registered
+[    1.075033] Asymmetric key parser 'x509' registered
+[    1.076218] bounce: pool size: 64 pages
+[    1.077274] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 249)
+[    1.079227] io scheduler noop registered
+[    1.080229] io scheduler deadline registered (default)
+[    1.081481] io scheduler cfq registered
+[    1.082608] pci_hotplug: PCI Hot Plug PCI Core version: 0.5
+[    1.083911] pciehp: PCI Express Hot Plug Controller Driver version: 0.4
+[    1.085539] ACPI: AC Adapter [AC] (on-line)
+[    1.086667] input: Power Button as /devices/LNXSYSTM:00/LNXPWRBN:00/input/input0
+[    1.088567] ACPI: Power Button [PWRF]
+[    1.089589] input: Sleep Button as /devices/LNXSYSTM:00/LNXSLPBN:00/input/input1
+[    1.091459] ACPI: Sleep Button [SLPF]
+[    1.092920] GHES: HEST is not enabled!
+[    1.093797] ACPI: Battery Slot [BAT0] (battery present)
+[    1.095506] isapnp: Scanning for PnP cards...
+[    1.095662] Serial: 8250/16550 driver, 32 ports, IRQ sharing enabled
+[    1.117422] 00:02: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    1.121810] Linux agpgart interface v0.103
+[    1.126649] loop: module loaded
+[    1.127839] scsi host0: ata_piix
+[    1.128719] scsi host1: ata_piix
+[    1.129276] ata1: PATA max UDMA/33 cmd 0x1f0 ctl 0x3f6 bmdma 0xd000 irq 14
+[    1.130020] ata2: PATA max UDMA/33 cmd 0x170 ctl 0x376 bmdma 0xd008 irq 15
+[    1.130900] libphy: Fixed MDIO Bus: probed
+[    1.131531] tun: Universal TUN/TAP device driver, 1.6
+[    1.132163] tun: (C) 1999-2004 Max Krasnyansky <maxk@qualcomm.com>
+[    1.133069] PPP generic driver version 2.4.2
+[    1.133783] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    1.134562] ehci-pci: EHCI PCI platform driver
+[    1.135181] ehci-platform: EHCI generic platform driver
+[    1.135844] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+[    1.136579] ohci-pci: OHCI PCI platform driver
+[    1.137225] ohci-platform: OHCI generic platform driver
+[    1.137843] uhci_hcd: USB Universal Host Controller Interface driver
+[    1.138607] i8042: PNP: PS/2 Controller [PNP0303:PS2K,PNP0f03:PS2M] at 0x60,0x64 irq 1,12
+[    1.475254] isapnp: No Plug & Play device found
+[    1.667292] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    1.671581] mousedev: PS/2 mouse device common for all mice
+[    1.674999] rtc_cmos rtc_cmos: rtc core: registered rtc_cmos as rtc0
+[    1.677165] rtc_cmos rtc_cmos: alarms up to one day, 114 bytes nvram
+[    1.678852] i2c /dev entries driver
+[    1.680331] device-mapper: uevent: version 1.0.3
+[    1.682254] device-mapper: ioctl: 4.34.0-ioctl (2015-10-28) initialised: dm-devel@redhat.com
+[    1.685605] platform eisa.0: Probing EISA bus 0
+[    1.686867] platform eisa.0: EISA: Cannot allocate resource for mainboard
+[    1.688583] platform eisa.0: Cannot allocate resource for EISA slot 1
+[    1.690257] platform eisa.0: Cannot allocate resource for EISA slot 2
+[    1.692041] platform eisa.0: Cannot allocate resource for EISA slot 3
+[    1.693626] platform eisa.0: Cannot allocate resource for EISA slot 4
+[    1.695181] platform eisa.0: Cannot allocate resource for EISA slot 5
+[    1.696739] platform eisa.0: Cannot allocate resource for EISA slot 6
+[    1.698483] platform eisa.0: Cannot allocate resource for EISA slot 7
+[    1.700197] platform eisa.0: Cannot allocate resource for EISA slot 8
+[    1.701808] platform eisa.0: EISA: Detected 0 cards
+[    1.703204] cpufreq-nforce2: No nForce2 chipset.
+[    1.704512] ledtrig-cpu: registered to indicate activity on CPUs
+[    1.706574] NET: Registered protocol family 10
+[    1.708558] NET: Registered protocol family 17
+[    1.710264] Key type dns_resolver registered
+[    1.712043] Using IPI No-Shortcut mode
+[    1.713854] registered taskstats version 1
+[    1.715072] Loading compiled-in X.509 certificates
+[    1.719699] Loaded X.509 cert 'Build time autogenerated kernel key: 20ac0ed02049a72ce76c079ea50dd43d3ac5969c'
+[    1.722732] zswap: loaded using pool lzo/zbud
+[    1.727302] Key type trusted registered
+[    1.734473] Key type encrypted registered
+[    1.735849] AppArmor: AppArmor sha1 policy hashing enabled
+[    1.737325] ima: No TPM chip found, activating TPM-bypass!
+[    1.738803] ima: Allocated hash algorithm: sha1
+[    1.740091] evm: HMAC attrs: 0x1
+[    1.741559]   Magic number: 1:378:811
+[    1.743262] rtc_cmos rtc_cmos: setting system clock to 2021-12-06 01:48:01 UTC (1638755281)
+[    1.745896] BIOS EDD facility v0.16 2004-Jun-25, 0 devices found
+[    1.762459] EDD information not available.
+[    1.764867] Freeing unused kernel memory: 944K
+[    2.370808] Write protecting the kernel text: 8156k
+[    2.373703] Write protecting the kernel read-only data: 3220k
+[    2.375883] NX-protecting the kernel data: 6180k
+[    2.407456] random: systemd-udevd: uninitialized urandom read (16 bytes read, 0 bits of entropy available)
+[    2.408885] random: udevadm: uninitialized urandom read (16 bytes read, 0 bits of entropy available)
+[    2.410601] random: systemd-udevd: uninitialized urandom read (16 bytes read, 0 bits of entropy available)
+[    2.412133] random: systemd-udevd: uninitialized urandom read (16 bytes read, 0 bits of entropy available)
+[    2.417996] random: systemd-udevd: uninitialized urandom read (16 bytes read, 0 bits of entropy available)
+[    2.419202] random: udevadm: uninitialized urandom read (16 bytes read, 0 bits of entropy available)
+[    2.419262] random: udevadm: uninitialized urandom read (16 bytes read, 0 bits of entropy available)
+[    2.419686] random: udevadm: uninitialized urandom read (16 bytes read, 0 bits of entropy available)
+[    2.419749] random: udevadm: uninitialized urandom read (16 bytes read, 0 bits of entropy available)
+[    2.419797] random: udevadm: uninitialized urandom read (16 bytes read, 0 bits of entropy available)
+[    2.464773] Fusion MPT base driver 3.04.20
+[    2.466935] Copyright (c) 1999-2008 LSI Corporation
+[    2.472938] e1000: Intel(R) PRO/1000 Network Driver - version 7.3.21-k8-NAPI
+[    2.475786] e1000: Copyright (c) 1999-2006 Intel Corporation.
+[    2.505110] Fusion MPT SPI Host driver 3.04.20
+[    3.145050] e1000 0000:00:03.0 eth0: (PCI:33MHz:32-bit) 02:4c:f1:9f:ae:47
+[    3.146445] e1000 0000:00:03.0 eth0: Intel(R) PRO/1000 Network Connection
+[    3.149049] mptbase: ioc0: Initiating bringup
+[    3.149669] e1000 0000:00:03.0 enp0s3: renamed from eth0
+[    3.446728] ioc0: LSI53C1030 A0: Capabilities={Initiator}
+[   19.108749] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[   21.167364] mptbase: ioc0: Attempting Retry Config request type 0x3, page 0x0, action 0
+[   36.487080] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[   36.489756] mptbase: ioc0: Initiating recovery
+[   39.862689] mptbase: ioc0: Attempting Retry Config request type 0x3, page 0x0, action 0
+[   55.023023] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[   55.024201] mptbase: ioc0: Initiating recovery
+[   74.516056] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[   77.120984] mptbase: ioc0: Attempting Retry Config request type 0x4, page 0x1, action 0
+[   92.185659] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[   92.188425] mptbase: ioc0: Initiating recovery
+[   95.370187] mptbase: ioc0: Attempting Retry Config request type 0x4, page 0x1, action 0
+[  110.399945] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  110.402292] mptbase: ioc0: Initiating recovery
+[  128.974567] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  132.548182] mptbase: ioc0: Attempting Retry Config request type 0x1, page 0x2, action 0
+[  147.610843] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  147.615298] mptbase: ioc0: Initiating recovery
+[  152.553040] mptbase: ioc0: Attempting Retry Config request type 0x1, page 0x2, action 0
+[  167.605455] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  167.606483] mptbase: ioc0: Initiating recovery
+[  186.918732] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  189.372801] mptbase: ioc0: Attempting Retry Config request type 0x1, page 0x1, action 0
+[  204.420939] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  204.422906] mptbase: ioc0: Initiating recovery
+[  208.555461] mptbase: ioc0: Attempting Retry Config request type 0x1, page 0x1, action 0
+[  223.572501] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  223.574677] mptbase: ioc0: Initiating recovery
+[  242.469398] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  244.828938] mptbase: ioc0: Attempting Retry Config request type 0x1, page 0x4, action 0
+[  259.897832] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  259.899194] mptbase: ioc0: Initiating recovery
+[  263.510007] mptbase: ioc0: Attempting Retry Config request type 0x1, page 0x4, action 0
+[  278.552504] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  278.554665] mptbase: ioc0: Initiating recovery
+[  297.925771] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  300.357048] mptbase: ioc0: Attempting Retry Config request type 0x0, page 0x2, action 0
+[  315.360957] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  315.362507] mptbase: ioc0: Initiating recovery
+[  317.228577] mptbase: ioc0: Attempting Retry Config request type 0x0, page 0x2, action 0
+[  332.234642] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  332.236114] mptbase: ioc0: Initiating recovery
+[  350.765436] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  351.259259] mptbase: ioc0: Attempting Retry Config request type 0x9, page 0x0, action 0
+[  365.563481] md: linear personality registered for level -1
+[  365.572589] md: multipath personality registered for level -4
+[  365.578296] md: raid0 personality registered for level 0
+[  365.594403] md: raid1 personality registered for level 1
+[  365.796718] raid6: mmxx1    gen()  9162 MB/s
+[  365.977384] raid6: mmxx2    gen() 20897 MB/s
+[  366.160499] raid6: sse1x1   gen()  9995 MB/s
+[  366.327194] raid6: sse1x2   gen() 18522 MB/s
+[  366.327260] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  366.327263] mptbase: ioc0: Initiating recovery
+[  366.493566] raid6: sse2x1   gen() 20181 MB/s
+[  366.818150] raid6: sse2x1   xor() 21550 MB/s
+[  366.982047] raid6: sse2x2   gen() 40309 MB/s
+[  367.159076] raid6: sse2x2   xor() 30315 MB/s
+[  367.314924] raid6: avx2x1   gen() 45146 MB/s
+[  367.481781] raid6: avx2x2   gen() 83342 MB/s
+[  367.482735] raid6: using algorithm avx2x2 gen() 83342 MB/s
+[  367.483535] raid6: using avx2x1 recovery algorithm
+[  367.487210] xor: automatically using best checksumming function:
+[  368.771746]    avx       : 554089.000 MB/sec
+[  368.774963] async_tx: api initialized (async)
+[  368.798853] md: raid6 personality registered for level 6
+[  368.799784] md: raid5 personality registered for level 5
+[  368.800615] md: raid4 personality registered for level 4
+[  368.815231] md: raid10 personality registered for level 10
+[  368.865027] Btrfs loaded
+[  370.490821] mptbase: ioc0: Attempting Retry Config request type 0x9, page 0x0, action 0
+[  385.490072] mptbase: ioc0: WARNING - Issuing Reset from mpt_config!!, doorbell=0x24000000
+[  385.492739] mptbase: ioc0: Initiating recovery
+[  387.905790] scsi host2: ioc0: LSI53C1030 A0, FwRev=00000000h, Ports=1, MaxQ=256, IRQ=20
+[  387.908225] ------------[ cut here ]------------
+[  387.909692] WARNING: CPU: 6 PID: 6 at /build/linux-GFfRMW/linux-4.4.0/mm/page_alloc.c:3202 __alloc_pages_slowpath.constprop.105+0x913/0x9d0()
+[  387.913091] Modules linked in: btrfs raid10 raid456 async_raid6_recov async_memcpy async_pq async_xor async_tx xor raid6_pq libcrc32c raid1 raid0 multipath linear mptspi scsi_transport_spi mptscsih aesni_intel xts e1000 mptbase aes_i586 lrw gf128mul ablk_helper cryptd
+[  387.922936] CPU: 6 PID: 6 Comm: kworker/u16:0 Not tainted 4.4.0-210-generic #242-Ubuntu
+[  387.925108] Hardware name: innotek GmbH VirtualBox/VirtualBox, BIOS VirtualBox 12/01/2006
+[  387.927363] Workqueue: events_unbound async_run_entry_fn
+[  387.929131]  c1b23967 2b4a1841 00000286 f2747ac0 c17e7889 00000000 c1a28e5c f2747af0
+[  387.932313]  c10744f7 c1a11e9c 00000006 00000006 c1a28e5c 00000c82 c1185623 c1185623
+[  387.934935]  00000000 00000000 00000000 f2747b00 c1074602 00000009 00000000 f2747b88
+[  387.936081] Call Trace:
+[  387.936380]  [<c17e7889>] dump_stack+0x60/0x7a
+[  387.936791]  [<c10744f7>] warn_slowpath_common+0x87/0xc0
+[  387.937255]  [<c1185623>] ? __alloc_pages_slowpath.constprop.105+0x913/0x9d0
+[  387.937887]  [<c1185623>] ? __alloc_pages_slowpath.constprop.105+0x913/0x9d0
+[  387.938493]  [<c1074602>] warn_slowpath_null+0x22/0x30
+[  387.939058]  [<c1185623>] __alloc_pages_slowpath.constprop.105+0x913/0x9d0
+[  387.939809]  [<c118443e>] ? get_page_from_freelist+0xae/0x860
+[  387.940318]  [<c118590e>] __alloc_pages_nodemask+0x22e/0x280
+[  387.940810]  [<c102fd7d>] dma_generic_alloc_coherent+0x7d/0x140
+[  387.941405]  [<c102fd00>] ? via_no_dac+0x40/0x40
+[  387.941836]  [<f8438ea1>] mptspi_write_spi_device_pg1.constprop.15+0x2c1/0x4f0 [mptspi]
+[  387.942568]  [<c10af552>] ? find_busiest_group+0x32/0x510
+[  387.943056]  [<c13cf329>] ? vsnprintf+0x329/0x430
+[  387.943505]  [<c11d0001>] ? new_slab+0x1/0x340
+[  387.943942]  [<f84394be>] mptspi_write_width+0x6e/0x90 [mptspi]
+[  387.949921]  [<f843953e>] ? mptspi_target_alloc+0x5e/0x250 [mptspi]
+[  387.950523]  [<f84395f2>] mptspi_target_alloc+0x112/0x250 [mptspi]
+[  387.951150]  [<c1198c95>] ? kfree_const+0x25/0x30
+[  387.951587]  [<c13c6131>] ? kobject_set_name_vargs+0x61/0x90
+[  387.952082]  [<c15866a4>] scsi_alloc_target+0x234/0x2d0
+[  387.952653]  [<c1587b3e>] __scsi_scan_target+0x6e/0x6f0
+[  387.953116]  [<c10a422d>] ? __enqueue_entity+0x6d/0x80
+[  387.953624]  [<c10ab57d>] ? enqueue_entity+0x3cd/0x1360
+[  387.954076]  [<c158832e>] scsi_scan_channel+0x8e/0xa0
+[  387.954529]  [<c15884d0>] scsi_scan_host_selected+0xf0/0x190
+[  387.955068]  [<c1033248>] ? sched_clock+0x8/0x10
+[  387.955570]  [<c10a3435>] ? sched_clock_cpu+0x125/0x140
+[  387.956115]  [<c1588790>] ? scsi_scan_host+0x190/0x190
+[  387.956655]  [<c15885fa>] do_scsi_scan_host+0x8a/0x90
+[  387.957156]  [<c15887a8>] do_scan_async+0x18/0x170
+[  387.957635]  [<c109d577>] ? ttwu_do_wakeup+0x17/0x120
+[  387.958235]  [<c1588790>] ? scsi_scan_host+0x190/0x190
+[  387.958674]  [<c10953a3>] async_run_entry_fn+0x53/0x170
+[  387.959187]  [<c109e0c9>] ? try_to_wake_up+0x39/0x360
+[  387.959838]  [<c108cfae>] process_one_work+0x11e/0x430
+[  387.960305]  [<c108d2f7>] worker_thread+0x37/0x540
+[  387.960731]  [<c1092bb6>] kthread+0xb6/0xd0
+[  387.961201]  [<c108d2c0>] ? process_one_work+0x430/0x430
+[  387.961690]  [<c17ef64d>] ? __schedule+0x31d/0x7e0
+[  387.962139]  [<c17f3f20>] ret_from_kernel_thread+0x38/0x4c
+[  387.962619]  [<c1092b00>] ? kthread_create_on_node+0x180/0x180
+[  387.963186] ---[ end trace 08f7064019a80b17 ]---
+[  387.963710] scsi target2:0:0: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  409.268011] mptscsih: ioc0: attempting task abort! (sc=f6869b00)
+[  409.269877] scsi 2:0:0:0: tag#0 CDB: Inquiry 12 00 00 00 24 00
+[  419.820678] mptscsih: ioc0: WARNING - Issuing Reset from mptscsih_IssueTaskMgmt!! doorbell=0x24000000
+[  420.065881] mptscsih: ioc0: task abort: SUCCESS (rv=2002) (sc=f6869b00)
+[  420.067553] scsi target2:0:0: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  420.067661] scsi target2:0:1: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  420.069253] scsi target2:0:0: FAST-5 SCSI 1.0 MB/s ST IU QAS RTI HMCS (984 ns, offset 126)
+[  420.070067] scsi target2:0:0: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  420.070921] scsi target2:0:1: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  420.071717] scsi target2:0:1: FAST-5 WIDE SCSI 5.8 MB/s ST RTI (340 ns, offset 84)
+[  420.072510] scsi target2:0:1: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  444.269046] mptscsih: ioc0: attempting task abort! (sc=f23c9000)
+[  444.271137] scsi 2:0:1:0: tag#0 CDB: Inquiry 12 00 00 00 24 00
+[  454.601343] mptscsih: ioc0: WARNING - Issuing Reset from mptscsih_IssueTaskMgmt!! doorbell=0x24000000
+[  455.986709] mptscsih: ioc0: task abort: SUCCESS (rv=2002) (sc=f23c9000)
+[  455.988811] scsi target2:0:1: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  455.988911] scsi target2:0:2: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  455.994225] scsi target2:0:1: FAST-5 SCSI 1.0 MB/s ST IU QAS RTI HMCS (984 ns, offset 126)
+[  455.996882] scsi target2:0:1: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  455.999581] scsi target2:0:2: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  456.002101] scsi target2:0:2: FAST-5 WIDE SCSI 5.8 MB/s ST RTI (340 ns, offset 84)
+[  456.004553] scsi target2:0:2: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  477.272551] mptscsih: ioc0: attempting task abort! (sc=f23c9a00)
+[  477.275159] scsi 2:0:2:0: tag#0 CDB: Inquiry 12 00 00 00 24 00
+[  487.530956] mptscsih: ioc0: WARNING - Issuing Reset from mptscsih_IssueTaskMgmt!! doorbell=0x24000000
+[  488.208920] mptscsih: ioc0: task abort: SUCCESS (rv=2002) (sc=f23c9a00)
+[  488.211180] scsi target2:0:2: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  488.211355] scsi target2:0:3: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  488.216159] scsi target2:0:2: FAST-5 SCSI 1.0 MB/s ST IU QAS RTI HMCS (984 ns, offset 126)
+[  488.218882] scsi target2:0:2: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  488.221636] scsi target2:0:3: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  488.225628] scsi target2:0:3: FAST-5 WIDE SCSI 5.8 MB/s ST RTI (340 ns, offset 84)
+[  488.228269] scsi target2:0:3: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  509.273342] mptscsih: ioc0: attempting task abort! (sc=f23c9a00)
+[  509.274446] scsi 2:0:3:0: tag#0 CDB: Inquiry 12 00 00 00 24 00
+[  519.690103] mptscsih: ioc0: WARNING - Issuing Reset from mptscsih_IssueTaskMgmt!! doorbell=0x24000000
+[  521.278004] mptscsih: ioc0: task abort: SUCCESS (rv=2002) (sc=f23c9a00)
+[  521.280106] scsi target2:0:3: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  521.280159] scsi target2:0:4: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  521.284744] scsi target2:0:3: FAST-5 SCSI 1.0 MB/s ST IU QAS RTI HMCS (984 ns, offset 126)
+[  521.286980] scsi target2:0:3: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  521.289385] scsi target2:0:4: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  521.291577] scsi target2:0:4: FAST-5 WIDE SCSI 5.8 MB/s ST RTI (340 ns, offset 84)
+[  521.293720] scsi target2:0:4: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  542.280808] mptscsih: ioc0: attempting task abort! (sc=f23c9000)
+[  542.282869] scsi 2:0:4:0: tag#0 CDB: Inquiry 12 00 00 00 24 00
+[  552.830466] mptscsih: ioc0: WARNING - Issuing Reset from mptscsih_IssueTaskMgmt!! doorbell=0x24000000
+[  553.475932] mptscsih: ioc0: task abort: SUCCESS (rv=2002) (sc=f23c9000)
+[  553.478373] scsi target2:0:4: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  553.478505] scsi target2:0:5: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  553.483467] scsi target2:0:4: FAST-5 SCSI 1.0 MB/s ST IU QAS RTI HMCS (984 ns, offset 126)
+[  553.486454] scsi target2:0:4: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  553.489360] scsi target2:0:5: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  553.492114] scsi target2:0:5: FAST-5 WIDE SCSI 5.8 MB/s ST RTI (340 ns, offset 84)
+[  553.495035] scsi target2:0:5: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  574.357773] mptscsih: ioc0: attempting task abort! (sc=f2056200)
+[  574.359805] scsi 2:0:5:0: tag#0 CDB: Inquiry 12 00 00 00 24 00
+[  584.531085] mptscsih: ioc0: WARNING - Issuing Reset from mptscsih_IssueTaskMgmt!! doorbell=0x24000000
+[  585.159238] mptscsih: ioc0: task abort: SUCCESS (rv=2002) (sc=f2056200)
+[  585.161955] scsi target2:0:5: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  585.162108] scsi target2:0:6: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  585.167596] scsi target2:0:5: FAST-5 SCSI 1.0 MB/s ST IU QAS RTI HMCS (984 ns, offset 126)
+[  585.170472] scsi target2:0:5: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  585.173431] scsi target2:0:6: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  585.176351] scsi target2:0:6: FAST-5 WIDE SCSI 5.8 MB/s ST RTI (340 ns, offset 84)
+[  585.179139] scsi target2:0:6: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  600.670815] INFO: task systemd-udevd:161 blocked for more than 120 seconds.
+[  600.673393]       Tainted: G        W       4.4.0-210-generic #242-Ubuntu
+[  600.675613] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+[  600.678416] systemd-udevd   D f6e88064     0   161    144 0x00000004
+[  600.680739]  f6fc9db0 00000086 00000000 f6e88064 00000000 00000286 512002b5 0000005a
+[  600.684498]  f312fd00 f272e400 f6fa0a00 f6fca000 ffffffff ffffffff f6fc9dbc c17efb3d
+[  600.688452]  00000000 f6fc9e08 c109559b 024000c0 c13c6b00 f843c288 00000000 00000000
+[  600.692384] Call Trace:
+[  600.693545]  [<c17efb3d>] schedule+0x2d/0x80
+[  600.695168]  [<c109559b>] async_synchronize_cookie_domain+0xdb/0x170
+[  600.697265]  [<c13c6b00>] ? cleanup_uevent_env+0x10/0x10
+[  600.699154]  [<c10b6530>] ? wake_atomic_t_function+0x70/0x70
+[  600.701114]  [<c1095669>] async_synchronize_full+0x19/0x20
+[  600.703025]  [<c17e5d31>] do_init_module+0xb5/0x1b0
+[  600.704809]  [<c11000bb>] load_module+0x15db/0x1ab0
+[  600.706551]  [<c10fcb59>] ? copy_module_from_fd.isra.54+0xf9/0x190
+[  600.708919]  [<c11007c5>] SyS_finit_module+0xa5/0xf0
+[  600.710671]  [<c1199083>] ? vm_mmap_pgoff+0xa3/0xc0
+[  600.712404]  [<c10038cf>] do_fast_syscall_32+0x9f/0x190
+[  600.714415]  [<c17f3fb0>] sysenter_past_esp+0x3d/0x5d
+[  606.353762] mptscsih: ioc0: attempting task abort! (sc=f2056200)
+[  606.356013] scsi 2:0:6:0: tag#0 CDB: Inquiry 12 00 00 00 24 00
+[  616.537883] mptscsih: ioc0: WARNING - Issuing Reset from mptscsih_IssueTaskMgmt!! doorbell=0x24000000
+[  617.370172] mptscsih: ioc0: task abort: SUCCESS (rv=2002) (sc=f2056200)
+[  617.372569] scsi target2:0:6: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  617.372705] scsi target2:0:8: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  617.377831] scsi target2:0:6: FAST-5 SCSI 1.0 MB/s ST IU QAS RTI HMCS (984 ns, offset 126)
+[  617.380497] scsi target2:0:6: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  617.400903] scsi target2:0:8: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  617.403537] scsi target2:0:8: FAST-5 WIDE SCSI 5.8 MB/s ST RTI (340 ns, offset 84)
+[  617.406095] scsi target2:0:8: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  638.383994] mptscsih: ioc0: attempting task abort! (sc=f2056700)
+[  638.385413] scsi 2:0:8:0: tag#0 CDB: Inquiry 12 00 00 00 24 00
+[  648.570523] mptscsih: ioc0: WARNING - Issuing Reset from mptscsih_IssueTaskMgmt!! doorbell=0x24000000
+[  649.612016] mptscsih: ioc0: task abort: SUCCESS (rv=2002) (sc=f2056700)
+[  649.614064] scsi target2:0:8: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  649.614338] scsi target2:0:9: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  649.619687] scsi target2:0:8: FAST-5 SCSI 1.0 MB/s ST IU QAS RTI HMCS (984 ns, offset 126)
+[  649.622310] scsi target2:0:8: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  649.625054] scsi target2:0:9: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  649.627460] scsi target2:0:9: FAST-5 WIDE SCSI 5.8 MB/s ST RTI (340 ns, offset 84)
+[  649.629802] scsi target2:0:9: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  670.362412] mptscsih: ioc0: attempting task abort! (sc=f2056600)
+[  670.364517] scsi 2:0:9:0: tag#0 CDB: Inquiry 12 00 00 00 24 00
+[  680.928865] mptscsih: ioc0: WARNING - Issuing Reset from mptscsih_IssueTaskMgmt!! doorbell=0x24000000
+[  681.257963] mptscsih: ioc0: task abort: SUCCESS (rv=2002) (sc=f2056600)
+[  681.259982] scsi target2:0:9: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  681.260069] scsi target2:0:10: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  681.265207] scsi target2:0:9: FAST-5 SCSI 1.0 MB/s ST IU QAS RTI HMCS (984 ns, offset 126)
+[  681.267799] scsi target2:0:9: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  681.270372] scsi target2:0:10: mptspi: ioc0: dma_alloc_coherent for parameters failed
+[  681.272957] scsi target2:0:10: FAST-5 WIDE SCSI 5.8 MB/s ST RTI (340 ns, offset 84)
+[  681.275423] scsi target2:0:10: mptspi: ioc0: dma_alloc_coherent for parameters failed
