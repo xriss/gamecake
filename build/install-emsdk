@@ -8,11 +8,25 @@ fi
 echo "echo installing emscipten sdk into $(pwd) / emsdk "
 
 
-sudo apt-get install -y luajit
-sudo apt-get install -y lua-filesystem
-sudo apt-get install -y cmake
-sudo apt-get install -y python
-sudo apt-get install -y git
+# first install a require script
+if ! [[ -x "$(command -v require.sh)" ]] ; then
+
+	echo " we need sudo to install require.sh to /usr/local/bin "
+	sudo wget -O /usr/local/bin/require.sh https://raw.githubusercontent.com/xriss/require.sh/main/require.sh
+	sudo chmod +x /usr/local/bin/require.sh
+
+fi
+
+
+
+require.sh luajit
+require.sh lua-filesystem
+require.sh wget
+require.sh git
+require.sh cmake
+require.sh python
+
+
 
 rm -rf emsdk
 git clone https://github.com/juj/emsdk.git
