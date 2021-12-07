@@ -120,7 +120,6 @@ for key in "${!flags[@]}" ; do
 		echo "unknown flag $key=$val"
 		exit 20
 	fi
-
 done
 
 

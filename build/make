@@ -2,127 +2,149 @@
 cd `dirname $0`
 cd ..
 
-getopt --test > /dev/null
-if [[ $? -ne 4 ]]; then
-    echo " gamecake make script failed : we need a working version of getopt "
-    exit 1
-fi
+arg_flags=("help debug release:1 clean gcc=gcc cpu=native win= openal=soft jobs=$(nproc||echo 1)")
 
+arg_get() {
+key="$1"
+	envkey=${key//-/_}
+	if printenv BUILD_${envkey^^} ; then
+		return 0
+	fi
+	return 20
+}
 
-# default build settings
+arg_set() {
+key="$1"
+val="$2"
+	envkey=${key//-/_}
+	export BUILD_${envkey^^}="$val"
+}
 
-
-release=1
-
-# defaults to a release build
-
-
-gcc=gcc
-
-# other options are : gcc clang emcc windows osx 
-
-
-cpu=native
-
-# other options are : native 32 64
-
-jobs=$(nproc||echo 1)
-
-# use --jobs=1 to prevent parallel builds
-
-openal=soft
-
-# other options are : soft sys
-
-
-OPTIONS=
-LONGOPTIONS=help,debug,release,clean,gcc:,cpu:,win:,openal:,jobs:
-
-
-
-PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
-if [[ $? -ne 0 ]]; then
-    exit 2
-fi
-eval set -- "$PARSED"
-
-while true; do
-case "$1" in
-        --help)
-                help=1
-                shift
-        ;;
-        --debug)
-                debug=1
-                shift
-        ;;
-        --release)
-                release=1
-                shift
-        ;;
-        --clean)
-                clean=1
-                shift
-        ;;
-        --gcc)
-                gcc="$2"
-                shift 2
-        ;;
-        --jobs)
-                jobs="$2"
-                shift 2
-        ;;
-        --cpu)
-                cpu="$2"
-                shift 2
-        ;;
-        --win)
-                win="$2"
-                shift 2
-        ;;
-        --openal)
-                openal="$2"
-                shift 2
-        ;;
-        --)
-                shift
-                break
-        ;;
-        *)
-                echo "Programming error"
-                exit 3
-        ;;
-esac
+#parse arg_flags
+declare -A all_flaga
+declare -A value_flaga
+declare -A boolean_flaga
+for flag in $arg_flags ; do
+	if [[ "${flag}" == *"="* ]]; then
+		fs=(${flag//=/ })
+		value_flaga[${fs[0]}]="1"
+		all_flaga[${fs[0]}]="1"
+		if arg_get ${fs[0]} >/dev/null ; then
+			:
+		else
+			arg_set "${fs[0]}" "${fs[1]}"
+		fi
+	else
+		fs=(${flag//:/ })
+		boolean_flaga[${fs[0]}]="1"
+		all_flaga[${fs[0]}]="1"
+		if arg_get ${fs[0]} >/dev/null ; then
+			:
+		else
+			arg_set "${fs[0]}" "${fs[1]}"
+		fi
+	fi
 done
 
-if [ "$help" = "1" ] ; then
+# fill in these arrays as output
+declare -A args
+declare -A flags
+mode="names"
+for arg in "$@" ; do
 
-echo "debug: $debug, release: $release, clean: $clean, gcc: $gcc, cpu: $cpu, win: $win, openal: $openal, makeargs: $*"
+echo $arg
 
-echo " Available options are : "
-echo
-echo " ./make --release     # perform a release build (default) "
-echo " ./make --debug       # or perform a debug build "
-echo
-echo " ./make --clean       # delete objects and force a full rebuild "
-echo
-echo " ./make --jobs=1      # build one thing at a time "
-echo
-echo " ./make --gcc=gcc     # normal nix build using gcc (default) "
-echo " ./make --gcc=clang   # alternative nix build using clang "
-echo " ./make --gcc=emcc    # build using emscripten "
-echo " ./make --gcc=android # build using android "
-echo
-echo " ./make --cpu=native  # use the host cpu (default) "
-echo " ./make --cpu=32      # force a 32bit build "
-echo " ./make --cpu=64      # force a 64bit build "
-echo " ./make --cpu=arm     # force a 32bit arm build "
-echo " ./make --cpu=a64     # force a 64bit arm build "
-echo
-echo " ./make --win=raspi   # force the use of the raspi os interface "
-echo
-echo " ./make --openal=sys  # use system provided openal "
-echo
+	case $mode in
+
+		"set")
+			val="$arg"
+			flags["$set"]="$val"
+			mode="names"
+		;;
+
+		"done")
+			args[${#args[@]}]="$arg"
+		;;
+
+		*)
+			if [[ "$arg" = "--" ]] ; then # just a -- so stop parsing
+				mode="done"
+			elif [[ "${arg:0:5}" = "--no-" ]] ; then # unset a flag
+				set="${arg:5}"
+				flags["$set"]=""
+			elif [[ "${arg:0:2}" = "--" ]] ; then # begins with --
+			
+				set="${arg:2}"
+				if [[ "$set" == *"="* ]] ; then # --var=val
+					a=(${set//=/ })
+					set="${a[0]}"
+					val="${a[1]}"
+					flags["$set"]="$val"
+				else # --var val
+					if [[ ${boolean_flaga[$set]} ]] ; then # no val expected
+						flags["$set"]="1"
+					else
+						flags["$set"]="1" # temporary value
+						mode="set"
+					fi
+				fi
+			else
+				args[${#args[@]}]="$arg"
+			fi
+		;;
+
+	esac
+
+done
+
+# process flags we found here and probably overwrite env vars
+
+for key in "${!flags[@]}" ; do
+	val=${flags[$key]}
+
+	if [[ ${all_flaga[$key]} ]] ; then
+		arg_set "${key}" "$val"
+	else
+		echo "unknown flag $key=$val"
+		exit 20
+	fi
+
+done
+
+
+if [[ -n "$( arg_get help )" ]] ; then
+
+cat <<EOF
+
+debug: $debug, release: $release, clean: $clean, gcc: $gcc, cpu: $cpu, win: $win, openal: $openal, makeargs: $*
+
+
+Available options are :
+
+./make --release     # perform a release build (default)
+./make --debug       # or perform a debug build
+
+./make --clean       # delete objects and force a full rebuild
+
+./make --jobs=1      # build one thing at a time
+
+./make --gcc=gcc     # normal nix build using gcc (default)
+./make --gcc=clang   # alternative nix build using clang
+./make --gcc=emcc    # build using emscripten
+./make --gcc=android # build using android
+
+./make --cpu=native  # use the host cpu (default)
+./make --cpu=32      # force a 32bit build
+./make --cpu=64      # force a 64bit build
+./make --cpu=arm     # force a 32bit arm build
+./make --cpu=a64     # force a 64bit arm build
+
+./make --win=raspi   # force the use of the raspi os interface
+
+./make --openal=sys  # use system provided openal
+
+
+EOF
 
 exit 0
 
@@ -130,7 +152,7 @@ fi
 
 
 
-if [ "$gcc" = "emcc" ] ; then
+if [ "$( arg_get gcc )" = "emcc" ] ; then
 
 emcc --version >/dev/null || . build/emsdk/emsdk_env.sh
 
@@ -138,20 +160,19 @@ fi
 
 
 
-
-buildhere=build-gmake-$gcc-$cpu
+buildhere=build-gmake-$( arg_get gcc )-$( arg_get cpu )
 
 echo BUILDING INTO $buildhere
 
 
 
-export GAMECAKE_WIN_TYPE=$win
+export GAMECAKE_WIN_TYPE=$( arg_get win )
 
 
 
 #remove all files and perform a clean build
 
-if [ "$clean" = "1" ] ; then
+if [[ -n "$( arg_get clean )" ]] ; then
 
 echo cleaning ${buildhere}
 
@@ -166,18 +187,18 @@ fi
 
 #default to release and override with debug if selected
 
-makeopts="config=release_$gcc"
+makeopts="config=release_$( arg_get gcc )"
 
-if [ "$debug" = "1" ] ; then
+if [[ -n "$( arg_get debug )" ]] ; then
 
 makeopts="config=debug_$gcc"
 
 fi
 
 # need to include cpu in android builds
-if [ "$gcc" = "android" ] ; then
+if [[ "$( arg_get gcc )" = "android" ]] ; then
 
-makeopts="$makeopts-$cpu"
+makeopts="$makeopts-$( arg_get cpu )"
 
 fi
 
@@ -185,37 +206,38 @@ fi
 
 # this will make a directory to build into
 
-if [ -z "$PUREMAKE_LUA" ]; then 
+if [[ -z "$PUREMAKE_LUA" ]]; then 
  if lua -e "require('lfs')" >/dev/null 2>&1; then
   PUREMAKE_LUA=lua
- elif gamecake -e "require('lfs')" >/dev/null 2>&1; then 
-  PUREMAKE_LUA=gamecake
  elif command -v luajit >/dev/null 2>&1; then
   PUREMAKE_LUA=luajit
+ elif gamecake -e "require('lfs')" >/dev/null 2>&1; then 
+  PUREMAKE_LUA=gamecake
  else
   printf "puremake requires lua+lfs or gamecake or luajit to be installed\n" 1>&2
   exit 1
  fi
 fi
 
-$PUREMAKE_LUA build/puremake --openal=$openal gmake $gcc-$cpu
+
+echo "$PUREMAKE_LUA build/puremake --openal=$( arg_get openal ) gmake $( arg_get gcc )-$( arg_get cpu )"
+$PUREMAKE_LUA build/puremake --openal=$( arg_get openal ) gmake $( arg_get gcc )-$( arg_get cpu )
 
 # enter that directory
 cd ${buildhere}
 
 
+if [[ -n "$( arg_get clean )" ]] ; then
 
-if [ "$*" = "clean" ] ; then
+echo " make -j$( arg_get jobs ) $makeopts "
 
-echo " make -j$jobs $makeopts "
-
-make -j$jobs $makeopts clean
-make -j$jobs $makeopts
+make -j$( arg_get jobs ) $makeopts clean
+make -j$( arg_get jobs ) $makeopts
 
 else
 
-echo " make -j$jobs $makeopts "
-make -j$jobs $makeopts
+echo " make -j$( arg_get jobs ) $makeopts "
+make -j$( arg_get jobs ) $makeopts
 
 fi
 
