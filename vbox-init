@@ -11,6 +11,12 @@ vagrant up
 vagrant halt
 cd ..
 
+cd vbox_1604_32
+vagrant destroy -f
+vagrant up
+vagrant halt
+cd ..
+
 cd vbox_emcc
 vagrant destroy -f
 vagrant up

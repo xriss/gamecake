@@ -134,8 +134,8 @@ Available options are :
 ./make --gcc=android # build using android
 
 ./make --cpu=native  # use the host cpu (default)
-./make --cpu=32      # force a 32bit build
-./make --cpu=64      # force a 64bit build
+./make --cpu=x32     # force a 32bit build
+./make --cpu=x64     # force a 64bit build
 ./make --cpu=arm     # force a 32bit arm build
 ./make --cpu=a64     # force a 64bit arm build
 

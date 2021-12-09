@@ -1,8 +1,0 @@
-cd `dirname $0`
-
-vagrant up
-
-vagrant ssh -c " cd /gamecake ; ./make --cpu=32 $* "
-
-vagrant halt
-
