@@ -17,6 +17,8 @@
   #define PLATFORM_QNX
 #elif (defined __CYGWIN__)
   #define PLATFORM_CYGWIN
+#elif (defined __EMSCRIPTEN__)
+  #define PLATFORM_EMSCRIPTEN
 #else
   #error "Unknown platform!"
 #endif
