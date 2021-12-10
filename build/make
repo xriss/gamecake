@@ -116,9 +116,6 @@ if [[ -n "$( arg_get help )" ]] ; then
 
 cat <<EOF
 
-debug: $debug, release: $release, clean: $clean, gcc: $gcc, cpu: $cpu, win: $win, openal: $openal, makeargs: $*
-
-
 Available options are :
 
 ./make --release     # perform a release build (default)
@@ -136,7 +133,7 @@ Available options are :
 ./make --cpu=native  # use the host cpu (default)
 ./make --cpu=x32     # force a 32bit build
 ./make --cpu=x64     # force a 64bit build
-./make --cpu=arm     # force a 32bit arm build
+./make --cpu=a32     # force a 32bit arm build
 ./make --cpu=a64     # force a 64bit arm build
 
 ./make --win=raspi   # force the use of the raspi os interface
