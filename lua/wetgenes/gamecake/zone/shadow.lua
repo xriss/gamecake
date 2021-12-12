@@ -136,6 +136,7 @@ M.bake=function(oven,shadow)
 
 
 			shadow.mtx:pretranslate(x,y,z)
+			shadow.mtx:rotate( 120 , 0,1,0 )
 			shadow.mtx:prerotate( r , -1,0,0 )
 			shadow.mtx:prescale(1,1,1/sd)
 
