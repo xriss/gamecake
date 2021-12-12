@@ -59,7 +59,7 @@ B.sky.draw=function(sky)
 		 1,	-1,	1,	1,	0, 			
 		 1,	 1,	1,	1,	1,
 	}
-	oven.cake.canvas.flat.tristrip("rawuv",t,"sky",function(p)
+	oven.cake.canvas.flat.tristrip("rawuv",t,"zone_sky_base",function(p)
 		gl.Uniform4f( p:uniform("time") , sky.time,1,1,1 )
 
 		local inverse_modelview=M4(gl.matrix(gl.MODELVIEW)):inverse()

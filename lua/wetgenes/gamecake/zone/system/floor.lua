@@ -53,7 +53,7 @@ B.floors.draw=function(floors)
 
 	local camera=floors.scene.get("camera")
 
-	geom.draw(B.geomfloor,"floors?RND="..floors.RND,function(p)
+	geom.draw(B.geomfloor,"zone_floor_base?RND="..floors.RND,function(p)
 
 		local s=50
 		local x=(camera.mtx[9]*-s  + camera.mtx[13])

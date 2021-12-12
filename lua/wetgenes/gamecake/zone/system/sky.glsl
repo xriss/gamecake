@@ -29,7 +29,7 @@ vec4 sky(vec3 eye, vec4 blend)
 }
 
 
-#shader "sky"
+#shader "zone_sky_base"
 
 #version 300 es
 #version 330

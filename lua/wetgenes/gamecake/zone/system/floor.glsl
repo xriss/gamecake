@@ -1,5 +1,5 @@
 
-#shader "floors"
+#shader "zone_floor_base"
 
 #version 300 es
 #version 330
