@@ -89,7 +89,7 @@ B.cameras.create=function(cameras,boot)
 
 	camera.dolly=5 -- minimum dolly value
 
-	camera.floor=0 -- keep camera above this
+--	camera.floor=0 -- keep camera above this
 
 --	camera.base={ rot=deepcopy(camera.rot) ,  pos=deepcopy(camera.pos) , dolly=camera.dolly }
 
@@ -258,8 +258,10 @@ B.camera.update=function(camera)
 	camera.mtx:rotate( camera.rot[1] ,  1, 0, 0 )
 	camera.mtx:translate( 0,0, 0.0 + camera.dolly*camera.orbit.dolly )
 
---	if camera.mtx[14] > camera.floor then camera.mtx[14]=camera.floor end -- keep above ground
-
+	if camera.floor then
+		if camera.mtx[14] > camera.floor then camera.mtx[14]=camera.floor end -- keep above ground
+	end
+	
 	local c=math.cos(math.pi*camera.rot[2]/180)
 	local s=math.sin(math.pi*camera.rot[2]/180)
 	camera.playerz=V3( { 0 , -1 , 0 } )
