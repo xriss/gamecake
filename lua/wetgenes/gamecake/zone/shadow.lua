@@ -80,37 +80,13 @@ M.bake=function(oven,shadow)
 		local sky=scene.systems.sky or {time=0}
 		if camera then
 
-	--		print( M4(gl.matrix(gl.MODELVIEW)) )
-
-			gl.Translate( camera.inv[13] , camera.inv[14] , camera.inv[15] )
-
-			gl.Rotate( -90 , 1,0,0 )
-			gl.Translate( 0,-512,0 )
-
-			gl.Scale( 2 , 2 , 2 )
-
---			local t=M4( gl.SaveMatrix() )			
---			print(t)
-
-
-
 			local s=256 -- 40*shadow.mapsize/1024
 			local sd=1024
-			local x=(camera.mtx[ 9]*-s + camera.mtx[13])*-1/s	-- swap z/y as rotation
-			local y=(camera.mtx[11]*-s + camera.mtx[15])*-1/s
-			local z=(camera.mtx[10]*-s + camera.mtx[14])*-1/s
-
-			local snap=16
-			x=math.floor(0.5+x*snap)/snap
-			y=math.floor(0.5+y*snap)/snap
-			z=math.floor(0.5+z*snap)/snap
-			
+			local x=(camera.mtx[13])*-1/s	-- swap z/y as rotation
+			local y=(camera.mtx[15])*-1/s
+			local z=(camera.mtx[14])*-1/s
 			
 			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..0.000000*s/sd..","..0.000008*s/sd..",0.0"
-
---			x=0
---			y=0
---			z=0
 
 			shadow.mtx=M4{
 				1/s,		0,			0,			0,
@@ -128,25 +104,11 @@ M.bake=function(oven,shadow)
 			if r < 90+180+6 then r=90+180+6 end
 			if r > 90+360-6 then r=90+360-6 end
 
---			r=math.floor((r+0.5)/1)*1
-
---			shadow.mtx:rotate( r , 1,0,0 )
-			
---			shadow.mtx:rotate( -10 , 1,0,0 )
-
-
 			shadow.mtx:pretranslate(x,y,z)
-			shadow.mtx:rotate( 120 , 0,1,0 )
-			shadow.mtx:prerotate( r , -1,0,0 )
+			shadow.mtx:rotate( 120 , 0,1,0 ) -- eastwest ish
+			shadow.mtx:prerotate( r , -1,0,0 ) -- time of day
 			shadow.mtx:prescale(1,1,1/sd)
 
--- snap to pixels?
---[[
-			local vv=shadow.mtx:v3(4)
-			shadow.mtx[13]=math.floor( vv[1] * (shadow.mapsize) ) / (shadow.mapsize)
-			shadow.mtx[14]=math.floor( vv[2] * (shadow.mapsize) ) / (shadow.mapsize)
-			shadow.mtx[15]=math.floor( vv[3] * (shadow.mapsize) ) / (shadow.mapsize)
-]]
 			gl.MatrixMode(gl.PROJECTION)
 			gl.LoadMatrix( shadow.mtx )
 
