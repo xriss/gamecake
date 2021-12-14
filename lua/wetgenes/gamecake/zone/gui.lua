@@ -40,14 +40,14 @@ gui.data_setup=function()
 		screen.shader_qs.zone_screen_draw.COLOR_POW=it:value()
 	end
 
-	datas.new({id="screen_shadow",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.SHADOW_POW,min=0.01,max=8,step=0.01})
+	datas.new({id="screen_shadow",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen.SHADOW_POW,min=0.01,max=8,step=0.01})
 	gui.value["screen_shadow"]=function(it)
-		screen.shader_qs.zone_screen_draw.SHADOW_POW=it:value()
+		screen.shader_qs.zone_screen.SHADOW_POW=it:value()
 	end
 
-	datas.new({id="screen_light",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.LIGHT_POW,min=0.01,max=8,step=0.01})
+	datas.new({id="screen_light",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen.LIGHT_POW,min=0.01,max=8,step=0.01})
 	gui.value["screen_light"]=function(it)
-		screen.shader_qs.zone_screen_draw.LIGHT_POW=it:value()
+		screen.shader_qs.zone_screen.LIGHT_POW=it:value()
 	end
 
 	datas.new({id="screen_bloom",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.BLOOM_MUL,min=0,max=4,step=0.01})
@@ -77,16 +77,15 @@ gui.data_setup=function()
 		screen.shader_qs.zone_screen_build_occlusion.AO_WIDTH=it:value()
 	end
 
-	datas.new({id="ao_steps",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_STEPS,min=1,max=8,step=1})
-	gui.value["ao_steps"]=function(it)
-		screen.shader_qs.zone_screen_build_occlusion.AO_STEPS=it:value()
-	end
-
-	datas.new({id="ao_angles",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_ANGLES,min=1,max=64,step=1})
-	gui.value["ao_angles"]=function(it)
-		screen.shader_qs.zone_screen_build_occlusion.AO_ANGLES=it:value()
+	datas.new({id="ao_samples",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_SAMPLES,min=1,max=64,step=1})
+	gui.value["ao_samples"]=function(it)
+		screen.shader_qs.zone_screen_build_occlusion.AO_SAMPLES=it:value()
 	end
 			
+	datas.new({id="shadow_samples",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SAMPLES,min=1,max=64,step=1})
+	gui.value["shadow_samples"]=function(it)
+		screen.shader_qs.zone_screen_build_occlusion.SHADOW_SAMPLES=it:value()
+	end
 			
 	datas.new({id="screen_mode",class="string",hooks=gui.hooks,str=oven.console.screen_mode()})
 	oven.console.screen_mode_data=datas.get("screen_mode")
@@ -235,10 +234,10 @@ gui.plan_windows=function()
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_size"),color=0})
 	def.add(canvas,{text="AO Width"})
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_width"),color=0})
-	def.add(canvas,{text="AO Steps"})
-	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_steps"),color=0})
-	def.add(canvas,{text="AO Angles"})
-	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_angles"),color=0})
+	def.add(canvas,{text="AO Samples"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_samples"),color=0})
+	def.add(canvas,{text="Shadow Samples"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_samples"),color=0})
 
 	gui.screen:windows_reset()
 

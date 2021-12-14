@@ -273,12 +273,10 @@ float pows(float s,float p)
 float ambient_occlusion( vec2 vv )
 {
 
-#define AO_SAMPLES (AO_ANGLES*AO_STEPS)
-	
 	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
 	vec2 aspect=vec2( texel_size.y/texel_size.x , 1.0 );
 	vec2 vp=vv*texel_size; // each unit is a pixel
-	vec2 hp=normalize((fract(vp/2.0)-0.5)*2.0); // a hash unit start vector
+	vec2 hp=normalize((fract(vp/4.0)-0.5)*4.0); // a hash unit start vector
 	float ha=atan(hp.y,hp.x);
 
 	float slen=float(AO_SIZE);
@@ -289,10 +287,10 @@ float ambient_occlusion( vec2 vv )
 
 	float dlen=length(p2.xy-vv.xy); // scale needed to adjust to depth
 
-	float rots=PI2*float(AO_STEPS)/float(AO_ANGLES);
-	float dims=0.5/float(AO_ANGLES);
+	float rots=PI2/float(AO_SAMPLES);
+	float dims=0.5/float(AO_SAMPLES);
 	float ac=0.0;
-	for(int ia=0;ia<int(AO_ANGLES);ia++)
+	for(int ia=0;ia<int(AO_SAMPLES);ia++)
 	{
 		float fa=float(ia);
 		float r=ha+fa*rots;
@@ -300,7 +298,7 @@ float ambient_occlusion( vec2 vv )
 		vec3 ss=depth_to_view(cc+vv);
 		ac+=1.0-smoothstep( p1.z - slen , p1.z + slen , ss.z );
 	}
-	return (ac/float(AO_ANGLES));
+	return (ac/float(AO_SAMPLES));
 
 }
 
@@ -317,7 +315,7 @@ float shadow_occlusion( vec2 vv )
 //	vec2 aspect=vec2( texel_size.y/texel_size.x , 1.0 );
 	vec2 vp=vv*texel_size; // each unit is a pixel
 	vec2 hp=((fract(vp/4.0)-0.5)*4.0); // a hash unit start vector
-//	float ha=atan(hp.y,hp.x);
+	float ha=atan(hp.y,hp.x);
 
 	vec3 v=depth_to_view( vv );
 
@@ -334,21 +332,20 @@ float shadow_occlusion( vec2 vv )
 		float shadow_tmp=0.0;
 		float shadow_add=0.0;
 		float shadow_min=1.0;
-		vec2 shadow_texel_size = 1.0 / vec2( textureSize(shadow_map,0) );
-float x=0.0;
-//		for(int x = -1; x <= 1; x++)
+		vec2 shadow_texel_size = 2.0 / vec2( textureSize(shadow_map,0) );
+
+		float rots=PI2/float(SHADOW_SAMPLES);
+		float dims=0.5/float(SHADOW_SAMPLES);
+		float ac=0.0;
+		for(int ia=0;ia<int(SHADOW_SAMPLES);ia++)
 		{
-float y=0.0;
-//			for(int y = -1; y <= 1; y++)
-			{
-//				ha+=PI2/9.0; // 9 steps
-//				vec2 rr=vec2(sin(ha),cos(ha))*0.5;
-//				vec2 rr = vec2( random2d(vv.xy)-0.5 , random2d(vv.yx)-0.5 );
-vec2 rr=hp;
-				shadow_tmp = texture(shadow_map, shadow_uv.xy + ((vec2(float(x),float(y))+rr)*shadow_texel_size) ).r ;
-				shadow_add += shadow_tmp;
-				shadow_min = min( shadow_min ,  shadow_tmp );
-			}
+			float fa=float(ia);
+			float r=ha+fa*rots;
+			vec2 rr=vec2(sin(r),cos(r))*(1.0-fa*dims);
+
+			shadow_tmp = texture(shadow_map, shadow_uv.xy + rr*shadow_texel_size ).r ;
+			shadow_add += shadow_tmp;
+			shadow_min = min( shadow_min ,  shadow_tmp );
 		}
 		shadow_value = max( shadow_value , smoothstep(	shadow[1] ,	shadow[2] ,
 			shadow_uv.z - mix( shadow_min , shadow_add/9.0 , abs( shadow_uv.w ) ) ) );
@@ -428,7 +425,16 @@ void main(void)
 	vec3 m = texture(tex0, v_texcoord).rgb ;
 	float s = texture(tex1, v_texcoord).r ;
 
+#ifdef SHADOW_POW
+
+	float ss=(clamp(s,0.0,1.0)-0.5)*2.0; // shadow is encoded such that 0.5 is neutral
+	float sp=ss<0.0 ? float(SHADOW_POW) : float(LIGHT_POW) ;
+	s=((1.0-pow(1.0-abs(ss),sp))*0.5*sign(ss))+0.5 ;
+	
+#endif
+
 	s = min( 1.0 , (s*2.0) ); // do not bloom in shadows
+
 
 	FragColor=vec4( pow( m*s , vec3(4.0) ) , 1.0 );
 

@@ -48,6 +48,8 @@ M.bake=function(oven,screen)
 -- all shaders
 
 		zone_screen={
+			SHADOW_POW=1/2,
+			LIGHT_POW=1/4,
 		},
 
 -- named shaders
@@ -55,16 +57,14 @@ M.bake=function(oven,screen)
 		zone_screen_draw={
 			GAMMA=1.5,
 			COLOR_POW=1,
-			SHADOW_POW=1/2,
-			LIGHT_POW=1/4,
 			BLOOM_MUL=1,
 		},
 		
 		zone_screen_build_occlusion={
 			AO_SIZE=1/8,
 			AO_WIDTH=1,
-			AO_STEPS=1,
-			AO_ANGLES=6,
+			AO_SAMPLES=6,
+			SHADOW_SAMPLES=6,
 --			SHADOW=" 0.0 , 0.0 , 0.0 , 0.0 ",
 		},
 		
