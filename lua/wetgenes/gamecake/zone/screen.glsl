@@ -395,7 +395,7 @@ uniform mat4 projection;
 uniform vec4 color;
 
 uniform sampler2D tex0;
-//uniform sampler2D tex1;
+uniform sampler2D tex1;
 
 uniform mat4 inverse_projection;
 
@@ -426,15 +426,11 @@ void main(void)
 //	const vec3 one=vec3(1.0);
 //	FragColor=vec4( one-pow( one-texture(tex,v_texcoord).rgb , vec3(1.0/4.0) ) , 1.0 );
 	vec3 m = texture(tex0, v_texcoord).rgb ;
-//	float s = texture(tex1, v_texcoord).r ;
+	float s = texture(tex1, v_texcoord).r ;
 
-//	s = ( smoothstep( 0.0 , 0.5 , s )*2.0 + (1.0 - pow( (1.0-s) , 3.0 ) )*1.0 ) / 3.0;
+	s = min( 1.0 , (s*2.0) ); // do not bloom in shadows
 
-//	m = smoothstep( 0.5 , 1.0 , m );
-//	float n=min(min(m.r,m.g),m.b);
-//	m.rgb = vec3(n);
-
-	FragColor=vec4( pow( m , vec3(4.0) ) , 1.0 );
+	FragColor=vec4( pow( m*s , vec3(4.0) ) , 1.0 );
 
 }
 
