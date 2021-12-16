@@ -107,8 +107,8 @@ void main(void)
 {
 	vec3 m = texture(tex0, v_texcoord).rgb ;
 	vec4 s4 = texture(tex1, v_texcoord).rgba ;
-	float s=s4.r;
 	vec3 b = texture(tex2, v_texcoord).rgb ;
+	float s=s4.a;
 
 	
 #ifdef COLOR_FIX
@@ -116,27 +116,15 @@ void main(void)
 #endif
 
 #ifdef SHADOW_FIX
-//	s=SHADOW_FIX;
+	s=SHADOW_FIX;
 #endif
 
 #ifdef BLOOM_FIX
 	b=BLOOM_FIX;
 #endif
 
-
-
-#ifdef COLOR_POW
-	m=pow(m,vec3(float(COLOR_POW)));
-#endif
-#ifdef SHADOW_POW
-
-	float ss=(clamp(s,0.0,1.0)-0.5)*2.0; // shadow is encoded such that 0.5 is neutral
-	float sp=ss<0.0 ? float(SHADOW_POW) : float(LIGHT_POW) ;
-	s=((1.0-pow(1.0-abs(ss),sp))*0.5*sign(ss))+0.5 ;
-
-#endif
-#ifdef BLOOM_MUL
-	b*=float(BLOOM_MUL);
+#ifdef BLOOM_SCALE
+	b*=float(BLOOM_SCALE);
 #endif
 
 	vec3 c;
@@ -169,7 +157,7 @@ void main(void)
 
 #elif TWEAK==6
 
-	c= s4.gba ;
+	c= s4.xyz ;
 
 #endif
 
@@ -383,13 +371,21 @@ void main(void)
 #else
 	float s=1.0;
 #endif
+#ifdef SHADOW_SCALE
+	s=clamp( (1.0-((1.0-s)*float(SHADOW_SCALE))) ,0.0,1.0);
+#endif
 
 	float t=ambient_occlusion(v_texcoord,nrm);
-	s=1.0;
-	
-	FragColor=vec4( s*t, vec3(0.5)+(nrm.xyz*0.5) );
-//	FragColor=vec4( s*t , 0.0 , 0.0 , 0.0 );
 
+#ifdef AO_CLIP
+	t=min(1.0,t/float(AO_CLIP));
+#endif
+#ifdef AO_SCALE
+	t=clamp( (1.0-((1.0-t)*float(AO_SCALE))) ,0.0,1.0);
+#endif
+	
+	FragColor=vec4( vec3(0.5)+(nrm.xyz*0.5) , s*t );
+	
 }
 
 #endif
@@ -445,24 +441,9 @@ out vec4 FragColor;
 
 void main(void)
 {
-//	const vec3 one=vec3(1.0);
-//	FragColor=vec4( one-pow( one-texture(tex,v_texcoord).rgb , vec3(1.0/4.0) ) , 1.0 );
 	vec3 m = texture(tex0, v_texcoord).rgb ;
-	float s = texture(tex1, v_texcoord).r ;
-
-#ifdef SHADOW_POW
-
-	float ss=(clamp(s,0.0,1.0)-0.5)*2.0; // shadow is encoded such that 0.5 is neutral
-	float sp=ss<0.0 ? float(SHADOW_POW) : float(LIGHT_POW) ;
-	s=((1.0-pow(1.0-abs(ss),sp))*0.5*sign(ss))+0.5 ;
-	
-#endif
-
-	s = min( 1.0 , (s*2.0) ); // do not bloom in shadows
-
-
+	float s = texture(tex1, v_texcoord).a ;
 	FragColor=vec4( pow( m*s , vec3(4.0) ) , 1.0 );
-
 }
 
 #endif

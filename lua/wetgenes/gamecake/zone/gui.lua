@@ -35,24 +35,24 @@ gui.data_setup=function()
 		screen.shader_qs.zone_screen_draw.GAMMA=it:value()
 	end
 
-	datas.new({id="screen_color",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.COLOR_POW,min=0,max=4,step=0.01})
-	gui.value["screen_color"]=function(it)
-		screen.shader_qs.zone_screen_draw.COLOR_POW=it:value()
+	datas.new({id="shadow_scale",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SCALE,min=0.00,max=2,step=0.01})
+	gui.value["shadow_scale"]=function(it)
+		screen.shader_qs.zone_screen_build_occlusion.SHADOW_SCALE=it:value()
 	end
 
-	datas.new({id="screen_shadow",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen.SHADOW_POW,min=0.01,max=8,step=0.01})
-	gui.value["screen_shadow"]=function(it)
-		screen.shader_qs.zone_screen.SHADOW_POW=it:value()
+	datas.new({id="ao_scale",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_SCALE,min=0.00,max=2,step=0.01})
+	gui.value["ao_scale"]=function(it)
+		screen.shader_qs.zone_screen_build_occlusion.AO_SCALE=it:value()
 	end
 
-	datas.new({id="screen_light",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen.LIGHT_POW,min=0.01,max=8,step=0.01})
-	gui.value["screen_light"]=function(it)
-		screen.shader_qs.zone_screen.LIGHT_POW=it:value()
+	datas.new({id="ao_clip",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_CLIP,min=0.00,max=1,step=0.01})
+	gui.value["ao_clip"]=function(it)
+		screen.shader_qs.zone_screen_build_occlusion.AO_CLIP=it:value()
 	end
 
-	datas.new({id="screen_bloom",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.BLOOM_MUL,min=0,max=4,step=0.01})
-	gui.value["screen_bloom"]=function(it)
-		screen.shader_qs.zone_screen_draw.BLOOM_MUL=it:value()
+	datas.new({id="bloom_scale",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_draw.BLOOM_SCALE,min=0,max=4,step=0.01})
+	gui.value["bloom_scale"]=function(it)
+		screen.shader_qs.zone_screen_draw.BLOOM_SCALE=it:value()
 	end
 
 
@@ -216,15 +216,14 @@ gui.plan_windows=function()
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_scale"),color=0})
 	def.add(canvas,{text="Screen Gamma"})
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_gamma"),color=0})
-	def.add(canvas,{text="Screen Color"})
-	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_color"),color=0})
-	def.add(canvas,{text="Screen Shadow"})
-	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_shadow"),color=0})
-	def.add(canvas,{text="Screen Light"})
-	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_light"),color=0})
-	def.add(canvas,{text="Screen Bloom"})
-	def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_bloom"),color=0})
-
+	def.add(canvas,{text="Bloom Scale"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("bloom_scale"),color=0})
+	def.add(canvas,{text="Shadow Scale"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_scale"),color=0})
+	def.add(canvas,{text="AO Scale"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_scale"),color=0})
+	def.add(canvas,{text="AO Clip"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_clip"),color=0})
 	def.add(canvas,{text="AO Size"})
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_size"),color=0})
 	def.add(canvas,{text="AO Samples"})
