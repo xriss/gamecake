@@ -53,7 +53,7 @@ M.bake=function(oven,screen)
 -- named shaders
 
 		zone_screen_draw={
-			GAMMA=1.5,
+			GAMMA=1.0,
 			BLOOM_SCALE=1,
 --			TWEAK=0,
 		},
