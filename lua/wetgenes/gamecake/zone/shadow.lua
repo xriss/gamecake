@@ -82,9 +82,9 @@ M.bake=function(oven,shadow)
 
 			local s=256 -- 40*shadow.mapsize/1024
 			local sd=1024
-			local x=(camera.mtx[13])*-1/s	-- swap z/y as rotation
-			local y=(camera.mtx[15])*-1/s
-			local z=(camera.mtx[14])*-1/s
+			local x=(math.floor(camera.pos[1]))*-1/s	-- swap z/y as rotation
+			local y=(math.floor(camera.pos[3]))*-1/s
+			local z=(math.floor(camera.pos[2]))*-1/s
 			
 			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..0.000000*s/sd..","..0.000008*s/sd..",0.0"
 

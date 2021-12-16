@@ -319,7 +319,6 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 {
 
 	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
-//	vec2 aspect=vec2( texel_size.y/texel_size.x , 1.0 );
 	vec2 vp=vv*texel_size; // each unit is a pixel
 	vec2 hp=((fract(vp/4.0)-0.5)*4.0); // a hash unit start vector
 	float ha=atan(hp.y,hp.x);
@@ -329,22 +328,14 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 	vec4 shadow_uv = shadow_mtx * camera * vec4(v,1.0) ;
 	shadow_uv = (shadow_uv/shadow_uv.w) * 0.5 + 0.5;
 
-	// this should be 1.0 - surface normal dot light normal so we can adjust type of shadow
-	vec3 shadow_nrm = normalize( shadow_mtx[2].xyz );
-	vec3 surface_nrm = normalize( mat3(camera) * nrm );
-	float shadow_angle=1.0-abs( dot( shadow_nrm , surface_nrm ) );
-	
 	const vec4 shadow=vec4(SHADOW);
 
 	float shadow_value = 0.0; // max( 0.0 , shadow_uv.w );
 
 	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) && (shadow_uv.z > 0.0) && (shadow_uv.z < 1.0) )
 	{
-		float shadow_tmp=0.0;
 		float shadow_add=0.0;
-		float shadow_min=1.0;
 		vec2 shadow_texel_size = 2.0 / vec2( textureSize(shadow_map,0) );
-
 		float rots=PI2/float(SHADOW_SAMPLES);
 		float dims=0.5/float(SHADOW_SAMPLES);
 		float ac=0.0;
@@ -353,13 +344,10 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 			float fa=float(ia);
 			float r=ha+fa*rots;
 			vec2 rr=vec2(sin(r),cos(r))*(1.0-fa*dims);
-
-			shadow_tmp = texture(shadow_map, shadow_uv.xy + rr*shadow_texel_size ).r ;
-			shadow_add += shadow_tmp;
-			shadow_min = min( shadow_min ,  shadow_tmp );
+			shadow_add += texture(shadow_map, shadow_uv.xy + rr*shadow_texel_size ).r ;
 		}
 		shadow_value = max( shadow_value , smoothstep(	shadow[1] ,	shadow[2] ,
-			shadow_uv.z - mix( shadow_min , shadow_add/float(SHADOW_SAMPLES) , shadow_angle ) ) );
+			shadow_uv.z - (shadow_add/float(SHADOW_SAMPLES)) ) );
 	}
 	return ( (1.0-shadow_value)*shadow[0] + (1.0-shadow[0]) ) ;
 }
