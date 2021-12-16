@@ -328,7 +328,11 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 
 	vec4 shadow_uv = shadow_mtx * camera * vec4(v,1.0) ;
 	shadow_uv = (shadow_uv/shadow_uv.w) * 0.5 + 0.5;
-	shadow_uv.w=0.0; // this should be normal into the light so we can adjust type of shadow
+
+	// this should be 1.0 - surface normal dot light normal so we can adjust type of shadow
+	vec3 shadow_nrm = normalize( shadow_mtx[2].xyz );
+	vec3 surface_nrm = normalize( mat3(camera) * nrm );
+	float shadow_angle=1.0-abs( dot( shadow_nrm , surface_nrm ) );
 	
 	const vec4 shadow=vec4(SHADOW);
 
@@ -355,9 +359,8 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 			shadow_min = min( shadow_min ,  shadow_tmp );
 		}
 		shadow_value = max( shadow_value , smoothstep(	shadow[1] ,	shadow[2] ,
-			shadow_uv.z - mix( shadow_min , shadow_add/9.0 , abs( shadow_uv.w ) ) ) );
+			shadow_uv.z - mix( shadow_min , shadow_add/float(SHADOW_SAMPLES) , shadow_angle ) ) );
 	}
-//	return	1.0-shadow_value;
 	return ( (1.0-shadow_value)*shadow[0] + (1.0-shadow[0]) ) ;
 }
 #endif
