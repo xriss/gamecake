@@ -67,14 +67,9 @@ gui.data_setup=function()
 		screen.base_scale=math.pow(2.0,it:value())
 	end
 
-	datas.new({id="ao_size",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_SIZE,min=0.001,max=0.250,step=0.001})
+	datas.new({id="ao_size",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_SIZE,min=0.01,max=0.5,step=0.01})
 	gui.value["ao_size"]=function(it)
 		screen.shader_qs.zone_screen_build_occlusion.AO_SIZE=it:value()
-	end
-
-	datas.new({id="ao_width",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_WIDTH,min=1,max=8,step=0.1})
-	gui.value["ao_width"]=function(it)
-		screen.shader_qs.zone_screen_build_occlusion.AO_WIDTH=it:value()
 	end
 
 	datas.new({id="ao_samples",class="number",hooks=gui.hooks,num=screen.shader_qs.zone_screen_build_occlusion.AO_SAMPLES,min=1,max=64,step=1})
@@ -232,8 +227,6 @@ gui.plan_windows=function()
 
 	def.add(canvas,{text="AO Size"})
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_size"),color=0})
-	def.add(canvas,{text="AO Width"})
-	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_width"),color=0})
 	def.add(canvas,{text="AO Samples"})
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_samples"),color=0})
 	def.add(canvas,{text="Shadow Samples"})

@@ -106,7 +106,8 @@ out vec4 FragColor;
 void main(void)
 {
 	vec3 m = texture(tex0, v_texcoord).rgb ;
-	float s = texture(tex1, v_texcoord).r ;
+	vec4 s4 = texture(tex1, v_texcoord).rgba ;
+	float s=s4.r;
 	vec3 b = texture(tex2, v_texcoord).rgb ;
 
 	
@@ -165,6 +166,10 @@ void main(void)
 #elif TWEAK==5
 
 	c= m + b ;
+
+#elif TWEAK==6
+
+	c= s4.gba ;
 
 #endif
 
@@ -270,9 +275,24 @@ float pows(float s,float p)
 	return s<0.0 ? -pow(-s,p) : pow(s,p) ;
 }
 
-float ambient_occlusion( vec2 vv )
+vec3 reconstruct_normal( vec2 vv )
 {
+	vec2 oo_texel_size = vec2(1.0) / vec2( textureSize(tex,0) );
+	vec3 p0=depth_to_view( vv );
+	vec3 p1=depth_to_view( vv+ vec2(-oo_texel_size.x , 0.0 ) );
+	vec3 p2=depth_to_view( vv+ vec2( oo_texel_size.x , 0.0 ) );
+	vec3 p3=depth_to_view( vv+ vec2( 0.0             ,-oo_texel_size.y) );
+	vec3 p4=depth_to_view( vv+ vec2( 0.0             , oo_texel_size.y) );
+	
+	vec3 c1,c2;	
+	if( abs(p1.z-p0.z) < abs(p2.z-p0.z) ) { c1=p1-p0; } else { c1=p0-p2; }
+	if( abs(p3.z-p0.z) < abs(p4.z-p0.z) ) { c2=p3-p0; } else { c2=p0-p4; }
 
+	return normalize( cross( c2 , c1 ) ) ;
+}
+
+float ambient_occlusion( vec2 vv , vec3 nrm )
+{
 	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
 	vec2 aspect=vec2( texel_size.y/texel_size.x , 1.0 );
 	vec2 vp=vv*texel_size; // each unit is a pixel
@@ -280,11 +300,9 @@ float ambient_occlusion( vec2 vv )
 	float ha=atan(hp.y,hp.x);
 
 	float slen=float(AO_SIZE);
-	
 
 	vec3 p1=depth_to_view( vv );
-	vec3 p2=view_to_depth( p1+(vec3(slen,slen,0.0)*float(AO_WIDTH)) );
-
+	vec3 p2=view_to_depth( p1+(vec3(slen,slen,0.0)) );
 	float dlen=length(p2.xy-vv.xy); // scale needed to adjust to depth
 
 	float rots=PI2/float(AO_SAMPLES);
@@ -296,7 +314,8 @@ float ambient_occlusion( vec2 vv )
 		float r=ha+fa*rots;
 		vec2 cc=vec2(sin(r),cos(r))*aspect*dlen*(1.0-fa*dims);
 		vec3 ss=depth_to_view(cc+vv);
-		ac+=1.0-smoothstep( p1.z - slen , p1.z + slen , ss.z );
+		float zz=p1.z;
+		ac+=1.0-smoothstep( zz - slen , zz + slen , ss.z );
 	}
 	return (ac/float(AO_SAMPLES));
 
@@ -308,7 +327,7 @@ uniform mat4 camera;
 uniform mat4 shadow_mtx;
 uniform sampler2D shadow_map;
 
-float shadow_occlusion( vec2 vv )
+float shadow_occlusion( vec2 vv , vec3 nrm )
 {
 
 	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
@@ -357,13 +376,19 @@ float shadow_occlusion( vec2 vv )
 
 void main(void)
 {
+	vec3 nrm=reconstruct_normal(v_texcoord);
+
 #ifdef SHADOW
-	float s=shadow_occlusion(v_texcoord);
+	float s=shadow_occlusion(v_texcoord,nrm);
 #else
 	float s=1.0;
 #endif
-	float t=ambient_occlusion(v_texcoord);
-	FragColor=vec4( s*t, 1.0 , 1.0 , 1.0 );
+
+	float t=ambient_occlusion(v_texcoord,nrm);
+	s=1.0;
+	
+	FragColor=vec4( s*t, vec3(0.5)+(nrm.xyz*0.5) );
+//	FragColor=vec4( s*t , 0.0 , 0.0 , 0.0 );
 
 }
 

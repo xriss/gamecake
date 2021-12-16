@@ -58,11 +58,11 @@ M.bake=function(oven,screen)
 			GAMMA=1.5,
 			COLOR_POW=1,
 			BLOOM_MUL=1,
+			TWEAK=0,
 		},
 		
 		zone_screen_build_occlusion={
 			AO_SIZE=1/8,
-			AO_WIDTH=1,
 			AO_SAMPLES=6,
 			SHADOW_SAMPLES=6,
 --			SHADOW=" 0.0 , 0.0 , 0.0 , 0.0 ",
@@ -217,6 +217,10 @@ M.bake=function(oven,screen)
 	screen.draw=function(scene)
 
 		gl.PushMatrix()
+		gl.state.push(gl.state_defaults)
+		gl.state.set({
+			[gl.BLEND]					=	gl.FALSE,
+		})
 
 		local t={
 			-1,	 1,	0,	0,	1,
@@ -248,6 +252,7 @@ M.bake=function(oven,screen)
 
 		end)
 
+		gl.state.pop()
 		gl.PopMatrix()
 
 	end
@@ -256,6 +261,10 @@ M.bake=function(oven,screen)
 	screen.draw_test=function()
 
 		gl.PushMatrix()
+		gl.state.push(gl.state_defaults)
+		gl.state.set({
+			[gl.BLEND]					=	gl.FALSE,
+		})
 
 		local t={
 			0,	1,	0,	0,	1,
@@ -278,6 +287,7 @@ M.bake=function(oven,screen)
 
 		end)
 
+		gl.state.pop()
 		gl.PopMatrix()
 
 	end
@@ -297,6 +307,9 @@ M.bake=function(oven,screen)
 		gl.PushMatrix()
 		oven.cake.views.push_and_apply(screen.view_occlusion)
 		gl.state.push(gl.state_defaults)
+		gl.state.set({
+			[gl.BLEND]					=	gl.FALSE,
+		})
 
 		screen.fbo_occlusion:bind_frame()
 		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_occlusion"),function(p)
@@ -356,6 +369,9 @@ M.bake=function(oven,screen)
 		gl.PushMatrix()
 		oven.cake.views.push_and_apply(screen.view_bloom)
 		gl.state.push(gl.state_defaults)
+		gl.state.set({
+			[gl.BLEND]					=	gl.FALSE,
+		})
 
 		screen.fbo_bloom:bind_frame()
 --		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_bloom_pick",function(p)
