@@ -68,7 +68,7 @@ B.sky.draw=function(sky)
 		gl.UniformMatrix4f(p:uniform("inverse_modelview"),  inverse_modelview )
 		gl.UniformMatrix4f(p:uniform("inverse_projection"), inverse_projection )
 
-		gl.Uniform4f( p:uniform("sun") , math.pi*2*(((sky.time)/60)%1) , -(120/360)*math.pi*2 , 0.050 , 0.150 )
+--		gl.Uniform4f( p:uniform("sun") , 0.0 , 0.0 , 0.95 , 1.00 )
 	end)
 
 	gl.state.pop()

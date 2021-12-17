@@ -24,6 +24,8 @@ M.bake=function(oven,shadow)
 
 	shadow.mtx=M4()
 
+	shadow.light=V3() -- the normal of the light casting the shadow
+
 	shadow.mapsize=2048*2
 
 	shadow.loads=function()
@@ -56,6 +58,9 @@ M.bake=function(oven,shadow)
 			gl.UniformMatrix4f( u,  shadow.mtx )
 		end
 
+		gl.uniforms.shadow_light=function(u)
+			gl.Uniform3f( u,  shadow.light )
+		end
 
 	end
 	
@@ -88,26 +93,41 @@ M.bake=function(oven,shadow)
 			
 			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..0.000000*s/sd..","..0.000008*s/sd..",0.0"
 
-			shadow.mtx=M4{
-				1/s,		0,			0,			0,
-				0,			0,			1/s,		0,
-				0,			1/s,		0,			0,
-				0,			0,			0,			1,
-			}
-			local r=360*(((sky.time)/60)%1)
-			if r>180 and r<360 then
-				r = 90 + r
-			else
-				r = 90 + 360-r
+			local r=( 360*(((sky.time)/60)%1) ) % 360
+
+			-- bounce on horizon
+			if r>180 then
+				r = 360-r
 			end
 
-			if r < 90+180+6 then r=90+180+6 end
-			if r > 90+360-6 then r=90+360-6 end
+			local  calculate_matrix=function()
+				shadow.mtx=M4{
+					1/s,		0,			0,			0,
+					0,			0,			1/s,		0,
+					0,			1/s,		0,			0,
+					0,			0,			0,			1,
+				}
+				shadow.mtx:pretranslate(x,y,z)
+				shadow.mtx:rotate( 35 , 1,0,0 ) -- hemasphere
+				shadow.mtx:rotate( -90 + r ,  0,0,1 ) -- time of day
+				shadow.mtx:prescale(1,1,1/sd)
+			end
+			
+			-- calculate light matrix
+			calculate_matrix()
 
-			shadow.mtx:pretranslate(x,y,z)
-			shadow.mtx:rotate( 120 , 0,1,0 ) -- eastwest ish
-			shadow.mtx:prerotate( r , -1,0,0 ) -- time of day
-			shadow.mtx:prescale(1,1,1/sd)
+			-- remember light normal
+			shadow.light[1]=-shadow.mtx[3]
+			shadow.light[2]=-shadow.mtx[7]
+			shadow.light[3]=-shadow.mtx[11]
+			shadow.light:normalize()
+
+			-- keep 6 deg above horizon so we dont get bad long shadows
+			if r < 6 then r=6 end
+			if r > 180-6 then r=180-6 end
+
+			-- calculate shadow matrix
+			calculate_matrix()
 
 			gl.MatrixMode(gl.PROJECTION)
 			gl.LoadMatrix( shadow.mtx )
