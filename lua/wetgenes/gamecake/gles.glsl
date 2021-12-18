@@ -146,6 +146,7 @@ IN float a_matidx;
 #endif
 
 #ifdef NORMAL
+uniform mat4 camera;
 IN vec4  a_normal;
 #endif
 
@@ -350,7 +351,7 @@ void main(void)
 #endif
 
 #ifdef NORMAL
-	v_normal = normalize( mat3( modelview ) * n );
+	v_normal = normalize( mat3( camera * modelview ) * n );
 #endif
 
 #ifdef COLOR
@@ -415,7 +416,7 @@ void main(void)
 #ifdef TEXNTOON
 
 	vec3 n=normalize(v_normal);
-	vec3 s=normalize( mat3( modelview ) * shadow_light.xyz );
+	vec3 s=shadow_light.xyz;
 	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	vec2 uv=clamp( v_texcoord + vec2( pow( l , 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
 
@@ -450,7 +451,7 @@ void main(void)
 #ifdef NTOON
 
 	vec3 n=normalize(v_normal);
-	vec3 s=normalize( mat3( modelview ) * shadow_light.xyz );
+	vec3 s=shadow_light.xyz;
 	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	FragColor= vec4(  c1.rgb*(NTOON+(l*(1.0-NTOON))) , c1.a ); 
 
@@ -458,7 +459,7 @@ void main(void)
 
 #ifdef LIGHT
 	vec3 n=normalize( v_normal );
-	vec3 s=normalize( mat3( modelview ) * shadow_light.xyz );
+	vec3 s=shadow_light.xyz;
 	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	
 	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) + 
@@ -467,7 +468,7 @@ void main(void)
 
 #ifdef PHONG
 	vec3 n=normalize(v_normal);
-	vec3 s=normalize( mat3( modelview ) * shadow_light.xyz );
+	vec3 s=shadow_light.xyz;
 	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) + 
 						(c2.rgb * pow( max( l , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
