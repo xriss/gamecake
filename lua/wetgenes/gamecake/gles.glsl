@@ -96,20 +96,20 @@ uniform vec4 bone_fix; // min,max,0,0 (bone ids stored in bones array)
 #endif
 
 #ifdef LIGHT
-uniform vec3  shadow_light;
+uniform vec4  shadow_light;
 uniform vec4  light_color;
 #endif
 
 #ifdef PHONG
-uniform vec3  shadow_light;
+uniform vec4  shadow_light;
 #endif
 
 #ifdef NTOON
-uniform vec3  shadow_light;
+uniform vec4  shadow_light;
 #endif
 
 #ifdef TEXNTOON
-uniform vec3  shadow_light;
+uniform vec4  shadow_light;
 #endif
 
 #header "gamecake_shader_vertex"
@@ -415,8 +415,8 @@ void main(void)
 #ifdef TEXNTOON
 
 	vec3 n=normalize(v_normal);
-	vec3 s=normalize( mat3( modelview ) * shadow_light );
-	float l=max( 0.0, dot(n,s) );
+	vec3 s=normalize( mat3( modelview ) * shadow_light.xyz );
+	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	vec2 uv=clamp( v_texcoord + vec2( pow( l , 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
 
 	FragColor = texture(tex, uv ).rgba;
@@ -450,24 +450,25 @@ void main(void)
 #ifdef NTOON
 
 	vec3 n=normalize(v_normal);
-	vec3 s=normalize( mat3( modelview ) * shadow_light );
-	float l=max( 0.0, dot(n,s) );
+	vec3 s=normalize( mat3( modelview ) * shadow_light.xyz );
+	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	FragColor= vec4(  c1.rgb*(NTOON+(l*(1.0-NTOON))) , c1.a ); 
 
 #endif
 
 #ifdef LIGHT
 	vec3 n=normalize( v_normal );
-	vec3 l=normalize( mat3( modelview ) * shadow_light );
+	vec3 s=normalize( mat3( modelview ) * shadow_light.xyz );
+	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	
-	FragColor= vec4(  c1.rgb *         max( dot(n,l) , 0.25 ) + 
-						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
+	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) + 
+						(c2.rgb * pow( max( l , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif
 
 #ifdef PHONG
 	vec3 n=normalize(v_normal);
-	vec3 s=normalize( mat3( modelview ) * shadow_light );
-	float l=max( 0.0, dot(n,s) );
+	vec3 s=normalize( mat3( modelview ) * shadow_light.xyz );
+	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) + 
 						(c2.rgb * pow( max( l , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif

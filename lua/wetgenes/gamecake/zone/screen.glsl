@@ -198,6 +198,8 @@ precision mediump float;
 #endif
 #endif
   
+uniform vec4 shadow_light; // normal of light, IE position of sun and power in W
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -334,7 +336,9 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 
 	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) && (shadow_uv.z > 0.0) && (shadow_uv.z < 1.0) )
 	{
+//		float shadow_min=1.0;
 		float shadow_add=0.0;
+		float shadow_tmp=0.0;
 		vec2 shadow_texel_size = 2.0 / vec2( textureSize(shadow_map,0) );
 		float rots=PI2/float(SHADOW_SAMPLES);
 		float dims=0.5/float(SHADOW_SAMPLES);
@@ -344,12 +348,14 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 			float fa=float(ia);
 			float r=ha+fa*rots;
 			vec2 rr=vec2(sin(r),cos(r))*(1.0-fa*dims);
-			shadow_add += texture(shadow_map, shadow_uv.xy + rr*shadow_texel_size ).r ;
+			shadow_tmp = texture(shadow_map, shadow_uv.xy + rr*shadow_texel_size ).r ;
+			shadow_add += shadow_tmp ;
+//			shadow_min = min( shadow_min , shadow_tmp );
 		}
 		shadow_value = max( shadow_value , smoothstep(	shadow[1] ,	shadow[2] ,
-			shadow_uv.z - (shadow_add/float(SHADOW_SAMPLES)) ) );
+			shadow_uv.z - (shadow_add/float(SHADOW_SAMPLES))  ) );
 	}
-	return ( (1.0-shadow_value)*shadow[0] + (1.0-shadow[0]) ) ;
+	return ( ((1.0-shadow_value)*shadow_light.w)*shadow[0] + (1.0-shadow[0]) ) ;
 }
 #endif
 

@@ -1,8 +1,9 @@
 
 #header "sky_function"
 
-uniform vec3 shadow_light; // normal of light, IE position of sun
-//uniform vec4 sun;
+uniform vec4 shadow_light; // normal of light, IE position of sun and power in W
+uniform vec3 sun;
+uniform vec3 moon;
 
 #define PI 3.1415926538
 #define PI2 (2.0*PI)
@@ -24,27 +25,26 @@ vec3 qrot(vec3 v, vec4 q) {
 
 vec4 sky(vec3 eye, vec4 blend)
 {
-	float sunc=dot(eye,shadow_light);
-//	vec4 r=qset(sun[1],vec3(0.0,-1.0,0.0));
-//	vec3 e=qrot(eye,r);
+	float sunc=dot(eye,sun);
+	float moonc=dot(eye,moon);
 	
-	float daynight=0.0;//0.5 + shadow_light.y*0.5 ; //sin(sun[0]);
+	float daynight=smoothstep( -0.1 , 0.1 , sun.y );
 
 	vec3 color_sky=mix(     vec3( 0.0 , 0.2 , 0.7 ) , vec3( 0.0 , 0.0 , 0.1 ) , daynight );
-	vec3 color_horizon=mix( vec3( 0.2 , 0.2 , 0.5 ) , vec3( 0.0 , 0.0 , 0.4 ) , daynight );
+	vec3 color_horizon=mix( vec3( 0.2 , 0.2 , 0.5 ) , vec3( 0.0 , 0.0 , 0.2 ) , daynight );
 	vec3 color_floor=mix(   vec3( 0.0 , 0.0 , 0.0 ) , vec3( 0.0 , 0.0 , 0.0 ) , daynight );
 	vec3 color_sun=vec3( 1.0 , 0.8 , 0.4 );
+	vec3 color_moon=vec3( 0.75 , 0.75 , 0.75 );
 
 	vec3 color=color_horizon;
 	color=mix( color , color_sky   , pow( smoothstep(0.0,1.0, -eye.y) , 1.0 ) );
 	color=mix( color , color_floor , pow( smoothstep(0.0,0.1,  eye.y) , 1.0 ) );
+	color=color*blend[1];
+	
+	color=mix( color , color_sun*blend[0]  , smoothstep( 0.950 , 1.000 , sunc  ) );
+	color=mix( color , color_moon*blend[0] , smoothstep( 0.990 , 0.991 , moonc ) );
 
-//	vec2 ang=mod( vec2( asin(e.x)+PI , atan(e.y,e.z)+PI-(sun[0]) ) , PI2 )-PI ;
-//    float d=( 1.0-smoothstep( sun[2] , sun[3] , length(ang) ) ) * smoothstep(-0.1,0.0,-e.y) ;
-    
-    float d=smoothstep( 0.95 , 1.00 , sunc );
-
-	return vec4( mix( color*blend[1] , color_sun*blend[0] , d ) , 1.0 );
+	return vec4( color , 1.0 );
 }
 
 

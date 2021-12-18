@@ -21,13 +21,15 @@ local gl=oven.gl
 local geom=oven.rebake("wetgenes.gamecake.spew.geom")
 local geoms=oven.rebake("wetgenes.gamecake.spew.geoms")
 
+local shadow=oven.rebake("wetgenes.gamecake.zone.shadow")
+
 
 B.system=function(sky)
 
 	setmetatable(sky,B.sky_metatable)
 
 	sky.caste="sky"
-	sky.time_frac=35*24
+	sky.time_frac=45
 	sky.time=math.floor(0.5+sky.time_frac)
 
 	sky.RND=math.random()
@@ -36,8 +38,8 @@ B.system=function(sky)
 end
 
 B.sky.update=function(sky)
-	sky.time_frac=sky.time_frac+(1/60)
-	sky.time=math.floor(0.5+sky.time_frac)/24
+	sky.time_frac=(sky.time_frac+(1/60) ) % (360)
+	sky.time=math.floor(0.5+sky.time_frac)
 end
 
 B.sky.draw=function(sky)
@@ -68,7 +70,8 @@ B.sky.draw=function(sky)
 		gl.UniformMatrix4f(p:uniform("inverse_modelview"),  inverse_modelview )
 		gl.UniformMatrix4f(p:uniform("inverse_projection"), inverse_projection )
 
---		gl.Uniform4f( p:uniform("sun") , 0.0 , 0.0 , 0.95 , 1.00 )
+		gl.Uniform3f( p:uniform("sun") , shadow.sun )
+		gl.Uniform3f( p:uniform("moon") , shadow.moon )
 	end)
 
 	gl.state.pop()

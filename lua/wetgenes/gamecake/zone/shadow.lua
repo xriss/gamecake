@@ -22,9 +22,13 @@ M.bake=function(oven,shadow)
 
 	local screen=oven.rebake("wetgenes.gamecake.zone.screen")
 
-	shadow.mtx=M4()
+	shadow.mtx=M4() -- the transform matrix to render from the lights point of view
 
-	shadow.light=V3() -- the normal of the light casting the shadow
+	shadow.light=V3() -- the normal of the light casting the shadow (sun or moon)
+	shadow.power=1.0 -- the power of the light so we can fade out when swapping between sun and moon
+
+	shadow.sun=V3() -- the normal of the sun
+	shadow.moon=V3() -- the normal of the moon
 
 	shadow.mapsize=2048*2
 
@@ -59,7 +63,7 @@ M.bake=function(oven,shadow)
 		end
 
 		gl.uniforms.shadow_light=function(u)
-			gl.Uniform3f( u,  shadow.light )
+			gl.Uniform4f( u,  shadow.light[1] , shadow.light[2] , shadow.light[3] , shadow.power )
 		end
 
 	end
@@ -93,12 +97,8 @@ M.bake=function(oven,shadow)
 			
 			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..0.000000*s/sd..","..0.000008*s/sd..",0.0"
 
-			local r=( 360*(((sky.time)/60)%1) ) % 360
+			local r=sky.time
 
-			-- bounce on horizon
-			if r>180 then
-				r = 360-r
-			end
 
 			local  calculate_matrix=function()
 				shadow.mtx=M4{
@@ -108,23 +108,43 @@ M.bake=function(oven,shadow)
 					0,			0,			0,			1,
 				}
 				shadow.mtx:pretranslate(x,y,z)
+				shadow.mtx:prescale(1,1,1/sd)
 				shadow.mtx:rotate( 35 , 1,0,0 ) -- hemasphere
 				shadow.mtx:rotate( -90 + r ,  0,0,1 ) -- time of day
-				shadow.mtx:prescale(1,1,1/sd)
 			end
 			
 			-- calculate light matrix
 			calculate_matrix()
 
 			-- remember light normal
-			shadow.light[1]=-shadow.mtx[3]
-			shadow.light[2]=-shadow.mtx[7]
-			shadow.light[3]=-shadow.mtx[11]
-			shadow.light:normalize()
+			shadow.sun[1]=-shadow.mtx[3]
+			shadow.sun[2]=-shadow.mtx[7]
+			shadow.sun[3]=-shadow.mtx[11]
+			shadow.sun:normalize()
 
-			-- keep 6 deg above horizon so we dont get bad long shadows
-			if r < 6 then r=6 end
-			if r > 180-6 then r=180-6 end
+			shadow.mtx:rotate( 180 ,  0,0,1 ) -- time of day
+			-- remember light normal
+			shadow.moon[1]=-shadow.mtx[3]
+			shadow.moon[2]=-shadow.mtx[7]
+			shadow.moon[3]=-shadow.mtx[11]
+			shadow.moon:normalize()
+
+
+			shadow.light=V3(shadow.sun)
+			if r > 180 then -- moon or sun
+				r = r-180
+				shadow.light=V3(shadow.moon)
+			end
+			
+			shadow.power=1
+			
+			local ddd=10
+			if r < ddd then
+				shadow.power=math.pow( r/ddd , 1 )
+			end
+			if r > 180-ddd then
+				shadow.power=math.pow( (180-r)/ddd , 1 )
+			end
 
 			-- calculate shadow matrix
 			calculate_matrix()
