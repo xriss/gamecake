@@ -29,8 +29,12 @@ B.system=function(sky)
 	setmetatable(sky,B.sky_metatable)
 
 	sky.caste="sky"
+	sky.time_speed=1/60
 	sky.time_frac=45
 	sky.time=math.floor(0.5+sky.time_frac)
+
+	sky.sun=V3() -- the normal of the suns light direction
+	sky.moon=V3() -- the normal of the moons light direction
 
 	sky.RND=math.random()
 
@@ -38,7 +42,7 @@ B.system=function(sky)
 end
 
 B.sky.update=function(sky)
-	sky.time_frac=(sky.time_frac+(1/60) ) % (360)
+	sky.time_frac=(sky.time_frac+sky.time_speed ) % (360)
 	sky.time=math.floor(0.5+sky.time_frac)
 end
 
@@ -70,8 +74,8 @@ B.sky.draw=function(sky)
 		gl.UniformMatrix4f(p:uniform("inverse_modelview"),  inverse_modelview )
 		gl.UniformMatrix4f(p:uniform("inverse_projection"), inverse_projection )
 
-		gl.Uniform3f( p:uniform("sun") , shadow.sun )
-		gl.Uniform3f( p:uniform("moon") , shadow.moon )
+		gl.Uniform3f( p:uniform("sun") , sky.sun )
+		gl.Uniform3f( p:uniform("moon") , sky.moon )
 	end)
 
 	gl.state.pop()

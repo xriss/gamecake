@@ -6,7 +6,7 @@
 #ifdef VERSION_ES
 precision mediump float;
 #endif
-  
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -103,13 +103,16 @@ in vec2 v_texcoord;
 
 out vec4 FragColor;
 
+#ifdef DAYNIGHT
+uniform vec4 day_night;
+#endif
+
 void main(void)
 {
 	vec3 m = texture(tex0, v_texcoord).rgb ;
 	vec4 s4 = texture(tex1, v_texcoord).rgba ;
 	vec3 b = texture(tex2, v_texcoord).rgb ;
 	float s=s4.a;
-
 	
 #ifdef COLOR_FIX
 	m=COLOR_FIX;
@@ -167,17 +170,19 @@ void main(void)
 
 #endif
 
+#ifdef DAYNIGHT
+	c=DAYNIGHT(c,day_night);
+#endif
+
 	c=clamp(c,0.0,1.0);
 
 #ifdef GAMMA
+	c=pow(c,vec3(1.0/float( GAMMA )));
+#endif
 
-	FragColor=vec4( pow(c,vec3(1.0/float( GAMMA ))) , 1.0 );
-
-#else
 
 	FragColor=vec4( c , 1.0 );
 
-#endif
 
 }
 

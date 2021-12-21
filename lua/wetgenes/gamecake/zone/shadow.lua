@@ -27,9 +27,6 @@ M.bake=function(oven,shadow)
 	shadow.light=V3() -- the normal of the light casting the shadow (sun or moon)
 	shadow.power=1.0 -- the power of the light so we can fade out when swapping between sun and moon
 
-	shadow.sun=V3() -- the normal of the sun
-	shadow.moon=V3() -- the normal of the moon
-
 	shadow.mapsize=2048*2
 
 	shadow.loads=function()
@@ -117,34 +114,48 @@ M.bake=function(oven,shadow)
 			calculate_matrix()
 
 			-- remember light normal
-			shadow.sun[1]=-shadow.mtx[3]
-			shadow.sun[2]=-shadow.mtx[7]
-			shadow.sun[3]=-shadow.mtx[11]
-			shadow.sun:normalize()
+			sky.sun[1]=-shadow.mtx[3]
+			sky.sun[2]=-shadow.mtx[7]
+			sky.sun[3]=-shadow.mtx[11]
+			sky.sun:normalize()
 
 			shadow.mtx:rotate( 180 ,  0,0,1 ) -- time of day
 			-- remember light normal
-			shadow.moon[1]=-shadow.mtx[3]
-			shadow.moon[2]=-shadow.mtx[7]
-			shadow.moon[3]=-shadow.mtx[11]
-			shadow.moon:normalize()
+			sky.moon[1]=-shadow.mtx[3]
+			sky.moon[2]=-shadow.mtx[7]
+			sky.moon[3]=-shadow.mtx[11]
+			sky.moon:normalize()
 
 
-			shadow.light=V3(shadow.sun)
+			local ddd=10
+
+			if r<180 then
+				if r<=0+ddd then		screen.day_night[1]=0.5-0.5*(r)/ddd
+				elseif r>=180-ddd then	screen.day_night[1]=0.5-0.5*(180-r)/ddd
+				else					screen.day_night[1]=0.0
+				end
+			else
+				if r<=180+ddd then		screen.day_night[1]=0.5+0.5*(r-180)/ddd
+				elseif r>=360-ddd then	screen.day_night[1]=0.5+0.5*(360-r)/ddd
+				else					screen.day_night[1]=1.0
+				end
+			end
+
+			shadow.light=V3(sky.sun)
 			if r > 180 then -- moon or sun
 				r = r-180
-				shadow.light=V3(shadow.moon)
+				shadow.light=V3(sky.moon)
 			end
 			
 			shadow.power=1
 			
-			local ddd=10
 			if r < ddd then
-				shadow.power=math.pow( r/ddd , 1 )
+				shadow.power=r/ddd
 			end
 			if r > 180-ddd then
-				shadow.power=math.pow( (180-r)/ddd , 1 )
+				shadow.power=(180-r)/ddd
 			end
+			
 
 			-- calculate shadow matrix
 			calculate_matrix()

@@ -34,6 +34,7 @@ M.bake=function(oven,screen)
 
 	local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
+	screen.day_night=V4( 0.0 , 0.0 , 0.0 , 0.0 )
 
 	screen.loads=function()
 
@@ -53,6 +54,7 @@ M.bake=function(oven,screen)
 -- named shaders
 
 		zone_screen_draw={
+			["DAYNIGHT(rgb,daynight)"]="( (rgb) * mix( vec3(1.0,1.0,1.0) , vec3(0.5,0.5,1.0) , daynight.x ) )",
 			GAMMA=1.0,
 			BLOOM_SCALE=1,
 --			TWEAK=0,
@@ -249,6 +251,8 @@ M.bake=function(oven,screen)
 				screen.fbo_bloom:bind_texture()
 				gl.Uniform1i( p:uniform("tex2"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
+				gl.Uniform4f(p:uniform("day_night"),  screen.day_night )
 
 		end)
 
