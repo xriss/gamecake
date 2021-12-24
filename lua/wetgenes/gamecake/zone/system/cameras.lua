@@ -258,9 +258,9 @@ B.camera.update=function(camera)
 	camera.mtx:rotate( camera.rot[1] ,  1, 0, 0 )
 	camera.mtx:translate( 0,0, 0.0 + camera.dolly*camera.orbit.dolly )
 
-	if camera.floor then
-		if camera.mtx[14] > camera.floor then camera.mtx[14]=camera.floor end -- keep above ground
-	end
+--	if camera.floor then
+--		if camera.mtx[14] > camera.floor then camera.mtx[14]=camera.floor end -- keep above ground
+--	end
 	
 	local c=math.cos(math.pi*camera.rot[2]/180)
 	local s=math.sin(math.pi*camera.rot[2]/180)

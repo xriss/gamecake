@@ -344,6 +344,11 @@ void main(void)
 	gl_Position = v;
 #endif
 
+#ifdef DRAW_SHADOW_SQUISH
+	gl_Position.xy=clamp(gl_Position.xy,vec2(-1.0),vec2(1.0));
+	gl_Position.xy=(sign(gl_Position.xy)*pow(abs(gl_Position.xy),vec2(DRAW_SHADOW_SQUISH)));
+#endif
+
 #ifdef SHADOW
 	shadow_uv = ( shadow_mtx * camera * modelview * v ) ;
 	shadow_uv = vec4( ( shadow_uv.xyz / shadow_uv.w ) * 0.5 + 0.5 ,

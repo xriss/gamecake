@@ -471,9 +471,12 @@ function glescode.create(gl)
 		if params then -- query style
 			for _,d in ipairs( wstr.split(params,"&") ) do
 				local dd=wstr.split(d,"=")
-				paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
+				if dd[1] and dd[1]~="" then
+					paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
+				end
 			end
 		end
+		
 		local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
 		paramdefs=table.concat(paramdefs,"\n").."\n".."#line "..line.." //?\n"
 	
@@ -606,8 +609,17 @@ function glescode.create(gl)
 		return ret
 	end
 	
+	
+	code.program_defs={}
+	
 	function code.program(pname)
 		local p
+		
+		if not string.find(pname,"?",1,true) then pname=pname.."?" end -- makes sure it is always a query string
+
+		for n,v in pairs(code.program_defs) do -- force these query parts ( assumed to be pre escaped )
+			pname=pname.."&"..n.."="..v
+		end
 		
 		p=code.programs[pname]
 		if not p then -- try and create from headers

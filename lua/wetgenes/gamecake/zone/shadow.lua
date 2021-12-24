@@ -67,6 +67,9 @@ M.bake=function(oven,shadow)
 	
 --	shadow.default="0.0,0.0,0.0,0.0"
 	shadow.draw_head=function(scene)
+	
+-- special shadow transform to make the area around 0 more detailed
+--		gl.program_defs["DRAW_SHADOW_SQUISH"]=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SQUISH
 
 		gl.PushMatrix()
 		shadow.fbo:bind_frame()
@@ -77,7 +80,7 @@ M.bake=function(oven,shadow)
 			[gl.BLEND]						=	gl.FALSE,
 			[gl.DEPTH_TEST]					=	gl.TRUE,
 			[gl.CULL_FACE]					=	gl.TRUE,
-			[gl.FRONT_FACE]					=	gl.CW,	-- shadows are drawn upside down?
+--			[gl.FRONT_FACE]					=	gl.CW,	-- shadows are drawn upside down?
 		})
 
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
@@ -88,9 +91,9 @@ M.bake=function(oven,shadow)
 
 			local s=256 -- 40*shadow.mapsize/1024
 			local sd=1024
-			local x=(math.floor(camera.pos[1]))*-1/s	-- swap z/y as rotation
-			local y=(math.floor(camera.pos[3]))*-1/s
-			local z=(math.floor(camera.pos[2]))*-1/s
+			local x=(math.floor(camera.pos[1]))--*-1/s	-- swap z/y as rotation
+			local y=(math.floor(camera.pos[2]))--*-1/s
+			local z=(math.floor(camera.pos[3]))--*-1/s
 			
 			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..0.000000*s/sd..","..0.000008*s/sd..",0.0"
 
@@ -99,15 +102,17 @@ M.bake=function(oven,shadow)
 
 			local  calculate_matrix=function()
 				shadow.mtx=M4{
-					1/s,		0,			0,			0,
-					0,			0,			1/s,		0,
-					0,			1/s,		0,			0,
+					1,			0,			0,			0,
+					0,			1,			0,			0,
+					0,			0,			1,			0,
 					0,			0,			0,			1,
 				}
-				shadow.mtx:pretranslate(x,y,z)
-				shadow.mtx:prescale(1,1,1/sd)
+				shadow.mtx:scale(1/s,1/s,1/(sd*s))
+				shadow.mtx:rotate( 90 , 1,0,0 ) -- top down
 				shadow.mtx:rotate( 35 , 1,0,0 ) -- hemasphere
 				shadow.mtx:rotate( -90 + r ,  0,0,1 ) -- time of day
+				shadow.mtx:translate(-x,-y,-z)
+
 			end
 			
 			-- calculate light matrix
@@ -174,6 +179,9 @@ M.bake=function(oven,shadow)
 
 	shadow.draw_tail=function()
 
+-- turn off special shadow transform
+--		gl.program_defs["DRAW_SHADOW_SQUISH"]=nil
+
 		gl.state.pop()
 		oven.cake.views.pop_and_apply()
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -194,20 +202,21 @@ M.bake=function(oven,shadow)
 		local v3=gl.apply_modelview( {w* 1,	h* 1,	0,1} )
 		local v4=gl.apply_modelview( {w* 1,	h*-0,	0,1} )
 		local t={
-			0,	1,	0,	0,	0,
-			0,	0,	0,	0,	1,
-			1,	1,	0,	1,	0,
-			1,	0,	0,	1,	1,
+			0,	1,	0,	0,	1,
+			0,	0,	0,	0,	0,
+			1,	1,	0,	1,	1,
+			1,	0,	0,	1,	0,
 		}
 
 		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_shadow_test",function(p)
 
+--[[
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 --				shadow.fbo:bind_texture()
 				shadow.fbo:bind_depth()
 				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
-
+]]
 		end)
 
 		gl.PopMatrix()
