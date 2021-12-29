@@ -68,7 +68,7 @@ M.bake=function(oven,screen)
 			SHADOW_SCALE=1/2,
 			SHADOW_SAMPLES=6,
 --			SHADOW=" 0.0 , 0.0 , 0.0 , 0.0 ",
---			SHADOW_SQUISH="0.25",
+--			SHADOW_SQUISH=1,
 
 		},
 		

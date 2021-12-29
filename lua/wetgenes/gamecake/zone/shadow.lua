@@ -29,6 +29,9 @@ M.bake=function(oven,shadow)
 
 	shadow.mapsize=2048*2
 
+-- number of shadows to draw
+	shadow.count=1
+
 	shadow.loads=function()
 
 		local filename="lua/"..string.gsub(M.modname,"%.","/")..".glsl"
@@ -66,10 +69,11 @@ M.bake=function(oven,shadow)
 	end
 	
 --	shadow.default="0.0,0.0,0.0,0.0"
-	shadow.draw_head=function(scene)
+	shadow.draw_head=function(scene,shadow_idx)
 	
 -- special shadow transform to make the area around 0 more detailed
 --		gl.program_defs["DRAW_SHADOW_SQUISH"]=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SQUISH
+		gl.program_defs["DRAW_SHADOW_SQUISH"]=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SQUISH
 
 		gl.PushMatrix()
 		shadow.fbo:bind_frame()
@@ -177,10 +181,10 @@ M.bake=function(oven,shadow)
 
 	end
 
-	shadow.draw_tail=function()
+	shadow.draw_tail=function(scene,shadow_idx)
 
 -- turn off special shadow transform
---		gl.program_defs["DRAW_SHADOW_SQUISH"]=nil
+		gl.program_defs["DRAW_SHADOW_SQUISH"]=nil
 
 		gl.state.pop()
 		oven.cake.views.pop_and_apply()

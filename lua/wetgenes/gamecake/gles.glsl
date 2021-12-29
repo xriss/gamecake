@@ -345,8 +345,10 @@ void main(void)
 #endif
 
 #ifdef DRAW_SHADOW_SQUISH
-	gl_Position.xy=clamp(gl_Position.xy,vec2(-1.0),vec2(1.0));
-	gl_Position.xy=(sign(gl_Position.xy)*pow(abs(gl_Position.xy),vec2(DRAW_SHADOW_SQUISH)));
+//	gl_Position.xy=clamp(gl_Position.xy,vec2(-1.0),vec2(1.0));
+//	gl_Position.xy=(sign(gl_Position.xy)*pow(abs(gl_Position.xy),vec2(DRAW_SHADOW_SQUISH)));
+//    gl_Position.xy=mix( gl_Position.xy*0.5 , gl_Position.xy*0.75 - (sign(gl_Position.xy)*0.125) , step(0.5,abs(gl_Position.xy)) );
+    gl_Position.xy=mix( gl_Position.xy*2.0 , gl_Position.xy*0.75/1.25 + (sign(gl_Position.xy)*0.35) , step(0.25,abs(gl_Position.xy)) );
 #endif
 
 #ifdef SHADOW
