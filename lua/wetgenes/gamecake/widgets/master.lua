@@ -76,16 +76,14 @@ function wmaster.setup(widget,def)
 	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, alpha=1, grid_size=40, text_size=20, }
 
 -- global GUI color theme
-
-	master.color_theme=master.color_theme_bright
-	master.color_theme=master.color_theme_dark
-
+	master.theme={}
+	for n,v in pairs(master.color_theme_dark) do master.theme[n]=v end
 
 
 -- get a color from a theme and optionally apply a tint
 	function master.get_color(val,tint)
 	
-		local t=master.color_theme
+		local t=master.theme
 
 		if not val then val=t.text end -- text color
 	

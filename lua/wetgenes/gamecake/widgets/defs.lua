@@ -28,15 +28,12 @@ M.create=function()
 	end
 
 	def.copy=function(it)
-		local d=it.class and def.classes[it.class]
-		if d then
-			for n,v in pairs(d) do
-				if type(it[n])=="nil" then
-					it[n]=v
-				end
+		for n,v in pairs( it.class and def.classes[it.class] or {} ) do
+			if type(it[n])=="nil" then
+				it[n]=v
 			end
 		end
-		for n,v in pairs(def.classes["*"]) do
+		for n,v in pairs( def.classes["*"] or {} ) do
 			if type(it[n])=="nil" then
 				it[n]=v
 			end

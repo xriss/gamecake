@@ -29,7 +29,7 @@ wtree.refresh=function(widget,items)
 	local pan=widget.scroll_widget.pan
 	pan:remove_all()
 
-	local ss=widget.master.grid_size or 24
+	local ss=widget.master.theme.grid_size
 
 	local recurse ; recurse=function(items,depth)
 	

@@ -81,7 +81,7 @@ end
 
 function wquad.setup(widget,def)
 
-	local ss=widget.master.grid_size or 24
+	local ss=widget.master.theme.grid_size
 
 	widget.class="quad"
 	

@@ -184,7 +184,7 @@ wfile.file_refresh=function(widget)
 	local pan=widget.scroll_widget.pan
 	pan:remove_all()
 	
-	local ss=widget.master.grid_size or 24
+	local ss=widget.master.theme.grid_size
 
 	if widget.view=="history" then
 	
@@ -253,7 +253,7 @@ function wfile.setup(widget,def)
 	widget.file_dir			=	wfile.file_dir
 	widget.file_refresh		=	wfile.file_refresh
 
-	local ss=widget.master.grid_size or 24
+	local ss=widget.master.theme.grid_size
 	local ss1=ss/24
 	local ss2=ss/12
 

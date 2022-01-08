@@ -40,7 +40,7 @@ wwindow=wwindow or {}
 			window.hx=window.win_fbo.hx*sx
 			window.hy=window.win_fbo.hy*sy
 		elseif window.panel_mode=="fill" then
-			local ss=(it.master.grid_size or 24)
+			local ss=(it.master.theme.grid_size)
 			if window.hx<ss*2 then window.hx=ss*2 end
 			if window.hy<ss*2 then window.hy=ss*2 end
 		end
@@ -215,7 +215,7 @@ function wwindow.layout(widget)
 	local window=widget
 	local windows= (window.parent.class=="windows") and window.parent or nil
 
-	local ss=(widget.master.grid_size or 24)
+	local ss=widget.master.theme.grid_size
 	local bar_height=widget.flags.nobar and 0 or ss
 	
 	if v then
@@ -458,7 +458,7 @@ function wwindow.setup(window,def)
 		hooks=window.window_hooks,
 	}
 	
-	local ss=window.master.grid_size or 24
+	local ss=window.master.theme.grid_size
 	local color=0
 
 	local ss1=ss/24
@@ -477,12 +477,12 @@ function wwindow.setup(window,def)
 		hook_resize=function(it)
 			if window.win_canvas.size=="fit" then -- does the window fit the canvas?
 			
-				local bar_height=(window.flags.nobar and 0 or window.master.grid_size or 24)
+				local bar_height=(window.flags.nobar and 0 or window.master.theme.grid_size)
 				it.hx=window.win_canvas.hx
 				it.hy=window.win_canvas.hy+bar_height
 
 			else -- or does the canvas fit the window
-				local bar_height=(window.flags.nobar and 0 or window.master.grid_size or 24)
+				local bar_height=(window.flags.nobar and 0 or window.master.theme.grid_size)
 				it.hx=it.parent.hx
 				it.hy=it.parent.hy
 
@@ -515,14 +515,14 @@ function wwindow.setup(window,def)
 			
 			else -- or does the canvas fit the window
 
-				local bar_height=(window.flags.nobar and 0 or window.master.grid_size or 24)
+				local bar_height=(window.flags.nobar and 0 or window.master.theme.grid_size)
 				it.hx=it.parent.hx
 				it.hy=it.parent.hy-bar_height
 
 			end
 		end,
 		hook_layout=function(it)
-			local bar_height=(window.flags.nobar and 0 or window.master.grid_size or 24)
+			local bar_height=(window.flags.nobar and 0 or window.master.theme.grid_size)
 			it.px=0
 			it.py=bar_height
 		end,

@@ -64,7 +64,7 @@ function wmenuitem.menu_add(widget,opts)
 			widget.menu=nil
 		end
 
-		local ss=opts.grid_size or md.grid_size or widget.master.grid_size
+		local ss=opts.grid_size or md.grid_size or widget.master.theme.grid_size
 
 --		local screen;widget.master:call_descendents(function(it) if it.class=="screen" then screen=it end end)
 --		screen=screen or widget.master
