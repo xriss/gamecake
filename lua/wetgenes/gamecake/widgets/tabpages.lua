@@ -11,8 +11,6 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wtabs)
 wtabs=wtabs or {}
 
-local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
-
 function wtabs.update(widget)
 	return widget.meta.update(widget)
 end
@@ -46,8 +44,11 @@ function wtabs.setup(widget,def)
 		widget.data = widget.master.new_data{class="list",num=1,list=list}
 	end
 
-	widget.bar      = widget:add({class="tabs",		hx=widget.hx,	hy=ss,				py=0,	color=widget.color, data=widget.data })
-	widget.children = widget:add({class="pages",	hx=widget.hx,	hy=widget.hy-ss,	py=ss,	color=widget.color, data=widget.data })
+	widget.tabs  = widget:add({class="tabs",	hx=widget.hx,	hy=ss,				py=0,	color=widget.color, data=widget.data })
+	widget.pages = widget:add({class="pages",	hx=widget.hx,	hy=widget.hy-ss,	py=ss,	color=widget.color, data=widget.data })
+
+
+	widget.children=widget.pages
 
 	return widget
 end

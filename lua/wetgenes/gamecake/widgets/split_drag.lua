@@ -22,7 +22,6 @@ function wsplit_drag.setup(widget,def)
 	sub.size="full"
 
 	widget.split=widget:add(sub)
-	widget.children=widget.split -- a generic name for subwidget trees to continue down
 
 
 -- build an invisible dragbar so we can drag to resize left and right
@@ -59,7 +58,7 @@ function wsplit_drag.setup(widget,def)
 			snapit(ws)
 		end
 
-		widget.drag.class_hooks=function(h,w)
+		widget.drag.class_hooks={function(h,w)
 			local ws=widget.split[ widget.split.split_order ]
 			if not ws then return end
 
@@ -71,7 +70,7 @@ function wsplit_drag.setup(widget,def)
 				end
 				clampit()
 			end
-		end
+		end}
 
 		widget.resize=function(widget)
 			local ws=widget.split[ widget.split.split_order ]
@@ -106,7 +105,7 @@ function wsplit_drag.setup(widget,def)
 			snapit(ws)
 		end
 
-		widget.drag.class_hooks=function(h,w)
+		widget.drag.class_hooks={function(h,w)
 			local ws=widget.split[ widget.split.split_order ]
 			if not ws then return end
 
@@ -118,7 +117,7 @@ function wsplit_drag.setup(widget,def)
 				end
 				clampit()
 			end
-		end
+		end}
 
 		widget.resize=function(widget)
 			local ws=widget.split[ widget.split.split_order ]
@@ -135,6 +134,8 @@ function wsplit_drag.setup(widget,def)
 
 	end
 	
+	widget.children=widget.split -- a generic name for subwidget trees to continue down
+
 	return widget
 end
 
