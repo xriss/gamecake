@@ -67,6 +67,7 @@ function wmaster.setup(widget,def)
 
 -- create or reuse datas interface
 	master.datas=master.datas or wdatas.new_datas({master=master})
+	master.new_data=function(dat) return master.datas.new_data(dat) end
 
 
 
@@ -557,9 +558,7 @@ function wmaster.setup(widget,def)
 			if master.over     then master.over:set_dirty() end
 			if master.old_over then master.old_over:set_dirty() end
 			if master.over     then master.over:call_hook_later("over") end
-
-			if master.edit and master.edit.class_hooks then master.edit.class_hooks("notover",master.edit) end
-
+			if master.edit     then master.edit:call_hook_later("notover") end
 		end
 		
 	end

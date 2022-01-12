@@ -27,6 +27,11 @@ wdata.call_hook_later=function(dat,hook)
 end
 
 wdata.call_hook=function(dat,hook)
+	if dat.class_hooks then
+		for _,ch in ipairs(dat.class_hooks) do
+			if ch(hook,dat) then return end -- and it can eat the event if it returns true
+		end
+	end
 	local hooks=dat.hooks
 	local type_hooks=type(hooks)
 	if type_hooks=="function" then -- master function
@@ -35,6 +40,20 @@ wdata.call_hook=function(dat,hook)
 		return hooks[hook](dat)
 	end
 end
+
+wdata.add_class_hook=function(dat,fn)
+	dat.class_hooks=dat.class_hooks or {}
+	dat.class_hooks[ #dat.class_hooks+1 ]=fn
+end
+wdata.del_class_hook=function(dat,fn)
+	local hooks=dat.class_hooks or {}
+	for i=#hooks,1,-1 do
+		if hooks[i]==fn then
+			table.remove(hooks,i)
+		end
+	end
+end
+
 
 -- set number (may trigger hook unless nohook is set)
 wdata.data_value=function(dat,val,nohook)

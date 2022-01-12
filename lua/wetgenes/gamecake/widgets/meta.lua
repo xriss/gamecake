@@ -44,8 +44,11 @@ wmeta.classes={
 	["menubar"]=oven.rebake("wetgenes.gamecake.widgets.menubar"),
 	["menuitem"]=oven.rebake("wetgenes.gamecake.widgets.menuitem"),
 	["pages"]=oven.rebake("wetgenes.gamecake.widgets.pages"),
+	["tabs"]=oven.rebake("wetgenes.gamecake.widgets.tabs"),
 
 --classes built out of the base classes
+
+	["tabpages"]=oven.rebake("wetgenes.gamecake.widgets.tabpages"),
 
 	["split_drag"]=oven.rebake("wetgenes.gamecake.widgets.split_drag"),
 
@@ -54,7 +57,6 @@ wmeta.classes={
 
 	["scroll"]=oven.rebake("wetgenes.gamecake.widgets.scroll"),
 
-	["tabs"]=oven.rebake("wetgenes.gamecake.widgets.tabs"),
 
 	["tree"]=oven.rebake("wetgenes.gamecake.widgets.tree"),
 	["treefile"]=oven.rebake("wetgenes.gamecake.widgets.treefile"),
@@ -91,8 +93,10 @@ function wmeta.setup(def)
 	end
 	
 	function meta.call_hook(widget,hook,dat)
-		if type(widget.class_hooks)=="function" then -- the widget class wants to see this hook
-			if widget.class_hooks(hook,widget,dat) then return end -- and it can eat the event if it returns true
+		if widget.class_hooks then
+			for _,ch in ipairs(widget.class_hooks) do
+				if ch(hook,widget,dat) then return end -- and it can eat the event if it returns true
+			end
 		end
 		local hooks=widget.hooks or widget.master.hooks -- can use master hooks
 		local type_hooks=type(hooks)
@@ -103,10 +107,24 @@ function wmeta.setup(def)
 		end
 	end
 
+	meta.add_class_hook=function(widget,fn)
+		widget.class_hooks=widget.class_hooks or {}
+		widget.class_hooks[ #widget.class_hooks+1 ]=fn
+	end
+	meta.del_class_hook=function(widget,fn)
+		local hooks=widget.class_hooks or {}
+		for i=#hooks,1,-1 do
+			if hooks[i]==fn then
+				table.remove(hooks,i)
+			end
+		end
+	end
+
 --
 -- add a new widget as a child to this one
 --
 	function meta.add(parent,...) -- could supply multiple, but probably just one at a time
+		if parent.children then parent=parent.children end -- always put children here
 		local ret
 		for i,def in pairs{...} do
 			local widget={}

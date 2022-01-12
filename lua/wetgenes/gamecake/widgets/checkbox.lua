@@ -52,7 +52,7 @@ function wcheckbox.setup(widget,def)
 	widget.text_false=(type(def.text_false)=="nil") and " " or def.text_false
 	widget.text_true=(type(def.text_true)=="nil") and "X" or def.text_true
 
-	widget.class_hooks=wcheckbox.class_hooks
+	widget.class_hooks={wcheckbox.class_hooks}
 
 	return widget
 end

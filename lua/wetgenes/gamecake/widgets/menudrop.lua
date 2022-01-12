@@ -101,7 +101,7 @@ function wmenudrop.setup(widget,def)
 
 	widget.menu_data=def.menu_data -- data to display
 
-	widget.class_hooks=wmenudrop.class_hooks
+	widget.class_hooks={wmenudrop.class_hooks}
 	
 	return widget
 end

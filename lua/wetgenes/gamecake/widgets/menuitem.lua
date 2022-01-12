@@ -252,7 +252,7 @@ function wmenuitem.setup(widget,def)
 	widget.solid=true
 	widget.style=widget.style or "button"
 
-	widget.class_hooks=wmenuitem.hooks
+	widget.class_hooks={wmenuitem.hooks}
 	
 	widget.hide_when_clicked=def.hide_when_clicked
 --	widget.remove_when_clicked=def.remove_when_clicked

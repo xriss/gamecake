@@ -394,7 +394,7 @@ function wtextedit.setup(widget,def)
 --	widget.string=it
 	widget.class="textedit"
 	widget.class_funcs=wtextedit
-	widget.class_hooks=wtextedit.class_hooks
+	widget.class_hooks={wtextedit.class_hooks}
 
 	widget.data=widget.data or widget_data.new_data({master=widget.master})
 	

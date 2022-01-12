@@ -461,7 +461,6 @@ function wwindow.setup(window,def)
 	local ss=window.master.theme.grid_size
 	local color=0
 
-	local ss1=ss/24
 	local ss_side=ss/8
 	local ss_corner=ss/4
 
@@ -724,7 +723,10 @@ function wwindow.setup(window,def)
 
 	window.hx=def.hx
 	window.hy=def.hy+bar_height
-	
+
+-- you should put your widgets here
+	window.children=window.win_canvas
+
 	return window
 end
 
