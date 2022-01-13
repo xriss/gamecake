@@ -444,6 +444,8 @@ function glescode.create(gl)
 --
 	function code.program_source(name,opts)
 
+		if not string.find(name,"?",1,true) then name=name.."?" end -- makes sure it is always a query string
+
 		local gsource
 		local vsource
 		local fsource
@@ -497,8 +499,11 @@ function glescode.create(gl)
 		}
 		setmetatable(p,pmeta)
 
-		if code.programs[name] then -- forget old program
-			code.forget_program( code.programs[name] )
+		for n,v in pairs(code.programs) do
+			if n:sub(1,#name)==name then
+				code.forget_program( code.programs[n] ) -- forget all programs derived from this source
+				code.programs[n]=nil
+			end
 		end
 		code.programs[name]=p -- remember new program
 

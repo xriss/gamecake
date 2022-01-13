@@ -45,7 +45,7 @@ wdialogs.show=function(dialogs,opts)
 	local master=dialogs.master
 	local screen=dialogs.parent
 
-	local hz=widget.master.theme.grid_size
+	local hz=master.theme.grid_size
 
 
 	local def_window=function(parent,it)
