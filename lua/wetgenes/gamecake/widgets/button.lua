@@ -4,24 +4,25 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---[[
+--[[#lua.wetgenes.gamecake.widgets.button
+
+	local master=oven.rebake("wetgenes.gamecake.widgets").setup()
+	local button=master:add{class="button",...}
 
 A button for pressing and such.
 
 ]]
 
+-- module bake
+local M={ modname = (...) } package.loaded[M.modname] = M function M.bake(oven,B) B = B or {}
 
---module
-local M={ modname = (...) } package.loaded[M.modname] = M
+--[[#lua.wetgenes.gamecake.widgets.button.update
 
--- and bake
-function M.bake(oven,B) B = B or {}
-
---[[
+	this function will also call lua.wetgenes.gamecake.widgets.meta.update
 
 If we have a data assigned to this button then make sure that the 
 displayed text is up to date. We should really hook into the data so 
-any change there is coppied here instead?
+any change there is copied here instead?
 
 ]]
 function B.update(widget)
@@ -33,12 +34,17 @@ function B.update(widget)
 	return widget.meta.update(widget)
 end
 
---[[
+--[[#lua.wetgenes.gamecake.widgets.button.setup
 
-we need to be solid and have a hand cursor
+	see lua.wetgenes.gamecake.widgets.meta.setup for generic options
+
+As a button we always need to be solid so this is forced to true.
+
+Also cursor will be set to "hand" if it is not already set so you can 
+tell it is a button when you hover over it.
 
 ]]
-function B.setup(widget,def)
+function B.setup(widget)
 
 	widget.class="button"
 	

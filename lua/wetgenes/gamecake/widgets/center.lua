@@ -1,18 +1,30 @@
 --
--- (C) 2013 Kriss@XIXs.com
+-- (C) 2022 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+--[[#lua.wetgenes.gamecake.widgets.center
 
---module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
+	local master=oven.rebake("wetgenes.gamecake.widgets").setup()
+	local button=master:add{class="center",...}
 
-function M.bake(oven,wcenter)
+A layout class for very centered children.
 
-wcenter=wcenter or {}
+]]
 
--- place any children in the center of this widget
-function wcenter.layout(widget)
+-- module bake
+local M={ modname = (...) } package.loaded[M.modname] = M function M.bake(oven,B) B = B or {}
+
+--[[#lua.wetgenes.gamecake.widgets.center.layout
+
+	this function will also call lua.wetgenes.gamecake.widgets.meta.layout
+
+Place any children in the center of this widget. Multiple children will 
+overlap so probably best to only have one child.
+
+]]
+function B.layout(widget)
 	
 	for i,w in ipairs(widget) do
 		if not w.hidden then
@@ -26,15 +38,23 @@ function wcenter.layout(widget)
 
 end
 
-function wcenter.setup(widget,def)
+--[[#lua.wetgenes.gamecake.widgets.center.setup
+
+	see lua.wetgenes.gamecake.widgets.meta.setup for generic options
+
+If not explicetly set we will use a size of "full" ie the size of 
+parent as that is probably how this class will always be used.
+
+]]
+function B.setup(widget)
 
 	widget.class="center"
-	widget.size=def.size or "full" -- makes sense for this to usually be the size of its parent
+	widget.size=widget.size or "full" -- makes sense for this to usually be the size of its parent
 
-	widget.layout=wcenter.layout
+	widget.layout=B.layout
 	
 	return widget
 end
 
-return wcenter
+return B
 end
