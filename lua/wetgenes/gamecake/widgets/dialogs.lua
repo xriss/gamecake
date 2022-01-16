@@ -1,45 +1,45 @@
 --
--- (C) 2013 Kriss@XIXs.com
+-- (C) 2022 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+--[[#lua.wetgenes.gamecake.widgets.dialogs
+
+handle a collection of dialogs that all live in the same place
+
+]]
+
+-- module bake
+local M={ modname = (...) } package.loaded[M.modname] = M function M.bake(oven,B) B = B or {}
+
+--local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+--local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
+
+local wdialogs=B
 
 
--- handle a collection of dialogs that all live in the same place
+--[[#lua.wetgenes.gamecake.widgets.dialogs.show_overlay
 
---module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
-
-function M.bake(oven,wdialogs)
-
-local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
-local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
-
-wdialogs=wdialogs or {}
-
-function wdialogs.update(widget)
-	return widget.meta.update(widget)
-end
-
-function wdialogs.draw(widget)
-	return widget.meta.draw(widget)
-end
-
-function wdialogs.layout(widget)
-	return widget.meta.layout(widget)
-end
-
+]]
 wdialogs.show_overlay=function(dialogs)
 	local screen=dialogs.parent
 	dialogs.overlay=screen:add{size="full",solid=true,transparent=0xcc000000,class="center"}
 	return dialogs.overlay
 end
 
+--[[#lua.wetgenes.gamecake.widgets.dialogs.hide_overlay
+
+]]
 wdialogs.hide_overlay=function(dialogs)
 	dialogs.overlay:remove() -- hide/delete all of our widgets
 	dialogs.overlay=nil
 end
 
 
+--[[#lua.wetgenes.gamecake.widgets.dialogs.show
+
+]]
 wdialogs.show=function(dialogs,opts)
 
 	local master=dialogs.master
@@ -139,6 +139,9 @@ wdialogs.show=function(dialogs,opts)
 end
 
 
+--[[#lua.wetgenes.gamecake.widgets.dialogs.setup
+
+]]
 function wdialogs.setup(widget,def)
 
 	widget.class="dialogs"

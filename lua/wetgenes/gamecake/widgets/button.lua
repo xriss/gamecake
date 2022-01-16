@@ -7,7 +7,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --[[#lua.wetgenes.gamecake.widgets.button
 
 	local master=oven.rebake("wetgenes.gamecake.widgets").setup()
-	local button=master:add{class="button",...}
+	local widget=master:add{class="button",...}
 
 A button for pressing and such.
 

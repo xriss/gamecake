@@ -7,7 +7,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --[[#lua.wetgenes.gamecake.widgets.center
 
 	local master=oven.rebake("wetgenes.gamecake.widgets").setup()
-	local button=master:add{class="center",...}
+	local widget=master:add{class="center",...}
 
 A layout class for very centered children.
 
