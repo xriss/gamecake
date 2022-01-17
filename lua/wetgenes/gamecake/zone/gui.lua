@@ -22,6 +22,7 @@ M.bake=function(oven,gui)
 	local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
 	local screen=oven.rebake("wetgenes.gamecake.zone.screen")
+	local shadow=oven.rebake("wetgenes.gamecake.zone.shadow")
 
 
 -- create data
@@ -82,6 +83,18 @@ gui.data_setup=function()
 		screen.shader_qs.zone_screen_build_occlusion.SHADOW_SAMPLES=it:value()
 	end
 			
+	datas.new({id="shadow_mapsize",class="number",hooks=gui.hooks,num=12,min=8,max=16,step=1,
+		tostring=function(dat,num) return string.format("%d",math.pow(2.0,num)) end})
+	gui.value["shadow_mapsize"]=function(it)
+		shadow.mapsize=math.pow(2.0,it:value())
+	end
+
+	datas.new({id="shadow_maparea",class="number",hooks=gui.hooks,num=9,min=4,max=16,step=1,
+		tostring=function(dat,num) return string.format("%d",math.pow(2.0,num)) end})
+	gui.value["shadow_maparea"]=function(it)
+		shadow.maparea=math.pow(2.0,it:value()-1)
+	end
+
 	datas.new({id="screen_mode",class="string",hooks=gui.hooks,str=oven.console.screen_mode()})
 	oven.console.screen_mode_data=datas.get("screen_mode")
 	gui.click["screen_mode_change"]=function(it)
@@ -230,6 +243,10 @@ gui.plan_windows=function()
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_samples"),color=0})
 	def.add(canvas,{text="Shadow Samples"})
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_samples"),color=0})
+	def.add(canvas,{text="Shadow Map Size"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_mapsize"),color=0})
+	def.add(canvas,{text="Shadow Map Area"})
+	def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_maparea"),color=0})
 
 	gui.screen:windows_reset()
 

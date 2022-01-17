@@ -27,7 +27,8 @@ M.bake=function(oven,shadow)
 	shadow.light=V3() -- the normal of the light casting the shadow (sun or moon)
 	shadow.power=1.0 -- the power of the light so we can fade out when swapping between sun and moon
 
-	shadow.mapsize=2048*2
+	shadow.mapsize=4096
+	shadow.maparea=256
 
 -- number of shadows to draw
 	shadow.count=1
@@ -67,6 +68,12 @@ M.bake=function(oven,shadow)
 		end
 
 	end
+
+	shadow.update=function()
+		if shadow.fbo.w ~= shadow.mapsize or shadow.fbo.h ~= shadow.mapsize then -- auto resize
+			shadow.fbo:resize( shadow.mapsize , shadow.mapsize , -1 )
+		end
+	end
 	
 --	shadow.default="0.0,0.0,0.0,0.0"
 	shadow.draw_head=function(scene,shadow_idx)
@@ -93,16 +100,15 @@ M.bake=function(oven,shadow)
 		local sky=scene.systems.sky or {time=0}
 		if camera then
 
-			local s=256 -- 40*shadow.mapsize/1024
+			local s=shadow.maparea -- 40*shadow.mapsize/1024
 			local sd=1024
 			local x=(math.floor(camera.pos[1]))--*-1/s	-- swap z/y as rotation
 			local y=(math.floor(camera.pos[2]))--*-1/s
 			local z=(math.floor(camera.pos[3]))--*-1/s
 			
-			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..0.000000*s/sd..","..0.000008*s/sd..",0.0"
+			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..(0.04/sd)..","..(0.08/sd)..",0.0"
 
 			local r=sky.time
-
 
 			local  calculate_matrix=function()
 				shadow.mtx=M4{
@@ -111,7 +117,7 @@ M.bake=function(oven,shadow)
 					0,			0,			1,			0,
 					0,			0,			0,			1,
 				}
-				shadow.mtx:scale(1/s,1/s,1/(sd*s))
+				shadow.mtx:scale(1/s,1/s,1/sd)
 				shadow.mtx:rotate( 90 , 1,0,0 ) -- top down
 				shadow.mtx:rotate( 35 , 1,0,0 ) -- hemasphere
 				shadow.mtx:rotate( -90 + r ,  0,0,1 ) -- time of day
