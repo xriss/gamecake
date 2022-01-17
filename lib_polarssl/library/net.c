@@ -249,7 +249,7 @@ int net_accept( int bind_fd, int *client_fd, void *client_ip )
     defined(_SOCKLEN_T_DECLARED)
     socklen_t n = (socklen_t) sizeof( client_addr );
 #else
-    int n = (int) sizeof( client_addr );
+    unsigned int n = (unsigned int) sizeof( client_addr );
 #endif
 
     *client_fd = accept( bind_fd, (struct sockaddr *)

@@ -758,8 +758,8 @@ all_includes=all_includes or {
 	{"lua_linenoise",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
 	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_sys",			WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_polarssl",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lib_polarssl",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
+	{"lua_polarssl",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_polarssl",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_zip",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_pgsql",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
@@ -783,7 +783,7 @@ all_includes=all_includes or {
 	{"lib_vorbis",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{LIB_OPENAL,		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
-	{"lib_sqlite",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
+	{"lib_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 
 -- going to need some multithreading
