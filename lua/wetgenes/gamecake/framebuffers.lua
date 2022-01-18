@@ -18,8 +18,8 @@ function M.bake(oven,framebuffers)
 	local funcs={}
 	local metatable={__index=funcs}
 
-	local vendor=string.lower((oven.gl.Get(oven.gl.VENDOR) or ""))
-	framebuffers.webkithax=(vendor=="webkit") -- enable webkit hax (TODO: turn this into a benchmark test)
+--	local vendor=string.lower((oven.gl.Get(oven.gl.VENDOR) or ""))
+--	framebuffers.webkithax=(vendor=="webkit") -- enable webkit hax (TODO: turn this into a benchmark test)
 
 	framebuffers.data=setmetatable({}, { __mode = 'vk' })
 
@@ -159,6 +159,11 @@ function M.bake(oven,framebuffers)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
+-- I really want this one, but we will need to test it works before we can use it
+--[[
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+]]
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
 
