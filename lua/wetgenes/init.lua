@@ -45,7 +45,7 @@ M.rnd64k=function(seed)
 		num=bit.bxor(num,math.floor(num/65536))%65536	-- xor top and bottom 16 bits
 	end
 	local roll=function()
-		num=(75*(num+1)-1)%65536
+		num=(75*(num+1)-1)%65537
 		return num
 	end
 	local rnd=function(a,b)
