@@ -259,38 +259,83 @@ A basic function to handle http memos.
 ]]
 M.http_code=function(linda,task_id,task_idx)
 
-	print("http start")
-
-	local socket = lanes.require("socket")
 	local http = lanes.require("socket.http")
+	local ltn12 = lanes.require("ltn12")
 
-	local b, c, h = http.request("http://xixs.com/index.html")
-	
-	print(b,c,h)
-	for n,v in pairs(h) do
-		print( n , v )
+	local function request(memo)
+		print("memo task "..task_id..":"..task_idx)
+		for n,v in pairs(memo) do print(n,v) end
+
+		local out = {}
+		local req = {}
+
+		req.sink = ltn12.sink.table(out)
+		if memo.body then
+			req.source = ltn12.source.string(memo.body)
+		end
+
+		req.url=memo.url
+		req.method=memo.method or "GET"
+		req.headers=memo.headers
+		req.proxy=memo.proxy
+		req.redirect=memo.redirect
+
+		local body , code, headers, status = http.request(req)
+		local ret={}
+
+		if not body then -- error message is in code
+			ret.error=code or true
+		else
+			ret.body=table.concat(out)
+			ret.code=code
+			ret.headers=headers
+			ret.status=status
+		end
+		
+		return ret
 	end
-	
-	print("poop")
 
 
 	while true do
 
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
-		print("memo task "..task_id..":"..task_idx)
-		for n,v in pairs(memo) do print(n,v) end
-	
+		if memo then
+			local ok,ret=pcall(function() return request(memo) end) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
+		end
+
 	end
 
 	print("http stop")
 end
 
+--[[#lua.wetgenes.tasks.http_memo
+
+Create send and return a http memo.
+
+]]
+M.tasks_functions.http_memo=function(tasks,memo)
+
+	if type(memo) == "string" then -- url only
+		memo={url=memo}
+	end
+	tasks:add_memo(memo)
+	memo.task="http"
+	
+	tasks.linda:send( nil , memo.task , memo )
+	
+	return memo
+end
 
 
 
+--[[#lua.wetgenes.tasks.test
 
+test
 
+]]
 M.test=function()
 
 	print("testing tasks")
@@ -327,6 +372,13 @@ M.test=function()
 		end,
 	})
 	
+	
+	local me=tasks:http_memo("http://xixs.com/index.html")
+	print("wating for",me.id)
+	local _,ret= tasks.linda:receive( nil , me.id )
+	print("got",ret)
+	for n,v in pairs(ret) do print(n,v) end
+
 	for i=1,10 do
 --		tasks.linda:send("thread",{id=i,poop="ok",name="this"..i})
 	end
