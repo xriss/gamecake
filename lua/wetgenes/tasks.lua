@@ -15,7 +15,14 @@ Manage coroutines that can then easily call into these threads by yeilding
 ]]
 
 local lanes=require("lanes")
-
+if lanes.configure then -- first time configuration
+	lanes=lanes.configure(
+		{
+			with_timers = false ,
+			on_state_create = require("wetgenes.gamecake.core").preloadlibs ,	-- this makes lanes.require work on internal modules inside a new thread
+		}
+	)
+end
 
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M 
@@ -173,7 +180,7 @@ this linda socket and then yielding if there is nothing to do.
 	code
 
 A lua function to run inside a coroutine, this function will recieve 
-tasks.linda and the task.id for comunication and an index of 1 so it 
+tasks.linda and the task.id for comunication and an index of 0 so it 
 has the same calling signature as a thread.
 
 ]]
@@ -197,6 +204,33 @@ M.tasks_functions.del_task=function(tasks,task)
 	return task
 end
 
+--[[#lua.wetgenes.tasks.update
+
+	tasks:update()
+	
+Resume all current coroutines and wait for them to yield.
+
+]]
+M.tasks_functions.update=function(tasks)
+	for idx,task in pairs(tasks.task) do
+	end
+end
+
+--[[#lua.wetgenes.tasks.delete
+
+	tasks:delete()
+	
+Force stop all threads and delete all data.
+
+Failure to call this will allow any created threads to continue to run 
+until program termination.
+
+]]
+M.tasks_functions.delete=function(tasks)
+	for idx,thread in pairs(tasks.thread) do
+	end
+end
+
 --[[#lua.wetgenes.tasks.create
 
 Create a tasks group to contain all associated threads and coroutines 
@@ -218,27 +252,73 @@ M.create=function(tasks)
 end
 
 
+--[[#lua.wetgenes.tasks.http_code
+
+A basic function to handle http memos.
+
+]]
+M.http_code=function(linda,task_id,task_idx)
+
+	print("http start")
+
+	local socket = lanes.require("socket")
+	local http = lanes.require("socket.http")
+
+	local b, c, h = http.request("http://xixs.com/index.html")
+	
+	print(b,c,h)
+	for n,v in pairs(h) do
+		print( n , v )
+	end
+	
+	print("poop")
+
+
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		print("memo task "..task_id..":"..task_idx)
+		for n,v in pairs(memo) do print(n,v) end
+	
+	end
+
+	print("http stop")
+end
+
+
+
+
+
+
 M.test=function()
 
-for n,v in pairs(lanes) do print(n,v) end
-
 	print("testing tasks")
-	
+
 	local tasks=M.create()
 	
+	local preloadlibs=require("wetgenes.gamecake.core").preloadlibs
+	
+	tasks:add_thread({
+		count=1,
+		globals={},
+		id="http",
+		code=M.http_code,
+	})
+
 	local thread=tasks:add_thread({
 		count=10,
 		globals={},
 		id="thread",	-- send memos here
-		code=function(linda,task_name,task_idx)
+		code=function(linda,task_id,task_idx)
 
 			print("starting linda")
 
 			while true do
 
-				local _,memo= linda:receive( nil , task_name ) -- wait for any memos coming into this thread
+				local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 				
-				print("memo task "..task_name..":"..task_idx)
+				print("memo task "..task_id..":"..task_idx)
 				for n,v in pairs(memo) do print(n,v) end
 			
 			end
@@ -248,10 +328,9 @@ for n,v in pairs(lanes) do print(n,v) end
 	})
 	
 	for i=1,10 do
-		tasks.linda:send("thread",{id=i,poop="ok",name="this"..i})
+--		tasks.linda:send("thread",{id=i,poop="ok",name="this"..i})
 	end
 	
 end
-
 M.test()
 
