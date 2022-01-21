@@ -263,8 +263,6 @@ M.http_code=function(linda,task_id,task_idx)
 	local ltn12 = lanes.require("ltn12")
 
 	local function request(memo)
-		print("memo task "..task_id..":"..task_idx)
-		for n,v in pairs(memo) do print(n,v) end
 
 		local out = {}
 		local req = {}
@@ -308,7 +306,6 @@ M.http_code=function(linda,task_id,task_idx)
 
 	end
 
-	print("http stop")
 end
 
 --[[#lua.wetgenes.tasks.http_memo
@@ -374,9 +371,7 @@ M.test=function()
 	
 	
 	local me=tasks:http_memo("http://xixs.com/index.html")
-	print("wating for",me.id)
 	local _,ret= tasks.linda:receive( nil , me.id )
-	print("got",ret)
 	for n,v in pairs(ret) do print(n,v) end
 
 	for i=1,10 do
