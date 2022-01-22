@@ -1,8 +1,8 @@
 local _M = {}
 
---if module then
---    mbox = _M
---end 
+if module then
+    mbox = _M
+end 
 
 function _M.split_message(message_s)
     local message = {}
@@ -61,7 +61,7 @@ function _M.parse_from(from)
 end
 
 function _M.split_mbox(mbox_s)
-    mbox = {}
+    local mbox = {}
     mbox_s = string.gsub(mbox_s, "\r\n", "\n") .."\n\nFrom \n"
     local nj, i, j = 1, 1, 1
     while 1 do

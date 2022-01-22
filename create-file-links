@@ -3,6 +3,18 @@ cd `dirname $0`
 echo "linking all .lua fles from the main lua dir so we dont accidently edit multiple copies"
 
 
+ln -f lua/ltn12.lua                lua_socket/git/src/ltn12.lua
+ln -f lua/mime.lua                 lua_socket/git/src/mime.lua
+ln -f lua/socket.lua               lua_socket/git/src/socket.lua
+ln -f lua/socket/ftp.lua           lua_socket/git/src/ftp.lua
+ln -f lua/socket/headers.lua       lua_socket/git/src/headers.lua
+ln -f lua/socket/http.lua          lua_socket/git/src/http.lua
+ln -f lua/socket/mbox.lua          lua_socket/git/src/mbox.lua
+ln -f lua/socket/smtp.lua          lua_socket/git/src/smtp.lua
+ln -f lua/socket/tp.lua            lua_socket/git/src/tp.lua
+ln -f lua/socket/url.lua           lua_socket/git/src/url.lua
+
+
 ln -f lua/glslang.lua              lua_glslang/code/glslang.lua
 ln -f lua/gles.lua                 lua_gles/code/gles.lua
 ln -f lua/glescode.lua             lua_gles/code/glescode.lua
