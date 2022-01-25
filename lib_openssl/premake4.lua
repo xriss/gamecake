@@ -1,24 +1,23 @@
 
 project "lib_openssl"
-kind "StaticLib"
 language "C"
 
-files { "ssl/**.c" , "ssl/**.h" }
-excludes { "ssl/ssl_task.c" , "ssl/ssltest.c" }
+files { "git/ssl/**.c" , "git/ssl/**.h" }
+excludes { "git/ssl/ssl_task.c" , "git/ssl/ssltest.c" }
 
 
-files { "crypto/err/**.c" }
-files { "crypto/objects/**.c" }
-files { "crypto/buffer/**.c" }
-files { "crypto/stack/**.c" }
-files { "crypto/comp/**.c" }
-files { "crypto/pqueue/**.c" }
-files { "crypto/dso/**.c" }
-files { "crypto/ui/**.c" }
-files { "crypto/ocsp/**.c" }
-files { "crypto/txt_db/**.c" }
-files { "crypto/cmac/**.c" }
-files { "crypto/ts/**.c" }
+files { "git/crypto/err/**.c" }
+files { "git/crypto/objects/**.c" }
+files { "git/crypto/buffer/**.c" }
+files { "git/crypto/stack/**.c" }
+files { "git/crypto/comp/**.c" }
+files { "git/crypto/pqueue/**.c" }
+files { "git/crypto/dso/**.c" }
+files { "git/crypto/ui/**.c" }
+files { "git/crypto/ocsp/**.c" }
+files { "git/crypto/txt_db/**.c" }
+files { "git/crypto/cmac/**.c" }
+files { "git/crypto/ts/**.c" }
 
 for w in string.gmatch([[
 	encode.c digest.c evp_enc.c evp_key.c evp_acnf.c evp_cnf.c 
@@ -34,7 +33,7 @@ for w in string.gmatch([[
 	e_old.c pmeth_lib.c pmeth_fn.c pmeth_gn.c m_sigver.c evp_fips.c	
 	e_aes_cbc_hmac_sha1.c e_rc4_hmac_md5.c
 ]],"%S+") do
-	files { "crypto/evp/"..w }
+	files { "git/crypto/evp/"..w }
 end
 
 
@@ -42,14 +41,14 @@ for w in string.gmatch( [[
 	cryptlib.c mem.c mem_clr.c mem_dbg.c cversion.c ex_data.c cpt_err.c
 	ebcdic.c uid.c o_time.c o_str.c o_dir.c o_fips.c o_init.c fips_ers.c
 ]],"%S+") do
-	files { "crypto/"..w }
+	files { "git/crypto/"..w }
 end
 
 for w in string.gmatch( [[
 	md_rand.c randfile.c rand_lib.c rand_err.c rand_egd.c 
 	rand_win.c rand_unix.c rand_os2.c rand_nw.c
 ]],"%S+") do
-	files { "crypto/rand/"..w }
+	files { "git/crypto/rand/"..w }
 end
 
 for w in string.gmatch( [[
@@ -60,7 +59,7 @@ for w in string.gmatch( [[
 	x509type.c x509_lu.c x_all.c x509_txt.c 
 	x509_trs.c by_file.c by_dir.c x509_vpm.c
 ]],"%S+") do
-	files { "crypto/x509/"..w }
+	files { "git/crypto/x509/"..w }
 end	
 
 for w in string.gmatch( [[
@@ -78,7 +77,7 @@ for w in string.gmatch( [[
 	asn1_gen.c asn1_par.c asn1_lib.c asn1_err.c a_bytes.c a_strnid.c 
 	evp_asn1.c asn_pack.c p5_pbe.c p5_pbev2.c p8_pkey.c asn_moid.c
 ]],"%S+") do
-	files { "crypto/asn1/"..w }
+	files { "git/crypto/asn1/"..w }
 end	
 	
 for w in string.gmatch( [[
@@ -89,7 +88,7 @@ for w in string.gmatch( [[
 	b_sock.c bss_acpt.c bf_nbio.c bss_log.c bss_bio.c 
 	bss_dgram.c
 ]],"%S+") do
-	files { "crypto/bio/"..w }
+	files { "git/crypto/bio/"..w }
 end	
 
 for w in string.gmatch( [[
@@ -98,7 +97,7 @@ for w in string.gmatch( [[
 	rsa_pss.c rsa_x931.c rsa_asn1.c rsa_depr.c rsa_ameth.c rsa_prn.c 
 	rsa_pmeth.c rsa_crpt.c
 ]],"%S+") do
-	files { "crypto/rsa/"..w }
+	files { "git/crypto/rsa/"..w }
 end	
 
 for w in string.gmatch( [[
@@ -108,7 +107,7 @@ for w in string.gmatch( [[
 	bn_recp.c bn_mont.c bn_mpi.c bn_exp2.c bn_gf2m.c bn_nist.c 
 	bn_depr.c bn_const.c bn_x931p.c
 ]],"%S+") do
-	files { "crypto/bn/"..w }
+	files { "git/crypto/bn/"..w }
 end		
 
 for w in string.gmatch( [[
@@ -119,46 +118,46 @@ for w in string.gmatch( [[
 	pcy_cache.c pcy_node.c pcy_data.c pcy_map.c pcy_tree.c pcy_lib.c 
 	v3_asid.c v3_addr.c
 ]],"%S+") do
-	files { "crypto/x509v3/"..w }
+	files { "git/crypto/x509v3/"..w }
 end		
 
 for w in string.gmatch( [[
 	conf_err.c conf_lib.c conf_api.c conf_def.c conf_mod.c 
 	conf_mall.c conf_sap.c
 ]],"%S+") do
-	files { "crypto/conf/"..w }
+	files { "git/crypto/conf/"..w }
 end		
 
 for w in string.gmatch( [[
 	lhash.c lh_stats.c
 ]],"%S+") do
-	files { "crypto/lhash/"..w }
+	files { "git/crypto/lhash/"..w }
 end		
 
 for w in string.gmatch( [[
 	sha_dgst.c sha1dgst.c sha_one.c sha1_one.c sha256.c sha512.c
 ]],"%S+") do
-	files { "crypto/sha/"..w }
+	files { "git/crypto/sha/"..w }
 end		
 
 for w in string.gmatch( [[
 	md5_dgst.c md5_one.c
 ]],"%S+") do
-	files { "crypto/md5/"..w }
+	files { "git/crypto/md5/"..w }
 end		
 
 for w in string.gmatch( [[
 	pem_sign.c pem_seal.c pem_info.c pem_lib.c pem_all.c pem_err.c
 	pem_x509.c pem_xaux.c pem_oth.c pem_pk8.c pem_pkey.c pvkfmt.c
 ]],"%S+") do
-	files { "crypto/pem/"..w }
+	files { "git/crypto/pem/"..w }
 end
 
 for w in string.gmatch( [[
 	pk7_asn1.c pk7_lib.c pkcs7err.c pk7_doit.c pk7_smime.c pk7_attr.c \
 	pk7_mime.c bio_pk7.c
 ]],"%S+") do
-	files { "crypto/pkcs7/"..w }
+	files { "git/crypto/pkcs7/"..w }
 end	
 	
 for w in string.gmatch( [[
@@ -166,7 +165,7 @@ for w in string.gmatch( [[
 	p12_init.c p12_key.c p12_kiss.c p12_mutl.c
 	p12_utl.c p12_npas.c pk12err.c p12_p8d.c p12_p8e.c
 ]],"%S+") do
-	files { "crypto/pkcs12/"..w }
+	files { "git/crypto/pkcs12/"..w }
 end
 
 
@@ -177,20 +176,20 @@ for w in string.gmatch( [[
 	ecp_nistp224.c ecp_nistp256.c ecp_nistp521.c ecp_nistputil.c 
 	ecp_oct.c ec2_oct.c ec_oct.c
 ]],"%S+") do
-	files { "crypto/ec/"..w }
+	files { "git/crypto/ec/"..w }
 end
 	
 for w in string.gmatch( [[
 	dh_asn1.c dh_gen.c dh_key.c dh_lib.c dh_check.c dh_err.c dh_depr.c 
 	dh_ameth.c dh_pmeth.c dh_prn.c	
 ]],"%S+") do
-	files { "crypto/dh/"..w }
+	files { "git/crypto/dh/"..w }
 end
 
 for w in string.gmatch( [[
 	hmac.c hm_ameth.c hm_pmeth.c
 ]],"%S+") do
-	files { "crypto/hmac/"..w }
+	files { "git/crypto/hmac/"..w }
 end
 
 for w in string.gmatch( [[
@@ -201,26 +200,26 @@ for w in string.gmatch( [[
 	eng_openssl.c eng_cnf.c eng_dyn.c eng_cryptodev.c 
 	eng_rsax.c eng_rdrand.c
 ]],"%S+") do
-	files { "crypto/engine/"..w }
+	files { "git/crypto/engine/"..w }
 end
 
 for w in string.gmatch( [[
 	ecs_lib.c ecs_asn1.c ecs_ossl.c ecs_sign.c ecs_vrf.c ecs_err.c
 ]],"%S+") do
-	files { "crypto/ecdsa/"..w }
+	files { "git/crypto/ecdsa/"..w }
 end
 
 for w in string.gmatch( [[
 	ech_lib.c ech_ossl.c ech_key.c ech_err.c
 ]],"%S+") do
-	files { "crypto/ecdh/"..w }
+	files { "git/crypto/ecdh/"..w }
 end
 
 for w in string.gmatch( [[
 	dsa_gen.c dsa_key.c dsa_lib.c dsa_asn1.c dsa_vrf.c dsa_sign.c 
 	dsa_err.c dsa_ossl.c dsa_depr.c dsa_ameth.c dsa_pmeth.c dsa_prn.c
 ]],"%S+") do
-	files { "crypto/dsa/"..w }
+	files { "git/crypto/dsa/"..w }
 end
 
 for w in string.gmatch( [[
@@ -228,46 +227,46 @@ for w in string.gmatch( [[
 	cms_sd.c cms_dd.c cms_cd.c cms_env.c cms_enc.c cms_ess.c \
 	cms_pwri.c
 ]],"%S+") do
-	files { "crypto/cms/"..w }
+	files { "git/crypto/cms/"..w }
 end
 
 for w in string.gmatch( [[
 	aes_core.c aes_misc.c aes_ecb.c aes_cbc.c aes_cfb.c aes_ofb.c
     aes_ctr.c aes_ige.c aes_wrap.c
 ]],"%S+") do
-	files { "crypto/aes/"..w }
+	files { "git/crypto/aes/"..w }
 end
 
 for w in string.gmatch( [[
 	rc2_ecb.c rc2_skey.c rc2_cbc.c rc2cfb64.c rc2ofb64.c
 ]],"%S+") do
-	files { "crypto/rc2/"..w }
+	files { "git/crypto/rc2/"..w }
 end
 
 for w in string.gmatch( [[
 	rc4_skey.c rc4_enc.c rc4_utl.c
 ]],"%S+") do
-	files { "crypto/rc4/"..w }
+	files { "git/crypto/rc4/"..w }
 end
 
 for w in string.gmatch( [[
 	cbc128.c ctr128.c cts128.c cfb128.c ofb128.c gcm128.c 
 	ccm128.c xts128.c
 ]],"%S+") do
-	files { "crypto/modes/"..w }
+	files { "git/crypto/modes/"..w }
 end
 
 for w in string.gmatch( [[
 	seed.c seed_ecb.c seed_cbc.c seed_cfb.c seed_ofb.c
 ]],"%S+") do
-	files { "crypto/seed/"..w }
+	files { "git/crypto/seed/"..w }
 end
 
 for w in string.gmatch( [[
 	camellia.c cmll_misc.c cmll_ecb.c cmll_cbc.c cmll_ofb.c 
 	   cmll_cfb.c cmll_ctr.c cmll_utl.c
 ]],"%S+") do
-	files { "crypto/camellia/"..w }
+	files { "git/crypto/camellia/"..w }
 end
 
 for w in string.gmatch( [[
@@ -280,22 +279,22 @@ for w in string.gmatch( [[
 	str2key.c  cfb64ede.c ofb64ede.c ede_cbcm_enc.c des_old.c des_old2.c 
 	read2pwd.c
 ]],"%S+") do
-	files { "crypto/des/"..w }
+	files { "git/crypto/des/"..w }
 end
 
 for w in string.gmatch( [[
 	i_cbc.c i_cfb64.c i_ofb64.c i_ecb.c i_skey.c
 ]],"%S+") do
-	files { "crypto/idea/"..w }
+	files { "git/crypto/idea/"..w }
 end
 
 for w in string.gmatch( [[
 	srp_lib.c srp_vfy.c	
 ]],"%S+") do
-	files { "crypto/srp/"..w }
+	files { "git/crypto/srp/"..w }
 end
 
-includedirs { ".", "include" , "crypto" , "crypto/asn1" , "crypto/modes" , "crypto/evp" }
+includedirs { "git/.", "git/include" , "git/crypto" , "git/crypto/asn1" , "git/crypto/modes" , "git/crypto/evp" }
 
 
 KIND{}
