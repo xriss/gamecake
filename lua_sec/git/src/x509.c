@@ -280,7 +280,7 @@ int meth_extensions(lua_State* L)
   int j;
   int i = -1;
   int n_general_names;
-  OTHERNAME *otherName;
+  WOLFSSL_ASN1_OTHERNAME *otherName;
   X509_EXTENSION *extension;
   GENERAL_NAME *general_name;
   STACK_OF(GENERAL_NAME) *values;

@@ -252,6 +252,7 @@ static int cert_verify_cb(X509_STORE_CTX *x509_ctx, void *ptr)
 
   lua_pop(L, 2); /* Remove values from stack */
 
+#if 0
   if (verify & LSEC_VERIFY_IGNORE_PURPOSE) {
     /* Set parameters to ignore the server purpose */
     X509_VERIFY_PARAM *param = X509_STORE_CTX_get0_param(x509_ctx);
@@ -260,6 +261,7 @@ static int cert_verify_cb(X509_STORE_CTX *x509_ctx, void *ptr)
       X509_VERIFY_PARAM_set_trust(param, X509_TRUST_SSL_SERVER);
     }
   }
+#endif
   /* Call OpenSSL standard verification function */
   return X509_verify_cert(x509_ctx);
 }

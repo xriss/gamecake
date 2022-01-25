@@ -34,9 +34,9 @@
 
 
 #ifndef LSEC_API_OPENSSL_1_1_0
-#define SSL_is_server(s) (s->server)
-#define SSL_up_ref(ssl)  CRYPTO_add(&(ssl)->references, 1, CRYPTO_LOCK_SSL)
-#define X509_up_ref(c)   CRYPTO_add(&c->references, 1, CRYPTO_LOCK_X509)
+#define SSL_is_server(s) 0//(s->server)
+#define SSL_up_ref(ssl)  //CRYPTO_add(&(ssl)->references, 1, CRYPTO_LOCK_SSL)
+#define X509_up_ref(c)   //CRYPTO_add(&c->references, 1, CRYPTO_LOCK_X509)
 #endif
 
 
@@ -452,7 +452,7 @@ static int meth_want(lua_State *L)
   case SSL_NOTHING: lua_pushstring(L, "nothing"); break;
   case SSL_READING: lua_pushstring(L, "read"); break;
   case SSL_WRITING: lua_pushstring(L, "write"); break;
-  case SSL_X509_LOOKUP: lua_pushstring(L, "x509lookup"); break;
+  default: lua_pushstring(L, "x509lookup"); break;
   }
   return 1;
 }
@@ -473,10 +473,12 @@ static int meth_compression(lua_State *L)
     lua_pushstring(L, "closed");
     return 2;
   }
+#if 0
   comp = SSL_get_current_compression(ssl->ssl);
   if (comp)
     lua_pushstring(L, SSL_COMP_get_name(comp));
   else
+#endif
     lua_pushnil(L);
   return 1;
 }
