@@ -13,7 +13,7 @@ ln -f lua_socket/git/src/mbox.lua               lua/socket/mbox.lua
 ln -f lua_socket/git/src/smtp.lua               lua/socket/smtp.lua
 ln -f lua_socket/git/src/tp.lua                 lua/socket/tp.lua
 ln -f lua_socket/git/src/url.lua                lua/socket/url.lua
-ln -f lua_sec/git/src/https.lua                 lua/socket/https.lua
+ln -f lua_sec/git/src/https.lua                 lua/ssl/https.lua
 ln -f lua_sec/git/src/ssl.lua                   lua/ssl.lua
 
 
