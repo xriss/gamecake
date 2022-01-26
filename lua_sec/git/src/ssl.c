@@ -64,12 +64,12 @@ static const char *ssl_ioerror(void *ctx, int err)
 {
   if (err == LSEC_IO_SSL) {
     p_ssl ssl = (p_ssl) ctx;
-
+/*
 printf("%d\n",ssl->error);
 char errorString[80];
 wolfSSL_ERR_error_string(ssl->error, errorString);
 printf("%s\n",errorString);
-
+*/
     switch(ssl->error) {
     case SSL_ERROR_NONE: return "No error";
     case SSL_ERROR_ZERO_RETURN: return "closed";
