@@ -22,6 +22,11 @@ defines{
 }
 
 
+if WINDOWS then
+
+	defines "LUASEC_INET_NTOP"
+
+end
 
 links { "lib_wolfssl" }
 

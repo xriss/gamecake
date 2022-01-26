@@ -1,6 +1,4 @@
 
-if not WEB then -- just grab mime under nacl
-
 project "lua_socket"
 language "C"
 files { "git/src/*.c" , "git/src/*.cpp" , "git/src/*.h" }
@@ -19,6 +17,7 @@ if WINDOWS then
 
 	excludes("git/src/usocket.*")
 	excludes("git/src/serial.*")
+	excludes("git/src/unix*")
 
 	links { "ws2_32" }
 	
@@ -33,7 +32,7 @@ end
 
 KIND{kind="lua",dir="socket",name="core",luaname="socket.core",luaopen="socket_core"}
 
-end
+
 
 
 project "lua_mime"
