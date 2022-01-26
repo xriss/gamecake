@@ -712,7 +712,7 @@ includedirs { "./lua_grd/code" }
 
 all_includes=all_includes or {
 
--- lua bindings
+-- lua bindings that should always be available no matter the OS host.
 	{LUA_BIT,		    WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_kissfft",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_pack",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
@@ -728,78 +728,63 @@ all_includes=all_includes or {
 	{"lua_grdmap",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_sod",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_socket",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_sec",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_gamecake",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_win",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_lfs",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lua_sqlite",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
-	{"lua_profiler",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_posix",		nil			or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_lash",		WINDOWS		or		NIX		or		EMCC		or		nil			or	OSX		},
-	
--- we just use SDL2 now
---	{"lua_win_"..GAMECAKE_WIN_TYPE, GAMECAKE_WIN_TYPE }, -- pick the os interface, see above
-
---	{"lua_win_android", ANDROID },
-
-	{"lua_sdl2",	   WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-
--- emcc wraps the SDL2 with some extra functions.
-
-	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
-
---new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
+	{"lua_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_lash",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_sdl2",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_bullet",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_utf8",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_cmsgpack",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+
+-- emcc needs a little bit of special sauce
+	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
+
+
+-- These are mostly linux only bindings for linux only gamecake projects...
+	{"lua_linenoise",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
+	{"lua_posix",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 	{"lua_periphery",	nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_v4l2",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_rex",			nil			or		NIX		or		nil			or		nil			or	nil		},
-	{"lua_linenoise",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_sys",			WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_sec",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_wolfssl",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_zip",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_glslang",		nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_midi",		nil			or		NIX		or		nil			or		nil			or	nil		},
+
 	{"lua_pgsql",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
-	{"lua_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_speexdsp",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
--- no raspi build anymore, need to add to linux build in a sensible way.
---	{"lua_raspi_unicornhat",																RASPI	},
+	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lib_hidapi",		nil			or		NIX		or		nil			or		nil			or	nil		},
 
--- only emcc actually needs this as a vanilla LUA build
+-- this is probably luajit but may be lua 5.1
 	{LIB_LUA,			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
--- static libs used by the lua bindings
-	{"lib_zzip",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+-- static libs used by the lua bindings so they should be linked afterwards
+	{"lib_wolfssl",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_speexdsp",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_png",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_jpeg",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_gif",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_z",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_zip",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_zzip",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_freetype",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_vorbis",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{LIB_OPENAL,		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 
--- going to need some multithreading
-	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-
--- test glslang?
-	{"lua_glslang",		NIX		},
-
--- test midi alsa?
-	{"lua_midi",		NIX		},
-
--- test hid?
-	{"lua_hid",			NIX		},
-	{"lib_hidapi",		NIX		},
-
-	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+-- some OS will provide openal so do not need this.
+	{LIB_OPENAL,		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
 
 -- the output executables
 	{"exe_gamecake",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
