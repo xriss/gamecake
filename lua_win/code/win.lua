@@ -46,9 +46,9 @@ if flavour_request then print("The requested flavour of win is "..(flavour_reque
 -- probe for available hardcores, 
 local hardcores={}
 for _,it in ipairs({
-		{name="sdl",		noblock=false,	posix=false,	},
-		{name="emcc",		noblock=true,	posix=false,	},
-		{name="nacl",		noblock=true,	posix=false,	},
+		{name="sdl",		noblock=false,	posix=false,	}, -- we are probably using this one
+		{name="emcc",		noblock=true,	posix=false,	}, -- this is a slightly modified version of sdl
+		{name="nacl",		noblock=true,	posix=false,	}, -- the rest are old and probably broken
 		{name="android",	noblock=false,	posix=false,	},
 		{name="windows",	noblock=false,	posix=false,	},
 		{name="linux",		noblock=false,	posix=true,		},
@@ -212,55 +212,6 @@ function win.load_run_init(args)
 	return f(args)
 
 end
-
---
--- Special android entry points, we pass in the location of the apk
--- this does things that must only happen once
---
-function win.android_start(apk)
-
--- replace print
-	_G.print=hardcore.print
-	print=_G.print
-
-
-	if jit then -- start by tring to force a jit memory allocation
-		log("oven",jit.status())
-		require("jit.opt").start("sizemcode=256","maxmcode=256")
-		for i=1,1000 do end
-		log("oven",jit.status())
-  	end
-
-	if hardcore.get_memory_class then
-		log("oven","memory class "..hardcore.get_memory_class().." meg")
-	end
-
---	if jit and jit.off then
---		jit.off()
---		hardcore.print("LUA JIT OFF")
---	end -- jit breaks stuff?
-
-
-
-	win.apk=apk
-	local zips=require("wetgenes.zips")
-	zips.add_apk_file(win.apk)
-	
-	win.files_prefix=hardcore.get_files_prefix().."/"
-	win.cache_prefix=hardcore.get_cache_prefix().."/"
---	win.cache_prefix=hardcore.get_files_prefix().."/cache/"
-	win.external_prefix=hardcore.get_external_prefix().."/"
-
-	win.smell=hardcore.smell_check()
-
---print(win.files_prefix)
---print(win.cache_prefix)
-
---print("ANDROID_SETUP with ",apk)
-	
-	return win.load_run_init({})
-end
-
 
 --
 -- Special nacl entry points, we pass in the url of the main zip we wish to load
@@ -619,9 +570,9 @@ function base.warp_mouse(w,x,y)
 	end
 end
 
-function base.relative_mouse(b)
+function base.relative_mouse(w,b)
 	if     hardcore and hardcore.relative_mouse then
-		return hardcore.relative_mouse(b)
+		return hardcore.relative_mouse(w[0],b)
 	end
 end
 
@@ -632,3 +583,9 @@ function base.cursor(...)
 	end
 end
 
+-- set hints
+function base.hints(...)
+	if     hardcore and hardcore.hints then
+		return hardcore.hints(...)
+	end
+end

@@ -1,5 +1,5 @@
 /*
- * TOOLS.C   	                    Copyright (c) 2002-10, Asko Kauppi
+ * TOOLS.C                         Copyright (c) 2002-10, Asko Kauppi
  *
  * Lua tools to support Lanes.
 */
@@ -48,11 +48,59 @@ THE SOFTWARE.
 #include "uniquekey.h"
 
 // functions implemented in deep.c
-extern bool_t copydeep( Universe* U, lua_State* L, lua_State* L2, int index, LookupMode mode_);
+extern bool_t copydeep( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_State* L, uint_t i, LookupMode mode_, char const* upName_);
 extern void push_registry_subtable( lua_State* L, UniqueKey key_);
 
 DEBUGSPEW_CODE( char const* debugspew_indent = "----+----!----+----!----+----!----+----!----+----!----+----!----+----!----+");
 
+
+// ################################################################################################
+
+/*
+ * Does what the original 'push_registry_subtable' function did, but adds an optional mode argument to it
+ */
+void push_registry_subtable_mode( lua_State* L, UniqueKey key_, const char* mode_)
+{
+  STACK_GROW( L, 3);
+  STACK_CHECK( L, 0);
+
+  REGISTRY_GET( L, key_);                               // {}|nil
+  STACK_MID( L, 1);
+
+  if( lua_isnil( L, -1))
+  {
+    lua_pop( L, 1);                                     //
+    lua_newtable( L);                                   // {}
+    // _R[key_] = {}
+    REGISTRY_SET( L, key_, lua_pushvalue( L, -2));      // {}
+    STACK_MID( L, 1);
+
+    // Set its metatable if requested
+    if( mode_)
+    {
+      lua_newtable( L);                                 // {} mt
+      lua_pushliteral( L, "__mode");                    // {} mt "__mode"
+      lua_pushstring( L, mode_);                        // {} mt "__mode" mode
+      lua_rawset( L, -3);                               // {} mt
+      lua_setmetatable( L, -2);                         // {}
+    }
+  }
+  STACK_END( L, 1);
+  ASSERT_L( lua_istable( L, -1));
+}
+
+// ################################################################################################
+
+/*
+ * Push a registry subtable (keyed by unique 'key_') onto the stack.
+ * If the subtable does not exist, it is created and chained.
+ */
+void push_registry_subtable( lua_State* L, UniqueKey key_)
+{
+  push_registry_subtable_mode( L, key_, NULL);
+}
+
+// ################################################################################################
 
 /*---=== luaG_dump ===---*/
 #ifdef _DEBUG
@@ -178,139 +226,6 @@ void cleanup_allocator_function( Universe* U, lua_State* L)
 
 // ################################################################################################
 
-void initialize_on_state_create( Universe* U, lua_State* L)
-{
-	STACK_CHECK( L, 0);
-	lua_getfield( L, -1, "on_state_create");              // settings on_state_create|nil
-	if( !lua_isnil( L, -1))
-	{
-		// store C function pointer in an internal variable
-		U->on_state_create_func = lua_tocfunction( L, -1);  // settings on_state_create
-		if( U->on_state_create_func != NULL)
-		{
-			// make sure the function doesn't have upvalues
-			char const* upname = lua_getupvalue( L, -1, 1);   // settings on_state_create upval?
-			if( upname != NULL) // should be "" for C functions with upvalues if any
-			{
-				(void) luaL_error( L, "on_state_create shouldn't have upvalues");
-			}
-			// remove this C function from the config table so that it doesn't cause problems
-			// when we transfer the config table in newly created Lua states
-			lua_pushnil( L);                                  // settings on_state_create nil
-			lua_setfield( L, -3, "on_state_create");          // settings on_state_create
-		}
-		else
-		{
-			// optim: store marker saying we have such a function in the config table
-			U->on_state_create_func = (lua_CFunction) initialize_on_state_create;
-		}
-	}
-	lua_pop( L, 1);                                       // settings
-	STACK_END( L, 0);
-}
-
-// ################################################################################################
-
-// just like lua_xmove, args are (from, to)
-static void copy_one_time_settings( Universe* U, lua_State* L, lua_State* L2)
-{
-	STACK_GROW( L, 2);
-	STACK_CHECK( L, 0);
-	STACK_CHECK( L2, 0);
-
-	DEBUGSPEW_CODE( fprintf( stderr, INDENT_BEGIN "copy_one_time_settings()\n" INDENT_END));
-	DEBUGSPEW_CODE( ++ U->debugspew_indent_depth);
-
-	REGISTRY_GET( L, CONFIG_REGKEY);                                               // config
-	// copy settings from from source to destination registry
-	if( luaG_inter_move( U, L, L2, 1, eLM_LaneBody) < 0)                           //                           // config
-	{
-		(void) luaL_error( L, "failed to copy settings when loading lanes.core");
-	}
-	// set L2:_R[CONFIG_REGKEY] = settings
-	REGISTRY_SET( L2, CONFIG_REGKEY, lua_insert( L2, -2));                                                      //
-	STACK_END( L2, 0);
-	STACK_END( L, 0);
-	DEBUGSPEW_CODE( -- U->debugspew_indent_depth);
-}
-
-
-/*---=== luaG_newstate ===---*/
-
-static int require_lanes_core( lua_State* L)
-{
-	// leaves a copy of 'lanes.core' module table on the stack
-	luaL_requiref( L, "lanes.core", luaopen_lanes_core, 0);
-	return 1;
-}
-
-
-static const luaL_Reg libs[] =
-{
-	{ LUA_LOADLIBNAME, luaopen_package},
-	{ LUA_TABLIBNAME, luaopen_table},
-	{ LUA_STRLIBNAME, luaopen_string},
-	{ LUA_MATHLIBNAME, luaopen_math},
-#ifndef PLATFORM_XBOX // no os/io libs on xbox
-	{ LUA_OSLIBNAME, luaopen_os},
-	{ LUA_IOLIBNAME, luaopen_io},
-#endif // PLATFORM_XBOX
-#if LUA_VERSION_NUM >= 503
-	{ LUA_UTF8LIBNAME, luaopen_utf8},
-#endif
-#if LUA_VERSION_NUM >= 502
-#ifdef luaopen_bit32
-	{ LUA_BITLIBNAME, luaopen_bit32},
-#endif
-	{ LUA_COLIBNAME, luaopen_coroutine}, // Lua 5.2: coroutine is no longer a part of base!
-#else // LUA_VERSION_NUM
-	{ LUA_COLIBNAME, NULL},              // Lua 5.1: part of base package
-#endif // LUA_VERSION_NUM
-	{ LUA_DBLIBNAME, luaopen_debug},
-#if defined LUA_JITLIBNAME // building against LuaJIT headers, add some LuaJIT-specific libs
-//#pragma message( "supporting JIT base libs")
-	{ LUA_BITLIBNAME, luaopen_bit},
-	{ LUA_JITLIBNAME, luaopen_jit},
-	{ LUA_FFILIBNAME, luaopen_ffi},
-#endif // LUA_JITLIBNAME
-
-	{ LUA_DBLIBNAME, luaopen_debug},
-	{ "lanes.core", require_lanes_core}, // So that we can open it like any base library (possible since we have access to the init function)
-	//
-	{ "base", NULL},                     // ignore "base" (already acquired it)
-	{ NULL, NULL }
-};
-
-static void open1lib( DEBUGSPEW_PARAM_COMMA( Universe* U) lua_State* L, char const* name_, size_t len_)
-{
-	int i;
-	for( i = 0; libs[i].name; ++ i)
-	{
-		if( strncmp( name_, libs[i].name, len_) == 0)
-		{
-			lua_CFunction libfunc = libs[i].func;
-			name_ = libs[i].name; // note that the provided name_ doesn't necessarily ends with '\0', hence len_
-			if( libfunc != NULL)
-			{
-				bool_t const isLanesCore = (libfunc == require_lanes_core) ? TRUE : FALSE; // don't want to create a global for "lanes.core"
-				DEBUGSPEW_CODE( fprintf( stderr, INDENT_BEGIN "opening %.*s library\n" INDENT_END, (int) len_, name_));
-				STACK_CHECK( L, 0);
-				// open the library as if through require(), and create a global as well if necessary (the library table is left on the stack)
-				luaL_requiref( L, name_, libfunc, !isLanesCore);
-				// lanes.core doesn't declare a global, so scan it here and now
-				if( isLanesCore == TRUE)
-				{
-					populate_func_lookup_table( L, -1, name_);
-				}
-				lua_pop( L, 1);
-				STACK_END( L, 0);
-			}
-			break;
-		}
-	}
-}
-
-
 static int dummy_writer( lua_State* L, void const* p, size_t sz, void* ud)
 {
 	(void)L; (void)p; (void)sz; (void) ud; // unused
@@ -382,7 +297,8 @@ static char const* luaG_pushFQN( lua_State* L, int t, int last, size_t* length)
 	int i = 1;
 	luaL_Buffer b;
 	STACK_CHECK( L, 0);
-	luaL_buffinit( L, &b);
+	// Lua 5.4 pushes &b as light userdata on the stack. be aware of it...
+	luaL_buffinit( L, &b);                            // ... {} ... &b?
 	for( ; i < last; ++ i)
 	{
 		lua_rawgeti( L, t, i);
@@ -394,7 +310,8 @@ static char const* luaG_pushFQN( lua_State* L, int t, int last, size_t* length)
 		lua_rawgeti( L, t, i);
 		luaL_addvalue( &b);
 	}
-	luaL_pushresult( &b);
+	// &b is popped at that point (-> replaced by the result)
+	luaL_pushresult( &b);                             // ... {} ... "<result>"
 	STACK_END( L, 1);
 	return lua_tolstring( L, -1, length);
 }
@@ -668,197 +585,6 @@ void populate_func_lookup_table( lua_State* L, int _i, char const* name_)
 	DEBUGSPEW_CODE( -- U->debugspew_indent_depth);
 }
 
-void call_on_state_create( Universe* U, lua_State* L, lua_State* from_, LookupMode mode_)
-{
-	if( U->on_state_create_func != NULL)
-	{
-		STACK_CHECK( L, 0);
-		DEBUGSPEW_CODE( fprintf( stderr, INDENT_BEGIN "calling on_state_create()\n" INDENT_END));
-		if( U->on_state_create_func != (lua_CFunction) initialize_on_state_create)
-		{
-			// C function: recreate a closure in the new state, bypassing the lookup scheme
-			lua_pushcfunction( L, U->on_state_create_func);                             // on_state_create()
-		}
-		else // Lua function located in the config table, copied when we opened "lanes.core"
-		{
-			if( mode_ != eLM_LaneBody)
-			{
-				// if attempting to call in a keeper state, do nothing because the function doesn't exist there
-				// this doesn't count as an error though
-				return;
-			}
-			REGISTRY_GET( L, CONFIG_REGKEY);                                            // {}
-			STACK_MID( L, 1);
-			lua_getfield( L, -1, "on_state_create");                                    // {} on_state_create()
-			lua_remove( L, -2);                                                         // on_state_create()
-		}
-		STACK_MID( L, 1);
-		// capture error and raise it in caller state
-		if( lua_pcall( L, 0, 0, 0) != LUA_OK)
-		{
-			luaL_error( from_, "on_state_create failed: \"%s\"", lua_isstring( L, -1) ? lua_tostring( L, -1) : lua_typename( L, lua_type( L, -1)));
-		}
-		STACK_END( L, 0);
-	}
-}
-
-lua_State* create_state( Universe* U, lua_State* from_)
-{
-	lua_State* L;
-	if( U->provide_allocator != NULL)
-	{
-		lua_pushcclosure( from_, U->provide_allocator, 0);
-		lua_call( from_, 0, 1);
-		{
-			AllocatorDefinition* def = lua_touserdata( from_, -1);
-			L = lua_newstate( def->allocF, def->allocUD);
-		}
-		lua_pop( from_, 1);
-	}
-	else
-	{
-		L = luaL_newstate();
-	}
-
-	if( L == NULL)
-	{
-		(void) luaL_error( from_, "luaG_newstate() failed while creating state; out of memory");
-	}
-	return L;
-}
-
-/*
- * Like 'luaL_openlibs()' but allows the set of libraries be selected
- *
- *   NULL    no libraries, not even base
- *   ""      base library only
- *   "io,string"     named libraries
- *   "*"     all libraries
- *
- * Base ("unpack", "print" etc.) is always added, unless 'libs' is NULL.
- *
- * *NOT* called for keeper states!
- *
- */
-lua_State* luaG_newstate( Universe* U, lua_State* from_, char const* libs_)
-{
-	lua_State* L = create_state( U, from_);
-
-	STACK_GROW( L, 2);
-	STACK_CHECK_ABS( L, 0);
-
-	// copy the universe as a light userdata (only the master state holds the full userdata)
-	// that way, if Lanes is required in this new state, we'll know we are part of this universe
-	universe_store( L, U);
-	STACK_MID( L, 0);
-
-	// we'll need this every time we transfer some C function from/to this state
-	REGISTRY_SET( L, LOOKUP_REGKEY, lua_newtable( L));
-	STACK_MID( L, 0);
-
-	// neither libs (not even 'base') nor special init func: we are done
-	if( libs_ == NULL && U->on_state_create_func == NULL)
-	{
-		DEBUGSPEW_CODE( fprintf( stderr, INDENT_BEGIN "luaG_newstate(NULL)\n" INDENT_END));
-		return L;
-	}
-
-	DEBUGSPEW_CODE( fprintf( stderr, INDENT_BEGIN "luaG_newstate()\n" INDENT_END));
-	DEBUGSPEW_CODE( ++ U->debugspew_indent_depth);
-
-	// copy settings (for example because it may contain a Lua on_state_create function)
-	copy_one_time_settings( U, from_, L);
-
-	// 'lua.c' stops GC during initialization so perhaps its a good idea. :)
-	lua_gc( L, LUA_GCSTOP, 0);
-
-		
-		// Anything causes 'base' to be taken in
-	//
-	if( libs_ != NULL)
-	{
-		// special "*" case (mainly to help with LuaJIT compatibility)
-		// as we are called from luaopen_lanes_core() already, and that would deadlock
-		if( libs_[0] == '*' && libs_[1] == 0)
-		{
-			DEBUGSPEW_CODE( fprintf( stderr, INDENT_BEGIN "opening ALL standard libraries\n" INDENT_END));
-			luaL_openlibs( L);
-			// don't forget lanes.core for regular lane states
-			open1lib( DEBUGSPEW_PARAM_COMMA( U) L, "lanes.core", 10);
-			libs_ = NULL; // done with libs
-		}
-		else
-		{
-			DEBUGSPEW_CODE( fprintf( stderr, INDENT_BEGIN "opening base library\n" INDENT_END));
-#if LUA_VERSION_NUM >= 502
-			// open base library the same way as in luaL_openlibs()
-			luaL_requiref( L, "_G", luaopen_base, 1);
-			lua_pop( L, 1);
-#else // LUA_VERSION_NUM
-			lua_pushcfunction( L, luaopen_base);
-			lua_pushstring( L, "");
-			lua_call( L, 1, 0);
-#endif // LUA_VERSION_NUM
-		}
-	}
-	STACK_END( L, 0);
-
-	// scan all libraries, open them one by one
-	if( libs_)
-	{
-		char const* p;
-		unsigned int len = 0;
-		for( p = libs_; *p; p += len)
-		{
-			// skip delimiters ('.' can be part of name for "lanes.core")
-			while( *p && !isalnum( *p) && *p != '.')
-				++ p;
-			// skip name
-			len = 0;
-			while( isalnum( p[len]) || p[len] == '.')
-				++ len;
-			// open library
-			open1lib( DEBUGSPEW_PARAM_COMMA( U) L, p, len);
-		}
-	}
-	lua_gc( L, LUA_GCRESTART, 0);
-
-	serialize_require( DEBUGSPEW_PARAM_COMMA( U) L);
-
-	// call this after the base libraries are loaded and GC is restarted
-	// will raise an error in from_ in case of problem
-	call_on_state_create( U, L, from_, eLM_LaneBody);
-
-	STACK_CHECK( L, 0);
-	// after all this, register everything we find in our name<->function database
-	lua_pushglobaltable( L); // Lua 5.2 no longer has LUA_GLOBALSINDEX: we must push globals table on the stack
-	populate_func_lookup_table( L, -1, NULL);
-
-#if 0 && USE_DEBUG_SPEW
-	// dump the lookup database contents
-	lua_getfield( L, LUA_REGISTRYINDEX, LOOKUP_REGKEY);                       // {}
-	lua_pushnil( L);                                                          // {} nil
-	while( lua_next( L, -2))                                                  // {} k v
-	{
-		lua_getglobal( L, "print");                                             // {} k v print
-		lua_pushlstring( L, debugspew_indent, U->debugspew_indent_depth);       // {} k v print " "
-		lua_pushvalue( L, -4);                                                  // {} k v print " " k
-		lua_pushvalue( L, -4);                                                  // {} k v print " " k v
-		lua_call( L, 3, 0);                                                     // {} k v
-		lua_pop( L, 1);                                                         // {} k
-	}
-	lua_pop( L, 1);                                                           // {}
-#endif // USE_DEBUG_SPEW
-
-	lua_pop( L, 1);
-	STACK_END( L, 0);
-	DEBUGSPEW_CODE( -- U->debugspew_indent_depth);
-	return L;
-}
-
-
-
-
 /*---=== Inter-state copying ===---*/
 
 // crc64/we of string "REG_MTID" generated at http://www.nitrxgen.net/hashgen/
@@ -906,14 +632,6 @@ static lua_Integer get_mt_id( Universe* U, lua_State* L, int i)
 
 	return id;
 }
-
-
-static int buf_writer( lua_State *L, const void* b, size_t n, void* B ) {
-  (void)L;
-  luaL_addlstring((luaL_Buffer*) B, (const char *)b, n);
-  return 0;
-}
-
 
 // function sentinel used to transfer native functions from/to keeper states
 static int func_lookup_sentinel( lua_State* L)
@@ -1019,7 +737,7 @@ static bool_t lookup_table( lua_State* L2, lua_State* L, uint_t i, LookupMode mo
 		return FALSE;
 	}
 	// push the equivalent table in the destination's stack, retrieved from the lookup table
-	STACK_CHECK( L2, 0);                                        // L                          // L2
+	STACK_CHECK( L2, 0);                                     // L                          // L2
 	STACK_GROW( L2, 3); // up to 3 slots are necessary on error
 	switch( mode_)
 	{
@@ -1390,13 +1108,6 @@ static void lookup_native_func( lua_State* L2, lua_State* L, uint_t i, LookupMod
  * Copy a function over, which has not been found in the cache.
  * L2 has the cache key for this function at the top of the stack
 */
-enum e_vt
-{
-	VT_NORMAL,
-	VT_KEY,
-	VT_METATABLE
-};
-static bool_t inter_copy_one( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_State* L, uint_t i, enum e_vt value_type, LookupMode mode_, char const* upName_);
 
 #if USE_DEBUG_SPEW
 static char const* lua_type_names[] =
@@ -1421,13 +1132,31 @@ static char const* vt_names[] =
 };
 #endif // USE_DEBUG_SPEW
 
+// Lua 5.4.3 style of dumping (see lstrlib.c)
+// we have to do it that way because we can't unbalance the stack between buffer operations
+// namely, this means we can't push a function on top of the stack *after* we initialize the buffer!
+// luckily, this also works with earlier Lua versions
+static int buf_writer( lua_State* L, void const* b, size_t size, void* ud)
+{
+    luaL_Buffer* B = (luaL_Buffer*) ud;
+    if( !B->L)
+    {
+        luaL_buffinit( L, B);
+    }
+    luaL_addlstring( B, (char const*) b, size);
+    return 0;
+}
+
 static void copy_func( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_State* L, uint_t i, LookupMode mode_, char const* upName_)
 {
 	int n, needToPush;
-	luaL_Buffer b;
+	luaL_Buffer B;
+	B.L = NULL;
+
 	ASSERT_L( L2_cache_i != 0);                                                       // ... {cache} ... p
 	STACK_GROW( L, 2);
 	STACK_CHECK( L, 0);
+
 
 	// 'lua_dump()' needs the function at top of stack
 	// if already on top of the stack, no need to push again
@@ -1437,18 +1166,18 @@ static void copy_func( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_State*
 		lua_pushvalue( L, i);                                // ... f
 	}
 
-	luaL_buffinit( L, &b);
 	//
 	// "value returned is the error code returned by the last call 
 	// to the writer" (and we only return 0)
 	// not sure this could ever fail but for memory shortage reasons
-	if( lua504_dump( L, buf_writer, &b, 0) != 0)
+	// last parameter is Lua 5.4-specific (no stripping)
+	if( lua504_dump( L, buf_writer, &B, 0) != 0)
 	{
 		luaL_error( L, "internal error: function dump failed.");
 	}
 
 	// pushes dumped string on 'L'
-	luaL_pushresult( &b);                                  // ... f b
+	luaL_pushresult( &B);                                  // ... f b
 
 	// if not pushed, no need to pop
 	if( needToPush)
@@ -1736,17 +1465,41 @@ static void inter_copy_keyvaluepair( Universe* U, lua_State* L2, uint_t L2_cache
 	}
 }
 
+/*
+* The clone cache is a weak valued table listing all clones, indexed by their userdatapointer
+* fnv164 of string "CLONABLES_CACHE_KEY" generated at https://www.pelock.com/products/hash-calculator
+*/
+static DECLARE_CONST_UNIQUE_KEY( CLONABLES_CACHE_KEY, 0xD04EE018B3DEE8F5);
+
 static bool_t copyclone( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_State* L, uint_t i, LookupMode mode_, char const* upName_)
 {
+	void* const source = lua_touserdata( L, i);
+
 	STACK_CHECK( L, 0);
 	STACK_CHECK( L2, 0);
 
+	// Check if the source was already cloned during this copy
+	lua_pushlightuserdata( L2, source);                                                                  // ... source
+	lua_rawget( L2, L2_cache_i);                                                                         // ... clone?
+	if ( !lua_isnil( L2, -1))
+	{
+		STACK_MID( L2, 1);
+		return TRUE;
+	}
+	else
+	{
+		lua_pop( L2, 1);                                                                                   // ...
+	}
+	STACK_MID( L2, 0);
+
+	// no metatable? -> not clonable
 	if( !lua_getmetatable( L, i))                                            // ... mt?
 	{
 		STACK_MID( L, 0);
 		return FALSE;
 	}
 
+	// no __lanesclone? -> not clonable
 	lua_getfield( L, -1, "__lanesclone");                                    // ... mt __lanesclone?
 	if( lua_isnil( L, -1))
 	{
@@ -1756,79 +1509,88 @@ static bool_t copyclone( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_Stat
 	}
 
 	{
+		int const mt = lua_absindex( L, -2);
 		size_t userdata_size = 0;
-		void* const source = lua_touserdata( L, i);
 		void* clone = NULL;
 		lua_pushvalue( L, -1);                                                 // ... mt __lanesclone __lanesclone
-		// call the cloning function with 0 arguments, should return the number of bytes to allocate for the clone
-		lua_call( L, 0, 1);                                                    // ... mt __lanesclone size
+		// call the cloning function with 1 argument, should return the number of bytes to allocate for the clone
+		lua_pushlightuserdata( L, source);                                     // ... mt __lanesclone __lanesclone source
+		lua_call( L, 1, 1);                                                    // ... mt __lanesclone size
 		STACK_MID( L, 3);
 		userdata_size = (size_t) lua_tointeger( L, -1);                        // ... mt __lanesclone size
 		lua_pop( L, 1);                                                        // ... mt __lanesclone
 		// we need to copy over the uservalues of the userdata as well
-		lua_pushnil( L2);                                                                                  // ... nil
 		{
-			int const clone_i = lua_gettop( L2);
+			// extract all the uservalues, but don't transfer them yet
 			int uvi = 0;
-			while( lua_getiuservalue( L, i, uvi + 1) != LUA_TNONE)               // ... mt __lanesclone uv
+			while( lua_getiuservalue( L, i, uvi + 1) != LUA_TNONE)               // ... mt __lanesclone [uv]+ nil
 			{
-				luaG_inter_move( U, L, L2, 1, mode_);                              // ... mt __lanesclone      // ... nil [uv]+
 				++ uvi;
 			}
 			// when lua_getiuservalue() returned LUA_TNONE, it pushed a nil. pop it now
-			lua_pop( L, 1);                                                      // ... mt __lanesclone
+			lua_pop( L, 1);                                                      // ... mt __lanesclone [uv]+
 				// create the clone userdata with the required number of uservalue slots
-			clone = lua_newuserdatauv( L2, userdata_size, uvi);                                              // ... nil [uv]+ u
-			lua_replace( L2, clone_i);                                                                       // ... u [uv]+
+			clone = lua_newuserdatauv( L2, userdata_size, uvi);                                              // ... u
+			// copy the metatable in the target state, and give it to the clone we put there
+			if( inter_copy_one( U, L2, L2_cache_i, L, mt, VT_NORMAL, mode_, upName_))                        // ... u mt|sentinel
+			{
+				if( eLM_ToKeeper == mode_)                                                                     // ... u sentinel
+				{
+					ASSERT_L( lua_tocfunction( L2, -1) == table_lookup_sentinel);
+					// we want to create a new closure with a 'clone sentinel' function, where the upvalues are the userdata and the metatable fqn
+					lua_getupvalue( L2, -1, 1);                                                                  // ... u sentinel fqn
+					lua_remove( L2, -2);                                                                         // ... u fqn
+					lua_insert( L2, -2);                                                                         // ... fqn u
+					lua_pushcclosure( L2, userdata_clone_sentinel, 2);                                           // ... userdata_clone_sentinel
+				}
+				else // from keeper or direct                                                                  // ... u mt
+				{
+					ASSERT_L( lua_istable( L2, -1));
+					lua_setmetatable( L2, -2);                                                                   // ... u
+				}
+				STACK_MID( L2, 1);
+			}
+			else
+			{
+				(void) luaL_error( L, "Error copying a metatable");
+			}
+			// first, add the entry in the cache (at this point it is either the actual userdata or the keeper sentinel
+			lua_pushlightuserdata( L2, source);                                                              // ... u source
+			lua_pushvalue( L2, -2);                                                                          // ... u source u
+			lua_rawset( L2, L2_cache_i);                                                                     // ... u
+			// make sure we have the userdata now
+			if( eLM_ToKeeper == mode_)                                                                       // ... userdata_clone_sentinel
+			{
+				lua_getupvalue( L2, -1, 2);                                                                    // ... userdata_clone_sentinel u
+			}
 			// assign uservalues
 			while( uvi > 0)
 			{
+				inter_copy_one( U, L2, L2_cache_i, L, lua_absindex( L, -1), VT_NORMAL, mode_, upName_);        // ... u uv
+				lua_pop( L, 1);                                                    // ... mt __lanesclone [uv]*
 				// this pops the value from the stack
-				lua_setiuservalue( L2, clone_i, uvi);                                                          // ... u [uv]+
+				lua_setiuservalue( L2, -2, uvi);                                                               // ... u
 				-- uvi;
 			}
-			// when we are done, all uservalues are popped from the stack
-			STACK_MID( L2, 1);                                                                               // ... u
-		}
-		STACK_MID( L, 2);                                                      // ... mt __lanesclone
-		// call cloning function in source state to perform the actual memory cloning
-		lua_pushlightuserdata( L, clone);                                      // ... mt __lanesclone clone
-		lua_pushlightuserdata( L, source);                                     // ... mt __lanesclone source
-		lua_call( L, 2, 0);                                                    // ... mt
-		STACK_MID( L, 1);
-		// copy the metatable in the target state
-		if( inter_copy_one( U, L2, L2_cache_i, L, lua_absindex( L, -1), VT_NORMAL, mode_, upName_))        // ... u mt?
-		{
-			lua_pop( L, 1);                                                      // ...
-			STACK_MID( L, 0);
-			// when writing to a keeper state, we have here a sentinel function with the metatable's fqn as upvalue
-			if( eLM_ToKeeper == mode_)                                                                       // ... u sentinel
+			// when we are done, all uservalues are popped from the source stack, and we want only the single transferred value in the destination
+			if( eLM_ToKeeper == mode_)                                                                       // ... userdata_clone_sentinel u
 			{
-				ASSERT_L( lua_tocfunction( L2, -1) == table_lookup_sentinel);
-				// we want to create a new closure with a 'clone sentinel' function, where the upvalues are the userdata and the metatable fqn
-				lua_getupvalue( L2, -1, 1);                                                                    // ... u sentinel fqn
-				lua_remove( L2, -2);                                                                           // ... u fqn
-				lua_insert( L2, -2);                                                                           // ... fqn u
-				lua_pushcclosure( L2, userdata_clone_sentinel, 2);                                             // ... userdata_clone_sentinel
-			}
-			else // from keeper or direct, we have the userdata and the metatable
-			{
-				ASSERT_L( lua_istable( L2, -1));
-				lua_setmetatable( L2, -2);                                                                     // ... u
+				lua_pop( L2, 1);                                                                               // ... userdata_clone_sentinel
 			}
 			STACK_MID( L2, 1);
-			STACK_MID( L, 0);
-			return TRUE;
-		}
-		else
-		{
-			(void) luaL_error( L, "Error copying a metatable");
+			STACK_MID( L, 2);
+			// call cloning function in source state to perform the actual memory cloning
+			lua_pushlightuserdata( L, clone);                                    // ... mt __lanesclone clone
+			lua_pushlightuserdata( L, source);                                   // ... mt __lanesclone clone source
+			lua_call( L, 2, 0);                                                  // ... mt
+			STACK_MID( L, 1);
 		}
 	}
 
 	STACK_END( L2, 1);
+	lua_pop( L, 1);                                                          // ...
 	STACK_END( L, 0);
-	return FALSE;
+	return TRUE;
 }
 
 static bool_t inter_copy_userdata( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_State* L, uint_t i, enum e_vt vt, LookupMode mode_, char const* upName_)
@@ -1839,17 +1601,21 @@ static bool_t inter_copy_userdata( Universe* U, lua_State* L2, uint_t L2_cache_i
 	{
 		return FALSE;
 	}
-	// Allow only deep userdata entities to be copied across
-	DEBUGSPEW_CODE( fprintf( stderr, "USERDATA\n"));
-	if( copydeep( U, L, L2, i, mode_))
+
+	// try clonable userdata first
+	if( copyclone( U, L2, L2_cache_i, L, i, mode_, upName_))
 	{
+		STACK_MID( L, 0);
+		STACK_MID( L2, 1);
 		return TRUE;
 	}
 
 	STACK_MID( L, 0);
 	STACK_MID( L2, 0);
 
-	if( copyclone( U, L2, L2_cache_i, L, i, mode_, upName_))
+	// Allow only deep userdata entities to be copied across
+	DEBUGSPEW_CODE( fprintf( stderr, "USERDATA\n"));
+	if( copydeep( U, L2, L2_cache_i, L, i, mode_, upName_))
 	{
 		STACK_MID( L, 0);
 		STACK_MID( L2, 1);
@@ -1886,53 +1652,78 @@ static bool_t inter_copy_function( Universe* U, lua_State* L2, uint_t L2_cache_i
 	STACK_CHECK( L2, 0);
 	DEBUGSPEW_CODE( fprintf( stderr, "FUNCTION %s\n", upName_));
 
-	if( lua_tocfunction( L, i) == userdata_clone_sentinel) // we are actually copying a clonable full userdata
+	if( lua_tocfunction( L, i) == userdata_clone_sentinel) // we are actually copying a clonable full userdata from a keeper
 	{
 		// clone the full userdata again
 		size_t userdata_size = 0;
 		void* source;
 		void* clone;
-		// this function has 2 upvalues: the fqn of its metatable, and the userdata itself
+
+		// let's see if we already restored this userdata
 		lua_getupvalue( L, i, 2);                                                // ... u
 		source = lua_touserdata( L, -1);
-		lookup_table( L2, L, i, mode_, upName_);                                 // ... u                      // ... mt
+		lua_pushlightuserdata( L2, source);                                                                    // ... source
+		lua_rawget( L2, L2_cache_i);                                                                           // ... u?
+		if( !lua_isnil( L2, -1))
+		{
+			lua_pop( L, 1);                                                        // ...
+			STACK_MID( L, 0);
+			STACK_MID( L2, 1);
+			return TRUE;
+		}
+		lua_pop( L2, 1);                                                                                       // ...
+
+		// this function has 2 upvalues: the fqn of its metatable, and the userdata itself
+		lookup_table( L2, L, i, mode_, upName_);                                                               // ... mt
 		// __lanesclone should always exist because we wouldn't be restoring data from a userdata_clone_sentinel closure to begin with
 		lua_getfield( L2, -1, "__lanesclone");                                                                 // ... mt __lanesclone
 		lua_pushvalue( L2, -1);                                                                                // ... mt __lanesclone __lanesclone
-		// call the cloning function with 0 arguments, should return the number of bytes to allocate for the clone
-		lua_call( L2, 0, 1);                                                                                   // ... mt __lanesclone size
+		// 'i' slot is the closure, but from now on it is the actual userdata
+		i = lua_gettop( L);
+		source = lua_touserdata( L, -1);
+		// call the cloning function with 1 argument, should return the number of bytes to allocate for the clone
+		lua_pushlightuserdata( L2, source);                                                                    // ... mt __lanesclone __lanesclone source
+		lua_call( L2, 1, 1);                                                                                   // ... mt __lanesclone size
 		userdata_size = (size_t) lua_tointeger( L2, -1);                                                       // ... mt __lanesclone size
 		lua_pop( L2, 1);                                                                                       // ... mt __lanesclone
-		lua_pushnil( L2);                                                                                      // ... mt __lanesclone nil
 		{
-			int const clone_i = lua_gettop( L2);
+			// extract uservalues (don't transfer them yet)
 			int uvi = 0;
-			while( lua_getiuservalue( L, -1, uvi + 1) != LUA_TNONE)                // ... u uv
+			while( lua_getiuservalue( L, i, uvi + 1) != LUA_TNONE)                // ... u uv
 			{
-				luaG_inter_move( U, L, L2, 1, mode_);                                // ... u                      // ... mt __lanesclone nil [uv]+
 				++ uvi;
 			}
-			// when lua_getiuservalue() returned LUA_TNONE, it pushed a nil. pop it now at the same time as the rest
-			lua_pop( L, 2);                                                        // ... u
-			STACK_MID( L, 0);                                                      // ...
+			// when lua_getiuservalue() returned LUA_TNONE, it pushed a nil. pop it now
+			lua_pop( L, 1);                                                        // ... u [uv]*
+			STACK_MID( L, uvi + 1);
 			// create the clone userdata with the required number of uservalue slots
-			clone = lua_newuserdatauv( L2, userdata_size, uvi);                                                  // ... mt __lanesclone nil [uv]+ u
-			lua_replace( L2, clone_i);                                                                           // ... mt __lanesclone u [uv]+
-			// assign uservalues
+			clone = lua_newuserdatauv( L2, userdata_size, uvi);                                                  // ... mt __lanesclone u
+			// add it in the cache
+			lua_pushlightuserdata( L2, source);                                                                  // ... mt __lanesclone u source
+			lua_pushvalue( L2, -2);                                                                              // ... mt __lanesclone u source u
+			lua_rawset( L2, L2_cache_i);                                                                         // ... mt __lanesclone u
+			// set metatable
+			lua_pushvalue( L2, -3);                                                                              // ... mt __lanesclone u mt
+			lua_setmetatable( L2, -2);                                                                           // ... mt __lanesclone u
+			// transfer and assign uservalues
 			while( uvi > 0)
 			{
+				inter_copy_one( U, L2, L2_cache_i, L, lua_absindex( L, -1), vt, mode_, upName_);                   // ... mt __lanesclone u uv
+				lua_pop( L, 1);                                                      // ... u [uv]*
 				// this pops the value from the stack
-				lua_setiuservalue( L2, clone_i, uvi);                                                              // ... mt __lanesclone u [uv]+
+				lua_setiuservalue( L2, -2, uvi);                                                                   // ... mt __lanesclone u
 				-- uvi;
 			}
 			// when we are done, all uservalues are popped from the stack
+			lua_pop( L, 1);                                                        // ...
+			STACK_MID( L, 0);
 			STACK_MID( L2, 3);                                                                                   // ... mt __lanesclone u
 		}
-		lua_insert( L2, -3);                                                                                   // ... u mt __lanesclone
-		lua_pushlightuserdata( L2, clone);                                                                     // ... u mt __lanesclone clone
-		lua_pushlightuserdata( L2, source);                                                                    // ... u mt __lanesclone clone source
-		lua_call( L2, 2, 0);                                                                                   // ... u mt
-		lua_setmetatable( L2, -2);                                                                             // ... u
+		// perform the custom cloning part
+		lua_replace( L2, -3);                                                                                  // ... u __lanesclone
+		lua_pushlightuserdata( L2, clone);                                                                     // ... u __lanesclone clone
+		lua_pushlightuserdata( L2, source);                                                                    // ... u __lanesclone clone source
+		lua_call( L2, 2, 0);                                                                                   // ... u
 	}
 	else
 	{
@@ -2018,7 +1809,7 @@ static bool_t inter_copy_table( Universe* U, lua_State* L2, uint_t L2_cache_i, l
 *
 * Returns TRUE if value was pushed, FALSE if its type is non-supported.
 */
-static bool_t inter_copy_one( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_State* L, uint_t i, enum e_vt vt, LookupMode mode_, char const* upName_)
+bool_t inter_copy_one( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_State* L, uint_t i, enum e_vt vt, LookupMode mode_, char const* upName_)
 {
 	bool_t ret = TRUE;
 	int val_type = lua_type( L, i);
@@ -2133,7 +1924,6 @@ static bool_t inter_copy_one( Universe* U, lua_State* L2, uint_t L2_cache_i, lua
 	STACK_END( L, 0);
 	return ret;
 }
-
 
 /*
 * Akin to 'lua_xmove' but copies values between _any_ Lua states.
@@ -2262,76 +2052,4 @@ int luaG_inter_copy_package( Universe* U, lua_State* L, lua_State* L2, int packa
 	STACK_END( L, 0);
 	DEBUGSPEW_CODE( -- U->debugspew_indent_depth);
 	return 0;
-}
-
-
-/*---=== Serialize require ===---
-*/
-
-//---
-// [val]= new_require( ... )
-//
-// Call 'old_require' but only one lane at a time.
-//
-// Upvalues: [1]: original 'require' function
-//
-int luaG_new_require( lua_State* L)
-{
-	int rc, i;
-	int args = lua_gettop( L);
-	Universe* U = universe_get( L);
-	//char const* modname = luaL_checkstring( L, 1);
-
-	STACK_GROW( L, args + 1);
-	STACK_CHECK( L, 0);
-
-	lua_pushvalue( L, lua_upvalueindex( 1));
-	for( i = 1; i <= args; ++ i)
-	{
-		lua_pushvalue( L, i);
-	}
-
-	// Using 'lua_pcall()' to catch errors; otherwise a failing 'require' would
-	// leave us locked, blocking any future 'require' calls from other lanes.
-	//
-	MUTEX_LOCK( &U->require_cs);
-	rc = lua_pcall( L, args, 1 /*retvals*/, 0 /*errfunc*/ );
-	MUTEX_UNLOCK( &U->require_cs);
-
-	// the required module (or an error message) is left on the stack as returned value by original require function
-	STACK_END( L, 1);
-
-	if( rc != LUA_OK) // LUA_ERRRUN / LUA_ERRMEM ?
-	{
-		return lua_error( L);   // error message already at [-1]
-	}
-
-	return 1;
-}
-
-/*
-* Serialize calls to 'require', if it exists
-*/
-void serialize_require( DEBUGSPEW_PARAM_COMMA( Universe* U) lua_State* L)
-{
-	STACK_GROW( L, 1);
-	STACK_CHECK( L, 0);
-	DEBUGSPEW_CODE( fprintf( stderr, INDENT_BEGIN "serializing require()\n" INDENT_END));
-
-	// Check 'require' is there and not already wrapped; if not, do nothing
-	//
-	lua_getglobal( L, "require");
-	if( lua_isfunction( L, -1) && lua_tocfunction( L, -1) != luaG_new_require)
-	{
-		// [-1]: original 'require' function
-		lua_pushcclosure( L, luaG_new_require, 1 /*upvalues*/);
-		lua_setglobal( L, "require");
-	}
-	else
-	{
-		// [-1]: nil
-		lua_pop( L, 1);
-	}
-
-	STACK_END( L, 0);
 }

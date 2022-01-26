@@ -1,38 +1,79 @@
 
+local lua_sec_all=function()
 
-project "lua_sec"
-language "C++"
-files { "src/**.c" , "src/**.cpp" , "src/**.h" }
+includedirs{
+	"git/src",
+	"../lib_wolfssl",
+	"../lib_wolfssl/git",
+	"../lib_wolfssl/git/wolfssl",
+}
 
-links { "lib_lua" }
-
-	includedirs "../lib_openssl/include"
-
-
--- this is all just copies of lua socket, so we do not really need?
-
-	excludes("src/usocket.*")
-	excludes("src/wsocket.*")
-	excludes("src/timeout.*")
-	excludes("src/buffer.*")
+defines{
+	"HAVE_EX_DATA",
+	"SESSION_CERTS",
+	"HAVE_ALPN",
+	"WOLFSSL_ALLOW_TLSV10",
+	"WOLFSSL_CERT_GEN",
+	"WOLFSSL_USER_SETTINGS",
+	"OPENSSL_EXTRA",
+	"OPENSSL_ALL",
+	"WOLFSSL_ALT_CERT_CHAINS",
+--	"DEBUG_WOLFSSL",
+}
 
 
 if WINDOWS then
 
-	excludes("src/usocket.*")
-	
---	links { "WS2_32" , "libcrypto" , "libssl" }
---	libdirs "openssl/lib"
+	defines "LUASEC_INET_NTOP"
 
-else -- nix
+end
 
-	excludes("src/wsocket.*")
-
---	links { "crypt" , "ssl" }
+links { "lib_wolfssl" }
 
 end
 
 
-KIND{kind="lua",name="ssl.core",luaname="ssl.core",luaopen="ssl_core"}
+project "lua_sec_core"
+language "C"
 
+lua_sec_all()
+
+files { "git/src/ssl.*" }
+
+KIND{lua="ssl.core"}
+
+
+
+project "lua_sec_context"
+language "C"
+
+lua_sec_all()
+
+files { "git/src/context.*" }
+files { "git/src/options.*" }
+files { "git/src/ec.*" }
+
+KIND{lua="ssl.context"}
+
+
+
+project "lua_sec_x509"
+language "C"
+
+lua_sec_all()
+
+files { "git/src/x509.*" }
+
+KIND{lua="ssl.x509"}
+
+
+
+project "lua_sec_config"
+language "C"
+
+lua_sec_all()
+
+files { "git/src/config.*" }
+
+KIND{lua="ssl.config"}
 

@@ -29,7 +29,6 @@ local canvas=oven.canvas
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
 	local skeys=oven.rebake("wetgenes.gamecake.spew.keys")
-	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 
 local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
 
@@ -68,25 +67,24 @@ function wmaster.setup(widget,def)
 
 -- create or reuse datas interface
 	master.datas=master.datas or wdatas.new_datas({master=master})
+	master.new_data=function(dat) return master.datas.new_data(dat) end
 
 
 
 -- built in color themes, 
 
-	master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, }
-	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, }
+	master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, alpha=1, grid_size=40, text_size=20, }
+	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, alpha=1, grid_size=40, text_size=20, }
 
 -- global GUI color theme
-
-	master.color_theme=master.color_theme_bright
-	master.color_theme=master.color_theme_dark
-
+	master.theme={}
+	for n,v in pairs(master.color_theme_dark) do master.theme[n]=v end
 
 
 -- get a color from a theme and optionally apply a tint
 	function master.get_color(val,tint)
 	
-		local t=master.color_theme
+		local t=master.theme
 
 		if not val then val=t.text end -- text color
 	
@@ -123,7 +121,10 @@ function wmaster.setup(widget,def)
 
 		for i=1,3 do if c[i]<0 then c[i]=0 end if c[i]>1 then c[i]=1 end end -- clamp result
 		
-		c[4]=1 -- full alpha only
+		c[1]=c[1]*t.alpha
+		c[2]=c[2]*t.alpha
+		c[3]=c[3]*t.alpha
+		c[4]=t.alpha -- full alpha only
 	
 		return c
 	end
@@ -133,7 +134,7 @@ function wmaster.setup(widget,def)
 	function master.update(widget,resize)
 
 		
-		local ups=srecaps.ups()
+		local ups=skeys.ups()
 		if ups then -- use skeys / srecaps code 
 
 
@@ -557,9 +558,7 @@ function wmaster.setup(widget,def)
 			if master.over     then master.over:set_dirty() end
 			if master.old_over then master.old_over:set_dirty() end
 			if master.over     then master.over:call_hook_later("over") end
-
-			if master.edit and master.edit.class_hooks then master.edit.class_hooks("notover",master.edit) end
-
+			if master.edit     then master.edit:call_hook_later("notover") end
 		end
 		
 	end

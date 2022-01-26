@@ -7,7 +7,7 @@ echo build windows
 ../vbox_mingw/make $*
 
 
-echo build emscipten
+echo build emscripten
 
 ../vbox_emcc/make $*
 

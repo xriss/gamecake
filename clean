@@ -1,3 +1,0 @@
-cd `dirname $0`
-build/make clean
-

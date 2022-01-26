@@ -812,7 +812,9 @@ void main(void)
 		local show={}		
 		for i,v in pairs(soul.parts) do
 			for i,p in ipairs(v) do
-				show[p.name]=p.flags
+				if p.name then
+					show[p.name]=p.flags
+				end
 			end
 		end
 		

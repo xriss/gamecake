@@ -29,15 +29,21 @@ if EMCC then
 
 elseif ANDROID then 
 	
-	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
-	linkoptions { "-u android_main" } -- we really need an android_main as well
+	linkoptions { "-static-libstdc++" }
+	linkoptions { "-static-libgcc" }
+	linkoptions { "-Wl,-soname,libgamecake.so" }
 
-	links { "GLESv2" }
-	
-	links { "EGL" , "android" , "jnigraphics" , "OpenSLES" }
-	links { "dl", "log", "c", "m", "gcc" }
+--	linkoptions { "-Wl,-z,defs" }
 
-	KIND{kind="SharedLib",name="liblua"}
+--	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
+--	linkoptions { "-u android_main" } -- we really need an android_main as well
+
+-- these must be dynamic
+	links { "GLESv2" , "EGL" , "android" , "jnigraphics" , "OpenSLES" , "log"  }
+
+	links { "dl",  "c", "m", "gcc" }
+
+	KIND{kind="SharedLib",name="libgamecake"}
 
 elseif WINDOWS then
 
@@ -95,7 +101,7 @@ elseif OSX then
 	links { "objc" }
 	links { "iconv" }
 
-	if CPU=="32" then
+	if CPU=="x32" then
 		KIND{kind="WindowedApp",name="gamecake.osx32"}
 	else
 		linkoptions { "-pagezero_size 10000","-image_base 100000000" }
@@ -104,6 +110,10 @@ elseif OSX then
 	end
 	
 elseif NIX then
+
+--	linkoptions { "-static" }
+	linkoptions { "-static-libstdc++" }
+	linkoptions { "-static-libgcc" }
 
 	linkoptions { "-Wl,-R\\$$ORIGIN,-R\\$$ORIGIN/arm,-R\\$$ORIGIN/x32,-R\\$$ORIGIN/x64" } -- so much escape \\$$ -> $
 
@@ -118,8 +128,8 @@ elseif NIX then
 
 	end
 
+-- these two need to be dynamic
 	links { "udev" }
-	
 	links { "asound" }
 
 --	links { "GL" }
@@ -130,9 +140,9 @@ elseif NIX then
 	links { "rt" }
 	links { "c" }
 
-	if CPU=="64" then
+	if CPU=="x64" then
 		KIND{kind="ConsoleApp",name="gamecake.x64"}
-	elseif CPU=="32" then
+	elseif CPU=="x32" then
 		KIND{kind="ConsoleApp",name="gamecake.x32"}
 	else
 		KIND{kind="ConsoleApp",name="gamecake.nix"}

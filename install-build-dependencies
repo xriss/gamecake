@@ -1,0 +1,65 @@
+
+# first install a require script
+if ! [[ -x "$(command -v require.sh)" ]] ; then
+
+	echo " we need sudo to install require.sh to /usr/local/bin "
+	sudo wget -O /usr/local/bin/require.sh https://raw.githubusercontent.com/xriss/require.sh/main/require.sh
+	sudo chmod +x /usr/local/bin/require.sh
+
+fi
+
+# commands
+
+require.sh gcc
+require.sh make
+require.sh luajit
+
+# libs
+
+require.sh lua-filesystem
+
+# devs
+
+require.sh /usr/include/readline/readline.h
+require.sh /usr/include/GL/gl.h
+require.sh /usr/include/X11/X.h
+require.sh /usr/include/alsa/asoundlib.h
+require.sh /usr/include/libudev.h
+require.sh /usr/include/pulse/pulseaudio.h
+require.sh /usr/include/luajit-2.0/lua.h
+require.sh /usr/include/luajit-2.1/lua.h
+require.sh /usr/include/SDL2/SDL.h
+require.sh /usr/include/openssl/ssl.h
+
+
+
+
+if [ "$1" = "--extra" ]; then
+
+# commands
+
+	require.sh upx
+	require.sh clang
+	require.sh /usr/bin/i686-w64-mingw32-gcc
+
+#vagrant and virtualbox for building in controlled environments
+
+	require.sh vagrant
+
+# these are not commands ...
+	
+	require.sh virtualbox
+#	require.sh virtualbox-ext-pack
+	require.sh virtualbox-guest-utils
+#	require.sh linux54-virtualbox-guest-modules
+
+else
+
+	echo ""
+	echo " installed base dependencies only "
+	echo ""
+	echo " Run with --extra, eg ./install-build-dependencies --extra to install extra dependencies "
+	echo ""
+
+fi
+

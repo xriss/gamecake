@@ -89,6 +89,7 @@ THE SOFTWARE.
 #include "threading.h"
 #include "compat.h"
 #include "tools.h"
+#include "state.h"
 #include "universe.h"
 #include "keeper.h"
 #include "lanes_private.h"
@@ -1652,26 +1653,31 @@ LUAG_FUNC( thread_index)
 // Return a list of all known lanes
 LUAG_FUNC( threads)
 {
-	int const top = lua_gettop( L);
-	Universe* U = universe_get( L);
+  int const top = lua_gettop( L);
+  Universe* U = universe_get( L);
 
-	// List _all_ still running threads
-	//
-	MUTEX_LOCK( &U->tracking_cs);
-	if( U->tracking_first && U->tracking_first != TRACKING_END)
-	{
-		Lane* s = U->tracking_first;
-		lua_newtable( L);                                          // {}
-		while( s != TRACKING_END)
-		{
-			lua_pushstring( L, s->debug_name);                       // {} "name"
-			push_thread_status( L, s);                               // {} "name" "status"
-			lua_rawset( L, -3);                                      // {}
-			s = s->tracking_next;
-		}
-	}
-	MUTEX_UNLOCK( &U->tracking_cs);
-	return lua_gettop( L) - top;
+  // List _all_ still running threads
+  //
+  MUTEX_LOCK( &U->tracking_cs);
+  if( U->tracking_first && U->tracking_first != TRACKING_END)
+  {
+    Lane* s = U->tracking_first;
+    int index = 0;
+    lua_newtable( L);                                          // {}
+    while( s != TRACKING_END)
+    {
+      // insert a { name, status } tuple, so that several lanes with the same name can't clobber each other
+      lua_newtable( L);                                        // {} {}
+      lua_pushstring( L, s->debug_name);                       // {} {} "name"
+      lua_setfield( L, -2, "name");                            // {} {}
+      push_thread_status( L, s);                               // {} {} "status"
+      lua_setfield( L, -2, "status");                          // {} {}
+      lua_rawseti( L, -2, ++ index);                           // {}
+      s = s->tracking_next;
+    }
+  }
+  MUTEX_UNLOCK( &U->tracking_cs);
+  return lua_gettop( L) - top; // 0 or 1
 }
 #endif // HAVE_LANE_TRACKING
 
@@ -1925,7 +1931,7 @@ LUAG_FUNC( configure)
 
 	{
 		char const* errmsg;
-		errmsg = push_deep_proxy( U, L, (DeepPrelude*) U->timer_deep, eLM_LaneBody);       // settings M timer_deep
+		errmsg = push_deep_proxy( U, L, (DeepPrelude*) U->timer_deep, 0, eLM_LaneBody);    // settings M timer_deep
 		if( errmsg != NULL)
 		{
 			return luaL_error( L, errmsg);

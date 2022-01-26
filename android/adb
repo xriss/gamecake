@@ -1,0 +1,6 @@
+cd `dirname $0`
+
+source ~/andsdk-env.sh
+
+$ANDSDK/platform-tools/adb $*
+

@@ -444,6 +444,8 @@ function glescode.create(gl)
 --
 	function code.program_source(name,opts)
 
+		if not string.find(name,"?",1,true) then name=name.."?" end -- makes sure it is always a query string
+
 		local gsource
 		local vsource
 		local fsource
@@ -471,9 +473,12 @@ function glescode.create(gl)
 		if params then -- query style
 			for _,d in ipairs( wstr.split(params,"&") ) do
 				local dd=wstr.split(d,"=")
-				paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
+				if dd[1] and dd[1]~="" then
+					paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
+				end
 			end
 		end
+		
 		local line=debug.getinfo(2).currentline+1 -- assume source is defined inline
 		paramdefs=table.concat(paramdefs,"\n").."\n".."#line "..line.." //?\n"
 	
@@ -494,8 +499,11 @@ function glescode.create(gl)
 		}
 		setmetatable(p,pmeta)
 
-		if code.programs[name] then -- forget old program
-			code.forget_program( code.programs[name] )
+		for n,v in pairs(code.programs) do
+			if n:sub(1,#name)==name then
+				code.forget_program( code.programs[n] ) -- forget all programs derived from this source
+				code.programs[n]=nil
+			end
 		end
 		code.programs[name]=p -- remember new program
 
@@ -606,8 +614,17 @@ function glescode.create(gl)
 		return ret
 	end
 	
+	
+	code.program_defs={}
+	
 	function code.program(pname)
 		local p
+		
+		if not string.find(pname,"?",1,true) then pname=pname.."?" end -- makes sure it is always a query string
+
+		for n,v in pairs(code.program_defs) do -- force these query parts ( assumed to be pre escaped )
+			pname=pname.."&"..n.."="..v
+		end
 		
 		p=code.programs[pname]
 		if not p then -- try and create from headers

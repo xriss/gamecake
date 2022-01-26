@@ -11,28 +11,6 @@ local string = require("string")
 local math = require("math")
 local socket = require("socket.core")
 
---
--- HACK: patch protect to allow yields (needed to sendmail on ngx)
---
-    socket.protect = function (f) 
-        local rm = table.remove 
-        return function (...) 
-            local rets = {pcall(f, ...)} 
-            if rets[1] then 
-                rm(rets, 1); 
-                return unpack(rets) 
-            else 
-                local err = rets[2] 
-                if type(err) == "table" then 
-                    return nil, err[1] 
-                else 
-                    return error(err) 
-                end 
-            end 
-        end 
-    end 
-
-
 local _M = socket
 
 -----------------------------------------------------------------------------
@@ -54,23 +32,23 @@ function _M.bind(host, port, backlog)
     err = "no info on address"
     for i, alt in base.ipairs(addrinfo) do
         if alt.family == "inet" then
-            sock, err = socket.tcp()
+            sock, err = socket.tcp4()
         else
             sock, err = socket.tcp6()
         end
         if not sock then return nil, err end
         sock:setoption("reuseaddr", true)
         res, err = sock:bind(alt.addr, port)
-        if not res then 
+        if not res then
             sock:close()
-        else 
+        else
             res, err = sock:listen(backlog)
-            if not res then 
+            if not res then
                 sock:close()
             else
                 return sock
             end
-        end 
+        end
     end
     return nil, err
 end

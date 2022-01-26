@@ -760,6 +760,23 @@ static int l_window_setResizable(lua_State *L)
 #endif
 
 /*
+ * Window:setBordered(Bordered)
+ *
+ * Arguments:
+ *	resizable the state to set the Bordered flag to
+ *
+ */
+static int l_window_setBordered(lua_State *L)
+{
+	SDL_Window *w	= commonGetAs(L, 1, WindowName, SDL_Window *);
+	int Bordered	= lua_toboolean(L, 2);
+
+	SDL_SetWindowBordered(w, Bordered);
+
+	return 0;
+}
+
+/*
  * Window:setSize(w, h)
  *
  * Arguments:
@@ -1070,6 +1087,7 @@ static const luaL_Reg WindowMethods[] = {
 #if SDL_VERSION_ATLEAST(2, 0, 5)
 	{ "setResizeable",	l_window_setResizable		},
 #endif
+	{ "setBordered",	l_window_setBordered		},
 	{ "setSize",		l_window_setSize		},
 	{ "setTitle",		l_window_setTitle		},
 #if SDL_VERSION_ATLEAST(2, 0, 5)

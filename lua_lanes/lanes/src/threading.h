@@ -143,11 +143,11 @@ enum e_status { PENDING, RUNNING, WAITING, DONE, ERROR_ST, CANCELLED };
   //
   #if defined( PLATFORM_OSX)
     #define YIELD() pthread_yield_np()
-#elif defined( PLATFORM_EMSCRIPTEN) || defined( PLATFORM_WIN32) || defined( PLATFORM_POCKETPC) || defined(__ANDROID__) // no PTHREAD for PLATFORM_XBOX
+#elif defined( PLATFORM_WIN32) || defined( PLATFORM_POCKETPC) || defined(__ANDROID__) || defined(__NetBSD__) || defined( PLATFORM_EMSCRIPTEN ) // no PTHREAD for PLATFORM_XBOX
     // for some reason win32-pthread doesn't have pthread_yield(), but sched_yield()
     #define YIELD() sched_yield()
   #else
-    #define YIELD() pthread_yield()
+    #define YIELD() sched_yield()
   #endif
 	#define THREAD_CALLCONV
 #endif //THREADAPI == THREADAPI_PTHREAD

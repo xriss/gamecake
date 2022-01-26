@@ -59,10 +59,10 @@ EGifOpenFileName(const char *FileName, const bool TestExistence, int *Error)
 
     if (TestExistence)
         FileHandle = open(FileName, O_WRONLY | O_CREAT | O_EXCL, 
-			  S_IREAD | S_IWRITE);
+			  S_IRUSR | S_IWUSR);
     else
         FileHandle = open(FileName, O_WRONLY | O_CREAT | O_TRUNC, 
-			  S_IREAD | S_IWRITE);
+			  S_IRUSR | S_IWUSR);
 
     if (FileHandle == -1) {
         if (Error != NULL)

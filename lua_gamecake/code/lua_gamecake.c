@@ -271,6 +271,21 @@ static int lua_gamecake_list_cache_strings(lua_State *l)
 }
 
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// setup packages.preload to access internal libs, this is mostly for lua lanes
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+extern void lua_preloadlibs(lua_State *);
+
+static int lua_gamecake_preloadlibs(lua_State *l)
+{
+	lua_preloadlibs(l);
+	return 0;
+}
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -280,6 +295,8 @@ LUALIB_API int luaopen_wetgenes_gamecake_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{
+		{"preloadlibs",				lua_gamecake_preloadlibs},
+
 		{"list_cache_strings",		lua_gamecake_list_cache_strings},
 		{"get_cache_string",		lua_gamecake_get_cache_string},
 

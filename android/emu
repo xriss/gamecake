@@ -1,0 +1,6 @@
+cd `dirname $0`
+
+source ~/andsdk-env.sh
+
+$ANDSDK/emulator/emulator -avd google29 -netdelay none -netspeed full $* | ./adb logcat
+

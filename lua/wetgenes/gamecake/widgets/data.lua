@@ -1,20 +1,31 @@
 --
--- (C) 2013 Kriss@XIXs.com
+-- (C) 2022 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---
--- handle widgets data values
---
+--[[#lua.wetgenes.gamecake.widgets.data
+
+	local master=oven.rebake("wetgenes.gamecake.widgets").setup()
+	local data=master.new_data{}
+
+A number or string that can be shared between multiple widgets given 
+basic limits and watched for changes.
+
+This alows the same data to be linked and displayed in multiple widgets 
+simultaneously.
+
+]]
+
+-- module bake
+local M={ modname = (...) } package.loaded[M.modname] = M function M.bake(oven,B) B = B or {}
+
+local wdata=B
 
 
---module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
+--[[#lua.wetgenes.gamecake.widgets.data.call_hook_later
 
-function M.bake(oven,wdata)
-wdata=wdata or {}
-
-
+]]
 wdata.call_hook_later=function(dat,hook)
 	if not dat.master then return wdata.call_hook(dat,hook) end -- can not defer without master
 	local hooks=dat.hooks
@@ -26,7 +37,15 @@ wdata.call_hook_later=function(dat,hook)
 	end
 end
 
+--[[#lua.wetgenes.gamecake.widgets.data.call_hook
+
+]]
 wdata.call_hook=function(dat,hook)
+	if dat.class_hooks then
+		for _,ch in ipairs(dat.class_hooks) do
+			if ch(hook,dat) then return end -- and it can eat the event if it returns true
+		end
+	end
 	local hooks=dat.hooks
 	local type_hooks=type(hooks)
 	if type_hooks=="function" then -- master function
@@ -36,7 +55,31 @@ wdata.call_hook=function(dat,hook)
 	end
 end
 
--- set number (may trigger hook unless nohook is set)
+--[[#lua.wetgenes.gamecake.widgets.data.add_class_hook
+
+]]
+wdata.add_class_hook=function(dat,fn)
+	dat.class_hooks=dat.class_hooks or {}
+	dat.class_hooks[ #dat.class_hooks+1 ]=fn
+end
+--[[#lua.wetgenes.gamecake.widgets.data.del_class_hook
+
+]]
+wdata.del_class_hook=function(dat,fn)
+	local hooks=dat.class_hooks or {}
+	for i=#hooks,1,-1 do
+		if hooks[i]==fn then
+			table.remove(hooks,i)
+		end
+	end
+end
+
+
+--[[#lua.wetgenes.gamecake.widgets.data.data_value
+
+set number (may trigger hook unless nohook is set)
+
+]]
 wdata.data_value=function(dat,val,nohook)
 
 	local master=dat.master
@@ -78,20 +121,32 @@ wdata.data_value=function(dat,val,nohook)
 	end
 end
 
--- adjust number (may trigger hook)
+--[[#lua.wetgenes.gamecake.widgets.data.data_inc
+
+adjust number (may trigger hook)
+
+]]
 wdata.data_inc=function(dat,step,nohook)
 	step=step or dat.step
 	if step==0 then step=1 end
 	return dat:value(dat.num+step,nohook)
 end
--- adjust number (may trigger hook)
+--[[#lua.wetgenes.gamecake.widgets.data.data_dec
+
+adjust number (may trigger hook)
+
+]]
 wdata.data_dec=function(dat,step,nohook)
 	step=step or dat.step
 	if step==0 then step=1 end
 	return dat:value(dat.num-step,nohook)
 end
 
--- set a number value and min/max range probably without any triggers
+--[[#lua.wetgenes.gamecake.widgets.data.data_set
+
+set a number value and min/max range probably without any triggers
+
+]]
 wdata.data_set=function(dat,val,vmin,vmax,nohook)
 	dat.min=vmin or dat.min
 	dat.max=vmax or dat.max
@@ -102,19 +157,33 @@ wdata.data_set=function(dat,val,vmin,vmax,nohook)
 end
 
 
--- get a string from the number
+--[[#lua.wetgenes.gamecake.widgets.data.data_tostring
+
+get a string from the number
+
+]]
 wdata.data_tostring=function(dat,num)
 	return tostring(num or dat:value() )
 end
+--[[#lua.wetgenes.gamecake.widgets.data.data_tostring_from_list
+
+]]
 wdata.data_tostring_from_list=function(dat,num)
 	local d=dat.list[ num or dat:value() ]
 	return d and d.str
 end
 
--- get a number from the string
+--[[#lua.wetgenes.gamecake.widgets.data.data_tonumber
+
+get a number from the string
+
+]]
 wdata.data_tonumber=function(dat,str)
 	return tonumber(str or dat:value())
 end
+--[[#lua.wetgenes.gamecake.widgets.data.data_tonumber_from_list
+
+]]
 wdata.data_tonumber_from_list=function(dat,str)
 	str=str or dat:value()
 	for i,v in ipairs(dat.list) do
@@ -123,7 +192,11 @@ wdata.data_tonumber_from_list=function(dat,str)
 	return nil
 end
 
--- how wide or tall should the handle be given the size of the parent?
+--[[#lua.wetgenes.gamecake.widgets.data.data_get_size
+
+how wide or tall should the handle be given the size of the parent?
+
+]]
 wdata.data_get_size=function(dat,w)
 	local ret=16
 	if dat.min==dat.max then
@@ -139,7 +212,11 @@ wdata.data_get_size=function(dat,w)
 end
 
 
--- get display pos, given the size of the parent and our size?
+--[[#lua.wetgenes.gamecake.widgets.data.data_get_pos
+
+get display pos, given the size of the parent and our size?
+
+]]
 wdata.data_get_pos=function(dat,psiz,bsiz,reverse)
 	if reverse then
 		if dat.step==0 then -- no snap
@@ -156,8 +233,12 @@ wdata.data_get_pos=function(dat,psiz,bsiz,reverse)
 	end
 end
 
--- given the parents size and our relative position/size within it
--- update dat.num and return a new position (for snapping)
+--[[#lua.wetgenes.gamecake.widgets.data.data_snap
+
+given the parents size and our relative position/size within it update 
+dat.num and return a new position (for snapping)
+
+]]
 wdata.data_snap=function(dat,psiz,bsiz,bpos,reverse)
 
 --print("minmax",dat.min,dat.max)
@@ -190,6 +271,9 @@ wdata.data_snap=function(dat,psiz,bsiz,bpos,reverse)
 end
 
 
+--[[#lua.wetgenes.gamecake.widgets.data.new_data
+
+]]
 function wdata.new_data(dat)
 
 	local dat=dat or {} -- probably use what is passed in only fill in more values
@@ -243,12 +327,6 @@ function wdata.new_data(dat)
 
 	dat.str=dat.str or ""
 	dat.num=dat.num or 0
-	
---	if dat.class=="number" then
---		dat:value(dat.num,true) -- triger value changed/set callbacks?
---	else
---		dat:value(dat.str,true) -- triger value changed/set callbacks
---	end
 	
 	return dat
 	

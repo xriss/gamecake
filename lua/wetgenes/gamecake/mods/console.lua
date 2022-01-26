@@ -83,7 +83,7 @@ function M.bake(oven,console)
 		
 		console.show=false
 --		console.show_hud=true
-		console.show_hud=false
+--		console.show_hud=false
 
 --		console.show=true
 --		console.show_hud=true
@@ -290,9 +290,9 @@ font.vbs_idx=1
 			oven.times.draw.done()
 
 			local gci=gcinfo()
-			local s=string.format("fps=%2d %-4s% 02d/%02d %5.2fm vb=%d tx=%d fb=%d gl=%d vbi=%d gm=%d",
+			local s=string.format("fps=%2d %s %2d /%3d %5.2fm vb=%d tx=%d fb=%d gl=%d vbi=%d gm=%d",
 				console.fps,
-				string.rep("x",console.fps_updates), -- idealy we only want 1 x 
+				string.rep("x",console.fps_updates)..string.rep(" ",4-(console.fps_updates%4)), -- idealy we only want 1 x 
 				(oven.times.update.time*1000),
 				(oven.times.draw.time*1000),
 				gci/1024,
@@ -306,7 +306,7 @@ font.vbs_idx=1
 			gl.counts.calls=0 -- reset number of gl calls, so we display number of calls per frame.
 			console.fps_updates=0
 
--- print info as we are			
+-- disabled means we can not see anything so need to print info here
 			if gl.patch_functions_method=="disable" then
 				print(s)
 			end
@@ -316,8 +316,6 @@ font.vbs_idx=1
 
 			console.fps_count=console.fps_count+1
 		end
-
-		gl.ActiveTexture( gl.TEXTURE0 )
 
 		cake.views.push_and_apply(console.view)
 		gl.PushMatrix()

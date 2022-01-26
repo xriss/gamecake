@@ -122,6 +122,16 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		pmat=32
 		pbone=36
 
+	elseif fmt=="xyznrmuvtansbone" or fmt=="posnrmuvtansbone" then -- xyz and normal and texture and  material id and tangent and bones
+
+		def_progname=fmt:sub(1,3).."_normal_tex_tans_bone"
+
+		pstride=64
+		pnrm=12
+		ptex=24
+		ptans=36
+		pbone=52
+
 	elseif fmt=="xyznrmuvmtansbone" or fmt=="posnrmuvmtansbone" then -- xyz and normal and texture and  material id and tangent and bones
 
 		def_progname=fmt:sub(1,3).."_normal_tex_mat_tans_bone"

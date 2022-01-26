@@ -64,7 +64,7 @@ function wmenuitem.menu_add(widget,opts)
 			widget.menu=nil
 		end
 
-		local ss=opts.grid_size or md.grid_size or widget.master.grid_size
+		local ss=opts.grid_size or md.grid_size or widget.master.theme.grid_size
 
 --		local screen;widget.master:call_descendents(function(it) if it.class=="screen" then screen=it end end)
 --		screen=screen or widget.master
@@ -252,7 +252,7 @@ function wmenuitem.setup(widget,def)
 	widget.solid=true
 	widget.style=widget.style or "button"
 
-	widget.class_hooks=wmenuitem.hooks
+	widget.class_hooks={wmenuitem.hooks}
 	
 	widget.hide_when_clicked=def.hide_when_clicked
 --	widget.remove_when_clicked=def.remove_when_clicked

@@ -1,21 +1,28 @@
 --
--- (C) 2013 Kriss@XIXs.com
+-- (C) 2022 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---
--- handle widgets data values
---
+--[[#lua.wetgenes.gamecake.widgets.datas
+
+Handle a collection of data (IE in the master widget)
+
+]]
 
 
---module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
+-- module bake
+local M={ modname = (...) } package.loaded[M.modname] = M function M.bake(oven,B) B = B or {}
 
-function M.bake(oven,wdatas)
-wdatas=wdatas or {}
+local wdatas=B
 
 local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
 
+
+
+--[[#lua.wetgenes.gamecake.widgets.datas.new_datas
+
+]]
 function wdatas.new_datas(datas)
 
 	local datas=datas or {} -- probably use what is passed in only fill in more values
@@ -29,32 +36,53 @@ function wdatas.new_datas(datas)
 
 	datas.ids=datas.ids or {}
 	
+--[[#lua.wetgenes.gamecake.widgets.datas.set
+
+]]
 	datas.set=function(n,v)
 		if type(n)=="table" then datas.ids[n.id]=n return n else datas.ids[n]=v return v end
 	end
 
+--[[#lua.wetgenes.gamecake.widgets.datas.del
+
+]]
 	datas.del=function(v)
 		if type(v)=="table" then datas.ids[v.id]=nil else datas.ids[v]=nil end
 	end
 
+--[[#lua.wetgenes.gamecake.widgets.datas.new
+
+]]
 	datas.new=function(v)
 		return datas.set( datas.new_data(v) )
 	end
 
+--[[#lua.wetgenes.gamecake.widgets.datas.get
+
+]]
 	datas.get=function(n)
 		return datas.ids[n]
 	end
 
+--[[#lua.wetgenes.gamecake.widgets.datas.get_value
+
+]]
 	datas.get_value=function(n)
 		local v=datas.get(n)
 		return v and v:value()
 	end
 
+--[[#lua.wetgenes.gamecake.widgets.datas.get_string
+
+]]
 	datas.get_string=function(n)
 		local v=datas.get(n)
 		return v and v:tostring()
 	end
 
+--[[#lua.wetgenes.gamecake.widgets.datas.set_string
+
+]]
 	datas.set_string=function(n,val)
 		local v=datas.get(n)
 		if v.class=="list" then
@@ -64,11 +92,17 @@ function wdatas.new_datas(datas)
 		end
 	end
 
+--[[#lua.wetgenes.gamecake.widgets.datas.get_number
+
+]]
 	datas.get_number=function(n)
 		local v=datas.get(n)
 		return v and v:tonumber()
 	end
 
+--[[#lua.wetgenes.gamecake.widgets.datas.set_value
+
+]]
 	datas.set_value=function(n,val)
 		local v=datas.get(n)
 		return v and v:value(val)
@@ -81,6 +115,9 @@ function wdatas.new_datas(datas)
 	datas.lookup_infos={}
 	datas.lookup_keys={}
 		
+--[[#lua.wetgenes.gamecake.widgets.datas.set_infos
+
+]]
 	datas.set_infos=function(infos)
 	
 		datas.infos=infos

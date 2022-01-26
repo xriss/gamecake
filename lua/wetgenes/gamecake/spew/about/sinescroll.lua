@@ -75,15 +75,17 @@ Greetz to No1 and No6!
 		mode="clip",
 		vx=640,
 		vy=480,
-		fov=0.25,
+		fov=0,
 	})
 	
 	about.shaders=function()
-		gl.progsrc("about_sinescroll",
-		[[
+		gl.program_source("about_sinescroll",[[
 		
 #version 100
 #version 120
+
+#ifdef VERTEX_SHADER
+
 #ifdef VERSION_ES
 precision mediump float;
 #endif
@@ -106,10 +108,10 @@ precision mediump float;
 			v_texcoord=a_texcoord;
 		}
 
-		]],[[
+#endif //VERTEX_SHADER
 
-#version 100
-#version 120
+#ifdef FRAGMENT_SHADER
+
 #ifdef VERSION_ES
 precision mediump float;
 #endif
@@ -135,6 +137,8 @@ precision highp float; /* really need better numbers if possible */
 			vec4 c=vec4( sin(t.y*2.0),sin(t.y*3.0),sin(t.y*4.0),1.0);
 			gl_FragColor=texture2D(tex, t) * c;
 		}
+
+#endif //FRAGMENT_SHADER
 
 		]])
 	end
@@ -370,17 +374,25 @@ precision highp float; /* really need better numbers if possible */
 				gl.Scale(v.ss,v.ss,v.ss)
 				gl.Rotate(v.t,0,-1,0)
 				gl.Rotate(v.t/8,1,0,0)
-				gl.state.push({
-					[gl.CULL_FACE]					=	gl.TRUE,
-				})
+--				gl.state.push({
+--					[gl.CULL_FACE]					=	gl.TRUE,
+--				})
 				wetiso.draw()
-				gl.state.pop()
+--				gl.state.pop()
 				gl.PopMatrix()
 			end
 				
 		end
 
 		local update=function()
+			if about.exitnow then
+				about.exitnow=false
+				if about.exitname then
+					oven.next=oven.rebake(about.exitname)
+				else
+					if about.exit then oven.next=about.exit end
+				end
+			end
 			tim=tim+1
 			update_bobs()
 			update_scroll()
@@ -428,11 +440,7 @@ precision highp float; /* really need better numbers if possible */
 	
 		if m.class=="key" or m.class=="mouse" or m.class=="joykey" or m.class=="padkey" then
 			if m.action==-1 then
-				if about.exitname then
-					oven.next=oven.rebake(about.exitname)
-				else
-					if about.exit then oven.next=about.exit end
-				end
+				about.exitnow=true
 			end
 		end
 

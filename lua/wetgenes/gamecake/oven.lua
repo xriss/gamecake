@@ -64,10 +64,13 @@ modules and sharing state between them.
 
 ]]
 function M.bake(opts)
-
+	
 	local oven={}
 	wwin.oven=wwin.oven or oven -- store a global oven on first use
 
+	if opts.hints then -- pass hints from opts to sdl
+		wwin.hints(opts.hints)
+	end
 
 	oven.enable_close_window=true -- let the close button, close the window (otherwise you should catch close messages in app)
 
@@ -217,7 +220,9 @@ os.exit()
 
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
 				console=opts.args.console,		-- use --console on commandline to keep console open
-				border=opts.args.border}		-- use --border  on commandline to keep window borders
+				borderless=opts.args.borderless,
+				}
+--				border=opts.args.border}		-- use --border  on commandline to keep window borders
 			local screen=wwin.screen()
 
 			inf.name=opts.class_name or opts.title
@@ -480,7 +485,9 @@ require("gles").CheckError() -- uhm this fixes an error?
 			if oven.started then return end -- already started
 			oven.started=true
 
+--oven.gl.CheckError()
 			oven.win:start()
+--oven.gl.CheckError()
 			oven.cake.start()
 			oven.cake.canvas.start()
 			if oven.now and oven.now.start then
@@ -513,7 +520,10 @@ require("gles").CheckError() -- uhm this fixes an error?
 			end
 		end
 
+		oven.ticks=0
 		function oven.update()
+--print(oven.ticks)
+			oven.ticks=(oven.ticks+1)%0x100000000	-- 32bit update tick counter
 
 			if oven.do_backtrace then
 				oven.do_backtrace=false
@@ -602,7 +612,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 
 		end
 
-		oven.preloader_enabled=true
+		oven.preloader_enabled=false -- do we need this? we is fast and it is broken
 --		if wwin.flavour=="raspi" then -- do fullscreen on raspi
 --			oven.preloader_enabled=false
 --		end

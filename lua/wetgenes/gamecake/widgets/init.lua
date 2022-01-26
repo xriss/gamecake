@@ -107,6 +107,8 @@ The size in pixels that we try and create buttons at.
 ]]
 function widgets.setup(def)
 
+	def=def or {}
+
 --print("SETUP")
 --dprint(def)
 --print(debug.traceback())

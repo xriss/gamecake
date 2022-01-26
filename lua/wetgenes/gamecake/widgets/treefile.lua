@@ -122,11 +122,11 @@ function wtreefile.setup(widget,def)
 	widget.class="treefile"
 
 	widget.refresh=wtreefile.refresh
-	widget.class_hooks=wtreefile.class_hooks
+	widget.class_hooks={wtreefile.class_hooks}
 
 
 	widget.tree_widget=widget:add({hx=widget.hx,hy=widget.hy,size="full",class="tree",id="files"})
-	widget.tree_widget.hooks=wtreefile.class_hooks
+	widget.tree_widget.class_hooks={wtreefile.class_hooks}
 
 	widget:refresh()
 

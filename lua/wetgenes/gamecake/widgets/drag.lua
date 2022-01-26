@@ -1,17 +1,27 @@
 --
--- (C) 2013 Kriss@XIXs.com
+-- (C) 2022 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+--[[#lua.wetgenes.gamecake.widgets.drag
+
+	local master=oven.rebake("wetgenes.gamecake.widgets").setup()
+	local widget=master:add{class="drag",...}
+
+A button to drag arround.
+
+]]
+
+-- module bake
+local M={ modname = (...) } package.loaded[M.modname] = M function M.bake(oven,B) B = B or {}
+
+local wdrag=B
 
 
---module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
+--[[#lua.wetgenes.gamecake.widgets.drag.drag
 
-function M.bake(oven,wdrag)
-wdrag=wdrag or {}
-
-local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
-
+]]
 function wdrag.drag(widget,x,y)
 
 	local parent=widget.parent
@@ -42,6 +52,9 @@ function wdrag.drag(widget,x,y)
 	
 end
 
+--[[#lua.wetgenes.gamecake.widgets.drag.update
+
+]]
 function wdrag.update(widget)
 
 	if widget.data then
@@ -51,21 +64,16 @@ function wdrag.update(widget)
 	return widget.meta.update(widget)
 end
 
-function wdrag.draw(widget)
-	return widget.meta.draw(widget)
-end
 
+--[[#lua.wetgenes.gamecake.widgets.drag.setup
 
+]]
 function wdrag.setup(widget,def)
 
 	widget.class="drag"
 	
 	widget.drag=wdrag.drag
-	widget.key=wdrag.key
-	widget.mouse=wdrag.mouse
 	widget.update=wdrag.update
-	widget.draw=wdrag.draw
-	widget.layout=wfill.layout
 
 	widget.cursor=widget.cursor or "hand"
 

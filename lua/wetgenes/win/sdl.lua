@@ -37,6 +37,16 @@ local SDL=require("SDL")
 local wstr=require("wetgenes.string")
 local dprint=function(a) print(wstr.dump(a)) end
 
+sdl.hints=function(it)
+	for n,v in pairs(it) do
+		if string.sub(n,1,4)=="SDL_" then -- only SDL_ hints
+			SDL.setHint(n,v,SDL.hintPriority.Normal)
+		end
+	end
+end
+
+
+
 sdl.print=print
 
 sdl.video_init_done=false
@@ -90,7 +100,7 @@ sdl.create=function(t)
 	if jit and jit.os=="Windows" then -- windows does not do borderless resize, so, meh
 
 	else
-		if not t.border then
+		if t.borderless then
 			flags[#flags+1]=SDL.window.Borderless
 		end
 	end
@@ -110,18 +120,11 @@ sdl.create=function(t)
 		y       = t.y,
 	})
 
-	if not t.border then
-
-		require("wetgenes.win.core").sdl_attach_resize_hax(it.win)
-
---[[
-		it.win:setHitTest(function(...)
-
-			print(...)
-
-		end)
-]]
-
+	if jit and jit.os=="Windows" then -- windows does not do borderless resize, so, meh
+	else
+		if t.borderless then
+			require("wetgenes.win.core").sdl_attach_resize_hax(it.win)
+		end
 	end
 	
 	return it
@@ -154,9 +157,10 @@ sdl.show=function(it,view)
 --	print("SDL show")
 	it=it or sdl.it
 	it.win:show()
-	
+
+--  it.win:setResizeable(false) it.win:setBordered(false)
+
 	if     view=="full" then	 it.win:setFullscreen(SDL.window.Desktop)
---	if     view=="full" then	 it.win:setFullscreen(SDL.window.Fullscreen)
 	elseif view=="max"  then	 it.win:maximize()
 	else						 it.win:setFullscreen(0) it.win:restore()
 	end
@@ -229,6 +233,9 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 	log( "oven","vendor",(gles.Get(gles.VENDOR) or ""))
 	log( "oven","render",(gles.Get(gles.RENDERER) or ""))
 	log( "oven","version",(gles.Get(gles.VERSION) or ""))
+	for w in (gles.Get(gles.EXTENSIONS) or ""):gmatch("([^%s]+)") do
+		log( "oven","glext",w)
+	end
 	
 	return it.ctx
 end

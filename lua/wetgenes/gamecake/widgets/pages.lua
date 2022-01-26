@@ -31,6 +31,12 @@ function wpages.layout(widget)
 		if v.hx>widget.hx then widget.hx=v.hx end
 		if v.hy>widget.hy then widget.hy=v.hy end
 --		v:layout()
+
+		if widget.data and widget.data.num==i then
+			v.hidden=false
+		else
+			v.hidden=true
+		end
 	end
 
 	widget.meta.layout(widget)
@@ -45,6 +51,8 @@ function wpages.setup(widget,def)
 	widget.draw=wpages.draw
 	widget.layout=wpages.layout
 	
+	widget.data=def.data
+
 	return widget
 end
 

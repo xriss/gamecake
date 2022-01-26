@@ -1,37 +1,54 @@
 --
--- (C) 2013 Kriss@XIXs.com
+-- (C) 2022 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
+--[[#lua.wetgenes.gamecake.widgets.button
 
-function M.bake(oven,wbutton)
-wbutton=wbutton or {}
+	local master=oven.rebake("wetgenes.gamecake.widgets").setup()
+	local widget=master:add{class="button",...}
 
-function wbutton.update(widget)
+A button for pressing and such.
+
+]]
+
+-- module bake
+local M={ modname = (...) } package.loaded[M.modname] = M function M.bake(oven,B) B = B or {}
+
+--[[#lua.wetgenes.gamecake.widgets.button.update
+
+	this function will also call lua.wetgenes.gamecake.widgets.meta.update
+
+If we have a data assigned to this button then make sure that the 
+displayed text is up to date. We should really hook into the data so 
+any change there is copied here instead?
+
+]]
+function B.update(widget)
 
 	if widget.data then
-		widget.text=widget.data.str
+		widget.text=widget.data:tostring()
 	end
 
 	return widget.meta.update(widget)
 end
 
-function wbutton.draw(widget)
-	return widget.meta.draw(widget)
-end
+--[[#lua.wetgenes.gamecake.widgets.button.setup
 
+	see lua.wetgenes.gamecake.widgets.meta.setup for generic options
 
-function wbutton.setup(widget,def)
---	local it={}
---	widget.button=it
+As a button we always need to be solid so this is forced to true.
+
+Also cursor will be set to "hand" if it is not already set so you can 
+tell it is a button when you hover over it.
+
+]]
+function B.setup(widget)
+
 	widget.class="button"
 	
-	widget.key=key
-	widget.mouse=wbutton.mouse
-	widget.update=wbutton.update
-	widget.draw=wbutton.draw
+	widget.update=B.update
 
 	widget.solid=true
 	widget.cursor=widget.cursor or "hand"
@@ -39,5 +56,5 @@ function wbutton.setup(widget,def)
 	return widget
 end
 
-return wbutton
+return B
 end

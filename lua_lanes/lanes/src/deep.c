@@ -49,59 +49,6 @@ THE SOFTWARE.
 
 /*-- Metatable copying --*/
 
-/*
- * 'reg[ REG_MT_KNOWN ]'= {
- *      [ table ]= id_uint,
- *          ...
- *      [ id_uint ]= table,
- *          ...
- * }
- */
-
-/*
-* Does what the original 'push_registry_subtable' function did, but adds an optional mode argument to it
-*/
-static void push_registry_subtable_mode( lua_State* L, UniqueKey key_, const char* mode_)
-{
-	STACK_GROW( L, 3);
-	STACK_CHECK( L, 0);
-
-	REGISTRY_GET( L, key_);                               // {}|nil
-	STACK_MID( L, 1);
-
-	if( lua_isnil( L, -1))
-	{
-		lua_pop( L, 1);                                     //
-		lua_newtable( L);                                   // {}
-		// _R[key_] = {}
-		REGISTRY_SET( L, key_, lua_pushvalue( L, -2));      // {}
-		STACK_MID( L, 1);
-
-		// Set its metatable if requested
-		if( mode_)
-		{
-			lua_newtable( L);                                 // {} mt
-			lua_pushliteral( L, "__mode");                    // {} mt "__mode"
-			lua_pushstring( L, mode_);                        // {} mt "__mode" mode
-			lua_rawset( L, -3);                               // {} mt
-			lua_setmetatable( L, -2);                         // {}
-		}
-	}
-	STACK_END( L, 1);
-	ASSERT_L( lua_istable( L, -1));
-}
-
-
-/*
-* Push a registry subtable (keyed by unique 'key_') onto the stack.
-* If the subtable does not exist, it is created and chained.
-*/
-void push_registry_subtable( lua_State* L, UniqueKey key_)
-{
-	push_registry_subtable_mode( L, key_, NULL);
-}
-
-
 /*---=== Deep userdata ===---*/
 
 /* 
@@ -256,7 +203,7 @@ static int deep_userdata_gc( lua_State* L)
  * used in this Lua state (metatable, registring it). Otherwise, increments the
  * reference count.
  */
-char const* push_deep_proxy( Universe* U, lua_State* L, DeepPrelude* prelude, LookupMode mode_)
+char const* push_deep_proxy( Universe* U, lua_State* L, DeepPrelude* prelude, int nuv_, LookupMode mode_)
 {
 	DeepPrelude** proxy;
 
@@ -283,7 +230,8 @@ char const* push_deep_proxy( Universe* U, lua_State* L, DeepPrelude* prelude, Lo
 	STACK_GROW( L, 7);
 	STACK_CHECK( L, 0);
 
-	proxy = lua_newuserdatauv( L, sizeof(DeepPrelude*), 0);                                            // DPC proxy
+	// a new full userdata, fitted with the specified number of uservalue slots (always 1 for Lua < 5.4)
+	proxy = lua_newuserdatauv( L, sizeof(DeepPrelude*), nuv_);                                         // DPC proxy
 	ASSERT_L( proxy);
 	*proxy = prelude;
 
@@ -414,7 +362,7 @@ char const* push_deep_proxy( Universe* U, lua_State* L, DeepPrelude* prelude, Lo
 *   proxy_ud= deep_userdata( idfunc [, ...] )
 *
 * Creates a deep userdata entry of the type defined by 'idfunc'.
-* Other parameters are passed on to the 'idfunc' "new" invocation.
+* Parameters found on the stack are left as is passed on to the 'idfunc' "new" invocation.
 *
 * 'idfunc' must fulfill the following features:
 *
@@ -430,7 +378,7 @@ char const* push_deep_proxy( Universe* U, lua_State* L, DeepPrelude* prelude, Lo
 *
 * Returns:  'proxy' userdata for accessing the deep data via 'luaG_todeep()'
 */
-int luaG_newdeepuserdata( lua_State* L, luaG_IdFunction idfunc)
+int luaG_newdeepuserdata( lua_State* L, luaG_IdFunction idfunc, int nuv_)
 {
 	char const* errmsg;
 
@@ -460,7 +408,7 @@ int luaG_newdeepuserdata( lua_State* L, luaG_IdFunction idfunc)
 			idfunc( L, eDO_delete);
 			return luaL_error( L, "Bad idfunc(eDO_new): should not push anything on the stack");
 		}
-		errmsg = push_deep_proxy( universe_get( L), L, prelude, eLM_LaneBody);  // proxy
+		errmsg = push_deep_proxy( universe_get( L), L, prelude, nuv_, eLM_LaneBody);  // proxy
 		if( errmsg != NULL)
 		{
 			return luaL_error( L, errmsg);
@@ -502,16 +450,47 @@ void* luaG_todeep( lua_State* L, luaG_IdFunction idfunc, int index)
  *   the id function of the copied value, or NULL for non-deep userdata
  *   (not copied)
  */
-bool_t copydeep( Universe* U, lua_State* L, lua_State* L2, int index, LookupMode mode_)
+bool_t copydeep( Universe* U, lua_State* L2, uint_t L2_cache_i, lua_State* L, uint_t i, LookupMode mode_, char const* upName_)
 {
 	char const* errmsg;
-	luaG_IdFunction idfunc = get_idfunc( L, index, mode_);
+	luaG_IdFunction idfunc = get_idfunc( L, i, mode_);
+	int nuv = 0;
+
 	if( idfunc == NULL)
 	{
 		return FALSE;   // not a deep userdata
 	}
 
-	errmsg = push_deep_proxy( U, L2, *(DeepPrelude**) lua_touserdata( L, index), mode_);
+	STACK_CHECK( L, 0);
+	STACK_CHECK( L2, 0);
+
+	// extract all uservalues of the source
+	while( lua_getiuservalue( L, i, nuv + 1) != LUA_TNONE)                               // ... u [uv]* nil
+	{
+		++ nuv;
+	}
+	// last call returned TNONE and pushed nil, that we don't need
+	lua_pop( L, 1);                                                                      // ... u [uv]*
+	STACK_MID( L, nuv);
+
+	errmsg = push_deep_proxy( U, L2, *(DeepPrelude**) lua_touserdata( L, i), nuv, mode_);               // u
+
+	// transfer all uservalues of the source in the destination
+	{
+		int const clone_i = lua_gettop( L2);
+		while( nuv)
+		{
+			inter_copy_one( U, L2, L2_cache_i, L,  lua_absindex( L, -1), VT_NORMAL, mode_, upName_);        // u uv
+			lua_pop( L, 1);                                                                  // ... u [uv]*
+			// this pops the value from the stack
+			lua_setiuservalue( L2, clone_i, nuv);                                                           // u
+			-- nuv;
+		}
+	}
+
+	STACK_END( L2, 1);
+	STACK_END( L, 0);
+
 	if( errmsg != NULL)
 	{
 		// raise the error in the proper state (not the keeper)

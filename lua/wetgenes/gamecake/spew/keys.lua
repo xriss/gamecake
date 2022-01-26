@@ -155,6 +155,18 @@ M.bake=function(oven,keys)
 				
 		return keys -- so setup is chainable with a bake
 	end
+	
+	function keys.clean()
+	end
+
+	function keys.ups()
+		return recaps.ups()
+	end
+
+	function keys.update()
+		return recaps.step()
+	end
+
 
 	function keys.set_opts(n,v)
 		if n=="typing" and keys.opts.notyping then v=false end -- disable typing../
@@ -166,16 +178,14 @@ M.bake=function(oven,keys)
 	function keys.msg(m)
 
 		if not keys.up then return end -- no key maping
+		if m.skeys then return end -- already processed
 
 		local used=false
-		for i,v in ipairs(keys.up) do -- possibly sort the joy msgs here...
---			if m.class=="posix_joystick" and ( m.code==59 or m.code==60 or m.code==61 ) then -- ignore crappy acc spam from a ds3
---			else
---print(wstr.dump(m))
-				local t=v.msg(m)
-				used=used or t
---			end
+		for i,v in ipairs(keys.up) do
+			local t=v.msg(m)
+			used=used or t
 		end
+		if used then m.skeys=true end -- flag as used by skeys
 		return used
 	end
 	

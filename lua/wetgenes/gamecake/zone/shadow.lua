@@ -20,9 +20,18 @@ M.bake=function(oven,shadow)
 
 	local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
-	shadow.mtx=M4()
+	local screen=oven.rebake("wetgenes.gamecake.zone.screen")
 
-	shadow.mapsize=2048*2
+	shadow.mtx=M4() -- the transform matrix to render from the lights point of view
+
+	shadow.light=V3() -- the normal of the light casting the shadow (sun or moon)
+	shadow.power=1.0 -- the power of the light so we can fade out when swapping between sun and moon
+
+	shadow.mapsize=4096
+	shadow.maparea=256
+
+-- number of shadows to draw
+	shadow.count=1
 
 	shadow.loads=function()
 
@@ -40,7 +49,7 @@ M.bake=function(oven,shadow)
 			mode="fbo",
 			fbo=shadow.fbo,
 			fov=0,
-			cx=0.5,cy=0.5,
+			cx=0.5,cy=0.5,cz=0.5,
 		})
 
 		gl.uniforms.shadow_map=function(u)
@@ -54,11 +63,24 @@ M.bake=function(oven,shadow)
 			gl.UniformMatrix4f( u,  shadow.mtx )
 		end
 
+		gl.uniforms.shadow_light=function(u)
+			gl.Uniform4f( u,  shadow.light[1] , shadow.light[2] , shadow.light[3] , shadow.power )
+		end
 
 	end
+
+	shadow.update=function()
+		if shadow.fbo.w ~= shadow.mapsize or shadow.fbo.h ~= shadow.mapsize then -- auto resize
+			shadow.fbo:resize( shadow.mapsize , shadow.mapsize , -1 )
+		end
+	end
 	
-	shadow.default="0.0,0.0,0.0,0.0"
-	shadow.draw_head=function(scene)
+--	shadow.default="0.0,0.0,0.0,0.0"
+	shadow.draw_head=function(scene,shadow_idx)
+	
+-- special shadow transform to make the area around 0 more detailed
+--		gl.program_defs["DRAW_SHADOW_SQUISH"]=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SQUISH
+		gl.program_defs["DRAW_SHADOW_SQUISH"]=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SQUISH
 
 		gl.PushMatrix()
 		shadow.fbo:bind_frame()
@@ -69,80 +91,90 @@ M.bake=function(oven,shadow)
 			[gl.BLEND]						=	gl.FALSE,
 			[gl.DEPTH_TEST]					=	gl.TRUE,
 			[gl.CULL_FACE]					=	gl.TRUE,
-			[gl.FRONT_FACE]					=	gl.CW,	-- shadows are drawn upside down?
+--			[gl.FRONT_FACE]					=	gl.CW,	-- shadows are drawn upside down?
 		})
 
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
 		local camera=scene.get("camera")
-		local sky=scene.systems.sky
+		local sky=scene.systems.sky or {time=0}
 		if camera then
 
-	--		print( M4(gl.matrix(gl.MODELVIEW)) )
-
-			gl.Translate( camera.inv[13] , camera.inv[14] , camera.inv[15] )
-
-			gl.Rotate( -90 , 1,0,0 )
-			gl.Translate( 0,-512,0 )
-
-			gl.Scale( 2 , 2 , 2 )
-
---			local t=M4( gl.SaveMatrix() )			
---			print(t)
-
-
-
-			local s=256 -- 40*shadow.mapsize/1024
+			local s=shadow.maparea -- 40*shadow.mapsize/1024
 			local sd=1024
-			local x=(camera.mtx[ 9]*-s + camera.mtx[13])*-1/s	-- swap z/y as rotation
-			local y=(camera.mtx[11]*-s + camera.mtx[15])*-1/s
-			local z=(camera.mtx[10]*-s + camera.mtx[14])*-1/s
+			local x=(math.floor(camera.pos[1]))--*-1/s	-- swap z/y as rotation
+			local y=(math.floor(camera.pos[2]))--*-1/s
+			local z=(math.floor(camera.pos[3]))--*-1/s
+			
+			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..(0.04/sd)..","..(0.08/sd)..",0.0"
 
-			local snap=16
-			x=math.floor(0.5+x*snap)/snap
-			y=math.floor(0.5+y*snap)/snap
-			z=math.floor(0.5+z*snap)/snap
+			local r=sky.time
 
-			shadow.default="0.6,"..0.000000*s/sd..","..0.000008*s/sd..",0.0"
+			local  calculate_matrix=function()
+				shadow.mtx=M4{
+					1,			0,			0,			0,
+					0,			1,			0,			0,
+					0,			0,			1,			0,
+					0,			0,			0,			1,
+				}
+				shadow.mtx:scale(1/s,1/s,1/sd)
+				shadow.mtx:rotate( 90 , 1,0,0 ) -- top down
+				shadow.mtx:rotate( 35 , 1,0,0 ) -- hemasphere
+				shadow.mtx:rotate( -90 + r ,  0,0,1 ) -- time of day
+				shadow.mtx:translate(-x,-y,-z)
 
---			x=0
---			y=0
---			z=0
+			end
+			
+			-- calculate light matrix
+			calculate_matrix()
 
-			shadow.mtx=M4{
-				1/s,		0,			0,			0,
-				0,			0,			1/s,		0,
-				0,			1/s,		0,			0,
-				0,			0,			0,			1,
-			}
-			local r=360*(((sky.time)/60)%1)
-			if r>180 and r<360 then
-				r = 90 + r
+			-- remember light normal
+			sky.sun[1]=-shadow.mtx[3]
+			sky.sun[2]=-shadow.mtx[7]
+			sky.sun[3]=-shadow.mtx[11]
+			sky.sun:normalize()
+
+			shadow.mtx:rotate( 180 ,  0,0,1 ) -- time of day
+			-- remember light normal
+			sky.moon[1]=-shadow.mtx[3]
+			sky.moon[2]=-shadow.mtx[7]
+			sky.moon[3]=-shadow.mtx[11]
+			sky.moon:normalize()
+
+
+			local ddd=10
+
+			if r<180 then
+				if r<=0+ddd then		screen.day_night[1]=0.5-0.5*(r)/ddd
+				elseif r>=180-ddd then	screen.day_night[1]=0.5-0.5*(180-r)/ddd
+				else					screen.day_night[1]=0.0
+				end
 			else
-				r = 90 + 360-r
+				if r<=180+ddd then		screen.day_night[1]=0.5+0.5*(r-180)/ddd
+				elseif r>=360-ddd then	screen.day_night[1]=0.5+0.5*(360-r)/ddd
+				else					screen.day_night[1]=1.0
+				end
 			end
 
-			if r < 90+180+6 then r=90+180+6 end
-			if r > 90+360-6 then r=90+360-6 end
-
---			r=math.floor((r+0.5)/1)*1
-
---			shadow.mtx:rotate( r , 1,0,0 )
+			shadow.light=V3(sky.sun)
+			if r > 180 then -- moon or sun
+				r = r-180
+				shadow.light=V3(sky.moon)
+			end
 			
---			shadow.mtx:rotate( -10 , 1,0,0 )
+			shadow.power=1
+			
+			if r < ddd then
+				shadow.power=r/ddd
+			end
+			if r > 180-ddd then
+				shadow.power=(180-r)/ddd
+			end
+			
 
+			-- calculate shadow matrix
+			calculate_matrix()
 
-			shadow.mtx:pretranslate(x,y,z)
-			shadow.mtx:prerotate( r , -1,0,0 )
-			shadow.mtx:prescale(1,1,1/sd)
-
--- snap to pixels?
---[[
-			local vv=shadow.mtx:v3(4)
-			shadow.mtx[13]=math.floor( vv[1] * (shadow.mapsize) ) / (shadow.mapsize)
-			shadow.mtx[14]=math.floor( vv[2] * (shadow.mapsize) ) / (shadow.mapsize)
-			shadow.mtx[15]=math.floor( vv[3] * (shadow.mapsize) ) / (shadow.mapsize)
-]]
 			gl.MatrixMode(gl.PROJECTION)
 			gl.LoadMatrix( shadow.mtx )
 
@@ -155,7 +187,10 @@ M.bake=function(oven,shadow)
 
 	end
 
-	shadow.draw_tail=function()
+	shadow.draw_tail=function(scene,shadow_idx)
+
+-- turn off special shadow transform
+		gl.program_defs["DRAW_SHADOW_SQUISH"]=nil
 
 		gl.state.pop()
 		oven.cake.views.pop_and_apply()
@@ -177,20 +212,21 @@ M.bake=function(oven,shadow)
 		local v3=gl.apply_modelview( {w* 1,	h* 1,	0,1} )
 		local v4=gl.apply_modelview( {w* 1,	h*-0,	0,1} )
 		local t={
-			0,	1,	0,	0,	0,
-			0,	0,	0,	0,	1,
-			1,	1,	0,	1,	0,
-			1,	0,	0,	1,	1,
+			0,	1,	0,	0,	1,
+			0,	0,	0,	0,	0,
+			1,	1,	0,	1,	1,
+			1,	0,	0,	1,	0,
 		}
 
 		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_shadow_test",function(p)
 
+--[[
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 --				shadow.fbo:bind_texture()
 				shadow.fbo:bind_depth()
 				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
-
+]]
 		end)
 
 		gl.PopMatrix()

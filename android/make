@@ -1,0 +1,24 @@
+cd `dirname $0`
+
+source ~/andsdk-env.sh
+
+source ./config.sh
+
+BASENAME=` basename $ANDROID_APP_BASEDIR `
+
+./copyfiles
+
+./gradlew build installDebug
+
+./adb logcat -c
+./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake.$BASENAME/.CakeAct | ./adb logcat "SDL/APP:*" "*:S"
+
+
+#zipinfo app/build/outputs/apk/debug/app-debug.apk
+
+#jarsigner -keystore ~/android.keystore -storepass xxxxxx gamecake/build/outputs/apk/release/gamecake-release-unsigned.apk android
+#zipalign -p -f -v 4 gamecake/build/outputs/apk/release/gamecake-release-unsigned.apk gamecake/build/outputs/apk/release/gamecake-release.apk
+
+#./adb install gamecake/build/outputs/apk/release/gamecake-release.apk
+#./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake/.CakeAct
+

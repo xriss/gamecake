@@ -1,0 +1,66 @@
+#cd `dirname $0`
+
+if [ -z "$1" ] ; then
+        cd ~
+else
+        cd $1
+fi
+echo "echo installing android sdk into $(pwd) / andsdk "
+
+ANDSDK=$(pwd)/andsdk
+
+cat >"andsdk-env.sh" <<EOF
+
+export ANDSDK=$ANDSDK
+export PATH=$ANDSDK/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDSDK/ndk-bundle:\$PATH
+
+export ANDROID_SDK_ROOT=$ANDSDK
+
+EOF
+chmod +x andsdk-env.sh
+
+# first install a require script
+if ! [[ -x "$(command -v require.sh)" ]] ; then
+
+	echo " we need sudo to install require.sh to /usr/local/bin "
+	sudo wget -O /usr/local/bin/require.sh https://raw.githubusercontent.com/xriss/require.sh/main/require.sh
+	sudo chmod +x /usr/local/bin/require.sh
+
+fi
+
+
+
+require.sh luajit
+require.sh lua-filesystem
+require.sh wget
+require.sh git
+require.sh cmake
+require.sh python
+require.sh unzip
+require.sh /usr/bin/javac
+require.sh /usr/lib/jvm/java-17-openjdk/bin/javac
+
+
+
+wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O andsdk.zip
+unzip andsdk.zip
+rm andsdk.zip
+
+
+rm -rf andsdk
+mkdir andsdk
+yes | cmdline-tools/bin/sdkmanager --sdk_root=$ANDSDK --licenses
+cmdline-tools/bin/sdkmanager --sdk_root=$ANDSDK --install "cmdline-tools;latest"
+rm -rf cmdline-tools
+
+
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "ndk-bundle"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "cmake;3.18.1"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "emulator"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-29"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-29;google_apis;x86"
+$ANDSDK/cmdline-tools/latest/bin/avdmanager create avd -n google29 -k "system-images;android-29;google_apis;x86" -d pixel_5
+
+#start an emulator like so
+#$ANDSDK/emulator/emulator -avd google29 -netdelay none -netspeed full

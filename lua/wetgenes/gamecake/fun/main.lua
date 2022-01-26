@@ -35,7 +35,7 @@ M.bake=function(oven,main)
 		vx=opts.width,
 		vy=opts.height,
 		vz=opts.height*4,
-		fov=1/4,
+		fov=0,
 	})
 
 	local view_debug=views.create({
@@ -44,11 +44,11 @@ M.bake=function(oven,main)
 		vx=opts.width,
 		vy=opts.height,
 		vz=opts.height*4,
-		fov=1/4,
+		fov=0,
 	})
 
-	local skeys=oven.rebake("wetgenes.gamecake.spew.keys").setup{max_up=6,pad_map=2} -- upto 6 players, two on keyboard 4-6 on controllers
-	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps").setup(6)
+--	local skeys=oven.rebake("wetgenes.gamecake.spew.keys").setup{max_up=6,pad_map=2} -- upto 6 players, two on keyboard 4-6 on controllers
+--	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps").setup(6)
 	local sscores=oven.rebake("wetgenes.gamecake.spew.scores").setup(6)
 
 
@@ -86,7 +86,7 @@ main.setup=function()
 		vx=screen.hx,
 		vy=screen.hy,
 		vz=screen.hy*4,
-		fov=1/4,
+		fov=0,
 	})
 	
 end
@@ -105,7 +105,7 @@ main.msg=function(m)
 
 	view.msg(m) -- fix mouse coords
 
-	if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
+--	if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
 	
 	main.system.msg(m)
 	
@@ -123,7 +123,7 @@ end
 
 main.update=function()
 
-	srecaps.step()
+--	srecaps.step()
 
 	main.system.update()
 	
@@ -152,7 +152,7 @@ main.draw=function()
 				view.vx=tiles.hx
 				view.vy=tiles.hy
 				view.vz=tiles.hy*4
-				view.fov=1/4
+				view.fov=0
 
 			end
 

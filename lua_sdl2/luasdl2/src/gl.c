@@ -50,6 +50,7 @@ const CommonObject GlObject = {
 static int
 l_glExtensionSupported(lua_State *L)
 {
+	SDL_GL_GetProcAddress(luaL_checkstring(L, 1));
 	return commonPush(L, "b", SDL_GL_ExtensionSupported(luaL_checkstring(L, 1)));
 }
 

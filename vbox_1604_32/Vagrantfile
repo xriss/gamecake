@@ -7,17 +7,10 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.box = "ubuntu/xenial32"
-
+  
   config.vm.synced_folder "..", "/gamecake"
 
   config.vm.provision :shell, :path => "provision.sh"
 
-config.vm.provider "virtualbox" do |v|
-  v.memory = 2048
-end
-
-if Vagrant.has_plugin?("vagrant-cachier")
-  config.cache.scope = :box
-end
 
 end

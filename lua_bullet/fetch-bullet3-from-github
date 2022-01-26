@@ -7,5 +7,6 @@ rm -rf src
 mv bullet3/src src
 mv bullet3/LICENSE.txt .
 
-#rm -rf bullet3
+rm -rf bullet3
 
+echo " also please make sure btDiscreteDynamicsWorld.cpp has the H4X we need... "

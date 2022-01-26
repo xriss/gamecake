@@ -96,8 +96,20 @@ uniform vec4 bone_fix; // min,max,0,0 (bone ids stored in bones array)
 #endif
 
 #ifdef LIGHT
-uniform vec3  light_normal;
+uniform vec4  shadow_light;
 uniform vec4  light_color;
+#endif
+
+#ifdef PHONG
+uniform vec4  shadow_light;
+#endif
+
+#ifdef NTOON
+uniform vec4  shadow_light;
+#endif
+
+#ifdef TEXNTOON
+uniform vec4  shadow_light;
 #endif
 
 #header "gamecake_shader_vertex"
@@ -134,6 +146,7 @@ IN float a_matidx;
 #endif
 
 #ifdef NORMAL
+uniform mat4 camera;
 IN vec4  a_normal;
 #endif
 
@@ -331,6 +344,13 @@ void main(void)
 	gl_Position = v;
 #endif
 
+#ifdef DRAW_SHADOW_SQUISH
+//	gl_Position.xy=clamp(gl_Position.xy,vec2(-1.0),vec2(1.0));
+//	gl_Position.xy=(sign(gl_Position.xy)*pow(abs(gl_Position.xy),vec2(DRAW_SHADOW_SQUISH)));
+//    gl_Position.xy=mix( gl_Position.xy*0.5 , gl_Position.xy*0.75 - (sign(gl_Position.xy)*0.125) , step(0.5,abs(gl_Position.xy)) );
+    gl_Position.xy=mix( gl_Position.xy*2.0 , gl_Position.xy*0.75/1.25 + (sign(gl_Position.xy)*0.35) , step(0.25,abs(gl_Position.xy)) );
+#endif
+
 #ifdef SHADOW
 	shadow_uv = ( shadow_mtx * camera * modelview * v ) ;
 	shadow_uv = vec4( ( shadow_uv.xyz / shadow_uv.w ) * 0.5 + 0.5 ,
@@ -338,7 +358,7 @@ void main(void)
 #endif
 
 #ifdef NORMAL
-	v_normal = normalize( mat3( modelview ) * n );
+	v_normal = normalize( mat3( camera * modelview ) * n );
 #endif
 
 #ifdef COLOR
@@ -403,7 +423,9 @@ void main(void)
 #ifdef TEXNTOON
 
 	vec3 n=normalize(v_normal);
-	vec2 uv=clamp( v_texcoord + vec2( pow( max( max( n.z, -n.y ) , 0.0 ) , 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
+	vec3 s=shadow_light.xyz;
+	float l=max( 0.0, dot(n,s)*shadow_light.w );
+	vec2 uv=clamp( v_texcoord + vec2( pow( l , 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
 
 	FragColor = texture(tex, uv ).rgba;
 
@@ -436,22 +458,25 @@ void main(void)
 #ifdef NTOON
 
 	vec3 n=normalize(v_normal);
-	float l=max( max( n.z, -n.y ) , 0.0 );
+	vec3 s=shadow_light.xyz;
+	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	FragColor= vec4(  c1.rgb*(NTOON+(l*(1.0-NTOON))) , c1.a ); 
 
 #endif
 
 #ifdef LIGHT
 	vec3 n=normalize( v_normal );
-	vec3 l=normalize( mat3( modelview ) * light_normal );
+	vec3 s=shadow_light.xyz;
+	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	
-	FragColor= vec4(  c1.rgb *         max( dot(n,l) , 0.25 ) + 
-						(c2.rgb * pow( max( dot(n,l) , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
+	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) + 
+						(c2.rgb * pow( max( l , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif
 
 #ifdef PHONG
 	vec3 n=normalize(v_normal);
-	float l=max( n.z, -n.y );
+	vec3 s=shadow_light.xyz;
+	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) + 
 						(c2.rgb * pow( max( l , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif

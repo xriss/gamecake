@@ -110,7 +110,7 @@ function M.bake(oven,escmenu)
 			mode="full",
 			vx=480,
 			vy=480,
-			fov=0.25,
+			fov=0.0,
 		})
 	end
 
@@ -175,7 +175,7 @@ function M.bake(oven,escmenu)
 
 				escmenu.view.msg(m)
 
-				if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
+				skeys.msg(m)
 
 --				if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
 --					m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen

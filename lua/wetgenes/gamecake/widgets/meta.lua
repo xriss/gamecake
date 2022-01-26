@@ -44,15 +44,19 @@ wmeta.classes={
 	["menubar"]=oven.rebake("wetgenes.gamecake.widgets.menubar"),
 	["menuitem"]=oven.rebake("wetgenes.gamecake.widgets.menuitem"),
 	["pages"]=oven.rebake("wetgenes.gamecake.widgets.pages"),
+	["tabs"]=oven.rebake("wetgenes.gamecake.widgets.tabs"),
 
 --classes built out of the base classes
 
+	["tabpages"]=oven.rebake("wetgenes.gamecake.widgets.tabpages"),
+	
 	["split_drag"]=oven.rebake("wetgenes.gamecake.widgets.split_drag"),
 
 	["pan"]=oven.rebake("wetgenes.gamecake.widgets.pan"),
 	["slide"]=oven.rebake("wetgenes.gamecake.widgets.slide"),
 
 	["scroll"]=oven.rebake("wetgenes.gamecake.widgets.scroll"),
+
 
 	["tree"]=oven.rebake("wetgenes.gamecake.widgets.tree"),
 	["treefile"]=oven.rebake("wetgenes.gamecake.widgets.treefile"),
@@ -89,8 +93,10 @@ function wmeta.setup(def)
 	end
 	
 	function meta.call_hook(widget,hook,dat)
-		if type(widget.class_hooks)=="function" then -- the widget class wants to see this hook
-			if widget.class_hooks(hook,widget,dat) then return end -- and it can eat the event if it returns true
+		if widget.class_hooks then
+			for _,ch in ipairs(widget.class_hooks) do
+				if ch(hook,widget,dat) then return end -- and it can eat the event if it returns true
+			end
 		end
 		local hooks=widget.hooks or widget.master.hooks -- can use master hooks
 		local type_hooks=type(hooks)
@@ -101,10 +107,24 @@ function wmeta.setup(def)
 		end
 	end
 
+	meta.add_class_hook=function(widget,fn)
+		widget.class_hooks=widget.class_hooks or {}
+		widget.class_hooks[ #widget.class_hooks+1 ]=fn
+	end
+	meta.del_class_hook=function(widget,fn)
+		local hooks=widget.class_hooks or {}
+		for i=#hooks,1,-1 do
+			if hooks[i]==fn then
+				table.remove(hooks,i)
+			end
+		end
+	end
+
 --
 -- add a new widget as a child to this one
 --
 	function meta.add(parent,...) -- could supply multiple, but probably just one at a time
+		if parent.children then parent=parent.children end -- always put children here
 		local ret
 		for i,def in pairs{...} do
 			local widget={}
@@ -184,37 +204,16 @@ function wmeta.setup(def)
 	function meta.setup(widget,def)
 	
 		for a,b in pairs(def) do if type(a)=="string" then widget[a]=b end end -- shallow copy every string value
-		if type(widget.class)=="function" then widget.class(widget) end -- allow callback to fill in more values
+		if type(widget.class)=="function" then widget.class(widget,def) end -- allow callback to fill in more values
 	
 		widget.state=widget.state or "none"
 		
 		widget.meta=meta
 		
---		widget.draw=def.draw -- custom render, probably best to wrap with a widget:draw_base(function)
-		
---		widget.data=def.data -- this widget is synced with this data
-		
---		widget.class=def.class
---		widget.highlight=def.highlight
-		
---		widget.id=def.id
---		widget.user=def.user -- any user data you wish to associate with this widget (we will ignore it)
---		widget.hooks=def.hooks
-
---		widget.clip=def.clip -- use viewport clipping to prevent drawing outside of the area
-
 		widget.smode=widget.smode or "center"
 		widget.sx=widget.sx or 1 -- display scale (of children)
 		widget.sy=widget.sy or 1
 		widget.pa=widget.pa or 0 -- display rotation angle (of children)
-		
---		widget.size=def.size 	-- special layout action flag
-								--	"full" 	==	Expand to fullsize of widget
-								-- "minmax" fit using hx_min hy_max or hy_min hx_max
---		widget.hx_min=def.hx_min
---		widget.hy_min=def.hy_min
---		widget.hx_max=def.hx_max
---		widget.hy_max=def.hy_max
 		
 		widget.px=widget.px or 0 -- relative to parent, pixel position
 		widget.py=widget.py or 0
@@ -222,48 +221,10 @@ function wmeta.setup(def)
 		widget.hx=widget.hx or 0 -- absolute pixel size of widget (in parents space)
 		widget.hy=widget.hy or 0
 		widget.hz=widget.hz or 0 -- used to signal an fbo with a depth buffer
-		
-
---		widget.outline_size=def.outline_size
---		widget.outline_color=def.outline_color
---		widget.outline_fade_color=def.outline_fade_color
-		
---		widget.transparent=def.transparent -- transparent color tint
-
---		widget.color=def.color
-		
---		widget.cursor=def.cursor
---		widget.drag=def.drag
-		
+				
 		widget.font=widget.font or widget.parent.font --  use this font if set or inherit value from parent
 		
 		widget.text_color=widget.text_color or widget.parent.text_color -- black text
---		widget.text_color_over=def.text_color_over -- if set, switch text color on hover
---		widget.text_color_shadow=def.text_color_shadow  -- may need a shadow
---		widget.text_size=def.text_size
---		widget.text_align=def.text_align -- default is "center", and "wrap" will wrap the text
-		
---		widget.grid_size=def.grid_size
-
---		widget.sheet=def.sheet -- display this sheet (by name) on the button
---		widget.sheet_id=def.sheet_id
---		widget.sheet_px=def.sheet_px
---		widget.sheet_py=def.sheet_py
---		widget.sheet_hx=def.sheet_hx
---		widget.sheet_hy=def.sheet_hy
-
---		widget.draw_text=def.draw_text -- special text draw function probably nil
-		
---		widget.text=def.text -- display this text on the button
---		widget.style=def.style -- style the button this way
---		widget.skin=def.skin -- skin the button this way
-		
---		widget.hidden=def.hidden -- start off hidden?
-
-
--- remove auto solid, need to make sure that all buttons now have a class of button.
---		if widget.hooks then widget.solid=true end
---		widget.solid=widget.solid or def.solid
 		
 		if widget.class and wmeta.classes[widget.class] then -- got a class, call its setup, its setup can override other functions
 			wmeta.classes[widget.class].setup(widget,def)
@@ -273,7 +234,6 @@ function wmeta.setup(def)
 		
 		if def.fbo then -- an fbo buffer has been requested (can speed rendering up)
 			widget.fbo=framebuffers.create(0,0,0)
---			widget.fbo_fov=def.fbo_fov
 		end
 		
 		widget:set_dirty()
@@ -507,8 +467,189 @@ function wmeta.setup(def)
 	end
 
 
--- more setup, moved to other files
-	oven.rebake("wetgenes.gamecake.widgets.meta_layout").setup(def)
+	function meta.build_m4(widget)
+	
+		widget.m4=widget.m4 or tardis.m4.new()
+		
+		if widget.parent==widget then
+			widget.m4:identity()
+		else
+--print("parent",widget.parent.m4)
+			widget.m4:set(widget.parent.m4)
+		end
+		
+		local m4=tardis.m4.new()	
+		m4:identity()	
+
+--		local m4=widget.m4
+
+
+--print("SS",widget.sx,widget.sy)		
+		if widget.sx==1 and widget.sy==1 then
+				m4:translate( tardis.v3.new(-widget.px,-widget.py,0,0) )
+--				x= x-widget.px
+--				y= y-widget.py
+--print("noscale",sx,sy)
+		else
+			if widget.smode=="center" then
+--print("CCCscale",widget.sx,widget.sy)
+				m4:translate( tardis.v3.new(widget.hx*0.5,widget.hy*0.5,0) )
+				m4:scale_v3(  tardis.v3.new(1/widget.sx,1/widget.sy,1) )
+				m4:translate( tardis.v3.new(-widget.px-widget.hx*0.5,-widget.py-widget.hy*0.5,0) )
+--				x= ((x-widget.px-widget.hx*0.5)/widget.parent.sx)+widget.hx*0.5
+--				y= ((y-widget.py-widget.hy*0.5)/widget.parent.sy)+widget.hy*0.5
+			else
+--print("scale",widget.sx,widget.sy)
+				m4:scale_v3(  tardis.v3.new(1/widget.sx,1/widget.sy,1) )
+				m4:translate( tardis.v3.new(-widget.px,-widget.py,0) )
+--				x=((x-widget.px)/widget.sx)
+--				y=((y-widget.py)/widget.sy)
+			end
+		end
+		
+		if widget.pan_px and widget.pan_py then -- fidle everything
+--print("build",widget.pan_px,widget.pan_py)
+			m4:translate({widget.pan_px,widget.pan_py,0})
+		end
+
+		m4:product(widget.m4,widget.m4)
+
+
+		for i,v in ipairs(widget) do
+			meta.build_m4(v)
+		end
+
+	end
+	
+-- resize is performed recursively before layout so that layout can position its children
+	function meta.resize(widget,mini)
+		mini=mini or 0
+		for i,v in ipairs(widget) do if i>mini and v.size then
+		
+			for token in string.gmatch(v.size, "[^%s]+") do -- can contain multiple tokens
+			
+				if token=="full" then -- force full size
+
+					v.px=0
+					v.py=0
+					v.hx=widget.hx/widget.sx
+					v.hy=widget.hy/widget.sy
+
+	--print("full",v.px,v.py,v.hx,v.hy)
+	--print("parent class",widget.parent.class)
+
+				elseif token=="fullx" then -- force full size X only
+
+					v.px=0
+					v.hx=widget.hx/widget.sx
+
+				elseif token=="fully" then -- force full size Y only
+
+					v.py=0
+					v.hy=widget.hy/widget.sy
+
+				elseif token=="border" then -- force a fixed border size
+
+					v.hx=(widget.hx/widget.sx)-(v.px*2)
+					v.hy=(widget.hy/widget.sy)-(v.py*2)
+
+				elseif token=="minmax" then -- force a minimum width maximum height with scale on parent
+				
+					if     v.hx_min and v.hy_max then
+--						v.px=0
+--						v.py=0
+						v.hx=widget.hx
+						v.hy=v.hy_max
+						if v.hx < v.hx_min then
+							v.sx=widget.hx/v.hx_min
+							v.sy=v.sx
+							v.hx=v.hx_min
+							v.hy=v.hy_max--*v.sy
+						else
+							v.sx=1
+							v.sy=1
+						end
+					elseif v.hy_min and v.hx_max then
+						v.px=0
+						v.py=0
+						v.hx=v.hx_max
+						v.hy=widget.hy
+						if v.hy < v.hy_min then
+							v.sx=widget.hy/v.hy_min
+							v.sy=v.sx
+							v.hy=v.hy_min
+							v.hx=v.hx_max--*v.sx
+						else
+							v.sx=1
+							v.sy=1
+						end
+					end
+
+				end
+			end
+			
+		end end
+		if widget.hook_resize then -- let the widget do some magic before we recurse
+			widget.hook_resize(widget)
+		end
+		for i,v in ipairs(widget) do
+--			if not v.hidden then v:resize() end
+			v:resize()
+		end
+		for i,v in ipairs(widget) do if i>mini and v.size then
+			for token in string.gmatch(v.size, "[^%s]+") do -- can contain multiple tokens
+		
+				if token=="fitx" then  -- set hx to maximum of children
+
+					v.hx=0
+					for i,w in ipairs(v) do
+						if not w.hidden then
+							local x=(w.hx+w.px)*w.sx
+							if x>v.hx then v.hx=x end
+						end
+					end
+					v.hx=math.floor(v.hx)
+
+				elseif token=="fity" then -- set hy to maximum of children
+
+					v.hy=0
+					for i,w in ipairs(v) do
+						if not w.hidden then
+--print(w.sy)
+							local y=(w.hy+w.py)*w.sy
+							if y>v.hy then v.hy=y end
+						end
+					end
+					v.hy=math.floor(v.hy)
+				end
+
+			end
+		end end
+
+
+	end
+
+	function meta.layout(widget,mini)
+--		mini=mini or 0
+--		for i,v in ipairs(widget) do if i>mini then
+--		end end
+
+		if widget.hook_layout then -- let the widget do some magic before we recurse
+			widget.hook_layout(widget)
+		end
+		for i,v in ipairs(widget) do
+--			if not v.hidden then v:layout() end
+			v:layout()
+		end
+	end
+
+	function meta.resize_and_layout(widget)
+--print("master layout")
+		widget:resize()
+		widget:layout()
+		widget:build_m4()
+--exit()
+	end
 
 end
 

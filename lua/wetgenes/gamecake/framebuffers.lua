@@ -18,8 +18,8 @@ function M.bake(oven,framebuffers)
 	local funcs={}
 	local metatable={__index=funcs}
 
-	local vendor=string.lower((oven.gl.Get(oven.gl.VENDOR) or ""))
-	framebuffers.webkithax=(vendor=="webkit") -- enable webkit hax (TODO: turn this into a benchmark test)
+--	local vendor=string.lower((oven.gl.Get(oven.gl.VENDOR) or ""))
+--	framebuffers.webkithax=(vendor=="webkit") -- enable webkit hax (TODO: turn this into a benchmark test)
 
 	framebuffers.data=setmetatable({}, { __mode = 'vk' })
 
@@ -154,15 +154,16 @@ function M.bake(oven,framebuffers)
 
 				gl.BindTexture(gl.TEXTURE_2D, fbo.depth)
 
---	chrome webgl3 hax
-				if framebuffers.webkithax then
-					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-				else
-					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-				end
-				
+-- this is the only filter that *will* work on depth buffers
+
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+-- I really want this one, but we will need to test it works before we can use it
+--[[
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+]]
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
 
@@ -233,15 +234,31 @@ function M.bake(oven,framebuffers)
 
 	end
 	
-	framebuffers.mipmap = function(fbo) -- generate mipmaps and enable default mipmapping filter
---print("fbo mipmap???",tostring(fbo.texture))
---print(debug.traceback())
+	framebuffers.mipmap = function(fbo)
+		framebuffers.mipmap_texture(fbo)
+		framebuffers.mipmap_depth(fbo)
+	end
 
+	framebuffers.mipmap_texture = function(fbo) -- generate mipmaps and enable default mipmapping filter
 		if fbo.texture then
 			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
 			gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR_MIPMAP_LINEAR)
---print("FBmipmap",fbo.texture,fbo.txw, fbo.txh,gl.GetError())
-			gl.GenerateMipmap(gl.TEXTURE_2D)	
+			gl.GenerateMipmap(gl.TEXTURE_2D)
+		end
+	end
+
+	framebuffers.mipmap_depth_broken=false
+	framebuffers.mipmap_depth = function(fbo) -- generate mipmaps and enable default mipmapping filter
+		if fbo.depth then
+			if not framebuffers.mipmap_depth_broken then
+				gl.BindTexture(gl.TEXTURE_2D, fbo.depth)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+				gl.GenerateMipmap(gl.TEXTURE_2D)
+				if gl.GetError()==gl.INVALID_OPERATION then -- bad driver, we fucked
+					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+					framebuffers.mipmap_depth_broken=true
+				end
+			end
 		end
 	end
 
@@ -285,6 +302,8 @@ function M.bake(oven,framebuffers)
 		"resize",
 		"download",
 		"mipmap",
+		"mipmap_texture",
+		"mipmap_depth",
 		"free_depth",
 		"free_texture",
 		"free_frame",

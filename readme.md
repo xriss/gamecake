@@ -32,14 +32,16 @@ can be downloaded from https://github.com/xriss/gamecake/archive/exe.zip
 
 
 
-For a linuxy build, the big required build/lib dependencies are 
-luajit, luafilesystem and SDL2. You have two choices either install via a 
-package manager, the following script should do that using apt.
+For a linuxy build, the big required build/lib dependencies are luajit, 
+luafilesystem and SDL2. You have two choices either install via a package 
+manager, the following script should do that along with making sure you have a 
+basic build environment setup. If it does not work or you do not trust it then 
+read it and install the bits it asks for yourself.
 
-	./apt-gets
+	./install-build-dependencies
 
-Or build them and install them from source which the following script 
-will try to do.
+Some of the dependencies can be built them and installed them from source which 
+the following script will try to do for luajit and sdl2.
 
 	build/install
 
@@ -52,6 +54,13 @@ Then you may use these scripts to make and install.
 For some more options when building (eg use clang) see the output of
 
 	./make --help
+
+
+EG I have successfully built an exe under WSL in Windows 10 using the 
+following to install tools/libs and then build using mingw. 
+
+	build/install --mingw
+	build/make --gcc=mingw
 
 
 Alternatively any vbox_* directory can build a specific executable. For

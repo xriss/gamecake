@@ -29,7 +29,7 @@ wtree.refresh=function(widget,items)
 	local pan=widget.scroll_widget.pan
 	pan:remove_all()
 
-	local ss=widget.master.grid_size or 24
+	local ss=widget.master.theme.grid_size
 
 	local recurse ; recurse=function(items,depth)
 	
@@ -38,6 +38,7 @@ wtree.refresh=function(widget,items)
 			local opts={
 				class="button",
 				id=it.id or widget.id,
+				class_hooks=it.class_hooks or widget.class_hooks,
 				hooks=it.hooks or widget.hooks,
 				hx=ss,
 				hy=ss,
@@ -71,7 +72,7 @@ function wtree.setup(widget,def)
 
 	widget.items={} -- items to display
 	widget.refresh=wtree.refresh -- rebuild display from items
-	widget.tree_hooks=wtree.tree_hooks -- handle clicks to expand or collapse
+--	widget.tree_hooks=wtree.tree_hooks -- handle clicks to expand or collapse
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,size="full",class="scroll"})
 

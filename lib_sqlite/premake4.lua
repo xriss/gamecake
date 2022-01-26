@@ -2,12 +2,10 @@
 project "lib_sqlite"
 kind "StaticLib"
 language "C"
-files { "sqlite3.c" , "./**.h" }
+files { "sqlite-amalgamation/sqlite3.c" , "./sqlite-amalgamation/**.h" }
 
 
-
-
-includedirs { "." }
+includedirs { "sqlite-amalgamation" }
 
 
 KIND{}

@@ -9,63 +9,76 @@ newoption {
    }
 }
 
-
-
-
 function buildlinkoptions(t) buildoptions(t) linkoptions(t) end
 
-------------------------------------------------------------------------
--- hacky premake functions
-------------------------------------------------------------------------
 
-function newplatform(plf)
-    local name = plf.name
-    local description = plf.description
+function newplatform(platform)
  
-    -- Register new platform
-    premake.platforms[name] = {
-        cfgsuffix = "_"..name,
-        iscrosscompiler = true
-    }
+    platform.cfgsuffix = "_"..platform.name
+    platform.iscrosscompiler = true
+
+    premake.gcc.platforms[platform.name] = platform.gcc
+    premake.platforms[platform.name] = platform
+
+    table.insert(premake.option.list["platform"].allowed, { platform.name, platform.description })
+    table.insert(premake.fields.platforms.allowed, platform.name)
  
-    -- Allow use of new platform in --platfroms
-    table.insert(premake.option.list["platform"].allowed, { name, description })
-    table.insert(premake.fields.platforms.allowed, name)
- 
-    -- Add compiler support
-    -- gcc
-    premake.gcc.platforms[name] = plf.gcc
-    --other compilers (?)
-end
- 
-function newgcctoolchain(toolchain)
-    newplatform {
-        name = toolchain.name,
-        description = toolchain.description,
-        gcc = {
-            cc = toolchain.prefix .. "gcc",
-            cxx = toolchain.prefix .. "g++",
-            ar = toolchain.prefix .. "ar",
-            cppflags = "-MMD " .. toolchain.cppflags,
-        }
-    }
 end
 
+ANDROID_VERSION="29"
 
-
-
-newgcctoolchain {
-    name = "android",
-    description = "android",
-    prefix = "arm-linux-androideabi-",
-    cppflags = "-fPIC",
+newplatform {
+    name = "android-a32",
+    description = "android 32 bit arm",
+    cpu_id = "a32",
+    cpu_name = "armeabi-v7a",
+	gcc=
+	{
+		cc ="armv7a-linux-androideabi"..ANDROID_VERSION.."-clang",
+		cxx="armv7a-linux-androideabi"..ANDROID_VERSION.."-clang++",
+		ar ="arm-linux-androideabi-ar",
+		cppflags = "-MMD -fPIC",	-- should we build in thumb mode?  "-mthumb"
+	}
+}
+newplatform {
+    name = "android-a64",
+    description = "android 64 bit arm",
+    cpu_id = "a64",
+    cpu_name = "arm64-v8a",
+	gcc=
+	{
+		cc ="aarch64-linux-android"..ANDROID_VERSION.."-clang",
+		cxx="aarch64-linux-android"..ANDROID_VERSION.."-clang++",
+		ar ="aarch64-linux-android-ar",
+		cppflags = "-MMD -fPIC",
+	}
 }
 
-newgcctoolchain {
-    name = "android-x86",
-    description = "android-x86",
-    prefix = "i686-android-linux-",
-    cppflags = "-fPIC",
+newplatform {
+    name = "android-x32",
+    description = "android 32 bit intel",
+    cpu_id = "x32",
+    cpu_name = "x86",
+	gcc=
+	{
+		cc ="i686-linux-android"..ANDROID_VERSION.."-clang",
+		cxx="i686-linux-android"..ANDROID_VERSION.."-clang++",
+		ar ="i686-linux-android-ar",
+		cppflags = "-MMD -fPIC",
+	}
+}
+newplatform {
+    name = "android-x64",
+    description = "android 64 bit intel",
+    cpu_id = "x64",
+    cpu_name = "x86_64",
+	gcc=
+	{
+		cc ="x86_64-linux-android"..ANDROID_VERSION.."-clang",
+		cxx="x86_64-linux-android"..ANDROID_VERSION.."-clang++",
+		ar ="x86_64-linux-android-ar",
+		cppflags = "-MMD -fPIC",
+	}
 }
 
 newplatform {
@@ -136,14 +149,6 @@ newplatform {
     }
 }
 
---[[ ios notez, something like this makefile but platforms are in /Applications
-
-/Applications/Xcode.app/Contents/Developer/Platforms/
-
-https://gitorious.org/mac-app-from-scratch/ios-app-from-scratch/source/ccb29c96bce7ee72aaa9bc222415f4393d008b9f:Makefile#L77
-
-]]
-
 
 ------------------------------------------------------------------------
 -- work out what we should be building for
@@ -211,16 +216,13 @@ end
 
 if CPU=="native" then -- done
 else
-	if CPU=="-64" then
-		CPU="64"
-	elseif CPU=="-32" then
-		CPU="32"
-	elseif CPU=="-arm" then
-		CPU="arm"
-	elseif CPU=="-armv7" then
-		CPU="armv7"
-	else
-		CPU="native"
+	if 			CPU=="-64" 		then		CPU="x64"
+	elseif 		CPU=="-32" 		then		CPU="x32"
+	elseif 		CPU=="-x64" 	then		CPU="x64"
+	elseif 		CPU=="-x32" 	then		CPU="x32"
+	elseif 		CPU=="-a32" 	then		CPU="a32"
+	elseif 		CPU=="-a64" 	then		CPU="a64"
+	else									CPU="native"
 	end
 end
 
@@ -242,7 +244,7 @@ if EMCC then
 
 	buildlinkoptions{
 		"-Wno-long-long",
-		"-Werror",
+--		"-Werror",
 		"-Wno-almost-asm",
 	}
 
@@ -279,48 +281,23 @@ if EMCC then
 
 elseif ANDROID then
 
-	local androidsdk=path.getabsolute("./sdks/android-sdk")
-	local androidsys=path.getabsolute("./sdks/android-9-arm/sysroot/usr")
+--	local androidsdk=path.getabsolute("./sdks/android-sdk")
+--	local androidsys=path.getabsolute("./sdks/android-9-arm/sysroot/usr")
 
+
+	local platform=premake.platforms[ "android-"..CPU ]
+
+	platforms { "android-"..CPU } --hax
 
 	defines "ANDROID"
 
 	defines("LUA_USE_POSIX")
 	
--- these are application specific and need proper paths so will get overidden
-AND_LIB_DIR=AND_LIB_DIR or path.getabsolute("android")
+	includedirs { "exe/android/include" }
+	libdirs { path.getabsolute("exe/android/lib/"..platform.cpu_name) }
 
-	if CPU=="32" then
+	buildoptions{ "-mtune=generic" }
 
-		platforms { "android-x86" } --hax
-	
-		androidsys=path.getabsolute("./sdks/android-9-x86/sysroot/usr")
-		
-		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/x86")
-
-		buildoptions{ "-mtune=generic" }
---		linkoptions{ "-m32" }
-		
-	elseif CPU=="arm" then
-	
-		platforms { "android" } --hax
-		
-		buildoptions{ "-mthumb"  }
-		
-		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi")
-		
-	elseif CPU=="armv7" then
-	
-		platforms { "android" } --hax
-
-		buildoptions{ "-march=armv7-a" , "-mfloat-abi=softfp" , "-mfpu=vfpv3" }
-		linkoptions{ "--fix-cortex-a8" }
-
-		AND_OUT_DIR=AND_OUT_DIR or path.getabsolute("android/libs/armeabi-v7a")
-	end
-
-	includedirs { androidsys.."/include" }
-	libdirs { androidsys.."/lib" }
 
 elseif WINDOWS then
 
@@ -336,7 +313,6 @@ elseif WINDOWS then
 		end
 		
 		buildoptions{"-mtune=generic"}
-		linkoptions {"-mtune=generic"}
 
 	end
 
@@ -352,12 +328,12 @@ elseif OSX then
 	buildoptions{"-mmacosx-version-min=10.12"}
 	linkoptions {"-mmacosx-version-min=10.12"}
 
-	if CPU=="32" then
+	if CPU=="x32" then
 	
 		buildoptions{"-m32 -msse -msse2 -mtune=generic"}
 		linkoptions {"-m32 -msse -msse2 -mtune=generic"}
 		
-	elseif CPU=="64" then
+	elseif CPU=="x64" then
 	
 		buildoptions{"-m64 -mtune=generic"}
 		linkoptions {"-m64 -mtune=generic"}
@@ -367,6 +343,10 @@ elseif OSX then
 elseif NIX then
 
 	platforms { "gcc" } --hax
+
+	buildlinkoptions {
+		"-pthread",
+	}
 
 	buildoptions{
 		"-Wno-format-security",
@@ -401,12 +381,12 @@ elseif NIX then
 		platforms { "clang" } --hax
 	end
 
-	if CPU=="32" then
+	if CPU=="x32" then
 	
 		buildoptions{"-m32 -msse -msse2 -mtune=generic"}
 		linkoptions{"-m32 -msse -msse2 -mtune=generic"}
 		
-	elseif CPU=="64" then
+	elseif CPU=="x64" then
 	
 		buildoptions{"-m64 -mtune=generic"}
 		linkoptions{"-m64 -mtune=generic"}
@@ -549,12 +529,16 @@ function KIND(opts)
 		
 		if ANDROID then
 		
+			local platform=premake.platforms[ "android-"..CPU ]
+
 			configuration {"Debug"}
-			targetdir(AND_OUT_DIR..d)
+			targetdir(DBG_OUT_DIR.."/android/lib/"..platform.cpu_name..d)
 
 			configuration {"Release"}
-			targetdir(AND_OUT_DIR..d)
-			
+			targetdir(EXE_OUT_DIR.."/android/lib/"..platform.cpu_name..d)
+
+print(EXE_OUT_DIR.."/android/lib/"..platform.cpu_name..d)
+
 		else
 
 			configuration {"Debug"}
@@ -728,10 +712,11 @@ includedirs { "./lua_grd/code" }
 
 all_includes=all_includes or {
 
--- lua bindings
+-- lua bindings that should always be available no matter the OS host.
 	{LUA_BIT,		    WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_kissfft",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_pack",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_fats",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_zip",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_zlib",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_freetype",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
@@ -743,76 +728,63 @@ all_includes=all_includes or {
 	{"lua_grdmap",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_sod",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_socket",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_sec",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_gamecake",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_win",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_lfs",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lua_sqlite",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
-	{"lua_profiler",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_posix",		nil			or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_lash",		WINDOWS		or		NIX		or		EMCC		or		nil			or	OSX		},
-	
--- we just use SDL2 now
---	{"lua_win_"..GAMECAKE_WIN_TYPE, GAMECAKE_WIN_TYPE }, -- pick the os interface, see above
-
-	{"lua_sdl2",	   WINDOWS		or		NIX		or		EMCC		or		nil			or	OSX		},
-
--- emcc wraps the SDL2 with some extra functions.
-
-	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
-
---new lua bindings and libs (maybe be buggy unfinshed or removed at anytime)
+	{"lua_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_lash",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_sdl2",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_bullet",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_utf8",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_cmsgpack",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+
+-- emcc needs a little bit of special sauce
+	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
+
+
+-- These are mostly linux only bindings for linux only gamecake projects...
+	{"lua_linenoise",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
+	{"lua_posix",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 	{"lua_periphery",	nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_v4l2",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_rex",			nil			or		NIX		or		nil			or		nil			or	nil		},
-	{"lua_linenoise",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_sys",			WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_polarssl",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lib_polarssl",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lib_zip",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_glslang",		nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_midi",		nil			or		NIX		or		nil			or		nil			or	nil		},
+
 	{"lua_pgsql",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
-	{"lua_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_speexdsp",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
--- no raspi build anymore, need to add to linux build in a sensible way.
---	{"lua_raspi_unicornhat",																RASPI	},
+	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lib_hidapi",		nil			or		NIX		or		nil			or		nil			or	nil		},
 
--- only emcc actually needs this as a vanilla LUA build
+-- this is probably luajit but may be lua 5.1
 	{LIB_LUA,			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
--- static libs used by the lua bindings
-	{"lib_zzip",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+-- static libs used by the lua bindings so they should be linked afterwards
+	{"lib_wolfssl",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_speexdsp",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_png",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_jpeg",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_gif",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_z",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_zip",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_zzip",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_freetype",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_vorbis",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{LIB_OPENAL,		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
-	{"lib_sqlite",		WINDOWS		or		NIX		or		nil			or		ANDROID		or	OSX		},
+	{"lib_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 
--- going to need some multithreading
-	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-
--- test glslang?
-	{"lua_glslang",		NIX		},
-
--- test midi alsa?
-	{"lua_midi",		NIX		},
-
--- test hid?
-	{"lua_hid",			NIX		},
-	{"lib_hidapi",		NIX		},
-
-	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+-- some OS will provide openal so do not need this.
+	{LIB_OPENAL,		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
 
 -- the output executables
 	{"exe_gamecake",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},

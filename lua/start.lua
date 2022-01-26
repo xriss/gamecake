@@ -1,16 +1,51 @@
 
 local apps=require("apps")
-
 -- try hard to find any files wemay need
 apps.default_paths()
 
+-- need to know about the system we are running on
+local SDL=require("SDL")
+local platform=SDL.getPlatform()
+
+-- need to auto mount some zip files for reading from
 local wzips=require("wetgenes.zips")
+
+if platform=="Android" then
+
+	SDL.log("START ANDROID")
+
+-- replace print so we send print output to SDL.log	
+	print=function(...)
+		local t={...}
+		for i=1,#t do t[i]=tostring(t[i]) end
+		SDL.log( table.concat(t,"\t") )
+	end
+	
+	os.exit=function()print("os.exit() IN ANDROID IS DISABLED") return 1/0 end
+
+	if jit then -- start by trying to force a jit memory allocation
+		print("LUAJIT",jit.status())
+		require("jit.opt").start("sizemcode=256","maxmcode=256")
+		for i=1,1000 do end
+		print("LUAJIT",jit.status())
+
+--		if jit and jit.off then
+--			jit.off()
+--			print("LUAJIT","OFF")
+--		end -- sometimes jit causes problems
+
+  	end
+
+end
+
+
 
 -- strip some args before passing on to main code
 local a=arg or {}
 local argx={}
 
-local done_start=false -- only remove the first
+local done_start=false -- only remove the first -lstart we see
+local done_apk=false
 local done_zip=false
 
 for i=1,#a do
@@ -18,6 +53,10 @@ for i=1,#a do
 
 	if v=="-lstart" and not done_start then
 		done_start=true
+		v=nil
+	elseif v:sub(-4)==".apk" and not done_apk then -- the first apk only
+		wzips.add_apk_file(v)
+		done_apk=true	
 		v=nil
 	elseif v:sub(-4)==".zip" and not done_zip then -- the first zip only
 		wzips.add_zip_file(v)
