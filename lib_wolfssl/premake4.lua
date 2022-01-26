@@ -23,6 +23,11 @@ defines{
 --	"DEBUG_WOLFSSL",
 }
 
+	buildlinkoptions{
+		"-Wno-implicit-function-declaration",
+	}
+
+
 
 if WINDOWS then
 

@@ -244,7 +244,7 @@ if EMCC then
 
 	buildlinkoptions{
 		"-Wno-long-long",
-		"-Werror",
+--		"-Werror",
 		"-Wno-almost-asm",
 	}
 
