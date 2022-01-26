@@ -370,7 +370,7 @@ M.test=function()
 	})
 	
 	
-	local me=tasks:http_memo("http://xixs.com/index.html")
+	local me=tasks:http_memo("https://xixs.com/index.html")
 	local _,ret= tasks.linda:receive( nil , me.id )
 	for n,v in pairs(ret) do print(n,v) end
 

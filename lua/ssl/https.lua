@@ -29,6 +29,7 @@ local cfg = {
   protocol = "any",
   options  = {"all", "no_sslv2", "no_sslv3", "no_tlsv1"},
   verify   = "none",
+  verifyext = "lsec_continue" ,
 }
 
 --------------------------------------------------------------------
