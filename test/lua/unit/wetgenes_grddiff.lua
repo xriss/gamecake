@@ -79,6 +79,6 @@ function test_grddiff_history()
 --		assert_true( do_file_compare("dat/grd/diff.base."..i..".out.png","dat/grd/diff.redo."..i..".out.png") )
 	end
 
-	io.open("dat/grd/diff.base.lua","w"):write( wstr.dump(history.list) )
+--	io.open("dat/grd/diff.base.lua","w"):write( wstr.dump(history.list) )
 
 end
