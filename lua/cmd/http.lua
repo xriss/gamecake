@@ -42,13 +42,13 @@ Port to listen on.
 
 ]], },
 
-		{	"host",		"localhost",		[[
+		{	"host",		"*",		[[
 		
 Host to listen on.
 
 ]], },
 
-		{	"location",		"",		[[
+		{	"location",		".",		[[
 		
 Location of files to expose.
 
@@ -69,7 +69,7 @@ Location of files to expose.
 	local server = pegasus:new({
 	  host=args.data.host,
 	  port=args.data.port,
-	  location=args.location,
+	  location=args.data.location,
 	})
 
 	server:start()

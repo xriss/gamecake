@@ -112,8 +112,8 @@ function Handler:processRequest(port, client, server)
   end
 
   if request:path() and self.location ~= '' then
-    local path = ternary(request:path() == '/' or request:path() == '', 'index.html', request:path())
-    local filename = '.' .. self.location .. path
+    local path = ternary(request:path() == '/' or request:path() == '', '/index.html', request:path())
+    local filename = self.location .. path
 
     if not lfs.attributes(filename) then
       response:statusCode(404)
