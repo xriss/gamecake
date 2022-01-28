@@ -36,7 +36,7 @@ if cmd=="server" then
 
 	local args=require("cmd.args").bake({inputs=default_inputs{
 
-		{	"port",		2323,	[[
+		{	"port",		12211,	[[
 		
 Port to listen on.
 
@@ -45,6 +45,12 @@ Port to listen on.
 		{	"host",		"localhost",		[[
 		
 Host to listen on.
+
+]], },
+
+		{	"location",		"",		[[
+		
+Location of files to expose.
 
 ]], },
 
@@ -61,12 +67,12 @@ Host to listen on.
 	local pegasus = require "pegasus"
 
 	local server = pegasus:new({
-	  port=2323,
-	  location=".",
+	  host=args.data.host,
+	  port=args.data.port,
+	  location=args.location,
 	})
 
 	server:start()
-
 
 else -- print help
 
