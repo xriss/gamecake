@@ -2,6 +2,12 @@ cd `dirname $0`
 
 echo "linking all .lua fles from the main lua dir so we dont accidently edit multiple copies"
 
+ln -f lua_pegasus/git/src/pegasus/compress.lua  lua/pegasus/compress.lua
+ln -f lua_pegasus/git/src/pegasus/handler.lua   lua/pegasus/handler.lua
+ln -f lua_pegasus/git/src/pegasus/init.lua      lua/pegasus/init.lua
+ln -f lua_pegasus/git/src/pegasus/request.lua   lua/pegasus/request.lua
+ln -f lua_pegasus/git/src/pegasus/response.lua  lua/pegasus/response.lua
+
 
 ln -f lua_socket/git/src/ltn12.lua              lua/ltn12.lua
 ln -f lua_socket/git/src/mime.lua               lua/mime.lua
@@ -42,6 +48,9 @@ ln -f lua_ogg/code/ogg.lua                      lua/wetgenes/ogg.lua
 ln -f lua_speak/code/speak.lua                  lua/wetgenes/speak.lua
 
 ln -f lua_raspi_unicornhat/code/unicornhat.lua  lua/raspi/unicornhat.lua
+
+
+
 
 echo "listing all linked files"
 
