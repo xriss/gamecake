@@ -30,6 +30,9 @@ local M={ modname = (...) } package.loaded[M.modname] = M
 M.tasks_functions={}
 M.tasks_metatable={__index=M.tasks_functions}
 
+M.colinda_functions={}
+M.colinda_metatable={__index=M.colinda_functions}
+
 --[[#lua.wetgenes.tasks.add_id
 
 	tasks:add_id(it)
@@ -53,10 +56,13 @@ Internal function to manage deletion of all objects with unique ids.
 
 ]]
 M.tasks_functions.del_id=function(tasks,it)
-	if it.type then
-		tasks[it.type][it.id]=nil
+	if it.id then
+		if it.type then
+			tasks[it.type][it.id]=nil
+		end
+		tasks.ids[it.id]=nil
+		it.id=nil
 	end
-	tasks.ids[it.id]=nil
 	return it
 end
 
@@ -71,6 +77,7 @@ comunication.
 M.tasks_functions.add_memo=function(tasks,memo)
 	memo=memo or {}
 	memo.type="memo"
+	memo.state="setup"
 	tasks:add_id(memo)
 	return memo
 end
@@ -167,9 +174,9 @@ end
 	})
 	
 Create a task with various preset values similar to a thread except 
-there is no point in createing multiple tasks as they all run on the 
-calling thread anyway. the function is inside a coroutine and must 
-yield regulary this yield will then continue on the next update.
+inside a coroutine on the calling thread. As this function is inside a 
+coroutine you must yield regulary this yield will then continue on the 
+next update. Probably called once ever 60th of a second.
 
 	id
 
@@ -177,11 +184,18 @@ A unique id string to be used by lindas when sending messages into this
 task. The function is expected to sit in an infinite loop testing 
 this linda socket and then yielding if there is nothing to do.
 
+	count
+
+The number of tasks to create, they will all use the same instanced 
+code function so should be interchangable and it should not matter 
+which task we are actually running code on. If you expect the task to 
+maintain some state between memos, then this must be 1 .
+
 	code
 
 A lua function to run inside a coroutine, this function will recieve 
-tasks.linda and the task.id for comunication and an index of 0 so it 
-has the same calling signature as a thread.
+tasks.linda and the task.id for comunication and an index so we know 
+which of the count tasks we are (mostly for debugging)
 
 ]]
 M.tasks_functions.add_task=function(tasks,task)
@@ -216,6 +230,57 @@ M.tasks_functions.update=function(tasks)
 	end
 end
 
+--[[#lua.wetgenes.tasks.send
+
+	memo = tasks:send(memo,timeout)
+	memo = tasks:send(memo)
+	
+Send a memo with optional timeout.
+
+Check memo.error for posible error.
+
+]]
+M.tasks_functions.send=function(tasks,memo,timeout)
+	if memo.error then return memo end
+	memo.state="sending"
+	local ok=tasks.colinda:send( timeout , memo.task , memo )
+	memo.state="sent"
+	if not ok then memo.error="send failed" return memo end
+	return memo
+end
+
+--[[#lua.wetgenes.tasks.receive
+
+	memo = tasks:receive(memo,timeout)
+	memo = tasks:receive(memo)
+	
+Recieve a memo with optional timeout.
+
+The memo will be deleted after being recieved (ie we will have called 
+del_memo) so as to free up its comunication id for another memo.
+
+if the memo has not yet been sent then it will be autosent with the 
+same timeout before we try and receive it.
+
+After calling check if memo.error is nil then you will find the result in 
+memo.result
+
+]]
+M.tasks_functions.receive=function(tasks,memo,timeout)
+	if memo.error then return memo end
+	if 	memo.state=="setup" then -- autosend
+		tasks:send(memo)
+	end
+	memo.state="receiving"
+	local ok,result=tasks.colinda:receive( timeout , memo.id )
+	memo.state="done"
+	tasks:del_memo(memo)
+
+	if not ok then memo.error="receive failed" return memo end
+	memo.result=result
+	return memo
+end
+
 --[[#lua.wetgenes.tasks.delete
 
 	tasks:delete()
@@ -229,6 +294,111 @@ until program termination.
 M.tasks_functions.delete=function(tasks)
 	for idx,thread in pairs(tasks.thread) do
 	end
+end
+
+--[[#lua.wetgenes.tasks.create_colinda
+
+	local colinda=require("wetgenes.tasks").colinda(linda)
+	
+Create a colinda which is a wrapper around a linda providing 
+replacement functions to be used inside a coroutine so it will yield 
+(and assume it will be resumed) rather than wait.
+
+This should be a dropin replacement for a linda and will fallback to 
+normal linda use if not in a coroutine.
+
+If linda is nil then we will create one, the linda used in this colinda 
+can be found in colinda.linda if you need raw access.
+
+What we are doing here is wrapping the send/receive functions so that
+
+	colinda:send(time,...)
+	colinda:recieve(time,...)
+
+will be replaced with functions that call
+
+	linda:send(0,...)
+	linda:recieve(0,...)
+
+and use coroutines.yield to mimic the original timeout value without 
+blocking.
+
+]]
+M.create_colinda=function(linda)
+	if not linda then linda=lanes.linda() end
+	local colida={linda=linda}
+	setmetatable(colida,M.colida_metatable)
+	return colinda
+end
+	
+M.colinda_functions.set=function(colinda,...)
+	return colinda.linda:set(...)
+end
+
+M.colinda_functions.get=function(colinda,...)
+	return colinda.linda:get(...)
+end
+
+M.colinda_functions.count=function(colinda,...)
+	return colinda.linda:count(...)
+end
+
+M.colinda_functions.dump=function(colinda,...)
+	return colinda.linda:cancel(...)
+end
+
+M.colinda_functions.cancel=function(colinda,...)
+	return colinda.linda:cancel(...)
+end
+
+local checktimeout=function(timeout,...)
+	local aa={...}
+	local t=type(timeout)
+	if ( t~="nil" and t~="number" ) then -- is the first arg a valid timeout
+		timeout=nil
+		table.insert(aa,1,timeout)
+	end
+	return timeout,aa
+end
+
+M.colinda_functions.send=function(colinda,...)
+	if not coroutine.running() then
+		return colinda.linda:send(...)
+	end
+	local timeout,aa=checktimeout(...)
+	if timeout==0 then return colinda.linda:send(0,unpack(aa)) end -- no need to yield
+	local timestart
+	if timeout then timestart=os.time() end
+	
+	local ret
+	repeat
+		ret={ colinda.linda:send(0,unpack(aa)) }
+		if ret[1] then break end -- got a result
+		if timeout and os.time() > timestart+timeout then break end
+		coroutine.yield()
+	until false
+	
+	return unpack(ret)
+end
+
+M.colinda_functions.receive=function(colinda,...)
+	if not coroutine.running() then
+		return colinda.linda:receive(...)
+	end
+	local timeout,aa=checktimeout(...)
+	if timeout==0 then return colinda.linda:receive(0,unpack(aa)) end -- no need to yield
+	local timestart
+	if timeout then timestart=os.time() end
+	
+	local ret
+	repeat
+		ret={ colinda.linda:receive(0,unpack(aa)) }
+		if ret[1] then break end -- got a result
+		if timeout and os.time() > timestart+timeout then break end
+		coroutine.yield()
+	until false
+
+	return unpack(ret)
 end
 
 --[[#lua.wetgenes.tasks.create
@@ -247,6 +417,7 @@ M.create=function(tasks)
 	tasks.task={}		-- cooperative tasks
 	
 	tasks.linda=lanes.linda()
+	tasks.colinda=M.create_colinda(tasks.linda)
 
 	return tasks
 end
