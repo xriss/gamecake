@@ -203,6 +203,32 @@ M.tasks_functions.add_task=function(tasks,task)
 	task.type="task"
 	tasks:add_id(task)
 	
+	task.count=task.count or 1
+	task.errors={}
+	task.handles={}
+	for idx=1,task.count do
+		task.handles[idx]=coroutine.create(task.code)
+		local ok , err = coroutine.resume( task.handles[idx] , task.colinda , task.id , idx ) -- first call passing in args
+		if not ok then task.errors[idx]=err end
+	end
+
+	return task
+end
+
+--[[#lua.wetgenes.tasks.run_task
+
+	tasks:run_task(task)
+	
+Resume all the coroutines in this task.
+
+]]
+M.tasks_functions.run_task=function(tasks,task)
+
+	for idx=1,task.count do
+		local ok , err = coroutine.resume( task.handles[idx] )
+		if not ok then task.errors[idx]=err end
+	end
+
 	return task
 end
 
@@ -227,6 +253,7 @@ Resume all current coroutines and wait for them to yield.
 ]]
 M.tasks_functions.update=function(tasks)
 	for idx,task in pairs(tasks.task) do
+		tasks:run_task(task)
 	end
 end
 
@@ -237,11 +264,14 @@ end
 	
 Send a memo with optional timeout.
 
+if memo.id is not set then we will auto call add_memo to create it.
+
 Check memo.error for posible error.
 
 ]]
 M.tasks_functions.send=function(tasks,memo,timeout)
 	if memo.error then return memo end
+	if not memo.id then tasks:add_memo(memo) end -- auto add
 	memo.state="sending"
 	local ok=tasks.colinda:send( timeout , memo.task , memo )
 	memo.state="sent"
@@ -251,8 +281,8 @@ end
 
 --[[#lua.wetgenes.tasks.receive
 
-	memo = tasks:receive(memo,timeout)
-	memo = tasks:receive(memo)
+	result = tasks:receive(memo,timeout)
+	result = tasks:receive(memo)
 	
 Recieve a memo with optional timeout.
 
@@ -278,6 +308,7 @@ M.tasks_functions.receive=function(tasks,memo,timeout)
 
 	if not ok then memo.error="receive failed" return memo end
 	memo.result=result
+
 	return memo
 end
 
@@ -326,8 +357,8 @@ blocking.
 ]]
 M.create_colinda=function(linda)
 	if not linda then linda=lanes.linda() end
-	local colida={linda=linda}
-	setmetatable(colida,M.colida_metatable)
+	local colinda={linda=linda}
+	setmetatable(colinda,M.colinda_metatable)
 	return colinda
 end
 	
@@ -486,13 +517,10 @@ Create send and return a http memo.
 ]]
 M.tasks_functions.http_memo=function(tasks,memo)
 
-	if type(memo) == "string" then -- url only
-		memo={url=memo}
-	end
-	tasks:add_memo(memo)
+	if type(memo) == "string" then memo={url=memo} end
 	memo.task="http"
 	
-	tasks.linda:send( nil , memo.task , memo )
+	tasks:send(memo)
 	
 	return memo
 end
@@ -509,8 +537,6 @@ M.test=function()
 	print("testing tasks")
 
 	local tasks=M.create()
-	
-	local preloadlibs=require("wetgenes.gamecake.core").preloadlibs
 	
 	tasks:add_thread({
 		count=1,
@@ -541,8 +567,8 @@ M.test=function()
 	})
 	
 	
-	local me=tasks:http_memo("https://xixs.com/index.html")
-	local _,ret= tasks.linda:receive( nil , me.id )
+	local ret = tasks:receive( tasks:http_memo("https://xixs.com/index.html") ).result
+print( "got" , ret)
 	for n,v in pairs(ret) do print(n,v) end
 
 	for i=1,10 do
