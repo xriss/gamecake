@@ -225,8 +225,10 @@ Resume all the coroutines in this task.
 M.tasks_functions.run_task=function(tasks,task)
 
 	for idx=1,task.count do
-		local ok , err = coroutine.resume( task.handles[idx] )
-		if not ok then task.errors[idx]=err end
+		if not task.errors[idx] then -- do not resume if we got an error ( the error can be task has finished )
+			local ok , err = coroutine.resume( task.handles[idx] )
+			if not ok then task.errors[idx]=err end
+		end
 	end
 
 	return task
