@@ -225,7 +225,7 @@ Resume all the coroutines in this task.
 M.tasks_functions.run_task=function(tasks,task)
 
 	for idx=1,task.count do
-		if not task.errors[idx] then -- do not resume if we got an error ( the error can be task has finished )
+		if coroutine.status( task.handles[idx] )=="suspended" then
 			local ok , err = coroutine.resume( task.handles[idx] )
 			if not ok then task.errors[idx]=err end
 		end
