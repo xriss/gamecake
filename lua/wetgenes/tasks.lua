@@ -264,9 +264,14 @@ end
 	
 Send a memo with optional timeout.
 
+This is intended to be run from within a coroutine task on the main 
+thread. It will work outside of a task but that may block the main 
+thread waiting to send.
+
 if memo.id is not set then we will auto call add_memo to create it.
 
-Check memo.error for posible error.
+Check memo.error for posible error, this will be nil if everything went 
+OK.
 
 ]]
 M.tasks_functions.send=function(tasks,memo,timeout)
@@ -286,11 +291,16 @@ end
 	
 Recieve a memo with optional timeout.
 
+This is intended to be run from within a coroutine task on the main 
+thread. It will work outside of a task but that will block the main 
+thread waiting for a response.
+
 The memo will be deleted after being recieved (ie we will have called 
 del_memo) so as to free up its comunication id for another memo.
 
-if the memo has not yet been sent then it will be autosent with the 
-same timeout before we try and receive it.
+if the memo has not yet been sent or even been through add_memo (we 
+check state for "setup" or nil) then it will be autosent with the same 
+timeout before we try and receive it.
 
 After calling check if memo.error is nil then you will find the result in 
 memo.result
@@ -298,8 +308,8 @@ memo.result
 ]]
 M.tasks_functions.receive=function(tasks,memo,timeout)
 	if memo.error then return memo end
-	if 	memo.state=="setup" then -- autosend
-		tasks:send(memo)
+	if memo.state=="setup" or not memo.state then -- autosend
+		tasks:send(memo,timeout)
 	end
 	memo.state="receiving"
 	local ok,result=tasks.colinda:receive( timeout , memo.id )
@@ -512,17 +522,18 @@ end
 
 --[[#lua.wetgenes.tasks.http_memo
 
-Create send and return a http memo.
+Create send and return a http memo result.
 
 ]]
-M.tasks_functions.http_memo=function(tasks,memo)
+M.tasks_functions.http=function(tasks,memo)
 
 	if type(memo) == "string" then memo={url=memo} end
-	memo.task="http"
+	memo.task=memo.task or "http"
 	
-	tasks:send(memo)
-	
-	return memo
+	tasks:receive(memo)
+
+	if memo.error then return nil,memo.error end
+	return memo.result
 end
 
 
@@ -539,42 +550,28 @@ M.test=function()
 	local tasks=M.create()
 	
 	tasks:add_thread({
-		count=1,
-		globals={},
+		count=8,
 		id="http",
 		code=M.http_code,
 	})
 
-	local thread=tasks:add_thread({
-		count=10,
-		globals={},
-		id="thread",	-- send memos here
+	local task=tasks:add_task({
+		count=4,
 		code=function(linda,task_id,task_idx)
 
-			print("starting linda")
+			local ret = tasks:http("https://xixs.com/index.html")
+			print("####",ret)
+			for n,v in pairs(ret) do print(n,#tostring(v)>128 and "#"..#v or v) end
 
-			while true do
-
-				local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
-				
-				print("memo task "..task_id..":"..task_idx)
-				for n,v in pairs(memo) do print(n,v) end
-			
-			end
-	
-			print("finishing linda")
 		end,
 	})
 	
-	
-	local ret = tasks:receive( tasks:http_memo("https://xixs.com/index.html") ).result
-print( "got" , ret)
-	for n,v in pairs(ret) do print(n,v) end
-
-	for i=1,10 do
---		tasks.linda:send("thread",{id=i,poop="ok",name="this"..i})
+	while true do
+		tasks:update()
+--		print(task.errors[1])
 	end
+
 	
 end
-M.test()
+-- M.test()
 
