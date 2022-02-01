@@ -4,6 +4,8 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 --[[#lua.wetgenes.tasks
 
 	local tasks=require("wetgenes.tasks").create()
@@ -221,14 +223,29 @@ end
 	
 Resume all the coroutines in this task.
 
+Any errors will be logged with a backtrace.
+
+If the tasks have finished running (returned or crashed) then we will tasks:del_task(task) this task.
+Check task.id which will be nil after this task has finished.
+
 ]]
 M.tasks_functions.run_task=function(tasks,task)
 
+	local runcount=0
+
 	for idx=1,task.count do
 		if coroutine.status( task.handles[idx] )=="suspended" then
+			runcount=runcount+1
 			local ok , err = coroutine.resume( task.handles[idx] )
-			if not ok then task.errors[idx]=err end
+			if not ok then
+				task.errors[idx]=err
+				log("tasks" , debug.traceback(co,err) )
+			end
 		end
+	end
+	
+	if runcount==0 then -- coroutines are not runnig
+		tasks:del_task(task)
 	end
 
 	return task
@@ -575,5 +592,5 @@ M.test=function()
 
 	
 end
--- M.test()
+--M.test()
 
