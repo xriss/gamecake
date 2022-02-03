@@ -163,13 +163,11 @@ end
 
 	local thread=tasks:add_task({
 		id="test",
-		code=function(linda,task_id,task_idx)
+		code=function(linda,task_id,task_idx,task)
 			while true do
 				local _,memo= linda:receive( 0 , task_id )
 				if memo then
 					...
-				else
-					coroutine.yield()
 				end
 			end
 		end,
@@ -196,11 +194,14 @@ maintain some state between memos, then this must be 1 .
 	code
 
 A lua function to run inside a coroutine, this function will recieve 
-tasks.linda and the task.id for comunication and an index so we know 
-which of the count tasks we are (mostly for debugging)
+tasks.linda (which is a colinda) and the task.id for comunication and 
+an index so we know which of the count tasks we are (mostly for 
+debugging) and finally the task table itself which make sense to share 
+with coroutines.
 
 ]]
 M.tasks_functions.add_task=function(tasks,task)
+	if type(task)=="function" then task={code=task} end -- the simplest form is to just pass in a function
 	task=task or {}
 	task.type="task"
 	tasks:add_id(task)
@@ -210,7 +211,7 @@ M.tasks_functions.add_task=function(tasks,task)
 	task.handles={}
 	for idx=1,task.count do
 		task.handles[idx]=coroutine.create(task.code)
-		local ok , err = coroutine.resume( task.handles[idx] , task.colinda , task.id , idx ) -- first call passing in args
+		local ok , err = coroutine.resume( task.handles[idx] , task.colinda , task.id , idx , task ) -- first call passing in args
 		if not ok then task.errors[idx]=err end
 	end
 
@@ -225,8 +226,9 @@ Resume all the coroutines in this task.
 
 Any errors will be logged with a backtrace.
 
-If the tasks have finished running (returned or crashed) then we will tasks:del_task(task) this task.
-Check task.id which will be nil after this task has finished.
+If the tasks have finished running (returned or crashed) then we will 
+tasks:del_task(task) this task. Check task.id which will be nil after 
+this task has finished.
 
 ]]
 M.tasks_functions.run_task=function(tasks,task)
