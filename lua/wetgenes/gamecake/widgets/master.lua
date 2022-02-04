@@ -389,7 +389,7 @@ function wmaster.setup(widget,def)
 	end
 	
 	function master.set_focus(focus)
---print("focus",tostring(focus))
+--print("focus",tostring(focus),focus and focus.class)
 		if master.focus==focus then return end -- no change
 	
 		if master.focus then
@@ -403,6 +403,7 @@ function wmaster.setup(widget,def)
 				master.focus:call_hook_later("focus")
 				if focus.class=="textedit" then -- also set edit focus
 					master.set_focus_edit(focus)
+--print("edit focus",tostring(focus),focus and focus.class)
 				end
 			end
 		end
