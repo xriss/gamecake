@@ -132,7 +132,7 @@ function wmaster.setup(widget,def)
 
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget,resize)
-
+--print("update",widget)
 		
 		local ups=skeys.ups()
 		if ups then -- use skeys / srecaps code 
@@ -192,12 +192,18 @@ function wmaster.setup(widget,def)
 
 				master.press=false
 
-				if master.over --[[ and master.active==master.over ]] then -- no click if we drag away from button
+				if master.over and master.over~=master --[[ and master.active==master.over ]] then -- no click if we drag away from button
 				
 					if not master.over.never_set_focus_edit then
---						print("click",master.edit,master.focus)
-						master.set_focus_edit(master.over)
-						master.set_focus(master.over)
+--print("active",master.active,master.active.class)
+--print("over",master.over,master.over.class)
+--						master.set_focus_edit(master.over)
+--						master.set_focus(master.over)
+
+						if master.active and master.active.can_focus then
+							master.set_focus(master.active)
+						end
+
 					end
 					if ups.button("mouse_left_clr")  then
 						master.over:call_hook_later("click",{keyname="mouse_left"}) -- its a left click
@@ -512,6 +518,7 @@ function wmaster.setup(widget,def)
 -- handle mouse input
 --	
 	function master.mouse(widget,act,x,y,keyname)
+--print(widget,act,x,y,keyname)
 
 -- keep mouse state in master	
 		if act==1 and keyname then

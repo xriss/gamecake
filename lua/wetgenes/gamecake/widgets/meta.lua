@@ -338,31 +338,31 @@ function wmeta.setup(def)
 		
 		local x,y=widget:mousexy(_x,_y)
 
-		local nudge=0--widget.outline_size or 0 -- allow clicking outside
 		local tx=(x-(widget.pan_px or 0))
 		local ty=(y-(widget.pan_py or 0))
-		if widget==widget.master or ( tx>=0-nudge and tx<widget.hx+nudge and ty>=0-nudge and ty<widget.hy+nudge ) then
+		if widget==widget.master or ( tx>=0 and tx<widget.hx and ty>=0 and ty<widget.hy ) then
 
 			if widget.solid then
-				if (not widget.master.dragging()) --[[or widget.master.active==widget]] then
+--				if (not widget.master.dragging()) --[[or widget.master.active==widget]] then
 					widget.master.over=widget
-				end
+--				end
 			end
 
-			if widget.master.active==widget then return true end -- *we* are getting dragged do not check children
+--			if widget.master.active==widget then return true end -- *we* are getting dragged do not check children
 
-			for i=#widget,1,-1 do -- children must be within parent bounds to catch clicks
+			for i=1,#widget do -- ,1,-1 do -- children must be within parent bounds to catch clicks
 				local v=widget[i] -- backwards so front has priority
-				if not v.hidden then if v:mouse(act,_x,_y,keyname) then return true end end
+--				if not v.hidden then if v:mouse(act,_x,_y,keyname) then return true end end
+				if not v.hidden then v:mouse(act,_x,_y,keyname) end
 			end
 			
-			if widget.master.over==widget then return true end
+--			if widget.master.over==widget then return true end
 
-		else
+--		else
 		
-			if (not widget.master.dragging()) and widget.master.over==widget then
-				widget.master.over=nil
-			end
+--			if (not widget.master.dragging()) and widget.master.over==widget then
+--				widget.master.over=nil
+--			end
 
 		end
 	
