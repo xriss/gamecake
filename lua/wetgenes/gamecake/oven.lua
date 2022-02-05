@@ -253,6 +253,15 @@ os.exit()
 				end
 			end
 
+-- setup tasks
+			oven.tasks=require("wetgenes.tasks").create()
+-- and http requests
+			oven.tasks:add_thread({
+				count=8,
+				id="http",
+				code=require("wetgenes.tasks").http_code,
+			})
+-- so we can run off thread code and coroutines
 
 			oven.win=wwin.create(inf)
 			oven.win:context({})
@@ -591,6 +600,10 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 					if v.update then
 						v.update()
 					end
+				end
+				
+				if oven.tasks then -- update generic coroutines
+					oven.tasks:update()
 				end
 
 				if oven.times then oven.times.update.stop() end

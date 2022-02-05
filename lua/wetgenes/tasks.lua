@@ -495,7 +495,55 @@ M.http_code=function(linda,task_id,task_idx)
 	local http = lanes.require("socket.http")
 	local ltn12 = lanes.require("ltn12")
 
+	local wjson = lanes.require("wetgenes.json")
+
 	local function request(memo)
+
+		local urlencode=function(s)
+			return tostring(s):gsub("([^%w_%%%-%.~])", function(c) return string.format("%%%02X", string.byte(c)) end )
+		end
+
+		-- check for values passed by table that we shouold encode
+		
+		if memo.get then -- add a ? and these values to the url
+		
+			local t={}
+			for n,v in pairs(memo.post) do
+				t[#t+1]=urlencode(n) .. "=" .. urlencode(v)
+			end
+			if string.find( memo.url, "?" , 1 , true ) then -- already a query
+				local c=string.sub(memo.url,-1,1) -- last char
+				if c~="?" and c~="&" then -- must be one a seperator
+					memo.url=memo.url.."&"
+				end
+			else
+				memo.url=memo.url.."?"
+			end
+			memo.url=memo.url..table.concat(t,"&")
+		
+		end
+		
+		if memo.json then -- we want to send all these values in a POST json body
+
+			memo.body=wjson.encode(memo.json)
+			memo.method="POST"
+			memo.headers=memo.headers or {}
+			memo.headers["Content-Type"]="application/json"
+			
+		end
+
+		if memo.post then -- we want to send all these values in a POST body
+
+			local t={}
+			for n,v in pairs(memo.post) do
+				t[#t+1]=urlencode(n) .. "=" .. urlencode(v)
+			end
+			memo.body=table.concat(t,"&")
+			memo.method="POST"
+			memo.headers=memo.headers or {}
+			memo.headers["Content-Type"]="application/x-www-form-urlencoded"
+			
+		end
 
 		local out = {}
 		local req = {}
@@ -503,6 +551,8 @@ M.http_code=function(linda,task_id,task_idx)
 		req.sink = ltn12.sink.table(out)
 		if memo.body then
 			req.source = ltn12.source.string(memo.body)
+			memo.headers=memo.headers or {}
+			memo.headers["Content-Length"]=#memo.body
 		end
 
 		req.url=memo.url
