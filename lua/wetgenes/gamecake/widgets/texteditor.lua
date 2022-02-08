@@ -487,13 +487,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 	if (act==1 or act==0) and ( not ascii or ascii=="" ) then
 
-		if key=="c" then	-- copy
-		
-			local s=txt.undo.copy()
-
-			if s then wwin.set_clipboard(s) end
-
-		elseif key=="left" then
+		if key=="left" then
 
 			texteditor.float_cx=nil
 
@@ -580,7 +574,13 @@ function wtexteditor.key(pan,ascii,key,act)
 			if master.key_control then
 			
 	--print(key)		
-				if     key=="x" then	-- cut
+				if key=="c" then	-- copy
+				
+					local s=txt.undo.copy()
+
+					if s then wwin.set_clipboard(s) end
+
+				elseif key=="x" then	-- cut
 
 					local s=txt.undo.cut()
 					

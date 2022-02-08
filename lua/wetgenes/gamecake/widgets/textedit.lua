@@ -123,25 +123,81 @@ function wtextedit.key(widget,ascii,key,act)
 --print("gotkey",ascii,act)
 	
 	
-	local function clear_selected_chars()
+	local function get_selected_chars()
+		if widget.data.str_select~=0 then
+			if  widget.data.str_select<0 then
+				return widget.data.str:sub(widget.data.str_idx+widget.data.str_select+1,widget.data.str_idx)
+			elseif  widget.data.str_select>0 then
+				return widget.data.str:sub(widget.data.str_idx+1,widget.data.str_idx+widget.data.str_select)
+			end
+		end
+	end
+	
+	local function replace_selected_chars(ascii)
+		ascii=ascii or ""
 		if widget.data.str_select~=0 then
 			if  widget.data.str_select<0 then
 				local s1=widget.data.str:sub(1,widget.data.str_idx+widget.data.str_select)
 				local s2=widget.data.str:sub(widget.data.str_idx+1)
-				widget.data.str=s1..s2
+				widget.data.str=s1..ascii..s2
 				widget.data.str_idx=widget.data.str_idx + widget.data.str_select
 			elseif  widget.data.str_select>0 then
 				local s1=widget.data.str:sub(1,widget.data.str_idx)
 				local s2=widget.data.str:sub(widget.data.str_idx+widget.data.str_select+1)
-				widget.data.str=s1..s2
+				widget.data.str=s1..ascii..s2
 			end
 			widget.data.str_select=0
+		else
+			if widget.data.str_idx >= #widget.data.str then -- put at end
+			
+				widget.data.str=widget.data.str..ascii
+				widget.data.str_idx=#widget.data.str
+				widget.data.str_select=0
+				
+			elseif widget.data.str_idx < 1 then -- put at start
+			
+				widget.data.str=ascii..widget.data.str
+				widget.data.str_idx=#ascii
+				widget.data.str_select=0
+				
+			else -- need to insert into line
+			
+				widget.data.str=widget.data.str:sub(1,widget.data.str_idx) .. ascii .. widget.data.str:sub(widget.data.str_idx+1)
+				widget.data.str_idx=widget.data.str_idx+#ascii
+				widget.data.str_select=0
+				
+			end
 		end
 	end
 	
 	if act==1 then
 	
-		if key=="enter" or key=="return" or key=="tab" then
+		if master.key_control then
+		
+			if key=="c" then	-- copy
+			
+				local s=get_selected_chars()
+
+				if s then wwin.set_clipboard(s) end
+
+			elseif key=="x" then	-- cut
+
+				local s=get_selected_chars()
+				
+				if s then wwin.set_clipboard(s) end
+			
+				replace_selected_chars()
+
+			elseif key=="v" then	-- paste
+			
+				if wwin.has_clipboard() then -- only if something to paste
+					local s=wwin.get_clipboard()
+					replace_selected_chars(s)
+				end
+
+			end
+			
+		elseif key=="enter" or key=="return" or key=="tab" then
 		
 			if widget.data.str then -- callback?
 
@@ -191,27 +247,7 @@ function wtextedit.key(widget,ascii,key,act)
 		
 		if c>=32 and c<128 then
 		
-			clear_selected_chars()
-
-			if widget.data.str_idx >= #widget.data.str then -- put at end
-			
-				widget.data.str=widget.data.str..ascii
-				widget.data.str_idx=#widget.data.str
-				widget.data.str_select=0
-				
-			elseif widget.data.str_idx < 1 then -- put at start
-			
-				widget.data.str=ascii..widget.data.str
-				widget.data.str_idx=1
-				widget.data.str_select=0
-				
-			else -- need to insert into line
-			
-				widget.data.str=widget.data.str:sub(1,widget.data.str_idx) .. ascii .. widget.data.str:sub(widget.data.str_idx+1)
-				widget.data.str_idx=widget.data.str_idx+1
-				widget.data.str_select=0
-				
-			end
+			replace_selected_chars(ascii)
 			
 			master.throb=255
 			
@@ -255,7 +291,7 @@ function wtextedit.key(widget,ascii,key,act)
 			
 			if 	widget.data.str_select~=0 then
 
-				clear_selected_chars()
+				replace_selected_chars()
 				changed=true
 				
 			elseif widget.data.str_idx >= #widget.data.str then -- at end
@@ -289,7 +325,7 @@ function wtextedit.key(widget,ascii,key,act)
 	
 			if 	widget.data.str_select~=0 then
 
-				clear_selected_chars()
+				replace_selected_chars()
 				changed=true
 				
 			elseif widget.data.str_idx >= #widget.data.str then -- at end
