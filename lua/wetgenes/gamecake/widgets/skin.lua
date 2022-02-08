@@ -772,11 +772,15 @@ end
 
 				local lines
 				
+				local s=widget.text
+				if widget.text_password then -- hide text
+					s=string.rep( (type(widget.text_password)=="string") and widget.text_password or "*",#s)
+				end
 				if widget.text_align=="wrap" then
-					lines=font.wrap(widget.text,{w=widget.hx}) -- break into lines
+					lines=font.wrap(s,{w=widget.hx-fy}) -- break into lines
 					widget.lines=lines -- remember wraped text
 				else
-					lines={widget.text}
+					lines={s}
 				end
 
 				local ty=typ
@@ -785,17 +789,19 @@ end
 				
 					local tx=font.width(line)
 					
-					if widget.text_align=="left" or widget.text_align=="wrap" then
-						tx=0
-					elseif widget.text_align=="right" then
-						tx=(widget.hx-tx)
-					elseif widget.text_align=="centerx" then
-						tx=(widget.hx-tx)/2
-					elseif widget.text_align=="left_center" then
-						tx=widget.hy/4
+					if widget.text_align=="wrap" then
+						tx=fy/2
+					elseif widget.text_align=="left" then
+						tx=fy/2
 						ty=(widget.hy/2)-(fy*fontfix)+typ
-					else -- center a single line vertically as well
-						tx=(widget.hx-tx)/2 
+					elseif widget.text_align=="center" then
+						tx=(widget.hx-tx)/2
+						ty=(widget.hy/2)-(fy*fontfix)+typ
+					elseif widget.text_align=="right" then
+						tx=(widget.hx-tx)-(fy/2)
+						ty=(widget.hy/2)-(fy*fontfix)+typ
+					else -- center everything by default
+						tx=(widget.hx-tx)/2
 						ty=(widget.hy/2)-(fy*fontfix)+typ
 					end
 					

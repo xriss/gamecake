@@ -253,16 +253,18 @@ function wmaster.setup(widget,def)
 			end
 		end
 	
-		if ( resize and (widget.hx~=resize.hx or widget.hy~=resize.hy) ) or master.request_layout then
+		if ( resize and (widget.hx~=resize.hx or widget.hy~=resize.hy) ) or master.request_layout or master.request_refresh then
 			master.request_layout=false
 			widget.hx=resize and resize.hx or widget.hx
 			widget.hy=resize and resize.hy or widget.hy
 			widget:resize_and_layout()
---			widget:set_dirty()
---			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
-			
 		end
-	
+		if master.request_refresh then -- redraw and layout
+			master.request_refresh=false
+			widget:set_dirty()
+			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
+		end
+		
 		local throb=(widget.throb>=128)
 		
 		widget.throb=widget.throb-4
