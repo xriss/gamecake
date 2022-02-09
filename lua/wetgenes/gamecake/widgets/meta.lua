@@ -204,6 +204,15 @@ function wmeta.setup(def)
 	function meta.setup(widget,def)
 	
 		for a,b in pairs(def) do if type(a)=="string" then widget[a]=b end end -- shallow copy every string value
+
+		if widget.master.datas then -- auto lookup data by name
+			for _,n in ipairs({"data","datx","daty"}) do
+				if type(widget[n])=="string" then
+					widget[n]=widget.master.datas.get(widget[n])
+				end
+			end
+		end
+
 		if type(widget.class)=="function" then widget.class(widget,def) end -- allow callback to fill in more values
 	
 		widget.state=widget.state or "none"

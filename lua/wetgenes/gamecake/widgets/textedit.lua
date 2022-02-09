@@ -140,11 +140,12 @@ function wtextedit.key(widget,ascii,key,act)
 				local s1=widget.data.str:sub(1,widget.data.str_idx+widget.data.str_select)
 				local s2=widget.data.str:sub(widget.data.str_idx+1)
 				widget.data.str=s1..ascii..s2
-				widget.data.str_idx=widget.data.str_idx + widget.data.str_select
+				widget.data.str_idx=widget.data.str_idx + widget.data.str_select + #ascii
 			elseif  widget.data.str_select>0 then
 				local s1=widget.data.str:sub(1,widget.data.str_idx)
 				local s2=widget.data.str:sub(widget.data.str_idx+widget.data.str_select+1)
 				widget.data.str=s1..ascii..s2
+				widget.data.str_idx=widget.data.str_idx + #ascii
 			end
 			widget.data.str_select=0
 		else

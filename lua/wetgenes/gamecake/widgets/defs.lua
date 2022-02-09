@@ -19,7 +19,10 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 --[[#lua.wetgenes.gamecake.widgets.defs.create
 
 ]]
-M.create=function()
+M.create=function(grid_size)
+
+	grid_size=grid_size or 1
+
 	local def={}
 
 	def.classes={}
@@ -56,6 +59,10 @@ M.create=function()
 				it[n]=v
 			end
 		end
+		for _,n in ipairs({"px","py","hx","hy"}) do
+			if it[n] then it[n]=it[n]*grid_size end -- auto scale these numbers by grid_size
+		end
+		for i,v in ipairs(it) do def.copy(v) end -- and children
 		return it
 	end
 
