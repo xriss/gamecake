@@ -808,6 +808,15 @@ end
 					tx=tx+txp
 	--				ty=ty+typ
 					
+					if widget.class=="textedit" then -- keep cursor visible
+						local cx=font.width(widget.text:sub(1,widget.data.str_idx))
+						local cw=font.width("_")
+						if tx+cx < 0 then					tx=tx-(tx+cx)
+						elseif tx+cx+cw > widget.hx then	tx=tx-(tx+cx+cw-widget.hx)
+						end
+					end
+
+
 					if i==1 then -- remember topleft of text position for first line
 						widget.text_x=tx
 						widget.text_y=ty
