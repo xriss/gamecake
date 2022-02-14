@@ -75,7 +75,8 @@ wpath.setup()
 split a path into numbered components
 
 ]]
-wpath.split=function(p)
+wpath.split=function(...)
+	local p=wpath.join(...)
 	local ps={}
 	local fi=1
 	while true do
@@ -149,7 +150,8 @@ if root is set then it implies an absolute path and will be something
 like C:\ under windows.
 
 ]]
-wpath.parse=function(p)
+wpath.parse=function(...)
+	local p=wpath.join(...)
 	local ps=wpath.split(p)
 	local r={}
 
@@ -205,8 +207,9 @@ end
 remove ".." and "." components from the path string
 
 ]]
-wpath.normalize=function(p)
+wpath.normalize=function(...)
 
+	local p=wpath.join(...)
 	local pp=wpath.parse(p) -- we need to know if path contains a root
 	local ps=wpath.split(p)
 	
@@ -332,4 +335,76 @@ If called repeatedly, then eventually we will return wpath.root
 ]]
 wpath.parent=function(...)
 	return wpath.resolve(...,"..","")
+end
+
+--[[#lua.wetgenes.path.dir
+
+	local dir=wpath.dir(path)
+
+This is a small utility function to perform a wpath.resolve then 
+wpath.parse and return the dir component of the result.
+
+]]
+wpath.dir=function(...)
+	return wpath.parse( wpath.resolve(...) ).dir
+end
+
+--[[#lua.wetgenes.path.name
+
+	local name=wpath.name(path)
+
+This is a small utility function to perform a wpath.resolve then 
+wpath.parse and return the name component of the result.
+
+]]
+wpath.name=function(...)
+	return wpath.parse( wpath.resolve(...) ).name
+end
+
+--[[#lua.wetgenes.path.root
+
+	local root=wpath.root(path)
+
+This is a small utility function to perform a wpath.resolve then 
+wpath.parse and return the root component of the result.
+
+]]
+wpath.root=function(...)
+	return wpath.parse( wpath.resolve(...) ).root
+end
+
+--[[#lua.wetgenes.path.folder
+
+	local folder=wpath.folder(path)
+
+This is a small utility function to perform a wpath.resolve then 
+wpath.parse and return the folder component of the result.
+
+]]
+wpath.folder=function(...)
+	return wpath.parse( wpath.resolve(...) ).folder
+end
+
+--[[#lua.wetgenes.path.name
+
+	local name=wpath.name(path)
+
+This is a small utility function to perform a wpath.resolve then 
+wpath.parse and return the name component of the result.
+
+]]
+wpath.name=function(...)
+	return wpath.parse( wpath.resolve(...) ).name
+end
+
+--[[#lua.wetgenes.path.ext
+
+	local ext=wpath.ext(path)
+
+This is a small utility function to perform a wpath.resolve then 
+wpath.parse and return the ext component of the result.
+
+]]
+wpath.ext=function(...)
+	return wpath.parse( wpath.resolve(...) ).ext
 end
