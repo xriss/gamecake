@@ -314,6 +314,10 @@ require("gles").CheckError() -- uhm this fixes an error?
 					local d=assert(wzips.readfile(fname),"Failed to load "..fname)
 					assert(g:load_data(d,"png")) -- last 3 letters pleaze
 					wwin.hardcore.icon(oven.win[0],g)
+				elseif opts.icon then -- load ascii pixels
+					local bd=require("wetgenes.gamecake.fun.bitdown")
+					local g=bd.pix_grd(opts.icon)
+					wwin.hardcore.icon(oven.win[0],g)
 				end
 			end
 
