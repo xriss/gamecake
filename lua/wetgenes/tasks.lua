@@ -591,7 +591,7 @@ M.http_code=function(linda,task_id,task_idx)
 
 end
 
---[[#lua.wetgenes.tasks.http_memo
+--[[#lua.wetgenes.tasks.http
 
 Create send and return a http memo result.
 
@@ -600,6 +600,102 @@ M.tasks_functions.http=function(tasks,memo)
 
 	if type(memo) == "string" then memo={url=memo} end
 	memo.task=memo.task or "http"
+	
+	tasks:receive(memo)
+
+	if memo.error then return nil,memo.error end
+	return memo.result
+end
+
+--[[#lua.wetgenes.tasks.sqlite_code
+
+A basic function to handle sqlite memos.
+
+As we are opening an sqlite database here it wont help much to have 
+more than one thread per database as they will just fight over file 
+access.
+
+]]
+M.sqlite_code=function(linda,task_id,task_idx)
+
+	local sqlite3 = lanes.require("lsqlite3")
+
+	local db
+	
+	if sqlite_filename then	db = sqlite3.open(sqlite_filename) end -- auto open
+
+	local function request(memo)
+	
+		local ret={}
+	
+		if memo.cmd then -- this is a special cmd eg to close or open the database
+		
+			if memo.cmd=="close" then -- probably good to "try" and do this before exiting
+				db:close()
+				db=nil
+				ret.result=true
+			end
+
+		elseif memo.sql then -- execute some sql
+
+			local result={}
+			
+			
+			local err
+			
+			if memo.compact then -- return data in a slightly more compact format
+
+				err=db:exec(memo.sql,function(udata,cols,values,names)
+					result.names=names
+					result[#result+1]=values
+					return 0
+				end,"udata")
+			
+			else
+
+				err=db:exec(memo.sql,function(udata,cols,values,names)
+					local it={}
+					for i=1,cols do it[ names[i] ] = values[i] end
+					result[#result+1]=it
+					return 0
+				end,"udata")
+
+			end
+
+			if err~=sqlite3.OK then
+				ret.error=db:errmsg()
+			else
+				ret.result=result
+			end
+
+		end
+		
+		return ret
+	end
+
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			local ok,ret=pcall(function() return request(memo) end) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
+		end
+
+	end
+
+end
+
+--[[#lua.wetgenes.tasks.sqlite
+
+Create send and return a sqlite memo result.
+
+]]
+M.tasks_functions.sqlite=function(tasks,memo)
+
+	if type(memo) == "string" then memo={sql=memo} end
+	memo.task=memo.task or "sqlite"
 	
 	tasks:receive(memo)
 
@@ -626,6 +722,13 @@ M.test=function()
 		code=M.http_code,
 	})
 
+	tasks:add_thread({
+		count=1,
+		id="sqlite",
+		globals={sqlite_filename="test.sqlite"},
+		code=M.sqlite_code,
+	})
+
 	local task=tasks:add_task({
 		count=4,
 		code=function(linda,task_id,task_idx)
@@ -637,6 +740,42 @@ M.test=function()
 		end,
 	})
 	
+	local task2=tasks:add_task({
+		code=function(linda,task_id,task_idx)
+
+			dump( tasks:sqlite([[
+
+CREATE TABLE IF NOT EXISTS contacts (
+	id INTEGER PRIMARY KEY,
+	name TEXT NOT NULL,
+	phone TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS poops (
+	id INTEGER PRIMARY KEY,
+	poop TEXT NOT NULL
+);
+
+INSERT INTO contacts (name, phone)
+VALUES ("dave","12345");
+
+INSERT INTO contacts (name, phone)
+VALUES ("other dave","678");
+
+INSERT INTO poops (poop)
+VALUES ("plopplop");
+
+SELECT * FROM contacts ;
+SELECT * FROM poops ;
+
+			]]) )
+
+			dump( tasks:sqlite({cmd="close"}) )
+
+			dump( tasks:sqlite([[ SELECT * FROM poops ; ]]) )
+		end,
+	})
+
 	while true do
 		tasks:update()
 --		print(task.errors[1])
