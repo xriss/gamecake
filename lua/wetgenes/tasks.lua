@@ -647,6 +647,11 @@ M.sqlite_code=function(linda,task_id,task_idx)
 			if memo.binds or memo.blobs then -- use prepared statement
 			
 				local stmt = db:prepare(memo.sql)
+				
+				if not stmt then
+					ret.error=db:errmsg()
+					return ret
+				end
 
 				local bmax=stmt:bind_parameter_count()
 				local bs={}
