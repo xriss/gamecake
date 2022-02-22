@@ -261,6 +261,13 @@ os.exit()
 				id="http",
 				code=require("wetgenes.tasks").http_code,
 			})
+-- and sqlite requests to a default database
+			oven.tasks:add_thread({
+				count=1,
+				id="sqlite",
+				globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
+				code=require("wetgenes.tasks").sqlite_code,
+			})
 -- so we can run off thread code and coroutines
 
 			oven.win=wwin.create(inf)
@@ -824,6 +831,7 @@ log("oven","caught : ",m.class,m.cmd)
 				finished=oven.serv_pulse(oven)
 			until finished
 			
+			oven.tasks:sqlite({cmd="close"}) -- shut down the default sqlite databsase so we finish with any out standing writes
 			wtongues.save() -- last thing we do is remember any new text ids used in this run
 
 		end

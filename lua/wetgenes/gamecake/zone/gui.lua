@@ -63,7 +63,7 @@ gui.data_setup=function()
 	end
 
 	datas.new({id="screen_scale",class="number",hooks=gui.hooks,num=0,min=-5,max=1,step=1,
-		tostring=function(dat,num) return string.format("%0.2f",math.pow(2.0,num)) end})
+		tostring=function(dat,num) return string.format("%0.2f",math.pow(2.0, (num or dat.num) )) end})
 	gui.value["screen_scale"]=function(it)
 		screen.base_scale=math.pow(2.0,it:value())
 	end
@@ -84,13 +84,13 @@ gui.data_setup=function()
 	end
 			
 	datas.new({id="shadow_mapsize",class="number",hooks=gui.hooks,num=12,min=8,max=16,step=1,
-		tostring=function(dat,num) return string.format("%d",math.pow(2.0,num)) end})
+		tostring=function(dat,num) return string.format("%d",math.pow(2.0, (num or dat.num) )) end})
 	gui.value["shadow_mapsize"]=function(it)
 		shadow.mapsize=math.pow(2.0,it:value())
 	end
 
 	datas.new({id="shadow_maparea",class="number",hooks=gui.hooks,num=9,min=4,max=16,step=1,
-		tostring=function(dat,num) return string.format("%d",math.pow(2.0,num)) end})
+		tostring=function(dat,num) return string.format("%d",math.pow(2.0, (num or dat.num) )) end})
 	gui.value["shadow_maparea"]=function(it)
 		shadow.maparea=math.pow(2.0,it:value()-1)
 	end

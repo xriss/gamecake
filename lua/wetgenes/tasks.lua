@@ -623,6 +623,7 @@ M.sqlite_code=function(linda,task_id,task_idx)
 	local db
 	
 	if sqlite_filename then	db = sqlite3.open(sqlite_filename) end -- auto open
+	if sqlite_pragmas and db then db:exec(sqlite_pragmas) end -- auto configure
 
 	local function request(memo)
 	
@@ -643,22 +644,58 @@ M.sqlite_code=function(linda,task_id,task_idx)
 			
 			local err
 			
-			if memo.compact then -- return data in a slightly more compact format
+			if memo.binds or memo.blobs then -- use prepared statement
+			
+				local stmt = db:prepare(memo.sql)
 
-				err=db:exec(memo.sql,function(udata,cols,values,names)
-					result.names=names
-					result[#result+1]=values
-					return 0
-				end,"udata")
+				local bmax=stmt:bind_parameter_count()
+				local bs={}
+				for i=1,bmax do
+					local n=stmt:bind_parameter_name(i)
+					if n then bs[n]=i end
+				end
+
+				
+				for n,v in pairs( memo.binds or {} ) do
+					stmt:bind( bs[n] or n , v )
+				end
+				for n,v in pairs( memo.blobs or {} ) do
+					stmt:bind_blob( bs[n] or n , v )
+				end
+				
+				if memo.compact then
+					result.names=stmt:get_names()
+					for it in stmt:rows() do
+						result[#result+1]=it
+					end
+				else
+					for it in stmt:nrows() do
+						result[#result+1]=it
+					end
+				end
+
+				err=stmt:finalize()
 			
 			else
+			
+				if memo.compact then -- return data in a slightly more compact format
 
-				err=db:exec(memo.sql,function(udata,cols,values,names)
-					local it={}
-					for i=1,cols do it[ names[i] ] = values[i] end
-					result[#result+1]=it
-					return 0
-				end,"udata")
+					err=db:exec(memo.sql,function(udata,cols,values,names)
+						result.names=names
+						result[#result+1]=values
+						return 0
+					end,"udata")
+				
+				else
+
+					err=db:exec(memo.sql,function(udata,cols,values,names)
+						local it={}
+						for i=1,cols do it[ names[i] ] = values[i] end
+						result[#result+1]=it
+						return 0
+					end,"udata")
+
+				end
 
 			end
 
@@ -725,7 +762,7 @@ M.test=function()
 	tasks:add_thread({
 		count=1,
 		id="sqlite",
-		globals={sqlite_filename="test.sqlite"},
+		globals={sqlite_filename="test.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
 		code=M.sqlite_code,
 	})
 
