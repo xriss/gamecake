@@ -8,7 +8,7 @@ local n={
 	"alc.core","wetgenes.tardis.core","gles.core","wetgenes.grd.core",
 	"wetgenes.grdmap.core","wetgenes.sod.core","socket.core",
 	"mime.core","wetgenes.gamecake.core","wetgenes.win.core","lfs",
-	"sqlite","posix_c","lash","SDL","cmsgpack","periphery",
+	"lsqlite3","posix_c","lash","SDL","cmsgpack","periphery",
 	"wetgenes.v4l2.core","rex_pcre","linenoise","brimworks_zip",
 	"sys","sys.sock","pgsql","wetgenes.opus.core"}
 
