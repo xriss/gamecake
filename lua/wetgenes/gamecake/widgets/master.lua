@@ -132,7 +132,7 @@ function wmaster.setup(widget,def)
 
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget,resize)
-
+--print("update",widget)
 		
 		local ups=skeys.ups()
 		if ups then -- use skeys / srecaps code 
@@ -192,12 +192,18 @@ function wmaster.setup(widget,def)
 
 				master.press=false
 
-				if master.over --[[ and master.active==master.over ]] then -- no click if we drag away from button
+				if master.over and master.over~=master --[[ and master.active==master.over ]] then -- no click if we drag away from button
 				
 					if not master.over.never_set_focus_edit then
---						print("click",master.edit,master.focus)
-						master.set_focus_edit(master.over)
-						master.set_focus(master.over)
+--print("active",master.active,master.active.class)
+--print("over",master.over,master.over.class)
+--						master.set_focus_edit(master.over)
+--						master.set_focus(master.over)
+
+						if master.active and master.active.can_focus then
+							master.set_focus(master.active)
+						end
+
 					end
 					if ups.button("mouse_left_clr")  then
 						master.over:call_hook_later("click",{keyname="mouse_left"}) -- its a left click
@@ -247,16 +253,18 @@ function wmaster.setup(widget,def)
 			end
 		end
 	
-		if ( resize and (widget.hx~=resize.hx or widget.hy~=resize.hy) ) or master.request_layout then
+		if ( resize and (widget.hx~=resize.hx or widget.hy~=resize.hy) ) or master.request_layout or master.request_refresh then
 			master.request_layout=false
 			widget.hx=resize and resize.hx or widget.hx
 			widget.hy=resize and resize.hy or widget.hy
 			widget:resize_and_layout()
---			widget:set_dirty()
---			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
-			
 		end
-	
+		if master.request_refresh then -- redraw and layout
+			master.request_refresh=false
+			widget:set_dirty()
+			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
+		end
+		
 		local throb=(widget.throb>=128)
 		
 		widget.throb=widget.throb-4
@@ -389,7 +397,7 @@ function wmaster.setup(widget,def)
 	end
 	
 	function master.set_focus(focus)
---print("focus",tostring(focus))
+--print("focus",tostring(focus),focus and focus.class)
 		if master.focus==focus then return end -- no change
 	
 		if master.focus then
@@ -403,6 +411,7 @@ function wmaster.setup(widget,def)
 				master.focus:call_hook_later("focus")
 				if focus.class=="textedit" then -- also set edit focus
 					master.set_focus_edit(focus)
+--print("edit focus",tostring(focus),focus and focus.class)
 				end
 			end
 		end
@@ -412,6 +421,24 @@ function wmaster.setup(widget,def)
 -- handle key input
 --
 	function master.key(widget,ascii,key,act)
+
+-- keep track of shift key states in master
+
+	if (act==1 or act==0) and ( not ascii or ascii=="" ) then
+
+		if     key=="shift_l"   or key=="shift_r"   then	widget.key_shift=true
+		elseif key=="control_l" or key=="control_r" then	widget.key_control=true
+		elseif key=="alt_l"     or key=="alt_r"     then	widget.key_alt=true
+		end
+
+	elseif act==-1 then
+
+		if     key=="shift_l"   or key=="shift_r"   then	widget.key_shift=false
+		elseif key=="control_l" or key=="control_r" then	widget.key_control=false
+		elseif key=="alt_l"     or key=="alt_r"     then	widget.key_alt=false
+		end	
+
+	end
 
 		if master.focus then -- key focus, steals all the key presses until we press enter again
 		
@@ -511,6 +538,7 @@ function wmaster.setup(widget,def)
 -- handle mouse input
 --	
 	function master.mouse(widget,act,x,y,keyname)
+--print(widget,act,x,y,keyname)
 
 -- keep mouse state in master	
 		if act==1 and keyname then

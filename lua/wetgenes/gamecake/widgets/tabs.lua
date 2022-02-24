@@ -55,6 +55,13 @@ function wtabs.layout(widget)
 			widget[i].px=px
 			widget[i].hx=hx
 		end
+		if widget.data and widget.data.num==i then
+			widget[i].style="flat"
+			widget[i].state="selected"
+		else
+			widget[i].style="flat"
+			widget[i].state=nil
+		end
 		px=px+hx
 	end
 

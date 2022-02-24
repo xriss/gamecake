@@ -253,6 +253,22 @@ os.exit()
 				end
 			end
 
+-- setup tasks
+			oven.tasks=require("wetgenes.tasks").create()
+-- and http requests
+			oven.tasks:add_thread({
+				count=8,
+				id="http",
+				code=require("wetgenes.tasks").http_code,
+			})
+-- and sqlite requests to a default database
+			oven.tasks:add_thread({
+				count=1,
+				id="sqlite",
+				globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
+				code=require("wetgenes.tasks").sqlite_code,
+			})
+-- so we can run off thread code and coroutines
 
 			oven.win=wwin.create(inf)
 			oven.win:context({})
@@ -304,6 +320,10 @@ require("gles").CheckError() -- uhm this fixes an error?
 					local g=assert(wgrd.create())
 					local d=assert(wzips.readfile(fname),"Failed to load "..fname)
 					assert(g:load_data(d,"png")) -- last 3 letters pleaze
+					wwin.hardcore.icon(oven.win[0],g)
+				elseif opts.icon then -- load ascii pixels
+					local bd=require("wetgenes.gamecake.fun.bitdown")
+					local g=bd.pix_grd(opts.icon)
 					wwin.hardcore.icon(oven.win[0],g)
 				end
 			end
@@ -592,6 +612,10 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 						v.update()
 					end
 				end
+				
+				if oven.tasks then -- update generic coroutines
+					oven.tasks:update()
+				end
 
 				if oven.times then oven.times.update.stop() end
 				
@@ -807,6 +831,7 @@ log("oven","caught : ",m.class,m.cmd)
 				finished=oven.serv_pulse(oven)
 			until finished
 			
+			oven.tasks:sqlite({cmd="close"}) -- shut down the default sqlite databsase so we finish with any out standing writes
 			wtongues.save() -- last thing we do is remember any new text ids used in this run
 
 		end

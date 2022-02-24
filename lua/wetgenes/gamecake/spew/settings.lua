@@ -24,7 +24,7 @@ M.bake=function(oven,settings)
 	local cake=oven.cake
 	local canvas=cake.canvas
 
-	local sgui=oven.rebake("wetgenes.gamecake.spew.gui")
+--	local sgui=oven.rebake("wetgenes.gamecake.spew.gui")
 	
 	local sounds=oven.rebake("wetgenes.gamecake.sounds")
 	

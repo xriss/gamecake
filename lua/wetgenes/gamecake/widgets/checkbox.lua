@@ -88,6 +88,8 @@ function B.setup(widget,def)
 	widget.solid=true
 	widget.cursor=widget.cursor or "hand"
 
+	widget.color=widget.color or 0
+
 	widget.data_mask=def.data_mask or 1
 	widget.text_false = (not def.text_false) and " " or def.text_false
 	widget.text_true  = (not def.text_true ) and "X" or def.text_true

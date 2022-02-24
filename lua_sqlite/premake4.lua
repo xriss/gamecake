@@ -7,6 +7,6 @@ links { "lib_sqlite" }
 includedirs { "." , "../lib_sqlite/sqlite-amalgamation" }
 
 
-KIND{kind="lua",name="sqlite",luaname="sqlite",luaopen="lsqlite3"}
+KIND{kind="lua",name="lsqlite3"}
 
 

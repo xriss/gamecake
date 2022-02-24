@@ -103,6 +103,8 @@ function build(tab)
 		bake.copyfile(opts.basedir.."/"..v,fname)
 	end
 
+--[[ we use a generic openresty install in a vm now so this is less useful
+
 tab.ngx_listen	=tab.ngx_listen or "127.0.0.1:8888"
 tab.ngx_user	=tab.ngx_user	or "kriss"
 tab.ngx_debug	=tab.ngx_debug	or "debug"
@@ -134,5 +136,6 @@ tab.ngx_debug	=tab.ngx_debug	or "debug"
 			else break end
 		end
 	end
+]]
 	
 end

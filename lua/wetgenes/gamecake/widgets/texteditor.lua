@@ -458,12 +458,13 @@ end
 function wtexteditor.key(pan,ascii,key,act)
 --print("gotkey",ascii,act,key)
 
+	local master=pan.master
 	local texteditor=pan.texteditor
 	local txt=texteditor.txt
 
 
 	local cpre=function()
-		if texteditor.key_shift then
+		if master.key_shift then
 			if not texteditor.mark_area then
 				texteditor.mark_area={txt.cy,txt.cx,txt.cy,txt.cx}
 			end
@@ -473,7 +474,7 @@ function wtexteditor.key(pan,ascii,key,act)
 		end
 	end
 	local cpost=function()
-		if texteditor.key_shift and texteditor.mark_area then
+		if master.key_shift and texteditor.mark_area then
 				texteditor.mark_area[3]=txt.cy
 				texteditor.mark_area[4]=txt.cx
 				txt.mark(unpack(texteditor.mark_area))
@@ -486,18 +487,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 	if (act==1 or act==0) and ( not ascii or ascii=="" ) then
 
-		if     key=="shift_l"   or key=="shift_r"   then	texteditor.key_shift=true
-		elseif key=="control_l" or key=="control_r" then	texteditor.key_control=true
-		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=true
-		end
-
-		if key=="c" then	-- copy
-		
-			local s=txt.undo.copy()
-
-			if s then wwin.set_clipboard(s) end
-
-		elseif key=="left" then
+		if key=="left" then
 
 			texteditor.float_cx=nil
 
@@ -555,13 +545,6 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		end
 		
-	elseif act==-1 then
-
-		if     key=="shift_l"   or key=="shift_r"   then	texteditor.key_shift=false
-		elseif key=="control_l" or key=="control_r" then	texteditor.key_control=false
-		elseif key=="alt_l"     or key=="alt_r"     then	texteditor.key_alt=false
-		end
-		
 	end
 
 
@@ -588,10 +571,16 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			texteditor.txt_dirty=true
 
-			if texteditor.key_control then
+			if master.key_control then
 			
 	--print(key)		
-				if     key=="x" then	-- cut
+				if key=="c" then	-- copy
+				
+					local s=txt.undo.copy()
+
+					if s then wwin.set_clipboard(s) end
+
+				elseif key=="x" then	-- cut
 
 					local s=txt.undo.cut()
 					
@@ -655,7 +644,7 @@ function wtexteditor.key(pan,ascii,key,act)
 					if tx>1 then ty=ty+1 end
 					txt.mark(fy,0,ty,0)
 
-					if texteditor.key_shift then
+					if master.key_shift then
 
 						local s=txt.undo.copy()
 						local ls=wstring.split_lines(s)
