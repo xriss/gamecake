@@ -34,9 +34,7 @@ function wtabs.setup(widget,def)
 	widget.draw   = wtabs.draw
 	widget.layout = wtabs.layout
 
-	if def.data then
-		widget.data=def.data
-	else
+	if not widget.data then
 		local list={}
 		for i,v in ipairs( widget.list or {} ) do
 			list[i]={str=v,num=i}
