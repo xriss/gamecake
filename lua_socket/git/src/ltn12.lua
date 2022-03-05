@@ -13,7 +13,7 @@ local unpack = unpack or table.unpack
 local base = _G
 local _M = {}
 if module then -- heuristic for exporting a global package table
-    ltn12 = _M
+    pcall(function() ltn12 = _M end)
 end
 local filter,source,sink,pump = {},{},{},{}
 
