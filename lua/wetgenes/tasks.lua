@@ -241,7 +241,7 @@ M.tasks_functions.run_task=function(tasks,task)
 			local ok , err = coroutine.resume( task.handles[idx] )
 			if not ok then
 				task.errors[idx]=err
-				log("tasks" , debug.traceback(co,err) )
+				log("tasks" , debug.traceback( task.handles[idx] , err ) )
 			end
 		end
 	end
