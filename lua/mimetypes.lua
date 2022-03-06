@@ -175,6 +175,7 @@ extensions['xpdl'] = 'application/xml'
 extensions['xsl'] = 'application/xml'
 extensions['xul'] = 'application/vnd.mozilla.xul+xml'
 extensions['zip'] = 'application/zip'
+extensions['wasm'] = 'application/wasm'
 
 -- audio/
 extensions['aif'] = 'audio/x-aiff'
