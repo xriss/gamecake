@@ -6,6 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local jit=jit
 
+local wpath=require("wetgenes.path")
 local wsbox=require("wetgenes.sandbox")
 local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
@@ -117,9 +118,9 @@ win.softcore=softcore
 win.posix=posix
 
 -- a dir to store config or user generated files in
-win.files_prefix="./files/"
+win.files_prefix=wpath.resolve("./files/")
 -- a dir to store cache files in, may auto delete but also should be deleted by app
-win.cache_prefix="./cache/"
+win.cache_prefix=wpath.resolve("./cache/")
 
 
 local meta={}

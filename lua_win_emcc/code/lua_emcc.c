@@ -134,6 +134,31 @@ int main_post(const char *message,const char *data)
 	}
 	return ret;
 }
+
+
+/*+-----------------------------------------------------------------------------------------------------------------
+
+Eval a javascript string and return a possible string value from that function
+
++-----------------------------------------------------------------------------------------------------------------+*/
+int lua_emcc_js_eval(lua_State *l)
+{
+const char *eval=0;
+const char *result=0;
+
+	eval=lua_tostring(l,1);
+
+	result=emscripten_run_script_string(eval);
+	
+	if(result)
+	{
+		lua_pushstring(l,result);
+//		free((void*)result);
+	}
+
+	return 1;
+}
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -145,6 +170,7 @@ LUALIB_API int luaopen_wetgenes_win_emcc_core(lua_State *l)
 	{
 		
 		{	"js_post",						lua_emcc_js_post					},
+		{	"js_eval",						lua_emcc_js_eval					},
 
 		{0,0}
 	};
