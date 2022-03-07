@@ -492,12 +492,62 @@ A basic function to handle http memos.
 ]]
 M.http_code=function(linda,task_id,task_idx)
 
+	local js_eval -- function call into javascript if we are an emcc build
+	do
+		local suc,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
+		if lib then js_eval=lib.js_eval end
+	end
+
 	local http = lanes.require("socket.http")
 	local ltn12 = lanes.require("ltn12")
 
 	local wjson = lanes.require("wetgenes.json")
 
+-- we need a special case for emcc as we can only use websockets or javascript requests
+	local function request_js(memo)
+	
+		local opts={}
+		
+		opts.method=memo.method
+		opts.url=memo.url
+		opts.headers=memo.headers or {}
+		opts.body=memo.body
+		
+--		dump(opts)
+
+		local js=[[
+(function(opts){
+
+	var request = new XMLHttpRequest();
+	request.open( opts.method , opts.url , false );
+	for(const key in opts.headers)
+	{
+		request.setRequestHeader( key , opts.headers[key] );
+    }
+  	request.send(opts.body);
+
+	var ret={};
+	ret.body=request.responseText;
+	ret.code=request.status;
+	ret.headers=request.getAllResponseHeaders();
+	
+	return JSON.stringify(ret);
+
+})(]]..wjson.encode(opts)..[[);
+]]
+	
+		local rets=js_eval(js)
+		local ret=wjson.decode( rets or "{}" ) or {}
+		if not ret.body then ret.error=ret.code or 0 end
+
+--		dump(ret)
+		
+		return ret
+	end
+	
 	local function request(memo)
+	
+		memo.headers=memo.headers or {}
 
 		local urlencode=function(s)
 			return tostring(s):gsub("([^%w_%%%-%.~])", function(c) return string.format("%%%02X", string.byte(c)) end )
@@ -527,7 +577,6 @@ M.http_code=function(linda,task_id,task_idx)
 
 			memo.body=wjson.encode(memo.json)
 			memo.method="POST"
-			memo.headers=memo.headers or {}
 			memo.headers["Content-Type"]="application/json"
 			
 		end
@@ -540,10 +589,13 @@ M.http_code=function(linda,task_id,task_idx)
 			end
 			memo.body=table.concat(t,"&")
 			memo.method="POST"
-			memo.headers=memo.headers or {}
 			memo.headers["Content-Type"]="application/x-www-form-urlencoded"
 			
 		end
+		
+		memo.method=memo.method or "GET"
+
+		if js_eval then return request_js(memo) end
 
 		local out = {}
 		local req = {}
@@ -551,12 +603,11 @@ M.http_code=function(linda,task_id,task_idx)
 		req.sink = ltn12.sink.table(out)
 		if memo.body then
 			req.source = ltn12.source.string(memo.body)
-			memo.headers=memo.headers or {}
 			memo.headers["Content-Length"]=#memo.body
 		end
 
 		req.url=memo.url
-		req.method=memo.method or "GET"
+		req.method=memo.method
 		req.headers=memo.headers
 		req.proxy=memo.proxy
 		req.redirect=memo.redirect

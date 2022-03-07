@@ -20,6 +20,8 @@ if EMCC then
 	files { "./lua.c" }
 
 	linkoptions { "-rdynamic" }
+
+	linkoptions { "-lidbfs.js" }
 	
 	linkoptions { "-v" }
 	

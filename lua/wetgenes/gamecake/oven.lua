@@ -120,6 +120,9 @@ if fp then -- stick with the default files in the app dir (lets the user force l
 end
 
 
+if wwin.flavour=="emcc" then sniff_homedir=false end -- the homedir is a lie and /files has been mounted as persistant storage so use that
+
+
 if sniff_homedir then -- smart setup to save files into some sort of user file area depending on OS
 
 	local homedir

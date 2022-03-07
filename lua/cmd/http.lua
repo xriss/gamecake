@@ -65,11 +65,18 @@ Location of files to expose.
 	end
 
 	local pegasus = require "pegasus"
+	
+	local plugin={}
+	plugin.newRequestResponse=function(self,request,response)
+		response:addHeader(	"Cross-Origin-Opener-Policy"	,	"same-origin"	)
+		response:addHeader(	"Cross-Origin-Embedder-Policy"	,	"require-corp"	)
+	end
 
 	local server = pegasus:new({
 	  host=args.data.host,
 	  port=args.data.port,
 	  location=args.data.location,
+	  plugins={plugin},
 	})
 
 	server:start()
