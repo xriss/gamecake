@@ -1,0 +1,126 @@
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>GameCake</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.split {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	height: 100%;
+	width: 100%;
+	background-color: #000;
+}
+
+.gutter {
+	cursor: row-resize;
+	background-color: #111;
+}
+
+#gamecake {
+	background-color: #000;
+	overflow:hidden;
+}
+
+#terminal {
+	color: #080;
+	background-color: #000;
+	overflow: auto;
+	font-family: monospace;
+	white-space: pre;
+}
+
+</style>
+
+<script type="text/javascript" src="./split.js"></script>
+<script type="text/javascript" src="./gamecake_loader.js"></script>
+
+<script>
+
+	var str_to_msg=function(s,msg) // split a query like string
+	{
+	var i;
+		var msg=msg || {};
+		
+		var msg_dec=function(s)
+		{
+			var s2="";
+			if(s)
+			{
+				try
+				{
+					s2=s.split("%26").join("&").split("%3d").join("=").split("%25").join("%");
+					return s2;
+				}
+				catch(e)
+				{
+					return "";
+				}
+			}
+			return "";
+		};
+
+		var aa=s.split("&");
+		for(i in aa)
+		{
+			var v=aa[i];
+			var va=v.split("=");
+			var key=msg_dec(va[0]);
+			var val=msg_dec(va[1]);
+			if(key!=="")
+			{
+				msg[key]=val;
+			}
+		}
+		
+		return msg;
+	};
+
+	var msg={}
+	str_to_msg( window.location.search.substring(1) , msg )
+	str_to_msg( window.location.hash.substring(1) , msg )
+
+	console.log( msg )
+
+// make sure the page has finished loaded before we do anything
+
+;(function(callback){
+  if (document.readyState != "loading") { callback(); }
+  else { document.addEventListener("DOMContentLoaded", callback); }
+})(function(){
+
+	if(msg.terminal) // display terminal
+	{
+
+		Split(['#gamecake', '#terminal'],{
+			direction: 'vertical',
+			sizes:[90,10],
+			minSize:[20,20],
+			gutterSize:4,
+			onDragEnd:function(){
+				gamecake.resize()
+			},
+		})
+
+	}
+	else
+	{
+		document.querySelector( "#terminal" ).style.display = "none"
+	}
+	
+	gamecake=gamecake_loader(msg);
+
+});
+
+</script>
+
+</head>
+<body class="split"><div id="gamecake" style="width:100%;height:100%;" ></div><div id="terminal"></div></body>
+</html>

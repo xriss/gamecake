@@ -1,0 +1,46 @@
+
+SRCDIR=`dirname $0`
+SRCDIR=`readlink -f ${SRCDIR}`
+
+if [ -z "$DESTDIR" ] ; then
+	DESTDIR="/usr/local"
+fi
+
+mkdir -p ${DESTDIR}/bin/
+
+
+if [ -e "${SRCDIR}/gamecake.nix" ] ; then
+        SRCEXT="nix"
+
+elif [ "`uname -o`" = "Msys" ] ; then
+        SRCEXT="exe"
+
+elif [ "`uname`" = "Darwin" ] ; then
+        SRCEXT="osx"
+
+elif [ "`uname -m`" = "armv6l" ] ; then
+        SRCEXT="arm"
+
+elif [ "`getconf LONG_BIT`" = "64" ] ; then
+        SRCEXT="x64"
+
+else
+        SRCEXT="x32"
+
+fi
+
+echo
+echo " Installing ${SRCDIR}/gamecake.${SRCEXT} to ${DESTDIR}/bin/gamecake "
+echo "${SRCDIR}/gamecake.${SRCEXT} \"\$@\"" >${DESTDIR}/bin/gamecake
+chmod +x ${DESTDIR}/bin/gamecake
+cp ${SRCDIR}/gamecake.grd ${DESTDIR}/bin/gamecake.grd
+chmod +x ${DESTDIR}/bin/gamecake.grd
+cp ${SRCDIR}/gamecake.midi ${DESTDIR}/bin/gamecake.midi
+chmod +x ${DESTDIR}/bin/gamecake.midi
+echo
+
+echo
+echo " Installing ${SRCDIR}/pagecake.${SRCEXT} to ${DESTDIR}/bin/pagecake "
+echo "${SRCDIR}/pagecake.${SRCEXT} \"\$@\"" >${DESTDIR}/bin/pagecake
+chmod +x ${DESTDIR}/bin/pagecake
+echo
